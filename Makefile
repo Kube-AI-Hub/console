@@ -2,7 +2,7 @@
 # Use of this source code is governed by a AGPL-3.0 license
 # that can be found in the LICENSE file.
 
-REPO?=kubespheredev
+REPO?=kube-api-hub
 TAG?=$(shell git rev-parse --abbrev-ref HEAD | sed -e 's/\//-/g')
 
 .PHONY: all
@@ -32,3 +32,9 @@ container-cross:	## Build the container for multiple platforms(currently linux/a
 
 container-cross-push:	## Build the container for multiple platforms and push
 	hack/docker_build_multiarch.sh
+
+container-cross-from-dist:	## Build the container for multiple platforms from dist and push
+	DRY_RUN=true REPO=${REPO} TAG=${TAG} hack/docker_build_multiarch_from_dist.sh
+
+container-cross-from-dist-push:	## Build the container for multiple platforms from dist and push
+	REPO=${REPO} TAG=${TAG} hack/docker_build_multiarch_from_dist.sh
