@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .item {
   display: flex;
@@ -7,7 +7,7 @@
   padding: 12px;
   margin-bottom: 8px;
   line-height: 20px;
-  background-color: $th-bg-color;
+  background-color: variables.$th-bg-color;
   border-radius: 4px;
 
   &:last-child {
@@ -25,10 +25,10 @@
     line-height: 20px;
 
     strong {
-      font-size: $size-normal;
+      font-size: variables.$size-normal;
       font-weight: 600;
-      color: $text-color;
-      @include break-all;
+      color: variables.$text-color;
+      @include mixins.break-all;
     }
 
     .record {
@@ -41,7 +41,7 @@
 
       .text {
         word-break: break-all;
-        @include break-all;
+        @include mixins.break-all;
 
         & > p {
           display: inline-block;
@@ -56,7 +56,7 @@
       vertical-align: middle;
       min-height: 40px;
       padding: 0 20px;
-      border-left: 1px dashed $btn-flat-active-bg;
+      border-left: 1px dashed variables.$btn-flat-active-bg;
 
       &:first-child {
         border-left: none;

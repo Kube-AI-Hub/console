@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .selectWrapper {
   display: flex;
@@ -41,11 +41,11 @@
   .customSelect {
     display: flex;
     padding: 8px 12px;
-    border-top: 1px solid $dark-color02;
+    border-top: 1px solid variables.$dark-color02;
     :global {
       input.input {
         background-color: transparent;
-        border-color: $dark-color04;
+        border-color: variables.$dark-color04;
         flex: 1;
         color: #fff;
       }
@@ -59,11 +59,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid $dark-color04;
+  border: 1px solid variables.$dark-color04;
   border-radius: 4px;
   margin-left: 8px;
   cursor: pointer;
   &:hover {
-    background-color: $dark-color06;
+    background-color: variables.$dark-color06;
   }
 }

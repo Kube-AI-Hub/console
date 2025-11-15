@@ -19,7 +19,7 @@
 import React, { Component } from 'react'
 import { Form, Select } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 class LogCollectionStatusForm extends Component {
   statusLabel = [

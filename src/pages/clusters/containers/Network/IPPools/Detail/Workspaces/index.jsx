@@ -25,11 +25,12 @@ import React from 'react'
 import WorkspaceStore from 'stores/workspace'
 import { showNameAndAlias } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('detailStore')
 @observer
-export default class Workspaces extends React.Component {
+class Workspaces extends React.Component {
   store = this.props.detailStore
 
   workspaceStore = new WorkspaceStore()

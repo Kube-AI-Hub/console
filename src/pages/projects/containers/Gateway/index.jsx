@@ -26,12 +26,13 @@ import { Tooltip, Icon, Loading, Button } from '@kube-design/components'
 import GatewayStore from 'stores/gateway'
 import { observable, toJS } from 'mobx'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('rootStore')
 @observer
 @trigger
-export default class Getway extends React.Component {
+class Getway extends React.Component {
   store = new GatewayStore()
 
   @observable

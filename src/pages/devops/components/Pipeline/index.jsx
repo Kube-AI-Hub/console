@@ -24,7 +24,7 @@ import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React from 'react'
 
-import style from './index.scss'
+import * as style from './index.scss'
 
 import PipelineNodes from './nodesRender'
 import Sider from './Sider'
@@ -41,8 +41,9 @@ const CREATE_TEMP = {
   },
 }
 
+export default
 @observer
-export default class Pipeline extends React.Component {
+class Pipeline extends React.Component {
   constructor(props) {
     super(props)
     this.state = {}

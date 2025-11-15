@@ -23,7 +23,7 @@ import { last } from 'lodash'
 import { Upload, Image } from 'components/Base'
 import { UPLOAD_FILE_TYPES } from 'configs/openpitrix/app'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class HelmUpload extends Component {
   static propTypes = {

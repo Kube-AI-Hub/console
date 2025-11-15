@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .header {
   display: flex;
@@ -11,11 +11,11 @@
     margin-left: 12px;
 
     & > div {
-      @include TypographyTitleH6($dark-color07);
+      @include mixins.TypographyTitleH6(variables.$dark-color07);
     }
 
     & > p {
-      @include TypographyParagraph($dark-color01);
+      @include mixins.TypographyParagraph(variables.$dark-color01);
     }
   }
 }
@@ -26,17 +26,17 @@
   margin-bottom: 20px;
 
   :global .icon {
-    @include vertical-center;
+    @include mixins.vertical-center;
     left: 0;
   }
 
   .title {
     & > div {
-      @include TypographyTitleH6($dark-color07);
+      @include mixins.TypographyTitleH6(variables.$dark-color07);
     }
 
     & > p {
-      @include TypographyParagraph($dark-color01);
+      @include mixins.TypographyParagraph(variables.$dark-color01);
     }
   }
 }

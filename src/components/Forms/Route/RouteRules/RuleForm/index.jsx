@@ -30,7 +30,7 @@ import { PATTERN_HOST } from 'utils/constants'
 
 import ClusterSelect from './ClusterSelect'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class RuleForm extends React.Component {
   static propTypes = {

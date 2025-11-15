@@ -1,9 +1,9 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .header {
   position: relative;
-  height: $header-height;
-  background-color: $body-bg-color;
+  height: variables.$header-height;
+  background-color: variables.$body-bg-color;
 
   &.inAppsPage {
     background-color: rgba(24, 29, 40, 0.2);
@@ -39,13 +39,11 @@
 }
 
 .logo {
-  position: absolute;
-  top: 50%;
-  left: 50%;
+  display: inline-block;
   width: 150px;
   height: 30px;
-  transform: translate(-50%, -50%);
-
+  vertical-align: middle;
+  margin-left: 15px;
   .inAppsPage & {
     color: white;
   }
@@ -56,7 +54,7 @@
   padding: 18px 20px;
 
   button {
-    padding: 5px 11px !important;
+    padding: 5px 4px !important;
 
     & + button {
       margin-left: 12px !important;
@@ -66,7 +64,7 @@
       color: white;
 
       &:hover {
-        color: $text-color;
+        color: variables.$text-color;
       }
     }
   }

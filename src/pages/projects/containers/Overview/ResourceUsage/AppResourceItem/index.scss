@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .card {
   position: relative;
@@ -7,9 +7,9 @@
   align-items: center;
   height: 56px;
   padding: 8px 12px;
-  border-bottom: 1px solid $border-color;
-  background-color: $card-bg-color;
-  transition: all $trans-speed cubic-bezier(0.175, 0.35, 0.32, 1);
+  border-bottom: 1px solid variables.$border-color;
+  background-color: variables.$card-bg-color;
+  transition: all variables.$trans-speed cubic-bezier(0.175, 0.35, 0.32, 1);
 
   .icon {
     position: relative;
@@ -22,10 +22,10 @@
       height: 14px;
       line-height: 14px;
       text-align: center;
-      color: $white;
+      color: variables.$white;
       font-weight: 600;
       border-radius: 3px;
-      background-color: $yellow;
+      background-color: variables.$yellow;
       box-shadow: 0 2px 4px 0 rgba(245, 166, 35, 0.36);
 
       .tips {
@@ -50,27 +50,28 @@
       cursor: pointer;
 
       &:hover {
-        strong, span {
-          color: $primary;
+        strong,
+        span {
+          color: variables.$primary;
         }
       }
     }
 
     strong {
       display: block;
-      color: $title-color;
+      color: variables.$title-color;
       font-weight: 600;
-      font-size: $size-normal;
+      font-size: variables.$size-normal;
       line-height: 1.43;
-      transition: all $trans-speed cubic-bezier(0.175, 0.35, 0.32, 1);
+      transition: all variables.$trans-speed cubic-bezier(0.175, 0.35, 0.32, 1);
     }
 
     span {
       display: block;
-      color: $third-text-color;
+      color: variables.$third-text-color;
       line-height: 1.67;
       white-space: nowrap;
-      transition: all $trans-speed cubic-bezier(0.175, 0.35, 0.32, 1);
+      transition: all variables.$trans-speed cubic-bezier(0.175, 0.35, 0.32, 1);
     }
   }
 }

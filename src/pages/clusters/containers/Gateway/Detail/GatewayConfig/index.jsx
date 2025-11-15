@@ -19,11 +19,12 @@ import React from 'react'
 import { Panel } from 'components/Base'
 import { observer, inject } from 'mobx-react'
 import { isEmpty, get } from 'lodash'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('detailStore')
 @observer
-export default class GatewayConfig extends React.Component {
+class GatewayConfig extends React.Component {
   get module() {
     return this.props.detailStore.module
   }

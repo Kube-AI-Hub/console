@@ -22,14 +22,13 @@ const webpack = require('webpack')
 const CopyPlugin = require('copy-webpack-plugin')
 const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
-const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin')
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
   .BundleAnalyzerPlugin
 
 const root = path => resolve(__dirname, `../${path}`)
 
 const baseConfig = require('./webpack.base')
-const localeConfig = require('./webpack.locale')
 
 const smp = new SpeedMeasurePlugin()
 
@@ -90,11 +89,9 @@ const config = smp.wrap({
       {
         test: /\.(ttf|otf|eot|woff2?)(\?.+)?$/,
         include: root('src/assets'),
-        use: {
-          loader: 'file-loader',
-          options: {
-            outputPath: '/assets/',
-          },
+        type: 'asset/resource',
+        generator: {
+          filename: 'assets/[name].[hash][ext]',
         },
       },
     ],
@@ -106,6 +103,13 @@ const config = smp.wrap({
     sideEffects: true,
     concatenateModules: true,
     minimize: true,
+    minimizer: [
+      new CssMinimizerPlugin({
+        minimizerOptions: {
+          preset: ['default', { discardComments: { removeAll: true } }],
+        },
+      }),
+    ],
     splitChunks: {
       chunks: 'async',
       minChunks: 1,
@@ -135,14 +139,6 @@ const config = smp.wrap({
       filename: '[name].[chunkhash].css',
       chunkFilename: '[chunkhash].css',
     }),
-    new OptimizeCssAssetsPlugin({
-      assetNameRegExp: /\.css$/g,
-      cssProcessor: require('cssnano'),
-      cssProcessorPluginOptions: {
-        preset: ['default', { discardComments: { removeAll: true } }],
-      },
-      canPrint: true,
-    }),
     new webpack.DefinePlugin({
       'process.env.BROWSER': true,
       'process.env.NODE_ENV': JSON.stringify('production'),
@@ -152,4 +148,4 @@ const config = smp.wrap({
 })
 
 
-module.exports = [config, localeConfig]
+module.exports = [config]

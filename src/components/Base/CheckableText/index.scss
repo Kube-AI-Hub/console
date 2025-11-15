@@ -1,17 +1,17 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   display: flex;
   padding: 6px 12px;
-  transition: all $trans-speed ease-in-out;
+  transition: all variables.$trans-speed ease-in-out;
   cursor: pointer;
 
   &:hover {
-    background-color: $bg-color;
+    background-color: variables.$bg-color;
   }
 
   &:active {
-    background-color: $btn-default-hover-bg;
+    background-color: variables.$btn-default-hover-bg;
   }
 }
 

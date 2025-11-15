@@ -34,7 +34,7 @@ import SecurityContext from './SecurityContext'
 import SyncTimeZone from './SyncTimeZone'
 import LifeManagement from './LifeManagement'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ContaineForm extends React.Component {
   static propTypes = {
@@ -201,7 +201,6 @@ export default class ContaineForm extends React.Component {
       type,
     } = this.props
     const { containerType, formData } = this.state
-
     return (
       <div className={classNames(styles.wrapper, className)}>
         <div className="h5">

@@ -35,8 +35,9 @@ import { getDisplayName, getLocalTime, map_accessModes } from 'utils'
 import { VOLUME_STATUS } from 'utils/constants'
 import { getVolumeStatus } from 'utils/status'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @withProjectList({
   store: new VolumeStore(),
   module: 'persistentvolumeclaims',
@@ -44,7 +45,7 @@ import styles from './index.scss'
   name: 'PERSISTENT_VOLUME_CLAIM',
   rowKey: 'uid',
 })
-export default class Volumes extends React.Component {
+class Volumes extends React.Component {
   pvStore = new PvStore()
 
   get tips() {

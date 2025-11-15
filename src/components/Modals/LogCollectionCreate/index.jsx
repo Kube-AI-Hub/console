@@ -24,7 +24,7 @@ import { Alert } from '@kube-design/components'
 import { Modal } from 'components/Base'
 import widthBack from 'components/Modals/WithBack'
 import collectionConfig from 'pages/clusters/containers/LogCollections/config'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class CreateLogCollectionModal extends Component {
   static propTypes = {

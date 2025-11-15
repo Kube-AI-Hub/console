@@ -1,15 +1,15 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .snapshotList {
-  background: $light-color01;
+  background: variables.$light-color01;
   padding: 10px;
 }
 
 .item {
   margin-bottom: 10px;
   display: flex;
-  background: $white;
-  border: solid 1px $light-color06;
+  background: variables.$white;
+  border: solid 1px variables.$light-color06;
   padding: 12px;
   border-radius: 4px;
 
@@ -20,8 +20,7 @@
       font-weight: bold;
     }
     p {
-      color: $dark-color01;
+      color: variables.$dark-color01;
     }
   }
-
 }

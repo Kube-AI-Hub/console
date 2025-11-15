@@ -29,15 +29,16 @@ import { REVIEW_QUERY_STATUS } from 'configs/openpitrix/app'
 import { getLocalTime, showNameAndAlias } from 'utils'
 import { transferReviewStatus } from 'utils/app'
 import { find } from 'lodash'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @withList({
   store: new ReviewStore(),
   module: 'apps',
   name: 'APP_REVIEW',
   rowKey: 'version_id',
 })
-export default class Reviews extends React.Component {
+class Reviews extends React.Component {
   get type() {
     return this.props.match.params.type
   }

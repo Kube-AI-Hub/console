@@ -1,12 +1,12 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .bar {
   display: flex;
   justify-content: space-between;
   padding: 6px 20px;
-  background-color: $card-bg-color;
-  border-top: 1px solid $border-color;
-  border-bottom: 1px solid $border-color;
+  background-color: variables.$card-bg-color;
+  border-top: 1px solid variables.$border-color;
+  border-bottom: 1px solid variables.$border-color;
 }
 
 .content {

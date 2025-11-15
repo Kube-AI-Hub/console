@@ -33,11 +33,12 @@ import { parse } from 'qs'
 
 import Steps from './Steps'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('rootStore')
 @observer
-export default class App extends React.Component {
+class App extends React.Component {
   constructor(props) {
     super(props)
 

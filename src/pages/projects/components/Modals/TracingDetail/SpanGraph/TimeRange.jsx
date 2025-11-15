@@ -20,7 +20,7 @@ import React from 'react'
 
 import { formatDuration, COORD_COUNT } from 'utils/tracing'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class TimeRange extends React.Component {
   constructor(props) {

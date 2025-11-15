@@ -20,7 +20,7 @@ import React from 'react'
 
 import { Button } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const Item = ({ data, onUpgrade, currentVersion }) => {
   const handleUpgrade = () => onUpgrade(data.version_id)

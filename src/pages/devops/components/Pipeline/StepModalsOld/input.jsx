@@ -27,10 +27,11 @@ import { Modal } from 'components/Base'
 
 import UserStore from 'stores/user'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class InputStep extends React.Component {
+class InputStep extends React.Component {
   static propTypes = {
     name: PropTypes.string,
   }

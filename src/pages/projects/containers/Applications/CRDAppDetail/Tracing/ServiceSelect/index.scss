@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .select {
   padding: 12px;
@@ -16,18 +16,18 @@
 
 .rightIcon {
   position: absolute;
-  @include vertical-center;
+  @include mixins.vertical-center;
   right: 32px;
 }
 
 .selected {
-  background-color: $lightest;
+  background-color: variables.$lightest;
 }
 
 .options {
   width: calc(100vw - 436px);
   overflow: hidden;
-  border-radius: $border-radius;
+  border-radius: variables.$border-radius;
 }
 
 .item {
@@ -40,9 +40,9 @@
 
   .name {
     :global .h6 {
-      font-family: $font-family-id;
-      font-size: $size-normal;
-      font-weight: $font-bold;
+      font-family: variables.$font-family-id;
+      font-size: variables.$size-normal;
+      font-weight: variables.$font-bold;
       line-height: 1.43;
     }
 
@@ -52,16 +52,16 @@
   }
 
   &:hover {
-    background-color: $lightest;
+    background-color: variables.$lightest;
   }
 }
 
 .empty {
   padding: 12px 20px;
   color: #abb4be;
-  font-size: $size-medium;
-  font-weight: $font-bold;
+  font-size: variables.$size-medium;
+  font-weight: variables.$font-bold;
   line-height: 1.5;
-  background-color: $th-bg-color;
+  background-color: variables.$th-bg-color;
   border-radius: 4px;
 }

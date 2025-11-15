@@ -21,7 +21,7 @@ import React from 'react'
 import { Tag } from '@kube-design/components'
 import { List, Panel } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ProbeCard extends React.Component {
   renderProbe() {

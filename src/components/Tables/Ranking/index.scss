@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .table.table_rank.table_no_border {
   td {
@@ -23,7 +23,7 @@
     border: none;
   }
   td {
-    background: $lightest;
+    background: variables.$lightest;
   }
   td div {
     white-space: nowrap;
@@ -41,7 +41,7 @@
 
 .table.table_rank.table_no_border.table_transparent {
   table {
-    background: $lightest;
+    background: variables.$lightest;
     border-collapse: separate;
     border-spacing: 0 5px;
     padding: 0;

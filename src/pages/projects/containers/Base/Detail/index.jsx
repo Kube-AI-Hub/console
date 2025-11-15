@@ -22,10 +22,11 @@ import { inject, observer } from 'mobx-react'
 import { withRouter } from 'react-router-dom'
 import { MODULE_KIND_MAP } from 'utils/constants'
 
+export default
 @withRouter
 @inject('rootStore')
 @observer
-export default class DetailPage extends Base {
+class DetailPage extends Base {
   // state = {
   //   fetchFin: false,
   // }

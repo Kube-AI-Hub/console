@@ -21,7 +21,7 @@ import React from 'react'
 import { isObject } from 'lodash'
 import { Icon } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class GraphMenu extends React.Component {
   state = {

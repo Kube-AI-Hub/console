@@ -1,12 +1,12 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .item {
   display: flex;
   position: relative;
   padding: 12px 32px;
   border-radius: 60px;
-  border: solid 1px $border-color;
-  background-color: $bg-color;
+  border: solid 1px variables.$border-color;
+  background-color: variables.$bg-color;
 
   & + .item {
     margin-top: 8px;
@@ -39,5 +39,5 @@
   color: #ffffff;
   border-radius: 10px;
   box-shadow: 0 2px 4px 0 rgba(85, 188, 138, 0.36);
-  background-color: $green;
+  background-color: variables.$green;
 }

@@ -26,10 +26,11 @@ import yaml from 'js-yaml/dist/js-yaml'
 
 import { CodeEditor } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class TextPreview extends React.Component {
+class TextPreview extends React.Component {
   DEFAULT_PREVIEW_FILE = 'values.yaml'
 
   constructor(props) {

@@ -24,7 +24,7 @@ import { NotifyConfirm } from 'components/Base'
 import { SimpleCircle } from 'components/Charts'
 import NumberControl from './NumberControl'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const initialSeconds = 5
 

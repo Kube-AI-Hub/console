@@ -31,10 +31,11 @@ import {
   removeFullScreenChangeEvents,
 } from 'utils/dom'
 
-import style from './index.scss'
+import * as style from './index.scss'
 
+export default
 @observer
-export default class Dragger extends React.Component {
+class Dragger extends React.Component {
   static defaultProps = {
     onClick: () => {},
     enableToggleFullScreen: true,

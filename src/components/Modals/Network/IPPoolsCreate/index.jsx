@@ -25,7 +25,7 @@ import { PATTERN_IP } from 'utils/constants'
 import { generateId } from 'utils'
 import { Netmask } from 'netmask'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class CreateIPPoolModal extends Component {
   state = {

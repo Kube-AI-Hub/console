@@ -1,11 +1,11 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .image {
   width: 120px;
   height: 120px;
-  border-radius: $border-radius;
-  background-color: $lightest;
+  border-radius: variables.$border-radius;
+  background-color: variables.$lightest;
 }
 
 .upload {
@@ -16,12 +16,12 @@
   background-color: #ffffff;
   border: dashed 1px #d8dee5;
   cursor: pointer;
-  transition: all $trans-speed ease-in-out;
+  transition: all variables.$trans-speed ease-in-out;
 
   :global {
     .icon {
       left: 24px;
-      @include vertical-center;
+      @include mixins.vertical-center;
     }
   }
 
@@ -29,11 +29,11 @@
     left: 80px;
     right: 24px;
     color: #79879c;
-    @include vertical-center;
+    @include mixins.vertical-center;
   }
 
   &:hover {
-    background-color: $lightest;
+    background-color: variables.$lightest;
   }
 
   &:active {

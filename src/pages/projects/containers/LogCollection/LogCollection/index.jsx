@@ -24,7 +24,7 @@ import { observer } from 'mobx-react'
 import { Icon } from '@kube-design/components'
 import { Switch, Panel, Modal } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @observer
 class LogCollection extends React.Component {

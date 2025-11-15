@@ -1,14 +1,14 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   display: flex;
   padding: 8px;
   border-radius: 2px;
-  background-color: $white;
+  background-color: variables.$white;
   align-items: center;
   border: solid 1px transparent;
-  transition: all $trans-speed ease;
+  transition: all variables.$trans-speed ease;
   cursor: pointer;
 
   &.disabled {
@@ -37,6 +37,6 @@
 
   &:hover {
     box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.2);
-    border-color: $dark-color01;
+    border-color: variables.$dark-color01;
   }
 }

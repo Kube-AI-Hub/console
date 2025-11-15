@@ -28,7 +28,7 @@ import ClusterStore from 'stores/cluster'
 import { trigger } from 'utils/action'
 
 import EditBasicInfoModal from 'clusters/components/Modals/EditBasicInfo'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @inject('rootStore')
 @observer

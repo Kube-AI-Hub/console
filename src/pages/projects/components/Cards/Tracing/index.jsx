@@ -25,7 +25,7 @@ import { Card } from 'components/Base'
 
 import Item from './Item'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class TracingCard extends React.Component {
   static propTypes = {

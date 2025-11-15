@@ -1,10 +1,10 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .baseInfo {
   height: 80px;
   padding: 23px 32px;
   margin: 0;
-  background: $white;
+  background: variables.$white;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
 }
@@ -20,7 +20,7 @@
   padding: 0 14px;
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
-  background-color: $lightest;
+  background-color: variables.$lightest;
   margin: 0 0 12px;
 
   &Item {
@@ -33,15 +33,15 @@
     color: #5f708a;
     border: 1px solid transparent;
     text-align: center;
-    transition: all $trans-speed;
+    transition: all variables.$trans-speed;
 
     &.active {
       border-radius: 100px;
-      background-color: $bg-color;
-      border: solid 1px $border-color;
+      background-color: variables.$bg-color;
+      border: solid 1px variables.$border-color;
 
       &:hover {
-        color: $green;
+        color: variables.$green;
       }
     }
   }

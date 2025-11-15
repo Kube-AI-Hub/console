@@ -39,7 +39,7 @@ import CustomTooltip from 'components/Charts/Custom/Tooltip'
 import { getActiveSeries } from 'components/Charts/utils'
 import { getSuitableValue } from 'utils/monitoring'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const AreaColors = [
   'green',

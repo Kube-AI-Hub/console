@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .secretWrapper {
   .title {
@@ -12,22 +12,22 @@
   padding: 12px;
   border-radius: 4px;
   background-color: #ffffff;
-  border: solid 1px $light-color03;
+  border: solid 1px variables.$light-color03;
   margin-bottom: 20px;
 
   ul > li {
     display: flex;
     padding: 12px 20px;
     border-radius: 22px;
-    background-color: $bg-color;
-    border: solid 1px $border-color;
+    background-color: variables.$bg-color;
+    border: solid 1px variables.$border-color;
 
     & + li {
       margin-top: 8px;
     }
 
     & > span {
-      font-family: $font-family-id;
+      font-family: variables.$font-family-id;
       word-break: break-all;
 
       &:first-child {
@@ -37,7 +37,7 @@
       }
 
       & > pre {
-        font-family: $font-family-id;
+        font-family: variables.$font-family-id;
         padding: 0;
         background: transparent;
         white-space: pre-wrap;
@@ -52,7 +52,7 @@
     margin-bottom: 12px;
 
     a {
-      color: $blue-color04;
+      color: variables.$blue-color04;
     }
   }
 
@@ -67,8 +67,8 @@
       height: 32px;
       padding: 6px 10px;
       border-radius: 16px;
-      color: $white;
-      background-color: $dark-color06;
+      color: variables.$white;
+      background-color: variables.$dark-color06;
     }
 
     :global {

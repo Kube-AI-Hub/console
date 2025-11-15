@@ -1,13 +1,13 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   border-radius: 4px;
-  border: solid 1px $dark-color06;
+  border: solid 1px variables.$dark-color06;
   box-shadow: none;
   padding: 5px 11px;
 
   &:hover {
-    background-color: $dark-color06;
+    background-color: variables.$dark-color06;
   }
 }
 
@@ -15,6 +15,6 @@
   border-color: transparent;
 
   &:hover {
-    background-color: $red-color03;
+    background-color: variables.$red-color03;
   }
 }

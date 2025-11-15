@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   width: 100%;
@@ -11,11 +11,11 @@
     }
 
     .recharts-cartesian-axis-line {
-      stroke: $light-color04;
+      stroke: variables.$light-color04;
     }
 
     span {
-      fill: $dark-color01;
+      fill: variables.$dark-color01;
     }
 
     .recharts-tooltip-wrapper {
@@ -23,9 +23,9 @@
     }
 
     .recharts-default-tooltip {
-      background-color: $dark-color06 !important;
+      background-color: variables.$dark-color06 !important;
       border-radius: 4px;
-      color: $white;
+      color: variables.$white;
       opacity: 0.9;
     }
 
@@ -40,7 +40,7 @@
         vertical-align: middle;
       }
       & > span {
-        color: $white !important;
+        color: variables.$white !important;
       }
     }
   }

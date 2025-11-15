@@ -23,7 +23,7 @@ import { keyBy } from 'lodash'
 import { Alert } from '@kube-design/components'
 import UsageCard from './UsageCard'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @inject('detailStore', 'projectStore')
 @observer

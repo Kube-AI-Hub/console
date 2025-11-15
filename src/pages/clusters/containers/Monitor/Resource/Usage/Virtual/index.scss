@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .content {
   display: flex;
@@ -14,7 +14,7 @@
 .item {
   padding: 6px;
   border-radius: 4px;
-  background-color: $card-bg-color;
+  background-color: variables.$card-bg-color;
 
   &.cursor {
     cursor: pointer;

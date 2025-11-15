@@ -25,7 +25,7 @@ import { RadioGroup } from 'components/Base'
 import BaseForm from '../BaseForm'
 import Item from './Item'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class WeComForm extends Component {
   state = {

@@ -1,27 +1,27 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   padding: 12px;
-  border-radius: $border-radius;
-  background-color: $light-color01;
+  border-radius: variables.$border-radius;
+  background-color: variables.$light-color01;
 }
 
 .title {
   margin-bottom: 8px;
-  @include TypographySymbolText;
+  @include mixins.TypographySymbolText;
 }
 
 .content {
   border-radius: 3px;
-  border: solid 1px $border-color;
-  background-color: $bg-color;
+  border: solid 1px variables.$border-color;
+  background-color: variables.$bg-color;
   overflow: hidden;
 }
 
 .search {
   padding: 8px;
-  background-color: $white;
+  background-color: variables.$white;
 }
 
 .list {
@@ -41,8 +41,8 @@
 .footer {
   height: 32px;
   padding: 6px 8px;
-  background-color: $white;
-  border-top: 1px solid $border-color;
+  background-color: variables.$white;
+  border-top: 1px solid variables.$border-color;
   box-sizing: border-box;
 
   & > span {

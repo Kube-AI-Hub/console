@@ -28,7 +28,7 @@ import HealthChecker from 'components/Forms/Workload/ContainerSettings/Container
 
 import ContainerSetting from '../ContainerSetting'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ContaineForm extends React.Component {
   static propTypes = {

@@ -22,7 +22,7 @@ import { inject, observer } from 'mobx-react'
 import React from 'react'
 import { getDisplayNameNew, getDomTitle } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 import PhysicalResource from './Physical'
 
 import ResourceStatistics from './Statistics'

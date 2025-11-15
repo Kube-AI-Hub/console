@@ -1,25 +1,25 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .card {
   padding: 12px 24px;
   border-radius: 60px;
-  background-color: $bg-color;
-  border: solid 1px $border-color;
+  background-color: variables.$bg-color;
+  border: solid 1px variables.$border-color;
 
   & + .card {
     margin-top: 8px;
   }
 
   p {
-    font-family: $font-family-id;
-    font-size: $size-normal;
+    font-family: variables.$font-family-id;
+    font-size: variables.$size-normal;
     line-height: 1.43;
   }
 
   span {
-    font-size: $size-small;
+    font-size: variables.$size-small;
     line-height: 1.67;
-    color: $second-text-color;
+    color: variables.$second-text-color;
     margin-right: 8px;
   }
 }

@@ -21,7 +21,7 @@ import classNames from 'classnames'
 
 import { Loading } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Panel extends React.Component {
   render() {

@@ -31,14 +31,15 @@ import { ICON_TYPES } from 'utils/constants'
 import IngressStore from 'stores/ingress'
 import GatewayStore from 'stores/gateway'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @withProjectList({
   store: new IngressStore(),
   module: 'ingresses',
   name: 'ROUTE',
 })
-export default class Routers extends React.Component {
+class Routers extends React.Component {
   gatewayStore = new GatewayStore()
 
   state = {

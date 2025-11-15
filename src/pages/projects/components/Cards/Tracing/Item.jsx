@@ -25,7 +25,7 @@ import { formatRelativeDate } from 'utils/tracing'
 
 import { Icon } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const isErrorTag = ({ key, value }) =>
   key === 'error' && (value === true || value === 'true')

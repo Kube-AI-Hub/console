@@ -38,7 +38,7 @@ import Table from 'clusters/containers/Monitor/Resource/Ranking/Project/Table'
 import StatusReason from 'clusters/components/StatusReason'
 import { showNameAndAlias } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @inject('rootStore', 'workspaceStore')
 @observer

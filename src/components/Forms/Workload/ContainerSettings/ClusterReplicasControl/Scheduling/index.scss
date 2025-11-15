@@ -1,12 +1,12 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   display: flex;
   width: 920px;
   padding: 8px;
   border-radius: 4px;
-  background-color: $white;
-  border: solid 1px $border-color;
+  background-color: variables.$white;
+  border: solid 1px variables.$border-color;
   overflow: auto;
   margin-top: 12px;
 }
@@ -18,8 +18,8 @@
     width: 220px;
     padding: 5px 10px;
     margin-right: 8px;
-    background: $dark-color07;
-    color: $white;
+    background: variables.$dark-color07;
+    color: variables.$white;
     margin-top: 5px;
   }
 
@@ -27,7 +27,7 @@
     display: flex;
     align-items: center;
     margin: 5px 0;
-    background-color: $dark-color07;
+    background-color: variables.$dark-color07;
   }
 
   .input {
@@ -48,7 +48,7 @@
 
     :global {
       .form-item-label {
-        color: $white;
+        color: variables.$white;
       }
     }
   }

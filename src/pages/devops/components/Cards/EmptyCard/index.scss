@@ -1,10 +1,10 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   padding: 38px 72px;
-  border-radius: $border-radius;
+  border-radius: variables.$border-radius;
   background-color: #ffffff;
-  box-shadow: $base-shadow;
+  box-shadow: variables.$base-shadow;
   text-align: center;
 
   img {

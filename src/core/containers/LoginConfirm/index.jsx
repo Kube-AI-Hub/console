@@ -23,11 +23,12 @@ import { Button, Form, Input } from '@kube-design/components'
 import { PATTERN_USER_NAME } from 'utils/constants'
 import UserStore from 'stores/user'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('rootStore')
 @observer
-export default class LoginConfirm extends Component {
+class LoginConfirm extends Component {
   state = {
     formData: {},
   }

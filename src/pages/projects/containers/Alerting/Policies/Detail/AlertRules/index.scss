@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .item {
   display: flex;
@@ -35,20 +35,20 @@
 .notify {
   .title {
     padding: 12px;
-    background-color: $card-bg-color;
-    border-radius: $border-radius;
-    @include TypographyTitleH6;
+    background-color: variables.$card-bg-color;
+    border-radius: variables.$border-radius;
+    @include mixins.TypographyTitleH6;
   }
   .content {
     margin-top: 4px;
     padding: 12px;
-    background-color: $card-bg-color;
-    border-radius: $border-radius;
-    @include TypographyParagraph;
+    background-color: variables.$card-bg-color;
+    border-radius: variables.$border-radius;
+    @include mixins.TypographyParagraph;
   }
 }
 
 .query {
-  font-family: $font-family-code;
+  font-family: variables.$font-family-code;
   font-weight: bold;
 }

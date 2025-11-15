@@ -29,11 +29,12 @@ import Placement from 'projects/components/Cards/Placement'
 
 import Ports from '../Ports'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('detailStore', 'serviceMonitorStore')
 @observer
-export default class ResourceStatus extends React.Component {
+class ResourceStatus extends React.Component {
   store = this.props.detailStore
 
   componentWillUnmount() {

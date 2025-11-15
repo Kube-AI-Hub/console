@@ -38,10 +38,11 @@ import AppFileStore from 'stores/openpitrix/file'
 
 import { compareVersion } from 'utils/app'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class AppDeploy extends React.Component {
+class AppDeploy extends React.Component {
   static propTypes = {
     visible: PropTypes.bool,
     detail: PropTypes.object,

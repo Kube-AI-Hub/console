@@ -25,7 +25,7 @@ import { toJS } from 'mobx'
 import Cluster from './Cluster'
 import ScheduleCluster from './ScheduleCluster'
 import ReplicasInput from './ReplicasInput'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ClusterWorkloadStatus extends Component {
   getWeight = name => {

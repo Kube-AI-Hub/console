@@ -21,8 +21,9 @@ import { pick } from 'lodash'
 import { observer } from 'mobx-react'
 import { Select, Form } from '@kube-design/components'
 
+export default
 @observer
-export default class PipelineSelect extends Component {
+class PipelineSelect extends Component {
   componentDidMount() {
     this.getPipelineListData()
   }

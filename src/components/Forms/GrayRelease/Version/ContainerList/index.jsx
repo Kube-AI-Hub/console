@@ -22,7 +22,7 @@ import Base from 'components/Forms/Workload/ContainerSettings/ContainerList'
 
 import Card from './Card'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ContainerList extends Base {
   renderEmpty() {

@@ -29,10 +29,11 @@ import { isSystemRole } from 'utils'
 import { PATTERN_USER_NAME, PATTERN_PASSWORD } from 'utils/constants'
 import RoleStore from 'stores/role'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class UserCreateModal extends Component {
+class UserCreateModal extends Component {
   static propTypes = {
     store: PropTypes.object,
     detail: PropTypes.object,

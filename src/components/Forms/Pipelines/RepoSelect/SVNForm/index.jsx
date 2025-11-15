@@ -21,10 +21,11 @@ import { pick } from 'lodash'
 import { Form, Input, Select, Tag } from '@kube-design/components'
 import { observer } from 'mobx-react'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class SvnForm extends React.Component {
+class SvnForm extends React.Component {
   constructor(props) {
     super(props)
     this.state = { type: 'svn' }

@@ -29,7 +29,7 @@ import FORM_TEMPLATES from 'utils/form.templates'
 
 import ConditionSelect from './ConditionSelect'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class BaseForm extends Component {
   formRef = this.props.formRef || React.createRef()

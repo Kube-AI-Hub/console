@@ -31,15 +31,16 @@ import { Form, Button, Icon, Select, Table } from '@kube-design/components'
 import { SimpleArea } from 'components/Charts'
 import ControllerModal from 'components/Modals/Monitoring/Controller'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const MonitorOptions = {
   times: 100,
   step: '5m',
 }
 
+export default
 @observer
-export default class ResourceMonitorModal extends React.Component {
+class ResourceMonitorModal extends React.Component {
   static propTypes = {
     visible: PropTypes.bool,
     detail: PropTypes.object,

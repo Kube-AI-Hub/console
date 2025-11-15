@@ -25,12 +25,13 @@ import { getLocalTime, getDisplayName, showNameAndAlias } from 'utils'
 import { trigger } from 'utils/action'
 import CRDResource from 'stores/crd.resource'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('rootStore', 'detailStore')
 @observer
 @trigger
-export default class ResourceStatus extends React.Component {
+class ResourceStatus extends React.Component {
   constructor(props) {
     super(props)
 

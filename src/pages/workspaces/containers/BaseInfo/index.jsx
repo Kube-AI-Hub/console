@@ -32,7 +32,7 @@ import { getDomTitle, getLocalTime, showNameAndAlias } from 'utils'
 import { trigger } from 'utils/action'
 import EditBasicInfoModal from 'workspaces/components/Modals/EditBasicInfo'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @inject('rootStore', 'workspaceStore')
 @observer

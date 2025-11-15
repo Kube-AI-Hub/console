@@ -1,16 +1,16 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .statusBox {
   display: inline-flex;
   padding: 4px;
-  background: $white;
+  background: variables.$white;
   border-radius: 14px;
   overflow: auto;
 
   :global {
     li {
-      border: 1px solid $white;
+      border: 1px solid variables.$white;
       border-radius: 12px;
       margin-left: -4px;
       padding: 0px 6px;
@@ -34,7 +34,7 @@
     font-weight: 400;
     font-size: 12px;
     line-height: 20px;
-    color: $white;
+    color: variables.$white;
 
     &:nth-of-type(1) {
       margin-right: 12px;
@@ -54,69 +54,69 @@
     left: 0px;
     top: 50%;
     transform: translateY(-50%);
-    background: $green-color03;
+    background: variables.$green-color03;
     border-radius: 4px;
   }
 }
 
 .li-inactive {
-  background: $green-color01;
-  color: $green-color05;
+  background: variables.$green-color01;
+  color: variables.$green-color05;
   margin-left: 0px !important;
   z-index: 10;
 }
 
 .li-pending {
-  background: $yellow-color01;
-  color: $yellow-color05;
+  background: variables.$yellow-color01;
+  color: variables.$yellow-color05;
   z-index: 8;
 }
 
 .li-firing {
-  background: $red-color01;
-  color: $red-color05;
+  background: variables.$red-color01;
+  color: variables.$red-color05;
   z-index: 6;
 }
 
 .li-disabled {
-  background: $light-color04;
-  color: $dark-color07;
+  background: variables.$light-color04;
+  color: variables.$dark-color07;
   z-index: 4;
 }
 
 .pending {
   &::before {
-    background: $yellow-color03;
+    background: variables.$yellow-color03;
   }
 }
 
 .inactive {
   &::before {
-    background: $green-color03;
+    background: variables.$green-color03;
   }
 }
 
 .firing {
   &::before {
-    background: $red-color03;
+    background: variables.$red-color03;
   }
 }
 
 .disabled {
   &::before {
-    background: $light-color02;
+    background: variables.$light-color02;
   }
 }
 
 .disabled {
-  color: $light-color06 !important;
+  color: variables.$light-color06 !important;
 
   &::before {
-    background: $light-color06;
+    background: variables.$light-color06;
   }
 }
 
 .iconDisabled {
-  color: $light-color06 !important;
-  background: $light-color02 !important;
+  color: variables.$light-color06 !important;
+  background: variables.$light-color02 !important;
 }

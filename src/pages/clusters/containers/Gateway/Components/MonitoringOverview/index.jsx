@@ -26,7 +26,7 @@ import GatewayMonitor from 'stores/monitoring/gateway'
 import { isEmpty, get } from 'lodash'
 import { startAutoRefresh, stopAutoRefresh } from 'utils/monitoring'
 import TimeSelector from '../TimeSelector'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const MetricTypes = {
   ingress_request_count: 'ingress_request_count',

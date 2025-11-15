@@ -42,10 +42,11 @@ import ServicePolicyStore from 'stores/application/servicePolicy'
 
 import SessionRetention from './Session'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class PolicyForm extends React.Component {
+class PolicyForm extends React.Component {
   static propTypes = {
     detail: PropTypes.object,
     store: PropTypes.object,

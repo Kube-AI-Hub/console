@@ -27,10 +27,11 @@ import CustomRange from 'components/Cards/Monitoring/Controller/TimeSelector/Ran
 import RecentTimeSelect from 'components/Cards/Monitoring/Controller/TimeSelector/Range/Default'
 import { getTimeLabel } from 'components/Cards/Monitoring/Controller/TimeSelector/utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class DurationSelect extends React.Component {
+class DurationSelect extends React.Component {
   @observable
   showDropDown = false
 

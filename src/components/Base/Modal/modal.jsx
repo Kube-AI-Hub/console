@@ -27,7 +27,7 @@ import classnames from 'classnames'
 import { Button, Icon } from '@kube-design/components'
 import { Image, Text } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 ReactModal.defaultStyles.overlay = {
   ...ReactModal.defaultStyles.overlay,

@@ -27,7 +27,7 @@ import {
   compareQuotaAndResources,
 } from 'utils/workload'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class QuotaCheck extends Component {
   state = {

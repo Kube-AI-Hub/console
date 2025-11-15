@@ -1,18 +1,17 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
-
   & > div {
     padding: 12px 20px;
   }
 
   h3 {
-    @include TypographySymbolText()
+    @include mixins.TypographySymbolText();
   }
 
   p {
-    @include TypographyParagraph($dark-color01);
+    @include mixins.TypographyParagraph(variables.$dark-color01);
     line-height: 20px;
   }
 }

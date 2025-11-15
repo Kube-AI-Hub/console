@@ -1,8 +1,8 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .status {
   display: inline-block;
-  font-family: $font-family-id;
+  font-family: variables.$font-family-id;
   line-height: 20px;
 }
 

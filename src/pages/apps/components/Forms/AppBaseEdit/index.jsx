@@ -25,7 +25,7 @@ import { Upload, Image } from 'components/Base'
 import { PATTERN_URL } from 'utils/constants'
 import { UPLOAD_FILE_TYPES } from 'configs/openpitrix/app'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class AppBaseEdit extends React.Component {
   static propTypes = {

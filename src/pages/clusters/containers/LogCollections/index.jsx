@@ -32,11 +32,12 @@ import { getLocalTime } from 'utils'
 
 import collectionConfig from './config'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('rootStore')
 @observer
-export default class LogCollection extends React.Component {
+class LogCollection extends React.Component {
   store = new OutputStore()
 
   state = {

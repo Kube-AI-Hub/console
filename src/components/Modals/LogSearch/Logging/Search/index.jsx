@@ -34,7 +34,7 @@ import { markAll, esMark, mark } from 'utils/log'
 import TimeBar from 'components/Charts/Bar/TimeBar'
 import SearchInput from '../SearchInput'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const converter = new AnsiUp()
 
@@ -56,8 +56,9 @@ const getSecond = step => {
 
 const stepLevelList = ['m', 'h', 'd', 'M', 'y']
 
+export default
 @observer
-export default class LogSearchModal extends React.Component {
+class LogSearchModal extends React.Component {
   queryStore = new LogQueryStore({
     size: 50,
   })

@@ -32,10 +32,11 @@ import VolumeFormTemplate from 'components/Forms/Volume/VolumeSettings/FormTempl
 
 import VolumeStore from 'stores/volume'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class AddVolume extends React.Component {
+class AddVolume extends React.Component {
   static propTypes = {
     containers: PropTypes.array,
     volume: PropTypes.object,

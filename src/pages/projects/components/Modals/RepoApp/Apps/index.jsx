@@ -28,7 +28,7 @@ import AppStore from 'stores/openpitrix/app'
 import RepoStore from 'stores/openpitrix/repo'
 import { STORE_APP_LIMIT } from 'configs/openpitrix/app'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @observer
 class Apps extends Component {
@@ -180,6 +180,7 @@ class Apps extends Component {
   render() {
     const { allApps, list } = this.appStore
     const { isLoading, total } = list
+    const { display } = this.props
 
     return (
       <>
@@ -193,6 +194,7 @@ class Apps extends Component {
             total={total}
             onFetchMore={this.fetchMoreApps}
             onClickAppItem={this.props.onClickApp}
+            display={display}
             disableLink
           />
         </div>

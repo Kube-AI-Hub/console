@@ -25,7 +25,7 @@ import { Form, Input, Select, Tag } from '@kube-design/components'
 
 import { Column, Columns } from '@kube-design/components/lib/components/Layout'
 import { pick } from 'lodash'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const formTemplate = ({
   credentialsId,
@@ -68,8 +68,9 @@ const formTemplate = ({
   name: 'container',
 })
 
+export default
 @observer
-export default class CD extends React.Component {
+class CD extends React.Component {
   static propTypes = {
     name: PropTypes.string,
   }

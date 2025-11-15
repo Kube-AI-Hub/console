@@ -24,7 +24,7 @@ import { COLORS_MAP } from 'utils/constants'
 
 import { Icon } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 class NumberControl extends PureComponent {
   static propTypes = {

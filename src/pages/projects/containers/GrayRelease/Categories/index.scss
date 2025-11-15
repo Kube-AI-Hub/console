@@ -1,11 +1,11 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   margin-top: 12px;
 
   li {
-    border-radius: $border-radius;
+    border-radius: variables.$border-radius;
     box-shadow: 0 6px 16px 0 rgba(33, 43, 54, 0.2);
     background-color: #ffffff;
 
@@ -42,7 +42,7 @@
         line-height: 1.5;
       }
     }
-    
+
     p {
       margin-top: 5px;
       color: #79879c;
@@ -52,9 +52,9 @@
 
 .footer {
   height: 48px;
-  border-radius: 0 0 $border-radius $border-radius;
+  border-radius: 0 0 variables.$border-radius variables.$border-radius;
   padding: 8px 20px;
-  background-color: $lightest;
+  background-color: variables.$lightest;
   text-align: right;
 
   button + button {
@@ -62,6 +62,6 @@
   }
 
   button {
-    display: none;  
+    display: none;
   }
 }

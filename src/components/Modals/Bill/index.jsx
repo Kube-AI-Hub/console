@@ -25,13 +25,14 @@ import { isEmpty, set } from 'lodash'
 import Modal from 'components/Base/Modal/modal'
 import EmptyList from 'components/Cards/EmptyList'
 import { Icon } from '@kube-design/components'
-import styles from './index.scss'
+import * as styles from './index.scss'
 import Home from './Home'
 import Details from './Details'
 import { CARD_CONFIG } from './constats'
 
+export default
 @observer
-export default class BillModal extends React.Component {
+class BillModal extends React.Component {
   @observable
   type = ''
 

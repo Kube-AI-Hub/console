@@ -23,7 +23,7 @@ import { isString } from 'lodash'
 
 import { Loading } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Card extends PureComponent {
   static propTypes = {

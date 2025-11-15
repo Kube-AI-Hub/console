@@ -25,7 +25,7 @@ import { Icon, Select } from '@kube-design/components'
 import { Panel } from 'components/Base'
 import { getSuitableUnit, getValueByUnit } from 'utils/monitoring'
 import Store from 'stores/rank/workload'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const UNITS = {
   workload_cpu_usage: 'cpu',

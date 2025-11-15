@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .sync_info {
   margin-bottom: 12px;
@@ -85,6 +85,6 @@
 
 .statusTip {
   p {
-    color: $light-color03 !important;
+    color: variables.$light-color03 !important;
   }
 }

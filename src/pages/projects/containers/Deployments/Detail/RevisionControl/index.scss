@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .header {
   display: flex;
@@ -13,5 +13,5 @@
 .diffWrapper {
   padding: 12px;
   margin-top: 12px;
-  background-color: $light-color01;
+  background-color: variables.$light-color01;
 }

@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .list {
   margin-bottom: 12px;
@@ -15,7 +15,7 @@
   bottom: 0;
   width: 100%;
   padding: 4px 12px;
-  background-color: $lightest;
+  background-color: variables.$lightest;
   border-radius: 0 0 4px 4px;
 
   input {
@@ -26,8 +26,8 @@
 
 .limits {
   right: 20px;
-  @include vertical-center;
-  @include TypographyTitleH6();
+  @include mixins.vertical-center;
+  @include mixins.TypographyTitleH6();
 
   .limit {
     :global .icon {

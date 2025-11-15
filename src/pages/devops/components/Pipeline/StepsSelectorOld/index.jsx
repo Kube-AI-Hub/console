@@ -48,7 +48,7 @@ import {
   WaitForQualityGate,
   WithCredentials,
 } from '../StepModalsOld'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const noInputTasks = {
   not: true,
@@ -71,8 +71,9 @@ const taskIcon = {
   withSonarQubeEnv: 'network',
 }
 
+export default
 @observer
-export default class StepsEditor extends React.Component {
+class StepsEditor extends React.Component {
   constructor(props) {
     super(props)
     this.taskDescs = {

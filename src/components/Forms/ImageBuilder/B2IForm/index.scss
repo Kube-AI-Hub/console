@@ -1,13 +1,13 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .title {
   margin-bottom: 4px;
   height: 20px;
-  font-family: $font-family-id;
+  font-family: variables.$font-family-id;
   font-size: 12px;
   line-height: 1.67;
-  color: $dark-color07;
+  color: variables.$dark-color07;
 }
 
 @mixin column {

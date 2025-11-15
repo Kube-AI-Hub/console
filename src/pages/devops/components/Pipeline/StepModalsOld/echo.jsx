@@ -20,7 +20,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { Form, TextArea } from '@kube-design/components'
 import { Modal } from 'components/Base'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Echo extends React.Component {
   static propTypes = {

@@ -32,7 +32,7 @@ import Span from './Span'
 import SpanDetail from './SpanDetail'
 import SpanGraph from './SpanGraph'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class TracingDetailModal extends React.Component {
   static propTypes = {

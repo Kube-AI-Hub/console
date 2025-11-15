@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   width: 487px;
@@ -36,12 +36,12 @@
   .word {
     .note {
       margin: 8px 0 12px;
-      color: $second-text-color;
+      color: variables.$second-text-color;
     }
   }
 }
 
 .error {
   margin: 8px 0;
-  color: $red;
+  color: variables.$red;
 }

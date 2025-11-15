@@ -24,7 +24,7 @@ import { Button } from '@kube-design/components'
 import { Modal, Steps } from 'components/Base'
 import steps from './steps'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class CreateModal extends React.Component {
   static propTypes = {

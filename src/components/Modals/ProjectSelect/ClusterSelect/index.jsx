@@ -20,7 +20,7 @@ import { Dropdown, Icon, Menu } from '@kube-design/components'
 import classNames from 'classnames'
 import React, { Component } from 'react'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ClusterSelect extends Component {
   handleOptionsClick = (e, key) => {

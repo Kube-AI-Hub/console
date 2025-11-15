@@ -1,12 +1,12 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .card {
   position: relative;
   display: flex;
   width: 335px;
   padding: 10px 18px;
-  background-color: $lightest;
-  border-radius: $border-radius;
+  background-color: variables.$lightest;
+  border-radius: variables.$border-radius;
   overflow: hidden;
 
   &Img {
@@ -17,8 +17,8 @@
   }
 
   &.dark {
-    background-color: $dark;
-    color: $white;
+    background-color: variables.$dark;
+    color: variables.$white;
   }
 }
 
@@ -29,7 +29,7 @@
   margin-left: 20px;
 
   .title {
-    font-size: $size-medium;
+    font-size: variables.$size-medium;
     font-weight: 600;
     line-height: 1.43;
     margin-bottom: 5px;
@@ -55,14 +55,14 @@
 
   :global {
     .icon.icon-clickable:hover {
-      background-color: $dark-color04;
+      background-color: variables.$dark-color04;
       user-select: none;
     }
   }
   .add,
   .substract {
     padding: 2px;
-    background: $dark-color06;
+    background: variables.$dark-color06;
     border-radius: 4px;
   }
   .substract {

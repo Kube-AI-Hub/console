@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .operations {
   display: flex;
@@ -23,7 +23,7 @@
     min-width: 188px;
     background: white;
     border: 1px solid #abb4be;
-    color: $dark-color06;
+    color: variables.$dark-color06;
 
     &:hover {
       background: white !important;

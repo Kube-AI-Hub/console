@@ -20,9 +20,10 @@ import { withRouter } from 'react-router-dom'
 import { inject } from 'mobx-react'
 import { Component as Base } from 'core/containers/Base/Detail'
 
+export default
 @withRouter
 @inject('rootStore')
-export default class DetailPage extends Base {
+class DetailPage extends Base {
   get enabledActions() {
     const { cluster, namespace: project } = this.props.match.params
     return globals.app.getActions({

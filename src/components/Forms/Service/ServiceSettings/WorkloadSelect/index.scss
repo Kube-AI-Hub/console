@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .body {
   padding: 12px;
@@ -8,9 +8,9 @@
 .footer {
   height: 44px;
   padding: 6px 12px;
-  border-radius: 0 0 $border-radius $border-radius;
-  border-top: 1px solid $border-color;
-  background-color: $bg-color;
+  border-radius: 0 0 variables.$border-radius variables.$border-radius;
+  border-top: 1px solid variables.$border-color;
+  background-color: variables.$bg-color;
   text-align: right;
 }
 
@@ -18,8 +18,8 @@
   margin-top: 8px;
   height: 188px;
   padding: 6px 0;
-  border: 1px solid $border-color;
-  border-radius: $border-radius;
+  border: 1px solid variables.$border-color;
+  border-radius: variables.$border-radius;
 }
 
 .item {
@@ -27,18 +27,18 @@
   height: 32px;
   padding: 6px 12px 6px 36px;
   cursor: pointer;
-  transition: all $trans-speed ease-in-out;
+  transition: all variables.$trans-speed ease-in-out;
 
   :global {
     .icon {
-      @include vertical-center;
+      @include mixins.vertical-center;
       left: 12px;
     }
   }
 
   &.selected,
   &:hover {
-    background-color: $lightest;
+    background-color: variables.$lightest;
 
     :global {
       .icon {
@@ -52,17 +52,17 @@
   }
 
   &.selected {
-    background-color: $bg-color;
+    background-color: variables.$bg-color;
 
     .ring {
       display: block;
-      border: 3px solid $primary;
+      border: 3px solid variables.$primary;
       box-shadow: 0 4px 8px rgba(85, 188, 138, 0.2);
     }
   }
 
   .name {
-    @include TypographySymbolText();
+    @include mixins.TypographySymbolText();
   }
 
   .ring {
@@ -70,9 +70,9 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    border: 1px solid $border-color;
-    @include vertical-center;
+    border: 1px solid variables.$border-color;
+    @include mixins.vertical-center;
     left: 14px;
-    transition: all $trans-speed ease-in-out;
+    transition: all variables.$trans-speed ease-in-out;
   }
 }

@@ -22,7 +22,7 @@ import { isEmpty } from 'lodash'
 import CanvasGraph from './CanvasGraph'
 import TimeRange from './TimeRange'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class SpanGraph extends React.Component {
   render() {

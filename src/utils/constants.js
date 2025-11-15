@@ -312,6 +312,7 @@ export const ICON_TYPES = {
   notificationhistory: 'record',
   gpu: 'gpu',
   'gpu.limit': 'gpu',
+  'gpu.memory': 'gpu',
   cds: 'rocket',
   codeRepos: 'code',
   allowlists: 'allowlist',
@@ -372,6 +373,14 @@ export const QUOTAS_MAP = {
   pods: {
     name: 'count/pods',
     placeholder: 'eg: 100',
+  },
+  gpu: {
+    name: 'gpu',
+    placeholder: 'eg: 1',
+  },
+  'gpu.memory': {
+    name: 'gpu.memory',
+    placeholder: 'eg: 1',
   },
   deployments: {
     name: 'count/deployments.apps',

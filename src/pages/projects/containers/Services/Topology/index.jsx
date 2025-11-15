@@ -32,10 +32,11 @@ import Service from './Service'
 import Edge from './Edge'
 import Detail from './Detail'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class Topology extends Component {
+class Topology extends Component {
   state = {
     type: 'pause',
     selectService: null,

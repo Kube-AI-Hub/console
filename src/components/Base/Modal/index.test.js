@@ -18,7 +18,7 @@
 
 import React from 'react'
 import { mount } from 'enzyme'
-import styles from 'identity-obj-proxy'
+import * as styles from 'identity-obj-proxy'
 
 import Modal from './index'
 

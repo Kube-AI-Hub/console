@@ -24,15 +24,16 @@ import React from 'react'
 import ProjectStore from 'stores/project'
 import { inCluster2Default, showNameAndAlias } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const allItem = {
   label: t('ALL'),
   value: '*',
   icon: 'allowlist',
 }
+export default
 @observer
-export default class Destinations extends React.Component {
+class Destinations extends React.Component {
   projectStore = new ProjectStore()
 
   state = {

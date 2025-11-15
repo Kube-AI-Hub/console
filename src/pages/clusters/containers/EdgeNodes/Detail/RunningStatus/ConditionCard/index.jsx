@@ -23,7 +23,7 @@ import { getLocalTime } from 'utils'
 import { getConditionsStatus, NODE_CONDITION_ICONS } from 'utils/node'
 import { Text } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const ConditionCard = ({ data }) => {
   if (!NODE_CONDITION_ICONS[data.type]) {

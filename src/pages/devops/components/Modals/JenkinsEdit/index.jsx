@@ -25,7 +25,7 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import PipelineStore from 'stores/devops/pipelines'
 import { compareVersion } from 'utils'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class JenkinsEdit extends React.Component {
   static propTypes = {

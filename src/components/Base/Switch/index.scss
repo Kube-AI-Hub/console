@@ -1,25 +1,25 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 $slider-bar-width: 24px;
 $silder-circle-diameter: 12px;
 
 .wrapper {
   border-color: transparent;
-  background-color: $light-color07;
+  background-color: variables.$light-color07;
   box-shadow: none;
-  color: $dark-color06;
+  color: variables.$dark-color06;
   padding-left: 20px;
   padding-right: 20px;
 
   &.primary {
-    background-color: $dark-color07;
-    color: $white;
+    background-color: variables.$dark-color07;
+    color: variables.$white;
   }
 
   &.control {
-    background-color: $btn-control-bg;
-    color: $white;
+    background-color: variables.$btn-control-bg;
+    color: variables.$white;
   }
 }
 
@@ -43,9 +43,9 @@ $silder-circle-diameter: 12px;
     right: 0;
     width: $slider-bar-width;
     height: 5.8px;
-    background: $white;
+    background: variables.$white;
     border-radius: 100px;
-    @include vertical-center;
+    @include mixins.vertical-center;
   }
 
   &::after {
@@ -55,11 +55,11 @@ $silder-circle-diameter: 12px;
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background-color: $white;
+    background-color: variables.$white;
     box-shadow: 0 1px 2px 0 rgba(33, 42, 51, 0.04),
       0 1px 1px 0 rgba(33, 42, 51, 0.04);
     transition: all 0.2s cubic-bezier(0.78, 0.14, 0.15, 0.86);
-    @include vertical-center;
+    @include mixins.vertical-center;
   }
 
   &.on {

@@ -25,7 +25,7 @@ import CookieMatch from '../CookieMatch'
 import HeaderMatch from '../HeaderMatch'
 import OSSelect from '../OSSelect'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ByContent extends React.Component {
   get formTemplate() {

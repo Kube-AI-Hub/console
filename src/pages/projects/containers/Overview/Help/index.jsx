@@ -22,7 +22,7 @@ import { Icon } from '@kube-design/components'
 
 import { getDocsUrl } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Help extends React.Component {
   render() {

@@ -22,11 +22,12 @@ import { Button, Icon } from '@kube-design/components'
 import { Card } from 'components/Base'
 import Placement from 'projects/components/Cards/Placement'
 import { get } from 'lodash'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('detailStore')
 @observer
-export default class SecretDetail extends React.Component {
+class SecretDetail extends React.Component {
   constructor(props) {
     super(props)
 

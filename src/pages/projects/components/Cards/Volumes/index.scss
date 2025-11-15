@@ -1,18 +1,18 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .content {
   padding: 12px;
   border-radius: 4px;
-  background-color: $card-bg-color;
+  background-color: variables.$card-bg-color;
 }
 
 .item {
   display: flex;
   padding: 12px;
   margin-bottom: 8px;
-  background-color: $white;
-  border: solid 1px $border-color;
+  background-color: variables.$white;
+  border: solid 1px variables.$border-color;
   border-radius: 4px;
 
   &:last-child {

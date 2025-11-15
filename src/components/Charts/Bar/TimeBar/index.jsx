@@ -23,7 +23,7 @@ import classnames from 'classnames'
 import { ResponsiveContainer, BarChart, XAxis, Tooltip, Bar } from 'recharts'
 import { timestampify } from 'utils/monitoring'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 class TimeBar extends Component {
   static propTypes = {

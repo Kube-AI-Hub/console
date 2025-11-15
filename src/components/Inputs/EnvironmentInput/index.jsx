@@ -28,11 +28,12 @@ import AddConfigOrSecret from './ConfigOrSecret'
 
 import Item from './Item'
 import ArrayInput from '../ArrayInput'
-import styles from './index.scss'
+import * as styles from './index.scss'
 import ArrowModal from './ArrowModal'
 
+export default
 @trigger
-export default class EnvironmentInput extends React.Component {
+class EnvironmentInput extends React.Component {
   constructor(props) {
     super(props)
     this.configMapStore = new ConfigMapStore()

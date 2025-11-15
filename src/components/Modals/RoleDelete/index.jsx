@@ -28,10 +28,11 @@ import GroupStore from 'stores/group'
 
 import { ROLE_QUERY_KEY } from 'utils/constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class RoleDeleteModal extends React.Component {
+class RoleDeleteModal extends React.Component {
   static propTypes = {
     detail: PropTypes.object,
     module: PropTypes.string,

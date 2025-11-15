@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import  '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 $banner-height: 144px;
 
@@ -7,13 +7,13 @@ $banner-height: 144px;
   width: 100%;
   height: $banner-height;
   padding: 26px;
-  background: $light-color02;
+  background: variables.$light-color02;
 
   .back {
     display: inline-flex;
     cursor: pointer;
     margin-bottom: 18px;
-    font-size: $size-small;
+    font-size: variables.$size-small;
     line-height: 20px;
     > span:last-child {
       margin-left: 8px;
@@ -30,7 +30,7 @@ $banner-height: 144px;
       height: 48px;
       line-height: 48px;
 
-      >span {
+      > span {
         position: static;
         transform: translateY(0);
       }
@@ -39,17 +39,17 @@ $banner-height: 144px;
       margin-left: 19px;
       > h3 {
         font-size: 24px;
-        font-weight: $font-bold;
+        font-weight: variables.$font-bold;
         line-height: 32px;
-        color: $dark-color07;
+        color: variables.$dark-color07;
         text-shadow: 0 2px 4px 0 rgba(36, 46, 66, 0.1);
       }
       > p {
-        font-style: $size-small;
+        font-style: variables.$size-small;
         line-height: 20px;
-        color: $dark-color01;
+        color: variables.$dark-color01;
         word-break: break-word;
-        @include ellipsis;
+        @include mixins.ellipsis;
       }
     }
   }

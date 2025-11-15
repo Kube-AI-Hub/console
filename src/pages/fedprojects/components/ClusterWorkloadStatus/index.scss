@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 @mixin cluster-base {
   padding: 8px;
@@ -45,13 +45,13 @@
   overflow: hidden;
 
   & > div {
-    @include TypographyTitleH6(#fff);
-    @include ellipsis;
+    @include mixins.TypographyTitleH6(#fff);
+    @include mixins.ellipsis;
   }
 
   & > p {
-    @include TypographyParagraph(#fff);
-    @include ellipsis;
+    @include mixins.TypographyParagraph(#fff);
+    @include mixins.ellipsis;
   }
 }
 
@@ -68,10 +68,10 @@
 
 .replicas {
   margin-right: 8px;
-  @include TypographySymbolText(#fff);
+  @include mixins.TypographySymbolText(#fff);
 
   .readyNum {
-    @include TypographyTitleH2(#fff);
+    @include mixins.TypographyTitleH2(#fff);
     line-height: 40px;
   }
 
@@ -98,13 +98,13 @@
   :global {
     .icon {
       padding: 4px;
-      border-radius: $border-radius;
-      background-color: $dark-color06;
+      border-radius: variables.$border-radius;
+      background-color: variables.$dark-color06;
     }
 
     .icon.icon-clickable:hover,
     .icon.icon-clickable:active {
-      background-color: $dark-color07;
+      background-color: variables.$dark-color07;
     }
 
     .icon + .icon {
@@ -151,11 +151,11 @@
 
       &:nth-of-type(1) {
         font-weight: 600;
-        color: $dark-color07;
+        color: variables.$dark-color07;
       }
 
       &:nth-of-type(2) {
-        color: $dark-color01;
+        color: variables.$dark-color01;
       }
     }
   }
@@ -170,7 +170,7 @@
   justify-content: center;
   align-items: center;
   padding: 10px 12px;
-  background: $dark-color07;
+  background: variables.$dark-color07;
   margin-right: 12px;
 
   .total {
@@ -190,8 +190,8 @@
       width: 48px;
       height: 32px;
       padding: 6px 12px;
-      background: $dark-color07;
-      border: 1px solid $dark-color04;
+      background: variables.$dark-color07;
+      border: 1px solid variables.$dark-color04;
       box-sizing: border-box;
       border-radius: 4px;
       color: #fff;
@@ -206,20 +206,20 @@
   margin: 0 auto;
   margin-top: 12px;
   padding: 6px;
-  background: $dark-color06;
+  background: variables.$dark-color06;
   border-radius: 16px;
 
   .value {
     flex: 1;
     text-align: center;
-    @include TypographySymbolText($dark-color06);
+    @include mixins.TypographySymbolText(variables.$dark-color06);
 
     .spanText {
-      color: $white;
+      color: variables.$white;
     }
 
     .subText {
-      color: $dark-color01;
+      color: variables.$dark-color01;
     }
   }
 }

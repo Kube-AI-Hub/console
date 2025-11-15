@@ -27,11 +27,12 @@ import { getAreaChartOps } from 'utils/monitoring'
 
 import TinyArea from '../TinyArea'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('rootStore')
 @observer
-export default class ResourceCard extends React.Component {
+class ResourceCard extends React.Component {
   static propTypes = {
     className: PropTypes.string,
     icon: PropTypes.string,

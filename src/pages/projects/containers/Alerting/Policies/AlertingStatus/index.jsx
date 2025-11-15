@@ -1,7 +1,7 @@
 import React from 'react'
 import { Tooltip } from '@kube-design/components'
 import classnames from 'classnames'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const AlertStatus = ({ rulesStats }) => {
   const labelMapper = {

@@ -1,3 +1,4 @@
+/* eslint-disable import/no-import-module-exports */
 /*
  * This file is part of KubeSphere Console.
  * Copyright (C) 2019 The KubeSphere Console Authors.
@@ -29,7 +30,7 @@ import i18n from './i18n'
 import '@kube-design/components/esm/styles/index.scss'
 import 'scss/main.scss'
 
-require('@babel/polyfill')
+import 'core-js/stable'
 
 // request error handler
 window.onunhandledrejection = function(e) {

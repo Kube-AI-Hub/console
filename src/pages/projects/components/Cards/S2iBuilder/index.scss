@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .logContainer {
   pre {
@@ -7,7 +7,7 @@
     color: #363e4a;
     border: solid 1px #d8dee5;
     border-radius: 4px;
-    background-color: $lightest;
+    background-color: variables.$lightest;
     max-height: 200px;
     overflow-y: auto;
     white-space: pre-wrap;
@@ -19,7 +19,7 @@
   padding: 12px 0;
   cursor: pointer;
   &:hover {
-    background-color: $lightest;
+    background-color: variables.$lightest;
   }
   :global .spin {
     flex-basis: 20px;
@@ -58,7 +58,7 @@
   color: #363e4a;
   border: solid 1px #d8dee5;
   border-radius: 4px;
-  background-color: $lightest;
+  background-color: variables.$lightest;
   max-height: 200px;
 }
 
@@ -77,7 +77,7 @@
 
 .successful {
   background-image: url('/assets/pipeline-success.svg');
-  background-color: $green;
+  background-color: variables.$green;
 }
 
 @keyframes rotate {

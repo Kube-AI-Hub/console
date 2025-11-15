@@ -21,7 +21,7 @@ import { Button, Icon, Tooltip } from '@kube-design/components'
 
 import { isEmpty } from 'lodash'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Ports extends Component {
   render() {

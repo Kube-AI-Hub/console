@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .container {
   & > div {
@@ -37,7 +37,7 @@
 .formGroup {
   border-radius: 4px;
   padding: 12px;
-  border: solid 1px $light-color03;
+  border: solid 1px variables.$light-color03;
   background-color: #ffffff;
 
   .header {
@@ -62,7 +62,7 @@
   padding: 12px;
   margin: 12px;
   margin-top: 24px;
-  outline: $light-color01 solid 12px;
+  outline: variables.$light-color01 solid 12px;
   border-radius: 4px;
-  border: solid 1px $light-color03;
+  border: solid 1px variables.$light-color03;
 }

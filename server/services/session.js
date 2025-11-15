@@ -266,7 +266,7 @@ const getWorkspaces = async (token, clusterRole) => {
   const resp = await send_gateway_request({
     method: 'GET',
     url,
-    params: { limit: 10 },
+    params: { limit: 100 },
     token,
   })
 

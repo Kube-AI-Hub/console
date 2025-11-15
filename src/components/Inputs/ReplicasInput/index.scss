@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   text-align: center;
@@ -7,11 +7,11 @@
 .value {
   display: inline-block;
   margin-right: 24px;
-  font-family: $font-family-id;
+  font-family: variables.$font-family-id;
   font-size: 60px;
-  font-weight: $font-bold;
+  font-weight: variables.$font-bold;
   line-height: 1.33;
-  color: $second-text-color;
+  color: variables.$second-text-color;
   vertical-align: middle;
 }
 
@@ -22,11 +22,11 @@
   vertical-align: middle;
 
   p {
-    color: $second-text-color;
+    color: variables.$second-text-color;
 
     strong {
-      color: $text-color;
-      font-weight: $font-bold;
+      color: variables.$text-color;
+      font-weight: variables.$font-bold;
     }
   }
 }
@@ -40,7 +40,7 @@
       display: block;
       cursor: pointer;
       &:hover {
-        background-color: $bg-color;
+        background-color: variables.$bg-color;
         border-radius: 4px;
       }
     }

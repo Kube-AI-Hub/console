@@ -22,7 +22,7 @@ import { trim } from 'lodash'
 import { Select } from '@kube-design/components'
 import NumberInput from 'components/Inputs/NumberInput'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class TailItemInput extends React.Component {
   static propTypes = {

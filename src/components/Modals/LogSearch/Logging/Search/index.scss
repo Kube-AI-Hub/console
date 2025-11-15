@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 $toolbarHeight: 48px;
 $logCountColor: #329dce;
@@ -41,8 +41,8 @@ $logCountColor: #329dce;
 }
 
 .searchResult {
-  border-radius: $border-radius;
-  background-color: $lightest;
+  border-radius: variables.$border-radius;
+  background-color: variables.$lightest;
   padding: 25px 12px 14px 12px;
   border: solid 1px #d8dee5;
   display: flex;

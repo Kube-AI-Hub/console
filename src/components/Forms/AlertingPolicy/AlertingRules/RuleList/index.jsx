@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 
 import { ALERT_GROUP_MAX_LIMIT } from 'utils/constants'
 import { get } from 'lodash'
-import styles from './index.scss'
+import * as styles from './index.scss'
 import Card from './Card'
 
 const RuleList = props => {

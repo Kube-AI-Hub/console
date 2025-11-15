@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   & > div:last-child {
@@ -14,7 +14,7 @@
 
   a {
     margin: 0 5px;
-    color: $green-color03;
+    color: variables.$green-color03;
   }
 }
 .extraBtn {
@@ -22,7 +22,7 @@
 }
 
 .formError {
-  border: solid 1px $red-color03 !important;
+  border: solid 1px variables.$red-color03 !important;
 }
 .nameTip {
   margin-bottom: 8px;
@@ -39,7 +39,7 @@
 .textContent {
   width: 100px;
   height: 100px;
-  background: $white;
+  background: variables.$white;
   box-shadow: 0px 8px 16px rgba(36, 46, 66, 0.28);
   border-radius: 4px;
 }

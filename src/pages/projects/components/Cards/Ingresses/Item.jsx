@@ -23,7 +23,7 @@ import { Link } from 'react-router-dom'
 import { Button, Icon } from '@kube-design/components'
 import { getDisplayName } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const Card = ({ detail, gateway, prefix }) => {
   const ports = {}

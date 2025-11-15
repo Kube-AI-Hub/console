@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .modalBody {
   padding: 20px 12px;
@@ -6,8 +6,8 @@
 
   .content {
     padding: 12px;
-    background-color: $card-bg-color;
-    border-radius: $border-radius;
+    background-color: variables.$card-bg-color;
+    border-radius: variables.$border-radius;
     display: flex;
     justify-content: space-between;
     height: 100%;

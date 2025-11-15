@@ -24,11 +24,12 @@ import { RadioButton, RadioGroup, Form, Input } from '@kube-design/components'
 
 import { action, observable } from 'mobx'
 import { PATTERN_URL } from 'utils/constants'
-import styles from './index.scss'
+import * as styles from './index.scss'
 import Uploader from './Uploader'
 
+export default
 @observer
-export default class GrafanaModal extends React.Component {
+class GrafanaModal extends React.Component {
   @observable
   type = 'json'
 

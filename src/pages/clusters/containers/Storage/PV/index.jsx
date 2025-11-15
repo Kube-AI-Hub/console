@@ -30,15 +30,16 @@ import { PV_STATUS } from 'utils/constants'
 import StatusReason from 'projects/components/StatusReason'
 
 import { Avatar, Status } from 'components/Base'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @withList({
   store: new PvStore(),
   module: 'persistentvolumes',
   name: 'PERSISTENT_VOLUME',
   rowKey: 'uid',
 })
-export default class PV extends React.Component {
+class PV extends React.Component {
   showAction = record => !record.isFedManaged
 
   cantDelete = ({ status }) => ['Bound', 'Released'].indexOf(status.phase) > -1

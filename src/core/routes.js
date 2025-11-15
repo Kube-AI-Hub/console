@@ -24,30 +24,28 @@ import LoginConfirm from 'core/containers/LoginConfirm'
 import PasswordConfirm from 'core/containers/PasswordConfirm'
 
 const Console = lazy(() =>
-  import(/* webpackChunkName: "console" */ 'console/App.jsx')
+  import(/* webpackChunkName: "console" */ 'console/App')
 )
 const Clusters = lazy(() =>
-  import(/* webpackChunkName: "clusters" */ 'clusters/App.jsx')
+  import(/* webpackChunkName: "clusters" */ 'clusters/App')
 )
 const AccessControl = lazy(() =>
-  import(/* webpackChunkName: "access" */ 'access/App.jsx')
+  import(/* webpackChunkName: "access" */ 'access/App')
 )
 const Settings = lazy(() =>
-  import(/* webpackChunkName: "settings" */ 'settings/App.jsx')
+  import(/* webpackChunkName: "settings" */ 'settings/App')
 )
 const Workspaces = lazy(() =>
-  import(/* webpackChunkName: "workspaces" */ 'workspaces/App.jsx')
+  import(/* webpackChunkName: "workspaces" */ 'workspaces/App')
 )
 const Projects = lazy(() =>
-  import(/* webpackChunkName: "projects" */ 'projects/App.jsx')
+  import(/* webpackChunkName: "projects" */ 'projects/App')
 )
 const FederatedProjects = lazy(() =>
-  import(/* webpackChunkName: "fedprojects" */ 'fedprojects/App.jsx')
+  import(/* webpackChunkName: "fedprojects" */ 'fedprojects/App')
 )
-const DevOps = lazy(() =>
-  import(/* webpackChunkName: "devops" */ 'devops/App.jsx')
-)
-const App = lazy(() => import(/* webpackChunkName: "apps" */ 'apps/App.jsx'))
+const DevOps = lazy(() => import(/* webpackChunkName: "devops" */ 'devops/App'))
+const App = lazy(() => import(/* webpackChunkName: "apps" */ 'apps/App'))
 
 export default [
   { path: `/login`, component: Login, exact: true },

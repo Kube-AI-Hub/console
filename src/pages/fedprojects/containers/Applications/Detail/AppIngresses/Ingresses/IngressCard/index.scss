@@ -1,8 +1,8 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   border-radius: 2px;
-  border: solid 1px $border-color;
+  border: solid 1px variables.$border-color;
   padding: 12px;
   background-color: #ffffff;
 

@@ -32,10 +32,11 @@ import { Status } from 'components/Base'
 
 import routes from './routes'
 
+export default
 @inject('rootStore')
 @observer
 @trigger
-export default class NodeDetail extends React.Component {
+class NodeDetail extends React.Component {
   store = new NodeStore()
 
   componentDidMount() {

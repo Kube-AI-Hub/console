@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .title {
   height: 32px;
@@ -8,7 +8,7 @@
 
   h2 {
     font-size: 24px;
-    font-weight: $font-bold;
+    font-weight: variables.$font-bold;
     flex: 8 1 auto;
   }
 

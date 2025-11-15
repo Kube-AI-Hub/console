@@ -30,7 +30,7 @@ import {
 import { Empty, Modal } from 'components/Base'
 import BuilderStore from 'stores/s2i/builder'
 import RadioItem from './item'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ReBuild extends React.Component {
   static propTypes = {

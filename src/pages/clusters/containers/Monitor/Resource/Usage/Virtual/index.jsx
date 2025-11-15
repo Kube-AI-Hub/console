@@ -29,7 +29,7 @@ import { Controller as MonitoringController } from 'components/Cards/Monitoring'
 import { MediumArea } from 'components/Charts'
 import ResourceMonitoringModal from 'components/Modals/Monitoring/ApplicationResource'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const MetricTypes = {
   deployment_count: 'cluster_deployment_count',

@@ -1,7 +1,7 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .errorMessage {
-  color: $red-color03;
+  color: variables.$red-color03;
 }
 
 .linkContainer {
@@ -9,10 +9,10 @@
 }
 
 .link {
-  background: $bg-color;
+  background: variables.$bg-color;
   word-break: break-all;
-  border: 1px solid $border-color;
-  box-shadow: $base-shadow;
+  border: 1px solid variables.$border-color;
+  box-shadow: variables.$base-shadow;
   padding: 5px;
 }
 
@@ -34,10 +34,10 @@
 
   .installInfo {
     a {
-      color: $green-color03;
+      color: variables.$green-color03;
       margin-left: 5px;
       &:hover {
-        color: $green-color01;
+        color: variables.$green-color01;
       }
     }
   }

@@ -19,7 +19,7 @@
 import React, { Component } from 'react'
 import { Button } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class RadioButtons extends Component {
   handleClick = e => {

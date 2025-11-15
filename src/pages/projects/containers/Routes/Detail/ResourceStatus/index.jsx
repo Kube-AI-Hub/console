@@ -26,7 +26,7 @@ import GatewayStore from 'stores/gateway'
 import EmptyCard from 'devops/components/Cards/EmptyCard'
 import Rule from './Rule'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @inject('detailStore')
 @observer

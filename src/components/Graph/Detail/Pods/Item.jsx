@@ -23,7 +23,7 @@ import { Icon } from '@kube-design/components'
 import { Link } from 'react-router-dom'
 import { getLocalTime } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Item extends React.Component {
   handleLinkClick = () => {

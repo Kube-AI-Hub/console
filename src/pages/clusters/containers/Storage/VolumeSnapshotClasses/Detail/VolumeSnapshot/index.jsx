@@ -25,11 +25,12 @@ import VolumeSnapshotStore from 'stores/volumeSnapshot'
 import { Avatar, Panel, Status } from 'components/Base'
 import BaseTable from 'components/Tables/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('detailStore')
 @observer
-export default class VolumeSnapshot extends React.Component {
+class VolumeSnapshot extends React.Component {
   constructor(props) {
     super(props)
 

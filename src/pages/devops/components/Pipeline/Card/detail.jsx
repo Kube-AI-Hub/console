@@ -20,7 +20,7 @@ import { get, isString, pick, set } from 'lodash'
 import React from 'react'
 import { groovyToJS } from 'utils/devops'
 
-import style from './index.scss'
+import * as style from './index.scss'
 
 const getValue = arg => {
   if (get(arg, 'value.value') !== undefined) {

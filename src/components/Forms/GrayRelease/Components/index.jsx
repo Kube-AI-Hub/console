@@ -30,12 +30,13 @@ import ServiceStore from 'stores/service'
 
 import SelectComponent from './SelectComponent'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const REQUEST_CONTENT_PROTOCOLS = ['http', 'http2', 'grpc']
 
+export default
 @observer
-export default class Components extends React.Component {
+class Components extends React.Component {
   constructor(props) {
     super(props)
 

@@ -1,18 +1,18 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   padding: 12px;
-  background-color: $light-color01;
+  background-color: variables.$light-color01;
 }
 
 .cluster {
   padding: 6px 8px 8px;
   border-radius: 2px;
-  background-color: $dark-color07;
- 
+  background-color: variables.$dark-color07;
+
   .title {
-    @include TypographySymbolText(#fff);
+    @include mixins.TypographySymbolText(#fff);
 
     & > span {
       display: inline-block;
@@ -22,7 +22,7 @@
   }
 
   &.selected {
-    background-color: $green-color05;
+    background-color: variables.$green-color05;
   }
 
   & + .cluster {

@@ -23,8 +23,9 @@ import { observer } from 'mobx-react'
 import Card from './card'
 import Edges from '../Pipeline/Edges'
 
+export default
 @observer
-export default class PipelineNodes extends React.Component {
+class PipelineNodes extends React.Component {
   @observable
   heights = []
 

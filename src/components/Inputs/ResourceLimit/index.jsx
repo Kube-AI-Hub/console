@@ -40,7 +40,7 @@ import {
 
 import { cpuFormat, memoryFormat } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ResourceLimit extends React.Component {
   static propTypes = {
@@ -69,6 +69,10 @@ export default class ResourceLimit extends React.Component {
       cpuError: '',
       memoryError: '',
       workspaceLimitCheck: {},
+      gpu: {
+        ...ResourceLimit.gpuSetting(props),
+        memory: ResourceLimit.gpuSetting(props).memory || '', // 确保 gpu.memory 有默认值
+      },
     }
   }
 
@@ -81,6 +85,10 @@ export default class ResourceLimit extends React.Component {
       this.setState({
         ...ResourceLimit.getValue(this.props),
         defaultValue: this.props.defaultProps,
+        gpu: {
+          ...ResourceLimit.gpuSetting(this.props),
+          memory: ResourceLimit.gpuSetting(this.props).memory || '', // 确保 gpu.memory 有默认值
+        },
       })
     }
   }
@@ -128,7 +136,6 @@ export default class ResourceLimit extends React.Component {
     const requestMeo = ResourceLimit.getDefaultRequestValue(props, 'memory')
     const limitCpu = ResourceLimit.getDefaultLimitValue(props, 'cpu')
     const limitMeo = ResourceLimit.getDefaultLimitValue(props, 'memory')
-
     const cpuRequests = ResourceLimit.allowInputDot(
       requestCpu,
       cpuUnit,
@@ -199,6 +206,7 @@ export default class ResourceLimit extends React.Component {
       return {
         type: supportGpuType[0],
         value: '',
+        memory: '',
       }
     }
     // The value may not have requests field
@@ -206,9 +214,13 @@ export default class ResourceLimit extends React.Component {
       supportGpuType.some(item => key.endsWith(item))
     )
     const type = !isEmpty(types) ? types[0] : supportGpuType[0]
+    const gpumem = value.requests[`${type}mem`]
+      ? value.requests[`${type}mem`].replace('Gi', '').replace('Mi', '')
+      : ''
     return {
       type,
       value: !isEmpty(types) ? value.requests[`${type}`] : '',
+      memory: !isEmpty(types) ? gpumem : '', // 确保 memory 有默认值
     }
   }
 
@@ -433,6 +445,16 @@ export default class ResourceLimit extends React.Component {
         [`${gpu.type}`]: gpu.value,
       })
     }
+    if (!!gpu.type && !!gpu.memory) {
+      set(result, 'limits', {
+        ...result.limits,
+        [`${gpu.type}mem`]: `${gpu.memory}${memoryUnit}`,
+      })
+      set(result, 'requests', {
+        ...result.requests,
+        [`${gpu.type}mem`]: `${gpu.memory}${memoryUnit}`,
+      })
+    }
 
     onChange(result)
   }
@@ -471,11 +493,11 @@ export default class ResourceLimit extends React.Component {
       inputNum = ''
     } else {
       const number = /^(([1-9]{1}\d*)|(0{1}))(\.\d{0,2})?$/.exec(value)
-      inputNum = number == null ? get(this.state, name, null) : number[0]
+      inputNum = number == null ? get(this.state, name, '') : number[0]
     }
 
     this.setState(state => {
-      set(state, name, isNaN(inputNum) ? '' : inputNum)
+      set(state, name, inputNum)
       return { ...state, ...this.checkError(state) }
     }, this.checkAndTrigger)
   }
@@ -493,6 +515,28 @@ export default class ResourceLimit extends React.Component {
         gpu: {
           type: this.state.gpu.type,
           value: inputNum,
+          memory: this.state.gpu.memory,
+        },
+      },
+      this.checkAndTrigger
+    )
+  }
+
+  // gpu memory input change
+  handleGpuMemoryInputChange = (e, value) => {
+    let inputNum
+    if (value === '') {
+      inputNum = ''
+    } else {
+      const number = /^(([1-9]{1}\d*)|(0{1}))(\.\d{0,2})?$/.exec(value)
+      inputNum = number == null ? get(this.state, 'gpu.memory', '') : number[0]
+    }
+    this.setState(
+      {
+        gpu: {
+          type: this.state.gpu.type,
+          value: this.state.gpu.value,
+          memory: inputNum,
         },
       },
       this.checkAndTrigger
@@ -617,6 +661,20 @@ export default class ResourceLimit extends React.Component {
               />
             </div>
           </div>
+          <div className={classnames(styles.input)}>
+            <div className={styles.label}>
+              <span>{t('GPU_MEMORY')}</span>
+            </div>
+            <div className={styles.inputBox}>
+              <Input
+                name="gpu.memory"
+                value={this.state.gpu.memory}
+                onChange={this.handleGpuMemoryInputChange}
+                placeholder={t('NO_LIMIT')}
+              />
+              <span className={styles.unit}>{this.memoryUnit}</span>
+            </div>
+          </div>
         </div>
       </Column>
     )
@@ -631,6 +689,7 @@ export default class ResourceLimit extends React.Component {
       <div className={styles.wrapper}>
         <div className={styles.inputWrapper}>
           <Columns className="is-gapless">
+            {supportGpuSelect && this.renderGpuSelect()}
             <Column>
               <div className={styles.inputGroup}>
                 <Icon name="cpu" size={48} />
@@ -705,7 +764,6 @@ export default class ResourceLimit extends React.Component {
                 </div>
               </div>
             </Column>
-            {supportGpuSelect && this.renderGpuSelect()}
           </Columns>
         </div>
         {this.ifRenderTip && this.renderQuotasTip()}

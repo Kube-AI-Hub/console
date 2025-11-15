@@ -25,7 +25,7 @@ import { Button, Icon } from '@kube-design/components'
 import DefaultRange from './Range/Default'
 
 import { getTimeLabel } from './utils'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class TimeSelector extends React.PureComponent {
   static propTypes = {

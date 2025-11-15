@@ -39,7 +39,7 @@ import CDSelect from './application'
 import SecretSelect from './credential'
 import { Reaction } from './reaction'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 import FromCodeRepository from './FromCodeRepository'
 
 const boolMap = new Map([
@@ -109,8 +109,10 @@ const initialData = parameters => {
     { initData: {}, typeMap: {}, codeKey: '' }
   )
 }
+
+export default
 @observer
-export default class Params extends React.Component {
+class Params extends React.Component {
   static formProps = {
     visible: false,
     onOk() {},

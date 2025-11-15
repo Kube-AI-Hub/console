@@ -137,7 +137,11 @@ const renderViewErr = async (ctx, err) => {
   if (err) {
     if (err.code === 401 || err.code === 403 || err.status === 401) {
       if (isValidReferer(ctx.path)) {
-        ctx.redirect(`/login?referer=${ctx.path}`)
+        let referer = ctx.path
+        if (ctx.path === '/authorize') {
+          referer = encodeURIComponent(ctx.originalUrl)
+        }
+        ctx.redirect(`/login?referer=${referer}`)
       } else {
         ctx.redirect('/login')
       }

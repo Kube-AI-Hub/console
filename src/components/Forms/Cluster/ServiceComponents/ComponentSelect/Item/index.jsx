@@ -24,7 +24,7 @@ import { COMPONENT_ICON_MAP } from 'utils/constants'
 
 import Params from '../Params'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Item extends Component {
   handleSwitch = enable => {

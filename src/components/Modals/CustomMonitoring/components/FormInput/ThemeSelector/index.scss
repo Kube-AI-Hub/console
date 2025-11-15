@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   & > div {
@@ -9,13 +9,13 @@
       font-weight: bold;
     }
     margin-bottom: 10px;
-    background: $white;
+    background: variables.$white;
     cursor: pointer;
   }
 
   .select {
-    background: $dark-color07;
-    color: $white;
+    background: variables.$dark-color07;
+    color: variables.$white;
   }
 }
 

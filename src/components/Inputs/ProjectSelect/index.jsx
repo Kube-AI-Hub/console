@@ -23,10 +23,11 @@ import { Icon, Select, Tooltip } from '@kube-design/components'
 import ProjectStore from 'stores/project'
 import { showNameAndAlias } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class ProjectSelect extends Component {
+class ProjectSelect extends Component {
   projectStore = new ProjectStore()
 
   componentDidMount() {

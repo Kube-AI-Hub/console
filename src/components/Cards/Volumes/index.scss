@@ -1,10 +1,10 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   padding: 12px;
-  background-color: $lightest;
-  border-radius: $border-radius;
+  background-color: variables.$lightest;
+  border-radius: variables.$border-radius;
 }
 
 .mount {
@@ -12,14 +12,14 @@
 
   ul > li {
     display: flex;
-    background-color: $bg-color;
+    background-color: variables.$bg-color;
     padding: 8px;
     border-radius: 4px;
 
     & > div {
       display: flex;
-      color: $text-color;
-      font-weight: $font-bold;
+      color: variables.$text-color;
+      font-weight: variables.$font-bold;
       min-width: 200px;
       word-break: break-all;
     }

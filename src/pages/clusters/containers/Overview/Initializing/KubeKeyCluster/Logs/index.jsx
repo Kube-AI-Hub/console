@@ -29,10 +29,11 @@ import ContainerStore from 'stores/container'
 import { PATTERN_UTC_TIME } from 'utils/constants'
 import { CLUSTER_CREATING_STEPS } from '../constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class Logs extends Component {
+class Logs extends Component {
   constructor(props) {
     super(props)
 

@@ -19,6 +19,8 @@
 import 'whatwg-fetch'
 import qs from 'qs'
 import { isObject, get, set, merge, isEmpty } from 'lodash'
+import { Notify } from '@kube-design/components'
+
 import { getClusterUrl, safeParseJSON } from './index'
 
 const methods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
@@ -35,7 +37,7 @@ const methods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
 export default methods.reduce(
   (prev, method) => ({
     ...prev,
-    [method.toLowerCase()]: (url, params = {}, options, reject) =>
+    [method.toLowerCase()]: (url, params, options, reject) =>
       buildRequest({ method, url, params, options, reject }),
   }),
   {
@@ -70,6 +72,7 @@ function buildRequest({
           method === 'PATCH'
             ? 'application/merge-patch+json'
             : 'application/json',
+        Authorization: `Bearer ${globals.token}`,
       },
     },
     options
@@ -115,7 +118,7 @@ function buildRequest({
   )
 }
 
-function watchResource(url, params = {}, callback) {
+function watchResource(url, params, callback) {
   const xhr = new XMLHttpRequest()
 
   xhr.open('GET', getClusterUrl(`/${url}?${qs.stringify(params)}`), true)
@@ -163,6 +166,22 @@ function handleResponse(response, reject, request = {}) {
     return response.json().then(data => {
       if (response.status === 401) {
         console.warn('Unauthorized', response, response.ok)
+      }
+
+      if (response.status === 403) {
+        console.warn('Forbidden', response, response.ok)
+        Notify.error({
+          title: t('error'),
+          content: t(
+            'You do not have permission to access this resource. please login again.'
+          ),
+        })
+        const pathname = window.location.pathname
+
+        window.location.replace(
+          pathname === '/login' ? pathname : `/login?referer=${pathname}`
+        )
+        return
       }
 
       if (response.ok && response.status >= 200 && response.status < 400) {

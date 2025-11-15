@@ -26,10 +26,11 @@ import VersionStore from 'stores/openpitrix/version'
 import FileStore from 'stores/openpitrix/file'
 import { CAN_EDIT_STATUS } from 'configs/openpitrix/version'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class ConfigFile extends React.Component {
+class ConfigFile extends React.Component {
   static propTypes = {
     appId: PropTypes.string,
     versionId: PropTypes.string,

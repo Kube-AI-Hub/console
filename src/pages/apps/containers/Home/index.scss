@@ -1,6 +1,6 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
-$content-width: 1258px;
+variables.$content-width: 1258px;
 $toolbar-height: 52px;
 $category-width: 193px;
 
@@ -11,7 +11,7 @@ $category-width: 193px;
     width: 1024px;
   }
   @media (min-width: 1164px) {
-    width: $content-width;
+    width: variables.$content-width;
     margin-left: auto;
     margin-right: auto;
   }
@@ -35,7 +35,7 @@ $category-width: 193px;
           position: absolute;
           top: -40px;
           font-weight: bold;
-          color: $dark-color06;
+          color: variables.$dark-color06;
         }
       }
     }
@@ -48,12 +48,12 @@ $category-width: 193px;
   color: #fff;
 
   > .title {
-    font-size: $size-mid-large;
+    font-size: variables.$size-mid-large;
     line-height: 32px;
     text-shadow: 0 2px 4px rgba(36, 46, 66, 0.1);
   }
   > .desc {
-    font-size: $size-small;
+    font-size: variables.$size-small;
     line-height: 20px;
   }
 }
@@ -63,17 +63,17 @@ $category-width: 193px;
   align-items: center;
   position: relative;
   height: $toolbar-height;
-  background: $light-color01;
-  top: -$header-height;
+  background: variables.$light-color01;
+  top: -(variables.$header-height);
 
   .level {
     display: flex;
     @extend %centerItem;
 
     .countDesc {
-      color: $dark-color06;
+      color: variables.$dark-color06;
       line-height: 1.67;
-      font-size: $size-small;
+      font-size: variables.$size-small;
       font-weight: bold;
       margin-left: calc(#{$category-width} + 20px);
     }
@@ -101,7 +101,7 @@ $category-width: 193px;
     margin-bottom: 28px;
 
     .title {
-      color: $dark-color06;
+      color: variables.$dark-color06;
       font-weight: bold;
     }
     .menu {
@@ -113,12 +113,12 @@ $category-width: 193px;
         line-height: 20px;
         font-size: 12px;
         list-style: none;
-        color: $dark-color07;
+        color: variables.$dark-color07;
         cursor: pointer;
 
         &:hover,
         &.active {
-          color: $primary;
+          color: variables.$primary;
         }
 
         &.active {

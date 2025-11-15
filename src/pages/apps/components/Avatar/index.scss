@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   position: relative;
@@ -9,7 +9,7 @@
     line-height: 40px;
     vertical-align: middle;
     border: 0 none;
-    border-radius: $border-radius;
+    border-radius: variables.$border-radius;
   }
 
   .title {
@@ -28,28 +28,28 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: solid 2px $white;
-  @include vertical-center;
+  border: solid 2px variables.$white;
+  @include mixins.vertical-center;
 }
 
 .icon {
-  @include vertical-center;
+  @include mixins.vertical-center;
 }
 
 .title {
   padding-left: 37px;
 
   .desc {
-    @include ellipsis;
+    @include mixins.ellipsis;
     max-width: 300px;
-    color: $second-text-color;
+    color: variables.$second-text-color;
     line-height: 1.67;
     font-weight: normal;
   }
 
   strong {
-    color: $text-color;
-    font-family: $font-family-id;
+    color: variables.$text-color;
+    font-family: variables.$font-family-id;
   }
 
   .canClick {
@@ -75,7 +75,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: $bg-color;
-  border-radius: $border-radius;
+  background-color: variables.$bg-color;
+  border-radius: variables.$border-radius;
   font-weight: bold;
 }

@@ -26,10 +26,11 @@ import { Alert, Form, Input, Loading } from '@kube-design/components'
 import { Modal } from 'components/Base'
 import { NumberInput } from 'components/Inputs'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class HPAModal extends React.Component {
+class HPAModal extends React.Component {
   static propTypes = {
     visible: PropTypes.bool,
     store: PropTypes.object,

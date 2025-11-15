@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .mode {
   display: flex;
@@ -17,7 +17,7 @@
     line-height: 32px;
 
     .title {
-      font-size: $size-normal;
+      font-size: variables.$size-normal;
       font-weight: 600;
     }
 
@@ -45,7 +45,7 @@
       border: 1px solid transparent;
       cursor: pointer;
 
-      @include ellipsis;
+      @include mixins.ellipsis;
 
       :global(.icon) {
         display: inline-block;
@@ -55,13 +55,13 @@
       }
 
       &:hover {
-        background-color: $btn-default-active-bg;
-        border-color: $btn-default-active-bg;
+        background-color: variables.$btn-default-active-bg;
+        border-color: variables.$btn-default-active-bg;
       }
 
       &.active {
-        background-color: $light;
-        border-color: $border-color;
+        background-color: variables.$light;
+        border-color: variables.$border-color;
         box-shadow: 0 4px 12px 0 rgba(36, 46, 66, 0.1);
       }
     }
@@ -80,7 +80,7 @@
     z-index: 2;
     height: 32px;
     padding: 6px 10px;
-    color: $white;
+    color: variables.$white;
     border-radius: 16px;
     background-color: #36435c;
 

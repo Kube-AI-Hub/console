@@ -25,7 +25,7 @@ import { Modal } from 'components/Base'
 import TimeInput from './time.input'
 import UrlInput from './url.input'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class AddRepoModal extends Component {
   static propTypes = {
@@ -94,13 +94,14 @@ export default class AddRepoModal extends Component {
       return 179
     }
     switch (unit) {
-      default:
       case 's':
         return value
       case 'm':
         return value * 60
       case 'h':
         return value * 60 * 60
+      default:
+        return value
     }
   }
 

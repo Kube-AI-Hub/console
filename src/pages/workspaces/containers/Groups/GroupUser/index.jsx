@@ -34,12 +34,13 @@ import { trigger } from 'utils/action'
 
 import User from './User'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('rootStore')
 @observer
 @trigger
-export default class GroupUser extends Component {
+class GroupUser extends Component {
   static propTypes = {
     group: PropTypes.string,
     enabledActions: PropTypes.array,

@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .deployment_codeResource {
   display: flex;
@@ -6,7 +6,7 @@
   li {
     border: none;
     border-radius: 4px;
-    background-color: $lightest;
+    background-color: variables.$lightest;
   }
   & > :first-child {
     width: 60%;

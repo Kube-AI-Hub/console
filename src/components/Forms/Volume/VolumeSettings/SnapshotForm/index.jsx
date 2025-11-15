@@ -34,10 +34,11 @@ import VolumeStore from 'stores/volume'
 import { safeParseJSON } from 'utils'
 import { ACCESS_MODES } from 'utils/constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class SanpshotForm extends Component {
+class SanpshotForm extends Component {
   snapshotStore = new SnapshotStore()
 
   snapshotClassStore = new SnapshotClassStore()

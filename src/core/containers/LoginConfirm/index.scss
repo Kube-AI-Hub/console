@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .logo {
   position: absolute;
@@ -20,12 +20,12 @@
   padding: 20px;
   background-color: #fff;
   border-radius: 4px;
-  box-shadow: $base-shadow;
+  box-shadow: variables.$base-shadow;
   box-sizing: border-box;
 
   :global {
     .form-item-label {
-      @include TypographySymbolText;
+      @include mixins.TypographySymbolText;
     }
 
     input.input {
@@ -38,7 +38,7 @@
   position: relative;
   font-weight: 600;
   font-size: 12px;
-  color: $text-color;
+  color: variables.$text-color;
   line-height: 20px;
   text-align: center;
 }
@@ -111,6 +111,6 @@
     position: absolute;
     top: -24px;
     right: 0;
-    color: $primary;
+    color: variables.$primary;
   }
 }

@@ -1,7 +1,7 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .snapshot {
-  background: $white;
+  background: variables.$white;
   padding: 12px;
   display: flex;
   cursor: pointer;
@@ -11,8 +11,8 @@
   }
 
   &.selected {
-    background: $dark-color07;
-    color: $white;
+    background: variables.$dark-color07;
+    color: variables.$white;
   }
 
   & > div {
@@ -25,7 +25,7 @@
   }
 
   p {
-    color: $dark-color01;
+    color: variables.$dark-color01;
   }
 }
 
@@ -40,5 +40,5 @@
 .snapshots {
   padding: 10px;
   border-radius: 4px;
-  background: $light-color01;
+  background: variables.$light-color01;
 }

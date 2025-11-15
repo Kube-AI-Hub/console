@@ -19,7 +19,7 @@
 import React from 'react'
 import { Select, Input } from '@kube-design/components'
 import { SCHEME_OPTIONS, SCHEME_REG } from 'utils/constants'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class SchemeInput extends React.Component {
   static defaultProps = {

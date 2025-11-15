@@ -24,10 +24,11 @@ import { observer } from 'mobx-react'
 import { Modal } from 'components/Base'
 import { Alert, Form, Input } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class withSonarQubeEnv extends React.Component {
+class withSonarQubeEnv extends React.Component {
   static propTypes = {
     name: PropTypes.string,
     edittingData: PropTypes.object,

@@ -18,7 +18,7 @@
 
 import React, { Component } from 'react'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ContainerPorts extends Component {
   render() {

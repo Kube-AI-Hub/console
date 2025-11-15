@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .input {
   max-width: 560px !important;
@@ -8,7 +8,7 @@
 .option {
   position: relative;
   width: 100%;
-  @include ellipsis;
+  @include mixins.ellipsis;
   & > span,
   & > img {
     display: inline-block;
@@ -20,6 +20,6 @@
 }
 
 .tip {
-  @include vertical-center;
+  @include mixins.vertical-center;
   right: 0;
 }

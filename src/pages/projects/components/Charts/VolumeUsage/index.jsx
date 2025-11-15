@@ -21,7 +21,7 @@ import PropTypes from 'prop-types'
 import classnames from 'classnames'
 import { getSuitableValue } from 'utils/monitoring'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const WIDTH = 100
 const HEIGHT = 100

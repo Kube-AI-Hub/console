@@ -25,7 +25,7 @@ import { Modal } from 'components/Base'
 import Confirm from 'components/Forms/Base/Confirm'
 import SecretSettings from 'components/Forms/Secret/SecretSettings'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class SecretEditModal extends React.Component {
   static propTypes = {

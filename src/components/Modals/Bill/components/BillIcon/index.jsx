@@ -19,7 +19,7 @@
 import React from 'react'
 import { Icon } from '@kube-design/components'
 import { Image } from 'components/Base'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const BillIcon = ({ type, name, isActive = false, icon, crumb = false }) => {
   const size = crumb ? 18 : type === 'openpitrixs' ? 35 : 40

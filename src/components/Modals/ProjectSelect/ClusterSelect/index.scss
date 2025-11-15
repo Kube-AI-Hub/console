@@ -1,17 +1,17 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .value {
   display: inline-block;
   padding: 1px 20px 1px 4px;
   width: 105px;
-  background-color: $dark-color07;
-  border-radius: 4px;  
+  background-color: variables.$dark-color07;
+  border-radius: 4px;
 
   .label {
     display: block;
-    @include ellipsis;
-    @include TypographySymbolText(#fff);
+    @include mixins.ellipsis;
+    @include mixins.TypographySymbolText(#fff);
   }
 }
 
@@ -20,6 +20,6 @@
 }
 
 .rightIcon {
-  @include vertical-center;
+  @include mixins.vertical-center;
   right: 4px;
 }

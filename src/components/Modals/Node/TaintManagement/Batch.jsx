@@ -34,7 +34,7 @@ import { Alert } from '@kube-design/components'
 import { Modal } from 'components/Base'
 import TaintInput from './TaintInput'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class TaintManagementModal extends React.Component {
   static propTypes = {

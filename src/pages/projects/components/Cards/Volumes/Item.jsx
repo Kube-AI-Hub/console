@@ -23,7 +23,7 @@ import { Link } from 'react-router-dom'
 
 import { Text } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const Card = ({ volume, prefix }) => {
   const description = t('STORAGE_CLASS_VALUE', {

@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   position: relative;
@@ -9,11 +9,11 @@
 .text {
   flex: 1;
   & > div:first-child {
-    @include TypographyTitleH6($dark-color07);
+    @include mixins.TypographyTitleH6(variables.$dark-color07);
   }
 
   & > div:last-child {
-    @include TypographyParagraph($dark-color01);
+    @include mixins.TypographyParagraph(variables.$dark-color01);
   }
 }
 
@@ -26,7 +26,7 @@
     overflow: hidden;
 
     & > div {
-      @include ellipsis;
+      @include mixins.ellipsis;
     }
   }
 }
@@ -41,7 +41,7 @@
   &:hover {
     .text {
       & > div {
-        color: $primary;
+        color: variables.$primary;
       }
     }
     .icon {

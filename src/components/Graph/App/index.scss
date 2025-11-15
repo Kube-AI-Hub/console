@@ -1,7 +1,7 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .title {
-  font-weight: $font-bold;
+  font-weight: variables.$font-bold;
   margin-bottom: 8px;
 }
 
@@ -11,10 +11,10 @@
 
 .group {
   padding: 12px;
-  border-radius: $border-radius;
+  border-radius: variables.$border-radius;
   background-color: #eff4f960;
   border: 1px dashed #e1e7ed;
-  transition: all $trans-speed ease-in-out;
+  transition: all variables.$trans-speed ease-in-out;
 
   &:hover {
     background-color: rgba(199, 222, 239, 0.5);
@@ -32,7 +32,7 @@
 }
 
 .pods {
-  font-weight: $font-bold;
+  font-weight: variables.$font-bold;
 
   img {
     margin-right: 10px;

@@ -1,11 +1,11 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   width: 30%;
   min-width: 356px;
   background-color: #fff;
-  border-radius: $border-radius;
-  border: 1px solid $border-color;
+  border-radius: variables.$border-radius;
+  border: 1px solid variables.$border-color;
   overflow: auto;
 }
 

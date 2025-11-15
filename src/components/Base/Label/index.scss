@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .label {
   display: inline-block;
@@ -7,11 +7,11 @@
   padding: 0 6px 0 2px;
   margin: 6px 4px;
   line-height: 20px;
-  color: $text-color;
+  color: variables.$text-color;
   font-weight: 600;
-  background-color: $light;
+  background-color: variables.$light;
   border-radius: 3px;
-  @include break-all;
+  @include mixins.break-all;
 }
 
 .name {
@@ -19,9 +19,9 @@
   padding: 0 6px;
   margin: 2px 6px 2px 0;
   line-height: 16px;
-  color: $white;
+  color: variables.$white;
   font-weight: 500;
-  text-shadow: $head-shadow;
+  text-shadow: variables.$head-shadow;
   border-radius: 1px;
-  background-color: $dark-color06;
+  background-color: variables.$dark-color06;
 }

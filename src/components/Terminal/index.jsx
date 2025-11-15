@@ -26,8 +26,9 @@ const ContainerTerminal = lazy(() =>
 
 const BG_COLOR = '#181d28'
 
+export default
 @observer
-export default class SessionTerminal extends Component {
+class SessionTerminal extends Component {
   get url() {
     return `${getWebSocketProtocol(window.location.protocol)}://${
       window.location.host

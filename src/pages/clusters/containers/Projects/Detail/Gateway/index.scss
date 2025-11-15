@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .empty {
   padding: 32px 0;
@@ -9,14 +9,14 @@
     display: inline-block;
     padding: 10px;
     border-radius: 100px 0 100px 100px;
-    background-color: $bg-color;
+    background-color: variables.$bg-color;
   }
 
   .text {
     margin-top: 12px;
     & > div {
-      font-size: $size-normal;
-      font-weight: $font-bold;
+      font-size: variables.$size-normal;
+      font-weight: variables.$font-bold;
       line-height: 20px;
     }
 

@@ -1,7 +1,7 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .modal {
-  background: $light-color01;
+  background: variables.$light-color01;
   .body {
     position: static;
     top: 0;

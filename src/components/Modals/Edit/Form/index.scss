@@ -1,16 +1,16 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .content {
   padding: 12px;
-  background-color: $white;
+  background-color: variables.$white;
 }
 
 .container {
   display: flex;
   padding: 12px;
   border-radius: 4px;
-  background-color: $card-bg-color;
+  background-color: variables.$card-bg-color;
 }
 
 .tabs {
@@ -62,10 +62,10 @@
     p {
       width: 100%;
       padding-right: 10px;
-      color: $third-text-color;
+      color: variables.$third-text-color;
       font-weight: 500;
       pointer-events: none;
-      @include ellipsis;
+      @include mixins.ellipsis;
     }
 
     .updated {
@@ -84,17 +84,17 @@
   padding: 12px;
   padding-bottom: 38px;
   border-radius: 4px;
-  background-color: $white;
-  border: 1px solid $light-color03;
+  background-color: variables.$white;
+  border: 1px solid variables.$light-color03;
   overflow: hidden;
 
   &Actions {
     bottom: 0;
     transform: translateY(100%);
-    transition: all $trans-speed;
+    transition: all variables.$trans-speed;
 
     &.active {
-      transform: translateY(0)
+      transform: translateY(0);
     }
   }
 }
@@ -110,8 +110,8 @@
 .footer {
   text-align: right;
   padding: 12px 20px;
-  background-color: $light;
-  border-radius: 0 0 $border-radius $border-radius;
+  background-color: variables.$light;
+  border-radius: 0 0 variables.$border-radius variables.$border-radius;
 }
 
 .confirm {

@@ -38,7 +38,7 @@ import ColumeInput from '../../FormInput/Template/ColumeInput'
 import FormItemContainer from '../ItemContianer'
 import Field from '../Field'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const formatOpts = Object.keys(unitTransformMap).map(format => ({
   label: format,

@@ -1,10 +1,10 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .item {
   display: flex;
   padding: 12px;
 
-  background-color: $light-color01;
+  background-color: variables.$light-color01;
 
   & + .item {
     margin-top: 8px;

@@ -26,7 +26,7 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { PATTERN_ALIAS_NAME, PATTERN_NAME } from 'utils/constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class CodeRepoCreate extends React.Component {
   constructor(props) {

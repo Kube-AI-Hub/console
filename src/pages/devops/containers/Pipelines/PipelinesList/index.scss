@@ -1,9 +1,9 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .pipelineSuccessNumber {
   font-size: 20px;
   font-weight: bold;
-  color: $green;
+  color: variables.$green;
   margin-right: 8px;
   vertical-align: unset !important;
 }

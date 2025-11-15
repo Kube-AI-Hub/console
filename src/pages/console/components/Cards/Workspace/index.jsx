@@ -21,7 +21,7 @@ import React from 'react'
 import { Button, Icon, Columns, Column } from '@kube-design/components'
 import { getLocalTime } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class WorkspaceCard extends React.Component {
   handleClick = () => {

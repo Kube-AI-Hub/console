@@ -28,7 +28,7 @@ import MAPPER from 'utils/object.mapper'
 import BuilderInfo from './BuilderInfo'
 import RerunModal from './RerunModal'
 import Log from './log'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class S2IBuilder extends React.Component {
   constructor(props) {

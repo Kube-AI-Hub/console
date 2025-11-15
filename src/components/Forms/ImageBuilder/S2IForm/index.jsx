@@ -29,7 +29,7 @@ import ToggleView from 'components/ToggleView'
 
 import TemplateSelect from './TemplateSelect'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class S2IForm extends React.Component {
   constructor(props) {

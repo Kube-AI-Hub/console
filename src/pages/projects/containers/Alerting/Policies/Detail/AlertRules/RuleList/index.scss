@@ -1,11 +1,11 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .header {
   display: flex;
   padding: 12px;
   padding-bottom: 20px;
-  background-color: $th-bg-color;
+  background-color: variables.$th-bg-color;
 
   .search {
     width: 100%;
@@ -19,7 +19,7 @@
         margin-left: 12px;
 
         &:hover {
-          background-color: $bg-color;
+          background-color: variables.$bg-color;
         }
       }
     }
@@ -29,13 +29,13 @@
 .item {
   position: relative;
   padding: 4px 12px;
-  background: $light-color01;
+  background: variables.$light-color01;
 
   .content {
     padding: 12px;
-    border: 1px solid $light-color06;
+    border: 1px solid variables.$light-color06;
     border-radius: 4px;
-    background: $white;
+    background: variables.$white;
     display: flex;
     align-items: center;
     cursor: pointer;
@@ -98,7 +98,7 @@
           font-size: 12px;
           line-height: 20px;
           padding: 0px 4px;
-          background: $light-color04;
+          background: variables.$light-color04;
           border-radius: 2px;
         }
       }
@@ -146,7 +146,7 @@
 
     :global {
       .icon {
-        transition: all $trans-speed;
+        transition: all variables.$trans-speed;
       }
     }
 
@@ -154,7 +154,7 @@
       font-weight: 600;
       font-size: 12px;
       line-height: 20px;
-      color: $dark-color07;
+      color: variables.$dark-color07;
       overflow: hidden;
       max-width: 369px;
       white-space: nowrap;
@@ -165,13 +165,13 @@
       font-weight: 400;
       font-size: 12px;
       line-height: 20px;
-      color: $dark-color01;
+      color: variables.$dark-color01;
     }
   }
 
   .expanded {
-    background: $dark-color07;
-    border: 1px solid $dark-color07;
+    background: variables.$dark-color07;
+    border: 1px solid variables.$dark-color07;
 
     :global {
       .kubed-icon-chevron-down {
@@ -180,11 +180,11 @@
     }
 
     .title {
-      color: $white;
+      color: variables.$white;
     }
 
     .desc {
-      color: $light-color01;
+      color: variables.$light-color01;
     }
   }
 }
@@ -196,15 +196,16 @@
   top: calc(100% - 12px);
   left: 16px;
   z-index: 100;
-  background: $white;
-  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25), 0px 1px 0px $dark-color01,
-    -1px 0px 0px $dark-color01, 1px 0px 0px $dark-color01;
+  background: variables.$white;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25),
+    0px 1px 0px variables.$dark-color01, -1px 0px 0px variables.$dark-color01,
+    1px 0px 0px variables.$dark-color01;
   border-radius: 0px 0px 4px 4px;
   padding: 12px;
 
   .ms_content {
     padding: 8px 12px;
-    background: $light-color01;
+    background: variables.$light-color01;
     border-radius: 4px;
     font-weight: 400;
     font-size: 12px;
@@ -220,12 +221,12 @@
     }
 
     .label {
-      color: $dark-color01;
+      color: variables.$dark-color01;
       margin-right: 4px;
     }
 
     .value {
-      color: $dark-color06;
+      color: variables.$dark-color06;
       margin-right: 4px;
     }
 
@@ -248,71 +249,71 @@
 .status_disabled {
   &::before,
   &::after {
-    background: $dark-color01;
+    background: variables.$dark-color01;
   }
 }
 
 .status_pending {
   &::before,
   &::after {
-    background: $yellow-color03;
+    background: variables.$yellow-color03;
   }
 }
 
 .status_firing {
   &::before,
   &::after {
-    background: $red-color03;
+    background: variables.$red-color03;
   }
 }
 
 .status_inactive {
   &::before,
   &::after {
-    background: $green-color03;
+    background: variables.$green-color03;
   }
 }
 
 .info_disabled {
   svg {
-    color: $white;
-    fill: $dark-color01;
+    color: variables.$white;
+    fill: variables.$dark-color01;
   }
 }
 
 .info_pending {
   svg {
-    color: $white;
-    fill: $yellow-color03;
+    color: variables.$white;
+    fill: variables.$yellow-color03;
   }
 }
 
 .info_firing {
   svg {
-    color: $white;
-    fill: $red-color03;
+    color: variables.$white;
+    fill: variables.$red-color03;
   }
 }
 
 .info_inactive {
   svg {
-    color: $white;
-    fill: $green-color03;
+    color: variables.$white;
+    fill: variables.$green-color03;
   }
 }
 
 .critical {
-  background: $red-color03 !important;
-  color: $white;
+  background: variables.$red-color03 !important;
+  color: variables.$white;
 }
 
 .error {
-  background: $yellow-color03 !important;
-  color: $white;
+  background: variables.$yellow-color03 !important;
+  color: variables.$white;
 }
 
 .footer {
-  background: $light-color01;
+  background: variables.$light-color01;
   padding: 6px 20px;
   padding-top: 8px;
 }
@@ -333,7 +334,7 @@
       font-weight: 600;
       font-size: 12px;
       line-height: 20px;
-      color: $dark-color06;
+      color: variables.$dark-color06;
       margin-right: 4px;
     }
   }
@@ -341,7 +342,7 @@
   .gap {
     width: 1px;
     height: 12px;
-    background: $light-color03;
+    background: variables.$light-color03;
     margin: 0px 12px;
   }
 }
@@ -357,7 +358,7 @@
     font-weight: 600;
     font-size: 12px;
     line-height: 20px;
-    color: $dark-color04;
+    color: variables.$dark-color04;
     padding: 0 12px;
     display: flex;
     justify-content: center;
@@ -365,7 +366,7 @@
 
     &:hover {
       cursor: pointer;
-      background: $light-color02;
+      background: variables.$light-color02;
     }
   }
 }

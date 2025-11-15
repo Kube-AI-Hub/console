@@ -22,7 +22,7 @@ import { toJS } from 'mobx'
 import { Form } from '@kube-design/components'
 import ComponentSelect from './ComponentSelect'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 import Title from '../Title'
 

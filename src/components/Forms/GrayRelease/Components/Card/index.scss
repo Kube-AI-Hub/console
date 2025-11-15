@@ -1,12 +1,12 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .card {
   position: relative;
   padding: 20px 24px;
   border-radius: 4px;
   background-color: #ffffff;
-  border: solid 1px $light-color03;
+  border: solid 1px variables.$light-color03;
 
   .text {
     display: inline-block;
@@ -26,7 +26,7 @@
   .right {
     right: 12px;
     min-width: 96px;
-    @include vertical-center;
+    @include mixins.vertical-center;
   }
 
   & + .card {
@@ -37,7 +37,7 @@
 .icon {
   position: relative;
   display: inline-block;
-  
+
   .istio {
     display: block;
     position: absolute;

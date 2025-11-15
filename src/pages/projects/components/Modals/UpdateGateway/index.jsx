@@ -24,10 +24,11 @@ import { Icon } from '@kube-design/components'
 
 import { observer } from 'mobx-react'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class UpdateGatewayModal extends React.Component {
+class UpdateGatewayModal extends React.Component {
   static propTypes = {
     detail: PropTypes.object,
     visible: PropTypes.bool,

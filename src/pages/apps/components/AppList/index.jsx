@@ -25,7 +25,7 @@ import { Link } from 'react-router-dom'
 import AppCard from 'components/Cards/App'
 import { stringify } from 'qs'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class AppList extends React.PureComponent {
   static propTypes = {

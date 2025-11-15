@@ -27,7 +27,7 @@ import {
 } from '@kube-design/components'
 import { inject, observer } from 'mobx-react'
 
-const TableWrapper = (Table, setting = { pagination: true }) => {
+const RankTableWrapper = (Table, setting = { pagination: true }) => {
   @inject('rootStore')
   @observer
   class HOC extends React.Component {
@@ -70,4 +70,4 @@ const TableWrapper = (Table, setting = { pagination: true }) => {
   return HOC
 }
 
-export default TableWrapper
+export default RankTableWrapper

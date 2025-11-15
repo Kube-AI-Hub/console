@@ -1,17 +1,17 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .item {
   display: flex;
   justify-content: space-between;
 
   padding: 12px;
-  background-color:$white;
+  background-color: variables.$white;
   margin-bottom: 5px;
 }
 
 .rowTitle {
-  @include TypographyTitleH6($dark-color07);
+  @include mixins.TypographyTitleH6(variables.$dark-color07);
   line-height: 20px;
 
   padding: 12px;

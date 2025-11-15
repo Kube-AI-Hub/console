@@ -1,11 +1,11 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .card {
   padding: 20px 24px;
-  border-radius: $border-radius;
+  border-radius: variables.$border-radius;
   background-color: #ffffff;
   box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.06);
-  transition: all $trans-speed ease-in-out;
+  transition: all variables.$trans-speed ease-in-out;
 
   &:hover {
     box-shadow: 0 6px 16px 0 rgba(33, 43, 54, 0.2);
@@ -23,10 +23,10 @@
 
     .h6 {
       line-height: 1.71;
-      font-family: $font-family-id;
+      font-family: variables.$font-family-id;
 
       p {
-        font-size: $size-small;
+        font-size: variables.$size-small;
         font-weight: normal;
       }
     }

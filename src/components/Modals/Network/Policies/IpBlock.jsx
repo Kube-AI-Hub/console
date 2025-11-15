@@ -33,11 +33,12 @@ import ServiceStore from 'stores/service'
 import { generateId } from 'utils'
 import { PATTERN_IP, PATTERN_IP_MASK } from 'utils/constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('projectStore')
 @observer
-export default class NetworkPoliciesIpBlockModal extends React.Component {
+class NetworkPoliciesIpBlockModal extends React.Component {
   constructor(props) {
     super(props)
     this.projectStore = props.projectStore

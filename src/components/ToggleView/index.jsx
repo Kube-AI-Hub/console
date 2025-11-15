@@ -21,7 +21,7 @@ import { PropTypes } from 'prop-types'
 import classNames from 'classnames'
 import { Icon } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ToggleView extends React.Component {
   static propTypes = {

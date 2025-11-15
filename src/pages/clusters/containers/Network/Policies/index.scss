@@ -1,11 +1,11 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .subtitle {
   margin-bottom: 8px;
   font-weight: 600;
   font-size: 12px;
   line-height: 1.67;
-  color: $dark-color06;
+  color: variables.$dark-color06;
 }
 
 .onBtn {
@@ -13,6 +13,6 @@
   color: #fff;
   &:hover {
     background-color: #324558;
-    color: $green-color03;
+    color: variables.$green-color03;
   }
 }

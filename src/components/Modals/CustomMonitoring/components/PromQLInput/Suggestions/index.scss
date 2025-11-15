@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   min-height: 100px;
@@ -13,7 +13,7 @@
   &Title {
     padding: 8px;
     user-select: none;
-    @include TypographySymbolText($dark-color01)
+    @include mixins.TypographySymbolText(variables.$dark-color01);
   }
 
   .item {
@@ -21,13 +21,13 @@
     cursor: pointer;
 
     &:hover {
-      background-color: $dark-color06;
+      background-color: variables.$dark-color06;
     }
 
     :global {
       .highlight {
-        color: $primary;
-        font-weight: $font-bold;
+        color: variables.$primary;
+        font-weight: variables.$font-bold;
         text-decoration: underline;
       }
     }
@@ -35,7 +35,7 @@
 
   :global {
     .is-focus {
-      background-color: $dark-color06;
+      background-color: variables.$dark-color06;
     }
   }
 }

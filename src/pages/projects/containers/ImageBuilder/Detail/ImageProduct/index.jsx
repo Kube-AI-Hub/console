@@ -21,7 +21,7 @@ import { observer } from 'mobx-react'
 
 import { Card } from 'components/Base'
 import ImageArtifactsCard from 'projects/components/Cards/ImageArtifacts'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @observer
 class ImageArtifacts extends React.Component {

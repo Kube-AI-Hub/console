@@ -19,7 +19,7 @@
 import React from 'react'
 import { get, isNaN } from 'lodash'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const CustomToolTip = (props = {}) => {
   if (!props.active) return null

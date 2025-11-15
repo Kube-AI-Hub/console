@@ -1,10 +1,10 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .title {
   margin-bottom: 8px;
   line-height: 1.67;
-  color: $second-text-color;
+  color: variables.$second-text-color;
 }
 
 .default {
@@ -13,7 +13,7 @@
     flex-direction: column;
     flex-wrap: wrap;
     height: 160px;
-    font-size: $body-size;
+    font-size: variables.$body-size;
 
     li {
       width: 33.3333%;
@@ -23,11 +23,11 @@
       cursor: pointer;
 
       &.cur {
-        color: $primary;
+        color: variables.$primary;
       }
 
       &:hover {
-        color: $primary;
+        color: variables.$primary;
       }
     }
   }
@@ -36,7 +36,7 @@
 .custom {
   :global {
     .form-item {
-      font-size: $body-size;
+      font-size: variables.$body-size;
     }
   }
 

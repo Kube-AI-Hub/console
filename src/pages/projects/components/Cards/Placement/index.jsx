@@ -27,10 +27,11 @@ import ClusterTitle from 'components/Clusters/ClusterTitle'
 import ClusterStore from 'stores/cluster'
 import FederatedStore from 'stores/federated'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class Placement extends Component {
+class Placement extends Component {
   fedStore = new FederatedStore({ module: this.props.module })
 
   clusterStore = new ClusterStore()

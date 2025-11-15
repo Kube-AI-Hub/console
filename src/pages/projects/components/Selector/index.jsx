@@ -22,7 +22,7 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { getDomTitle, showNameAndAlias } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Selector extends React.Component {
   static propTypes = {

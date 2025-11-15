@@ -21,7 +21,7 @@ import React from 'react'
 import { RadioGroup } from '@kube-design/components'
 import { ACCESS_MODES } from 'utils/constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const Card = ({ name, value }) => (
   <div className={styles.accessMode}>

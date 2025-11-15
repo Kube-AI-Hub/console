@@ -21,7 +21,7 @@ import React from 'react'
 import { Form, Input } from '@kube-design/components'
 import { UrlInput } from 'components/Inputs'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class BaseInfo extends React.Component {
   render() {

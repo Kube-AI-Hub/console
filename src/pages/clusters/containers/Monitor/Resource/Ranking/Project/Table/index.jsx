@@ -24,9 +24,10 @@ import { showNameAndAlias } from 'utils'
 
 import { getSuitableValue } from 'utils/monitoring'
 
+export default
 @inject('rootStore')
 @observer
-export default class ProjectUsageRank extends React.Component {
+class ProjectUsageRank extends React.Component {
   IconWidth = 40
 
   rankTdWidth = 124
@@ -58,6 +59,52 @@ export default class ProjectUsageRank extends React.Component {
           })}
           to={`${this.prefix}/${namespace}`}
         />
+      ),
+    },
+    {
+      sort_metric: 'namespace_vgpu_usage',
+      key: 'gpu',
+      width: this.rankTdWidth,
+      title: <div>{t('GPU_USAGE')}</div>,
+      render: node => (
+        <div>
+          <h3>{getSuitableValue(node.namespace_vgpu_usage, 'gpu', '-')}</h3>
+          <div>
+            {t('QUOTA_VALUE', {
+              value: getSuitableValue(
+                node.namespace_vgpu_limit_hard,
+                'gpu',
+                '-'
+              ),
+            })}
+          </div>
+        </div>
+      ),
+    },
+    {
+      sort_metric: 'namespace_vgpu_memory_usage',
+      width: this.rankTdWidth,
+      title: <div>{t('GPU_MEMORY_USAGE')}</div>,
+      key: 'gpu_memory',
+      render: node => (
+        <div>
+          <h3>
+            {getSuitableValue(
+              node.namespace_vgpu_memory_usage,
+              'gpu_memory',
+              '-'
+            )}
+          </h3>
+          <div>
+            {t('QUOTA_VALUE', {
+              value: getSuitableValue(
+                node.namespace_vgpu_memory_limit_hard,
+                'gpu_memory',
+                '-'
+              ),
+            })}
+          </div>
+        </div>
       ),
     },
     {

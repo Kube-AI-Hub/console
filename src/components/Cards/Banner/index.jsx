@@ -29,7 +29,7 @@ import Tip from './Tip'
 import Navs from './Navs'
 import Tabs from './Tabs'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Banner extends React.Component {
   static propTypes = {

@@ -22,7 +22,7 @@ import PropTypes from 'prop-types'
 import classnames from 'classnames'
 import { get } from 'lodash'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Nav extends React.Component {
   static propTypes = {

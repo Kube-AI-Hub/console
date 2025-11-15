@@ -23,7 +23,7 @@ import { getAreaChartOps } from 'utils/monitoring'
 
 import { SimpleArea } from 'components/Charts'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class LineChart extends React.Component {
   static propTypes = {

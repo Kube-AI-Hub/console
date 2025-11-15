@@ -23,7 +23,7 @@ import { throttle } from 'lodash'
 
 import { Tooltip } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Slider extends React.Component {
   static propTypes = {

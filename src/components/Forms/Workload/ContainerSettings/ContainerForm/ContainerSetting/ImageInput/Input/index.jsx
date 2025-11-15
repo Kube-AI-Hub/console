@@ -20,7 +20,7 @@ import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import { isFunction, omit, noop } from 'lodash'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 class Input extends PureComponent {
   static propTypes = {

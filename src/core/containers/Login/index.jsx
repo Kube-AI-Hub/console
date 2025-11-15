@@ -31,7 +31,7 @@ import {
 import { get } from 'lodash'
 
 import { Base64 } from 'js-base64'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 function encrypt(salt, str) {
   return mix(salt, Base64.encode(str))
@@ -53,9 +53,10 @@ function mix(salt, str) {
   return `${Base64.encode(prefix.join(''))}@${ret.join('')}`
 }
 
+export default
 @inject('rootStore')
 @observer
-export default class Login extends Component {
+class Login extends Component {
   state = {
     formData: {},
     isSubmmiting: false,
@@ -105,6 +106,12 @@ export default class Login extends Component {
               errorCount: resp.errorCount,
             })
           }
+        }).catch(err => {
+          this.setState({
+            isSubmmiting: false,
+            errorMessage: err.message || 'LOGIN_FAILED',
+            errorCount: 0,
+          })
         })
     } else {
       this.props.rootStore
@@ -121,6 +128,12 @@ export default class Login extends Component {
               errorCount: resp.errorCount,
             })
           }
+        }).catch(err => {
+          this.setState({
+            isSubmmiting: false,
+            errorMessage: err.message || 'LOGIN_FAILED',
+            errorCount: 0,
+          })
         })
     }
   }

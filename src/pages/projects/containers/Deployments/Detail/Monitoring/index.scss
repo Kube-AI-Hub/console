@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .item {
   position: relative;
@@ -12,7 +12,7 @@
     font-weight: 600;
 
     &:hover {
-      color: $green;
+      color: variables.$green;
     }
   }
 }

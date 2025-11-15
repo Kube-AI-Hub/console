@@ -1,12 +1,12 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   cursor: pointer;
 
   &:hover {
     a {
-      color: $primary;
+      color: variables.$primary;
     }
   }
 }

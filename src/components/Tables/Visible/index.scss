@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .table {
   display: flex;
@@ -16,7 +16,7 @@
   display: flex;
   height: 42px;
   line-height: 42px;
-  background-color: $bg-color;
+  background-color: variables.$bg-color;
   font-weight: 600;
   position: relative;
   border-bottom: solid 1px #eee;
@@ -36,7 +36,7 @@
           padding: 12px 8px;
           font-weight: bold;
           h3 {
-            color: $light-color08;
+            color: variables.$light-color08;
           }
         }
         .visibleItem {
@@ -48,7 +48,7 @@
           }
           &:hover {
             border-radius: 4px;
-            background-color: $bg-color;
+            background-color: variables.$bg-color;
           }
         }
       }
@@ -60,10 +60,10 @@
   display: flex;
   line-height: 32px;
   &:nth-child(2n) {
-    background-color: $lightest;
+    background-color: variables.$lightest;
   }
   &:hover {
-    background-color: $lightest;
+    background-color: variables.$lightest;
   }
   @at-root {
     .bodyItems {

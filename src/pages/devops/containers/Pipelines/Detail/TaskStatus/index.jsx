@@ -35,11 +35,12 @@ import { getPipelineStatus } from 'utils/status'
 import PipelineContent from 'devops/components/PipelineStatus'
 
 import PipelineLog from '../PipelineLogDialog'
-import style from './index.scss'
+import * as style from './index.scss'
 
+export default
 @inject('rootStore', 'detailStore')
 @observer
-export default class TaskStatus extends React.Component {
+class TaskStatus extends React.Component {
   constructor(props) {
     super(props)
     this.state = {

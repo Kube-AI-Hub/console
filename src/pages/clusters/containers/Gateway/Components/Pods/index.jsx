@@ -40,15 +40,18 @@ import { joinSelector } from 'utils'
 import { Panel } from 'components/Base'
 import PodItem from './Item'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const MetricTypes = {
+  gpu: 'ingress_request_gpu_usage',
+  gpu_memory: 'ingress_request_gpu_memory_bytes',
   cpu: 'ingress_request_cpu_usage',
   memory: 'ingress_request_memory_bytes',
 }
 
+export default
 @observer
-export default class PodsCard extends React.Component {
+class PodsCard extends React.Component {
   static propTypes = {
     prefix: PropTypes.string,
     title: PropTypes.string,

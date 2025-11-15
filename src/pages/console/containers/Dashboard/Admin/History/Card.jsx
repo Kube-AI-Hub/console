@@ -23,7 +23,7 @@ import { Link } from 'react-router-dom'
 import { getDisplayNameNew as getDisplayName } from 'utils'
 import { CLUSTER_GROUP_TAG_TYPE, CLUSTER_PROVIDER_ICON } from 'utils/constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Card extends Component {
   getIcon() {

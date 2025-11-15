@@ -29,7 +29,7 @@ import {
 } from './promql'
 import History from './history'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class PromQLInput extends Component {
   static defaultProps = {

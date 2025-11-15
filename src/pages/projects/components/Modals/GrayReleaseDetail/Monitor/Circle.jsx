@@ -23,7 +23,7 @@ import { Icon, Tooltip } from '@kube-design/components'
 import { PieChart } from 'components/Charts'
 import { getSuitableValue } from 'utils/monitoring'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class CircleChart extends React.Component {
   static propTypes = {

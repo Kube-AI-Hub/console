@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   padding: 12px 0;
@@ -7,7 +7,7 @@
 .header {
   padding: 10px;
   margin-top: -12px;
-  border-bottom: 1px solid $border-color;
+  border-bottom: 1px solid variables.$border-color;
 }
 
 .timeSelect {

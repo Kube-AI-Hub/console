@@ -1,18 +1,18 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .select {
   width: 250px;
   margin-right: 12px;
 
   input::placeholder {
-    color: $text-color;
+    color: variables.$text-color;
     font-weight: bold;
   }
 }
 
 .option {
-  @include ellipsis;
+  @include mixins.ellipsis;
   & > span,
   & > img {
     display: inline-block;

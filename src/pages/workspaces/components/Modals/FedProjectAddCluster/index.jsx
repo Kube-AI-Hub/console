@@ -23,7 +23,7 @@ import { computed } from 'mobx'
 import { Modal } from 'components/Base'
 import { set, uniqBy, get } from 'lodash'
 import ClusterTitle from 'components/Clusters/ClusterTitle'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class EditBasicInfoModal extends React.Component {
   clustersList = get(this.props.formTemplate, 'spec.placement.clusters', [])

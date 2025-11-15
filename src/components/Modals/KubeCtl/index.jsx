@@ -29,11 +29,12 @@ import TerminalStore from 'stores/terminal'
 import ClusterStore from 'stores/cluster'
 import { CLUSTER_PROVIDER_ICON } from 'utils/constants'
 import { observable } from 'mobx'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @fullScreen
 @observer
-export default class KubeCtlModal extends React.Component {
+class KubeCtlModal extends React.Component {
   state = {
     cluster: this.props.cluster || '',
   }

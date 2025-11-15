@@ -24,7 +24,7 @@ import { Modal, Switch } from 'components/Base'
 import Form from './Form'
 import Code from './Code'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class CreateModal extends React.Component {
   static propTypes = {

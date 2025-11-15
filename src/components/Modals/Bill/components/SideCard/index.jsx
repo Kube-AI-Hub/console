@@ -6,10 +6,11 @@ import { saveAs } from 'file-saver'
 import { clone, isEmpty, isUndefined, last, get } from 'lodash'
 import { getRetentionDay } from 'utils/meter'
 import SideCardItem from './item'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class SideContainer extends React.Component {
+class SideContainer extends React.Component {
   @observable
   billReportList = []
 

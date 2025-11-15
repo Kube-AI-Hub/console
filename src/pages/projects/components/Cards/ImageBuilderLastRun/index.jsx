@@ -23,7 +23,7 @@ import { get, isArray } from 'lodash'
 
 import { getLanguageName, parseUrl, formatSize } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class BuilderInfo extends React.Component {
   pathAddCluster = (path, cluster) => {

@@ -23,7 +23,7 @@ import { Link } from 'react-router-dom'
 
 import { Image } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Avatar extends React.Component {
   static propTypes = {
@@ -31,7 +31,7 @@ export default class Avatar extends React.Component {
     avatarClass: PropTypes.string,
     iconLetter: PropTypes.string,
     iconSize: PropTypes.number,
-    title: PropTypes.string,
+    title: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
     desc: PropTypes.string,
     to: PropTypes.string,
     onClick: PropTypes.func,

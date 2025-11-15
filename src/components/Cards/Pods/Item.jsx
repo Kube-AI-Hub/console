@@ -31,7 +31,7 @@ import { TinyArea } from 'components/Charts'
 import ContainerItem from 'components/Cards/Containers/Item'
 import StatusReason from 'projects/components/StatusReason'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class PodItem extends React.PureComponent {
   static propTypes = {
@@ -128,6 +128,22 @@ export default class PodItem extends React.PureComponent {
   }
 
   getMonitoringCfgs = metrics => [
+    {
+      type: 'gpu',
+      title: 'GPU',
+      unitType: 'gpu',
+      legend: ['USED'],
+      data: [metrics.gpu],
+      bgColor: 'transparent',
+    },
+    {
+      type: 'gpu_memory',
+      title: 'GPU_MEMORY',
+      unitType: 'gpu_memory',
+      legend: ['USED'],
+      data: [metrics.gpu_memory],
+      bgColor: 'transparent',
+    },
     {
       type: 'cpu',
       title: 'CPU',

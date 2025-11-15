@@ -37,10 +37,11 @@ import DetailPage from 'projects/containers/Base/Detail'
 
 import getRoutes from './routes'
 
+export default
 @inject('rootStore')
 @observer
 @trigger
-export default class ServiceDetail extends React.Component {
+class ServiceDetail extends React.Component {
   store = new ServiceStore()
 
   serviceMonitorStore = new ServiceMonitorStore()

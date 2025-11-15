@@ -31,7 +31,7 @@ import GatewayStore from 'stores/gateway'
 import WorkloadStore from 'stores/workload'
 import ConfigMapStore from 'stores/configmap'
 import { getAllYAMLValue } from 'utils/yaml'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 class ResourceStatus extends React.Component {
   gateway = new GatewayStore()

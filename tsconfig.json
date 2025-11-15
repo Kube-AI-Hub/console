@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["dom", "es5", "es2017", "es2020.promise", "ES2021", "DOM.Iterable"],
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "noEmit": false,
+    "paths": {
+      "@ks-console/*": ["packages/*/src"]
+    },
+    "allowJs": true,
+    "jsx": "react",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "target": "es6",
+    "experimentalDecorators": true,
+    "useDefineForClassFields": true,
+    "outDir": "./dist",
+  },
+  "include": ["src/**/*", "custom.d.ts"],
+}

@@ -22,10 +22,11 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { showNameAndAlias } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class BaseInfo extends React.Component {
+class BaseInfo extends React.Component {
   static propTypes = {
     detail: PropTypes.object,
     versionName: PropTypes.string,

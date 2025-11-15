@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .pipelineCard {
   width: 256px;
@@ -21,7 +21,7 @@
   color: #ffffff;
   border-radius: 16px;
   background-color: #242e42;
-  @include ellipsis;
+  @include mixins.ellipsis;
 }
 
 .pipelineCard__title-error {
@@ -60,8 +60,8 @@
   line-height: 20px;
   border-radius: 4px;
   margin-bottom: 8px;
-  background-color: $lightest;
-  @include break-all;
+  background-color: variables.$lightest;
+  @include mixins.break-all;
 
   & > .pipelineCard__item {
     margin-bottom: 8px;
@@ -105,7 +105,7 @@
     color: #242e42;
 
     & > div {
-      @include ellipsis;
+      @include mixins.ellipsis;
     }
   }
 
@@ -140,7 +140,7 @@
   }
 
   &:hover {
-    background-color: $bg-color;
+    background-color: variables.$bg-color;
     border: 1px dashed #329dce;
     border-color: #51a6d3;
   }
@@ -150,7 +150,7 @@
   margin-top: 12px;
   padding: 5px 5px 5px 22px;
   height: 32px;
-  color: $dark-color06;
+  color: variables.$dark-color06;
   font-weight: bolder;
   background-color: transparent;
   border-radius: 4px;
@@ -166,7 +166,7 @@
 
   &:hover {
     border: 1px dashed #329dce;
-    background-color: $bg-color;
+    background-color: variables.$bg-color;
   }
 }
 

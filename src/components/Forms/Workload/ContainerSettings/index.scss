@@ -1,11 +1,11 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 @mixin tipFont {
   font-family: 'PingFang SC', sans-serif;
   font-style: normal;
   font-size: 12px;
   line-height: 20px;
-  color: $white;
+  color: variables.$white;
 }
 
 .formTip {

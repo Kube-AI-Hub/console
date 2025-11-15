@@ -27,7 +27,7 @@ import { getDisplayName } from 'utils'
 import { Modal } from 'components/Base'
 import EmptyList from 'components/Cards/EmptyList'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ServiceDeleteModal extends React.Component {
   static propTypes = {

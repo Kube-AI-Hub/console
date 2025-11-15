@@ -24,9 +24,9 @@ import { Bar } from 'components/Base'
 import { cpuFormat, memoryFormat } from 'utils'
 import { ICON_TYPES } from 'utils/constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
-const transformName = (text = '', type) =>
+const transformName = (text = '', type = '') =>
   type === 'userDefined' && !text.includes('gpu')
     ? text
     : t(text.replace(/[. ]/g, '_').toUpperCase())

@@ -1,11 +1,11 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .container {
   position: relative;
   flex-grow: 1;
   overflow: hidden;
   background-image: url('/assets/pipelineBg.svg');
-  background-color: $bg-color;
+  background-color: variables.$bg-color;
   background-repeat: repeat;
   cursor: grab;
   touch-action: none;
@@ -74,7 +74,7 @@
   height: 16px;
   text-align: center;
   color: #54657f;
-  font-weight: $font-bold;
+  font-weight: variables.$font-bold;
   border-radius: 3px;
   user-select: none;
 

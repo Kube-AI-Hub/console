@@ -22,7 +22,7 @@ import { get, isEmpty } from 'lodash'
 
 import { Button, Icon } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Card extends React.PureComponent {
   static propTypes = {

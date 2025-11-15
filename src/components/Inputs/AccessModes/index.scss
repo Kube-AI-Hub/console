@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .accessModeWrapper {
   :global {
@@ -7,9 +7,9 @@
       margin-top: 4px;
       margin-right: 20px !important;
       padding: 12px 20px;
-      border: 1px solid $border-color;
+      border: 1px solid variables.$border-color;
       border-radius: 4px;
-      transition: all $trans-speed ease-in-out;
+      transition: all variables.$trans-speed ease-in-out;
 
       &:last-of-type {
         margin-right: 0 !important;
@@ -21,7 +21,8 @@
         transform: translateY(-50%);
       }
 
-      &.checked, &:hover {
+      &.checked,
+      &:hover {
         &::after {
           left: 24px;
           top: 50%;
@@ -38,19 +39,19 @@
 
 .accessMode {
   display: inline-block;
-  
+
   :global {
     .name {
-      font-size: $size-normal;
-      font-weight: $font-bold;
-      font-family: $font-family-id;
+      font-size: variables.$size-normal;
+      font-weight: variables.$font-bold;
+      font-family: variables.$font-family-id;
       line-height: 20px;
       color: #232d41;
-      transition: all $trans-speed ease-in-out;
+      transition: all variables.$trans-speed ease-in-out;
     }
 
     .desc {
-      font-weight: $font-thin;
+      font-weight: variables.$font-thin;
       line-height: 20px;
       color: #79879c;
     }

@@ -29,10 +29,11 @@ import SecretStore from 'stores/secret'
 
 import Endpoint from './Endpoint'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class ServiceMonitor extends Component {
+class ServiceMonitor extends Component {
   store = this.props.store
 
   secretStore = new SecretStore()

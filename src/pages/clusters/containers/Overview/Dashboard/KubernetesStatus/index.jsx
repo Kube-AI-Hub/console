@@ -26,7 +26,7 @@ import { getDomTitle } from 'utils'
 
 import { getValueByUnit } from 'utils/monitoring'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const MetricTypes = {
   request_latencies_total: 'apiserver_request_latencies',
@@ -34,8 +34,9 @@ const MetricTypes = {
   schedule_attempts_count: 'scheduler_schedule_attempts',
 }
 
+export default
 @observer
-export default class KubernetesStatus extends Component {
+class KubernetesStatus extends Component {
   constructor(props) {
     super(props)
 

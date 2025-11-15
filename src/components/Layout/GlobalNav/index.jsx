@@ -25,7 +25,7 @@ import { Modal } from 'components/Base'
 
 import NavItem from './item'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 class GlobalNav extends React.Component {
   static propTypes = {

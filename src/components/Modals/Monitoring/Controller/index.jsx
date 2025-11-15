@@ -25,7 +25,7 @@ import { Modal } from 'components/Base'
 import { get } from 'lodash'
 import { stopAutoRefresh } from 'utils/monitoring'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class MonitoringModalController extends Base {
   static propTypes = {

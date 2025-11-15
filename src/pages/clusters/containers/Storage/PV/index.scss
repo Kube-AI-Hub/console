@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 .mode_title {
   display: flex;
   align-items: center;
@@ -21,7 +21,7 @@
     align-items: center;
 
     &:hover {
-      background: $light-color03;
+      background: variables.$light-color03;
       border-radius: 4px;
       cursor: pointer;
     }

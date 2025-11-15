@@ -26,11 +26,12 @@ import EmptyList from 'components/Cards/EmptyList'
 import { ICON_TYPES } from 'utils/constants'
 import RuleInfo from './RuleInfo'
 import IsolateInfo from './IsolateInfo'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('projectStore')
 @observer
-export default class Policies extends React.Component {
+class Policies extends React.Component {
   name = 'NETWORK_ISOLATION'
 
   module = 'namespacenetworkpolicies'

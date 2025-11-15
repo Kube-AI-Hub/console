@@ -27,11 +27,12 @@ import ComponentStore from 'stores/component'
 
 import Card from './Card'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('rootStore')
 @observer
-export default class ServiceComponents extends React.Component {
+class ServiceComponents extends React.Component {
   constructor(props) {
     super(props)
 

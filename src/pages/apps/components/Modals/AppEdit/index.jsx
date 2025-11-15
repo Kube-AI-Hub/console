@@ -31,10 +31,11 @@ import ReadmeEdit from 'apps/components/Cards/ReadmeEdit'
 import CategoryStore from 'stores/openpitrix/category'
 import FileStore from 'stores/openpitrix/file'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class AppEdit extends Component {
+class AppEdit extends Component {
   static propTypes = {
     store: PropTypes.object,
     detail: PropTypes.object,

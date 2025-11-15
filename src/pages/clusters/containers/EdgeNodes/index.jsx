@@ -35,7 +35,7 @@ import Banner from 'components/Cards/Banner'
 import Table from 'components/Tables/List'
 
 import { toJS } from 'mobx'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const MetricTypes = {
   cpu_used: 'node_cpu_usage',
@@ -48,12 +48,13 @@ const MetricTypes = {
   pod_total: 'node_pod_quota',
 }
 
+export default
 @withClusterList({
   store: new EdgeNodeStore(),
   name: 'EDGE_NODE',
   module: 'edgenodes',
 })
-export default class EdgeNodes extends React.Component {
+class EdgeNodes extends React.Component {
   store = this.props.store
 
   monitoringStore = new NodeMonitoringStore({ cluster: this.cluster })

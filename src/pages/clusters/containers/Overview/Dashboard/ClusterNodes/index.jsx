@@ -21,7 +21,7 @@ import { Panel } from 'components/Base'
 import NodesStatus from './NodesStatus'
 import NodesTop5 from './NodesTop5'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 // TODO: need to verify
 export default class ClusterNodes extends Component {

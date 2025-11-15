@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .body {
   padding: 0;
@@ -12,10 +12,10 @@
 .header {
   position: relative;
   padding: 20px;
-  color: $title-color;
+  color: variables.$title-color;
   min-height: 40px;
   border-radius: 8px 8px 0 0;
-  background-color: $bg-color;
+  background-color: variables.$bg-color;
 
   .title {
     display: inline-block;
@@ -24,9 +24,9 @@
     margin-left: 20px;
 
     .name {
-      font-size: $size-normal;
-      font-family: $font-family-id;
-      font-weight: $font-bold;
+      font-size: variables.$size-normal;
+      font-family: variables.$font-family-id;
+      font-weight: variables.$font-bold;
       line-height: 1.43;
     }
 
@@ -80,18 +80,18 @@
   position: relative;
   padding: 12px;
   height: calc(100vh - 144px);
-  background-color: $lightest;
+  background-color: variables.$lightest;
 }
 
 .timelineTitle {
   height: 60px;
   padding: 12px;
   border-radius: 4px 0 0 0;
-  border-bottom: solid 1px $light-color03;
-  background-color: $bg-color;
-  font-family: $font-family-id;
-  font-size: $size-normal;
-  font-weight: $font-bold;
+  border-bottom: solid 1px variables.$light-color03;
+  background-color: variables.$bg-color;
+  font-family: variables.$font-family-id;
+  font-size: variables.$size-normal;
+  font-weight: variables.$font-bold;
   line-height: 1.43;
 }
 
@@ -99,7 +99,7 @@
 .rightPane {
   height: calc(100vh - 168px);
   border-radius: 4px 0 0 4px;
-  border: solid 1px $light-color03;
+  border: solid 1px variables.$light-color03;
   background-color: #fff;
 }
 
@@ -112,7 +112,7 @@
   height: 60px;
   background-color: #ffffff;
   border-radius: 0 4px 0 0;
-  border-bottom: solid 1px $light-color03;
+  border-bottom: solid 1px variables.$light-color03;
 }
 
 .listPane {
@@ -133,7 +133,7 @@
   height: 50%;
   padding: 8px;
   border-radius: 0 0 4px 4px;
-  border: solid 1px $light-color03;
+  border: solid 1px variables.$light-color03;
   background-color: #ffffff;
   z-index: 10;
 
@@ -156,7 +156,7 @@
   & > line {
     pointer-events: none;
     stroke-width: 1px;
-    stroke: $light-color03;
+    stroke: variables.$light-color03;
 
     &:first-child,
     &:last-child {

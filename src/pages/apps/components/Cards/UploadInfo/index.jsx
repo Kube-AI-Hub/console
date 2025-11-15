@@ -25,7 +25,7 @@ import { Upload } from 'components/Base'
 import { UPLOAD_STATUS_WORD, UPLOAD_FILE_TYPES } from 'configs/openpitrix/app'
 import { getLocalTime } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class UploadInfo extends Component {
   static propTypes = {

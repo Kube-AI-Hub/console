@@ -24,7 +24,7 @@ import { Button } from '@kube-design/components'
 import { getPipelineStatus } from 'utils/status'
 import Status from 'devops/components/Status'
 
-import style from './card.scss'
+import * as style from './card.scss'
 
 export default class PipelineCard extends React.Component {
   constructor(props) {

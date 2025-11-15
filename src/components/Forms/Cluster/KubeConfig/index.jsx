@@ -25,10 +25,11 @@ import { Text, Modal } from 'components/Base'
 import PropTypes from 'prop-types'
 import { observer } from 'mobx-react'
 import { isEmpty } from 'lodash'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class KubeConfigModal extends React.Component {
+class KubeConfigModal extends React.Component {
   static propTypes = {
     formTemplate: PropTypes.object,
     visible: PropTypes.bool,

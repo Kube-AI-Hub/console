@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .datepicker {
   display: flex;
@@ -24,11 +24,11 @@
         }
       }
       & > div {
-        color: $dark-color06;
+        color: variables.$dark-color06;
       }
 
       p {
-        color: $dark-color01;
+        color: variables.$dark-color01;
       }
     }
   }

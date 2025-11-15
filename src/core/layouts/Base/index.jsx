@@ -29,7 +29,7 @@ import { getScrollTop } from 'utils/dom'
 import { initAlias, initEvents } from 'utils/events'
 import { renderRoutes } from 'utils/router.config'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const appStoreScrollThreshold = 10
 

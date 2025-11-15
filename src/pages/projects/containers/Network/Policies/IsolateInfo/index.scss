@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   display: flex;
@@ -20,10 +20,10 @@
 
 .isolate {
   margin-left: 15px;
-  color: $dark-color01;
+  color: variables.$dark-color01;
 }
 
 .isolatetitle {
   font-weight: 600;
-  color: $dark-color07;
+  color: variables.$dark-color07;
 }

@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   width: 916px;
@@ -9,25 +9,25 @@
 .step {
   margin: 20px 0;
   & > div {
-    @include TypographyTitleH4($dark-color08);
+    @include mixins.TypographyTitleH4(variables.$dark-color08);
   }
   & > p {
     margin-top: 4px;
-    @include TypographyParagraph($dark-color01);
+    @include mixins.TypographyParagraph(variables.$dark-color01);
   }
 }
 
 .codeWrapper {
   padding: 12px;
-  background-color: $card-bg-color;
-  border-radius: $border-radius;
+  background-color: variables.$card-bg-color;
+  border-radius: variables.$border-radius;
 }
 
 .pane {
   padding: 12px;
-  border-radius: $border-radius;
-  border: solid 1px $border-color;
-  background-color: $white;
+  border-radius: variables.$border-radius;
+  border: solid 1px variables.$border-color;
+  background-color: variables.$white;
 }
 
 .editor {
@@ -40,7 +40,7 @@
 }
 
 .title {
-  @include TypographySymbolText;
+  @include mixins.TypographySymbolText;
   margin-bottom: 12px;
 
   & > span {

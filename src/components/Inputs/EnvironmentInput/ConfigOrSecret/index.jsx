@@ -28,7 +28,7 @@ import {
 } from '@kube-design/components'
 import { cloneDeep } from 'lodash'
 import classNames from 'classnames'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class AddConfigOrSecret extends Component {
   state = {

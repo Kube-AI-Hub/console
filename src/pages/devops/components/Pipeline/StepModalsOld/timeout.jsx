@@ -24,10 +24,11 @@ import { Form, RadioGroup, Select } from '@kube-design/components'
 import { Modal } from 'components/Base'
 import { NumberInput } from 'components/Inputs'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class Timeout extends React.Component {
+class Timeout extends React.Component {
   static propTypes = {
     name: PropTypes.string,
   }

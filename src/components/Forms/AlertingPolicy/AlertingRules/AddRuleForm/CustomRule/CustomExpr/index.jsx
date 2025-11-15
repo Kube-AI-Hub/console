@@ -21,8 +21,9 @@ import { observer } from 'mobx-react'
 import { computed } from 'mobx'
 import MetircQueryInput from './MetircQueryInput'
 
+export default
 @observer
-export default class CustomExpr extends Component {
+class CustomExpr extends Component {
   componentDidMount() {
     const { cluster, namespace } = this.props
     this.props.store.fetchMetadata({ cluster, namespace })

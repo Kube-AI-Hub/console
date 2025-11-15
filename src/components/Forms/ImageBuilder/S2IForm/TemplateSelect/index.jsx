@@ -23,7 +23,7 @@ import { Form, Loading } from '@kube-design/components'
 
 import cookie from 'utils/cookie'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class TemplateSelect extends React.PureComponent {
   static defaultProps = {

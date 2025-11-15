@@ -31,7 +31,7 @@ import { TinyArea } from 'components/Charts'
 import ContainerItem from 'components/Cards/Containers/Item'
 import StatusReason from 'projects/components/StatusReason'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class PodItem extends React.PureComponent {
   static propTypes = {
@@ -124,24 +124,42 @@ export default class PodItem extends React.PureComponent {
     return `${this.props.prefix}/projects/${detail.namespace}/pods/${detail.name}`
   }
 
-  getMonitoringCfgs = metrics => [
-    {
-      type: 'cpu',
-      title: 'CPU',
-      unitType: 'cpu',
-      legend: ['USED'],
-      data: [metrics.cpu],
-      bgColor: 'transparent',
-    },
-    {
-      type: 'memory',
-      title: 'MEMORY',
-      unitType: 'memory',
-      legend: ['USED'],
-      data: [metrics.memory],
-      bgColor: 'transparent',
-    },
-  ]
+  getMonitoringCfgs = metrics => {
+    return [
+      {
+        type: 'gpu',
+        title: 'GPU',
+        unitType: 'gpu',
+        legend: ['USED'],
+        data: [metrics.gpu],
+        bgColor: 'transparent',
+      },
+      {
+        type: 'gpu_memory',
+        title: 'GPU_MEMORY',
+        unitType: 'gpu_memory',
+        legend: ['USED'],
+        data: [metrics.gpu_memory],
+        bgColor: 'transparent',
+      },
+      {
+        type: 'cpu',
+        title: 'CPU',
+        unitType: 'cpu',
+        legend: ['USED'],
+        data: [metrics.cpu],
+        bgColor: 'transparent',
+      },
+      {
+        type: 'memory',
+        title: 'MEMORY',
+        unitType: 'memory',
+        legend: ['USED'],
+        data: [metrics.memory],
+        bgColor: 'transparent',
+      },
+    ]
+  }
 
   getNodeContent = () => {
     const { cluster, node, nodeIp } = this.props.detail

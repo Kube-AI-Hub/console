@@ -25,7 +25,7 @@ import { isEqual } from 'lodash'
 import { Modal } from 'components/Base'
 import { CATEGORY_ICONS } from 'configs/openpitrix/app'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class CategoryCreate extends Component {
   static propTypes = {

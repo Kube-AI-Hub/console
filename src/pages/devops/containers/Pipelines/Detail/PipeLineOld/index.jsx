@@ -27,12 +27,13 @@ import React from 'react'
 
 import { trigger } from 'utils/action'
 
-import style from './index.scss'
+import * as style from './index.scss'
 
+export default
 @inject('rootStore', 'detailStore')
 @observer
 @trigger
-export default class PipelineOld extends React.Component {
+class PipelineOld extends React.Component {
   store = this.props.detailStore || {}
 
   formTemplate = {}

@@ -22,7 +22,7 @@ import { debounce } from 'lodash'
 
 import { Select, Input } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class CookieMatch extends React.Component {
   static propTypes = {

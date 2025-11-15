@@ -23,10 +23,11 @@ import PropTypes from 'prop-types'
 import Markdown from 'components/Base/Markdown'
 import FileStore from 'stores/openpitrix/file'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class Introduction extends React.Component {
+class Introduction extends React.Component {
   static propTypes = {
     versionId: PropTypes.string,
   }

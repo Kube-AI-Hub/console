@@ -24,10 +24,11 @@ import CardSelect from 'components/Inputs/CardSelect'
 import { PATTERN_NAME, MODULE_KIND_MAP } from 'utils/constants'
 import templateSettings from 'stores/monitoring/custom/template.json'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class BaseInfo extends React.Component {
+class BaseInfo extends React.Component {
   constructor(props) {
     super(props)
 

@@ -1,9 +1,9 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   padding: 12px;
-  background-color: $light-color01;
+  background-color: variables.$light-color01;
 }
 
 .item {
@@ -11,14 +11,14 @@
   position: relative;
   padding: 12px;
   border-radius: 3px;
-  border: 1px solid $border-color;
+  border: 1px solid variables.$border-color;
   align-items: center;
   cursor: pointer;
-  transition: all $trans-speed ease-in-out;
+  transition: all variables.$trans-speed ease-in-out;
 
   &:hover {
     box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.2);
-    border-color: $dark-color01;
+    border-color: variables.$dark-color01;
   }
 
   & + .item {
@@ -29,7 +29,7 @@
     opacity: 0.7;
     &:hover {
       box-shadow: none;
-      border-color: $border-color;
+      border-color: variables.$border-color;
     }
   }
 

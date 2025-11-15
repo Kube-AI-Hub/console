@@ -1,9 +1,9 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   display: flex;
-  border: solid 1px $light-color08;
+  border: solid 1px variables.$light-color08;
   border-radius: 4px;
   line-height: 24px;
   padding: 0 4px;
@@ -18,12 +18,12 @@
 
 .trigger {
   border-radius: 2px;
-  color: $white;
+  color: variables.$white;
   padding: 0 10px;
   display: inline-block;
   cursor: pointer;
   height: 24px;
-  background: $dark-color07;
+  background: variables.$dark-color07;
 }
 
 .input {
@@ -31,7 +31,6 @@
 }
 
 .debug {
-  background: $yellow-color05;
+  background: variables.$yellow-color05;
   vertical-align: center;
 }
-

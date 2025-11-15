@@ -3,7 +3,7 @@ import { Button, Icon } from '@kube-design/components'
 import { capitalize, get } from 'lodash'
 import { Panel } from 'components/Base'
 import { compareVersion } from 'utils'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const GatewayEmpty = ({
   component,

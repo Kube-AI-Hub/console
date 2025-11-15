@@ -29,10 +29,11 @@ import EventSearchStore from 'stores/eventSearch'
 
 import { dropDownItems, getSecond, supportQueryParams } from '../utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class HomeModal extends React.Component {
+class HomeModal extends React.Component {
   eventSearchStore = new EventSearchStore()
 
   componentDidMount() {

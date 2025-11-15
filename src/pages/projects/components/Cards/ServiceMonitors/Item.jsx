@@ -21,7 +21,7 @@ import PropTypes from 'prop-types'
 
 import { Text } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Item extends React.Component {
   static propTypes = {

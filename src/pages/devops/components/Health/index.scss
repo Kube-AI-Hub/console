@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 .icon {
   display: inline-block;
   vertical-align: middle;
@@ -8,17 +8,17 @@
 }
 
 .health {
-  background-image: url('/assets/health.svg')
+  background-image: url('/assets/health.svg');
 }
 
 .subhealth {
-  background-image: url('/assets/subhealth.svg')
+  background-image: url('/assets/subhealth.svg');
 }
 
 .error {
-  background-image: url('/assets/health-error.svg')
+  background-image: url('/assets/health-error.svg');
 }
 
 .nostatus {
-  background-image: url('/assets/health-nostatus.svg')
+  background-image: url('/assets/health-nostatus.svg');
 }

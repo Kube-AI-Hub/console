@@ -20,7 +20,7 @@ import React from 'react'
 
 import { Form, Input, RadioGroup, Radio } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default function ParamsInput({ option }) {
   function renderFormItems(type) {

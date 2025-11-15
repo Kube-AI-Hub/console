@@ -22,7 +22,7 @@ import PropTypes from 'prop-types'
 import { Button, Icon, Input, Checkbox } from '@kube-design/components'
 import { Modal } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class DeleteModal extends React.Component {
   static propTypes = {

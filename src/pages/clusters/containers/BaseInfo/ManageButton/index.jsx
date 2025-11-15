@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Dropdown, Icon } from '@kube-design/components'
 import classnames from 'classnames'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default function MangeButton({ className = '', content }) {
   const [down, setDown] = useState(true)

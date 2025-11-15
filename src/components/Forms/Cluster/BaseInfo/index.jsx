@@ -37,7 +37,7 @@ import {
 import NodeList from '../NodeList'
 import SubTitle from '../SubTitle'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class BaseInfo extends React.Component {
   get method() {

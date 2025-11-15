@@ -1,12 +1,12 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .modal {
-  min-width: $content-width;
+  min-width: variables.$content-width;
   width: 100vw;
   height: 100vh;
   border-radius: 0;
-  background-color: $light-color02;
+  background-color: variables.$light-color02;
 }
 
 .body {
@@ -22,7 +22,7 @@
 }
 
 .steps {
-  @include vertical-center;
+  @include mixins.vertical-center;
   z-index: 0;
 
   & > div:first-child {
@@ -59,7 +59,7 @@
 }
 
 .title {
-  @include TypographySymbolText($dark-color07);
+  @include mixins.TypographySymbolText(variables.$dark-color07);
   z-index: 1;
 
   span {
@@ -73,7 +73,7 @@
       width: 1px;
       height: 20px;
       margin-right: 12px;
-      border-right: solid 1px $light-color04;
+      border-right: solid 1px variables.$light-color04;
     }
     &:nth-child(3) {
       margin-right: 8px;
@@ -96,7 +96,7 @@
   display: flex;
   height: 56px;
   align-items: center;
-  box-shadow: 0 -1px 0 0 $light-color04;
+  box-shadow: 0 -1px 0 0 variables.$light-color04;
   background-color: #ffffff;
   z-index: 10;
 }

@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .layout {
   min-width: 1164px;
@@ -8,7 +8,7 @@
   $light-height: 20px,
   $size: 14px,
   $bold-height: 600,
-  $color: $dark-color07
+  $color: variables.$dark-color07
 ) {
   font-size: $size;
   line-height: $light-height;
@@ -20,7 +20,7 @@
   $light-height: 24px,
   $size: 16px,
   $bold-height: 600,
-  $color: $dark-color08
+  $color: variables.$dark-color08
 ) {
   font-size: $size;
   line-height: $light-height;
@@ -46,7 +46,7 @@
 
 .desc {
   margin-top: 8px;
-  @include font(24px, 14px, 400, $dark-color01);
+  @include font(24px, 14px, 400, variables.$dark-color01);
 }
 
 .wrapper {
@@ -106,9 +106,9 @@
 
             &:hover {
               cursor: pointer;
-              background: $dark-color07;
+              background: variables.$dark-color07;
               box-shadow: 0px 8px 16px rgba(36, 46, 66, 0.28);
-              border: 1px solid $dark-color07;
+              border: 1px solid variables.$dark-color07;
 
               .buttonText {
                 color: white;
@@ -150,10 +150,10 @@
           transition: all 0.3s ease;
 
           &:hover {
-            color: $blue-color03;
+            color: variables.$blue-color03;
 
             .smallButtonText {
-              color: $blue-color03;
+              color: variables.$blue-color03;
             }
           }
         }
@@ -165,21 +165,21 @@
       background-image: url('/assets/support-ticket-about-bg.svg');
       background-repeat: no-repeat;
       background-size: 100% auto;
-      color: $dark-color07;
+      color: variables.$dark-color07;
       display: grid;
       grid-template-rows: auto 1fr auto;
 
       .desc {
         margin-top: 12px;
         margin-bottom: 24px;
-        color: $dark-color07;
+        color: variables.$dark-color07;
       }
 
       &:hover {
         .link {
           gap: 12px;
-          fill: $blue-color03;
-          color: $blue-color03;
+          fill: variables.$blue-color03;
+          color: variables.$blue-color03;
         }
       }
 
@@ -226,7 +226,7 @@
 
   .kse {
     .title {
-      color: $dark-color07;
+      color: variables.$dark-color07;
     }
 
     .content {
@@ -270,7 +270,7 @@
     padding: 20px;
 
     .title {
-      color: $dark-color07;
+      color: variables.$dark-color07;
       margin-bottom: 8px;
       margin-top: 20px;
     }
@@ -323,8 +323,8 @@
 
           .buttonText {
             gap: 12px;
-            fill: $blue-color03;
-            color: $blue-color03;
+            fill: variables.$blue-color03;
+            color: variables.$blue-color03;
           }
         }
       }
@@ -335,20 +335,20 @@
     font-weight: 400;
     font-size: 14px;
     line-height: 20px;
-    color: $dark-color07;
+    color: variables.$dark-color07;
   }
 
   :global {
     a.support-action {
-      color: $blue-color03;
+      color: variables.$blue-color03;
       transition: all 0.3s ease;
 
       &:hover {
-        color: $blue-color04;
+        color: variables.$blue-color04;
       }
 
       &:active {
-        color: $blue-color05;
+        color: variables.$blue-color05;
       }
     }
   }

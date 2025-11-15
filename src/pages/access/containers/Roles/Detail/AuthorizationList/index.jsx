@@ -24,9 +24,10 @@ import { observer, inject } from 'mobx-react'
 import { Card } from 'components/Base'
 import RuleList from 'components/Cards/RuleList'
 
+export default
 @inject('detailStore')
 @observer
-export default class AuthorizationList extends React.Component {
+class AuthorizationList extends React.Component {
   store = this.props.detailStore
 
   componentDidMount() {

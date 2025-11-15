@@ -23,7 +23,7 @@ import { get, isEmpty } from 'lodash'
 
 import { Icon, Tag, Tooltip } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ContainerItem extends React.Component {
   static propTypes = {

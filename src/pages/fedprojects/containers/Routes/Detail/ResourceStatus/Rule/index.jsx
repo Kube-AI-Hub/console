@@ -22,7 +22,7 @@ import { Link } from 'react-router-dom'
 import { Button, Icon, Columns, Column, Tooltip } from '@kube-design/components'
 import { Text } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const Card = ({ gateway, rule, tls = {}, prefix }) => {
   const protocol = tls.hosts && tls.hosts.includes(rule.host) ? 'https' : 'http'

@@ -25,10 +25,11 @@ import { Modal } from 'components/Base'
 import { groovyToJS } from 'utils/devops'
 import { toJS } from 'mobx'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class Checkout extends React.Component {
+class Checkout extends React.Component {
   static propTypes = {
     name: PropTypes.string,
   }

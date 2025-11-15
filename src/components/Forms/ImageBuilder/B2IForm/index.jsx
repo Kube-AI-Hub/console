@@ -29,7 +29,7 @@ import ToggleView from 'components/ToggleView'
 import { PATTERN_IMAGE_NAME } from 'utils/constants'
 
 import Uploader from './BinaryFileUploader'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class S2IForm extends React.Component {
   constructor(props) {

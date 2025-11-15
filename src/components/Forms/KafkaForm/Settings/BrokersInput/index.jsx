@@ -20,7 +20,7 @@ import React from 'react'
 import { get } from 'lodash'
 import { ObjectInput, NumberInput, ArrayInput } from 'components/Inputs'
 import { Input } from '@kube-design/components'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class BrokersInput extends React.Component {
   checkItemValid = item => item.host && item.port

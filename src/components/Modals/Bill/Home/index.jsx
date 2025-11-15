@@ -21,7 +21,7 @@ import React from 'react'
 import { Card } from 'components/Base'
 import { Icon, Button } from '@kube-design/components'
 import cookie from 'utils/cookie'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default function Home({ handleSelected, cardConfigRule }) {
   const isZH = cookie('lang') === 'zh'

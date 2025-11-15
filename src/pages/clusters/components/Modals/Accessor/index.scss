@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 .wrapper {
   display: flex;
   margin: 12px 0;
@@ -18,13 +18,13 @@
 }
 
 .selectBox {
-  background: $light-color01;
+  background: variables.$light-color01;
   border-radius: 4px;
   padding: 12px;
 
   .line {
-    background: $light-color02;
-    border: 1px solid $light-color06;
+    background: variables.$light-color02;
+    border: 1px solid variables.$light-color06;
     border-radius: 22px;
     padding: 6px 20px 6px 20px;
     height: 44px;

@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .banner {
   position: relative;
@@ -6,13 +6,13 @@
   padding: 24px 20px;
   margin-bottom: 12px;
   line-height: 20px;
-  border-radius: $border-radius;
+  border-radius: variables.$border-radius;
   box-shadow: 0 2px 4px 0 rgba(36, 46, 66, 0.12),
     0 4px 8px 0 rgba(125, 158, 224, 0.06);
-  color: $white;
+  color: variables.$white;
 
   &.light {
-    background-color: $blue;
+    background-color: variables.$blue;
   }
 
   &.dark {
@@ -24,15 +24,15 @@
   }
 
   &.white {
-    background-color: $white;
+    background-color: variables.$white;
     .icon {
-      background-color: $bg-color;
+      background-color: variables.$bg-color;
     }
     .title {
-      color: $second-text-color;
+      color: variables.$second-text-color;
       :global {
         .h3 {
-          color: $head-color;
+          color: variables.$head-color;
           margin-bottom: 0;
         }
       }
@@ -46,9 +46,9 @@
   }
 
   strong {
-    color: $white;
-    font-weight: $font-bold;
-    font-family: $font-family-id;
+    color: variables.$white;
+    font-weight: variables.$font-bold;
+    font-family: variables.$font-family-id;
   }
 }
 
@@ -72,7 +72,7 @@
 .title {
   :global {
     .h3 {
-      color: $white;
+      color: variables.$white;
       margin-bottom: 2px;
       text-shadow: 0 2px 4px rgba(36, 46, 66, 0.1);
     }

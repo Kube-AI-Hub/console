@@ -22,7 +22,7 @@ import FormItemContainer from 'components/Modals/CustomMonitoring/components/For
 import Field from 'components/Modals/CustomMonitoring/components/Form/Field'
 import TableColumnStyle from '../../TableColumnStyle'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default function TableColumnInput({
   prefix,

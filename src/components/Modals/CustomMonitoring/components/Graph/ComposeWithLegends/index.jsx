@@ -19,7 +19,7 @@ import React from 'react'
 import classnames from 'classnames'
 import Chart from '../Compose'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class LegendsManageChart extends React.Component {
   state = {

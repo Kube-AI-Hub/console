@@ -26,10 +26,11 @@ import { Modal } from 'components/Base'
 import Department from './Department'
 import Detail from './Detail'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class EditGroupModal extends React.Component {
+class EditGroupModal extends React.Component {
   static propTypes = {
     visible: PropTypes.bool,
     title: PropTypes.string,

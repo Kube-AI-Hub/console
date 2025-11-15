@@ -1,7 +1,7 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
-  border-radius: $border-radius;
+  border-radius: variables.$border-radius;
   box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.06);
   background-color: #ffffff;
   overflow: hidden;
@@ -12,14 +12,14 @@
   padding-right: 20px;
   @at-root {
     .pane__toolbar {
-      background-color: $lightest;
+      background-color: variables.$lightest;
       padding-top: 12px;
       padding-bottom: 12px;
       border-bottom: solid 1px #d8dee5;
       box-shadow: 0 1px 0 0 #d8dee5, 0 -1px 0 0 #d8dee5;
     }
     .pane__pagination {
-      background-color: $lightest;
+      background-color: variables.$lightest;
       line-height: 56px;
       box-shadow: 0 -1px 0 0 #d8dee5;
     }
@@ -89,7 +89,7 @@
       border: none;
     }
     td {
-      background: $lightest;
+      background: variables.$lightest;
     }
     td:first-child {
       border-radius: 4px 0 0 4px;

@@ -24,7 +24,7 @@ import moment from 'moment-mini'
 import { Markdown } from 'components/Base'
 import ImageSlider from './ImageSlider'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class AppInfo extends React.PureComponent {
   static propTypes = {
@@ -99,13 +99,13 @@ export default class AppInfo extends React.PureComponent {
 
   render() {
     const { className, app } = this.props
-    const { abstraction, screenshots } = app
+    const { abstraction, screenshots, description} = app
 
     return (
       <div className={classnames(styles.appInfo, className)}>
         <div>
           <h3 className={styles.title}>{t('APP_INTRODUCTION')}</h3>
-          <Markdown source={abstraction || t('NONE')} />
+          <Markdown source={abstraction || description || t('NONE')} />
         </div>
         <div>
           <h3 className={styles.title}>{t('APP_SCREENSHOTS')}</h3>

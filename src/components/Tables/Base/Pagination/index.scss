@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .pagination {
   display: flex;
@@ -21,7 +21,7 @@
     justify-content: center;
     width: 58px;
     height: 32px;
-    color: $dark-color06;
+    color: variables.$dark-color06;
     border-radius: 4px;
     margin: 0px 4px;
 
@@ -33,7 +33,7 @@
 
     &:hover {
       cursor: pointer;
-      background: $light-color03;
+      background: variables.$light-color03;
     }
   }
 }
@@ -51,11 +51,11 @@
   font-weight: 600;
   font-size: 12px;
   line-height: 20px;
-  color: $dark-color04;
+  color: variables.$dark-color04;
 
   &:hover {
     cursor: pointer;
-    background: $light-color02;
+    background: variables.$light-color02;
   }
 }
 
@@ -73,7 +73,7 @@
       font-weight: 600;
       font-size: 12px;
       line-height: 20px;
-      color: $dark-color06;
+      color: variables.$dark-color06;
       margin-right: 4px;
     }
   }
@@ -81,7 +81,7 @@
   .gap {
     width: 1px;
     height: 12px;
-    background: $light-color03;
+    background: variables.$light-color03;
     margin: 0px 12px;
   }
 }
@@ -97,7 +97,7 @@
     font-weight: 600;
     font-size: 12px;
     line-height: 20px;
-    color: $dark-color04;
+    color: variables.$dark-color04;
     padding: 0 12px;
     display: flex;
     justify-content: center;
@@ -105,11 +105,11 @@
 
     &:hover {
       cursor: pointer;
-      background: $light-color02;
+      background: variables.$light-color02;
     }
   }
 }
 
 .menuActive {
-  background: $light-color02;
+  background: variables.$light-color02;
 }

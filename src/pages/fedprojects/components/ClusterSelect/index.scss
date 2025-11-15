@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   position: relative;
@@ -7,7 +7,7 @@
 
 .name {
   margin: 0 8px;
-  @include TypographyTitleH6($white);
+  @include mixins.TypographyTitleH6(variables.$white);
 }
 
 .options {
@@ -28,12 +28,12 @@
   padding: 8px;
   padding-right: 55px;
   border-radius: 2px;
-  background-color: $dark-color07;
-  color: $white;
+  background-color: variables.$dark-color07;
+  color: variables.$white;
   cursor: pointer;
 }
 
 .indicator {
-  @include vertical-center;
+  @include mixins.vertical-center;
   right: 12px;
 }

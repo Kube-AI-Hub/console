@@ -22,11 +22,12 @@ import { get } from 'lodash'
 
 import Secret from './Secret'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('detailStore')
 @observer
-export default class ServiceAccountDetail extends React.Component {
+class ServiceAccountDetail extends React.Component {
   constructor(props) {
     super(props)
 

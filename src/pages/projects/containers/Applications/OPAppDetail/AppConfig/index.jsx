@@ -21,11 +21,12 @@ import { observer, inject } from 'mobx-react'
 
 import { Panel, CodeEditor } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('rootStore', 'detailStore')
 @observer
-export default class AppConfig extends React.Component {
+class AppConfig extends React.Component {
   get store() {
     return this.props.detailStore
   }

@@ -23,7 +23,7 @@ import { Icon } from '@kube-design/components'
 
 import { transferVersionStatus } from 'utils/app'
 import { STATUS_TO_ICON } from 'configs/openpitrix/version'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class VersionStatus extends PureComponent {
   static propTypes = {

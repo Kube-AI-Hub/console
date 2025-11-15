@@ -26,7 +26,7 @@ import { Loading } from '@kube-design/components'
 import { Empty } from 'components/Base'
 import { SimpleArea } from 'components/Charts'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Charts extends React.Component {
   static propTypes = {

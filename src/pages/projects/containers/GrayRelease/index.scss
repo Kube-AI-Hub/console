@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .title {
   padding: 20px;
@@ -25,7 +25,7 @@
   margin-top: 12px;
 
   a {
-    color: $second-text-color;
+    color: variables.$second-text-color;
 
     :global(.icon) {
       margin-right: 8px;
@@ -41,8 +41,8 @@
 .tabs {
   position: relative;
   padding: 8px 20px;
-  border-radius: 0 0 $border-radius $border-radius;
-  background-color: $lightest;
+  border-radius: 0 0 variables.$border-radius variables.$border-radius;
+  background-color: variables.$lightest;
   z-index: 1;
 
   a + a {
@@ -52,10 +52,10 @@
 
 .item {
   margin-top: 12px;
-  border-radius: $border-radius;
+  border-radius: variables.$border-radius;
   overflow: hidden;
   box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.06);
-  transition: all $trans-speed ease-in-out;
+  transition: all variables.$trans-speed ease-in-out;
 
   &:hover {
     box-shadow: 0 6px 16px 0 rgba(33, 43, 54, 0.2);
@@ -76,8 +76,8 @@
   .name {
     :global {
       .h6 {
-        font-family: $font-family-id;
-        font-size: $size-medium;
+        font-family: variables.$font-family-id;
+        font-size: variables.$size-medium;
         line-height: 1.5;
         word-break: break-all;
       }
@@ -91,7 +91,7 @@
   .status {
     & > div {
       color: #242e42;
-      font-weight: $font-bold;
+      font-weight: variables.$font-bold;
     }
 
     & > p {

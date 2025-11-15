@@ -21,7 +21,7 @@ import PropTypes from 'prop-types'
 import { Toggle } from '@kube-design/components'
 import Text from '../Text'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class CheckableText extends React.PureComponent {
   static propTypes = {

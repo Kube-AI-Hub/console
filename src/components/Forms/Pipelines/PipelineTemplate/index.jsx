@@ -21,10 +21,11 @@ import { set } from 'lodash'
 import { observer } from 'mobx-react'
 import PipelineTemplate from 'pages/devops/components/Pipeline/PipelineTemplate'
 import React from 'react'
-import style from './index.scss'
+import * as style from './index.scss'
 
+export default
 @observer
-export default class AdvanceSettings extends React.Component {
+class AdvanceSettings extends React.Component {
   handleTemplateChange = (value, params) => {
     set(this.props.formTemplate, 'template', value)
     set(this.props.formTemplate, 'params', params)

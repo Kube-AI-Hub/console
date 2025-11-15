@@ -17,7 +17,7 @@
  */
 
 const HttpProxy = require('http-proxy')
-const pathToRegexp = require('path-to-regexp')
+const { pathToRegexp } = require('path-to-regexp')
 const isArray = require('lodash/isArray')
 const get = require('lodash/get')
 const isFunction = require('lodash/isFunction')
@@ -29,7 +29,7 @@ module.exports = (context, options) => (ctx, next) => {
   const regex = pathToRegexp(context)
   const proxy = HttpProxy.createProxyServer()
 
-  if (!regex.test(ctx.path)) return next()
+  if (!regex.regexp.test(ctx.path)) return next()
 
   const { events, ...httpProxyOpts } = options
 

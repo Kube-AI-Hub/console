@@ -22,7 +22,7 @@ import { Icon } from '@kube-design/components'
 
 import PieChart from 'components/Charts/Pie/PieChart'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Chart extends React.Component {
   render() {

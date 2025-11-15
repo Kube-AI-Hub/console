@@ -27,7 +27,7 @@ import { RadioButton, RadioGroup, Form } from '@kube-design/components'
 import Confirm from 'components/Forms/Base/Confirm'
 import ProbeConfig from './ProbeConfig'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 import ProbeSection from './ProbeSection'
 
 const PROBE_RADIO_CONFIG = [
@@ -36,8 +36,9 @@ const PROBE_RADIO_CONFIG = [
   { value: 'tcp', desc: 'TCP_PORT' },
 ]
 
+export default
 @observer
-export default class ProbeForm extends React.Component {
+class ProbeForm extends React.Component {
   static propTypes = {
     className: PropTypes.string,
     componentType: PropTypes.string,
@@ -81,7 +82,6 @@ export default class ProbeForm extends React.Component {
     }
 
     switch (checkerType) {
-      default:
       case 'http': {
         delete data.tcpSocket
         delete data.exec
@@ -94,6 +94,12 @@ export default class ProbeForm extends React.Component {
       }
       case 'tcp': {
         delete data.httpGet
+        delete data.exec
+        break
+      }
+      // defaults to 'http'
+      default: {
+        delete data.tcpSocket
         delete data.exec
         break
       }

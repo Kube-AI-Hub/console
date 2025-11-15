@@ -24,9 +24,10 @@ import { renderRoutes } from 'utils/router.config'
 import VolumeStore from 'stores/volume'
 import routes from './routes'
 
+export default
 @inject('rootStore')
 @observer
-export default class VolumesSnapshots extends React.Component {
+class VolumesSnapshots extends React.Component {
   store = new VolumeStore()
 
   get tips() {

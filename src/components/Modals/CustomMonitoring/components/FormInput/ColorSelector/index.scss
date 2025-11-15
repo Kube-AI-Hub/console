@@ -1,7 +1,7 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
-  border: solid 1px $light-color08;
+  border: solid 1px variables.$light-color08;
   padding: 5px;
   display: inline-block;
   border-radius: 4px;

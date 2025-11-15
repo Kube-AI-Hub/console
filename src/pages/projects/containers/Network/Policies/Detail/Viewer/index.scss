@@ -1,7 +1,7 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .table {
-  border: 1px solid $light-color06;
+  border: 1px solid variables.$light-color06;
   border-radius: 3px;
   overflow: hidden;
   :global {
@@ -13,14 +13,14 @@
             padding: 10px 12px;
           }
           &:first-child > th:first-child {
-            border-right: 1px solid $light-color06;
+            border-right: 1px solid variables.$light-color06;
           }
           &:last-child {
-            background-color: $light-color01;
+            background-color: variables.$light-color01;
             & > th {
-              border-bottom: 1px solid $light-color06;
+              border-bottom: 1px solid variables.$light-color06;
               &:nth-child(2) {
-                border-right: 1px solid $light-color06;
+                border-right: 1px solid variables.$light-color06;
               }
             }
           }
@@ -29,18 +29,18 @@
       .table-tbody {
         tr {
           &:nth-child(even) {
-            background-color: $light-color01;
+            background-color: variables.$light-color01;
           }
           &.table-expanded-row {
             &:hover td {
-              background-color: $light-color03;
+              background-color: variables.$light-color03;
             }
-            background-color: $light-color03;
+            background-color: variables.$light-color03;
           }
           > td {
             height: 40px;
             &:nth-child(2) {
-              border-right: 1px solid $light-color06;
+              border-right: 1px solid variables.$light-color06;
             }
           }
         }
@@ -51,8 +51,8 @@
 
 .label {
   font-weight: 500;
-  color: $dark-color06;
-  background-color: $light-color03;
+  color: variables.$dark-color06;
+  background-color: variables.$light-color03;
   border-radius: 2px;
   height: 20px;
   display: inline-block;
@@ -60,7 +60,7 @@
   padding: 0 3px;
   :global {
     span {
-      background-color: $dark-color07;
+      background-color: variables.$dark-color07;
       color: #fff;
       display: inline-block;
       margin-right: 6px;
@@ -93,7 +93,7 @@
 }
 .detail {
   width: 100%;
-  background-color: $light-color01;
+  background-color: variables.$light-color01;
   padding: 12px;
   border-radius: 4px;
 }

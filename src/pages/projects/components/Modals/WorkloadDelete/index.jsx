@@ -31,7 +31,7 @@ import ServiceStore from 'stores/service'
 import VolumeStore from 'stores/volume'
 import FederatedStore from 'stores/federated'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class WorkloadDeleteModal extends React.Component {
   static propTypes = {

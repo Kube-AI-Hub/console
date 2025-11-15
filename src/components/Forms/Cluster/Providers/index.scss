@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   width: 860px;
@@ -15,10 +15,10 @@
     label.radio {
       width: 130px;
       height: 130px;
-      border-radius: $border-radius;
-      border: solid 1px $border-color;
-      background-color: $white;
-      transition: all $trans-speed ease-in-out;
+      border-radius: variables.$border-radius;
+      border: solid 1px variables.$border-color;
+      background-color: variables.$white;
+      transition: all variables.$trans-speed ease-in-out;
 
       &::before,
       &::after {
@@ -27,12 +27,12 @@
 
       &.checked,
       &:hover {
-        border: solid 1px $dark-color01;
+        border: solid 1px variables.$dark-color01;
         box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.2);
 
         .icon svg {
-          color: $primary;
-          fill: $green-color02;
+          color: variables.$primary;
+          fill: variables.$green-color02;
         }
       }
 
@@ -46,7 +46,7 @@
         height: 100%;
         width: 100%;
         padding: 25px 12px;
-        @include TypographyTitleH5($dark-color07);
+        @include mixins.TypographyTitleH5(variables.$dark-color07);
 
         .icon {
           margin-bottom: 12px;

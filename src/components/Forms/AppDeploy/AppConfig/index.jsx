@@ -28,10 +28,11 @@ import { getValueObj, getValue } from 'utils/yaml'
 
 import SchemaForm from './SchemaForm'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class AppConfig extends React.Component {
+class AppConfig extends React.Component {
   state = {
     valuesYaml: '',
     valuesJSON: {},

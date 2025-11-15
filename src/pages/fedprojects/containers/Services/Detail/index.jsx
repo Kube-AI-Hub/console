@@ -31,10 +31,11 @@ import { trigger } from 'utils/action'
 
 import getRoutes from './routes'
 
+export default
 @inject('rootStore', 'projectStore')
 @observer
 @trigger
-export default class ServiceDetail extends React.Component {
+class ServiceDetail extends React.Component {
   store = new FederatedStore(new ServiceStore())
 
   componentDidMount() {

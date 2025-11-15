@@ -23,7 +23,7 @@ import { Form, Input, Select, Checkbox } from '@kube-design/components'
 import { InputPassword } from 'components/Inputs'
 
 import BaseForm from '../BaseForm'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class WebhookForm extends Component {
   state = {

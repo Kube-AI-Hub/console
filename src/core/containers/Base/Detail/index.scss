@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .sider {
   position: fixed;
@@ -31,7 +31,7 @@
   height: 48px;
   padding: 0 14px;
   border-radius: 4px;
-  background-color: $dark;
+  background-color: variables.$dark;
   margin: 0 0 12px;
 
   &Item {
@@ -41,10 +41,10 @@
     margin: 0 6px;
     padding: 0 14px;
     font-weight: 500;
-    color: $white;
+    color: variables.$white;
     border: 1px solid transparent;
     text-align: center;
-    transition: all $trans-speed;
+    transition: all variables.$trans-speed;
 
     &:first-child {
       margin: 0 6px 0 0;
@@ -52,12 +52,12 @@
 
     &.active {
       border-radius: 4px;
-      box-shadow: $btn-primary-shadow;
-      background-color: $primary;
-      border-color: $primary;
+      box-shadow: variables.$btn-primary-shadow;
+      background-color: variables.$primary;
+      border-color: variables.$primary;
 
       &:hover {
-        color: $white;
+        color: variables.$white;
       }
     }
   }

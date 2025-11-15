@@ -23,7 +23,7 @@ import { getSuitableUnit, getValueByUnit } from 'utils/monitoring'
 
 import { SimpleCircle } from 'components/Charts'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const TabItem = ({ active, name, used, total, unit, unitType }) => {
   const nameText = t(name)

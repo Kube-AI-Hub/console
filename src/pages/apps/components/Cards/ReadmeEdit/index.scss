@@ -1,51 +1,51 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .header {
   position: relative;
   margin: 30px 0 12px;
-  color: $title-color;
+  color: variables.$title-color;
   font-weight: bold;
 }
 
 .readmeEdit {
   :global {
     .for-container {
-      box-shadow: $base-shadow;
-      border-color: $border-color;
-      border-radius: $border-radius;
+      box-shadow: variables.$base-shadow;
+      border-color: variables.$border-color;
+      border-radius: variables.$border-radius;
 
       .for-toolbar {
-        border-color: $border-color;
-        color: $title-color;
+        border-color: variables.$border-color;
+        color: variables.$title-color;
         font-weight: bold;
         font-size: 16px;
-        background-color: $bg-color;
-        border-radius: $border-radius $border-radius 0 0;
+        background-color: variables.$bg-color;
+        border-radius: variables.$border-radius variables.$border-radius 0 0;
 
         ul > li {
           &:hover {
-            background-color: $light-color03;
+            background-color: variables.$light-color03;
           }
 
           &.for-active {
-            background-color: $light-color04;
+            background-color: variables.$light-color04;
           }
         }
       }
 
       .for-editor {
-        color: $text-color;
-        border-radius: 0 0 $border-radius $border-radius;
+        color: variables.$text-color;
+        border-radius: 0 0 variables.$border-radius variables.$border-radius;
 
         .for-editor-edit {
           .for-line-num {
             width: 46px;
             padding: 12px 0;
             line-height: 24px;
-            background-color: $bg-color;
-            color: $dark-color02;
-            border-right: 1px solid $border-color;
+            background-color: variables.$bg-color;
+            color: variables.$dark-color02;
+            border-right: 1px solid variables.$border-color;
           }
 
           .for-editor-content {

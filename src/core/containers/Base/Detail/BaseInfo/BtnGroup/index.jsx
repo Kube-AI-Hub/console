@@ -23,7 +23,7 @@ import { isEmpty, isFunction } from 'lodash'
 
 import { Button, Icon, Dropdown, Menu } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class BtnGroup extends Component {
   static propTypes = {

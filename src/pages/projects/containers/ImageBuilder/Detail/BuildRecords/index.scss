@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .main {
   padding: 0;
@@ -12,7 +12,7 @@
 .table {
   :global {
     .table {
-      border-radius: 0 0 $border-radius $border-radius;
+      border-radius: 0 0 variables.$border-radius variables.$border-radius;
     }
   }
 }
@@ -20,7 +20,7 @@
 .clickable {
   &:hover {
     cursor: pointer;
-    color: $btn-primary-hover-bg;
+    color: variables.$btn-primary-hover-bg;
   }
 }
 
@@ -31,7 +31,7 @@
 .title {
   height: 20px;
   margin-bottom: 5px;
-  @include TypographySymbolText;
+  @include mixins.TypographySymbolText;
 }
 
 .card {

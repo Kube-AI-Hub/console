@@ -24,10 +24,11 @@ import { Icon, Loading, Tooltip } from '@kube-design/components'
 import { Empty } from 'components/Base'
 import RunStore from 'stores/s2i/run'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class Log extends React.Component {
+class Log extends React.Component {
   static defaultProps = {
     logURL: '',
     runState: '',

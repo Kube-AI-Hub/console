@@ -1,16 +1,16 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .item {
   min-width: 160px;
   margin-left: 12px;
 
   & > div {
-    @include TypographyTitleH6($dark-color07);
+    @include mixins.TypographyTitleH6(variables.$dark-color07);
   }
 
   & > p {
-    @include TypographyParagraph($dark-color01);
+    @include mixins.TypographyParagraph(variables.$dark-color01);
   }
 }
 

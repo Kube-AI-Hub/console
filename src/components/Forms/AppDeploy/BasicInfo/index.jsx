@@ -36,10 +36,11 @@ import { compareVersion } from 'utils/app'
 import { PATTERN_SERVICE_NAME } from 'utils/constants'
 
 import Placement from './Placement'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class BasicInfo extends React.Component {
+class BasicInfo extends React.Component {
   @computed
   get sortedVersions() {
     return this.props.versionStore.list.data

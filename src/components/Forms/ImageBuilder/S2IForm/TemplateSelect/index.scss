@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .form {
   margin-bottom: 12px;
@@ -8,7 +8,7 @@
 .leftIcon {
   width: 30px;
   position: absolute;
-  @include vertical-center;
+  @include mixins.vertical-center;
   left: 16px;
 }
 .loading {

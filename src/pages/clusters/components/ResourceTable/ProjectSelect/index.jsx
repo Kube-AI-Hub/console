@@ -22,10 +22,11 @@ import { pick } from 'lodash'
 import { Icon, Select } from '@kube-design/components'
 import { showNameAndAlias } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class ProjectSelect extends Component {
+class ProjectSelect extends Component {
   getProjects() {
     return [
       ...this.props.list.data.map(item => ({

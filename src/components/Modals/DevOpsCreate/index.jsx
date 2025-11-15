@@ -35,10 +35,11 @@ import WorkspaceStore from 'stores/workspace'
 import { PATTERN_ALIAS_NAME, PATTERN_SERVICE_NAME } from 'utils/constants'
 
 import { compareVersion } from 'utils/app'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class ProjectCreateModal extends React.Component {
+class ProjectCreateModal extends React.Component {
   static propTypes = {
     formTemplate: PropTypes.object,
     visible: PropTypes.bool,

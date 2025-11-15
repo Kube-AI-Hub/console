@@ -30,7 +30,7 @@ import ClusterTitle from 'components/Clusters/ClusterTitle'
 import React from 'react'
 import { getDomTitle, getLocalTime } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ClusterCard extends React.Component {
   handleClick = () => {

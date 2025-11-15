@@ -1,16 +1,16 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .title {
   margin-bottom: 12px;
-  color: $text-color;
+  color: variables.$text-color;
   font-weight: bold;
 }
 
 .screenshot {
   padding: 12px;
-  border-radius: $border-radius;
-  background-color: $bg-color;
+  border-radius: variables.$border-radius;
+  background-color: variables.$bg-color;
   overflow: hidden;
 
   .pictures {
@@ -22,11 +22,11 @@
       width: 160px;
       height: 90px;
       line-height: 90px;
-      background-color: $white;
+      background-color: variables.$white;
       text-align: center;
 
       &.upload {
-        border: 1px dashed $border-color;
+        border: 1px dashed variables.$border-color;
         cursor: pointer;
 
         .add {
@@ -46,10 +46,10 @@
         top: 0;
         width: 160px;
         height: 92px;
-        background-color: rgba($dark-color08, 0.8);
-        color: $white;
+        background-color: rgba(variables.$dark-color08, 0.8);
+        color: variables.$white;
 
-        >label {
+        > label {
           display: inline-block;
           line-height: 20px;
           cursor: pointer;
@@ -59,24 +59,23 @@
           }
         }
       }
-
     }
   }
 
   .error {
     padding: 8px 0;
-    color: $red;
+    color: variables.$red;
   }
 
   .words {
     font-size: 12px;
     line-height: 20px;
-    color: $second-text-color;
+    color: variables.$second-text-color;
 
     .upload {
       display: inline-block;
       margin: 0 12px;
-      color: $blue;
+      color: variables.$blue;
       font-weight: bold;
       cursor: pointer;
 
@@ -88,7 +87,7 @@
 
     .deleteAll {
       float: right;
-      color: $blue;
+      color: variables.$blue;
       font-weight: bold;
       cursor: pointer;
 

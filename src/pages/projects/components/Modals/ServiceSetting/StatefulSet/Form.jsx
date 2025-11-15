@@ -23,7 +23,7 @@ import Base from 'components/Forms/Service/ServiceSettings'
 import { Form, Input } from '@kube-design/components'
 import { Label, TypeSelect } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ServiceSettingsForm extends Base {
   renderName() {

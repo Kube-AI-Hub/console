@@ -21,7 +21,7 @@ import { get } from 'lodash'
 import { Select } from '@kube-design/components'
 import ContainerMonitorStore from 'stores/monitoring/container'
 import { observer } from 'mobx-react'
-import styles from './index.scss'
+import * as styles from './index.scss'
 import PhysicalResourceItem from '../../../../Overview/ResourceUsage/PhysicalResourceItem'
 
 const MetricTypes = {
@@ -29,8 +29,9 @@ const MetricTypes = {
   memory_usage: 'container_memory_usage_wo_cache',
 }
 
+export default
 @observer
-export default class Containers extends Component {
+class Containers extends Component {
   constructor(props) {
     super(props)
     this.state = {

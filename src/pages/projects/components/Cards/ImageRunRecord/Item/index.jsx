@@ -25,10 +25,11 @@ import { Button, Icon, Loading, Tooltip } from '@kube-design/components'
 import { Status } from 'components/Base'
 import { getLocalTime, parseUrl, formatSize } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class ImageBuilderLastRun extends React.Component {
+class ImageBuilderLastRun extends React.Component {
   constructor(props) {
     super(props)
     this.state = {

@@ -25,7 +25,7 @@ import { Columns, Column } from '@kube-design/components'
 import Health from 'devops/components/Health'
 import { ReactComponent as ForkIcon } from 'assets/fork.svg'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 class Nav extends Component {
   static defaultProps = {

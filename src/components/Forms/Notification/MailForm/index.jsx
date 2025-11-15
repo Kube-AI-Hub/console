@@ -27,7 +27,7 @@ import { PATTERN_HOST, PATTERN_PORT } from 'utils/constants'
 import BaseForm from '../BaseForm'
 import Item from './Item'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class MailForm extends Component {
   state = {

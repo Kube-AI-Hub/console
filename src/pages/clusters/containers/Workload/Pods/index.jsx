@@ -28,18 +28,18 @@ import ResourceTable from 'clusters/components/ResourceTable'
 
 import { getLocalTime } from 'utils'
 import { ICON_TYPES, PODS_STATUS } from 'utils/constants'
-
 import PodStore from 'stores/pod'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @withClusterList({
   store: new PodStore(),
   module: 'pods',
   name: 'POD',
   rowKey: 'uid',
 })
-export default class Pods extends React.Component {
+class Pods extends React.Component {
   componentDidMount() {
     localStorage.setItem('pod-detail-referrer', location.pathname)
   }
@@ -114,7 +114,7 @@ export default class Pods extends React.Component {
         filters: this.getPodsStatus(),
         isHideable: true,
         search: true,
-        with: '5%',
+        width: 80,
         render: (_, { podStatus }) => (
           <span>{t(podStatus.type.toUpperCase())}</span>
         ),
@@ -131,6 +131,58 @@ export default class Pods extends React.Component {
         dataIndex: 'podIp',
         isHideable: true,
         width: '15%',
+      },
+      {
+        title: t('RESOURCE_LIMIT'),
+        dataIndex: 'containers_limits',
+        isHideable: true,
+        width: 100,
+        render: (_, record) => {
+          if (record.containers && record.containers.length > 0) {
+            const { resources } = record.containers[0]
+            const { limits } = resources
+            const { cpu, memory } = {
+              cpu: limits?.cpu,
+              memory: limits?.memory,
+            }
+            return (
+              <>
+                <div>
+                  {t('CPU')}: {cpu || '-'}
+                </div>
+                <div>
+                  {t('MEMORY')}: {memory || '-'}
+                </div>
+              </>
+            )
+          }
+        },
+      },
+      {
+        title: t('RESOURCE_REQUESTS'),
+        dataIndex: 'containers_requests',
+        isHideable: true,
+        width: 100,
+        render: (_, record) => {
+          if (record.containers && record.containers.length > 0) {
+            const { resources } = record.containers[0]
+            const { requests } = resources
+            const { cpu, memory } = {
+              cpu: requests?.cpu,
+              memory: requests?.memory,
+            }
+            return (
+              <>
+                <div>
+                  {t('CPU')}: {cpu || '-'}
+                </div>
+                <div>
+                  {t('MEMORY')}: {memory || '-'}
+                </div>
+              </>
+            )
+          }
+        },
       },
       {
         title: t('UPDATE_TIME_TCAP'),

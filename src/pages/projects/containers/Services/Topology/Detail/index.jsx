@@ -27,12 +27,13 @@ import Childrens from './Childrens'
 import Containers from './Containers'
 import Tables from './Tables'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const { CollapseItem } = Collapse
 
+export default
 @observer
-export default class ServiceDetail extends Component {
+class ServiceDetail extends Component {
   static defaultProps = {
     data: {},
   }

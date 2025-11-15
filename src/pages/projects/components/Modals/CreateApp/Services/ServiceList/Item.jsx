@@ -29,7 +29,7 @@ import {
 
 import ClusterDiffs from './ClusterDiffs'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Item extends React.Component {
   static propTypes = {

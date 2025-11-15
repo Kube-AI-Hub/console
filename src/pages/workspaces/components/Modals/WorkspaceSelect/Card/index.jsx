@@ -23,7 +23,7 @@ import { isEmpty } from 'lodash'
 import React from 'react'
 import { getDisplayNameNew, getLocalTime } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class WorkspaceCard extends React.Component {
   handleClick = () => {

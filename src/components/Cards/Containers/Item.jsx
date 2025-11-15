@@ -28,7 +28,7 @@ import { createCenterWindowOpt } from 'utils/dom'
 import { getContainerStatus } from 'utils/status'
 import ContainerLogModal from 'components/Modals/ContainerLog'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ContainerItem extends React.Component {
   static propTypes = {

@@ -31,14 +31,15 @@ import { POD_STATUS, ICON_TYPES, PODS_STATUS } from 'utils/constants'
 
 import PodStore from 'stores/pod'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @withProjectList({
   store: new PodStore(),
   module: 'pods',
   name: 'POD',
 })
-export default class Pods extends React.Component {
+class Pods extends React.Component {
   componentDidMount() {
     localStorage.setItem('pod-detail-referrer', location.pathname)
   }

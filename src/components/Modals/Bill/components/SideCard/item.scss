@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .billCard {
   width: 440px;
@@ -14,7 +14,7 @@
 
   &:hover {
     cursor: pointer;
-    background: $light-color03;
+    background: variables.$light-color03;
   }
 
   :global {
@@ -91,7 +91,7 @@
 }
 
 .selected {
-  background: $dark-color07;
+  background: variables.$dark-color07;
 
   .desc {
     div {
@@ -101,7 +101,7 @@
 
   &:hover {
     cursor: pointer;
-    background: $dark-color07;
+    background: variables.$dark-color07;
   }
 }
 

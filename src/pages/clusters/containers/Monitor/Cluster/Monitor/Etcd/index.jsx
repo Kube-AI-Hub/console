@@ -27,7 +27,7 @@ import { SimpleArea, PercentArea } from 'components/Charts'
 import { Controller as MonitoringController } from 'components/Cards/Monitoring'
 import { ETCDNodes } from 'clusters/components/Cards/Monitoring'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const MetricTypes = {
   proposals_committed_rate: 'etcd_server_proposals_committed_rate',

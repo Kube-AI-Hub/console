@@ -26,10 +26,11 @@ import Cascader from 'components/Base/Cascader'
 
 import PromQLInput from 'components/Modals/CustomMonitoring/components/PromQLInput'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class MetircQueryInput extends Component {
+class MetircQueryInput extends Component {
   @computed
   get groupedMetrics() {
     const ruleRegex = /:\w+:/

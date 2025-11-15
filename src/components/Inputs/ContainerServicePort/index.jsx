@@ -22,7 +22,7 @@ import { Input, Select, Icon, Tooltip } from '@kube-design/components'
 import { NumberInput, AddonsInput } from 'components/Inputs'
 import { PROTOCOLS } from 'utils/constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const DEFAULT_PROTOCOL = 'HTTP'
 

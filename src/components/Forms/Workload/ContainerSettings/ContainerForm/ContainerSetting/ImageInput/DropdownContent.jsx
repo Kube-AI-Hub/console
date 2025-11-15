@@ -25,7 +25,7 @@ import { Icon, InputSearch, Loading } from '@kube-design/components'
 import Select from './Select'
 import Input from './Input'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class DropdownContent extends React.Component {
   static contextTypes = {

@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   width: 220px;
@@ -7,18 +7,18 @@
   margin-right: 8px;
   border-radius: 2px;
   border-radius: 4px;
-  background-color: $light-color03;
+  background-color: variables.$light-color03;
   cursor: pointer;
   flex-shrink: 0;
 
   :global {
     label.checkbox .label-value {
-      @include TypographySymbolText;
+      @include mixins.TypographySymbolText;
     }
   }
 
   &.checked {
-    background-color: $dark-color07;
+    background-color: variables.$dark-color07;
     color: #fff;
 
     :global {
@@ -28,7 +28,7 @@
     }
 
     .replicas {
-      background-color: $dark-color06;
+      background-color: variables.$dark-color06;
       .value {
         color: #fff;
       }
@@ -41,16 +41,16 @@
   height: 32px;
   margin-top: 8px;
   padding: 6px;
-  background-color: $light-color07;
+  background-color: variables.$light-color07;
   border-radius: 16px;
 
   .value {
     flex: 1;
     text-align: center;
-    @include TypographySymbolText($dark-color06);
+    @include mixins.TypographySymbolText(variables.$dark-color06);
 
     & > span {
-      color: $dark-color01;
+      color: variables.$dark-color01;
     }
   }
 }

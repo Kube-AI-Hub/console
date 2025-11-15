@@ -37,12 +37,13 @@ import DetailPage from 'core/containers/Base/Detail'
 
 import routes from './routes'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('rootStore')
 @observer
 @trigger
-export default class AppDetail extends React.Component {
+class AppDetail extends React.Component {
   store = new AppStore()
 
   versionStore = new VersionStore()

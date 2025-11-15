@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .charts {
   display: flex;
@@ -23,13 +23,21 @@
 
 .allocated {
   display: flex;
-
+  flex-wrap: wrap;
   & > div {
     min-width: 200px;
     margin-right: 20px;
+    margin-bottom: 10px;
   }
 }
-
+.resourcestotal{
+   padding: 0;
+}
+.tabResourcesItem {
+  display: inline-block;
+  width: 220px;
+  padding: 12px;
+}
 .conditions {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

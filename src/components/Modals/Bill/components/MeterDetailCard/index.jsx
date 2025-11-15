@@ -20,7 +20,7 @@ import React from 'react'
 import classnames from 'classnames'
 import { get, isEmpty, isUndefined } from 'lodash'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 import { METER_RESOURCE_TITLE } from '../../constats'
 
 const MeterDetailCard = ({

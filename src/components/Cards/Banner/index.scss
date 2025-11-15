@@ -1,10 +1,10 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
-  border-radius: $border-radius;
+  border-radius: variables.$border-radius;
   background-color: #ffffff;
-  box-shadow: $base-shadow;
+  box-shadow: variables.$base-shadow;
   margin-bottom: 12px;
 
   & > div {
@@ -20,11 +20,11 @@
   overflow: hidden;
 
   .icon {
-    @include vertical-center;
+    @include mixins.vertical-center;
     left: 20px;
     padding: 6px;
-    border-radius: 100px 0 100px 100px;
-    background-color: $bg-color;
+    border-radius: 100px;
+    background-color: variables.$bg-color;
   }
 
   .title {
@@ -49,7 +49,7 @@
   }
 
   & > a {
-    @include TypographySymbolText(#3385b0);
+    @include mixins.TypographySymbolText(#3385b0);
   }
 }
 
@@ -57,11 +57,11 @@
   position: relative;
   padding: 12px 60px 12px 52px;
   background-color: #fff;
-  border-top: 1px solid $light-color03;
+  border-top: 1px solid variables.$light-color03;
   cursor: pointer;
 
   &:hover {
-    background-color: $lightest;
+    background-color: variables.$lightest;
   }
 
   &:last-of-type {
@@ -75,7 +75,7 @@
   }
 
   .operations {
-    @include vertical-center;
+    @include mixins.vertical-center;
     right: 20px;
 
     & > a + span,
@@ -86,15 +86,15 @@
 
   .tipContent {
     & > div {
-      @include TypographyTitleH6($dark-color07);
+      @include mixins.TypographyTitleH6(variables.$dark-color07);
     }
     & > p {
-      @include TypographyParagraph($dark-color01);
+      @include mixins.TypographyParagraph(variables.$dark-color01);
     }
   }
 }
 
 .tabsWrapper {
   padding: 6px 12px;
-  background-color: $bg-color;
+  background-color: variables.$bg-color;
 }

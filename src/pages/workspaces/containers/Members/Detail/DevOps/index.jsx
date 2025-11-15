@@ -26,11 +26,12 @@ import { Card } from 'components/Base'
 
 import DevOpsStore from 'stores/devops'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('detailStore', 'workspaceStore')
 @observer
-export default class MemberDevOpsProjects extends React.Component {
+class MemberDevOpsProjects extends React.Component {
   devopsStore = new DevOpsStore()
 
   componentDidMount() {

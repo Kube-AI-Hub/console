@@ -27,7 +27,7 @@ import Confirm from 'components/Forms/Base/Confirm'
 
 import EnhanceWrapper from './wrapper'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class FormsBox extends React.Component {
   static propTypes = {

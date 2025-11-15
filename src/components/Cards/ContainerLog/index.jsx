@@ -29,12 +29,13 @@ import { Card, Empty } from 'components/Base'
 import ContainerStore from 'stores/container'
 import PodStore from 'stores/pod'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const converter = new AnsiUp()
 
+export default
 @observer
-export default class ContainerLog extends React.Component {
+class ContainerLog extends React.Component {
   constructor(props) {
     super(props)
 

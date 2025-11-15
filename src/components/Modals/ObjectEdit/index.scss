@@ -1,7 +1,7 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .body {
-  background-color: $white;
+  background-color: variables.$white;
 }
 
 .wrapper {
@@ -17,7 +17,7 @@
   min-height: 450px;
   padding: 20px;
   border-radius: 4px;
-  background-color: $card-bg-color;
+  background-color: variables.$card-bg-color;
 }
 
 .inputs {

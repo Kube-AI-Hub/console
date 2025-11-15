@@ -21,7 +21,7 @@ import { Form, Input, TextArea } from '@kube-design/components'
 import Title from 'components/Forms/Base/Title'
 import { PATTERN_NAME } from 'utils/constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class BaseInfo extends React.Component {
   render() {

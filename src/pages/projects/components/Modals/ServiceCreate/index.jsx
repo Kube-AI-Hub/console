@@ -34,7 +34,7 @@ import FORM_TEMPLATES from 'utils/form.templates'
 import { getLanguageIcon } from 'utils/devops'
 import { S2I_SUPPORTED_TYPES, B2I_SUPPORTED_TYPES } from 'utils/constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ServiceCreateModal extends React.Component {
   constructor(props) {

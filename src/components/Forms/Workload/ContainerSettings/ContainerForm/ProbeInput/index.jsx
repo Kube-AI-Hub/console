@@ -25,7 +25,7 @@ import { Button, Icon } from '@kube-design/components'
 
 import ProbeForm from '../ProbeForm'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ProbeInput extends React.Component {
   static propTypes = {

@@ -28,7 +28,7 @@ import { getSuitableValue } from 'utils/monitoring'
 import { Checkbox, Icon, Loading, Notify } from '@kube-design/components'
 import { Empty } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Resources extends React.Component {
   static propTypes = {

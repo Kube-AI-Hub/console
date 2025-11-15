@@ -19,7 +19,7 @@
 import React from 'react'
 import { Input } from '@kube-design/components'
 import classnames from 'classnames'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default function TitleInput({ title, isEditing, onChange, theme }) {
   return (

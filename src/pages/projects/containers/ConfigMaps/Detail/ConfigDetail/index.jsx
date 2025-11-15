@@ -22,7 +22,7 @@ import { observer, inject } from 'mobx-react'
 import { Card } from 'components/Base'
 import Placement from 'projects/components/Cards/Placement'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @inject('detailStore')
 @observer

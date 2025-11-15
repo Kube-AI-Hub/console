@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .card {
   position: relative;
@@ -22,23 +22,23 @@
   padding: 12px 20px;
   margin-top: 8px;
   border-radius: 22px;
-  background-color: $bg-color;
-  border: solid 1px $border-color;
+  background-color: variables.$bg-color;
+  border: solid 1px variables.$border-color;
 
   .access {
     right: 6px;
-    @include vertical-center;
+    @include mixins.vertical-center;
   }
 
   span {
     text-align: left;
-    color: $second-text-color;
+    color: variables.$second-text-color;
 
     strong {
-      font-family: $font-family-id;
-      font-size: $size-normal;
+      font-family: variables.$font-family-id;
+      font-size: variables.$size-normal;
       line-height: 1.43;
-      color: $text-color;
+      color: variables.$text-color;
     }
   }
 }

@@ -1,12 +1,12 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .cluster {
   position: relative;
   width: 326px;
   padding: 8px;
   border-radius: 2px;
-  background-color: $dark-color07;
+  background-color: variables.$dark-color07;
   margin-right: 20px;
 }
 
@@ -25,6 +25,6 @@
   top: 12px;
   right: 12px;
   padding: 18px;
-  background-color: $card-bg-color;
-  @include TypographyTitleH5($dark-color01);
+  background-color: variables.$card-bg-color;
+  @include mixins.TypographyTitleH5(variables.$dark-color01);
 }

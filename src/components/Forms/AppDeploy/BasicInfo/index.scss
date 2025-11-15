@@ -1,26 +1,26 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .title {
   margin-bottom: 20px;
   font-size: 14px;
   font-weight: 600;
   line-height: 1.43;
-  color: $dark-color07;
+  color: variables.$dark-color07;
 }
 
 .placement {
   padding: 12px;
-  border-radius: $border-radius;
-  background-color: $card-bg-color;
+  border-radius: variables.$border-radius;
+  background-color: variables.$card-bg-color;
 }
 
 .placementWrapper {
   position: relative;
   padding: 12px;
-  border: 1px solid $border-color;
-  border-radius: $border-radius;
-  background-color: $white;
-  transition: all $trans-speed ease-in-out;
+  border: 1px solid variables.$border-color;
+  border-radius: variables.$border-radius;
+  background-color: variables.$white;
+  transition: all variables.$trans-speed ease-in-out;
   opacity: 0.7;
 }
 

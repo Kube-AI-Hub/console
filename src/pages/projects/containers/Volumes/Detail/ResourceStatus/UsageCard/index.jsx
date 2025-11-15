@@ -35,7 +35,7 @@ import { Alert, Loading } from '@kube-design/components'
 import { Panel } from 'components/Base'
 import { SimpleArea } from 'components/Charts'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const METRICS = {
   inodeUsage: 'pvc_inodes_used',
@@ -48,8 +48,9 @@ const METRICS = {
 
 const UPDATE_INTERVAL = 60000
 
+export default
 @observer
-export default class UsageCard extends Component {
+class UsageCard extends Component {
   static propTypes = {
     store: PropTypes.object,
     title: PropTypes.string,

@@ -40,10 +40,11 @@ import BaseTable from 'components/Tables/Base'
 import { severityOptions } from 'components/Forms/AlertingPolicy/AlertingRules'
 
 import classnames from 'classnames'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class AlertHistory extends React.Component {
+class AlertHistory extends React.Component {
   constructor(props) {
     super(props)
 

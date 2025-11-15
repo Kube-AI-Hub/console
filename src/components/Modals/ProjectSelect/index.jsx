@@ -34,11 +34,12 @@ import { showNameAndAlias } from 'utils'
 import Card from './Card'
 import ClusterSelect from './ClusterSelect'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('rootStore')
 @observer
-export default class ProjectSelectModal extends React.Component {
+class ProjectSelectModal extends React.Component {
   constructor(props) {
     super(props)
 

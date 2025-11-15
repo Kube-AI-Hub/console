@@ -31,7 +31,7 @@ import Edge from './Edge'
 import App from './App'
 import Detail from './Detail'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Graph extends React.Component {
   static propTypes = {

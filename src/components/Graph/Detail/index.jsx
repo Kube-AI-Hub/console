@@ -26,7 +26,7 @@ import Monitors from './Monitors'
 import PolicyForm from './PolicyForm'
 import Pods from './Pods'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const { CollapseItem } = Collapse
 

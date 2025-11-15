@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   display: flex;
@@ -8,8 +8,8 @@
 
   .button,
   .item {
-    background: $dark-color07;
-    color: $white;
+    background: variables.$dark-color07;
+    color: variables.$white;
     border-radius: 2px;
     padding: 4px 10px;
 

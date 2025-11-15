@@ -24,7 +24,7 @@ import { Button, Icon } from '@kube-design/components'
 
 import { REPO_KEY_MAP } from 'utils/constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class RepoSelect extends React.Component {
   static propTypes = {

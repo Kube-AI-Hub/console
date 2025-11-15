@@ -1,9 +1,9 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .icons {
   :global {
     .icon {
-      background-color: $light-color01; 
+      background-color: variables.$light-color01;
     }
   }
 

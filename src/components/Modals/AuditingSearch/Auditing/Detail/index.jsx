@@ -39,7 +39,7 @@ import {
   httpcodes,
 } from '../utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const DefaultRealTimeConfig = {
   duration: 600,
@@ -48,8 +48,9 @@ const DefaultRealTimeConfig = {
 
 const stepLevelList = ['m', 'h', 'd', 'M', 'y']
 
+export default
 @observer
-export default class Detail extends React.PureComponent {
+class Detail extends React.PureComponent {
   constructor(props) {
     super(props)
     this.state = {

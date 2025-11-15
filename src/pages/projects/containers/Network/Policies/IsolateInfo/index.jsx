@@ -20,7 +20,7 @@ import React from 'react'
 import { Icon } from '@kube-design/components'
 import { ICON_TYPES } from 'utils/constants'
 import { Switch } from 'components/Base'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class IsolateInfo extends React.Component {
   constructor(props) {

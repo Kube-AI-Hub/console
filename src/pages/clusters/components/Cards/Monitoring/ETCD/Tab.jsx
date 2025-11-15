@@ -21,7 +21,7 @@ import classnames from 'classnames'
 
 import { Icon } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const TabItem = ({ active, icon, name, title }) => {
   const iconProps = { color: { primary: '#fff', secondary: '#fff' } }

@@ -24,7 +24,7 @@ import { Notify } from '@kube-design/components'
 
 import { PATTERN_TAG } from 'utils/constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 class Autosuggest extends Component {
   static propTypes = {

@@ -6,11 +6,12 @@ import { Input, Form } from '@kube-design/components'
 import PropTypes from 'prop-types'
 
 import SchedulePlacement from './SchedulePlacement'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const initialSeconds = 5
+export default
 @observer
-export default class Scheduling extends Component {
+class Scheduling extends Component {
   static propsTypes = {
     scheduleTemplate: PropTypes.object,
     clusters: PropTypes.array,

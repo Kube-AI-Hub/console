@@ -1,7 +1,7 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .table {
   margin: -12px;
-  border-radius: $border-radius;
+  border-radius: variables.$border-radius;
   overflow: hidden;
 }

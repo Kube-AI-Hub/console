@@ -39,10 +39,11 @@ import PipelineStore from 'stores/devops/pipelines'
 
 import ParamsInput from '../ParamsInput'
 import ActionsInput from '../ActionsInput'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class AdvanceSettings extends React.Component {
+class AdvanceSettings extends React.Component {
   constructor(props) {
     super(props)
 

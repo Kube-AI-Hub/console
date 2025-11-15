@@ -19,7 +19,7 @@
 import React from 'react'
 import { mount } from 'enzyme'
 import { set } from 'lodash'
-import styles from 'identity-obj-proxy'
+import * as styles from 'identity-obj-proxy'
 
 import Banner from './index'
 

@@ -40,11 +40,12 @@ import EditGroupModal from 'workspaces/components/Modals/EditGroup'
 import GroupTree from './GroupTree'
 import GroupUser from './GroupUser'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('rootStore', 'workspaceStore')
 @observer
-export default class Groups extends React.Component {
+class Groups extends React.Component {
   constructor(props) {
     super(props)
     this.store = new GroupStore()

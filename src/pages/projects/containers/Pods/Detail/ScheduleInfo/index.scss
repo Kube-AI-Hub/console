@@ -1,18 +1,18 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   display: flex;
   justify-content: space-between;
-  border-radius: $border-radius;
-  background-color: $card-bg-color;
+  border-radius: variables.$border-radius;
+  background-color: variables.$card-bg-color;
 }
 
 .info,
 .condition {
   position: relative;
   padding: 12px;
-  background-color: $card-bg-color;
+  background-color: variables.$card-bg-color;
 }
 
 .info {
@@ -50,11 +50,11 @@
 .text {
   min-width: 108px;
   & > div {
-    @include TypographyTitleH6($dark-color07);
+    @include mixins.TypographyTitleH6(variables.$dark-color07);
   }
 
   & > p {
-    @include TypographyParagraph($dark-color01);
+    @include mixins.TypographyParagraph(variables.$dark-color01);
   }
 
   & + .text {
@@ -96,7 +96,7 @@
   padding: 0 4px;
   border-radius: 2px;
   background-color: #f5a623;
-  color: $white;
+  color: variables.$white;
   font-weight: 600;
   line-height: 20px;
 }

@@ -22,7 +22,7 @@ import classnames from 'classnames'
 import { Button, Form } from '@kube-design/components'
 import Modal from './modal'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ModalForm extends React.Component {
   static propTypes = {

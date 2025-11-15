@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .confirmButton {
   float: right;
@@ -10,17 +10,17 @@
   padding: 12px;
   border-radius: 4px;
   background-color: #ffffff;
-  border: solid 1px $light-color03;
-  @include clearfix;
+  border: solid 1px variables.$light-color03;
+  @include mixins.clearfix;
 }
 
 .error {
   margin: 12px 0px;
-  color: $red-color03;
+  color: variables.$red-color03;
 }
 
 .clickable {
-  color: $green;
+  color: variables.$green;
   cursor: pointer;
   margin-left: 15px;
 }

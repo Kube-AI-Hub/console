@@ -22,7 +22,7 @@ import classNames from 'classnames'
 import { Link } from 'react-router-dom'
 import { Icon } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class NavItem extends React.Component {
   static propTypes = {

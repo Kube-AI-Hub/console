@@ -1,15 +1,15 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   padding: 12px;
-  background-color: $lightest;
-  border-bottom: 1px solid $border-color;
+  background-color: variables.$lightest;
+  border-bottom: 1px solid variables.$border-color;
 }
 
 .chartWrapper {
   position: relative;
-  background-color: $dark-color07;
-  border-radius: $border-radius;
+  background-color: variables.$dark-color07;
+  border-radius: variables.$border-radius;
 }
 
 .chart {
@@ -21,6 +21,6 @@
   left: 12px;
   top: 6px;
   color: #fff;
-  font-weight: $font-bold;
+  font-weight: variables.$font-bold;
   line-height: 20px;
 }

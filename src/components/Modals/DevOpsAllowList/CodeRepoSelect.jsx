@@ -19,7 +19,7 @@ import { Icon, Select } from '@kube-design/components'
 import { pick } from 'lodash'
 import React from 'react'
 import CodeStore from 'stores/codeRepo'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class CodeRepoSelect extends React.Component {
   codeStore = new CodeStore()

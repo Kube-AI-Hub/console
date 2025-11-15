@@ -24,10 +24,11 @@ import { observer } from 'mobx-react'
 import { Checkbox, Form } from '@kube-design/components'
 import { Modal } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class Echo extends React.Component {
+class Echo extends React.Component {
   static propTypes = {
     name: PropTypes.string,
   }

@@ -28,15 +28,16 @@ import SecretStore from 'stores/secret'
 
 import { getDisplayName, getLocalTime, showNameAndAlias } from 'utils'
 import { ICON_TYPES, SECRET_TYPES } from 'utils/constants'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @withClusterList({
   store: new SecretStore(),
   module: 'secrets',
   name: 'SECRET',
   rowKey: 'uid',
 })
-export default class Secrets extends React.Component {
+class Secrets extends React.Component {
   showAction = record => !record.isFedManaged
 
   showSetDefault = record =>

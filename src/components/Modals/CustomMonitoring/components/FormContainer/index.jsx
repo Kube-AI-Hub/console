@@ -20,7 +20,7 @@ import React from 'react'
 
 import { Form, Button } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default function FormContainer({
   formData,

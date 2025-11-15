@@ -23,7 +23,7 @@ import { trimEnd } from 'lodash'
 
 import NavItem from './NavItem'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 class Nav extends React.Component {
   static propTypes = {

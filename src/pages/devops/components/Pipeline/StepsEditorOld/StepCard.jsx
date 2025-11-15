@@ -27,7 +27,7 @@ import { toJS } from 'mobx'
 import { cloneDeep, isEqual } from 'lodash'
 import { renderStepArgs } from '../Card/detail'
 
-import styles from '../Sider/index.scss'
+import * as styles from '../Sider/index.scss'
 import cardStyles from '../Card/index.scss'
 import StepContainer from './StepContainer'
 

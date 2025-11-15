@@ -1,14 +1,14 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .footer {
-  border-color: $bg-color;
-  border-top: 1px solid $border-color;
+  border-color: variables.$bg-color;
+  border-top: 1px solid variables.$border-color;
 }
 
 .icons {
   margin: 0 30px 0 -6px;
 
-  >label {
+  > label {
     display: inline-block;
     margin: 0 4px 4px 0;
     width: 32px;
@@ -24,9 +24,9 @@
 
     &.active,
     &:hover {
-      border-color: $border-hover-color;
-      box-shadow: $base-shadow;
-      border-radius: $border-radius;
+      border-color: variables.$border-hover-color;
+      box-shadow: variables.$base-shadow;
+      border-radius: variables.$border-radius;
 
       svg {
         opacity: 1;

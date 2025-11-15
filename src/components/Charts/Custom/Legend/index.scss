@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .legend {
   display: flex;
@@ -31,16 +31,16 @@
     height: 6px;
     margin-right: 8px;
     border-radius: 50%;
-    background: $lightest;
+    background: variables.$lightest;
     overflow: hidden;
     pointer-events: none;
   }
 
   &.inactive {
-    color: $grey !important;
+    color: variables.$grey !important;
 
     i {
-      background: $grey !important;
+      background: variables.$grey !important;
     }
   }
 }

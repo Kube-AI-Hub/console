@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .sider {
   position: relative;
@@ -64,7 +64,7 @@
     border: solid 1px #c1c9d1;
 
     &::placeholder {
-      color: $light-color08;
+      color: variables.$light-color08;
       line-height: 20px;
     }
   }
@@ -85,11 +85,11 @@
   left: 0;
   height: 56px;
   text-align: right;
-  background-color: $bg-color;
+  background-color: variables.$bg-color;
 }
 
 .clickable {
-  color: $green;
+  color: variables.$green;
   cursor: pointer;
 }
 

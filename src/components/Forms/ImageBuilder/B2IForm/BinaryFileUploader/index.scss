@@ -1,10 +1,10 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .container {
   height: 64px;
   border-radius: 4px;
-  background-color: $white;
+  background-color: variables.$white;
   margin-bottom: 12px;
 }
 
@@ -12,8 +12,8 @@
   height: 66px;
   padding: 12px;
   border-radius: 4px;
-  border: dashed 1px $light-color06;
-  background-color: $white;
+  border: dashed 1px variables.$light-color06;
+  background-color: variables.$white;
   cursor: pointer;
   box-sizing: border-box;
 
@@ -26,12 +26,12 @@
   }
   .title {
     height: 20px;
-    @include TypographyTitleH6;
+    @include mixins.TypographyTitleH6;
   }
   .desc {
     height: 20px;
-    @include ellipsis;
-    @include TypographyParagraph($dark-color01);
+    @include mixins.ellipsis;
+    @include mixins.TypographyParagraph(variables.$dark-color01);
   }
 }
 
@@ -40,8 +40,8 @@
   height: 66px;
   padding: 12px;
   border-radius: 4px;
-  border: solid 1px $border-color;
-  background-color: $white;
+  border: solid 1px variables.$border-color;
+  background-color: variables.$white;
   box-sizing: border-box;
 
   .icon {
@@ -57,12 +57,12 @@
       height: 20px;
       .fileName {
         height: 20px;
-        @include TypographyTitleH6;
+        @include mixins.TypographyTitleH6;
       }
       .uploadText {
         margin-right: 5px;
         float: right;
-        @include TypographyParagraph($dark-color01);
+        @include mixins.TypographyParagraph(variables.$dark-color01);
       }
     }
 
@@ -75,12 +75,12 @@
       :global(.lego-progress-inner) {
         height: 8px;
         border-radius: 2px;
-        background-color: $light-color02;
+        background-color: variables.$light-color02;
       }
       :global(.lego-progress-bg) {
         height: 8px;
         border-radius: 2px;
-        background-color: $primary;
+        background-color: variables.$primary;
       }
     }
   }

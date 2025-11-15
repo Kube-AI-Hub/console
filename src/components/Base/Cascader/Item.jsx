@@ -21,7 +21,7 @@ import classNames from 'classnames'
 import { Icon } from '@kube-design/components'
 import Options from './Options'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Item extends Component {
   ref = React.createRef()

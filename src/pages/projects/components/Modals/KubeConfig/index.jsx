@@ -24,7 +24,7 @@ import { Button, Icon, Notify } from '@kube-design/components'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { Modal, CodeEditor } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class KubeConfigModal extends React.Component {
   static propTypes = {

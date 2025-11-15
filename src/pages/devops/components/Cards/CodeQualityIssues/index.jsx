@@ -24,7 +24,7 @@ import { parseUrl } from 'utils'
 
 import Issue from './issue'
 import Status from './ClassIcon'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 class CodeQualityIssues extends React.Component {
   static propTypes = {

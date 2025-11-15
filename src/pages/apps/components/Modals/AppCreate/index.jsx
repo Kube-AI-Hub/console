@@ -25,7 +25,7 @@ import { Modal } from 'components/Base'
 import ToggleView from 'apps/components/ToggleView'
 import { getWebsiteUrl } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class AppCreate extends Component {
   static propTypes = {

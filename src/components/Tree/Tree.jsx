@@ -21,7 +21,7 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import contextTypes from './contextTypes'
 
-import styles from './style.scss'
+import * as styles from './style.scss'
 import TreeNode from './TreeNode'
 import {
   arrAdd,

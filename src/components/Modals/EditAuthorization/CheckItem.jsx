@@ -22,7 +22,7 @@ import { get, isEmpty } from 'lodash'
 import { Checkbox, Tag, Notify } from '@kube-design/components'
 import { Text } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class CheckItem extends Component {
   handleCheck = () => {

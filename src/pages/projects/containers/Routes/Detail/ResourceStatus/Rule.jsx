@@ -21,7 +21,7 @@ import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
 import { Button, Icon, Columns, Column, Tooltip } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const Card = ({ gateway, rule, tls = [], prefix }) => {
   const tlsItem = tls.find(item => item.hosts && item.hosts.includes(rule.host))

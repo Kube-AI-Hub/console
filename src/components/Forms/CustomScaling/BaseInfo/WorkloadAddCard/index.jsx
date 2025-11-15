@@ -22,7 +22,7 @@ import React from 'react'
 
 import WorkloadStore from 'stores/workload'
 import Card from './Card'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class WorkloadAddCard extends React.Component {
   state = {

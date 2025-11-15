@@ -34,11 +34,12 @@ import ServiceStore from 'stores/service'
 import { generateId, showNameAndAlias } from 'utils'
 import { ProjectSelect } from '../../../Inputs'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('projectStore')
 @observer
-export default class NetworkPoliciesModal extends React.Component {
+class NetworkPoliciesModal extends React.Component {
   @observable tabName = 'projects'
 
   @observable specType = ''

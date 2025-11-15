@@ -24,7 +24,7 @@ import { Modal } from 'components/Base'
 
 import RouteRulesForm from 'components/Forms/Route/RouteRules'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 class RouteRulesEdit extends React.Component {
   static propTypes = {

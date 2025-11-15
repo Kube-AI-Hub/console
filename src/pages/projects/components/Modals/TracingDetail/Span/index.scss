@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   padding: 2px 0;
@@ -10,7 +10,7 @@
 
   &.selected,
   &:hover {
-    background-color: $light-color07;
+    background-color: variables.$light-color07;
   }
 
   :global .column {
@@ -29,7 +29,7 @@
     min-width: 100%;
     overflow: visible;
     z-index: 1;
-    background-color: $light-color07;
+    background-color: variables.$light-color07;
   }
 }
 
@@ -38,7 +38,7 @@
   flex: 1 1 auto;
   outline: none;
   overflow: hidden;
-  font-family: $font-family-id;
+  font-family: variables.$font-family-id;
   padding-left: 12px;
   padding-right: 12px;
   text-overflow: ellipsis;
@@ -67,7 +67,7 @@
 
   .svc {
     padding-right: 12px;
-    font-weight: $font-bold;
+    font-weight: variables.$font-bold;
   }
 
   .endpoint {

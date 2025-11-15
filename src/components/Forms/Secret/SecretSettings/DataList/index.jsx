@@ -21,7 +21,7 @@ import { omit } from 'lodash'
 import { List } from 'components/Base'
 import { safeAtob } from 'utils/base64'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class SecretDataList extends React.Component {
   static defaultProps = {

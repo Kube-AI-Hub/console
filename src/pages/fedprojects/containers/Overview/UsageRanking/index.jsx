@@ -28,7 +28,7 @@ import Store from 'stores/rank/workload'
 import { showNameAndAlias } from 'utils'
 import { getSuitableUnit, getValueByUnit } from 'utils/monitoring'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const UNITS = {
   workload_cpu_usage: 'cpu',

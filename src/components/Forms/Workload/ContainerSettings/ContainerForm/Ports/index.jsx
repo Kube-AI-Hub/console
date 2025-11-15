@@ -29,7 +29,7 @@ import {
   ArrayInput,
 } from 'components/Inputs'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Ports extends React.Component {
   static defaultProps = {
@@ -138,6 +138,7 @@ export default class Ports extends React.Component {
                 </Button>
               )
             }
+            onChange={this.props.onChange}
           >
             {withService ? <ContainerServicePort /> : <ContainerPort />}
           </ArrayInput>

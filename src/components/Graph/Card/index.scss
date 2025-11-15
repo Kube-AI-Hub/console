@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .card {
   position: relative;
@@ -17,7 +17,7 @@
 
 .wrapper {
   padding: 20px 12px 12px;
-  border-radius: $border-radius;
+  border-radius: variables.$border-radius;
   box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.06);
   background-color: #fff;
 }
@@ -25,11 +25,11 @@
 .detail {
   padding: 8px;
   border-radius: 4px;
-  background-color: $lightest;
+  background-color: variables.$lightest;
 
   & > p {
-    font-family: $font-family-id;
-    font-weight: $font-bold;
+    font-family: variables.$font-family-id;
+    font-weight: variables.$font-bold;
     line-break: 1.67;
 
     :global .icon {
@@ -44,8 +44,8 @@
 }
 
 .gatewayName {
-  font-family: $font-family-id;
-  font-weight: $font-bold;
+  font-family: variables.$font-family-id;
+  font-weight: variables.$font-bold;
   line-height: 1.67;
 
   :global .icon {
@@ -57,9 +57,9 @@
   margin-top: 12px;
   padding: 2px 8px 2px 2px;
   border-radius: 3px;
-  background-color: $bg-color;
-  font-family: $font-family-id;
-  font-weight: $font-bold;
+  background-color: variables.$bg-color;
+  font-family: variables.$font-family-id;
+  font-weight: variables.$font-bold;
   line-height: 16px;
   display: flex;
   flex-wrap: wrap;
@@ -72,7 +72,7 @@
       border-radius: 1px;
       background-color: #36435c;
       text-shadow: 0 2px 4px rgba(36, 46, 66, 0.1);
-      font-weight: $font-bold;
+      font-weight: variables.$font-bold;
       line-height: 16px;
       color: #fff;
     }
@@ -85,7 +85,7 @@
   top: 0;
   left: 50%;
   padding: 4px 12px;
-  font-weight: $font-bold;
+  font-weight: variables.$font-bold;
   line-height: 1.67;
   color: #fff;
   border-radius: 16px;

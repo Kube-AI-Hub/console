@@ -30,10 +30,11 @@ import { Card } from 'components/Base'
 import { getSuitableUnit, getValueByUnit } from 'utils/monitoring'
 import { coreUnitTS } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class HPACard extends React.Component {
+class HPACard extends React.Component {
   static propTypes = {
     className: PropTypes.string,
     title: PropTypes.string,

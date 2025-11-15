@@ -26,8 +26,9 @@ import { TypeSelect } from 'components/Base'
 import { ArrayInput, ObjectInput } from 'components/Inputs'
 import WorkloadStore from 'stores/workload'
 
+export default
 @observer
-export default class AffinityForm extends React.Component {
+class AffinityForm extends React.Component {
   static propTypes = {
     data: PropTypes.object,
     checkable: PropTypes.bool,

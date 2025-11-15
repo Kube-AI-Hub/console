@@ -23,10 +23,11 @@ import { observer } from 'mobx-react'
 import { Modal } from 'components/Base'
 import { Form, Input } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class Expression extends React.Component {
+class Expression extends React.Component {
   static propTypes = {
     name: PropTypes.string,
   }

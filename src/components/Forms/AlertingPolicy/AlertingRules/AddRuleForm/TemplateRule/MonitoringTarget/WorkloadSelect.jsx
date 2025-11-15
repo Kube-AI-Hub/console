@@ -19,7 +19,7 @@
 import React, { Component } from 'react'
 import { pick } from 'lodash'
 import { Select } from '@kube-design/components'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class WorkloadSelect extends Component {
   selectRef = React.createRef()

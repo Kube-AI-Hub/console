@@ -28,7 +28,7 @@ import { CodeEditor } from 'components/Base'
 
 import { getValue, getAllYAMLValue } from 'utils/yaml'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const objectToYaml = formTemplate => {
   if (formTemplate.metadata) {

@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   margin-top: 8px;
@@ -19,6 +19,6 @@
   display: flex;
   padding: 5px 10px 5px 20px;
   border-radius: 22px;
-  border: 1px solid $border-color;
-  background-color: $bg-color;
+  border: 1px solid variables.$border-color;
+  background-color: variables.$bg-color;
 }

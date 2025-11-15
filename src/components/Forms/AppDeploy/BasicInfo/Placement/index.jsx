@@ -38,10 +38,11 @@ import ProjectStore from 'stores/project'
 import WorkspaceStore from 'stores/workspace'
 import { showNameAndAlias } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class Placement extends Component {
+class Placement extends Component {
   state = {
     showForm: false,
     initializing: true,

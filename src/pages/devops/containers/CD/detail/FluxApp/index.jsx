@@ -24,7 +24,7 @@ import { toJS } from 'mobx'
 import PropTypes from 'prop-types'
 import Table from 'components/Tables/List'
 import { get } from 'lodash'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @inject('detailStore')
 @observer

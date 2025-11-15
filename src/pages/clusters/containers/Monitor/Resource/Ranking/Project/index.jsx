@@ -35,7 +35,7 @@ import Store from 'stores/rank/project'
 
 import Table from './Table'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @observer
 class Ranking extends React.Component {

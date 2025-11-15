@@ -1,24 +1,24 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .clusterSelector {
   width: 200px;
-  color: $white;
+  color: variables.$white;
   font-size: 12px;
   margin-left: 15px;
 
   :global {
     .select-control {
-      background-color: $dark-color07 !important;
+      background-color: variables.$dark-color07 !important;
       box-shadow: none !important;
       border: none !important;
     }
 
     .select-value {
-      color: $white !important;
+      color: variables.$white !important;
     }
 
     .select-icon .kubed-icon-dark {
-      color: $white;
+      color: variables.$white;
     }
   }
 }

@@ -28,7 +28,7 @@ import ObjectMapper from 'utils/object.mapper'
 import RuleList from './RuleList'
 import RuleForm from './RuleForm'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Routes extends React.Component {
   constructor(props) {

@@ -24,6 +24,8 @@ import ContainerMonitorStore from 'stores/monitoring/container'
 import { Component as Base } from '../Detail/Monitoring'
 
 const MetricTypes = {
+  gpu_usage: 'container_gpu_usage',
+  gpu_memory_usage: 'container_gpu_memory_usage',
   cpu_usage: 'container_cpu_usage',
   memory_usage: 'container_memory_usage_wo_cache',
 }
@@ -53,6 +55,20 @@ class Monitorings extends Base {
 
   getMonitoringCfgs = () => [
     {
+      type: 'gpu',
+      title: 'GPU_USAGE',
+      unitType: 'gpu',
+      legend: ['USAGE'],
+      data: get(this.metrics, `${MetricTypes.gpu_usage}.data.result`),
+    },
+    {
+      type: 'gpu_memory',
+      title: 'GPU_MEMORY_USAGE',
+      unitType: 'memory',
+      legend: ['USAGE'],
+      data: get(this.metrics, `${MetricTypes.gpu_memory_usage}.data.result`),
+    },
+    {
       type: 'cpu',
       title: 'CPU_USAGE',
       unitType: 'cpu',
@@ -69,5 +85,5 @@ class Monitorings extends Base {
   ]
 }
 
-export default inject('rootStore', 'detailStore')(observer(Monitorings))
+export default inject('rootStore', 'detailStore')(Monitorings)
 export const Component = Monitorings

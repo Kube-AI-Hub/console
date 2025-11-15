@@ -1,9 +1,9 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .title {
   margin-bottom: 12px;
-  @include TypographySymbolText;
+  @include mixins.TypographySymbolText;
 }
 
 .status {
@@ -12,8 +12,8 @@
   justify-content: space-between;
   padding: 12px;
   margin-top: 12px;
-  background-color: $card-bg-color;
-  border-radius: $border-radius;
+  background-color: variables.$card-bg-color;
+  border-radius: variables.$border-radius;
 
   button {
     height: 32px;

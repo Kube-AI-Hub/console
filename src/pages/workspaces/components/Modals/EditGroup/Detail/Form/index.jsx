@@ -30,12 +30,13 @@ import { compareVersion } from 'utils'
 import { PATTERN_ALIAS_NAME, PATTERN_NAME } from 'utils/constants'
 import DevopsSelect from './DevopsSelect'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 import ProjectSelect from './ProjectSelect'
 
+export default
 @observer
-export default class GroupForm extends React.Component {
+class GroupForm extends React.Component {
   static propTypes = {
     workspace: PropTypes.string,
     groupId: PropTypes.string,
@@ -198,7 +199,7 @@ export default class GroupForm extends React.Component {
             desc={
               t('GROUP_WORKSPACE_ROLE_DESC') +
               (this.needUpgrade
-                ? t('MEMBER_CLUSTER_UPGRADE_TIP', { version: 'v3.1.0' })
+                ? t('MEMBER_CLUSTER_UPGRADE_TIP', { version: 'v3.0.0' })
                 : '')
             }
           >

@@ -25,7 +25,7 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { PATTERN_ALIAS_NAME } from 'utils/constants'
 import UnitInput from '../BaseInfo/UnitInput'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class EditAlarmBasicInfoModal extends React.Component {
   static propTypes = {

@@ -1,12 +1,12 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   position: relative;
   padding: 12px 12px 44px 12px;
   border-radius: 4px;
   box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.2);
-  border: solid 1px $input-hover-color;
-  background-color: $white;
+  border: solid 1px variables.$input-hover-color;
+  background-color: variables.$white;
 }
 
 .radioGroup {
@@ -30,6 +30,6 @@
 .object {
   padding: 6px 68px 6px 17px;
   border-radius: 60px;
-  background-color: $bg-color;
-  border: solid 1px $border-color;
+  background-color: variables.$bg-color;
+  border: solid 1px variables.$border-color;
 }

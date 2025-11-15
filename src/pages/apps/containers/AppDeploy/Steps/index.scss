@@ -1,25 +1,25 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   display: flex;
-  width: $apps-content-width;
+  width: variables.$apps-content-width;
   padding: 16px 24px;
   margin: 0 auto;
 
   & > div {
-    @include TypographySymbolText();
+    @include mixins.TypographySymbolText();
 
     & + div {
       position: relative;
       padding-left: 84px;
       &::before {
         content: '';
-        @include vertical-center;
+        @include mixins.vertical-center;
         left: 16px;
         height: 1px;
         width: 52px;
-        border-bottom: 1px dashed $light-color07;
+        border-bottom: 1px dashed variables.$light-color07;
       }
     }
 
@@ -38,17 +38,17 @@
   box-sizing: border-box;
 
   &.pending {
-    border: solid 2px $light-color08;
-    background-color: $white;
+    border: solid 2px variables.$light-color08;
+    background-color: variables.$white;
   }
 
   &.current {
     box-shadow: 0 4px 8px 0 rgba(85, 188, 138, 0.2);
-    border: solid 2px $primary;
-    background-color: $white;
+    border: solid 2px variables.$primary;
+    background-color: variables.$white;
   }
 
   &.fullfill {
-    background-color: $primary;
+    background-color: variables.$primary;
   }
 }

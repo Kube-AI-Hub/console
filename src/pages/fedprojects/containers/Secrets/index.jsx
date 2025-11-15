@@ -28,12 +28,13 @@ import { ICON_TYPES, SECRET_TYPES } from 'utils/constants'
 
 import FederatedStore from 'stores/federated'
 
+export default
 @withProjectList({
   store: new FederatedStore({ module: 'secrets' }),
   module: 'secrets',
   name: 'SECRET',
 })
-export default class Secrets extends React.Component {
+class Secrets extends React.Component {
   get itemActions() {
     const { trigger, name } = this.props
     return [

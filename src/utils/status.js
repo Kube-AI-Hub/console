@@ -228,11 +228,10 @@ export const getPodStatusAndRestartCount = pod => {
         initializing = true
       } else if (
         waiting &&
-        terminated &&
-        !isEmpty(terminated.reason) &&
+        waiting.reason &&
         waiting.reason !== 'PodInitializing'
       ) {
-        status = `Init:${terminated.reason}`
+        status = `Init:${waiting.reason}`
         initializing = true
       } else {
         const len = get(pod, 'spec.initContainers.length')

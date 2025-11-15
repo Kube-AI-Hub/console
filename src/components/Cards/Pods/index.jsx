@@ -44,16 +44,19 @@ import { joinSelector, showNameAndAlias } from 'utils'
 import { startAutoRefresh, stopAutoRefresh } from 'utils/monitoring'
 import ObjectMapper from 'utils/object.mapper'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 import PodItem from './Item'
 
 const MetricTypes = {
+  gpu: 'pod_gpu_usage',
+  gpu_memory: 'pod_gpu_memory_usage',
   cpu: 'pod_cpu_usage',
   memory: 'pod_memory_usage_wo_cache',
 }
 
+export default
 @observer
-export default class PodsCard extends React.Component {
+class PodsCard extends React.Component {
   static propTypes = {
     prefix: PropTypes.string,
     title: PropTypes.string,
@@ -262,6 +265,7 @@ export default class PodsCard extends React.Component {
       const records = get(data, `${value}.data.result`) || []
       metrics[key] = records.find(item => get(item, 'metric.pod') === pod.name)
     })
+
     return metrics
   }
 

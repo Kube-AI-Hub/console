@@ -28,15 +28,16 @@ import { Loading } from '@kube-design/components'
 import { Card } from 'components/Base'
 import { SimpleArea } from 'components/Charts'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const MetricTypes = {
   namespace_count: 'cluster_namespace_count',
 }
 
+export default
 @inject('rootStore')
 @observer
-export default class ProjectTrend extends React.Component {
+class ProjectTrend extends React.Component {
   constructor(props) {
     super(props)
 

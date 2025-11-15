@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 :global {
   .pipeline_status_icon {
     display: inline-block;
@@ -42,7 +42,7 @@
 
 .success {
   background-image: url('/assets/pipeline-success.svg');
-  background-color: $green;
+  background-color: variables.$green;
 }
 
 .paused {

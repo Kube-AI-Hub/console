@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .selector {
   &.active {
@@ -31,13 +31,13 @@
   min-width: 230px;
   padding: 6px !important;
   line-height: 20px;
-  color: $white;
+  color: variables.$white;
   border: none;
   border-radius: 4px;
-  background-color: $dark;
+  background-color: variables.$dark;
 
   &:hover {
-    background-color: $dark !important;
+    background-color: variables.$dark !important;
   }
 
   & > div {
@@ -51,7 +51,7 @@
     margin-right: 24px;
     text-align: left;
 
-    @include ellipsis;
+    @include mixins.ellipsis;
   }
 
   .arrow {
@@ -83,6 +83,6 @@
   width: 330px;
   padding: 20px;
   border-radius: 4px;
-  background-color: $white;
+  background-color: variables.$white;
   box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.06);
 }

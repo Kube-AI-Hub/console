@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .contentWrapper {
   min-height: 500px;
@@ -14,7 +14,7 @@
 
 .footer {
   padding: 12px 20px;
-  background-color: $lightest;
+  background-color: variables.$lightest;
   text-align: right;
 }
 

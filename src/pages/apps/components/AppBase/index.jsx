@@ -25,7 +25,7 @@ import moment from 'moment-mini'
 import { safeParseJSON } from 'utils'
 import { getAppCategoryNames } from 'utils/app'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class AppBase extends React.PureComponent {
   static propTypes = {

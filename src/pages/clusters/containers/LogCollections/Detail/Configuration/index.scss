@@ -1,7 +1,7 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .attributes {
-  background: $lightest;
+  background: variables.$lightest;
   padding: 12px;
 
   li.item {

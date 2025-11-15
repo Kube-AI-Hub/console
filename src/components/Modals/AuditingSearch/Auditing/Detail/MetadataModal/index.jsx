@@ -3,7 +3,7 @@ import { Tabs, Icon } from '@kube-design/components'
 
 import Metadata from './Metadata'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const { TabPanel } = Tabs
 

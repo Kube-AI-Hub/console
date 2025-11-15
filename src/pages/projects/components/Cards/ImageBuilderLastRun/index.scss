@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .builderContent {
   display: grid;
@@ -8,7 +8,7 @@
   padding: 12px;
   height: 64px;
   border-radius: 4px;
-  background-color: $light-color01;
+  background-color: variables.$light-color01;
 
   li {
     height: 40px;
@@ -25,17 +25,17 @@
     }
 
     .info {
-      @include ellipsis;
+      @include mixins.ellipsis;
 
       .value {
         height: 20px;
-        @include ellipsis;
-        @include TypographyTitleH6;
+        @include mixins.ellipsis;
+        @include mixins.TypographyTitleH6;
       }
 
       .name {
         height: 20px;
-        @include TypographyParagraph($dark-color01);
+        @include mixins.TypographyParagraph(variables.$dark-color01);
       }
     }
   }
@@ -52,7 +52,7 @@
 
       &:hover {
         .info p {
-          color: $primary;
+          color: variables.$primary;
         }
       }
     }

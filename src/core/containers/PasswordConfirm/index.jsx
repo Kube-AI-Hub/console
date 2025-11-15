@@ -29,14 +29,15 @@ import { get } from 'lodash'
 import UserStore from 'stores/user'
 import { PATTERN_PASSWORD } from 'utils/constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const PATTERN_WORD = /(?=.*?[A-Z])(?=.*?[a-z])/
 const PATTERN_NUMBER = /(?=.*?[0-9])/
 
+export default
 @inject('rootStore')
 @observer
-export default class PasswordConfirm extends Component {
+class PasswordConfirm extends Component {
   state = {
     formData: {},
     password: '',

@@ -36,7 +36,7 @@ import MountConfig from './MountConfig'
 import VolumeTemplateList from './VolumeTemplateList'
 import AddVolumeTemplate from './AddVolumeTemplate'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 class VolumeSettings extends React.Component {
   constructor(props) {
@@ -172,9 +172,9 @@ class VolumeSettings extends React.Component {
     })
   }
 
-  formatSpecVolume = (volume = {}, newVolume) => {
+  formatSpecVolume = (volume, newVolume) => {
     let newSpecVolume
-
+    volume = volume || {}
     if (isNotPersistentVolume(newVolume)) {
       newSpecVolume = newVolume
     } else {
@@ -417,7 +417,9 @@ class VolumeSettings extends React.Component {
     )
   }
 
-  handleVolume(newVolume = {}, newVolumeMounts = [], omitEditVolume) {
+  handleVolume(newVolume, newVolumeMounts, omitEditVolume) {
+    newVolume = newVolume || {}
+    newVolumeMounts = newVolumeMounts || []
     if (!newVolume.uid) {
       newVolumeMounts.forEach(vm => {
         vm.name = newVolume.name

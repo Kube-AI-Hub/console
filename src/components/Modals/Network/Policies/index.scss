@@ -1,19 +1,19 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .panel_p {
-  background-color: $light-color01;
+  background-color: variables.$light-color01;
 }
 .panel_s {
-  background-color: $light-color01;
+  background-color: variables.$light-color01;
   padding: 0 !important;
 }
 .list {
   min-height: 37px;
   overflow-y: auto;
   background-color: #fff;
-  border-radius: $border-radius;
-  border: 1px solid $border-color;
+  border-radius: variables.$border-radius;
+  border: 1px solid variables.$border-color;
 
   & > li {
     padding: 8px 12px;
@@ -24,12 +24,12 @@
     }
 
     & + li {
-      border-top: 1px solid $border-color;
+      border-top: 1px solid variables.$border-color;
     }
   }
 }
 .sheader {
-  background-color: $light-color02;
+  background-color: variables.$light-color02;
   padding: 7px 0 7px 12px;
 }
 .sbody {
@@ -50,14 +50,14 @@
   }
   &_desc {
     margin-top: 4px;
-    color: $dark-color01;
+    color: variables.$dark-color01;
   }
 }
 .rulerow {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: $light-color02;
+  background-color: variables.$light-color02;
   padding: 6px 24px;
   border-radius: 22px;
   margin-bottom: 5px;
@@ -73,11 +73,11 @@
   }
 }
 .error {
-  border: 1px solid $danger !important;
+  border: 1px solid variables.$danger !important;
 }
 .errColor {
   margin-top: 4px;
-  color: $danger;
+  color: variables.$danger;
 }
 .addBtn {
   display: flex;
@@ -90,24 +90,24 @@
 }
 .disp {
   margin-top: 4px;
-  color: $second-text-color;
+  color: variables.$second-text-color;
 }
 .dirCheck {
   :global {
     label.radio-button {
-      @include TypographySymbolText();
+      @include mixins.TypographySymbolText();
       height: auto;
       padding: 15px;
-      border-radius: $border-radius;
-      border: 1px solid $border-color;
+      border-radius: variables.$border-radius;
+      border: 1px solid variables.$border-color;
       margin-right: 4px;
-      transition: all $trans-speed ease;
+      transition: all variables.$trans-speed ease;
 
       &:hover,
       &.checked {
-        border-color: $dark-color01;
-        background-color: $white;
-        color: $text-color;
+        border-color: variables.$dark-color01;
+        background-color: variables.$white;
+        color: variables.$text-color;
       }
 
       &.checked {

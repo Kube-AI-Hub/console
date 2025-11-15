@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .taskList {
   height: calc(100% - 80px);
@@ -13,7 +13,7 @@
   padding: 12px 12px 12px 24px;
   border-radius: 4px;
   background-color: #ffffff;
-  border: solid 1px $light-color03;
+  border: solid 1px variables.$light-color03;
   margin-bottom: 8px;
   color: #242e42;
   cursor: pointer;
@@ -60,7 +60,7 @@
   padding: 5px;
   margin-bottom: 15px;
   border-radius: 4px;
-  background-color: $bg-color;
+  background-color: variables.$bg-color;
 }
 
 .tab {
@@ -71,7 +71,7 @@
   line-height: 30px;
   text-align: center;
   border-radius: 4px;
-  background-color: $bg-color;
+  background-color: variables.$bg-color;
   margin: 0 4px;
   cursor: pointer;
 }

@@ -25,7 +25,7 @@ import React from 'react'
 import { showNameAndAlias } from 'utils'
 import { PROTOCOLS } from 'utils/constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ContainerPorts extends React.Component {
   static propTypes = {

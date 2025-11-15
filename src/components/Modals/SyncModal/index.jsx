@@ -23,10 +23,11 @@ import { Input, Form, Checkbox, Select } from '@kube-design/components'
 import { Modal } from 'components/Base'
 import { get, set } from 'lodash'
 import { PRUNE_PROPAGATION_POLICY_OPTIONS } from 'utils/constants'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class SyncModal extends React.Component {
+class SyncModal extends React.Component {
   static propTypes = {
     store: PropTypes.object,
     module: PropTypes.string,

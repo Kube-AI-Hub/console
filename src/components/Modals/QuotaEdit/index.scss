@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .body {
   margin: -20px;
@@ -8,7 +8,7 @@
 .quotaItem {
   padding: 12px;
   border-radius: 2px;
-  background-color: $lightest;
+  background-color: variables.$lightest;
 
   input {
     width: 398px;

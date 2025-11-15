@@ -1,7 +1,7 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .body {
-  background-color: $white;
+  background-color: variables.$white;
   padding-top: 10px;
 }
 
@@ -18,18 +18,18 @@
     margin-bottom: 12px;
 
     &.canCreate {
-      border: 1px solid $border-hover-color;
-      box-shadow: $head-shadow;
+      border: 1px solid variables.$border-hover-color;
+      box-shadow: variables.$head-shadow;
     }
   }
 
   .checkFiles {
     position: relative;
-    background-color: $card-bg-color;
+    background-color: variables.$card-bg-color;
     padding: 12px;
 
     ul {
-      background-color: $white;
+      background-color: variables.$white;
     }
 
     li {
@@ -45,18 +45,18 @@
       &.error {
         .name,
         .description {
-          color: $red;
+          color: variables.$red;
         }
       }
     }
 
     .name {
       min-width: 160px;
-      color: $second-text-color;
+      color: variables.$second-text-color;
     }
 
     .description {
-      color: $text-color;
+      color: variables.$text-color;
     }
 
     .configMask {
@@ -66,7 +66,11 @@
       right: 0;
       bottom: 0;
       z-index: 2;
-      background-image: linear-gradient(180deg,rgba(249,250,251,.75), $white);
+      background-image: linear-gradient(
+        180deg,
+        rgba(249, 250, 251, 0.75),
+        variables.$white
+      );
     }
   }
 
@@ -74,11 +78,11 @@
     margin: 8px 0 12px;
     line-height: 20px;
     font-size: 12px;
-    color: $text-color;
+    color: variables.$text-color;
     text-align: right;
 
     a {
-      color: $blue;
+      color: variables.$blue;
     }
   }
 }
@@ -86,7 +90,7 @@
 .appInfo {
   .title {
     font-weight: bold;
-    color: $title-color;
+    color: variables.$title-color;
     margin-bottom: 20px;
   }
 
@@ -97,16 +101,16 @@
     }
     dt {
       font-weight: bold;
-      color: $title-color;
+      color: variables.$title-color;
     }
     dl {
-      color: $second-text-color;
+      color: variables.$second-text-color;
     }
   }
 
   .appIcon {
     text-align: center;
-    color: $blue;
+    color: variables.$blue;
     cursor: pointer;
 
     .iconShow {
@@ -116,7 +120,7 @@
       justify-content: center;
       width: 90px;
       height: 90px;
-      background-color: $bg-color;
+      background-color: variables.$bg-color;
     }
 
     .reload {
@@ -125,4 +129,3 @@
     }
   }
 }
-

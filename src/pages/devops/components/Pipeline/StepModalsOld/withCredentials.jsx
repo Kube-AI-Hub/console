@@ -25,7 +25,7 @@ import { Form, Input, Select, Tag } from '@kube-design/components'
 import { Modal } from 'components/Base'
 import { groovyToJS } from 'utils/devops'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const formatParams = (formData, type) => {
   const content = Object.keys(formData).reduce(
@@ -55,8 +55,9 @@ const setCredentialType = str => {
   return null
 }
 
+export default
 @observer
-export default class WithCredentials extends React.Component {
+class WithCredentials extends React.Component {
   static propTypes = {
     name: PropTypes.string,
   }

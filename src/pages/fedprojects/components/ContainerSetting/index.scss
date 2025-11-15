@@ -1,10 +1,10 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .message {
   margin-top: 12px;
   padding: 8px;
   border-radius: 4px;
-  background-color: $bg-color;
+  background-color: variables.$bg-color;
 
   p + p {
     margin-top: 4px;

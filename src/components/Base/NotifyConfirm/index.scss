@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   position: fixed;
@@ -9,11 +9,11 @@
 
 .card {
   min-width: 320px;
-  color: $dark;
-  border-radius: $border-radius;
+  color: variables.$dark;
+  border-radius: variables.$border-radius;
   box-shadow: 0 6px 16px 0 rgba(33, 43, 54, 0.2);
-  background-color: $white;
-  transition: all $trans-speed;
+  background-color: variables.$white;
+  transition: all variables.$trans-speed;
   transform-origin: top center;
   animation-duration: 0.3s;
 
@@ -37,8 +37,8 @@
     justify-content: flex-end;
     align-items: center;
     padding: 8px 20px;
-    border-radius: 0 0 $border-radius $border-radius;
-    background-color: $light;
+    border-radius: 0 0 variables.$border-radius variables.$border-radius;
+    background-color: variables.$light;
   }
 }
 
@@ -50,15 +50,15 @@
   margin-bottom: 8px;
 
   strong {
-    font-size: $size-normal;
+    font-size: variables.$size-normal;
   }
 
   :global {
     .icon {
       margin-right: 6px;
       svg {
-        --primary-color: #{$white};
-        --secondary-color: #{$green};
+        --primary-color: #{variables.$white};
+        --secondary-color: #{variables.$green};
       }
     }
   }

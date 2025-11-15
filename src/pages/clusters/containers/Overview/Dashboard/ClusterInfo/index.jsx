@@ -21,10 +21,11 @@ import { get } from 'lodash'
 import { inject } from 'mobx-react'
 import { Panel, Text } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('rootStore')
-export default class ClusterInfo extends Component {
+class ClusterInfo extends Component {
   handleClick = () => {
     const { cluster, rootStore } = this.props
     rootStore.routing.push(`/clusters/${cluster.name}/visibility`)

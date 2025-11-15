@@ -1,23 +1,23 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .editorWrapper {
   margin-top: 12px;
   padding: 12px;
-  border-radius: $border-radius;
-  background-color: $light-color01;
+  border-radius: variables.$border-radius;
+  background-color: variables.$light-color01;
 }
 
 .editor {
   padding: 8px;
-  border-radius: $border-radius;
-  border: solid 1px $light-color06;
+  border-radius: variables.$border-radius;
+  border: solid 1px variables.$light-color06;
   background-color: #ffffff;
 }
 
 .editorTitle {
   margin: 4px 0 12px 0;
-  @include TypographyTitleH6($dark-color07);
+  @include mixins.TypographyTitleH6(variables.$dark-color07);
   :global .icon {
     margin-right: 8px;
   }
@@ -31,17 +31,17 @@
 .tip {
   margin-top: 12px;
   padding: 12px;
-  border-radius: $border-radius;
-  border: solid 1px $border-color;
-  background-color: $card-bg-color;
-  @include TypographyParagraph;
+  border-radius: variables.$border-radius;
+  border: solid 1px variables.$border-color;
+  background-color: variables.$card-bg-color;
+  @include mixins.TypographyParagraph;
 }
 
 .link {
   float: right;
-  color: $blue-color04;
+  color: variables.$blue-color04;
 
   &:hover {
-    color: $blue-color04;
+    color: variables.$blue-color04;
   }
 }

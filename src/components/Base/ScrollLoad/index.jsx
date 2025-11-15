@@ -24,7 +24,7 @@ import { isEmpty, get, throttle, isUndefined } from 'lodash'
 import { Loading } from '@kube-design/components'
 import { Empty } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const isRemainingData = ({ data, total, isEnd }) => {
   return !isUndefined(isEnd) ? !isEnd : !isEmpty(data) && data.length < total

@@ -31,7 +31,7 @@ import { Avatar } from 'components/Base'
 import Banner from 'components/Cards/Banner'
 import Table from 'components/Tables/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @inject('rootStore', 'devopsStore')
 @observer

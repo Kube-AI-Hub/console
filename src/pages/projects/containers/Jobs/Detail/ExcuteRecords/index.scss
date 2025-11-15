@@ -1,9 +1,9 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .table {
   :global {
     .table {
-      border-radius: 0 0 $border-radius $border-radius;
+      border-radius: 0 0 variables.$border-radius variables.$border-radius;
     }
   }
 }

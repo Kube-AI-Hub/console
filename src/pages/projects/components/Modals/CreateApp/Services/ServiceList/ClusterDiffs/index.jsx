@@ -23,7 +23,7 @@ import ContainersMapper from './ContainersMapper'
 import ContainerImages from './ContainerImages'
 import ContainerPorts from './ContainerPorts'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class AdvancedSettings extends React.Component {
   get showContainerSettings() {

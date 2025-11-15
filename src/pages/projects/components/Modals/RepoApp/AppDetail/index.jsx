@@ -33,7 +33,7 @@ import VersionStore from 'stores/openpitrix/version'
 
 import Banner from './Banner'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @observer
 class AppDetail extends Component {

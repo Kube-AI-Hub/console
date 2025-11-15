@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .main {
   min-height: auto;
@@ -51,7 +51,7 @@
   height: 24px;
   border-radius: 50%;
   background-color: rgba(85, 188, 138, 0.1);
-  transition: all $trans-speed;
+  transition: all variables.$trans-speed;
 
   &::before {
     content: '';
@@ -61,7 +61,7 @@
     transform: translate(-50%, -50%);
     width: 16.5px;
     height: 16.5px;
-    background-color: $green;
+    background-color: variables.$green;
     border-radius: 50%;
     z-index: 1;
   }
@@ -83,10 +83,10 @@
     padding: 11px 32px;
     margin-bottom: 8px;
     line-height: 20px;
-    background-color: $bg-color;
-    border: 1px solid $border-color;
+    background-color: variables.$bg-color;
+    border: 1px solid variables.$border-color;
     border-radius: 20px;
-    font-size: $body-size;
+    font-size: variables.$body-size;
 
     &:last-child {
       margin-bottom: 0;

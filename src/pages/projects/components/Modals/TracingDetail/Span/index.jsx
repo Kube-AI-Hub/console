@@ -21,7 +21,7 @@ import classNames from 'classnames'
 import { Icon, Columns, Column } from '@kube-design/components'
 import { isErrorSpan, formatDuration } from 'utils/tracing'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 function toPercent(value) {
   return `${(value * 100).toFixed(1)}%`

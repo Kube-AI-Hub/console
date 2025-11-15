@@ -24,11 +24,12 @@ import { Table, Pagination } from '@kube-design/components'
 import { Card, Indicator } from 'components/Base'
 import { getLocalTime } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('rootStore', 'detailStore')
 @observer
-export default class LoginHistory extends React.Component {
+class LoginHistory extends React.Component {
   get store() {
     return this.props.detailStore
   }

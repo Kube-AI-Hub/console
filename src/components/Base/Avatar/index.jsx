@@ -22,7 +22,7 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { Link } from 'react-router-dom'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Avatar extends React.Component {
   static propTypes = {

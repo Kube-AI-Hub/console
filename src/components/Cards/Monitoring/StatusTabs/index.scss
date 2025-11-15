@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .card {
 }
@@ -21,7 +21,7 @@
     align-items: center;
     min-height: 68px;
     border-radius: 4px;
-    background-color: $card-bg-color;
+    background-color: variables.$card-bg-color;
     cursor: pointer;
 
     & + .tab {
@@ -29,7 +29,7 @@
     }
 
     &.active {
-      background-color: $green;
+      background-color: variables.$green;
     }
 
     .img {
@@ -60,7 +60,7 @@
   .inner {
     height: 100%;
     border-radius: 4px;
-    background-color: $card-bg-color;
+    background-color: variables.$card-bg-color;
 
     :global {
       .spin-nested-loading,

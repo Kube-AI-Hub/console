@@ -26,7 +26,7 @@ import { isNotPersistentVolume } from 'utils/volume'
 
 import Card from './Card'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class VolumeList extends React.Component {
   static propTypes = {

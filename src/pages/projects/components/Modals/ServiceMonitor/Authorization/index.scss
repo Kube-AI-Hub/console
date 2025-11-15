@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   position: relative;
@@ -11,33 +11,33 @@
   height: 32px;
   padding: 5px 12px;
   margin-left: 12px;
-  background-color: $white;
-  border: solid 1px $light-color08;
-  border-radius: $border-radius;
-  transition: all $trans-speed ease-in-out;
+  background-color: variables.$white;
+  border: solid 1px variables.$light-color08;
+  border-radius: variables.$border-radius;
+  transition: all variables.$trans-speed ease-in-out;
   cursor: pointer;
 
   &:hover {
-    border-color: $dark-color01;
+    border-color: variables.$dark-color01;
   }
 
   &.active {
-    border-color: $primary;
+    border-color: variables.$primary;
   }
 }
 
 .text {
   padding-left: 24px;
-  @include TypographySymbolText;
+  @include mixins.TypographySymbolText;
 }
 
 .prefix {
-  @include vertical-center;
+  @include mixins.vertical-center;
   left: 12px;
 }
 
 .close {
-  @include vertical-center;
+  @include mixins.vertical-center;
   right: 6px;
   z-index: 999;
 }
@@ -48,13 +48,13 @@
   right: 0;
   z-index: 9999;
   box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.16);
-  border-radius: $border-radius;
+  border-radius: variables.$border-radius;
   overflow: hidden;
 }
 
 .form {
   padding: 12px;
-  background-color: $white;
+  background-color: variables.$white;
   min-width: 600px;
 
   .formContent {
@@ -63,13 +63,13 @@
 }
 
 .footer {
-  background-color: $card-bg-color;
+  background-color: variables.$card-bg-color;
   padding: 8px 12px;
   text-align: right;
 }
 
 .secrets {
   a {
-    color: $blue-color03;
+    color: variables.$blue-color03;
   }
 }

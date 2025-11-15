@@ -20,7 +20,7 @@ import React, { Component } from 'react'
 import { Panel, Text } from 'components/Base'
 import Banner from 'components/Cards/Banner'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class BaseInfo extends Component {
   state = {

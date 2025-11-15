@@ -22,7 +22,7 @@ import { Text } from 'components/Base'
 import React, { Component } from 'react'
 import { showNameAndAlias } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class WorkspaceItem extends Component {
   handleClick = () => {

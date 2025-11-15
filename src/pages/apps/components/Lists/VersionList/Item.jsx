@@ -44,13 +44,14 @@ import {
 } from 'configs/openpitrix/version'
 import { STORE_QUERY_STATUS } from 'configs/openpitrix/app'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const { TabPanel } = Tabs
 
+export default
 @inject('rootStore')
 @trigger
-export default class VersionItem extends React.PureComponent {
+class VersionItem extends React.PureComponent {
   static propTypes = {
     className: PropTypes.string,
     isAdmin: PropTypes.bool,

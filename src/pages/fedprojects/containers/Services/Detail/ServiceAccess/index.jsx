@@ -25,12 +25,13 @@ import { trigger } from 'utils/action'
 import { toJS } from 'mobx'
 import ClusterService from './ClusterService'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('rootStore', 'detailStore', 'projectStore')
 @observer
 @trigger
-export default class ServiceAccess extends React.Component {
+class ServiceAccess extends React.Component {
   store = this.props.detailStore
 
   get enabledActions() {

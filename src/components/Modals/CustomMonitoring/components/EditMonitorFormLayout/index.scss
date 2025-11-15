@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   height: 100%;
@@ -6,7 +6,7 @@
   overflow: auto;
 
   .preview {
-    border: solid 1px $light-color06;
+    border: solid 1px variables.$light-color06;
     border-radius: 3px;
     margin-bottom: 15px;
   }
@@ -19,11 +19,10 @@
         width: 340px;
         margin-right: 10px;
       }
-      
+
       .resource {
         flex: 1;
       }
     }
   }
-  
 }

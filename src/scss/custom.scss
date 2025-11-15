@@ -1,3 +1,6 @@
+@use '~scss/variables';
+@use '~scss/mixins';
+
 .input-password {
   width: 100% !important;
   max-width: 455px;
@@ -6,23 +9,23 @@
 // recharts
 .chart {
   &-light {
-    color: $dark !important;
-    background-color: $lightest !important;
+    color: variables.$dark !important;
+    background-color: variables.$lightest !important;
   }
 
   &-dark {
-    color: $white !important;
-    background-color: $dark !important;
+    color: variables.$white !important;
+    background-color: variables.$dark !important;
 
     .recharts-cartesian-axis {
       text {
-        fill: $grey;
+        fill: variables.$grey;
       }
     }
 
     .recharts-cartesian-grid {
       line {
-        stroke: $grey;
+        stroke: variables.$grey;
       }
     }
   }
@@ -33,7 +36,7 @@
   &-title {
     padding-left: 5px;
     margin: 0 0 2px;
-    color: $white;
+    color: variables.$white;
     font-weight: 600;
     line-height: 17px;
   }
@@ -61,26 +64,26 @@
       }
 
       &.white::before {
-        background-color: $white;
+        background-color: variables.$white;
       }
       &.default::before {
-        background-color: $blue;
+        background-color: variables.$blue;
       }
       &.totals::before {
-        background-color: $white;
+        background-color: variables.$white;
         opacity: 0.4;
       }
       &.active::before {
-        background-color: $green;
+        background-color: variables.$green;
       }
       &.warn::before {
-        background-color: $yellow;
+        background-color: variables.$yellow;
       }
       &.danger::before {
-        background-color: $red;
+        background-color: variables.$red;
       }
       &.total::before {
-        background-color: $light;
+        background-color: variables.$light;
       }
     }
   }
@@ -110,7 +113,7 @@
   }
 
   .badge-wrapper {
-    @include vertical-center;
+    @include mixins.vertical-center;
     right: 4px;
   }
 
@@ -128,7 +131,7 @@
   }
 
   .flatpickr-day {
-    font-family: $font-family !important;
+    font-family: variables.$font-family !important;
   }
 }
 
@@ -137,7 +140,7 @@
 }
 
 .ks-tag {
-  font-size: $size-small;
+  font-size: variables.$size-small;
   padding: 0 9px;
   border-radius: 1px;
   background-color: #329dce;
@@ -148,7 +151,7 @@
   cursor: default;
 
   &-disable {
-    background-color: $light-color07;
+    background-color: variables.$light-color07;
   }
 
   & + .ks-tag {
@@ -161,7 +164,7 @@
 }
 
 .badge-wrapper > span.badge.is-success {
-  background-color: $primary;
+  background-color: variables.$primary;
 }
 
 .control.has-icons-left .icon,
@@ -206,15 +209,15 @@
 }
 
 .tooltip-desc {
-  color: $dark-color01 !important;
+  color: variables.$dark-color01 !important;
 }
 
 .tag-critical {
-  color: $white;
-  background-color: $red-color03;
+  color: variables.$white;
+  background-color: variables.$red-color03;
 }
 
 .tag-error {
-  color: $white;
-  background-color: $yellow-color03;
+  color: variables.$white;
+  background-color: variables.$yellow-color03;
 }

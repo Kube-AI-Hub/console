@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .sliderWrapper {
   padding-bottom: 24px;
@@ -22,7 +22,7 @@
 .rail {
   height: 10px;
   border-radius: 5px;
-  background-color: $bg-color;
+  background-color: variables.$bg-color;
 }
 
 .track {
@@ -30,7 +30,7 @@
   top: 5px;
   height: 10px;
   border-radius: 5px;
-  background-color: $primary;
+  background-color: variables.$primary;
 }
 
 .handler {
@@ -39,10 +39,10 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  border: 1px solid $primary;
+  border: 1px solid variables.$primary;
   background-color: #fff;
   box-shadow: 0 4px 8px 0 rgba(85, 188, 138, 0.36);
-  transition: box-shadow $trans-speed ease-in-out;
+  transition: box-shadow variables.$trans-speed ease-in-out;
   cursor: pointer;
   outline: none;
   user-select: none;
@@ -60,8 +60,8 @@
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    background-color: $primary;
-    transition: transform $trans-speed ease-in-out;
+    background-color: variables.$primary;
+    transition: transform variables.$trans-speed ease-in-out;
   }
 
   &:hover,
@@ -79,7 +79,7 @@
 
   & > span {
     position: absolute;
-    @include TypographyParagraph($dark-color01);
+    @include mixins.TypographyParagraph(variables.$dark-color01);
     user-select: none;
     transform: translateX(-50%);
 
@@ -98,7 +98,7 @@
 .inputWrapper {
   padding: 12px;
   border-radius: 4px;
-  background-color: $lightest;
+  background-color: variables.$lightest;
 }
 
 .inputGroup {
@@ -127,7 +127,7 @@
 
     &.error {
       :global .input {
-        border-color: $red !important;
+        border-color: variables.$red !important;
         box-shadow: none !important;
       }
     }
@@ -138,7 +138,7 @@
       margin-right: 8px;
       display: flex;
       align-items: center;
-      @include TypographyParagraph();
+      @include mixins.TypographyParagraph();
     }
 
     .inputBox {
@@ -147,8 +147,8 @@
 
     .unit {
       right: 12px;
-      @include TypographySymbolText();
-      @include vertical-center;
+      @include mixins.TypographySymbolText();
+      @include mixins.vertical-center;
     }
 
     & + .input {

@@ -31,13 +31,14 @@ import { WORKLOAD_STATUS, ICON_TYPES } from 'utils/constants'
 
 import WorkloadStore from 'stores/workload'
 
+export default
 @withProjectList({
   store: new WorkloadStore('deployments'),
   module: 'deployments',
   name: 'DEPLOYMENT',
   rowKey: 'uid',
 })
-export default class Deployments extends React.Component {
+class Deployments extends React.Component {
   get prefix() {
     const { workspace, namespace, cluster } = this.props.match.params
     return `/${workspace}/clusters/${cluster}/projects/${namespace}`

@@ -27,11 +27,12 @@ import { Panel, Avatar, Card, Status } from 'components/Base'
 import BaseTable from 'components/Tables/Base'
 
 import classnames from 'classnames'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('detailStore')
 @observer
-export default class Volumes extends React.Component {
+class Volumes extends React.Component {
   constructor(props) {
     super(props)
 

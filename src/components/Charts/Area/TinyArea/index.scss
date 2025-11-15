@@ -1,10 +1,10 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .chart {
   position: relative;
   padding: 0;
   border-radius: 4px;
-  background-color: $lightest;
+  background-color: variables.$lightest;
 }
 
 .title {
@@ -14,7 +14,7 @@
   height: 20px;
   line-height: 20px;
   white-space: nowrap;
-  color: $dark-color01;
+  color: variables.$dark-color01;
 }
 
 .dark {

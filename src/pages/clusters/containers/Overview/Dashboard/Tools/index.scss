@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .level {
   display: flex;
@@ -6,16 +6,16 @@
   & > div {
     flex: 1;
     padding: 12px;
-    background-color: $light-color01;
-    transition: all $trans-speed ease-in-out;
+    background-color: variables.$light-color01;
+    transition: all variables.$trans-speed ease-in-out;
     cursor: pointer;
 
     &:hover {
-      background-color: $light-color02;
+      background-color: variables.$light-color02;
     }
 
     &:active {
-      background-color: $light-color03;
+      background-color: variables.$light-color03;
     }
   }
 }

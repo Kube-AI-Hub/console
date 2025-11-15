@@ -1,7 +1,7 @@
-@import "~scss/variables";
+@use "~scss/variables";
 
 .wrapper {
-  border: 1px solid $light-color06;
+  border: 1px solid variables.$light-color06;
   padding: 8px;
   border-radius: 4px;
 
@@ -20,10 +20,10 @@
       top: 4px;
 
       > span:last-child {
-        font-size: $size-small;
+        font-size: variables.$size-small;
         font-weight: 500;
         line-height: 20px;
-        color: $dark-color07;
+        color: variables.$dark-color07;
         margin-left: 5px;
       }
     }
@@ -41,7 +41,7 @@
   position: absolute;
   right: 0;
   font-size: 12px;
-  padding: .5em 1em;
+  padding: 0.5em 1em;
   z-index: 3;
   line-height: 20px;
   border-radius: 16px;
@@ -63,4 +63,3 @@
   font-weight: bold;
   color: #fff;
 }
-

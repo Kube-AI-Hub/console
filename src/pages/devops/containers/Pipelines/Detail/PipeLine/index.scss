@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .pipelineCard {
   min-height: 400px;
@@ -9,8 +9,8 @@
 .pipelineCard__toolbar {
   height: 52px;
   line-height: 52px;
-  background-color: $lightest;
-  box-shadow: 0 1px 0 0 $light-color03;
+  background-color: variables.$lightest;
+  box-shadow: 0 1px 0 0 variables.$light-color03;
 
   button {
     margin: 0 10px;
@@ -31,7 +31,7 @@
 }
 
 .pipelineCard__main {
-  background-color: $bg-color;
+  background-color: variables.$bg-color;
   overflow: auto;
   height: calc(100vh - 350px);
   min-height: 600px;

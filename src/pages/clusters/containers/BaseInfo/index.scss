@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .header {
   position: relative;
@@ -16,7 +16,7 @@
   margin-top: 12px;
   margin-left: -12px;
   margin-right: -12px;
-  background-color: $light-color01;
+  background-color: variables.$light-color01;
 
   & > div {
     width: 250px;
@@ -50,4 +50,19 @@
 .singleButton {
   @include button();
   min-width: 92px;
+}
+.vgpuText {
+  .vgpuTextLink {
+    margin-left: 4px;
+    cursor: pointer;
+    display: inline-block;
+    border-bottom: 1px solid #242e42;
+    &:hover {
+      border-bottom-color: #55bc8a;
+      svg {
+        color: #55bc8a;
+        fill: #55bc8a;
+      }
+    }
+  }
 }

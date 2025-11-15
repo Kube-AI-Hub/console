@@ -26,10 +26,11 @@ import ContainerLog from 'components/Cards/ContainerLog'
 import KubeKeyClusterStore from 'stores/cluster/kubekey'
 
 import { observer } from 'mobx-react'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class NodeLogModal extends React.Component {
+class NodeLogModal extends React.Component {
   kubekeyClusterStore = new KubeKeyClusterStore()
 
   componentDidMount() {

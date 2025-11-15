@@ -37,7 +37,7 @@ import ClusterTitle from 'components/Clusters/ClusterTitle'
 
 import VolumeMonitor from 'stores/monitoring/volume'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const METRICS = {
   inodeUsage: 'pvc_inodes_used',
@@ -50,8 +50,9 @@ const METRICS = {
 
 const UPDATE_INTERVAL = 60000
 
+export default
 @observer
-export default class UsageCard extends Component {
+class UsageCard extends Component {
   constructor(props) {
     super(props)
 

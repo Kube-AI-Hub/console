@@ -25,7 +25,7 @@ import { Text } from 'components/Base'
 
 import ClusterWrapper from 'components/Clusters/ClusterWrapper'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const Item = ({ index, rule, tls = [], projectDetail, onDelete, onEdit }) => {
   const tlsItem = tls.find(item => item.hosts && item.hosts.includes(rule.host))

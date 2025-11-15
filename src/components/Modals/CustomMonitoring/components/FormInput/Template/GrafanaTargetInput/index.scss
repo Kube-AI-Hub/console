@@ -1,17 +1,17 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   display: flex;
 
   .sort {
-    padding: 10px 0 ;
+    padding: 10px 0;
     width: 36px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
-    background: $light-color01;
-    
+    background: variables.$light-color01;
+
     :global {
       .icon {
         cursor: pointer;
@@ -23,7 +23,7 @@
 
   .form {
     flex: 1;
-    background: $white;
+    background: variables.$white;
     padding: 10px;
   }
 
@@ -53,4 +53,3 @@
     margin-top: 10px;
   }
 }
-

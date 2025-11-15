@@ -24,7 +24,7 @@ import { Tooltip, Icon } from '@kube-design/components'
 import { Status } from 'components/Base'
 import { S2I_STATUS_DESC } from 'utils/constants'
 import { getWorkloadStatus } from 'utils/status'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default function WorkloadStatus({ data, module }) {
   const { status: statusResult } = getWorkloadStatus(data, module) || ''

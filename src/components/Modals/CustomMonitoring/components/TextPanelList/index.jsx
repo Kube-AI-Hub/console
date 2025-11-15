@@ -22,7 +22,7 @@ import { Icon, Loading } from '@kube-design/components'
 import classNames from 'classnames'
 
 import ErrorContainer from '../ErrorContainer'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const ANIMATION_DURATION = 200
 

@@ -23,7 +23,7 @@ import { Icon } from '@kube-design/components'
 
 import { Text } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const STATES = {
   current: 'CURRENT',

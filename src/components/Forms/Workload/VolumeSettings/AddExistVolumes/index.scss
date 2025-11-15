@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   min-height: 284px;
@@ -6,8 +6,8 @@
   margin-top: 12px;
   padding: 12px;
   border-radius: 4px;
-  border: 1px solid $border-color;
-  background-color: $white;
+  border: 1px solid variables.$border-color;
+  background-color: variables.$white;
 
   :global .tag:not(body) {
     height: 20px;

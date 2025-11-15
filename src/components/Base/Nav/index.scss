@@ -1,18 +1,18 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .main {
   display: flex;
   align-items: center;
   padding: 8px 14px;
-  border-radius: $border-radius;
-  background-color: $card-bg-color;
+  border-radius: variables.$border-radius;
+  background-color: variables.$card-bg-color;
 
   &.dark {
     display: inline-block;
     padding: 2px;
-    border: 1px solid $border-color;
+    border: 1px solid variables.$border-color;
     border-radius: 16px;
-    background-color: $white;
+    background-color: variables.$white;
 
     .item {
       display: inline-block;
@@ -21,20 +21,20 @@
       min-width: 100px;
       height: 28px;
       line-height: 28px;
-      color: $title-color;
+      color: variables.$title-color;
       font-weight: 500;
       border-radius: 14px;
       border: 0 none;
       text-align: center;
-      transition: all $trans-speed ease-in-out;
+      transition: all variables.$trans-speed ease-in-out;
 
       &:hover {
-        background-color: $bg-color;
+        background-color: variables.$bg-color;
       }
 
       &.active {
-        background-color: $dark;
-        color: $white;
+        background-color: variables.$dark;
+        color: variables.$white;
       }
     }
   }
@@ -47,18 +47,18 @@
   line-height: 32px;
   margin: 0 6px;
   font-weight: 400;
-  color: $second-title-color;
+  color: variables.$second-title-color;
   text-align: center;
   border: 1px solid transparent;
-  transition: all $trans-speed;
+  transition: all variables.$trans-speed;
 
   &.active {
     border-radius: 100px;
-    border-color: $border-color;
-    background-color: $bg-color;
+    border-color: variables.$border-color;
+    background-color: variables.$bg-color;
 
     &:hover {
-      color: $second-title-color;
+      color: variables.$second-title-color;
     }
   }
 }

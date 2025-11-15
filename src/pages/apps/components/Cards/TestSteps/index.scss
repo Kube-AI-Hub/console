@@ -1,15 +1,15 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .main {
   .note {
-    color: $second-text-color;
+    color: variables.$second-text-color;
   }
   .steps {
     margin: 12px;
     line-height: 24px;
   }
   a {
-    color: $blue;
+    color: variables.$blue;
   }
 }

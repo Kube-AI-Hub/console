@@ -1,18 +1,18 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .breadcrumb {
   height: 20px;
-  font-family: $font-family-id;
+  font-family: variables.$font-family-id;
 
   a, span {
     display: inline-block;
     vertical-align: middle;
-    color: $second-title-color;
+    color: variables.$second-title-color;
   }
 
   a:hover {
-    color: $primary;
+    color: variables.$primary;
   }
 
   .back {

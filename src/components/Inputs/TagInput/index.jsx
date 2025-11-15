@@ -24,7 +24,7 @@ import { noop } from 'lodash'
 import { Tag, Icon } from '@kube-design/components'
 import Autosuggest from './autosuggest'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class TagInput extends React.Component {
   static propTypes = {

@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .body {
   padding: 0;
@@ -16,12 +16,12 @@
 
 .close {
   position: absolute;
-  @include vertical-center;
+  @include mixins.vertical-center;
   right: 20px;
   width: 32px;
   height: 32px;
   padding: 6px;
-  border-radius: $border-radius;
+  border-radius: variables.$border-radius;
   background-color: #242e42;
   cursor: pointer;
 }

@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   input {
@@ -19,9 +19,9 @@
 }
 
 .dark {
-  color: $white;
+  color: variables.$white;
   input {
-    color: $white;
-    caret-color: $white;
+    color: variables.$white;
+    caret-color: variables.$white;
   }
 }

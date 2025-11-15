@@ -35,7 +35,7 @@ import ConfigMapStore from 'stores/configmap'
 import SecretStore from 'stores/secret'
 import FederatedStore from 'stores/federated'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class MountConfig extends React.Component {
   static propTypes = {

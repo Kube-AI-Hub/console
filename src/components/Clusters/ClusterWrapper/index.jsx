@@ -22,7 +22,7 @@ import React, { Component } from 'react'
 import { getDisplayNameNew } from 'utils'
 import { CLUSTER_GROUP_TAG_TYPE, CLUSTER_PROVIDER_ICON } from 'utils/constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ClusterWrapper extends Component {
   renderItem = (item, index, isTooltip = false) => {
@@ -36,6 +36,7 @@ export default class ClusterWrapper extends Component {
       <span
         className={isTooltip ? styles.tagItem : ''}
         title={getDisplayNameNew(cluster, false)}
+        key={`${cluster.name}-${index}`}
       >
         <Tag key={cluster.name} type={!isTooltip ? type : 'info'}>
           <Icon

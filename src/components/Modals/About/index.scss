@@ -1,24 +1,27 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .body {
-  background: $white;
+  background: variables.$white;
   padding: 0;
 
   .describtion {
     background: url('/assets/about-bg.svg') no-repeat left top / auto 100%
-      $light-color01;
+      variables.$light-color01;
     padding: 24px 20px 24px 24px;
 
     p {
-      @include TypographyParagraph();
+      @include mixins.TypographyParagraph();
       margin-bottom: 12px;
+      text-indent: 2em;
     }
 
     img {
-      width: 200px;
-      height: 40px;
+      width: 65px;
+      height: 30px;
       margin-bottom: 12px;
+      vertical-align: middle;
+      margin-right: 6px;
     }
   }
 
@@ -30,7 +33,7 @@
       margin-left: 12px;
       &:before {
         content: '|';
-        color: $light-color04;
+        color: variables.$light-color04;
         margin-right: 12px;
         vertical-align: middle;
       }

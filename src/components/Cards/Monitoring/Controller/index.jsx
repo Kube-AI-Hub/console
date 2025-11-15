@@ -26,7 +26,7 @@ import { showNameAndAlias } from 'utils'
 
 import { startAutoRefresh, stopAutoRefresh } from 'utils/monitoring'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 import TimeSelector from './TimeSelector'
 
 export default class MonitoringController extends React.Component {

@@ -21,7 +21,7 @@ import React from 'react'
 import { Button, Icon, Input, Select, Tooltip } from '@kube-design/components'
 import { ObjectInput } from 'components/Inputs'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const Item = ({ onSelect, onDelete, disabled, ...params }) => {
   const effects = [

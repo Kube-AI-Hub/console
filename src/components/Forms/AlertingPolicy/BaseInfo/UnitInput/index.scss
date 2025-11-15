@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .box {
   display: flex;
@@ -13,10 +13,10 @@
 
     :global {
       .select-control {
-        border: 1px solid $light-color08 !important;
+        border: 1px solid variables.$light-color08 !important;
 
         &:hover {
-          border: 1px solid $light-color08 !important;
+          border: 1px solid variables.$light-color08 !important;
           box-shadow: none !important;
         }
       }

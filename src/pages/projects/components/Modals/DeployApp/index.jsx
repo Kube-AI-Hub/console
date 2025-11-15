@@ -22,7 +22,7 @@ import classNames from 'classnames'
 import { Icon } from '@kube-design/components'
 import { Modal } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const Item = ({ icon, image, title, desc, disabled, onEnter }) => (
   <div

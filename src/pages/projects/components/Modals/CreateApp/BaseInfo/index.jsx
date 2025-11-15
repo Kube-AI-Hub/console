@@ -23,7 +23,7 @@ import { Form, Input, Select, TextArea } from '@kube-design/components'
 import { PATTERN_NAME, PATTERN_SERVICE_VERSION } from 'utils/constants'
 import { updateFederatedAnnotations, generateId } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class BaseInfo extends React.Component {
   static propTypes = {

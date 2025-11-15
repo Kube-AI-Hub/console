@@ -21,7 +21,7 @@ import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
 import Editor from 'for-editor'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const toolbar = {
   h1: true,
@@ -39,8 +39,9 @@ const toolbar = {
   subfield: true,
 }
 
+export default
 @observer
-export default class ReadmeEdit extends React.Component {
+class ReadmeEdit extends React.Component {
   static propTypes = {
     detail: PropTypes.object,
     store: PropTypes.object,

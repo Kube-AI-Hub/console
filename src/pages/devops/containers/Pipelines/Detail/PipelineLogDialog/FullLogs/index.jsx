@@ -20,10 +20,11 @@ import React from 'react'
 import { action, computed } from 'mobx'
 import { observer } from 'mobx-react'
 import { Icon, Loading, Tooltip } from '@kube-design/components'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class FullLogs extends React.Component {
+class FullLogs extends React.Component {
   ref = React.createRef()
 
   store = this.props.store

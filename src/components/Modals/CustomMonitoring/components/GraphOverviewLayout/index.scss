@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   display: flex;
@@ -12,11 +12,11 @@
     padding: 20px;
     overflow: auto;
   }
-  
+
   .row {
     width: 320px;
     border-left: solid 1px #d8dee5;
-    background: $light-color01;
+    background: variables.$light-color01;
     overflow: auto;
   }
 }

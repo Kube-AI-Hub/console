@@ -31,8 +31,9 @@ import { CD_SYNC_STATUS, CD_WEATHER_STATUS } from 'utils/constants'
 import ChartCard from '../Components/ChartCard'
 import Destination from '../Components/Destination'
 import StatusText from '../Components/StatusText'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @withList({
   store: new CDStore(),
   module: 'cds',
@@ -40,7 +41,7 @@ import styles from './index.scss'
   rowKey: 'name',
   authKey: 'applications',
 })
-export default class CDList extends React.Component {
+class CDList extends React.Component {
   clusterStore = new ClusterStore()
 
   @computed

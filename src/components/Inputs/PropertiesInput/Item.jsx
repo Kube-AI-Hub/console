@@ -20,7 +20,7 @@ import React from 'react'
 import { Button, Input } from '@kube-design/components'
 
 import ObjectInput from '../ObjectInput'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class PropertyItem extends React.Component {
   handleChange = value => {

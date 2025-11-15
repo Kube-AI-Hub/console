@@ -22,7 +22,7 @@ import { Icon, Button } from '@kube-design/components'
 
 import { ICON_TYPES } from 'utils/constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 import BillIcon from '../BillIcon'
 
 export default class Crumb extends React.Component {

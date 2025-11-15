@@ -28,10 +28,11 @@ import { showNameAndAlias } from 'utils'
 import RoleStore from 'stores/role'
 import DevOpsStore from 'stores/devops'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class DevopsSelect extends Component {
+class DevopsSelect extends Component {
   static propTypes = {
     clusters: PropTypes.array,
   }

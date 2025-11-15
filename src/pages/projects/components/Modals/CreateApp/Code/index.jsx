@@ -22,7 +22,7 @@ import { Icon } from '@kube-design/components'
 
 import EditMode from 'components/EditMode'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const formatData = formTemplate => {
   const { application, ingress, ...components } = formTemplate

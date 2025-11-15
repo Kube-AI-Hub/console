@@ -1,11 +1,11 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   cursor: pointer;
 
   &:hover {
     a {
-      color: $primary;
+      color: variables.$primary;
     }
   }
 }

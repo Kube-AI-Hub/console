@@ -24,11 +24,12 @@ import { getLocalTime } from 'utils'
 
 import Resource from './Resource'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('rootStore')
 @observer
-export default class PlatformStatus extends Component {
+class PlatformStatus extends Component {
   get resources() {
     return [
       {

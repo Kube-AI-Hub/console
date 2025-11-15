@@ -1,17 +1,17 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   width: 30%;
   min-width: 356px;
   background-color: #fff;
-  border-radius: $border-radius;
-  border: 1px solid $border-color;
+  border-radius: variables.$border-radius;
+  border: 1px solid variables.$border-color;
   overflow: auto;
 
   .empty,
   .loading {
-    @include middle;
+    @include mixins.middle;
     height: 100%;
     padding: 12px 20px;
     text-align: center;

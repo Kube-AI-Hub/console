@@ -26,11 +26,12 @@ import { Columns, Column } from '@kube-design/components'
 import { Panel, Image } from 'components/Base'
 import ApplicationStore from 'stores/openpitrix/application'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('rootStore')
 @observer
-export default class Applications extends React.Component {
+class Applications extends React.Component {
   constructor(props) {
     super(props)
     this.store = new ApplicationStore()

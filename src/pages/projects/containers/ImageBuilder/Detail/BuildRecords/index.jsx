@@ -22,7 +22,7 @@ import { observer, inject } from 'mobx-react'
 
 import ImageBuilderLastRun from 'projects/components/Cards/ImageBuilderLastRun'
 import RunRecords from 'projects/components/Cards/ImageRunRecord'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @inject('detailStore', 's2iRunStore')
 @observer

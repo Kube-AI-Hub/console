@@ -35,21 +35,28 @@ import ClusterMonitorStore from 'stores/monitoring/cluster'
 
 import ResourceItem from './ResourceItem'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const MetricTypes = {
   cpu_usage: 'cluster_cpu_usage',
   cpu_total: 'cluster_cpu_total',
+  cpu_quota: 'cluster_cpu_quota',
   memory_usage: 'cluster_memory_usage_wo_cache',
   memory_total: 'cluster_memory_total',
+  memory_quota: 'cluster_memory_quota',
   disk_size_usage: 'cluster_disk_size_usage',
   disk_size_capacity: 'cluster_disk_size_capacity',
   pod_count: 'cluster_pod_running_count',
   pod_capacity: 'cluster_pod_quota',
+  gpu_memory_allocated: 'cluster_gpu_memory_allocated',
+  cpu_allocated: 'cluster_cpu_allocated',
+  memory_allocated: 'cluster_memory_allocated',
+  gpu_allocated: 'cluster_gpu_allocated',
 }
 
+export default
 @observer
-export default class ResourcesUsage extends Component {
+class ResourcesUsage extends Component {
   monitorStore = new ClusterMonitorStore({ cluster: this.props.cluster })
 
   componentDidMount() {
@@ -73,16 +80,32 @@ export default class ResourcesUsage extends Component {
     const data = getLastMonitoringData(this.metrics)
     return [
       {
+        name: t('GPU_MEMORY'),
+        unitType: 'gpu_memory',
+        used: this.getValue(data[MetricTypes.gpu_memory_usage]),
+        total: this.getValue(data[MetricTypes.gpu_memory_total]),
+        allocated: this.getValue(data[MetricTypes.gpu_memory_allocated]),
+      },
+      {
+        name: t('GPU'),
+        unitType: 'gpu',
+        used: this.getValue(data[MetricTypes.gpu_usage]),
+        total: this.getValue(data[MetricTypes.gpu_total]),
+        allocated: this.getValue(data[MetricTypes.gpu_allocated]),
+      },
+      {
         name: 'CPU',
         unitType: 'cpu',
         used: this.getValue(data[MetricTypes.cpu_usage]),
         total: this.getValue(data[MetricTypes.cpu_total]),
+        allocated: this.getValue(data[MetricTypes.cpu_allocated]),
       },
       {
         name: t('MEMORY'),
         unitType: 'memory',
         used: this.getValue(data[MetricTypes.memory_usage]),
         total: this.getValue(data[MetricTypes.memory_total]),
+        allocated: this.getValue(data[MetricTypes.memory_allocated]),
       },
       {
         name: t('POD'),
@@ -108,20 +131,19 @@ export default class ResourcesUsage extends Component {
   render() {
     const options = this.getResourceOptions()
     const radarOptions = this.getRadarOptions(options)
-
     return (
       <Panel title={t('RESOURCE_USAGE')}>
         <Loading spinning={this.monitorStore.isLoading}>
           <div className={styles.wrapper}>
             <div className={styles.chart}>
               <RadarChart
-                cx={180}
-                cy={158}
+                cx={170}
+                cy={200}
                 width={360}
-                height={316}
+                height={360}
                 data={radarOptions}
               >
-                <PolarGrid gridType="circle" />
+                <PolarGrid gridType="polygon" />
                 <PolarAngleAxis dataKey="name" />
                 <PolarRadiusAxis domain={[0, 100]} />
                 <Radar dataKey="usage" stroke="#345681" fill="#1c2d4267" />

@@ -20,7 +20,7 @@ import React from 'react'
 
 import Project from './Project'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 class UsageRanking extends React.Component {
   render() {

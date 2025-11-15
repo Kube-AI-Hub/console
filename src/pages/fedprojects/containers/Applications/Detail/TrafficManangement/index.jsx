@@ -25,7 +25,7 @@ import { get, isEmpty } from 'lodash'
 import { inject, observer } from 'mobx-react'
 import React from 'react'
 import { getMinuteValue, getTimeRange } from 'stores/monitoring/base'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @inject('detailStore', 'projectStore')
 @observer

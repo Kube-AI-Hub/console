@@ -1,9 +1,9 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   display: flex;
   border-radius: 4px;
-  border: solid 1px $light-color08;
+  border: solid 1px variables.$light-color08;
   overflow: hidden;
 }
 
@@ -14,8 +14,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: $light-color02;
-  border-right: solid 1px $light-color08;
+  background: variables.$light-color02;
+  border-right: solid 1px variables.$light-color08;
 }
 
 .content {

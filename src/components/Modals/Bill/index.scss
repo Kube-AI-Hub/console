@@ -1,7 +1,7 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .billContainer {
-  background-color: $light-color02;
+  background-color: variables.$light-color02;
   padding: 20px 16px 0 20px;
 
   .billContent {

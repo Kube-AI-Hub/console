@@ -27,11 +27,12 @@ import Table from 'components/Tables/Base'
 
 import UserStore from 'stores/user'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('detailStore')
 @observer
-export default class AuthorizedUsers extends React.Component {
+class AuthorizedUsers extends React.Component {
   store = new UserStore()
 
   componentDidMount() {

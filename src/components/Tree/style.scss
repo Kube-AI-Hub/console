@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .tree {
   display: inline-block;
@@ -20,7 +20,7 @@
   }
 
   .treeNodeWrap {
-    color: $tree-text-color;
+    color: variables.$tree-text-color;
     display: inline-flex;
     &.disabled {
       .treeContent {
@@ -33,25 +33,25 @@
   .treeContent {
     flex: 1;
     padding: 6px 8px;
-    border-radius: $tree-border-radius;
+    border-radius: variables.$tree-border-radius;
     display: flex;
     cursor: pointer;
     white-space: nowrap;
 
     &:hover {
-      background-color: $tree-node-hover-bg;
+      background-color: variables.$tree-node-hover-bg;
     }
 
     &.selected {
       color: #fff;
-      background-color: $tree-node-selected-bg;
+      background-color: variables.$tree-node-selected-bg;
     }
   }
 
   .treeSwitch {
     width: 20px;
     height: 20px;
-    border-radius: $tree-border-radius;
+    border-radius: variables.$tree-border-radius;
     margin: 6px 4px;
     display: flex;
     align-items: center;
@@ -81,7 +81,7 @@
     }
 
     &:hover {
-      background-color: $tree-switch-hover-color;
+      background-color: variables.$tree-switch-hover-color;
     }
   }
 
@@ -92,7 +92,7 @@
 
     > li:first-child {
       &:before {
-        top: #{$tree-node-height / 2} !important;
+        top: calc(variables.$tree-node-height / 2) !important;
         height: 100% !important;
       }
 
@@ -112,11 +112,11 @@
 
       &:after {
         position: absolute;
-        top: $tree-node-height / 2;
+        top: calc(variables.$tree-node-height / 2);
         left: -17px;
         width: 8px;
         height: 1px;
-        border-top: 1px solid $border-color;
+        border-top: 1px solid variables.$border-color;
         content: ' ';
         z-index: auto;
       }
@@ -126,8 +126,8 @@
         top: 0;
         left: -17px;
         width: 0;
-        height: calc(100% + #{$tree-node-height / 2});
-        border-left: 1px solid $border-color;
+        height: calc(100% + variables.$tree-node-height / 2);
+        border-left: 1px solid variables.$border-color;
         margin: 0;
         content: ' ';
       }
@@ -138,8 +138,8 @@
         top: 0;
         left: -17px;
         width: 0;
-        height: #{$tree-node-height / 2};
-        border-left: 1px solid $border-color;
+        height: calc(variables.$tree-node-height / 2);
+        border-left: 1px solid variables.$border-color;
         margin: 0;
         content: ' ';
       }

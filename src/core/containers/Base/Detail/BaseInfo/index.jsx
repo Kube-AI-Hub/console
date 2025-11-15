@@ -26,7 +26,7 @@ import BtnGroup from './BtnGroup'
 import Label from './Label'
 import Attributes from './Attributes'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 class BaseInfo extends React.Component {
   static propTypes = {

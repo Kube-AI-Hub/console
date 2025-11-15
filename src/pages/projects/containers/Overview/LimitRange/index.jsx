@@ -25,12 +25,13 @@ import { Text, Panel } from 'components/Base'
 import LimitRangeStore from 'stores/limitrange'
 import { trigger } from 'utils/action'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('rootStore', 'projectStore')
 @observer
 @trigger
-export default class LimitRange extends Component {
+class LimitRange extends Component {
   state = {
     showTip: false,
   }

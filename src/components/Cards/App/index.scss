@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 $card-height: 152px;
 
@@ -11,15 +11,15 @@ $card-height: 152px;
   border: 1px solid transparent;
   box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.06);
   vertical-align: top;
-  transition: all $trans-speed ease-in-out;
+  transition: all variables.$trans-speed ease-in-out;
 
   &:hover {
     transform: translateY(-4px);
-    border: 1px solid $dark-color01;
+    border: 1px solid variables.$dark-color01;
     box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.2);
 
     .title strong {
-      color: $primary;
+      color: variables.$primary;
     }
   }
 
@@ -33,7 +33,7 @@ $card-height: 152px;
       height: 48px;
       line-height: 48px;
       left: 0;
-      @include vertical-center;
+      @include mixins.vertical-center;
     }
 
     .text {
@@ -47,27 +47,27 @@ $card-height: 152px;
     }
 
     p {
-      @include block-ellipsis;
+      @include mixins.block-ellipsis;
       color: #79879c;
     }
 
     strong {
-      font-family: $font-family-id;
+      font-family: variables.$font-family-id;
       color: #242e42;
     }
   }
 
   .bottom {
     margin-top: 24px;
-    color: $dark-color01;
+    color: variables.$dark-color01;
 
     .vendor {
       float: left;
-      @include ellipsis;
+      @include mixins.ellipsis;
       max-width: 140px;
     }
     .version {
-      @include ellipsis;
+      @include mixins.ellipsis;
       float: right;
       max-width: 120px;
     }

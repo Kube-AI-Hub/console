@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   position: relative;
@@ -29,7 +29,7 @@
   margin-top: 8px;
   margin-bottom: 8px;
   border-radius: 4px;
-  background-color: $lightest;
+  background-color: variables.$lightest;
 
   & > li {
     line-height: 20px;
@@ -51,7 +51,7 @@
   width: 100%;
   height: 8px;
   border-radius: 4px;
-  background-color: $lightest;
+  background-color: variables.$lightest;
   margin-top: 4px;
 
   .bar {
@@ -78,9 +78,9 @@
 
 .icon {
   border-radius: 24px;
-  background-color: $light-color07;
+  background-color: variables.$light-color07;
 
   &.selected {
-    background-color: $green;
+    background-color: variables.$green;
   }
 }

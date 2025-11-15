@@ -26,8 +26,9 @@ const FormItemWrap = props => {
   return renderItem(rest)
 }
 
+export default
 @observer
-export default class CDSelect extends Component {
+class CDSelect extends Component {
   componentDidMount() {
     this.getCDListData()
   }

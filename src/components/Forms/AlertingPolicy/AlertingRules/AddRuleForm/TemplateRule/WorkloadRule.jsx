@@ -9,7 +9,7 @@ import React, {
 import { Form, Input, TextArea } from '@kube-design/components'
 import { get, isEmpty, endsWith, isUndefined } from 'lodash'
 import WorkloadStore from 'stores/workload'
-import styles from './index.scss'
+import * as styles from './index.scss'
 import MonitoringTarget from './MonitoringTarget/WorkloadSelect'
 import RuleInput from './RuleInput'
 

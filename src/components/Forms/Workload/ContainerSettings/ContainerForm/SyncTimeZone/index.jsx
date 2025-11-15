@@ -20,7 +20,7 @@ import React from 'react'
 import { get, set } from 'lodash'
 import { Checkbox } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class SyncTimeZone extends React.PureComponent {
   state = {

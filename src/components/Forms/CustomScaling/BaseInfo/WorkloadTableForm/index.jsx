@@ -25,7 +25,7 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import WorkloadStore from 'stores/workload'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 import WorkloadTable from './WorkloadTable'
 
 const SCALED_OBJECT_MAPPER = {
@@ -33,8 +33,9 @@ const SCALED_OBJECT_MAPPER = {
   statefulsets: 'StatefulSet',
 }
 
+export default
 @observer
-export default class WorkloadTableForm extends React.Component {
+class WorkloadTableForm extends React.Component {
   constructor(props) {
     super(props)
 
@@ -126,7 +127,7 @@ export default class WorkloadTableForm extends React.Component {
             </RadioButton>
           </RadioGroup>
 
-          <div className={styles.tableWrapper}>
+          <div className={styles.tWrapper}>
             <WorkloadTable
               key={type}
               fetchList={this.fetchList}

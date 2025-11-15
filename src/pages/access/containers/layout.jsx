@@ -24,7 +24,7 @@ import { renderRoutes, getIndexRoute } from 'utils/router.config'
 import { Nav } from 'components/Layout'
 import { Icon } from '@kube-design/components'
 
-import styles from './layout.scss'
+import * as styles from './layout.scss'
 
 class AccessLayout extends Component {
   render() {

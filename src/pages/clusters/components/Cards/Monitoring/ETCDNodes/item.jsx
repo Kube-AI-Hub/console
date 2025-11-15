@@ -24,7 +24,7 @@ import { ICON_TYPES } from 'utils/constants'
 import { Icon, Tag } from '@kube-design/components'
 import { Status } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const Item = ({ prefix = '', data = {} }) => {
   const {

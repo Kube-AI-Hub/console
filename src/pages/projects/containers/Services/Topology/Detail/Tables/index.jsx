@@ -20,7 +20,7 @@ import React, { Component } from 'react'
 import { get, isEmpty } from 'lodash'
 
 import { Label } from 'components/Base'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Tables extends Component {
   render() {

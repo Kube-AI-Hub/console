@@ -23,7 +23,7 @@ import copy from 'fast-copy'
 import { Column, Columns, Form, Input } from '@kube-design/components'
 import { Modal } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class OAuthModal extends React.Component {
   static propTypes = {

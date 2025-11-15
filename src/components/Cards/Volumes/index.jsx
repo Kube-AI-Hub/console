@@ -24,10 +24,11 @@ import { inject } from 'mobx-react'
 import { Panel } from 'components/Base'
 import VolumeItem from './Item'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('projectStore')
-export default class VolumesCard extends React.Component {
+class VolumesCard extends React.Component {
   static propTypes = {
     className: PropTypes.string,
     title: PropTypes.string,

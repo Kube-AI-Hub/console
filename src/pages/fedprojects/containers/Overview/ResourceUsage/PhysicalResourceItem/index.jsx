@@ -23,7 +23,7 @@ import { getAreaChartOps } from 'utils/monitoring'
 
 import SimpleArea from '../SimpleArea'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class PhysicalResourceItem extends React.Component {
   render() {

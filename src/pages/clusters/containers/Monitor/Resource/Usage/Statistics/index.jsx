@@ -28,11 +28,12 @@ import { Columns, Column, Loading } from '@kube-design/components'
 import { Card } from 'components/Base'
 import Info from 'components/Cards/Info'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('rootStore')
 @observer
-export default class ResourceStatistics extends React.Component {
+class ResourceStatistics extends React.Component {
   constructor(props) {
     super(props)
 

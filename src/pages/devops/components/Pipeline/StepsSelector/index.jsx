@@ -28,7 +28,7 @@ import { PIPELINE_CONDITIONS } from 'utils/constants'
 import { Branch, Environment, Expression, Params } from '../StepModals'
 
 import siderStyle from '../Sider/index.scss'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const noInputTasks = {
   not: true,
@@ -51,8 +51,9 @@ const conditionDescs = {
   anyOf: t('Internal nested conditions only need to satisfy one'),
 }
 
+export default
 @observer
-export default class StepsEditor extends React.Component {
+class StepsEditor extends React.Component {
   constructor(props) {
     super(props)
 

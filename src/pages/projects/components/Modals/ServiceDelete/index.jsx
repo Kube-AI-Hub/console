@@ -32,7 +32,7 @@ import WorkloadStore from 'stores/workload'
 import VolumeStore from 'stores/volume'
 import FederatedStore from 'stores/federated'
 import Builder from 'stores/s2i/builder'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const modules = ['deployments', 'daemonsets', 'statefulsets']
 

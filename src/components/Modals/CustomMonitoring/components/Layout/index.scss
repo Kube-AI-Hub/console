@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   display: flex;
@@ -14,8 +14,8 @@
   .content {
     flex: 1;
     border-radius: 8px;
-    background: $white;
-    color: $dark-color06;
+    background: variables.$white;
+    color: variables.$dark-color06;
     overflow: auto;
   }
 }

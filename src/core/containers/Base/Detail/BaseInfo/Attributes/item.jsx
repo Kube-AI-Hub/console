@@ -22,7 +22,7 @@ import classnames from 'classnames'
 
 import { Tooltip, Icon } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Item extends PureComponent {
   static propTypes = {

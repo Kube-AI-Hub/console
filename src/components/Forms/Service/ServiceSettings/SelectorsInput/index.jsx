@@ -27,7 +27,7 @@ import { joinSelector, isValidLabel } from 'utils'
 
 import WorkloadSelect from '../WorkloadSelect'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class SelectorsInput extends React.Component {
   constructor(props) {

@@ -30,10 +30,11 @@ import { safeBtoa } from 'utils/base64'
 
 import SecretStore from 'stores/secret'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class Secret extends React.Component {
+class Secret extends React.Component {
   constructor(props) {
     super(props)
 

@@ -21,7 +21,7 @@ import { get } from 'lodash'
 import { Input, Form } from '@kube-design/components'
 import { NumberInput } from 'components/Inputs'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 import Title from '../Title'
 import KSSettings from './KSSettings'

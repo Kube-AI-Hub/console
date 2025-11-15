@@ -22,7 +22,7 @@ import classnames from 'classnames'
 
 import { getTimeOptions } from '../utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const TimeOps = ['1m', '5m', '10m', '30m', '1h', '3h', '6h', '12h']
 

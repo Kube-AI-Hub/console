@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   display: flex;
@@ -17,13 +17,13 @@
   .content {
     position: relative;
     h6 {
-      @include TypographyTitleH6(inherit);
+      @include mixins.TypographyTitleH6(inherit);
       white-space: nowrap;
       text-overflow: ellipsis;
       overflow: hidden;
     }
     p {
-      @include TypographyParagraph($dark-color01);
+      @include mixins.TypographyParagraph(variables.$dark-color01);
     }
 
     .loadingTip {
@@ -38,13 +38,13 @@
   }
 
   .editting {
-    border: dashed 1px $dark-color06;
-    transition: all $trans-speed ease-in-out;
+    border: dashed 1px variables.$dark-color06;
+    transition: all variables.$trans-speed ease-in-out;
     cursor: grab;
 
     &:hover {
-      background-color: $dark-color06;
-      border-color: $dark-color02;
+      background-color: variables.$dark-color06;
+      border-color: variables.$dark-color02;
       .content {
         filter: blur(1px);
       }
@@ -70,7 +70,7 @@
       :global {
         .icon-clickable:hover,
         .icon-clickable:active {
-          background-color: $light-color08;
+          background-color: variables.$light-color08;
         }
       }
     }
@@ -83,16 +83,16 @@
   }
 
   .addButton {
-    border: dashed 1px $dark-color06;
+    border: dashed 1px variables.$dark-color06;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    transition: all $trans-speed ease-in-out;
+    transition: all variables.$trans-speed ease-in-out;
 
     &:hover {
-      background-color: $dark-color06;
-      border-color: $dark-color02;
+      background-color: variables.$dark-color06;
+      border-color: variables.$dark-color02;
       .content {
         filter: blur(1px);
       }

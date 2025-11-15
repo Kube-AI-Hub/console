@@ -21,7 +21,7 @@ import { List } from 'components/Base'
 import React from 'react'
 import { getDisplayNameNew, getLocalTime } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ProjectCard extends React.Component {
   handleClick = () => {

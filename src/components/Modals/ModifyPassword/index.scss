@@ -1,9 +1,8 @@
-@import "~scss/variables";
+@use "~scss/variables";
 
 .password {
   width: 455px;
 }
-
 
 .textarea {
   :global .textarea {
@@ -19,8 +18,8 @@
   }
 
   strong {
-    color: $text-color;
-    font-family: $font-family-id;
+    color: variables.$text-color;
+    font-family: variables.$font-family-id;
     overflow: hidden;
   }
 }

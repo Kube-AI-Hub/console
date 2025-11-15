@@ -1,7 +1,7 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
-  background: $white;
+  background: variables.$white;
   padding: 12px;
 
   .config {
@@ -12,7 +12,7 @@
       margin-top: 0;
     }
   }
-  
+
   .metric {
     margin-top: 10px;
   }
@@ -21,5 +21,5 @@
 .input {
   width: 100%;
   border: none;
-  background: $white;
+  background: variables.$white;
 }

@@ -31,7 +31,7 @@ import {
 
 import { PIPELINE_PARAMS_TYPES } from 'utils/constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ParamsInput extends React.Component {
   static propTypes = {

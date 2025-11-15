@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .icon {
   display: block;
@@ -26,7 +26,7 @@
     box-shadow: 0 8px 16px 0 rgba(36, 46, 66, 0.06);
 
     &::before {
-      background-color: $blue-color03;
+      background-color: variables.$blue-color03;
     }
   }
 
@@ -49,7 +49,7 @@
     box-shadow: 0 8px 16px 0 rgba(85, 188, 138, 0.36);
 
     &::before {
-      background-color: $green;
+      background-color: variables.$green;
     }
   }
 
@@ -82,7 +82,7 @@
     }
 
     &::before {
-      background-color: $yellow-dark;
+      background-color: variables.$yellow-dark;
     }
   }
 
@@ -97,7 +97,7 @@
     background-color: rgba(202, 38, 33, 0.1);
     box-shadow: 0 8px 16px 0 rgba(202, 38, 33, 0.2);
     &::before {
-      background-color: $red-dark;
+      background-color: variables.$red-dark;
     }
   }
 

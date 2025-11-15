@@ -34,10 +34,11 @@ import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
 import React from 'react'
 import { PATTERN_ALIAS_NAME, PATTERN_SERVICE_NAME } from 'utils/constants'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class FedProjectCreateModal extends React.Component {
+class FedProjectCreateModal extends React.Component {
   static propTypes = {
     formTemplate: PropTypes.object,
     visible: PropTypes.bool,

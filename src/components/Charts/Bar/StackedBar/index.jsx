@@ -37,7 +37,7 @@ import CustomLegend from 'components/Charts/Custom/Legend'
 import CustomTooltip from 'components/Charts/Custom/Tooltip'
 import { getActiveSeries } from 'components/Charts/utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const AreaColors = ['green', 'blue', 'yellow']
 

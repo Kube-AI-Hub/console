@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .kubectl {
   display: flex;
@@ -18,8 +18,8 @@
 .terminalWrapper {
   flex: 1;
   padding: 8px;
-  border-radius: $border-radius;
-  border: 1px solid $border-color;
+  border-radius: variables.$border-radius;
+  border: 1px solid variables.$border-color;
 }
 
 .terminal {
@@ -36,7 +36,7 @@
     margin-bottom: 8px;
     line-height: 20px;
     font-weight: 600;
-    color: $dark-color07;
+    color: variables.$dark-color07;
   }
 
   dt,
@@ -47,7 +47,7 @@
   }
   dt {
     font-size: 12px;
-    color: $dark-color01;
+    color: variables.$dark-color01;
     width: 40%;
     &:after {
       content: ':';
@@ -56,10 +56,10 @@
   dd {
     width: 60%;
     vertical-align: top;
-    font-family: $font-family-id;
+    font-family: variables.$font-family-id;
     font-size: 12px;
     line-height: 20px;
-    color: $dark-color07;
+    color: variables.$dark-color07;
     word-wrap: break-word;
   }
 }

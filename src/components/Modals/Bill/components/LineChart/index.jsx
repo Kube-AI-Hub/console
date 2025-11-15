@@ -11,7 +11,7 @@ import {
   METER_RESOURCE_TITLE,
   METER_RESOURCE_USAGE_TITLE,
 } from '../../constats'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class LineChart extends React.Component {
   state = {

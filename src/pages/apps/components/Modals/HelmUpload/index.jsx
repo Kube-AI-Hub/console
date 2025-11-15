@@ -28,7 +28,7 @@ import FileStore from 'stores/openpitrix/file'
 import { getWebsiteUrl } from 'utils'
 
 import typeFiles from './files'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class HelmUpload extends Component {
   static propTypes = {

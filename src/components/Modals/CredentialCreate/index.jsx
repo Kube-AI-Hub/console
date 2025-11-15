@@ -27,10 +27,11 @@ import { Form, Input, Loading, Select, TextArea } from '@kube-design/components'
 import CredentialStore from 'stores/devops/credential'
 import { PATTERN_NAME } from 'utils/constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class CredentialModal extends React.Component {
+class CredentialModal extends React.Component {
   static propTypes = {
     name: PropTypes.string,
     isEditMode: PropTypes.bool,

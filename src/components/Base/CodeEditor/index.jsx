@@ -21,7 +21,7 @@ import PropTypes from 'prop-types'
 import classnames from 'classnames'
 import { Loading } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const AceEditor = lazy(() =>
   import(/* webpackChunkName: "react-ace" */ './AceEditor')

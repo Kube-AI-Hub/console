@@ -26,7 +26,7 @@ import { ICON_TYPES } from 'utils/constants'
 import Steps from './Steps'
 import Code from './Code'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class FullCreateModal extends React.Component {
   static propTypes = {

@@ -23,7 +23,7 @@ import { cloneDeep } from 'lodash'
 import { getBrowserLang } from 'utils'
 import cookie from 'utils/cookie'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class BaseInfo extends React.Component {
   static contextTypes = {

@@ -24,7 +24,7 @@ import { Form, Input } from '@kube-design/components'
 import { PATTERN_NAME } from 'utils/constants'
 import { MountInput } from 'components/Inputs'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class AddTemporary extends React.Component {
   static propTypes = {

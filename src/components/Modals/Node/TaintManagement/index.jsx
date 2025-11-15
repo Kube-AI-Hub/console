@@ -24,7 +24,7 @@ import { Modal } from 'components/Base'
 import { get, isEmpty } from 'lodash'
 import TaintInput from './TaintInput'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class TaintManagementModal extends React.Component {
   static propTypes = {

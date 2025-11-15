@@ -19,7 +19,7 @@
 import React from 'react'
 import { isArray, isEmpty } from 'lodash'
 
-import style from './index.scss'
+import * as style from './index.scss'
 
 const STROKEWIDTH = 2
 const EDGES_LENGTH = 35

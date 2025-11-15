@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .container {
   display: flex;
@@ -11,10 +11,10 @@
     align-items: center;
 
     & > div {
-      @include TypographyTitleH6($dark-color07);
+      @include mixins.TypographyTitleH6(variables.$dark-color07);
     }
     & > p {
-      @include TypographyParagraph($dark-color01);
+      @include mixins.TypographyParagraph(variables.$dark-color01);
     }
 
     &:last-child {
@@ -40,11 +40,11 @@
       margin-left: 12px;
 
       & > div {
-        @include TypographyTitleH6($dark-color07);
+        @include mixins.TypographyTitleH6(variables.$dark-color07);
         word-break: break-all;
       }
       & > p {
-        @include TypographyParagraph($dark-color01);
+        @include mixins.TypographyParagraph(variables.$dark-color01);
       }
     }
 
@@ -60,7 +60,7 @@
   }
   & + div {
     .header {
-      background: $light-color01;
+      background: variables.$light-color01;
     }
   }
 }
@@ -69,11 +69,11 @@
   margin-top: 12px;
   border-radius: 4px;
   padding: 12px;
-  background: $light-color01;
+  background: variables.$light-color01;
 
   & > p {
-    font-size: $size-small;
-    font-weight: $font-bold;
+    font-size: variables.$size-small;
+    font-weight: variables.$font-bold;
     line-height: 1.43;
   }
 
@@ -84,9 +84,9 @@
       height: 44px;
       padding: 12px 32px;
       border-radius: 60px;
-      background-color: $bg-color;
-      border: solid 1px $border-color;
-      font-family: $font-family-id;
+      background-color: variables.$bg-color;
+      border: solid 1px variables.$border-color;
+      font-family: variables.$font-family-id;
       display: flex;
 
       & + li {
@@ -96,26 +96,26 @@
       & > span {
         display: inline-block;
         flex: 1;
-        @include TypographyParagraph($dark-color01);
+        @include mixins.TypographyParagraph(variables.$dark-color01);
 
         & + span {
           margin-left: 20px;
-          @include TypographyTitleH6($dark-color07);
+          @include mixins.TypographyTitleH6(variables.$dark-color07);
         }
       }
     }
   }
 }
 .bgWhite {
-  background: $white !important;
+  background: variables.$white !important;
 }
 .federatedContainer {
-  background: $light-color01;
+  background: variables.$light-color01;
 
   & > div {
     & + div {
       .header {
-        background: $white;
+        background: variables.$white;
       }
     }
   }

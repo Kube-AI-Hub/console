@@ -22,7 +22,7 @@ import { Dropdown, Form, Icon } from '@kube-design/components'
 
 import Confirm from 'components/Forms/Base/Confirm'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ContainerImages extends Component {
   formRef = React.createRef()

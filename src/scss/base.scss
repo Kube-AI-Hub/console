@@ -1,14 +1,16 @@
+@use "sass:map";
+@use '~scss/variables';
 html {
   overflow-y: visible; // overwrite overflow from minireset
   margin-right: calc(100% - 100vw); // fix jumping scrollbar
-  background-color: $body-bg-color;
+  background-color: variables.$body-bg-color;
   height: 100%;
 }
 
 body {
-  font-family: $font-family;
-  font-size: $body-size;
-  color: $text-color;
+  font-family: variables.$font-family;
+  font-size: variables.$body-size;
+  color: variables.$text-color;
   min-width: 960px;
   height: 100%;
   line-height: 1.67;
@@ -19,12 +21,12 @@ body {
 
 button,
 input {
-  font-family: $font-family;
-  font-size: $body-size;
+  font-family: variables.$font-family;
+  font-size: variables.$body-size;
 }
 
 a {
-  color: $text-color;
+  color: variables.$text-color;
   cursor: pointer;
 }
 
@@ -52,26 +54,26 @@ pre {
   padding: 0;
   background-color: transparent;
   white-space: pre-wrap;
-  font-size: $body-size;
-  color: $text-color;
-  font-family: $font-family-code;
+  font-size: variables.$body-size;
+  color: variables.$text-color;
+  font-family: variables.$font-family-code;
   overflow: auto;
   -webkit-font-smoothing: unset;
 }
 
-@each $header, $size in $headings {
+@each $header, $size in variables.$headings {
   .#{$header} {
     display: block;
-    line-height: map-get($heading-heights, $header);
+    line-height: map.get(variables.$heading-heights, $header);
     font-size: $size;
     font-weight: 600;
     font-style: normal;
-    color: $head-color;
-    text-shadow: $head-shadow;
+    color: variables.$head-color;
+    text-shadow: variables.$head-shadow;
   }
 }
 
-@each $text, $color in $text-colors {
+@each $text, $color in variables.$text-colors {
   .text-#{$text} {
     color: $color;
   }
@@ -80,8 +82,8 @@ pre {
 .code {
   display: block;
   padding: 12px;
-  border: 1px solid $light-color04;
-  background-color: $light-color01;
+  border: 1px solid variables.$light-color04;
+  background-color: variables.$light-color01;
 }
 
 .hover-show {
@@ -90,9 +92,9 @@ pre {
 
 .item-name {
   display: flex;
-  color: $text-color;
-  font-family: $font-family-id;
-  font-size: $body-size;
+  color: variables.$text-color;
+  font-family: variables.$font-family-id;
+  font-size: variables.$body-size;
   font-weight: 600;
 
   .icon {
@@ -102,7 +104,7 @@ pre {
 
   &:hover {
     strong {
-      color: $primary;
+      color: variables.$primary;
     }
   }
 }
@@ -130,16 +132,16 @@ pre {
   height: 16px;
   width: 16px;
   &.icon-success {
-    background-image: $icon-status-success;
+    background-image: variables.$icon-status-success;
   }
   &.icon-info {
-    background-image: $icon-status-info;
+    background-image: variables.$icon-status-info;
   }
   &.icon-warning {
-    background-image: $icon-status-warning;
+    background-image: variables.$icon-status-warning;
   }
   &.icon-error {
-    background-image: $icon-status-error;
+    background-image: variables.$icon-status-error;
   }
 }
 
@@ -148,7 +150,7 @@ pre {
 }
 
 .apps-dark-header {
-  background-color: $dark-color08 !important;
+  background-color: variables.$dark-color08 !important;
 }
 
 .loading {
@@ -183,18 +185,18 @@ pre {
   }
 
   &-body {
-    background-color: $body-bg-color;
+    background-color: variables.$body-bg-color;
   }
 
   &-side {
     position: fixed;
     top: 88px;
-    width: $nav-width;
+    width: variables.$nav-width;
     padding: 0 20px 40px 20px;
     z-index: 201;
 
     @media (max-width: 1366px) {
-      width: $narrow-nav-width;
+      width: variables.$narrow-nav-width;
     }
 
     &-title {
@@ -242,11 +244,11 @@ pre {
   &-main {
     overflow-y: auto;
     overflow-x: hidden;
-    margin-left: $nav-width - 20px;
+    margin-left: variables.$nav-width - 20px;
     padding: 20px;
 
     @media (max-width: 1366px) {
-      margin-left: $narrow-nav-width - 20px;
+      margin-left: variables.$narrow-nav-width - 20px;
     }
   }
 }
@@ -275,7 +277,7 @@ pre {
 }
 
 .disabled-input {
-  background-color: $light-color02;
+  background-color: variables.$light-color02;
   width: 100%;
   max-width: 455px;
   cursor: not-allowed;
@@ -283,11 +285,11 @@ pre {
   font-size: 12px;
   font-weight: 600;
   line-height: 1.67;
-  color: $dark-color06;
+  color: variables.$dark-color06;
   transition: all 0.3s ease-in-out;
-  caret-color: $dark-color06;
+  caret-color: variables.$dark-color06;
   outline: none;
-  border: solid 1px $light-color08;
+  border: solid 1px variables.$light-color08;
   border-radius: 4px;
   word-break: break-all;
 }

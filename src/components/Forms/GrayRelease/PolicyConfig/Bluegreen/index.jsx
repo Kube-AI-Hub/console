@@ -22,7 +22,7 @@ import { Form } from '@kube-design/components'
 
 import VersionSelect from './VersionSelect'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Bluegreen extends React.Component {
   state = {

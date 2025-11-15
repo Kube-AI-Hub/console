@@ -29,11 +29,12 @@ import RunStore from 'stores/devops/run'
 
 import TimeCounter from 'devops/containers/Pipelines/Detail/PipelineLogDialog/Timer'
 import LogItem from './logItem'
-import styles from './index.scss'
+import * as styles from './index.scss'
 import FullLogs from './FullLogs'
 
+export default
 @observer
-export default class PipelineLog extends React.Component {
+class PipelineLog extends React.Component {
   constructor(props) {
     super(props)
     /**

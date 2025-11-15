@@ -24,7 +24,7 @@ import { Alert, Form } from '@kube-design/components'
 import { Modal } from 'components/Base'
 import { UnitSlider } from 'components/Inputs'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ExpandVolume extends Component {
   static propTypes = {

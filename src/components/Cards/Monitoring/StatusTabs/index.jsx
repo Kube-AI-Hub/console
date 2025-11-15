@@ -27,7 +27,7 @@ import { startAutoRefresh, stopAutoRefresh } from 'utils/monitoring'
 import { Loading } from '@kube-design/components'
 import { Card, Empty } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class StatusTabs extends React.Component {
   static propTypes = {

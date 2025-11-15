@@ -16,6 +16,8 @@
  * along with KubeSphere Console.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+//Copyright 2025 4Paradigm
+
 import { Button, Notify } from '@kube-design/components'
 
 import { Avatar } from 'components/Base'
@@ -53,16 +55,14 @@ export default class PipelinesList extends React.Component {
     this.codeRepoSelectorRef = React.createRef()
   }
 
-  componentWillReceiveProps(nextProps) {
-    const { params } = this.props.match
-    const { params: nextParams } = nextProps.match
-
-    if (params.devops !== nextParams.devops) {
-      this.getData(nextParams)
+  componentDidUpdate(prevProps) {
+    // 处理 props 变化时的数据获取逻辑
+    const prevParams = prevProps.match.params
+    const currParams = this.props.match.params
+    if (prevParams.devops !== currParams.devops) {
+      this.getData(currParams)
     }
-  }
-
-  componentDidUpdate() {
+    // 保持原有定时刷新逻辑
     if (this.refreshTimer === null && this.isRuning) {
       this.refreshTimer = setInterval(() => this.refreshHandler(), 4000)
     }

@@ -25,7 +25,7 @@ import TimeSelector from 'components/Cards/Monitoring/Controller/TimeSelector'
 import { getTimeRange, getMinuteValue } from 'stores/monitoring/base'
 
 import Graph from 'components/Graph'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @inject('detailStore')
 @observer

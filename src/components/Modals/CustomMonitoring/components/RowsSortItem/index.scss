@@ -1,18 +1,17 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
-
   display: flex;
   padding: 0 15px;
   margin-bottom: 5px;
   line-height: 44px;
-  background-color:$white;
+  background-color: variables.$white;
   justify-content: space-between;
 
   h3 {
     font-weight: 800;
     font-size: 12px;
-    color: $dark-color06;
+    color: variables.$dark-color06;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -42,5 +41,4 @@
       }
     }
   }
-
 }

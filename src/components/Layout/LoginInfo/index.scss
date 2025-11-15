@@ -1,9 +1,9 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .logined {
   display: inline-block;
   line-height: 1.67;
-  font-family: $font-family-id;
+  font-family: variables.$font-family-id;
   z-index: 100;
   cursor: pointer;
 
@@ -16,8 +16,8 @@
 }
 
 .name {
-  font-size: $body-size;
-  color: $title-color;
+  font-size: variables.$body-size;
+  color: variables.$title-color;
 
   &.isAppsPage {
     color: white;
@@ -38,20 +38,20 @@
 
 .notLoggedIn {
   .name {
-    color: $yellow-color03;
-    font-size: $size-small;
+    color: variables.$yellow-color03;
+    font-size: variables.$size-small;
     line-height: 20px;
 
     :global {
       svg {
-        --primary-color: #{$yellow-color03};
-        --second-color: #{$yellow-color05};
+        --primary-color: #{variables.$yellow-color03};
+        --second-color: #{variables.$yellow-color05};
       }
     }
   }
 
   .loginLabel {
-    color: $yellow-color03;
+    color: variables.$yellow-color03;
     cursor: pointer;
   }
 }

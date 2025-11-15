@@ -24,7 +24,7 @@ import Banner from 'components/Cards/Banner'
 import OAuthModal from 'settings/components/Modals/OAuth'
 import GithubOAuthModal from 'settings/components/Modals/GithubOAuth'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ThirdPartyLogin extends Component {
   state = {

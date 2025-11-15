@@ -22,7 +22,7 @@ import React from 'react'
 import { PATTERN_NAME, PATTERN_ALIAS_NAME } from 'utils/constants'
 import Placement from '../Advance/Placement'
 
-import styles from '../Advance/index.scss'
+import * as styles from '../Advance/index.scss'
 
 export default class BaseInfo extends React.Component {
   render() {

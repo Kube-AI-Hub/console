@@ -31,14 +31,15 @@ import QuotaStore from 'stores/quota'
 
 import QuotaItem from './QuotaItem'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const RESERVED_KEYS = ['limits.cpu', 'limits.memory', 'pods']
 
+export default
 @inject('rootStore')
 @observer
 @trigger
-export default class ResourceQuota extends React.Component {
+class ResourceQuota extends React.Component {
   store = new QuotaStore()
 
   state = {

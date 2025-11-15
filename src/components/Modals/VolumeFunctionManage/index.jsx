@@ -23,10 +23,11 @@ import { Modal } from 'components/Base'
 
 import { get, isUndefined, isString } from 'lodash'
 import { observer } from 'mobx-react'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class SetDefaultStorageClassModal extends React.Component {
+class SetDefaultStorageClassModal extends React.Component {
   static propTypes = {
     visible: PropTypes.bool,
     onOk: PropTypes.func,

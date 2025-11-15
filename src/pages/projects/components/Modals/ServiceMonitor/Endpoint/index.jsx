@@ -21,7 +21,7 @@ import { get, omit } from 'lodash'
 import { Select, Input, Icon } from '@kube-design/components'
 import { ObjectInput } from 'components/Inputs'
 import Authorization from '../Authorization'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Endpoints extends Component {
   get protocols() {

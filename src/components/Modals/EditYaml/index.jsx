@@ -24,7 +24,7 @@ import classNames from 'classnames'
 import { Modal } from 'components/Base'
 import EditMode from 'components/EditMode'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class YamlEditModal extends React.Component {
   static propTypes = {

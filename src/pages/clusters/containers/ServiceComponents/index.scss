@@ -1,9 +1,9 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .header {
   position: relative;
   margin-bottom: 20px;
-  border-radius: $border-radius;
+  border-radius: variables.$border-radius;
   overflow: hidden;
   background-color: #fff;
   box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.06);
@@ -12,7 +12,7 @@
 .title {
   position: relative;
   padding: 24px 20px;
-  color: $dark-color07;
+  color: variables.$dark-color07;
   overflow: hidden;
 
   :global {
@@ -23,7 +23,7 @@
   }
 
   & > p {
-    color: $dark-color01;
+    color: variables.$dark-color01;
     margin-top: 3px;
   }
 
@@ -44,7 +44,7 @@
 
 .toolbar {
   padding: 8px 14px;
-  background-color: $light-color02;
+  background-color: variables.$light-color02;
 
   :global {
     .radio-group-button label.radio-button {

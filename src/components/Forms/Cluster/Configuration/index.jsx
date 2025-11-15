@@ -23,7 +23,7 @@ import { getDocsUrl } from 'utils'
 import EditMode from 'components/EditMode'
 
 import { get } from 'lodash'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Confiuguration extends React.Component {
   constructor(props) {

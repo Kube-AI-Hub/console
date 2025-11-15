@@ -1,23 +1,23 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   margin-right: 4px;
   max-width: 150px;
   border-radius: 2px;
-  background-color: $dark-color07;
+  background-color: variables.$dark-color07;
   cursor: pointer;
-  transition: all $trans-speed ease-in-out;
+  transition: all variables.$trans-speed ease-in-out;
   color: white;
   z-index: 1;
 
   &:hover,
   &:focus {
-    border-color: $input-hover-color;
+    border-color: variables.$input-hover-color;
   }
 
   &.disabled {
-    border-color: $border-color !important;
+    border-color: variables.$border-color !important;
     cursor: default;
     .control {
       padding: 0px 6px;
@@ -31,7 +31,7 @@
   max-height: 104px;
   border-radius: 4px;
   box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.2);
-  background-color: $dark-color07;
+  background-color: variables.$dark-color07;
   z-index: 2;
   overflow-y: scroll;
 }
@@ -42,7 +42,7 @@
   position: relative;
   padding: 0px 26px 0px 6px;
   height: 22px;
-  font-family: $font-family;
+  font-family: variables.$font-family;
   font-size: 12px;
   font-weight: 600;
   line-height: 22px;
@@ -52,7 +52,7 @@
   .label {
     max-width: 125px;
     min-width: 64px;
-    @include ellipsis;
+    @include mixins.ellipsis;
   }
 
   .rightIcon {
@@ -71,7 +71,7 @@
   }
 
   &.selected {
-    background-color: $dark-color06;
+    background-color: variables.$dark-color06;
   }
 }
 
@@ -80,16 +80,16 @@
   height: 32px;
   user-select: none;
   line-height: 20px;
-  @include ellipsis;
+  @include mixins.ellipsis;
 
   &.selected {
-    background-color: $dark-color06;
+    background-color: variables.$dark-color06;
   }
 }
 
 .option {
   &:hover {
-    background-color: $dark-color06;
+    background-color: variables.$dark-color06;
   }
 }
 

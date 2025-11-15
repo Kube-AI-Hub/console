@@ -1,9 +1,9 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .modalBody {
   min-width: 320px;
-  color: $dark;
-  background-color: $white;
+  color: variables.$dark;
+  background-color: variables.$white;
 
   .title {
     display: flex;
@@ -13,7 +13,7 @@
     margin-bottom: 8px;
 
     strong {
-      font-size: $size-normal;
+      font-size: variables.$size-normal;
     }
 
     :global {
@@ -32,5 +32,5 @@
 
 .footer {
   padding: 8px 20px;
-  background-color: $light;
+  background-color: variables.$light;
 }

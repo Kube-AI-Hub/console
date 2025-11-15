@@ -21,7 +21,7 @@ import React from 'react'
 import { Form } from '@kube-design/components'
 import ClusterSelect from './ClusterSelect'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class BaseInfo extends React.Component {
   render() {

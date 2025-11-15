@@ -1,14 +1,14 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .text {
   margin-bottom: 20px;
 
   & > div {
-    @include TypographyTitleH5($dark-color07);
+    @include mixins.TypographyTitleH5(variables.$dark-color07);
   }
 
   & > p {
-    @include TypographyParagraph($dark-color01);
+    @include mixins.TypographyParagraph(variables.$dark-color01);
   }
 }

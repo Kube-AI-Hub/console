@@ -39,17 +39,19 @@ import Banner from 'apps/components/Banner'
 import AppInfo from 'apps/components/AppInfo'
 import AppPreview from 'apps/components/AppPreview'
 import AppBase from 'apps/components/AppBase'
+import InstanceList from 'apps/components/Lists/InstanceList'
 
 import { trigger } from 'utils/action'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const { TabPanel } = Tabs
 
+export default
 @inject('rootStore')
 @observer
 @trigger
-export default class App extends React.Component {
+class App extends React.Component {
   constructor(props) {
     super(props)
 
@@ -206,6 +208,7 @@ export default class App extends React.Component {
     if (isLoading) {
       return <Loading className={styles.loading} />
     }
+    const hasVersion = toJS(data) && toJS(data).length > 0
 
     return (
       <Tabs
@@ -239,6 +242,11 @@ export default class App extends React.Component {
             </Column>
           </Columns>
         </TabPanel>
+        {hasVersion && (
+          <TabPanel label={t('APP_INSTANCES')} name="instanceList">
+            <InstanceList appId={detail.app_id} />
+          </TabPanel>
+        )}
       </Tabs>
     )
   }

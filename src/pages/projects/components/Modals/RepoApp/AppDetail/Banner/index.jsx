@@ -21,7 +21,7 @@ import PropTypes from 'prop-types'
 import { Icon } from '@kube-design/components'
 
 import { Image } from 'components/Base'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 class Banner extends PureComponent {
   static propTypes = {

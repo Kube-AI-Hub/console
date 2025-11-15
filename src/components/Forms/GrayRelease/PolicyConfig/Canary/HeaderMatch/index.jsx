@@ -22,7 +22,7 @@ import { debounce, pick } from 'lodash'
 
 import { Select, Input } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const RESERVED_KEYS = ['cookie', 'User-Agent']
 

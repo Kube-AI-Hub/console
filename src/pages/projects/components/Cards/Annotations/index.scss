@@ -1,13 +1,13 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .annotations {
   & > li {
     padding: 12px 32px;
     border-radius: 60px;
-    background-color: $bg-color;
-    border: solid 1px $border-color;
-    font-family: $font-family-id;
+    background-color: variables.$bg-color;
+    border: solid 1px variables.$border-color;
+    font-family: variables.$font-family-id;
 
     & + li {
       margin-top: 8px;

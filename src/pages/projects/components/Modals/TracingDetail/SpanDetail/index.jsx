@@ -22,7 +22,7 @@ import { Icon, RadioGroup, RadioButton } from '@kube-design/components'
 import { Label } from 'components/Base'
 import { formatDuration } from 'utils/tracing'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const getValue = (type, value) => {
   switch (type) {

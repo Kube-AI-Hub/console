@@ -21,7 +21,7 @@ import React, { Component } from 'react'
 import { Icon } from '@kube-design/components'
 import { getSuitableValue } from 'utils/monitoring'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const sortByWithOrder = (data, sortKey, order = 'asc') => {
   if (!sortKey) {

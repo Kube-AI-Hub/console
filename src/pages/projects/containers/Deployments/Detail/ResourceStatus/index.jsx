@@ -30,7 +30,7 @@ import ReplicaCard from 'projects/components/Cards/Replica'
 import S2iBuilderCard from 'projects/components/Cards/S2iBuilder'
 import Placement from 'projects/components/Cards/Placement'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 class ResourceStatus extends React.Component {
   constructor(props) {

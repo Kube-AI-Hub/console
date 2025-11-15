@@ -23,7 +23,7 @@ import { Radio } from '@kube-design/components'
 import classnames from 'classnames'
 import { isEmpty } from 'lodash'
 import { capitalize } from 'utils'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default function ChartCard({ click, item, type, filters }) {
   const [checked, setCheck] = useState(false)

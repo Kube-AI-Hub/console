@@ -36,9 +36,15 @@ import Banner from 'components/Cards/Banner'
 import Table from 'components/Tables/List'
 
 import { toJS } from 'mobx'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const MetricTypes = {
+  gpu_used: 'node_gpu_usage',
+  gpu_total: 'node_gpu_total',
+  gpu_utilisation: 'node_gpu_utilisation',
+  gpu_memory_used: 'node_gpu_memory_usage',
+  gpu_memory_total: 'node_gpu_memory_total',
+  gpu_memory_utilisation: 'node_gpu_memory_utilisation',
   cpu_used: 'node_cpu_usage',
   cpu_total: 'node_cpu_total',
   cpu_utilisation: 'node_cpu_utilisation',
@@ -49,12 +55,13 @@ const MetricTypes = {
   pod_total: 'node_pod_quota',
 }
 
+export default
 @withClusterList({
   store: new NodeStore(),
   name: 'CLUSTER_NODE',
   module: 'nodes',
 })
-export default class Nodes extends React.Component {
+class Nodes extends React.Component {
   store = this.props.store
 
   monitoringStore = new NodeMonitoringStore({ cluster: this.cluster })
@@ -314,6 +321,78 @@ export default class Nodes extends React.Component {
         search: true,
         render: roles =>
           roles.indexOf('master') === -1 ? t('WORKER') : t('CONTROL_PLANE'),
+      },
+      {
+        title: t('GPU_USAGE'),
+        key: 'gpu',
+        isHideable: true,
+        render: record => {
+          const metrics = this.getRecordMetrics(record, [
+            {
+              type: 'gpu_used',
+              unit: 'Core',
+            },
+            {
+              type: 'gpu_total',
+              unit: 'Core',
+            },
+            {
+              type: 'gpu_utilisation',
+            },
+          ])
+
+          return (
+            <Text
+              title={
+                <div className={styles.resource}>
+                  <span>{`${Math.round(metrics.gpu_utilisation * 100)}%`}</span>
+                  {metrics.cpu_utilisation >= 0.9 && (
+                    <Icon name="exclamation" />
+                  )}
+                </div>
+              }
+              description={`${metrics.gpu_used}/${metrics.gpu_total} ${t(
+                'CORE_PL'
+              )}`}
+            />
+          )
+        },
+      },
+      {
+        title: t('GPU_MEMORY_USAGE'),
+        key: 'gpu_memory',
+        isHideable: true,
+        render: record => {
+          const metrics = this.getRecordMetrics(record, [
+            {
+              type: 'gpu_memory_used',
+              unit: 'Gi',
+            },
+            {
+              type: 'gpu_memory_total',
+              unit: 'Gi',
+            },
+            {
+              type: 'gpu_memory_utilisation',
+            },
+          ])
+
+          return (
+            <Text
+              title={
+                <div className={styles.resource}>
+                  <span>{`${Math.round(
+                    metrics.gpu_memory_utilisation * 100
+                  )}%`}</span>
+                  {metrics.gpu_memory_utilisation >= 0.9 && (
+                    <Icon name="exclamation" />
+                  )}
+                </div>
+              }
+              description={`${metrics.gpu_memory_used}/${metrics.gpu_memory_total} GiB`}
+            />
+          )
+        },
       },
       {
         title: t('CPU_USAGE'),

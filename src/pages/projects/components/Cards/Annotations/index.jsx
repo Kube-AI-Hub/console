@@ -22,7 +22,7 @@ import { isEmpty } from 'lodash'
 import { Columns, Column } from '@kube-design/components'
 import { Card } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Annotations extends React.Component {
   static propTypes = {

@@ -21,10 +21,11 @@ import { ScrollLoad } from 'components/Base'
 import { InputSearch, Icon } from '@kube-design/components'
 import { observer } from 'mobx-react'
 import Card from './Card'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class RadioTable extends React.Component {
+class RadioTable extends React.Component {
   handleSearch = text => {
     this.props.fetchList({ name: text }, true)
   }

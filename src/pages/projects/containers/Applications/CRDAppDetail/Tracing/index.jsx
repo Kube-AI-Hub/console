@@ -31,11 +31,12 @@ import { getTimeRange, getMinuteValue } from 'stores/monitoring/base'
 
 import ServiceStore from 'stores/service'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('detailStore')
 @observer
-export default class Tracing extends React.Component {
+class Tracing extends React.Component {
   constructor(props) {
     super(props)
 

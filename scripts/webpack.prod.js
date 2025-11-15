@@ -22,7 +22,7 @@ const webpack = require('webpack')
 const CopyPlugin = require('copy-webpack-plugin')
 const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
-const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin')
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
   .BundleAnalyzerPlugin
 
@@ -46,65 +46,28 @@ const config = smp.wrap({
     rules: [
       ...baseConfig.moduleRules,
       {
-        test: /\.s[ac]ss$/i,
-        include: root('src'),
-        loader: [
-          MiniCssExtractPlugin.loader,
-          {
-            loader: 'css-loader',
-            options: {
-              importLoaders: 2,
-              modules: true,
-            },
-          },
-          {
-            loader: 'postcss-loader',
-            options: baseConfig.postCssOptions,
-          },
-          { loader: 'sass-loader' },
-        ],
-      },
-      {
-        test: /\.s[ac]ss$/i,
-        include: root('node_modules'),
-        use: [
-          MiniCssExtractPlugin.loader,
-          {
-            loader: 'css-loader',
-            options: {
-              importLoaders: 2,
-            },
-          },
-          {
-            loader: 'postcss-loader',
-            options: baseConfig.postCssOptions,
-          },
-          'sass-loader',
-        ],
-      },
-      {
-        test: /\.css$/,
-        loader: [MiniCssExtractPlugin.loader, 'css-loader'],
-      },
-      {
         test: /\.(ttf|otf|eot|woff2?)(\?.+)?$/,
         include: root('src/assets'),
-        use: {
-          loader: 'file-loader',
-          options: {
-            outputPath: '/assets/',
-          },
+        type: 'asset/resource',
+        generator: {
+          filename: 'assets/[name].[hash][ext]',
         },
       },
     ],
   },
   optimization: {
     flagIncludedChunks: true,
-    occurrenceOrder: true,
     usedExports: true,
     sideEffects: true,
     concatenateModules: true,
     minimize: true,
+    minimizer: [
+      new CssMinimizerPlugin({
+        minimizerOptions: {
+          preset: ['default', { discardComments: { removeAll: true } }],
+        },
+      }),
+    ],
     splitChunks: {
       chunks: 'async',
       minChunks: 1,
@@ -130,18 +93,6 @@ const config = smp.wrap({
   plugins: [
     ...baseConfig.plugins,
     new CopyPlugin([{ from: root('src/assets'), to: root('dist/assets') }]),
-    new MiniCssExtractPlugin({
-      filename: '[name].[chunkhash].css',
-      chunkFilename: '[id].[chunkhash].css',
-    }),
-    new OptimizeCssAssetsPlugin({
-      assetNameRegExp: /\.css$/g,
-      cssProcessor: require('cssnano'),
-      cssProcessorPluginOptions: {
-        preset: ['default', { discardComments: { removeAll: true } }],
-      },
-      canPrint: true,
-    }),
     new webpack.DefinePlugin({
       'process.env.BROWSER': true,
       'process.env.NODE_ENV': JSON.stringify('production'),
@@ -149,5 +100,13 @@ const config = smp.wrap({
     new BundleAnalyzerPlugin({ analyzerMode: 'static' }),
   ],
 })
+
+// 修复 SpeedMeasurePlugin 与 MiniCssExtractPlugin 同时使用时 css 文件没有被压缩的问题
+config.plugins.push(
+  new MiniCssExtractPlugin({
+    filename: '[name].[chunkhash].css',
+    chunkFilename: '[id].[chunkhash].css',
+  })
+)
 
 module.exports = [config, localeConfig]

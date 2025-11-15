@@ -1,8 +1,8 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .rowTitle {
-  @include TypographyTitleH6($dark-color07);
+  @include mixins.TypographyTitleH6(variables.$dark-color07);
   line-height: 20px;
 
   padding: 12px;

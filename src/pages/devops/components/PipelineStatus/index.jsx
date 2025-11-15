@@ -26,10 +26,11 @@ import { Dragger } from 'components/Base'
 import ParamsFormModal from 'components/Forms/Pipelines/ParamsFormModal'
 
 import PipelineNodes from './nodesRender'
-import style from './index.scss'
+import * as style from './index.scss'
 
+export default
 @observer
-export default class PipelineStatus extends React.Component {
+class PipelineStatus extends React.Component {
   constructor(props) {
     super(props)
     this.draggerCref = React.createRef()

@@ -1,13 +1,13 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .quota {
   display: flex;
   padding: 20px;
-  background-color: $lightest;
+  background-color: variables.$lightest;
 
   &:hover {
-    background-color: $light-color02;
+    background-color: variables.$light-color02;
   }
 }
 
@@ -18,14 +18,14 @@
 
   & > div {
     &:first-child {
-      @include ellipsis;
+      @include mixins.ellipsis;
     }
 
-    @include TypographyTitleH6($dark-color07);
+    @include mixins.TypographyTitleH6(variables.$dark-color07);
   }
 
   & > p {
-    @include TypographyParagraph($dark-color01);
+    @include mixins.TypographyParagraph(variables.$dark-color01);
   }
 }
 

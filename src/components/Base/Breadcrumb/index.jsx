@@ -21,9 +21,9 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
 import isEqual from 'react-fast-compare'
-import pathToRegexp from 'path-to-regexp'
+import { pathToRegexp } from 'path-to-regexp'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Breadcrumb extends React.Component {
   static propTypes = {
@@ -53,12 +53,12 @@ export default class Breadcrumb extends React.Component {
     const { pathname, routes } = this.props
     return routes
       .filter(item => item.name)
-      .find(item => !isEmpty(pathToRegexp(item.path).exec(pathname)))
+      .find(item => !isEmpty(pathToRegexp(item.path).regexp.exec(pathname)))
   }
 
   compile = value => {
     const { params } = this.props
-    return pathToRegexp.compile(value)(params)
+    return pathToRegexp.regexp.compile(value)(params)
   }
 
   render() {

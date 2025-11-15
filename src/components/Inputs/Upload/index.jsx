@@ -22,7 +22,7 @@ import classNames from 'classnames'
 import { Column, Columns, Icon, Notify } from '@kube-design/components'
 import { Upload } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class UploadInput extends React.Component {
   static propTypes = {

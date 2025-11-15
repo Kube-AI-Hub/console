@@ -20,7 +20,7 @@ import { Icon, Tooltip } from '@kube-design/components'
 import { get } from 'lodash'
 import React from 'react'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const isSuccess = (type, condition) => {
   const conditionType = condition.type

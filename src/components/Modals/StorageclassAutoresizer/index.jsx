@@ -25,7 +25,7 @@ import { observer } from 'mobx-react'
 import { get, isBoolean, range, set, trim, endsWith } from 'lodash'
 import Slider from './Slider'
 import TailItemInput from './TailItemInput'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const values = (props, type, key, defaultValue) => {
   return get(
@@ -41,8 +41,9 @@ const sliderSettings = {
   unit: 'Gi',
 }
 
+export default
 @observer
-export default class StorageClassAutoResizerModal extends React.Component {
+class StorageClassAutoResizerModal extends React.Component {
   static propTypes = {
     visible: PropTypes.bool,
     onOk: PropTypes.func,

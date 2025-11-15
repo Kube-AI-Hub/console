@@ -24,7 +24,7 @@ import { Bar } from 'components/Base'
 import { cpuFormat, memoryFormat } from 'utils'
 import { ICON_TYPES } from 'utils/constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const QuotaItem = ({ name, total, used }) => {
   let ratio = 0

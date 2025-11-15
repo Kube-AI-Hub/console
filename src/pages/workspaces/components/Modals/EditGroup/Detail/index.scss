@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .detailWrapper {
   margin-left: 20px;
@@ -7,10 +7,9 @@
   flex-direction: column;
 }
 
-
 .breadcrumbs {
-  font-size: $size-normal;
-  color: $text-color;
+  font-size: variables.$size-normal;
+  color: variables.$text-color;
   font-weight: 500;
   margin-bottom: 20px;
   display: flex;

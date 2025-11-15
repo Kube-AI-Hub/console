@@ -23,7 +23,7 @@ import { isEmpty, get } from 'lodash'
 import { Tooltip, Icon } from '@kube-design/components'
 
 import { METER_RESOURCE_TITLE } from '../../constats'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class MeterTable extends React.Component {
   renderTooltipContent = () => {

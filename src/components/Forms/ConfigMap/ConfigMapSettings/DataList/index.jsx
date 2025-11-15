@@ -20,7 +20,7 @@ import React from 'react'
 import { omit } from 'lodash'
 import { List } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class SecretDataList extends React.Component {
   static defaultProps = {

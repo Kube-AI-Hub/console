@@ -34,7 +34,7 @@ import { PATTERN_IP, PATTERN_NAME } from 'utils/constants'
 
 import { Modal } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const ERROR_MESSAGE = {
   name: name => t('IN_USE_Node_NAME', { name }),

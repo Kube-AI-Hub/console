@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .header {
   margin-bottom: 20px;
@@ -15,19 +15,19 @@
   vertical-align: top;
   padding: 14px;
   h3 {
-    @include TypographyTitleH3();
+    @include mixins.TypographyTitleH3();
     small {
-      margin-left: .5em;
-      @include TypographyTitleH6(); 
+      margin-left: 0.5em;
+      @include mixins.TypographyTitleH6();
     }
   }
   p {
-    color: $dark-color01;
+    color: variables.$dark-color01;
   }
 }
 
 .card {
   display: inline-block;
-  width: 123px; 
+  width: 123px;
   height: 80px;
 }

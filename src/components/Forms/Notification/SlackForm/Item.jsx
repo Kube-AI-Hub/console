@@ -24,7 +24,7 @@ import { isEmpty } from 'lodash'
 import { Notify, Tag, Icon } from '@kube-design/components'
 import { BoxInput } from 'components/Inputs'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Item extends React.Component {
   static propTypes = {

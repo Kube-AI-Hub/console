@@ -1,6 +1,6 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .item > label {
-  color: $title-color;
-  font-weight: $font-bold;
+  color: variables.$title-color;
+  font-weight: variables.$font-bold;
 }

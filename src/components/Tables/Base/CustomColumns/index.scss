@@ -1,10 +1,10 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   padding: 4px 0;
-  color: $white;
-  background-color: $dark-color07;
+  color: variables.$white;
+  background-color: variables.$dark-color07;
   border-radius: 4px;
 
   header {
@@ -19,14 +19,14 @@
     line-height: 20px;
     cursor: pointer;
     &:hover {
-      background-color: $dark-color06;
+      background-color: variables.$dark-color06;
     }
   }
 
   :global {
     .icon {
       position: absolute;
-      @include vertical-center;
+      @include mixins.vertical-center;
       width: 16px;
       height: 16px;
       left: 12px;

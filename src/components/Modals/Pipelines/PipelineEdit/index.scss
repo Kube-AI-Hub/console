@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .header {
   div > label {
@@ -9,7 +9,7 @@
 .body {
   height: calc(100vh - 58px);
   max-height: none;
-  background-color: $bg-color;
+  background-color: variables.$bg-color;
   padding: 0;
 }
 .templeHeight {

@@ -1,25 +1,25 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   header {
     font-weight: bold;
-    color: $dark-color07;
+    color: variables.$dark-color07;
     margin-bottom: 8px;
   }
 
   & > div {
     height: 96px;
-    border: solid 8px $light-color02;
+    border: solid 8px variables.$light-color02;
     border-radius: 4px;
-    background-color: $dark-color07;
-    color: $white;
+    background-color: variables.$dark-color07;
+    color: variables.$white;
     text-align: center;
     background-position: 50% 35px;
     padding: 10px;
 
     h3 {
-      @include TypographySymbolText($white);
+      @include mixins.TypographySymbolText(variables.$white);
     }
     picture {
       display: inline-block;

@@ -29,12 +29,13 @@ import WorkspaceStore from 'stores/workspace'
 import { getLocalTime, showNameAndAlias } from 'utils'
 import { trigger } from 'utils/action'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('rootStore', 'clusterStore')
 @observer
 @trigger
-export default class Overview extends React.Component {
+class Overview extends React.Component {
   workspaceStore = new WorkspaceStore()
 
   componentDidMount() {
@@ -156,7 +157,7 @@ export default class Overview extends React.Component {
     }
 
     return (
-      <div className={styles.tableWrapper}>
+      <div className={styles.tWrapper}>
         <Table
           className="table-1-10"
           data={toJS(data)}

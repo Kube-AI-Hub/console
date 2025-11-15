@@ -22,8 +22,9 @@ import { observer } from 'mobx-react'
 import Card from './Card'
 import Edges from './Edges'
 
+export default
 @observer
-export default class PipelineNodes extends React.Component {
+class PipelineNodes extends React.Component {
   static defaultProps = {}
 
   @observable

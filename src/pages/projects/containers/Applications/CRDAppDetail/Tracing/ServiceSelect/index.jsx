@@ -24,7 +24,7 @@ import isEqual from 'react-fast-compare'
 
 import Item from './Item'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ServiceSelect extends React.Component {
   static propTypes = {

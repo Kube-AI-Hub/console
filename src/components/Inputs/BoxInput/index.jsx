@@ -22,7 +22,7 @@ import classnames from 'classnames'
 import { isEmpty, trim } from 'lodash'
 import { Input, Button, Select } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class BoxInput extends React.Component {
   static propTypes = {

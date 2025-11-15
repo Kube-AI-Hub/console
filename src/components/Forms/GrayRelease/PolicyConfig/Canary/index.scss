@@ -1,7 +1,7 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
-  background-color: $lightest;
+  background-color: variables.$lightest;
 }
 
 .bar {

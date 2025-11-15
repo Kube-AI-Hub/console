@@ -21,10 +21,11 @@ import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
 import React from 'react'
 import { getDisplayName, showNameAndAlias } from 'utils'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class Department extends React.Component {
+class Department extends React.Component {
   static propTypes = {
     treeData: PropTypes.array,
   }

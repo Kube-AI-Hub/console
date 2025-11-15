@@ -19,7 +19,7 @@
 import React from 'react'
 import GraphMenu from '../GraphMenu'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default function GraphRows({ rows }) {
   return rows.map(row => (

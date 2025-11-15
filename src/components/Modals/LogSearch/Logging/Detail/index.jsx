@@ -33,12 +33,13 @@ import { ReactComponent as BackIcon } from 'assets/back.svg'
 
 import DurationSelect from './DurationSelect'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const converter = new AnsiUp()
 
+export default
 @observer
-export default class DetailModal extends React.Component {
+class DetailModal extends React.Component {
   constructor(props) {
     super(props)
 

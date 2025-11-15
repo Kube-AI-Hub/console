@@ -21,7 +21,7 @@ import { Column, Columns, Form } from '@kube-design/components'
 import { CheckableText } from 'components/Base'
 import { NumberInput } from 'components/Inputs'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class UserGroup extends React.Component {
   get prefix() {

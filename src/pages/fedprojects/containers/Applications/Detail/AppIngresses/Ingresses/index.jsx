@@ -30,11 +30,12 @@ import IngressStore from 'stores/ingress'
 
 import IngressCard from './IngressCard'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('projectStore')
 @observer
-export default class Components extends Component {
+class Ingresses extends Component {
   gatewayStore = new GatewayStore()
 
   ingressStore = new IngressStore()

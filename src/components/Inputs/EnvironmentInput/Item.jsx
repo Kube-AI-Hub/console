@@ -24,7 +24,7 @@ import { getDisplayName } from 'utils'
 import { PATTERN_ENV_NAME } from 'utils/constants'
 import classNames from 'classnames'
 import { Input, Select, Icon } from '@kube-design/components'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 import ObjectInput from '../ObjectInput'
 

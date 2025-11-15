@@ -23,8 +23,9 @@ import Base from 'projects/components/Cards/ImageRunRecord'
 
 import RunItem from './Item'
 
+export default
 @observer
-export default class ImageArtifacts extends Base {
+class ImageArtifacts extends Base {
   fetchData = async (params = {}) => {
     const { limit, params: _params } = this.props
     _params.status = 'Successful'

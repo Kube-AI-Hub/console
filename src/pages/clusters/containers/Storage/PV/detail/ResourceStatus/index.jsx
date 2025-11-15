@@ -25,7 +25,7 @@ import { getLocalTime, map_accessModes } from 'utils'
 import { toJS } from 'mobx'
 
 import { isEmpty } from 'lodash'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const renderModeTip = (
   <div>

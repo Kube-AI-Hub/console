@@ -21,10 +21,11 @@ import { withRouter } from 'react-router'
 
 import RadioGroup from './RadioGroup'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @withRouter
-export default class Navs extends React.Component {
+class Navs extends React.Component {
   render() {
     const { routes, match, history } = this.props
 

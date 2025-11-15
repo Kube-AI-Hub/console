@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   position: relative;
@@ -8,7 +8,7 @@
   padding: 20px;
   background-color: #ffffff;
   box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.06);
-  transition: all $trans-speed ease-in-out;
+  transition: all variables.$trans-speed ease-in-out;
 
   &:hover {
     box-shadow: 0 6px 16px 0 rgba(33, 43, 54, 0.2);

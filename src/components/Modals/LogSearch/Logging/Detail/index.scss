@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 $titleHeight: 30px;
 
@@ -30,8 +30,8 @@ $titleHeight: 30px;
   padding: 12px;
   height: calc(100% - #{$titleHeight});
 
-  border-radius: $border-radius;
-  background-color: $lightest;
+  border-radius: variables.$border-radius;
+  background-color: variables.$lightest;
   border: solid 1px #d8dee5;
 
   @at-root {
@@ -45,7 +45,7 @@ $titleHeight: 30px;
         .dataList {
           border-radius: 4px;
           background: #fff;
-          border: solid 1px $light-color03;
+          border: solid 1px variables.$light-color03;
           padding: 4px 0;
           & > div {
             h4 {
@@ -59,7 +59,7 @@ $titleHeight: 30px;
             }
             padding: 12px;
             border-radius: 4px;
-            background-color: $lightest;
+            background-color: variables.$lightest;
             margin: 4px 8px;
           }
         }
@@ -70,7 +70,7 @@ $titleHeight: 30px;
           width: 45px;
           height: 32px;
           border-radius: 2px;
-          background-color: $bg-color;
+          background-color: variables.$bg-color;
           margin-left: 9px;
           text-align: center;
           line-height: 29px;
@@ -108,7 +108,7 @@ $titleHeight: 30px;
           @at-root {
             .frequencyOpts {
               border-radius: 3px;
-              background-color: $dark-color06;
+              background-color: variables.$dark-color06;
               :global {
                 .select-control {
                   color: inherit;
@@ -141,7 +141,7 @@ $titleHeight: 30px;
               align-items: center;
               justify-content: center;
               border-radius: 4px;
-              background-color: $dark-color06;
+              background-color: variables.$dark-color06;
               width: 32px;
               text-align: center;
               height: 32px;
@@ -154,7 +154,7 @@ $titleHeight: 30px;
             }
             .duration {
               border-radius: 4px;
-              background-color: $dark-color06;
+              background-color: variables.$dark-color06;
               font-weight: 600;
             }
             .clearQuery {
@@ -162,7 +162,7 @@ $titleHeight: 30px;
             }
             .input {
               border-radius: 4px;
-              background-color: $dark-color06;
+              background-color: variables.$dark-color06;
               align-items: center;
               display: flex;
               padding: 0 8px;
@@ -211,5 +211,5 @@ $titleHeight: 30px;
 .queryLog {
   color: #d8dee5;
   white-space: pre-wrap;
-  font-family: $font-family-code;
+  font-family: variables.$font-family-code;
 }

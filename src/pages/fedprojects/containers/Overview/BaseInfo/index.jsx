@@ -23,7 +23,7 @@ import { Icon } from '@kube-design/components'
 import { Text } from 'components/Base'
 import { getDisplayName } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class BaseInfo extends React.Component {
   render() {

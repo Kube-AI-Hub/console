@@ -1,12 +1,12 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   position: relative;
   display: flex;
   border-radius: 4px;
-  border: 1px solid $light-color03;
+  border: 1px solid variables.$light-color03;
   padding: 4px;
-  background-color: $card-bg-color;
+  background-color: variables.$card-bg-color;
 
   :global {
     .select + .select {

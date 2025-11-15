@@ -22,10 +22,11 @@ import PropTypes from 'prop-types'
 import { Form, Input, TextArea } from '@kube-design/components'
 import { PATTERN_APPTEMPLATE_VERSION } from 'utils/constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class VersionEdit extends React.Component {
+class VersionEdit extends React.Component {
   static propTypes = {
     formData: PropTypes.object,
     handleChange: PropTypes.func,

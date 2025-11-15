@@ -1,14 +1,14 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .appInfo {
   > div {
     margin-bottom: 32px;
 
     .title {
-      font-size: $size-normal;
+      font-size: variables.$size-normal;
       line-height: 20px;
       font-weight: bold;
-      color: $dark-color07;
+      color: variables.$dark-color07;
       margin-bottom: 12px;
 
       span {
@@ -21,7 +21,7 @@
 
 .versions {
   width: 100%;
-  border: 1px solid $border-color;
+  border: 1px solid variables.$border-color;
   border-collapse: collapse;
   border-spacing: 0;
   text-align: left;
@@ -32,8 +32,8 @@
     font-size: 12px;
     line-height: 20px;
     text-align: left;
-    border-right: 1px solid $light-color05;
-    border-bottom: 1px solid $light-color05;
+    border-right: 1px solid variables.$light-color05;
+    border-bottom: 1px solid variables.$light-color05;
     vertical-align: middle;
 
     &:first-child {
@@ -42,21 +42,21 @@
   }
 
   th {
-    color: $dark-color01;
+    color: variables.$dark-color01;
   }
 
   td {
     > .name {
-      color: $dark-color07;
+      color: variables.$dark-color07;
       font-weight: bold;
     }
 
     > .date {
-      color: $dark-color01;
+      color: variables.$dark-color01;
     }
 
     > .desc {
-      color: $dark-color07;
+      color: variables.$dark-color07;
     }
   }
 }

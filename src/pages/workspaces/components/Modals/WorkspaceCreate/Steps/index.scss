@@ -1,25 +1,25 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   display: inline-flex;
   padding: 4px 8px;
   border-radius: 3px;
-  background-color: $dark-color07;
+  background-color: variables.$dark-color07;
 
   & > div {
-    @include TypographySymbolText(#fff);
+    @include mixins.TypographySymbolText(#fff);
 
     & + div {
       position: relative;
       padding-left: 84px;
       &::before {
         content: '';
-        @include vertical-center;
+        @include mixins.vertical-center;
         left: 16px;
         height: 1px;
         width: 52px;
-        border-bottom: 1px dashed $light-color07;
+        border-bottom: 1px dashed variables.$light-color07;
       }
     }
 

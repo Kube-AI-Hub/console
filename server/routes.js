@@ -16,7 +16,7 @@
  * along with KubeSphere Console.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-const Router = require('koa-router')
+const Router = require('@koa/router')
 const convert = require('koa-convert')
 const bodyParser = require('koa-bodyparser')
 
@@ -63,16 +63,14 @@ const parseBody = convert(
 const router = new Router()
 
 router
-  .use(proxy('/devops_webhook/(.*)', devopsWebhookProxy))
-  .use(proxy('/b2i_download/(.*)', b2iFileProxy))
-  .post('/dockerhub/(.*)', parseBody, handleDockerhubProxy)
-  .post('/harbor/(.*)', parseBody, handleHarborProxy)
+  .use(proxy('/devops_webhook{/*path}', devopsWebhookProxy))
+  .use(proxy('/b2i_download{/*path}', b2iFileProxy))
+  .post('/dockerhub{/*path}', parseBody, handleDockerhubProxy)
+  .post('/harbor{/*path}', parseBody, handleHarborProxy)
   .get('/blank_md', renderMarkdown)
-
-  .all('/(k)?api(s)?/(.*)', checkToken, checkIfExist)
-  .use(proxy('/(k)?api(s)?/(.*)', k8sResourceProxy))
-
-  .get('/sample/:app', parseBody, handleSampleData)
+  .all('/{k}api{s}{/*path}', checkToken, checkIfExist)
+  .use(proxy('/{k}api{s}{/*path}', k8sResourceProxy))
+  .use(proxy('/oauth{/*path}', k8sResourceProxy))
 
   // session
   .post('/login', parseBody, handleLogin)
@@ -86,8 +84,8 @@ router
   .get('/oauth/redirect/:name', handleOAuthLogin)
 
   // terminal
-  .get('/terminal*', renderTerminal)
+  .get('/terminal{/*path}', renderTerminal)
   // page entry
-  .all('*', renderView)
+  .all('{/*path}', renderView)
 
 module.exports = router

@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   padding: 20px;
@@ -21,14 +21,14 @@
     &.selected,
     &:hover {
       box-shadow: 0 4px 12px 0 rgba(36, 46, 66, 0.1);
-      background-color: $bg-color;
+      background-color: variables.$bg-color;
       border-color: #ccd3db;
     }
 
     & + .tabItem {
       margin-top: 4px;
       font-weight: 500;
-      color: $title-color;
+      color: variables.$title-color;
     }
   }
 }
@@ -42,6 +42,6 @@
 
 .footer {
   padding: 12px 20px;
-  background-color: $bg-color;
+  background-color: variables.$bg-color;
   text-align: right;
 }

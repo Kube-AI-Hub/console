@@ -22,7 +22,7 @@ import { Column, Columns, Form, Select } from '@kube-design/components'
 import NumberInput from 'components/Inputs/NumberInput'
 import ColorSelector from '../FormInput/ColorSelector'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class TableColumnStyleModal extends React.Component {
   constructor(props) {

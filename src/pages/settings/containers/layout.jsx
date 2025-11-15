@@ -23,7 +23,7 @@ import React, { Component } from 'react'
 
 import { renderRoutes } from 'utils/router.config'
 
-import styles from './layout.scss'
+import * as styles from './layout.scss'
 
 class AccessLayout extends Component {
   render() {

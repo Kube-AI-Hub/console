@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const Slider = props => {
   const {

@@ -25,7 +25,7 @@ import { Avatar } from 'components/Base'
 
 import { getDisplayName } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class GroupCard extends React.Component {
   static propTypes = {

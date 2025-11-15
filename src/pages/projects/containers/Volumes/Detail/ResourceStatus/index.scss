@@ -1,16 +1,16 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .ports {
   padding: 20px 40px;
   line-height: 20px;
   border-radius: 4px;
-  background-color: $lightest;
+  background-color: variables.$lightest;
 
   & > div {
     display: inline-block;
     vertical-align: middle;
-    font-family: $font-family-id;
+    font-family: variables.$font-family-id;
     color: #5f708a;
 
     & + div {
@@ -23,23 +23,23 @@
   }
 
   p {
-    color: $second-text-color;
+    color: variables.$second-text-color;
   }
 
   strong {
-    font-family: $font-family-id;
-    font-size: $size-normal;
+    font-family: variables.$font-family-id;
+    font-size: variables.$size-normal;
     font-weight: bold;
     line-height: 1.43;
-    color: $text-color;
+    color: variables.$text-color;
   }
 }
 
 .card {
   padding: 20px;
   border-radius: 4px;
-  background-color: $lightest;
-  transition: all $trans-speed ease-in-out;
+  background-color: variables.$lightest;
+  transition: all variables.$trans-speed ease-in-out;
 
   & + .card {
     margin-top: 8px;
@@ -59,17 +59,17 @@
   display: inline-block;
   margin-left: 20px;
   margin-right: 20px;
-  font-family: $font-family-id;
-  font-size: $size-normal;
-  font-weight: $font-bold;
+  font-family: variables.$font-family-id;
+  font-size: variables.$size-normal;
+  font-weight: variables.$font-bold;
   line-height: 1.43;
-  color: $text-color;
+  color: variables.$text-color;
   vertical-align: middle;
 
   p {
-    font-size: $body-size;
+    font-size: variables.$body-size;
     color: #79879c;
-    font-weight: $font-normal;
+    font-weight: variables.$font-normal;
 
     span + span {
       margin-left: 100px;
@@ -81,8 +81,8 @@
   position: relative;
   padding: 12px 20px;
   border-radius: 22px;
-  background-color: $bg-color;
-  border: solid 1px $border-color;
+  background-color: variables.$bg-color;
+  border: solid 1px variables.$border-color;
 
   & + .path {
     margin-top: 8px;
@@ -90,18 +90,18 @@
 
   .access {
     right: 6px;
-    @include vertical-center;
+    @include mixins.vertical-center;
   }
-  
+
   span {
     text-align: left;
-    color: $second-text-color;
+    color: variables.$second-text-color;
 
     strong {
-      font-family: $font-family-id;
-      font-size: $size-normal;
+      font-family: variables.$font-family-id;
+      font-size: variables.$size-normal;
       line-height: 1.43;
-      color: $text-color;
+      color: variables.$text-color;
     }
   }
 }

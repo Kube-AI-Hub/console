@@ -28,10 +28,11 @@ import ControllerModal from 'components/Modals/Monitoring/Controller'
 import ResourcesList from './Resources'
 import ChartsList from './Charts'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class MultipleDataModal extends React.Component {
+class MultipleDataModal extends React.Component {
   static propTypes = {
     visible: PropTypes.bool,
     defaultChecked: PropTypes.number,

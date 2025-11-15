@@ -25,7 +25,7 @@ import { isAppsPage, getWebsiteUrl } from 'utils'
 
 import LoginInfo from '../LoginInfo'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 class Header extends React.Component {
   static propTypes = {

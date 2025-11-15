@@ -24,9 +24,15 @@ import { Bar } from 'components/Base'
 import { cpuFormat, memoryFormat } from 'utils'
 import { ICON_TYPES } from 'utils/constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
-const RESERVED_KEYS = ['limits.cpu', 'limits.memory', 'pods']
+const RESERVED_KEYS = [
+  'limits.cpu',
+  'limits.memory',
+  'pods',
+  'gpu',
+  'gpu.memory',
+]
 const Unit = {
   Ti: 1024 ** 4,
   Gi: 1024 ** 3,
@@ -40,6 +46,7 @@ const Unit = {
   G: 1000 ** 3,
   M: 1000 ** 2,
   K: 1000,
+  k: 1000,
   Bytes: 1,
   B: 1,
 }
@@ -54,6 +61,7 @@ const QuotaItem = ({ name, total, used }) => {
   let totalUnit = ''
 
   const getNumberUnit = value => {
+    if (!value) return 0
     const matchUnit = /[0-9]+([a-zA-Z]+)/
     const unitsMaps = Object.keys(Unit)
     let _unit = get(value.match(matchUnit), '1', '')
@@ -79,6 +87,9 @@ const QuotaItem = ({ name, total, used }) => {
   const handleNumberValue = value => getNumberValue(getNumberUnit(value), value)
 
   const handleUsedValue = usedValue => {
+    if (name === 'gpu.memory') {
+      return `${usedValue / 1024} Gi`
+    }
     if (totalUnit && !usedUnit) {
       const unitValue =
         ICON_TYPES[name] || !Unit[totalUnit] ? 1 : Unit[totalUnit]
@@ -103,6 +114,10 @@ const QuotaItem = ({ name, total, used }) => {
       used = `${memoryFormat(used, 'Gi')} Gi`
       total = `${memoryFormat(total, 'Gi')} Gi`
     }
+  } else if (name === 'gpu.memory') {
+    const [_totalUnit, _total] = handleNumberValue(total)
+    totalUnit = _totalUnit
+    ratio = used / 1024 / _total
   } else if (total) {
     const [_usedUnit, _used] = handleNumberValue(used)
     const [_totalUnit, _total] = handleNumberValue(total)
@@ -114,9 +129,8 @@ const QuotaItem = ({ name, total, used }) => {
   }
 
   ratio = Math.min(Math.max(ratio, 0), 1)
-  const labelName = name.indexOf('gpu') > -1 ? 'gpu' : name
+  const labelName = name.indexOf('gpu.limit') > -1 ? 'gpu' : name
   const labelText = labelName === 'gpu' ? `${labelName}.limit` : labelName
-
   return (
     <div className={styles.quota}>
       <Icon name={ICON_TYPES[labelName] || 'resource'} size={40} />

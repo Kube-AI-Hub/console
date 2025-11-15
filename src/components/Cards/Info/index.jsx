@@ -23,7 +23,7 @@ import { Link } from 'react-router-dom'
 
 import { Icon } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Info extends React.Component {
   static propTypes = {

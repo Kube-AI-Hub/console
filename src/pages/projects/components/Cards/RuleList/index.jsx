@@ -20,7 +20,7 @@ import { isString } from 'lodash'
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class RuleList extends React.Component {
   static propTypes = {

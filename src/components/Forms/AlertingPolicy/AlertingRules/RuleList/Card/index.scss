@@ -1,9 +1,9 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .container {
-  border: 1px solid $light-color06;
+  border: 1px solid variables.$light-color06;
   border-radius: 4px;
-  background: $white;
+  background: variables.$white;
   padding: 12px;
   margin-bottom: 12px;
 
@@ -47,21 +47,21 @@
 
       .iconDisabled {
         &::before {
-          background: $dark-color01;
+          background: variables.$dark-color01;
         }
 
         &::after {
-          background: $dark-color01;
+          background: variables.$dark-color01;
         }
       }
 
       .iconOn {
         &::before {
-          background: $green-color03;
+          background: variables.$green-color03;
         }
 
         &::after {
-          background: $green-color03;
+          background: variables.$green-color03;
         }
       }
 
@@ -69,10 +69,10 @@
         p {
           font-size: 12px;
           line-height: 20px;
-          color: $dark-color07;
+          color: variables.$dark-color07;
 
           &:nth-of-type(2) {
-            color: $dark-color01;
+            color: variables.$dark-color01;
           }
 
           span:nth-of-type(2) {
@@ -106,7 +106,7 @@
           min-width: 60px;
           height: 36px;
           padding: 8px 0px;
-          background: $dark-color07;
+          background: variables.$dark-color07;
           box-shadow: 0px 4px 8px rgba(36, 46, 66, 0.2);
           border-radius: 4px;
           top: -10px;
@@ -120,7 +120,7 @@
             font-weight: 600;
             font-size: 12px;
             line-height: 20px;
-            color: $white;
+            color: variables.$white;
             padding: 0px 12px;
           }
         }
@@ -134,7 +134,7 @@
           left: 0px;
           transform: translateY(-100%) translateX(calc(-50% + 20px));
           border: 6px solid transparent;
-          border-top-color: $dark-color07;
+          border-top-color: variables.$dark-color07;
           border-bottom: 0px;
         }
 
@@ -173,7 +173,7 @@
   }
 
   .desc {
-    background: $light-color01;
+    background: variables.$light-color01;
     border-radius: 4px;
     padding: 8px 12px;
     display: flex;
@@ -189,13 +189,13 @@
     }
 
     .title {
-      color: $dark-color01;
+      color: variables.$dark-color01;
     }
 
     .descText {
       margin-left: 4px;
       font-weight: 600;
-      color: $dark-color07;
+      color: variables.$dark-color07;
     }
 
     .customLine {
@@ -212,7 +212,7 @@
           font-weight: 400;
           font-size: 12px;
           line-height: 20px;
-          color: $dark-color07;
+          color: variables.$dark-color07;
           flex: 1;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -236,7 +236,7 @@
         &:nth-of-type(2) {
           margin-left: 0px;
           font-weight: 600;
-          color: $dark-color07;
+          color: variables.$dark-color07;
           flex: 1;
           overflow: hidden;
           text-overflow: ellipsis;

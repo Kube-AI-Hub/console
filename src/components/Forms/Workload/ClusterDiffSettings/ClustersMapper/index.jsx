@@ -23,7 +23,7 @@ import React, { Component } from 'react'
 import { getDisplayNameNew, showNameAndAlias } from 'utils'
 import { CLUSTER_PROVIDER_ICON } from 'utils/constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ClustersMapper extends Component {
   state = {

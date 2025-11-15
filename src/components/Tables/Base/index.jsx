@@ -38,7 +38,7 @@ import FilterInput from './FilterInput'
 import Empty from './Empty'
 import Pagination from './Pagination'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const ORDER_MAP = {
   ascend: false,
@@ -120,7 +120,6 @@ export default class WorkloadTable extends React.Component {
 
   get showEmpty() {
     const { filters, pagination, isLoading } = this.props
-
     if ('showEmpty' in this.props) {
       return this.props.showEmpty
     }
@@ -364,6 +363,7 @@ export default class WorkloadTable extends React.Component {
   }
 
   renderEmptyText() {
+    const { hideSearch } = this.props
     return (
       this.props.emptyText || (
         <div className={styles.emptyText}>
@@ -380,14 +380,18 @@ export default class WorkloadTable extends React.Component {
             >
               {t('REFRESH_DATA')}
             </span>
-            {t('OR')}
-            <span
-              className={styles.action}
-              onClick={this.clearFilter}
-              data-test="table-empty-clear-filter"
-            >
-              {t('CLEAR_SEARCH_CONDITIONS')}
-            </span>
+            {hideSearch ? '' : t('OR')}
+            {hideSearch ? (
+              ''
+            ) : (
+              <span
+                className={styles.action}
+                onClick={this.clearFilter}
+                data-test="table-empty-clear-filter"
+              >
+                {t('CLEAR_SEARCH_CONDITIONS')}
+              </span>
+            )}
           </p>
         </div>
       )

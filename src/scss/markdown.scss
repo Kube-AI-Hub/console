@@ -1,3 +1,5 @@
+@use '~scss/variables';
+
 .markdown-body {
   font-size: 12px;
   color: #242e42;
@@ -5,14 +7,14 @@
   word-wrap: break-word;
 
   h2 {
-    font-family: $font-family-id;
+    font-family: variables.$font-family-id;
     font-size: 16px;
     font-weight: 600;
     line-height: 1.5;
   }
 
   h3 {
-    font-family: $font-family-id;
+    font-family: variables.$font-family-id;
     font-size: 14px;
     font-weight: bold;
     line-height: 1.43;
@@ -21,7 +23,7 @@
   }
 
   h4 {
-    font-family: $font-family-id;
+    font-family: variables.$font-family-id;
     font-size: 12px;
     font-weight: 600;
     line-height: 1.67;
@@ -53,7 +55,7 @@
     display: block;
     padding: 0 8px;
     border-radius: 4px;
-    background-color: $light-color03;
+    background-color: variables.$light-color03;
     margin-bottom: 8px;
     font-family: 'Monaco', sans-serif;
     font-size: 12px;

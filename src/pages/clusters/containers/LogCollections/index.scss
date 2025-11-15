@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .empty {
   text-align: center;
@@ -23,9 +23,9 @@
 }
 
 .pane {
-  border-radius: $border-radius;
-  box-shadow: $card-shadow;
-  background-color: $white;
+  border-radius: variables.$border-radius;
+  box-shadow: variables.$card-shadow;
+  background-color: variables.$white;
 }
 
 .item {
@@ -34,7 +34,7 @@
 
   &:hover {
     .title {
-      color: $primary;
+      color: variables.$primary;
     }
   }
 

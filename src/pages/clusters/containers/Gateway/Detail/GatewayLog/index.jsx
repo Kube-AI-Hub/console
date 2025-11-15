@@ -32,7 +32,7 @@ import Table from 'components/Tables/Visible'
 import memoizee from 'memoizee'
 import { markAll, esMark, mark } from 'utils/log'
 import AnsiUp from 'ansi_up'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const converter = new AnsiUp()
 
@@ -40,9 +40,10 @@ const DefaultRealTimeConfig = {
   duration: 600,
 }
 
+export default
 @inject('detailStore')
 @observer
-export default class GatewayLog extends React.Component {
+class GatewayLog extends React.Component {
   @observable
   searchInputState = {
     query: [],

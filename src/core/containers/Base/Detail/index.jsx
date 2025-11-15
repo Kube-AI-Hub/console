@@ -20,14 +20,14 @@ import { has, isString } from 'lodash'
 import React from 'react'
 import { NavLink, withRouter } from 'react-router-dom'
 import { inject, Provider } from 'mobx-react'
-import pathToRegexp from 'path-to-regexp'
+import { compile } from 'path-to-regexp'
 
 import { ICON_TYPES } from 'utils/constants'
 import { renderRoutes } from 'utils/router.config'
 
 import BaseInfo from './BaseInfo'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 class DetailPage extends React.Component {
   constructor(props) {
@@ -106,7 +106,7 @@ class DetailPage extends React.Component {
               key={route.path}
               className={styles.navItem}
               activeClassName={styles.active}
-              to={pathToRegexp.compile(route.path)(params)}
+              to={compile(route.path)(params)}
             >
               {t(route.title)}
             </NavLink>

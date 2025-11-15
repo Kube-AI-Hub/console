@@ -25,7 +25,7 @@ import { TagInput } from 'components/Inputs'
 import { SEVERITY_LEVEL } from 'configs/alerting/metrics/rule.config'
 import { PATTERN_TAG } from 'utils/constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ConditionSelect extends React.Component {
   constructor(props) {

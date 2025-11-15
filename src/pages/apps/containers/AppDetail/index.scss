@@ -1,20 +1,20 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 $toolbar-height: 52px;
 
 .content {
   position: relative;
-  top: -$header-height;
+  top: -(variables.$header-height);
   z-index: 11;
 
   :global {
     .tabs-new {
       & > .tabs {
-        background-color: $bg-color;
+        background-color: variables.$bg-color;
         & > ul {
           margin: 0 auto;
-          max-width: $apps-content-width;
+          max-width: variables.$apps-content-width;
 
           & > li {
             padding: 16px 12px;
@@ -24,7 +24,7 @@ $toolbar-height: 52px;
 
       & > .tab-content {
         position: relative;
-        width: $apps-content-width;
+        width: variables.$apps-content-width;
         padding: 32px 20px;
         margin: 0 auto;
       }

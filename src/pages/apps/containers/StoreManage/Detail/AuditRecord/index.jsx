@@ -25,15 +25,16 @@ import VersionStatus from 'apps/components/VersionStatus'
 import AuditStore from 'stores/openpitrix/audit'
 import { getLocalTime } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @withList({
   store: new AuditStore(),
   module: 'apps',
   name: 'RELEASE_RECORD',
   rowKey: 'status_time',
 })
-export default class AuditRecord extends React.Component {
+class AuditRecord extends React.Component {
   getData = params => {
     const { appId } = this.props.match.params
     this.props.store.fetchList({ app_id: appId, ...params })

@@ -1,12 +1,12 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .container {
   .title {
     line-height: 28px;
     font-size: 20px;
-    color: $dark-color07;
-    font-weight: $font-bold;
+    color: variables.$dark-color07;
+    font-weight: variables.$font-bold;
     text-shadow: 0px 4px 8px rgba(36, 46, 66, 0.2);
     margin-bottom: 40px;
   }
@@ -16,7 +16,7 @@
     height: 184px;
     padding: 20px;
     margin: 0 12px 12px 0;
-    border: 1px solid $light-color06;
+    border: 1px solid variables.$light-color06;
     border-radius: 4px;
     background: #ffffff;
     cursor: pointer;
@@ -26,12 +26,12 @@
     display: inline-block;
 
     &Selected {
-      border: 1px solid $dark-color01;
+      border: 1px solid variables.$dark-color01;
       box-shadow: 0px 4px 8px rgba(36, 46, 66, 0.2);
     }
 
     &:hover {
-      border: 1px solid $dark-color01;
+      border: 1px solid variables.$dark-color01;
       box-shadow: 0px 4px 8px rgba(36, 46, 66, 0.2);
     }
 
@@ -50,18 +50,18 @@
     .info {
       text-align: center;
       .subtitle {
-        font-weight: $font-bold;
+        font-weight: variables.$font-bold;
         font-size: 12px;
         line-height: 20px;
-        color: $dark-color07;
+        color: variables.$dark-color07;
         margin-bottom: 2px;
       }
 
       .desc {
-        color: $dark-color01;
+        color: variables.$dark-color01;
         line-height: 20px;
         font-size: 12px;
-        @include block-ellipsis(3);
+        @include mixins.block-ellipsis(3);
       }
     }
   }

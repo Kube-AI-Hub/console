@@ -29,7 +29,7 @@ import NodeMonitoringStore from 'stores/monitoring/node'
 
 import NodeItem from './Item'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const MetricTypes = {
   cpu_used: 'node_cpu_usage',
@@ -42,8 +42,9 @@ const MetricTypes = {
   pod_total: 'node_pod_quota',
 }
 
+export default
 @observer
-export default class NodeSelect extends React.PureComponent {
+class NodeSelect extends React.PureComponent {
   constructor(props) {
     super(props)
 

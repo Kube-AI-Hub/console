@@ -24,7 +24,7 @@ import { NEW_CLUSTER, IMPORT_CLUSTER } from 'configs/steps/clusters'
 import Title from '../Title'
 import { IMPORT_CLUSTER_SPEC, NEW_CLUSTER_SPEC } from '../constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Providers extends React.Component {
   static contextTypes = {

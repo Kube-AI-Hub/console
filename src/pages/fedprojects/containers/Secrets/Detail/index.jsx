@@ -31,10 +31,11 @@ import { SECRET_TYPES } from 'utils/constants'
 
 import getRoutes from './routes'
 
+export default
 @inject('rootStore')
 @observer
 @trigger
-export default class SecretDetail extends React.Component {
+class SecretDetail extends React.Component {
   store = new FederatedStore({ module: this.module })
 
   componentDidMount() {

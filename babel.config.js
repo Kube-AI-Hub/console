@@ -17,13 +17,14 @@
  */
 
 module.exports = {
+  sourceType: 'unambiguous',
   presets: [
     [
       '@babel/preset-env',
       {
-        corejs: '2',
+        corejs: '3',
         useBuiltIns: 'entry',
-        targets: ['> 5%', 'ie 9'],
+        targets: ['> 1%', 'last 2 versions', 'not ie <= 8'],
         modules: 'commonjs',
         exclude: ['proposal-dynamic-import'],
       },
@@ -31,7 +32,14 @@ module.exports = {
     '@babel/preset-react',
   ],
   plugins: [
-    '@babel/plugin-transform-runtime',
+    ['@babel/plugin-transform-runtime', {
+      corejs: 3,
+      helpers: true,
+      regenerator: true,
+    }],
+     // 'lodash',
+    '@babel/plugin-syntax-dynamic-import',
+    '@babel/plugin-syntax-import-meta',
     [
       '@babel/plugin-proposal-decorators',
       {
@@ -39,6 +47,22 @@ module.exports = {
       },
     ],
     ['@babel/plugin-proposal-class-properties', { loose: true }],
+    ['@babel/plugin-proposal-private-methods', { loose: true }],
+    ['@babel/plugin-proposal-private-property-in-object', { loose: true }],
+    '@babel/plugin-proposal-json-strings',
+    '@babel/plugin-proposal-function-sent',
+    '@babel/plugin-proposal-export-namespace-from',
+    '@babel/plugin-proposal-numeric-separator',
+    '@babel/plugin-proposal-throw-expressions',
+    '@babel/plugin-proposal-export-default-from',
+    '@babel/plugin-proposal-logical-assignment-operators',
+    '@babel/plugin-proposal-optional-chaining',
+    [
+      '@babel/plugin-proposal-pipeline-operator',
+      {
+        proposal: 'minimal',
+      },
+    ],
     [
       'transform-imports',
       {
@@ -56,6 +80,12 @@ module.exports = {
         },
       },
     ],
+    ["@babel/plugin-transform-class-properties", { "loose": true }],
+    ["@babel/plugin-transform-private-methods", { "loose": true }],
+    ["@babel/plugin-transform-private-property-in-object", { "loose": true }],
+    '@babel/plugin-proposal-nullish-coalescing-operator',
+    '@babel/plugin-proposal-do-expressions',
+    'babel-plugin-styled-components',
     'recharts',
   ],
   env: {
@@ -69,6 +99,23 @@ module.exports = {
           },
         ],
       ],
+    },
+    publish: {
+      presets: [
+        [
+          '@babel/preset-env',
+          {
+            targets: {
+              browsers: ['> 1%', 'last 2 versions', 'not ie <= 8'],
+            },
+          },
+        ],
+        '@babel/preset-react',
+      ],
+      plugins: ['@babel/plugin-proposal-object-rest-spread'],
+    },
+    test: {
+      presets: ['@babel/preset-env', '@babel/preset-react'],
     },
   },
 }

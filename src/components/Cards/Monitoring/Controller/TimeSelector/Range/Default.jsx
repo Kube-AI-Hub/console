@@ -22,7 +22,7 @@ import classnames from 'classnames'
 
 import { getStep, getTimes, getTimeOptions, getLastTimeStr } from '../utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const TimeOps = [
   '10m',
@@ -89,9 +89,9 @@ export default class DefaultRange extends React.Component {
       <div className={styles.default}>
         <div className={styles.title}>{t('SELECT_TIME_RANGE')}</div>
         <ul onClick={this.handleClick}>
-          {options.map(({ label, value }) => (
+          {options.map(({ label, value }, index) => (
             <li
-              key={label}
+              key={index}
               data-value={value}
               className={classnames({
                 [styles.cur]: value === lastTimeStr,

@@ -27,10 +27,11 @@ import GatewayStore from 'stores/gateway'
 
 import Rule from '../Rule'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class Item extends React.Component {
+class Item extends React.Component {
   store = new GatewayStore()
 
   state = {

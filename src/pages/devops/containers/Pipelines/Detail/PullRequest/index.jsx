@@ -30,11 +30,12 @@ import Link from 'components/Layout/Nav/Link'
 
 import Table from 'components/Tables/List'
 import EmptyCard from 'devops/components/Cards/EmptyCard'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('rootStore', 'detailStore')
 @observer
-export default class Pullrequest extends React.Component {
+class Pullrequest extends React.Component {
   name = 'PullRequest'
 
   store = this.props.detailStore || {}

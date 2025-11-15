@@ -1,10 +1,9 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 $gap: 12px;
 
 .container {
- 
   li {
     display: inline-block;
     width: 134px;
@@ -12,27 +11,27 @@ $gap: 12px;
     padding: 12px 4px;
     margin-bottom: $gap;
     text-align: center;
-    border-radius: $border-radius;
-    border:solid 1px $light-color06;
+    border-radius: variables.$border-radius;
+    border: solid 1px variables.$light-color06;
     cursor: pointer;
-    transition: all .3s ease-in-out;
+    transition: all 0.3s ease-in-out;
 
     &:hover {
-      box-shadow: 0 3px 6px $light-color06;  
+      box-shadow: 0 3px 6px variables.$light-color06;
     }
 
     & + li {
       margin-left: $gap;
     }
   }
-  
+
   figure {
     display: inline-block;
     width: 48px;
     height: 48px;
     margin-bottom: 6px;
     padding: 4px;
-    
+
     :global {
       .icon {
         width: 100%;
@@ -42,13 +41,12 @@ $gap: 12px;
   }
 
   h3 {
-    @include TypographyTitleH6();
-    @include ellipsis();
+    @include mixins.TypographyTitleH6();
+    @include mixins.ellipsis();
   }
-
 }
 
 li.selected {
-  border-color: $dark-color01;
-  box-shadow: 0 3px 6px $light-color06;  
+  border-color: variables.$dark-color01;
+  box-shadow: 0 3px 6px variables.$light-color06;
 }

@@ -26,7 +26,7 @@ import { getLanguageIcon } from 'utils/devops'
 
 import S2IForm from '../S2IForm'
 import B2IForm from '../B2IForm'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class LanguageSelect extends React.Component {
   constructor(props) {

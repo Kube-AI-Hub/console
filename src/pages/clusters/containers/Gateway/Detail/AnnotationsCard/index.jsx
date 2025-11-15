@@ -21,11 +21,12 @@ import { Panel } from 'components/Base'
 import { isEmpty } from 'lodash'
 import { observer, inject } from 'mobx-react'
 
-import styles from '../GatewayConfig/index.scss'
+import * as styles from '../GatewayConfig/index.scss'
 
+export default
 @inject('detailStore')
 @observer
-export default class Annotations extends Component {
+class Annotations extends Component {
   get store() {
     return this.props.detailStore
   }

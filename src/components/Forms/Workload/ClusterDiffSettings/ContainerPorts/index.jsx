@@ -22,7 +22,7 @@ import { pick } from 'lodash'
 import EditForm from '../EditForm'
 import Ports from '../../ContainerSettings/ContainerForm/Ports'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ContainerPorts extends Component {
   handleSubmit = data => {

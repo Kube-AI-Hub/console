@@ -1,11 +1,11 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .status {
   display: inline-block;
-  font-family: $font-family-id;
+  font-family: variables.$font-family-id;
   line-height: 12px;
   font-weight: bold;
-  vertical-align: middle
+  vertical-align: middle;
 }
 
 .icon {
@@ -13,15 +13,15 @@
   height: 12px;
   width: 12px;
   margin-right: 8px;
-  background: $white;
+  background: variables.$white;
   border-radius: 50%;
 
   .draft {
     display: inline-block;
     width: 12px;
     height: 12px;
-    background-color: $white;
-    border: 2px  solid $light-color08;
+    background-color: variables.$white;
+    border: 2px solid variables.$light-color08;
     border-radius: 50%;
   }
 
@@ -29,8 +29,8 @@
     display: inline-block;
     width: 12px;
     height: 12px;
-    background-color: $white;
-    border: 2px  solid $green-color03;
+    background-color: variables.$white;
+    border: 2px solid variables.$green-color03;
     border-radius: 50%;
   }
 
@@ -39,8 +39,8 @@
     top: -2px;
     left: -2px;
     svg {
-      color: $white;
-      fill: $green;
+      color: variables.$white;
+      fill: variables.$green;
     }
   }
 
@@ -48,12 +48,12 @@
     display: inline-block;
     width: 12px;
     height: 12px;
-    background-color: $yellow;
+    background-color: variables.$yellow;
     border-radius: 50%;
 
     .substract {
       svg {
-        color: $white;
+        color: variables.$white;
       }
     }
   }
@@ -63,8 +63,8 @@
     top: -2px;
     left: -2px;
     svg {
-      color: $white;
-      fill: $red-color03;
+      color: variables.$white;
+      fill: variables.$red-color03;
     }
   }
 }

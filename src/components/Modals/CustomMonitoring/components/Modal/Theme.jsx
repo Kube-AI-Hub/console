@@ -21,7 +21,7 @@ import classnames from 'classnames'
 
 import Modal from './index'
 
-import styles from './theme.scss'
+import * as styles from './theme.scss'
 
 export default function ThemeModal({ theme, className, ...props }) {
   const themeStyle = theme === 'light' ? styles.light : styles.dark

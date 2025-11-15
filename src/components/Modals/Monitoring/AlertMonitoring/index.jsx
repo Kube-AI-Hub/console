@@ -8,7 +8,7 @@ import { getMinuteValue, getTimeRange } from 'stores/monitoring/base'
 import { RESOURCE_METRICS_CONFIG } from 'configs/alerting/metrics'
 import { getAreaChartOps, getFormatTime } from 'utils/monitoring'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class AlertMonitor extends React.Component {
   state = {

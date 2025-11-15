@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .body {
   display: flex;
@@ -25,7 +25,7 @@
   padding: 0 20px;
   height: 60px;
   border-radius: 4px;
-  background-color: $light;
+  background-color: variables.$light;
 
   .title {
     font-size: 14px;
@@ -43,10 +43,10 @@
     line-height: 20px;
     border: none;
     border-radius: 4px;
-    background-color: $dark;
+    background-color: variables.$dark;
 
     &:hover {
-      background-color: $dark !important;
+      background-color: variables.$dark !important;
     }
   }
 }

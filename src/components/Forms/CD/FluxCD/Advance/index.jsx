@@ -34,7 +34,7 @@ import { ArrayInput, ObjectInput } from 'components/Inputs'
 import { TypeSelect } from 'components/Base'
 import { get, set } from 'lodash'
 import Placement from '../../Advance/Placement'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const { TabPanel } = Tabs
 

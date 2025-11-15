@@ -22,7 +22,7 @@ import { get } from 'lodash'
 
 import { Text } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ServiceCard extends Component {
   render() {

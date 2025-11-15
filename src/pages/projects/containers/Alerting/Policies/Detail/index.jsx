@@ -32,12 +32,13 @@ import AlertingPolicyStore from 'stores/alerting/policy'
 import DetailPage from 'clusters/containers/Base/Detail'
 
 import getRoutes from './routes'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('rootStore')
 @observer
 @trigger
-export default class AlertPolicyDetail extends React.Component {
+class AlertPolicyDetail extends React.Component {
   store = new AlertingPolicyStore()
 
   componentDidMount() {

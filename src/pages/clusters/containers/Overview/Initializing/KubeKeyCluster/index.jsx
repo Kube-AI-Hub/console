@@ -25,8 +25,9 @@ import WebsocketStore from 'stores/websocket'
 import Progress from './Progress'
 import Logs from './Logs'
 
+export default
 @observer
-export default class KubeKeyCluster extends Component {
+class KubeKeyCluster extends Component {
   store = this.props.store
 
   websocket = new WebsocketStore()

@@ -23,7 +23,7 @@ import { isEmpty } from 'lodash'
 import { List } from 'components/Base'
 import { BoxInput } from 'components/Inputs'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Item extends React.Component {
   static propTypes = {

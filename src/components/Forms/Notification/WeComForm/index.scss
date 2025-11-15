@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .title {
   display: flex;
@@ -10,7 +10,7 @@
 .subTitle {
   margin-top: -12px;
   margin-bottom: 4px;
-  color: $dark-color01;
+  color: variables.$dark-color01;
 }
 
 .row {
@@ -23,7 +23,7 @@
 
 .item {
   padding: 12px;
-  border: solid 1px $light-color06;
+  border: solid 1px variables.$light-color06;
   border-radius: 4px;
   background-color: white;
 }
@@ -32,13 +32,13 @@
   max-width: 455px;
   margin-top: 4px;
   padding: 12px;
-  background-color: $light-color01;
+  background-color: variables.$light-color01;
   border-radius: 4px;
   min-height: 80px;
 
   .empty {
     text-align: center;
-    color: $dark-color01;
+    color: variables.$dark-color01;
     line-height: 56px;
   }
 }

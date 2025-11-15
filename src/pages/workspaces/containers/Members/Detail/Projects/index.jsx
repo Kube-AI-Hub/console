@@ -26,11 +26,12 @@ import { Card } from 'components/Base'
 
 import ProjectStore from 'stores/project'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('detailStore', 'workspaceStore')
 @observer
-export default class MemberProjects extends React.Component {
+class MemberProjects extends React.Component {
   projectStore = new ProjectStore()
 
   componentDidMount() {

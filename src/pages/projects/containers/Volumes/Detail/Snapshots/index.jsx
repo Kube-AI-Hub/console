@@ -30,11 +30,12 @@ import VolumeSnapshotStore from 'stores/volumeSnapshot'
 import { Link } from 'react-router-dom'
 import moment from 'moment-mini'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('detailStore')
 @observer
-export default class PVCSnapshots extends Component {
+class PVCSnapshots extends Component {
   store = new VolumeSnapshotStore()
 
   componentDidMount() {

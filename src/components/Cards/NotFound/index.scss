@@ -1,8 +1,8 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   margin-top: 100px;
-  border-radius: $border-radius;
+  border-radius: variables.$border-radius;
   text-align: center;
 }
 
@@ -28,9 +28,9 @@
   p {
     text-shadow: 0 4px 8px rgba(36, 46, 66, 0.1);
     font-size: 20px;
-    font-weight: $font-bold;
+    font-weight: variables.$font-bold;
     line-height: 1.4;
-    color: $text-color;
+    color: variables.$text-color;
     text-align: left;
   }
 

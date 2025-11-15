@@ -1,10 +1,10 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .card {
-  border-radius: $border-radius;
-  background-color: $white;
-  box-shadow: $base-shadow;
+  border-radius: variables.$border-radius;
+  background-color: variables.$white;
+  box-shadow: variables.$base-shadow;
 
   .base,
   .extra {
@@ -12,7 +12,7 @@
   }
 
   .base {
-    background-color: $th-bg-color;
+    background-color: variables.$th-bg-color;
     background-image: url('/assets/detail-info.svg');
     background-repeat: no-repeat;
     background-size: 100% auto;
@@ -22,8 +22,8 @@
 
 .name {
   margin-bottom: 4px;
-  @include ellipsis;
-  @include TypographyTitleH4();
+  @include mixins.ellipsis;
+  @include mixins.TypographyTitleH4();
 
   :global {
     .icon {
@@ -50,7 +50,7 @@
 
 .desc {
   margin-bottom: 12px;
-  @include TypographyParagraph($dark-color01);
+  @include mixins.TypographyParagraph(variables.$dark-color01);
   word-break: break-all;
 }
 
@@ -79,7 +79,7 @@
   margin-bottom: 12px;
   border-radius: 12px;
   background-color: #ffffff;
-  @include TypographySymbolText;
+  @include mixins.TypographySymbolText;
 
   span {
     display: inline-block;
@@ -88,11 +88,11 @@
 
   :global .icon {
     position: absolute;
-    @include vertical-center;
+    @include mixins.vertical-center;
     left: 8px;
-    
+
     & > svg {
-      color: $blue-color03;
+      color: variables.$blue-color03;
     }
   }
 }

@@ -28,11 +28,12 @@ import { CodeEditor } from 'components/Base'
 import { get } from 'lodash'
 import TerminalStore from 'stores/terminal'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @fullScreen
 @observer
-export default class KubeConfigModal extends React.Component {
+class KubeConfigModal extends React.Component {
   store = new TerminalStore()
 
   componentDidMount() {

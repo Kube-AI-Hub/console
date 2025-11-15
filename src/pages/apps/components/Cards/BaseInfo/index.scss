@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .base {
   .info {
@@ -31,11 +31,11 @@
 
   dd {
     font-weight: bold;
-    color: $text-color;
+    color: variables.$text-color;
   }
 
   dt {
-    color: $second-text-color;
+    color: variables.$second-text-color;
   }
 
   .title {
@@ -43,6 +43,6 @@
     line-height: 20px;
     font-size: 14px;
     font-weight: bold;
-    color: $title-color;
+    color: variables.$title-color;
   }
 }

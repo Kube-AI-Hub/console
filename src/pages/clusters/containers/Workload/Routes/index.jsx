@@ -29,13 +29,14 @@ import IngressStore from 'stores/ingress'
 import { getDisplayName, getLocalTime, showNameAndAlias } from 'utils'
 import { ICON_TYPES } from 'utils/constants'
 
+export default
 @withClusterList({
   store: new IngressStore(),
   module: 'ingresses',
   name: 'ROUTE',
   rowKey: 'uid',
 })
-export default class Routers extends React.Component {
+class Routers extends React.Component {
   showAction = record => !record.isFedManaged
 
   get itemActions() {

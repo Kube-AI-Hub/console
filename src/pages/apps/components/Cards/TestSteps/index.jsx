@@ -24,10 +24,11 @@ import VersionStore from 'stores/openpitrix/version'
 import FileStore from 'stores/openpitrix/file'
 import { getWebsiteUrl } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class TestSteps extends React.Component {
+class TestSteps extends React.Component {
   static propTypes = {
     detail: PropTypes.object,
     appId: PropTypes.string,

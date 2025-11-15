@@ -19,11 +19,23 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { map, get, set, every, has, debounce, isEmpty, isNaN } from 'lodash'
-import { Form, Input, Slider, TextArea, Toggle, Select } from '@kube-design/components'
+import {
+  Form,
+  Input,
+  Slider,
+  TextArea,
+  Toggle,
+  Select,
+  Radio,
+  Checkbox,
+  DatePicker,
+  TimePicker,
+  Button,
+} from '@kube-design/components'
 import { Text } from 'components/Base'
 import { NumberInput } from 'components/Inputs'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class SchemaForm extends React.Component {
   static propTypes = {
@@ -33,7 +45,7 @@ export default class SchemaForm extends React.Component {
   }
 
   static defaultProps = {
-    onChange() {},
+    onChange() { },
   }
 
   state = {
@@ -89,13 +101,62 @@ export default class SchemaForm extends React.Component {
           )
         } else if (propObj.render === 'textArea') {
           content = <TextArea {...attrs} />
-        } else if  (propObj.render === 'select') {
+        } else if (propObj.render === 'select') {
           content = (
-             <Select
+            <Select
               options={propObj.options}
               defaultValue={propObj.defaultValue}
-            {...attrs} />
+              {...attrs}
+            />
           )
+        } else if (propObj.render === 'radio') {
+          content = (
+            <Radio.Group
+              options={propObj.options}
+              defaultValue={propObj.defaultValue}
+              {...attrs}
+            />
+          )
+        } else if (propObj.render === 'date') {
+          content = (
+            <DatePicker
+              {...attrs}
+              defaultValue={get(value, propPath, null)}
+              onChange={date => this.handleFormChange(set(value, propPath, date))}
+            />
+          )
+        } else if (propObj.render === 'datetime') {
+          const { RangePicker } = DatePicker;
+          content = (
+            <RangePicker
+              {...attrs}
+              defaultValue={get(value, propPath, null)}
+              onChange={date => this.handleFormChange(set(value, propPath, date))}
+            />
+          )
+        } else if (propObj.render === 'time') {
+
+          content = (
+            <TimePicker
+              {...attrs}
+              defaultValue={get(value, propPath, null)}
+              onChange={dateRange =>
+                this.handleFormChange(set(value, propPath, dateRange))
+              }
+            />
+          )
+        } else if (propObj.render === 'checkbox') {
+          content = (
+            <Checkbox.Group
+              options={propObj.options}
+              defaultValue={propObj.defaultValue}
+              {...attrs}
+            />
+          )
+        } else if (propObj.render === 'password') {
+          content = <Input.Password {...attrs} />
+        } else if (propObj.render === 'code') {
+          content = <pre>{JSON.stringify(get(value, propPath), null, 2)}</pre>
         } else {
           content = <Input {...attrs} />
         }
@@ -104,15 +165,82 @@ export default class SchemaForm extends React.Component {
         content = <NumberInput {...attrs} min={0} integer />
         break
       case 'boolean':
-        content = (
-          <div className={styles.boolean}>
-            <Toggle {...attrs} defaultChecked={get(value, propPath, false)} />
-            <Text title={propObj.title} description={propObj.description} />
-          </div>
-        )
+        if (propObj.render === 'checkbox') {
+          content = (
+            <div className={styles.boolean}>
+              <Checkbox
+                {...attrs}
+                defaultChecked={get(value, propPath, false)}
+              />
+              <Text title={propObj.title} description={propObj.description} />
+            </div>
+          )
+        } else if (propObj.render === 'radio') {
+          content = (
+            <div className={styles.boolean}>
+              <Radio
+                {...attrs}
+                defaultChecked={get(value, propPath, false)}
+              />
+              <Text title={propObj.title} description={propObj.description} />
+            </div>
+          )
+        } else {
+          content = (
+            <div className={styles.boolean}>
+              <Toggle {...attrs} defaultChecked={get(value, propPath, false)} />
+              <Text title={propObj.title} description={propObj.description} />
+            </div>
+          )
+        }
         break
       case 'array':
-        content = <>todo</>
+        // Render array form
+        const arr = get(value, propPath, []) || [];
+        content = (
+          <div className={styles.arrayField}>
+            {arr.map((item, idx) => (
+              <div key={idx} className={styles.arrayItem}>
+                {this.renderSchemaForm(
+                  { ...propObj.items, form: true },
+                  `${propKey}[${idx}]`,
+                  [...propPath, idx]
+                )}
+                <Button
+                  type="flat"
+                  icon="trash"
+                  color="primary"
+                  style={{ marginLeft: 8 }}
+                  onClick={() => {
+                    const newArr = arr.slice();
+                    newArr.splice(idx, 1);
+                    this.handleFormChange(set({ ...value }, propPath, newArr));
+                  }}
+                >
+                  {t('DELETE')}
+                </Button>
+              </div>
+            ))}
+            <div className={styles.addButton}>
+              <Button
+                type="primary"
+                // icon="add"
+                onClick={() => {
+                  const newArr = arr.concat(
+                    propObj.items.type === 'object'
+                      ? {}
+                      : propObj.items.type === 'array'
+                      ? []
+                      : ''
+                  );
+                  this.handleFormChange(set({ ...value }, propPath, newArr));
+                }}
+              >
+                {t('ADD')}
+              </Button>
+            </div>
+          </div>
+        );
         break
       default:
         content = <></>

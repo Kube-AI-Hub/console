@@ -27,7 +27,7 @@ import DefaultRange from './Range/Default'
 import CustomRange from './Range/Custom'
 
 import { getLastTimeStr, getTimeLabel, getDateStr } from './utils'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class TimeSelector extends React.PureComponent {
   static propTypes = {

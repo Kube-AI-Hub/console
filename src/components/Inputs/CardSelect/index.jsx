@@ -21,7 +21,7 @@ import classnames from 'classnames'
 import PropTypes from 'prop-types'
 import { Icon } from '@kube-design/components'
 import { isArray } from 'lodash'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class CardSelect extends Component {
   static propTypes = {

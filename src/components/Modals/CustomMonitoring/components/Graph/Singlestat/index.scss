@@ -1,19 +1,17 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   height: 153px;
-  display:flex;
+  display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
 
   h3 {
-    @include TypographyTitleH2()
- 
-    
+    @include mixins.TypographyTitleH2();
   }
   p {
-    @include TypographySymbolText()
+    @include mixins.TypographySymbolText();
   }
 }

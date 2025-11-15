@@ -1,9 +1,9 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .reason {
   display: inline-block;
-  @include ellipsis;
+  @include mixins.ellipsis;
 
   & > span {
     display: inline-block;
@@ -23,7 +23,7 @@
 
 .condition {
   .title {
-    @include TypographySymbolText(#fff);
+    @include mixins.TypographySymbolText(#fff);
 
     & > span {
       display: inline-block;
@@ -41,9 +41,9 @@
 }
 
 .warning {
-  color: $yellow-color04;
+  color: variables.$yellow-color04;
 }
 
 .error {
-  color: $red-color04;
+  color: variables.$red-color04;
 }

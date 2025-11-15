@@ -21,7 +21,7 @@ import { Panel } from 'components/Base'
 import PodsCard from 'components/Cards/Pods'
 import ClusterTitle from 'components/Clusters/ClusterTitle'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class PodsCardWrapper extends Component {
   get prefix() {

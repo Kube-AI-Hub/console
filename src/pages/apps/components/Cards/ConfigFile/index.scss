@@ -1,28 +1,28 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .uploadInfo {
   margin-bottom: 8px;
-  background-color: $card-bg-color;
+  background-color: variables.$card-bg-color;
   border: 0 none;
 }
 
 .updateInfo {
   padding: 12px;
-  background-color: $card-bg-color;
-  border-radius: $border-radius;
+  background-color: variables.$card-bg-color;
+  border-radius: variables.$border-radius;
   line-height: 20px;
 
   .title {
     font-weight: bold;
-    color: $title-color;
+    color: variables.$title-color;
   }
 
   pre {
     margin-top: 8px;
     padding: 0;
-    color: $text-color;
-    background-color: $card-bg-color;
+    color: variables.$text-color;
+    background-color: variables.$card-bg-color;
     word-break: break-all;
     word-wrap: break-word;
   }

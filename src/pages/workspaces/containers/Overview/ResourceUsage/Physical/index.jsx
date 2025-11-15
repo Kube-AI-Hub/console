@@ -26,14 +26,17 @@ import WorkspaceMonitorStore from 'stores/monitoring/workspace'
 import { Component as Base } from 'clusters/containers/Monitor/Resource/Usage/Physical'
 
 const MetricTypes = {
+  gpu_usage: 'workspace_gpu_usage',
+  gpu_memory_usage: 'workspace_gpu_memory_usage',
   cpu_usage: 'workspace_cpu_usage',
   memory_usage: 'workspace_memory_usage_wo_cache',
   disk_usage: 'workspace_disk_size_usage',
 }
 
+export default
 @inject('rootStore')
-@observer
-export default class PhysicalResource extends Base {
+// @observer
+class PhysicalResource extends Base {
   componentDidUpdate(prevProps) {
     if (prevProps.cluster !== this.props.cluster) {
       this.fetchData()
@@ -53,6 +56,20 @@ export default class PhysicalResource extends Base {
   }
 
   getMonitoringCfgs = () => [
+    {
+      type: 'gpu',
+      title: 'GPU_USAGE',
+      unitType: 'gpu',
+      legend: ['GPU'],
+      metricType: MetricTypes.gpu_usage,
+    },
+    {
+      type: 'gpu_memory',
+      title: 'GPU_MEMORY_USAGE',
+      unitType: 'memory',
+      legend: ['MEMORY'],
+      metricType: MetricTypes.gpu_memory_usage,
+    },
     {
       type: 'cpu',
       title: 'CPU_USAGE',

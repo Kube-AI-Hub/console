@@ -23,7 +23,7 @@ import { isEmpty } from 'lodash'
 import { Modal } from 'components/Base'
 import FormsBox from './Form'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class EditModal extends React.Component {
   static propTypes = {

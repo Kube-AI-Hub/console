@@ -20,7 +20,7 @@ import { get, set, cloneDeep, isEmpty, uniqBy } from 'lodash'
 import React, { Component } from 'react'
 import classNames from 'classnames'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ContainersMapper extends Component {
   state = {

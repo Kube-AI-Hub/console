@@ -1,11 +1,11 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .graph {
   display: flex;
   position: relative;
   height: 100%;
   padding: 12px;
-  border-radius: $border-radius;
+  border-radius: variables.$border-radius;
   box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.06);
   background-color: #fff;
 }

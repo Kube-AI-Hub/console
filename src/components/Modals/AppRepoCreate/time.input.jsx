@@ -19,7 +19,7 @@
 import React from 'react'
 import { Input, Select } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class TimeInput extends React.Component {
   constructor(props) {

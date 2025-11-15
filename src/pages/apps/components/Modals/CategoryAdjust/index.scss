@@ -1,7 +1,7 @@
-@import '~scss/variables';
+@use '~scss/variables';
 .footer {
-  border-color: $bg-color;
-  border-top: 1px solid $border-color;
+  border-color: variables.$bg-color;
+  border-top: 1px solid variables.$border-color;
 }
 
 .form {

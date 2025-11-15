@@ -36,7 +36,7 @@ import ClusterMonitorStore from 'stores/monitoring/cluster'
 
 import { getLastMonitoringData } from 'utils/monitoring'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const MetricTypes = {
   cpu_usage: 'cluster_cpu_usage',
@@ -49,8 +49,9 @@ const MetricTypes = {
   pod_capacity: 'cluster_pod_quota',
 }
 
+export default
 @observer
-export default class Card extends Component {
+class Card extends Component {
   monitorStore = new ClusterMonitorStore({ cluster: this.props.cluster.name })
 
   componentDidMount() {

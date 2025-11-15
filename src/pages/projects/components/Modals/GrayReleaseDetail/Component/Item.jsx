@@ -23,7 +23,7 @@ import { Icon } from '@kube-design/components'
 import { Indicator } from 'components/Base'
 import { getSuitableValue } from 'utils/monitoring'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Item extends React.Component {
   handleLinkClick = () => {

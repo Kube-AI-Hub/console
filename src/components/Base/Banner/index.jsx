@@ -23,7 +23,7 @@ import { isString } from 'lodash'
 
 import { Icon } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Banner extends React.PureComponent {
   static propTypes = {

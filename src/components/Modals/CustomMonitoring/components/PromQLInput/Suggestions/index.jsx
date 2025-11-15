@@ -26,7 +26,7 @@ import { RATE_RANGES, FUNCTIONS } from '../grammar'
 
 import Item from './Item'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const searchFunctions = value => {
   return FUNCTIONS.filter(func => func.label.indexOf(value) >= 0)
@@ -40,7 +40,8 @@ const searchRateRanges = value => {
   return []
 }
 
-const searchLabels = (labelsets = {}, value, tokenType) => {
+const searchLabels = (labelsets, value, tokenType) => {
+  labelsets = labelsets || {}
   const keys = Object.keys(labelsets)
   if (value === '{' || value === ',') {
     return keys.map(key => ({ value: key }))

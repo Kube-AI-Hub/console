@@ -24,12 +24,13 @@ import { trigger } from 'utils/action'
 
 import Item from './Item'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('rootStore')
 @observer
 @trigger
-export default class Cates extends Component {
+class Cates extends Component {
   store = this.props.store
 
   componentDidMount() {

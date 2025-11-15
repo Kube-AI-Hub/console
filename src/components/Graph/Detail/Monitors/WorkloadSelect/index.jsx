@@ -20,7 +20,7 @@ import React, { Component } from 'react'
 import classNames from 'classnames'
 import { Dropdown, Menu, Icon } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class WorkloadSelect extends Component {
   handleOptionsClick = (e, key) => {

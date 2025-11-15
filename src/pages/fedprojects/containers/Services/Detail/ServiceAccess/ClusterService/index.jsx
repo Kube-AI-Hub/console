@@ -28,11 +28,12 @@ import MoreActions from 'components/MoreActions'
 import { get } from 'lodash'
 import Ports from '../../Ports'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('rootStore')
 @observer
-export default class ClusterService extends Component {
+class ClusterService extends Component {
   gatewayStore = new GatewayStore()
 
   state = {

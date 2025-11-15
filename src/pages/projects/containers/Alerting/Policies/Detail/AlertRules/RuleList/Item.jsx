@@ -9,7 +9,7 @@ import { getLocalTime } from 'utils'
 import { observer, inject } from 'mobx-react'
 import { trigger } from 'utils/action'
 import { ReactComponent as CustomIcon } from 'assets/computing-setting.svg'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const mapperIcon = {
   cpu: 'cpu',
@@ -38,10 +38,11 @@ const workloadValuesMapper = {
   DaemonSet: 'DAEMONSETS_VALUES',
 }
 
+export default
 @inject('rootStore')
 @observer
 @trigger
-export default class AlertRuleItem extends React.Component {
+class AlertRuleItem extends React.Component {
   get ruleType() {
     const { rule } = this.props
     const exprBuilder = get(rule, 'exprBuilder', {})

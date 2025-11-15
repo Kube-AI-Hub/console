@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   display: inline-block;
@@ -7,7 +7,7 @@
   width: 60px;
   height: 10px;
   border-radius: 5px;
-  background-color: $bg-color;
+  background-color: variables.$bg-color;
   overflow: hidden;
 }
 
@@ -17,16 +17,16 @@
   left: 0;
   width: 0;
   height: 100%;
-  background-color: $blue;
+  background-color: variables.$blue;
   transition: all 0.6s ease;
   z-index: 1;
 
   &.warning {
-    background-color: $warning;
+    background-color: variables.$warning;
   }
 
   &.danger {
-    background-color: $danger;
+    background-color: variables.$danger;
   }
 }
 
@@ -41,6 +41,6 @@
 .rightText {
   position: absolute;
   right: 20px;
-  @include TypographyParagraph($dark-color01);
+  @include mixins.TypographyParagraph(variables.$dark-color01);
   z-index: 2;
 }

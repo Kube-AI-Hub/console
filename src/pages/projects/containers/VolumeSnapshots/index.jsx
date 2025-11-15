@@ -30,14 +30,15 @@ import SnapshotStore from 'stores/volumeSnapshot'
 import { getLocalTime, showNameAndAlias } from 'utils'
 import { VOLUME_SNAPSHOT_STATUS } from 'utils/constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @withProjectList({
   store: new SnapshotStore(),
   module: 'volume-snapshots',
   name: 'VOLUME_SNAPSHOT',
 })
-export default class VolumeSnapshot extends React.Component {
+class VolumeSnapshot extends React.Component {
   getStatus() {
     return VOLUME_SNAPSHOT_STATUS.map(status => ({
       text: t(status.text),

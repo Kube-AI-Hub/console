@@ -28,7 +28,7 @@ import { MODULE_KIND_MAP, PATTERN_PORT_NAME } from 'utils/constants'
 
 import SelectorsInput from './SelectorsInput'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ServiceSettings extends React.Component {
   state = {

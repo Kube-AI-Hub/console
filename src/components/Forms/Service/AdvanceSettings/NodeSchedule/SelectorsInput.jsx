@@ -21,7 +21,7 @@ import { Button, Popper } from '@kube-design/components'
 
 import { PropertiesInput } from 'components/Inputs'
 import NodeSelect from './NodeSelect/index'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class SelectorsInput extends React.Component {
   state = {

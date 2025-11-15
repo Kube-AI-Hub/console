@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   margin: 0 auto;
@@ -14,5 +14,5 @@
   padding: 20px;
   min-height: 410px;
   border-radius: 4px;
-  background-color: $lightest;
+  background-color: variables.$lightest;
 }

@@ -25,12 +25,13 @@ import { Text, Panel } from 'components/Base'
 import QuotaStore from 'stores/quota'
 import { trigger } from 'utils/action'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('rootStore', 'projectStore')
 @observer
 @trigger
-export default class Quota extends Component {
+class Quota extends Component {
   state = {
     showTip: false,
   }

@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .item {
   position: relative;
@@ -7,16 +7,16 @@
   padding-left: 64px;
   margin-bottom: 8px;
   border-radius: 4px;
-  background-color: $white;
-  border: solid 1px $border-color;
-  transition: all $trans-speed ease-in-out;
+  background-color: variables.$white;
+  border: solid 1px variables.$border-color;
+  transition: all variables.$trans-speed ease-in-out;
 
   &:last-child {
     margin-bottom: 0;
   }
 
   &:hover {
-    border-color: $border-hover-color;
+    border-color: variables.$border-hover-color;
     box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.2);
 
     :global .buttons {
@@ -62,12 +62,12 @@
   }
 
   .title {
-    @include TypographyTitleH6($dark-color07);
+    @include mixins.TypographyTitleH6(variables.$dark-color07);
   }
 
   .description {
-    @include ellipsis;
-    @include TypographyParagraph($dark-color01);
+    @include mixins.ellipsis;
+    @include mixins.TypographyParagraph(variables.$dark-color01);
 
     span + span {
       margin-left: 12px;
@@ -94,14 +94,14 @@
   position: relative;
   padding: 11px 12px;
   border-radius: 4px;
-  border: 1px dashed $border-color;
-  background-color: $white;
+  border: 1px dashed variables.$border-color;
+  background-color: variables.$white;
   cursor: pointer;
-  transition: all $trans-speed ease-in-out;
+  transition: all variables.$trans-speed ease-in-out;
 
   &:hover {
     box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.2);
-    border-color: $border-hover-color;
+    border-color: variables.$border-hover-color;
   }
 }
 
@@ -112,7 +112,7 @@
 .path {
   padding: 6px 12px;
   border-radius: 4px;
-  background-color: $bg-color;
+  background-color: variables.$bg-color;
 
   & + .path {
     margin-top: 4px;
@@ -120,10 +120,10 @@
 
   span {
     display: inline-block;
-    @include TypographyParagraph($dark-color01);
+    @include mixins.TypographyParagraph(variables.$dark-color01);
 
     & + span {
-      color: $dark-color07;
+      color: variables.$dark-color07;
       margin-left: 5px;
     }
   }
@@ -131,5 +131,5 @@
 
 .error {
   margin-top: 12px;
-  color: $red !important;
+  color: variables.$red !important;
 }

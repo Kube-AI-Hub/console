@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper,
 .empty {
@@ -6,15 +6,15 @@
   height: 96px;
   border-radius: 4px;
   background-color: #ffffff;
-  border: solid 1px $light-color03;
+  border: solid 1px variables.$light-color03;
   overflow: hidden;
 }
 
 .empty {
   cursor: pointer;
-  transition: all $trans-speed ease-in-out;
+  transition: all variables.$trans-speed ease-in-out;
   &:hover {
-    background-color: $light-color03;
+    background-color: variables.$light-color03;
   }
 
   & > p {
@@ -43,7 +43,7 @@
   height: 100%;
   padding: 12px;
   border-radius: 4px;
-  background-color: $lightest;
+  background-color: variables.$lightest;
 }
 
 .repoTypes {
@@ -53,10 +53,10 @@
     display: inline-block;
     padding: 4px 13px;
     border-radius: 4px;
-    background-color: $light-color03;
-    font-family: $font-family-id;
-    font-size: $size-medium;
-    font-weight: $font-bold;
+    background-color: variables.$light-color03;
+    font-family: variables.$font-family-id;
+    font-size: variables.$size-medium;
+    font-weight: variables.$font-bold;
     line-height: 1.5;
     cursor: pointer;
     flex: 1 1;
@@ -111,7 +111,7 @@
   background-color: #ffffff;
   border: solid 1px transparent;
   margin-bottom: 8px;
-  transition: all $trans-speed ease-in-out;
+  transition: all variables.$trans-speed ease-in-out;
 
   &:hover {
     box-shadow: 0 8px 16px 0 rgba(36, 46, 66, 0.08);
@@ -147,7 +147,7 @@
 
     .desc {
       line-height: 20px;
-      color: $dark-grey;
+      color: variables.$dark-grey;
       white-space: nowrap;
       text-overflow: ellipsis;
       overflow: hidden;
@@ -157,7 +157,7 @@
     padding-top: 4px;
     opacity: 0;
     flex-basis: 100px;
-    transition: all $trans-speed ease-in-out;
+    transition: all variables.$trans-speed ease-in-out;
   }
 }
 

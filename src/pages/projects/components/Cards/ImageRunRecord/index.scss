@@ -1,10 +1,10 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .content {
   padding: 12px;
   border-radius: 4px;
-  background-color: $light-color01;
+  background-color: variables.$light-color01;
 
   .header {
     display: flex;
@@ -22,7 +22,7 @@
           margin-left: 12px;
 
           &:hover {
-            background-color: $bg-color;
+            background-color: variables.$bg-color;
           }
         }
       }

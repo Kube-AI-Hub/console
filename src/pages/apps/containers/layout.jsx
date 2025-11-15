@@ -25,11 +25,12 @@ import ClusterStore from 'stores/cluster'
 
 import { renderRoutes } from 'utils/router.config'
 
-import styles from './layout.scss'
+import * as styles from './layout.scss'
 
+export default
 @inject('rootStore')
 @observer
-export default class AppsLayout extends Component {
+class AppsLayout extends Component {
   constructor(props) {
     super(props)
     this.store = new ClusterStore()

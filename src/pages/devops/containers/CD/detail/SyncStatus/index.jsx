@@ -27,7 +27,7 @@ import { get, isEmpty } from 'lodash'
 import { Icon, Tooltip } from '@kube-design/components'
 import { ReactComponent as ForkIcon } from 'assets/fork.svg'
 import { getLocalTime, formatUsedTime } from 'utils'
-import styles from './index.scss'
+import * as styles from './index.scss'
 import StatusText from '../../Components/StatusText'
 
 @inject('detailStore')

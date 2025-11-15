@@ -1,12 +1,12 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
-  box-shadow: 0 -1px 0 0 $light-color04;
+  box-shadow: 0 -1px 0 0 variables.$light-color04;
 }
 
 .tabs {
   display: flex;
-  background-color: $light-color02;
+  background-color: variables.$light-color02;
 }
 
 .tab {
@@ -23,11 +23,11 @@
 
 .disc {
   margin-left: 12px;
-  color: $dark-color01;
+  color: variables.$dark-color01;
 }
 
 .dictitle {
-  color: $dark-color07;
+  color: variables.$dark-color07;
   font-weight: 600;
 }
 
@@ -39,7 +39,7 @@
   height: 44px;
   border-radius: 4px;
   padding: 0 12px;
-  background-color: $light-color01;
+  background-color: variables.$light-color01;
 }
 
 .rulebody {
@@ -53,20 +53,20 @@
 }
 
 .subtitle {
-  color: $dark-color06;
+  color: variables.$dark-color06;
   line-height: 1.67;
   font-weight: 600;
 }
 
 .disp {
-  color: $dark-color01;
+  color: variables.$dark-color01;
   line-height: 1.67;
 }
 
 .row {
   display: flex;
-  background-color: $light-color02;
-  border: 1px solid $light-color06;
+  background-color: variables.$light-color02;
+  border: 1px solid variables.$light-color06;
   border-radius: 22px;
   margin-top: 8px;
   justify-content: space-between;
@@ -102,7 +102,7 @@
 
   :global {
     label {
-      color: $dark-color01;
+      color: variables.$dark-color01;
     }
   }
 }
@@ -116,7 +116,7 @@
 
   :global {
     label {
-      color: $dark-color01;
+      color: variables.$dark-color01;
     }
   }
 }

@@ -25,10 +25,11 @@ import { Form, Button, Select } from '@kube-design/components'
 import { REPO_KEY_MAP } from 'utils/constants'
 
 import GitHubForm from '../GithubForm'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
-@observer
-export default class BitBucketForm extends GitHubForm {
+export default
+// @observer
+class BitBucketForm extends GitHubForm {
   constructor(props) {
     super(props)
     this.state = {

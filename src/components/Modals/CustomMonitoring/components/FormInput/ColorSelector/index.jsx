@@ -19,7 +19,7 @@ import React from 'react'
 import { SwatchesPicker } from 'react-color'
 import classnames from 'classnames'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ColorSelector extends React.Component {
   state = {

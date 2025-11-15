@@ -31,9 +31,11 @@ import { MultiArea } from 'components/Charts'
 import { Controller as MonitoringController } from 'components/Cards/Monitoring'
 import PodsMonitoring from 'projects/components/Modals/PodsMonitoring'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const MetricTypes = {
+  gpu_usage: 'pod_gpu_usage',
+  gpu_memory_usage: 'pod_gpu_memory_usage',
   cpu_usage: 'pod_cpu_usage',
   memory_usage: 'pod_memory_usage_wo_cache',
   net_transmitted: 'pod_net_bytes_transmitted',
@@ -46,9 +48,10 @@ const MONITOR_MODULES = {
   daemonsets: 'daemonset',
 }
 
+export default
 @inject('detailStore')
 @observer
-export default class Monitorings extends React.Component {
+class Monitorings extends React.Component {
   constructor(props) {
     super(props)
 
@@ -127,17 +130,24 @@ export default class Monitorings extends React.Component {
 
   getMonitoringCfgs = () => [
     {
+      type: 'gpu',
+      title: 'GPU_USAGE',
+      unitType: 'gpu',
+      metricType: MetricTypes.gpu_usage,
+    },
+    {
+      type: 'gpu_memory',
+      title: 'GPU_MEMORY_USAGE',
+      unitType: 'memory',
+      metricType: MetricTypes.gpu_memory_usage,
+    },
+    {
       type: 'cpu',
       title: 'CPU_USAGE',
       unitType: 'cpu',
       metricType: MetricTypes.cpu_usage,
     },
-    {
-      type: 'memory',
-      title: 'MEMORY_USAGE',
-      unitType: 'memory',
-      metricType: MetricTypes.memory_usage,
-    },
+
     {
       type: 'bandwidth',
       title: 'OUTBOUND_TRAFFIC',

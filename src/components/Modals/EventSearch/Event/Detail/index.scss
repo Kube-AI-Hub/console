@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 $toolbarHeight: 48px;
 $chartHeight: 160px;
@@ -12,11 +12,11 @@ $chartContainerPadding: 8px;
 }
 
 .searchBar {
-  border: solid 2px $light-color04;
+  border: solid 2px variables.$light-color04;
   margin-left: 12px;
   margin-right: 12px;
   margin-bottom: -23px;
-  background: $white;
+  background: variables.$white;
   display: flex;
   position: relative;
   border-radius: 4px;
@@ -26,8 +26,8 @@ $chartContainerPadding: 8px;
       position: relative;
       flex: 1;
       border: none;
-      border-right: solid 2px $light-color04;
-      border-left: solid 2px $light-color04;
+      border-right: solid 2px variables.$light-color04;
+      border-left: solid 2px variables.$light-color04;
       border-radius: 0;
     }
     .select {
@@ -51,9 +51,9 @@ $chartContainerPadding: 8px;
 
 .searchResult {
   position: relative;
-  border-radius: $border-radius;
-  border: solid 1px $light-color04;
-  background-color: $lightest;
+  border-radius: variables.$border-radius;
+  border: solid 1px variables.$light-color04;
+  background-color: variables.$lightest;
   padding: 25px 12px 14px 12px;
   display: flex;
   flex-direction: column;
@@ -64,9 +64,9 @@ $chartContainerPadding: 8px;
   height: $toolbarHeight;
   line-height: $toolbarHeight;
   border-radius: 4px;
-  background-color: $dark-color07;
-  margin: $size-medium 0;
-  color: $white;
+  background-color: variables.$dark-color07;
+  margin: variables.$size-medium 0;
+  color: variables.$white;
   display: flex;
   justify-content: space-between;
   padding: 0 20px;
@@ -106,8 +106,8 @@ $chartContainerPadding: 8px;
 .chartContainer {
   margin-bottom: 12px;
   border-radius: 4px;
-  box-shadow: $base-shadow;
-  background-color: $white;
+  box-shadow: variables.$base-shadow;
+  background-color: variables.$white;
   display: flex;
   align-items: center;
   padding: 0 32px;
@@ -146,7 +146,7 @@ $chartContainerPadding: 8px;
 }
 
 .detail {
-  background-color: $white;
+  background-color: variables.$white;
   width: 492px;
   height: calc(100% - 64px - #{$toolbarHeight} - #{$chartContainerPadding});
   border: 1px solid #d5dee7;
@@ -167,7 +167,7 @@ $chartContainerPadding: 8px;
 
 .table {
   border-radius: 4px;
-  background-color: $white;
+  background-color: variables.$white;
   flex: 1;
   overflow: hidden;
   @at-root {
@@ -220,7 +220,7 @@ $chartContainerPadding: 8px;
   }
 
   .hightLightMatch {
-    background: $yellow-color02;
+    background: variables.$yellow-color02;
   }
 }
 
@@ -237,7 +237,7 @@ $chartContainerPadding: 8px;
   text-align: center;
   &:hover {
     border-radius: 2px;
-    background-color: $dark-color06;
+    background-color: variables.$dark-color06;
   }
 }
 
@@ -252,20 +252,20 @@ $chartContainerPadding: 8px;
 }
 
 .normal {
-  color: $dark-color06;
-  background-color: $light-color02;
+  color: variables.$dark-color06;
+  background-color: variables.$light-color02;
 }
 
 .warning {
-  color: $white;
-  background-color: $yellow-color03;
+  color: variables.$white;
+  background-color: variables.$yellow-color03;
 }
 
 .kind {
   display: inline-block;
   padding: 0 3px;
   text-align: center;
-  background-color: $light-color04;
+  background-color: variables.$light-color04;
   border-radius: 1px;
 }
 

@@ -27,10 +27,11 @@ import { Modal, Text, Indicator } from 'components/Base'
 import { ROLE_MODULES } from './constants'
 import CheckItem from './CheckItem'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class EditAuthorizationModal extends React.Component {
+class EditAuthorizationModal extends React.Component {
   static propTypes = {
     roleTemplates: PropTypes.array,
     formTemplate: PropTypes.object,
@@ -155,7 +156,6 @@ export default class EditAuthorizationModal extends React.Component {
       currentModule,
     } = this.state
     const templates = sortBy(groupedTemplates[currentModule] || [], 'aliasName')
-
     return (
       <div className={styles.content}>
         <div className={styles.title}>{t('PERMISSION_PL')}</div>

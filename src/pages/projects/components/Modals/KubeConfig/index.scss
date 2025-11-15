@@ -1,19 +1,19 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .body {
-  background-color: $white;
+  background-color: variables.$white;
   padding: 0;
 }
 
 .header {
   display: flex;
   padding: 15px 20px;
-  border-bottom: 1px solid $border-color;
+  border-bottom: 1px solid variables.$border-color;
 
   .title {
-    font-size: $size-normal;
+    font-size: variables.$size-normal;
     font-weight: 600;
-    color: $dark;
+    color: variables.$dark;
     line-height: 20px;
     margin: 10px 0 10px 20px;
   }
@@ -30,13 +30,13 @@
     p {
       float: left;
       font-weight: 600;
-      color: $third-text-color;
+      color: variables.$third-text-color;
     }
 
     button {
       float: right;
       padding: 0 5px;
-      color: $green;
+      color: variables.$green;
       border: none !important;
     }
   }
@@ -44,9 +44,9 @@
 
 .footer {
   padding: 9px 20px;
-  border-top: 1px solid $border-color;
+  border-top: 1px solid variables.$border-color;
   text-align: right;
-  background-color: $white;
+  background-color: variables.$white;
 
   button {
     margin-left: 10px;

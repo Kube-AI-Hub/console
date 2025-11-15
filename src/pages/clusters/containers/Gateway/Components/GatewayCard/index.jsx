@@ -30,7 +30,7 @@ import { trigger } from 'utils/action'
 import { CLUSTER_PROVIDERS } from 'utils/constants'
 import GatewayEmpty from '../GatewayEmpty'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @inject('rootStore')
 @observer

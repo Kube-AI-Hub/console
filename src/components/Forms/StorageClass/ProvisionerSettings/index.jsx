@@ -22,7 +22,7 @@ import { Form } from '@kube-design/components'
 import CardSelect from 'components/Inputs/CardSelect'
 import { MODULE_KIND_MAP, PROVISIONERS } from 'utils/constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ProvisionerSettings extends React.Component {
   constructor(props) {

@@ -43,6 +43,10 @@ module.exports = {
     filename,
     path: root('dist/'),
     publicPath: '/dist/',
+    library: {
+      type: 'global',
+      name: 'locale',
+    },
   },
   plugins: [
     new LocalePlugin({ output: '../dist' }),

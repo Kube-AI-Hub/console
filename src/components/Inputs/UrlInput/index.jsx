@@ -22,7 +22,7 @@ import classnames from 'classnames'
 import { Column, Columns, Form, Input } from '@kube-design/components'
 import { NumberInput } from 'components/Inputs'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class UrlInput extends React.Component {
   static defaultProps = {

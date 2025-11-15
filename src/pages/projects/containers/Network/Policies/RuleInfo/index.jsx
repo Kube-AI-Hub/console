@@ -26,13 +26,14 @@ import { Button, Icon } from '@kube-design/components'
 import { trigger } from 'utils/action'
 import ServiceStore from 'stores/service'
 import NetWorkPolicyStore from 'stores/network/policy'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('rootStore')
 @inject('projectStore')
 @trigger
 @observer
-export default class RuleInfo extends React.Component {
+class RuleInfo extends React.Component {
   constructor(props) {
     super(props)
     this.store = new NetWorkPolicyStore(props.module)

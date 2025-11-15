@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .form {
   width: 854px;
@@ -7,7 +7,7 @@
 
 .formContent {
   height: 320px;
-  border: solid 1px $dark-color01;
+  border: solid 1px variables.$dark-color01;
   border-radius: 2px;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
@@ -27,7 +27,7 @@
 
 .modify {
   position: absolute;
-  @include vertical-center;
+  @include mixins.vertical-center;
   right: 8px;
 }
 

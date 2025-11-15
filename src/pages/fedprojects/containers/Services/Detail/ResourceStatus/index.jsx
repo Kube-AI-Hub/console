@@ -27,11 +27,12 @@ import FedStore from 'stores/federated'
 import PodsCard from 'components/Cards/Pods'
 import ClusterWorkloadStatus from 'fedprojects/components/ClusterWorkloadStatus'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('detailStore', 'projectStore')
 @observer
-export default class ResourceStatus extends React.Component {
+class ResourceStatus extends React.Component {
   constructor(props) {
     super(props)
 

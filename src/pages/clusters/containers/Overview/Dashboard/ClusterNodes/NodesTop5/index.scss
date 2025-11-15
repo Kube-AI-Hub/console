@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .header {
   display: flex;
@@ -7,7 +7,7 @@
 
   & > div:first-child {
     flex: 1;
-    @include TypographySymbolText;
+    @include mixins.TypographySymbolText;
   }
 
   .select {
@@ -21,7 +21,7 @@
     display: flex;
     padding: 12px;
     margin-bottom: 8px;
-    background-color: $light-color01;
+    background-color: variables.$light-color01;
   }
 }
 
@@ -37,7 +37,7 @@
   margin: -12px;
   margin-top: 12px;
   padding: 12px;
-  border-top: 1px solid $border-color;
+  border-top: 1px solid variables.$border-color;
 
   button {
     width: 100%;
@@ -45,9 +45,9 @@
 }
 
 .label {
-  color: $white;
-  border-radius: $border-radius;
-  background: $dark-color06;
+  color: variables.$white;
+  border-radius: variables.$border-radius;
+  background: variables.$dark-color06;
   padding: 0 0.3em;
-  margin: 0 .3em;
+  margin: 0 0.3em;
 }

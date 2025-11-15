@@ -37,10 +37,11 @@ import HelmUploadModal from 'apps/components/Modals/HelmUpload'
 import { STORE_QUERY_STATUS } from 'configs/openpitrix/app'
 import VersionItem from './Item'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class VersionList extends React.Component {
+class VersionList extends React.Component {
   static propTypes = {
     versionStore: PropTypes.object,
     appStore: PropTypes.object,

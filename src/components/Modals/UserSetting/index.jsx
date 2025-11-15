@@ -30,7 +30,7 @@ import UserStore from 'stores/user'
 
 import TABS from './tabs'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class UserSettingModal extends React.Component {
   static propTypes = {

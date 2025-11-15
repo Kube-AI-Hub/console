@@ -22,7 +22,7 @@ import { Select } from '@kube-design/components'
 
 import { getDisplayName } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class EnvironmentInputItem extends React.Component {
   static propTypes = {

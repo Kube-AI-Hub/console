@@ -32,7 +32,7 @@ import BaseForm from '../BaseForm'
 import Item from './Item'
 import KeyWords from './KeyWords'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const { TabPanel } = Tabs
 

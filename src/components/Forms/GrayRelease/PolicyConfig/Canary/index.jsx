@@ -25,7 +25,7 @@ import { Icon, RadioButton, RadioGroup, Tooltip } from '@kube-design/components'
 import ByTraffic from './ByTraffic'
 import ByContent from './ByContent'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Canary extends React.Component {
   constructor(props) {

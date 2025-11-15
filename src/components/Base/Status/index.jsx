@@ -23,7 +23,7 @@ import classNames from 'classnames'
 
 import Indicator from '../Indicator'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Status extends PureComponent {
   static propTypes = {

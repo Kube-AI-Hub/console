@@ -1,10 +1,10 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   h3 {
     font-weight: bold;
-    color: $dark-color07;
+    color: variables.$dark-color07;
     margin-bottom: 8px;
     margin-top: 8px;
   }
@@ -27,24 +27,24 @@
     align-items: center;
     flex-direction: column;
     justify-content: center;
-    transition: all $trans-speed ease-in-out;
+    transition: all variables.$trans-speed ease-in-out;
     img {
       width: 40px;
       height: 40px;
     }
     h4 {
-      @include TypographySymbolText($dark-color06);
+      @include mixins.TypographySymbolText(variables.$dark-color06);
     }
 
     &:hover {
-      background-color: $light-color07;
+      background-color: variables.$light-color07;
     }
 
     &.select {
       h4 {
-        color: $white;
+        color: variables.$white;
       }
-      background-color: $dark-color07;
+      background-color: variables.$dark-color07;
     }
   }
 
@@ -54,7 +54,7 @@
     padding: 20px;
     padding-bottom: 0px;
     margin: -8px;
-    background-color: $light-color02;
+    background-color: variables.$light-color02;
 
     .navs {
       width: 140px;
@@ -65,11 +65,11 @@
 
         &:nth-child(1) {
           width: 78px;
-          background-color: $dark-color01;
+          background-color: variables.$dark-color01;
         }
         &:nth-child(2) {
           width: 140px;
-          background-color: $light-color06;
+          background-color: variables.$light-color06;
         }
       }
     }
@@ -78,18 +78,18 @@
       flex: 1;
       padding: 20px;
       margin-left: 20px;
-      background-color: $white;
+      background-color: variables.$white;
 
       .placeholder {
         display: flex;
         width: 100%;
         height: 180px;
         border-radius: 1px;
-        border: dashed 1px $blue-color03;
+        border: dashed 1px variables.$blue-color03;
         background-color: rgba(199, 222, 239, 0.4);
         justify-content: center;
         align-items: center;
-        @include TypographySymbolText();
+        @include mixins.TypographySymbolText();
       }
     }
   }

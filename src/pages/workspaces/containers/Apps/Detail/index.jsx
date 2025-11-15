@@ -38,12 +38,13 @@ import { getLocalTime } from 'utils'
 
 import routes from './routes'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('rootStore')
 @observer
 @trigger
-export default class RoleDetail extends React.Component {
+class RoleDetail extends React.Component {
   store = new AppStore()
 
   versionStore = new VersionStore()

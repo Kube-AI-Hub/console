@@ -30,7 +30,7 @@ import WorkloadStore from 'stores/workload'
 import { Button, Table } from '@kube-design/components'
 import { Card, Status } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @inject('rootStore', 'detailStore')
 @observer

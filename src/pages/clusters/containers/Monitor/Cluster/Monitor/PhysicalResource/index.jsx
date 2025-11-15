@@ -27,9 +27,11 @@ import { Controller as MonitoringController } from 'components/Cards/Monitoring'
 import { SimpleArea } from 'components/Charts'
 import CustomTooltip from 'components/Charts/Custom/Tooltip'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const MetricTypes = {
+  gpu_memory_utilisation: 'cluster_gpu_memory_utilisation',
+  gpu_utilisation: 'cluster_gpu_utilisation',
   cpu_utilisation: 'cluster_cpu_utilisation',
   memory_utilisation: 'cluster_memory_utilisation',
   cpu_load1: 'cluster_load1',
@@ -73,6 +75,23 @@ class ClusterMonitorings extends React.Component {
   }
 
   getMonitoringCfgs = () => [
+    {
+      type: 'utilisation',
+      title: 'GPU_MEMORY_USAGE',
+      unit: '%',
+      legend: ['USAGE'],
+      data: get(
+        this.metrics,
+        `${MetricTypes.gpu_memory_utilisation}.data.result`
+      ),
+    },
+    {
+      type: 'utilisation',
+      title: 'GPU_USAGE',
+      unit: '%',
+      legend: ['USAGE'],
+      data: get(this.metrics, `${MetricTypes.gpu_utilisation}.data.result`),
+    },
     {
       type: 'utilisation',
       title: 'CPU_USAGE',

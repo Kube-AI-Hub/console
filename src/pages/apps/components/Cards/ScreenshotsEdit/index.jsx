@@ -26,10 +26,11 @@ import { get } from 'lodash'
 import { Image, Upload } from 'components/Base'
 import { UPLOAD_FILE_TYPES, SCREENSHOTS_LIMIT } from 'configs/openpitrix/app'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class Screenshots extends React.Component {
+class Screenshots extends React.Component {
   static propTypes = {
     detail: PropTypes.object,
     store: PropTypes.object,

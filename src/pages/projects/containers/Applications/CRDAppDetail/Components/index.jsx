@@ -23,11 +23,12 @@ import Workloads from 'projects/components/Cards/Workloads'
 import Ingresses from 'projects/components/Cards/Ingresses'
 import Volumes from 'projects/components/Cards/Volumes'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('detailStore')
 @observer
-export default class ResourceStatus extends React.Component {
+class ResourceStatus extends React.Component {
   constructor(props) {
     super(props)
 

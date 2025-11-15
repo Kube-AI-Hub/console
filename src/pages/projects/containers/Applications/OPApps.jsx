@@ -83,6 +83,22 @@ export default class OPApps extends React.Component {
       },
     ]
   }
+  renderNameTitle = record => {
+    const { name } = record
+    const {display_name } = record.app
+    if (display_name) {
+      return (
+        <div>
+          <div>{name}</div>
+          <div style={{
+            fontSize: 12,
+            color: '#999',
+          }}>{display_name}</div>
+        </div>
+      )
+    }
+    return name
+  }
 
   getColumns = () => {
     const { getSortOrder } = this.props
@@ -97,7 +113,7 @@ export default class OPApps extends React.Component {
             avatar={get(record, 'app.icon')}
             iconLetter={name}
             iconSize={40}
-            title={name}
+            title={this.renderNameTitle(record)}
             desc={record.description}
           />
         ),
@@ -106,23 +122,51 @@ export default class OPApps extends React.Component {
         title: t('STATUS'),
         dataIndex: 'status',
         isHideable: true,
-        width: '16%',
+        // width: '16%',
         render: this.renderStatus,
       },
       {
         title: t('APP_TEMPLATE'),
         dataIndex: 'app.name',
         isHideable: true,
-        width: '16%',
+        // width: '16%',
         render: (name, record) => (
           <Link to={`/apps/${get(record, 'version.app_id')}`}>{name}</Link>
         ),
       },
       {
+        title: t('INTERNAL_ADDRESS'),
+        dataIndex: 'database.innerAddress',
+        isHideable: true,
+        render: (innerAddress, record) => {
+          const outerAddress = record.database?.outerAddress
+          return (
+            <>
+              <div> 内部地址：{innerAddress || '-'}</div>
+              <div> 外部地址：{outerAddress || '-'}</div>
+            </>
+          )
+        },
+      },
+      {
         title: t('VERSION'),
         dataIndex: 'version.name',
         isHideable: true,
-        width: '16%',
+        // width: '16%',
+      },
+      {
+        title: t('CONFIGURATION'),
+        dataIndex: 'database.cpu',
+        width: 100,
+        render: (cpu, record) => {
+          const memory = record.database?.memory
+          return (
+            <div>
+              <div>{cpu ? ` CPU：${cpu}` : ''}</div>
+              <div>{memory ? `内存：${memory}` : ''}</div>
+            </div>
+          )
+        },
       },
       {
         title: t('UPDATE_TIME_TCAP'),
@@ -130,7 +174,7 @@ export default class OPApps extends React.Component {
         sorter: true,
         sortOrder: getSortOrder('status_time'),
         isHideable: true,
-        width: 180,
+        width: 100,
         render: (time, record) =>
           getLocalTime(record.update_time || record.status_time).format(
             'YYYY-MM-DD HH:mm:ss'
@@ -148,11 +192,12 @@ export default class OPApps extends React.Component {
       )
     }
 
-    return <Status name={t(status)} type={status} flicker />
+    return <Status name={t(status.toUpperCase())} type={status} flicker />
   }
 
   showDeploy = () => {
     const { match, module, projectStore, trigger } = this.props
+
     return this.props.trigger('app.deploy', {
       module,
       namespace: match.params.namespace,

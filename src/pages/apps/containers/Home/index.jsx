@@ -37,16 +37,17 @@ import { STORE_APP_LIMIT } from 'configs/openpitrix/app'
 import Banner from '../../components/Banner'
 import AppList from '../../components/AppList'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const noCategories = ['new', 'all']
 const cateLatest = 'new'
 const uncateKey = 'ctg-uncategorized'
 const scrollThreshold = 200
 
+export default
 @inject('rootStore')
 @observer
-export default class Home extends React.Component {
+class Home extends React.Component {
   constructor(props) {
     super(props)
     this.appStore = new PublishedAppStore()
@@ -61,6 +62,10 @@ export default class Home extends React.Component {
 
   get queryParams() {
     return qs.parse(location.search.slice(1))
+  }
+
+  get routing() {
+    return this.props.rootStore.routing
   }
 
   async componentDidMount() {
@@ -260,6 +265,7 @@ export default class Home extends React.Component {
             workspace={workspace}
             namespace={namespace}
             cluster={cluster}
+            routing={this.routing}
           />
         </div>
       </div>

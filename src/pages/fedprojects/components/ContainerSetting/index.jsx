@@ -34,7 +34,7 @@ import { ResourceLimit } from 'components/Inputs'
 import ToggleView from 'components/ToggleView'
 
 import Base from 'components/Forms/Workload/ContainerSettings/ContainerForm/ContainerSetting'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ContainerSetting extends Base {
   get defaultResourceLimit() {

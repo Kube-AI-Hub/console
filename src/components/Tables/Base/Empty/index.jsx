@@ -25,7 +25,7 @@ import { Icon } from '@kube-design/components'
 
 import { ICON_TYPES } from 'utils/constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class EmptyTable extends React.PureComponent {
   static propTypes = {

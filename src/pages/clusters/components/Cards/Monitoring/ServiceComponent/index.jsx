@@ -36,9 +36,10 @@ const MetricTypes = {
   schedule_attempt_rate: 'scheduler_schedule_attempt_rate',
 }
 
+export default
 @inject('rootStore')
 @observer
-export default class ServiceComponentStatusTab extends React.Component {
+class ServiceComponentStatusTab extends React.Component {
   constructor(props) {
     super(props)
 

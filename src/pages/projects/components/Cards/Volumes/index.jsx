@@ -29,10 +29,11 @@ import { joinSelector } from 'utils'
 
 import VolumeItem from './Item'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class VolumesCard extends React.Component {
+class VolumesCard extends React.Component {
   static propTypes = {
     className: PropTypes.string,
     title: PropTypes.string,

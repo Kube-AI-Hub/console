@@ -26,10 +26,11 @@ import { ScrollLoad } from 'components/Base'
 import WorkloadStore from 'stores/workload'
 import WorkloadItem from './Item'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class WorkloadSelect extends React.Component {
+class WorkloadSelect extends React.Component {
   constructor(props) {
     super(props)
 

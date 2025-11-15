@@ -29,7 +29,7 @@ import { Card } from 'components/Base'
 
 import { dateI18n, getLastTimeRange } from './utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @observer
 class LogCollectionDetailContainers extends Component {

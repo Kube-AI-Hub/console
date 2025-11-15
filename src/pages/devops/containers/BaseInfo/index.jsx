@@ -42,7 +42,7 @@ import {
 
 import { trigger } from 'utils/action'
 import { eventKeys, initEvents } from 'utils/events'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @inject('rootStore', 'devopsStore')
 @observer

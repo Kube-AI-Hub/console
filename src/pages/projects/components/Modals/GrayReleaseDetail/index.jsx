@@ -47,7 +47,7 @@ import Component from './Component'
 import Monitor from './Monitor'
 import EditModal from './Edit'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const MATCH_TYPES = {
   exact: 'EXACT_MATCH',
@@ -57,9 +57,10 @@ const MATCH_TYPES = {
 
 const CANARY_CONTENT = keyBy(GRAY_RELEASE_CANARY_CONTENT, 'value')
 
+export default
 @inject('rootStore')
 @observer
-export default class GatewaySettingModal extends React.Component {
+class GatewaySettingModal extends React.Component {
   static propTypes = {
     visible: PropTypes.bool,
     detail: PropTypes.object,

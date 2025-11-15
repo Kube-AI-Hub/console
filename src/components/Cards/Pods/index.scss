@@ -1,11 +1,11 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .main {
   .header {
     display: flex;
     padding: 12px;
-    background-color: $th-bg-color;
+    background-color: variables.$th-bg-color;
 
     .search {
       width: 100%;
@@ -19,7 +19,7 @@
           margin-left: 12px;
 
           &:hover {
-            background-color: $bg-color;
+            background-color: variables.$bg-color;
           }
         }
       }
@@ -29,15 +29,15 @@
   .body {
     min-height: 80px;
     padding: 12px;
-    background-color: $th-bg-color;
+    background-color: variables.$th-bg-color;
   }
 
   .footer {
     padding: 10px 12px;
-    background-color: $th-bg-color;
+    background-color: variables.$th-bg-color;
 
     :global .level-left {
-      @include TypographyParagraph($dark-color01);
+      @include mixins.TypographyParagraph(variables.$dark-color01);
     }
   }
 }
@@ -66,23 +66,23 @@
     left: 0;
     margin: 0 -4px;
     padding: 12px 16px;
-    background-color: $dark-color07;
-    border-color: $dark-color07;
+    background-color: variables.$dark-color07;
+    border-color: variables.$dark-color07;
 
     .content .text {
       div,
       a,
       p {
-        color: $white;
+        color: variables.$white;
       }
 
       a:hover {
-        color: $primary;
+        color: variables.$primary;
       }
     }
 
     .content .monitors {
-      color: $white;
+      color: variables.$white;
     }
   }
 
@@ -97,11 +97,11 @@
   padding: 12px;
   height: 64px;
   line-height: 20px;
-  background-color: $white;
-  border: 1px solid $border-color;
+  background-color: variables.$white;
+  border: 1px solid variables.$border-color;
   border-radius: 4px;
   cursor: pointer;
-  transition: all $trans-speed;
+  transition: all variables.$trans-speed;
 
   .icon {
     position: relative;
@@ -117,7 +117,7 @@
 
     .statusTip {
       strong {
-        color: $white;
+        color: variables.$white;
       }
     }
   }
@@ -129,10 +129,10 @@
     line-height: 20px;
 
     strong {
-      font-size: $size-normal;
+      font-size: variables.$size-normal;
       font-weight: 600;
-      color: $text-color;
-      @include break-all;
+      color: variables.$text-color;
+      @include mixins.break-all;
     }
 
     :global(.spin-nested-loading) {
@@ -140,11 +140,11 @@
     }
 
     p {
-      color: $light-color08;
+      color: variables.$light-color08;
     }
 
     strong {
-      font-family: $font-family-id;
+      font-family: variables.$font-family-id;
     }
 
     .arrow {
@@ -154,7 +154,7 @@
       width: 5%;
 
       :global(.icon) {
-        transition: all $trans-speed;
+        transition: all variables.$trans-speed;
       }
     }
 
@@ -177,7 +177,7 @@
       width: 20px;
       height: 20px;
       border-radius: 4px;
-      background: $green-color03;
+      background: variables.$green-color03;
       margin-left: 8px;
       line-height: 20px;
       text-align: center;
@@ -196,13 +196,13 @@
       }
 
       & > div {
-        @include ellipsis;
-        @include TypographyTitleH6($dark-color07);
+        @include mixins.ellipsis;
+        @include mixins.TypographyTitleH6(variables.$dark-color07);
       }
 
       & > p {
-        @include ellipsis;
-        @include TypographyParagraph($dark-color01);
+        @include mixins.ellipsis;
+        @include mixins.TypographyParagraph(variables.$dark-color01);
       }
     }
   }
@@ -233,16 +233,16 @@
   width: 100%;
   bottom: 0;
   padding: 12px;
-  background-color: $white;
-  border: 1px solid $dark-color01;
+  background-color: variables.$white;
+  border: 1px solid variables.$dark-color01;
   border-top: 0;
   box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.2);
   border-radius: 0 0 4px 4px;
   z-index: 1;
 
   .containers > div {
-    background-color: $white;
-    border: 1px solid $light-color03;
+    background-color: variables.$white;
+    border: 1px solid variables.$light-color03;
     margin-bottom: 12px;
 
     &:last-child {

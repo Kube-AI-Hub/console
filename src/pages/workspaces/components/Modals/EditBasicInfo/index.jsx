@@ -27,8 +27,9 @@ import React from 'react'
 import UserStore from 'stores/user'
 import { PATTERN_ALIAS_NAME } from 'utils/constants'
 
+export default
 @observer
-export default class EditBasicInfoModal extends React.Component {
+class EditBasicInfoModal extends React.Component {
   static propTypes = {
     detail: PropTypes.object,
     visible: PropTypes.bool,

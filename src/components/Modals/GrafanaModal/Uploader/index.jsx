@@ -25,7 +25,7 @@ import classnames from 'classnames'
 import { formatSize } from 'utils'
 import { ReactComponent as JSONIcon } from 'assets/json.svg'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Uploader extends React.Component {
   constructor(props) {

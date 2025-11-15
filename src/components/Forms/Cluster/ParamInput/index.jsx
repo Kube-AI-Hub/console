@@ -20,7 +20,7 @@ import React, { Component } from 'react'
 import { Input, Select } from '@kube-design/components'
 import { NumberInput } from 'components/Inputs'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ParamInput extends Component {
   handleSelectChange = value => {

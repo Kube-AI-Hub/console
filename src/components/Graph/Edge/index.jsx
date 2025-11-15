@@ -20,7 +20,7 @@ import React from 'react'
 import classNames from 'classnames'
 import { get, isUndefined } from 'lodash'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Edge extends React.Component {
   constructor(props) {

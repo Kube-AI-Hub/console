@@ -19,7 +19,7 @@
 import React, { Component } from 'react'
 import { line, curveBasis } from 'd3-shape'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class index extends Component {
   render() {

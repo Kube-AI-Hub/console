@@ -29,9 +29,11 @@ import PodMonitoringStore from 'stores/monitoring/pod'
 
 import Item from './Item'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const MetricTypes = {
+  gpu: 'pod_gpu_usage',
+  gpu_memory: 'pod_gpu_memory_usage',
   cpu: 'pod_cpu_usage',
   memory: 'pod_memory_usage_wo_cache',
 }

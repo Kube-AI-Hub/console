@@ -1,11 +1,11 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .option {
   display: block;
   position: relative;
   width: 100%;
-  @include ellipsis;
+  @include mixins.ellipsis;
   & > span {
     margin-right: 6px;
     width: 16px;

@@ -24,7 +24,7 @@ import { toJS } from 'mobx'
 import { getRepoUrl } from '../../utils/devops'
 import { TypeSelect } from '../Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class CodeRepoSelect extends React.Component {
   constructor(props) {

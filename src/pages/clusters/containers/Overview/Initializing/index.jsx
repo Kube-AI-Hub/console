@@ -35,12 +35,13 @@ import KubeKeyClusterStore from 'stores/cluster/kubekey'
 
 import KubeKeyCluster from './KubeKeyCluster'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('rootStore')
 @observer
 @trigger
-export default class Initializing extends Component {
+class Initializing extends Component {
   kubekeyClusterStore = new KubeKeyClusterStore()
 
   websocket = this.props.rootStore.websocket

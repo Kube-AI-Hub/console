@@ -1,18 +1,18 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .label {
   font-size: 12px;
   line-height: 20px;
   margin-top: 12px;
   margin-bottom: 8px;
-  color: $dark-color07;
+  color: variables.$dark-color07;
 }
 
 .contentGroup {
   padding: 12px;
-  border: 1px solid $light-color06;
+  border: 1px solid variables.$light-color06;
   border-radius: 4px;
-  background: $white;
+  background: variables.$white;
 
   .message {
     :global {
@@ -41,20 +41,20 @@
 
 .critical {
   @include warningText;
-  color: $white;
-  background-color: $red-color03;
+  color: variables.$white;
+  background-color: variables.$red-color03;
 }
 
 .error {
   @include warningText;
-  color: $white;
-  background-color: $yellow-color03;
+  color: variables.$white;
+  background-color: variables.$yellow-color03;
 }
 
 .warning {
   @include warningText;
-  color: $dark-color06;
-  background-color: $light-color04;
+  color: variables.$dark-color06;
+  background-color: variables.$light-color04;
 }
 
 .CustomExpr {

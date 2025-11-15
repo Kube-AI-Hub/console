@@ -29,7 +29,7 @@ import HistogramStore from 'stores/logging/histogram'
 
 import SearchInput from '../SearchInput'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const getSecond = step => {
   const [, count = 0, unit = 's'] = step.match(/(\d+)(\w+)/)
@@ -42,8 +42,9 @@ const getSecond = step => {
   return count * unitMap[unit]
 }
 
+export default
 @observer
-export default class HomeModal extends React.Component {
+class HomeModal extends React.Component {
   logStatisticsStore = new LogStatisticsStore()
 
   histogramStore = new HistogramStore({

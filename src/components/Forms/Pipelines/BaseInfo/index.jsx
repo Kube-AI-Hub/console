@@ -26,7 +26,7 @@ import { PATTERN_NAME } from 'utils/constants'
 import { compareVersion } from 'utils/app'
 import { TypeSelect } from '../../../Base'
 import CodeRepoSelector from '../../../CodeRepoSelector'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class BaseInfo extends React.Component {
   state = {

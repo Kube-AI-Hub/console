@@ -17,7 +17,7 @@
  */
 import React from 'react'
 import { List } from 'components/Base'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Card extends React.PureComponent {
   getDetails(item) {

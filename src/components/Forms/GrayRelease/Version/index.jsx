@@ -31,10 +31,11 @@ import { PATTERN_COMPONENT_VERSION } from 'utils/constants'
 
 import ContainerList from './ContainerList'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class Version extends ContainerSettings {
+class Version extends ContainerSettings {
   constructor(props) {
     super(props)
     this.module = get(

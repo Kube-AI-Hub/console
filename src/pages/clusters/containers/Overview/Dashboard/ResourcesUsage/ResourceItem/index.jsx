@@ -23,13 +23,16 @@ import { PieChart } from 'components/Charts'
 
 import { getSuitableUnit, getValueByUnit } from 'utils/monitoring'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default function ResourceItem(props) {
   const title = t(props.name)
   const unit = getSuitableUnit(props.total, props.unitType) || unit
   const used = getValueByUnit(props.used, unit)
   const total = getValueByUnit(props.total, unit) || used
+  const allocated = props.allocated
+    ? getValueByUnit(props.allocated, unit)
+    : null
 
   return (
     <div className={styles.item}>
@@ -79,6 +82,18 @@ export default function ResourceItem(props) {
         }
         description={t('TOTAL')}
       />
+      {allocated !== null && (
+        <Text
+          title={
+            unit
+              ? allocated !== 1 && unit === 'core'
+                ? `${allocated} cores`
+                : `${allocated} ${unit}`
+              : allocated
+          }
+          description={t('AllOCATED')}
+        />
+      )}
     </div>
   )
 }

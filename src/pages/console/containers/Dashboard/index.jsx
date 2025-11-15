@@ -26,7 +26,7 @@ import { inject } from 'mobx-react'
 import EmptyList from 'components/Cards/EmptyList'
 import AdminDashboard from './Admin'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @inject('rootStore')
 class Dashboard extends React.Component {

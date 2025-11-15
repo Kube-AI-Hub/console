@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .container {
   ul {
@@ -9,9 +9,9 @@
       height: 44px;
       padding: 12px 32px;
       border-radius: 60px;
-      background-color: $bg-color;
-      border: solid 1px $border-color;
-      font-family: $font-family-id;
+      background-color: variables.$bg-color;
+      border: solid 1px variables.$border-color;
+      font-family: variables.$font-family-id;
       display: flex;
 
       & + li {
@@ -21,11 +21,11 @@
       & > span {
         display: inline-block;
         flex: 1;
-        @include TypographyParagraph($dark-color01);
+        @include mixins.TypographyParagraph(variables.$dark-color01);
 
         & + span {
           margin-left: 20px;
-          @include TypographyTitleH6($dark-color07);
+          @include mixins.TypographyTitleH6(variables.$dark-color07);
         }
       }
     }

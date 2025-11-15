@@ -31,7 +31,7 @@ import {
   Bar,
 } from 'recharts'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const STACKED_SYM = 'A'
 const debounce = 100

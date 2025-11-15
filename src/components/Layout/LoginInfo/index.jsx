@@ -27,12 +27,13 @@ import { trigger } from 'utils/action'
 
 import UserStore from 'stores/user'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('rootStore')
 @observer
 @trigger
-export default class LoginInfo extends Component {
+class LoginInfo extends Component {
   static propTypes = {
     isAppsPage: PropTypes.bool,
   }
@@ -84,10 +85,10 @@ export default class LoginInfo extends Component {
         <Menu.MenuItem key="about">
           <Icon name="information" /> {t('ABOUT')}
         </Menu.MenuItem>
-        <Menu.MenuItem key="support">
+        {/* <Menu.MenuItem key="support">
           <Icon name="message-circle-duotone" />
           {t('TECHNICAL_SUPPORT')}
-        </Menu.MenuItem>
+        </Menu.MenuItem> */}
       </Menu>
     )
   }

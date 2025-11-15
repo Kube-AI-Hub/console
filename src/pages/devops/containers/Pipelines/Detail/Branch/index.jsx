@@ -34,11 +34,12 @@ import Table from 'components/Tables/List'
 import EmptyCard from 'devops/components/Cards/EmptyCard'
 
 import classNames from 'classnames'
-// import styles from './index.scss'
+// import * as styles from './index.scss'
 
+export default
 @inject('rootStore', 'detailStore')
 @observer
-export default class Branch extends React.Component {
+class Branch extends React.Component {
   name = 'branch'
 
   store = this.props.detailStore || {}

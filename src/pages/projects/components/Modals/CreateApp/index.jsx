@@ -33,7 +33,7 @@ import Services from './Services'
 import Routes from './Routes'
 import Code from './Code'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ServiceDeployAppModal extends React.Component {
   static propTypes = {

@@ -21,7 +21,7 @@ import PropTypes from 'prop-types'
 import { Icon, Tooltip } from '@kube-design/components'
 import { PieChart } from 'components/Charts'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Chart extends React.Component {
   static propTypes = {

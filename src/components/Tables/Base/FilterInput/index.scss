@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   position: relative;
@@ -8,31 +8,31 @@
   padding: 5px 40px;
   border-radius: 18px;
   border: solid 1px transparent;
-  background-color: $bg-color;
+  background-color: variables.$bg-color;
   box-sizing: border-box;
-  @include TypographySymbolText;
-  transition: all $trans-speed ease-in-out;
+  @include mixins.TypographySymbolText;
+  transition: all variables.$trans-speed ease-in-out;
   outline: none;
 
   &:hover {
-    border-color: $border-color;
+    border-color: variables.$border-color;
   }
 
   &.hasValue,
   &.focus {
-    background-color: $white;
-    border-color: $dark-color01;
+    background-color: variables.$white;
+    border-color: variables.$dark-color01;
     box-shadow: none;
   }
 
   :global {
     .icon.is-left {
-      @include vertical-center;
+      @include mixins.vertical-center;
       z-index: 4;
       left: 12px;
     }
     .icon.is-right {
-      @include vertical-center;
+      @include mixins.vertical-center;
       z-index: 4;
       right: 12px;
     }
@@ -66,10 +66,10 @@
 
         .icon-clickable:hover,
         .icon-clickable:active {
-          background-color: $dark-color05;
+          background-color: variables.$dark-color05;
 
           svg {
-            color: $white;
+            color: variables.$white;
           }
         }
       }
@@ -93,6 +93,6 @@
     outline: none;
     background-color: transparent;
     box-shadow: none !important;
-    caret-color: $text-color;
+    caret-color: variables.$text-color;
   }
 }

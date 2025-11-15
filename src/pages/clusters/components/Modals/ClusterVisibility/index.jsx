@@ -36,7 +36,7 @@ import WorkspaceStore from 'stores/workspace'
 
 import WorkspaceItem from './WorkspaceItem'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ClusterVisibility extends React.Component {
   state = {

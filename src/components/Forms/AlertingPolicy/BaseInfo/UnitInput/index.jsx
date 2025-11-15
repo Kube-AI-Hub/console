@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { Input, Select } from '@kube-design/components'
 import { isEmpty, isUndefined, trimEnd } from 'lodash'
 import classnames from 'classnames'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class UnitInput extends Component {
   state = {

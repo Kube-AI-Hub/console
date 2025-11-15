@@ -17,7 +17,7 @@ import { cloneDeep, get, includes } from 'lodash'
 import { PAGESIZE_OPTION } from 'utils/constants'
 import classNames from 'classnames'
 import AlertRuleItem from './Item'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @observer
 class AlertingRuleList extends React.Component {

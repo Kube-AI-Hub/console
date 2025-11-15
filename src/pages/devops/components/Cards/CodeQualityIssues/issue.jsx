@@ -22,7 +22,7 @@ import classNames from 'classnames'
 import { Icon } from '@kube-design/components'
 
 import Status from './ClassIcon'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 class Issue extends React.PureComponent {
   static propTypes = {

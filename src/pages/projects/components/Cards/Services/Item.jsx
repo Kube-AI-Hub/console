@@ -27,7 +27,7 @@ import { Text } from 'components/Base'
 import ServiceAccess from 'projects/components/ServiceAccess'
 import { getDisplayName } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ServiceItem extends React.Component {
   static propTypes = {

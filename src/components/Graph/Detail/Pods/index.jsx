@@ -29,10 +29,11 @@ import WorkloadStore from 'stores/workload'
 
 import Item from './Item'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @withRouter
-export default class Pods extends React.Component {
+class Pods extends React.Component {
   constructor(props) {
     super(props)
 

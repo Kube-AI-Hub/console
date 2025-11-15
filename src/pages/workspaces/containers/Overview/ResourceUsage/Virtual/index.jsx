@@ -38,9 +38,10 @@ const MetricTypes = {
   pod_running_count: 'workspace_pod_running_count',
 }
 
+export default
 @inject('rootStore')
-@observer
-export default class VirtualResource extends Base {
+// @observer
+class VirtualResource extends Base {
   componentDidUpdate(prevProps) {
     if (prevProps.cluster !== this.props.cluster) {
       this.fetchData()

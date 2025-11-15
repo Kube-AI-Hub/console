@@ -22,7 +22,7 @@ import FormItemContainer from 'components/Modals/CustomMonitoring/components/For
 import Field from 'components/Modals/CustomMonitoring/components/Form/Field'
 import CustomMonitorMetircQueryInput from 'components/Modals/CustomMonitoring/components/MetircQueryInput'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default function GrafanaTargetInput({
   prefix,

@@ -22,7 +22,7 @@ import classNames from 'classnames'
 import { Tooltip, Icon } from '@kube-design/components'
 import { CLUSTER_CREATING_STEPS } from '../constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Progress extends Component {
   getBarLength(conditions) {

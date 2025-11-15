@@ -25,7 +25,7 @@ import { Form } from '@kube-design/components'
 import { Modal } from 'components/Base'
 import { PropertiesInput } from 'components/Inputs'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ObjectEditModal extends React.Component {
   static propTypes = {

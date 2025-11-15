@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .container {
   display: grid;
@@ -14,7 +14,7 @@
   font-size: 14px;
   font-weight: 600;
   color: #242e42;
-  box-shadow: 0 1px 0 0 $light-color07;
+  box-shadow: 0 1px 0 0 variables.$light-color07;
 }
 
 .left {
@@ -52,7 +52,7 @@
   border-radius: 18px;
   text-indent: 2em;
   cursor: pointer;
-  @include ellipsis;
+  @include mixins.ellipsis;
 
   :global {
     .pipeline_status_icon {
@@ -69,8 +69,8 @@
   color: #363e4a;
   border-radius: 18px;
   box-shadow: 0 4px 12px 0 rgba(36, 46, 66, 0.1);
-  background-color: $bg-color;
-  border: solid 1px $border-color;
+  background-color: variables.$bg-color;
+  border: solid 1px variables.$border-color;
 }
 
 .header {

@@ -23,7 +23,7 @@ import { get } from 'lodash'
 
 import { SimpleCircle } from 'components/Charts'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class StatusCircle extends React.Component {
   static propTypes = {

@@ -11,7 +11,7 @@ import {
 import classNames from 'classnames'
 import React, { Component } from 'react'
 import { PAGESIZE_OPTION } from 'utils/constants'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Pagination extends Component {
   state = {

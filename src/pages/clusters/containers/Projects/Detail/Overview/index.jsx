@@ -28,11 +28,12 @@ import ResourceUsage from 'projects/containers/Overview/ResourceUsage'
 import ClusterStore from 'stores/cluster'
 import FederatedStore from 'stores/federated'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('detailStore')
 @observer
-export default class Overview extends React.Component {
+class Overview extends React.Component {
   fedStore = new FederatedStore({ module: 'namespaces' })
 
   clusterStore = new ClusterStore()

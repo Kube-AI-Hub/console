@@ -30,15 +30,16 @@ import SnapshotClassStore from 'stores/volumeSnapshotClasses'
 import { getLocalTime, showNameAndAlias } from 'utils'
 import { VOLUME_SNAPSHOT_STATUS } from 'utils/constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @withClusterList({
   store: new SnapshotStore(),
   module: 'volume-snapshots',
   name: 'VOLUME_SNAPSHOT',
   authKey: 'volumes',
 })
-export default class Snapshots extends React.Component {
+class Snapshots extends React.Component {
   volumeStore = new VolumeStore()
 
   snapshotClass = new SnapshotClassStore()

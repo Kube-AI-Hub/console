@@ -23,8 +23,9 @@ import ClusterDetail from './Cluster'
 
 import { LEVEL_CONFIG } from '../constats'
 
+export default
 @observer
-export default class Details extends React.Component {
+class Details extends React.Component {
   render() {
     const { type, handleBack } = this.props
 

@@ -29,11 +29,12 @@ import ServiceStore from 'stores/service'
 
 import ServiceCard from './ServiceCard'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('projectStore')
 @observer
-export default class Components extends Component {
+class Components extends Component {
   serviceStore = new ServiceStore()
 
   get prefix() {

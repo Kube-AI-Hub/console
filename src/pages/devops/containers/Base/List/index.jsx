@@ -25,7 +25,7 @@ import React, { Component } from 'react'
 
 import { getIndexRoute, renderRoutes } from 'utils/router.config'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @inject('rootStore', 'devopsStore')
 @observer

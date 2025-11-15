@@ -30,7 +30,7 @@ import GatewayStore from 'stores/gateway'
 import { trigger } from 'utils/action'
 
 import { compareVersion } from 'utils'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @inject('rootStore')
 @observer

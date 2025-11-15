@@ -32,7 +32,7 @@ import {
   Legend,
 } from 'recharts'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const AreaColors = ['green']
 

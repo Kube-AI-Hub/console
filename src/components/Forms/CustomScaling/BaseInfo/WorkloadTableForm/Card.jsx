@@ -27,7 +27,7 @@ import { getDisplayName, getLocalTime } from 'utils'
 import { ICON_TYPES } from 'utils/constants'
 import { getWorkloadStatus } from 'utils/status'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Card extends React.Component {
   static propTypes = {

@@ -29,7 +29,10 @@ it('renders correctly', () => {
   const onchangeCb = jest.fn()
   const wrapper = mount(
     <S2IEnviroment
-      value={[{ name: 'a', value: 'a' }, { name: 'b', value: 'b' }]}
+      value={[
+        { name: 'a', value: 'a' },
+        { name: 'b', value: 'b' },
+      ]}
       options={defaultData}
       onChange={onchangeCb}
     />
@@ -47,7 +50,10 @@ it('add correctly', () => {
   const onchangeCb = jest.fn()
   const wrapper = mount(
     <S2IEnviroment
-      value={[{ name: 'a', value: 'a' }, { name: 'b', value: 'b' }]}
+      value={[
+        { name: 'a', value: 'a' },
+        { name: 'b', value: 'b' },
+      ]}
       options={defaultData}
       onChange={onchangeCb}
     />

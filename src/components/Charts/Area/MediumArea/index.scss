@@ -1,22 +1,22 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .chart {
   position: relative;
   padding: 0;
-  background-color: $lightest;
+  background-color: variables.$lightest;
 }
 
 .title {
   position: absolute;
   left: 10px;
   top: 10px;
-  color: $dark-grey;
+  color: variables.$dark-grey;
   height: 20px;
   line-height: 20px;
 
   span {
     margin-right: 10px;
-    color: $dark;
+    color: variables.$dark;
     font-weight: bold;
 
     strong {

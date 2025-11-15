@@ -23,10 +23,11 @@ import { getLocalTime, formatSize } from 'utils'
 import { Icon, Notify } from '@kube-design/components'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class ImageRunRecords extends React.Component {
+class ImageRunRecords extends React.Component {
   handleCopy = () => {
     Notify.success({
       content: t('COPY_SUCCESSFUL'),

@@ -31,7 +31,7 @@ import {
   getTimeLabel,
 } from 'components/Cards/Monitoring/Controller/TimeSelector/utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const getSecond = step => {
   const [, count = 0, unit = 's'] = step.match(/(\d+)(\w+)/)
@@ -44,8 +44,9 @@ const getSecond = step => {
   return count * unitMap[unit]
 }
 
+export default
 @observer
-export default class SearchBar extends React.Component {
+class SearchBar extends React.Component {
   static propType = {
     params: PropTypes.object.isRequired,
     onChange: PropTypes.func,

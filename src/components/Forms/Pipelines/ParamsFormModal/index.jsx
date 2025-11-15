@@ -31,10 +31,11 @@ import { Modal } from 'components/Base'
 import { isString, get, isEmpty } from 'lodash'
 import PipelineStore from 'stores/devops/pipelines'
 
-import style from './index.scss'
+import * as style from './index.scss'
 
+export default
 @observer
-export default class ParamsFormModal extends React.Component {
+class ParamsFormModal extends React.Component {
   static propTypes = {
     name: PropTypes.string,
     branches: PropTypes.array,

@@ -1,10 +1,10 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   padding: 12px;
-  background-color: $card-bg-color;
-  border-radius: $border-radius;
+  background-color: variables.$card-bg-color;
+  border-radius: variables.$border-radius;
 }
 
 .item {
@@ -14,9 +14,9 @@
   padding: 12px;
   margin-bottom: 8px;
   line-height: 20px;
-  background-color: $white;
+  background-color: variables.$white;
   border-radius: 4px;
-  border: 1px solid $border-color;
+  border: 1px solid variables.$border-color;
 
   &:last-child {
     margin-bottom: 0;
@@ -41,13 +41,13 @@
     min-width: 120px;
 
     & > div {
-      @include ellipsis;
-      @include TypographyTitleH6($dark-color07);
+      @include mixins.ellipsis;
+      @include mixins.TypographyTitleH6(variables.$dark-color07);
     }
 
     & > p {
-      @include ellipsis;
-      @include TypographyParagraph($dark-color01);
+      @include mixins.ellipsis;
+      @include mixins.TypographyParagraph(variables.$dark-color01);
     }
 
     &.name {
@@ -71,7 +71,7 @@
   & > p {
     margin-top: 4px;
     line-height: 20px;
-    font-family: $font-family-id;
+    font-family: variables.$font-family-id;
   }
 
   .probeType {
@@ -83,7 +83,7 @@
   .probeTime {
     margin-left: 4px;
     line-height: 20px;
-    color: $dark-color01;
+    color: variables.$dark-color01;
   }
 }
 

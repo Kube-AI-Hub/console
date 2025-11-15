@@ -30,15 +30,16 @@ import { showNameAndAlias } from 'utils'
 
 import Cates from './Cates'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @withList({
   store: new AppStore(),
   module: 'apps',
   name: 'APP',
   rowKey: 'app_id',
 })
-export default class AppCategories extends React.Component {
+class AppCategories extends React.Component {
   categoryStore = new CategoryStore()
 
   state = {

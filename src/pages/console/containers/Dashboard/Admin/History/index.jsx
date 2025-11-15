@@ -26,7 +26,7 @@ import { safeParseJSON } from 'utils'
 
 import Card from './Card'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class History extends Component {
   get histories() {

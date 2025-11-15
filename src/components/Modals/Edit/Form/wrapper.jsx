@@ -23,7 +23,7 @@ import { get, cloneDeep } from 'lodash'
 
 import Confirm from 'components/Forms/Base/Confirm'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const EnhanceWrapper = function(Component) {
   return class WrapperComponent extends React.Component {

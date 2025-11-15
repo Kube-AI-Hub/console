@@ -2,7 +2,7 @@ import React from 'react'
 import { Icon } from '@kube-design/components'
 import { Modal } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const AlertConfirm = props => {
   const { onCancel, title, visible, isSubmitting, desc, icon } = props

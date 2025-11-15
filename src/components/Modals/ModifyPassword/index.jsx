@@ -24,7 +24,7 @@ import { Modal } from 'components/Base'
 import { InputPassword } from 'components/Inputs'
 import { PATTERN_PASSWORD } from 'utils/constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ModifyPasswordModal extends Component {
   static propTypes = {

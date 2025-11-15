@@ -30,10 +30,11 @@ import DetailPage from 'projects/containers/Base/Detail'
 
 import getRoutes from './routes'
 
+export default
 @inject('rootStore')
 @observer
 @trigger
-export default class RouteDetail extends React.Component {
+class RouteDetail extends React.Component {
   store = new IngressStore()
 
   componentDidMount() {

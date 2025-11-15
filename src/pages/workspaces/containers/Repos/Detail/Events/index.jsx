@@ -24,11 +24,12 @@ import { Table } from '@kube-design/components'
 import { Panel, Status } from 'components/Base'
 import { getLocalTime } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('detailStore')
 @observer
-export default class Events extends React.Component {
+class Events extends React.Component {
   constructor(props) {
     super(props)
 

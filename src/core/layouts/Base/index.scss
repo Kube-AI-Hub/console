@@ -1,12 +1,12 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .main {
-  padding-top: $header-height;
-  min-width: $content-width;
+  padding-top: variables.$header-height;
+  min-width: variables.$content-width;
 }
 
 .nav {
-  left: -($nav-width + 10px);
+  left: -(variables.$nav-width + 10px);
 }
 
 .header {
@@ -14,6 +14,6 @@
   top: 0;
   left: 0;
   width: 100vw;
-  min-width: $content-width;
+  min-width: variables.$content-width;
   z-index: 200;
 }

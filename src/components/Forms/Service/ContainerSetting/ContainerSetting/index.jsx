@@ -31,7 +31,7 @@ import QuotaStore from 'stores/quota'
 import ProjectStore from 'stores/project'
 import SecretStore from 'stores/secret'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ContainerSetting extends React.Component {
   constructor(props) {

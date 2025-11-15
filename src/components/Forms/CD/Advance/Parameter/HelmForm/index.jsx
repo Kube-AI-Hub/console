@@ -20,7 +20,7 @@ import React from 'react'
 import { ArrayInput, ObjectInput } from 'components/Inputs'
 import { Form, Input, Checkbox, Columns, Column } from '@kube-design/components'
 import { get, set } from 'lodash'
-import style from '../../index.scss'
+import * as style from '../../index.scss'
 
 export default class HelmForm extends React.Component {
   checkItemValid = item => item.name && item.value

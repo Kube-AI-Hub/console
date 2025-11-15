@@ -27,7 +27,7 @@ import { ICON_TYPES } from 'utils/constants'
 import { Icon } from '@kube-design/components'
 import { Panel } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ServiceCard extends React.Component {
   static propTypes = {

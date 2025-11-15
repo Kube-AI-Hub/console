@@ -1,15 +1,15 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .item {
   position: relative;
   display: grid;
-  grid-template-columns: 55px 20% 15% auto 20% ;
+  grid-template-columns: 55px 20% 15% auto 20%;
   padding: 12px 20px;
   margin-bottom: 8px;
   min-height: 64px;
-  border-radius: $border-radius;
-  border: solid 1px $border-color;
+  border-radius: variables.$border-radius;
+  border: solid 1px variables.$border-color;
   background-color: #ffffff;
 
   li {
@@ -17,13 +17,13 @@
     .value,
     .status {
       height: 20px;
-      @include TypographyTitleH6;
-      @include ellipsis;
+      @include mixins.TypographyTitleH6;
+      @include mixins.ellipsis;
     }
 
     .label {
       height: 20px;
-      @include TypographyParagraph($dark-color01);
+      @include mixins.TypographyParagraph(variables.$dark-color01);
     }
   }
 

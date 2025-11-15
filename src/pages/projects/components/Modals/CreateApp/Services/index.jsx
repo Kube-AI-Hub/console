@@ -25,7 +25,7 @@ import ServiceStore from 'stores/service'
 import CreateAppServiceModal from 'projects/components/Modals/CreateAppService'
 import ServiceList from './ServiceList'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Services extends React.Component {
   serviceStore = new ServiceStore()

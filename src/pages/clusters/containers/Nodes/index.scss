@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .taints {
   display: inline-block;
@@ -9,10 +9,10 @@
   line-height: 20px;
   border-radius: 2px;
   box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.2);
-  background-color: $dark-color08;
+  background-color: variables.$dark-color08;
   text-align: center;
   font-weight: bold;
-  color: $white;
+  color: variables.$white;
   cursor: pointer;
 
   &:hover {

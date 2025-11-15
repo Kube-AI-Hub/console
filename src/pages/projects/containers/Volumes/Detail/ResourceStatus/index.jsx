@@ -25,7 +25,7 @@ import Placement from 'projects/components/Cards/Placement'
 import VolumeMonitor from 'stores/monitoring/volume'
 import UsageCard from './UsageCard'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @inject('detailStore')
 @observer

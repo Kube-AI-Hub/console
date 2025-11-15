@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   position: relative;
@@ -8,12 +8,12 @@
     margin-top: 6px;
     padding: 4px 8px;
     border-radius: 2px;
-    background-color: $dark-color06;
+    background-color: variables.$dark-color06;
 
-    @include TypographyParagraph(#fff);
+    @include mixins.TypographyParagraph(#fff);
   }
 
   &.selected > div:first-child {
-    background-color: $green-color04;
+    background-color: variables.$green-color04;
   }
 }

@@ -21,7 +21,7 @@ import classnames from 'classnames'
 import { pick } from 'lodash'
 import React, { useEffect, useRef, useState } from 'react'
 import PipelineStore from 'stores/devops/pipelines'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const PipelineTemplate = ({ handleTemplateChange, formTemplate, params }) => {
   const CUSTOM_TEMPLATE = {

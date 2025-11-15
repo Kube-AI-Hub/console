@@ -29,9 +29,11 @@ import { Controller as MonitoringController } from 'components/Cards/Monitoring'
 import { MediumArea } from 'components/Charts'
 import ResourceMonitoringModal from 'components/Modals/Monitoring/ApplicationResource'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const MetricTypes = {
+  gpu_usage: 'cluster_gpu_usage',
+  gpu_memory_usage: 'cluster_gpu_memory_usage',
   cpu_usage: 'cluster_cpu_usage',
   memory_usage: 'cluster_memory_usage_wo_cache',
   disk_usage: 'cluster_disk_size_usage',
@@ -107,6 +109,20 @@ class PhysicalResource extends React.Component {
   getControllerProps = () => ({})
 
   getMonitoringCfgs = () => [
+    {
+      type: 'gpu',
+      title: 'GPU',
+      unitType: 'gpu',
+      legend: ['USAGE'],
+      metricType: MetricTypes.gpu_usage,
+    },
+    {
+      type: 'gpu_memory',
+      title: 'GPU_MEMORY',
+      unitType: 'gpu_memory',
+      legend: ['USAGE'],
+      metricType: MetricTypes.gpu_memory_usage,
+    },
     {
       type: 'cpu',
       title: 'CPU',

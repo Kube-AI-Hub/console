@@ -4,7 +4,7 @@ import { get, isEmpty, cloneDeep } from 'lodash'
 import classnames from 'classnames'
 import { RESOURCE_METRICS_CONFIG } from 'configs/alerting/metrics'
 import { severityOptions } from '../../AddRuleForm/CustomRule'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const mapperIcon = {
   cpu: 'cpu',

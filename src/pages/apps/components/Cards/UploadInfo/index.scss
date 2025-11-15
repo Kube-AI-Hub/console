@@ -1,31 +1,31 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .upload {
   display: flex;
   padding: 12px;
   line-height: 20px;
   font-size: 12px;
-  border: 1px dashed $border-color;
-  border-radius: $border-radius;
+  border: 1px dashed variables.$border-color;
+  border-radius: variables.$border-radius;
   cursor: pointer;
 
   &.hide {
     display: none;
   }
-  
+
   &.error {
     .statusIcon {
       .icon {
         svg {
-          color: $white;
-          fill: $red;
+          color: variables.$white;
+          fill: variables.$red;
         }
       }
     }
 
-    .name, 
+    .name,
     .description {
-      color: $red;
+      color: variables.$red;
       font-weight: bold;
     }
   }
@@ -49,23 +49,23 @@
       z-index: 2;
 
       svg {
-        color: $white;
-        fill: $green;
+        color: variables.$white;
+        fill: variables.$green;
       }
     }
   }
 
   .name {
-    color: $text-color;
+    color: variables.$text-color;
     font-weight: bold;
   }
 
   .description {
-    color: $second-text-color;
+    color: variables.$second-text-color;
   }
 
   .edit {
-    color: $blue;
+    color: variables.$blue;
     cursor: pointer;
   }
 }
@@ -87,7 +87,7 @@
   text-align: right;
 
   > label {
-    color: $blue;
+    color: variables.$blue;
     cursor: pointer;
   }
 }

@@ -28,10 +28,11 @@ import CellMeasurerCache from 'react-virtualized/dist/es/CellMeasurer/CellMeasur
 import CellMeasurer from 'react-virtualized/dist/es/CellMeasurer/CellMeasurer'
 
 import { Icon, Dropdown } from '@kube-design/components'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class VisibleTable extends React.Component {
+class VisibleTable extends React.Component {
   static defaultProps = {
     defaultRowHeight: 32,
   }

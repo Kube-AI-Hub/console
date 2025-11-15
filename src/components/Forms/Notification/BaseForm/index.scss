@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .header {
   position: relative;
@@ -21,7 +21,7 @@
   position: relative;
   padding: 12px;
   margin-bottom: 12px;
-  background-color: $light-color01;
+  background-color: variables.$light-color01;
   border-radius: 4px;
 
   .isHorizon {
@@ -39,14 +39,14 @@
 
 .item {
   padding: 12px;
-  border: solid 1px $light-color06;
+  border: solid 1px variables.$light-color06;
   border-radius: 4px;
   background-color: white;
 }
 
 .annotation {
   padding-left: 12px;
-  color: $dark-color06;
+  color: variables.$dark-color06;
 
   :global {
     .icon {

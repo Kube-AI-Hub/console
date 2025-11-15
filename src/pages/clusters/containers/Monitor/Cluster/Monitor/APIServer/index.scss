@@ -1,9 +1,9 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .content {
   margin: 0 -6px;
-  @include clearfix;
+  @include mixins.clearfix;
 
   .box {
     float: left;

@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .billTotal {
   padding: 12px;
@@ -13,7 +13,7 @@
 
     & > div > {
       h3 {
-        color: $dark-color06;
+        color: variables.$dark-color06;
 
         strong {
           font-weight: 700;
@@ -21,7 +21,7 @@
         }
       }
       span {
-        color: $dark-color01;
+        color: variables.$dark-color01;
       }
     }
 
@@ -38,12 +38,12 @@
 
   & > div:first-child > h3 {
     margin-bottom: 12px;
-    color: $dark-color01;
+    color: variables.$dark-color01;
 
     strong {
       margin: 0 5px;
       font-weight: 700;
-      color: $dark-color06;
+      color: variables.$dark-color06;
     }
   }
 
@@ -59,7 +59,7 @@
 
     p {
       line-height: 20px;
-      color: $dark-color07;
+      color: variables.$dark-color07;
     }
   }
 
@@ -94,7 +94,7 @@
         }
 
         p {
-          color: $dark-color01;
+          color: variables.$dark-color01;
 
           span {
             &:first-child {

@@ -29,11 +29,12 @@ import ContainerTerminal from 'components/Terminal'
 import fullscreen from 'components/Modals/FullscreenModal'
 
 import { observable } from 'mobx'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @fullscreen
 @observer
-export default class ContainerTerminalModal extends React.Component {
+class ContainerTerminalModal extends React.Component {
   podStore = new PodStore()
 
   @observable

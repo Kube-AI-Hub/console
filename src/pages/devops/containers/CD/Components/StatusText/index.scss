@@ -1,9 +1,9 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .status {
   display: inline-block;
   font-weight: 600;
-  color: $dark-color07;
+  color: variables.$dark-color07;
   line-height: 20px;
 }
 

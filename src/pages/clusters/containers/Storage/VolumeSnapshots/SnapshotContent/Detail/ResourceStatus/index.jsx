@@ -23,11 +23,12 @@ import { Panel } from 'components/Base'
 import VolumeSnapshot from 'stores/volumeSnapshot'
 
 import { isEmpty } from 'lodash'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('detailStore')
 @observer
-export default class VolumeSnapshotContentStatus extends Component {
+class VolumeSnapshotContentStatus extends Component {
   store = new VolumeSnapshot()
 
   componentDidMount() {

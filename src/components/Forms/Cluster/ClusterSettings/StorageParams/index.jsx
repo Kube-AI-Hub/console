@@ -24,7 +24,7 @@ import { flattenObject } from 'utils'
 
 import ParamInput from '../../ParamInput'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class StorageParams extends Component {
   state = {

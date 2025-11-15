@@ -23,7 +23,7 @@ import { Loading } from '@kube-design/components'
 
 import Card from '../Card'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class SelectComponent extends React.Component {
   static propTypes = {

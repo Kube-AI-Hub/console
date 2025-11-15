@@ -33,7 +33,7 @@ import {
 } from '@kube-design/components'
 import { Modal } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const objToGroovy = obj => {
   const str = Object.keys(obj)
@@ -51,8 +51,9 @@ const objToGroovy = obj => {
   return `[${str}]`
 }
 
+export default
 @observer
-export default class KubernetesDeploy extends React.Component {
+class KubernetesDeploy extends React.Component {
   static propTypes = {
     name: PropTypes.string,
   }

@@ -19,7 +19,7 @@
 import React from 'react'
 import classNames from 'classnames'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default function SubTitle({ className, title, description }) {
   return (

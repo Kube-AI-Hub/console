@@ -38,7 +38,7 @@ import { Panel } from 'components/Base'
 import AppResourceItem from './AppResourceItem'
 import PhysicalResourceItem from './PhysicalResourceItem'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const APP_RESOURCE_METRIC_TYPES = [
   'namespace_pod_count',
@@ -55,6 +55,8 @@ const APP_RESOURCE_METRIC_TYPES = [
 ]
 
 const PHYSICAL_RESOURCE_METRIC_TYPES = [
+  'namespace_vgpu_usage',
+  'namespace_vgpu_memory_usage',
   'namespace_cpu_usage',
   'namespace_memory_usage_wo_cache',
 ]
@@ -285,6 +287,20 @@ class ResourceUsage extends React.Component {
       this.timeOptions.find(item => item.value === this.state.range) || {}
     return (
       <div>
+        <PhysicalResourceItem
+          type="gpu"
+          title={t('GPU_USAGE_TIME', { time: range.label })}
+          metrics={get(metrics, `namespace_vgpu_usage.data.result`)}
+          isLoading={isMetricsLoading || isRefreshing}
+          showDay={range.value >= 172800}
+        />
+        <PhysicalResourceItem
+          type="gpu_memory"
+          title={t('GPU_MEMORY_USAGE_TIME', { time: range.label })}
+          metrics={get(metrics, `namespace_vgpu_memory_usage.data.result`)}
+          isLoading={isMetricsLoading || isRefreshing}
+          showDay={range.value >= 172800}
+        />
         <PhysicalResourceItem
           type="cpu"
           title={t('CPU_USAGE_TIME', { time: range.label })}

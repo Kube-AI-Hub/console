@@ -26,15 +26,16 @@ import { getLocalTime, getDisplayName } from 'utils'
 
 import MonitoringDashboard from 'stores/clusterdashboard'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @withList({
   store: new MonitoringDashboard(),
   module: 'clusterdashboards',
   authKey: 'custom-monitoring',
   name: 'CUSTOM_MONITORING_DASHBOARD',
 })
-export default class CustomMonitoringDashboards extends React.Component {
+class CustomMonitoringDashboards extends React.Component {
   getColumns() {
     return [
       {

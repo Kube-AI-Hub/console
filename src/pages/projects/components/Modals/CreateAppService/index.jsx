@@ -30,7 +30,7 @@ import FORM_STEPS from 'configs/steps/services'
 import { withProps } from 'utils'
 import FORM_TEMPLATES from 'utils/form.templates'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ServiceCreateModal extends React.Component {
   constructor(props) {

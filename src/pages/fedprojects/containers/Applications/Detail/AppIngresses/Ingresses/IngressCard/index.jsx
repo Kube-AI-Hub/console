@@ -22,7 +22,7 @@ import { isEmpty } from 'lodash'
 
 import Rule from 'fedprojects/containers/Routes/Detail/ResourceStatus/Rule'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class IngressCard extends Component {
   render() {

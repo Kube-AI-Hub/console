@@ -1,20 +1,20 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .preview {
   position: relative;
   padding: 8px 12px;
-  border-radius: $border-radius;
-  background-color: $light-color03;
+  border-radius: variables.$border-radius;
+  background-color: variables.$light-color03;
 
   .item {
-    @include TypographyParagraph;
+    @include mixins.TypographyParagraph;
   }
 
   .edit {
     position: absolute;
-    @include vertical-center;
+    @include mixins.vertical-center;
     right: 12px;
-    color: $blue-color03;
+    color: variables.$blue-color03;
   }
 }

@@ -20,7 +20,7 @@ import React, { Component } from 'react'
 import { Panel } from 'components/Base'
 import { isEmpty } from 'lodash'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Annotations extends Component {
   render() {

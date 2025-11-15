@@ -23,7 +23,7 @@ import PropTypes from 'prop-types'
 import { Icon } from '@kube-design/components'
 import { List } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const Card = ({ volume, onDelete, onEdit, banEdit = false }) => {
   const handleDelete = () => onDelete(volume.metadata.name)

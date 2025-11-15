@@ -22,7 +22,7 @@ import isEqual from 'react-fast-compare'
 import { find, isEmpty, trim, omit, flatMap } from 'lodash'
 import { Icon, Input, Dropdown, Menu, Tag } from '@kube-design/components'
 import { hasClass, addClass, removeClass } from 'utils/dom'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 function getTags(suggestions, filters) {
   if (typeof filters !== 'object') return []
@@ -143,7 +143,7 @@ export default class FilterInput extends Component {
 
   handleTagDelete = tag => {
     const { onChange, filters } = this.props
-    onChange(omit(filters, tag.filter))
+    onChange(omit(filters, tag.filter, 'conditions'))
   }
 
   handleMenuClick = (e, key, value) => {

@@ -29,11 +29,11 @@ import { Card } from 'components/Base'
 import { StatusCircle } from 'components/Cards/Monitoring'
 import {
   ClusterResourceStatus,
-  ETCDStatus,
+  ETCDStatusTab,
   ServiceComponentStatus,
 } from 'clusters/components/Cards/Monitoring'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @inject('rootStore')
 @observer
@@ -203,6 +203,7 @@ class Overview extends React.Component {
             onClick={() => this.handleComponentsClick(item.disabled, item.type)}
           >
             <img src={item.icon} />
+
             {!item.disabled ? (
               <p>
                 {get(counts, `[${item.type}].health`, 0)}
@@ -285,7 +286,7 @@ class Overview extends React.Component {
         <Columns>
           <Column className="is-12">
             <ClusterResourceStatus cluster={this.cluster} />
-            {this.supportETCD && <ETCDStatus cluster={this.cluster} />}
+            {this.supportETCD && <ETCDStatusTab cluster={this.cluster} />}
             <ServiceComponentStatus cluster={this.cluster} />
           </Column>
         </Columns>

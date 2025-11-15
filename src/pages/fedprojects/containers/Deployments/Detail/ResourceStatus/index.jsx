@@ -33,7 +33,7 @@ import PodsCard from 'components/Cards/Pods'
 import ContainerPortsCard from 'components/Cards/Containers/Ports'
 import ClusterWorkloadStatus from 'fedprojects/components/ClusterWorkloadStatus'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 class ResourceStatus extends React.Component {
   state = {

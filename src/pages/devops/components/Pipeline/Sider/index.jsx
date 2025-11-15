@@ -25,7 +25,7 @@ import { compareVersion } from 'utils'
 
 import YamlEditor from '../StepModals/kubernetesYaml'
 import { getStepsEditor } from '../StepsEditor'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const AgentType = [
   { label: 'Any', value: 'any' },
@@ -33,8 +33,9 @@ const AgentType = [
   { label: 'kubernetes', value: 'kubernetes' },
 ]
 
+export default
 @observer
-export default class Sider extends React.Component {
+class Sider extends React.Component {
   @observable
   stageName
 

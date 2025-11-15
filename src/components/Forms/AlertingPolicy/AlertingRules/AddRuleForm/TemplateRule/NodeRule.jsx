@@ -1,7 +1,7 @@
 import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 import { Form, Input, TextArea } from '@kube-design/components'
 import { get, isEmpty, endsWith, isUndefined } from 'lodash'
-import styles from './index.scss'
+import * as styles from './index.scss'
 import MonitoringTarget from './MonitoringTarget'
 import RuleInput from './RuleInput'
 

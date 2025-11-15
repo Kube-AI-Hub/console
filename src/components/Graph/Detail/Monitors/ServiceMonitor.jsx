@@ -26,7 +26,7 @@ import { getMetricData, getSuccessCount } from 'utils/service'
 import { SimpleArea as Chart } from 'components/Charts'
 import TrafficCard from './TrafficCard'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Monitors extends React.Component {
   static propTypes = {

@@ -19,7 +19,7 @@
 import React, { Component } from 'react'
 import Item from './Item'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Cascader extends Component {
   static defaultProps = {

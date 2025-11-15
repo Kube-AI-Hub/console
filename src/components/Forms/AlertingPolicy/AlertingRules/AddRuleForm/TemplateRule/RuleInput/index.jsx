@@ -25,7 +25,7 @@ import { Icon, Select } from '@kube-design/components'
 import { NumberInput } from 'components/Inputs'
 
 import { RESOURCE_METRICS_CONFIG } from 'configs/alerting/metrics'
-import styles from './index.scss'
+import * as styles from './index.scss'
 import { severityOptions } from '../../CustomRule'
 
 const durationOptions = [1, 5, 15, 30, 60].map(num => ({
@@ -294,7 +294,6 @@ class RuleInput extends React.Component {
     }
 
     switch (type) {
-      default:
       case 'select': {
         const ops = this.getSelectOptions(options)
 
@@ -302,6 +301,12 @@ class RuleInput extends React.Component {
       }
       case 'number': {
         return <NumberInput showUnit {...baseProps} {...rest} />
+      }
+      // defaults to 'select'
+      default: {
+        const ops = this.getSelectOptions(options)
+
+        return <Select options={ops} {...baseProps} {...rest} />
       }
     }
   }

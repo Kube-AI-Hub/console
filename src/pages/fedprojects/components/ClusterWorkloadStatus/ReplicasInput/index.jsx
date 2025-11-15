@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { NotifyConfirm } from 'components/Base'
-import styles from '../index.scss'
+import * as styles from '../index.scss'
 
 const initialSeconds = 5
 const getInter = value => Number(value || 0)

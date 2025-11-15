@@ -1,6 +1,6 @@
 import React from 'react'
 import { Select, Icon } from '@kube-design/components'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const Title = ({ type, cluster, clusters, setCluster }) => {
   const handleChangeCluster = value => {

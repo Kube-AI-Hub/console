@@ -29,10 +29,11 @@ import Card from './Card'
 
 import Form from './Form'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class Detail extends Component {
+class Detail extends Component {
   static propTypes = {
     rowTreeData: PropTypes.object,
     groupId: PropTypes.string,

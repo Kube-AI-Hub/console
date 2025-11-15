@@ -23,7 +23,7 @@ import { Modal, Card, Empty } from 'components/Base'
 
 import ContainerLog from 'components/Cards/ContainerLog'
 import { PropTypes } from 'prop-types'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ContainerLogModal extends React.Component {
   static contextTypes = {

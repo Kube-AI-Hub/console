@@ -1,11 +1,11 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 :global {
   .custom-tooltip {
     padding: 8px 12px;
 
-    font-size: $size-small;
+    font-size: variables.$size-small;
     line-height: 1.67;
     border-radius: 4px;
     background-color: rgba(36, 46, 66, 0.8);
@@ -15,7 +15,7 @@
   }
 
   .label {
-    color: $white;
+    color: variables.$white;
     display: flex;
     flex: 1 1 auto;
 
@@ -24,7 +24,7 @@
       height: 6px;
       margin-right: 7px;
       border-radius: 50%;
-      background: $lightest;
+      background: variables.$lightest;
       overflow: hidden;
       align-self: center;
     }
@@ -37,7 +37,7 @@
 
   .chart__center__text {
     width: 200px;
-    @include ellipsis;
+    @include mixins.ellipsis;
   }
 }
 
@@ -68,7 +68,7 @@
         margin: 0 12px;
         & > div > div:first-child {
           width: 120px;
-          @include ellipsis;
+          @include mixins.ellipsis;
         }
       }
     }

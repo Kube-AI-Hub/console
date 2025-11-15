@@ -23,8 +23,9 @@ import { Form, Input, Select, Tag } from '@kube-design/components'
 import { pick, get } from 'lodash'
 import styles from './index.scss'
 
+export default
 @observer
-export default class GitLabForm extends React.Component {
+class GitLabForm extends React.Component {
   state = {
     serverList: [],
     projectList: [],

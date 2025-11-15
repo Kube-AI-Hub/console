@@ -23,7 +23,7 @@ import { Form, Input, TextArea } from '@kube-design/components'
 import { ReactComponent as BackIcon } from 'assets/back.svg'
 import { safeAtob, safeBtoa } from 'utils/base64'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class SecretDataForm extends React.Component {
   static defaultProps = {

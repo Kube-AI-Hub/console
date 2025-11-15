@@ -34,7 +34,7 @@ import {
 import { get, set } from 'lodash'
 import Placement from './Placement'
 import Parameter from './Parameter'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Advance extends React.Component {
   get syncPolicyType() {

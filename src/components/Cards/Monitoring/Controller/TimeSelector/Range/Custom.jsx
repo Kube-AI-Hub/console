@@ -30,7 +30,7 @@ import {
 
 import { getMinutes, getTimeOptions } from '../utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const TimeOps = ['1m', '2m', '5m', '10m', '15m', '30m', '1h', '2h', '5h']
 

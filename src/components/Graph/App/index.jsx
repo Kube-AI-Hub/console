@@ -23,7 +23,7 @@ import classNames from 'classnames'
 
 import Card from '../Card'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class App extends React.Component {
   static propTypes = {

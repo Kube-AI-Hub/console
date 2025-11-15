@@ -22,7 +22,7 @@ import classNames from 'classnames'
 
 import { Icon } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class BoxSelect extends React.Component {
   static propTypes = {

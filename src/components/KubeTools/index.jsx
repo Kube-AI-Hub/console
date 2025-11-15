@@ -28,14 +28,15 @@ import { safeParseJSON } from 'utils'
 import { trigger } from 'utils/action'
 import { createCenterWindowOpt } from 'utils/dom'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const KS_TOOLBOX_POS_KEY = 'ks-toolbox-pos'
 
+export default
 @inject('rootStore')
 @observer
 @trigger
-export default class KubeTools extends React.Component {
+class KubeTools extends React.Component {
   state = {
     showTools: 0,
     defaultPosition: safeParseJSON(localStorage.getItem(KS_TOOLBOX_POS_KEY), {

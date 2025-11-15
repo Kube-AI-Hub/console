@@ -18,7 +18,7 @@
 
 import React from 'react'
 import { Icon } from '@kube-design/components'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ReplicasInput extends React.Component {
   handleUp = () => {

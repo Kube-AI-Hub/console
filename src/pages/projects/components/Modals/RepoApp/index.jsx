@@ -28,7 +28,7 @@ import { Modal } from 'components/Base'
 import Apps from './Apps'
 import AppDetail from './AppDetail'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @observer
 class RepoApp extends Component {
@@ -55,8 +55,8 @@ class RepoApp extends Component {
     }
   }
 
-  setViewType = (type = 'appList', selectRepo) => {
-    this.setState({ selectRepo, viewType: type })
+  setViewType = (type, selectRepo) => {
+    this.setState({ selectRepo, viewType: type || 'appList' })
   }
 
   handleClickApp = app => {
@@ -77,6 +77,7 @@ class RepoApp extends Component {
   render() {
     const { visible, onCancel, workspace, onDeploy, ...rest } = this.props
     const { viewType, selectApp, selectRepo } = this.state
+    const { display } = this.props
 
     return (
       <Modal
@@ -102,6 +103,7 @@ class RepoApp extends Component {
             workspace={workspace}
             selectRepo={selectRepo}
             setType={this.setViewType}
+            display={display}
             onClickApp={this.handleClickApp}
           />
         )}

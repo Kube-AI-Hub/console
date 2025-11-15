@@ -27,12 +27,13 @@ import collectionConfig from '../config'
 
 import routes from './routes'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('rootStore')
 @observer
 @trigger
-export default class LogCollectionDetail extends React.Component {
+class LogCollectionDetail extends React.Component {
   store = new OutputStore()
 
   get listUrl() {

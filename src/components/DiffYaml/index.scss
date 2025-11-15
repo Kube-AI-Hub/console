@@ -1,24 +1,24 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .header {
   padding: 12px;
-  background-color: $light-color02;
-  border: 1px solid $border-color;
-  border-radius: $border-radius $border-radius 0 0;
+  background-color: variables.$light-color02;
+  border: 1px solid variables.$border-color;
+  border-radius: variables.$border-radius variables.$border-radius 0 0;
 
   span {
     display: inline-block;
     margin-right: 4px;
     vertical-align: middle;
-    @include TypographySymbolText;
+    @include mixins.TypographySymbolText;
   }
 }
 
 :global {
   .d2h-file-wrapper {
-    border-radius: 0 0 $border-radius $border-radius;
-    border-color: $border-color;
+    border-radius: 0 0 variables.$border-radius variables.$border-radius;
+    border-color: variables.$border-color;
     border-top-width: 0;
     background-color: #fff;
   }
@@ -30,21 +30,23 @@
     background-color: transparent !important;
   }
   .d2h-code-linenumber {
-    background-color: rgba($light-color02, .8);
+    background-color: rgba(variables.$light-color02, 0.8);
   }
   .d2h-file-diff .d2h-del.d2h-change {
-    background-color: rgba($red-color01, .7);
+    background-color: rgba(variables.$red-color01, 0.7);
   }
   .d2h-file-diff .d2h-ins.d2h-change {
-    background-color: rgba($green-color01, .7);
+    background-color: rgba(variables.$green-color01, 0.7);
   }
   .d2h-ins {
-    background-color: rgba($green-color02, .7);
+    background-color: rgba(variables.$green-color02, 0.7);
   }
-  .d2h-code-line del, .d2h-code-side-line del {
-    background-color: rgba($red-color02, .7);
+  .d2h-code-line del,
+  .d2h-code-side-line del {
+    background-color: rgba(variables.$red-color02, 0.7);
   }
-  .d2h-code-line ins, .d2h-code-side-line ins {
-    background-color: rgba($green-color03, .7);
+  .d2h-code-line ins,
+  .d2h-code-side-line ins {
+    background-color: rgba(variables.$green-color03, 0.7);
   }
 }

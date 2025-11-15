@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .body {
   display: flex;
@@ -47,7 +47,7 @@
 .current {
   margin-top: 12px;
   padding: 12px;
-  background: $light-color01;
+  background: variables.$light-color01;
   height: 100%;
   flex: 1;
   height: calc(100% - 396px);
@@ -62,15 +62,15 @@
       padding: 0px 12px;
       display: flex;
       align-items: center;
-      background: $light-color01;
-      box-shadow: inset 0px -1px 0px $light-color03;
+      background: variables.$light-color01;
+      box-shadow: inset 0px -1px 0px variables.$light-color03;
 
       span {
         display: block;
         font-weight: 600;
         font-size: 12px;
         line-height: 20px;
-        color: $dark-color01;
+        color: variables.$dark-color01;
       }
     }
 

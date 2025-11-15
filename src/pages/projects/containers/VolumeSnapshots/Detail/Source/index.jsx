@@ -25,7 +25,7 @@ import { getLocalTime, map_accessModes } from 'utils'
 import { toJS } from 'mobx'
 
 import { isEmpty, isFunction } from 'lodash'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const renderModeTip = (
   <div>
@@ -34,9 +34,11 @@ const renderModeTip = (
     <div>{t('RWX_DESC')}</div>
   </div>
 )
+
+export default
 @inject('detailStore')
 @observer
-export default class VolumeSnapshotSource extends Component {
+class VolumeSnapshotSource extends Component {
   store = new Volume()
 
   componentDidMount() {

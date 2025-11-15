@@ -28,10 +28,11 @@ import { Empty } from 'components/Base'
 import Link from 'components/Link'
 import Table from 'components/Tables/Ranking'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class NodeUsageRank extends React.Component {
+class NodeUsageRank extends React.Component {
   IconWidth = 40
 
   rankTdWidth = 124
@@ -74,6 +75,42 @@ export default class NodeUsageRank extends React.Component {
               )}
             </h3>
             <p>{get(node, 'host_ip', '-')}</p>
+          </div>
+        )
+      },
+    },
+    {
+      key: 'gpu_memory',
+      width: this.rankTdWidth,
+      sort_metric: 'node_gpu_memory_utilisation',
+      title: t('GPU_MEMORY_USAGE'),
+      render: node => {
+        const unit = getSuitableUnit(node.node_gpu_memory_total, 'gpu_memory')
+        return (
+          <div>
+            <h3>{this.toPercentage(node.node_gpu_memory_utilisation)}</h3>
+            <div>
+              {getValueByUnit(node.node_gpu_memory_usage, unit) || '-'}/{''}
+              {getValueByUnit(node.node_gpu_memory_total, unit) || '-'} {unit}
+            </div>
+          </div>
+        )
+      },
+    },
+    {
+      key: 'gpu',
+      width: this.rankTdWidth,
+      sort_metric: 'node_gpu_utilisation',
+      title: t('GPU_USAGE'),
+      render: node => {
+        const unit = getSuitableUnit(node.node_gpu_total, 'gpu')
+        return (
+          <div>
+            <h3>{this.toPercentage(node.node_gpu_utilisation)}</h3>
+            <div>
+              {getValueByUnit(node.node_gpu_usage, unit) || '-'}/{''}
+              {getValueByUnit(node.node_gpu_total, unit) || '-'} {unit}
+            </div>
           </div>
         )
       },

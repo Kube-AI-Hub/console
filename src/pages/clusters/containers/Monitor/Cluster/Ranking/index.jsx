@@ -35,7 +35,7 @@ import {
 
 import Table from 'components/Cards/RankTable/NodeTable'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @inject('rootStore')
 @observer

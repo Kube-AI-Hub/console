@@ -1,10 +1,10 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .itemWrapper {
   padding: 12px;
   margin-top: 12px;
   border-radius: 2px;
-  background-color: $lightest;
+  background-color: variables.$lightest;
 
   & > p {
     margin-bottom: 4px;

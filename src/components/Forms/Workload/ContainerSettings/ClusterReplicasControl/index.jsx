@@ -22,13 +22,14 @@ import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
 import React from 'react'
 import { getDisplayNameNew } from 'utils'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 import Placement from './Placement'
 import Scheduling from './Scheduling'
 
+export default
 @observer
-export default class ReplicasControl extends React.Component {
+class ReplicasControl extends React.Component {
   static propTypes = {
     template: PropTypes.object,
     value: PropTypes.array,

@@ -26,7 +26,7 @@ import FilterInput from 'components/Tables/Base/FilterInput'
 import ClusterStore from 'stores/cluster'
 
 import WorkspaceCard from './Card'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @inject('rootStore')
 @observer

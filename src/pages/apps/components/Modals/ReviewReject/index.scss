@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .rejectForm {
   textarea {
@@ -8,6 +8,6 @@
 }
 
 .footer {
-  border-color: $bg-color;
-  border-top: 1px solid $border-color;
+  border-color: variables.$bg-color;
+  border-top: 1px solid variables.$border-color;
 }

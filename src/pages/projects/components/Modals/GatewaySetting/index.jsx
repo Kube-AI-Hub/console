@@ -37,10 +37,11 @@ import { observable, toJS } from 'mobx'
 import { observer } from 'mobx-react'
 import { CLUSTER_PROVIDERS_ANNOTATIONS } from './contants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class GatewaySettingModal extends React.Component {
+class GatewaySettingModal extends React.Component {
   static propTypes = {
     template: PropTypes.object,
     visible: PropTypes.bool,

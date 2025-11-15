@@ -16,7 +16,7 @@
  * along with KubeSphere Console.  If not, see <https://www.gnu.org/licenses/>.
  */
 import React from 'react'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default function ColumeInput({ left, right }) {
   return (

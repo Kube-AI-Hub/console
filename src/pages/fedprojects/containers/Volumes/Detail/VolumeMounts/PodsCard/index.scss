@@ -1,17 +1,17 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .cluster {
   position: relative;
   width: 326px;
   padding: 8px;
   border-radius: 2px;
-  background-color: $dark-color07;
+  background-color: variables.$dark-color07;
 }
 
 .content {
   padding: 12px;
   margin-top: 12px;
-  border-radius: $border-radius;
-  background-color: $light-color01;
+  border-radius: variables.$border-radius;
+  background-color: variables.$light-color01;
 }

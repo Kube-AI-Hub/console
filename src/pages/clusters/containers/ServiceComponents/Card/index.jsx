@@ -23,7 +23,7 @@ import { Columns, Column } from '@kube-design/components'
 import { Status, Text } from 'components/Base'
 import { getComponentStatus } from 'utils/status'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const Card = ({ cluster, component = {} }) => {
   const { name, namespace } = component

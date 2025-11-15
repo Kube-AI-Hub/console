@@ -20,7 +20,7 @@ import React from 'react'
 import { Form } from '@kube-design/components'
 import StringInput from 'components/Inputs/StringInput'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Commands extends React.Component {
   static defaultProps = {
@@ -32,7 +32,12 @@ export default class Commands extends React.Component {
 
     return prefix ? `${prefix}.` : ''
   }
-
+  handleChange = (name, value) => {
+    const { onChange } = this.props
+    if (onChange) {
+      onChange(name, value)
+    }
+  }
   render() {
     return (
       <Form.Group
@@ -44,10 +49,15 @@ export default class Commands extends React.Component {
           <StringInput
             className={styles.input}
             name={`${this.prefix}command`}
+            onChange={this.handleChange}
           />
         </Form.Item>
         <Form.Item label={t('PARAMETERS')} desc={t('CONTAINER_ARGUMENT_DESC')}>
-          <StringInput className={styles.input} name={`${this.prefix}args`} />
+          <StringInput
+            className={styles.input}
+            name={`${this.prefix}args`}
+            onChange={this.handleChange}
+          />
         </Form.Item>
       </Form.Group>
     )

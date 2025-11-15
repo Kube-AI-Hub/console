@@ -28,6 +28,8 @@ import { SimpleArea } from 'components/Charts'
 import CustomTooltip from 'components/Charts/Custom/Tooltip'
 
 const MetricTypes = {
+  gpu_utilisation: 'node_gpu_utilisation',
+  gpu_memory_utilisation: 'node_gpu_memory_utilisation',
   cpu_utilisation: 'node_cpu_utilisation',
   cpu_load1: 'node_load1',
   cpu_load5: 'node_load5',
@@ -86,6 +88,23 @@ class Monitorings extends React.Component {
     const legend = deviceUsage && deviceUsage.map(item => item.metric.device)
 
     return [
+      {
+        type: 'utilisation',
+        title: 'GPU_USAGE',
+        unit: '%',
+        legend: ['GPU_USAGE'],
+        data: get(this.metrics, `${MetricTypes.gpu_utilisation}.data.result`),
+      },
+      {
+        type: 'utilisation',
+        title: 'GPU_MEMORY_USAGE',
+        unit: '%',
+        legend: ['GPU_MEMORY_USAGE'],
+        data: get(
+          this.metrics,
+          `${MetricTypes.gpu_memory_utilisation}.data.result`
+        ),
+      },
       {
         type: 'utilisation',
         title: 'CPU_USAGE',

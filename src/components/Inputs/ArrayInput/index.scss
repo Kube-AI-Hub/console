@@ -1,12 +1,12 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .item {
   position: relative;
   padding: 6px 68px 6px 17px;
   border-radius: 60px;
-  background-color: $bg-color;
-  border: solid 1px $border-color;
+  background-color: variables.$bg-color;
+  border: solid 1px variables.$border-color;
 
   & + .item {
     margin-top: 4px;
@@ -19,11 +19,11 @@
 
 .delete {
   right: 6px;
-  @include vertical-center;
+  @include mixins.vertical-center;
 }
 
 .desc {
-  color: $second-text-color;
+  color: variables.$second-text-color;
 }
 
 .footer {
@@ -36,9 +36,9 @@
 .errorText {
   padding: 3px 68px 3px 17px;
   margin-top: 4px;
-  font-family: $font-family;
+  font-family: variables.$font-family;
   font-size: 12px;
   line-height: 1.67;
   letter-spacing: normal;
-  color: $red-color03;
+  color: variables.$red-color03;
 }

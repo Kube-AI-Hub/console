@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   padding: 12px 0;
@@ -10,8 +10,8 @@
 
   .title {
     display: inline;
-    @include TypographyParagraph($dark-color06);
-    font-weight: $font-bold;
+    @include mixins.TypographyParagraph(variables.$dark-color06);
+    font-weight: variables.$font-bold;
     line-height: 32px;
   }
 
@@ -27,12 +27,12 @@
 }
 
 .value {
-  @include vertical-center;
+  @include mixins.vertical-center;
   right: 12px;
   font-size: 24px;
-  font-weight: $font-bold;
+  font-weight: variables.$font-bold;
   line-height: 33px;
-  color: $dark-color06;
+  color: variables.$dark-color06;
 }
 
 .appContent {
@@ -45,21 +45,21 @@
   z-index: 1;
 
   :global .icon {
-    @include vertical-center;
+    @include mixins.vertical-center;
     left: 12px;
   }
 
   .text {
     & > div {
-      @include TypographyTitleH6($dark-color07);
+      @include mixins.TypographyTitleH6(variables.$dark-color07);
       & > div {
-        @include ellipsis;
+        @include mixins.ellipsis;
       }
     }
 
     & > p {
-      @include TypographyParagraph($dark-color01);
-      @include ellipsis;
+      @include mixins.TypographyParagraph(variables.$dark-color01);
+      @include mixins.ellipsis;
     }
   }
 }
@@ -69,7 +69,7 @@
   top: 0;
   bottom: 0;
   left: 0;
-  background-color: $bg-color;
+  background-color: variables.$bg-color;
   background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.06));
 }
 
@@ -79,10 +79,10 @@
   align-items: center;
   flex-flow: column;
   height: 140px;
-  background-color: $lightest;
+  background-color: variables.$lightest;
 
   & > div {
     margin-top: 8px;
-    @include TypographySymbolText;
+    @include mixins.TypographySymbolText;
   }
 }

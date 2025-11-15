@@ -26,11 +26,12 @@ import { observable, toJS } from 'mobx'
 import { observer, inject } from 'mobx-react'
 import { isEmpty } from 'lodash'
 import { Panel } from 'components/Base'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('detailStore', 'rootStore')
 @observer
-export default class Gateway extends React.Component {
+class Gateway extends React.Component {
   store = new GatewayStore()
 
   @observable

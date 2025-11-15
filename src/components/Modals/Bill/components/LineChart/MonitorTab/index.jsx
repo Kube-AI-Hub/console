@@ -27,7 +27,7 @@ import { Text } from 'components/Base'
 
 import { SimpleArea } from 'components/Charts'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class MonitorTab extends React.Component {
   static propTypes = {

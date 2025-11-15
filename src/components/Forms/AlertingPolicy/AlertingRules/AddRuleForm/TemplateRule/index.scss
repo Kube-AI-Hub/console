@@ -1,18 +1,18 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .label {
   font-size: 12px;
   line-height: 20px;
   margin-top: 12px;
   margin-bottom: 8px;
-  color: $dark-color07;
+  color: variables.$dark-color07;
 }
 
 .contentGroup {
   padding: 12px;
-  border: 1px solid $light-color06;
+  border: 1px solid variables.$light-color06;
   border-radius: 4px;
-  background: $white;
+  background: variables.$white;
 
   .message {
     :global {
@@ -33,8 +33,8 @@
   align-items: center;
   padding: 6px 17px;
   border-radius: 60px;
-  background-color: $bg-color;
-  border: solid 1px $border-color;
+  background-color: variables.$bg-color;
+  border: solid 1px variables.$border-color;
 
   & > div,
   input {

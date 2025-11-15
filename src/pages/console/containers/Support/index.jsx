@@ -26,7 +26,7 @@ import ksCluster from 'assets/support-kse-cluster.svg'
 import ksSecurity from 'assets/support-kse-security.svg'
 import { ReactComponent as Slack } from 'assets/slack_duotone.svg'
 import { ReactComponent as Topic } from 'assets/topic_circle_duotone.svg'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const config = globals.config.supportLinks
 

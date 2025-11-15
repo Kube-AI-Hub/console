@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   position: relative;
@@ -10,7 +10,7 @@
   font-size: 14px;
   font-weight: 600;
   line-height: 1.43;
-  color: $dark-color07;
+  color: variables.$dark-color07;
 }
 
 .switch {
@@ -23,8 +23,8 @@
   padding: 8px;
   height: calc(100vh - 500px);
   min-height: 500px;
-  border-radius: $border-radius;
-  border: 1px solid $border-color;
+  border-radius: variables.$border-radius;
+  border: 1px solid variables.$border-color;
   box-sizing: content-box;
 }
 

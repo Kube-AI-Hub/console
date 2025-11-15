@@ -1,13 +1,13 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   position: relative;
   padding: 0 12px;
   padding-right: 170px;
   background-color: #fff;
-  border-radius: $border-radius;
-  box-shadow: $base-shadow;
+  border-radius: variables.$border-radius;
+  box-shadow: variables.$base-shadow;
 }
 
 .header {
@@ -16,7 +16,7 @@
   padding: 12px 0 12px 52px;
 
   :global .icon {
-    @include vertical-center;
+    @include mixins.vertical-center;
     left: 0;
   }
 }
@@ -24,26 +24,26 @@
 .text {
   padding: 12px;
   height: 64px;
-  background: $light-color01;
+  background: variables.$light-color01;
   border-radius: 4px;
   overflow: hidden;
 
   & > div {
-    @include TypographyTitleH6($dark-color07);
-    @include ellipsis;
+    @include mixins.TypographyTitleH6(variables.$dark-color07);
+    @include mixins.ellipsis;
   }
 
   & > p {
-    @include TypographyParagraph($dark-color01);
-    @include ellipsis;
+    @include mixins.TypographyParagraph(variables.$dark-color01);
+    @include mixins.ellipsis;
   }
 }
 
 .content {
   display: flex;
   padding: 8px;
-  border-radius: $border-radius $border-radius 0 0;
-  background-color: $lightest;
+  border-radius: variables.$border-radius variables.$border-radius 0 0;
+  background-color: variables.$lightest;
 }
 
 .background {

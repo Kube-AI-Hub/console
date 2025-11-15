@@ -1,13 +1,13 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .item {
   position: relative;
   padding: 12px 24px;
-  background-color: $card-bg-color;
-  border-top: 1px solid $light-color04;
+  background-color: variables.$card-bg-color;
+  border-top: 1px solid variables.$light-color04;
 
   &.hideBg {
-    background-color: $white;
+    background-color: variables.$white;
   }
 
   &.close {
@@ -15,19 +15,19 @@
   }
 
   &:last-child {
-    border-radius: 0 0 $border-radius $border-radius;
+    border-radius: 0 0 variables.$border-radius variables.$border-radius;
   }
 
   .name {
     line-height: 20px;
     font-size: 12px;
-    color: $head-color;
+    color: variables.$head-color;
     font-weight: 500;
     cursor: pointer;
 
     :global .icon {
       margin-right: 8px;
-      color: $head-color;
+      color: variables.$head-color;
     }
 
     .closeIcon {
@@ -40,7 +40,7 @@
     margin-left: 28px;
     line-height: 20px;
     font-size: 12px;
-    color: $second-text-color;
+    color: variables.$second-text-color;
   }
 
   .more {
@@ -49,4 +49,3 @@
     visibility: hidden;
   }
 }
-

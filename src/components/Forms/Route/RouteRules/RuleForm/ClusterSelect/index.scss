@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .group {
   :global {
@@ -7,11 +7,11 @@
       padding: 4px 8px;
       margin-right: 12px;
       border-radius: 2px;
-      background-color: $light-color03;
+      background-color: variables.$light-color03;
     }
 
     label.checkbox.checked {
-      background-color: $dark-color07;
+      background-color: variables.$dark-color07;
 
       .label-value {
         color: #fff;

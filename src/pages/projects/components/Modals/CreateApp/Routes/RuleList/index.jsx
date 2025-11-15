@@ -23,7 +23,7 @@ import { get } from 'lodash'
 import { Text } from 'components/Base'
 import Item from 'components/Forms/Route/RouteRules/RuleList/Item'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class RuleList extends React.Component {
   static propTypes = {

@@ -24,7 +24,7 @@ import { TypeSelect } from 'components/Base'
 import { updateLabels } from 'utils'
 import FORM_TEMPLATES from 'utils/form.templates'
 import { MODULE_KIND_MAP } from 'utils/constants'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class StatefulSetting extends React.Component {
   static propTypes = {

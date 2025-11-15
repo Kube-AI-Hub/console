@@ -1,17 +1,17 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
-$banner-height: 152px + $header-height;
+$banner-height: 152px + variables.$header-height;
 
 %shapePos {
   position: absolute;
-  top: $header-height;
+  top: variables.$header-height;
 }
 
 .banner {
   position: relative;
-  top: -$header-height;
-  background-color: $dark-color08;
+  top: -(variables.$header-height);
+  background-color: variables.$dark-color08;
   height: $banner-height;
   z-index: 10;
 
@@ -22,15 +22,15 @@ $banner-height: 152px + $header-height;
     @media (max-width: 768px) {
       width: 1024px;
     }
-    @media (min-width: $apps-content-width) {
-      width: $apps-content-width;
+    @media (min-width: variables.$apps-content-width) {
+      width: variables.$apps-content-width;
       .leftShape_1,
       .leftShape_2 {
         left: -50px;
       }
     }
 
-    @media (min-width: $apps-content-width + 140px) {
+    @media (min-width: variables.$apps-content-width + 140px) {
       .leftShape_1,
       .leftShape_2 {
         left: -50px;
@@ -95,7 +95,7 @@ $banner-height: 152px + $header-height;
   .appOutline {
     overflow: hidden;
     padding-top: 98px;
-    color: $white;
+    color: variables.$white;
 
     .back {
       margin-bottom: 12px;
@@ -106,7 +106,7 @@ $banner-height: 152px + $header-height;
         color: #fff;
 
         &:hover {
-          color: $primary;
+          color: variables.$primary;
 
           svg {
             color: #00aa72;
@@ -126,7 +126,7 @@ $banner-height: 152px + $header-height;
           height: 20px;
           margin-right: 8px;
           color: #fff;
-          fill: #B6C2CD;
+          fill: #b6c2cd;
         }
       }
     }
@@ -141,9 +141,9 @@ $banner-height: 152px + $header-height;
         height: 48px;
         line-height: 48px;
         margin-right: 20px;
-        color: $text-color;
-        background-color: $bg-color;
-        border-radius: $border-radius;
+        color: variables.$text-color;
+        background-color: variables.$bg-color;
+        border-radius: variables.$border-radius;
       }
       .text {
         float: left;
@@ -158,9 +158,9 @@ $banner-height: 152px + $header-height;
           color: #ffffff;
         }
         > p {
-          font-size: $size-small;
+          font-size: variables.$size-small;
           line-height: 20px;
-          @include ellipsis;
+          @include mixins.ellipsis;
           margin-top: 8px;
         }
       }

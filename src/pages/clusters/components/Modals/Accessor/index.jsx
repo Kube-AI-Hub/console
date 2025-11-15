@@ -24,7 +24,7 @@ import React, { Component } from 'react'
 import ProjectStore from 'stores/project'
 import WorkspaceStore from 'stores/workspace'
 import { showNameAndAlias } from 'utils'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class AccessorModal extends Component {
   static propTypes = {

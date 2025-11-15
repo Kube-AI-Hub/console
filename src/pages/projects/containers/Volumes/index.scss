@@ -1,18 +1,18 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .capacity {
   h3 {
-    @include TypographyTitleH6();
+    @include mixins.TypographyTitleH6();
   }
 
   small {
-    color: $dark-color01;
+    color: variables.$dark-color01;
     margin-left: 0.3em;
   }
 
   p {
-    @include TypographyParagraph($dark-color01);
+    @include mixins.TypographyParagraph(variables.$dark-color01);
   }
 }
 
@@ -29,7 +29,7 @@
     align-items: center;
 
     &:hover {
-      background: $light-color03;
+      background: variables.$light-color03;
       border-radius: 4px;
       cursor: pointer;
     }

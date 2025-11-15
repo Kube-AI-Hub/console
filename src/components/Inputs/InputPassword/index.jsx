@@ -22,7 +22,7 @@ import { InputPassword, Icon, Dropdown } from '@kube-design/components'
 import classNames from 'classnames'
 import { PATTERN_PASSWORD } from 'utils/constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const PATTERN_WORD = /(?=.*?[A-Z])(?=.*?[a-z])/
 const PATTERN_NUMBER = /(?=.*?[0-9])/

@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   padding: 12px;
@@ -15,7 +15,7 @@
   .formFooter {
     height: 32px;
     border-radius: 3px;
-    background: $dark-color07;
+    background: variables.$dark-color07;
     text-align: right;
     line-height: 32px;
     padding: 0 12px;
@@ -24,8 +24,8 @@
       border-radius: 0;
 
       &:hover {
-        background-color: $dark-color08;
-        border-color: $dark-color08;
+        background-color: variables.$dark-color08;
+        border-color: variables.$dark-color08;
       }
     }
   }

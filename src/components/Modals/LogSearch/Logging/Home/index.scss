@@ -1,8 +1,8 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .tips {
-  border-radius: $border-radius;
-  background-color: $lightest;
+  border-radius: variables.$border-radius;
+  background-color: variables.$lightest;
   padding: 12px 0;
   border: solid 1px #eee;
   @at-root {
@@ -114,13 +114,13 @@
 }
 
 .searchBarContainer {
-  display:flex;
-  border: solid 1px $border-color;
+  display: flex;
+  border: solid 1px variables.$border-color;
   border-radius: 4px;
 
   .clusterSelector {
     flex-basis: 130px;
-    border-right: solid 1px $border-color;
+    border-right: solid 1px variables.$border-color;
     border-radius: 4px 0 0 4px;
     line-height: 40px;
     overflow: hidden;

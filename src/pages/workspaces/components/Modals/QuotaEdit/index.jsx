@@ -26,7 +26,7 @@ import { ResourceLimit } from 'components/Inputs'
 
 import QuotaStore from 'stores/workspace.quota'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class QuotaEditModal extends React.Component {
   static propTypes = {

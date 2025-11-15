@@ -37,10 +37,11 @@ import GitLabForm from './GitLabForm'
 import { compareVersion } from '../../../../utils'
 import { isSvnRepo } from '../../../../utils/devops'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class RepoSelectForm extends React.Component {
+class RepoSelectForm extends React.Component {
   static propTypes = {
     onSave: PropTypes.func,
     onCancel: PropTypes.func,

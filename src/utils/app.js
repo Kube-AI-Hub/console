@@ -86,7 +86,7 @@ export const getAppCategoryNames = categories => {
   return names.length ? names.join(', ') : '-'
 }
 
-export const downloadFileFromBase64 = (base64Str = '', fileName) => {
+export const downloadFileFromBase64 = (base64Str = '', fileName = 'file') => {
   const a = document.createElement('a')
   a.href = `data:application/tar+gzip;base64,${base64Str}`
   a.download = `${fileName}.tgz`

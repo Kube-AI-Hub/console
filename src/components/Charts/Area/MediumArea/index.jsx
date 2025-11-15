@@ -25,7 +25,7 @@ import { COLORS_MAP } from 'utils/constants'
 import { ResponsiveContainer, AreaChart, XAxis, Tooltip, Area } from 'recharts'
 import CustomTooltip from 'components/Charts/Custom/Tooltip'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const AreaColors = ['green', 'blue', 'yellow', 'red']
 

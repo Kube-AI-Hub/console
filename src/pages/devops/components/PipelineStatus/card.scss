@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .pipelineCard {
   width: 256px;
@@ -83,7 +83,7 @@
   min-height: 56px;
   line-height: 20px;
   border-radius: 4px;
-  background-color: $lightest;
+  background-color: variables.$lightest;
 
   .content__title {
     font-weight: 500;
@@ -95,7 +95,7 @@
 }
 
 .content__status {
-  color: $green;
+  color: variables.$green;
 
   span {
     vertical-align: middle;

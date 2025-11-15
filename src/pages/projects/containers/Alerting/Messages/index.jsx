@@ -34,7 +34,7 @@ import { getAlertingResource } from 'utils/alerting'
 import { SEVERITY_LEVEL } from 'configs/alerting/metrics/rule.config'
 
 import MessageStore from 'stores/alerting/message'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export const severityOptions = [
   {
@@ -56,12 +56,14 @@ export const severityOptions = [
     bgColor: '#D8DEE5',
   },
 ]
+
+export default
 @withList({
   store: new MessageStore(),
   module: 'alerts',
   name: 'ALERTING_MESSAGE',
 })
-export default class AlertingPolicy extends React.Component {
+class AlertingPolicy extends React.Component {
   state = {
     type: location.search.indexOf('type=builtin') > 0 ? 'builtin' : 'custom',
   }

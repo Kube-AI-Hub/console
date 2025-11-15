@@ -27,7 +27,7 @@ import { Loading } from '@kube-design/components'
 import { Empty } from 'components/Base'
 import Item from './item'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const MetricTypes = {
   etcd_online: 'etcd_server_up_total',
@@ -38,9 +38,10 @@ const MetricTypes = {
   etcd_server_is_leader: 'etcd_server_is_leader',
 }
 
+export default
 @inject('rootStore')
 @observer
-export default class ETCDNodes extends React.Component {
+class ETCDNodes extends React.Component {
   constructor(props) {
     super(props)
 

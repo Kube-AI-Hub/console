@@ -20,7 +20,7 @@ import React from 'react'
 import classnames from 'classnames'
 import { get } from 'lodash'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const CustomLegend = (props = {}) => {
   const { className, payload, activeSeries = [], showAll = false } = props

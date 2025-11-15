@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   display: flex;
@@ -9,12 +9,12 @@
 
   :global {
     .recharts-polar-grid-concentric {
-      .recharts-polar-grid-concentric-circle{
-        stroke: $light-color04;
+      .recharts-polar-grid-concentric-circle {
+        stroke: variables.$light-color04;
 
         &:last-child {
-          fill: $light-color02;
-          opacity: .5;
+          fill: variables.$light-color02;
+          opacity: 0.5;
         }
       }
     }

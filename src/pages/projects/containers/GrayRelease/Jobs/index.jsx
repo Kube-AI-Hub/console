@@ -27,7 +27,7 @@ import GrayReleaseStore from 'stores/grayrelease'
 
 import Item from './Item'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 class Jobs extends React.Component {
   constructor(props) {

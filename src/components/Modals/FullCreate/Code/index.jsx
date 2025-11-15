@@ -23,7 +23,7 @@ import { Icon } from '@kube-design/components'
 
 import EditMode from 'components/EditMode'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class CodeMode extends React.Component {
   static propTypes = {

@@ -30,7 +30,7 @@ import {
 
 import { isEmpty } from 'lodash'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const MOUNT_OPTIONS = [
   { label: 'READ_AND_WRITE', value: 'false' },

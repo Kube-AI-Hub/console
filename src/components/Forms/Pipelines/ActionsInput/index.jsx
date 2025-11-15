@@ -24,7 +24,7 @@ import { Button, Menu, Dropdown, Icon } from '@kube-design/components'
 import { PIPELINE_ACTION_TYPES } from 'utils/constants'
 import Item from './Item'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ActionsInput extends React.Component {
   static propTypes = {

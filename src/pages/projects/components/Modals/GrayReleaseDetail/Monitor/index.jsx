@@ -26,7 +26,7 @@ import { getSuccessRate } from 'utils/service'
 import Circle from './Circle'
 import Line from './Line'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Monitor extends React.Component {
   static propTypes = {

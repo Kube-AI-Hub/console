@@ -23,11 +23,12 @@ import { get } from 'lodash'
 import { Panel } from 'components/Base'
 import Attributes from 'core/containers/Base/Detail/BaseInfo/Attributes'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('detailStore')
 @observer
-export default class Configuration extends React.Component {
+class Configuration extends React.Component {
   render() {
     const detail = get(this.props.detailStore, 'detail', {})
     const { address, config = {}, type } = detail

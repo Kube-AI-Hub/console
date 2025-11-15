@@ -39,10 +39,11 @@ import ClusterStore from 'stores/cluster'
 
 import Wrapper from './Wrapper'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class ImageRegistry extends Component {
+class ImageRegistry extends Component {
   getStateFromProps = value => {
     const valueObj = safeParseJSON(value)
     const url = Object.keys(get(valueObj, 'auths', {}))[0] || ''

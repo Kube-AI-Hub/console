@@ -1,7 +1,7 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .clickable {
-  color: $green;
+  color: variables.$green;
   cursor: pointer;
   margin-left: 15px;
 }
@@ -11,5 +11,5 @@
   margin-top: 12px;
   border-radius: 4px;
   background-color: #ffffff;
-  border: solid 1px $light-color03;
+  border: solid 1px variables.$light-color03;
 }

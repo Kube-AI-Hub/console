@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   position: relative;
@@ -16,7 +16,7 @@
   .dropdown {
     position: absolute;
     padding: 12px;
-    border-radius: $border-radius;
+    border-radius: variables.$border-radius;
     top: 100%;
     right: 0;
     width: 450px;
@@ -24,8 +24,8 @@
     opacity: 0;
     transition: all 0.3s ease;
     z-index: 10;
-    background: $white;
-    box-shadow: $card-shadow;
+    background: variables.$white;
+    box-shadow: variables.$card-shadow;
   }
 }
 
@@ -49,23 +49,23 @@
   grid-template-columns: 12px 1fr 12px;
   grid-gap: 12px;
   padding: 5px 11px;
-  border: solid 1px $dark-color06;
-  border-radius: $border-radius;
-  background-color: $text-color;
+  border: solid 1px variables.$dark-color06;
+  border-radius: variables.$border-radius;
+  background-color: variables.$text-color;
   line-height: 20px;
-  font-weight: $font-bold;
+  font-weight: variables.$font-bold;
   cursor: pointer;
-  color: $white;
+  color: variables.$white;
   user-select: none;
-  transition: all $trans-speed ease-in-out;
+  transition: all variables.$trans-speed ease-in-out;
 
   &:hover {
-    background-color: $dark-color06;
+    background-color: variables.$dark-color06;
   }
 }
 
 .title {
-  @include TypographySymbolText;
+  @include mixins.TypographySymbolText;
   margin-bottom: 8px;
 }
 
@@ -76,12 +76,12 @@
     display: inline-block;
     padding: 0 6px;
     border-radius: 2px;
-    background: $light-color04;
+    background: variables.$light-color04;
     margin-bottom: 8px;
     margin-right: 8px;
     cursor: pointer;
     &:hover {
-      background: $light-color07;
+      background: variables.$light-color07;
     }
   }
 }

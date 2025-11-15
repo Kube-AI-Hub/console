@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .table {
   width: 100%;
@@ -7,7 +7,7 @@
   border-spacing: 0px;
   margin-bottom: 20px;
   padding: 8px 12px 8px 12px;
-  border: 1px solid $light-color03;
+  border: 1px solid variables.$light-color03;
   box-sizing: border-box;
   border-radius: 4px;
   background: #fff;
@@ -17,7 +17,7 @@
     width: auto;
     padding: 8px 12px 8px 12px;
     text-align: right;
-    @include ellipsis;
+    @include mixins.ellipsis;
 
     a {
       text-decoration: underline;

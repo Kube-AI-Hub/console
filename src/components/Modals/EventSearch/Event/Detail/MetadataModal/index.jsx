@@ -23,7 +23,7 @@ import { getLocalTime } from 'utils'
 
 import Metadata from './Metadata'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const { TabPanel } = Tabs
 

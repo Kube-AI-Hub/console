@@ -1,22 +1,22 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   width: 100%;
   min-width: 1200px;
   height: 100%;
   border-radius: 0;
-  background: $light-color02;
-  transition: all .3s ease-in-out;
+  background: variables.$light-color02;
+  transition: all 0.3s ease-in-out;
 
   .operations {
     & > div,
     & > button {
       margin-right: 10px;
-      display:inline-block;
+      display: inline-block;
       vertical-align: middle;
     }
   }
-  
+
   .body,
   .header {
     border-radius: 0;
@@ -48,16 +48,15 @@
     }
   }
 
-  &:after{
-    content: "";
+  &:after {
+    content: '';
     position: absolute;
     left: 0;
     bottom: 0;
     width: 155px;
     height: 255px;
     background: url(/assets/custom-monitoring-modal.svg) no-repeat left bottom;
-    opacity: .1;
+    opacity: 0.1;
     pointer-events: none;
   }
-
 }

@@ -20,7 +20,7 @@ import React, { useState } from 'react'
 
 import { Button } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const Item = ({ component, index, value, arrayValue, onChange, onDelete }) => {
   const [keyErrorTip, setKeyError] = useState('')

@@ -20,7 +20,7 @@ import React from 'react'
 import { Form } from '@kube-design/components'
 import { CheckableText } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class AccessControl extends React.Component {
   get prefix() {

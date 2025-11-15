@@ -25,7 +25,7 @@ import { Modal } from 'components/Base'
 import S2iForm from '../S2IForm'
 import B2iForm from '../B2IForm'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class RerunForm extends React.Component {
   static propTypes = {

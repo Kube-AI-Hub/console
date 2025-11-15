@@ -30,7 +30,7 @@ import MonitorTab from 'components/Cards/Monitoring/MonitorTab'
 import ConditionCard from './ConditionCard'
 import TaintCard from './TaintCard'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const METRIC_TYPES = [
   'node_cpu_utilisation',
@@ -39,9 +39,10 @@ const METRIC_TYPES = [
   'node_pod_utilisation',
 ]
 
+export default
 @inject('detailStore')
 @observer
-export default class RunningStatus extends React.Component {
+class RunningStatus extends React.Component {
   constructor(props) {
     super(props)
 
@@ -78,6 +79,22 @@ export default class RunningStatus extends React.Component {
       >
         <MonitorTab
           tabs={[
+            {
+              key: 'gpu',
+              icon: 'cpu',
+              unit: '%',
+              legend: ['GPU_USAGE'],
+              title: 'GPU_USAGE',
+              data: get(metrics, 'node_gpu_utilisation.data.result'),
+            },
+            {
+              key: 'gpu_memory',
+              icon: 'memory',
+              unit: '%',
+              legend: ['GPU_MEMORY_USAGE'],
+              title: 'GPU_MEMORY_USAGE',
+              data: get(metrics, 'node_gpu_memory_utilisation.data.result'),
+            },
             {
               key: 'cpu',
               icon: 'cpu',

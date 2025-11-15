@@ -33,7 +33,7 @@ import { NumberInput } from 'components/Inputs'
 import { generateId } from 'utils'
 import { PATTERN_IP } from 'utils/constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class AddNode extends Component {
   state = {

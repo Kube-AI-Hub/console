@@ -20,7 +20,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import classnames from 'classnames'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Empty extends React.PureComponent {
   static propTypes = {

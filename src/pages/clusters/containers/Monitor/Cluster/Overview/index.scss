@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .node {
   margin-bottom: 0;
@@ -26,7 +26,7 @@
         padding: 0 10px;
         margin: 3px;
         border-radius: 4px;
-        background-color: $card-bg-color;
+        background-color: variables.$card-bg-color;
         overflow: hidden;
 
         &.disabled {
@@ -35,7 +35,7 @@
 
           p {
             font-size: 16px;
-            color: $second-text-color;
+            color: variables.$second-text-color;
           }
         }
       }
@@ -58,7 +58,7 @@
             font-weight: 600;
 
             span {
-              font-size: $size-small;
+              font-size: variables.$size-small;
               line-height: 20px;
             }
           }
@@ -81,26 +81,26 @@
 
             &.healthy,
             &.ready {
-              background-color: $green;
+              background-color: variables.$green;
             }
 
             &.unhealthy,
             &.warn {
-              background-color: $yellow;
+              background-color: variables.$yellow;
             }
 
             &.danger {
-              background-color: $red;
+              background-color: variables.$red;
             }
 
             &.unknown {
-              background-color: $grey;
+              background-color: variables.$grey;
             }
           }
 
           p {
             font-weight: 600;
-            @include ellipsis;
+            @include mixins.ellipsis;
           }
         }
       }

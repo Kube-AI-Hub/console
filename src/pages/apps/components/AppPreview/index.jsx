@@ -28,12 +28,13 @@ import AppFileStore from 'stores/openpitrix/file'
 import { Markdown } from 'components/Base'
 import TextPreview from 'components/TextPreview'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const { TabPanel } = Tabs
 
+export default
 @observer
-export default class AppPreview extends React.Component {
+class AppPreview extends React.Component {
   static propTypes = {
     appId: PropTypes.string,
     versionId: PropTypes.string,

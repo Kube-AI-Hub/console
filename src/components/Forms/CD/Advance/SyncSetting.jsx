@@ -23,7 +23,7 @@ import { TypeSelect } from 'components/Base'
 import { SYNC_STRATEGY } from 'utils/constants'
 import { get, set } from 'lodash'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class SyncSetting extends React.Component {
   get syncPolicyTypeOptions() {

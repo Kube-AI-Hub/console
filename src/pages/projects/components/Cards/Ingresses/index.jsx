@@ -29,8 +29,9 @@ import GatewayStore from 'stores/gateway'
 
 import Item from './Item'
 
+export default
 @observer
-export default class Routes extends React.Component {
+class Routes extends React.Component {
   static propTypes = {
     className: PropTypes.string,
     prefix: PropTypes.string,

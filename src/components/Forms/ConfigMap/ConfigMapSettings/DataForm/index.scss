@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   position: relative;
@@ -6,7 +6,7 @@
     .h6 {
       line-height: 20px;
       margin-bottom: 12px;
-  
+
       svg {
         width: 20px;
         height: 20px;
@@ -16,7 +16,8 @@
     }
 
     .form-item {
-      input, textarea {
+      input,
+      textarea {
         max-width: none;
       }
     }
@@ -28,7 +29,7 @@
   padding-bottom: 40px;
   margin-bottom: -40px;
   height: calc(100vh - 290px);
-  background-color: $card-bg-color;
+  background-color: variables.$card-bg-color;
   overflow: auto;
 }
 

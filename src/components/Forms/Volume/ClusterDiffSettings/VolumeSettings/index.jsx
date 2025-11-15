@@ -23,7 +23,7 @@ import classNames from 'classnames'
 import EditForm from '../EditForm'
 import VolumeSettings from '../../VolumeSettings/FormTemplate'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class VolumeSettingsDiff extends Component {
   state = {

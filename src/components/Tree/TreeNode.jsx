@@ -24,7 +24,7 @@ import { noop } from 'lodash'
 import { Icon } from '@kube-design/components'
 import contextTypes from './contextTypes'
 
-import styles from './style.scss'
+import * as styles from './style.scss'
 
 import { getNodeChildren, mapChildren, toArray } from './treeUtils'
 

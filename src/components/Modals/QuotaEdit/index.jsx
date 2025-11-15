@@ -30,7 +30,7 @@ import { getLeftQuota, getUsedQuota } from 'utils/workload'
 
 import Quotas from './Quotas'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class QuotaEditModal extends React.Component {
   static propTypes = {
@@ -177,6 +177,7 @@ export default class QuotaEditModal extends React.Component {
     const gpuSetting = !isEmpty(whatTypeGpu)
       ? {
           [`${whatTypeGpu[0]}`]: hard[`requests.${whatTypeGpu[0]}`],
+          [`${whatTypeGpu[0]}mem`]: hard[`requests.${whatTypeGpu[0]}mem`],
         }
       : {}
     return {
@@ -262,6 +263,13 @@ export default class QuotaEditModal extends React.Component {
             `spec.hard["requests.${type}"]`,
             value.requests[`${type}`]
           )
+          if (!isEmpty(value.requests[`${type}mem`])) {
+            set(
+              formTemplate,
+              `spec.hard["requests.${type}mem"]`,
+              value.requests[`${type}mem`]
+            )
+          }
         }
       },
       onError: error => {

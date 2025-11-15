@@ -23,10 +23,11 @@ import { get } from 'lodash'
 import { Select } from '@kube-design/components'
 import RoleStore from 'stores/role'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class RoleSelect extends Component {
+class RoleSelect extends Component {
   roleStore = new RoleStore()
 
   componentDidMount() {

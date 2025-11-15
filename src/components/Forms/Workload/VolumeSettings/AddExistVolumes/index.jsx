@@ -25,7 +25,7 @@ import { TypeSelect } from 'components/Base'
 import { MountInput } from 'components/Inputs'
 import { getDisplayName } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class AddExistVolumes extends React.Component {
   static propTypes = {

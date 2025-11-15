@@ -31,7 +31,7 @@ import { Alert, Tag } from '@kube-design/components'
 import { Text, TypeSelect, Panel } from 'components/Base'
 import DiffYaml from 'components/DiffYaml'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 class RevisionControl extends React.Component {
   revisionStore = new RevisionStore(this.module)

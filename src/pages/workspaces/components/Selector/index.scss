@@ -1,11 +1,11 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .titleWrapper {
   position: relative;
   margin-bottom: 20px;
   padding: 12px;
-  border-radius: $border-radius;
+  border-radius: variables.$border-radius;
   background-color: #242e42;
   box-shadow: 0 8px 16px 0 rgba(36, 46, 66, 0.2);
 
@@ -21,15 +21,15 @@
     width: calc(100% - 60px);
 
     :global .h6 {
-      font-family: $font-family-id;
+      font-family: variables.$font-family-id;
       line-height: 1.43;
       color: #ffffff;
-      @include ellipsis;
+      @include mixins.ellipsis;
     }
 
     p {
       color: #d8dee5;
-      @include ellipsis;
+      @include mixins.ellipsis;
     }
   }
 }

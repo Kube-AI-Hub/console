@@ -23,10 +23,11 @@ import { observer } from 'mobx-react'
 import { Alert, Form, Select } from '@kube-design/components'
 import { Modal } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class WaitForQualityGate extends React.Component {
+class WaitForQualityGate extends React.Component {
   static propTypes = {
     name: PropTypes.string,
   }

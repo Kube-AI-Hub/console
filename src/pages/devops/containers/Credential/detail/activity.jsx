@@ -25,7 +25,7 @@ import PropTypes from 'prop-types'
 import { Table } from '@kube-design/components'
 import { Card } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @inject('detailStore')
 @observer

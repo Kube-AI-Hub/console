@@ -24,13 +24,30 @@ import 'ace-builds/src-noconflict/mode-groovy'
 import 'ace-builds/src-noconflict/theme-chaos'
 import 'ace-builds/src-noconflict/keybinding-vscode'
 import 'ace-builds/src-noconflict/ext-searchbox'
+import 'ace-builds/src-noconflict/ext-language_tools'
+
+import { config } from 'ace-builds'
+import yamlWorker from 'ace-builds/src-noconflict/worker-yaml'
+import xmlWorker from 'ace-builds/src-noconflict/worker-xml'
+import javascriptWorker from 'ace-builds/src-noconflict/worker-javascript'
+import jsonWorker from 'ace-builds/src-noconflict/worker-json'
 
 import './custom.css'
+
+// fix ace-build worker-loader
+config.setModuleUrl('ace/mode/yaml_worker', yamlWorker)
+config.setModuleUrl('ace/mode/xml_worker', xmlWorker)
+config.setModuleUrl('ace/mode/javascript_worker', javascriptWorker)
+config.setModuleUrl('ace/mode/json_worker', jsonWorker)
 
 export default class AceEditorWrapper extends React.Component {
   render() {
     return (
       <AceEditor
+        setOptions={{
+          enableBasicAutocompletion: true,
+          enableLiveAutocompletion: true,
+        }}
         theme="chaos"
         width="auto"
         height="100%"

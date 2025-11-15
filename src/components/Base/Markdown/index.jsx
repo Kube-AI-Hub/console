@@ -19,10 +19,10 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
-import MarkdownIt from 'markdown-it'
+import markdownit from 'markdown-it'
 import { Loading } from '@kube-design/components'
 
-import style from './index.scss'
+import * as style from './index.scss'
 
 class Markdown extends React.Component {
   static propTypes = {
@@ -39,7 +39,7 @@ class Markdown extends React.Component {
     super(props)
 
     this.iframeLoaded = false
-    this.md = new MarkdownIt({ html: true, linkify: true, ...props.options })
+    this.md = markdownit({ html: true, linkify: true, ...props.options })
     this.state = {
       loading: true,
     }
@@ -56,7 +56,7 @@ class Markdown extends React.Component {
 
   componentDidUpdate(prevProps) {
     if (prevProps.options !== this.props.options) {
-      this.md = new MarkdownIt(this.props.options)
+      this.md = markdownit(this.props.options)
     }
     this.updateMarkdown()
   }
@@ -123,8 +123,7 @@ class Markdown extends React.Component {
           src="/blank_md"
           name="frame_markdown"
           width="100%"
-          frameBorder="0"
-          scrolling="no"
+          style={{ border: 'none', overflow: 'hidden' }}
         />
       </div>
     )

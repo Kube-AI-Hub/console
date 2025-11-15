@@ -1,11 +1,11 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .info {
   position: relative;
   padding: 12px 20px;
-  border-radius: $border-radius;
-  background-color: $card-bg-color;
+  border-radius: variables.$border-radius;
+  background-color: variables.$card-bg-color;
 
   .icon {
     position: absolute;
@@ -27,13 +27,13 @@
   min-height: 40px;
 
   & > div {
-    @include TypographyTitleH6($dark-color07);
+    @include mixins.TypographyTitleH6(variables.$dark-color07);
     font-size: 14px;
     line-height: 20px;
   }
 
   & > p {
-    @include TypographyParagraph($dark-color01);
+    @include mixins.TypographyParagraph(variables.$dark-color01);
     max-height: 40px;
     word-break: break-all;
     overflow: hidden;
@@ -44,10 +44,10 @@
   display: block;
   width: 100%;
   cursor: pointer;
-  transition: all $trans-speed cubic-bezier(0.175, 0.35, 0.32, 1);
+  transition: all variables.$trans-speed cubic-bezier(0.175, 0.35, 0.32, 1);
 
   &:hover {
-    box-shadow: $card-selector-shadow;
+    box-shadow: variables.$card-selector-shadow;
   }
 }
 

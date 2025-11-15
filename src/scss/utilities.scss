@@ -1,3 +1,6 @@
+@use '~scss/variables';
+@use '~scss/mixins';
+
 // hide
 .hide {
   display: none !important;
@@ -38,7 +41,7 @@
 
 // float
 .clearfix {
-  @include clearfix;
+  @include mixins.clearfix;
 }
 
 .clear-right {
@@ -160,11 +163,11 @@
 
 // family
 .font-code {
-  font-family: $font-family-code !important;
+  font-family: variables.$font-family-code !important;
 }
 
 .font-id {
-  font-family: $font-family-id !important;
+  font-family: variables.$font-family-id !important;
 }
 
 // weight
@@ -182,23 +185,23 @@
 
 // color
 .text-second {
-  color: $second-text-color !important;
+  color: variables.$second-text-color !important;
 }
 
 .text-third {
-  color: $third-text-color !important;
+  color: variables.$third-text-color !important;
 }
 
 .text-primary {
-  color: $primary !important;
+  color: variables.$primary !important;
 }
 
 .text-title {
-  @include TypographyTitleH6($dark-color07);
+  @include mixins.TypographyTitleH6(variables.$dark-color07);
 }
 
 .text-desc {
-  @include TypographyParagraph($dark-color01);
+  @include mixins.TypographyParagraph(variables.$dark-color01);
 }
 
 // text align
@@ -244,40 +247,40 @@
 }
 
 .ellipsis {
-  @include ellipsis;
+  @include mixins.ellipsis;
 }
 
 .nowrap {
-  @include nowrap;
+  @include mixins.nowrap;
 }
 
 .break-all {
-  @include break-all;
+  @include mixins.break-all;
 }
 
 // border
 .border {
-  border: 1px solid $border-color !important;
+  border: 1px solid variables.$border-color !important;
 }
 
 .border-top {
-  border-top: 1px solid $border-color !important;
+  border-top: 1px solid variables.$border-color !important;
 }
 
 .border-right {
-  border-right: 1px solid $border-color !important;
+  border-right: 1px solid variables.$border-color !important;
 }
 
 .border-bottom {
-  border-bottom: 1px solid $border-color !important;
+  border-bottom: 1px solid variables.$border-color !important;
 }
 
 .border-left {
-  border-top: 1px solid $border-color !important;
+  border-top: 1px solid variables.$border-color !important;
 }
 
 .rounded {
-  border-radius: $border-radius !important;
+  border-radius: variables.$border-radius !important;
 }
 
 .rounded-circle {
@@ -286,7 +289,7 @@
 
 // shadow
 .shadow {
-  box-shadow: $base-shadow !important;
+  box-shadow: variables.$base-shadow !important;
 }
 
 .shadow-reverse {

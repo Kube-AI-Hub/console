@@ -29,13 +29,14 @@ import { Card } from 'components/Base'
 import Markdown from 'components/Base/Markdown'
 import TextPreview from 'components/TextPreview'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const { TabPanel } = Tabs
 
+export default
 @inject('detailStore')
 @observer
-export default class AppTemplate extends React.Component {
+class AppTemplate extends React.Component {
   constructor(props) {
     super(props)
 

@@ -25,7 +25,7 @@ import { Steps } from 'components/Base'
 import { checkRepoSource } from 'utils/devops'
 import Confirm from 'components/Forms/Base/Confirm'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class FormMode extends React.Component {
   static propTypes = {

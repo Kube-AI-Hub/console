@@ -24,7 +24,7 @@ import { Panel } from 'components/Base'
 
 import { cpuFormat, memoryFormat } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 class DefaultResource extends React.Component {
   render() {

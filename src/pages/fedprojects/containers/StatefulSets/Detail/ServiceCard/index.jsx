@@ -26,7 +26,7 @@ import { ICON_TYPES } from 'utils/constants'
 
 import { Panel, Text } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ServiceCard extends React.Component {
   static propTypes = {

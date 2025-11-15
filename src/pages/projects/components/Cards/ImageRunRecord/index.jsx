@@ -33,10 +33,11 @@ import {
 } from '@kube-design/components'
 import RunItem from './Item'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class RunsCard extends React.Component {
+class RunsCard extends React.Component {
   static propTypes = {
     prefix: PropTypes.string,
     title: PropTypes.string,

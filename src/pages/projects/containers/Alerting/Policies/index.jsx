@@ -31,15 +31,16 @@ import PolicyStore from 'stores/alerting/policy'
 import { toJS } from 'mobx'
 import classNames from 'classnames'
 import AlertStatus from './AlertingStatus'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @withList({
   store: new PolicyStore(),
   module: 'rules',
   authKey: 'alert-rules',
   name: 'ALERTING_POLICY',
 })
-export default class AlertingPolicy extends React.Component {
+class AlertingPolicy extends React.Component {
   state = {
     type: location.search.indexOf('type=builtin') > 0 ? 'builtin' : 'custom',
   }

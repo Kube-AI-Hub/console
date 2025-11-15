@@ -20,7 +20,7 @@ import React, { Component } from 'react'
 
 import { Icon } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ContainerImages extends Component {
   render() {

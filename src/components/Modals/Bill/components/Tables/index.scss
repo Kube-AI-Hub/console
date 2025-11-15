@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .tableContainer {
   margin-bottom: 20px;
@@ -13,7 +13,7 @@
     }
 
     p {
-      color: $dark-color01;
+      color: variables.$dark-color01;
     }
   }
 
@@ -30,7 +30,7 @@
     }
 
     .table {
-      border: 1px solid $light-color04;
+      border: 1px solid variables.$light-color04;
       box-shadow: none;
 
       table {
@@ -42,13 +42,13 @@
             padding: 0 16px;
             border: none;
             line-height: 40px;
-            color: $dark-color06;
+            color: variables.$dark-color06;
           }
 
           td {
             height: 40px;
             padding: 0 16px;
-            border-top: 1px solid $light-color04;
+            border-top: 1px solid variables.$light-color04;
           }
         }
       }
@@ -56,7 +56,7 @@
       tbody {
         tr {
           &:nth-child(odd) {
-            background-color: $light-color01;
+            background-color: variables.$light-color01;
           }
 
           & > td:nth-child(1) {

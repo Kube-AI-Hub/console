@@ -23,10 +23,11 @@ import { observer } from 'mobx-react'
 import { get, isEmpty } from 'lodash'
 import { Modal } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class ScanRepositoryLogs extends React.Component {
+class ScanRepositoryLogs extends React.Component {
   static propTypes = {
     name: PropTypes.string,
     branches: PropTypes.array,

@@ -26,7 +26,7 @@ import { List } from 'components/Base'
 import Item from './Item'
 import AddNode from './AddNode'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class NodeList extends React.Component {
   static propTypes = {

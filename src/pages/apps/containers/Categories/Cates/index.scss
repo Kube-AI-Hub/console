@@ -1,10 +1,10 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .categories {
   min-height: 300px;
   padding: 4px 0 20px;
-  color: $text-color;
+  color: variables.$text-color;
 
   .title {
     display: flex;
@@ -12,7 +12,7 @@
     padding: 0 16px 0 20px;
     line-height: 44px;
     font-weight: bold;
-    background-color: $card-bg-color;
+    background-color: variables.$card-bg-color;
 
     label {
       width: 50%;
@@ -36,7 +36,7 @@
 
       &:hover,
       &.active {
-        background-color: $bg-color;
+        background-color: variables.$bg-color;
       }
 
       &.hasAction {
@@ -61,7 +61,7 @@
         width: 8px;
         height: 8px;
         border-radius: 50%;
-        background-color: $dark;
+        background-color: variables.$dark;
       }
 
       .number {

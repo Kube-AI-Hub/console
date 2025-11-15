@@ -37,7 +37,7 @@ import QuotaItem from './Item'
 
 import { QUOTAS_KEY_MODULE_MAP } from './constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Quotas extends React.Component {
   constructor(props) {

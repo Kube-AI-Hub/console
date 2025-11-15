@@ -24,15 +24,16 @@ import { Form } from '@kube-design/components'
 import { TypeSelect } from 'components/Base'
 import { NETWORK_PLUGIN_ICONS, STORAGE_PLUGIN_ICONS } from '../constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 import Title from '../Title'
 import KubernetesParams from './KubernetesParams'
 import NetworkParams from './NetworkParams'
 import StorageParams from './StorageParams'
 
+export default
 @observer
-export default class ClusterSettings extends React.Component {
+class ClusterSettings extends React.Component {
   constructor(props) {
     super(props)
 

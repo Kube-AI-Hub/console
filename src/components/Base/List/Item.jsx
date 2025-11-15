@@ -22,7 +22,7 @@ import classNames from 'classnames'
 import { Indicator } from 'components/Base'
 import React from 'react'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Item extends React.Component {
   renderDetail(details) {

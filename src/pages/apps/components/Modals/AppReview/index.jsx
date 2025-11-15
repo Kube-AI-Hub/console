@@ -35,12 +35,13 @@ import AppStore from 'stores/openpitrix/app'
 import VersionStore from 'stores/openpitrix/version'
 import FilesStore from 'stores/openpitrix/file'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const { TabPanel } = Tabs
 
+export default
 @observer
-export default class AppReview extends Component {
+class AppReview extends Component {
   static propTypes = {
     visible: PropTypes.bool,
     canHandle: PropTypes.bool,

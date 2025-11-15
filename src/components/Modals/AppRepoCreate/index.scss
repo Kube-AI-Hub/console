@@ -1,7 +1,7 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .body {
-  background-color: $white;
+  background-color: variables.$white;
 }
 
 .formItem {
@@ -13,7 +13,7 @@
     display: block;
     margin-bottom: 4px;
     line-height: 20px;
-    color: $text-color;
+    color: variables.$text-color;
   }
 
   .desc {

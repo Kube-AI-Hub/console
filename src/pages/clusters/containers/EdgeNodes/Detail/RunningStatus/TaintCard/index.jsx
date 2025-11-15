@@ -20,7 +20,7 @@ import React from 'react'
 
 import { Columns, Column } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const TaintCard = ({ data }) => (
   <div className={styles.card}>

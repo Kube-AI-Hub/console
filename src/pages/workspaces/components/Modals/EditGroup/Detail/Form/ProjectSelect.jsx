@@ -28,10 +28,11 @@ import { showNameAndAlias } from 'utils'
 import RoleStore from 'stores/role'
 import ProjectStore from 'stores/project'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class ProjectSelect extends Component {
+class ProjectSelect extends Component {
   static propTypes = {
     clusters: PropTypes.array,
   }
@@ -155,7 +156,7 @@ export default class ProjectSelect extends Component {
         <span>{showNameAndAlias(option.item)}</span>
         {option.needUpgrade && (
           <Tooltip
-            content={t('CLUSTER_UPGRADE_REQUIRED', { version: 'v3.1.0' })}
+            content={t('CLUSTER_UPGRADE_REQUIRED', { version: 'v3.0.0' })}
             placement="bottom"
           >
             <Icon

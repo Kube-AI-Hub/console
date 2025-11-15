@@ -27,7 +27,7 @@ import Steps from './Steps'
 import BaseInfo from './BaseInfo'
 import ClusterSettings from './ClusterSettings'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class WorkspaceCreateModal extends React.Component {
   static propTypes = {
@@ -137,7 +137,6 @@ export default class WorkspaceCreateModal extends React.Component {
     return (
       <div className={styles.header}>
         <div className={styles.title}>
-          <Icon name="close" size={20} clickable onClick={onCancel} />
           <span />
           <Icon name="enterprise" size={20} />
           <span>{t('CREATE_WORKSPACE')}</span>
@@ -147,6 +146,7 @@ export default class WorkspaceCreateModal extends React.Component {
             <Steps steps={this.steps} current={currentStep} />
           )}
         </div>
+        <Icon name="close" className={styles.closeIcon} size={20} clickable onClick={onCancel} />
         <div className={styles.headerBottom} />
       </div>
     )
@@ -191,7 +191,7 @@ export default class WorkspaceCreateModal extends React.Component {
 
     return (
       <Modal
-        className={styles.modal}
+        // className={styles.modal}
         bodyClassName={styles.body}
         visible={visible}
         hideHeader

@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import { RadioGroup, RadioButton, Icon } from '@kube-design/components'
 
 import { isEmpty, get, set, unset } from 'lodash'
-import styles from './index.scss'
+import * as styles from './index.scss'
 import TemplateRule from './TemplateRule'
 import CustomRule from './CustomRule'
 

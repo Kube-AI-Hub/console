@@ -1,12 +1,12 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 @mixin item {
   .title {
     display: flex;
     font-size: 12px;
     line-height: 20px;
-    color: $dark-color07;
+    color: variables.$dark-color07;
     align-items: center;
 
     .toolTip {
@@ -18,7 +18,7 @@
     display: block;
     font-size: 12px;
     line-height: 20px;
-    color: $dark-color01;
+    color: variables.$dark-color01;
 
     .mode_title {
       display: flex;
@@ -59,7 +59,7 @@
     width: 32.5%;
     height: 64px;
     padding: 17px;
-    background: $light-color01;
+    background: variables.$light-color01;
     border-radius: 4px;
     display: flex;
     align-items: center;

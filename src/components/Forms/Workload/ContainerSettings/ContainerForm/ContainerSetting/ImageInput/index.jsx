@@ -30,7 +30,7 @@ import ContainerStore from 'stores/container'
 import DropdownContent from './DropdownContent'
 import ImageTagRadioList from './ImageTagRadioList'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ImageSearch extends Component {
   constructor(props) {

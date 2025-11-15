@@ -23,7 +23,7 @@ import { Modal } from 'components/Base'
 import { Icon } from '@kube-design/components'
 
 import FormGroupCard from '../FormGroupCard'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class GraphTypeSelectModal extends Component {
   state = {

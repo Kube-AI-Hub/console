@@ -19,7 +19,7 @@
 import React from 'react'
 import { Column, Columns, Form, Input } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class SELinuxOptions extends React.Component {
   get prefix() {

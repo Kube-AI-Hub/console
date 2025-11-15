@@ -24,7 +24,7 @@ import { isArray, isEmpty, set } from 'lodash'
 import Loading from '@kube-design/components/lib/components/Loading'
 
 import ParmasItem from './params'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const { TabPanel } = Tabs
 

@@ -25,10 +25,11 @@ import { COMPONENT_ICON_MAP } from 'utils/constants'
 
 import ComponentStore from 'stores/component'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class ServiceComponents extends Component {
+class ServiceComponents extends Component {
   store = new ComponentStore()
 
   get configs() {

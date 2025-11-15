@@ -21,7 +21,7 @@ import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import { Button } from '@kube-design/components'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Switch extends PureComponent {
   static propTypes = {

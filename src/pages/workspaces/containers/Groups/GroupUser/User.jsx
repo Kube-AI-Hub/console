@@ -21,7 +21,7 @@ import { Avatar, Text } from 'components/Base'
 import { toJS } from 'mobx'
 import PropTypes from 'prop-types'
 import React from 'react'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class UserItem extends React.Component {
   static propTypes = {

@@ -25,7 +25,7 @@ import ExternalName from 'components/Forms/Service/ExternalName'
 import { SERVICE_TYPES, SERVICE_TYPES_VALUE } from 'utils/constants'
 import ServiceSettings from './Form'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ServiceSettingModal extends React.Component {
   static propTypes = {

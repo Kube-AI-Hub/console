@@ -25,7 +25,7 @@ import PipelineContent from 'devops/components/Pipeline'
 import classnames from 'classnames'
 import { isEmpty } from 'lodash'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class PipelineModal extends React.Component {
   static propTypes = {

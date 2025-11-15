@@ -29,6 +29,12 @@ import { StatusTabs } from 'components/Cards/Monitoring'
 import TabItem from './Tab'
 
 const MetricTypes = {
+  gpu_memory_usage: 'cluster_gpu_memory_usage',
+  gpu_memory_total: 'cluster_gpu_memory_total',
+  gpu_memory_utilisation: 'cluster_gpu_memory_utilisation',
+  gpu_usage: 'cluster_gpu_usage',
+  gpu_total: 'cluster_gpu_total',
+  gpu_utilisation: 'cluster_gpu_utilisation',
   cpu_usage: 'cluster_cpu_usage',
   cpu_total: 'cluster_cpu_total',
   cpu_utilisation: 'cluster_cpu_utilisation',
@@ -42,9 +48,10 @@ const MetricTypes = {
   pod_capacity: 'cluster_pod_quota',
 }
 
+export default
 @inject('rootStore')
 @observer
-export default class ClusterResourceStatusTab extends React.Component {
+class ClusterResourceStatusTab extends React.Component {
   constructor(props) {
     super(props)
 
@@ -72,7 +79,20 @@ export default class ClusterResourceStatusTab extends React.Component {
 
   getTabOptions = () => {
     const lastData = getLastMonitoringData(this.metrics)
+
     const result = [
+      {
+        name: 'GPU_MEMORY',
+        unitType: 'gpu_memory',
+        used: this.getValue(lastData[MetricTypes.gpu_memory_usage]),
+        total: this.getValue(lastData[MetricTypes.gpu_memory_total]),
+      },
+      {
+        name: 'GPU',
+        unitType: 'gpu',
+        used: this.getValue(lastData[MetricTypes.gpu_usage]),
+        total: this.getValue(lastData[MetricTypes.gpu_total]),
+      },
       {
         name: 'CPU',
         unitType: 'cpu',
@@ -107,6 +127,23 @@ export default class ClusterResourceStatusTab extends React.Component {
 
   getContentOptions = () => {
     const result = [
+      {
+        type: 'utilisation',
+        title: 'GPU_MEMORY_USAGE',
+        unit: '%',
+        legend: ['USAGE'],
+        data: get(
+          this.metrics,
+          `${MetricTypes.gpu_memory_utilisation}.data.result`
+        ),
+      },
+      {
+        type: 'utilisation',
+        title: 'GPU_USAGE',
+        unit: '%',
+        legend: ['USAGE'],
+        data: get(this.metrics, `${MetricTypes.gpu_utilisation}.data.result`),
+      },
       {
         type: 'utilisation',
         title: 'CPU_USAGE',
@@ -153,8 +190,12 @@ export default class ClusterResourceStatusTab extends React.Component {
     }
 
     switch (option.type) {
-      default:
       case 'area': {
+        const config = getAreaChartOps(option)
+        return <SimpleArea {...commonProps} {...config} />
+      }
+      // defaults to 'area'
+      default: {
         const config = getAreaChartOps(option)
         return <SimpleArea {...commonProps} {...config} />
       }

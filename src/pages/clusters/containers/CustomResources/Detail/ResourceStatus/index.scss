@@ -1,7 +1,7 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .title {
-  @include TypographySymbolText;
+  @include mixins.TypographySymbolText;
   margin-bottom: 12px;
 }

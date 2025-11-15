@@ -26,10 +26,11 @@ import { Modal } from 'components/Base'
 
 import User from './User'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class ModifyMemberModal extends React.Component {
+class ModifyMemberModal extends React.Component {
   static propTypes = {
     users: PropTypes.array,
     roles: PropTypes.array,

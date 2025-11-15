@@ -34,10 +34,11 @@ import { generateId } from 'utils'
 
 import Steps from './Steps'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class AppDeploy extends React.Component {
+class AppDeploy extends React.Component {
   static propTypes = {
     visible: PropTypes.bool,
     app: PropTypes.object,

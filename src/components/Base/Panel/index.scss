@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   position: relative;
@@ -8,23 +8,23 @@
 
 .title {
   margin-bottom: 8px;
-  @include TypographySymbolText();
+  @include mixins.TypographySymbolText();
 }
 
 .panel {
   padding: 12px;
-  border-radius: $border-radius;
-  background-color: $white;
-  box-shadow: $card-shadow;
+  border-radius: variables.$border-radius;
+  background-color: variables.$white;
+  box-shadow: variables.$card-shadow;
 }
 
 .empty {
   padding: 12px;
-  border-radius: $border-radius;
-  background-color: $card-bg-color;
+  border-radius: variables.$border-radius;
+  background-color: variables.$card-bg-color;
   font-size: 16px;
-  font-weight: $font-bold;
-  color: $light-color07;
+  font-weight: variables.$font-bold;
+  color: variables.$light-color07;
 }
 
 .loading {

@@ -28,12 +28,13 @@ import { ICON_TYPES } from 'utils/constants'
 import FederatedStore from 'stores/federated'
 import IngressStore from 'stores/ingress'
 
+export default
 @withProjectList({
   store: new FederatedStore(new IngressStore()),
   module: 'ingresses',
   name: 'ROUTE',
 })
-export default class Routers extends React.Component {
+class Routers extends React.Component {
   get tips() {
     return [
       {

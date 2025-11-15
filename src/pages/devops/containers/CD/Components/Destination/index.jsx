@@ -23,7 +23,7 @@ import React from 'react'
 import { inCluster2Default, showNameAndAlias } from 'utils'
 import { CLUSTER_GROUP_TAG_TYPE, CLUSTER_PROVIDER_ICON } from 'utils/constants'
 import { eventKeys, useEventValue } from 'utils/events'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const Destination = props => {
   const clusterMap = keyBy(props.clustersDetail, 'name')

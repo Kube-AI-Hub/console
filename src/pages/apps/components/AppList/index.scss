@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .appList {
   position: relative;
@@ -18,7 +18,7 @@
   }
 
   @media (max-width: 100px) {
-    .appItem{
+    .appItem {
       width: calc(50% - 11px);
 
       &:nth-of-type(3n + 3) {

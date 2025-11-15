@@ -1,10 +1,10 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .empty {
   padding: 12px;
   border-radius: 3px;
-  border: dashed 1px $border-color;
+  border: dashed 1px variables.$border-color;
   background-color: #ffffff;
 }
 
@@ -21,8 +21,8 @@
     position: relative;
     padding: 12px;
     border-radius: 3px;
-    background-color: $card-bg-color;
-    transition: all $trans-speed ease-in-out;
+    background-color: variables.$card-bg-color;
+    transition: all variables.$trans-speed ease-in-out;
 
     .tagWrapper {
       text-align: right;
@@ -58,7 +58,7 @@
     &:hover {
       .text {
         & > div > div {
-          color: $primary;
+          color: variables.$primary;
         }
       }
     }

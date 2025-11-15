@@ -1,14 +1,14 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .container {
   width: 100%;
   height: 100%;
   position: relative;
-  background: $dark-color06;
+  background: variables.$dark-color06;
 
   svg {
-    fill: $green-color03;
+    fill: variables.$green-color03;
     fill-opacity: 0.6;
   }
 
@@ -22,24 +22,23 @@
       background-size: 100% 100%;
 
       h3 {
-        @include TypographyParagraph($white);
+        @include mixins.TypographyParagraph(variables.$white);
         position: absolute;
         right: 16%;
         top: 10%;
         width: 28%;
         text-align: center;
       }
-
     }
 
     .wave {
       animation: waveSvgAnim 4s linear infinite;
     }
-    
+
     .wave2 {
       animation: waveSvgAnim 6s linear infinite;
     }
-    
+
     @keyframes waveSvgAnim {
       0% {
         transform: translateX(0px);
@@ -47,6 +46,6 @@
       100% {
         transform: translateX(-100px);
       }
-    }  
+    }
   }
 }

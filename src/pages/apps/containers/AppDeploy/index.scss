@@ -1,13 +1,13 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .content {
   position: relative;
-  top: -$header-height;
+  top: -(variables.$header-height);
 }
 
 .formWrapper {
-  width: $apps-content-width;
+  width: variables.$apps-content-width;
   padding: 32px 24px;
   margin: 0 auto;
   margin-bottom: 0 !important;
@@ -18,7 +18,7 @@
 }
 
 .steps {
-  background-color: $bg-color;
+  background-color: variables.$bg-color;
 }
 
 .control {

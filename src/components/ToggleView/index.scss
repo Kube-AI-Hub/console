@@ -1,12 +1,12 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .toggle {
   & > a {
-    color: $blue;
+    color: variables.$blue;
   }
 
   svg {
-    color: $blue;
+    color: variables.$blue;
   }
 }
 

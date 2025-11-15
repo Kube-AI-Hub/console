@@ -25,10 +25,11 @@ import { Modal, ScrollLoad } from 'components/Base'
 import ClusterStore from 'stores/cluster'
 import Card from './Card'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class ClusterSelectModal extends React.Component {
+class ClusterSelectModal extends React.Component {
   constructor(props) {
     super(props)
     this.store = new ClusterStore()

@@ -34,7 +34,7 @@ import {
   Icon,
 } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const protocolReg = /^(http|https|s3):\/\//
 
@@ -44,8 +44,9 @@ const protocols = [
   { label: 's3://', value: 's3' },
 ]
 
+export default
 @observer
-export default class UrlInput extends React.Component {
+class UrlInput extends React.Component {
   static propTypes = {
     formData: PropTypes.object,
     onValidate: PropTypes.func,
@@ -91,7 +92,7 @@ export default class UrlInput extends React.Component {
 
   getUrl(formData) {
     if (formData.url) {
-      const reg = new RegExp('^([\\s\\S]*?:\\/\\/)([\\s\\S]*)$', 'g')
+      const reg = /^([\s\S]*?:\/\/)([\s\S]*)$/g
       const res = reg.exec(formData.url)
       return res ? res[2] : ''
     }

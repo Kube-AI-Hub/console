@@ -24,7 +24,7 @@ import { get } from 'lodash'
 import { Panel } from 'components/Base'
 import ReplicaStatus from './Status'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class HPACard extends React.Component {
   static propTypes = {
@@ -45,7 +45,6 @@ export default class HPACard extends React.Component {
     let status = {}
 
     switch (module) {
-      default:
       case 'deployments': {
         status = {
           current: detail.availablePodNums || 0,
@@ -72,6 +71,15 @@ export default class HPACard extends React.Component {
           current: Array.isArray(detail.pods) ? detail.pods.length : 1,
           desire: get(detail, 'replicas', 0),
         }
+        break
+      }
+      // default to deployments
+      default: {
+        status = {
+          current: detail.availablePodNums || 0,
+          desire: detail.podNums || 0,
+        }
+        break
       }
     }
 

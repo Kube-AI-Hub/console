@@ -18,7 +18,7 @@
 import React, { memo } from 'react'
 import { NumberInput, StringInput, ObjectInput } from 'components/Inputs'
 import { Select, Input, Form } from '@kube-design/components'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default memo(function ProbeSection({ checkerType }) {
   const defaultData = {

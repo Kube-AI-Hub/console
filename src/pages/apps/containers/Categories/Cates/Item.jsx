@@ -20,7 +20,7 @@ import React, { PureComponent } from 'react'
 import classnames from 'classnames'
 import { Icon } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Item extends PureComponent {
   handleSelect = () => {

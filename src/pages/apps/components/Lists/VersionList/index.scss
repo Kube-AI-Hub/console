@@ -1,11 +1,11 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .main {
   padding: 12px;
 
   .inner {
-    background-color: $bg-color;
+    background-color: variables.$bg-color;
   }
 
   .header {
@@ -52,8 +52,8 @@
   display: flex;
   align-items: center;
   padding: 12px;
-  background-color: $white;
-  border: 1px solid $border-color;
+  background-color: variables.$white;
+  border: 1px solid variables.$border-color;
   border-radius: 4px;
   cursor: pointer;
 
@@ -69,7 +69,7 @@
       width: 16px;
       height: 16px;
       border-radius: 50%;
-      border: 2px solid $white;
+      border: 2px solid variables.$white;
     }
   }
 
@@ -91,11 +91,11 @@
 
       dt {
         font-weight: bold;
-        color: $text-color;
+        color: variables.$text-color;
       }
 
       dd {
-        color: $second-text-color;
+        color: variables.$second-text-color;
       }
     }
   }
@@ -110,12 +110,12 @@
   width: 100%;
   margin-bottom: 20px;
   padding: 12px;
-  background-color: $white;
-  border: 1px solid $border-hover-color;
+  background-color: variables.$white;
+  border: 1px solid variables.$border-hover-color;
   border-top: 0 none;
   box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.2);
   border-radius: 0 0 4px 4px;
-  transition: all $trans-speed;
+  transition: all variables.$trans-speed;
 
   .actions {
     position: absolute;
@@ -135,25 +135,25 @@
       transform: rotate(180deg);
 
       svg {
-        color: $white;
+        color: variables.$white;
       }
     }
   }
 
   .itemMain {
     margin: 0 -4px;
-    background-color: $dark;
-    border-color: $dark;
+    background-color: variables.$dark;
+    border-color: variables.$dark;
 
     .icon {
       .status {
-        border-color: $dark;
+        border-color: variables.$dark;
       }
     }
     dl {
       dd,
       dt {
-        color: $white;
+        color: variables.$white;
       }
     }
   }

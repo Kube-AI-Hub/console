@@ -18,7 +18,6 @@
 
 const { resolve } = require('path')
 const webpack = require('webpack')
-const HardSourceWebpackPlugin = require('hard-source-webpack-plugin')
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin')
 const baseConfig = require('./webpack.base')
 const localeConfig = require('./webpack.locale')
@@ -31,55 +30,18 @@ const config = {
   output: {
     filename: '[name].js',
     path: root('dist/'),
-    publicPath: '/',
-    pathinfo: false,
+    publicPath: '/dist/',
   },
-  devtool: 'cheap-module-eval-source-map',
+  devtool: 'eval-cheap-module-source-map',
   module: {
     rules: [
       ...baseConfig.moduleRules,
       {
-        test: /\.s[ac]ss$/i,
-        include: root('src'),
-        use: [
-          'style-loader',
-          {
-            loader: 'css-loader',
-            options: {
-              minimize: false,
-              importLoaders: 1,
-              localIdentName: '[path][name]__[local]',
-              modules: true,
-            },
-          },
-          {
-            loader: 'sass-loader',
-          },
-        ],
-      },
-      {
-        test: /\.s[ac]ss$/i,
-        include: root('node_modules'),
-        use: ['style-loader', 'css-loader', 'sass-loader'],
-      },
-      {
-        test: /\.css$/,
-        use: [
-          'style-loader',
-          {
-            loader: 'css-loader',
-            options: {
-              minimize: false,
-              importLoaders: 2,
-            },
-          },
-        ],
-      },
-      {
         test: /\.(ttf|otf|eot|woff2?)(\?.+)?$/,
         include: root('src/assets'),
-        use: {
-          loader: 'file-loader',
+        type: 'asset/resource',
+        generator: {
+          filename: 'assets/[name].[ext]',
         },
       },
     ],
@@ -104,34 +66,67 @@ const config = {
     },
   },
   resolve: baseConfig.resolve,
+  cache: {
+    type: 'filesystem',
+    buildDependencies: {
+      config: [__filename],
+    },
+  },
   plugins: [
     ...baseConfig.plugins,
-    new HardSourceWebpackPlugin(),
-    new webpack.HotModuleReplacementPlugin(),
     new ReactRefreshWebpackPlugin({ overlay: false }),
-    new webpack.WatchIgnorePlugin([
-      root('node_modules'),
-      root('server'),
-      root('build'),
-      root('dist'),
-    ]),
+    new webpack.WatchIgnorePlugin({
+      paths: [
+        root('node_modules'),
+        root('server'),
+        root('build'),
+        root('dist'),
+      ],
+    }),
     new webpack.DefinePlugin({
       'process.env.BROWSER': true,
       'process.env.NODE_ENV': JSON.stringify('development'),
     }),
   ],
   devServer: {
-    publicPath: '/',
-    compress: true,
-    noInfo: false,
-    quiet: false,
-    hot: true,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
+    static: {
+      directory: root('dist/'),
+      publicPath: '/dist',
     },
-    disableHostCheck: true,
+    client: {
+      logging: 'info',
+      overlay: {
+        errors: true,
+        warnings: false,
+      },
+    },
+    allowedHosts: 'all',
     host: '0.0.0.0',
     port: 8001,
+    hot: true,
+    compress: true,
+    headers: (req, res) => {
+      const origin = req.headers.origin
+      res.setHeader('Access-Control-Allow-Origin', origin || '*')
+
+      res.setHeader('Access-Control-Allow-Credentials', 'true')
+
+      res.setHeader(
+        'Access-Control-Allow-Methods',
+        'GET, POST, PUT, DELETE, OPTIONS'
+      )
+
+      res.setHeader(
+        'Access-Control-Allow-Headers',
+        'Access-Control-Allow-Headers,Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers,DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Range,Authorization'
+      )
+
+      res.setHeader('Access-Control-Max-Age', '86400')
+
+      if (req.method === 'OPTIONS') {
+        res.status = 204
+      }
+    },
   },
 }
 

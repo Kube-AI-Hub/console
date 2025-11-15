@@ -27,7 +27,7 @@ import { joinSelector } from 'utils'
 import EmptyList from 'components/Cards/EmptyList'
 import { Component as Base } from 'projects/containers/GrayRelease/Jobs'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @inject('detailStore')
 @observer

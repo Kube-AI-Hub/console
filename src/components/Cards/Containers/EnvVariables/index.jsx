@@ -24,7 +24,7 @@ import { isEmpty } from 'lodash'
 import { Icon } from '@kube-design/components'
 import { Card } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const HIDE_RULE = ['password', 'secret']
 

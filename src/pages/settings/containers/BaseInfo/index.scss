@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .header {
   display: flex;
@@ -7,7 +7,7 @@
   justify-content: space-between;
 
   a {
-    color: $blue;
+    color: variables.$blue;
     font-weight: 600;
   }
 }
@@ -17,7 +17,7 @@
   align-items: center;
   padding: 20px;
   margin: 12px -12px 0 -12px;
-  background-color: $card-bg-color;
+  background-color: variables.$card-bg-color;
 }
 
 .image {
@@ -28,8 +28,8 @@
   height: 88px;
   margin-right: 20px;
   border-radius: 2px;
-  border: dashed 1px $light-color04;
-  background-color: $white;
+  border: dashed 1px variables.$light-color04;
+  background-color: variables.$white;
 
   img {
     width: 282px;

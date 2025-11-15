@@ -21,7 +21,7 @@ import { Icon } from '@kube-design/components'
 import { isFunction, isUndefined } from 'lodash'
 import classNames from 'classnames'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Text extends React.PureComponent {
   render() {

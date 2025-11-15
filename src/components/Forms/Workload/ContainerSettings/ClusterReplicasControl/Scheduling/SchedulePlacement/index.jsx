@@ -21,7 +21,7 @@ import classNames from 'classnames'
 import { debounce } from 'lodash'
 import { Checkbox, Icon } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class SchedulePlacement extends Component {
   state = {

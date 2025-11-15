@@ -1,7 +1,7 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
-$trans-speed: 0.2s;
+variables.$trans-speed: 0.2s;
 
 .subNav {
   & > p {
@@ -15,7 +15,7 @@ $trans-speed: 0.2s;
     & > li {
       border-radius: 18px;
       border: solid 1px transparent;
-      transition: all $trans-speed ease-in-out;
+      transition: all variables.$trans-speed ease-in-out;
 
       & > a,
       .title {
@@ -37,7 +37,7 @@ $trans-speed: 0.2s;
 
           .kubed-icon-chevron-down {
             margin-top: 4px;
-            transition: all $trans-speed ease-in-out;
+            transition: all variables.$trans-speed ease-in-out;
           }
         }
       }
@@ -45,7 +45,7 @@ $trans-speed: 0.2s;
       &.select,
       &.open {
         & > a {
-          color: $primary;
+          color: variables.$primary;
 
           :global .kubed-icon {
             color: #00aa72;
@@ -63,14 +63,14 @@ $trans-speed: 0.2s;
           height: 20px;
           margin-top: 8px;
           opacity: 1;
-          transition: height $trans-speed ease-in-out,
-            margin-top $trans-speed ease-in-out,
-            opacity $trans-speed ease-in-out 0.1s;
+          transition: height variables.$trans-speed ease-in-out,
+            margin-top variables.$trans-speed ease-in-out,
+            opacity variables.$trans-speed ease-in-out 0.1s;
         }
       }
 
       &.childSelect .title {
-        color: $primary;
+        color: variables.$primary;
         :global .kubed-icon {
           color: #00aa72;
           fill: #90e0c5;
@@ -125,8 +125,9 @@ $trans-speed: 0.2s;
     height: 0;
     opacity: 0;
     overflow: hidden;
-    transition: height $trans-speed ease-in-out 0.1s,
-      margin-top $trans-speed ease-in-out 0.1s, opacity $trans-speed ease-in-out;
+    transition: height variables.$trans-speed ease-in-out 0.1s,
+      margin-top variables.$trans-speed ease-in-out 0.1s,
+      opacity variables.$trans-speed ease-in-out;
 
     & > a {
       display: block;
@@ -137,7 +138,7 @@ $trans-speed: 0.2s;
     &:hover,
     &:active {
       & > a {
-        color: $primary;
+        color: variables.$primary;
       }
     }
 

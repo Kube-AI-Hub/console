@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .templateList {
   display: flex;
@@ -29,7 +29,7 @@
 
     p {
       margin-top: -2px;
-      color: $dark-color01;
+      color: variables.$dark-color01;
     }
   }
 }
@@ -39,6 +39,6 @@
     font-weight: bold;
   }
   p {
-    @include TypographyParagraph($dark-color01);
+    @include mixins.TypographyParagraph(variables.$dark-color01);
   }
 }

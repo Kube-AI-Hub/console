@@ -30,6 +30,26 @@ const BANDWIDTH_RULE_CONFIG = getBaseRuleConfig({
 })
 
 export default {
+  pod_gpu_usage: {
+    label: 'GPU_USAGE_SCAP',
+    prefixIcon: 'cpu',
+    ruleConfig: CPU_RULE_CONFIG,
+  },
+  pod_vgpu_utilisation: {
+    label: 'GPU_UTILIZATION_SCAP',
+    prefixIcon: 'cpu',
+    ruleConfig: PERCENT_RULE_CONFIG,
+  },
+  pod_gpu_memory_usage: {
+    label: 'GPU_MEMORY_USAGE_SCAP',
+    prefixIcon: 'memory',
+    ruleConfig: MEMORY_RULE_CONFIG,
+  },
+  pod_vgpu_memory_utilisation: {
+    label: 'GPU_MEMORY_UTILIZATION_SCAP',
+    prefixIcon: 'memory',
+    ruleConfig: PERCENT_RULE_CONFIG,
+  },
   pod_cpu_usage: {
     label: 'CPU_USAGE_SCAP',
     prefixIcon: 'cpu',

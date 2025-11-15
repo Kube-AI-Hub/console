@@ -19,7 +19,7 @@
 import React, { useState, useRef } from 'react'
 import { Button } from '@kube-design/components'
 import classNames from 'classnames'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const ArrowModal = ({
   children,

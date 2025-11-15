@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .codeEditor {
   height: 382px;
@@ -17,9 +17,9 @@
     vertical-align: middle;
   }
   span {
-    color: $red;
+    color: variables.$red;
     text-indent: 1em;
-    @include ellipsis;
+    @include mixins.ellipsis;
 
     span {
       margin-right: 5px;

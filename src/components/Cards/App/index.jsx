@@ -22,7 +22,7 @@ import { Image } from 'components/Base'
 
 import { safeParseJSON } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class AppCard extends React.Component {
   renderVendor() {

@@ -26,7 +26,7 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import cardStyles from '../Card/index.scss'
 
-import styles from '../Sider/index.scss'
+import * as styles from '../Sider/index.scss'
 import YamlEditor from '../StepModals/kubernetesYaml'
 import StepsSelector from '../StepsSelector'
 import StepContainer from './StepContainer'
@@ -42,8 +42,9 @@ const stepNameMapper = {
   sh: 'shell',
 }
 
+export default
 @observer
-export default class StepsEditor extends React.Component {
+class StepsEditor extends React.Component {
   static defaultProps = {
     activeStage: {},
   }

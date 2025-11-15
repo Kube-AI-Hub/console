@@ -21,7 +21,7 @@ import { Panel, Text } from 'components/Base'
 
 import { createCenterWindowOpt } from 'utils/dom'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Tools extends Component {
   getWindowOpts() {

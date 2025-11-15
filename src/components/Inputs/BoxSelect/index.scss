@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   list-style: none;
@@ -20,7 +20,7 @@
     :global {
       .icon {
         position: absolute;
-        @include vertical-center;
+        @include mixins.vertical-center;
         left: 20px;
       }
     }

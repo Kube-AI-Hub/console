@@ -24,7 +24,7 @@ import Banner from 'components/Cards/Banner'
 
 import ResourceQuota from './ResourceQuota'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @inject('projectStore')
 class QuotaManage extends React.Component {

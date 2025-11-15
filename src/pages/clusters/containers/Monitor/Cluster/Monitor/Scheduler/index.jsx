@@ -26,7 +26,7 @@ import ComponentMonitorStore from 'stores/monitoring/component'
 import { SimpleArea, PercentArea } from 'components/Charts'
 import { Controller as MonitoringController } from 'components/Cards/Monitoring'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const MetricTypes = {
   schedule_attempts_count: 'scheduler_schedule_attempts',

@@ -30,7 +30,7 @@ import AddExistVolumes from '../AddExistVolumes'
 import AddTemporary from '../AddTemporary'
 import AddHostPath from '../AddHostPath'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class AddVolume extends React.Component {
   static propTypes = {
@@ -260,8 +260,21 @@ export default class AddVolume extends React.Component {
         )
         break
       }
-      default:
       case 'exist': {
+        content = (
+          <AddExistVolumes
+            formRef={this.formRef}
+            formData={volume}
+            currentName={currentName}
+            volumes={volumes}
+            containers={containers}
+            collectSavedLog={collectSavedLog}
+          />
+        )
+        break
+      }
+      // treats default as exist
+      default: {
         content = (
           <AddExistVolumes
             formRef={this.formRef}

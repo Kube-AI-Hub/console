@@ -22,7 +22,7 @@ import { keyBy } from 'lodash'
 
 import PodsCard from './PodsCard'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @inject('detailStore', 'projectStore')
 @observer

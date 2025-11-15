@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .card {
 }
@@ -6,14 +6,14 @@
 .content {
   padding: 8px;
   border-radius: 4px;
-  background-color: $card-bg-color;
+  background-color: variables.$card-bg-color;
 }
 
 .table {
   width: 100%;
 
   tr {
-    border-bottom: 4px solid $card-bg-color;
+    border-bottom: 4px solid variables.$card-bg-color;
   }
 
   th,
@@ -24,11 +24,11 @@
 
   th {
     padding: 4px 0 8px 20px;
-    color: $second-text-color;
+    color: variables.$second-text-color;
   }
 
   td {
     padding: 8px 0 8px 20px;
-    background-color: $white;
+    background-color: variables.$white;
   }
 }

@@ -22,8 +22,9 @@ import classnames from 'classnames'
 
 import { Status } from 'components/Base'
 import { getLocalTime } from 'utils'
+import { Link } from 'react-router-dom'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class InstanceItem extends React.PureComponent {
   static propTypes = {
@@ -40,11 +41,11 @@ export default class InstanceItem extends React.PureComponent {
   renderContent() {
     const { detail, showVersion } = this.props
     const { version } = detail
-
+    const to=`/${detail.workspace}/clusters/${detail.cluster || detail.runtime_id}/projects/${detail.namespace}/applications/template/${detail.cluster_id}`
     return (
       <div className={styles.content}>
         <dl>
-          <dt>{detail.name}</dt>
+          <dt><Link to={to}>{detail.name}</Link></dt>
           <dd>{t('NAME')}</dd>
         </dl>
         <dl>
@@ -52,7 +53,7 @@ export default class InstanceItem extends React.PureComponent {
             <Status
               className={styles.status}
               type={detail.status}
-              name={t(detail.status)}
+              name={t(detail.status.toUpperCase())}
             />
           </dt>
           <dd>{t('STATUS')}</dd>

@@ -29,7 +29,7 @@ import NodeStore from 'stores/node'
 
 import Chart from './Chart'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const CONDITION_ICONS = {
   PodScheduled: 'stretch',

@@ -1,8 +1,8 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .tips {
-  border-radius: $border-radius;
-  background-color: $lightest;
+  border-radius: variables.$border-radius;
+  background-color: variables.$lightest;
   padding: 12px 0;
   border: solid 1px #eee;
   @at-root {
@@ -25,8 +25,8 @@
 
 .card {
   border-radius: 2px;
-  box-shadow: $base-shadow;
-  background-color: $white;
+  box-shadow: variables.$base-shadow;
+  background-color: variables.$white;
   padding: 12px 20px;
   margin: 8px 0;
 }
@@ -35,7 +35,7 @@
   font-size: 32px;
   font-weight: 600;
   line-height: 1.38;
-  color: $blue-color03;
+  color: variables.$blue-color03;
 }
 
 .banner {
@@ -56,7 +56,7 @@
       }
       p {
         font-size: 12px;
-        color: $dark-color07;
+        color: variables.$dark-color07;
         & > span {
           margin: -3px 5px 0 0;
           &:last-child {
@@ -76,7 +76,7 @@
   cursor: pointer;
   transition: box-shadow 0.3s;
   &:hover {
-    box-shadow: $card-hover-shadow;
+    box-shadow: variables.$card-hover-shadow;
     h4 {
       color: #4ca986;
     }
@@ -97,10 +97,10 @@
         font-stretch: normal;
         line-height: 1.67;
         letter-spacing: normal;
-        color: $dark-color07;
+        color: variables.$dark-color07;
       }
       p {
-        color: $dark-color01;
+        color: variables.$dark-color01;
       }
     }
   }
@@ -124,12 +124,12 @@
 
 .searchBarContainer {
   display: flex;
-  border: solid 1px $border-color;
+  border: solid 1px variables.$border-color;
   border-radius: 4px;
 
   .clusterSelector {
     flex-basis: 130px;
-    border-right: solid 1px $border-color;
+    border-right: solid 1px variables.$border-color;
     border-radius: 4px 0 0 4px;
     line-height: 40px;
     overflow: hidden;

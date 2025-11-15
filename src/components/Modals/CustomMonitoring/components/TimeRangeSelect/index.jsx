@@ -30,13 +30,16 @@ import {
 } from '@kube-design/components'
 import moment from 'moment-mini'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const defaultRecentOpts = [
   { label: 'Last 5 Minutes', value: { count: 5, unit: 'Minutes' } },
 ]
 
-const defaultFormat = ({ count, unit } = {}, { startTime = 0, endTime = 0 }) =>
+const defaultFormat = (
+  { count, unit } = {},
+  { startTime = 0, endTime = 0 } = { startTime: 0, endTime: 0 }
+) =>
   count
     ? `${t('LAST')} ${count} ${t(unit)}`
     : `${moment(startTime).format('YYYY/MM/DD HH:mm:ss')} ~ ${moment(

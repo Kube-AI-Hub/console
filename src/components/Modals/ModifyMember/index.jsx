@@ -24,10 +24,11 @@ import { observer } from 'mobx-react'
 import { Form, Select } from '@kube-design/components'
 import { Modal } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class ModifyMemberModal extends React.Component {
+class ModifyMemberModal extends React.Component {
   static propTypes = {
     role: PropTypes.string,
     roles: PropTypes.array,

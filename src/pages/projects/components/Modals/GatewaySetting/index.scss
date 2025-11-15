@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .modalBody {
   padding: 0 !important;
@@ -29,7 +29,7 @@
 
       .content {
         padding: 12px;
-        background: $light-color01;
+        background: variables.$light-color01;
         border-radius: 4px;
         margin-top: 14px;
 
@@ -37,7 +37,7 @@
           padding: 12px;
           margin-bottom: 12px;
           background: #ffffff;
-          border: 1px solid $light-color06;
+          border: 1px solid variables.$light-color06;
           border-radius: 4px;
 
           .toggle {
@@ -58,7 +58,7 @@
           .toggleTip {
             margin-top: 12px;
             padding: 12px;
-            background: $light-color01;
+            background: variables.$light-color01;
             border-radius: 4px;
             color: #363e4a;
           }
@@ -90,11 +90,11 @@
 
     .modalTitleContent {
       & > div {
-        @include TypographyTitleH6(#242e42);
+        @include mixins.TypographyTitleH6(#242e42);
       }
 
       & > p {
-        @include TypographyParagraph(#79879c);
+        @include mixins.TypographyParagraph(#79879c);
       }
     }
   }
@@ -102,13 +102,13 @@
 
 .footer {
   padding: 12px 20px;
-  border-radius: 0 0 $border-radius $border-radius;
-  background-color: $bg-color;
+  border-radius: 0 0 variables.$border-radius variables.$border-radius;
+  background-color: variables.$bg-color;
   text-align: right;
 }
 
 .objectBg {
-  background: $light-color01;
+  background: variables.$light-color01;
   padding: 12px;
 }
 

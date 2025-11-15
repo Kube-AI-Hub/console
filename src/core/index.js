@@ -1,3 +1,4 @@
+/* eslint-disable import/no-import-module-exports */
 /*
  * This file is part of KubeSphere Console.
  * Copyright (C) 2019 The KubeSphere Console Authors.
@@ -26,8 +27,7 @@ import request from 'utils/request'
 import App from './App'
 import GlobalValue from './global'
 import i18n from './i18n'
-
-require('@babel/polyfill')
+import 'core-js/stable'
 
 // request error handler
 window.onunhandledrejection = function(e) {

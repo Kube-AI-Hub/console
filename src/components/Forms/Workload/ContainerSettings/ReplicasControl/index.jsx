@@ -23,7 +23,7 @@ import { Button, Columns, Column } from '@kube-design/components'
 
 import { NumberInput } from 'components/Inputs'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ReplicasControl extends React.Component {
   static propTypes = {

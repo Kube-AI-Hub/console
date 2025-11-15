@@ -20,10 +20,11 @@ import React from 'react'
 import { observer } from 'mobx-react'
 import { pick } from 'lodash'
 import { Form, Input, Select, Tag } from '@kube-design/components'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class GitForm extends React.Component {
+class GitForm extends React.Component {
   getCredentialsListData = params => {
     const { devops, cluster } = this.props
     return this.props.store.getCredentials({ devops, cluster, ...params })

@@ -27,7 +27,7 @@ import PlatformMonitorStore from 'stores/monitoring/platform'
 import PlatformStatus from './PlatformStatus'
 import History from './History'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const MetricTypes = {
   cluster_count: 'kubesphere_cluser_count',
@@ -36,9 +36,10 @@ const MetricTypes = {
   app_template_count: 'kubesphere_app_template_count',
 }
 
+export default
 @inject('rootStore')
 @observer
-export default class AdminDashboard extends React.Component {
+class AdminDashboard extends React.Component {
   monitorStore = new PlatformMonitorStore()
 
   componentDidMount() {

@@ -31,7 +31,7 @@ import { isEmpty } from 'lodash'
 import { Text } from 'components/Base'
 
 import { ICON_TYPES } from 'utils/constants'
-import styles from './index.scss'
+import * as styles from './index.scss'
 import { PIE_COLORS, RESOURCE_TITLE } from '../../constats'
 import BillIcon from '../BillIcon'
 

@@ -1,12 +1,12 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .trigger {
   position: fixed;
   right: -16px;
   bottom: 64px;
-  z-index: $kube-tools-z-index;
-  transition: right $trans-speed ease;
+  z-index: variables.$kube-tools-z-index;
+  transition: right variables.$trans-speed ease;
 
   &:hover {
     right: 0px;
@@ -30,44 +30,44 @@
 
 .toolsWrapper {
   width: 420px;
-  background-color: $white;
-  border-radius: $border-radius;
+  background-color: variables.$white;
+  border-radius: variables.$border-radius;
   overflow: hidden;
   box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.2);
 }
 
 .toolsContent {
   padding: 12px;
-  background-color: $white;
+  background-color: variables.$white;
 }
 
 .toolsHeader {
   padding: 12px;
-  background-color: $card-bg-color;
+  background-color: variables.$card-bg-color;
 }
 
 .toolsTitle {
   padding: 12px;
-  border-radius: $border-radius;
-  background-color: $dark-color07;
+  border-radius: variables.$border-radius;
+  background-color: variables.$dark-color07;
 
   & > div > div {
-    color: $white !important;
+    color: variables.$white !important;
   }
 }
 
 .toolsFooter {
   padding: 10px 12px;
-  background-color: $card-bg-color;
+  background-color: variables.$card-bg-color;
 
   & > p {
-    @include TypographyParagraph($dark-color01);
+    @include mixins.TypographyParagraph(variables.$dark-color01);
   }
 }
 
 .groupTitle {
   margin: 12px 0;
-  @include TypographySymbolText;
+  @include mixins.TypographySymbolText;
 }
 
 .toolItem {

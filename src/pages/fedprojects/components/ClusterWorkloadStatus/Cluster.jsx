@@ -29,10 +29,11 @@ import { getWorkloadStatus } from 'utils/status'
 
 import WebSocketStore from 'stores/websocket'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class Cluster extends Component {
+class Cluster extends Component {
   websocket = new WebSocketStore()
 
   state = {

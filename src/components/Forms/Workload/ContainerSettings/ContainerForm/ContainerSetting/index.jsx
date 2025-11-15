@@ -35,7 +35,7 @@ import { ResourceLimit } from 'components/Inputs'
 import ToggleView from 'components/ToggleView'
 import ImageInput from './ImageInput'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ContainerSetting extends React.Component {
   constructor(props) {

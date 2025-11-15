@@ -24,7 +24,7 @@ import { Button } from '@kube-design/components'
 
 import Item from './Item'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class PropertiesInput extends React.Component {
   static propTypes = {

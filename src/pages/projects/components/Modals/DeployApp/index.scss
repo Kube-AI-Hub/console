@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .body {
   padding: 0;
@@ -9,7 +9,7 @@
   .header {
     width: 100%;
     height: 180px;
-    background: $light-color01;
+    background: variables.$light-color01;
 
     .logo {
       position: absolute;
@@ -23,14 +23,14 @@
       > h2 {
         font-size: 20px;
         line-height: 28px;
-        color: $dark-color07;
+        color: variables.$dark-color07;
         text-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.1);
         margin-bottom: 12px;
       }
       > p {
-        font-size: $size-small;
+        font-size: variables.$size-small;
         line-height: 20px;
-        color: $dark-color01;
+        color: variables.$dark-color01;
       }
     }
   }
@@ -46,10 +46,10 @@
   margin-bottom: 12px;
   padding: 8px 10px 8px 12px;
   border-radius: 4px;
-  background-color: $light-color01;
-  transition: all $trans-speed ease-in-out;
+  background-color: variables.$light-color01;
+  transition: all variables.$trans-speed ease-in-out;
   cursor: pointer;
-  font-size: $size-small;
+  font-size: variables.$size-small;
 
   img {
     width: 40px;
@@ -71,7 +71,7 @@
 
     &:hover {
       box-shadow: none;
-      border: 1px solid $light-color03;
+      border: 1px solid variables.$light-color03;
 
       .enterIcon {
         opacity: 0;
@@ -84,11 +84,11 @@
     flex: 1;
 
     div {
-      @include TypographyTitleH6($dark-color07);
+      @include mixins.TypographyTitleH6(variables.$dark-color07);
     }
 
     p {
-      @include TypographyParagraph($dark-color01);
+      @include mixins.TypographyParagraph(variables.$dark-color01);
     }
   }
 }

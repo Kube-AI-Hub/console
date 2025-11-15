@@ -29,8 +29,9 @@ import Table from 'components/Tables/List'
 import { getLocalTime, capitalize, getDisplayName } from 'utils'
 import { omit } from 'lodash'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @withList({
   store: new CodeStore(),
   module: 'codeRepos',
@@ -38,7 +39,7 @@ import styles from './index.scss'
   rowKey: 'name',
   authKey: 'gitrepositories',
 })
-export default class CRList extends React.Component {
+class CRList extends React.Component {
   get enabledActions() {
     return globals.app.getActions({
       module: 'gitrepositories',

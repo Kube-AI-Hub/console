@@ -20,7 +20,7 @@ import React from 'react'
 import { Modal } from 'components/Base'
 import classnames from 'classnames'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default function FullscreenModal(WrappedComponent, options = {}) {
   class observerModal extends React.Component {

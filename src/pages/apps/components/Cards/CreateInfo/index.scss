@@ -1,9 +1,9 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .createInfo {
   .title {
     font-weight: bold;
-    color: $title-color;
+    color: variables.$title-color;
     margin-bottom: 12px;
   }
 
@@ -11,8 +11,8 @@
     margin-bottom: 12px;
     padding: 12px;
     line-height: 20px;
-    background-color: $red-color01;
-    color: $red-color05;
+    background-color: variables.$red-color01;
+    color: variables.$red-color05;
   }
 
   .appIcon {
@@ -27,14 +27,14 @@
       justify-content: center;
       width: 100px;
       height: 100px;
-      background-color: $bg-color;
+      background-color: variables.$bg-color;
     }
 
     .uploadIcon {
       display: inline-block;
       margin: 12px 0 8px;
       width: 100px;
-      color: $blue;
+      color: variables.$blue;
       cursor: pointer;
     }
 
@@ -46,7 +46,7 @@
     .note {
       width: 100px;
       line-height: 20px;
-      color: $second-text-color;
+      color: variables.$second-text-color;
       text-align: center;
     }
   }
@@ -58,11 +58,10 @@
     }
     dt {
       font-weight: bold;
-      color: $title-color;
+      color: variables.$title-color;
     }
     dl {
-      color: $second-text-color;
+      color: variables.$second-text-color;
     }
   }
 }
-

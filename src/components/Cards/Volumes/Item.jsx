@@ -24,7 +24,7 @@ import { Icon } from '@kube-design/components'
 
 import { List } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const Card = ({ volume, match, isMultiProject }) => {
   const { workspace, cluster, namespace } = match.params

@@ -25,7 +25,7 @@ import { Text } from 'components/Base'
 
 import NodeStore from 'stores/rank/node'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const storeParams = {
   limit: 5,
@@ -33,8 +33,9 @@ const storeParams = {
   sort_type: 'desc',
 }
 
+export default
 @observer
-export default class NodesTop5 extends Component {
+class NodesTop5 extends Component {
   store = new NodeStore({ ...storeParams, cluster: this.cluster })
 
   componentDidMount() {

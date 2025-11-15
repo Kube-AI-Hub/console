@@ -26,7 +26,7 @@ import { Avatar, Status, Text } from 'components/Base'
 
 import { getValueByUnit } from 'utils/monitoring'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const MetricTypes = {
   cpu_used: 'node_cpu_usage',

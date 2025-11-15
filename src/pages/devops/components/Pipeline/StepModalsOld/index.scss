@@ -1,11 +1,11 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .CodeEditor {
   height: calc(100vh - 300px);
 }
 
 .clickable {
-  color: $green;
+  color: variables.$green;
   cursor: pointer;
   margin-left: 15px;
 }
@@ -23,7 +23,7 @@
 .dockerCredentialsContent__content {
   padding: 20px;
   width: 500px;
-  border: 2px dashed $light;
+  border: 2px dashed variables.$light;
   margin-bottom: 15px;
   position: relative;
 }
@@ -110,7 +110,7 @@
 
       &:focus {
         border-color: #55bc8a;
-        box-shadow: $base-shadow;
+        box-shadow: variables.$base-shadow;
         outline: transparent;
       }
     }

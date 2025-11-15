@@ -25,7 +25,7 @@ import { GRAY_RELEASE_CATEGORIES } from 'utils/constants'
 
 import Chart from './Chart'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Item extends React.Component {
   constructor(props) {

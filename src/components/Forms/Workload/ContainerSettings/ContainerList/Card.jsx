@@ -24,7 +24,7 @@ import { Icon, Tag } from '@kube-design/components'
 import { List } from 'components/Base'
 import { cpuFormat, memoryFormat } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const Card = ({ type = 'worker', container, onDelete, onEdit, readOnly }) => {
   const handleDelete = () => onDelete({ type, ...container })

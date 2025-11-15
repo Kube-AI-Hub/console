@@ -25,11 +25,10 @@ import { Panel } from 'components/Base'
 
 import QuotaItem from './QuotaItem'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default function ResourceQuota({ detail }) {
   const [quotaListKeys, setQuotaListKeys] = useState([])
-
   useEffect(() => {
     if (detail.used) {
       const _quotaListKeys = Object.entries(QUOTAS_MAP).map(([key, value]) => {
@@ -38,18 +37,21 @@ export default function ResourceQuota({ detail }) {
           ...value,
         }
       })
-
       Object.entries(detail.used).forEach(([key]) => {
         const quota = _quotaListKeys.find(item => item.name === key)
-
         if (isEmpty(quota)) {
-          _quotaListKeys.push({
-            label: key,
-            name: key,
-          })
+          if (key.includes('/gpu') && !key.includes('/gpumem')) {
+            _quotaListKeys.find(item => item.name === 'gpu').name = key
+          } else if (key.includes('/gpumem')) {
+            _quotaListKeys.find(item => item.name === 'gpu.memory').name = key
+          } else {
+            _quotaListKeys.push({
+              label: key,
+              name: key,
+            })
+          }
         }
       })
-
       setQuotaListKeys(_quotaListKeys)
     }
   }, [detail])

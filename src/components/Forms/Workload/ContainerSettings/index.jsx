@@ -48,7 +48,7 @@ import { getLeftQuota } from 'utils/workload'
 import ClusterReplicasControl from './ClusterReplicasControl'
 import ContainerForm from './ContainerForm'
 import ContainerList from './ContainerList'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 import Metadata from './Metadata'
 import PodSecurityContext from './PodSecurityContext'

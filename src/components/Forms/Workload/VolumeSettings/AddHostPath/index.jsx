@@ -23,7 +23,7 @@ import { Input, Form, Alert } from '@kube-design/components'
 import { PATTERN_NAME } from 'utils/constants'
 import { MountInput } from 'components/Inputs'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class AddHostPath extends React.Component {
   static propTypes = {

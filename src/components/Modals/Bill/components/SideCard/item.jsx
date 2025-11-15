@@ -23,7 +23,7 @@ import { Text, Indicator } from 'components/Base'
 
 import { get, isEmpty } from 'lodash'
 import { CLUSTER_GROUP_TAG_TYPE } from 'utils/constants'
-import styles from './item.scss'
+import * as styles from './item.scss'
 import BillIcon from '../BillIcon'
 
 export default function Card({
@@ -144,7 +144,7 @@ export default function Card({
   const renderDisabledTip = () => {
     return (
       <Tooltip
-        content={t('CLUSTER_UPGRADE_REQUIRED', { version: ' v3.1.0' })}
+        content={t('CLUSTER_UPGRADE_REQUIRED', { version: ' v3.0.0' })}
         placement="topRight"
       >
         <Icon

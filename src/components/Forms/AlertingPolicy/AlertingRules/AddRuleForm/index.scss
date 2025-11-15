@@ -1,11 +1,11 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .AddRuleContainer {
   :global {
     .h6 {
       font-size: 14px;
       line-height: 20px;
-      color: $dark-color07;
+      color: variables.$dark-color07;
 
       svg {
         width: 20px;
@@ -23,14 +23,14 @@
   .AddForm {
     margin-top: 12px;
     padding: 12px;
-    background: $light-color01;
+    background: variables.$light-color01;
     border-radius: 4px;
 
     :global {
       .radio {
         padding: 2px;
-        background: $light-color01;
-        border: 1px solid $light-color07;
+        background: variables.$light-color01;
+        border: 1px solid variables.$light-color07;
         border-radius: 16px;
 
         .radio-button {

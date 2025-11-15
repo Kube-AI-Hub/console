@@ -29,10 +29,11 @@ import AuditingStore from 'stores/auditing'
 
 import { dropDownItems, getSecond, supportQueryParams } from '../utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class Home extends React.Component {
+class Home extends React.Component {
   auditingStore = new AuditingStore()
 
   componentDidMount() {

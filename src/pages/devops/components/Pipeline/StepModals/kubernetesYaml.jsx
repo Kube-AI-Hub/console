@@ -23,10 +23,11 @@ import { observer } from 'mobx-react'
 import { Modal } from 'components/Base'
 import CodeEditor from 'components/Base/CodeEditor'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class YamlEditor extends React.Component {
+class YamlEditor extends React.Component {
   static propTypes = {
     name: PropTypes.string,
   }

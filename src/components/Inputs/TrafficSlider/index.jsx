@@ -20,7 +20,7 @@ import { isUndefined } from 'lodash'
 import React from 'react'
 import { Slider } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const SLIDER_PROPS = {
   className: styles.slider,

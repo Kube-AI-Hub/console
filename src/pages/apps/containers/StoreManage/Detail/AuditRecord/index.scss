@@ -1,6 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
-
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   :global {
@@ -14,5 +13,5 @@
   margin-bottom: 8px;
   line-height: 20px;
   font-weight: bold;
-  color: $head-color;
+  color: variables.$head-color;
 }

@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .buttonModalBox {
   position: relative;
@@ -24,7 +24,7 @@
   border-top: 9px solid transparent;
   border-right: none;
   border-bottom: 9px solid transparent;
-  border-left: $white solid 12px;
+  border-left: variables.$white solid 12px;
 }
 
 .showModal {

@@ -1,4 +1,5 @@
-@import '~scss/mixins';
+@use '~scss/mixins';
+@use '~scss/variables';
 
 .apps {
   padding: 8px;
@@ -8,8 +9,8 @@
     align-items: center;
     height: 64px;
     padding: 12px;
-    background-color: $lightest;
-    border-radius: $border-radius;
+    background-color: variables.$lightest;
+    border-radius: variables.$border-radius;
     cursor: pointer;
 
     .icon {
@@ -19,23 +20,23 @@
       width: 40px;
       height: 40px;
       line-height: 40px;
-      background-color: $bg-color;
+      background-color: variables.$bg-color;
     }
 
     .title {
       & > div {
-        @include TypographyTitleH6($dark-color07);
-        transition: all $trans-speed ease-in-out;
+        @include mixins.TypographyTitleH6(variables.$dark-color07);
+        transition: all variables.$trans-speed ease-in-out;
       }
 
       & > p {
-        @include TypographyParagraph($dark-color01);
-        @include ellipsis;
+        @include mixins.TypographyParagraph(variables.$dark-color01);
+        @include mixins.ellipsis;
       }
 
       &:hover {
         & > div {
-          color: $primary;
+          color: variables.$primary;
         }
       }
     }
@@ -46,5 +47,5 @@
   position: absolute;
   top: 0;
   right: 0;
-  color: $sub;
+  color: variables.$sub;
 }

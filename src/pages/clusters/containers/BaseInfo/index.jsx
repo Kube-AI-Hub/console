@@ -35,20 +35,23 @@ import {
   getSuitableUnit,
   getValueByUnit,
 } from 'utils/monitoring'
-import styles from './index.scss'
+import * as styles from './index.scss'
 import ManageButton from './ManageButton'
 
 const MetricTypes = {
+  gpu_usage: 'cluster_gpu_total',
+  vgpu_usage: 'cluster_vgpu_total',
   cpu_usage: 'cluster_cpu_total',
   memory_usage: 'cluster_memory_total',
   disk_size_usage: 'cluster_disk_size_capacity',
   node_count: 'cluster_node_total',
 }
 
+export default
 @inject('rootStore', 'clusterStore')
 @observer
 @trigger
-export default class Overview extends React.Component {
+class Overview extends React.Component {
   state = {
     confirm: false,
   }
@@ -127,6 +130,16 @@ export default class Overview extends React.Component {
         name: 'DISK',
         icon: 'storage',
         value: this.getValue(data[MetricTypes.disk_size_usage], 'disk'),
+      },
+      {
+        name: 'TOTAL_GPU',
+        icon: 'gpu',
+        value: this.getValue(data[MetricTypes.gpu_usage], 'gpu'),
+      },
+      {
+        name: 'TOTAL_VGPU',
+        icon: 'box',
+        value: this.getValue(data[MetricTypes.vgpu_usage], 'gpu'),
       },
     ]
   }

@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .modal {
   border-radius: 0;
@@ -43,7 +43,7 @@
   overflow: hidden;
 
   &.active {
-    background-color: $blue-color03;
+    background-color: variables.$blue-color03;
 
     .bottomIcon {
       opacity: 0.09;

@@ -22,7 +22,7 @@ import { Table } from '@kube-design/components'
 import classNames from 'classnames'
 import { get } from 'lodash'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export const THEME = {
   default: classNames(styles.table, styles.table_rank, styles.table_no_border),
@@ -34,9 +34,10 @@ export const THEME = {
   ),
 }
 
+export default
 @inject('rootStore')
 @observer
-export default class RankingTable extends React.Component {
+class RankingTable extends React.Component {
   get columns() {
     const sort_metric = get(this, 'props.store.sort_metric', '')
     return this.props.columns.map(column => ({

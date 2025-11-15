@@ -23,7 +23,7 @@ import { getTimeOptions } from 'components/Cards/Monitoring/Controller/TimeSelec
 import cookie from 'utils/cookie'
 
 import moment from 'moment-mini'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const TimeOps = ['1h', '2h', '4h', '8h', '1d']
 

@@ -20,7 +20,7 @@ import { RadioGroup, Radio } from '@kube-design/components'
 import { ScrollLoad } from 'components/Base'
 import { toJS } from 'mobx'
 import Item from './ImageTagRadio'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const ImageTagRadioList = ({
   selectedImageTag,

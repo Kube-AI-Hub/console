@@ -23,7 +23,7 @@ import isEqual from 'react-fast-compare'
 import classNames from 'classnames'
 import { Icon } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class TypeSelect extends React.Component {
   static propTypes = {

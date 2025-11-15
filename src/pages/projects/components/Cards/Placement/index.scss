@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .clusters {
   display: flex;
@@ -10,6 +10,6 @@
   width: 326px;
   padding: 8px;
   border-radius: 2px;
-  background-color: $dark-color07;
+  background-color: variables.$dark-color07;
   margin-right: 12px;
 }

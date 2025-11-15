@@ -21,7 +21,7 @@ import PropTypes from 'prop-types'
 import { Button, Icon } from '@kube-design/components'
 import classnames from 'classnames'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Tip extends React.Component {
   static propTypes = {

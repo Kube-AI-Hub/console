@@ -23,7 +23,7 @@ import StatusReason from 'projects/components/StatusReason'
 import { CLUSTER_PROVIDER_ICON, CLUSTER_GROUP_TAG_TYPE } from 'utils/constants'
 import { getWorkloadStatus } from 'utils/status'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class FedWorkloadStatus extends Component {
   render() {

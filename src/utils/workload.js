@@ -202,7 +202,6 @@ export const getCurrentRevision = (
   let revision = 0
 
   switch (module) {
-    default:
     case 'deployments':
       revision = get(
         workloadDetail,
@@ -224,6 +223,12 @@ export const getCurrentRevision = (
       revision = cur ? cur.revision : maxRevision
       break
     }
+    default:
+      revision = get(
+        workloadDetail,
+        'annotations["deployment.kubernetes.io/revision"]'
+      )
+      break
   }
 
   return parseInt(revision, 10)
@@ -233,17 +238,17 @@ export const getWorkloadReplicaCount = (record, module) => {
   const result = { ready: 0, total: 0 }
 
   switch (module) {
-    default:
+    case 'daemonsets':
+      result.ready = get(record, 'status.numberReady', 0)
+      result.total = get(record, 'status.desiredNumberScheduled', 0)
+      break
     case 'jobs':
     case 'cronjobs':
     case 'deployments':
     case 'statefulsets':
+    default:
       result.ready = get(record, 'readyPodNums', 0)
       result.total = get(record, 'podNums', 0)
-      break
-    case 'daemonsets':
-      result.ready = get(record, 'status.numberReady', 0)
-      result.total = get(record, 'status.desiredNumberScheduled', 0)
       break
   }
 

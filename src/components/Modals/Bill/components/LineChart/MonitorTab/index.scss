@@ -1,14 +1,14 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
-  border-radius: $border-radius;
+  border-radius: variables.$border-radius;
   overflow: hidden;
 }
 
 .tabHeader {
   padding: 4px 12px;
-  background-color: $light-color01;
+  background-color: variables.$light-color01;
 
   &Item {
     display: inline-block;
@@ -29,6 +29,6 @@
 
 .chartWrapper {
   position: relative;
-  background-color: $dark-color07;
-  border-radius: $border-radius;
+  background-color: variables.$dark-color07;
+  border-radius: variables.$border-radius;
 }

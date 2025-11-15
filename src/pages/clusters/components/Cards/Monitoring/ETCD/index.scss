@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .tab {
   display: flex;
@@ -9,7 +9,7 @@
 
   &.active {
     .info {
-      color: $white;
+      color: variables.$white;
     }
   }
 
@@ -19,7 +19,7 @@
     color: #404e68;
 
     .title {
-      font-size: $size-small;
+      font-size: variables.$size-small;
       font-weight: 600;
       line-height: 1.67;
     }
@@ -29,10 +29,10 @@
       line-height: 32px;
       font-size: 20px;
       font-weight: 600;
-      @include ellipsis;
+      @include mixins.ellipsis;
 
       span {
-        font-size: $size-small;
+        font-size: variables.$size-small;
       }
     }
   }
@@ -60,8 +60,8 @@
       height: calc(50% - 12px);
       margin: 6px;
       border-radius: 4px;
-      border: 1px solid $light-color03;
-      background-color: $white;
+      border: 1px solid variables.$light-color03;
+      background-color: variables.$white;
 
       .icon {
         position: relative;
@@ -76,11 +76,11 @@
           width: 8px;
           height: 8px;
           border-radius: 50%;
-          background-color: $green;
+          background-color: variables.$green;
           box-shadow: 0 4px 8px 0 rgba(85, 188, 138, 0.32);
 
           &.offline {
-            background-color: $red;
+            background-color: variables.$red;
             box-shadow: 0 8px 16px 0 rgba(202, 38, 33, 0.2);
           }
         }

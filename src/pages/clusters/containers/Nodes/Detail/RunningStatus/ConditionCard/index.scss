@@ -1,11 +1,11 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .card {
   display: inline-flex;
   padding: 12px;
   border-radius: 4px;
-  background-color: $light-color01;
+  background-color: variables.$light-color01;
 
   .icon {
     position: relative;
@@ -22,9 +22,9 @@
 }
 
 .check {
-  background-color: $primary;
+  background-color: variables.$primary;
 }
 
 .substract {
-  background-color: $yellow;
+  background-color: variables.$yellow;
 }

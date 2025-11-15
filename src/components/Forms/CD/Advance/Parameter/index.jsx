@@ -25,10 +25,11 @@ import { TypeSelect } from 'components/Base'
 import { Form } from '@kube-design/components'
 import HelmForm from './HelmForm'
 import KustomizeForm from './KustomizeForm'
-import styles from '../index.scss'
+import * as styles from '../index.scss'
 
+export default
 @observer
-export default class Parameter extends Component {
+class Parameter extends Component {
   constructor(props) {
     super(props)
 

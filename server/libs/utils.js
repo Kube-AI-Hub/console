@@ -85,7 +85,7 @@ const isValidReferer = path => {
   const isUrl = URL_PATTEN.test(referer)
 
   // eslint-disable-next-line no-script-url
-  const isJsScript = referer.indexOf('javascript:') < 0
+  const isJsScript = referer.indexOf('javascript:') < 0 || referer.endsWith('.js') || referer.endsWith('.js.map')
 
   return (
     referer !== '/' && referer.indexOf('/login') === -1 && !isUrl && isJsScript

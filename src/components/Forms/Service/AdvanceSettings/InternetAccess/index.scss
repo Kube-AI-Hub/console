@@ -1,10 +1,10 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   padding: 12px;
   border-radius: 4px;
-  background-color: $lightest;
+  background-color: variables.$lightest;
 }
 
 .title {
@@ -29,18 +29,18 @@
   padding: 20px;
   border-radius: 4px;
   background-color: #ffffff;
-  border: solid 1px $light-color03;
+  border: solid 1px variables.$light-color03;
 }
 
 .option {
   overflow: hidden;
 
   & > div {
-    @include TypographyTitleH6($white);
+    @include mixins.TypographyTitleH6(variables.$white);
   }
 
   & > p {
-    @include TypographyParagraph($dark-color01);
+    @include mixins.TypographyParagraph(variables.$dark-color01);
   }
 }
 

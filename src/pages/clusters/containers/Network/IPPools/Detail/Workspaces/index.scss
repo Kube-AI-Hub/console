@@ -1,18 +1,18 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .wrapper {
   padding: 12px;
-  border-radius: $border-radius;
-  background-color: $card-bg-color;
+  border-radius: variables.$border-radius;
+  background-color: variables.$card-bg-color;
 }
 
 .item {
   display: flex;
   padding: 12px;
-  border: 1px solid $border-color;
-  border-radius: $border-radius;
-  background-color: $white;
+  border: 1px solid variables.$border-color;
+  border-radius: variables.$border-radius;
+  background-color: variables.$white;
 
   & + .item {
     margin-top: 8px;
@@ -29,5 +29,5 @@
 }
 
 .empty {
-  @include TypographyTitleH5($dark-color01);
+  @include mixins.TypographyTitleH5(variables.$dark-color01);
 }

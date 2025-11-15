@@ -26,7 +26,7 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import cardStyles from '../Card/index.scss'
 
-import styles from '../Sider/index.scss'
+import * as styles from '../Sider/index.scss'
 import YamlEditor from '../StepModals/kubernetesYaml'
 import StepsSelector from '../StepsSelectorOld'
 import StepContainer from './StepContainer'
@@ -38,8 +38,9 @@ const AgentType = [
   { label: 'none', value: 'none' },
 ]
 
+export default
 @observer
-export default class StepsEditorOld extends React.Component {
+class StepsEditorOld extends React.Component {
   static defaultProps = {
     activeStage: {},
   }

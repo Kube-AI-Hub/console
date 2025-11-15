@@ -1,11 +1,11 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
-$header-height: 144px;
+variables.$header-height: 144px;
 $toolbar-height: 44px;
 
 .apps {
   position: relative;
-  height: calc(100vh - #{$header-height} - #{$toolbar-height});
+  height: calc(100vh - #{variables.$header-height} - #{$toolbar-height});
   padding: 50px 20px 20px;
   overflow-y: auto;
 
@@ -17,8 +17,8 @@ $toolbar-height: 44px;
 }
 
 .header {
-  height: $header-height;
-  background-color: $bg-color;
+  height: variables.$header-height;
+  background-color: variables.$bg-color;
 
   .logo {
     position: absolute;
@@ -34,14 +34,14 @@ $toolbar-height: 44px;
       font-size: 20px;
       font-weight: 500;
       line-height: 28px;
-      color: $dark-color07;
+      color: variables.$dark-color07;
       text-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.1);
       margin-bottom: 12px;
     }
     > p {
-      font-size: $size-small;
+      font-size: variables.$size-small;
       line-height: 20px;
-      color: $dark-color01;
+      color: variables.$dark-color01;
     }
   }
 }
@@ -52,9 +52,9 @@ $toolbar-height: 44px;
   position: relative;
   height: 44px;
   padding: 6px 20px;
-  border: 1px solid $border-color;
-  background-color: $lightest;
-  box-shadow: $base-shadow;
+  border: 1px solid variables.$border-color;
+  background-color: variables.$lightest;
+  box-shadow: variables.$base-shadow;
 
   .selectRepos {
     margin-right: 12px;

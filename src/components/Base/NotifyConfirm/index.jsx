@@ -22,7 +22,7 @@ import classnames from 'classnames'
 
 import { Icon, Button } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class NotifyConfirm extends React.PureComponent {
   static propTypes = {
@@ -75,9 +75,10 @@ export default class NotifyConfirm extends React.PureComponent {
     }
 
     switch (type) {
-      default:
       case 'info':
         colors.secondary = '#329dce'
+        break
+      default:
         break
     }
     return colors

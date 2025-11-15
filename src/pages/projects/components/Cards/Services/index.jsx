@@ -28,10 +28,11 @@ import { joinSelector } from 'utils'
 
 import Item from './Item'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class ServicesCard extends React.Component {
+class ServicesCard extends React.Component {
   static propTypes = {
     className: PropTypes.string,
     prefix: PropTypes.string,

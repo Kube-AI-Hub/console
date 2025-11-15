@@ -22,7 +22,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 
 import { showNameAndAlias } from 'utils'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class BaseInfo extends React.Component {
   render() {

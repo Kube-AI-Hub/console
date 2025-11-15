@@ -1,5 +1,5 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .tab {
   display: flex;
@@ -9,7 +9,7 @@
 
   &.active {
     .info {
-      color: $white;
+      color: variables.$white;
     }
   }
 
@@ -19,7 +19,7 @@
     color: #404e68;
 
     .title {
-      font-size: $size-small;
+      font-size: variables.$size-small;
       font-weight: 600;
       line-height: 1.67;
     }
@@ -29,10 +29,10 @@
       line-height: 32px;
       font-size: 20px;
       font-weight: 600;
-      @include ellipsis;
+      @include mixins.ellipsis;
 
       span {
-        font-size: $size-small;
+        font-size: variables.$size-small;
       }
     }
   }

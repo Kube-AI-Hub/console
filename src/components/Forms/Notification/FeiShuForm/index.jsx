@@ -23,7 +23,7 @@ import { Form, Input, Notify, Tabs } from '@kube-design/components'
 
 import BaseForm from '../BaseForm'
 import KeyWords from '../DingTalkForm/KeyWords'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const { TabPanel } = Tabs
 

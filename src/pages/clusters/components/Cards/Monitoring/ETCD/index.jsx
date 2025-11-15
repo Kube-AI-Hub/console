@@ -39,9 +39,10 @@ const MetricTypes = {
   client_sent_bytes: 'etcd_network_client_grpc_sent_bytes',
 }
 
+export default
 @inject('rootStore')
 @observer
-export default class ETCDStatusTab extends React.Component {
+class ETCDStatusTab extends React.Component {
   constructor(props) {
     super(props)
 

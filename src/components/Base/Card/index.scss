@@ -1,31 +1,31 @@
-@import '~scss/variables';
-@import '~scss/mixins';
+@use '~scss/variables';
+@use '~scss/mixins';
 
 .card {
   position: relative;
   min-height: 150px;
   margin-bottom: 12px;
   padding: 20px;
-  border-radius: $border-radius;
-  background-color: $white;
-  transition: all $trans-speed;
+  border-radius: variables.$border-radius;
+  background-color: variables.$white;
+  transition: all variables.$trans-speed;
 
   &.default {
-    box-shadow: $card-shadow;
+    box-shadow: variables.$card-shadow;
 
     &:hover {
-      box-shadow: $card-hover-shadow;
+      box-shadow: variables.$card-hover-shadow;
       z-index: 103;
     }
   }
 
   &.selector {
     border-radius: 4px;
-    border: 1px solid $light-color03;
+    border: 1px solid variables.$light-color03;
 
     &:hover {
-      border-color: $border-color;
-      box-shadow: $card-selector-shadow;
+      border-color: variables.$border-color;
+      box-shadow: variables.$card-selector-shadow;
     }
   }
 
@@ -33,9 +33,9 @@
     .table {
       &-footer {
         padding: 0 20px 16px;
-        background-color: $white;
+        background-color: variables.$white;
         box-shadow: none;
-        border-radius: 0 0 $border-radius $border-radius;
+        border-radius: 0 0 variables.$border-radius variables.$border-radius;
       }
     }
   }
@@ -53,13 +53,13 @@
   position: relative;
   height: 20px;
   margin-bottom: 20px;
-  font-size: $size-normal;
+  font-size: variables.$size-normal;
   font-weight: 600;
   line-height: 1.43;
-  @include clearfix;
+  @include mixins.clearfix;
 
   .operations {
-    @include vertical-center;
+    @include mixins.vertical-center;
     right: 0;
     z-index: 10;
   }
@@ -74,10 +74,10 @@
   display: flex;
   align-items: center;
   padding: 0 20px;
-  color: $light-color08;
-  font-size: $size-medium;
+  color: variables.$light-color08;
+  font-size: variables.$size-medium;
   font-weight: 600;
   line-height: 1.5;
-  background-color: $th-bg-color;
+  background-color: variables.$th-bg-color;
   border-radius: 4px;
 }

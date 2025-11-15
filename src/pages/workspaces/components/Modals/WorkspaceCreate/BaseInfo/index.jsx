@@ -23,10 +23,11 @@ import React from 'react'
 import UserStore from 'stores/user'
 import { PATTERN_ALIAS_NAME, PATTERN_NAME } from 'utils/constants'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @observer
-export default class BaseInfo extends React.Component {
+class BaseInfo extends React.Component {
   constructor(props) {
     super(props)
 

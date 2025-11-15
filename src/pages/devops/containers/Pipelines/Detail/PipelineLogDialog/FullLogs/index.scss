@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .logs_container {
   position: relative;
@@ -14,7 +14,7 @@
       z-index: 2;
       height: 32px;
       padding: 6px 10px;
-      color: $white;
+      color: variables.$white;
       border-radius: 16px;
       background-color: #36435c;
 

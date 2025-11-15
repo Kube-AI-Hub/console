@@ -22,7 +22,7 @@ import { Modal } from 'components/Base'
 
 import ParamInput from '../../../ParamInput'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class Params extends Component {
   state = {

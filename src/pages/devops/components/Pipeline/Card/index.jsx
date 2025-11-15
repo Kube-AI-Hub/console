@@ -25,7 +25,7 @@ import classNames from 'classnames'
 import { get, without, isEmpty, isEqual, cloneDeep } from 'lodash'
 import { renderStepArgs } from './detail'
 
-import style from './index.scss'
+import * as style from './index.scss'
 
 const taskIcon = {
   echo: 'loudspeaker',

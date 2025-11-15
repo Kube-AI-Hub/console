@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .loading {
   text-align: center;
@@ -8,4 +8,3 @@
 .modalInfo {
   margin-bottom: 20px;
 }
-

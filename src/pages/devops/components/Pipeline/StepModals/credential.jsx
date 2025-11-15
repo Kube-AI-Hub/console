@@ -21,10 +21,11 @@ import { pick, get } from 'lodash'
 import { Select, Tag, Form } from '@kube-design/components'
 import { observer } from 'mobx-react'
 
-import styles from '../index.scss'
+import * as styles from '../index.scss'
 
+export default
 @observer
-export default class SecretSelect extends Component {
+class SecretSelect extends Component {
   async componentDidMount() {
     const { formData, onChange, option } = this.props
     await this.getCredentialsListData()

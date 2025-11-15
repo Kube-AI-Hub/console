@@ -22,7 +22,7 @@ import classNames from 'classnames'
 
 import { Button, Icon } from '@kube-design/components'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class VersionSelect extends React.Component {
   static propTypes = {

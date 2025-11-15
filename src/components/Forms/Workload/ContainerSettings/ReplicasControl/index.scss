@@ -1,21 +1,21 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .wrapper {
   padding: 8px;
   border-radius: 4px;
   background-color: #ffffff;
-  border: solid 1px $border-color;
+  border: solid 1px variables.$border-color;
 }
 
 .replicas {
   width: 320px;
   padding: 8px;
   border-radius: 4px;
-  background-color: $bg-color;
+  background-color: variables.$bg-color;
   text-align: center;
 
   & > div {
-    color: $text-color;
+    color: variables.$text-color;
   }
 
   input {

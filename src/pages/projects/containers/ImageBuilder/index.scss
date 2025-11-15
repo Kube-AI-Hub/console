@@ -1,4 +1,4 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .header {
   height: 100px;
@@ -13,19 +13,19 @@
   h3 {
     height: 32px;
     text-shadow: 0 2px 4px rgba(36, 46, 66, 0.1);
-    font-family: $font-family-id;
+    font-family: variables.$font-family-id;
     font-size: 24px;
     line-height: 1.33;
     font-weight: 600;
-    color: $dark-color07;
+    color: variables.$dark-color07;
   }
 
   p {
     height: 20px;
-    font-family: $font-family-id;
+    font-family: variables.$font-family-id;
     font-size: 12px;
     line-height: 1.67;
-    color: $dark-color01;
+    color: variables.$dark-color01;
   }
 
   .icon {
@@ -35,7 +35,7 @@
     height: 52px;
     border-radius: 100px;
     border-top-right-radius: 0px;
-    background-color: $light-color02;
+    background-color: variables.$light-color02;
 
     svg {
       width: 40px;
@@ -55,7 +55,7 @@
   padding: 2px;
   border-radius: 18px;
   display: inline-block;
-  background-color: $bg-color;
+  background-color: variables.$bg-color;
   border: 1px solid #d8dee5;
   margin-right: 20px;
 

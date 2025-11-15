@@ -23,11 +23,12 @@ import { toJS } from 'mobx'
 import { inject, observer } from 'mobx-react'
 import React from 'react'
 import { showNameAndAlias } from 'utils'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('detailStore')
 @observer
-export default class Viewer extends React.Component {
+class Viewer extends React.Component {
   constructor(props) {
     super(props)
     this.store = props.detailStore

@@ -21,7 +21,7 @@ import { Form } from '@kube-design/components'
 
 import ProbeInput from '../ProbeInput'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class HealthChecker extends React.Component {
   static defaultProps = {

@@ -1,12 +1,12 @@
-@import '~scss/variables';
+@use '~scss/variables';
 
 .inputs {
   display: flex;
   align-items: center;
   padding: 6px 17px;
   border-radius: 60px;
-  background-color: $bg-color;
-  border: solid 1px $border-color;
+  background-color: variables.$bg-color;
+  border: solid 1px variables.$border-color;
 
   .type {
     :global {
@@ -104,18 +104,18 @@
 
 .critical {
   @include warningText;
-  color: $white;
-  background-color: $red-color03;
+  color: variables.$white;
+  background-color: variables.$red-color03;
 }
 
 .error {
   @include warningText;
-  color: $white;
-  background-color: $yellow-color03;
+  color: variables.$white;
+  background-color: variables.$yellow-color03;
 }
 
 .warning {
   @include warningText;
-  color: $dark-color06;
-  background-color: $light-color04;
+  color: variables.$dark-color06;
+  background-color: variables.$light-color04;
 }

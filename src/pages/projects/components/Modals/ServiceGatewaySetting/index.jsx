@@ -34,7 +34,7 @@ import Title from 'components/Forms/Base/Title'
 import OpenELBStore from 'stores/openelb'
 import { CLUSTER_PROVIDERS_ANNOTATIONS } from 'pages/projects/components/Modals/GatewaySetting/contants'
 import { CLUSTER_PROVIDERS } from 'utils/constants'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const defaultProvider = 'QingCloud Kubernetes Engine'
 export default class GatewaySettingModal extends React.Component {

@@ -22,7 +22,7 @@ import Loading from '@kube-design/components/lib/components/Loading'
 import PipelineContent from 'devops/components/Pipeline'
 import { isArray, isEmpty, set } from 'lodash'
 import React, { useState } from 'react'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 import ParmasItem from './params'
 

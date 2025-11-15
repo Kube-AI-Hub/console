@@ -32,7 +32,7 @@ import { updateFederatedAnnotations } from 'utils'
 import { CLUSTER_PROVIDERS } from 'utils/constants'
 
 import OpenELBStore from 'stores/openelb'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const defaultProvider = 'QingCloud Kubernetes Engine'
 export default class InternetAccess extends React.Component {

@@ -21,7 +21,7 @@ import React from 'react'
 import { Input, Select, AutoComplete } from '@kube-design/components'
 import { ObjectInput } from 'components/Inputs'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class RulePath extends React.Component {
   static defaultProps = {

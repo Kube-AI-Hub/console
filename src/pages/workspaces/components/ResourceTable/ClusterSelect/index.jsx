@@ -21,7 +21,7 @@ import { Select } from '@kube-design/components'
 import StatusReason from 'clusters/components/StatusReason'
 import { showNameAndAlias } from 'utils'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class ClusterSelect extends Component {
   valueRenderer = option =>

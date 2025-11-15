@@ -26,7 +26,7 @@ import { Switch, Panel, Modal } from 'components/Base'
 
 import FederatedStore from 'stores/federated'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 @observer
 class LogCollection extends React.Component {

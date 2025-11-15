@@ -22,7 +22,7 @@ import PropTypes from 'prop-types'
 import { Input, Tag } from '@kube-design/components'
 import { List } from 'components/Base'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 const Card = ({ type = 'worker', container, onEdit, onDelete, disabled }) => {
   const handleImageChange = (e, value) => {

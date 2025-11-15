@@ -18,7 +18,7 @@
 
 import React from 'react'
 import classNames from 'classnames'
-import styles from './item.scss'
+import * as styles from './item.scss'
 
 const ItemWrapper = props => {
   const { title, list } = props

@@ -18,7 +18,7 @@
 
 import React from 'react'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class RuleList extends React.Component {
   render() {

@@ -25,7 +25,7 @@ import { Icon } from '@kube-design/components'
 import { parseUrl } from 'utils'
 
 import StatusCard from './StatusCard'
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 class CodeQualityResult extends React.Component {
   static propTypes = {

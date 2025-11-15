@@ -24,7 +24,7 @@ import { Tooltip, Icon } from '@kube-design/components'
 
 import Link from './Link'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
 export default class NavItem extends React.Component {
   static propTypes = {

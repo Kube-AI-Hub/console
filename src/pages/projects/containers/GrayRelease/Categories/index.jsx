@@ -29,11 +29,12 @@ import GatewayStore from 'stores/gateway'
 
 import FORM_STEPS from 'configs/steps/grayreleases'
 
-import styles from './index.scss'
+import * as styles from './index.scss'
 
+export default
 @inject('rootStore')
 @observer
-export default class Categories extends React.Component {
+class Categories extends React.Component {
   constructor(props) {
     super(props)
 

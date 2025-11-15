@@ -39,6 +39,14 @@ const UnitTypes = {
     conditions: [0.01, 0],
     units: ['s', 'ms'],
   },
+  gpu: {
+    conditions: [0.1, 0],
+    units: ['core', 'm'],
+  },
+  gpu_memory: {
+    conditions: [1000 ** 4, 1000 ** 3, 1000 ** 2, 1000, 0],
+    units: ['TB', 'GB', 'MB', 'KB', 'Bytes'],
+  },
   cpu: {
     conditions: [0.1, 0],
     units: ['core', 'm'],
@@ -111,8 +119,6 @@ export const getValueByUnit = (num, unit, precision = 2) => {
   let value = num === 'NAN' ? 0 : parseFloat(num)
 
   switch (unit) {
-    default:
-      break
     case '':
     case 'default':
       return value
@@ -172,6 +178,8 @@ export const getValueByUnit = (num, unit, precision = 2) => {
       break
     case 'ms':
       value *= 1000
+      break
+    default:
       break
   }
 
