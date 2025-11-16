@@ -22,6 +22,7 @@ class Dropdown extends Component {
     closeAfterMouseLeave: PropTypes.bool,
     children: PropTypes.node,
     onClick: PropTypes.func,
+    appendToBody: PropTypes.bool,
   };
 
   static defaultProps = {
@@ -32,6 +33,7 @@ class Dropdown extends Component {
     closeAfterClick: true,
     closeAfterMouseLeave: false,
     onClick: noop,
+    appendToBody: true,
   };
 
   render() {

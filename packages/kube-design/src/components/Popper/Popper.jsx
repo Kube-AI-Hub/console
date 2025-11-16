@@ -46,6 +46,7 @@ class Popper extends Component {
     onClose: PropTypes.func,
     onClick: PropTypes.func,
     positionFixed: PropTypes.bool,
+    appendToBody: PropTypes.bool,
   };
 
   static defaultProps = {
@@ -63,6 +64,7 @@ class Popper extends Component {
     onClose: noop,
     onClick: noop,
     positionFixed: false,
+    appendToBody: false,
   };
 
   constructor(props) {
@@ -313,17 +315,20 @@ class Popper extends Component {
   }
 
   render() {
-    const { children } = this.props;
+    const { children, appendToBody } = this.props;
     const cloneChildren = cloneElement(React.Children.only(children), {
       ref: (ref) => {
         this.referenceNode = ref;
       },
     });
+    const portalTarget =
+      appendToBody && typeof document !== "undefined" ? document.body : null;
+    const content = this.renderContent();
 
     return (
       <Fragment>
         {cloneChildren}
-        {this.renderContent()}
+        {portalTarget ? ReactDOM.createPortal(content, portalTarget) : content}
       </Fragment>
     );
   }
