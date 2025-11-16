@@ -1,0 +1,57 @@
+import { Meta, Story, Canvas, ArgTypes } from '@storybook/blocks';
+import Button from 'components/Button';
+
+<Meta title="Components/Button" component={Button} />
+
+# Button
+
+Html button.
+
+## Props
+<ArgTypes of={Button} />
+
+
+## Examples
+
+### Basic
+
+Basic usage for ``Button`` Component, using type to customize button styles.
+
+<Canvas>
+  <Story name="basic buttons">
+    <div>
+      <Button type="primary">Kube Design</Button>
+      <Button type="control">Kube Design</Button>
+      <Button>Kube Design</Button>
+      <Button type="danger">Kube Design</Button>
+      <Button type="flat">Kube Design</Button>
+      <Button disabled>Kube Design</Button>
+    </div>
+  </Story>
+</Canvas>
+
+
+### With Icon
+Passing ``icon`` prop to ``Button``.
+
+<Canvas>
+  <Story name="buttons with icon">
+    <div>
+      <Button icon="add">Kube Design</Button>
+      <Button icon="add" />
+      <Button icon="add" type="flat" />
+      <Button icon="add" disabled />
+    </div>
+  </Story>
+</Canvas>
+
+### Loading
+Passing ``loading`` prop to ``Button``.
+
+<Canvas>
+  <Story name="button loading">
+    <div>
+      <Button loading={true}>Kube Design</Button>
+    </div>
+  </Story>
+</Canvas>

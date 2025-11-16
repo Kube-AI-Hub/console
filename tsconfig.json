@@ -8,7 +8,9 @@
     "resolveJsonModule": true,
     "noEmit": false,
     "paths": {
-      "@ks-console/*": ["packages/*/src"]
+      "@ks-console/*": ["packages/*/src"],
+      "@kube-design/components": ["packages/kube-design/src"],
+      "@kube-design/components/*": ["packages/kube-design/src/*"]
     },
     "allowJs": true,
     "jsx": "react",

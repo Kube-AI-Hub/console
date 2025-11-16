@@ -57,11 +57,11 @@
     "prismjs": "^1.29.0",
     "prop-types": "^15.8.1",
     "qs": "^6.14.0",
-    "react": "^16.14.0",
+    "react": "^18.2.0",
     "react-ace": "^14.0.1",
     "react-color": "^2.19.3",
     "react-copy-to-clipboard": "^5.1.0",
-    "react-dom": "^16.14.0",
+    "react-dom": "^18.2.0",
     "react-draggable": "^4.4.6",
     "react-fast-compare": "^2.0.4",
     "react-file-reader": "^1.1.4",
@@ -215,7 +215,9 @@
     "serve": "NODE_ENV=production node server/server.js",
     "start": "concurrently -k --raw \"yarn dev:client\" \"yarn dev:server\"",
     "test": "jest",
-    "test:e2e": "cypress run"
+    "test:e2e": "cypress run",
+    "storybook:build": "yarn workspace @kube-design/components build-storybook",
+    "storybook:start": "yarn workspace @kube-design/components start"
   },
   "version": "3.4.2",
   "workspaces": [

@@ -1,0 +1,30 @@
+name: Release Legacy
+on:
+  push:
+    branches:
+      - legacy
+  # Run build for any PRs.
+  # pull_request:
+  # workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 12
+      - name: Install dependencies
+        run: yarn
+      - name: Unit Tests
+        run: yarn test
+      - name: Build package
+        run: yarn build
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: yarn semantic-release
