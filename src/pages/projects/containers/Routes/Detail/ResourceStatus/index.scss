@@ -11,7 +11,7 @@
     display: inline-block;
     vertical-align: middle;
     font-family: variables.$font-family-id;
-    color: #5f708a;
+    color: #4a5aa2;
 
     & + div {
       margin-left: 20px;
@@ -68,7 +68,7 @@
 
   & > div {
     font-size: variables.$body-size;
-    color: #79879c;
+    color: #707fc9;
     font-weight: variables.$font-normal;
 
     span + span {

@@ -51,7 +51,7 @@
 
 .cluster {
   margin-top: 12px;
-  border: 1px solid #d8dee5;
+  border: 1px solid #bfdcf0;
   border-radius: 4px;
   padding: 12px;
 
@@ -67,7 +67,7 @@
           height: 8px;
           right: 2px;
           bottom: 2px;
-          background: #55bc8a;
+          background: #a981f8;
           border-radius: 50%;
         }
 
@@ -78,7 +78,7 @@
           height: 12px;
           right: 0px;
           bottom: 0px;
-          background: #55bc8a;
+          background: #a981f8;
           border-radius: 50%;
           opacity: 0.16;
         }
@@ -92,7 +92,7 @@
         font-weight: 600;
         font-size: 12px;
         line-height: 20px;
-        color: #242e42;
+        color: #14215a;
       }
 
       label {
@@ -124,13 +124,13 @@
       line-height: 20px;
 
       .label {
-        color: #79879c;
+        color: #707fc9;
         margin-right: 0.5em;
       }
 
       .value {
         font-weight: 600;
-        color: #242e42;
+        color: #14215a;
       }
 
       &:nth-of-type(4n + 1),
@@ -158,7 +158,7 @@
     font-weight: 400;
     font-size: 12px;
     line-height: 20px;
-    color: #242e42;
+    color: #14215a;
   }
 }
 

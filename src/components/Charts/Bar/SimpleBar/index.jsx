@@ -167,7 +167,7 @@ export default class SimpleBar extends React.Component {
             margin={{ top: 50, bottom: -20, left: 0, right: 20 }}
           >
             <CartesianGrid
-              stroke="#d8dee5"
+              stroke="#bfdcf0"
               strokeDasharray="2 3"
               vertical={false}
             />

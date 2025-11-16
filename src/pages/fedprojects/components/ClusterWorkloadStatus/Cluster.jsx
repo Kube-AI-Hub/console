@@ -146,8 +146,8 @@ class Cluster extends Component {
                         secondary: '#f5a623',
                       }
                     : {
-                        primary: '#479e88',
-                        secondary: '#479e88',
+                        primary: '#8b61eb',
+                        secondary: '#8b61eb',
                       }
                 }
               />

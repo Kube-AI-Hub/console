@@ -13,7 +13,7 @@
   line-height: 20px;
   font-size: 14px;
   font-weight: 600;
-  color: #242e42;
+  color: #14215a;
   box-shadow: 0 1px 0 0 variables.$light-color07;
 }
 
@@ -32,11 +32,11 @@
 
 .cutTitle {
   font-size: 12px;
-  color: #79879c;
+  color: #707fc9;
 }
 
 .activeTitle {
-  color: #242e42 !important;
+  color: #14215a !important;
   font-style: normal;
   font-weight: 600;
   font-size: 12px;
@@ -48,7 +48,7 @@
   height: 36px;
   line-height: 36px;
   font-weight: 500;
-  color: #4a5974;
+  color: #3a498f;
   border-radius: 18px;
   text-indent: 2em;
   cursor: pointer;
@@ -98,7 +98,7 @@
   width: 100%;
   padding: 12px;
   border-radius: 4px;
-  background-color: #242e42;
+  background-color: #14215a;
   color: white;
   overflow-y: auto;
 }
@@ -114,7 +114,7 @@
   height: 36px;
   line-height: 36px;
   border-radius: 4px;
-  background-color: #36435c;
+  background-color: #1f2c6a;
   cursor: pointer;
 
   :global {
@@ -133,7 +133,7 @@
 .logitem_status {
   float: right;
   margin-right: 20px;
-  color: #79879c;
+  color: #707fc9;
 
   :global {
     .pipeline_status_icon {
@@ -148,7 +148,7 @@
 .LogItem_content {
   padding-left: 60px;
   line-height: 22px;
-  background-color: #242e42;
+  background-color: #14215a;
   color: white;
 }
 

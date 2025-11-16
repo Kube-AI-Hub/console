@@ -1,4 +1,3 @@
-
 .container {
   position: relative;
   .select {
@@ -11,7 +10,7 @@
     :global(.select-control) {
       height: 24px;
       border: none;
-      background: #242e42;
+      background: #14215a;
     }
     :global(.select-input) {
       height: 24px;
@@ -30,5 +29,3 @@
     text-indent: 100px;
   }
 }
-
-

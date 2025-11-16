@@ -35,7 +35,7 @@ const DEFAULT_TERMINAL_OPTS = {
   fontSize: 12,
   fontFamily: "Monaco, Menlo, Consolas, 'Courier New', monospace",
   theme: {
-    background: '#181d28',
+    background: '#0b184d',
   },
 }
 

@@ -1,5 +1,5 @@
-@import "../../styles/variables";
-@import "./flatpickr.scss";
+@import '../../styles/variables';
+@import './flatpickr.scss';
 
 .datepicker {
   display: inline-flex;
@@ -8,7 +8,7 @@
 .datepicker-input {
   position: relative;
   &.input {
-    &[readonly="readonly"] {
+    &[readonly='readonly'] {
       background-color: $white;
     }
   }
@@ -46,7 +46,7 @@ div.flatpickr-calendar {
         height: 32px;
         padding: 0 8px;
         border-radius: 3px;
-        color: #324558;
+        color: #14215a;
         overflow: visible;
         line-height: 32px;
         cursor: pointer;
@@ -62,7 +62,7 @@ div.flatpickr-calendar {
           margin-left: 8px;
           vertical-align: middle;
           transform-origin: 50% 25%;
-          content: "";
+          content: '';
         }
         &:hover {
           background-color: $light-color01;

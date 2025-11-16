@@ -1,18 +1,18 @@
-@import "../src/styles/index.scss";
+@import '../src/styles/index.scss';
 
 body {
   line-height: 1;
   font-size: 12px;
-  font-family: PingFang SC, -apple-system, ".SFNSText-Regular",
-    "San Francisco", BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica,
-    Arial, sans-serif;
+  font-family: PingFang SC, -apple-system, '.SFNSText-Regular', 'San Francisco',
+    BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Helvetica, Arial,
+    sans-serif;
 }
 
 p {
   margin: 12px 0;
 }
 
-.button+.button {
+.button + .button {
   margin-left: 12px;
 }
 
@@ -23,7 +23,7 @@ p {
     &-title {
       font-size: 14px;
       font-weight: bold;
-      color: #242e42;
+      color: #14215a;
       line-height: 20px;
       margin: 24px 0;
     }
@@ -54,15 +54,15 @@ p {
       font-weight: normal;
       padding: 12px 0;
 
-      &>p {
-        color: #79879c;
+      & > p {
+        color: #707fc9;
         font-family: PingFang SC;
         margin: 0;
         margin-bottom: 8px;
       }
 
-      &>div {
-        color: #242e42;
+      & > div {
+        color: #14215a;
       }
     }
   }

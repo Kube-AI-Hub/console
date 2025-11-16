@@ -90,7 +90,7 @@ class LoadingIcon extends PureComponent {
               y1="0%"
               y2="100%"
             >
-              <stop offset="0%" stopColor="#324558" />
+              <stop offset="0%" stopColor="#14215a" />
               <stop offset="100%" stopColor="#86919C" />
             </linearGradient>
           </defs>

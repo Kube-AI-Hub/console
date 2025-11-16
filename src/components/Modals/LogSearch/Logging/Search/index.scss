@@ -11,14 +11,14 @@ $logCountColor: #329dce;
   margin-bottom: -23px;
   background: #fff;
   border-radius: 4px;
-  border: solid 2px #d8dee5;
+  border: solid 2px #bfdcf0;
   @at-root {
     .searchInput {
       position: relative;
       flex: 1;
       border: none;
-      border-right: solid 2px #d8dee5;
-      border-left: solid 2px #d8dee5;
+      border-right: solid 2px #bfdcf0;
+      border-left: solid 2px #bfdcf0;
       border-radius: 0;
     }
     .select {
@@ -44,7 +44,7 @@ $logCountColor: #329dce;
   border-radius: variables.$border-radius;
   background-color: variables.$lightest;
   padding: 25px 12px 14px 12px;
-  border: solid 1px #d8dee5;
+  border: solid 1px #bfdcf0;
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -54,7 +54,7 @@ $logCountColor: #329dce;
   height: $toolbarHeight;
   line-height: $toolbarHeight;
   border-radius: 4px;
-  background-color: #242e42;
+  background-color: #14215a;
   margin: 8px 0;
   color: #fff;
   display: flex;
@@ -154,7 +154,7 @@ $logCountColor: #329dce;
   text-align: center;
   &:hover {
     border-radius: 2px;
-    background-color: #36435c;
+    background-color: #1f2c6a;
   }
 }
 

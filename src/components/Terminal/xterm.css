@@ -37,7 +37,7 @@
 
 .xterm {
   font-family: Monaco, Menlo, Consolas, 'Courier New', monospace;
-  font-feature-settings: 'liga' 0;
+  font-feature-settings: 'liga'0;
   position: relative;
   user-select: none;
   -ms-user-select: none;
@@ -85,7 +85,7 @@
 
 .xterm .composition-view {
   /* TODO: Composition position got messed up somewhere */
-  background: #181d28;
+  background: #0b184d;
   color: #fff;
   display: none;
   position: absolute;
@@ -99,7 +99,7 @@
 
 .xterm .xterm-viewport {
   /* On OS X this is required in order for the scroll bar to appear fully opaque */
-  background-color: #242e42;
+  background-color: #14215a;
   overflow-y: scroll;
   cursor: default;
   position: absolute;

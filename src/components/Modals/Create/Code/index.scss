@@ -22,7 +22,7 @@
     &:hover {
       box-shadow: 0 4px 12px 0 rgba(36, 46, 66, 0.1);
       background-color: variables.$bg-color;
-      border-color: #ccd3db;
+      border-color: #96c8e9;
     }
 
     & + .tabItem {
@@ -36,7 +36,7 @@
 .content {
   height: 500px;
   margin-left: 220px;
-  box-shadow: 1px 0 0 0 #4a5974;
+  box-shadow: 1px 0 0 0 #3a498f;
   overflow-y: auto;
 }
 

@@ -4,7 +4,7 @@
     font-weight: 600;
     font-size: 12px;
     line-height: 20px;
-    color: #242e42;
+    color: #14215a;
     margin-bottom: 8px;
   }
 
@@ -29,7 +29,7 @@
     .column {
       flex: 1 1;
       padding: 12px;
-      border: 1px solid #ccd3db;
+      border: 1px solid #96c8e9;
       background: #fff;
       border-radius: 4px;
       margin-right: 12px;
@@ -43,7 +43,7 @@
     display: flex;
     padding: 12px;
     background: #fff;
-    border: 1px solid #ccd3db;
+    border: 1px solid #96c8e9;
     border-radius: 4px;
 
     :global {
@@ -59,7 +59,7 @@
       margin-left: 12px;
       p {
         font-weight: 600;
-        color: #242e42;
+        color: #14215a;
       }
     }
   }

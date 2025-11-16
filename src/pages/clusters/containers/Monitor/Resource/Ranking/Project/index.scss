@@ -15,12 +15,12 @@
       background-color: variables.$lightest;
       padding-top: 12px;
       padding-bottom: 12px;
-      border-bottom: solid 1px #d8dee5;
+      border-bottom: solid 1px #bfdcf0;
     }
     .pane__pagination {
       background-color: variables.$lightest;
       line-height: 56px;
-      box-shadow: 0 -1px 0 0 #d8dee5;
+      box-shadow: 0 -1px 0 0 #bfdcf0;
     }
   }
 }
@@ -29,7 +29,7 @@
   font-size: 14px;
   font-weight: 600;
   line-height: 66px;
-  color: #242e42;
+  color: #14215a;
 }
 
 .toolbar {
@@ -67,7 +67,7 @@
 
 .table.table_rank.table_no_border {
   td {
-    color: #79879c;
+    color: #707fc9;
   }
   table {
     border-collapse: separate;
@@ -79,7 +79,7 @@
   .rankList_row {
     h3 {
       font-size: 14px;
-      color: #242e42;
+      color: #14215a;
       font-weight: bold;
     }
     td,

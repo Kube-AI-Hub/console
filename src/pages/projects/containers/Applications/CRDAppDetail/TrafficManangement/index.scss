@@ -23,7 +23,7 @@
   line-height: 1.43;
   border-radius: 8px 8px 0 0;
   background-color: variables.$lightest;
-  box-shadow: 0 1px 0 0 #d8dee5;
+  box-shadow: 0 1px 0 0 #bfdcf0;
   @include mixins.clearfix;
 
   .operations {
@@ -39,12 +39,12 @@
   & > button {
     min-width: 188px;
     background: white;
-    border: 1px solid #abb4be;
+    border: 1px solid #77b6e6;
     color: variables.$dark-color06;
 
     &:hover {
       background: white !important;
-      border-color: #79879c;
+      border-color: #707fc9;
     }
   }
 

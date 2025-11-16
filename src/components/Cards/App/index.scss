@@ -42,18 +42,18 @@ $card-height: 152px;
       .desc {
         height: 40px;
         line-height: 1.67;
-        color: #79879c;
+        color: #707fc9;
       }
     }
 
     p {
       @include mixins.block-ellipsis;
-      color: #79879c;
+      color: #707fc9;
     }
 
     strong {
       font-family: variables.$font-family-id;
-      color: #242e42;
+      color: #14215a;
     }
   }
 

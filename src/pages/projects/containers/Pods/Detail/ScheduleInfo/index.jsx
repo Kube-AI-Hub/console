@@ -45,7 +45,7 @@ const Status = ({ status, tip }) => {
       name={status === 'success' ? 'success' : 'error'}
       color={{
         primary: '#fff',
-        secondary: status === 'success' ? '#55bc8a' : '#ca2621',
+        secondary: status === 'success' ? '#a981f8' : '#ca2621',
       }}
     />
   )
@@ -132,14 +132,14 @@ class ScheduleInfo extends React.Component {
       {
         name: 'used',
         itemStyle: {
-          fill: '#404e68',
+          fill: '#2c3a7c',
         },
         value: Number((capacity - allocatable - podRequests).toFixed(3)),
       },
       {
         name: 'allocatable',
         itemStyle: {
-          fill: '#eff4f9',
+          fill: '#deebf6',
         },
         value: allocatable,
       },

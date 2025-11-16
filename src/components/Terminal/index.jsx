@@ -24,7 +24,7 @@ const ContainerTerminal = lazy(() =>
   import(/* webpackChunkName: "terminal" */ './terminal')
 )
 
-const BG_COLOR = '#181d28'
+const BG_COLOR = '#0b184d'
 
 export default
 @observer

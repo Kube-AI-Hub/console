@@ -140,7 +140,7 @@ export default class Monitors extends React.Component {
     return getAreaChartOps({
       title: 'TRAFFIC',
       legend: ['SUCCESSFUL', 'ALL'],
-      areaColors: ['#329dce', '#d8dee5'],
+      areaColors: ['#329dce', '#bfdcf0'],
       data: [{ values: request_success_count }, { values: request_count }],
       unit: 'RPS',
     })
@@ -166,7 +166,7 @@ export default class Monitors extends React.Component {
     return getAreaChartOps({
       title: 'TRAFFIC',
       legend: ['SUCCESSFUL', 'ALL'],
-      areaColors: ['#329dce', '#d8dee5'],
+      areaColors: ['#329dce', '#bfdcf0'],
       data: [{ values: request_success_count }, { values: request_count }],
       unit: 'RPS',
     })

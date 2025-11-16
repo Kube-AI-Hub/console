@@ -56,7 +56,7 @@
   border-radius: 18px;
   display: inline-block;
   background-color: variables.$bg-color;
-  border: 1px solid #d8dee5;
+  border: 1px solid #bfdcf0;
   margin-right: 20px;
 
   span {
@@ -64,13 +64,13 @@
     text-align: center;
     min-width: 120px;
     line-height: 32px;
-    color: #79879c;
+    color: #707fc9;
     padding: 0 30px;
   }
 }
 
 .tabs__selected {
   border-radius: 16px;
-  background-color: #36435c;
+  background-color: #1f2c6a;
   color: white !important;
 }

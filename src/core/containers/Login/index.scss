@@ -55,7 +55,7 @@
       border-bottom: 1px solid;
       border-image-source: radial-gradient(
         circle at 50% 0,
-        #abb4be,
+        #77b6e6,
         #ffffff 100%
       );
       border-image-slice: 1;
@@ -71,8 +71,8 @@
     .oauth {
       padding: 6px;
       border-radius: 2px;
-      background-color: #eff4f9;
-      color: #36435c;
+      background-color: #deebf6;
+      color: #1f2c6a;
       font-size: 12px;
       font-weight: 500;
       line-height: 20px;
@@ -82,11 +82,11 @@
       transition: all 0.3s ease-in-out;
 
       &:hover {
-        background-color: #d8dee5;
+        background-color: #bfdcf0;
       }
 
       &:active {
-        background-color: #d1d7df;
+        background-color: #a9d1ea;
       }
 
       & + .oauth {

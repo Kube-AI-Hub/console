@@ -1,24 +1,24 @@
-$dark-color01: #79879c;
-$dark-color02: #6b7b95;
-$dark-color03: #5f708a;
-$dark-color04: #4a5974;
-$dark-color05: #404e68;
-$dark-color06: #36435c;
-$dark-color07: #242e42;
-$dark-color08: #181d28;
+$dark-color01: #707fc9;
+$dark-color02: #5c6cb6;
+$dark-color03: #4a5aa2;
+$dark-color04: #3a498f;
+$dark-color05: #2c3a7c;
+$dark-color06: #1f2c6a;
+$dark-color07: #14215a;
+$dark-color08: #0b184d;
 $light-color01: #f9fbfd;
-$light-color02: #eff4f9;
-$light-color03: #e3e9ef;
-$light-color04: #d8dee5;
-$light-color05: #d1d7df;
-$light-color06: #ccd3db;
-$light-color07: #c1c9d1;
-$light-color08: #abb4be;
-$green-color01: #c4e6d4;
-$green-color02: #a2d8bb;
-$green-color03: #55bc8a;
-$green-color04: #479e88;
-$green-color05: #3b747a;
+$light-color02: #deebf6;
+$light-color03: #cfe4f2;
+$light-color04: #bfdcf0;
+$light-color05: #a9d1ea;
+$light-color06: #96c8e9;
+$light-color07: #85bfe8;
+$light-color08: #77b6e6;
+$green-color01: #d5c5f6;
+$green-color02: #c4aff0;
+$green-color03: #a981f8;
+$green-color04: #8b61eb;
+$green-color05: #6b29fa;
 $blue-color01: #c7deef;
 $blue-color02: #7eb8dc;
 $blue-color03: #329dce;
@@ -61,11 +61,11 @@ $base-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.06);
 $box-shadow: 0 4px 16px 0 rgba(39, 50, 71, 0.28);
 
 // font
-$font-family: "PingFang SC", "Lantinghei SC", "Helvetica Neue", Helvetica, Arial,
-  "Microsoft YaHei", 微软雅黑, STHeitiSC-Light, simsun, 宋体,
-  "WenQuanYi Zen Hei", "WenQuanYi Micro Hei", sans-serif;
+$font-family: 'PingFang SC', 'Lantinghei SC', 'Helvetica Neue', Helvetica, Arial,
+  'Microsoft YaHei', 微软雅黑, STHeitiSC-Light, simsun, 宋体,
+  'WenQuanYi Zen Hei', 'WenQuanYi Micro Hei', sans-serif;
 $font-family-id: Roboto, $font-family;
-$font-family-code: "PT Mono", Monaco, Menlo, Consolas, "Courier New", monospace;
+$font-family-code: 'PT Mono', Monaco, Menlo, Consolas, 'Courier New', monospace;
 
 $size-small: 12px;
 $size-normal: 14px;
@@ -159,7 +159,7 @@ $input-error-color: $red-color03;
 $input-caret-color: $dark-color06;
 $input-placeholder-color: $dark-color03;
 $input-disabled-color: $light-color02;
-$input-focus-shadow: 0 4px 8px 0 rgba(85,188,138,.2);
+$input-focus-shadow: 0 4px 8px 0 rgba(85, 188, 138, 0.2);
 
 $input-search-bg: $bg-color;
 $input-search-hover-bg: $white;

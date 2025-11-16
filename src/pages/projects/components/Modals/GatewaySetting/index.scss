@@ -90,11 +90,11 @@
 
     .modalTitleContent {
       & > div {
-        @include mixins.TypographyTitleH6(#242e42);
+        @include mixins.TypographyTitleH6(#14215a);
       }
 
       & > p {
-        @include mixins.TypographyParagraph(#79879c);
+        @include mixins.TypographyParagraph(#707fc9);
       }
     }
   }

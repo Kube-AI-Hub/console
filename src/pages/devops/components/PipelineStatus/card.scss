@@ -19,7 +19,7 @@
 
 .pipelineCard--queue {
   .pipelineCard__title {
-    background-color: #6b7b95;
+    background-color: #5c6cb6;
 
     &::before {
       content: '';
@@ -66,7 +66,7 @@
   line-height: 32px;
   color: #ffffff;
   border-radius: 16px;
-  background-color: #242e42;
+  background-color: #14215a;
 }
 
 .pipelineCard__content {
@@ -90,7 +90,7 @@
   }
 
   .content__detail {
-    color: #242e42;
+    color: #14215a;
   }
 }
 

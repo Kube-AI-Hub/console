@@ -41,7 +41,7 @@ class CustomizedAxisTick extends React.PureComponent {
 
     return (
       <g transform={`translate(${x},${y})`}>
-        <text x={0} y={0} dy={12} fill="#79879c" textAnchor={textAnchor}>
+        <text x={0} y={0} dy={12} fill="#707fc9" textAnchor={textAnchor}>
           {payload.value}
         </text>
       </g>
@@ -115,13 +115,13 @@ export default class SimpleArea extends React.Component {
         >
           <defs>
             <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#55bc8a" stopOpacity={0.2} />
-              <stop offset="95%" stopColor="#55bc8a" stopOpacity={0} />
+              <stop offset="5%" stopColor="#a981f8" stopOpacity={0.2} />
+              <stop offset="95%" stopColor="#a981f8" stopOpacity={0} />
             </linearGradient>
           </defs>
           <CartesianGrid
             vertical={false}
-            stroke={'#36435c'}
+            stroke={'#1f2c6a'}
             strokeDasharray="2 2"
             horizontalPoints={this.getHorizontalPoints()}
           />

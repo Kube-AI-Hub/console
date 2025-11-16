@@ -6,7 +6,7 @@
   :global {
     .recharts-cartesian-axis-line {
       stroke-width: 5px;
-      stroke: #eff4f9;
+      stroke: #deebf6;
       stroke-linecap: round;
 
       /* can only use transform to move the svg child node */
@@ -15,7 +15,7 @@
 
     .recharts-cartesian-axis-tick-value {
       font-size: 11px;
-      fill: #abb4be;
+      fill: #77b6e6;
     }
 
     .recharts-bar-rectangle {
@@ -30,14 +30,14 @@
     .recharts-default-tooltip {
       display: flex;
       flex-direction: column-reverse;
- 
+
       /*
        * must use !important in
        * borderColor color padding border white-space
        */
       color: #fff !important;
       background-color: rgba(36, 46, 66, 0.95) !important;
-   
+
       opacity: 0.9;
       border-radius: 4px;
 
@@ -46,7 +46,4 @@
       }
     }
   }
-
 }
-
-

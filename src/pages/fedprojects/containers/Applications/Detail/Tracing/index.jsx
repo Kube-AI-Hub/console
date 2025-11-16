@@ -256,8 +256,8 @@ class Tracing extends React.Component {
           color={
             isServiceMeshEnabled
               ? {
-                  primary: '#00aa72',
-                  secondary: '#90e0c5',
+                  primary: '#a981f8',
+                  secondary: '#c4aff0',
                 }
               : {
                   primary: '#d0a406',

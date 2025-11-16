@@ -6,13 +6,13 @@
 
 .ace_editor.ace-chaos {
   color: #ffffff;
-  background-color: #242e42;
+  background-color: #14215a;
 }
 
 .ace_editor.ace-chaos .ace_gutter {
   color: #537f7e;
-  background-color: #242e42;
-  border-right: 1px solid #4a5974;
+  background-color: #14215a;
+  border-right: 1px solid #3a498f;
 }
 
 .ace_editor.ace-chaos .ace_variable,
@@ -34,7 +34,7 @@
 }
 
 .ace_editor.ace-chaos .ace_marker-layer .ace_active-line {
-  background-color: #36435c;
+  background-color: #1f2c6a;
 }
 
 .ace_editor.ace-chaos .ace_indent-guide {
@@ -43,7 +43,7 @@
 }
 
 .ace_editor.ace-chaos .ace_marker-layer .ace_selection {
-  background-color: #4a5974;
+  background-color: #3a498f;
 }
 
 .ace_editor.ace-chaos .ace_comment {

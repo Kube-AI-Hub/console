@@ -14,7 +14,7 @@
   line-height: 1.43;
   border-radius: 8px 8px 0 0;
   background-color: variables.$lightest;
-  box-shadow: 0 1px 0 0 #d8dee5;
+  box-shadow: 0 1px 0 0 #bfdcf0;
   @include mixins.clearfix;
 
   .operations {
@@ -46,7 +46,7 @@
   position: relative;
   height: 35px;
   padding: 6px 80px 6px 20px;
-  box-shadow: 0 1px 0 0 #d8dee5;
+  box-shadow: 0 1px 0 0 #bfdcf0;
 
   .title {
     position: absolute;
@@ -94,7 +94,7 @@
     height: 20px;
     padding: 2px 9px;
     border-radius: 3px;
-    border: solid 1px #d8dee5;
+    border: solid 1px #bfdcf0;
     background-color: #ffffff;
     font-weight: variables.$font-bold;
     font-family: variables.$font-family-id;
@@ -159,9 +159,9 @@
   }
 
   p {
-    color: #79879c;
+    color: #707fc9;
     strong {
-      color: #242e42;
+      color: #14215a;
     }
   }
 }

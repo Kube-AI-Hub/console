@@ -32,7 +32,7 @@ $titleHeight: 30px;
 
   border-radius: variables.$border-radius;
   background-color: variables.$lightest;
-  border: solid 1px #d8dee5;
+  border: solid 1px #bfdcf0;
 
   @at-root {
     .summery {
@@ -82,14 +82,14 @@ $titleHeight: 30px;
           }
 
           &:hover {
-            background-color: #d8dee5;
+            background-color: #bfdcf0;
           }
         }
       }
     }
     .log {
       border-radius: 4px;
-      background-color: #242e42;
+      background-color: #14215a;
       color: #fff;
       display: grid;
       grid-template-rows: auto 1fr;
@@ -188,7 +188,7 @@ $titleHeight: 30px;
           }
           @at-root {
             .logTime {
-              color: #5f708a;
+              color: #4a5aa2;
             }
           }
         }
@@ -209,7 +209,7 @@ $titleHeight: 30px;
 }
 
 .queryLog {
-  color: #d8dee5;
+  color: #bfdcf0;
   white-space: pre-wrap;
   font-family: variables.$font-family-code;
 }

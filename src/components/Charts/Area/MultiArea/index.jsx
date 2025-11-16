@@ -207,7 +207,7 @@ export default class MultiArea extends React.Component {
             margin={{ top: 50, bottom: 0, left: 0, right: 25 }}
           >
             <CartesianGrid
-              stroke="#d8dee5"
+              stroke="#bfdcf0"
               strokeDasharray="2 3"
               vertical={false}
             />

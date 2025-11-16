@@ -15,7 +15,7 @@
   background-color: #ffffff;
   border: solid 1px variables.$light-color03;
   margin-bottom: 8px;
-  color: #242e42;
+  color: #14215a;
   cursor: pointer;
 
   &:hover {
@@ -66,7 +66,7 @@
 .tab {
   flex-shrink: 1;
   flex-grow: 1;
-  color: #5f708a;
+  color: #4a5aa2;
   height: 30px;
   line-height: 30px;
   text-align: center;
@@ -80,6 +80,6 @@
   color: white;
   border-radius: 100px;
   box-shadow: 0 8px 16px 0 rgba(35, 45, 65, 0.28);
-  background-color: #242e42;
-  border: solid 1px #242e42;
+  background-color: #14215a;
+  border: solid 1px #14215a;
 }

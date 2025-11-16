@@ -163,14 +163,14 @@ pre {
   svg {
     width: 16px;
     height: 16px;
-    color: #324558;
-    fill: #b6c2cd;
+    color: #14215a;
+    fill: #a9d1ea;
   }
 
   &:hover {
     svg {
-      color: #00aa72;
-      fill: #90e0c5;
+      color: #a981f8;
+      fill: #c4aff0;
     }
   }
 }
@@ -225,7 +225,7 @@ pre {
       border-width: 1px 0 0 0;
       border-image-source: radial-gradient(
         circle at 50% 50%,
-        #e3e9ef,
+        #cfe4f2,
         rgba(216, 216, 216, 0)
       );
       border-image-slice: 1;

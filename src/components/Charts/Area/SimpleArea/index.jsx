@@ -206,7 +206,7 @@ export default class SimpleArea extends React.Component {
             margin={{ top: 42, bottom: -20, left: 13, right: 13 }}
           >
             <CartesianGrid
-              stroke={'#d8dee5'}
+              stroke={'#bfdcf0'}
               strokeDasharray="2 2"
               vertical={false}
             />

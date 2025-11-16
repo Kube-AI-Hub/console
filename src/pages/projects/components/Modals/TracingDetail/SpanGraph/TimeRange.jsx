@@ -192,7 +192,7 @@ export default class TimeRange extends React.Component {
             <line
               y1={19}
               y2={41}
-              stroke="#242e42"
+              stroke="#14215a"
               strokeWidth="4"
               strokeOpacity="0"
               strokeLinecap="round"

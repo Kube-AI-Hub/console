@@ -18,17 +18,17 @@
   border-radius: 18px;
   display: inline-block;
   background-color: variables.$bg-color;
-  border: solid 1px #d8dee5;
+  border: solid 1px #bfdcf0;
   & > span {
     display: inline-block;
     line-height: 32px;
-    color: #79879c;
+    color: #707fc9;
     padding: 0 30px;
   }
   @at-root {
     span.selected {
       border-radius: 16px;
-      background-color: #36435c;
+      background-color: #1f2c6a;
       color: #fff;
     }
   }

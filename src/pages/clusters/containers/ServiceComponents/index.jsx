@@ -55,7 +55,7 @@ class ServiceComponents extends React.Component {
     return this.props.match.params.cluster
   }
 
-  getColor = healthy => (healthy ? '#f5a623' : '#55bc8a')
+  getColor = healthy => (healthy ? '#f5a623' : '#a981f8')
 
   getCount = type => {
     const exceptionCount = this.store.exceptionCount

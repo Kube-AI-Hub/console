@@ -50,7 +50,7 @@
   margin-bottom: 20px;
   opacity: 0.6;
   border-bottom: 1px solid;
-  border-image-source: radial-gradient(circle at 50% 0, #abb4be, #ffffff 100%);
+  border-image-source: radial-gradient(circle at 50% 0, #77b6e6, #ffffff 100%);
   border-image-slice: 1;
 }
 
@@ -59,7 +59,7 @@
   :global {
     .button {
       width: 100%;
-  
+
       + .button {
         margin-left: 0;
         margin-top: 12px;

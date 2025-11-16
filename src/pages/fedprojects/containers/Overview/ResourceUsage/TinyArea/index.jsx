@@ -72,7 +72,7 @@ export default class TinyArea extends React.Component {
   renderArea() {
     const { unit, areaColors } = this.props
     const dot = {
-      stroke: '#55bc8a',
+      stroke: '#a981f8',
       strokeWidth: 1,
       fill: '#fff',
       fillOpacity: 1,

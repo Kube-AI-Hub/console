@@ -2,7 +2,7 @@
   fill: none;
   stroke: #a5afba;
   stroke-width: 2px;
-  transition: all .2s ease-in-out;
+  transition: all 0.2s ease-in-out;
 
   &:hover {
     stroke-width: 3px;
@@ -17,7 +17,7 @@
   }
 
   &.tcpActive {
-    stroke: #479e88;
+    stroke: #8b61eb;
   }
 
   &.selected {
@@ -37,6 +37,6 @@
   }
 
   &.tcpActive {
-    fill: #479e88;
+    fill: #8b61eb;
   }
 }

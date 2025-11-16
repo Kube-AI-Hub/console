@@ -70,7 +70,7 @@ export default class PipelineEdges extends React.Component {
           cx={EDGES_LENGTH}
           cy={POINT_R}
           r="10"
-          stroke="#d8dee5"
+          stroke="#bfdcf0"
           strokeDasharray="3,3"
           fill="white"
           strokeWidth={STROKEWIDTH}
@@ -100,7 +100,7 @@ export default class PipelineEdges extends React.Component {
         <path
           key={`left-${this.props.index}`}
           d={this.getLeftLinePath(height)}
-          stroke={isShallow ? '#d8dee5' : 'black'}
+          stroke={isShallow ? '#bfdcf0' : 'black'}
           strokeWidth={STROKEWIDTH}
           fill="none"
           markerStart={`url(#path-marker-${isShallow ? 'grey' : 'black'})`}
@@ -112,7 +112,7 @@ export default class PipelineEdges extends React.Component {
       <path
         key={`right-${this.props.index}`}
         d={this.getRightLinePath(height)}
-        stroke={isShallow ? '#d8dee5' : 'black'}
+        stroke={isShallow ? '#bfdcf0' : 'black'}
         strokeWidth={STROKEWIDTH}
         fill="none"
         markerStart={`url(#path-marker-${isShallow ? 'grey' : 'black'})`}
@@ -213,7 +213,7 @@ export default class PipelineEdges extends React.Component {
               cx={POINT_R}
               cy={POINT_R}
               r={POINT_R - 1}
-              fill={'#d8dee5'}
+              fill={'#bfdcf0'}
             />
           </marker>
         </defs>

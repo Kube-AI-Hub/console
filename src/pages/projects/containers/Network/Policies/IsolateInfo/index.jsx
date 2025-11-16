@@ -48,7 +48,7 @@ export default class IsolateInfo extends React.Component {
             name={ICON_TYPES[module]}
             size={40}
             color={{
-              primary: '#324558',
+              primary: '#14215a',
               secondary: '#f5a623',
             }}
           />

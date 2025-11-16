@@ -65,7 +65,7 @@ export const SEVERITY_LEVEL = [
     prefixIcon: 'information',
     color: {
       primary: '#fae7e5',
-      secondary: '#79879c',
+      secondary: '#707fc9',
     },
     label: 'WARNING_ALERT',
     value: 'warning',
@@ -76,19 +76,19 @@ export const getBaseRuleConfig = ({
   comparator = {},
   thresholds = {},
 } = {}) => [
-  {
-    name: 'comparator',
-    placeholder: 'CONDITION_OPERATOR',
-    options: COMPARATOR_OPTIONS,
-    ...comparator,
-  },
-  {
-    type: 'number',
-    name: 'thresholds',
-    placeholder: 'THRESHOLD',
-    ...thresholds,
-  },
-]
+    {
+      name: 'comparator',
+      placeholder: 'CONDITION_OPERATOR',
+      options: COMPARATOR_OPTIONS,
+      ...comparator,
+    },
+    {
+      type: 'number',
+      name: 'thresholds',
+      placeholder: 'THRESHOLD',
+      ...thresholds,
+    },
+  ]
 
 export const BASE_RULE_CONFIG = getBaseRuleConfig({
   thresholds: {

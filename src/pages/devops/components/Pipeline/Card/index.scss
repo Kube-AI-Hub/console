@@ -20,7 +20,7 @@
   line-height: 32px;
   color: #ffffff;
   border-radius: 16px;
-  background-color: #242e42;
+  background-color: #14215a;
   @include mixins.ellipsis;
 }
 
@@ -51,7 +51,7 @@
 }
 
 .pipelineCard-active {
-  border: 1px solid #6b7b95;
+  border: 1px solid #5c6cb6;
   box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.2);
 }
 
@@ -66,7 +66,7 @@
   & > .pipelineCard__item {
     margin-bottom: 8px;
     border-radius: 0;
-    border-bottom: 1px dashed #ccd3db;
+    border-bottom: 1px dashed #96c8e9;
   }
 
   & > .pipelineCard__item:last-child {
@@ -102,7 +102,7 @@
   }
 
   .content__text {
-    color: #242e42;
+    color: #14215a;
 
     & > div {
       @include mixins.ellipsis;
@@ -110,7 +110,7 @@
   }
 
   .content__detail {
-    color: #242e42;
+    color: #14215a;
   }
 }
 
@@ -128,7 +128,7 @@
   padding: 5px 5px 5px 10px;
   font-weight: bolder;
   background-color: #ffffff;
-  border: 1px dashed #ccd3db;
+  border: 1px dashed #96c8e9;
   user-select: none;
   cursor: pointer;
 
@@ -154,7 +154,7 @@
   font-weight: bolder;
   background-color: transparent;
   border-radius: 4px;
-  border: 1px dashed #ccd3db;
+  border: 1px dashed #96c8e9;
   user-select: none;
 
   :global {

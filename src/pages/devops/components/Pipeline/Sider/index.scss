@@ -26,14 +26,14 @@
   font-size: 14px;
   font-weight: bold;
   line-height: 20px;
-  color: #242e42;
+  color: #14215a;
   margin: 12px 0px;
 
   span {
     font-size: 12px;
     font-weight: normal;
     margin-left: 10px;
-    color: #79879c;
+    color: #707fc9;
   }
 }
 
@@ -47,7 +47,7 @@
 }
 
 .describtion {
-  color: #79879c;
+  color: #707fc9;
 }
 
 .form {
@@ -61,7 +61,7 @@
     padding-left: 8px;
     border-radius: 4px;
     background-color: #ffffff;
-    border: solid 1px #c1c9d1;
+    border: solid 1px #85bfe8;
 
     &::placeholder {
       color: variables.$light-color08;
@@ -73,7 +73,7 @@
 .form_lable {
   line-height: 20px;
   margin-bottom: 4px;
-  color: #242e42;
+  color: #14215a;
 }
 
 .footer {

@@ -50,7 +50,7 @@ export default class Bar extends React.Component {
     const textStyle = {
       left: value > 0.35 ? `${(value / 2) * 100}%` : `${(value + 0.01) * 100}%`,
       transform: value > 0.35 ? 'translateX(-50%)' : '',
-      color: value > 0.35 ? '#fff' : '#79879c',
+      color: value > 0.35 ? '#fff' : '#707fc9',
     }
 
     return (
