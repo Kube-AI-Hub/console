@@ -24,6 +24,8 @@ import { Button, Icon } from '@kube-design/components'
 
 import * as styles from './index.scss'
 
+import variables from '~scss/variables.module.scss'
+
 export default class Card extends React.PureComponent {
   static propTypes = {
     component: PropTypes.object,
@@ -90,7 +92,7 @@ export default class Card extends React.PureComponent {
           <Icon name="network-router" size={40} />
           {isIstioEnable && (
             <span className={styles.istio}>
-              <Icon name="istio" size={16} color={{ primary: '#329dce' }} />
+              <Icon name="istio" size={16} color={{ primary: variables.blueColor03 }} />
             </span>
           )}
         </div>

@@ -6,7 +6,7 @@
   padding: 15px 20px;
   border-radius: 4px;
   background-color: variables.$white;
-  border: solid 1px #bfdcf0;
+  border: solid 1px variables.$light-color04;
 }
 
 .tabs {
@@ -16,7 +16,7 @@
     display: block;
     margin-bottom: 4px;
     line-height: 20px;
-    color: #14215a;
+    color: variables.$dark-color07;
   }
 }
 

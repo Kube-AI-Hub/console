@@ -6,8 +6,8 @@
   margin-bottom: 20px;
   padding: 12px;
   border-radius: variables.$border-radius;
-  background-color: #14215a;
-  box-shadow: 0 8px 16px 0 rgba(36, 46, 66, 0.2);
+  background-color: variables.$dark-color07;
+  box-shadow: 0 8px 16px 0 rgba(variables.$dark-color07, 0.2);
   cursor: pointer;
 
   .icon {
@@ -31,7 +31,7 @@
     }
 
     p {
-      color: #bfdcf0;
+      color: variables.$light-color04;
     }
   }
 
@@ -44,7 +44,7 @@
     padding: 3px;
     transform: translateY(-50%);
     border-radius: 50%;
-    background-color: rgba(85, 188, 138, 0.1);
+    background-color: rgba(variables.$green-color03, 0.1);
 
     :global .icon {
       width: 14px;
@@ -57,7 +57,7 @@
 }
 
 .dropdown {
-  background-color: #14215a;
+  background-color: variables.$dark-color07;
 
   :global {
     .dropdown-content {

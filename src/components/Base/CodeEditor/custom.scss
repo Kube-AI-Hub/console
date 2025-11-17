@@ -1,3 +1,5 @@
+@use '~scss/variables';
+
 .ace_editor {
   line-height: 20px !important;
   font-family: Monaco, Menlo, Consolas, Courier New, monospace;
@@ -5,53 +7,53 @@
 }
 
 .ace_editor.ace-chaos {
-  color: #ffffff;
-  background-color: #14215a;
+  color: variables.$white;
+  background-color: variables.$dark-color07;
 }
 
 .ace_editor.ace-chaos .ace_gutter {
-  color: #537f7e;
-  background-color: #14215a;
-  border-right: 1px solid #3a498f;
+  color: variables.$green-color03;
+  background-color: variables.$dark-color07;
+  border-right: 1px solid variables.$dark-color04;
 }
 
 .ace_editor.ace-chaos .ace_variable,
 .ace_editor.ace-chaos .ace_identifier,
 .ace_editor.ace-chaos .ace_meta.ace_tag {
-  color: #75e0f2;
+  color: variables.$blue-color02;
 }
 
 .ace_editor.ace-chaos .ace_keyword {
-  color: #ffffff;
+  color: variables.$white;
 }
 
 .ace_editor.ace-chaos .ace_string {
-  color: #ebe087;
+  color: variables.$yellow-color02;
 }
 
 .ace_editor.ace-chaos .ace_constant.ace_numeric {
-  color: #bd99ff;
+  color: variables.$red-color02;
 }
 
 .ace_editor.ace-chaos .ace_marker-layer .ace_active-line {
-  background-color: #1f2c6a;
+  background-color: variables.$dark-color06;
 }
 
 .ace_editor.ace-chaos .ace_indent-guide {
-  border-right: 1px dotted #777;
+  border-right: 1px dotted variables.$dark-color01;
   padding: 2px 0;
 }
 
 .ace_editor.ace-chaos .ace_marker-layer .ace_selection {
-  background-color: #3a498f;
+  background-color: variables.$dark-color04;
 }
 
 .ace_editor.ace-chaos .ace_comment {
-  color: #aaa;
+  color: variables.$light-color08;
 }
 
 .ace_editor.ace-chaos .ace_fold:hover {
-  background-color: #fff;
+  background-color: variables.$white;
 }
 
 .ace_editor.ace-chaos .ace_line .ace_fold {
@@ -59,7 +61,7 @@
 }
 
 .ace_search {
-  background-color: #f9fbfd;
+  background-color: variables.$light-color01;
 }
 
 .ace_search.right {

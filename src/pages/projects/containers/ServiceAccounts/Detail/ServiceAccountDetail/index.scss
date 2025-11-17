@@ -33,7 +33,7 @@
       &:first-child {
         min-width: 160px;
         margin-right: 80px;
-        color: #707fc9;
+        color: variables.$dark-color01;
       }
 
       & > pre {

@@ -3,7 +3,7 @@
 
 .pipelineCard {
   min-height: 400px;
-  box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.06);
+  box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.06);
 }
 
 .pipelineCard__toolbar {

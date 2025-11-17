@@ -3,44 +3,44 @@
 // --------------------------------------------------
 
 // init
-$dark-color01: #707fc9;
-$dark-color02: #5c6cb6;
-$dark-color03: #4a5aa2;
-$dark-color04: #3a498f;
-$dark-color05: #2c3a7c;
-$dark-color06: #1f2c6a;
-$dark-color07: #14215a;
-$dark-color08: #0b184d;
-$light-color01: #f9fbfd;
-$light-color02: #deebf6;
-$light-color03: #cfe4f2;
-$light-color04: #bfdcf0;
-$light-color05: #a9d1ea;
-$light-color06: #96c8e9;
-$light-color07: #85bfe8;
-$light-color08: #77b6e6;
-$green-color01: #d5c5f6;
-$green-color02: #c4aff0;
+$dark-color01: #a9d1ea;
+$dark-color02: #b5d7ec;
+$dark-color03: #bfdcf0;
+$dark-color04: #c9e1f3;
+$dark-color05: #cfe4f2;
+$dark-color06: #d9e9f5;
+$dark-color07: #deebf6;
+$dark-color08: #f9fbfd;
+$light-color01: #0b184d;
+$light-color02: #14215a;
+$light-color03: #1f2c6a;
+$light-color04: #2c3a7c;
+$light-color05: #3a498f;
+$light-color06: #4a5aa2;
+$light-color07: #5c6cb6;
+$light-color08: #707fc9;
+$green-color01: #6b29fa;
+$green-color02: #8b61eb;
 $green-color03: #a981f8;
-$green-color04: #8b61eb;
-$green-color05: #6b29fa;
-$blue-color01: #c7deef;
-$blue-color02: #7eb8dc;
+$green-color04: #c4aff0;
+$green-color05: #d5c5f6;
+$blue-color01: #326e93;
+$blue-color02: #3385b0;
 $blue-color03: #329dce;
-$blue-color04: #3385b0;
-$blue-color05: #326e93;
-$red-color01: #fae7e5;
-$red-color02: #ea8573;
+$blue-color04: #7eb8dc;
+$blue-color05: #c7deef;
+$red-color01: #8c3231;
+$red-color02: #ab2f29;
 $red-color03: #ca2621;
-$red-color04: #ab2f29;
-$red-color05: #8c3231;
-$yellow-color01: #ffe1be;
-$yellow-color02: #ffc781;
+$red-color04: #ea8573;
+$red-color05: #fae7e5;
+$yellow-color01: #8d663e;
+$yellow-color02: #e0992c;
 $yellow-color03: #f5a623;
-$yellow-color04: #e0992c;
-$yellow-color05: #8d663e;
-$white: #ffffff;
-$black: #000000;
+$yellow-color04: #ffc781;
+$yellow-color05: #ffe1be;
+$white: $light-color06;
+$black: #ffffff;
 
 // specific color
 $dark: $dark-color07;
@@ -87,7 +87,7 @@ $input-border-radius: 4px;
 $bg-color: $light-color02;
 $body-bg-color: $light-color02;
 $th-bg-color: $light-color01;
-$card-bg-color: $light-color01;
+$card-bg-color: $light-color04;
 
 $btn-default-bg: $light-color02;
 $btn-default-border: $light-color06;
@@ -116,23 +116,23 @@ $text-colors: (
 );
 
 // shadow
-$base-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.06);
-$title-shadow: 0 2px 4px rgba(72, 91, 127, 0.4);
-$head-shadow: 0 4px 8px rgba(36, 46, 66, 0.1);
+$base-shadow: 0 4px 8px 0  rgba($dark-color07, 0.06);
+$title-shadow: 0 2px 4px rgba($dark-color04, 0.4);
+$head-shadow: 0 4px 8px rgba($dark-color07, 0.1);
 
-$btn-text-shadow: 0 2px 4px rgba(36, 46, 66, 0.1);
+$btn-text-shadow: 0 2px 4px rgba($dark-color07, 0.1);
 $btn-default-shadow: none;
-$btn-default-active-shadow: inset 0 4px 8px 0 rgba(36, 46, 66, 0.12);
-$btn-primary-shadow: 0 8px 16px 0 rgba(85, 188, 138, 0.36);
-$btn-primary-active-shadow: inset 0 4px 8px 0 rgba(35, 45, 65, 0.24);
-$btn-control-shadow: 0 8px 16px 0 rgba(35, 45, 65, 0.28);
-$btn-danger-shadow: 0 8px 16px 0 rgba(202, 38, 33, 0.28);
+$btn-default-active-shadow: inset 0 4px 8px 0 rgba($dark-color07, 0.12);
+$btn-primary-shadow: 0 8px 16px 0 rgba($green-color03, 0.36);
+$btn-primary-active-shadow: inset 0 4px 8px 0 rgba($dark-color07, 0.24);
+$btn-control-shadow: 0 8px 16px 0 rgba($dark-color07, 0.28);
+$btn-danger-shadow: 0 8px 16px 0 rgba($red-color03, 0.28);
 
-$card-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.06);
-$card-hover-shadow: 0 6px 16px 0 rgba(33, 43, 54, 0.2);
-$card-selector-shadow: 0 8px 16px 0 rgba(36, 46, 66, 0.08);
+$card-shadow: 0 4px 8px 0 rgba($dark-color07, 0.06);
+$card-hover-shadow: 0 6px 16px 0 rgba($dark-color07, 0.2);
+$card-selector-shadow: 0 8px 16px 0 rgba($dark-color07, 0.08);
 
-$tr-shadow: inset 0 2px 4px 0 rgba(72, 91, 127, 0.2);
+$tr-shadow: inset 0 2px 4px 0 rgba($dark-color04, 0.2);
 
 // font
 $font-family: 'PingFang SC', 'Lantinghei SC', 'Helvetica Neue', Helvetica, Arial,

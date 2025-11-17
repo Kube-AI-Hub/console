@@ -50,7 +50,7 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background-color: rgba(85, 188, 138, 0.1);
+  background-color: rgba(variables.$green-color03, 0.1);
   transition: all variables.$trans-speed;
 
   &::before {

@@ -21,6 +21,7 @@ import PropTypes from 'prop-types'
 
 import { COLORS_MAP } from 'utils/constants'
 
+import variables from '~scss/variables.module.scss'
 import {
   ResponsiveContainer,
   CartesianGrid,
@@ -41,7 +42,7 @@ class CustomizedAxisTick extends React.PureComponent {
 
     return (
       <g transform={`translate(${x},${y})`}>
-        <text x={0} y={0} dy={12} fill="#707fc9" textAnchor={textAnchor}>
+        <text x={0} y={0} dy={12} fill={variables.darkColor01} textAnchor={textAnchor}>
           {payload.value}
         </text>
       </g>
@@ -96,7 +97,7 @@ export default class SimpleArea extends React.Component {
           key={key}
           dataKey={key}
           stroke={color}
-          fillOpacity="1"
+          fillOpacity={1}
           fill="url(#colorPv)"
           unit={unit}
         />
@@ -115,13 +116,13 @@ export default class SimpleArea extends React.Component {
         >
           <defs>
             <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#a981f8" stopOpacity={0.2} />
-              <stop offset="95%" stopColor="#a981f8" stopOpacity={0} />
+              <stop offset="5%" stopColor={variables.greenColor03} stopOpacity={0.2} />
+              <stop offset="95%" stopColor={variables.greenColor03} stopOpacity={0} />
             </linearGradient>
           </defs>
           <CartesianGrid
             vertical={false}
-            stroke={'#1f2c6a'}
+            stroke={variables.darkColor06}
             strokeDasharray="2 2"
             horizontalPoints={this.getHorizontalPoints()}
           />

@@ -1,5 +1,5 @@
 import React from 'react'
-import { get, set, isEmpty, isEqual, isArray } from 'lodash'
+import { get, set, isEmpty, isEqual, isArray, cloneDeep } from 'lodash'
 
 import { Loading } from '@kube-design/components'
 import { SimpleArea } from 'components/Charts'
@@ -15,7 +15,7 @@ import * as styles from './index.scss'
 
 export default class LineChart extends React.Component {
   state = {
-    chartData: this.props.chartData,
+    chartData: [],
     loading: false,
   }
 
@@ -30,6 +30,13 @@ export default class LineChart extends React.Component {
     )
   }
 
+  componentDidMount() {
+    // Process data on initial mount
+    if (!isEmpty(this.props.chartData)) {
+      this.setAreaChartData(this.props.chartData)
+    }
+  }
+
   componentDidUpdate(prevProps) {
     if (!isEqual(this.props.chartData, prevProps.chartData)) {
       this.setAreaChartData(this.props.chartData)
@@ -37,12 +44,14 @@ export default class LineChart extends React.Component {
   }
 
   setNoPriceChartData = data => {
-    data.forEach(item => {
+    const chartData = cloneDeep(data)
+    chartData.forEach(item => {
       item.title = METER_RESOURCE_TITLE[item.type]
     })
 
     this.setState({
-      chartData: data,
+      chartData,
+      loading: false,
     })
   }
 
@@ -56,7 +65,10 @@ export default class LineChart extends React.Component {
       if (isEmpty(this.priceConfig)) {
         this.setNoPriceChartData(data)
       } else {
-        data.forEach(item => {
+        // Deep clone data to avoid mutating props
+        const clonedData = cloneDeep(data)
+        
+        clonedData.forEach(item => {
           item.values = item.values.map(_item => {
             const value = get(_item, [1])
 
@@ -75,11 +87,11 @@ export default class LineChart extends React.Component {
           item.type = METER_RESOURCE_TITLE[item.type]
         })
 
-        const legend = data.map(record => get(record, `type`))
+        const legend = clonedData.map(record => get(record, `type`))
         const _result = {
           title: t('CONSUMER_TRENDS'),
           unit: this.priceConfig.currency ? this.priceConfig.currency : ' ',
-          data,
+          data: clonedData,
           legend,
         }
         const chartData = getAreaChartOps(_result)
@@ -87,9 +99,9 @@ export default class LineChart extends React.Component {
 
         this.setState({
           chartData,
+          loading: false,
         })
       }
-      this.setState({ loading: false })
     })
   }
 

@@ -42,7 +42,7 @@ $banner-height: 144px;
         font-weight: variables.$font-bold;
         line-height: 32px;
         color: variables.$dark-color07;
-        text-shadow: 0 2px 4px 0 rgba(36, 46, 66, 0.1);
+        text-shadow: 0 2px 4px 0 rgba(variables.$dark-color07, 0.1);
       }
       > p {
         font-style: variables.$size-small;

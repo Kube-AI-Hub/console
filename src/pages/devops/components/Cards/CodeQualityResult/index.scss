@@ -44,7 +44,7 @@
   .title {
     height: 20px;
     font-weight: 600;
-    color: #2c3a7c;
+    color: variables.$dark-color05;
     :global(.icon) {
       margin-top: -3px;
       margin-right: 4px;
@@ -53,7 +53,7 @@
 
   .value {
     height: 32px;
-    text-shadow: 0 2px 4px rgba(36, 46, 66, 0.1);
+    text-shadow: 0 2px 4px rgba(variables.$dark-color07, 0.1);
     font-family: variables.$font-family-id;
     font-size: 24px;
     font-weight: 600;
@@ -61,7 +61,7 @@
     font-stretch: normal;
     line-height: 1.33;
     letter-spacing: normal;
-    color: #2c3a7c;
+    color: variables.$dark-color05;
     .unit {
       font-size: 10px;
       margin-left: 4px;
@@ -70,7 +70,11 @@
 }
 
 .success {
-  background-image: linear-gradient(to bottom, #46d18e, #329dce);
+  background-image: linear-gradient(
+    to bottom,
+    #46d18e,
+    variables.$blue-color03
+  );
 }
 
 .error {

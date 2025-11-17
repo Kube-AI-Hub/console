@@ -50,7 +50,7 @@
       &:focus,
       &:hover {
         border: solid 1px $input-error-color !important;
-        box-shadow: 0 4px 8px 0 rgba(202, 38, 33, 0.2) !important;
+        box-shadow: 0 4px 8px 0 rgba($red-color03, 0.2) !important;
       }
     }
   }

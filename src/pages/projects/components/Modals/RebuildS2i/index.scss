@@ -34,15 +34,15 @@
   label {
     .title {
       font-weight: 600;
-      color: #14215a;
+      color: variables.$dark-color07;
     }
     height: 20px;
   }
   .desc {
-    color: #707fc9;
+    color: variables.$dark-color01;
   }
   &:hover {
-    box-shadow: 0 8px 16px 0 rgba(36, 46, 66, 0.08);
+    box-shadow: 0 8px 16px 0 rgba(variables.$dark-color07, 0.08);
   }
 }
 
@@ -50,7 +50,7 @@
   height: 20px;
   font-size: 14px;
   font-weight: 600;
-  color: #14215a;
+  color: variables.$dark-color07;
 }
 
 .desc {

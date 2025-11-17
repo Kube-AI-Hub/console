@@ -1,3 +1,5 @@
+@use '~scss/variables';
+
 .wrapper {
   display: flex;
   width: 100%;
@@ -12,7 +14,7 @@
     width: 120px;
     height: 32px;
     position: relative;
-    border: 1px solid #77b6e6;
+    border: 1px solid variables.$light-color08;
     border-radius: 4px;
     margin-left: 22px;
 

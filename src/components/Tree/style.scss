@@ -43,7 +43,7 @@
     }
 
     &.selected {
-      color: #fff;
+      color: variables.$white;
       background-color: variables.$tree-node-selected-bg;
     }
   }

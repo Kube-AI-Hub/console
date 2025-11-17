@@ -26,6 +26,8 @@ import Link from './Link'
 
 import * as styles from './index.scss'
 
+import variables from '~scss/variables.module.scss'
+
 export default class NavItem extends React.Component {
   static propTypes = {
     item: PropTypes.object,
@@ -66,8 +68,8 @@ export default class NavItem extends React.Component {
             name="update"
             className={styles.tip}
             color={{
-              primary: '#ffc781',
-              secondary: '#f5a623',
+              primary: variables.yellowColor02,
+              secondary: variables.yellowColor03,
             }}
           />
         </Tooltip>

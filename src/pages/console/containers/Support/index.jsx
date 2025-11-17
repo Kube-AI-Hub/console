@@ -28,6 +28,8 @@ import { ReactComponent as Slack } from 'assets/slack_duotone.svg'
 import { ReactComponent as Topic } from 'assets/topic_circle_duotone.svg'
 import * as styles from './index.scss'
 
+import variables from '~scss/variables.module.scss'
+
 const config = globals.config.supportLinks
 
 const openButtons = [
@@ -157,7 +159,7 @@ export default function Support() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Icon name={'git'} size={20} color={{ primary: '#329DCE' }} />
+              <Icon name={'git'} size={20} color={{ primary: variables.blueColor03 }} />
               <span className={styles.smallButtonText}>
                 {t('CODE_CONTRIBUTE')}
               </span>
@@ -169,7 +171,7 @@ export default function Support() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Icon name={'star'} size={20} color={{ primary: '#F5A623' }} />
+              <Icon name={'star'} size={20} color={{ primary: variables.yellowColor03 }} />
               <span className={styles.smallButtonText}>{t('GITHUB_STAR')}</span>
             </a>
           </div>

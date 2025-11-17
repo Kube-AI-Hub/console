@@ -22,6 +22,8 @@ import { ICON_TYPES } from 'utils/constants'
 import { Switch } from 'components/Base'
 import * as styles from './index.scss'
 
+import variables from '~scss/variables.module.scss'
+
 export default class IsolateInfo extends React.Component {
   constructor(props) {
     super(props)
@@ -48,8 +50,8 @@ export default class IsolateInfo extends React.Component {
             name={ICON_TYPES[module]}
             size={40}
             color={{
-              primary: '#14215a',
-              secondary: '#f5a623',
+              primary: variables.darkColor07,
+              secondary: variables.yellowColor03,
             }}
           />
           <div className={styles.isolate}>

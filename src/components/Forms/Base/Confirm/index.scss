@@ -17,7 +17,7 @@
   margin-right: 12px;
   transition: all variables.$trans-speed ease-in-out;
   cursor: pointer;
-  color: #fff;
+  color: variables.$white;
 
   &:hover {
     background-color: variables.$dark-color06;

@@ -102,6 +102,7 @@ module.exports = {
     {
       test: /\.s[ac]ss$/i,
       include: root('src'),
+      exclude: /\.module\.s[ac]ss$/i,
       use: [
         isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
         {
@@ -164,6 +165,42 @@ module.exports = {
       ],
     },
     {
+      test: /\.module\.s[ac]ss$/i,
+      include: root('src'),
+      use: [
+        isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
+        {
+          loader: 'css-loader',
+          options: {
+            importLoaders: 2,
+            esModule: true,
+            modules: {
+              localIdentName: '[name]__[local]___[hash:base64:5]',
+              exportLocalsConvention: 'camelCase',
+              namedExport: false,
+            },
+            sourceMap: true,
+          },
+        },
+        {
+          loader: 'postcss-loader',
+          options: {
+            postcssOptions,
+            sourceMap: true,
+          },
+        },
+        {
+          loader: 'sass-loader',
+          options: {
+            sassOptions: {
+              quietDeps: true,
+              sourceMap: true,
+            },
+          },
+        },
+      ],
+    },
+    {
       test: /\.css$/,
       use: [isDev ? 'style-loader' : MiniCssExtractPlugin.loader, 'css-loader'],
     },
@@ -178,6 +215,8 @@ module.exports = {
     symlinks: false,
     modules: [root('src'), root('src/pages'), 'node_modules'],
     alias: {
+      '@': root('src'),
+      '~scss': root('src/scss'),
       node_modules: root('node_modules'),
       '/assets': root('src/assets'),
     },

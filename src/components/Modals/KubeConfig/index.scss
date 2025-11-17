@@ -26,7 +26,7 @@
   border-radius: 4px;
   overflow: auto;
   position: relative;
-  background-color: #14215a;
+  background-color: variables.$dark-color07;
   & > * {
     box-sizing: border-box;
   }
@@ -40,9 +40,9 @@
   margin: 12px;
   height: 32px;
   line-height: 32px;
-  background-color: #1f2c6a;
+  background-color: variables.$dark-color06;
   padding: 0 12px;
-  color: #fff;
+  color: variables.$white;
   font-weight: 600;
   cursor: pointer;
 }

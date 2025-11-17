@@ -28,6 +28,8 @@ import { showNameAndAlias } from 'utils'
 import RoleStore from 'stores/role'
 import DevOpsStore from 'stores/devops'
 
+import variables from '~scss/variables.module.scss'
+
 import * as styles from './index.scss'
 
 export default
@@ -161,8 +163,8 @@ class DevopsSelect extends Component {
               name="update"
               className={styles.tip}
               color={{
-                primary: '#ffc781',
-                secondary: '#f5a623',
+                primary: variables.yellowColor02,
+                secondary: variables.yellowColor03,
               }}
             />
           </Tooltip>

@@ -4,9 +4,9 @@
   height: 120px;
   border-radius: variables.$border-radius;
   background-color: #2e4658;
-  box-shadow: 0 2px 4px 0 rgba(36, 46, 66, 0.12),
-    0 4px 8px 0 rgba(36, 46, 66, 0.06);
-  color: #fff;
+  box-shadow: 0 2px 4px 0 rgba(variables.$dark-color07, 0.12),
+    0 4px 8px 0 rgba(variables.$dark-color07, 0.06);
+  color: variables.$white;
   padding: 30px 20px;
 }
 
@@ -25,10 +25,10 @@
 
   :global {
     .h3 {
-      color: #fff;
+      color: variables.$white;
       font-weight: variables.$font-bold;
       line-height: 1.33;
-      text-shadow: 0 2px 4px rgba(36, 46, 66, 0.1);
+      text-shadow: 0 2px 4px rgba(variables.$dark-color07, 0.1);
     }
   }
 }

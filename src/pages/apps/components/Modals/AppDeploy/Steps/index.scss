@@ -43,7 +43,7 @@
   }
 
   &.current {
-    box-shadow: 0 4px 8px 0 rgba(85, 188, 138, 0.2);
+    box-shadow: 0 4px 8px 0 rgba(variables.$green-color03, 0.2);
     border: solid 2px variables.$primary;
     background-color: variables.$white;
   }

@@ -22,6 +22,8 @@ import { formatDuration, COORD_COUNT } from 'utils/tracing'
 
 import * as styles from './index.scss'
 
+import variables from '~scss/variables.module.scss'
+
 export default class TimeRange extends React.Component {
   constructor(props) {
     super(props)
@@ -192,7 +194,7 @@ export default class TimeRange extends React.Component {
             <line
               y1={19}
               y2={41}
-              stroke="#14215a"
+              stroke={variables.darkColor07}
               strokeWidth="4"
               strokeOpacity="0"
               strokeLinecap="round"

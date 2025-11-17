@@ -1,5 +1,5 @@
 html {
-  background-color: #eff4f8;
+  background-color: var(--light-color02);
 }
 
 body {
@@ -29,18 +29,18 @@ p {
 svg {
   height: 20px;
   width: 20px;
-  color: #14215a;
-  fill: #a9d1ea;
+  color: var(--dark-color07);
+  fill: var(--light-color05);
 }
 
 ::selection {
-  color: #fff;
-  background: #369a6a;
+  color: var(--white);
+  background: var(--green-color05);
 }
 
 ::-moz-selection {
-  color: #fff;
-  background: #369a6a;
+  color: var(--white);
+  background: var(--green-color05);
 }
 
 .wrapper {
@@ -58,7 +58,7 @@ h1 {
   font-size: 120px;
   font-weight: 600;
   line-height: 168px;
-  color: #77b6e6;
+  color: var(--light-color08);
   user-select: none;
 }
 
@@ -68,11 +68,11 @@ p {
   font-size: 20px;
   font-weight: 600;
   line-height: 1.4;
-  color: #14215a;
+  color: var(--dark-color07);
 }
 
 a {
   margin-left: 4px;
-  color: #329dce;
+  color: var(--blue-color03);
   text-decoration: none;
 }

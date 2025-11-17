@@ -17,7 +17,7 @@
 
   &:hover {
     border-color: variables.$border-hover-color;
-    box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.2);
+    box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.2);
 
     :global .buttons {
       display: block;
@@ -32,7 +32,7 @@
     height: 62px;
     padding: 16px 4px;
     border-radius: 4px;
-    background-color: #fff;
+    background-color: variables.$white;
 
     & > button {
       width: 56px;
@@ -100,7 +100,7 @@
   transition: all variables.$trans-speed ease-in-out;
 
   &:hover {
-    box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.2);
+    box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.2);
     border-color: variables.$border-hover-color;
   }
 }

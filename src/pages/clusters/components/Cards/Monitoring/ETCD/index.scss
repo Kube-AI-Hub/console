@@ -16,7 +16,7 @@
   .info {
     width: calc(100% - 60px);
     margin-left: 20px;
-    color: #2c3a7c;
+    color: variables.$dark-color05;
 
     .title {
       font-size: variables.$size-small;
@@ -77,11 +77,11 @@
           height: 8px;
           border-radius: 50%;
           background-color: variables.$green;
-          box-shadow: 0 4px 8px 0 rgba(85, 188, 138, 0.32);
+          box-shadow: 0 4px 8px 0 rgba(variables.$green-color03, 0.32);
 
           &.offline {
             background-color: variables.$red;
-            box-shadow: 0 8px 16px 0 rgba(202, 38, 33, 0.2);
+            box-shadow: 0 8px 16px 0 rgba(variables.$red-color03, 0.2);
           }
         }
       }

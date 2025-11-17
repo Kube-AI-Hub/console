@@ -60,7 +60,7 @@ describe('The Dashboard Page', function() {
 
     cy.visit('/dashboard')
     cy.wait('@getNodes')
-    cy.get('img[src="/assets/kubesphere.svg"]').click()
+    cy.get('img[src="/assets/logo.svg"]').click()
     cy.url().should('include', '/components')
   })
 

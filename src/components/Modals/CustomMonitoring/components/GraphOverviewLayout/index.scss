@@ -3,7 +3,7 @@
 .wrapper {
   display: flex;
   height: 100%;
-  background: #fff;
+  background: variables.$white;
   border-radius: 8px;
   overflow: hidden;
 
@@ -15,7 +15,7 @@
 
   .row {
     width: 320px;
-    border-left: solid 1px #bfdcf0;
+    border-left: solid 1px variables.$light-color04;
     background: variables.$light-color01;
     overflow: auto;
   }

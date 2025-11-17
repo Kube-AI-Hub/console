@@ -11,7 +11,7 @@
   min-width: 320px;
   color: variables.$dark;
   border-radius: variables.$border-radius;
-  box-shadow: 0 6px 16px 0 rgba(33, 43, 54, 0.2);
+  box-shadow: 0 6px 16px 0 rgba(variables.$dark-color07, 0.2);
   background-color: variables.$white;
   transition: all variables.$trans-speed;
   transform-origin: top center;

@@ -22,6 +22,8 @@ import React from 'react'
 
 import * as styles from './index.scss'
 
+import variables from '~scss/variables.module.scss'
+
 const isSuccess = (type, condition) => {
   const conditionType = condition.type
   const conditionStatus = condition.status
@@ -54,7 +56,7 @@ export default function StatusReason({
                 <Icon
                   name="error"
                   color={{
-                    primary: '#ffffff',
+                    primary: variables.black,
                     secondary: '#ea4641',
                   }}
                 />
@@ -95,8 +97,8 @@ export default function StatusReason({
         <Icon
           name="information"
           color={{
-            primary: '#ffffff',
-            secondary: status === 'error' ? '#ab2f29' : '#f5a623',
+            primary: variables.black,
+            secondary: status === 'error' ? variables.redColor04 : variables.yellowColor03,
           }}
         />
       </Tooltip>

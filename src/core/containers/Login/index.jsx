@@ -158,9 +158,6 @@ class Login extends Component {
 
     return (
       <div className={styles.loginContainer}>
-        <a href="/" className={styles.logo}>
-          <img src="/assets/logo.svg" alt="" />
-        </a>
         <div className={styles.login}>
           <div className={styles.header}>
             {showKS

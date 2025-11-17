@@ -71,7 +71,7 @@
   width: calc(100% - 4px);
   height: 371px;
   border-radius: 2px;
-  box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.2);
+  box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.2);
   border: solid 1px variables.$dark-color01;
   background-color: variables.$white;
   :hover {

@@ -28,6 +28,8 @@ import { SimpleArea as Chart } from 'components/Charts'
 import TrafficCard from './TrafficCard'
 import WorkloadSelect from './WorkloadSelect'
 
+import variables from '~scss/variables.module.scss'
+
 import * as styles from './index.scss'
 
 export default class Monitors extends React.Component {
@@ -140,7 +142,7 @@ export default class Monitors extends React.Component {
     return getAreaChartOps({
       title: 'TRAFFIC',
       legend: ['SUCCESSFUL', 'ALL'],
-      areaColors: ['#329dce', '#bfdcf0'],
+      areaColors: [variables.blueColor03, variables.lightColor04],
       data: [{ values: request_success_count }, { values: request_count }],
       unit: 'RPS',
     })
@@ -166,7 +168,7 @@ export default class Monitors extends React.Component {
     return getAreaChartOps({
       title: 'TRAFFIC',
       legend: ['SUCCESSFUL', 'ALL'],
-      areaColors: ['#329dce', '#bfdcf0'],
+      areaColors: [variables.blueColor03, variables.lightColor04],
       data: [{ values: request_success_count }, { values: request_count }],
       unit: 'RPS',
     })

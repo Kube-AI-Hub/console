@@ -22,8 +22,8 @@
   &.pending-review,
   &.to-be-reviewed,
   &.creating {
-    background-color: rgba(36, 46, 66, 0.1);
-    box-shadow: 0 8px 16px 0 rgba(36, 46, 66, 0.06);
+    background-color: rgba(variables.$dark-color07, 0.1);
+    box-shadow: 0 8px 16px 0 rgba(variables.$dark-color07, 0.06);
 
     &::before {
       background-color: variables.$blue-color03;
@@ -45,8 +45,8 @@
   &.working,
   &.passed,
   &.published {
-    background-color: rgba(85, 188, 138, 0.1);
-    box-shadow: 0 8px 16px 0 rgba(85, 188, 138, 0.36);
+    background-color: rgba(variables.$green-color03, 0.1);
+    box-shadow: 0 8px 16px 0 rgba(variables.$green-color03, 0.36);
 
     &::before {
       background-color: variables.$green;
@@ -94,8 +94,8 @@
   &.failed,
   &.critical,
   &.rejected {
-    background-color: rgba(202, 38, 33, 0.1);
-    box-shadow: 0 8px 16px 0 rgba(202, 38, 33, 0.2);
+    background-color: rgba(variables.$red-color03, 0.1);
+    box-shadow: 0 8px 16px 0 rgba(variables.$red-color03, 0.2);
     &::before {
       background-color: variables.$red-dark;
     }

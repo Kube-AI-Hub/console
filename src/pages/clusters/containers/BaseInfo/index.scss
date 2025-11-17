@@ -56,12 +56,12 @@
     margin-left: 4px;
     cursor: pointer;
     display: inline-block;
-    border-bottom: 1px solid #14215a;
+    border-bottom: 1px solid variables.$dark-color07;
     &:hover {
-      border-bottom-color: #a981f8;
+      border-bottom-color: variables.$green-color03;
       svg {
-        color: #a981f8;
-        fill: #a981f8;
+        color: variables.$green-color03;
+        fill: variables.$green-color03;
       }
     }
   }

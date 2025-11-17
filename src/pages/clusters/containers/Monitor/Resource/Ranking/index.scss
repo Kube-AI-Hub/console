@@ -2,7 +2,7 @@
 
 .wrapper {
   border-radius: variables.$border-radius;
-  box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.06);
+  box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.06);
   background-color: variables.$white;
   overflow: hidden;
   min-height: 300px;
@@ -18,18 +18,18 @@
   border-radius: 18px;
   display: inline-block;
   background-color: variables.$bg-color;
-  border: solid 1px #bfdcf0;
+  border: solid 1px variables.$light-color04;
   & > span {
     display: inline-block;
     line-height: 32px;
-    color: #707fc9;
+    color: variables.$dark-color01;
     padding: 0 30px;
   }
   @at-root {
     span.selected {
       border-radius: 16px;
-      background-color: #1f2c6a;
-      color: #fff;
+      background-color: variables.$dark-color06;
+      color: variables.$white;
     }
   }
 }

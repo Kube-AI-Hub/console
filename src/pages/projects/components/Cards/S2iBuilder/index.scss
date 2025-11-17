@@ -5,7 +5,7 @@
     padding: 12px;
     line-height: 2;
     color: #363e4a;
-    border: solid 1px #bfdcf0;
+    border: solid 1px variables.$light-color04;
     border-radius: 4px;
     background-color: variables.$lightest;
     max-height: 200px;
@@ -29,9 +29,9 @@
     flex-grow: 1;
     height: 20px;
     font-weight: 600;
-    color: #14215a;
+    color: variables.$dark-color07;
     span {
-      color: #329dce;
+      color: variables.$blue-color03;
       margin: 0 8px;
     }
   }
@@ -56,7 +56,7 @@
   line-height: 20px;
   padding: 15px 18px;
   color: #363e4a;
-  border: solid 1px #bfdcf0;
+  border: solid 1px variables.$light-color04;
   border-radius: 4px;
   background-color: variables.$lightest;
   max-height: 200px;

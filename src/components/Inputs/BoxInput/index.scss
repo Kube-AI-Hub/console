@@ -1,3 +1,5 @@
+@use '~scss/variables';
+
 .inputWrapper {
   display: flex;
 }
@@ -24,15 +26,15 @@
   :global {
     .select-control {
       height: 24px;
-      background: #14215a;
+      background: variables.$dark-color07;
     }
 
     .select-value {
-      color: #fff;
+      color: variables.$white;
     }
 
     .kubed-icon-dark {
-      color: #fff;
+      color: variables.$white;
     }
   }
 }

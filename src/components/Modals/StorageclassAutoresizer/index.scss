@@ -1,3 +1,5 @@
+@use '~scss/variables';
+
 .wrapper {
   display: flex;
   margin: 12px 0;
@@ -18,21 +20,21 @@
 
 .settings {
   padding: 12px;
-  background: #f9fbfd;
+  background: variables.$light-color01;
   border-radius: 4px;
 
   .title {
     font-weight: 600;
     font-size: 12px;
     line-height: 20px;
-    color: #14215a;
+    color: variables.$dark-color07;
   }
 
   .container {
     padding: 12px;
     border-radius: 4px;
-    border: 1px solid #96c8e9;
-    background-color: #fff;
+    border: 1px solid variables.$light-color06;
+    background-color: variables.$white;
     margin-top: 8px;
 
     .limit {
@@ -60,13 +62,13 @@
           font-weight: 600;
           font-size: 12px;
           line-height: 20px;
-          color: #14215a;
+          color: variables.$dark-color07;
         }
 
         .des {
           font-size: 12px;
           line-height: 20px;
-          color: #707fc9;
+          color: variables.$dark-color01;
         }
       }
     }

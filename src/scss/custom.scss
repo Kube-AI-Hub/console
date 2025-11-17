@@ -94,7 +94,7 @@
     position: relative;
     font-weight: 500;
     min-width: 117px;
-    color: #1f2c6a;
+    color: variables.$dark-color06;
     padding: 4px 24px;
     border-radius: 16px !important;
     border: none;
@@ -107,7 +107,7 @@
     }
 
     &.checked {
-      background-color: #1f2c6a;
+      background-color: variables.$dark-color06;
       color: variables.$white;
     }
   }
@@ -143,11 +143,11 @@
   font-size: variables.$size-small;
   padding: 0 9px;
   border-radius: 1px;
-  background-color: #329dce;
-  text-shadow: 0 2px 4px rgba(36, 46, 66, 0.1);
+  background-color: variables.$blue-color03;
+  text-shadow: 0 2px 4px rgba(variables.$dark-color07, 0.1);
   font-weight: 500;
   line-height: 1.33;
-  color: #fff;
+  color: variables.$white;
   cursor: default;
 
   &-disable {
@@ -197,7 +197,7 @@
 }
 
 .form-group {
-  background-color: #fff;
+  background-color: variables.$white;
 }
 
 .datepicker {

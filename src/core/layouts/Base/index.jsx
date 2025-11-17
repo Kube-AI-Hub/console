@@ -22,7 +22,8 @@ import { GlobalNav, Header } from 'components/Layout'
 import GlobalSVG from 'components/SVG'
 import { inject, observer } from 'mobx-react'
 import PropTypes from 'prop-types'
-import React, { Component } from 'react'
+import React, { Component, Suspense } from 'react'
+import { Loading } from '@kube-design/components'
 import WebSocketStore from 'stores/websocket'
 import { isAppsPage } from 'utils'
 import { getScrollTop } from 'utils/dom'
@@ -134,7 +135,11 @@ class BaseLayout extends Component {
             onCancel={rootStore.hideGlobalNav}
           />
         )}
-        <div className={styles.main}>{renderRoutes(this.routes)}</div>
+        <div className={styles.main}>
+          <Suspense fallback={<Loading className="ks-page-loading" />}>
+            {renderRoutes(this.routes)}
+          </Suspense>
+        </div>
         {globals.user && <Tools />}
       </div>
     )

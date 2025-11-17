@@ -13,7 +13,7 @@
   transition: all variables.$trans-speed ease-in-out;
 
   &:hover {
-    box-shadow: 0 8px 16px 0 rgba(36, 46, 66, 0.08);
+    box-shadow: 0 8px 16px 0 rgba(variables.$dark-color07, 0.08);
 
     .action {
       opacity: 1;
@@ -44,7 +44,7 @@
       line-height: 20px;
       font-size: 12px;
       font-weight: bold;
-      color: #14215a;
+      color: variables.$dark-color07;
     }
 
     .desc {
@@ -92,14 +92,14 @@
 .repo {
   display: flex;
   padding: 12px 20px;
-  background-color: white;
+  background-color: variables.$white;
   margin-bottom: 8px;
   border: solid 1px variables.$light-color03;
   border-radius: 4px;
   cursor: pointer;
 
   &:hover {
-    box-shadow: 0 8px 16px 0 rgba(36, 46, 66, 0.08);
+    box-shadow: 0 8px 16px 0 rgba(variables.$dark-color07, 0.08);
   }
 }
 
@@ -170,7 +170,7 @@
         margin-top: 40px;
         font-size: 16px;
         font-weight: 600;
-        color: #77b6e6;
+        color: variables.$light-color08;
       }
     }
     .empty {
@@ -204,7 +204,7 @@
       margin-top: 40px;
       font-size: 16px;
       font-weight: 600;
-      color: #77b6e6;
+      color: variables.$light-color08;
     }
   }
 }
@@ -223,7 +223,7 @@
 
 .loadMore {
   text-align: center;
-  color: #707fc9;
+  color: variables.$dark-color01;
   margin: 0 auto;
   display: flex;
   span {

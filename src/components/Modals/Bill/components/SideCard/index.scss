@@ -17,10 +17,10 @@
     bottom: 70px;
     width: 440px;
     border-radius: 4px;
-    background-color: #14215a;
+    background-color: variables.$dark-color07;
     text-align: right;
     z-index: 999;
-    color: #fff;
+    color: variables.$white;
 
     .text {
       text-align: left;
@@ -35,7 +35,7 @@
       padding: 8px 20px;
       transition: all variables.$trans-speed ease-in-out;
       cursor: pointer;
-      color: #fff;
+      color: variables.$white;
 
       &:hover {
         background-color: variables.$dark-color06;
@@ -61,7 +61,7 @@
     padding: 20px 20px 0;
     margin-bottom: 0;
     background: none;
-    box-shadow: 0 -4px 4px rgba(36, 46, 66, 0.1);
+    box-shadow: 0 -4px 4px rgba(variables.$dark-color07, 0.1);
 
     ul li {
       flex: 1 1 auto;

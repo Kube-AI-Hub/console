@@ -103,14 +103,14 @@ $banner-height: 152px + variables.$header-height;
       :global .custom-icon {
         display: inline-block;
         height: 20px;
-        color: #fff;
+        color: variables.$white;
 
         &:hover {
           color: variables.$primary;
 
           svg {
-            color: #a981f8;
-            fill: #c4aff0;
+            color: variables.$green-color03;
+            fill: variables.$green-color04;
           }
         }
 
@@ -125,8 +125,8 @@ $banner-height: 152px + variables.$header-height;
           width: 20px;
           height: 20px;
           margin-right: 8px;
-          color: #fff;
-          fill: #a9d1ea;
+          color: variables.$white;
+          fill: variables.$dark-color04;
         }
       }
     }
@@ -148,13 +148,13 @@ $banner-height: 152px + variables.$header-height;
       .text {
         float: left;
         width: calc(100% - 70px);
-        color: #fff;
+        color: variables.$white;
 
         > div {
           font-size: 24px;
           line-height: 32px;
           font-weight: 600;
-          text-shadow: 0 2px 4px rgba(36, 46, 66, 0.1);
+          text-shadow: 0 2px 4px rgba(variables.$dark-color07, 0.1);
           color: variables.$white;
         }
         > p {

@@ -54,7 +54,7 @@
   text-align: left;
   border-radius: 4px;
   background-color: variables.$white;
-  box-shadow: 0 4px 8px 0 rgba(72, 91, 127, 0.2);
+  box-shadow: 0 4px 8px 0 rgba(variables.$dark-color04, 0.2);
   vertical-align: middle;
   outline: none;
 }

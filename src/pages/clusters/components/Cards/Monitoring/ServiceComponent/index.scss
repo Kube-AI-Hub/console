@@ -16,7 +16,7 @@
   .info {
     width: calc(100% - 60px);
     margin-left: 20px;
-    color: #2c3a7c;
+    color: variables.$dark-color05;
 
     .title {
       font-size: variables.$size-small;

@@ -28,6 +28,7 @@ import { Icon, Loading, Notify, Tooltip } from '@kube-design/components'
 import { Card, Empty } from 'components/Base'
 import ContainerStore from 'stores/container'
 import PodStore from 'stores/pod'
+import variables from '~scss/variables.module.scss'
 
 import * as styles from './index.scss'
 
@@ -178,7 +179,7 @@ class ContainerLog extends React.Component {
         >
           <Icon
             name={isRealtime ? 'stop' : 'start'}
-            color={{ primary: '#fff', secondary: '#fff' }}
+            color={{ primary: variables.white, secondary: variables.white }}
             size={20}
             onClick={this.handleRealtime}
             clickable
@@ -189,7 +190,7 @@ class ContainerLog extends React.Component {
         <Tooltip content={t('REFRESH')}>
           <Icon
             name="refresh"
-            color={{ primary: '#fff', secondary: '#fff' }}
+            color={{ primary: variables.white, secondary: variables.white }}
             size={20}
             onClick={this.handleNext}
             clickable
@@ -204,7 +205,7 @@ class ContainerLog extends React.Component {
           ) : (
             <Icon
               name="download"
-              color={{ primary: '#fff', secondary: '#fff' }}
+              color={{ primary: variables.white, secondary: variables.white }}
               size={20}
               onClick={this.handleDownload}
               clickable

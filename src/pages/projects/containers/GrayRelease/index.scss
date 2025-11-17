@@ -5,19 +5,19 @@
   padding: 20px;
   background-color: variables.$white;
   border-radius: 8px 8px 0 0;
-  box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.06);
+  box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.06);
 
   :global {
     .h3 {
       margin-bottom: 8px;
       line-height: 1.33;
-      color: #14215a;
-      text-shadow: 0 2px 4px rgba(36, 46, 66, 0.1);
+      color: variables.$dark-color07;
+      text-shadow: 0 2px 4px rgba(variables.$dark-color07, 0.1);
     }
   }
 
   & > p {
-    color: #707fc9;
+    color: variables.$dark-color01;
   }
 }
 
@@ -54,11 +54,11 @@
   margin-top: 12px;
   border-radius: variables.$border-radius;
   overflow: hidden;
-  box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.06);
+  box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.06);
   transition: all variables.$trans-speed ease-in-out;
 
   &:hover {
-    box-shadow: 0 6px 16px 0 rgba(33, 43, 54, 0.2);
+    box-shadow: 0 6px 16px 0 rgba(variables.$dark-color07, 0.2);
   }
 }
 
@@ -84,18 +84,18 @@
     }
 
     & > p {
-      color: #707fc9;
+      color: variables.$dark-color01;
     }
   }
 
   .status {
     & > div {
-      color: #14215a;
+      color: variables.$dark-color07;
       font-weight: variables.$font-bold;
     }
 
     & > p {
-      color: #707fc9;
+      color: variables.$dark-color01;
     }
   }
 
@@ -113,7 +113,7 @@
   border-width: 1px 0 0 0;
   border-image-source: radial-gradient(
     circle at 50% 7%,
-    #bfdcf0,
+    variables.$light-color04,
     rgba(216, 222, 229, 0.16)
   );
   border-image-slice: 1;
@@ -125,6 +125,6 @@
     padding: 0 8px;
     background-color: #ecf1f7;
     transform: translate(-50%, -50%);
-    color: #707fc9;
+    color: variables.$dark-color01;
   }
 }

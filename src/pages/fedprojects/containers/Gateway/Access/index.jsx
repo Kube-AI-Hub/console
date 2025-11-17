@@ -29,6 +29,8 @@ import ClusterTitle from 'components/Clusters/ClusterTitle'
 import GatewayStore from 'stores/gateway'
 import { trigger } from 'utils/action'
 
+import variables from '~scss/variables.module.scss'
+
 import { compareVersion } from 'utils'
 import * as styles from './index.scss'
 
@@ -125,8 +127,8 @@ class InternetAccess extends React.Component {
                       name="update"
                       size={20}
                       color={{
-                        primary: '#f5a623 ',
-                        secondary: '#ffe1be',
+                        primary: variables.yellowColor03,
+                        secondary: variables.yellowColor01,
                       }}
                     />
                   </Tooltip>

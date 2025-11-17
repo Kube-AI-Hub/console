@@ -4,7 +4,7 @@
   position: relative;
   padding: 12px 12px 44px 12px;
   border-radius: 4px;
-  box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.2);
+  box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.2);
   border: solid 1px variables.$input-hover-color;
   background-color: variables.$white;
 }

@@ -22,6 +22,7 @@ import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import { toJS, reaction } from 'mobx'
 import { inject, observer } from 'mobx-react'
+import variables from '~scss/variables.module.scss'
 import {
   Button,
   Loading,
@@ -753,7 +754,7 @@ class GatewaySettingModal extends React.Component {
             </Column>
             <Column className="is-narrow">
               <div className={styles.matchArrow}>
-                <Icon name="update" color={{ primary: '#329dce' }} size={24} />
+                <Icon name="update" color={{ primary: variables.blueColor03 }} size={24} />
               </div>
             </Column>
             <Column className="is-narrow">

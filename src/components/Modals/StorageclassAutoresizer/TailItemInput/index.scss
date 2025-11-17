@@ -1,3 +1,5 @@
+@use '~scss/variables';
+
 .title {
   font-size: 12px;
   line-height: 20px;
@@ -6,7 +8,7 @@
 
 .wrapper {
   display: flex;
-  border: 1px solid #77b6e6;
+  border: 1px solid variables.$light-color08;
   border-radius: 4px;
 
   .input {
@@ -26,7 +28,7 @@
     :global {
       .select-control {
         border-radius: 0px 4px 4px 0px;
-        background: #deebf6;
+        background: variables.$light-color02;
         border-top: none;
         border-bottom: none;
         border-right: none;
@@ -43,6 +45,6 @@
     font-weight: 600;
     font-size: 12px;
     line-height: 20px;
-    color: #1f2c6a;
+    color: variables.$dark-color06;
   }
 }

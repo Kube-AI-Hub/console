@@ -23,6 +23,7 @@ import { isEmpty, isEqual, remove } from 'lodash'
 
 import { COLORS_MAP } from 'utils/constants'
 
+import variables from '~scss/variables.module.scss'
 import {
   ResponsiveContainer,
   BarChart,
@@ -180,7 +181,7 @@ export default class StackedBar extends React.Component {
             margin={{ top: 50, bottom: -20, left: 0, right: 20 }}
           >
             <CartesianGrid
-              stroke="#bfdcf0"
+              stroke={variables.lightColor04}
               strokeDasharray="2 3"
               vertical={false}
             />

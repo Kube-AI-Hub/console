@@ -20,12 +20,12 @@
   line-height: 32px;
   color: variables.$white;
   border-radius: 16px;
-  background-color: #14215a;
+  background-color: variables.$dark-color07;
   @include mixins.ellipsis;
 }
 
 .pipelineCard__title-error {
-  background-color: #ca2621;
+  background-color: variables.$red-color03;
 }
 
 .pipelineCard__content {
@@ -34,7 +34,7 @@
   background-color: variables.$white;
   border-radius: 8px;
   border: 1px solid transparent;
-  box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.06);
+  box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.06);
 
   & > .pipelineCard__item:last-child {
     margin-bottom: 0;
@@ -42,17 +42,17 @@
 }
 
 .pipelineCard-error {
-  border-color: #ca2621;
+  border-color: variables.$red-color03;
 }
 
 .errorTip {
-  color: #ca2621;
+  color: variables.$red-color03;
   padding: 4px;
 }
 
 .pipelineCard-active {
-  border: 1px solid #5c6cb6;
-  box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.2);
+  border: 1px solid variables.$dark-color02;
+  box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.2);
 }
 
 .pipelineCard__item {
@@ -66,7 +66,7 @@
   & > .pipelineCard__item {
     margin-bottom: 8px;
     border-radius: 0;
-    border-bottom: 1px dashed #96c8e9;
+    border-bottom: 1px dashed variables.$light-color06;
   }
 
   & > .pipelineCard__item:last-child {
@@ -77,12 +77,12 @@
 
   .content__title {
     font-weight: bolder;
-    color: #329dce;
+    color: variables.$blue-color03;
     margin-bottom: 5px;
   }
 
   .content__title__error {
-    color: #ca2621;
+    color: variables.$red-color03;
   }
 
   .content__title__noDetail {
@@ -102,7 +102,7 @@
   }
 
   .content__text {
-    color: #14215a;
+    color: variables.$dark-color07;
 
     & > div {
       @include mixins.ellipsis;
@@ -110,7 +110,7 @@
   }
 
   .content__detail {
-    color: #14215a;
+    color: variables.$dark-color07;
   }
 }
 
@@ -128,7 +128,7 @@
   padding: 5px 5px 5px 10px;
   font-weight: bolder;
   background-color: variables.$white;
-  border: 1px dashed #96c8e9;
+  border: 1px dashed variables.$light-color06;
   user-select: none;
   cursor: pointer;
 
@@ -141,7 +141,7 @@
 
   &:hover {
     background-color: variables.$bg-color;
-    border: 1px dashed #329dce;
+    border: 1px dashed variables.$blue-color03;
     border-color: #51a6d3;
   }
 }
@@ -154,7 +154,7 @@
   font-weight: bolder;
   background-color: transparent;
   border-radius: 4px;
-  border: 1px dashed #96c8e9;
+  border: 1px dashed variables.$light-color06;
   user-select: none;
 
   :global {
@@ -165,7 +165,7 @@
   }
 
   &:hover {
-    border: 1px dashed #329dce;
+    border: 1px dashed variables.$blue-color03;
     background-color: variables.$bg-color;
   }
 }
@@ -187,11 +187,11 @@
     top: 0;
     width: 6px;
     height: 100%;
-    background-color: #329dce;
+    background-color: variables.$blue-color03;
   }
 
   .nestsStage_detail {
-    background: white;
+    background: variables.$white;
     width: 100%;
   }
 }

@@ -6,7 +6,7 @@
   :global {
     svg {
       color: rgba(255, 255, 255, 0.9);
-      fill: #329dce;
+      fill: variables.$blue-color03;
     }
   }
 }
@@ -22,6 +22,6 @@
   font-weight: 400;
   font-size: 12px;
   line-height: 20px;
-  color: #14215a;
+  color: variables.$dark-color07;
   margin-top: 12px;
 }

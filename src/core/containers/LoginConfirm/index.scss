@@ -18,7 +18,7 @@
   width: 320px;
   margin: 140px auto 40px;
   padding: 20px;
-  background-color: #fff;
+  background-color: variables.$white;
   border-radius: 4px;
   box-shadow: variables.$base-shadow;
   box-sizing: border-box;
@@ -52,7 +52,7 @@
   border-bottom: 1px solid;
   border-image-source: radial-gradient(
     circle at 50% 0,
-    #77b6e6,
+    variables.$light-color08,
     variables.$white 100%
   );
   border-image-slice: 1;
@@ -68,8 +68,8 @@
 .oauth {
   padding: 6px;
   border-radius: 2px;
-  background-color: #deebf6;
-  color: #1f2c6a;
+  background-color: variables.$light-color02;
+  color: variables.$dark-color06;
   font-size: 12px;
   font-weight: 500;
   line-height: 20px;
@@ -79,11 +79,11 @@
   transition: all 0.3s ease-in-out;
 
   &:hover {
-    background-color: #bfdcf0;
+    background-color: variables.$light-color04;
   }
 
   &:active {
-    background-color: #a9d1ea;
+    background-color: variables.$light-color05;
   }
 
   & + .oauth {

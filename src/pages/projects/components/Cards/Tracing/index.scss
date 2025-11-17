@@ -14,7 +14,7 @@
   line-height: 1.43;
   border-radius: 8px 8px 0 0;
   background-color: variables.$lightest;
-  box-shadow: 0 1px 0 0 #bfdcf0;
+  box-shadow: 0 1px 0 0 variables.$light-color04;
   @include mixins.clearfix;
 
   .operations {
@@ -38,7 +38,7 @@
   }
 
   &:hover {
-    box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.06);
+    box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.06);
   }
 }
 
@@ -46,7 +46,7 @@
   position: relative;
   height: 35px;
   padding: 6px 80px 6px 20px;
-  box-shadow: 0 1px 0 0 #bfdcf0;
+  box-shadow: 0 1px 0 0 variables.$light-color04;
 
   .title {
     position: absolute;
@@ -94,7 +94,7 @@
     height: 20px;
     padding: 2px 9px;
     border-radius: 3px;
-    border: solid 1px #bfdcf0;
+    border: solid 1px variables.$light-color04;
     background-color: variables.$white;
     font-weight: variables.$font-bold;
     font-family: variables.$font-family-id;
@@ -159,9 +159,9 @@
   }
 
   p {
-    color: #707fc9;
+    color: variables.$dark-color01;
     strong {
-      color: #14215a;
+      color: variables.$dark-color07;
     }
   }
 }

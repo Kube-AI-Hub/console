@@ -117,12 +117,12 @@ pre {
 
 ::-moz-selection {
   background: #369a6a;
-  color: #fff;
+  color: variables.$white;
 }
 
 ::selection {
   background: #369a6a;
-  color: #fff;
+  color: variables.$white;
 }
 
 .icon-notification {
@@ -146,7 +146,7 @@ pre {
 }
 
 .header-shadow {
-  box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.06) !important;
+  box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.06) !important;
 }
 
 .apps-dark-header {
@@ -163,14 +163,14 @@ pre {
   svg {
     width: 16px;
     height: 16px;
-    color: #14215a;
-    fill: #a9d1ea;
+    color: variables.$dark-color07;
+    fill: variables.$dark-color04;
   }
 
   &:hover {
     svg {
-      color: #a981f8;
-      fill: #c4aff0;
+      color: variables.$green-color03;
+      fill: variables.$green-color04;
     }
   }
 }
@@ -212,7 +212,7 @@ pre {
         vertical-align: middle;
         font-size: 23px;
         line-height: 1.33;
-        text-shadow: 0 2px 4px rgba(36, 46, 66, 0.1);
+        text-shadow: 0 2px 4px rgba(variables.$dark-color07, 0.1);
       }
     }
 
@@ -225,7 +225,7 @@ pre {
       border-width: 1px 0 0 0;
       border-image-source: radial-gradient(
         circle at 50% 50%,
-        #cfe4f2,
+        variables.$light-color03,
         rgba(216, 216, 216, 0)
       );
       border-image-slice: 1;
@@ -262,7 +262,7 @@ pre {
     padding: 3px 6px;
     border-radius: 2px;
     background: variables.$black;
-    color: #fff;
+    color: variables.$white;
     white-space: nowrap;
     z-index: 100;
   }

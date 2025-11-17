@@ -293,7 +293,7 @@
 }
 
 .shadow-reverse {
-  box-shadow: 0 -2px 4px 0 rgba(72, 91, 127, 0.2);
+  box-shadow: 0 -2px 4px 0 rgba(variables.$dark-color04, 0.2);
 }
 
 .no-shadow {

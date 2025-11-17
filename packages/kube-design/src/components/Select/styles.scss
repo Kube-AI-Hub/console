@@ -1,5 +1,5 @@
-@import "../../styles/variables.scss";
-@import "../../styles/mixins";
+@import '../../styles/variables.scss';
+@import '../../styles/mixins';
 
 .select {
   position: relative;
@@ -137,7 +137,7 @@
     padding: 4px 0;
     border-radius: $border-radius;
     background-color: $heading-color;
-    box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.16);
+    box-shadow: 0 4px 8px 0 rgba($dark-color07, 0.16);
     box-sizing: border-box;
     overflow-y: auto;
     z-index: 1000;
@@ -198,7 +198,7 @@
 
       &::after {
         display: block;
-        content: "";
+        content: '';
         height: 1px;
         width: auto;
         margin: 0 10px;

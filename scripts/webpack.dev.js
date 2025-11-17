@@ -53,7 +53,7 @@ const config = {
       minChunks: 1,
       cacheGroups: {
         vendors: {
-          test: /[\\/]node_modules[\\/](?!(ace-builds|react-ace|xterm)).*.jsx?$/,
+          test: /[\\/]node_modules[\\/](?!(ace-builds|react-ace|@xterm)).*.jsx?$/,
           name: 'vendor',
           priority: 10,
         },

@@ -7,10 +7,10 @@
 
   &.error {
     .type {
-      background-color: #ca2621;
+      background-color: variables.$red-color03;
     }
     .wrapper {
-      border: solid 1px #ca2621;
+      border: solid 1px variables.$red-color03;
     }
   }
 }
@@ -18,8 +18,8 @@
 .wrapper {
   padding: 20px 12px 12px;
   border-radius: variables.$border-radius;
-  box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.06);
-  background-color: #fff;
+  box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.06);
+  background-color: variables.$white;
 }
 
 .detail {
@@ -70,11 +70,11 @@
       padding: 0 6px;
       margin-right: 6px;
       border-radius: 1px;
-      background-color: #1f2c6a;
-      text-shadow: 0 2px 4px rgba(36, 46, 66, 0.1);
+      background-color: variables.$dark-color06;
+      text-shadow: 0 2px 4px rgba(variables.$dark-color07, 0.1);
       font-weight: variables.$font-bold;
       line-height: 16px;
-      color: #fff;
+      color: variables.$white;
     }
   }
 }
@@ -87,9 +87,9 @@
   padding: 4px 12px;
   font-weight: variables.$font-bold;
   line-height: 1.67;
-  color: #fff;
+  color: variables.$white;
   border-radius: 16px;
-  background-color: #14215a;
+  background-color: variables.$dark-color07;
   transform: translateX(-50%);
   text-align: center;
 

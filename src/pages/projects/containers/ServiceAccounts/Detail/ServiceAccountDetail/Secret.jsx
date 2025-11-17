@@ -27,6 +27,7 @@ import { Panel, CodeEditor } from 'components/Base'
 import { getValue } from 'utils/yaml'
 import { copyToClipboard } from 'utils/dom'
 import { safeBtoa } from 'utils/base64'
+import variables from '~scss/variables.module.scss'
 
 import SecretStore from 'stores/secret'
 
@@ -180,7 +181,7 @@ class Secret extends React.Component {
               name="copy"
               size={20}
               clickable
-              color={{ primary: '#fff', secondary: '#fff' }}
+              color={{ primary: variables.white, secondary: variables.white }}
               onClick={this.handleCopy}
             />
             <span className={styles.split}>|</span>
@@ -188,7 +189,7 @@ class Secret extends React.Component {
               name="download"
               size={20}
               clickable
-              color={{ primary: '#fff', secondary: '#fff' }}
+              color={{ primary: variables.white, secondary: variables.white }}
               onClick={this.handleDownload}
             />
           </div>

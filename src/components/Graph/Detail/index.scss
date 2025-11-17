@@ -11,9 +11,9 @@
 .wrapper {
   width: 400px;
   height: 100%;
-  background-color: #fff;
+  background-color: variables.$white;
   border-radius: 4px;
-  box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.1);
+  box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.1);
 
   :global {
     .collapse .collapse-item-content {
@@ -47,7 +47,7 @@
       line-height: 1.5;
 
       & + p {
-        color: #707fc9;
+        color: variables.$dark-color01;
       }
     }
   }

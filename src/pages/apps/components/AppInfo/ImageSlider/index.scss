@@ -97,7 +97,7 @@ $N75: #8c96ad;
     float: left;
     width: $picture-width + $picture-margin;
     height: $picture-height;
-    background-color: #fff;
+    background-color: variables.$white;
 
     .picture {
       display: flex;

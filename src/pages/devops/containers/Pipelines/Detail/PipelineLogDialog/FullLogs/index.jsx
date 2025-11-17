@@ -21,6 +21,7 @@ import { action, computed } from 'mobx'
 import { observer } from 'mobx-react'
 import { Icon, Loading, Tooltip } from '@kube-design/components'
 import * as styles from './index.scss'
+import variables from '~scss/variables.module.scss'
 
 export default
 @observer
@@ -138,7 +139,7 @@ class FullLogs extends React.Component {
         <Tooltip content={t('BACK')}>
           <Icon
             name="return"
-            color={{ primary: '#fff', secondary: '#fff' }}
+            color={{ primary: variables.white, secondary: variables.white }}
             size={20}
             onClick={this.props.handleVisableLog}
             clickable
@@ -151,7 +152,7 @@ class FullLogs extends React.Component {
         >
           <Icon
             name={isRealtime ? 'stop' : 'start'}
-            color={{ primary: '#fff', secondary: '#fff' }}
+            color={{ primary: variables.white, secondary: variables.white }}
             size={20}
             onClick={this.handleRealtime}
             clickable
@@ -162,7 +163,7 @@ class FullLogs extends React.Component {
         <Tooltip content={t('REFRESH')}>
           <Icon
             name="refresh"
-            color={{ primary: '#fff', secondary: '#fff' }}
+            color={{ primary: variables.white, secondary: variables.white }}
             size={20}
             onClick={isRealtime ? null : this.handleRefreshLogs}
             clickable
@@ -177,7 +178,7 @@ class FullLogs extends React.Component {
           ) : (
             <Icon
               name="download"
-              color={{ primary: '#fff', secondary: '#fff' }}
+              color={{ primary: variables.white, secondary: variables.white }}
               size={20}
               onClick={this.handleDownload}
               clickable

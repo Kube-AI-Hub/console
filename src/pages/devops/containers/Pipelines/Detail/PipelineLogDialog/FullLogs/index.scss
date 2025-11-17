@@ -16,7 +16,7 @@
       padding: 6px 10px;
       color: variables.$white;
       border-radius: 16px;
-      background-color: #1f2c6a;
+      background-color: variables.$dark-color06;
 
       :global {
         .icon {
@@ -41,7 +41,7 @@
 
     height: calc(100vh - 210px);
     overflow-y: auto;
-    background-color: #14215a;
+    background-color: variables.$dark-color07;
     padding-bottom: 10px;
 
     pre {

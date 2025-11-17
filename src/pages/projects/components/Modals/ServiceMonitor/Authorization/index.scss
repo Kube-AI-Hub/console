@@ -47,7 +47,7 @@
   top: 40px;
   right: 0;
   z-index: 9999;
-  box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.16);
+  box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.16);
   border-radius: variables.$border-radius;
   overflow: hidden;
 }

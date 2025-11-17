@@ -57,7 +57,7 @@
     .ring {
       display: block;
       border: 3px solid variables.$primary;
-      box-shadow: 0 4px 8px rgba(85, 188, 138, 0.2);
+      box-shadow: 0 4px 8px rgba(variables.$green-color03, 0.2);
     }
   }
 

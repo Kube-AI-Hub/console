@@ -14,7 +14,7 @@
     min-width: 230px;
     margin-left: 24px;
     padding-right: 24px;
-    border-right: dashed 1px #bfdcf0;
+    border-right: dashed 1px variables.$light-color04;
   }
 
   .version {
@@ -45,8 +45,8 @@
     height: 20px;
     right: 0;
     bottom: 0;
-    background-color: #fff;
-    border: 2px solid #329dce;
+    background-color: variables.$white;
+    border: 2px solid variables.$blue-color03;
     border-radius: 50%;
 
     :global .icon {

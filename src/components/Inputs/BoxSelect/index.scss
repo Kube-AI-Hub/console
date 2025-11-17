@@ -9,7 +9,7 @@
     position: relative;
     min-width: 128px;
     border-radius: 4px;
-    border: 1px solid #85bfe8;
+    border: 1px solid variables.$light-color07;
     padding: 14px 20px 14px 56px;
     font-size: 12px;
     font-weight: 500;
@@ -30,15 +30,15 @@
     }
 
     &:hover {
-      border-color: #329dce;
+      border-color: variables.$blue-color03;
     }
 
     &.select {
-      border-color: #329dce;
-      color: #329dce;
+      border-color: variables.$blue-color03;
+      color: variables.$blue-color03;
 
       :global .icon > svg {
-        color: #329dce;
+        color: variables.$blue-color03;
       }
     }
   }

@@ -6,7 +6,7 @@
       font-weight: variables.$font-normal;
       line-height: 2;
       color: variables.$title-color;
-      text-shadow: 0 2px 4px rgba(72, 91, 127, 0.2);
+      text-shadow: 0 2px 4px rgba(variables.$dark-color04, 0.2);
     }
 
     p {

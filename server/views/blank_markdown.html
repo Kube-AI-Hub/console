@@ -7,13 +7,14 @@
 <title>Markdown Content</title>
 <base target="_blank"/>
 <style>
- ::-moz-selection{background: #369a6a; color: #fff }
- ::selection {background: #369a6a;color: #fff}
+<%- include('../public/variables.css') %>
+ ::-moz-selection{background: var(--green-color05); color: var(--white) }
+ ::selection {background: var(--green-color05);color: var(--white) }
 .markdown-body {
     margin: 0;
     font-family: 'PingFang SC', 'Lantinghei SC', 'Helvetica Neue', Helvetica, Arial, 'Microsoft YaHei', 微软雅黑, STHeitiSC-Light, simsun, 宋体, 'WenQuanYi Zen Hei', 'WenQuanYi Micro Hei', sans-serif;
     font-size: 12px;
-    color: #232d41;
+    color: var(--dark-color07) ;
     line-height: 1.5;
     word-wrap: break-word;
     -webkit-font-smoothing: antialiased;
@@ -40,7 +41,7 @@
 }
 
 .markdown-body a {
-    color: #369a6a;
+    color: var(--green-color05) ;
     text-decoration: none;
 }
 
@@ -54,7 +55,7 @@
 }
 
 .markdown-body .absent {
-    color: #cb2431
+    color: var(--red-color03)
 }
 
 .markdown-body .anchor {
@@ -72,23 +73,23 @@
     margin-top: 0;
     margin-bottom: 12px;
     line-height: 20px;
-    color: #303e5a;
+    color: var(--dark-color06) ;
 }
 
 .markdown-body hr {
     height: .25em;
     padding: 0;
     margin: 24px 0;
-    background-color: #e1e4e8;
+    background-color: var(--light-color03) ;
     border: 0
 }
 
 .markdown-body blockquote {
     margin: 0;
     padding:1em;
-    color: #232d41;
-    border-left: 0.25em solid #369a6a;
-    background: #fafbfc;
+    color: var(--dark-color07);
+    border-left: 0.25em solid var(--green-color05) ;
+    background: var(--light-color01) ;
 }
 
 .markdown-body blockquote>:first-child {
@@ -104,13 +105,13 @@
     padding: 3px 5px;
     font-size: 11px;
     line-height: 10px;
-    color: #444d56;
+    color: var(--dark-color05) ;
     vertical-align: middle;
-    background-color: #fafbfc;
-    border: solid 1px #c6cbd1;
-    border-bottom-color: #959da5;
+    background-color: var(--light-color01) ;
+    border: solid 1px var(--blue-color01) ;
+    border-bottom-color: var(--dark-color01) ;
     border-radius: 3px;
-    box-shadow: inset 0 -1px 0 #959da5
+    box-shadow: inset 0 -1px 0 var(--dark-color01) ;
 }
 
 .markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6 {
@@ -121,7 +122,7 @@
 }
 
 .markdown-body h1 .octicon-link,.markdown-body h2 .octicon-link,.markdown-body h3 .octicon-link,.markdown-body h4 .octicon-link,.markdown-body h5 .octicon-link,.markdown-body h6 .octicon-link {
-    color: #1b1f23;
+    color: var(--dark-color08) ;
     vertical-align: middle;
     visibility: hidden
 }
@@ -164,7 +165,7 @@
 
 .markdown-body h6 {
     font-size: 0.85em;
-    color: #303e5a;
+    color: var(--dark-color06);
 }
 
 .markdown-body ul,.markdown-body ol {
@@ -218,7 +219,7 @@
 
 .markdown-body table th {
     font-weight: 600;
-    color: #303e5a;
+    color: var(--dark-color06);
 }
 
 .markdown-body table th,.markdown-body table td {
@@ -231,11 +232,11 @@
 }
 
 .markdown-body table tr {
-    background-color: #fff;
-    border-top: 1px solid #c6cbd1
+    background-color: var(--white) ;
+    border-top: 1px solid var(--light-color06) ;
 }
 .markdown-body table tr:nth-child(odd) td{
-    background-color: #EFF4F8;
+    background-color: var(--light-color02);
 }
 .markdown-body table tr:nth-child(odd) td:first-child,.markdown-body table tr:nth-child(odd) td:last-child{
     border: 3px;
@@ -251,7 +252,7 @@
 .markdown-body img {
     max-width: 100%;
     box-sizing: content-box;
-    background-color: #fff
+    background-color: var(--white);
 }
 
 .markdown-body img[align=right] {
@@ -280,7 +281,7 @@
     padding: 7px;
     margin: 13px 0 0;
     overflow: hidden;
-    border: 1px solid #dfe2e5
+    border: 1px solid var(--light-color05);
 }
 
 .markdown-body span.frame span img {
@@ -292,7 +293,7 @@
     display: block;
     padding: 5px 0 0;
     clear: both;
-    color: #24292e
+    color: var(--dark-color07);
 }
 
 .markdown-body span.align-center {
@@ -359,8 +360,8 @@
 .markdown-body code,.markdown-body tt {
     padding: 0.2em 0.4em;
     margin: 0;
-    color: #369a6a;
-    background-color: rgba(85, 188, 138, 0.2);
+    color: var(--green-color05);
+    background-color: rgba(var(--green-color03), 0.2);
     border-radius: 3px;
     font-family: Monaco, Menlo, Consolas, 'Courier New', monospace;
 
@@ -402,8 +403,8 @@
     overflow: auto;
     line-height: 1.45;
     border-radius: 3px;
-    background-color: #f5f8f9;
-    border: 1px solid #cfd9df;
+    background-color: var(--light-color01);
+    border: 1px solid var(--light-color06);
 }
 
 .markdown-body pre code,.markdown-body pre tt {
@@ -416,7 +417,7 @@
     word-wrap: normal;
     background-color: transparent;
     border: 0;
-    color: #232d41;
+    color: var(--dark-color07);
 }
 
 .markdown-body .csv-data td,.markdown-body .csv-data th {
@@ -431,7 +432,7 @@
 .markdown-body .csv-data .blob-num {
     padding: 10px 8px 9px;
     text-align: right;
-    background: #fff;
+    background: var(--white);
     border: 0
 }
 
@@ -441,7 +442,7 @@
 
 .markdown-body .csv-data th {
     font-weight: 600;
-    background: #f6f8fa;
+    background: var(--light-color01);
     border-top: 0
 }
 </style>

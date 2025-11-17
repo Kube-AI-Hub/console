@@ -16,7 +16,7 @@
       float: left;
       width: 140px;
       padding: 0 5px 0 0;
-      color: #4a5aa2;
+      color: variables.$dark-color03;
       vertical-align: top;
       @include mixins.break-all;
 

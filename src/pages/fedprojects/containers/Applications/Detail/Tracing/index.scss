@@ -20,13 +20,13 @@
   margin-right: 12px;
 
   & > button {
-    background: white;
-    border: 1px solid #77b6e6;
+    background: variables.$white;
+    border: 1px solid variables.$light-color08;
     color: variables.$dark-color06;
 
     &:hover {
       background: white !important;
-      border-color: #707fc9;
+      border-color: variables.$light-color08;
     }
   }
 

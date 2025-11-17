@@ -39,7 +39,23 @@ export default class MonitorTab extends React.Component {
   }
 
   state = {
-    activeTab: get(this, 'props.tabs[0].key', ''),
+    activeTab: '',
+  }
+
+  componentDidMount() {
+    // Set default activeTab on initial mount
+    const { tabs } = this.props
+    if (!isEmpty(tabs) && !this.state.activeTab) {
+      this.setState({ activeTab: tabs[0]?.key || '' })
+    }
+  }
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    // Set first tab as active if tabs changed and no tab is currently selected
+    if (!isEmpty(nextProps.tabs) && !prevState.activeTab) {
+      return { activeTab: nextProps.tabs[0]?.key || '' }
+    }
+    return null
   }
 
   handleTabClick = e =>
@@ -53,9 +69,9 @@ export default class MonitorTab extends React.Component {
 
     return (
       <div className={styles.tabHeader}>
-        {tabs.map(tab => (
+        {tabs.map((tab, index) => (
           <div
-            key={tab.key}
+            key={tab.key || index}
             className={classnames(styles.tabHeaderItem, {
               [styles.active]: tab.key === activeTab,
             })}

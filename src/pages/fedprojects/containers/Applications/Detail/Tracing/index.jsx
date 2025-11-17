@@ -28,6 +28,8 @@ import { Button, Select, Icon } from '@kube-design/components'
 import EmptyList from 'components/Cards/EmptyList'
 import TracingCard from 'projects/components/Cards/Tracing'
 import TracingDetail from 'projects/components/Modals/TracingDetail'
+
+import variables from '~scss/variables.module.scss'
 import ClusterSelect from 'fedprojects/components/ClusterSelect'
 import TimeSelector from 'components/Cards/Monitoring/Controller/TimeSelector'
 import { getTimeRange, getMinuteValue } from 'stores/monitoring/base'
@@ -256,8 +258,8 @@ class Tracing extends React.Component {
           color={
             isServiceMeshEnabled
               ? {
-                  primary: '#a981f8',
-                  secondary: '#c4aff0',
+                  primary: variables.greenColor03,
+                  secondary: variables.greenColor04,
                 }
               : {
                   primary: '#d0a406',

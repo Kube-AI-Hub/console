@@ -19,7 +19,7 @@
     & > label {
       height: 36px;
       background: variables.$white;
-      border: 1px solid #96c8e9;
+      border: 1px solid variables.$light-color06;
       border-radius: 4px;
       display: flex;
       padding: 8px 12px;
@@ -44,9 +44,9 @@
     }
 
     :global .checked {
-      background: #14215a;
+      background: variables.$dark-color07;
       & > span {
-        color: #fff;
+        color: variables.$white;
       }
     }
   }

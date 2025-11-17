@@ -18,7 +18,7 @@
   width: 320px;
   margin: 140px auto 40px;
   padding: 20px;
-  background-color: #fff;
+  background-color: variables.$white;
   border-radius: 4px;
   box-shadow: variables.$base-shadow;
   box-sizing: border-box;
@@ -52,7 +52,7 @@
   border-bottom: 1px solid;
   border-image-source: radial-gradient(
     circle at 50% 0,
-    #77b6e6,
+    variables.$light-color08,
     variables.$white 100%
   );
   border-image-slice: 1;

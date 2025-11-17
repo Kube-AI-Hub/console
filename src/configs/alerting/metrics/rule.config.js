@@ -18,6 +18,8 @@
 
 import Big from 'big.js'
 
+import variables from '~scss/variables.module.scss'
+
 Big.DP = 10
 
 const COMPARATOR_OPTIONS = [
@@ -44,8 +46,8 @@ export const SEVERITY_LEVEL = [
     type: 'critical',
     prefixIcon: 'information',
     color: {
-      primary: '#fae7e5',
-      secondary: '#ca2621',
+      primary: variables.redColor01,
+      secondary: variables.redColor03,
     },
     label: 'CRITICAL_ALERT',
     value: 'critical',
@@ -54,8 +56,8 @@ export const SEVERITY_LEVEL = [
     type: 'warning',
     prefixIcon: 'information',
     color: {
-      primary: '#fae7e5',
-      secondary: '#f5a623',
+      primary: variables.redColor01,
+      secondary: variables.yellowColor03,
     },
     label: 'ERROR_ALERT',
     value: 'error',
@@ -64,8 +66,8 @@ export const SEVERITY_LEVEL = [
     type: 'secondary',
     prefixIcon: 'information',
     color: {
-      primary: '#fae7e5',
-      secondary: '#707fc9',
+      primary: variables.redColor01,
+      secondary: variables.darkColor01,
     },
     label: 'WARNING_ALERT',
     value: 'warning',

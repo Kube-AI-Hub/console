@@ -29,6 +29,8 @@ import Card from './Card'
 
 import * as styles from './index.scss'
 
+import variables from '~scss/variables.module.scss'
+
 export default
 @inject('rootStore')
 @observer
@@ -55,7 +57,7 @@ class ServiceComponents extends React.Component {
     return this.props.match.params.cluster
   }
 
-  getColor = healthy => (healthy ? '#f5a623' : '#a981f8')
+  getColor = healthy => (healthy ? variables.yellowColor03 : variables.greenColor03)
 
   getCount = type => {
     const exceptionCount = this.store.exceptionCount
@@ -67,8 +69,8 @@ class ServiceComponents extends React.Component {
   getConfigs = () => [
     {
       type: 'kubesphere',
-      title: 'KubeSphere',
-      icon: '/assets/kubesphere.svg',
+      title: t('KUBE_AI_HUB'),
+      icon: '/assets/logo.svg',
     },
     {
       type: 'kubernetes',
@@ -163,7 +165,9 @@ class ServiceComponents extends React.Component {
     return (
       <div className={styles.cardsWrapper}>
         <div className={styles.cardTitle}>
-          <img src={config.icon} alt={config.title} />
+          <svg viewBox="0 0 150 20" preserveAspectRatio="xMidYMid meet">
+            <use href={config.icon} />
+          </svg>
         </div>
         {this.renderCards(components)}
       </div>

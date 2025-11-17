@@ -35,7 +35,7 @@ $toolbar-height: 44px;
       font-weight: 500;
       line-height: 28px;
       color: variables.$dark-color07;
-      text-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.1);
+      text-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.1);
       margin-bottom: 12px;
     }
     > p {

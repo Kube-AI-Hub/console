@@ -28,6 +28,7 @@ import { Panel, Text } from 'components/Base'
 import NodeStore from 'stores/node'
 
 import Chart from './Chart'
+import variables from '~scss/variables.module.scss'
 
 import * as styles from './index.scss'
 
@@ -44,8 +45,8 @@ const Status = ({ status, tip }) => {
       className={styles.status}
       name={status === 'success' ? 'success' : 'error'}
       color={{
-        primary: '#fff',
-        secondary: status === 'success' ? '#a981f8' : '#ca2621',
+        primary: variables.white,
+        secondary: status === 'success' ? variables.greenColor03 : variables.redColor03,
       }}
     />
   )
@@ -125,21 +126,21 @@ class ScheduleInfo extends React.Component {
       {
         name: 'podRequests',
         itemStyle: {
-          fill: '#f5a623',
+          fill: variables.yellowColor03,
         },
         value: podRequests,
       },
       {
         name: 'used',
         itemStyle: {
-          fill: '#2c3a7c',
+          fill: variables.darkColor05,
         },
         value: Number((capacity - allocatable - podRequests).toFixed(3)),
       },
       {
         name: 'allocatable',
         itemStyle: {
-          fill: '#deebf6',
+          fill: variables.lightColor02,
         },
         value: allocatable,
       },

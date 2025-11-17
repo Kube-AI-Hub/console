@@ -77,7 +77,7 @@
 }
 
 .modalHead {
-  background: #fff;
+  background: variables.$white;
 
   .modalTitle {
     display: flex;
@@ -90,11 +90,11 @@
 
     .modalTitleContent {
       & > div {
-        @include mixins.TypographyTitleH6(#14215a);
+        @include mixins.TypographyTitleH6(variables.$dark-color07);
       }
 
       & > p {
-        @include mixins.TypographyParagraph(#707fc9);
+        @include mixins.TypographyParagraph(variables.$dark-color01);
       }
     }
   }

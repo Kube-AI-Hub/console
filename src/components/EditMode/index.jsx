@@ -27,6 +27,7 @@ import { Icon } from '@kube-design/components'
 import { CodeEditor } from 'components/Base'
 
 import { getValue, getAllYAMLValue } from 'utils/yaml'
+import variables from '~scss/variables.module.scss'
 
 import * as styles from './index.scss'
 
@@ -152,7 +153,7 @@ export default class EditMode extends React.Component {
                   <Icon
                     name="upload"
                     size={20}
-                    color={{ primary: '#fff', secondary: '#fff' }}
+                    color={{ primary: variables.white, secondary: variables.white }}
                     clickable
                     changeable
                   />
@@ -163,7 +164,7 @@ export default class EditMode extends React.Component {
             <Icon
               name="download"
               size={20}
-              color={{ primary: '#fff', secondary: '#fff' }}
+              color={{ primary: variables.white, secondary: variables.white }}
               onClick={this.handleDownload}
               clickable
               changeable

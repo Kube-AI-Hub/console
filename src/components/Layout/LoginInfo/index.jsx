@@ -29,6 +29,8 @@ import UserStore from 'stores/user'
 
 import * as styles from './index.scss'
 
+import variables from '~scss/variables.module.scss'
+
 export default
 @inject('rootStore')
 @observer
@@ -114,8 +116,8 @@ class LoginInfo extends Component {
             <Icon
               name="human"
               color={{
-                primary: '#f5a623',
-                secondary: '#8d663e',
+                primary: variables.yellowColor03,
+                secondary: variables.yellowColor05,
               }}
             />
             <a

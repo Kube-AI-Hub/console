@@ -20,7 +20,7 @@
   & > p {
     padding: 38px 0;
     text-align: center;
-    color: #4a5aa2;
+    color: variables.$dark-color03;
   }
 }
 
@@ -78,7 +78,7 @@
     }
 
     &.selectType {
-      background-color: #14215a;
+      background-color: variables.$dark-color07;
       color: variables.$white;
     }
   }
@@ -98,8 +98,8 @@
 }
 
 .dark {
-  fill: #14215a;
-  color: #14215a;
+  fill: variables.$dark-color07;
+  color: variables.$dark-color07;
 }
 
 .branch {
@@ -114,7 +114,7 @@
   transition: all variables.$trans-speed ease-in-out;
 
   &:hover {
-    box-shadow: 0 8px 16px 0 rgba(36, 46, 66, 0.08);
+    box-shadow: 0 8px 16px 0 rgba(variables.$dark-color07, 0.08);
     .action {
       opacity: 1;
     }
@@ -139,7 +139,7 @@
       line-height: 20px;
       font-size: 12px;
       font-weight: bold;
-      color: #14215a;
+      color: variables.$dark-color07;
       white-space: nowrap;
       text-overflow: ellipsis;
       overflow: hidden;

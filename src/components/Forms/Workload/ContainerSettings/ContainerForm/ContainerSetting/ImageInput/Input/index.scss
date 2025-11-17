@@ -27,9 +27,9 @@
     font-size: 12px;
     font-weight: 600;
     font-family: variables.$font-family-id;
-    color: #14215a;
-    border-color: #77b6e6;
-    caret-color: #14215a;
+    color: variables.$dark-color07;
+    border-color: variables.$light-color08;
+    caret-color: variables.$dark-color07;
     &::placeholder {
       font-weight: 400;
     }
@@ -94,8 +94,8 @@
   width: 100%;
   max-width: none !important;
   height: 100%;
-  color: #3a498f;
-  border: 1px solid #96c8e9;
+  color: variables.$dark-color04;
+  border: 1px solid variables.$light-color06;
   border-radius: 4px;
   background-color: transparent;
   box-shadow: none;

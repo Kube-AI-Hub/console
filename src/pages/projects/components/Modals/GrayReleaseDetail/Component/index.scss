@@ -5,11 +5,11 @@
   padding: 12px;
   border-radius: 4px;
   border: 1px solid variables.$light-color03;
-  background-color: #fff;
+  background-color: variables.$white;
   transition: all variables.$trans-speed ease-in-out;
 
   &:hover {
-    box-shadow: 0 8px 16px 0 rgba(36, 46, 66, 0.08);
+    box-shadow: 0 8px 16px 0 rgba(variables.$dark-color07, 0.08);
   }
 }
 
@@ -64,7 +64,7 @@
     font-size: 10px;
     font-weight: variables.$font-bold;
     line-height: 2;
-    color: #14215a;
+    color: variables.$dark-color07;
   }
 }
 
@@ -82,7 +82,7 @@
 
     &.running {
       background-color: variables.$green;
-      box-shadow: 0 4px 8px 0 rgba(85, 188, 138, 0.32);
+      box-shadow: 0 4px 8px 0 rgba(variables.$green-color03, 0.32);
     }
 
     &.updating {

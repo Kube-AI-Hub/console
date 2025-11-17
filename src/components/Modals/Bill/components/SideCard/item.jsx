@@ -26,6 +26,8 @@ import { CLUSTER_GROUP_TAG_TYPE } from 'utils/constants'
 import * as styles from './item.scss'
 import BillIcon from '../BillIcon'
 
+import variables from '~scss/variables.module.scss'
+
 export default function Card({
   data,
   active,
@@ -150,8 +152,8 @@ export default function Card({
         <Icon
           name="update"
           color={{
-            primary: '#ffc781',
-            secondary: '#f5a623',
+            primary: variables.yellowColor02,
+            secondary: variables.yellowColor03,
           }}
         />
       </Tooltip>
@@ -164,8 +166,8 @@ export default function Card({
         <Icon
           name="information"
           color={{
-            primary: '#ffc781',
-            secondary: '#f5a623',
+            primary: variables.yellowColor02,
+            secondary: variables.yellowColor03,
           }}
         />
       </Tooltip>

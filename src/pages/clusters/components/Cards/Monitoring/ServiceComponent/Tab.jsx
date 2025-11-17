@@ -22,9 +22,10 @@ import classnames from 'classnames'
 import { Icon } from '@kube-design/components'
 
 import * as styles from './index.scss'
+import variables from '~scss/variables.module.scss'
 
 const TabItem = ({ active, icon, name, title }) => {
-  const iconProps = { color: { primary: '#fff', secondary: '#fff' } }
+  const iconProps = { color: { primary: variables.white, secondary: variables.white } }
 
   return (
     <div

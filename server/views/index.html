@@ -11,6 +11,7 @@
     <title><%= title %></title>
     <link rel="icon" href="/assets/favicon.ico" type="image/x-icon" />
     <style>
+      <%- include('../public/variables.css') %>
       <%- include('../public/loading.css') %>
     </style>
     <% if (manifest && manifest.assets && manifest.assets.css && manifest.assets.css.length > 0) { %>

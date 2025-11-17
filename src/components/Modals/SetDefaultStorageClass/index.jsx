@@ -23,6 +23,8 @@ import { Modal } from 'components/Base'
 
 import * as styles from './index.scss'
 
+import variables from '~scss/variables.module.scss'
+
 export default class SetDefaultStorageClassModal extends React.Component {
   static propTypes = {
     visible: PropTypes.bool,
@@ -55,7 +57,7 @@ export default class SetDefaultStorageClassModal extends React.Component {
           <div className="h5">
             <Icon
               name="information"
-              color={{ primary: '#ffffff', secondary: '#41b1ea' }}
+              color={{ primary: variables.black, secondary: '#41b1ea' }}
               size={18}
             />
             &nbsp;&nbsp;

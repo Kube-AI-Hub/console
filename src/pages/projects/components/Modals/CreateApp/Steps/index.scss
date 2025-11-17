@@ -8,7 +8,7 @@
   background-color: variables.$dark-color07;
 
   & > div {
-    @include mixins.TypographySymbolText(#fff);
+    @include mixins.TypographySymbolText(variables.$white);
 
     & + div {
       position: relative;

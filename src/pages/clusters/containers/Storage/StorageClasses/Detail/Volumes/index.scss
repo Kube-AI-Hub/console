@@ -27,14 +27,14 @@
   font-weight: 600;
   font-size: 12px;
   line-height: 20px;
-  color: #14215a;
+  color: variables.$dark-color07;
 }
 
 .des {
   font-weight: 400;
   font-size: 12px;
   line-height: 20px;
-  color: #707fc9;
+  color: variables.$dark-color01;
 }
 
 .bottom {
@@ -42,7 +42,7 @@
 }
 
 .item_bg {
-  background: #f9fbfd;
+  background: variables.$light-color01;
   border-radius: 4px;
   padding: 12px;
   flex: 1;

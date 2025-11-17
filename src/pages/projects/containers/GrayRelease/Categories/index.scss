@@ -6,7 +6,7 @@
 
   li {
     border-radius: variables.$border-radius;
-    box-shadow: 0 6px 16px 0 rgba(33, 43, 54, 0.2);
+    box-shadow: 0 6px 16px 0 rgba(variables.$dark-color07, 0.2);
     background-color: variables.$white;
 
     & + li {
@@ -31,7 +31,7 @@
     height: 40px;
     padding: 8px;
     border-radius: 100px 0 100px 100px;
-    background-color: #329dce;
+    background-color: variables.$blue-color03;
   }
 
   .text {
@@ -45,7 +45,7 @@
 
     p {
       margin-top: 5px;
-      color: #707fc9;
+      color: variables.$dark-color01;
     }
   }
 }

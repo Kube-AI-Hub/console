@@ -22,6 +22,7 @@ import { observer, inject } from 'mobx-react'
 import classnames from 'classnames'
 import { toJS } from 'mobx'
 
+import variables from '~scss/variables.module.scss'
 import {
   RadioGroup,
   RadioButton,
@@ -93,7 +94,7 @@ class GroupUser extends Component {
 
   getColor = value => {
     const { type } = this.state
-    return value === type ? '#a981f8' : '#85bfe8'
+    return value === type ? variables.greenColor03 : variables.lightColor07
   }
 
   fetchNotingroupData = (params = {}) => {

@@ -19,6 +19,7 @@
 import { sortBy } from 'lodash'
 import moment from 'moment-mini'
 import { TRACING_COLORS_HEX } from 'utils/constants'
+import variables from '~scss/variables.module.scss'
 
 class TreeNode {
   static iterFunction(fn, depth = 0) {
@@ -321,7 +322,7 @@ export const renderIntoCanvas = (
   totalValueWidth,
   getFillColor
 ) => {
-  const BG_COLOR = '#fff'
+  const BG_COLOR = variables.white
   const ITEM_ALPHA = 'a0'
   const MIN_ITEM_HEIGHT = 2
   const MAX_ITEM_HEIGHT = 4

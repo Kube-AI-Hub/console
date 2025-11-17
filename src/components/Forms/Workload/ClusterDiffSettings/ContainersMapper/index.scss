@@ -10,7 +10,7 @@
     border-radius: 2px;
     background-color: variables.$dark-color06;
 
-    @include mixins.TypographyParagraph(#fff);
+    @include mixins.TypographyParagraph(variables.$white);
   }
 
   &.selected > div:first-child {

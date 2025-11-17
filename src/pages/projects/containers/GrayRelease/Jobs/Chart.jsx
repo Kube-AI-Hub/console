@@ -23,6 +23,8 @@ import { PieChart } from 'components/Charts'
 
 import * as styles from './index.scss'
 
+import variables from '~scss/variables.module.scss'
+
 export default class Chart extends React.Component {
   static propTypes = {
     name: PropTypes.string,
@@ -45,14 +47,14 @@ export default class Chart extends React.Component {
       {
         name: legendData[0],
         itemStyle: {
-          fill: '#329dce',
+          fill: variables.blueColor03,
         },
         value: data[0] || 0,
       },
       {
         name: legendData[1],
         itemStyle: {
-          fill: '#c7deef',
+          fill: variables.blueColor01,
         },
         value: data[1] || 0,
       },

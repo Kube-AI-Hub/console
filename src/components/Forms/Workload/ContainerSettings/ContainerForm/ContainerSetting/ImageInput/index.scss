@@ -10,8 +10,8 @@
   width: 100%;
   border: solid 1px variables.$dark-color01;
   border-radius: variables.$border-radius;
-  box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.2);
-  background-color: white;
+  box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.2);
+  background-color: variables.$white;
   z-index: 2;
 
   .header {
@@ -100,7 +100,7 @@
   border-radius: 18px;
   display: inline-block;
   background-color: variables.$bg-color;
-  border: 1px solid #bfdcf0;
+  border: 1px solid variables.$light-color04;
   margin-right: 20px;
   .tab {
     display: inline-block;
@@ -108,12 +108,12 @@
     text-align: center;
     min-width: 120px;
     line-height: 28px;
-    color: #707fc9;
+    color: variables.$dark-color01;
   }
 
   .selected {
     border-radius: 16px;
-    background-color: #1f2c6a;
+    background-color: variables.$dark-color06;
     color: white !important;
   }
 }
@@ -205,7 +205,7 @@
 
       &:hover {
         background-color: variables.$green;
-        color: #fff;
+        color: variables.$white;
       }
     }
   }

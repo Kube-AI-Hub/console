@@ -1,3 +1,5 @@
+@use '~scss/variables';
+
 .path {
   fill: none;
   stroke: #a5afba;
@@ -9,15 +11,15 @@
   }
 
   &.error {
-    stroke: #ca2621;
+    stroke: variables.$red-color03;
   }
 
   &.active {
-    stroke: #329dce;
+    stroke: variables.$blue-color03;
   }
 
   &.tcpActive {
-    stroke: #8b61eb;
+    stroke: variables.$green-color04;
   }
 
   &.selected {
@@ -29,14 +31,14 @@
   fill: #a5afba;
 
   &.error {
-    fill: #ca2621;
+    fill: variables.$red-color03;
   }
 
   &.active {
-    fill: #329dce;
+    fill: variables.$blue-color03;
   }
 
   &.tcpActive {
-    fill: #8b61eb;
+    fill: variables.$green-color04;
   }
 }

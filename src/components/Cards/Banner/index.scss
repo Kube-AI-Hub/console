@@ -49,14 +49,14 @@
   }
 
   & > a {
-    @include mixins.TypographySymbolText(#3385b0);
+    @include mixins.TypographySymbolText(variables.$blue-color04);
   }
 }
 
 .tip {
   position: relative;
   padding: 12px 60px 12px 52px;
-  background-color: #fff;
+  background-color: variables.$white;
   border-top: 1px solid variables.$light-color03;
   cursor: pointer;
 

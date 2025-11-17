@@ -46,8 +46,8 @@
     }
     .icon {
       :global .kubed-icon {
-        color: #a981f8;
-        fill: #c4aff0;
+        color: variables.$green-color03;
+        fill: variables.$green-color04;
       }
     }
   }

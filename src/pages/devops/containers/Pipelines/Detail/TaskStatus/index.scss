@@ -1,21 +1,21 @@
 @use '~scss/variables';
 
 .pipelineCard {
-  box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.06);
+  box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.06);
 }
 
 .pipelineCard__tab {
   display: grid;
   grid-template-columns: 1fr auto;
-  background: #f9fbfd;
+  background: variables.$light-color01;
   height: 52px;
   padding: 10px 12px;
-  box-shadow: inset 0px -1px 0px #cfe4f2;
+  box-shadow: inset 0px -1px 0px variables.$light-color03;
 }
 
 .pipelineCard_content {
   background: variables.$white;
-  box-shadow: 0px 4px 8px rgba(36, 46, 66, 0.06);
+  box-shadow: 0px 4px 8px rgba(variables.$dark-color07, 0.06);
   border-radius: 4px;
   padding: 12px;
 }
@@ -56,7 +56,7 @@
     line-height: 1.67;
     color: variables.$white;
     border-radius: 4px;
-    background-color: #14215a;
+    background-color: variables.$dark-color07;
     white-space: pre-wrap;
   }
 }
@@ -75,7 +75,7 @@
 
 .running_tips {
   margin-left: 25px;
-  color: #14215a;
+  color: variables.$dark-color07;
 }
 
 .runningIcon {
@@ -103,7 +103,7 @@
   border-radius: variables.$border-radius;
   min-height: 212px;
   background-color: variables.$white;
-  box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.06);
+  box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.06);
 
   .icon {
     margin-top: 40px;
@@ -113,13 +113,13 @@
     line-height: 20px;
     font-size: 14px;
     font-weight: 600;
-    color: #14215a;
+    color: variables.$dark-color07;
   }
   .desc {
     margin-bottom: 8px;
     line-height: 20px;
     font-size: 12px;
-    color: #707fc9;
+    color: variables.$dark-color01;
   }
 }
 

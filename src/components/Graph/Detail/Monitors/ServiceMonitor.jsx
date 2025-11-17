@@ -28,6 +28,8 @@ import TrafficCard from './TrafficCard'
 
 import * as styles from './index.scss'
 
+import variables from '~scss/variables.module.scss'
+
 export default class Monitors extends React.Component {
   static propTypes = {
     detail: PropTypes.object,
@@ -122,7 +124,7 @@ export default class Monitors extends React.Component {
     return getAreaChartOps({
       title: 'TRAFFIC',
       legend: ['SUCCESSFUL', 'ALL'],
-      areaColors: ['#329dce', '#bfdcf0'],
+      areaColors: [variables.blueColor03, variables.lightColor04],
       data: [{ values: request_success_count }, { values: request_count }],
       unit: 'RPS',
     })

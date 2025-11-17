@@ -45,12 +45,12 @@ $category-width: 193px;
 .banner {
   top: 114px;
   left: 303px;
-  color: #fff;
+  color: variables.$white;
 
   > .title {
     font-size: variables.$size-mid-large;
     line-height: 32px;
-    text-shadow: 0 2px 4px rgba(36, 46, 66, 0.1);
+    text-shadow: 0 2px 4px rgba(variables.$dark-color07, 0.1);
   }
   > .desc {
     font-size: variables.$size-small;

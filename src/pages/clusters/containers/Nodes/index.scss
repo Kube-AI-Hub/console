@@ -8,7 +8,7 @@
   padding: 0 6px;
   line-height: 20px;
   border-radius: 2px;
-  box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.2);
+  box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.2);
   background-color: variables.$dark-color08;
   text-align: center;
   font-weight: bold;
@@ -35,7 +35,7 @@
   }
 
   :global .kubed-icon-dark {
-    color: #fff;
+    color: variables.$white;
     fill: #ea4641;
   }
 }

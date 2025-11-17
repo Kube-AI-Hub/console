@@ -4,7 +4,7 @@
   position: relative;
   border-radius: 4px;
   background-color: variables.$white;
-  box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.06);
+  box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.06);
   transition: all variables.$trans-speed ease-in-out;
 
   & + .wrapper {
@@ -12,7 +12,7 @@
   }
 
   &:hover {
-    box-shadow: 0 6px 16px 0 rgba(33, 43, 54, 0.2);
+    box-shadow: 0 6px 16px 0 rgba(variables.$dark-color07, 0.2);
 
     .view {
       opacity: 1;
@@ -67,7 +67,7 @@
     display: inline-block;
     vertical-align: middle;
     margin-right: 12px;
-    color: #707fc9;
+    color: variables.$dark-color01;
   }
 
   img {

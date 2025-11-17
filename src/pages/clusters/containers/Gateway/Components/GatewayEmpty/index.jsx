@@ -5,6 +5,8 @@ import { Panel } from 'components/Base'
 import { compareVersion } from 'utils'
 import * as styles from './index.scss'
 
+import variables from '~scss/variables.module.scss'
+
 const GatewayEmpty = ({
   component,
   type,
@@ -35,8 +37,8 @@ const GatewayEmpty = ({
               <Icon
                 name="update"
                 color={{
-                  primary: '#f5a623 ',
-                  secondary: '#ffe1be',
+                  primary: variables.yellowColor03,
+                  secondary: variables.yellowColor01,
                 }}
               />
             </p>

@@ -28,7 +28,7 @@ export default class EmptyList extends React.PureComponent {
   static propTypes = {
     icon: PropTypes.string,
     title: PropTypes.string,
-    desc: PropTypes.string,
+    desc: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
     actions: PropTypes.oneOfType([PropTypes.node, PropTypes.element]),
   }
 

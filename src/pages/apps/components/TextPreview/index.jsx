@@ -27,6 +27,7 @@ import yaml from 'js-yaml/dist/js-yaml'
 import { CodeEditor } from 'components/Base'
 
 import * as styles from './index.scss'
+import variables from '~scss/variables.module.scss'
 
 export default
 @observer
@@ -145,7 +146,7 @@ class TextPreview extends React.Component {
           className={styles.download}
           name="download"
           size={20}
-          color={{ primary: '#fff' }}
+          color={{ primary: variables.white }}
           onClick={this.handleDownload}
           clickable
           changeable

@@ -4,9 +4,9 @@
 .select {
   padding: 12px;
   margin-bottom: 12px;
-  background-color: #fff;
+  background-color: variables.$white;
   border-radius: 4px;
-  box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.06);
+  box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.06);
 }
 
 .control {
@@ -47,7 +47,7 @@
     }
 
     p {
-      color: #707fc9;
+      color: variables.$light-color08;
     }
   }
 
@@ -58,7 +58,7 @@
 
 .empty {
   padding: 12px 20px;
-  color: #77b6e6;
+  color: variables.$light-color08;
   font-size: variables.$size-medium;
   font-weight: variables.$font-bold;
   line-height: 1.5;

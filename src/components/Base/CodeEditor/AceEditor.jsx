@@ -32,7 +32,7 @@ import xmlWorker from 'ace-builds/src-noconflict/worker-xml'
 import javascriptWorker from 'ace-builds/src-noconflict/worker-javascript'
 import jsonWorker from 'ace-builds/src-noconflict/worker-json'
 
-import './custom.css'
+import './custom.scss'
 
 // fix ace-build worker-loader
 config.setModuleUrl('ace/mode/yaml_worker', yamlWorker)

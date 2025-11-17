@@ -25,6 +25,8 @@ import { SimpleArea } from 'components/Charts'
 
 import * as styles from './index.scss'
 
+import variables from '~scss/variables.module.scss'
+
 export default class LineChart extends React.Component {
   static propTypes = {
     title: PropTypes.string,
@@ -47,7 +49,7 @@ export default class LineChart extends React.Component {
       data: data.map(item => ({
         values: item,
       })),
-      areaColors: ['#329dce', '#c7deef'],
+      areaColors: [variables.blueColor03, variables.blueColor01],
       ...rest,
     }
 

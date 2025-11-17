@@ -10,10 +10,10 @@
 .contentHeader {
   padding: 10px 24px;
   background-color: variables.$card-bg-color;
-  box-shadow: 0 1px 0 0 #deebf6;
+  box-shadow: 0 1px 0 0 variables.$light-color02;
   border-top-left-radius: variables.$border-radius;
   border-top-right-radius: variables.$border-radius;
-  color: #fff;
+  color: variables.$white;
   &.hasSelected {
     background-color: variables.$dark;
   }

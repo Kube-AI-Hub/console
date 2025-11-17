@@ -84,7 +84,7 @@
   .content_item {
     padding: 12px;
     margin-bottom: 10px;
-    background: #f9fbfd;
+    background: variables.$light-color01;
     border-radius: 4px;
     .content_item_title,
     .content_item_desc {
@@ -99,10 +99,10 @@
 
     .item_tag {
       margin-top: 8px;
-      background: #deebf6;
+      background: variables.$light-color02;
       border-radius: 4px;
       padding: 12px 20px;
-      color: #707fc9;
+      color: variables.$dark-color01;
     }
 
     .items {
@@ -112,8 +112,8 @@
         margin-bottom: 8px;
         margin-left: 0;
         line-height: 1.5;
-        background: #deebf6;
-        border: 1px solid #96c8e9;
+        background: variables.$light-color02;
+        border: 1px solid variables.$light-color06;
         box-sizing: border-box;
         border-radius: 22px;
         font-weight: 600;

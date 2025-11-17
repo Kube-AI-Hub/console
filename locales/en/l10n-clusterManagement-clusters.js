@@ -19,6 +19,9 @@
 module.exports = {
   // Banner
   NO_CLUSTER_TIP: 'Please add at least one cluster.',
+  // System Components
+  // Resource Usage
+  GPU_MEMORY: 'GPU Memory',
   // Add Cluster > Basic Information
   CLUSTER_NAME_EMPTY: 'Please enter a cluster name.',
   ADD_CLUSTER: 'Add Cluster',

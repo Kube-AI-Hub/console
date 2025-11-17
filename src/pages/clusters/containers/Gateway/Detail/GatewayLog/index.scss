@@ -8,13 +8,13 @@
   padding: 10px 20px;
   background-color: variables.$light-color01;
   letter-spacing: normal;
-  color: #1f2c6a;
+  color: variables.$dark-color06;
   outline: none;
   display: flex;
 
   .focus {
     border-color: variables.$light-color06 !important;
-    background: #fff !important;
+    background: variables.$white !important;
   }
 
   .search {
@@ -36,7 +36,7 @@
       cursor: pointer;
 
       &:hover {
-        background-color: #deebf6;
+        background-color: variables.$light-color02;
       }
     }
 
@@ -76,7 +76,7 @@
           border-radius: 4px;
           background: #2a354b;
           cursor: pointer;
-          color: #fff;
+          color: variables.$white;
           line-height: 32px;
           padding: 0 12px;
         }
@@ -97,7 +97,7 @@
 
           :global {
             .select-control {
-              color: #fff;
+              color: variables.$white;
               font-weight: 400;
               border: none;
               background: transparent !important;
@@ -109,7 +109,7 @@
 
             .icon {
               svg {
-                color: #fff;
+                color: variables.$white;
               }
             }
 
@@ -119,7 +119,7 @@
 
             .select-value,
             .select-value {
-              color: #fff !important;
+              color: variables.$white !important;
             }
 
             .select-menu {
@@ -149,7 +149,7 @@
           background: transparent;
           outline: none;
           border: none;
-          color: #fff;
+          color: variables.$white;
         }
       }
     }
@@ -158,7 +158,7 @@
 
 .dropdownClass {
   background: variables.$dark-color07;
-  color: #fff;
+  color: variables.$white;
   font-size: 12px;
   padding: 0;
   border-radius: 4px;
@@ -182,7 +182,7 @@
     .bodyClassName {
       & > div > div > div {
         & > div:nth-child(even) {
-          background: #f9fbfd;
+          background: variables.$light-color01;
         }
       }
     }

@@ -28,7 +28,7 @@
       &.checked,
       &:hover {
         border: solid 1px variables.$dark-color01;
-        box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.2);
+        box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.2);
 
         .icon svg {
           color: variables.$primary;

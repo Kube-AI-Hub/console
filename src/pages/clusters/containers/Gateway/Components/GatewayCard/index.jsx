@@ -28,6 +28,8 @@ import { isEmpty, isArray } from 'lodash'
 
 import { trigger } from 'utils/action'
 import { CLUSTER_PROVIDERS } from 'utils/constants'
+
+import variables from '~scss/variables.module.scss'
 import GatewayEmpty from '../GatewayEmpty'
 
 import * as styles from './index.scss'
@@ -200,8 +202,8 @@ class GatewayCard extends React.Component {
             <Icon
               name="update"
               color={{
-                primary: '#f5a623 ',
-                secondary: '#ffe1be',
+                primary: variables.yellowColor03,
+                secondary: variables.yellowColor01,
               }}
             />
           </Tooltip>

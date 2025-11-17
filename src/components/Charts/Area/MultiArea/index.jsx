@@ -23,6 +23,7 @@ import { isEmpty, remove } from 'lodash'
 
 import { COLORS_MAP } from 'utils/constants'
 
+import variables from '~scss/variables.module.scss'
 import {
   ResponsiveContainer,
   AreaChart,
@@ -181,7 +182,7 @@ export default class MultiArea extends React.Component {
           activeDot={
             <Dot
               r={4}
-              stroke="#fff"
+              stroke={variables.white}
               strokeWidth={1}
               fill={color}
               fillOpacity={1}
@@ -207,7 +208,7 @@ export default class MultiArea extends React.Component {
             margin={{ top: 50, bottom: 0, left: 0, right: 25 }}
           >
             <CartesianGrid
-              stroke="#bfdcf0"
+              stroke={variables.lightColor04}
               strokeDasharray="2 3"
               vertical={false}
             />

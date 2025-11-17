@@ -25,6 +25,8 @@ import { getSuitableValue } from 'utils/monitoring'
 
 import * as styles from './index.scss'
 
+import variables from '~scss/variables.module.scss'
+
 export default class CircleChart extends React.Component {
   static propTypes = {
     title: PropTypes.string,
@@ -55,14 +57,14 @@ export default class CircleChart extends React.Component {
       {
         name: legendData[0],
         itemStyle: {
-          fill: whiteMode ? '#ffffff' : '#329dce',
+          fill: whiteMode ? variables.black : variables.blueColor03,
         },
         value: Number(data0),
       },
       {
         name: legendData[1],
         itemStyle: {
-          fill: whiteMode ? '#6fbadc' : '#c7deef',
+          fill: whiteMode ? '#6fbadc' : variables.blueColor01,
         },
         value: Number(data1),
       },

@@ -26,7 +26,7 @@ import React from 'react'
 import { PIPELINE_CONDITIONS, PIPELINE_TASKS } from 'utils/constants'
 
 import siderStyle from '../Sider/index.scss'
-
+import variables from '~scss/variables.module.scss'
 import {
   ArchiveArtifacts,
   Branch,
@@ -414,8 +414,8 @@ class StepsEditor extends React.Component {
                         name="exclamation"
                         size={16}
                         color={{
-                          primary: '#fff',
-                          secondary: '#F5A623',
+                          primary: variables.white,
+                          secondary: variables.yellowColor03,
                         }}
                       />
                     </Tooltip>

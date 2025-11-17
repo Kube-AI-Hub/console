@@ -112,7 +112,7 @@
   font-size: variables.$size-small;
   line-height: 1.67;
   border-radius: 4px;
-  background-color: rgba(36, 46, 66, 0.8);
+  background-color: rgba(variables.$dark-color07, 0.8);
   box-shadow: 0 6px 12px 0 rgba(2, 5, 8, 0.08), 0 1px 2px 0 rgba(2, 5, 8, 0.08);
   z-index: 100;
 }

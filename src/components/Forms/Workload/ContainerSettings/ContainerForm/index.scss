@@ -25,12 +25,12 @@
 
   a {
     display: inline-block;
-    color: #329dce;
+    color: variables.$blue-color03;
     vertical-align: middle;
   }
 
   :global .icon > svg {
-    color: #329dce;
+    color: variables.$blue-color03;
   }
 }
 
@@ -47,12 +47,12 @@
         height: 20px;
         font-size: 12px;
         font-weight: 600;
-        color: #14215a;
+        color: variables.$dark-color07;
       }
       .desc {
         height: 20px;
         font-size: 12px;
-        color: #707fc9;
+        color: variables.$dark-color01;
       }
     }
   }

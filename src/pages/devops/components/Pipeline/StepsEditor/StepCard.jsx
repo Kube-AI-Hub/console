@@ -28,6 +28,8 @@ import { renderStepArgs } from '../Card/detail'
 
 import * as styles from '../Sider/index.scss'
 import cardStyles from '../Card/index.scss'
+
+import variables from '~scss/variables.module.scss'
 import StepContainer from './StepContainer'
 
 const nestingSteps = {
@@ -98,7 +100,7 @@ export default class StepCard extends React.Component {
             <Icon name="wrench" clickable />
           </span>
         )}
-        <div style={{ color: '#329dce' }} className={cardStyles.content__title}>
+        <div style={{ color: variables.blueColor03 }} className={cardStyles.content__title}>
           {t(step.name)}
         </div>
 

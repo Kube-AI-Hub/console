@@ -45,6 +45,8 @@ class KubeTools extends React.Component {
     }),
   }
 
+  dragRef = React.createRef()
+
   getWindowOpts() {
     return createCenterWindowOpt({
       width: 1200,
@@ -259,9 +261,14 @@ class KubeTools extends React.Component {
       <Draggable
         axis="y"
         defaultPosition={this.state.defaultPosition}
+        nodeRef={this.dragRef}
         onStop={this.handleStop}
       >
-        <div className={styles.trigger} onMouseLeave={this.onMouseLeave}>
+        <div
+          ref={this.dragRef}
+          className={styles.trigger}
+          onMouseLeave={this.onMouseLeave}
+        >
           <Button
             className={styles.button}
             onMouseEnter={this.onMouseEnter}

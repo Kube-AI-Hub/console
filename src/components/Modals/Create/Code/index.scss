@@ -20,9 +20,9 @@
 
     &.selected,
     &:hover {
-      box-shadow: 0 4px 12px 0 rgba(36, 46, 66, 0.1);
+      box-shadow: 0 4px 12px 0 rgba(variables.$dark-color07, 0.1);
       background-color: variables.$bg-color;
-      border-color: #96c8e9;
+      border-color: variables.$light-color06;
     }
 
     & + .tabItem {
@@ -36,7 +36,7 @@
 .content {
   height: 500px;
   margin-left: 220px;
-  box-shadow: 1px 0 0 0 #3a498f;
+  box-shadow: 1px 0 0 0 variables.$dark-color04;
   overflow-y: auto;
 }
 

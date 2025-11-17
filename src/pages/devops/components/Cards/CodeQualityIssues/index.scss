@@ -63,7 +63,7 @@
     display: block;
     font-size: 14px;
     font-weight: 600;
-    color: #14215a;
+    color: variables.$dark-color07;
   }
   .details {
     font-size: 12px;
@@ -111,7 +111,7 @@
 
 .card-blocker,
 .card-critical {
-  background-color: rgba(202, 38, 33, 0.1);
+  background-color: rgba(variables.$red-color03, 0.1);
   &:hover {
     border: 1px dashed #dd4040;
     transition: all 0.3s ease;
@@ -129,7 +129,7 @@
 .card-info {
   background-color: #fafbfc;
   &:hover {
-    border: 1px dashed #329dce;
+    border: 1px dashed variables.$blue-color03;
     transition: all 0.3s ease;
   }
 }
@@ -137,11 +137,11 @@
 .titleShowMore {
   font-size: 12px;
   font-weight: normal;
-  color: #4a5aa2;
+  color: variables.$dark-color03;
   span {
     margin-left: 4px;
     font-weight: 600;
-    color: #329dce;
+    color: variables.$blue-color03;
     cursor: pointer;
   }
 }
@@ -155,5 +155,5 @@
   line-height: 42px;
   font-size: 12px;
   font-weight: 500;
-  color: #329dce;
+  color: variables.$blue-color03;
 }

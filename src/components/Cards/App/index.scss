@@ -9,14 +9,14 @@ $card-height: 152px;
   border-radius: 4px;
   background-color: variables.$white;
   border: 1px solid transparent;
-  box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.06);
+  box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.06);
   vertical-align: top;
   transition: all variables.$trans-speed ease-in-out;
 
   &:hover {
     transform: translateY(-4px);
     border: 1px solid variables.$dark-color01;
-    box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.2);
+    box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.2);
 
     .title strong {
       color: variables.$primary;
@@ -42,18 +42,18 @@ $card-height: 152px;
       .desc {
         height: 40px;
         line-height: 1.67;
-        color: #707fc9;
+        color: variables.$dark-color01;
       }
     }
 
     p {
       @include mixins.block-ellipsis;
-      color: #707fc9;
+      color: variables.$dark-color01;
     }
 
     strong {
       font-family: variables.$font-family-id;
-      color: #14215a;
+      color: variables.$dark-color07;
     }
   }
 

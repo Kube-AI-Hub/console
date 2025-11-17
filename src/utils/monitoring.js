@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with KubeSphere Console.  If not, see <https://www.gnu.org/licenses/>.
  */
-
+import variables from '~scss/variables.module.scss'
 import {
   isEmpty,
   isArray,
@@ -329,7 +329,7 @@ export const getZeroValues = () => {
   return values
 }
 
-export const getColorByName = (colorName = '#fff') =>
+export const getColorByName = (colorName = variables.white) =>
   COLORS_MAP[colorName] || colorName
 
 export const startAutoRefresh = (context, options = {}) => {
@@ -475,7 +475,7 @@ export const unitTransformMap = {
     ['months', 10000 * 60 * 60 * 24 * 30],
   ]),
   'percent (0-100)': unitTransformFactory([['%', 0]]),
-  'percent (0.0-1.0)': function(number, decimals) {
+  'percent (0.0-1.0)': function (number, decimals) {
     const format = unitTransformFactory([['%', 0]])
     return format(number * 100, decimals)
   },
@@ -498,7 +498,7 @@ export function unitTransformGroupFactory(config) {
 }
 
 export function unitTransformFactory(config) {
-  return function(number, decimals = 0) {
+  return function (number, decimals = 0) {
     const isNegative = number < 0
     const abs = Math.abs(number)
 

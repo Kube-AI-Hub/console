@@ -15,11 +15,11 @@
   background-color: variables.$white;
   border: solid 1px variables.$light-color03;
   margin-bottom: 8px;
-  color: #14215a;
+  color: variables.$dark-color07;
   cursor: pointer;
 
   &:hover {
-    box-shadow: 0 8px 16px 0 rgba(36, 46, 66, 0.08);
+    box-shadow: 0 8px 16px 0 rgba(variables.$dark-color07, 0.08);
   }
 }
 
@@ -66,7 +66,7 @@
 .tab {
   flex-shrink: 1;
   flex-grow: 1;
-  color: #4a5aa2;
+  color: variables.$dark-color03;
   height: 30px;
   line-height: 30px;
   text-align: center;
@@ -79,9 +79,9 @@
 .tab_active {
   color: white;
   border-radius: 100px;
-  box-shadow: 0 8px 16px 0 rgba(35, 45, 65, 0.28);
-  background-color: #14215a;
-  border: solid 1px #14215a;
+  box-shadow: 0 8px 16px 0 rgba(variables.$dark-color07, 0.28);
+  background-color: variables.$dark-color07;
+  border: solid 1px variables.$dark-color07;
 }
 
 .loading {

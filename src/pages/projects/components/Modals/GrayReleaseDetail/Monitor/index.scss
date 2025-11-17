@@ -14,25 +14,25 @@
     width: 10px;
     height: 10px;
     border-radius: 1px;
-    background-color: #329dce;
+    background-color: variables.$blue-color03;
   }
 
   & + .tag {
     margin-left: 8px;
     &::before {
-      background-color: #c7deef;
+      background-color: variables.$blue-color01;
     }
   }
 
   span {
-    color: #707fc9;
+    color: variables.$dark-color01;
   }
 }
 
 .title {
   line-height: 20px;
   font-weight: variables.$font-bold;
-  color: #2c3a7c;
+  color: variables.$dark-color05;
 }
 
 .chart {
@@ -70,10 +70,10 @@
     }
 
     &.selected {
-      background-color: #329dce;
+      background-color: variables.$blue-color03;
 
       .tag {
-        color: #fff;
+        color: variables.$white;
 
         &::before {
           background-color: variables.$white;
@@ -87,7 +87,7 @@
       }
 
       .title {
-        color: #fff;
+        color: variables.$white;
       }
     }
   }

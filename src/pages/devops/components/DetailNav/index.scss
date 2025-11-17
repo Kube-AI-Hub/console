@@ -30,7 +30,7 @@
     margin: 0 6px;
     padding: 0 14px;
     font-weight: 500;
-    color: #4a5aa2;
+    color: variables.$dark-color03;
     border: 1px solid transparent;
     text-align: center;
     transition: all variables.$trans-speed;
@@ -54,14 +54,14 @@
 
 .dashboardLable {
   line-height: 20px;
-  color: #707fc9;
+  color: variables.$dark-color01;
 }
 
 .dashboardValue {
   font-size: 14px;
   font-weight: 600;
   line-height: 1.43;
-  color: #14215a;
+  color: variables.$dark-color07;
   vertical-align: middle;
   svg,
   span {

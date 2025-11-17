@@ -28,6 +28,7 @@ module.exports = {
   CLUSTER_BASE_INFO_DESC: '基本信息是当前集群的信息概览，您可以查看和编辑集群的基本信息。',
   // System Components
   // Resource Usage
+  GPU_MEMORY: 'GPU 显存',
   MEMORY: '内存',
   TOTAL: '总计',
   USED: '已使用',

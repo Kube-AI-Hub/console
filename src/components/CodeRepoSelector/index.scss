@@ -22,7 +22,7 @@
   margin-top: 4px;
   :global {
     .text-action {
-      color: #329dce;
+      color: variables.$blue-color03;
       font-weight: 600;
       line-height: 20px;
     }
@@ -33,6 +33,6 @@
         cursor: pointer;
       }
     }
-    color: #14215a;
+    color: variables.$dark-color07;
   }
 }

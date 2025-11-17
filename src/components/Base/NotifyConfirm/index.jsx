@@ -24,6 +24,8 @@ import { Icon, Button } from '@kube-design/components'
 
 import * as styles from './index.scss'
 
+import variables from '~scss/variables.module.scss'
+
 export default class NotifyConfirm extends React.PureComponent {
   static propTypes = {
     visible: PropTypes.bool,
@@ -71,12 +73,12 @@ export default class NotifyConfirm extends React.PureComponent {
   getIconColr = () => {
     const { type } = this.props
     const colors = {
-      primary: '#fff',
+      primary: variables.white,
     }
 
     switch (type) {
       case 'info':
-        colors.secondary = '#329dce'
+        colors.secondary = variables.blueColor03
         break
       default:
         break

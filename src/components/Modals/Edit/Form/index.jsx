@@ -28,6 +28,7 @@ import Confirm from 'components/Forms/Base/Confirm'
 import EnhanceWrapper from './wrapper'
 
 import * as styles from './index.scss'
+import variables from '~scss/variables.module.scss'
 
 export default class FormsBox extends React.Component {
   static propTypes = {
@@ -170,8 +171,8 @@ export default class FormsBox extends React.Component {
                 name="exclamation"
                 size={18}
                 color={{
-                  primary: '#fff',
-                  secondary: '#f5a623',
+                  primary: variables.white,
+                  secondary: variables.yellowColor03,
                 }}
               />
             </li>

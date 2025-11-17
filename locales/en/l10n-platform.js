@@ -17,6 +17,7 @@
  */
 
 module.exports = {
+  KUBE_AI_HUB: 'Kube AI Hub',
   PLATFORM: 'Platform',
   CLUSTER_MANAGEMENT: 'Cluster Management',
   CLUSTER_DESC: 'Unified management of multiple clusters and their basic resources, components, and application resources.',

@@ -26,6 +26,8 @@ import { Switch, Panel, Modal } from 'components/Base'
 
 import * as styles from './index.scss'
 
+import variables from '~scss/variables.module.scss'
+
 @observer
 class LogCollection extends React.Component {
   state = {
@@ -119,8 +121,8 @@ class LogCollection extends React.Component {
                 name="question"
                 size={40}
                 color={{
-                  primary: '#fff',
-                  secondary: '#329dce',
+                  primary: variables.white,
+                  secondary: variables.blueColor03,
                 }}
               />
               <div className={styles.title}>

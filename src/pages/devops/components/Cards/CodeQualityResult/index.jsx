@@ -27,6 +27,8 @@ import { parseUrl } from 'utils'
 import StatusCard from './StatusCard'
 import * as styles from './index.scss'
 
+import variables from '~scss/variables.module.scss'
+
 class CodeQualityResult extends React.Component {
   static propTypes = {
     detail: PropTypes.object,
@@ -72,8 +74,8 @@ class CodeQualityResult extends React.Component {
           className={styles.icon}
           size={24}
           color={{
-            primary: '#ffffff',
-            secondary: '#ffffff',
+            primary: variables.black,
+            secondary: variables.black,
           }}
         />
         <p>{t('CODE_CHECK')}</p>

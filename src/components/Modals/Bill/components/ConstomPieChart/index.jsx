@@ -16,7 +16,7 @@
  * along with KubeSphere Console.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 import {
   PieChart,
@@ -34,6 +34,7 @@ import { ICON_TYPES } from 'utils/constants'
 import * as styles from './index.scss'
 import { PIE_COLORS, RESOURCE_TITLE } from '../../constats'
 import BillIcon from '../BillIcon'
+import variables from '~scss/variables.module.scss'
 
 const renderActiveShape = props => {
   const RADIAN = Math.PI / 180
@@ -100,14 +101,14 @@ const renderActiveShape = props => {
         x={ex + (cos >= 0 ? 1 : -1) * 12}
         y={ey}
         textAnchor={textAnchor}
-        fill="#333"
+        fill={variables.darkColor06}
       >{`${value} ${payload.unit}`}</text>
       <text
         x={ex + (cos >= 0 ? 1 : -1) * 12}
         y={ey}
         dy={18}
         textAnchor={textAnchor}
-        fill="#999"
+        fill={variables.darkColor01}
       >
         {`(${(percent * 100).toFixed(2)}%)`}
       </text>
@@ -116,11 +117,6 @@ const renderActiveShape = props => {
 }
 
 const Chart = ({ data, dataKey = 'value' }) => {
-  const [activeIndex, setActiveIndex] = useState(0)
-
-  const onPieEnter = (_, index) => {
-    setActiveIndex(index)
-  }
 
   const renderLegend = props => {
     const { payload } = props
@@ -153,8 +149,8 @@ const Chart = ({ data, dataKey = 'value' }) => {
   }
 
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      <PieChart width={250} height={250}>
+    <ResponsiveContainer width="100%" height="100%" minHeight={300}>
+      <PieChart>
         <Legend vertical content={renderLegend} verticalAlign="top" />
         <Pie
           cx="70%"
@@ -163,8 +159,6 @@ const Chart = ({ data, dataKey = 'value' }) => {
           innerRadius="60%"
           outerRadius="75%"
           activeShape={renderActiveShape}
-          activeIndex={activeIndex}
-          onMouseEnter={onPieEnter}
         >
           {data.map((entry, index) => (
             <Cell

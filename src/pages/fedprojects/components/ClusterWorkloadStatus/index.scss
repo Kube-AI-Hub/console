@@ -4,7 +4,7 @@
 @mixin cluster-base {
   padding: 8px;
   margin-right: 12px;
-  color: #fff;
+  color: variables.$white;
   border-radius: 4px;
 }
 
@@ -45,12 +45,12 @@
   overflow: hidden;
 
   & > div {
-    @include mixins.TypographyTitleH6(#fff);
+    @include mixins.TypographyTitleH6(variables.$white);
     @include mixins.ellipsis;
   }
 
   & > p {
-    @include mixins.TypographyParagraph(#fff);
+    @include mixins.TypographyParagraph(variables.$white);
     @include mixins.ellipsis;
   }
 }
@@ -68,10 +68,10 @@
 
 .replicas {
   margin-right: 8px;
-  @include mixins.TypographySymbolText(#fff);
+  @include mixins.TypographySymbolText(variables.$white);
 
   .readyNum {
-    @include mixins.TypographyTitleH2(#fff);
+    @include mixins.TypographyTitleH2(variables.$white);
     line-height: 40px;
   }
 
@@ -179,7 +179,7 @@
     font-weight: normal;
     font-size: 12px;
     line-height: 20px;
-    color: #fff;
+    color: variables.$white;
     margin: 4px 0;
     text-align: center;
   }
@@ -194,7 +194,7 @@
       border: 1px solid variables.$dark-color04;
       box-sizing: border-box;
       border-radius: 4px;
-      color: #fff;
+      color: variables.$white;
     }
   }
 }

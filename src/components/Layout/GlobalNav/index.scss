@@ -22,8 +22,8 @@
 
   &:hover {
     :global .kubed-icon-light {
-      color: #14215a;
-      fill: #a9d1ea;
+      color: variables.$dark-color04;
+      fill: variables.$dark-color07;
     }
   }
 }
@@ -59,7 +59,7 @@
     font-weight: 600;
     line-height: 1.4;
     color: variables.$white;
-    text-shadow: 0 4px 8px rgba(36, 46, 66, 0.1);
+    text-shadow: 0 4px 8px rgba(variables.$dark-color07, 0.1);
     margin-bottom: 12px;
   }
 

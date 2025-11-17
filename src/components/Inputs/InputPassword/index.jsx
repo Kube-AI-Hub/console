@@ -24,6 +24,8 @@ import { PATTERN_PASSWORD } from 'utils/constants'
 
 import * as styles from './index.scss'
 
+import variables from '~scss/variables.module.scss'
+
 const PATTERN_WORD = /(?=.*?[A-Z])(?=.*?[a-z])/
 const PATTERN_NUMBER = /(?=.*?[0-9])/
 
@@ -99,16 +101,16 @@ export default class Password extends React.Component {
     const { strength } = this.state
 
     if (strength === -1) {
-      return { width: 0, backgroundColor: '#fff' }
+      return { width: 0, backgroundColor: variables.white }
     }
     if (strength >= 0 && strength < 6) {
-      return { width: '33%', backgroundColor: '#ca2621' }
+      return { width: '33%', backgroundColor: variables.redColor03 }
     }
     if (strength >= 6 && strength < 8) {
-      return { width: '66%', backgroundColor: '#f5a623' }
+      return { width: '66%', backgroundColor: variables.yellowColor03 }
     }
     if (strength >= 8) {
-      return { width: '100%', backgroundColor: '#a981f8' }
+      return { width: '100%', backgroundColor: variables.greenColor03 }
     }
   }
 

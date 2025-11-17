@@ -21,13 +21,13 @@
   }
 
   &.selected {
-    border-color: #329dce;
+    border-color: variables.$blue-color03;
     background-color: rgba(199, 222, 239, 0.5);
   }
 
   &.error {
-    border-color: #ca2621;
-    background-color: rgba(202, 38, 33, 0.1);
+    border-color: variables.$red-color03;
+    background-color: rgba(variables.$red-color03, 0.1);
   }
 }
 

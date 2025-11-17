@@ -1,15 +1,17 @@
+@use '~scss/variables';
+
 .wrapper {
   margin-bottom: 12px;
   h6 {
     font-weight: 600;
     font-size: 12px;
     line-height: 20px;
-    color: #14215a;
+    color: variables.$dark-color07;
     margin-bottom: 8px;
   }
 
   &_item {
-    // background: #f9fbfd;
+    // background: variables.$light-color01;
     // border-radius: 4px;
     // padding: 12px;
 
@@ -29,8 +31,8 @@
     .column {
       flex: 1 1;
       padding: 12px;
-      border: 1px solid #96c8e9;
-      background: #fff;
+      border: 1px solid variables.$light-color06;
+      background: variables.$white;
       border-radius: 4px;
       margin-right: 12px;
 
@@ -42,8 +44,8 @@
   .checkbox_item {
     display: flex;
     padding: 12px;
-    background: #fff;
-    border: 1px solid #96c8e9;
+    background: variables.$white;
+    border: 1px solid variables.$light-color06;
     border-radius: 4px;
 
     :global {
@@ -59,7 +61,7 @@
       margin-left: 12px;
       p {
         font-weight: 600;
-        color: #14215a;
+        color: variables.$dark-color07;
       }
     }
   }

@@ -33,13 +33,13 @@
       line-height: 1.33;
       padding-top: 80px;
       margin-bottom: 8px;
-      text-shadow: 0 2px 4px rgba(36, 46, 66, 0.1);
+      text-shadow: 0 2px 4px rgba(variables.$dark-color07, 0.1);
     }
   }
 
   & > p {
     margin-bottom: 40px;
-    color: #707fc9;
+    color: variables.$dark-color01;
   }
 }
 
@@ -55,7 +55,7 @@
   transition: all variables.$trans-speed ease-in-out;
 
   &:hover {
-    box-shadow: 0 8px 16px 0 rgba(36, 46, 66, 0.08);
+    box-shadow: 0 8px 16px 0 rgba(variables.$dark-color07, 0.08);
   }
 
   img {

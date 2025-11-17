@@ -7,11 +7,11 @@
   .errorItem {
     :global {
       .input[name='key'] {
-        box-shadow: 0 4px 8px 0 rgba(202, 38, 33, 0.2);
-        border: 2px solid #ca2621 !important;
+        box-shadow: 0 4px 8px 0 rgba(variables.$red-color03, 0.2);
+        border: 2px solid variables.$red-color03 !important;
         &:focus,
         &:hover {
-          border: 2px solid #ca2621 !important;
+          border: 2px solid variables.$red-color03 !important;
         }
       }
     }

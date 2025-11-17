@@ -176,7 +176,9 @@ class SideContainer extends React.Component {
 
     return (
       <div className={styles.side}>
-        <Loading spinning={loading}>{this.renderSideCardItem()}</Loading>
+        <Loading spinning={loading}>
+          <>{this.renderSideCardItem()}</>
+        </Loading>
         {this.renderBillReportConform()}
       </div>
     )

@@ -2,25 +2,63 @@
 
 .wrapper {
   display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.chart {
-  width: 372px;
-
-  :global {
-    .recharts-polar-grid-concentric {
-      .recharts-polar-grid-concentric-circle {
-        stroke: variables.$light-color04;
-
-        &:last-child {
-          fill: variables.$light-color02;
-          opacity: 0.5;
-        }
-      }
-    }
-  }
+.row {
+  display: flex;
+  gap: 24px;
+  align-items: stretch;
 }
 
-.list {
+.progressItem {
+  flex: 0 0 320px;
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 1px solid variables.$light-color05;
+  background: variables.$light-color01;
+  box-shadow: 0 8px 16px rgba(variables.$dark-color07, 0.08);
+}
+
+.progressHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.progressLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: variables.$dark-color06;
+}
+
+.progressValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: variables.$dark-color08;
+}
+
+.progressBar {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: variables.$light-color05;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    variables.$blue-color02 0%,
+    variables.$blue-color03 100%
+  );
+  transition: width 0.3s ease;
+}
+
+.resource {
   flex: 1;
 }

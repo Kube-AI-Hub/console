@@ -87,7 +87,7 @@ $chartContainerPadding: 8px;
         font-size: 10px;
       }
       .select-value {
-        color: #fff !important;
+        color: variables.$white !important;
       }
       .select-control {
         border: none;
@@ -150,7 +150,7 @@ $chartContainerPadding: 8px;
   height: calc(100% - 64px - #{$toolbarHeight} - #{$chartContainerPadding});
   border: 1px solid #d5dee7;
   border-radius: 4px;
-  box-shadow: 0 4px 8px 0 rgba(72, 91, 127, 0.2);
+  box-shadow: 0 4px 8px 0 rgba(variables.$dark-color04, 0.2);
   position: absolute;
   right: 10px;
   bottom: 15px;

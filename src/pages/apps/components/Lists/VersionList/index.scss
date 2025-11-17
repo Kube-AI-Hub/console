@@ -113,7 +113,7 @@
   background-color: variables.$white;
   border: 1px solid variables.$border-hover-color;
   border-top: 0 none;
-  box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.2);
+  box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.2);
   border-radius: 0 0 4px 4px;
   transition: all variables.$trans-speed;
 

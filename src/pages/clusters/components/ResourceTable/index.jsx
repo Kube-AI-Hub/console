@@ -92,4 +92,4 @@ class ResourceTable extends React.Component {
 export default inject(
   'rootStore',
   'clusterStore'
-)(observer(withTableActions(ResourceTable)))
+)(withTableActions(observer(ResourceTable)))

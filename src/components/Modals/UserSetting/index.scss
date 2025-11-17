@@ -38,11 +38,11 @@
 
     &.active {
       box-shadow: 0 4px 8px 0 rgba(25, 30, 41, 0.2);
-      background-color: #1f2c6a;
-      border: 1px solid #2c3a7c;
+      background-color: variables.$dark-color06;
+      border: 1px solid variables.$dark-color05;
 
       p {
-        color: #fff;
+        color: variables.$white;
       }
     }
 
@@ -81,7 +81,7 @@
           bottom: 0;
           border-radius: 1px;
           z-index: 3;
-          color: #fff;
+          color: variables.$white;
           background-color: variables.$yellow-color03;
           line-height: 8px;
           font-size: 6px;

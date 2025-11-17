@@ -1,3 +1,5 @@
+@use '~scss/variables';
+
 .content {
   display: flex;
   max-width: 32.7%;
@@ -15,7 +17,7 @@
   }
 
   &:hover {
-    background: #f9fbfd;
+    background: variables.$light-color01;
     cursor: pointer;
     .info .radio {
       opacity: 1 !important;
@@ -23,7 +25,7 @@
   }
 
   &--checked {
-    background: #f9fbfd;
+    background: variables.$light-color01;
   }
 
   .chart {
@@ -69,18 +71,18 @@
     .label {
       font-size: 12px;
       line-height: 20px;
-      color: #707fc9;
+      color: variables.$dark-color01;
     }
 
     .type {
       font-weight: 600;
       font-size: 12px;
       line-height: 20px;
-      color: #14215a;
+      color: variables.$dark-color07;
     }
 
     .number {
-      color: #14215a;
+      color: variables.$dark-color07;
       font-weight: 600;
       line-height: 28px;
       font-size: 16px;

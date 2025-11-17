@@ -11,7 +11,7 @@
   background-color: variables.$white;
 
   &.on {
-    box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.2);
+    box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.2);
     border-color: variables.$dark-color01;
   }
 }

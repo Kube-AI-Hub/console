@@ -6,9 +6,9 @@
   margin-bottom: 20px;
   padding: 12px;
   border-radius: variables.$border-radius;
-  background-color: #14215a;
+  background-color: variables.$dark-color07;
   cursor: pointer;
-  box-shadow: 0 8px 16px 0 rgba(36, 46, 66, 0.2);
+  box-shadow: 0 8px 16px 0 rgba(variables.$dark-color07, 0.2);
 
   .icon {
     display: inline-block;
@@ -29,7 +29,7 @@
     }
 
     p {
-      color: #bfdcf0;
+      color: variables.$light-color04;
       @include mixins.ellipsis;
     }
   }

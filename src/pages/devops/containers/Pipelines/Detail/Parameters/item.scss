@@ -1,9 +1,11 @@
+@use '~scss/variables';
+
 // Variables
-$color-palette-wb-white: #fff;
-$color-palette-light-light-color-02: #deebf6;
-$color-palette-light-light-color-06: #96c8e9;
-$paragraph-heading-color: #14215a;
-$neutral-neutral-15: #14215a;
+$color-palette-wb-white: variables.$white;
+$color-palette-light-light-color-02: variables.$light-color02;
+$color-palette-light-light-color-06: variables.$light-color06;
+$paragraph-heading-color: variables.$dark-color07;
+$neutral-neutral-15: variables.$dark-color07;
 
 // Mixins
 @mixin cardBase {
@@ -12,7 +14,7 @@ $neutral-neutral-15: #14215a;
   gap: 16px;
   border-radius: 4px;
   background: $color-palette-wb-white;
-  box-shadow: 0px 4px 8px 0px rgba(36, 46, 66, 0.06);
+  box-shadow: 0px 4px 8px 0px rgba(variables.$dark-color07, 0.06);
   padding: 16px;
 }
 

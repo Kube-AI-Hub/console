@@ -16,6 +16,8 @@
  * along with KubeSphere Console.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import variables from '~scss/variables.module.scss'
+
 export const WORKLOAD_STATUS = [
   { text: 'RUNNING', value: 'running' },
   { text: 'UPDATING', value: 'updating' },
@@ -717,31 +719,31 @@ export const TIME_MICROSECOND_MAP = {
 }
 
 export const COLORS_MAP = {
-  white: '#fff',
-  light: '#f9fbfd',
-  lightest: '#f9fbfd',
-  dark: '#14215a',
-  grey: '#cfe4f2',
-  green: '#a981f8',
-  blue: '#329dce',
-  red: '#ca2621',
-  yellow: '#f5a623',
-  darkerGreen: '#8b61eb',
-  darkerBlue: '#3385b0',
-  darkerRed: '#ab2f29',
-  darkerYellow: '#e0992c',
-  darkestGreen: '#6b29fa',
-  darkestBlue: '#326e93',
-  darkestRed: '#8c3231',
-  darkestYellow: '#8d663e',
-  lighterGreen: '#c4aff0',
-  lighterBlue: '#7eb8dc',
-  lighterRed: '#ea8573',
-  lighterYellow: '#ffc781',
-  lightestGreen: '#d5c5f6',
-  lightestBlue: '#c7deef',
-  lightestRed: '#fae7e5',
-  lightestYellow: '#ffe1be',
+  white: variables.white,
+  light: variables.lightColor01,
+  lightest: variables.lightColor01,
+  dark: variables.lightColor02,
+  grey: variables.lightColor03,
+  green: variables.greenColor03,
+  blue: variables.blueColor03,
+  red: variables.redColor03,
+  yellow: variables.yellowColor03,
+  darkerGreen: variables.greenColor02,
+  darkerBlue: variables.blueColor02,
+  darkerRed: variables.redColor02,
+  darkerYellow: variables.yellowColor02,
+  darkestGreen: variables.greenColor01,
+  darkestBlue: variables.blueColor01,
+  darkestRed: variables.redColor01,
+  darkestYellow: variables.yellowColor01,
+  lighterGreen: variables.greenColor04,
+  lighterBlue: variables.blueColor04,
+  lighterRed: variables.redColor04,
+  lighterYellow: variables.yellowColor04,
+  lightestGreen: variables.greenColor05,
+  lightestBlue: variables.blueColor05,
+  lightestRed: variables.redColor05,
+  lightestYellow: variables.yellowColor05,
 }
 
 export const ALERT_GROUP_MAX_LIMIT = 40

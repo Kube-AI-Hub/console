@@ -12,7 +12,7 @@
 
   h3 {
     height: 32px;
-    text-shadow: 0 2px 4px rgba(36, 46, 66, 0.1);
+    text-shadow: 0 2px 4px rgba(variables.$dark-color07, 0.1);
     font-family: variables.$font-family-id;
     font-size: 24px;
     line-height: 1.33;
@@ -56,7 +56,7 @@
   border-radius: 18px;
   display: inline-block;
   background-color: variables.$bg-color;
-  border: 1px solid #bfdcf0;
+  border: 1px solid variables.$light-color04;
   margin-right: 20px;
 
   span {
@@ -64,13 +64,13 @@
     text-align: center;
     min-width: 120px;
     line-height: 32px;
-    color: #707fc9;
+    color: variables.$dark-color01;
     padding: 0 30px;
   }
 }
 
 .tabs__selected {
   border-radius: 16px;
-  background-color: #1f2c6a;
+  background-color: variables.$dark-color06;
   color: white !important;
 }

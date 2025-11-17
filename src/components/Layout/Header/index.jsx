@@ -46,6 +46,10 @@ class Header extends React.Component {
     window.open(key)
   }
 
+  handlePlatformNavClick = (e, key) => {
+    this.props.jumpTo(key)
+  }
+
   renderDocumentList() {
     const { url, api } = getWebsiteUrl()
     return (
@@ -56,6 +60,19 @@ class Header extends React.Component {
         <Menu.MenuItem key={api}>
           <Icon name="api" /> {t('API_DOCUMENT')}
         </Menu.MenuItem>
+      </Menu>
+    )
+  }
+
+  renderPlatformNav() {
+    const navs = globals.app.getGlobalNavs()
+    return (
+      <Menu onClick={this.handlePlatformNavClick} data-test="header-platform">
+        {navs.map(nav => (
+          <Menu.MenuItem key={`/${nav.name}`}>
+            <Icon name={nav.icon} /> {t(nav.title)}
+          </Menu.MenuItem>
+        ))}
       </Menu>
     )
   }
@@ -76,23 +93,26 @@ class Header extends React.Component {
         )}
       >
         <Link to={isAppsPage() && !globals.user ? '/apps' : '/'}>
-          <img
+          <svg
             className={styles.logo}
-            src={isAppsPage() ? `/assets/login-logo.svg` : logo}
-            alt=""
-          />
+            viewBox="0 0 20 20"
+            preserveAspectRatio="xMidYMid meet"
+          >
+            <use href={isAppsPage() ? `/assets/login-logo.svg` : logo} />
+          </svg>
         </Link>
         <div className="header-bottom" />
         {this.isLoggedIn && (
           <div className={styles.navs}>
             {globals.app.enableGlobalNav && (
-              <Button
-                type="flat"
-                icon="cogwheel"
-                onClick={this.props.onToggleNav}
-              >
-                {t('PLATFORM')}
-              </Button>
+              <Dropdown content={this.renderPlatformNav()}>
+                <Button
+                  type="flat"
+                  icon="cogwheel"
+                >
+                  {t('PLATFORM')}
+                </Button>
+              </Dropdown>
             )}
             {globals.app.enableAppStore && (
               <Button

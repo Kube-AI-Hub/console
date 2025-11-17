@@ -1,8 +1,10 @@
+@use '~scss/variables';
+
 .alertRule {
   font-weight: 400;
   font-size: 12px;
   line-height: 20px;
-  color: #14215a;
+  color: variables.$dark-color07;
   display: inline-block;
   margin-top: 12px;
   margin-bottom: 4px;
@@ -16,6 +18,6 @@
     font-weight: 400;
     font-size: 12px;
     line-height: 20px;
-    color: #ca2621;
+    color: variables.$red-color03;
   }
 }

@@ -107,7 +107,7 @@
           height: 36px;
           padding: 8px 0px;
           background: variables.$dark-color07;
-          box-shadow: 0px 4px 8px rgba(36, 46, 66, 0.2);
+          box-shadow: 0px 4px 8px rgba(variables.$dark-color07, 0.2);
           border-radius: 4px;
           top: -10px;
           left: 0px;
@@ -166,7 +166,7 @@
         justify-content: center;
 
         &:hover {
-          background: #cfe4f2;
+          background: variables.$light-color03;
         }
       }
     }
@@ -248,7 +248,7 @@
 
   &:hover {
     cursor: pointer;
-    box-shadow: 0px 4px 8px rgba(36, 46, 66, 0.2);
+    box-shadow: 0px 4px 8px rgba(variables.$dark-color07, 0.2);
 
     .head {
       .opt {

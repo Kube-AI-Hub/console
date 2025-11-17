@@ -44,10 +44,10 @@
   }
 
   p {
-    color: #707fc9;
+    color: variables.$dark-color01;
 
     strong {
-      color: #14215a;
+      color: variables.$dark-color07;
     }
   }
 
@@ -79,7 +79,7 @@
   }
 
   & > p {
-    color: #4a5aa2;
+    color: variables.$dark-color03;
     margin-top: 4px;
     margin-bottom: 20px;
   }
@@ -144,7 +144,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #ffffffe8;
+  background-color: variables.$black;
   text-align: center;
   z-index: 2;
 }
@@ -159,7 +159,7 @@
 .bar {
   padding: 5px;
   border-radius: 2px;
-  background-color: #329dce;
+  background-color: variables.$blue-color03;
   text-align: center;
   color: variables.$white;
   font-weight: variables.$font-bold;

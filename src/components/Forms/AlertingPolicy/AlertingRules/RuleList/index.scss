@@ -28,7 +28,7 @@
 
     &:hover {
       cursor: pointer;
-      box-shadow: 0px 4px 8px rgba(36, 46, 66, 0.2);
+      box-shadow: 0px 4px 8px rgba(variables.$dark-color07, 0.2);
     }
   }
 }

@@ -22,24 +22,26 @@ import { Form } from '@kube-design/components'
 import RuleList from './RuleList'
 import AddRuleForm from './AddRuleForm'
 
+import variables from '~scss/variables.module.scss'
+
 export const severityOptions = [
   {
     label: t('CRITICAL_ALERT'),
     value: 'critical',
-    bgColor: '#CA2621',
-    color: '#FFFFFF',
+    bgColor: variables.redColor03,
+    color: variables.black,
   },
   {
     label: t('ERROR_ALERT'),
     value: 'error',
-    color: '#FFFFFF',
-    bgColor: '#F5A623',
+    color: variables.black,
+    bgColor: variables.yellowColor03,
   },
   {
     label: t('WARNING_ALERT'),
     value: 'warning',
-    color: '#36435C',
-    bgColor: '#D8DEE5',
+    color: variables.darkColor06,
+    bgColor: variables.lightColor04,
   },
 ]
 

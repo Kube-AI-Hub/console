@@ -39,14 +39,14 @@
 
   table {
     a {
-      color: #14215a;
+      color: variables.$dark-color07;
     }
 
     & > thead > tr > th {
       a {
-        color: #707fc9;
+        color: variables.$dark-color01;
         &:hover {
-          color: #707fc9;
+          color: variables.$dark-color01;
         }
       }
     }
@@ -58,7 +58,7 @@
 }
 
 .cancelSelect {
-  color: #fff;
+  color: variables.$white;
   &:hover {
     background-color: variables.$dark-color06;
   }

@@ -27,6 +27,8 @@ import React from 'react'
 import { getMinuteValue, getTimeRange } from 'stores/monitoring/base'
 import * as styles from './index.scss'
 
+import variables from '~scss/variables.module.scss'
+
 @inject('detailStore', 'projectStore')
 @observer
 class TrafficManagement extends React.Component {
@@ -203,8 +205,8 @@ class TrafficManagement extends React.Component {
           color={
             isServiceMeshEnabled
               ? {
-                  primary: '#a981f8',
-                  secondary: '#c4aff0',
+                  primary: variables.greenColor03,
+                  secondary: variables.greenColor04,
                 }
               : {
                   primary: '#d0a406',

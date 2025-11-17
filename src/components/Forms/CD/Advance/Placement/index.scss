@@ -12,7 +12,7 @@
 
   &:hover {
     border-color: variables.$border-hover-color;
-    box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.2);
+    box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.2);
   }
 }
 
@@ -28,7 +28,7 @@
   border-radius: 4px 4px 0 0;
   border: solid 1px variables.$border-hover-color;
   background-color: variables.$white;
-  box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.2);
+  box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.2);
 }
 
 .confirm {

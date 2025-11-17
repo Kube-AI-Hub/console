@@ -14,7 +14,7 @@
     }
 
     &.selected {
-      border: solid 1px #329dce;
+      border: solid 1px variables.$blue-color03;
       background-color: rgba(199, 222, 239, 0.1);
     }
 

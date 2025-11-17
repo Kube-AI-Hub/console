@@ -488,7 +488,8 @@ class ClusterDetails extends React.Component {
         this.childrenResourceList = []
       }
 
-      await this.getResourceMeterData(get(this.tableData, '[0].type', 'cpu'))
+      const defaultType = this.tableData.length > 0 ? this.tableData[0].type : 'cpu'
+      await this.getResourceMeterData(defaultType)
     } else {
       this.childrenResourceList = []
     }
@@ -1072,6 +1073,7 @@ class ClusterDetails extends React.Component {
         </div>
         <div className={styles.childrenResourceContainer}>
           <Loading spinning={this.resourceLoading}>
+            <div className={styles.resourceWrapper}>
             <div className={styles.childrenlistContainer}>
               <ResourceSelect
                 selectOptions={toJS(this.currentMeterData.sumData)}
@@ -1081,6 +1083,7 @@ class ClusterDetails extends React.Component {
             </div>
             <div className={styles.constomChartContainer}>
               <PieChart data={pieChartData} />
+              </div>
             </div>
           </Loading>
         </div>
@@ -1157,7 +1160,7 @@ class ClusterDetails extends React.Component {
         </div>
         <div className={styles.rightContent}>
           <Loading spinning={this.loading}>
-            <>
+            <div className={styles.contentWrapper}>
               <Title
                 type={type}
                 cluster={this.cluster}
@@ -1208,7 +1211,7 @@ class ClusterDetails extends React.Component {
                   {this.renderSubResource()}
                 </div>
               )}
-            </>
+            </div>
           </Loading>
         </div>
       </div>

@@ -21,6 +21,8 @@ import { isArray, isEmpty } from 'lodash'
 
 import * as style from './index.scss'
 
+import variables from '~scss/variables.module.scss'
+
 const STROKEWIDTH = 2
 const EDGES_LENGTH = 35
 const POINT_R = 6
@@ -70,7 +72,7 @@ export default class PipelineEdges extends React.Component {
           cx={EDGES_LENGTH}
           cy={POINT_R}
           r="10"
-          stroke="#bfdcf0"
+          stroke={variables.lightColor04}
           strokeDasharray="3,3"
           fill="white"
           strokeWidth={STROKEWIDTH}
@@ -100,7 +102,7 @@ export default class PipelineEdges extends React.Component {
         <path
           key={`left-${this.props.index}`}
           d={this.getLeftLinePath(height)}
-          stroke={isShallow ? '#bfdcf0' : 'black'}
+          stroke={isShallow ? variables.lightColor04 : 'black'}
           strokeWidth={STROKEWIDTH}
           fill="none"
           markerStart={`url(#path-marker-${isShallow ? 'grey' : 'black'})`}
@@ -112,7 +114,7 @@ export default class PipelineEdges extends React.Component {
       <path
         key={`right-${this.props.index}`}
         d={this.getRightLinePath(height)}
-        stroke={isShallow ? '#bfdcf0' : 'black'}
+        stroke={isShallow ? variables.lightColor04 : 'black'}
         strokeWidth={STROKEWIDTH}
         fill="none"
         markerStart={`url(#path-marker-${isShallow ? 'grey' : 'black'})`}
@@ -197,7 +199,7 @@ export default class PipelineEdges extends React.Component {
               cx={POINT_R}
               cy={POINT_R}
               r={POINT_R - 1}
-              fill={'#329dce'}
+              fill={variables.blueColor03}
             />
           </marker>
           <marker
@@ -213,7 +215,7 @@ export default class PipelineEdges extends React.Component {
               cx={POINT_R}
               cy={POINT_R}
               r={POINT_R - 1}
-              fill={'#bfdcf0'}
+              fill={variables.lightColor04}
             />
           </marker>
         </defs>

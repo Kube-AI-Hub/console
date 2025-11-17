@@ -23,6 +23,8 @@ import Table from 'components/Tables/List'
 import { Tooltip, Icon } from '@kube-design/components'
 import { isEmpty } from 'lodash'
 
+import variables from '~scss/variables.module.scss'
+
 @withList({
   store: new GatewayStore(),
   name: 'PROJECT_GATEWAY',
@@ -135,8 +137,8 @@ export default class ProjectGatewayCard extends React.Component {
             size={20}
             name="update"
             color={{
-              primary: '#f5a623 ',
-              secondary: '#ffe1be',
+              primary: variables.yellowColor03,
+              secondary: variables.yellowColor01,
             }}
           />
         </Tooltip>

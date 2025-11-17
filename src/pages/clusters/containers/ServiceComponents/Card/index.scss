@@ -4,11 +4,11 @@
   padding: 20px 24px;
   border-radius: variables.$border-radius;
   background-color: variables.$white;
-  box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.06);
+  box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.06);
   transition: all variables.$trans-speed ease-in-out;
 
   &:hover {
-    box-shadow: 0 6px 16px 0 rgba(33, 43, 54, 0.2);
+    box-shadow: 0 6px 16px 0 rgba(variables.$dark-color07, 0.2);
   }
 
   & + .card {
@@ -33,10 +33,10 @@
   }
 
   p {
-    color: #707fc9;
+    color: variables.$dark-color01;
   }
 
   strong {
-    color: #14215a;
+    color: variables.$dark-color07;
   }
 }

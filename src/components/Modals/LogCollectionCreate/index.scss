@@ -21,16 +21,16 @@
       padding: 14px 20px;
       cursor: pointer;
       &:hover {
-        box-shadow: 0 8px 16px 0 rgba(36, 46, 66, 0.08);
+        box-shadow: 0 8px 16px 0 rgba(variables.$dark-color07, 0.08);
       }
       h3 {
         line-height: 1.5;
-        color: #14215a;
+        color: variables.$dark-color07;
         font-weight: bold;
         font-size: 16px;
       }
       p {
-        color: #707fc9;
+        color: variables.$dark-color01;
       }
     }
   }
@@ -46,7 +46,7 @@
   &:before {
     content: '?';
     border-radius: 50%;
-    color: #fff;
+    color: variables.$white;
     background: #3391bf;
     display: inline-block;
     margin-right: 0.5em;

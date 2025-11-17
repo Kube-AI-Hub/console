@@ -32,7 +32,7 @@ $titleHeight: 30px;
 
   border-radius: variables.$border-radius;
   background-color: variables.$lightest;
-  border: solid 1px #bfdcf0;
+  border: solid 1px variables.$light-color04;
 
   @at-root {
     .summery {
@@ -44,7 +44,7 @@ $titleHeight: 30px;
       @at-root {
         .dataList {
           border-radius: 4px;
-          background: #fff;
+          background: variables.$white;
           border: solid 1px variables.$light-color03;
           padding: 4px 0;
           & > div {
@@ -82,15 +82,15 @@ $titleHeight: 30px;
           }
 
           &:hover {
-            background-color: #bfdcf0;
+            background-color: variables.$light-color04;
           }
         }
       }
     }
     .log {
       border-radius: 4px;
-      background-color: #14215a;
-      color: #fff;
+      background-color: variables.$dark-color07;
+      color: variables.$white;
       display: grid;
       grid-template-rows: auto 1fr;
       @at-root {
@@ -125,7 +125,7 @@ $titleHeight: 30px;
                 }
                 .select-value,
                 .select-value {
-                  color: #fff !important;
+                  color: variables.$white !important;
                 }
                 .select-menu {
                   padding: 0;
@@ -168,7 +168,7 @@ $titleHeight: 30px;
               padding: 0 8px;
               input {
                 margin: 0 10px;
-                color: #fff;
+                color: variables.$white;
                 background-color: inherit;
                 outline: none;
                 border: none;
@@ -188,7 +188,7 @@ $titleHeight: 30px;
           }
           @at-root {
             .logTime {
-              color: #4a5aa2;
+              color: variables.$dark-color03;
             }
           }
         }
@@ -209,7 +209,7 @@ $titleHeight: 30px;
 }
 
 .queryLog {
-  color: #bfdcf0;
+  color: variables.$light-color04;
   white-space: pre-wrap;
   font-family: variables.$font-family-code;
 }

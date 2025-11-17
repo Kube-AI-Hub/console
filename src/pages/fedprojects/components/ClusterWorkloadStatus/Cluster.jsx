@@ -29,6 +29,8 @@ import { getWorkloadStatus } from 'utils/status'
 
 import WebSocketStore from 'stores/websocket'
 
+import variables from '~scss/variables.module.scss'
+
 import * as styles from './index.scss'
 
 export default
@@ -142,12 +144,12 @@ class Cluster extends Component {
                 color={
                   unReadyNums > 6
                     ? {
-                        primary: '#f5a623',
-                        secondary: '#f5a623',
+                        primary: variables.yellowColor03,
+                        secondary: variables.yellowColor03,
                       }
                     : {
-                        primary: '#8b61eb',
-                        secondary: '#8b61eb',
+                        primary: variables.greenColor02,
+                        secondary: variables.greenColor02,
                       }
                 }
               />

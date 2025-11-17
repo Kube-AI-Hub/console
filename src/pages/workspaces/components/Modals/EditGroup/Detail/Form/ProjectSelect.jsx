@@ -28,6 +28,8 @@ import { showNameAndAlias } from 'utils'
 import RoleStore from 'stores/role'
 import ProjectStore from 'stores/project'
 
+import variables from '~scss/variables.module.scss'
+
 import * as styles from './index.scss'
 
 export default
@@ -163,8 +165,8 @@ class ProjectSelect extends Component {
               name="update"
               className={styles.tip}
               color={{
-                primary: '#ffc781',
-                secondary: '#f5a623',
+                primary: variables.yellowColor02,
+                secondary: variables.yellowColor03,
               }}
             />
           </Tooltip>

@@ -28,6 +28,8 @@ import ClusterStore from 'stores/cluster'
 import { getDisplayName, getLocalTime } from 'utils'
 import { isArgo } from 'utils/devops'
 import { CD_SYNC_STATUS, CD_WEATHER_STATUS } from 'utils/constants'
+
+import variables from '~scss/variables.module.scss'
 import ChartCard from '../Components/ChartCard'
 import Destination from '../Components/Destination'
 import StatusText from '../Components/StatusText'
@@ -502,7 +504,7 @@ class CDList extends React.Component {
       },
       {
         title: 'DEGRADED',
-        color: '#CA2621',
+        color: variables.redColor03,
         used: healthStatus.Degraded || 0,
         total,
         icon: '/assets/cd/degraded.svg',
@@ -510,7 +512,7 @@ class CDList extends React.Component {
       },
       {
         title: 'PROGRESSING',
-        color: '#F5A623',
+        color: variables.yellowColor03,
         used: healthStatus.Progressing || 0,
         total,
         icon: '/assets/cd/progressing.svg',
@@ -549,7 +551,7 @@ class CDList extends React.Component {
       {
         title: 'OUTOFSYNC',
         filterValue: 'OutOfSync',
-        color: '#F5A623',
+        color: variables.yellowColor03,
         used: syncStatus.OutOfSync || 0,
         total,
         icon: '/assets/cd/outofsync.svg',
@@ -557,7 +559,7 @@ class CDList extends React.Component {
       },
       {
         title: 'UNKNOWN',
-        color: '#36435C',
+        color: variables.darkColor06,
         used: syncStatus.Unknown || 0,
         total,
         icon: '/assets/cd/unknown.svg',

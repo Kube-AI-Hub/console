@@ -7,7 +7,7 @@
   margin-bottom: 12px;
   line-height: 20px;
   border-radius: variables.$border-radius;
-  box-shadow: 0 2px 4px 0 rgba(36, 46, 66, 0.12),
+  box-shadow: 0 2px 4px 0 rgba(variables.$dark-color07, 0.12),
     0 4px 8px 0 rgba(125, 158, 224, 0.06);
   color: variables.$white;
 
@@ -74,7 +74,7 @@
     .h3 {
       color: variables.$white;
       margin-bottom: 2px;
-      text-shadow: 0 2px 4px rgba(36, 46, 66, 0.1);
+      text-shadow: 0 2px 4px rgba(variables.$dark-color07, 0.1);
     }
   }
 }

@@ -3,7 +3,7 @@
 .wrapper {
   margin: 0 !important;
   background-color: variables.$white;
-  border: 1px solid #bfdcf0;
+  border: 1px solid variables.$light-color04;
 
   :global {
     .column {

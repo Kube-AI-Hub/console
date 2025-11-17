@@ -12,7 +12,7 @@
   background-color: variables.$dark-color07;
 
   .title {
-    @include mixins.TypographySymbolText(#fff);
+    @include mixins.TypographySymbolText(variables.$white);
 
     & > span {
       display: inline-block;

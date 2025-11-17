@@ -1,3 +1,5 @@
+import variables from '~scss/variables.module.scss'
+
 export const CARD_CONFIG = [
   {
     icon: 'cluster',
@@ -185,25 +187,25 @@ export const AREA_COLORS = [
 ]
 
 export const PIE_COLORS = [
-  '#6b29fa',
-  '#8b61eb',
-  '#a981f8',
-  '#c4aff0',
-  '#326e93',
-  '#3385b0',
-  '#329dce',
-  '#7eb8dc',
-  '#c7deef',
-  '#8c3231',
-  '#ab2f29',
-  '#ca2621',
-  '#ea8573',
-  '#fae7e5',
-  '#8d663e',
-  '#e0992c',
-  '#f5a623',
-  '#ffc781',
-  '#ffe1be',
+  variables.greenColor01,
+  variables.greenColor02,
+  variables.greenColor03,
+  variables.greenColor04,
+  variables.blueColor01,
+  variables.blueColor02,
+  variables.blueColor03,
+  variables.blueColor04,
+  variables.blueColor05,
+  variables.redColor01,
+  variables.redColor02,
+  variables.redColor03,
+  variables.redColor04,
+  variables.redColor05,
+  variables.yellowColor01,
+  variables.yellowColor02,
+  variables.yellowColor03,
+  variables.yellowColor04,
+  variables.yellowColor05,
 ]
 
 export const UNIT_CONFIG = {

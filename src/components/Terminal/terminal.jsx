@@ -18,15 +18,14 @@
 
 import React from 'react'
 import { debounce } from 'lodash'
-import { Terminal } from 'xterm'
+import { Terminal } from '@xterm/xterm'
+import { FitAddon } from '@xterm/addon-fit'
 import PropTypes from 'prop-types'
-import * as fit from 'xterm/lib/addons/fit/fit'
 import SocketClient from 'utils/socket.client'
 
-import './terminal.css'
-import './xterm.css'
-
-Terminal.applyAddon(fit)
+import '@xterm/xterm/css/xterm.css'
+import './terminal.scss'
+import './xterm.scss'
 
 const DEFAULT_TERMINAL_OPTS = {
   lineHeight: 1.2,
@@ -35,7 +34,7 @@ const DEFAULT_TERMINAL_OPTS = {
   fontSize: 12,
   fontFamily: "Monaco, Menlo, Consolas, 'Courier New', monospace",
   theme: {
-    background: '#0b184d',
+    background: '#181d28', // Always use dark color for terminal background
   },
 }
 
@@ -63,6 +62,9 @@ export default class ContainerTerminal extends React.Component {
     this.first = true
     this.containerRef = React.createRef()
     this.initTimer = null
+    this.fitAddon = new FitAddon()
+    this.resizeDisposable = null
+    this.dataDisposable = null
   }
 
   componentDidMount() {
@@ -76,7 +78,15 @@ export default class ContainerTerminal extends React.Component {
   }
 
   componentWillUnmount() {
-    this.term.destroy()
+    if (this.resizeDisposable) {
+      this.resizeDisposable.dispose()
+    }
+    if (this.dataDisposable) {
+      this.dataDisposable.dispose()
+    }
+    if (this.term) {
+      this.term.dispose()
+    }
     this.disconnect()
     this.removeResizeListener()
     this.initTimer && clearInterval(this.initTimer)
@@ -87,8 +97,9 @@ export default class ContainerTerminal extends React.Component {
     const terminalOpts = this.getTerminalOpts()
     const term = new Terminal(terminalOpts)
     term.open(this.containerRef.current)
+    term.loadAddon(this.fitAddon)
     this.initTimer = this.renderConnecting(term, initText)
-    term.fit()
+    this.fitAddon.fit()
 
     return term
   }
@@ -117,11 +128,15 @@ export default class ContainerTerminal extends React.Component {
 
   onTerminalResize() {
     window.addEventListener('resize', this.onResize)
-    this.term.on('resize', this.resizeRemoteTerminal)
+    if (this.term && this.term.onResize) {
+      this.resizeDisposable = this.term.onResize(this.resizeRemoteTerminal)
+    }
   }
 
   onTerminalKeyPress() {
-    this.term.on('data', this.sendTerminalInput)
+    if (this.term && this.term.onData) {
+      this.dataDisposable = this.term.onData(this.sendTerminalInput)
+    }
   }
 
   sendTerminalInput = data => {
@@ -130,10 +145,11 @@ export default class ContainerTerminal extends React.Component {
     }
   }
 
-  resizeRemoteTerminal = () => {
-    const { cols, rows } = this.term
+  resizeRemoteTerminal = ({ cols, rows } = {}) => {
+    const terminalCols = cols || this.term.cols
+    const terminalRows = rows || this.term.rows
     if (this.isWsOpen) {
-      this.ws.send(this.packResize(cols, rows))
+      this.ws.send(this.packResize(terminalCols, terminalRows))
     }
   }
 
@@ -141,7 +157,7 @@ export default class ContainerTerminal extends React.Component {
     window.removeEventListener('resize', this.onResize)
   }
 
-  fitTerm = () => this.term.fit()
+  fitTerm = () => this.fitAddon.fit()
 
   onResize = debounce(this.fitTerm, 800)
 

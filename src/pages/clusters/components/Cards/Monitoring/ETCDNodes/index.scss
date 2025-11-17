@@ -64,18 +64,18 @@
         display: block;
         font-size: variables.$size-normal;
         line-height: 1.43;
-        color: #14215a;
+        color: variables.$dark-color07;
       }
 
       span {
         line-height: 1.67;
-        color: #707fc9;
+        color: variables.$dark-color01;
       }
     }
 
     .tag {
       margin-left: 8px;
-      color: #fff;
+      color: variables.$white;
     }
   }
 }

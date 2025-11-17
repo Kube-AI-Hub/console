@@ -38,7 +38,7 @@
   margin-bottom: 15px;
   font-size: 12px;
   line-height: 1.67;
-  color: #707fc9;
+  color: variables.$light-color08;
 
   li {
     margin-left: 20px;
@@ -86,7 +86,7 @@
           font-weight: normal;
 
           b {
-            color: #a981f8;
+            color: variables.$green-color03;
             font-style: normal;
           }
         }
@@ -94,10 +94,10 @@
     }
 
     textarea {
-      border-color: #77b6e6;
+      border-color: variables.$light-color08;
       padding: 4px 12px;
-      color: #14215a;
-      caret-color: #14215a;
+      color: variables.$dark-color07;
+      caret-color: variables.$dark-color07;
       border-radius: 4px;
       transition: all 0.3s ease-in-out;
       font-weight: 600;
@@ -109,7 +109,7 @@
       }
 
       &:focus {
-        border-color: #a981f8;
+        border-color: variables.$green-color03;
         box-shadow: variables.$base-shadow;
         outline: transparent;
       }

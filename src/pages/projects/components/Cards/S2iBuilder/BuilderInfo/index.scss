@@ -27,13 +27,13 @@
         height: 20px;
         font-size: 12px;
         font-weight: 600;
-        color: #14215a;
+        color: variables.$dark-color07;
         @include mixins.ellipsis;
       }
       .name {
         height: 20px;
         font-size: 12px;
-        color: #707fc9;
+        color: variables.$dark-color01;
       }
     }
   }

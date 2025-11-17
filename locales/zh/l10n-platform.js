@@ -16,6 +16,7 @@
  * along with KubeSphere Console.  If not, see <https://www.gnu.org/licenses/>.
  */
 module.exports = {
+  KUBE_AI_HUB: 'AI管理平台',
   PLATFORM: '平台管理',
   CLUSTER_MANAGEMENT: '集群管理',
   CLUSTER_DESC: '对多集群以及每个集群的基础资源、服务组件和应用资源等的统一管理。',

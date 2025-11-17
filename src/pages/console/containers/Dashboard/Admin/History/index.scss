@@ -31,7 +31,7 @@
         display: inline-flex;
         justify-content: flex-end;
         gap: 4px;
-        background: #fff;
+        background: variables.$white;
       }
       .tag {
         overflow: hidden;
@@ -69,6 +69,6 @@
   position: absolute;
   top: 32px;
   left: 32px;
-  background-color: #fff;
+  background-color: variables.$white;
   border-radius: 50%;
 }

@@ -164,30 +164,42 @@ class Overview extends React.Component {
     const components = [
       {
         type: 'kubesphere',
-        icon: '/assets/kubesphere.svg',
+        icon: '/assets/logo.svg',
+        width: 100,
+        height: 20,
       },
       {
         type: 'kubeSystem',
         icon: '/assets/kubernetes.svg',
+        width: 94,
+        height: 20,
       },
       {
         type: 'istio',
         icon: '/assets/istio.svg',
+        width: 56,
+        height: 16,
         disabled: !globals.app.hasClusterModule(this.cluster, 'servicemesh'),
       },
       {
         type: 'monitoring',
         icon: '/assets/monitoring.svg',
+        width: 103,
+        height: 20,
         disabled: !globals.app.hasClusterModule(this.cluster, 'monitoring'),
       },
       {
         type: 'logging',
         icon: '/assets/logging.svg',
+        width: 82,
+        height: 20,
         disabled: !globals.app.hasClusterModule(this.cluster, 'logging'),
       },
       {
         type: 'devops',
         icon: '/assets/dev-ops.svg',
+        width: 68,
+        height: 17,
         disabled: !globals.app.hasClusterModule(this.cluster, 'devops'),
       },
     ]
@@ -202,7 +214,13 @@ class Overview extends React.Component {
             })}
             onClick={() => this.handleComponentsClick(item.disabled, item.type)}
           >
-            <img src={item.icon} />
+            <svg
+              className="kubed-icon-dark"
+              viewBox={`0 0 ${item.width} ${item.height}`}
+              preserveAspectRatio="xMidYMid meet"
+            >
+              <use href={item.icon} />
+            </svg>
 
             {!item.disabled ? (
               <p>

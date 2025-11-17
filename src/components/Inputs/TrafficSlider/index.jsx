@@ -22,22 +22,24 @@ import { Slider } from '@kube-design/components'
 
 import * as styles from './index.scss'
 
+import variables from '~scss/variables.module.scss'
+
 const SLIDER_PROPS = {
   className: styles.slider,
   railStyle: {
     height: 30,
-    backgroundColor: '#7eb8dc',
+    backgroundColor: variables.blueColor02,
     borderRadius: 2,
   },
   handleStyle: {
     width: 14,
     height: 30,
     marginTop: 0,
-    backgroundColor: '#fff',
+    backgroundColor: variables.white,
     borderRadius: 0,
     border: 'none',
   },
-  trackStyle: { height: 30, borderRadius: 2, backgroundColor: '#329dce' },
+  trackStyle: { height: 30, borderRadius: 2, backgroundColor: variables.blueColor03 },
 }
 
 export default class TrafficSlider extends React.PureComponent {

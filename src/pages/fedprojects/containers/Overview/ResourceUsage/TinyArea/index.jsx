@@ -21,6 +21,7 @@ import PropTypes from 'prop-types'
 
 import { COLORS_MAP } from 'utils/constants'
 
+import variables from '~scss/variables.module.scss'
 import {
   ResponsiveContainer,
   CartesianGrid,
@@ -72,9 +73,9 @@ export default class TinyArea extends React.Component {
   renderArea() {
     const { unit, areaColors } = this.props
     const dot = {
-      stroke: '#a981f8',
+      stroke: variables.greenColor03,
       strokeWidth: 1,
-      fill: '#fff',
+      fill: variables.white,
       fillOpacity: 1,
     }
 
@@ -86,7 +87,7 @@ export default class TinyArea extends React.Component {
           key={key}
           dataKey={key}
           stroke={color}
-          fillOpacity="0.1"
+          fillOpacity={0.1}
           fill={color}
           unit={unit}
           dot={dot}

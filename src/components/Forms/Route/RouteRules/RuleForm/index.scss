@@ -26,12 +26,12 @@
 
   a {
     display: inline-block;
-    color: #329dce;
+    color: variables.$blue-color03;
     vertical-align: middle;
   }
 
   :global .icon > svg {
-    color: #329dce;
+    color: variables.$blue-color03;
   }
 }
 

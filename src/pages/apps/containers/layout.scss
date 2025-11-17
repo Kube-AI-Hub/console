@@ -8,7 +8,7 @@
   margin: 0 auto;
 
   p {
-    color: #707fc9;
+    color: variables.$light-color08;
   }
 }
 
@@ -58,7 +58,7 @@
   padding: 0 8px;
   margin-left: 8px;
   border-radius: 10px;
-  background-color: #77b6e6;
+  background-color: variables.$light-color08;
   font-weight: 500;
   color: variables.$white;
 }
@@ -67,7 +67,7 @@
   height: 226px;
   border-radius: variables.$border-radius;
   padding: 32px 0;
-  box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.06);
+  box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.06);
   background-color: variables.$white;
   text-align: center;
 
@@ -90,8 +90,8 @@
   margin-bottom: 20px;
   padding: 12px;
   border-radius: variables.$border-radius;
-  background-color: #14215a;
-  box-shadow: 0 8px 16px 0 rgba(36, 46, 66, 0.2);
+  background-color: variables.$dark-color07;
+  box-shadow: 0 8px 16px 0 rgba(variables.$dark-color07, 0.2);
   cursor: pointer;
 
   .icon {
@@ -115,7 +115,7 @@
     }
 
     p {
-      color: #bfdcf0;
+      color: variables.$light-color04;
     }
   }
 }

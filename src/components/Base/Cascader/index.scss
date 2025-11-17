@@ -12,7 +12,7 @@
     max-height: 252px;
     border-radius: variables.$border-radius;
     background-color: variables.$text-color;
-    box-shadow: 0 4px 16px 0 rgba(39, 50, 71, 0.28);
+    box-shadow: 0 4px 16px 0 rgba(variables.$dark-color07, 0.28);
     overflow-y: auto;
     z-index: 200;
   }

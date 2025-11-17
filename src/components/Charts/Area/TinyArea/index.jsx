@@ -93,7 +93,7 @@ export default class TinyArea extends React.Component {
           key={key}
           dataKey={key}
           stroke={color}
-          fillOpacity="0.1"
+          fillOpacity={0.1}
           fill={color}
           unit={unit}
         />

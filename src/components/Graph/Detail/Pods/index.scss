@@ -26,11 +26,11 @@
     padding: 0 6px;
     margin-right: 6px;
     border-radius: 1px;
-    background-color: #1f2c6a;
-    text-shadow: 0 2px 4px rgba(36, 46, 66, 0.1);
+    background-color: variables.$dark-color06;
+    text-shadow: 0 2px 4px rgba(variables.$dark-color07, 0.1);
     font-weight: variables.$font-bold;
     line-height: 16px;
-    color: #fff;
+    color: variables.$white;
   }
 }
 
@@ -57,7 +57,7 @@
       color: variables.$light-color08;
 
       & > strong {
-        color: #14215a;
+        color: variables.$dark-color07;
       }
     }
   }
@@ -82,7 +82,7 @@
 
     &.running {
       background-color: variables.$green;
-      box-shadow: 0 4px 8px 0 rgba(85, 188, 138, 0.32);
+      box-shadow: 0 4px 8px 0 rgba(variables.$green-color03, 0.32);
     }
 
     &.updating {

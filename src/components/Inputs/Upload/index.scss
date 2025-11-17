@@ -14,7 +14,7 @@
   padding: 24px;
   border-radius: 4px;
   background-color: variables.$white;
-  border: dashed 1px #bfdcf0;
+  border: dashed 1px variables.$light-color04;
   cursor: pointer;
   transition: all variables.$trans-speed ease-in-out;
 
@@ -28,7 +28,7 @@
   & > p {
     left: 80px;
     right: 24px;
-    color: #707fc9;
+    color: variables.$dark-color01;
     @include mixins.vertical-center;
   }
 

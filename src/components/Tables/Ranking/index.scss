@@ -2,7 +2,7 @@
 
 .table.table_rank.table_no_border {
   td {
-    color: #707fc9;
+    color: variables.$dark-color01;
   }
   table {
     border-collapse: separate;
@@ -14,7 +14,7 @@
   }
   h3 {
     font-size: 14px;
-    color: #14215a;
+    color: variables.$dark-color07;
     font-weight: bold;
   }
   td,
@@ -35,7 +35,7 @@
     border-radius: 0 4px 4px 0;
   }
   td.rankCol {
-    background: #dbefe2;
+    background: variables.$green-color01;
   }
 }
 
@@ -47,7 +47,7 @@
     padding: 0;
   }
   td {
-    color: #707fc9;
+    color: variables.$dark-color01;
   }
   td,
   th {
@@ -56,9 +56,9 @@
     border: none;
   }
   td {
-    background: #fff;
+    background: variables.$white;
   }
   td.rankCol {
-    background: #dbefe2;
+    background: variables.$green-color01;
   }
 }

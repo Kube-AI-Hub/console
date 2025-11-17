@@ -9,17 +9,17 @@
 
 .pipelineCard--error {
   .pipelineCard__title {
-    background-color: #ca2621;
+    background-color: variables.$red-color03;
   }
 
   .pipelineCard__content {
-    border: 1px solid #ca2621;
+    border: 1px solid variables.$red-color03;
   }
 }
 
 .pipelineCard--queue {
   .pipelineCard__title {
-    background-color: #5c6cb6;
+    background-color: variables.$dark-color02;
 
     &::before {
       content: '';
@@ -66,7 +66,7 @@
   line-height: 32px;
   color: variables.$white;
   border-radius: 16px;
-  background-color: #14215a;
+  background-color: variables.$dark-color07;
 }
 
 .pipelineCard__content {
@@ -74,7 +74,7 @@
   text-align: left;
   border-radius: 8px;
   background-color: variables.$white;
-  box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.06);
+  box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.06);
 }
 
 .pipelineCard__item {
@@ -90,7 +90,7 @@
   }
 
   .content__detail {
-    color: #14215a;
+    color: variables.$dark-color07;
   }
 }
 
@@ -112,7 +112,7 @@
 }
 
 .content__status__error {
-  color: #ca2621;
+  color: variables.$red-color03;
 }
 
 .content__status__quene {
@@ -120,7 +120,7 @@
 }
 
 .errorMessage {
-  color: #ca2621;
+  color: variables.$red-color03;
 }
 
 .pipeline_column {

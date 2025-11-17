@@ -19,13 +19,6 @@
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import { get } from 'lodash'
-import {
-  Radar,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-} from 'recharts'
 import { Loading } from '@kube-design/components'
 import { Panel } from 'components/Base'
 
@@ -122,38 +115,35 @@ class ResourcesUsage extends Component {
     ]
   }
 
-  getRadarOptions = options =>
-    options.map(option => ({
-      name: option.name,
-      usage: Math.round((option.used * 100) / (option.total || option.used)),
-    }))
-
   render() {
     const options = this.getResourceOptions()
-    const radarOptions = this.getRadarOptions(options)
     return (
       <Panel title={t('RESOURCE_USAGE')}>
         <Loading spinning={this.monitorStore.isLoading}>
           <div className={styles.wrapper}>
-            <div className={styles.chart}>
-              <RadarChart
-                cx={170}
-                cy={200}
-                width={360}
-                height={360}
-                data={radarOptions}
-              >
-                <PolarGrid gridType="polygon" />
-                <PolarAngleAxis dataKey="name" />
-                <PolarRadiusAxis domain={[0, 100]} />
-                <Radar dataKey="usage" stroke="#345681" fill="#1c2d4267" />
-              </RadarChart>
-            </div>
-            <div className={styles.list}>
-              {options.map(option => (
-                <ResourceItem key={option.name} {...option} />
-              ))}
-            </div>
+            {options.map(option => {
+              const totalValue = option.total || option.used || 1
+              const usage = Math.round((option.used * 100) / totalValue)
+              return (
+                <div className={styles.row} key={option.name}>
+                  <div className={styles.progressItem}>
+                    <div className={styles.progressHeader}>
+                      <span className={styles.progressLabel}>{option.name}</span>
+                      <span className={styles.progressValue}>{usage}%</span>
+                    </div>
+                    <div className={styles.progressBar}>
+                      <div
+                        className={styles.progressFill}
+                        style={{ width: `${Math.min(usage, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                  <div className={styles.resource}>
+                    <ResourceItem {...option} />
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </Loading>
       </Panel>

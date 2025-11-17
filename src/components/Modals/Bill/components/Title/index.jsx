@@ -2,6 +2,8 @@ import React from 'react'
 import { Select, Icon } from '@kube-design/components'
 import * as styles from './index.scss'
 
+import variables from '~scss/variables.module.scss'
+
 const Title = ({ type, cluster, clusters, setCluster }) => {
   const handleChangeCluster = value => {
     setCluster(value)
@@ -12,8 +14,8 @@ const Title = ({ type, cluster, clusters, setCluster }) => {
       <Icon
         name="update"
         color={{
-          primary: '#ffc781',
-          secondary: '#f5a623',
+          primary: variables.yellowColor02,
+          secondary: variables.yellowColor03,
         }}
       />
     )

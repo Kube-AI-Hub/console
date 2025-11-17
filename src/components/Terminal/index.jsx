@@ -20,11 +20,14 @@ import React, { lazy, Suspense, Component } from 'react'
 import { observer } from 'mobx-react'
 import { getWebSocketProtocol, getClusterUrl } from 'utils'
 
+import variables from '~scss/variables.module.scss'
+
 const ContainerTerminal = lazy(() =>
   import(/* webpackChunkName: "terminal" */ './terminal')
 )
 
-const BG_COLOR = '#0b184d'
+// Always use dark color for terminal background
+const BG_COLOR = '#181d28'
 
 export default
 @observer
@@ -59,7 +62,7 @@ class SessionTerminal extends Component {
           borderRadius: '4px',
           background: BG_COLOR,
           padding: '12px',
-          color: '#fff',
+          color: variables.white,
         }}
       >
         <Suspense fallback={'Loading'}>

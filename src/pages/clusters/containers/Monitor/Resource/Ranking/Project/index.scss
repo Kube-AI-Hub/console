@@ -2,7 +2,7 @@
 
 .wrapper {
   border-radius: variables.$border-radius;
-  box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.06);
+  box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.06);
   background-color: variables.$white;
   overflow: hidden;
 }
@@ -15,12 +15,12 @@
       background-color: variables.$lightest;
       padding-top: 12px;
       padding-bottom: 12px;
-      border-bottom: solid 1px #bfdcf0;
+      border-bottom: solid 1px variables.$light-color04;
     }
     .pane__pagination {
       background-color: variables.$lightest;
       line-height: 56px;
-      box-shadow: 0 -1px 0 0 #bfdcf0;
+      box-shadow: 0 -1px 0 0 variables.$light-color04;
     }
   }
 }
@@ -29,7 +29,7 @@
   font-size: 14px;
   font-weight: 600;
   line-height: 66px;
-  color: #14215a;
+  color: variables.$dark-color07;
 }
 
 .toolbar {
@@ -67,7 +67,7 @@
 
 .table.table_rank.table_no_border {
   td {
-    color: #707fc9;
+    color: variables.$dark-color01;
   }
   table {
     border-collapse: separate;
@@ -79,7 +79,7 @@
   .rankList_row {
     h3 {
       font-size: 14px;
-      color: #14215a;
+      color: variables.$dark-color07;
       font-weight: bold;
     }
     td,
@@ -97,7 +97,7 @@
       border-radius: 0 4px 4px 0;
     }
     .rankLink__sort_col {
-      background: #dbefe2;
+      background: variables.$green-color01;
     }
   }
 }

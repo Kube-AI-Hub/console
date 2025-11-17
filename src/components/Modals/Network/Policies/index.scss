@@ -11,7 +11,7 @@
 .list {
   min-height: 37px;
   overflow-y: auto;
-  background-color: #fff;
+  background-color: variables.$white;
   border-radius: variables.$border-radius;
   border: 1px solid variables.$border-color;
 
@@ -111,7 +111,7 @@
       }
 
       &.checked {
-        box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.2);
+        box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.2);
       }
 
       span.label-value {

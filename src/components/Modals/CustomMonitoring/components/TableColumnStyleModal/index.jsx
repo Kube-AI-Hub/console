@@ -23,6 +23,7 @@ import NumberInput from 'components/Inputs/NumberInput'
 import ColorSelector from '../FormInput/ColorSelector'
 
 import * as styles from './index.scss'
+import variables from '~scss/variables.module.scss'
 
 export default class TableColumnStyleModal extends React.Component {
   constructor(props) {
@@ -163,7 +164,7 @@ export default class TableColumnStyleModal extends React.Component {
                       <Form.Item className={styles.thresholds}>
                         <ColorSelector
                           name={'colors[0]'}
-                          defaultValue={'#fff'}
+                          defaultValue={variables.white}
                         />
                       </Form.Item>
                       <span>{' < '}</span>
@@ -176,7 +177,7 @@ export default class TableColumnStyleModal extends React.Component {
                       <span>{' < '}</span>
                       <Form.Item className={styles.thresholds}>
                         <ColorSelector
-                          defaultValue={'#fff'}
+                          defaultValue={variables.white}
                           name={'colors[1]'}
                         />
                       </Form.Item>
@@ -191,7 +192,7 @@ export default class TableColumnStyleModal extends React.Component {
                       <Form.Item className={styles.thresholds}>
                         <ColorSelector
                           name={'colors[2]'}
-                          defaultValue={'#fff'}
+                          defaultValue={variables.white}
                         />
                       </Form.Item>
                     </div>

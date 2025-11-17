@@ -22,10 +22,10 @@
         font-weight: 600;
         font-size: 12px;
         line-height: 20px;
-        color: #14215a;
+        color: variables.$dark-color07;
       }
       p {
-        color: #707fc9;
+        color: variables.$dark-color01;
         font-size: 12px;
         line-height: 20px;
       }
@@ -40,7 +40,7 @@
     }
 
     .wrapper_gray {
-      background: #f9fbfd;
+      background: variables.$light-color01;
       border-radius: 4px;
       padding: 12px;
       margin-right: 12px;
@@ -55,7 +55,7 @@
         position: relative;
         margin-left: 0;
         .syncStatus_icon {
-          background: #fff;
+          background: variables.$white;
           border-radius: 50%;
           position: absolute;
           bottom: 0;
@@ -69,7 +69,7 @@
   }
 
   .info_card {
-    background: #fff;
+    background: variables.$white;
     padding: 12px;
     border-radius: 4px;
   }

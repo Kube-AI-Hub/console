@@ -28,6 +28,8 @@ import { CLUSTER_GROUP_TAG_TYPE, CLUSTER_PROVIDER_ICON } from 'utils/constants'
 
 import * as styles from './index.scss'
 
+import variables from '~scss/variables.module.scss'
+
 export default class ClusterTitle extends Component {
   static propTypes = {
     theme: PropTypes.oneOf(['dark', 'light']),
@@ -127,7 +129,7 @@ export default class ClusterTitle extends Component {
                 <Icon
                   name="information"
                   size="15"
-                  color={{ primary: '#ffffff', secondary: '#ab2f29' }}
+                  color={{ primary: variables.black, secondary: variables.redColor04 }}
                 />
                 {t('KUBE_CONFIG_IS_EXPIRED')}
               </p>

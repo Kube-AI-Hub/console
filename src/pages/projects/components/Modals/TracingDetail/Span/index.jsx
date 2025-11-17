@@ -22,6 +22,7 @@ import { Icon, Columns, Column } from '@kube-design/components'
 import { isErrorSpan, formatDuration } from 'utils/tracing'
 
 import * as styles from './index.scss'
+import variables from '~scss/variables.module.scss'
 
 function toPercent(value) {
   return `${(value * 100).toFixed(1)}%`
@@ -69,7 +70,7 @@ export default class Span extends React.Component {
                     <Icon
                       name="error"
                       color={{
-                        primary: '#fff',
+                        primary: variables.white,
                         secondary: '#ea4641',
                       }}
                     />

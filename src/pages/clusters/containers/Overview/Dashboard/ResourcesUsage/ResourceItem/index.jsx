@@ -19,7 +19,6 @@
 import React from 'react'
 
 import { Text } from 'components/Base'
-import { PieChart } from 'components/Charts'
 
 import { getSuitableUnit, getValueByUnit } from 'utils/monitoring'
 
@@ -36,28 +35,6 @@ export default function ResourceItem(props) {
 
   return (
     <div className={styles.item}>
-      <div className={styles.pie}>
-        <PieChart
-          width={48}
-          height={48}
-          data={[
-            {
-              name: 'Used',
-              itemStyle: {
-                fill: '#329dce',
-              },
-              value: used,
-            },
-            {
-              name: 'Left',
-              itemStyle: {
-                fill: '#c7deef',
-              },
-              value: total - used,
-            },
-          ]}
-        />
-      </div>
       <Text
         title={`${Math.round((used * 100) / total)}%`}
         description={title}

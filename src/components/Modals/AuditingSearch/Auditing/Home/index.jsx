@@ -28,6 +28,7 @@ import TimeBar from 'components/Charts/Bar/TimeBar'
 import AuditingStore from 'stores/auditing'
 
 import { dropDownItems, getSecond, supportQueryParams } from '../utils'
+import variables from '~scss/variables.module.scss'
 
 import * as styles from './index.scss'
 
@@ -125,7 +126,7 @@ class Home extends React.Component {
             <p className={styles.tip}>
               <Icon
                 name="information"
-                color={{ primary: '#fff', secondary: '#F5A623' }}
+                color={{ primary: variables.white, secondary: variables.yellowColor03 }}
               />
               {t.html('ENABLE_AUDIT_LOG_COLLECTION_DESC', {
                 link:

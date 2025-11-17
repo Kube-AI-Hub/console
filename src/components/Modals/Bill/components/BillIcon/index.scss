@@ -1,6 +1,8 @@
+@use '~scss/variables';
+
 .img {
   position: relative;
-  border: 1px solid #14215a;
+  border: 1px solid variables.$dark-color07;
   border-radius: 4px;
   align-self: center;
 

@@ -22,7 +22,7 @@ import classnames from 'classnames'
 import { get, isEmpty } from 'lodash'
 
 import { getColorByName } from 'utils/monitoring'
-
+import variables from '~scss/variables.module.scss'
 import {
   ResponsiveContainer,
   PieChart,
@@ -105,7 +105,7 @@ export default class SimpleCircle extends React.Component {
   getPrimaryColor = props => {
     const { areaColors, active, showRate } = props || {}
     const rate = this.getRate()
-    let colorName = get(areaColors, [0], '#fff')
+    let colorName = get(areaColors, [0], variables.white)
 
     if (showRate) {
       if (active) {
@@ -131,7 +131,7 @@ export default class SimpleCircle extends React.Component {
 
     const totalFill = active
       ? {
-          fill: '#fff',
+          fill: variables.white,
           fillOpacity: 0.4,
         }
       : {
@@ -232,7 +232,7 @@ export default class SimpleCircle extends React.Component {
             </p>
           </div>
           <div className={styles.item}>
-            <i style={{ background: '#fff' }} />
+            <i style={{ background: variables.white }} />
             <label>{t(legend[1])}:</label>
             <p>
               {total}
@@ -258,7 +258,7 @@ export default class SimpleCircle extends React.Component {
 
           if (!isEmpty(data)) {
             data[data.length - 1].value = legend[legend.length - 1]
-            data[data.length - 1].color = areaColors[data.length - 1] || '#fff'
+            data[data.length - 1].color = areaColors[data.length - 1] || variables.white
           }
 
           return (

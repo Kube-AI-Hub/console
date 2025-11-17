@@ -37,7 +37,7 @@
           &:hover,
           &:focus,
           &:active {
-            background-color: #fff;
+            background-color: variables.$white;
           }
         }
 
@@ -45,7 +45,7 @@
           &:hover,
           &:focus,
           &:active {
-            background-color: #14215a;
+            background-color: variables.$dark-color07;
           }
         }
       }

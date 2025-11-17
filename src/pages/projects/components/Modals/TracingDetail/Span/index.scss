@@ -71,7 +71,7 @@
   }
 
   .endpoint {
-    color: #707fc9;
+    color: variables.$dark-color01;
   }
 }
 
@@ -95,7 +95,7 @@
 
 .barLabel {
   position: absolute;
-  color: #707fc9;
+  color: variables.$dark-color01;
   top: -6px;
 
   &Left {

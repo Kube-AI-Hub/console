@@ -5,7 +5,7 @@ variables.$trans-speed: 0.2s;
 
 .subNav {
   & > p {
-    color: #707fc9;
+    color: variables.$dark-color01;
     margin-bottom: 12px;
   }
 
@@ -21,7 +21,7 @@ variables.$trans-speed: 0.2s;
       .title {
         display: block;
         padding: 7px 12px;
-        color: #3a498f;
+        color: variables.$dark-color04;
         font-weight: 500;
         cursor: pointer;
 
@@ -48,8 +48,8 @@ variables.$trans-speed: 0.2s;
           color: variables.$primary;
 
           :global .kubed-icon {
-            color: #a981f8;
-            fill: #c4aff0;
+            color: variables.$green-color03;
+            fill: variables.$green-color04;
           }
         }
 
@@ -72,8 +72,8 @@ variables.$trans-speed: 0.2s;
       &.childSelect .title {
         color: variables.$primary;
         :global .kubed-icon {
-          color: #a981f8;
-          fill: #c4aff0;
+          color: variables.$green-color03;
+          fill: variables.$green-color04;
         }
       }
 
@@ -82,13 +82,13 @@ variables.$trans-speed: 0.2s;
 
         &.select {
           & > a {
-            color: #3a498f;
+            color: variables.$dark-color04;
             cursor: not-allowed;
           }
 
           :global .kubed-icon {
-            color: #14215a;
-            fill: #a9d1ea;
+            color: variables.$dark-color07;
+            fill: variables.$dark-color04;
           }
         }
 
@@ -131,7 +131,7 @@ variables.$trans-speed: 0.2s;
 
     & > a {
       display: block;
-      color: #3a498f;
+      color: variables.$dark-color04;
     }
 
     &.select,
@@ -149,7 +149,7 @@ variables.$trans-speed: 0.2s;
       &:hover,
       &:active {
         & > a {
-          color: #3a498f;
+          color: variables.$dark-color04;
           cursor: not-allowed;
         }
       }
