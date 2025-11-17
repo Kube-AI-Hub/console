@@ -46,7 +46,7 @@ div.flatpickr-calendar {
         height: 32px;
         padding: 0 8px;
         border-radius: 3px;
-        color: #14215a;
+        color: $dark-color07;
         overflow: visible;
         line-height: 32px;
         cursor: pointer;
@@ -236,7 +236,7 @@ div.flatpickr-calendar {
           border-radius: 3px;
           margin: 4px;
           color: $dark-color07;
-          background-color: #fff;
+          background-color: $white;
           line-height: 32px;
           text-align: center;
           &.prevMonthDay,
@@ -248,7 +248,7 @@ div.flatpickr-calendar {
           }
           &.selected {
             border-color: $primary;
-            color: #fff;
+            color: $white;
             background-color: $primary;
             &:hover {
               border-color: $primary;
@@ -273,7 +273,7 @@ div.flatpickr-calendar {
             &.selected,
             .selected:hover {
               border-color: $primary;
-              color: #fff;
+              color: $white;
               background-color: $primary;
             }
             & + .endRange.selected {
@@ -367,7 +367,7 @@ div.flatpickr-calendar {
       border: solid 1px #d5dee7;
       border-radius: 3px;
       margin-right: 7px;
-      background-color: #fff;
+      background-color: $white;
       &:last-child {
         margin-right: 0;
       }
@@ -381,7 +381,7 @@ div.flatpickr-calendar {
         &:hover,
         &:focus,
         &:hover:focus {
-          background-color: #fff;
+          background-color: $white;
         }
       }
       .arrowUp,

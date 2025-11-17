@@ -39,7 +39,7 @@ label.checkbox {
     border: 1px solid $border-color;
     border-radius: 2px;
     outline: none !important;
-    background-color: #fff;
+    background-color: $white;
     transition: border 0.2s ease;
     transform: translateY(-50%);
     box-sizing: border-box;
@@ -60,7 +60,7 @@ label.checkbox {
     height: $checkbox-after-height;
     border-width: 0 1.6px 1.6px 0;
     border-style: solid;
-    border-color: #fff;
+    border-color: $white;
     transform: rotate(45deg);
     backface-visibility: hidden;
     box-sizing: content-box;
@@ -86,7 +86,7 @@ label.checkbox {
       display: block;
       width: 4px;
       height: 8px;
-      border: solid #fff;
+      border: solid $white;
       border-width: 0 2px 0 0;
       transform: rotate(90deg);
       box-sizing: content-box;

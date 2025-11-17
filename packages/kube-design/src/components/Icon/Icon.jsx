@@ -88,8 +88,8 @@ export default class Icon extends PureComponent {
 
     if (color) {
       colorStyles = {
-        color: color.primary,
-        fill: color.secondary,
+        color: color.secondary,
+        fill: color.primary,
       };
     }
     return (

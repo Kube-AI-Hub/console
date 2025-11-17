@@ -25,7 +25,7 @@
   &:hover,
   &:active {
     & > svg {
-      color: #a981f8;
+      color: $green-color03;
       fill: #c4aff0;
     }
   }
@@ -47,8 +47,8 @@
 }
 
 .kubed-icon-dark {
-  color: #14215a;
-  fill: #a9d1ea;
+  color: $dark-color07;
+  fill: $light-color05;
 }
 
 .kubed-icon-light {
@@ -57,7 +57,7 @@
 }
 
 .kubed-icon-coloured {
-  color: #a981f8;
+  color: $green-color03;
   fill: #c4aff0;
 }
 
