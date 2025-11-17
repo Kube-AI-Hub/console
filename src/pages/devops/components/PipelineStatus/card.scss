@@ -38,11 +38,11 @@
 
 .pipelineCard--paused {
   .pipelineCard__title {
-    background-color: #f5a623;
+    background-color: variables.$yellow-color03;
   }
 
   .content__title__paused {
-    color: #f5a623;
+    color: variables.$yellow-color03;
   }
 
   button {

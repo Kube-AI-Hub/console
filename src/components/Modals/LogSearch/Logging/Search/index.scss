@@ -166,12 +166,12 @@ $logCountColor: #329dce;
 }
 
 .hightLightMatch {
-  background: #ffc781;
+  background: variables.$yellow-color02;
 }
 
 .hightLog {
   em {
-    background: #ffc781;
+    background: variables.$yellow-color02;
     font-style: normal;
   }
 }
