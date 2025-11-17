@@ -18,7 +18,7 @@
 .itemWrapper {
   padding: 10px 12px 20px 12px;
   border-radius: 4px;
-  background-color: #ffffff;
+  background-color: variables.$white;
   border: solid 1px variables.$light-color03;
 
   & + .itemWrapper {

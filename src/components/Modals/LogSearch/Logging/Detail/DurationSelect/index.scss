@@ -1,10 +1,12 @@
+@use '~scss/variables';
+
 .select {
   padding: 8px;
   line-height: 15px;
   cursor: pointer;
   display: grid;
   grid-template-columns: 16px auto 16px;
-  grid-column-gap: 6px
+  grid-column-gap: 6px;
 }
 
 .duration {
@@ -20,7 +22,7 @@
   width: 700px;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  color: #000;
+  color: variables.$black;
   padding: 20px;
   height: 260px;
 }

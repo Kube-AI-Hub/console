@@ -76,7 +76,7 @@
         color: #fff;
 
         &::before {
-          background-color: #ffffff;
+          background-color: variables.$white;
         }
 
         & + .tag {

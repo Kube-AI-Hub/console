@@ -155,7 +155,7 @@ $banner-height: 152px + variables.$header-height;
           line-height: 32px;
           font-weight: 600;
           text-shadow: 0 2px 4px rgba(36, 46, 66, 0.1);
-          color: #ffffff;
+          color: variables.$white;
         }
         > p {
           font-size: variables.$size-small;

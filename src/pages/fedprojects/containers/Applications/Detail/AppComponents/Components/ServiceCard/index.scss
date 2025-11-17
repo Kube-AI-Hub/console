@@ -5,7 +5,7 @@
   padding: 12px;
   border-radius: 2px;
   border: solid 1px variables.$border-color;
-  background-color: #ffffff;
+  background-color: variables.$white;
 
   & + .wrapper {
     margin-top: 12px;

@@ -7,7 +7,7 @@
   li {
     border-radius: variables.$border-radius;
     box-shadow: 0 6px 16px 0 rgba(33, 43, 54, 0.2);
-    background-color: #ffffff;
+    background-color: variables.$white;
 
     & + li {
       margin-top: 12px;

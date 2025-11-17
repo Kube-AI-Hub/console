@@ -17,7 +17,7 @@
 
     .wrapper {
       padding: 20px;
-      background-color: #ffffff;
+      background-color: variables.$white;
 
       .types {
         width: 315px;
@@ -36,7 +36,7 @@
         .wrapperContent {
           padding: 12px;
           margin-bottom: 12px;
-          background: #ffffff;
+          background: variables.$white;
           border: 1px solid variables.$light-color06;
           border-radius: 4px;
 

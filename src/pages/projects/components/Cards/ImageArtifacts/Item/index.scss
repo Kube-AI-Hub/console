@@ -10,7 +10,7 @@
   min-height: 64px;
   border-radius: variables.$border-radius;
   border: solid 1px variables.$border-color;
-  background-color: #ffffff;
+  background-color: variables.$white;
 
   li {
     margin-right: 8px;

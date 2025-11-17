@@ -56,7 +56,7 @@
       border-image-source: radial-gradient(
         circle at 50% 0,
         #77b6e6,
-        #ffffff 100%
+        variables.$white 100%
       );
       border-image-slice: 1;
     }

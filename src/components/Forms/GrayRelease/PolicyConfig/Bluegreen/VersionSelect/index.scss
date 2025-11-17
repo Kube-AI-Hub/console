@@ -7,7 +7,7 @@
     padding: 20px;
     border-radius: 4px;
     border: solid 1px variables.$border-color;
-    background-color: #ffffff;
+    background-color: variables.$white;
 
     & + li {
       margin-top: 12px;

@@ -14,7 +14,7 @@
 }
 
 .pipelineCard_content {
-  background: #ffffff;
+  background: variables.$white;
   box-shadow: 0px 4px 8px rgba(36, 46, 66, 0.06);
   border-radius: 4px;
   padding: 12px;
@@ -54,7 +54,7 @@
     padding: 20px;
     font-size: 12px;
     line-height: 1.67;
-    color: #ffffff;
+    color: variables.$white;
     border-radius: 4px;
     background-color: #14215a;
     white-space: pre-wrap;
@@ -102,7 +102,7 @@
   text-align: center;
   border-radius: variables.$border-radius;
   min-height: 212px;
-  background-color: #ffffff;
+  background-color: variables.$white;
   box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.06);
 
   .icon {

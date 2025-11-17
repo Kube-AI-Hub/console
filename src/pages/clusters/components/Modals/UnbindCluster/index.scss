@@ -1,3 +1,6 @@
+@use '~scss/variables';
+@use '~scss/mixins';
+
 .header {
   border-bottom: none;
   background-color: #fff;
@@ -40,7 +43,7 @@
         width: 0.4em;
         height: 0.4em;
         border-radius: 50%;
-        background-color: #000;
+        background-color: variables.$black;
         left: 1em;
         top: 0.6em;
         transform: translateX(-50%);

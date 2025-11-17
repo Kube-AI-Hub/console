@@ -18,7 +18,7 @@
   font-size: 12px;
   font-weight: bolder;
   line-height: 32px;
-  color: #ffffff;
+  color: variables.$white;
   border-radius: 16px;
   background-color: #14215a;
   @include mixins.ellipsis;
@@ -31,7 +31,7 @@
 .pipelineCard__content {
   padding: 22px 12px 12px;
   text-align: left;
-  background-color: #ffffff;
+  background-color: variables.$white;
   border-radius: 8px;
   border: 1px solid transparent;
   box-shadow: 0 4px 8px 0 rgba(36, 46, 66, 0.06);
@@ -90,7 +90,7 @@
     margin-bottom: 0 !important;
 
     .content__title__text {
-      color: #000;
+      color: variables.$black;
     }
 
     :global {
@@ -127,7 +127,7 @@
   border-radius: 4px;
   padding: 5px 5px 5px 10px;
   font-weight: bolder;
-  background-color: #ffffff;
+  background-color: variables.$white;
   border: 1px dashed #96c8e9;
   user-select: none;
   cursor: pointer;

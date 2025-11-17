@@ -90,7 +90,7 @@
   padding: 12px;
   border-radius: 4px;
   border: solid 1px variables.$light-color03;
-  background-color: #ffffff;
+  background-color: variables.$white;
 
   ul {
     li {
@@ -153,7 +153,7 @@
   padding: 4px;
   border-radius: 4px;
   border: solid 1px variables.$light-color03;
-  background-color: #ffffff;
+  background-color: variables.$white;
 }
 
 .bar {
@@ -161,7 +161,7 @@
   border-radius: 2px;
   background-color: #329dce;
   text-align: center;
-  color: #ffffff;
+  color: variables.$white;
   font-weight: variables.$font-bold;
 }
 

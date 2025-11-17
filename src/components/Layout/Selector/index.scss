@@ -33,7 +33,7 @@
     :global .h6 {
       font-family: variables.$font-family-id;
       line-height: 1.43;
-      color: #ffffff;
+      color: variables.$white;
       @include mixins.ellipsis;
     }
 
