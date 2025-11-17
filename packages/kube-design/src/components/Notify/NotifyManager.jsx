@@ -1,9 +1,11 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import classnames from "classnames";
 import { generateUUID, createChainedFunction } from "./utils";
 import Notice from "./Notice";
+
+const managerRoots = new WeakMap();
 
 class NotifyManager extends Component {
   static propTypes = {
@@ -27,6 +29,8 @@ class NotifyManager extends Component {
     document.body.appendChild(wrapper);
 
     let called = false;
+    const root = createRoot(wrapper);
+    managerRoots.set(wrapper, root);
 
     const ref = (notify) => {
       if (called) {
@@ -42,19 +46,23 @@ class NotifyManager extends Component {
         },
         component: notify,
         destroy() {
-          ReactDOM.unmountComponentAtNode(wrapper);
-          wrapper.parentNode.removeChild(wrapper);
+          if (managerRoots.has(wrapper)) {
+            managerRoots.get(wrapper).unmount();
+            managerRoots.delete(wrapper);
+          }
+          if (wrapper.parentNode) {
+            wrapper.parentNode.removeChild(wrapper);
+          }
         },
       });
     };
 
-    ReactDOM.render(
+    root.render(
       <NotifyManager
         key={generateUUID("notify-manager")}
         {...props}
         ref={ref}
-      />,
-      wrapper
+      />
     );
   };
 

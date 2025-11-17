@@ -18,7 +18,7 @@
  */
 
 import React, { Suspense } from 'react'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import { LocaleProvider, Loading, Notify } from '@kube-design/components'
 
 import { isAppsPage, isMemberClusterPage } from 'utils'
@@ -63,15 +63,28 @@ window.request = request
 
 globals.app = new GlobalValue()
 
+const container = document.getElementById('root')
+if (!container) {
+  throw new Error('Root container #root not found')
+}
+const root = createRoot(container)
+
+let localesPromise
+const ensureLocales = () => {
+  if (!localesPromise) {
+    localesPromise = i18n.init().then(({ locales }) => locales)
+  }
+  return localesPromise
+}
+
 const render = async component => {
-  const { locales } = await i18n.init()
-  ReactDOM.render(
+  const locales = await ensureLocales()
+  root.render(
     <Suspense fallback={<Loading className="ks-page-loading" />}>
       <LocaleProvider locales={locales} localeKey="lang" ignoreWarnings>
         {component}
       </LocaleProvider>
-    </Suspense>,
-    document.getElementById('root')
+    </Suspense>
   )
 }
 

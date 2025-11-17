@@ -18,7 +18,7 @@
 
 import { get, omit, isUndefined, isFunction } from 'lodash'
 import React from 'react'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import ReactModal from 'react-modal'
 import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
@@ -50,6 +50,8 @@ ReactModal.defaultStyles.content = {
   position: 'relative',
   margin: '0 auto',
 }
+
+const modalRoots = new WeakMap()
 
 export default class Modal extends React.Component {
   static propTypes = {
@@ -116,14 +118,21 @@ export default class Modal extends React.Component {
         visible
       />
     ))
-    ReactDOM.render(<WrappedComponent />, modalWrapper)
+    const root = createRoot(modalWrapper)
+    modalRoots.set(modalWrapper, root)
+    root.render(<WrappedComponent />)
 
     return modalWrapper
   }
 
   static close = modal => {
-    const unmounted = ReactDOM.unmountComponentAtNode(modal)
-    if (unmounted && modal.parentNode) {
+    if (!modal) return
+    const root = modalRoots.get(modal)
+    if (root) {
+      root.unmount()
+      modalRoots.delete(modal)
+    }
+    if (modal.parentNode) {
       modal.parentNode.removeChild(modal)
     }
   }

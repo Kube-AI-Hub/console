@@ -18,13 +18,13 @@ yarn add @kube-design/components
 ## Example
 
 ```jsx
-import React, { Component } from "react";
+import React, { Component } from 'react'
 
-import { Button } from "@kube-design/components";
+import { Button } from '@kube-design/components'
 
 class Example extends Component {
   render() {
-    return <Button>Button</Button>;
+    return <Button>Button</Button>
   }
 }
 ```
@@ -38,7 +38,7 @@ There are two ways to import style files.
 The css file can be imported directly, so no additional configuration is required in the webpack configuration file.
 
 ```jsx
-import "@kube-design/components/esm/styles/index.css";
+import '@kube-design/components/esm/styles/index.css'
 ```
 
 ### Use scss
@@ -46,21 +46,21 @@ import "@kube-design/components/esm/styles/index.css";
 If you import the scss file, you may need to compile this part of the scss file in the webpack configuration file.
 
 ```jsx
-import "@kube-design/components/esm/styles/index.scss";
+import '@kube-design/components/esm/styles/index.scss'
 ```
 
 webpack.config.js
 
 ```js
 // module.rules
-[
+;[
   ...otherRules,
   {
     test: /\.s[ac]ss$/i,
-    include: root("node_modules"),
-    use: ["style-loader", "css-loader", "sass-loader"],
+    include: root('node_modules'),
+    use: ['style-loader', 'css-loader', 'sass-loader'],
   },
-];
+]
 ```
 
 ## Modular Import
@@ -86,7 +86,7 @@ const getBabelPluginImportConfig = require('@kube-design/components/babel.plugin
 Import the `main.scss` instead of `index.scss`
 
 ```jsx
-import "@kube-design/components/esm/styles/main.scss";
+import '@kube-design/components/esm/styles/main.scss'
 ```
 
 ## Localization
@@ -99,15 +99,15 @@ Kube Design use `LocaleProvider` component to support localization.
 // locales.js
 
 const locales = {
-  "en-US": {
-    HELLO: "Hello!",
+  'en-US': {
+    HELLO: 'Hello!',
   },
-  "zh-CN": {
-    HELLO: "你好!",
+  'zh-CN': {
+    HELLO: '你好!',
   },
-};
+}
 
-export default locales;
+export default locales
 ```
 
 2. Use the LocaleProvider component to wrap the root node
@@ -115,30 +115,32 @@ export default locales;
 The `locale` method can be assigned to `window` for easy use.
 
 ```jsx
-import React from "react";
-import ReactDOM from "react-dom";
-import { LocaleProvider } from "@kube-design/components";
-import locales from "./locales";
-import App from "./App";
+import React from 'react'
+import { createRoot } from 'react-dom/client'
+import { LocaleProvider } from '@kube-design/components'
+import locales from './locales'
+import App from './App'
 
-window.locale = LocaleProvider.locale;
+window.locale = LocaleProvider.locale
 
-const App = () => (
+const Root = () => (
   <LocaleProvider locales={locales} currentLocale="en">
     <App />
   </LocaleProvider>
-);
+)
 
-ReactDOM.render(<App />, document.getElementById("root"));
+const container = document.getElementById('root')
+const root = createRoot(container)
+root.render(<Root />)
 ```
 
 3. In the root node App.jsx and its child nodes, use `locale.get('key')` to get the language text
 
 ```jsx
-import React from "react";
-import { Button } from "@kube-design/components";
+import React from 'react'
+import { Button } from '@kube-design/components'
 
-export default () => <Button>{locale.get("HELLO")}</Button>;
+export default () => <Button>{locale.get('HELLO')}</Button>
 ```
 
 ## License

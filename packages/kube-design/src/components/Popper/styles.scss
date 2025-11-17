@@ -2,6 +2,10 @@
 
 $popper-z-index: 100;
 
+.popper-reference {
+  display: inline-block;
+}
+
 .popper {
   position: fixed;
   border-radius: $border-radius;

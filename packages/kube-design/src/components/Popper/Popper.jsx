@@ -1,4 +1,4 @@
-import React, { Component, Fragment, cloneElement } from "react";
+import React, { Component, Fragment } from "react";
 import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 import { noop, isFunction } from "lodash";
@@ -82,7 +82,6 @@ class Popper extends Component {
 
   componentDidMount() {
     const { always, visible } = this.props;
-    this.reference = ReactDOM.findDOMNode(this.referenceNode);
     (always || visible) && this.runPopper();
     !always && this.bindEvent();
     this.isPopperMounted = true;
@@ -229,8 +228,7 @@ class Popper extends Component {
 
   handleDocumentClick = (e) => {
     const { visible } = this.state;
-    const rootNode = ReactDOM.findDOMNode(this);
-    if (!rootNode || !this.reference || !this.popper || !visible) {
+    if (!visible) {
       return;
     }
     this.hidePopper(e);
@@ -314,20 +312,25 @@ class Popper extends Component {
     );
   }
 
+  setReferenceNode = (node) => {
+    this.reference = node;
+  };
+
   render() {
     const { children, appendToBody } = this.props;
-    const cloneChildren = cloneElement(React.Children.only(children), {
-      ref: (ref) => {
-        this.referenceNode = ref;
-      },
-    });
+    const triggerChild = React.Children.only(children);
     const portalTarget =
       appendToBody && typeof document !== "undefined" ? document.body : null;
     const content = this.renderContent();
 
     return (
       <Fragment>
-        {cloneChildren}
+        <div
+          className="popper-reference"
+          ref={this.setReferenceNode}
+        >
+          {triggerChild}
+        </div>
         {portalTarget ? ReactDOM.createPortal(content, portalTarget) : content}
       </Fragment>
     );
