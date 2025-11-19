@@ -21,7 +21,7 @@ server:
   redisTimeout: 5000
 
   # kubesphere console session params, not login session
-  sessionKey: "kubesphere:sess"
+  sessionKey: "kubeapihub:sess"
   sessionTimeout: 3600000 # unit: millisecond
 
   # backend service gateway server
@@ -35,7 +35,7 @@ server:
   dockerHubUrl: https://hub.docker.com
 
 client:
-  title: KubeSphere
+  title: Kube AI Hub
   description: ""
   encryptKey: kubesphere
 
