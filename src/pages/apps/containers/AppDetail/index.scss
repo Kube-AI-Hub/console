@@ -6,6 +6,7 @@ $toolbar-height: 52px;
 .content {
   position: relative;
   top: -(variables.$header-height);
+  background-color: variables.$white;
   z-index: 11;
 
   :global {

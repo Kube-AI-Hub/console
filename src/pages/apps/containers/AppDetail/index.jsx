@@ -87,13 +87,10 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    this.fixBodyColor()
     this.getData()
   }
 
   componentWillUnmount() {
-    // restore bg color
-    document.querySelector('html').style.backgroundColor = this.htmlOrigBgColor
   }
 
   getData() {
@@ -116,12 +113,6 @@ class App extends React.Component {
 
   handleTabChange = tab => {
     this.setState({ tab })
-  }
-
-  fixBodyColor() {
-    const htmlElem = document.querySelector('html')
-    this.htmlOrigBgColor = window.getComputedStyle(htmlElem).backgroundColor
-    htmlElem.style.backgroundColor = 'white'
   }
 
   handleBack = () => {

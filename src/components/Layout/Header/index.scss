@@ -6,7 +6,6 @@
   background-color: variables.$body-bg-color;
 
   &.inAppsPage {
-    background-color: rgba(24, 29, 40, 0.2);
     :global {
       .header-bottom {
         border-style: none;

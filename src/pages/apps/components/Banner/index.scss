@@ -11,7 +11,7 @@ $banner-height: 152px + variables.$header-height;
 .banner {
   position: relative;
   top: -(variables.$header-height);
-  background-color: variables.$dark-color08;
+  background-color: variables.$light-color08;
   height: $banner-height;
   z-index: 10;
 
@@ -103,7 +103,7 @@ $banner-height: 152px + variables.$header-height;
       :global .custom-icon {
         display: inline-block;
         height: 20px;
-        color: variables.$white;
+        color: variables.$black;
 
         &:hover {
           color: variables.$primary;
@@ -125,8 +125,8 @@ $banner-height: 152px + variables.$header-height;
           width: 20px;
           height: 20px;
           margin-right: 8px;
-          color: variables.$white;
-          fill: variables.$dark-color04;
+          color: variables.$black;
+          fill: variables.$light-color04;
         }
       }
     }
@@ -148,14 +148,14 @@ $banner-height: 152px + variables.$header-height;
       .text {
         float: left;
         width: calc(100% - 70px);
-        color: variables.$white;
+        color: variables.$black;
 
         > div {
           font-size: 24px;
           line-height: 32px;
           font-weight: 600;
-          text-shadow: 0 2px 4px rgba(variables.$dark-color07, 0.1);
-          color: variables.$white;
+          text-shadow: 0 2px 4px rgba(variables.$light-color07, 0.1);
+          color: variables.$black;
         }
         > p {
           font-size: variables.$size-small;
@@ -166,4 +166,8 @@ $banner-height: 152px + variables.$header-height;
       }
     }
   }
+}
+
+.banner_2 {
+  height: variables.$header-height;
 }

@@ -84,19 +84,10 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    this.fixBodyColor()
     this.getData()
   }
 
   componentWillUnmount() {
-    // restore bg color
-    document.querySelector('html').style.backgroundColor = this.htmlOrigBgColor
-  }
-
-  fixBodyColor() {
-    const htmlElem = document.querySelector('html')
-    this.htmlOrigBgColor = window.getComputedStyle(htmlElem).backgroundColor
-    htmlElem.style.backgroundColor = 'white'
   }
 
   async getData() {
