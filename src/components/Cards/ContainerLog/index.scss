@@ -50,7 +50,7 @@
   overflow: auto;
 
   p {
-    color: #b7c4d1;
+    color: variables.$light-color07;
     font-weight: 600;
     line-height: 20px;
     white-space: pre-wrap;
@@ -67,6 +67,6 @@
 }
 
 .more {
-  color: #b7c4d1;
+  color: variables.$light-color07;
   cursor: pointer;
 }
