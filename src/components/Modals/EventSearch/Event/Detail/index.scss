@@ -98,6 +98,9 @@ $chartContainerPadding: 8px;
         &:hover {
           background: transparent;
         }
+        .kubed-icon-dark {
+          color: variables.$white;
+        }
       }
     }
   }

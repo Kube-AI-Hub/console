@@ -88,6 +88,9 @@ $logCountColor: variables.$blue-color03;
         &:hover {
           background: transparent;
         }
+        .kubed-icon-dark {
+          color: variables.$white;
+        }
       }
     }
   }
