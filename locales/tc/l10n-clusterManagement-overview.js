@@ -22,7 +22,7 @@ module.exports = {
   // Baisc Information
   PROVIDER: '服務商',
   KUBERNETES_VERSION: 'Kubernetes 版本',
-  KUBESPHERE_VERSION: 'KubeSphere 版本',
+  KUBESPHERE_VERSION: 'Kube AI Hub 版本',
   VISIBILITY_PARTIAL: '部分可見',
   VISIBILITY_PUBLIC: '公開',
   CLUSTER_BASE_INFO_DESC: '基本資訊是目前集群的資訊概覽，您可以查看和編輯集群的基本資訊。',

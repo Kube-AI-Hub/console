@@ -51,7 +51,7 @@ export default class AboutModal extends Component {
           </div>
           <p>{t('KS_DESCRIPTION')}</p>
           <strong>
-            KubeSphere {t('VERSION')} : {ksVersion}
+            {t('KUBESPHERE_VERSION')} : {ksVersion}
           </strong>
         </div>
       </Modal>

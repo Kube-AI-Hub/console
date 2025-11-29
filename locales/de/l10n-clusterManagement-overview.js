@@ -22,7 +22,7 @@ module.exports = {
   // Baisc Information
   PROVIDER: 'Anbieter',
   KUBERNETES_VERSION: 'Kubernetes Version',
-  KUBESPHERE_VERSION: 'KubeSphere Version',
+  KUBESPHERE_VERSION: 'Kube AI Hub Version',
   VISIBILITY_PARTIAL: 'Sichtbar für einige Arbeitsbereiche',
   VISIBILITY_PUBLIC: 'Für alle Arbeitsbereiche sichtbar',
   CLUSTER_BASE_INFO_DESC: 'Grundlegende Informationen bieten einen Überblick über den Cluster. Sie können Clusterinformationen ansehen und bearbeiten.',
