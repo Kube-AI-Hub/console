@@ -295,6 +295,9 @@ const getKSConfig = async token => {
     resp = { ...config }
     if (version) {
       resp.ksVersion = version.gitVersion
+      if (resp.ksVersion === "v0.0.0") {
+        resp.ksVersion = "v3.4.1"
+      }
       resp.k8sVersion = get(version, 'kubernetes.gitVersion')
     }
   } catch (error) {
