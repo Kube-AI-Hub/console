@@ -33,6 +33,10 @@ class Dashboard extends React.Component {
   constructor(props) {
     super(props)
 
+    if (!globals.user) {
+      return
+    }
+
     if (!globals.app.isPlatformAdmin) {
       if (globals.app.getActions({ module: 'workspaces' }).includes('create')) {
         return this.routing.push(`/access/workspaces`)
@@ -49,6 +53,9 @@ class Dashboard extends React.Component {
   }
 
   get workspace() {
+    if (!globals.user || !globals.user.username) {
+      return null
+    }
     let workspace
     const savedWorkspace = localStorage.getItem(
       `${globals.user.username}-workspace`
@@ -107,6 +114,10 @@ class Dashboard extends React.Component {
   }
 
   render() {
+    if (!globals.user) {
+      return null
+    }
+
     return (
       <div className={styles.dashboard}>
         <div className={styles.wrapper}>

@@ -17,17 +17,44 @@
  */
 
 import React, { Component } from 'react'
+import { Loading } from '@kube-design/components'
 import Modal from 'components/Modals/ContianerTerminal'
 import KubeModal from 'components/Modals/KubeCtl'
+import { ensureSessionContext } from 'core/session'
 
 class TerminalApp extends Component {
+  state = {
+    ready: false,
+  }
+
+  componentDidMount() {
+    ensureSessionContext()
+      .then(context => {
+        if (!context && !globals.user) {
+          this.redirectToLogin()
+          return
+        }
+        this.setState({ ready: true })
+      })
+      .catch(() => {
+        this.redirectToLogin()
+      })
+  }
+
   pageClose() {
     window.opener = null
     window.open('', '_self', '')
     window.close()
   }
 
-  render() {
+  redirectToLogin() {
+    const referer = encodeURIComponent(
+      `${window.location.pathname}${window.location.search || ''}`
+    )
+    window.location.replace(`/login?referer=${referer}`)
+  }
+
+  renderTerminalContent() {
     const pathSplit = window.location.pathname.split('/')
     const isKubeCtrl = pathSplit[2] === 'kubectl'
     const isNode = pathSplit[2] === 'nodename'
@@ -61,6 +88,26 @@ class TerminalApp extends Component {
     }
 
     return <Modal onCancel={this.pageClose} match={match} title="terminal" />
+  }
+
+  render() {
+    if (!this.state.ready) {
+      return (
+        <div
+          style={{
+            width: '100%',
+            height: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Loading />
+        </div>
+      )
+    }
+
+    return this.renderTerminalContent()
   }
 }
 

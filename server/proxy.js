@@ -29,9 +29,16 @@ const k8sResourceProxy = {
   changeOrigin: true,
   events: {
     proxyReq(proxyReq, req) {
-      // Set authorization
-      if (req.token) {
-        proxyReq.setHeader('Authorization', `Bearer ${req.token}`)
+      // Handle modified body for /oauth/token requests
+      // If body was modified by middleware (stored as string in req.body),
+      // we need to write it manually since the original stream was consumed
+      if (req.body && typeof req.body === 'string' && req.method === 'POST') {
+        const body = Buffer.from(req.body, 'utf8')
+        proxyReq.setHeader('Content-Length', body.length)
+        // Write the body and end the request
+        proxyReq.write(body)
+        proxyReq.end()
+        return
       }
 
       NEED_OMIT_HEADERS.forEach(key => proxyReq.removeHeader(key))
@@ -59,7 +66,7 @@ const k8sResourceProxy = {
 
           offset += chunk.length
         })
-        proxyRes.pipe = function(res) {
+        proxyRes.pipe = function (res) {
           proxyRes.on('end', () => {
             end = true
             const offset1 = Math.min(offset, maxBufferSize)
@@ -102,8 +109,6 @@ const b2iFileProxy = {
   },
   events: {
     proxyReq(proxyReq, req) {
-      proxyReq.setHeader('Authorization', `Bearer ${req.token}`)
-
       NEED_OMIT_HEADERS.forEach(key => proxyReq.removeHeader(key))
     },
     proxyRes(proxyRes, req, client_res) {

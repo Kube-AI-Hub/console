@@ -24,6 +24,8 @@ import { parse } from 'qs'
 import UserStore from 'stores/user'
 import WebSocketStore from 'stores/websocket'
 import { getQueryString } from 'utils'
+import { removeToken } from 'utils/token'
+import request from 'utils/request'
 
 export default class RootStore {
   @observable
@@ -82,7 +84,12 @@ export default class RootStore {
   }
 
   login(params) {
-    return request.post('login', params)
+    // Directly call /oauth/token API (credentials will be injected by server middleware)
+    return request.post('oauth/token', params, {
+      headers: {
+        'content-type': 'application/x-www-form-urlencoded',
+      },
+    })
   }
 
   loginIdentityProviders(params) {
@@ -93,14 +100,29 @@ export default class RootStore {
   @action
   async logout() {
     const res = await request.post('logout')
+
+    // Remove token from localStorage
+    removeToken()
+
     const url = get(res, 'data.url')
     if (url) {
       window.location.href = url
+    } else {
+      // Redirect to login page
+      const pathname = window.location.pathname
+      const isAppsRoute = pathname.startsWith('/apps/')
+      window.location.href = isAppsRoute ? pathname : '/login'
     }
   }
 
   @action
   getRules(params) {
-    return this.user.fetchRules({ ...params, name: globals.user.username })
+    const username = get(globals, 'user.username')
+    if (!username) {
+      console.warn('User info missing, skip fetching rules')
+      return Promise.resolve(null)
+    }
+
+    return this.user.fetchRules({ ...params, name: username })
   }
 }

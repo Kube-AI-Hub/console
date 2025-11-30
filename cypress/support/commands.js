@@ -24,7 +24,27 @@ const USERS = {
 }
 
 Cypress.Commands.add('login', role => {
-  cy.request('POST', '/login', USERS[role || 'admin'])
+  const user = USERS[role || 'admin']
+  cy.request({
+    method: 'POST',
+    url: '/oauth/token',
+    body: {
+      username: user.username,
+      password: user.password,
+      grant_type: 'password',
+    },
+    headers: {
+      'content-type': 'application/x-www-form-urlencoded',
+    },
+    form: true,
+  }).then(response => {
+    // Store token for subsequent requests
+    if (response.body && response.body.access_token) {
+      cy.window().then(win => {
+        win.localStorage.setItem('kah_token', response.body.access_token)
+      })
+    }
+  })
   cy.setCookie('lang', 'en')
 })
 

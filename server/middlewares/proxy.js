@@ -33,8 +33,6 @@ module.exports = (context, options) => (ctx, next) => {
 
   const { events, ...httpProxyOpts } = options
 
-  ctx.req.token = ctx.cookies.get('token')
-
   return new Promise((resolve, reject) => {
     if (events && typeof events === 'object' && !eventRegistered) {
       Object.entries(events).forEach(([event, handler]) => {

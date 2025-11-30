@@ -33,7 +33,7 @@ const handleLoginResp = (resp = {}) => {
     throw new Error(resp.message)
   }
 
-  const { access_token, refresh_token, expires_in } = resp || {}
+  const { access_token, expires_in } = resp || {}
 
   const { username, extra, groups } = jwtDecode(access_token)
   const email = get(extra, 'email[0]')
@@ -47,8 +47,6 @@ const handleLoginResp = (resp = {}) => {
     extraname,
     initialized,
     token: access_token,
-    refreshToken: refresh_token,
-    expire: new Date().getTime() + Number(expires_in) * 1000,
   }
 }
 
@@ -233,7 +231,7 @@ const getUserDetail = async (token, clusterRole, isMulticluster) => {
     }
 
     user.globalRules = roles
-  } catch (error) {}
+  } catch (error) { }
 
   return user
 }
@@ -308,7 +306,8 @@ const getKSConfig = async token => {
 }
 
 const getK8sRuntime = async ctx => {
-  const token = ctx.cookies.get('token')
+  const authHeader = ctx.headers.authorization
+  const token = authHeader ? authHeader.replace('Bearer ', '') : null
   let resp = 'docker'
   if (!token) {
     return resp
@@ -331,7 +330,8 @@ const getK8sRuntime = async ctx => {
 }
 
 const getClusterRole = async ctx => {
-  const token = ctx.cookies.get('token')
+  const authHeader = ctx.headers.authorization
+  const token = authHeader ? authHeader.replace('Bearer ', '') : null
   let role = 'host'
   if (!token) {
     return role
@@ -358,7 +358,8 @@ const getClusterRole = async ctx => {
 }
 
 const getSupportGpuList = async ctx => {
-  const token = ctx.cookies.get('token')
+  const authHeader = ctx.headers.authorization
+  const token = authHeader ? authHeader.replace('Bearer ', '') : null
   let gpuKinds = []
   if (!token) {
     return []
@@ -380,14 +381,15 @@ const getSupportGpuList = async ctx => {
 
       gpuKinds = [...defaultGpu, ...otherGpus]
     }
-  } catch (error) {}
+  } catch (error) { }
 
   return gpuKinds
 }
 
 // TODO: need to get the data from kubesphere
 const getGitOpsEngine = async ctx => {
-  const token = ctx.cookies.get('token')
+  const authHeader = ctx.headers.authorization
+  const token = authHeader ? authHeader.replace('Bearer ', '') : null
   if (!token) {
     return []
   }
@@ -395,7 +397,8 @@ const getGitOpsEngine = async ctx => {
 }
 
 const getCurrentUser = async (ctx, clusterRole, isMulticluster) => {
-  const token = ctx.cookies.get('token')
+  const authHeader = ctx.headers.authorization
+  const token = authHeader ? authHeader.replace('Bearer ', '') : null
 
   if (!token) {
     if (isAppsRoute(ctx.path)) {
@@ -500,7 +503,6 @@ module.exports = {
   oAuthLogin,
   getCurrentUser,
   getOAuthInfo,
-  getNewToken,
   getKSConfig,
   getK8sRuntime,
   createUser,

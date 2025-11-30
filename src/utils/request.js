@@ -22,6 +22,7 @@ import { isObject, get, set, merge, isEmpty } from 'lodash'
 import { Notify } from '@kube-design/components'
 
 import { getClusterUrl, safeParseJSON } from './index'
+import { getToken, removeToken } from './token'
 
 const methods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
 
@@ -62,6 +63,7 @@ function buildRequest({
   handler,
 }) {
   let requestURL = createURL(url)
+  const token = getToken()
   const request = merge(
     {
       method,
@@ -72,8 +74,9 @@ function buildRequest({
           method === 'PATCH'
             ? 'application/merge-patch+json'
             : 'application/json',
-        Authorization: `Bearer ${globals.token}`,
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
+      url: requestURL, // 保存原始 URL 用于错误处理判断
     },
     options
   )
@@ -120,8 +123,13 @@ function buildRequest({
 
 function watchResource(url, params, callback) {
   const xhr = new XMLHttpRequest()
+  const token = getToken()
 
   xhr.open('GET', getClusterUrl(`/${url}?${qs.stringify(params)}`), true)
+
+  if (token) {
+    xhr.setRequestHeader('Authorization', `Bearer ${token}`)
+  }
 
   xhr.onreadystatechange = () => {
     if (xhr.readyState >= 3 && xhr.status === 200) {
@@ -166,6 +174,33 @@ function handleResponse(response, reject, request = {}) {
     return response.json().then(data => {
       if (response.status === 401) {
         console.warn('Unauthorized', response, response.ok)
+
+        // 检查是否是登录相关的请求 - 这些请求的 401 是正常的业务错误，不应该触发会话超时处理
+        const isLoginRequest = request.url && (
+          request.url.includes('/login') ||
+          request.url.startsWith('/oauth/')
+        )
+
+        // 只有非登录请求的 401 才是真正的会话超时
+        if (!isLoginRequest) {
+          // Remove token and redirect to login
+          removeToken()
+          const pathname = window.location.pathname
+          if (pathname !== '/login') {
+            window.location.replace(`/login?referer=${pathname}`)
+          }
+        }
+
+        // 返回错误信息给调用者处理，同时标记来源便于全局错误处理识别
+        const loginError = {
+          status: 401,
+          reason: data.reason || 'Unauthorized',
+          message: data.message || 'Please login again',
+        }
+        if (isLoginRequest) {
+          loginError.source = 'login'
+        }
+        return Promise.reject(loginError)
       }
 
       if (response.status === 403) {

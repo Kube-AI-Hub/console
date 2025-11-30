@@ -23,26 +23,35 @@ import { LocaleProvider, Loading, Notify } from '@kube-design/components'
 
 import { isAppsPage, isMemberClusterPage } from 'utils'
 import request from 'utils/request'
+import { removeToken } from 'utils/token'
 
 import App from './App'
 import GlobalValue from './global'
 import i18n from './i18n'
+import { ensureSessionContext } from './session'
 import 'core-js/stable'
 
 // request error handler
-window.onunhandledrejection = function(e) {
-  if (e && (e.status === 'Failure' || e.status >= 400)) {
-    if (e.status === 401 || e.reason === 'Unauthorized') {
+window.onunhandledrejection = function (event) {
+  const err = event?.reason || event
+  if (!err || err.source === 'login') {
+    // 忽略已经在登录表单中处理过的错误
+    return
+  }
+
+  if (err && (err.status === 'Failure' || err.status >= 400)) {
+    if (err.status === 401 || err.reason === 'Unauthorized') {
       // session timeout handler, except app store page.
-      if (!isAppsPage() && !isMemberClusterPage(location.pathname, e.message)) {
+      removeToken()
+      if (!isAppsPage() && !isMemberClusterPage(location.pathname, err.message)) {
         /* eslint-disable no-alert */
         location.href = `/login?referer=${location.pathname}`
         window.alert(t('LOGIN_AGAIN_DESC'))
       } else {
-        Notify.error({ title: e.reason, content: t(e.message), duration: 6000 })
+        Notify.error({ title: err.reason, content: t(err.message), duration: 6000 })
       }
-    } else if (globals.config.enableErrorNotify && (e.reason || e.message)) {
-      Notify.error({ title: e.reason, content: t(e.message), duration: 6000 })
+    } else if (globals.config.enableErrorNotify && (err.reason || err.message)) {
+      Notify.error({ title: err.reason, content: t(err.message), duration: 6000 })
     }
   }
 }
@@ -88,7 +97,18 @@ const render = async component => {
   )
 }
 
-render(<App />)
+const bootstrap = async () => {
+  try {
+    await ensureSessionContext()
+  } catch (err) {
+    // Ignore bootstrap session errors; will redirect later if needed
+    console.warn('Session bootstrap skipped', err)
+  } finally {
+    render(<App />)
+  }
+}
+
+bootstrap()
 
 module.hot &&
   module.hot.accept('./App', () => {

@@ -26,6 +26,8 @@ const {
   getGitOpsEngine,
 } = require('../services/session')
 
+const { oAuthLogin } = require('../services/session')
+
 const {
   getServerConfig,
   getManifest,
@@ -37,6 +39,23 @@ const {
 const { client: clientConfig } = getServerConfig()
 
 const renderView = async ctx => {
+  const baseGlobals = {
+    user: null,
+    ksConfig: {},
+    runtime: null,
+    clusterRole: 'host',
+    config: { ...clientConfig },
+  }
+
+  const hasAuthHeader = Boolean(
+    ctx.headers.authorization || ctx.headers.Authorization
+  )
+
+  if (!hasAuthHeader) {
+    await renderIndex(ctx, baseGlobals)
+    return
+  }
+
   try {
     const clusterRole = await getClusterRole(ctx)
     const ksConfig = await getKSConfig()
@@ -56,17 +75,15 @@ const renderView = async ctx => {
       config: { ...clientConfig, supportGpuType, gitopsEngine },
     })
   } catch (err) {
+    if (err.code === 401 || err.status === 401) {
+      await renderIndex(ctx, baseGlobals)
+      return
+    }
     await renderViewErr(ctx, err)
   }
 }
 
 const renderLogin = async ctx => {
-  const referer = ctx.querystring.split('referer=')[1]
-
-  if (isValidReferer(referer)) {
-    ctx.cookies.set('referer', referer)
-  }
-
   const oauthServers = await getOAuthInfo(ctx)
 
   await renderIndex(ctx, {
@@ -75,13 +92,7 @@ const renderLogin = async ctx => {
 }
 
 const renderLoginConfirm = async ctx => {
-  const usrName = ctx.cookies.get('defaultUser') || ''
-  await renderIndex(ctx, {
-    user: {
-      username: safeBase64.safeAtob(usrName),
-      email: ctx.cookies.get('defaultEmail'),
-    },
-  })
+  await renderIndex(ctx, {})
 }
 
 const renderIndex = async (ctx, params) => {
@@ -102,14 +113,37 @@ const renderIndex = async (ctx, params) => {
 }
 
 const renderTerminal = async ctx => {
+  const manifest = getManifest('terminalEntry')
+  const localeManifest = getLocaleManifest()
+
+  const baseGlobals = {
+    localeManifest,
+    user: null,
+    ksConfig: {},
+    runtime: null,
+  }
+
+  const hasAuthHeader = Boolean(
+    ctx.headers.authorization || ctx.headers.Authorization
+  )
+
+  if (!hasAuthHeader) {
+    await ctx.render('terminal', {
+      manifest,
+      isDev: global.MODE_DEV,
+      title: clientConfig.title,
+      hostname: ctx.hostname,
+      globals: JSON.stringify(baseGlobals),
+    })
+    return
+  }
+
   try {
-    const manifest = getManifest('terminalEntry')
     const [user, ksConfig, runtime] = await Promise.all([
       getCurrentUser(ctx),
       getKSConfig(),
       getK8sRuntime(ctx),
     ])
-    const localeManifest = getLocaleManifest()
 
     await ctx.render('terminal', {
       manifest,
@@ -124,6 +158,16 @@ const renderTerminal = async ctx => {
       }),
     })
   } catch (err) {
+    if (err.code === 401 || err.status === 401) {
+      await ctx.render('terminal', {
+        manifest,
+        isDev: global.MODE_DEV,
+        title: clientConfig.title,
+        hostname: ctx.hostname,
+        globals: JSON.stringify(baseGlobals),
+      })
+      return
+    }
     await renderViewErr(ctx, err)
   }
 }
@@ -132,18 +176,44 @@ const renderMarkdown = async ctx => {
   await ctx.render('blank_markdown')
 }
 
+const renderOAuthRedirect = async ctx => {
+  const oauthName = ctx.params.name
+
+  await ctx.render('oauth_redirect', {
+    title: clientConfig.title,
+    oauthProvider: oauthName,
+    loginUrl: '/login',
+  })
+}
+
 const renderViewErr = async (ctx, err) => {
   ctx.app.emit('error', err)
   if (err) {
     if (err.code === 401 || err.code === 403 || err.status === 401) {
-      if (isValidReferer(ctx.path)) {
-        let referer = ctx.path
-        if (ctx.path === '/authorize') {
-          referer = encodeURIComponent(ctx.originalUrl)
+      let referer = ctx.path
+      if (ctx.path === '/authorize') {
+        referer = encodeURIComponent(ctx.originalUrl)
+      }
+
+      const loginUrl = isValidReferer(referer)
+        ? `/login?referer=${referer}`
+        : '/login'
+
+      const wantsJSON =
+        ctx.accepts('json', 'html') === 'json' ||
+        ctx.get('x-requested-with') === 'XMLHttpRequest' ||
+        ctx.path.startsWith('/api/')
+
+      if (wantsJSON) {
+        ctx.status = 401
+        ctx.body = {
+          status: 401,
+          reason: 'Unauthorized',
+          message: 'Not authenticated',
+          redirect: loginUrl,
         }
-        ctx.redirect(`/login?referer=${referer}`)
       } else {
-        ctx.redirect('/login')
+        ctx.redirect(loginUrl)
       }
     } else if (err.code === 502) {
       await ctx.render('error', {
@@ -174,4 +244,5 @@ module.exports = {
   renderLogin,
   renderMarkdown,
   renderLoginConfirm,
+  renderOAuthRedirect,
 }

@@ -43,4 +43,7 @@ module.exports = {
   PASSWORD_LENGTH: 'Contain at least 8 characters.',
   // Third-party authentication
   SET_EMAIL_AND_USERNAME: 'Set Email and Username',
+  // OAuth authorization
+  AUTHORIZING: 'Authorizing',
+  AUTHORIZING_DESC: 'Please wait while we authorize your request...',
 }

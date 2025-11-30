@@ -69,7 +69,8 @@ class BaseLayout extends Component {
       document.addEventListener('click', this.handleClick)
     }
 
-    if (!globals.user && !isAppsPage(this.props.location.path)) {
+    const sessionLoading = window.__SESSION_LOADING__
+    if (!globals.user && !sessionLoading && !isAppsPage(this.props.location.path)) {
       location.href = '/login'
     }
   }

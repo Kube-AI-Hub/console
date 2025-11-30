@@ -21,7 +21,8 @@ const convert = require('koa-convert')
 const bodyParser = require('koa-bodyparser')
 
 const proxy = require('./middlewares/proxy')
-const checkToken = require('./middlewares/checkToken')
+const injectOAuthCredentials = require('./middlewares/injectOAuthCredentials')
+const extractTokenFromQuery = require('./middlewares/extractTokenFromQuery')
 const checkIfExist = require('./middlewares/checkIfExist')
 
 const {
@@ -31,16 +32,15 @@ const {
 } = require('./proxy')
 
 const {
-  handleSampleData,
   handleDockerhubProxy,
   handleHarborProxy,
 } = require('./controllers/api')
 
 const {
-  handleLogin,
   handleThirdLogin,
   handleLogout,
-  handleOAuthLogin,
+  handleSessionContext,
+  handleOAuthCallback,
   handleLoginConfirm,
 } = require('./controllers/session')
 
@@ -50,6 +50,7 @@ const {
   renderLogin,
   renderLoginConfirm,
   renderMarkdown,
+  renderOAuthRedirect,
 } = require('./controllers/view')
 
 const parseBody = convert(
@@ -68,20 +69,27 @@ router
   .post('/dockerhub{/*path}', parseBody, handleDockerhubProxy)
   .post('/harbor{/*path}', parseBody, handleHarborProxy)
   .get('/blank_md', renderMarkdown)
-  .all('/{k}api{s}{/*path}', checkToken, checkIfExist)
-  .use(proxy('/{k}api{s}{/*path}', k8sResourceProxy))
-  .use(proxy('/oauth{/*path}', k8sResourceProxy))
 
+  // oauth - frontend handles redirect/callback first
+  .get('/oauth/redirect/:name', renderOAuthRedirect)
+  .get('/oauth/callback/:name', handleOAuthCallback)
+
+  .all('/{k}api{s}{/*path}', checkIfExist)
+  .use(proxy('/{k}api{s}{/*path}', k8sResourceProxy))
   // session
-  .post('/login', parseBody, handleLogin)
   .post('/oauth/login/:title', parseBody, handleThirdLogin)
   .get('/login', renderLogin)
   .post('/login/confirm', parseBody, handleLoginConfirm)
   .get('/login/confirm', renderLoginConfirm)
   .post('/logout', handleLogout)
+  .get('/session/context', handleSessionContext)
 
-  // oauth
-  .get('/oauth/redirect/:name', handleOAuthLogin)
+  // proxy oauth requests to backend (after frontend routes have chance)
+  // Inject credentials for /oauth/token POST requests
+  .post('/oauth/token', parseBody, injectOAuthCredentials)
+  // Extract token from query parameter for /oauth/authorize requests
+  .get('/oauth/authorize', extractTokenFromQuery)
+  .use(proxy('/oauth{/*path}', k8sResourceProxy))
 
   // terminal
   .get('/terminal{/*path}', renderTerminal)

@@ -16,25 +16,26 @@
  * along with KubeSphere Console.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { get } from 'lodash'
+import { get, uniq } from 'lodash'
+import { Base64 } from 'js-base64'
 import { getWebSocketProtocol } from 'utils'
+import { getToken } from './token'
 
 const readyStates = ['connecting', 'open', 'closing', 'closed']
 const defaultOptions = {
   reopenLimit: 5,
-  onopen() {},
-  onmessage() {},
-  onclose() {},
-  onerror() {},
+  onopen() { },
+  onmessage() { },
+  onclose() { },
+  onerror() { },
 }
 
 export default class SocketClient {
   static composeEndpoint = (socketUrl, suffix = '') => {
     const re = /(\w+?:\/\/)?([^\\?]+)/
     const matchParts = String(socketUrl).match(re)
-    return `${getWebSocketProtocol(window.location.protocol)}://${
-      matchParts[2]
-    }${suffix}`
+    return `${getWebSocketProtocol(window.location.protocol)}://${matchParts[2]
+      }${suffix}`
   }
 
   constructor(endpoint, options = {}) {
@@ -57,15 +58,36 @@ export default class SocketClient {
   }
 
   initClient() {
-    const subProto = get(this.options, 'subProtocol')
+    let subProto = get(this.options, 'subProtocol', [])
+    if (typeof subProto === 'string') {
+      subProto = subProto
+        ? subProto.split(',').map(p => p.trim()).filter(Boolean)
+        : []
+    } else if (Array.isArray(subProto)) {
+      subProto = subProto.map(p => (p || '').trim()).filter(Boolean)
+    } else {
+      subProto = []
+    }
+
+    const protocols = [...subProto]
+
+    const token = getToken()
+    if (token) {
+      // Send token via Sec-WebSocket-Protocol header
+      // Kubernetes expects: base64url.bearer.authorization.k8s.io.<base64url(token)>
+      const encoded = Base64.encodeURI(token)
+      protocols.push(`base64url.bearer.authorization.k8s.io.${encoded}`)
+    }
+
+    const finalProtocols = uniq(protocols)
 
     if (!this.client) {
-      this.client = new WebSocket(this.endpoint, subProto)
+      this.client = new WebSocket(this.endpoint, finalProtocols)
     }
 
     if (this.client && this.client.readyState > 1) {
       this.client.close()
-      this.client = new WebSocket(this.endpoint, subProto)
+      this.client = new WebSocket(this.endpoint, finalProtocols)
     }
 
     return this.client
@@ -91,7 +113,7 @@ export default class SocketClient {
       if (typeof data === 'string') {
         try {
           data = JSON.parse(data)
-        } catch (e) {}
+        } catch (e) { }
       }
 
       onmessage && onmessage(data)

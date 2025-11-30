@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title><%= title %> - OAuth Login</title>
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <style>
+        <%- include('../public/variables.css') %>
+        <%- include('../public/loading.css') %>
+    </style>
+</head>
+
+<body>
+    <div id="root">
+        <%- include('./components/loading.html')  %>
+    </div>
+    <script type="text/javascript">
+        (async function () {
+            try {
+                const provider = '<%= oauthProvider %>'
+                const query = window.location.search || ''
+                const apiUrl = `/oauth/callback/${provider}${query}`
+
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !data.token) {
+                    console.error('OAuth login failed:', data);
+                    alert(data.message || 'OAuth authentication failed');
+                    window.location.href = '<%= loginUrl %>';
+                    return;
+                }
+
+                localStorage.setItem('kah_token', data.token);
+
+                if (data.needConfirm) {
+                    sessionStorage.setItem('defaultUser', data.defaultUser || '');
+                    sessionStorage.setItem('defaultEmail', data.defaultEmail || '');
+                    window.location.href = data.confirmUrl || '/login/confirm';
+                    return;
+                }
+
+                if (data.needPasswordChange) {
+                    window.location.href = data.passwordChangeUrl || '/password/confirm';
+                    return;
+                }
+
+                window.location.href = data.redirectUrl || '/';
+            } catch (error) {
+                console.error('OAuth callback error:', error);
+                alert('Authentication failed: ' + error.message);
+                window.location.href = '<%= loginUrl %>';
+            }
+        })();
+    </script>
+</body>
+
+</html>

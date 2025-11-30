@@ -41,5 +41,8 @@ module.exports = {
   PASSWORD_NUMBER: '包含至少 1 个数字。',
   PASSWORD_LENGTH: '包含至少 8 个字符。',
   // Third-party authentication
-  SET_EMAIL_AND_USERNAME: '设置邮箱和用户名'
+  SET_EMAIL_AND_USERNAME: '设置邮箱和用户名',
+  // OAuth authorization
+  AUTHORIZING: '正在授权',
+  AUTHORIZING_DESC: '正在处理您的授权请求，请稍候...',
 };

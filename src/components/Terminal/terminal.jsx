@@ -180,6 +180,7 @@ export default class ContainerTerminal extends React.Component {
     return new SocketClient(this.props.websocketUrl, {
       onmessage: this.onWSReceive,
       onerror: this.onWSError,
+      subProtocol: ['binary.k8s.io'],
     })
   }
 

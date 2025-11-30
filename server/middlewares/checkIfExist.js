@@ -23,11 +23,14 @@ const { send_gateway_request } = require('../libs/request')
 module.exports = async (ctx, next) => {
   if (ctx.headers['x-check-exist']) {
     try {
+      const authHeader = ctx.headers.authorization || ctx.headers.Authorization
+      const token = authHeader ? authHeader.replace('Bearer ', '') : null
+
       ctx.body = await send_gateway_request({
         method: ctx.method,
         headers: ctx.headers,
         url: ctx.url,
-        token: ctx.cookies.get('token'),
+        token,
       })
 
       ctx.status = 200

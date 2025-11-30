@@ -17,6 +17,7 @@
  */
 
 import { getClusterUrl } from 'utils/index'
+import { getToken } from 'utils/token'
 
 function getError(option, xhr) {
   const msg = `cannot post ${option.action} ${xhr.status}'`
@@ -97,6 +98,12 @@ export default function upload(option) {
   }
 
   const headers = option.headers || {}
+
+  // Add Authorization token
+  const token = getToken()
+  if (token) {
+    xhr.setRequestHeader('Authorization', `Bearer ${token}`)
+  }
 
   if (headers['X-Requested-With'] !== null) {
     xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest')

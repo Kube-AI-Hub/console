@@ -405,7 +405,7 @@ export default class GlobalValue {
   }
 
   get isPlatformAdmin() {
-    return globals.user.globalrole === 'platform-admin'
+    return globals.user && globals.user.globalrole === 'platform-admin'
   }
 
   get isMultiCluster() {
@@ -424,6 +424,9 @@ export default class GlobalValue {
   }
 
   cacheHistory(url, obj) {
+    if (!globals.user || !globals.user.username) {
+      return
+    }
     let histories = safeParseJSON(localStorage.getItem('history-cache'), {})
     histories = histories[globals.user.username] || []
     histories = histories.filter(item => item.url !== url)
