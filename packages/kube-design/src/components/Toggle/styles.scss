@@ -1,5 +1,5 @@
-@import "../../styles/variables";
-@import "../../styles/mixins";
+@use "../../styles/variables";
+@use "../../styles/mixins";
 
 .toggle {
   position: relative;
@@ -7,14 +7,14 @@
   height: 20px;
   min-width: 40px;
   border-radius: 100px;
-  background-color: $light-color04;
+  background-color: variables.$light-color04;
   vertical-align: middle;
   line-height: 20px;
   transition: all 0.36s;
   cursor: pointer;
   user-select: none;
   &:hover:after {
-    background-color: $bg-color;
+    background-color: variables.$bg-color;
   }
   &.disabled {
     opacity: 0.5;
@@ -38,25 +38,25 @@
     }
   }
   &.checked {
-    background-color: $green-color03;
+    background-color: variables.$green-color03;
     &:hover {
-      background-color: $green-color04;
+      background-color: variables.$green-color04;
     }
     &:active {
-      background-color: $green-color05;
+      background-color: variables.$green-color05;
     }
     &:after {
       left: 100%;
       transform: translateX(calc(-100% - 5px)) translateY(-50%);
     }
     &:hover:after {
-      background-color: $bg-color;
+      background-color: variables.$bg-color;
     }
     &:active:after {
       transform: translateX(calc(-100% - 5px)) translateY(-50%);
     }
     &:hover:active:after {
-      background-color: $light-color02;
+      background-color: variables.$light-color02;
     }
   }
   &:after {
@@ -67,7 +67,7 @@
     left: 5px;
     border-radius: 18px;
     margin-left: 0;
-    background-color: $white;
+    background-color: variables.$white;
     box-shadow: 0 1px 2px 0 rgba(0, 41, 27, 0.08);
     transform: translateY(-50%);
     transition: all 0.36s cubic-bezier(0.78, 0.14, 0.15, 0.86);
@@ -78,15 +78,15 @@
     width: 24px;
   }
   &:active {
-    background-color: $light-color04;
+    background-color: variables.$light-color04;
   }
   > span.text {
     line-height: 16px;
     font-size: 12px;
-    font-weight: $font-bold;
+    font-weight: variables.$font-bold;
     margin-left: 20px;
     margin-right: 8px;
-    color: $white;
+    color: variables.$white;
 
     &.checked {
       margin-left: 8px;

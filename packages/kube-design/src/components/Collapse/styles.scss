@@ -1,10 +1,10 @@
-@import "../../styles/variables";
-@import "../../styles/mixins";
+@use "../../styles/variables";
+@use "../../styles/mixins";
 
 .collapse {
   line-height: 1.67;
-  font-size: $size-small;
-  border-radius: $border-radius;
+  font-size: variables.$size-small;
+  border-radius: variables.$border-radius;
 
   ul {
     padding: 0;
@@ -12,39 +12,39 @@
   }
 
   li:first-child > :first-child {
-    border-radius: $border-radius $border-radius 0 0;
+    border-radius: variables.$border-radius variables.$border-radius 0 0;
   }
 
   &-item {
     &-label {
       position: relative;
       padding: 8px 20px;
-      color: $collapse-item-text;
-      background-color: $collapse-item-bg;
-      font-weight: $font-bold;
+      color: variables.$collapse-item-text;
+      background-color: variables.$collapse-item-bg;
+      font-weight: variables.$font-bold;
       line-height: 20px;
       cursor: pointer;
 
       .icon {
         right: 20px;
-        @include vertical-center;
+        @include mixins.vertical-center;
       }
       &-border-bottom {
-        color: $collapse-item-active-text;
-        background-color: $collapse-item-active-bg;
+        color: variables.$collapse-item-active-text;
+        background-color: variables.$collapse-item-active-bg;
       }
       &-last-border-bottom {
-        border-radius: 0 0 $border-radius $border-radius;
+        border-radius: 0 0 variables.$border-radius variables.$border-radius;
       }
     }
     &-content {
       padding: 12px;
-      @include TypographyParagraph;
-      background-color: $collapse-content-bg;
+      @include mixins.TypographyParagraph;
+      background-color: variables.$collapse-content-bg;
       overflow: hidden auto;
-      color: $collapse-content-text;
+      color: variables.$collapse-content-text;
       &-last-border-bottom {
-        border-radius: 0 0 $border-radius $border-radius;
+        border-radius: 0 0 variables.$border-radius variables.$border-radius;
       }
     }
   }

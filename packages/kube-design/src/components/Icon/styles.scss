@@ -1,4 +1,4 @@
-@import '../../styles/variables';
+@use '../../styles/variables';
 
 .icon {
   display: inline-flex;
@@ -25,7 +25,7 @@
   &:hover,
   &:active {
     & > svg {
-      color: $green-color03;
+      color: variables.$green-color03;
       fill: #c4aff0;
     }
   }
@@ -33,31 +33,31 @@
 
 .icon-clickable {
   cursor: pointer;
-  border-radius: $border-radius;
+  border-radius: variables.$border-radius;
   pointer-events: auto;
 }
 
 .icon-clickable:hover,
 .icon-clickable:active {
-  background-color: $bg-color;
+  background-color: variables.$bg-color;
 
   & > svg {
-    color: $text-color;
+    color: variables.$text-color;
   }
 }
 
 .kubed-icon-dark {
-  color: $dark-color07;
-  fill: $light-color08;
+  color: variables.$dark-color07;
+  fill: variables.$light-color08;
 }
 
 .kubed-icon-light {
-  color: $light-color01;
-  fill: $light-color05;
+  color: variables.$light-color01;
+  fill: variables.$light-color05;
 }
 
 .kubed-icon-coloured {
-  color: $green-color03;
+  color: variables.$green-color03;
   fill: #c4aff0;
 }
 

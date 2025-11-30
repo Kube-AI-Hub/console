@@ -1,5 +1,5 @@
-@import '../../styles/variables';
-@import './flatpickr.scss';
+@use '../../styles/variables';
+@use 'flatpickr.scss';
 
 .datepicker {
   display: inline-flex;
@@ -9,18 +9,18 @@
   position: relative;
   &.input {
     &[readonly='readonly'] {
-      background-color: $white;
+      background-color: variables.$white;
     }
   }
 }
 
 div.flatpickr-calendar {
   width: 300px;
-  border: solid 1px $border-color;
-  border-radius: $border-radius;
+  border: solid 1px variables.$border-color;
+  border-radius: variables.$border-radius;
   margin-top: 4px;
-  background-color: $white;
-  box-shadow: $box-shadow;
+  background-color: variables.$white;
+  box-shadow: variables.$box-shadow;
   &.open {
     z-index: 100;
   }
@@ -46,7 +46,7 @@ div.flatpickr-calendar {
         height: 32px;
         padding: 0 8px;
         border-radius: 3px;
-        color: $dark-color07;
+        color: variables.$dark-color07;
         overflow: visible;
         line-height: 32px;
         cursor: pointer;
@@ -65,7 +65,7 @@ div.flatpickr-calendar {
           content: '';
         }
         &:hover {
-          background-color: $light-color01;
+          background-color: variables.$light-color01;
         }
         &.is-open {
           &:after {
@@ -79,12 +79,12 @@ div.flatpickr-calendar {
         left: 50%;
         display: flex;
         width: 148px;
-        border: solid 1px $border-color;
+        border: solid 1px variables.$border-color;
         border-radius: 3px;
         margin-top: -4px;
         margin-left: -74px;
-        background-color: $white;
-        box-shadow: $box-shadow;
+        background-color: variables.$white;
+        box-shadow: variables.$box-shadow;
         opacity: 0;
         visibility: hidden;
         transition: all ease 0.2s;
@@ -106,11 +106,11 @@ div.flatpickr-calendar {
             line-height: 32px;
             text-align: center;
             &.is-active {
-              color: $primary;
+              color: variables.$primary;
               font-weight: 500;
             }
             &:hover {
-              background-color: $light-color01;
+              background-color: variables.$light-color01;
             }
             &.disabled {
               opacity: 0.5;
@@ -152,9 +152,9 @@ div.flatpickr-calendar {
       border-radius: 3px;
       background-color: transparent;
       &:hover {
-        background-color: $light-color01;
+        background-color: variables.$light-color01;
         svg {
-          fill: $light-color05;
+          fill: variables.$light-color05;
         }
       }
       &.disabled {
@@ -216,7 +216,7 @@ div.flatpickr-calendar {
         width: 32px;
         max-width: 32px;
         margin: 4px;
-        color: $light-color08;
+        color: variables.$light-color08;
         font-weight: normal;
         line-height: 24px;
       }
@@ -235,24 +235,24 @@ div.flatpickr-calendar {
           border: solid 1px transparent;
           border-radius: 3px;
           margin: 4px;
-          color: $dark-color07;
-          background-color: $white;
+          color: variables.$dark-color07;
+          background-color: variables.$white;
           line-height: 32px;
           text-align: center;
           &.prevMonthDay,
           &.nextMonthDay {
-            color: $light-color08;
+            color: variables.$light-color08;
           }
           &.today {
             border-color: #c6d1dc;
           }
           &.selected {
-            border-color: $primary;
-            color: $white;
-            background-color: $primary;
+            border-color: variables.$primary;
+            color: variables.$white;
+            background-color: variables.$primary;
             &:hover {
-              border-color: $primary;
-              background-color: $primary;
+              border-color: variables.$primary;
+              background-color: variables.$primary;
             }
           }
           &.startRange {
@@ -272,9 +272,9 @@ div.flatpickr-calendar {
             }
             &.selected,
             .selected:hover {
-              border-color: $primary;
-              color: $white;
-              background-color: $primary;
+              border-color: variables.$primary;
+              color: variables.$white;
+              background-color: variables.$primary;
             }
             & + .endRange.selected {
               box-shadow: -8px 0 0 #e1f6f0 !important;
@@ -303,9 +303,9 @@ div.flatpickr-calendar {
               }
               &.selected,
               .selected:hover {
-                border-color: $primary;
-                color: $white;
-                background-color: $primary;
+                border-color: variables.$primary;
+                color: variables.$white;
+                background-color: variables.$primary;
               }
             }
             &.endRange {
@@ -321,8 +321,8 @@ div.flatpickr-calendar {
             }
           }
           &:hover {
-            border-color: $light-color01;
-            background-color: $light-color01;
+            border-color: variables.$light-color01;
+            background-color: variables.$light-color01;
           }
           &.selected.startRange + .endRange:not(:nth-child(7n + 1)),
           &.startRange.startRange + .endRange:not(:nth-child(7n + 1)),
@@ -367,21 +367,21 @@ div.flatpickr-calendar {
       border: solid 1px #d5dee7;
       border-radius: 3px;
       margin-right: 7px;
-      background-color: $white;
+      background-color: variables.$white;
       &:last-child {
         margin-right: 0;
       }
       .numInput {
         height: 100%;
         padding-left: 12px;
-        color: $dark-color07;
+        color: variables.$dark-color07;
         font-weight: normal;
         text-align: left;
         caret-color: #0fbb7f;
         &:hover,
         &:focus,
         &:hover:focus {
-          background-color: $white;
+          background-color: variables.$white;
         }
       }
       .arrowUp,
@@ -403,7 +403,7 @@ div.flatpickr-calendar {
           background-repeat: no-repeat;
         }
         &:hover {
-          background-color: $light-color01;
+          background-color: variables.$light-color01;
         }
       }
       .arrowUp {

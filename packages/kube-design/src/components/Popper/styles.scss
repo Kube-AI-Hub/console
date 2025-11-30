@@ -1,4 +1,6 @@
-@import "../../styles/variables";
+@use "sass:math";
+
+@use "../../styles/variables";
 
 $popper-z-index: 300;
 
@@ -8,10 +10,10 @@ $popper-z-index: 300;
 
 .popper {
   position: fixed;
-  border-radius: $border-radius;
+  border-radius: variables.$border-radius;
   background-clip: padding-box;
-  background-color: $popper-background;
-  box-shadow: $box-shadow;
+  background-color: variables.$popper-background;
+  box-shadow: variables.$box-shadow;
   opacity: 0;
   white-space: normal;
   text-align: left;
@@ -34,45 +36,45 @@ $popper-z-index: 300;
 .popper-arrow {
   position: absolute;
   display: block;
-  width: $arrow-border-width;
-  height: $arrow-border-width;
-  background-color: $popper-background;
+  width: variables.$arrow-border-width;
+  height: variables.$arrow-border-width;
+  background-color: variables.$popper-background;
   transform: rotate(45deg);
   z-index: -1;
 }
 
 .popper[x-placement^="bottom"] {
-  margin-top: $arrow-margin;
+  margin-top: variables.$arrow-margin;
   .popper-arrow {
-    top: $arrow-border-width / -2;
-    border-top-left-radius: $border-radius / 2;
+    top: math.div(variables.$arrow-border-width, -2);
+    border-top-left-radius: variables.$border-radius * 0.5;
     clip-path: polygon(0 0, 0 100%, 100% 0);
   }
 }
 
 .popper[x-placement^="top"] {
-  margin-bottom: $arrow-margin;
+  margin-bottom: variables.$arrow-margin;
   .popper-arrow {
-    bottom: $arrow-border-width / -2;
-    border-bottom-right-radius: $border-radius / 2;
+    bottom: math.div(variables.$arrow-border-width, -2);
+    border-bottom-right-radius: variables.$border-radius * 0.5;
     clip-path: polygon(100% 0, 0% 100%, 100% 100%);
   }
 }
 
 .popper[x-placement^="left"] {
-  margin-right: $arrow-margin;
+  margin-right: variables.$arrow-margin;
   .popper-arrow {
-    right: $arrow-border-width / -2;
-    border-top-right-radius: $border-radius / 2;
+    right: math.div(variables.$arrow-border-width, -2);
+    border-top-right-radius: variables.$border-radius * 0.5;
     clip-path: polygon(100% 0, 0 0, 100% 100%);
   }
 }
 
 .popper[x-placement^="right"] {
-  margin-left: $arrow-margin;
+  margin-left: variables.$arrow-margin;
   .popper-arrow {
-    left: $arrow-border-width / -2;
-    border-bottom-left-radius: $border-radius / 2;
+    left: math.div(variables.$arrow-border-width, -2);
+    border-bottom-left-radius: variables.$border-radius * 0.5;
     clip-path: polygon(0 100%, 0 0, 100% 100%);
   }
 }

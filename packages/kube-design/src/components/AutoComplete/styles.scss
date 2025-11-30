@@ -1,8 +1,9 @@
-@import "../../styles/mixins";
+@use "../../styles/mixins";
+@use "../../styles/variables";
 
 .auto-complete {
   &-caret {
-    @include vertical-center;
+    @include mixins.vertical-center;
     right: 12px;
   }
 
@@ -22,7 +23,7 @@
   &-content {
     mark {
       background-color: transparent;
-      color: $primary;
+      color: variables.$primary;
     }
 
     .menu-item > span {

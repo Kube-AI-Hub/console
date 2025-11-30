@@ -1,4 +1,4 @@
-@import "../../styles/variables";
+@use "../../styles/variables";
 
 .badge-wrapper {
   position: relative;
@@ -9,8 +9,8 @@
     height: 20px;
     padding: 0 8px;
     border-radius: 12px;
-    color: $white;
-    font-size: $body-size;
+    color: variables.$white;
+    font-size: variables.$body-size;
     line-height: 20px;
 
     &:hover {
@@ -18,16 +18,16 @@
     }
 
     &.is-error {
-      background-color: $error;
+      background-color: variables.$error;
     }
     &.is-success {
-      background-color: $success;
+      background-color: variables.$success;
     }
     &.is-warning {
-      background-color: $warning;
+      background-color: variables.$warning;
     }
     &.is-default {
-      background-color: $dark-color01;
+      background-color: variables.$dark-color01;
     }
   }
 }

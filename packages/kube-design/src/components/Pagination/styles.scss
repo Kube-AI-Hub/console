@@ -1,4 +1,4 @@
-@import "../../styles/variables";
+@use "../../styles/variables";
 
 .pagination {
   display: inline-flex;
@@ -11,6 +11,6 @@
   .button {
     height: 32px;
     padding: 5px 12px;
-    border-radius: $border-radius;
+    border-radius: variables.$border-radius;
   }
 }

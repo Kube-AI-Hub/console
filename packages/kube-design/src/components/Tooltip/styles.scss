@@ -1,30 +1,30 @@
-@import "../../styles/variables";
-@import "../../styles/mixins";
+@use "../../styles/variables";
+@use "../../styles/mixins";
 
 .tooltip {
-  max-width: $tooltip-max-width;
+  max-width: variables.$tooltip-max-width;
   background: transparent;
-  box-shadow: $tooltip-box-shadow;
+  box-shadow: variables.$tooltip-box-shadow;
   line-height: 1.7143;
   z-index: 1000;
 
   .popper-arrow {
-    background-color: $tooltip-background;
+    background-color: variables.$tooltip-background;
   }
 
   .tooltip-content {
     padding: 12px;
-    background: $tooltip-background;
-    border-radius: $border-radius;
-    color: $tooltip-color;
+    background: variables.$tooltip-background;
+    border-radius: variables.$border-radius;
+    color: variables.$tooltip-color;
   }
 
   &-title {
     margin-bottom: 8px;
-    @include TypographySymbolText;
-    color: $white;
+    @include mixins.TypographySymbolText;
+    color: variables.$white;
   }
   &-desc {
-    @include TypographyParagraph;
+    @include mixins.TypographyParagraph;
   }
 }

@@ -1,34 +1,34 @@
-@import "../../styles/variables";
-@import "../../styles/mixins";
+@use "../../styles/variables";
+@use "../../styles/mixins";
 
 .textarea {
   width: 376px;
   padding: 6px 12px;
-  border-radius: $border-radius;
-  border: solid 1px $input-border-color;
-  background-color: $white;
+  border-radius: variables.$border-radius;
+  border: solid 1px variables.$input-border-color;
+  background-color: variables.$white;
   box-sizing: border-box;
-  @include TypographySymbolText;
-  transition: all $trans-speed ease-in-out;
+  @include mixins.TypographySymbolText;
+  transition: all variables.$trans-speed ease-in-out;
   outline: none;
-  caret-color: $dark-color06;
+  caret-color: variables.$dark-color06;
 
   &::placeholder {
-    font-weight: $font-normal;
-    color: $dark-color03;
+    font-weight: variables.$font-normal;
+    color: variables.$dark-color03;
   }
 
   &:not([readonly]):not([disabled]):hover {
-    border-color: $input-hover-color;
+    border-color: variables.$input-hover-color;
   }
 
   &:not([readonly]):not([disabled]):focus {
-    border-color: $input-focus-color;
+    border-color: variables.$input-focus-color;
   }
 
   &[readonly],
   &[disabled] {
-    background-color: $light-color02;
+    background-color: variables.$light-color02;
   }
 
   &[readonly] {

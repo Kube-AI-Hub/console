@@ -1,36 +1,36 @@
-@import "../../styles/variables";
-@import "../../styles/mixins";
+@use "../../styles/variables";
+@use "../../styles/mixins";
 
 input.input {
-  width: $input-default-width;
+  width: variables.$input-default-width;
   height: 32px;
   padding: 6px 12px;
-  border-radius: $border-radius;
-  border: solid 1px $input-border-color;
-  background-color: $input-bg-color;
+  border-radius: variables.$border-radius;
+  border: solid 1px variables.$input-border-color;
+  background-color: variables.$input-bg-color;
   box-sizing: border-box;
-  @include TypographySymbolText;
-  transition: all $trans-speed ease-in-out;
-  caret-color: $input-caret-color;
+  @include mixins.TypographySymbolText;
+  transition: all variables.$trans-speed ease-in-out;
+  caret-color: variables.$input-caret-color;
   outline: none;
 
   &::placeholder {
-    font-weight: $font-normal;
-    color: $input-placeholder-color;
+    font-weight: variables.$font-normal;
+    color: variables.$input-placeholder-color;
   }
 
   &:not([readonly]):not([disabled]):hover {
-    border-color: $input-hover-color;
+    border-color: variables.$input-hover-color;
   }
 
   &:not([readonly]):not([disabled]):focus {
-    border-color: $input-focus-color;
-    box-shadow: $input-focus-shadow;
+    border-color: variables.$input-focus-color;
+    box-shadow: variables.$input-focus-shadow;
   }
 
   &[readonly],
   &[disabled] {
-    background-color: $input-disabled-color;
+    background-color: variables.$input-disabled-color;
   }
 
   &[readonly] {
@@ -44,7 +44,7 @@ input.input {
 
 .input-password {
   position: relative;
-  width: $input-default-width;
+  width: variables.$input-default-width;
 
   &.has-icons-right {
     .icon.clickable {
@@ -57,7 +57,7 @@ input.input {
 
     .icon.is-right {
       z-index: 5;
-      @include vertical-center;
+      @include mixins.vertical-center;
       right: 12px;
     }
   }
@@ -85,7 +85,7 @@ input.input {
   }
 
   .icon {
-    @include vertical-center;
+    @include mixins.vertical-center;
     z-index: 4;
   }
 
@@ -93,18 +93,18 @@ input.input {
     width: 100%;
     border-radius: 18px;
     border-color: transparent;
-    background-color: $input-search-bg;
+    background-color: variables.$input-search-bg;
     padding: 5px 12px;
 
     &:not([readonly]):not([disabled]):hover {
-      border-color: $input-search-hover-border;
+      border-color: variables.$input-search-hover-border;
     }
 
     &:not([readonly]):not([disabled]):focus,
     &:not([readonly]):not([disabled]):active,
     &:not([readonly]):not([disabled]):visited {
-      background-color: $input-search-hover-bg;
-      border-color: $input-search-hover-border;
+      background-color: variables.$input-search-hover-bg;
+      border-color: variables.$input-search-hover-border;
       box-shadow: none;
     }
   }

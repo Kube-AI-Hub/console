@@ -1,9 +1,9 @@
-@import '../../styles/variables.scss';
-@import '../../styles/mixins';
+@use '../../styles/variables.scss';
+@use '../../styles/mixins';
 
 .select {
   position: relative;
-  width: $input-default-width;
+  width: variables.$input-default-width;
 
   &-control {
     position: relative;
@@ -11,26 +11,26 @@
     width: 100%;
     height: 32px;
     padding: 0 12px;
-    border: 1px solid $input-border-color;
-    border-radius: $border-radius;
-    background-color: $white;
-    transition: border-color $trans-speed ease-in-out;
+    border: 1px solid variables.$input-border-color;
+    border-radius: variables.$border-radius;
+    background-color: variables.$white;
+    transition: border-color variables.$trans-speed ease-in-out;
     box-sizing: border-box;
     cursor: pointer;
 
     &:hover {
-      border-color: $input-hover-color;
+      border-color: variables.$input-hover-color;
     }
 
     &:focus {
-      border-color: $input-focus-color;
-      box-shadow: $input-focus-shadow;
+      border-color: variables.$input-focus-color;
+      box-shadow: variables.$input-focus-shadow;
     }
   }
 
   &.is-open .select-control {
-    border-color: $input-focus-color;
-    box-shadow: $input-focus-shadow;
+    border-color: variables.$input-focus-color;
+    box-shadow: variables.$input-focus-shadow;
   }
 
   &-value-wrapper {
@@ -48,8 +48,8 @@
       display: inline-flex;
       align-items: center;
       max-width: 100%;
-      @include TypographySymbolText;
-      @include ellipsis;
+      @include mixins.TypographySymbolText;
+      @include mixins.ellipsis;
     }
 
     .select-value-opacity {
@@ -81,8 +81,8 @@
       padding: 4px 12px;
       cursor: pointer;
       justify-content: space-between;
-      color: $text-color;
-      background-color: $light-color02;
+      color: variables.$text-color;
+      background-color: variables.$light-color02;
     }
 
     &-prefixIcon {
@@ -108,11 +108,11 @@
       width: 100%;
       background: 0 0;
       cursor: pointer;
-      @include TypographySymbolText;
+      @include mixins.TypographySymbolText;
 
       &::placeholder {
-        font-weight: $font-normal;
-        color: $input-placeholder-color;
+        font-weight: variables.$font-normal;
+        color: variables.$input-placeholder-color;
       }
     }
 
@@ -135,9 +135,9 @@
     max-height: 232px;
     margin-top: 4px;
     padding: 4px 0;
-    border-radius: $border-radius;
-    background-color: $heading-color;
-    box-shadow: 0 4px 8px 0 rgba($dark-color07, 0.16);
+    border-radius: variables.$border-radius;
+    background-color: variables.$heading-color;
+    box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.16);
     box-sizing: border-box;
     overflow-y: auto;
     z-index: 1000;
@@ -145,19 +145,19 @@
     .select-option {
       display: flex;
       padding: 6px 12px;
-      @include TypographyParagraph($white);
-      font-family: $font-family-id;
+      @include mixins.TypographyParagraph(variables.$white);
+      font-family: variables.$font-family-id;
       box-sizing: border-box;
       cursor: pointer;
 
       &-active,
       &:hover {
-        background: $dark-color06;
-        font-weight: $font-bold;
+        background: variables.$dark-color06;
+        font-weight: variables.$font-bold;
       }
 
       &-disabled {
-        color: $dark-color01;
+        color: variables.$dark-color01;
         cursor: not-allowed;
       }
 
@@ -168,11 +168,11 @@
       &-label {
         flex-grow: 1;
         text-align: left;
-        @include ellipsis;
+        @include mixins.ellipsis;
       }
 
       &-icon {
-        color: $text-color;
+        color: variables.$text-color;
         box-sizing: inherit;
         display: inline-flex;
         align-items: center;
@@ -191,7 +191,7 @@
         padding: 0 12px;
         height: 32px;
         line-height: 32px;
-        color: $dark-color01;
+        color: variables.$dark-color01;
         font-size: 12px;
         text-align: left;
       }
@@ -203,7 +203,7 @@
         width: auto;
         margin: 0 10px;
         margin-top: -1px;
-        background-color: $dark-color06;
+        background-color: variables.$dark-color06;
       }
 
       &:last-child::after {
@@ -219,7 +219,7 @@
     &-empty {
       padding: 20px 0;
       text-align: center;
-      color: $white;
+      color: variables.$white;
     }
   }
 
@@ -260,7 +260,7 @@
           display: inline-flex;
           height: 20px;
           padding: 0 4px;
-          background: $heading-color;
+          background: variables.$heading-color;
           border-radius: 2px;
           align-items: center;
           justify-content: center;
@@ -273,7 +273,7 @@
           padding-right: 8px;
           font-weight: normal;
           cursor: default;
-          color: $white;
+          color: variables.$white;
         }
 
         &-icon {
@@ -290,7 +290,7 @@
     .select-control {
       opacity: 0.5;
       cursor: not-allowed;
-      background-color: $input-disabled-color;
+      background-color: variables.$input-disabled-color;
     }
 
     .select-input input {

@@ -1,4 +1,4 @@
-@import '../../styles/variables';
+@use '../../styles/variables';
 
 .flatpickr-calendar {
   position: absolute;
@@ -9,9 +9,9 @@
   border: 0;
   border-radius: 5px;
   background: transparent;
-  background: $white;
-  box-shadow: 1px 0 0 $light-color01, -1px 0 0 $light-color01,
-    0 1px 0 $light-color01, 0 -1px 0 $light-color01,
+  background: variables.$white;
+  box-shadow: 1px 0 0 variables.$light-color01, -1px 0 0 variables.$light-color01,
+    0 1px 0 variables.$light-color01, 0 -1px 0 variables.$light-color01,
     0 3px 13px rgba(0, 0, 0, 0.08);
   opacity: 0;
   visibility: hidden;
@@ -52,7 +52,7 @@
       box-shadow: none !important;
     }
     &:nth-child(n + 2) .flatpickr-day.inRange:nth-child(7n + 1) {
-      box-shadow: -2px 0 0 $light-color01, 5px 0 0 $light-color01;
+      box-shadow: -2px 0 0 variables.$light-color01, 5px 0 0 variables.$light-color01;
     }
   }
   .hasWeeks .dayContainer,
@@ -99,10 +99,10 @@
       bottom: 100%;
     }
     &:before {
-      border-bottom-color: $light-color01;
+      border-bottom-color: variables.$light-color01;
     }
     &:after {
-      border-bottom-color: $white;
+      border-bottom-color: variables.$white;
     }
   }
   &.arrowBottom {
@@ -111,10 +111,10 @@
       top: 100%;
     }
     &:before {
-      border-top-color: $light-color01;
+      border-top-color: variables.$light-color01;
     }
     &:after {
-      border-top-color: $white;
+      border-top-color: variables.$white;
     }
   }
   &:focus {
@@ -406,7 +406,7 @@ span.flatpickr-weekday {
   text-align: left;
   transform: translate3d(0, 0, 0);
   + .dayContainer {
-    box-shadow: -1px 0 0 $light-color01;
+    box-shadow: -1px 0 0 variables.$light-color01;
   }
 }
 
@@ -422,7 +422,7 @@ span.flatpickr-weekday {
   border: 1px solid transparent;
   border-radius: 150px;
   margin: 0;
-  color: $dark-color06;
+  color: variables.$dark-color06;
   background: none;
   font-weight: 400;
   line-height: 39px;
@@ -440,9 +440,9 @@ span.flatpickr-weekday {
   &:focus,
   &.prevMonthDay:focus,
   &.nextMonthDay:focus {
-    border-color: $light-color01;
+    border-color: variables.$light-color01;
     outline: 0;
-    background: $light-color01;
+    background: variables.$light-color01;
     cursor: pointer;
   }
   &.today {
@@ -450,7 +450,7 @@ span.flatpickr-weekday {
     &:hover,
     &:focus {
       border-color: #959ea9;
-      color: $white;
+      color: variables.$white;
       background: #959ea9;
     }
   }
@@ -473,7 +473,7 @@ span.flatpickr-weekday {
   &.startRange.nextMonthDay,
   &.endRange.nextMonthDay {
     border-color: #569ff7;
-    color: $white;
+    color: variables.$white;
     background: #569ff7;
     box-shadow: none;
   }
@@ -498,7 +498,7 @@ span.flatpickr-weekday {
   }
   &.inRange {
     border-radius: 0;
-    box-shadow: -5px 0 0 $light-color01, 5px 0 0 $light-color01;
+    box-shadow: -5px 0 0 variables.$light-color01, 5px 0 0 variables.$light-color01;
   }
   &.disabled {
     border-color: transparent;
@@ -552,7 +552,7 @@ span.flatpickr-weekday {
   display: inline-block;
   .flatpickr-weeks {
     padding: 0 12px;
-    box-shadow: 1px 0 0 $light-color01;
+    box-shadow: 1px 0 0 variables.$light-color01;
   }
   .flatpickr-weekday {
     float: none;
@@ -593,7 +593,7 @@ span.flatpickr-weekday {
   display: flex;
   box-sizing: border-box;
   height: 40px;
-  border-top: 1px solid $light-color01;
+  border-top: 1px solid variables.$light-color01;
   max-height: 40px;
   outline: 0;
   overflow: hidden;
@@ -610,10 +610,10 @@ span.flatpickr-weekday {
     height: 40px;
     span {
       &.arrowUp:after {
-        border-bottom-color: $dark-color06;
+        border-bottom-color: variables.$dark-color06;
       }
       &.arrowDown:after {
-        border-top-color: $dark-color06;
+        border-top-color: variables.$dark-color06;
       }
     }
   }
@@ -631,7 +631,7 @@ span.flatpickr-weekday {
     border: 0;
     border-radius: 0;
     margin: 0;
-    color: $dark-color06;
+    color: variables.$dark-color06;
     background: transparent;
     box-shadow: none;
     font-size: 14px;
@@ -655,7 +655,7 @@ span.flatpickr-weekday {
     align-self: center;
     width: 2%;
     height: inherit;
-    color: $dark-color06;
+    color: variables.$dark-color06;
     font-weight: bold;
     line-height: inherit;
     user-select: none;
@@ -668,7 +668,7 @@ span.flatpickr-weekday {
     width: 18%;
     height: inherit;
     outline: 0;
-    color: $dark-color06;
+    color: variables.$dark-color06;
     font-weight: bold;
     font-weight: 400;
     line-height: inherit;
@@ -689,9 +689,9 @@ span.flatpickr-weekday {
     cursor: pointer;
   }
   &.is-hover {
-    border-color: $input-hover-color;
+    border-color: variables.$input-hover-color;
     &.is-active {
-      border-color: $input-focus-color;
+      border-color: variables.$input-focus-color;
     }
   }
 }

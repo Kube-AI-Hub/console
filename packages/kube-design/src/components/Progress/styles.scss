@@ -1,12 +1,12 @@
-@import "../../styles/variables";
-@import "../../styles/mixins";
+@use "../../styles/variables";
+@use "../../styles/mixins";
 
 .progress {
   display: block;
   position: relative;
   height: 8px;
   border-radius: 5px;
-  background-color: $light-color02;
+  background-color: variables.$light-color02;
   overflow: hidden;
 
   &-bar {
@@ -19,15 +19,15 @@
     z-index: 1;
 
     &-primary {
-      background-color: $primary;
+      background-color: variables.$primary;
     }
 
     &-warning {
-      background-color: $warning;
+      background-color: variables.$warning;
     }
 
     &-danger {
-      background-color: $error;
+      background-color: variables.$error;
     }
   }
 }

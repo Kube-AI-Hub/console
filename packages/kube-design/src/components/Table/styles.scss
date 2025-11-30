@@ -1,27 +1,27 @@
-@import "../../styles/variables";
-@import "../../styles/mixins";
+@use "../../styles/variables";
+@use "../../styles/mixins";
 
 .table table {
   width: 100%;
   text-align: left;
 
   a {
-    color: $dark-color01;
+    color: variables.$dark-color01;
     &:hover {
-      color: $primary;
+      color: variables.$primary;
     }
   }
 
   & > thead {
     & > tr > th {
       padding: 16px 12px;
-      @include TypographySymbolText;
-      color: $dark-color01;
+      @include mixins.TypographySymbolText;
+      color: variables.$dark-color01;
 
       &[colspan] {
         padding: 8px 12px;
         text-align: center;
-        background-color: $secondary-bg-color;
+        background-color: variables.$secondary-bg-color;
       }
 
       .is-trigger {
@@ -38,7 +38,7 @@
       }
 
       .icon > svg {
-        color: $dark-color01;
+        color: variables.$dark-color01;
       }
     }
 
@@ -58,8 +58,8 @@
       & > td {
         height: 56px;
         padding: 8px 12px;
-        border-top: 1px solid $light-color02;
-        @include TypographyParagraph($dark-color07);
+        border-top: 1px solid variables.$light-color02;
+        @include mixins.TypographyParagraph(variables.$dark-color07);
         word-break: break-all;
         box-sizing: border-box;
 
@@ -70,41 +70,41 @@
 
       &:hover {
         & > td {
-          background-color: $bg-color;
+          background-color: variables.$bg-color;
         }
       }
 
       &:last-child {
         & > td {
-          border-bottom: 1px solid $light-color02;
+          border-bottom: 1px solid variables.$light-color02;
         }
 
         &.table-row-selected > td {
-          border-bottom: 1px solid $primary;
+          border-bottom: 1px solid variables.$primary;
         }
       }
 
       &.table-row-selected > td {
-        border-top: 1px solid $primary;
-        background-color: $bg-color;
+        border-top: 1px solid variables.$primary;
+        background-color: variables.$bg-color;
 
         &:first-child {
-          border-left: 1px solid $primary;
+          border-left: 1px solid variables.$primary;
         }
 
         &:last-child {
-          border-right: 1px solid $primary;
+          border-right: 1px solid variables.$primary;
         }
       }
 
       &.table-row-expand > td {
-        background-color: $light-color02;
+        background-color: variables.$light-color02;
       }
     }
 
     .table-row-selected + tr {
       & > td {
-        border-top: 1px solid $primary;
+        border-top: 1px solid variables.$primary;
       }
     }
 
@@ -119,16 +119,16 @@
 .table-title {
   position: relative;
   padding: 10px 20px;
-  background-color: $secondary-bg-color;
-  box-shadow: 0 1px 0 0 $light-color02;
-  border-top-left-radius: $border-radius;
-  border-top-right-radius: $border-radius;
+  background-color: variables.$secondary-bg-color;
+  box-shadow: 0 1px 0 0 variables.$light-color02;
+  border-top-left-radius: variables.$border-radius;
+  border-top-right-radius: variables.$border-radius;
 }
 
 .table-placeholder {
   position: relative;
   padding: 16px;
-  background: $white;
+  background: variables.$white;
   text-align: center;
   z-index: 1;
 }
@@ -136,22 +136,22 @@
 .table-footer {
   position: relative;
   padding: 10px 20px;
-  background-color: $secondary-bg-color;
-  border-bottom-left-radius: $border-radius;
-  border-bottom-right-radius: $border-radius;
-  color: $dark-color01;
+  background-color: variables.$secondary-bg-color;
+  border-bottom-left-radius: variables.$border-radius;
+  border-bottom-right-radius: variables.$border-radius;
+  color: variables.$dark-color01;
 }
 
 .table-has-selected > .table-title {
-  background-color: $heading-color;
+  background-color: variables.$heading-color;
 }
 
 .table.table-multi-heads table > thead > tr {
   & > th {
-    border-right: 1px solid $light-color02;
+    border-right: 1px solid variables.$light-color02;
   }
 
   & + tr > th {
-    border-top: 1px solid $light-color02;
+    border-top: 1px solid variables.$light-color02;
   }
 }

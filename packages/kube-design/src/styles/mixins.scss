@@ -1,5 +1,5 @@
 
-@import './variables';
+@use 'variables';
 
 @mixin ellipsis {
   text-overflow: ellipsis;
@@ -20,59 +20,59 @@
 }
 
 @mixin TypographyTitle {
-  font-family: $font-family-id;
+  font-family: variables.$font-family-id;
   font-style: normal;
   font-stretch: normal;
   letter-spacing: normal;
-  font-weight: $font-bold;
+  font-weight: variables.$font-bold;
 }
 
 @mixin TypographyTitleH1() {
   font-size: 40px;
   line-height: 1.4;
   @include TypographyTitle;
-  color: $heading-color;
+  color: variables.$heading-color;
 }
 
 @mixin TypographyTitleH2() {
   font-size: 32px;
   line-height: 1.38;
   @include TypographyTitle;
-  color: $heading-color;
+  color: variables.$heading-color;
 }
 
 @mixin TypographyTitleH3() {
   font-size: 24px;
   line-height: 1.33;
   @include TypographyTitle;
-  color: $heading-color;
+  color: variables.$heading-color;
 }
 
 @mixin TypographyTitleH4() {
   font-size: 20px;
   line-height: 1.4;
   @include TypographyTitle;
-  color: $heading-color;
+  color: variables.$heading-color;
 }
 
 @mixin TypographyTitleH5() {
   font-size: 14px;
   line-height: 1.43;
   @include TypographyTitle;
-  color: $heading-color;
+  color: variables.$heading-color;
 }
 
 @mixin TypographyTitleH6() {
-  font-size: $size-small;
+  font-size: variables.$size-small;
   line-height: 1.67;
   @include TypographyTitle;
-  color: $heading-color;
+  color: variables.$heading-color;
 }
 
-@mixin TypographySymbolText($color: $text-color) {
-  font-family: $font-family;
-  font-size: $size-small;
-  font-weight: $font-bold;
+@mixin TypographySymbolText($color: variables.$text-color) {
+  font-family: variables.$font-family;
+  font-size: variables.$size-small;
+  font-weight: variables.$font-bold;
   font-style: normal;
   font-stretch: normal;
   line-height: 1.67;
@@ -80,9 +80,9 @@
   color: $color;
 }
 
-@mixin TypographyParagraphCode($color: $paragraph-color) {
+@mixin TypographyParagraphCode($color: variables.$paragraph-color) {
   font-family: Monaco;
-  font-size: $size-small;
+  font-size: variables.$size-small;
   font-weight: normal;
   font-style: normal;
   font-stretch: normal;
@@ -91,9 +91,9 @@
   color: $color;
 }
 
-@mixin TypographyParagraph($color: $paragraph-color) {
-  font-family: $font-family;
-  font-size: $size-small;
+@mixin TypographyParagraph($color: variables.$paragraph-color) {
+  font-family: variables.$font-family;
+  font-size: variables.$size-small;
   font-weight: normal;
   font-style: normal;
   font-stretch: normal;

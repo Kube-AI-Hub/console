@@ -1,5 +1,5 @@
-@import "../../styles/variables";
-@import "../../styles/mixins";
+@use "../../styles/variables";
+@use "../../styles/mixins";
 
 .tabs-container {
   display: flex;
@@ -9,11 +9,11 @@
     position: relative;
 
     & > ul {
-      background-color: $bg-color;
+      background-color: variables.$bg-color;
 
       & > li {
         display: inline-block;
-        @include TypographySymbolText;
+        @include mixins.TypographySymbolText;
         padding: 12px;
         min-width: 120px;
 
@@ -23,17 +23,17 @@
         &:hover,
         &:active,
         &.is-active {
-          color: $primary;
+          color: variables.$primary;
         }
 
         &:active,
         &.is-active {
-          background-color: $white;
+          background-color: variables.$white;
         }
 
         &.is-disabled {
           opacity: 0.5;
-          color: $text-color;
+          color: variables.$text-color;
           cursor: not-allowed;
         }
       }
@@ -43,27 +43,27 @@
       & > ul {
         display: inline-block;
         padding: 1px;
-        border: 1px solid $border-color;
+        border: 1px solid variables.$border-color;
         border-radius: 16px;
-        background-color: $secondary-bg-color;
+        background-color: variables.$secondary-bg-color;
 
         & > li {
           padding: 4px 12px;
           border-radius: 14px;
 
           &:hover {
-            color: $text-color;
+            color: variables.$text-color;
           }
 
           &:active {
-            background-color: $text-color;
-            color: $white;
+            background-color: variables.$text-color;
+            color: variables.$white;
           }
 
           &.is-active {
-            background-color: $text-color;
-            border-color: $white;
-            color: $white;
+            background-color: variables.$text-color;
+            border-color: variables.$white;
+            color: variables.$white;
           }
         }
       }
@@ -85,19 +85,19 @@
 
 .tabs-container-vertical {
   flex-direction: row;
-  border: 1px solid $border-color;
+  border: 1px solid variables.$border-color;
 
   .tabs {
     min-width: 128px;
 
     & > ul {
       height: 100%;
-      border-right: 1px solid $border-color;
+      border-right: 1px solid variables.$border-color;
 
       & > li {
         display: block;
         padding: 12px;
-        border-bottom: 1px solid $border-color;
+        border-bottom: 1px solid variables.$border-color;
       }
     }
   }

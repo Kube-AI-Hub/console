@@ -1,41 +1,41 @@
-@import "../../styles/variables";
-@import "../../styles/mixins";
+@use "../../styles/variables";
+@use "../../styles/mixins";
 
 .menu {
   margin: 0;
-  padding: $menu-padder;
-  min-width: $menu-min-width;
-  border-radius: $border-radius;
-  background-color: $menu-bg;
+  padding: variables.$menu-padder;
+  min-width: variables.$menu-min-width;
+  border-radius: variables.$border-radius;
+  background-color: variables.$menu-bg;
   list-style: none;
   box-sizing: border-box;
-  z-index: $menu-z-index;
+  z-index: variables.$menu-z-index;
 
   &-label {
-    padding: $menu-item-padder;
+    padding: variables.$menu-item-padder;
   }
 
   &-item {
     position: relative;
     display: flex;
     align-items: center;
-    padding: $menu-item-padder;
-    border-radius: $border-radius;
-    font-weight: $font-bold;
-    color: $menu-item-color;
+    padding: variables.$menu-item-padder;
+    border-radius: variables.$border-radius;
+    font-weight: variables.$font-bold;
+    color: variables.$menu-item-color;
     line-height: 20px;
     cursor: pointer;
 
     &:hover {
-      background-color: $menu-item-hover-bg;
+      background-color: variables.$menu-item-hover-bg;
     }
 
     &-selected {
-      background-color: $menu-item-selected-bg;
+      background-color: variables.$menu-item-selected-bg;
     }
 
     &:active {
-      background-color: $menu-item-active-bg;
+      background-color: variables.$menu-item-active-bg;
     }
 
     &-disabled {
@@ -45,13 +45,13 @@
 
     & > a {
       flex: 1;
-      padding: 0 $base-margin;
-      margin: 0 -$base-margin;
+      padding: 0 variables.$base-margin;
+      margin: 0 - variables.$base-margin;
       line-height: 32px;
     }
   }
 
   .icon {
-    margin-right: $base-margin;
+    margin-right: variables.$base-margin;
   }
 }

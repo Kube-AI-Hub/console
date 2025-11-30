@@ -1,5 +1,5 @@
-@import "../../styles/variables";
-@import "../../styles/mixins";
+@use "../../styles/variables";
+@use "../../styles/mixins";
 
 .alert {
   display: flex;
@@ -11,40 +11,40 @@
   }
 
   &-info {
-    background-color: $alert-info-background;
+    background-color: variables.$alert-info-background;
 
     .alert-content {
-      color: $alert-info-text-color;
+      color: variables.$alert-info-text-color;
     }
   }
 
   &-error {
-    background-color: $alert-error-background;
+    background-color: variables.$alert-error-background;
 
     .alert-content {
-      color: $alert-error-text-color;
+      color: variables.$alert-error-text-color;
     }
   }
 
   &-warning {
-    background-color: $alert-warning-background;
+    background-color: variables.$alert-warning-background;
 
     .alert-content {
-      color: $alert-warning-text-color;
+      color: variables.$alert-warning-text-color;
     }
   }
 
   &-default {
-    background-color: $alert-default-background;
+    background-color: variables.$alert-default-background;
 
     .alert-content {
-      color: $alert-default-text-color;
+      color: variables.$alert-default-text-color;
     }
   }
 }
 
 .alert-content {
-  @include TypographyParagraph;
+  @include mixins.TypographyParagraph;
 }
 
 .alert-title {

@@ -1,5 +1,5 @@
-@import "../../styles/variables";
-@import "../../styles/mixins";
+@use "../../styles/variables";
+@use "../../styles/mixins";
 
 .notify-wrapper {
   .notify {
@@ -11,84 +11,84 @@
     z-index: 2010;
     pointer-events: none;
     .notice {
-      box-shadow: $notify-shadow;
-      width: $notify-width;
+      box-shadow: variables.$notify-shadow;
+      width: variables.$notify-width;
       position: relative;
-      border-radius: $border-radius;
-      border: solid 1px $notify-default-color;
-      background-color: $notify-default-color;
+      border-radius: variables.$border-radius;
+      border: solid 1px variables.$notify-default-color;
+      background-color: variables.$notify-default-color;
       margin: 10px 0 20px;
-      color: $notify-default-text;
+      color: variables.$notify-default-text;
       pointer-events: auto;
 
       &-error {
-        border-color: $notify-error-color;
+        border-color: variables.$notify-error-color;
 
         .notify-icon {
-          background-color: $notify-error-color;
+          background-color: variables.$notify-error-color;
         }
 
         .notify-title {
-          color: $notify-error-text;
+          color: variables.$notify-error-text;
         }
 
         .notice-close {
           .kubed-icon {
-            color: $notify-error-text;
+            color: variables.$notify-error-text;
           }
         }
       }
 
       &-warning {
-        border-color: $notify-warning-color;
+        border-color: variables.$notify-warning-color;
 
         .notify-icon {
-          background-color: $notify-warning-color;
+          background-color: variables.$notify-warning-color;
         }
 
         .notify-title {
-          color: $notify-warning-text;
+          color: variables.$notify-warning-text;
         }
 
         .notice-close {
           .kubed-icon {
-            color: $notify-warning-text;
+            color: variables.$notify-warning-text;
           }
         }
       }
 
       &-success {
-        border-color: $notify-success-color;
+        border-color: variables.$notify-success-color;
 
         .notify-icon {
-          background-color: $notify-success-color;
+          background-color: variables.$notify-success-color;
         }
 
         .notify-title {
-          color: $notify-success-text;
+          color: variables.$notify-success-text;
         }
 
         .notice-close {
           .kubed-icon {
-            color: $notify-success-text;
+            color: variables.$notify-success-text;
           }
         }
       }
 
       &-info {
-        border-color: $notify-info-color;
+        border-color: variables.$notify-info-color;
 
         .notify-icon {
-          background-color: $notify-info-color;
+          background-color: variables.$notify-info-color;
         }
 
         .notify-title {
-          color: $notify-info-text;
+          color: variables.$notify-info-text;
         }
 
         .notice-close {
           .kubed-icon {
-            color: $notify-info-text;
+            color: variables.$notify-info-text;
           }
         }
       }
@@ -121,11 +121,11 @@
     }
 
     .notify-content {
-      font-family: $font-family-id;
-      font-weight: $font-bold;
+      font-family: variables.$font-family-id;
+      font-weight: variables.$font-bold;
       line-height: 20px;
-      color: $notify-default-text;
-      @include break-all;
+      color: variables.$notify-default-text;
+      @include mixins.break-all;
     }
   }
 

@@ -1,13 +1,13 @@
-@import "../../styles/variables";
-@import "../../styles/mixins";
+@use "../../styles/variables";
+@use "../../styles/mixins";
 
 $line-height: 20px;
-$checkbox-inner-width: $checkbox-size - 2px;
+$checkbox-inner-width: variables.$checkbox-size - 2px;
 
-$checkbox-after-width: $checkbox-inner-width / 4;
+$checkbox-after-width: $checkbox-inner-width * 0.25;
 $checkbox-after-height: $checkbox-inner-width - $checkbox-after-width - 2px;
-$checkbox-after-top: ($line-height - 4px - $checkbox-after-height) / 2;
-$checkbox-after-left: ($checkbox-inner-width - $checkbox-after-width) / 2;
+$checkbox-after-top: ($line-height - 4px - $checkbox-after-height) * 0.5;
+$checkbox-after-left: ($checkbox-inner-width - $checkbox-after-width) * 0.5;
 
 label.checkbox {
   display: inline-block;
@@ -16,17 +16,17 @@ label.checkbox {
   &:not(.disabled) {
     &:hover {
       &:before {
-        background-color: $bg-color;
+        background-color: variables.$bg-color;
       }
     }
     &:active {
       &:before {
-        background-color: $bg-color;
+        background-color: variables.$bg-color;
       }
       &.checked:before,
       &.indeterminate:before {
         border-color: transparent;
-        background-color: $primary;
+        background-color: variables.$primary;
       }
     }
   }
@@ -34,12 +34,12 @@ label.checkbox {
     position: absolute;
     top: 50%;
     display: inline-block;
-    width: $checkbox-size;
-    height: $checkbox-size;
-    border: 1px solid $border-color;
+    width: variables.$checkbox-size;
+    height: variables.$checkbox-size;
+    border: 1px solid variables.$border-color;
     border-radius: 2px;
     outline: none !important;
-    background-color: $white;
+    background-color: variables.$white;
     transition: border 0.2s ease;
     transform: translateY(-50%);
     box-sizing: border-box;
@@ -49,7 +49,7 @@ label.checkbox {
   &.checked:before,
   &.checked:hover:before {
     border-color: transparent;
-    background-color: $primary;
+    background-color: variables.$primary;
   }
   &.checked:after {
     position: absolute;
@@ -60,7 +60,7 @@ label.checkbox {
     height: $checkbox-after-height;
     border-width: 0 1.6px 1.6px 0;
     border-style: solid;
-    border-color: $white;
+    border-color: variables.$white;
     transform: rotate(45deg);
     backface-visibility: hidden;
     box-sizing: content-box;
@@ -77,7 +77,7 @@ label.checkbox {
     &:before,
     &:hover:before {
       border-color: transparent;
-      background-color: $primary;
+      background-color: variables.$primary;
     }
     &:after {
       position: absolute;
@@ -86,7 +86,7 @@ label.checkbox {
       display: block;
       width: 4px;
       height: 8px;
-      border: solid $white;
+      border: solid variables.$white;
       border-width: 0 2px 0 0;
       transform: rotate(90deg);
       box-sizing: content-box;
@@ -97,7 +97,7 @@ label.checkbox {
   & span.label-value {
     display: inline-block;
     vertical-align: middle;
-    @include TypographyParagraph;
+    @include mixins.TypographyParagraph;
     padding: 0 8px;
     user-select: none;
   }
@@ -106,8 +106,8 @@ label.checkbox {
 label.checkbox input[type="checkbox"] {
   display: inline-block;
   vertical-align: middle;
-  width: $checkbox-size;
-  height: $checkbox-size;
+  width: variables.$checkbox-size;
+  height: variables.$checkbox-size;
   margin: 0;
   opacity: 0;
   outline: none !important;
@@ -122,7 +122,7 @@ label.checkbox input[type="checkbox"] {
   flex-direction: column;
   label.checkbox {
     width: 100%;
-    margin-bottom: $base-margin;
+    margin-bottom: variables.$base-margin;
     &:last-child {
       margin-bottom: 0;
     }

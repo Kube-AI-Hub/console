@@ -1,5 +1,5 @@
-@import "../../styles/variables";
-@import "../../styles/mixins";
+@use "../../styles/variables";
+@use "../../styles/mixins";
 
 .button {
   position: relative;
@@ -8,8 +8,8 @@
   border-radius: 100px;
   box-sizing: border-box;
   cursor: pointer;
-  transition: all $trans-speed ease-in-out;
-  @include TypographySymbolText;
+  transition: all variables.$trans-speed ease-in-out;
+  @include mixins.TypographySymbolText;
 
   &-content {
     height: 20px;
@@ -73,52 +73,52 @@
 }
 
 .button-default {
-  border: 1px solid $btn-default-border;
-  background-color: $btn-default-bg;
-  box-shadow: $btn-default-shadow;
+  border: 1px solid variables.$btn-default-border;
+  background-color: variables.$btn-default-bg;
+  box-shadow: variables.$btn-default-shadow;
 
   &:hover {
-    background-color: $btn-default-hover-bg;
-    border-color: $btn-default-hover-border;
+    background-color: variables.$btn-default-hover-bg;
+    border-color: variables.$btn-default-hover-border;
   }
 
   &:active {
-    background-color: $btn-default-active-bg;
-    border-color: $btn-default-active-border;
-    box-shadow: $btn-default-active-shadow;
+    background-color: variables.$btn-default-active-bg;
+    border-color: variables.$btn-default-active-border;
+    box-shadow: variables.$btn-default-active-shadow;
   }
 }
 
 .button-primary {
-  color: $btn-primary-text-color;
-  border: 1px solid $btn-primary-bg;
-  background-color: $btn-primary-bg;
-  box-shadow: $btn-primary-shadow;
+  color: variables.$btn-primary-text-color;
+  border: 1px solid variables.$btn-primary-bg;
+  background-color: variables.$btn-primary-bg;
+  box-shadow: variables.$btn-primary-shadow;
 
   &:active {
-    box-shadow: $btn-primary-active-shadow;
+    box-shadow: variables.$btn-primary-active-shadow;
   }
 }
 
 .button-control {
-  color: $btn-control-text-color;
-  border: 1px solid $btn-control-bg;
-  background-color: $btn-control-bg;
-  box-shadow: $btn-control-shadow;
+  color: variables.$btn-control-text-color;
+  border: 1px solid variables.$btn-control-bg;
+  background-color: variables.$btn-control-bg;
+  box-shadow: variables.$btn-control-shadow;
 
   &:active {
-    box-shadow: $btn-control-active-shadow;
+    box-shadow: variables.$btn-control-active-shadow;
   }
 }
 
 .button-danger {
-  color: $btn-danger-text-color;
-  border: 1px solid $btn-danger-bg;
-  background-color: $btn-danger-bg;
-  box-shadow: $btn-danger-shadow;
+  color: variables.$btn-danger-text-color;
+  border: 1px solid variables.$btn-danger-bg;
+  background-color: variables.$btn-danger-bg;
+  box-shadow: variables.$btn-danger-shadow;
 
   &:active {
-    box-shadow: $btn-danger-active-shadow;
+    box-shadow: variables.$btn-danger-active-shadow;
   }
 }
 
@@ -127,11 +127,11 @@
   background-color: transparent;
 
   &:hover {
-    background-color: $btn-flat-hover-bg;
+    background-color: variables.$btn-flat-hover-bg;
   }
 
   &:active {
-    background-color: $btn-flat-active-bg;
+    background-color: variables.$btn-flat-active-bg;
   }
 }
 

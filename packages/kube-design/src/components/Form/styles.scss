@@ -1,14 +1,14 @@
-@import "../../styles/variables";
-@import "../../styles/mixins";
+@use "../../styles/variables";
+@use "../../styles/mixins";
 
 .form-item {
   &-desc {
     margin-top: 4px;
-    @include TypographyParagraph;
-    color: $form-item-desc-color;
+    @include mixins.TypographyParagraph;
+    color: variables.$form-item-desc-color;
 
     a {
-      color: $primary;
+      color: variables.$primary;
     }
   }
 
@@ -19,20 +19,20 @@
   &-label {
     display: block;
     margin-bottom: 4px;
-    @include TypographyParagraph;
-    color: $form-item-label-color;
+    @include mixins.TypographyParagraph;
+    color: variables.$form-item-label-color;
   }
 
   &-error {
     margin-top: 4px;
-    @include TypographyParagraph;
-    color: $form-item-error-color;
+    @include mixins.TypographyParagraph;
+    color: variables.$form-item-error-color;
   }
 
   &-required {
     margin: 0 6px;
-    @include TypographyParagraph;
-    color: $form-item-required-color;
+    @include mixins.TypographyParagraph;
+    color: variables.$form-item-required-color;
   }
 
   .input,
@@ -46,11 +46,11 @@
     .input,
     .textarea,
     .select-control {
-      border: solid 1px $input-error-color !important;
+      border: solid 1px variables.$input-error-color !important;
       &:focus,
       &:hover {
-        border: solid 1px $input-error-color !important;
-        box-shadow: 0 4px 8px 0 rgba($red-color03, 0.2) !important;
+        border: solid 1px variables.$input-error-color !important;
+        box-shadow: 0 4px 8px 0 rgba(variables.$red-color03, 0.2) !important;
       }
     }
   }
@@ -64,17 +64,17 @@
 .form-group {
   margin-bottom: 12px;
   padding: 11px 16px;
-  border-radius: $border-radius;
-  border: solid 1px $border-color;
+  border-radius: variables.$border-radius;
+  border: solid 1px variables.$border-color;
 
   &-title {
-    font-weight: $font-bold;
-    color: $form-item-label-color;
+    font-weight: variables.$font-bold;
+    color: variables.$form-item-label-color;
 
     label.checkbox span.label-value {
-      font-weight: $font-bold;
+      font-weight: variables.$font-bold;
       padding-left: 11px;
-      color: $form-item-label-color;
+      color: variables.$form-item-label-color;
     }
 
     &-toggle {
@@ -87,15 +87,15 @@
   }
 
   &-desc {
-    @include TypographyParagraph($form-item-desc-color);
+    @include mixins.TypographyParagraph(variables.$form-item-desc-color);
   }
 
   &-content {
-    padding: $base-margin;
+    padding: variables.$base-margin;
     margin: 0 -8px;
-    margin-top: $base-margin;
-    border-radius: $border-radius;
-    background-color: $form-group-content-bg;
+    margin-top: variables.$base-margin;
+    border-radius: variables.$border-radius;
+    background-color: variables.$form-group-content-bg;
   }
 
   &-hide {

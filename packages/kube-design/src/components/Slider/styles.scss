@@ -1,5 +1,5 @@
-@import '../../styles/variables';
-@import '../../styles/mixins';
+@use '../../styles/variables';
+@use '../../styles/mixins';
 
 .slider-wrapper {
   display: flex;
@@ -22,7 +22,7 @@
   &-rail {
     height: 10px;
     border-radius: 5px;
-    background-color: $bg-color;
+    background-color: variables.$bg-color;
   }
 
   &-track {
@@ -30,7 +30,7 @@
     top: 5px;
     height: 10px;
     border-radius: 5px;
-    background-color: $primary;
+    background-color: variables.$primary;
   }
 
   &-handler {
@@ -39,10 +39,10 @@
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    border: 1px solid $primary;
-    background-color: $white;
-    box-shadow: 0 4px 8px 0 rgba($green-color03, 0.36);
-    transition: box-shadow $trans-speed ease-in-out;
+    border: 1px solid variables.$primary;
+    background-color: variables.$white;
+    box-shadow: 0 4px 8px 0 rgba(variables.$green-color03, 0.36);
+    transition: box-shadow variables.$trans-speed ease-in-out;
     cursor: pointer;
     outline: none;
     user-select: none;
@@ -60,8 +60,8 @@
       width: 14px;
       height: 14px;
       border-radius: 50%;
-      background-color: $primary;
-      transition: transform $trans-speed ease-in-out;
+      background-color: variables.$primary;
+      transition: transform variables.$trans-speed ease-in-out;
     }
 
     &:hover,
@@ -82,7 +82,7 @@
     & > span {
       position: absolute;
       top: 0;
-      @include TypographyParagraph;
+      @include mixins.TypographyParagraph;
       user-select: none;
       white-space: nowrap;
       transform: translateX(-50%);
