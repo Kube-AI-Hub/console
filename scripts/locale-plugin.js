@@ -17,43 +17,54 @@ const isDev = process.env.NODE_ENV === 'development'
 
 class LocalePlugin {
   apply(compiler) {
-    compiler.hooks.emit.tap('LocalePlugin', compilation => {
-      const assets = compilation.getAssets()
-      assets.forEach(asset => {
-        // skip manifest.json
-        if (asset.name.includes('manifest')) {
-          return
-        }
-        logger.default.info(`building ${asset.name}`)
-        let content = asset.source.source()
-        try {
-          const obj = eval(`var global = {};${content}; global.locale`)
-          if (obj.default) {
-            content = JSON.stringify(
-              obj.default.reduce((prev, cur) => ({ ...prev, ...cur }), {})
-            )
-          }
-          if (isDev) {
-            if (!fs.existsSync(compiler.outputPath)) {
-              fs.mkdirSync(compiler.outputPath)
+    compiler.hooks.thisCompilation.tap('LocalePlugin', compilation => {
+      compilation.hooks.processAssets.tap(
+        {
+          name: 'LocalePlugin',
+          stage: compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE,
+        },
+        assets => {
+          Object.keys(assets).forEach(assetName => {
+            // skip manifest.json
+            if (assetName.includes('manifest')) {
+              return
             }
-            fs.writeFileSync(
-              path.join(compiler.outputPath, asset.name),
-              content
-            )
-          }
-        } catch (error) {
-          logger.default.error(`${asset.name} build error`, error)
+            logger.default.info(`building ${assetName}`)
+            const asset = compilation.getAsset(assetName)
+            if (!asset) {
+              return
+            }
+            let content = asset.source.source()
+            try {
+              const obj = eval(`var global = {};${content}; global.locale`)
+              if (obj.default) {
+                content = JSON.stringify(
+                  obj.default.reduce((prev, cur) => ({ ...prev, ...cur }), {})
+                )
+              }
+              if (isDev) {
+                if (!fs.existsSync(compiler.outputPath)) {
+                  fs.mkdirSync(compiler.outputPath, { recursive: true })
+                }
+                fs.writeFileSync(
+                  path.join(compiler.outputPath, assetName),
+                  content
+                )
+              }
+            } catch (error) {
+              logger.default.error(`${assetName} build error`, error)
+            }
+
+            compilation.updateAsset(assetName, new RawSource(content))
+          })
+
+          langArr.forEach(lang => {
+            only(lang)
+          })
+
+          isExistFilesInEN()
         }
-
-        compilation.updateAsset(asset.name, new RawSource(content))
-      })
-
-      langArr.forEach(lang => {
-        only(lang)
-      })
-
-      isExistFilesInEN()
+      )
     })
   }
 }
