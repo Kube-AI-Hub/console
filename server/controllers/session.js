@@ -81,7 +81,7 @@ const handleLogin = async ctx => {
           Object.assign(error, {
             status: err.code,
             reason: 'Unauthorized',
-            message: 'INCORRECT_USERNAME_OR_PASSWORD',
+            message: err.error == 'invalid_grant' ? 'INCORRECT_USERNAME_OR_PASSWORD' : err.error_description,
           })
           break
         case 429:
