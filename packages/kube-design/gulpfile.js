@@ -36,10 +36,9 @@ function buildStyles() {
     .src(paths.styles)
     .pipe(
       sass({
-        includePaths: [
+        loadPaths: [
           "node_modules",
           path.resolve(__dirname, "../../node_modules"),
-          path.resolve(__dirname, "../../../node_modules"),
         ],
       })
     )
