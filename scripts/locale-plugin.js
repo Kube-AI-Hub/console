@@ -3,7 +3,7 @@ const fs = require('fs')
 const path = require('path')
 const RawSource = require('webpack-sources/lib/RawSource')
 
-const EXCLUDE_NAMES = ['scripts', 'node_modules', 'dist', 'en']
+const EXCLUDE_NAMES = ['scripts', 'node_modules', 'dist', 'en', '.DS_Store']
 
 const langArr = fs
   .readdirSync(`./locales/`)

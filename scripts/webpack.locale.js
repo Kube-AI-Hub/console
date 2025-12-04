@@ -24,7 +24,15 @@ const root = path => resolve(__dirname, `../${path}`)
 
 const isDev = process.env.NODE_ENV === 'development'
 
-const langs = fs.readdirSync(root('locales'))
+const EXCLUDE_NAMES = ['scripts', 'node_modules', 'dist', '.DS_Store']
+
+const langs = fs
+  .readdirSync(root('locales'))
+  .filter(
+    lang =>
+      !EXCLUDE_NAMES.includes(lang) &&
+      fs.statSync(root(`locales/${lang}`)).isDirectory()
+  )
 const entries = langs.reduce(
   (prev, cur) => ({
     ...prev,
