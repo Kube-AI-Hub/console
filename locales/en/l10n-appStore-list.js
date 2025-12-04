@@ -19,6 +19,7 @@
 module.exports = {
   // Head
   APP_STORE: 'App Store',
+  LARGE_MODEL: 'Large Model',
   HOME_APP_STORE_DESC: 'The official App Store of KubeSphere provides deployment and management features that allow users to quickly deploy apps with one click based on app templates.',
   // Discover
   DISCOVER: 'Discover',

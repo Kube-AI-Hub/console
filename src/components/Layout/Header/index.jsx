@@ -50,6 +50,10 @@ class Header extends React.Component {
     this.props.jumpTo(key)
   }
 
+  handleExternalLinkClick = url => () => {
+    window.open(url, '_blank')
+  }
+
   renderDocumentList() {
     const { url, api } = getWebsiteUrl()
     return (
@@ -126,6 +130,13 @@ class Header extends React.Component {
                 {t('APP_STORE')}
               </Button>
             )}
+            <Button
+              type="flat"
+              icon="ai"
+              onClick={this.handleExternalLinkClick('/platform-model/')}
+            >
+              {t('LARGE_MODEL')}
+            </Button>
             <Button
               type="flat"
               icon="dashboard"
