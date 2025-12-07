@@ -69,10 +69,12 @@ export default class ProbeCard extends React.Component {
     } else if ('tcpSocket' in probe) {
       probeType = 'TCP_PORT'
       details = [{ title: probe.tcpSocket.port, description: t('PORT') }]
-    } else {
+    } else if ('exec' in probe && probe.exec) {
       const { command = [] } = probe.exec
       probeType = 'COMMAND'
       details = [{ title: command.join(' '), description: t('COMMANDS') }]
+    } else {
+      return null
     }
 
     const titleElm = (
