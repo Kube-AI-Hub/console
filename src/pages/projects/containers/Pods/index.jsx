@@ -48,14 +48,13 @@ class Pods extends React.Component {
     const { getData, trigger, name } = this.props
     return [
       {
-        key: 'viewYaml',
-        icon: 'eye',
-        text: t('VIEW_YAML'),
-        action: 'view',
+        key: 'editYaml',
+        icon: 'pen',
+        text: t('EDIT_YAML'),
+        action: 'edit',
         onClick: item =>
           trigger('resource.yaml.edit', {
             detail: item,
-            readOnly: true,
           }),
       },
       {

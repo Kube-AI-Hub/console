@@ -77,14 +77,13 @@ export default class PodDetail extends React.Component {
 
   getOperations = () => [
     {
-      key: 'viewYaml',
-      icon: 'eye',
-      text: t('VIEW_YAML'),
-      action: 'view',
+      key: 'editYaml',
+      icon: 'pen',
+      text: t('EDIT_YAML'),
+      action: 'edit',
       onClick: () =>
         this.trigger('resource.yaml.edit', {
           detail: this.store.detail,
-          readOnly: true,
         }),
     },
     {
