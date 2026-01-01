@@ -26,6 +26,9 @@ const { getServerConfig, root } = require('../libs/utils')
 
 const serverConfig = getServerConfig().server
 
+// Latest version for kube-docs redirect
+const KUBE_DOCS_LATEST_VERSION = 'v3.4'
+
 module.exports = function(app) {
   // compress middleware
   app.use(
@@ -35,10 +38,30 @@ module.exports = function(app) {
     })
   )
 
+  // Redirect version-less /kube-docs/*/docs/* paths to latest version
+  // e.g., /kube-docs/zh/docs/foo/ -> /kube-docs/zh/docs/v3.4/foo/
+  app.use(async (ctx, next) => {
+    const url = ctx.url
+    // Match /kube-docs/(zh|en)/docs/[path] where path doesn't start with v[0-9]
+    const match = url.match(/^\/kube-docs\/(zh|en)\/docs\/(?!v\d)(.*)$/)
+    if (match) {
+      const lang = match[1]
+      const pathAfterDocs = match[2] || ''
+      const redirectUrl = `/kube-docs/${lang}/docs/${KUBE_DOCS_LATEST_VERSION}/${pathAfterDocs}`
+      ctx.redirect(redirectUrl)
+      return
+    }
+    await next()
+  })
+
   // serve static files
   const httpStatic = serverConfig.http.static[process.env.NODE_ENV]
   for (const [k, v] of Object.entries(httpStatic)) {
-    app.use(mount(k, serve(root(v), { index: false, maxage: 604800000 })))
+    // Enable index.html serving for kube-docs (Hugo site)
+    const staticOptions = k === '/kube-docs' 
+      ? { index: 'index.html', maxage: 604800000 }
+      : { index: false, maxage: 604800000 }
+    app.use(mount(k, serve(root(v), staticOptions)))
   }
 
   if (global.MODE_DEV) {

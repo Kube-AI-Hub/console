@@ -4,7 +4,7 @@
   "license": "Apache-2.0",
   "description": "Kube AI Hub documentation website",
   "scripts": {
-    "build": "hugo build && npx pagefind --site public",
+    "build": "hugo build --baseURL ${HUGO_BASEURL:-/kube-docs/} && npx pagefind --site public",
     "dev": "rm -rf public/ resources/ && hugo --baseURL 'http://localhost:1313/kube-docs/' && npx pagefind --site public && cp -r public/pagefind static/ && hugo server -D",
     "preview": "hugo && npx pagefind --site public --serve"
   },

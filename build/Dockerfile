@@ -3,23 +3,15 @@
 # that can be found in the LICENSE file.
 
 # Prepare the build environment
-FROM node:22-alpine as builder
-
-ARG YARN_VERSION=1.22.22
-
-WORKDIR /kubesphere
-ADD . /kubesphere/
+FROM node:22-alpine AS builder
 
 # APK acceleration for China
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 
 RUN apk add --no-cache --virtual python2
-RUN apk add --no-cache --virtual .build-deps ca-certificates python3 py3-pip make openssl g++ bash
+RUN apk add --no-cache --virtual .build-deps ca-certificates python3 py3-pip make openssl g++ bash hugo asciidoctor
 
-# China mirror source
-RUN npm config -g set registry https://r.cnpmjs.org/
-
-RUN npm install yarn@${YARN_VERSION}
+WORKDIR /kubesphere
 
 # Install dependencies to reduce build time
 ADD package.json /kubesphere/package.json
@@ -30,7 +22,7 @@ ADD . /kubesphere/
 # If you have trouble downloading the yarn binary, try the following:
 # RUN yarn config set registry https://registry.npmmirror.com or https://r.cnpmjs.org/
 
-RUN yarn && yarn build
+RUN yarn && yarn storybook:build && yarn install && yarn build
 
 # Copy compiled files
 RUN mkdir -p /out/server
@@ -46,7 +38,7 @@ RUN mv /kubesphere/package.json /out/
 ##############
 # Final Image
 ##############
-FROM node:22-alpine as base_os_context
+FROM node:22-alpine AS base_os_context
 
 RUN adduser -D -g kubesphere -u 1002 kubesphere && \
     mkdir -p /opt/kubesphere/console && \

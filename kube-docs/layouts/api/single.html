@@ -8,7 +8,8 @@
   <meta name="description" content="{{ with .Params.Description }}{{ . }}{{ else }}{{ with .Site.Params.description }}{{ . }}{{ end }}{{ end }}">
   <meta name="keywords" content="{{ with .Params.Keywords }}{{ range $i, $e := . }}{{ if $i }} {{ end }}{{ $e }}{{ end }}{{ else }}{{ with .Site.Params.keywords }}{{ . }}{{ end }}{{ end }}">
 
-  <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700|Roboto:300,400,700" rel="stylesheet">
+  <link href="{{ $basePath }}/fonts/Montserrat/stylesheet.css" rel="stylesheet">
+  <link href="{{ $basePath }}/fonts/Roboto/stylesheet.css" rel="stylesheet">
   <style>
     body {
       margin: 0;
