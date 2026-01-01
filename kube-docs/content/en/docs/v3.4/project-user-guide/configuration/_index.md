@@ -2,6 +2,6 @@
 linkTitle: "Configuration"
 weight: 10400
 
-_build:
+build:
     render: false
 ---

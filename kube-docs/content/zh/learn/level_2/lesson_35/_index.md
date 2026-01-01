@@ -2,7 +2,7 @@
 linkTitle: Kubernetes 核心实战-Ingress 限流
 weight: 35
 
-_build:
+build:
   render: false
 
 profit: 了解 Ingress 的流量限制

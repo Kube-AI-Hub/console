@@ -2,7 +2,7 @@
 linkTitle: Kubernetes 核心实战-Deployment 版本回退
 weight: 27
 
-_build:
+build:
   render: false
 
 profit: 了解 Deployment 的版本回退功能

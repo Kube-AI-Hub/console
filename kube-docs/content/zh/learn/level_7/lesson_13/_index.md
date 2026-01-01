@@ -2,7 +2,7 @@
 linkTitle: Kubernetes Federation 介绍
 weight: 13
 
-_build:
+build:
     render: false
 
 profit: 了解 Kubernetes Federation 的架构和原理

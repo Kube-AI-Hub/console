@@ -2,6 +2,6 @@
 linkTitle: "Applications"
 weight: 10100
 
-_build:
+build:
     render: false
 ---

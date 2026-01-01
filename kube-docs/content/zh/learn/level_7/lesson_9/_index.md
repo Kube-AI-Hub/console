@@ -2,7 +2,7 @@
 linkTitle: 如何开发一个 Helm 应用
 weight: 9
 
-_build:
+build:
     render: false
 
 profit: 了解 Helm 应用开发规范

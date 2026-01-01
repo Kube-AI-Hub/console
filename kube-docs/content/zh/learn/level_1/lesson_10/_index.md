@@ -2,7 +2,7 @@
 linkTitle: Docker 安装
 weight: 10
 
-_build:
+build:
     render: false
 
 profit: 了解如何在 Linux 中安装 Docker

@@ -2,7 +2,7 @@
 linkTitle: Kubernetes 集群搭建-安装集群三大件
 weight: 9
 
-_build:
+build:
   render: false
 
 profit: 安装kubelet、kubeadm、kubectl

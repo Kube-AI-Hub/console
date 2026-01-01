@@ -2,7 +2,7 @@
 linkTitle: Argo CD-GitHub 实现自动化部署
 weight: 17
 
-_build:
+build:
     render: false
 
 profit: Argo CD-GitHub 实现自动化部署

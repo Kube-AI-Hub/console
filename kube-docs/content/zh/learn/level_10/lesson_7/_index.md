@@ -2,7 +2,7 @@
 linkTitle: 使用 KubeVirt 管理虚拟机负载
 weight: 7
 
-_build:
+build:
   render: false
 
 profit: 了解如何使用 KubeVirt 来管理虚拟机

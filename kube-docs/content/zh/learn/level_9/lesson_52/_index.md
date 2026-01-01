@@ -2,7 +2,7 @@
 linkTitle: Prometheus Operator 安装使用与高级配置 
 weight: 52
 
-_build:
+build:
     render: false
 
 profit: Prometheus Operator 架构介绍、安装与配置解析

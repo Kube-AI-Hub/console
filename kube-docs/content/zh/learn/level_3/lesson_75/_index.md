@@ -2,7 +2,7 @@
 linkTitle: 单节点上 KubeKey 一键安装完整平台
 weight: 75
 
-_build:
+build:
     render: false
 
 profit: Linux 单节点上 KubeKey 一键安装 Kube AI Hub 完整平台  

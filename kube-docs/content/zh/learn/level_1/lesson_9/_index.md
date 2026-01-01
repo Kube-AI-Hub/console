@@ -2,7 +2,7 @@
 linkTitle: 开通青云服务器
 weight: 9
 
-_build:
+build:
     render: false
 
 profit: 熟悉公有云开通服务器的流程

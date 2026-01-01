@@ -2,7 +2,7 @@
 linkTitle: Argo CD-ApplicationSet 理论知识
 weight: 22
 
-_build:
+build:
     render: false
 
 profit: Argo CD-ApplicationSet 理论知识

@@ -2,7 +2,7 @@
 linkTitle: Argo CD-数据加密之 sealed secret
 weight: 18
 
-_build:
+build:
     render: false
 
 profit: Argo CD-数据加密之 sealed secret

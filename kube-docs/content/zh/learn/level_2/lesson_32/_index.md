@@ -2,7 +2,7 @@
 linkTitle: Kubernetes 核心实战-Ingress 原理及安装
 weight: 32
 
-_build:
+build:
   render: false
 
 profit: 了解 Ingress 的网络模型和安装方式

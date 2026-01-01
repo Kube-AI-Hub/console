@@ -2,7 +2,7 @@
 linkTitle: Istio 核心概念解读
 weight: 9
 
-_build:
+build:
     render: false
 
 profit: 了解 Istio 核心概念

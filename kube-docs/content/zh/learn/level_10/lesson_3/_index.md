@@ -2,7 +2,7 @@
 linkTitle: KubeVirt 虚拟机
 weight: 3
 
-_build:
+build:
   render: false
 
 profit: 了解 KubeVirt 虚拟机的概念

@@ -2,7 +2,7 @@
 linkTitle: 服务器的安全组设置
 weight: 5
 
-_build:
+build:
     render: false
 
 profit: 通过安全组来设置服务器的防火墙

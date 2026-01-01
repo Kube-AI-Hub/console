@@ -2,7 +2,7 @@
 linkTitle: DevOps 实践-使用 Source-to-Image 发布应用
 weight: 9
 
-_build:
+build:
     render: false
 
 profit: S2I 实操演示

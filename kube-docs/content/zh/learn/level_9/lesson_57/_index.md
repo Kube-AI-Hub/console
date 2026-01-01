@@ -2,7 +2,7 @@
 linkTitle: Kube AI Hub 自定义监控 
 weight: 57
 
-_build:
+build:
     render: false
 
 profit: Kube AI Hub 自定义监控面板配置及实战

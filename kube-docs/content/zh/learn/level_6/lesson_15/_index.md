@@ -2,7 +2,7 @@
 linkTitle: Argo CD-安装 Argo CD 及基本功能讲解
 weight: 15
 
-_build:
+build:
     render: false
 
 profit: Argo CD-安装 Argo CD 及基本功能讲解

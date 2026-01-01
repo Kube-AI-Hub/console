@@ -2,7 +2,7 @@
 linkTitle: 镜像保存
 weight: 15
 
-_build:
+build:
     render: false
 
 profit: 将镜像保存为压缩包

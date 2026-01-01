@@ -2,7 +2,7 @@
 linkTitle: Kubernetes 核心实战-理解 Pod
 weight: 17
 
-_build:
+build:
   render: false
 
 profit: 了解 Pod 的原理

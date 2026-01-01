@@ -2,7 +2,7 @@
 linkTitle: SpringCloud 与 kubernetes 基础概念
 weight: 1
 
-_build:
+build:
     render: false
 
 profit: 了解 kubernetes 下微服务的基础概念

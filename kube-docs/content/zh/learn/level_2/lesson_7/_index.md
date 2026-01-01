@@ -2,7 +2,7 @@
 linkTitle: Kubernetes 集群搭建-Docker 安装
 weight: 7
 
-_build:
+build:
   render: false
 
 profit: 安装 Docker 容器化环境

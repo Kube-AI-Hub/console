@@ -2,7 +2,7 @@
 linkTitle: 创建并部署 WordPress
 weight: 7
 
-_build:
+build:
     render: false
 
 profit: 使用 Kube AI Hub 部署 Wordpress

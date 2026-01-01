@@ -2,7 +2,7 @@
 linkTitle: KubeVirt 网络
 weight: 6
 
-_build:
+build:
   render: false
 
 profit: 了解 KubeVirt 网络的概念

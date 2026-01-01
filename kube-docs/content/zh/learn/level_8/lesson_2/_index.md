@@ -2,7 +2,7 @@
 linkTitle: Kube AI Hub 部署 SpringCloud 全家桶
 weight: 2
 
-_build:
+build:
     render: false
 
 profit: 在 Kube AI Hub 上部署微服务   

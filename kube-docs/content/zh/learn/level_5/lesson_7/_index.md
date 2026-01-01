@@ -2,7 +2,7 @@
 linkTitle: KubeKey 实践-Kube AI Hub 启用可插拔组件
 weight: 7
 
-_build:
+build:
   render: false
 
 profit: 了解如何在 Kube AI Hub 中启用可插拔组件

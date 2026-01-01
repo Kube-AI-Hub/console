@@ -2,7 +2,7 @@
 linkTitle: DevOps 实践-使用 Binary-to-Image 发布应用
 weight: 10
 
-_build:
+build:
     render: false
 
 profit: B2I 实操演示

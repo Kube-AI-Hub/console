@@ -2,7 +2,7 @@
 linkTitle: 通过应用商店部署 RabbitMQ 服务
 weight: 9
 
-_build:
+build:
   render: false
 
 profit: 了解 Kube AI Hub 下的应用商店的使用并且部署 RabbitMQ 服务

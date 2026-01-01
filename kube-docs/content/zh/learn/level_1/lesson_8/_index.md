@@ -2,7 +2,7 @@
 linkTitle: Docker 基础概念
 weight: 8
 
-_build:
+build:
     render: false
 
 profit: 了解容器的优点和架构

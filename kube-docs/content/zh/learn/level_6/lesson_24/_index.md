@@ -2,7 +2,7 @@
 linkTitle: Argo CD-管理员配置讲解
 weight: 24
 
-_build:
+build:
     render: false
 
 profit: Argo CD-管理员配置讲解

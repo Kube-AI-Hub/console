@@ -2,7 +2,7 @@
 linkTitle: Kubernetes 核心实战-Secret 场景示例
 weight: 41
 
-_build:
+build:
   render: false
 
 profit: 使用 Secret 存储机密信息

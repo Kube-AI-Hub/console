@@ -2,7 +2,7 @@
 linkTitle: Istio 安装
 weight: 7
 
-_build:
+build:
     render: false
 
 profit: 通过实践演示来理解 Istio

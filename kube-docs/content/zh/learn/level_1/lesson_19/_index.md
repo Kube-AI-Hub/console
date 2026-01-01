@@ -2,7 +2,7 @@
 linkTitle: 进阶-创建 Java 应用
 weight: 19
 
-_build:
+build:
     render: false
 
 profit: 使用 Docker 创建并启动 Java 容器

@@ -2,7 +2,7 @@
 linkTitle: 阿里云服务器开通流程
 weight: 3
 
-_build:
+build:
     render: false
 
 profit: 注册并使用阿里云服务器

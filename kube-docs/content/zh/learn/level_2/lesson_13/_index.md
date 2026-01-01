@@ -2,7 +2,7 @@
 linkTitle: Kubernetes 集群搭建-集群自我修复能力测试
 weight: 13
 
-_build:
+build:
   render: false
 
 profit: 验证 Kubernetes 集群的自我修复能力

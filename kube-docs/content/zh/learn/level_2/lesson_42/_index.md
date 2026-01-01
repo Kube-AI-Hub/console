@@ -2,7 +2,7 @@
 linkTitle: Kubernetes 核心实战小结
 weight: 42
 
-_build:
+build:
   render: false
 
 profit: 本章总结

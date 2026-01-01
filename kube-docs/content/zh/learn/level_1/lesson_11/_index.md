@@ -2,7 +2,7 @@
 linkTitle: 镜像操作
 weight: 11
 
-_build:
+build:
     render: false
 
 profit: 通过 Docker CLI 来管理镜像

@@ -2,7 +2,7 @@
 linkTitle: Prometheus 告警处理
 weight: 51
 
-_build:
+build:
     render: false
 
 profit: Prometheus 告警配置及查看

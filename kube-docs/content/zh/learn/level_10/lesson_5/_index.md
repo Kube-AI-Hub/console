@@ -2,7 +2,7 @@
 linkTitle: KubeVirt 磁盘和卷
 weight: 5
 
-_build:
+build:
   render: false
 
 profit: 了解 KubeVirt 磁盘和卷的概念

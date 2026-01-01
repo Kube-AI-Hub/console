@@ -2,7 +2,7 @@
 linkTitle: KubeVirt 虚拟机镜像
 weight: 4
 
-_build:
+build:
   render: false
 
 profit: 了解 KubeVirt 镜像的概念

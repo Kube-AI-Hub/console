@@ -2,7 +2,7 @@
 linkTitle: Argo CD-功能介绍及学前导读
 weight: 12
 
-_build:
+build:
     render: false
 
 profit: Argo CD-功能介绍及学前导读

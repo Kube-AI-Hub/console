@@ -2,7 +2,7 @@
 linkTitle: 微服务概念回顾
 weight: 3
 
-_build:
+build:
     render: false
 
 profit: 了解微服务概念

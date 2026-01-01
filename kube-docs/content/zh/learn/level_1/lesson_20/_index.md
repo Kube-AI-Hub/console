@@ -2,7 +2,7 @@
 linkTitle: 进阶-部署 Redis
 weight: 20
 
-_build:
+build:
     render: false
 
 profit: 使用 Docker 创建并启动 Redis 容器

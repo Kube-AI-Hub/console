@@ -2,7 +2,7 @@
 linkTitle: 云计算简单概念
 weight: 2
 
-_build:
+build:
     render: false
 
 profit: 了解云计算的相关概念   

@@ -2,7 +2,7 @@
 linkTitle: 基础架构以及多租户实践 - 企业空间管理
 weight: 2
 
-_build:
+build:
   render: false
 
 profit: 了解 Kube AI Hub 的整体架构，以及企业空间管理相关功能

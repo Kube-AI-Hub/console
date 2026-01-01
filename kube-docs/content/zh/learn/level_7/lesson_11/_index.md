@@ -2,7 +2,7 @@
 linkTitle: Kube AI Hub 应用仓库管理
 weight: 11
 
-_build:
+build:
     render: false
 
 profit: 管理 Kube AI Hub 的应用仓库

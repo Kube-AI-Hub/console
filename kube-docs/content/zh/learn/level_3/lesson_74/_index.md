@@ -2,7 +2,7 @@
 linkTitle: 全功能安装完成
 weight: 74
 
-_build:
+build:
     render: false
 
 profit: 全功能安装 Kube AI Hub

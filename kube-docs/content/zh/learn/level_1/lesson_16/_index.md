@@ -2,7 +2,7 @@
 linkTitle: 镜像推送
 weight: 16
 
-_build:
+build:
     render: false
 
 profit: 将镜像推送到镜像仓库

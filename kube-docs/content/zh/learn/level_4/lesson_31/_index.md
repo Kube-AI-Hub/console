@@ -2,7 +2,7 @@
 linkTitle: DevOps 基础以及 DevOps 的落地
 weight: 31
 
-_build:
+build:
   render: false
 
 profit: 了解 DevOps 的概念，以及 Kube AI Hub 的 DevOps 落地实现

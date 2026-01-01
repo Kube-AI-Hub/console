@@ -2,7 +2,7 @@
 linkTitle: 通过应用市场部署 Zookeeper 服务
 weight: 10
 
-_build:
+build:
   render: false
 
 profit: 了解 Kube AI Hub 下的应用商店的使用并且部署 Zookeeper 服务

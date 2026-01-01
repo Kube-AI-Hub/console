@@ -2,7 +2,7 @@
 linkTitle: 进阶-统计访问人数场景
 weight: 22
 
-_build:
+build:
     render: false
 
 profit: 结合 Redis 和 Spring Boot 统计访问人数场景

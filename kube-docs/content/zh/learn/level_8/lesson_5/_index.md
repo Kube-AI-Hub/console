@@ -2,7 +2,7 @@
 linkTitle: ServiceMesh 概念与架构
 weight: 5
 
-_build:
+build:
     render: false
 
 profit: 通过服务架构的演进来理解服务网格的概念

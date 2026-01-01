@@ -2,7 +2,7 @@
 linkTitle: 测试安装 Nginx
 weight: 4
 
-_build:
+build:
     render: false
 
 profit: 在云平台上部署 Nginx

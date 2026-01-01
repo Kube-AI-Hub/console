@@ -2,7 +2,7 @@
 linkTitle: Kube AI Hub 基于租户的告警与通知 
 weight: 56
 
-_build:
+build:
     render: false
 
 profit: Kube AI Hub 基于租户的告警功能介绍及告警策略配置

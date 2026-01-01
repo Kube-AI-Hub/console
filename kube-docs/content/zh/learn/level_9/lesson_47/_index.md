@@ -2,7 +2,7 @@
 linkTitle: Kubernetes 集群日志检索与落盘日志收集
 weight: 47
 
-_build:
+build:
     render: false
 
 profit: 容器日志检索与落盘日志收集

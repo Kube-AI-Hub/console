@@ -2,7 +2,7 @@
 linkTitle: Kubernetes 架构解析
 weight: 3
 
-_build:
+build:
   render: false
 
 profit: 了解 Kubernetes 的架构

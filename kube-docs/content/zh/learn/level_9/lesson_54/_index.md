@@ -2,7 +2,7 @@
 linkTitle: Kube AI Hub 应用状态监控
 weight: 54
 
-_build:
+build:
     render: false
 
 profit: Kube AI Hub 应用资源监控

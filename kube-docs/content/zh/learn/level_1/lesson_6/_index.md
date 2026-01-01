@@ -2,7 +2,7 @@
 linkTitle: 按量付费优点
 weight: 6
 
-_build:
+build:
     render: false
 
 profit: 通过按量付费节省成本

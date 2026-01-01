@@ -2,7 +2,7 @@
 linkTitle: Argo CD-ApplicationSet 生成器
 weight: 23
 
-_build:
+build:
     render: false
 
 profit: Argo CD-ApplicationSet 生成器

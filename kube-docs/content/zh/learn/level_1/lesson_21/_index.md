@@ -2,7 +2,7 @@
 linkTitle: 进阶-Redis 设置密码访问
 weight: 21
 
-_build:
+build:
     render: false
 
 profit: 为 Redis 容器设置安全密码

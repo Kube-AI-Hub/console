@@ -2,6 +2,6 @@
 linkTitle: "Pipelines"
 weight: 11210
 
-_build:
+build:
     render: false
 ---

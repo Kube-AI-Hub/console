@@ -2,7 +2,7 @@
 linkTitle: Argo CD-自建应用模拟开发场景
 weight: 16
 
-_build:
+build:
     render: false
 
 profit: Argo CD-自建应用模拟开发场景

@@ -2,7 +2,7 @@
 linkTitle: Kubernetes 核心实战-可视化操作 Pod
 weight: 20
 
-_build:
+build:
   render: false
 
 profit: 使用可视化界面操作 Pod

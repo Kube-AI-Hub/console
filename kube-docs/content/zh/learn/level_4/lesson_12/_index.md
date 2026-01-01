@@ -2,7 +2,7 @@
 linkTitle: “若依” 微服务项目实战 - 导入本地数据库
 weight: 12
 
-_build:
+build:
   render: false
 
 profit: 了解 Kube AI Hub 下的微服务部署，导入本地数据库

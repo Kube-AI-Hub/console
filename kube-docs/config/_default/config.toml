@@ -2,7 +2,7 @@ baseURL = "https://watering.ai/kube-docs/"
 canonifyURLs = true
 
 enableRobotsTXT = true
-ignorefiles = [ ".*/_custom" ]
+ignoreFiles = [ ".*/_custom" ]
 
 [caches]
   [caches.images]

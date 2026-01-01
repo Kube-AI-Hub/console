@@ -2,7 +2,7 @@
 linkTitle: Kubernetes 集群搭建-初始化主节点
 weight: 10
 
-_build:
+build:
   render: false
 
 profit: 使用 Kubeadm 引导集群主节点

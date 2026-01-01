@@ -2,7 +2,7 @@
 linkTitle: Kubernetes 计量计费 
 weight: 59
 
-_build:
+build:
     render: false
 
 profit: Kubernetes 计量计费配置及资源消费统计

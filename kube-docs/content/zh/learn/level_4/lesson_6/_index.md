@@ -2,7 +2,7 @@
 linkTitle: 设置 MySQL 的负载均衡网络
 weight: 6
 
-_build:
+build:
   render: false
 
 profit: 了解 Kube AI Hub 下的负载均衡网络以及配置 MySQL 的负载均衡网络

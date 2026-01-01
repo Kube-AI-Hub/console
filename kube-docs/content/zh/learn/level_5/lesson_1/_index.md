@@ -2,7 +2,7 @@
 linkTitle: 课程简介
 weight: 1
 
-_build:
+build:
   render: false
 
 profit: 从整体了解课程大纲

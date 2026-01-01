@@ -2,7 +2,7 @@
 linkTitle: “尚医通” 微服务项目 DevOps 实战 - Webhook 自启动流水线
 weight: 53
 
-_build:
+build:
   render: false
 
 profit: 了解 Kube AI Hub 的 DevOps 下 Webhook 自启动流水线

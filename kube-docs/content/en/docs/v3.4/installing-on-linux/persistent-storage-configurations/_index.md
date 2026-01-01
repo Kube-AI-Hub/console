@@ -2,6 +2,6 @@
 linkTitle: "Persistent Storage Configurations"
 weight: 3300
 
-_build:
+build:
     render: false
 ---

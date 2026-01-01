@@ -2,7 +2,7 @@
 linkTitle: Kubernetes 集群搭建-主节点完成
 weight: 11
 
-_build:
+build:
   render: false
 
 profit: 安装主节点必要组件

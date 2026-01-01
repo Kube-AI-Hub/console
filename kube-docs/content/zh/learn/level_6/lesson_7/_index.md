@@ -2,7 +2,7 @@
 linkTitle: DevOps 实践-DevOps 自动测试构建
 weight: 7
 
-_build:
+build:
     render: false
 
 profit: DevOps 自动测试构建实操演示

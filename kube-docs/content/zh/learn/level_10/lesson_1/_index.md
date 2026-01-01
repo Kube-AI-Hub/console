@@ -2,7 +2,7 @@
 linkTitle: 虚拟化技术介绍
 weight: 1
 
-_build:
+build:
   render: false
 
 profit: 了解虚拟化的相关概念

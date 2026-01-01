@@ -2,7 +2,7 @@
 linkTitle: 在 Kube AI Hub 上调试应用
 weight: 5
 
-_build:
+build:
     render: false
 
 profit: 了解 Kubesphere 的排错方法与工具

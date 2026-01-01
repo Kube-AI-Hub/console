@@ -2,7 +2,7 @@
 linkTitle: 挂载主机目录
 weight: 17
 
-_build:
+build:
     render: false
 
 profit: 将持久化数据挂载到主机目录

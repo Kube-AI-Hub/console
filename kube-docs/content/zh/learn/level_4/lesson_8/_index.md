@@ -2,7 +2,7 @@
 linkTitle: 部署 ElasticSearch 服务以及负载均衡网络
 weight: 8
 
-_build:
+build:
   render: false
 
 profit: 了解 Kube AI Hub 下的 ElasticSearch 的部署和负载均衡网络配置

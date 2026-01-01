@@ -2,7 +2,7 @@
 linkTitle: Kube AI Hub 监控功能与使用 
 weight: 53
 
-_build:
+build:
     render: false
 
 profit: Kube AI Hub 监控系统介绍及使用

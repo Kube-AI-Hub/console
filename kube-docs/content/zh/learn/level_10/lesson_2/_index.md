@@ -2,7 +2,7 @@
 linkTitle: KubeVirt 介绍
 weight: 2
 
-_build:
+build:
   render: false
 
 profit: 了解 KubeVirt 的相关概念

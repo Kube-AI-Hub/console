@@ -1,2 +1,7 @@
+---
+build:
+  render: never
+  list: never
+---
 [source,javascript,subs="+attributes"]
 ----

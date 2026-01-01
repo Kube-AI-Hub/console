@@ -2,7 +2,7 @@
 linkTitle: Isito 简介
 weight: 6
 
-_build:
+build:
     render: false
 
 profit: 了解 Isito 服务网格框架

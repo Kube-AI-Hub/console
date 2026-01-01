@@ -2,7 +2,7 @@
 linkTitle: Argo CD-多集群添加
 weight: 21
 
-_build:
+build:
     render: false
 
 profit: Argo CD-多集群添加

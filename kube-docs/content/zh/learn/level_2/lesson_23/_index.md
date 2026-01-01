@@ -2,7 +2,7 @@
 linkTitle: Kubernetes 核心实战-Deployment 多副本
 weight: 23
 
-_build:
+build:
   render: false
 
 profit: 利用 Deployment 的多副本能力

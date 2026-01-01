@@ -2,7 +2,7 @@
 linkTitle: Kube AI Hub 应用调度
 weight: 6
 
-_build:
+build:
     render: false
 
 profit: 将应用调度到指定主机

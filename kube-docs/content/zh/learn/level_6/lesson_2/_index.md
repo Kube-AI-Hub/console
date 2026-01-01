@@ -2,7 +2,7 @@
 linkTitle: DevOps 基础-Git 基本命令使用示例
 weight: 2
 
-_build:
+build:
     render: false
 
 profit: 学会 Git 的基本命令使用  

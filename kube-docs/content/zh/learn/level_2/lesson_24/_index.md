@@ -2,7 +2,7 @@
 linkTitle: Kubernetes 核心实战-Deployment 扩缩容
 weight: 24
 
-_build:
+build:
   render: false
 
 profit: 利用 Deployment 的扩缩容能力

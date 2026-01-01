@@ -2,7 +2,7 @@
 linkTitle: “尚医通” 微服务项目 DevOps 实战 - 流水线项目编译
 weight: 39
 
-_build:
+build:
   render: false
 
 profit: 了解 Kube AI Hub 的 DevOps 流水线项目编译的过程

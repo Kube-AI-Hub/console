@@ -2,7 +2,7 @@
 linkTitle: “若依” 微服务项目实战 - 上云Dockerfile修改
 weight: 22
 
-_build:
+build:
   render: false
 
 profit: 了解 Kube AI Hub 下的微服务部署上云Dockerfile修改

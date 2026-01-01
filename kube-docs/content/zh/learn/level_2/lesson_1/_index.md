@@ -2,7 +2,7 @@
 linkTitle: Kubernetes 简介
 weight: 1
 
-_build:
+build:
   render: false
 
 profit: 了解 Kubernetes 是什么

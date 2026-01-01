@@ -2,7 +2,7 @@
 linkTitle: Kubernetes 核心实战-PV 与 PVC 使用
 weight: 39
 
-_build:
+build:
   render: false
 
 profit: 在 Kubernetes 中使用 PV 和 PVC

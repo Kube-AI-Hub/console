@@ -2,7 +2,7 @@
 linkTitle: Kubernetes 核心实战-配置文件创建 Pod
 weight: 19
 
-_build:
+build:
   render: false
 
 profit: 使用配置文件方式创建一个 Pod

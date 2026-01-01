@@ -2,7 +2,7 @@
 linkTitle: 修改容器内容
 weight: 13
 
-_build:
+build:
     render: false
 
 profit: 通过 Docker CLI 来修改容器内容

@@ -2,7 +2,7 @@
 linkTitle: Kubernetes 核心实战-Deployment 小结
 weight: 28
 
-_build:
+build:
   render: false
 
 profit: 其他工作负载介绍

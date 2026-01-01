@@ -2,7 +2,7 @@
 linkTitle: Kubernetes 集群搭建-开通服务器
 weight: 6
 
-_build:
+build:
   render: false
 
 profit: 开通青云三个按量付费服务器

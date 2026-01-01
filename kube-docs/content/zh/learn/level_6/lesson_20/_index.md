@@ -2,7 +2,7 @@
 linkTitle: Argo CD-app of apps 模式
 weight: 20
 
-_build:
+build:
     render: false
 
 profit: Argo CD-app of apps 模式

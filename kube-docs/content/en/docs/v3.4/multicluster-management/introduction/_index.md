@@ -2,6 +2,6 @@
 linkTitle: "Introduction"
 weight: 5100
 
-_build:
+build:
     render: false
 ---

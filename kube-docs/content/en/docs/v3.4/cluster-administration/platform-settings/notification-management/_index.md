@@ -2,6 +2,6 @@
 linkTitle: "Notification Management"
 weight: 8720
 
-_build:
+build:
     render: false
 ---

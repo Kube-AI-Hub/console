@@ -2,7 +2,7 @@
 linkTitle: DevOps 基础-DevOps 元素周期表
 weight: 3
 
-_build:
+build:
     render: false
 
 profit: 了解 DevOps 及 DevOps 元素周期表

@@ -2,6 +2,6 @@
 linkTitle: "Examples"
 weight: 10811
 
-_build:
+build:
     render: false
 ---

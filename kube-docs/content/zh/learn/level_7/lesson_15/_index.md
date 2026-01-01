@@ -2,7 +2,7 @@
 linkTitle: Kubernetes 跨多集群的应用发布
 weight: 15
 
-_build:
+build:
     render: false
 
 profit: 使用 Kube AI Hub 跨多集群发布应用

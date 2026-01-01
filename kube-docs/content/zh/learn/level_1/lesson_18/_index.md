@@ -2,7 +2,7 @@
 linkTitle: 补充内容
 weight: 18
 
-_build:
+build:
     render: false
 
 profit: 常用命令补充

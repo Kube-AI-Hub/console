@@ -2,7 +2,7 @@
 linkTitle: 应用部署三要素
 weight: 4
 
-_build:
+build:
   render: false
 
 profit: 了解 Kube AI Hub 的下部署应用的基础只是

@@ -2,7 +2,7 @@
 linkTitle: Kubernetes 核心实战-操作 namespace
 weight: 16
 
-_build:
+build:
   render: false
 
 profit: 熟悉 namespace 的常见操作

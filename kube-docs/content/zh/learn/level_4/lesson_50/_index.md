@@ -2,7 +2,7 @@
 linkTitle: “尚医通” 微服务项目 DevOps 实战 - 后端部署完成以及验证
 weight: 50
 
-_build:
+build:
   render: false
 
 profit: 了解 Kube AI Hub 的 DevOps 后端部署完成以及验证

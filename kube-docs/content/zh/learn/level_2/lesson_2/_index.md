@@ -2,7 +2,7 @@
 linkTitle: Kubernetes 集群工作方式
 weight: 2
 
-_build:
+build:
   render: false
 
 profit: 了解 Kubernetes 集群工作原理

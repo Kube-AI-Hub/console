@@ -2,7 +2,7 @@
 linkTitle: Kubernetes 核心实战-Deployment 使用 NFS
 weight: 38
 
-_build:
+build:
   render: false
 
 profit: Deployment 使用 NFS 作为持久化存储

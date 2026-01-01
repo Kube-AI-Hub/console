@@ -2,7 +2,7 @@
 linkTitle: 安装 metrics-server
 weight: 73
 
-_build:
+build:
     render: false
 
 profit: 安装 metrics-server 集群监控组件  

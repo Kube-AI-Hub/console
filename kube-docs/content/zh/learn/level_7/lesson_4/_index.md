@@ -2,7 +2,7 @@
 linkTitle: Kubernetes 集群重启与恢复
 weight: 4
 
-_build:
+build:
     render: false
 
 profit: 演示重启集群的功能

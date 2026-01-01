@@ -2,7 +2,7 @@
 linkTitle: 提交改变
 weight: 14
 
-_build:
+build:
     render: false
 
 profit: 将容器保存为镜像

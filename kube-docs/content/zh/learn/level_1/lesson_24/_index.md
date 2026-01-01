@@ -2,7 +2,7 @@
 linkTitle: 进阶-应用分享与启动
 weight: 24
 
-_build:
+build:
     render: false
 
 profit: 将自定义镜像推送到公共镜像仓库

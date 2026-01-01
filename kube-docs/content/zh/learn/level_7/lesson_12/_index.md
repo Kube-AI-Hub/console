@@ -2,7 +2,7 @@
 linkTitle: Kube AI Hub 应用管理场景
 weight: 12
 
-_build:
+build:
     render: false
 
 profit: 部署、升级与删除 Kube AI Hub 示例应用

@@ -2,7 +2,7 @@
 linkTitle: Kube AI Hub 虚拟化云平台安装
 weight: 9
 
-_build:
+build:
   render: false
 
 profit: Kube AI Hub 虚拟化云平台单节点安装

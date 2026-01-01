@@ -2,7 +2,7 @@
 linkTitle: Kube AI Hub 虚拟化云平台功能演示
 weight: 10
 
-_build:
+build:
   render: false
 
 profit: 熟悉 Kube AI Hub 虚拟化云平台的主要功能

@@ -2,7 +2,7 @@
 linkTitle: Argo CD-实验环境安装-1
 weight: 13
 
-_build:
+build:
     render: false
 
 profit: Argo CD-实验环境安装-1

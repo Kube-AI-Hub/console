@@ -2,6 +2,6 @@
 linkTitle: "Add and Delete Nodes"
 weight: 3600
 
-_build:
+build:
     render: false
 ---

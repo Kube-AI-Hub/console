@@ -2,7 +2,7 @@
 linkTitle: PromQL 介绍
 weight: 50
 
-_build:
+build:
     render: false
 
 profit: PromQL 表达式类型、语法及指标类型

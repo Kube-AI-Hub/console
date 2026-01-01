@@ -2,6 +2,6 @@
 linkTitle: "Continuous Deployments"
 weight: 11220
 
-_build:
+build:
     render: false
 ---

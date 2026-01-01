@@ -2,7 +2,7 @@
 linkTitle: Kubernetes 集群常见问题及解决办法
 weight: 48
 
-_build:
+build:
     render: false
 
 profit: 常见问题及解决办法
