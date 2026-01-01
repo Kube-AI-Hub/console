@@ -7,6 +7,7 @@
     const LANGUAGE_REG = [/en/g, /zh/g]
     const LANGUAGE_HREF = ['/', '/zh']
     const BASE_PATH = '/kube-docs'
+    const latestVersion = '{{ .Site.Params.latestVersion }}'
 
     const userLang = navigator.language;
     const nowPathName = window.location.pathname
@@ -30,6 +31,39 @@
     // Check if current path is a Chinese page (considering the base path)
     const isZhPage = nowPathName.startsWith(BASE_PATH + '/zh') || nowPathName.startsWith('/zh')
 
+    // Check if we're on a /docs/ path without version and redirect to latest version
+    // Match pattern: /kube-docs/(zh/|en/)?docs/(path) where path doesn't start with vX.X
+    if (latestVersion) {
+        const escapedBasePath = BASE_PATH.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        // Match /docs/ followed by something that doesn't start with vX.X/
+        const docsPathRegex = new RegExp('^(' + escapedBasePath + ')?\\/(zh\\/|en\\/)?docs\\/(?!v[0-9]+\\.[0-9]+(?:\\/|$))(.*)$');
+        const docsMatch = nowPathName.match(docsPathRegex);
+        
+        if (docsMatch) {
+            const langPrefix = docsMatch[2] || ''; // 'zh/' or 'en/' or ''
+            const pathAfterDocs = docsMatch[3] || ''; // content after /docs/
+            
+            // Build the redirect URL
+            let redirectPath = BASE_PATH;
+            if (langPrefix) {
+                redirectPath += '/' + langPrefix;
+            }
+            redirectPath += 'docs/' + latestVersion;
+            if (pathAfterDocs) {
+                redirectPath += '/' + pathAfterDocs;
+            }
+            // Ensure trailing slash for directory paths or if pathAfterDocs is empty
+            if (!pathAfterDocs || pathAfterDocs.endsWith('/')) {
+                if (!redirectPath.endsWith('/')) {
+                    redirectPath += '/';
+                }
+            }
+            
+            // Perform redirect before language redirect
+            window.location.replace(redirectPath);
+        }
+    }
+    
     if(!cookieBanned){
         if (pageLang === 'en') {
             if (isZhPage) {

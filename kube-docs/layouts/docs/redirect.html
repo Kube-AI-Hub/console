@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="{{ with .Site.LanguageCode }}{{ . }}{{ else }}en-US{{ end }}">
+<head>
+    {{- partial "head.html" . -}}
+</head>
+<script>
+    const BASE_PATH = '/kube-docs';
+    const latestVersion = '{{ .Site.Params.latestVersion }}';
+    const currentPath = window.location.pathname;
+    
+    // Extract the path after /docs/ (could be empty or have content)
+    const docsMatch = currentPath.match(/^(\/kube-docs)?\/(zh\/|en\/)?docs\/(.*)$/);
+    
+    if (docsMatch) {
+        const langPrefix = docsMatch[2] || ''; // 'zh/' or 'en/' or ''
+        const pathAfterDocs = docsMatch[3] || ''; // content after /docs/
+        
+        // Build the redirect URL
+        let redirectPath = BASE_PATH;
+        if (langPrefix) {
+            redirectPath += '/' + langPrefix;
+        }
+        redirectPath += 'docs/' + latestVersion;
+        if (pathAfterDocs) {
+            redirectPath += '/' + pathAfterDocs;
+        }
+        // Ensure trailing slash for directory paths
+        if (!pathAfterDocs || pathAfterDocs.endsWith('/')) {
+            if (!redirectPath.endsWith('/')) {
+                redirectPath += '/';
+            }
+        }
+        
+        // Perform redirect
+        window.location.replace(redirectPath);
+    } else {
+        // Fallback: redirect to base docs with version
+        const langPrefix = currentPath.includes('/zh/') ? 'zh/' : (currentPath.includes('/en/') ? 'en/' : '');
+        window.location.replace(BASE_PATH + (langPrefix ? '/' + langPrefix : '') + 'docs/' + latestVersion + '/');
+    }
+</script>
+<body>
+    <div style="text-align: center; padding: 50px;">
+        <p>正在重定向到最新版本文档...</p>
+        <p>Redirecting to latest version documentation...</p>
+    </div>
+</body>
+</html>
+

@@ -64,6 +64,7 @@ keywords = "云计算,Kube AI Hub,文档"
 logoLink = "/kube-docs/"
 disableVersions = false
 disablePdf = false
+latestVersion = "v3.4"
 
 githubUrl = "https://github.com/kube-ai-hub/website"
 
