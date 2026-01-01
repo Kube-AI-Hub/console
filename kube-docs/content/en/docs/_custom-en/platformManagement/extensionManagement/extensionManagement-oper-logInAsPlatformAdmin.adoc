@@ -1,0 +1,2 @@
+// :ks_include_id: 6eca522f12cc4fac84157f8cae7f92ba
+. Log in to the {ks_product-en} web console with a user having the **platform-admin** role.

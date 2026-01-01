@@ -1,0 +1,2 @@
+// :ks_include_id: b8f6aaa1104a42b3a0856ce1f21e1cea
+. On the **Alert Rules** tab, click **Add Alert Rule** and select **Rule Template** or **Custom Rule** as needed to set the alert rule.

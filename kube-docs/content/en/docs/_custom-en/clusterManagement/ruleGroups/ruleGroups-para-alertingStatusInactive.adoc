@@ -1,0 +1,2 @@
+// :ks_include_id: 6bf2b0acd7e043fc8ef1328d3b45bec3
+* **Inactive**: The monitoring metrics do not meet the preset conditions. No alerts are generated in this state.

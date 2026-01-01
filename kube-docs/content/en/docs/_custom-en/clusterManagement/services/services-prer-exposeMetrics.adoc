@@ -1,0 +1,4 @@
+// :ks_include_id: f845b7136ccc47a59ea94257751c74cc
+* You should configure the application to expose monitoring metrics that conform to the Prometheus specification at a certain service endpoint. For more information, see the link:https://prometheus.io/docs/instrumenting/clientlibs/[Prometheus Documentation].
+
+* If the monitoring metric collection process requires authentication, you also need to configure the relevant authentication logic in the target application and create a Secret containing the authentication information in the {ks_product-en} platform in advance.

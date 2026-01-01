@@ -1,0 +1,5 @@
+Information about the pods to which the rule applies.
+
+* **Project**: The project to which the rule belongs. Rules in a network policy only apply to pods in the project to which the network policy belongs.
+
+* **Labels**: The labels of the pods to which the rule applies. If no labels are set, the rule applies to all pods in the project to which the network policy belongs.

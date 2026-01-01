@@ -1,0 +1,14 @@
+// :ks_include_id: 4cae0895d3854461b646043abc44ff2b
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+|Silence Continuously
+|Notifications that meet the silence conditions are silenced at all times.
+
+|Silence During Time Range
+|Notifications that meet the silence conditions are silenced during the specified time range. You need to select the start and end times for the silence.
+
+|Silence Periodically
+|Notifications that meet the silence conditions are silenced daily, weekly, or monthly during the specified time range. You need to select the date, start time, and end time for the silence.
+|===

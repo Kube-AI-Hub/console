@@ -13,6 +13,7 @@ server:
         /public: server/public
         /assets: dist/assets
         /dist: dist
+        /kube-docs: dist/kube-docs
 
   # redis config for multi replicas
   # redis:
@@ -48,13 +49,11 @@ client:
   slackUrl: https://kubesphere.slack.com
   documents:
     en:
-      url: https://kubesphere.io/docs
-      api: https://kubesphere.io/docs/reference/api-docs/
+      url: /kube-docs/docs
+      api: /kube-docs/docs/reference/api-docs/
     zh:
-      # url: https://kubesphere.com.cn/docs
-      # api: https://kubesphere.com.cn/docs/reference/api-docs/
-      url: https://kubesphere.io/zh/docs
-      api: https://kubesphere.io/zh/docs/reference/api-docs/
+      url: /kube-docs/zh/docs
+      api: /kube-docs/zh/docs/reference/api-docs/
 
   # current support lanaguages
   supportLangs:

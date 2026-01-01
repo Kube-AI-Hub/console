@@ -1,0 +1,2 @@
+// :ks_include_id: 161aaad98ab04d7fa4240eec51d232f7
+. Log in to the {ks_product-en} web console with a user who has the pass:a,q[{ks_permission}] permission, and access your multi-cluster project.

@@ -1,0 +1,42 @@
+// :ks_include_id: 5b3a15eedffe4ef39e6a46e6adc2b335
+. In the **Create Custom Monitoring Dashboard** dialog, set the name, description, and template of the monitoring dashboard, then click **Next**.
++
+--
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+|Name
+|The name of the custom monitoring dashboard. The name can only contain lowercase letters, numbers, and hyphens (-), must start and end with a lowercase letter or number, and can be up to 63 characters long.
+
+|Description
+|The description of the custom monitoring dashboard. The description can contain any characters and can be up to 256 characters long.
+
+|Template
+|The template of the custom monitoring dashboard.
+
+* Kube AI Hub provides templates with preset custom monitoring dashboards for Elasticsearch, MySQL, Redis, Jenkins, and GPU. Each template provides some preset monitoring metrics and monitoring charts, which you can customize on top of to reduce operations.
+
+* To use a Grafana dashboard, you need to upload the Grafana dashboard configuration file.
+
+* You can also choose **Custom** to use an empty template.
+|===
+--
+
+. On the custom monitoring dashboard editing page, set the monitoring charts and text-displayed monitoring metrics as needed.
++
+====
+* Click image:/images/ks-qkcp/zh/icons/add-dark.svg[add-dark,18,18] on the left side of the page, set the metric parameters, then click image:/images/ks-qkcp/zh/icons/check-dark.svg[check-dark,18,18] to create text-displayed monitoring metrics.
++
+--
+include::customMonitoringDashboards-para-textMetric.adoc[]
+--
+
+* Click **Add Monitoring Item** in the lower right corner of the page, select **Line Chart** or **Bar Chart**, set the chart parameters, then click image:/images/ks-qkcp/zh/icons/check-dark.svg[check-dark,18,18] to create monitoring charts.
++
+--
+include::customMonitoringDashboards-para-monitoringChart.adoc[]
+--
+====
+
+. Click **Save Template** in the upper right corner of the page. After the monitoring dashboard is created, it will be displayed in the custom monitoring dashboard list.

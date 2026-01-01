@@ -1,0 +1,17 @@
+// :ks_include_id: f41b68cc492640acadc07b371d665ebb
+. Click image:/images/ks-qkcp/zh/icons/more.svg[more,18,18] on the right side of the custom monitoring dashboard you want to edit, then select **Edit Information** from the dropdown list.
+
+. In the **Edit Information** dialog, set the alias and description of the custom monitoring dashboard, then click **OK**.
++
+--
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+|Alias
+|The alias of the custom monitoring dashboard. Different custom monitoring dashboards can have the same alias. The alias can only contain Chinese characters, letters, numbers, and hyphens (-), and cannot start or end with a hyphen (-), with a maximum of 63 characters.
+
+|Description
+|The description of the custom monitoring dashboard. The description can contain any characters, with a maximum of 256 characters.
+|===
+--

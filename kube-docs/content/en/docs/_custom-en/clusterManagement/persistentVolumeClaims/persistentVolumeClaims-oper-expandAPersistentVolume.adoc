@@ -1,0 +1,15 @@
+// :ks_include_id: b1b90c0bbcf94434a5daecc86d546c03
+. In the top-left corner of the details page, select **More > Expand**.
+
+. In the **Expand Volume** dialog, set the volume capacity, and then click **OK**.
++
+--
+//warning
+[.admon.warning,cols="a"]
+|===
+| Warning
+
+|
+Persistent volume capacity can only be increased and cannot be reduced.
+|===
+--

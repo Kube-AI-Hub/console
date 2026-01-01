@@ -1,0 +1,2 @@
+// :ks_include_id: 8ada03e949d64141806728273792c325
+. On the **Rule Groups** page, click **Custom Rule Groups** or **Built-in Rule Groups**, then click the name of a rule group in the list to open its details page.

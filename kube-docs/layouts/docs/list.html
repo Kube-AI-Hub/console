@@ -1,0 +1,79 @@
+{{ define "main" }}
+{{ $basePath := strings.TrimSuffix "/" .Site.Params.logoLink }}
+{{ with .Params.section1 }}
+<section class='section-1 bg-cover' style='background-image: url("{{ $basePath }}{{ .image }}");'>
+    <div class="title-div common-layout">
+        <h1 class="title-h1">{{ .title }}</h1>
+        <p class="common-p">{{ .content }}</p>
+        <div class="search-div">
+            {{ partial "searchInput" . }}
+        </div>
+    </div>
+</section>
+{{ end }}
+{{ $Site := .Site }}
+{{ with .Params.sectionLink }}
+<section class="section-link">
+    <div class="common-layout">
+        {{ with .docs}}
+        <div class="left">
+            <h2>{{ .title }}</h2>
+            <p>{{ .description }}</p>
+            <ul>
+                {{ range .list }}
+                <li>
+                    {{ with $Site.GetPage . }}
+                    <a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a>
+                    {{ end }}
+                </li>
+                {{ end }}
+            </ul>
+        </div>
+        {{ end }}
+        {{ with .videos}}
+        <div class="right">
+            <h2>{{ .title }}</h2>
+            <p>{{ .description }}</p>
+            <ul>
+                {{ range .list }}
+                <li>
+                    <span>{{ .text }}</span>
+                    <a href="{{ .link }}" target="_blank" aria-label="link"></a>
+                </li>
+                {{ end }}
+            </ul>
+        </div>
+        {{ end }}
+    </div>
+</section>
+{{ end }}
+
+<section class="section-2">
+    <div class="common-layout">
+        {{ partial "section" (dict "context" .) }}
+    </div>
+</section>
+
+{{ with .Params.section3 }}
+<section class="section-3">
+    <div class="common-layout">
+        <div class="left-part-div">
+            <h2>{{ .title }}</h2>
+            <p>{{ .description }}</p>
+            <div class="common-flex-layout">
+                {{ range .list }}
+                <div>
+                    <img src="{{ $basePath }}{{ .image }}" alt="">
+                    <p><a href="{{ .link }}">{{ .content }}</a></p>
+                </div>
+                {{ end }}
+            </div>
+        </div>
+        <div class="right-part-div">
+            <h3>{{ .titleRight }}</h3>
+            <a href="{{ .btnLink }}"><button>{{ .btnContent }}</button></a>
+        </div>
+    </div>
+</section>
+{{ end }}
+{{ end }}

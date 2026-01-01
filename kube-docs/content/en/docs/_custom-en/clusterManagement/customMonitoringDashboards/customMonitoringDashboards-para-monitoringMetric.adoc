@@ -1,0 +1,2 @@
+// :ks_include_id: 5ed9a5c35fa945bc84988f238d7ab69a
+The monitoring metrics exposed by the application. You can click **Monitoring Metric** and then select a monitoring metric from the dropdown list, or manually enter a PromQL statement. Ensure that you have configured the application to expose monitoring metrics and have set up the monitoring exporter. For more information about PromQL expressions, see the link:https://prometheus.io/docs/prometheus/latest/querying/basics/[Prometheus Documentation].

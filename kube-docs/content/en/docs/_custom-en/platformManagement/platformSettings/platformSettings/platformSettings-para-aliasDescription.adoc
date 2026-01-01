@@ -1,0 +1,6 @@
+// :ks_include_id: 920119fed2624b659ff20db4f8b42082
+|Alias
+|The alias of the silence policy. Different silence policies can have the same alias. The alias can only contain Chinese characters, letters, numbers, and hyphens (-), cannot start or end with a hyphen (-), and can be up to 63 characters long.
+
+|Description
+|The description of the silence policy. The description can contain any characters and can be up to 256 characters long.

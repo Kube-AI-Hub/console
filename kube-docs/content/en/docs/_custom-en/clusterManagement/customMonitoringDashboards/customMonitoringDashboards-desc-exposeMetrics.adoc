@@ -1,0 +1,4 @@
+// :ks_include_id: fb5da34edef1455388ca60e23308095f
+. Configure applications running in containers to expose monitoring metrics that conform to the Prometheus specification at a certain service endpoint. For more information, see the link:https://prometheus.io/docs/instrumenting/clientlibs/[Prometheus Documentation].
+
+. In the {ks_product-en} web console, set up a monitoring exporter on the service exposing the workload to declare the path providing application monitoring metrics. Kube AI Hub will get the application's monitoring metrics based on the relevant parameters of the monitoring exporter.

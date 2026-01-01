@@ -1,0 +1,17 @@
+// :ks_include_id: 57816266c5504de8838e5d900bee849d
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+|Pod Replicas
+|The current and desired number of pod replicas for the workload in each cluster.
+
+|Ports
+|The port name, protocol, and port number of the containers managed by the workload.
+
+|Pods
+|
+All pods running in the workload. Expand the dropdown to view pod information for specific clusters.
+
+include::../../clusterManagement/nodes/nodes-para-podList.adoc[]
+|===

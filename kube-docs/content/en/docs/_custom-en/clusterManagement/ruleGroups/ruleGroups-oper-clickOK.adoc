@@ -1,0 +1,6 @@
+// :ks_include_id: 513da96dc1b64eb9af9a791f349a9fce
+. After completing the alert rule settings, click image:/images/ks-qkcp/zh/icons/check-dark.svg[check,18,18] to save the settings, then click **Create**.
++
+--
+The rule group will be displayed in the rule group list after creation.
+--

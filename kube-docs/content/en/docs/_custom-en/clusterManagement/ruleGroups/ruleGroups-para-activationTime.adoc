@@ -1,0 +1,2 @@
+// :ks_include_id: c3b29bad32424d7abc3be2e77357df17
+The time when the rule group changed from the **Inactive** state to the **Pending** state.

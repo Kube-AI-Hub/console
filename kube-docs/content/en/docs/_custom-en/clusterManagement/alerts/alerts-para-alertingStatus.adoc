@@ -1,0 +1,4 @@
+// :ks_include_id: eb9742b579e948b29be0240b89d9335b
+* **Pending**: The monitoring metrics meet the preset conditions but do not meet the preset duration.
+
+* **Firing**: The monitoring metrics meet the preset conditions and the preset duration.

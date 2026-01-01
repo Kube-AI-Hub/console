@@ -1,0 +1,21 @@
+// :ks_include_id: 7faeedc1e81841e7a783f960b238f5f0
+* The ConfigMap list provides the following information:
++
+--
+[%header,cols="1,4"]
+|===
+|Parameter |Description
+
+|Name
+|The name of the ConfigMap.
+
+|Status
+|The current status of the ConfigMap.
+
+|Data
+|The key names of the key-value data stored in the ConfigMap. Different keys are separated by commas (,).
+
+|Creation Time
+|The creation time of the ConfigMap.
+|===
+--

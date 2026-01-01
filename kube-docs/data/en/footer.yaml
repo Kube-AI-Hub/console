@@ -1,0 +1,29 @@
+footer:
+  list:
+    - title: Scenarios
+      list:
+        - content: Kubernetes DevOps and GitOps
+          link: devops/
+
+        - content: Microservices with Service Mesh
+          link: service-mesh/
+
+        - content: Cloud Native Observability
+          link: observability/
+
+        - content: Functions-as-a-Service Platform and Serverless
+          link: 'https://github.com/OpenFunction/OpenFunction'
+
+        - content: Multi-cloud Apps Mgmt
+          link: 'https://github.com/openpitrix/openpitrix'
+
+    - title: Kube AI Hub Docs
+      list:
+        - content: Introduction
+          link: '../../../docs/v3.4/introduction/what-is-kubesphere/'
+        - content: Installation
+          link: '../../../docs/v3.4/installing-on-kubernetes/introduction/overview/'
+        - content: Tutorial
+          link: '../../../docs/v3.4/quick-start/'
+        - content: API Documentation
+          link: '../../../docs/v3.4/reference/api-docs/'

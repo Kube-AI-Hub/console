@@ -1,0 +1,18 @@
+// :ks_include_id: 9f95c83dc7754be49bf6b78b7587d110
+* Chatbot Settings
++
+--
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+|Webhook URL
+|The Webhook URL of the chatbot. {ks_product-en} will send notifications to this URL.
+
+|Secret
+|The access key of the chatbot.
+
+|Keywords
+|The keywords accepted by the chatbot. Click **Add** to set multiple keywords.
+|===
+--

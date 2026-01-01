@@ -1,0 +1,48 @@
+// :ks_include_id: f0e2bbaddcbd4d3db4ce4f3625f57ca1
+. Select **More > Edit Metrics Exporter** in the upper left corner of the service details page.
+
+. On the **Edit Metrics Exporter** page, set the collection path, collection interval, and timeout for the monitoring metrics, then click **OK**.
++
+--
+The monitoring and alerting module of Kube AI Hub will access the service and collect the application's monitoring metrics based on the parameters set here.
+
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+|Protocol
+|The protocol used for communication, which can be **HTTP** or **HTTPS**.
+
+|Port
+|The service port used for communication.
+
+|Path
+|The path exposing the application's monitoring metrics.
+
+|Authentication Method
+|The communication authentication method for the process of collecting application monitoring metrics.
+
+* **No Authentication**: No authentication method is used. This method may have information security risks.
+
+* **TLS**: The process of collecting application monitoring metrics is authenticated through the TLS protocol.
+
+* **Bearer Token**: Authentication is performed through a token.
+
+* **Basic Authentication**: Authentication is performed through a username and password.
+
+Except for **No Authentication**, other authentication methods require corresponding authentication logic to be configured in the application and a Secret containing the authentication information to be created in advance.
+
+|Collection Interval
+|The collection interval for application monitoring metrics, in minutes.
+
+|Timeout
+|The timeout for each collection of application monitoring metrics, in seconds.
+|===
+--
+
+// Note
+include::../../../../_ks_components-en/admonitions/note.adoc[]
+
+After the metrics exporter is created, you also need to use the monitoring metrics to further create rule groups or custom monitoring dashboards in the {ks_product-en} web console to monitor the running status of the application.
+
+include::../../../../_ks_components-en/admonitions/admonEnd.adoc[]

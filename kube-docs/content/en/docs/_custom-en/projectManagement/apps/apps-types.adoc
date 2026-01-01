@@ -1,0 +1,6 @@
+// :ks_include_id: faff93159cca48358390bdd176c1577d
+In Kube AI Hub, an application refers to a business program composed of one or more workloads, services, Ingresses, and other resources. Based on the creation method, apps in Kube AI Hub are divided into the following two types:
+
+* Template-based apps: Apps created using existing app templates. The app templates used to create apps can be app templates uploaded to the workspace, app templates published to the App Store, or app templates from third-party app repositories.
+
+* Composed apps: Apps created by manually orchestrating workloads, services, Ingresses, and other resources. When creating a composed app, you can enable application governance to use the traffic monitoring, grayscale release, and tracing features provided by Kube AI Hub.

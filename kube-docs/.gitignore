@@ -1,0 +1,11 @@
+# Project dependencies
+.cache
+node_modules
+.hugo_build.lock
+
+# Build directory
+/public
+.DS_Store
+.idea
+/resources
+

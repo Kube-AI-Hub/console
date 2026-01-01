@@ -1,0 +1,2 @@
+// :ks_include_id: 0a4f15a804bd4a04b35fa4baec7bca69
+This section introduces how to edit a custom monitoring dashboard.

@@ -61,7 +61,7 @@ module.exports = {
   // List > Remove Cluster
   RISK_WARNING: 'Risikowarnung',
   REMOVE_CLUSTER_TIP_A: 'Nachdem der Cluster entfernt wurde, werden Ressourcen im Cluster nicht automatisch gelöscht.',
-  REMOVE_CLUSTER_TIP_B: 'Nachdem der Cluster entfernt wurde, werden Multi-Cluster-Konfigurationsdaten im Cluster nicht automatisch gelöscht. Das Deinstallieren von KubeSphere oder das Löschen zugehöriger Ressourcen kann zu Benutzerdatenverlust führen. Sie müssen die Multi-Cluster-Konfigurationsdaten im entfernten Cluster manuell löschen, durch Bezugnahme auf die <a href="https://kubesphere.io/docs/">offizielle KubeSphere-Dokumentation</a>.',
+  REMOVE_CLUSTER_TIP_B: 'Nachdem der Cluster entfernt wurde, werden Multi-Cluster-Konfigurationsdaten im Cluster nicht automatisch gelöscht. Das Deinstallieren von KubeSphere oder das Löschen zugehöriger Ressourcen kann zu Benutzerdatenverlust führen. Sie müssen die Multi-Cluster-Konfigurationsdaten im entfernten Cluster manuell löschen, durch Bezugnahme auf die <a href="/kube-docs/docs/">offizielle KubeSphere-Dokumentation</a>.',
   CLUSTER_CONFIRM_TEXT: 'Ich verstehe die Risiken beim Entfernen des Clusters',
   ENTER_CLUSTER_NAME: 'Dieser Vorgang kann nicht rückgängig gemacht werden. Geben Sie den Clusternamen <strong>{name}</strong> ein, um zu bestätigen, dass Sie die Risiken dieses Vorgangs verstehen.'
 };

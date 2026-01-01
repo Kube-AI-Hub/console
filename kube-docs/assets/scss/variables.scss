@@ -1,0 +1,84 @@
+// Font families
+$font-family: "PingFang SC", "Lantinghei SC", "Helvetica Neue", Helvetica, Arial,
+  "Microsoft YaHei", 微软雅黑, STHeitiSC-Light, simsun, 宋体,
+  "WenQuanYi Zen Hei", "WenQuanYi Micro Hei", sans-serif;
+$font-family-1: Roboto, $font-family;
+
+// Responsive breakpoints
+$mobile-max-width: 768px;
+
+// Color palette - Dark theme with purple accents
+// Dark colors (light shades for text on dark backgrounds)
+$dark-color01: #a9d1ea;
+$dark-color02: #b5d7ec;
+$dark-color03: #bfdcf0;
+$dark-color04: #c9e1f3;
+$dark-color05: #cfe4f2;
+$dark-color06: #d9e9f5;
+$dark-color07: #deebf6;
+$dark-color08: #f9fbfd;
+
+// Light colors (dark shades for backgrounds)
+$light-color01: #0b184d;
+$light-color02: #14215a;
+$light-color03: #1f2c6a;
+$light-color04: #2c3a7c;
+$light-color05: #3a498f;
+$light-color06: #4a5aa2;
+$light-color07: #5c6cb6;
+$light-color08: #707fc9;
+
+// Green colors (actually purple - accent colors)
+$green-color01: #6b29fa;
+$green-color02: #8b61eb;
+$green-color03: #a981f8;
+$green-color04: #c4aff0;
+$green-color05: #d5c5f6;
+
+// Blue colors
+$blue-color01: #326e93;
+$blue-color02: #3385b0;
+$blue-color03: #329dce;
+$blue-color04: #7eb8dc;
+$blue-color05: #c7deef;
+
+// Red colors
+$red-color01: #8c3231;
+$red-color02: #ab2f29;
+$red-color03: #ca2621;
+$red-color04: #ea8573;
+$red-color05: #fae7e5;
+
+// Yellow colors
+$yellow-color01: #8d663e;
+$yellow-color02: #e0992c;
+$yellow-color03: #f5a623;
+$yellow-color04: #ffc781;
+$yellow-color05: #ffe1be;
+
+// Base colors (inverted for dark mode)
+$white: $light-color06;
+$black: #ffffff;
+
+// Semantic colors (for easier maintenance)
+$bg-primary: $light-color02;
+$bg-secondary: $light-color03;
+$bg-tertiary: $light-color04;
+$bg-card: $light-color04;
+$bg-surface: $light-color05;
+
+$text-primary: $dark-color01;
+$text-secondary: $dark-color03;
+$text-tertiary: $dark-color04;
+$text-muted: $dark-color05;
+
+$accent-primary: $green-color01;
+$accent-secondary: $green-color02;
+$accent-tertiary: $green-color03;
+$accent-light: $green-color04;
+$accent-lighter: $green-color05;
+
+$border-primary: rgba($light-color06, 0.3);
+$border-secondary: rgba($light-color07, 0.2);
+
+$shadow-color: rgba(0, 0, 0, 0.5);

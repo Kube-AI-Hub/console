@@ -1,0 +1,63 @@
+// :ks_include_id: 4527bd133db04495b10cf1930a58d5f9
+. On the **Basic Information** tab, set the basic information for the persistent volume claim, then click **Next**.
++
+--
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+|Name
+|The name of the persistent volume claim. The name can only contain lowercase letters, numbers, and hyphens (-), must start and end with a lowercase letter or number, and can be up to 253 characters long.
+
+|Alias
+|The alias of the persistent volume claim. Different persistent volume claims can have the same alias. The alias can only contain Chinese characters, letters, numbers, and hyphens (-), and cannot start or end with a hyphen (-), with a maximum length of 63 characters.
+
+|Description
+|The description of the persistent volume claim. The description can contain any characters, with a maximum of 256 characters.
+|===
+--
+
+. On the **Storage Settings** tab, set the storage space requirements, then click **Next**.
++
+--
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+|Access Mode
+|
+include::persistentVolumeClaims-para-accessMode.adoc[]
+
+Depending on the backend storage system, some access mode types may not be available.
+
+|Volume Capacity
+|The capacity size of the volume corresponding to the persistent volume claim.
+|===
+--
+
+. On the **Advanced Settings** tab, set the labels and annotations for the persistent volume claim, then click **Create**.
++
+--
+include::../workloads/createWorkload/workloads-para-Metadata.adoc[]
+--
+
+. On the **Cluster Differences** tab, use different storage settings for the persistent volume claim in different clusters.
++
+--
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+|Storage Class
+|The storage class used to create the persistent volume claim.
+
+|Access Mode
+|
+include::persistentVolumeClaims-para-accessMode.adoc[]
+
+|Volume Capacity
+|The capacity of each persistent volume created from the persistent volume claim.
+|===
+
+After the persistent volume claim is created, it will be displayed in the persistent volume claim list.
+--

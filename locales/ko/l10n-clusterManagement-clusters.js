@@ -61,7 +61,7 @@ module.exports = {
   // List > Remove Cluster
   RISK_WARNING: '위험 경고',
   REMOVE_CLUSTER_TIP_A: '클러스터가 제거된 후에는 클러스터의 리소스가 자동으로 지워지지 않습니다.',
-  REMOVE_CLUSTER_TIP_B: '클러스터가 제거된 후에는 클러스터의 멀티 클러스터 구성 데이터가 자동으로 지워지지 않습니다. KubeSphere를 제거하거나 관련 리소스를 삭제하면 사용자 데이터가 손실될 수 있습니다. <a href="https://kubesphere.io/docs/"> 공식 KubeSphere 설명서</a>를 참조하여 제거된 클러스터의 멀티 클러스터 구성 데이터를 수동으로 지워야 합니다.',
+  REMOVE_CLUSTER_TIP_B: '클러스터가 제거된 후에는 클러스터의 멀티 클러스터 구성 데이터가 자동으로 지워지지 않습니다. KubeSphere를 제거하거나 관련 리소스를 삭제하면 사용자 데이터가 손실될 수 있습니다. <a href="/kube-docs/docs/"> 공식 KubeSphere 설명서</a>를 참조하여 제거된 클러스터의 멀티 클러스터 구성 데이터를 수동으로 지워야 합니다.',
   CLUSTER_CONFIRM_TEXT: '클러스터를 제거할 때의 위험을 인지하였습니다.',
   ENTER_CLUSTER_NAME: '이 작업은 실행 취소할 수 없습니다. 클러스터 이름 <strong>{name}</strong>을 입력하여 이 작업의 위험을 이해하고 있는지 확인합니다.'
 };

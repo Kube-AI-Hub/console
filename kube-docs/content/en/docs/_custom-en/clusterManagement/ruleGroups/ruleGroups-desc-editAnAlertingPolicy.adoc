@@ -1,0 +1,9 @@
+// :ks_include_id: 50920b439c7f4f4e996fecec215f24ed
+This section describes how to edit alert rules in a rule group.
+
+// Note
+include::../../../../_ks_components-en/admonitions/note.adoc[]
+
+{ks_product-en} only supports editing custom rule groups, not built-in rule groups.
+
+include::../../../../_ks_components-en/admonitions/admonEnd.adoc[]

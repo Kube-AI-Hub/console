@@ -1,0 +1,46 @@
+<div>
+  <nav class='nav-menu'>
+		{{ $sections := .FirstSection.Sections.ByWeight }}
+		{{ $secondSection := .FirstSection }}
+		{{ $page := . }}
+		{{ range $sections }}
+			{{ if $page.IsDescendant . }}
+				{{ $secondSection = . }}
+			{{ end }}
+		{{ end }}
+    {{ template "section-tree-nav-section" (dict "page" . "section" $secondSection)  }}
+  </nav>
+</div>
+
+{{ define "section-tree-nav-section" }}
+{{ $s := .section }}
+{{ $p := .page }}
+{{ $list_active := $p.IsDescendant $s }}
+{{ if eq $s.Parent $s.FirstSection }}
+{{ else }}
+<p class="list-title">
+	<span class="arrow {{ if $list_active }}arrow-open{{ end }}"></span>
+	<span>{{ $s.LinkTitle }}</span>
+</p>
+{{ end }}
+
+<ul class="{{ if $list_active }}ul-active{{ end }}">
+	{{ $pages := (union (where $s.Pages ".Params._build.render" "!=" false) $s.Sections).ByWeight }}
+	{{ range $pages }}
+	{{ $active := eq . $p }}
+	<li class="list{{ if $active }} active{{ end }}">
+		{{ if .IsPage }}
+		<a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a>
+		{{ else }}
+		{{ template "section-tree-nav-section" (dict "page" $p "section" .) }}
+		{{ end }}
+	</li>
+	{{ end }}
+</ul>
+{{ end }}
+<script>
+	$('.nav-menu .list-title').click(function() {
+		$(this).find('.arrow').toggleClass('arrow-open')
+		$(this).next().toggleClass('ul-active')
+	})
+</script>

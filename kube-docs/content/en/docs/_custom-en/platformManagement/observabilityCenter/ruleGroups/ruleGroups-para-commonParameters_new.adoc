@@ -1,0 +1,23 @@
+// :ks_include_id: e1fc48dace834fd9b24c37503267b870
+* Common Parameters
++
+--
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+|Rule Name
+|The name of the alert rule. The rule name can contain any characters and can be up to 63 characters long.
+
+|Label Setting
+|Set key-value pair labels for the alert rule, so that alerts can be filtered by labels in notification subscriptions and sent to recipients whose labels meet specific conditions.
+
+After the alert rule is created, a label with the key `rule_id` will be automatically generated.
+
+|Summary
+|The content summary of the alert message. The message summary can contain any characters and can be up to 63 characters long.
+
+|Details
+|The detailed description of the alert message. The message details can contain any characters and can be up to 256 characters long.
+|===
+--

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="{{ with .Site.LanguageCode }}{{ . }}{{ else }}en-US{{ end }}">
+<head>
+    {{- partial "head.html" . -}}
+</head>
+<script>
+    const LANGUAGE_REG = [/en/g, /zh/g]
+    const LANGUAGE_HREF = ['/', '/zh']
+    const BASE_PATH = '/kube-docs'
+
+    const userLang = navigator.language;
+    const nowPathName = window.location.pathname
+    let cookieBanned = false
+    let pageLang
+
+    try{
+        pageLang = localStorage.getItem('lang')
+    } catch (err){
+        cookieBanned = true
+    }
+
+    if(!pageLang){
+        if(userLang.indexOf('zh') !== -1){
+            pageLang = 'zh'
+        } else {
+            pageLang = 'en'
+        }
+    }
+
+    // Check if current path is a Chinese page (considering the base path)
+    const isZhPage = nowPathName.startsWith(BASE_PATH + '/zh') || nowPathName.startsWith('/zh')
+
+    if(!cookieBanned){
+        if (pageLang === 'en') {
+            if (isZhPage) {
+                // Remove /zh from the path, handling both /kube-docs/zh/... and /zh/... cases
+                if (nowPathName.startsWith(BASE_PATH + '/zh')) {
+                    window.location.href = BASE_PATH + nowPathName.slice((BASE_PATH + '/zh').length)
+                } else if (nowPathName.startsWith('/zh')) {
+                    window.location.href = nowPathName.slice(3)
+                }
+            }
+        } else {
+            if (!isZhPage) {
+                // Add /zh after the base path
+                if (nowPathName.startsWith(BASE_PATH)) {
+                    window.location.href = BASE_PATH + '/zh' + nowPathName.slice(BASE_PATH.length)
+                } else {
+                    window.location.href = '/zh' + nowPathName
+                }
+            }
+        }  
+    }
+</script>
+
+<body>
+{{ if .Site.Params.addGoogleTag }}
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W9FLX4R"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+{{ end }}
+{{- partial "header.html" . -}}
+<main class='main-section'>
+    {{- block "main" . }}{{- end }}
+</main>
+{{- partial "footer.html" . -}}
+</body>
+
+</html>

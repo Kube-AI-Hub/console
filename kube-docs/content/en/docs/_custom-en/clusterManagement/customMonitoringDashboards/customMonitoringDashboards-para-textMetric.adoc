@@ -1,0 +1,19 @@
+// :ks_include_id: 6d474f2ff06e43c7bc9003aaa10e29c2
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+|Chart Name
+|The name of the monitoring metric.
+
+|Unit
+|The unit of the metric data.
+
+|Decimal Places
+|The number of significant decimal places in the metric data.
+
+|Monitoring Metric
+|
+include::customMonitoringDashboards-para-monitoringMetric.adoc[]
+
+|===

@@ -1,0 +1,2 @@
+// :ks_include_id: a11cb13f4c4d44e59332bb4fe44859c0
+. On the **Alerts** page, click **From Custom Rules** or **From Built-in Rules** to open the alert list.

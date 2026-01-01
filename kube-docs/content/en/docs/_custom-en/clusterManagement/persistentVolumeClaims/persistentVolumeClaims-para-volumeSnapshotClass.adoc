@@ -1,0 +1,2 @@
+// :ks_include_id: 308d3cded9ea45a5a0a4475b02e53d57
+The volume snapshot class used to create the volume snapshot. Ensure that the provider of the volume snapshot class matches the provider of the storage class corresponding to the persistent volume; otherwise, the volume snapshot creation will fail.

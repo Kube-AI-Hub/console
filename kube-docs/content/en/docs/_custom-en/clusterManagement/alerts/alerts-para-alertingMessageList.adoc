@@ -1,0 +1,36 @@
+// :ks_include_id: 9bb30ff8148c403aa266fbe96dcaa2a8
+* The alert list provides the following information:
++
+--
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+|Message
+|
+include::../ruleGroups/ruleGroups-para-message.adoc[]
+
+|Status
+|
+The current status of the alert.
+
+include::alerts-para-alertingStatus.adoc[]
+
+|Severity
+|
+include::../ruleGroups/ruleGroups-para-alertLevel.adoc[]
+
+|Alerting Name
+|The name of the alert rule.
+
+|Rule Group
+|The name of the alerting rule group.
+
+|Monitored Target
+|The type and name of the monitored target that generated the alert.
+
+|Trigger Time
+|
+include::../ruleGroups/ruleGroups-para-activationTime.adoc[]
+|===
+--

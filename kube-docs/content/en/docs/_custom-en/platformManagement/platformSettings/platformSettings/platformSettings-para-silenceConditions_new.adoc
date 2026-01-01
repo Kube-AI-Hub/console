@@ -1,0 +1,14 @@
+// :ks_include_id: 4886da3f3a094de187d396ed1236141b
+* Silent for All Notifications
++
+--
+Set the silence policy to apply to all notifications.
+--
+
+* Custom Silence Conditions
++
+--
+Set the silence policy to apply only to notifications that meet the specified conditions. Click **Add** to set the conditions that the notification needs to meet.
+
+include::../notificationChannels/notificationChannels-para-filterRule_new.adoc[]
+--

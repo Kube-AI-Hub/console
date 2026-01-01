@@ -1,0 +1,133 @@
+@import 'open-source';
+@import 'variables';
+
+.tab-content {
+  background-color: $bg-card;
+  padding-top: 60px;
+  padding-bottom: 100px;
+
+  @media only screen and (max-width: $mobile-max-width) {
+    padding-top: 20px;
+  }
+
+  .content {
+    position: relative;
+    min-height: 580px;
+    padding-bottom: 20px;
+
+    .left {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 200px;
+      padding: 0 30px;
+      border-radius: 4px;
+      box-shadow: 0 4px 15px 0 rgba(7,42,68,.1);
+      background-color: $bg-card;
+
+      @media only screen and (max-width: $mobile-max-width) {
+        display: none;
+      }
+
+      li:first-of-type {
+        border-bottom: 1px solid rgba(181,193,204,.5);
+        font-size: 16px;
+        font-weight: 500;
+        color: $text-secondary;
+        line-height: 22px;
+        padding: 20px 0;
+        margin-bottom: 5px;
+      }
+
+      li {
+        position: relative;
+        padding: 15px 0;
+        font-size: 14px;
+        line-height: 20px;
+        color: $text-secondary;
+        -webkit-transition: all .2s ease-in-out;
+        transition: all .2s ease-in-out;
+        cursor: pointer;
+      }
+
+      li:hover, li.active {
+        color: $accent-primary;
+      }
+    }
+
+    .right {
+      padding-left: 300px;
+
+      @media only screen and (max-width: $mobile-max-width) {
+        padding-left: 0px;
+      }
+
+      li {
+        position: relative;
+        padding: 32px 157px 32px 120px;
+        border-radius: 4px;
+        box-shadow: 0 4px 15px 0 rgba(7,42,68,.1);
+        background-color: $bg-card;
+
+        img {
+          position: absolute;
+          width: 64px;
+          height: 64px;
+          top: 50%;
+          left: 28px;
+          -webkit-transform: translateY(-50%);
+          transform: translateY(-50%);
+        }
+
+        & > a {
+          font-size: 20px;
+          font-weight: 600;
+          line-height: 1.6;
+          margin-bottom: 8px;
+          color: $text-secondary;
+        }
+
+        p {
+          font-size: 14px;
+          line-height: 1.71;
+          color: $text-tertiary;
+        }
+
+        div {
+          display: block;
+          position: absolute;
+          top: 50%;
+          right: 40px;
+          -webkit-transform: translateY(-50%);
+          transform: translateY(-50%);
+          font-size: 16px;
+          line-height: 1.5;
+
+          a {
+            color: $accent-primary;
+          }
+        }
+
+        @media only screen and (max-width: $mobile-max-width) {
+          padding: 12px 30px 12px 54px;
+
+          img {
+            width: 32px;
+            height: 32px;
+            left: 12px;
+          }
+
+          &:hover {
+            div {
+              display: none;
+            }
+          }
+        }
+      }
+
+      li + li {
+        margin-top: 12px;
+      }
+    }
+  }
+}

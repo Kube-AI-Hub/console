@@ -1,0 +1,8 @@
+// :ks_include_id: b4d12ee4d7d748a4915f6f72d47fa1d7
+This section describes how to manage configuration resources.
+
+{ks_product-en} supports managing the following two types of configuration resources:
+
+* Secret: Contains Base64-encoded key-value pairs used to store confidential data such as passwords, tokens, and keys.
+
+* ConfigMap: Contains plaintext key-value pairs used to store general configuration data.

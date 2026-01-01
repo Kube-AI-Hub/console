@@ -1,0 +1,19 @@
+// :ks_include_id: 70f19c4ccbb54fb4ad10de0f5c8a4a1e
+
+|Project
+|The project to which the app belongs.
+
+|App
+|The name of the app.
+
+|Version
+|The version of the app.
+
+|Creation Time
+|The creation time of the app.
+
+|Update Time
+|The update time of the app.
+
+|Creator
+|The user who created the app.

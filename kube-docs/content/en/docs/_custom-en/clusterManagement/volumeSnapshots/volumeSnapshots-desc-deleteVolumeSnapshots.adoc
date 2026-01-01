@@ -1,0 +1,9 @@
+// :ks_include_id: 3603af7c772d428bb6e514c29c8eb747
+This section describes how to delete a volume snapshot.
+
+// Warning
+include::../../../../_ks_components-en/admonitions/warning.adoc[]
+
+Volume snapshots cannot be recovered after deletion. Please proceed with caution to avoid data loss.
+
+include::../../../../_ks_components-en/admonitions/admonEnd.adoc[]

@@ -1,0 +1,75 @@
+{{ define "main" }}
+
+{{ with .Params.section1 }}
+<section class="section-1 bg-cover" style='background-image: url("{{ .topImage }}");'>
+    <div class="title-div common-layout">
+        <h1 class="title-center-h1">{{ .title }}</h1>
+        <p class="common-p">{{ .content }}</p>
+    </div>
+</section>
+{{ end }}
+
+<section class="section-2">
+    {{ with .Params.section2 }}
+    {{ $tip := .tip }}
+    <ul class="cases-ul common-layout">
+        {{ range .caseList }}
+            <li>
+                <img src="{{ .icon | relURL }}" alt="{{ .content }}">
+                <p class="title-p">{{ .content }}</p>
+                <div>
+                    <a class="common-green-a" href="{{ .link }}">{{ $tip }}</a>
+                </div>
+            </li>
+        {{ end }}
+    </ul>
+    <img src="{{ .icon | relURL }}" alt="{{ i18n "icon" }}">
+    {{ end }}
+</section>
+
+<section class="section-3">
+    {{ with .Params.section3 }}
+    <h2 class="title-black-h2 common-layout">{{ .title }}</h2>
+    <div class="common-layout">
+        <ul id="case-group">
+            <li class="active">{{ .tip }}</li>
+            {{ range .caseType }}
+            <li data-name="{{ .name }}">{{ .name }}</li>
+            {{ end }}
+        </ul>
+        <ul id="case-children">
+            {{ range .caseType }}
+            {{ $name := .name }}
+            {{ range .children }}
+            <li data-name="{{ $name }}">
+                <img src="{{ .icon | relURL }}" alt="{{ .name }}">
+            </li>
+            {{ end }}
+            {{ end }}
+        </ul>
+        {{ with .bottomContent }}
+        <p>{{ .content }} <a class="common-green-a" target="_blank" rel="noopener noreferrer" href="{{ .link }}">{{ .linkContent }}</a></p>
+        {{ end }}
+    </div>
+    <img src="{{ .icon | relURL }}" alt="{{ i18n "icon" }}">
+    {{ end }}
+</section>
+<script>
+    $('#case-group li').click(function() {
+        $("#case-group li").removeClass("active");
+        $(this).addClass("active");
+        var name = $(this).data("name")
+        if (name) {
+            $("#case-children li").each(function(item) {
+                if ($(this).data("name") !== name) {
+                    $(this).hide()
+                } else {
+                    $(this).show()
+                }
+            })
+        } else {
+            $("#case-children li").show()
+        }
+	})
+</script>
+{{ end }}

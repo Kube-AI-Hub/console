@@ -1,0 +1,3 @@
+// :ks_include_id: 933bd63e86ea4c958e7578f625e38dca
+|Type
+|The type of the application template.

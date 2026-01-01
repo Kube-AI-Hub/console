@@ -1,0 +1,30 @@
+// :ks_include_id: 02c275a851594f868957a3c32ff9f5cd
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+|Graph Types
+|The vertical data display method of the monitoring chart, with options including **Basic Chart** and **Stacked Chart**.
+
+|Chart Colors
+|The color scheme of the monitoring chart, with options including **Default Colors**, **Cool Colors**, and **Warm Colors**.
+
+|Basic Information
+|User-defined name and description for the monitoring chart.
+
+|Data
+|The monitoring metrics displayed in the monitoring chart.
+
+* **Metric Name**: User-defined name for the monitoring metric.
+
+* **Interval**: The time interval of the data in the monitoring chart, with a value of <number><unit>, for example, **1m** means the data time interval is 1 minute.
+
+* **Monitoring Metric**: The monitoring metrics exposed by the application. You can click **Monitoring Metric** and then select a monitoring metric from the dropdown list, or manually enter a PromQL statement. Ensure that you have configured the application to expose monitoring metrics and have set up the monitoring exporter. For more information about PromQL expressions, see the link:https://prometheus.io/docs/prometheus/latest/querying/basics/[Prometheus Documentation].
+
+|Y Axis
+|Settings for the vertical axis of the monitoring chart.
+
+* **Unit**: The unit of the data on the vertical axis.
+
+* **Decimal Places**: The number of significant decimal places in the data on the vertical axis.
+|===

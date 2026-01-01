@@ -1,0 +1,2 @@
+// :ks_include_id: 86dce4cf97db45baa0af638a00a5a435
+Kube AI Hub supports monitoring the running status of applications through custom monitoring dashboards. You can use custom monitoring dashboards in the following ways:

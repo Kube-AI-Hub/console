@@ -1,0 +1,2 @@
+// :ks_include_id: 352d6d8a19f04dbeb3551dbec55871b0
+. Click the name of a microservice configuration in the list to open its details page.

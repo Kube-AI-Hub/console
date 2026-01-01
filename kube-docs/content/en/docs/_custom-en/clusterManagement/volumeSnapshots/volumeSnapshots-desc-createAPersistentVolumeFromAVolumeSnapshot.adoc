@@ -1,0 +1,4 @@
+// :ks_include_id: e8fdffd5e61b45e99c5afd2ae8efb5ec
+This section describes how to create a persistent volume using a volume snapshot.
+
+After a volume snapshot is created, you can use it to create a persistent volume claim and a persistent volume.

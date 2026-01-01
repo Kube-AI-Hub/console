@@ -1,0 +1,136 @@
+- id: KubeSphere®️ 2022 All Rights Reserved.
+  translation: "Kube AI Hub®️ 2022 All Rights Reserved."
+- id: KubeSphere®️ 2025 All Rights Reserved.
+  translation: "Kube AI Hub®️ 2025 All Rights Reserved."
+- id: Published on
+  translation: 发布于
+- id: KubeCon & QCon
+  translation: KubeCon & QCon
+- id: Subscribe
+  translation: 订阅
+- id: Please enter your email address
+  translation: 请输入您的邮箱地址
+- id: Receive the latest news, articles and updates from Kube AI Hub
+  translation: "通过邮件接收 Kube AI Hub 最新的技术博客与产品更新的通知"
+- id: Welcome to the Kube AI Hub Documentation
+  translation: 欢迎使用 Kube AI Hub 文档
+- id: We will introduce the services and features of Kube AI Hub with clear and concise pictures and texts as far as possible.
+  translation: 欢迎阅读 Kube AI Hub 文档，我们尽可能以清晰简明的图文，介绍 Kube AI Hub 各项服务及使用方法。
+- id: Open Source Community
+  translation: 开源社区
+- id: Kube AI Hub is committed to the open source contribution of cloud native technology, enriching the ecosystem of the open source community.
+  translation: 分享云原生领域最前沿的技术干货与开发实践文章，以及 Kube AI Hub 产品最新的动态。
+- id: Go to GitHub
+  translation: 访问 GitHub
+- id: email is required
+  translation: 请提供您的邮箱
+- id: Please enter a valid email address.
+  translation: 请输入有效的邮箱地址!
+- id: Email address already exists.
+  translation: 邮箱地址已经存在
+- id: Subscription is successful, we promise not to send you spam
+  translation: 订阅成功啦，我们保证不会给你发垃圾邮件的啦
+- id: Table of Contents
+  translation: 目录
+- id: Demo
+  translation: Demo
+- id: demo content 1
+  translation: "1.创建 Kube AI Hub Cloud 账户并登录。"
+- id: demo content 2
+  translation: 2.在页面右上角，进入管理控制台，并点击轻量集群服务。
+- id: demo content 3
+  translation: 3.新建一个安装了 Kube AI Hub 的 K8s 集群。
+- id: demo content 4
+  translation: 4.使用默认账户和密码 （admin/P@88w0rd）登录 Kube AI Hub。
+- id: Coming Soon
+  translation: Coming Soon
+- id: Read More
+  translation: 了解更多
+- id: We can’t find the page that you’re looking for :(
+  translation: 没有你想找的页面 :(
+- id: Go To Home
+  translation: 返回首页
+- id: icon
+  translation: 图标
+- id: background image
+  translation: 背景图片
+- id: kubesphere console screenshot
+  translation: kubesphere console 截图
+- id: Learn More
+  translation: 查看更多
+- id: Download this page (PDF)
+  translation: 下载该页 (PDF)
+- id: Last updated
+  translation: 最新更新
+- id: What’s on this Page
+  translation: 页面内容
+- id: Previous
+  translation: 上一篇
+- id: Next
+  translation: 下一篇
+- id: edit
+  translation: 编辑
+- id: feedback
+  translation: 反馈
+- id: share
+  translation: 分享
+- id: note
+  translation: 备注
+- id: tip
+  translation: 提示
+- id: info
+  translation: 信息
+- id: warning
+  translation: 警告
+- id: Search Documentation
+  translation: 搜索文档
+- id: ALL
+  translation: 全部
+- id: Watch replay
+  translation: 观看回放
+- id: View details
+  translation: 了解详情
+- id: Wonderful review
+  translation: 精彩回顾
+- id: Course theme
+  translation: 课程主题
+- id: Course benefits
+  translation: 课程收益
+- id: Video tutorial
+  translation: 视频教程
+- id: Graphic Course
+  translation: 图文课程
+- id: Start learning
+  translation: 开始学习
+- id: View graphic
+  translation: 查看图文
+- id: Apply for the job
+  translation: 申请职位
+- id: View more jobs
+  translation: 查看更多职位
+- id: Cloud Native Technology Class
+  translation: 云原生技术课堂
+- id: warnGraphic explanation
+  translation: 图文讲解
+- id: PPT courseware
+  translation: PPT 课件
+- id: Self-test
+  translation: 考题自测
+- id: Cookie Statement
+  translation: 您的隐私对我们很重要。我们使用Cookie来记住订阅详细信息，优化网站功能并交付根据您的兴趣量身定制的内容。要了解更多信息，请参阅我们的<a href="{{.}}">隐私政策</a>.
+- id: Accept and continue
+  translation: 接受并继续
+- id: Install on Kubernetes
+  translation: 在 Kubernetes 安装
+- id: Install on Linux
+  translation: 在 Linux 安装
+- id: Was this page Helpful?
+  translation: 这篇文章对您有帮助吗？
+- id: 'Yes'
+  translation: 是
+- id: 'No'
+  translation: 否
+- id: Msg-Thank
+  translation: 感谢您的反馈。如果您有关于如何使用 Kube AI Hub 的具体问题，请在 Slack 上提问。如果您想报告问题或提出改进建议，请在 GitHub 存储库中打开问题。
+- id: Visitor-count
+  translation: 本文总阅读量：

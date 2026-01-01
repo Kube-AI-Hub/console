@@ -130,7 +130,7 @@ class Home extends React.Component {
               />
               {t.html('ENABLE_AUDIT_LOG_COLLECTION_DESC', {
                 link:
-                  'https://kubesphere.io/docs/toolbox/auditing/auditing-receive-customize/#receive-auditing-logs-from-kubernetes',
+                  '/kube-docs/docs/toolbox/auditing/auditing-receive-customize/#receive-auditing-logs-from-kubernetes',
               })}
             </p>
           </div>

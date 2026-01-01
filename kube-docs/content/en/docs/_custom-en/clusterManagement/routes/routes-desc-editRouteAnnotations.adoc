@@ -1,0 +1,2 @@
+// :ks_include_id: 9a1f0d5fdb294c79a6051a90fe1a17be
+This section describes how to edit Ingress annotations.

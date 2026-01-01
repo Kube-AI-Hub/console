@@ -1,0 +1,21 @@
+// :ks_include_id: d43be0d6bddf43e5aacfeed52c0fe32a
+* The Ingress list provides the following information:
++
+--
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+|Name
+|The name and description of the Ingress.
+
+|Status
+|The current status of the Ingress.
+
+|App
+|The name of the app to which the Ingress corresponds.
+
+|Creation Time
+|The creation time of the Ingress.
+|===
+--

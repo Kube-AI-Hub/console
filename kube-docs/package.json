@@ -1,0 +1,17 @@
+{
+  "name": "kube-ai-hub-website",
+  "version": "1.0.0",
+  "description": "Kube AI Hub documentation website",
+  "scripts": {
+    "build": "hugo build && npx pagefind --site public",
+    "dev": "hugo server -D",
+    "preview": "hugo && npx pagefind --site public --serve"
+  },
+  "devDependencies": {
+    "pagefind": "^1.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+

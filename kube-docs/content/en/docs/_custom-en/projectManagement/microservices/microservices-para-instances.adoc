@@ -1,0 +1,20 @@
+// :ks_include_id: 63f2cf5af75e41deb6a5d5c45da3d5b3
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+|Name
+|The name of the microservice instance.
+
+|Weight
+|The weight of the microservice instance within the microservice. Traffic sent to the microservice will be distributed to microservice instances based on their weights.
+
+|IP Address
+|The internal access address of the microservice instance in the Kube AI Hub cluster.
+
+|Port
+|The access port number of the microservice instance.
+
+|Creation Time
+|The creation time of the microservice instance.
+|===

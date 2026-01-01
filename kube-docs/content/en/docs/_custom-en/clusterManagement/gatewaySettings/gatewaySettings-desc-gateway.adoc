@@ -1,0 +1,2 @@
+// :ks_include_id: 854355fa9af44f41886ade72f0ee39da
+The gateway provides reverse proxy for services on the Kube AI Hub platform. The gateway needs to work according to the Ingresses. Business traffic from clients is first sent to the gateway through domain name resolution, and then the gateway forwards the business traffic to different services according to the rules defined in the Ingresses. The gateway itself is also a workload exposed through services, so the gateway also supports two external access modes: NodePort and LoadBalancer.

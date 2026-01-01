@@ -1,0 +1,13 @@
+{{ define "main" }}
+<section class="section-1">
+    <img class="img-1" src="{{ "/images/404/combined-shape.svg" | relURL }}" alt="icon">
+    <img class="img-2" src="{{ "/images/404/fill.svg" | relURL }}" alt="background image">
+    <div class="common-layout">
+        <img src="{{ "/images/404/404.png" | relURL }}" alt="404 image">
+        <p>{{ i18n "We can’t find the page that you’re looking for :(" }}</p>
+        <a href="{{ site.Home.RelPermalink }}">
+            <button>{{ i18n "Go To Home" }}</button>
+        </a>
+    </div>
+</section>
+{{ end }}

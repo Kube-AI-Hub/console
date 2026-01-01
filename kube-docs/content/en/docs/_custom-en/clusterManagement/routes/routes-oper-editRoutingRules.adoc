@@ -1,0 +1,8 @@
+// :ks_include_id: b0e0fbee5bf54cfda0ac0d8847b90185
+. Click image:/images/ks-qkcp/zh/icons/more.svg[more,18,18] on the right side of the ingress you want to edit, then select **Edit Routing Rules** from the dropdown list.
+
+. In the **Edit Routing Rules** dialog, set the routing rules, then click **OK**.
++
+--
+include::routes-para-routingRules.adoc[]
+--

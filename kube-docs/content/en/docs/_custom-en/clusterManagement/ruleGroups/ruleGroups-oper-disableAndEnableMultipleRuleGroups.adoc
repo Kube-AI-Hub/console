@@ -1,0 +1,10 @@
+// :ks_include_id: 76fde78ac7ba4fef9a7a125fa849713d
+. Select the checkbox on the left side of the rule groups you need to disable, and then click **Disable** above the rule group list.
+
+. In the **Disable Multiple Rule Groups** dialog, enter the names of the rule groups, and then click **OK**.
++
+--
+include::../../note-separateNamesByComma.adoc[]
+--
+
+. Select the checkbox on the left side of the disabled rule groups, and then click **Enable** above the rule group list to batch enable the rule groups.

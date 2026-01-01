@@ -1,0 +1,26 @@
+// :ks_include_id: ebcff396ff624f5f9d3e0534615ffdcb
+* The volume snapshot list provides the following information:
++
+--
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+|Name
+|The name, alias, and volume snapshot class of the volume snapshot.
+
+|Status
+|
+include::volumeSnapshots-para-volumeSnapshotStatus_v4.adoc[]
+
+|Volume Snapshot Content
+|The name of the volume snapshot content.
+
+|Capacity
+|
+include::volumeSnapshots-para-capacity.adoc[]
+
+|Creation Time
+|The creation time of the volume snapshot.
+|===
+--

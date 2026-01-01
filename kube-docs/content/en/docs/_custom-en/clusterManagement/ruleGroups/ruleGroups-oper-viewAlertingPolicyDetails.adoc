@@ -1,0 +1,56 @@
+// :ks_include_id: 539c72cb8f884103bce5d979f3b31d09
+. View the resource attributes of the rule group in the **Attributes** area on the left side of the details page.
++
+--
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+include::ruleGroups-para-ruleGroupStatus.adoc[]
+
+|Check Interval
+|The time interval between metric checks.
+
+include::ruleGroups-para-timeSpent.adoc[]
+
+|Creation Time
+|The creation time of the rule group.
+
+|Creator
+|The creator of the rule group.
+|===
+--
+
+. View the alert rules set in the rule group in the **Alert Rules** tab on the right side of the rule group details page.
++
+--
+The **Alert Rules** tab displays the name, severity, trigger status, monitoring target, and last check time of the alert rules.
+
+* Click image:/images/ks-qkcp/zh/icons/monitor.svg[monitor,18,18] on the right side of the alert rule name to view the metric data.
+
+* Click image:/images/ks-qkcp/zh/icons/chevron-down.svg["chevron-down",18,18] on the right side of the alert rule to view the trigger condition, PromSQL expression, and alert message content of the alert rule.
+--
+
+. Click the **Alerts** tab on the right side of the details page to view the currently generated alerts.
++
+--
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+|Message
+|
+include::ruleGroups-para-message.adoc[]
+
+|Severity
+|
+include::ruleGroups-para-alertLevel.adoc[]
+
+|Monitoring Target
+|The monitoring target of the rule group.
+
+|Trigger Time
+|
+include::ruleGroups-para-activationTime.adoc[]
+|===
+--

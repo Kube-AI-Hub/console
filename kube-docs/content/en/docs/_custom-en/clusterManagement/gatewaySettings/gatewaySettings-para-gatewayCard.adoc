@@ -1,0 +1,36 @@
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+|Type
+|The type of the gateway.
+
+|Creator
+|The user who enabled the gateway.
+
+|Creation Time
+|The time when the gateway was enabled.
+
+|Access Mode
+|The external access mode of the gateway service.
+
+include::../services/services-para-externalAccess.adoc[tag=bullets]
+
+|Gateway Address
+|
+The external access address of the gateway.
+
+include::gatewaySettings-para-address.adoc[tag=bullets]
+
+|Node Ports
+|The HTTP and HTTPS node ports of the gateway service. Only displayed when the external access mode of the gateway is NodePort.
+
+|Replicas
+|The number of replicas of the gateway workload.
+
+|Tracing
+|Whether the gateway has tracing enabled.
+
+|Annotations
+|The annotations of the gateway service. When the external access mode of the gateway is LoadBalancer, you need to set the annotations of the gateway service according to the load balancer plugin and infrastructure environment to create the required load balancer. For more information, please contact your infrastructure environment provider. Only displayed when the external access mode of the gateway is LoadBalancer.
+|===

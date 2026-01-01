@@ -1,0 +1,2 @@
+// :ks_include_id: b79841529a1d49a19e7e17eac5decf19
+. In the {ks_product-en} web console, create custom monitoring dashboards using monitoring metrics to monitor the running status of applications.

@@ -1,0 +1,4 @@
+// :ks_include_id: ab9cb5143fe449bb900ce47e7fb62049
+This section describes how to edit Ingress information.
+
+You can edit the alias and description of an Ingress. Kube AI Hub does not support editing the name of an already created Ingress.

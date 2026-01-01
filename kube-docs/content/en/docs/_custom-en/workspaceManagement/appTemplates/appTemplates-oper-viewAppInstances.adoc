@@ -1,0 +1,25 @@
+// :ks_include_id: a04eb03cbce9496996bd54443b6e4d64
+. Click the **Application Instance** tab on the right side of the details page to view the applications installed using the application template on the {ks_product-en} platform.
++
+--
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+|Name
+|The name of the application.
+
+include::../../projectManagement/apps/apps-para-status.adoc[]
+
+include::appTemplates-para-version.adoc[]
+
+|Project
+|The project to which the application belongs.
+
+|Cluster
+|The cluster to which the application belongs.
+
+|Creation Time
+|The creation time of the application.
+|===
+--

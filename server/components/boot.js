@@ -20,6 +20,7 @@ const compress = require('koa-compress')
 const mount = require('koa-mount')
 const render = require('koa-ejs')
 const serve = require('koa-static')
+const HttpProxy = require('http-proxy')
 
 const { getServerConfig, root } = require('../libs/utils')
 
@@ -41,6 +42,38 @@ module.exports = function(app) {
   }
 
   if (global.MODE_DEV) {
+    // Proxy /kube-docs requests to Hugo dev server
+    const hugoProxy = HttpProxy.createProxyServer({
+      target: 'http://localhost:1313',
+      changeOrigin: true,
+    })
+
+    hugoProxy.on('error', (err, req, res) => {
+      console.error('Hugo proxy error:', err.message)
+      if (res.writeHead) {
+        res.writeHead(502, { 'Content-Type': 'text/plain' })
+        res.end('Hugo dev server not available. Please run: cd ../website && yarn dev')
+      }
+    })
+
+    app.use(async (ctx, next) => {
+      if (ctx.url.startsWith('/kube-docs')) {
+        return new Promise((resolve, reject) => {
+          ctx.res.on('close', resolve)
+          ctx.res.on('finish', resolve)
+          hugoProxy.web(ctx.req, ctx.res, {}, e => {
+            if (e) {
+              console.error('Hugo proxy error:', e.message)
+              ctx.status = 502
+              ctx.body = 'Hugo dev server not available. Please run: cd ../website && yarn dev'
+            }
+            resolve()
+          })
+        })
+      }
+      await next()
+    })
+
     app.use(async (ctx, next) => {
       if (
         /(\.hot-update\.)|(\.(ttf|otf|eot|woff2?)(\?.+)?$)|(\.js$)|(\/dist\/)/.test(

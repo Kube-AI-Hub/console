@@ -1,0 +1,8 @@
+// :ks_include_id: 6d568952e6604999a005dfff5d21d3d3
+|Cluster
+|The cluster to which the app belongs.
+
+|Project
+|The project to which the app belongs.
+
+include::apps-para-status.adoc[]

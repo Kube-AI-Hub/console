@@ -1,0 +1,219 @@
+<!-- Header Start -->
+<header class="navigation">
+    <div class="common-layout">
+        <div class="header-container">
+            <a href="{{ site.Home.RelPermalink }}" aria-label="logo">
+                <img src="{{ "/images/header/logo.svg" | relURL }}" alt="{{ .Site.Title }}" class="logo">
+            </a>
+
+            <ul class="nav">
+                {{ $section := .Page.Section }}
+                {{ range .Site.Menus.main }}
+                {{ if .HasChildren }}
+
+                {{ $active := false }}
+                {{ range .Children }}
+                {{ if eq $section .URL }}
+                {{ $active = true }}
+                {{ end}}
+                {{ end }}
+
+                <li {{ if $active }} class="menu-li menu-active" {{ else }} class="menu-li" {{ end}}>
+                    <span class='menu-span'>{{ .Name }}</span>
+                    <ul class="dropdown-menu menu-{{ .Weight }}">
+                        {{ range .Children }}
+                        <li {{ if eq $section .URL }} class="active" {{ end}}>
+                            {{ if hasPrefix .URL "http" }}
+                            <a href="{{ .URL }}" target="_blank" rel="noopener noreferrer">{{ .Name | safeHTML }}</a>
+                            {{ else }}
+                            <a href="{{ .URL | relLangURL }}">{{ .Name | safeHTML }}</a>
+                            {{ end }}
+                        </li>
+                        {{ end }}
+                    </ul>
+                </li>
+                {{ else }}
+                <li {{ if eq $section .URL }} class="active" {{ end}}>
+                    {{ if hasPrefix .URL "http" }}
+                    <a data-docs="{{ .Name }}" href="{{ .URL }}" target="_blank"
+                        rel="noopener noreferrer">{{ .Name }}</a>
+                    {{ else }}
+                    <a data-docs="{{ .Name }}" href="{{ .URL | relLangURL }}">{{ .Name }}</a>
+                    {{ end }}
+                </li>
+                {{ end }}
+
+                {{ end }}
+
+            </ul>
+            <div class="right-menu">
+                <ul>
+                    <li class="language-menu">
+                        <div>
+                            <img src="{{ "/images/header/black.svg" | relURL }}" alt="">
+                            <span>{{ .Site.Language.LanguageName }}</span>
+                        </div>
+                        {{ with $.Page.AllTranslations }}
+                        <ul class="dropdown-menu">
+                            {{ range . }}
+                            {{ $basePath := strings.TrimSuffix "/" $.Site.Params.logoLink }}
+                            <li onclick="handleLangClick('{{ .Language }}','{{ $basePath }}{{ .RelPermalink }}')">
+                                {{ .Language.LanguageName }}</li>
+                            {{ end }}
+                        </ul>
+                        {{ end }}
+                    </li>
+                    <!-- <li class='btn-li'>
+                        {{ if eq .Site.Language.Lang "zh"}}
+                            <a href="{{ .Site.Params.DemoLinkZh }}" target="_blank" rel="noopener noreferrer">
+                                <button class="demo-btn">{{ i18n "Demo" }} →</button>
+                            </a>
+                        {{ else }}
+                            <a href="{{ .Site.Params.DemoLinkEn }}" target="_blank" rel="noopener noreferrer">
+                                <button class="demo-btn">{{ i18n "Demo" }} →</button>
+                            </a>
+                        {{ end }}
+                        <ol class="dropdown-menu">
+                            <li>{{ i18n "demo content 1" }}</li>
+                            <li>{{ i18n "demo content 2" }}</li>
+                            <li>{{ i18n "demo content 3" }}</li>
+                            <li>{{ i18n "demo content 4" }}</li> 
+                        </ol>
+                    </li> -->
+                    <!-- <li class='link-li'>
+                        <a class='link-slack' href="{{ .Site.Params.slackLink }}" target="_blank" rel="noopener noreferrer"></a>
+                        <a class='link-twitter' href="{{ .Site.Params.twitterLink }}" target="_blank" rel="noopener noreferrer"></a>
+                        <a class='link-github' href="{{ .Site.Params.githubLink }}" target="_blank" rel="noopener noreferrer"></a>
+                    </li> -->
+                    <li class="github-li">
+                        <div class="github-star">
+                            <a class="star-btn" href="{{ .Site.Params.githubLink }}" rel="noopener noreferrer"
+                                target="_blank">
+                                <span class="star-img"></span>&nbsp;<span>Star</span>
+                            </a>
+                        </div>
+                    </li>
+                    <li class="menu-icon">
+                        <img src="{{ "/images/header/menu.svg" | relURL }}" alt="">
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-for-menu" class="modal">
+        <ul class="nav">
+            {{ $section := .Page.Section }}
+            {{ range .Site.Menus.main }}
+            {{ if .HasChildren }}
+
+            {{ $active := false }}
+            {{ range .Children }}
+            {{ if eq $section .URL }}
+            {{ $active = true }}
+            {{ end}}
+            {{ end }}
+
+            <li data-check="0" {{ if $active }} class="menu-li menu-active" {{ else }} class="menu-li" {{ end}}>
+                <span class='menu-span'>{{ .Name }}</span>
+                <ul class="dropdown-menu">
+                    {{ range .Children }}
+                    <li {{ if eq $section .URL }} class="active" {{ end}}>
+                        <a href="{{ .URL | relLangURL }}">{{ .Name | safeHTML }}</a>
+                    </li>
+                    {{ end }}
+                </ul>
+            </li>
+            {{ else }}
+            <li {{ if eq $section .URL }} class="active" {{ end}}><a data-docs="{{ .Name }}"
+                    href="{{ .URL | relLangURL }}">{{ .Name | safeHTML }}</a></li>
+            {{ end }}
+
+            {{ end }}
+
+        </ul>
+        <div class="link-div">
+            <a href="{{ .Site.Params.slackLink }}" target="_blank" rel="noopener noreferrer" aria-label="slack">
+                <img src="{{ "/images/header/slack-hover.svg" | relURL }}" alt="">
+            </a>
+            <a href="{{ .Site.Params.twitterLink }}" target="_blank" rel="noopener noreferrer" aria-label="twitter">
+                <img src="{{ "/images/header/twitter-hover.svg" | relURL }}" alt="">
+            </a>
+            <a href="{{ .Site.Params.githubLink }}" target="_blank" rel="noopener noreferrer" aria-label="github">
+                <img src="{{ "/images/header/github-hover.svg" | relURL }}" alt="">
+            </a>
+        </div>
+    </div>
+</header>
+<script>
+    var bindNavMouseEvent = function (selector, element) {
+        if (!element) {
+            element = $(selector)
+        }
+        var flag = false
+        element.mouseenter(function () {
+            if (flag) {
+                return false
+            }
+            flag = true
+            $(this).find('.dropdown-menu').fadeIn(200, function () {
+                flag = false
+            })
+        });
+        element.mouseleave(function () {
+            $(this).find('.dropdown-menu').fadeOut(200)
+        });
+    }
+
+    var bindScrollChangeHeader = function () {
+        var check = 100
+        var header = $('header')
+        window.addEventListener('scroll', function () {
+            var scrollY = window.scrollY;
+            if (scrollY > 0) {
+                header.addClass('navigationScroll')
+            } else {
+                header.removeClass('navigationScroll')
+            }
+        })
+    }
+
+    var bindClickShowMenu = function () {
+        $('.menu-icon').click(function () {
+            $('#modal-for-menu').modal()
+        })
+    }
+
+    var bindClickModalLi = function () {
+        $('.modal .menu-li').click(function () {
+            var check = $(this).data('check')
+            if (check === 0) {
+                $(this).data('check', 1)
+                $(this).find('.dropdown-menu').slideDown(200)
+            } else {
+                $(this).data('check', 0)
+                $(this).find('.dropdown-menu').slideUp(200)
+            }
+            $(this).find('.menu-span').toggleClass('up')
+        })
+    }
+
+    var language = '{{.Site.Language.Lang}}'
+
+    bindScrollChangeHeader()
+
+    $('.header-container .menu-li').each(function () {
+        bindNavMouseEvent('', $(this))
+    })
+    bindNavMouseEvent('.header-container .language-menu')
+    bindNavMouseEvent('.header-container .btn-li')
+
+    bindClickShowMenu()
+    bindClickModalLi()
+    var handleLangClick = function (lang, href) {
+        try {
+            localStorage.setItem('lang', lang)
+        } catch (err) {}
+        location.href = href
+    }
+</script>

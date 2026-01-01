@@ -1,0 +1,6 @@
+// :ks_include_id: 8e195bed54da4a4d8f7337f34ddec2ec
+. Click image:/images/ks-qkcp/zh/icons/more.svg[more,18,18] on the right side of the rule group you need to disable, and then select **Disable** from the dropdown list.
+
+. In the **Disable Rule Group** dialog, enter the name of the rule group, and then click **OK**.
+
+. Click image:/images/ks-qkcp/zh/icons/more.svg[more,18,18] on the right side of the disabled rule group, and then select **Enable** from the dropdown list to enable the rule group.

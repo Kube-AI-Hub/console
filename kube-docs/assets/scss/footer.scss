@@ -1,0 +1,322 @@
+@import 'variables';
+
+.footer {
+  width: 100%;
+  padding: 118px 0;
+
+  @media only screen and (max-width: $mobile-max-width) {
+    padding-top: 50px;
+  }
+
+  & > .footer-main {
+    & > .up-main {
+      display: flex;
+      @media only screen and (max-width: $mobile-max-width) {
+        flex-direction: column;
+      }
+      .left-div {
+
+        .foot-logo {
+          height: 32px;
+        }
+
+        p {
+          width: 360px;
+          height: 44px;
+          margin-top: 40px;
+          font-size: 16px;
+          line-height: 1.38;
+          color: $text-tertiary;
+
+          @media only screen and (max-width: $mobile-max-width) {
+            width: auto;
+          }
+        }
+
+        div {
+          width: 358px;
+          height: 48px;
+          margin-top: 20px;
+          border-radius: 24px;
+          border: solid 1px $border-primary;
+          background-color: $bg-surface;
+
+          input {
+            width: 207px;
+            height: 20px;
+            font-size: 14px;
+            margin-left: 16px;
+            color: $text-secondary;
+            border: none;
+            outline: none;
+            background-color: $bg-surface;
+          }
+
+          button {
+            width: 111px;
+            height: 40px;
+            margin: 4px 5px 4px 14px;
+            border-radius: 20px;
+            border: none;
+            font-size: 14px;
+            color: $black;
+            cursor: pointer;
+            box-shadow: 0 10px 50px 0 $shadow-color, 0 8px 16px 0 $shadow-color;
+            background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.1) 97%), linear-gradient(to bottom, $accent-primary, $accent-primary);
+            &:hover {
+              box-shadow: none;
+            }
+          }
+
+          @media only screen and (max-width: $mobile-max-width) {
+            width: 280px;
+
+            input {
+              width: 150px;
+            }
+
+            button {
+              width: 90px;
+            }
+          }
+        }
+        #message {
+          color: red;
+          margin-left: 16px;
+        }
+      }
+      .right-div {
+        flex: 1;
+        margin-left: 30px;
+
+        @media only screen and (max-width: $mobile-max-width) {
+          width: 100%;
+          margin-left: 0px;
+        }
+
+        & > ul {
+          li {
+            max-width: 170px;
+            @media only screen and (max-width: $mobile-max-width) {
+              margin-top: 20px;
+            }
+          }
+          li:last-child {
+            margin-right: 0;
+          }
+        }
+
+        .h3 {
+          font-weight: 600;
+          line-height: 1.5;
+          color: $text-primary;
+          margin-bottom: 10px;
+        }
+
+        a {
+          display: block;
+          line-height: 1.2;
+          color: $text-tertiary;
+          margin-bottom: 14px;
+
+          &:hover {
+            color: $accent-primary;
+          }
+        }
+      }
+    }
+
+    .down-main {
+      text-align: center;
+      margin-top: 60px;
+
+      .img-div {
+        font-size: 0;
+
+        svg {
+          width: 32px;
+          height: 32px;
+          color: $text-muted;
+          cursor: pointer;
+          transition: all 0.2s ease-in-out;
+          margin-right: 8px;
+        }
+
+        a {
+          display: inline-block;
+          width: 34px;
+          height: 34px;
+          margin: 0 6px;
+          background-position: center;
+          background-repeat: no-repeat;
+        }
+
+        .wechat {
+          position: relative;
+
+          .hide-div {
+            display: none;
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            padding: 10px;
+            transform: translate(-50%, -100%);
+            background: $bg-card;
+            p {
+              font-size: 12px;
+              color: $text-muted;
+            }
+            img {
+              margin: 0 10px;
+            }
+            &::after {
+              content: '';
+              position: absolute;
+              bottom: -18px;
+              left: 50%;
+              transform: translateX(-50%);
+              border: 10px solid transparent;
+              border-top-color: $bg-card;
+            }
+          }
+
+          &:hover {
+            svg {
+              color: $accent-secondary;
+            }
+            div {
+              display: block;
+            }
+          }
+        }
+
+        .bilibili-a {
+          background-image: url("/kube-docs/images/footer/bilibili.svg");
+
+          &:hover {
+            background-image: url("/kube-docs/images/footer/bilibili-hover.svg");
+          }
+        }
+
+        .facebook-a {
+          background-image: url("/kube-docs/images/footer/facebook.svg");
+
+          &:hover {
+            background-image: url("/kube-docs/images/footer/facebook-hover.svg");
+          }
+        }
+
+        .youtube-a {
+          background-image: url("/kube-docs/images/footer/youtube.svg");
+
+          &:hover {
+            background-image: url("/kube-docs/images/footer/youtube-hover.svg");
+          }
+        }
+
+        .slack-a {
+          background-image: url("/kube-docs/images/footer/slack.svg");
+
+          &:hover {
+            background-image: url("/kube-docs/images/footer/slack-hover.svg");
+          }
+        }
+
+        .twitter-a {
+          background-image: url("/kube-docs/images/footer/twitter.svg");
+
+          &:hover {
+            background-image: url("/kube-docs/images/footer/twitter-hover.svg");
+          }
+        }
+
+        .github-a {
+          background-image: url("/kube-docs/images/footer/github.svg");
+
+          &:hover {
+            background-image: url("/kube-docs/images/footer/github-hover.svg");
+          }
+        }
+
+        .medium-a {
+          background-image: url("/kube-docs/images/footer/medium.svg");
+
+          &:hover {
+            background-image: url("/kube-docs/images/footer/medium-hover.svg");
+          }
+        }
+
+        .linkedin-a {
+          background-image: url("/kube-docs/images/footer/linkedin.svg");
+
+          &:hover {
+            background-image: url("/kube-docs/images/footer/linkedin-hover.svg");
+          }
+        }
+      }
+
+      .p1 {
+        height: 23px;
+        margin-top: 6px;
+        font-size: 14px;
+        line-height: 23px;
+        font-weight: 500;
+        letter-spacing: 1.08px;
+        color: $text-primary;
+      }
+
+      .case {
+        margin-top: 20px;
+      }
+    }
+  }
+}
+
+.cookie {
+  position: fixed;
+  display: none;
+  z-index: 10;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+
+  & > div {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: $black;
+    line-height: 20px;
+    background-color: $bg-tertiary;
+    border-radius: 4px;
+    @media only screen and (max-width: $mobile-max-width) {
+      flex-direction: column;
+    }
+  }
+
+  a {
+    color: $accent-light;
+
+    &:hover {
+      color: $accent-primary;
+    }
+  }
+
+  button {
+    width: 240px;
+    height: 40px;
+    border: none;
+    margin-left: 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    color: $black;
+    background-color: $accent-secondary;
+    cursor: pointer;
+    &:hover {
+      background-color: $accent-primary;
+    }
+    @media only screen and (max-width: $mobile-max-width) {
+      margin-top: 20px;
+    }
+  }
+}

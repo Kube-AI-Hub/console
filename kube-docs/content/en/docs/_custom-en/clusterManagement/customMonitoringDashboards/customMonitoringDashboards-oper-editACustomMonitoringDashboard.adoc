@@ -1,0 +1,34 @@
+// :ks_include_id: 1762c0ce44e445d89cd9f2e5b34055fa
+. Click the name of a custom monitoring dashboard in the list to open the custom monitoring dashboard, then click **Edit Template** in the upper right corner of the page.
+
+. Set the text-displayed monitoring metrics on the left side of the page.
++
+====
+* Click image:/images/ks-qkcp/zh/icons/add-dark.svg[add-dark,18,18] to add monitoring metrics.
++
+--
+include::customMonitoringDashboards-para-textMetric.adoc[]
+--
+
+* Hover the cursor over a monitoring metric, then click image:/images/ks-qkcp/zh/icons/trash-dark.svg[trash-dark,18,18] to delete the monitoring metric.
+
+* Hover the cursor over a monitoring metric, then click image:/images/ks-qkcp/zh/icons/pen-dark.svg[pen-dark,18,18] to edit the monitoring metric.
+====
+
+. Set the monitoring charts in the monitoring chart list on the right side of the page.
++
+====
+* Click **Add Monitoring Item** to add monitoring charts.
++
+--
+include::customMonitoringDashboards-para-monitoringChart.adoc[]
+--
+
+* Hover the cursor over the monitoring chart name, then click image:/images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18] to delete the monitoring chart.
+
+* Hover the cursor over the monitoring chart name, then click image:/images/ks-qkcp/zh/icons/pen-light.svg[pen-light,18,18] to edit the monitoring chart.
+
+* Drag image:/images/ks-qkcp/zh/icons/drag-handle.svg[drag-handle,18,18] on the right side to adjust the sorting of the monitoring charts.
+====
+
+. Click **Save Template** in the upper right corner of the page to complete the editing.

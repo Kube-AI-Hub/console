@@ -1,0 +1,2 @@
+// :ks_include_id: 8780fa783a634e2ea7e02b71327c3608
+. Click **Volume Snapshot Content** on the **Volume Snapshots** page to open the volume snapshot content list.

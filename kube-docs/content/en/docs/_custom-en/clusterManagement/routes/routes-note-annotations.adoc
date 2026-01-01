@@ -1,0 +1,7 @@
+// :ks_include_id: b5b7ecc42a4f49a583613c4e211cd53f
+// Note
+include::../../../../_ks_components-en/admonitions/note.adoc[]
+
+The cluster gateway and project gateway in Kube AI Hub are implemented based on Nginx Ingress Controller. You can set annotations on the Ingress to control the behavior of the gateway. For more information, see link:https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/[Nginx Ingress Controller Documentation].
+
+include::../../../../_ks_components-en/admonitions/admonEnd.adoc[]

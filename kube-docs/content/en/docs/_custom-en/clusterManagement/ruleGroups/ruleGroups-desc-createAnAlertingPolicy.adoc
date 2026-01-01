@@ -1,0 +1,4 @@
+// :ks_include_id: e19cfac61c85491d9f631ba61f012c62
+This section introduces how to create an alert rule group.
+
+The monitoring and alerting functions of {ks_product-en} are implemented based on Prometheus. Each rule group can contain multiple alert rules. You can create alert rules using the rule templates provided by the system or manually enter PromQL expressions to create alert rules. For more information, see the link:https://prometheus.io/docs/prometheus/latest/querying/basics/[Prometheus Documentation].

@@ -1,0 +1,6 @@
+// :ks_include_id: f51f45c2029a4242ad04da5a1fe817c7
+. In the **Resource Status** tab, click **Access Service** on the right side of the routing rule you want to access.
++
+--
+If the Ingress is set correctly, the browser will display the response information from the backend service.
+--

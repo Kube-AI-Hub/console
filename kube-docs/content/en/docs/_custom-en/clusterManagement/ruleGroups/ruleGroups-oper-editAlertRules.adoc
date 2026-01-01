@@ -1,0 +1,12 @@
+// :ks_include_id: af3bb03cf3e148bfa42409178889df61
+. In the **Edit Alert Rules** dialog, edit existing alert rules or create new alert rules, and then click **OK**.
++
+--
+* Hover over an existing alert rule and click the toggle switch to enable/disable the alert rule.
+
+* Hover over an existing alert rule and click image:/images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18] to delete the alert rule.
+
+* Hover over an existing alert rule and click image:/images/ks-qkcp/zh/icons/pen-light.svg[pen,18,18] to modify the settings of the alert rule.
+
+* Click **Add Alert Rule** to create a new alert rule.
+--

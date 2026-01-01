@@ -1,0 +1,132 @@
+- id: Kube AI Hub®️ 2022 All Rights Reserved.
+  translation: Kube AI Hub®️ 2022 All Rights Reserved.
+- id: Kube AI Hub®️ 2025 All Rights Reserved.
+  translation: Kube AI Hub®️ 2025 All Rights Reserved.
+- id: Published on
+  translation: Published on
+- id: KubeCon & QCon
+  translation: KubeCon & QCon
+- id: Subscribe
+  translation: Subscribe
+- id: Please enter your email address
+  translation: Please enter your email address
+- id: Receive the latest news, articles and updates from Kube AI Hub
+  translation: Receive the latest news, articles and updates from Kube AI Hub
+- id: Welcome to the Kube AI Hub Documentation
+  translation: Welcome to the Kube AI Hub Documentation
+- id: We will introduce the services and features of Kube AI Hub with clear and concise pictures and texts as far as possible.
+  translation: We will introduce the services and features of Kube AI Hub with clear and concise pictures and texts as far as possible.
+- id: Open Source Community
+  translation: Open Source Community
+- id: Kube AI Hub is committed to the open source contribution of cloud native technology, enriching the ecosystem of the open source community.
+  translation: Kube AI Hub is committed to the open source contribution of cloud native technology, enriching the ecosystem of the open source community.
+- id: Go to GitHub
+  translation: Go to GitHub
+- id: email is required
+  translation: email is required!
+- id: Please enter a valid email address.
+  translation: Please enter a valid email address!
+- id: Email address already exists.
+  translation: Email address already exists!
+- id: Table of Contents
+  translation: Table of Contents
+- id: Demo
+  translation: Demo
+- id: demo content 1
+  translation: "1.Create a Kube AI Hub Cloud account and log in to the platform."
+- id: demo content 2
+  translation: 2.In the upper-right corner, click Console, and then click Lite Cluster on the left.
+- id: demo content 3
+  translation: 3.Create a K8s cluster with Kube AI Hub installed.
+- id: demo content 4
+  translation: 4.Access Kube AI Hub with the default account and password (admin/P@88w0rd).
+- id: Coming Soon
+  translation: Coming Soon
+- id: Read More
+  translation: Read More
+- id: We can’t find the page that you’re looking for :(
+  translation: We can’t find the page that you’re looking for :(
+- id: Go To Home
+  translation: Go To Home
+- id: icon
+  translation: icon
+- id: background image
+  translation: background image
+- id: kubesphere console screenshot
+  translation: kubesphere console screenshot
+- id: Learn More
+  translation: Learn More
+- id: Download this page (PDF)
+  translation: Download this page (PDF)
+- id: Last updated
+  translation: Last updated
+- id: What’s on this Page
+  translation: What’s on this Page
+- id: Previous
+  translation: Previous
+- id: Next
+  translation: Next
+- id: edit
+  translation: Edit
+- id: feedback
+  translation: Feedback
+- id: share
+  translation: Share
+- id: note
+  translation: Note
+- id: tip
+  translation: Tip
+- id: info
+  translation: Info
+- id: warning
+  translation: Warning
+- id: Search Documentation
+  translation: Search Documentation
+- id: ALL
+  translation: ALL
+- id: Watch replay
+  translation: Watch replay
+- id: View details
+  translation: View details
+- id: Course theme
+  translation: Course theme
+- id: Course benefits
+  translation: Course benefits
+- id: Video tutorial
+  translation: Video tutorial
+- id: Graphic Course
+  translation: Graphic Course
+- id: Start learning
+  translation: Start learning
+- id: View graphic
+  translation: View graphic
+- id: Apply for the job
+  translation: Apply for the job
+- id: View more jobs
+  translation: View more jobs
+- id: Cloud Native Technology Class
+  translation: Cloud Native Technology Class
+- id: warnGraphic explanation
+  translation: Graphic explanation
+- id: PPT courseware
+  translation: PPT courseware
+- id: Self-test
+  translation: Self-test
+- id: Cookie Statement
+  translation: Your privacy is important to us. We use cookies to remember subscription details, optimize site functionality, and deliver content tailored to your interests. To find out more, see our <a href="{{.}}">privacy policy</a>.
+- id: Accept and continue
+  translation: Accept and continue
+- id: Install on Kubernetes
+  translation: Install on Kubernetes
+- id: Install on Linux
+  translation: Install on Linux
+- id: Was this page Helpful?
+  translation: Was this page Helpful?
+- id: 'Yes'
+  translation: 'Yes'
+- id: 'No'
+  translation: 'No'
+- id: Msg-Thank
+  translation: Thanks for the feedback. If you have a specific question about how to use Kube AI Hub, ask it on Slack. Open an issue in the GitHub repo if you want to report a problem or suggest an improvement.
+- id: Visitor-count
+  translation: 'The number of views: '

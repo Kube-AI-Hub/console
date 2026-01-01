@@ -1,0 +1,35 @@
+// :ks_include_id: 9b12ede280884331985685925cf5dfc4
+* The pod list provides the following information:
++
+--
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+|Name
+|The name of the pod.
+
+|Status
+|The status of the pod.
+
+include::pods-para-podStatus_overview.adoc[]
+// pod status is different
+
+|Node
+|The node where the pod is located and the node's IP address.
+
+include::pods-para-podIpPool.adoc[]
+
+// |Application
+// |The application the pod belongs to.
+
+|Project
+|The project the pod belongs to.
+
+|Cluster
+|The cluster the pod belongs to.
+
+|Update Time
+|The update time of the pod.
+|===
+--

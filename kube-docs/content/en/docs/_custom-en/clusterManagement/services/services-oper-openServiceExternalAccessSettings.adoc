@@ -1,0 +1,5 @@
+// :ks_include_id: f8bbecbf87544c4f9173c8107364d8ee
+
+. On the service details page, click the **Access Information** tab on the right to view the service's access information.
+
+. Click image:/images/ks-qkcp/zh/icons/more.svg[more,18,18] on the right side of the page, then select **Edit External Access** from the dropdown list.

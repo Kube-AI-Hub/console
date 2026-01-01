@@ -1,0 +1,13 @@
+// :ks_include_id: 436a1f9062db4517a30c7da15aad1061
+
+. On the **Basic Information** tab, set the basic information for the workload, then click **Next**.
+
+. On the **Pod Settings** tab, set the number of replicas, containers, update strategy, security context, scheduling rules, and metadata for the pods managed by the workload, then click **Next**.
+
+. On the **Storage Settings** tab, mount volumes for the containers managed by the workload, then click **Next**.
+
+. On the **Advanced Settings** tab, specify nodes for the pods managed by the workload and set the metadata for the workload.
+
+. On the **Cluster Differences** tab, differentiate the workload based on containers, ports, and environment variables in different clusters, then click **Create**.
++
+After the workload is created, it will be displayed in the workload list.

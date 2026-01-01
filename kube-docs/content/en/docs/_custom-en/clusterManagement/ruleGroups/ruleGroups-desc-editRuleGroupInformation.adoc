@@ -1,0 +1,4 @@
+// :ks_include_id: d62dbb9307bf4f21a25a732737dbe531
+This section introduces how to edit the information of an alert rule group.
+
+You can edit the alias, check interval, and description of the alert rule group. Kube AI Hub does not support editing the name of a rule group.

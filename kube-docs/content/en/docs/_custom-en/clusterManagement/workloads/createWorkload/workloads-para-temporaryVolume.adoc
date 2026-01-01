@@ -1,0 +1,20 @@
+// :ks_include_id: cc570a193fc8465392e3f53790581f56
+Mount a temporary volume for the container. Temporary volumes have the following characteristics:
+
+* Automatically created by the system in the storage system of the node where the pod is located.
+
+* Automatically managed by the system, with a capacity limit equal to the storage capacity of the node.
+
+* Cannot save persistent data. The system automatically creates a temporary volume when the pod is created and automatically deletes the temporary volume when the pod is deleted.
+
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+|Volume Name
+|The name of the temporary volume.
+
+include::workloads-para-volumeMountModePath.adoc[]
+
+// include::workloads-para-containerLogPath.adoc[]
+|===

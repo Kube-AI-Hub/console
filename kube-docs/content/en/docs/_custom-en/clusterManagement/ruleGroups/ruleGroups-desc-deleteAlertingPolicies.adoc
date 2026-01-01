@@ -1,0 +1,16 @@
+// :ks_include_id: afa42dbe50664f968d66928b7d9b75d6
+This section describes how to delete alert rule groups.
+
+// Note
+include::../../../../_ks_components-en/admonitions/note.adoc[]
+
+{ks_product-en} only supports deleting custom rule groups, not built-in rule groups.
+
+include::../../../../_ks_components-en/admonitions/admonEnd.adoc[]
+
+// Warning
+include::../../../../_ks_components-en/admonitions/warning.adoc[]
+
+Rule groups cannot be recovered after deletion, so please proceed with caution.
+
+include::../../../../_ks_components-en/admonitions/admonEnd.adoc[]

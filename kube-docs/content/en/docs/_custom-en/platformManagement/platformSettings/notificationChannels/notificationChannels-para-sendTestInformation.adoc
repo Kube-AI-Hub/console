@@ -1,0 +1,2 @@
+// :ks_include_id: a951805f6c724c60851e752934b9e529
+* Click **Send Test Message** to confirm that the notification channel is working properly.

@@ -1,0 +1,22 @@
+<ul class="common-flex-layout">
+    {{ if .ver }}
+    {{ $sections := where .context.Sections ".Params.section1.version" "==" .ver }}
+
+    {{ range $sections }}
+    {{ partial "section_item" . }}
+    {{ end }}
+    {{ range $sections }}
+    <li style="height: 0; margin: 0; padding: 0;"></li>
+    {{ end }}
+
+    <!-- render all -->
+    {{ else }}
+    {{ $sections := .context.Sections.ByWeight }}
+    {{ range $sections }}
+    {{ partial "section_item" . }}
+    {{ end }}
+    {{ range $sections }}
+    <li style="height: 0; margin: 0; padding: 0;"></li>
+    {{ end }}
+    {{ end }}
+</ul>

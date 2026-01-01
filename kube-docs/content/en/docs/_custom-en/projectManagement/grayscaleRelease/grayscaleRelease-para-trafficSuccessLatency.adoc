@@ -1,0 +1,9 @@
+// :ks_include_id: c831ace6bfe442abba34ed44c8c2ec4b
+|Traffic
+|The number of requests per second for the new and old versions.
+
+|Successful Request Rate
+|The percentage of successful requests for the new and old versions.
+
+|Request Latency
+|The average request latency for the new and old versions.

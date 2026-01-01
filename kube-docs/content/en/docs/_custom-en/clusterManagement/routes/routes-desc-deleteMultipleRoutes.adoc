@@ -1,0 +1,9 @@
+// :ks_include_id: 4f3a812c48b342fdb0cec7f38b00ce81
+This section describes how to delete an Ingress.
+
+// Warning
+include::../../../../_ks_components-en/admonitions/warning.adoc[]
+
+After deleting an Ingress, you will no longer be able to access its backend services through the Ingress. Please proceed with caution.
+
+include::../../../../_ks_components-en/admonitions/admonEnd.adoc[]

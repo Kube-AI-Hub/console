@@ -1,0 +1,2 @@
+// :ks_include_id: 01c521d890b44fab91dfa6803d6a6bb5
+. Click the name of an Ingress in the Ingress list to open its details page.

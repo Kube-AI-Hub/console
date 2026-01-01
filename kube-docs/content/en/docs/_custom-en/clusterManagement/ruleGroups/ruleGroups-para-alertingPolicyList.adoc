@@ -1,0 +1,31 @@
+// :ks_include_id: 9e29dba51eed467195d8b4402adcee08
+* The rule group list provides the following information:
++
+--
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+|Name
+|The name of the rule group.
+
+include::ruleGroups-para-ruleGroupStatus.adoc[]
+
+|Rule Status
+|The status of the alert rules contained in the rule group.
+
+include::ruleGroups-para-alertingStatusInactive.adoc[]
+
+include::../alerts/alerts-para-alertingStatus.adoc[]
+
+include::ruleGroups-para-alertingStatusDisabled.adoc[]
+
+include::ruleGroups-para-timeSpent.adoc[]
+
+// |Cluster
+// |The cluster using this rule group for resource monitoring.
+
+|Last Check
+|The execution time of the most recent metric check.
+|===
+--

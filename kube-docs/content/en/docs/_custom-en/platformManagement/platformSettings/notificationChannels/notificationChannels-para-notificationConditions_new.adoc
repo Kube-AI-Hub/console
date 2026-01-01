@@ -1,0 +1,8 @@
+// :ks_include_id: cd2ef9bcec6f4a9e8c517cfa2a4c539d
+* Filter Conditions
++
+--
+The notifications sent by {ks_product-en} are presented in the form of key-value pairs. When the **key** and **value** filled in here match the **key** and **value** in the label settings of the alert rules in rule groups, the notifications can be filtered by labels and alert notifications that meet specific label conditions can be sent to receivers. Click **Add** to set multiple conditions.
+
+include::notificationChannels-para-filterRule_new.adoc[]
+--

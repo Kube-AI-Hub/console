@@ -1,0 +1,86 @@
+{{ define "main" }}
+{{ $basePath := strings.TrimSuffix "/" .Site.Params.logoLink }}
+{{ with .Params.section1}}
+<section class='section-1 bg-cover' style='background-image: url("{{ $basePath }}{{ .image }}");'>
+  <div class="title-div common-layout">
+    <h1 class="title-h1">{{ .title }}</h1>
+    <p class="common-p {{ if (and .showDownload (not .inCenter)) }} left-p {{ end }}">{{ .content }}</p>
+    {{ if .content2 }}
+    <p class="common-p {{ if (and .showDownload (not .inCenter)) }} left-p {{ end }}">{{ .content2 }}</p>
+    {{ end }}
+    {{ if .showDownload }}
+    <div class="download-div {{ if .inCenter }} center {{ end }}">
+      {{ partial "downloadButton" . }}
+    </div>
+    {{ end }}
+  </div>
+</section>
+{{ end }}
+
+<section class="section-img">
+  <img class="common-layout" src="{{ $basePath }}{{ .Params.image }}" alt="{{ .Title }}">
+  {{ if .Params.bg }}
+  <img class="bg" src="{{ $basePath }}{{ .Params.bg }}" alt="">
+  {{ end }}
+</section>
+
+<section class="section-2">
+  {{ with .Params.section2 }}
+  <div class="common-layout">
+    <h2 class="title-black-h2 titleH2">{{ .title }}</h2>
+    <ul>
+      {{ range .list }}
+      <li class="common-flex-layout">
+        <div>
+          <h2 class="title-black-h3">{{ .title }}</h2>
+          {{ if .summary }}
+          <p class="common-p">{{ .summary }}</p>
+          {{ end }}
+          {{ if .contentList }}
+          <ul>
+            {{ range .contentList}}
+            <li class="common-li">{{ .content | safeHTML }}</li>
+            {{ end }}
+          </ul>
+          {{ end }}
+        </div>
+        <img src="{{ $basePath }}{{ .image }}" alt="{{ .title }}">
+      </li>
+      {{ end }}
+    </ul>
+  </div>
+  {{ end }}
+</section>
+
+<section class="section-3">
+  {{ with .Params.section3 }}
+  <img class="bg-left" src="{{ $basePath }}{{ .bgLeft }}" alt="{{ i18n "background image" }}">
+  <img class="bg-right" src="{{ $basePath }}{{ .bgRight }}" alt="{{ i18n "background image" }}">
+  <div class="common-layout">
+    <h2 class="title-black-h2">{{ .title }}</h2>
+    {{ if .videoLink }}
+    <iframe 
+        id='iframe-player' 
+        src="{{ .videoLink }}"
+        width="900" 
+        height="580" 
+        frameborder="0"
+        allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+        title="video"
+        allowfullscreen>
+    </iframe>
+    {{ else }}
+    <img src="{{ $basePath }}{{ .image }}" alt="">
+    {{ end }}
+    {{ if .showDownload }}
+    <div>
+      {{ partial "downloadButton" . }}
+    </div>
+    {{ else }}
+    <p class="common-p">{{ .content }}</p>
+    <a href="{{ .link | relLangURL }}"><button class="common-btn lab">{{ .btnContent }}</button></a>
+    {{ end }}
+  </div>
+  {{ end }}
+</section>
+{{ end }}

@@ -1,0 +1,8 @@
+// :ks_include_id: c98f892c063d4948889dcb04d2bef599
+. Select the checkbox on the left side of the rule groups you need to delete, and then click **Delete** above the rule group list.
+
+. In the **Delete Multiple Rule Groups** dialog, enter the names of the rule groups, and then click **OK**.
++
+--
+include::../../note-separateNamesByComma.adoc[]
+--

@@ -1,0 +1,6 @@
+// :ks_include_id: 41158ab30242438694d2437566046d38
+|Alias
+|The alias of the DevOps project. Aliases can only contain Chinese characters, letters, numbers, and hyphens (-), cannot start or end with a hyphen (-), and can be up to 63 characters long.
+
+|Description
+|The description of the DevOps project. Descriptions can contain any characters and can be up to 256 characters long.

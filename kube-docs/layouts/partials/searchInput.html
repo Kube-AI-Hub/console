@@ -1,0 +1,14 @@
+<div class="search-input-div" id="pagefind-search"></div>
+
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    new PagefindUI({
+      element: "#pagefind-search",
+      showSubResults: true,
+      translations: {
+        placeholder: '{{i18n "Search Documentation"}}'
+      },
+      pageSize: 10,
+    });
+  });
+</script>

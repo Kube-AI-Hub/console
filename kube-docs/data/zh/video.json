@@ -1,0 +1,1377 @@
+[ {
+    "title": "Spring AI Alibaba -- 帮助 Java 开发者更方便的构建云原生 AI 智能体应用",
+    "link": " //player.bilibili.com/player.html?aid=113547828789728&bvid=BV1rvzgYTEnt&cid=27036025947&page=1&high_quality=1",
+    "createTime": "2024.11.23",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/meetup-chengdu-20241123-cover-1.png",
+    "group": "Meetup",
+    "tag": "AI"
+  },
+  {
+    "title": "使用可插拔架构集成多个多集群解决方案",
+    "link": "//player.bilibili.com/player.html?aid=113547862345184&bvid=BV11xzgYVEny&cid=27036289251&page=1&high_quality=1",
+    "createTime": "2024.11.23",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/meetup-chengdu-20241123-cover-2.png",
+    "group": "Meetup",
+    "tag": "KubeSphere"
+  },
+  {
+    "title": "AI 时代的 API 网关选型",
+    "link": "//player.bilibili.com/player.html?aid=113547895899746&bvid=BV1ybzgY3Ewc&cid=27036420688&page=1&high_quality=1",
+    "createTime": "2024.11.23",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/meetup-chengdu-20241123-cover-3.png",
+    "group": "Meetup",
+    "tag": "AI"
+  },
+  {
+    "title": "深度解析 Kubernetes API 扩展：从 CRD 到独立 API Server 的最佳实践",
+    "link": " //player.bilibili.com/player.html?aid=113547929456296&bvid=BV1FRzuYvE3R&cid=27036549732&page=1&high_quality=1",
+    "createTime": "2024.11.23",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/meetup-chengdu-20241123-cover-4.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,API"
+  },
+  {
+    "title": "IOMesh 携手 KubeSphere：加速企业云原生数据工作负载落地",
+    "link": " //player.bilibili.com/player.html?aid=113548919440197&bvid=BV1v3zGYaE5v&cid=27041398987&page=1&high_quality=1",
+    "createTime": "2024.11.23",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/meetup-chengdu-20241123-cover-5.png",
+    "group": "Meetup",
+    "tag": "IOMesh,AI"
+  },
+  {
+    "title": "LangChain 与 MinIO——AI 数据管理的可能性探索",
+    "link": "//player.bilibili.com/player.html?aid=1906261916&bvid=BV1BS411w7ZJ&cid=1623666689&page=1&high_quality=1",
+    "createTime": "2024.07.20",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/meetup-shanghai-20240720-cover-5.png",
+    "group": "Meetup",
+    "tag": "AI"
+  },
+  {
+    "title": "在 KubeSphere 上构建轻量级的 K8s 数据平台",
+    "link": "//player.bilibili.com/player.html?aid=1906466138&bvid=BV1NU411S7kJ&cid=1623666557&page=1&high_quality=1",
+    "createTime": "2024.07.20",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/meetup-shanghai-20240720-cover-4.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,大数据"
+  },
+  {
+    "title": "StarShip 赋能产研高效降本增效",
+    "link": "//player.bilibili.com/player.html?aid=1656276809&bvid=BV1wE421w755&cid=1623666343&page=1&high_quality=1",
+    "createTime": "2024.07.20",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/meetup-shanghai-20240720-cover-3.png",
+    "group": "Meetup",
+    "tag": "AI"
+  },
+  {
+    "title": "基于 KubeSphere LuBan 架构将灾备能力无缝融入到控制平面中",
+    "link": "//player.bilibili.com/player.html?aid=1006438527&bvid=BV1nx4y1s7Fq&cid=1623666061&page=1&high_quality=1",
+    "createTime": "2024.07.20",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/meetup-shanghai-20240720-cover-2.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,灾备"
+  },
+  {
+    "title": "构线上线下一体的开源 Hugging Face+",
+    "link": "//player.bilibili.com/player.html?aid=1656304410&bvid=BV1nE421w7Sc&cid=16236656851&page=1&high_quality=1",
+    "createTime": "2024.07.20",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/meetup-shanghai-20240720-cover-1.png",
+    "group": "Meetup",
+    "tag": "AI"
+  },
+  {
+    "title": "构建云原生湖仓数据智能一体化架构",
+    "link": "//player.bilibili.com/player.html?aid=1105080916&bvid=BV15w4m1S7Au&cid=1561563253&page=1&high_quality=1",
+    "createTime": "2024.05.25",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/kubesphere-meetup-20240525-ai-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,AI"
+  },
+  {
+    "title": "使用 KubeSphere 部署 Databend",
+    "link": "//player.bilibili.com/player.html?aid=1205239007&bvid=BV1Df42197H5&cid=1561553670&page=1&high_quality=1",
+    "createTime": "2024.05.25",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/kubesphere-meetup-20240525-databend-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,Databend"
+  },
+  {
+    "title": "以应用为中心的可插拔产品设计 KubeSphere 4.x",
+    "link": "//player.bilibili.com/player.html?aid=1555022133&bvid=BV1K1421q7Ew&cid=1561558925&page=1&high_quality=1",
+    "createTime": "2024.05.25",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/kubesphere-meetup-20240525-kubesphere-2-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,可插拔"
+  },
+  {
+    "title": "可观测平台在 KubeSphere 4.x 可插拔架构下的演进",
+    "link": "//player.bilibili.com/player.html?aid=1655132217&bvid=BV1Q7421Z7bE&cid=1561545680&page=1&high_quality=1",
+    "createTime": "2024.05.25",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/kubesphere-meetup-20240525-kubesphere-1-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,可插拔"
+  },
+  {
+    "title": "SkyWalking 二开企业级实战",
+    "link": "//player.bilibili.com/player.html?aid=1655026634&bvid=BV1b7421Z7C2&cid=1561561536&page=1&high_quality=1",
+    "createTime": "2024.05.25",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/kubesphere-meetup-20240525-skywalking-2-cover.png",
+    "group": "Meetup",
+    "tag": "SkyWalking"
+  },
+  {
+    "title": "洞察云原生服务性能--多层次剖析系统性能，分布式追踪不再是万能灵药",
+    "link": "//player.bilibili.com/player.html?aid=1655199982&bvid=BV187421d748&cid=1561538640&page=1&high_quality=1",
+    "createTime": "2024.05.25",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/kubesphere-meetup-20240525-skywalking-1-cover.png",
+    "group": "Meetup",
+    "tag": "SkyWalking"
+  },
+  {
+    "title": "基于 K8s 的大数据平台构建",
+    "link": "//player.bilibili.com/player.html?aid=1053707580&bvid=BV1FH4y1P7LD&cid=1515999994&page=1&high_quality=1",
+    "createTime": "2024.04.20",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/meetup-shenzhen-20240420-jinjin-cover.png",
+    "group": "Meetup",
+    "tag": "Kubernetes,大数据"
+  },
+  {
+    "title": "铺设平台工程所主张的自服务路径实践",
+    "link": "//player.bilibili.com/player.html?aid=1103587359&bvid=BV11w4m127DE&cid=1515993245&page=1&high_quality=1",
+    "createTime": "2024.04.20",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/meetup-shenzhen-20240420-liyinlin-cover.png",
+    "group": "Meetup",
+    "tag": "Kubernetes,平台工程"
+  },
+  {
+    "title": "某保险基于 KubeSphere 的容器平台落地实践",
+    "link": "//player.bilibili.com/player.html?aid=1953525181&bvid=BV1HC411n7nC&cid=1515953250&page=1&high_quality=1",
+    "createTime": "2024.04.20",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/meetup-shenzhen-20240420-zhoujun-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere"
+  },
+  {
+    "title": "Kubevirt 虚拟机备份保护介绍",
+    "link": "//player.bilibili.com/player.html?aid=1203534429&bvid=BV15F4m1w744&cid=1515944096&page=1&high_quality=1",
+    "createTime": "2024.04.20",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/meetup-shenzhen-20240420-gongyongjie-cover.png",
+    "group": "Meetup",
+    "tag": "Kubevirt"
+  },
+  {
+    "title": "深入浅出 K8s 准入控制",
+    "link": "//player.bilibili.com/player.html?aid=1203718751&bvid=BV13F4m1A75n&cid=1515930733&page=1&high_quality=1",
+    "createTime": "2024.04.20",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/meetup-shenzhen-20240420-wanhongming-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,Kubernetes"
+  },
+  {
+    "title": "云原生时代业务连续性：路线、工具和最佳实践",
+    "link": "//player.bilibili.com/player.html?aid=1253654886&bvid=BV1kJ4m1J7se&cid=1515921396&page=1&high_quality=1",
+    "createTime": "2024.04.20",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/meetup-shenzhen-20240420-liuyang-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,velero"
+  },
+  {
+    "title": "混合环境下服务治理新模式",
+    "link": "//player.bilibili.com/player.html?aid=1502245300&bvid=BV1kD421L7XH&cid=1481625956&page=1&high_quality=1",
+    "createTime": "2024.03.23",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/hangzhou0323-flomesh-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,flomesh"
+  },
+  {
+    "title": "KubeSphere+Kosmos 实现跨集群编排",
+    "link": "//player.bilibili.com/player.html?aid=1902172948&bvid=BV1Km411k788&cid=1481626802&page=1&high_quality=1",
+    "createTime": "2024.03.23",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/hangzhou0323-kubesphere-kosmos-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,Kosmos"
+  },
+  {
+    "title": "ByConity 2024 重点功能概览&社区 Roadmap 同步",
+    "link": "//player.bilibili.com/player.html?aid=1602061463&bvid=BV1p2421P7Ej&cid=1481626384&page=1&high_quality=1",
+    "createTime": "2024.03.23",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/hangzhou0323-byconity-2-cover.png",
+    "group": "Meetup",
+    "tag": "ByConity"
+  },
+  {
+    "title": "ByConity 技术架构和核心特性",
+    "link": "//player.bilibili.com/player.html?aid=1152021729&bvid=BV19Z421b7bE&cid=1481626722&page=1&high_quality=1",
+    "createTime": "2024.03.23",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/hangzhou0323-byconity-1-cover.png",
+    "group": "Meetup",
+    "tag": "ByConity"
+  },
+  {
+    "title": "KubeSphere 在 vsleem 的落地实践",
+    "link": "//player.bilibili.com/player.html?aid=622827797&bvid=BV1xb4y1G7gK&cid=1380502630&page=1&high_quality=1",
+    "createTime": "2023.12.23",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/suzhou1223-kubesphere-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere"
+  },
+  {
+    "title": "KubeSphere 可插拔架构下 DevOps 插件实现方法",
+    "link": "//player.bilibili.com/player.html?aid=922826100&bvid=BV1tT4y1s7JN&cid=1380495841&page=1&high_quality=1",
+    "createTime": "2023.12.23",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/suzhou1223-devops-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,DevOps"
+  },
+  {
+    "title": "大模型网络优化方法",
+    "link": "//player.bilibili.com/player.html?aid=451490195&bvid=BV1Zj411L7SS&cid=1345860870&page=1&high_quality=1",
+    "createTime": "2023.11.25",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/guangzhou-meetup-20231125-cover-5.png",
+    "group": "Meetup",
+    "tag": "AI"
+  },
+  {
+    "title": "基于 SkyWalking 实现全域可观测",
+    "link": "//player.bilibili.com/player.html?aid=706430813&bvid=BV1EQ4y1t7dg&cid=1345834171&page=1&high_quality=1",
+    "createTime": "2023.11.25",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/guangzhou-meetup-20231125-cover-4.png",
+    "group": "Meetup",
+    "tag": "SkyWalking"
+  },
+  {
+    "title": "OpenKruiseGame 助力游戏运维管理提效",
+    "link": "//player.bilibili.com/player.html?aid=748948642&bvid=BV16C4y1w7jV&cid=1345824813&page=1&high_quality=1",
+    "createTime": "2023.11.25",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/guangzhou-meetup-20231125-cover-3.png",
+    "group": "Meetup",
+    "tag": "OpenKruiseGame"
+  },
+  {
+    "title": "DeepFlow 扩展协议解析实践",
+    "link": "//player.bilibili.com/player.html?aid=921401645&bvid=BV1Nu4y1A7ZC&cid=1345829549&page=1&high_quality=1",
+    "createTime": "2023.11.25",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/guangzhou-meetup-20231125-cover-2.png",
+    "group": "Meetup",
+    "tag": "DeepFlow"
+  },
+  {
+    "title": "蜘点云原生之 KubeSphere 落地实践过程",
+    "link": "//player.bilibili.com/player.html?aid=621453031&bvid=BV1Ab4y1M7B5&cid=1345832474&page=1&high_quality=1",
+    "createTime": "2023.11.25",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/guangzhou-meetup-20231125-cover-1.png",
+    "group": "Meetup",
+    "tag": "KubeSphere"
+  },
+  {
+    "title": "使用可插拔架构集成多个多集群解决方案",
+    "link": "//player.bilibili.com/player.html?aid=748081892&bvid=BV1vC4y1J7b6&cid=1323367993&page=1&high_quality=1",
+    "createTime": "2023.11.04",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/meetup-chengdu-20231104-6.png",
+    "group": "Meetup",
+    "tag": "KubeSphere"
+  },
+  {
+    "title": "KubeBlocks RSM——如何让数据库更好的跑在 K8s 上",
+    "link": "//player.bilibili.com/player.html?aid=535532341&bvid=BV1SM411Q79p&cid=1323375006&page=1&high_quality=1",
+    "createTime": "2023.11.04",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/meetup-chengdu-20231104-5.png",
+    "group": "Meetup",
+    "tag": "KubeBlocks,Kubernetes"
+  },
+  {
+    "title": "KubeBlocks 简介及部署 AIGC 基础设施演示",
+    "link": "//player.bilibili.com/player.html?aid=578084710&bvid=BV1rz4y1A773&cid=1323371066&page=1&high_quality=1",
+    "createTime": "2023.11.04",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/meetup-chengdu-20231104-4.png",
+    "group": "Meetup",
+    "tag": "KubeBlocks,AIGC"
+  },
+  {
+    "title": "SOFABoot 4.0-迈向 JDK17 新时代",
+    "link": "//player.bilibili.com/player.html?aid=833040391&bvid=BV1cg4y1d7WE&cid=1323377652&page=1&high_quality=1",
+    "createTime": "2023.11.04",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/meetup-chengdu-20231104-3.png",
+    "group": "Meetup",
+    "tag": "SOFABoot,JDK17"
+  },
+  {
+    "title": "KubeSphere 平台整合多样化云原生网关的设计",
+    "link": "//player.bilibili.com/player.html?aid=235567328&bvid=BV1Ee411X7C6&cid=1323376078&page=1&high_quality=1",
+    "createTime": "2023.11.04",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/meetup-chengdu-20231104-2.png",
+    "group": "Meetup",
+    "tag": "KubeSphere"
+  },
+  {
+    "title": "DLRover——蚂蚁大模型训练弹性容错与自动优化",
+    "link": "//player.bilibili.com/player.html?aid=493119904&bvid=BV1oN411u7f8&cid=1323370126&page=1&high_quality=1",
+    "createTime": "2023.11.04",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/meetup-chengdu-20231104-1.png",
+    "group": "Meetup",
+    "tag": "DLRover,AI"
+  },
+  {
+    "title": "使用 Kubernetes 原生方式实现多集群告警",
+    "link": "https://kubesphere-community.pek3b.qingstor.com/videos/Multi-Cluster-Alerting-A-Kubernetes-Native-Approach.mp4",
+    "createTime": "2023.09.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/kubecon-2023-alerting.png",
+    "group": "KubeCon",
+    "tag": "Kubernetes"
+  },
+  {
+    "title": "使用 OpenFunction 在任何基础设施上运行无服务器工作负载",
+    "link": "https://kubesphere-community.pek3b.qingstor.com/videos/Run-Serverless-Workloads-on-Any-Infrastructure-with-OpenFunction.mp4",
+    "createTime": "2023.09.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/kubecon-2023-openfunction.png",
+    "group": "KubeCon",
+    "tag": "OpenFunction"
+  },
+  {
+    "title": "EMQX 云服务的 Serverless 实践",
+    "link": "//player.bilibili.com/player.html?aid=786948545&bvid=BV1714y1z7Cv&cid=1226529183&page=1&high_quality=1",
+    "createTime": "2023.08.05",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/20230805-shanghai-meetup-6-cover.png",
+    "group": "Meetup",
+    "tag": "Serverless,EMQX"
+  },
+  {
+    "title": "Milvus——AI & LLM 时代的记忆体",
+    "link": "//player.bilibili.com/player.html?aid=231880556&bvid=BV1F8411o7kN&cid=1226522632&page=1&high_quality=1",
+    "createTime": "2023.08.05",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/20230805-shanghai-meetup-5-cover.png",
+    "group": "Meetup",
+    "tag": "Milvus,AI"
+  },
+  {
+    "title": "面向无人驾驶车联网的云原生远程监控实践",
+    "link": "//player.bilibili.com/player.html?aid=616999781&bvid=BV1Rh4y1F77S&cid=1226508011&page=1&high_quality=1",
+    "createTime": "2023.08.05",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/20230805-shanghai-meetup-4-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere"
+  },
+  {
+    "title": "AIOPS — 日志的分析与挖掘的研究现状",
+    "link": "//player.bilibili.com/player.html?aid=744473959&bvid=BV1Ck4y1g7NQ&cid=1226502391&page=1&high_quality=1",
+    "createTime": "2023.08.05",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/20230805-shanghai-meetup-3-cover.png",
+    "group": "Meetup",
+    "tag": "AIOPS"
+  },
+  {
+    "title": "OpenFunction 函数计算框架及 AI 应用实践浅谈",
+    "link": "//player.bilibili.com/player.html?aid=231969736&bvid=BV1t8411o7ye&cid=1226492212&page=1&high_quality=1",
+    "createTime": "2023.08.05",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/20230805-shanghai-meetup-2-cover.png",
+    "group": "Meetup",
+    "tag": "OpenFunction"
+  },
+  {
+    "title": "云原生环境下的技术变革 — 从无服务器到生成式 AI",
+    "link": "//player.bilibili.com/player.html?aid=361879172&bvid=BV1894y1C7i2&cid=1225903563&page=1&high_quality=1",
+    "createTime": "2023.08.05",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/20230805-shanghai-meetup-1-cover.png",
+    "group": "Meetup",
+    "tag": "AI"
+  },
+  {
+    "title": "基于 KubeSphere 的云计算落地实践",
+    "link": "//player.bilibili.com/player.html?aid=741876969&bvid=BV11k4y1H7xY&cid=1153185612&page=1&high_quality=1",
+    "createTime": "2023.06.03",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/hangzhou0603-kubesphere-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere"
+  },
+  {
+    "title": "无需编译重启快速扩展服务网格功能",
+    "link": "//player.bilibili.com/player.html?aid=826973216&bvid=BV1ku4y1Z7Jf&cid=1153185657&page=1&high_quality=1",
+    "createTime": "2023.06.03",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/hangzhou0603-flomesh-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,flomesh"
+  },
+  {
+    "title": "Curve 云原生分布式存储",
+    "link": "//player.bilibili.com/player.html?aid=954433421&bvid=BV1zW4y1R74w&cid=1153185733&page=1&high_quality=1",
+    "createTime": "2023.06.03",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/hangzhou0603-curve-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,Curve"
+  },
+  {
+    "title": "极狐GitLab x KubeSphere 云原生应用安全构建初体验",
+    "link": "//player.bilibili.com/player.html?aid=229416528&bvid=BV1m8411o7j3&cid=1153185702&page=1&high_quality=1",
+    "createTime": "2023.06.03",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/hangzhou0603-gitlab-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,极狐GitLab"
+  },
+  {
+    "title": "借助 Argo CD 实现 GitOps 多环境管理",
+    "link": "//player.bilibili.com/player.html?aid=739790018&bvid=BV1Hk4y1Y7RX&cid=1091067350&page=1&high_quality=1",
+    "createTime": "2023.04.08",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/shenzhen0408-gitops-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,Argo CD,GitOps"
+  },
+  {
+    "title": "好上好信息 API 微服务集群在 KubeSphere 的部署实践",
+    "link": "//player.bilibili.com/player.html?aid=484757502&bvid=BV1PT411W7wx&cid=1091048631&page=1&high_quality=1",
+    "createTime": "2023.04.08",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/shenzhen0408-api-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,微服务"
+  },
+  {
+    "title": "KubeSphere 可插拔架构前瞻",
+    "link": "//player.bilibili.com/player.html?aid=654847503&bvid=BV1Ga4y1N71n&cid=1092251258&page=1&high_quality=1",
+    "createTime": "2023.04.08",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/shenzhen0408-kubesphere-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,可插拔"
+  },
+  {
+    "title": "Jenkins 云原生企业级实践",
+    "link": "//player.bilibili.com/player.html?aid=782268846&bvid=BV1Z24y1c7dc&cid=1091056235&page=1&high_quality=1",
+    "createTime": "2023.04.08",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/shenzhen0408-jenkins-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,Jenkins"
+  },
+  {
+    "title": "混合多云下的多 K8s 集群和流量管理",
+    "link": "//player.bilibili.com/player.html?aid=313773230&bvid=BV1EP411d7uX&cid=1133992070&page=1&high_quality=1",
+    "createTime": "2023.04.08",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/shenzhen0408-flomesh-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,Kubernetes"
+  },
+  {
+    "title": "手把手一起玩 KubeSphere 全新可插拔功能",
+    "link": "//player.bilibili.com/player.html?aid=346985450&bvid=BV11R4y1Q7ko&cid=870801120&page=1&high_quality=1",
+    "createTime": "2022.10.22",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/kubesphere-apisix-20221022-ks.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,可插拔"
+  },
+  {
+    "title": "OpenFunction 函数计算框架的应用探索",
+    "link": "//player.bilibili.com/player.html?aid=561971794&bvid=BV1oe4y1e72A&cid=870798100&page=1&high_quality=1",
+    "createTime": "2022.10.22",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/kubesphere-apisix-20221022-of.png",
+    "group": "Meetup",
+    "tag": "FaaS,OpenFunction"
+  },
+  {
+    "title": "NebulaGraph 的云产品交付实践",
+    "link": "//player.bilibili.com/player.html?aid=560071809&bvid=BV1Le4y1Y79K&cid=817822312&page=1&high_quality=1",
+    "createTime": "2022.08.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/meetup-hangzhou-20220827-nebulagragh-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,NebulaGraph"
+  },
+  {
+    "title": "KubeSphere 在青花瓷的落地实践与展望",
+    "link": "//player.bilibili.com/player.html?aid=771796800&bvid=BV1o14y1t7o7&cid=798190254&page=1&high_quality=1",
+    "createTime": "2022.08.06",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/meetup-guangzhou-20220806-qinghuaci-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere"
+  },
+  {
+    "title": "基于 Buildpacks 和 Argo CD 的云原生 GitOps 实践",
+    "link": "//player.bilibili.com/player.html?aid=771761897&bvid=BV1m14y1t7ks&cid=798179477&page=1&high_quality=1",
+    "createTime": "2022.08.06",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/meetup-guangzhou-20220806-gitops-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,GitOps,Argo CD"
+  },
+  {
+    "title": "云原生数据工厂- 中海庭数字化转型之路",
+    "link": "//player.bilibili.com/player.html?aid=427959522&bvid=BV15G411x7oi&cid=758122437&page=1&high_quality=1",
+    "createTime": "2022.06.25",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/pulsar-kubesphere-meetup-liuxu-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere"
+  },
+  {
+    "title": "使用 KubeSphere & CoreDNS 搭建云原生 DNS",
+    "link": "//player.bilibili.com/player.html?aid=642935218&bvid=BV1HY4y1n7PV&cid=758124588&page=1&high_quality=1",
+    "createTime": "2022.06.25",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/pulsar-kubesphere-meetup-ma-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,CoreDNS"
+  },
+  {
+    "title": "KubeSphere x Apache Pulsar 实战部署",
+    "link": "//player.bilibili.com/player.html?aid=257994185&bvid=BV1Ja411X7Ls&cid=758125825&page=1&high_quality=1",
+    "createTime": "2022.06.25",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/pulsar-kubesphere-meetup-xu-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,Apache Pulsar"
+  },
+  {
+    "title": "从 Fluentbit-operator 到 Fluent-operator",
+    "link": "//player.bilibili.com/player.html?aid=426507696&bvid=BV113411N7ji&cid=721591563&page=1&high_quality=1",
+    "createTime": "2022.05.14",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/chengdu0514-fluent-operator-cover.png",
+    "group": "Meetup",
+    "tag": "Fluent-operator"
+  },
+  {
+    "title": "基于 KubeSphere 的分级管理实践",
+    "link": "//player.bilibili.com/player.html?aid=214069597&bvid=BV1aa411J7Yw&cid=721579413&page=1&high_quality=1",
+    "createTime": "2022.05.14",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/chengdu0514-level-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere"
+  },
+  {
+    "title": "镜像构建技术 Buildpacks 的原理及在 FaaS 平台中的实践",
+    "link": "//player.bilibili.com/player.html?aid=554062007&bvid=BV1Kv4y1N7DQ&cid=721576758&page=1&high_quality=1",
+    "createTime": "2022.05.14",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/chengdu0514-openfunction-cover.png",
+    "group": "Meetup",
+    "tag": "FaaS,OpenFunction"
+  },
+  {
+    "title": "生产化集群的 Day2 运营思考",
+    "link": "//player.bilibili.com/player.html?aid=339768625&bvid=BV1uR4y1F79m&cid=550080991&page=1&high_quality=1",
+    "createTime": "2022.03.12",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/meetup-changsha-cluster-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,Kubernetes"
+  },
+  {
+    "title": "云原生环境下微服务治理应用实践",
+    "link": "//player.bilibili.com/player.html?aid=254758310&bvid=BV18Y41137C2&cid=550076305&page=1&high_quality=1",
+    "createTime": "2022.03.12",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/meetup-changsha-microservice-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,Kubernetes,微服务"
+  },
+  {
+    "title": "从 Java 到 Rust，提灯医疗在云原生时代的编程语言演化",
+    "link": "//player.bilibili.com/player.html?aid=937346476&bvid=BV1zT4y1U7yf&cid=550067168&page=1&high_quality=1",
+    "createTime": "2022.03.12",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/meetup-changsha-rust-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,Kubernetes,Rust"
+  },
+  {
+    "title": "JuiceFS CSI Driver 的最佳实践",
+    "link": "//player.bilibili.com/player.html?aid=676257371&bvid=BV1ZU4y1F7kK&cid=430831516&page=1&high_quality=1",
+    "createTime": "2021.10.23",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/hangzhou1023-juicefs-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,Kubernetes,JuiceFS"
+  },
+  {
+    "title": "KubeSphere DevOps 越开放，越强大",
+    "link": "//player.bilibili.com/player.html?aid=763750235&bvid=BV1Rr4y1y7wF&cid=430838015&page=1&high_quality=1",
+    "createTime": "2021.10.23",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/hangzhou1023-devops-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,Kubernetes,DevOps"
+  },
+  {
+    "title": "新一代高可用 MySQL K8s Operator 源码解析",
+    "link": "//player.bilibili.com/player.html?aid=421345772&bvid=BV1j3411k7ye&cid=431626676&page=1&high_quality=1",
+    "createTime": "2021.10.23",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/hangzhou1023-mysql-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,Kubernetes,MySQL"
+  },
+  {
+    "title": "云原生区块链探索之路",
+    "link": "//player.bilibili.com/player.html?aid=633793789&bvid=BV1Sb4y1h7eb&cid=430844218&page=1&high_quality=1",
+    "createTime": "2021.10.23",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/hangzhou1023-blockchain-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,Kubernetes,区块链"
+  },
+  {
+    "title": "基于 Kubernetes 与 Dapr 打造智慧医疗平台",
+    "link": "//player.bilibili.com/player.html?aid=333864719&bvid=BV1qw411o76d&cid=357591374&page=1&high_quality=1",
+    "createTime": "2021.06.19",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/Dapr.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,Kubernetes,Dapr"
+  },
+  {
+    "title": "长虹电器基于 Kubernetes 的弹性伸缩与金丝雀发布实践",
+    "link": "//player.bilibili.com/player.html?aid=418857946&bvid=BV15V411x7tX&cid=357631746&page=1&high_quality=1",
+    "createTime": "2021.06.19",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/hpa-cover.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,Kubernetes,弹性伸缩,金丝雀发布"
+  },
+  {
+    "title": "初识云原生 FaaS 平台及 Serverless 生态",
+    "link": "//player.bilibili.com/player.html?aid=248447658&bvid=BV1Dv411V7Ku&cid=347150253&page=1&high_quality=1",
+    "createTime": "2021.05.29",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/Faas-serverless.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,Kubernetes,FaaS,Serverless"
+  },
+  {
+    "title": "基于 KubeSphere 的 Nebula Graph 多云架构管理实践",
+    "link": "//player.bilibili.com/player.html?aid=460886659&bvid=BV1u5411M7hr&cid=347153258&page=1&high_quality=1",
+    "createTime": "2021.05.29",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/nebulagraph.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,Kubernetes,Nebula Graph,图数据库"
+  },
+  {
+    "title": "KubeSphere + KubeEdge——打造云原生边缘计算服务",
+    "link": "//player.bilibili.com/player.html?aid=845966924&bvid=BV1654y137iR&cid=347155149&page=1&high_quality=1",
+    "createTime": "2021.05.29",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/KubeSphere-KubeEdge.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,Kubernetes,KubeEdge,边缘计算"
+  },
+  {
+    "title": "SegmentFault 基于 K8s 的容器化与持续交付实践",
+    "link": "//player.bilibili.com/player.html?aid=888493519&bvid=BV1TK4y137XE&cid=347158829&page=1&high_quality=1",
+    "createTime": "2021.05.29",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/SegmentFault-hangzhou.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,Kubernetes"
+  },
+  {
+    "title": "基于 Kubernetes 的新一代 MySQL 高可用架构实现方案",
+    "link": "//player.bilibili.com/player.html?aid=333433521&bvid=BV1YA41137MQ&cid=347162028&page=1&high_quality=1",
+    "createTime": "2021.05.29",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/MySQL-hangzhou.png",
+    "group": "Meetup",
+    "tag": "KubeSphere,Kubernetes,MySQL"
+  },
+  {
+    "title": "跳离云原生深水区，KubeSphere 带你远航",
+    "link": "//player.bilibili.com/player.html?aid=375675566&bvid=BV1Fo4y117xt&cid=340529916&page=1&high_quality=1",
+    "createTime": "2021.05.15",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/yuanhang-kubesphere.jpeg",
+    "group": "Meetup",
+    "tag": "KubeSphere,Kubernetes"
+  },
+  {
+    "title": "混合云下的 K8s 多集群管理及应用部署",
+    "link": "//player.bilibili.com/player.html?aid=248246237&bvid=BV17v411L7tG&cid=340534276&page=1&high_quality=1",
+    "createTime": "2021.05.15",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/multicluster-kubesphere.jpeg",
+    "group": "Meetup",
+    "tag": "KubeSphere,Kubernetes"
+  },
+  {
+    "title": "Kubernetes 在媒体直播行业的落地实践",
+    "link": "//player.bilibili.com/player.html?aid=205640169&bvid=BV1Jh411v7kG&cid=340538245&page=1&high_quality=1",
+    "createTime": "2021.05.15",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/kubesphere-live.jpeg",
+    "group": "Meetup",
+    "tag": "KubeSphere,Kubernetes"
+  },
+  {
+    "title": "MySQL on K8s：开源开放的高可用容器编排方案",
+    "link": "//player.bilibili.com/player.html?aid=205670397&bvid=BV1bh411v7Ph&cid=340545938&page=1&high_quality=1",
+    "createTime": "2021.05.15",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/MySQLonkubernetes.jpeg",
+    "group": "Meetup",
+    "tag": "KubeSphere,Kubernetes,MySQL"
+  },
+  {
+    "title": "中通快递关键业务和复杂架构挑战下的 K8s 集群服务暴露实践",
+    "link": "//player.bilibili.com/player.html?aid=760635980&bvid=BV1Z64y1C75y&cid=340544087&page=1&high_quality=1",
+    "createTime": "2021.05.15",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/cluster-zhongtong.jpeg",
+    "group": "Meetup",
+    "tag": "KubeSphere,Kubernetes"
+  },
+  {
+    "title": "基于云原生架构下的 DevOps 实践",
+    "link": "//player.bilibili.com/player.html?aid=205642662&bvid=BV1Jh411v7jc&cid=340549646&page=1&high_quality=1",
+    "createTime": "2021.05.15",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/DevOps-cloudnative.jpeg",
+    "group": "Meetup",
+    "tag": "KubeSphere,DevOps"
+  },
+  {
+    "title": "KubeSphere 历程回顾与未来展望",
+    "link": "//player.bilibili.com/player.html?aid=671719411&bvid=BV1YU4y1W7XQ&cid=299188597&page=1&high_quality=1",
+    "createTime": "2020.12.19",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/licheng-kubesphere.jpeg",
+    "group": "Meetup",
+    "tag": "KubeSphere,Kubernetes"
+  },
+  {
+    "title": "中通物流在 KubeSphere 上的开发部署实践",
+    "link": "//player.bilibili.com/player.html?aid=628441379&bvid=BV1dt4y167qj&cid=276016600&page=1&high_quality=1",
+    "createTime": "2020.12.19",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/zhongtong-kubesphere.jpeg",
+    "group": "Meetup",
+    "tag": "KubeSphere,Kubernetes"
+  },
+  {
+    "title": "基于 WDS Prophecis 与 KubeSphere 构建云原生机器学习平台",
+    "link": "//player.bilibili.com/player.html?aid=288996625&bvid=BV1Mf4y1r7bv&cid=292045702&page=1&high_quality=1",
+    "createTime": "2020.12.19",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/WDS-KubeSphere.jpeg",
+    "group": "Meetup",
+    "tag": "KubeSphere,机器学习"
+  },
+  {
+    "title": "对于 Serverless, DevOps, 多云及边缘可观察性的思考与实践",
+    "link": "//player.bilibili.com/player.html?aid=629112959&bvid=BV1gt4y1z75j&cid=293145463&page=1&high_quality=1",
+    "createTime": "2020.12.19",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/serverless-ben.jpeg",
+    "group": "Meetup",
+    "tag": "Serverless,DevOps,可观测性"
+  },
+  {
+    "title": "使用（KubeSphere）QKE 管理多个 ACK 集群",
+    "link": "//player.bilibili.com/player.html?aid=801598359&bvid=BV1Xy4y1n764&cid=294877842&page=1&high_quality=1",
+    "createTime": "2020.12.19",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/qke-akc.jpeg",
+    "group": "Meetup",
+    "tag": "KubeSphere,QKE,ACK"
+  },
+  {
+    "title": "云原生的 WebAssembly 能取代 Docker 吗？",
+    "link": "//player.bilibili.com/player.html?aid=374255852&bvid=BV1wo4y1R7x2&cid=302625819&page=1&high_quality=1",
+    "createTime": "2020.12.19",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/webassembly-docker.jpeg",
+    "group": "Meetup",
+    "tag": "WebAssembly,Docker"
+  },
+  {
+    "title": "为什么选择 KubeSphere",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/meetup/meetup-final-1226.mp4",
+    "createTime": "2019.12.14",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20200206170305.png",
+    "group": "Meetup",
+    "tag": "用户访谈,容器,Kubernetes"
+  },
+  {
+    "title": "走近 KubeSphere",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/meetup/zhouxiaosi-final.mp4",
+    "createTime": "2019.12.14",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20200206171311.png",
+    "group": "Meetup",
+    "tag": "KubeSphere 2.1,容器,Kubernetes"
+  },
+  {
+    "title": "企业级容器 CI/CD 进阶之路",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/meetup/xiarunze-final.mp4",
+    "createTime": "2019.12.14",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20200206171404.png",
+    "group": "Meetup",
+    "tag": "KubeSphere 2.1,DevOps,容器,Kubernetes"
+  },
+  {
+    "title": "Istio 在 KubeSphere 平台上的实践",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/meetup/zhangrenyu-final.mp4",
+    "createTime": "2019.12.14",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20200206171431.png",
+    "group": "Meetup",
+    "tag": "KubeSphere 2.1,微服务,容器,Kubernetes"
+  },
+  {
+    "title": "K8s 可观测性实践之路 - 上",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/meetup/huobingjie-final.mp4",
+    "createTime": "2019.12.14",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20200206171451.png",
+    "group": "Meetup",
+    "tag": "KubeSphere 2.1,容器,Kubernetes"
+  },
+  {
+    "title": "K8s 可观测性实践之路 - 下",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/meetup/huangguangzhe-final.mp4",
+    "createTime": "2019.12.14",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20200206171451.png",
+    "group": "Meetup",
+    "tag": "KubeSphere 2.1,容器,Kubernetes"
+  },
+  {
+    "title": "你不知道的 KubeSphere Console",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/meetup/liulu-final.mp4",
+    "createTime": "2019.12.14",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20200206171525.png",
+    "group": "Meetup",
+    "tag": "KubeSphere 2.1,容器,Kubernetes"
+  },
+  {
+    "title": "KubeSphere 多租户管理教程",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/%E5%85%A5%E9%97%A8%E6%95%99%E7%A8%8B/KS2.1_1-multi-tenancy.mp4",
+    "createTime": "2019.01.24",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20200206174734.png",
+    "group": "入门教程",
+    "tag": "KubeSphere 2.1,容器,Kubernetes"
+  },
+  {
+    "title": "创建 Wordpress 应用并发布至 K8s",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/%E5%85%A5%E9%97%A8%E6%95%99%E7%A8%8B/KS2.1_3-wordpress-k8s.mp4",
+    "createTime": "2019.01.24",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20200206174845.png",
+    "group": "入门教程",
+    "tag": "KubeSphere 2.1,容器,Kubernetes"
+  },
+  {
+    "title": "创建 Service 与 Ingress 暴露应用",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/%E5%85%A5%E9%97%A8%E6%95%99%E7%A8%8B/KS2.1_2-service-ingress.mp4",
+    "createTime": "2019.01.24",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928174847.png",
+    "group": "入门教程",
+    "tag": "KubeSphere 2.1,容器,Kubernetes"
+  },
+  {
+    "title": "Binary to Image - 发布制品至 K8s",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/%E5%85%A5%E9%97%A8%E6%95%99%E7%A8%8B/Binary-to-image.mp4",
+    "createTime": "2019.01.24",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20200206174934.png",
+    "group": "入门教程",
+    "tag": "KubeSphere 2.1,容器,Kubernetes"
+  },
+  {
+    "title": "深入解读云原生可观测性之日志与告警通知",
+    "link": "//player.bilibili.com/player.html?aid=377155706&bvid=BV1Ro4y1S7Uo&cid=383164279&page=1&high_quality=1",
+    "createTime": "2021.07.29",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/nm-cic-cover.png",
+    "group": "CIC 用户大会",
+    "tag": "KubeSphere,可观测性,峰会论坛"
+  },
+  {
+    "title": "面向无人驾驶 “云端大脑” 可用性的云原生实践",
+    "link": "//player.bilibili.com/player.html?aid=804632135&bvid=BV1Ty4y1L7Np&cid=383744661&page=1&high_quality=1",
+    "createTime": "2021.07.29",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/driverless-cic-cover.png",
+    "group": "CIC 用户大会",
+    "tag": "KubeSphere,无人驾驶,峰会论坛"
+  },
+  {
+    "title": "中国移动基于 K8s 的物联网边缘计算应用实践",
+    "link": "//player.bilibili.com/player.html?aid=504628879&bvid=BV1vg411L7e4&cid=383475330&page=1&high_quality=1",
+    "createTime": "2021.07.29",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/edgebox-cic-cover.png",
+    "group": "CIC 用户大会",
+    "tag": "KubeSphere,物联网,边缘计算,峰会论坛"
+  },
+  {
+    "title": "马上消费金融基于 KubeSphere 的 AI 平台的开发实践",
+    "link": "//player.bilibili.com/player.html?aid=762238630&bvid=BV1764y1s7bD&cid=383494454&page=1&high_quality=1",
+    "createTime": "2021.07.29",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/ai-cic-cover.png",
+    "group": "CIC 用户大会",
+    "tag": "KubeSphere,AI,峰会论坛"
+  },
+  {
+    "title": "基于 Argo CD 的 GitOps 实践经验",
+    "link": "//player.bilibili.com/player.html?aid=589719212&bvid=BV1Hq4y1Q7Py&cid=383590164&page=1&high_quality=1",
+    "createTime": "2021.07.29",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/gitops-cic-cover.png",
+    "group": "CIC 用户大会",
+    "tag": "KubeSphere,Argo CD,GitOps,峰会论坛"
+  },
+  {
+    "title": "KubeSphere 容器平台新动向 - 周小四",
+    "link": "https://insight2019.pek3a.qingstor.com/%E7%9B%B4%E6%92%AD%E8%A7%86%E9%A2%91/%E4%B8%BB%E4%BC%9A%E5%9C%BA/6%E3%80%81KubeSphere%20%E5%AE%B9%E5%99%A8%E5%B9%B3%E5%8F%B0%E6%96%B0%E5%8A%A8%E5%90%91%20%20%20%E5%91%A8%E5%B0%8F%E5%9B%9B.mp4",
+    "createTime": "2019.07.25",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928183518.png",
+    "group": "CIC 用户大会",
+    "tag": "KubeSphere 2.0,峰会论坛"
+  },
+  {
+    "title": "KubeSphere 助力企业解禁云原生 - 于爽",
+    "link": "https://insight2019.pek3a.qingstor.com/%E7%9B%B4%E6%92%AD%E8%A7%86%E9%A2%91/%E5%AE%B9%E5%99%A8%E4%B8%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1/KubeSphere%20%E5%8A%A9%E5%8A%9B%E4%BC%81%E4%B8%9A%E8%A7%A3%E7%A6%81%E4%BA%91%E5%8E%9F%E7%94%9F%20%E4%BA%8E%E7%88%BD_batch.mp4",
+    "createTime": "2019.07.25",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928183518.png",
+    "group": "CIC 用户大会",
+    "tag": "KubeSphere 2.0,峰会论坛"
+  },
+  {
+    "title": "企业应用向容器迁移和微服务改造实践 - 张仁宇",
+    "link": "https://insight2019.pek3a.qingstor.com/%E7%9B%B4%E6%92%AD%E8%A7%86%E9%A2%91/%E5%AE%B9%E5%99%A8%E4%B8%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1/%E4%BC%81%E4%B8%9A%E5%BA%94%E7%94%A8%E5%90%91%E5%AE%B9%E5%99%A8%E8%BF%81%E7%A7%BB%E5%92%8C%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%94%B9%E9%80%A0%E5%AE%9E%E8%B7%B5%20%E5%BC%A0%E4%BB%81%E5%AE%87_batch.mp4",
+    "createTime": "2019.07.25",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928183518.png",
+    "group": "CIC 用户大会",
+    "tag": "KubeSphere 2.0,峰会论坛"
+  },
+  {
+    "title": "K8S 监控实践 ：Prometheus, 多租户与多集群 - 霍秉杰",
+    "link": "https://insight2019.pek3a.qingstor.com/%E7%9B%B4%E6%92%AD%E8%A7%86%E9%A2%91/%E5%AE%B9%E5%99%A8%E4%B8%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1/K8S%E7%9B%91%E6%8E%A7%E5%AE%9E%E8%B7%B5%20%EF%BC%9APrometheus%2C%20%E5%A4%9A%E7%A7%9F%E6%88%B7%E4%B8%8E%E5%A4%9A%E9%9B%86%E7%BE%A4%20%E9%9C%8D%E7%A7%89%E6%9D%B0_batch.mp4",
+    "createTime": "2019.07.25",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928183518.png",
+    "group": "CIC 用户大会",
+    "tag": "KubeSphere 2.0,峰会论坛"
+  },
+  {
+    "title": "如何打造一个轻量级的极简 CI / CD Kubernetes 工作流 - 夏润泽",
+    "link": "https://insight2019.pek3a.qingstor.com/%E7%9B%B4%E6%92%AD%E8%A7%86%E9%A2%91/%E5%AE%B9%E5%99%A8%E4%B8%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1/%E5%A6%82%E4%BD%95%E6%89%93%E9%80%A0%E4%B8%80%E4%B8%AA%E8%BD%BB%E9%87%8F%E7%BA%A7%E7%9A%84%E6%9E%81%E7%AE%80%20%E5%A4%8F%E6%B6%A6%E6%B3%BD_batch.mp4",
+    "createTime": "2019.07.25",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928183518.png",
+    "group": "CIC 用户大会",
+    "tag": "KubeSphere 2.0,峰会论坛"
+  },
+  {
+    "title": "Harbor 镜像仓储最佳实践 - Alex Xu",
+    "link": "https://insight2019.pek3a.qingstor.com/%E7%9B%B4%E6%92%AD%E8%A7%86%E9%A2%91/%E5%AE%B9%E5%99%A8%E4%B8%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1/Harbor%E9%95%9C%E5%83%8F%E4%BB%93%E5%82%A8%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%20%E5%BE%90%E5%A4%A9%E8%A1%8C_batch.mp4",
+    "createTime": "2019.07.25",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928183518.png",
+    "group": "CIC 用户大会",
+    "tag": "峰会论坛"
+  },
+  {
+    "title": "KubeSphere 容器平台发布 - 周小四",
+    "link": "https://insight2018.pek3a.qingstor.com/%E8%A7%86%E9%A2%91/%E4%B8%BB%E4%BC%9A%E5%9C%BA/KubeSphere%20%E5%AE%B9%E5%99%A8%E4%BA%A7%E5%93%81%E7%BA%BF-%E5%91%A8%E5%B0%8F%E5%9B%9B-%E9%9D%92%E4%BA%91QingCloud%20%E5%AE%B9%E5%99%A8%E5%8F%8A%E5%BA%94%E7%94%A8%E5%B9%B3%E5%8F%B0%E7%A0%94%E5%8F%91%E6%80%BB%E7%9B%91.mp4",
+    "createTime": "2018.07.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928184613.png",
+    "group": "CIC 用户大会",
+    "tag": "峰会论坛"
+  },
+  {
+    "title": "划时代的云端容器平台 KubeSphere - 于爽",
+    "link": "https://insight2018.pek3a.qingstor.com/%E8%A7%86%E9%A2%91/%E5%AE%B9%E5%99%A8%E3%80%81%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%84%E6%9E%B6%E4%B8%8E%E6%B2%BB%E7%90%86%E4%B8%93%E9%A2%98%E8%AE%BA%E5%9D%9B/%E5%88%92%E6%97%B6%E4%BB%A3%E7%9A%84%E4%BA%91%E7%AB%AF%E5%AE%B9%E5%99%A8%E5%B9%B3%E5%8F%B0%20KubeSphere-%E4%BA%8E%E7%88%BD-%E9%9D%92%E4%BA%91QingCloud%20%E5%AE%B9%E5%99%A8%E5%B9%B3%E5%8F%B0%E8%B5%84%E6%B7%B1%E6%9E%B6%E6%9E%84%E5%B8%88.mp4",
+    "createTime": "2018.07.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928184613.png",
+    "group": "CIC 用户大会",
+    "tag": "KubeSphere 2.0,峰会论坛"
+  },
+  {
+    "title": "招银云创容器及微服务实践-陈沙克",
+    "link": "https://insight2018.pek3a.qingstor.com/%E8%A7%86%E9%A2%91/%E5%AE%B9%E5%99%A8%E3%80%81%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%84%E6%9E%B6%E4%B8%8E%E6%B2%BB%E7%90%86%E4%B8%93%E9%A2%98%E8%AE%BA%E5%9D%9B/%E6%8B%9B%E9%93%B6%E4%BA%91%E5%88%9B%E5%AE%B9%E5%99%A8%E5%8F%8A%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%AE%9E%E8%B7%B5-%E9%99%88%E6%B2%99%E5%85%8B-%E6%8B%9B%E9%93%B6%E4%BA%91%E5%88%9B%E9%87%91%E8%9E%8D%20PaaS%20%E7%A0%94%E7%A9%B6%E4%B8%AD%E5%BF%83%E6%80%BB%E7%9B%91.mp4",
+    "createTime": "2018.07.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928184613.png",
+    "group": "CIC 用户大会",
+    "tag": "KubeSphere 2.0,峰会论坛"
+  },
+  {
+    "title": "DataOps 容器技术助力敏捷大数据-王庆",
+    "link": "https://insight2018.pek3a.qingstor.com/%E8%A7%86%E9%A2%91/%E5%AE%B9%E5%99%A8%E3%80%81%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%84%E6%9E%B6%E4%B8%8E%E6%B2%BB%E7%90%86%E4%B8%93%E9%A2%98%E8%AE%BA%E5%9D%9B/DataOps%20%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E5%8A%A9%E5%8A%9B%E6%95%8F%E6%8D%B7%E5%A4%A7%E6%95%B0%E6%8D%AE-%E7%8E%8B%E5%BA%86%E4%B8%80-%E6%96%B0%E6%B0%A6%E6%95%B0%E6%8D%AE%20CEO.mp4",
+    "createTime": "2018.07.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928184613.png",
+    "group": "CIC 用户大会",
+    "tag": "KubeSphere 2.0,峰会论坛"
+  },
+  {
+    "title": "DevOps 工具链落地之路-王青",
+    "link": "https://insight2018.pek3a.qingstor.com/%E8%A7%86%E9%A2%91/%E5%AE%B9%E5%99%A8%E3%80%81%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%84%E6%9E%B6%E4%B8%8E%E6%B2%BB%E7%90%86%E4%B8%93%E9%A2%98%E8%AE%BA%E5%9D%9B/DevOps%20%E5%B7%A5%E5%85%B7%E9%93%BE%E8%90%BD%E5%9C%B0%E4%B9%8B%E8%B7%AF-%E7%8E%8B%E9%9D%92-JFrog%20%E4%B8%AD%E5%9B%BD%E9%A6%96%E5%B8%AD%E6%9E%B6%E6%9E%84%E5%B8%88.mp4",
+    "createTime": "2018.07.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928184613.png",
+    "group": "CIC 用户大会",
+    "tag": "KubeSphere 2.0,峰会论坛"
+  },
+  {
+    "title": "ofo 小黄车容器云平台及业务容器化实践-王强",
+    "link": "https://insight2018.pek3a.qingstor.com/%E8%A7%86%E9%A2%91/%E5%AE%B9%E5%99%A8%E3%80%81%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%84%E6%9E%B6%E4%B8%8E%E6%B2%BB%E7%90%86%E4%B8%93%E9%A2%98%E8%AE%BA%E5%9D%9B/ofo%20%E5%B0%8F%E9%BB%84%E8%BD%A6%E5%AE%B9%E5%99%A8%E4%BA%91%E5%B9%B3%E5%8F%B0%E5%8F%8A%E4%B8%9A%E5%8A%A1%E5%AE%B9%E5%99%A8%E5%8C%96%E5%AE%9E%E8%B7%B5-%E7%8E%8B%E5%BC%BA-ofo%20%E5%B0%8F%E9%BB%84%E8%BD%A6%E5%AE%B9%E5%99%A8%E4%BA%91%E7%A0%94%E5%8F%91%E8%B4%9F%E8%B4%A3%E4%BA%BA.mp4",
+    "createTime": "2018.07.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928184613.png",
+    "group": "CIC 用户大会",
+    "tag": "KubeSphere 2.0,峰会论坛"
+  },
+  {
+    "title": "使用云原生 Serverless 技术为自动驾驶赋能",
+    "link": "https://kubesphere-community.pek3b.qingstor.com/videos/KubeCon-America-2022-ben.mp4",
+    "createTime": "2022.10.24",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/kubecon-a-2022-ben.png",
+    "group": "KubeCon",
+    "tag": "Fluent Bit,峰会论坛"
+  },
+  {
+    "title": "使用云原生 Serverless 技术为自动驾驶赋能",
+    "link": "https://kubesphere-community.pek3b.qingstor.com/videos/KubeCon-EU-2022-Ben-Lu.mp4",
+    "createTime": "2022.05.17",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/kubecon-eu-2022-ben-lu.png",
+    "group": "KubeCon",
+    "tag": "Serverless,峰会论坛"
+  },
+  {
+    "title": "深入浅出 Fluent Operator",
+    "link": "https://kubesphere-community.pek3b.qingstor.com/videos/KubeCon-EU-2022-Ben.mp4",
+    "createTime": "2022.05.17",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/kubecon-eu-2022-fluent-operator.png",
+    "group": "KubeCon",
+    "tag": "Fluent Operator,峰会论坛"
+  },
+  {
+    "title": "使用 Fluent Operator 在边缘端构建云原生日志管道",
+    "link": "https://kubesphere-community.pek3b.qingstor.com/videos/KubeCon-EU-2022-Feynman.mp4",
+    "createTime": "2022.05.17",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/kubecon-eu-2022-fluent-operator-2.png",
+    "group": "KubeCon",
+    "tag": "Fluent Operator,峰会论坛"
+  },
+  {
+    "title": "去哪儿网 Kubernetes 多集群和金丝雀部署最佳实践",
+    "link": "https://kubesphere-community.pek3b.qingstor.com/videos/KubeCon2021-China-qunar.mp4",
+    "createTime": "2021.12.10",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/kubecon2021-qunar.png",
+    "group": "KubeCon",
+    "tag": "Kubernetes,峰会论坛"
+  },
+  {
+    "title": "用云原生无服务器技术构建现代 FaaS（函数即服务）平台",
+    "link": "https://kubesphere-community.pek3b.qingstor.com/videos/KubeCon2021-China-Ben.mp4",
+    "createTime": "2021.12.10",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/kubecon2021-ben.png",
+    "group": "KubeCon",
+    "tag": "FaaS,峰会论坛"
+  },
+  {
+    "title": "基于 RBAC 和 Kubefed 的 Kubernetes 多集群和多租户管理",
+    "link": "https://kubesphere-community.pek3b.qingstor.com/videos/KubeCon2021-China-hongming.mp4",
+    "createTime": "2021.12.09",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/kubecon2021-hongming.png",
+    "group": "KubeCon",
+    "tag": "Kubernetes,峰会论坛"
+  },
+  {
+    "title": "用统一的方式分发 Helm 和 Operator 应用",
+    "link": "https://kubesphere-community.pek3b.qingstor.com/videos/KubeCon2021-China-zhengyi.mp4",
+    "createTime": "2021.12.09",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/kubecon2021-zhengyi.png",
+    "group": "KubeCon",
+    "tag": "Kubernetes,峰会论坛"
+  },
+  {
+    "title": "基于云原生系统通用模型的计量计费系统",
+    "link": "https://kubesphere-community.pek3b.qingstor.com/videos/KubeCon2020-metering.mp4",
+    "createTime": "2020.07.31",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/kubecon2020-metering.png",
+    "group": "KubeCon",
+    "tag": "Kubernetes,峰会论坛"
+  },
+  {
+    "title": "多租户环境中的 Kubernetes 事件导出、过滤和警报",
+    "link": "https://kubesphere-community.pek3b.qingstor.com/videos/KubeCon2020-event.mp4",
+    "createTime": "2020.07.30",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-community/images/kubecon2020-event.jpg",
+    "group": "KubeCon",
+    "tag": "Kubernetes,峰会论坛"
+  },
+  {
+    "title": "Porter：面向裸金属环境的 Kubernetes 开源负载均衡器",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/kubecon/Porter%20-%20An%20Open%20Source%20Load%20Balancer%20for%20Bare%20Metal%20Kubernetes%20-%20Xuetao%20Song%20%26%20Fang%20Du.mp4",
+    "createTime": "2019.09.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928115532.png",
+    "group": "KubeCon",
+    "tag": "Kubernetes,峰会论坛"
+  },
+  {
+    "title": "The New Stack 在 KubeCon 采访 Porter 作者宋雪涛",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/kubecon/Open%20Source%20Load%20Balancing%20on%20Bare%20Metal.mp4",
+    "createTime": "2019.09.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928115700.png",
+    "group": "KubeCon",
+    "tag": "Kubernetes"
+  },
+  {
+    "title": "Serverless Jenkins on Kubernetes - Jenkins X",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/kubecon/Serverless%20Jenkins%20on%20Kubernetes%20-%20Jenkins%20X%20-%20RunZe%20Xia%20%26%20Fang%20Du.mp4",
+    "createTime": "2019.09.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928115408.png",
+    "group": "KubeCon",
+    "tag": "Kubernetes,峰会论坛"
+  },
+  {
+    "title": "KubeSphere 容器平台产品发布会",
+    "link": "https://workshop.pek3a.qingstor.com/%E5%A4%A7%E9%81%93%E8%87%B3%E7%AE%80%E4%B8%BB%E4%BC%9A%E5%9C%BA%E7%9B%B4%E6%92%AD%E8%A7%86%E9%A2%91-%E5%89%AA%E8%BE%91.mp4",
+    "createTime": "2019.04.18",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928181423.png",
+    "group": "发布会",
+    "tag": "KubeSphere 2.0,容器,峰会论坛"
+  },
+  {
+    "title": "嘉宾观点 - 阳光保险云计算架构师朱向阳",
+    "link": "https://workshop.pek3a.qingstor.com/%E9%98%B3%E5%85%89%E4%BF%9D%E9%99%A9%E4%BA%91%E8%AE%A1%E7%AE%97%E6%9E%B6%E6%9E%84%E5%B8%88-%E6%9C%B1%E5%90%91%E9%98%B3.mp4",
+    "createTime": "2019.04.18",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928182510.png",
+    "group": "发布会",
+    "tag": "KubeSphere 2.0,容器"
+  },
+  {
+    "title": "嘉宾观点 - 马哥教育创始人、CEO 马永亮",
+    "link": "https://workshop.pek3a.qingstor.com/%E9%98%B3%E5%85%89%E4%BF%9D%E9%99%A9%E4%BA%91%E8%AE%A1%E7%AE%97%E6%9E%B6%E6%9E%84%E5%B8%88-%E6%9C%B1%E5%90%91%E9%98%B3.mp4",
+    "createTime": "2019.04.18",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928182936.png",
+    "group": "发布会",
+    "tag": "KubeSphere 2.0,容器"
+  },
+  {
+    "title": "嘉宾观点 - 某保险公司云计算架构师芦苇",
+    "link": "https://workshop.pek3a.qingstor.com/%E6%9F%90%E4%BF%9D%E9%99%A9%E5%85%AC%E5%8F%B8%E4%BA%91%E8%AE%A1%E7%AE%97%E6%9E%B6%E6%9E%84%E5%B8%88-%E8%8A%A6%E8%8B%87.mp4",
+    "createTime": "2019.04.18",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928183054.png",
+    "group": "发布会",
+    "tag": "KubeSphere 2.0,容器"
+  },
+  {
+    "title": "嘉宾观点 - CuriosityChina CTO 水羽哲",
+    "link": "https://workshop.pek3a.qingstor.com/Curiosity%20China%20CTO%E6%B0%B4%E7%BE%BD%E5%93%B2.mp4",
+    "createTime": "2019.04.18",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928183123.png",
+    "group": "发布会",
+    "tag": "KubeSphere 2.0,容器"
+  },
+  {
+    "title": "嘉宾观点 - 金融 PaaS 技术专家陈沙克",
+    "link": "https://workshop.pek3a.qingstor.com/%E9%87%91%E8%9E%8DPaaS%E6%8A%80%E6%9C%AF%E4%B8%93%E5%AE%B6-%E9%99%88%E6%B2%99%E5%85%8B.mp4",
+    "createTime": "2019.04.18",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928183241.png",
+    "group": "发布会",
+    "tag": "KubeSphere 2.0,容器"
+  },
+  {
+    "title": "KubeSphere 是什么",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/%E4%BA%A7%E5%93%81%E4%BB%8B%E7%BB%8D/Container_100P003C201904_KubeSphere%E6%98%AF%E4%BB%80%E4%B9%88.mp4",
+    "createTime": "2019.09.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928165927.png",
+    "group": "产品介绍",
+    "tag": "KubeSphere 2.0,容器"
+  },
+  {
+    "title": "KubeSphere架构与主要功能",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/%E4%BA%A7%E5%93%81%E4%BB%8B%E7%BB%8D/Container_100P004C201904_KubeSphere%E6%9E%B6%E6%9E%84%E4%B8%8E%E4%B8%BB%E8%A6%81%E5%8A%9F%E8%83%BD.mp4",
+    "createTime": "2019.09.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928170035.png",
+    "group": "产品介绍",
+    "tag": "KubeSphere 2.0,容器"
+  },
+  {
+    "title": "KubeSphere 全景功能概览",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/%E4%BA%A7%E5%93%81%E4%BB%8B%E7%BB%8D/Container_100P005C201904_KubeSphere%20%E5%85%A8%E6%99%AF%E5%8A%9F%E8%83%BD%E6%A6%82%E8%A7%88.mp4",
+    "createTime": "2019.09.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928170201.png",
+    "group": "产品介绍",
+    "tag": "KubeSphere 2.0,容器"
+  },
+  {
+    "title": "KubeSphere 租户和权限管理",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/%E4%BA%A7%E5%93%81%E4%BB%8B%E7%BB%8D/Container_100P006C201906_KubeSphere%20%E7%A7%9F%E6%88%B7%E5%92%8C%E6%9D%83%E9%99%90%E7%AE%A1%E7%90%86.mp4",
+    "createTime": "2019.09.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928170244.png",
+    "group": "产品介绍",
+    "tag": "KubeSphere 2.0,容器"
+  },
+  {
+    "title": "KubeSphere 的网络与存储",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/%E4%BA%A7%E5%93%81%E4%BB%8B%E7%BB%8D/Container_100P007C201906_KubeSphere%20%E7%9A%84%E7%BD%91%E7%BB%9C%E4%B8%8E%E5%AD%98%E5%82%A8.mp4",
+    "createTime": "2019.09.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928170313.png",
+    "group": "产品介绍",
+    "tag": "KubeSphere 2.0,容器"
+  },
+  {
+    "title": "KubeSphere 集群资源管理与监控",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/%E4%BA%A7%E5%93%81%E4%BB%8B%E7%BB%8D/Container_100P008C201906_KubeSphere%20%E9%9B%86%E7%BE%A4%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86%E4%B8%8E%E7%9B%91%E6%8E%A7.mp4",
+    "createTime": "2019.09.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928170358.png",
+    "group": "产品介绍",
+    "tag": "KubeSphere 2.0,容器"
+  },
+  {
+    "title": "KubeSphere 多租户日志",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/%E4%BA%A7%E5%93%81%E4%BB%8B%E7%BB%8D/Container_100P009C201906_KubeSphere%20%E6%97%A5%E5%BF%97.mp4",
+    "createTime": "2019.09.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928170458.png",
+    "group": "产品介绍",
+    "tag": "KubeSphere 2.0,容器"
+  },
+  {
+    "title": "KubeSphere 告警和通知",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/%E4%BA%A7%E5%93%81%E4%BB%8B%E7%BB%8D/Container_100P010C201906_KubeSphere%20%E5%91%8A%E8%AD%A6%E5%92%8C%E9%80%9A%E7%9F%A5.mp4",
+    "createTime": "2019.09.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928120049.png",
+    "group": "产品介绍",
+    "tag": "KubeSphere 2.0,容器"
+  },
+  {
+    "title": "Porter 在本来生活的落地实践",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/meetup/benlaishenghuo-final.mp4",
+    "createTime": "2019.12.14",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20200206171221.png",
+    "group": "Meetup",
+    "tag": "网络,容器,Kubernetes"
+  },
+  {
+    "title": "新浪产品运维团队 K8s 应用实践",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/meetup/sina-k8s.mp4",
+    "createTime": "2019.12.14",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20200206171248.png",
+    "group": "Meetup",
+    "tag": "容器,Kubernetes"
+  },
+  {
+    "title": "在 OpenShift 部署 KubeSphere",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/video/Demo-Install-KubeSphere-on-OpenShift.mp4",
+    "createTime": "2020.01.20",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20200308224101.png",
+    "group": "Webinar",
+    "tag": "容器"
+  },
+  {
+    "title": "KubeSphere 多维度监控教程",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/%E5%85%A5%E9%97%A8%E6%95%99%E7%A8%8B/%E5%A4%9A%E7%BB%B4%E5%BA%A6%E7%9B%91%E6%8E%A7.mov",
+    "createTime": "2019.06.24",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928174806.png",
+    "group": "入门教程",
+    "tag": "KubeSphere 2.0,容器,Kubernetes"
+  },
+  {
+    "title": "KubeSphere 日志查询与收集教程",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/%E5%85%A5%E9%97%A8%E6%95%99%E7%A8%8B/kubesphere%20%E6%97%A5%E5%BF%97.mov",
+    "createTime": "2019.06.24",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928175300.png",
+    "group": "入门教程",
+    "tag": "KubeSphere 2.0,容器,Kubernetes"
+  },
+  {
+    "title": "KubeSphere 集群与工作负载告警策略",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/%E5%85%A5%E9%97%A8%E6%95%99%E7%A8%8B/kubesphere%20%E5%91%8A%E8%AD%A6.mov",
+    "createTime": "2019.06.24",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928175350.png",
+    "group": "入门教程",
+    "tag": "KubeSphere 2.0,容器,Kubernetes"
+  },
+  {
+    "title": "CI/CD 流水线发布 Spring Boot 项目至 K8s",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/%E5%85%A5%E9%97%A8%E6%95%99%E7%A8%8B/inscm-20190412-1080.mov",
+    "createTime": "2019.06.24",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928175645.png",
+    "group": "入门教程",
+    "tag": "KubeSphere 2.0,容器,Kubernetes"
+  },
+  {
+    "title": "图形化构建流水线发布项目至 K8s",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/%E5%85%A5%E9%97%A8%E6%95%99%E7%A8%8B/noscm-20190412-1080.mov",
+    "createTime": "2019.06.24",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928175943.png",
+    "group": "入门教程",
+    "tag": "KubeSphere 2.0,容器,Kubernetes"
+  },
+  {
+    "title": "Source-to-Image（代码直达镜像）",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/%E5%85%A5%E9%97%A8%E6%95%99%E7%A8%8B/s2i-20190412-1080.mov",
+    "createTime": "2019.06.24",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928180222.png",
+    "group": "入门教程",
+    "tag": "KubeSphere 2.0,容器,Kubernetes"
+  },
+  {
+    "title": "微服务治理 - Bookinfo 应用的金丝雀发布（上）",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/%E5%85%A5%E9%97%A8%E6%95%99%E7%A8%8B/1.mov",
+    "createTime": "2019.06.24",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928180638.png",
+    "group": "入门教程",
+    "tag": "KubeSphere 2.0,容器,Kubernetes"
+  },
+  {
+    "title": "微服务治理 - Bookinfo 应用的金丝雀发布（中）",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/%E5%85%A5%E9%97%A8%E6%95%99%E7%A8%8B/2.mov",
+    "createTime": "2019.06.24",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928181043.png",
+    "group": "入门教程",
+    "tag": "KubeSphere 2.0,容器,Kubernetes"
+  },
+  {
+    "title": "微服务治理 - Bookinfo 应用的金丝雀发布（下）",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/%E5%85%A5%E9%97%A8%E6%95%99%E7%A8%8B/s2i-20190412-1080.mov",
+    "createTime": "2019.06.24",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928181112.png",
+    "group": "入门教程",
+    "tag": "KubeSphere 2.0,容器,Kubernetes"
+  },
+  {
+    "title": "容器是什么",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/%E4%BA%A7%E5%93%81%E4%BB%8B%E7%BB%8D/Container_100P001C201804_%E5%AE%B9%E5%99%A8%E6%98%AF%E4%BB%80%E4%B9%88.mp4",
+    "createTime": "2019.09.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928114725.png",
+    "group": "Kubernetes 基础",
+    "tag": "Kubernetes,容器"
+  },
+  {
+    "title": "容器与镜像的关系",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/%E4%BA%A7%E5%93%81%E4%BB%8B%E7%BB%8D/Container_100P002C201804_%E5%AE%B9%E5%99%A8%E4%B8%8E%E9%95%9C%E5%83%8F%E7%9A%84%E5%85%B3%E7%B3%BB.mp4",
+    "createTime": "2019.09.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928114801.png",
+    "group": "Kubernetes 基础",
+    "tag": "Kubernetes,容器"
+  },
+  {
+    "title": "什么是 Kubernetes",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/Kubernetes%E5%9F%BA%E7%A1%80/K8S_100P001C201809_K8S%E6%98%AF%E4%BB%80%E4%B9%88.mp4",
+    "createTime": "2019.09.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928000918.png",
+    "group": "Kubernetes 基础",
+    "tag": "Kubernetes,快速教程"
+  },
+  {
+    "title": "Kubernetes 与 KubeSphere 的关系",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/Kubernetes%E5%9F%BA%E7%A1%80/K8S_100P002C201809_K8S%E4%B8%8EKubeSphere%E7%9A%84%E5%85%B3%E7%B3%BB.mp4",
+    "createTime": "2019.09.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928001616.png",
+    "group": "Kubernetes 基础",
+    "tag": "Kubernetes,快速教程"
+  },
+  {
+    "title": "Kubernetes 架构",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/Kubernetes%E5%9F%BA%E7%A1%80/K8S_100P003C201809_K8S%E6%9E%B6%E6%9E%84.mp4",
+    "createTime": "2019.09.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928001806.png",
+    "group": "Kubernetes 基础",
+    "tag": "Kubernetes,快速教程"
+  },
+  {
+    "title": "Kubernetes 基本概念（上）",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/Kubernetes%E5%9F%BA%E7%A1%80/K8S_100P004C201809_K8S%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5-1.mp4",
+    "createTime": "2019.09.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928001957.png",
+    "group": "Kubernetes 基础",
+    "tag": "Kubernetes,快速教程"
+  },
+  {
+    "title": "Kubernetes 基本概念（中）",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/Kubernetes%E5%9F%BA%E7%A1%80/K8S_100P005C201809_K8S%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5-2.mp4",
+    "createTime": "2019.09.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928002045.png",
+    "group": "Kubernetes 基础",
+    "tag": "Kubernetes,快速教程"
+  },
+  {
+    "title": "Kubernetes 基本概念（下）",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/Kubernetes%E5%9F%BA%E7%A1%80/K8S_100P005C201809_K8S%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5-3.mp4",
+    "createTime": "2019.09.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928002215.png",
+    "group": "Kubernetes 基础",
+    "tag": "Kubernetes,快速教程"
+  },
+  {
+    "title": "Kubernetes 网络（上）",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/Kubernetes%E5%9F%BA%E7%A1%80/K8S_100P007C201809_K8S%20Networking-1.mp4",
+    "createTime": "2019.09.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928002445.png",
+    "group": "Kubernetes 基础",
+    "tag": "Kubernetes,快速教程"
+  },
+  {
+    "title": "Kubernetes 网络（下）",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/Kubernetes%E5%9F%BA%E7%A1%80/K8S_100P007C201809_K8S%20Networking-2.mp4",
+    "createTime": "2019.09.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928002510.png",
+    "group": "Kubernetes 基础",
+    "tag": "Kubernetes,快速教程"
+  },
+  {
+    "title": "Kubernetes 存储（上）",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/Kubernetes%E5%9F%BA%E7%A1%80/K8S_100P009C201809_K8S%20Storage-1.mp4",
+    "createTime": "2019.09.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928002616.png",
+    "group": "Kubernetes 基础",
+    "tag": "Kubernetes,快速教程"
+  },
+  {
+    "title": "Kubernetes 存储（下）",
+    "link": "https://kubesphere-docs.pek3b.qingstor.com/website/Kubernetes%E5%9F%BA%E7%A1%80/K8S_100P010C201809_K8S%20Storage-2-CSI%20%E6%9E%B6%E6%9E%84.mp4",
+    "createTime": "2019.09.27",
+    "snapshot": "https://pek3b.qingstor.com/kubesphere-docs/png/20190928002702.png",
+    "group": "Kubernetes 基础",
+    "tag": "Kubernetes,快速教程"
+  }
+]

@@ -1,0 +1,2 @@
+// :ks_include_id: 869781900cdb48f19e54811ea9a8abcc
+. Click the **Application Information** tab on the right side of the details page to view the introduction, screenshots, and version information of the application template.

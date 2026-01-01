@@ -1,0 +1,3 @@
+// :ks_include_id: de8b37eae7ea4bdba3f2534f9d1b19c2
+|Name
+|The name, icon, and description of the application template.

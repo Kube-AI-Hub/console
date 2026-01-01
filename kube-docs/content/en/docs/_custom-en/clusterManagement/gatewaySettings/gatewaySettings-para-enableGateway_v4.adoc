@@ -1,0 +1,30 @@
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+|Nginx Ingress Version
+|The version of Nginx Ingress. The Kube AI Hub Gateway extension provides gateway management based on Nginx Ingress.
+
+|IngressClassName
+|The name of the IngressClass.
+
+|Pod Replicas
+|The desired number of pod replicas.
+
+|Access Mode
+|The external access mode of the gateway service.
+
+include::../services/services-para-externalAccess.adoc[tag=bullets]
+
+|Tracing
+|Whether to enable tracing for the gateway. To use the tracing function, the **Kube AI Hub Service Mesh** extension should be installed and enabled.
+
+|Configuration Options
+|The configuration options for the gateway. The gateway functionality of Kube AI Hub is based on Nginx Ingress Controller. You can set the configuration options for the gateway to control its behavior. For more information, please refer to the link:https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/[Nginx Ingress Controller Documentation].
+
+|Load Balancer Provider
+|The load balancer provider for the gateway. When the external access mode of the gateway service is LoadBalancer, you need to set the annotations of the gateway service according to the load balancer plugin and infrastructure environment to create the required load balancer. After selecting the load balancer provider, the system will provide annotation hints when setting the gateway service annotations. Only available when the external access mode of the gateway service is LoadBalancer.
+
+|Annotations
+|The annotations of the gateway service. If a load balancer provider has been selected, the system will display annotation hints in the dropdown list when clicking the **Key** text box. Only available when the external access mode of the gateway service is LoadBalancer. For more information, please contact your infrastructure environment provider.
+|===

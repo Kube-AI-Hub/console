@@ -1,0 +1,9 @@
+// :ks_include_id: b1063d2135a7413f839d796f93c2afa0
+|Status
+|The current status of the application template.
+
+* **Not Listed**: The application template has been successfully created but is not listed in the App Store.
+
+* **Listed**: The application template has been successfully created and is listed in in the App Store.
+
+* **Suspended**: The application template was listed in the App Store but has been delisted by the App Store administrator.

@@ -1,0 +1,17 @@
+// :ks_include_id: 9dce53f38c804429a1d874c4d0f635a3
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+|Name
+|The name of the app repository.
+
+|URL
+|The URL of the Helm Chart repository. Click **Validate** to test if the Helm Chart repository is available.
+
+|Sync Interval
+|The automatic sync interval between the app repository and the Helm Chart repository. The value range is from 3 minutes to 24 hours. The default value **0** means no automatic sync.
+
+|Description
+|The description of the app repository. The description can contain any characters, with a maximum length of 256 characters.
+|===

@@ -1,0 +1,66 @@
+// :ks_include_id: c4590bcc1e7e440b8eaf162491107dc0
+. On the app details page, view the Ingresses, services, and workloads that make up the app in the **Resource Status** tab.
+
+* The **Ingresses** area provides the following information:
++
+--
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+|Name
+|The name of the Ingress.
+
+|Domain
+|The domain of the Ingress.
+
+|URL
+|The access address of the service corresponding to the Ingress.
+|===
+
+Click **Access Service** on the right side of the Ingress to access the backend service of the Ingress.
+--
+
+* The **Services** area provides the following information:
++
+--
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+|Name
+|The name of the service.
+
+|Internal Access Mode
+|
+include::../../clusterManagement/services/services-para-internalAccess.adoc[]
+
+include::../../clusterManagement/services/services-para-virtualip-headless.adoc[]
+
+|Virtual IP Address
+|The virtual IP address for internal access within the cluster. Only displayed when the service's internal access type is **VirtualIP**.
+|===
+--
+
+* The **Workloads** area provides the following information:
++
+--
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+|Name
+|The name of the workload.
+
+|Type
+|The type of the workload.
+
+|Status
+|The current status of the workload.
+
+include::../../clusterManagement/workloads/workloads-para-workloadStatus.adoc[]
+
+|Revision Record
+|The current revision record of the workload.
+|===
+--

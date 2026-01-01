@@ -1,0 +1,24 @@
+// :ks_include_id: cad509443a554a38ab6ce4a11e4d2b73
+* The workload list provides the following information:
++
+--
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+|Name
+|The name and description of the workload.
+
+|Status
+|
+The number of normal pod replicas, the desired number of pod replicas, and the running status of the workload. The workload status includes the following types:
+
+include::../workloads-para-workloadStatus.adoc[]
+
+|App
+|The app declared by the workload.
+
+|Update Time
+|The update time of the workload.
+|===
+--

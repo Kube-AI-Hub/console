@@ -1,0 +1,8 @@
+// :ks_include_id: da77b27e5b9840dab0503615aec625a4
+. Select the checkbox on the left side of the custom monitoring dashboards you want to delete, then click **Delete** above the custom monitoring dashboard list.
+
+. In the **Delete Multiple Custom Monitoring Dashboards** dialog, enter the names of the custom monitoring dashboards, then click **OK**.
++
+--
+include::../../note-separateNamesByComma.adoc[]
+--

@@ -1,0 +1,4 @@
+// :ks_include_id: d8a06afae96b4c0bbb29c390f1fe18f5
+* The client must resolve the domain name to the gateway IP address through the local **hosts** file or DNS service.
+
+* The client must have network connectivity to the gateway IP address. For more information, contact your network environment administrator.

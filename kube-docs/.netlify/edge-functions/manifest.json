@@ -1,0 +1,15 @@
+{
+  "functions": [
+    {
+      "pattern": "^/[^l][^o][^g].*$",
+      "function": "go-get",
+      "name": "go-get for go module"
+    },
+    {
+      "pattern": "^(/zh/docs/|/docs/).*$",
+      "function": "redirect",
+      "name": "redirect"
+    }
+  ],
+  "version": 1
+}

@@ -1,0 +1,27 @@
+// :ks_include_id: cd11a468685d4e6fadc53bf1c8827311
+* Click **Add Routing Rule** to set routing rules. You can set multiple routing rules, each corresponding to a domain name.
+
+* Hover the cursor over a created routing rule, then click image:/images/ks-qkcp/zh/icons/pen-light.svg[pen,18,18] on the right side to edit the routing rule settings.
+
+* Hover the cursor over a created routing rule, then click image:/images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18] on the right side to delete the routing rule.
+
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+|Domain
+|The user-defined domain name.
+
+|Protocol
+|The protocol supported by the Ingress. The value can be **HTTP** or **HTTPS**.
+
+|Secret
+|The Secret used to provide the certificate and key when the Ingress protocol is **HTTPS**. This Secret must contain the **tls.cert** and **tls.key** fields, which store the Base64-encoded certificate and private key, respectively.
+
+|Path
+|The domain path and its mapping relationship with the service port.
+
+* Click **Add** to set multiple paths.
+
+* Click image:/images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18] on the right side of a created path to delete the path.
+|===

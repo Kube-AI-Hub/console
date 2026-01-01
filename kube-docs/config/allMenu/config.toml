@@ -1,0 +1,277 @@
+[languages.en]
+contentDir = "content/en"
+weight = 1
+languageCode = "en-US"
+languageName = "English"
+
+[[languages.en.menu.main]]
+weight = 1
+name = "Why Kube AI Hub"
+URL = "reason"
+
+[[languages.en.menu.main]]
+weight = 2
+name = "Scenario"
+hasChildren = true
+
+  [[languages.en.menu.main]]
+  parent = "Scenario"
+  name = "Embracing One-stop DevOps Workflow"
+  URL = "devops"
+  weight = 1
+
+  [[languages.en.menu.main]]
+  parent = "Scenario"
+  name = "Running Microservices on Kubernetes"
+  URL = "service-mesh"
+  weight = 2
+
+  [[languages.en.menu.main]]
+  parent = "Scenario"
+  name = "Building Cloud Native Observability"
+  URL = "observability"
+  weight = 3
+
+[[languages.en.menu.main]]
+weight = 3
+name = "Resources"
+hasChildren = true
+
+  [[languages.en.menu.main]]
+  parent = "Resources"
+  name = "Open Source Projects"
+  URL = "projects"
+  weight = 1
+
+  [[languages.en.menu.main]]
+  parent = "Resources"
+  name = "Video Resources"
+  URL = "videos"
+  weight = 2
+
+[[languages.en.menu.main]]
+weight = 4
+name = "Documentation"
+URL = "/kube-docs/docs/"
+
+    [[languages.en.menu.main]]
+    parent = "Documentation"
+    name = "v3.0.0"
+    URL = "/kube-docs/docs"
+    weight = 1
+
+    [[languages.en.menu.main]]
+    parent = "Documentation"
+    name = "v2.1.x"
+    URL = "/kube-docs/docs/v2.1"
+    weight = 2
+
+    [[languages.en.menu.main]]
+    parent = "Documentation"
+    name = "v2.0.x"
+    URL = "/kube-docs/docs/v2.0/"
+    weight = 3
+
+    [[languages.en.menu.main]]
+    parent = "Documentation"
+    name = "v1.0.0"
+    URL = "/kube-docs/docs/v1.0.0/"
+    weight = 4
+
+[[languages.en.menu.main]]
+weight = 5
+hasChildren = true
+name = "Community"
+    [[languages.en.menu.main]]
+    parent = "Community"
+    name = "Case Studies"
+    URL = "case"
+    weight = 1
+
+[languages.zh]
+weight = 2
+contentDir = "content/zh"
+languageCode = "zh-CN"
+languageName = "简体中文"
+
+[[languages.zh.menu.main]]
+weight = 1
+name = "Why Kube AI Hub"
+URL = "reason"
+
+[[languages.zh.menu.main]]
+weight = 2
+name = "Scenario"
+hasChildren = true
+
+  [[languages.zh.menu.main]]
+  parent = "Scenario"
+  name = "DevOps"
+  URL = "devOps"
+  weight = 2
+
+  [[languages.zh.menu.main]]
+  parent = "Scenario"
+  name = "Service Mesh"
+  URL = "service-mesh"
+  weight = 4
+
+  [[languages.zh.menu.main]]
+  parent = "Scenario"
+  name = "Observability"
+  URL = "observability"
+  weight = 8
+
+[[languages.zh.menu.main]]
+weight = 3
+name = "Resources"
+hasChildren = true
+
+  [[languages.zh.menu.main]]
+  parent = "Resources"
+  name = "Open Source Projects"
+  URL = "projects"
+  weight = 1
+
+  [[languages.zh.menu.main]]
+  parent = "Resources"
+  name = "Video Resources"
+  URL = "videos"
+  weight = 2
+
+[[languages.zh.menu.main]]
+weight = 4
+name = "Documentation"
+URL = "docs"
+
+[[languages.zh.menu.main]]
+weight = 5
+hasChildren = true
+name = "Community"
+    [[languages.zh.menu.main]]
+    parent = "Community"
+    name = "Case Studies"
+    URL = "case"
+    weight = 1
+
+
+
+# [languages.tr]
+# weight = 3
+# contentDir = "content/tr"
+# languageCode = "tr-TR"
+# languageName = "Türkçe"
+
+# [[languages.tr.menu.main]]
+# weight = 1
+# name = "Neden Kube AI Hub"
+# URL = "reason"
+
+# [[languages.tr.menu.main]]
+# weight = 2
+# name = "Senaryolar"
+# hasChildren = true
+
+#   [[languages.tr.menu.main]]
+#   parent = "Senaryolar"
+#   name = "Multi-cluster"
+#   URL = "multi-cluster"
+#   weight = 1
+
+#   [[languages.tr.menu.main]]
+#   parent = "Senaryolar"
+#   name = "DevOps"
+#   URL = "devOps"
+#   weight = 2
+
+#   [[languages.tr.menu.main]]
+#   parent = "Senaryolar"
+#   name = "Network"
+#   URL = "network"
+#   weight = 3
+
+#   [[languages.tr.menu.main]]
+#   parent = "Senaryolar"
+#   name = "Service Mesh"
+#   URL = "service-mesh"
+#   weight = 4
+
+#   [[languages.tr.menu.main]]
+#   parent = "Senaryolar"
+#   name = "Storage"
+#   URL = "storage"
+#   weight = 5
+
+#   [[languages.tr.menu.main]]
+#   parent = "Senaryolar"
+#   name = "AppStore"
+#   URL = "app-store"
+#   weight = 6
+
+#   [[languages.tr.menu.main]]
+#   parent = "Senaryolar"
+#   name = "Multi-tenancy"
+#   URL = "multi-tenancy"
+#   weight = 7
+
+#   [[languages.tr.menu.main]]
+#   parent = "Senaryolar"
+#   name = "Observability"
+#   URL = "observability"
+#   weight = 8
+
+# [[languages.tr.menu.main]]
+# weight = 3
+# name = "Kaynaklar"
+# hasChildren = true
+
+#   [[languages.tr.menu.main]]
+#   parent = "Kaynaklar"
+#   name = "Open Source Projeler"
+#   URL = "projects"
+#   weight = 1
+
+#   [[languages.tr.menu.main]]
+#   parent = "Kaynaklar"
+#   name = "KubeCon & QCon"
+#   URL = "conferences"
+#   weight = 2
+
+#   [[languages.tr.menu.main]]
+#   parent = "Kaynaklar"
+#   name = "Blog Yazıları"
+#   URL = "blogs"
+#   weight = 3
+
+#   [[languages.tr.menu.main]]
+#   parent = "Kaynaklar"
+#   name = "Videolar"
+#   URL = "videos"
+#   weight = 4
+
+# [[languages.tr.menu.main]]
+# weight = 4
+# name = "Dokümantasyon"
+# URL = "docs"
+
+# [[languages.tr.menu.main]]
+# weight = 5
+# hasChildren = true
+# name = "Topluluk"
+#     [[languages.tr.menu.main]]
+#     parent = "Topluluk"
+#     name = "Contribution"
+#     URL = "contribution"
+#     weight = 1
+
+#     [[languages.tr.menu.main]]
+#     parent = "Topluluk"
+#     name = "Case Studies"
+#     URL = "case"
+#     weight = 2
+
+#     [[languages.tr.menu.main]]
+#     parent = "Topluluk"
+#     name = "Partnerler"
+#     URL = "partner"
+#     weight = 3

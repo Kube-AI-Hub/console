@@ -1,0 +1,2 @@
+// :ks_include_id: c545dcba1c5d46908a87e91f9fc37f77
+* Click **Export** in the upper right corner of the list to download the resource usage data in JSON format.

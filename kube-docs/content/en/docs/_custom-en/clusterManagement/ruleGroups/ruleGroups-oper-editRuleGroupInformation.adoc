@@ -1,0 +1,11 @@
+// :ks_include_id: 33d094f3069e40519db31aec587457b4
+. In the **Edit Information** dialog, set the basic information for the rule group, and then click **OK**.
++
+--
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+include::ruleGroups-para-aliasCheckIntervalDescription.adoc[]
+|===
+--

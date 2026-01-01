@@ -1,0 +1,4 @@
+// :ks_include_id: 6aade36eb695477ab6e8a0eda652c52e
+This section introduces how to edit a metrics exporter.
+
+A metrics exporter is used to monitor applications. The monitoring and alerting functions of Kube AI Hub are implemented through Prometheus at the bottom layer. To monitor the running status of applications, you need to perform the following operations:

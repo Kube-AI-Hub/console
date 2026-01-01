@@ -1,0 +1,103 @@
+<footer>
+    {{ $data := index .Site.Data .Site.Language.Lang }}
+    <div class="footer">
+        <div class="footer-main common-layout">
+            <div class="up-main">
+                <div class="left-div">
+                    <img src="{{ .Site.Params.logo | relURL }}" alt="{{ .Site.Title }}" class="foot-logo">
+                </div>
+                <div class="right-div">
+                    <ul class="common-flex-layout">
+                        {{ with $data.footer.footer }}
+                        {{ range .list }}
+                        <li class="nowrap-li">
+                            <div class="h3">{{ .title }}</div>
+                            {{ range .list }}
+                            {{ if hasPrefix .link "http" }}
+                            <a href="{{ .link }}" target="_blank" rel="noopener noreferrer">{{ .content }}</a>
+                            {{ else }}
+                            <a href="{{ .link | relLangURL }}">{{ .content }}</a>
+                            {{ end }}
+                            {{ end }}
+                        </li>
+                        {{ end }}
+                        {{ end }}
+                    </ul>
+                </div>
+            </div>
+            <div class="down-main">
+                <p class='p1'>{{ i18n "Kube AI Hub®️ 2025 All Rights Reserved." }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="cookie">
+        <div class="common-layout">
+            <p>
+                {{ i18n "Cookie Statement" ("/privacy" | relLangURL) | safeHTML }}
+            </p>
+            <button>
+                {{ i18n "Accept and continue" }}
+            </button>
+        </div>
+    </div>
+
+</footer>
+
+<script>
+    var lazyLoad = function (allImg, imgNum) {
+        for (var i = 0; i < imgNum; i++) {
+            var img = allImg.eq(i)
+            var loaded = img.attr("data-loaded");
+            if (loaded) {
+                continue
+            }
+            if (img.offset().top < parseInt($(window).height()) + parseInt($(window).scrollTop())) {
+                var src = img.attr("src")
+                img.attr("src", src)
+                img.attr("data-loaded", true)
+            }
+        }
+    }
+
+    var bindLayLoad = function () {
+        var allImg = $('img')
+        var imgNum = allImg.length
+        lazyLoad(allImg, imgNum)
+        $(window).scroll(function () {
+            lazyLoad(allImg, imgNum)
+        });
+    }
+
+    var docCookies = {
+        getItem: function (sKey) {
+            return decodeURIComponent(document.cookie.replace(new RegExp("(?:(?:^|.*;)\\s*" +
+                encodeURIComponent(sKey).replace(/[-.+*]/g, "\\$&") + "\\s*\\=\\s*([^;]*).*$)|^.*$"
+            ), "$1")) || null;
+        },
+        setItem: function (sKey, sValue) {
+            if (!sKey || /^(?:expires|max\-age|path|domain|secure)$/i.test(sKey)) {
+                return false;
+            }
+            document.cookie = encodeURIComponent(sKey) + "=" + encodeURIComponent(sValue)
+            return true;
+        },
+    };
+
+    var bindHideCookie = function () {
+        var hasAuth = docCookies.getItem("hasAuth")
+        var cookieElement = $('.cookie')
+        if (hasAuth) {
+            cookieElement.hide()
+        } else {
+            cookieElement.show()
+        }
+        cookieElement.find('button').on('click', function () {
+            docCookies.setItem("hasAuth", '1')
+            cookieElement.hide()
+        })
+    }
+
+    // bindLayLoad()
+    bindHideCookie()
+</script>

@@ -1,0 +1,302 @@
+baseURL = "https://watering.ai/kube-docs/"
+canonifyURLs = true
+
+enableRobotsTXT = true
+ignorefiles = [ ".*/_custom" ]
+
+[caches]
+  [caches.images]
+    dir = ':cacheDir/images'
+
+[markup]
+  [markup.goldmark.extensions]
+    typographer = false
+  [markup.tableOfContents]
+    endLevel = 3
+    ordered = false
+    startLevel = 2
+  [markup.goldmark.renderer]
+    unsafe= true
+  [markup.asciidocExt]
+    backend = 'html5'
+    extensions = []
+    failureLevel = 'fatal'
+    noHeaderOrFooter = true
+    preserveTOC = false
+    safeMode = 'unsafe'
+    sectionNumbers = false
+    trace = false
+    verbose = false
+    workingFolderCurrent = true
+  [markup.asciidocExt.attributes]
+    toc = "null"
+    toclevels = 2
+    file_output_type = "html"
+    relfilesuffix = "/"
+    ks_product = "Kube AI Hub"
+    ks_product_left = " Kube AI Hub"
+    ks_product_right = "Kube AI Hub "
+    ks_product_both = " Kube AI Hub "
+    ks_product_full = "Kube AI Hub"
+    ks_product-en = "Kube AI Hub"
+    ks_product_ver = "v3.4"
+
+[security]
+  enableInlineShortcodes = false
+  [security.exec]
+    allow = ['^(dart-)?sass(-embedded)?$', '^go$', '^npx$', '^postcss$', '^asciidoctor$']
+    osEnv = ['(?i)^((HTTPS?|NO)_PROXY|PATH(EXT)?|APPDATA|TE?MP|TERM|GO\w+|(XDG_CONFIG_)?HOME|USERPROFILE|SSH_AUTH_SOCK|DISPLAY|LANG|SYSTEMDRIVE)$', '(?i)^(GEM_PATH)$']
+  [security.funcs]
+    getenv = ['^HUGO_', '^CI$']
+  [security.http]
+    methods = ['(?i)GET|POST']
+    urls = ['.*']
+
+[security.gotemplates]
+allowActionJSTmpl = true
+
+[Taxonomies]
+
+[params]
+logo = "images/logo.svg"
+description = "这是Kube AI Hub文档页面"
+keywords = "云计算,Kube AI Hub,文档"
+logoLink = "/kube-docs/"
+disableVersions = false
+disablePdf = false
+
+githubUrl = "https://github.com/kube-ai-hub/website"
+
+githubBlobUrl = "https://github.com/kube-ai-hub/website/blob/master/content"
+
+githubEditUrl = "https://github.com/kube-ai-hub/website/edit/master/content"
+
+gcs_engine_id = "018068616810858123755%3Apb1pt8sx6ve"
+
+githubLink = "https://github.com/kube-ai-hub/kube-server"
+githubApiLink = "https://api.github.com/repos/kube-ai-hub/kube-server"
+githubStarLink = "https://github.com/kube-ai-hub/kube-server/stargazers"
+slackLink = ""
+twitterLink = "https://x.com/Kube AI Hub"
+mediumLink = "https://itnext.io/@kubesphere"
+linkedinLink = "https://www.linkedin.com/company/kubesphere/"
+DemoLinkEn = "https://kubesphere.cloud/en/console/managed-cluster/"
+DemoLinkZh = "https://kubesphere.cloud/console/managed-cluster/"
+
+baiduAnalyticsID = ""
+googleAnalyticsID = ""
+
+[languages.en]
+contentDir = "content/en"
+weight = 1
+languageCode = "en-US"
+languageName = "English"
+
+[languages.en.params]
+title = "Kube AI Hub | The Kubernetes platform tailored for hybrid multicloud"
+description = "Kube AI Hub is a distributed operating system managing cloud native applications with Kubernetes as its kernel, and provides plug-and-play architecture for the seamless integration of third-party applications to boost its ecosystem."
+keywords = "Kube AI Hub, Kubernetes, container platform, DevOps, hybrid cloud, cloud native"
+snapshot = "/images/common/snapshot-en.png"
+useSendcloud = false
+mailchimpSubscribeUrl = "https://kubesphere.us10.list-manage.com/subscribe/post?u=c85ea2b944b08b951f607bdd4&id=83f673a2d9"
+hotjarTracking = true
+youtubeLink = "https://www.youtube.com/c/Kube AI Hub"
+addLinkedin = true
+addTwitter = true
+
+[[languages.en.menu.main]]
+weight = 2
+name = "Scenarios"
+hasChildren = true
+
+  [[languages.en.menu.main]]
+  parent = "Scenarios"
+  name = "Embracing One-stop DevOps Workflow"
+  URL = "devops/"
+  weight = 1
+
+  [[languages.en.menu.main]]
+  parent = "Scenarios"
+  name = "Running Microservices on Kubernetes"
+  URL = "service-mesh/"
+  weight = 2
+
+  [[languages.en.menu.main]]
+  parent = "Scenarios"
+  name = "Building Cloud Native Observability"
+  URL = "observability/"
+  weight = 3
+
+[[languages.en.menu.main]]
+weight = 4
+name = "Documentation"
+hasChildren = true
+    [[languages.en.menu.main]]
+    parent = "Documentation"
+    name = "v3.4"
+    URL = "docs/v3.4"
+    weight = 43
+
+[languages.zh]
+weight = 2
+contentDir = "content/zh"
+languageCode = "zh-CN"
+languageName = "简体中文"
+
+[languages.zh.params]
+title = "Kube AI Hub | 面向云原生应用的容器混合云"
+description = "Kube AI Hub 是在 Kubernetes 之上构建的以应用为中心的多租户容器平台，提供全栈的 IT 自动化运维的能力，简化企业的 DevOps 工作流。Kube AI Hub 提供了运维友好的向导式操作界面，帮助企业快速构建一个强大和功能丰富的容器云平台。"
+keywords = "Kube AI Hub, Kubernetes, 容器平台, DevOps, 混合云"
+snapshot = "/images/common/snapshot-zh.png"
+useSendcloud = true
+mailchimpSubscribeUrl = "https://www.sendcloud.net/v3/api/subInvite/subscription?invitecode=1dc5a4fb-894c-4470-b01d-ca7fa9d47a46"
+showCaseNumber = true
+bilibiliLink = "https://space.bilibili.com/438908638"
+
+[[languages.zh.menu.main]]
+weight = 2
+name = "应用场景"
+hasChildren = true
+
+  [[languages.zh.menu.main]]
+  parent = "应用场景"
+  name = "拥抱一站式 DevOps 工作流"
+  URL = "devops/"
+  weight = 2
+
+  [[languages.zh.menu.main]]
+  parent = "应用场景"
+  name = "在 Kubernetes 运行微服务"
+  URL = "service-mesh/"
+  weight = 4
+
+  [[languages.zh.menu.main]]
+  parent = "应用场景"
+  name = "构建丰富的云原生可观测性"
+  URL = "observability/"
+  weight = 8
+
+[[languages.zh.menu.main]]
+weight = 4
+hasChildren = true
+name = "文档中心"
+    [[languages.zh.menu.main]]
+    parent = "文档中心"
+    name = "v3.4"
+    URL = "docs/v3.4"
+    weight = 43
+
+# [languages.tr]
+# weight = 3
+# contentDir = "content/tr"
+# languageCode = "tr-TR"
+# languageName = "Türkçe"
+
+# [[languages.tr.menu.main]]
+# weight = 2
+# name = "Senaryolar"
+# hasChildren = true
+
+#   [[languages.tr.menu.main]]
+#   parent = "Senaryolar"
+#   name = "Multi-cluster"
+#   URL = "multi-cluster"
+#   weight = 1
+
+#   [[languages.tr.menu.main]]
+#   parent = "Senaryolar"
+#   name = "DevOps"
+#   URL = "devOps"
+#   weight = 2
+
+#   [[languages.tr.menu.main]]
+#   parent = "Senaryolar"
+#   name = "Network"
+#   URL = "network"
+#   weight = 3
+
+#   [[languages.tr.menu.main]]
+#   parent = "Senaryolar"
+#   name = "Service Mesh"
+#   URL = "service-mesh"
+#   weight = 4
+
+#   [[languages.tr.menu.main]]
+#   parent = "Senaryolar"
+#   name = "Storage"
+#   URL = "storage"
+#   weight = 5
+
+#   [[languages.tr.menu.main]]
+#   parent = "Senaryolar"
+#   name = "AppStore"
+#   URL = "app-store"
+#   weight = 6
+
+#   [[languages.tr.menu.main]]
+#   parent = "Senaryolar"
+#   name = "Multi-tenancy"
+#   URL = "multi-tenancy"
+#   weight = 7
+
+#   [[languages.tr.menu.main]]
+#   parent = "Senaryolar"
+#   name = "Observability"
+#   URL = "observability"
+#   weight = 8
+
+# [[languages.tr.menu.main]]
+# weight = 3
+# name = "Kaynaklar"
+# hasChildren = true
+
+#   [[languages.tr.menu.main]]
+#   parent = "Kaynaklar"
+#   name = "Open Source Projeler"
+#   URL = "projects/"
+#   weight = 1
+
+#   [[languages.tr.menu.main]]
+#   parent = "Kaynaklar"
+#   name = "KubeCon & QCon"
+#   URL = "conferences/"
+#   weight = 2
+
+#   [[languages.tr.menu.main]]
+#   parent = "Kaynaklar"
+#   name = "Blog Yazıları"
+#   URL = "blogs/"
+#   weight = 3
+
+#   [[languages.tr.menu.main]]
+#   parent = "Kaynaklar"
+#   name = "Videolar"
+#   URL = "videos/"
+#   weight = 4
+
+# [[languages.tr.menu.main]]
+# weight = 4
+# name = "Dokümantasyon"
+# URL = "docs/"
+
+# [[languages.tr.menu.main]]
+# weight = 5
+# hasChildren = true
+# name = "Topluluk"
+#     [[languages.tr.menu.main]]
+#     parent = "Topluluk"
+#     name = "Contribution"
+#     URL = "contribution/"
+#     weight = 1
+
+#     [[languages.tr.menu.main]]
+#     parent = "Topluluk"
+#     name = "Case Studies"
+#     URL = "case/"
+#     weight = 2
+
+#     [[languages.tr.menu.main]]
+#     parent = "Topluluk"
+#     name = "Partnerler"
+#     URL = "partner/"
+#     weight = 3

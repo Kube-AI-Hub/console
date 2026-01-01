@@ -1,0 +1,2 @@
+// :ks_include_id: 2f8bbec5d37b4c239396337ce7576a71
+* Click the search box at the top of the list to search for application templates by name.

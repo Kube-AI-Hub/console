@@ -1,0 +1,17 @@
+// :ks_include_id: 9f1f9315fbc0466396a168bfa897683f
+. Click image:/images/ks-qkcp/zh/icons/more.svg[more,18,18] on the right side of the Ingress you want to edit, then select **Edit Information** from the dropdown list.
+
+. In the **Edit Information** dialog, set the alias and description of the ingress, then click **OK**.
++
+--
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+|Alias
+|The alias of the ingress. Different ingresses can have the same alias. The alias can only contain Chinese characters, letters, numbers, and hyphens (-), and cannot start or end with a hyphen (-), with a maximum length of 63 characters.
+
+|Description
+|The description information of the ingress. The description can contain any characters, with a maximum of 256 characters.
+|===
+--

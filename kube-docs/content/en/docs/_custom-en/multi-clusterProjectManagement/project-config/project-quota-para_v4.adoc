@@ -1,0 +1,45 @@
+// :ks_include_id: 54a483bb55aa44d8ac2635c12c503512
+
+[%header,cols="1a,4a"]
+|===
+|Parameter |Description
+
+|CPU Limit
+|The maximum sum of CPU limits for all containers in the project, in cores.
+
+// |CPU Reservation
+// |The maximum sum of CPU reservations for all containers in the project, in cores.
+
+|Memory Limit
+|The maximum sum of memory limits for all containers in the project, in MiB.
+
+// |Memory Reservation
+// |The maximum sum of memory reservations for all containers in the project, in MiB.
+
+|Pods
+|The current number of pods created in the project, and the maximum number of pods that can be created.
+
+|PVC Limit
+|The current capacity of persistent volume claims created in the project, and the maximum capacity of persistent volume claims that can be created.
+
+|PVC
+|The current number of persistent volume claims created in the project, and the maximum number of persistent volume claims that can be created.
+
+|Deployments
+|The current number of deployments created in the project, and the maximum number of deployments that can be created.
+
+|StatefulSets
+|The current number of stateful sets created in the project, and the maximum number of stateful sets that can be created.
+
+|Volumes
+|The current number of volumes created in the project, and the maximum number of volumes that can be created.
+
+|Services
+|The current number of services created in the project, and the maximum number of services that can be created.
+
+|Ingresses
+|The current number of ingresses created in the project, and the maximum number of ingresses that can be created.
+
+// |GPU Limit
+// |The current number of GPUs used in the project, and the maximum number of GPUs that can be used, in GPUs.
+|===

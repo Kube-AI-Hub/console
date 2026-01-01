@@ -1,0 +1,47 @@
+footer:
+  list:
+    - title: Products
+      list:
+        - content: Kube AI Hub
+          link: ''
+
+        - content: Porter
+          link: ''
+        
+        - content: OpenPitrix
+          link: ''
+
+        - content: Fluentbit-Operator
+          link: ''
+
+        - content: KubeKey
+          link: ''
+
+        - content: Notification Manager
+          link: ''
+    - title: Kaynaklar
+      list:
+        - content: Projeler
+          link: 
+        - content: KubeCon & QCon
+          link: 
+        - content: Videolar
+          link: 
+    - title: Kube AI Hub Dokümantasyon
+      list:
+        - content: Giriş/Önsöz
+          link: ''
+        - content: Kurulum
+          link: ''
+        - content: Eğitim
+          link: ''
+        - content: API Dokümantasyonu
+          link: ''
+    - title: Topluluk
+      list:
+        - content: Müşteri Senaryoları
+          link:
+        - content: Partnerler
+          link: 
+        - content: Yol Haritası
+          link: 

@@ -1,0 +1,107 @@
+@import 'variables';
+.open-source-header {
+  padding-top: 129px;
+  padding-bottom: 40px;
+  text-align: center;
+  color: $black;
+  background-image: url("/kube-docs/images/common/resource-bg.jpg");
+  @media only screen and (max-width: $mobile-max-width) {
+    padding-top: 100px;
+  }
+  h1 {
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    font-size: 40px;
+    font-weight: bold;
+    line-height: 1;
+    letter-spacing: -0.11px;
+    color: $black;
+  }
+
+  p {
+    margin-top: 12px;
+    margin-bottom: 16px;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    font-size: 16px;
+    line-height: 1.5;
+    letter-spacing: -0.04px;
+    text-align: center;
+    color: $black;
+  }
+
+  button {
+    height: 48px;
+    border-radius: 30px;
+    font-size: 16px;
+    padding: 7px 20px;
+    font-weight: 600;
+    color: $black;
+    line-height: 1.5;
+    text-align: center;
+    border: none;
+    cursor: pointer;
+    -webkit-transition: all .3s ease;
+    transition: all .3s ease;
+    box-sizing: border-box;
+    vertical-align: middle;
+    background-color: $bg-tertiary;
+    box-shadow: 0 10px 50px 0 rgba(34,43,62,.1),0 8px 16px 0 rgba(33,43,61,.2);
+    &:hover {
+      box-shadow: none;
+    }
+    svg {
+      width: 21px;
+      height: 21px;
+      margin-right: 12px;
+      vertical-align: text-top;
+    }
+  }
+}
+
+.open-source-tab {
+  margin-top: 40px;
+  text-align: center;
+  li {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 32px;
+    font-size: 16px;
+    font-weight: 600;
+    color: $text-secondary;
+    cursor: pointer;
+    @media only screen and (max-width: $mobile-max-width) {
+      font-size: 14px;
+    }
+  }
+  li + li {
+    margin-left: 40px;
+    @media only screen and (max-width: $mobile-max-width) {
+      margin-left: 24px;
+    }
+  }
+  a {
+    color: $text-secondary;
+    &:hover {
+      color: $accent-primary;
+    }
+  }
+  .active {
+    color: $accent-primary;
+    &::after {
+      position: absolute;
+      bottom: -32px;
+      left: 50%;
+      -webkit-transform: translateX(-50%);
+      transform: translateX(-50%);
+      content: "";
+      width: 0;
+      height: 0;
+      border: 1em solid transparent;
+      border-bottom-color: $black;
+
+      @media only screen and (max-width: $mobile-max-width) {
+        display: none;
+      }
+    }
+  }
+
+}

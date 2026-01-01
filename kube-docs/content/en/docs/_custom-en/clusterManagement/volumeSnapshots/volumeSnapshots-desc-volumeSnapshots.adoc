@@ -1,0 +1,4 @@
+// :ks_include_id: fdb0d37ac974460092567e5ee221abcb
+This section describes how to manage volume snapshots and volume snapshot contents.
+
+A volume snapshot defines the storage resources required to save snapshot data. After a volume snapshot is created, the system will save the snapshot data in the backend storage system, and each unit of snapshot data corresponds to a volume snapshot content on the {ks_product-en} platform.

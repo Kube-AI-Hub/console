@@ -1,0 +1,8 @@
+// :ks_include_id: 6ec380c8bcbe4e1589334e0b050b0b6c
+. Select the checkbox on the left side of the Ingresses you want to delete, then click **Delete** above the ingress list.
+
+. In the **Delete Multiple Ingresses** dialog, enter the names of the Ingresses, then click **OK**.
++
+--
+include::../../note-separateNamesByComma.adoc[]
+--

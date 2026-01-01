@@ -1,0 +1,6 @@
+// :ks_include_id: d7d51560e0e64d3a927f19e81658358b
+The current status of the volume snapshot.
+
+* **Ready**: The volume snapshot and the corresponding volume snapshot content have been successfully created.
+
+* **Not Ready**: The volume snapshot and the corresponding volume snapshot content are being created, failed to create, or the volume snapshot is being deleted.

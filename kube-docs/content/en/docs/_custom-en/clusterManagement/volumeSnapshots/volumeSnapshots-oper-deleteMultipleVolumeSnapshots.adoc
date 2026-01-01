@@ -1,0 +1,8 @@
+// :ks_include_id: 7a2c4eb010e0470095968312938c7699
+. Select the checkbox on the left side of the volume snapshots you want to delete, then click **Delete** above the volume snapshot list.
+
+. In the **Delete Multiple Volume Snapshots** dialog, enter the name of the volume snapshot, then click **OK**.
++
+--
+include::../../note-separateNamesByComma.adoc[]
+--

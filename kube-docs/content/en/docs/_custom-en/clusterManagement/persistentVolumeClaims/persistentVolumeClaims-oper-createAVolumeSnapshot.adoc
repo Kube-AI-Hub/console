@@ -1,0 +1,20 @@
+// :ks_include_id: f523ebef727d479488a3ad33a373f462
+. In the upper-left corner of the details page, select **More > Create Snapshot**.
+
+. In the **Create Snapshot** dialog, set the name of the volume snapshot and the volume snapshot class, then click **OK**.
++
+--
+[%header,cols="1,4"]
+|===
+|Parameter |Description
+
+|Name
+|The name of the volume snapshot. The name can only contain lowercase letters, numbers, and hyphens (-), must start and end with a lowercase letter or number, and can be up to 253 characters long.
+
+|Volume Snapshot Class
+|
+include::persistentVolumeClaims-para-volumeSnapshotClass.adoc[]
+|===
+
+After the volume snapshot is created, it will be displayed in the volume snapshot list on the **Volume Snapshots** page.
+--

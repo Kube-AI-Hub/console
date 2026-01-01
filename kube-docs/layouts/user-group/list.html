@@ -1,0 +1,207 @@
+{{ define "main" }}
+
+{{ with .Params.topSection }}
+<section class='topSection div pc-topSection' style='background-image: url("{{ .image }}");'>
+  <div class="title-div common-layout">
+    <div class="title">
+      <div class="t1">{{ .kubSphere }}&nbsp;</div>
+      <div class="t1">{{ .committee }}</div>
+    </div>
+    <p class="common-p">{{ .description }}</p>
+  </div>
+</section>
+
+<section class='topSection div m-topSection' style='background-image: url("{{ .mobile_image }}");'>
+  <div class="title-div common-layout">
+    <div class="title">
+      <div class="t1">{{ .kubSphere }}&nbsp;</div>
+      <div class="t1">{{ .committee }}</div>
+    </div>
+    <p class="common-p">{{ .description }}</p>
+  </div>
+</section>
+{{ end }}
+
+{{ $Pages := .Pages.ByWeight }}
+
+{{ with .Params.citySection }}
+<section class="city-section div" style="background-image: url(/images/user-group/list/org/bg.png);">
+  <div class="common-layout">
+    <div class="cityBox">
+      {{ with .cityCard }}
+      <div class="city-card">
+        <div class="innerBox">
+          <span class="title">{{ .title }}</span>
+          <span class="des">{{ .des }}</span>
+          <a class="joinUs" href="{{ .joinLink }}" target="_blank">加入我们</a>
+        </div>
+      </div>
+      {{ end }}
+
+      <div class="imageList">
+        {{ range $Pages }}
+          <a class="normalPic" href="{{ .Permalink | relURL }}" target="_blank" style="background-image: url('{{ .Params.coverImage }}')">
+            <div class="nameText">{{ .Params.stationName }}</div>
+          </a>
+        {{ end }}
+        </div>
+      </div>
+  </div>
+</section>
+{{end}}
+ 
+{{ with .Params.organization }}
+<section class="org-section div">
+  <div class="common-layout">
+    <div class="org">
+      <div class="left">
+        <div class="textBox">
+          <div class="title">{{ .name }}</div>
+          <a href="{{ .githublink }}" target="_blank">
+            <image src="{{ .githubIcon }}" class="orgIcon"></image>
+          </a>
+        </div>
+        <div class="des"> {{ .description }}</div>
+      </div>
+      <div class="right">
+        <image class="bg" src="{{ "/images/user-group/list/org/tree.svg" | relURL }}"></image>
+        <image class="m-bg" src="{{ "/images/user-group/list/org/m-bg.svg" | relURL }}"></image>
+        <div class="sig">{{ .SIG }}</div>
+        <div class="sig-zh">{{ .SIG_zh }}</div>
+        <div class="positionBox">
+          <div class="position">{{ .position1 }}</div>
+          <div class="position">{{ .position2 }}</div>
+          <div class="position">{{ .position3 }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{{ end }}
+
+{{ with .Params.applyNew }}
+<section class="applyNew div">
+  <div class="common-layout">
+    <div class="apply">
+      <div class="text-head">
+        <div class="left">
+          <div class="title-en">{{ .title_en }}</div>
+          <div class="title">{{ .title }}</div>
+          <div class="des">{{ .description }}</div>
+          <image class="svg" src="{{ "/images/user-group/list/applyNew/top-rect.svg" | relURL }}"></image>
+        </div>
+        <div class="right"></div>
+      </div>
+      {{ with .conditions }}
+      <div class="condition">
+        <image class="icon" src="{{ .image }}"></image>
+        <div class="text">
+          <span class="title">{{ .text }}</span>
+          <span class="des">
+            {{ range .description }}
+            <span>
+              {{ .head }} <a target="_blank" href="{{ .link.link_address }}">{{ .link.text }}</a>{{ .tail }}
+            </span>
+            {{ end }}
+          </span>
+        </div>
+      </div>
+      <div class="m-condition">
+        <div class="top">
+          <image class="icon" src="{{ .image }}"></image>
+          <span class="title">{{ .text }}</span>
+        </div>
+        <span class="des">
+          {{ range .description }}
+          <span>
+            {{ .head }} <a target="_blank" href="{{ .link.link_address }}">{{ .link.text }}</a>{{ .tail }}
+          </span>
+          {{ end }}
+        </span>
+      </div>
+      {{ end }}
+
+      {{ with .apply }}
+      <div class="apply">
+        <image class="icon" src="{{ .image }}"></image>
+        <div class="text">
+          <span class="title">{{ .text }}</span>
+          {{ with .des }}
+          <span class="des">
+            {{ .head }} <a target="_blank" href="{{ .link.link_address }}">{{ .link.text }}</a>{{ .tail }}
+          </span>
+          {{ end }}
+        </div>
+      </div>
+
+      <div class="m-apply">
+        <div class="top">
+          <image class="icon" src="{{ .image }}"></image>
+          <span class="title">{{ .text }}</span>
+
+        </div>
+        {{ with .des }}
+        <span class="des">
+          {{ .head }} <a target="_blank" href="{{ .link.link_address }}">{{ .link.text }}</a>{{ .tail }}
+        </span>
+        {{ end }}
+      </div>
+      {{ end }}
+
+      {{ with .requirements }}
+      <div class="apply">
+        <image class="icon" src="{{ .image }}"></image>
+        <div class="text">
+          <span class="title">{{ .text }}</span>
+          <span class="des" style="line-height: 32px;">
+            {{ range .des }}
+            <span>
+              {{ .head }}<a target="_blank" href="{{ .link.link_address }}">{{ .link.text }}</a>{{.tail}}
+            </span>
+            {{ end }}
+          </span>
+        </div>
+      </div>
+
+      <div class="m-apply">
+        <div class="top">
+          <image class="icon" src="{{ .image }}"></image>
+          <span class="title">{{ .text }}</span>
+        </div>
+        <ol class="des" style="line-height: 32px;">
+          {{ range .des }}
+          <li>
+            {{ .head }}<a target="_blank" href="{{ .link.link_address }}">{{ .link.text }}</a>{{.tail}}
+          </li>
+          {{ end }}
+        </ol>
+      </div>
+      {{ end }}
+    </div>
+  </div>
+</section>
+{{ end }}
+
+
+{{ with .Params.returns }}
+<section class="returns">
+  <div class="common-layout">
+    <div class="return">
+      <p class="title">{{ .title }}</p>
+      <div class="cards">
+        {{ range .list }}
+        <div class="card">
+          <span class="text">{{ .text }}</span>
+          <image class="bg" src="{{ .bg }}"></image>
+        </div>
+        {{ end }}
+      </div>
+    </div>
+  </div>
+</section>
+{{ end }}
+
+<script>
+
+</script>
+{{ end }}

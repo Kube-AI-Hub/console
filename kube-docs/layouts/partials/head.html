@@ -1,0 +1,165 @@
+<meta charset="utf-8">
+<title>{{ with .Params.Title }}{{ . }}{{ else }}{{ with .Site.Params.title }}{{ . }}{{ end }}{{ end }}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description"
+  content="{{ with .Params.Description }}{{ . }}{{ else }}{{ with .Site.Params.description }}{{ . }}{{ end }}{{ end }}">
+<meta name="keywords"
+  content="{{ with .Params.Keywords }}{{ range $i, $e := . }}{{ if $i }} {{ end }}{{ $e }}{{ end }}{{ else }}{{ with .Site.Params.keywords }}{{ . }}{{ end }}{{ end }}">
+
+<meta property="og:type" content="article" />
+<meta property="og:title"
+  content="{{ with .Params.Title }}{{ . }}{{ else }}{{ with .Site.Params.title }}{{ . }}{{ end }}{{ end }}" />
+<meta property="og:description"
+  content="{{ with .Params.Description }}{{ . }}{{ else }}{{ with .Site.Params.description }}{{ . }}{{ end }}{{ end }}" />
+<meta property="og:image"
+  content="{{ with .Params.snapshot }}{{ . | absURL }}{{ else }}{{ with .Site.Params.snapshot }}{{ . | absURL }}{{ end }}{{ end }}" />
+<meta property="og:url" content="{{ .Permalink }}" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:site" content="@KubeAIHub" />
+<meta property="twitter:image"
+  content="{{ with .Params.snapshot }}{{ . | absURL }}{{ else }}{{ with .Site.Params.snapshot }}{{ . | absURL }}{{ end }}{{ end }}" />
+
+
+<link rel="canonical" href="{{ .Permalink }}" />
+
+{{- partial "favicons.html" . -}}
+
+{{- partial "css.html" . -}}
+
+<script src='{{ "js/jquery-3.7.1.min.js" | relURL }}'></script>
+<script src='{{ "js/viewer.min.js" | relURL }}'></script>
+<script src='{{ "js/jquery.modal.min.js" | relURL }}'></script>
+<script src='{{ "swiper/swiper-bundle.min.js" | relURL }}'></script>
+
+{{ if .IsDescendant (.GetPage "/docs") }}
+<link href='{{ "/pagefind/pagefind-ui.css" | relURL }}' rel="stylesheet">
+<script src='{{ "/pagefind/pagefind-ui.js" | relURL }}'></script>
+{{ end }}
+
+<!-- Baidu Analytics -->
+{{ if .Site.Params.baiduAnalyticsID }}
+<script>
+  var _hmt = _hmt || [];
+  (function () {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?{{ .Site.Params.baiduAnalyticsID }}";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+{{ end }}
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+{{ if .Site.Params.googleAnalyticsID }}
+<script async src="https://www.googletagmanager.com/gtag/js?id={{ .Site.Params.googleAnalyticsID }}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+
+  function gtag() {
+    dataLayer.push(arguments);
+  }
+  gtag('js', new Date());
+
+
+  gtag('config', '{{ .Site.Params.googleAnalyticsID }}');
+</script>
+{{ end }}
+
+{{ if .Site.Params.addGoogleTag }}
+<!-- Google Tag Manager -->
+<script>
+  (function (w, d, s, l, i) {
+    w[l] = w[l] || [];
+    w[l].push({
+      'gtm.start': new Date().getTime(),
+      event: 'gtm.js'
+    });
+    var f = d.getElementsByTagName(s)[0],
+      j = d.createElement(s),
+      dl = l != 'dataLayer' ? '&l=' + l : '';
+    j.async = true;
+    j.src =
+      'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+    f.parentNode.insertBefore(j, f);
+  })(window, document, 'script', 'dataLayer', 'GTM-W9FLX4R');
+</script>
+<!-- End Google Tag Manager -->
+
+<script type="text/javascript" src="//script.crazyegg.com/pages/scripts/0100/4419.js" async="async"></script>
+{{ end }}
+
+<!-- GrowingIO Analytics code version 2.1 -->
+<!-- Copyright 2015-2017 GrowingIO, Inc. More info available at https://www.growingio.com -->
+<script type='text/javascript'>
+  ! function (e, t, n, g, i) {
+    e[i] = e[i] || function () {
+      (e[i].q = e[i].q || []).push(arguments)
+    }, n = t.createElement("script"), tag = t.getElementsByTagName("script")[0], n.async = 1, n.src = ('https:' ==
+      document.location.protocol ? 'https://' : 'http://') + g, tag.parentNode.insertBefore(n, tag)
+  }(window, document, "script", "assets.giocdn.com/2.1/gio.js", "gio");
+  gio('init', '8a24ae300cbf8b8c', {});
+  //custom page code begin here
+  //custom page code end here
+  gio('send');
+</script>
+<!-- End GrowingIO Analytics code version: 2.1 -->
+
+<!-- Hotjar Tracking Code for https://kubesphere.io/docs/ -->
+{{ if (and (.Site.Params.hotjarTracking) (.IsDescendant (.GetPage "/docs")) (eq .Site.Language.Lang "en"))  }}
+<script>
+  (function (h, o, t, j, a, r) {
+    h.hj = h.hj || function () {
+      (h.hj.q = h.hj.q || []).push(arguments)
+    };
+    h._hjSettings = {
+      hjid: 1756364,
+      hjsv: 6
+    };
+    a = o.getElementsByTagName('head')[0];
+    r = o.createElement('script');
+    r.async = 1;
+    r.src = t + h._hjSettings.hjid + j + h._hjSettings.hjsv;
+    a.appendChild(r);
+  })(window, document, 'https://static.hotjar.com/c/hotjar-', '.js?sv=');
+</script>
+{{ end }}
+
+
+{{ if .Site.Params.addLinkedin }}
+<script type="text/javascript">
+  _linkedin_partner_id = "3131724";
+  window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || [];
+  window._linkedin_data_partner_ids.push(_linkedin_partner_id);
+</script>
+<script type="text/javascript">
+  (function () {
+    var s = document.getElementsByTagName("script")[0];
+    var b = document.createElement("script");
+    b.type = "text/javascript";
+    b.async = true;
+    b.src = "https://snap.licdn.com/li.lms-analytics/insight.min.js";
+    s.parentNode.insertBefore(b, s);
+  })();
+</script>
+<noscript>
+  < img height="1" width="1" style="display:none;" alt=""
+    src="https://px.ads.linkedin.com/collect/?pid=3131724&fmt=gif" /> </noscript>
+{{ end }}
+
+{{ if .Site.Params.addTwitter }}
+<!-- Twitter universal website tag code -->
+<script>
+  ! function (e, t, n, s, u, a) {
+    e.twq || (s = e.twq = function () {
+        s.exe ? s.exe.apply(s, arguments) : s.queue.push(arguments);
+      }, s.version = '1.1', s.queue = [], u = t.createElement(n), u.async = !0, u.src =
+      '//static.ads-twitter.com/uwt.js',
+      a = t.getElementsByTagName(n)[0], a.parentNode.insertBefore(u, a))
+  }(window, document, 'script');
+  // Insert Twitter Pixel ID and Standard Event data below
+  twq('init', 'o65xa');
+  twq('track', 'PageView');
+</script>
+<!-- End Twitter universal website tag code -->
+{{ end }}
