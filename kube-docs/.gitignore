@@ -5,6 +5,7 @@ node_modules
 
 # Build directory
 /public
+/static/pagefind
 .DS_Store
 .idea
 /resources

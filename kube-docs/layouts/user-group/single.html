@@ -1,4 +1,5 @@
 {{ define "main" }}
+{{ $basePath := strings.TrimSuffix "/" .Site.Params.logoLink }}
 
 {{ with .Params.topSection }}
 <section class='topSection div pc-topSection' data-bg="{{ .image }},{{ .mobile_image }}" style='background-image: url("{{ .image }}");'>
@@ -46,7 +47,7 @@
             <div class="top">
               <span class="p-name">{{ .name }}</span>
               <div class="codeBox">
-                <image class="p-wx" src="{{ "/images/user-group/shanghai/weChat.svg" | relURL }}"></image>
+                <image class="p-wx" src="{{ $basePath }}/images/user-group/shanghai/weChat.svg"></image>
                 <image class="qrCode" src="{{ .wxCode }}"></image>
               </div>
             </div>
@@ -66,7 +67,7 @@
             <div class="top">
               <span class="p-name">{{ .name }}</span>
               <div class="codeBox">
-                <image class="p-wx" src="{{ "/images/user-group/shanghai/weChat.svg" | relURL }}"></image>
+                <image class="p-wx" src="{{ $basePath }}/images/user-group/shanghai/weChat.svg"></image>
                 <image class="qrCode" src="{{ .wxCode }}"></image>
               </div>
             </div>
@@ -145,9 +146,9 @@
       <div class="active-content">
         <div id="video-box" class="left">
           <div class="buttons">
-            <image id="video-pre" src="{{ "/images/user-group/single/pre.svg" | relURL }}" class="pre-next"></image>
+            <image id="video-pre" src="{{ $basePath }}/images/user-group/single/pre.svg" class="pre-next"></image>
             <a id="video-open" class="video" target="_blank"></a>
-            <image id="video-next" src="{{ "/images/user-group/single/next.svg" | relURL }}" class="pre-next"></image>
+            <image id="video-next" src="{{ $basePath }}/images/user-group/single/next.svg" class="pre-next"></image>
           </div>
           <div class="cover-box"></div>
           <div id="swiper" class="rotations">

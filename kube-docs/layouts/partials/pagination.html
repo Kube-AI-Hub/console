@@ -1,3 +1,4 @@
+{{ $basePath := strings.TrimSuffix "/" site.Params.logoLink }}
 <div class="page-div common-flex-layout">
 {{ if .IsPage }}
 	<!-- if not each page in a section is pure page we can't simply use prev/nextInsection -->
@@ -41,7 +42,7 @@
 	<a class="next" href="{{.RelPermalink}}">
 		{{ i18n "Next" }}
 		<span>: {{.LinkTitle}}</span>
-		<img src="{{ "/images/docs/v3.3/next.svg" | relURL }}" alt="{{ i18n " Next" }}">
+		<img src="{{ $basePath }}/images/docs/v3.3/next.svg" alt="{{ i18n " Next" }}">
 	</a>
 	{{ end }}
 	{{ end }}

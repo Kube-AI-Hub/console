@@ -1,3 +1,4 @@
+{{ $basePath := strings.TrimSuffix "/" .Site.Params.logoLink }}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -20,7 +21,7 @@
   </style>
 </head>
 <body>
-  <redoc spec-url='{{ .Params.swaggerUrl | relURL }}'></redoc>
-  <script src="{{ "/npm/redoc/bundles/redoc.standalone.js" | relURL }}" </script>
+  <redoc spec-url='{{ $basePath }}{{ .Params.swaggerUrl }}'></redoc>
+  <script src="{{ $basePath }}/npm/redoc/bundles/redoc.standalone.js" </script>
 </body>
 </html>

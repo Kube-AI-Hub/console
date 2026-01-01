@@ -52,7 +52,7 @@ module.exports = function(app) {
       console.error('Hugo proxy error:', err.message)
       if (res.writeHead) {
         res.writeHead(502, { 'Content-Type': 'text/plain' })
-        res.end('Hugo dev server not available. Please run: cd ../website && yarn dev')
+        res.end('Hugo dev server not available. Please run: cd kube-docs && yarn dev')
       }
     })
 
@@ -65,7 +65,7 @@ module.exports = function(app) {
             if (e) {
               console.error('Hugo proxy error:', e.message)
               ctx.status = 502
-              ctx.body = 'Hugo dev server not available. Please run: cd ../website && yarn dev'
+              ctx.body = 'Hugo dev server not available. Please run: cd kube-docs && yarn dev'
             }
             resolve()
           })

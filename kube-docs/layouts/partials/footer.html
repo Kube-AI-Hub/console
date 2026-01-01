@@ -1,10 +1,11 @@
 <footer>
+    {{ $basePath := strings.TrimSuffix "/" .Site.Params.logoLink }}
     {{ $data := index .Site.Data .Site.Language.Lang }}
     <div class="footer">
         <div class="footer-main common-layout">
             <div class="up-main">
                 <div class="left-div">
-                    <img src="{{ .Site.Params.logo | relURL }}" alt="{{ .Site.Title }}" class="foot-logo">
+                    <img src="{{ $basePath }}/{{ .Site.Params.logo }}" alt="{{ .Site.Title }}" class="foot-logo">
                 </div>
                 <div class="right-div">
                     <ul class="common-flex-layout">

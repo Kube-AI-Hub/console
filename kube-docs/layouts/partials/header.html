@@ -1,9 +1,10 @@
 <!-- Header Start -->
+{{ $basePath := strings.TrimSuffix "/" .Site.Params.logoLink }}
 <header class="navigation">
     <div class="common-layout">
         <div class="header-container">
             <a href="{{ site.Home.RelPermalink }}" aria-label="logo">
-                <img src="{{ "/images/header/logo.svg" | relURL }}" alt="{{ .Site.Title }}" class="logo">
+                <img src="{{ $basePath }}/images/header/logo.svg" alt="{{ .Site.Title }}" class="logo">
             </a>
 
             <ul class="nav">
@@ -50,7 +51,7 @@
                 <ul>
                     <li class="language-menu">
                         <div>
-                            <img src="{{ "/images/header/black.svg" | relURL }}" alt="">
+                            <img src="{{ $basePath }}/images/header/black.svg" alt="">
                             <span>{{ .Site.Language.LanguageName }}</span>
                         </div>
                         {{ with $.Page.AllTranslations }}
@@ -94,7 +95,7 @@
                         </div>
                     </li>
                     <li class="menu-icon">
-                        <img src="{{ "/images/header/menu.svg" | relURL }}" alt="">
+                        <img src="{{ $basePath }}/images/header/menu.svg" alt="">
                     </li>
                 </ul>
             </div>
@@ -134,13 +135,13 @@
         </ul>
         <div class="link-div">
             <a href="{{ .Site.Params.slackLink }}" target="_blank" rel="noopener noreferrer" aria-label="slack">
-                <img src="{{ "/images/header/slack-hover.svg" | relURL }}" alt="">
+                <img src="{{ $basePath }}/images/header/slack-hover.svg" alt="">
             </a>
             <a href="{{ .Site.Params.twitterLink }}" target="_blank" rel="noopener noreferrer" aria-label="twitter">
-                <img src="{{ "/images/header/twitter-hover.svg" | relURL }}" alt="">
+                <img src="{{ $basePath }}/images/header/twitter-hover.svg" alt="">
             </a>
             <a href="{{ .Site.Params.githubLink }}" target="_blank" rel="noopener noreferrer" aria-label="github">
-                <img src="{{ "/images/header/github-hover.svg" | relURL }}" alt="">
+                <img src="{{ $basePath }}/images/header/github-hover.svg" alt="">
             </a>
         </div>
     </div>

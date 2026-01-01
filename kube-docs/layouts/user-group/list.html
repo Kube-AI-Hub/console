@@ -1,4 +1,5 @@
 {{ define "main" }}
+{{ $basePath := strings.TrimSuffix "/" .Site.Params.logoLink }}
 
 {{ with .Params.topSection }}
 <section class='topSection div pc-topSection' style='background-image: url("{{ .image }}");'>
@@ -40,7 +41,7 @@
 
       <div class="imageList">
         {{ range $Pages }}
-          <a class="normalPic" href="{{ .Permalink | relURL }}" target="_blank" style="background-image: url('{{ .Params.coverImage }}')">
+          <a class="normalPic" href="{{ .Permalink }}" target="_blank" style="background-image: url('{{ .Params.coverImage }}')">
             <div class="nameText">{{ .Params.stationName }}</div>
           </a>
         {{ end }}
@@ -64,8 +65,8 @@
         <div class="des"> {{ .description }}</div>
       </div>
       <div class="right">
-        <image class="bg" src="{{ "/images/user-group/list/org/tree.svg" | relURL }}"></image>
-        <image class="m-bg" src="{{ "/images/user-group/list/org/m-bg.svg" | relURL }}"></image>
+        <image class="bg" src="{{ $basePath }}/images/user-group/list/org/tree.svg"></image>
+        <image class="m-bg" src="{{ $basePath }}/images/user-group/list/org/m-bg.svg"></image>
         <div class="sig">{{ .SIG }}</div>
         <div class="sig-zh">{{ .SIG_zh }}</div>
         <div class="positionBox">
@@ -88,7 +89,7 @@
           <div class="title-en">{{ .title_en }}</div>
           <div class="title">{{ .title }}</div>
           <div class="des">{{ .description }}</div>
-          <image class="svg" src="{{ "/images/user-group/list/applyNew/top-rect.svg" | relURL }}"></image>
+          <image class="svg" src="{{ $basePath }}/images/user-group/list/applyNew/top-rect.svg"></image>
         </div>
         <div class="right"></div>
       </div>

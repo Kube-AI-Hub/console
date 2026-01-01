@@ -1,3 +1,4 @@
+{{ $basePath := strings.TrimSuffix "/" .Site.Params.logoLink }}
 <!DOCTYPE html>
 <html lang="{{ with .Site.LanguageCode }}{{ . }}{{ else }}en-US{{ end }}">
 
@@ -101,27 +102,27 @@
                                 </div>
                                 <ul>
                                     <li>
-                                        <img src="{{ "/images/docs/v3.3/twitter.svg" | relURL }}" alt="twitter">
+                                        <img src="{{ $basePath }}/images/docs/v3.3/twitter.svg" alt="twitter">
                                         <a href="https://twitter.com/intent/tweet?url={{ .Permalink }}&text={{ .Title }}"
                                             target="_blank" rel="noopener noreferrer">twitter</a>
                                     </li>
                                     <li>
-                                        <img src="{{ "/images/docs/v3.3/linkedIn.svg" | relURL }}" alt="linkedIn">
+                                        <img src="{{ $basePath }}/images/docs/v3.3/linkedIn.svg" alt="linkedIn">
                                         <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ .Permalink }}"
                                             target="_blank" rel="noopener noreferrer">linkedIn</a>
                                     </li>
                                     <li>
-                                        <img src="{{ "/images/docs/v3.3/facebook.svg" | relURL }}" alt="facebook">
+                                        <img src="{{ $basePath }}/images/docs/v3.3/facebook.svg" alt="facebook">
                                         <a href="https://www.facebook.com/sharer.php?u={{ .Permalink }}" target="_blank"
                                             rel="noopener noreferrer">facebook</a>
                                     </li>
                                     <li>
-                                        <img src="{{ "/images/docs/v3.3/reddit.svg" | relURL }}" alt="reddit">
+                                        <img src="{{ $basePath }}/images/docs/v3.3/reddit.svg" alt="reddit">
                                         <a href="https://reddit.com/submit?url={{ .Permalink }}&title={{ .Title }}"
                                             target="_blank" rel="noopener noreferrer">reddit</a>
                                     </li>
                                     <li>
-                                        <img src="{{ "/images/docs/v3.3/email.svg" | relURL }}" alt="email">
+                                        <img src="{{ $basePath }}/images/docs/v3.3/email.svg" alt="email">
                                         <a href="mailto:info@kubesphere.io" target="_blank"
                                             rel="noopener noreferrer">email</a>
                                     </li>
@@ -321,7 +322,7 @@
                     {{ "/static/images/footer/wechat.svg" | readFile | safeHTML }}
                     <div class="hide-div">
                         <p>Follow the official account</p>
-                        <img src="{{ "/images/footer/wechat_code.svg" | relURL }}" alt="">
+                        <img src="{{ $basePath }}/images/footer/wechat_code.svg" alt="">
                     </div>
                 </a>
                 <a class='facebook-a' href="https://www.facebook.com/kubesphere" target="_blank"

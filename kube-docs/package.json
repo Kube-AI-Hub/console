@@ -4,7 +4,7 @@
   "description": "Kube AI Hub documentation website",
   "scripts": {
     "build": "hugo build && npx pagefind --site public",
-    "dev": "hugo server -D",
+    "dev": "rm -rf public/ resources/ && hugo --baseURL 'http://localhost:1313/kube-docs/' && npx pagefind --site public && cp -r public/pagefind static/ && hugo server -D",
     "preview": "hugo && npx pagefind --site public --serve"
   },
   "devDependencies": {

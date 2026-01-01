@@ -27,14 +27,15 @@
 
 {{- partial "css.html" . -}}
 
-<script src='{{ "js/jquery-3.7.1.min.js" | relURL }}'></script>
-<script src='{{ "js/viewer.min.js" | relURL }}'></script>
-<script src='{{ "js/jquery.modal.min.js" | relURL }}'></script>
-<script src='{{ "swiper/swiper-bundle.min.js" | relURL }}'></script>
+{{ $basePath := strings.TrimSuffix "/" .Site.Params.logoLink }}
+<script src='{{ $basePath }}/js/jquery-3.7.1.min.js'></script>
+<script src='{{ $basePath }}/js/viewer.min.js'></script>
+<script src='{{ $basePath }}/js/jquery.modal.min.js'></script>
+<script src='{{ $basePath }}/swiper/swiper-bundle.min.js'></script>
 
 {{ if .IsDescendant (.GetPage "/docs") }}
-<link href='{{ "/pagefind/pagefind-ui.css" | relURL }}' rel="stylesheet">
-<script src='{{ "/pagefind/pagefind-ui.js" | relURL }}'></script>
+<link href='{{ $basePath }}/pagefind/pagefind-ui.css' rel="stylesheet">
+<script src='{{ $basePath }}/pagefind/pagefind-ui.js'></script>
 {{ end }}
 
 <!-- Baidu Analytics -->

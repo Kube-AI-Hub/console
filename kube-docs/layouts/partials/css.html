@@ -1,14 +1,15 @@
-<link rel="stylesheet" href="{{ "/fonts/Roboto/stylesheet.css" | relURL }}">
-<link rel="stylesheet" href="{{ "/css/jquery.modal.min.css" | relURL }}">
-<link rel="stylesheet" href="{{ "/css/viewer.min.css" | relURL }}">
-<link rel="stylesheet" href="{{ "/swiper/swiper-bundle.min.css" | relURL }}">
+{{ $basePath := strings.TrimSuffix "/" .Site.Params.logoLink }}
+<link rel="stylesheet" href="{{ $basePath }}/fonts/Roboto/stylesheet.css">
+<link rel="stylesheet" href="{{ $basePath }}/css/jquery.modal.min.css">
+<link rel="stylesheet" href="{{ $basePath }}/css/viewer.min.css">
+<link rel="stylesheet" href="{{ $basePath }}/swiper/swiper-bundle.min.css">
 
 {{ $common := resources.Get "scss/common.scss" | toCSS | minify | fingerprint }}
 <link rel="stylesheet" href="{{ $common.RelPermalink }}">
 
 {{ if .Params.minCss }}
 {{ range (split .Params.minCss ",")}}
-<link rel="stylesheet" href="{{ . | relURL }}">
+<link rel="stylesheet" href="{{ $basePath }}{{ . }}">
 {{ end }}
 {{ end }}
 
@@ -39,5 +40,4 @@
 <link rel="stylesheet" href="{{ $style.RelPermalink }}">
 {{ end }}
 {{ end }}
-
 

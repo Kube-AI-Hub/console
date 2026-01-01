@@ -1,7 +1,7 @@
 {{ define "main" }}
-
+{{ $basePath := strings.TrimSuffix "/" .Site.Params.logoLink }}
 {{ with .Params.section1 }}
-<section class="section-1 bg-cover" style='background-image: url("/images/case/case-detail-bg.png");'>
+<section class="section-1 bg-cover" style='background-image: url("{{ $basePath }}/images/case/case-detail-bg.png");'>
     <div class="common-layout">
         <h1 class="title-h1">{{ .title }}</h1>
         <p class="common-p">{{ .content }}</p>
@@ -40,7 +40,7 @@
             <div>
               <p class='p1'>{{ .content }}</p>
               <p class='p2'>{{ .author }}</p>
-              <img src="{{ "/images/case/ic-quote-right.svg" | relURL }}" alt="">
+              <img src="{{ $basePath }}/images/case/ic-quote-right.svg" alt="">
             </div>
           {{ else }}
             <h2>{{ .title }}</h2>
@@ -72,7 +72,7 @@
       {{ end }}
     </ul>
   </div>
-  <img src="{{ "/images/common/hexagon.svg" | relURL }}" alt="">
+  <img src="{{ $basePath }}/images/common/hexagon.svg" alt="">
   {{ end }}
 </section>
 {{ end }}
