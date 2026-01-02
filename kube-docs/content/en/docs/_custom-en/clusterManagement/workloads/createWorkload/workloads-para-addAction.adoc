@@ -3,9 +3,9 @@ Create post-start or pre-termination actions for the container.
 
 * Click **Add Action** to create an action.
 
-* Hover over the created action, then click image:/images/ks-qkcp/zh/icons/pen-light.svg[pen,18,18] on the right to edit the action settings.
+* Hover over the created action, then click image:images/ks-qkcp/zh/icons/pen-light.svg[pen,18,18] on the right to edit the action settings.
 
-* Hover over the created action, then click image:/images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18] on the right to delete the action.
+* Hover over the created action, then click image:images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18] on the right to delete the action.
 
 [%header,cols="1a,4a"]
 |===

@@ -17,7 +17,7 @@
 
 * Manually select workloads by clicking **Specify Workload**.
 
-* Click image:/images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18] on the right side of a created label to delete it.
+* Click image:images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18] on the right side of a created label to delete it.
 
 | Ports
 | Map service ports and their corresponding container ports.
@@ -30,5 +30,5 @@
 
 * **Service Port**: The port number of the service.
 
-Click **Add** to set multiple service ports. Click image:/images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18] on the right side of a created service port to delete it.
+Click **Add** to set multiple service ports. Click image:images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18] on the right side of a created service port to delete it.
 |===

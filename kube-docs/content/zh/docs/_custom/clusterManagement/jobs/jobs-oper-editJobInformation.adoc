@@ -1,5 +1,5 @@
 // :ks_include_id: 71ed2df8398646ea982d8084536b45d9
-. 在需要操作的任务右侧点击image:/images/ks-qkcp/zh/icons/more.svg[more,18,18]，然后在下拉列表中选择**编辑信息**。
+. 在需要操作的任务右侧点击image:images/ks-qkcp/zh/icons/more.svg[more,18,18]，然后在下拉列表中选择**编辑信息**。
 
 . 在**编辑信息**对话框，设置任务的别名和描述，然后点击**确定**。
 +

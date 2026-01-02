@@ -1,4 +1,4 @@
 // :ks_include_id: 91f54871ad6f447eaca67f6b1853872e
-. Click image:/images/ks-qkcp/zh/icons/more.svg[more,18,18] on the right side of the custom monitoring dashboard you want to delete, then select **Delete** from the dropdown list.
+. Click image:images/ks-qkcp/zh/icons/more.svg[more,18,18] on the right side of the custom monitoring dashboard you want to delete, then select **Delete** from the dropdown list.
 
 . In the **Delete Custom Monitoring Dashboard** dialog, enter the name of the custom monitoring dashboard, then click **OK**.

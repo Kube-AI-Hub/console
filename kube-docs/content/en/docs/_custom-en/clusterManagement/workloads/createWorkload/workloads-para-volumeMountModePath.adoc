@@ -10,4 +10,4 @@ The mount mode of the volume on the container.
 * **Not mounted**: The volume is not mounted to the container.
 
 |Mount Path
-|The path where the volume is mounted to the container. Click image:/images/ks-qkcp/zh/icons/textfield.svg[textfield,18,18] to set the subpath that needs to be mounted. If no subpath is set, the entire volume is mounted by default.
+|The path where the volume is mounted to the container. Click image:images/ks-qkcp/zh/icons/textfield.svg[textfield,18,18] to set the subpath that needs to be mounted. If no subpath is set, the entire volume is mounted by default.

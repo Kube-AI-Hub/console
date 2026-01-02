@@ -1,5 +1,5 @@
 // :ks_include_id: f41b68cc492640acadc07b371d665ebb
-. Click image:/images/ks-qkcp/zh/icons/more.svg[more,18,18] on the right side of the custom monitoring dashboard you want to edit, then select **Edit Information** from the dropdown list.
+. Click image:images/ks-qkcp/zh/icons/more.svg[more,18,18] on the right side of the custom monitoring dashboard you want to edit, then select **Edit Information** from the dropdown list.
 
 . In the **Edit Information** dialog, set the alias and description of the custom monitoring dashboard, then click **OK**.
 +

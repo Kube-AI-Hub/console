@@ -37,7 +37,7 @@ include::../../para-replicasPortsPods.adoc[]
 --
 * Click a revision record from the dropdown list to view its serial number, creation time, and configuration file. Kube AI Hub automatically creates a serial number for each revision record, and up to 10 revision records can be retained.
 
-* The **Configuration File** section displays the differences between the current configuration file and the configuration file from the previous revision record. Click image:/images/ks-qkcp/zh/icons/chevron-down.svg[chevron-down,18,18] to vertically display the  differences in the configuration files, and Click image:/images/ks-qkcp/zh/icons/chevron-right.svg[chevron-right,18,18] to horizontally display the differences in the configuration files.
+* The **Configuration File** section displays the differences between the current configuration file and the configuration file from the previous revision record. Click image:images/ks-qkcp/zh/icons/chevron-down.svg[chevron-down,18,18] to vertically display the  differences in the configuration files, and Click image:images/ks-qkcp/zh/icons/chevron-right.svg[chevron-right,18,18] to horizontally display the differences in the configuration files.
 --
 
 . Click the **Metadata** tab on the right side of the workload details page to view the labels and annotations of the workload.

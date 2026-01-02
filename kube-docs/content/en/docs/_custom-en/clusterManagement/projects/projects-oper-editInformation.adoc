@@ -1,5 +1,5 @@
 // :ks_include_id: a1b9b1a5e4b74f6083a9dbf399919ea3
-. Click image:/images/ks-qkcp/zh/icons/more.svg[more,18,18] on the right of the project you want to edit, then choose **Edit Information** from the dropdown list.
+. Click image:images/ks-qkcp/zh/icons/more.svg[more,18,18] on the right of the project you want to edit, then choose **Edit Information** from the dropdown list.
 
 . In the **Edit Information** dialog, set the alias and description for the project, then click **OK**.
 +

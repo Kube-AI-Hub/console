@@ -8,4 +8,4 @@
 
 . 点击搜索结果中的 **ClusterConfiguration** 进入其详情页面。
 
-. 在**资源状态**页签上，点击 **ks-installer** 右侧的image:/images/ks-qkcp/zh/icons/more.svg[more,18,18]，选择**编辑 YAML**。
+. 在**资源状态**页签上，点击 **ks-installer** 右侧的image:images/ks-qkcp/zh/icons/more.svg[more,18,18]，选择**编辑 YAML**。

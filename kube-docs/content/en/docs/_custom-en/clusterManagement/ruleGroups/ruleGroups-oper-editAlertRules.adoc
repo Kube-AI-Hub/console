@@ -4,9 +4,9 @@
 --
 * Hover over an existing alert rule and click the toggle switch to enable/disable the alert rule.
 
-* Hover over an existing alert rule and click image:/images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18] to delete the alert rule.
+* Hover over an existing alert rule and click image:images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18] to delete the alert rule.
 
-* Hover over an existing alert rule and click image:/images/ks-qkcp/zh/icons/pen-light.svg[pen,18,18] to modify the settings of the alert rule.
+* Hover over an existing alert rule and click image:images/ks-qkcp/zh/icons/pen-light.svg[pen,18,18] to modify the settings of the alert rule.
 
 * Click **Add Alert Rule** to create a new alert rule.
 --

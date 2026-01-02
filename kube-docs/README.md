@@ -162,3 +162,110 @@ You will find the previously generated content in the `public` directory, includ
 ### Search Migration
 
 The website has migrated from Algolia DocSearch to Pagefind local search. For detailed information about the migration, see [SEARCH_MIGRATION.md](SEARCH_MIGRATION.md).
+
+## Generate PDF Documentation
+
+The documentation can be exported as PDF files. All content from the `content/` directory (including `.adoc` and `.md` files) will be converted and merged into a single document per language.
+
+**Features:**
+- Files are processed in Hugo navigation order (sorted by frontmatter `weight`)
+- The merged PDF includes a clickable Table of Contents (bookmarks)
+- Supports resume after interruption (skips already processed files)
+
+### Prerequisites
+
+1. Install asciidoctor-pdf (requires Ruby) for AsciiDoc files:
+
+```bash
+gem install asciidoctor-pdf
+```
+
+2. Install pandoc and weasyprint for Markdown files（推荐使用 miniforge/conda 环境）:
+
+```bash
+# 在 miniforge/conda 环境中
+conda install -c conda-forge pandoc weasyprint
+
+# 若需系统库（macOS）
+# brew install pango cairo gdk-pixbuf glib gobject-introspection
+# export DYLD_FALLBACK_LIBRARY_PATH="/opt/homebrew/lib:${DYLD_FALLBACK_LIBRARY_PATH}"
+```
+
+3. Install ghostscript for PDF merging with bookmarks:
+
+```bash
+# macOS
+brew install ghostscript
+
+# Ubuntu/Debian
+sudo apt-get install ghostscript
+
+# CentOS/RHEL
+sudo yum install ghostscript
+```
+
+4. (Optional) Install pdfinfo for accurate page counting:
+
+```bash
+# macOS
+brew install poppler
+
+# Ubuntu/Debian
+sudo apt-get install poppler-utils
+```
+
+Notes:
+- AsciiDoc PDF generation sets `imagesdir=static/images` to resolve repo-hosted images.
+- PDF files are sorted by Hugo `weight` to match website navigation order.
+
+### Generate PDFs
+
+Generate PDF documentation for all languages:
+
+```bash
+yarn pdf:build
+```
+
+Generate PDF for a specific language:
+
+```bash
+# Chinese documentation
+yarn pdf:build:zh
+
+# English documentation
+yarn pdf:build:en
+```
+
+### Clean PDF output
+
+Remove all generated PDF files:
+
+```bash
+yarn pdf:clean
+```
+
+### PDF output location
+
+Generated PDF files will be saved to the `dist/pdf/` directory:
+
+- `dist/pdf/zh/` - Individual Chinese PDF files
+- `dist/pdf/en/` - Individual English PDF files
+- `dist/pdf/kube-ai-hub-docs-zh.pdf` - Merged Chinese documentation
+- `dist/pdf/kube-ai-hub-docs-en.pdf` - Merged English documentation
+
+### Included content
+
+The following directories are included in PDF generation:
+
+| Directory | Type | Description |
+|-----------|------|-------------|
+| `docs/_custom/` | .adoc | Custom documentation components |
+| `docs/v3.4/` | .md | v3.4 version documentation |
+| `learn/` | .md | Learning tutorials |
+| `common/` | .md | Common requirements |
+| `api/` | .md | API documentation (English only) |
+| `user-group/` | .md | User group information (Chinese only) |
+
+**Excluded content:**
+- `_ks_components/` and `_ks_components-en/` - Reusable component libraries (for include only)
+- `_index.md` files - Hugo directory index pages

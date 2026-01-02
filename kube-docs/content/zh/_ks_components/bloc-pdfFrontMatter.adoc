@@ -16,20 +16,20 @@
 文档版本 01
 
 [.bottom_center]
-版权所有 © 北京青云科技股份有限公司
+版权所有 © Kube AI Hub
 
 [.cover_product_logo]
 --
 ifeval::["{ks_output_type}" == "md"]
-image::/images/ks-qkcp/pdf/kubesphere-logo.svg[]
+image::images/ks-qkcp/pdf/kubesphere-logo.svg[]
 endif::[]
 ifeval::["{ks_output_type}" == "pdf"]
-image::/images/ks-qkcp/pdf/kubesphere-enterprise-logo.svg[]
+image::images/ks-qkcp/pdf/kubesphere-enterprise-logo.svg[]
 endif::[]
 --
 
 [.cover_doc_image]
-image::/images/ks-qkcp/pdf/cover_doc_image.svg[]
+image::images/ks-qkcp/pdf/cover_doc_image.svg[]
 
 [.cover_doc_name]
 {ks_product_full} +
@@ -40,7 +40,7 @@ image::/images/ks-qkcp/pdf/cover_doc_image.svg[]
 
 |
 [.cover_qc_logo]
-image::/images/ks-qkcp/pdf/qingcloud-logo-color.png[]
+image::images/ks-qkcp/pdf/qingcloud-logo-color.png[]
 
 北京青云科技股份有限公司
 
@@ -61,7 +61,7 @@ image::/images/ks-qkcp/pdf/qingcloud-logo-color.png[]
 
 **商标声明**
 
-image:/images/ks-qkcp/pdf/qingcloud-logo-icon.png[qincloud-logo-icon,18,18] 和其他青云商标均由北京青云科技股份有限公司拥有。
+image:images/ks-qkcp/pdf/qingcloud-logo-icon.png[qincloud-logo-icon,18,18] 和其他青云商标均由北京青云科技股份有限公司拥有。
 
 本文档提及的其他商标或注册商标，由各自的所有人拥有。
 

@@ -1,5 +1,5 @@
 // :ks_include_id: a1b9b1a5e4b74f6083a9dbf399919ea3
-. 在需要操作的项目右侧点击image:/images/ks-qkcp/zh/icons/more.svg[more,18,18]，然后在下拉列表中选择**编辑信息**。
+. 在需要操作的项目右侧点击image:images/ks-qkcp/zh/icons/more.svg[more,18,18]，然后在下拉列表中选择**编辑信息**。
 
 . 在**编辑信息**对话框，设置项目的别名和描述，然后点击**确定**。
 +

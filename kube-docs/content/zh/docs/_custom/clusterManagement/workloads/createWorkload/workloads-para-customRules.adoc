@@ -3,7 +3,7 @@
 
 * 点击**添加**可以设置多条规则。
 
-* 在已创建的规则右侧点击image:/images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18]可删除规则。
+* 在已创建的规则右侧点击image:images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18]可删除规则。
 
 [%header,cols="1a,4a"]
 |===

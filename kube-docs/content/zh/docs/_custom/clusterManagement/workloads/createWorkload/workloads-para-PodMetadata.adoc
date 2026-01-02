@@ -3,4 +3,4 @@
 
 * 点击添加可设置多条注解。
 
-* 在已创建的注解右侧点击image:/images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18]可删除注解。
+* 在已创建的注解右侧点击image:images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18]可删除注解。

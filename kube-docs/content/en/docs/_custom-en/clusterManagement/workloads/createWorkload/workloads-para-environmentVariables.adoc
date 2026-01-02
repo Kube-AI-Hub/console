@@ -5,7 +5,7 @@ Configure environment variables for the container.
 
 * Click **Batch Reference** to create environment variables using data from a ConfigMap or Secret. The ConfigMap or Secret to be referenced must belong to the same project as the container. The values of environment variables will not dynamically change with changes made in the ConfigMap or Secret after the container is created.
 
-* Click image:/images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18] on the right of the created environment variable to delete it.
+* Click image:images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18] on the right of the created environment variable to delete it.
 
 [%header,cols="1a,4a"]
 |===

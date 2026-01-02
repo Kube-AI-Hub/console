@@ -1,5 +1,5 @@
 // :ks_include_id: f0f32c026c8a44b7ac18acbadf465ea5
-. 在需要操作的服务右侧点击image:/images/ks-qkcp/zh/icons/more.svg[more,18,18]，然后在下拉列表中选择**编辑设置**。
+. 在需要操作的服务右侧点击image:images/ks-qkcp/zh/icons/more.svg[more,18,18]，然后在下拉列表中选择**编辑设置**。
 
 . 在**编辑设置**对话框的**服务设置**页签，修改服务的设置。
 

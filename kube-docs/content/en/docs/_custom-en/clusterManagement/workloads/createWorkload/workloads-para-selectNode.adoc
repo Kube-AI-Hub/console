@@ -7,4 +7,4 @@ Schedule pod replicas to nodes with specified labels.
 
 * Click **Add Node Selector** to set multiple labels; pod replicas will be scheduled to nodes with all specified labels.
 
-* Click image:/images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18] on the right of a created label to delete it.
+* Click image:images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18] on the right of a created label to delete it.

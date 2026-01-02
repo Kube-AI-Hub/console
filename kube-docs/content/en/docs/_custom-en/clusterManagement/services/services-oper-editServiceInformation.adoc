@@ -1,5 +1,5 @@
 // :ks_include_id: 1137d62e09344a798e172ba55bf7a205
-. Click image:/images/ks-qkcp/zh/icons/more.svg[more,18,18] on the right of the service you want to edit, then choose **Edit Information** from the dropdown list.
+. Click image:images/ks-qkcp/zh/icons/more.svg[more,18,18] on the right of the service you want to edit, then choose **Edit Information** from the dropdown list.
 
 . In the **Edit Information** dialog, set the alias and description for the service, then click **OK**.
 +

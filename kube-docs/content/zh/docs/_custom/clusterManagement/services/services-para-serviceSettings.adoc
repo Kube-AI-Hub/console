@@ -17,7 +17,7 @@
 
 * 点击**指定工作负载**可手动选择工作负载。
 
-* 在已创建的标签右侧点击image:/images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18]可删除标签。
+* 在已创建的标签右侧点击image:images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18]可删除标签。
 
 |端口
 |服务端口及其与目标容器端口的映射关系。
@@ -30,5 +30,5 @@
 
 * **服务端口**：服务的端口号。
 
-点击**添加**可设置多个服务端口。在已创建的服务端口右侧点击image:/images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18]可删除服务端口。
+点击**添加**可设置多个服务端口。在已创建的服务端口右侧点击image:images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18]可删除服务端口。
 |===

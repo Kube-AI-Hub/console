@@ -109,11 +109,11 @@ include::../../../../_ks_components/oper-refreshData.adoc[]
 
 * 在**网关日志**页签上方点击搜索框并设置搜索条件，可按关键字、容器组或时间范围搜索日志数据。
 
-* 在**网关日志**页签上方点击image:/images/ks-qkcp/zh/icons/start-dark.svg[start-dark,18,18]/image:/images/ks-qkcp/zh/icons/stop-dark-white.svg[stop-dark-white,18,18]可开启/停止实时数据刷新。
+* 在**网关日志**页签上方点击image:images/ks-qkcp/zh/icons/start-dark.svg[start-dark,18,18]/image:images/ks-qkcp/zh/icons/stop-dark-white.svg[stop-dark-white,18,18]可开启/停止实时数据刷新。
 
 * 在**网关日志**页签上方点击**刷新间隔**可设置数据刷新间隔为 5s、10s 或 20s。
 
-* 在**网关日志**页签上方点击image:/images/ks-qkcp/zh/icons/export.svg[export,18,18]可将日志文件下载到本地。
+* 在**网关日志**页签上方点击image:images/ks-qkcp/zh/icons/export.svg[export,18,18]可将日志文件下载到本地。
 --
 
 . 在网关详情页面右侧点击**资源状态**页签查看网关工作负载的容器组副本数、容器端口和容器组。

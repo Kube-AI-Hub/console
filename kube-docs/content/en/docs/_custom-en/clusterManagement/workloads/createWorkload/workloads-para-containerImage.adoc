@@ -7,4 +7,4 @@ The image required to create the container.
 
 * If you only enter the image name, the image will be pulled from Docker Hub by default. To use a private image registry, you need to create a Secret containing the information for the private image registry, and then select the private image registry on the left side of the **Image** text box.
 
-* Click image:/images/ks-qkcp/zh/icons/templet.svg[template,18,18] to browse images in the current image registry.
+* Click image:images/ks-qkcp/zh/icons/templet.svg[template,18,18] to browse images in the current image registry.

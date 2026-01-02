@@ -2,7 +2,7 @@
 Configure custom rules for pod scheduling.
 
 * Click **Add** to set multiple rules.
-* To delete a rule, Click image:/images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18] on the right of the created rule.
+* To delete a rule, Click image:images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18] on the right of the created rule.
 
 [%header,cols="1a,4a"]
 |===

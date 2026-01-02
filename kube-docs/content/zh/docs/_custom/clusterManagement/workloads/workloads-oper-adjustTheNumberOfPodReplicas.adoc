@@ -1,5 +1,5 @@
 // :ks_include_id: d02b5f4b6a354bdfbba1d532b30bda69
-. 在工作负载详情页面的**资源状态**页签，点击image:/images/ks-qkcp/zh/icons/add-dark.svg[add-dark,18,18]或image:/images/ks-qkcp/zh/icons/substract-dark.svg[subtrack-dark,18,18]调整容器组副本的数量，然后在右上角的**调整副本数量**对话框点击**确定**。
+. 在工作负载详情页面的**资源状态**页签，点击image:images/ks-qkcp/zh/icons/add-dark.svg[add-dark,18,18]或image:images/ks-qkcp/zh/icons/substract-dark.svg[subtrack-dark,18,18]调整容器组副本的数量，然后在右上角的**调整副本数量**对话框点击**确定**。
 +
 --
 // Warning

@@ -2,5 +2,5 @@
 * 容器组设置 > 容器组副本数量
 +
 --
-点击image:/images/ks-qkcp/zh/icons/add-light.svg[add,18,18]/image:/images/ks-qkcp/zh/icons/substract-light.svg[subtract,18,18]增加/减少容器组副本的数量，最小值为 **1**。
+点击image:images/ks-qkcp/zh/icons/add-light.svg[add,18,18]/image:images/ks-qkcp/zh/icons/substract-light.svg[subtract,18,18]增加/减少容器组副本的数量，最小值为 **1**。
 --

@@ -1,4 +1,4 @@
 // :ks_include_id: d6ffb1f3d075421a9c9d96456b1349f1
-. Click image:/images/ks-qkcp/zh/icons/more.svg[more,18,18] on the right side of the volume snapshot you want to delete, then select **Delete** from the dropdown list.
+. Click image:images/ks-qkcp/zh/icons/more.svg[more,18,18] on the right side of the volume snapshot you want to delete, then select **Delete** from the dropdown list.
 
 . In the **Delete Volume Snapshot** dialog, enter the name of the volume snapshot, then click **OK**.

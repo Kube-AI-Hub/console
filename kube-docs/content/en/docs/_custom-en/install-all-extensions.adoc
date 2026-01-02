@@ -18,7 +18,7 @@ If a required dependency is **Not Ready**, you need to install the required vers
 
 . On the **Extensions Installation** tab, make modifications to the configuration (if needed), and then click **Start Installation**.
 +
-image:/images/ks-qkcp/en/v4.0/install-extensions.png[,100%]
+image:images/ks-qkcp/en/v4.0/install-extensions.png[,100%]
 
 . After the installation is complete, click **Next** to configure the cluster agent.
 

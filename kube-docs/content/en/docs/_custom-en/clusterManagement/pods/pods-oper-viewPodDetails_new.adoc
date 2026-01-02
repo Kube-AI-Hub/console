@@ -56,7 +56,7 @@ include::pods-para-qosTypes.adoc[]
 
 include::../workloads/workloads-para-containerStatus.adoc[]
 
-Click image:/images/ks-qkcp/zh/icons/log.svg[log,18,18] next to the container name to view the container logs. Hover over **Probes** to view the configured probes in the container.
+Click image:images/ks-qkcp/zh/icons/log.svg[log,18,18] next to the container name to view the container logs. Hover over **Probes** to view the configured probes in the container.
 
 |Volumes
 |Displays the names of all volumes for the pod, the containers to which volumes are mounted, and the mount paths of volumes on containers.
@@ -74,7 +74,7 @@ Click image:/images/ks-qkcp/zh/icons/log.svg[log,18,18] next to the container na
 |Displays the name of node that accepted the pod.
 
 |Status Information
-|Shows whether the pod has successfully completed all startup steps. If image:/images/ks-qkcp/zh/icons/success.svg[success,18,18] is displayed, the pod has completed the startup steps; if image:/images/ks-qkcp/zh/icons/error.svg[error,18,18] is displayed, the startup steps are not yet completed.
+|Shows whether the pod has successfully completed all startup steps. If image:images/ks-qkcp/zh/icons/success.svg[success,18,18] is displayed, the pod has completed the startup steps; if image:images/ks-qkcp/zh/icons/error.svg[error,18,18] is displayed, the startup steps are not yet completed.
 
 * **Running**: Whether the pod is in the **Running** state.
 

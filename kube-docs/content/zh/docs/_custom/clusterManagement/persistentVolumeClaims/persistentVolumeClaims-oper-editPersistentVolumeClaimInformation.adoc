@@ -1,5 +1,5 @@
 // :ks_include_id: 760d701b023046d9889a96949df4735e
-. 在需要操作的持久卷声明右侧点击image:/images/ks-qkcp/zh/icons/more.svg[more,18,18]，然后在下拉列表中选择**编辑信息**。
+. 在需要操作的持久卷声明右侧点击image:images/ks-qkcp/zh/icons/more.svg[more,18,18]，然后在下拉列表中选择**编辑信息**。
 
 . 在**编辑信息**对话框，设置持久卷声明的别名和描述，然后点击**确定**。
 +

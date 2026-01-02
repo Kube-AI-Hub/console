@@ -64,7 +64,7 @@ Set the ports for the service exposing the microservice gateway.
 |The port number of the service.
 |===
 
-Click **Add** to set multiple service ports. Click image:/images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18] on the right side of the created service port to delete it.
+Click **Add** to set multiple service ports. Click image:images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18] on the right side of the created service port to delete it.
 --
 
 * Image Pull Policy

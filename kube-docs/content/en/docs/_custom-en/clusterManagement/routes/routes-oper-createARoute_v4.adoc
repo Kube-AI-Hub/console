@@ -33,7 +33,7 @@ include::routes-para-routingRules.adoc[]
 --
 * Click **Add** to set multiple labels or annotations.
 
-* Click image:/images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18] on the right side of a created label or annotation to delete it.
+* Click image:images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18] on the right side of a created label or annotation to delete it.
 
 include::routes-note-annotations.adoc[]
 

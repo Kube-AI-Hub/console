@@ -58,7 +58,7 @@ include::../persistentVolumes/persistentVolumes-para-provisioner.adoc[]
 --
 // include::../nodes/nodes-para-podList.adoc[]
 
-Click image:/images/ks-qkcp/zh/icons/chevron-down.svg["chevron-down",18,18] to view the information of the containers running in the pod.
+Click image:images/ks-qkcp/zh/icons/chevron-down.svg["chevron-down",18,18] to view the information of the containers running in the pod.
 --
 
 . On the persistent volume claim details page, click the **Metadata** tab on the right to view the labels and annotations of the persistent volume claim.

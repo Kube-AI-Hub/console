@@ -2,4 +2,4 @@
 
 . On the service details page, click the **Access Information** tab on the right to view the service's access information.
 
-. Click image:/images/ks-qkcp/zh/icons/more.svg[more,18,18] on the right side of the page, then select **Edit External Access** from the dropdown list.
+. Click image:images/ks-qkcp/zh/icons/more.svg[more,18,18] on the right side of the page, then select **Edit External Access** from the dropdown list.

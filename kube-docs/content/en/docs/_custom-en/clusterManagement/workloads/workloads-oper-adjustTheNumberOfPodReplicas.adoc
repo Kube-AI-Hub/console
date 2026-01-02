@@ -1,5 +1,5 @@
 // :ks_include_id: d02b5f4b6a354bdfbba1d532b30bda69
-. On the **Resource Status** tab of the workload details page, click image:/images/ks-qkcp/zh/icons/add-dark.svg[add-dark,18,18] or image:/images/ks-qkcp/zh/icons/substract-dark.svg[subtract-dark,18,18] to adjust the replica count. Then, in the **Adjust Replicas** dialog at the top right corner, click **OK**.
+. On the **Resource Status** tab of the workload details page, click image:images/ks-qkcp/zh/icons/add-dark.svg[add-dark,18,18] or image:images/ks-qkcp/zh/icons/substract-dark.svg[subtract-dark,18,18] to adjust the replica count. Then, in the **Adjust Replicas** dialog at the top right corner, click **OK**.
 +
 --
 //warning

@@ -1,5 +1,5 @@
 // :ks_include_id: f0f32c026c8a44b7ac18acbadf465ea5
-. Click image:/images/ks-qkcp/zh/icons/more.svg[more,18,18] on the right side of the service you want to operate, then select **Edit Settings** from the dropdown list.
+. Click image:images/ks-qkcp/zh/icons/more.svg[more,18,18] on the right side of the service you want to operate, then select **Edit Settings** from the dropdown list.
 
 . On the **Service Settings** tab, modify the service settings.
 

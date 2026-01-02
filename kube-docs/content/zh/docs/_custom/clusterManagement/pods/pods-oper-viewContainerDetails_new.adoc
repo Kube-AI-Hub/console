@@ -62,9 +62,9 @@ include::../workloads/workloads-para-containerStatus.adoc[]
 // . 在容器详情页面右侧点击**容器日志**页签查看容器的标准输出日志。
 // +
 // --
-// * 在右上角点击image:/images/ks-qkcp/zh/icons/start-dark.svg[start-dark,18,18]/image:/images/ks-qkcp/zh/icons/stop-dark-white.svg[stop-dark-white,18,18]可开启/停止实时数据刷新。
+// * 在右上角点击image:images/ks-qkcp/zh/icons/start-dark.svg[start-dark,18,18]/image:images/ks-qkcp/zh/icons/stop-dark-white.svg[stop-dark-white,18,18]可开启/停止实时数据刷新。
 
-// * 在右上角点击image:/images/ks-qkcp/zh/icons/refresh-dark-white.svg[refresh-dark-white,18,18]可手动刷新数据。
+// * 在右上角点击image:images/ks-qkcp/zh/icons/refresh-dark-white.svg[refresh-dark-white,18,18]可手动刷新数据。
 
-// * 在右上角点击image:/images/ks-qkcp/zh/icons/download-dark-white.svg[download-dark-white,18,18]可下载日志文件。
+// * 在右上角点击image:images/ks-qkcp/zh/icons/download-dark-white.svg[download-dark-white,18,18]可下载日志文件。
 // --

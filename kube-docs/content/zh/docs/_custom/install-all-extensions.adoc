@@ -18,7 +18,7 @@
 
 . 在**扩展组件安装**页签，修改扩展组件的配置后（可选），点击**开始安装**，开始安装扩展组件。
 +
-image:/images/ks-qkcp/zh/v4.0/install-extensions.png[,100%]
+image:images/ks-qkcp/zh/v4.0/install-extensions.png[,100%]
 
 . 待安装完成后，点击**下一步**，配置集群 Agent。
 

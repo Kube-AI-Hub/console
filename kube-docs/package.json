@@ -6,7 +6,11 @@
   "scripts": {
     "build": "hugo build --baseURL ${HUGO_BASEURL:-/kube-docs/} && npx pagefind --site public",
     "dev": "rm -rf public/ resources/ && hugo --baseURL 'http://localhost:1313/kube-docs/' && npx pagefind --site public && cp -r public/pagefind static/ && hugo server -D",
-    "preview": "hugo && npx pagefind --site public --serve"
+    "preview": "hugo && npx pagefind --site public --serve",
+    "pdf:build": "yarn pdf:build:zh && yarn pdf:build:en",
+    "pdf:build:zh": "bash scripts/generate-pdf.sh zh",
+    "pdf:build:en": "bash scripts/generate-pdf.sh en",
+    "pdf:clean": "rm -rf dist/pdf"
   },
   "devDependencies": {
     "pagefind": "^1.1.0"

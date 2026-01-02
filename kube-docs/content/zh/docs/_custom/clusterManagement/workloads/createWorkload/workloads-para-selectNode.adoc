@@ -7,4 +7,4 @@
 
 * 点击**添加节点选择器**可设置多个标签，容器组副本将被调度到具有所有指定标签的节点上。
 
-* 在已创建的标签右侧点击image:/images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18]可删除标签。
+* 在已创建的标签右侧点击image:images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18]可删除标签。

@@ -1,5 +1,5 @@
 // :ks_include_id: 9f1f9315fbc0466396a168bfa897683f
-. 在需要操作的应用路由右侧点击image:/images/ks-qkcp/zh/icons/more.svg[more,18,18]，然后在下拉列表中选择**编辑信息**。
+. 在需要操作的应用路由右侧点击image:images/ks-qkcp/zh/icons/more.svg[more,18,18]，然后在下拉列表中选择**编辑信息**。
 
 . 在**编辑信息**对话框，设置应用路由的别名和描述，然后点击**确定**。
 +

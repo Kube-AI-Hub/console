@@ -59,7 +59,7 @@ include::../persistentVolumes/persistentVolumes-para-provisioner.adoc[]
 --
 // include::../nodes/nodes-para-podList.adoc[]
 
-点击image:/images/ks-qkcp/zh/icons/chevron-down.svg["chevron-down",18,18]可查看容器组中运行的容器的信息。
+点击image:images/ks-qkcp/zh/icons/chevron-down.svg["chevron-down",18,18]可查看容器组中运行的容器的信息。
 --
 
 . 在持久卷声明详情页面右侧点击**元数据**页签查看持久卷声明的标签和注解。

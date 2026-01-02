@@ -2,5 +2,5 @@
 * Pod Settings > Number of Pod Replicas
 +
 --
-Click image:/images/ks-qkcp/zh/icons/add-light.svg[add,18,18] or image:/images/ks-qkcp/zh/icons/substract-light.svg[substract,18,18] to increase/decrease the number of pod replicas. The minimum value is **1**.
+Click image:images/ks-qkcp/zh/icons/add-light.svg[add,18,18] or image:images/ks-qkcp/zh/icons/substract-light.svg[substract,18,18] to increase/decrease the number of pod replicas. The minimum value is **1**.
 --

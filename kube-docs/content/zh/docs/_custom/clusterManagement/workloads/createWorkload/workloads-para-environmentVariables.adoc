@@ -5,7 +5,7 @@
 
 * 点击**批量引用**可使用配置字典或保密字典中的数据创建环境变量。配置字典或密保字典必须与容器属于同一个项目才能被容器引用。容器创建后环境变量的值不会随配置字典或保密字典设置的变更而动态变化。
 
-* 在已创建的环境变量右侧点击image:/images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18]可删除环境变量。
+* 在已创建的环境变量右侧点击image:images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18]可删除环境变量。
 
 [%header,cols="1a,4a"]
 |===

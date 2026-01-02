@@ -56,7 +56,7 @@ include::pods-para-qosTypes.adoc[]
 
 include::../workloads/workloads-para-containerStatus.adoc[]
 
-在容器名称右侧点击image:/images/ks-qkcp/zh/icons/log.svg[log,18,18]可查看容器日志。将光标悬停在**探针**可查看容器上配置的探针。
+在容器名称右侧点击image:images/ks-qkcp/zh/icons/log.svg[log,18,18]可查看容器日志。将光标悬停在**探针**可查看容器上配置的探针。
 
 |卷
 |显示容器组中所有卷的名称、已挂载卷的容器以及卷在容器上的挂载路径。
@@ -74,7 +74,7 @@ include::../workloads/workloads-para-containerStatus.adoc[]
 |显示接收容器组的节点的名称。
 
 |状态信息
-|显示容器组是否成功完成所有启动步骤。如果显示image:/images/ks-qkcp/zh/icons/success.svg[success,18,18]则表明容器组已完成启动步骤，如果显示image:/images/ks-qkcp/zh/icons/error.svg[error,18,18]则表明尚未完成启动步骤。
+|显示容器组是否成功完成所有启动步骤。如果显示image:images/ks-qkcp/zh/icons/success.svg[success,18,18]则表明容器组已完成启动步骤，如果显示image:images/ks-qkcp/zh/icons/error.svg[error,18,18]则表明尚未完成启动步骤。
 
 * **运行中**：容器组当前的状态是否为**运行中**。
 

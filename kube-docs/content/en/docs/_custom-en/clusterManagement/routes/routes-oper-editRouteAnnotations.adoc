@@ -1,12 +1,12 @@
 // :ks_include_id: 2ead4c416e934d44b2a8a404251bdfe8
-. Click image:/images/ks-qkcp/zh/icons/more.svg[more,18,18] on the right side of the ingress you want to edit, then select **Edit Annotations** from the dropdown list.
+. Click image:images/ks-qkcp/zh/icons/more.svg[more,18,18] on the right side of the ingress you want to edit, then select **Edit Annotations** from the dropdown list.
 
 . In the **Edit Annotations** dialog, set the annotation key-value pairs, then click **OK**.
 +
 --
 * Click **Add** to set multiple annotations.
 
-* Click image:/images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18] on the right side of a created annotation to delete it.
+* Click image:images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18] on the right side of a created annotation to delete it.
 
 include::routes-note-annotations.adoc[]
 --

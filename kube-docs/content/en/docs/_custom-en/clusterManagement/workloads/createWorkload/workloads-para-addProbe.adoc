@@ -3,9 +3,9 @@ Create probes for liveness, readiness, or startup checks on the container.
 
 * Click **Add Probe** to create a probe.
 
-* Hover over the created probe, then click image:/images/ks-qkcp/zh/icons/pen-light.svg[pen,18,18] on the right to edit the probe settings.
+* Hover over the created probe, then click image:images/ks-qkcp/zh/icons/pen-light.svg[pen,18,18] on the right to edit the probe settings.
 
-* Hover over the created probe, then click image:/images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18] on the right to delete the probe.
+* Hover over the created probe, then click image:images/ks-qkcp/zh/icons/trash-light.svg[trash-light,18,18] on the right to delete the probe.
 
 [%header,cols="1a,4a"]
 |===

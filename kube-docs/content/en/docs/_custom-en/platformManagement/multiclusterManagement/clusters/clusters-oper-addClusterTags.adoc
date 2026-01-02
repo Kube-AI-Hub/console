@@ -1,5 +1,5 @@
 // :ks_include_id: 8caf86e9401c464db99437a414d7b638
-. Click the image:/images/ks-qkcp/zh/icons/more.svg[more,18,18] icon on the right side of the cluster you want to add tags, then select **Add Tags** from the dropdown list.
+. Click the image:images/ks-qkcp/zh/icons/more.svg[more,18,18] icon on the right side of the cluster you want to add tags, then select **Add Tags** from the dropdown list.
 
 . In the **Add Tags** dialog, choose the key and value for the tag, click **Add**, and then click **OK**.
 +

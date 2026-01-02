@@ -26,13 +26,13 @@
 . 在自定义监控面板编辑页面，根据需要设置监控图和以文本显示的监控指标。
 +
 ====
-* 在页面左侧点击image:/images/ks-qkcp/zh/icons/add-dark.svg[add-dark,18,18]，设置指标参数，然后点击image:/images/ks-qkcp/zh/icons/check-dark.svg[check-dark,18,18]可创建以文本显示的监控指标。
+* 在页面左侧点击image:images/ks-qkcp/zh/icons/add-dark.svg[add-dark,18,18]，设置指标参数，然后点击image:images/ks-qkcp/zh/icons/check-dark.svg[check-dark,18,18]可创建以文本显示的监控指标。
 +
 --
 include::customMonitoringDashboards-para-textMetric.adoc[]
 --
 
-* 在页面右下角点击**添加监控项**，选择**折线图**或**柱状图**，设置图表参数，然后点击image:/images/ks-qkcp/zh/icons/check-dark.svg[check-dark,18,18]可创建监控图。
+* 在页面右下角点击**添加监控项**，选择**折线图**或**柱状图**，设置图表参数，然后点击image:images/ks-qkcp/zh/icons/check-dark.svg[check-dark,18,18]可创建监控图。
 +
 --
 include::customMonitoringDashboards-para-monitoringChart.adoc[]

@@ -26,13 +26,13 @@
 . On the custom monitoring dashboard editing page, set the monitoring charts and text-displayed monitoring metrics as needed.
 +
 ====
-* Click image:/images/ks-qkcp/zh/icons/add-dark.svg[add-dark,18,18] on the left side of the page, set the metric parameters, then click image:/images/ks-qkcp/zh/icons/check-dark.svg[check-dark,18,18] to create text-displayed monitoring metrics.
+* Click image:images/ks-qkcp/zh/icons/add-dark.svg[add-dark,18,18] on the left side of the page, set the metric parameters, then click image:images/ks-qkcp/zh/icons/check-dark.svg[check-dark,18,18] to create text-displayed monitoring metrics.
 +
 --
 include::customMonitoringDashboards-para-textMetric.adoc[]
 --
 
-* Click **Add Monitoring Item** in the lower right corner of the page, select **Line Chart** or **Bar Chart**, set the chart parameters, then click image:/images/ks-qkcp/zh/icons/check-dark.svg[check-dark,18,18] to create monitoring charts.
+* Click **Add Monitoring Item** in the lower right corner of the page, select **Line Chart** or **Bar Chart**, set the chart parameters, then click image:images/ks-qkcp/zh/icons/check-dark.svg[check-dark,18,18] to create monitoring charts.
 +
 --
 include::customMonitoringDashboards-para-monitoringChart.adoc[]
