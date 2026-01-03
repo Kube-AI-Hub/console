@@ -32,6 +32,7 @@ module.exports = {
   MEMORY: '内存',
   TOTAL: '总计',
   USED: '已使用',
+  ALLOCATED: '已分配',
   // Tools
   TOOLS: '工具',
   KUBECTL_DESC: '命令行工具，用于控制当前集群。',

@@ -32,6 +32,7 @@ module.exports = {
   MEMORY: 'Memory',
   TOTAL: 'Total',
   USED: 'Used',
+  ALLOCATED: 'Allocated',
   // Tools
   TOOLS: 'Tools',
   KUBECTL_DESC: 'Command line tool used to control the current cluster.',

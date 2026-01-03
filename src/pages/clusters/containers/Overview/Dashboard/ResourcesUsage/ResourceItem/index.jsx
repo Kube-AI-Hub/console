@@ -33,44 +33,33 @@ export default function ResourceItem(props) {
     ? getValueByUnit(props.allocated, unit)
     : null
 
+  const formatValue = (value) => {
+    if (!unit) return value
+    return value !== 1 && unit === 'core' ? `${value} cores` : `${value} ${unit}`
+  }
+
   return (
     <div className={styles.item}>
       <Text
         title={`${Math.round((used * 100) / total)}%`}
         description={title}
       />
+      <div className={styles.usedAllocated}>
+        <div className={styles.usedRow}>
+          <span className={styles.usedLabel}>{t('USED')}:</span>
+          <span className={styles.usedValue}>{formatValue(used)}</span>
+        </div>
+        {allocated !== null && (
+          <div className={styles.allocatedRow}>
+            <span className={styles.allocatedLabel}>{t('ALLOCATED')}:</span>
+            <span className={styles.allocatedValue}>{formatValue(allocated)}</span>
+          </div>
+        )}
+      </div>
       <Text
-        title={
-          unit
-            ? used !== 1 && unit === 'core'
-              ? `${used} cores`
-              : `${used} ${unit}`
-            : used
-        }
-        description={t('USED')}
-      />
-      <Text
-        title={
-          unit
-            ? total !== 1 && unit === 'core'
-              ? `${total} cores`
-              : `${total} ${unit}`
-            : total
-        }
+        title={formatValue(total)}
         description={t('TOTAL')}
       />
-      {allocated !== null && (
-        <Text
-          title={
-            unit
-              ? allocated !== 1 && unit === 'core'
-                ? `${allocated} cores`
-                : `${allocated} ${unit}`
-              : allocated
-          }
-          description={t('AllOCATED')}
-        />
-      )}
     </div>
   )
 }

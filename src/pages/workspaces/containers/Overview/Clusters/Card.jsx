@@ -41,8 +41,10 @@ import * as styles from './index.scss'
 const MetricTypes = {
   cpu_usage: 'cluster_cpu_usage',
   cpu_total: 'cluster_cpu_total',
+  cpu_allocated: 'cluster_cpu_allocated',
   memory_usage: 'cluster_memory_usage_wo_cache',
   memory_total: 'cluster_memory_total',
+  memory_allocated: 'cluster_memory_allocated',
   disk_size_usage: 'cluster_disk_size_usage',
   disk_size_capacity: 'cluster_disk_size_capacity',
   pod_count: 'cluster_pod_running_count',
@@ -87,12 +89,14 @@ class Card extends Component {
         unitType: 'cpu',
         used: this.getValue(data[MetricTypes.cpu_usage]),
         total: this.getValue(data[MetricTypes.cpu_total]),
+        allocated: this.getValue(data[MetricTypes.cpu_allocated]),
       },
       {
         name: 'MEMORY',
         unitType: 'memory',
         used: this.getValue(data[MetricTypes.memory_usage]),
         total: this.getValue(data[MetricTypes.memory_total]),
+        allocated: this.getValue(data[MetricTypes.memory_allocated]),
       },
       {
         name: 'POD',
