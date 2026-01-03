@@ -5,22 +5,3 @@
   background-color: variables.$lightest;
   border-bottom: 1px solid variables.$border-color;
 }
-
-.chartWrapper {
-  position: relative;
-  background-color: variables.$dark-color07;
-  border-radius: variables.$border-radius;
-}
-
-.chart {
-  height: 120px;
-}
-
-.title {
-  position: absolute;
-  left: 12px;
-  top: 6px;
-  color: variables.$white;
-  font-weight: variables.$font-bold;
-  line-height: 20px;
-}

@@ -21,7 +21,7 @@ import React from 'react'
 import { getLocalTime } from 'utils'
 import { getAreaChartOps } from 'utils/monitoring'
 
-import SimpleArea from '../SimpleArea'
+import { SimpleArea } from 'components/Charts'
 
 import * as styles from './index.scss'
 
@@ -41,17 +41,12 @@ export default class PhysicalResourceItem extends React.Component {
 
     return (
       <div className={styles.wrapper}>
-        <div className={styles.chartWrapper}>
-          <div className={styles.title}>{title}</div>
-          <div className={styles.chart}>
-            <SimpleArea
-              width="100%"
-              height={120}
-              bgColor="transparent"
-              {...config}
-            />
-          </div>
-        </div>
+        <SimpleArea
+          width="100%"
+          height={200}
+          theme="light"
+          {...config}
+        />
       </div>
     )
   }
