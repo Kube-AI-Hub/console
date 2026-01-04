@@ -44,8 +44,8 @@ const UnitTypes = {
     units: ['core', 'm'],
   },
   gpu_memory: {
-    conditions: [1000 ** 4, 1000 ** 3, 1000 ** 2, 1000, 0],
-    units: ['TB', 'GB', 'MB', 'KB', 'Bytes'],
+    conditions: [1024 ** 4, 1024 ** 3, 1024 ** 2, 1024, 0],
+    units: ['Ti', 'Gi', 'Mi', 'Ki', 'Bytes'],
   },
   cpu: {
     conditions: [0.1, 0],
