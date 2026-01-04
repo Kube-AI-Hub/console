@@ -108,6 +108,17 @@ export default class NodeDetail extends React.Component {
     ]
   }
 
+  getXpuTypeTooltip = () => {
+    return (
+      <div>
+        <div>{t('XPU_TYPE_TIP_SOURCE')}</div>
+        <div>{t('XPU_TYPE_TIP_FORMAT')}</div>
+        <div>{t('XPU_TYPE_TIP_EXAMPLES')}</div>
+        <div>{t('XPU_TYPE_TIP_DEFAULT')}</div>
+      </div>
+    )
+  }
+
   getAttrs = () => {
     const detail = toJS(this.store.detail)
 
@@ -124,6 +135,7 @@ export default class NodeDetail extends React.Component {
     )
     const address = get(detail, 'status.addresses[0].address', '-')
     const nodeInfo = detail.nodeInfo || {}
+    const xpu = get(detail, 'labels.xpu') || 'CPU'
 
     return [
       {
@@ -140,6 +152,11 @@ export default class NodeDetail extends React.Component {
           getNodeRoles(detail.labels).indexOf('master') === -1
             ? t('WORKER')
             : t('CONTROL_PLANE'),
+      },
+      {
+        name: t('XPU_TYPE'),
+        value: xpu,
+        tooltips: this.getXpuTypeTooltip(),
       },
       {
         name: t('OS_VERSION'),
