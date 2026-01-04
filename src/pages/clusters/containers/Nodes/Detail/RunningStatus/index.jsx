@@ -228,6 +228,10 @@ class RunningStatus extends React.Component {
     return (
       <Panel className={styles.allocated} title={t('ALLOCATED_RESOURCES')}>
         <Text
+          title={this.getLastValue('node_gpu_allocated', t('GPU_CARD_UNIT'), 'gpu')}
+          description={t('GPU_REQUEST_SCAP')}
+        />
+        <Text
           title={
             cpuFormat(
               get(detail, 'annotations["node.kubesphere.io/cpu-requests"]')
@@ -310,10 +314,6 @@ class RunningStatus extends React.Component {
             ),
           })}
           description={t('MEMORY_LIMIT_SCAP')}
-        />
-        <Text
-          title={this.getLastValue('node_gpu_allocated', t('GPU_CARD_UNIT'), 'gpu')}
-          description={t('GPU_REQUEST_SCAP')}
         />
       </Panel>
     )
