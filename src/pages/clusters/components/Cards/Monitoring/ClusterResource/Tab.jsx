@@ -31,6 +31,12 @@ const TabItem = ({ active, name, used, total, unit, unitType }) => {
   const _used = getValueByUnit(used, _unit)
   const _total = getValueByUnit(total, _unit)
 
+  const formatUnit = () => {
+    if (unitType === 'gpu') return t('GPU_CARD_UNIT')
+    if (unitType === 'cpu' || _unit === 'core') return t('CORE_PL')
+    return t(_unit)
+  }
+
   return (
     <div
       className={classnames(styles.tab, {
@@ -50,7 +56,7 @@ const TabItem = ({ active, name, used, total, unit, unitType }) => {
       />
       <div className={styles.info}>
         <div className={styles.title}>
-          {nameText} {t(_unit)}
+          {nameText} {formatUnit()}
         </div>
         <p title={`${_used}/${_total}`}>
           {_used}
