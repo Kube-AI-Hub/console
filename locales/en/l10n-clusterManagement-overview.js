@@ -52,6 +52,8 @@ module.exports = {
   SCHEDULING_FAILURE: 'Scheduling failure',
   // Nodes
   VIEW_MORE: 'View More',
+  NODE_GPU_UTILISATION: 'GPU usage',
+  NODE_GPU_MEMORY_UTILISATION: 'GPU memory usage',
   NODE_CPU_UTILISATION: 'CPU usage',
   NODE_LOAD1: 'Average CPU load (1 min)',
   NODE_MEMORY_UTILISATION: 'Memory usage',

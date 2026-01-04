@@ -51,6 +51,8 @@ module.exports = {
   SCHEDULING_FAILURE: '调度失败次数',
   // Nodes
   VIEW_MORE: '查看更多',
+  NODE_GPU_UTILISATION: 'GPU 用量',
+  NODE_GPU_MEMORY_UTILISATION: 'GPU 显存用量',
   NODE_CPU_UTILISATION: 'CPU 用量',
   NODE_LOAD1: 'CPU 平均负载（1 分钟）',
   NODE_MEMORY_UTILISATION: '内存用量',
