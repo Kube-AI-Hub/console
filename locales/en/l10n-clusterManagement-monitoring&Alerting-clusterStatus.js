@@ -121,6 +121,8 @@ module.exports = {
   SCHEDULING_LATENCY: 'Scheduling Latency',
   // Resource Usage Ranking
   RESOURCE_USAGE_RANKING: 'Resource Usage Ranking',
+  SORT_BY_NODE_GPU_UTILISATION: 'Sort by GPU usage (%)',
+  SORT_BY_NODE_GPU_MEMORY_UTILISATION: 'Sort by GPU memory usage (%)',
   SORT_BY_NODE_CPU_UTILISATION: 'Sort by CPU usage (%)',
   SORT_BY_NODE_MEMORY_UTILISATION: 'Sort by memory usage (%)',
   SORT_BY_NODE_DISK_SIZE_UTILISATION: 'Sort by disk usage (%)',

@@ -103,13 +103,13 @@ class NodeUsageRank extends React.Component {
       sort_metric: 'node_gpu_utilisation',
       title: t('GPU_USAGE'),
       render: node => {
-        const unit = getSuitableUnit(node.node_gpu_total, 'gpu')
+        const gpuUsage = node.node_gpu_usage ? Number(node.node_gpu_usage).toFixed(2) : '-'
         return (
           <div>
             <h3>{this.toPercentage(node.node_gpu_utilisation)}</h3>
             <div>
-              {getValueByUnit(node.node_gpu_usage, unit) || '-'}/{''}
-              {getValueByUnit(node.node_gpu_total, unit) || '-'} {unit}
+              {gpuUsage}/{''}
+              {node.node_gpu_total || '-'} {t('GPU_CARD_UNIT')}
             </div>
           </div>
         )
@@ -127,7 +127,7 @@ class NodeUsageRank extends React.Component {
             <h3>{this.toPercentage(node.node_cpu_utilisation)}</h3>
             <div>
               {getValueByUnit(node.node_cpu_usage, unit) || '-'}/{''}
-              {getValueByUnit(node.node_cpu_total, unit) || '-'} {unit}
+              {getValueByUnit(node.node_cpu_total, unit) || '-'} {t('CORE_PL')}
             </div>
           </div>
         )
