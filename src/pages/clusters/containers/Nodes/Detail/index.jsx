@@ -28,7 +28,8 @@ import { trigger } from 'utils/action'
 import NodeStore from 'stores/node'
 
 import DetailPage from 'clusters/containers/Base/Detail'
-import { Status } from 'components/Base'
+import { Status, Modal } from 'components/Base'
+import KubeCtlModal from 'components/Modals/KubeCtl'
 
 import routes from './routes'
 
@@ -70,6 +71,16 @@ export default class NodeDetail extends React.Component {
         text: unschedulable ? t('UNCORDON') : t('CORDON'),
         action: 'edit',
         onClick: this.handleCordon,
+      },
+      {
+        key: 'terminal',
+        icon: 'terminal',
+        text: t('OPEN_TERMINAL'),
+        action: 'edit',
+        show: () =>
+          this.store.detail.importStatus === 'success' &&
+          this.getReady(this.store.detail),
+        onClick: this.handleOpenTerminal,
       },
       {
         key: 'eidtLabel',
@@ -163,6 +174,30 @@ export default class NodeDetail extends React.Component {
         value: getLocalTime(detail.createTime).format('YYYY-MM-DD HH:mm:ss'),
       },
     ]
+  }
+
+  getReady = record => {
+    const conditions = record.conditions || []
+
+    return conditions.some(
+      condition => condition.type === 'Ready' && condition.status === 'True'
+    )
+  }
+
+  handleOpenTerminal = () => {
+    const detail = toJS(this.store.detail)
+    const { cluster } = this.props.match.params
+
+    const modal = Modal.open({
+      onOk: () => {
+        Modal.close(modal)
+      },
+      modal: KubeCtlModal,
+      cluster,
+      title: detail.name,
+      nodename: detail.name,
+      isEdgeNode: true,
+    })
   }
 
   handleCordon = () => {
