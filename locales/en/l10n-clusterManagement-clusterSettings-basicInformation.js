@@ -21,6 +21,8 @@ module.exports = {
   // Cluster Information
   NODES: 'Nodes',
   DISK: 'Disk',
+  TOTAL_GPU: 'GPU',
+  TOTAL_VGPU: 'vGPU',
   CLUSTER_INFORMATION: 'Cluster Information',
   // Cluster Information > Edit Information
   CLUSTER_NAME: 'Cluster Name',

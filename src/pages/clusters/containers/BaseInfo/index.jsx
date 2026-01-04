@@ -84,6 +84,15 @@ class Overview extends React.Component {
     const unit = getSuitableUnit(value, unitType) || unit
     const result = getValueByUnit(value, unit)
 
+    // GPU 单位显示为"卡"
+    if (unitType === 'gpu') {
+      return `${result} ${t('GPU_CARD_UNIT')}`
+    }
+    // CPU 单位显示为"核"
+    if (unitType === 'cpu') {
+      return `${result} ${t('CORE_PL')}`
+    }
+
     return unit ? `${result} ${unit}` : result
   }
 
