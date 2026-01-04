@@ -20,8 +20,8 @@ import { observable } from 'mobx'
 import Store from './index'
 
 const sort_metric_options = [
-  'node_gpu_utilisation',
   'node_gpu_memory_utilisation',
+  'node_gpu_utilisation',
   'node_cpu_utilisation',
   'node_load1',
   'node_memory_utilisation',
