@@ -19,7 +19,7 @@ module.exports = {
   // Banner
   CLUSTER_NODE_PL: 'Küme Düğümleri',
   CLUSTER_NODE: 'Küme Düğümü',
-  CLUSTER_NODE_DESC: 'Küme düğümleri, KubeSphere kümesinin temel sunucularıdır. Bu sayfada küme düğümlerini yönetebilirsiniz.',
+  CLUSTER_NODE_DESC: 'Küme düğümleri, kümenin temel sunucularıdır. Bu sayfada küme düğümlerini yönetebilirsiniz.',
   NODE_TYPES_Q: 'Küme düğümlerinin türleri nelerdir?',
   NODE_TYPES_A: 'Düğümler, kontrol düzlemi düğümleri ve çalışan düğümleri olarak sınıflandırılır.',
   WHAT_IS_NODE_TAINTS_Q: 'Düğüm Kusurları nelerdir?',

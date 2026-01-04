@@ -19,7 +19,7 @@ module.exports = {
   // Banner
   CLUSTER_NODE_PL: 'Cluster Nodes',
   CLUSTER_NODE: 'Cluster Node',
-  CLUSTER_NODE_DESC: 'Cluster Nodes sind Basisserver des KubeSphere-Clusters. Auf dieser Seite können Sie Cluster Nodes verwalten.',
+  CLUSTER_NODE_DESC: 'Cluster Nodes sind Basisserver des Clusters. Auf dieser Seite können Sie Cluster Nodes verwalten.',
   NODE_TYPES_Q: 'Was sind die Arten von Cluster Nodes?',
   NODE_TYPES_A: 'Nodes werden in Steuer Nodes und Arbeiter Nodes eingeteilt.',
   WHAT_IS_NODE_TAINTS_Q: 'What are node taints?',

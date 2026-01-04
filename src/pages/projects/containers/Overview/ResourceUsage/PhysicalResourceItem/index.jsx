@@ -41,12 +41,12 @@ export default class PhysicalResourceItem extends React.Component {
 
     return (
       <div className={styles.wrapper}>
-        <SimpleArea
-          width="100%"
+            <SimpleArea
+              width="100%"
           height={200}
           theme="light"
-          {...config}
-        />
+              {...config}
+            />
       </div>
     )
   }

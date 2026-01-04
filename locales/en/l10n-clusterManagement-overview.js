@@ -29,6 +29,10 @@ module.exports = {
   CLUSTER_BASE_INFO_DESC: 'Basic information provides an overview of the cluster. You can view and edit cluster information.',
   // System Components
   // Resource Usage
+  GPU_MEMORY: 'GPU Memory',
+  GPU_MEMORY_USAGE: 'GPU Memory Usage',
+  GPU_ALLOCATED: 'GPU Allocated',
+  GPU_TOTAL: 'Total GPUs',
   MEMORY: 'Memory',
   TOTAL: 'Total',
   USED: 'Used',

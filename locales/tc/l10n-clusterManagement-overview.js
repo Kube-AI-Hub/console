@@ -28,6 +28,10 @@ module.exports = {
   CLUSTER_BASE_INFO_DESC: '基本資訊是目前集群的資訊概覽，您可以查看和編輯集群的基本資訊。',
   // System Components
   // Resource Usage
+  GPU_MEMORY: 'GPU 顯存',
+  GPU_MEMORY_USAGE: 'GPU 顯存用量',
+  GPU_ALLOCATED: 'GPU 已分配',
+  GPU_TOTAL: 'GPU 總數',
   MEMORY: '記憶體',
   TOTAL: '總計',
   USED: '已使用',

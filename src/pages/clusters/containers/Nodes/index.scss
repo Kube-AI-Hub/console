@@ -39,3 +39,20 @@
     fill: #ea4641;
   }
 }
+
+.secondary {
+  color: variables.$dark-color06;
+  font-weight: normal;
+  font-size: 12px;
+  margin-left: 4px;
+  color: variables.$dark-color01;
+}
+
+.mode_title {
+  display: flex;
+  align-items: center;
+
+  .question {
+    margin-left: 6px;
+  }
+}

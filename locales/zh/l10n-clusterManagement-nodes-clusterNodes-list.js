@@ -19,7 +19,7 @@ module.exports = {
   // Banner
   CLUSTER_NODE_PL: '集群节点',
   CLUSTER_NODE: '集群节点',
-  CLUSTER_NODE_DESC: '集群节点是 KubeSphere 集群中的基础服务器，您可以在此页面对集群节点进行管理。',
+  CLUSTER_NODE_DESC: '集群节点是集群中的基础服务器，您可以在此页面对集群节点进行管理。',
   NODE_TYPES_Q: '集群节点有哪些类型？',
   NODE_TYPES_A: '集群节点分为控制平面节点和工作节点。',
   WHAT_IS_NODE_TAINTS_Q: '什么是节点污点？',
@@ -75,6 +75,13 @@ module.exports = {
   YOU_CAN_TRY_TO: '您可以尝试',
   REFRESH_DATA: '刷新数据',
   CLEAR_SEARCH_CONDITIONS: '清空搜索条件。',
+  GPU_CARD_UNIT: '卡',
+  ALLOCATED_SCAP: '已分配',
+  XPU_TYPE: '算力卡类型',
+  XPU_TYPE_TIP_SOURCE: '算力卡类型从节点的 `labels.xpu` 字段获取。',
+  XPU_TYPE_TIP_FORMAT: '格式：xpu = xpu-vendor + "-" + xpu-model',
+  XPU_TYPE_TIP_EXAMPLES: '示例：nvidia (RTX_3090, A100, A10, H100, L40S, L40), metax (MXN260), ascend (Ascend910B, Ascend910)',
+  XPU_TYPE_TIP_DEFAULT: '如果该字段不存在，则显示为 CPU。',
   // List > Edit Taints
   DUPLICATE_KEYS: '该键已经存在，请输入其他键。',
   EMPTY_KEY: '请输入一个键。'

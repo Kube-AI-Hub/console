@@ -35,6 +35,14 @@ export default function ResourceItem(props) {
 
   const formatValue = (value) => {
     if (!unit) return value
+    // GPU 单位显示为"卡"
+    if (props.unitType === 'gpu') {
+      return `${value} ${t('GPU_CARD_UNIT')}`
+    }
+    // CPU 单位显示为"核"
+    if (unit === 'core') {
+      return `${value} ${t('CORE_PL')}`
+    }
     return value !== 1 && unit === 'core' ? `${value} cores` : `${value} ${unit}`
   }
 

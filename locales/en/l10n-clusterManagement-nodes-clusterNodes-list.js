@@ -20,7 +20,7 @@ module.exports = {
   // Banner
   CLUSTER_NODE_PL: 'Cluster Nodes',
   CLUSTER_NODE: 'Cluster Node',
-  CLUSTER_NODE_DESC: 'Cluster nodes are basic servers of the KubeSphere cluster. You can manage cluster nodes on this page.',
+  CLUSTER_NODE_DESC: 'Cluster nodes are basic servers of the cluster. You can manage cluster nodes on this page.',
   NODE_TYPES_Q: 'What are the types of cluster nodes?',
   NODE_TYPES_A: 'Nodes are classified into control plane nodes and worker nodes.',
   WHAT_IS_NODE_TAINTS_Q: 'What are node taints?',
@@ -76,6 +76,13 @@ module.exports = {
   YOU_CAN_TRY_TO: 'You can try',
   REFRESH_DATA: 'refreshing data',
   CLEAR_SEARCH_CONDITIONS: 'clearing search conditions',
+  GPU_CARD_UNIT: 'Cards',
+  ALLOCATED_SCAP: 'Allocated',
+  XPU_TYPE: 'Compute Card Type',
+  XPU_TYPE_TIP_SOURCE: 'Compute card type is obtained from the node\'s labels.xpu field.',
+  XPU_TYPE_TIP_FORMAT: 'Format: xpu = xpu-vendor + "-" + xpu-model',
+  XPU_TYPE_TIP_EXAMPLES: 'Examples: nvidia (RTX_3090, A100, A10, H100, L40S, L40), metax (MXN260), ascend (Ascend910B, Ascend910)',
+  XPU_TYPE_TIP_DEFAULT: 'If the field does not exist, it displays as CPU.',
   // List > Edit Taints
   DUPLICATE_KEYS: 'The key already exists. Please enter another key.',
   EMPTY_KEY: 'Please enter a key.',

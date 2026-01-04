@@ -42,6 +42,7 @@ const MetricTypes = {
   gpu_used: 'node_gpu_usage',
   gpu_total: 'node_gpu_total',
   gpu_utilisation: 'node_gpu_utilisation',
+  gpu_allocated: 'node_gpu_allocated',
   gpu_memory_used: 'node_gpu_memory_usage',
   gpu_memory_total: 'node_gpu_memory_total',
   gpu_memory_utilisation: 'node_gpu_memory_utilisation',
@@ -247,6 +248,25 @@ class Nodes extends React.Component {
     </div>
   )
 
+  renderXpuTitle = () => {
+    const renderXpuTip = (
+      <div>
+        <div>{t('XPU_TYPE_TIP_SOURCE')}</div>
+        <div>{t('XPU_TYPE_TIP_FORMAT')}</div>
+        <div>{t('XPU_TYPE_TIP_EXAMPLES')}</div>
+        <div>{t('XPU_TYPE_TIP_DEFAULT')}</div>
+      </div>
+    )
+    return (
+      <div className={styles.mode_title}>
+        {t('XPU_TYPE')}
+        <Tooltip content={renderXpuTip}>
+          <Icon name="question" size={16} className={styles.question}></Icon>
+        </Tooltip>
+      </div>
+    )
+  }
+
   getStatus() {
     return NODE_STATUS.map(status => ({
       text: t(status.text),
@@ -330,14 +350,15 @@ class Nodes extends React.Component {
           const metrics = this.getRecordMetrics(record, [
             {
               type: 'gpu_used',
-              unit: 'Core',
             },
             {
               type: 'gpu_total',
-              unit: 'Core',
             },
             {
               type: 'gpu_utilisation',
+            },
+            {
+              type: 'gpu_allocated',
             },
           ])
 
@@ -346,14 +367,13 @@ class Nodes extends React.Component {
               title={
                 <div className={styles.resource}>
                   <span>{`${Math.round(metrics.gpu_utilisation * 100)}%`}</span>
-                  {metrics.cpu_utilisation >= 0.9 && (
+                  <span className={styles.secondary}>({`${metrics.gpu_used.toFixed(2)}/${metrics.gpu_total} ${t('GPU_CARD_UNIT')}`})</span>
+                  {metrics.gpu_utilisation >= 0.9 && (
                     <Icon name="exclamation" />
                   )}
                 </div>
               }
-              description={`${metrics.gpu_used}/${metrics.gpu_total} ${t(
-                'CORE_PL'
-              )}`}
+              description={`${t('ALLOCATED_SCAP')}: ${metrics.gpu_allocated} ${t('GPU_CARD_UNIT')}`}
             />
           )
         },
@@ -384,12 +404,12 @@ class Nodes extends React.Component {
                   <span>{`${Math.round(
                     metrics.gpu_memory_utilisation * 100
                   )}%`}</span>
+                  <span className={styles.secondary}>({`${metrics.gpu_memory_used}/${metrics.gpu_memory_total} GiB`})</span>
                   {metrics.gpu_memory_utilisation >= 0.9 && (
                     <Icon name="exclamation" />
                   )}
                 </div>
               }
-              description={`${metrics.gpu_memory_used}/${metrics.gpu_memory_total} GiB`}
             />
           )
         },
@@ -412,20 +432,22 @@ class Nodes extends React.Component {
               type: 'cpu_utilisation',
             },
           ])
+          const cpuRequests = cpuFormat(
+            get(record, 'annotations["node.kubesphere.io/cpu-requests"]')
+          )
 
           return (
             <Text
               title={
                 <div className={styles.resource}>
                   <span>{`${Math.round(metrics.cpu_utilisation * 100)}%`}</span>
+                  <span className={styles.secondary}>({`${metrics.cpu_used}/${metrics.cpu_total} ${t('CORE_PL')}`})</span>
                   {metrics.cpu_utilisation >= 0.9 && (
                     <Icon name="exclamation" />
                   )}
                 </div>
               }
-              description={`${metrics.cpu_used}/${metrics.cpu_total} ${t(
-                'CORE_PL'
-              )}`}
+              description={`${t('ALLOCATED_SCAP')}: ${cpuRequests} ${t('CORE_PL')}`}
             />
           )
         },
@@ -448,6 +470,10 @@ class Nodes extends React.Component {
               type: 'memory_utilisation',
             },
           ])
+          const memoryRequests = memoryFormat(
+            get(record, 'annotations["node.kubesphere.io/memory-requests"]'),
+            'Gi'
+          )
 
           return (
             <Text
@@ -456,12 +482,13 @@ class Nodes extends React.Component {
                   <span>{`${Math.round(
                     metrics.memory_utilisation * 100
                   )}%`}</span>
+                  <span className={styles.secondary}>({`${metrics.memory_used}/${metrics.memory_total} GiB`})</span>
                   {metrics.memory_utilisation >= 0.9 && (
                     <Icon name="exclamation" />
                   )}
                 </div>
               }
-              description={`${metrics.memory_used}/${metrics.memory_total} GiB`}
+              description={`${t('ALLOCATED_SCAP')}: ${memoryRequests} GiB`}
             />
           )
         },
@@ -492,16 +519,13 @@ class Nodes extends React.Component {
         },
       },
       {
-        title: t('ALLOCATED_CPU'),
-        key: 'allocated_resources_cpu',
+        title: this.renderXpuTitle(),
+        key: 'xpu',
         isHideable: true,
-        render: this.renderCPUTooltip,
-      },
-      {
-        title: t('ALLOCATED_MEMORY'),
-        key: 'allocated_resources_memory',
-        isHideable: true,
-        render: this.renderMemoryTooltip,
+        render: record => {
+          const xpu = get(record, 'labels.xpu') || 'CPU'
+          return xpu
+        },
       },
     ]
   }

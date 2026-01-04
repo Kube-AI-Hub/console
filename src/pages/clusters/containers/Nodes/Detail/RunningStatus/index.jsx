@@ -22,6 +22,7 @@ const METRIC_TYPES = [
   'node_pod_utilisation',
   'node_gpu_total',
   'node_gpu_memory_total',
+  'node_gpu_allocated',
   'node_cpu_total',
   'node_memory_total',
   'node_pod_quota',
@@ -78,9 +79,17 @@ class RunningStatus extends React.Component {
     const metricsData = this.monitoringStore.data
     const metrics = get(metricsData, `${type}.data.result`) || []
     const values = get(metrics, '[0].values', [])
+    const lastValue = values.length > 0 ? values[values.length - 1] : [0, 0]
+    const value = parseFloat(get(lastValue, '[1]', 0))
+    
+    // For GPU count, display raw value without unit conversion
+    if (unitType === 'gpu') {
+      return `${Math.round(value)} ${unit}`
+    }
+    
     const unitValue = unitType ? getSuitableUnit(values, unitType) : ''
     const unitText = unitValue ? coreUnitTS(values, unitValue) : ''
-    return `${getValueByUnit(get(values, '[0][1]', 0), unit)} ${unitText}`
+    return `${getValueByUnit(value, unit)} ${unitText}`
   }
 
   renderResourceTotalStatus() {
@@ -88,19 +97,19 @@ class RunningStatus extends React.Component {
     const tabs = [
       {
         key: 'node_gpu_total',
-        icon: 'cpu',
-        unitType: 'cpu',
-        unit: 'Core',
-        legend: ['GPU_USAGE'],
-        title: 'GPU_TOTAL_USAGE',
+        icon: 'gpu',
+        unitType: 'gpu',
+        unit: t('GPU_CARD_UNIT'),
+        legend: ['GPU_TOTAL'],
+        title: 'GPU_TOTAL',
       },
       {
         key: 'node_gpu_memory_total',
         icon: 'memory',
         unitType: 'memory',
         unit: 'Gi',
-        legend: ['GPU_MEMORY_USAGE'],
-        title: 'GPU_MEMORY_TOTAL_USAGE',
+        legend: ['GPU_MEMORY_TOTAL'],
+        title: 'GPU_MEMORY_TOTAL',
       },
       {
         key: 'node_cpu_total',
@@ -133,7 +142,7 @@ class RunningStatus extends React.Component {
     return (
       <Panel
         className={styles.resourcestotal}
-        title={t('RESOURCE_TOTAL_USAGE')}
+        title={t('RESOURCE_TOTAL')}
         loading={this.monitoringStore.isLoading}
       >
         {tabs.map(tab => (
@@ -162,7 +171,7 @@ class RunningStatus extends React.Component {
           tabs={[
             {
               key: 'gpu',
-              icon: 'cpu',
+              icon: 'gpu',
               unit: '%',
               legend: ['GPU_USAGE'],
               title: 'GPU_USAGE',
@@ -303,20 +312,8 @@ class RunningStatus extends React.Component {
           description={t('MEMORY_LIMIT_SCAP')}
         />
         <Text
-          title={`${cpuFormat(
-            get(detail, 'annotations["node.kubesphere.io/gpu-requests"]')
-          )} 核`}
+          title={this.getLastValue('node_gpu_allocated', t('GPU_CARD_UNIT'), 'gpu')}
           description={t('GPU_REQUEST_SCAP')}
-        />
-        <Text
-          title={`${memoryFormat(
-            get(
-              detail,
-              'annotations["node.kubesphere.io/gpu-memory-requests"]'
-            ),
-            'Gi'
-          )} GiB`}
-          description={t('GPU_MEMORY_REQUEST_SCAP')}
         />
       </Panel>
     )
