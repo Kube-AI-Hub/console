@@ -29,9 +29,7 @@ module.exports = {
   // System Components
   // Resource Usage
   GPU_MEMORY: 'GPU 显存',
-  GPU_MEMORY_USAGE: 'GPU 显存用量',
   GPU_ALLOCATED: 'GPU 已分配',
-  GPU_TOTAL: 'GPU 总数',
   MEMORY: '内存',
   TOTAL: '总计',
   USED: '已使用',

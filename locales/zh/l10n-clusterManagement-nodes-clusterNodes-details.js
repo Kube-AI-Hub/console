@@ -47,7 +47,6 @@ module.exports = {
   RESOURCE_TOTAL: '资源总量',
   GPU_TOTAL: 'GPU 总量',
   GPU_TOTAL_SCAP: 'GPU 总量',
-  GPU_CARD_UNIT: '卡',
   GPU_MEMORY_TOTAL: '显存总量',
   GPU_MEMORY_TOTAL_SCAP: '显存总量',
   CPU_TOTAL_USAGE: 'CPU 总量',
@@ -60,13 +59,9 @@ module.exports = {
   DISK_TOTAL_USAGE_SCAP: '磁盘总量',
   // Running Status > Resource Usage
   RESOURCE_USAGE: '资源用量',
-  GPU_USAGE: 'GPU 用量',
   GPU_USAGE_SCAP: 'GPU 用量',
   GPU_MEMORY_USAGE: 'GPU 显存用量',
   GPU_MEMORY_USAGE_SCAP: 'GPU 显存用量',
-  CPU_USAGE: 'CPU 用量',
-  MEMORY_USAGE: '内存用量',
-  DISK_USAGE: '磁盘用量',
   MAXIMUM_PODS: '容器组最大数量',
   MAXIMUM_PODS_SCAP: '容器组最大数量',
   DISK_USAGE_SCAP: '磁盘用量',
@@ -76,8 +71,6 @@ module.exports = {
   MEMORY_LIMIT_SCAP: '内存上限',
   CPU_REQUEST_SCAP: 'CPU 预留',
   CPU_LIMIT_SCAP: 'CPU 上限',
-  CPU_CORE_PERCENT_SI: '{core} 核（{percent}）',
-  CPU_CORE_PERCENT_PL: '{core} 核（{percent}）',
   // Running Status > Allocated Resources
   ALLOCATED_RESOURCES: '已分配资源',
   // Running Status > Health Status

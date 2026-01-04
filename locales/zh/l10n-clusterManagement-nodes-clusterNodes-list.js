@@ -49,7 +49,6 @@ module.exports = {
   CPU_USAGE: 'CPU 用量',
   MEMORY_USAGE: '内存用量',
   GPU_USAGE: 'GPU 用量',
-  GPU_MEMORY_USAGE: 'GPU 显存用量',
   CONTROL_PLANE: '控制平面节点',
   WORKER: '工作节点',
   ALLOCATED_CPU: '已分配 CPU',

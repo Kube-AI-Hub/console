@@ -64,9 +64,6 @@ module.exports = {
   GPU_USAGE_SCAP: 'GPU 用量',
   GPU_MEMORY_USAGE: 'GPU 顯存用量',
   GPU_MEMORY_USAGE_SCAP: 'GPU 顯存用量',
-  CPU_USAGE: 'CPU 用量',
-  MEMORY_USAGE: '記憶體用量',
-  DISK_USAGE: '磁碟用量',
   MAXIMUM_PODS: '容器組最大數量',
   MAXIMUM_PODS_SCAP: '容器組最大數量',
   DISK_USAGE_SCAP: '磁碟用量',
@@ -76,8 +73,6 @@ module.exports = {
   MEMORY_LIMIT_SCAP: '記憶體限制',
   CPU_REQUEST_SCAP: 'CPU 預留',
   CPU_LIMIT_SCAP: 'CPU 限制',
-  CPU_CORE_PERCENT_SI: '{core} 核（{percent}）',
-  CPU_CORE_PERCENT_PL: '{core} 核（{percent}）',
   // Running Status > Allocated Resources
   ALLOCATED_RESOURCES: '已分配資源',
   // Running Status > Health Status
