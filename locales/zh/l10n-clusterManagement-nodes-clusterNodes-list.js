@@ -75,6 +75,7 @@ module.exports = {
   REFRESH_DATA: '刷新数据',
   CLEAR_SEARCH_CONDITIONS: '清空搜索条件。',
   GPU_CARD_UNIT: '卡',
+  CPU_CORE_UNIT: '核',
   ALLOCATED_SCAP: '已分配',
   XPU_TYPE: '算力卡类型',
   XPU_TYPE_TIP_SOURCE: '算力卡类型从节点的 `labels.xpu` 字段获取。',

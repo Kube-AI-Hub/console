@@ -77,6 +77,7 @@ module.exports = {
   REFRESH_DATA: 'refreshing data',
   CLEAR_SEARCH_CONDITIONS: 'clearing search conditions',
   GPU_CARD_UNIT: 'Cards',
+  CPU_CORE_UNIT: 'Cores',
   ALLOCATED_SCAP: 'Allocated',
   XPU_TYPE: 'Compute Card Type',
   XPU_TYPE_TIP_SOURCE: 'Compute card type is obtained from the node\'s labels.xpu field.',

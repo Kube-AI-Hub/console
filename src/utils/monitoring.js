@@ -41,7 +41,7 @@ const UnitTypes = {
   },
   gpu: {
     conditions: [0.1, 0],
-    units: ['core', 'm'],
+    units: ['GPU_CARD_UNIT', 'm'],
   },
   gpu_memory: {
     conditions: [1024 ** 4, 1024 ** 3, 1024 ** 2, 1024, 0],
@@ -49,7 +49,7 @@ const UnitTypes = {
   },
   cpu: {
     conditions: [0.1, 0],
-    units: ['core', 'm'],
+    units: ['CPU_CORE_UNIT', 'm'],
   },
   memory: {
     conditions: [1024 ** 4, 1024 ** 3, 1024 ** 2, 1024, 0],

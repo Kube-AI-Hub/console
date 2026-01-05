@@ -48,6 +48,7 @@ module.exports = {
   GPU_TOTAL: 'GPU 總量',
   GPU_TOTAL_SCAP: 'GPU 總量',
   GPU_CARD_UNIT: '卡',
+  CPU_CORE_UNIT: '核',
   GPU_MEMORY_TOTAL: '顯存總量',
   GPU_MEMORY_TOTAL_SCAP: '顯存總量',
   CPU_TOTAL_USAGE: 'CPU 總量',
