@@ -84,6 +84,13 @@ class PhysicalResource extends Base {
       legend: ['MEMORY'],
       metricType: MetricTypes.memory_usage,
     },
+    {
+      type: 'disk',
+      title: 'DISK_USAGE',
+      unitType: 'disk',
+      legend: ['USAGE'],
+      metricType: MetricTypes.disk_usage,
+    },
   ]
 
   getControllerProps = () => ({
