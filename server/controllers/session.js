@@ -69,12 +69,22 @@ const mapLoginError = (err, { includeErrorDescription } = {}) => {
   switch (err.code) {
     case 400:
     case 401: {
-      const message =
-        err.error === 'invalid_grant'
-          ? 'INCORRECT_USERNAME_OR_PASSWORD'
-          : includeErrorDescription && err.error_description
-            ? err.error_description
-            : 'INCORRECT_USERNAME_OR_PASSWORD'
+      const errorDesc = (err.error_description || '').toLowerCase()
+      let message = 'INCORRECT_USERNAME_OR_PASSWORD' // 默认值
+
+      if (err.error === 'invalid_grant') {
+        // 根据 error_description 映射到更具体的错误消息
+        if (errorDesc.includes('incorrect password') || errorDesc.includes('password')) {
+          message = 'INCORRECT_PASSWORD'
+        } else if (errorDesc.includes('user not found') || errorDesc.includes('user does not exist')) {
+          message = 'USER_NOT_FOUND'
+        } else {
+          message = 'INCORRECT_USERNAME_OR_PASSWORD'
+        }
+      } else if (includeErrorDescription && err.error_description) {
+        message = err.error_description
+      }
+
       return formatErrorResponse(err.code, 'Unauthorized', message)
     }
     case 429:
@@ -224,7 +234,7 @@ const handleOAuthCallback = async ctx => {
 
     if (!user) {
       ctx.status = 401
-      ctx.body = formatErrorResponse(401, 'Unauthorized', 'LOGIN_FAILED')
+      ctx.body = formatErrorResponse(401, 'Unauthorized', 'INCORRECT_USERNAME_OR_PASSWORD')
       return
     }
 
@@ -263,12 +273,9 @@ const handleOAuthCallback = async ctx => {
     console.log(err)
 
     ctx.app.emit('error', err)
-    ctx.status = err.code || 500
-    ctx.body = formatErrorResponse(
-      err.code || 500,
-      err.statusText || 'Internal Server Error',
-      err.message || 'LOGIN_FAILED'
-    )
+    const errorResponse = mapLoginError(err)
+    ctx.status = errorResponse.status
+    ctx.body = errorResponse
   }
 }
 

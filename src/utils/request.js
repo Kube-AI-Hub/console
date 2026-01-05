@@ -192,15 +192,59 @@ function handleResponse(response, reject, request = {}) {
         }
 
         // 返回错误信息给调用者处理，同时标记来源便于全局错误处理识别
+        // 对于 OAuth 错误，将 error_description 映射到友好的 i18n key
+        let message = data.message || 'Please login again'
+        if (isLoginRequest && data.error === 'invalid_grant') {
+          const errorDesc = (data.error_description || '').toLowerCase()
+          if (errorDesc.includes('incorrect password') || errorDesc.includes('password')) {
+            message = 'INCORRECT_PASSWORD'
+          } else if (errorDesc.includes('user not found') || errorDesc.includes('user does not exist')) {
+            message = 'USER_NOT_FOUND'
+          } else {
+            message = 'INCORRECT_USERNAME_OR_PASSWORD'
+          }
+        }
+
         const loginError = {
           status: 401,
           reason: data.reason || 'Unauthorized',
-          message: data.message || 'Please login again',
+          message,
+          error: data.error,
+          error_description: data.error_description,
         }
         if (isLoginRequest) {
           loginError.source = 'login'
         }
         return Promise.reject(loginError)
+      }
+
+      // 处理 OAuth 登录 400 错误（如密码错误）
+      if (response.status === 400) {
+        const isLoginRequest = request.url && (
+          request.url.includes('/login') ||
+          request.url.startsWith('/oauth/')
+        )
+
+        if (isLoginRequest && data.error === 'invalid_grant') {
+          const errorDesc = (data.error_description || '').toLowerCase()
+          let message = 'INCORRECT_USERNAME_OR_PASSWORD'
+
+          if (errorDesc.includes('incorrect password') || errorDesc.includes('password')) {
+            message = 'INCORRECT_PASSWORD'
+          } else if (errorDesc.includes('user not found') || errorDesc.includes('user does not exist')) {
+            message = 'USER_NOT_FOUND'
+          }
+
+          const loginError = {
+            status: 400,
+            reason: data.error,
+            message,
+            error: data.error,
+            error_description: data.error_description,
+            source: 'login',
+          }
+          return Promise.reject(loginError)
+        }
       }
 
       if (response.status === 403) {

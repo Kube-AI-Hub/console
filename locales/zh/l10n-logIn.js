@@ -32,6 +32,9 @@ module.exports = {
   FAILED_TO_ACCESS_BACKEND: '访问后端服务失败。',
   FAILED_TO_ACCESS_API_SERVER: '访问 API 服务失败。',
   LOGIN_AGAIN_DESC: '会话已超时或用户已从其他地方登录，请重新登录。',
+  INCORRECT_USERNAME_OR_PASSWORD: '用户名或密码错误。',
+  INCORRECT_PASSWORD: '密码不正确。',
+  USER_NOT_FOUND: '用户不存在。',
   // Change password upon first login
   CHANGE_PASSWORD_TIP: '初次登录请修改密码。',
   SUBMIT: '提交',

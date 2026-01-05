@@ -30,6 +30,9 @@ module.exports = {
   FAILED_TO_ACCESS_BACKEND: '백엔드 서비스에 액세스하지 못했습니다.',
   FAILED_TO_ACCESS_API_SERVER: 'API 서버에 액세스하지 못했습니다.',
   LOGIN_AGAIN_DESC: '세션이 시간 초과되었거나 사용자가 다른 곳에 로그인했습니다. 다시 로그인하십시오.',
+  INCORRECT_USERNAME_OR_PASSWORD: '사용자 이름 또는 비밀번호가 잘못되었습니다.',
+  INCORRECT_PASSWORD: '비밀번호가 잘못되었습니다.',
+  USER_NOT_FOUND: '사용자를 찾을 수 없습니다.',
   // Change password upon first login
   CHANGE_PASSWORD_TIP: '첫 로그인입니다. 비밀번호를 변경하시기 바랍니다.',
   SUBMIT: '제출',

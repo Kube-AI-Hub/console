@@ -33,6 +33,9 @@ module.exports = {
   FAILED_TO_ACCESS_BACKEND: 'Failed to access the backend services.',
   FAILED_TO_ACCESS_API_SERVER: 'Failed to access the API server.',
   LOGIN_AGAIN_DESC: 'The session has timed out or the user has logged in elsewhere. Please log in again.',
+  INCORRECT_USERNAME_OR_PASSWORD: 'Incorrect username or password.',
+  INCORRECT_PASSWORD: 'Incorrect password.',
+  USER_NOT_FOUND: 'User not found.',
   // Change password upon first login
   CHANGE_PASSWORD_TIP: 'You are logging in for the first time. Please change your password.',
   SUBMIT: 'Submit',

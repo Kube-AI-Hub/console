@@ -30,6 +30,9 @@ module.exports = {
   FAILED_TO_ACCESS_BACKEND: 'Fehler beim Zugriff auf die Backend-Dienste.',
   FAILED_TO_ACCESS_API_SERVER: 'Fehler beim Zugriff auf den API-Server.',
   LOGIN_AGAIN_DESC: 'Die Sitzung ist abgelaufen oder der Benutzer hat sich woanders angemeldet. Bitte melde dich erneut an.',
+  INCORRECT_USERNAME_OR_PASSWORD: 'Falscher Benutzername oder falsches Passwort.',
+  INCORRECT_PASSWORD: 'Falsches Passwort.',
+  USER_NOT_FOUND: 'Benutzer nicht gefunden.',
   // Change password upon first login
   CHANGE_PASSWORD_TIP: 'Sie melden sich zum ersten Mal an. Bitte ändern Sie Ihr Passwort.',
   SUBMIT: 'Absenden',
