@@ -33,6 +33,8 @@ import { getSuitableValue, getValueByUnit } from 'utils/monitoring'
 import Table from 'workspaces/components/ResourceTable'
 
 const MetricTypes = {
+  gpu: 'namespace_gpu_usage',
+  gpu_memory: 'namespace_gpu_memory_usage',
   cpu: 'namespace_cpu_usage',
   memory: 'namespace_memory_usage_wo_cache',
   pod: 'namespace_pod_count',
@@ -223,6 +225,28 @@ export default class Projects extends React.Component {
         dataIndex: 'status',
         isHideable: true,
         render: status => <Status type={status} name={t(status)} flicker />,
+      },
+      {
+        title: t('GPU_USAGE'),
+        key: 'namespace_gpu_usage',
+        isHideable: true,
+        render: record =>
+          getSuitableValue(
+            this.getLastValue(record, MetricTypes.gpu),
+            'gpu',
+            '-'
+          ),
+      },
+      {
+        title: t('GPU_MEMORY_USAGE'),
+        key: 'namespace_gpu_memory_usage',
+        isHideable: true,
+        render: record =>
+          getSuitableValue(
+            this.getLastValue(record, MetricTypes.gpu_memory),
+            'memory',
+            '-'
+          ),
       },
       {
         title: t('CPU_USAGE'),
