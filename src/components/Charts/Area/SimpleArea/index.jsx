@@ -124,7 +124,7 @@ export default class SimpleArea extends React.Component {
       ? renderTitle()
       : isEmpty(unit)
       ? t(title)
-      : t('TITLE_UNIT', { title: t(title), unit })
+      : t('TITLE_UNIT', { title: t(title), unit: t(unit) })
     return <div className={styles.title}>{text}</div>
   }
 

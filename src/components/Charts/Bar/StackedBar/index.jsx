@@ -109,7 +109,7 @@ export default class StackedBar extends React.Component {
       ? renderTitle()
       : isEmpty(unit)
       ? t(title)
-      : `${t(title)} (${unit})`
+      : `${t(title)} (${t(unit)})`
     return <div className={styles.title}>{text}</div>
   }
 
