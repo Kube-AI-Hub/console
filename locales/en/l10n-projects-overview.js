@@ -47,6 +47,8 @@ module.exports = {
   PHYSICAL_RESOURCE_PL: 'Physical Resources',
   CPU_USAGE_TIME: 'CPU Usage ({time})',
   MEMORY_USAGE_TIME: 'Memory Usage ({time})',
+  GPU_USAGE_TIME: 'GPU Usage ({time})',
+  GPU_MEMORY_USAGE_TIME: 'GPU Memory Usage ({time})',
   // Tips
   TIPS: 'Tips',
   HOW_TO_INVITE_USERS: 'How do I invite users to the current project?',

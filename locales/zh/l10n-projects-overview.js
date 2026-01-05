@@ -46,6 +46,8 @@ module.exports = {
   PHYSICAL_RESOURCE_PL: '物理资源',
   CPU_USAGE_TIME: 'CPU 用量（{time}）',
   MEMORY_USAGE_TIME: '内存用量（{time}）',
+  GPU_USAGE_TIME: 'GPU 用量（{time}）',
+  GPU_MEMORY_USAGE_TIME: 'GPU 显存用量（{time}）',
   // Tips
   TIPS: '帮助信息',
   HOW_TO_INVITE_USERS: '如何邀请用户到当前项目中？',
