@@ -65,7 +65,7 @@ export default class TinyArea extends React.Component {
   get lastValue() {
     const { unit, data } = this.props
     const series = this.series
-    return series.length === 1 ? `${last(data)[series[0]]} ${unit}` : ''
+    return series.length === 1 ? `${last(data)[series[0]]} ${t(unit)}` : ''
   }
 
   renderTitle() {
