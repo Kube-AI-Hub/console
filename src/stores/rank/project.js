@@ -20,6 +20,8 @@ import { observable, action } from 'mobx'
 import Store from './index'
 
 const sort_metric_options = [
+  'namespace_gpu_usage',
+  'namespace_gpu_memory_usage',
   'namespace_cpu_usage',
   'namespace_memory_usage_wo_cache',
   'namespace_pod_count',
@@ -28,6 +30,9 @@ const sort_metric_options = [
 ]
 
 const metrics_filter = [
+  'namespace_gpu_usage',
+  'namespace_gpu_memory_usage',
+
   'namespace_memory_usage_wo_cache',
   'namespace_memory_limit_hard',
 
