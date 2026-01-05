@@ -30,8 +30,8 @@ import { getDisplayNameNew, showNameAndAlias } from 'utils'
 import { getSuitableValue, getValueByUnit } from 'utils/monitoring'
 
 const MetricTypes = {
-  gpu: 'namespace_vgpu_usage',
-  gpu_memory: 'namespace_vgpu_memory_usage',
+  gpu: 'namespace_gpu_usage',
+  gpu_memory: 'namespace_gpu_memory_usage',
   cpu: 'namespace_cpu_usage',
   memory: 'namespace_memory_usage_wo_cache',
   pod: 'namespace_pod_count',
@@ -220,7 +220,7 @@ export default class Projects extends React.Component {
       },
       {
         title: t('GPU_USAGE'),
-        key: 'namespace_vgpu_usage',
+        key: 'namespace_gpu_usage',
         isHideable: true,
         render: record =>
           getSuitableValue(
@@ -231,7 +231,7 @@ export default class Projects extends React.Component {
       },
       {
         title: t('GPU_MEMORY_USAGE'),
-        key: 'namespace_vgpu_memory_usage',
+        key: 'namespace_gpu_memory_usage',
         isHideable: true,
         render: record =>
           getSuitableValue(

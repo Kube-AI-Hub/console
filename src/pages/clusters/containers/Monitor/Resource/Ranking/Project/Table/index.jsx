@@ -62,17 +62,17 @@ class ProjectUsageRank extends React.Component {
       ),
     },
     {
-      sort_metric: 'namespace_vgpu_usage',
+      sort_metric: 'namespace_gpu_usage',
       key: 'gpu',
       width: this.rankTdWidth,
       title: <div>{t('GPU_USAGE')}</div>,
       render: node => (
         <div>
-          <h3>{getSuitableValue(node.namespace_vgpu_usage, 'gpu', '-')}</h3>
+          <h3>{getSuitableValue(node.namespace_gpu_usage, 'gpu', '-')}</h3>
           <div>
             {t('QUOTA_VALUE', {
               value: getSuitableValue(
-                node.namespace_vgpu_limit_hard,
+                node.namespace_gpu_limit_hard,
                 'gpu',
                 '-'
               ),
@@ -82,7 +82,7 @@ class ProjectUsageRank extends React.Component {
       ),
     },
     {
-      sort_metric: 'namespace_vgpu_memory_usage',
+      sort_metric: 'namespace_gpu_memory_usage',
       width: this.rankTdWidth,
       title: <div>{t('GPU_MEMORY_USAGE')}</div>,
       key: 'gpu_memory',
@@ -90,7 +90,7 @@ class ProjectUsageRank extends React.Component {
         <div>
           <h3>
             {getSuitableValue(
-              node.namespace_vgpu_memory_usage,
+              node.namespace_gpu_memory_usage,
               'gpu_memory',
               '-'
             )}
@@ -98,7 +98,7 @@ class ProjectUsageRank extends React.Component {
           <div>
             {t('QUOTA_VALUE', {
               value: getSuitableValue(
-                node.namespace_vgpu_memory_limit_hard,
+                node.namespace_gpu_memory_limit_hard,
                 'gpu_memory',
                 '-'
               ),
