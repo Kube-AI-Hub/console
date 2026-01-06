@@ -37,6 +37,8 @@ module.exports = {
   TOTAL: 'Total',
   USED: 'Used',
   ALLOCATED: 'Allocated',
+  CPU_CORE_UNIT: 'Cores',
+  CORE_PL: 'cores',
   // Tools
   TOOLS: 'Tools',
   KUBECTL_DESC: 'Command line tool used to control the current cluster.',

@@ -49,7 +49,7 @@ const UnitTypes = {
   },
   cpu: {
     conditions: [0.1, 0],
-    units: ['CPU_CORE_UNIT', 'm'],
+    units: ['core', 'm'],
   },
   memory: {
     conditions: [1024 ** 4, 1024 ** 3, 1024 ** 2, 1024, 0],
@@ -110,7 +110,9 @@ export const getSuitableValue = (
   }
 
   const unit = getSuitableUnit(value, unitType)
-  const unitText = unit ? ` ${t(unit)}` : ''
+  const unitText = unit
+    ? ` ${t(unit === 'core' ? 'CPU_CORE_UNIT' : unit)}`
+    : ''
   const count = getValueByUnit(value, unit || unitType)
   return `${count}${unitText}`
 }
@@ -256,9 +258,13 @@ export const getAreaChartOps = ({
   const seriesData = isArray(data) ? data : []
   const valuesData = seriesData.map(result => get(result, 'values') || [])
 
-  const unit = unitType
+  let unit = unitType
     ? getSuitableUnit(flatten(valuesData), unitType)
     : rest.unit
+
+  if (unitType === 'cpu' && unit === 'core') {
+    unit = 'CPU_CORE_UNIT'
+  }
 
   const chartData = getChartData({
     type,
