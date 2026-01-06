@@ -87,6 +87,8 @@ module.exports = {
   QUOTA_VALUE: 'Quota: {value}',
   OUTBOUND_TRAFFIC: 'Outbound Traffic',
   INBOUND_TRAFFIC: 'Inbound Traffic',
+  SORT_BY_NAMESPACE_GPU_USAGE: 'Sort by GPU usage',
+  SORT_BY_NAMESPACE_GPU_MEMORY_USAGE: 'Sort by GPU memory usage',
   SORT_BY_NAMESPACE_CPU_USAGE: 'Sort by CPU usage',
   SORT_BY_NAMESPACE_POD_COUNT: 'Sort by pod quota usage (%)',
   SORT_BY_NAMESPACE_NET_BYTES_RECEIVED: 'Sort by inbound traffic',

@@ -86,6 +86,8 @@ module.exports = {
   QUOTA_VALUE: '配额：{value}',
   OUTBOUND_TRAFFIC: '出站流量',
   INBOUND_TRAFFIC: '入站流量',
+  SORT_BY_NAMESPACE_GPU_USAGE: '按 GPU 用量排行',
+  SORT_BY_NAMESPACE_GPU_MEMORY_USAGE: '按 GPU 显存用量排行',
   SORT_BY_NAMESPACE_CPU_USAGE: '按 CPU 用量排行',
   SORT_BY_NAMESPACE_POD_COUNT: '按容器组配额用量（%）排行',
   SORT_BY_NAMESPACE_NET_BYTES_RECEIVED: '按入站流量排行',

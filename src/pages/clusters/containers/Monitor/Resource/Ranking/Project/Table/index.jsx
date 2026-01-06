@@ -91,19 +91,10 @@ class ProjectUsageRank extends React.Component {
           <h3>
             {getSuitableValue(
               node.namespace_gpu_memory_usage,
-              'gpu_memory',
+              'memory',
               '-'
             )}
           </h3>
-          <div>
-            {t('QUOTA_VALUE', {
-              value: getSuitableValue(
-                node.namespace_gpu_memory_limit_hard,
-                'gpu_memory',
-                '-'
-              ),
-            })}
-          </div>
         </div>
       ),
     },
