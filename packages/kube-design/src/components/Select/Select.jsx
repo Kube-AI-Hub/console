@@ -414,9 +414,40 @@ export default class Select extends React.Component {
     ) : null;
   };
 
+  getFilteredOptions = (options, inputValue) => {
+    if (!inputValue || isEmpty(inputValue)) {
+      return options;
+    }
+
+    const searchValue = inputValue.toLowerCase();
+    const filtered = [];
+
+    for (const item of options) {
+      if (item.options) {
+        // Handle group options
+        const filteredGroupOptions = this.getFilteredOptions(item.options, inputValue);
+        if (filteredGroupOptions.length > 0) {
+          filtered.push({
+            ...item,
+            options: filteredGroupOptions,
+          });
+        }
+      } else {
+        // Match against label or value
+        const label = (item.label || "").toLowerCase();
+        const value = (item.value || "").toLowerCase();
+        if (label.includes(searchValue) || value.includes(searchValue)) {
+          filtered.push(item);
+        }
+      }
+    }
+
+    return filtered;
+  };
+
   renderOptions = () => {
-    const { visible } = this.state;
-    const { options, isLoading, pagination = {}, onFetch } = this.props;
+    const { visible, inputValue } = this.state;
+    const { options, isLoading, pagination = {}, onFetch, searchable } = this.props;
     const { page = 1, total = 0, limit = 10 } = pagination;
 
     if (!visible || !get(this.selectRef, "current")) {
@@ -429,6 +460,12 @@ export default class Select extends React.Component {
 
     const canFetch = isFunction(onFetch) && page * limit < total;
 
+    // Filter options locally if searchable and inputValue exists
+    const displayOptions =
+      searchable && inputValue && !isEmpty(inputValue)
+        ? this.getFilteredOptions(options, inputValue)
+        : options;
+
     return (
       <div
         className="select-options"
@@ -440,9 +477,9 @@ export default class Select extends React.Component {
         ref={this.optionsRef}
         onScrollCapture={canFetch ? this.handleOptionsScroll : null}
       >
-        {options.length === 0 && !isLoading
+        {displayOptions.length === 0 && !isLoading
           ? this.renderEmpty()
-          : this.renderDorpdownRender(options)}
+          : this.renderDorpdownRender(displayOptions)}
         {isLoading && (
           <div className="select-options-loading">
             <Loading size={20} />
