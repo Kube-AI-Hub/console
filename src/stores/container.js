@@ -113,15 +113,35 @@ export default class ContainerStore {
     }
 
     if (params.follow) {
+      // First fetch complete logs with follow=false to ensure we have all data
+      // This works around K8s API buffering issue where the last few lines
+      // may not be flushed immediately in follow mode
+      const initialResult = await request.get(
+        `${this.getDetailUrl({ cluster, namespace, podName, gateways })}/log`,
+        { ...params, follow: false }
+      )
+
+      this.logs = {
+        data: initialResult,
+        isLoading: false,
+      }
+      callback()
+
+      // Then start watching for new logs
+      // Only update logs if streaming data is longer (has more content)
+      const initialLength = initialResult ? initialResult.length : 0
       this.watchHandler = request.watch(
         `${this.getDetailUrl({ cluster, namespace, podName, gateways })}/log`,
         params,
         data => {
-          this.logs = {
-            data,
-            isLoading: false,
+          // Only update if streaming returned more data than initial fetch
+          if (data && data.length > initialLength) {
+            this.logs = {
+              data,
+              isLoading: false,
+            }
+            callback()
           }
-          callback()
         }
       )
     } else {
