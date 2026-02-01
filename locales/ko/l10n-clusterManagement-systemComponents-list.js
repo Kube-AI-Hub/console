@@ -18,7 +18,7 @@
 module.exports = {
   // Banner
   SYSTEM_COMPONENT_PL: '시스템 구성 요소',
-  SERVICE_COMPONENTS_DESC: '시스템 구성 요소는 다양한 기능을 제공하는 KubeSphere 시스템의 소프트웨어 구성 요소입니다. 이 페이지에서 서비스 구성 요소의 실행 상태를 볼 수 있습니다.',
+  SERVICE_COMPONENTS_DESC: '시스템 구성 요소는 다양한 기능을 제공하는 Kube AI Hub 시스템의 소프트웨어 구성 요소입니다. 이 페이지에서 서비스 구성 요소의 실행 상태를 볼 수 있습니다.',
   // KubeSphere
   STOPPED: '중지됨',
   RUNNING_TIME: '실행 시간',

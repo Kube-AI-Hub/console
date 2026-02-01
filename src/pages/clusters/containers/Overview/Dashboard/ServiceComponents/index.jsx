@@ -36,8 +36,8 @@ class ServiceComponents extends Component {
     const { cluster } = this.props
     return [
       {
-        type: 'kubesphere',
-        title: 'KubeSphere',
+        type: 'kubeaihub',
+        title: 'Kube AI Hub',
       },
       {
         type: 'kubernetes',
