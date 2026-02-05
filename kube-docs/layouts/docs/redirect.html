@@ -20,7 +20,7 @@
         if (langPrefix) {
             redirectPath += '/' + langPrefix;
         }
-        redirectPath += 'docs/' + latestVersion;
+        redirectPath += '/docs/' + latestVersion;
         if (pathAfterDocs) {
             redirectPath += '/' + pathAfterDocs;
         }
@@ -36,7 +36,7 @@
     } else {
         // Fallback: redirect to base docs with version
         const langPrefix = currentPath.includes('/zh/') ? 'zh/' : (currentPath.includes('/en/') ? 'en/' : '');
-        window.location.replace(BASE_PATH + (langPrefix ? '/' + langPrefix : '') + 'docs/' + latestVersion + '/');
+        window.location.replace(BASE_PATH + (langPrefix ? '/' + langPrefix : '') + '/docs/' + latestVersion + '/');
     }
 </script>
 <body>

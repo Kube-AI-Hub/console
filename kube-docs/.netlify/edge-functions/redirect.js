@@ -1,3 +1,5 @@
+const KUBE_DOCS_LATEST_VERSION = 'v3.4';
+
 export default async (req, context) => {
   const { url } = req;
   const parsedUrl = new URL(url);
@@ -10,10 +12,10 @@ export default async (req, context) => {
     let hasContentAfterDocs = false;
     const newPath = path.replace(/(\/docs\/)(.*)$/, (match, p1, p2) => {
       if (p2.trim() === "") {
-        return `${p1}v4.1/`;
+        return `${p1}${KUBE_DOCS_LATEST_VERSION}/`;
       } else {
         hasContentAfterDocs = true;
-        return `${p1}v4.1/${p2}`;
+        return `${p1}${KUBE_DOCS_LATEST_VERSION}/${p2}`;
       }
     });
 

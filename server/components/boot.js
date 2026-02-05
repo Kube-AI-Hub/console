@@ -38,15 +38,24 @@ module.exports = function(app) {
     })
   )
 
-  // Redirect version-less /kube-docs/*/docs/* paths to latest version
+  // Redirect version-less /kube-docs/*/docs/* paths to latest version (v3.4)
+  // e.g., /kube-docs/docs/ -> /kube-docs/docs/v3.4/
   // e.g., /kube-docs/zh/docs/foo/ -> /kube-docs/zh/docs/v3.4/foo/
   app.use(async (ctx, next) => {
     const url = ctx.url
+    // Match /kube-docs/docs/[path] (en, no lang segment) where path doesn't start with v[0-9]
+    const enMatch = url.match(/^\/kube-docs\/docs\/(?!v\d)(.*)$/)
+    if (enMatch) {
+      const pathAfterDocs = enMatch[1] || ''
+      const redirectUrl = `/kube-docs/docs/${KUBE_DOCS_LATEST_VERSION}/${pathAfterDocs}`
+      ctx.redirect(redirectUrl)
+      return
+    }
     // Match /kube-docs/(zh|en)/docs/[path] where path doesn't start with v[0-9]
-    const match = url.match(/^\/kube-docs\/(zh|en)\/docs\/(?!v\d)(.*)$/)
-    if (match) {
-      const lang = match[1]
-      const pathAfterDocs = match[2] || ''
+    const langMatch = url.match(/^\/kube-docs\/(zh|en)\/docs\/(?!v\d)(.*)$/)
+    if (langMatch) {
+      const lang = langMatch[1]
+      const pathAfterDocs = langMatch[2] || ''
       const redirectUrl = `/kube-docs/${lang}/docs/${KUBE_DOCS_LATEST_VERSION}/${pathAfterDocs}`
       ctx.redirect(redirectUrl)
       return

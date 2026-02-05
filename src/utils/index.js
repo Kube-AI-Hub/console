@@ -40,6 +40,7 @@ import moment from 'moment-mini'
 import generate from 'nanoid/generate'
 import React from 'react'
 
+import cookie from 'utils/cookie'
 import { PATTERN_LABEL, MODULE_KIND_MAP } from 'utils/constants'
 
 export { showNameAndAlias } from './NameWithAction'
@@ -448,8 +449,10 @@ export const getWebSocketProtocol = protocol => {
 }
 
 export const getWebsiteUrl = () => {
-  const useLang = get(globals, 'user.lang', 'en')
-  const lang = useLang === 'zh' ? 'zh' : 'en'
+  const useLang =
+    cookie('lang') || get(globals, 'user.lang') || getBrowserLang() || 'en'
+  const lang = useLang === 'zh' || useLang === 'tc' ? 'zh' : 'en'
+  console.log('useLang', useLang, 'website url', globals.config.documents[lang])
   return globals.config.documents[lang]
 }
 

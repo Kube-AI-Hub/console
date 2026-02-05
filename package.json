@@ -209,7 +209,7 @@
     "build:e2e": "webpack --mode production --config scripts/webpack.e2e.js --stats errors-only",
     "build:server": "webpack --mode production --config scripts/webpack.server.js --stats errors-only",
     "dev:client": "cross-env NODE_ENV=development webpack serve --config scripts/webpack.dev.js",
-    "dev:docs": "cd kube-docs && hugo server -D --baseURL /kube-docs/ --appendPort=false",
+    "dev:docs": "cd kube-docs && rm -rf public/ resources/ && hugo --baseURL 'http://localhost:1313/kube-docs/' && npx pagefind --site public && cp -r public/pagefind static/ && hugo server -D",
     "dev:server": "cross-env NODE_ENV=development nodemon -w ./common -w ./server -e js,yaml server/server.js",
     "lint": "eslint src/**/*.jsx src/**/*.js",
     "postinstall": "rimraf node_modules/.cache",
