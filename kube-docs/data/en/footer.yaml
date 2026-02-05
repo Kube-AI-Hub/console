@@ -20,10 +20,10 @@ footer:
     - title: Kube AI Hub Docs
       list:
         - content: Introduction
-          link: '../../../docs/v3.4/introduction/what-is-kubesphere/'
+          link: docs/v3.4/introduction/
         - content: Installation
-          link: '../../../docs/v3.4/installing-on-kubernetes/introduction/overview/'
+          link: docs/v3.4/installing-on-kubernetes/introduction/overview/
         - content: Tutorial
-          link: '../../../docs/v3.4/quick-start/'
+          link: docs/v3.4/quick-start/
         - content: API Documentation
-          link: '../../../docs/v3.4/reference/api-docs/'
+          link: docs/v3.4/reference/api-docs/

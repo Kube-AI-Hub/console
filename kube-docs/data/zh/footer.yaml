@@ -23,11 +23,11 @@ footer:
     - title: 文档中心
       list:
         - content: 产品介绍
-          link: '../../../zh/docs/v3.4/introduction/what-is-kubesphere/'
+          link: docs/v3.4/introduction/
         - content: 如何安装
-          link: '../../../zh/docs/v3.4/installing-on-kubernetes/introduction/overview/'
+          link: docs/v3.4/installing-on-kubernetes/introduction/overview/
         - content: 快速入门
-          link: '../../../zh/docs/v3.4/quick-start/'
+          link: docs/v3.4/quick-start/
         - content: API 文档
-          link: '../../../zh/docs/v3.4/reference/api-docs/'
+          link: docs/v3.4/reference/api-docs/
 
