@@ -22,7 +22,7 @@ ADD . /kubesphere/
 # If you have trouble downloading the yarn binary, try the following:
 # RUN yarn config set registry https://registry.npmmirror.com or https://r.cnpmjs.org/
 
-RUN yarn && yarn storybook:build && yarn install && yarn build
+RUN yarn install && yarn build
 
 # Copy compiled files
 RUN mkdir -p /out/server
