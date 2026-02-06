@@ -54,6 +54,7 @@ module.exports = {
   REQUESTS_MEMORY: '内存预留',
   // Project Quotas
   PROJECT_QUOTA_PL: '项目配额',
+  GPU_QUOTA_SECTION: 'GPU配额',
   RESOURCE_TYPE_SCAP: '资源类型',
   JOBS: '任务',
   VOLUMES: '卷',

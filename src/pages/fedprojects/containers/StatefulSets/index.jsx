@@ -214,6 +214,7 @@ export default class StatefulSets extends React.Component {
       isFederated: true,
       projectDetail: projectStore.detail,
       namespace: match.params.namespace,
+      supportGpuSelect: true,
     })
   }
 

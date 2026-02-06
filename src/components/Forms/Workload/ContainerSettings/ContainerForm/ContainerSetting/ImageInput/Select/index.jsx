@@ -32,6 +32,7 @@ export default class Select extends React.Component {
     defaultValue: PropTypes.any,
     options: PropTypes.array.isRequired,
     onChange: PropTypes.func,
+    containerType: PropTypes.oneOf(['worker', 'init']),
   }
 
   static defaultProps = {
@@ -39,6 +40,7 @@ export default class Select extends React.Component {
     defaultValue: '',
     options: [],
     onChange() {},
+    containerType: 'worker',
   }
 
   constructor(props) {
@@ -79,6 +81,7 @@ export default class Select extends React.Component {
   }
 
   renderOption(option, selected) {
+    const { containerType = 'worker' } = this.props
     const onClick = () => this.handleClick(option.value)
     return (
       <div
@@ -89,7 +92,13 @@ export default class Select extends React.Component {
         <div className={styles.optionCol}>
           <span className={styles.optionLabel}>{option.label}</span>
           {option.isDefault && (
-            <span className={styles.defaultTag}>{t('DEFAULT')}</span>
+            <span
+              className={classNames(styles.defaultTag, {
+                [styles.defaultTag_warning]: containerType === 'init',
+              })}
+            >
+              {t('DEFAULT')}
+            </span>
           )}
         </div>
       </div>

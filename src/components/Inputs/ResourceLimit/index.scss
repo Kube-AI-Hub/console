@@ -101,6 +101,15 @@
   background-color: variables.$lightest;
 }
 
+// CPU、内存、GPU 配置项各自单独成行，行间距留大一些
+.resourceRowSection {
+  margin-top: 24px;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
 .inputGroup {
   position: relative;
   padding: 0 8px;
@@ -118,6 +127,32 @@
     position: absolute;
     top: 0;
     left: 8px;
+  }
+
+  // CPU/内存/GPU 统一 2 列网格，配置项宽度对齐
+  &.inputGroupResourceGrid,
+  &.inputGroupGpuGrid {
+    .resourceGridInner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 12px;
+
+      .input {
+        margin-top: 0;
+        min-width: 0;
+      }
+
+      .input + .input {
+        margin-top: 0;
+      }
+    }
+  }
+
+  &.inputGroupGpuGrid {
+    img {
+      top: 50%;
+      transform: translateY(-50%);
+    }
   }
 
   .input {

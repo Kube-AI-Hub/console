@@ -33,7 +33,7 @@ import QuotaItem from './QuotaItem'
 
 import * as styles from './index.scss'
 
-const RESERVED_KEYS = ['limits.cpu', 'limits.memory']
+const RESERVED_KEYS = ['limits.cpu', 'limits.memory', 'gpu', 'gpu.memory']
 
 export default
 @inject('rootStore')
@@ -72,18 +72,29 @@ class ResourceQuota extends React.Component {
 
   get items() {
     const detail = toJS(this.store.detail)
-    return Object.entries(WORKSPACE_QUOTAS_MAP)
-      .map(([key, value]) => ({
-        key,
-        name: key,
-        total: get(detail, `spec.quota.hard["${value.name}"]`),
-        used: get(detail, `status.total.used["${value.name}"]`, 0),
-      }))
+    const hard = get(detail, 'spec.quota.hard', {}) || {}
+    // 仅展示已配置的配额（hard），删除的 GPU 等不再出现在列表中
+    const allKeys = new Set([
+      ...Object.keys(WORKSPACE_QUOTAS_MAP),
+      ...Object.keys(hard),
+    ])
+    return Array.from(allKeys)
+      .map(key => {
+        const value = WORKSPACE_QUOTAS_MAP[key]
+        const name = value ? value.name : key
+        return {
+          key,
+          name,
+          total: get(detail, `spec.quota.hard["${name}"]`),
+          used: get(detail, `status.total.used["${name}"]`, 0),
+        }
+      })
       .filter(({ total, used, name }) => {
-        if (!total && !Number(used) && RESERVED_KEYS.indexOf(name) === -1) {
+        const isReserved =
+          RESERVED_KEYS.indexOf(name) !== -1 || (name && name.includes('/'))
+        if (!total && !Number(used) && !isReserved) {
           return false
         }
-
         return true
       })
   }

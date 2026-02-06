@@ -376,14 +376,6 @@ export const QUOTAS_MAP = {
     name: 'count/pods',
     placeholder: 'eg: 100',
   },
-  gpu: {
-    name: 'gpu',
-    placeholder: 'eg: 1',
-  },
-  'gpu.memory': {
-    name: 'gpu.memory',
-    placeholder: 'eg: 1',
-  },
   deployments: {
     name: 'count/deployments.apps',
     placeholder: 'eg: 100',

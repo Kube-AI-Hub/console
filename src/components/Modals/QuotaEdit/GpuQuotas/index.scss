@@ -1,0 +1,12 @@
+@use '~scss/variables';
+
+// 与下方应用资源（Quotas）样式一致
+.wrapper {
+  margin-top: 8px;
+
+  :global {
+    .form-item + .form-item {
+      margin-top: 8px;
+    }
+  }
+}

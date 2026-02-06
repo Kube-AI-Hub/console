@@ -3,7 +3,7 @@
 # that can be found in the LICENSE file.
 
 # Prepare the build environment
-FROM node:22-alpine AS builder
+FROM watering-ai-registry.cn-shanghai.cr.aliyuncs.com/kube-ai-hub/node:22-alpine AS builder
 
 # APK acceleration for China
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
@@ -22,6 +22,7 @@ ADD . /kubesphere/
 # If you have trouble downloading the yarn binary, try the following:
 # RUN yarn config set registry https://registry.npmmirror.com or https://r.cnpmjs.org/
 
+# ADD . 后需 yarn install 以安装 workspaces；只跑 yarn build，避免重复 install 和重复 storybook:build
 RUN yarn install && yarn build
 
 # Copy compiled files
@@ -38,7 +39,7 @@ RUN mv /kubesphere/package.json /out/
 ##############
 # Final Image
 ##############
-FROM node:22-alpine AS base_os_context
+FROM watering-ai-registry.cn-shanghai.cr.aliyuncs.com/kube-ai-hub/node:22-alpine AS base_os_context
 
 RUN adduser -D -g kubesphere -u 1002 kubesphere && \
     mkdir -p /opt/kubesphere/console && \

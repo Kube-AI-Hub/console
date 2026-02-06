@@ -441,6 +441,7 @@ export default class DropdownContent extends React.Component {
             options={this.secretsOptions}
             onChange={this.handleSecretChange}
             disabled={this.secretsOptions.length <= 1}
+            containerType={this.props.containerType || 'worker'}
           />
         </Input>
         {this.hubType !== 'others' &&

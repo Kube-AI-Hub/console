@@ -38,9 +38,45 @@ import {
   Select,
 } from '@kube-design/components'
 
-import { cpuFormat, memoryFormat } from 'utils'
+import { cpuFormat, memoryFormat, getGpuTypeOptions } from 'utils'
 
 import * as styles from './index.scss'
+
+// 显存单位、显存字段名由后端与显卡类型一起返回（supportGpuTypeMetadata[type].memoryUnit / memoryName）
+// memoryName 为空时表示该类型不限制显存，不展示显存输入框
+
+const getGpuMemoryUnit = type => {
+  const fromBackend = get(globals, [
+    'config',
+    'supportGpuTypeMetadata',
+    type,
+    'memoryUnit',
+  ])
+  if (fromBackend) return fromBackend
+  return 'Mi'
+}
+
+const getGpuMemoryName = type => {
+  return (
+    get(globals, ['config', 'supportGpuTypeMetadata', type, 'memoryName']) || ''
+  )
+}
+
+// 核心数字段名由后端 supportGpuTypeMetadata[type].vcoresName 下发，为空则不限制核心数
+const getGpuVcoresName = type => {
+  return (
+    get(globals, ['config', 'supportGpuTypeMetadata', type, 'vcoresName']) || ''
+  )
+}
+
+// 从 YAML 值解析出纯数字（用于界面输入框）。支持 "1024Mi"、"2Gi"、1024、"1024"
+const parseGpuMemoryDisplayValue = raw => {
+  if (raw === '' || raw === undefined || raw === null) return ''
+  if (typeof raw === 'number' && !Number.isNaN(raw)) return String(raw)
+  const s = String(raw).trim()
+  const m = s.match(/^(\d+(?:\.\d+)?)\s*(Mi|Gi|Ki|Ti|M|G|K|T)?$/i)
+  return m ? m[1] : s.replace(/[a-zA-Z]+$/, '').trim() || ''
+}
 
 export default class ResourceLimit extends React.Component {
   static propTypes = {
@@ -49,6 +85,7 @@ export default class ResourceLimit extends React.Component {
     onChange: PropTypes.func,
     onError: PropTypes.func,
     supportGpuSelect: PropTypes.bool,
+    extraContentBeforeTip: PropTypes.node,
   }
 
   static defaultProps = {
@@ -200,27 +237,44 @@ export default class ResourceLimit extends React.Component {
   }
 
   static getGpuFromProps(value) {
-    // get gpu config from requests field
+    // get gpu config from requests field；显存/核心数字段名由后端 supportGpuTypeMetadata[type].memoryName / vcoresName 下发，为空则不限制
     const supportGpuType = globals.config.supportGpuType
     if (!value) {
+      const type = supportGpuType[0]
       return {
-        type: supportGpuType[0],
+        type,
         value: '',
         memory: '',
+        memoryName: getGpuMemoryName(type),
+        vcores: '',
+        vcoresName: getGpuVcoresName(type),
       }
     }
-    // The value may not have requests field
     const types = Object.keys(get(value, 'requests', {})).filter(key =>
       supportGpuType.some(item => key.endsWith(item))
     )
     const type = !isEmpty(types) ? types[0] : supportGpuType[0]
-    const gpumem = value.requests[`${type}mem`]
-      ? value.requests[`${type}mem`].replace('Gi', '').replace('Mi', '')
-      : ''
+    const memoryName = getGpuMemoryName(type)
+    const vcoresName = getGpuVcoresName(type)
+    const gpumemRaw =
+      memoryName && value.requests ? value.requests[memoryName] : undefined
+    const gpumem =
+      gpumemRaw !== undefined && gpumemRaw !== ''
+        ? parseGpuMemoryDisplayValue(gpumemRaw)
+        : ''
+    const gpuvcoresRaw =
+      vcoresName && value.requests ? value.requests[vcoresName] : undefined
+    const gpuvcores =
+      gpuvcoresRaw !== undefined && gpuvcoresRaw !== ''
+        ? String(gpuvcoresRaw).trim()
+        : ''
     return {
       type,
       value: !isEmpty(types) ? value.requests[`${type}`] : '',
-      memory: !isEmpty(types) ? gpumem : '', // 确保 memory 有默认值
+      memory: memoryName && !isEmpty(types) ? gpumem : '',
+      memoryName,
+      vcores: vcoresName && !isEmpty(types) ? gpuvcores : '',
+      vcoresName,
     }
   }
 
@@ -293,17 +347,12 @@ export default class ResourceLimit extends React.Component {
     return this.props.memoryProps.unit || 'Mi'
   }
 
+  get gpuMemoryUnit() {
+    return getGpuMemoryUnit(this.state.gpu.type)
+  }
+
   get gpuOption() {
-    return globals.config.supportGpuType.reduce(
-      (prev, value) => [
-        ...prev,
-        {
-          value,
-          label: t(value.replace(/[-/.]/g, '_').toUpperCase()),
-        },
-      ],
-      []
-    )
+    return getGpuTypeOptions()
   }
 
   get gpuType() {
@@ -445,14 +494,26 @@ export default class ResourceLimit extends React.Component {
         [`${gpu.type}`]: gpu.value,
       })
     }
-    if (!!gpu.type && !!gpu.memory) {
+    // GPU 显存：字段名由后端 memoryName 下发，为空则不限制显存；单位由 gpuMemoryUnit 决定
+    if (!!gpu.type && !!gpu.memoryName && !!gpu.memory) {
       set(result, 'limits', {
         ...result.limits,
-        [`${gpu.type}mem`]: `${gpu.memory}${memoryUnit}`,
+        [gpu.memoryName]: gpu.memory,
       })
       set(result, 'requests', {
         ...result.requests,
-        [`${gpu.type}mem`]: `${gpu.memory}${memoryUnit}`,
+        [gpu.memoryName]: gpu.memory,
+      })
+    }
+    // GPU 核心数：字段名由后端 vcoresName 下发，为空则不限制核心数
+    if (!!gpu.type && !!gpu.vcoresName && !!gpu.vcores) {
+      set(result, 'limits', {
+        ...result.limits,
+        [gpu.vcoresName]: gpu.vcores,
+      })
+      set(result, 'requests', {
+        ...result.requests,
+        [gpu.vcoresName]: gpu.vcores,
       })
     }
 
@@ -516,6 +577,9 @@ export default class ResourceLimit extends React.Component {
           type: this.state.gpu.type,
           value: inputNum,
           memory: this.state.gpu.memory,
+          memoryName: this.state.gpu.memoryName,
+          vcores: this.state.gpu.vcores,
+          vcoresName: this.state.gpu.vcoresName,
         },
       },
       this.checkAndTrigger
@@ -537,6 +601,33 @@ export default class ResourceLimit extends React.Component {
           type: this.state.gpu.type,
           value: this.state.gpu.value,
           memory: inputNum,
+          memoryName: this.state.gpu.memoryName,
+          vcores: this.state.gpu.vcores,
+          vcoresName: this.state.gpu.vcoresName,
+        },
+      },
+      this.checkAndTrigger
+    )
+  }
+
+  // gpu vcores (核心数) input change
+  handleGpuVcoresInputChange = (e, value) => {
+    let inputNum
+    if (value === '') {
+      inputNum = ''
+    } else {
+      const number = /^(0|[1-9][0-9]*)$/.exec(value)
+      inputNum = number == null ? get(this.state, 'gpu.vcores', '') : number[0]
+    }
+    this.setState(
+      {
+        gpu: {
+          type: this.state.gpu.type,
+          value: this.state.gpu.value,
+          memory: this.state.gpu.memory,
+          memoryName: this.state.gpu.memoryName,
+          vcores: inputNum,
+          vcoresName: this.state.gpu.vcoresName,
         },
       },
       this.checkAndTrigger
@@ -544,11 +635,17 @@ export default class ResourceLimit extends React.Component {
   }
 
   gpuSelectChange = type => {
+    const memoryName = getGpuMemoryName(type)
+    const vcoresName = getGpuVcoresName(type)
     this.setState(
       {
         gpu: {
           type,
           value: this.state.gpu.value,
+          memory: '',
+          memoryName,
+          vcores: '',
+          vcoresName,
         },
       },
       this.checkAndTrigger
@@ -576,6 +673,36 @@ export default class ResourceLimit extends React.Component {
           {isUndefined(findResult)
             ? t('NO_LIMIT')
             : Object.values(findResult)[0]}
+        </span>
+      </div>
+    )
+  }
+
+  renderGpuAvailableQuotaTip = () => {
+    const { workspaceLimitProps: pWL } = this.props
+    const gpuLimit = pWL?.gpuLimit || []
+    if (isEmpty(gpuLimit)) return null
+    const getGpuTypeLabel = type => {
+      const gpuType = type.replace(/^(limits|requests)\./, '')
+      const key = gpuType.replace(/[-/.]/g, '_').toUpperCase()
+      const translated = t(key)
+      return translated !== key ? translated : type
+    }
+    return (
+      <div className={styles.message}>
+        <span>{t('GPU_QUOTA_SECTION')}:</span>
+        <span>
+          {gpuLimit.map((item, index) => {
+            const type = Object.keys(item)[0]
+            const value = Object.values(item)[0]
+            const label = getGpuTypeLabel(type)
+            return (
+              <span key={type}>
+                {index > 0 ? '；' : ''}
+                {label}：{value}
+              </span>
+            )
+          })}
         </span>
       </div>
     )
@@ -611,6 +738,10 @@ export default class ResourceLimit extends React.Component {
             </span>
           </div>
           {supportGpuSelect && pWL.gpuLimit && this.renderGpuTip()}
+          {!supportGpuSelect &&
+            pWL.gpuLimit &&
+            pWL.gpuLimit.length > 0 &&
+            this.renderGpuAvailableQuotaTip()}
         </div>
       </>
     )
@@ -633,47 +764,68 @@ export default class ResourceLimit extends React.Component {
   renderGpuSelect = () => {
     return (
       <Column>
-        <div className={styles.inputGroup}>
+        <div
+          className={classnames(styles.inputGroup, styles.inputGroupGpuGrid)}
+        >
           <img src="/assets/GPU.svg" size={48} />
-          <div className={classnames(styles.input)}>
-            <div className={styles.label}>
-              <span>{t('GPU_TYPE')}</span>
+          <div className={styles.resourceGridInner}>
+            <div className={classnames(styles.input)}>
+              <div className={styles.label}>
+                <span>{t('GPU_TYPE')}</span>
+              </div>
+              <div className={styles.inputBox}>
+                <Select
+                  options={this.gpuOption}
+                  value={this.state.gpu.type}
+                  onChange={this.gpuSelectChange}
+                  placeholder=" "
+                ></Select>
+              </div>
             </div>
-            <div className={styles.inputBox}>
-              <Select
-                options={this.gpuOption}
-                value={this.state.gpu.type}
-                onChange={this.gpuSelectChange}
-                placeholder=" "
-              ></Select>
+            <div className={classnames(styles.input)}>
+              <div className={styles.label}>
+                <span>{t('GPU_LIMIT')}</span>
+              </div>
+              <div className={styles.inputBox}>
+                <Input
+                  name="gpu.value"
+                  value={this.state.gpu.value}
+                  onChange={this.handleGpuInputChange}
+                  placeholder={t('NO_LIMIT')}
+                />
+              </div>
             </div>
-          </div>
-          <div className={classnames(styles.input)}>
-            <div className={styles.label}>
-              <span>{t('GPU_LIMIT')}</span>
-            </div>
-            <div className={styles.inputBox}>
-              <Input
-                name="gpu.value"
-                value={this.state.gpu.value}
-                onChange={this.handleGpuInputChange}
-                placeholder={t('NO_LIMIT')}
-              />
-            </div>
-          </div>
-          <div className={classnames(styles.input)}>
-            <div className={styles.label}>
-              <span>{t('GPU_MEMORY')}</span>
-            </div>
-            <div className={styles.inputBox}>
-              <Input
-                name="gpu.memory"
-                value={this.state.gpu.memory}
-                onChange={this.handleGpuMemoryInputChange}
-                placeholder={t('NO_LIMIT')}
-              />
-              <span className={styles.unit}>{this.memoryUnit}</span>
-            </div>
+            {this.state.gpu.memoryName && (
+              <div className={classnames(styles.input)}>
+                <div className={styles.label}>
+                  <span>{t('GPU_MEMORY')}</span>
+                </div>
+                <div className={styles.inputBox}>
+                  <Input
+                    name="gpu.memory"
+                    value={this.state.gpu.memory}
+                    onChange={this.handleGpuMemoryInputChange}
+                    placeholder={t('NO_LIMIT')}
+                  />
+                  <span className={styles.unit}>{this.gpuMemoryUnit}</span>
+                </div>
+              </div>
+            )}
+            {this.state.gpu.vcoresName && (
+              <div className={classnames(styles.input)}>
+                <div className={styles.label}>
+                  <span>{t('GPU_VCORES')}</span>
+                </div>
+                <div className={styles.inputBox}>
+                  <Input
+                    name="gpu.vcores"
+                    value={this.state.gpu.vcores}
+                    onChange={this.handleGpuVcoresInputChange}
+                    placeholder={t('NO_LIMIT')}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </Column>
@@ -688,11 +840,16 @@ export default class ResourceLimit extends React.Component {
     return (
       <div className={styles.wrapper}>
         <div className={styles.inputWrapper}>
-          <Columns className="is-gapless">
-            {supportGpuSelect && this.renderGpuSelect()}
-            <Column>
-              <div className={styles.inputGroup}>
-                <Icon name="cpu" size={48} />
+          {/* 第一行：CPU 相关配置（预留 | 上限），2 列与 GPU 对齐 */}
+          <div className={styles.resourceRowSection}>
+            <div
+              className={classnames(
+                styles.inputGroup,
+                styles.inputGroupResourceGrid
+              )}
+            >
+              <Icon name="cpu" size={48} />
+              <div className={styles.resourceGridInner}>
                 <div
                   className={classnames(styles.input, {
                     [styles.error]: cpuError || limit.requestCpuError,
@@ -726,10 +883,18 @@ export default class ResourceLimit extends React.Component {
                   </div>
                 </div>
               </div>
-            </Column>
-            <Column>
-              <div className={styles.inputGroup}>
-                <Icon name="memory" size={48} />
+            </div>
+          </div>
+          {/* 第二行：内存相关配置（预留 | 上限），2 列与 GPU 对齐 */}
+          <div className={styles.resourceRowSection}>
+            <div
+              className={classnames(
+                styles.inputGroup,
+                styles.inputGroupResourceGrid
+              )}
+            >
+              <Icon name="memory" size={48} />
+              <div className={styles.resourceGridInner}>
                 <div
                   className={classnames(styles.input, {
                     [styles.error]: memoryError || limit.requestMemoryError,
@@ -763,9 +928,16 @@ export default class ResourceLimit extends React.Component {
                   </div>
                 </div>
               </div>
-            </Column>
-          </Columns>
+            </div>
+          </div>
+          {/* 第三/四行：GPU 相关配置（2×2 网格），配置项宽度与上面对齐 */}
+          {supportGpuSelect && (
+            <div className={styles.resourceRowSection}>
+              <Columns className="is-gapless">{this.renderGpuSelect()}</Columns>
+            </div>
+          )}
         </div>
+        {this.props.extraContentBeforeTip}
         {this.ifRenderTip && this.renderQuotasTip()}
         {(cpuError || memoryError) && (
           <Alert

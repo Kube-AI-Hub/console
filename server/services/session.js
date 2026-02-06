@@ -33,7 +33,7 @@ const handleLoginResp = (resp = {}) => {
     throw new Error(resp.message)
   }
 
-  const { access_token, expires_in } = resp || {}
+  const { access_token } = resp || {}
 
   const { username, extra, groups } = jwtDecode(access_token)
   const email = get(extra, 'email[0]')
@@ -91,53 +91,6 @@ const loginThird = async ({ title, ...params }) => {
   })
 
   return handleLoginResp(resp)
-}
-
-const getNewToken = async ctx => {
-  const refreshToken = ctx.cookies.get('refreshToken')
-  let newToken = {}
-
-  const data = {
-    grant_type: 'refresh_token',
-    refresh_token: refreshToken,
-  }
-
-  let clientID = serverConfig.apiServer.clientID
-  if (!clientID) {
-    clientID = 'kubesphere'
-  }
-
-  let clientSecret = serverConfig.apiServer.clientSecret
-  if (!clientSecret) {
-    clientSecret = 'kubesphere'
-  }
-
-  data.client_id = clientID
-  data.client_secret = clientSecret
-
-  const resp = await send_gateway_request({
-    method: 'POST',
-    url: '/oauth/token',
-    headers: {
-      'content-type': 'application/x-www-form-urlencoded',
-    },
-    params: data,
-    token: refreshToken,
-  })
-
-  const { access_token, refresh_token, expires_in } = resp || {}
-
-  if (!access_token) {
-    throw new Error(resp.message)
-  }
-
-  newToken = {
-    token: access_token,
-    refreshToken: refresh_token,
-    expire: new Date().getTime() + Number(expires_in) * 1000,
-  }
-
-  return newToken
 }
 
 const oAuthLogin = async ({ oauthName, ...params }) => {
@@ -231,7 +184,7 @@ const getUserDetail = async (token, clusterRole, isMulticluster) => {
     }
 
     user.globalRules = roles
-  } catch (error) { }
+  } catch (error) {}
 
   return user
 }
@@ -293,8 +246,8 @@ const getKSConfig = async token => {
     resp = { ...config }
     if (version) {
       resp.ksVersion = version.gitVersion
-      if (resp.ksVersion === "v0.0.0") {
-        resp.ksVersion = "v3.4.1"
+      if (resp.ksVersion === 'v0.0.0') {
+        resp.ksVersion = 'v3.4.1'
       }
       resp.k8sVersion = get(version, 'kubernetes.gitVersion')
     }
@@ -360,9 +313,10 @@ const getClusterRole = async ctx => {
 const getSupportGpuList = async ctx => {
   const authHeader = ctx.headers.authorization
   const token = authHeader ? authHeader.replace('Bearer ', '') : null
-  let gpuKinds = []
+  let types = []
+  const metadata = {}
   if (!token) {
-    return []
+    return { types: [], metadata: {} }
   }
   try {
     const list = await send_gateway_request({
@@ -374,16 +328,22 @@ const getSupportGpuList = async ctx => {
       const defaultGpu = list
         .filter(item => item.default)
         .map(item => item.resourceName)
-
       const otherGpus = list
         .filter(item => !item.default)
         .map(item => item.resourceName)
-
-      gpuKinds = [...defaultGpu, ...otherGpus]
+      types = [...defaultGpu, ...otherGpus]
+      list.forEach(item => {
+        if (item.resourceName) {
+          metadata[item.resourceName] = {
+            memoryUnit: item.memoryUnit || 'Mi',
+            memoryName: item.memoryName || '',
+            vcoresName: item.vcoresName || '',
+          }
+        }
+      })
     }
-  } catch (error) { }
-
-  return gpuKinds
+  } catch (error) {}
+  return { types, metadata }
 }
 
 // TODO: need to get the data from kubesphere

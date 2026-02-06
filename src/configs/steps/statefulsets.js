@@ -33,7 +33,10 @@ export default [
   {
     title: 'POD_SETTINGS',
     icon: 'docker',
-    component: withProps(ContainerSettings, { withService: true }),
+    component: withProps(ContainerSettings, {
+      withService: true,
+      supportGpuSelect: true,
+    }),
     required: true,
   },
   {

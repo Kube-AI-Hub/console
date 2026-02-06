@@ -17,7 +17,7 @@
  */
 
 import React from 'react'
-import { isUndefined } from 'lodash'
+import { get, isUndefined } from 'lodash'
 import { Icon } from '@kube-design/components'
 import { Bar } from 'components/Base'
 
@@ -26,8 +26,106 @@ import { ICON_TYPES } from 'utils/constants'
 
 import * as styles from './index.scss'
 
+const RESERVED_KEYS = [
+  'limits.cpu',
+  'limits.memory',
+  'pods',
+  'gpu',
+  'gpu.memory',
+]
+const Unit = {
+  Ti: 1024 ** 4,
+  Gi: 1024 ** 3,
+  Mi: 1024 ** 2,
+  Ki: 1024,
+  TB: 1000 ** 4,
+  GB: 1000 ** 3,
+  MB: 1000 ** 2,
+  KB: 1000,
+  T: 1000 ** 4,
+  G: 1000 ** 3,
+  M: 1000 ** 2,
+  K: 1000,
+  k: 1000,
+  Bytes: 1,
+  B: 1,
+}
+
 const QuotaItem = ({ name, total, used }) => {
+  const isReserved =
+    RESERVED_KEYS.indexOf(name) !== -1 || (name && name.includes('/'))
+  if (!total && !Number(used) && !isReserved) {
+    return null
+  }
+
   let ratio = 0
+  let usedUnit = ''
+  let totalUnit = ''
+
+  const getNumberUnit = value => {
+    if (!value) return 0
+    const matchUnit = /[0-9]+([a-zA-Z]+)/
+    const unitsMaps = Object.keys(Unit)
+    let _unit = get(value.match(matchUnit), '1', '')
+
+    unitsMaps.forEach(unit => {
+      if (_unit.indexOf(unit) > -1) {
+        _unit = unit
+        return false
+      }
+    })
+    return _unit
+  }
+
+  const getNumberValue = (unit, value) =>
+    unit
+      ? [
+          unit,
+          parseFloat(value) *
+            (ICON_TYPES[name] || !Unit[unit] ? 1 : Unit[unit]),
+        ]
+      : ['', parseFloat(value)]
+
+  const handleNumberValue = value => getNumberValue(getNumberUnit(value), value)
+
+  const handleUsedValue = usedValue => {
+    if (name === 'gpu.memory') {
+      return `${usedValue / 1024} Gi`
+    }
+    if (totalUnit && !usedUnit) {
+      const unitValue =
+        ICON_TYPES[name] || !Unit[totalUnit] ? 1 : Unit[totalUnit]
+      return `${usedValue / unitValue}${usedValue > 0 ? totalUnit : ''}`
+    }
+
+    return usedValue
+  }
+
+  const getTranslationKey = (rawName = '') => {
+    if (!rawName) return ''
+    if (rawName.includes('/')) {
+      const key = rawName
+        .replace(/^(limits|requests)\./, '')
+        .replace(/[./]/g, '_')
+        .toUpperCase()
+      return key || rawName.replace(/[. ]/g, '_').toUpperCase()
+    }
+    const key = rawName.replace(/[. ]/g, '_').toUpperCase()
+    if (key === 'GPU' || key === 'LIMITS_GPU' || key === 'REQUESTS_GPU') {
+      return 'GPU_LIMIT'
+    }
+    return key
+  }
+
+  const transformName = (text = '') => {
+    if (ICON_TYPES[labelName]) {
+      return t(getTranslationKey(text))
+    }
+    if (text && text.includes('/')) {
+      return t(getTranslationKey(text))
+    }
+    return text
+  }
 
   if (name === 'limits.cpu' || name === 'requests.cpu') {
     if (total) {
@@ -41,23 +139,34 @@ const QuotaItem = ({ name, total, used }) => {
       used = `${memoryFormat(used, 'Gi')} Gi`
       total = `${memoryFormat(total, 'Gi')} Gi`
     }
+  } else if (name === 'gpu.memory') {
+    const [_totalUnit, _total] = handleNumberValue(total)
+    totalUnit = _totalUnit
+    ratio = used / 1024 / _total
   } else if (total) {
-    ratio = Number(used) / Number(total)
+    const [_usedUnit, _used] = handleNumberValue(used)
+    const [_totalUnit, _total] = handleNumberValue(total)
+
+    usedUnit = _usedUnit
+    totalUnit = _totalUnit
+
+    ratio = _used / _total
   }
 
   ratio = Math.min(Math.max(ratio, 0), 1)
-  const labelName = name.indexOf('gpu') > -1 ? 'gpu' : name
-  const labelText = labelName === 'gpu' ? `${labelName}.limit` : labelName
-
+  const labelName =
+    name.indexOf('gpu.limit') > -1 || name.includes('/') ? 'gpu' : name
+  const labelText =
+    labelName === 'gpu' && !name.includes('/') ? 'gpu.limit' : name
   return (
     <div className={styles.quota}>
       <Icon name={ICON_TYPES[labelName] || 'resource'} size={40} />
       <div className={styles.item}>
-        <div>{t(labelText.replace(/[. ]/g, '_').toUpperCase())}</div>
+        <div>{transformName(labelText)}</div>
         <p>{t('RESOURCE_TYPE_SCAP')}</p>
       </div>
       <div className={styles.item}>
-        <div>{used}</div>
+        <div>{handleUsedValue(used)}</div>
         <p>{t('USED')}</p>
       </div>
       <div className={styles.item}>

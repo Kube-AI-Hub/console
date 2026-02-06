@@ -42,6 +42,7 @@ export default [
     icon: 'docker',
     component: withProps(ContainerSettings, {
       prefix: 'spec.jobTemplate.spec.template.',
+      supportGpuSelect: true,
     }),
     required: true,
   },
