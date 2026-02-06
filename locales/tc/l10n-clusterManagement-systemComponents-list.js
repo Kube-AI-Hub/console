@@ -18,7 +18,7 @@
 module.exports = {
   // Banner
   SYSTEM_COMPONENT_PL: '服務組件',
-  SERVICE_COMPONENTS_DESC: '服務組件提供 KubeSphere、Kubernetes 和 OpenPitrix 集群内各項服務組件的健康狀態監控，可以查看目前集群的健康狀態和運行時間，能夠幫助用戶監測集群的狀況和即時定位問題。',
+  SERVICE_COMPONENTS_DESC: '服務組件提供 Kube AI Hub、Kubernetes 和 OpenPitrix 集群内各項服務組件的健康狀態監控，可以查看目前集群的健康狀態和運行時間，能夠幫助用戶監測集群的狀況和即時定位問題。',
   // KubeSphere
   STOPPED: 'Stopped',
   RUNNING_TIME: '運行時間',

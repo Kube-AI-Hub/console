@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# Multi-platform build requires a buildx builder with docker-container driver.
+# If you see "Multi-platform build is not supported for the docker driver", run once:
+#   docker buildx create --use --name multiarch --driver docker-container --platform linux/amd64,linux/arm64
+#   docker buildx inspect --bootstrap
 
 set -ex
 set -o pipefail
@@ -18,6 +22,15 @@ fi
 
 # supported platforms
 PLATFORMS=linux/amd64,linux/arm64
+
+# Fail early if current builder does not support multi-platform
+CURRENT_DRIVER=$(docker buildx ls 2>/dev/null | grep '\*' | awk '{print $2}')
+if [[ "${CURRENT_DRIVER}" == "docker" ]]; then
+  echo "ERROR: Multi-platform build requires a builder with docker-container driver."
+  echo "Run once: docker buildx create --use --name multiarch --driver docker-container --platform linux/amd64,linux/arm64"
+  echo "Then:     docker buildx inspect --bootstrap"
+  exit 1
+fi
 
 # build the preimage
 docker buildx build -f build/Dockerfile --target builder --load -t ks-console-pre:"${TAG}" .

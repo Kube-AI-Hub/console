@@ -163,7 +163,7 @@ class Overview extends React.Component {
     const { componentCounts: counts } = this.componentHealth
     const components = [
       {
-        type: 'kubesphere',
+        type: 'kubeaihub',
         icon: '/assets/logo.svg',
         width: 100,
         height: 20,

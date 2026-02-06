@@ -18,7 +18,7 @@
 module.exports = {
   // Banner
   SYSTEM_COMPONENT_PL: 'Sistem bileşenleri',
-  SERVICE_COMPONENTS_DESC: 'Sistem bileşenleri, KubeSphere sistemindeki çeşitli işlevleri sağlayan yazılım bileşenleridir. Servis bileşenlerinin çalışma durumunu bu sayfada görüntüleyebilirsiniz.',
+  SERVICE_COMPONENTS_DESC: 'Sistem bileşenleri, Kube AI Hub sistemindeki çeşitli işlevleri sağlayan yazılım bileşenleridir. Servis bileşenlerinin çalışma durumunu bu sayfada görüntüleyebilirsiniz.',
   // KubeSphere
   STOPPED: 'Durduruldu',
   RUNNING_TIME: 'Çalışma süresi',

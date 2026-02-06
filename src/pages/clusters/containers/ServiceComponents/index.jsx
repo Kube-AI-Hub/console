@@ -41,7 +41,7 @@ class ServiceComponents extends React.Component {
     const { type } = parse(location.search.slice(1)) || {}
 
     this.state = {
-      type: type || 'kubesphere',
+      type: type || 'kubeaihub',
     }
 
     this.configs = this.getConfigs()
@@ -68,7 +68,7 @@ class ServiceComponents extends React.Component {
 
   getConfigs = () => [
     {
-      type: 'kubesphere',
+      type: 'kubeaihub',
       title: t('KUBE_AI_HUB'),
       icon: '/assets/logo.svg',
     },

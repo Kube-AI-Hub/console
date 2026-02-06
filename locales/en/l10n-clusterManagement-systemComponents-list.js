@@ -19,7 +19,7 @@
 module.exports = {
   // Banner
   SYSTEM_COMPONENT_PL: 'System Components',
-  SERVICE_COMPONENTS_DESC: 'System components are software components in the KubeSphere system, which provide various functions. You can view the running status of services components on this page.',
+  SERVICE_COMPONENTS_DESC: 'System components are software components in the Kube AI Hub system, which provide various functions. You can view the running status of services components on this page.',
   // KubeSphere
   STOPPED: 'Stopped',
   RUNNING_TIME: 'Running time',

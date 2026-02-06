@@ -226,9 +226,15 @@ class ContainerLog extends React.Component {
       return <Empty desc={'NO_DATA'} />
     }
 
-    const items = String(data)
+    let items = String(data)
       .replace(/\\r\\n/g, '\n')
+      .replace(/\r\n/g, '\n')
+      .replace(/\r/g, '\n')
       .split('\n')
+
+    if (items.length > 0 && items[items.length - 1] === '') {
+      items = items.slice(0, -1)
+    }
 
     return (
       <div

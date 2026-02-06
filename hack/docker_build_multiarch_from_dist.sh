@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# Multi-platform build requires a buildx builder with docker-container driver.
+# If you see "Multi-platform build is not supported for the docker driver", run once:
+#   docker buildx create --use --name multiarch --driver docker-container --platform linux/amd64,linux/arm64
+#   docker buildx inspect --bootstrap
 
 set -ex
 set -o pipefail
@@ -10,6 +14,15 @@ PUSH=${PUSH:-}
 # support other container tools. e.g. podman
 CONTAINER_CLI=${CONTAINER_CLI:-docker}
 CONTAINER_BUILDER=${CONTAINER_BUILDER:-"buildx build"}
+
+# Fail early if current builder does not support multi-platform
+CURRENT_DRIVER=$(${CONTAINER_CLI} buildx ls 2>/dev/null | grep '\*' | awk '{print $2}')
+if [[ "${CURRENT_DRIVER}" == "docker" ]]; then
+  echo "ERROR: Multi-platform build requires a builder with docker-container driver."
+  echo "Run once: docker buildx create --use --name multiarch --driver docker-container --platform linux/amd64,linux/arm64"
+  echo "Then:     docker buildx inspect --bootstrap"
+  exit 1
+fi
 
 # check if the os is ubuntu, if yes, use sudo to run docker
 if [[ $(uname -s) == "Linux" ]]; then

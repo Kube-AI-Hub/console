@@ -49,10 +49,10 @@ client:
   slackUrl: https://kubesphere.slack.com
   documents:
     en:
-      url: /kube-docs/docs
+      url: /kube-docs/docs/
       api: /kube-docs/docs/reference/api-docs/
     zh:
-      url: /kube-docs/zh/docs
+      url: /kube-docs/zh/docs/
       api: /kube-docs/zh/docs/reference/api-docs/
 
   # current support lanaguages

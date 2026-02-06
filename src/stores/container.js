@@ -44,10 +44,79 @@ export default class ContainerStore {
   }
 
   watchHandler = null
+  tailProbeTimer = null
+  tailProbeFingerprint = ''
+  tailProbeInFlight = false
+  tailProbeKey = ''
 
   encryptKey = get(globals, 'config.encryptKey', 'kubesphere')
 
   module = 'containers'
+
+  normalizeLogText = text =>
+    String(text || '')
+      .replace(/\r\n/g, '\n')
+      .replace(/\r/g, '\n')
+
+  extractLastTimestamp = text => {
+    const normalized = this.normalizeLogText(text)
+    const re = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})/g
+    let match = null
+    let last = ''
+    while ((match = re.exec(normalized))) {
+      last = match[0]
+    }
+    return last
+  }
+
+  fingerprintTail = (text, lines = 5) => {
+    const items = this.normalizeLogText(text)
+      .split('\n')
+      .filter(Boolean)
+    if (!items.length) {
+      return ''
+    }
+    return items.slice(-lines).join('\n')
+  }
+
+  mergeLogsByOverlap = (baseText, newText, maxOverlapLines = 50) => {
+    const baseLines = this.normalizeLogText(baseText).split('\n')
+    const newLines = this.normalizeLogText(newText).split('\n')
+
+    // trim trailing empty line to stabilize comparisons
+    if (baseLines.length > 0 && baseLines[baseLines.length - 1] === '') {
+      baseLines.pop()
+    }
+    if (newLines.length > 0 && newLines[newLines.length - 1] === '') {
+      newLines.pop()
+    }
+
+    const max = Math.min(maxOverlapLines, baseLines.length, newLines.length)
+    for (let k = max; k > 0; k--) {
+      let ok = true
+      for (let i = 0; i < k; i++) {
+        if (baseLines[baseLines.length - k + i] !== newLines[i]) {
+          ok = false
+          break
+        }
+      }
+      if (ok) {
+        return [...baseLines, ...newLines.slice(k)].join('\n')
+      }
+    }
+
+    return [...baseLines, ...newLines].join('\n')
+  }
+
+  stopTailProbe = () => {
+    if (this.tailProbeTimer) {
+      clearInterval(this.tailProbeTimer)
+      this.tailProbeTimer = null
+    }
+    this.tailProbeFingerprint = ''
+    this.tailProbeInFlight = false
+    this.tailProbeKey = ''
+  }
 
   getDetailUrl = ({ cluster, namespace, podName, gateways }) => {
     let path = `api/v1`
@@ -113,18 +182,98 @@ export default class ContainerStore {
     }
 
     if (params.follow) {
+      this.stopTailProbe()
+
+      const url = `${this.getDetailUrl({ cluster, namespace, podName, gateways })}/log`
+      const probeKey = JSON.stringify({ cluster, namespace, podName, gateways, params })
+      this.tailProbeKey = probeKey
+
+      // First fetch complete logs with follow=false to ensure we have all data
+      // This works around K8s API buffering issue where the last few lines
+      // may not be flushed immediately in follow mode
+      const initialResult = await request.get(
+        url,
+        { ...params, follow: false }
+      )
+
+      this.logs = {
+        data: initialResult,
+        isLoading: false,
+      }
+      callback()
+
+      // Then start watching for new logs
+      // Only update logs if streaming data is longer (has more content)
       this.watchHandler = request.watch(
-        `${this.getDetailUrl({ cluster, namespace, podName, gateways })}/log`,
+        url,
         params,
         data => {
-          this.logs = {
-            data,
-            isLoading: false,
+          const currentLength = this.logs && this.logs.data ? this.logs.data.length : 0
+          // Only update if streaming returned more data than current view
+          if (data && data.length > currentLength) {
+            this.logs = {
+              data,
+              isLoading: false,
+            }
+            callback()
           }
-          callback()
         }
       )
+
+      // 1Hz tail probe: cheap check (tailLines=20). If tail changes, backfill once.
+      this.tailProbeTimer = setInterval(async () => {
+        if (this.tailProbeInFlight) {
+          return
+        }
+        if (this.tailProbeKey !== probeKey) {
+          return
+        }
+        this.tailProbeInFlight = true
+
+        try {
+          const probeResult = await request.get(url, {
+            container: params.container,
+            timestamps: params.timestamps,
+            follow: false,
+            tailLines: 20,
+          })
+
+          const fp = this.fingerprintTail(probeResult, 5)
+          if (!fp || fp === this.tailProbeFingerprint) {
+            this.tailProbeInFlight = false
+            return
+          }
+          this.tailProbeFingerprint = fp
+
+          const lastTs = this.extractLastTimestamp(this.logs && this.logs.data)
+          const backfillParams = lastTs
+            ? {
+                container: params.container,
+                timestamps: params.timestamps,
+                follow: false,
+                sinceTime: lastTs,
+              }
+            : { ...params, follow: false }
+
+          const backfillResult = await request.get(url, backfillParams)
+          if (backfillResult) {
+            const merged = this.mergeLogsByOverlap(this.logs && this.logs.data, backfillResult)
+            if (merged && this.logs && merged.length > (this.logs.data || '').length) {
+              this.logs = {
+                data: merged,
+                isLoading: false,
+              }
+              callback()
+            }
+          }
+        } catch (e) {
+          // ignore probe/backfill errors to avoid breaking realtime logs
+        } finally {
+          this.tailProbeInFlight = false
+        }
+      }, 1000)
     } else {
+      this.stopTailProbe()
       const result = await request.get(
         `${this.getDetailUrl({ cluster, namespace, podName, gateways })}/log`,
         params
@@ -142,6 +291,7 @@ export default class ContainerStore {
   @action
   stopWatchLogs() {
     this.watchHandler && this.watchHandler.abort()
+    this.stopTailProbe()
   }
 
   async checkPreviousLog({ cluster, namespace, podName, ...params }) {

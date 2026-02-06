@@ -66,9 +66,11 @@ export default class ComponentStore {
     const result = await request.get(this.getListUrl(params))
     const components = groupBy(result, 'namespace')
 
+    const kubesphereData = get(components, 'kubesphere-system', [])
     const data = {
       kubernetes: get(components, 'kube-system', []),
-      kubesphere: get(components, 'kubesphere-system', []),
+      kubesphere: kubesphereData,
+      kubeaihub: kubesphereData,
       istio: get(components, 'istio-system', []),
       monitoring: get(components, 'kubesphere-monitoring-system', []),
       logging: get(components, 'kubesphere-logging-system', []),

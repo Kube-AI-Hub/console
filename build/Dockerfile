@@ -22,7 +22,6 @@ ADD . /kubesphere/
 # If you have trouble downloading the yarn binary, try the following:
 # RUN yarn config set registry https://registry.npmmirror.com or https://r.cnpmjs.org/
 
-# ADD . 后需 yarn install 以安装 workspaces；只跑 yarn build，避免重复 install 和重复 storybook:build
 RUN yarn install && yarn build
 
 # Copy compiled files
