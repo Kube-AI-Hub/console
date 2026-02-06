@@ -30,14 +30,14 @@ import * as styles from './index.scss'
 export default function ResourceQuota({ detail }) {
   const [quotaListKeys, setQuotaListKeys] = useState([])
   useEffect(() => {
-    if (detail.used) {
-      const _quotaListKeys = Object.entries(QUOTAS_MAP).map(([key, value]) => {
-        return {
-          label: key,
-          ...value,
-        }
-      })
-      Object.entries(detail.used).forEach(([key]) => {
+    if (detail) {
+      const hard = detail.hard || {}
+      const _quotaListKeys = Object.entries(QUOTAS_MAP).map(([key, value]) => ({
+        label: key,
+        ...value,
+      }))
+      // 仅展示已配置的配额（hard），used 里存在但 hard 里没有的 key 不展示
+      Object.keys(hard).forEach(key => {
         const quota = _quotaListKeys.find(item => item.name === key)
         if (isEmpty(quota)) {
           _quotaListKeys.push({
