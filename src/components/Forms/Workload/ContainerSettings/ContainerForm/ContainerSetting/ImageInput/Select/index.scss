@@ -109,12 +109,12 @@
     line-height: 20px;
     color: variables.$white;
     padding: 0px 4px;
-
     height: 20px;
-
-    /* ColorPalette/Green/$green-color-03 */
-
-    background: variables.$green-color03;
+    background: variables.$dark-color05;
     border-radius: 2px;
+
+    &.defaultTag_warning {
+      background: variables.$yellow-color03;
+    }
   }
 }

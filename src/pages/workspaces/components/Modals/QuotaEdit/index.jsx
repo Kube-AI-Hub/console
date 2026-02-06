@@ -25,6 +25,7 @@ import { Modal } from 'components/Base'
 import { ResourceLimit } from 'components/Inputs'
 
 import QuotaStore from 'stores/workspace.quota'
+import GpuQuotas from 'components/Modals/QuotaEdit/GpuQuotas'
 
 import * as styles from './index.scss'
 
@@ -162,6 +163,8 @@ export default class QuotaEditModal extends React.Component {
       onError: error => {
         this.setState({ error })
       },
+      supportGpuSelect: false,
+      omitQuotaCheck: true,
     }
   }
 
@@ -183,7 +186,15 @@ export default class QuotaEditModal extends React.Component {
       >
         <div className={styles.body}>
           <Form.Item>
-            <ResourceLimit {...this.resourceLimitProps} />
+            <ResourceLimit
+              {...this.resourceLimitProps}
+              extraContentBeforeTip={
+                <GpuQuotas
+                  data={this.state.formTemplate}
+                  dataMode="workspaceQuota"
+                />
+              }
+            />
           </Form.Item>
         </div>
       </Modal.Form>

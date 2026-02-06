@@ -144,9 +144,17 @@ export default class ContainerSetting extends React.Component {
   )
 
   renderImageForm = () => {
-    const { data, namespace, cluster, type, isEdit } = this.props
+    const {
+      data,
+      namespace,
+      cluster,
+      type,
+      isEdit,
+      defaultContainerType,
+    } = this.props
     const imageRegistries = this.imageRegistries
     const formTemplate = this.getFormTemplate(data, imageRegistries)
+    const containerType = get(data, 'type') || defaultContainerType || 'worker'
 
     return (
       <ImageInput
@@ -157,6 +165,7 @@ export default class ContainerSetting extends React.Component {
         imageRegistries={imageRegistries}
         cluster={cluster}
         type={isEdit ? 'Edit' : type}
+        containerType={containerType}
       />
     )
   }
@@ -191,7 +200,7 @@ export default class ContainerSetting extends React.Component {
     const defaultResourceLimit = this.defaultResourceLimit
 
     return (
-      <ToggleView defaultShow={isEmpty(defaultResourceLimit)}>
+      <ToggleView defaultShow>
         <>
           <Columns className={styles.columns}>
             <Column>

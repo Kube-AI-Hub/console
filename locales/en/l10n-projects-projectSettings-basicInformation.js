@@ -55,6 +55,7 @@ module.exports = {
   REQUESTS_MEMORY: 'Memory Request',
   // Project Quotas
   PROJECT_QUOTA_PL: 'Project Quotas',
+  GPU_QUOTA_SECTION: 'GPU Quotas',
   RESOURCE_TYPE_SCAP: 'Resource type',
   JOBS: 'Jobs',
   VOLUMES: 'Volumes',

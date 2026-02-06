@@ -41,7 +41,7 @@ export default [
   {
     title: 'POD_SETTINGS',
     icon: 'docker',
-    component: ContainerSettings,
+    component: withProps(ContainerSettings, { supportGpuSelect: true }),
     required: true,
   },
   {

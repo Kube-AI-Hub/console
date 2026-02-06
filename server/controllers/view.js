@@ -26,14 +26,11 @@ const {
   getGitOpsEngine,
 } = require('../services/session')
 
-const { oAuthLogin } = require('../services/session')
-
 const {
   getServerConfig,
   getManifest,
   getLocaleManifest,
   isValidReferer,
-  safeBase64,
 } = require('../libs/utils')
 
 const { client: clientConfig } = getServerConfig()
@@ -60,19 +57,27 @@ const renderView = async ctx => {
     const clusterRole = await getClusterRole(ctx)
     const ksConfig = await getKSConfig()
 
-    const [user, runtime, supportGpuType, gitopsEngine] = await Promise.all([
+    const [user, runtime, supportGpuResult, gitopsEngine] = await Promise.all([
       getCurrentUser(ctx, clusterRole, ksConfig.multicluster),
       getK8sRuntime(ctx),
       getSupportGpuList(ctx),
       getGitOpsEngine(ctx),
     ])
 
+    const supportGpuType = supportGpuResult.types || []
+    const supportGpuTypeMetadata = supportGpuResult.metadata || {}
+
     await renderIndex(ctx, {
       ksConfig,
       user,
       runtime,
       clusterRole,
-      config: { ...clientConfig, supportGpuType, gitopsEngine },
+      config: {
+        ...clientConfig,
+        supportGpuType,
+        supportGpuTypeMetadata,
+        gitopsEngine,
+      },
     })
   } catch (err) {
     if (err.code === 401 || err.status === 401) {

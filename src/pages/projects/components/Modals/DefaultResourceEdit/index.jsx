@@ -25,12 +25,14 @@ import {
   reduce,
   pickBy,
   endsWith,
+  pick,
 } from 'lodash'
 import React from 'react'
 import PropTypes from 'prop-types'
 
 import { Modal } from 'components/Base'
 import { ResourceLimit } from 'components/Inputs'
+import GpuQuotas from 'components/Modals/QuotaEdit/GpuQuotas'
 import QuotaStore from 'stores/quota'
 import WorkspaceQuotaStore from 'stores/workspace.quota'
 import { cpuFormat, memoryFormat, resourceLimitKey, gpuLimitsArr } from 'utils'
@@ -86,10 +88,15 @@ export default class DefaultResourceEditModal extends React.Component {
   }
 
   handleChange = data => {
+    const supportGpuType = globals.config.supportGpuType || []
+    const prevDefault = get(this.state, 'data.default', {})
+    const prevDefaultRequest = get(this.state, 'data.defaultRequest', {})
+    const gpuFromDefault = pick(prevDefault, supportGpuType)
+    const gpuFromDefaultRequest = pick(prevDefaultRequest, supportGpuType)
     this.setState({
       data: {
-        default: data.limits,
-        defaultRequest: data.requests,
+        default: { ...data.limits, ...gpuFromDefault },
+        defaultRequest: { ...data.requests, ...gpuFromDefaultRequest },
       },
     })
   }
@@ -288,7 +295,10 @@ export default class DefaultResourceEditModal extends React.Component {
           defaultValue={this.resourceLimit}
           onChange={this.handleChange}
           onError={this.handleError}
-          supportGpuSelect={this.props.supportGpuSelect || false}
+          supportGpuSelect={false}
+          extraContentBeforeTip={
+            <GpuQuotas data={this.state.data} dataMode="defaultResource" />
+          }
           workspaceLimitProps={this.workspaceLimitProps}
         />
       </Modal>

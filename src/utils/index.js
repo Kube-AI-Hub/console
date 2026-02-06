@@ -765,6 +765,25 @@ export const gpuLimitsArr = objData => {
   return Object.keys(gpusObj).map(key => ({ [key]: gpusObj[key] }))
 }
 
+/**
+ * GPU 类型下拉选项（创建 Deployment 的 ResourceLimit 与 项目配额的显卡配额 共用此逻辑，保证一致）
+ * 数据源：globals.config.supportGpuType；文案：同 key 规则 t(key)，key = type.replace(/[-/.]/g, '_').toUpperCase()
+ * @param {Object} opts
+ * @param {string[]} opts.excludeTypes - 不包含在选项中的类型；不传或 [] 时返回全部类型（Deployment 与配额均不传）
+ * @returns {{ value: string, label: string }[]}
+ */
+export const getGpuTypeOptions = (opts = {}) => {
+  const { excludeTypes = [] } = opts
+  const supportGpuType = globals.config.supportGpuType || []
+  return supportGpuType
+    .filter(type => !excludeTypes.includes(type))
+    .map(type => {
+      const key = type.replace(/[-/.]/g, '_').toUpperCase()
+      const label = t(key) !== key ? t(key) : type
+      return { value: type, label }
+    })
+}
+
 export const map_accessModes = accessModes =>
   accessModes.map(item => accessModeMapper[item])
 

@@ -210,6 +210,7 @@ export default class DaemonSets extends React.Component {
       module,
       namespace: query.namespace,
       cluster: match.params.cluster,
+      supportGpuSelect: true,
     })
   }
 

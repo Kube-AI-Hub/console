@@ -16,6 +16,8 @@
  * along with KubeSphere Console.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { withProps } from 'utils'
+
 import BaseInfo from 'components/Forms/Workload/BaseInfo'
 import ContainerSettings from 'components/Forms/Workload/ContainerSettings'
 import VolumeSettings from 'components/Forms/Workload/VolumeSettings'
@@ -31,7 +33,7 @@ export default [
   {
     title: 'POD_SETTINGS',
     icon: 'docker',
-    component: ContainerSettings,
+    component: withProps(ContainerSettings, { supportGpuSelect: true }),
     required: true,
   },
   {

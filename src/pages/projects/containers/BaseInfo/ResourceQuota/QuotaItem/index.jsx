@@ -52,7 +52,9 @@ const Unit = {
 }
 
 const QuotaItem = ({ name, total, used }) => {
-  if (!total && !Number(used) && RESERVED_KEYS.indexOf(name) === -1) {
+  const isReserved =
+    RESERVED_KEYS.indexOf(name) !== -1 || (name && name.includes('/'))
+  if (!total && !Number(used) && !isReserved) {
     return null
   }
 
@@ -99,8 +101,31 @@ const QuotaItem = ({ name, total, used }) => {
     return usedValue
   }
 
-  const transformName = (text = '') =>
-    ICON_TYPES[labelName] ? t(text.replace(/[. ]/g, '_').toUpperCase()) : text
+  const getTranslationKey = (rawName = '') => {
+    if (!rawName) return ''
+    if (rawName.includes('/')) {
+      const key = rawName
+        .replace(/^(limits|requests)\./, '')
+        .replace(/[./]/g, '_')
+        .toUpperCase()
+      return key || rawName.replace(/[. ]/g, '_').toUpperCase()
+    }
+    const key = rawName.replace(/[. ]/g, '_').toUpperCase()
+    if (key === 'GPU' || key === 'LIMITS_GPU' || key === 'REQUESTS_GPU') {
+      return 'GPU_LIMIT'
+    }
+    return key
+  }
+
+  const transformName = (text = '') => {
+    if (ICON_TYPES[labelName]) {
+      return t(getTranslationKey(text))
+    }
+    if (text && text.includes('/')) {
+      return t(getTranslationKey(text))
+    }
+    return text
+  }
 
   if (name === 'limits.cpu' || name === 'requests.cpu') {
     if (total) {
@@ -129,8 +154,10 @@ const QuotaItem = ({ name, total, used }) => {
   }
 
   ratio = Math.min(Math.max(ratio, 0), 1)
-  const labelName = name.indexOf('gpu.limit') > -1 ? 'gpu' : name
-  const labelText = labelName === 'gpu' ? `${labelName}.limit` : labelName
+  const labelName =
+    name.indexOf('gpu.limit') > -1 || name.includes('/') ? 'gpu' : name
+  const labelText =
+    labelName === 'gpu' && !name.includes('/') ? 'gpu.limit' : name
   return (
     <div className={styles.quota}>
       <Icon name={ICON_TYPES[labelName] || 'resource'} size={40} />

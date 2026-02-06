@@ -19,16 +19,17 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { toJS } from 'mobx'
-import { get, set, isEmpty, mergeWith, add, omitBy, endsWith } from 'lodash'
+import { get, set, isEmpty, mergeWith, add } from 'lodash'
 import { Form, Input } from '@kube-design/components'
 import { Modal } from 'components/Base'
 import { ResourceLimit } from 'components/Inputs'
 
 import QuotaStore from 'stores/quota'
 import WorkSpaceStore from 'stores/workspace.quota'
-import { getLeftQuota, getUsedQuota } from 'utils/workload'
+import { getLeftQuota, getLeftGpuQuota, getUsedQuota } from 'utils/workload'
 
 import Quotas from './Quotas'
+import GpuQuotas from './GpuQuotas'
 
 import * as styles from './index.scss'
 
@@ -76,6 +77,7 @@ export default class QuotaEditModal extends React.Component {
     const { visible, detail } = this.props
     if (visible && visible !== prevProps.visible && detail && detail.name) {
       this.fetchData(detail)
+      this.fetchQuota()
     }
   }
 
@@ -117,24 +119,35 @@ export default class QuotaEditModal extends React.Component {
           cluster,
         }),
       ]).then(dataArr => {
-        const statusTotal = get(
-          this.workspaceQuotaStore.detail,
-          'status.total',
-          {}
-        )
-        const specQuota = get(this.workspaceQuotaStore.detail, 'spec.quota', {})
+        const wsDetail = this.workspaceQuotaStore.detail
+        const statusTotal = get(wsDetail, 'status.total', {})
+        const specQuota = get(wsDetail, 'spec.quota', {})
+        const specHard = get(specQuota, 'hard', specQuota)
+        const wsUsed =
+          get(statusTotal, 'used', {}) || get(wsDetail, 'status.used', {}) || {}
+        const wsHard =
+          (!isEmpty(specHard) ? specHard : get(statusTotal, 'hard', {})) ||
+          specQuota
+        const wsQuotaDetail = {
+          hard: wsHard,
+          used: wsUsed,
+        }
         const { workspace: wsQuota } = getLeftQuota(
-          !isEmpty(statusTotal) ? statusTotal : specQuota,
+          wsQuotaDetail,
           get(dataArr[0], 'data')
         )
+        const supportGpuType = globals.config.supportGpuType || []
+        const gpuKeys = supportGpuType.map(type => `requests.${type}`)
+        const gpuLeft = getLeftGpuQuota(wsQuotaDetail, gpuKeys)
         const nsUsed = getUsedQuota(get(dataArr[0], 'data'))
+        const baseLeft = mergeWith(nsUsed, wsQuota, (ns, ws) => {
+          if (!ws) {
+            return ns
+          }
+          return add(ns, ws)
+        })
         this.setState({
-          leftQuota: mergeWith(nsUsed, wsQuota, (ns, ws) => {
-            if (!ws) {
-              return ns
-            }
-            return add(ns, ws)
-          }),
+          leftQuota: { ...baseLeft, ...gpuLeft },
         })
       })
     }
@@ -154,6 +167,17 @@ export default class QuotaEditModal extends React.Component {
       return value
     }
 
+    const supportGpuType = globals.config.supportGpuType || []
+    const gpuLimitArr =
+      supportGpuType
+        .map(type => {
+          const key = `requests.${type}`
+          const value = get(workspaceStore, key)
+          if (value === undefined || value === null) return null
+          return { [type]: value }
+        })
+        .filter(Boolean) || []
+
     const workspaceLimitProps = !isEmpty(workspaceStore)
       ? {
           limits: {
@@ -164,22 +188,10 @@ export default class QuotaEditModal extends React.Component {
             cpu: get(workspaceStore, 'requests.cpu'),
             memory: get(workspaceStore, 'requests.memory'),
           },
+          ...(gpuLimitArr.length > 0 ? { gpuLimit: gpuLimitArr } : {}),
         }
       : {}
 
-    // get gpu config form spec.hard field and
-    // pass it to resourceLimit component
-    const supportGpu = globals.config.supportGpuType
-    const hard = get(formTemplate, 'spec.hard', {})
-    const whatTypeGpu = supportGpu.filter(type =>
-      Object.keys(hard).some(key => endsWith(key, type))
-    )
-    const gpuSetting = !isEmpty(whatTypeGpu)
-      ? {
-          [`${whatTypeGpu[0]}`]: hard[`requests.${whatTypeGpu[0]}`],
-          [`${whatTypeGpu[0]}mem`]: hard[`requests.${whatTypeGpu[0]}mem`],
-        }
-      : {}
     return {
       cpuProps: {
         marks: [
@@ -219,7 +231,6 @@ export default class QuotaEditModal extends React.Component {
         requests: {
           cpu: get(formTemplate, 'spec.hard["requests.cpu"]'),
           memory: get(formTemplate, 'spec.hard["requests.memory"]'),
-          ...gpuSetting,
         },
       },
       workspaceLimitProps,
@@ -244,38 +255,11 @@ export default class QuotaEditModal extends React.Component {
           'spec.hard["requests.memory"]',
           get(value, 'requests.memory', null)
         )
-        const supportGpuArr = globals.config.supportGpuType
-        // exclude Gpu fields
-        const oldHard = get(formTemplate, 'spec.hard', {})
-        const noGpuHard = omitBy(oldHard, (_, key) =>
-          supportGpuArr.some(type => key.endsWith(type))
-        )
-        set(formTemplate, 'spec.hard', noGpuHard)
-
-        // set gpu config into hard field
-        const incomeGpu = Object.keys(get(value, 'requests', {})).filter(key =>
-          supportGpuArr.some(type => key.endsWith(type))
-        )
-        if (!isEmpty(incomeGpu)) {
-          const type = incomeGpu[0]
-          set(
-            formTemplate,
-            `spec.hard["requests.${type}"]`,
-            value.requests[`${type}`]
-          )
-          if (!isEmpty(value.requests[`${type}mem`])) {
-            set(
-              formTemplate,
-              `spec.hard["requests.${type}mem"]`,
-              value.requests[`${type}mem`]
-            )
-          }
-        }
       },
       onError: error => {
         this.setState({ error })
       },
-      supportGpuSelect: this.props.supportGpuSelect,
+      supportGpuSelect: false,
       omitQuotaCheck: true,
     }
   }
@@ -309,7 +293,12 @@ export default class QuotaEditModal extends React.Component {
             <Input name="name" defaultValue={detail.name} disabled />
           </Form.Item>
           <Form.Item>
-            <ResourceLimit {...this.resourceLimitProps} />
+            <ResourceLimit
+              {...this.resourceLimitProps}
+              extraContentBeforeTip={
+                <GpuQuotas data={this.state.formTemplate} />
+              }
+            />
           </Form.Item>
           <div className={styles.label}>{t('APPLICATION_RESOURCE_COUNT')}</div>
           <Quotas data={this.state.formTemplate} isFederated={isFederated} />

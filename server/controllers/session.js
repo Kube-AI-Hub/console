@@ -74,9 +74,15 @@ const mapLoginError = (err, { includeErrorDescription } = {}) => {
 
       if (err.error === 'invalid_grant') {
         // 根据 error_description 映射到更具体的错误消息
-        if (errorDesc.includes('incorrect password') || errorDesc.includes('password')) {
+        if (
+          errorDesc.includes('incorrect password') ||
+          errorDesc.includes('password')
+        ) {
           message = 'INCORRECT_PASSWORD'
-        } else if (errorDesc.includes('user not found') || errorDesc.includes('user does not exist')) {
+        } else if (
+          errorDesc.includes('user not found') ||
+          errorDesc.includes('user does not exist')
+        ) {
           message = 'USER_NOT_FOUND'
         } else {
           message = 'INCORRECT_USERNAME_OR_PASSWORD'
@@ -88,11 +94,23 @@ const mapLoginError = (err, { includeErrorDescription } = {}) => {
       return formatErrorResponse(err.code, 'Unauthorized', message)
     }
     case 429:
-      return formatErrorResponse(err.code, 'Too Many Failures', 'TOO_MANY_FAILURES')
+      return formatErrorResponse(
+        err.code,
+        'Too Many Failures',
+        'TOO_MANY_FAILURES'
+      )
     case 502:
-      return formatErrorResponse(err.code, 'Bad Gateway', 'FAILED_TO_ACCESS_BACKEND')
+      return formatErrorResponse(
+        err.code,
+        'Bad Gateway',
+        'FAILED_TO_ACCESS_BACKEND'
+      )
     case 'ETIMEDOUT':
-      return formatErrorResponse(500, 'Internal Server Error', 'FAILED_TO_ACCESS_API_SERVER')
+      return formatErrorResponse(
+        500,
+        'Internal Server Error',
+        'FAILED_TO_ACCESS_API_SERVER'
+      )
     default:
       return formatErrorResponse(500, err.statusText, err.message)
   }
@@ -109,9 +127,7 @@ const {
   getSupportGpuList,
   getGitOpsEngine,
 } = require('../services/session')
-const {
-  safeParseJSON,
-} = require('../libs/utils')
+const { safeParseJSON } = require('../libs/utils')
 
 const { send_gateway_request } = require('../libs/request')
 
@@ -120,7 +136,11 @@ const handleThirdLogin = async ctx => {
 
   if (!params.username || !params.password) {
     ctx.status = 400
-    ctx.body = formatErrorResponse(400, 'Invalid Login Params', 'invalid login params')
+    ctx.body = formatErrorResponse(
+      400,
+      'Invalid Login Params',
+      'invalid login params'
+    )
     return
   }
 
@@ -129,7 +149,11 @@ const handleThirdLogin = async ctx => {
 
     if (!user) {
       ctx.status = 401
-      ctx.body = formatErrorResponse(401, 'Unauthorized', 'INCORRECT_USERNAME_OR_PASSWORD')
+      ctx.body = formatErrorResponse(
+        401,
+        'Unauthorized',
+        'INCORRECT_USERNAME_OR_PASSWORD'
+      )
       return
     }
 
@@ -199,19 +223,27 @@ const handleSessionContext = async ctx => {
     const clusterRole = await getClusterRole(ctx)
     const ksConfig = await getKSConfig()
 
-    const [user, runtime, supportGpuType, gitopsEngine] = await Promise.all([
+    const [user, runtime, supportGpuResult, gitopsEngine] = await Promise.all([
       getCurrentUser(ctx, clusterRole, ksConfig.multicluster),
       getK8sRuntime(ctx),
       getSupportGpuList(ctx),
       getGitOpsEngine(ctx),
     ])
 
+    const supportGpuType = supportGpuResult.types || []
+    const supportGpuTypeMetadata = supportGpuResult.metadata || {}
+
     ctx.body = {
       user,
       ksConfig,
       runtime,
       clusterRole,
-      config: { ...clientConfig, supportGpuType, gitopsEngine },
+      config: {
+        ...clientConfig,
+        supportGpuType,
+        supportGpuTypeMetadata,
+        gitopsEngine,
+      },
     }
   } catch (err) {
     ctx.app.emit('error', err)
@@ -230,11 +262,18 @@ const handleOAuthCallback = async ctx => {
   const oauthParams = omit(ctx.query, ['redirect_url', 'state'])
 
   try {
-    const user = await oAuthLogin({ ...oauthParams, oauthName: ctx.params.name })
+    const user = await oAuthLogin({
+      ...oauthParams,
+      oauthName: ctx.params.name,
+    })
 
     if (!user) {
       ctx.status = 401
-      ctx.body = formatErrorResponse(401, 'Unauthorized', 'INCORRECT_USERNAME_OR_PASSWORD')
+      ctx.body = formatErrorResponse(
+        401,
+        'Unauthorized',
+        'INCORRECT_USERNAME_OR_PASSWORD'
+      )
       return
     }
 

@@ -283,6 +283,25 @@ export const getLeftQuota = (wsQuota, nsQuota) => {
   }
 }
 
+/**
+ * 计算企业空间 GPU 可用配额（剩余量）
+ * @param {Object} quota - 配额对象，需包含 hard、used 结构（如 status.total）
+ * @param {string[]} gpuKeys - GPU 配额 key 列表，如 ['requests.nvidia.com/gpu']
+ * @returns {Object} key -> 剩余数量
+ */
+export const getLeftGpuQuota = (quota, gpuKeys = []) => {
+  const result = {}
+  gpuKeys.forEach(key => {
+    const total = get(quota, `hard["${key}"]`)
+    const used = get(quota, `used["${key}"]`, '0')
+    if (total !== undefined && total !== null && total !== '') {
+      const left = Number(total) - Number(used)
+      result[key] = Math.max(0, left)
+    }
+  })
+  return result
+}
+
 export const getUsedQuota = data => {
   function getQuota(quota, key) {
     let result

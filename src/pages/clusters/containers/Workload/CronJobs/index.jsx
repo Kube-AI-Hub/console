@@ -207,6 +207,7 @@ export default class CronJobs extends React.Component {
       module,
       namespace: query.namespace,
       cluster: match.params.cluster,
+      supportGpuSelect: true,
     })
   }
 

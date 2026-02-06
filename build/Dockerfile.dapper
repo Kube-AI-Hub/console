@@ -2,7 +2,7 @@
 # Use of this source code is governed by an Apache license
 # that can be found in the LICENSE file.
 
-FROM node:22-alpine
+FROM watering-ai-registry.cn-shanghai.cr.aliyuncs.com/kube-ai-hub/node:22-alpine
 
 RUN adduser -D -g kubesphere -u 1002 kubesphere && \
     mkdir -p /opt/kubesphere/console && \

@@ -40,16 +40,10 @@ export default function ResourceQuota({ detail }) {
       Object.entries(detail.used).forEach(([key]) => {
         const quota = _quotaListKeys.find(item => item.name === key)
         if (isEmpty(quota)) {
-          if (key.includes('/gpu') && !key.includes('/gpumem')) {
-            _quotaListKeys.find(item => item.name === 'gpu').name = key
-          } else if (key.includes('/gpumem')) {
-            _quotaListKeys.find(item => item.name === 'gpu.memory').name = key
-          } else {
-            _quotaListKeys.push({
-              label: key,
-              name: key,
-            })
-          }
+          _quotaListKeys.push({
+            label: key,
+            name: key,
+          })
         }
       })
       setQuotaListKeys(_quotaListKeys)
