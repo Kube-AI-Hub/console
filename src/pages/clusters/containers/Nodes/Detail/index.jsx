@@ -22,7 +22,7 @@ import { observer, inject } from 'mobx-react'
 import { get, isEmpty } from 'lodash'
 import { Loading } from '@kube-design/components'
 
-import { getDisplayName, getLocalTime } from 'utils'
+import { getDisplayName, getLocalTime, formatXpuDisplay } from 'utils'
 import { getNodeRoles, getNodeStatus } from 'utils/node'
 import { trigger } from 'utils/action'
 import NodeStore from 'stores/node'
@@ -135,7 +135,13 @@ export default class NodeDetail extends React.Component {
     )
     const address = get(detail, 'status.addresses[0].address', '-')
     const nodeInfo = detail.nodeInfo || {}
-    const xpu = get(detail, 'labels.xpu') || 'CPU'
+    const xpu =
+      get(detail, 'labels.xpu') ||
+      (get(detail, ['labels', 'xpu-vendor']) &&
+      get(detail, ['labels', 'xpu-model'])
+        ? `${get(detail, ['labels', 'xpu-vendor'])}-${get(detail, ['labels', 'xpu-model'])}`
+        : null) ||
+      'CPU'
 
     return [
       {
@@ -155,7 +161,7 @@ export default class NodeDetail extends React.Component {
       },
       {
         name: t('XPU_TYPE'),
-        value: xpu,
+        value: formatXpuDisplay(xpu),
         tooltips: this.getXpuTypeTooltip(),
       },
       {

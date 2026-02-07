@@ -798,6 +798,22 @@ export const getGpuDisplayName = resourceName => {
   return (metadata[resourceName] && metadata[resourceName].displayName) || resourceName
 }
 
+/**
+ * Format XPU type for display: i18n(vendor) + "-" + model
+ * @param {string} xpuValue - e.g. "cambricon-MLU370_S4", "nvidia-RTX_3090"
+ * @returns {string} e.g. "寒武纪-MLU370_S4" (zh) or "Cambricon-MLU370_S4" (en)
+ */
+export const formatXpuDisplay = xpuValue => {
+  if (!xpuValue || xpuValue === 'CPU') return 'CPU'
+  const idx = xpuValue.indexOf('-')
+  if (idx <= 0) return xpuValue
+  const vendor = xpuValue.slice(0, idx)
+  const model = xpuValue.slice(idx + 1)
+  const i18nKey = `XPU_VENDOR_${vendor.toUpperCase()}`
+  const i18nVendor = t(i18nKey) !== i18nKey ? t(i18nKey) : vendor
+  return `${i18nVendor}-${model}`
+}
+
 export const map_accessModes = accessModes =>
   accessModes.map(item => accessModeMapper[item])
 

@@ -20,7 +20,7 @@ import React from 'react'
 import { isEmpty, get } from 'lodash'
 import { Tooltip, Icon } from '@kube-design/components'
 
-import { cpuFormat, memoryFormat } from 'utils'
+import { cpuFormat, memoryFormat, formatXpuDisplay } from 'utils'
 import { ICON_TYPES, NODE_STATUS } from 'utils/constants'
 import { getNodeStatus } from 'utils/node'
 import { getValueByUnit } from 'utils/monitoring'
@@ -523,8 +523,14 @@ class Nodes extends React.Component {
         key: 'xpu',
         isHideable: true,
         render: record => {
-          const xpu = get(record, 'labels.xpu') || 'CPU'
-          return xpu
+          const xpu =
+            get(record, 'labels.xpu') ||
+            (get(record, ['labels', 'xpu-vendor']) &&
+            get(record, ['labels', 'xpu-model'])
+              ? `${get(record, ['labels', 'xpu-vendor'])}-${get(record, ['labels', 'xpu-model'])}`
+              : null) ||
+            'CPU'
+          return formatXpuDisplay(xpu)
         },
       },
     ]
