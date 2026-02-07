@@ -22,7 +22,7 @@ import React from 'react'
 import { Icon } from '@kube-design/components'
 import { Panel } from 'components/Base'
 
-import { cpuFormat, memoryFormat } from 'utils'
+import { cpuFormat, memoryFormat, getGpuDisplayName } from 'utils'
 
 import * as styles from './index.scss'
 
@@ -80,7 +80,7 @@ class DefaultResource extends React.Component {
           <div className={styles.contentItem}>
             <img src="/assets/GPU.svg" size={48} />
             <div className={styles.item}>
-              <div>{gpu.value ? gpu.type : t('NONE')}</div>
+              <div>{gpu.value ? getGpuDisplayName(gpuType[0]) : t('NONE')}</div>
               <p>{t('GPU_TYPE_SCAP')}</p>
             </div>
             <div className={styles.item}>

@@ -21,15 +21,20 @@ import { isUndefined } from 'lodash'
 import { Icon } from '@kube-design/components'
 import { Bar } from 'components/Base'
 
-import { cpuFormat, memoryFormat } from 'utils'
+import { cpuFormat, memoryFormat, getGpuDisplayName } from 'utils'
 import { ICON_TYPES } from 'utils/constants'
 
 import * as styles from './index.scss'
 
-const transformName = (text = '', type = '') =>
-  type === 'userDefined' && !text.includes('gpu')
+const transformName = (text = '', type = '') => {
+  if (text && text.includes('/')) {
+    const resourceName = text.replace(/^(limits|requests)\./, '')
+    return getGpuDisplayName(resourceName)
+  }
+  return type === 'userDefined'
     ? text
     : t(text.replace(/[. ]/g, '_').toUpperCase())
+}
 
 const QuotaItem = ({ name, total, used, type }) => {
   let ratio = 0

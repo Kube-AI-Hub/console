@@ -38,7 +38,7 @@ import {
   Select,
 } from '@kube-design/components'
 
-import { cpuFormat, memoryFormat, getGpuTypeOptions } from 'utils'
+import { cpuFormat, memoryFormat, getGpuTypeOptions, getGpuDisplayName } from 'utils'
 
 import * as styles from './index.scss'
 
@@ -666,7 +666,7 @@ export default class ResourceLimit extends React.Component {
     return (
       <div className={styles.message}>
         <span>{t('GPU_TYPE')}:</span>
-        <span>{isUndefined(findResult) ? t('NO_LIMIT') : gpu.type}</span>
+        <span>{isUndefined(findResult) ? t('NO_LIMIT') : getGpuDisplayName(gpu.type)}</span>
         <br />
         <span>{t('GPU_LIMIT')}:</span>
         <span>
@@ -683,10 +683,8 @@ export default class ResourceLimit extends React.Component {
     const gpuLimit = pWL?.gpuLimit || []
     if (isEmpty(gpuLimit)) return null
     const getGpuTypeLabel = type => {
-      const gpuType = type.replace(/^(limits|requests)\./, '')
-      const key = gpuType.replace(/[-/.]/g, '_').toUpperCase()
-      const translated = t(key)
-      return translated !== key ? translated : type
+      const resourceName = type.replace(/^(limits|requests)\./, '')
+      return getGpuDisplayName(resourceName)
     }
     return (
       <div className={styles.message}>

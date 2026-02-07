@@ -787,6 +787,17 @@ export const getGpuTypeOptions = (opts = {}) => {
     })
 }
 
+/**
+ * 根据 GPU resourceName 获取展示名称，优先使用后端 metadata.displayName
+ * @param {string} resourceName - 如 nvidia.com/gpu
+ * @returns {string}
+ */
+export const getGpuDisplayName = resourceName => {
+  if (!resourceName) return ''
+  const metadata = globals.config.supportGpuTypeMetadata || {}
+  return (metadata[resourceName] && metadata[resourceName].displayName) || resourceName
+}
+
 export const map_accessModes = accessModes =>
   accessModes.map(item => accessModeMapper[item])
 
