@@ -61,7 +61,6 @@ module.exports = {
   CONTAINER_RESOURCE_LIMIT_TIP: '請設置容器的資源限制與資源預留，這將能夠幫助系統更好地調度容器，提高穩定性。您也可在【項目設置】中，通過【基本資訊】->【項目管理】->【編輯資源預設請求】，來統一設置預設值。',
   GPU_TYPE: 'GPU Type',
   GPU_LIMIT: 'GPU Limit',
-  NVIDIA_COM_GPU: 'NVIDIA GPU',
   NO_LIMIT: '不限制',
   NO_REQUEST: '不預留',
   NO_RESOURCE_LIMIT: '無資源限制',

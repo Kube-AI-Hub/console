@@ -335,6 +335,7 @@ const getSupportGpuList = async ctx => {
       list.forEach(item => {
         if (item.resourceName) {
           metadata[item.resourceName] = {
+            displayName: item.displayName || item.resourceName,
             memoryUnit: item.memoryUnit || 'Mi',
             memoryName: item.memoryName || '',
             vcoresName: item.vcoresName || '',
