@@ -139,7 +139,7 @@ export default class NodeDetail extends React.Component {
       },
       {
         key: 'setGpuVirtMode',
-        icon: 'cog',
+        icon: 'gpu',
         text: t('SET_GPU_VIRT_MODE'),
         action: 'edit',
         show: () => this.hasGpuNode(),

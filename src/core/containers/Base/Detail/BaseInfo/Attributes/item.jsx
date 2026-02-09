@@ -28,7 +28,7 @@ export default class Item extends PureComponent {
   static propTypes = {
     name: PropTypes.string.isRequired,
     value: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
-    tooltips: PropTypes.string,
+    tooltips: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
   }
 
   static defaultProps = {
@@ -42,7 +42,7 @@ export default class Item extends PureComponent {
       <li className={classnames(styles.item, className)}>
         <div className={styles.name}>
           <span>{name}: </span>
-          {tooltips !== '' && (
+          {tooltips && (
             <Tooltip content={tooltips} placement="topLeft">
               <Icon name="question" size={20} />
             </Tooltip>

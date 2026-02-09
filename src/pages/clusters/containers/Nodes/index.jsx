@@ -20,13 +20,14 @@ import React from 'react'
 import { isEmpty, get } from 'lodash'
 import { Tooltip, Icon } from '@kube-design/components'
 
-import { cpuFormat, memoryFormat, formatXpuDisplay } from 'utils'
+import { cpuFormat, memoryFormat, getVendorDisplayName } from 'utils'
 import { ICON_TYPES, NODE_STATUS } from 'utils/constants'
 import { getNodeStatus } from 'utils/node'
 import { getValueByUnit } from 'utils/monitoring'
 import NodeStore from 'stores/node'
 import NodeMonitoringStore from 'stores/monitoring/node'
 import KubeCtlModal from 'components/Modals/KubeCtl'
+import GpuVirtModeModal from 'components/Modals/Node/GpuVirtMode'
 
 import { withClusterList, ListPage } from 'components/HOCs/withList'
 
@@ -127,6 +128,23 @@ class Nodes extends React.Component {
           trigger('node.add.log', { detail: toJS(clusterStore.detail) }),
       },
       {
+        key: 'setGpuVirtMode',
+        icon: 'gpu',
+        text: t('SET_GPU_VIRT_MODE'),
+        action: 'edit',
+        show: item => this.hasGpuNode(item),
+        onClick: item => {
+          const modal = Modal.open({
+            modal: GpuVirtModeModal,
+            detail: toJS(item),
+            onOk: () => {
+              Modal.close(modal)
+              routing.query()
+            },
+          })
+        },
+      },
+      {
         key: 'delete',
         icon: 'trash',
         text: t('DELETE'),
@@ -140,6 +158,15 @@ class Nodes extends React.Component {
           }),
       },
     ]
+  }
+
+  hasGpuNode = record => {
+    const nodeInfo = get(record, 'status.nodeInfo') || record.nodeInfo || {}
+    return !!(
+      nodeInfo.gpuVendor ||
+      nodeInfo.virtualCardMode ||
+      get(record, 'labels.xpu-vendor')
+    )
   }
 
   get tableActions() {
@@ -543,17 +570,52 @@ class Nodes extends React.Component {
         key: 'xpu',
         isHideable: true,
         render: record => {
-          const xpu =
-            get(record, 'labels.xpu') ||
-            (get(record, ['labels', 'xpu-vendor']) &&
-            get(record, ['labels', 'xpu-model'])
-              ? `${get(record, ['labels', 'xpu-vendor'])}-${get(record, [
-                  'labels',
-                  'xpu-model',
-                ])}`
-              : null) ||
-            'CPU'
-          return formatXpuDisplay(xpu)
+          let vendor = get(record, 'labels.xpu-vendor')
+          let model = get(record, 'labels.xpu-model')
+          const xpu = get(record, 'labels.xpu')
+          if (!vendor && !model && xpu && xpu !== 'CPU') {
+            const idx = xpu.indexOf('-')
+            if (idx > 0) {
+              vendor = xpu.slice(0, idx)
+              model = xpu.slice(idx + 1)
+            }
+          }
+          if (!vendor && !model) {
+            return <Text title="CPU" description="-" />
+          }
+          return (
+            <Text
+              title={getVendorDisplayName(vendor) || vendor || '-'}
+              description={model || '-'}
+            />
+          )
+        },
+      },
+      {
+        title: t('GPU_VIRT_MODE'),
+        key: 'gpuVirtMode',
+        isHideable: true,
+        render: record => {
+          if (!this.hasGpuNode(record)) return '-'
+          const nodeInfo =
+            get(record, 'status.nodeInfo') || record.nodeInfo || {}
+          const gpuModeStatus = get(record, 'status.nodeInfo.gpuModeStatus')
+          let displayText = nodeInfo.virtualCardMode || '-'
+          if (gpuModeStatus?.status === 'in_progress') {
+            displayText = t('GPU_VIRT_MODE_SWITCHING', {
+              mode: gpuModeStatus.mode || '',
+            })
+          } else if (gpuModeStatus?.status === 'failed') {
+            displayText = gpuModeStatus.message
+              ? `${t('GPU_VIRT_MODE_SWITCH_FAILED')}: ${gpuModeStatus.message}`
+              : t('GPU_VIRT_MODE_SWITCH_FAILED')
+          } else if (
+            gpuModeStatus?.status === 'completed' &&
+            gpuModeStatus.mode
+          ) {
+            displayText = gpuModeStatus.mode
+          }
+          return displayText
         },
       },
     ]
