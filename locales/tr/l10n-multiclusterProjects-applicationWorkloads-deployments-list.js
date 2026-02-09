@@ -61,7 +61,6 @@ module.exports = {
   CONTAINER_RESOURCE_LIMIT_TIP: 'Konteynerin uygun düğümlere zamanlanması için kapsayıcının kaynak sınırlarını ve isteklerini ayarlayın.',
   GPU_TYPE: 'GPU Tipi',
   GPU_LIMIT: 'GPU Sınırı',
-  NVIDIA_COM_GPU: 'NVIDIA GPU',
   NO_LIMIT: 'Limit yok',
   NO_REQUEST: 'Istek yok',
   NO_RESOURCE_LIMIT: 'Kaynak Limiti Yok',

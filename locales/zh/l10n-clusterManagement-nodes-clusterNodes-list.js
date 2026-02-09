@@ -82,6 +82,17 @@ module.exports = {
   XPU_TYPE_TIP_FORMAT: '格式：xpu = xpu-vendor + "-" + xpu-model',
   XPU_TYPE_TIP_EXAMPLES: '示例：nvidia (RTX_3090, A100, A10, H100, L40S, L40), metax (MXN260), ascend (Ascend910B, Ascend910)',
   XPU_TYPE_TIP_DEFAULT: '如果该字段不存在，则显示为 CPU。',
+  XPU_VENDOR_NVIDIA: '英伟达',
+  XPU_VENDOR_CAMBRICON: '寒武纪',
+  XPU_VENDOR_ASCEND: '昇腾',
+  XPU_VENDOR_HYGON: '海光',
+  XPU_VENDOR_METAX: '沐曦',
+  XPU_VENDOR_ENFLAME: '燧原',
+  XPU_VENDOR_KUNLUN: '昆仑芯',
+  XPU_VENDOR_KUNLUNXIN: '昆仑芯',
+  XPU_VENDOR_ILUVATAR: '天数',
+  XPU_VENDOR_ALIBABA: '阿里巴巴',
+  XPU_VENDOR_MTHREADS: '摩尔线程',
   // List > Edit Taints
   DUPLICATE_KEYS: '该键已经存在，请输入其他键。',
   EMPTY_KEY: '请输入一个键。'

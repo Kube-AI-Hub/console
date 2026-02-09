@@ -21,7 +21,7 @@ import { get, isUndefined } from 'lodash'
 import { Icon } from '@kube-design/components'
 import { Bar } from 'components/Base'
 
-import { cpuFormat, memoryFormat } from 'utils'
+import { cpuFormat, memoryFormat, getGpuDisplayName } from 'utils'
 import { ICON_TYPES } from 'utils/constants'
 
 import * as styles from './index.scss'
@@ -118,10 +118,11 @@ const QuotaItem = ({ name, total, used }) => {
   }
 
   const transformName = (text = '') => {
-    if (ICON_TYPES[labelName]) {
-      return t(getTranslationKey(text))
-    }
     if (text && text.includes('/')) {
+      const resourceName = text.replace(/^(limits|requests)\./, '')
+      return getGpuDisplayName(resourceName)
+    }
+    if (ICON_TYPES[labelName]) {
       return t(getTranslationKey(text))
     }
     return text

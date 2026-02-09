@@ -452,7 +452,6 @@ export const getWebsiteUrl = () => {
   const useLang =
     cookie('lang') || get(globals, 'user.lang') || getBrowserLang() || 'en'
   const lang = useLang === 'zh' || useLang === 'tc' ? 'zh' : 'en'
-  console.log('useLang', useLang, 'website url', globals.config.documents[lang])
   return globals.config.documents[lang]
 }
 
@@ -770,7 +769,7 @@ export const gpuLimitsArr = objData => {
 
 /**
  * GPU 类型下拉选项（创建 Deployment 的 ResourceLimit 与 项目配额的显卡配额 共用此逻辑，保证一致）
- * 数据源：globals.config.supportGpuType；文案：同 key 规则 t(key)，key = type.replace(/[-/.]/g, '_').toUpperCase()
+ * 数据源：globals.config.supportGpuType；文案：由后端 supportGpuTypeMetadata[type].displayName 统一下发
  * @param {Object} opts
  * @param {string[]} opts.excludeTypes - 不包含在选项中的类型；不传或 [] 时返回全部类型（Deployment 与配额均不传）
  * @returns {{ value: string, label: string }[]}
@@ -778,13 +777,43 @@ export const gpuLimitsArr = objData => {
 export const getGpuTypeOptions = (opts = {}) => {
   const { excludeTypes = [] } = opts
   const supportGpuType = globals.config.supportGpuType || []
+  const metadata = globals.config.supportGpuTypeMetadata || {}
   return supportGpuType
     .filter(type => !excludeTypes.includes(type))
     .map(type => {
-      const key = type.replace(/[-/.]/g, '_').toUpperCase()
-      const label = t(key) !== key ? t(key) : type
+      const label = (metadata[type] && metadata[type].displayName) || type
       return { value: type, label }
     })
+}
+
+/**
+ * 根据 GPU resourceName 获取展示名称，优先使用后端 metadata.displayName
+ * @param {string} resourceName - 如 nvidia.com/gpu
+ * @returns {string}
+ */
+export const getGpuDisplayName = resourceName => {
+  if (!resourceName) return ''
+  const metadata = globals.config.supportGpuTypeMetadata || {}
+  return (
+    (metadata[resourceName] && metadata[resourceName].displayName) ||
+    resourceName
+  )
+}
+
+/**
+ * Format XPU type for display: i18n(vendor) + "-" + model
+ * @param {string} xpuValue - e.g. "cambricon-MLU370_S4", "nvidia-RTX_3090"
+ * @returns {string} e.g. "寒武纪-MLU370_S4" (zh) or "Cambricon-MLU370_S4" (en)
+ */
+export const formatXpuDisplay = xpuValue => {
+  if (!xpuValue || xpuValue === 'CPU') return 'CPU'
+  const idx = xpuValue.indexOf('-')
+  if (idx <= 0) return xpuValue
+  const vendor = xpuValue.slice(0, idx)
+  const model = xpuValue.slice(idx + 1)
+  const i18nKey = `XPU_VENDOR_${vendor.toUpperCase()}`
+  const i18nVendor = t(i18nKey) !== i18nKey ? t(i18nKey) : vendor
+  return `${i18nVendor}-${model}`
 }
 
 export const map_accessModes = accessModes =>
