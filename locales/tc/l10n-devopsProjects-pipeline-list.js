@@ -80,7 +80,6 @@ module.exports = {
   // List > Create > Basic Information > Code Repository > Bitbucket
   BITBUCKET_SERVER_ADDRESS: 'Bitbucket Server Address',
   BITBUCKET_SERVER_EMPTY_TIP: 'Please enter the address of a Bitbucket server.',
-  INCORRECT_USERNAME_OR_PASSWORD: '用戶名或密碼錯誤',
   BITBUCKET_SERVER_CREDENTIAL_EMPTY: '請輸入 BitBucket 帳號資訊。',
   BITBUCKET_ADDRESS_EMPTY_TIP: 'Please enter the address of a Bitbucket server.',
   BITBUCKET_ADDRESS_INVALID_TIP: 'Invalid Bitbucket server address.',

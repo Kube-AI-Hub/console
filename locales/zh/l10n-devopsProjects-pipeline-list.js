@@ -80,7 +80,6 @@ module.exports = {
   // List > Create > Basic Information > Code Repository > Bitbucket
   BITBUCKET_SERVER_ADDRESS: 'Bitbucket 服务器地址',
   BITBUCKET_SERVER_EMPTY_TIP: '请设置 Bitbucket 服务器的地址。',
-  INCORRECT_USERNAME_OR_PASSWORD: '用户名或密码错误。',
   BITBUCKET_SERVER_CREDENTIAL_EMPTY: '请设置 Bitbucket 服务器和凭证。',
   BITBUCKET_ADDRESS_EMPTY_TIP: '请输入 Bitbucket 服务器的地址。',
   BITBUCKET_ADDRESS_INVALID_TIP: 'Bitbucket 服务器地址格式错误。',

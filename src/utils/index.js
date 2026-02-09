@@ -816,6 +816,17 @@ export const formatXpuDisplay = xpuValue => {
   return `${i18nVendor}-${model}`
 }
 
+/**
+ * Get i18n display name for GPU/XPU vendor (same keys as formatXpuDisplay).
+ * @param {string} vendor - e.g. "nvidia", "cambricon"
+ * @returns {string} e.g. "英伟达" (zh) or "Nvidia" (en), or vendor if no translation
+ */
+export const getVendorDisplayName = vendor => {
+  if (!vendor) return ''
+  const i18nKey = `XPU_VENDOR_${vendor.toUpperCase()}`
+  return t(i18nKey) !== i18nKey ? t(i18nKey) : vendor
+}
+
 export const map_accessModes = accessModes =>
   accessModes.map(item => accessModeMapper[item])
 

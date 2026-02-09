@@ -34,8 +34,6 @@ module.exports = {
   TOTAL: '总计',
   USED: '已使用',
   ALLOCATED: '已分配',
-  CPU_CORE_UNIT: '核',
-  CORE_PL: '核',
   // Tools
   TOOLS: '工具',
   KUBECTL_DESC: '命令行工具，用于控制当前集群。',

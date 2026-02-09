@@ -1,0 +1,134 @@
+@use '~scss/variables';
+
+.gpuTopologyWrap {
+  overflow-x: auto;
+}
+
+.gpuTopologyTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+
+  th,
+  td {
+    padding: 6px 10px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    vertical-align: middle;
+  }
+
+  th {
+    font-weight: 600;
+    color: var(--text-desc);
+    background: var(--layout-body-bg-color);
+  }
+
+  td {
+    color: var(--text-title);
+  }
+}
+
+.gpuTopologyCellEmpty {
+  color: var(--text-desc);
+}
+
+.gpuTopologyBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  line-height: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.gpuTopologyBadgeSelf {
+  color: var(--text-title);
+  border-color: var(--color-primary, #409eff);
+  background: var(--color-primary-light-1, rgba(64, 158, 255, 0.12));
+}
+
+.gpuTopologyBadgeHighSpeed {
+  color: var(--text-title);
+  border-color: var(--color-success, #67c23a);
+  background: var(--color-success-light-1, rgba(103, 194, 58, 0.12));
+}
+
+.gpuTopologyBadgeSystem {
+  color: var(--text-desc);
+  border-color: var(--border-color);
+  background: transparent;
+}
+
+.gpuTopologyLegend {
+  margin-top: 12px;
+  padding: 10px 12px;
+  font-size: 12px;
+  color: var(--text-desc);
+  border: 1px dashed var(--border-color);
+  border-radius: 4px;
+  background: var(--layout-body-bg-color);
+}
+
+.gpuTopologyLegendTitle {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text-title);
+}
+
+.gpuTopologyLegendList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 16px;
+}
+
+@media (max-width: 768px) {
+  .gpuTopologyLegendList {
+    grid-template-columns: 1fr;
+  }
+}
+
+.gpuTopologyLegendItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.gpuTopologyLegendDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  border: 1px solid transparent;
+  margin-top: 3px;
+  flex: 0 0 auto;
+}
+
+.gpuTopologyLegendDotSelf {
+  border-color: var(--color-primary, #409eff);
+  background: var(--color-primary-light-1, rgba(64, 158, 255, 0.12));
+}
+
+.gpuTopologyLegendDotHighSpeed {
+  border-color: var(--color-success, #67c23a);
+  background: var(--color-success-light-1, rgba(103, 194, 58, 0.12));
+}
+
+.gpuTopologyLegendDotSystem {
+  border-color: var(--border-color);
+  background: transparent;
+}
+
+.gpuTopologyLegendCode {
+  font-weight: 600;
+  color: var(--text-title);
+  white-space: nowrap;
+}
+
+.gpuTopologyLegendDesc {
+  flex: 1 1 auto;
+  min-width: 0;
+}

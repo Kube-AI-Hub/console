@@ -80,7 +80,6 @@ module.exports = {
   // List > Create > Basic Information > Code Repository > Bitbucket
   BITBUCKET_SERVER_ADDRESS: 'Bitbucket Sunucu Adresi',
   BITBUCKET_SERVER_EMPTY_TIP: 'Lütfen bir Bitbucket sunucusunun adresini girin.',
-  INCORRECT_USERNAME_OR_PASSWORD: 'Hatalı kullanıcı adı veya şifre.',
   BITBUCKET_SERVER_CREDENTIAL_EMPTY: 'Lütfen bir Bitbucket sunucusu ve kimlik bilgisi ayarlayın.',
   BITBUCKET_ADDRESS_EMPTY_TIP: 'Lütfen bir Bitbucket sunucusunun adresini girin.',
   BITBUCKET_ADDRESS_INVALID_TIP: 'Geçersiz Bitbucket sunucu adresi.',

@@ -80,7 +80,6 @@ module.exports = {
   // List > Create > Basic Information > Code Repository > Bitbucket
   BITBUCKET_SERVER_ADDRESS: 'Bitbucket 서버 주소',
   BITBUCKET_SERVER_EMPTY_TIP: 'Bitbucket 서버의 주소를 입력하십시오.',
-  INCORRECT_USERNAME_OR_PASSWORD: '잘못 된 사용자 이름 또는 비밀번호 입니다.',
   BITBUCKET_SERVER_CREDENTIAL_EMPTY: 'Bitbucket 서버 및 자격 증명을 설정하십시오.',
   BITBUCKET_ADDRESS_EMPTY_TIP: 'Bitbucket 서버의 주소를 입력하십시오.',
   BITBUCKET_ADDRESS_INVALID_TIP: '유효하지 않은 Bitbucket 서버 주소입니다.',

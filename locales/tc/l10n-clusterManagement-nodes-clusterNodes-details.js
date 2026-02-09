@@ -29,6 +29,9 @@ module.exports = {
   IP_ADDRESS: 'IP 地址',
   SCHEDULABLE: '可調度',
   YES: '是',
+  GPU_VIRT_MODE: 'GPU 共享/虛擬化模式',
+  GPU_DRIVER_VERSION: 'GPU 驅動版本',
+  GPU_ENGINE_VERSION: 'GPU 引擎版本',
   // More > Edit Labels
   EDIT_LABELS: '編輯標籤',
   LABEL_PL: '標籤',
@@ -47,7 +50,8 @@ module.exports = {
   RESOURCE_TOTAL: '資源總量',
   GPU_TOTAL: 'GPU 總量',
   GPU_TOTAL_SCAP: 'GPU 總量',
-  GPU_CARD_UNIT: '卡',
+  VIRTUAL_GPU_TOTAL: '共享/虛擬GPU總量',
+  VIRTUAL_GPU_TOTAL_SCAP: '共享/虛擬GPU總量',
   CPU_CORE_UNIT: '核',
   GPU_MEMORY_TOTAL: '顯存總量',
   GPU_MEMORY_TOTAL_SCAP: '顯存總量',
@@ -59,9 +63,10 @@ module.exports = {
   POD_TOTAL_USAGE_SCAP: '容器組總量',
   DISK_TOTAL_USAGE: '磁碟總量',
   DISK_TOTAL_USAGE_SCAP: '磁碟總量',
+  EPHEMERAL_STORAGE: '臨時存儲',
+  EPHEMERAL_STORAGE_SCAP: '臨時存儲',
   // Running Status > Resource Usage
   RESOURCE_USAGE: '資源用量',
-  GPU_USAGE: 'GPU 用量',
   GPU_USAGE_SCAP: 'GPU 用量',
   GPU_MEMORY_USAGE: 'GPU 顯存用量',
   GPU_MEMORY_USAGE_SCAP: 'GPU 顯存用量',
@@ -76,6 +81,9 @@ module.exports = {
   CPU_LIMIT_SCAP: 'CPU 限制',
   // Running Status > Allocated Resources
   ALLOCATED_RESOURCES: '已分配資源',
+  REQUESTS: '下限(預留)',
+  LIMITS: '上限',
+  ALLOCATED_RESOURCES_OVERCOMMIT_TIP: '總上限可能超過 100%，即存在超賣。',
   // Running Status > Health Status
   RUNNING_STATUS: '運行狀態',
   HEALTH_STATUS: '健康狀態',
@@ -96,6 +104,22 @@ module.exports = {
   // Pods
   READY_VALUE: '就緒：{readyCount}/{total}',
   STATUS_VALUE: '狀態：{value}',
+  // Running Status > GPU Card List
+  GPU_CARD_LIST: '顯卡列表',
+  NO_GPU_TIPS: '該節點未發現顯卡。',
+  GPU_CARD_INDEX: '序號',
+  GPU_CARD_ID: '顯卡 ID',
+  GPU_CARD_STATUS: '狀態',
+  GPU_CARD_MODEL: '型號',
+  GPU_CARD_VGPU: 'vGPU',
+  GPU_CARD_COMPUTE: '算力',
+  GPU_CARD_MEMORY: '顯存',
+  GPU_CARD_NUMA: 'NUMA 節點',
+  GPU_CARD_VENDOR: '廠商',
+  GPU_CARD_MODE: '模式',
+  GPU_TOPOLOGY: '顯卡連接拓撲圖',
+  GPU_TOPOLOGY_SELF: '自身',
+  GPU_TOPOLOGY_LEGEND_TITLE: '圖例',
   // Metadata
   // Monitoring
   USAGE: 'Usage',

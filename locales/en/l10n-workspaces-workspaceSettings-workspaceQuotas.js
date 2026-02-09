@@ -30,6 +30,4 @@ module.exports = {
   CPU_LIMIT: 'CPU Limit',
   MEMORY_REQUEST: 'Memory Request',
   MEMORY_LIMIT: 'Memory Limit',
-  GPU_LIMIT: 'GPU Limit',
-  RESOURCE_TYPE_SCAP: 'Resource type',
 }

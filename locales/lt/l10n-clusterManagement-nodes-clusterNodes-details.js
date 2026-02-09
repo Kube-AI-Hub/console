@@ -29,6 +29,9 @@ module.exports = {
   IP_ADDRESS: 'IP Address',
   SCHEDULABLE: 'Schedulable',
   YES: 'Yes',
+  GPU_VIRT_MODE: 'GPU Shared/Virtualization Mode',
+  GPU_DRIVER_VERSION: 'GPU Driver Version',
+  GPU_ENGINE_VERSION: 'GPU Engine Version',
   // More > Edit Labels
   EDIT_LABELS: 'Edit Labels',
   LABEL_PL: 'Labels',

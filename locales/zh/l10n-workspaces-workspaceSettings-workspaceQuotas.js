@@ -29,6 +29,4 @@ module.exports = {
   CPU_LIMIT: 'CPU 限制',
   MEMORY_REQUEST: '内存预留',
   MEMORY_LIMIT: '内存上限',
-  GPU_LIMIT: '卡数限制',
-  RESOURCE_TYPE_SCAP: '资源类型',
 };

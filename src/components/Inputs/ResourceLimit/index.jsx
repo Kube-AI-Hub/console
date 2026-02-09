@@ -806,7 +806,7 @@ export default class ResourceLimit extends React.Component {
             {this.state.gpu.memoryName && (
               <div className={classnames(styles.input)}>
                 <div className={styles.label}>
-                  <span>{t('GPU_MEMORY')}</span>
+                  <span>{t('GPU_MEMORY_LIMIT')}</span>
                 </div>
                 <div className={styles.inputBox}>
                   <Input
@@ -822,7 +822,7 @@ export default class ResourceLimit extends React.Component {
             {this.state.gpu.vcoresName && (
               <div className={classnames(styles.input)}>
                 <div className={styles.label}>
-                  <span>{t('GPU_VCORES')}</span>
+                  <span>{t('GPU_VCORES_LIMIT')}</span>
                 </div>
                 <div className={styles.inputBox}>
                   <Input
@@ -849,7 +849,7 @@ export default class ResourceLimit extends React.Component {
     return (
       <div className={styles.wrapper}>
         <div className={styles.inputWrapper}>
-          {/* 第一行：CPU 相关配置（预留 | 上限），2 列与 GPU 对齐 */}
+          {/* 第一行：CPU 相关配置（下限(预留) | 上限），2 列与 GPU 对齐 */}
           <div className={styles.resourceRowSection}>
             <div
               className={classnames(
@@ -894,7 +894,7 @@ export default class ResourceLimit extends React.Component {
               </div>
             </div>
           </div>
-          {/* 第二行：内存相关配置（预留 | 上限），2 列与 GPU 对齐 */}
+          {/* 第二行：内存相关配置（下限(预留) | 上限），2 列与 GPU 对齐 */}
           <div className={styles.resourceRowSection}>
             <div
               className={classnames(

@@ -29,6 +29,9 @@ module.exports = {
   IP_ADDRESS: 'IP Adresi',
   SCHEDULABLE: 'Zamanlanabilir',
   YES: 'Evet',
+  GPU_VIRT_MODE: 'GPU Paylaşımlı/Sanal Mod',
+  GPU_DRIVER_VERSION: 'GPU Sürücü Sürümü',
+  GPU_ENGINE_VERSION: 'GPU Motor Sürümü',
   // More > Edit Labels
   EDIT_LABELS: 'Etketleri düzenle',
   LABEL_PL: 'Etiketler',

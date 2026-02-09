@@ -134,7 +134,7 @@ export default class NodeDetail extends React.Component {
       />
     )
     const address = get(detail, 'status.addresses[0].address', '-')
-    const nodeInfo = detail.nodeInfo || {}
+    const nodeInfo = detail.nodeInfo || get(detail, 'status.nodeInfo') || {}
     const xpu =
       get(detail, 'labels.xpu') ||
       (get(detail, ['labels', 'xpu-vendor']) &&
@@ -173,7 +173,9 @@ export default class NodeDetail extends React.Component {
       },
       {
         name: t('OS_TYPE'),
-        value: t(nodeInfo.operatingSystem.toUpperCase()),
+        value: nodeInfo.operatingSystem
+          ? t(nodeInfo.operatingSystem.toUpperCase())
+          : '-',
       },
       {
         name: t('KERNEL_VERSION'),
@@ -193,8 +195,28 @@ export default class NodeDetail extends React.Component {
       },
       {
         name: t('ARCHITECTURE'),
-        value: nodeInfo.architecture.toUpperCase(),
+        value: nodeInfo.architecture
+          ? nodeInfo.architecture.toUpperCase()
+          : '-',
       },
+      ...(nodeInfo.virtualCardMode
+        ? [{ name: t('GPU_VIRT_MODE'), value: nodeInfo.virtualCardMode }]
+        : []),
+      ...(nodeInfo.gpuDriverVersion
+        ? [{ name: t('GPU_DRIVER_VERSION'), value: nodeInfo.gpuDriverVersion }]
+        : []),
+      ...(nodeInfo.gpuEngineVersion
+        ? [{ name: t('GPU_ENGINE_VERSION'), value: nodeInfo.gpuEngineVersion }]
+        : []),
+      ...(nodeInfo.deviceSplitCount !== undefined &&
+      nodeInfo.deviceSplitCount !== ''
+        ? [
+            {
+              name: t('GPU_DEVICE_SPLIT_COUNT'),
+              value: String(nodeInfo.deviceSplitCount),
+            },
+          ]
+        : []),
       {
         name: t('CREATION_TIME_TCAP'),
         value: getLocalTime(detail.createTime).format('YYYY-MM-DD HH:mm:ss'),

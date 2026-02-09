@@ -61,6 +61,8 @@ module.exports = {
   CONTAINER_RESOURCE_LIMIT_TIP: '컨테이너가 적절한 노드로 스케줄링되도록 컨테이너의 리소스 제한 및 요청을 설정합니다.',
   GPU_TYPE: 'GPU 유형',
   GPU_LIMIT: 'GPU 제한',
+  GPU_MEMORY_LIMIT: 'GPU 메모리 제한',
+  GPU_VCORES_LIMIT: 'GPU vCores 제한',
   NO_LIMIT: '제한 없음',
   NO_REQUEST: '요청 없음',
   NO_RESOURCE_LIMIT: '리소스 제한 없음',

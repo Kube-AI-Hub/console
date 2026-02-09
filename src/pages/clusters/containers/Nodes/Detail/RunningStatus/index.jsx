@@ -4,14 +4,320 @@ import { inject, observer } from 'mobx-react'
 import { get, isEmpty } from 'lodash'
 
 import NodeMonitoringStore from 'stores/monitoring/node'
-import { cpuFormat, memoryFormat, coreUnitTS } from 'utils'
-import { Table, Tooltip } from '@kube-design/components'
+import {
+  cpuFormat,
+  memoryFormat,
+  coreUnitTS,
+  getVendorDisplayName,
+} from 'utils'
+import { Icon, Table, Tooltip } from '@kube-design/components'
 import { Panel, Text, Status } from 'components/Base'
 import MonitorTab from 'components/Cards/Monitoring/MonitorTab'
 import { getValueByUnit, getSuitableUnit } from 'utils/monitoring'
 import ConditionCard from './ConditionCard'
 import TaintCard from './TaintCard'
+import GpuTopology from './GpuTopology'
 import * as styles from './index.scss'
+
+const STANDARD_CAPACITY_KEYS = ['cpu', 'memory', 'pods', 'ephemeral-storage']
+
+const STANDARD_CAPACITY_CONFIG = {
+  cpu: { icon: 'cpu', titleKey: 'CPU_TOTAL_USAGE', format: 'cpu' },
+  memory: { icon: 'memory', titleKey: 'MEMORY_TOTAL_USAGE', format: 'memory' },
+  pods: { icon: 'pod', titleKey: 'POD_TOTAL_USAGE', format: 'count' },
+  'ephemeral-storage': {
+    icon: 'database',
+    titleKey: 'EPHEMERAL_STORAGE',
+    format: 'disk',
+  },
+}
+
+function formatCapacityValue(value, config) {
+  if (value === undefined || value === null || value === '') return '-'
+  const fmt = config ? config.format : null
+  if (fmt === 'cpu') return `${cpuFormat(value)} Core`
+  if (fmt === 'memory' || fmt === 'disk')
+    return `${memoryFormat(value, 'Gi')} Gi`
+  if (fmt === 'gpuMemory') {
+    const unit = (config && config.memoryUnit) || 'Mi'
+    if (unit === 'Mi' || unit === 'Gi') {
+      return `${memoryFormat(value, unit)} ${unit}`
+    }
+    const num = memoryFormat(value, 'Mi')
+    return isFinite(num) ? `${num} ${unit}` : `${String(value)} ${unit}`
+  }
+  if (fmt === 'count' || fmt === 'vcores') return String(value)
+  return String(value)
+}
+
+function formatAllocatedWithPercent(value, allocatable, config) {
+  const raw = formatCapacityValue(value, config)
+  if (raw === '-' || !allocatable || isCapacityZero(allocatable)) return raw
+  let pct
+  const fmt = config ? config.format : null
+  if (fmt === 'cpu') {
+    const v = cpuFormat(value)
+    const a = cpuFormat(allocatable)
+    if (!isFinite(v) || !isFinite(a) || a === 0) return raw
+    pct = Math.round((v / a) * 100)
+  } else if (fmt === 'memory' || fmt === 'disk' || fmt === 'gpuMemory') {
+    const v = memoryFormat(value, 'Mi')
+    const a = memoryFormat(allocatable, 'Mi')
+    if (!isFinite(v) || !isFinite(a) || a === 0) return raw
+    pct = Math.round((v / a) * 100)
+  } else if (fmt === 'count' || fmt === 'vcores') {
+    const v = Number(String(value).replace(/[^0-9.]/g, '')) || 0
+    const a = Number(String(allocatable).replace(/[^0-9.]/g, '')) || 0
+    if (!a) return raw
+    pct = Math.round((v / a) * 100)
+  } else {
+    return raw
+  }
+  return `${raw} (${pct}%)`
+}
+
+function isCapacityZero(value) {
+  if (value === undefined || value === null || value === '') return true
+  const s = String(value).trim()
+  if (s === '0') return true
+  if (/^0+\.?0*$/.test(s)) return true
+  return false
+}
+
+function getOrderedCapacityRows(
+  capacity,
+  supportGpuType,
+  supportGpuTypeMetadata
+) {
+  const rows = []
+  const seen = new Set()
+  const capacityKeys = Object.keys(capacity)
+
+  STANDARD_CAPACITY_KEYS.forEach(key => {
+    if (capacityKeys.includes(key)) {
+      seen.add(key)
+      const config = STANDARD_CAPACITY_CONFIG[key]
+      rows.push({
+        key,
+        icon: config ? config.icon : 'database',
+        description: t(`${config ? config.titleKey : key}_SCAP`),
+        config,
+        isGpuResource: false,
+      })
+    }
+  })
+
+  const gpuTypes = supportGpuType || []
+  const metadata = supportGpuTypeMetadata || {}
+  gpuTypes.forEach(resourceName => {
+    if (!Object.prototype.hasOwnProperty.call(capacity, resourceName)) return
+    if (isCapacityZero(capacity[resourceName])) return
+    seen.add(resourceName)
+    const meta = metadata[resourceName] || {}
+    const displayName = meta.displayName || resourceName
+    rows.push({
+      key: resourceName,
+      icon: 'gpu',
+      description: displayName,
+      config: { format: 'count' },
+      isGpuResource: true,
+    })
+    const memoryName = meta.memoryName
+    if (
+      memoryName &&
+      Object.prototype.hasOwnProperty.call(capacity, memoryName) &&
+      !isCapacityZero(capacity[memoryName])
+    ) {
+      seen.add(memoryName)
+      rows.push({
+        key: memoryName,
+        icon: 'memory',
+        description: `${displayName} ${t('GPU_MEMORY_TOTAL')}`,
+        config: { format: 'gpuMemory', memoryUnit: meta.memoryUnit || 'Mi' },
+        isGpuResource: true,
+      })
+    }
+    const vcoresName = meta.vcoresName
+    if (
+      vcoresName &&
+      Object.prototype.hasOwnProperty.call(capacity, vcoresName) &&
+      !isCapacityZero(capacity[vcoresName])
+    ) {
+      seen.add(vcoresName)
+      rows.push({
+        key: vcoresName,
+        icon: 'cpu',
+        description: `${displayName} Vcores`,
+        config: { format: 'vcores' },
+        isGpuResource: true,
+      })
+    }
+  })
+
+  capacityKeys.forEach(key => {
+    if (!seen.has(key)) {
+      if (isCapacityZero(capacity[key])) return
+      rows.push({
+        key: `other-${key}`,
+        dataKey: key,
+        icon: 'computing',
+        description: key,
+        config: null,
+        isGpuResource: false,
+      })
+    }
+  })
+
+  return rows
+}
+
+function getResourceTotalGroups(
+  capacity,
+  nodeInfo,
+  supportGpuType,
+  supportGpuTypeMetadata,
+  diskTitle
+) {
+  const row1 = []
+  const row2 = []
+  const row3 = []
+  const capacityKeys = Object.keys(capacity)
+  const gpuTypes = supportGpuType || []
+  const metadata = supportGpuTypeMetadata || {}
+  const gpuRelatedKeys = new Set(gpuTypes)
+  gpuTypes.forEach(resourceName => {
+    const meta = metadata[resourceName] || {}
+    if (meta.memoryName) gpuRelatedKeys.add(meta.memoryName)
+    if (meta.vcoresName) gpuRelatedKeys.add(meta.vcoresName)
+  })
+
+  const row1Order = [
+    'cpu',
+    'memory',
+    'pods',
+    'node_disk_size_capacity',
+    'ephemeral-storage',
+  ]
+  row1Order.forEach(key => {
+    if (key === 'node_disk_size_capacity') {
+      row1.push({
+        key: 'node_disk_size_capacity',
+        icon: 'database',
+        description: t('DISK_TOTAL_USAGE_SCAP'),
+        title: diskTitle,
+      })
+      return
+    }
+    if (!capacityKeys.includes(key)) return
+    const config = STANDARD_CAPACITY_CONFIG[key]
+    row1.push({
+      key,
+      icon: config ? config.icon : 'database',
+      description: t(`${config ? config.titleKey : key}_SCAP`),
+      title: formatCapacityValue(capacity[key], config),
+    })
+  })
+
+  const cardCount = get(nodeInfo, 'cardCount')
+  if (cardCount !== undefined && cardCount !== null && cardCount !== '') {
+    const n = Number(cardCount)
+    row2.push({
+      key: 'gpuCardCount',
+      icon: 'gpu',
+      description: t('GPU_TOTAL_SCAP'),
+      title: `${isFinite(n) ? n : cardCount} ${t('GPU_CARD_UNIT')}`,
+    })
+  }
+
+  const gpuMemoryTotal = get(nodeInfo, 'gpuMemoryTotal')
+  if (
+    gpuMemoryTotal !== undefined &&
+    gpuMemoryTotal !== null &&
+    gpuMemoryTotal !== ''
+  ) {
+    const value =
+      typeof gpuMemoryTotal === 'number'
+        ? `${gpuMemoryTotal}Mi`
+        : String(gpuMemoryTotal)
+    row2.push({
+      key: 'gpuMemoryTotal',
+      icon: 'memory',
+      description: t('GPU_MEMORY_TOTAL_SCAP'),
+      title: formatCapacityValue(value, {
+        format: 'gpuMemory',
+        memoryUnit: 'Mi',
+      }),
+    })
+  }
+
+  const virtualCardCount = get(nodeInfo, 'virtualCardCount')
+  if (
+    virtualCardCount !== undefined &&
+    virtualCardCount !== null &&
+    virtualCardCount !== ''
+  ) {
+    const n = Number(virtualCardCount)
+    row2.push({
+      key: 'virtualCardCount',
+      icon: 'gpu',
+      description: t('VIRTUAL_GPU_TOTAL_SCAP'),
+      title: `${isFinite(n) ? n : virtualCardCount} ${t('GPU_CARD_UNIT')}`,
+    })
+  }
+
+  gpuTypes.forEach(resourceName => {
+    if (!Object.prototype.hasOwnProperty.call(capacity, resourceName)) return
+    if (isCapacityZero(capacity[resourceName])) return
+    const meta = metadata[resourceName] || {}
+    const displayName = meta.displayName || resourceName
+    row2.push({
+      key: resourceName,
+      icon: 'gpu',
+      description: displayName,
+      title: formatCapacityValue(capacity[resourceName], { format: 'count' }),
+    })
+  })
+
+  const gpuPrefixes = new Set()
+  gpuTypes.forEach(resourceName => {
+    const idx = resourceName.indexOf('/')
+    if (idx !== -1) {
+      gpuPrefixes.add(resourceName.substring(0, idx + 1))
+    }
+  })
+
+  const standardCapacityKeys = ['cpu', 'memory', 'pods', 'ephemeral-storage']
+  const keysForRow3 = []
+  capacityKeys.forEach(key => {
+    if (standardCapacityKeys.includes(key)) return
+    if (gpuRelatedKeys.has(key)) return
+    if (isCapacityZero(capacity[key])) return
+    const matchesGpuPrefix = [...gpuPrefixes].some(prefix =>
+      key.startsWith(prefix)
+    )
+    if (matchesGpuPrefix) {
+      row2.push({
+        key: `gpu-${key}`,
+        icon: 'gpu',
+        description: key,
+        title: formatCapacityValue(capacity[key], null),
+      })
+    } else {
+      keysForRow3.push(key)
+    }
+  })
+
+  keysForRow3.forEach(key => {
+    row3.push({
+      key: `other-${key}`,
+      icon: 'computing',
+      description: key,
+      title: formatCapacityValue(capacity[key], null),
+    })
+  })
+
+  return { row1, row2, row3 }
+}
 
 const METRIC_TYPES = [
   'node_gpu_utilisation',
@@ -55,13 +361,15 @@ class RunningStatus extends React.Component {
     const params = {
       conditions: `nodeName=${this.store.detail.name}`,
     }
-    const result = await request.get(
-      `/kapis/gpu.kubesphere.io/v1alpha1/gpus`,
-      params
-    )
-    this.setState({
-      gpulist: result.items,
-    })
+    try {
+      const result = await request.get(
+        `/kapis/gpu.kubesphere.io/v1alpha1/gpus`,
+        params
+      )
+      this.setState({ gpulist: result.items || [] })
+    } catch (e) {
+      this.setState({ gpulist: [] })
+    }
   }
 
   fetchData() {
@@ -81,80 +389,141 @@ class RunningStatus extends React.Component {
     const values = get(metrics, '[0].values', [])
     const lastValue = values.length > 0 ? values[values.length - 1] : [0, 0]
     const value = parseFloat(get(lastValue, '[1]', 0))
-    
+
     // For GPU count, display raw value without unit conversion
     if (unitType === 'gpu') {
       return `${Math.round(value)} ${unit}`
     }
-    
+
     const unitValue = unitType ? getSuitableUnit(values, unitType) : ''
     const unitText = unitValue ? coreUnitTS(values, unitValue) : ''
     return `${getValueByUnit(value, unit)} ${unitText}`
   }
 
   renderResourceTotalStatus() {
-    // const metrics = toJS(this.monitoringStore.data)
-    const tabs = [
-      {
-        key: 'node_gpu_total',
-        icon: 'gpu',
-        unitType: 'gpu',
-        unit: t('GPU_CARD_UNIT'),
-        legend: ['GPU_TOTAL'],
-        title: 'GPU_TOTAL',
-      },
-      {
-        key: 'node_gpu_memory_total',
-        icon: 'memory',
-        unitType: 'memory',
-        unit: 'Gi',
-        legend: ['GPU_MEMORY_TOTAL'],
-        title: 'GPU_MEMORY_TOTAL',
-      },
-      {
-        key: 'node_cpu_total',
-        icon: 'cpu',
-        unitType: 'cpu',
-        unit: 'Core',
-        legend: ['CPU_USAGE'],
-        title: 'CPU_TOTAL_USAGE',
-      },
-      {
-        key: 'node_memory_total',
-        icon: 'memory',
-        unitType: 'memory',
-        unit: 'Gi',
-        title: 'MEMORY_TOTAL_USAGE',
-      },
-      {
-        key: 'node_pod_quota',
-        icon: 'pod',
-        title: 'POD_TOTAL_USAGE',
-      },
-      {
-        key: 'node_disk_size_capacity',
-        icon: 'database',
-        unitType: 'disk',
-        unit: 'TB',
-        title: 'DISK_TOTAL_USAGE',
-      },
-    ]
+    const { detail } = this.store
+    const capacity = get(detail, 'status.capacity') || {}
+    const capacityKeys = Object.keys(capacity)
+    const hasCapacity = capacityKeys.length > 0
+
+    const supportGpuType = get(globals, 'config.supportGpuType', [])
+    const supportGpuTypeMetadata = get(
+      globals,
+      'config.supportGpuTypeMetadata',
+      {}
+    )
+    const nodeInfo = get(detail, 'status.nodeInfo') || {}
+    const diskTitle = this.getLastValue('node_disk_size_capacity', 'TB', 'disk')
+    const { row1, row2, row3 } = getResourceTotalGroups(
+      capacity,
+      nodeInfo,
+      supportGpuType,
+      supportGpuTypeMetadata,
+      diskTitle
+    )
+
+    const useMetrics = !hasCapacity
+    if (useMetrics) {
+      const tabs = [
+        {
+          key: 'node_gpu_total',
+          icon: 'gpu',
+          unitType: 'gpu',
+          unit: t('GPU_CARD_UNIT'),
+          title: 'GPU_TOTAL',
+        },
+        {
+          key: 'node_gpu_memory_total',
+          icon: 'memory',
+          unitType: 'memory',
+          unit: 'Gi',
+          title: 'GPU_MEMORY_TOTAL',
+        },
+        {
+          key: 'node_cpu_total',
+          icon: 'cpu',
+          unitType: 'cpu',
+          unit: 'Core',
+          title: 'CPU_TOTAL_USAGE',
+        },
+        {
+          key: 'node_memory_total',
+          icon: 'memory',
+          unitType: 'memory',
+          unit: 'Gi',
+          title: 'MEMORY_TOTAL_USAGE',
+        },
+        { key: 'node_pod_quota', icon: 'pod', title: 'POD_TOTAL_USAGE' },
+        {
+          key: 'node_disk_size_capacity',
+          icon: 'database',
+          unitType: 'disk',
+          unit: 'TB',
+          title: 'DISK_TOTAL_USAGE',
+        },
+      ]
+      return (
+        <Panel
+          className={styles.resourcestotal}
+          title={t('RESOURCE_TOTAL')}
+          loading={this.monitoringStore.isLoading}
+        >
+          {tabs.map(tab => (
+            <div className={styles.tabResourcesItem} key={tab.key}>
+              <Text
+                icon={tab.icon}
+                title={this.getLastValue(tab.key, tab.unit, tab.unitType)}
+                description={t(`${tab.title}_SCAP`)}
+              />
+            </div>
+          ))}
+        </Panel>
+      )
+    }
+
     return (
       <Panel
         className={styles.resourcestotal}
         title={t('RESOURCE_TOTAL')}
         loading={this.monitoringStore.isLoading}
       >
-        {tabs.map(tab => (
-          <div className={styles.tabResourcesItem} key={tab.key}>
-            <Text
-              icon={tab.icon}
-              key={tab.key}
-              title={this.getLastValue(tab.key, tab.unit, tab.unitType)}
-              description={t(`${tab.title}_SCAP`)}
-            />
+        <div className={styles.resourceTotalRow1}>
+          {row1.map(item => (
+            <div className={styles.tabResourcesItem} key={item.key}>
+              <Text
+                icon={item.icon}
+                title={item.title}
+                description={item.description}
+              />
+            </div>
+          ))}
+        </div>
+        {row2.length > 0 && (
+          <div className={styles.resourceTotalRow2}>
+            {row2.map(item => (
+              <div className={styles.tabResourcesItem} key={item.key}>
+                <Text
+                  icon={item.icon}
+                  title={item.title}
+                  description={item.description}
+                />
+              </div>
+            ))}
           </div>
-        ))}
+        )}
+        {row3.length > 0 && (
+          <div className={styles.resourceTotalRow3}>
+            {row3.map(item => (
+              <div className={styles.tabResourcesItem} key={item.key}>
+                <Text
+                  icon={item.icon}
+                  title={item.title}
+                  description={item.description}
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </Panel>
     )
   }
@@ -225,40 +594,115 @@ class RunningStatus extends React.Component {
 
   renderAllocatedResources() {
     const { detail } = this.store
+    const capacity = get(detail, 'status.capacity') || {}
+    const allocated = get(detail, 'status.allocated') || {}
+    const allocatedLimits = get(detail, 'status.allocatedLimits') || {}
+    const allocatable = get(detail, 'status.allocatable') || {}
+    const hasAllocated = Object.keys(allocated).length > 0
+    const capacityKeys = Object.keys(capacity)
+    const hasCapacity = capacityKeys.length > 0
+
+    if (hasCapacity && hasAllocated) {
+      const supportGpuType = get(globals, 'config.supportGpuType', [])
+      const supportGpuTypeMetadata = get(
+        globals,
+        'config.supportGpuTypeMetadata',
+        {}
+      )
+      const rowSpecs = getOrderedCapacityRows(
+        capacity,
+        supportGpuType,
+        supportGpuTypeMetadata
+      )
+      const limits =
+        Object.keys(allocatedLimits).length > 0 ? allocatedLimits : allocated
+      const tableData = rowSpecs.map(row => {
+        const dataKey = row.dataKey !== undefined ? row.dataKey : row.key
+        const reqVal = allocated[dataKey]
+        const limVal = limits[dataKey] !== undefined ? limits[dataKey] : reqVal
+        const allocVal = allocatable[dataKey]
+        const requestsCell = row.isGpuResource
+          ? '-'
+          : formatAllocatedWithPercent(reqVal, allocVal, row.config)
+        const limitsCell = row.isGpuResource
+          ? formatCapacityValue(limVal, row.config)
+          : formatAllocatedWithPercent(limVal, allocVal, row.config)
+        return {
+          key: row.key,
+          icon: row.icon,
+          resource: row.description,
+          requests: requestsCell,
+          limits: limitsCell,
+        }
+      })
+      return (
+        <Panel className={styles.allocated} title={t('ALLOCATED_RESOURCES')}>
+          <div className={styles.allocatedTableWrap}>
+            <table className={styles.allocatedTable}>
+              <thead>
+                <tr>
+                  <th>{t('RESOURCE')}</th>
+                  <th>{t('REQUESTS')}</th>
+                  <th>{t('LIMITS')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tableData.map(row => (
+                  <tr key={row.key}>
+                    <td className={styles.allocatedTableResourceCell}>
+                      <Icon name={row.icon} size={20} />
+                      <span>{row.resource}</span>
+                    </td>
+                    <td>{row.requests}</td>
+                    <td>{row.limits}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className={styles.allocatedTableNote}>
+            {t('ALLOCATED_RESOURCES_OVERCOMMIT_TIP')}
+          </div>
+        </Panel>
+      )
+    }
+
+    const allocCpu = get(
+      detail,
+      'annotations["node.kubesphere.io/cpu-requests"]'
+    )
+    const allocMem = get(
+      detail,
+      'annotations["node.kubesphere.io/memory-requests"]'
+    )
+    const allocCpuFrac = get(
+      detail,
+      'annotations["node.kubesphere.io/cpu-requests-fraction"]'
+    )
+    const allocMemFrac = get(
+      detail,
+      'annotations["node.kubesphere.io/memory-requests-fraction"]'
+    )
     return (
       <Panel className={styles.allocated} title={t('ALLOCATED_RESOURCES')}>
         <Text
-          title={this.getLastValue('node_gpu_allocated', t('GPU_CARD_UNIT'), 'gpu')}
+          title={this.getLastValue(
+            'node_gpu_allocated',
+            t('GPU_CARD_UNIT'),
+            'gpu'
+          )}
           description={t('GPU_REQUEST_SCAP')}
         />
         <Text
           title={
-            cpuFormat(
-              get(detail, 'annotations["node.kubesphere.io/cpu-requests"]')
-            ) === 1
+            cpuFormat(allocCpu) === 1
               ? t('CPU_CORE_PERCENT_SI', {
-                  core: cpuFormat(
-                    get(
-                      detail,
-                      'annotations["node.kubesphere.io/cpu-requests"]'
-                    )
-                  ),
-                  percent: get(
-                    detail,
-                    'annotations["node.kubesphere.io/cpu-requests-fraction"]'
-                  ),
+                  core: cpuFormat(allocCpu),
+                  percent: allocCpuFrac,
                 })
               : t('CPU_CORE_PERCENT_PL', {
-                  core: cpuFormat(
-                    get(
-                      detail,
-                      'annotations["node.kubesphere.io/cpu-requests"]'
-                    )
-                  ),
-                  percent: get(
-                    detail,
-                    'annotations["node.kubesphere.io/cpu-requests-fraction"]'
-                  ),
+                  core: cpuFormat(allocCpu),
+                  percent: allocCpuFrac,
                 })
           }
           description={t('CPU_REQUEST_SCAP')}
@@ -291,14 +735,8 @@ class RunningStatus extends React.Component {
         />
         <Text
           title={t('MEMORY_GIB_PERCENT', {
-            gib: memoryFormat(
-              get(detail, 'annotations["node.kubesphere.io/memory-requests"]'),
-              'Gi'
-            ),
-            percent: get(
-              detail,
-              'annotations["node.kubesphere.io/memory-requests-fraction"]'
-            ),
+            gib: memoryFormat(allocMem, 'Gi'),
+            percent: allocMemFrac,
           })}
           description={t('MEMORY_REQUEST_SCAP')}
         />
@@ -359,6 +797,13 @@ class RunningStatus extends React.Component {
     }
     const columns = [
       {
+        title: t('GPU_CARD_INDEX'),
+        key: 'index',
+        isHideable: true,
+        width: '5%',
+        render: record => record.index,
+      },
+      {
         title: t('GPU_CARD_ID'),
         key: 'uuid',
         isHideable: true,
@@ -402,6 +847,25 @@ class RunningStatus extends React.Component {
         render: record => record.type,
       },
       {
+        title: t('GPU_CARD_NUMA'),
+        key: 'numa',
+        isHideable: true,
+        render: record =>
+          record.numa !== undefined && record.numa !== null ? record.numa : '-',
+      },
+      {
+        title: t('GPU_CARD_VENDOR'),
+        key: 'deviceVendor',
+        isHideable: true,
+        render: record => getVendorDisplayName(record.deviceVendor) || '-',
+      },
+      {
+        title: t('GPU_CARD_MODE'),
+        key: 'mode',
+        isHideable: true,
+        render: record => record.mode || '-',
+      },
+      {
         title: t('GPU_CARD_VGPU'),
         key: 'vgpuUsed',
         isHideable: true,
@@ -439,6 +903,12 @@ class RunningStatus extends React.Component {
     )
   }
 
+  renderGpuTopology() {
+    const detail = toJS(this.store.detail)
+    const nodeInfo = detail.nodeInfo || get(detail, 'status.nodeInfo') || {}
+    return <GpuTopology nodeInfo={nodeInfo} />
+  }
+
   render() {
     return (
       <div className={styles.main}>
@@ -448,6 +918,7 @@ class RunningStatus extends React.Component {
         {this.renderConditions()}
         {this.renderTanits()}
         {this.renderGpuCardList()}
+        {this.renderGpuTopology()}
       </div>
     )
   }

@@ -61,6 +61,8 @@ module.exports = {
   CONTAINER_RESOURCE_LIMIT_TIP: 'Set the resource limits and requests of the container so that the container is scheduled to appropriate nodes.',
   GPU_TYPE: 'GPU Type',
   GPU_LIMIT: 'GPU Limit',
+  GPU_MEMORY_LIMIT: 'GPU Memory Limit',
+  GPU_VCORES_LIMIT: 'GPU vCores Limit',
   NO_LIMIT: 'Ilimitado',
   NO_REQUEST: 'Ninguna solicitud',
   NO_RESOURCE_LIMIT: 'No resource limit',
