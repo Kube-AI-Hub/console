@@ -61,6 +61,7 @@ module.exports = {
   GPU_PARAM_ENABLE_DEVICE_TYPE: 'Enable device type (enable-device-type)',
   GPU_DRIVER_VERSION: 'GPU Driver Version',
   GPU_ENGINE_VERSION: 'GPU Engine Version',
+  GPU_DEVICE_SPLIT_COUNT: 'GPU Device Max Share/Split Count',
   // More > Edit Labels
   EDIT_LABELS: 'Edit Labels',
   LABEL_PL: 'Labels',

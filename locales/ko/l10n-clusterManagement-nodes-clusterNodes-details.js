@@ -32,6 +32,7 @@ module.exports = {
   GPU_VIRT_MODE: 'GPU 공유/가상화 모드',
   GPU_DRIVER_VERSION: 'GPU 드라이버 버전',
   GPU_ENGINE_VERSION: 'GPU 엔진 버전',
+  GPU_DEVICE_SPLIT_COUNT: 'GPU 디바이스 최대 공유/분할 수',
   // More > Edit Labels
   EDIT_LABELS: '레이블 편집',
   LABEL_PL: '레이블',

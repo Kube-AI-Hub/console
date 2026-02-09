@@ -32,6 +32,7 @@ module.exports = {
   GPU_VIRT_MODE: 'GPU Shared/Virtualization Mode',
   GPU_DRIVER_VERSION: 'GPU Driver Version',
   GPU_ENGINE_VERSION: 'GPU Engine Version',
+  GPU_DEVICE_SPLIT_COUNT: 'GPU Device Split Count',
   // More > Edit Labels
   EDIT_LABELS: 'Edit Labels',
   LABEL_PL: 'Labels',

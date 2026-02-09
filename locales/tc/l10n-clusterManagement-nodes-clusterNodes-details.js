@@ -32,6 +32,7 @@ module.exports = {
   GPU_VIRT_MODE: 'GPU 共享/虛擬化模式',
   GPU_DRIVER_VERSION: 'GPU 驅動版本',
   GPU_ENGINE_VERSION: 'GPU 引擎版本',
+  GPU_DEVICE_SPLIT_COUNT: 'GPU 設備最大共享/切分數',
   // More > Edit Labels
   EDIT_LABELS: '編輯標籤',
   LABEL_PL: '標籤',

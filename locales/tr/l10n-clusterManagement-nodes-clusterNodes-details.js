@@ -32,6 +32,7 @@ module.exports = {
   GPU_VIRT_MODE: 'GPU Paylaşımlı/Sanal Mod',
   GPU_DRIVER_VERSION: 'GPU Sürücü Sürümü',
   GPU_ENGINE_VERSION: 'GPU Motor Sürümü',
+  GPU_DEVICE_SPLIT_COUNT: 'GPU Cihaz Maks Paylaşımlı/Bölme Sayısı',
   // More > Edit Labels
   EDIT_LABELS: 'Etketleri düzenle',
   LABEL_PL: 'Etiketler',

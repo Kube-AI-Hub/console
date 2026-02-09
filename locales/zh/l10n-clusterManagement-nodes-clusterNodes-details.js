@@ -60,6 +60,7 @@ module.exports = {
   GPU_PARAM_ENABLE_DEVICE_TYPE: '启用设备类型 (enable-device-type)',
   GPU_DRIVER_VERSION: 'GPU 驱动版本',
   GPU_ENGINE_VERSION: 'GPU 引擎版本',
+  GPU_DEVICE_SPLIT_COUNT: 'GPU 设备最大共享/切分数',
   // More > Edit Labels
   EDIT_LABELS: '编辑标签',
   LABEL_PL: '标签',
