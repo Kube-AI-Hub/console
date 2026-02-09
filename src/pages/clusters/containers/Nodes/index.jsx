@@ -367,13 +367,21 @@ class Nodes extends React.Component {
               title={
                 <div className={styles.resource}>
                   <span>{`${Math.round(metrics.gpu_utilisation * 100)}%`}</span>
-                  <span className={styles.secondary}>({`${metrics.gpu_used.toFixed(2)}/${metrics.gpu_total} ${t('GPU_CARD_UNIT')}`})</span>
+                  <span className={styles.secondary}>
+                    (
+                    {`${metrics.gpu_used.toFixed(2)}/${metrics.gpu_total} ${t(
+                      'GPU_CARD_UNIT'
+                    )}`}
+                    )
+                  </span>
                   {metrics.gpu_utilisation >= 0.9 && (
                     <Icon name="exclamation" />
                   )}
                 </div>
               }
-              description={`${t('ALLOCATED_SCAP')}: ${metrics.gpu_allocated} ${t('GPU_CARD_UNIT')}`}
+              description={`${t('ALLOCATED_SCAP')}: ${
+                metrics.gpu_allocated
+              } ${t('GPU_CARD_UNIT')}`}
             />
           )
         },
@@ -404,7 +412,11 @@ class Nodes extends React.Component {
                   <span>{`${Math.round(
                     metrics.gpu_memory_utilisation * 100
                   )}%`}</span>
-                  <span className={styles.secondary}>({`${metrics.gpu_memory_used}/${metrics.gpu_memory_total} GiB`})</span>
+                  <span className={styles.secondary}>
+                    (
+                    {`${metrics.gpu_memory_used}/${metrics.gpu_memory_total} GiB`}
+                    )
+                  </span>
                   {metrics.gpu_memory_utilisation >= 0.9 && (
                     <Icon name="exclamation" />
                   )}
@@ -441,13 +453,19 @@ class Nodes extends React.Component {
               title={
                 <div className={styles.resource}>
                   <span>{`${Math.round(metrics.cpu_utilisation * 100)}%`}</span>
-                  <span className={styles.secondary}>({`${metrics.cpu_used}/${metrics.cpu_total} ${t('CORE_PL')}`})</span>
+                  <span className={styles.secondary}>
+                    (
+                    {`${metrics.cpu_used}/${metrics.cpu_total} ${t('CORE_PL')}`}
+                    )
+                  </span>
                   {metrics.cpu_utilisation >= 0.9 && (
                     <Icon name="exclamation" />
                   )}
                 </div>
               }
-              description={`${t('ALLOCATED_SCAP')}: ${cpuRequests} ${t('CORE_PL')}`}
+              description={`${t('ALLOCATED_SCAP')}: ${cpuRequests} ${t(
+                'CORE_PL'
+              )}`}
             />
           )
         },
@@ -482,7 +500,9 @@ class Nodes extends React.Component {
                   <span>{`${Math.round(
                     metrics.memory_utilisation * 100
                   )}%`}</span>
-                  <span className={styles.secondary}>({`${metrics.memory_used}/${metrics.memory_total} GiB`})</span>
+                  <span className={styles.secondary}>
+                    ({`${metrics.memory_used}/${metrics.memory_total} GiB`})
+                  </span>
                   {metrics.memory_utilisation >= 0.9 && (
                     <Icon name="exclamation" />
                   )}
@@ -527,7 +547,10 @@ class Nodes extends React.Component {
             get(record, 'labels.xpu') ||
             (get(record, ['labels', 'xpu-vendor']) &&
             get(record, ['labels', 'xpu-model'])
-              ? `${get(record, ['labels', 'xpu-vendor'])}-${get(record, ['labels', 'xpu-model'])}`
+              ? `${get(record, ['labels', 'xpu-vendor'])}-${get(record, [
+                  'labels',
+                  'xpu-model',
+                ])}`
               : null) ||
             'CPU'
           return formatXpuDisplay(xpu)

@@ -139,7 +139,10 @@ export default class NodeDetail extends React.Component {
       get(detail, 'labels.xpu') ||
       (get(detail, ['labels', 'xpu-vendor']) &&
       get(detail, ['labels', 'xpu-model'])
-        ? `${get(detail, ['labels', 'xpu-vendor'])}-${get(detail, ['labels', 'xpu-model'])}`
+        ? `${get(detail, ['labels', 'xpu-vendor'])}-${get(detail, [
+            'labels',
+            'xpu-model',
+          ])}`
         : null) ||
       'CPU'
 

@@ -452,7 +452,6 @@ export const getWebsiteUrl = () => {
   const useLang =
     cookie('lang') || get(globals, 'user.lang') || getBrowserLang() || 'en'
   const lang = useLang === 'zh' || useLang === 'tc' ? 'zh' : 'en'
-  console.log('useLang', useLang, 'website url', globals.config.documents[lang])
   return globals.config.documents[lang]
 }
 
@@ -795,7 +794,10 @@ export const getGpuTypeOptions = (opts = {}) => {
 export const getGpuDisplayName = resourceName => {
   if (!resourceName) return ''
   const metadata = globals.config.supportGpuTypeMetadata || {}
-  return (metadata[resourceName] && metadata[resourceName].displayName) || resourceName
+  return (
+    (metadata[resourceName] && metadata[resourceName].displayName) ||
+    resourceName
+  )
 }
 
 /**
