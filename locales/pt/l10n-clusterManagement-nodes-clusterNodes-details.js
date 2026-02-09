@@ -59,6 +59,7 @@ module.exports = {
   CPU_LIMIT_SCAP: 'CPU limit',
   // Running Status > Allocated Resources
   ALLOCATED_RESOURCES: 'Allocated Resources',
+  CORE_TOTAL_SCAP: 'Core total',
   // Running Status > Health Status
   RUNNING_STATUS: 'Running Status',
   HEALTH_STATUS: 'Health Status',

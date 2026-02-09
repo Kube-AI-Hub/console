@@ -41,12 +41,17 @@ function formatCapacityValue(value, config) {
   if (fmt === 'gpuMemory') {
     const unit = (config && config.memoryUnit) || 'Mi'
     if (unit === 'Mi' || unit === 'Gi') {
-      return `${memoryFormat(value, unit)} ${unit}`
+      return `${memoryFormat(value, 'Gi')} Gi`
     }
     const num = memoryFormat(value, 'Mi')
     return isFinite(num) ? `${num} ${unit}` : `${String(value)} ${unit}`
   }
   if (fmt === 'count' || fmt === 'vcores') return String(value)
+  if (fmt === 'countWithUnit') {
+    const unit = (config && config.unit) || ''
+    return unit ? `${String(value)} ${unit}` : String(value)
+  }
+  if (fmt === 'vcoresPercent') return `${String(value)}%`
   return String(value)
 }
 
@@ -65,7 +70,12 @@ function formatAllocatedWithPercent(value, allocatable, config) {
     const a = memoryFormat(allocatable, 'Mi')
     if (!isFinite(v) || !isFinite(a) || a === 0) return raw
     pct = Math.round((v / a) * 100)
-  } else if (fmt === 'count' || fmt === 'vcores') {
+  } else if (
+    fmt === 'count' ||
+    fmt === 'vcores' ||
+    fmt === 'countWithUnit' ||
+    fmt === 'vcoresPercent'
+  ) {
     const v = Number(String(value).replace(/[^0-9.]/g, '')) || 0
     const a = Number(String(allocatable).replace(/[^0-9.]/g, '')) || 0
     if (!a) return raw
@@ -110,47 +120,60 @@ function getOrderedCapacityRows(
   const gpuTypes = supportGpuType || []
   const metadata = supportGpuTypeMetadata || {}
   gpuTypes.forEach(resourceName => {
-    if (!Object.prototype.hasOwnProperty.call(capacity, resourceName)) return
-    if (isCapacityZero(capacity[resourceName])) return
-    seen.add(resourceName)
+    const inCapacity = Object.prototype.hasOwnProperty.call(
+      capacity,
+      resourceName
+    )
     const meta = metadata[resourceName] || {}
     const displayName = meta.displayName || resourceName
-    rows.push({
-      key: resourceName,
-      icon: 'gpu',
-      description: displayName,
-      config: { format: 'count' },
-      isGpuResource: true,
-    })
+    if (inCapacity && !isCapacityZero(capacity[resourceName])) {
+      seen.add(resourceName)
+      rows.push({
+        key: resourceName,
+        icon: 'gpu',
+        description: displayName,
+        config: { format: 'count' },
+        isGpuResource: true,
+      })
+    } else if (inCapacity) {
+      seen.add(resourceName)
+    }
     const memoryName = meta.memoryName
     if (
       memoryName &&
-      Object.prototype.hasOwnProperty.call(capacity, memoryName) &&
-      !isCapacityZero(capacity[memoryName])
+      Object.prototype.hasOwnProperty.call(capacity, memoryName)
     ) {
       seen.add(memoryName)
-      rows.push({
-        key: memoryName,
-        icon: 'memory',
-        description: `${displayName} ${t('GPU_MEMORY_TOTAL')}`,
-        config: { format: 'gpuMemory', memoryUnit: meta.memoryUnit || 'Mi' },
-        isGpuResource: true,
-      })
+      if (!isCapacityZero(capacity[memoryName])) {
+        const memoryUnit = meta.memoryUnit || 'Mi'
+        const memoryConfig =
+          memoryUnit === 'Mi' || memoryUnit === 'Gi'
+            ? { format: 'gpuMemory', memoryUnit }
+            : { format: 'countWithUnit', unit: memoryUnit }
+        rows.push({
+          key: memoryName,
+          icon: 'memory',
+          description: `${displayName} ${t('GPU_MEMORY_TOTAL')}`,
+          config: memoryConfig,
+          isGpuResource: true,
+        })
+      }
     }
     const vcoresName = meta.vcoresName
     if (
       vcoresName &&
-      Object.prototype.hasOwnProperty.call(capacity, vcoresName) &&
-      !isCapacityZero(capacity[vcoresName])
+      Object.prototype.hasOwnProperty.call(capacity, vcoresName)
     ) {
       seen.add(vcoresName)
-      rows.push({
-        key: vcoresName,
-        icon: 'cpu',
-        description: `${displayName} Vcores`,
-        config: { format: 'vcores' },
-        isGpuResource: true,
-      })
+      if (!isCapacityZero(capacity[vcoresName])) {
+        rows.push({
+          key: vcoresName,
+          icon: 'cpu',
+          description: `${displayName} ${t('CORE_TOTAL_SCAP')}`,
+          config: { format: 'vcoresPercent' },
+          isGpuResource: true,
+        })
+      }
     }
   })
 
@@ -266,16 +289,54 @@ function getResourceTotalGroups(
   }
 
   gpuTypes.forEach(resourceName => {
-    if (!Object.prototype.hasOwnProperty.call(capacity, resourceName)) return
-    if (isCapacityZero(capacity[resourceName])) return
     const meta = metadata[resourceName] || {}
     const displayName = meta.displayName || resourceName
-    row2.push({
-      key: resourceName,
-      icon: 'gpu',
-      description: displayName,
-      title: formatCapacityValue(capacity[resourceName], { format: 'count' }),
-    })
+    if (
+      Object.prototype.hasOwnProperty.call(capacity, resourceName) &&
+      !isCapacityZero(capacity[resourceName])
+    ) {
+      row2.push({
+        key: resourceName,
+        icon: 'gpu',
+        description: displayName,
+        title: `${formatCapacityValue(capacity[resourceName], {
+          format: 'count',
+        })} ${t('GPU_CARD_UNIT')}`,
+      })
+    }
+    const memoryName = meta.memoryName
+    if (
+      memoryName &&
+      Object.prototype.hasOwnProperty.call(capacity, memoryName) &&
+      !isCapacityZero(capacity[memoryName])
+    ) {
+      const memoryUnit = meta.memoryUnit || 'Mi'
+      const memoryConfig =
+        memoryUnit === 'Mi' || memoryUnit === 'Gi'
+          ? { format: 'gpuMemory', memoryUnit }
+          : { format: 'countWithUnit', unit: memoryUnit }
+      row2.push({
+        key: memoryName,
+        icon: 'memory',
+        description: `${displayName} ${t('GPU_MEMORY_TOTAL')}`,
+        title: formatCapacityValue(capacity[memoryName], memoryConfig),
+      })
+    }
+    const vcoresName = meta.vcoresName
+    if (
+      vcoresName &&
+      Object.prototype.hasOwnProperty.call(capacity, vcoresName) &&
+      !isCapacityZero(capacity[vcoresName])
+    ) {
+      row2.push({
+        key: vcoresName,
+        icon: 'cpu',
+        description: `${displayName} ${t('CORE_TOTAL_SCAP')}`,
+        title: formatCapacityValue(capacity[vcoresName], {
+          format: 'vcoresPercent',
+        }),
+      })
+    }
   })
 
   const gpuPrefixes = new Set()
@@ -601,18 +662,31 @@ class RunningStatus extends React.Component {
     const allocatedLimits = get(detail, 'status.allocatedLimits') || {}
     const allocatable = get(detail, 'status.allocatable') || {}
     const hasAllocated = Object.keys(allocated).length > 0
-    const capacityKeys = Object.keys(capacity)
-    const hasCapacity = capacityKeys.length > 0
 
-    if (hasCapacity && hasAllocated) {
+    if (hasAllocated) {
       const supportGpuType = get(globals, 'config.supportGpuType', [])
       const supportGpuTypeMetadata = get(
         globals,
         'config.supportGpuTypeMetadata',
         {}
       )
+      // Merge allocated/allocatedLimits keys into capacity so resources with
+      // non-zero allocations are always visible even when capacity is 0 or absent
+      const mergedCapacity = { ...capacity }
+      ;[allocated, allocatedLimits].forEach(src => {
+        Object.keys(src).forEach(key => {
+          if (
+            !Object.prototype.hasOwnProperty.call(mergedCapacity, key) ||
+            isCapacityZero(mergedCapacity[key])
+          ) {
+            if (!isCapacityZero(src[key])) {
+              mergedCapacity[key] = src[key]
+            }
+          }
+        })
+      })
       const rowSpecs = getOrderedCapacityRows(
-        capacity,
+        mergedCapacity,
         supportGpuType,
         supportGpuTypeMetadata
       )
@@ -624,7 +698,12 @@ class RunningStatus extends React.Component {
         const limVal = limits[dataKey] !== undefined ? limits[dataKey] : reqVal
         const allocVal = allocatable[dataKey]
         const requestsCell = row.isGpuResource
-          ? '-'
+          ? reqVal !== undefined &&
+            reqVal !== null &&
+            reqVal !== '' &&
+            !isCapacityZero(reqVal)
+            ? formatCapacityValue(reqVal, row.config)
+            : '-'
           : formatAllocatedWithPercent(reqVal, allocVal, row.config)
         const limitsCell = row.isGpuResource
           ? formatCapacityValue(limVal, row.config)

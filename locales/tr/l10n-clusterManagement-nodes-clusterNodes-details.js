@@ -59,6 +59,7 @@ module.exports = {
   CPU_LIMIT_SCAP: 'CPU Sınırlayıcı',
   // Running Status > Allocated Resources
   ALLOCATED_RESOURCES: 'Ayrılan Kaynaklar',
+  CORE_TOTAL_SCAP: 'Core total',
   // Running Status > Health Status
   RUNNING_STATUS: 'Çalışma Durumu',
   HEALTH_STATUS: 'Sağlık durumu',

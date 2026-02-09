@@ -59,6 +59,7 @@ module.exports = {
   CPU_LIMIT_SCAP: 'CPU 제한',
   // Running Status > Allocated Resources
   ALLOCATED_RESOURCES: '할당된 리소스',
+  CORE_TOTAL_SCAP: '코어 총량',
   // Running Status > Health Status
   RUNNING_STATUS: '실행 상태',
   HEALTH_STATUS: '건상 상태',
