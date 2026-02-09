@@ -1,0 +1,17 @@
+@use '~scss/variables';
+
+// GPU 共享/虚拟化模式 属性行：设置按钮居右、与行高一致、样式与行背景区分（参考更多操作）
+:global(.gpu-virt-mode-attr-value) {
+  .gpu-virt-mode-attr-btn {
+    border: 1px solid variables.$dark-color06;
+    background-color: variables.$dark-color08;
+    color: variables.$text-color;
+    font-size: 12px;
+
+    &:hover {
+      border-color: variables.$dark-color05;
+      background-color: variables.$dark-color07;
+      color: variables.$text-color;
+    }
+  }
+}

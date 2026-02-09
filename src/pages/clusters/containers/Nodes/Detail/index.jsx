@@ -20,7 +20,7 @@ import React from 'react'
 import { toJS } from 'mobx'
 import { observer, inject } from 'mobx-react'
 import { get, isEmpty } from 'lodash'
-import { Loading } from '@kube-design/components'
+import { Button, Loading } from '@kube-design/components'
 
 import { getDisplayName, getLocalTime, formatXpuDisplay } from 'utils'
 import { getNodeRoles, getNodeStatus } from 'utils/node'
@@ -30,8 +30,12 @@ import NodeStore from 'stores/node'
 import DetailPage from 'clusters/containers/Base/Detail'
 import { Status, Modal } from 'components/Base'
 import KubeCtlModal from 'components/Modals/KubeCtl'
+import GpuVirtModeModal from 'components/Modals/Node/GpuVirtMode'
 
 import routes from './routes'
+import './index.scss'
+
+const GPU_MODE_POLL_INTERVAL_MS = 3000
 
 @inject('rootStore')
 @observer
@@ -39,8 +43,36 @@ import routes from './routes'
 export default class NodeDetail extends React.Component {
   store = new NodeStore()
 
+  _gpuModePollTimer = null
+
   componentDidMount() {
     this.fetchData()
+    this.startGpuModePollIfNeeded()
+  }
+
+  componentDidUpdate() {
+    this.startGpuModePollIfNeeded()
+  }
+
+  componentWillUnmount() {
+    if (this._gpuModePollTimer) {
+      clearInterval(this._gpuModePollTimer)
+      this._gpuModePollTimer = null
+    }
+  }
+
+  startGpuModePollIfNeeded = () => {
+    if (this._gpuModePollTimer) {
+      clearInterval(this._gpuModePollTimer)
+      this._gpuModePollTimer = null
+    }
+    const detail = toJS(this.store.detail)
+    const status = get(detail, 'status.nodeInfo.gpuModeStatus.status')
+    if (status === 'in_progress') {
+      this._gpuModePollTimer = setInterval(() => {
+        this.fetchData()
+      }, GPU_MODE_POLL_INTERVAL_MS)
+    }
   }
 
   get module() {
@@ -105,7 +137,36 @@ export default class NodeDetail extends React.Component {
             success: this.fetchData,
           }),
       },
+      {
+        key: 'setGpuVirtMode',
+        icon: 'cog',
+        text: t('SET_GPU_VIRT_MODE'),
+        action: 'edit',
+        show: () => this.hasGpuNode(),
+        onClick: this.handleSetGpuVirtMode,
+      },
     ]
+  }
+
+  hasGpuNode = () => {
+    const detail = this.store.detail
+    const nodeInfo = get(detail, 'status.nodeInfo') || detail.nodeInfo || {}
+    return !!(
+      nodeInfo.gpuVendor ||
+      nodeInfo.virtualCardMode ||
+      get(detail, 'labels.xpu-vendor')
+    )
+  }
+
+  handleSetGpuVirtMode = () => {
+    const modal = Modal.open({
+      modal: GpuVirtModeModal,
+      detail: toJS(this.store.detail),
+      onOk: () => {
+        Modal.close(modal)
+        this.fetchData()
+      },
+    })
   }
 
   getXpuTypeTooltip = () => {
@@ -134,7 +195,8 @@ export default class NodeDetail extends React.Component {
       />
     )
     const address = get(detail, 'status.addresses[0].address', '-')
-    const nodeInfo = detail.nodeInfo || get(detail, 'status.nodeInfo') || {}
+    const nodeInfo = get(detail, 'status.nodeInfo') || detail.nodeInfo || {}
+    const gpuModeStatus = get(detail, 'status.nodeInfo.gpuModeStatus')
     const xpu =
       get(detail, 'labels.xpu') ||
       (get(detail, ['labels', 'xpu-vendor']) &&
@@ -199,8 +261,64 @@ export default class NodeDetail extends React.Component {
           ? nodeInfo.architecture.toUpperCase()
           : '-',
       },
-      ...(nodeInfo.virtualCardMode
-        ? [{ name: t('GPU_VIRT_MODE'), value: nodeInfo.virtualCardMode }]
+      ...(this.hasGpuNode()
+        ? [
+            {
+              name: t('GPU_VIRT_MODE'),
+              value: (() => {
+                let displayText = nodeInfo.virtualCardMode || '-'
+                if (gpuModeStatus?.status === 'in_progress') {
+                  displayText = t('GPU_VIRT_MODE_SWITCHING', {
+                    mode: gpuModeStatus.mode || '',
+                  })
+                } else if (gpuModeStatus?.status === 'failed') {
+                  displayText = gpuModeStatus.message
+                    ? `${t('GPU_VIRT_MODE_SWITCH_FAILED')}: ${
+                        gpuModeStatus.message
+                      }`
+                    : t('GPU_VIRT_MODE_SWITCH_FAILED')
+                } else if (
+                  gpuModeStatus?.status === 'completed' &&
+                  gpuModeStatus.mode
+                ) {
+                  displayText = gpuModeStatus.mode
+                }
+                const inProgress = gpuModeStatus?.status === 'in_progress'
+                return (
+                  <div
+                    className="gpu-virt-mode-attr-value"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      width: '100%',
+                      minHeight: 20,
+                      lineHeight: '20px',
+                    }}
+                  >
+                    <span style={{ flex: 1, minWidth: 0 }}>{displayText}</span>
+                    <Button
+                      type="default"
+                      size="small"
+                      className="gpu-virt-mode-attr-btn"
+                      style={{
+                        height: 20,
+                        minHeight: 20,
+                        lineHeight: '18px',
+                        padding: '0 8px',
+                        marginLeft: 8,
+                        flexShrink: 0,
+                      }}
+                      disabled={inProgress}
+                      onClick={() => this.handleSetGpuVirtMode()}
+                    >
+                      {t('SET')}
+                    </Button>
+                  </div>
+                )
+              })(),
+            },
+          ]
         : []),
       ...(nodeInfo.gpuDriverVersion
         ? [{ name: t('GPU_DRIVER_VERSION'), value: nodeInfo.gpuDriverVersion }]

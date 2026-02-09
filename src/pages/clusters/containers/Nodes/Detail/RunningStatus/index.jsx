@@ -366,7 +366,9 @@ class RunningStatus extends React.Component {
         `/kapis/gpu.kubesphere.io/v1alpha1/gpus`,
         params
       )
-      this.setState({ gpulist: result.items || [] })
+      this.setState({
+        gpulist: Array.isArray(result) ? result : [],
+      })
     } catch (e) {
       this.setState({ gpulist: [] })
     }
