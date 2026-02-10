@@ -55,6 +55,14 @@ function formatCapacityValue(value, config) {
   return String(value)
 }
 
+function parseNumericValue(value) {
+  if (value === undefined || value === null || value === '') return NaN
+  const cleaned = String(value).replace(/[^0-9.]/g, '')
+  if (!cleaned || cleaned === '.') return NaN
+  const parsed = Number(cleaned)
+  return isFinite(parsed) ? parsed : NaN
+}
+
 function formatAllocatedWithPercent(value, allocatable, config) {
   const raw = formatCapacityValue(value, config)
   if (raw === '-' || !allocatable || isCapacityZero(allocatable)) return raw
@@ -76,12 +84,15 @@ function formatAllocatedWithPercent(value, allocatable, config) {
     fmt === 'countWithUnit' ||
     fmt === 'vcoresPercent'
   ) {
-    const v = Number(String(value).replace(/[^0-9.]/g, '')) || 0
-    const a = Number(String(allocatable).replace(/[^0-9.]/g, '')) || 0
-    if (!a) return raw
+    const v = parseNumericValue(value)
+    const a = parseNumericValue(allocatable)
+    if (!isFinite(v) || !isFinite(a) || a === 0) return raw
     pct = Math.round((v / a) * 100)
   } else {
-    return raw
+    const v = parseNumericValue(value)
+    const a = parseNumericValue(allocatable)
+    if (!isFinite(v) || !isFinite(a) || a === 0) return raw
+    pct = Math.round((v / a) * 100)
   }
   return `${raw} (${pct}%)`
 }
@@ -132,8 +143,9 @@ function getOrderedCapacityRows(
         key: resourceName,
         icon: 'gpu',
         description: displayName,
-        config: { format: 'count' },
+        config: { format: 'countWithUnit', unit: t('GPU_CARD_UNIT') },
         isGpuResource: true,
+        showAllocatedPercent: true,
       })
     } else if (inCapacity) {
       seen.add(resourceName)
@@ -697,17 +709,21 @@ class RunningStatus extends React.Component {
         const reqVal = allocated[dataKey]
         const limVal = limits[dataKey] !== undefined ? limits[dataKey] : reqVal
         const allocVal = allocatable[dataKey]
-        const requestsCell = row.isGpuResource
-          ? reqVal !== undefined &&
-            reqVal !== null &&
-            reqVal !== '' &&
-            !isCapacityZero(reqVal)
-            ? formatCapacityValue(reqVal, row.config)
+        const formatCell = val =>
+          val !== undefined &&
+          val !== null &&
+          val !== '' &&
+          !isCapacityZero(val)
+            ? formatCapacityValue(val, row.config)
             : '-'
-          : formatAllocatedWithPercent(reqVal, allocVal, row.config)
-        const limitsCell = row.isGpuResource
-          ? formatCapacityValue(limVal, row.config)
-          : formatAllocatedWithPercent(limVal, allocVal, row.config)
+        const requestsCell =
+          row.showAllocatedPercent === false
+            ? formatCell(reqVal)
+            : formatAllocatedWithPercent(reqVal, allocVal, row.config)
+        const limitsCell =
+          row.showAllocatedPercent === false
+            ? formatCell(limVal)
+            : formatAllocatedWithPercent(limVal, allocVal, row.config)
         return {
           key: row.key,
           icon: row.icon,
