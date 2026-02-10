@@ -29,7 +29,7 @@ module.exports = {
   IP_ADDRESS: 'IP-Adresse',
   SCHEDULABLE: 'Planbar',
   YES: 'Ja',
-  GPU_VIRT_MODE: 'GPU Shared/Virtualization Mode',
+  GPU_VIRT_MODE: 'vGPU Mode',
   GPU_DRIVER_VERSION: 'GPU Driver Version',
   GPU_ENGINE_VERSION: 'GPU Engine Version',
   GPU_DEVICE_SPLIT_COUNT: 'GPU Device Max Shared/Split Count',

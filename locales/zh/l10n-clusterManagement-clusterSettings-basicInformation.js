@@ -21,7 +21,7 @@ module.exports = {
   NODES: '节点',
   DISK: '磁盘',
   TOTAL_GPU: 'GPU',
-  TOTAL_VGPU: '虚拟 GPU',
+  TOTAL_VGPU: 'vGPU',
   CLUSTER_INFORMATION: '集群信息',
   // Cluster Information > Edit Information
   CLUSTER_NAME: '集群名称',

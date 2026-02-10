@@ -283,7 +283,7 @@ function getResourceTotalGroups(
     row2.push({
       key: 'virtualCardCount',
       icon: 'gpu',
-      description: t('VIRTUAL_GPU_TOTAL_SCAP'),
+      description: t('VGPU_TOTAL_SCAP'),
       title: `${isFinite(n) ? n : virtualCardCount} ${t('GPU_CARD_UNIT')}`,
     })
   }
@@ -944,7 +944,12 @@ class RunningStatus extends React.Component {
         title: t('GPU_CARD_MODE'),
         key: 'mode',
         isHideable: true,
-        render: record => record.mode || '-',
+        render: record =>
+          record.mode
+            ? record.mode === 'default'
+              ? t('GPU_MODE_DEFAULT')
+              : record.mode
+            : '-',
       },
       {
         title: t('GPU_CARD_VGPU'),

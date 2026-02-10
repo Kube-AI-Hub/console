@@ -29,7 +29,7 @@ module.exports = {
   IP_ADDRESS: 'IP Adresi',
   SCHEDULABLE: 'Zamanlanabilir',
   YES: 'Evet',
-  GPU_VIRT_MODE: 'GPU Paylaşımlı/Sanal Mod',
+  GPU_VIRT_MODE: 'vGPU Mode',
   GPU_DRIVER_VERSION: 'GPU Sürücü Sürümü',
   GPU_ENGINE_VERSION: 'GPU Motor Sürümü',
   GPU_DEVICE_SPLIT_COUNT: 'GPU Cihaz Maks Paylaşımlı/Bölme Sayısı',

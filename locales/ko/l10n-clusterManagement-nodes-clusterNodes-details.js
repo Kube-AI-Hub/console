@@ -29,7 +29,7 @@ module.exports = {
   IP_ADDRESS: 'IP 주소',
   SCHEDULABLE: '스케줄링 가능',
   YES: '예',
-  GPU_VIRT_MODE: 'GPU 공유/가상화 모드',
+  GPU_VIRT_MODE: 'vGPU 모드',
   GPU_DRIVER_VERSION: 'GPU 드라이버 버전',
   GPU_ENGINE_VERSION: 'GPU 엔진 버전',
   GPU_DEVICE_SPLIT_COUNT: 'GPU 디바이스 최대 공유/분할 수',

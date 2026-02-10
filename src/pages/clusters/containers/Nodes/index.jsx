@@ -130,7 +130,7 @@ class Nodes extends React.Component {
       {
         key: 'setGpuVirtMode',
         icon: 'gpu',
-        text: t('SET_GPU_VIRT_MODE'),
+        text: t('SET_VGPU_MODE'),
         action: 'edit',
         show: item => this.hasGpuNode(item),
         onClick: item => {
@@ -600,7 +600,11 @@ class Nodes extends React.Component {
           const nodeInfo =
             get(record, 'status.nodeInfo') || record.nodeInfo || {}
           const gpuModeStatus = get(record, 'status.nodeInfo.gpuModeStatus')
-          let displayText = nodeInfo.virtualCardMode || '-'
+          const modeToDisplay = mode =>
+            mode === 'default' ? t('GPU_MODE_DEFAULT') : mode
+          let displayText = nodeInfo.virtualCardMode
+            ? modeToDisplay(nodeInfo.virtualCardMode)
+            : '-'
           if (gpuModeStatus?.status === 'in_progress') {
             displayText = t('GPU_VIRT_MODE_SWITCHING', {
               mode: gpuModeStatus.mode || '',
@@ -613,7 +617,7 @@ class Nodes extends React.Component {
             gpuModeStatus?.status === 'completed' &&
             gpuModeStatus.mode
           ) {
-            displayText = gpuModeStatus.mode
+            displayText = modeToDisplay(gpuModeStatus.mode)
           }
           return displayText
         },

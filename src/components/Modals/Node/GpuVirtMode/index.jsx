@@ -174,7 +174,7 @@ export default class GpuVirtModeModal extends React.Component {
     return (
       <Modal.Form
         width={560}
-        title={t('SET_GPU_VIRT_MODE')}
+        title={t('SET_VGPU_MODE')}
         icon="cog"
         okText={t('OK')}
         data={formData}
@@ -183,12 +183,9 @@ export default class GpuVirtModeModal extends React.Component {
         hideFooter={!supported}
         {...rest}
       >
-        <Alert type="info" message={t('SET_GPU_VIRT_MODE_DESC')} />
+        <Alert type="info" message={t('SET_VGPU_MODE_DESC')} />
         {!supported ? (
-          <Alert
-            type="warning"
-            message={t('GPU_VIRT_MODE_VENDOR_NOT_SUPPORTED')}
-          />
+          <Alert type="warning" message={t('VGPU_MODE_VENDOR_NOT_SUPPORTED')} />
         ) : (
           <>
             <Form.Item label={t('GPU_MODE')} rules={[{ required: true }]}>
