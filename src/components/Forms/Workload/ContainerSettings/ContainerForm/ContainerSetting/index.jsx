@@ -85,6 +85,7 @@ export default class ContainerSetting extends React.Component {
       return {
         url,
         username,
+        aliasName: item.aliasName,
         label: item.name,
         value: item.name,
         cluster,

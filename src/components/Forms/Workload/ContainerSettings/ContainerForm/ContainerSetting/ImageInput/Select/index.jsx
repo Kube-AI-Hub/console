@@ -21,7 +21,7 @@ import PropTypes from 'prop-types'
 import { debounce, isEmpty, isUndefined } from 'lodash'
 import isEqual from 'react-fast-compare'
 import classNames from 'classnames'
-import { Icon, Dropdown } from '@kube-design/components'
+import { Icon } from '@kube-design/components'
 
 import * as styles from './index.scss'
 
@@ -52,6 +52,28 @@ export default class Select extends React.Component {
     }
 
     this.optionsRef = React.createRef()
+    this.wrapperRef = React.createRef()
+  }
+
+  debugLog = (message, payload = {}) => {
+    if (process.env.NODE_ENV === 'production') {
+      return
+    }
+    // eslint-disable-next-line no-console
+    console.log(`[ImageInput][Select] ${message}`, payload)
+  }
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (
+      !isUndefined(nextProps.value) &&
+      !isEqual(nextProps.value, prevState.value)
+    ) {
+      return {
+        value: nextProps.value,
+      }
+    }
+
+    return null
   }
 
   triggerChange = debounce(() => {
@@ -60,29 +82,79 @@ export default class Select extends React.Component {
     onChange(this.state.value)
   })
 
-  handleClick = value => {
-    this.setState({ value, showOptions: false }, () => {
-      this.triggerChange()
+  handleClick = (e, value) => {
+    e.stopPropagation()
+    this.debugLog('optionClick', {
+      value,
+      options: this.props.options.map(item => item.value),
     })
-  }
-
-  toggleShowOptions = () => {
-    this.setState({
-      showOptions: !this.state.showOptions,
+    document.removeEventListener('click', this.handleDOMClick)
+    this.setState({ value, showOptions: false }, () => {
+      const { onChange } = this.props
+      onChange(value)
     })
   }
 
   handleShowOptions = () => {
+    this.debugLog('dropdownOpen', {
+      selected: this.state.value,
+      optionsCount: this.props.options.length,
+    })
     this.setState({ showOptions: true })
   }
 
   handleHideOptions = () => {
+    this.debugLog('dropdownClose', {
+      selected: this.state.value,
+    })
     this.setState({ showOptions: false })
+  }
+
+  handleDOMClick = e => {
+    if (
+      this.wrapperRef &&
+      this.wrapperRef.current &&
+      !this.wrapperRef.current.contains(e.target)
+    ) {
+      this.handleHideOptions()
+    }
+  }
+
+  toggleShowOptions = e => {
+    e.stopPropagation()
+    const { disabled, options } = this.props
+    if (disabled || isEmpty(options)) {
+      this.debugLog('toggleBlocked', {
+        disabled,
+        optionsCount: options.length,
+      })
+      return
+    }
+
+    const nextShowOptions = !this.state.showOptions
+    this.debugLog('toggleShowOptions', {
+      currentVisible: this.state.showOptions,
+      nextVisible: nextShowOptions,
+      options: options.map(item => item.value),
+      selected: this.state.value,
+    })
+
+    if (nextShowOptions) {
+      document.addEventListener('click', this.handleDOMClick)
+      this.handleShowOptions()
+    } else {
+      document.removeEventListener('click', this.handleDOMClick)
+      this.handleHideOptions()
+    }
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('click', this.handleDOMClick)
   }
 
   renderOption(option, selected) {
     const { containerType = 'worker' } = this.props
-    const onClick = () => this.handleClick(option.value)
+    const onClick = e => this.handleClick(e, option.value)
     return (
       <div
         key={option.uid || option.value}
@@ -90,7 +162,9 @@ export default class Select extends React.Component {
         className={classNames(styles.option, { [styles.selected]: selected })}
       >
         <div className={styles.optionCol}>
-          <span className={styles.optionLabel}>{option.label}</span>
+          <span className={styles.optionLabel}>
+            {option.selectedLabel || option.label}
+          </span>
           {option.isDefault && (
             <span
               className={classNames(styles.defaultTag, {
@@ -113,29 +187,27 @@ export default class Select extends React.Component {
       return null
     }
 
-    const selectOption = options.find(item => isEqual(item.value, value))
-
     return (
       <div className={styles.options}>
-        {selectOption && this.renderOption(selectOption, true)}
-        {options
-          .filter(item => !isEqual(item.value, value))
-          .map(option => this.renderOption(option))}
+        {options.map(option =>
+          this.renderOption(option, isEqual(option.value, value))
+        )}
       </div>
     )
   }
 
   renderControl() {
-    const { value, defaultValue, placeholder, options, disabled } = this.props
-
-    const _value = value || defaultValue
+    const { placeholder, options, disabled } = this.props
+    const { value } = this.state
 
     const option =
-      options.find(item => isEqual(item.value, _value)) || placeholder || {}
+      options.find(item => isEqual(item.value, value)) || placeholder || {}
+
+    const displayLabel = option.selectedLabel || option.label
 
     return (
       <div className={styles.control}>
-        <span className={styles.label}>{option.label}</span>
+        <span className={styles.label}>{displayLabel}</span>
         {!disabled && (
           <Icon
             className={classNames(styles.rightIcon, {
@@ -158,17 +230,11 @@ export default class Select extends React.Component {
           { [styles.disabled]: disabled },
           className
         )}
+        ref={this.wrapperRef}
         onClick={this.toggleShowOptions}
       >
-        <Dropdown
-          closeAfterClick={false}
-          visible={this.state.showOptions}
-          onOpen={this.handleShowOptions}
-          onClose={this.handleHideOptions}
-          content={this.renderOptions()}
-        >
-          {this.renderControl()}
-        </Dropdown>
+        {this.renderControl()}
+        {this.state.showOptions ? this.renderOptions() : null}
       </div>
     )
   }

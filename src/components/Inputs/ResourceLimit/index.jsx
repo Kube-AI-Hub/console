@@ -242,7 +242,7 @@ export default class ResourceLimit extends React.Component {
   }
 
   static getGpuFromProps(value) {
-    // get gpu config from requests field；显存/核心数字段名由后端 supportGpuTypeMetadata[type].memoryName / vcoresName 下发，为空则不限制
+    // get gpu config from requests/limits field；显存/核心数字段名由后端 supportGpuTypeMetadata[type].memoryName / vcoresName 下发，为空则不限制
     const supportGpuType = globals.config.supportGpuType
     if (!value) {
       const type = supportGpuType[0]
@@ -255,27 +255,34 @@ export default class ResourceLimit extends React.Component {
         vcoresName: getGpuVcoresName(type),
       }
     }
-    const types = Object.keys(get(value, 'requests', {})).filter(key =>
+    const requests = get(value, 'requests', {})
+    const limits = get(value, 'limits', {})
+    const keys = Array.from(
+      new Set([...Object.keys(requests), ...Object.keys(limits)])
+    )
+    const types = keys.filter(key =>
       supportGpuType.some(item => key.endsWith(item))
     )
     const type = !isEmpty(types) ? types[0] : supportGpuType[0]
     const memoryName = getGpuMemoryName(type)
     const vcoresName = getGpuVcoresName(type)
-    const gpumemRaw =
-      memoryName && value.requests ? value.requests[memoryName] : undefined
+    const gpumemRaw = memoryName
+      ? requests[memoryName] ?? limits[memoryName]
+      : undefined
     const gpumem =
       gpumemRaw !== undefined && gpumemRaw !== ''
         ? parseGpuMemoryDisplayValue(gpumemRaw)
         : ''
-    const gpuvcoresRaw =
-      vcoresName && value.requests ? value.requests[vcoresName] : undefined
+    const gpuvcoresRaw = vcoresName
+      ? requests[vcoresName] ?? limits[vcoresName]
+      : undefined
     const gpuvcores =
       gpuvcoresRaw !== undefined && gpuvcoresRaw !== ''
         ? String(gpuvcoresRaw).trim()
         : ''
     return {
       type,
-      value: !isEmpty(types) ? value.requests[`${type}`] : '',
+      value: !isEmpty(types) ? requests[type] ?? limits[type] ?? '' : '',
       memory: memoryName && !isEmpty(types) ? gpumem : '',
       memoryName,
       vcores: vcoresName && !isEmpty(types) ? gpuvcores : '',
@@ -521,6 +528,15 @@ export default class ResourceLimit extends React.Component {
         [gpu.vcoresName]: gpu.vcores,
       })
     }
+
+    // Preserve custom resource keys (e.g. cambricon.com/mlu.smlu.vcore) from existing value
+    // so that switching from YAML to UI mode does not drop them
+    const existingValue =
+      get(this.props, 'value', {}) || get(this.props, 'defaultValue', {})
+    const existingRequests = existingValue.requests || {}
+    const existingLimits = existingValue.limits || {}
+    result.requests = { ...existingRequests, ...(result.requests || {}) }
+    result.limits = { ...existingLimits, ...(result.limits || {}) }
 
     onChange(result)
   }

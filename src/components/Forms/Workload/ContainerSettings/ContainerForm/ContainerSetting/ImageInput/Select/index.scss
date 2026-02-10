@@ -2,13 +2,14 @@
 @use '~scss/mixins';
 
 .wrapper {
+  position: relative;
   margin-right: 4px;
-  max-width: 150px;
+  max-width: 320px;
   border-radius: 2px;
   background-color: variables.$dark-color07;
   cursor: pointer;
   transition: all variables.$trans-speed ease-in-out;
-  color: white;
+  color: variables.$light-color01;
   z-index: 1;
 
   &:hover,
@@ -26,13 +27,17 @@
 }
 
 .options {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
   padding: 4px 0px;
-  width: 240px;
-  max-height: 104px;
+  min-width: 240px;
+  max-width: 400px;
+  max-height: 200px;
   border-radius: 4px;
   box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.2);
   background-color: variables.$dark-color07;
-  z-index: 2;
+  z-index: 10;
   overflow-y: scroll;
 }
 
@@ -47,10 +52,10 @@
   font-weight: 600;
   line-height: 22px;
   user-select: none;
-  color: white;
+  color: variables.$light-color01;
 
   .label {
-    max-width: 125px;
+    max-width: 280px;
     min-width: 64px;
     @include mixins.ellipsis;
   }
@@ -62,7 +67,7 @@
     transform-origin: center;
 
     svg {
-      color: white;
+      color: variables.$light-color01;
     }
   }
 
@@ -77,10 +82,10 @@
 
 .option {
   padding: 6px 12px;
-  height: 32px;
+  min-height: 32px;
   user-select: none;
   line-height: 20px;
-  @include mixins.ellipsis;
+  color: variables.$light-color01;
 
   &.selected {
     background-color: variables.$dark-color06;

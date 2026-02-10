@@ -50,7 +50,16 @@ export default class DropdownContent extends React.Component {
 
     this.store = props.store
     this.dropContentRef = React.createRef()
+    this.dropdownWrapperRef = React.createRef()
     this.isUnMounted = false
+  }
+
+  debugLog = (message, payload = {}) => {
+    if (process.env.NODE_ENV === 'production') {
+      return
+    }
+    // eslint-disable-next-line no-console
+    console.log(`[ImageInput][DropdownContent] ${message}`, payload)
   }
 
   static defaultProps = {
@@ -78,7 +87,11 @@ export default class DropdownContent extends React.Component {
       return 'dockerHub'
     }
 
-    if (this.secretValue && this.registryUrl.indexOf('docker.io') < 0) {
+    if (
+      this.secretValue &&
+      this.registryUrl.indexOf('docker.io') < 0 &&
+      this.registryUrl.toLowerCase().includes('harbor')
+    ) {
       return 'harbor'
     }
 
@@ -115,19 +128,37 @@ export default class DropdownContent extends React.Component {
 
   get secretsOptions() {
     const { imageRegistries } = this.props
-    const options = imageRegistries.map(item => ({
-      label: `${item.url} (${item.value})`,
-      value: item.value,
-      url: item.url,
-      isDefault: item.isDefault,
-    }))
+    const options = imageRegistries.map(item => {
+      const name = item.aliasName || item.value
+      const url = (item.url || '').replace(/^(https?:\/\/)?/, '')
+      return {
+        label: name,
+        selectedLabel: `${name} (${url})`,
+        value: item.value,
+        url: item.url,
+        isDefault: item.isDefault,
+      }
+    })
 
-    return [{ label: `Docker Hub`, value: '', url: '' }, ...options].sort(
-      (x, y) => Number(!!y.isDefault) - Number(!!x.isDefault)
-    )
+    const defaultOptions = options.filter(item => item.isDefault)
+    const nonDefaultOptions = options.filter(item => !item.isDefault)
+
+    return [
+      ...defaultOptions,
+      { label: `Docker Hub`, value: '', url: '' },
+      ...nonDefaultOptions,
+    ]
   }
 
   componentDidMount() {
+    this.debugLog('mounted', {
+      imageRegistriesCount: this.props.imageRegistries.length,
+      secretValue: this.secretValue,
+      hubType: this.hubType,
+      registryUrl: this.registryUrl,
+      options: this.secretsOptions.map(item => item.value),
+    })
+
     if (this.props.type !== 'Edit' && this.secretValue !== '') {
       this.handleSecretChange(this.secretValue)
     }
@@ -141,6 +172,24 @@ export default class DropdownContent extends React.Component {
     }
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    if (
+      prevProps.imageRegistries !== this.props.imageRegistries ||
+      prevState.visible !== this.state.visible ||
+      prevProps.value !== this.props.value
+    ) {
+      this.debugLog('updated', {
+        imageRegistriesCount: this.props.imageRegistries.length,
+        secretValue: this.secretValue,
+        hubType: this.hubType,
+        registryUrl: this.registryUrl,
+        visible: this.state.visible,
+        imageValue: this.props.value,
+        options: this.secretsOptions.map(item => item.value),
+      })
+    }
+  }
+
   componentWillUnmount() {
     this.isUnMounted = true
     document.removeEventListener('click', this.handleDOMClick)
@@ -148,31 +197,57 @@ export default class DropdownContent extends React.Component {
 
   handleDOMClick = e => {
     if (
-      this.dropContentRef &&
-      this.dropContentRef.current &&
-      !this.dropContentRef.current.contains(e.target)
+      this.dropdownWrapperRef &&
+      this.dropdownWrapperRef.current &&
+      !this.dropdownWrapperRef.current.contains(e.target)
     ) {
       this.hideContent()
     }
   }
 
   showContent = () => {
+    this.debugLog('showContent', {
+      hubType: this.hubType,
+      secretValue: this.secretValue,
+      registryUrl: this.registryUrl,
+      harborData: this.state.harborData,
+    })
+
     this.setState({ visible: true }, () => {
       document.addEventListener('click', this.handleDOMClick)
-      if (this.hubType !== 'dockerHub') {
+      if (this.hubType === 'harbor') {
         this.fetchHarborList('', this.state.harborData)
       }
     })
   }
 
   hideContent = () => {
-    if (this.hubType !== 'dockerHub') {
+    this.debugLog('hideContent', {
+      hubType: this.hubType,
+      secretValue: this.secretValue,
+    })
+
+    if (this.hubType === 'harbor') {
       this.setState({ harborList: [] })
     }
 
     this.setState({ visible: false }, () => {
       document.removeEventListener('click', this.handleDOMClick)
     })
+  }
+
+  handleDropdownIconClick = e => {
+    e.stopPropagation()
+    this.debugLog('iconClick', {
+      visible: this.state.visible,
+      hubType: this.hubType,
+      secretValue: this.secretValue,
+    })
+    if (this.state.visible) {
+      this.hideContent()
+      return
+    }
+    this.showContent()
   }
 
   handleDetailRedirect = e => {
@@ -193,6 +268,11 @@ export default class DropdownContent extends React.Component {
     const { formTemplate } = this.props
 
     set(formTemplate, 'pullSecret', value)
+    this.debugLog('secretChanged', {
+      nextSecretValue: value,
+      nextRegistryUrl: this.registryUrl,
+      options: this.secretsOptions.map(item => item.value),
+    })
     this.props.onChange(this.registryUrl)
   }
 
@@ -423,7 +503,7 @@ export default class DropdownContent extends React.Component {
 
   render() {
     return (
-      <>
+      <div className={styles.dropdownWrapper} ref={this.dropdownWrapperRef}>
         <Input
           className={styles.imageInput}
           onChange={this.handleInputChange}
@@ -450,11 +530,11 @@ export default class DropdownContent extends React.Component {
             name="templet"
             changeable
             className={styles.dropDownIcon}
-            onClick={this.showContent}
+            onClick={this.handleDropdownIconClick}
           />
         )}
         {this.renderContent()}
-      </>
+      </div>
     )
   }
 }

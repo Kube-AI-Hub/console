@@ -18,11 +18,11 @@
       height: 24px;
     }
     :global(.select-value) {
-      color: white !important;
+      color: variables.$light-color01 !important;
     }
     :global(.select-icon) {
       svg {
-        color: white;
+        color: variables.$light-color01;
       }
     }
   }

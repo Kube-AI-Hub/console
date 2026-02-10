@@ -22,7 +22,7 @@ import { get, isEmpty } from 'lodash'
 
 import { Icon, Tag } from '@kube-design/components'
 import { List } from 'components/Base'
-import { cpuFormat, memoryFormat } from 'utils'
+import { cpuFormat, memoryFormat, getGpuDisplayName } from 'utils'
 
 import * as styles from './index.scss'
 
@@ -31,6 +31,13 @@ const Card = ({ type = 'worker', container, onDelete, onEdit, readOnly }) => {
   const handleEdit = () => onEdit({ type, ...container })
   const limits = get(container, 'resources.limits', {})
   const requests = get(container, 'resources.requests', {})
+  const supportGpuType = get(globals, 'config.supportGpuType', [])
+  const gpuType = supportGpuType.find(
+    item => requests[item] !== undefined || limits[item] !== undefined
+  )
+  const gpuValue = gpuType ? requests[gpuType] ?? limits[gpuType] : undefined
+  const gpuTypeLabel = gpuType ? getGpuDisplayName(gpuType) : ''
+  const gpuTypeSimpleLabel = gpuTypeLabel.split(' - ')[0]
 
   const isIstioProxy = container.name === 'istio-proxy'
 
@@ -69,6 +76,22 @@ const Card = ({ type = 'worker', container, onDelete, onEdit, readOnly }) => {
             {`${
               requests.memory ? `${memoryFormat(requests.memory)} MiB` : 0
             } – ${limits.memory ? `${memoryFormat(limits.memory)} MiB` : '∞'}`}
+          </span>
+        )}
+        {gpuType && (
+          <span className={styles.limit}>
+            <img
+              src="/assets/GPU.svg"
+              alt=""
+              width={20}
+              height={20}
+              style={{ marginRight: 4, verticalAlign: 'middle' }}
+            />
+            <span>{`${gpuTypeSimpleLabel} ${t('GPU_LIMIT')}: ${
+              gpuValue !== undefined && gpuValue !== ''
+                ? gpuValue
+                : t('NO_LIMIT')
+            }`}</span>
           </span>
         )}
       </div>
