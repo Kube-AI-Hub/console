@@ -89,12 +89,7 @@ const GpuCardList = ({ dataSource = [], isLoading = false }) => {
       title: t('GPU_CARD_MODE'),
       key: 'mode',
       isHideable: true,
-      render: record =>
-        record.mode
-          ? record.mode === 'default'
-            ? t('GPU_MODE_DEFAULT')
-            : record.mode
-          : '-',
+      render: record => record.mode || '-',
     },
     {
       title: t('GPU_CARD_VGPU'),
