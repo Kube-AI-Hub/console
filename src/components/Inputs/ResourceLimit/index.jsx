@@ -538,6 +538,44 @@ export default class ResourceLimit extends React.Component {
     result.requests = { ...existingRequests, ...(result.requests || {}) }
     result.limits = { ...existingLimits, ...(result.limits || {}) }
 
+    // 清理不再需要的GPU相关资源字段
+    // 当GPU类型切换时，旧类型的memoryName/vcoresName资源需要移除
+    const supportGpuType = globals.config.supportGpuType || []
+    const supportGpuTypeMetadata = get(
+      globals,
+      'config.supportGpuTypeMetadata',
+      {}
+    )
+
+    // 收集所有可能的GPU相关资源键
+    const allGpuKeys = new Set()
+    supportGpuType.forEach(gpuType => {
+      allGpuKeys.add(gpuType)
+      const metadata = supportGpuTypeMetadata[gpuType] || {}
+      if (metadata.memoryName) allGpuKeys.add(metadata.memoryName)
+      if (metadata.vcoresName) allGpuKeys.add(metadata.vcoresName)
+    })
+
+    // 当前GPU类型应该保留的资源键
+    const currentGpuKeysToKeep = new Set()
+    if (gpu.type && gpu.value) {
+      currentGpuKeysToKeep.add(gpu.type)
+    }
+    if (gpu.memoryName && gpu.memory) {
+      currentGpuKeysToKeep.add(gpu.memoryName)
+    }
+    if (gpu.vcoresName && gpu.vcores) {
+      currentGpuKeysToKeep.add(gpu.vcoresName)
+    }
+
+    // 从result中删除不需要的GPU相关资源键
+    allGpuKeys.forEach(key => {
+      if (!currentGpuKeysToKeep.has(key)) {
+        delete result.requests[key]
+        delete result.limits[key]
+      }
+    })
+
     onChange(result)
   }
 
