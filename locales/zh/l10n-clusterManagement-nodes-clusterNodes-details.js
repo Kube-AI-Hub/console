@@ -146,9 +146,23 @@ module.exports = {
   GPU_CARD_NUMA: 'NUMA 节点',
   GPU_CARD_VENDOR: '厂商',
   GPU_CARD_MODE: '模式',
+  // GPU Detail
+  GPU_CARD_SCAP: '显卡',
+  GPU_DETAIL_NODE: '所属节点',
+  GPU_CARD_SUMMARY: '显卡摘要',
+  GPU_ALLOCATION_RATIO: 'GPU 分配率',
+  GPU_ALLOCATION_RATIO_SCAP: 'GPU 分配率',
+  GPU_POWER: 'GPU 功率',
+  GPU_POWER_SCAP: 'GPU 功率',
+  GPU_TEMPERATURE: 'GPU 温度',
+  GPU_TEMPERATURE_SCAP: 'GPU 温度',
+  GPU_DETAIL_MONITORING_TIPS: '功率与温度指标依赖监控采集配置，暂无数据时将显示为空。',
+  GPU_DETAIL_EVENTS_TIPS: '当前为兼容模式，展示该节点相关事件。卡级事件过滤待后端支持。',
+  GPU_PODS_EMPTY_TIPS: '未找到使用此显卡的容器组。',
   GPU_TOPOLOGY: '显卡连接拓扑图',
   GPU_TOPOLOGY_SELF: '自身',
   GPU_TOPOLOGY_LEGEND_TITLE: '图例',
+  GPU_TOPOLOGY_CONNECTIONS: '{device} 连接关系',
   // Metadata
   // Monitoring
   USAGE: '用量',

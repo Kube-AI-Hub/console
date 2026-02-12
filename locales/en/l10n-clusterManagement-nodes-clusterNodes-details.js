@@ -147,9 +147,23 @@ module.exports = {
   GPU_CARD_NUMA: 'NUMA Node',
   GPU_CARD_VENDOR: 'Vendor',
   GPU_CARD_MODE: 'Mode',
+  // GPU Detail
+  GPU_CARD_SCAP: 'GPU Card',
+  GPU_DETAIL_NODE: 'Node',
+  GPU_CARD_SUMMARY: 'GPU Summary',
+  GPU_ALLOCATION_RATIO: 'GPU Allocation Ratio',
+  GPU_ALLOCATION_RATIO_SCAP: 'GPU allocation ratio',
+  GPU_POWER: 'GPU Power',
+  GPU_POWER_SCAP: 'GPU power',
+  GPU_TEMPERATURE: 'GPU Temperature',
+  GPU_TEMPERATURE_SCAP: 'GPU temperature',
+  GPU_DETAIL_MONITORING_TIPS: 'Power and temperature metrics depend on monitoring collectors. No data is shown when unavailable.',
+  GPU_DETAIL_EVENTS_TIPS: 'Compatibility mode: showing events for the parent node. Card-level event filtering requires backend support.',
+  GPU_PODS_EMPTY_TIPS: 'No pods found using this GPU card.',
   GPU_TOPOLOGY: 'GPU Connection Topology',
   GPU_TOPOLOGY_SELF: 'Self',
   GPU_TOPOLOGY_LEGEND_TITLE: 'Legend',
+  GPU_TOPOLOGY_CONNECTIONS: '{device} Connections',
   // Metadata
   // Monitoring
   USAGE: 'Usage',

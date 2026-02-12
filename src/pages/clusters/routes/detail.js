@@ -38,6 +38,7 @@ import PV from '../containers/Storage/PV/detail'
 import ProjectLayout from '../layouts/Project'
 
 import NodeDetail from '../containers/Nodes/Detail'
+import GpuDetail from '../containers/Nodes/Detail/GpuDetail'
 import EdgeNodeDetail from '../containers/EdgeNodes/Detail'
 
 import ProjectDetail from '../containers/Projects/Detail'
@@ -53,6 +54,10 @@ import GatewayDetail from '../containers/Gateway/Detail'
 const PATH = '/clusters/:cluster'
 
 export default [
+  {
+    path: `${PATH}/nodes/:node/gpus/:gpuUuid`,
+    component: GpuDetail,
+  },
   {
     path: `${PATH}/nodes/:node`,
     component: NodeDetail,

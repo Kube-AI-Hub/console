@@ -69,6 +69,7 @@ class PodsCard extends React.Component {
     onRefresh: PropTypes.func,
     onPage: PropTypes.func,
     limit: PropTypes.number,
+    extraParams: PropTypes.object,
   }
 
   static defaultProps = {
@@ -81,6 +82,7 @@ class PodsCard extends React.Component {
     onSearch() {},
     onRefresh() {},
     onPage() {},
+    extraParams: {},
   }
 
   constructor(props) {
@@ -212,6 +214,11 @@ class PodsCard extends React.Component {
 
     if (has(result, 'labelSelector') && isEmpty(selector)) {
       result = {}
+    }
+
+    const { extraParams } = this.props
+    if (!isEmpty(extraParams)) {
+      Object.assign(result, extraParams)
     }
 
     return result

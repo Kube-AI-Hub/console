@@ -16,11 +16,13 @@
  */
 
 import React from 'react'
+import { Link, withRouter } from 'react-router-dom'
 import { Table, Tooltip } from '@kube-design/components'
 import { Panel, Status } from 'components/Base'
 import { getVendorDisplayName } from 'utils'
 
-const GpuCardList = ({ dataSource = [], isLoading = false }) => {
+const GpuCardList = ({ dataSource = [], isLoading = false, match }) => {
+  const { cluster, node } = match.params
   const columns = [
     {
       title: t('GPU_CARD_INDEX'),
@@ -36,9 +38,13 @@ const GpuCardList = ({ dataSource = [], isLoading = false }) => {
       width: '10%',
       overFlow: 'ellipsis',
       render: record => {
+        const gpuDetailUrl = `/clusters/${cluster}/nodes/${node}/gpus/${encodeURIComponent(
+          record.uuid
+        )}/status`
         return (
           <Tooltip content={record.uuid}>
-            <span
+            <Link
+              to={gpuDetailUrl}
               style={{
                 display: 'inline-block',
                 width: '100%',
@@ -48,7 +54,7 @@ const GpuCardList = ({ dataSource = [], isLoading = false }) => {
               }}
             >
               {record.uuid}
-            </span>
+            </Link>
           </Tooltip>
         )
       },
@@ -130,4 +136,4 @@ const GpuCardList = ({ dataSource = [], isLoading = false }) => {
   )
 }
 
-export default GpuCardList
+export default withRouter(GpuCardList)
