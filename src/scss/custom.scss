@@ -221,3 +221,8 @@
   color: variables.$white;
   background-color: variables.$yellow-color03;
 }
+
+// Notify 弹窗背景与整体背景一致
+.notify-wrapper .notify .notice {
+  background-color: variables.$body-bg-color !important;
+}

@@ -176,10 +176,9 @@ function handleResponse(response, reject, request = {}) {
         console.warn('Unauthorized', response, response.ok)
 
         // 检查是否是登录相关的请求 - 这些请求的 401 是正常的业务错误，不应该触发会话超时处理
-        const isLoginRequest = request.url && (
-          request.url.includes('/login') ||
-          request.url.startsWith('/oauth/')
-        )
+        const isLoginRequest =
+          request.url &&
+          (request.url.includes('/login') || request.url.startsWith('/oauth/'))
 
         // 只有非登录请求的 401 才是真正的会话超时
         if (!isLoginRequest) {
@@ -196,9 +195,15 @@ function handleResponse(response, reject, request = {}) {
         let message = data.message || 'Please login again'
         if (isLoginRequest && data.error === 'invalid_grant') {
           const errorDesc = (data.error_description || '').toLowerCase()
-          if (errorDesc.includes('incorrect password') || errorDesc.includes('password')) {
+          if (
+            errorDesc.includes('incorrect password') ||
+            errorDesc.includes('password')
+          ) {
             message = 'INCORRECT_PASSWORD'
-          } else if (errorDesc.includes('user not found') || errorDesc.includes('user does not exist')) {
+          } else if (
+            errorDesc.includes('user not found') ||
+            errorDesc.includes('user does not exist')
+          ) {
             message = 'USER_NOT_FOUND'
           } else {
             message = 'INCORRECT_USERNAME_OR_PASSWORD'
@@ -220,18 +225,23 @@ function handleResponse(response, reject, request = {}) {
 
       // 处理 OAuth 登录 400 错误（如密码错误）
       if (response.status === 400) {
-        const isLoginRequest = request.url && (
-          request.url.includes('/login') ||
-          request.url.startsWith('/oauth/')
-        )
+        const isLoginRequest =
+          request.url &&
+          (request.url.includes('/login') || request.url.startsWith('/oauth/'))
 
         if (isLoginRequest && data.error === 'invalid_grant') {
           const errorDesc = (data.error_description || '').toLowerCase()
           let message = 'INCORRECT_USERNAME_OR_PASSWORD'
 
-          if (errorDesc.includes('incorrect password') || errorDesc.includes('password')) {
+          if (
+            errorDesc.includes('incorrect password') ||
+            errorDesc.includes('password')
+          ) {
             message = 'INCORRECT_PASSWORD'
-          } else if (errorDesc.includes('user not found') || errorDesc.includes('user does not exist')) {
+          } else if (
+            errorDesc.includes('user not found') ||
+            errorDesc.includes('user does not exist')
+          ) {
             message = 'USER_NOT_FOUND'
           }
 
@@ -317,7 +327,7 @@ function formatError(response, data) {
     result.status = data.code
   }
 
-  if (data.status) {
+  if (typeof data.status === 'number') {
     result.status = data.status
   }
 

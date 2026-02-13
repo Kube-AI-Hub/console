@@ -58,11 +58,20 @@ export default {
             ]
           }
 
-          store.patch(detail, _data).then(() => {
-            Modal.close(modal)
-            Notify.success({ content: t('UPDATE_SUCCESSFUL') })
-            success && success()
-          })
+          store
+            .patch(detail, _data)
+            .then(() => {
+              Modal.close(modal)
+              Notify.success({ content: t('UPDATE_SUCCESSFUL') })
+              success && success()
+            })
+            .catch(err => {
+              Notify.error({
+                title: err?.reason,
+                content: err?.message || t('UPDATE_FAILED'),
+                duration: 6000,
+              })
+            })
         },
         detail,
         modal: EditBasicInfoModal,
@@ -75,18 +84,26 @@ export default {
     on({ store, detail, success, ...props }) {
       const modal = Modal.open({
         onOk: async data => {
-          const isScheduleProject = store.isScheduleProject
-          if (isScheduleProject) {
-            set(data[0], 'metadata.resourceVersion', detail.resourceVersion)
-            await store.update(detail, data[0])
-            await store.updateScheduleYaml(detail, data[1])
-          } else {
-            set(data, 'metadata.resourceVersion', detail.resourceVersion)
-            await store.update(detail, data)
+          try {
+            const isScheduleProject = store.isScheduleProject
+            if (isScheduleProject) {
+              set(data[0], 'metadata.resourceVersion', detail.resourceVersion)
+              await store.update(detail, data[0])
+              await store.updateScheduleYaml(detail, data[1])
+            } else {
+              set(data, 'metadata.resourceVersion', detail.resourceVersion)
+              await store.update(detail, data)
+            }
+            Notify.success({ content: t('UPDATE_SUCCESSFUL') })
+            Modal.close(modal)
+            success && success()
+          } catch (err) {
+            Notify.error({
+              title: err?.reason,
+              content: err?.message || t('UPDATE_FAILED'),
+              duration: 6000,
+            })
           }
-          Notify.success({ content: t('UPDATE_SUCCESSFUL') })
-          Modal.close(modal)
-          success && success()
         },
         detail,
         store,
