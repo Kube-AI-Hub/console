@@ -74,9 +74,6 @@ export default class GpuDetail extends React.Component {
     const gpuMemoryTotal = (
       Number(get(detail, 'gpuMemoryTotal', 0)) / 1024
     ).toFixed(2)
-    const gpuMemoryUsed = (
-      Number(get(detail, 'gpuMemoryUsed', 0)) / 1024
-    ).toFixed(2)
 
     return [
       { name: t('STATUS'), value: healthStatus },
@@ -103,20 +100,8 @@ export default class GpuDetail extends React.Component {
       },
       { name: t('GPU_CARD_MODE'), value: get(detail, 'mode', '') || '-' },
       {
-        name: t('GPU_CARD_VGPU'),
-        value: `${get(detail, 'vgpuUsed', 0)}/${get(detail, 'vgpuTotal', 0)}`,
-      },
-      {
-        name: t('GPU_CARD_COMPUTE'),
-        value: `${get(detail, 'gpuCoreUsed', 0)}/${get(
-          detail,
-          'gpuCoreTotal',
-          0
-        )}`,
-      },
-      {
-        name: t('GPU_CARD_MEMORY'),
-        value: `${gpuMemoryUsed}/${gpuMemoryTotal} GiB`,
+        name: t('GPU_MEMORY_TOTAL'),
+        value: `${gpuMemoryTotal} GiB`,
       },
       {
         name: t('GPU_VIRT_MODE'),
