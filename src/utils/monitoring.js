@@ -110,9 +110,7 @@ export const getSuitableValue = (
   }
 
   const unit = getSuitableUnit(value, unitType)
-  const unitText = unit
-    ? ` ${t(unit === 'core' ? 'CPU_CORE_UNIT' : unit)}`
-    : ''
+  const unitText = unit ? ` ${t(unit === 'core' ? 'CPU_CORE_UNIT' : unit)}` : ''
   const count = getValueByUnit(value, unit || unitType)
   return `${count}${unitText}`
 }
@@ -128,6 +126,9 @@ export const getValueByUnit = (num, unit, precision = 2) => {
       return Math.round(value)
     case '%':
       value *= 100
+      break
+    case 'pct':
+      // percent, value already 0-100 (no multiplication, e.g. gpu_card_utilisation)
       break
     case 'm':
       value *= 1000
@@ -481,7 +482,7 @@ export const unitTransformMap = {
     ['months', 10000 * 60 * 60 * 24 * 30],
   ]),
   'percent (0-100)': unitTransformFactory([['%', 0]]),
-  'percent (0.0-1.0)': function (number, decimals) {
+  'percent (0.0-1.0)': function(number, decimals) {
     const format = unitTransformFactory([['%', 0]])
     return format(number * 100, decimals)
   },
@@ -504,7 +505,7 @@ export function unitTransformGroupFactory(config) {
 }
 
 export function unitTransformFactory(config) {
-  return function (number, decimals = 0) {
+  return function(number, decimals = 0) {
     const isNegative = number < 0
     const abs = Math.abs(number)
 

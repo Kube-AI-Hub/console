@@ -47,6 +47,7 @@ module.exports = {
   ETCD_DB_SIZE: 'DB <span>Size</span>',
   ETCD_CLIENT_TRAFFIC: 'Client <span>Traffic</span>',
   TITLE_UNIT: '{title} ({unit})',
+  pct: '%',
   AVERAGE: 'Average',
   PROPOSAL_COMMITTED: 'Committed',
   PROPOSAL_APPLIED: 'Applied',

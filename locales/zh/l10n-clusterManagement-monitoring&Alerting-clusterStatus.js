@@ -46,6 +46,7 @@ module.exports = {
   ETCD_DB_SIZE: '库 <span>大小</span>',
   ETCD_CLIENT_TRAFFIC: '客户端 <span>流量</span>',
   TITLE_UNIT: '{title}（{unit}）',
+  pct: '%',
   AVERAGE: '平均值',
   PROPOSAL_COMMITTED: '已提交',
   PROPOSAL_APPLIED: '已应用',

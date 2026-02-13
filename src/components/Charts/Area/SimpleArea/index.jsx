@@ -120,11 +120,12 @@ export default class SimpleArea extends React.Component {
   renderTitle() {
     const { title, unit, renderTitle } = this.props
 
+    const unitDisplay = unit === 'pct' ? '%' : t(unit)
     const text = renderTitle
       ? renderTitle()
       : isEmpty(unit)
       ? t(title)
-      : t('TITLE_UNIT', { title: t(title), unit: t(unit) })
+      : t('TITLE_UNIT', { title: t(title), unit: unitDisplay })
     return <div className={styles.title}>{text}</div>
   }
 

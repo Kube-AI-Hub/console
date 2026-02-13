@@ -10,11 +10,12 @@ import GpuTopology from '../../RunningStatus/GpuTopology'
 import * as styles from '../../RunningStatus/index.scss'
 
 const GpuMetricTypes = [
-  'node_gpu_utilisation',
-  'node_gpu_memory_utilisation',
-  'node_gpu_allocated',
-  'node_gpu_power',
-  'node_gpu_temperature',
+  'gpu_card_utilisation',
+  'gpu_card_memory_usage',
+  'gpu_card_memory_total',
+  'gpu_card_allocation_rate',
+  'gpu_card_power',
+  'gpu_card_temperature',
 ]
 
 @inject('gpuDetailStore', 'detailStore')
@@ -31,15 +32,15 @@ export default class GpuRunningStatus extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { node } = this.props.match.params
-    const { node: prevNode } = prevProps.match.params
-    if (node !== prevNode) {
+    const { node, gpuUuid } = this.props.match.params
+    const { node: prevNode, gpuUuid: prevGpuUuid } = prevProps.match.params
+    if (node !== prevNode || gpuUuid !== prevGpuUuid) {
       this.fetchMetrics()
     }
   }
 
   fetchMetrics = () => {
-    const { node } = this.props.match.params
+    const { node, gpuUuid } = this.props.match.params
     const { role = [] } = this.props.detailStore.detail || {}
     this.monitorStore.fetchMetrics({
       resources: [node],
@@ -47,6 +48,7 @@ export default class GpuRunningStatus extends React.Component {
       step: '1m',
       times: 30,
       fillZero: !role.includes('edge'),
+      gpu_uuid: decodeURIComponent(gpuUuid || ''),
     })
   }
 
@@ -92,6 +94,18 @@ export default class GpuRunningStatus extends React.Component {
     )
   }
 
+  getMemoryTabTitle = tab => {
+    const usageData = get(tab.data, '[0].values', [])
+    const totalData = get(tab.extraData, '[0].values', [])
+    if (isEmpty(usageData) || isEmpty(totalData)) return '-'
+    const usage = Number(get(usageData, [usageData.length - 1, 1], 0))
+    const total = Number(get(totalData, [totalData.length - 1, 1], 0))
+    if (Number.isNaN(usage) || Number.isNaN(total)) return '-'
+    const usageGiB = (usage / 1024 ** 3).toFixed(2)
+    const pct = total > 0 ? ((usage / total) * 100).toFixed(1) : 0
+    return `${usageGiB} GiB (${pct}%)`
+  }
+
   renderResourceUsage() {
     const metrics = toJS(this.monitorStore.data)
     return (
@@ -105,42 +119,51 @@ export default class GpuRunningStatus extends React.Component {
             {
               key: 'gpu_usage',
               icon: 'gpu',
-              unit: '%',
+              unit: 'pct',
+              unitSuffix: '%',
               legend: ['GPU_USAGE'],
               title: 'GPU_USAGE',
-              data: get(metrics, 'node_gpu_utilisation.data.result'),
+              data: get(metrics, 'gpu_card_utilisation.data.result'),
             },
             {
               key: 'gpu_memory',
               icon: 'memory',
-              unit: '%',
+              unitType: 'memory',
               legend: ['GPU_MEMORY_USAGE'],
               title: 'GPU_MEMORY_USAGE',
-              data: get(metrics, 'node_gpu_memory_utilisation.data.result'),
+              data: get(metrics, 'gpu_card_memory_usage.data.result'),
+              extraData: get(metrics, 'gpu_card_memory_total.data.result'),
+              renderTitle: this.getMemoryTabTitle,
+              yAxis: { hide: true },
             },
             {
               key: 'gpu_allocated',
               icon: 'pod',
               unit: '%',
+              unitSuffix: '%',
               legend: ['GPU_ALLOCATION_RATIO'],
               title: 'GPU_ALLOCATION_RATIO',
-              data: get(metrics, 'node_gpu_allocated.data.result'),
+              data: get(metrics, 'gpu_card_allocation_rate.data.result'),
             },
             {
               key: 'gpu_power',
               icon: 'gpu',
-              unit: 'W',
+              unit: 'default',
+              unitSuffix: ' W',
               legend: ['GPU_POWER'],
               title: 'GPU_POWER',
-              data: get(metrics, 'node_gpu_power.data.result'),
+              data: get(metrics, 'gpu_card_power.data.result'),
+              yAxis: { hide: true },
             },
             {
               key: 'gpu_temperature',
               icon: 'gpu',
-              unit: '°C',
+              unit: 'default',
+              unitSuffix: ' °C',
               legend: ['GPU_TEMPERATURE'],
               title: 'GPU_TEMPERATURE',
-              data: get(metrics, 'node_gpu_temperature.data.result'),
+              data: get(metrics, 'gpu_card_temperature.data.result'),
+              yAxis: { hide: true },
             },
           ]}
         />

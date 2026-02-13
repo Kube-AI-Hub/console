@@ -28,7 +28,12 @@ const CustomToolTip = (props = {}) => {
   const data = payload || []
   const timeStr = props.label
   const unit = get(data, '[0].unit') || ''
-  const unitText = unit === 'default' ? '' : unit === '%' ? '%' : ` ${t(unit)}`
+  const unitText =
+    unit === 'default'
+      ? ''
+      : unit === '%' || unit === 'pct'
+      ? '%'
+      : ` ${t(unit)}`
 
   const labelContent = renderLabel ? renderLabel(props) : timeStr
 

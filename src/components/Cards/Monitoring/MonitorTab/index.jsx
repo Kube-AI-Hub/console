@@ -19,7 +19,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import classnames from 'classnames'
-import { get, isEmpty } from 'lodash'
+import { get, isEmpty, omit } from 'lodash'
 
 import { getAreaChartOps, getValueByUnit } from 'utils/monitoring'
 
@@ -44,11 +44,24 @@ export default class MonitorTab extends React.Component {
 
   getLastValue = (data, unit) => {
     const values = get(data, `[0].values`, [])
-    return getValueByUnit(values[values.length - 1][1], unit)
+    if (isEmpty(values)) return 0
+    const lastPoint = values[values.length - 1]
+    const rawValue = Array.isArray(lastPoint) ? get(lastPoint, 1, 0) : lastPoint
+    return getValueByUnit(rawValue, unit)
   }
 
   handleTabClick = e =>
     this.setState({ activeTab: e.currentTarget.dataset.key })
+
+  getTabTitle = tab => {
+    if (tab.renderTitle) {
+      return tab.renderTitle(tab)
+    }
+    if (!tab.data) return '-'
+    const value = this.getLastValue(tab.data, tab.unit)
+    const suffix = tab.unitSuffix ?? '%'
+    return `${value}${suffix}`
+  }
 
   renderTabList() {
     const { tabs } = this.props
@@ -69,9 +82,7 @@ export default class MonitorTab extends React.Component {
           >
             <Text
               icon={tab.icon}
-              title={
-                !tab.data ? '-' : `${this.getLastValue(tab.data, tab.unit)}%`
-              }
+              title={this.getTabTitle(tab)}
               description={t(`${tab.title}_SCAP`)}
             />
           </div>
@@ -91,6 +102,8 @@ export default class MonitorTab extends React.Component {
     }
 
     const config = getAreaChartOps(tab)
+    const yAxis = tab.yAxis ?? { hide: true, domain: [0, 100] }
+    const chartProps = omit(config, ['renderTitle', 'extraData'])
 
     return (
       <div className={styles.tabContent}>
@@ -98,11 +111,8 @@ export default class MonitorTab extends React.Component {
           width="100%"
           height={200}
           theme="dark"
-          yAxis={{
-            hide: true,
-            domain: [0, 100],
-          }}
-          {...config}
+          yAxis={yAxis}
+          {...chartProps}
         />
       </div>
     )

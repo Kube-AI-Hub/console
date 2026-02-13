@@ -8,11 +8,12 @@ import { Controller as MonitoringController } from 'components/Cards/Monitoring'
 import { SimpleArea } from 'components/Charts'
 
 const MetricTypes = {
-  gpu_utilisation: 'node_gpu_utilisation',
-  gpu_memory_utilisation: 'node_gpu_memory_utilisation',
-  gpu_allocated: 'node_gpu_allocated',
-  gpu_power: 'node_gpu_power',
-  gpu_temperature: 'node_gpu_temperature',
+  gpu_utilisation: 'gpu_card_utilisation',
+  gpu_memory_usage: 'gpu_card_memory_usage',
+  gpu_memory_total: 'gpu_card_memory_total',
+  gpu_allocation_rate: 'gpu_card_allocation_rate',
+  gpu_power: 'gpu_card_power',
+  gpu_temperature: 'gpu_card_temperature',
 }
 
 @inject('detailStore')
@@ -29,12 +30,13 @@ export default class GpuMonitoring extends React.Component {
   }
 
   fetchData = params => {
-    const { node } = this.props.match.params
+    const { node, gpuUuid } = this.props.match.params
     const { role = [] } = this.props.detailStore.detail || {}
     this.monitorStore.fetchMetrics({
       resources: [node],
       metrics: Object.values(MetricTypes),
       fillZero: !role.includes('edge'),
+      gpu_uuid: decodeURIComponent(gpuUuid || ''),
       ...params,
     })
   }
@@ -43,26 +45,23 @@ export default class GpuMonitoring extends React.Component {
     {
       type: 'utilisation',
       title: 'GPU_USAGE',
-      unit: '%',
+      unit: 'pct',
       legend: ['GPU_USAGE'],
       data: get(this.metrics, `${MetricTypes.gpu_utilisation}.data.result`),
     },
     {
-      type: 'utilisation',
+      type: 'usage',
       title: 'GPU_MEMORY_USAGE',
-      unit: '%',
+      unitType: 'memory',
       legend: ['GPU_MEMORY_USAGE'],
-      data: get(
-        this.metrics,
-        `${MetricTypes.gpu_memory_utilisation}.data.result`
-      ),
+      data: get(this.metrics, `${MetricTypes.gpu_memory_usage}.data.result`),
     },
     {
       type: 'utilisation',
-      title: 'GPU_ALLOCATION_RATIO',
+      title: 'GPU_ALLOCATION_RATE',
       unit: '%',
-      legend: ['GPU_ALLOCATION_RATIO'],
-      data: get(this.metrics, `${MetricTypes.gpu_allocated}.data.result`),
+      legend: ['GPU_ALLOCATION_RATE'],
+      data: get(this.metrics, `${MetricTypes.gpu_allocation_rate}.data.result`),
     },
     {
       type: 'usage',
@@ -74,7 +73,7 @@ export default class GpuMonitoring extends React.Component {
     {
       type: 'usage',
       title: 'GPU_TEMPERATURE',
-      unit: '°C',
+      unit: '\u00B0C',
       legend: ['GPU_TEMPERATURE'],
       data: get(this.metrics, `${MetricTypes.gpu_temperature}.data.result`),
     },
