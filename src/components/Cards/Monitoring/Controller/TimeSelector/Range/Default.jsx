@@ -20,7 +20,13 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import classnames from 'classnames'
 
-import { getStep, getTimes, getTimeOptions, getLastTimeStr } from '../utils'
+import {
+  getStep,
+  getTimes,
+  getMinutes,
+  getTimeOptions,
+  getLastTimeStr,
+} from '../utils'
 
 import * as styles from './index.scss'
 
@@ -59,15 +65,25 @@ export default class DefaultRange extends React.Component {
       let times = this.props.times
       let step = getStep(value, times)
       const stepNum = parseInt(step, 10)
+      const valueMinutes = getMinutes(value)
 
-      if (stepNum < 1) {
-        times = 10
-        step = getStep(value, times)
+      if (stepNum < 1 || !Number.isFinite(stepNum)) {
+        if (valueMinutes <= 60) {
+          step = '1m'
+          times = Math.max(1, valueMinutes)
+        } else {
+          times = 10
+          step = getStep(value, times)
+        }
       }
 
       if (stepNum > 60) {
         step = '60m'
         times = getTimes(value, step)
+        if (times < 1) {
+          step = '1m'
+          times = Math.max(1, valueMinutes)
+        }
       }
 
       this.props.onChange({
