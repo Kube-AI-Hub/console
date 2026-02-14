@@ -8,6 +8,7 @@ import { cpuFormat, memoryFormat, coreUnitTS } from 'utils'
 import { Icon } from '@kube-design/components'
 import { Panel, Text } from 'components/Base'
 import MonitorTab from 'components/Cards/Monitoring/MonitorTab'
+import TimeSelector from 'components/Cards/Monitoring/Controller/TimeSelector'
 import { getValueByUnit, getSuitableUnit } from 'utils/monitoring'
 import ConditionCard from './ConditionCard'
 import TaintCard from './TaintCard'
@@ -412,6 +413,9 @@ class RunningStatus extends React.Component {
     super(props)
     this.state = {
       gpulist: [],
+      step: '3m',
+      times: 20,
+      activeTab: 'gpu',
     }
     this.store = props.detailStore
     this.monitoringStore = new NodeMonitoringStore({ cluster: this.cluster })
@@ -445,13 +449,25 @@ class RunningStatus extends React.Component {
 
   fetchData() {
     const { name, role = [] } = this.store.detail
+    const { step, times } = this.state
 
     this.monitoringStore.fetchMetrics({
       resources: [name],
       metrics: METRIC_TYPES,
-      step: '180s',
+      step,
+      times,
       fillZero: !role.includes('edge'),
     })
+  }
+
+  handleTimeChange = ({ step, times }) => {
+    this.setState({ step, times }, () => {
+      this.fetchData()
+    })
+  }
+
+  handleTabChange = key => {
+    this.setState({ activeTab: key })
   }
 
   getLastValue = (type, unit, unitType) => {
@@ -601,13 +617,27 @@ class RunningStatus extends React.Component {
 
   renderResourceStatus() {
     const metrics = toJS(this.monitoringStore.data)
+    const { step, times, activeTab } = this.state
     return (
       <Panel
         className={styles.resources}
-        title={t('RESOURCE_USAGE')}
+        title={
+          <div className={styles.resourceUsageHeader}>
+            <span>{t('RESOURCE_USAGE')}</span>
+            <TimeSelector
+              step={step}
+              times={times}
+              onChange={this.handleTimeChange}
+              dark
+              arrowIcon="chevron-down"
+            />
+          </div>
+        }
         loading={this.monitoringStore.isLoading}
       >
         <MonitorTab
+          activeTab={activeTab}
+          onTabChange={this.handleTabChange}
           tabs={[
             {
               key: 'gpu',

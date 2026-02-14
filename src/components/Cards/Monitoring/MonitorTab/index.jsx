@@ -32,6 +32,8 @@ import * as styles from './index.scss'
 export default class MonitorTab extends React.Component {
   static propTypes = {
     tabs: PropTypes.array,
+    activeTab: PropTypes.string,
+    onTabChange: PropTypes.func,
   }
 
   static defaultProps = {
@@ -50,8 +52,14 @@ export default class MonitorTab extends React.Component {
     return getValueByUnit(rawValue, unit)
   }
 
-  handleTabClick = e =>
-    this.setState({ activeTab: e.currentTarget.dataset.key })
+  handleTabClick = e => {
+    const key = e.currentTarget.dataset.key
+    if (this.props.onTabChange) {
+      this.props.onTabChange(key)
+    } else {
+      this.setState({ activeTab: key })
+    }
+  }
 
   getTabTitle = tab => {
     if (tab.renderTitle) {
@@ -64,8 +72,12 @@ export default class MonitorTab extends React.Component {
   }
 
   renderTabList() {
-    const { tabs } = this.props
-    const { activeTab } = this.state
+    const { tabs, activeTab: controlledActiveTab } = this.props
+    const { activeTab: uncontrolledActiveTab } = this.state
+    const activeTab =
+      controlledActiveTab !== undefined
+        ? controlledActiveTab
+        : uncontrolledActiveTab
 
     if (isEmpty(tabs)) return null
 
@@ -92,8 +104,12 @@ export default class MonitorTab extends React.Component {
   }
 
   renderTabContent() {
-    const { tabs } = this.props
-    const { activeTab } = this.state
+    const { tabs, activeTab: controlledActiveTab } = this.props
+    const { activeTab: uncontrolledActiveTab } = this.state
+    const activeTab =
+      controlledActiveTab !== undefined
+        ? controlledActiveTab
+        : uncontrolledActiveTab
 
     const tab = tabs.find(_tab => _tab.key === activeTab)
 

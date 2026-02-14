@@ -30,6 +30,7 @@ import CustomTooltip from 'components/Charts/Custom/Tooltip'
 const MetricTypes = {
   gpu_utilisation: 'node_gpu_utilisation',
   gpu_memory_utilisation: 'node_gpu_memory_utilisation',
+  gpu_allocation_rate: 'node_gpu_allocation_rate',
   cpu_utilisation: 'node_cpu_utilisation',
   cpu_load1: 'node_load1',
   cpu_load5: 'node_load5',
@@ -103,6 +104,16 @@ class Monitorings extends React.Component {
         data: get(
           this.metrics,
           `${MetricTypes.gpu_memory_utilisation}.data.result`
+        ),
+      },
+      {
+        type: 'utilisation',
+        title: 'GPU_ALLOCATION_RATE',
+        unit: '%',
+        legend: ['GPU_ALLOCATION_RATE'],
+        data: get(
+          this.metrics,
+          `${MetricTypes.gpu_allocation_rate}.data.result`
         ),
       },
       {

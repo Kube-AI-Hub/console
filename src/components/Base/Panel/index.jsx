@@ -26,9 +26,10 @@ import * as styles from './index.scss'
 export default class Panel extends React.Component {
   render() {
     const { className, title, loading = false, children, extras } = this.props
+    const titleStr = typeof title === 'string' ? title : ''
     const empty = (
       <div className={styles.empty}>
-        {t('NO_AVAILABLE_RESOURCE_VALUE', { resource: title })}
+        {t('NO_AVAILABLE_RESOURCE_VALUE', { resource: titleStr || 'resource' })}
       </div>
     )
 
@@ -36,8 +37,8 @@ export default class Panel extends React.Component {
       <div
         className={styles.wrapper}
         data-test={`panel-${
-          title
-            ? title
+          titleStr
+            ? titleStr
                 .toLowerCase()
                 .split(' ')
                 .join('-')

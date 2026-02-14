@@ -6,6 +6,7 @@ import { get, isEmpty } from 'lodash'
 import NodeMonitoringStore from 'stores/monitoring/node'
 import { Panel, Text } from 'components/Base'
 import MonitorTab from 'components/Cards/Monitoring/MonitorTab'
+import TimeSelector from 'components/Cards/Monitoring/Controller/TimeSelector'
 import GpuTopology from '../../RunningStatus/GpuTopology'
 import * as styles from '../../RunningStatus/index.scss'
 
@@ -25,6 +26,11 @@ export default class GpuRunningStatus extends React.Component {
     super(props)
     const { cluster } = props.match.params
     this.monitorStore = new NodeMonitoringStore({ cluster })
+    this.state = {
+      step: '1m',
+      times: 30,
+      activeTab: 'gpu_usage',
+    }
   }
 
   componentDidMount() {
@@ -42,14 +48,25 @@ export default class GpuRunningStatus extends React.Component {
   fetchMetrics = () => {
     const { node, gpuUuid } = this.props.match.params
     const { role = [] } = this.props.detailStore.detail || {}
+    const { step, times } = this.state
     this.monitorStore.fetchMetrics({
       resources: [node],
       metrics: GpuMetricTypes,
-      step: '1m',
-      times: 30,
+      step,
+      times,
       fillZero: !role.includes('edge'),
       gpu_uuid: decodeURIComponent(gpuUuid || ''),
     })
+  }
+
+  handleTimeChange = ({ step, times }) => {
+    this.setState({ step, times }, () => {
+      this.fetchMetrics()
+    })
+  }
+
+  handleTabChange = key => {
+    this.setState({ activeTab: key })
   }
 
   renderSummary() {
@@ -108,13 +125,27 @@ export default class GpuRunningStatus extends React.Component {
 
   renderResourceUsage() {
     const metrics = toJS(this.monitorStore.data)
+    const { step, times, activeTab } = this.state
     return (
       <Panel
         className={styles.resources}
-        title={t('RESOURCE_USAGE')}
+        title={
+          <div className={styles.resourceUsageHeader}>
+            <span>{t('RESOURCE_USAGE')}</span>
+            <TimeSelector
+              step={step}
+              times={times}
+              onChange={this.handleTimeChange}
+              dark
+              arrowIcon="chevron-down"
+            />
+          </div>
+        }
         loading={this.monitorStore.isLoading}
       >
         <MonitorTab
+          activeTab={activeTab}
+          onTabChange={this.handleTabChange}
           tabs={[
             {
               key: 'gpu_usage',

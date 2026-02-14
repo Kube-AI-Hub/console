@@ -153,6 +153,8 @@ module.exports = {
   GPU_CARD_SUMMARY: 'GPU Summary',
   GPU_ALLOCATION_RATIO: 'GPU Allocation Ratio',
   GPU_ALLOCATION_RATIO_SCAP: 'GPU allocation ratio',
+  GPU_ALLOCATION_RATE: 'GPU Allocation Rate',
+  GPU_ALLOCATION_RATE_SCAP: 'GPU allocation rate',
   GPU_POWER: 'GPU Power',
   GPU_POWER_SCAP: 'GPU power',
   GPU_TEMPERATURE: 'GPU Temperature',
