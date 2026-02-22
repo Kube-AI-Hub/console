@@ -87,7 +87,8 @@
   padding: 20px;
   border-radius: 4px;
   background-color: variables.$white;
-  box-shadow: 0 4px 8px 0 rgba(variables.$dark-color07, 0.06);
+  border: 1px solid variables.$border-color;
+  box-shadow: variables.$card-hover-shadow;
   position: relative;
   z-index: 1;
 
