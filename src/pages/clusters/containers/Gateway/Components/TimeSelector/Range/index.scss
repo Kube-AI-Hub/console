@@ -7,28 +7,31 @@
   color: variables.$second-text-color;
 }
 
-.default {
-  ul {
+.defaultRange {
+  .list {
     display: flex;
     flex-direction: column;
     flex-wrap: wrap;
     height: 160px;
     font-size: variables.$body-size;
+  }
 
-    li {
-      width: 33.3333%;
-      font-weight: 600;
-      line-height: 24px;
-      margin: 4px 0;
-      cursor: pointer;
+  .item {
+    width: 33.3333%;
+    font-weight: 600;
+    line-height: 24px;
+    margin: 4px 0;
+    padding: 2px 8px;
+    border-radius: 2px;
+    cursor: pointer;
 
-      &.cur {
-        color: variables.$primary;
-      }
+    &.cur {
+      color: variables.$primary;
+    }
 
-      &:hover {
-        color: variables.$primary;
-      }
+    &:hover {
+      color: variables.$primary;
+      background-color: variables.$dark-color08;
     }
   }
 }

@@ -31,7 +31,7 @@ it('renders correctly', () => {
   const wrapper = mount(<Card {...props}>Children</Card>)
   expect(wrapper).toIncludeText(props.title)
   expect(wrapper).toIncludeText('Children')
-  expect(wrapper.find(`.${styles.default}`)).toHaveLength(1)
+  expect(wrapper.find(`.${styles.defaultType}`)).toHaveLength(1)
   expect(wrapper.find(`.${styles.operations}`)).toHaveLength(1)
 
   wrapper.setProps({ loading: true })

@@ -20,8 +20,8 @@ import React from 'react'
 import { mount } from 'enzyme'
 import * as styles from 'identity-obj-proxy'
 
-import Bar from './index'
 import variables from '~scss/variables.module.scss'
+import Bar from './index'
 
 it('renders correctly', () => {
   const props = {
@@ -35,7 +35,7 @@ it('renders correctly', () => {
   let $bar = wrapper.find('div > div').first()
   const $text = wrapper.find('div > span').first()
   expect($bar).toHaveStyle('width', '50%')
-  expect($bar).toHaveClassName(styles.default)
+  expect($bar).toHaveClassName(styles.defaultBar)
   expect($text).toHaveStyle('left', '25%')
   expect($text).toHaveStyle('transform', 'translateX(-50%)')
   expect($text).toHaveStyle('color', variables.white)

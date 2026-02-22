@@ -10,7 +10,7 @@
   background-color: variables.$white;
   transition: all variables.$trans-speed;
 
-  &.default {
+  &.defaultType {
     box-shadow: variables.$card-shadow;
 
     &:hover {

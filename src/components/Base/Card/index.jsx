@@ -103,7 +103,11 @@ export default class Card extends PureComponent {
 
     return (
       <div
-        className={classnames(styles.card, className, styles[type])}
+        className={classnames(
+          styles.card,
+          className,
+          type === 'default' ? styles.defaultType : styles[type]
+        )}
         {...rest}
       >
         {this.renderTitle()}

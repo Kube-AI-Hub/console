@@ -38,7 +38,8 @@ export default class DefaultRange extends React.Component {
   }
 
   handleClick = e => {
-    const { value } = e.target.dataset
+    const li = e.target.closest('li[data-value]')
+    const value = li ? li.dataset.value : undefined
     if (value) {
       this.props.onChange({
         duration: value,
@@ -50,14 +51,14 @@ export default class DefaultRange extends React.Component {
     const options = getTimeOptions(TimeOps)
     const { duration } = this.props
     return (
-      <div className={styles.default}>
+      <div className={styles.defaultRange}>
         <div className={styles.title}>{t('SELECT_TIME_RANGE')}</div>
-        <ul onClick={this.handleClick}>
+        <ul className={styles.list} onClick={this.handleClick}>
           {options.map(({ label, value }) => (
             <li
               key={label}
               data-value={value}
-              className={classnames({
+              className={classnames(styles.item, {
                 [styles.cur]: value === duration,
               })}
             >

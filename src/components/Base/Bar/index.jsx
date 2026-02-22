@@ -20,8 +20,8 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import classnames from 'classnames'
 
-import * as styles from './index.scss'
 import variables from '~scss/variables.module.scss'
+import * as styles from './index.scss'
 
 export default class Bar extends React.Component {
   static propTypes = {
@@ -56,7 +56,13 @@ export default class Bar extends React.Component {
 
     return (
       <div className={classnames(styles.wrapper, className)}>
-        <div className={classnames(styles.bar, styles[type])} style={style} />
+        <div
+          className={classnames(
+            styles.bar,
+            type === 'default' ? styles.defaultBar : styles[type]
+          )}
+          style={style}
+        />
         {text && !!value && (
           <span className={styles.text} style={textStyle}>
             {text}
