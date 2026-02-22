@@ -4,6 +4,7 @@ import classNames from "classnames";
 import { Checkbox } from "../Checkbox";
 import Icon from "../Icon";
 import { get, unset, isUndefined } from "lodash";
+import FormContext from "./FormContext";
 
 export default class Group extends React.Component {
   static propTypes = {
@@ -16,21 +17,7 @@ export default class Group extends React.Component {
     onChange: () => {},
   };
 
-  static contextTypes = {
-    formData: PropTypes.object,
-  };
-
-  static childContextTypes = {
-    registerGroup: PropTypes.func,
-    unRegisterGroup: PropTypes.func,
-  };
-
-  getChildContext() {
-    return {
-      registerGroup: this.registerGroup,
-      unRegisterGroup: this.unRegisterGroup,
-    };
-  }
+  static contextType = FormContext;
 
   state = {
     isCheck: false,
@@ -40,7 +27,7 @@ export default class Group extends React.Component {
 
   componentDidMount() {
     const { checkable, keepDataWhenUnCheck } = this.props;
-    const { formData } = this.context;
+    const { formData } = this.context || {};
     if (
       checkable &&
       !keepDataWhenUnCheck &&
@@ -64,7 +51,7 @@ export default class Group extends React.Component {
     const { keepDataWhenUnCheck, onChange } = this.props;
     this.setState({ isCheck: check }, () => {
       if (!keepDataWhenUnCheck && !check) {
-        const { formData } = this.context;
+        const { formData } = this.context || {};
         if (formData && this.items.size > 0) {
           this.items.forEach((item) => unset(formData, item));
         }
@@ -128,32 +115,39 @@ export default class Group extends React.Component {
     }
 
     const hideChildren = checkable && !isCheck;
+    const contextValue = {
+      ...(this.context || {}),
+      registerGroup: this.registerGroup,
+      unRegisterGroup: this.unRegisterGroup,
+    };
 
     return (
-      <div
-        className={classNames("form-group", {
-          "form-group-checkable": checkable,
-        })}
-      >
-        {this.renderTitle()}
-        {noWrapper ? (
-          <div
-            className={classNames({
-              "form-group-hide": hideChildren,
-            })}
-          >
-            {children}
-          </div>
-        ) : (
-          <div
-            className={classNames("form-group-content", {
-              "form-group-hide": hideChildren,
-            })}
-          >
-            {children}
-          </div>
-        )}
-      </div>
+      <FormContext.Provider value={contextValue}>
+        <div
+          className={classNames("form-group", {
+            "form-group-checkable": checkable,
+          })}
+        >
+          {this.renderTitle()}
+          {noWrapper ? (
+            <div
+              className={classNames({
+                "form-group-hide": hideChildren,
+              })}
+            >
+              {children}
+            </div>
+          ) : (
+            <div
+              className={classNames("form-group-content", {
+                "form-group-hide": hideChildren,
+              })}
+            >
+              {children}
+            </div>
+          )}
+        </div>
+      </FormContext.Provider>
     );
   }
 }

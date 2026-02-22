@@ -18,6 +18,7 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
+import SubRouteContext from 'components/Forms/Base/SubRouteContext'
 import { toJS } from 'mobx'
 import { isEmpty } from 'lodash'
 import { Modal } from 'components/Base'
@@ -42,12 +43,7 @@ export default class ConfigMapEditModal extends React.Component {
     isSubmitting: false,
   }
 
-  static childContextTypes = {
-    registerSubRoute: PropTypes.func,
-    resetSubRoute: PropTypes.func,
-  }
-
-  getChildContext() {
+  get subRouteContextValue() {
     return {
       registerSubRoute: this.registerSubRoute,
       resetSubRoute: this.resetSubRoute,
@@ -137,6 +133,7 @@ export default class ConfigMapEditModal extends React.Component {
     const { visible, isSubmitting, onCancel, isFederated } = this.props
 
     return (
+      <SubRouteContext.Provider value={this.subRouteContextValue}>
       <Modal
         width={960}
         title={t('EDIT_SETTINGS')}
@@ -155,6 +152,7 @@ export default class ConfigMapEditModal extends React.Component {
         />
         {this.renderSaveBar()}
       </Modal>
+      </SubRouteContext.Provider>
     )
   }
 }

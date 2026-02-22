@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import Schema from "async-validator";
+import FormContext from "./FormContext";
 import {
   set,
   get,
@@ -18,16 +19,7 @@ export default class FormItem extends React.Component {
     error: PropTypes.object,
   };
 
-  static contextTypes = {
-    formData: PropTypes.object,
-    onFormChange: PropTypes.func,
-    registerValidate: PropTypes.func,
-    resetValidate: PropTypes.func,
-    validateResults: PropTypes.array,
-    resetValidateResults: PropTypes.func,
-    registerGroup: PropTypes.func,
-    unRegisterGroup: PropTypes.func,
-  };
+  static contextType = FormContext;
 
   state = {
     error: null,

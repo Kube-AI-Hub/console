@@ -23,6 +23,7 @@ import { toJS } from 'mobx'
 import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
 import React from 'react'
+import SubRouteContext from 'components/Forms/Base/SubRouteContext'
 import WorkloadStore from 'stores/workload'
 
 import * as styles from './index.scss'
@@ -47,14 +48,11 @@ class WorkloadTableForm extends React.Component {
     this.store = new WorkloadStore('deployments')
   }
 
-  static contextTypes = {
-    registerSubRoute: PropTypes.func,
-    resetSubRoute: PropTypes.func,
-  }
+  static contextType = SubRouteContext
 
   componentDidMount() {
     const { onCancel } = this.props
-    const { registerSubRoute } = this.context
+    const registerSubRoute = this.context?.registerSubRoute
 
     registerSubRoute && registerSubRoute(this.handleSubmit, onCancel)
 
@@ -68,7 +66,7 @@ class WorkloadTableForm extends React.Component {
   }
 
   handleGoBack = () => {
-    const { resetSubRoute } = this.context
+    const resetSubRoute = this.context?.resetSubRoute
 
     resetSubRoute && resetSubRoute()
 

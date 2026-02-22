@@ -31,6 +31,7 @@ import {
   removeFullScreenChangeEvents,
 } from 'utils/dom'
 
+import DraggerContext from './DraggerContext'
 import * as style from './index.scss'
 
 export default
@@ -41,16 +42,6 @@ class Dragger extends React.Component {
     enableToggleFullScreen: true,
     XOffset: 0, // content initial x offset
     YOffset: 0, // content initial y offset
-  }
-
-  static childContextTypes = {
-    scale: PropTypes.number,
-  }
-
-  getChildContext() {
-    return {
-      scale: this.scale,
-    }
   }
 
   constructor(props) {
@@ -349,14 +340,16 @@ class Dragger extends React.Component {
             </div>
           )}
         </div>
-        <div
-          className={classNames(style.main_content, contentClassName)}
-          ref={dom => {
-            this.content = dom
-          }}
-        >
-          {children}
-        </div>
+        <DraggerContext.Provider value={this.scale}>
+          <div
+            className={classNames(style.main_content, contentClassName)}
+            ref={dom => {
+              this.content = dom
+            }}
+          >
+            {children}
+          </div>
+        </DraggerContext.Provider>
       </div>
     )
   }

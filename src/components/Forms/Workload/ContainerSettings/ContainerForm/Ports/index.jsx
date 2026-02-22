@@ -28,6 +28,7 @@ import {
   ContainerServicePort,
   ArrayInput,
 } from 'components/Inputs'
+import ContainerFormContext from '../ContainerFormContext'
 
 import * as styles from './index.scss'
 
@@ -36,10 +37,7 @@ export default class Ports extends React.Component {
     prefix: '',
   }
 
-  static contextTypes = {
-    imageDetail: PropTypes.object,
-    forceUpdate: PropTypes.func,
-  }
+  static contextType = ContainerFormContext
 
   get prefix() {
     const { prefix } = this.props
@@ -89,7 +87,8 @@ export default class Ports extends React.Component {
   }
 
   handleFillPorts = () => {
-    const { exposedPorts = [] } = this.context.imageDetail
+    const { imageDetail = {} } = this.context || {}
+    const { exposedPorts = [] } = imageDetail
     const ports = exposedPorts.map(port => {
       const protocol = port.split('/')[1]
       const containerPort = Number(port.split('/')[0])
@@ -104,7 +103,8 @@ export default class Ports extends React.Component {
 
     if (!isEmpty(ports)) {
       set(this.props.data, 'ports', ports)
-      this.context?.forceUpdate()
+      const { forceUpdate } = this.context || {}
+      forceUpdate && forceUpdate()
     }
   }
 
@@ -129,7 +129,7 @@ export default class Ports extends React.Component {
             addText={t('ADD_PORT')}
             checkItemValid={this.checkContainerPortValid}
             extraAdd={
-              !isEmpty(this.context?.imageDetail?.exposedPorts ?? []) && (
+              !isEmpty((this.context || {}).imageDetail?.exposedPorts ?? []) && (
                 <Button
                   className={styles.defaultButton}
                   onClick={this.handleFillPorts}

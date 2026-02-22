@@ -23,6 +23,7 @@ import { isEmpty, get } from 'lodash'
 
 import { Button, Icon } from '@kube-design/components'
 
+import SubRouteContext from 'components/Forms/Base/SubRouteContext'
 import Confirm from 'components/Forms/Base/Confirm'
 
 import EnhanceWrapper from './wrapper'
@@ -44,18 +45,6 @@ export default class FormsBox extends React.Component {
     forms: [],
     data: {},
     onSubmit() {},
-  }
-
-  static childContextTypes = {
-    registerSubRoute: PropTypes.func,
-    resetSubRoute: PropTypes.func,
-  }
-
-  getChildContext() {
-    return {
-      registerSubRoute: this.registerSubRoute,
-      resetSubRoute: this.resetSubRoute,
-    }
   }
 
   registerSubRoute = (onSave, onCancel) => {
@@ -257,11 +246,18 @@ export default class FormsBox extends React.Component {
   }
 
   render() {
+    const subRouteContextValue = {
+      registerSubRoute: this.registerSubRoute,
+      resetSubRoute: this.resetSubRoute,
+    }
+
     return (
-      <div className={styles.wrapper}>
-        {this.renderContent()}
-        {this.renderFooter()}
-      </div>
+      <SubRouteContext.Provider value={subRouteContextValue}>
+        <div className={styles.wrapper}>
+          {this.renderContent()}
+          {this.renderFooter()}
+        </div>
+      </SubRouteContext.Provider>
     )
   }
 }

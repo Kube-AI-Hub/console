@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import Radio from "./Radio";
+import RadioGroupContext from "./RadioGroupContext";
 
 class RadioButton extends Component {
   static propTypes = {
@@ -10,9 +11,7 @@ class RadioButton extends Component {
     style: PropTypes.object,
   };
 
-  static contextTypes = {
-    radioGroup: PropTypes.any,
-  };
+  static contextType = RadioGroupContext;
 
   static defaultProps = {
     prefixCls: "radio-button",
@@ -21,7 +20,7 @@ class RadioButton extends Component {
 
   render() {
     const { value, disabled, style } = this.props;
-    const { radioGroup } = this.context;
+    const radioGroup = this.context;
     const radioProps = { ...this.props };
     if (radioGroup) {
       radioProps.onChange = radioGroup.onChange;

@@ -4,6 +4,7 @@ import classNames from "classnames";
 import { isFunction } from "lodash";
 import Radio from "./Radio";
 import RadioButton from "./RadioButton";
+import RadioGroupContext from "./RadioGroupContext";
 
 class RadioGroup extends Component {
   static propTypes = {
@@ -20,10 +21,6 @@ class RadioGroup extends Component {
     children: PropTypes.node,
     mode: PropTypes.string,
     buttonWidth: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  };
-
-  static childContextTypes = {
-    radioGroup: PropTypes.any,
   };
 
   static defaultProps = {
@@ -44,20 +41,6 @@ class RadioGroup extends Component {
 
     this.state = {
       value: newValue,
-    };
-  }
-
-  getChildContext() {
-    const { disabled, name, buttonWidth } = this.props;
-    const { value } = this.state;
-    return {
-      radioGroup: {
-        onChange: this.handleChange,
-        value,
-        disabled,
-        name,
-        buttonWidth,
-      },
     };
   }
 
@@ -145,15 +128,25 @@ class RadioGroup extends Component {
       });
     }
 
+    const radioGroupValue = {
+      onChange: this.handleChange,
+      value,
+      disabled,
+      name,
+      buttonWidth: this.props.buttonWidth,
+    };
+
     return (
-      <div
-        className={classNames(prefixCls, wrapClassName, {
-          "radio-group-button": mode === "button",
-        })}
-        style={style}
-      >
-        {newChildren}
-      </div>
+      <RadioGroupContext.Provider value={radioGroupValue}>
+        <div
+          className={classNames(prefixCls, wrapClassName, {
+            "radio-group-button": mode === "button",
+          })}
+          style={style}
+        >
+          {newChildren}
+        </div>
+      </RadioGroupContext.Provider>
     );
   }
 }

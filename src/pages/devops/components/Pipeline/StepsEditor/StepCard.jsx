@@ -20,9 +20,8 @@ import React from 'react'
 import classNames from 'classnames'
 
 import { Icon } from '@kube-design/components'
-import PropTypes from 'prop-types'
-
 import { toJS } from 'mobx'
+import PipelineStepsContext from '../PipelineStepsContext'
 import { cloneDeep, isEqual } from 'lodash'
 import { renderStepArgs } from '../Card/detail'
 
@@ -40,11 +39,7 @@ const nestingSteps = {
 export default class StepCard extends React.Component {
   step = toJS(this.props.step)
 
-  static contextTypes = {
-    toggleAddStep: PropTypes.func,
-    handleEdit: PropTypes.func,
-    handleDeleteStep: PropTypes.func,
-  }
+  static contextType = PipelineStepsContext
 
   shouldComponentUpdate(nextProps) {
     if (this.props.listType === 'condition') {
@@ -62,15 +57,15 @@ export default class StepCard extends React.Component {
   }
 
   toggleAddStep = (zIndex, type) => () => {
-    this.context.toggleAddStep(zIndex, type)()
+    this.context?.toggleAddStep(zIndex, type)?.()
   }
 
   handleEdit = (zIndex, index, step, type) => () => {
-    this.context.handleEdit(zIndex, index, step, type)()
+    this.context?.handleEdit(zIndex, index, step, type)?.()
   }
 
   handleDeleteStep = (index, zIndex, listType) => () => {
-    this.context.handleDeleteStep(index, zIndex, listType)()
+    this.context?.handleDeleteStep(index, zIndex, listType)?.()
   }
 
   render() {

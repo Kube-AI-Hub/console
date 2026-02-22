@@ -18,11 +18,12 @@
 
 import React from 'react'
 import classNames from 'classnames'
-import PropTypes from 'prop-types'
 import { get } from 'lodash'
 import { Button } from '@kube-design/components'
 import { getPipelineStatus } from 'utils/status'
 import Status from 'devops/components/Status'
+
+import PipelineTaskStatusContext from './PipelineTaskStatusContext'
 
 import * as style from './card.scss'
 
@@ -33,9 +34,7 @@ export default class PipelineCard extends React.Component {
     this.state = { runLoading: false }
   }
 
-  static contextTypes = {
-    result: PropTypes.string,
-  }
+  static contextType = PipelineTaskStatusContext
 
   componentDidMount() {
     this.calculateHeight()
@@ -87,9 +86,9 @@ export default class PipelineCard extends React.Component {
     })
     // has no difference between aborted status and queue status
     // need run detail status to judge
+    const result = this.context?.result || ''
     const isAbort =
-      (this.context.result === 'ABORTED' ||
-        this.context.result === 'FAILURE') &&
+      (result === 'ABORTED' || result === 'FAILURE') &&
       !node.result
     const isQueue = !isAbort && (!node.state || node.state === 'QUEUED')
     const isPaused = node.state && node.state === 'PAUSED'
@@ -117,7 +116,7 @@ export default class PipelineCard extends React.Component {
     if (isPaused) {
       const hasInputStep = node.steps.find(step => step.input)
       // if pipeline failed, can't operate
-      if (this.context.result === 'FAILURE') {
+      if (result === 'FAILURE') {
         return (
           <div
             className={classNames(

@@ -23,6 +23,7 @@ import { Icon, Button } from '@kube-design/components'
 import { Modal, Switch } from 'components/Base'
 import { ICON_TYPES } from 'utils/constants'
 
+import FullCreateContext from './FullCreateContext'
 import Steps from './Steps'
 import Code from './Code'
 
@@ -41,20 +42,6 @@ export default class FullCreateModal extends React.Component {
     visible: false,
     onOk() {},
     onCancel() {},
-  }
-
-  static childContextTypes = {
-    setSteps: PropTypes.func,
-    setCurrentStep: PropTypes.func,
-    setFormData: PropTypes.func,
-  }
-
-  getChildContext() {
-    return {
-      setSteps: this.setSteps,
-      setCurrentStep: this.setCurrentStep,
-      setFormData: this.setFormData,
-    }
   }
 
   constructor(props) {
@@ -235,9 +222,15 @@ export default class FullCreateModal extends React.Component {
   render() {
     const { visible } = this.props
     const { isCodeMode } = this.state
+    const fullCreateContextValue = {
+      setSteps: this.setSteps,
+      setCurrentStep: this.setCurrentStep,
+      setFormData: this.setFormData,
+    }
 
     return (
-      <Modal
+      <FullCreateContext.Provider value={fullCreateContextValue}>
+        <Modal
         className={styles.modal}
         bodyClassName={styles.body}
         visible={visible}
@@ -251,6 +244,7 @@ export default class FullCreateModal extends React.Component {
         </div>
         {this.renderFooter()}
       </Modal>
+      </FullCreateContext.Provider>
     )
   }
 }

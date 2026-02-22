@@ -18,6 +18,7 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
+import SubRouteContext from 'components/Forms/Base/SubRouteContext'
 import { toJS } from 'mobx'
 import { isEmpty } from 'lodash'
 
@@ -46,12 +47,7 @@ export default class SecretEditModal extends React.Component {
     disableSelect: false,
   }
 
-  static childContextTypes = {
-    registerSubRoute: PropTypes.func,
-    resetSubRoute: PropTypes.func,
-  }
-
-  getChildContext() {
+  get subRouteContextValue() {
     return {
       registerSubRoute: this.registerSubRoute,
       resetSubRoute: this.resetSubRoute,
@@ -135,6 +131,7 @@ export default class SecretEditModal extends React.Component {
     } = this.props
 
     return (
+      <SubRouteContext.Provider value={this.subRouteContextValue}>
       <Modal
         width={960}
         title={t('EDIT_SETTINGS')}
@@ -156,6 +153,7 @@ export default class SecretEditModal extends React.Component {
         />
         {this.renderSaveBar()}
       </Modal>
+      </SubRouteContext.Provider>
     )
   }
 }

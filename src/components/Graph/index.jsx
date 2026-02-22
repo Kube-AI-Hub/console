@@ -27,6 +27,7 @@ import { Dragger } from 'components/Base'
 
 import { processData } from './utils'
 
+import GraphContext from './GraphContext'
 import Edge from './Edge'
 import App from './App'
 import Detail from './Detail'
@@ -45,21 +46,6 @@ export default class Graph extends React.Component {
   static defaultProps = {
     data: { nodes: [], edges: [] },
     health: {},
-  }
-
-  static childContextTypes = {
-    wrapperRef: PropTypes.object,
-    selectedData: PropTypes.object,
-    selectedType: PropTypes.string,
-    onSelectApp: PropTypes.func,
-  }
-
-  getChildContext() {
-    return {
-      selectedData: this.state.selectedData,
-      selectedType: this.state.selectedType,
-      onSelectApp: this.handleSelect,
-    }
   }
 
   constructor(props) {
@@ -146,17 +132,24 @@ export default class Graph extends React.Component {
         <div className={styles.loading}>
           <Loading spinning={loading} />
         </div>
-        <Dragger
-          className={styles.dragger}
-          contentClassName={styles.mainContent}
-          ref={this.draggerRef}
-          onClick={this.handleWrapperClick}
-          initialScale={0.6}
-          onFullScreen={this.toggleFullScreen}
-          controlStyle={{ right: selectedType ? 420 : 20 }}
-          onRefresh={this.handleRefresh}
+        <GraphContext.Provider
+          value={{
+            selectedData,
+            selectedType,
+            onSelectApp: this.handleSelect,
+          }}
         >
-          <div className={styles.graphContent}>
+          <Dragger
+            className={styles.dragger}
+            contentClassName={styles.mainContent}
+            ref={this.draggerRef}
+            onClick={this.handleWrapperClick}
+            initialScale={0.6}
+            onFullScreen={this.toggleFullScreen}
+            controlStyle={{ right: selectedType ? 420 : 20 }}
+            onRefresh={this.handleRefresh}
+          >
+            <div className={styles.graphContent}>
             {graph.nodes.map(app => (
               <App key={app.name} data={app} />
             ))}
@@ -171,6 +164,7 @@ export default class Graph extends React.Component {
             </svg>
           </div>
         </Dragger>
+        </GraphContext.Provider>
         {selectedType && (
           <Detail
             className={styles.detail}

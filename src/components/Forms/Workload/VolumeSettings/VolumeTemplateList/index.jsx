@@ -18,6 +18,7 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
+import { FormContext } from '@kube-design/components'
 import classNames from 'classnames'
 import { concat, get, set, isEmpty } from 'lodash'
 import { List } from 'components/Base'
@@ -49,9 +50,7 @@ export default class VolumeList extends React.Component {
     hideVolumeSetting: false,
   }
 
-  static contextTypes = {
-    formData: PropTypes.object,
-  }
+  static contextType = FormContext
 
   getFormattedVolumes = () => {
     const { value, containers } = this.props
@@ -82,7 +81,7 @@ export default class VolumeList extends React.Component {
   }
 
   deleteVolumeMounts = name => {
-    const { formData } = this.context
+    const formData = this.context?.formData
 
     const containers = get(
       formData,

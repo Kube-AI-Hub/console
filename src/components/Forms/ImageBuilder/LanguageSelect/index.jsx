@@ -24,6 +24,7 @@ import { Form, Icon, Alert, Input } from '@kube-design/components'
 import S2iBuilderStore from 'stores/s2i/builder'
 import { getLanguageIcon } from 'utils/devops'
 
+import FullCreateContext from 'components/Modals/FullCreate/FullCreateContext'
 import S2IForm from '../S2IForm'
 import B2IForm from '../B2IForm'
 import * as styles from './index.scss'
@@ -38,9 +39,7 @@ export default class LanguageSelect extends React.Component {
     }
   }
 
-  static contextTypes = {
-    setSteps: PropTypes.func,
-  }
+  static contextType = FullCreateContext
 
   componentDidMount() {
     this.fetchData()
@@ -76,7 +75,8 @@ export default class LanguageSelect extends React.Component {
       )
       unset(this.props.formTemplate, 'spec.config.isBinaryURL')
     }
-    this.context.setSteps(steps)
+    const { setSteps } = this.context || {}
+    setSteps && setSteps(steps)
 
     set(
       this.props.formTemplate,

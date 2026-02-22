@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import classnames from "classnames";
 import Schema from "async-validator";
 import { debounce, set, get, isFunction } from "lodash";
+import FormContext from "./FormContext";
 
 export default class Form extends React.Component {
   static propTypes = {
@@ -19,26 +20,6 @@ export default class Form extends React.Component {
     className: "",
     type: "",
   };
-
-  static childContextTypes = {
-    formData: PropTypes.object,
-    onFormChange: PropTypes.func,
-    registerValidate: PropTypes.func,
-    resetValidate: PropTypes.func,
-    validateResults: PropTypes.array,
-    resetValidateResults: PropTypes.func,
-  };
-
-  getChildContext() {
-    return {
-      formData: this.state.formData,
-      onFormChange: this.triggerFormChange,
-      registerValidate: this.registerValidate,
-      resetValidate: this.resetValidate,
-      validateResults: this.state.errors,
-      resetValidateResults: this.resetValidateResults,
-    };
-  }
 
   constructor(props) {
     super(props);
@@ -128,22 +109,42 @@ export default class Form extends React.Component {
     this.customValidator = validator;
   }
 
+  getFormContextValue() {
+    return {
+      formData: this.state.formData,
+      onFormChange: this.triggerFormChange,
+      registerValidate: this.registerValidate,
+      resetValidate: this.resetValidate,
+      validateResults: this.state.errors,
+      resetValidateResults: this.resetValidateResults,
+      registerGroup: undefined,
+      unRegisterGroup: undefined,
+    };
+  }
+
   render() {
     const { className, children, type } = this.props;
     const classNames = classnames("form", className);
+    const contextValue = this.getFormContextValue();
 
     if (type === "inner") {
-      return <div className={classNames}>{children}</div>;
+      return (
+        <FormContext.Provider value={contextValue}>
+          <div className={classNames}>{children}</div>
+        </FormContext.Provider>
+      );
     }
 
     return (
-      <form
-        className={classNames}
-        onSubmit={this.handleSubmit}
-        autoComplete="off"
-      >
-        {children}
-      </form>
+      <FormContext.Provider value={contextValue}>
+        <form
+          className={classNames}
+          onSubmit={this.handleSubmit}
+          autoComplete="off"
+        >
+          {children}
+        </form>
+      </FormContext.Provider>
     );
   }
 }

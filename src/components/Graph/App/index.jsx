@@ -21,6 +21,7 @@ import PropTypes from 'prop-types'
 import { get, keyBy, groupBy } from 'lodash'
 import classNames from 'classnames'
 
+import GraphContext from '../GraphContext'
 import Card from '../Card'
 
 import * as styles from './index.scss'
@@ -30,22 +31,18 @@ export default class App extends React.Component {
     data: PropTypes.object,
   }
 
-  static contextTypes = {
-    selectedData: PropTypes.object,
-    selectedType: PropTypes.string,
-    onSelectApp: PropTypes.func,
-  }
+  static contextType = GraphContext
 
   handleClick = () => {
     const { data } = this.props
-    const { onSelectApp } = this.context
+    const { onSelectApp } = this.context || {}
 
-    onSelectApp(data, 'app')
+    onSelectApp && onSelectApp(data, 'app')
   }
 
   render() {
     const { data, store } = this.props
-    const { selectedData, selectedType } = this.context
+    const { selectedData = {}, selectedType = '' } = this.context || {}
 
     if (!data.nodes) {
       return null

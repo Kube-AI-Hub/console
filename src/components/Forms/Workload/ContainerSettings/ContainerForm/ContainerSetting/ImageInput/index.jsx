@@ -27,6 +27,7 @@ import { Form, Icon, Loading, Tooltip } from '@kube-design/components'
 import { getDocsUrl } from 'utils'
 import { PATTERN_IMAGE, PATTERN_IMAGE_TAG } from 'utils/constants'
 import ContainerStore from 'stores/container'
+import ContainerFormContext from '../../ContainerFormContext'
 import DropdownContent from './DropdownContent'
 import ImageTagRadioList from './ImageTagRadioList'
 
@@ -50,10 +51,7 @@ export default class ImageSearch extends Component {
     type: 'add',
   }
 
-  static contextTypes = {
-    forceUpdate: PropTypes.func,
-    setImageDetail: PropTypes.func,
-  }
+  static contextType = ContainerFormContext
 
   get secret() {
     const { imageRegistries, formTemplate } = this.props

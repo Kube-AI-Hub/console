@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { isEqual } from "lodash";
 import classNames from "classnames";
+import RadioGroupContext from "./RadioGroupContext";
 
 class Radio extends Component {
   static propTypes = {
@@ -22,9 +23,7 @@ class Radio extends Component {
     defaultChecked: false,
   };
 
-  static contextTypes = {
-    radioGroup: PropTypes.any,
-  };
+  static contextType = RadioGroupContext;
 
   constructor(props) {
     super(props);
@@ -91,7 +90,7 @@ class Radio extends Component {
     } = props;
     const { checked } = this.state;
 
-    const { radioGroup } = context;
+    const radioGroup = context;
 
     const RadioProps = { ...restProps };
 

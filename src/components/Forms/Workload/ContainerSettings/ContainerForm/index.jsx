@@ -23,6 +23,8 @@ import classNames from 'classnames'
 
 import { ReactComponent as BackIcon } from 'assets/back.svg'
 import { Form } from '@kube-design/components'
+import SubRouteContext from 'components/Forms/Base/SubRouteContext'
+import ContainerFormContext from './ContainerFormContext'
 
 import Ports from './Ports'
 import Commands from './Commands'
@@ -65,28 +67,7 @@ export default class ContaineForm extends React.Component {
     containers: [],
   }
 
-  static childContextTypes = {
-    forceUpdate: PropTypes.func,
-    imageDetail: PropTypes.object,
-    setImageDetail: PropTypes.func,
-  }
-
-  getChildContext() {
-    return {
-      forceUpdate: () => {
-        this.forceUpdate()
-      },
-      imageDetail: this.state.imageDetail,
-      setImageDetail: value => {
-        this.setState({ imageDetail: value })
-      },
-    }
-  }
-
-  static contextTypes = {
-    registerSubRoute: PropTypes.func,
-    resetSubRoute: PropTypes.func,
-  }
+  static contextType = SubRouteContext
 
   constructor(props) {
     super(props)
@@ -113,14 +94,14 @@ export default class ContaineForm extends React.Component {
   }
 
   registerForm = () => {
-    const { registerSubRoute } = this.context
+    const { registerSubRoute } = this.context || {}
     const { onCancel } = this.props
 
     registerSubRoute && registerSubRoute(this.handleSubmit, onCancel)
   }
 
   handleGoBack = () => {
-    const { resetSubRoute } = this.context
+    const { resetSubRoute } = this.context || {}
 
     resetSubRoute && resetSubRoute()
 
@@ -201,15 +182,22 @@ export default class ContaineForm extends React.Component {
       type,
     } = this.props
     const { containerType, formData } = this.state
+    const containerFormContextValue = {
+      forceUpdate: () => this.forceUpdate(),
+      imageDetail: this.state.imageDetail,
+      setImageDetail: value => this.setState({ imageDetail: value }),
+    }
+
     return (
-      <div className={classNames(styles.wrapper, className)}>
-        <div className="h5">
-          <a className="custom-icon" onClick={this.handleGoBack}>
-            <BackIcon />
-          </a>
-          {this.title}
-        </div>
-        <Form ref={this.formRef} data={formData}>
+      <ContainerFormContext.Provider value={containerFormContextValue}>
+        <div className={classNames(styles.wrapper, className)}>
+          <div className="h5">
+            <a className="custom-icon" onClick={this.handleGoBack}>
+              <BackIcon />
+            </a>
+            {this.title}
+          </div>
+          <Form ref={this.formRef} data={formData}>
           <ContainerSetting
             data={formData}
             cluster={cluster}
@@ -241,6 +229,7 @@ export default class ContaineForm extends React.Component {
           <SyncTimeZone data={formData} />
         </Form>
       </div>
+      </ContainerFormContext.Provider>
     )
   }
 }

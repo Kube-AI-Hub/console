@@ -22,15 +22,14 @@ import PropTypes from 'prop-types'
 import { get, set, isEmpty } from 'lodash'
 import classnames from 'classnames'
 import { Icon, InputSearch, Loading } from '@kube-design/components'
+import ContainerFormContext from '../../ContainerFormContext'
 import Select from './Select'
 import Input from './Input'
 
 import * as styles from './index.scss'
 
 export default class DropdownContent extends React.Component {
-  static contextTypes = {
-    setImageDetail: PropTypes.func,
-  }
+  static contextType = ContainerFormContext
 
   constructor(props) {
     super(props)

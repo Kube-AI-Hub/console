@@ -19,8 +19,8 @@
 import classNames from 'classnames'
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
-import contextTypes from './contextTypes'
 
+import TreeContext from './TreeContext'
 import * as styles from './style.scss'
 import TreeNode from './TreeNode'
 import {
@@ -68,10 +68,6 @@ export default class Tree extends Component {
     defaultExpandedKeys: [],
     defaultSelectedKeys: [],
   }
-
-  static contextTypes = contextTypes
-
-  static childContextTypes = contextTypes
 
   state = {
     keyEntities: {},
@@ -141,15 +137,13 @@ export default class Tree extends Component {
     return newState
   }
 
-  getChildContext() {
+  getTreeContextValue() {
     return {
-      tree: {
-        disabled: this.props.disabled,
-        renderTreeNode: this.renderTreeNode,
-        onNodeClick: this.onNodeClick,
-        onNodeExpand: this.onNodeExpand,
-        onNodeSelect: this.onNodeSelect,
-      },
+      disabled: this.props.disabled,
+      renderTreeNode: this.renderTreeNode,
+      onNodeClick: this.onNodeClick,
+      onNodeExpand: this.onNodeExpand,
+      onNodeSelect: this.onNodeSelect,
     }
   }
 
@@ -263,20 +257,23 @@ export default class Tree extends Component {
     const { className, showLine } = this.props
     const { treeNode } = this.state
     const domProps = getDataAndAria(this.props)
+    const treeContextValue = this.getTreeContextValue()
 
     return (
-      <ul
-        {...domProps}
-        className={classNames(styles.tree, className, {
-          [styles.showLine]: showLine,
-        })}
-        role="tree"
-        unselectable="on"
-      >
-        {mapChildren(treeNode, (node, index) =>
-          this.renderTreeNode(node, index)
-        )}
-      </ul>
+      <TreeContext.Provider value={treeContextValue}>
+        <ul
+          {...domProps}
+          className={classNames(styles.tree, className, {
+            [styles.showLine]: showLine,
+          })}
+          role="tree"
+          unselectable="on"
+        >
+          {mapChildren(treeNode, (node, index) =>
+            this.renderTreeNode(node, index)
+          )}
+        </ul>
+      </TreeContext.Provider>
     )
   }
 }

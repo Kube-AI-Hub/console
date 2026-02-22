@@ -22,6 +22,7 @@ import { get, throttle, isEmpty } from 'lodash'
 import { Button } from '@kube-design/components'
 
 import { Steps } from 'components/Base'
+import SubRouteContext from 'components/Forms/Base/SubRouteContext'
 import { checkRepoSource } from 'utils/devops'
 import Confirm from 'components/Forms/Base/Confirm'
 
@@ -41,22 +42,6 @@ export default class FormMode extends React.Component {
   static defaultProps = {
     isSubmitting: false,
     onOk() {},
-  }
-
-  static childContextTypes = {
-    registerSubRoute: PropTypes.func,
-    resetSubRoute: PropTypes.func,
-    setSteps: PropTypes.func,
-    setCurrentStep: PropTypes.func,
-  }
-
-  getChildContext() {
-    return {
-      registerSubRoute: this.registerSubRoute,
-      resetSubRoute: this.resetSubRoute,
-      setSteps: this.setSteps,
-      setCurrentStep: this.setCurrentStep,
-    }
   }
 
   constructor(props) {
@@ -259,13 +244,22 @@ export default class FormMode extends React.Component {
   }
 
   render() {
+    const subRouteContextValue = {
+      registerSubRoute: this.registerSubRoute,
+      resetSubRoute: this.resetSubRoute,
+      setSteps: this.setSteps,
+      setCurrentStep: this.setCurrentStep,
+    }
+
     return (
-      <div>
-        {this.renderTabs()}
-        {this.renderContent()}
-        {this.renderSaveBar()}
-        {this.renderFooter()}
-      </div>
+      <SubRouteContext.Provider value={subRouteContextValue}>
+        <div>
+          {this.renderTabs()}
+          {this.renderContent()}
+          {this.renderSaveBar()}
+          {this.renderFooter()}
+        </div>
+      </SubRouteContext.Provider>
     )
   }
 }

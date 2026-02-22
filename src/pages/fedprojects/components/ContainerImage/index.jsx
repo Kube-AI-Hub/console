@@ -18,7 +18,6 @@
 
 import React, { Component } from 'react'
 import { get, omit, mergeWith, isUndefined } from 'lodash'
-import PropTypes from 'prop-types'
 
 import { observer } from 'mobx-react'
 import { toJS } from 'mobx'
@@ -27,6 +26,7 @@ import QuotaStore from 'stores/quota'
 import WorkspaceQuotaStore from 'stores/workspace.quota'
 import { resourceLimitKey } from 'utils'
 import { getLeftQuota } from 'utils/workload'
+import ContainerFormContext from 'components/Forms/Workload/ContainerSettings/ContainerForm/ContainerFormContext'
 import EditForm from 'components/Forms/Workload/ClusterDiffSettings/EditForm'
 import SecretStore from 'stores/secret'
 import ContainerSetting from '../ContainerSetting'
@@ -46,13 +46,9 @@ export default class ContainerImages extends Component {
     }
   }
 
-  static childContextTypes = {
-    imageDetail: PropTypes.object,
-    setImageDetail: PropTypes.func,
-  }
-
-  getChildContext() {
+  get containerFormContextValue() {
     return {
+      forceUpdate: () => this.forceUpdate(),
       imageDetail: this.state.imageDetail,
       setImageDetail: value => {
         this.setState({ imageDetail: value })
@@ -137,6 +133,7 @@ export default class ContainerImages extends Component {
     const { imageRegistries } = this.state
 
     return (
+      <ContainerFormContext.Provider value={this.containerFormContextValue}>
       <EditForm
         {...this.props}
         title={<span>{`${t('IMAGE')}: ${formData.image}`}</span>}
@@ -153,6 +150,7 @@ export default class ContainerImages extends Component {
           imageRegistries={imageRegistries}
         />
       </EditForm>
+      </ContainerFormContext.Provider>
     )
   }
 }

@@ -25,6 +25,7 @@ import RepoSelectForm from 'components/Forms/Pipelines/RepoSelect/subForm'
 import PropTypes from 'prop-types'
 import React from 'react'
 import { PATTERN_ALIAS_NAME, PATTERN_NAME } from 'utils/constants'
+import SubRouteContext from 'components/Forms/Base/SubRouteContext'
 
 import * as styles from './index.scss'
 
@@ -36,18 +37,6 @@ export default class CodeRepoCreate extends React.Component {
     }
     this.scmRef = React.createRef()
     this.formRef = React.createRef()
-  }
-
-  static childContextTypes = {
-    registerSubRoute: PropTypes.func,
-    resetSubRoute: PropTypes.func,
-  }
-
-  getChildContext() {
-    return {
-      registerSubRoute: this.registerSubRoute,
-      resetSubRoute: this.resetSubRoute,
-    }
   }
 
   resetSubRoute = () => {
@@ -149,12 +138,22 @@ export default class CodeRepoCreate extends React.Component {
   render() {
     const { formTemplate, isEdit, ...rest } = this.props
     const { showSelectRepo } = this.state
+    const subRouteContextValue = {
+      registerSubRoute: this.registerSubRoute,
+      resetSubRoute: this.resetSubRoute,
+    }
+
     if (showSelectRepo) {
-      return this.renderRepoSelectForm()
+      return (
+        <SubRouteContext.Provider value={subRouteContextValue}>
+          {this.renderRepoSelectForm()}
+        </SubRouteContext.Provider>
+      )
     }
 
     return (
-      <Modal width={970} {...rest} onOk={this.submit}>
+      <SubRouteContext.Provider value={subRouteContextValue}>
+        <Modal width={970} {...rest} onOk={this.submit}>
         <Form ref={this.formRef} data={formTemplate}>
           <Columns>
             <Column>
@@ -211,6 +210,7 @@ export default class CodeRepoCreate extends React.Component {
           </Form.Item>
         </Form>
       </Modal>
+      </SubRouteContext.Provider>
     )
   }
 }

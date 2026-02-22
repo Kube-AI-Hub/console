@@ -24,6 +24,7 @@ import { action, observable, toJS } from 'mobx'
 import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
 import React from 'react'
+import PipelineStepsContext from '../PipelineStepsContext'
 import cardStyles from '../Card/index.scss'
 
 import * as styles from '../Sider/index.scss'
@@ -77,13 +78,7 @@ class StepsEditor extends React.Component {
     return get(this.props.activeStage, 'agent.type', 'none')
   }
 
-  static childContextTypes = {
-    toggleAddStep: PropTypes.func,
-    handleEdit: PropTypes.func,
-    handleDeleteStep: PropTypes.func,
-  }
-
-  getChildContext() {
+  get pipelineStepsContextValue() {
     return {
       toggleAddStep: this.toggleAddStep,
       handleEdit: this.handleEdit,
@@ -491,6 +486,7 @@ class StepsEditor extends React.Component {
     const { isAddingStep } = this.props.store
 
     return (
+      <PipelineStepsContext.Provider value={this.pipelineStepsContextValue}>
       <div className={styles.sheet}>
         <div className={styles.title}>
           {t('STAGE')}
@@ -566,6 +562,7 @@ class StepsEditor extends React.Component {
           onOk={this.handleSetYaml}
         />
       </div>
+      </PipelineStepsContext.Provider>
     )
   }
 }

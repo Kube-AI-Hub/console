@@ -28,6 +28,7 @@ import Confirm from 'components/Forms/Base/Confirm'
 
 import UserStore from 'stores/user'
 
+import UserSettingContext from './UserSettingContext'
 import TABS from './tabs'
 
 import * as styles from './index.scss'
@@ -43,16 +44,6 @@ export default class UserSettingModal extends React.Component {
     visible: false,
     onOk() {},
     onCancel() {},
-  }
-
-  static childContextTypes = {
-    registerUpdate: PropTypes.func,
-  }
-
-  getChildContext() {
-    return {
-      registerUpdate: this.registerUpdate,
-    }
   }
 
   constructor(props) {
@@ -271,8 +262,13 @@ export default class UserSettingModal extends React.Component {
 
   render() {
     const { detail, onOk, ...rest } = this.props
+    const userSettingContextValue = {
+      registerUpdate: this.registerUpdate,
+    }
+
     return (
-      <Modal
+      <UserSettingContext.Provider value={userSettingContextValue}>
+        <Modal
         bodyClassName={styles.body}
         title={t('USER_SETTINGS')}
         icon="wrench"
@@ -285,6 +281,7 @@ export default class UserSettingModal extends React.Component {
           {this.renderFooter()}
         </div>
       </Modal>
+      </UserSettingContext.Provider>
     )
   }
 }

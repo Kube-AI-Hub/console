@@ -1,7 +1,7 @@
-import React, { useRef, useEffect, useState } from 'react'
-import PropTypes from 'prop-types'
+import React, { useRef, useEffect, useState, useContext } from 'react'
 
 import { RadioGroup, RadioButton, Icon } from '@kube-design/components'
+import SubRouteContext from 'components/Forms/Base/SubRouteContext'
 
 import { isEmpty, get, set, unset } from 'lodash'
 import * as styles from './index.scss'
@@ -19,8 +19,9 @@ const radioOptions = [
   },
 ]
 
-const AddRuleForm = (props, context) => {
+const AddRuleForm = props => {
   const { editRule, namespace } = props
+  const context = useContext(SubRouteContext)
 
   const type = isEmpty(editRule)
     ? radioOptions[0].value
@@ -68,13 +69,14 @@ const AddRuleForm = (props, context) => {
   }
 
   const handleBack = () => {
-    const { resetSubRoute } = context
+    const resetSubRoute = context?.resetSubRoute
+
     resetSubRoute && resetSubRoute()
     props.onCancel()
   }
 
   useEffect(() => {
-    const { registerSubRoute } = context
+    const registerSubRoute = context?.registerSubRoute
     const { onCancel } = props
 
     registerSubRoute && registerSubRoute(handleSubmit, onCancel)
@@ -107,11 +109,6 @@ const AddRuleForm = (props, context) => {
       </div>
     </div>
   )
-}
-
-AddRuleForm.contextTypes = {
-  registerSubRoute: PropTypes.func,
-  resetSubRoute: PropTypes.func,
 }
 
 export default AddRuleForm

@@ -22,13 +22,12 @@ import { Column, Columns, Form, Input, Select } from '@kube-design/components'
 import { cloneDeep } from 'lodash'
 import { getBrowserLang } from 'utils'
 import cookie from 'utils/cookie'
+import UserSettingContext from '../UserSettingContext'
 
 import * as styles from './index.scss'
 
 export default class BaseInfo extends React.Component {
-  static contextTypes = {
-    registerUpdate: PropTypes.func,
-  }
+  static contextType = UserSettingContext
 
   constructor(props) {
     super(props)
@@ -65,7 +64,8 @@ export default class BaseInfo extends React.Component {
   }
 
   handleFormChange = (name, value) => {
-    this.context.registerUpdate(this.name, { name, value })
+    const { registerUpdate } = this.context || {}
+    registerUpdate && registerUpdate(this.name, { name, value })
   }
 
   render() {

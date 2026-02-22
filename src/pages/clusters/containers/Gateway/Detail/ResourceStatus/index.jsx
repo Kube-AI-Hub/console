@@ -31,16 +31,11 @@ import GatewayStore from 'stores/gateway'
 import WorkloadStore from 'stores/workload'
 import ConfigMapStore from 'stores/configmap'
 import { getAllYAMLValue } from 'utils/yaml'
+import GatewayContext from './GatewayContext'
 import * as styles from './index.scss'
 
 class ResourceStatus extends React.Component {
   gateway = new GatewayStore()
-
-  static childContextTypes = {
-    gatewayName: PropTypes.string,
-    gatewayNs: PropTypes.string,
-    cluster: PropTypes.string,
-  }
 
   constructor(props) {
     super(props)
@@ -53,14 +48,6 @@ class ResourceStatus extends React.Component {
     }
     this.workloadStore = new WorkloadStore('deployments')
     this.configMapStore = new ConfigMapStore()
-  }
-
-  getChildContext() {
-    return {
-      gatewayName: this.detail.name,
-      gatewayNs: this.props.match.params.namespace,
-      cluster: this.cluster,
-    }
   }
 
   get module() {
@@ -252,7 +239,17 @@ class ResourceStatus extends React.Component {
   }
 
   render() {
-    return <div className={styles.main}>{this.renderContent()}</div>
+    const gatewayContextValue = {
+      gatewayName: this.detail.name,
+      gatewayNs: this.props.match.params.namespace,
+      cluster: this.cluster,
+    }
+
+    return (
+      <GatewayContext.Provider value={gatewayContextValue}>
+        <div className={styles.main}>{this.renderContent()}</div>
+      </GatewayContext.Provider>
+    )
   }
 }
 

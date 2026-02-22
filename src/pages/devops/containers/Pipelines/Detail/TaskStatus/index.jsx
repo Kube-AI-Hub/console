@@ -34,6 +34,7 @@ import Status from 'devops/components/Status'
 import { getPipelineStatus } from 'utils/status'
 import PipelineContent from 'devops/components/PipelineStatus'
 
+import PipelineTaskStatusContext from 'devops/components/PipelineStatus/PipelineTaskStatusContext'
 import PipelineLog from '../PipelineLogDialog'
 import * as style from './index.scss'
 
@@ -87,13 +88,7 @@ class TaskStatus extends React.Component {
     removeFullScreenChangeEvents(this.toggleFullScreenState)
   }
 
-  static childContextTypes = {
-    onProceed: PropTypes.func,
-    onBreak: PropTypes.func,
-    result: PropTypes.string,
-  }
-
-  getChildContext() {
+  get pipelineTaskStatusContextValue() {
     return {
       onProceed: this.handleProceed,
       onBreak: this.handleBreak,
@@ -242,6 +237,7 @@ class TaskStatus extends React.Component {
       )
     }
     return (
+      <PipelineTaskStatusContext.Provider value={this.pipelineTaskStatusContextValue}>
       <React.Fragment>
         <div className={style.pipelineCard}>
           <div className={style.pipelineCard__tab}>
@@ -291,6 +287,7 @@ class TaskStatus extends React.Component {
           )}
         </div>
       </React.Fragment>
+      </PipelineTaskStatusContext.Provider>
     )
   }
 }

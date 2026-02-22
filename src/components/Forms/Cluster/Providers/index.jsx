@@ -23,14 +23,12 @@ import { Icon, RadioGroup, Radio, Form } from '@kube-design/components'
 import { NEW_CLUSTER, IMPORT_CLUSTER } from 'configs/steps/clusters'
 import Title from '../Title'
 import { IMPORT_CLUSTER_SPEC, NEW_CLUSTER_SPEC } from '../constants'
+import FullCreateContext from 'components/Modals/FullCreate/FullCreateContext'
 
 import * as styles from './index.scss'
 
 export default class Providers extends React.Component {
-  static contextTypes = {
-    setSteps: PropTypes.func,
-    setFormData: PropTypes.func,
-  }
+  static contextType = FullCreateContext
 
   STEPS = {
     new: NEW_CLUSTER,
@@ -47,10 +45,11 @@ export default class Providers extends React.Component {
   }
 
   handleChange = value => {
-    this.context.setSteps(this.STEPS[value])
+    const { setSteps, setFormData } = this.context || {}
+    setSteps && setSteps(this.STEPS[value])
     const newFormData = cloneDeep(this.SPECS[value])
     set(newFormData, "metadata.annotations['kubesphere.io/way-to-add']", value)
-    this.context.setFormData(newFormData)
+    setFormData && setFormData(newFormData)
   }
 
   render() {

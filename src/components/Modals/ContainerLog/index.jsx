@@ -22,20 +22,17 @@ import { get } from 'lodash'
 import { Modal, Card, Empty } from 'components/Base'
 
 import ContainerLog from 'components/Cards/ContainerLog'
+import GatewayContext from 'pages/clusters/containers/Gateway/Detail/ResourceStatus/GatewayContext'
 import { PropTypes } from 'prop-types'
 import * as styles from './index.scss'
 
 export default class ContainerLogModal extends React.Component {
-  static contextTypes = {
-    gatewayName: PropTypes.string,
-    gatewayNs: PropTypes.string,
-    cluster: PropTypes.string,
-  }
+  static contextType = GatewayContext
 
   renderContent() {
     const { namespace, name } = this.props.container
     const { podName } = this.props
-    const { gatewayName, gatewayNs, cluster } = this.context
+    const { gatewayName = '', gatewayNs = '', cluster = '' } = this.context || {}
     const _cluster = cluster || this.props.cluster
 
     if (!get(this.props, 'container.containerID')) {

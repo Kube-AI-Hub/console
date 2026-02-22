@@ -18,6 +18,7 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
+import SubRouteContext from 'components/Forms/Base/SubRouteContext'
 import classNames from 'classnames'
 
 import Ports from 'components/Forms/Workload/ContainerSettings/ContainerForm/Ports'
@@ -55,10 +56,7 @@ export default class ContaineForm extends React.Component {
     secrets: [],
   }
 
-  static contextTypes = {
-    registerSubRoute: PropTypes.func,
-    resetSubRoute: PropTypes.func,
-  }
+  static contextType = SubRouteContext
 
   constructor(props) {
     super(props)

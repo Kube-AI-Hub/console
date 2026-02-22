@@ -21,13 +21,12 @@ import PropTypes from 'prop-types'
 import { Alert, Form } from '@kube-design/components'
 import { InputPassword } from 'components/Inputs'
 import { PATTERN_PASSWORD } from 'utils/constants'
+import UserSettingContext from '../UserSettingContext'
 
 import * as styles from './index.scss'
 
 export default class PasswordSetting extends React.Component {
-  static contextTypes = {
-    registerUpdate: PropTypes.func,
-  }
+  static contextType = UserSettingContext
 
   constructor(props) {
     super(props)
@@ -72,7 +71,8 @@ export default class PasswordSetting extends React.Component {
   }
 
   handleFormChange = (name, value) => {
-    this.context.registerUpdate(this.name, { name, value })
+    const { registerUpdate } = this.context || {}
+    registerUpdate && registerUpdate(this.name, { name, value })
   }
 
   render() {

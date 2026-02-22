@@ -27,6 +27,7 @@ import { MountInput } from 'components/Inputs'
 
 import { PATTERN_NAME } from 'utils/constants'
 import { ReactComponent as BackIcon } from 'assets/back.svg'
+import SubRouteContext from 'components/Forms/Base/SubRouteContext'
 
 import VolumeFormTemplate from 'components/Forms/Volume/VolumeSettings/FormTemplate'
 
@@ -56,10 +57,7 @@ class AddVolume extends React.Component {
     onCancel() {},
   }
 
-  static contextTypes = {
-    registerSubRoute: PropTypes.func,
-    resetSubRoute: PropTypes.func,
-  }
+  static contextType = SubRouteContext
 
   constructor(props) {
     super(props)
@@ -75,7 +73,7 @@ class AddVolume extends React.Component {
 
   componentDidMount() {
     const { onCancel } = this.props
-    const { registerSubRoute } = this.context
+    const registerSubRoute = this.context?.registerSubRoute
     registerSubRoute && registerSubRoute(this.handleSubmit, onCancel)
   }
 
@@ -97,7 +95,7 @@ class AddVolume extends React.Component {
   }
 
   handleGoBack = () => {
-    const { resetSubRoute } = this.context
+    const resetSubRoute = this.context?.resetSubRoute
 
     resetSubRoute && resetSubRoute()
 

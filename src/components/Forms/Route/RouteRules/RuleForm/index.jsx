@@ -27,6 +27,7 @@ import { ArrayInput, RulePath } from 'components/Inputs'
 import { ReactComponent as BackIcon } from 'assets/back.svg'
 
 import { PATTERN_HOST } from 'utils/constants'
+import SubRouteContext from 'components/Forms/Base/SubRouteContext'
 
 import ClusterSelect from './ClusterSelect'
 
@@ -51,10 +52,7 @@ export default class RuleForm extends React.Component {
     onCancel() {},
   }
 
-  static contextTypes = {
-    registerSubRoute: PropTypes.func,
-    resetSubRoute: PropTypes.func,
-  }
+  static contextType = SubRouteContext
 
   constructor(props) {
     super(props)
@@ -68,7 +66,7 @@ export default class RuleForm extends React.Component {
   }
 
   componentDidMount() {
-    const { registerSubRoute } = this.context
+    const registerSubRoute = this.context?.registerSubRoute
 
     registerSubRoute && registerSubRoute(this.handleSubmit, this.handleGoBack)
   }
@@ -173,7 +171,7 @@ export default class RuleForm extends React.Component {
   }
 
   handleGoBack = () => {
-    const { resetSubRoute } = this.context
+    const resetSubRoute = this.context?.resetSubRoute
 
     resetSubRoute && resetSubRoute()
     if (this.handleValidator()) {

@@ -25,6 +25,7 @@ import { RadioGroup, RadioButton } from '@kube-design/components'
 import { ReactComponent as BackIcon } from 'assets/back.svg'
 
 import ObjectMapeer from 'utils/object.mapper'
+import SubRouteContext from 'components/Forms/Base/SubRouteContext'
 
 import AddExistVolumes from '../AddExistVolumes'
 import AddTemporary from '../AddTemporary'
@@ -49,10 +50,7 @@ export default class AddVolume extends React.Component {
     onCancel() {},
   }
 
-  static contextTypes = {
-    registerSubRoute: PropTypes.func,
-    resetSubRoute: PropTypes.func,
-  }
+  static contextType = SubRouteContext
 
   constructor(props) {
     super(props)
@@ -67,7 +65,7 @@ export default class AddVolume extends React.Component {
 
   componentDidMount() {
     const { onCancel } = this.props
-    const { registerSubRoute } = this.context
+    const registerSubRoute = this.context?.registerSubRoute
     registerSubRoute && registerSubRoute(this.handleSubmit, onCancel)
     this.saveEditVolume()
   }
@@ -107,7 +105,7 @@ export default class AddVolume extends React.Component {
   }
 
   handleGoBack = () => {
-    const { resetSubRoute } = this.context
+    const resetSubRoute = this.context?.resetSubRoute
 
     resetSubRoute && resetSubRoute()
 

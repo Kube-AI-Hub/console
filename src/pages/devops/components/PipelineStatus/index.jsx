@@ -21,10 +21,10 @@ import { observer } from 'mobx-react'
 import { isEmpty } from 'lodash'
 import { observable, action, toJS } from 'mobx'
 
-import PropTypes from 'prop-types'
 import { Dragger } from 'components/Base'
 import ParamsFormModal from 'components/Forms/Pipelines/ParamsFormModal'
 
+import PipelineTaskStatusContext from './PipelineTaskStatusContext'
 import PipelineNodes from './nodesRender'
 import * as style from './index.scss'
 
@@ -59,17 +59,17 @@ class PipelineStatus extends React.Component {
     this.translateY = 0
   }
 
-  static contextTypes = {
-    onProceed: PropTypes.func,
-    onBreak: PropTypes.func,
-  }
+  static contextType = PipelineTaskStatusContext
 
   @action
   handleProceed = async (parameters, cb) => {
-    await this.context.onProceed(
-      { parameters, ...this.elseParams },
-      typeof cb === 'function' ? cb : undefined
-    )
+    const onProceed = this.context?.onProceed
+    if (onProceed) {
+      await onProceed(
+        { parameters, ...this.elseParams },
+        typeof cb === 'function' ? cb : undefined
+      )
+    }
     this.showParamsModal = false
   }
 
@@ -103,7 +103,7 @@ class PipelineStatus extends React.Component {
             isEditMode={isEditMode}
             stages={jsonData}
             onProceed={this.handelShowProceedModal}
-            onBreak={this.context.onBreak}
+            onBreak={(this.context && this.context.onBreak) || (() => {})}
           />
         </Dragger>
         <ParamsFormModal

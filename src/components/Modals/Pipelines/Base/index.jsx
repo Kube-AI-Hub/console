@@ -23,6 +23,7 @@ import { Form, Input, TextArea } from '@kube-design/components'
 import { Modal } from 'components/Base'
 import { get } from 'lodash'
 // import RepoSelect from 'components/Forms/Pipelines/RepoSelect'
+import SubRouteContext from 'components/Forms/Base/SubRouteContext'
 import RepoSelectForm from 'components/Forms/Pipelines/RepoSelect/subForm'
 import CodeRepoSelector from 'components/CodeRepoSelector'
 
@@ -48,18 +49,6 @@ export default class BaseInfoModal extends React.Component {
     this.state = {
       showSelectRepo: false,
       repo: {},
-    }
-  }
-
-  static childContextTypes = {
-    registerSubRoute: PropTypes.func,
-    resetSubRoute: PropTypes.func,
-  }
-
-  getChildContext() {
-    return {
-      registerSubRoute: this.registerSubRoute,
-      resetSubRoute: this.resetSubRoute,
     }
   }
 
@@ -98,9 +87,15 @@ export default class BaseInfoModal extends React.Component {
       get(formTemplate, 'pipeline.description', '') ||
       get(formTemplate, 'multi_branch_pipeline.description', '')
 
+    const subRouteContextValue = {
+      registerSubRoute: this.registerSubRoute,
+      resetSubRoute: this.resetSubRoute,
+    }
+
     if (this.state.showSelectRepo) {
       return (
-        <Modal
+        <SubRouteContext.Provider value={subRouteContextValue}>
+          <Modal
           width={1000}
           hideHeader
           onOk={this.handleSaveRepo}
@@ -116,11 +111,13 @@ export default class BaseInfoModal extends React.Component {
             enableTypeChange={false}
           />
         </Modal>
+        </SubRouteContext.Provider>
       )
     }
 
     return (
-      <Modal
+      <SubRouteContext.Provider value={subRouteContextValue}>
+        <Modal
         width={691}
         title={t('EDIT_INFORMATION')}
         icon="pen"
@@ -149,6 +146,7 @@ export default class BaseInfoModal extends React.Component {
           ) : null}
         </Form>
       </Modal>
+      </SubRouteContext.Provider>
     )
   }
 }

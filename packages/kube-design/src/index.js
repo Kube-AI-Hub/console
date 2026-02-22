@@ -6,6 +6,7 @@ export { default as Collapse } from "./components/Collapse";
 export { default as DatePicker } from "./components/DatePicker";
 export { default as Dropdown } from "./components/Dropdown";
 export { default as Form } from "./components/Form";
+export { default as FormContext } from "./components/Form/FormContext";
 export { default as Icon } from "./components/Icon";
 export { default as Loading } from "./components/Loading";
 export { default as LocaleProvider } from "./components/LocaleProvider";

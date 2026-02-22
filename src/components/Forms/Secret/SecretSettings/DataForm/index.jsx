@@ -18,6 +18,7 @@
 
 import React from 'react'
 import { trim } from 'lodash'
+import SubRouteContext from 'components/Forms/Base/SubRouteContext'
 import PropTypes from 'prop-types'
 import { Form, Input, TextArea } from '@kube-design/components'
 import { ReactComponent as BackIcon } from 'assets/back.svg'
@@ -31,10 +32,7 @@ export default class SecretDataForm extends React.Component {
     selectKey: '',
   }
 
-  static contextTypes = {
-    registerSubRoute: PropTypes.func,
-    resetSubRoute: PropTypes.func,
-  }
+  static contextType = SubRouteContext
 
   formRef = React.createRef()
 
@@ -47,14 +45,14 @@ export default class SecretDataForm extends React.Component {
   }
 
   registerForm = () => {
-    const { registerSubRoute } = this.context
+    const registerSubRoute = this.context?.registerSubRoute
     const { onCancel } = this.props
 
     registerSubRoute && registerSubRoute(this.handleSubmit, onCancel)
   }
 
   handleGoBack = () => {
-    const { resetSubRoute } = this.context
+    const resetSubRoute = this.context?.resetSubRoute
 
     resetSubRoute && resetSubRoute()
 

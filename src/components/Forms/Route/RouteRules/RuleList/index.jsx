@@ -19,6 +19,7 @@
 import { get } from 'lodash'
 import React from 'react'
 import PropTypes from 'prop-types'
+import { FormContext } from '@kube-design/components'
 
 import { Text } from 'components/Base'
 
@@ -41,14 +42,12 @@ export default class RuleList extends React.Component {
     onShow() {},
   }
 
-  static contextTypes = {
-    formData: PropTypes.object,
-  }
+  static contextType = FormContext
 
   renderContent() {
     const { value, onShow, onEdit, onDelete, projectDetail } = this.props
 
-    const tls = get(this.context.formData, 'spec.tls', [])
+    const tls = get(this.context?.formData, 'spec.tls', [])
 
     return (
       <ul>

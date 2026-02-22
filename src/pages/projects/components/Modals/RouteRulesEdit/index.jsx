@@ -18,6 +18,7 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
+import SubRouteContext from 'components/Forms/Base/SubRouteContext'
 import { toJS } from 'mobx'
 import { get, cloneDeep, isEmpty } from 'lodash'
 import { Modal } from 'components/Base'
@@ -43,12 +44,7 @@ class RouteRulesEdit extends React.Component {
     isSubmitting: false,
   }
 
-  static childContextTypes = {
-    registerSubRoute: PropTypes.func,
-    resetSubRoute: PropTypes.func,
-  }
-
-  getChildContext() {
+  get subRouteContextValue() {
     return {
       registerSubRoute: this.registerSubRoute,
       resetSubRoute: this.resetSubRoute,
@@ -141,6 +137,7 @@ class RouteRulesEdit extends React.Component {
     const { subRoute, formTemplate } = this.state
 
     return (
+      <SubRouteContext.Provider value={this.subRouteContextValue}>
       <Modal
         width={960}
         title={t('EDIT_ROUTING_RULES')}
@@ -162,6 +159,7 @@ class RouteRulesEdit extends React.Component {
           />
         </div>
       </Modal>
+      </SubRouteContext.Provider>
     )
   }
 }

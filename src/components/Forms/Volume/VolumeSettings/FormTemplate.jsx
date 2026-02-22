@@ -18,6 +18,7 @@
 
 import { get, isNaN, unset, pick, isUndefined, isEmpty } from 'lodash'
 import React from 'react'
+import { FormContext } from '@kube-design/components'
 import { toJS } from 'mobx'
 
 import { PropTypes } from 'prop-types'
@@ -33,9 +34,7 @@ const ACCESSMODE_KEY = 'spec.accessModes'
 const PREFERABLE_DEFAULT_ACCESS_MODE = 'ReadWriteOnce'
 
 export default class VolumeSettings extends React.Component {
-  static contextTypes = {
-    formData: PropTypes.object,
-  }
+  static contextType = FormContext
 
   constructor(props) {
     super(props)
@@ -56,7 +55,7 @@ export default class VolumeSettings extends React.Component {
   updateStorageClass = (params = {}) => {
     this.setState({ isLoading: true })
 
-    const { formData } = this.context
+    const formData = this.context?.formData
     const storageClasses = get(formData, STORAGE_CLASSES_KEY)
 
     return this.store
@@ -147,7 +146,7 @@ export default class VolumeSettings extends React.Component {
     const newStorageClass =
       storageClasses.find(item => item.name === value) || {}
 
-    unset(this.context.formData, ACCESSMODE_KEY)
+    unset(this.context?.formData, ACCESSMODE_KEY)
 
     this.setState({ storageClass: newStorageClass })
   }

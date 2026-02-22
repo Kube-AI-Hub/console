@@ -18,6 +18,7 @@
 
 import { get, set, keyBy, isEmpty, isUndefined, uniq } from 'lodash'
 import React from 'react'
+import SubRouteContext from 'components/Forms/Base/SubRouteContext'
 import PropTypes from 'prop-types'
 import {
   Form,
@@ -53,10 +54,7 @@ export default class MountConfig extends React.Component {
     onCancel() {},
   }
 
-  static contextTypes = {
-    registerSubRoute: PropTypes.func,
-    resetSubRoute: PropTypes.func,
-  }
+  static contextType = SubRouteContext
 
   constructor(props) {
     super(props)
@@ -102,7 +100,7 @@ export default class MountConfig extends React.Component {
 
   componentDidMount() {
     const { onCancel } = this.props
-    const { registerSubRoute } = this.context
+    const registerSubRoute = this.context?.registerSubRoute
     registerSubRoute && registerSubRoute(this.handleSubmit, onCancel)
 
     this.fetchData()
@@ -146,7 +144,7 @@ export default class MountConfig extends React.Component {
   }
 
   handleGoBack = () => {
-    const { resetSubRoute } = this.context
+    const resetSubRoute = this.context?.resetSubRoute
 
     resetSubRoute && resetSubRoute()
 

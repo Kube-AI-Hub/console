@@ -34,6 +34,7 @@ import GithubForm from './GithubForm'
 import SvnForm from './SVNForm'
 import BitBucketForm from './BitBucketForm'
 import GitLabForm from './GitLabForm'
+import SubRouteContext from 'components/Forms/Base/SubRouteContext'
 import { compareVersion } from '../../../../utils'
 import { isSvnRepo } from '../../../../utils/devops'
 
@@ -56,10 +57,7 @@ class RepoSelectForm extends React.Component {
     enableTypeChange: true,
   }
 
-  static contextTypes = {
-    registerSubRoute: PropTypes.func,
-    resetSubRoute: PropTypes.func,
-  }
+  static contextType = SubRouteContext
 
   constructor(props) {
     super(props)
@@ -80,7 +78,7 @@ class RepoSelectForm extends React.Component {
 
   componentDidMount() {
     const { onCancel, devops, name, cluster } = this.props
-    const { registerSubRoute } = this.context
+    const { registerSubRoute } = this.context || {}
     const { sourceData } = this.props
 
     registerSubRoute && registerSubRoute(this.handleSubmit, onCancel)
@@ -157,7 +155,7 @@ class RepoSelectForm extends React.Component {
   }
 
   handleGoBack = () => {
-    const { resetSubRoute } = this.context
+    const { resetSubRoute } = this.context || {}
 
     resetSubRoute && resetSubRoute()
 
@@ -166,7 +164,7 @@ class RepoSelectForm extends React.Component {
 
   handleSubmit = data => {
     const { onSave } = this.props
-    const { resetSubRoute } = this.context
+    const { resetSubRoute } = this.context || {}
     const { formData } = this.store
     if (['github', 'bitbucket_server'].includes(this.source_type)) {
       if (isEmpty(data)) {

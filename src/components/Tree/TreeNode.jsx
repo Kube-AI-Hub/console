@@ -22,7 +22,7 @@ import classNames from 'classnames'
 import { noop } from 'lodash'
 
 import { Icon } from '@kube-design/components'
-import contextTypes from './contextTypes'
+import TreeContext from './TreeContext'
 
 import * as styles from './style.scss'
 
@@ -46,18 +46,10 @@ export default class TreeNode extends Component {
     disabled: PropTypes.bool,
   }
 
-  static contextTypes = contextTypes
-
-  static childContextTypes = contextTypes
+  static contextType = TreeContext
 
   static defaultProps = {
     title: '---',
-  }
-
-  getChildContext() {
-    return {
-      ...this.context,
-    }
   }
 
   getNodeChildren = () => {
@@ -81,9 +73,8 @@ export default class TreeNode extends Component {
 
   isDisabled = () => {
     const { disabled } = this.props
-    const {
-      tree: { disabled: treeDisabled },
-    } = this.context
+    const treeContext = this.context
+    const treeDisabled = treeContext?.disabled
 
     if (disabled === false) {
       return false
@@ -93,26 +84,20 @@ export default class TreeNode extends Component {
   }
 
   onExpand = e => {
-    const {
-      tree: { onNodeExpand },
-    } = this.context
-    onNodeExpand(e, this)
+    const treeContext = this.context
+    if (treeContext?.onNodeExpand) treeContext.onNodeExpand(e, this)
   }
 
   onSelect = e => {
     if (this.isDisabled()) return
-    const {
-      tree: { onNodeSelect },
-    } = this.context
+    const treeContext = this.context
     e.preventDefault()
-    onNodeSelect(e, this)
+    if (treeContext?.onNodeSelect) treeContext.onNodeSelect(e, this)
   }
 
   onSelectorClick = e => {
-    const {
-      tree: { onNodeClick },
-    } = this.context
-    onNodeClick(e, this)
+    const treeContext = this.context
+    if (treeContext?.onNodeClick) treeContext.onNodeClick(e, this)
     this.onSelect(e)
   }
 
@@ -151,20 +136,18 @@ export default class TreeNode extends Component {
 
   renderChildren = () => {
     const { expanded, pos } = this.props
-    const {
-      tree: { renderTreeNode },
-    } = this.context
+    const treeContext = this.context
+    const renderTreeNode = treeContext?.renderTreeNode
     const nodeList = this.getNodeChildren()
+    if (!expanded || !renderTreeNode) return null
     return (
-      expanded && (
-        <ul
-          className={classNames(styles.treeChildren, expanded && styles.open)}
-        >
-          {mapChildren(nodeList, (node, index) =>
-            renderTreeNode(node, index, pos)
-          )}
-        </ul>
-      )
+      <ul
+        className={classNames(styles.treeChildren, expanded && styles.open)}
+      >
+        {mapChildren(nodeList, (node, index) =>
+          renderTreeNode(node, index, pos)
+        )}
+      </ul>
     )
   }
 

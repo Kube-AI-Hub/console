@@ -25,6 +25,7 @@ import { AccessModes } from 'components/Inputs'
 import classNames from 'classnames'
 import { Form, Icon, Loading } from '@kube-design/components'
 import PropTypes from 'prop-types'
+import { FormContext } from '@kube-design/components'
 
 import SnapshotStore from 'stores/volumeSnapshot'
 
@@ -45,9 +46,7 @@ class SanpshotForm extends Component {
 
   volumeStore = new VolumeStore()
 
-  static contextTypes = {
-    formData: PropTypes.object,
-  }
+  static contextType = FormContext
 
   componentDidMount() {
     if (this.storageClassName) {
@@ -56,7 +55,7 @@ class SanpshotForm extends Component {
   }
 
   get storageClassName() {
-    return get(this.context.formData, 'spec.storageClassName')
+    return get(this.context?.formData, 'spec.storageClassName')
   }
 
   get supportedAccessModes() {
@@ -82,7 +81,7 @@ class SanpshotForm extends Component {
         const { data } = this.snapshotStore.list
         const name = get(data, '[0].name')
         if (name) {
-          set(this.context.formData, 'spec.dataSource.name', name)
+          set(this.context?.formData, 'spec.dataSource.name', name)
           this.handeSnapshotChange(name)
         }
       })
@@ -111,18 +110,18 @@ class SanpshotForm extends Component {
       toJS(data).find(snapshot => snapshot.name === name) || {}
     await this.getSnapshotSourceVolumeInfo(selectSnapshot.snapshotSourceName)
     set(
-      this.context.formData,
+      this.context?.formData,
       'spec.resources.requests.storage',
       selectSnapshot.restoreSize
     )
     set(
-      this.context.formData,
+      this.context?.formData,
       'spec.storageClassName',
       this.volumeStore.detail.storageClassName
     )
-    set(this.context.formData, 'spec.dataSource.kind', 'VolumeSnapshot')
+    set(this.context?.formData, 'spec.dataSource.kind', 'VolumeSnapshot')
     set(
-      this.context.formData,
+      this.context?.formData,
       'spec.dataSource.apiGroup',
       'snapshot.storage.k8s.io'
     )
