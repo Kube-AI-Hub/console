@@ -59,30 +59,29 @@ export default class DefaultRange extends React.Component {
   }
 
   handleClick = e => {
-    const { value } = e.target.dataset
+    const li = e.target.closest('li[data-value]')
+    const value = li ? li.dataset.value : undefined
 
     if (value) {
-      let times = this.props.times
-      let step = getStep(value, times)
-      const stepNum = parseInt(step, 10)
       const valueMinutes = getMinutes(value)
+      let step
+      let times
 
-      if (stepNum < 1 || !Number.isFinite(stepNum)) {
-        if (valueMinutes <= 60) {
+      if (valueMinutes <= 60) {
+        step = '1m'
+        times = Math.max(1, Math.round(valueMinutes))
+      } else {
+        times = 10
+        step = getStep(value, times)
+        const stepNum = parseInt(step, 10)
+        if (stepNum > 60) {
+          step = '60m'
+          times = Math.max(1, getTimes(value, step))
+        } else if (stepNum < 1 || !Number.isFinite(stepNum)) {
           step = '1m'
-          times = Math.max(1, valueMinutes)
+          times = Math.max(1, Math.round(valueMinutes))
         } else {
-          times = 10
-          step = getStep(value, times)
-        }
-      }
-
-      if (stepNum > 60) {
-        step = '60m'
-        times = getTimes(value, step)
-        if (times < 1) {
-          step = '1m'
-          times = Math.max(1, valueMinutes)
+          times = Math.max(1, getTimes(value, step))
         }
       }
 
@@ -102,14 +101,14 @@ export default class DefaultRange extends React.Component {
     const lastTimeStr = getLastTimeStr(step, times)
 
     return (
-      <div className={styles.default}>
+      <div className={styles.defaultRange}>
         <div className={styles.title}>{t('SELECT_TIME_RANGE')}</div>
-        <ul onClick={this.handleClick}>
+        <ul className={styles.list} onClick={this.handleClick}>
           {options.map(({ label, value }, index) => (
             <li
               key={index}
               data-value={value}
-              className={classnames({
+              className={classnames(styles.item, {
                 [styles.cur]: value === lastTimeStr,
               })}
             >
