@@ -86,6 +86,7 @@ module.exports = {
   XPU_TYPE_TIP_DEFAULT: 'If the field does not exist, it displays as CPU.',
   FILTER_DEVICE_VENDOR: 'Device Vendor',
   FILTER_TYPE: 'Model',
+  NO_XPU_NODES: 'No XPU',
   XPU_VENDOR_NVIDIA: 'Nvidia',
   XPU_VENDOR_CAMBRICON: 'Cambricon',
   XPU_VENDOR_ASCEND: 'Ascend',

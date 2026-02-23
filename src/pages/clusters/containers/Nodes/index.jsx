@@ -204,10 +204,13 @@ class Nodes extends React.Component {
   }
 
   getData = async params => {
-    await this.store.fetchList({
-      ...params,
-      ...this.props.match.params,
-    })
+    await Promise.all([
+      this.store.fetchList({
+        ...params,
+        ...this.props.match.params,
+      }),
+      this.store.fetchVendorStats(this.props.match.params),
+    ])
 
     await this.monitoringStore.fetchMetrics({
       ...this.props.match.params,
@@ -773,9 +776,32 @@ class Nodes extends React.Component {
     )
   }
 
+  getVendorOrder() {
+    const known = [
+      'CPU',
+      'nvidia',
+      'cambricon',
+      'ascend',
+      'hygon',
+      'metax',
+      'iluvatar',
+    ]
+    return (a, b) => {
+      const i = known.indexOf(a)
+      const j = known.indexOf(b)
+      if (i !== -1 && j !== -1) return i - j
+      if (i !== -1) return -1
+      if (j !== -1) return 1
+      return a.localeCompare(b)
+    }
+  }
+
   renderOverview() {
-    const { masterNum, list } = this.store
+    const { masterNum, list, vendorCounts } = this.store
     const totalCount = list.total
+    const vendorEntries = Object.entries(vendorCounts || {}).sort((a, b) =>
+      this.getVendorOrder()(a[0], b[0])
+    )
     return (
       <Panel className="margin-b12">
         <div className={styles.overview}>
@@ -790,6 +816,17 @@ class Nodes extends React.Component {
               masterNum === 1 ? t('MASTER_NODE_SI') : t('MASTER_NODE_PL')
             }
           />
+          {vendorEntries.map(([vendor, count]) => (
+            <Text
+              key={vendor}
+              title={count}
+              description={
+                vendor === 'CPU'
+                  ? t('NO_XPU_NODES')
+                  : getVendorDisplayName(vendor) || vendor
+              }
+            />
+          ))}
         </div>
       </Panel>
     )

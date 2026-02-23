@@ -84,6 +84,7 @@ module.exports = {
   XPU_TYPE_TIP_DEFAULT: '如果该字段不存在，则显示为 CPU。',
   FILTER_DEVICE_VENDOR: '算力卡厂商',
   FILTER_TYPE: '算力卡型号',
+  NO_XPU_NODES: '无算力卡',
   XPU_VENDOR_NVIDIA: '英伟达',
   XPU_VENDOR_CAMBRICON: '寒武纪',
   XPU_VENDOR_ASCEND: '昇腾',

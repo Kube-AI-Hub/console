@@ -23,6 +23,7 @@ import { getNodeRoles } from 'utils/node'
 import { get, omit } from 'lodash'
 import { LIST_DEFAULT_ORDER } from 'utils/constants'
 
+import request from 'utils/request'
 import Base from './base'
 
 export default class NodeStore extends Base {
@@ -34,6 +35,9 @@ export default class NodeStore extends Base {
 
   @observable
   masterNum = 0
+
+  @observable
+  vendorCounts = {}
 
   @observable
   masterCount = 0
@@ -143,6 +147,19 @@ export default class NodeStore extends Base {
 
     this.masterCount = resp.totalItems
     this.masterWorkerCount = masterWorker
+  }
+
+  @action
+  async fetchVendorStats({ cluster, devops } = {}) {
+    const url = `${this.getResourceUrl({ cluster, devops })}/stats`
+    const params = this.withTypeSelectParams({}, 'node')
+    try {
+      const result = await request.get(url, params)
+      this.vendorCounts =
+        typeof result === 'object' && result !== null ? result : {}
+    } catch {
+      this.vendorCounts = {}
+    }
   }
 
   @action
