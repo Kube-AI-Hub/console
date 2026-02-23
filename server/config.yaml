@@ -124,6 +124,7 @@ client:
                 title: EDGE_NODE_PL,
                 clusterModule: edgeruntime,
               }
+            - { name: gpus, title: GPU_CARD_PL }
         - { name: components, title: SYSTEM_COMPONENT_PL, icon: components }
         - { name: projects, title: PROJECT_PL, icon: project }
         - name: app-workloads
