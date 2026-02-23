@@ -23,6 +23,7 @@ import { Radio } from '@kube-design/components'
 import classnames from 'classnames'
 import { isEmpty } from 'lodash'
 import { capitalize } from 'utils'
+import variables from '~scss/variables.module.scss'
 import * as styles from './index.scss'
 
 export default function ChartCard({ click, item, type, filters }) {
@@ -74,7 +75,7 @@ export default function ChartCard({ click, item, type, filters }) {
             {
               name: 'Left',
               itemStyle: {
-                fill: '#EFF4F9',
+                fill: variables.lightColor01,
               },
               value: total - used,
             },

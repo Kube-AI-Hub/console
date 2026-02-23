@@ -27,6 +27,7 @@ import {
   ResponsiveContainer,
   PieChart,
   Pie,
+  Cell,
   Sector,
   Tooltip,
   Legend,
@@ -78,20 +79,31 @@ export default class SimpleCircle extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.active !== this.props.active) {
+    if (
+      prevProps.active !== this.props.active ||
+      prevProps.value !== this.props.value ||
+      prevProps.total !== this.props.total ||
+      prevProps.showRate !== this.props.showRate ||
+      prevProps.areaColors !== this.props.areaColors
+    ) {
       this.setState({
         ...this.getFills(this.props),
       })
     }
   }
 
-  get value() {
+  get rawValue() {
     const value = parseFloat(this.props.value || 0)
-    return value > 0 ? value : 0
+    return Number.isFinite(value) && value > 0 ? value : 0
   }
 
   get total() {
-    return parseFloat(this.props.total || 0)
+    const total = parseFloat(this.props.total || 0)
+    return Number.isFinite(total) && total > 0 ? total : 0
+  }
+
+  get value() {
+    return this.total ? Math.min(this.rawValue, this.total) : 0
   }
 
   get remain() {
@@ -105,46 +117,62 @@ export default class SimpleCircle extends React.Component {
   getPrimaryColor = props => {
     const { areaColors, active, showRate } = props || {}
     const rate = this.getRate()
-    let colorName = get(areaColors, [0], variables.white)
+    let colorName = ''
+    let colorValue = getColorByName(get(areaColors, [0], variables.white))
 
     if (showRate) {
       if (active) {
         colorName = 'white'
+        colorValue = variables.white
       }
       if (rate >= 80) {
         colorName = 'yellow'
+        colorValue = variables.yellowColor03
       }
       if (rate >= 90) {
         colorName = 'red'
+        colorValue = variables.redColor03
       }
     }
-    return colorName
+    return { colorName, colorValue }
   }
 
   getFills = props => {
     const { areaColors, active } = props || {}
     const activeFill = {
-      fill: getColorByName(this.getPrimaryColor(props)),
+      fill: this.getPrimaryColor(props).colorValue,
     }
 
-    const colorName = areaColors[1] || activeFill.fill
+    const totalFillColor = areaColors[1]
+      ? getColorByName(areaColors[1])
+      : variables.white
 
     const totalFill = active
       ? {
           fill: variables.white,
-          fillOpacity: 0.4,
+          fillOpacity: 0.2,
         }
       : {
-          fill: getColorByName(colorName),
-          fillOpacity: areaColors[1] ? 1 : 0.2,
+          fill: totalFillColor,
+          fillOpacity: areaColors[1] ? 1 : 0.35,
         }
 
     return { activeFill, totalFill }
   }
 
   getData = () => [
-    { name: this.props.legend[0], value: this.value },
-    { name: 'Remaining', value: this.remain },
+    {
+      name: this.props.legend[0],
+      value: this.value,
+      ...this.state.activeFill,
+      fillOpacity: this.state.activeFill.fillOpacity || 1,
+    },
+    {
+      name: 'Remaining',
+      value: this.remain,
+      ...this.state.totalFill,
+      fillOpacity: this.state.totalFill.fillOpacity || 1,
+    },
   ]
 
   renderCenter() {
@@ -156,7 +184,7 @@ export default class SimpleCircle extends React.Component {
       showRatio,
       renderCustomCenter,
     } = this.props
-    const colorName = this.getPrimaryColor(this.props)
+    const { colorName } = this.getPrimaryColor(this.props)
 
     const extra = showRate
       ? {
@@ -258,7 +286,8 @@ export default class SimpleCircle extends React.Component {
 
           if (!isEmpty(data)) {
             data[data.length - 1].value = legend[legend.length - 1]
-            data[data.length - 1].color = areaColors[data.length - 1] || variables.white
+            data[data.length - 1].color =
+              areaColors[data.length - 1] || variables.white
           }
 
           return (
@@ -295,13 +324,18 @@ export default class SimpleCircle extends React.Component {
             <Pie
               data={data}
               dataKey="value"
-              activeIndex={0}
-              activeShape={this.renderActiveShape}
               innerRadius={innerRadius}
               outerRadius="100%"
               stroke="transparent"
-              {...this.state.totalFill}
-            />
+            >
+              {data.map(item => (
+                <Cell
+                  key={item.name}
+                  fill={item.fill}
+                  fillOpacity={item.fillOpacity}
+                />
+              ))}
+            </Pie>
             <Tooltip
               wrapperStyle={{ zIndex: 100 }}
               content={this.renderTooltip}

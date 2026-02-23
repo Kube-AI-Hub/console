@@ -23,9 +23,8 @@ import { Icon, Tooltip } from '@kube-design/components'
 import { PieChart } from 'components/Charts'
 import { getSuitableValue } from 'utils/monitoring'
 
-import * as styles from './index.scss'
-
 import variables from '~scss/variables.module.scss'
+import * as styles from './index.scss'
 
 export default class CircleChart extends React.Component {
   static propTypes = {
@@ -64,7 +63,7 @@ export default class CircleChart extends React.Component {
       {
         name: legendData[1],
         itemStyle: {
-          fill: whiteMode ? '#6fbadc' : variables.blueColor01,
+          fill: whiteMode ? variables.blueColor04 : variables.blueColor01,
         },
         value: Number(data1),
       },
