@@ -487,6 +487,21 @@ class RunningStatus extends React.Component {
     return `${getValueByUnit(value, unit)} ${unitText}`
   }
 
+  getGpuAllocatedTabTitle = tab => {
+    const { data, extraData } = tab
+    if (!data) return '-'
+    const getLastRaw = arr => {
+      const values = get(arr, '[0].values', [])
+      if (!values.length) return 0
+      const last = values[values.length - 1]
+      return parseFloat(Array.isArray(last) ? get(last, 1, 0) : last) || 0
+    }
+    const allocated = (getLastRaw(data) || 0).toFixed(2)
+    const total = Math.round(getLastRaw(extraData))
+    const pct = total > 0 ? Math.round((allocated / total) * 100) : 0
+    return `${allocated}${t('GPU_CARD_UNIT')}(${pct}%)`
+  }
+
   renderResourceTotalStatus() {
     const { detail } = this.store
     const capacity = get(detail, 'status.capacity') || {}
@@ -654,6 +669,17 @@ class RunningStatus extends React.Component {
               legend: ['GPU_MEMORY_USAGE'],
               title: 'GPU_MEMORY_USAGE',
               data: get(metrics, 'node_gpu_memory_utilisation.data.result'),
+            },
+            {
+              key: 'gpu_allocated',
+              icon: 'pod',
+              unit: 'default',
+              legend: ['GPU_ALLOCATION_COUNT'],
+              title: 'GPU_ALLOCATION_COUNT',
+              data: get(metrics, 'node_gpu_allocated.data.result'),
+              extraData: get(metrics, 'node_gpu_total.data.result'),
+              renderTitle: this.getGpuAllocatedTabTitle,
+              yAxis: { hide: true },
             },
             {
               key: 'cpu',

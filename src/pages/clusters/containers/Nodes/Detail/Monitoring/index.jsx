@@ -31,6 +31,9 @@ const MetricTypes = {
   gpu_utilisation: 'node_gpu_utilisation',
   gpu_memory_utilisation: 'node_gpu_memory_utilisation',
   gpu_allocation_rate: 'node_gpu_allocation_rate',
+  gpu_allocated: 'node_gpu_allocated',
+  gpu_card_power: 'gpu_card_power',
+  gpu_card_temperature: 'gpu_card_temperature',
   cpu_utilisation: 'node_cpu_utilisation',
   cpu_load1: 'node_load1',
   cpu_load5: 'node_load5',
@@ -87,6 +90,22 @@ class Monitorings extends React.Component {
       []
     )
     const legend = deviceUsage && deviceUsage.map(item => item.metric.device)
+    const gpuPowerData = get(
+      this.metrics,
+      `${MetricTypes.gpu_card_power}.data.result`,
+      []
+    )
+    const gpuTempData = get(
+      this.metrics,
+      `${MetricTypes.gpu_card_temperature}.data.result`,
+      []
+    )
+    const gpuPowerLegend = gpuPowerData.map(
+      (item, idx) => item.metric?.uuid || `GPU ${idx}`
+    )
+    const gpuTempLegend = gpuTempData.map(
+      (item, idx) => item.metric?.uuid || `GPU ${idx}`
+    )
 
     return [
       {
@@ -115,6 +134,27 @@ class Monitorings extends React.Component {
           this.metrics,
           `${MetricTypes.gpu_allocation_rate}.data.result`
         ),
+      },
+      {
+        type: 'usage',
+        title: 'GPU_ALLOCATION_COUNT',
+        unit: '',
+        legend: ['GPU_ALLOCATION_COUNT'],
+        data: get(this.metrics, `${MetricTypes.gpu_allocated}.data.result`),
+      },
+      {
+        type: 'usage',
+        title: 'GPU_POWER',
+        unit: 'W',
+        legend: gpuPowerLegend,
+        data: gpuPowerData,
+      },
+      {
+        type: 'usage',
+        title: 'GPU_TEMPERATURE',
+        unit: '°C',
+        legend: gpuTempLegend,
+        data: gpuTempData,
       },
       {
         type: 'utilisation',

@@ -119,6 +119,8 @@ module.exports = {
   GPU_CARD_NUMA: 'NUMA 節點',
   GPU_CARD_VENDOR: '廠商',
   GPU_CARD_MODE: '模式',
+  GPU_ALLOCATION_COUNT: 'GPU 分配量',
+  GPU_ALLOCATION_COUNT_SCAP: 'GPU 分配量',
   GPU_TOPOLOGY: '顯卡連接拓撲圖',
   GPU_TOPOLOGY_SELF: '自身',
   GPU_TOPOLOGY_LEGEND_TITLE: '圖例',
