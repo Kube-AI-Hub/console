@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor">
+  <!--
+    阿里巴巴 (Alibaba) logo 标志：
+    官方 logo 为经典"阿里笑脸"——小写字母 "a" 内嵌一个微笑弧线，
+    形成一个"看向右侧、嘴角上扬"的笑脸图案
+  -->
+  <!-- 外圆（"a" 的圆形部分） -->
+  <circle cx="46" cy="50" r="30" fill="none" stroke="currentColor" stroke-width="10"/>
+  <!-- 右竖线（"a" 的竖画） -->
+  <rect x="70" y="30" width="10" height="46" rx="5"/>
+  <!-- 微笑弧线（嘴） -->
+  <path d="M 28 55 Q 46 72 64 55" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor">
+  <!--
+    寒武纪 (Cambricon) logo 标志：
+    logo 由六边形网格 + 内部六角星形构成，象征寒武纪生命爆发 / 神经网络芯片
+    取自官方标志的几何特征：外六边形轮廓 + 内部放射状连线
+  -->
+  <!-- 外六边形 -->
+  <polygon points="50,4 93,27.5 93,72.5 50,96 7,72.5 7,27.5" fill="none" stroke="currentColor" stroke-width="6"/>
+  <!-- 内六角星（六个菱形叶片，模拟寒武纪 logo 放射对称图形） -->
+  <polygon points="50,20 58,38 76,40 63,53 67,71 50,63 33,71 37,53 24,40 42,38"/>
+</svg>

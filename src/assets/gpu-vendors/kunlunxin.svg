@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor">
+  <!--
+    昆仑芯 (Kunlunxin) logo 标志：同 kunlun
+  -->
+  <!-- 左峰 -->
+  <polygon points="10,80 35,25 53,62"/>
+  <!-- 右峰（更高） -->
+  <polygon points="47,80 65,20 90,80"/>
+  <!-- 底部平台（芯片基座） -->
+  <rect x="10" y="80" width="80" height="10" rx="3"/>
+</svg>

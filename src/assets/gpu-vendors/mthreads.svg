@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor">
+  <!--
+    摩尔线程 (Moore Threads) logo 标志：
+    官方 logo 采用三条平行斜线（代表"线程/thread"），
+    三条从左下到右上的平行对角线 + MT 首字母造型融合
+  -->
+  <!-- 三条平行斜线（线程符号），由左下到右上 -->
+  <rect x="8"  y="8"  width="84" height="14" rx="7" transform="rotate(-38 50 50)"/>
+  <rect x="8"  y="30" width="84" height="14" rx="7" transform="rotate(-38 50 50)"/>
+  <rect x="8"  y="52" width="84" height="14" rx="7" transform="rotate(-38 50 50)"/>
+</svg>

@@ -21,6 +21,18 @@ import { Tooltip } from '@kube-design/components'
 import { Avatar, Panel, Status, Text } from 'components/Base'
 import { ICON_TYPES } from 'utils/constants'
 import { getVendorDisplayName } from 'utils'
+import { ReactComponent as AlibabaVendorIcon } from 'assets/gpu-vendors/alibaba.svg'
+import { ReactComponent as AscendVendorIcon } from 'assets/gpu-vendors/ascend.svg'
+import { ReactComponent as CambriconVendorIcon } from 'assets/gpu-vendors/cambricon.svg'
+import { ReactComponent as DefaultVendorIcon } from 'assets/gpu-vendors/default.svg'
+import { ReactComponent as EnflameVendorIcon } from 'assets/gpu-vendors/enflame.svg'
+import { ReactComponent as HygonVendorIcon } from 'assets/gpu-vendors/hygon.svg'
+import { ReactComponent as IluvatarVendorIcon } from 'assets/gpu-vendors/iluvatar.svg'
+import { ReactComponent as KunlunVendorIcon } from 'assets/gpu-vendors/kunlun.svg'
+import { ReactComponent as KunlunxinVendorIcon } from 'assets/gpu-vendors/kunlunxin.svg'
+import { ReactComponent as MetaxVendorIcon } from 'assets/gpu-vendors/metax.svg'
+import { ReactComponent as MthreadsVendorIcon } from 'assets/gpu-vendors/mthreads.svg'
+import { ReactComponent as NvidiaVendorIcon } from 'assets/gpu-vendors/nvidia.svg'
 
 import { withClusterList, ListPage } from 'components/HOCs/withList'
 
@@ -28,6 +40,55 @@ import Banner from 'components/Cards/Banner'
 import GpuResourceTable from 'clusters/components/ResourceTable/GpuResourceTable'
 
 import GpuStore from 'stores/gpu'
+
+const GPU_VENDOR_FILTERS = [
+  { text: t('XPU_VENDOR_NVIDIA'), value: 'nvidia' },
+  { text: t('XPU_VENDOR_CAMBRICON'), value: 'cambricon' },
+  { text: t('XPU_VENDOR_ASCEND'), value: 'ascend' },
+  { text: t('XPU_VENDOR_HYGON'), value: 'hygon' },
+  { text: t('XPU_VENDOR_METAX'), value: 'metax' },
+  { text: t('XPU_VENDOR_ENFLAME'), value: 'enflame' },
+  { text: t('XPU_VENDOR_KUNLUN'), value: 'kunlun' },
+  { text: t('XPU_VENDOR_KUNLUNXIN'), value: 'kunlunxin' },
+  { text: t('XPU_VENDOR_ILUVATAR'), value: 'iluvatar' },
+  { text: t('XPU_VENDOR_ALIBABA'), value: 'alibaba' },
+  { text: t('XPU_VENDOR_MTHREADS'), value: 'mthreads' },
+]
+
+const normalizeVendor = vendor => String(vendor || '').toLowerCase()
+
+const GPU_VENDOR_ICONS = {
+  nvidia: NvidiaVendorIcon,
+  cambricon: CambriconVendorIcon,
+  ascend: AscendVendorIcon,
+  hygon: HygonVendorIcon,
+  metax: MetaxVendorIcon,
+  enflame: EnflameVendorIcon,
+  kunlun: KunlunVendorIcon,
+  kunlunxin: KunlunxinVendorIcon,
+  iluvatar: IluvatarVendorIcon,
+  alibaba: AlibabaVendorIcon,
+  mthreads: MthreadsVendorIcon,
+}
+
+const renderVendorWithIcon = vendor => {
+  const normalizedVendor = normalizeVendor(vendor)
+  const VendorIcon = GPU_VENDOR_ICONS[normalizedVendor] || DefaultVendorIcon
+  const displayName = getVendorDisplayName(vendor)
+  if (!displayName) return '-'
+
+  return (
+    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+      <VendorIcon
+        width={16}
+        height={16}
+        style={{ color: 'currentColor', flexShrink: 0 }}
+        aria-hidden
+      />
+      <span>{displayName}</span>
+    </div>
+  )
+}
 
 export default
 @withClusterList({
@@ -78,14 +139,7 @@ class Gpus extends React.Component {
         dataIndex: 'deviceVendor',
         title: t('FILTER_DEVICE_VENDOR'),
         search: true,
-        filters: [
-          { text: t('XPU_VENDOR_NVIDIA'), value: 'nvidia' },
-          { text: t('XPU_VENDOR_CAMBRICON'), value: 'cambricon' },
-          { text: t('XPU_VENDOR_ASCEND'), value: 'ascend' },
-          { text: t('XPU_VENDOR_HYGON'), value: 'hygon' },
-          { text: t('XPU_VENDOR_METAX'), value: 'metax' },
-          { text: t('XPU_VENDOR_ILUVATAR'), value: 'iluvatar' },
-        ],
+        filters: GPU_VENDOR_FILTERS,
       },
       {
         dataIndex: 'type',
@@ -208,17 +262,10 @@ class Gpus extends React.Component {
         title: t('GPU_CARD_VENDOR'),
         key: 'deviceVendor',
         dataIndex: 'deviceVendor',
-        filters: [
-          { text: t('XPU_VENDOR_NVIDIA'), value: 'nvidia' },
-          { text: t('XPU_VENDOR_CAMBRICON'), value: 'cambricon' },
-          { text: t('XPU_VENDOR_ASCEND'), value: 'ascend' },
-          { text: t('XPU_VENDOR_HYGON'), value: 'hygon' },
-          { text: t('XPU_VENDOR_METAX'), value: 'metax' },
-          { text: t('XPU_VENDOR_ILUVATAR'), value: 'iluvatar' },
-        ],
+        filters: GPU_VENDOR_FILTERS,
         filteredValue: getFilteredValue('deviceVendor'),
         isHideable: true,
-        render: value => getVendorDisplayName(value) || '-',
+        render: value => renderVendorWithIcon(value),
       },
       {
         title: t('GPU_CARD_MODE'),
