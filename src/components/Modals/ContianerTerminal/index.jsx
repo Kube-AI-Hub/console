@@ -57,7 +57,7 @@ class ContainerTerminalModal extends React.Component {
       namespace,
       pod: podName,
       container: containerName,
-      shell: 'sh',
+      shell: 'bash',
     })
   }
 
