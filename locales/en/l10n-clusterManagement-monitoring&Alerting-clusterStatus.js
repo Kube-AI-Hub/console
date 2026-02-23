@@ -37,6 +37,8 @@ module.exports = {
   POD_COUNT: 'Pods',
   COUNT: 'Count',
   PODS: 'Pods',
+  GPU_ALLOCATION: 'GPU Allocation',
+  GPU_ALLOCATION_SCAP: 'GPU allocation',
   // Overview > etcd Monitoring
   SERVICE_STATUS: 'Service Status',
   ETCD_MONITORING: 'etcd Monitoring',

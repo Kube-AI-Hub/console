@@ -138,7 +138,7 @@ class Monitorings extends React.Component {
       {
         type: 'usage',
         title: 'GPU_ALLOCATION_COUNT',
-        unit: '',
+        unitType: 'gpu',
         legend: ['GPU_ALLOCATION_COUNT'],
         data: get(this.metrics, `${MetricTypes.gpu_allocated}.data.result`),
       },

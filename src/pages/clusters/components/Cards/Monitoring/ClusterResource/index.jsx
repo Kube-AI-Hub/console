@@ -34,6 +34,7 @@ const MetricTypes = {
   gpu_memory_utilisation: 'cluster_gpu_memory_utilisation',
   gpu_usage: 'cluster_gpu_usage',
   gpu_total: 'cluster_gpu_total',
+  gpu_allocated: 'cluster_gpu_allocated',
   gpu_utilization: 'cluster_gpu_utilization',
   cpu_usage: 'cluster_cpu_usage',
   cpu_total: 'cluster_cpu_total',
@@ -96,6 +97,12 @@ class ClusterResourceStatusTab extends React.Component {
         total: this.getValue(lastData[MetricTypes.gpu_total]),
       },
       {
+        name: 'GPU_ALLOCATION',
+        unitType: 'gpu',
+        used: this.getValue(lastData[MetricTypes.gpu_allocated]),
+        total: this.getValue(lastData[MetricTypes.gpu_total]),
+      },
+      {
         name: 'CPU',
         unitType: 'cpu',
         used: this.getValue(lastData[MetricTypes.cpu_usage]),
@@ -147,6 +154,13 @@ class ClusterResourceStatusTab extends React.Component {
         unit: '%',
         legend: ['USAGE'],
         data: get(this.metrics, `${MetricTypes.gpu_utilization}.data.result`),
+      },
+      {
+        type: 'usage',
+        title: 'GPU_ALLOCATION',
+        unitType: 'gpu',
+        legend: ['GPU_ALLOCATION'],
+        data: get(this.metrics, `${MetricTypes.gpu_allocated}.data.result`),
       },
       {
         type: 'utilisation',

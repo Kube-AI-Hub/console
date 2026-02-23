@@ -32,6 +32,7 @@ import * as styles from './index.scss'
 const MetricTypes = {
   gpu_memory_utilisation: 'cluster_gpu_memory_utilisation',
   gpu_utilization: 'cluster_gpu_utilization',
+  gpu_allocated: 'cluster_gpu_allocated',
   cpu_utilisation: 'cluster_cpu_utilisation',
   memory_utilisation: 'cluster_memory_utilisation',
   cpu_load1: 'cluster_load1',
@@ -91,6 +92,13 @@ class ClusterMonitorings extends React.Component {
       unit: '%',
       legend: ['USAGE'],
       data: get(this.metrics, `${MetricTypes.gpu_utilization}.data.result`),
+    },
+    {
+      type: 'usage',
+      title: 'GPU_ALLOCATION_COUNT',
+      unitType: 'gpu',
+      legend: ['GPU_ALLOCATION_COUNT'],
+      data: get(this.metrics, `${MetricTypes.gpu_allocated}.data.result`),
     },
     {
       type: 'utilisation',

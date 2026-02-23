@@ -36,6 +36,8 @@ module.exports = {
   POD_COUNT: '容器组数量',
   COUNT: '数量',
   PODS: '容器组',
+  GPU_ALLOCATION: 'GPU 分配',
+  GPU_ALLOCATION_SCAP: 'GPU 分配',
   // Overview > etcd Monitoring
   SERVICE_STATUS: '服务状态',
   ETCD_MONITORING: 'etcd 监控',

@@ -673,7 +673,8 @@ class RunningStatus extends React.Component {
             {
               key: 'gpu_allocated',
               icon: 'pod',
-              unit: 'default',
+              unitType: 'gpu',
+              unitSuffix: t('GPU_CARD_UNIT'),
               legend: ['GPU_ALLOCATION_COUNT'],
               title: 'GPU_ALLOCATION_COUNT',
               data: get(metrics, 'node_gpu_allocated.data.result'),
