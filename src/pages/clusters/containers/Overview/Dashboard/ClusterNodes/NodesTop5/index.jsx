@@ -83,9 +83,20 @@ class NodesTop5 extends Component {
               />
               <Text
                 className={styles.cpu}
-                title={`${Math.round(
-                  (Number(get(node, this.store.sort_metric)) || 0) * 100
-                )}%`}
+                title={
+                  this.store.sort_metric === 'node_gpu_allocated'
+                    ? (() => {
+                        const total = Number(get(node, 'node_gpu_total'))
+                        const allocated = Number(
+                          get(node, 'node_gpu_allocated')
+                        )
+                        if (total <= 0) return '-'
+                        return `${Math.round((allocated / total) * 100)}%`
+                      })()
+                    : `${Math.round(
+                        (Number(get(node, this.store.sort_metric)) || 0) * 100
+                      )}%`
+                }
                 description={t(this.store.sort_metric.toUpperCase())}
               />
             </div>

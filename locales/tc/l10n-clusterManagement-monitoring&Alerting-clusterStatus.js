@@ -122,6 +122,7 @@ module.exports = {
   SCHEDULING_LATENCY: '調度延遲',
   // Resource Usage Ranking
   RESOURCE_USAGE_RANKING: '資源用量排行',
+  SORT_BY_NODE_GPU_ALLOCATED: '按 GPU 分配量排行',
   SORT_BY_NODE_CPU_UTILISATION: 'Sort by CPU usage (%)',
   SORT_BY_NODE_MEMORY_UTILISATION: 'Sort by memory usage (%)',
   SORT_BY_NODE_DISK_SIZE_UTILISATION: 'Sort by disk usage (%)',

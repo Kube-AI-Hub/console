@@ -49,6 +49,7 @@ module.exports = {
   SCHEDULING_FAILURE: '調度失敗的容器組',
   // Nodes
   VIEW_MORE: '查看更多',
+  NODE_GPU_ALLOCATED: 'GPU 分配量',
   NODE_CPU_UTILISATION: 'CPU 用量',
   NODE_LOAD1: 'Average CPU load (1 min)',
   NODE_MEMORY_UTILISATION: '記憶體用量',

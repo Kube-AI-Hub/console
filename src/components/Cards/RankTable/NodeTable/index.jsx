@@ -103,13 +103,39 @@ class NodeUsageRank extends React.Component {
       sort_metric: 'node_gpu_utilisation',
       title: t('GPU_USAGE'),
       render: node => {
-        const gpuUsage = node.node_gpu_usage ? Number(node.node_gpu_usage).toFixed(2) : '-'
+        const gpuUsage = node.node_gpu_usage
+          ? Number(node.node_gpu_usage).toFixed(2)
+          : '-'
         return (
           <div>
             <h3>{this.toPercentage(node.node_gpu_utilisation)}</h3>
             <div>
               {gpuUsage}/{''}
               {node.node_gpu_total || '-'} {t('GPU_CARD_UNIT')}
+            </div>
+          </div>
+        )
+      },
+    },
+    {
+      key: 'gpu_allocated',
+      width: this.rankTdWidth,
+      sort_metric: 'node_gpu_allocated',
+      title: t('GPU_ALLOCATION_COUNT'),
+      render: node => {
+        const total = Number(node.node_gpu_total)
+        const allocated = Number(node.node_gpu_allocated)
+        const ratio = total > 0 ? (allocated / total).toFixed(2) : null
+        const allocatedDisplay =
+          node.node_gpu_allocated != null
+            ? Number(node.node_gpu_allocated).toFixed(2)
+            : '-'
+        return (
+          <div>
+            <h3>{ratio != null ? this.toPercentage(ratio) : '-'}</h3>
+            <div>
+              {allocatedDisplay}/{node.node_gpu_total ?? '-'}{' '}
+              {t('GPU_CARD_UNIT')}
             </div>
           </div>
         )
