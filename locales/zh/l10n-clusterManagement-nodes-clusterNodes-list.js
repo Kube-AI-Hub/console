@@ -91,7 +91,6 @@ module.exports = {
   XPU_VENDOR_HYGON: '海光',
   XPU_VENDOR_METAX: '沐曦',
   XPU_VENDOR_ENFLAME: '燧原',
-  XPU_VENDOR_KUNLUN: '昆仑芯',
   XPU_VENDOR_KUNLUNXIN: '昆仑芯',
   XPU_VENDOR_ILUVATAR: '天数',
   XPU_VENDOR_ALIBABA: '阿里巴巴',

@@ -93,7 +93,6 @@ module.exports = {
   XPU_VENDOR_HYGON: 'Hygon',
   XPU_VENDOR_METAX: 'Metax',
   XPU_VENDOR_ENFLAME: 'Enflame',
-  XPU_VENDOR_KUNLUN: 'Kunlunxin',
   XPU_VENDOR_KUNLUNXIN: 'Kunlunxin',
   XPU_VENDOR_ILUVATAR: 'Iluvatar',
   XPU_VENDOR_ALIBABA: 'Alibaba',
