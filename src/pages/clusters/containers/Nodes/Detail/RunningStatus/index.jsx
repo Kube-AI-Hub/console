@@ -440,7 +440,7 @@ class RunningStatus extends React.Component {
         params
       )
       this.setState({
-        gpulist: Array.isArray(result) ? result : [],
+        gpulist: get(result, 'items', []),
       })
     } catch (e) {
       this.setState({ gpulist: [] })

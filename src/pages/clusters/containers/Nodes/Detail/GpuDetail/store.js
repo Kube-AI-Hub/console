@@ -1,5 +1,5 @@
 import { action, observable } from 'mobx'
-import { isEmpty } from 'lodash'
+import { get, isEmpty } from 'lodash'
 
 export default class GpuDetailStore {
   @observable
@@ -21,7 +21,8 @@ export default class GpuDetailStore {
           }`,
         }
       )
-      const target = (result || []).find(item => item.uuid === decodedUuid)
+      const items = get(result, 'items', [])
+      const target = items.find(item => item.uuid === decodedUuid)
       this.detail = isEmpty(target) ? {} : target
       return this.detail
     } finally {
