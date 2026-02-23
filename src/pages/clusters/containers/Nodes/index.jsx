@@ -314,6 +314,46 @@ class Nodes extends React.Component {
     ]
   }
 
+  getFilterColumns() {
+    return [
+      {
+        dataIndex: 'name',
+        title: t('NAME'),
+        search: true,
+      },
+      {
+        dataIndex: 'status',
+        title: t('STATUS'),
+        search: true,
+        filters: this.getStatus(),
+      },
+      {
+        dataIndex: 'role',
+        title: t('ROLE'),
+        search: true,
+        filters: this.getRoles(),
+      },
+      {
+        dataIndex: 'deviceVendor',
+        title: t('FILTER_DEVICE_VENDOR'),
+        search: true,
+        filters: [
+          { text: t('XPU_VENDOR_NVIDIA'), value: 'nvidia' },
+          { text: t('XPU_VENDOR_CAMBRICON'), value: 'cambricon' },
+          { text: t('XPU_VENDOR_ASCEND'), value: 'ascend' },
+          { text: t('XPU_VENDOR_HYGON'), value: 'hygon' },
+          { text: t('XPU_VENDOR_METAX'), value: 'metax' },
+          { text: t('XPU_VENDOR_ILUVATAR'), value: 'iluvatar' },
+        ],
+      },
+      {
+        dataIndex: 'xpuModel',
+        title: t('FILTER_TYPE'),
+        search: true,
+      },
+    ]
+  }
+
   getColumns = () => {
     const { module, prefix, getSortOrder, getFilteredValue } = this.props
     return [
@@ -568,8 +608,18 @@ class Nodes extends React.Component {
       {
         title: this.renderXpuTitle(),
         key: 'xpu',
+        dataIndex: 'deviceVendor',
+        filters: [
+          { text: t('XPU_VENDOR_NVIDIA'), value: 'nvidia' },
+          { text: t('XPU_VENDOR_CAMBRICON'), value: 'cambricon' },
+          { text: t('XPU_VENDOR_ASCEND'), value: 'ascend' },
+          { text: t('XPU_VENDOR_HYGON'), value: 'hygon' },
+          { text: t('XPU_VENDOR_METAX'), value: 'metax' },
+          { text: t('XPU_VENDOR_ILUVATAR'), value: 'iluvatar' },
+        ],
+        filteredValue: getFilteredValue('deviceVendor'),
         isHideable: true,
-        render: record => {
+        render: (_, record) => {
           let vendor = get(record, 'labels.xpu-vendor')
           let model = get(record, 'labels.xpu-model')
           const xpu = get(record, 'labels.xpu')
@@ -747,6 +797,10 @@ class Nodes extends React.Component {
 
   render() {
     const { bannerProps, tableProps } = this.props
+    const tablePropsWithSearch = {
+      ...tableProps,
+      columnSearch: this.getFilterColumns(),
+    }
     const isLoadingMonitor = this.monitoringStore.isLoading
     return (
       <ListPage {...this.props} getData={this.getData} noWatch>
@@ -757,7 +811,7 @@ class Nodes extends React.Component {
         />
         {this.renderOverview()}
         <Table
-          {...tableProps}
+          {...tablePropsWithSearch}
           itemActions={this.itemActions}
           tableActions={this.tableActions}
           columns={this.getColumns()}

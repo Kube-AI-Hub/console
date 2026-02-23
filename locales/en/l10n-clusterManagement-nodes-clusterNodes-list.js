@@ -84,6 +84,8 @@ module.exports = {
   XPU_TYPE_TIP_FORMAT: 'Format: xpu = xpu-vendor + "-" + xpu-model',
   XPU_TYPE_TIP_EXAMPLES: 'Examples: nvidia (RTX_3090, A100, A10, H100, L40S, L40), metax (MXN260), ascend (Ascend910B, Ascend910)',
   XPU_TYPE_TIP_DEFAULT: 'If the field does not exist, it displays as CPU.',
+  FILTER_DEVICE_VENDOR: 'Device Vendor',
+  FILTER_TYPE: 'Model',
   XPU_VENDOR_NVIDIA: 'Nvidia',
   XPU_VENDOR_CAMBRICON: 'Cambricon',
   XPU_VENDOR_ASCEND: 'Ascend',
