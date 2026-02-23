@@ -21,18 +21,11 @@ import { Tooltip } from '@kube-design/components'
 import { Avatar, Panel, Status, Text } from 'components/Base'
 import { ICON_TYPES } from 'utils/constants'
 import { getVendorDisplayName } from 'utils'
-import { ReactComponent as AlibabaVendorIcon } from 'assets/gpu-vendors/alibaba.svg'
-import { ReactComponent as AscendVendorIcon } from 'assets/gpu-vendors/ascend.svg'
-import { ReactComponent as CambriconVendorIcon } from 'assets/gpu-vendors/cambricon.svg'
-import { ReactComponent as DefaultVendorIcon } from 'assets/gpu-vendors/default.svg'
-import { ReactComponent as EnflameVendorIcon } from 'assets/gpu-vendors/enflame.svg'
-import { ReactComponent as HygonVendorIcon } from 'assets/gpu-vendors/hygon.svg'
-import { ReactComponent as IluvatarVendorIcon } from 'assets/gpu-vendors/iluvatar.svg'
-import { ReactComponent as KunlunVendorIcon } from 'assets/gpu-vendors/kunlun.svg'
-import { ReactComponent as KunlunxinVendorIcon } from 'assets/gpu-vendors/kunlunxin.svg'
-import { ReactComponent as MetaxVendorIcon } from 'assets/gpu-vendors/metax.svg'
-import { ReactComponent as MthreadsVendorIcon } from 'assets/gpu-vendors/mthreads.svg'
-import { ReactComponent as NvidiaVendorIcon } from 'assets/gpu-vendors/nvidia.svg'
+import {
+  GPU_VENDOR_FILTERS,
+  renderGpuVendorIcon,
+  renderGpuVendorWithIcon,
+} from 'utils/gpuVendors'
 
 import { withClusterList, ListPage } from 'components/HOCs/withList'
 
@@ -40,55 +33,6 @@ import Banner from 'components/Cards/Banner'
 import GpuResourceTable from 'clusters/components/ResourceTable/GpuResourceTable'
 
 import GpuStore from 'stores/gpu'
-
-const GPU_VENDOR_FILTERS = [
-  { text: t('XPU_VENDOR_NVIDIA'), value: 'nvidia' },
-  { text: t('XPU_VENDOR_CAMBRICON'), value: 'cambricon' },
-  { text: t('XPU_VENDOR_ASCEND'), value: 'ascend' },
-  { text: t('XPU_VENDOR_HYGON'), value: 'hygon' },
-  { text: t('XPU_VENDOR_METAX'), value: 'metax' },
-  { text: t('XPU_VENDOR_ENFLAME'), value: 'enflame' },
-  { text: t('XPU_VENDOR_KUNLUN'), value: 'kunlun' },
-  { text: t('XPU_VENDOR_KUNLUNXIN'), value: 'kunlunxin' },
-  { text: t('XPU_VENDOR_ILUVATAR'), value: 'iluvatar' },
-  { text: t('XPU_VENDOR_ALIBABA'), value: 'alibaba' },
-  { text: t('XPU_VENDOR_MTHREADS'), value: 'mthreads' },
-]
-
-const normalizeVendor = vendor => String(vendor || '').toLowerCase()
-
-const GPU_VENDOR_ICONS = {
-  nvidia: NvidiaVendorIcon,
-  cambricon: CambriconVendorIcon,
-  ascend: AscendVendorIcon,
-  hygon: HygonVendorIcon,
-  metax: MetaxVendorIcon,
-  enflame: EnflameVendorIcon,
-  kunlun: KunlunVendorIcon,
-  kunlunxin: KunlunxinVendorIcon,
-  iluvatar: IluvatarVendorIcon,
-  alibaba: AlibabaVendorIcon,
-  mthreads: MthreadsVendorIcon,
-}
-
-const renderVendorWithIcon = vendor => {
-  const normalizedVendor = normalizeVendor(vendor)
-  const VendorIcon = GPU_VENDOR_ICONS[normalizedVendor] || DefaultVendorIcon
-  const displayName = getVendorDisplayName(vendor)
-  if (!displayName) return '-'
-
-  return (
-    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-      <VendorIcon
-        width={16}
-        height={16}
-        style={{ color: 'currentColor', flexShrink: 0 }}
-        aria-hidden
-      />
-      <span>{displayName}</span>
-    </div>
-  )
-}
 
 export default
 @withClusterList({
@@ -117,10 +61,16 @@ class Gpus extends React.Component {
   }
 
   getData = async params => {
-    await this.store.fetchList({
-      ...params,
-      ...this.props.match.params,
-    })
+    await Promise.all([
+      this.store.fetchList({
+        ...params,
+        ...this.props.match.params,
+      }),
+      this.store.fetchModelStats({
+        ...params,
+        ...this.props.match.params,
+      }),
+    ])
   }
 
   getFilterColumns() {
@@ -265,7 +215,8 @@ class Gpus extends React.Component {
         filters: GPU_VENDOR_FILTERS,
         filteredValue: getFilteredValue('deviceVendor'),
         isHideable: true,
-        render: value => renderVendorWithIcon(value),
+        render: value =>
+          renderGpuVendorWithIcon(value, getVendorDisplayName(value)),
       },
       {
         title: t('GPU_CARD_MODE'),
@@ -302,13 +253,40 @@ class Gpus extends React.Component {
     ]
   }
 
+  parseModelKey = key => {
+    const value = String(key || '')
+    const idx = value.indexOf('-')
+    if (idx === -1) {
+      return { vendor: '', model: value || '-' }
+    }
+    const vendor = value.slice(0, idx)
+    const model = value.slice(idx + 1) || '-'
+    return { vendor, model }
+  }
+
   renderOverview() {
-    const { list } = this.store
+    const { list, modelCounts } = this.store
     const totalCount = list.total
+    const modelEntries = Object.entries(modelCounts || {}).sort((a, b) =>
+      a[0].localeCompare(b[0])
+    )
     return (
       <Panel className="margin-b12">
         <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
           <Text icon="gpu" title={totalCount} description={t('GPU_CARD_PL')} />
+          {modelEntries.map(([key, count]) => {
+            const { vendor, model } = this.parseModelKey(key)
+            const vendorName = getVendorDisplayName(vendor)
+            const description = vendorName ? `${vendorName} ${model}` : model
+            return (
+              <Text
+                key={key}
+                icon={() => renderGpuVendorIcon(vendor)}
+                title={count}
+                description={description}
+              />
+            )
+          })}
         </div>
       </Panel>
     )

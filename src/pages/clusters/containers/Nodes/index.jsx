@@ -22,6 +22,7 @@ import { Tooltip, Icon } from '@kube-design/components'
 
 import { cpuFormat, memoryFormat, getVendorDisplayName } from 'utils'
 import { ICON_TYPES, NODE_STATUS } from 'utils/constants'
+import { GPU_VENDOR_FILTERS, renderGpuVendorIcon } from 'utils/gpuVendors'
 import { getNodeStatus } from 'utils/node'
 import { getValueByUnit } from 'utils/monitoring'
 import NodeStore from 'stores/node'
@@ -340,14 +341,7 @@ class Nodes extends React.Component {
         dataIndex: 'deviceVendor',
         title: t('FILTER_DEVICE_VENDOR'),
         search: true,
-        filters: [
-          { text: t('XPU_VENDOR_NVIDIA'), value: 'nvidia' },
-          { text: t('XPU_VENDOR_CAMBRICON'), value: 'cambricon' },
-          { text: t('XPU_VENDOR_ASCEND'), value: 'ascend' },
-          { text: t('XPU_VENDOR_HYGON'), value: 'hygon' },
-          { text: t('XPU_VENDOR_METAX'), value: 'metax' },
-          { text: t('XPU_VENDOR_ILUVATAR'), value: 'iluvatar' },
-        ],
+        filters: GPU_VENDOR_FILTERS,
       },
       {
         dataIndex: 'xpuModel',
@@ -612,14 +606,7 @@ class Nodes extends React.Component {
         title: this.renderXpuTitle(),
         key: 'xpu',
         dataIndex: 'deviceVendor',
-        filters: [
-          { text: t('XPU_VENDOR_NVIDIA'), value: 'nvidia' },
-          { text: t('XPU_VENDOR_CAMBRICON'), value: 'cambricon' },
-          { text: t('XPU_VENDOR_ASCEND'), value: 'ascend' },
-          { text: t('XPU_VENDOR_HYGON'), value: 'hygon' },
-          { text: t('XPU_VENDOR_METAX'), value: 'metax' },
-          { text: t('XPU_VENDOR_ILUVATAR'), value: 'iluvatar' },
-        ],
+        filters: GPU_VENDOR_FILTERS,
         filteredValue: getFilteredValue('deviceVendor'),
         isHideable: true,
         render: (_, record) => {
@@ -819,6 +806,7 @@ class Nodes extends React.Component {
           {vendorEntries.map(([vendor, count]) => (
             <Text
               key={vendor}
+              icon={() => renderGpuVendorIcon(vendor)}
               title={count}
               description={
                 vendor === 'CPU'

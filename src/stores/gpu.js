@@ -15,7 +15,7 @@
  * along with KubeSphere Console.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { action } from 'mobx'
+import { action, observable } from 'mobx'
 import { get } from 'lodash'
 
 import Base from './base'
@@ -25,7 +25,24 @@ const GPU_API = '/kapis/gpu.kubesphere.io/v1alpha1/gpus'
 export default class GpuStore extends Base {
   module = 'gpus'
 
+  @observable
+  modelCounts = {}
+
   getListUrl = () => GPU_API
+
+  @action
+  async fetchModelStats({ labelSelector, nodeName } = {}) {
+    const params = {}
+    if (labelSelector) params.labelSelector = labelSelector
+    if (nodeName) params.nodeName = nodeName
+    try {
+      const result = await request.get(`${GPU_API}/stats`, params)
+      this.modelCounts =
+        typeof result === 'object' && result !== null ? result : {}
+    } catch {
+      this.modelCounts = {}
+    }
+  }
 
   @action
   async fetchList({
