@@ -148,6 +148,7 @@ module.exports = {
   GPU_CARD_VENDOR: 'Vendor',
   GPU_CARD_MODE: 'Mode',
   // GPU Detail
+  GPU_CARD_PL: 'GPU Cards',
   GPU_CARD_SCAP: 'GPU Card',
   GPU_DETAIL_NODE: 'Node',
   GPU_CARD_SUMMARY: 'GPU Summary',

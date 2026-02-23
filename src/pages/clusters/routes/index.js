@@ -32,6 +32,7 @@ import VolumeSnapshotClasses from '../containers/Storage/VolumeSnapshotClasses'
 import Volumes from '../containers/Storage/Volumes'
 import Nodes from '../containers/Nodes'
 import EdgeNodes from '../containers/EdgeNodes/index'
+import GPUs from '../containers/Nodes/Gpus'
 import ServiceComponents from '../containers/ServiceComponents'
 import Projects from '../containers/Projects'
 import CustomResources from '../containers/CustomResources'
@@ -102,6 +103,11 @@ export default [
           {
             path: `${PATH}/edgenodes`,
             component: EdgeNodes,
+            exact: true,
+          },
+          {
+            path: `${PATH}/gpus`,
+            component: GPUs,
             exact: true,
           },
           {

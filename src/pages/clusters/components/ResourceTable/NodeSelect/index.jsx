@@ -1,6 +1,5 @@
 /*
- * This file is part of KubeSphere Console.
- * Copyright (C) 2019 The KubeSphere Console Authors.
+ * Copyright (C) 2026 Kube AI Hub.
  *
  * KubeSphere Console is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -20,46 +19,41 @@ import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import { pick } from 'lodash'
 import { Icon, Select } from '@kube-design/components'
-import { showNameAndAlias } from 'utils'
 
 import * as styles from './index.scss'
 
 export default
 @observer
-class ProjectSelect extends Component {
-  getProjects() {
+class NodeSelect extends Component {
+  getNodes() {
     return [
       ...this.props.list.data.map(item => ({
-        label: showNameAndAlias(item),
+        label:
+          item.ip && item.ip !== '-' ? `${item.name} (${item.ip})` : item.name,
         value: item.name,
-        isFedManaged: item.isFedManaged,
       })),
     ]
   }
 
   optionRenderer = option => (
     <span className={styles.option}>
-      {option.isFedManaged ? (
-        <img className={styles.indicator} src="/assets/cluster.svg" />
-      ) : (
-        <Icon name="project" type="light" />
-      )}
+      <Icon name="nodes" type="light" />
       {option.label}
     </span>
   )
 
   render() {
-    const { namespace, list, onChange, onFetch } = this.props
+    const { value, list, onChange, onFetch } = this.props
 
     const pagination = pick(list, ['page', 'total', 'limit'])
 
     return (
       <Select
         className={styles.select}
-        value={namespace}
+        value={value}
         onChange={onChange}
-        options={this.getProjects()}
-        placeholder={t('ALL_PROJECTS')}
+        options={this.getNodes()}
+        placeholder={t('ALL_NODES')}
         pagination={pagination}
         isLoading={list.isLoading}
         valueRenderer={this.optionRenderer}

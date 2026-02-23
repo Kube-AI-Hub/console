@@ -147,6 +147,7 @@ module.exports = {
   GPU_CARD_VENDOR: '厂商',
   GPU_CARD_MODE: '模式',
   // GPU Detail
+  GPU_CARD_PL: '显卡',
   GPU_CARD_SCAP: '显卡',
   GPU_DETAIL_NODE: '所属节点',
   GPU_CARD_SUMMARY: '显卡摘要',

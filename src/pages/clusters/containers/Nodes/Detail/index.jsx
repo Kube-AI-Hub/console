@@ -387,6 +387,8 @@ export default class NodeDetail extends React.Component {
       return <Loading className="ks-page-loading" />
     }
 
+    const { cluster } = this.props.match.params
+    const fromGpus = this.props.location?.search?.includes('from=gpus')
     const sideProps = {
       module: this.module,
       name: getDisplayName(this.store.detail),
@@ -395,8 +397,8 @@ export default class NodeDetail extends React.Component {
       attrs: this.getAttrs(),
       breadcrumbs: [
         {
-          label: t('CLUSTER_NODE_PL'),
-          url: this.listUrl,
+          label: fromGpus ? t('GPU_CARD_PL') : t('CLUSTER_NODE_PL'),
+          url: fromGpus ? `/clusters/${cluster}/gpus` : this.listUrl,
         },
       ],
     }

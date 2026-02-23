@@ -156,8 +156,8 @@ export default class GpuDetail extends React.Component {
       attrs: this.getAttrs(),
       breadcrumbs: [
         {
-          label: t('GPU_CARD_SCAP'),
-          url: `/clusters/${this.cluster}/nodes/${this.nodeName}/status`,
+          label: t('GPU_CARD_PL'),
+          url: `/clusters/${this.cluster}/gpus`,
         },
       ],
     }
