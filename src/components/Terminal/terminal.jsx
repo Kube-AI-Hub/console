@@ -179,6 +179,7 @@ export default class ContainerTerminal extends React.Component {
   createWS() {
     return new SocketClient(this.props.websocketUrl, {
       onmessage: this.onWSReceive,
+      onclose: this.onWSClose,
       onerror: this.onWSError,
       subProtocol: ['binary.k8s.io'],
     })
@@ -189,9 +190,25 @@ export default class ContainerTerminal extends React.Component {
     this.fatal(ex.message)
   }
 
+  onWSClose = ev => {
+    this.initTimer && clearInterval(this.initTimer)
+    if (this.first && this.term) {
+      const msg = ev.reason || 'Connection closed'
+      this.fatal(msg)
+    }
+  }
+
   onWSReceive = data => {
     this.initTimer && clearInterval(this.initTimer)
     const term = this.term
+
+    if (data.Op === 'toast') {
+      if (this.first && term) {
+        this.first = false
+        this.fatal(data.Data || 'Connection closed')
+      }
+      return
+    }
 
     if (this.first) {
       this.first = false
