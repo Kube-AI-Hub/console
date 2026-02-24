@@ -145,7 +145,7 @@ export default class SimpleCircle extends React.Component {
 
     const totalFillColor = areaColors[1]
       ? getColorByName(areaColors[1])
-      : variables.white
+      : variables.darkColor06
 
     const totalFill = active
       ? {
@@ -154,7 +154,7 @@ export default class SimpleCircle extends React.Component {
         }
       : {
           fill: totalFillColor,
-          fillOpacity: areaColors[1] ? 1 : 0.35,
+          fillOpacity: areaColors[1] ? 1 : 0.5,
         }
 
     return { activeFill, totalFill }

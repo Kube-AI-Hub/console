@@ -23,6 +23,17 @@ import classnames from 'classnames'
 import { get } from 'lodash'
 
 import ComponentMonitoringStore from 'stores/monitoring/component'
+import request from 'utils/request'
+import { getVendorDisplayName } from 'utils'
+import { renderGpuVendorIcon } from 'utils/gpuVendors'
+import variables from '~scss/variables.module.scss'
+import {
+  PieChart as RechartsPieChart,
+  Pie,
+  Cell,
+  Sector,
+  ResponsiveContainer,
+} from 'recharts'
 
 import { Columns, Column, Loading, Icon } from '@kube-design/components'
 import { Card } from 'components/Base'
@@ -35,6 +46,93 @@ import {
 
 import * as styles from './index.scss'
 
+const PIE_COLORS = [
+  variables.greenColor01,
+  variables.greenColor02,
+  variables.greenColor03,
+  variables.greenColor04,
+  variables.blueColor01,
+  variables.blueColor02,
+  variables.blueColor03,
+  variables.blueColor04,
+  variables.blueColor05,
+]
+
+const renderNodePieActiveShape = props => {
+  const RADIAN = Math.PI / 180
+  const {
+    cx,
+    cy,
+    midAngle,
+    innerRadius,
+    outerRadius,
+    startAngle,
+    endAngle,
+    fill,
+    payload,
+    percent,
+    value,
+  } = props
+  const sin = Math.sin(-RADIAN * midAngle)
+  const cos = Math.cos(-RADIAN * midAngle)
+  const sx = cx + (outerRadius + 10) * cos
+  const sy = cy + (outerRadius + 10) * sin
+  const mx = cx + (outerRadius + 30) * cos
+  const my = cy + (outerRadius + 30) * sin
+  const ex = mx + (cos >= 0 ? 1 : -1) * 22
+  const ey = my
+  const textAnchor = cos >= 0 ? 'start' : 'end'
+
+  return (
+    <g>
+      <text x={cx} y={cy} dy={8} textAnchor="middle" fill={fill}>
+        {payload.displayName}
+      </text>
+      <Sector
+        cx={cx}
+        cy={cy}
+        innerRadius={innerRadius}
+        outerRadius={outerRadius}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        fill={fill}
+      />
+      <Sector
+        cx={cx}
+        cy={cy}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        innerRadius={outerRadius + 6}
+        outerRadius={outerRadius + 10}
+        fill={fill}
+      />
+      <path
+        d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`}
+        stroke={fill}
+        fill="none"
+      />
+      <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
+      <text
+        x={ex + (cos >= 0 ? 1 : -1) * 12}
+        y={ey}
+        textAnchor={textAnchor}
+        fill={variables.darkColor06}
+      >
+        {`${value} ${t('NODE_PL')}`}
+      </text>
+      <text
+        x={ex + (cos >= 0 ? 1 : -1) * 12}
+        y={ey}
+        dy={18}
+        textAnchor={textAnchor}
+        fill={variables.darkColor01}
+      >
+        {`(${(percent * 100).toFixed(1)}%)`}
+      </text>
+    </g>
+  )
+}
+
 @inject('rootStore')
 @observer
 class Overview extends React.Component {
@@ -44,6 +142,11 @@ class Overview extends React.Component {
     this.componentMonitoringStore = new ComponentMonitoringStore({
       cluster: this.cluster,
     })
+    this.state = {
+      nodeStats: {},
+      nodeStatsLoading: true,
+      activePieIndex: 0,
+    }
     this.fetchData()
   }
 
@@ -67,6 +170,106 @@ class Overview extends React.Component {
 
   componentDidMount() {
     this.updateData()
+    this.fetchNodeStats()
+  }
+
+  getNodeStatsApiPath = () =>
+    globals.app.isMultiCluster
+      ? `/kapis/clusters/${this.cluster}/resources.kubesphere.io/v1alpha3`
+      : '/kapis/resources.kubesphere.io/v1alpha3'
+
+  fetchNodeStats = async () => {
+    this.setState({ nodeStatsLoading: true })
+    try {
+      const result = await request.get(
+        `${this.getNodeStatsApiPath()}/nodes/stats`
+      )
+      this.setState({
+        nodeStats: typeof result === 'object' && result !== null ? result : {},
+        nodeStatsLoading: false,
+      })
+    } catch {
+      this.setState({ nodeStats: {}, nodeStatsLoading: false })
+    }
+  }
+
+  onNodePieEnter = (_, index) => {
+    this.setState({ activePieIndex: index })
+  }
+
+  renderNodeVendorPie() {
+    const { nodeStats, nodeStatsLoading, activePieIndex } = this.state
+    const vendorCounts = {}
+    Object.keys(nodeStats || {}).forEach(key => {
+      if (key === 'total' || key === 'healthy') return
+      const vendor = key
+      vendorCounts[vendor] =
+        (vendorCounts[vendor] || 0) + Number(nodeStats[key] || 0)
+    })
+    const total = Object.values(vendorCounts).reduce((a, b) => a + b, 0)
+    const data = Object.entries(vendorCounts).map(([vendor, count], i) => ({
+      name: vendor,
+      displayName:
+        vendor === 'CPU'
+          ? t('NO_XPU_NODES')
+          : getVendorDisplayName(vendor) || vendor,
+      value: count,
+      percent: total > 0 ? ((count / total) * 100).toFixed(1) : '0',
+      color: PIE_COLORS[i % PIE_COLORS.length],
+    }))
+    return (
+      <Card className={styles.pie} title={t('NODE_VENDOR_DISTRIBUTION')}>
+        <Loading spinning={nodeStatsLoading}>
+          {total === 0 ? (
+            <div className={styles.piePlaceholder}>{t('NO_DATA')}</div>
+          ) : (
+            <div className={styles.pieWrapper}>
+              <div className={styles.vendorList}>
+                {data.map(item => (
+                  <div key={item.name} className={styles.vendorItem}>
+                    <i
+                      className={styles.vendorDot}
+                      style={{ backgroundColor: item.color }}
+                    />
+                    {renderGpuVendorIcon(item.name, 24)}
+                    <span className={styles.vendorName}>
+                      {item.displayName}
+                    </span>
+                    <span className={styles.vendorCount}>
+                      {item.value} {t('NODE_PL')} ({item.percent}%)
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div className={styles.pieChart}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <RechartsPieChart>
+                    <Pie
+                      cx="50%"
+                      data={data}
+                      dataKey="value"
+                      innerRadius="60%"
+                      outerRadius="75%"
+                      activeIndex={activePieIndex}
+                      activeShape={renderNodePieActiveShape}
+                      onMouseEnter={this.onNodePieEnter}
+                    >
+                      {data.map(entry => (
+                        <Cell
+                          key={`cell-${entry.name}`}
+                          fill={entry.color}
+                          strokeWidth={1}
+                        />
+                      ))}
+                    </Pie>
+                  </RechartsPieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
+        </Loading>
+      </Card>
+    )
   }
 
   componentWillUnmount() {
@@ -299,7 +502,10 @@ class Overview extends React.Component {
       <div>
         <Columns className="is-1_1">
           <Column className="is-5">{this.renderNodeStatus()}</Column>
-          <Column className="is-7">{this.renderComponentStatus()}</Column>
+          <Column className="is-7">{this.renderNodeVendorPie()}</Column>
+        </Columns>
+        <Columns className="is-1_1">
+          <Column className="is-12">{this.renderComponentStatus()}</Column>
         </Columns>
         <Columns>
           <Column className="is-12">

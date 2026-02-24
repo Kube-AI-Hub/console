@@ -22,10 +22,9 @@
 
 .overview {
   display: flex;
-
-  & > div {
-    min-width: 220px;
-  }
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
 }
 
 .resource {

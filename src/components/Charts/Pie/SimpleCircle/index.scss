@@ -23,7 +23,7 @@
   transform: translate(-50%, -50%);
   color: variables.$dark;
   font-weight: bold;
-  font-size: 16px;
+  font-size: 11px;
   line-height: 40px;
   animation: fadeIn 1.5s ease;
 
@@ -31,7 +31,7 @@
     white-space: nowrap;
 
     strong {
-      font-size: 24px;
+      font-size: 16px;
     }
 
     span {
@@ -40,14 +40,14 @@
   }
 
   &.standard {
-    font-size: 20px;
+    font-size: 13px;
   }
 
   &.mid {
-    font-size: 12px;
+    font-size: 8px;
 
     strong {
-      font-size: 15px;
+      font-size: 10px;
     }
   }
 

@@ -5,8 +5,75 @@
   margin-bottom: 0;
 
   &Status {
-    padding: 25px 18px;
+    padding: 50px 18px;
+    min-height: 200px;
   }
+}
+
+.pie {
+  margin-bottom: 0;
+
+  &Placeholder {
+    padding: 24px;
+    text-align: center;
+    color: variables.$second-text-color;
+  }
+
+  &Wrapper {
+    display: flex;
+    flex-direction: row;
+    background-color: variables.$light-color02;
+    background-image: url('/assets/pipelineBg.svg');
+    border-radius: 0 0 4px 4px;
+    min-height: 200px;
+    position: relative;
+  }
+
+  &Chart {
+    flex: 1;
+    min-height: 200px;
+  }
+}
+
+.vendorList {
+  width: 240px;
+  flex-shrink: 0;
+  padding: 12px;
+  overflow-y: auto;
+  max-height: 220px;
+}
+
+.vendorItem {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  height: 32px;
+  line-height: 32px;
+}
+
+.vendorDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+.vendorName {
+  flex: 1;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 0 8px;
+}
+
+.vendorCount {
+  white-space: nowrap;
+  font-weight: 600;
+  color: variables.$dark-color06;
+  font-size: variables.$size-small;
 }
 
 .components {
@@ -18,9 +85,12 @@
       display: flex;
       flex-wrap: wrap;
       margin: 0 -3px;
+      width: 100%;
 
       .item {
-        flex: 1 0 250px;
+        flex: 0 0 calc((100% - 18px) / 3);
+        box-sizing: border-box;
+        min-width: 0;
         display: flex;
         align-items: center;
         padding: 0 10px;
@@ -42,7 +112,6 @@
 
       &.service {
         .item {
-          flex: 1 0 250px;
           justify-content: space-between;
           cursor: pointer;
 

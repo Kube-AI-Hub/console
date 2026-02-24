@@ -31,6 +31,7 @@ import { withClusterList, ListPage } from 'components/HOCs/withList'
 
 import Banner from 'components/Cards/Banner'
 import GpuResourceTable from 'clusters/components/ResourceTable/GpuResourceTable'
+import { SimpleCircle } from 'components/Charts'
 
 import GpuStore from 'stores/gpu'
 
@@ -267,26 +268,79 @@ class Gpus extends React.Component {
   renderOverview() {
     const { list, modelCounts } = this.store
     const totalCount = list.total
-    const modelEntries = Object.entries(modelCounts || {}).sort((a, b) =>
-      a[0].localeCompare(b[0])
-    )
+    const statsTotal = Number(modelCounts?.total) || 0
+    const statsHealthy = Number(modelCounts?.healthy) || 0
+    const vendorEntries = Object.entries(modelCounts || {})
+      .filter(([key]) => key !== 'total' && key !== 'healthy')
+      .sort((a, b) => a[0].localeCompare(b[0]))
     return (
       <Panel className="margin-b12">
-        <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '24px',
+            flexWrap: 'wrap',
+          }}
+        >
           <Text icon="gpu" title={totalCount} description={t('GPU_CARD_PL')} />
-          {modelEntries.map(([key, count]) => {
-            const { vendor, model } = this.parseModelKey(key)
-            const vendorName = getVendorDisplayName(vendor)
-            const description = vendorName ? `${vendorName} ${model}` : model
-            return (
-              <Text
-                key={key}
-                icon={() => renderGpuVendorIcon(vendor)}
-                title={count}
-                description={description}
+          <div
+            style={{
+              width: 1,
+              height: 48,
+              backgroundColor: 'var(--border-color, #e3e9ef)',
+              flexShrink: 0,
+            }}
+          />
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 24,
+              flexWrap: 'wrap',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                minHeight: 60,
+              }}
+            >
+              <SimpleCircle
+                theme="light"
+                width={60}
+                height={60}
+                title={t('GPU_ONLINE_STATUS')}
+                legend={['HEALTHY_GPUS', 'ALL_GPUS']}
+                value={statsHealthy}
+                total={statsTotal}
+                showRatio
               />
-            )
-          })}
+              <Text
+                title={
+                  statsTotal > 0
+                    ? `${((statsHealthy / statsTotal) * 100).toFixed(1)}%`
+                    : '0%'
+                }
+                description={t('CLUSTER_GPU_STATUS')}
+              />
+            </div>
+            {vendorEntries.map(([key, count]) => {
+              const { vendor, model } = this.parseModelKey(key)
+              const vendorName = getVendorDisplayName(vendor)
+              const description = vendorName ? `${vendorName} ${model}` : model
+              return (
+                <Text
+                  key={key}
+                  icon={() => renderGpuVendorIcon(vendor)}
+                  title={count}
+                  description={description}
+                />
+              )
+            })}
+          </div>
         </div>
       </Panel>
     )

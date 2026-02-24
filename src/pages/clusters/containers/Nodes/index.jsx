@@ -36,6 +36,7 @@ import { Avatar, Status, Panel, Text, Modal } from 'components/Base'
 
 import Banner from 'components/Cards/Banner'
 import Table from 'components/Tables/List'
+import { SimpleCircle } from 'components/Charts'
 
 import { toJS } from 'mobx'
 import * as styles from './index.scss'
@@ -786,9 +787,11 @@ class Nodes extends React.Component {
   renderOverview() {
     const { masterNum, list, vendorCounts } = this.store
     const totalCount = list.total
-    const vendorEntries = Object.entries(vendorCounts || {}).sort((a, b) =>
-      this.getVendorOrder()(a[0], b[0])
-    )
+    const statsTotal = Number(vendorCounts?.total) || 0
+    const statsHealthy = Number(vendorCounts?.healthy) || 0
+    const vendorEntries = Object.entries(vendorCounts || {})
+      .filter(([key]) => key !== 'total' && key !== 'healthy')
+      .sort((a, b) => this.getVendorOrder()(a[0], b[0]))
     return (
       <Panel className="margin-b12">
         <div className={styles.overview}>
@@ -803,18 +806,62 @@ class Nodes extends React.Component {
               masterNum === 1 ? t('MASTER_NODE_SI') : t('MASTER_NODE_PL')
             }
           />
-          {vendorEntries.map(([vendor, count]) => (
-            <Text
-              key={vendor}
-              icon={() => renderGpuVendorIcon(vendor)}
-              title={count}
-              description={
-                vendor === 'CPU'
-                  ? t('NO_XPU_NODES')
-                  : getVendorDisplayName(vendor) || vendor
-              }
-            />
-          ))}
+          <div
+            style={{
+              width: 1,
+              height: 48,
+              backgroundColor: 'var(--border-color, #e3e9ef)',
+              flexShrink: 0,
+            }}
+          />
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 24,
+              flexWrap: 'wrap',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                minHeight: 60,
+              }}
+            >
+              <SimpleCircle
+                theme="light"
+                width={60}
+                height={60}
+                title={t('NODE_ONLINE_STATUS')}
+                legend={['HEALTHY_NODES', 'ALL_NODES']}
+                value={statsHealthy}
+                total={statsTotal}
+                showRatio
+              />
+              <Text
+                title={
+                  statsTotal > 0
+                    ? `${((statsHealthy / statsTotal) * 100).toFixed(1)}%`
+                    : '0%'
+                }
+                description={t('CLUSTER_NODE_STATUS')}
+              />
+            </div>
+            {vendorEntries.map(([vendor, count]) => (
+              <Text
+                key={vendor}
+                icon={() => renderGpuVendorIcon(vendor)}
+                title={count}
+                description={
+                  vendor === 'CPU'
+                    ? t('NO_XPU_NODES')
+                    : getVendorDisplayName(vendor) || vendor
+                }
+              />
+            ))}
+          </div>
         </div>
       </Panel>
     )
