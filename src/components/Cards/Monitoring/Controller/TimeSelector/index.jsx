@@ -26,7 +26,7 @@ import { Button, Icon } from '@kube-design/components'
 import DefaultRange from './Range/Default'
 import CustomRange from './Range/Custom'
 
-import { getLastTimeStr, getTimeLabel, getDateStr } from './utils'
+import { getLastTimeStr, getTimeLabel, getDateStr, getMinutes } from './utils'
 import * as styles from './index.scss'
 
 export default class TimeSelector extends React.PureComponent {
@@ -112,23 +112,50 @@ export default class TimeSelector extends React.PureComponent {
     return t('LAST_TIME', { value: lastTimeText })
   }
 
+  getEffectiveStartEnd() {
+    const { step, times, start, end } = this.state
+    const nowSec = Math.floor(Date.now() / 1000)
+    const effectiveEnd = end ? Number(end) : nowSec
+    const effectiveStart = start
+      ? Number(start)
+      : effectiveEnd -
+        Math.round(getMinutes(step || '10m') * 60 * (times || 30))
+    return {
+      start: new Date(effectiveStart * 1000),
+      end: new Date(effectiveEnd * 1000),
+    }
+  }
+
   renderContent() {
     const { step, times } = this.state
     const { showStep = true } = this.props
+    const {
+      start: effectiveStart,
+      end: effectiveEnd,
+    } = this.getEffectiveStartEnd()
     return (
       <div className={styles.content}>
-        <DefaultRange
-          step={step}
-          times={times}
-          onChange={this.handleTimeChange}
-        />
-        <CustomRange
-          step={step}
-          times={times}
-          showStep={showStep}
-          onSubmit={this.handleTimeChange}
-          onCancel={this.hideSelector}
-        />
+        <div className={styles.rangePanels}>
+          <div className={styles.defaultRangeWrap}>
+            <DefaultRange
+              step={step}
+              times={times}
+              onChange={this.handleTimeChange}
+            />
+            <div className={styles.stepHint}>
+              {t('MONITORING_STEP_AUTO_ADAPT_HINT')}
+            </div>
+          </div>
+          <CustomRange
+            step={step}
+            times={times}
+            start={effectiveStart}
+            end={effectiveEnd}
+            showStep={showStep}
+            onSubmit={this.handleTimeChange}
+            onCancel={this.hideSelector}
+          />
+        </div>
       </div>
     )
   }

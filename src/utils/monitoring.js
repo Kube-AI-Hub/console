@@ -372,6 +372,67 @@ export const isSameDay = (preTime, nextTime) =>
 
 export const timeAliasReg = /(\d+)(\w+)/
 
+export const MONITORING_MAX_POINTS = 500
+
+const FRIENDLY_STEP_SECONDS = [
+  60,
+  120,
+  300,
+  600,
+  900,
+  1800,
+  3600,
+  7200,
+  21600,
+  43200,
+]
+
+export const stepStrToSeconds = stepStr => {
+  if (!stepStr || !isString(stepStr)) return 0
+  const unit = stepStr.slice(-1)
+  const value = parseFloat(stepStr)
+  if (!Number.isFinite(value) || value <= 0) return 0
+  switch (unit) {
+    case 's':
+      return value
+    case 'm':
+      return value * 60
+    case 'h':
+      return value * 3600
+    case 'd':
+      return value * 86400
+    default:
+      return value
+  }
+}
+
+export const secondsToStepStr = seconds => {
+  const target = Math.ceil(Number(seconds) || 0)
+  if (target <= 0) return '1m'
+  const matched =
+    FRIENDLY_STEP_SECONDS.find(candidate => candidate >= target) || target
+  if (matched % 3600 === 0) return `${matched / 3600}h`
+  if (matched % 60 === 0) return `${matched / 60}m`
+  return `${matched}s`
+}
+
+export const getAdaptedStep = (
+  startUnixSec,
+  endUnixSec,
+  stepStr,
+  maxPoints = MONITORING_MAX_POINTS
+) => {
+  const start = Math.floor(Number(startUnixSec))
+  const end = Math.floor(Number(endUnixSec))
+  const rangeSec = end - start
+  const stepSec = stepStrToSeconds(stepStr)
+  if (rangeSec <= 0 || stepSec <= 0 || maxPoints <= 0) return stepStr
+  const points = rangeSec / stepSec
+  if (points <= maxPoints) return stepStr
+  const requiredStepSec = rangeSec / maxPoints
+  return secondsToStepStr(requiredStepSec)
+}
+
 export const timestampify = timeAlias => {
   const [, count = 0, unit] = timeAlias.match(timeAliasReg) || []
   return Number(count) * (MILLISECOND_IN_TIME_UNIT[unit] || 0)

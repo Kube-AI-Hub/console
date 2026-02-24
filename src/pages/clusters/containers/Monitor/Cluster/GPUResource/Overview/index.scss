@@ -1,0 +1,112 @@
+@use '~scss/variables';
+
+.node {
+  margin-bottom: 0;
+
+  &Status {
+    padding: 50px 18px;
+    min-height: 200px;
+  }
+}
+
+.pie {
+  margin-bottom: 0;
+
+  &Placeholder {
+    padding: 24px;
+    text-align: center;
+    color: variables.$second-text-color;
+  }
+
+  &Wrapper {
+    display: flex;
+    flex-direction: row;
+    background-color: variables.$light-color02;
+    background-image: url('/assets/pipelineBg.svg');
+    border-radius: 0 0 4px 4px;
+    min-height: 200px;
+    position: relative;
+  }
+
+  &Chart {
+    flex: 1;
+    min-height: 200px;
+  }
+}
+
+.vendorList {
+  width: 240px;
+  flex-shrink: 0;
+  padding: 12px;
+  overflow-y: auto;
+  max-height: 220px;
+}
+
+.vendorItem {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  height: 32px;
+  line-height: 32px;
+}
+
+.vendorDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+.vendorName {
+  flex: 1;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 0 8px;
+}
+
+.vendorCount {
+  white-space: nowrap;
+  font-weight: 600;
+  color: variables.$dark-color06;
+  font-size: variables.$size-small;
+}
+
+.section {
+  margin-top: 20px;
+}
+
+.content {
+  display: flex;
+  margin: 0 -6px;
+}
+
+.item {
+  flex: 1;
+  margin: 0 6px;
+  padding: 6px;
+  border-radius: 4px;
+  background-color: variables.$card-bg-color;
+}
+
+.chartTitle {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  color: variables.$dark-grey;
+  height: 20px;
+  line-height: 20px;
+
+  span {
+    margin-right: 10px;
+    color: variables.$dark;
+    font-weight: bold;
+
+    strong {
+      font-size: 22px;
+    }
+  }
+}

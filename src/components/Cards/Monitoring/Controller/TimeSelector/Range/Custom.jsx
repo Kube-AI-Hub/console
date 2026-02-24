@@ -28,6 +28,12 @@ import {
   Select,
 } from '@kube-design/components'
 
+import {
+  MONITORING_MAX_POINTS,
+  getAdaptedStep,
+  secondsToStepStr,
+  stepStrToSeconds,
+} from 'utils/monitoring'
 import { getMinutes, getTimeOptions } from '../utils'
 
 import * as styles from './index.scss'
@@ -39,6 +45,8 @@ export default class CustomRange extends React.Component {
     showStep: PropTypes.bool,
     step: PropTypes.string,
     times: PropTypes.number,
+    start: PropTypes.instanceOf(Date),
+    end: PropTypes.instanceOf(Date),
     onSubmit: PropTypes.func,
     onCancel: PropTypes.func,
   }
@@ -55,12 +63,73 @@ export default class CustomRange extends React.Component {
     super(props)
 
     const now = new Date()
-    const start = new Date(now.valueOf() - 3600000)
+    const defaultStart = new Date(now.valueOf() - 3600000)
+    const startDate =
+      props.start && props.start instanceof Date ? props.start : defaultStart
+    const endDate = props.end && props.end instanceof Date ? props.end : now
 
     this.formData = {
-      step: props.step,
-      start: props.start ? [props.start] : [start],
-      end: props.end ? [props.end] : [now],
+      step: this.normalizeStep(props.step),
+      start: [startDate],
+      end: [endDate],
+    }
+  }
+
+  normalizeStep(step) {
+    const stepSec = stepStrToSeconds(step)
+    if (!stepSec) return '1m'
+    return secondsToStepStr(stepSec)
+  }
+
+  getStepOptions = () => {
+    const { start, end } = this.formData
+    const startDate = start && start[0]
+    const endDate = end && end[0]
+    const intervalSec =
+      startDate instanceof Date && endDate instanceof Date
+        ? (endDate.valueOf() - startDate.valueOf()) / 1000
+        : 0
+    return getTimeOptions(TimeOps).map(option => {
+      const stepSec = stepStrToSeconds(option.value)
+      const disabled =
+        intervalSec > 0 && stepSec > 0
+          ? intervalSec / stepSec > MONITORING_MAX_POINTS
+          : false
+      return { ...option, disabled }
+    })
+  }
+
+  ensureAvailableStep = () => {
+    const options = this.getStepOptions()
+    const current = this.formData.step
+    const currentOption = options.find(option => option.value === current)
+    if (currentOption && !currentOption.disabled) return
+    const fallback = options.find(option => !option.disabled)
+    if (fallback) this.formData.step = fallback.value
+  }
+
+  componentDidUpdate(prevProps) {
+    const { start, end, step } = this.props
+    const prevStart =
+      prevProps.start && prevProps.start.getTime
+        ? prevProps.start.getTime()
+        : null
+    const prevEnd =
+      prevProps.end && prevProps.end.getTime ? prevProps.end.getTime() : null
+    const nextStart = start && start.getTime ? start.getTime() : null
+    const nextEnd = end && end.getTime ? end.getTime() : null
+    const prevStep = prevProps.step
+    const nextStep = step
+    if (
+      prevStart !== nextStart ||
+      prevEnd !== nextEnd ||
+      prevStep !== nextStep
+    ) {
+      if (start && start instanceof Date) this.formData.start = [start]
+      if (end && end instanceof Date) this.formData.end = [end]
+      if (nextStep) this.formData.step = this.normalizeStep(nextStep)
+      this.ensureAvailableStep()
+      this.forceUpdate()
     }
   }
 
@@ -71,6 +140,7 @@ export default class CustomRange extends React.Component {
   handlerDateClose(name) {
     return time => {
       this.formData[name] = time
+      this.ensureAvailableStep()
       this.forceUpdate()
     }
   }
@@ -86,8 +156,15 @@ export default class CustomRange extends React.Component {
     const interval = endTime - startTime
 
     if (interval > 0) {
-      const times = Math.floor(interval / (getMinutes(step) * 60)) || 1
-      const data = { step, times, start: startTime, end: endTime, lastTime: '' }
+      const adaptedStep = getAdaptedStep(startTime, endTime, step)
+      const times = Math.floor(interval / (getMinutes(adaptedStep) * 60)) || 1
+      const data = {
+        step: adaptedStep,
+        times,
+        start: startTime,
+        end: endTime,
+        lastTime: '',
+      }
       this.props.onSubmit(data)
     } else {
       Notify.error({ content: t('TIMERANGE_SELECTOR_MSG') })
@@ -96,7 +173,8 @@ export default class CustomRange extends React.Component {
 
   render() {
     const { onCancel, className } = this.props
-    const { start, end } = this.formData
+    const { step, start, end } = this.formData
+    const stepOptions = this.getStepOptions()
 
     return (
       <div className={classnames(styles.custom, className)}>
@@ -128,9 +206,13 @@ export default class CustomRange extends React.Component {
             <Form.Item label={t('SAMPLING_INTERVAL')}>
               <Select
                 className={styles.selectBox}
-                defaultValue="1m"
+                value={step}
                 name="step"
-                options={getTimeOptions(TimeOps)}
+                options={stepOptions}
+                onChange={value => {
+                  this.formData.step = value
+                  this.forceUpdate()
+                }}
               />
             </Form.Item>
           )}

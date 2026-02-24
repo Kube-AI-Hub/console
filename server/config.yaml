@@ -201,6 +201,12 @@ client:
                 authKey: monitoring,
               }
             - {
+                name: gpu-resource,
+                title: GPU_RESOURCE,
+                icon: gpu,
+                authKey: monitoring,
+              }
+            - {
                 name: monitor-resource,
                 title: APPLICATION_RESOURCE_PL,
                 icon: linechart,

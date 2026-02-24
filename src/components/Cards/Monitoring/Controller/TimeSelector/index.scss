@@ -82,7 +82,6 @@
 }
 
 .content {
-  display: flex;
   width: 760px;
   padding: 20px;
   border-radius: 4px;
@@ -91,8 +90,23 @@
   box-shadow: variables.$card-hover-shadow;
   position: relative;
   z-index: 1;
+}
+
+.rangePanels {
+  display: flex;
 
   & > div {
     width: 50%;
   }
+}
+
+.defaultRangeWrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.stepHint {
+  margin-top: 8px;
+  font-size: 12px;
+  color: variables.$dark-color06;
 }

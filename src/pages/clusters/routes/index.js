@@ -49,6 +49,7 @@ import Secrets from '../containers/Secrets'
 import ConfigMaps from '../containers/ConfigMaps'
 import ServiceAccounts from '../containers/ServiceAccounts'
 import ClusterMonitor from '../containers/Monitor/Cluster'
+import GpuResourcePage from '../containers/Monitor/Cluster/GpuResourcePage'
 import ResourceMonitor from '../containers/Monitor/Resource'
 import Members from '../containers/Members'
 import Roles from '../containers/Roles'
@@ -200,6 +201,10 @@ export default [
           {
             path: `${PATH}/monitor-cluster`,
             component: ClusterMonitor,
+          },
+          {
+            path: `${PATH}/gpu-resource`,
+            component: GpuResourcePage,
           },
           {
             path: `${PATH}/monitor-resource`,
