@@ -40,8 +40,8 @@ const UnitTypes = {
     units: ['s', 'ms'],
   },
   gpu: {
-    conditions: [0.1, 0],
-    units: ['GPU_CARD_UNIT', 'm'],
+    conditions: [0],
+    units: ['GPU_CARD_UNIT'],
   },
   gpu_memory: {
     conditions: [1024 ** 4, 1024 ** 3, 1024 ** 2, 1024, 0],
