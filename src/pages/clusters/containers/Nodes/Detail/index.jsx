@@ -389,6 +389,15 @@ export default class NodeDetail extends React.Component {
 
     const { cluster } = this.props.match.params
     const fromGpus = this.props.location?.search?.includes('from=gpus')
+    const returnTo = this.props.location?.state?.returnTo
+    const returnToLabel = this.props.location?.state?.returnToLabel
+    const breadcrumbUrl =
+      returnTo || (fromGpus ? `/clusters/${cluster}/gpus` : this.listUrl)
+    const breadcrumbLabel = returnTo
+      ? returnToLabel || t('CLUSTER_NODE_PL')
+      : fromGpus
+      ? t('GPU_CARD_PL')
+      : t('CLUSTER_NODE_PL')
     const sideProps = {
       module: this.module,
       name: getDisplayName(this.store.detail),
@@ -397,8 +406,8 @@ export default class NodeDetail extends React.Component {
       attrs: this.getAttrs(),
       breadcrumbs: [
         {
-          label: fromGpus ? t('GPU_CARD_PL') : t('CLUSTER_NODE_PL'),
-          url: fromGpus ? `/clusters/${cluster}/gpus` : this.listUrl,
+          label: breadcrumbLabel,
+          url: breadcrumbUrl,
         },
       ],
     }

@@ -148,6 +148,13 @@ export default class GpuDetail extends React.Component {
     const displayName =
       gpuIndex !== undefined ? `GPU #${gpuIndex} (${gpuName})` : gpuName
 
+    const returnTo = this.props.location?.state?.returnTo
+    const returnToLabel = this.props.location?.state?.returnToLabel
+    const breadcrumbUrl = returnTo || `/clusters/${this.cluster}/gpus`
+    const breadcrumbLabel = returnTo
+      ? returnToLabel || t('GPU_CARD_PL')
+      : t('GPU_CARD_PL')
+
     const sideProps = {
       module: 'nodes',
       icon: 'gpu',
@@ -156,8 +163,8 @@ export default class GpuDetail extends React.Component {
       attrs: this.getAttrs(),
       breadcrumbs: [
         {
-          label: t('GPU_CARD_PL'),
-          url: `/clusters/${this.cluster}/gpus`,
+          label: breadcrumbLabel,
+          url: breadcrumbUrl,
         },
       ],
     }

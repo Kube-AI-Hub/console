@@ -113,10 +113,19 @@ class NodeRanking extends React.Component {
   }
 
   renderList() {
+    const returnTo =
+      this.props.location?.pathname ||
+      `/clusters/${this.cluster}/monitor-cluster/ranking`
+    const returnToLabel = t('RESOURCE_USAGE_RANKING')
     return (
       <Loading spinning={this.store.isLoading}>
         <div>
-          <Table store={this.store} cluster={this.cluster} />
+          <Table
+            store={this.store}
+            cluster={this.cluster}
+            returnTo={returnTo}
+            returnToLabel={returnToLabel}
+          />
           {this.renderPagination()}
         </div>
       </Loading>

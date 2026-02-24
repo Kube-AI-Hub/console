@@ -41,10 +41,15 @@ const GpuCardList = ({ dataSource = [], isLoading = false, match }) => {
         const gpuDetailUrl = `/clusters/${cluster}/nodes/${node}/gpus/${encodeURIComponent(
           record.uuid
         )}/status`
+        const returnTo = `/clusters/${cluster}/nodes/${node}/status`
+        const linkTo = {
+          pathname: gpuDetailUrl,
+          state: { returnTo, returnToLabel: t('RUNNING_STATUS') },
+        }
         return (
           <Tooltip content={record.uuid}>
             <Link
-              to={gpuDetailUrl}
+              to={linkTo}
               style={{
                 display: 'inline-block',
                 width: '100%',

@@ -16,6 +16,7 @@
  */
 
 import React from 'react'
+import { withRouter } from 'react-router-dom'
 import { observer } from 'mobx-react'
 import classNames from 'classnames'
 import {
@@ -146,11 +147,23 @@ class GPURanking extends React.Component {
         dataIndex: 'nodeName',
         width: 180,
         render: (val, row) => {
-          const link = `/clusters/${this.cluster}/nodes/${val}`
+          const link = `/clusters/${this.cluster}/nodes/${val}/status`
+          const returnTo =
+            this.props.location?.pathname ||
+            `/clusters/${this.cluster}/gpu-resource/ranking`
+          const linkTo = returnTo
+            ? {
+                pathname: link,
+                state: {
+                  returnTo,
+                  returnToLabel: t('RESOURCE_USAGE_RANKING'),
+                },
+              }
+            : link
           return (
             <div>
               <h3>
-                <Link to={link} auth={canViewNode}>
+                <Link to={linkTo} auth={canViewNode}>
                   {val}
                 </Link>
               </h3>
@@ -168,16 +181,30 @@ class GPURanking extends React.Component {
         title: t('GPU_ID'),
         dataIndex: 'uuid',
         width: 120,
-        render: (val, row) => (
-          <Link
-            to={`/clusters/${this.cluster}/nodes/${
-              row.nodeName
-            }/gpus/${encodeURIComponent(val || '')}`}
-            auth={canViewNode}
-          >
-            <span style={{ fontFamily: 'monospace', fontSize: 12 }}>{val}</span>
-          </Link>
-        ),
+        render: (val, row) => {
+          const gpuPath = `/clusters/${this.cluster}/nodes/${
+            row.nodeName
+          }/gpus/${encodeURIComponent(val || '')}/status`
+          const returnTo =
+            this.props.location?.pathname ||
+            `/clusters/${this.cluster}/gpu-resource/ranking`
+          const linkTo = returnTo
+            ? {
+                pathname: gpuPath,
+                state: {
+                  returnTo,
+                  returnToLabel: t('RESOURCE_USAGE_RANKING'),
+                },
+              }
+            : gpuPath
+          return (
+            <Link to={linkTo} auth={canViewNode}>
+              <span style={{ fontFamily: 'monospace', fontSize: 12 }}>
+                {val}
+              </span>
+            </Link>
+          )
+        },
       },
       {
         title: t('MODEL'),
@@ -318,4 +345,4 @@ class GPURanking extends React.Component {
   }
 }
 
-export default GPURanking
+export default withRouter(GPURanking)

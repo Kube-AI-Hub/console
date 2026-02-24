@@ -61,15 +61,26 @@ class NodeUsageRank extends React.Component {
       title: t('NODE'),
       render: node => {
         const link = get(node, 'role', []).includes('edge')
-          ? `/clusters/${this.props.cluster}/edgenodes/${node.node}`
-          : `/clusters/${this.props.cluster}/nodes/${node.node}`
+          ? `/clusters/${this.props.cluster}/edgenodes/${node.node}/status`
+          : `/clusters/${this.props.cluster}/nodes/${node.node}/status`
+
+        const linkProps = {
+          to: this.props.returnTo
+            ? {
+                pathname: link,
+                state: {
+                  returnTo: this.props.returnTo,
+                  returnToLabel: this.props.returnToLabel,
+                },
+              }
+            : link,
+          auth: this.canViewNode,
+        }
 
         return (
           <div>
             <h3>
-              <Link to={link} auth={this.canViewNode}>
-                {node.node}
-              </Link>
+              <Link {...linkProps}>{node.node}</Link>
               {node.role === 'master' && (
                 <span className={styles.label}>{t('CONTROL_PLANE')}</span>
               )}
