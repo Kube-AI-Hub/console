@@ -47,9 +47,9 @@ const TabItem = ({ active, name, used, total, unit, unitType }) => {
         width={40}
         height={40}
         title={nameText}
-        value={parseFloat(used)}
-        total={parseFloat(total)}
-        unit={_unit}
+        value={parseFloat(_used)}
+        total={parseFloat(_total)}
+        unit={formatUnit()}
         showCenter={false}
         showRate={true}
         active={active}

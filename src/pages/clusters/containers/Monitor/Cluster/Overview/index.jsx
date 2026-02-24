@@ -214,7 +214,7 @@ class Overview extends React.Component {
           ? t('NO_XPU_NODES')
           : getVendorDisplayName(vendor) || vendor,
       value: count,
-      percent: total > 0 ? ((count / total) * 100).toFixed(1) : '0',
+      percent: total > 0 ? (count / total).toFixed(2) : '0',
       color: PIE_COLORS[i % PIE_COLORS.length],
     }))
     return (

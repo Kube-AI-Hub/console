@@ -285,7 +285,7 @@ class GPUResourceOverview extends React.Component {
       name: vendor,
       displayName: getVendorDisplayName(vendor),
       value: count,
-      percent: total > 0 ? ((count / total) * 100).toFixed(1) : '0',
+      percent: total > 0 ? (count / total).toFixed(2) : '0',
       color: PIE_COLORS[i % PIE_COLORS.length],
     }))
     return (
