@@ -17,8 +17,10 @@
 
 module.exports = {
   ALL_NODES: '全部节点',
+  GPU_CARD: '显卡',
   GPU_CARD_PL: '显卡',
   GPU_CARD_DESC: '查看和管理集群内所有节点的显卡。',
+  GPU_CARD_EMPTY_DESC: '集群中暂无显卡。请确保节点已安装并正确配置 GPU 设备。',
   NODE: '节点',
   FILTER_NODE_NAME: '节点名',
   FILTER_UUID: '显卡 UUID',

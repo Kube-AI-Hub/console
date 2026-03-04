@@ -17,8 +17,10 @@
 
 module.exports = {
   ALL_NODES: 'All nodes',
+  GPU_CARD: 'GPU Card',
   GPU_CARD_PL: 'GPU Cards',
   GPU_CARD_DESC: 'View and manage GPU cards across all nodes in the cluster.',
+  GPU_CARD_EMPTY_DESC: 'No GPU cards in the cluster. Ensure that nodes have GPU devices installed and configured correctly.',
   NODE: 'Node',
   FILTER_NODE_NAME: 'Node Name',
   FILTER_UUID: 'GPU UUID',
