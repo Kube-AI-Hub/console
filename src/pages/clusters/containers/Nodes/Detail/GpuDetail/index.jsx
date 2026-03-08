@@ -20,6 +20,9 @@ export default class GpuDetail extends React.Component {
 
   nodeStore = new NodeStore()
 
+  // Preserve initial breadcrumb so it does not change when switching tabs (tab nav loses location.state)
+  breadcrumbRef = { label: null, url: null, paramsKey: null }
+
   componentDidMount() {
     this.fetchData()
   }
@@ -42,6 +45,24 @@ export default class GpuDetail extends React.Component {
 
   get gpuUuid() {
     return this.props.match.params.gpuUuid
+  }
+
+  getBreadcrumb() {
+    const paramsKey = `${this.cluster}/${this.nodeName}/${this.gpuUuid}`
+    if (this.breadcrumbRef.paramsKey !== paramsKey) {
+      const returnTo = this.props.location?.state?.returnTo
+      const returnToLabel = this.props.location?.state?.returnToLabel
+      const breadcrumbUrl = returnTo || `/clusters/${this.cluster}/gpus`
+      const breadcrumbLabel = returnTo
+        ? returnToLabel || t('GPU_CARD_PL')
+        : t('GPU_CARD_PL')
+      this.breadcrumbRef = {
+        label: breadcrumbLabel,
+        url: breadcrumbUrl,
+        paramsKey,
+      }
+    }
+    return this.breadcrumbRef
   }
 
   fetchData = () => {
@@ -148,12 +169,7 @@ export default class GpuDetail extends React.Component {
     const displayName =
       gpuIndex !== undefined ? `GPU #${gpuIndex} (${gpuName})` : gpuName
 
-    const returnTo = this.props.location?.state?.returnTo
-    const returnToLabel = this.props.location?.state?.returnToLabel
-    const breadcrumbUrl = returnTo || `/clusters/${this.cluster}/gpus`
-    const breadcrumbLabel = returnTo
-      ? returnToLabel || t('GPU_CARD_PL')
-      : t('GPU_CARD_PL')
+    const { label: breadcrumbLabel, url: breadcrumbUrl } = this.getBreadcrumb()
 
     const sideProps = {
       module: 'nodes',

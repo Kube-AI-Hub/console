@@ -45,6 +45,9 @@ export default class NodeDetail extends React.Component {
 
   _gpuModePollTimer = null
 
+  // Preserve initial breadcrumb so it does not change when switching tabs (tab nav loses location.search/state)
+  breadcrumbRef = { label: null, url: null, paramsKey: null }
+
   componentDidMount() {
     this.fetchData()
     this.startGpuModePollIfNeeded()
@@ -86,6 +89,29 @@ export default class NodeDetail extends React.Component {
   get listUrl() {
     const { cluster } = this.props.match.params
     return `/clusters/${cluster}/nodes`
+  }
+
+  getBreadcrumb() {
+    const { cluster, node } = this.props.match.params
+    const paramsKey = `${cluster}/${node}`
+    if (this.breadcrumbRef.paramsKey !== paramsKey) {
+      const fromGpus = this.props.location?.search?.includes('from=gpus')
+      const returnTo = this.props.location?.state?.returnTo
+      const returnToLabel = this.props.location?.state?.returnToLabel
+      const breadcrumbUrl =
+        returnTo || (fromGpus ? `/clusters/${cluster}/gpus` : this.listUrl)
+      const breadcrumbLabel = returnTo
+        ? returnToLabel || t('CLUSTER_NODE_PL')
+        : fromGpus
+        ? t('GPU_CARD_PL')
+        : t('CLUSTER_NODE_PL')
+      this.breadcrumbRef = {
+        label: breadcrumbLabel,
+        url: breadcrumbUrl,
+        paramsKey,
+      }
+    }
+    return this.breadcrumbRef
   }
 
   fetchData = () => {
@@ -387,17 +413,7 @@ export default class NodeDetail extends React.Component {
       return <Loading className="ks-page-loading" />
     }
 
-    const { cluster } = this.props.match.params
-    const fromGpus = this.props.location?.search?.includes('from=gpus')
-    const returnTo = this.props.location?.state?.returnTo
-    const returnToLabel = this.props.location?.state?.returnToLabel
-    const breadcrumbUrl =
-      returnTo || (fromGpus ? `/clusters/${cluster}/gpus` : this.listUrl)
-    const breadcrumbLabel = returnTo
-      ? returnToLabel || t('CLUSTER_NODE_PL')
-      : fromGpus
-      ? t('GPU_CARD_PL')
-      : t('CLUSTER_NODE_PL')
+    const { label: breadcrumbLabel, url: breadcrumbUrl } = this.getBreadcrumb()
     const sideProps = {
       module: this.module,
       name: getDisplayName(this.store.detail),
