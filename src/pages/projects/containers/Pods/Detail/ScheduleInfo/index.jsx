@@ -17,12 +17,19 @@
  */
 
 import React from 'react'
+import { Link } from 'react-router-dom'
 import { when } from 'mobx'
 import { observer, inject } from 'mobx-react'
 import { get } from 'lodash'
 import { Icon, Tooltip } from '@kube-design/components'
 
-import { getLocalTime, memoryFormat, cpuFormat } from 'utils'
+import {
+  getLocalTime,
+  memoryFormat,
+  cpuFormat,
+  getVendorDisplayName,
+} from 'utils'
+import { parseGpuAllocationsFromAnnotations } from 'utils/gpuAllocation'
 import { Panel, Text } from 'components/Base'
 
 import NodeStore from 'stores/node'
@@ -190,6 +197,7 @@ class ScheduleInfo extends React.Component {
                 />
               }
             />
+            {this.renderGpuScheduleInfo()}
             {/* <div className={styles.requests}>
               <div className={styles.text}>
                 <div>{get(detail, 'requests.cpu')} Core</div>
@@ -204,6 +212,58 @@ class ScheduleInfo extends React.Component {
           {/* <div>{this.renderNode()}</div> */}
         </div>
       </Panel>
+    )
+  }
+
+  renderGpuScheduleInfo() {
+    const { detail } = this.store
+    const annotations = get(detail, 'annotations', {})
+    const gpuAllocations = parseGpuAllocationsFromAnnotations(annotations)
+    if (!gpuAllocations.length) return null
+
+    const { cluster } = get(this.props, 'match.params', {})
+    const node = detail.node
+    if (!cluster || !node) return null
+
+    return (
+      <Text
+        className={`${styles.info} ${styles.gpuInfo}`}
+        icon="gpu"
+        title={t('SCHEDULED_TO_GPU')}
+        description={
+          <div className={styles.gpuAllocationsList}>
+            {gpuAllocations.map((gpu, idx) => {
+              const statusUrl = `/clusters/${cluster}/nodes/${node}/gpus/${encodeURIComponent(
+                gpu.physicalUuid
+              )}/status`
+              const vendorName = getVendorDisplayName(gpu.vendor) || gpu.vendor
+              const desc = [
+                vendorName && t('GPU_ALLOCATED_VENDOR', { value: vendorName }),
+                gpu.memoryMi > 0 &&
+                  t('GPU_ALLOCATED_MEMORY', { value: gpu.memoryMi }),
+                gpu.corePercent > 0 &&
+                  t('GPU_ALLOCATED_CORE', { value: gpu.corePercent }),
+              ]
+                .filter(Boolean)
+                .join(' · ')
+
+              return (
+                <div
+                  key={`${gpu.physicalUuid}-${idx}`}
+                  className={styles.gpuAllocationsItem}
+                >
+                  <Link to={statusUrl} className={styles.gpuAllocationsLink}>
+                    {gpu.uuid}
+                  </Link>
+                  {desc ? (
+                    <span className={styles.gpuAllocationsDesc}>{desc}</span>
+                  ) : null}
+                </div>
+              )
+            })}
+          </div>
+        }
+      />
     )
   }
 

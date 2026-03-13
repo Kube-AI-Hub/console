@@ -100,3 +100,39 @@
   font-weight: 600;
   line-height: 20px;
 }
+
+.gpuAllocations {
+  margin-top: 12px;
+}
+
+.gpuInfo {
+  margin-top: 4px;
+}
+
+.gpuAllocationsList {
+  margin-top: 4px;
+}
+
+.gpuAllocationsItem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  row-gap: 2px;
+  margin-bottom: 4px;
+}
+
+.gpuAllocationsLink {
+  color: variables.$blue-color05;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.gpuAllocationsDesc {
+  margin-left: 8px;
+  color: variables.$dark-color01;
+  overflow-wrap: anywhere;
+}
