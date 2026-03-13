@@ -22,6 +22,7 @@ import { observer, inject } from 'mobx-react'
 import { Loading } from '@kube-design/components'
 
 import { getDisplayName, getLocalTime, showNameAndAlias } from 'utils'
+import { formatAggregatedContainersResourceLines } from 'utils/resource'
 import { getJobStatus } from 'utils/status'
 import { trigger } from 'utils/action'
 import WorkloadStore from 'stores/workload'
@@ -128,6 +129,20 @@ export default class JobDetail extends React.Component {
     const detail = toJS(this.store.detail)
     const { spec = {} } = detail
     const status = getJobStatus(detail)
+    const containers = detail.containers || []
+    const replicas = Number(spec.parallelism ?? 1)
+    const requestsLines = formatAggregatedContainersResourceLines(
+      containers,
+      'requests',
+      {
+        multiplier: Number.isFinite(replicas) ? replicas : 1,
+        simplifyGpuName: true,
+      }
+    )
+    const limitsLines = formatAggregatedContainersResourceLines(containers, 'limits', {
+      multiplier: Number.isFinite(replicas) ? replicas : 1,
+      simplifyGpuName: true,
+    })
 
     return [
       {
@@ -166,7 +181,26 @@ export default class JobDetail extends React.Component {
         name: t('CREATOR'),
         value: detail.creator,
       },
+      {
+        name: t('RESOURCE_REQUESTS'),
+        value: this.renderResourceLines(requestsLines),
+      },
+      {
+        name: t('RESOURCE_LIMITS'),
+        value: this.renderResourceLines(limitsLines),
+      },
     ]
+  }
+
+  renderResourceLines = lines => {
+    if (!lines || lines.length === 0) return '-'
+    return (
+      <div>
+        {lines.map((line, index) => (
+          <div key={`${index}-${line}`}>{line}</div>
+        ))}
+      </div>
+    )
   }
 
   render() {

@@ -27,6 +27,7 @@ import StatusReason from 'projects/components/StatusReason'
 import ResourceTable from 'clusters/components/ResourceTable'
 
 import { getLocalTime } from 'utils'
+import { formatResourceItems } from 'utils/resource'
 import { ICON_TYPES, PODS_STATUS } from 'utils/constants'
 import PodStore from 'stores/pod'
 
@@ -135,53 +136,15 @@ class Pods extends React.Component {
         title: t('RESOURCE_LIMIT'),
         dataIndex: 'containers_limits',
         isHideable: true,
-        width: 100,
-        render: (_, record) => {
-          if (record.containers && record.containers.length > 0) {
-            const { resources } = record.containers[0]
-            const { limits } = resources
-            const { cpu, memory } = {
-              cpu: limits?.cpu,
-              memory: limits?.memory,
-            }
-            return (
-              <>
-                <div>
-                  {t('CPU')}: {cpu || '-'}
-                </div>
-                <div>
-                  {t('MEMORY')}: {memory || '-'}
-                </div>
-              </>
-            )
-          }
-        },
+        width: 220,
+        render: (_, record) => this.renderContainerResource(record, 'limits'),
       },
       {
         title: t('RESOURCE_REQUESTS'),
         dataIndex: 'containers_requests',
         isHideable: true,
-        width: 100,
-        render: (_, record) => {
-          if (record.containers && record.containers.length > 0) {
-            const { resources } = record.containers[0]
-            const { requests } = resources
-            const { cpu, memory } = {
-              cpu: requests?.cpu,
-              memory: requests?.memory,
-            }
-            return (
-              <>
-                <div>
-                  {t('CPU')}: {cpu || '-'}
-                </div>
-                <div>
-                  {t('MEMORY')}: {memory || '-'}
-                </div>
-              </>
-            )
-          }
-        },
+        width: 120,
+        render: (_, record) => this.renderContainerResource(record, 'requests'),
       },
       {
         title: t('UPDATE_TIME_TCAP'),
@@ -193,6 +156,23 @@ class Pods extends React.Component {
         render: time => getLocalTime(time).format('YYYY-MM-DD HH:mm:ss'),
       },
     ]
+  }
+
+  renderContainerResource = (record, type) => {
+    if (!record.containers || record.containers.length === 0) return '-'
+    const { resources = {} } = record.containers[0]
+    const items = formatResourceItems(resources, type, {
+      showGpuSubResources: false,
+      simplifyGpuName: true,
+    })
+    if (items.length === 0) return '-'
+    return (
+      <>
+        {items.map(item => (
+          <div key={item}>{item}</div>
+        ))}
+      </>
+    )
   }
 
   renderAvatar = (name, record) => {

@@ -23,6 +23,7 @@ import { Link } from 'react-router-dom'
 import { get } from 'lodash'
 
 import { getLocalTime } from 'utils'
+import { formatResourceInfo } from 'utils/resource'
 import { getJobStatus } from 'utils/status'
 import RecordStore from 'stores/workload/record'
 import WorkloadStore from 'stores/workload'
@@ -92,6 +93,22 @@ class JobRecords extends React.Component {
       render: (status, record) => {
         const _status = getJobStatus(record)
         return <Status type={_status} name={t(_status)} />
+      },
+    },
+    {
+      title: t('RESOURCE_REQUESTS'),
+      dataIndex: 'containers_requests',
+      render: (_, record) => {
+        const resources = get(record, 'containers[0].resources', {})
+        return formatResourceInfo(resources, 'requests')
+      },
+    },
+    {
+      title: t('RESOURCE_LIMITS'),
+      dataIndex: 'containers_limits',
+      render: (_, record) => {
+        const resources = get(record, 'containers[0].resources', {})
+        return formatResourceInfo(resources, 'limits')
       },
     },
     {

@@ -17,11 +17,12 @@
  */
 
 import React from 'react'
-import { get, isEmpty } from 'lodash'
+import { isEmpty } from 'lodash'
 import { observer } from 'mobx-react'
 import { Loading } from '@kube-design/components'
 
-import { getDisplayName, showNameAndAlias, memoryFormat, getGpuDisplayName } from 'utils'
+import { getDisplayName, showNameAndAlias } from 'utils'
+import { formatResourceItems } from 'utils/resource'
 import { trigger } from 'utils/action'
 import { createCenterWindowOpt } from 'utils/dom'
 import ContainerStore from 'stores/container'
@@ -88,68 +89,19 @@ export default class ContainerDetail extends React.Component {
 
   getResourceInfo = type => {
     const { resources = {} } = this.store.detail
-    const resourceType = resources[type]
-    const supportGpuType = get(globals, 'config.supportGpuType', [])
-    const supportGpuTypeMetadata = get(
-      globals,
-      'config.supportGpuTypeMetadata',
-      {}
-    )
-    const gpuCardUnit = t('GPU_CARD_UNIT')
-    const gpuCardUnitText = gpuCardUnit === 'GPU_CARD_UNIT' ? '' : gpuCardUnit
-    const gpuMemoryText = t('GPU_MEMORY_TOTAL')
-    const gpuMemoryLabel =
-      gpuMemoryText === 'GPU_MEMORY_TOTAL' ? 'GPU Memory' : gpuMemoryText
-    const gpuCoreText = t('CORE_TOTAL_SCAP')
-    const gpuCoreLabel = gpuCoreText === 'CORE_TOTAL_SCAP' ? 'Core' : gpuCoreText
+    return formatResourceItems(resources, type, {
+      simplifyGpuName: true,
+    })
+  }
 
+  renderResourceLines = lines => {
+    if (!lines || lines.length === 0) return '-'
     return (
-      resourceType &&
-      Object.keys(resourceType)
-        .map(key => {
-          const isCpu = key === 'cpu'
-          const value =
-            isCpu && resourceType[key].endsWith('m')
-              ? parseInt(resourceType[key], 10) / 1000
-              : resourceType[key]
-
-          if (supportGpuType.includes(key)) {
-            const gpuValue = gpuCardUnitText
-              ? `${value} ${gpuCardUnitText}`
-              : String(value)
-            return `${getGpuDisplayName(key)}: ${gpuValue}`
-          }
-
-          const gpuTypeByMemory = supportGpuType.find(resourceName => {
-            const meta = supportGpuTypeMetadata[resourceName] || {}
-            return meta.memoryName === key
-          })
-          if (gpuTypeByMemory) {
-            const meta = supportGpuTypeMetadata[gpuTypeByMemory] || {}
-            const memoryUnit = meta.memoryUnit || 'Mi'
-            const memoryValue =
-              memoryUnit === 'Mi' || memoryUnit === 'Gi'
-                ? `${memoryFormat(value, 'Gi')} Gi`
-                : `${memoryFormat(value, 'Mi')} ${memoryUnit}`
-            return `${getGpuDisplayName(gpuTypeByMemory)} ${gpuMemoryLabel}: ${memoryValue}`
-          }
-
-          const gpuTypeByVcores = supportGpuType.find(resourceName => {
-            const meta = supportGpuTypeMetadata[resourceName] || {}
-            return meta.vcoresName === key
-          })
-          if (gpuTypeByVcores) {
-            return `${getGpuDisplayName(gpuTypeByVcores)} ${gpuCoreLabel}: ${value}%`
-          }
-
-          const translationKey = `${key.toUpperCase().replace(/[^A-Z]/g, '_')}_VALUE`
-          const translated = t(translationKey, { value })
-          if (translated === translationKey) {
-            return `${key}: ${value}`
-          }
-          return translated
-        })
-        .join('/')
+      <div>
+        {lines.map((line, index) => (
+          <div key={`${index}-${line}`}>{line}</div>
+        ))}
+      </div>
     )
   }
 
@@ -209,11 +161,11 @@ export default class ContainerDetail extends React.Component {
       },
       {
         name: t('RESOURCE_REQUESTS'),
-        value: this.getResourceInfo('requests'),
+        value: this.renderResourceLines(this.getResourceInfo('requests')),
       },
       {
         name: t('RESOURCE_LIMITS'),
-        value: this.getResourceInfo('limits'),
+        value: this.renderResourceLines(this.getResourceInfo('limits')),
       },
       {
         name: t('IMAGE_PULL_POLICY'),

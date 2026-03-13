@@ -22,6 +22,7 @@ import { observer, inject } from 'mobx-react'
 import { Loading } from '@kube-design/components'
 
 import { getDisplayName, getLocalTime, showNameAndAlias } from 'utils'
+import { formatAggregatedContainersResourceLines } from 'utils/resource'
 import { trigger } from 'utils/action'
 import PodStore from 'stores/pod'
 
@@ -109,6 +110,20 @@ export default class PodDetail extends React.Component {
     if (isEmpty(detail)) return null
 
     const { status, restarts } = detail.podStatus
+    const containers = [
+      ...(detail.containers || []),
+      ...(detail.initContainers || []),
+    ]
+    const requestsLines = formatAggregatedContainersResourceLines(
+      containers,
+      'requests',
+      { simplifyGpuName: true }
+    )
+    const limitsLines = formatAggregatedContainersResourceLines(
+      containers,
+      'limits',
+      { simplifyGpuName: true }
+    )
 
     return [
       {
@@ -144,6 +159,14 @@ export default class PodDetail extends React.Component {
         value: restarts,
       },
       {
+        name: t('RESOURCE_REQUESTS'),
+        value: this.renderResourceLines(requestsLines),
+      },
+      {
+        name: t('RESOURCE_LIMITS'),
+        value: this.renderResourceLines(limitsLines),
+      },
+      {
         name: t('QOS_CLASS'),
         value: get(detail, 'status.qosClass'),
       },
@@ -156,6 +179,17 @@ export default class PodDetail extends React.Component {
         value: detail.creator,
       },
     ]
+  }
+
+  renderResourceLines = lines => {
+    if (!lines || lines.length === 0) return '-'
+    return (
+      <div>
+        {lines.map((line, index) => (
+          <div key={`${index}-${line}`}>{line}</div>
+        ))}
+      </div>
+    )
   }
 
   render() {

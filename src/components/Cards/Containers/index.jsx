@@ -31,12 +31,14 @@ export default class ContainersCard extends React.Component {
     title: PropTypes.string,
     containers: PropTypes.array,
     initContainers: PropTypes.array,
+    showResourceRequestsLimits: PropTypes.bool,
   }
 
   static defaultProps = {
     prefix: '',
     containers: [],
     initContainers: [],
+    showResourceRequestsLimits: false,
   }
 
   render() {
@@ -47,6 +49,7 @@ export default class ContainersCard extends React.Component {
       containers,
       initContainers,
       podName,
+      showResourceRequestsLimits,
     } = this.props
     const title = this.props.title
     return (
@@ -59,6 +62,7 @@ export default class ContainersCard extends React.Component {
               cluster={cluster}
               detail={item}
               podName={podName}
+              showResourceRequestsLimits={showResourceRequestsLimits}
             />
           ))}
           {initContainers.map((item, index) => (
@@ -69,6 +73,7 @@ export default class ContainersCard extends React.Component {
               detail={item}
               podName={podName}
               isInit
+              showResourceRequestsLimits={showResourceRequestsLimits}
             />
           ))}
         </div>

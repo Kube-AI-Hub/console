@@ -25,6 +25,7 @@ import { isUndefined, isEmpty } from 'lodash'
 import { Icon, Tag, Tooltip } from '@kube-design/components'
 import { Indicator } from 'components/Base'
 import { createCenterWindowOpt } from 'utils/dom'
+import { formatResourceInfo } from 'utils/resource'
 import { getContainerStatus } from 'utils/status'
 import ContainerLogModal from 'components/Modals/ContainerLog'
 
@@ -37,12 +38,14 @@ export default class ContainerItem extends React.Component {
     detail: PropTypes.object,
     podName: PropTypes.string,
     isCreating: PropTypes.bool,
+    showResourceRequestsLimits: PropTypes.bool,
   }
 
   static defaultProps = {
     prefix: '',
     detail: {},
     isCreating: false,
+    showResourceRequestsLimits: false,
   }
 
   state = {
@@ -189,6 +192,7 @@ export default class ContainerItem extends React.Component {
       cluster,
       isInit,
       onContainerClick,
+      showResourceRequestsLimits,
       ...rest
     } = this.props
     const { showContainerLog } = this.state
@@ -289,6 +293,18 @@ export default class ContainerItem extends React.Component {
               : t('PORT_PL')}
           </p>
         </div>
+        {showResourceRequestsLimits && (
+          <div className={styles.text}>
+            <div>{formatResourceInfo(detail.resources || {}, 'requests')}</div>
+            <p>{t('RESOURCE_REQUESTS')}</p>
+          </div>
+        )}
+        {showResourceRequestsLimits && (
+          <div className={styles.text}>
+            <div>{formatResourceInfo(detail.resources || {}, 'limits')}</div>
+            <p>{t('RESOURCE_LIMITS')}</p>
+          </div>
+        )}
         <ContainerLogModal
           visible={showContainerLog}
           podName={podName}

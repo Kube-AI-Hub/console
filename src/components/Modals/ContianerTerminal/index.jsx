@@ -27,7 +27,7 @@ import TerminalStore from 'stores/terminal'
 import { TypeSelect } from 'components/Base'
 import ContainerTerminal from 'components/Terminal'
 import fullscreen from 'components/Modals/FullscreenModal'
-import { memoryFormat, getGpuDisplayName } from 'utils'
+import { formatResourceInfo } from 'utils/resource'
 
 import { observable } from 'mobx'
 import * as styles from './index.scss'
@@ -94,59 +94,7 @@ class ContainerTerminalModal extends React.Component {
 
   getResourceInfo = type => {
     const { resources = {} } = this.container || {}
-    const resourceType = resources[type]
-    const supportGpuType = get(globals, 'config.supportGpuType', [])
-    const supportGpuTypeMetadata = get(
-      globals,
-      'config.supportGpuTypeMetadata',
-      {}
-    )
-    const gpuCardUnit = t('GPU_CARD_UNIT')
-    const gpuCardUnitText = gpuCardUnit === 'GPU_CARD_UNIT' ? '' : gpuCardUnit
-    const gpuMemoryText = t('GPU_MEMORY_TOTAL')
-    const gpuMemoryLabel =
-      gpuMemoryText === 'GPU_MEMORY_TOTAL' ? 'GPU Memory' : gpuMemoryText
-    const gpuCoreText = t('CORE_TOTAL_SCAP')
-    const gpuCoreLabel = gpuCoreText === 'CORE_TOTAL_SCAP' ? 'Core' : gpuCoreText
-
-    return (
-      resourceType &&
-      Object.keys(resourceType)
-        .map(key => {
-          const value = resourceType[key]
-          if (supportGpuType.includes(key)) {
-            const gpuValue = gpuCardUnitText
-              ? `${value} ${gpuCardUnitText}`
-              : String(value)
-            return `${getGpuDisplayName(key)}: ${gpuValue}`
-          }
-
-          const gpuTypeByMemory = supportGpuType.find(resourceName => {
-            const meta = supportGpuTypeMetadata[resourceName] || {}
-            return meta.memoryName === key
-          })
-          if (gpuTypeByMemory) {
-            const meta = supportGpuTypeMetadata[gpuTypeByMemory] || {}
-            const memoryUnit = meta.memoryUnit || 'Mi'
-            const memoryValue =
-              memoryUnit === 'Mi' || memoryUnit === 'Gi'
-                ? `${memoryFormat(value, 'Gi')} Gi`
-                : `${memoryFormat(value, 'Mi')} ${memoryUnit}`
-            return `${getGpuDisplayName(gpuTypeByMemory)} ${gpuMemoryLabel}: ${memoryValue}`
-          }
-
-          const gpuTypeByVcores = supportGpuType.find(resourceName => {
-            const meta = supportGpuTypeMetadata[resourceName] || {}
-            return meta.vcoresName === key
-          })
-          if (gpuTypeByVcores) {
-            return `${getGpuDisplayName(gpuTypeByVcores)} ${gpuCoreLabel}: ${value}%`
-          }
-
-          return `${key}: ${value}`
-        })
-        .join(' / ')
-    )
+    return formatResourceInfo(resources, type)
   }
 
   renderContainerMsg() {
