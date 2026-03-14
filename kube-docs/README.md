@@ -261,10 +261,8 @@ The following directories are included in PDF generation:
 |-----------|------|-------------|
 | `docs/_custom/` | .adoc | Custom documentation components |
 | `docs/v3.4/` | .md | v3.4 version documentation |
-| `learn/` | .md | Learning tutorials |
 | `common/` | .md | Common requirements |
 | `api/` | .md | API documentation (English only) |
-| `user-group/` | .md | User group information (Chinese only) |
 
 **Excluded content:**
 - `_ks_components/` and `_ks_components-en/` - Reusable component libraries (for include only)

@@ -2,20 +2,8 @@ footer:
   list:
     - title: Scenarios
       list:
-        - content: Kubernetes DevOps and GitOps
-          link: devops/
-
-        - content: Microservices with Service Mesh
-          link: service-mesh/
-
-        - content: Cloud Native Observability
-          link: observability/
-
-        - content: Functions-as-a-Service Platform and Serverless
-          link: 'https://github.com/OpenFunction/OpenFunction'
-
-        - content: Multi-cloud Apps Mgmt
-          link: 'https://github.com/openpitrix/openpitrix'
+        - content: Heterogeneous Compute Management
+          link: ai-compute/
 
     - title: Kube AI Hub Docs
       list:

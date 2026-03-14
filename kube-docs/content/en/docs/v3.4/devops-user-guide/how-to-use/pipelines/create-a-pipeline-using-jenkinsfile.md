@@ -26,9 +26,7 @@ Two types of pipelines can be created in Kube AI Hub: Pipelines created based on
 
 ## Jenkins Pipeline Overview
 
-There are eight stages as shown below in this example pipeline.
-
-![Pipeline Overview](https://pek3b.qingstor.com/kubesphere-docs/png/20190512155453.png#align=left&display=inline&height=1302&originHeight=1302&originWidth=2180&search=&status=done&width=2180)
+There are eight stages in this example pipeline. After the pipeline is created, you can inspect them from the pipeline details page in execution order.
 
 {{< notice note >}}
 

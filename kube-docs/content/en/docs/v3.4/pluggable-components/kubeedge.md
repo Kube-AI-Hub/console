@@ -12,7 +12,7 @@ KubeEdge has components running in two separate places - cloud and edge nodes. T
 
 After you enable KubeEdge, you can [add edge nodes to your cluster](../../installing-on-linux/cluster-operation/add-edge-nodes/) and deploy workloads on them.
 
-![kubeedge_arch](/images/docs/v3.x/enable-pluggable-components/kubeedge/kubeedge_arch.png)
+![KubeEdge architecture](/images/docs/v3.x/installing-on-linux/add-and-delete-nodes/add-edge-nodes/kubeedge-architecture.svg)
 
 ## Enable KubeEdge Before Installation
 

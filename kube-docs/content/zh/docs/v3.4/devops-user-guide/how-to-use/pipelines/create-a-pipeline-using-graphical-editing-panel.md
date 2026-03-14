@@ -21,9 +21,7 @@ Kube AI Hub 中的图形编辑面板包含用于 Jenkins [阶段 (Stage)](https:
 
 ## 流水线概述
 
-本示例流水线包括以下六个阶段。
-
-![Pipeline](https://pek3b.qingstor.com/kubesphere-docs/png/20190516091714.png#align=left&display=inline&height=1278&originHeight=1278&originWidth=2190&search=&status=done&width=2190)
+本示例流水线包括以下六个阶段。创建完成后，您可以在流水线详情页按顺序看到这些阶段及其执行状态。
 
 {{< notice note >}} 
 
@@ -256,8 +254,6 @@ Kube AI Hub 中的图形编辑面板包含用于 Jenkins [阶段 (Stage)](https:
    echo "$DOCKER_PASSWORD" | docker login $REGISTRY -u "$DOCKER_USERNAME" --password-stdin
    ```
 
-   ![Docker 登录命令](/images/docs/v3.x/zh-cn/devops-user-guide/use-devops/create-a-pipeline-using-graphical-editing-panel/login_docker_command.png)
-
 7. 在**添加凭证**步骤中点击**添加嵌套步骤**。选择 **shell** 并输入以下命令，将 SNAPSHOT 镜像推送至 Docker Hub。点击**确定**完成操作。
 
    ```shell
@@ -326,15 +322,11 @@ Kube AI Hub 中的图形编辑面板包含用于 Jenkins [阶段 (Stage)](https:
 
 ### 步骤 5：运行流水线
 
-1. 您需要手动运行使用图形编辑面板创建的流水线。点击**运行**，您可以在弹出的对话框中看到步骤 3 中已定义的三个字符串参数。点击**确定**来运行流水线。
-
-   ![运行流水线](/images/docs/v3.x/zh-cn/devops-user-guide/use-devops/create-a-pipeline-using-graphical-editing-panel/run_pipeline.png)
+1. 您需要手动运行使用图形编辑面板创建的流水线。点击**运行**后，您可以在弹出的对话框中看到步骤 3 中已定义的三个字符串参数。确认参数后，点击**确定**运行流水线。
    
 2. 要查看流水线的状态，请转到**运行记录**选项卡，点击您想查看的记录。
 
-3. 稍等片刻，流水线如果成功运行，则会在 **Deploy to Dev** 阶段停止。`project-admin` 作为流水线的审核员，需要进行审批，然后资源才会部署至开发环境。
-
-   ![流水线成功运行](/images/docs/v3.x/zh-cn/devops-user-guide/use-devops/create-a-pipeline-using-graphical-editing-panel/pipeline_successful.png)
+3. 稍等片刻，如果流水线运行成功，则会在 **Deploy to Dev** 阶段停止。`project-admin` 作为流水线的审核员，需要完成审批，然后资源才会部署至开发环境。
 
 4. 登出 Kube AI Hub 控制台，以 `project-admin` 身份重新登录。转到您的 DevOps 项目，点击 `graphical-pipeline` 流水线。在**运行记录**选项卡下，点击要审核的记录。要批准流水线，请点击**继续**。
 

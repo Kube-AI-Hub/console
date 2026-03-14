@@ -21,9 +21,7 @@ This tutorial demonstrates how to create a pipeline through graphical editing pa
 
 ## Pipeline Overview
 
-This example pipeline includes the following six stages.
-
-![Pipeline](https://pek3b.qingstor.com/kubesphere-docs/png/20190516091714.png#align=left&display=inline&height=1278&originHeight=1278&originWidth=2190&search=&status=done&width=2190)
+This example pipeline includes the following six stages. After the pipeline is created, you can review them in sequence on the pipeline details page together with their execution status.
 
 {{< notice note >}} 
 
@@ -256,8 +254,6 @@ This stage uses SonarQube to test your code. You can skip this stage if you do n
    echo "$DOCKER_PASSWORD" | docker login $REGISTRY -u "$DOCKER_USERNAME" --password-stdin
    ```
 
-   ![login-docker-command](/images/docs/v3.x/devops-user-guide/using-devops/create-a-pipeline-using-graphical-editing-panels/login-docker-command.png)
-
 7. Click **Add nesting steps** in the **withCredentials** step. Select **shell** and enter the following command to push the SNAPSHOT image to Docker Hub. Click **OK** to finish.
 
    ```shell
@@ -326,15 +322,11 @@ This stage uses SonarQube to test your code. You can skip this stage if you do n
 
 ### Step 5: Run a pipeline
 
-1. You need to manually run the pipeline that is created through the graphical editing panel. Click **Run**, and you can see three string parameters defined in Step 3. Click **OK** to run the pipeline.
-
-   ![run-pipeline](/images/docs/v3.x/devops-user-guide/using-devops/create-a-pipeline-using-graphical-editing-panels/run-pipeline.png)
+1. You need to manually run the pipeline that is created through the graphical editing panel. Click **Run**, review the three string parameters defined in Step 3, and click **OK** to start the pipeline.
    
 2. To see the status of a pipeline, go to the **Run Records** tab and click the record you want to view.
 
-3. Wait for a while and the pipeline stops at the stage **Deploy to Dev** if it runs successfully. As the reviewer of the pipeline, `project-admin` needs to approve it before resources are deployed to the development environment.
-
-   ![pipeline-successful](/images/docs/v3.x/devops-user-guide/using-devops/create-a-pipeline-using-graphical-editing-panels/pipeline-successful.jpg)
+3. Wait for a while. If the pipeline runs successfully, it pauses at the stage **Deploy to Dev**. As the reviewer of the pipeline, `project-admin` needs to approve it before resources are deployed to the development environment.
 
 4. Log out of Kube AI Hub and log back in to the console as `project-admin`. Go to your DevOps project and click the pipeline `graphical-pipeline`. Under the **Run Records** tab, click the record to be reviewed. To approve the pipeline, click **Proceed**.
 

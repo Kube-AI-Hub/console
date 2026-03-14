@@ -8,7 +8,7 @@ weight: 3630
 
 Kube AI Hub leverages [KubeEdge](https://kubeedge.io/en/), to extend native containerized application orchestration capabilities to hosts at edge. With separate cloud and edge core modules, KubeEdge provides complete edge computing solutions while the installation may be complex and difficult.
 
-![kubeedge_arch](/images/docs/v3.x/installing-on-linux/add-and-delete-nodes/add-edge-nodes/kubeedge_arch.png)
+![KubeEdge architecture](/images/docs/v3.x/installing-on-linux/add-and-delete-nodes/add-edge-nodes/kubeedge-architecture.svg)
 
 {{< notice note >}}
 

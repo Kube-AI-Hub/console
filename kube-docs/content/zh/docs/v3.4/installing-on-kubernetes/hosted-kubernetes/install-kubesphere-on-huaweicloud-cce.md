@@ -24,8 +24,6 @@ weight: 4250
 - 创建完集群后，进入**资源管理** > **集群管理**界面，在**基本信息** > **网络** 面板中，绑定`公网apiserver地址`；
 - 在右侧面板中，选择 **kubectl** 标签页，并在**下载kubectl配置文件**列表项中**点击此处下载**，即可获取公用可用的 kubectl 证书。
 
-![生成 Kubectl 配置文件](/images/docs/v3.x/huawei-cce/zh/generate-kubeconfig.png)
-
 获取 kubectl 配置文件后，可通过 kubectl 命令行工具来验证集群连通性：
 
 ```bash
@@ -78,21 +76,15 @@ kubectl apply -f https://github.com/kubesphere/ks-installer/releases/download/v3
 kubectl apply -f https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/cluster-configuration.yaml
 ```
 
-执行部署命令后，可以通过进入**工作负载** > **容器组 Pod** 界面，在右侧面板中查询 `kubesphere-system` 命名空间下的 Pod 运行状态了解 Kube AI Hub 平台最小功能集的部署状态；通过该命名空间下 `ks-console-xxxx` 容器的状态来了解 Kube AI Hub 控制台应用的可用状态。
-
-![部署 Kube AI Hub 最小功能集](/images/docs/v3.x/huawei-cce/zh/deploy-ks-minimal.png)
+执行部署命令后，可以进入**工作负载** > **容器组 Pod**，查看 `kubesphere-system` 命名空间下 Pod 的运行状态，以确认最小功能集是否部署成功；其中 `ks-console-*` Pod 进入运行状态后，表示控制台已经可用。
 
 ### 开启 Kube AI Hub 外网访问
 
 通过 `kubesphere-system` 命名空间下的 Pod 运行状态确认 Kube AI Hub 基础组件都已进入运行状态后，我们需要为 Kube AI Hub 控制台开启外网访问。
 
-进入**资源管理** > **网络**，在右侧面板中选择 `ks-console` 更改网络访问方式，建议选用 `负载均衡（LoadBalancer` 访问方式（需绑定弹性公网 IP），配置完成后如下图：
+进入**资源管理** > **网络**，找到 `ks-console` 服务并修改访问方式。建议选用 `负载均衡（LoadBalancer）`，同时绑定弹性公网 IP。
 
-![开启 Kube AI Hub 外网访问](/images/docs/v3.x/huawei-cce/zh/expose-ks-console.png)
-
-服务细节配置基本上选用默认选项即可，当然也可以按需进行调整：
-
-![为 Kube AI Hub 控制台配置负载均衡访问](/images/docs/v3.x/huawei-cce/zh/edit-ks-console-svc.png)
+服务细节通常保持默认即可。完成配置后，请确认 `ks-console` 服务已经获得外部访问地址，然后使用该地址访问登录页。
 
 通过负载均衡绑定公网访问后，即可使用给定的访问地址进行访问，进入到 Kube AI Hub 的登录界面并使用默认帐户（用户名 `admin`，密码 `P@88w0rd`）即可登录平台。
 

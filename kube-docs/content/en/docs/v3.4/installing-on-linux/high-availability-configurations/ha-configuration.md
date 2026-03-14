@@ -12,9 +12,9 @@ This tutorial demonstrates the general configurations of a high-availability clu
 
 ## Architecture
 
-Make sure you have prepared six Linux machines before you begin, with three of them serving as control plane nodes and the other three as worker nodes. The following image shows details of these machines, including their private IP address and role. For more information about system and network requirements, see [Multi-node Installation](../../../installing-on-linux/introduction/multioverview/#step-1-prepare-linux-hosts).
+Make sure you have prepared six Linux machines before you begin, with three of them serving as control plane nodes and the other three as worker nodes. The following diagram shows the recommended layout. For more information about system and network requirements, see [Multi-node Installation](../../../installing-on-linux/introduction/multioverview/#step-1-prepare-linux-hosts).
 
-![ha-architecture](/images/docs/v3.x/installing-on-linux/high-availability-configurations/set-up-ha-cluster-using-lb/ha-architecture.png)
+![HA architecture](/images/docs/v3.x/installing-on-linux/high-availability-configurations/ha-architecture.svg)
 
 ## Configure a Load Balancer
 

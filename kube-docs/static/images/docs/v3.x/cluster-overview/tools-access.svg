@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="520" viewBox="0 0 1040 520" fill="none">
+  <rect width="1040" height="520" rx="24" fill="#0F172A"/>
+  <rect x="44" y="44" width="952" height="432" rx="20" fill="#111827" stroke="#334155"/>
+  <text x="76" y="90" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="28" font-weight="700">Overview Tools Card</text>
+  <text x="76" y="122" fill="#94A3B8" font-family="Arial, sans-serif" font-size="18">Platform administrators can open cluster tools directly from the overview page.</text>
+  <rect x="76" y="160" width="888" height="268" rx="18" fill="#0B1220" stroke="#334155"/>
+  <text x="108" y="204" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="22" font-weight="700">Tools</text>
+  <rect x="108" y="238" width="360" height="144" rx="18" fill="#111827" stroke="#334155"/>
+  <rect x="500" y="238" width="360" height="144" rx="18" fill="#111827" stroke="#334155"/>
+  <circle cx="156" cy="286" r="22" fill="#38BDF8"/>
+  <circle cx="548" cy="286" r="22" fill="#22C55E"/>
+  <text x="192" y="278" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="22" font-weight="700">kubectl</text>
+  <text x="584" y="278" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="22" font-weight="700">kubeconfig</text>
+  <text x="192" y="312" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="16">Command line tool used to control</text>
+  <text x="192" y="336" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="16">the current cluster.</text>
+  <text x="584" y="312" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="16">File used to configure the access</text>
+  <text x="584" y="336" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="16">information about the current cluster.</text>
+  <rect x="192" y="350" width="128" height="18" rx="9" fill="#1D4ED8"/>
+  <rect x="584" y="350" width="128" height="18" rx="9" fill="#0F766E"/>
+  <path d="M876 310C908 310 934 284 934 252C934 220 908 194 876 194C844 194 818 220 818 252C818 284 844 310 876 310Z" fill="#1E293B"/>
+  <path d="M882 236L900 252L882 268" stroke="#F8FAFC" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M856 252H898" stroke="#F8FAFC" stroke-width="5" stroke-linecap="round"/>
+</svg>

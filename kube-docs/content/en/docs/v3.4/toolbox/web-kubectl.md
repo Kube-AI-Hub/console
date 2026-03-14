@@ -12,21 +12,25 @@ Kube AI Hub provides web kubectl on the console for user convenience. By default
 
 This tutorial demonstrates how to use web kubectl to operate on and manage cluster resources.
 
+![](/images/docs/v3.x/cluster-overview/tools-access.svg)
+
 ## Use Web Kubectl
 
-1. Log in to Kube AI Hub with a user granted the `platform-admin` role, hover over the **Toolbox** in the lower-right corner and select **Kubectl**.
+1. Log in to Kube AI Hub with a user granted the `platform-admin` role.
 
-2. You can see the kubectl interface in the pop-up window. If you have enabled the multi-cluster feature, you need to select the target cluster first from the drop-down list in the upper-right corner. This drop-down list is not visible if the multi-cluster feature is not enabled.
+2. Go to **Platform** > **Cluster Management**, and open the **Overview** page of the target cluster.
 
-3. Enter kubectl commands in the command-line tool to query and manage Kubernetes cluster resources. For example, execute the following command to query the status of all PVCs in the cluster.
+3. In the **Tools** card, click **kubectl**.
+
+4. The Web Kubectl terminal opens in a new window for the current cluster. If multi-cluster is enabled, the terminal is opened directly for the cluster you selected on the overview page.
+
+5. Enter kubectl commands in the command-line tool to query and manage Kubernetes cluster resources. For example, run the following command to query the status of all PVCs in the cluster.
 
     ```bash
     kubectl get pvc --all-namespaces
     ```
 
-    ![web-kubectl-example](/images/docs/v3.x/web-kubectl/web-kubectl-example.png)
-
-4. Use the following syntax to run kubectl commands from your terminal window:
+6. Use the following syntax to run kubectl commands from the terminal window:
 
     ```bash
     kubectl [command] [TYPE] [NAME] [flags]

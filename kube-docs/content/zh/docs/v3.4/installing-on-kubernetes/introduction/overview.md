@@ -7,8 +7,6 @@ linkTitle: "概述"
 weight: 4110
 ---
 
-![Kube AI Hub+K8s](https://pek3b.qingstor.com/kubesphere-docs/png/20191123144507.png)
-
 Kube AI Hub 承诺为用户提供即插即用架构，您可以轻松地将 Kube AI Hub 安装在现有的 Kubernetes 集群上。更具体地说，Kube AI Hub 既可以部署于托管在云端（例如 AWS EKS、青云 QingCloud QKE 和 Google GKE 等）的 Kubernetes 服务上，也可以部署在本地 Kubernetes 集群上。这是因为 Kube AI Hub 不会侵入 Kubernetes，它仅与 Kubernetes API 交互，以管理 Kubernetes 集群资源。换句话说，Kube AI Hub 可以安装在任何原生 Kubernetes 集群和 Kubernetes 发行版上。
 
 本节概述了在 Kubernetes 上安装 Kube AI Hub 的一般步骤。有关在不同环境中特定安装方式的更多信息，请参见在托管 Kubernetes 上安装和在本地 Kubernetes 上安装。
@@ -18,12 +16,6 @@ Kube AI Hub 承诺为用户提供即插即用架构，您可以轻松地将 Kube
 在现有 Kubernetes 集群上安装 Kube AI Hub 之前，请参阅[准备工作](../prerequisites/)。
 
 {{</ notice >}}
-
-## 视频演示
-
-<video controls="controls" style="width: 100% !important; height: auto !important;">
-  <source type="video/mp4" src="https://kubesphere-docs.pek3b.qingstor.com/website/docs-v3.0/KS3.0%E5%AE%89%E8%A3%85%E4%B8%8E%E9%83%A8%E7%BD%B2_4_%E5%9C%A8%E5%B7%B2%E6%9C%89K8s%E9%9B%86%E7%BE%A4%E4%B8%8A%E9%83%A8%E7%BD%B2Kube AI Hub.mp4">
-</video>
 
 ## 部署 Kube AI Hub
 
@@ -49,7 +41,7 @@ Kube AI Hub 承诺为用户提供即插即用架构，您可以轻松地将 Kube
    kubectl get svc/ks-console -n kubesphere-system
    ```
 
-4. 确保在安全组中打开了 30880 端口，通过 NodePort (`IP:30880`) 使用默认帐户和密码 (`admin/P@88w0rd`) 访问 Web 控制台。
+4. 确保在安全组中打开了 30880 端口，通过 NodePort (`IP:30880`) 使用默认帐户和密码 (`admin/P@88w0rd`) 访问 Web 控制台。登录后，建议先检查集群概览和系统组件状态，并尽快修改默认密码。
 
 ## 启用可插拔组件（可选）
 

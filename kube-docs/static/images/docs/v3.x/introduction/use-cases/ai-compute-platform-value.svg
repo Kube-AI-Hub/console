@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="560" viewBox="0 0 1200 560" fill="none">
+  <rect width="1200" height="560" rx="24" fill="#0F172A"/>
+
+  <!-- Header -->
+  <text x="56" y="62" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="28" font-weight="700">AI Compute Management Platform: Simplify Complexity, 10x Utilization</text>
+  <text x="56" y="96" fill="#94A3B8" font-family="Arial, sans-serif" font-size="16">A unified platform for heterogeneous GPU/CPU compute pooling, scheduling, and operations purpose-built for AI workloads.</text>
+
+  <!-- Divider -->
+  <line x1="56" y1="116" x2="1144" y2="116" stroke="#1E293B" stroke-width="1"/>
+
+  <!-- Section label -->
+  <text x="56" y="148" fill="#94A3B8" font-family="Arial, sans-serif" font-size="13" font-weight="600" letter-spacing="1">PRODUCT VALUE</text>
+
+  <!-- Card 1: Compute Pooling -->
+  <rect x="56" y="164" width="252" height="330" rx="16" fill="#111827" stroke="#334155"/>
+  <!-- Icon background -->
+  <rect x="80" y="188" width="48" height="48" rx="12" fill="#1E293B"/>
+  <!-- CPU icon simplified -->
+  <rect x="88" y="196" width="32" height="32" rx="4" fill="none" stroke="#38BDF8" stroke-width="2"/>
+  <rect x="94" y="202" width="20" height="20" rx="2" fill="#38BDF8" fill-opacity="0.3"/>
+  <line x1="93" y1="192" x2="93" y2="196" stroke="#38BDF8" stroke-width="2"/>
+  <line x1="101" y1="192" x2="101" y2="196" stroke="#38BDF8" stroke-width="2"/>
+  <line x1="109" y1="192" x2="109" y2="196" stroke="#38BDF8" stroke-width="2"/>
+  <line x1="93" y1="228" x2="93" y2="232" stroke="#38BDF8" stroke-width="2"/>
+  <line x1="101" y1="228" x2="101" y2="232" stroke="#38BDF8" stroke-width="2"/>
+  <line x1="109" y1="228" x2="109" y2="232" stroke="#38BDF8" stroke-width="2"/>
+  <line x1="84" y1="205" x2="88" y2="205" stroke="#38BDF8" stroke-width="2"/>
+  <line x1="84" y1="212" x2="88" y2="212" stroke="#38BDF8" stroke-width="2"/>
+  <line x1="84" y1="219" x2="88" y2="219" stroke="#38BDF8" stroke-width="2"/>
+  <line x1="120" y1="205" x2="116" y2="205" stroke="#38BDF8" stroke-width="2"/>
+  <line x1="120" y1="212" x2="116" y2="212" stroke="#38BDF8" stroke-width="2"/>
+  <line x1="120" y1="219" x2="116" y2="219" stroke="#38BDF8" stroke-width="2"/>
+
+  <text x="80" y="262" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700">Compute Pooling</text>
+  <text x="80" y="284" fill="#38BDF8" font-family="Arial, sans-serif" font-size="13" font-weight="600">Maximum Utilization</text>
+  <line x1="80" y1="298" x2="284" y2="298" stroke="#1E293B" stroke-width="1"/>
+  <text x="80" y="320" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">GPU/CPU heterogeneous</text>
+  <text x="80" y="340" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">compute pooling and</text>
+  <text x="80" y="360" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">virtualization. Utilization</text>
+  <text x="80" y="380" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">improved by 3~10x.</text>
+  <!-- Metric badge -->
+  <rect x="80" y="448" width="100" height="28" rx="14" fill="#0C2A4A"/>
+  <text x="130" y="467" fill="#38BDF8" font-family="Arial, sans-serif" font-size="13" font-weight="600" text-anchor="middle">3~10x faster</text>
+
+  <!-- Card 2: On-demand Allocation -->
+  <rect x="332" y="164" width="252" height="330" rx="16" fill="#111827" stroke="#334155"/>
+  <!-- Grid icon -->
+  <rect x="356" y="188" width="48" height="48" rx="12" fill="#1E293B"/>
+  <rect x="364" y="196" width="12" height="12" rx="2" fill="#A78BFA"/>
+  <rect x="380" y="196" width="12" height="12" rx="2" fill="#38BDF8"/>
+  <rect x="364" y="212" width="12" height="12" rx="2" fill="#38BDF8"/>
+  <rect x="380" y="212" width="12" height="12" rx="2" fill="#A78BFA"/>
+  <polygon points="400,202 407,210 400,218" fill="#A78BFA"/>
+
+  <text x="356" y="262" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700">On-demand Allocation</text>
+  <text x="356" y="284" fill="#A78BFA" font-family="Arial, sans-serif" font-size="13" font-weight="600">Flexible Scheduling</text>
+  <line x1="356" y1="298" x2="560" y2="298" stroke="#1E293B" stroke-width="1"/>
+  <text x="356" y="320" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">Fine-grained compute</text>
+  <text x="356" y="340" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">quota and slicing. Allocate</text>
+  <text x="356" y="360" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">by user, department, or</text>
+  <text x="356" y="380" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">project. Elastic scaling.</text>
+  <rect x="356" y="448" width="120" height="28" rx="14" fill="#1E1040"/>
+  <text x="416" y="467" fill="#A78BFA" font-family="Arial, sans-serif" font-size="13" font-weight="600" text-anchor="middle">Multi-tenant RBAC</text>
+
+  <!-- Card 3: Metered Billing -->
+  <rect x="608" y="164" width="252" height="330" rx="16" fill="#111827" stroke="#334155"/>
+  <!-- Bill icon -->
+  <rect x="632" y="188" width="48" height="48" rx="12" fill="#1E293B"/>
+  <rect x="642" y="196" width="28" height="32" rx="3" fill="none" stroke="#34D399" stroke-width="2"/>
+  <line x1="648" y1="206" x2="664" y2="206" stroke="#34D399" stroke-width="2"/>
+  <line x1="648" y1="213" x2="664" y2="213" stroke="#34D399" stroke-width="2"/>
+  <line x1="648" y1="220" x2="658" y2="220" stroke="#34D399" stroke-width="2"/>
+
+  <text x="632" y="262" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700">Metered Billing</text>
+  <text x="632" y="284" fill="#34D399" font-family="Arial, sans-serif" font-size="13" font-weight="600">Fine-grained Cost Control</text>
+  <line x1="632" y1="298" x2="836" y2="298" stroke="#1E293B" stroke-width="1"/>
+  <text x="632" y="320" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">Compute usage monitoring</text>
+  <text x="632" y="340" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">and cost accounting. Help</text>
+  <text x="632" y="360" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">enterprises manage IT</text>
+  <text x="632" y="380" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">costs with precision.</text>
+  <rect x="632" y="448" width="120" height="28" rx="14" fill="#052E1C"/>
+  <text x="692" y="467" fill="#34D399" font-family="Arial, sans-serif" font-size="13" font-weight="600" text-anchor="middle">Usage analytics</text>
+
+  <!-- Card 4: Intelligent Scheduling -->
+  <rect x="884" y="164" width="252" height="330" rx="16" fill="#111827" stroke="#334155"/>
+  <!-- Wrench icon -->
+  <rect x="908" y="188" width="48" height="48" rx="12" fill="#1E293B"/>
+  <circle cx="932" cy="212" r="8" fill="none" stroke="#FB923C" stroke-width="2"/>
+  <line x1="938" y1="218" x2="946" y2="226" stroke="#FB923C" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="922" cy="204" r="3" fill="#FB923C"/>
+
+  <text x="908" y="262" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700">Intelligent Scheduling</text>
+  <text x="908" y="284" fill="#FB923C" font-family="Arial, sans-serif" font-size="13" font-weight="600">Smart O&amp;M</text>
+  <line x1="908" y1="298" x2="1112" y2="298" stroke="#1E293B" stroke-width="1"/>
+  <text x="908" y="320" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">Thousand-GPU distributed</text>
+  <text x="908" y="340" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">scheduling. Built-in task</text>
+  <text x="908" y="360" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">queues, service deploy,</text>
+  <text x="908" y="380" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">alerts, and log management.</text>
+  <rect x="908" y="448" width="120" height="28" rx="14" fill="#2D1A00"/>
+  <text x="968" y="467" fill="#FB923C" font-family="Arial, sans-serif" font-size="13" font-weight="600" text-anchor="middle">1000+ GPU nodes</text>
+
+  <!-- Bottom bullet points -->
+  <circle cx="72" cy="516" r="4" fill="#38BDF8"/>
+  <text x="84" y="521" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14">Unified scheduling across heterogeneous clusters with GPU virtualization and resource pooling.</text>
+  <circle cx="72" cy="540" r="4" fill="#A78BFA"/>
+  <text x="84" y="545" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14">Full domestic hardware compatibility: NVIDIA, Cambricon, Huawei, Tianshu, INTEL, AMD, Hygon.</text>
+</svg>

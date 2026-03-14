@@ -12,9 +12,7 @@ Here are some of the frequently asked questions about user login failure.
 
 ## User Not Active
 
-You may see an image below when the login fails. To find out the reason and solve the issue, perform the following steps:
-
-![account-not-active](/images/docs/v3.x/faq/access-control-and-account-management/cannot-login/account-not-active.png)
+When login fails, the sign-in page usually indicates that the user is not active. To find out the reason and solve the issue, perform the following steps:
 
 1. Execute the following command to check the status of the user.
 
@@ -86,7 +84,7 @@ kubectl -n kubesphere-system get deploy ks-controller-manager -o jsonpath='{.spe
 
 ## Wrong Username or Password
 
-![incorrect-password](/images/docs/v3.x/faq/access-control-and-account-management/cannot-login/wrong-password.png)
+If the username or password is incorrect, the sign-in page usually displays a credential error.
 
 Run the following command to verify that the username and the password are correct.
 

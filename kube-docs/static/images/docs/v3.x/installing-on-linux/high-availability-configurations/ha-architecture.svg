@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" fill="none">
+  <rect width="1200" height="520" rx="24" fill="#0F172A"/>
+  <text x="56" y="60" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="30" font-weight="700">HA Cluster Layout</text>
+  <text x="56" y="94" fill="#94A3B8" font-family="Arial, sans-serif" font-size="18">A load balancer fronts three control plane nodes and three worker nodes for production availability.</text>
+
+  <rect x="480" y="126" width="240" height="86" rx="18" fill="#1D4ED8" fill-opacity=".18" stroke="#60A5FA"/>
+  <text x="536" y="160" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="24" font-weight="700">Load Balancer</text>
+  <text x="516" y="190" fill="#BFDBFE" font-family="Arial, sans-serif" font-size="16">6443 / 30880 / 80 / 443</text>
+
+  <rect x="110" y="278" width="250" height="92" rx="16" fill="#111827" stroke="#334155"/>
+  <rect x="475" y="278" width="250" height="92" rx="16" fill="#111827" stroke="#334155"/>
+  <rect x="840" y="278" width="250" height="92" rx="16" fill="#111827" stroke="#334155"/>
+  <text x="154" y="316" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="20" font-weight="700">master1</text>
+  <text x="519" y="316" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="20" font-weight="700">master2</text>
+  <text x="884" y="316" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="20" font-weight="700">master3</text>
+  <text x="154" y="346" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="16">Control plane + etcd</text>
+  <text x="519" y="346" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="16">Control plane + etcd</text>
+  <text x="884" y="346" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="16">Control plane + etcd</text>
+
+  <rect x="110" y="404" width="250" height="72" rx="16" fill="#0B1220" stroke="#334155"/>
+  <rect x="475" y="404" width="250" height="72" rx="16" fill="#0B1220" stroke="#334155"/>
+  <rect x="840" y="404" width="250" height="72" rx="16" fill="#0B1220" stroke="#334155"/>
+  <text x="168" y="448" fill="#38BDF8" font-family="Arial, sans-serif" font-size="20" font-weight="700">node1 worker</text>
+  <text x="533" y="448" fill="#38BDF8" font-family="Arial, sans-serif" font-size="20" font-weight="700">node2 worker</text>
+  <text x="898" y="448" fill="#38BDF8" font-family="Arial, sans-serif" font-size="20" font-weight="700">node3 worker</text>
+
+  <path d="M600 212V252" stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+  <path d="M236 278V252H600" stroke="#475569" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M600 252H965V278" stroke="#475569" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

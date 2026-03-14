@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" fill="none">
+  <rect width="1200" height="420" rx="24" fill="#0F172A"/>
+  <text x="56" y="68" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="28" font-weight="700">Agent Connection Flow</text>
+  <text x="56" y="100" fill="#94A3B8" font-family="Arial, sans-serif" font-size="18">The overview page shows the same three-step process while a cluster is waiting to join.</text>
+  <rect x="56" y="148" width="320" height="212" rx="20" fill="#111827" stroke="#334155"/>
+  <rect x="440" y="148" width="320" height="212" rx="20" fill="#111827" stroke="#334155"/>
+  <rect x="824" y="148" width="320" height="212" rx="20" fill="#111827" stroke="#334155"/>
+  <circle cx="104" cy="196" r="24" fill="#1D4ED8"/>
+  <circle cx="488" cy="196" r="24" fill="#0F766E"/>
+  <circle cx="872" cy="196" r="24" fill="#7C3AED"/>
+  <text x="96" y="204" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700">1</text>
+  <text x="480" y="204" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700">2</text>
+  <text x="864" y="204" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700">3</text>
+  <text x="140" y="196" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="22" font-weight="700">Create agent.yaml</text>
+  <text x="524" y="196" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="22" font-weight="700">Copy generated YAML</text>
+  <text x="908" y="196" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="22" font-weight="700">Apply and wait</text>
+  <text x="88" y="240" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="17">Log in to the member cluster over SSH</text>
+  <text x="88" y="268" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="17">and create an `agent.yaml` file.</text>
+  <rect x="88" y="292" width="176" height="38" rx="10" fill="#0B1220" stroke="#334155"/>
+  <text x="110" y="316" fill="#38BDF8" font-family="Courier New, monospace" font-size="16">vi agent.yaml</text>
+  <text x="472" y="240" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="17">Open the overview page and copy the</text>
+  <text x="472" y="268" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="17">agent manifest shown by the console.</text>
+  <rect x="472" y="292" width="212" height="38" rx="10" fill="#0B1220" stroke="#334155"/>
+  <text x="494" y="316" fill="#22C55E" font-family="Arial, sans-serif" font-size="16">Copy generated content</text>
+  <text x="856" y="240" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="17">Deploy the agent in the member cluster</text>
+  <text x="856" y="268" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="17">and wait until the overview switches to</text>
+  <text x="856" y="296" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="17">the normal dashboard.</text>
+  <rect x="856" y="314" width="214" height="38" rx="10" fill="#0B1220" stroke="#334155"/>
+  <text x="878" y="338" fill="#A78BFA" font-family="Courier New, monospace" font-size="15">kubectl create -f agent.yaml</text>
+  <path d="M384 254H424" stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+  <path d="M768 254H808" stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+  <path d="M412 240L432 254L412 268" stroke="#475569" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M796 240L816 254L796 268" stroke="#475569" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

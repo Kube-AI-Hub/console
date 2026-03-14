@@ -7,7 +7,7 @@ linkTitle: "部署 Chaos Mesh"
 
 [Chaos Mesh](https://github.com/chaos-mesh/chaos-mesh) 是一个开源的云原生混沌工程平台，提供丰富的故障模拟类型，具有强大的故障场景编排能力，方便用户在开发测试中以及生产环境中模拟现实世界中可能出现的各类异常，帮助用户发现系统潜在的问题。
 
-![Chaos Mesh architecture](/images/docs/v3.x/zh-cn/appstore/built-in-apps/deploy-chaos-mesh/chaos-mesh-architecture-v2.png)
+![Chaos Mesh architecture](/images/docs/v3.x/appstore/built-in-apps/deploy-chaos-mesh/chaos-mesh-architecture.svg)
 
 本教程演示了如何在 Kube AI Hub 上部署 Chaos Mesh 进行混沌实验。
 
@@ -21,36 +21,19 @@ linkTitle: "部署 Chaos Mesh"
 
 ### 步骤1: 部署 Chaos Mesh 
 
-1. 使用 `project-regular` 身份登陆，在应用市场中搜索 `chaos-mesh`，点击搜索结果进入应用。 
+1. 使用 `project-regular` 身份登录，在**应用商店**中搜索 `chaos-mesh`，进入应用详情页。
 
-    ![Chaos Mesh app](/images/docs/v3.x/zh-cn/appstore/built-in-apps/deploy-chaos-mesh/chaos-mesh-app.png)
-  
+2. 点击右上角**安装**，设置应用**名称**、安装**位置**（对应 Namespace）和**版本**，然后继续下一步。
 
-2. 进入应用信息页后，点击右上角**安装**按钮。
+3. 根据实际需要编辑 `values.yaml`，或直接使用默认配置完成安装。
 
-    ![Install Chaos Mesh](/images/docs/v3.x/zh-cn/appstore/built-in-apps/deploy-chaos-mesh/install-chaos-mesh.png)
+4. 等待应用状态变为运行中。
 
-3. 进入应用设置页面，可以设置应用**名称**（默认会随机一个唯一的名称）和选择安装的**位置**（对应的 Namespace) 和**版本**，然后点击右上角**下一步**。
-
-    ![Chaos Mesh basic information](/images/docs/v3.x/zh-cn/appstore/built-in-apps/deploy-chaos-mesh/chaos-mesh-basic-info.png)
-
-4. 根据实际需要编辑 `values.yaml` 文件，也可以直接点击**安装**使用默认配置。
-
-    ![Chaos Mesh configurations](/images/docs/v3.x/zh-cn/appstore/built-in-apps/deploy-chaos-mesh/chaos-mesh-config.png)
-
-5. 等待 Chaos Mesh 开始正常运行。
-
-    ![Chaos Mesh deployed](/images/docs/v3.x/zh-cn/appstore/built-in-apps/deploy-chaos-mesh/chaos-mesh-deployed.png)
-
-6. 访问**应用负载**， 可以看到 Chaos Mesh 创建的三个部署。
-
-    ![Chaos Mesh deployments](/images/docs/v3.x/zh-cn/appstore/built-in-apps/deploy-chaos-mesh/chaos-mesh-deployments.png)
+5. 安装完成后，前往**应用负载**检查 Chaos Mesh 创建的部署和服务是否已就绪。
 
 ### 步骤 2: 访问 Chaos Mesh
 
-1. 前往**应用负载**下服务页面，复制 chaos-dashboard 的 **NodePort**。
-
-    ![Chaos Mesh NodePort](/images/docs/v3.x/zh-cn/appstore/built-in-apps/deploy-chaos-mesh/chaos-mesh-nodeport.png)
+1. 前往**应用负载**下的服务页面，找到 `chaos-dashboard` 服务并复制其 **NodePort**。
 
 2. 您可以通过 `${NodeIP}:${NODEPORT}` 方式访问 Chaos Dashboard。并参考[管理用户权限](https://chaos-mesh.org/zh/docs/manage-user-permissions/)文档，生成 Token，并登陆 Chaos Dashboard。
 

@@ -6,8 +6,6 @@ description: '了解如何在 Google Kubernetes Engine 上部署 Kube AI Hub。'
 weight: 4240
 ---
 
-![Kube AI Hub+GKE](https://pek3b.qingstor.com/kubesphere-docs/png/20191123145223.png)
-
 本指南将演示如何在 [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/) 上部署 Kube AI Hub。
 
 ## 准备一个 GKE 集群
@@ -81,17 +79,11 @@ weight: 4240
 
 现在已经安装了 Kube AI Hub，您可以按照以下步骤访问 Kube AI Hub 的 Web 控制台。
 
-- 在 **Services 和 Ingress** 选项中, 选择 **ks-console** 服务.
+- 在 **Services 和 Ingress** 中选择 **ks-console** 服务。
 
-  ![ks-console](/images/docs/v3.x/zh-cn/installing-on-kubernetes/hosted-kubernetes/install-kubesphere-on-gke/console-service.png)
+- 在**服务详细信息**中，单击**修改**，然后将服务类型从 `NodePort` 更改为 `LoadBalancer`，完成后保存配置。
 
-- 在**服务详细信息**中，单击**修改**，然后将服务类型从`NodePort`更改为`LoadBalancer`，完成后保存文件。
-
-  ![lb-change](/images/docs/v3.x/zh-cn/installing-on-kubernetes/hosted-kubernetes/install-kubesphere-on-gke/lb-change.png)
-
-- 使用 GKE 生成的端点访问 Kube AI Hub 的 Web 控制台。
-
-  ![access-console](/images/docs/v3.x/zh-cn/installing-on-kubernetes/hosted-kubernetes/install-kubesphere-on-gke/access-console.png)
+- 等待 GKE 为该服务分配外部地址，然后使用生成的端点访问 Kube AI Hub 的 Web 控制台。
 
   {{< notice tip >}}
 

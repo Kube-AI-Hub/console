@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="660" viewBox="0 0 1100 660" fill="none">
+  <rect width="1100" height="660" rx="16" fill="#0F172A"/>
+  <rect width="1100" height="48" rx="16" fill="#1E293B"/>
+  <rect y="32" width="1100" height="16" fill="#1E293B"/>
+  <circle cx="24" cy="24" r="8" fill="#38BDF8"/>
+  <rect x="42" y="18" width="80" height="12" rx="6" fill="#334155"/>
+  <rect x="900" y="16" width="72" height="16" rx="8" fill="#0F172A"/>
+  <text x="936" y="28" fill="#94A3B8" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">admin</text>
+  <rect x="988" y="16" width="96" height="16" rx="8" fill="#1D4ED8"/>
+  <text x="1036" y="28" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">+ Add Cluster</text>
+  <rect x="0" y="48" width="180" height="612" fill="#111827"/>
+  <rect x="12" y="64" width="156" height="32" rx="8" fill="#1D4ED8"/>
+  <text x="36" y="85" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="13" font-weight="600">概览</text>
+  <text x="36" y="122" fill="#64748B" font-family="Arial, sans-serif" font-size="12">集群管理</text>
+  <text x="36" y="149" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12">节点管理</text>
+  <text x="36" y="181" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12">算力资源</text>
+  <text x="36" y="213" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12">工作负载</text>
+  <text x="36" y="250" fill="#64748B" font-family="Arial, sans-serif" font-size="12">算力调度</text>
+  <text x="36" y="277" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12">任务队列</text>
+  <text x="36" y="309" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12">GPU 调度</text>
+  <text x="36" y="341" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12">资源配额</text>
+  <text x="36" y="378" fill="#64748B" font-family="Arial, sans-serif" font-size="12">可观测性</text>
+  <text x="36" y="405" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12">监控告警</text>
+  <text x="36" y="437" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12">日志管理</text>
+  <text x="36" y="474" fill="#64748B" font-family="Arial, sans-serif" font-size="12">访问控制</text>
+  <text x="36" y="501" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12">租户管理</text>
+  <text x="36" y="533" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12">权限配置</text>
+  <rect x="192" y="60" width="896" height="588" rx="12" fill="#0F172A"/>
+  <text x="212" y="92" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700">集群概览</text>
+  <text x="212" y="112" fill="#64748B" font-family="Arial, sans-serif" font-size="12">default 集群 · 实时状态</text>
+  <rect x="212" y="124" width="196" height="80" rx="10" fill="#111827" stroke="#1E3A5F"/>
+  <text x="228" y="148" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12">GPU 总量</text>
+  <text x="228" y="180" fill="#38BDF8" font-family="Arial, sans-serif" font-size="28" font-weight="700">128</text>
+  <text x="340" y="180" fill="#64748B" font-family="Arial, sans-serif" font-size="12">张</text>
+  <rect x="340" y="156" width="52" height="18" rx="9" fill="#0C2A4A"/>
+  <text x="366" y="169" fill="#38BDF8" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">4 集群</text>
+  <rect x="420" y="124" width="196" height="80" rx="10" fill="#111827" stroke="#1E3A5F"/>
+  <text x="436" y="148" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12">GPU 利用率</text>
+  <text x="436" y="180" fill="#A78BFA" font-family="Arial, sans-serif" font-size="28" font-weight="700">78.4</text>
+  <text x="524" y="180" fill="#64748B" font-family="Arial, sans-serif" font-size="12">%</text>
+  <rect x="524" y="156" width="52" height="18" rx="9" fill="#1E1040"/>
+  <text x="550" y="169" fill="#A78BFA" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">+12%</text>
+  <rect x="628" y="124" width="196" height="80" rx="10" fill="#111827" stroke="#1E3A5F"/>
+  <text x="644" y="148" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12">运行中任务</text>
+  <text x="644" y="180" fill="#34D399" font-family="Arial, sans-serif" font-size="28" font-weight="700">47</text>
+  <text x="700" y="180" fill="#64748B" font-family="Arial, sans-serif" font-size="12">个</text>
+  <rect x="724" y="156" width="52" height="18" rx="9" fill="#052E1C"/>
+  <text x="750" y="169" fill="#34D399" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">正常</text>
+  <rect x="836" y="124" width="196" height="80" rx="10" fill="#111827" stroke="#1E3A5F"/>
+  <text x="852" y="148" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12">活跃租户</text>
+  <text x="852" y="180" fill="#FB923C" font-family="Arial, sans-serif" font-size="28" font-weight="700">32</text>
+  <text x="898" y="180" fill="#64748B" font-family="Arial, sans-serif" font-size="12">个</text>
+  <rect x="924" y="156" width="80" height="18" rx="9" fill="#2D1A00"/>
+  <text x="964" y="169" fill="#FB923C" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">3 部门</text>
+  <rect x="212" y="220" width="460" height="200" rx="10" fill="#111827" stroke="#1E293B"/>
+  <text x="228" y="244" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="13" font-weight="600">GPU 利用率趋势（24小时）</text>
+  <line x1="240" y1="390" x2="652" y2="390" stroke="#1E293B" stroke-width="1"/>
+  <line x1="240" y1="260" x2="240" y2="390" stroke="#1E293B" stroke-width="1"/>
+  <text x="228" y="395" fill="#475569" font-family="Arial, sans-serif" font-size="10" text-anchor="end">0%</text>
+  <text x="228" y="355" fill="#475569" font-family="Arial, sans-serif" font-size="10" text-anchor="end">50%</text>
+  <text x="228" y="275" fill="#475569" font-family="Arial, sans-serif" font-size="10" text-anchor="end">100%</text>
+  <polyline points="240,340 282,320 324,310 366,290 408,275 450,280 492,268 534,272 576,265 618,270 652,268" fill="none" stroke="#A78BFA" stroke-width="2.5" stroke-linejoin="round"/>
+  <polyline points="240,340 282,320 324,310 366,290 408,275 450,280 492,268 534,272 576,265 618,270 652,268 652,390 240,390" fill="#A78BFA" fill-opacity="0.08"/>
+  <polyline points="240,370 282,362 324,358 366,350 408,345 450,348 492,342 534,344 576,340 618,342 652,340" fill="none" stroke="#38BDF8" stroke-width="2" stroke-linejoin="round" stroke-dasharray="4,2"/>
+  <rect x="504" y="232" width="12" height="4" rx="2" fill="#A78BFA"/>
+  <text x="520" y="239" fill="#64748B" font-family="Arial, sans-serif" font-size="10">GPU</text>
+  <rect x="556" y="232" width="12" height="4" rx="2" fill="#38BDF8"/>
+  <text x="572" y="239" fill="#64748B" font-family="Arial, sans-serif" font-size="10">CPU</text>
+  <rect x="684" y="220" width="404" height="200" rx="10" fill="#111827" stroke="#1E293B"/>
+  <text x="700" y="244" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="13" font-weight="600">GPU 节点状态</text>
+  <rect x="684" y="252" width="404" height="24" fill="#1E293B"/>
+  <text x="700" y="268" fill="#64748B" font-family="Arial, sans-serif" font-size="11">节点名称</text>
+  <text x="820" y="268" fill="#64748B" font-family="Arial, sans-serif" font-size="11">GPU型号</text>
+  <text x="930" y="268" fill="#64748B" font-family="Arial, sans-serif" font-size="11">利用率</text>
+  <text x="1006" y="268" fill="#64748B" font-family="Arial, sans-serif" font-size="11">状态</text>
+  <text x="700" y="294" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="12">gpu-node-01</text>
+  <text x="820" y="294" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12">A100 x8</text>
+  <rect x="930" y="283" width="60" height="8" rx="4" fill="#1E293B"/>
+  <rect x="930" y="283" width="48" height="8" rx="4" fill="#A78BFA"/>
+  <text x="1006" y="294" fill="#34D399" font-family="Arial, sans-serif" font-size="11">运行中</text>
+  <text x="700" y="318" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="12">gpu-node-02</text>
+  <text x="820" y="318" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12">H800 x4</text>
+  <rect x="930" y="307" width="60" height="8" rx="4" fill="#1E293B"/>
+  <rect x="930" y="307" width="52" height="8" rx="4" fill="#A78BFA"/>
+  <text x="1006" y="318" fill="#34D399" font-family="Arial, sans-serif" font-size="11">运行中</text>
+  <text x="700" y="342" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="12">gpu-node-03</text>
+  <text x="820" y="342" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12">910B x8</text>
+  <rect x="930" y="331" width="60" height="8" rx="4" fill="#1E293B"/>
+  <rect x="930" y="331" width="36" height="8" rx="4" fill="#38BDF8"/>
+  <text x="1006" y="342" fill="#34D399" font-family="Arial, sans-serif" font-size="11">运行中</text>
+  <text x="700" y="366" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="12">gpu-node-04</text>
+  <text x="820" y="366" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12">MLU370 x4</text>
+  <rect x="930" y="355" width="60" height="8" rx="4" fill="#1E293B"/>
+  <rect x="930" y="355" width="28" height="8" rx="4" fill="#FB923C"/>
+  <text x="1006" y="366" fill="#FB923C" font-family="Arial, sans-serif" font-size="11">维护中</text>
+  <text x="700" y="390" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="12">gpu-node-05</text>
+  <text x="820" y="390" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12">BI-V100 x8</text>
+  <rect x="930" y="379" width="60" height="8" rx="4" fill="#1E293B"/>
+  <rect x="930" y="379" width="44" height="8" rx="4" fill="#A78BFA"/>
+  <text x="1006" y="390" fill="#34D399" font-family="Arial, sans-serif" font-size="11">运行中</text>
+  <rect x="212" y="432" width="224" height="168" rx="10" fill="#111827" stroke="#1E293B"/>
+  <text x="228" y="456" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="13" font-weight="600">任务队列</text>
+  <text x="228" y="480" fill="#64748B" font-family="Arial, sans-serif" font-size="12">等待中</text>
+  <text x="380" y="480" fill="#FB923C" font-family="Arial, sans-serif" font-size="18" font-weight="700" text-anchor="end">12</text>
+  <line x1="228" y1="488" x2="420" y2="488" stroke="#1E293B" stroke-width="1"/>
+  <text x="228" y="510" fill="#64748B" font-family="Arial, sans-serif" font-size="12">运行中</text>
+  <text x="380" y="510" fill="#34D399" font-family="Arial, sans-serif" font-size="18" font-weight="700" text-anchor="end">47</text>
+  <line x1="228" y1="518" x2="420" y2="518" stroke="#1E293B" stroke-width="1"/>
+  <text x="228" y="540" fill="#64748B" font-family="Arial, sans-serif" font-size="12">已完成（今日）</text>
+  <text x="380" y="540" fill="#38BDF8" font-family="Arial, sans-serif" font-size="18" font-weight="700" text-anchor="end">284</text>
+  <line x1="228" y1="548" x2="420" y2="548" stroke="#1E293B" stroke-width="1"/>
+  <text x="228" y="570" fill="#64748B" font-family="Arial, sans-serif" font-size="12">失败（今日）</text>
+  <text x="380" y="570" fill="#F87171" font-family="Arial, sans-serif" font-size="18" font-weight="700" text-anchor="end">3</text>
+  <rect x="448" y="432" width="224" height="168" rx="10" fill="#111827" stroke="#1E293B"/>
+  <text x="464" y="456" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="13" font-weight="600">算力分配</text>
+  <circle cx="560" cy="536" r="50" fill="none" stroke="#1E293B" stroke-width="14"/>
+  <circle cx="560" cy="536" r="50" fill="none" stroke="#A78BFA" stroke-width="14" stroke-dasharray="110 204" stroke-dashoffset="0" transform="rotate(-90 560 536)"/>
+  <circle cx="560" cy="536" r="50" fill="none" stroke="#38BDF8" stroke-width="14" stroke-dasharray="70 244" stroke-dashoffset="-110" transform="rotate(-90 560 536)"/>
+  <circle cx="560" cy="536" r="50" fill="none" stroke="#34D399" stroke-width="14" stroke-dasharray="24 250" stroke-dashoffset="-180" transform="rotate(-90 560 536)"/>
+  <text x="560" y="530" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="14" font-weight="700" text-anchor="middle">128</text>
+  <text x="560" y="548" fill="#64748B" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">GPU 总量</text>
+  <rect x="628" y="476" width="8" height="8" rx="2" fill="#A78BFA"/>
+  <text x="640" y="484" fill="#94A3B8" font-family="Arial, sans-serif" font-size="10">AI 训练</text>
+  <rect x="628" y="496" width="8" height="8" rx="2" fill="#38BDF8"/>
+  <text x="640" y="504" fill="#94A3B8" font-family="Arial, sans-serif" font-size="10">推理服务</text>
+  <rect x="628" y="516" width="8" height="8" rx="2" fill="#34D399"/>
+  <text x="640" y="524" fill="#94A3B8" font-family="Arial, sans-serif" font-size="10">开发调试</text>
+  <rect x="628" y="536" width="8" height="8" rx="2" fill="#1E293B"/>
+  <text x="640" y="544" fill="#94A3B8" font-family="Arial, sans-serif" font-size="10">空闲</text>
+  <rect x="684" y="432" width="404" height="168" rx="10" fill="#111827" stroke="#1E293B"/>
+  <text x="700" y="456" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="13" font-weight="600">近期告警</text>
+  <rect x="700" y="464" width="8" height="8" rx="4" fill="#F87171"/>
+  <text x="716" y="472" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="12">gpu-node-04 温度超阈值 (82 degC)</text>
+  <text x="1056" y="472" fill="#475569" font-family="Arial, sans-serif" font-size="11" text-anchor="end">2分钟前</text>
+  <rect x="700" y="490" width="8" height="8" rx="4" fill="#FB923C"/>
+  <text x="716" y="498" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="12">训练任务 train-llm-003 等待资源</text>
+  <text x="1056" y="498" fill="#475569" font-family="Arial, sans-serif" font-size="11" text-anchor="end">15分钟前</text>
+  <rect x="700" y="516" width="8" height="8" rx="4" fill="#34D399"/>
+  <text x="716" y="524" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="12">新节点 gpu-node-06 加入集群成功</text>
+  <text x="1056" y="524" fill="#475569" font-family="Arial, sans-serif" font-size="11" text-anchor="end">1小时前</text>
+  <rect x="700" y="542" width="8" height="8" rx="4" fill="#34D399"/>
+  <text x="716" y="550" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="12">租户 dept-ai 配额申请审批通过</text>
+  <text x="1056" y="550" fill="#475569" font-family="Arial, sans-serif" font-size="11" text-anchor="end">2小时前</text>
+  <rect x="700" y="568" width="8" height="8" rx="4" fill="#38BDF8"/>
+  <text x="716" y="576" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="12">推理服务 infer-gpt-v2 自动扩容至 4 副本</text>
+  <text x="1056" y="576" fill="#475569" font-family="Arial, sans-serif" font-size="11" text-anchor="end">3小时前</text>
+</svg>

@@ -24,7 +24,7 @@ The isolation of physical resources includes nodes and networks, while it also r
 
 To solve the issues above, Kube AI Hub provides a multi-tenant management solution based on Kubernetes.
 
-![multi-tenancy-architecture](/images/docs/v3.x/access-control-and-account-management/multi-tanancy-in-kubesphere/multi-tenancy-architecture.png)
+![multi-tenancy-architecture](/images/docs/v3.x/access-control-and-account-management/multi-tenancy/multi-tenancy-architecture.svg)
 
 In Kube AI Hub, the [workspace](../../workspace-administration/what-is-workspace/) is the smallest tenant unit. A workspace enables users to share resources across clusters and projects. Workspace members can create projects in an authorized cluster and invite other members to cooperate in the same project.
 
@@ -54,4 +54,4 @@ Kube AI Hub also provides [auditing logs](../../pluggable-components/auditing-lo
 
 For a complete authentication and authorization chain in Kube AI Hub, see the following diagram. Kube AI Hub has expanded RBAC rules using the Open Policy Agent (OPA). The Kube AI Hub team looks to integrate [Gatekeeper](https://github.com/open-policy-agent/gatekeeper) to provide more security management policies.
 
-![request-chain](/images/docs/v3.x/access-control-and-account-management/multi-tanancy-in-kubesphere/request-chain.jpg)
+![request-chain](/images/docs/v3.x/access-control-and-account-management/multi-tenancy/request-chain.svg)

@@ -1,144 +1,137 @@
 ---
-title: 面向云原生应用的容器混合云，支持 Kubernetes 多集群管理的 PaaS 容器云平台解决方案 | Kube AI Hub
-description: Kube AI Hub 是在 Kubernetes 之上构建的以应用为中心的多租户容器平台，完全开源，提供全栈的 IT 自动化运维的能力，简化企业的 DevOps 工作流。Kube AI Hub 提供了运维友好的向导式操作界面，帮助企业快速构建一个强大和功能丰富的容器云平台。
-
+title: 异构算力管理平台，支持 GPU/CPU 多集群统一调度 | Kube AI Hub
+description: Kube AI Hub 是以 Kubernetes 为内核的异构算力管理平台，提供 GPU/CPU 资源池化、vGPU 虚拟化、多租户隔离、智能调度与全栈可观测性，帮助企业将算力利用率提升 3～10 倍。
 
 css: scss/index.scss
 
 section1:
-  title: Kube AI Hub 容器平台
-  topic: 面向云原生应用的<br>容器混合云
-  content: Kube AI Hub 愿景是打造一个以 Kubernetes 为内核的云原生分布式操作系统，它的架构可以非常方便地使第三方应用与云原生生态组件进行即插即用（plug-and-play）的集成，支持云原生应用在多云与多集群的统一分发和运维管理。
+  title: Kube AI Hub 算力管理平台
+  topic: 异构算力统一管理<br>算力利用率提升 3～10 倍
+  content: Kube AI Hub 是以 Kubernetes 为内核的异构算力管理平台，通过 GPU/CPU 资源池化与 vGPU 虚拟化技术，实现硬件集群平台化管理。支持国产 GPU/CPU/NPU，构建安全可控的本地算力底座。
 
 section2:
-  title: 全栈的 Kubernetes 容器云 PaaS 解决方案
-  content: Kube AI Hub 是在 Kubernetes 之上构建的以应用为中心的多租户容器平台，提供全栈的 IT 自动化运维的能力，简化企业的 DevOps 工作流。Kube AI Hub 提供了运维友好的向导式操作界面，帮助企业快速构建一个强大和功能丰富的容器云平台。
+  title: 全栈算力管理平台，化繁为简
+  content: Kube AI Hub 提供从硬件资源到业务应用的全链路算力管理能力，通过统一控制台纳管异构 GPU/CPU 集群，内置多租户隔离、弹性调度与精细化计量，帮助企业快速构建自主可控的 AI 算力基础设施。
   children:
-    - name: 完全开源
-      icon: /images/home/open-source.svg
-      content: 通过 CNCF 一致性认证的 Kubernetes 平台，100% 开源，由社区驱动与开发
-
-    - name: 简易安装
+    - name: 快速部署
       icon: /images/home/easy-to-run.svg
-      content: 支持部署在任何基础设施环境，提供在线与离线安装，支持一键升级与扩容集群
+      content: 支持部署在任意 Kubernetes 集群或裸金属环境，提供在线与离线安装，一键扩容与升级
 
-    - name: 功能丰富
+    - name: 功能完整
       icon: /images/home/feature-rich.svg
-      content: 在一个平台统一纳管 DevOps、云原生可观测性、服务网格、应用生命周期、多租户、多集群、存储与网络
+      content: 在统一平台中纳管 GPU 节点、任务队列、算力调度、多租户、监控告警、计量计费与日志管理
 
     - name: 模块化 & 可插拔
       icon: /images/home/modular-pluggable.svg
-      content: 平台中的所有功能都是可插拔与松耦合，您可以根据业务场景可选安装所需功能组件
-
-
+      content: 所有功能模块均可按需开启，松耦合架构支持灵活集成第三方调度器与存储系统
 
 section3:
-  title: 不同团队的受益
-  content: 平台内置的多租户设计，让不同的团队能够在一个平台中不同的企业空间下，更安全地从云端到边缘部署云原生应用。开发者通过界面点击即可快速部署项目，平台内置丰富的云原生可观测性与 DevOps 工具集帮助运维人员定位问题和快速交付。Kube AI Hub 还能帮助基础设施团队在数据中心与多个云上高效地部署与运维多集群，避免单一云厂商绑定。
+  title: 不同团队的核心价值
+  content: 平台内置多租户设计，让基础设施团队、算法工程师、运维人员在同一平台中协同工作。基础设施团队统一管控硬件资源，算法工程师专注业务开发，运维团队获得完整的可观测性与自动化运维能力。
   children:
     - name: 基础设施团队
-      content: 实现从云端到数据中心自动化部署、扩容与升级集群
+      content: 统一纳管异构 GPU/CPU 集群，资源池化降低硬件成本
       icon: /images/home/7.svg
       children:
-        - content: 提高资源利用率，减少内部基础设施的成本支出
-        - content: 提供安全增强，支持多种存储与网络方案
-        - content: 为企业交付一个通过 CNCF 认证和可信赖的 Kubernetes 发行版
-        - content: 支持 Kubernetes 的多云与多集群管理，提供多云与多可用区的高可用
+        - content: 支持英伟达、华为昇腾、寒武纪、天数智芯等主流 GPU 统一接入
+        - content: vGPU 虚拟化切分算力资源，硬件利用率提升 3～10 倍
+        - content: 内置 CSI 对接主流存储，支持 S3、NFS 等文件存储资源
+        - content: 多集群统一管理，支持跨数据中心与混合云部署
 
-    - name: 开发者
-      content: 从繁琐的 YAML 编辑工作中解放，让开发者只需专注于业务开发
+    - name: 算法工程师
+      content: 专注 AI 训练与推理业务，告别繁琐的基础设施配置
       icon: /images/home/74.png
       children:
-        - content: 为开发者提供向导式的用户体验，降低上手云原生技术栈的学习曲线
-        - content: 内置常用的自动化部署环境，为应用（Java/NodeJs/Python/Go）部署提供定制化的容器运行环境
-        - content: 提供开箱即用的工具集，帮助开发者将代码快速构建为可运行的容器镜像，提高开发效率
-        - content: 提供应用商店和应用生命周期管理，缩短应用上线周期
+        - content: 通过 Web 控制台提交 AI 训练任务，无需编写复杂的 Kubernetes YAML
+        - content: 内置任务队列支持优先级调度与资源预留，合理分配训练算力
+        - content: 支持 PyTorch、TensorFlow 等主流框架的分布式训练任务
+        - content: 一键部署推理服务，支持自动弹性扩缩容
 
     - name: 运维团队
-      content: 构建一站式企业级的 DevOps 架构与可视化运维能力
+      content: 构建一站式的算力平台运维与可观测体系
       icon: /images/home/71.svg
       children:
-        - content: 提供从平台到应用维度的日志、监控、事件、审计、告警与通知，实现集中式与多租户隔离的可观测性
-        - content: 简化应用的持续集成、测试、审核、发布、升级与弹性扩缩容
-        - content: 为云原生应用提供基于微服务的灰度发布、流量管理、网络拓扑与追踪
-        - content: 提供易用的界面命令终端与图形化操作面板，满足不同使用习惯的运维人员
+        - content: 多维度监控与告警：GPU 温度、利用率、显存使用率实时告警
+        - content: 统一日志收集与检索，快速定位任务失败原因
+        - content: 节点健康检查与自动故障隔离，保障训练任务稳定性
+        - content: 提供图形化操作界面与 Web 终端，满足不同运维习惯
 
-    - name: 用户
-      content: 在 Kubernetes 上使用与运维应用变得极其简单
+    - name: 业务负责人
+      content: 算力成本透明可见，按需分配，精细化管理 IT 预算
       icon: /images/home/80.svg
       children:
-        - content: 通过应用商店一键部署与升级应用至 Kubernetes
-        - content: 提供按需容器资源申请，支持设置容器的弹性伸缩（HPA），提升应用的可靠性与灵活性
-        - content: 支持导入 Helm 应用仓库可视化编辑与部署应用
-        - content: 应用商店将支持运营，提供针对应用的计量与计费（v3.x）
+        - content: 按租户、部门、项目维度查看算力用量与费用分摊报表
+        - content: 支持算力配额管理，避免资源抢占与浪费
+        - content: 计量计费报告辅助 IT 预算规划与成本核算
+        - content: 多租户隔离确保不同团队的数据与资源安全
 
 section4:
-  title: 主要功能
-  content: 如果您在寻找一个可以媲美商业产品的开源项目，Kube AI Hub 会是您的选择。<br> <br>我们在 <a class='inner-a' target='_blank' href='https://github.com/kubesphere/kubesphere/blob/master/docs/roadmap.md'>RoadMap</a> 列出了下一个版本的规划，欢迎所有人为社区提供您的需求、建议与反馈。
+  title: 核心功能特性
+  content: Kube AI Hub 覆盖从硬件接入到业务交付的完整算力管理链路，所有功能均可按需启用。
   children:
-    - name: 安装 Kubernetes 集群
+    - name: 异构 GPU 集群管理
       icon: /images/home/provisioning-kubernetes.svg
-      content: 支持在任何基础设施上部署 Kubernetes，提供在线与离线安装，支持添加 GPU 节点
+      content: 统一接入英伟达、华为昇腾、寒武纪、天数等异构 GPU，支持在线扩容节点与跨集群资源调配
 
-    - name: Kubernetes 资源管理
+    - name: vGPU 虚拟化调度
       icon: /images/home/k-8-s-resource-management.svg
-      content: 提供 Web 控制台对接 Kubernetes 原生 API 快速创建与管理 Kubernetes 资源，内置多维度的可观测性
+      content: GPU 细粒度切分与共享，支持多任务并发使用同一 GPU，显著提升硬件利用率
 
-    - name: 多租户管理
+    - name: 多租户权限管理
       icon: /images/home/multi-tenant-management.svg
-      content: 提供统一的认证鉴权与细粒度的基于角色的授权系统，支持对接 AD/LDAP
+      content: 提供平台、企业空间、项目三层权限体系，支持 AD/LDAP 集成，保障多团队资源安全隔离
 
-    - name: 支持多种存储与网络方案
+    - name: 存储与网络
       icon: /images/home/multi-tenant-management.svg
-      content: 支持 GlusterFS、Ceph、NFS、LocalPV，提供多个 CSI 插件对接公有云与企业级存储；提供面向物理机 Kubernetes 环境的负载均衡器 <a class='inner-a' target='_blank' href='https://openelb.github.io/'>OpenELB</a>，支持网络策略可视化，支持 Calico、Flannel、Cilium、Kube-OVN 等网络插件
+      content: 支持 S3、NFS、Ceph、LocalPV 等多种存储方案，内置网络策略管理，支持 Calico、Flannel 等主流 CNI
 
   features:
-    - name: Kubernetes DevOps 系统
+    - name: 异构算力管理
       icon: /images/home/dev-ops.svg
-      content: 基于 Jenkins 为引擎打造的 CI/CD，内置 Source-to-Image 和 Binary-to-Image 自动化打包部署工具
-      link: "devops/"
+      content: GPU/CPU 异构算力池化与虚拟化，利用率提升 3～10 倍，支持国产 GPU/CPU/NPU，构建安全可控本地算力底座
+      link: "ai-compute/"
       color: orange
 
-    - name: 基于 Istio 的微服务治理
+    - name: 智能任务调度
       icon: /images/home/service.svg
-      content: 提供细粒度的流量管理、流量监控、灰度发布、分布式追踪，支持可视化的流量拓扑
-      link: "service-mesh/"
+      content: 千卡级分布式调度能力，内置优先级任务队列与资源预留策略，支持大规模 AI 训练任务并行执行
+      link: "/docs/v3.4/pluggable-components/devops/"
       color: red
 
-    - name: 丰富的云原生可观测性
+    - name: 全栈可观测性
       icon: /images/home/rich.svg
-      content: 提供多维度与多租户的监控、日志、事件、审计搜索，支持多种告警策略与通知渠道，支持日志转发
-      link: "observability/"
+      content: 多维度 GPU/CPU 监控、告警与日志管理，多租户隔离，支持多种告警通知渠道
+      link: "/docs/v3.4/pluggable-components/logging/"
       color: green
 
-    - name: 云原生应用商店
+    - name: 计量与计费
       icon: /images/home/store.svg
-      content: 提供基于 Helm 的应用商店与应用仓库，内置多个应用模板，支持应用生命周期管理
-      link: "/docs/v3.4/pluggable-components/app-store/"
-      color: grape
-
-    - name: Kubernetes 多集群管理
-      icon: /images/home/management.svg
-      content: 跨多云与多集群统一分发应用，提供集群高可用与灾备的最佳实践，支持跨级群的可观测性
-      link: "/docs/v3.4/multicluster-management/introduction/overview/"
-      color: orange
-
-    - name: Kubernetes 边缘节点管理
-      icon: /images/home/network.svg
-      content: 基于 KubeEdge 实现应用与工作负载在云端与边缘节点的统一分发与管理，解决在海量边、端设备上完成应用交付、运维、管控的需求
-      link: "/docs/v3.4/pluggable-components/kubeedge/"
-      color: green
-
-    - name: 多维度计量与计费
-      icon: /images/home/multiple.svg
-      content: 提供基于集群与租户的多维度资源计量与计费的监控报表，让 Kubernetes 运营成本更透明
+      content: 算力用量监控与计费核算，按租户/部门/项目多维度统计，帮助企业精细化管理 IT 成本
       link: "/docs/v3.4/toolbox/metering-and-billing/view-resource-consumption/"
       color: grape
 
+    - name: 多集群管理
+      icon: /images/home/management.svg
+      content: 跨数据中心与混合云统一管理多个 GPU/CPU 集群，提供集群高可用与灾备最佳实践
+      link: "/docs/v3.4/multicluster-management/introduction/overview/"
+      color: orange
+
+    - name: 边缘节点支持
+      icon: /images/home/network.svg
+      content: 基于 KubeEdge 将算力调度延伸至边缘节点，支持云边协同的 AI 推理任务分发与管理
+      link: "/docs/v3.4/pluggable-components/kubeedge/"
+      color: green
+
+    - name: 应用市场
+      icon: /images/home/multiple.svg
+      content: 内置基于 Helm 的应用市场与镜像仓库（Harbor），支持 AI 框架与工具的一键部署与生命周期管理
+      link: "/docs/v3.4/pluggable-components/app-store/"
+      color: grape
+
 section5:
-  title: 面向云原生的架构，前后端分离
+  title: 前后端分离的云原生平台架构
   frontEnd:
-    title: Front End
+    title: 前端
     project: Kube AI Hub Console
     children:
       - icon: /images/home/mobx.jpg
@@ -146,13 +139,12 @@ section5:
       - icon: /images/home/react.png
 
   backEnd:
-    title: Back End (REST API)
+    title: 后端 (REST API)
     project: Kube AI Hub System
     group:
       - name: API Server
       - name: API Gateway
       - name: Controller Manager
-      - name: Account Service
-
+      - name: GPU Scheduler
 
 ---

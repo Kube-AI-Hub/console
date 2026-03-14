@@ -1,7 +1,7 @@
 ---
 title: "代理连接"
 keywords: 'Kubernetes, Kube AI Hub, 多集群, 代理连接'
-description: '了解通过代理连接导入集群的一般步骤。'
+description: '了解如何通过代理连接导入集群，以及概览页中的 agent.yaml 引导流程。'
 linkTitle: "代理连接"
 weight: 5220
 ---
@@ -9,6 +9,22 @@ weight: 5220
 Kube AI Hub 的组件 [Tower](https://github.com/kubesphere/tower) 用于代理连接。Tower 是一种通过代理在集群间建立网络连接的工具。如果主集群无法直接访问成员集群，您可以暴露主集群的代理服务地址，这样可以让成员集群通过代理连接到主集群。当成员集群部署在私有环境（例如 IDC）并且主集群可以暴露代理服务时，适用此连接方法。当您的集群分布部署在不同的云厂商上时，同样适用代理连接的方法。
 
 要通过代理连接使用多集群功能，您必须拥有至少两个集群，分别用作主集群和成员集群。您可以在安装 Kube AI Hub 之前或者之后将一个集群指定为主集群或成员集群。有关安装 Kube AI Hub 的更多信息，请参考[在 Linux 上安装](../../../installing-on-linux/)和[在 Kubernetes 上安装](../../../installing-on-kubernetes/)。
+
+![](/images/docs/v3.x/cluster-overview/agent-connection-flow.svg)
+
+## 控制台中的代理连接引导
+
+当您在控制台中创建成员集群并选择**代理连接**后，如果集群尚未成功加入，访问该集群的**概览**页会看到三步式引导：
+
+1. 通过 SSH 登录成员集群并创建 `agent.yaml` 文件。
+2. 将控制台生成的代理配置复制到 `agent.yaml` 中。
+3. 在成员集群中执行 `kubectl create -f agent.yaml`，等待代理启动并上报状态。
+
+{{< notice info >}}
+
+概览页中的 `agent.yaml` 内容由主集群自动生成，您可以直接复制后部署到成员集群。
+
+{{</ notice >}}
 
 ## 准备主集群
 
@@ -257,8 +273,12 @@ kubectl logs -n kubesphere-system $(kubectl get pod -n kubesphere-system -l 'app
    
 2. 在**导入集群**页面输入要导入的集群的基本信息。您也可以点击右上角的**编辑模式**以 YAML 格式查看并编辑基本信息。编辑完成后，点击**下一步**。
 
-3. 在**连接方式**，选择**集群连接代理**，然后点击**创建**。主集群为代理部署 (Deployment) 生成的 YAML 配置文件会显示在控制台上。
+3. 在**连接方式**中选择**代理连接**，然后点击**创建**。创建完成后，系统会进入该集群的概览页并显示 `agent.yaml` 引导内容。
 
-4. 根据指示在成员集群中创建一个 `agent.yaml` 文件，然后将代理部署复制并粘贴到该文件中。在该节点上执行 `kubectl create -f agent.yaml` 然后等待代理启动并运行。请确保成员集群可以访问代理地址。
+4. 根据界面提示在成员集群中创建一个 `agent.yaml` 文件，然后将控制台中的代理部署配置复制并粘贴到该文件中。在成员集群中执行以下命令部署代理：
 
-5. 待集群代理启动并运行，您会看到成员集群已经导入主集群。
+   ```bash
+   kubectl create -f agent.yaml
+   ```
+
+5. 请确保成员集群能够访问主集群暴露出来的代理地址。待代理启动并运行后，概览页会自动切换为正常的集群仪表盘。

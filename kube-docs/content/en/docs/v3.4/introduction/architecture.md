@@ -9,9 +9,9 @@ weight: 1500
 
 ## Separation of frontend and backend
 
-Kube AI Hub separates [frontend](https://github.com/kubesphere/console) from [backend](https://github.com/kubesphere/kubesphere), and it itself is a cloud native application and provides open standard REST APIs for external systems to use. Please see [API documentation](../../reference/api-docs/) for details. The following figure is the system architecture. Kube AI Hub can run anywhere from on-premise datacenter to any cloud to edge. In addition, it can be deployed on any Kubernetes distribution.
+Kube AI Hub separates [frontend](https://github.com/kubesphere/console) from [backend](https://github.com/kubesphere/kubesphere), and it itself is a cloud native application and provides open standard REST APIs for external systems to use. Please see [API documentation](../../reference/api-docs/) for details. The following diagram shows the system architecture. Kube AI Hub can run anywhere from on-premise datacenter to any cloud to edge. In addition, it can be deployed on any Kubernetes distribution.
 
-![Architecture](https://pek3b.qingstor.com/kubesphere-docs/png/20190810073322.png)
+![Architecture](/images/docs/v3.x/introduction/system-architecture.svg)
 
 ## Components List
 

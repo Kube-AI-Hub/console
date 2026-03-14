@@ -22,7 +22,7 @@ Weight: 3420
 
 本教程使用六台 **Ubuntu 16.04.6** 机器。您需要创建两个负载均衡器，并在其中的三台机器上部署三个主节点和 etcd 节点。您可以在 KubeKey 创建的 `config-sample.yaml` 文件中配置上述节点（`config-sample.yaml` 为文件的默认名称，可以手动更改）。
 
-![ha-architecture](/images/docs/v3.x/zh-cn/installing-on-linux/installing-on-public-cloud/deploy-kubesphere-on-qingcloud-instances/ha-architecture.png)
+![ha-architecture](/images/docs/v3.x/installing-on-linux/high-availability-configurations/ha-architecture.svg)
 
 {{< notice note >}}
 

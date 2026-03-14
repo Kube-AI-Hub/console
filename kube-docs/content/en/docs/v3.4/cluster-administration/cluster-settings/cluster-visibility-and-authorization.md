@@ -1,7 +1,7 @@
 ---
 title: "Cluster Visibility and Authorization"
 keywords: "Cluster Visibility, Cluster Management"
-description: "Learn how to set up cluster visibility and authorization."
+description: "Learn how to configure cluster visibility and authorization, and how to open the settings from the cluster overview page."
 linkTitle: "Cluster Visibility and Authorization"
 weight: 8610
 ---
@@ -10,9 +10,15 @@ In Kube AI Hub, you can allocate a cluster to multiple workspaces through author
 
 This guide demonstrates how to set cluster visibility.
 
+![](/images/docs/v3.x/cluster-overview/visibility-entry.svg)
+
 ## Prerequisites
 * You need to enable the [multi-cluster feature](../../../multicluster-management/).
 * You need to have a workspace and a user that has the permission to create workspaces, such as `ws-manager`. For more information, see [Create Workspaces, Projects, Users and Roles](../../../quick-start/create-workspace-and-project/).
+
+## Open Cluster Visibility from the Overview Page
+
+If you are already on the cluster overview page, you can open this page directly by clicking the **Cluster visibility** field in the **Basic Information** card. This entry is available only when multi-cluster is enabled.
 
 ## Set Cluster Visibility
 
@@ -40,7 +46,7 @@ After a workspace is created, you can allocate additional clusters to the worksp
 
 1. Log in to Kube AI Hub with a user that has the permission to manage clusters, such as `admin`.
 
-2. Click **Platform** in the upper-left corner and select **Cluster Management**. Select a cluster from the list to view cluster information.
+2. Click **Platform** in the upper-left corner and select **Cluster Management**. Select a cluster from the list to view cluster information. You can also open the cluster **Overview** page first and then jump here through the **Cluster visibility** field in **Basic Information**.
 
 3. In **Cluster Settings** from the navigation bar, select **Cluster Visibility**.
 

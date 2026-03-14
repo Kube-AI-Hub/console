@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="560" viewBox="0 0 1200 560" fill="none">
+  <rect width="1200" height="560" rx="24" fill="#0F172A"/>
+  <text x="56" y="62" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="28" font-weight="700">AI算力管理平台：化繁为简，提升10倍算力利用率</text>
+  <text x="56" y="96" fill="#94A3B8" font-family="Arial, sans-serif" font-size="16">统一异构GPU/CPU算力池化、调度与运维的一体化平台，专为AI工作负载设计。</text>
+  <line x1="56" y1="116" x2="1144" y2="116" stroke="#1E293B" stroke-width="1"/>
+  <text x="56" y="148" fill="#94A3B8" font-family="Arial, sans-serif" font-size="13" font-weight="600">产品价值</text>
+
+  <!-- Card 1: 算力池化 -->
+  <rect x="56" y="164" width="252" height="330" rx="16" fill="#111827" stroke="#334155"/>
+  <rect x="80" y="188" width="48" height="48" rx="12" fill="#1E293B"/>
+  <rect x="88" y="196" width="32" height="32" rx="4" fill="none" stroke="#38BDF8" stroke-width="2"/>
+  <rect x="94" y="202" width="20" height="20" rx="2" fill="#38BDF8" fill-opacity="0.3"/>
+  <line x1="93" y1="192" x2="93" y2="196" stroke="#38BDF8" stroke-width="2"/>
+  <line x1="101" y1="192" x2="101" y2="196" stroke="#38BDF8" stroke-width="2"/>
+  <line x1="109" y1="192" x2="109" y2="196" stroke="#38BDF8" stroke-width="2"/>
+  <line x1="93" y1="228" x2="93" y2="232" stroke="#38BDF8" stroke-width="2"/>
+  <line x1="101" y1="228" x2="101" y2="232" stroke="#38BDF8" stroke-width="2"/>
+  <line x1="109" y1="228" x2="109" y2="232" stroke="#38BDF8" stroke-width="2"/>
+  <line x1="84" y1="205" x2="88" y2="205" stroke="#38BDF8" stroke-width="2"/>
+  <line x1="84" y1="212" x2="88" y2="212" stroke="#38BDF8" stroke-width="2"/>
+  <line x1="84" y1="219" x2="88" y2="219" stroke="#38BDF8" stroke-width="2"/>
+  <line x1="120" y1="205" x2="116" y2="205" stroke="#38BDF8" stroke-width="2"/>
+  <line x1="120" y1="212" x2="116" y2="212" stroke="#38BDF8" stroke-width="2"/>
+  <line x1="120" y1="219" x2="116" y2="219" stroke="#38BDF8" stroke-width="2"/>
+  <text x="80" y="262" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700">算力池化</text>
+  <text x="80" y="284" fill="#38BDF8" font-family="Arial, sans-serif" font-size="13" font-weight="600">极致利用率</text>
+  <line x1="80" y1="298" x2="284" y2="298" stroke="#1E293B" stroke-width="1"/>
+  <text x="80" y="320" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">通过GPU/CPU异构算力</text>
+  <text x="80" y="340" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">池化与虚拟化，利用率</text>
+  <text x="80" y="360" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">可提升3～10倍。</text>
+  <rect x="80" y="448" width="100" height="28" rx="14" fill="#0C2A4A"/>
+  <text x="130" y="467" fill="#38BDF8" font-family="Arial, sans-serif" font-size="13" font-weight="600" text-anchor="middle">提升3–10倍</text>
+
+  <!-- Card 2: 按需分配 -->
+  <rect x="332" y="164" width="252" height="330" rx="16" fill="#111827" stroke="#334155"/>
+  <rect x="356" y="188" width="48" height="48" rx="12" fill="#1E293B"/>
+  <rect x="364" y="196" width="12" height="12" rx="2" fill="#A78BFA"/>
+  <rect x="380" y="196" width="12" height="12" rx="2" fill="#38BDF8"/>
+  <rect x="364" y="212" width="12" height="12" rx="2" fill="#38BDF8"/>
+  <rect x="380" y="212" width="12" height="12" rx="2" fill="#A78BFA"/>
+  <polygon points="400,202 407,210 400,218" fill="#A78BFA"/>
+  <text x="356" y="262" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700">按需分配</text>
+  <text x="356" y="284" fill="#A78BFA" font-family="Arial, sans-serif" font-size="13" font-weight="600">灵活调度</text>
+  <line x1="356" y1="298" x2="560" y2="298" stroke="#1E293B" stroke-width="1"/>
+  <text x="356" y="320" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">支持算力超分与精细</text>
+  <text x="356" y="340" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">切分，按租户/部门/</text>
+  <text x="356" y="360" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">项目灵活分配，按需</text>
+  <text x="356" y="380" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">弹性伸缩。</text>
+  <rect x="356" y="448" width="120" height="28" rx="14" fill="#1E1040"/>
+  <text x="416" y="467" fill="#A78BFA" font-family="Arial, sans-serif" font-size="13" font-weight="600" text-anchor="middle">多租户精细管控</text>
+
+  <!-- Card 3: 计量计费 -->
+  <rect x="608" y="164" width="252" height="330" rx="16" fill="#111827" stroke="#334155"/>
+  <rect x="632" y="188" width="48" height="48" rx="12" fill="#1E293B"/>
+  <rect x="642" y="196" width="28" height="32" rx="3" fill="none" stroke="#34D399" stroke-width="2"/>
+  <line x1="648" y1="206" x2="664" y2="206" stroke="#34D399" stroke-width="2"/>
+  <line x1="648" y1="213" x2="664" y2="213" stroke="#34D399" stroke-width="2"/>
+  <line x1="648" y1="220" x2="658" y2="220" stroke="#34D399" stroke-width="2"/>
+  <text x="632" y="262" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700">计量计费</text>
+  <text x="632" y="284" fill="#34D399" font-family="Arial, sans-serif" font-size="13" font-weight="600">精细管理</text>
+  <line x1="632" y1="298" x2="836" y2="298" stroke="#1E293B" stroke-width="1"/>
+  <text x="632" y="320" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">支持算力用量监控与</text>
+  <text x="632" y="340" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">计费核算，帮助企业</text>
+  <text x="632" y="360" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">精细化管理IT成本。</text>
+  <rect x="632" y="448" width="100" height="28" rx="14" fill="#052E1C"/>
+  <text x="682" y="467" fill="#34D399" font-family="Arial, sans-serif" font-size="13" font-weight="600" text-anchor="middle">用量统计分析</text>
+
+  <!-- Card 4: 智能调度与运维 -->
+  <rect x="884" y="164" width="252" height="330" rx="16" fill="#111827" stroke="#334155"/>
+  <rect x="908" y="188" width="48" height="48" rx="12" fill="#1E293B"/>
+  <circle cx="932" cy="212" r="8" fill="none" stroke="#FB923C" stroke-width="2"/>
+  <line x1="938" y1="218" x2="946" y2="226" stroke="#FB923C" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="922" cy="204" r="3" fill="#FB923C"/>
+  <text x="908" y="262" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700">智能调度与运维</text>
+  <text x="908" y="284" fill="#FB923C" font-family="Arial, sans-serif" font-size="13" font-weight="600">智能运营</text>
+  <line x1="908" y1="298" x2="1112" y2="298" stroke="#1E293B" stroke-width="1"/>
+  <text x="908" y="320" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">具备千卡级别分布式</text>
+  <text x="908" y="340" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">调度能力，内置任务</text>
+  <text x="908" y="360" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">队列、服务部署、监</text>
+  <text x="908" y="380" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">控告警与日志管理。</text>
+  <rect x="908" y="448" width="120" height="28" rx="14" fill="#2D1A00"/>
+  <text x="968" y="467" fill="#FB923C" font-family="Arial, sans-serif" font-size="13" font-weight="600" text-anchor="middle">支持千卡规模</text>
+
+  <!-- Bottom bullets -->
+  <circle cx="72" cy="516" r="4" fill="#38BDF8"/>
+  <text x="84" y="521" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14">智算集群统一调度与管理，通过资源池化、GPU虚拟化技术，实现硬件集群平台化管理。</text>
+  <circle cx="72" cy="540" r="4" fill="#A78BFA"/>
+  <text x="84" y="545" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14">全面信创适配，支持国产GPU/CPU/NPU，构建安全可控本地算力底座。</text>
+</svg>

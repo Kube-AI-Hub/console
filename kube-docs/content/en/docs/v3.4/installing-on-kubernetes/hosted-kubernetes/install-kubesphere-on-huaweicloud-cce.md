@@ -23,8 +23,6 @@ First, create a Kubernetes cluster based on the requirements below.
 - Go to **Resource Management** > **Cluster Management** > **Basic Information** > **Network**, and bind `Public apiserver`.
 - Select **kubectl** on the right column, go to **Download kubectl configuration file**, and click **Click here to download**, then you will get a public key for kubectl.
 
-  ![Generate Kubectl config file](/images/docs/v3.x/huawei-cce/en/generate-kubeconfig.png)
-
 After you get the configuration file for kubectl, use kubectl command line to verify the connection to the cluster.
 
 ```bash
@@ -81,21 +79,15 @@ kubectl apply -f https://github.com/kubesphere/ks-installer/releases/download/v3
 kubectl apply -f https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/cluster-configuration.yaml
 ```
 
-Go to **Workload** > **Pod**, and check the running status of the pod in `kubesphere-system` of its namespace to understand the minimal deployment of Kube AI Hub. Check `ks-console-xxxx`  of the namespace to understand the availability of Kube AI Hub console.
-
-  ![Deploy Kube AI Hub in Minimal](/images/docs/v3.x/huawei-cce/en/deploy-ks-minimal.png)
+Go to **Workload** > **Pod** and check the running status of Pods in the `kubesphere-system` namespace to confirm the minimal deployment. When the `ks-console-*` Pod becomes ready, the Kube AI Hub console is available.
 
 ### Expose Kube AI Hub Console
 
 Check the running status of Pods in `kubesphere-system` namespace and make sure the basic components of  Kube AI Hub are running. Then expose Kube AI Hub console.
 
-Go to **Resource Management** > **Network** and choose the service in `ks-console`. It is suggested that you choose `LoadBalancer` (Public IP is required). The configuration is shown below.
+Go to **Resource Management** > **Network** and edit the `ks-console` Service. It is recommended that you use `LoadBalancer`, which requires a public IP.
 
-  ![Expose Kube AI Hub Console](/images/docs/v3.x/huawei-cce/en/expose-ks-console.png)
-
-Default settings are OK for other detailed configurations. You can also set them based on your needs.
-
-  ![Edit Kube AI Hub Console SVC](/images/docs/v3.x/huawei-cce/en/edit-ks-console-svc.png)
+Default settings are usually sufficient for the remaining fields. After the Service is updated, confirm that an external access address has been assigned and use it to open the login page.
 
 After you set LoadBalancer for Kube AI Hub console, you can visit it via the given address. Go to Kube AI Hub login page and use the default account (username `admin` and password `P@88w0rd`) to log in.
 

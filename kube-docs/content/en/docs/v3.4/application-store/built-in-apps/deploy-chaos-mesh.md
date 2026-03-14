@@ -8,7 +8,7 @@ linkTitle: "Deploy Chaos Mesh on Kube AI Hub"
 
 [Chaos Mesh](https://github.com/chaos-mesh/chaos-mesh) is a cloud-native Chaos Engineering platform that orchestrates chaos in Kubernetes environments. With Chaos Mesh, you can test your system's resilience and robustness on Kubernetes by injecting various types of faults into Pods, network, file system, and even the kernel.
 
-![Chaos Mesh architecture](/images/docs/v3.x/appstore/built-in-apps/deploy-chaos-mesh/chaos-mesh-architecture-v2.png)
+![Chaos Mesh architecture](/images/docs/v3.x/appstore/built-in-apps/deploy-chaos-mesh/chaos-mesh-architecture.svg)
 
 ## Enable App Store on Kube AI Hub 
 
@@ -20,32 +20,20 @@ linkTitle: "Deploy Chaos Mesh on Kube AI Hub"
 
 ### Step 1: Deploy Chaos Mesh 
   
-1. Login Kube AI Hub as `project-regular`, search for **chaos-mesh** in the **App Store**, and click on the search result to enter the app. 
-      
-    ![Chaos Mesh app](/images/docs/v3.x/appstore/built-in-apps/deploy-chaos-mesh/chaos-mesh-app.png)
-        
-2.  In the **App Information** page, click **Install** on the upper right corner.
+1. Log in to Kube AI Hub as `project-regular`, search for **chaos-mesh** in the **App Store**, and open the app details page.
 
-    ![Install Chaos Mesh](/images/docs/v3.x/appstore/built-in-apps/deploy-chaos-mesh/install-chaos-mesh.png)
-        
-3. In the **App Settings** page, set the application **Name,** **Location** (as your Namespace), and **App Version**, and then click **Next** on the upper right corner.
+2. Click **Install** in the upper-right corner.
 
-    ![Chaos Mesh basic information](/images/docs/v3.x/appstore/built-in-apps/deploy-chaos-mesh/chaos-mesh-basic-info.png)
+3. In **App Settings**, set the application **Name**, **Location** (your Namespace), and **App Version**, and then continue.
 
-4. Configure the `values.yaml` file as needed, or click **Install** to use the default configuration.
+4. Configure `values.yaml` as needed, or keep the default configuration and install the app directly.
 
-    ![Chaos Mesh configurations](/images/docs/v3.x/appstore/built-in-apps/deploy-chaos-mesh/chaos-mesh-config.png)
-
-5. Wait for the deployment to be finished. Upon completion, Chaos Mesh will be shown as **Running** in Kube AI Hub. 
-
-    ![Chaos Mesh deployed](/images/docs/v3.x/appstore/built-in-apps/deploy-chaos-mesh/chaos-mesh-deployed.png)
+5. Wait until the application status changes to **Running**.
 
 
 ### Step 2: Visit Chaos Dashboard
 
-1. In the **Resource Status** page, copy the **NodePort **of `chaos-dashboard`.
-       
-    ![Chaos Mesh NodePort](/images/docs/v3.x/appstore/built-in-apps/deploy-chaos-mesh/chaos-mesh-nodeport.png)
+1. In the application resources or Service list, locate the `chaos-dashboard` Service and copy its **NodePort**.
 
 2. Access the Chaos Dashboard by entering `${NodeIP}:${NODEPORT}` in your browser. Refer to [Manage User Permissions](https://chaos-mesh.org/docs/manage-user-permissions/) to generate a Token and log into Chaos Dashboard. 
 

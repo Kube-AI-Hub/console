@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" fill="none">
+  <rect width="1200" height="720" rx="24" fill="#0F172A"/>
+
+  <!-- Title -->
+  <text x="56" y="56" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="28" font-weight="700">AI Compute Management Platform Product Architecture</text>
+  <text x="56" y="88" fill="#94A3B8" font-family="Arial, sans-serif" font-size="16">A layered architecture from user identity and permissions down to heterogeneous GPU/CPU hardware clusters.</text>
+  <line x1="56" y1="108" x2="1144" y2="108" stroke="#1E293B" stroke-width="1"/>
+
+  <!-- Layer 1: User & Permissions -->
+  <text x="56" y="134" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12" font-weight="600" letter-spacing="1">USER &amp; PERMISSIONS</text>
+  <rect x="56" y="142" width="1088" height="52" rx="12" fill="#111827" stroke="#334155"/>
+  <rect x="76" y="154" width="320" height="28" rx="8" fill="#1E293B"/>
+  <text x="236" y="173" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle">Standard Authentication</text>
+  <rect x="440" y="154" width="320" height="28" rx="8" fill="#1E293B"/>
+  <text x="600" y="173" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle">Custom Authentication</text>
+  <rect x="804" y="154" width="320" height="28" rx="8" fill="#1E293B"/>
+  <text x="964" y="173" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle">Multi-tenant Isolation</text>
+
+  <!-- Connector -->
+  <line x1="600" y1="194" x2="600" y2="210" stroke="#334155" stroke-width="2" stroke-dasharray="4,3"/>
+
+  <!-- Layer 2: Cluster Management -->
+  <text x="56" y="226" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12" font-weight="600" letter-spacing="1">CLUSTER MANAGEMENT</text>
+  <rect x="56" y="234" width="1088" height="52" rx="12" fill="#111827" stroke="#334155"/>
+  <rect x="76" y="246" width="156" height="28" rx="8" fill="#1E293B"/>
+  <text x="154" y="265" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle">Nodes</text>
+  <rect x="248" y="246" width="156" height="28" rx="8" fill="#1E293B"/>
+  <text x="326" y="265" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle">Groups</text>
+  <rect x="420" y="246" width="156" height="28" rx="8" fill="#1E293B"/>
+  <text x="498" y="265" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle">Containers</text>
+  <rect x="592" y="246" width="156" height="28" rx="8" fill="#1E293B"/>
+  <text x="670" y="265" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle">Storage</text>
+  <rect x="764" y="246" width="156" height="28" rx="8" fill="#1E293B"/>
+  <text x="842" y="265" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle">Monitoring</text>
+  <rect x="936" y="246" width="156" height="28" rx="8" fill="#1E293B"/>
+  <text x="1014" y="265" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle">Logs</text>
+
+  <!-- Connector -->
+  <line x1="600" y1="286" x2="600" y2="302" stroke="#334155" stroke-width="2" stroke-dasharray="4,3"/>
+
+  <!-- Layer 3: Kubernetes with vGPU (left) + vGPU (right) -->
+  <text x="56" y="318" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12" font-weight="600" letter-spacing="1">KUBERNETES WITH vGPU</text>
+  <text x="790" y="318" fill="#A78BFA" font-family="Arial, sans-serif" font-size="12" font-weight="600" letter-spacing="1">vGPU</text>
+
+  <!-- K8s panel -->
+  <rect x="56" y="326" width="700" height="116" rx="12" fill="#0F1F35" stroke="#1E3A5F"/>
+  <rect x="76" y="342" width="308" height="40" rx="8" fill="#172033" stroke="#334155"/>
+  <text x="230" y="367" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle">App Management (Helm Charts)</text>
+  <rect x="400" y="342" width="336" height="40" rx="8" fill="#172033" stroke="#334155"/>
+  <text x="568" y="367" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle">Product Registry (Harbor)</text>
+  <rect x="76" y="392" width="308" height="40" rx="8" fill="#172033" stroke="#334155"/>
+  <text x="230" y="417" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle">Compute Resource Mgmt (K8S)</text>
+  <rect x="400" y="392" width="336" height="40" rx="8" fill="#172033" stroke="#334155"/>
+  <text x="568" y="417" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle">Service Management (K8S)</text>
+
+  <!-- vGPU panel -->
+  <rect x="780" y="326" width="364" height="116" rx="12" fill="#1E0A3C" stroke="#6D28D9"/>
+  <rect x="800" y="342" width="324" height="40" rx="8" fill="#2D1060" stroke="#7C3AED"/>
+  <text x="962" y="367" fill="#C4B5FD" font-family="Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle">Heterogeneous GPU Virtualization</text>
+  <rect x="800" y="392" width="324" height="40" rx="8" fill="#2D1060" stroke="#7C3AED"/>
+  <text x="962" y="417" fill="#C4B5FD" font-family="Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle">GPU Compute Scheduling</text>
+
+  <!-- Connector -->
+  <line x1="400" y1="442" x2="400" y2="458" stroke="#334155" stroke-width="2" stroke-dasharray="4,3"/>
+  <line x1="962" y1="442" x2="962" y2="458" stroke="#6D28D9" stroke-width="2" stroke-dasharray="4,3"/>
+
+  <!-- Layer 4: Hardware Clusters -->
+  <text x="56" y="474" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12" font-weight="600" letter-spacing="1">HARDWARE CLUSTERS</text>
+
+  <!-- GPU Cluster -->
+  <rect x="56" y="482" width="364" height="188" rx="14" fill="#0D1B2A" stroke="#1E3A5F"/>
+  <text x="238" y="508" fill="#7DD3FC" font-family="Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle">GPU Cluster Management</text>
+  <line x1="76" y1="516" x2="400" y2="516" stroke="#1E3A5F" stroke-width="1"/>
+  <!-- GPU chip icons row -->
+  <rect x="76" y="528" width="60" height="56" rx="10" fill="#111827" stroke="#334155"/>
+  <rect x="83" y="535" width="46" height="42" rx="6" fill="#1E293B"/>
+  <text x="106" y="561" fill="#7DD3FC" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">NVIDIA</text>
+  <rect x="152" y="528" width="60" height="56" rx="10" fill="#111827" stroke="#334155"/>
+  <rect x="159" y="535" width="46" height="42" rx="6" fill="#1E293B"/>
+  <text x="182" y="561" fill="#7DD3FC" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">Cambricon</text>
+  <rect x="228" y="528" width="60" height="56" rx="10" fill="#111827" stroke="#334155"/>
+  <rect x="235" y="535" width="46" height="42" rx="6" fill="#1E293B"/>
+  <text x="258" y="561" fill="#7DD3FC" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">Huawei</text>
+  <rect x="304" y="528" width="60" height="56" rx="10" fill="#111827" stroke="#334155"/>
+  <rect x="311" y="535" width="46" height="42" rx="6" fill="#1E293B"/>
+  <text x="334" y="561" fill="#7DD3FC" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">Tianshu</text>
+  <rect x="154" y="596" width="110" height="28" rx="8" fill="#111827" stroke="#334155"/>
+  <text x="209" y="615" fill="#94A3B8" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">+ more vendors</text>
+  <!-- Domestic badge -->
+  <rect x="76" y="636" width="172" height="22" rx="11" fill="#0C2A4A"/>
+  <text x="162" y="652" fill="#38BDF8" font-family="Arial, sans-serif" font-size="12" font-weight="600" text-anchor="middle">Domestic GPU Support</text>
+
+  <!-- CPU Cluster -->
+  <rect x="444" y="482" width="364" height="188" rx="14" fill="#0D1B2A" stroke="#1E3A5F"/>
+  <text x="626" y="508" fill="#7DD3FC" font-family="Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle">CPU Cluster Management</text>
+  <line x1="464" y1="516" x2="788" y2="516" stroke="#1E3A5F" stroke-width="1"/>
+  <rect x="464" y="528" width="84" height="56" rx="10" fill="#111827" stroke="#334155"/>
+  <rect x="473" y="535" width="66" height="42" rx="6" fill="#1E293B"/>
+  <text x="506" y="561" fill="#7DD3FC" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">INTEL</text>
+  <rect x="564" y="528" width="84" height="56" rx="10" fill="#111827" stroke="#334155"/>
+  <rect x="573" y="535" width="66" height="42" rx="6" fill="#1E293B"/>
+  <text x="606" y="561" fill="#7DD3FC" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">AMD</text>
+  <rect x="664" y="528" width="84" height="56" rx="10" fill="#111827" stroke="#334155"/>
+  <rect x="673" y="535" width="66" height="42" rx="6" fill="#1E293B"/>
+  <text x="706" y="561" fill="#7DD3FC" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">Hygon</text>
+  <rect x="538" y="596" width="110" height="28" rx="8" fill="#111827" stroke="#334155"/>
+  <text x="593" y="615" fill="#94A3B8" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">+ more vendors</text>
+  <rect x="464" y="636" width="156" height="22" rx="11" fill="#0C2A4A"/>
+  <text x="542" y="652" fill="#38BDF8" font-family="Arial, sans-serif" font-size="12" font-weight="600" text-anchor="middle">Domestic CPU Support</text>
+
+  <!-- File Storage -->
+  <rect x="832" y="482" width="312" height="188" rx="14" fill="#0D1B2A" stroke="#1E3A5F"/>
+  <text x="988" y="508" fill="#7DD3FC" font-family="Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle">File Storage Resources</text>
+  <line x1="852" y1="516" x2="1124" y2="516" stroke="#1E3A5F" stroke-width="1"/>
+  <rect x="852" y="528" width="80" height="56" rx="10" fill="#111827" stroke="#334155"/>
+  <rect x="861" y="535" width="62" height="42" rx="6" fill="#1E293B"/>
+  <text x="892" y="561" fill="#7DD3FC" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">S3</text>
+  <rect x="948" y="528" width="80" height="56" rx="10" fill="#111827" stroke="#334155"/>
+  <rect x="957" y="535" width="62" height="42" rx="6" fill="#1E293B"/>
+  <text x="988" y="561" fill="#7DD3FC" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">NFS</text>
+  <rect x="1044" y="528" width="80" height="56" rx="10" fill="#111827" stroke="#334155"/>
+  <rect x="1053" y="535" width="62" height="42" rx="6" fill="#1E293B"/>
+  <text x="1084" y="561" fill="#7DD3FC" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">...</text>
+  <rect x="912" y="596" width="110" height="28" rx="8" fill="#111827" stroke="#334155"/>
+  <text x="967" y="615" fill="#94A3B8" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">+ more types</text>
+  <rect x="852" y="636" width="150" height="22" rx="11" fill="#1E1040"/>
+  <text x="927" y="652" fill="#A78BFA" font-family="Arial, sans-serif" font-size="12" font-weight="600" text-anchor="middle">Distributed Storage</text>
+</svg>

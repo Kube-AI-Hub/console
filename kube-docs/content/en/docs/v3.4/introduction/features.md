@@ -15,7 +15,7 @@ It also supports various open source storage and network solutions, as well as c
 
 With an easy-to-use web console in place, Kube AI Hub eases the learning curve for users and drives the adoption of Kubernetes.
 
-![Overview](https://pek3b.qingstor.com/kubesphere-docs/png/20200202153355.png)
+The main workspace typically brings resource views, application operations, and O&M entry points together in one place for daily cluster management.
 
 The following modules elaborate on the key features and benefits provided by Kube AI Hub. For detailed information, see the respective chapter in this guide.
 
@@ -52,7 +52,7 @@ For more information, see [Multi-cluster Management](../../multicluster-manageme
 
 Kube AI Hub provides a pluggable DevOps component based on popular CI/CD tools such as Jenkins. It features automated workflows and tools including binary-to-image (B2I) and source-to-image (S2I) to package source code or binary artifacts into ready-to-run container images.
 
-![DevOps](https://pek3b.qingstor.com/kubesphere-docs/png/20200202220455.png)
+The DevOps experience centers on pipelines, build strategies, and code quality integrations for continuous delivery workflows.
 
 ### CI/CD Pipeline
 
@@ -68,7 +68,7 @@ Source-to-Image (S2I) is a toolkit and automated workflow for building reproduci
 
 S2I allows you to publish your service to Kubernetes without writing a Dockerfile. You just need to provide a source code repository address, and specify the target image registry. All configurations will be stored as different resources in Kubernetes. Your service will be automatically published to Kubernetes, and the image will be pushed to the target registry as well.
 
-![S2I](https://pek3b.qingstor.com/kubesphere-docs/png/20200204131749.png)
+S2I links a source repository, builder image, and target registry through guided configuration so that services can be built and published without writing a Dockerfile manually.
 
 ### Binary-to-Image
 

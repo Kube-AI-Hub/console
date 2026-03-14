@@ -14,7 +14,7 @@ Kube AI Hub also represents a multi-tenant enterprise-grade Kubernetes container
 
 The Kube AI Hub team developed [KubeKey](https://github.com/kubesphere/kubekey), an open-source brand-new installer, to help enterprises quickly set up a Kubernetes cluster on public clouds or data centers. Users have the option to install Kubernetes only or install both Kube AI Hub and Kubernetes. KubeKey provides users with different installation options such as all-in-one installation and multi-node installation. It is also an efficient tool to install cloud-native add-ons, and upgrade and scale your Kubernetes cluster.
 
-![architecture-1](/images/docs/v3.x/introduction/what-is-kubesphere/architecture-1.png)
+![Architecture](/images/docs/v3.x/introduction/feature-overview.svg)
 
 ## O&M Friendly
 

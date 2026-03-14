@@ -10,7 +10,7 @@ weight: 17200
 
 The Kube AI Hub API server validates and configures data for API objects. The API Server services REST operations and provides the frontend to the cluster's shared state through which all other components interact.
 
-![ks-apiserver](/images/docs/v3.x/reference/kubesphere-api/ks-apiserver.png)
+In a default deployment, `ks-apiserver` serves as the unified API entry point for authentication, authorization, and API aggregation. It exposes REST endpoints to clients while coordinating with the Kubernetes API Server and other platform components.
 
 ## Use the Kube AI Hub API
 

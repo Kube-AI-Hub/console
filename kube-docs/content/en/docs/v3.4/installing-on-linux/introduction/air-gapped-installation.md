@@ -605,8 +605,6 @@ In KubeKey v2.1.0, we bring in concepts of manifest and artifact, which provides
 
 9. Access Kube AI Hub's web console at `http://{IP}:30880` using the default account and password `admin/P@88w0rd`.
 
-![login](/images/docs/v3.x/installing-on-kubernetes/introduction/overview/login.png)
-
 {{< notice note >}}
 
 To access the console, make sure that port 30880 is enabled in your security group.

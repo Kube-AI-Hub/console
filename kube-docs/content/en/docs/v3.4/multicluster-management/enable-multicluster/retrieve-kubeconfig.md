@@ -1,31 +1,49 @@
 ---
 title: "Retrieve Kubeconfig"
 keywords: 'Kubernetes, Kube AI Hub, multicluster, hybrid-cloud, kubeconfig'
-description: 'Retrieve the Kubeconfig which is needed for cluster importing through direct connection.'
+description: 'Retrieve the kubeconfig required for direct connection imports and learn where to open kubeconfig from the overview page.'
 titleLink: "Retrieve KubeConfig"
 weight: 5230
 ---
 
-You need to provide the kubeconfig of a member cluster if you import it using [direct connection](../direct-connection/).
+You need to provide the kubeconfig of a member cluster if you import it using [direct connection](../direct-connection/). For clusters that are already connected to the console, users granted the `platform-admin` role can also open the `kubeconfig` entry from the **Tools** card on the cluster **Overview** page.
+
+![](/images/docs/v3.x/cluster-overview/tools-access.svg)
 
 ## Prerequisites
 
-You have a Kubernetes cluster.
+You need a Kubernetes cluster and the permission to read its kubeconfig.
 
-## Get KubeConfig
+## Open the kubeconfig page from the console
 
-Go to `$HOME/.kube`, and check the file in the directory where, normally, a file named `config` exists. Use the following command to retrieve the KubeConfig file:
+1. Log in to Kube AI Hub with a user granted the `platform-admin` role.
+
+2. Go to **Platform** > **Cluster Management**, and open the **Overview** page of the target cluster.
+
+3. In the **Tools** card, click **kubeconfig**.
+
+4. View, copy, or download the kubeconfig content from the page that opens.
+
+{{< notice info >}}
+
+The `kubeconfig` entry on the overview page is intended for clusters that are already connected to the console. If you are preparing a cluster for direct connection import, retrieve the kubeconfig from the Kubernetes cluster itself.
+
+{{</ notice >}}
+
+## Retrieve kubeconfig from a Kubernetes node
+
+For a member cluster that is about to be imported, the kubeconfig is commonly available at `$HOME/.kube/config` on a control plane or administration node. Use the following command to print the raw kubeconfig:
 
 ```bash
-cat $HOME/.kube/config
+kubectl config view --raw
 ```
 
 ```yaml
 apiVersion: v1
 clusters:
 - cluster:
-    certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUN5RENDQWJDZ0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkFRc0ZBREFWTVJNd0VRWURWUVFERXdwcmRXSmwKY201bGRHVnpNQjRYRFRJd01EZ3dPREE1hqaVE3NXhwbGFQNUgwSm5ySk5peTBacFh6QWxjYzZlV2JlaXJ1VgpUbmZUVjZRY3pxaVcrS3RBdFZVbkl4MCs2VTgzL3FiKzdINHk2RnA0aVhUaDJxRHJ6Qkd4dG1UeFlGdC9OaFZlCmhqMHhEbHVMOTVUWkRjOUNmSFgzdGZJeVh5WFR3eWpnQ2g1RldxbGwxVS9qVUo2RjBLVVExZ1pRTFp4TVJMV0MKREM2ZFhvUGlnQ3BNaVRPVXl5SVNhWUVjYVNBMEo5VWZmSGd4ditVcXVleTc0cEM2emszS0lOT2tGMkI1MllxeApUa09OT2VkV2hDUExMZkUveVJqeGw1aFhPL1Z4REFaVC9HQ1Y1a0JZN0toNmRhendmUllOa21IQkhDMD0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=hqaVE3NXhwbGFQNUgwSm5ySk5peTBacFh6QWxjYzZlV2JlaXJ1VgpUbmZUVjZRY3pxaVcrS3RBdFZVbkl4MCs2VTgzL3FiKzdINHk2RnA0aVhUaDJxRHJ6Qkd4dG1UeFlGdC9OaFZlCmhqMHhEbHVMOTVUWkRjOUNmSFgzdGZJeVh5WFR3eWpnQ2g1RldxbGwxVS9qVUo2RjBLVVExZ1pRTFp4TVJMV0MKREM2ZFhvUGlnQ3BNaVRPVXl5SVNhWUVjYVNBMEo5VWZmSGd4ditVcXVleTc0cEM2emszS0lOT2tGMkI1MllxeApUa09OT2VkV2hDUExMZkUveVJqeGw1aFhPL1Z4REFaVC9HQ1Y1a0JZN0toNmRhendmUllOa21IQkhDMD0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
-    server: https://lb.kubesphere.local:6443
+    certificate-authority-data: <certificate-authority-data>
+    server: https://lb.kube-ai-hub.local:6443
   name: cluster.local
 contexts:
 - context:
@@ -38,6 +56,22 @@ preferences: {}
 users:
 - name: kubernetes-admin
   user:
-    client-certificate-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUM4akNDQWRxZ0F3SUJBZ0lJRzd5REpscVdjdTh3RFFZSktvWklodmNOQVFFTEJRQXdGVEVUTUJFR0ExVUUKQXhNS2EzVmlaWEp1WlhSbGN6QWVGdzB5TURBNE1EZ3dPVEkzTXpkYUZ3MHlNVEE0TURnd09USTNNemhhTURReApGekFWQmdOVkJBb1REbk41YzNSbGJUcHRZWE4wWlhKek1Sa3dGd1lEVlFRREV4QnsOTJBUkJDNTRSR3BsZ3VmCmw5a0hPd0lEQVFBQm95Y3dKVEFPQmdOVkhROEJBZjhFQkFNQ0JhQXdFd1lEVlIwbEJBd3dDZ1lJS3dZQkJRVUgKQXdJd0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFEQ2FUTXNBR1Vhdnhrazg0NDZnOGNRQUJpSmk5RTZiREV5TwphRnJubC8reGRzRmgvOTFiMlNpM3ZwaHFkZ2k5bXRYWkhhaWI5dnQ3aXdtSEFwbGQxUkhBU25sMFoxWFh1dkhzCmMzcXVIU0puY3dmc3JKT0I4UG9NRjVnaG10a0dPV3g0M2RHTTNHQnpGTVJ4ZGcrNmttNjRNUGhneXl6NTJjYUoKbzhPajNja1Uzd1NWNkxvempRcFVaUnZHV25qQjEwUXFPWXBtQUk4VCtlZkxKZzhuY0drK3V3UUVTeXBYWExpYwoxWVQ2QkFJeFhEK2tUUU1hOFhjdUhHZzlWRkdsUm9yK1EvY3l0S3RDeHVncFlxQ2xvbHVpckFUUnpsemRXamxYCkVQaHVjRWs2UUdIZEpObjd0M2NwRGkzSUdYYXJFdGxQQmFwck9nSGpkOHZVOStpWXdoQT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=TJBUkJDNTRSR3BsZ3VmCmw5a0hPd0lEQVFBQm95Y3dKVEFPQmdOVkhROEJBZjhFQkFNQ0JhQXdFd1lEVlIwbEJBd3dDZ1lJS3dZQkJRVUgKQXdJd0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFEQ2FUTXNBR1Vhdnhrazg0NDZnOGNRQUJpSmk5RTZiREV5TwphRnJubC8reGRzRmgvOTFiMlNpM3ZwaHFkZ2k5bXRYWkhhaWI5dnQ3aXdtSEFwbGQxUkhBU25sMFoxWFh1dkhzCmMzcXVIU0puY3dmc3JKT0I4UG9NRjVnaG10a0dPV3g0M2RHTTNHQnpGTVJ4ZGcrNmttNjRNUGhneXl6NTJjYUoKbzhPajNja1Uzd1NWNkxvempRcFVaUnZHV25qQjEwUXFPWXBtQUk4VCtlZkxKZzhuY0drK3V3UUVTeXBYWExpYwoxWVQ2QkFJeFhEK2tUUU1hOFhjdUhHZzlWRkdsUm9yK1EvY3l0S3RDeHVncFlxQ2xvbHVpckFUUnpsemRXamxYCkVQaHVjRWs2UUdIZEpObjd0M2NwRGkzSUdYYXJFdGxQQmFwck9nSGpkOHZVOStpWXdoQT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
-    client-key-data: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcEFJQkFBS0NBUUVBeXBLWkdtdmdiSHdNaU9pVU80UHZKZXB2MTJaaE1yRUIxK2xlVnM0dHIzMFNGQ0p1Ck8wc09jL2lUNmFuWEJzUU1XNDF6V3hwV1B5elkzWXlUWEJMTlIrM01pWTl2SFhUeWJ6eitTWnNlTzVENytHL3MKQnR5NkovNGpJb2pZZlRZNTFzUUxyRVJydStmVnNGeUU0U2dXbE1HYWdqV0RIMFltM0VJsOTJBUkJDNTRSR3BsZ3VmCmw5a0hPd0lEQVFBQm95Y3dKVEFPQmdOVkhROEJBZjhFQkFNQ0JhQXdFd1lEVlIwbEJBd3dDZ1lJS3dZQkJRVUgKQXdJd0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFEQ2FUTXNBR1Vhdnhrazg0NDZnOGNRQUJpSmk5RTZiREV5TwphRnJubC8reGRzRmgvOTFiMlNpM3ZwaHFkZ2k5bXRYWkhhaWI5dnQ3aXdtSEFwbGQxUkhBU25sMFoxWFh1dkhzCmMzcXVIU0puY3dmc3JKT0I4UG9NRjVnaG10a0dPV3g0M2RHTTNHQnpGTVJ4ZGcrNmttNjRNUGhneXl6NTJjYUoKbzhPajNja1Uzd1NWNkxvempRcFVaUnZHV25qQjEwUXFPWXBtQUk4VCtlZkxKZzhuY0drK3V3UUVTeXBYWExpYwoxWVQ2QkFJeFhEK2tUUU1hOFhjdUhHZzlWRkdsUm9yK1EvY3l0S3RDeHVncFlxQ2xvbHVpckFUUnpsemRXamxYCkVQaHVjRWs2UUdIZEpObjd0M2NwRGkzSUdYYXJFdGxQQmFwck9nSGpkOHZVOStpWXdoQT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=Ygo3THE3a2tBMURKNTBld2pMUTNTd1Yxd2p6N2ZjeDYvbzUwRnJnK083dEJMVVdQNTNHaDQ1VjJpUEp2NkdPYk1uCjhIWElmem83cW5XRFQvU20ybW5HbitUdVY4THdLVWFXL2wya3FkRUNnWUVBcS9zRmR1RDk2Z3VoT2ZaRnczcWMKblZGekNGQ3JsMkUvVkdYQy92SmV1WnJLQnFtSUtNZFI3ajdLWS9WRFVlMnJocVd6MFh2Wm9Sa1FoMkdwWkdIawpDd3NzcENKTVl4L0hETTVaWlBvcittb1J6VE5HNHlDNGhTRGJ2VEFaTmV1VTZTK1hzL1JSTDJ6WnUwemNQQXk1CjJJRVgwelFpZ1JzK3VzS3Jkc1FVZXZrQ2dZQUUrQUNWeDJnMC94bmFsMVFJNmJsK3Y2TDJrZVJtVGppcHB4Wm0KS1JEd2xnaXpsWGxsTjhyQmZwSGNiK1ZnZ282anN2eHFrb0pkTEhBLzFDME5IMWVuS1NoUTlpZVFpeWNsZngwdQpKOE1oeW1JM0RBZUg1REJyOG1rZ0pwNnJwUXNBc1paYmVhOHlLTzV5eVdCYTN6VGxOVnQvNDRibGg5alpnTWNMCjNyUXFVUUtCZ1FETVlXdEt2S0hOQllXV0p5enFERnFPbS9qY3Z3andvcURibUZVMlU3UGs2aUdNVldBV3VYZ3cKSm5qQWtES01GN0JXSnJRUjR6RHVoQlhvQVMxWVhiQ2lGd2hTcXVjWGhFSGlwQ3Nib0haVVRtT1pXUUh4Vlp4bQowU1NiRXFZU2MvZHBDZ1BHRk9IaW1FdUVic05kc2JjRmRETDQyODZHb0psQUxCOGc3VWRUZUE9PQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQo=
+    client-certificate-data: <client-certificate-data>
+    client-key-data: <client-key-data>
 ```
+
+## Use kubeconfig during cluster import
+
+1. In the Kube AI Hub console, choose to import the member cluster through **Direct connection**.
+
+2. Paste or upload the kubeconfig content as prompted by the page.
+
+3. Make sure the API server address in the `server` field is reachable from the host cluster.
+
+4. Submit the import task and wait for the cluster status to update.
+
+{{< notice warning >}}
+
+The kubeconfig usually contains API server addresses, certificates, and credentials. Store it carefully and avoid exposing it publicly.
+
+{{</ notice >}}

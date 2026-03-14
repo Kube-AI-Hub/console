@@ -112,9 +112,7 @@ Now that Kube AI Hub is installed, you can access the web console of Kube AI Hub
   kubectl get svc -n kubesphere-system
   ```
 
-- The output may look as below. You can change the type to `LoadBalancer` so that the external IP address can be exposed.
-
-  ![console-nodeport](https://ap3.qingstor.com/kubesphere-website/docs/nodeport-console.jpg)
+- If the output shows that `ks-console` is exposed through `NodePort`, you can change the type to `LoadBalancer` so that an external IP address is assigned.
 
   {{< notice tip >}}
 
@@ -130,15 +128,11 @@ Now that Kube AI Hub is installed, you can access the web console of Kube AI Hub
 
 - Navigate to `type` and change `NodePort` to `LoadBalancer`. Save the configuration after you finish.
 
-  ![change-svc-type](https://ap3.qingstor.com/kubesphere-website/docs/change-service-type.png)
-
-- Execute the following command again and you can see the IP address displayed as below.
+- Execute the following command again and confirm that `EXTERNAL-IP` has been assigned.
 
   ```bash
   kubectl get svc -n kubesphere-system
   ```
-
-  ![console-service](https://ap3.qingstor.com/kubesphere-website/docs/console-service.png)
 
 - Log in to the console through the external IP address with the default account and password (`admin/P@88w0rd`). In the cluster overview page, you can see the dashboard.
 

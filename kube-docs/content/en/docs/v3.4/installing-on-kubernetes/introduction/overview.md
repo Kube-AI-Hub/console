@@ -6,8 +6,6 @@ linkTitle: "Overview"
 weight: 4110
 ---
 
-![kubesphere+k8s](/images/docs/v3.x/installing-on-kubernetes/introduction/overview/kubesphere+k8s.png)
-
 As part of Kube AI Hub's commitment to provide a plug-and-play architecture for users, it can be easily installed on existing Kubernetes clusters. More specifically, Kube AI Hub can be deployed on Kubernetes either hosted on clouds (for example, AWS EKS, QingCloud QKE and Google GKE) or on-premises. This is because Kube AI Hub does not hack Kubernetes itself. It only interacts with the Kubernetes API to manage Kubernetes cluster resources. In other words, Kube AI Hub can be installed on any native Kubernetes cluster and Kubernetes distribution.
 
 This section gives you an overview of the general steps of installing Kube AI Hub on Kubernetes. For more information about the specific way of installation in different environments, see Installing on Hosted Kubernetes and Installing on On-premises Kubernetes.
@@ -17,10 +15,6 @@ This section gives you an overview of the general steps of installing Kube AI Hu
 Read [Prerequisites](../prerequisites/) before you install Kube AI Hub on existing Kubernetes clusters.
 
 {{</ notice >}}
-
-## Video Demonstration
-
-{{< youtube 6wdOBD4gyg4 >}}
 
 ## Deploy Kube AI Hub
 
@@ -46,9 +40,7 @@ After you make sure your existing Kubernetes cluster meets all the requirements,
    kubectl get svc/ks-console -n kubesphere-system
    ```
 
-4. Make sure port 30880 is opened in security groups and access the web console through the NodePort (`IP:30880`) with the default account and password (`admin/P@88w0rd`).
-
-   ![login](/images/docs/v3.x/installing-on-kubernetes/introduction/overview/login.png)
+4. Make sure port 30880 is opened in security groups and access the web console through the NodePort (`IP:30880`) with the default account and password (`admin/P@88w0rd`). After login, review the cluster overview and system component status first, and then change the default password.
 
 ## Enable Pluggable Components (Optional)
 

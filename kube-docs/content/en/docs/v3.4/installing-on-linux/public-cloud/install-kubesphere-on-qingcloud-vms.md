@@ -22,7 +22,7 @@ This tutorial walks you through an example of how to create two [QingCloud load 
 
 This example prepares six machines of **Ubuntu 16.04.6**. You will create two load balancers, and deploy three control plane nodes and etcd nodes on three of the machines. You can configure these control plane and etcd nodes in `config-sample.yaml` created by KubeKey (Please note that this is the default name, which can be changed by yourself).
 
-![ha-architecture](/images/docs/v3.x/installing-on-linux/installing-on-public-cloud/deploy-kubesphere-on-qingcloud-instances/ha-architecture.png)
+![HA architecture](/images/docs/v3.x/installing-on-linux/high-availability-configurations/ha-architecture.svg)
 
 {{< notice note >}}
 

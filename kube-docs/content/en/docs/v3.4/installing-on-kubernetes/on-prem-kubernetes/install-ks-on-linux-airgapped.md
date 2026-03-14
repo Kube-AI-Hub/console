@@ -238,7 +238,7 @@ To access the console, make sure port 30880 is opened in your security group.
 
 {{</ notice >}}
 
-![kubesphere-login](https://ap3.qingstor.com/kubesphere-website/docs/login.png)
+After the sign-in page opens, log in with the default credentials and verify that the console home page and system components load normally.
 
 ## Appendix
 

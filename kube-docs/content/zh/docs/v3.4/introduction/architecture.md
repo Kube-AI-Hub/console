@@ -9,9 +9,9 @@ weight: 1500
 
 ## 前后端分离
 
-Kube AI Hub 将 [前端](https://github.com/kubesphere/console) 与 [后端](https://github.com/kubesphere/kubesphere) 分开，实现了面向云原生的设计，后端的各个功能组件可通过 REST API 对接外部系统。 可参考 [API文档](../../reference/api-docs/)。下图是系统架构图。 Kube AI Hub 无底层的基础设施依赖，可以运行在任何 Kubernetes、私有云、公有云、VM 或物理环境（BM）之上。 此外，它可以部署在任何 Kubernetes 发行版上。
+Kube AI Hub 将 [前端](https://github.com/kubesphere/console) 与 [后端](https://github.com/kubesphere/kubesphere) 分开，实现了面向云原生的设计，后端的各个功能组件可通过 REST API 对接外部系统。可参考 [API 文档](../../reference/api-docs/)。下图是系统架构图。Kube AI Hub 无底层的基础设施依赖，可以运行在任何 Kubernetes、私有云、公有云、VM 或物理环境（BM）之上。此外，它可以部署在任何 Kubernetes 发行版上。
 
-![Architecture](https://pek3b.qingstor.com/kubesphere-docs/png/20190810073322.png)
+![Architecture](/images/docs/v3.x/introduction/system-architecture.svg)
 
 ## 组件列表
 

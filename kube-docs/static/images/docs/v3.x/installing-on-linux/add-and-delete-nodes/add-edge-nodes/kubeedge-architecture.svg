@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" fill="none">
+  <rect width="1200" height="520" rx="24" fill="#0F172A"/>
+  <text x="56" y="60" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="30" font-weight="700">KubeEdge Architecture</text>
+  <text x="56" y="94" fill="#94A3B8" font-family="Arial, sans-serif" font-size="18">CloudCore runs in the cluster, while EdgeCore services run on edge nodes connected through public or forwarded ports.</text>
+
+  <rect x="56" y="132" width="470" height="320" rx="20" fill="#111827" stroke="#334155"/>
+  <text x="84" y="174" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="26" font-weight="700">Cloud Side</text>
+  <rect x="84" y="208" width="414" height="88" rx="16" fill="#1E293B" stroke="#334155"/>
+  <text x="112" y="244" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="21" font-weight="700">CloudCore</text>
+  <text x="112" y="274" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="16">CloudHub, Controllers, tunnel and stream services</text>
+  <rect x="84" y="320" width="414" height="92" rx="16" fill="#0B1220" stroke="#334155"/>
+  <text x="112" y="356" fill="#38BDF8" font-family="Arial, sans-serif" font-size="21" font-weight="700">Kubernetes Cluster</text>
+  <text x="112" y="386" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="16">Workloads, APIs, monitoring, and configuration</text>
+
+  <rect x="674" y="132" width="470" height="320" rx="20" fill="#111827" stroke="#334155"/>
+  <text x="702" y="174" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="26" font-weight="700">Edge Side</text>
+  <rect x="702" y="208" width="414" height="88" rx="16" fill="#1E293B" stroke="#334155"/>
+  <text x="730" y="244" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="21" font-weight="700">EdgeCore</text>
+  <text x="730" y="274" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="16">EdgeHub, EdgeMesh, device services, metadata</text>
+  <rect x="702" y="320" width="414" height="92" rx="16" fill="#0B1220" stroke="#334155"/>
+  <text x="730" y="356" fill="#38BDF8" font-family="Arial, sans-serif" font-size="21" font-weight="700">Edge Nodes</text>
+  <text x="730" y="386" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="16">Application runtime and local device access</text>
+
+  <path d="M526 292H654" stroke="#475569" stroke-width="6" stroke-linecap="round"/>
+  <path d="M632 274L660 292L632 310" stroke="#475569" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="517" y="252" fill="#94A3B8" font-family="Arial, sans-serif" font-size="15">10000-10004 or 30000-30004</text>
+</svg>

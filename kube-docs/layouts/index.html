@@ -12,8 +12,11 @@
       {{ partial "downloadButton" . }}
     </div>
     <div class="img1-div">
-      <img class='img1' src="{{ $basePath }}/images/home/53.png" id='video' alt="{{ i18n " kubesphere console screenshot"}}">
-      <img class='play' src="{{ $basePath }}/images/videos/play-b.svg" alt="play">
+      {{ if eq $.Site.Language.Lang "zh" }}
+      <img class='img1' src="{{ $basePath }}/images/home/hero-dashboard-zh.svg" alt="console screenshot">
+      {{ else }}
+      <img class='img1' src="{{ $basePath }}/images/home/hero-dashboard-en.svg" alt="console screenshot">
+      {{ end }}
     </div>
   </div>
   {{ end }}
@@ -51,7 +54,7 @@
       {{ range .children }}
       <div class='right-div'>
         <div class='top'>
-          <h3>💁🏼‍♂️{{ .name }}</h3>
+          <h3>{{ .name }}</h3>
           <p>{{ .content | safeHTML }}</p>
         </div>
         <ul>
@@ -143,8 +146,11 @@
           </ul>
         </div>
         <div class='image'>
-          <img src="{{ $basePath }}/images/home/applications.png" alt="{{ .project }}">
-          <img src="{{ $basePath }}/images/home/applications.png" alt="{{ .project }}">
+          {{ if eq $.Site.Language.Lang "zh" }}
+          <img src="{{ $basePath }}/images/home/platform-architecture-zh.svg" alt="{{ .project }}">
+          {{ else }}
+          <img src="{{ $basePath }}/images/home/platform-architecture-en.svg" alt="{{ .project }}">
+          {{ end }}
         </div>
       </div>
       {{ end }}
@@ -207,58 +213,8 @@
 <script>
   var basePath = '{{ strings.TrimSuffix "/" .Site.Params.logoLink }}';
   console.log('basePath', basePath);
-  var controlVideo = function () {
-
-    var startVideo = $('div.img1-div')
-    var shadow = $('div.shadow')
-    var video = $('div.modal-for-video')
-    var start1 = $('video.start1')
-    var start2 = $('iframe.start2')
-    var closeVideo = $('img.close-video')
-    var language = $('div.video-div').data('language')
-    var height = document.body.scrollHeight + 'px'
-
-    let openVideo = function () {
-      if (language == 'zh') {
-        start2.css('display', 'none')
-        start1.attr('src', "https://kubesphere-community.pek3b.qingstor.com/videos/kubesphere-demo-cn.mp4")
-        video.css('height', 'auto')
-
-      } else if (language == 'en') {
-        start1.css('display', 'none')
-        start2.attr('src', "https://www.youtube.com/embed/YxZ1YUv0CYs")
-      }
-
-      shadow.show()
-      shadow.css('height', `${height}`)
-
-      video.show();
-      closeVideo.show();
-
-    }
-
-    let endVideo = function () {
-      closeVideo.hide()
-      start1.attr('src', '')
-      start2.attr('src', '')
-      shadow.hide()
-      video.hide()
-    }
-
-    shadow.hide();
-
-    startVideo.click(function () {
-      openVideo()
-    })
-
-    closeVideo.click(function () {
-      endVideo()
-    })
-    shadow.click(function () {
-      endVideo()
-    })
-
-  }
+  // Video modal removed — hero uses SVG dashboard image
+  var controlVideo = function () {}
 
   var bindMouseLeftLi = function () {
     $('.section-3 .left-li').mouseenter(function () {
@@ -270,18 +226,7 @@
   }
 
   var bindResize = function () {
-    var screenWidth = $(window).width()
-    if (screenWidth <= 768) {
-      $('.image').find('img').attr('src', basePath + "/images/home/applications2.png")
-    }
-    $(window).resize(function () {
-      var screenWidth = $(window).width()
-      if (screenWidth <= 768) {
-        $('.image').find('img').attr('src', basePath + "/images/home/applications2.png")
-      } else {
-        $('.image').find('img').attr('src', basePath + "/images/home/applications.png")
-      }
-    })
+    // Architecture SVG is responsive, no swap needed
   }
 
   var bindMeet = function () {

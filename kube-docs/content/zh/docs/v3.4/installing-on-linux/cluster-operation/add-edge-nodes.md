@@ -8,7 +8,7 @@ weight: 3630
 
 Kube AI Hub 利用 [KubeEdge](https://kubeedge.io/zh/) 将原生容器化应用程序编排功能扩展到边缘的主机。KubeEdge 拥有单独的云端和边端核心模块，提供完整的边缘计算解决方案，但安装过程可能较为繁琐。
 
-![kubeedge_arch](/images/docs/v3.x/zh-cn/installing-on-linux/add-and-delete-nodes/add-edge-nodes/kubeedge_arch.png)
+![kubeedge_arch](/images/docs/v3.x/installing-on-linux/add-and-delete-nodes/add-edge-nodes/kubeedge-architecture.svg)
 
 {{< notice note >}}
 

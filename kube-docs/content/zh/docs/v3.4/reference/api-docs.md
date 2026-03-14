@@ -10,9 +10,9 @@ weight: 17200
 
 Kube AI Hub API 服务器为 API 对象验证和配置数据。API 服务器为 REST 操作提供服务，并为集群的共享状态提供前端，其他所有组件通过它进行交互。
 
-其中 /kapi 和/kapis 是 Kube AI Hub 拓展聚合的 API，/api和 /apis开头的都属于 Kubernetes 原生的 API，Kube AI Hub 把用户对原生 Kubernetes 资源的请求通过 API Server 转发到 Kubernetes API Server 对原生资源进行操作和管理。
+其中 `/kapi` 和 `/kapis` 是 Kube AI Hub 扩展聚合的 API，`/api` 和 `/apis` 开头的则属于 Kubernetes 原生 API。Kube AI Hub 会将用户对原生 Kubernetes 资源的请求转发到 Kubernetes API Server，从而完成资源的操作和管理。
 
-![ks-apiserver](/images/docs/v3.x/zh-cn/reference/kubesphere-api/ks-apiserver.png)
+在默认部署中，`ks-apiserver` 作为统一入口提供认证、鉴权和 API 聚合能力，对外暴露 REST 接口，对内与 Kubernetes API Server 及平台组件协作。
 
 ## 使用 Kube AI Hub API
 

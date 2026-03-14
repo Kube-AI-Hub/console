@@ -6,8 +6,6 @@ description: '了解如何在 DigitalOcean 上部署 Kube AI Hub。'
 weight: 4230
 ---
 
-![Kube AI Hub+DOKS](/images/docs/v3.x/do/Kube AI Hub-DOKS.png)
-
 本指南将介绍在 [DigitalOcean Kubernetes](https://www.digitalocean.com/products/kubernetes/) 上部署 Kube AI Hub 的步骤。
 
 ## 准备一个 DOKS 集群
@@ -98,9 +96,7 @@ https://kubesphere.io             2020-xx-xx xx:xx:xx
 
   ![lb-change](/images/docs/v3.x/zh-cn/installing-on-kubernetes/hosted-kubernetes/install-kubesphere-on-do/lb-change.png)
 
-- 使用 DO 生成的端点访问 Kube AI Hub 的 Web 控制台。
-
-  ![access-console](/images/docs/v3.x/zh-cn/installing-on-kubernetes/hosted-kubernetes/install-kubesphere-on-do/access-console.png)
+- 等待 DO 为 `ks-console` 服务分配外部端点，然后使用该地址访问 Kube AI Hub 的 Web 控制台。
 
   {{< notice tip >}}
 
@@ -108,7 +104,7 @@ https://kubesphere.io             2020-xx-xx xx:xx:xx
 
   {{</ notice >}}
 
-- 使用默认帐户和密码（`admin/P@88w0rd`）登录控制台。
+- 使用默认帐户和密码（`admin/P@88w0rd`）登录控制台。登录后建议先检查集群概览和系统组件状态。
 
 
 ## 启用可插拔组件（可选）

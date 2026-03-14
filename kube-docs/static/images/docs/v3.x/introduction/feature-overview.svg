@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="660" viewBox="0 0 1200 660" fill="none">
+  <rect width="1200" height="660" rx="24" fill="#0F172A"/>
+  <rect x="28" y="28" width="1144" height="604" rx="22" fill="#111827" stroke="#334155"/>
+
+  <text x="56" y="66" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="30" font-weight="700">Platform Overview</text>
+  <text x="56" y="98" fill="#94A3B8" font-family="Arial, sans-serif" font-size="18">Kube AI Hub builds a full-stack cloud-native platform on Kubernetes with plug-and-play integration across infrastructure, apps, and operations.</text>
+
+  <rect x="56" y="132" width="1088" height="86" rx="18" fill="#0B1220" stroke="#334155"/>
+  <text x="84" y="162" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">Who Uses It</text>
+  <rect x="84" y="176" width="170" height="24" rx="12" fill="#1E293B"/>
+  <rect x="270" y="176" width="170" height="24" rx="12" fill="#1E293B"/>
+  <rect x="456" y="176" width="170" height="24" rx="12" fill="#1E293B"/>
+  <rect x="642" y="176" width="170" height="24" rx="12" fill="#1E293B"/>
+  <rect x="828" y="176" width="170" height="24" rx="12" fill="#1E293B"/>
+  <text x="118" y="193" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="14">Platform Admin</text>
+  <text x="313" y="193" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="14">Workspace Admin</text>
+  <text x="515" y="193" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="14">Project Team</text>
+  <text x="705" y="193" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="14">DevOps Team</text>
+  <text x="883" y="193" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="14">Ops / SRE Team</text>
+
+  <rect x="56" y="248" width="1088" height="214" rx="18" fill="#0B1220" stroke="#334155"/>
+  <text x="84" y="278" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">Core Capabilities</text>
+
+  <rect x="84" y="296" width="236" height="64" rx="14" fill="#172033" stroke="#334155"/>
+  <rect x="336" y="296" width="236" height="64" rx="14" fill="#172033" stroke="#334155"/>
+  <rect x="588" y="296" width="236" height="64" rx="14" fill="#172033" stroke="#334155"/>
+  <rect x="840" y="296" width="236" height="64" rx="14" fill="#172033" stroke="#334155"/>
+  <rect x="84" y="378" width="236" height="64" rx="14" fill="#172033" stroke="#334155"/>
+  <rect x="336" y="378" width="236" height="64" rx="14" fill="#172033" stroke="#334155"/>
+  <rect x="588" y="378" width="236" height="64" rx="14" fill="#172033" stroke="#334155"/>
+  <rect x="840" y="378" width="236" height="64" rx="14" fill="#172033" stroke="#334155"/>
+
+  <text x="110" y="322" fill="#38BDF8" font-family="Arial, sans-serif" font-size="17" font-weight="700">Multi-cluster</text>
+  <text x="110" y="344" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14">Import, visibility, and unified control</text>
+  <text x="362" y="322" fill="#38BDF8" font-family="Arial, sans-serif" font-size="17" font-weight="700">Kubernetes Resources</text>
+  <text x="362" y="344" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14">Nodes, workloads, apps, configs</text>
+  <text x="614" y="322" fill="#38BDF8" font-family="Arial, sans-serif" font-size="17" font-weight="700">DevOps</text>
+  <text x="614" y="344" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14">Pipelines, image build, release flow</text>
+  <text x="866" y="322" fill="#38BDF8" font-family="Arial, sans-serif" font-size="17" font-weight="700">Application Lifecycle</text>
+  <text x="866" y="344" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14">App Store, Helm apps, upgrades</text>
+
+  <text x="110" y="404" fill="#38BDF8" font-family="Arial, sans-serif" font-size="17" font-weight="700">Service Mesh</text>
+  <text x="110" y="426" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14">Traffic governance and observability</text>
+  <text x="362" y="404" fill="#38BDF8" font-family="Arial, sans-serif" font-size="17" font-weight="700">Observability</text>
+  <text x="362" y="426" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14">Monitoring, logs, alerts, auditing</text>
+  <text x="614" y="404" fill="#38BDF8" font-family="Arial, sans-serif" font-size="17" font-weight="700">Multi-tenancy</text>
+  <text x="614" y="426" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14">Platform, workspace, project RBAC</text>
+  <text x="866" y="404" fill="#38BDF8" font-family="Arial, sans-serif" font-size="17" font-weight="700">Storage and Network</text>
+  <text x="866" y="426" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14">CSI, ingress, policies, gateways</text>
+
+  <rect x="56" y="490" width="824" height="88" rx="18" fill="#1E293B" stroke="#334155"/>
+  <text x="84" y="520" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">Platform Core</text>
+  <text x="84" y="552" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="20" font-weight="700">Web Console  |  API Server  |  Controller Manager  |  RBAC  |  App Framework</text>
+
+  <rect x="900" y="490" width="244" height="88" rx="18" fill="#172033" stroke="#334155"/>
+  <text x="924" y="520" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14">KubeKey</text>
+  <text x="924" y="546" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="18" font-weight="700">Install, scale, upgrade</text>
+  <text x="924" y="567" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14">Single-node / multi-node / addons</text>
+
+  <rect x="56" y="596" width="1088" height="20" rx="10" fill="#0B1220" stroke="#334155"/>
+  <rect x="56" y="596" width="412" height="20" rx="10" fill="#0F766E"/>
+  <rect x="396" y="596" width="340" height="20" rx="10" fill="#1D4ED8"/>
+  <rect x="676" y="596" width="264" height="20" rx="10" fill="#7C3AED"/>
+  <rect x="884" y="596" width="260" height="20" rx="10" fill="#A16207"/>
+  <text x="82" y="610" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="12" font-weight="700">Any compatible Kubernetes cluster</text>
+  <text x="434" y="610" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="12" font-weight="700">Data center / VM / bare metal</text>
+  <text x="727" y="610" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="12" font-weight="700">Public cloud / hosted K8s</text>
+  <text x="943" y="610" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="12" font-weight="700">Hybrid cloud / edge</text>
+
+  <path d="M600 218V238" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+  <path d="M600 462V482" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+</svg>
