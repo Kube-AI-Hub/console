@@ -43,12 +43,6 @@ hasChildren = true
   URL = "projects"
   weight = 1
 
-  [[languages.en.menu.main]]
-  parent = "Resources"
-  name = "Video Resources"
-  URL = "videos"
-  weight = 2
-
 [[languages.en.menu.main]]
 weight = 4
 name = "Documentation"
@@ -132,12 +126,6 @@ hasChildren = true
   name = "Open Source Projects"
   URL = "projects"
   weight = 1
-
-  [[languages.zh.menu.main]]
-  parent = "Resources"
-  name = "Video Resources"
-  URL = "videos"
-  weight = 2
 
 [[languages.zh.menu.main]]
 weight = 4
@@ -246,7 +234,6 @@ name = "Community"
 #   [[languages.tr.menu.main]]
 #   parent = "Kaynaklar"
 #   name = "Videolar"
-#   URL = "videos"
 #   weight = 4
 
 # [[languages.tr.menu.main]]

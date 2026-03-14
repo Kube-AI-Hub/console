@@ -248,7 +248,6 @@ name = "文档中心"
 #   [[languages.tr.menu.main]]
 #   parent = "Kaynaklar"
 #   name = "Videolar"
-#   URL = "videos/"
 #   weight = 4
 
 # [[languages.tr.menu.main]]

@@ -944,24 +944,3 @@ footer {
   }
 }
 
-// ─── Unused / legacy cleanup ────────────────────────────────────────────────
-
-.modal-for-video {
-  display: none;
-}
-
-.close-video {
-  display: none;
-}
-
-.shadow {
-  position: fixed;
-  top: 0;
-  left: 0;
-  overflow: hidden;
-  z-index: 18;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.7);
-  display: none;
-}
