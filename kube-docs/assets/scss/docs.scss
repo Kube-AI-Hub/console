@@ -103,47 +103,6 @@
     }
   }
 
-  .right {
-    width: 333px;
-    @media only screen and (max-width: $mobile-max-width) {
-      width: 100%;
-    }
-    ul {
-      margin-top: 20px;
-      li {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 8px;
-        padding: 8px 20px;
-        box-shadow: 0 4px 8px 0 $shadow-color, 0 8px 16px 0 $shadow-color;
-        background-color: $bg-card;
-
-        &:last-child {
-          margin-bottom: 0;
-        }
-
-        span {
-          flex: 1;
-          font-size: 14px;
-          color: $text-primary;
-          line-height: 24px;
-        }
-
-        a {
-          display: inline-block;
-          width: 40px;
-          height: 40px;
-          background-image: url("/kube-docs/images/docs/v3.3/22.svg");
-
-          &:hover {
-            background-image: url("/kube-docs/images/docs/v3.3/22-hover.svg");
-          }
-        }
-      }
-    }
-  }
-
   h2 {
     font-size: 28px;
     line-height: 34px;

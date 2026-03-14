@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="420" viewBox="0 0 1000 420" fill="none">
+  <rect width="1000" height="420" rx="20" fill="#0F172A"/>
+
+  <!-- Title -->
+  <text x="500" y="44" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="22" font-weight="700" text-anchor="middle">Blue-Green Deployment</text>
+  <text x="500" y="68" fill="#64748B" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">One version serves all traffic; the other stays idle for instant rollback.</text>
+
+  <!-- ===== BEFORE panel ===== -->
+  <rect x="24" y="88" width="420" height="300" rx="14" fill="#111827" stroke="#1E293B"/>
+  <text x="234" y="116" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12" font-weight="700" letter-spacing="1" text-anchor="middle">BEFORE</text>
+
+  <!-- Reverse proxy box -->
+  <rect x="44" y="128" width="72" height="140" rx="10" fill="#292524" stroke="#78716C"/>
+  <text x="80" y="186" fill="#D6D3D1" font-family="Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">reverse</text>
+  <text x="80" y="202" fill="#D6D3D1" font-family="Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">proxy</text>
+
+  <!-- Arrow from proxy to blue (active) -->
+  <line x1="116" y1="198" x2="148" y2="198" stroke="#3B82F6" stroke-width="2.5"/>
+  <polygon points="145,193 156,198 145,203" fill="#3B82F6"/>
+
+  <!-- Blue group (Active) -->
+  <rect x="156" y="128" width="132" height="140" rx="10" fill="#1E3A8A" fill-opacity="0.5" stroke="#3B82F6" stroke-width="1.5"/>
+  <text x="222" y="150" fill="#93C5FD" font-family="Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle">Blue  v1  &#x2022; Active</text>
+  <!-- App pods -->
+  <rect x="167" y="158" width="46" height="26" rx="6" fill="#1D4ED8"/>
+  <text x="190" y="176" fill="#BFDBFE" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">App 1</text>
+  <rect x="221" y="158" width="46" height="26" rx="6" fill="#1D4ED8"/>
+  <text x="244" y="176" fill="#BFDBFE" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">App 2</text>
+  <rect x="167" y="192" width="46" height="26" rx="6" fill="#1D4ED8"/>
+  <text x="190" y="210" fill="#BFDBFE" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">App 3</text>
+  <!-- DB cylinder -->
+  <ellipse cx="244" cy="196" rx="18" ry="6" fill="#2563EB"/>
+  <rect x="226" y="196" width="36" height="22" fill="#2563EB"/>
+  <ellipse cx="244" cy="218" rx="18" ry="6" fill="#1D4ED8"/>
+  <text x="244" y="213" fill="#BFDBFE" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">DB</text>
+  <!-- 100% label -->
+  <text x="222" y="250" fill="#60A5FA" font-family="Arial, sans-serif" font-size="22" font-weight="700" text-anchor="middle">100%</text>
+
+  <!-- Dashed line proxy to green (idle, no arrow) -->
+  <line x1="116" y1="248" x2="294" y2="248" stroke="#334155" stroke-width="1.5" stroke-dasharray="5,4"/>
+
+  <!-- Green group (Idle) -->
+  <rect x="294" y="128" width="132" height="140" rx="10" fill="#14532D" fill-opacity="0.3" stroke="#334155" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <text x="360" y="150" fill="#4ADE80" fill-opacity="0.6" font-family="Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle">Green  v2  &#x2022; Idle</text>
+  <!-- App pods (dimmed) -->
+  <rect x="305" y="158" width="46" height="26" rx="6" fill="#166534" fill-opacity="0.5"/>
+  <text x="328" y="176" fill="#86EFAC" fill-opacity="0.5" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">App 1</text>
+  <rect x="359" y="158" width="46" height="26" rx="6" fill="#166534" fill-opacity="0.5"/>
+  <text x="382" y="176" fill="#86EFAC" fill-opacity="0.5" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">App 2</text>
+  <rect x="305" y="192" width="46" height="26" rx="6" fill="#166534" fill-opacity="0.5"/>
+  <text x="328" y="210" fill="#86EFAC" fill-opacity="0.5" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">App 3</text>
+  <!-- DB cylinder (dimmed) -->
+  <ellipse cx="382" cy="196" rx="18" ry="6" fill="#166534" fill-opacity="0.5"/>
+  <rect x="364" y="196" width="36" height="22" fill="#166534" fill-opacity="0.5"/>
+  <ellipse cx="382" cy="218" rx="18" ry="6" fill="#14532D" fill-opacity="0.5"/>
+  <text x="382" y="213" fill="#86EFAC" fill-opacity="0.5" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">DB</text>
+  <!-- 0% label -->
+  <text x="360" y="250" fill="#4ADE80" fill-opacity="0.5" font-family="Arial, sans-serif" font-size="22" font-weight="700" text-anchor="middle">0%</text>
+
+  <!-- ===== CENTER arrow ===== -->
+  <line x1="470" y1="238" x2="530" y2="238" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>
+  <polygon points="524,231 538,238 524,245" fill="#475569"/>
+  <text x="500" y="226" fill="#64748B" font-family="Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">switch</text>
+
+  <!-- ===== AFTER panel ===== -->
+  <rect x="556" y="88" width="420" height="300" rx="14" fill="#111827" stroke="#1E293B"/>
+  <text x="766" y="116" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12" font-weight="700" letter-spacing="1" text-anchor="middle">AFTER</text>
+
+  <!-- Reverse proxy box -->
+  <rect x="576" y="128" width="72" height="140" rx="10" fill="#292524" stroke="#78716C"/>
+  <text x="612" y="186" fill="#D6D3D1" font-family="Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">reverse</text>
+  <text x="612" y="202" fill="#D6D3D1" font-family="Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">proxy</text>
+
+  <!-- Dashed line proxy to blue (now idle) -->
+  <line x1="648" y1="198" x2="686" y2="198" stroke="#334155" stroke-width="1.5" stroke-dasharray="5,4"/>
+
+  <!-- Blue group (Idle) -->
+  <rect x="686" y="128" width="132" height="140" rx="10" fill="#1E3A8A" fill-opacity="0.3" stroke="#334155" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <text x="752" y="150" fill="#93C5FD" fill-opacity="0.55" font-family="Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle">Blue  v1  &#x2022; Idle</text>
+  <!-- App pods (dimmed) -->
+  <rect x="697" y="158" width="46" height="26" rx="6" fill="#1D4ED8" fill-opacity="0.4"/>
+  <text x="720" y="176" fill="#BFDBFE" fill-opacity="0.4" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">App 1</text>
+  <rect x="751" y="158" width="46" height="26" rx="6" fill="#1D4ED8" fill-opacity="0.4"/>
+  <text x="774" y="176" fill="#BFDBFE" fill-opacity="0.4" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">App 2</text>
+  <rect x="697" y="192" width="46" height="26" rx="6" fill="#1D4ED8" fill-opacity="0.4"/>
+  <text x="720" y="210" fill="#BFDBFE" fill-opacity="0.4" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">App 3</text>
+  <ellipse cx="774" cy="196" rx="18" ry="6" fill="#2563EB" fill-opacity="0.4"/>
+  <rect x="756" y="196" width="36" height="22" fill="#2563EB" fill-opacity="0.4"/>
+  <ellipse cx="774" cy="218" rx="18" ry="6" fill="#1D4ED8" fill-opacity="0.4"/>
+  <text x="774" y="213" fill="#BFDBFE" fill-opacity="0.4" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">DB</text>
+  <text x="752" y="250" fill="#60A5FA" fill-opacity="0.4" font-family="Arial, sans-serif" font-size="22" font-weight="700" text-anchor="middle">0%</text>
+
+  <!-- Arrow from proxy to green (now active) -->
+  <line x1="648" y1="248" x2="820" y2="248" stroke="#22C55E" stroke-width="2.5"/>
+  <polygon points="817,243 828,248 817,253" fill="#22C55E"/>
+
+  <!-- Green group (Active) -->
+  <rect x="826" y="128" width="132" height="140" rx="10" fill="#14532D" fill-opacity="0.5" stroke="#22C55E" stroke-width="1.5"/>
+  <text x="892" y="150" fill="#86EFAC" font-family="Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle">Green  v2  &#x2022; Active</text>
+  <rect x="837" y="158" width="46" height="26" rx="6" fill="#166534"/>
+  <text x="860" y="176" fill="#BBF7D0" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">App 1</text>
+  <rect x="891" y="158" width="46" height="26" rx="6" fill="#166534"/>
+  <text x="914" y="176" fill="#BBF7D0" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">App 2</text>
+  <rect x="837" y="192" width="46" height="26" rx="6" fill="#166534"/>
+  <text x="860" y="210" fill="#BBF7D0" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">App 3</text>
+  <ellipse cx="914" cy="196" rx="18" ry="6" fill="#15803D"/>
+  <rect x="896" y="196" width="36" height="22" fill="#15803D"/>
+  <ellipse cx="914" cy="218" rx="18" ry="6" fill="#166534"/>
+  <text x="914" y="213" fill="#BBF7D0" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">DB</text>
+  <text x="892" y="250" fill="#4ADE80" font-family="Arial, sans-serif" font-size="22" font-weight="700" text-anchor="middle">100%</text>
+
+  <!-- Bottom note -->
+  <text x="500" y="406" fill="#475569" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">Rollback: redirect traffic back to Blue (v1) instantly with zero downtime</text>
+</svg>

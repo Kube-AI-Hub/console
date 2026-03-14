@@ -14,7 +14,7 @@ weight: 3150
 
 下图举例展示了内置高可用模式的架构图。有关系统和网络要求的更多信息，请参见[多节点安装](../../../installing-on-linux/introduction/multioverview/#步骤1准备-linux-主机)。
 
-![高可用架构](/images/docs/v3.x/installing-on-linux/high-availability-configurations/internal-ha-architecture.svg)
+![高可用架构](/images/docs/v3.x/installing-on-linux/high-availability-configurations/internal-ha-architecture-zh.svg)
 
 {{< notice note >}}
 

@@ -3,9 +3,9 @@
   <text x="56" y="60" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="30" font-weight="700">Multi-cluster Overview</text>
   <text x="56" y="94" fill="#94A3B8" font-family="Arial, sans-serif" font-size="18">A unified control plane manages heterogeneous member clusters across cloud and on-premises environments.</text>
 
-  <rect x="436" y="126" width="328" height="94" rx="18" fill="#1D4ED8" fill-opacity=".18" stroke="#60A5FA"/>
-  <text x="498" y="164" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="24" font-weight="700">Host Cluster</text>
-  <text x="482" y="194" fill="#BFDBFE" font-family="Arial, sans-serif" font-size="16">Control plane, observability, and app distribution</text>
+  <rect x="376" y="126" width="448" height="94" rx="18" fill="#1D4ED8" fill-opacity=".18" stroke="#60A5FA"/>
+  <text x="600" y="164" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="24" font-weight="700" text-anchor="middle">Host Cluster</text>
+  <text x="600" y="194" fill="#BFDBFE" font-family="Arial, sans-serif" font-size="16" text-anchor="middle">Control plane, observability, and app distribution</text>
 
   <rect x="96" y="304" width="240" height="110" rx="18" fill="#111827" stroke="#334155"/>
   <rect x="480" y="304" width="240" height="110" rx="18" fill="#111827" stroke="#334155"/>

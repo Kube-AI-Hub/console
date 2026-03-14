@@ -8,7 +8,7 @@ weight: 5230
 
 如果您使用[直接连接](../direct-connection/)导入成员集群，则需要提供 kubeconfig。对于已接入控制台的集群，被授予 `platform-admin` 角色的用户还可以从集群**概览**页的**工具**卡片打开 `kubeconfig` 入口，查看当前集群的访问配置。
 
-![](/images/docs/v3.x/cluster-overview/tools-access.svg)
+![](/images/docs/v3.x/cluster-overview/tools-access-zh.svg)
 
 ## 准备工作
 

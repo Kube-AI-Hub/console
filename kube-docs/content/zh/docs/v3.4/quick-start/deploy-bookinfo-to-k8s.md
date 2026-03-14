@@ -12,12 +12,6 @@ weight: 2400
 
 为了给用户提供管理微服务的一致体验，Kube AI Hub 在容器平台上集成了 Istio。本教程演示了如何部署由四个独立的微服务组成的示例应用程序 Bookinfo，以及如何通过 NodePort 访问该应用。
 
-## 视频演示
-
-<video controls="controls" style="width: 100% !important; height: auto !important;">
-  <source type="video/mp4" src="https://kubesphere-community.pek3b.qingstor.com/videos/Kube AI Hub-v3.1.x-tutorial-videos/zh/KS311_200P004C202109_%E9%83%A8%E7%BD%B2%E5%B9%B6%E8%AE%BF%E9%97%AE%20Bookinfo.mp4">
-</video>
-
 ## 准备工作
 
 - 您需要启用 [Kube AI Hub 服务网格](../../pluggable-components/service-mesh/)。

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" fill="none">
+  <rect width="1200" height="680" rx="20" fill="#0F172A"/>
+
+  <!-- Title -->
+  <text x="600" y="46" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="22" font-weight="700" text-anchor="middle">Kube AI Hub 系统架构</text>
+  <text x="600" y="70" fill="#64748B" font-family="Arial, sans-serif" font-size="14" text-anchor="middle">前后端解耦，以 Kubernetes 原生 API Server 为核心</text>
+  <line x1="56" y1="84" x2="1144" y2="84" stroke="#1E293B" stroke-width="1"/>
+
+  <!-- Frontend Layer -->
+  <rect x="56" y="100" width="1088" height="80" rx="14" fill="#0D1A14" stroke="#166534"/>
+  <text x="160" y="126" fill="#86EFAC" font-family="Arial, sans-serif" font-size="13" font-weight="700">前端</text>
+  <rect x="200" y="110" width="176" height="58" rx="10" fill="#111827" stroke="#334155"/>
+  <text x="288" y="137" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="13" font-weight="600" text-anchor="middle">Kube AI Hub 控制台</text>
+  <text x="288" y="155" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">React / MobX / Node.js</text>
+  <rect x="400" y="110" width="176" height="58" rx="10" fill="#111827" stroke="#334155"/>
+  <text x="488" y="137" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="13" font-weight="600" text-anchor="middle">Web 终端</text>
+  <text x="488" y="155" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">kubectl / shell 访问</text>
+  <rect x="600" y="110" width="176" height="58" rx="10" fill="#111827" stroke="#334155"/>
+  <text x="688" y="137" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="13" font-weight="600" text-anchor="middle">REST API 文档</text>
+  <text x="688" y="155" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">Swagger / OpenAPI</text>
+
+  <!-- Arrow down -->
+  <line x1="600" y1="182" x2="600" y2="202" stroke="#334155" stroke-width="2" stroke-dasharray="4,3"/>
+  <polygon points="594,198 600,210 606,198" fill="#334155"/>
+
+  <!-- Backend Core Layer -->
+  <rect x="56" y="212" width="1088" height="100" rx="14" fill="#0A1929" stroke="#1E3A5F"/>
+  <text x="160" y="238" fill="#7DD3FC" font-family="Arial, sans-serif" font-size="13" font-weight="700">后端核心（REST API）</text>
+
+  <rect x="160" y="246" width="196" height="54" rx="10" fill="#111827" stroke="#1E3A5F"/>
+  <text x="258" y="269" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="13" font-weight="600" text-anchor="middle">API Server</text>
+  <text x="258" y="287" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">ks-apiserver</text>
+
+  <rect x="372" y="246" width="196" height="54" rx="10" fill="#111827" stroke="#1E3A5F"/>
+  <text x="470" y="269" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="13" font-weight="600" text-anchor="middle">API 网关</text>
+  <text x="470" y="287" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">认证 / 路由 / 代理</text>
+
+  <rect x="584" y="246" width="196" height="54" rx="10" fill="#111827" stroke="#1E3A5F"/>
+  <text x="682" y="269" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="13" font-weight="600" text-anchor="middle">Controller Manager</text>
+  <text x="682" y="287" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">ks-controller-manager</text>
+
+  <rect x="796" y="246" width="196" height="54" rx="10" fill="#1E0A3C" stroke="#6D28D9"/>
+  <text x="894" y="269" fill="#C4B5FD" font-family="Arial, sans-serif" font-size="13" font-weight="600" text-anchor="middle">GPU 调度器</text>
+  <text x="894" y="287" fill="#7C3AED" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">vGPU / 异构调度</text>
+
+  <!-- Arrow down -->
+  <line x1="600" y1="314" x2="600" y2="334" stroke="#334155" stroke-width="2" stroke-dasharray="4,3"/>
+  <polygon points="594,330 600,342 606,330" fill="#334155"/>
+
+  <!-- Kubernetes Layer -->
+  <rect x="56" y="344" width="1088" height="70" rx="14" fill="#0F1F35" stroke="#1E3A5F"/>
+  <text x="600" y="372" fill="#38BDF8" font-family="Arial, sans-serif" font-size="15" font-weight="700" text-anchor="middle">Kubernetes</text>
+  <text x="600" y="394" fill="#64748B" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">Cluster API � Resource Scheduler � Workload Engine � RBAC � CRD Extension</text>
+
+  <!-- Arrow down -->
+  <line x1="600" y1="416" x2="600" y2="436" stroke="#334155" stroke-width="2" stroke-dasharray="4,3"/>
+  <polygon points="594,432 600,444 606,432" fill="#334155"/>
+
+  <!-- Plugins Layer -->
+  <rect x="56" y="446" width="1088" height="100" rx="14" fill="#111823" stroke="#334155"/>
+  <text x="160" y="472" fill="#94A3B8" font-family="Arial, sans-serif" font-size="13" font-weight="700">可选组件</text>
+
+  <rect x="160" y="480" width="148" height="52" rx="10" fill="#0F172A" stroke="#334155"/>
+  <text x="234" y="500" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12" font-weight="600" text-anchor="middle">Prometheus</text>
+  <text x="234" y="518" fill="#475569" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">指标与告警</text>
+
+  <rect x="324" y="480" width="148" height="52" rx="10" fill="#0F172A" stroke="#334155"/>
+  <text x="398" y="500" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12" font-weight="600" text-anchor="middle">Elasticsearch</text>
+  <text x="398" y="518" fill="#475569" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">日志索引</text>
+
+  <rect x="488" y="480" width="148" height="52" rx="10" fill="#0F172A" stroke="#334155"/>
+  <text x="562" y="500" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12" font-weight="600" text-anchor="middle">Fluent Bit</text>
+  <text x="562" y="518" fill="#475569" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">日志收集</text>
+
+  <rect x="652" y="480" width="148" height="52" rx="10" fill="#0F172A" stroke="#334155"/>
+  <text x="726" y="500" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12" font-weight="600" text-anchor="middle">Harbor</text>
+  <text x="726" y="518" fill="#475569" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">镜像仓库</text>
+
+  <rect x="816" y="480" width="148" height="52" rx="10" fill="#0F172A" stroke="#334155"/>
+  <text x="890" y="500" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12" font-weight="600" text-anchor="middle">OpenLDAP / AD</text>
+  <text x="890" y="518" fill="#475569" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">身份与认证</text>
+
+  <!-- Arrow down -->
+  <line x1="600" y1="548" x2="600" y2="568" stroke="#334155" stroke-width="2" stroke-dasharray="4,3"/>
+  <polygon points="594,564 600,576 606,564" fill="#334155"/>
+
+  <!-- Infrastructure Layer -->
+  <rect x="56" y="578" width="1088" height="76" rx="14" fill="#0D1B2A" stroke="#1E3A5F"/>
+  <text x="600" y="604" fill="#7DD3FC" font-family="Arial, sans-serif" font-size="14" font-weight="700" text-anchor="middle">基础设施（裸机 / 虚拟机 / 公有云 / 私有云）</text>
+  <line x1="76" y1="614" x2="1124" y2="614" stroke="#1E293B" stroke-width="1"/>
+
+  <rect x="96" y="622" width="130" height="24" rx="6" fill="#111827" stroke="#334155"/>
+  <text x="161" y="639" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">NVIDIA / 昇腾 GPU</text>
+  <rect x="242" y="622" width="130" height="24" rx="6" fill="#111827" stroke="#334155"/>
+  <text x="307" y="639" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">寒武纪 / 燧原</text>
+  <rect x="388" y="622" width="130" height="24" rx="6" fill="#111827" stroke="#334155"/>
+  <text x="453" y="639" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">Intel / AMD / 海光</text>
+  <rect x="534" y="622" width="130" height="24" rx="6" fill="#111827" stroke="#334155"/>
+  <text x="599" y="639" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">S3 / NFS / Ceph</text>
+  <rect x="680" y="622" width="130" height="24" rx="6" fill="#111827" stroke="#334155"/>
+  <text x="745" y="639" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">Calico / Flannel</text>
+  <rect x="826" y="622" width="130" height="24" rx="6" fill="#111827" stroke="#334155"/>
+  <text x="891" y="639" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">LocalPV / CSI</text>
+  <rect x="972" y="622" width="120" height="24" rx="6" fill="#111827" stroke="#334155"/>
+  <text x="1032" y="639" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">KubeEdge</text>
+</svg>

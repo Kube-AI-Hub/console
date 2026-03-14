@@ -66,11 +66,11 @@ disableVersions = false
 disablePdf = false
 latestVersion = "v3.4"
 
-githubUrl = "https://github.com/kube-ai-hub/website"
+githubUrl = "https://github.com/kube-ai-hub/console/kube-docs/"
 
-githubBlobUrl = "https://github.com/kube-ai-hub/website/blob/master/content"
+githubBlobUrl = "https://github.com/kube-ai-hub/console/blob/master/kube-docs/content"
 
-githubEditUrl = "https://github.com/kube-ai-hub/website/edit/master/content"
+githubEditUrl = "https://github.com/kube-ai-hub/console/edit/master/kube-docs/content"
 
 gcs_engine_id = "018068616810858123755%3Apb1pt8sx6ve"
 

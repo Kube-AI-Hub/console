@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="380" viewBox="0 0 960 380" fill="none">
+  <rect width="960" height="380" rx="16" fill="#0F172A"/>
+  <text x="480" y="38" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700" text-anchor="middle">S2I Build Flow</text>
+  <text x="480" y="60" fill="#64748B" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">Three steps: inject source code &#x2192; assemble &#x2192; commit app image</text>
+
+  <!-- Step 1 -->
+  <rect x="32" y="84" width="264" height="168" rx="12" fill="#111827" stroke="#1E3A5F" stroke-width="1.5"/>
+  <rect x="32" y="84" width="264" height="32" rx="12" fill="#1E3A5F"/>
+  <rect x="32" y="100" width="264" height="16" fill="#1E3A5F"/>
+  <text x="164" y="106" fill="#93C5FD" font-family="Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle">Step 1 &#x2014; Inject</text>
+  <!-- Builder container -->
+  <rect x="48" y="126" width="120" height="60" rx="8" fill="#312E81" stroke="#6366F1"/>
+  <text x="108" y="152" fill="#C7D2FE" font-family="Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">Image Builder</text>
+  <text x="108" y="168" fill="#818CF8" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">Container</text>
+  <!-- Source arrow into builder -->
+  <rect x="183" y="136" width="88" height="40" rx="6" fill="#1E3A5F" stroke="#3B82F6"/>
+  <text x="227" y="154" fill="#93C5FD" font-family="Arial, sans-serif" font-size="10" font-weight="600" text-anchor="middle">Source Code</text>
+  <text x="227" y="168" fill="#64748B" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">injected to /src</text>
+  <line x1="183" y1="156" x2="168" y2="156" stroke="#3B82F6" stroke-width="1.5"/>
+  <polygon points="171,151 160,156 171,161" fill="#3B82F6"/>
+  <text x="164" y="216" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">Start container from Image Builder</text>
+  <text x="164" y="232" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">with source code injected</text>
+
+  <!-- Arrow between steps -->
+  <line x1="296" y1="168" x2="344" y2="168" stroke="#475569" stroke-width="2" stroke-linecap="round"/>
+  <polygon points="340,162 352,168 340,174" fill="#475569"/>
+
+  <!-- Step 2 -->
+  <rect x="352" y="84" width="256" height="168" rx="12" fill="#111827" stroke="#1E3A5F" stroke-width="1.5"/>
+  <rect x="352" y="84" width="256" height="32" rx="12" fill="#1E3A5F"/>
+  <rect x="352" y="100" width="256" height="16" fill="#1E3A5F"/>
+  <text x="480" y="106" fill="#93C5FD" font-family="Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle">Step 2 &#x2014; Assemble</text>
+  <rect x="368" y="126" width="224" height="60" rx="8" fill="#312E81" stroke="#6366F1"/>
+  <text x="480" y="150" fill="#C7D2FE" font-family="Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">Run assemble script</text>
+  <text x="480" y="166" fill="#818CF8" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">Install deps, move code to workdir</text>
+  <text x="480" y="216" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">Execute assemble script inside</text>
+  <text x="480" y="232" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">the Image Builder container</text>
+
+  <!-- Arrow between steps -->
+  <line x1="608" y1="168" x2="656" y2="168" stroke="#475569" stroke-width="2" stroke-linecap="round"/>
+  <polygon points="652,162 664,168 652,174" fill="#475569"/>
+
+  <!-- Step 3 -->
+  <rect x="664" y="84" width="264" height="168" rx="12" fill="#111827" stroke="#14532D" stroke-width="1.5"/>
+  <rect x="664" y="84" width="264" height="32" rx="12" fill="#14532D"/>
+  <rect x="664" y="100" width="264" height="16" fill="#14532D"/>
+  <text x="796" y="106" fill="#86EFAC" font-family="Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle">Step 3 &#x2014; Commit</text>
+  <rect x="680" y="126" width="232" height="60" rx="8" fill="#14532D" fill-opacity="0.6" stroke="#22C55E"/>
+  <text x="796" y="150" fill="#86EFAC" font-family="Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">App Image</text>
+  <text x="796" y="166" fill="#4ADE80" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">Entrypoint = run script</text>
+  <text x="796" y="212" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">Set run script as entrypoint,</text>
+  <text x="796" y="228" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">commit and push to registry</text>
+
+  <!-- Bottom note -->
+  <rect x="32" y="280" width="896" height="72" rx="10" fill="#111827" stroke="#1E293B"/>
+  <text x="480" y="308" fill="#94A3B8" font-family="Arial, sans-serif" font-size="13" font-weight="600" text-anchor="middle">Result: a ready-to-run container image pushed to the target registry</text>
+  <text x="480" y="330" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">No Dockerfile required. S2I handles dependency installation, build, and image packaging automatically.</text>
+</svg>

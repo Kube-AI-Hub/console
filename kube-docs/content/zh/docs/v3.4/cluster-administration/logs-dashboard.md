@@ -117,8 +117,7 @@ weight: 6200
 定制资源定义（CRD）允许用户在不增加额外 API 服务器的情况下创建一种新的资源类型，用户可以像使用其他 Kubernetes 原生对象一样使用这些定制资源。
     {{</ notice >}}
 
-3. 在**自定义资源**中，点击 `ks-installer` 右侧的![](/images/docs/v3.x/cluster-administration/cluster-wide-alerting-and-notification/alerting-policies-node-level/edit-policy.png)，选择**编辑 YAML**。
-<img src="/images/docs/v3.x/logs-ds1.png"/>
+3. 在**自定义资源**中，点击 `ks-installer` 右侧的编辑图标，选择**编辑 YAML**。
 
 4. 在该 YAML 文件中，编辑如下，点击右下角的**确定**，保存配置。
 
@@ -160,19 +159,11 @@ weight: 6200
 
     {{< notice note >}}
 
-您可以通过点击控制台右下角的![](/images/docs/v3.x/cluster-administration/cluster-wide-alerting-and-notification/alerting-policies-node-level/edit-policy.png)，找到 kubectl 工具。
- <img src="/images/docs/v3.x/logs-ds2.png"/>
+您可以通过点击控制台右下角的终端图标找到 kubectl 工具。
     {{</ notice >}}
 
 ## 验证组件的安装
 
-在您登录控制台后，查看：
+登录控制台后，进入**平台管理 → 集群管理 → 服务组件**，可以看到 `opensearch-dashboards` 服务已列出并处于运行状态。
 
-<img src="/images/docs/v3.x/logs-ds3.png"/>
-
-将其 5601 端口通过 NodePort 或者 Ingress 等其他形式暴露到我们可以访问到的网络中即可。
-
-
-
-
-
+将 OpenSearch Dashboard 服务的 `5601` 端口通过 NodePort 或 Ingress 等方式暴露到可访问的网络中即可。

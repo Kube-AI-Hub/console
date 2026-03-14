@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="340" viewBox="0 0 900 340" fill="none">
+  <rect width="900" height="340" rx="16" fill="#0F172A"/>
+  <text x="450" y="38" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700" text-anchor="middle">S2I &#x955C;&#x50CF;&#x6784;&#x5EFA;&#x5668; &#x2014; &#x89E3;&#x91CA;&#x578B;&#x8BED;&#x8A00;&#x6784;&#x5EFA;&#x6D41;&#x7A0B;</text>
+  <text x="450" y="60" fill="#64748B" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">&#x6784;&#x5EFA;&#x73AF;&#x5883;&#x4E0E;&#x8FD0;&#x884C;&#x65F6;&#x73AF;&#x5883;&#x76F8;&#x540C;&#xFF08;&#x5982; Python&#x3001;Ruby&#xFF09;</text>
+
+  <!-- Source Code -->
+  <rect x="40" y="90" width="160" height="80" rx="12" fill="#1E3A5F" stroke="#3B82F6" stroke-width="1.5"/>
+  <text x="120" y="126" fill="#93C5FD" font-family="Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle">&#x6E90;&#x4EE3;&#x7801;</text>
+  <text x="120" y="146" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">Git &#x4ED3;&#x5E93;</text>
+
+  <line x1="200" y1="130" x2="248" y2="130" stroke="#475569" stroke-width="2" stroke-linecap="round"/>
+  <polygon points="244,124 256,130 244,136" fill="#475569"/>
+  <text x="224" y="122" fill="#64748B" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">&#x6CE8;&#x5165;</text>
+
+  <!-- Image Builder -->
+  <rect x="256" y="76" width="220" height="108" rx="12" fill="#312E81" stroke="#6366F1" stroke-width="1.5"/>
+  <text x="366" y="108" fill="#C7D2FE" font-family="Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle">&#x955C;&#x50CF;&#x6784;&#x5EFA;&#x5668;</text>
+  <text x="366" y="128" fill="#818CF8" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">Bundler / Rake / GCC</text>
+  <text x="366" y="146" fill="#818CF8" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">Apache / &#x8FD0;&#x884C;&#x65F6;&#x4F9D;&#x8D56;</text>
+  <text x="366" y="164" fill="#64748B" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">assemble &#x811A;&#x672C;</text>
+
+  <line x1="476" y1="130" x2="524" y2="130" stroke="#475569" stroke-width="2" stroke-linecap="round"/>
+  <polygon points="520,124 532,130 520,136" fill="#475569"/>
+  <text x="500" y="122" fill="#64748B" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">&#x63D0;&#x4EA4;</text>
+
+  <!-- App Image -->
+  <rect x="532" y="90" width="160" height="80" rx="12" fill="#14532D" stroke="#22C55E" stroke-width="1.5"/>
+  <text x="612" y="124" fill="#86EFAC" font-family="Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle">&#x5E94;&#x7528;&#x955C;&#x50CF;</text>
+  <text x="612" y="144" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">&#x53EF;&#x76F4;&#x63A5;&#x8FD0;&#x884C;</text>
+
+  <line x1="692" y1="130" x2="740" y2="130" stroke="#475569" stroke-width="2" stroke-linecap="round"/>
+  <polygon points="736,124 748,130 736,136" fill="#475569"/>
+  <text x="716" y="122" fill="#64748B" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">&#x63A8;&#x9001;</text>
+
+  <!-- Registry -->
+  <rect x="748" y="90" width="120" height="80" rx="12" fill="#422006" stroke="#F97316" stroke-width="1.5"/>
+  <text x="808" y="124" fill="#FDBA74" font-family="Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle">&#x955C;&#x50CF;&#x4ED3;&#x5E93;</text>
+  <text x="808" y="144" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">Docker Hub</text>
+
+  <!-- run script note -->
+  <rect x="532" y="196" width="160" height="36" rx="8" fill="#1E293B" stroke="#334155"/>
+  <text x="612" y="219" fill="#94A3B8" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">&#x5165;&#x53E3;&#x70B9;&#xFF1A;run &#x811A;&#x672C;</text>
+  <line x1="612" y1="170" x2="612" y2="196" stroke="#334155" stroke-width="1.5" stroke-dasharray="4,3"/>
+
+  <rect x="40" y="264" width="820" height="52" rx="10" fill="#111827" stroke="#1E293B"/>
+  <text x="450" y="288" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">&#x955C;&#x50CF;&#x6784;&#x5EFA;&#x5668;&#x5305;&#x542B;&#x6240;&#x6709;&#x6784;&#x5EFA;&#x65F6;&#x548C;&#x8FD0;&#x884C;&#x65F6;&#x4F9D;&#x8D56;&#x9879;&#x3002;</text>
+  <text x="450" y="306" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">S2I &#x6CE8;&#x5165;&#x6E90;&#x7801;&#x5E76;&#x6267;&#x884C; assemble &#x811A;&#x672C;&#xFF0C;&#x5C06; run &#x811A;&#x672C;&#x8BBE;&#x4E3A;&#x5165;&#x53E3;&#x70B9;&#xFF0C;&#x6700;&#x540E;&#x63D0;&#x4EA4;&#x751F;&#x6210;&#x6700;&#x7EC8;&#x955C;&#x50CF;&#x3002;</text>
+</svg>

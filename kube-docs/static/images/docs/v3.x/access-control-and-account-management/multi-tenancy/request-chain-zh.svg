@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1060" height="800" viewBox="0 0 1060 800" fill="none">
+  <rect width="1060" height="800" fill="#14215a"/>
+
+  <!-- Title -->
+  <text x="530" y="40" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="18" font-weight="700" text-anchor="middle">&#x8BA4;&#x8BC1;&#x4E0E;&#x6388;&#x6743;</text>
+
+  <!-- ks-console -->
+  <rect x="60" y="62" width="760" height="38" rx="4" fill="#1a2b6b" stroke="#2c3a7c" stroke-width="1.5"/>
+  <text x="440" y="86" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle">ks-console</text>
+
+  <line x1="440" y1="100" x2="440" y2="120" stroke="#7dd3fc" stroke-width="1.5"/>
+  <polygon points="434,117 440,128 446,117" fill="#7dd3fc"/>
+
+  <!-- ks-apiserver outer box -->
+  <rect x="60" y="128" width="760" height="636" rx="6" fill="#1a2b6b" stroke="#2c3a7c" stroke-width="1.5"/>
+  <text x="440" y="152" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle">ks-apiserver</text>
+
+  <!-- identity provider plugin: y=170, h=220, center=280 -->
+  <rect x="444" y="170" width="280" height="220" rx="8" fill="#1f3380" stroke="#334d9a" stroke-width="1.2" stroke-dasharray="6,3"/>
+  <text x="584" y="190" fill="#94a3b8" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">&#x8EAB;&#x4EFD;&#x63D0;&#x4F9B;&#x5546;&#x63D2;&#x4EF6;</text>
+
+  <rect x="460" y="198" width="192" height="34" rx="4" fill="#14215a" stroke="#2c3a7c" stroke-width="1.2"/>
+  <text x="556" y="220" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">LDAP &#x8EAB;&#x4EFD;&#x63D0;&#x4F9B;&#x5546;</text>
+  <line x1="652" y1="215" x2="698" y2="215" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="4,3"/>
+  <polygon points="695,209 706,215 695,221" fill="#94a3b8"/>
+
+  <rect x="460" y="244" width="192" height="34" rx="4" fill="#14215a" stroke="#2c3a7c" stroke-width="1.2"/>
+  <text x="556" y="266" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">OAuth2 &#x8EAB;&#x4EFD;&#x63D0;&#x4F9B;&#x5546;</text>
+  <line x1="652" y1="261" x2="698" y2="261" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="4,3"/>
+  <polygon points="695,255 706,261 695,267" fill="#94a3b8"/>
+
+  <rect x="460" y="290" width="192" height="34" rx="4" fill="#14215a" stroke="#2c3a7c" stroke-width="1.2"/>
+  <text x="556" y="312" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">&#x5176;&#x4ED6;&#x8EAB;&#x4EFD;&#x63D0;&#x4F9B;&#x5546;</text>
+  <line x1="652" y1="307" x2="698" y2="307" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="4,3"/>
+  <polygon points="695,301 706,307 695,313" fill="#94a3b8"/>
+
+  <!-- identity provider right panel: y=184, h=172 -->
+  <rect x="706" y="184" width="196" height="172" rx="8" fill="#1a2b6b" stroke="#334d9a" stroke-width="1.2" stroke-dasharray="5,3"/>
+  <text x="804" y="204" fill="#94a3b8" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">&#x8EAB;&#x4EFD;&#x63D0;&#x4F9B;&#x5546;</text>
+
+  <rect x="718" y="210" width="172" height="32" rx="3" fill="#14215a" stroke="#2c3a7c" stroke-width="1.2"/>
+  <text x="804" y="231" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">LDAP/AD &#x670D;&#x52A1;&#x5668;</text>
+
+  <rect x="718" y="250" width="172" height="32" rx="3" fill="#14215a" stroke="#2c3a7c" stroke-width="1.2"/>
+  <text x="804" y="271" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">OAuth2 &#x670D;&#x52A1;&#x5668;</text>
+
+  <rect x="718" y="290" width="172" height="32" rx="3" fill="#14215a" stroke="#2c3a7c" stroke-width="1.2"/>
+  <text x="804" y="311" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">CAS/OIDC &#x670D;&#x52A1;&#x5668;</text>
+
+  <!-- union authorizer: y=420, h=220, center=530 -->
+  <rect x="444" y="420" width="280" height="220" rx="8" fill="#1f3380" stroke="#334d9a" stroke-width="1.2" stroke-dasharray="6,3"/>
+  <text x="584" y="440" fill="#94a3b8" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">&#x8054;&#x5408;&#x6388;&#x6743;&#x5668;</text>
+
+  <rect x="460" y="448" width="192" height="30" rx="4" fill="#14215a" stroke="#2c3a7c" stroke-width="1.2"/>
+  <text x="556" y="468" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">API &#x8DEF;&#x5F84;&#x6388;&#x6743;&#x5668;</text>
+
+  <rect x="460" y="486" width="192" height="30" rx="4" fill="#14215a" stroke="#2c3a7c" stroke-width="1.2"/>
+  <text x="556" y="506" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">RBAC &#x6388;&#x6743;&#x5668;</text>
+
+  <rect x="460" y="524" width="192" height="30" rx="4" fill="#14215a" stroke="#2c3a7c" stroke-width="1.2"/>
+  <text x="556" y="544" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">OPA: rego</text>
+
+  <rect x="460" y="562" width="192" height="30" rx="4" fill="#14215a" stroke="#2c3a7c" stroke-width="1.2"/>
+  <text x="556" y="582" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">&#x89D2;&#x8272;&#xFF1A;&#x7B56;&#x7565;&#x89C4;&#x5219;</text>
+
+  <!-- api aggregation: y=570, h=128, center=634 — aligns with dispatch filter -->
+  <rect x="706" y="570" width="196" height="128" rx="8" fill="#1a2b6b" stroke="#334d9a" stroke-width="1.2" stroke-dasharray="5,3"/>
+  <text x="804" y="590" fill="#94a3b8" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">API &#x805A;&#x5408;</text>
+
+  <rect x="718" y="598" width="172" height="30" rx="3" fill="#14215a" stroke="#2c3a7c" stroke-width="1.2"/>
+  <text x="804" y="618" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">kube-apiserver</text>
+
+  <rect x="718" y="636" width="172" height="30" rx="3" fill="#14215a" stroke="#2c3a7c" stroke-width="1.2"/>
+  <text x="804" y="656" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">&#x805A;&#x5408; apiserver</text>
+
+  <rect x="718" y="672" width="172" height="26" rx="3" fill="#14215a" stroke="#2c3a7c" stroke-width="1.2"/>
+  <text x="804" y="690" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">&#x591A;&#x96C6;&#x7FA4;&#x5206;&#x53D1;</text>
+
+  <!-- request chain box: y=162, h=576 -->
+  <rect x="80" y="162" width="300" height="576" rx="8" fill="#1f3380" stroke="#334d9a" stroke-width="1.2" stroke-dasharray="6,3"/>
+  <text x="230" y="182" fill="#94a3b8" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">&#x8BF7;&#x6C42;&#x94FE;</text>
+
+  <!-- authentication filter: top=258, center=280 -->
+  <rect x="100" y="258" width="260" height="44" rx="4" fill="#14215a" stroke="#2c3a7c" stroke-width="1.2"/>
+  <text x="230" y="285" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle">&#x8BA4;&#x8BC1;&#x8FC7;&#x6EE4;&#x5668;</text>
+
+  <!-- Arrow: authentication filter -> identity provider plugin (y=280) -->
+  <line x1="360" y1="280" x2="430" y2="280" stroke="#94a3b8" stroke-width="1.2"/>
+  <polygon points="427,274 438,280 427,286" fill="#94a3b8"/>
+
+  <!-- Arrow down: auth -> authorization -->
+  <line x1="230" y1="302" x2="230" y2="500" stroke="#7dd3fc" stroke-width="1.5"/>
+  <polygon points="224,497 230,508 236,497" fill="#7dd3fc"/>
+
+  <!-- authorization filter: top=508, center=530 -->
+  <rect x="100" y="508" width="260" height="44" rx="4" fill="#14215a" stroke="#2c3a7c" stroke-width="1.2"/>
+  <text x="230" y="535" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle">&#x6388;&#x6743;&#x8FC7;&#x6EE4;&#x5668;</text>
+
+  <!-- Arrow: authorization filter -> union authorizer (y=530) -->
+  <line x1="360" y1="530" x2="440" y2="530" stroke="#94a3b8" stroke-width="1.2"/>
+  <polygon points="437,524 448,530 437,536" fill="#94a3b8"/>
+
+  <!-- Arrow down: authorization -> dispatch -->
+  <line x1="230" y1="552" x2="230" y2="604" stroke="#7dd3fc" stroke-width="1.5"/>
+  <polygon points="224,601 230,612 236,601" fill="#7dd3fc"/>
+
+  <!-- dispatch filter: top=612, center=634 -->
+  <rect x="100" y="612" width="260" height="44" rx="4" fill="#14215a" stroke="#2c3a7c" stroke-width="1.2"/>
+  <text x="230" y="639" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle">&#x5206;&#x53D1;&#x8FC7;&#x6EE4;&#x5668;</text>
+
+  <!-- Arrow: dispatch filter -> api aggregation (dashed y=634) -->
+  <line x1="360" y1="634" x2="704" y2="634" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="5,3"/>
+  <polygon points="701,628 712,634 701,640" fill="#94a3b8"/>
+
+  <!-- Arrow down: dispatch -> request handler -->
+  <line x1="230" y1="656" x2="230" y2="686" stroke="#7dd3fc" stroke-width="1.5"/>
+  <polygon points="224,683 230,694 236,683" fill="#7dd3fc"/>
+
+  <!-- request handler: top=694 -->
+  <rect x="100" y="694" width="260" height="44" rx="4" fill="#14215a" stroke="#2c3a7c" stroke-width="1.2"/>
+  <text x="230" y="721" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle">&#x8BF7;&#x6C42;&#x5904;&#x7406;&#x5668;</text>
+
+</svg>

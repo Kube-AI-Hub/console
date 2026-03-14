@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="400" viewBox="0 0 1000 400" fill="none">
+  <rect width="1000" height="400" rx="20" fill="#0F172A"/>
+
+  <!-- Title -->
+  <text x="500" y="44" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="22" font-weight="700" text-anchor="middle">&#x91D1;&#x4E1D;&#x96C0;&#x53D1;&#x5E03;</text>
+  <text x="500" y="68" fill="#64748B" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">&#x5C06;&#x5C11;&#x91CF;&#x6D41;&#x91CF;&#x5BFC;&#x5165;&#x65B0;&#x7248;&#x672C;&#xFF0C;&#x901A;&#x8FC7;&#x8C03;&#x6574;&#x6D41;&#x91CF;&#x6BD4;&#x4F8B;&#x9010;&#x6B65;&#x653E;&#x5927;&#x6216;&#x56DE;&#x6EDA;&#x3002;</text>
+
+  <!-- Load Balancer bar -->
+  <rect x="160" y="94" width="680" height="52" rx="12" fill="#D9F99D" fill-opacity="0.15" stroke="#84CC16" stroke-width="1.5"/>
+  <text x="500" y="126" fill="#BEF264" font-family="Arial, sans-serif" font-size="16" font-weight="700" text-anchor="middle">&#x8D1F;&#x8F7D;&#x5747;&#x8861;&#x5668;</text>
+
+  <!-- Connector lines -->
+  <line x1="272" y1="146" x2="196" y2="210" stroke="#334155" stroke-width="1.5"/>
+  <line x1="362" y1="146" x2="310" y2="210" stroke="#334155" stroke-width="1.5"/>
+  <line x1="452" y1="146" x2="424" y2="210" stroke="#334155" stroke-width="1.5"/>
+  <line x1="542" y1="146" x2="538" y2="210" stroke="#334155" stroke-width="1.5"/>
+  <line x1="672" y1="146" x2="726" y2="210" stroke="#A3E635" stroke-width="1.5" stroke-dasharray="5,3"/>
+
+  <!-- v1 Pod 1 -->
+  <rect x="148" y="210" width="96" height="90" rx="14" fill="#7E22CE" fill-opacity="0.35" stroke="#A855F7" stroke-width="1.5"/>
+  <text x="196" y="256" fill="#D8B4FE" font-family="Arial, sans-serif" font-size="18" font-weight="700" text-anchor="middle">v1</text>
+  <text x="196" y="278" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">&#x7A33;&#x5B9A;&#x7248;</text>
+
+  <!-- v1 Pod 2 -->
+  <rect x="262" y="210" width="96" height="90" rx="14" fill="#7E22CE" fill-opacity="0.35" stroke="#A855F7" stroke-width="1.5"/>
+  <text x="310" y="256" fill="#D8B4FE" font-family="Arial, sans-serif" font-size="18" font-weight="700" text-anchor="middle">v1</text>
+  <text x="310" y="278" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">&#x7A33;&#x5B9A;&#x7248;</text>
+
+  <!-- v1 Pod 3 -->
+  <rect x="376" y="210" width="96" height="90" rx="14" fill="#7E22CE" fill-opacity="0.35" stroke="#A855F7" stroke-width="1.5"/>
+  <text x="424" y="256" fill="#D8B4FE" font-family="Arial, sans-serif" font-size="18" font-weight="700" text-anchor="middle">v1</text>
+  <text x="424" y="278" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">&#x7A33;&#x5B9A;&#x7248;</text>
+
+  <!-- v1 Pod 4 -->
+  <rect x="490" y="210" width="96" height="90" rx="14" fill="#7E22CE" fill-opacity="0.35" stroke="#A855F7" stroke-width="1.5"/>
+  <text x="538" y="256" fill="#D8B4FE" font-family="Arial, sans-serif" font-size="18" font-weight="700" text-anchor="middle">v1</text>
+  <text x="538" y="278" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">&#x7A33;&#x5B9A;&#x7248;</text>
+
+  <!-- Canary Pod (v2) -->
+  <rect x="678" y="210" width="96" height="90" rx="14" fill="#14532D" fill-opacity="0.4" stroke="#22C55E" stroke-width="1.5"/>
+  <text x="726" y="248" fill="#4ADE80" font-family="Arial, sans-serif" font-size="22" text-anchor="middle">&#x1F426;</text>
+  <text x="726" y="272" fill="#86EFAC" font-family="Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle">v2</text>
+  <text x="726" y="289" fill="#86EFAC" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">&#x91D1;&#x4E1D;&#x96C0;</text>
+
+  <!-- Traffic ratio labels -->
+  <rect x="148" y="316" width="438" height="28" rx="8" fill="#1E293B"/>
+  <text x="367" y="335" fill="#93C5FD" font-family="Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle">80% &#x6D41;&#x91CF; &#x2192; v1 (&#x7A33;&#x5B9A;&#x7248;)</text>
+
+  <rect x="620" y="316" width="154" height="28" rx="8" fill="#14532D" fill-opacity="0.5"/>
+  <text x="697" y="335" fill="#4ADE80" font-family="Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle">20% &#x2192; v2 (&#x91D1;&#x4E1D;&#x96C0;)</text>
+
+  <!-- Bottom note -->
+  <text x="500" y="386" fill="#475569" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">&#x9010;&#x6B65;&#x5C06;&#x91D1;&#x4E1D;&#x96C0;&#x6D41;&#x91CF;&#x589E;&#x81F3; 100% &#x5B8C;&#x6210;&#x5347;&#x7EA7;&#xFF0C;&#x6216;&#x964D;&#x81F3; 0% &#x5B9E;&#x73B0;&#x56DE;&#x6EDA;</text>
+</svg>

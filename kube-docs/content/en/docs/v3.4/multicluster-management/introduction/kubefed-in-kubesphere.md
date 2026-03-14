@@ -16,7 +16,7 @@ There can only be one host cluster while multiple member clusters can exist at t
 
 If you are using on-premises Kubernetes clusters built through kubeadm, install Kube AI Hub on your Kubernetes clusters by referring to [Air-gapped Installation on Kubernetes](../../../installing-on-kubernetes/on-prem-kubernetes/install-ks-on-linux-airgapped/), and then enable Kube AI Hub multi-cluster management through direct connection or agent connection.
 
-![kubesphere-federation](/images/docs/v3.x/multicluster-management/introduction/kubesphere-federation/kubesphere-federation.png)
+![kubesphere-federation](/images/docs/v3.x/multicluster-management/introduction/kubesphere-federation/kubesphere-federation.svg)
 
 ## Vendor Agnostic
 

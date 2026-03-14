@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820" fill="none">
+  <rect width="1280" height="820" rx="24" fill="#0F172A"/>
+
+  <!-- Page frame -->
+  <rect x="32" y="32" width="1216" height="756" rx="20" fill="#111827" stroke="#1E293B"/>
+  <!-- Cluster header bar -->
+  <rect x="64" y="64" width="1152" height="68" rx="14" fill="#1E293B"/>
+  <circle cx="104" cy="98" r="18" fill="#38BDF8"/>
+  <rect x="134" y="84" width="160" height="12" rx="6" fill="#E2E8F0"/>
+  <rect x="134" y="104" width="100" height="9" rx="5" fill="#64748B"/>
+  <!-- badge -->
+  <rect x="880" y="80" width="72" height="26" rx="13" fill="#1E3A5F"/>
+  <text x="916" y="98" fill="#7DD3FC" font-family="Arial, sans-serif" font-size="12" font-weight="600" text-anchor="middle">&#x4E3B;&#x96C6;&#x7FA4;</text>
+
+  <!-- Left column background -->
+  <rect x="64" y="152" width="740" height="584" rx="16" fill="#0B1220" stroke="#1E293B"/>
+
+  <!-- Basic Information card -->
+  <rect x="88" y="172" width="692" height="116" rx="12" fill="#111827" stroke="#334155"/>
+  <text x="112" y="200" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="16" font-weight="700">&#x57FA;&#x672C;&#x4FE1;&#x606F;</text>
+  <text x="112" y="230" fill="#64748B" font-family="Arial, sans-serif" font-size="13">&#x63D0;&#x4F9B;&#x5546;</text>
+  <text x="240" y="230" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="13">&#x79C1;&#x6709;&#x4E91;</text>
+  <text x="440" y="230" fill="#64748B" font-family="Arial, sans-serif" font-size="13">Kubernetes</text>
+  <text x="560" y="230" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="13">v1.29.4</text>
+  <text x="112" y="258" fill="#64748B" font-family="Arial, sans-serif" font-size="13">Kube AI Hub</text>
+  <text x="240" y="258" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="13">v3.4.1</text>
+  <text x="440" y="258" fill="#64748B" font-family="Arial, sans-serif" font-size="13">&#x96C6;&#x7FA4;&#x53EF;&#x89C1;&#x6027;</text>
+  <text x="560" y="258" fill="#38BDF8" font-family="Arial, sans-serif" font-size="13">&#x90E8;&#x5206;&#x4F01;&#x4E1A;&#x7A7A;&#x95F4;&#x53EF;&#x89C1;</text>
+
+  <!-- System Components card -->
+  <rect x="88" y="304" width="692" height="96" rx="12" fill="#111827" stroke="#334155"/>
+  <text x="112" y="330" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="16" font-weight="700">&#x7CFB;&#x7EDF;&#x7EC4;&#x4EF6;</text>
+  <circle cx="140" cy="368" r="18" fill="#1E3A5F"/>
+  <text x="140" y="374" fill="#7DD3FC" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">Hub</text>
+  <circle cx="196" cy="368" r="18" fill="#14532D"/>
+  <text x="196" y="374" fill="#86EFAC" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">K8s</text>
+  <circle cx="252" cy="368" r="18" fill="#3B1F6E"/>
+  <text x="252" y="374" fill="#C4B5FD" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">Istio</text>
+  <circle cx="308" cy="368" r="18" fill="#1C3545"/>
+  <text x="308" y="374" fill="#7DD3FC" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">&#x76D1;&#x63A7;</text>
+  <circle cx="364" cy="368" r="18" fill="#422006"/>
+  <text x="364" y="374" fill="#FCD34D" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">&#x65E5;&#x5FD7;</text>
+  <circle cx="420" cy="368" r="18" fill="#1A1040"/>
+  <text x="420" y="374" fill="#818CF8" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">DevOps</text>
+
+  <!-- Resource Usage card -->
+  <rect x="88" y="416" width="692" height="244" rx="12" fill="#111827" stroke="#334155"/>
+  <text x="112" y="444" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="16" font-weight="700">&#x8D44;&#x6E90;&#x7528;&#x91CF;</text>
+
+  <!-- GPU Memory row -->
+  <text x="112" y="476" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="13">GPU &#x663E;&#x5B58;</text>
+  <rect x="232" y="464" width="280" height="10" rx="5" fill="#1E293B"/>
+  <rect x="232" y="464" width="137" height="10" rx="5" fill="#38BDF8"/>
+  <text x="524" y="474" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12">49%</text>
+  <text x="572" y="474" fill="#64748B" font-family="Arial, sans-serif" font-size="12">&#x5DF2;&#x4F7F;&#x7528; 98 GiB / &#x603B;&#x8BA1; 200 GiB</text>
+
+  <!-- GPU row -->
+  <text x="112" y="508" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="13">GPU</text>
+  <rect x="232" y="496" width="280" height="10" rx="5" fill="#1E293B"/>
+  <rect x="232" y="496" width="109" height="10" rx="5" fill="#22C55E"/>
+  <text x="524" y="506" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12">39%</text>
+  <text x="572" y="506" fill="#64748B" font-family="Arial, sans-serif" font-size="12">&#x5DF2;&#x4F7F;&#x7528; 7 / &#x5DF2;&#x5206;&#x914D; 12 / &#x603B;&#x8BA1; 16</text>
+
+  <!-- CPU row -->
+  <text x="112" y="540" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="13">CPU</text>
+  <rect x="232" y="528" width="280" height="10" rx="5" fill="#1E293B"/>
+  <rect x="232" y="528" width="176" height="10" rx="5" fill="#F59E0B"/>
+  <text x="524" y="538" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12">63%</text>
+  <text x="572" y="538" fill="#64748B" font-family="Arial, sans-serif" font-size="12">&#x5DF2;&#x4F7F;&#x7528; 50.4 / &#x5DF2;&#x5206;&#x914D; 72 / &#x603B;&#x8BA1; 80</text>
+
+  <!-- Memory row -->
+  <text x="112" y="572" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="13">&#x5185;&#x5B58;</text>
+  <rect x="232" y="560" width="280" height="10" rx="5" fill="#1E293B"/>
+  <rect x="232" y="560" width="199" height="10" rx="5" fill="#A78BFA"/>
+  <text x="524" y="570" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12">71%</text>
+  <text x="572" y="570" fill="#64748B" font-family="Arial, sans-serif" font-size="12">&#x5DF2;&#x4F7F;&#x7528; 227 GiB / &#x603B;&#x8BA1; 320 GiB</text>
+
+  <!-- Pod row -->
+  <text x="112" y="604" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="13">&#x5BB9;&#x5668;&#x7EC4;</text>
+  <rect x="232" y="592" width="280" height="10" rx="5" fill="#1E293B"/>
+  <rect x="232" y="592" width="84" height="10" rx="5" fill="#34D399"/>
+  <text x="524" y="602" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12">30%</text>
+  <text x="572" y="602" fill="#64748B" font-family="Arial, sans-serif" font-size="12">&#x5DF2;&#x4F7F;&#x7528; 330 / &#x603B;&#x8BA1; 1100</text>
+
+  <!-- Disk row -->
+  <text x="112" y="636" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="13">&#x78C1;&#x76D8;</text>
+  <rect x="232" y="624" width="280" height="10" rx="5" fill="#1E293B"/>
+  <rect x="232" y="624" width="112" height="10" rx="5" fill="#FB923C"/>
+  <text x="524" y="634" fill="#94A3B8" font-family="Arial, sans-serif" font-size="12">40%</text>
+  <text x="572" y="634" fill="#64748B" font-family="Arial, sans-serif" font-size="12">&#x5DF2;&#x4F7F;&#x7528; 4.8 TiB / &#x603B;&#x8BA1; 12 TiB</text>
+
+  <!-- Tools card -->
+  <rect x="88" y="676" width="692" height="40" rx="12" fill="#111827" stroke="#334155"/>
+  <text x="112" y="700" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14" font-weight="700">&#x5DE5;&#x5177;</text>
+  <rect x="240" y="682" width="100" height="28" rx="8" fill="#0F172A" stroke="#334155"/>
+  <text x="290" y="701" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">kubectl</text>
+  <rect x="356" y="682" width="110" height="28" rx="8" fill="#0F172A" stroke="#334155"/>
+  <text x="411" y="701" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">kubeconfig</text>
+
+  <!-- Right column background -->
+  <rect x="820" y="152" width="428" height="584" rx="16" fill="#0B1220" stroke="#1E293B"/>
+
+  <!-- Kubernetes Status card -->
+  <rect x="844" y="172" width="380" height="172" rx="12" fill="#111827" stroke="#334155"/>
+  <text x="868" y="200" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="16" font-weight="700">Kubernetes &#x72B6;&#x6001;</text>
+  <text x="868" y="238" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="20" font-weight="700">128.4</text>
+  <text x="868" y="258" fill="#64748B" font-family="Arial, sans-serif" font-size="12">&#x6BCF;&#x79D2; API &#x8BF7;&#x6C42;&#x6570;</text>
+  <text x="1040" y="238" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="20" font-weight="700">19 ms</text>
+  <text x="1040" y="258" fill="#64748B" font-family="Arial, sans-serif" font-size="12">API &#x8BF7;&#x6C42;&#x5EF6;&#x8FDF;</text>
+  <line x1="868" y1="272" x2="1204" y2="272" stroke="#1E293B" stroke-width="1"/>
+  <text x="868" y="302" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="20" font-weight="700">642</text>
+  <text x="868" y="322" fill="#64748B" font-family="Arial, sans-serif" font-size="12">&#x8C03;&#x5EA6;&#x6B21;&#x6570;</text>
+  <text x="1040" y="302" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="20" font-weight="700">2</text>
+  <text x="1040" y="322" fill="#64748B" font-family="Arial, sans-serif" font-size="12">&#x8C03;&#x5EA6;&#x5931;&#x8D25;&#x6B21;&#x6570;</text>
+
+  <!-- Nodes card -->
+  <rect x="844" y="360" width="380" height="376" rx="12" fill="#111827" stroke="#334155"/>
+  <text x="868" y="388" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="16" font-weight="700">&#x8282;&#x70B9;</text>
+  <text x="868" y="416" fill="#94A3B8" font-family="Arial, sans-serif" font-size="13">&#x8D44;&#x6E90;&#x7528;&#x91CF; Top 5</text>
+  <rect x="1040" y="402" width="164" height="26" rx="8" fill="#0F172A" stroke="#334155"/>
+  <text x="1052" y="419" fill="#64748B" font-family="Arial, sans-serif" font-size="11">GPU &#x663E;&#x5B58;&#x7528;&#x91CF; &#x25BE;</text>
+
+  <!-- Node 1 -->
+  <circle cx="886" cy="456" r="14" fill="#1E293B"/>
+  <text x="886" y="461" fill="#94A3B8" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">N</text>
+  <text x="908" y="452" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="13">node-gpu-01</text>
+  <text x="908" y="468" fill="#64748B" font-family="Arial, sans-serif" font-size="11">192.168.1.11</text>
+  <text x="1172" y="460" fill="#38BDF8" font-family="Arial, sans-serif" font-size="14" font-weight="700" text-anchor="end">83%</text>
+
+  <!-- Node 2 -->
+  <circle cx="886" cy="506" r="14" fill="#1E293B"/>
+  <text x="886" y="511" fill="#94A3B8" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">N</text>
+  <text x="908" y="502" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="13">node-gpu-02</text>
+  <text x="908" y="518" fill="#64748B" font-family="Arial, sans-serif" font-size="11">192.168.1.12</text>
+  <text x="1172" y="510" fill="#38BDF8" font-family="Arial, sans-serif" font-size="14" font-weight="700" text-anchor="end">74%</text>
+
+  <!-- Node 3 -->
+  <circle cx="886" cy="556" r="14" fill="#1E293B"/>
+  <text x="886" y="561" fill="#94A3B8" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">N</text>
+  <text x="908" y="552" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="13">node-gpu-03</text>
+  <text x="908" y="568" fill="#64748B" font-family="Arial, sans-serif" font-size="11">192.168.1.13</text>
+  <text x="1172" y="560" fill="#38BDF8" font-family="Arial, sans-serif" font-size="14" font-weight="700" text-anchor="end">66%</text>
+
+  <!-- Node 4 -->
+  <circle cx="886" cy="606" r="14" fill="#1E293B"/>
+  <text x="886" y="611" fill="#94A3B8" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">N</text>
+  <text x="908" y="602" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="13">node-cpu-01</text>
+  <text x="908" y="618" fill="#64748B" font-family="Arial, sans-serif" font-size="11">192.168.1.21  &#x63A7;&#x5236;&#x5E73;&#x9762;</text>
+  <text x="1172" y="610" fill="#38BDF8" font-family="Arial, sans-serif" font-size="14" font-weight="700" text-anchor="end">51%</text>
+
+  <!-- Node 5 -->
+  <circle cx="886" cy="656" r="14" fill="#1E293B"/>
+  <text x="886" y="661" fill="#94A3B8" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">N</text>
+  <text x="908" y="652" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="13">node-cpu-02</text>
+  <text x="908" y="668" fill="#64748B" font-family="Arial, sans-serif" font-size="11">192.168.1.22</text>
+  <text x="1172" y="660" fill="#38BDF8" font-family="Arial, sans-serif" font-size="14" font-weight="700" text-anchor="end">38%</text>
+
+  <!-- View More button -->
+  <rect x="1096" y="696" width="108" height="28" rx="14" fill="#1D4ED8"/>
+  <text x="1150" y="715" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">&#x67E5;&#x770B;&#x66F4;&#x591A;</text>
+</svg>

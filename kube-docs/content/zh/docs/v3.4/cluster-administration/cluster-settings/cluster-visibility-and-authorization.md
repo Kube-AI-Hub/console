@@ -10,7 +10,7 @@ weight: 8610
 
 本指南演示如何设置集群可见性。
 
-![](/images/docs/v3.x/cluster-overview/visibility-entry.svg)
+![](/images/docs/v3.x/cluster-overview/visibility-entry-zh.svg)
 
 ## 准备工作
 * 您需要启用[多集群功能](../../../multicluster-management/)。

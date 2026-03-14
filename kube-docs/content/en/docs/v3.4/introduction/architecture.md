@@ -1,44 +1,61 @@
 ---
 title: "Architecture"
-keywords: "kubesphere, kubernetes, docker, helm, jenkins, istio, prometheus, devops, service mesh"
-description: "Kube AI Hub architecture"
-
+keywords: "Kube AI Hub, Kubernetes, architecture, API Server, GPU Scheduler"
+description: "Kube AI Hub system architecture"
 linkTitle: "Architecture"
 weight: 1500
 ---
 
-## Separation of frontend and backend
+## Decoupled Frontend and Backend
 
-Kube AI Hub separates [frontend](https://github.com/kubesphere/console) from [backend](https://github.com/kubesphere/kubesphere), and it itself is a cloud native application and provides open standard REST APIs for external systems to use. Please see [API documentation](../../reference/api-docs/) for details. The following diagram shows the system architecture. Kube AI Hub can run anywhere from on-premise datacenter to any cloud to edge. In addition, it can be deployed on any Kubernetes distribution.
+Kube AI Hub separates frontend from backend. The console communicates with backend services through standard REST APIs, and each backend component can scale independently or integrate with external systems. See [API Documentation](../../reference/api-docs/) for details.
 
-![Architecture](/images/docs/v3.x/introduction/system-architecture.svg)
+The following diagram illustrates the overall system architecture:
 
-## Components List
+![System Architecture](/images/docs/v3.x/introduction/system-architecture-new.svg)
 
-| Back-end component | Function description |
+## Frontend
+
+The Kube AI Hub Console is built with React and MobX, using a Node.js service layer to proxy user requests to the backend REST API. The platform also includes a built-in Web Terminal, enabling users to run kubectl commands directly in the browser.
+
+## Backend Core Components
+
+| Component | Description |
 |---|---|
-| ks-apiserver | The Kube AI Hub API server validates and configures data for the API objects which include Kubernetes objects. The API Server services REST operations and provides the frontend to the cluster's shared state through which all other components interact. |
-| ks-console | Kube AI Hub console offers Kube AI Hub console service |
-| ks-controller-manager | Kube AI Hub controller takes care of business logic, for example, when create a workspace, the controller will automatically create corresponding permissions and configurations for it. |
-| metrics-server | Kubernetes monitoring component collects metrics from Kubelet on each node. |
-| Prometheus | provides monitoring metrics and services of clusters, nodes, workloads, API objects. |
-| Elasticsearch | provides log indexing, querying and data management. Besides the built-in service, Kube AI Hub supports the integration of external Elasticsearch service. |
-| Fluent Bit | collects logs and forwarding them to ElasticSearch or Kafka. |
-| Jenkins | provides CI/CD pipeline service. |
-| SonarQube | is an optional component that provides code static checking and quality analysis. |
-| Source-to-Image | automatically compiles and packages source code into Docker image. |
-| Istio | provides microservice governance and traffic control, such as grayscale release, canary release, circuit break, traffic mirroring and so on. |
-| Jaeger | collects sidecar data and provides distributed tracing service. |
-| OpenPitrix | provides application lifecycle management such as template management, deployment, app store management, etc. |
-| Alert | provides configurable alert service for cluster, workload, Pod, and container etc. |
-| Notification | is an integrated notification service; it currently supports mail delivery method. |
-| Redis | caches the data of ks-console and ks-account. |
-| MySQL | is the shared database for cluster back-end components including monitoring, alarm, DevOps, OpenPitrix etc. |
-| PostgreSQL | SonarQube and Harbor's back-end database |
-| OpenLDAP | is responsible for centralized storage and management of user account and integrates with external LDAP server. |
-| Storage | built-in CSI plug-in collecting cloud platform storage services. It supports open source NFS/Ceph/Gluster client. |
-| Network | supports Calico/Flannel and other open source network plug-ins to integrate with cloud platform SDN. |
+| ks-apiserver | Unified API interface for cluster management, handling inter-module communication and security control |
+| API Gateway | Authentication, request routing, and proxying; supports LDAP/AD/SSO integration |
+| ks-controller-manager | Implements platform business logic, e.g., syncing permissions when a workspace is created |
+| GPU Scheduler | Heterogeneous GPU scheduler handling vGPU virtualization slicing and multi-card parallel dispatch |
 
-## Service Components
+## Kubernetes Layer
 
-Each component has many services. See [Overview](../../pluggable-components/overview/) for more details.
+The platform uses standard Kubernetes as its foundation without any invasive modifications. All extensions are implemented via CRD (Custom Resource Definitions). Key Kubernetes capabilities leveraged include:
+
+- **Cluster API**: Resource CRUD operations and state synchronization
+- **Scheduler**: Pod scheduling policies (affinity, taints, GPU resource requests)
+- **Workload Engine**: Lifecycle management for Deployment, StatefulSet, DaemonSet, Job, and CronJob
+- **RBAC**: Fine-grained role and permission control
+
+## Optional Components
+
+The following components are all optional and can be enabled on demand:
+
+| Component | Function |
+|---|---|
+| Prometheus | Metric collection and alerting for clusters, nodes, and GPUs |
+| Elasticsearch | Log indexing and full-text search |
+| Fluent Bit | Container log collection and forwarding |
+| Harbor | Container image registry with scanning and permission management |
+| OpenLDAP / AD | Enterprise user identity authentication and unified account management |
+| KubeEdge | Cloud-edge collaboration, extending compute scheduling to edge nodes |
+
+## Infrastructure
+
+Kube AI Hub can run on any compatible infrastructure:
+
+- **Bare metal servers**: Ideal for high-performance GPU cluster deployments
+- **Virtual machines and private cloud**: On-premises data center installations
+- **Managed Kubernetes**: Alibaba Cloud, AWS, Huawei Cloud, Tencent Cloud, and more
+- **Hybrid cloud**: Unified management of multiple clusters across data centers
+
+Supports multiple storage backends (S3, NFS, Ceph, LocalPV) and network plugins (Calico, Flannel).

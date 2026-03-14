@@ -8,7 +8,7 @@ weight: 8200
 
 集群概览页集中展示当前集群的关键信息、系统组件、资源用量、快捷工具以及节点排行。相比旧版本的监控入口，当前页面更偏向仪表盘形式，帮助集群管理员快速了解集群状态并进入相关管理页面。
 
-![](/images/docs/v3.x/cluster-overview/overview-dashboard.svg)
+![](/images/docs/v3.x/cluster-overview/overview-dashboard-zh.svg)
 
 ## 准备工作
 

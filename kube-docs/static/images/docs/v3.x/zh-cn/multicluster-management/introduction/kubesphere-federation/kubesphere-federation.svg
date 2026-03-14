@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="500" viewBox="0 0 1200 500" fill="none">
+  <rect width="1200" height="500" rx="24" fill="#0F172A"/>
+  <text x="56" y="60" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="30" font-weight="700">Kube AI Hub 联邦</text>
+  <text x="56" y="94" fill="#94A3B8" font-family="Arial, sans-serif" font-size="18">主集群提供控制平面，成员集群由主集群统一管理。</text>
+
+  <rect x="376" y="126" width="448" height="94" rx="18" fill="#1D4ED8" fill-opacity=".18" stroke="#60A5FA"/>
+  <text x="600" y="164" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="24" font-weight="700" text-anchor="middle">主集群</text>
+  <text x="600" y="194" fill="#BFDBFE" font-family="Arial, sans-serif" font-size="16" text-anchor="middle">控制平面、可观测性与应用分发</text>
+
+  <rect x="96" y="304" width="240" height="110" rx="18" fill="#111827" stroke="#334155"/>
+  <rect x="480" y="304" width="240" height="110" rx="18" fill="#111827" stroke="#334155"/>
+  <rect x="864" y="304" width="240" height="110" rx="18" fill="#111827" stroke="#334155"/>
+  <text x="150" y="348" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="24" font-weight="700">成员 A</text>
+  <text x="534" y="348" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="24" font-weight="700">成员 B</text>
+  <text x="918" y="348" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="24" font-weight="700">成员 C</text>
+  <text x="138" y="378" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="16">公有云集群</text>
+  <text x="522" y="378" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="16">自建集群</text>
+  <text x="907" y="378" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="16">边缘或区域集群</text>
+
+  <path d="M600 220V266" stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+  <path d="M216 304V266H984V304" stroke="#475569" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="600" cy="266" r="6" fill="#94A3B8"/>
+</svg>

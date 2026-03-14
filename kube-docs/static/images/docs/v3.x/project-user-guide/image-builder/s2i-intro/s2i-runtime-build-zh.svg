@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="420" viewBox="0 0 960 420" fill="none">
+  <rect width="960" height="420" rx="16" fill="#0F172A"/>
+  <text x="480" y="38" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700" text-anchor="middle">S2I &#x8FD0;&#x884C;&#x65F6;&#x955C;&#x50CF; &#x2014; &#x7F16;&#x8BD1;&#x578B;&#x8BED;&#x8A00;&#x5206;&#x9636;&#x6784;&#x5EFA;</text>
+  <text x="480" y="60" fill="#64748B" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">Go&#x3001;C&#x3001;C++&#x3001;Java&#xFF1A;&#x6784;&#x5EFA;&#x9636;&#x6BB5;&#x4E0E;&#x8FD0;&#x884C;&#x9636;&#x6BB5;&#x5206;&#x79BB;&#xFF0C;&#x751F;&#x6210;&#x66F4;&#x8F7B;&#x5C0F;&#x7684;&#x955C;&#x50CF;</text>
+
+  <!-- Phase 1 -->
+  <rect x="32" y="84" width="420" height="188" rx="12" fill="#111827" stroke="#312E81" stroke-width="1.5"/>
+  <rect x="32" y="84" width="420" height="32" rx="12" fill="#312E81"/>
+  <rect x="32" y="100" width="420" height="16" fill="#312E81"/>
+  <text x="242" y="106" fill="#C7D2FE" font-family="Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle">&#x7B2C;&#x4E00;&#x9636;&#x6BB5; &#x2014; &#x6784;&#x5EFA;&#x9636;&#x6BB5;&#xFF08;&#x955C;&#x50CF;&#x6784;&#x5EFA;&#x5668;&#xFF09;</text>
+
+  <rect x="52" y="128" width="120" height="60" rx="8" fill="#1E3A5F" stroke="#3B82F6"/>
+  <text x="112" y="154" fill="#93C5FD" font-family="Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">&#x6E90;&#x4EE3;&#x7801;</text>
+  <text x="112" y="170" fill="#64748B" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">+ &#x7F16;&#x8BD1;&#x5668;/&#x4F9D;&#x8D56;</text>
+
+  <line x1="172" y1="158" x2="208" y2="158" stroke="#475569" stroke-width="2" stroke-linecap="round"/>
+  <polygon points="204,152 216,158 204,164" fill="#475569"/>
+  <text x="190" y="148" fill="#64748B" font-family="Arial, sans-serif" font-size="9" text-anchor="middle">&#x7F16;&#x8BD1;</text>
+
+  <rect x="216" y="128" width="120" height="60" rx="8" fill="#312E81" stroke="#6366F1"/>
+  <text x="276" y="154" fill="#C7D2FE" font-family="Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">&#x6784;&#x5EFA;&#x5BB9;&#x5668;</text>
+  <text x="276" y="170" fill="#818CF8" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">assemble &#x811A;&#x672C;</text>
+
+  <line x1="336" y1="158" x2="372" y2="158" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-dasharray="5,3"/>
+  <polygon points="368,152 380,158 368,164" fill="#F59E0B"/>
+  <text x="354" y="148" fill="#F59E0B" font-family="Arial, sans-serif" font-size="9" text-anchor="middle">&#x5BFC;&#x51FA;</text>
+
+  <rect x="380" y="128" width="56" height="60" rx="8" fill="#78350F" stroke="#F59E0B"/>
+  <text x="408" y="152" fill="#FDE68A" font-family="Arial, sans-serif" font-size="10" font-weight="600" text-anchor="middle">&#x5236;&#x54C1;</text>
+  <text x="408" y="168" fill="#FCD34D" font-family="Arial, sans-serif" font-size="9" text-anchor="middle">.jar/bin</text>
+
+  <text x="242" y="240" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">&#x7F16;&#x8BD1;&#x6E90;&#x7801;&#x3001;&#x8FD0;&#x884C;&#x6D4B;&#x8BD5;&#x3001;&#x751F;&#x6210;&#x53EF;&#x6267;&#x884C;&#x5236;&#x54C1;</text>
+  <text x="242" y="258" fill="#475569" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">&#x7F16;&#x8BD1;&#x5668;&#x548C;&#x6784;&#x5EFA;&#x5DE5;&#x5177;&#x4EC5;&#x5728;&#x6B64;&#x9636;&#x6BB5;&#x4F7F;&#x7528;</text>
+
+  <!-- Center arrow -->
+  <line x1="452" y1="178" x2="508" y2="178" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round"/>
+  <polygon points="504,172 516,178 504,184" fill="#F59E0B"/>
+  <text x="480" y="168" fill="#F59E0B" font-family="Arial, sans-serif" font-size="10" font-weight="600" text-anchor="middle">&#x6CE8;&#x5165;&#x5236;&#x54C1;</text>
+
+  <!-- Phase 2 -->
+  <rect x="516" y="84" width="412" height="188" rx="12" fill="#111827" stroke="#14532D" stroke-width="1.5"/>
+  <rect x="516" y="84" width="412" height="32" rx="12" fill="#14532D"/>
+  <rect x="516" y="100" width="412" height="16" fill="#14532D"/>
+  <text x="722" y="106" fill="#86EFAC" font-family="Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle">&#x7B2C;&#x4E8C;&#x9636;&#x6BB5; &#x2014; &#x8FD0;&#x884C;&#x9636;&#x6BB5;&#xFF08;&#x8FD0;&#x884C;&#x65F6;&#x955C;&#x50CF;&#xFF09;</text>
+
+  <rect x="536" y="128" width="88" height="60" rx="8" fill="#78350F" stroke="#F59E0B"/>
+  <text x="580" y="154" fill="#FDE68A" font-family="Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">&#x5236;&#x54C1;</text>
+  <text x="580" y="170" fill="#FCD34D" font-family="Arial, sans-serif" font-size="9" text-anchor="middle">.jar/&#x4E8C;&#x8FDB;&#x5236;</text>
+
+  <line x1="624" y1="158" x2="660" y2="158" stroke="#475569" stroke-width="2" stroke-linecap="round"/>
+  <polygon points="656,152 668,158 656,164" fill="#475569"/>
+
+  <rect x="668" y="128" width="120" height="60" rx="8" fill="#14532D" stroke="#22C55E"/>
+  <text x="728" y="150" fill="#86EFAC" font-family="Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">&#x8FD0;&#x884C;&#x65F6;&#x955C;&#x50CF;</text>
+  <text x="728" y="166" fill="#4ADE80" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">JRE / libc &#x6700;&#x5C0F;&#x96C6;</text>
+  <text x="728" y="180" fill="#64748B" font-family="Arial, sans-serif" font-size="9" text-anchor="middle">&#x65E0;&#x7F16;&#x8BD1;&#x5668;</text>
+
+  <line x1="788" y1="158" x2="824" y2="158" stroke="#475569" stroke-width="2" stroke-linecap="round"/>
+  <polygon points="820,152 832,158 820,164" fill="#475569"/>
+
+  <rect x="832" y="128" width="80" height="60" rx="8" fill="#14532D" fill-opacity="0.8" stroke="#22C55E"/>
+  <text x="872" y="154" fill="#86EFAC" font-family="Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">&#x5E94;&#x7528;&#x955C;&#x50CF;</text>
+  <text x="872" y="170" fill="#4ADE80" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">&#x6781;&#x5C0F; &#x2713;</text>
+
+  <text x="722" y="240" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">&#x53EA;&#x5305;&#x542B;&#x5236;&#x54C1; + &#x6700;&#x5C0F;&#x8FD0;&#x884C;&#x65F6;&#x4F9D;&#x8D56;</text>
+  <text x="722" y="258" fill="#475569" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">&#x7F16;&#x8BD1;&#x5DE5;&#x5177;&#x3001;&#x6E90;&#x7801;&#x5747;&#x88AB;&#x6392;&#x9664; &#x2192; &#x955C;&#x50CF;&#x4F53;&#x79EF;&#x5927;&#x5E45;&#x7F29;&#x5C0F;</text>
+
+  <!-- Bottom note -->
+  <rect x="32" y="302" width="896" height="88" rx="10" fill="#111827" stroke="#1E293B"/>
+  <text x="480" y="330" fill="#94A3B8" font-family="Arial, sans-serif" font-size="13" font-weight="600" text-anchor="middle">&#x6838;&#x5FC3;&#x4F18;&#x52BF;&#xFF1A;&#x6700;&#x7EC8;&#x955C;&#x50CF;&#x4EC5;&#x5305;&#x542B;&#x5236;&#x54C1; + &#x8FD0;&#x884C;&#x65F6;&#x4F9D;&#x8D56;</text>
+  <text x="480" y="352" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">&#x7F16;&#x8BD1;&#x65F6;&#x4F9D;&#x8D56;&#xFF08;&#x7F16;&#x8BD1;&#x5668;&#x3001;&#x5934;&#x6587;&#x4EF6;&#x3001;&#x6E90;&#x7801;&#xFF09;&#x5728;&#x7B2C;&#x4E00;&#x9636;&#x6BB5;&#x5B8C;&#x6210;&#x540E;&#x5373;&#x88AB;&#x4E22;&#x5F03;&#x3002;</text>
+  <text x="480" y="372" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">&#x8FD9;&#x80FD;&#x751F;&#x6210;&#x4F53;&#x79EF;&#x66F4;&#x5C0F;&#x3001;&#x66F4;&#x5B89;&#x5168;&#x7684;&#x751F;&#x4EA7;&#x955C;&#x50CF;&#x3002;</text>
+</svg>

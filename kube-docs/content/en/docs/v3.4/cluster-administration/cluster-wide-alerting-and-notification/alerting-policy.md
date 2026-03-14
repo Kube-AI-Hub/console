@@ -1,69 +1,73 @@
 ---
-title: "Alerting Policies (Node Level)"
-keywords: 'Kube AI Hub, Kubernetes, Node, Alerting, Policy, Notification'
-description: 'Learn how to set alerting policies for nodes.'
-linkTitle: "Alerting Policies (Node Level)"
+title: "Alerting Rule Groups (Node Level)"
+keywords: 'Kube AI Hub, Kubernetes, Node, Alerting, Rule Group, Policy, Notification'
+description: 'Learn how to set alerting rule groups for nodes.'
+linkTitle: "Alerting Rule Groups (Node Level)"
 weight: 8530
 ---
 
-Kube AI Hub provides alerting policies for nodes and workloads. This tutorial demonstrates how to create alerting policies for nodes in a cluster. See [Alerting Policy (Workload Level)](../../../project-user-guide/alerting/alerting-policy/) to learn how to configure alerting policies for workloads.
+Kube AI Hub provides alerting rules for nodes with grouping support, allowing users to organize similar rules into a single rule group. Once the conditions defined in these rules are met, alerts will be triggered. This tutorial demonstrates how to create a rule group and alerting rules for nodes in a cluster.
 
-Kube AI Hub also has built-in policies which will trigger alerts if conditions defined for these policies are met. On the **Built-in Policies** tab, you can click a policy to see its details. Note that they cannot be directly deleted or edited on the console.
+Kube AI Hub also has built-in rule groups. On the **Built-in Rule Groups** tab, you can click any rule group to see all the rules it contains, and click any rule to view its details. Note that built-in rules cannot be directly deleted from the console, but their parameters can be adjusted by editing.
 
 ## Prerequisites
 
 - You have enabled [Kube AI Hub Alerting](../../../pluggable-components/alerting/).
 - To receive alert notifications, you must configure a [notification channel](../../../cluster-administration/platform-settings/notification-management/configure-email/) beforehand.
 - You need to create a user (`cluster-admin`) and grant it the `clusters-admin` role. For more information, see [Create Workspaces, Projects, Users and Roles](../../../quick-start/create-workspace-and-project/#step-4-create-a-role).
-- You have workloads in your cluster. If they are not ready, see [Deploy and Access Bookinfo](../../../quick-start/deploy-bookinfo-to-k8s/) to create a sample app.
 
-## Create an Alerting Policy
+## Create a Rule Group and Alerting Rules
 
 1. Log in to the console as `cluster-admin`. Click **Platform** in the upper-left corner, and then click **Cluster Management**.
 
-2. Go to **Alerting Policies** under **Monitoring & Alerting**, and then click **Create**.
+2. Go to **Rule Groups** under **Monitoring & Alerting**, and then click **Create**.
 
-3. In the displayed dialog box, provide the basic information as follows. Click **Next** to continue.
+3. In the displayed dialog box, provide the basic information as follows, then click **Next** to continue.
 
-   - **Name**. A concise and clear name as its unique identifier, such as `node-alert`.
-   - **Alias**. Help you distinguish alerting policies better.
-   - **Threshold Duration (min)**. The status of the alerting policy becomes Firing when the duration of the condition configured in the alerting rule reaches the threshold.
-   - **Severity**. Allowed values include **Warning**, **Error** and **Critical**, providing an indication of how serious an alert is.
-   - **Description**. A brief introduction to the alerting policy.
+   - **Name**: A concise name as its unique identifier, such as `node-rules`.
+   - **Alias**: Helps you identify the rule group more easily.
+   - **Check Interval (h m s)**: The interval between metric checks. The default is 1 minute.
+   - **Description**: A brief introduction to the rule group.
 
-4. On the **Rule Settings** tab, you can use the rule template or create a custom rule. To use the template, set the following parameters and click **Next** to continue.
+4. On the **Alerting Rules** tab, click **Add Alerting Rule** to add rules to the group.
 
-   - **Monitoring Targets**. Select at lease a node in your cluster for monitoring.
-   - **Alerting Rule**. Define a rule for the alerting policy. The rules provided in the drop-down list are based on Prometheus expressions and an alert will be triggered when conditions are met. You can monitor objects such as CPU, and memory.
+5. On the **Rule Settings** tab of an alerting rule, you can use the rule template or create a custom rule. To use the template, set the following parameters:
+
+   - **Rule Name**: A concise name as its unique identifier, such as `node1-cpu-rule`.
+   - **Monitoring Target**: Select at least one cluster node to monitor.
+   - **Trigger Condition**:
+     - **Monitoring Metric**: Click the drop-down list to select the desired metric.
+     - **Operator**: Click the drop-down list to select an operator (`>`, `>=`, `<`, `<=`).
+     - **Threshold**: Once the selected metric reaches this threshold, the alerting rule status becomes **Pending**.
+     - **Duration**: If the threshold condition persists for this duration, the alerting rule status becomes **Firing**.
+     - **Severity**: Available values are **Warning**, **Important**, and **Critical**, indicating the severity of the alert.
 
    {{< notice note >}}
 
-   You can create a custom rule with PromQL by entering an expression in the **Monitoring Metrics** field (autocompletion supported). For more information, see [Querying Prometheus](https://prometheus.io/docs/prometheus/latest/querying/basics/). 
+   You can also create a custom rule by entering a PromQL expression directly in the **Monitoring Metric** field (autocompletion supported). For more information, see [Querying Prometheus](https://prometheus.io/docs/prometheus/latest/querying/basics/).
 
-   {{</ notice >}} 
+   {{</ notice >}}
 
-5. On the **Message Settings** tab, enter the summary and details of the alerting message, then click **Create**.
+6. On the **Message Settings** tab of the alerting rule, configure the notification message.
 
-6. An alerting policy will be **Inactive** when just created. If conditions in the rule expression are met, it will reach **Pending** first, and then turn to **Firing** if conditions keep to be met in the given time range.
+   - **Summary**: The summary shown in alert notifications when this rule fires.
+   - **Details**: Custom details describing the alert notification.
 
-## Edit an Alerting Policy
+7. Click ✔ to finish configuring the rule (you can add multiple alerting rules to one group). After all rules are configured, click **Create** to create the rule group.
 
-To edit an alerting policy after it is created, on the **Alerting Policies** page, click <img src="/images/docs/v3.x/cluster-administration/cluster-wide-alerting-and-notification/alerting-policies-node-level/edit-policy.png" height="25px" alt="icon"> on the right of the alerting policy.
+## Edit a Rule Group
 
-1. Click **Edit** from the drop-down list and edit the alerting policy following the same steps as you create it. Click **OK** on the **Message Settings** page to save it.
+To edit a rule group after it is created, locate it on the **Rule Groups** page and click the action icon on the right. The available actions are:
 
-2. Click **Delete** from the drop-down list to delete an alerting policy.
+1. **Edit Info**: Edit the rule group's basic information following the same steps as creation. Click **OK** to save changes.
+2. **Delete**: Delete the rule group.
+3. **Disable**: Disable the rule group so it no longer triggers alerts.
+4. **Edit Alerting Rules**: Add, remove, modify, or disable individual alerting rules within the group.
 
-## View an Alerting Policy
+## View a Rule Group
 
-Click the name of an alerting policy on the **Alerting Policies** page to see its detail information, including the alerting rule and alerting history. You can also see the rule expression which is based on the template you use when creating the alerting policy.
+On the **Rule Groups** page, click the name of a rule group to view its details, including the list of alerting rules and triggered alert records.
 
-Under **Monitoring**, the **Alert Monitoring** chart shows the actual usage or amount of resources over time. **Alerting Message** displays the customized message you set in notifications.
+Enter a keyword in the search box to filter alerting rules. Click any alerting rule to view the rule expression generated from the template you selected.
 
-{{< notice note >}}
-
-You can click <img src="/images/docs/v3.x/cluster-administration/cluster-wide-alerting-and-notification/alerting-policies-node-level/drop-down-list.png" width='20' alt="icon" /> in the upper-right corner to select or custom a time range for the alert monitoring chart.
-
-You can also click <img src="/images/docs/v3.x/zh-cn/cluster-administration/cluster-wide-alerting-and-notification/alerting-policy-node-level/refresh.png" width='25' alt="icon" /> in the upper-right corner to manually refresh the alert monitoring chart.
-
-{{</ notice >}}
+**Alert Messages** displays the custom notification content configured in the message settings.

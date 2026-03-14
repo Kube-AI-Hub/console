@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="340" viewBox="0 0 960 340" fill="none">
+  <rect width="960" height="340" rx="16" fill="#0F172A"/>
+  <text x="480" y="38" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700" text-anchor="middle">S2I Build Process &#x2014; Source Code to Running Service</text>
+  <text x="480" y="60" fill="#64748B" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">From Git repository to a Kubernetes Service &#x2014; no Dockerfile required</text>
+
+  <!-- Git Repo -->
+  <rect x="32" y="90" width="130" height="80" rx="12" fill="#1E3A5F" stroke="#3B82F6" stroke-width="1.5"/>
+  <text x="97" y="126" fill="#93C5FD" font-family="Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle">Git Repo</text>
+  <text x="97" y="146" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">Source Code</text>
+
+  <line x1="162" y1="130" x2="200" y2="130" stroke="#475569" stroke-width="2" stroke-linecap="round"/>
+  <polygon points="196,124 208,130 196,136" fill="#475569"/>
+
+  <!-- S2I Image Builder -->
+  <rect x="208" y="78" width="150" height="104" rx="12" fill="#312E81" stroke="#6366F1" stroke-width="1.5"/>
+  <text x="283" y="112" fill="#C7D2FE" font-family="Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle">S2I</text>
+  <text x="283" y="130" fill="#818CF8" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">Image Builder</text>
+  <text x="283" y="148" fill="#64748B" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">assemble + run</text>
+  <text x="283" y="164" fill="#64748B" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">Java / Node / Python</text>
+
+  <line x1="358" y1="130" x2="396" y2="130" stroke="#475569" stroke-width="2" stroke-linecap="round"/>
+  <polygon points="392,124 404,130 392,136" fill="#475569"/>
+  <text x="377" y="120" fill="#64748B" font-family="Arial, sans-serif" font-size="9" text-anchor="middle">build</text>
+
+  <!-- Docker Image -->
+  <rect x="404" y="90" width="130" height="80" rx="12" fill="#14532D" stroke="#22C55E" stroke-width="1.5"/>
+  <text x="469" y="126" fill="#86EFAC" font-family="Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle">Docker Image</text>
+  <text x="469" y="146" fill="#4ADE80" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">App image</text>
+
+  <line x1="534" y1="130" x2="572" y2="130" stroke="#475569" stroke-width="2" stroke-linecap="round"/>
+  <polygon points="568,124 580,130 568,136" fill="#475569"/>
+  <text x="553" y="120" fill="#64748B" font-family="Arial, sans-serif" font-size="9" text-anchor="middle">push</text>
+
+  <!-- Registry -->
+  <rect x="580" y="90" width="130" height="80" rx="12" fill="#422006" stroke="#F97316" stroke-width="1.5"/>
+  <text x="645" y="122" fill="#FDBA74" font-family="Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle">Registry</text>
+  <text x="645" y="140" fill="#F97316" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">Docker Hub</text>
+  <text x="645" y="158" fill="#64748B" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">Harbor</text>
+
+  <line x1="710" y1="130" x2="748" y2="130" stroke="#475569" stroke-width="2" stroke-linecap="round"/>
+  <polygon points="744,124 756,130 744,136" fill="#475569"/>
+  <text x="729" y="120" fill="#64748B" font-family="Arial, sans-serif" font-size="9" text-anchor="middle">deploy</text>
+
+  <!-- Kubernetes -->
+  <rect x="756" y="78" width="172" height="104" rx="12" fill="#0F2942" stroke="#0EA5E9" stroke-width="1.5"/>
+  <text x="842" y="112" fill="#7DD3FC" font-family="Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle">Kubernetes</text>
+  <text x="842" y="132" fill="#38BDF8" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">Service</text>
+  <text x="842" y="150" fill="#64748B" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">Deployment + Job</text>
+  <text x="842" y="168" fill="#64748B" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">Auto-created</text>
+
+  <!-- Bottom note -->
+  <rect x="32" y="206" width="896" height="108" rx="10" fill="#111827" stroke="#1E293B"/>
+  <text x="480" y="234" fill="#94A3B8" font-family="Arial, sans-serif" font-size="13" font-weight="600" text-anchor="middle">Complete S2I workflow in Kube AI Hub</text>
+  <text x="480" y="258" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">1. Provide a Git repository URL and select the S2I build environment (Java / Node.js / Python)</text>
+  <text x="480" y="278" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">2. Kube AI Hub builds the image, pushes it to the target registry, and creates the Service / Deployment automatically</text>
+  <text x="480" y="298" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">3. Monitor build progress in Image Builders; check logs under Job Records</text>
+</svg>

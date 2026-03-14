@@ -6,7 +6,7 @@ LinkTitle: "从 Kubernetes 上卸载 Kube AI Hub"
 weight: 4400
 ---
 
-您可以使用 [kubesphere-delete.sh](https://github.com/kubesphere/ks-installer/blob/release-3.1/scripts/kubesphere-delete.sh) 将 Kube AI Hub 从您现有的 Kubernetes 集群中卸载。复制 [GitHub 源文件](https://raw.githubusercontent.com/kubesphere/ks-installer/release-3.1/scripts/kubesphere-delete.sh)并在本地机器上执行此脚本。
+您可以使用 [kubesphere-delete.sh](https://github.com/Kube-AI-Hub/ks-installer/blob/release-3.4/scripts/kubesphere-delete.sh) 将 Kube AI Hub 从您现有的 Kubernetes 集群中卸载。复制 [GitHub 源文件](https://raw.githubusercontent.com/Kube-AI-Hub/ks-installer/release-3.4/scripts/kubesphere-delete.sh)并在本地机器上执行此脚本。
 
 {{< notice warning >}}
 

@@ -1,41 +1,61 @@
 ---
 title: "架构说明"
-keywords: "kubesphere, kubernetes, docker, helm, jenkins, istio, prometheus, devops, service mesh，架构说明，架构"
-description: "Kube AI Hub 架构说明"
-
+keywords: "Kube AI Hub, Kubernetes, 架构, API Server, GPU 调度器"
+description: "Kube AI Hub 系统架构说明"
 linkTitle: "架构说明"
 weight: 1500
 ---
 
 ## 前后端分离
 
-Kube AI Hub 将 [前端](https://github.com/kubesphere/console) 与 [后端](https://github.com/kubesphere/kubesphere) 分开，实现了面向云原生的设计，后端的各个功能组件可通过 REST API 对接外部系统。可参考 [API 文档](../../reference/api-docs/)。下图是系统架构图。Kube AI Hub 无底层的基础设施依赖，可以运行在任何 Kubernetes、私有云、公有云、VM 或物理环境（BM）之上。此外，它可以部署在任何 Kubernetes 发行版上。
+Kube AI Hub 采用前后端完全分离的设计，前端控制台通过标准 REST API 与后端服务通信，后端各功能组件可独立扩展，也可对接外部系统。可参考 [API 文档](../../reference/api-docs/)。
 
-![Architecture](/images/docs/v3.x/introduction/system-architecture.svg)
+下图展示了系统整体架构：
 
-## 组件列表
+![系统架构](/images/docs/v3.x/introduction/system-architecture-new-zh.svg)
 
-| 后端组件 | 功能说明 |
+## 前端
+
+Kube AI Hub 控制台（Console）基于 React + MobX 构建，通过 Node.js 服务层将用户请求代理到后端 REST API。平台还内置了 Web 终端，用户可以在浏览器中直接使用 kubectl 命令行访问集群。
+
+## 后端核心组件
+
+| 组件 | 说明 |
 |---|---|
-| ks-apiserver | 整个集群管理的 API 接口和集群内部各个模块之间通信的枢纽，以及集群安全控制。|
-| ks-console | 提供 Kube AI Hub 的控制台服务。|
-| ks-controller-manager | 实现业务逻辑的，例如创建企业空间时，为其创建对应的权限；或创建服务策略时，生成对应的 Istio 配置等。|
-| metrics-server | Kubernetes 的监控组件，从每个节点的 Kubelet 采集指标信息。|
-| Prometheus | 提供集群，节点，工作负载，API对象的监视指标和服务。|
-| Elasticsearch | 提供集群的日志索引、查询、数据管理等服务，在安装时也可对接您已有的 ES 减少资源消耗。|
-| Fluent Bit | 提供日志接收与转发，可将采集到的⽇志信息发送到 ElasticSearch、Kafka。 |
-| Jenkins | 提供 CI/CD 流水线服务。|
-| Source-to-Image | 将源代码自动将编译并打包成 Docker 镜像，方便快速构建镜像。|
-| Istio | 提供微服务治理与流量管控，如灰度发布、金丝雀发布、熔断、流量镜像等。|
-| Jaeger | 收集 Sidecar 数据，提供分布式 Tracing 服务。|
-| OpenPitrix | 提供应用程序生命周期管理，例如应用模板、应用部署与管理的服务等。|
-| Alert | 提供集群、Workload、Pod、容器级别的自定义告警服务。|
-| Notification | 是一项综合通知服务； 它当前支持邮件传递方法。|
-| Redis | 将 ks-console 与 ks-account 的数据存储在内存中的存储系统。|
-| OpenLDAP | 负责集中存储和管理用户帐户信息与对接外部的 LDAP。|
-| Storage | 内置 CSI 插件对接云平台存储服务，可选安装开源的 NFS/Ceph/Gluster 的客户端。|
-| Network | 可选安装 Calico/Flannel 等开源的网络插件，支持对接云平台 SDN。|
+| ks-apiserver | 集群管理的统一 API 接口，负责集群内部各模块通信与安全控制 |
+| API Gateway | 认证鉴权、请求路由与代理，支持 LDAP/AD/SSO 集成 |
+| ks-controller-manager | 实现平台业务逻辑，例如企业空间创建时同步权限配置 |
+| GPU Scheduler | 异构 GPU 调度器，负责 vGPU 虚拟化切分与多卡并行调度策略 |
 
-## 服务组件
+## Kubernetes 层
 
-以上列表中每个功能组件下还有多个服务组件，关于服务组件的说明，可参考 [服务组件说明](../../pluggable-components/)。
+平台以标准 Kubernetes 为底座，不对 Kubernetes 本身做任何侵入性修改，所有扩展通过 CRD（Custom Resource Definitions）机制实现。主要利用以下 Kubernetes 能力：
+
+- **Cluster API**：资源的增删改查与状态同步
+- **调度器（Scheduler）**：Pod 调度策略（亲和性、污点容忍、GPU 资源请求）
+- **工作负载引擎**：Deployment、StatefulSet、DaemonSet、Job、CronJob 的生命周期管理
+- **RBAC**：角色与权限的细粒度控制
+
+## 可插拔组件
+
+以下组件均为可选，按需启用：
+
+| 组件 | 功能 |
+|---|---|
+| Prometheus | 集群、节点与 GPU 的监控指标采集与告警 |
+| Elasticsearch | 日志索引与全文检索 |
+| Fluent Bit | 容器日志采集与转发 |
+| Harbor | 容器镜像仓库，支持镜像扫描与权限管理 |
+| OpenLDAP / AD | 企业用户身份认证与统一账号管理 |
+| KubeEdge | 云边协同，将算力调度延伸至边缘节点 |
+
+## 基础设施
+
+Kube AI Hub 可运行在任何兼容的基础设施之上：
+
+- **裸金属服务器**：适用于高性能 GPU 集群场景
+- **虚拟机与私有云**：数据中心内部部署
+- **公有云 Kubernetes**：阿里云、AWS、华为云、腾讯云等托管集群
+- **混合云**：跨数据中心多集群统一管理
+
+支持多种存储后端（S3、NFS、Ceph、LocalPV）和网络插件（Calico、Flannel）。

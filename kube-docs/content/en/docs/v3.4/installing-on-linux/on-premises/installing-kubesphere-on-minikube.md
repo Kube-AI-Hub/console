@@ -139,7 +139,7 @@ This guide is used only for the minimal installation by default. For more inform
 
 ## Uninstall Kube AI Hub from Minikube
 
-You can uninstall Kube AI Hub from your existing Minikube cluster by using [kubesphere-delete.sh](https://github.com/kubesphere/ks-installer/blob/release-3.1/scripts/kubesphere-delete.sh). Copy it from the [GitHub source file](https://raw.githubusercontent.com/kubesphere/ks-installer/release-3.1/scripts/kubesphere-delete.sh) and execute this script on your local machine.
+You can uninstall Kube AI Hub from your existing Minikube cluster by using [kubesphere-delete.sh](https://github.com/Kube-AI-Hub/ks-installer/blob/release-3.4/scripts/kubesphere-delete.sh). Copy it from the [GitHub source file](https://raw.githubusercontent.com/Kube-AI-Hub/ks-installer/release-3.4/scripts/kubesphere-delete.sh) and execute this script on your local machine.
 
 {{< notice warning >}}
 

@@ -6,9 +6,9 @@ linkTitle: "Kube AI Hub Log Dashboard"
 weight: 6200
 ---
 
-As an open-source, application-centric container platform, Kube AI Hub v3.4.1 uses [OpenSearch](https://opensearch.org/) instead of ElasticSearch as the backend storage for logs, events, and auditing. By default, we can use the query tool provided in the lower-right corner on the Kube AI Hub console to retrieve logs, events, and auditing records.
+As an open-source, application-centric container platform, Kube AI Hub v3.4 uses [OpenSearch](https://opensearch.org/) instead of ElasticSearch as the backend storage for logs, events, and auditing. By default, you can use the built-in query tool in the lower-right corner of the Kube AI Hub console to retrieve logs and query events and auditing records.
 
-If you want an experience similar to the Kibana page, such as log chart drawing, you can enable OpenSearch Dashboard.
+If you want an experience similar to Kibana, such as log chart drawing, you can enable OpenSearch Dashboard.
 
 
 ## Enable Log Dashboard Before Kube AI Hub Installation
@@ -17,13 +17,13 @@ If you want an experience similar to the Kibana page, such as log chart drawing,
 
 When installing Kube AI Hub with multiple nodes on Linux, you should create a configuration file that lists all Kube AI Hub components.
 
-1. When you [Install Kube AI Hub on Linux](../../installing-on-linux/introduction/multioverview/), create a file `config-sample.yaml` and change it by executing the following command:
+1. When you [Install Kube AI Hub on Linux](../../installing-on-linux/introduction/multioverview/), create a file `config-sample.yaml` and edit it by executing the following command:
 
     ```bash
     vi config-sample.yaml
     ```
 
-2. Before enabling the OpenSearch Dashboard, you need to enable components `logging`, `opensearch`, and `events` or `auditing` in the yaml file. In this example, enable `events` as follows:
+2. Before enabling the OpenSearch Dashboard, you need to enable components `logging`, `opensearch`, and `events` or `auditing`. In this example, enable `events` as follows:
 
     ```yaml
     opensearch:
@@ -39,7 +39,6 @@ When installing Kube AI Hub with multiple nodes on Linux, you should create a co
       logMaxAge: 7
       opensearchPrefix: whizard 
     ```
-
     ```yaml
     logging:
       enabled: true   # Change "false" to "true".
@@ -47,7 +46,6 @@ When installing Kube AI Hub with multiple nodes on Linux, you should create a co
         enabled: true
         replicas: 2
     ```
-
     ```yaml
       events:
         enabled: true  # Change "false" to "true".
@@ -66,13 +64,13 @@ When installing Kube AI Hub with multiple nodes on Linux, you should create a co
 
 When you [Install Kube AI Hub on Kubernetes](../../installing-on-kubernetes/introduction/overview/), you need to enable the relevant components in the [cluster-configuration.yaml](https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/cluster-configuration.yaml) file.
 
-1. Download the [cluster-configuration.yaml](https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/cluster-configuration.yaml) file and edit the file using the following command:
+1. Download the [cluster-configuration.yaml](https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/cluster-configuration.yaml) file and edit it using the following command:
 
     ```bash
     vi cluster-configuration.yaml
     ```
 
-2. Before enabling the OpenSearch Dashboard, you need to enable components `logging`, `opensearch`, and `events` or `auditing` in the yaml file. In this example, enable `events` as follows:
+2. Before enabling the OpenSearch Dashboard, you need to enable components `logging`, `opensearch`, and `events` or `auditing`. In this example, enable `events` as follows:
 
     ```yaml
     opensearch:
@@ -88,7 +86,6 @@ When you [Install Kube AI Hub on Kubernetes](../../installing-on-kubernetes/intr
       logMaxAge: 7
       opensearchPrefix: whizard 
     ```
-
     ```yaml
     logging:
       enabled: true   # Change "false" to "true".
@@ -96,7 +93,6 @@ When you [Install Kube AI Hub on Kubernetes](../../installing-on-kubernetes/intr
         enabled: true
         replicas: 2
     ```
-
     ```yaml
       events:
         enabled: true  # Change "false" to "true".
@@ -105,7 +101,7 @@ When you [Install Kube AI Hub on Kubernetes](../../installing-on-kubernetes/intr
           replicas: 2
     ```
 
-3. Execute the following command to start Kube AI Hub installation:
+3. Execute the following command to start installation:
 
     ```bash
     kubectl apply -f https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/kubesphere-installer.yaml
@@ -115,17 +111,17 @@ When you [Install Kube AI Hub on Kubernetes](../../installing-on-kubernetes/intr
 
 ## Enable Log Dashboard After Kube AI Hub Installation
 
-1. Log in to the console as the `admin` user, click **Platform** in the upper left corner, and select **Cluster Management**.
+1. Log in to the console as the `admin` user, click **Platform** in the upper-left corner, and select **Cluster Management**.
 
-2. Click **CRDs**, enter `clusterconfiguration` in the search bar, and click the search result to view its detailed page.
+2. Click **CRDs**, enter `clusterconfiguration` in the search bar, and click the search result to view its detail page.
 
     {{< notice info >}}
-    Custom Resource Definitions (CRDs) allow users to create a new resource type without adding an additional API server. Users can use these custom resources just like other native Kubernetes objects.
+Custom Resource Definitions (CRDs) allow users to create a new resource type without adding an additional API server. Users can use these custom resources just like other native Kubernetes objects.
     {{</ notice >}}
 
-3. Under **Custom Resources**, click the three dots on the right side of `ks-installer`, select **Edit YAML**.
-<img src="/images/docs/v3.x/cluster-administration/logs-dashboard/logs-dashboard-1.png"/>
-4. In the YAML file, edit as follows, and then click **OK** to save the configuration.
+3. Under **Custom Resources**, click the edit icon on the right side of `ks-installer` and select **Edit YAML**.
+
+4. In the YAML file, edit as follows and click **OK** in the lower-right corner to save the configuration.
 
     ```yaml
     opensearch:
@@ -141,7 +137,6 @@ When you [Install Kube AI Hub on Kubernetes](../../installing-on-kubernetes/intr
       logMaxAge: 7
       opensearchPrefix: whizard 
     ```
-
     ```yaml
     logging:
       enabled: true   # Change "false" to "true".
@@ -149,7 +144,6 @@ When you [Install Kube AI Hub on Kubernetes](../../installing-on-kubernetes/intr
         enabled: true
         replicas: 2
     ```
-
     ```yaml
       events:
         enabled: true  # Change "false" to "true".
@@ -158,6 +152,7 @@ When you [Install Kube AI Hub on Kubernetes](../../installing-on-kubernetes/intr
           replicas: 2
     ```
 
+
 5. Check the installation process in kubectl by executing the following command:
 
     ```bash
@@ -165,14 +160,12 @@ When you [Install Kube AI Hub on Kubernetes](../../installing-on-kubernetes/intr
     ```
 
     {{< notice note >}}
-    You can find the kubectl tool by clicking on the lower-right corner of the console.
 
-<img src="/images/docs/v3.x/cluster-administration/logs-dashboard/logs-dashboard-2.png"/>
-
+You can find the kubectl tool by clicking the terminal icon in the lower-right corner of the console.
     {{</ notice >}}
 
-## Access Log Dashboard
+## Verify Component Installation
 
-After logging in to the console, expose the 5601 port of the OpenSearch dashboard through NodePort or other forms such as Ingress to an accessible network as below. 
+After logging in to the console, navigate to **Platform Management → Cluster Management → Service Components**. You should see the `opensearch-dashboards` service listed and running.
 
-<img src="/images/docs/v3.x/cluster-administration/logs-dashboard/logs-dashboard-3.png"/>
+Expose port `5601` of the OpenSearch Dashboard service via NodePort or Ingress to make it accessible from your network.

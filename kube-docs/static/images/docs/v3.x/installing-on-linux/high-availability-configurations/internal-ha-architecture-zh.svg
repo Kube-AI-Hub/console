@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" fill="none">
+  <rect width="1200" height="520" rx="24" fill="#0F172A"/>
+  <text x="56" y="60" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="30" font-weight="700">内置 HAProxy 架构</text>
+  <text x="56" y="94" fill="#94A3B8" font-family="Arial, sans-serif" font-size="18">KubeKey 在每个工作节点上部署本地 HAProxy，使集群流量无需外部负载均衡器即可访问多个控制平面。</text>
+
+  <rect x="138" y="152" width="280" height="120" rx="18" fill="#111827" stroke="#334155"/>
+  <rect x="460" y="152" width="280" height="120" rx="18" fill="#111827" stroke="#334155"/>
+  <rect x="782" y="152" width="280" height="120" rx="18" fill="#111827" stroke="#334155"/>
+  <text x="204" y="196" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="24" font-weight="700">控制平面 1</text>
+  <text x="526" y="196" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="24" font-weight="700">控制平面 2</text>
+  <text x="848" y="196" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="24" font-weight="700">控制平面 3</text>
+  <text x="212" y="226" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="16">kube-apiserver</text>
+  <text x="534" y="226" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="16">kube-apiserver</text>
+  <text x="856" y="226" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="16">kube-apiserver</text>
+
+  <rect x="256" y="338" width="688" height="102" rx="20" fill="#0B1220" stroke="#334155"/>
+  <text x="300" y="380" fill="#38BDF8" font-family="Arial, sans-serif" font-size="24" font-weight="700">带本地 HAProxy 的工作节点</text>
+  <text x="300" y="410" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="17">每个工作节点通过本地部署的负载均衡器将请求代理到健康的控制平面。</text>
+
+  <path d="M278 272V338" stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+  <path d="M600 272V338" stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+  <path d="M922 272V338" stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+</svg>

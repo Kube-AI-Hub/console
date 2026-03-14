@@ -206,15 +206,15 @@ Access your app at `<NodeIP>:<NodePort>`.
 
 **Internal Links**
 
-For links that direct readers to an internal website of Kube AI Hub, use relative links. For example, you want to add the link https://kubesphere.io/docs/introduction/what-is-kubesphere/ to "What is Kube AI Hub" in an internal guide in Kube AI Hub Documentation, the relative link can be:
+For links that direct readers to an internal website of Kube AI Hub, use relative links. For example, you want to add the link https://kubesphere.io/docs/introduction/what-is-kube-ai-hub/ to "What is Kube AI Hub" in an internal guide in Kube AI Hub Documentation, the relative link can be:
 
-../../../introduction/what-is-kubesphere/
+../../../introduction/what-is-kube-ai-hub/
 
-../../introduction/what-is-kubesphere/
+../../introduction/what-is-kube-ai-hub/
 
-../what-is-kubesphere/
+../what-is-kube-ai-hub/
 
-../../what-is-kubesphere/
+../../what-is-kube-ai-hub/
 
 The above are just four possible options and you may need to change the number of "../" and path name depending on the file directory. You can preview the link locally to see if the link works.
 

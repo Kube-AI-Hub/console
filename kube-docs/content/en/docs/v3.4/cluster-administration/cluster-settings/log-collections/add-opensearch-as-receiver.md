@@ -48,11 +48,7 @@ For Kube AI Hub versions below `v3.4.0`, please [upgrade](https://github.com/kub
 
 2. Click **CRDs**, enter `clusterconfiguration` in the search bar, and click the search result to view its detailed page.
 
-![](/images/docs/v3.x/cluster-administration/cluster-settings/log-collections/cc-search.png)
-
-3. Under **Custom Resources**, click the three dots on the right side of `ks-installer`, select **Edit YAML**.
-
-![](/images/docs/v3.x/cluster-administration/cluster-settings/log-collections/cc-ks-installer.png)
+3. Under **Custom Resources**, click the action icon on the right side of `ks-installer` and select **Edit YAML**.
 
 4. In the YAML file, search for `logging`, change the `enabled` from `false` to `true`. After that, click **OK** in the lower-right corner to save the configuration.
 
@@ -113,14 +109,8 @@ helm uninstall opensearch-master -n kubesphere-logging-system && helm uninstall 
 
 ## Query Logs in Kube AI Hub
 
-1. All users can use the log query feature. Log in with an account, hover over the icon in the lower right corner, and select Log Query from the pop-up menu.
+1. All users can use the log query feature. Log in with any account, click the toolbox icon in the lower-right corner, and select **Log Query** from the pop-up menu.
 
-![](/images/docs/v3.x/cluster-administration/cluster-settings/log-collections/logging-icon.png)
+2. In the pop-up window, you can see the time histogram of log counts, the cluster dropdown list, and the log search bar.
 
-2. In the pop-up window, you can see the time histogram of the number of logs, the cluster dropdown list, and the log search bar.
-
-![](/images/docs/v3.x/cluster-administration/cluster-settings/log-collections/logging-dashboard.png)
-
-3. Click on the search bar and search for logs by message, workspace, project, resource type, resource name, reason, category, or time range (e.g., enter the time range: last 10 minutes to search for logs in the last 10 minutes). Alternatively, click on the bar in the time histogram, and Kube AI Hub will show logs in the time range of that bar.
-
-![](/images/docs/v3.x/cluster-administration/cluster-settings/log-collections/logging-filter.png)
+3. Click the search bar and enter search conditions. You can search logs by message, workspace, project, resource type, resource name, reason, category, or time range (for example, enter the time range: last 10 minutes to search for logs in the last 10 minutes). Alternatively, click a bar in the time histogram and Kube AI Hub will display logs within that bar's time range.

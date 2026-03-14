@@ -668,127 +668,6 @@ footer {
   .down-main {
     text-align: center;
 
-    .img-div {
-      font-size: 0;
-
-      svg {
-        width: 32px;
-        height: 32px;
-        color: $text-muted;
-        cursor: pointer;
-        transition: all 0.2s ease-in-out;
-        margin-right: 8px;
-      }
-
-      a {
-        display: inline-block;
-        width: 34px;
-        height: 34px;
-        margin: 0 6px;
-        background-position: center;
-        background-repeat: no-repeat;
-      }
-
-      .wechat {
-        position: relative;
-
-        .hide-div {
-          display: none;
-          position: absolute;
-          top: -10px;
-          left: 50%;
-          padding: 10px;
-          transform: translate(-50%, -100%);
-          background: $bg-card;
-
-          p {
-            font-size: 12px;
-            color: $text-muted;
-          }
-
-          img {
-            margin: 0 10px;
-          }
-
-          &::after {
-            content: "";
-            position: absolute;
-            bottom: -18px;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 10px solid transparent;
-            border-top-color: $black;
-          }
-        }
-
-        &:hover {
-          svg {
-            color: green;
-          }
-
-          div {
-            display: block;
-          }
-        }
-      }
-
-      .facebook-a {
-        background-image: url("/kube-docs/images/footer/facebook.svg");
-
-        &:hover {
-          background-image: url("/kube-docs/images/footer/facebook-hover.svg");
-        }
-      }
-
-      .youtube-a {
-        background-image: url("/kube-docs/images/footer/youtube.svg");
-
-        &:hover {
-          background-image: url("/kube-docs/images/footer/youtube-hover.svg");
-        }
-      }
-
-      .slack-a {
-        background-image: url("/kube-docs/images/footer/slack.svg");
-
-        &:hover {
-          background-image: url("/kube-docs/images/footer/slack-hover.svg");
-        }
-      }
-
-      .twitter-a {
-        background-image: url("/kube-docs/images/footer/twitter.svg");
-
-        &:hover {
-          background-image: url("/kube-docs/images/footer/twitter-hover.svg");
-        }
-      }
-
-      .github-a {
-        background-image: url("/kube-docs/images/footer/github.svg");
-
-        &:hover {
-          background-image: url("/kube-docs/images/footer/github-hover.svg");
-        }
-      }
-
-      .medium-a {
-        background-image: url("/kube-docs/images/footer/medium.svg");
-
-        &:hover {
-          background-image: url("/kube-docs/images/footer/medium-hover.svg");
-        }
-      }
-
-      .linkedin-a {
-        background-image: url("/kube-docs/images/footer/linkedin.svg");
-
-        &:hover {
-          background-image: url("/kube-docs/images/footer/linkedin-hover.svg");
-        }
-      }
-    }
-
     .p1 {
       height: 23px;
       margin-top: 6px;
@@ -796,7 +675,7 @@ footer {
       line-height: 23px;
       font-weight: 500;
       letter-spacing: 1.08px;
-      color: $bg-tertiary;
+      color: rgba(255, 255, 255, 0.9);
     }
 
     .case {

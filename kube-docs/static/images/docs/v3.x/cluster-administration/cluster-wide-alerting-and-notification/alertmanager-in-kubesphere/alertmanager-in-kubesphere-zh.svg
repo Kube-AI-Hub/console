@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="440" viewBox="0 0 1200 440" fill="none">
+  <rect width="1200" height="440" rx="24" fill="#0F172A"/>
+  <text x="56" y="52" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="28" font-weight="700">Kube AI Hub 中的 Alertmanager</text>
+  <text x="56" y="84" fill="#94A3B8" font-family="Arial, sans-serif" font-size="18">Prometheus、kube-events 与 kube-auditing 向 Alertmanager 发送告警；Notification Manager 投递至接收方。</text>
+
+  <rect x="56" y="120" width="200" height="100" rx="14" fill="#111827" stroke="#334155"/>
+  <text x="156" y="168" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="20" font-weight="700" text-anchor="middle">Prometheus</text>
+  <text x="156" y="198" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="15" text-anchor="middle">告警规则</text>
+
+  <rect x="56" y="236" width="200" height="100" rx="14" fill="#111827" stroke="#334155"/>
+  <text x="156" y="284" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="20" font-weight="700" text-anchor="middle">kube-events</text>
+  <text x="156" y="314" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="15" text-anchor="middle">K8s 事件</text>
+
+  <rect x="56" y="352" width="200" height="64" rx="14" fill="#111827" stroke="#334155"/>
+  <text x="156" y="392" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="20" font-weight="700" text-anchor="middle">kube-auditing</text>
+
+  <path d="M256 170H380" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+  <path d="M256 286H380" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+  <path d="M256 384H380" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+  <path d="M372 170L392 220L372 270" stroke="#475569" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <rect x="400" y="140" width="280" height="260" rx="18" fill="#1D4ED8" fill-opacity=".18" stroke="#60A5FA"/>
+  <text x="540" y="200" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="24" font-weight="700" text-anchor="middle">Alertmanager</text>
+  <text x="540" y="232" fill="#BFDBFE" font-family="Arial, sans-serif" font-size="16" text-anchor="middle">去重、分组、路由</text>
+  <text x="540" y="260" fill="#BFDBFE" font-family="Arial, sans-serif" font-size="16" text-anchor="middle">沉默与抑制</text>
+  <text x="540" y="320" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14" text-anchor="middle">接收多来源告警</text>
+  <text x="540" y="348" fill="#94A3B8" font-family="Arial, sans-serif" font-size="14" text-anchor="middle">多租户感知</text>
+
+  <path d="M680 270H760" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+  <path d="M752 250L772 270L752 290" stroke="#475569" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <rect x="768" y="140" width="376" height="260" rx="18" fill="#111827" stroke="#334155"/>
+  <text x="956" y="200" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="24" font-weight="700" text-anchor="middle">Notification Manager</text>
+  <text x="956" y="232" fill="#94A3B8" font-family="Arial, sans-serif" font-size="16" text-anchor="middle">Kubernetes 原生、多租户</text>
+  <rect x="800" y="268" width="160" height="80" rx="12" fill="#0B1220" stroke="#334155"/>
+  <text x="880" y="308" fill="#38BDF8" font-family="Arial, sans-serif" font-size="16" text-anchor="middle">邮件</text>
+  <rect x="984" y="268" width="160" height="80" rx="12" fill="#0B1220" stroke="#334155"/>
+  <text x="1064" y="308" fill="#22C55E" font-family="Arial, sans-serif" font-size="16" text-anchor="middle">Slack</text>
+  <rect x="800" y="364" width="160" height="80" rx="12" fill="#0B1220" stroke="#334155"/>
+  <text x="880" y="404" fill="#A78BFA" font-family="Arial, sans-serif" font-size="16" text-anchor="middle">Webhook</text>
+  <rect x="984" y="364" width="160" height="80" rx="12" fill="#0B1220" stroke="#334155"/>
+  <text x="1064" y="404" fill="#F59E0B" font-family="Arial, sans-serif" font-size="16" text-anchor="middle">其他</text>
+</svg>

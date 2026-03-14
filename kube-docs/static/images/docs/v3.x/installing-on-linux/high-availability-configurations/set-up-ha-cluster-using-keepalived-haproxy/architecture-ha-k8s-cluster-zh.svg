@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600" fill="none">
+  <rect width="1200" height="600" rx="24" fill="#0F172A"/>
+  <text x="56" y="52" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="28" font-weight="700">使用 Keepalived 和 HAproxy 的高可用集群</text>
+  <text x="56" y="86" fill="#94A3B8" font-family="Arial, sans-serif" font-size="16">一个虚拟 IP、两个负载均衡节点（lb1、lb2）、三个主节点与三个工作节点。</text>
+
+  <!-- Virtual IP -->
+  <rect x="450" y="118" width="300" height="56" rx="14" fill="#166534" fill-opacity=".25" stroke="#22C55E"/>
+  <text x="600" y="152" fill="#86EFAC" font-family="Arial, sans-serif" font-size="18" font-weight="700" text-anchor="middle">虚拟 IP（浮动 IP）</text>
+
+  <!-- lb1, lb2 -->
+  <rect x="238" y="200" width="324" height="88" rx="16" fill="#1D4ED8" fill-opacity=".18" stroke="#60A5FA"/>
+  <rect x="638" y="200" width="324" height="88" rx="16" fill="#1D4ED8" fill-opacity=".18" stroke="#60A5FA"/>
+  <text x="400" y="238" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="20" font-weight="700" text-anchor="middle">lb1</text>
+  <text x="800" y="238" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="20" font-weight="700" text-anchor="middle">lb2</text>
+  <text x="400" y="268" fill="#BFDBFE" font-family="Arial, sans-serif" font-size="14" text-anchor="middle">Keepalived 与 HAproxy</text>
+  <text x="800" y="268" fill="#BFDBFE" font-family="Arial, sans-serif" font-size="14" text-anchor="middle">Keepalived 与 HAproxy</text>
+
+  <!-- master1, master2, master3 -->
+  <rect x="110" y="320" width="280" height="88" rx="16" fill="#111827" stroke="#334155"/>
+  <rect x="460" y="320" width="280" height="88" rx="16" fill="#111827" stroke="#334155"/>
+  <rect x="810" y="320" width="280" height="88" rx="16" fill="#111827" stroke="#334155"/>
+  <text x="250" y="358" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700" text-anchor="middle">master1</text>
+  <text x="600" y="358" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700" text-anchor="middle">master2</text>
+  <text x="950" y="358" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700" text-anchor="middle">master3</text>
+  <text x="250" y="386" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14" text-anchor="middle">控制平面 + etcd</text>
+  <text x="600" y="386" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14" text-anchor="middle">控制平面 + etcd</text>
+  <text x="950" y="386" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14" text-anchor="middle">控制平面 + etcd</text>
+
+  <!-- worker1, worker2, worker3 -->
+  <rect x="110" y="440" width="280" height="72" rx="16" fill="#0B1220" stroke="#334155"/>
+  <rect x="460" y="440" width="280" height="72" rx="16" fill="#0B1220" stroke="#334155"/>
+  <rect x="810" y="440" width="280" height="72" rx="16" fill="#0B1220" stroke="#334155"/>
+  <text x="250" y="484" fill="#38BDF8" font-family="Arial, sans-serif" font-size="18" font-weight="700" text-anchor="middle">worker1</text>
+  <text x="600" y="484" fill="#38BDF8" font-family="Arial, sans-serif" font-size="18" font-weight="700" text-anchor="middle">worker2</text>
+  <text x="950" y="484" fill="#38BDF8" font-family="Arial, sans-serif" font-size="18" font-weight="700" text-anchor="middle">worker3</text>
+
+  <!-- Connectors: VIP to lb1, lb2 -->
+  <path d="M520 174V200" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+  <path d="M680 174V200" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+  <!-- lb1 to masters -->
+  <path d="M318 288V320" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+  <path d="M400 288V320" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+  <path d="M482 288V320" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+  <!-- lb2 to masters -->
+  <path d="M718 288V320" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+  <path d="M800 288V320" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+  <path d="M882 288V320" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+  <!-- masters to workers -->
+  <path d="M250 408V440" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+  <path d="M600 408V440" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+  <path d="M950 408V440" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+</svg>

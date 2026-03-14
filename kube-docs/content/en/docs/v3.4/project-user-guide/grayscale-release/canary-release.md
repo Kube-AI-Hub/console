@@ -10,7 +10,7 @@ On the back of [Istio](https://istio.io/), Kube AI Hub provides users with neces
 
 This method serves as an efficient way to test performance and reliability of a service. It can help detect potential problems in the actual environment while not affecting the overall system stability.
 
-![canary-release-0](/images/docs/v3.x/project-user-guide/grayscale-release/canary-release/canary-release-0.png)
+![canary-release-0](/images/docs/v3.x/project-user-guide/grayscale-release/canary-release/canary-release-0.svg)
 
 ## Prerequisites
 

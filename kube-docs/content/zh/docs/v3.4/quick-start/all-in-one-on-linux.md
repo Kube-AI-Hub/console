@@ -8,12 +8,6 @@ weight: 2100
 
 对于刚接触 Kube AI Hub 并想快速上手该[容器平台](https://kubesphere.io/)的用户，All-in-One 安装模式是最佳的选择，它能够帮助您零配置快速部署 Kube AI Hub 和 Kubernetes。
 
-## 视频演示
-
-<video controls="controls" style="width: 100% !important; height: auto !important;">
-  <source type="video/mp4" src="https://kubesphere-docs.pek3b.qingstor.com/website/docs-v3.0/KS3.0%E5%AE%89%E8%A3%85%E4%B8%8E%E9%83%A8%E7%BD%B2_1_All-in-one%20Installation%20on%20Linux.mp4">
-</video>
-
 ## 步骤 1：准备 Linux 机器
 
 若要以 All-in-One 模式进行安装，您仅需参考以下对机器硬件和操作系统的要求准备一台主机。

@@ -10,7 +10,7 @@ weight: 12230
 
 下图显示了 Kube AI Hub 与外部 OAuth 2.0 身份提供者之间的身份验证过程。
 
-![oauth2](/images/docs/v3.x/access-control-and-account-management/external-authentication/use-an-oauth2-identity-provider/oauth2.svg)
+![oauth2](/images/docs/v3.x/access-control-and-account-management/external-authentication/use-an-oauth2-identity-provider/oauth2-zh.svg)
 
 ## 准备工作
 

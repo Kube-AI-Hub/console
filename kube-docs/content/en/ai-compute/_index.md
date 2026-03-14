@@ -5,10 +5,9 @@ layout: "scenario"
 css: "scss/scenario.scss"
 
 section1:
-  title: "AI Compute Management Platform: Simplify Complexity, 10x Utilization"
-  content: Through GPU/CPU heterogeneous compute pooling and virtualization, resource utilization can be improved by 3–10x. Unified scheduling and management of intelligent clusters enables platform-level management of hardware clusters through resource pooling and GPU virtualization.
+  title: "AI Compute Management Platform: Simplify Complexity, 3–10x Better Utilization"
+  content: Through GPU/CPU heterogeneous compute pooling and virtualization, resource utilization can be improved by 3–10x. Unified scheduling and management of AI clusters enables platform-level management of hardware through resource pooling and GPU virtualization.
   content2: Fully compatible with domestic GPU/CPU/NPU hardware, building a secure and controllable local compute infrastructure.
-  image: /images/devops/banner.png
   inCenter: true
 
 image: /images/docs/v3.x/introduction/use-cases/ai-compute-architecture.svg
@@ -20,10 +19,10 @@ section2:
       image: /images/docs/v3.x/introduction/use-cases/ai-compute-architecture.svg
       summary: GPU/CPU heterogeneous compute pooling and virtualization improves utilization by 3–10x.
       contentList:
-        - content: <span>Heterogeneous GPU virtualization</span> supporting NVIDIA, Cambricon, Huawei, Iluvatar, and more
+        - content: <span>Heterogeneous GPU virtualization</span> supporting NVIDIA, Cambricon, Huawei Ascend, Iluvatar, and more
         - content: <span>Unified compute resource pooling</span> to manage GPU clusters, CPU clusters, and file storage
         - content: <span>Native Kubernetes integration</span> for seamless compute resource and service management
-        - content: <span>Harbor product registry integration</span> with out-of-the-box Helm Charts application management
+        - content: <span>Harbor image registry integration</span> with out-of-the-box Helm Charts application management
 
     - title: On-Demand Allocation and Flexible Scheduling
       image: /images/docs/v3.x/introduction/use-cases/ai-compute-platform-value.svg
@@ -53,10 +52,10 @@ section2:
 
 section3:
   title: "Product Architecture: Full-Stack Management from User Permissions to Heterogeneous Hardware"
-  image: /images/docs/v3.x/introduction/use-cases/ai-compute-platform-value.svg
+  image: /images/docs/v3.x/introduction/platform-overview.svg
   content: Get started quickly with the AI Compute Management Platform by reading the documentation.
   btnContent: View Documentation
-  link: docs/v3.4/introduction/what-is-kubesphere/
+  link: docs/v3.4/introduction/what-is-kube-ai-hub/
   bgLeft: /images/service-mesh/3-2.svg
   bgRight: /images/service-mesh/3.svg
 ---

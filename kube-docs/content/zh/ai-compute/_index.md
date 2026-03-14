@@ -5,10 +5,9 @@ layout: "scenario"
 css: "scss/scenario.scss"
 
 section1:
-  title: 异构算力管理平台：化繁为简，提升10倍算力利用率
-  content: 通过 GPU/CPU 异构算力池化与虚拟化，利用率可提升 3～10 倍。智算集群统一调度与管理，通过资源池化、GPU 虚拟化技术，实现硬件集群平台化管理。
+  title: 异构算力管理平台：化繁为简，提升 3～10 倍算力利用率
+  content: 通过 GPU/CPU 异构算力池化与虚拟化，利用率可提升 3～10 倍。统一调度与管理智算集群，通过资源池化、GPU 虚拟化技术，实现硬件集群平台化管理。
   content2: 全面信创适配，支持国产 GPU/CPU/NPU，构建安全可控本地算力底座。
-  image: /images/devops/banner.png
   inCenter: true
 
 image: /images/docs/v3.x/introduction/use-cases/ai-compute-architecture-zh.svg
@@ -20,10 +19,10 @@ section2:
       image: /images/docs/v3.x/introduction/use-cases/ai-compute-architecture-zh.svg
       summary: 通过 GPU/CPU 异构算力池化与虚拟化，利用率可提升 3～10 倍。
       contentList:
-        - content: <span>异构 GPU 算力虚拟化，</span>支持英伟达、寒武纪、华为、天数等主流 GPU
+        - content: <span>异构 GPU 算力虚拟化，</span>支持英伟达、寒武纪、华为昇腾、天数等主流 GPU
         - content: <span>算力资源池化管理，</span>统一调度 GPU 集群、CPU 集群与文件存储资源
         - content: <span>Kubernetes 原生集成，</span>算力资源管理与服务管理无缝对接
-        - content: <span>产品仓库（Harbor）集成，</span>应用管理（Helm Charts）开箱即用
+        - content: <span>镜像仓库（Harbor）集成，</span>应用管理（Helm Charts）开箱即用
 
     - title: 按需分配，灵活调度
       image: /images/docs/v3.x/introduction/use-cases/ai-compute-platform-value-zh.svg
@@ -53,10 +52,10 @@ section2:
 
 section3:
   title: 产品架构：从用户权限到异构硬件的全栈管理平台
-  image: /images/docs/v3.x/introduction/use-cases/ai-compute-platform-value-zh.svg
+  image: /images/docs/v3.x/introduction/platform-overview-zh.svg
   content: 立即查阅文档，快速上手异构算力管理平台
   btnContent: 查看文档
-  link: docs/v3.4/introduction/what-is-kubesphere/
+  link: docs/v3.4/introduction/what-is-kube-ai-hub/
   bgLeft: /images/service-mesh/3-2.svg
   bgRight: /images/service-mesh/3.svg
 ---

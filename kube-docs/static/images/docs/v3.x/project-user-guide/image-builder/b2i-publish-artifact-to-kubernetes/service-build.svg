@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="320" viewBox="0 0 960 320" fill="none">
+  <rect width="960" height="320" rx="16" fill="#0F172A"/>
+  <text x="480" y="38" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700" text-anchor="middle">B2I Service Build &#x2014; Artifact to Running Service</text>
+  <text x="480" y="60" fill="#64748B" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">Upload a binary artifact (JAR / WAR / binary) and deploy it to Kubernetes automatically</text>
+
+  <!-- Upload Artifact -->
+  <rect x="32" y="88" width="148" height="80" rx="12" fill="#78350F" stroke="#F97316" stroke-width="1.5"/>
+  <text x="106" y="122" fill="#FDBA74" font-family="Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle">Artifact</text>
+  <text x="106" y="140" fill="#F97316" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">JAR / WAR / bin</text>
+  <text x="106" y="156" fill="#64748B" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">Upload via console</text>
+
+  <line x1="180" y1="128" x2="218" y2="128" stroke="#475569" stroke-width="2" stroke-linecap="round"/>
+  <polygon points="214,122 226,128 214,134" fill="#475569"/>
+
+  <!-- B2I Image Builder -->
+  <rect x="226" y="76" width="160" height="104" rx="12" fill="#312E81" stroke="#6366F1" stroke-width="1.5"/>
+  <text x="306" y="112" fill="#C7D2FE" font-family="Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle">B2I</text>
+  <text x="306" y="130" fill="#818CF8" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">Image Builder</text>
+  <text x="306" y="148" fill="#64748B" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">tomcat / java-runner</text>
+  <text x="306" y="164" fill="#64748B" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">Wraps artifact in image</text>
+
+  <line x1="386" y1="128" x2="424" y2="128" stroke="#475569" stroke-width="2" stroke-linecap="round"/>
+  <polygon points="420,122 432,128 420,134" fill="#475569"/>
+  <text x="405" y="118" fill="#64748B" font-family="Arial, sans-serif" font-size="9" text-anchor="middle">build</text>
+
+  <!-- Docker Image -->
+  <rect x="432" y="88" width="130" height="80" rx="12" fill="#14532D" stroke="#22C55E" stroke-width="1.5"/>
+  <text x="497" y="124" fill="#86EFAC" font-family="Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle">Docker Image</text>
+  <text x="497" y="144" fill="#4ADE80" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">App image</text>
+
+  <line x1="562" y1="128" x2="600" y2="128" stroke="#475569" stroke-width="2" stroke-linecap="round"/>
+  <polygon points="596,122 608,128 596,134" fill="#475569"/>
+  <text x="581" y="118" fill="#64748B" font-family="Arial, sans-serif" font-size="9" text-anchor="middle">push</text>
+
+  <!-- Registry -->
+  <rect x="608" y="88" width="130" height="80" rx="12" fill="#422006" stroke="#F97316" stroke-width="1.5"/>
+  <text x="673" y="122" fill="#FDBA74" font-family="Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle">Registry</text>
+  <text x="673" y="140" fill="#F97316" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">Docker Hub</text>
+  <text x="673" y="158" fill="#64748B" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">Harbor</text>
+
+  <line x1="738" y1="128" x2="776" y2="128" stroke="#475569" stroke-width="2" stroke-linecap="round"/>
+  <polygon points="772,122 784,128 772,134" fill="#475569"/>
+  <text x="757" y="118" fill="#64748B" font-family="Arial, sans-serif" font-size="9" text-anchor="middle">deploy</text>
+
+  <!-- Kubernetes -->
+  <rect x="784" y="76" width="144" height="104" rx="12" fill="#0F2942" stroke="#0EA5E9" stroke-width="1.5"/>
+  <text x="856" y="112" fill="#7DD3FC" font-family="Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle">Kubernetes</text>
+  <text x="856" y="132" fill="#38BDF8" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">Service</text>
+  <text x="856" y="150" fill="#64748B" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">Deployment + Job</text>
+  <text x="856" y="168" fill="#64748B" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">Auto-created</text>
+
+  <!-- Bottom note -->
+  <rect x="32" y="196" width="896" height="96" rx="10" fill="#111827" stroke="#1E293B"/>
+  <text x="480" y="224" fill="#94A3B8" font-family="Arial, sans-serif" font-size="13" font-weight="600" text-anchor="middle">B2I workflow via creating a Service</text>
+  <text x="480" y="248" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">Select artifact type (WAR / JAR / Binary), upload the file, configure Service settings</text>
+  <text x="480" y="270" fill="#64748B" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">Kube AI Hub builds the image, pushes it to the registry, and creates Service + Deployment + Job automatically</text>
+</svg>

@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="800" viewBox="0 0 1120 800" fill="none">
+  <rect width="1120" height="800" rx="0" fill="#14215a"/>
+
+  <!-- ============================================================
+       COLUMN HEADERS
+  ============================================================ -->
+  <text x="60" y="38" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="15" font-weight="700">&#x7528;&#x6237;&#x5165;&#x53E3;</text>
+  <text x="330" y="38" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="15" font-weight="700">&#x4F01;&#x4E1A;&#x7A7A;&#x95F4;</text>
+  <text x="910" y="38" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="15" font-weight="700">&#x96C6;&#x7FA4;</text>
+
+  <!-- ============================================================
+       USER ENTRIES
+  ============================================================ -->
+
+  <!-- User1 (red) -->
+  <circle cx="80" cy="172" r="18" fill="#E53E3E"/>
+  <path d="M50 212 Q50 192 80 192 Q110 192 110 212" fill="#E53E3E"/>
+  <text x="80" y="240" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">&#x7528;&#x6237;1</text>
+  <line x1="110" y1="182" x2="132" y2="182" stroke="#64748b" stroke-width="1.5"/>
+  <text x="121" y="179" fill="#718096" font-family="Arial, sans-serif" font-size="11" font-weight="700">+</text>
+
+  <!-- User2 (blue) -->
+  <circle cx="80" cy="390" r="18" fill="#3B82F6"/>
+  <path d="M50 430 Q50 410 80 410 Q110 410 110 430" fill="#3B82F6"/>
+  <text x="80" y="458" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">&#x7528;&#x6237;2</text>
+  <line x1="110" y1="400" x2="132" y2="400" stroke="#64748b" stroke-width="1.5"/>
+  <text x="121" y="397" fill="#718096" font-family="Arial, sans-serif" font-size="11" font-weight="700">+</text>
+
+  <!-- User3 (green) -->
+  <circle cx="80" cy="590" r="18" fill="#38A169"/>
+  <path d="M50 630 Q50 610 80 610 Q110 610 110 630" fill="#38A169"/>
+  <text x="80" y="658" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">&#x7528;&#x6237;3</text>
+  <line x1="110" y1="600" x2="132" y2="600" stroke="#64748b" stroke-width="1.5"/>
+  <text x="121" y="597" fill="#718096" font-family="Arial, sans-serif" font-size="11" font-weight="700">+</text>
+
+  <!-- ============================================================
+       WORKSPACE BOXES
+  ============================================================ -->
+
+  <!-- ==== Workspace 1 ==== -->
+  <rect x="160" y="58" width="360" height="205" rx="8" fill="#1a2b6b" stroke="#2c3a7c" stroke-width="1.5"/>
+  <rect x="178" y="46" width="110" height="24" rx="5" fill="#3B82F6"/>
+  <text x="233" y="63" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle">&#x4F01;&#x4E1A;&#x7A7A;&#x95F4;1</text>
+
+  <line x1="178" y1="158" x2="198" y2="158" stroke="#64748b" stroke-width="1.5"/>
+  <text x="188" y="155" fill="#718096" font-family="Arial, sans-serif" font-size="11" font-weight="700">+</text>
+  <circle cx="218" cy="150" r="11" fill="#718096"/>
+  <path d="M205 168 Q205 161 218 161 Q231 161 231 168" fill="#718096"/>
+  <rect x="223" y="153" width="11" height="8" rx="2" fill="#F6AD55"/>
+  <circle cx="223" cy="153" r="3" fill="#F6AD55"/>
+  <text x="255" y="163" fill="#94a3b8" font-family="Arial, sans-serif" font-size="12">&#x4F01;&#x4E1A;&#x7A7A;&#x95F4;&#x89D2;&#x8272;</text>
+  <line x1="345" y1="158" x2="410" y2="158" stroke="#475569" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <line x1="410" y1="158" x2="432" y2="158" stroke="#64748b" stroke-width="1.5"/>
+  <text x="421" y="155" fill="#718096" font-family="Arial, sans-serif" font-size="11" font-weight="700">+</text>
+  <circle cx="454" cy="150" r="11" fill="#2c3a7c"/>
+  <path d="M441 168 Q441 161 454 161 Q467 161 467 168" fill="#2c3a7c"/>
+  <text x="454" y="188" fill="#64748b" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">&#x7528;&#x6237;1</text>
+
+  <!-- ==== Workspace 2 ==== -->
+  <rect x="160" y="300" width="360" height="240" rx="8" fill="#1a2b6b" stroke="#2c3a7c" stroke-width="1.5"/>
+  <rect x="178" y="288" width="110" height="24" rx="5" fill="#3B82F6"/>
+  <text x="233" y="305" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle">&#x4F01;&#x4E1A;&#x7A7A;&#x95F4;2</text>
+
+  <!-- row1 -->
+  <line x1="178" y1="378" x2="198" y2="378" stroke="#64748b" stroke-width="1.5"/>
+  <text x="188" y="375" fill="#718096" font-family="Arial, sans-serif" font-size="11" font-weight="700">+</text>
+  <circle cx="218" cy="370" r="11" fill="#718096"/>
+  <path d="M205 388 Q205 381 218 381 Q231 381 231 388" fill="#718096"/>
+  <rect x="223" y="373" width="11" height="8" rx="2" fill="#F6AD55"/>
+  <circle cx="223" cy="373" r="3" fill="#F6AD55"/>
+  <text x="255" y="383" fill="#94a3b8" font-family="Arial, sans-serif" font-size="12">&#x4F01;&#x4E1A;&#x7A7A;&#x95F4;&#x89D2;&#x8272;</text>
+  <line x1="345" y1="378" x2="410" y2="378" stroke="#475569" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <line x1="410" y1="378" x2="432" y2="378" stroke="#64748b" stroke-width="1.5"/>
+  <text x="421" y="375" fill="#718096" font-family="Arial, sans-serif" font-size="11" font-weight="700">+</text>
+  <circle cx="454" cy="370" r="11" fill="#2c3a7c"/>
+  <path d="M441 388 Q441 381 454 381 Q467 381 467 388" fill="#2c3a7c"/>
+  <text x="454" y="408" fill="#64748b" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">&#x7528;&#x6237;1</text>
+
+  <!-- row2 -->
+  <line x1="178" y1="468" x2="198" y2="468" stroke="#64748b" stroke-width="1.5"/>
+  <text x="188" y="465" fill="#718096" font-family="Arial, sans-serif" font-size="11" font-weight="700">+</text>
+  <circle cx="218" cy="460" r="11" fill="#718096"/>
+  <path d="M205 478 Q205 471 218 471 Q231 471 231 478" fill="#718096"/>
+  <rect x="223" y="463" width="11" height="8" rx="2" fill="#F6AD55"/>
+  <circle cx="223" cy="463" r="3" fill="#F6AD55"/>
+  <text x="255" y="473" fill="#94a3b8" font-family="Arial, sans-serif" font-size="12">&#x4F01;&#x4E1A;&#x7A7A;&#x95F4;&#x89D2;&#x8272;</text>
+  <line x1="345" y1="468" x2="410" y2="468" stroke="#475569" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <line x1="410" y1="468" x2="432" y2="468" stroke="#64748b" stroke-width="1.5"/>
+  <text x="421" y="465" fill="#718096" font-family="Arial, sans-serif" font-size="11" font-weight="700">+</text>
+  <circle cx="454" cy="460" r="11" fill="#2c3a7c"/>
+  <path d="M441 478 Q441 471 454 471 Q467 471 467 478" fill="#2c3a7c"/>
+  <text x="454" y="498" fill="#64748b" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">&#x7528;&#x6237;2</text>
+
+  <!-- ==== Workspace 3 ==== -->
+  <rect x="160" y="570" width="360" height="200" rx="8" fill="#1a2b6b" stroke="#2c3a7c" stroke-width="1.5"/>
+  <rect x="178" y="558" width="110" height="24" rx="5" fill="#3B82F6"/>
+  <text x="233" y="575" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle">&#x4F01;&#x4E1A;&#x7A7A;&#x95F4;3</text>
+
+  <!-- row1 -->
+  <line x1="178" y1="638" x2="198" y2="638" stroke="#64748b" stroke-width="1.5"/>
+  <text x="188" y="635" fill="#718096" font-family="Arial, sans-serif" font-size="11" font-weight="700">+</text>
+  <circle cx="218" cy="630" r="11" fill="#718096"/>
+  <path d="M205 648 Q205 641 218 641 Q231 641 231 648" fill="#718096"/>
+  <rect x="223" y="633" width="11" height="8" rx="2" fill="#F6AD55"/>
+  <circle cx="223" cy="633" r="3" fill="#F6AD55"/>
+  <text x="255" y="643" fill="#94a3b8" font-family="Arial, sans-serif" font-size="12">&#x4F01;&#x4E1A;&#x7A7A;&#x95F4;&#x89D2;&#x8272;</text>
+  <line x1="345" y1="638" x2="410" y2="638" stroke="#475569" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <line x1="410" y1="638" x2="432" y2="638" stroke="#64748b" stroke-width="1.5"/>
+  <text x="421" y="635" fill="#718096" font-family="Arial, sans-serif" font-size="11" font-weight="700">+</text>
+  <circle cx="454" cy="630" r="11" fill="#2c3a7c"/>
+  <path d="M441 648 Q441 641 454 641 Q467 641 467 648" fill="#2c3a7c"/>
+  <text x="454" y="668" fill="#64748b" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">&#x7528;&#x6237;2</text>
+
+  <!-- row2 -->
+  <line x1="178" y1="718" x2="198" y2="718" stroke="#64748b" stroke-width="1.5"/>
+  <text x="188" y="715" fill="#718096" font-family="Arial, sans-serif" font-size="11" font-weight="700">+</text>
+  <circle cx="218" cy="710" r="11" fill="#718096"/>
+  <path d="M205 728 Q205 721 218 721 Q231 721 231 728" fill="#718096"/>
+  <rect x="223" y="713" width="11" height="8" rx="2" fill="#F6AD55"/>
+  <circle cx="223" cy="713" r="3" fill="#F6AD55"/>
+  <text x="255" y="723" fill="#94a3b8" font-family="Arial, sans-serif" font-size="12">&#x4F01;&#x4E1A;&#x7A7A;&#x95F4;&#x89D2;&#x8272;</text>
+  <line x1="345" y1="718" x2="410" y2="718" stroke="#475569" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <line x1="410" y1="718" x2="432" y2="718" stroke="#64748b" stroke-width="1.5"/>
+  <text x="421" y="715" fill="#718096" font-family="Arial, sans-serif" font-size="11" font-weight="700">+</text>
+  <circle cx="454" cy="710" r="11" fill="#2c3a7c"/>
+  <path d="M441 728 Q441 721 454 721 Q467 721 467 728" fill="#2c3a7c"/>
+  <text x="454" y="748" fill="#64748b" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">&#x7528;&#x6237;3</text>
+
+  <!-- ============================================================
+       USER-TO-WORKSPACE LINES
+  ============================================================ -->
+  <line x1="132" y1="182" x2="160" y2="158" stroke="#7dd3fc" stroke-width="1.2"/>
+  <line x1="132" y1="182" x2="160" y2="378" stroke="#7dd3fc" stroke-width="1.2"/>
+  <line x1="132" y1="400" x2="160" y2="468" stroke="#7dd3fc" stroke-width="1.2"/>
+  <line x1="132" y1="400" x2="160" y2="638" stroke="#7dd3fc" stroke-width="1.2"/>
+  <line x1="132" y1="600" x2="160" y2="718" stroke="#7dd3fc" stroke-width="1.2"/>
+
+  <!-- ============================================================
+       CLUSTER BOXES
+  ============================================================ -->
+
+  <!-- ==== Cluster 1 ==== -->
+  <rect x="590" y="58" width="490" height="210" rx="8" fill="#1a2b6b" stroke="#2c3a7c" stroke-width="1.5"/>
+  <rect x="982" y="68" width="78" height="24" rx="5" fill="#1a2b6b" stroke="#2c3a7c" stroke-width="1.5"/>
+  <text x="1021" y="85" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="12" font-weight="600" text-anchor="middle">&#x96C6;&#x7FA4;1</text>
+
+  <rect x="614" y="88" width="200" height="78" rx="6" fill="#1f3380" stroke="#334d9a" stroke-width="1.2"/>
+  <rect x="616" y="78" width="80" height="22" rx="4" fill="#3B82F6"/>
+  <text x="656" y="93" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">&#x9879;&#x76EE;</text>
+  <line x1="630" y1="140" x2="648" y2="140" stroke="#64748b" stroke-width="1.2"/>
+  <text x="639" y="137" fill="#718096" font-family="Arial, sans-serif" font-size="10" font-weight="700">+</text>
+  <circle cx="664" cy="132" r="9" fill="#718096"/>
+  <path d="M653 148 Q653 141 664 141 Q675 141 675 148" fill="#718096"/>
+  <rect x="668" y="135" width="10" height="7" rx="2" fill="#F6AD55"/>
+  <circle cx="668" cy="135" r="2.5" fill="#F6AD55"/>
+  <text x="692" y="147" fill="#94a3b8" font-family="Arial, sans-serif" font-size="11">&#x89D2;&#x8272;</text>
+
+  <rect x="614" y="180" width="200" height="78" rx="6" fill="#1f3380" stroke="#334d9a" stroke-width="1.2"/>
+  <rect x="616" y="170" width="96" height="22" rx="4" fill="#3B82F6"/>
+  <text x="664" y="185" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">DevOps &#x9879;&#x76EE;</text>
+  <line x1="630" y1="232" x2="648" y2="232" stroke="#64748b" stroke-width="1.2"/>
+  <text x="639" y="229" fill="#718096" font-family="Arial, sans-serif" font-size="10" font-weight="700">+</text>
+  <circle cx="664" cy="224" r="9" fill="#718096"/>
+  <path d="M653 240 Q653 233 664 233 Q675 233 675 240" fill="#718096"/>
+  <rect x="668" y="227" width="10" height="7" rx="2" fill="#F6AD55"/>
+  <circle cx="668" cy="227" r="2.5" fill="#F6AD55"/>
+  <text x="692" y="239" fill="#94a3b8" font-family="Arial, sans-serif" font-size="11">&#x89D2;&#x8272;</text>
+
+  <!-- ==== Cluster 2 ==== -->
+  <rect x="590" y="298" width="490" height="234" rx="8" fill="#1a2b6b" stroke="#2c3a7c" stroke-width="1.5"/>
+  <rect x="982" y="308" width="78" height="24" rx="5" fill="#1a2b6b" stroke="#2c3a7c" stroke-width="1.5"/>
+  <text x="1021" y="325" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="12" font-weight="600" text-anchor="middle">&#x96C6;&#x7FA4;2</text>
+
+  <rect x="614" y="322" width="200" height="78" rx="6" fill="#1f3380" stroke="#334d9a" stroke-width="1.2"/>
+  <rect x="616" y="312" width="80" height="22" rx="4" fill="#3B82F6"/>
+  <text x="656" y="327" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">&#x9879;&#x76EE;</text>
+  <line x1="630" y1="374" x2="648" y2="374" stroke="#64748b" stroke-width="1.2"/>
+  <text x="639" y="371" fill="#718096" font-family="Arial, sans-serif" font-size="10" font-weight="700">+</text>
+  <circle cx="664" cy="366" r="9" fill="#718096"/>
+  <path d="M653 382 Q653 375 664 375 Q675 375 675 382" fill="#718096"/>
+  <rect x="668" y="369" width="10" height="7" rx="2" fill="#F6AD55"/>
+  <circle cx="668" cy="369" r="2.5" fill="#F6AD55"/>
+  <text x="692" y="381" fill="#94a3b8" font-family="Arial, sans-serif" font-size="11">&#x89D2;&#x8272;</text>
+
+  <rect x="614" y="418" width="200" height="100" rx="6" fill="#1f3380" stroke="#334d9a" stroke-width="1.2"/>
+  <rect x="616" y="408" width="96" height="22" rx="4" fill="#3B82F6"/>
+  <text x="664" y="423" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">DevOps &#x9879;&#x76EE;</text>
+  <line x1="630" y1="472" x2="648" y2="472" stroke="#64748b" stroke-width="1.2"/>
+  <text x="639" y="469" fill="#718096" font-family="Arial, sans-serif" font-size="10" font-weight="700">+</text>
+  <circle cx="664" cy="464" r="9" fill="#718096"/>
+  <path d="M653 480 Q653 473 664 473 Q675 473 675 480" fill="#718096"/>
+  <rect x="668" y="467" width="10" height="7" rx="2" fill="#F6AD55"/>
+  <circle cx="668" cy="467" r="2.5" fill="#F6AD55"/>
+  <text x="692" y="479" fill="#94a3b8" font-family="Arial, sans-serif" font-size="11">&#x89D2;&#x8272;</text>
+
+  <!-- ==== Cluster 3 ==== -->
+  <rect x="590" y="562" width="490" height="210" rx="8" fill="#1a2b6b" stroke="#2c3a7c" stroke-width="1.5"/>
+  <rect x="982" y="572" width="78" height="24" rx="5" fill="#1a2b6b" stroke="#2c3a7c" stroke-width="1.5"/>
+  <text x="1021" y="589" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="12" font-weight="600" text-anchor="middle">&#x96C6;&#x7FA4;3</text>
+
+  <rect x="614" y="586" width="200" height="78" rx="6" fill="#1f3380" stroke="#334d9a" stroke-width="1.2"/>
+  <rect x="616" y="576" width="80" height="22" rx="4" fill="#3B82F6"/>
+  <text x="656" y="591" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">&#x9879;&#x76EE;</text>
+  <line x1="630" y1="638" x2="648" y2="638" stroke="#64748b" stroke-width="1.2"/>
+  <text x="639" y="635" fill="#718096" font-family="Arial, sans-serif" font-size="10" font-weight="700">+</text>
+  <circle cx="664" cy="630" r="9" fill="#718096"/>
+  <path d="M653 646 Q653 639 664 639 Q675 639 675 646" fill="#718096"/>
+  <rect x="668" y="633" width="10" height="7" rx="2" fill="#F6AD55"/>
+  <circle cx="668" cy="633" r="2.5" fill="#F6AD55"/>
+  <text x="692" y="645" fill="#94a3b8" font-family="Arial, sans-serif" font-size="11">&#x89D2;&#x8272;</text>
+
+  <rect x="614" y="680" width="200" height="78" rx="6" fill="#1f3380" stroke="#334d9a" stroke-width="1.2"/>
+  <rect x="616" y="670" width="96" height="22" rx="4" fill="#3B82F6"/>
+  <text x="664" y="685" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="11" font-weight="600" text-anchor="middle">DevOps &#x9879;&#x76EE;</text>
+  <line x1="630" y1="732" x2="648" y2="732" stroke="#64748b" stroke-width="1.2"/>
+  <text x="639" y="729" fill="#718096" font-family="Arial, sans-serif" font-size="10" font-weight="700">+</text>
+  <circle cx="664" cy="724" r="9" fill="#718096"/>
+  <path d="M653 740 Q653 733 664 733 Q675 733 675 740" fill="#718096"/>
+  <rect x="668" y="727" width="10" height="7" rx="2" fill="#F6AD55"/>
+  <circle cx="668" cy="727" r="2.5" fill="#F6AD55"/>
+  <text x="692" y="739" fill="#94a3b8" font-family="Arial, sans-serif" font-size="11">&#x89D2;&#x8272;</text>
+
+  <!-- ============================================================
+       WORKSPACE-TO-CLUSTER LINES
+  ============================================================ -->
+  <line x1="520" y1="158" x2="590" y2="127" stroke="#7dd3fc" stroke-width="1.2"/>
+  <line x1="520" y1="158" x2="590" y2="219" stroke="#7dd3fc" stroke-width="1.2"/>
+  <line x1="520" y1="378" x2="590" y2="361" stroke="#7dd3fc" stroke-width="1.2"/>
+  <line x1="520" y1="468" x2="590" y2="461" stroke="#7dd3fc" stroke-width="1.2"/>
+  <line x1="520" y1="638" x2="590" y2="625" stroke="#7dd3fc" stroke-width="1.2"/>
+  <line x1="520" y1="718" x2="590" y2="719" stroke="#7dd3fc" stroke-width="1.2"/>
+</svg>
