@@ -204,7 +204,7 @@
                 return arr
             }
             var getFileContributors = function () {
-                var url = 'https://api.github.com/repos/kubesphere/website/commits?path=content/' + languageCode +
+                var url = 'https://api.github.com/repos/kube-ai-hub/console/commits?path=kube-docs/content/' + languageCode +
                     '/' + filePath
                 $.getJSON(url, function (data) {
                     if (!data || data.length === 0) {
