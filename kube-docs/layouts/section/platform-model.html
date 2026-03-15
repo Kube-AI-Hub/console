@@ -1,3 +1,6 @@
+{{ if and (strings.HasSuffix .RelPermalink "platform-model/docs/") (not (in .RelPermalink "v1.x")) }}
+{{ partial "platform-model-redirect.html" . }}
+{{ else }}
 {{ $basePath := strings.TrimSuffix "/" .Site.Params.logoLink }}
 <!DOCTYPE html>
 <html lang="{{ with .Site.LanguageCode }}{{ . }}{{ else }}en-US{{ end }}">
@@ -42,13 +45,10 @@
             </div>
         </section>
 
-        {{ $version := index (strings.FindRE `v[0-9]+\.[0-9]+` .Page.RelPermalink) 0}}
-        <!-- {{ $doc_version := printf "/docs/%s"  $version }} -->
-
         <section class="section-menu">
-            {{ with (.GetPage "/docs") }}
+            {{ with .FirstSection }}
             <div class="common-layout">
-                {{ partial "section" (dict "context" . "ver" $version) }}
+                {{ partial "section" (dict "context" .) }}
             </div>
             {{ end }}
         </section>
@@ -57,11 +57,10 @@
             <div class="common-layout">
                 <div class="left-div left-tree">
                     <div class="inner-tree">
-                        {{ partial "tree.html" (dict "page" .) }}
-                        <!-- <div class="download-div">
-                        <span class="download-icon"></span>
-                        <span>{{ i18n "Download this page (PDF)" }}</span>
-                    </div> -->
+                        {{ $page := . }}
+                        {{ $treeRoot := false }}
+                        {{ range $page.FirstSection.Sections }}{{ range .Sections }}{{ if .IsAncestor $page }}{{ $treeRoot = . }}{{ end }}{{ end }}{{ end }}
+                        {{ partial "tree.html" (dict "page" $page "treeRoot" $treeRoot) }}
                     </div>
                 </div>
                 <div class="second-section-menu">
@@ -124,33 +123,15 @@
                         </div>
                     </div>
 
-                    {{ define "content" }}
-                    {{ if .context.IsSection }}
-                    <h{{.count}}>{{ .context.LinkTitle }}</h{{.count}}>
-                    {{ else }}
-                    <h{{.count}}><a href="{{ .context.RelPermalink }}">{{ .context.LinkTitle }}</a></h{{.count}}>
-                    {{ end }}
-                    <p>{{ .context.Description }}</p>
-                    {{ $count := add .count 1 }}
-                    {{ if .context.IsSection }}
-                    {{ range (union (where .context.Pages ".context.Params._build.render" "!=" false) .context.Sections).ByWeight }}
-                    {{ template "content" (dict "context" . "count" $count) }}
-                    {{ end }}
-                    {{ else}}
-                    {{ end }}
-                    {{ end }}
-
                     <div class="content-div main-div">
                         <div class="md-body" data-pagefind-body data-pagefind-filter="language:{{ .Site.Language.Lang }}">
                             <h1>{{ .Title }}</h1>
                             {{ .Content }}
                             {{ range (union (where .Pages ".Params._build.render" "!=" false) .Sections).ByWeight }}
-                            {{ template "content" (dict "context" . "count" 2) }}
+                            {{ partial "platform-model-list-content.html" (dict "context" . "count" 2) }}
                             {{ end }}
                         </div>
                     </div>
-
-                    {{ partial "pagination" . }}
 
                     <div></div>
                 </div>
@@ -158,7 +139,7 @@
                 <div class="aside">
                     <div class="inner-div">
                         <div class='title'>
-                            {{ i18n "What’s on this Page" }}
+                            {{ i18n "What's on this Page" }}
                         </div>
                         <div class='tabs'>
                             {{ .TableOfContents }}
@@ -181,7 +162,6 @@
             var languageCode = '{{.Site.Language.Lang}}'
             var filePath = '{{ .File.Path }}'
             var githubUrl = '{{ .Site.Params.githubUrl }}'
-            // var filePath = 'README.md'
 
             var getLatestTime = function (data) {
                 var commit = data[0].commit
@@ -199,7 +179,6 @@
                             arr.push(avatar_url)
                         }
                     }
-
                 }
                 return arr
             }
@@ -302,3 +281,4 @@
 </body>
 
 </html>
+{{ end }}

@@ -1,0 +1,14 @@
+{{ $ctx := .context }}
+{{ $count := .count }}
+{{ if $ctx.IsSection }}
+<h{{ $count }}>{{ $ctx.LinkTitle }}</h{{ $count }}>
+{{ else }}
+<h{{ $count }}><a href="{{ $ctx.RelPermalink }}">{{ $ctx.LinkTitle }}</a></h{{ $count }}>
+{{ end }}
+<p>{{ $ctx.Description }}</p>
+{{ if $ctx.IsSection }}
+{{ $nextCount := add $count 1 }}
+{{ range (union (where $ctx.Pages ".Params._build.render" "!=" false) $ctx.Sections).ByWeight }}
+{{ partial "platform-model-list-content.html" (dict "context" . "count" $nextCount) }}
+{{ end }}
+{{ end }}

@@ -57,7 +57,7 @@
             <div class="common-layout">
                 <div class="left-div left-tree">
                     <div class="inner-tree">
-                        {{ partial "tree.html" . }}
+                        {{ partial "tree.html" (dict "page" .) }}
                         <!-- <div class="download-div">
                         <span class="download-icon"></span>
                         <span>{{ i18n "Download this page (PDF)" }}</span>

@@ -8,14 +8,27 @@
   {{ template "breadcrumbnav" (dict "p1" .p1.Parent "p2" .p2 )  }}
   {{ end }}
 {{ end }}
+{{ $crumbTitle := .p1.LinkTitle }}
+{{ $docs := .p1.Site.GetPage "/docs" }}
+{{ $platformModel := .p1.Site.GetPage "/platform-model" }}
+{{ $platformModelDocs := .p1.Site.GetPage "/platform-model/docs" }}
+{{ if and $docs (eq .p1.Parent $docs) (findRE `^v[0-9]+\.[0-9]+$` .p1.File.ContentBaseName) }}
+  {{ $crumbTitle = .p1.File.ContentBaseName }}
+{{ end }}
+{{ if and $platformModel (eq .p1.Parent $platformModel) (eq .p1.File.ContentBaseName "docs") }}
+  {{ $crumbTitle = $platformModel.LinkTitle }}
+{{ end }}
+{{ if and $platformModel (eq .p1 $platformModel) $platformModelDocs (.p2.IsDescendant $platformModelDocs) }}
+{{ else }}
 {{ if eq .p1 .p2 }}
 <li class="active">
-  <a href="{{ .p1.RelPermalink }}">{{ .p1.LinkTitle }}</a>
+  <a href="{{ .p1.RelPermalink }}">{{ $crumbTitle }}</a>
 </li>
 {{ else}}
 <li>
-  <a href="{{ .p1.RelPermalink }}">{{ .p1.LinkTitle }}&nbsp;/&nbsp;</a>
+  <a href="{{ .p1.RelPermalink }}">{{ $crumbTitle }}&nbsp;/&nbsp;</a>
 </li>
+{{ end }}
 {{ end }}
 
 {{ end }}

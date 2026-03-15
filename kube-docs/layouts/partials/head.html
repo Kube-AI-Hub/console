@@ -33,7 +33,7 @@
 <script src='{{ $basePath }}/js/jquery.modal.min.js'></script>
 <script src='{{ $basePath }}/swiper/swiper-bundle.min.js'></script>
 
-{{ if .IsDescendant (.GetPage "/docs") }}
+{{ if or (.IsDescendant (.GetPage "/docs")) (.IsDescendant (.GetPage "/platform-model")) }}
 <link href='{{ $basePath }}/pagefind/pagefind-ui.css' rel="stylesheet">
 <script src='{{ $basePath }}/pagefind/pagefind-ui.js'></script>
 {{ end }}

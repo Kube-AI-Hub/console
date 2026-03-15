@@ -33,4 +33,10 @@
     {{ end }}
   {{ end }}
 {{ end }}
+{{ if .IsDescendant (.GetPage "/platform-model") }}
+  {{ if not .Params.isDocsRoot }}
+    {{ $style := resources.Get "scss/doc.scss" | toCSS | minify | fingerprint }}
+    <link rel="stylesheet" href="{{ $style.RelPermalink }}">
+  {{ end }}
+{{ end }}
 

@@ -126,6 +126,12 @@ hasChildren = true
     URL = "docs/v3.4"
     weight = 43
 
+    [[languages.en.menu.main]]
+    parent = "Documentation"
+    name = "Industry AI Model Platform"
+    URL = "platform-model/docs/v1.x"
+    weight = 10
+
 [languages.zh]
 weight = 2
 contentDir = "content/zh"
@@ -162,6 +168,12 @@ name = "文档中心"
     name = "v3.4"
     URL = "docs/v3.4"
     weight = 43
+
+    [[languages.zh.menu.main]]
+    parent = "文档中心"
+    name = "行业大模型平台"
+    URL = "platform-model/docs/v1.x"
+    weight = 10
 
 # [languages.tr]
 # weight = 3
