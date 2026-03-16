@@ -10,7 +10,7 @@ weight: 1
 
 section1:
   title: Industry AI Model Platform Documentation
-  content: Learn how to manage models, datasets, and code, create application Spaces, and perform model inference, fine-tuning, and evaluation on the Industry AI Model Platform.
+  content: Learn how to manage the model library, datasets, development environments, and user spaces, and perform model inference, model training & evaluation, and resource management on the Industry AI Model Platform.
   image: /images/docs/platform-model/banner.png
   version: "v1.x"
 

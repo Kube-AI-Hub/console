@@ -29,7 +29,7 @@ On the dedicated instance creation page, fill in the following configuration, th
 
 ## View Instance List
 
-After creation, go to **Resource Console → Dedicated Inference Instance List** to view all created instances and their running status.
+After creation, use the top navigation to open **Model Inference → Dedicated Instances** to view all created instances and their running status. You can also view them centrally in the dedicated instances section of **Resource Management**.
 
 ## Calling the Inference Service
 

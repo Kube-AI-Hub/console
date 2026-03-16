@@ -1,21 +1,22 @@
 ---
-title: "Create a Notebook Instance"
+title: "Create a Development Instance"
 keywords: "Industry AI Model Platform, create Notebook, JupyterLab, VS Code, Eclipse Theia"
-description: "How to create a Notebook instance on the Industry AI Model Platform, selecting the development environment and compute resources."
-linkTitle: "Create a Notebook Instance"
+description: "How to create a development instance on the Industry AI Model Platform, selecting the development environment and compute resources."
+linkTitle: "Create a Development Instance"
 weight: 6110
 ---
 
 ## Access Entry
 
-There are two ways to navigate to the Notebook creation page:
+There are two main ways to navigate to the development instance creation page:
 
-- Click your profile avatar in the top right corner and select **New Notebook**.
+- Click your profile avatar in the top right corner and select **New Development Instance**.
+- Open the **Development Environment** page from the top navigation, then click **New Development Instance**.
 - On a model details page, click **Use Model → Develop with Notebook**.
 
 ## Configuration Parameters
 
-On the Notebook instance creation page, fill in the following configuration:
+On the development instance creation page, fill in the following configuration:
 
 | Parameter | Description |
 |-----------|-------------|
@@ -29,11 +30,11 @@ After completing the configuration, click **Create Instance**.
 
 ## View Instance List
 
-After creation, go to **Resource Console → Notebook Instance List** to view all created instances and their running status.
+After creation, go to the **Development Environment** page to view all created instances and their running status. You can also view them centrally under the **Notebook** section in **Resource Management**.
 
 ## Notes
 
 {{< notice note >}}
-- Notebook instances are billed by usage time. Stop instances when not in use to avoid unnecessary charges.
+- Development instances are billed by usage time. Stop instances when not in use to avoid unnecessary charges.
 - Files in the working directory are retained after stopping an instance; data will be cleared when the instance is deleted — back up your work in advance.
 {{</ notice >}}

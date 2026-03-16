@@ -10,7 +10,7 @@ weight: 1
 
 section1:
   title: 行业大模型平台文档
-  content: 学习如何使用行业大模型平台管理模型、数据集和代码，创建应用空间，以及进行模型推理、微调与评测。
+  content: 学习如何使用行业大模型平台管理模型库、数据集、开发环境与用户空间，以及进行模型推理、模型训练评测和资源管理。
   image: /images/docs/platform-model/banner.png
   version: "v1.x"
 

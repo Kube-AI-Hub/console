@@ -28,7 +28,7 @@ On the model evaluation task creation page, fill in the following configuration,
 
 ## View Evaluation Results
 
-After creation, go to **Resource Console → Evaluation Task List** to view the running status and results of all evaluation tasks.
+After creation, use the top navigation to open **Model Training & Evaluation → Model Evaluation** to view the running status and results of all evaluation tasks. You can also view them centrally in **Resource Management**.
 
 ## Related Documentation
 

@@ -27,7 +27,7 @@ On the fine-tuning instance creation page, fill in the following configuration, 
 
 ## View Instance List
 
-After creation, go to **Resource Console → Fine-tuning Instance List** to monitor instance startup progress and manage running fine-tuning tasks in real time.
+After creation, use the top navigation to open **Model Training & Evaluation → Fine-tuning Instances** to monitor instance startup progress and manage running fine-tuning tasks in real time. You can also view them centrally in **Resource Management**.
 
 ## Using the Fine-tuning Framework
 
