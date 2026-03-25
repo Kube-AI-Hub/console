@@ -1109,9 +1109,9 @@ export const CLUSTER_PROVIDERS = [
     icon: 'google-plus',
   },
   {
-    label: 'QingCloud Kubernetes Engine',
-    value: 'QingCloud Kubernetes Engine',
-    icon: 'qingcloud',
+    label: 'Kube AI Hub',
+    value: 'Kube AI Hub Kubernetes Engine',
+    icon: 'kubernetes',
   },
   {
     label: 'Tencent Kubernetes Engine',
