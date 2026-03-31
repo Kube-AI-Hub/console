@@ -33,4 +33,8 @@ The platform supports the following dataset types:
 
 ## Related Operations
 
+- [Dataset Card](./dataset_card)
+- [Create Dataset](./create_dataset)
+- [Upload Datasets](./upload_dataset)
+- [Update Datasets](./update_dataset)
 - [Download Datasets](./download_datasets)

@@ -29,4 +29,8 @@ The platform is compatible with mainstream model formats, including:
 
 ## Related Operations
 
+- [Model Card](./model_card)
+- [Create Model Repository](./create_model)
+- [Upload Models](./upload_model)
+- [Update Models](./update_model)
 - [Download Models](./download_models)

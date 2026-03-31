@@ -29,4 +29,8 @@ icon: "/images/docs/platform-model/model.svg"
 
 ## 相关操作
 
+- [模型卡片](./model_card)
+- [创建模型仓库](./create_model)
+- [上传模型](./upload_model)
+- [更新模型](./update_model)
 - [下载模型](./download_models)

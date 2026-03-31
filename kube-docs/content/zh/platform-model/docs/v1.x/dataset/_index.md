@@ -33,4 +33,8 @@ icon: "/images/docs/platform-model/dataset.svg"
 
 ## 相关操作
 
+- [数据集卡片](./dataset_card)
+- [创建数据集](./create_dataset)
+- [上传数据集](./upload_dataset)
+- [更新数据集](./update_dataset)
 - [下载数据集](./download_datasets)
