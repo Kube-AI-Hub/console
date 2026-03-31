@@ -19,7 +19,7 @@ When login fails, the sign-in page usually indicates that the user is not active
    ```bash
    $ kubectl get users
    NAME         EMAIL                    STATUS
-   admin        admin@kubesphere.io      Active
+   admin        admin@kube-ai-hub.local      Active
    ```
 
 2. Verify that `ks-controller-manager` is running and check if exceptions are contained in logs:
