@@ -32,10 +32,53 @@ const ImageTagRadioList = ({
     onSelectImageTag(value)
   }, [])
 
+  const handleRadioListMouseDownCapture = useCallback(e => {
+    if (e.target.closest('label.radio')) {
+      e.preventDefault()
+      e.stopPropagation()
+      if (typeof e.nativeEvent?.stopImmediatePropagation === 'function') {
+        e.nativeEvent.stopImmediatePropagation()
+      }
+    }
+  }, [])
+
+  const handleRadioListClickCapture = useCallback(
+    e => {
+      const radioLabel = e.target.closest('label.radio')
+
+      if (!radioLabel) {
+        return
+      }
+
+      const input = radioLabel.querySelector('input[type="radio"]')
+      const value = input?.value
+
+      if (!value) {
+        return
+      }
+
+      e.preventDefault()
+      e.stopPropagation()
+      if (typeof e.nativeEvent?.stopImmediatePropagation === 'function') {
+        e.nativeEvent.stopImmediatePropagation()
+      }
+
+      if (value !== selectedImageTag) {
+        handleSelectImage(value)
+      }
+    },
+    [handleSelectImage, selectedImageTag]
+  )
+
   const { data, page, total, isLoading } = tagList || {}
 
   return (
-    <div className={styles.content}>
+    <div
+      className={styles.content}
+      data-image-tag-radio-list
+      onMouseDownCapture={handleRadioListMouseDownCapture}
+      onClickCapture={handleRadioListClickCapture}
+    >
       <RadioGroup
         wrapClassName={
           total === 1 ? styles.radioOnlyOneListContent : styles.radioListContent

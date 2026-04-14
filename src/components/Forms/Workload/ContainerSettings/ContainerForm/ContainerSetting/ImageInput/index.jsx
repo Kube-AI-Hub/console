@@ -282,6 +282,24 @@ export default class ImageSearch extends Component {
       const { message, status } = selectedImage
 
       if (status === 'failed') {
+        if (selectedLoading) {
+          return (
+            <div className={styles.selectedContent}>
+              <Loading spinning={selectedLoading}>
+                <div className={styles.selectedLoadingPlaceholder} />
+              </Loading>
+              {tagList.data.length > 0 ? (
+                <ImageTagRadioList
+                  onSelectImageTag={this.onSelectImageTag}
+                  selectedImageTag={selectedImageTag}
+                  tagList={tagList}
+                  getImageList={this.getImageList}
+                />
+              ) : null}
+            </div>
+          )
+        }
+
         if (message && message.includes('x509')) {
           return (
             <div
@@ -307,13 +325,23 @@ export default class ImageSearch extends Component {
         }
 
         return (
-          <div
-            className={classnames(styles.selectedContent, styles.emptyContent)}
-          >
-            <div>
-              <Icon name="docker" className={styles.icon} />
-              <p className={styles.desc}>{t('NO_IMAGE_FOUND')}</p>
-            </div>
+          <div className={styles.selectedContent}>
+            <div className={styles.message}>{message || t('NO_IMAGE_FOUND')}</div>
+            {tagList.data.length > 0 ? (
+              <ImageTagRadioList
+                onSelectImageTag={this.onSelectImageTag}
+                selectedImageTag={selectedImageTag}
+                tagList={tagList}
+                getImageList={this.getImageList}
+              />
+            ) : (
+              <div className={styles.emptyContent}>
+                <div>
+                  <Icon name="docker" className={styles.icon} />
+                  <p className={styles.desc}>{message || t('NO_IMAGE_FOUND')}</p>
+                </div>
+              </div>
+            )}
           </div>
         )
       }

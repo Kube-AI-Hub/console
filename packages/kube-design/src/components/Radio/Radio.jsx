@@ -43,7 +43,7 @@ class Radio extends Component {
 
   handleChange = (e) => {
     const { disabled, onChange } = this.props;
-    const { radioGroup } = this.context;
+    const radioGroup = this.context;
 
     if (disabled) return;
 

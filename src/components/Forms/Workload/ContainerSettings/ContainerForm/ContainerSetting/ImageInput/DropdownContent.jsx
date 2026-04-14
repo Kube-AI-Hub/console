@@ -195,6 +195,14 @@ export default class DropdownContent extends React.Component {
   }
 
   handleDOMClick = e => {
+    if (typeof e.target?.closest === 'function') {
+      const keepOpen = e.target.closest('[data-image-tag-radio-list]')
+
+      if (keepOpen) {
+        return
+      }
+    }
+
     if (
       this.dropdownWrapperRef &&
       this.dropdownWrapperRef.current &&

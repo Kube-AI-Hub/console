@@ -130,9 +130,15 @@
 
 .message {
   margin-bottom: 12px;
-  height: 20px;
+  padding: 8px 12px;
+  border-radius: variables.$border-radius;
+  background-color: variables.$white;
+  line-height: 20px;
   font-family: variables.$font-family-id;
   color: variables.$dark-color01;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .selectedContent {
@@ -172,6 +178,11 @@
       }
     }
   }
+}
+
+.selectedLoadingPlaceholder {
+  height: 64px;
+  margin-bottom: 12px;
 }
 
 .emptyContent {
