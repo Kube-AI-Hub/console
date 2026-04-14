@@ -323,13 +323,13 @@ jimmidyson/configmap-reload:v0.7.1
 prom/prometheus:v2.39.1
 kubesphere/prometheus-config-reloader:v0.55.1
 kubesphere/prometheus-operator:v0.55.1
-kubesphere/kube-rbac-proxy:v0.11.0
+kube-ai-hub/kube-rbac-proxy:v0.14.0
 kubesphere/kube-state-metrics:v2.6.0
 prom/node-exporter:v1.3.1
 prom/alertmanager:v0.23.0
 thanosio/thanos:v0.31.0
 grafana/grafana:8.3.3
-kubesphere/kube-rbac-proxy:v0.11.0
+kube-ai-hub/kube-rbac-proxy:v0.14.0
 kubesphere/notification-manager-operator:v2.3.0
 kubesphere/notification-manager:v2.3.0
 kubesphere/notification-tenant-sidecar:v3.2.0

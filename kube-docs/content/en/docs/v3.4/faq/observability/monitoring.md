@@ -60,7 +60,7 @@ kubectl edit ds -n kubesphere-monitoring-system node-exporter
          - --web.listen-address=127.0.0.1:9100
          ...
        - name: kube-rbac-proxy
-         image: kubesphere/kube-rbac-proxy:v0.4.1
+         image: kube-ai-hub/kube-rbac-proxy:v0.14.0
          args:
          - --logtostderr
          - --secure-listen-address=[$(IP)]:9100

@@ -203,13 +203,13 @@ In KubeKey v2.1.0, we bring in concepts of manifest and artifact, which provides
        - docker.io/prom/prometheus:v2.39.1
        - docker.io/kubesphere/prometheus-config-reloader:v0.55.1
        - docker.io/kubesphere/prometheus-operator:v0.55.1
-       - docker.io/kubesphere/kube-rbac-proxy:v0.11.0
+       - docker.io/kube-ai-hub/kube-rbac-proxy:v0.14.0
        - docker.io/kubesphere/kube-state-metrics:v2.6.0
        - docker.io/prom/node-exporter:v1.3.1
        - docker.io/prom/alertmanager:v0.23.0
        - docker.io/thanosio/thanos:v0.31.0
        - docker.io/grafana/grafana:8.3.3
-       - docker.io/kubesphere/kube-rbac-proxy:v0.11.0
+       - docker.io/kube-ai-hub/kube-rbac-proxy:v0.14.0
        - docker.io/kubesphere/notification-manager-operator:v2.3.0
        - docker.io/kubesphere/notification-manager:v2.3.0
        - docker.io/kubesphere/notification-tenant-sidecar:v3.2.0

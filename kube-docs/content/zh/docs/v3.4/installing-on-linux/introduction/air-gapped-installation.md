@@ -205,13 +205,13 @@ KubeKey v2.1.0 版本新增了清单（manifest）和制品（artifact）的概�
      - registry.cn-beijing.aliyuncs.com/kubesphereio/prometheus:v2.39.1
      - registry.cn-beijing.aliyuncs.com/kubesphereio/prometheus-config-reloader:v0.55.1
      - registry.cn-beijing.aliyuncs.com/kubesphereio/prometheus-operator:v0.55.1
-     - registry.cn-beijing.aliyuncs.com/kubesphereio/kube-rbac-proxy:v0.11.0
+     - registry.cn-beijing.aliyuncs.com/kubesphereio/kube-rbac-proxy:v0.14.0
      - registry.cn-beijing.aliyuncs.com/kubesphereio/kube-state-metrics:v2.6.0
      - registry.cn-beijing.aliyuncs.com/kubesphereio/node-exporter:v1.3.1
      - registry.cn-beijing.aliyuncs.com/kubesphereio/alertmanager:v0.23.0
      - registry.cn-beijing.aliyuncs.com/kubesphereio/thanos:v0.31.0
      - registry.cn-beijing.aliyuncs.com/kubesphereio/grafana:8.3.3
-     - registry.cn-beijing.aliyuncs.com/kubesphereio/kube-rbac-proxy:v0.11.0
+     - registry.cn-beijing.aliyuncs.com/kubesphereio/kube-rbac-proxy:v0.14.0
      - registry.cn-beijing.aliyuncs.com/kubesphereio/notification-manager-operator:v2.3.0
      - registry.cn-beijing.aliyuncs.com/kubesphereio/notification-manager:v2.3.0
      - registry.cn-beijing.aliyuncs.com/kubesphereio/notification-tenant-sidecar:v3.2.0
