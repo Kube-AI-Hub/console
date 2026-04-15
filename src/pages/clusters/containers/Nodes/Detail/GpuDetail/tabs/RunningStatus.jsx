@@ -123,6 +123,16 @@ export default class GpuRunningStatus extends React.Component {
     return `${usageGiB} GiB (${pct}%)`
   }
 
+  getPowerTabTitle = tab => {
+    const values = get(tab.data, '[0].values', [])
+    if (isEmpty(values)) return '-'
+    const lastPoint = values[values.length - 1]
+    const rawValue = Array.isArray(lastPoint) ? get(lastPoint, 1, 0) : lastPoint
+    const val = parseFloat(rawValue)
+    if (Number.isNaN(val) || rawValue === 'NAN') return `0${tab.unitSuffix ?? ''}`
+    return `${val === 0 ? 0 : val.toFixed(1)}${tab.unitSuffix ?? ''}`
+  }
+
   renderResourceUsage() {
     const metrics = toJS(this.monitorStore.data)
     const { step, times, activeTab } = this.state
@@ -179,8 +189,10 @@ export default class GpuRunningStatus extends React.Component {
             {
               key: 'gpu_power',
               icon: 'gpu',
-              unit: 'default',
+              unit: 'W',
               unitSuffix: ' W',
+              dot: 1,
+              renderTitle: this.getPowerTabTitle,
               legend: ['GPU_POWER'],
               title: 'GPU_POWER',
               data: get(metrics, 'gpu_card_power.data.result'),
@@ -189,7 +201,7 @@ export default class GpuRunningStatus extends React.Component {
             {
               key: 'gpu_temperature',
               icon: 'gpu',
-              unit: 'default',
+              unit: '°C',
               unitSuffix: ' °C',
               legend: ['GPU_TEMPERATURE'],
               title: 'GPU_TEMPERATURE',
