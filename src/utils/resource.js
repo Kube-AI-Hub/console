@@ -44,6 +44,31 @@ const normalizeGpuMemoryQuantity = value => {
   return `${n * 1024}Mi`
 }
 
+const getGpuMemoryUnitByMemoryKey = memoryKey => {
+  const supportGpuType = get(globals, 'config.supportGpuType', [])
+  const supportGpuTypeMetadata = get(globals, 'config.supportGpuTypeMetadata', {})
+  const gpuType = supportGpuType.find(resourceName => {
+    const meta = supportGpuTypeMetadata[resourceName] || {}
+    return meta.memoryName === memoryKey
+  })
+  if (!gpuType) return 'Mi'
+  const meta = supportGpuTypeMetadata[gpuType] || {}
+  return meta.memoryUnit || 'Mi'
+}
+
+// memoryFormat treats bare numbers as bytes; extended GPU memory (e.g. huawei.com/*-memory) uses Mi per backend metadata.
+const coerceGpuMemoryValueForMemoryFormat = (rawValue, memoryUnit = 'Mi') => {
+  const v = normalizeGpuMemoryQuantity(rawValue)
+  if (v === undefined || v === null || v === '') return v
+  const s = String(v).trim()
+  if (/[kmgt]i$/i.test(s)) return s
+  const unit = String(memoryUnit || 'Mi')
+  if (/^[0-9.]+$/.test(s) && (unit === 'Mi' || unit === 'Gi')) {
+    return `${s}${unit}`
+  }
+  return s
+}
+
 export const formatResourceItems = (resources = {}, type, opts = {}) => {
   const { showGpuSubResources = true, simplifyGpuName = false } = opts
   const resourceType = resources[type]
@@ -91,10 +116,14 @@ export const formatResourceItems = (resources = {}, type, opts = {}) => {
         const meta = supportGpuTypeMetadata[gpuTypeByMemory] || {}
         const memoryUnit = meta.memoryUnit || 'Mi'
         const normalizedMemoryValue = normalizeGpuMemoryQuantity(value)
+        const coercedForFormat = coerceGpuMemoryValueForMemoryFormat(
+          normalizedMemoryValue,
+          memoryUnit
+        )
         const memoryValue =
           memoryUnit === 'Mi' || memoryUnit === 'Gi'
-            ? `${memoryFormat(normalizedMemoryValue, 'Gi')} Gi`
-            : `${memoryFormat(normalizedMemoryValue, 'Mi')} ${memoryUnit}`
+            ? `${memoryFormat(coercedForFormat, 'Gi')} Gi`
+            : `${memoryFormat(coercedForFormat, 'Mi')} ${memoryUnit}`
         return `${getFinalGpuDisplayName(gpuTypeByMemory)} ${gpuMemoryLabel}: ${memoryValue}`
       }
 
@@ -194,9 +223,25 @@ const sumResourceValue = (key, current, next, gpuMemoryKeys) => {
     return current
   }
 
-  if (key === 'memory' || gpuMemoryKeys.has(key)) {
+  if (key === 'memory') {
     const a = memoryFormat(normalizeGpuMemoryQuantity(current), 'Mi')
     const b = memoryFormat(normalizeGpuMemoryQuantity(next), 'Mi')
+    if (Number.isFinite(a) && Number.isFinite(b)) {
+      return `${a + b}Mi`
+    }
+    return current
+  }
+
+  if (gpuMemoryKeys.has(key)) {
+    const memUnit = getGpuMemoryUnitByMemoryKey(key)
+    const a = memoryFormat(
+      coerceGpuMemoryValueForMemoryFormat(normalizeGpuMemoryQuantity(current), memUnit),
+      'Mi'
+    )
+    const b = memoryFormat(
+      coerceGpuMemoryValueForMemoryFormat(normalizeGpuMemoryQuantity(next), memUnit),
+      'Mi'
+    )
     if (Number.isFinite(a) && Number.isFinite(b)) {
       return `${a + b}Mi`
     }
@@ -223,8 +268,18 @@ const scaleResourceValue = (key, value, factor, gpuMemoryKeys) => {
     return value
   }
 
-  if (key === 'memory' || gpuMemoryKeys.has(key)) {
+  if (key === 'memory') {
     const mi = memoryFormat(normalizeGpuMemoryQuantity(value), 'Mi')
+    if (Number.isFinite(mi)) return `${mi * f}Mi`
+    return value
+  }
+
+  if (gpuMemoryKeys.has(key)) {
+    const memUnit = getGpuMemoryUnitByMemoryKey(key)
+    const mi = memoryFormat(
+      coerceGpuMemoryValueForMemoryFormat(normalizeGpuMemoryQuantity(value), memUnit),
+      'Mi'
+    )
     if (Number.isFinite(mi)) return `${mi * f}Mi`
     return value
   }
