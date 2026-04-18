@@ -22,6 +22,7 @@ export const WORKLOAD_STATUS = [
   { text: 'RUNNING', value: 'running' },
   { text: 'UPDATING', value: 'updating' },
   { text: 'STOPPED', value: 'stopped' },
+  { text: 'TERMINATING', value: 'terminating' },
 ]
 
 export const POD_STATUS = [
@@ -41,6 +42,7 @@ export const JOB_STATUS = [
   { text: 'FAILED', value: 'failed' },
   { text: 'COMPLETED', value: 'completed' },
   { text: 'RUNNING', value: 'running' },
+  { text: 'TERMINATING', value: 'terminating' },
 ]
 
 export const S2IJOBS_STATUS = [
@@ -58,6 +60,7 @@ export const S2I_STATUS_DESC = {
 export const CRONJOB_STATUS = [
   { text: 'CRONJOB_PAUSED', value: 'paused' },
   { text: 'CRONJOB_RUNNING', value: 'running' },
+  { text: 'TERMINATING', value: 'terminating' },
 ]
 
 export const VOLUME_STATUS = [

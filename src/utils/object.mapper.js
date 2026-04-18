@@ -196,6 +196,7 @@ const WorkLoadMapper = item => ({
   labels: get(item, 'metadata.labels', {}),
   namespace: get(item, 'metadata.namespace'),
   annotations: get(item, 'metadata.annotations'),
+  deletionTimestamp: get(item, 'metadata.deletionTimestamp'),
   status: get(item, 'status', {}),
   availablePodNums: get(item, 'status.availableReplicas', 0),
   readyPodNums: get(item, 'status.readyReplicas', 0),

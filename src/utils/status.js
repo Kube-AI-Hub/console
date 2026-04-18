@@ -146,6 +146,10 @@ export const getWorkloadStatus = (record, module) => {
   let status = ''
   let reason = ''
 
+  if (record.deletionTimestamp) {
+    return { status: 'Terminating', reason: '' }
+  }
+
   if (funcMap[module]) {
     status = funcMap[module](record)
   }
