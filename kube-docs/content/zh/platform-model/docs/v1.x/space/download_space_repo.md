@@ -1,14 +1,14 @@
 ---
-title: "下载应用空间"
-keywords: "行业大模型平台, 下载应用空间, git clone, Space"
-description: "介绍如何通过 Git 或命令行工具克隆和下载应用空间仓库。"
-linkTitle: "下载应用空间"
+title: "下载用户空间"
+keywords: "行业大模型平台, 下载用户空间, git clone, Space"
+description: "介绍如何通过 Git 或命令行工具克隆和下载用户空间仓库。"
+linkTitle: "下载用户空间"
 weight: 4100
 ---
 
 ## 下载方式概览
 
-应用空间本质上是一个 Git 仓库，支持以下方式克隆：
+用户空间本质上是一个 Git 仓库，支持以下方式克隆：
 
 | 方式 | 适用场景 |
 |------|----------|
@@ -44,7 +44,7 @@ git clone ssh://git@<平台地址>/<命名空间>/<应用名称>
 pip install csghub-sdk
 ```
 
-下载应用空间：
+下载用户空间：
 
 ```bash
 csghub-cli download <命名空间>/<应用名称> --repo_type space
@@ -61,7 +61,7 @@ space_path = snapshot_download(
     endpoint="https://<平台地址>",
     token="<访问令牌>"  # 私有应用需要
 )
-print(f"应用空间已下载到: {space_path}")
+print(f"用户空间已下载到: {space_path}")
 ```
 
 {{< notice note >}}

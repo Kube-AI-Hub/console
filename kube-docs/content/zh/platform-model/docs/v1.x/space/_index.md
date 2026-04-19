@@ -1,15 +1,15 @@
 ---
-title: "应用空间"
-keywords: "行业大模型平台, 应用空间, Space, Gradio, Streamlit, AI应用"
-description: "应用空间（Space）是大模型应用的展示平台，开发者可以在应用空间中自行搭建和展示不同的AI应用。"
-linkTitle: "应用空间"
+title: "用户空间"
+keywords: "行业大模型平台, 用户空间, Space, Gradio, Streamlit, AI应用"
+description: "用户空间（Space）是大模型应用的展示平台，开发者可以在用户空间中自行搭建和展示不同的AI应用。"
+linkTitle: "用户空间"
 weight: 4000
 icon: "/images/docs/platform-model/space.svg"
 ---
 
-## 什么是应用空间
+## 什么是用户空间
 
-应用空间（Space）是大模型应用的展示平台，开发者可以在应用空间中自行搭建和展示不同的 AI 应用，包括多种模型组合、可视化的交互展现形式等，为开发者提供一个能力展示平台。
+用户空间（Space）是大模型应用的展示平台，开发者可以在用户空间中自行搭建和展示不同的 AI 应用，包括多种模型组合、可视化的交互展现形式等，为开发者提供一个能力展示平台。
 
 ## 支持的应用类型
 
@@ -30,8 +30,8 @@ icon: "/images/docs/platform-model/space.svg"
 
 ## 快速开始（Gradio）
 
-1. 在平台创建一个新的应用空间，选择 **Gradio** 类型。
-2. 克隆应用空间仓库到本地：
+1. 在平台创建一个新的用户空间，选择 **Gradio** 类型。
+2. 克隆用户空间仓库到本地：
    ```bash
    git clone https://<平台地址>/<命名空间>/<应用名称>
    ```
@@ -54,7 +54,7 @@ icon: "/images/docs/platform-model/space.svg"
 
 ## 快速开始（Streamlit）
 
-1. 在平台创建一个新的应用空间，选择 **Streamlit** 类型。
+1. 在平台创建一个新的用户空间，选择 **Streamlit** 类型。
 2. 克隆并创建 `app.py` 文件：
    ```python
    import streamlit as st
@@ -68,4 +68,4 @@ icon: "/images/docs/platform-model/space.svg"
 
 ## 相关操作
 
-- [下载应用空间](./download_space_repo)
+- [下载用户空间](./download_space_repo)

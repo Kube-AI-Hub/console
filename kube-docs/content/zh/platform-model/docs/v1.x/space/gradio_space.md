@@ -1,7 +1,7 @@
 ---
 title: "Gradio 应用"
-keywords: "行业大模型平台, Gradio, 应用空间, 机器学习演示, ML Demo"
-description: "介绍如何创建和部署 Gradio 类型的应用空间，包括初始化代码和自动构建流程。"
+keywords: "行业大模型平台, Gradio, 用户空间, 机器学习演示, ML Demo"
+description: "介绍如何创建和部署 Gradio 类型的用户空间，包括初始化代码和自动构建流程。"
 linkTitle: "Gradio 应用"
 weight: 4030
 ---
@@ -10,12 +10,12 @@ weight: 4030
 
 [Gradio](https://gradio.app/) 是一个开源 Python 库，用于快速构建机器学习模型的交互式演示界面。只需几行代码，即可创建包含输入输出组件的 Web 应用，方便进行模型测试和展示。
 
-## 创建 Gradio 应用空间
+## 创建 Gradio 用户空间
 
-1. 按照 [创建应用空间](./create_space) 中的步骤，进入创建表单。
+1. 按照 [创建用户空间](./create_space) 中的步骤，进入创建表单。
 2. 在 **SDK 类型** 中选择 **Gradio**。
 3. 如果选择了 GPU 算力资源，还需要选择 **驱动版本**（`11.8.0` 或 `12.1.0`）。
-4. 填写其他必要参数后，点击 **创建应用空间** 提交。
+4. 填写其他必要参数后，点击 **创建用户空间** 提交。
 
 ## 初始化应用
 
@@ -71,9 +71,9 @@ git push origin main
 
 1. 安装 `requirements.txt` 中的依赖。
 2. 启动 `app.py` 应用。
-3. 构建完成后，应用空间页面将展示 Gradio 界面。
+3. 构建完成后，用户空间页面将展示 Gradio 界面。
 
-可在应用空间详情页查看构建日志和运行状态。
+可在用户空间详情页查看构建日志和运行状态。
 
 {{< notice note >}}
 如果需要在 Gradio 应用中使用平台上的模型，可以通过平台提供的模型推理 API 进行调用。在 `app.py` 中，使用 `requests` 或 `openai` 等库请求模型推理端点即可。具体的 API 地址和认证方式请参考模型推理相关文档。
@@ -81,6 +81,6 @@ git push origin main
 
 ## 相关文档
 
-- [创建应用空间](./create_space)
+- [创建用户空间](./create_space)
 - [Streamlit 应用](./streamlit_space)
 - [Docker 应用](./docker_space)
