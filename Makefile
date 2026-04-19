@@ -38,3 +38,6 @@ container-cross-from-dist:	## Build the container for multiple platforms from di
 
 container-cross-from-dist-push:	## Build the container for multiple platforms from dist and push
 	REPO=${REPO} TAG=${TAG} hack/docker_build_multiarch_from_dist.sh
+
+container-cache-prune:	## Remove the local buildx cache directory used by container-cross-push.
+	rm -rf $${BUILD_CACHE_DIR:-$$HOME/.cache/buildx/console}

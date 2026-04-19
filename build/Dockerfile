@@ -13,6 +13,9 @@ RUN apk add --no-cache --virtual .build-deps ca-certificates python3 py3-pip mak
 
 WORKDIR /kubesphere
 
+# npm registry mirror for fast install in China
+RUN yarn config set registry https://registry.npmmirror.com
+
 # Install dependencies to reduce build time
 ADD package.json /kubesphere/package.json
 RUN yarn install

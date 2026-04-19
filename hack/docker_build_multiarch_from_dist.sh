@@ -47,6 +47,12 @@ fi
 # supported platforms
 PLATFORMS=linux/amd64,linux/arm64
 
+# Local-directory buildx cache. Override BUILD_CACHE_DIR to relocate or
+# set BUILD_CACHE='' to disable.
+BUILD_CACHE_DIR=${BUILD_CACHE_DIR:-${HOME}/.cache/buildx/console}
+BUILD_CACHE=${BUILD_CACHE-"--cache-to type=local,dest=${BUILD_CACHE_DIR},mode=max,compression=zstd,compression-level=3 --cache-from type=local,src=${BUILD_CACHE_DIR}"}
+mkdir -p "${BUILD_CACHE_DIR}"
+
 # copy file from dist to ./out/
 rm -rf out && mkdir -p out/server
 cp -r dist out
@@ -56,9 +62,10 @@ cp package.json out/
 IMAGE="${REPO}"/ks-console:"${TAG}"
 echo "building image: ${IMAGE}"
 
-# shellcheck disable=SC2086 # inteneded splitting of CONTAINER_BUILDER
+# shellcheck disable=SC2086 # intended splitting of CONTAINER_BUILDER / BUILD_CACHE
 ${CONTAINER_CLI} ${CONTAINER_BUILDER} \
   --platform ${PLATFORMS} \
+  ${BUILD_CACHE} \
   ${PUSH} \
   -f build/Dockerfile.dapper \
   -t "${IMAGE}" .

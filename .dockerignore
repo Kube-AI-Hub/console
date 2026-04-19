@@ -22,3 +22,11 @@ yarn-error.log*
 .eslintrc.js
 .prettierignore
 .prettierrc
+
+# Keep source docs in context because image builds run yarn build:docs.
+# Ignore generated kube-docs artifacts to avoid bloating the build context.
+kube-docs/public
+kube-docs/resources
+out
+.cache
+tmp
