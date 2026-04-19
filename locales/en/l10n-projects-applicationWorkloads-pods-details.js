@@ -24,7 +24,13 @@ module.exports = {
   // Run Records
   JOB_UNFINISHED: 'Unfinished',
   // Resource Status
+  ContainerNotReady: 'Container Not Ready',
+  ContainersNotReady: 'Containers Not Ready',
+  ContainerCreating: 'Container Creating',
+  ContainersCreating: 'Containers Creating',
+  Terminating: 'Terminating',
   TERMINATED: 'Terminated',
+  UnKnown: 'Unknown',
   // Scheduling Information
   SCHEDULED_TO_NODE: 'Scheduled to {value}',
   SCHEDULING_NOT_SUCCESSFUL: 'Scheduling Not Successful',

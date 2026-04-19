@@ -23,7 +23,13 @@ module.exports = {
   // Run Records
   JOB_UNFINISHED: '未完成',
   // Resource Status
+  ContainerNotReady: '容器未就绪',
+  ContainersNotReady: '容器未就绪',
+  ContainerCreating: '容器创建中',
+  ContainersCreating: '容器创建中',
+  Terminating: '终止中',
   TERMINATED: '已终止',
+  UnKnown: '未知',
   // Scheduling Information
   SCHEDULED_TO_NODE: '调度至 {value}',
   SCHEDULING_NOT_SUCCESSFUL: '调度未成功',
