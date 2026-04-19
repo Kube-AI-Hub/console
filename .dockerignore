@@ -27,6 +27,7 @@ yarn-error.log*
 # Ignore generated kube-docs artifacts to avoid bloating the build context.
 kube-docs/public
 kube-docs/resources
-out
 .cache
 tmp
+# NOTE: do NOT exclude ./out - hack/docker_build_multiarch.sh writes
+# preimage outputs there and build/Dockerfile.dapper does COPY ./out/ ...
