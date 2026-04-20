@@ -1,7 +1,7 @@
 ---
 title: "特征提取"
 keywords: "行业大模型平台, 特征提取, Feature Extraction, Embeddings, 向量化"
-description: "介绍如何使用专属推理实例进行文本特征提取（Embeddings），包括 API 调用说明。"
+description: "介绍如何使用推理实例进行文本特征提取（Embeddings），包括 API 调用说明。"
 linkTitle: "特征提取"
 weight: 6254
 ---
@@ -86,4 +86,4 @@ for item in response.data:
 
 ## 相关文档
 
-- [创建专属推理实例](../endpoint_create)
+- [创建推理实例](../endpoint_create)

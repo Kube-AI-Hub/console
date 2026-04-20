@@ -1,7 +1,7 @@
 ---
 title: "模型推理常见问题"
 keywords: "行业大模型平台, 模型推理, 常见问题, FAQ"
-description: "模型推理专属实例常见问题解答。"
+description: "模型推理实例常见问题解答。"
 linkTitle: "模型推理常见问题"
 weight: 6220
 ---

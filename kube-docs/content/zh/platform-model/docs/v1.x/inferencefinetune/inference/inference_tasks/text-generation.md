@@ -1,14 +1,14 @@
 ---
 title: "文本生成"
 keywords: "行业大模型平台, 文本生成, Text Generation, API, 推理"
-description: "介绍如何使用专属推理实例进行文本生成任务，包括对话补全和 API 调用说明。"
+description: "介绍如何使用推理实例进行文本生成任务，包括对话补全和 API 调用说明。"
 linkTitle: "文本生成"
 weight: 6251
 ---
 
 ## 任务说明
 
-文本生成（Text Generation）是最常见的大语言模型推理任务，包括对话补全、文本续写、代码生成等场景。平台的专属推理实例提供兼容 OpenAI 格式的 API 接口。
+文本生成（Text Generation）是最常见的大语言模型推理任务，包括对话补全、文本续写、代码生成等场景。平台的推理实例提供兼容 OpenAI 格式的 API 接口。
 
 ## API 调用
 
@@ -72,4 +72,4 @@ print(response.choices[0].message.content)
 
 ## 相关文档
 
-- [创建专属推理实例](../endpoint_create)
+- [创建推理实例](../endpoint_create)

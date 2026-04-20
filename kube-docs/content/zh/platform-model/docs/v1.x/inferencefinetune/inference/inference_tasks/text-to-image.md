@@ -1,7 +1,7 @@
 ---
 title: "文本生成图像"
 keywords: "行业大模型平台, 文本生成图像, Text to Image, 图像生成, API"
-description: "介绍如何使用专属推理实例进行文本生成图像任务，包括 API 调用说明。"
+description: "介绍如何使用推理实例进行文本生成图像任务，包括 API 调用说明。"
 linkTitle: "文本生成图像"
 weight: 6252
 ---
@@ -70,4 +70,4 @@ print(response.data[0].url)
 
 ## 相关文档
 
-- [创建专属推理实例](../endpoint_create)
+- [创建推理实例](../endpoint_create)

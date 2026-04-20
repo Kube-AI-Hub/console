@@ -1,8 +1,8 @@
 ---
-title: "使用专属推理实例"
-keywords: "行业大模型平台, 专属推理, 推理 API, Playground, 模型监控, 计费"
-description: "介绍如何使用行业大模型平台的专属推理实例，包括 API 调用、Playground 测试、实时监控和计费管理。"
-linkTitle: "使用专属推理实例"
+title: "使用推理实例"
+keywords: "行业大模型平台, 推理实例, 推理 API, Playground, 模型监控, 计费"
+description: "介绍如何使用行业大模型平台的推理实例，包括 API 调用、Playground 测试、实时监控和计费管理。"
+linkTitle: "使用推理实例"
 weight: 6215
 ---
 

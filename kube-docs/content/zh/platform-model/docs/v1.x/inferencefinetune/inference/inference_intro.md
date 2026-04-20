@@ -1,6 +1,6 @@
 ---
 title: "模型推理介绍"
-keywords: "行业大模型平台, 模型推理, 专属实例, vLLM, SGLang, TGI, llama.cpp"
+keywords: "行业大模型平台, 模型推理, 推理实例, vLLM, SGLang, TGI, llama.cpp"
 description: "平台提供一键推理功能，帮助用户快速分配算力并启动推理服务，无需复杂的环境配置。"
 linkTitle: "模型推理介绍"
 weight: 6200
@@ -36,5 +36,5 @@ weight: 6200
 
 ## 相关文档
 
-- [创建专属推理实例](./endpoint_create)
+- [创建推理实例](./endpoint_create)
 - [常见问题](./endpoint_faq)
