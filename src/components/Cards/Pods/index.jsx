@@ -210,6 +210,9 @@ class PodsCard extends React.Component {
       default:
         result.ownerKind = kind === 'Deployment' ? 'ReplicaSet' : kind
         result.labelSelector = joinSelector(selector)
+        if (kind === 'StatefulSet' || kind === 'DaemonSet') {
+          result.ownerName = name
+        }
     }
 
     if (has(result, 'labelSelector') && isEmpty(selector)) {
