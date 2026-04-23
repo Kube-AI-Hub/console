@@ -30,5 +30,6 @@ sectionLink:
       - /platform-model/docs/v1.x/inferencefinetune/inference/endpoint_create
       - /platform-model/docs/v1.x/inferencefinetune/finetune/finetune_intro
       - /platform-model/docs/v1.x/inferencefinetune/evaluation/evaluation_create
+      - /platform-model/docs/v1.x/datatool/
       - /platform-model/docs/v1.x/mcp/
 ---
