@@ -1,5 +1,4 @@
 @use '~scss/variables';
-@use '~scss/mixins';
 
 .modalBody {
   padding: 0 !important;
@@ -34,6 +33,19 @@
   background-color: variables.$lightest;
 }
 
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  :global {
+    .input-search {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+}
+
 .results {
   height: calc(100vh - 400px);
   margin-top: 12px;
@@ -51,18 +63,16 @@
 }
 
 .item {
-  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   padding: 8px 20px;
   border-radius: 2px;
   background-color: variables.$lightest;
 
   & + .item {
     margin-top: 8px;
-  }
-
-  & > button {
-    right: 10px;
-    @include mixins.vertical-center;
   }
 
   p {
@@ -72,6 +82,15 @@
   strong {
     color: variables.$text-color;
   }
+}
+
+.itemMain {
+  flex: 1;
+  min-width: 0;
+}
+
+.itemActions {
+  flex-shrink: 0;
 }
 
 .menu {

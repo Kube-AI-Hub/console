@@ -18,10 +18,12 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
+import { set } from 'lodash'
 import { toJS } from 'mobx'
 import { observer } from 'mobx-react'
-import { InputSearch } from '@kube-design/components'
+import { Button, InputSearch, Notify } from '@kube-design/components'
 import { Modal, ScrollLoad } from 'components/Base'
+import CreateModal from 'components/Modals/UserCreate'
 
 import UserStore from 'stores/user'
 
@@ -105,6 +107,43 @@ class InviteMemberModal extends React.Component {
     this.props.onOk(this.state.newMembers)
   }
 
+  get canCreatePlatformUser() {
+    return globals.app.hasPermission({
+      module: 'users',
+      action: 'create',
+    })
+  }
+
+  handleOpenCreateUser = () => {
+    const modal = Modal.open({
+      modal: CreateModal,
+      store: this.userStore,
+      width: 691,
+      style: {
+        overlay: { zIndex: 2200 },
+        content: { width: 691, position: 'relative', margin: '0 auto' },
+      },
+      onOk: async data => {
+        if (!data) {
+          Modal.close(modal)
+          return
+        }
+
+        set(
+          data,
+          'metadata.annotations["iam.kubesphere.io/uninitialized"]',
+          'true'
+        )
+
+        await this.userStore.create(data)
+
+        Modal.close(modal)
+        Notify.success({ content: t('CREATE_SUCCESSFUL') })
+        this.fetchData()
+      },
+    })
+  }
+
   render() {
     const {
       visible,
@@ -133,12 +172,19 @@ class InviteMemberModal extends React.Component {
             <p>{desc || t('INVITE_MEMBER_DESC')}</p>
           </div>
           <div className={styles.content}>
-            <InputSearch
-              placeholder={
-                searchPlaceholder || t('INVITE_MEMBER_SEARCH_PLACEHOLDER')
-              }
-              onSearch={this.handleSearch}
-            />
+            <div className={styles.toolbar}>
+              <InputSearch
+                placeholder={
+                  searchPlaceholder || t('INVITE_MEMBER_SEARCH_PLACEHOLDER')
+                }
+                onSearch={this.handleSearch}
+              />
+              {this.canCreatePlatformUser && (
+                <Button type="control" onClick={this.handleOpenCreateUser}>
+                  {t('CREATE_USER')}
+                </Button>
+              )}
+            </div>
             <div className={styles.results}>
               <ScrollLoad
                 data={data}

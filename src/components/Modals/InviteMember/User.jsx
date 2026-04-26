@@ -42,24 +42,30 @@ export default class UserItem extends React.Component {
   }
 
   renderMoreMenu() {
-    const { roles } = this.props
+    const { roles = [] } = this.props
 
     return (
       <div className={styles.menu}>
         <p>{t('ASSIGN_ROLE')}</p>
         <Menu onClick={this.handleMoreMenuClick}>
-          {roles.map(role => (
-            <Menu.MenuItem key={role.name}>
-              <Avatar
-                className={styles.avatar}
-                icon="role"
-                iconSize={40}
-                title={role.name}
-                desc={this.getDesc(role)}
-                noLink
-              />
+          {roles.length > 0 ? (
+            roles.map(role => (
+              <Menu.MenuItem key={role.name}>
+                <Avatar
+                  className={styles.avatar}
+                  icon="role"
+                  iconSize={40}
+                  title={role.name}
+                  desc={this.getDesc(role)}
+                  noLink
+                />
+              </Menu.MenuItem>
+            ))
+          ) : (
+            <Menu.MenuItem disabled>
+              <div style={{ padding: '8px' }}>{t('NO_AVAILABLE_ROLE')}</div>
             </Menu.MenuItem>
-          ))}
+          )}
         </Menu>
       </div>
     )
@@ -70,25 +76,29 @@ export default class UserItem extends React.Component {
 
     return (
       <div className={styles.item} data-user={user.username}>
-        <p>
-          <strong>{user.username}</strong>
-        </p>
-        <p>{user.email}</p>
-        {!selected && (
-          <Dropdown
-            content={this.renderMoreMenu()}
-            trigger="click"
-            placement="bottomRight"
-          >
-            <Button
-              type="control"
-              icon="add"
-              iconType="light"
-              onClick={onSelect}
-            />
-          </Dropdown>
-        )}
-        {selected && <Button type="flat" icon="check" disabled />}
+        <div className={styles.itemMain}>
+          <p>
+            <strong>{user.username}</strong>
+          </p>
+          <p>{user.email}</p>
+        </div>
+        <div className={styles.itemActions}>
+          {!selected && (
+            <Dropdown
+              content={this.renderMoreMenu()}
+              trigger="click"
+              placement="bottomRight"
+              style={{ zIndex: 2100 }}
+            >
+              <Button
+                type="control"
+                icon="add"
+                iconType="light"
+              />
+            </Dropdown>
+          )}
+          {selected && <Button type="flat" icon="check" disabled />}
+        </div>
       </div>
     )
   }
