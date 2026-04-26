@@ -123,27 +123,27 @@ class Pods extends React.Component {
         title: t('NODE_SI'),
         dataIndex: 'node',
         isHideable: true,
-        width: '18%',
+        width: 140,
         render: this.renderNode,
       },
       {
         title: t('POD_IP_ADDRESS'),
         dataIndex: 'podIp',
         isHideable: true,
-        width: '15%',
+        width: 120,
       },
       {
         title: t('RESOURCE_LIMIT'),
         dataIndex: 'containers_limits',
         isHideable: true,
-        width: 220,
+        width: 120,
         render: (_, record) => this.renderContainerResource(record, 'limits'),
       },
       {
         title: t('RESOURCE_REQUESTS'),
         dataIndex: 'containers_requests',
         isHideable: true,
-        width: 120,
+        width: 140,
         render: (_, record) => this.renderContainerResource(record, 'requests'),
       },
       {
@@ -208,9 +208,17 @@ class Pods extends React.Component {
 
     if (!node) return '-'
 
-    const text = t('NODE_IP', { node, ip: nodeIp })
-
-    return <Link to={`/clusters/${cluster}/nodes/${node}`}>{text}</Link>
+    return (
+      <div className={styles.nodeCell}>
+        <Link
+          className={styles.nodeTitle}
+          to={`/clusters/${cluster}/nodes/${node}`}
+        >
+          {node}
+        </Link>
+        <div className={styles.nodeIp}>{nodeIp || '-'}</div>
+      </div>
+    )
   }
 
   renderStatus = podStatus => (

@@ -23,3 +23,13 @@
     @include mixins.TypographyParagraph(variables.$dark-color01);
   }
 }
+
+.nodeCell {
+  .nodeTitle {
+    @include mixins.TypographyTitleH6(variables.$dark-color07);
+  }
+
+  .nodeIp {
+    @include mixins.TypographyParagraph(variables.$dark-color01);
+  }
+}
