@@ -69,7 +69,7 @@
                     <div></div>
                 </div>
                 <div class="middle-div">
-                    <div class="top-div common-flex-layout">
+                    <div class="top-div common-flex-layout doc-contrib-host-gate" id="doc-contrib-edit-host-gate">
                         <div class="contributor-div">
                             <span>{{ i18n "Last updated" }}:</span>
                             <span class="update-time"></span>
@@ -86,39 +86,6 @@
                                     <span class="icon-span"></span>
                                     <span>{{ i18n "edit" }}</span>
                                 </a>
-                            </div>
-                            <div class="share-div">
-                                <div>
-                                    <span class="icon-span"></span>
-                                    <span>{{ i18n "share" }}</span>
-                                </div>
-                                <ul>
-                                    <li>
-                                        <img src="{{ $basePath }}/images/docs/v3.3/twitter.svg" alt="twitter">
-                                        <a href="https://twitter.com/intent/tweet?url={{ .Permalink }}&text={{ .Title }}"
-                                            target="_blank" rel="noopener noreferrer">twitter</a>
-                                    </li>
-                                    <li>
-                                        <img src="{{ $basePath }}/images/docs/v3.3/linkedIn.svg" alt="linkedIn">
-                                        <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ .Permalink }}"
-                                            target="_blank" rel="noopener noreferrer">linkedIn</a>
-                                    </li>
-                                    <li>
-                                        <img src="{{ $basePath }}/images/docs/v3.3/facebook.svg" alt="facebook">
-                                        <a href="https://www.facebook.com/sharer.php?u={{ .Permalink }}" target="_blank"
-                                            rel="noopener noreferrer">facebook</a>
-                                    </li>
-                                    <li>
-                                        <img src="{{ $basePath }}/images/docs/v3.3/reddit.svg" alt="reddit">
-                                        <a href="https://reddit.com/submit?url={{ .Permalink }}&title={{ .Title }}"
-                                            target="_blank" rel="noopener noreferrer">reddit</a>
-                                    </li>
-                                    <li>
-                                        <img src="{{ $basePath }}/images/docs/v3.3/email.svg" alt="email">
-                                        <a href="mailto:info@kubesphere.io" target="_blank"
-                                            rel="noopener noreferrer">email</a>
-                                    </li>
-                                </ul>
                             </div>
                         </div>
                     </div>
@@ -159,6 +126,14 @@
         <script type="text/javascript" src="{{ $tabJS.RelPermalink }}" integrity="{{ $tabJS.Data.Integrity }}"></script>
 
         <script>
+            var docContribEditHostOk = (function () {
+                var h = (location.hostname || '').toLowerCase()
+                return h.indexOf('watering') !== -1 && h.indexOf('github') !== -1
+            })()
+            if (docContribEditHostOk) {
+                var docContribEditHostEl = document.getElementById('doc-contrib-edit-host-gate')
+                if (docContribEditHostEl) docContribEditHostEl.classList.add('doc-contrib-host-gate--show')
+            }
             var languageCode = '{{.Site.Language.Lang}}'
             var filePath = '{{ .File.Path }}'
             var githubUrl = '{{ .Site.Params.githubUrl }}'
@@ -183,6 +158,7 @@
                 return arr
             }
             var getFileContributors = function () {
+                if (!docContribEditHostOk) return
                 var url = 'https://api.github.com/repos/kube-ai-hub/console/commits?path=kube-docs/content/' + languageCode +
                     '/' + filePath
                 $.getJSON(url, function (data) {

@@ -285,6 +285,14 @@
       top: 3px;
     }
 
+    /* Star CTA: hidden unless hostname matches gate (see header.html) */
+    .github-li-host-gate {
+      display: none !important;
+    }
+    .github-li-host-gate.github-li-host-gate--show {
+      display: inline-block !important;
+    }
+
     .github-star {
       display: flex;
       align-items: center;

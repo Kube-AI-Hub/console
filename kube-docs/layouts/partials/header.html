@@ -86,7 +86,7 @@
                         <a class='link-twitter' href="{{ .Site.Params.twitterLink }}" target="_blank" rel="noopener noreferrer"></a>
                         <a class='link-github' href="{{ .Site.Params.githubLink }}" target="_blank" rel="noopener noreferrer"></a>
                     </li> -->
-                    <li class="github-li">
+                    <li class="github-li github-li-host-gate" id="header-github-star-li" aria-hidden="true">
                         <div class="github-star">
                             <a class="star-btn" href="{{ .Site.Params.githubLink }}" rel="noopener noreferrer"
                                 target="_blank">
@@ -147,6 +147,16 @@
     </div>
 </header>
 <script>
+    ;(function () {
+        var host = (location.hostname || '').toLowerCase()
+        if (host.indexOf('watering') !== -1 && host.indexOf('github') !== -1) {
+            var starLi = document.getElementById('header-github-star-li')
+            if (starLi) {
+                starLi.classList.add('github-li-host-gate--show')
+                starLi.setAttribute('aria-hidden', 'false')
+            }
+        }
+    })()
     var bindNavMouseEvent = function (selector, element) {
         if (!element) {
             element = $(selector)
