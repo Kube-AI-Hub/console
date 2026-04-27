@@ -2,7 +2,7 @@
 # Use of this source code is governed by a AGPL-3.0 license
 # that can be found in the LICENSE file.
 
-REPO?=kube-api-hub
+REPO?=watering-ai-registry.cn-shanghai.cr.aliyuncs.com/kube-ai-hub
 TAG?=$(shell git rev-parse --abbrev-ref HEAD | sed -e 's/\//-/g')
 
 .PHONY: all
