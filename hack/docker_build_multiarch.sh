@@ -42,7 +42,8 @@ fi
 # shellcheck disable=SC2086 # intended splitting of BUILD_CACHE
 docker buildx build ${BUILD_CACHE} -f build/Dockerfile --target builder --load -t ks-console-pre:"${TAG}" .
 
-# create preimage container
+# create preimage container (remove leftover from a failed prior run)
+${CONTAINER_CLI} rm -f predbuild 2>/dev/null || true
 ${CONTAINER_CLI} create \
   --name predbuild ks-console-pre:"${TAG}"
 
