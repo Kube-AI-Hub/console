@@ -33,15 +33,38 @@ const getSimplifiedGpuDisplayName = displayName => {
   return displayName.slice(0, idx).trim()
 }
 
-const normalizeGpuMemoryQuantity = value => {
+/**
+ * Expand Kubernetes resource.Quantity for GPU extended memory keys.
+ * Those values use decimal SI suffixes only (k, M, G, T, P, E); Ki/Mi/Gi do not appear.
+ * API may canonicalize 20000 as "20k" (×1000). Pod memory "512Mi" etc. does not end with a
+ * single-letter decimal suffix and is returned unchanged (this helper is also used on memory).
+ */
+export const normalizeGpuMemoryQuantity = value => {
   if (value === undefined || value === null || value === '') return value
   if (typeof value !== 'string') return value
   const s = value.trim()
-  const m = s.match(/^([0-9.]+)[kK]$/)
-  if (!m) return value
-  const n = Number(m[1])
-  if (!Number.isFinite(n)) return value
-  return `${n * 1024}Mi`
+  if (s === '') return value
+
+  const decimalSuffixes = [
+    ['E', 1e18],
+    ['P', 1e15],
+    ['T', 1e12],
+    ['G', 1e9],
+    ['M', 1e6],
+    ['k', 1e3],
+    ['K', 1e3],
+  ]
+  for (const [suffix, mult] of decimalSuffixes) {
+    if (s.endsWith(suffix)) {
+      const numPart = s.slice(0, -suffix.length).trim()
+      const n = Number(numPart)
+      if (!Number.isFinite(n)) return value
+      const intVal = Math.round(n * mult)
+      return String(intVal)
+    }
+  }
+
+  return value
 }
 
 const getGpuMemoryUnitByMemoryKey = memoryKey => {
@@ -56,12 +79,11 @@ const getGpuMemoryUnitByMemoryKey = memoryKey => {
   return meta.memoryUnit || 'Mi'
 }
 
-// memoryFormat treats bare numbers as bytes; extended GPU memory (e.g. huawei.com/*-memory) uses Mi per backend metadata.
+// memoryFormat treats bare numbers as bytes; GPU extended memory is plain / decimal-SI only, then suffixed per metadata.
 const coerceGpuMemoryValueForMemoryFormat = (rawValue, memoryUnit = 'Mi') => {
   const v = normalizeGpuMemoryQuantity(rawValue)
   if (v === undefined || v === null || v === '') return v
   const s = String(v).trim()
-  if (/[kmgt]i$/i.test(s)) return s
   const unit = String(memoryUnit || 'Mi')
   if (/^[0-9.]+$/.test(s) && (unit === 'Mi' || unit === 'Gi')) {
     return `${s}${unit}`

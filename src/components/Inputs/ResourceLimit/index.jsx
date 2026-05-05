@@ -44,6 +44,7 @@ import {
   getGpuTypeOptions,
   getGpuDisplayName,
 } from 'utils'
+import { normalizeGpuMemoryQuantity } from 'utils/resource'
 
 import * as styles from './index.scss'
 
@@ -74,13 +75,19 @@ const getGpuVcoresName = type => {
   )
 }
 
-// 从 YAML 值解析出纯数字（用于界面输入框）。支持 "1024Mi"、"2Gi"、1024、"1024"
+// GPU 显存 extended resource 仅十进制 SI（k/M/G…），无 Ki/Mi/Gi；展开后应为纯数字（如 "20k"→20000）
 const parseGpuMemoryDisplayValue = raw => {
   if (raw === '' || raw === undefined || raw === null) return ''
-  if (typeof raw === 'number' && !Number.isNaN(raw)) return String(raw)
+  if (typeof raw === 'number' && !Number.isNaN(raw)) return String(Math.round(raw))
   const s = String(raw).trim()
-  const m = s.match(/^(\d+(?:\.\d+)?)\s*(Mi|Gi|Ki|Ti|M|G|K|T)?$/i)
-  return m ? m[1] : s.replace(/[a-zA-Z]+$/, '').trim() || ''
+  const expanded = normalizeGpuMemoryQuantity(s)
+  const s2 = typeof expanded === 'string' ? expanded.trim() : String(expanded)
+  if (/^\d+$/.test(s2)) return s2
+  const n = Number(s2)
+  if (Number.isFinite(n) && !/[a-zA-Z]/i.test(s2)) {
+    return String(Math.round(n))
+  }
+  return s2.replace(/[a-zA-Z]+$/, '').trim() || ''
 }
 
 export default class ResourceLimit extends React.Component {
