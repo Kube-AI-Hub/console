@@ -18,7 +18,7 @@ All components are loosely coupled with the platform: **enable only what you nee
 
 | Category | Component | Description |
 |---|---|---|
-| GPU & Scheduling | NVIDIA DCGM | GPU metric collection (utilization, VRAM, temperature, power) |
+| GPU & Scheduling | NVIDIA DCGM Exporter (optional, deploy in cluster) | GPU metrics (utilization, VRAM, temperature, power); not bundled in ks-installer |
 | GPU & Scheduling | vGPU Scheduler | Fine-grained GPU slicing and virtualized scheduling |
 | GPU & Scheduling | Volcano / Koordinator | Batch job queues and distributed scheduling frameworks |
 | Monitoring | Prometheus | Cluster and node metric collection and storage |

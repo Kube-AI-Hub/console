@@ -18,7 +18,7 @@ Kube AI Hub **围绕 Kubernetes 集成了多个云原生生态主流的开源软
 
 | 类别 | 组件 | 说明 |
 |---|---|---|
-| GPU 与调度 | NVIDIA DCGM | GPU 指标采集（利用率、显存、温度、功耗）|
+| GPU 与调度 | NVIDIA DCGM Exporter（可选，集群内自行部署）| GPU 指标采集（利用率、显存、温度、功耗）；不由 ks-installer 内置安装 |
 | GPU 与调度 | vGPU Scheduler | GPU 细粒度切分与虚拟化调度 |
 | GPU 与调度 | Volcano / Koordinator | 批量任务队列与分布式调度框架 |
 | 监控 | Prometheus | 集群与节点指标采集与存储 |

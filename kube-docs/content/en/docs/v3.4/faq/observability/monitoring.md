@@ -11,6 +11,7 @@ This page contains some of the frequently asked questions about monitoring.
 - [How to access the Prometheus console in Kube AI Hub](#how-to-access-the-prometheus-console-in-kubesphere)
 - [Host port 9100 conflict caused by the node exporter](#host-port-9100-conflict-caused-by-the-node-exporter)
 - [Conflicts with the preexisting prometheus operator](#conflicts-with-the-preexisting-prometheus-operator)
+- [GPU monitoring and ClusterConfiguration](#gpu-monitoring-and-clusterconfiguration)
 - [How to change the monitoring data retention period](#how-to-change-the-monitoring-data-retention-period)
 - [No monitoring data for kube-scheduler and kube-controller-manager](#no-monitoring-data-for-kube-scheduler-and-kube-controller-manager)
 - [No monitoring data for the last few minutes](#no-monitoring-data-for-the-last-few-minutes)

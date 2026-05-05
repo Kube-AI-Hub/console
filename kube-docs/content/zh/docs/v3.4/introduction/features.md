@@ -103,6 +103,8 @@ Kube AI Hub 是面向 GPU/AI 算力场景的异构算力管理平台，提供从
 
 专为 GPU 算力场景设计的监控视图，展示每个节点和每张 GPU 卡的实时指标：GPU 健康状态、GPU 利用率与显存占用率、GPU 分配，以及资源用量排行。
 
+使用前应先在 **`ClusterConfiguration`** 中开启 **`spec.monitoring.gpu.enabled`** 并完成 ks-installer 协调；NVIDIA DCGM 等 GPU 指标 exporter 需在集群内单独部署。详见[监控常见问题](../../faq/observability/monitoring/#gpu-监控与-clusterconfiguration)。
+
 #### 告警消息
 
 实时展示集群内触发的告警信息，包括节点异常、Pod 崩溃、存储告警等，支持按严重级别（紧急、警告、提示）筛选，并记录告警历史。

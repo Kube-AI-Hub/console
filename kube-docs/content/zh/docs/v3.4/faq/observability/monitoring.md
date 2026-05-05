@@ -11,6 +11,7 @@ weight: 16320
 - [如何访问 Kube AI Hub Prometheus 控制台](../../observability/monitoring/#如何访问-kubesphere-prometheus-控制台)
 - [Node Exporter 引起的主机端口 9100 冲突](../../observability/monitoring/#node-exporter-引起的主机端口-9100-冲突)
 - [与现有的 Prometheus Operator 相冲突](../../observability/monitoring/#与现有的-prometheus-operator-相冲突)
+- [GPU 监控与 ClusterConfiguration](#gpu-监控与-clusterconfiguration)
 - [如何更改监控数据保留期限](../../observability/monitoring/#如何更改监控数据保留期限)
 - [kube-scheduler 和 kube-controller-manager 没有监控数据](../../observability/monitoring/#kube-scheduler-和-kube-controller-manager-没有监控数据)
 - [近几分钟没有监控数据](../../observability/monitoring/#近几分钟没有监控数据)
@@ -75,6 +76,10 @@ kubectl edit svc -n kubesphere-monitoring-system prometheus-k8s
 ## 与现有的 Prometheus Operator 相冲突
 
 如果您已自行部署 Prometheus Operator，请确保在安装 Kube AI Hub 之前将 Prometheus Operator 删除。否则，可能会出现冲突，即 Kube AI Hub 内置的 Prometheus Operator 选择重复的 ServiceMonitor 对象。
+
+## GPU 监控与 ClusterConfiguration
+
+控制台中的 GPU 相关监控能力，以及安装器下发的 GPU Prometheus 规则、gpu-agent `ServiceMonitor`、控制台大盘等，均由 **`ClusterConfiguration` 的 `spec.monitoring.gpu.enabled`** 控制。将其设为 `true` 后，请重新应用 `cluster-configuration.yaml` 或触发 ks-installer 协调，以便 `kubesphere-config` 内的 `monitoring.enableGPUMonitoring` 与上述监控资源生效。
 
 ## 如何更改监控数据保留期限
 

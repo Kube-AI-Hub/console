@@ -103,6 +103,8 @@ Provides cluster-level monitoring at second-level precision, including CPU utili
 
 A monitoring view designed specifically for GPU compute scenarios. Displays real-time metrics per node and per GPU card: GPU health status, GPU utilization and VRAM usage, GPU allocation, and resource usage rankings.
 
+Enable **`spec.monitoring.gpu.enabled`** in **`ClusterConfiguration`** and let ks-installer reconcile before using this view. Deploy GPU metric exporters such as NVIDIA DCGM separately in the cluster. See the [Monitoring FAQ](../../faq/observability/monitoring/#gpu-monitoring-and-clusterconfiguration).
+
 #### Alert Messages
 
 Displays alerts triggered in the cluster in real time, including node anomalies, Pod crashes, and storage alerts. Supports filtering by severity level (Critical, Warning, Info) with full alert history.
