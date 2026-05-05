@@ -42,7 +42,13 @@ import QuotaStore from 'stores/quota'
 
 import SecretStore from 'stores/secret'
 import WorkspaceQuotaStore from 'stores/workspace.quota'
-import { cancelContainerDot, generateId, resourceLimitKey } from 'utils'
+import {
+  cancelContainerDot,
+  generateId,
+  resourceLimitKey,
+  filterGpuTypeOptionsByCluster,
+} from 'utils'
+import { fetchMergedClusterResourceSummary } from 'utils/cluster.resource.summary'
 import { MODULE_KIND_MAP } from 'utils/constants'
 import { getLeftQuota } from 'utils/workload'
 import ClusterReplicasControl from './ClusterReplicasControl'
@@ -67,6 +73,8 @@ export default class ContainerSetting extends React.Component {
       imageRegistries: [],
       replicas: this.getReplicas(),
       leftQuota: {},
+      clusterResourceSummary: null,
+      clusterResourceSummaryLoading: false,
     }
 
     this.module = props.module
@@ -94,6 +102,7 @@ export default class ContainerSetting extends React.Component {
     const { store } = this.props
     this.fetchData()
     this.fetchQuota()
+    this.fetchClusterResourceSummary()
     if (this.props.withService) {
       this.initService(this.formTemplate)
     }
@@ -199,6 +208,93 @@ export default class ContainerSetting extends React.Component {
   }
 
   getReplicas = () => get(this.fedFormTemplate, `spec.replicas`) || 1
+
+  fetchClusterResourceSummary = async () => {
+    const { supportGpuSelect, cluster, isFederated, projectDetail } = this.props
+    if (!supportGpuSelect) {
+      return
+    }
+    let names = []
+    if (isFederated && get(projectDetail, 'clusters.length')) {
+      names = projectDetail.clusters.map(c => c.name).filter(Boolean)
+    } else if (cluster) {
+      names = [cluster]
+    }
+    if (!names.length) {
+      return
+    }
+    this.setState({ clusterResourceSummaryLoading: true })
+    try {
+      const merged = await fetchMergedClusterResourceSummary(names)
+      this.setState({
+        clusterResourceSummary: merged,
+        clusterResourceSummaryLoading: false,
+      })
+    } catch (e) {
+      this.setState({
+        clusterResourceSummary: null,
+        clusterResourceSummaryLoading: false,
+      })
+    }
+  }
+
+  getGpuOptionsForCurrentContainer = data => {
+    const { supportGpuSelect, cluster, isFederated, projectDetail } = this.props
+    const { clusterResourceSummary, clusterResourceSummaryLoading } = this.state
+    if (!supportGpuSelect) {
+      return undefined
+    }
+    const hasCtx =
+      cluster ||
+      (isFederated &&
+        projectDetail &&
+        projectDetail.clusters &&
+        projectDetail.clusters.length)
+    if (!hasCtx) {
+      return undefined
+    }
+    if (clusterResourceSummaryLoading) {
+      return undefined
+    }
+    if (!clusterResourceSummary) {
+      return undefined
+    }
+    let currentType = get(data, 'resources.gpu.type')
+    if (!currentType) {
+      const supportGpuType = globals.config.supportGpuType || []
+      const reqKeys = Object.keys(get(data, 'resources.requests', {}))
+      const limKeys = Object.keys(get(data, 'resources.limits', {}))
+      currentType = [...reqKeys, ...limKeys].find(k => supportGpuType.includes(k))
+    }
+    return filterGpuTypeOptionsByCluster(
+      clusterResourceSummary.availableGpuResourceNames,
+      currentType
+    )
+  }
+
+  getClusterCapacityTip = () => {
+    const { supportGpuSelect, cluster, isFederated, projectDetail } = this.props
+    const { clusterResourceSummary, clusterResourceSummaryLoading } = this.state
+    if (!supportGpuSelect) {
+      return null
+    }
+    const hasCtx =
+      cluster ||
+      (isFederated &&
+        projectDetail &&
+        projectDetail.clusters &&
+        projectDetail.clusters.length)
+    if (!hasCtx) {
+      return null
+    }
+    return {
+      loading: clusterResourceSummaryLoading,
+      totals: clusterResourceSummary && clusterResourceSummary.totals,
+      federatedMultiCluster: !!(
+        clusterResourceSummary && clusterResourceSummary.federatedMultiCluster
+      ),
+    }
+  }
 
   fetchData() {
     const { cluster, isFederated } = this.props
@@ -630,6 +726,8 @@ export default class ContainerSetting extends React.Component {
         supportGpuSelect={supportGpuSelect}
         containers={this.containers}
         isEdit={this.props.isEdit}
+        gpuTypeOptions={this.getGpuOptionsForCurrentContainer(data)}
+        clusterCapacityTip={this.getClusterCapacityTip()}
         {...params}
       />
     )

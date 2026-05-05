@@ -43,6 +43,7 @@ import {
   memoryFormat,
   getGpuTypeOptions,
   getGpuDisplayName,
+  resolveGpuCardTypeFromResourceKeys,
 } from 'utils'
 import {
   normalizeGpuMemoryQuantity,
@@ -300,10 +301,15 @@ export default class ResourceLimit extends React.Component {
     const keys = Array.from(
       new Set([...Object.keys(requests), ...Object.keys(limits)])
     )
-    const types = keys.filter(key =>
-      supportGpuType.some(item => key.endsWith(item))
-    )
-    const type = !isEmpty(types) ? types[0] : supportGpuType[0]
+    const keySet = new Set(keys.filter(k => k !== 'cpu' && k !== 'memory'))
+    const resolvedCard = resolveGpuCardTypeFromResourceKeys(keySet)
+    const type = resolvedCard || supportGpuType[0]
+    const hasConfiguredGpu = Boolean(resolvedCard)
+    const primaryRaw = requests[type] ?? limits[type]
+    const hasPrimary =
+      hasConfiguredGpu &&
+      primaryRaw !== undefined &&
+      primaryRaw !== ''
     const memoryName = getGpuMemoryName(type)
     const vcoresName = getGpuVcoresName(type)
     const gpumemRaw = memoryName
@@ -322,10 +328,10 @@ export default class ResourceLimit extends React.Component {
         : ''
     return {
       type,
-      value: !isEmpty(types) ? requests[type] ?? limits[type] ?? '' : '',
-      memory: memoryName && !isEmpty(types) ? gpumem : '',
+      value: hasPrimary ? String(primaryRaw).trim() : '',
+      memory: memoryName && hasConfiguredGpu ? gpumem : '',
       memoryName,
-      vcores: vcoresName && !isEmpty(types) ? gpuvcores : '',
+      vcores: vcoresName && hasConfiguredGpu ? gpuvcores : '',
       vcoresName,
     }
   }
@@ -404,6 +410,10 @@ export default class ResourceLimit extends React.Component {
   }
 
   get gpuOption() {
+    const { gpuTypeOptions } = this.props
+    if (gpuTypeOptions !== undefined) {
+      return gpuTypeOptions
+    }
     return getGpuTypeOptions()
   }
 
@@ -829,19 +839,97 @@ export default class ResourceLimit extends React.Component {
       <div className={styles.message}>
         <span>{t('GPU_QUOTA_SECTION')}:</span>
         <span>
-          {gpuLimit.map((item, index) => {
-            const type = Object.keys(item)[0]
-            const value = Object.values(item)[0]
-            const label = getGpuTypeLabel(type)
-            return (
-              <span key={type}>
-                {index > 0 ? '；' : ''}
-                {label}：{value}
-              </span>
-            )
-          })}
+          {gpuLimit
+            .map(item => {
+              const type = Object.keys(item)[0]
+              const value = Object.values(item)[0]
+              const label = getGpuTypeLabel(type)
+              return `${label}：${value}`
+            })
+            .join('；')}
         </span>
       </div>
+    )
+  }
+
+  renderClusterCapacityReference = () => {
+    const tip = this.props.clusterCapacityTip
+    if (!tip) {
+      return null
+    }
+    if (tip.loading) {
+      return (
+        <Alert
+          type="info"
+          className="margin-t12"
+          title={t('CLUSTER_RESOURCE_REFERENCE')}
+          message="…"
+        />
+      )
+    }
+    if (tip.federatedMultiCluster && !tip.totals) {
+      return (
+        <Alert
+          type="info"
+          className="margin-t12"
+          title={t('CLUSTER_RESOURCE_REFERENCE')}
+          message={t('CLUSTER_RESOURCE_REFERENCE_FEDERATED')}
+        />
+      )
+    }
+    const totals = tip.totals
+    if (!totals) {
+      return null
+    }
+    const cpuUnit = this.cpuUnit
+    const memoryUnit = this.memoryUnit
+    let cpuDisp = '—'
+    let memDisp = '—'
+    if (totals.cpu !== undefined && totals.cpu !== null && totals.cpu !== '') {
+      const v = cpuFormat(totals.cpu, cpuUnit)
+      cpuDisp = Number.isNaN(v) ? String(totals.cpu) : `${v} ${cpuUnit}`
+    }
+    if (
+      totals.memory !== undefined &&
+      totals.memory !== null &&
+      totals.memory !== ''
+    ) {
+      const v = memoryFormat(String(totals.memory), memoryUnit)
+      memDisp = Number.isNaN(v) ? String(totals.memory) : `${v} ${memoryUnit}`
+    }
+    const gpuResources = totals.gpuResources || []
+    return (
+      <Alert
+        type="info"
+        className="margin-t12"
+        title={t('CLUSTER_RESOURCE_REFERENCE')}
+        message={
+          <div>
+            <p className="margin-b8">{t('CLUSTER_RESOURCE_REFERENCE_DESC')}</p>
+            <div className={styles.message}>
+              <span>{t('CPU_LIMIT')}:</span>
+              <span>{cpuDisp}</span>
+            </div>
+            <div className={styles.message}>
+              <span>{t('MEMORY_LIMIT')}:</span>
+              <span>{memDisp}</span>
+            </div>
+            {gpuResources.length > 0 && (
+              <div className={styles.message}>
+                <span>{t('GPU_LIMIT')}:</span>
+                <span>
+                  {gpuResources
+                    .map(
+                      g =>
+                        `${getGpuDisplayName(g.resourceName)}: ${g.total}`
+                    )
+                    .join('; ')}
+                </span>
+              </div>
+            )}
+          </div>
+        }
+      />
     )
   }
 
@@ -1081,6 +1169,7 @@ export default class ResourceLimit extends React.Component {
             </div>
           )}
         </div>
+        {this.renderClusterCapacityReference()}
         {this.props.extraContentBeforeTip}
         {this.ifRenderTip && this.renderQuotasTip()}
         {(cpuError || memoryError) && (

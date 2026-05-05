@@ -801,6 +801,46 @@ export const getGpuDisplayName = resourceName => {
 }
 
 /**
+ * Pick GPU card resourceName: first entry in supportGpuType that appears in keys (requests/limits minus cpu/memory).
+ */
+export const resolveGpuCardTypeFromResourceKeys = keys => {
+  const raw = keys instanceof Set ? [...keys] : keys
+  const keySet = new Set((raw || []).filter(k => k && k !== 'cpu' && k !== 'memory'))
+  if (keySet.size === 0) return ''
+  const supportGpuType = globals.config.supportGpuType || []
+  return supportGpuType.find(rn => keySet.has(rn)) || ''
+}
+
+/**
+ * Intersect global GPU kinds with cluster-available resource names from ks-apiserver.
+ * @param {string[]|undefined} availableResourceNames - from cluster-resources/summary; undefined skips filtering
+ * @param {string} [currentType] - always include in options when editing existing workload
+ * @returns {{ value: string, label: string }[]|undefined} undefined means use full getGpuTypeOptions()
+ */
+export const filterGpuTypeOptionsByCluster = (
+  availableResourceNames,
+  currentType
+) => {
+  if (!availableResourceNames || !Array.isArray(availableResourceNames)) {
+    return undefined
+  }
+  const allOpts = getGpuTypeOptions()
+  const set = new Set(availableResourceNames)
+  let opts = allOpts.filter(o => set.has(o.value))
+  if (currentType && !opts.some(o => o.value === currentType)) {
+    opts = [
+      ...opts,
+      {
+        value: currentType,
+        label: getGpuDisplayName(currentType),
+      },
+    ]
+  }
+  opts.sort((a, b) => a.value.localeCompare(b.value))
+  return opts
+}
+
+/**
  * Format XPU type for display: i18n(vendor) + "-" + model
  * @param {string} xpuValue - e.g. "cambricon-MLU370_S4", "nvidia-RTX_3090"
  * @returns {string} e.g. "寒武纪-MLU370_S4" (zh) or "Cambricon-MLU370_S4" (en)

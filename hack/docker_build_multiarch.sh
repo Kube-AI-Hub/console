@@ -23,12 +23,6 @@ fi
 # supported platforms
 PLATFORMS=linux/amd64,linux/arm64
 
-# Local-directory buildx cache. Override BUILD_CACHE_DIR to relocate or
-# set BUILD_CACHE='' to disable.
-BUILD_CACHE_DIR=${BUILD_CACHE_DIR:-${HOME}/.cache/buildx/console}
-BUILD_CACHE=${BUILD_CACHE-"--cache-to type=local,dest=${BUILD_CACHE_DIR},mode=max,compression=zstd,compression-level=3 --cache-from type=local,src=${BUILD_CACHE_DIR}"}
-mkdir -p "${BUILD_CACHE_DIR}"
-
 # Fail early if current builder does not support multi-platform
 CURRENT_DRIVER=$(docker buildx ls 2>/dev/null | grep '\*' | awk '{print $2}')
 if [[ "${CURRENT_DRIVER}" == "docker" ]]; then
@@ -39,8 +33,7 @@ if [[ "${CURRENT_DRIVER}" == "docker" ]]; then
 fi
 
 # build the preimage
-# shellcheck disable=SC2086 # intended splitting of BUILD_CACHE
-docker buildx build ${BUILD_CACHE} -f build/Dockerfile --target builder --load -t ks-console-pre:"${TAG}" .
+docker buildx build -f build/Dockerfile --target builder --load -t ks-console-pre:"${TAG}" .
 
 # create preimage container (remove leftover from a failed prior run)
 ${CONTAINER_CLI} rm -f predbuild 2>/dev/null || true
@@ -51,10 +44,9 @@ ${CONTAINER_CLI} create \
 ${CONTAINER_CLI} cp \
   predbuild:/out/ ./out/
 
-# shellcheck disable=SC2086 # intended splitting of CONTAINER_BUILDER / BUILD_CACHE
+# shellcheck disable=SC2086 # intended splitting of CONTAINER_BUILDER
 ${CONTAINER_CLI} ${CONTAINER_BUILDER} \
   --platform ${PLATFORMS} \
-  ${BUILD_CACHE} \
   ${PUSH} \
   -f build/Dockerfile.dapper \
   -t "${REPO}"/ks-console:"${TAG}" .

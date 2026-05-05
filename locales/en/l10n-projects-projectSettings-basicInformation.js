@@ -58,6 +58,11 @@ module.exports = {
   // Project Quotas
   PROJECT_QUOTA_PL: 'Project Quotas',
   GPU_QUOTA_SECTION: 'GPU Quotas',
+  CLUSTER_RESOURCE_REFERENCE: 'Cluster resource reference (allocatable total)',
+  CLUSTER_RESOURCE_REFERENCE_DESC:
+    "Sum of each node's allocatable CPU, memory, and configured GPU resources in the cluster. This is not remaining capacity after workloads are scheduled, and it is not the same as project or workspace quotas.",
+  CLUSTER_RESOURCE_REFERENCE_FEDERATED:
+    'This workload spans multiple member clusters. GPU types shown are the union across clusters; allocatable totals are not aggregated here.',
   RESOURCE_TYPE_SCAP: 'Resource type',
   JOBS: 'Jobs',
   VOLUMES: 'Volumes',

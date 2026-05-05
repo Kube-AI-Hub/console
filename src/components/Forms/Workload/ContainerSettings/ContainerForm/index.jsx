@@ -180,6 +180,8 @@ export default class ContaineForm extends React.Component {
       projectDetail,
       containers,
       type,
+      gpuTypeOptions,
+      clusterCapacityTip,
     } = this.props
     const { containerType, formData } = this.state
     const containerFormContextValue = {
@@ -210,6 +212,8 @@ export default class ContaineForm extends React.Component {
             supportGpuSelect={supportGpuSelect}
             containers={containers}
             type={type}
+            gpuTypeOptions={gpuTypeOptions}
+            clusterCapacityTip={clusterCapacityTip}
           />
           <Ports
             withService={containerType !== 'init' ? withService : false}

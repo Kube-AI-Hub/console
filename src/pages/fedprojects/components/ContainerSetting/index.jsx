@@ -127,6 +127,8 @@ export default class ContainerSetting extends Base {
               isEdit={isEdit}
               supportGpuSelect={true}
               workspaceLimitProps={this.workspaceLimitProps}
+              gpuTypeOptions={this.props.gpuTypeOptions}
+              clusterCapacityTip={this.props.clusterCapacityTip}
             />
           </Form.Item>
         </>

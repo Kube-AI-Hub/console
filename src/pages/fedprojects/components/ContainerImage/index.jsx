@@ -24,7 +24,8 @@ import { toJS } from 'mobx'
 
 import QuotaStore from 'stores/quota'
 import WorkspaceQuotaStore from 'stores/workspace.quota'
-import { resourceLimitKey } from 'utils'
+import { resourceLimitKey, filterGpuTypeOptionsByCluster } from 'utils'
+import { fetchClusterResourceSummary } from 'utils/cluster.resource.summary'
 import { getLeftQuota } from 'utils/workload'
 import ContainerFormContext from 'components/Forms/Workload/ContainerSettings/ContainerForm/ContainerFormContext'
 import EditForm from 'components/Forms/Workload/ClusterDiffSettings/EditForm'
@@ -43,6 +44,8 @@ export default class ContainerImages extends Component {
       availableQuota: {},
       imageRegistries: [],
       imageDetail: {},
+      clusterResourceSummary: null,
+      clusterResourceSummaryLoading: false,
     }
   }
 
@@ -65,6 +68,61 @@ export default class ContainerImages extends Component {
   componentDidMount() {
     this.fetchQuota()
     this.fetchImageSecret()
+    this.fetchClusterResourceSummary()
+  }
+
+  fetchClusterResourceSummary = async () => {
+    const { cluster } = this.props
+    if (!cluster) {
+      return
+    }
+    this.setState({ clusterResourceSummaryLoading: true })
+    try {
+      const data = await fetchClusterResourceSummary(cluster)
+      this.setState({
+        clusterResourceSummary: data,
+        clusterResourceSummaryLoading: false,
+      })
+    } catch (e) {
+      this.setState({
+        clusterResourceSummary: null,
+        clusterResourceSummaryLoading: false,
+      })
+    }
+  }
+
+  getFedGpuTypeOptions = () => {
+    const { formData } = this.props
+    const { clusterResourceSummary, clusterResourceSummaryLoading } = this.state
+    if (clusterResourceSummaryLoading || !clusterResourceSummary) {
+      return undefined
+    }
+    let currentType = get(formData, 'resources.gpu.type')
+    if (!currentType) {
+      const supportGpuType = globals.config.supportGpuType || []
+      const reqKeys = Object.keys(get(formData, 'resources.requests', {}))
+      const limKeys = Object.keys(get(formData, 'resources.limits', {}))
+      currentType = [...reqKeys, ...limKeys].find(k =>
+        supportGpuType.includes(k)
+      )
+    }
+    return filterGpuTypeOptionsByCluster(
+      clusterResourceSummary.availableGpuResourceNames,
+      currentType
+    )
+  }
+
+  getFedClusterCapacityTip = () => {
+    const { cluster } = this.props
+    const { clusterResourceSummary, clusterResourceSummaryLoading } = this.state
+    if (!cluster) {
+      return null
+    }
+    return {
+      loading: clusterResourceSummaryLoading,
+      totals: clusterResourceSummary && clusterResourceSummary.totals,
+      federatedMultiCluster: false,
+    }
   }
 
   fetchImageSecret() {
@@ -148,6 +206,8 @@ export default class ContainerImages extends Component {
           workspaceQuota={this.workspaceQuota}
           isEdit={isEdit}
           imageRegistries={imageRegistries}
+          gpuTypeOptions={this.getFedGpuTypeOptions()}
+          clusterCapacityTip={this.getFedClusterCapacityTip()}
         />
       </EditForm>
       </ContainerFormContext.Provider>

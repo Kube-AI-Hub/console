@@ -22,7 +22,8 @@ import { toJS } from 'mobx'
 
 import { observer } from 'mobx-react'
 import WorkspaceQuotaStore from 'stores/workspace.quota'
-import { resourceLimitKey } from 'utils'
+import { resourceLimitKey, filterGpuTypeOptionsByCluster } from 'utils'
+import { fetchClusterResourceSummary } from 'utils/cluster.resource.summary'
 import { getLeftQuota } from 'utils/workload'
 import SecretStore from 'stores/secret'
 import QuotaStore from 'stores/quota'
@@ -38,6 +39,8 @@ export default class ContainerImages extends Component {
     limitRange: {},
     imageRegistries: [],
     availableQuota: {},
+    clusterResourceSummary: null,
+    clusterResourceSummaryLoading: false,
   }
 
   quotaStore = new QuotaStore()
@@ -51,6 +54,61 @@ export default class ContainerImages extends Component {
   componentDidMount() {
     this.fetchData()
     this.fetchQuota()
+    this.fetchClusterResourceSummary()
+  }
+
+  fetchClusterResourceSummary = async () => {
+    const { cluster } = this.props
+    if (!cluster) {
+      return
+    }
+    this.setState({ clusterResourceSummaryLoading: true })
+    try {
+      const data = await fetchClusterResourceSummary(cluster)
+      this.setState({
+        clusterResourceSummary: data,
+        clusterResourceSummaryLoading: false,
+      })
+    } catch (e) {
+      this.setState({
+        clusterResourceSummary: null,
+        clusterResourceSummaryLoading: false,
+      })
+    }
+  }
+
+  getDiffGpuTypeOptions = () => {
+    const { formData } = this.props
+    const { clusterResourceSummary, clusterResourceSummaryLoading } = this.state
+    if (clusterResourceSummaryLoading || !clusterResourceSummary) {
+      return undefined
+    }
+    let currentType = get(formData, 'resources.gpu.type')
+    if (!currentType) {
+      const supportGpuType = globals.config.supportGpuType || []
+      const reqKeys = Object.keys(get(formData, 'resources.requests', {}))
+      const limKeys = Object.keys(get(formData, 'resources.limits', {}))
+      currentType = [...reqKeys, ...limKeys].find(k =>
+        supportGpuType.includes(k)
+      )
+    }
+    return filterGpuTypeOptionsByCluster(
+      clusterResourceSummary.availableGpuResourceNames,
+      currentType
+    )
+  }
+
+  getDiffClusterCapacityTip = () => {
+    const { cluster } = this.props
+    const { clusterResourceSummary, clusterResourceSummaryLoading } = this.state
+    if (!cluster) {
+      return null
+    }
+    return {
+      loading: clusterResourceSummaryLoading,
+      totals: clusterResourceSummary && clusterResourceSummary.totals,
+      federatedMultiCluster: false,
+    }
   }
 
   fetchData() {
@@ -151,6 +209,8 @@ export default class ContainerImages extends Component {
           defaultContainerType={containerType}
           supportGpuSelect={supportGpuSelect}
           workspaceQuota={this.workspaceQuota}
+          gpuTypeOptions={this.getDiffGpuTypeOptions()}
+          clusterCapacityTip={this.getDiffClusterCapacityTip()}
         />
       </EditForm>
     )

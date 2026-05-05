@@ -17,9 +17,10 @@
  */
 
 import React from 'react'
-import { get, isEmpty, omit } from 'lodash'
+import { get, omit } from 'lodash'
 import { Form } from '@kube-design/components'
 import Base from 'components/Forms/Workload/ContainerSettings'
+import { resolveGpuCardTypeFromResourceKeys } from 'utils'
 
 export default class PodTemplate extends Base {
   get formTemplate() {
@@ -56,19 +57,24 @@ export default class PodTemplate extends Base {
 
     const containers = get(data, 'spec.template.spec.containers', [])
     containers.forEach(item => {
-      const container = { ...item }
-      const requests = get(container, 'resources.requests')
-      const gpuInfo = isEmpty(requests)
-        ? null
-        : omit(requests, ['cpu', 'memory'])
-
-      if (!isEmpty(gpuInfo)) {
-        const type = Object.keys(gpuInfo)[0]
-        const gpu = {
-          type,
-          value: gpuInfo[type],
-        }
-        item.resources.gpu = gpu
+      const requests = get(item, 'resources.requests', {})
+      const limits = get(item, 'resources.limits', {})
+      const reqGpu = omit(requests, ['cpu', 'memory'])
+      const limGpu = omit(limits, ['cpu', 'memory'])
+      const keySet = new Set([
+        ...Object.keys(reqGpu),
+        ...Object.keys(limGpu),
+      ])
+      if (keySet.size === 0) {
+        return
+      }
+      const type = resolveGpuCardTypeFromResourceKeys(keySet)
+      if (!type) {
+        return
+      }
+      item.resources.gpu = {
+        type,
+        value: reqGpu[type] ?? limGpu[type] ?? '',
       }
     })
 

@@ -56,6 +56,11 @@ module.exports = {
   // Project Quotas
   PROJECT_QUOTA_PL: '项目配额',
   GPU_QUOTA_SECTION: 'GPU配额',
+  CLUSTER_RESOURCE_REFERENCE: '集群资源参考（Allocatable 合计）',
+  CLUSTER_RESOURCE_REFERENCE_DESC:
+    '为集群内各节点 allocatable 的 CPU、内存及已配置 GPU 扩展资源之和，仅供参考；不是扣减已调度负载后的剩余量，也与项目/企业空间配额不同。',
+  CLUSTER_RESOURCE_REFERENCE_FEDERATED:
+    '该工作负载面向多个成员集群，GPU 类型为各集群并集；各集群的 allocatable 合计不在此合并展示。',
   RESOURCE_TYPE_SCAP: '资源类型',
   JOBS: '任务',
   VOLUMES: '卷',
