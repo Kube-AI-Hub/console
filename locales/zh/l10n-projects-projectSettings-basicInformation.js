@@ -35,6 +35,7 @@ module.exports = {
   REQUEST_EXCEED_WORKSPACE: '资源预留和资源上限均不能超过企业空间资源上限。',
   REQUEST_EXCEED_LIMIT: '资源预留不能超过资源上限。',
   REQUEST_EXCEED_AVAILABLE_QUOTA: '资源不足。',
+  GPU_CARD_LIMIT_REQUIRED: '已选择 GPU 类型时，必须填写卡数限制（正整数）。',
   // Mange > Delete
   DELETE_PROJECT_TIP: '请输入项目名称 <strong>{resource}</strong> 以确认您了解此操作的风险。',
   // Project Information

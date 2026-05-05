@@ -177,7 +177,16 @@ export default class ContainerSetting extends React.Component {
 
   limitValidator = (rule, value, callback) => {
     if (this.limitError !== '') {
-      callback({ message: '' })
+      const msgMap = {
+        RequestExceed: t('REQUEST_EXCEED_LIMIT'),
+        workspaceRequestExceed: t('REQUEST_EXCEED_AVAILABLE_QUOTA'),
+        gpuCardRequired: t('GPU_CARD_LIMIT_REQUIRED'),
+        gpuCardPositiveInteger: t('ENTER_POSITIVE_INTEGER_DESC'),
+      }
+      callback({
+        message: msgMap[this.limitError] || this.limitError,
+      })
+      return
     }
     callback()
   }

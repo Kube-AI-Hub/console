@@ -1,6 +1,47 @@
 @use '~scss/variables';
 @use '~scss/mixins';
 
+// 外层 Form.Item 校验失败会加 .error-item，全局规则会把其下所有 Input/Select 标红。
+// 本组件按字段用 .input.error 自行标红；用足够高的选择器优先级覆盖 .form-item.error-item .input。
+.wrapper .inputWrapper .resourceRowSection .inputGroup {
+  :global {
+    input.input,
+    textarea.textarea {
+      border: solid 1px variables.$input-border-color !important;
+
+      &:not([readonly]):not([disabled]):hover {
+        border-color: variables.$input-hover-color !important;
+        box-shadow: none !important;
+      }
+
+      &:not([readonly]):not([disabled]):focus {
+        border-color: variables.$input-focus-color !important;
+        box-shadow: 0 4px 8px 0 rgba(variables.$green-color03, 0.2) !important;
+      }
+    }
+
+    .select .select-control {
+      border: solid 1px variables.$input-border-color !important;
+      box-shadow: none !important;
+
+      &:hover {
+        border-color: variables.$input-hover-color !important;
+        box-shadow: none !important;
+      }
+
+      &:focus {
+        border-color: variables.$input-focus-color !important;
+        box-shadow: 0 4px 8px 0 rgba(variables.$green-color03, 0.2) !important;
+      }
+    }
+
+    .select.is-open .select-control {
+      border-color: variables.$input-focus-color !important;
+      box-shadow: 0 4px 8px 0 rgba(variables.$green-color03, 0.2) !important;
+    }
+  }
+}
+
 .sliderWrapper {
   padding-bottom: 24px;
   margin-bottom: 12px;
@@ -160,13 +201,6 @@
     display: flex;
     align-items: center;
 
-    &.error {
-      :global .input {
-        border-color: variables.$red !important;
-        box-shadow: none !important;
-      }
-    }
-
     .label {
       width: 53px;
       line-height: 20px;
@@ -210,5 +244,21 @@
 .message {
   span + span {
     margin-left: 8px;
+  }
+}
+
+// 仅带 .error 的表单项标红（优先级需高于本文件中的 Form.Item 全局标红重置）
+.wrapper .inputWrapper .resourceRowSection .inputGroup .input.error {
+  :global {
+    input.input,
+    textarea.textarea {
+      border-color: variables.$red !important;
+      box-shadow: none !important;
+    }
+
+    .select .select-control {
+      border-color: variables.$red !important;
+      box-shadow: none !important;
+    }
   }
 }

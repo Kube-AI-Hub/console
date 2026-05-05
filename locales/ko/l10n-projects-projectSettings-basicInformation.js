@@ -35,6 +35,8 @@ module.exports = {
   REQUEST_EXCEED_WORKSPACE: '리소스 요청(request) 및 제한(limit)은 워크스페이스 리소스 제한(limit)을 초과할 수 없습니다.',
   REQUEST_EXCEED_LIMIT: '리소스 요청은 리소스 제한보다 클 수 없습니다.',
   REQUEST_EXCEED_AVAILABLE_QUOTA: '자원 부족',
+  GPU_CARD_LIMIT_REQUIRED:
+    'When a GPU type is selected, enter a GPU card limit (positive integer).',
   // Mange > Delete
   DELETE_PROJECT_TIP: '프로젝트 이름 <strong>{resource}</strong>을 입력하여 이 작업의 위험을 이해하고 있는지 확인합니다.',
   // Project Information

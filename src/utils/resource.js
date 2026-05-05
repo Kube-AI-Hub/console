@@ -67,6 +67,31 @@ export const normalizeGpuMemoryQuantity = value => {
   return value
 }
 
+/**
+ * 将 GPU 显存数值格式化为 k8s 十进制 SI 展示（如 2000 → "2k"），与 Quantity 写法一致。
+ */
+export const formatGpuMemoryQuantityCompactDisplay = n => {
+  if (!Number.isFinite(n) || n < 0) return ''
+  const intVal = Math.round(n)
+  if (intVal === 0) return '0'
+  const tiers = [
+    [1e18, 'E'],
+    [1e15, 'P'],
+    [1e12, 'T'],
+    [1e9, 'G'],
+    [1e6, 'M'],
+    [1e3, 'k'],
+  ]
+  for (const [mult, suf] of tiers) {
+    if (intVal >= mult && intVal % mult === 0) {
+      const q = intVal / mult
+      const numPart = String(q)
+      return suf === 'k' ? `${numPart}k` : `${numPart}${suf}`
+    }
+  }
+  return String(intVal)
+}
+
 const getGpuMemoryUnitByMemoryKey = memoryKey => {
   const supportGpuType = get(globals, 'config.supportGpuType', [])
   const supportGpuTypeMetadata = get(globals, 'config.supportGpuTypeMetadata', {})

@@ -44,7 +44,10 @@ import {
   getGpuTypeOptions,
   getGpuDisplayName,
 } from 'utils'
-import { normalizeGpuMemoryQuantity } from 'utils/resource'
+import {
+  normalizeGpuMemoryQuantity,
+  formatGpuMemoryQuantityCompactDisplay,
+} from 'utils/resource'
 
 import * as styles from './index.scss'
 
@@ -75,20 +78,50 @@ const getGpuVcoresName = type => {
   )
 }
 
-// GPU 显存 extended resource 仅十进制 SI（k/M/G…），无 Ki/Mi/Gi；展开后应为纯数字（如 "20k"→20000）
+// GPU 显存为十进制 SI（2k、20M 等）；从 API 读入时保留/规范后缀，纯整数则尽量压成 2k 形式展示
+const DECIMAL_SI_GPU_MEM = /^((?:0|[1-9]\d*)(?:\.\d+)?)([kKmMgGtTpPeE])$/
+
+const canonicalDecimalSiSuffix = ch => {
+  if (ch === 'k' || ch === 'K') return 'k'
+  return ch.toUpperCase()
+}
+
 const parseGpuMemoryDisplayValue = raw => {
   if (raw === '' || raw === undefined || raw === null) return ''
-  if (typeof raw === 'number' && !Number.isNaN(raw)) return String(Math.round(raw))
+  if (typeof raw === 'number' && !Number.isNaN(raw)) {
+    return formatGpuMemoryQuantityCompactDisplay(raw)
+  }
   const s = String(raw).trim()
+  if (s === '') return ''
+
+  const suffixed = s.match(DECIMAL_SI_GPU_MEM)
+  if (suffixed) {
+    return `${suffixed[1]}${canonicalDecimalSiSuffix(suffixed[2])}`
+  }
+
+  if (/^(?:0|[1-9]\d*)$/.test(s)) {
+    return formatGpuMemoryQuantityCompactDisplay(Number(s))
+  }
+
+  if (/^(?:0|[1-9]\d*)\.\d+$/.test(s)) {
+    return s
+  }
+
   const expanded = normalizeGpuMemoryQuantity(s)
   const s2 = typeof expanded === 'string' ? expanded.trim() : String(expanded)
-  if (/^\d+$/.test(s2)) return s2
+  if (/^\d+$/.test(s2)) {
+    return formatGpuMemoryQuantityCompactDisplay(Number(s2))
+  }
   const n = Number(s2)
   if (Number.isFinite(n) && !/[a-zA-Z]/i.test(s2)) {
-    return String(Math.round(n))
+    return formatGpuMemoryQuantityCompactDisplay(Math.round(n))
   }
   return s2.replace(/[a-zA-Z]+$/, '').trim() || ''
 }
+
+// 允许输入过程中的中间态：如 "2."、"2k"、"1.5M"
+const GPU_MEMORY_QUANTITY_INPUT =
+  /^((?:0|[1-9]\d*)(?:\.\d+)?)([kKmMgGtTpPeE])?$|^(?:0|[1-9]\d*)\.$/
 
 export default class ResourceLimit extends React.Component {
   static propTypes = {
@@ -430,6 +463,7 @@ export default class ResourceLimit extends React.Component {
           limitCpuError: this.checkNumOutLimit(limits.cpu, wsL.cpu),
           limitMemoryError: this.checkNumOutLimit(limits.memory, wsL.memory),
           gpuLimitError: this.checkGpuOutOfLimit(gpu),
+          gpuCardLimitError: this.checkGpuCardLimit(gpu),
         },
       },
       this.triggerChange
@@ -447,6 +481,21 @@ export default class ResourceLimit extends React.Component {
     return this.checkNumOutLimit(gpu.value, limit)
   }
 
+  /** 已选择 GPU 类型时，卡数须为正整数（仅 supportGpuSelect 为 true 时展示 GPU 区块） */
+  checkGpuCardLimit = gpu => {
+    if (!this.props.supportGpuSelect) return ''
+    if (!gpu.type) return ''
+    const v = gpu.value
+    if (v === '' || v === undefined || v === null || String(v).trim() === '') {
+      return 'gpuCardRequired'
+    }
+    const n = Number(v)
+    if (!Number.isInteger(n) || n < 1) {
+      return 'gpuCardPositiveInteger'
+    }
+    return ''
+  }
+
   checkNumOutLimit = (num, limit) => {
     const { omitQuotaCheck = false } = this.props
 
@@ -460,6 +509,12 @@ export default class ResourceLimit extends React.Component {
         : ''
     }
     return ''
+  }
+
+  componentDidMount() {
+    if (this.props.supportGpuSelect) {
+      this.checkAndTrigger()
+    }
   }
 
   triggerChange = () => {
@@ -592,6 +647,19 @@ export default class ResourceLimit extends React.Component {
     )
   }
 
+  /** 企业空间配额类错误（不含卡数校验） */
+  getWorkspaceQuotaCheckError = () => {
+    const w = this.state.workspaceLimitCheck
+    const keys = [
+      'requestCpuError',
+      'requestMemoryError',
+      'limitCpuError',
+      'limitMemoryError',
+      'gpuLimitError',
+    ]
+    return keys.filter(k => w[k] !== '')
+  }
+
   handleCPUChange = value => {
     this.setState(
       ({ requests, limits }) => ({
@@ -634,7 +702,7 @@ export default class ResourceLimit extends React.Component {
     if (value === '') {
       inputNum = ''
     } else {
-      const number = /^(0|[1-9][0-9]*)$/.exec(value)
+      const number = /^[1-9][0-9]*$/.exec(value)
       inputNum = number == null ? get(this.state, 'gpu.value', '') : number[0]
     }
     this.setState(
@@ -658,8 +726,9 @@ export default class ResourceLimit extends React.Component {
     if (value === '') {
       inputNum = ''
     } else {
-      const number = /^(([1-9]{1}\d*)|(0{1}))(\.\d{0,2})?$/.exec(value)
-      inputNum = number == null ? get(this.state, 'gpu.memory', '') : number[0]
+      inputNum = GPU_MEMORY_QUANTITY_INPUT.test(value)
+        ? value
+        : get(this.state, 'gpu.memory', '')
     }
     this.setState(
       {
@@ -850,7 +919,11 @@ export default class ResourceLimit extends React.Component {
                 ></Select>
               </div>
             </div>
-            <div className={classnames(styles.input)}>
+            <div
+              className={classnames(styles.input, {
+                [styles.error]: this.state.workspaceLimitCheck.gpuCardLimitError,
+              })}
+            >
               <div className={styles.label}>
                 <span>{t('GPU_LIMIT')}</span>
               </div>
@@ -905,7 +978,8 @@ export default class ResourceLimit extends React.Component {
   render() {
     const { cpuError, memoryError, workspaceLimitCheck: limit } = this.state
     const { supportGpuSelect } = this.props
-    const outWorkSpaceLimit = this.getWorkspaceCheckError()
+    const outWorkSpaceLimit = this.getWorkspaceQuotaCheckError()
+    const gpuCardErr = (limit || {}).gpuCardLimitError
 
     return (
       <div className={styles.wrapper}>
@@ -1021,6 +1095,17 @@ export default class ResourceLimit extends React.Component {
             type="error"
             className="margin-t12"
             message={t('REQUEST_EXCEED_AVAILABLE_QUOTA')}
+          />
+        )}
+        {gpuCardErr && (
+          <Alert
+            type="error"
+            className="margin-t12"
+            message={
+              gpuCardErr === 'gpuCardPositiveInteger'
+                ? t('ENTER_POSITIVE_INTEGER_DESC')
+                : t('GPU_CARD_LIMIT_REQUIRED')
+            }
           />
         )}
       </div>
