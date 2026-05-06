@@ -32,6 +32,30 @@ server:
     url: http://ks-apiserver
     wsUrl: ws://ks-apiserver
 
+  csghub:
+    basePath: /platform-model
+    apiServer:
+      # CSGHub API requests are authenticated by kube-server before being
+      # proxied to csghub-server through the platformmodel kapis group.
+      url: http://ks-apiserver
+      apiBasePath: /kapis/platformmodel.kubesphere.io/api/v1
+    onPremise: true
+    enableHttps: false
+    s3:
+      endpoint: ""
+      accessKeyID: ""
+      accessKeySecret: ""
+      region: ""
+      bucket: ""
+      enableSSL: false
+    privateS3:
+      endpoint: ""
+      accessKeyID: ""
+      accessKeySecret: ""
+      region: ""
+      bucket: ""
+      enableSSL: false
+
   # docker image search default url
   dockerHubUrl: https://hub.docker.com
 

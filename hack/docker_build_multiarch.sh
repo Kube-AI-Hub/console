@@ -23,6 +23,8 @@ fi
 # supported platforms
 PLATFORMS=linux/amd64,linux/arm64
 
+"$(dirname "$0")/build_csghub_frontend.sh"
+
 # Fail early if current builder does not support multi-platform
 CURRENT_DRIVER=$(docker buildx ls 2>/dev/null | grep '\*' | awk '{print $2}')
 if [[ "${CURRENT_DRIVER}" == "docker" ]]; then
@@ -59,3 +61,6 @@ docker rm predbuild
 
 # delete the folder in ./out
 rm -rf ./out
+
+# delete staged CSGHub frontend assets
+rm -rf ./.build/csghub

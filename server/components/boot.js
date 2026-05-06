@@ -21,6 +21,8 @@ const mount = require('koa-mount')
 const render = require('koa-ejs')
 const serve = require('koa-static')
 const HttpProxy = require('http-proxy')
+const fs = require('fs')
+const path = require('path')
 
 const { getServerConfig, root } = require('../libs/utils')
 
@@ -71,6 +73,31 @@ module.exports = function(app) {
       ? { index: 'index.html', maxage: 604800000 }
       : { index: false, maxage: 604800000 }
     app.use(mount(k, serve(root(v), staticOptions)))
+  }
+
+  const csgHubDist = [
+    path.resolve(global.APP_ROOT, '../csghub/frontend/dist'),
+    path.resolve(global.APP_ROOT, 'csghub/frontend/dist'),
+  ].find(fs.existsSync)
+  if (csgHubDist) {
+    app.use(
+      mount(
+        '/platform-model/assets',
+        serve(path.join(csgHubDist, 'assets'), {
+          index: false,
+          maxage: 604800000,
+        })
+      )
+    )
+    app.use(
+      mount(
+        '/platform-model/images',
+        serve(path.join(csgHubDist, 'images'), {
+          index: false,
+          maxage: 604800000,
+        })
+      )
+    )
   }
 
   if (global.MODE_DEV) {

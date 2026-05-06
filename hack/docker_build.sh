@@ -11,6 +11,8 @@ PUSH=${PUSH:-}
 CONTAINER_CLI=${CONTAINER_CLI:-docker}
 CONTAINER_BUILDER=${CONTAINER_BUILDER:-"build"}
 
+"$(dirname "$0")/build_csghub_frontend.sh"
+
 # shellcheck disable=SC2086 # inteneded splitting of CONTAINER_BUILDER
 ${CONTAINER_CLI} ${CONTAINER_BUILDER} \
   -f build/Dockerfile \
@@ -20,6 +22,8 @@ ${CONTAINER_CLI} ${CONTAINER_BUILDER} \
 if [[ -z "${DRY_RUN:-}" ]]; then
   ${CONTAINER_CLI} push "${REPO}"/ks-console:"${TAG}"
 fi
+
+rm -rf ./.build/csghub
 
 
 

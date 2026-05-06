@@ -33,6 +33,8 @@ container-cross:	## Build the container for multiple platforms(currently linux/a
 container-cross-push:	## Build the container for multiple platforms and push
 	hack/docker_build_multiarch.sh
 
+cross-container-push: container-cross-push	## Alias for container-cross-push
+
 container-cross-from-dist:	## Build the container for multiple platforms from dist and push
 	DRY_RUN=true REPO=${REPO} TAG=${TAG} hack/docker_build_multiarch_from_dist.sh
 

@@ -47,6 +47,8 @@ fi
 # supported platforms
 PLATFORMS=linux/amd64,linux/arm64
 
+"$(dirname "$0")/build_csghub_frontend.sh"
+
 # Local-directory buildx cache. Override BUILD_CACHE_DIR to relocate or
 # set BUILD_CACHE='' to disable.
 BUILD_CACHE_DIR=${BUILD_CACHE_DIR:-${HOME}/.cache/buildx/console}
@@ -58,6 +60,10 @@ rm -rf out && mkdir -p out/server
 cp -r dist out
 cp -r server/locales server/public server/views server/sample server/config.yaml out/server/
 cp package.json out/
+if [[ -d .build/csghub/frontend/dist ]]; then
+  mkdir -p out/csghub/frontend
+  cp -r .build/csghub/frontend/dist out/csghub/frontend/dist
+fi
 
 IMAGE="${REPO}"/ks-console:"${TAG}"
 echo "building image: ${IMAGE}"
@@ -77,3 +83,6 @@ fi
 
 # delete the folder in ./out
 rm -rf ./out
+
+# delete staged CSGHub frontend assets
+rm -rf ./.build/csghub

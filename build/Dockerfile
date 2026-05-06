@@ -36,6 +36,10 @@ RUN mv /kubesphere/server/locales \
        /kubesphere/server/views \
        /kubesphere/server/sample \
        /kubesphere/server/config.yaml /out/server/
+RUN if [ -d /kubesphere/.build/csghub/frontend/dist ]; then \
+      mkdir -p /out/csghub/frontend && \
+      cp -R /kubesphere/.build/csghub/frontend/dist /out/csghub/frontend/dist; \
+    fi
 #RUN ["/bin/bash", "-c", "mv /kubesphere/server/{locales,public,sample,views,config.yaml} /out/server/"]
 RUN mv /kubesphere/package.json /out/
 

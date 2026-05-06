@@ -134,8 +134,30 @@ const b2iFileProxy = {
   },
 }
 
+const normalizeBaseUrl = url => (url || '').replace(/\/+$/, '')
+
+const csgHubApiProxy = {
+  target: normalizeBaseUrl(serverConfig.csghub?.apiServer?.url),
+  changeOrigin: true,
+  ignorePath: true,
+  secure: false,
+  optionsHandle(options, req) {
+    const baseUrl = normalizeBaseUrl(serverConfig.csghub?.apiServer?.url)
+    // apiBasePath: path on the upstream server that corresponds to /platform-model/api/v1
+    //   - Direct csghub-server (http://csghub-server.csghub:8080): use /api/v1
+    //   - Via remote portal   (https://ka.4paradigm.com):  use /platform-model/api/v1
+    const apiBasePath = normalizeBaseUrl(
+      serverConfig.csghub?.apiServer?.apiBasePath || '/api/v1'
+    )
+    const parsedUrl = new URL(req.url, 'http://localhost')
+    const suffix = parsedUrl.pathname.replace(/^\/platform-model\/api\/v1/, '')
+    options.target = `${baseUrl}${apiBasePath}${suffix}${parsedUrl.search}`
+  },
+}
+
 module.exports = {
   k8sResourceProxy,
   devopsWebhookProxy,
   b2iFileProxy,
+  csgHubApiProxy,
 }

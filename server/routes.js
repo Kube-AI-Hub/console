@@ -29,6 +29,7 @@ const {
   k8sResourceProxy,
   devopsWebhookProxy,
   b2iFileProxy,
+  csgHubApiProxy,
 } = require('./proxy')
 
 const {
@@ -53,6 +54,18 @@ const {
   renderOAuthRedirect,
 } = require('./controllers/view')
 
+const {
+  handleCsgHubPing,
+  handleCsgHubUpload,
+  handleCsgHubPrivateUpload,
+  handleCsgHubTempUrl,
+  handleCsgHubResolve,
+  renderCsgHub,
+  setCsgHubZhLocale,
+  setCsgHubEnLocale,
+  setCsgHubZhHantLocale,
+} = require('./controllers/csghub')
+
 const parseBody = convert(
   bodyParser({
     formLimit: '200kb',
@@ -64,6 +77,19 @@ const parseBody = convert(
 const router = new Router()
 
 router
+  .use(proxy('/platform-model/api/v1{/*path}', csgHubApiProxy))
+  .get('/platform-model/internal_api/ping', handleCsgHubPing)
+  .post('/platform-model/internal_api/upload', handleCsgHubUpload)
+  .post('/platform-model/internal_api/private_upload', handleCsgHubPrivateUpload)
+  .get('/platform-model/internal_api/oss_temp_url', handleCsgHubTempUrl)
+  .get(
+    '/platform-model/:repo_type/:namespace/:name/resolve/:branch{/*path}',
+    handleCsgHubResolve
+  )
+  .get('/platform-model/zh/settings/locale', setCsgHubZhLocale)
+  .get('/platform-model/en/settings/locale', setCsgHubEnLocale)
+  .get('/platform-model/zhHant/settings/locale', setCsgHubZhHantLocale)
+  .get('/platform-model{/*path}', renderCsgHub)
   .use(proxy('/devops_webhook{/*path}', devopsWebhookProxy))
   .use(proxy('/b2i_download{/*path}', b2iFileProxy))
   .post('/dockerhub{/*path}', parseBody, handleDockerhubProxy)
