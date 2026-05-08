@@ -55,6 +55,37 @@ function mix(salt, str) {
   return `${Base64.encode(prefix.join(''))}@${ret.join('')}`
 }
 
+/**
+ * Paths like /platform-model are served by the Node app (csghub HTML), not the
+ * React SPA. Client-side routing.push would hit the "*" route and show the wrong UI.
+ */
+function pathRequiresDocumentNavigation(target) {
+  if (!target || typeof target !== 'string') {
+    return false
+  }
+  const trimmed = target.trim()
+  if (!trimmed || trimmed.startsWith('//')) {
+    return false
+  }
+  let pathname = ''
+  if (/^https?:\/\//i.test(trimmed)) {
+    try {
+      const url = new URL(trimmed)
+      if (url.origin !== window.location.origin) {
+        return false
+      }
+      pathname = url.pathname
+    } catch {
+      return false
+    }
+  } else {
+    pathname = trimmed.split(/[?#]/)[0] || ''
+  }
+  return (
+    pathname === '/platform-model' || pathname.startsWith('/platform-model/')
+  )
+}
+
 export default
 @inject('rootStore')
 @observer
@@ -152,6 +183,11 @@ class Login extends Component {
     const params = new URLSearchParams(window.location.search)
     const referer = params.get('referer')
     const target = resp.redirectUrl || referer || '/'
+
+    if (pathRequiresDocumentNavigation(target)) {
+      window.location.assign(target)
+      return
+    }
 
     if (this.props.rootStore?.routing?.push) {
       this.props.rootStore.routing.push(target)

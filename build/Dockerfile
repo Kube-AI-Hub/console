@@ -18,6 +18,7 @@ RUN yarn config set registry https://registry.npmmirror.com
 
 # Install dependencies to reduce build time
 ADD package.json /kubesphere/package.json
+ADD packages/ /kubesphere/packages/
 RUN yarn install
 
 ADD . /kubesphere/
