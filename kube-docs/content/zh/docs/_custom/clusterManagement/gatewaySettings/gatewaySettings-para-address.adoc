@@ -6,5 +6,5 @@
 
 * 如果网关的外部访问模式为 LoadBalancer，**网关地址**为负载均衡器的地址。
 
-// * 如果网关地址未显示，可能是因为集群节点缺少 **node-role.kubernetes.io/master** 标签。点击**集群节点**页面，点击控制平面节点，选择**更多操作 > 编辑标签**添加 **node-role.kubernetes.io/master** 标签。v4.1 删除该行
+// * 如果网关地址未显示，可能是因为集群节点缺少 **node-role.kubernetes.io/control-plane** 标签（v1.24 起；旧版本为 **node-role.kubernetes.io/master**）。点击**集群节点**页面，点击控制平面节点，选择**更多操作 > 编辑标签**添加对应标签。v4.1 删除该行
 // end::bullets[]

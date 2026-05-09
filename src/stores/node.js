@@ -61,8 +61,12 @@ export default class NodeStore extends Base {
     }
 
     if (result.role) {
-      result.labelSelector += `,node-role.kubernetes.io/${params.role}=`
-      delete result.role
+      if (params.role === 'master') {
+        // role=master is handled server-side (control-plane or legacy master label)
+      } else {
+        result.labelSelector += `,node-role.kubernetes.io/${params.role}=`
+        delete result.role
+      }
     }
 
     return result
@@ -131,21 +135,33 @@ export default class NodeStore extends Base {
 
   @action
   async fetchCount(params) {
-    const resp = await request.get(this.getResourceUrl(params), {
-      labelSelector: 'node-role.kubernetes.io/master',
-    })
+    const url = this.getResourceUrl(params)
+    const labelSelectors = [
+      'node-role.kubernetes.io/control-plane',
+      'node-role.kubernetes.io/master',
+    ]
+    const responses = await Promise.all(
+      labelSelectors.map(labelSelector => request.get(url, { labelSelector }))
+    )
+    const byName = new Map()
+    for (const resp of responses) {
+      for (const item of resp.items || []) {
+        byName.set(item.metadata.name, item)
+      }
+    }
+    const items = [...byName.values()]
 
-    const masterWorker = resp.items.filter(item => {
+    const masterWorker = items.filter(item => {
       const labels = getNodeRoles(item.metadata.labels)
       return labels.includes('worker')
     }).length
 
-    this.masterNum = resp.items.filter(item => {
+    this.masterNum = items.filter(item => {
       const labels = getNodeRoles(item.metadata.labels)
       return labels.includes('master') || labels.includes('control-plane')
     }).length
 
-    this.masterCount = resp.totalItems
+    this.masterCount = items.length
     this.masterWorkerCount = masterWorker
   }
 
@@ -209,7 +225,10 @@ export default class NodeStore extends Base {
     await Promise.all(
       rowKeys.map(rowKey => {
         const node = this.list.data[rowKey]
-        if (node.role === 'master') return null
+        const roles = node.role || []
+        if (roles.some(r => r === 'master' || r === 'control-plane')) {
+          return null
+        }
 
         return request.delete(this.getDetailUrl(node), {
           orphanDependents: false,

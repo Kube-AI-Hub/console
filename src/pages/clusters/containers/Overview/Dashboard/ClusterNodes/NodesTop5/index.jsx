@@ -74,8 +74,12 @@ class NodesTop5 extends Component {
                 title={
                   <Link to={`/clusters/${this.cluster}/nodes/${node.node}`}>
                     {node.node}
-                    {node.role === 'master' && (
-                      <span className={styles.label}>{t('CONTROL_PLANE')}</span>
+                    {[].concat(node.role || []).some(
+                      r => r === 'master' || r === 'control-plane'
+                    ) && (
+                      <span className={styles.label}>
+                        {t('CONTROL_PLANE')}
+                      </span>
                     )}
                   </Link>
                 }

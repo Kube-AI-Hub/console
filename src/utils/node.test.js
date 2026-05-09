@@ -21,6 +21,9 @@ import { getNodeRoles, getConditionsStatus, getNodeStatus } from './node'
 it('getNodeRoles', () => {
   const labels = { app: 'xxx', 'node-role.kubernetes.io/master': 'true' }
   expect(getNodeRoles(labels)).toStrictEqual(['master'])
+  expect(
+    getNodeRoles({ 'node-role.kubernetes.io/control-plane': '' })
+  ).toStrictEqual(['control-plane'])
   expect(getNodeRoles()).toStrictEqual([])
 })
 

@@ -405,7 +405,9 @@ class Nodes extends React.Component {
         isHideable: true,
         search: true,
         render: roles =>
-          roles.indexOf('master') === -1 ? t('WORKER') : t('CONTROL_PLANE'),
+          roles.includes('master') || roles.includes('control-plane')
+            ? t('CONTROL_PLANE')
+            : t('WORKER'),
       },
       {
         title: t('GPU_USAGE'),

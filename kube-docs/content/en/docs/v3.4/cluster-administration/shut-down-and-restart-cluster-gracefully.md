@@ -63,8 +63,10 @@ Wait for the cluster to be up and running, which may take about 10 minutes.
 ### Step 3: Check the status of all control plane components
 Check the status of core components, such as etcd services, and make sure everything is ready.
 ```bash
-kubectl get nodes -l node-role.kubernetes.io/master
+kubectl get nodes -l node-role.kubernetes.io/control-plane
 ```
+
+For clusters running Kubernetes before v1.24, use `node-role.kubernetes.io/master` instead.
 
 ### Step 4: Check all worker nodes' status
 ```bash

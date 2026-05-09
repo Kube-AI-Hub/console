@@ -77,8 +77,10 @@ done
 检查核心组件（例如 etcd 服务）的状态，并确保一切就绪。
 
 ```bash
-kubectl get nodes -l node-role.kubernetes.io/master
+kubectl get nodes -l node-role.kubernetes.io/control-plane
 ```
+
+在 Kubernetes v1.24 之前的集群上，请改用 `node-role.kubernetes.io/master`。
 
 ### 步骤 4：检查所有工作节点的状态
 

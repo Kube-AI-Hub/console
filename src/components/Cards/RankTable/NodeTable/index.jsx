@@ -81,7 +81,9 @@ class NodeUsageRank extends React.Component {
           <div>
             <h3>
               <Link {...linkProps}>{node.node}</Link>
-              {node.role === 'master' && (
+              {[].concat(node.role || []).some(
+                r => r === 'master' || r === 'control-plane'
+              ) && (
                 <span className={styles.label}>{t('CONTROL_PLANE')}</span>
               )}
             </h3>
