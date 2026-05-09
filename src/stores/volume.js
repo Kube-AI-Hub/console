@@ -39,7 +39,7 @@ export default class VolumeStore extends Base {
 
   async getSnapshotType() {
     this.snapshotType = await request.get(
-      `/apis/snapshot.storage.k8s.io/v1beta1/volumesnapshotclasses`
+      `/apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses`
     )
   }
 
@@ -105,7 +105,7 @@ export default class VolumeStore extends Base {
     const path = snapshotstore.getListUrl({ cluster, namespace })
 
     const params = {
-      apiVersion: 'snapshot.storage.k8s.io/v1beta1',
+      apiVersion: 'snapshot.storage.k8s.io/v1',
       kind: snapshotstore.resourceKind,
       metadata: {
         name,

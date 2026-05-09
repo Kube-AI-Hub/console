@@ -27,13 +27,13 @@ export default class VolumeSnapshotClassStore extends Base {
   }
 
   get apiVersion() {
-    return 'apis/snapshot.storage.k8s.io/v1beta1'
+    return 'apis/snapshot.storage.k8s.io/v1'
   }
 
   create(params, options) {
     return super.create(
       {
-        apiVersion: 'snapshot.storage.k8s.io/v1beta1',
+        apiVersion: 'snapshot.storage.k8s.io/v1',
         kind: this.resourceKind,
         deletionPolicy: 'Delete',
         ...params,
