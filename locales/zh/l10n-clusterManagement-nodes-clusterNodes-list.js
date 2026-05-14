@@ -97,5 +97,11 @@ module.exports = {
   XPU_VENDOR_MTHREADS: '摩尔线程',
   // List > Edit Taints
   DUPLICATE_KEYS: '该键已经存在，请输入其他键。',
-  EMPTY_KEY: '请输入一个键。'
+  EMPTY_KEY: '请输入一个键。',
+  // Node Time Sync
+  NODE_TIME_SYNC_COLUMN: '时间同步/NTP',
+  NODE_TIME_SYNC_SYNCED: '已同步',
+  NODE_TIME_SYNC_NOT_SYNCED: '未同步',
+  NODE_TIME_SYNC_NO_DATA: '监控数据不可用。请确保已部署 node_exporter 并正确连接监控堆栈。',
+  NODE_TIME_SYNC_CRITICAL_BANNER: '部分节点存在较大时钟偏差，在集群 Service VIP 负载均衡到多副本 apiserver 时可能导致 ServiceAccount token 401 错误。请检查 NTP/chrony 配置。',
 };

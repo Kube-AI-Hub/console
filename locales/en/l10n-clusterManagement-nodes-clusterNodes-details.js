@@ -182,5 +182,13 @@ module.exports = {
   USAGE: 'Usage',
   OUT: 'Out',
   IN: 'In',
+  // Node Time Sync
+  NODE_TIME_SYNC_TITLE: 'Time Synchronization',
+  NODE_TIME_SYNC_SERVER_TIME: 'Server Time',
+  NODE_TIME_SYNC_NTP_STATUS: 'NTP Status',
+  NODE_TIME_SYNC_SYNCED: 'Synchronized',
+  NODE_TIME_SYNC_NOT_SYNCED: 'Not synchronized',
+  NODE_TIME_SYNC_NO_DATA_DETAIL: 'Unable to detect time synchronization status. Ensure the node_exporter is deployed and monitoring stack is connected.',
+  NODE_TIME_SYNC_VIEW_LIST: 'View node list for cluster comparison',
   // Events
 }

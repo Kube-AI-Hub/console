@@ -180,5 +180,13 @@ module.exports = {
   // Monitoring
   USAGE: '用量',
   OUT: '出',
-  IN: '入'
+  IN: '入',
+  // Node Time Sync
+  NODE_TIME_SYNC_TITLE: '时间同步',
+  NODE_TIME_SYNC_SERVER_TIME: '服务器时间',
+  NODE_TIME_SYNC_NTP_STATUS: 'NTP 状态',
+  NODE_TIME_SYNC_SYNCED: '已同步',
+  NODE_TIME_SYNC_NOT_SYNCED: '未同步',
+  NODE_TIME_SYNC_NO_DATA_DETAIL: '无法检测节点时间同步状态。请确保已部署 node_exporter 并正确连接监控堆栈。',
+  NODE_TIME_SYNC_VIEW_LIST: '查看节点列表以进行集群对比',
 };

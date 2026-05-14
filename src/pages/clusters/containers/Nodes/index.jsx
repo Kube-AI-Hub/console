@@ -57,6 +57,8 @@ const MetricTypes = {
   memory_utilisation: 'node_memory_utilisation',
   pod_used: 'node_pod_running_count',
   pod_total: 'node_pod_quota',
+  time_seconds: 'node_time_seconds',
+  timex_sync: 'node_timex_sync_status',
 }
 
 export default
@@ -266,6 +268,105 @@ class Nodes extends React.Component {
       )
     })
     return metrics
+  }
+
+  hasTimeSyncData = () => {
+    const metricsData = this.monitoringStore.data
+    const timeMetrics = metricsData[MetricTypes.time_seconds]
+    if (!timeMetrics) return false
+    const results = get(timeMetrics, 'data.result') || []
+    return results.length > 0
+  }
+
+  getNodeTimeSeconds = record => {
+    const metricsData = this.monitoringStore.data
+    const result = get(metricsData[MetricTypes.time_seconds], 'data.result') || []
+    const metrics = result.find(item => get(item, 'metric.node') === record.name)
+    return parseFloat(get(metrics, 'value[1]', NaN))
+  }
+
+  getNodeTimexSyncStatus = record => {
+    const metricsData = this.monitoringStore.data
+    const result = get(metricsData[MetricTypes.timex_sync], 'data.result') || []
+    const metrics = result.find(item => get(item, 'metric.node') === record.name)
+    return parseFloat(get(metrics, 'value[1]', NaN))
+  }
+
+  getTimeSyncMedian = () => {
+    const { data: listData } = this.store.list
+    const values = listData
+      .map(r => this.getNodeTimeSeconds(r))
+      .filter(v => !isNaN(v))
+      .sort((a, b) => a - b)
+    if (values.length === 0) return NaN
+    const mid = Math.floor(values.length / 2)
+    return values.length % 2 === 0
+      ? (values[mid - 1] + values[mid]) / 2
+      : values[mid]
+  }
+
+  getTimeSyncLevel = offsetSeconds => {
+    if (isNaN(offsetSeconds)) return 'unknown'
+    const WARN_THRESHOLD = 30
+    const CRIT_THRESHOLD = 120
+    if (offsetSeconds >= CRIT_THRESHOLD) return 'critical'
+    if (offsetSeconds >= WARN_THRESHOLD) return 'warning'
+    return 'healthy'
+  }
+
+  anyNodeTimeCritical = () => {
+    if (!this.hasTimeSyncData()) return false
+    const { data: listData } = this.store.list
+    const median = this.getTimeSyncMedian()
+    if (isNaN(median)) return false
+    return listData.some(record => {
+      const nodeTime = this.getNodeTimeSeconds(record)
+      if (isNaN(nodeTime)) return false
+      return Math.abs(nodeTime - median) >= 120
+    })
+  }
+
+  renderTimeSyncColumn = () => {
+    const median = this.getTimeSyncMedian()
+    return {
+      title: t('NODE_TIME_SYNC_COLUMN'),
+      key: 'timeSync',
+      isHideable: true,
+      render: record => {
+        if (!this.hasTimeSyncData()) {
+          return (
+            <Tooltip content={t('NODE_TIME_SYNC_NO_DATA')}>
+              <Text title="-" description={t('UNKNOWN')} />
+            </Tooltip>
+          )
+        }
+        const nodeTime = this.getNodeTimeSeconds(record)
+        const syncStatus = this.getNodeTimexSyncStatus(record)
+        if (isNaN(nodeTime)) {
+          return <Text title="-" description={t('UNKNOWN')} />
+        }
+        const offset = Math.round(Math.abs(nodeTime - median))
+        const level = this.getTimeSyncLevel(offset)
+        const offsetPrefix = nodeTime >= median ? '+' : '-'
+        const offsetText = median && !isNaN(median)
+          ? (offset === 0 ? ' 0s' : `${offsetPrefix}${offset}s`)
+          : ''
+        const ntpText = !isNaN(syncStatus)
+          ? (syncStatus === 1 ? t('NODE_TIME_SYNC_SYNCED') : t('NODE_TIME_SYNC_NOT_SYNCED'))
+          : t('UNKNOWN')
+
+        let titleStyle = {}
+        if (level === 'critical') titleStyle = { color: 'var(--color-error, #ca2621)' }
+        else if (level === 'warning') titleStyle = { color: 'var(--color-warning, #f5a623)' }
+
+        return (
+          <Text
+            title={<span style={titleStyle}>{offsetText || '-'}</span>}
+            description={ntpText}
+          />
+        )
+      },
+    }
   }
 
   renderTaintsTip = data => (
@@ -665,6 +766,7 @@ class Nodes extends React.Component {
           return displayText
         },
       },
+      this.renderTimeSyncColumn(),
     ]
   }
 
@@ -884,6 +986,22 @@ class Nodes extends React.Component {
           tips={this.tips}
         />
         {this.renderOverview()}
+        {!isLoadingMonitor && this.anyNodeTimeCritical() && (
+          <div
+            className={styles.warning}
+            style={{
+              padding: '12px 20px',
+              marginBottom: 12,
+              backgroundColor: 'var(--bg-warning-light, #fff7e6)',
+              border: '1px solid var(--border-warning, #f5a623)',
+              borderRadius: 'var(--border-radius, 4px)',
+              color: 'var(--color-text, #333)',
+            }}
+          >
+            <Icon name="exclamation" size={16} style={{ marginRight: 8 }} />
+            {t('NODE_TIME_SYNC_CRITICAL_BANNER')}
+          </div>
+        )}
         <Table
           {...tablePropsWithSearch}
           itemActions={this.itemActions}

@@ -403,6 +403,8 @@ const METRIC_TYPES = [
   'node_memory_total',
   'node_pod_quota',
   'node_disk_size_capacity',
+  'node_time_seconds',
+  'node_timex_sync_status',
 ]
 
 export default
@@ -907,6 +909,42 @@ class RunningStatus extends React.Component {
     )
   }
 
+  renderTimeSyncCell() {
+    const timeVal = this.getLastValue('node_time_seconds', null, null)
+    const timexVal = this.getLastValue('node_timex_sync_status', null, null)
+    const hasTimeData = timeVal !== '-' && isFinite(parseFloat(timeVal))
+
+    const statusType = hasTimeData
+      ? (isFinite(parseFloat(timexVal)) && parseFloat(timexVal) === 1 ? 'healthy' : 'warning')
+      : 'unknown'
+
+    const title = hasTimeData
+      ? new Date(parseFloat(timeVal) * 1000).toLocaleString()
+      : '-'
+    const desc = hasTimeData
+      ? (isFinite(parseFloat(timexVal)) && parseFloat(timexVal) === 1
+          ? t('NODE_TIME_SYNC_SYNCED')
+          : t('NODE_TIME_SYNC_NOT_SYNCED'))
+      : t('UNKNOWN')
+
+    return (
+      <div className={styles.card}>
+        <div className={styles.icon}>
+          <Icon name="timed-task" size={40} />
+          {statusType !== 'unknown' && (
+            <Icon
+              className={statusType === 'healthy' ? styles.check : styles.substract}
+              name={statusType === 'healthy' ? 'check' : 'substract'}
+              type="light"
+              size={12}
+            />
+          )}
+        </div>
+        <Text title={t('NODE_TIME_SYNC_COLUMN')} description={`${title} · ${desc}`} />
+      </div>
+    )
+  }
+
   renderConditions() {
     const { conditions } = this.store.detail
 
@@ -916,6 +954,7 @@ class RunningStatus extends React.Component {
           {conditions.map((condition, i) => (
             <ConditionCard key={condition.type || i} data={condition} />
           ))}
+          {this.renderTimeSyncCell()}
         </div>
       </Panel>
     )

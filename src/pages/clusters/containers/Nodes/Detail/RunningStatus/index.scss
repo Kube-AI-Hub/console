@@ -99,3 +99,31 @@
   grid-column-gap: 12px;
   grid-row-gap: 12px;
 }
+
+.card {
+  display: inline-flex;
+  padding: 12px;
+  border-radius: 4px;
+  background-color: variables.$light-color01;
+
+  .icon {
+    position: relative;
+    margin-right: 12px;
+  }
+}
+
+.check,
+.substract {
+  position: absolute;
+  top: 28px;
+  right: 0;
+  border-radius: 50%;
+}
+
+.check {
+  background-color: variables.$primary;
+}
+
+.substract {
+  background-color: variables.$yellow;
+}

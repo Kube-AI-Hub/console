@@ -100,4 +100,10 @@ module.exports = {
   // List > Edit Taints
   DUPLICATE_KEYS: 'The key already exists. Please enter another key.',
   EMPTY_KEY: 'Please enter a key.',
+  // Node Time Sync
+  NODE_TIME_SYNC_COLUMN: 'Time Sync/NTP',
+  NODE_TIME_SYNC_SYNCED: 'Synced',
+  NODE_TIME_SYNC_NOT_SYNCED: 'Not Synced',
+  NODE_TIME_SYNC_NO_DATA: 'Monitoring data unavailable. Ensure the node_exporter is deployed and the monitoring stack is connected.',
+  NODE_TIME_SYNC_CRITICAL_BANNER: 'Some nodes have significant clock drift, which may cause ServiceAccount token 401 errors when the cluster Service VIP load-balances across multiple apiserver replicas. Please check NTP/chrony configuration.',
 }
