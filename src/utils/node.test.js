@@ -16,7 +16,13 @@
  * along with KubeSphere Console.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { getNodeRoles, getConditionsStatus, getNodeStatus } from './node'
+import {
+  getNodeRoles,
+  getConditionsStatus,
+  getNodeStatus,
+  isControlPlaneNode,
+  isControlPlaneRoles,
+} from './node'
 
 it('getNodeRoles', () => {
   const labels = { app: 'xxx', 'node-role.kubernetes.io/master': 'true' }
@@ -25,6 +31,21 @@ it('getNodeRoles', () => {
     getNodeRoles({ 'node-role.kubernetes.io/control-plane': '' })
   ).toStrictEqual(['control-plane'])
   expect(getNodeRoles()).toStrictEqual([])
+})
+
+it('isControlPlaneRoles / isControlPlaneNode', () => {
+  expect(isControlPlaneRoles(['worker'])).toBe(false)
+  expect(isControlPlaneRoles(['master'])).toBe(true)
+  expect(isControlPlaneRoles(['control-plane'])).toBe(true)
+  expect(isControlPlaneRoles(['master', 'etcd'])).toBe(true)
+  expect(isControlPlaneRoles(undefined)).toBe(false)
+  expect(
+    isControlPlaneNode({ 'node-role.kubernetes.io/control-plane': '' })
+  ).toBe(true)
+  expect(
+    isControlPlaneNode({ 'node-role.kubernetes.io/master': 'true' })
+  ).toBe(true)
+  expect(isControlPlaneNode({})).toBe(false)
 })
 
 it('getConditionsStatus', () => {

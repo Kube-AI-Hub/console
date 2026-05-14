@@ -23,7 +23,7 @@ import { get, isEmpty } from 'lodash'
 import { Button, Loading } from '@kube-design/components'
 
 import { getDisplayName, getLocalTime, formatXpuDisplay } from 'utils'
-import { getNodeRoles, getNodeStatus } from 'utils/node'
+import { getNodeStatus, isControlPlaneNode } from 'utils/node'
 import { trigger } from 'utils/action'
 import NodeStore from 'stores/node'
 
@@ -245,10 +245,9 @@ export default class NodeDetail extends React.Component {
       },
       {
         name: t('ROLE'),
-        value:
-          getNodeRoles(detail.labels).indexOf('master') === -1
-            ? t('WORKER')
-            : t('CONTROL_PLANE'),
+        value: isControlPlaneNode(detail.labels)
+          ? t('CONTROL_PLANE')
+          : t('WORKER'),
       },
       {
         name: t('XPU_TYPE'),

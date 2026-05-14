@@ -23,7 +23,7 @@ import { Tooltip, Icon } from '@kube-design/components'
 import { cpuFormat, memoryFormat, getVendorDisplayName } from 'utils'
 import { ICON_TYPES, NODE_STATUS } from 'utils/constants'
 import { GPU_VENDOR_FILTERS, renderGpuVendorIcon } from 'utils/gpuVendors'
-import { getNodeStatus } from 'utils/node'
+import { getNodeStatus, isControlPlaneRoles } from 'utils/node'
 import { getValueByUnit } from 'utils/monitoring'
 import NodeStore from 'stores/node'
 import NodeMonitoringStore from 'stores/monitoring/node'
@@ -506,9 +506,7 @@ class Nodes extends React.Component {
         isHideable: true,
         search: true,
         render: roles =>
-          roles.includes('master') || roles.includes('control-plane')
-            ? t('CONTROL_PLANE')
-            : t('WORKER'),
+          isControlPlaneRoles(roles) ? t('CONTROL_PLANE') : t('WORKER'),
       },
       {
         title: t('GPU_USAGE'),

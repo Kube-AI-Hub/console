@@ -30,6 +30,14 @@ export const getNodeRoles = labels => {
   return roles
 }
 
+/** True if node has legacy master or current control-plane role labels. */
+export const isControlPlaneRoles = roles =>
+  Array.isArray(roles) &&
+  (roles.includes('master') || roles.includes('control-plane'))
+
+export const isControlPlaneNode = labels =>
+  isControlPlaneRoles(getNodeRoles(labels))
+
 export const NODE_CONDITION_ICONS = {
   Ready: 'templet',
   OutOfDisk: 'storage',
