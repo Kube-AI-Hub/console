@@ -46,6 +46,7 @@ weight: 3120
 - 所有节点必须都能通过 `SSH` 访问。
 - 所有节点时间同步。
 - 所有节点都应使用 `sudo`/`curl`/`openssl`/`tar`。
+- 若节点配备 NVIDIA GPU 或华为昇腾 NPU，请在创建集群前参考 [安装显卡驱动](../gpu-driver-installation/) 完成驱动与容器 runtime 配置。
 
 ### 容器运行时
 

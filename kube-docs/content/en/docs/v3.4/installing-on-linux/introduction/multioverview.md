@@ -49,6 +49,7 @@ Please see the requirements for hardware and operating system shown below. To ge
 - All nodes must be accessible through `SSH`.
 - Time synchronization for all nodes.
 - `sudo`/`curl`/`openssl`/`tar` should be used in all nodes.
+- If nodes are equipped with NVIDIA GPUs or Huawei Ascend NPUs, install drivers and container runtimes before cluster creation. See [GPU Driver Installation](../gpu-driver-installation/).
 
 ### Container runtimes
 
