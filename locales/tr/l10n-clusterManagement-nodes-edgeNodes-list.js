@@ -18,7 +18,7 @@
 module.exports = {
   // Banner
   EDGE_NODE_PL: 'Kenar Düğümleri',
-  EDGE_NODE_DESC: 'Kenar düğümler, KubeSphere kümesinin dışına dağıtılan sunuculardır. Bunları yönetmek için KubeSphere kümesine kenar düğümler ekleyebilirsiniz.',
+  EDGE_NODE_DESC: 'Kenar düğümler, Kube AI Hub kümesinin dışına dağıtılan sunuculardır. Bunları yönetmek için Kube AI Hub kümesine kenar düğümler ekleyebilirsiniz.',
   // Node Count
   // List
   EDGE_NODE_EMPTY_DESC: 'Lütfen kümeye bir kenar düğüm ekleyin.',
@@ -36,8 +36,8 @@ module.exports = {
   ADD_DEFAULT_TAINT: 'Varsayılan kusur ekleyin {params}',
   EDGE_NODE: 'Kenar Düğümleri',
   INTERNAL_IP_ADDRESS: 'Dahili IP Adresi',
-  EDGENODE_INTERNAL_IP_DESC: 'KubeSphere kümesindeki uç düğümün dahili IP adresini ayarlayın.',
-  EDGENODE_INTERNAL_IP_EMPTY_DESC: 'Lütfen KubeSphere kümesindeki uç düğümün dahili IP adresini ayarlayın.',
+  EDGENODE_INTERNAL_IP_DESC: 'Kube AI Hub kümesindeki uç düğümün dahili IP adresini ayarlayın.',
+  EDGENODE_INTERNAL_IP_EMPTY_DESC: 'Lütfen Kube AI Hub kümesindeki uç düğümün dahili IP adresini ayarlayın.',
   COPY_SUCCESSFUL: 'Başarıyla kopyalandı.',
   // List > View Log
   LOGS: 'Günlükler',

@@ -26,6 +26,6 @@ module.exports = {
   EDIT_CLUSTER_INFO_DESC: 'Bearbeite grundlegende Informationen über den Cluster.',
   // Remove Cluster
   REMOVE_CLUSTER: 'Cluster entfernen',
-  REMOVE_CLUSTER_DESC: 'Nachdem der Cluster entfernt wurde, kann KubeSphere den Cluster nicht verwalten. Ressourcen im Cluster werden nicht gelöscht. Geben Sie den Clusternamen <strong>{name}</strong> ein, um zu bestätigen, dass Sie die Risiken dieser Operation verstehen.',
+  REMOVE_CLUSTER_DESC: 'Nachdem der Cluster entfernt wurde, kann Kube AI Hub den Cluster nicht verwalten. Ressourcen im Cluster werden nicht gelöscht. Geben Sie den Clusternamen <strong>{name}</strong> ein, um zu bestätigen, dass Sie die Risiken dieser Operation verstehen.',
   REMOVE_SUCCESS: 'Erfolgreich entfernt.'
 };

@@ -37,7 +37,7 @@ module.exports = {
   EDGE_NODE: 'Edge Node',
   INTERNAL_IP_ADDRESS: 'Node Internal IP Address',
   EDGENODE_INTERNAL_IP_DESC: 'The internal IP address for the connection between cluster nodes.',
-  EDGENODE_INTERNAL_IP_EMPTY_DESC: 'Please set the IP address of the edge node in the KubeSphere cluster.',
+  EDGENODE_INTERNAL_IP_EMPTY_DESC: 'Please set the IP address of the edge node in the Kube AI Hub cluster.',
   COPY_SUCCESSFUL: 'Copied successfully.',
   // List > View Log
   LOGS: 'Registros',

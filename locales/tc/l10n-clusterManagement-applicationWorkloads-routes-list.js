@@ -21,7 +21,7 @@ module.exports = {
   PREREQUESTS_FOR_USE_ROUTE_Q: '使用應用路由的前提條件?',
   PREREQUESTS_FOR_USE_ROUTE_A: '使用應用路由需要由項目管理員對當前項目設置網關。',
   ACCESS_TYPES_OF_ROUTE_Q: '應用路由支持的訪問方式?',
-  ACCESS_TYPES_OF_ROUTE_A: 'KubeSphere 應用路由支持 NodePort 訪問方式以及 LoadBalancer 訪問方式。',
+  ACCESS_TYPES_OF_ROUTE_A: 'Kube AI Hub 應用路由支持 NodePort 訪問方式以及 LoadBalancer 訪問方式。',
   ROUTE_PL: '應用路由',
   // List
   GATEWAY_ADDRESS_TCAP: '網關地址',

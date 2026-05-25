@@ -18,7 +18,7 @@
 module.exports = {
   // Head
   APP_STORE: 'App Store',
-  HOME_APP_STORE_DESC: 'Der offizielle App-Store von KubeSphere bietet Funktionen zur Bereitstellung und Verwaltung von Anwendungen, die es Benutzern ermöglichen, Apps mit einem Klick auf App-Vorlagen schnell zu verteilen.',
+  HOME_APP_STORE_DESC: 'Der offizielle App-Store von Kube AI Hub bietet Funktionen zur Bereitstellung und Verwaltung von Anwendungen, die es Benutzern ermöglichen, Apps mit einem Klick auf App-Vorlagen schnell zu verteilen.',
   // Discover
   DISCOVER: 'Entdecken',
   NEW_APPS: 'Neue Apps',

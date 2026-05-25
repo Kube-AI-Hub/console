@@ -48,7 +48,7 @@ module.exports = {
   S2I_TARGET_IMAGE_REPOSITORY_DESC: 'Select a Secret with push permissions to the image repository. De lo contrario, puedes <a href={link} target="_blank">crear una nueva credencial de repositorio de imágenes</a> .',
   TRIGGER_TOKEN: 'Secret Code',
   INVALID_TRIGGER_TOKEN_DESC: 'It can only contain upper and lower case letters, numbers.',
-  TRIGGER_TOKEN_DESC: 'Set a token used to authenticate a client against KubeSphere when the client attempts to trigger image building on KubeSphere. The token can contain only uppercase letters, lowercase letters, and numbers.',
+  TRIGGER_TOKEN_DESC: 'Set a token used to authenticate a client against Kube AI Hub when the client attempts to trigger image building on Kube AI Hub. The token can contain only uppercase letters, lowercase letters, and numbers.',
   CODE_RELATIVE_PATH: 'Ruta relativa del código (opcional):',
   CODE_RELATIVE_PATH_DESC: 'Especifica un directorio relativo dentro de la aplicación. (Valor por defecto /)',
   S2I_ENVIRONMENT_DESC: 'Los desarrolladores de aplicaciones pueden usar las siguientes variables de entorno para configurar el comportamiento en tiempo de ejecución de esta imagen; para configuraciones detalladas, consulta <a href={link} target="_blank">plantillas de compilación</a> .',

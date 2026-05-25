@@ -18,16 +18,16 @@
 module.exports = {
   // Banner
   TEMPLATE_BASED_APP_PL: 'Template-Based Apps',
-  APPLICATIONS_DESC: 'Una aplicación proporciona a los usuarios funciones comerciales integrales en un solo paquete. Las plantillas de aplicación en KubeSphere se basan en la especificación de empaquetado de Helm. Se entregan a través de un repositorio Helm público o privado unificado. Una aplicación está compuesta por uno o más objetos de Kubernetes, que incluyen workload, servicios e ingress.',
+  APPLICATIONS_DESC: 'Una aplicación proporciona a los usuarios funciones comerciales integrales en un solo paquete. Las plantillas de aplicación en Kube AI Hub se basan en la especificación de empaquetado de Helm. Se entregan a través de un repositorio Helm público o privado unificado. Una aplicación está compuesta por uno o más objetos de Kubernetes, que incluyen workload, servicios e ingress.',
   APP_PL: 'Aplicaciones',
   APP_TYPES_Q: 'tipo de aplicacion',
-  APP_TYPES_A: 'KubeSphere admite implementaciones de aplicaciones (basadas en Helm) desde App Store, así como Application CRD.',
+  APP_TYPES_A: 'Kube AI Hub admite implementaciones de aplicaciones (basadas en Helm) desde App Store, así como Application CRD.',
   HOW_TO_USE_APP_GOVERN_Q: '¿Cómo usar la Gestión de aplicaciones?',
   HOW_TO_USE_APP_GOVERN_A: 'Cree una aplicación por composición y habilite la gestión de servicios para cada servicio antes de utilizar la gestión de aplicaciones.',
   DEPLOY_SAMPLE_APP: 'Implementar aplicación de demo',
   // List
   NO_TEMPLATE_BASED_APP_FOUND: 'No Template-Based App Found',
-  TEMPLATE_BASED_APP_EMPTY_DESC: 'Please create an app from the KubeSphere App Store or an app template.',
+  TEMPLATE_BASED_APP_EMPTY_DESC: 'Please create an app from the Kube AI Hub App Store or an app template.',
   APP: 'App',
   VERSION: 'Versión',
   CREATING: 'Creating',
@@ -38,12 +38,12 @@ module.exports = {
   CREATE_APP_DESC: 'La liviana, portátil y autónoma tecnología de empaquetado de software permite que las aplicaciones se ejecuten en casi cualquier lugar de la misma manera.',
   FROM_APP_STORE: 'Desde la tienda de aplicaciones',
   FROM_APP_TEMPLATE: 'Desde plantillas de aplicaciones',
-  FROM_APP_STORE_DESC: 'Desde la tienda de aplicaciones oficial de KubeSphere con aplicaciones de alta calidad y despliegues fáciles.',
+  FROM_APP_STORE_DESC: 'Desde la tienda de aplicaciones oficial de Kube AI Hub con aplicaciones de alta calidad y despliegues fáciles.',
   // List > Create > From App Template
   SELECT_APP_REPOSITORY: 'Select app repository',
   CURRENT_WORKSPACE: 'Del espacio de trabajo',
   FROM_APP_TEMPLATE_DESC: 'Desde las plantillas de aplicación del espacio de trabajo y las plantillas de aplicaciones Helm de terceros del repositorio de aplicaciones.',
-  APP_TEMPLATES_MODAL_DESC: 'La plantilla de la aplicación proviene del espacio de trabajo y las plantillas de aplicación de Helm de terceros. Admite el despliegue con un click y se puede visualizar en KubeSphere para mostrar y proporcionar despliegues y funciones de administración.',
+  APP_TEMPLATES_MODAL_DESC: 'La plantilla de la aplicación proviene del espacio de trabajo y las plantillas de aplicación de Helm de terceros. Admite el despliegue con un click y se puede visualizar en Kube AI Hub para mostrar y proporcionar despliegues y funciones de administración.',
   // List > Create > From App Template > App Information
   // List > Create > From App Template > Chart Files
   // List > Edit

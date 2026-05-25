@@ -22,12 +22,12 @@ module.exports = {
   // More > Set as Default Storage Class
   SET_DEFAULT_STORAGE_CLASS_TITLE: 'Varsayılan Depolama Sınıfı Olarak Ayarla',
   SET_AS_DEFAULT_STORAGE_CLASS: 'Varsayılan Depolama Sınıfı Olarak Ayarla',
-  STORAGE_CLASS_SET_DEFAULT_DESC: 'Varsayılan depolama sınıfı ayarlandıktan sonra, herhangi bir özel gereksinim eklenmemişse, sistem varsayılan olarak bu sınıfın birimlerini oluşturacaktır. KubeSphere kümesinde yalnızca bir varsayılan depolama sınıfına izin verilir.',
+  STORAGE_CLASS_SET_DEFAULT_DESC: 'Varsayılan depolama sınıfı ayarlandıktan sonra, herhangi bir özel gereksinim eklenmemişse, sistem varsayılan olarak bu sınıfın birimlerini oluşturacaktır. Kube AI Hub kümesinde yalnızca bir varsayılan depolama sınıfına izin verilir.',
   // More > Edit Authorization Rules
   SET_AUTHORIZATION_RULES: 'Yetkilendirme Kuralları Belirleyin',
   AUTHORIZATION_RULES: 'Yetkilendirme Kuralları Belirleyin',
   AUTHORIZATION_RULES_DESC: 'Depolama sınıfına yalnızca belirli projelerde ve çalışma alanlarında erişilebilmesi için yetkilendirme kuralları ayarlayın.',
-  AUTHORIZATION_NOT_SUPPORT: 'Küme şu anda bu özelliği desteklemiyor. Lütfen KubeSphere\'i v3.3.0 veya sonraki bir sürümüne yükseltin veya manuel olarak yükleyin.<a href="https://github.com/kubesphere/storageclass-accessor" target="_blank">storageclass-accessor</a>.',
+  AUTHORIZATION_NOT_SUPPORT: 'Küme şu anda bu özelliği desteklemiyor. Lütfen Kube AI Hub\'i v3.3.0 veya sonraki bir sürümüne yükseltin veya manuel olarak yükleyin.<a href="https://github.com/kubesphere/storageclass-accessor" target="_blank">storageclass-accessor</a>.',
   OPERATOR_IN: 'İçinde',
   OPERATOR_NOT_IN: 'İçinde değil',
   // More > Set Volume Permissions

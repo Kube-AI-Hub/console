@@ -22,12 +22,12 @@ module.exports = {
   // More > Set as Default Storage Class
   SET_DEFAULT_STORAGE_CLASS_TITLE: '設為預設儲存類型',
   SET_AS_DEFAULT_STORAGE_CLASS: '設為預設儲存類型',
-  STORAGE_CLASS_SET_DEFAULT_DESC: '設置為預設儲存類型後，如果沒有特殊指定，系統將預設創建該類型的儲存卷。一個 KubeSphere 集群中僅允許設置一個預設儲存類型',
+  STORAGE_CLASS_SET_DEFAULT_DESC: '設置為預設儲存類型後，如果沒有特殊指定，系統將預設創建該類型的儲存卷。一個 Kube AI Hub 集群中僅允許設置一個預設儲存類型',
   // More > Edit Authorization Rules
   SET_AUTHORIZATION_RULES: 'Set Authorization Rules',
   AUTHORIZATION_RULES: 'Authorization Rules',
   AUTHORIZATION_RULES_DESC: 'Set authorization rules so that the storage class can be accessed only in specific projects and workspaces.',
-  AUTHORIZATION_NOT_SUPPORT: 'The cluster currently does not support this feature. Please upgrade KubeSphere to v3.3.0 or later, or manually install <a href="https://github.com/kubesphere/storageclass-accessor" target="_blank">storageclass-accessor</a>.',
+  AUTHORIZATION_NOT_SUPPORT: 'The cluster currently does not support this feature. Please upgrade Kube AI Hub to v3.3.0 or later, or manually install <a href="https://github.com/kubesphere/storageclass-accessor" target="_blank">storageclass-accessor</a>.',
   OPERATOR_IN: '入',
   OPERATOR_NOT_IN: 'Not in',
   // More > Set Volume Permissions

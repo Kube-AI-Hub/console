@@ -19,10 +19,10 @@ module.exports = {
   // Banner
   SYSTEM_COMPONENT_PL: 'System Components',
   SERVICE_COMPONENTS_DESC: 'System components are software components in the Kube AI Hub system, which provide various functions. You can view the running status of services components on this page.',
-  // KubeSphere
+  // Kube AI Hub
   STOPPED: 'Stopped',
   RUNNING_TIME: 'Running time',
-  KS_CONSOLE_DESC: 'Provides KubeSphere console services.',
+  KS_CONSOLE_DESC: 'Provides Kube AI Hub console services.',
   KS_APISERVER_DESC: 'Provides REST APIs for cluster management. This component is also used for communication between cluster components and cluster security control.',
   OPENLDAP_DESC: 'Stores and manages user information in a centralized manner.',
   REDIS_DESC: 'Open-source, in-memory data structure store, which is used as a database, cache, and message broker.',

@@ -20,9 +20,9 @@ module.exports = {
   PLATFORM_ROLE_PL: 'Plattformrollen',
   // List
   PLATFORM_ROLE_EMPTY_DESC: 'Bitte erstellen Sie eine Plattformrolle.',
-  ROLE_USERS_MANAGER: 'Verwalten Sie alle Benutzer auf der KubeSphere Plattform.',
-  ROLE_WORKSPACES_MANAGER: 'Verwalten Sie alle Arbeitsbereiche auf der KubeSphere Plattform.',
-  ROLE_PLATFORM_ADMIN: 'Verwalten Sie alle Ressourcen auf der KubeSphere Plattform.',
+  ROLE_USERS_MANAGER: 'Verwalten Sie alle Benutzer auf der Kube AI Hub Plattform.',
+  ROLE_WORKSPACES_MANAGER: 'Verwalten Sie alle Arbeitsbereiche auf der Kube AI Hub Plattform.',
+  ROLE_PLATFORM_ADMIN: 'Verwalten Sie alle Ressourcen auf der Kube AI Hub Plattform.',
   ROLE_PLATFORM_REGULAR: 'Vor dem Betreten eines Arbeitsbereiches kann auf keine Ressourcen zugreifen werden.',
   ROLE_PLATFORM_SELF_PROVISIONER: 'Erstellen Sie Arbeitsbereiche und werden Sie Administrator der erstellten Arbeitsbereiche.',
   CREATION_TIME_TCAP: 'Erstellungszeit',
@@ -59,7 +59,7 @@ module.exports = {
   // List > Create > Edit Permissions > Platform Settings
   PERMIGROUP_PLATFORM_SETTINGS: 'Plattformeinstellungen',
   PERMISSION_PLATFORM_SETTINGS_MANAGEMENT: 'Plattformeinstellungen verwalten',
-  PERMISSION_PLATFORM_SETTINGS_MANAGEMENT_DESC: 'Einstellungen der KubeSphere Plattform anzeigen und bearbeiten.',
+  PERMISSION_PLATFORM_SETTINGS_MANAGEMENT_DESC: 'Einstellungen der Kube AI Hub Plattform anzeigen und bearbeiten.',
   // List > Edit Information
   // List > Edit Permissions
   // List > Delete

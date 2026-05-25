@@ -20,9 +20,9 @@ module.exports = {
   PLATFORM_ROLE_PL: 'أدوار المنصة',
   // List
   PLATFORM_ROLE_EMPTY_DESC: 'الرجاء إنشاء دور منصة.',
-  ROLE_USERS_MANAGER: 'إدارة جميع المستخدمين على منصة KubeSphere.',
-  ROLE_WORKSPACES_MANAGER: 'إدارة جميع مساحات العمل على منصة KubeSphere.',
-  ROLE_PLATFORM_ADMIN: 'إدارة جميع الموارد على منصة KubeSphere.',
+  ROLE_USERS_MANAGER: 'إدارة جميع المستخدمين على منصة Kube AI Hub.',
+  ROLE_WORKSPACES_MANAGER: 'إدارة جميع مساحات العمل على منصة Kube AI Hub.',
+  ROLE_PLATFORM_ADMIN: 'إدارة جميع الموارد على منصة Kube AI Hub.',
   ROLE_PLATFORM_REGULAR: 'لا يمكن الوصول إلى أي موارد قبل الانضمام إلى مساحة العمل.',
   ROLE_PLATFORM_SELF_PROVISIONER: 'Create workspaces and become an administrator of the created workspaces.',
   CREATION_TIME_TCAP: 'وقت الإنشاء',
@@ -59,7 +59,7 @@ module.exports = {
   // List > Create > Edit Permissions > Platform Settings
   PERMIGROUP_PLATFORM_SETTINGS: 'Platform Settings',
   PERMISSION_PLATFORM_SETTINGS_MANAGEMENT: 'Platform Settings Management',
-  PERMISSION_PLATFORM_SETTINGS_MANAGEMENT_DESC: 'View and edit settings of the KubeSphere platform.',
+  PERMISSION_PLATFORM_SETTINGS_MANAGEMENT_DESC: 'View and edit settings of the Kube AI Hub platform.',
   // List > Edit Information
   // List > Edit Permissions
   // List > Delete

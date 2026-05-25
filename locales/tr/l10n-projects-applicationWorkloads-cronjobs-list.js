@@ -26,7 +26,7 @@ module.exports = {
   // List > Create > Basic Information
   SCHEDULE: 'Planla',
   ENTER_SCHEDULE_TIP: 'Lütfen bir zamanlayıcı seçin.',
-  CRONJOB_CRON_DESC: 'Cronjob için bir zamanlama ayarlayın. KubeSphere varsayılan olarak UTC kullanır ve zaman diliminize göre zamanlamayı ayarlamanız gerekir. <a href="//en.wikipedia.org/wiki/Cron" target="_blank">Daha Fazla Bilgi Edinin</a>',
+  CRONJOB_CRON_DESC: 'Cronjob için bir zamanlama ayarlayın. Kube AI Hub varsayılan olarak UTC kullanır ve zaman diliminize göre zamanlamayı ayarlamanız gerekir. <a href="//en.wikipedia.org/wiki/Cron" target="_blank">Daha Fazla Bilgi Edinin</a>',
   // List > Create > Advanced settings
   MAXIMUM_DELAY: 'Maksimum Başlatma Gecikmesi (s)',
   SUCCESSFUL_JOBS_RETAINED: 'Başarılı İşler Tutuldu',

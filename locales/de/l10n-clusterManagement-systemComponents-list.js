@@ -19,10 +19,10 @@ module.exports = {
   // Banner
   SYSTEM_COMPONENT_PL: 'Systemkomponenten',
   SERVICE_COMPONENTS_DESC: 'Systemkomponenten sind Softwarekomponenten im Kube AI Hub-System, die verschiedene Funktionen bereitstellen. Auf dieser Seite können Sie den Ausführungsstatus von Dienstkomponenten ansehen.',
-  // KubeSphere
+  // Kube AI Hub
   STOPPED: 'Gestoppt',
   RUNNING_TIME: 'Laufzeit',
-  KS_CONSOLE_DESC: 'Stellt KubeSphere-Konsolendienste bereit.',
+  KS_CONSOLE_DESC: 'Stellt Kube AI Hub-Konsolendienste bereit.',
   KS_APISERVER_DESC: 'Stellt REST-APIs für die Clusterverwaltung bereit. Diese Komponente wird auch für die Kommunikation zwischen Cluster-Komponenten und der Cluster-Sicherheitssteuerung verwendet.',
   OPENLDAP_DESC: 'Speichert und verwaltet Benutzerinformationen auf zentrale Weise.',
   REDIS_DESC: 'Open-source, in-memory data structure store, which is used as a database, cache, and message broker.',

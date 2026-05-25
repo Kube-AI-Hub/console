@@ -48,7 +48,7 @@ module.exports = {
   S2I_TARGET_IMAGE_REPOSITORY_DESC: 'Oluşturulacak görüntüyü depolamak için bir görüntü kaydı seçin. Görüntü kaydı yoksa, bir görüntü kayıt defteri sırrı oluşturmanız gerekir. <br/><a href={link} target="_blank">Daha Fazla Bilgi Edinin</a>',
   TRIGGER_TOKEN: 'Tetik anahtarı',
   INVALID_TRIGGER_TOKEN_DESC: 'Geçersiz jeton. Belirteç yalnızca büyük harf, küçük harf ve sayı içerebilir.',
-  TRIGGER_TOKEN_DESC: 'KubeSphere\'e karşı bir istemcinin kimliğini doğrulamak için kullanılan bir belirteç ayarlayın. Bir istemciyi, bir web kancası üzerinden KubeSphere\'de görüntü oluşturmayı otomatik olarak tetikleyecek şekilde ayarlayabilirsiniz. Belirteç yalnızca büyük harf, küçük harf ve sayı içerebilir.',
+  TRIGGER_TOKEN_DESC: 'Kube AI Hub\'e karşı bir istemcinin kimliğini doğrulamak için kullanılan bir belirteç ayarlayın. Bir istemciyi, bir web kancası üzerinden Kube AI Hub\'de görüntü oluşturmayı otomatik olarak tetikleyecek şekilde ayarlayabilirsiniz. Belirteç yalnızca büyük harf, küçük harf ve sayı içerebilir.',
   CODE_RELATIVE_PATH: 'Göreceli Yol',
   CODE_RELATIVE_PATH_DESC: 'Kod deposundaki kodun göreli yolunu ayarlayın. Varsayılan yol /.',
   S2I_ENVIRONMENT_DESC: 'Görüntünün çalışma zamanı davranışını kontrol etmek için ortam değişkenlerini ayarlayın. <a href={link} target="_blank">Daha Fazla Bilgi Edinin</a>',

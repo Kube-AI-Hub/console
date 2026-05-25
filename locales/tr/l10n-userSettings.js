@@ -17,7 +17,7 @@
  */
 module.exports = {
   // Basic Information
-  EMAIL_DESC: 'E-posta adresi, KubeSphere web konsolunda oturum açmak için kullanılabilir.',
+  EMAIL_DESC: 'E-posta adresi, Kube AI Hub web konsolunda oturum açmak için kullanılabilir.',
   LANGUAGE: 'Dil',
   USER_SETTINGS: 'Kullanıcı Ayarları',
   CLOSE: 'Kapat',

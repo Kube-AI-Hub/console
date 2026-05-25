@@ -21,7 +21,7 @@ module.exports = {
   PREREQUESTS_FOR_USE_ROUTE_Q: '¿Cuales son los requisitos para poder usar rutas?',
   PREREQUESTS_FOR_USE_ROUTE_A: 'To use a route, the project administrator needs to set the gateway for the current project.',
   ACCESS_TYPES_OF_ROUTE_Q: '¿Qué tipos de acceso admite la ruta?',
-  ACCESS_TYPES_OF_ROUTE_A: 'Las rutas de KubeSphere admiten nombres de dominio personalizados (HostName) y así como wildcards DNS.',
+  ACCESS_TYPES_OF_ROUTE_A: 'Las rutas de Kube AI Hub admiten nombres de dominio personalizados (HostName) y así como wildcards DNS.',
   ROUTE_PL: 'Routes',
   // List
   GATEWAY_ADDRESS_TCAP: 'Dirección del gateway',

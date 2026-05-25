@@ -21,7 +21,7 @@ module.exports = {
   PREREQUESTS_FOR_USE_ROUTE_Q: 'What are the prerequisites for using routes?',
   PREREQUESTS_FOR_USE_ROUTE_A: 'To use routes, you need to contact the project administrator to set the gateway for the project.',
   ACCESS_TYPES_OF_ROUTE_Q: 'What are the external access modes of routes?',
-  ACCESS_TYPES_OF_ROUTE_A: 'KubeSphere routes support the NodePort and LoadBalancer external access modes.',
+  ACCESS_TYPES_OF_ROUTE_A: 'Kube AI Hub routes support the NodePort and LoadBalancer external access modes.',
   ROUTE_PL: 'Routes',
   // List
   GATEWAY_ADDRESS_TCAP: 'Gateway Address',

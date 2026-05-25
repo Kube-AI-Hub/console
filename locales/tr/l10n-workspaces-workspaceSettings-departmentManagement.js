@@ -46,7 +46,7 @@ module.exports = {
   PROJECT_ROLE: 'Proje Rolü',
   SELECT_ROLE_TIP: 'Lütfen rol seçiniz.',
   ADD_PROJECT: 'Proje Ekle',
-  CLUSTER_UPGRADE_REQUIRED: 'Mevcut KubeSphere sürümü bu fonksiyonu desteklememektedir. Lütfen KubeSphere {version} veya daha yüksek bir sürüme güncelleme yapınız.',
+  CLUSTER_UPGRADE_REQUIRED: 'Mevcut Kube AI Hub sürümü bu fonksiyonu desteklememektedir. Lütfen Kube AI Hub {version} veya daha yüksek bir sürüme güncelleme yapınız.',
   // List > Set Departments > DevOps Project Role
   DEVOPS_PROJECT_ROLE: 'DevOps Proje Rolü',
   ADD_DEVOPS_PROJECT: 'DevOps Projesi Ekle'

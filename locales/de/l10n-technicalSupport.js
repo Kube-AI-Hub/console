@@ -25,26 +25,26 @@ module.exports = {
   TICKET_SUPPORT: 'Ticket Support',
   TICKET_SUPPORT_DESC: 'Professional cloud-native development team and container service delivery team with more than 10 years of public and private cloud support experience and in-depth understanding of industries, providing comprehensive technical support including installation, troubleshooting, recovery, and other professional services.',
   CONTACT_US: 'Kontaktiere uns',
-  // KubeSphere Enterprise
-  KUBESPHERE_ENTERPRISE_CAPTION: 'KubeSphere Enterprise',
-  KUBE_SPHERE_ENTERPRISE_DESC: 'KubeSphere Enterprise is an enterprise-grade container platform developed by QingCloud based on the open-source KubeSphere platform. Compared with the open-source edition, KubeSphere Enterprise enhances capabilities for enterprise quantitative operations, large-scale cluster O&M, and security hardening, and extends multiple key features such as microservice governance and app management. The KubeSphere Enterprise Extension Marketplace provides enterprise-grade extensions to meet requirements of various business scenarios, with expert solutions and technical support from QingCloud.',
+  // Kube AI Hub Enterprise
+  KUBESPHERE_ENTERPRISE_CAPTION: 'Kube AI Hub Enterprise',
+  KUBE_SPHERE_ENTERPRISE_DESC: 'Kube AI Hub Enterprise is an enterprise-grade container platform developed by QingCloud based on the open-source Kube AI Hub platform. Compared with the open-source edition, Kube AI Hub Enterprise enhances capabilities for enterprise quantitative operations, large-scale cluster O&M, and security hardening, and extends multiple key features such as microservice governance and app management. The Kube AI Hub Enterprise Extension Marketplace provides enterprise-grade extensions to meet requirements of various business scenarios, with expert solutions and technical support from QingCloud.',
   KSE_FEATURE_1: 'Ermöglicht die digitale Transformation von Unternehmen hin zu quantitativen Abläufen',
   KSE_FEATURE_2: 'Verbessert den Betrieb und die Verwaltung von föderierten Clustern im großen Maßstab',
   KSE_FEATURE_3: 'Bietet Schutz über den gesamten Lebenszyklus',
   KSE_PLATFORM_VERSION: 'Plattformversion: <strong>{version}</strong>',
-  // KubeSphere Cloud
-  KUBESPHERE_CLOUD_CAPTION: 'KubeSphere Cloud',
-  KSC_FEATURE_BACKUP: 'KubeSphere Backup',
+  // Kube AI Hub Cloud
+  KUBESPHERE_CLOUD_CAPTION: 'Kube AI Hub Cloud',
+  KSC_FEATURE_BACKUP: 'Kube AI Hub Backup',
   KSC_FEATURE_BACKUP_APP_DESC: 'Datenschutz auf Anwendungsebene',
   KSC_FEATURE_BACKUP_DATA_DESC: 'Gesicherte Datenkonsistenz',
   KSC_FEATURE_BACKUP_CLOUD_DESC: 'Einheitliches Management über Clouds hinweg',
-  KSC_FEATURE_INSPECTION: 'KubeSphere Inspektion',
+  KSC_FEATURE_INSPECTION: 'Kube AI Hub Inspektion',
   KSC_FEATURE_INSPECTION_VULN_DESC: 'Umfassendes Scannen auf Schwachstellen',
   KSC_FEATURE_INSPECTION_SECURITY_DESC: 'Härtung der Systemsicherheit',
   KSC_FEATURE_INSPECTION_BEST_DESC: 'Best Practice Anleitung',
-  KSC_FEATURE_LIGHTWEIGHT: 'KubeSphere Lite',
+  KSC_FEATURE_LIGHTWEIGHT: 'Kube AI Hub Lite',
   KSC_FEATURE_LIGHTWEIGHT_START_DESC: 'Cluster Setup in Sekunden',
-  KSC_FEATURE_LIGHTWEIGHT_KS_DESC: 'Out-of-the-box KubeSphere Cluster',
+  KSC_FEATURE_LIGHTWEIGHT_KS_DESC: 'Out-of-the-box Kube AI Hub Cluster',
   KSC_FEATURE_LIGHTWEIGHT_TEST_DESC: 'Ideal zum Testen und Demonstrieren',
   START_NOW: 'Jetzt starten'
 };

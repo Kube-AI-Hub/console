@@ -29,7 +29,7 @@ module.exports = {
   PROJECT_ADMINISTRATOR_DESC: '選擇企業空間的用戶作為管理員。',
   PROJECT_ASSIGN_DESC: '項目一旦被分配到企業空間後將不允許修改企業空間',
   // List > Create
-  CREATE_PROJECT_DESC: 'KubeSphere 中的項目對應的是 Kubernetes 的 namespace，是對一組資源和對象的抽象集合，常用來將系統内部的對象劃分為不同的項目組或用戶組。',
+  CREATE_PROJECT_DESC: 'Kube AI Hub 中的項目對應的是 Kubernetes 的 namespace，是對一組資源和對象的抽象集合，常用來將系統内部的對象劃分為不同的項目組或用戶組。',
   PROJECT_NAME_DESC: '最長 63 個字元，只能包含小寫字母、數字及分隔符號("-")，且必須以小寫字母開頭, 字母或數字結尾',
   PROJECT_NAME_INVALID_DESC: '最長 63 個字元，只能包含小寫字母、數字及分隔符號("-")，且必須以小寫字母開頭, 字母或數字結尾',
   CANCEL: '取消',

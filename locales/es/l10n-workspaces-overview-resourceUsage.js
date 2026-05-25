@@ -19,7 +19,7 @@ module.exports = {
   // Banner
   OVERVIEW: 'Visión global',
   // Description
-  WORKSPACE_OVERVIEW_DESC: 'Workspace proporciona a KubeSphere una plataforma segura, aislada y accesible. Aquí puedes ver el estado de ejecución de los recursos en el espacio de trabajo actual.',
+  WORKSPACE_OVERVIEW_DESC: 'Workspace proporciona a Kube AI Hub una plataforma segura, aislada y accesible. Aquí puedes ver el estado de ejecución de los recursos en el espacio de trabajo actual.',
   // Statistics
   ROLE_PL: 'Roles',
   // Physical Resources

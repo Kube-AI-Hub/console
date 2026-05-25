@@ -19,10 +19,10 @@ module.exports = {
   // Banner
   SYSTEM_COMPONENT_PL: 'Sistem bileşenleri',
   SERVICE_COMPONENTS_DESC: 'Sistem bileşenleri, Kube AI Hub sistemindeki çeşitli işlevleri sağlayan yazılım bileşenleridir. Servis bileşenlerinin çalışma durumunu bu sayfada görüntüleyebilirsiniz.',
-  // KubeSphere
+  // Kube AI Hub
   STOPPED: 'Durduruldu',
   RUNNING_TIME: 'Çalışma süresi',
-  KS_CONSOLE_DESC: 'KubeSphere konsol hizmetleri sağlar.',
+  KS_CONSOLE_DESC: 'Kube AI Hub konsol hizmetleri sağlar.',
   KS_APISERVER_DESC: 'Küme yönetimi için REST API\'leri sağlar. Bu bileşen ayrıca küme bileşenleri ve küme güvenlik denetimi arasındaki iletişim için de kullanılır.',
   OPENLDAP_DESC: 'Kullanıcı bilgilerini merkezi bir şekilde depolar ve yönetir.',
   REDIS_DESC: 'Veritabanı, önbellek ve ileti aracısı olarak kullanılan açık kaynaklı, bellek içi veri yapısı deposu.',

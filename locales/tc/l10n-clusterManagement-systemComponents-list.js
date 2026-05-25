@@ -19,10 +19,10 @@ module.exports = {
   // Banner
   SYSTEM_COMPONENT_PL: '服務組件',
   SERVICE_COMPONENTS_DESC: '服務組件提供 Kube AI Hub、Kubernetes 和 OpenPitrix 集群内各項服務組件的健康狀態監控，可以查看目前集群的健康狀態和運行時間，能夠幫助用戶監測集群的狀況和即時定位問題。',
-  // KubeSphere
+  // Kube AI Hub
   STOPPED: 'Stopped',
   RUNNING_TIME: '運行時間',
-  KS_CONSOLE_DESC: '提供 KubeSphere 的控制台服務',
+  KS_CONSOLE_DESC: '提供 Kube AI Hub 的控制台服務',
   KS_APISERVER_DESC: '整個集群管理的 API 介面和集群内部各個模組之間通信的樞紐，以及集群安全控制',
   OPENLDAP_DESC: '負責集中儲存和管理用戶帳號資訊',
   REDIS_DESC: '將結構化的數據儲存在記憶體中的儲存系統',

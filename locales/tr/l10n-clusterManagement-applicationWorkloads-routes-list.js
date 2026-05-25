@@ -21,7 +21,7 @@ module.exports = {
   PREREQUESTS_FOR_USE_ROUTE_Q: 'Routerleri kullanmak için ön koşullar nelerdir?',
   PREREQUESTS_FOR_USE_ROUTE_A: 'Routerleri kullanmak için, proje için ağ geçidini ayarlamak üzere proje yöneticisiyle iletişime geçmeniz gerekir.',
   ACCESS_TYPES_OF_ROUTE_Q: 'Routerlerin harici erişim modları nelerdir?',
-  ACCESS_TYPES_OF_ROUTE_A: 'KubeSphere yolları, NodePort ve LoadBalancer harici erişim modlarını destekler.',
+  ACCESS_TYPES_OF_ROUTE_A: 'Kube AI Hub yolları, NodePort ve LoadBalancer harici erişim modlarını destekler.',
   ROUTE_PL: 'Routerler',
   // List
   GATEWAY_ADDRESS_TCAP: 'Ağ Geçidi Adresi',

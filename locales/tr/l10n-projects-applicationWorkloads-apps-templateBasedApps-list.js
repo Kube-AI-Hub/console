@@ -18,16 +18,16 @@
 module.exports = {
   // Banner
   TEMPLATE_BASED_APP_PL: 'Şablon Tabanlı Uygulamalar',
-  APPLICATIONS_DESC: 'Bir uygulama, kullanıcılara tek bir pakette kapsamlı iş işlevleri sağlar. KubeSphere\'deki uygulama şablonları, Helm paketleme spesifikasyonuna göre oluşturulmuştur. Birleşik bir genel veya özel Helm deposu aracılığıyla teslim edilirler. Bir uygulama, iş yükleri, hizmetler ve girişler dahil olmak üzere bir veya daha fazla Kubernetes nesnesinden oluşur.',
+  APPLICATIONS_DESC: 'Bir uygulama, kullanıcılara tek bir pakette kapsamlı iş işlevleri sağlar. Kube AI Hub\'deki uygulama şablonları, Helm paketleme spesifikasyonuna göre oluşturulmuştur. Birleşik bir genel veya özel Helm deposu aracılığıyla teslim edilirler. Bir uygulama, iş yükleri, hizmetler ve girişler dahil olmak üzere bir veya daha fazla Kubernetes nesnesinden oluşur.',
   APP_PL: 'Uygulamalar',
-  APP_TYPES_Q: 'KubeSphere hangi uygulama türlerini destekler?',
-  APP_TYPES_A: 'KubeSphere, şablon tabanlı uygulamaları ve oluşturulmuş uygulamaları destekler. Şablon tabanlı uygulamalar şuradan oluşturulur: Uygulamaları KubeSphere App Store\'dan veya bir uygulama şablonundan dağıtabilirsiniz. Oluşturulan uygulamalar kullanıcılar tarafından özelleştirilir.',
+  APP_TYPES_Q: 'Kube AI Hub hangi uygulama türlerini destekler?',
+  APP_TYPES_A: 'Kube AI Hub, şablon tabanlı uygulamaları ve oluşturulmuş uygulamaları destekler. Şablon tabanlı uygulamalar şuradan oluşturulur: Uygulamaları Kube AI Hub App Store\'dan veya bir uygulama şablonundan dağıtabilirsiniz. Oluşturulan uygulamalar kullanıcılar tarafından özelleştirilir.',
   HOW_TO_USE_APP_GOVERN_Q: 'Uygulama Yönetimini nasıl kullanırım?',
   HOW_TO_USE_APP_GOVERN_A: 'Oluşturulan bir uygulama oluşturduğunuzda Uygulama Yönetimini etkinleştirebilirsiniz.',
   DEPLOY_SAMPLE_APP: 'Örnek Uygulamayı Dağıt',
   // List
   NO_TEMPLATE_BASED_APP_FOUND: 'Şablon Tabanlı Uygulama Bulunamadı',
-  TEMPLATE_BASED_APP_EMPTY_DESC: 'Lütfen KubeSphere App Store\'dan bir uygulama veya bir uygulama şablonu oluşturun.',
+  TEMPLATE_BASED_APP_EMPTY_DESC: 'Lütfen Kube AI Hub App Store\'dan bir uygulama veya bir uygulama şablonu oluşturun.',
   APP: 'Uygulama',
   VERSION: 'Versiyon',
   CREATING: 'Oluşturuluyor',
@@ -35,10 +35,10 @@ module.exports = {
   DELETING: 'Siliniyor',
   // List > Create
   CREATE_APP: 'Uygulama oluştur',
-  CREATE_APP_DESC: 'KubeSphere App Store\'dan veya bir uygulama şablonundan bir uygulama oluşturun.',
+  CREATE_APP_DESC: 'Kube AI Hub App Store\'dan veya bir uygulama şablonundan bir uygulama oluşturun.',
   FROM_APP_STORE: 'Uygulama Mağazasından',
   FROM_APP_TEMPLATE: 'Uygulama Şablonundan',
-  FROM_APP_STORE_DESC: 'KubeSphere App Store\'dan bir uygulama oluşturun.',
+  FROM_APP_STORE_DESC: 'Kube AI Hub App Store\'dan bir uygulama oluşturun.',
   // List > Create > From App Template
   SELECT_APP_REPOSITORY: 'Bir uygulama deposu seçin',
   CURRENT_WORKSPACE: 'Mevcut çalışma alanı',

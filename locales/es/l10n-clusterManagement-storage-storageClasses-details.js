@@ -22,12 +22,12 @@ module.exports = {
   // More > Set as Default Storage Class
   SET_DEFAULT_STORAGE_CLASS_TITLE: 'Set as Default Storage Class',
   SET_AS_DEFAULT_STORAGE_CLASS: 'Set as Default Storage Class',
-  STORAGE_CLASS_SET_DEFAULT_DESC: 'Una vez establecida la clase de almacenamiento predeterminada, el sistema creará volúmenes de esta clase de forma predeterminada si no se agrega ningún requisito especial. Solo se permite una clase de almacenamiento predeterminada en un clúster de KubeSphere.',
+  STORAGE_CLASS_SET_DEFAULT_DESC: 'Una vez establecida la clase de almacenamiento predeterminada, el sistema creará volúmenes de esta clase de forma predeterminada si no se agrega ningún requisito especial. Solo se permite una clase de almacenamiento predeterminada en un clúster de Kube AI Hub.',
   // More > Edit Authorization Rules
   SET_AUTHORIZATION_RULES: 'Set Authorization Rules',
   AUTHORIZATION_RULES: 'Authorization Rules',
   AUTHORIZATION_RULES_DESC: 'Set authorization rules so that the storage class can be accessed only in specific projects and workspaces.',
-  AUTHORIZATION_NOT_SUPPORT: 'The cluster currently does not support this feature. Please upgrade KubeSphere to v3.3.0 or later, or manually install <a href="https://github.com/kubesphere/storageclass-accessor" target="_blank">storageclass-accessor</a>.',
+  AUTHORIZATION_NOT_SUPPORT: 'The cluster currently does not support this feature. Please upgrade Kube AI Hub to v3.3.0 or later, or manually install <a href="https://github.com/kubesphere/storageclass-accessor" target="_blank">storageclass-accessor</a>.',
   OPERATOR_IN: 'En',
   OPERATOR_NOT_IN: 'Not in',
   // More > Set Volume Permissions

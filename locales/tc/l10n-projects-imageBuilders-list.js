@@ -48,7 +48,7 @@ module.exports = {
   S2I_TARGET_IMAGE_REPOSITORY_DESC: '選擇一個有鏡像倉庫推送權限的保密字典，如果沒有可以<a href={link} target="_blank">新建鏡像倉庫保密字典</a>。',
   TRIGGER_TOKEN: '觸發令牌',
   INVALID_TRIGGER_TOKEN_DESC: '只能包含大小寫字母、數字',
-  TRIGGER_TOKEN_DESC: 'Set a token used to authenticate a client against KubeSphere when the client attempts to trigger image building on KubeSphere. The token can contain only uppercase letters, lowercase letters, and numbers.',
+  TRIGGER_TOKEN_DESC: 'Set a token used to authenticate a client against Kube AI Hub when the client attempts to trigger image building on Kube AI Hub. The token can contain only uppercase letters, lowercase letters, and numbers.',
   CODE_RELATIVE_PATH: '代碼相對路徑(可選):',
   CODE_RELATIVE_PATH_DESC: '可以指定代碼編譯的相對路徑，預設為 /',
   S2I_ENVIRONMENT_DESC: '應用程式開發人員可以使用環境變量來配置此鏡像的運行時行為；詳細的配置說明請查看 <a href={link} target="_blank">編譯模板</a>。',

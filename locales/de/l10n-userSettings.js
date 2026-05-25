@@ -17,7 +17,7 @@
  */
 module.exports = {
   // Basic Information
-  EMAIL_DESC: 'Die E-Mail-Adresse kann verwendet werden, um sich auf der KubeSphere Web-Konsole anzumelden.',
+  EMAIL_DESC: 'Die E-Mail-Adresse kann verwendet werden, um sich auf der Kube AI Hub Web-Konsole anzumelden.',
   LANGUAGE: 'Sprache',
   USER_SETTINGS: 'Benutzereinstellungen',
   CLOSE: 'Schließen',

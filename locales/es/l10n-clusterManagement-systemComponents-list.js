@@ -19,10 +19,10 @@ module.exports = {
   // Banner
   SYSTEM_COMPONENT_PL: 'Componentes',
   SERVICE_COMPONENTS_DESC: 'Este módulo monitorea el estado de varios componentes del servicio en Kube AI Hub, Kubernetes, OpenPitrix, etc. Muestra el estado de mantenimiento y el tiempo de ejecución del clúster actual, y ayuda a los usuarios a monitorear el estado del clúster y localizar problemas a tiempo.',
-  // KubeSphere
+  // Kube AI Hub
   STOPPED: 'Stopped',
   RUNNING_TIME: 'Tiempo de ejecución',
-  KS_CONSOLE_DESC: 'Proporciona servicios de consola para KubeSphere.',
+  KS_CONSOLE_DESC: 'Proporciona servicios de consola para Kube AI Hub.',
   KS_APISERVER_DESC: 'Sirve los puntos finales API REST y proporciona la interfaz para el estado compartido del clúster a través del cual interactúan todos los demás componentes, así como el control de seguridad del clúster',
   OPENLDAP_DESC: 'Responsable del almacenamiento centralizado y la gestión de la información de la cuenta del usuario.',
   REDIS_DESC: 'Responsable del almacén de estructura de datos en memoria, utilizado como base de datos, caché y agente de mensajes',

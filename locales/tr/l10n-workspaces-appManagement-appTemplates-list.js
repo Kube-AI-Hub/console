@@ -21,7 +21,7 @@ module.exports = {
   APPS_MANAGEMENT: 'Uygulama Yönetimi',
   UPLOAD_TEMPLATE: 'Şablonu Yükleyin',
   APP_TEMPLATE_DESC: 'Kubesphere, uygulamanız için tam kapsamlı yaşam döngüsü yönetimi sağlar. Uygulama şablonları yükleyebilir, yeni şablonlar oluşturabilir ve bunları hızlıca test edebilirsiniz. Ek olarak, uygulamalarınızı App Store\'a yükleyebilir ve diğer kullanıcıların da bir tık ile kullanmaya başlamalarını sağlayabilirsiniz.',
-  DEVELOP_APP_DESC: 'Uygulama şablonları geliştirmek için Helm çizelgeleri yükleyebilir veya KubeSphere tarafından sağlanan kaynak orkestrasyon aracını kullanabilirsiniz.',
+  DEVELOP_APP_DESC: 'Uygulama şablonları geliştirmek için Helm çizelgeleri yükleyebilir veya Kube AI Hub tarafından sağlanan kaynak orkestrasyon aracını kullanabilirsiniz.',
   DEVELOP_APP_TITLE: 'Uygulama şablonlarını nasıl oluşturabilirim?',
   HOW_PUBLISH_APP_TITLE: 'Uygulamaları App Store\'a nasıl yayınlayabilirim?',
   HOW_PUBLISH_APP_DESC: 'Uygulama şablonu olarak Help çizelgelerini çalışma alanına yükleyebilirsiniz. Bu uygulamalar, onaylandıktan sonra App Store\'a yayınlanacaktır.',
