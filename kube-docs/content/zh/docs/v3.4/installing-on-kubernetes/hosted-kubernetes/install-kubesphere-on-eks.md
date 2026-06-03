@@ -157,7 +157,7 @@ aws-cli/2.1.2 Python/3.7.3 Linux/4.18.0-193.6.3.el8_2.x86_64 exe/x86_64.centos.8
       are ready.
     2. Please modify the default password after login.
   #####################################################
-  https://kubesphere.io             2020-xx-xx xx:xx:xx
+  https://www.watering.ai/          2020-xx-xx xx:xx:xx
   ```
 
 ## 访问 Kube AI Hub 控制台

@@ -302,7 +302,7 @@ NOTES：
   2. Please change the default password after login.
 
 #####################################################
-https://kubesphere.io             2020-08-28 01:25:54
+https://www.watering.ai/          2020-08-28 01:25:54
 #####################################################
 ```
 

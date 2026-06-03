@@ -321,7 +321,7 @@ NOTES：
      are up and running.
   2. Please change the default password after login.
 #####################################################
-https://kubesphere.io             20xx-xx-xx xx:xx:xx
+https://www.watering.ai/          20xx-xx-xx xx:xx:xx
 #####################################################
 ```
 

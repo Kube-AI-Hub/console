@@ -99,7 +99,7 @@ This guide walks you through the steps of deploying Kube AI Hub on [Oracle Kuber
     2. Please modify the default password after login.
 
   #####################################################
-  https://kubesphere.io             20xx-xx-xx xx:xx:xx
+  https://www.watering.ai/          20xx-xx-xx xx:xx:xx
   ```
 
 ## Access Kube AI Hub Console

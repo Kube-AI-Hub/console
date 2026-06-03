@@ -409,6 +409,6 @@ After you complete the configuration, you can execute the following command to s
      2. Please change the default password after login.
    
    #####################################################
-   https://kubesphere.io             2020-xx-xx xx:xx:xx
+   https://www.watering.ai/          2020-xx-xx xx:xx:xx
    #####################################################
    ```

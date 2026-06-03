@@ -59,7 +59,7 @@ This guide walks you through the steps of deploying Kube AI Hub on [Google Kuber
 
   ```yaml
   #####################################################
-  ###              Welcome to Kube AI Hub!           ###
+  ###              Welcome to Kube AI Hub!          ###
   #####################################################
   Console: http://10.128.0.44:30880
   Account: admin
@@ -72,7 +72,7 @@ This guide walks you through the steps of deploying Kube AI Hub on [Google Kuber
       are ready.
     2. Please modify the default password after login.
   #####################################################
-  https://kubesphere.io             2020-xx-xx xx:xx:xx
+  https://www.watering.ai/          2020-xx-xx xx:xx:xx
   ```
 
 ## Access Kube AI Hub Console

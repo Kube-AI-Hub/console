@@ -202,7 +202,7 @@ NOTES：
     are ready.
   2. Please modify the default password after login.
 #####################################################
-https://kubesphere.io             2020-xx-xx xx:xx:xx
+https://www.watering.ai/          2020-xx-xx xx:xx:xx
 ```
 
 ## 访问 Kube AI Hub 控制台

@@ -312,7 +312,7 @@ NOTES：
   2. Please change the default password after login.
 
 #####################################################
-https://kubesphere.io             2020-08-13 10:50:24
+https://www.watering.ai/          2020-08-13 10:50:24
 #####################################################
 ```
 

@@ -579,7 +579,7 @@ KubeKey v2.1.0 版本新增了清单（manifest）和制品（artifact）的概�
       1. Please change the default password after login.
       
       #####################################################
-      https://kubesphere.io             2022-02-28 23:30:06
+      https://www.watering.ai/          2022-02-28 23:30:06
       #####################################################
       ```
 

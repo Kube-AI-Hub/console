@@ -250,7 +250,7 @@ are up and running.
 2. Please change the default password after login.
 
 #####################################################
-https://kubesphere.io             2020-08-24 23:30:06
+https://www.watering.ai/          2020-08-24 23:30:06
 #####################################################
 ```
 

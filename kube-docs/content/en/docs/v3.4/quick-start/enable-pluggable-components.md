@@ -134,7 +134,7 @@ You can find the web kubectl tool by clicking the hammer icon in the bottom-righ
       2. Please change the default password after login.
     
     #####################################################
-    https://kubesphere.io             20xx-xx-xx xx:xx:xx
+    https://www.watering.ai/          20xx-xx-xx xx:xx:xx
     #####################################################
     ```
 

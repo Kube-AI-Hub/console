@@ -599,7 +599,7 @@ In KubeKey v2.1.0, we bring in concepts of manifest and artifact, which provides
    1. Please change the default password after login.
 
    #####################################################
-   https://kubesphere.io             2022-02-28 23:30:06
+   https://www.watering.ai/          2022-02-28 23:30:06
    #####################################################
    ```
 

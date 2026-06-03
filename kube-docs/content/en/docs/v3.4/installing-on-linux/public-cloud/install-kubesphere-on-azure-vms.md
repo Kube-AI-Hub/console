@@ -249,7 +249,7 @@ Azure Virtual Network doesn't support the IPIP mode used by [Calico](https://doc
         are up and running.
      2. Please change the default password after login.
    #####################################################
-   https://kubesphere.io             2020-xx-xx xx:xx:xx
+   https://www.watering.ai/          2020-xx-xx xx:xx:xx
    ```
 
 4. Access the Kube AI Hub console using `<NodeIP>:30880` with the default account and password (`admin/P@88w0rd`).
