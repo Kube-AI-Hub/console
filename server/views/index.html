@@ -9,11 +9,20 @@
     />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title><%= title %></title>
-    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/assets/favicon.svg?v=cma1" type="image/svg+xml" />
     <style>
       <%- include('../public/variables.css') %>
       <%- include('../public/loading.css') %>
     </style>
+    <% if (typeof loginSkin !== 'undefined' && loginSkin) { %>
+    <style id="login-skin-boot">
+      html,
+      body,
+      .loadBox {
+        background-color: #e8f4fc !important;
+      }
+    </style>
+    <% } %>
     <% if (manifest && manifest.assets && manifest.assets.css && manifest.assets.css.length > 0) { %>
       <% manifest.assets.css.forEach(function(item){ %>
         <link href="<%= bundlePrefix %>/<%= item %>" rel="stylesheet" media="all" />

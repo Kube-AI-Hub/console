@@ -59,7 +59,7 @@ class PasswordConfirm extends Component {
         },
       ])
       .then(() => {
-        this.props.rootStore.routing.push('/')
+        window.location.assign('/platform-model/notebooks')
       })
   }
 
@@ -72,7 +72,7 @@ class PasswordConfirm extends Component {
         },
       ])
       .then(() => {
-        this.props.rootStore.routing.push('/')
+        window.location.assign('/platform-model/notebooks')
       })
   }
 

@@ -1,12 +1,21 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en" class="cma-nb-theme">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><%= title %></title>
     <meta name="keywords" content="行业大模型、算力平台、Huggingface、开源社区、数据集、开源代码、算力租赁" />
     <meta name="description" content="行业大模型平台：让大模型赋能每一个人。" />
-    <link rel="shortcut icon" href="/platform-model/images/favicon.svg" />
+    <link rel="shortcut icon" href="/platform-model/images/favicon.svg?v=cma1" />
+    <style>
+      /* Avoid dark FOUC before CSS/JS hydrate CMA light theme */
+      html,
+      body,
+      #app {
+        background-color: #f2f3f5;
+        color: #333;
+      }
+    </style>
     <script>
       const CSGHUB_SERVER = "";
       const DEFAULT_TAGS = "[]";
@@ -16,7 +25,7 @@
     </script>
     <%- assetsHtml %>
   </head>
-  <body>
+  <body class="cma-nb-theme">
     <div id="app" class="flex flex-col min-h-screen">
       <div class="grow">
         <navbar v-if="!$route.meta.hideMainNavbar"></navbar>

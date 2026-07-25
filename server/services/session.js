@@ -304,6 +304,15 @@ const getClusterRole = async ctx => {
         ['host', 'member'].indexOf(clusterRole) === -1 ? 'host' : clusterRole
     }
   } catch (error) {
+    // 普通用户无权限读该 ConfigMap，默认 host 即可，避免刷 403 日志
+    if (
+      error &&
+      (error.code === 403 ||
+        error.status === 403 ||
+        error.reason === 'Forbidden')
+    ) {
+      return role
+    }
     console.error(error)
   }
 
