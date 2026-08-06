@@ -92,7 +92,7 @@ const setLocaleCookie = locale => async ctx => {
 const renderCsgHub = async ctx => {
   const config = getCsgHubConfig()
   await ctx.render('csghub', {
-    title: 'CloudIDE',
+    title: '行业大模型平台',
     assetsHtml: getCsgHubAssetTags(),
     onPremise: config.onPremise !== false,
     enableHttps: Boolean(config.enableHttps),

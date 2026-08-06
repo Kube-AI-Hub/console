@@ -91,20 +91,16 @@ const renderView = async ctx => {
 const renderLogin = async ctx => {
   const oauthServers = await getOAuthInfo(ctx)
 
-  await renderIndex(
-    ctx,
-    {
-      oauthServers: oauthServers || [],
-    },
-    { loginSkin: true }
-  )
+  await renderIndex(ctx, {
+    oauthServers: oauthServers || [],
+  })
 }
 
 const renderLoginConfirm = async ctx => {
-  await renderIndex(ctx, {}, { loginSkin: true })
+  await renderIndex(ctx, {})
 }
 
-const renderIndex = async (ctx, params, options = {}) => {
+const renderIndex = async (ctx, params) => {
   const manifest = getManifest('main')
   const localeManifest = getLocaleManifest()
 
@@ -113,7 +109,6 @@ const renderIndex = async (ctx, params, options = {}) => {
     isDev: global.MODE_DEV,
     title: clientConfig.title,
     hostname: ctx.hostname,
-    loginSkin: !!options.loginSkin,
     globals: JSON.stringify({
       config: clientConfig,
       localeManifest,

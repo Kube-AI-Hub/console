@@ -60,7 +60,7 @@ server:
   dockerHubUrl: https://hub.docker.com
 
 client:
-  title: CloudIDE
+  title: Kube AI Hub
   description: ""
   encryptKey: kubesphere
 

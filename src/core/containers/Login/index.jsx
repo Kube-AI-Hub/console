@@ -101,8 +101,6 @@ class Login extends Component {
   }
 
   componentDidMount() {
-    this.applyLoginSkin()
-
     const params = new URLSearchParams(window.location.search)
     const jwtFromURL = params.get('jwt')
     const clientId = params.get('client_id')
@@ -117,9 +115,7 @@ class Login extends Component {
       // Clean up URL by removing jwt parameter
       params.delete('jwt')
       const newSearch = params.toString()
-      const newURL = newSearch
-        ? `${window.location.pathname}?${newSearch}`
-        : window.location.pathname
+      const newURL = newSearch ? `${window.location.pathname}?${newSearch}` : window.location.pathname
       window.history.replaceState({}, '', newURL)
     }
 
@@ -140,26 +136,6 @@ class Login extends Component {
     }
   }
 
-  componentWillUnmount() {
-    this.clearLoginSkin()
-  }
-
-  applyLoginSkin = () => {
-    document.documentElement.style.backgroundColor = '#e8f4fc'
-    document.body.style.backgroundColor = '#e8f4fc'
-    const boot = document.getElementById('login-skin-boot')
-    if (boot) {
-      boot.remove()
-    }
-  }
-
-  clearLoginSkin = () => {
-    // Keep CMA light bg while leaving login — clearing would flash Console
-    // default body color (#14215a purple/navy) before the next page paints.
-    document.documentElement.style.backgroundColor = '#f2f3f5'
-    document.body.style.backgroundColor = '#f2f3f5'
-  }
-
   callOAuthAuthorize = (oauthParams, token) => {
     if (!oauthParams || !token) {
       return
@@ -173,7 +149,7 @@ class Login extends Component {
       client_id: oauthParams.client_id,
       redirect_uri: oauthParams.redirect_uri,
       response_type: oauthParams.response_type,
-      token, // Pass token via query parameter for console server to extract
+      token: token, // Pass token via query parameter for console server to extract
     })
     if (oauthParams.scope) {
       params.append('scope', oauthParams.scope)
@@ -206,16 +182,7 @@ class Login extends Component {
   navigateAfterLogin = resp => {
     const params = new URLSearchParams(window.location.search)
     const referer = params.get('referer')
-    let target = resp.redirectUrl || referer || '/platform-model/notebooks'
-
-    // CloudIDE: never land on KS Console `/` (flashes dark #14215a)
-    if (!target || target === '/') {
-      target = '/platform-model/notebooks'
-    }
-
-    // Hold light page bg across handoff to notebooks
-    document.documentElement.style.backgroundColor = '#f2f3f5'
-    document.body.style.backgroundColor = '#f2f3f5'
+    const target = resp.redirectUrl || referer || '/'
 
     if (pathRequiresDocumentNavigation(target)) {
       window.location.assign(target)
@@ -236,7 +203,7 @@ class Login extends Component {
       const accessToken = resp.access_token
       // Parse token to extract user info
       const userInfo = parseToken(accessToken)
-
+      
       if (!userInfo) {
         this.setState({
           isSubmmiting: false,
@@ -266,13 +233,13 @@ class Login extends Component {
         window.location.href = '/password/confirm'
         return
       }
-
+        
       // 检查是否有 OAuth 参数需要继续授权流程
       if (this.state.oauthParams) {
         this.callOAuthAuthorize(this.state.oauthParams, accessToken)
         return
       }
-
+        
       // 正常登录成功，先加载会话上下文，再跳转
       loadSessionContext()
         .then(() => {
@@ -315,7 +282,7 @@ class Login extends Component {
         this.callOAuthAuthorize(this.state.oauthParams, resp.token)
         return
       }
-
+        
       loadSessionContext()
         .then(() => {
           this.setState({ isSubmmiting: false })
@@ -335,11 +302,7 @@ class Login extends Component {
     // 登录失败
     this.setState({
       isSubmmiting: false,
-      errorMessage:
-        resp?.error_description ||
-        resp?.message ||
-        resp?.error ||
-        'LOGIN_FAILED',
+      errorMessage: resp?.error_description || resp?.message || resp?.error || 'LOGIN_FAILED',
       errorCount: resp?.errorCount || 0,
     })
   }
@@ -351,11 +314,11 @@ class Login extends Component {
       event.stopPropagation()
     }
 
-    const { username, password } = data
+    const { username, password, ...rest } = data
     const { showKS, currentServer } = this.state
-
+    
     // 清空之前的错误信息
-    this.setState({
+    this.setState({ 
       isSubmmiting: true,
       errorMessage: '',
       errorCount: 0,
@@ -395,11 +358,7 @@ class Login extends Component {
           console.error('Login error:', err)
           this.setState({
             isSubmmiting: false,
-            errorMessage:
-              err.message ||
-              err.error_description ||
-              err.error ||
-              'LOGIN_FAILED',
+            errorMessage: err.message || err.error_description || err.error || 'LOGIN_FAILED',
             errorCount: 0,
           })
         })
@@ -425,110 +384,86 @@ class Login extends Component {
       isCallingOAuth,
     } = this.state
 
-    const brandTitle = get(globals, 'config.title', 'CloudIDE')
-    const oauthServers = showKS ? get(globals, 'oauthServers', []) : []
-
-    const renderShell = content => (
-      <div className={styles.page}>
-        <div className={styles.bgGlow} aria-hidden="true" />
-        <div className={styles.bgOrbOne} aria-hidden="true" />
-        <div className={styles.bgOrbTwo} aria-hidden="true" />
-        <div className={styles.stage}>
-          <div className={styles.hero}>
-            <h1 className={styles.heroTitle}>{brandTitle}</h1>
-            <p className={styles.heroDesc}>一站式云端开发环境</p>
-          </div>
-          <div className={styles.loginContainer}>
-            <div className={styles.login}>{content}</div>
+    if (isCallingOAuth) {
+      return (
+        <div className={styles.loginContainer}>
+          <div className={styles.login}>
+            <div className={styles.header}>{t('AUTHORIZING')}</div>
+            <div className={styles.divider}></div>
+            <div style={{ textAlign: 'center', padding: '20px' }}>
+              {t('AUTHORIZING_DESC')}
+            </div>
           </div>
         </div>
-      </div>
-    )
-
-    if (isCallingOAuth) {
-      return renderShell(
-        <>
-          <div className={styles.header}>{t('AUTHORIZING')}</div>
-          <div className={styles.divider}></div>
-          <div
-            style={{
-              textAlign: 'center',
-              padding: '12px 0 4px',
-              color: '#6b7280',
-            }}
-          >
-            {t('AUTHORIZING_DESC')}
-          </div>
-        </>
       )
     }
 
-    return renderShell(
-      <>
-        <div className={styles.header}>
-          {showKS
-            ? t('WELCOME')
-            : t('TITLE_USERNAME', { title: currentServer.title })}
-        </div>
-        <div className={styles.divider}></div>
-        {oauthServers.map(server => (
-          <div
-            key={server.url}
-            className={styles.oauth}
-            data-url={server.url}
-            onClick={this.handleOAuthLogin(server)}
-          >
-            <span>{t('LOG_IN_WITH_TITLE', { title: server.title })}</span>
+    return (
+      <div className={styles.loginContainer}>
+        <div className={styles.login}>
+          <div className={styles.header}>
+            {showKS
+              ? t('WELCOME')
+              : t('TITLE_USERNAME', { title: currentServer.title })}
           </div>
-        ))}
-        {oauthServers.length > 0 && (
-          <div className={styles.sep}>或使用账号密码</div>
-        )}
-        {errorMessage && (
-          <Alert
-            className="margin-t12 margin-b12"
-            type="error"
-            message={t(errorMessage)}
-          />
-        )}
-        <Form data={formData} onSubmit={this.handleSubmit}>
-          <Form.Item
-            label={
-              showKS
-                ? t('USERNAME_OR_EMAIL')
-                : t('TITLE_USERNAME', { title: currentServer.title })
-            }
-            rules={[
-              {
-                required: true,
-                message: t('INPUT_USERNAME_OR_EMAIL_TIP'),
-              },
-            ]}
-          >
-            <Input name="username" />
-          </Form.Item>
-          <Form.Item
-            label={t('PASSWORD')}
-            rules={[{ required: true, message: t('PASSWORD_EMPTY_DESC') }]}
-          >
-            <InputPassword
-              name="password"
-              placeholder=" "
-              autoComplete="new-password"
+          <div className={styles.divider}></div>
+          {showKS &&
+            get(globals, 'oauthServers', []).map(server => (
+              <div
+                key={server.url}
+                className={styles.oauth}
+                data-url={server.url}
+                onClick={this.handleOAuthLogin(server)}
+              >
+                <span>{t('LOG_IN_WITH_TITLE', { title: server.title })}</span>
+              </div>
+            ))}
+          {errorMessage && (
+            <Alert
+              className="margin-t12 margin-b12"
+              type="error"
+              message={t(errorMessage)}
             />
-          </Form.Item>
-          <div className={styles.footer}>
-            <Button type="control" htmlType="submit" loading={isSubmmiting}>
-              {t('LOG_IN')}
-            </Button>
-            {!showKS && (
-              <p className={styles.back} onClick={this.handleBack}>
-                {t('BACK')}
-              </p>
-            )}
-          </div>
-        </Form>
-      </>
+          )}
+          <Form data={formData} onSubmit={this.handleSubmit}>
+            <Form.Item
+              label={
+                showKS
+                  ? t('USERNAME_OR_EMAIL')
+                  : t('TITLE_USERNAME', { title: currentServer.title })
+              }
+              rules={[
+                {
+                  required: true,
+                  message: t('INPUT_USERNAME_OR_EMAIL_TIP'),
+                },
+              ]}
+            >
+              <Input name="username" placeholder="user@example.com" />
+            </Form.Item>
+            <Form.Item
+              label={t('PASSWORD')}
+              rules={[{ required: true, message: t('PASSWORD_EMPTY_DESC') }]}
+            >
+              <InputPassword
+                name="password"
+                placeholder=" "
+                autoComplete="new-password"
+              />
+            </Form.Item>
+            <div className={styles.footer}>
+              <Button type="control" htmlType="submit" loading={isSubmmiting}>
+                {t('LOG_IN')}
+              </Button>
+              {!showKS && (
+                <p className={styles.back} onClick={this.handleBack}>
+                  {t('BACK')}
+                </p>
+              )}
+            </div>
+          </Form>
+        </div>
+      </div>
     )
   }
 }

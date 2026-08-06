@@ -6,18 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title><%= title %> - OAuth Login</title>
-    <link rel="icon" href="/assets/favicon.svg?v=cma1" type="image/svg+xml" />
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
     <style>
         <%- include('../public/variables.css') %>
         <%- include('../public/loading.css') %>
-    </style>
-    <style id="login-skin-boot">
-        /* Avoid Console dark FOUC (#14215a) between OAuth callback and notebooks */
-        html,
-        body,
-        .loadBox {
-            background-color: #f2f3f5 !important;
-        }
     </style>
 </head>
 
@@ -62,14 +54,7 @@
                     return;
                 }
 
-                const redirectUrl = data.redirectUrl
-                if (redirectUrl) {
-                    window.location.href = redirectUrl
-                    return
-                }
-
-                // 本地调试：任意角色登录后都进 CSGHub 开发环境
-                window.location.href = '/platform-model/notebooks';
+                window.location.href = data.redirectUrl || '/';
             } catch (error) {
                 console.error('OAuth callback error:', error);
                 alert('Authentication failed: ' + error.message);

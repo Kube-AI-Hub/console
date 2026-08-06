@@ -277,23 +277,20 @@ const handleOAuthCallback = async ctx => {
       return
     }
 
-    // Parse redirect URL from state or query parameter.
-    // CMA 等 IdP 的 state 常为纯文本（如 "cma"），不是 base64 JSON，勿强制解析。
+    // Parse redirect URL from state or query parameter
     let redirectUrl = null
     const state = ctx.query.state
     const redirect_url = ctx.query.redirect_url
 
     if (state) {
       try {
-        const decoded = base64_url_decode(state)
-        if (decoded && (decoded.startsWith('{') || decoded.startsWith('['))) {
-          const state_object = JSON.parse(decoded)
-          if (state_object.redirect_url) {
-            redirectUrl = state_object.redirect_url
-          }
+        const state_object = JSON.parse(base64_url_decode(state))
+        if (state_object.redirect_url) {
+          redirectUrl = state_object.redirect_url
         }
       } catch (err) {
-        // ignore non-JSON state
+        /* eslint-disable no-console */
+        console.log(err)
       }
     }
 
@@ -304,7 +301,7 @@ const handleOAuthCallback = async ctx => {
           redirectUrl = redirect_url
         }
       } catch (err) {
-        // ignore invalid redirect_url
+        console.log(err)
       }
     }
 
