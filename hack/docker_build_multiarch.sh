@@ -62,7 +62,10 @@ docker rmi ks-console-pre:"${TAG}" -f
 docker rm predbuild
 
 # delete the folder in ./out
-rm -rf ./out
+if ! rm -rf ./out; then
+  sleep 1
+  rm -rf ./out || echo "WARNING: failed to remove ./out; it will be cleaned before the next build"
+fi
 
 # delete staged CSGHub frontend assets
 rm -rf ./.build/csghub
