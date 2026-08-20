@@ -62,7 +62,14 @@ const config = smp.wrap({
             loader: 'postcss-loader',
             options: baseConfig.postCssOptions,
           },
-          { loader: 'sass-loader' },
+          {
+            loader: 'sass-loader',
+            options: {
+              sassOptions: {
+                charset: false,
+              },
+            },
+          },
         ],
       },
       {
@@ -71,7 +78,14 @@ const config = smp.wrap({
         use: [
           MiniCssExtractPlugin.loader,
           'css-loader',
-          'sass-loader',
+          {
+            loader: 'sass-loader',
+            options: {
+              sassOptions: {
+                charset: false,
+              },
+            },
+          },
         ],
       },
       {

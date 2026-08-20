@@ -18,8 +18,9 @@ RUN yarn config set registry https://registry.npmmirror.com
 
 # Install dependencies to reduce build time
 ADD package.json /kubesphere/package.json
+ADD yarn.lock /kubesphere/yarn.lock
 ADD packages/ /kubesphere/packages/
-RUN yarn install
+RUN yarn install --frozen-lockfile
 
 ADD . /kubesphere/
 
@@ -27,7 +28,7 @@ ADD . /kubesphere/
 # RUN yarn config set registry https://registry.npmmirror.com or https://r.cnpmjs.org/
 
 # ADD . 后需 yarn install 以安装 workspaces；只跑 yarn build，避免重复 install 和重复 storybook:build
-RUN yarn install && yarn build
+RUN yarn install --frozen-lockfile && yarn build
 
 # Copy compiled files
 RUN mkdir -p /out/server

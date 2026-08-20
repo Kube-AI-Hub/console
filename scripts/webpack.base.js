@@ -126,6 +126,7 @@ module.exports = {
           loader: 'sass-loader',
           options: {
             sassOptions: {
+              charset: false,
               quietDeps: true,
               sourceMap: true,
             },
@@ -156,6 +157,7 @@ module.exports = {
           loader: 'sass-loader',
           options: {
             sassOptions: {
+              charset: false,
               quietDeps: true,
               sourceMap: true,
               logger: require('sass').Logger.silent // 完全静默
@@ -193,6 +195,7 @@ module.exports = {
           loader: 'sass-loader',
           options: {
             sassOptions: {
+              charset: false,
               quietDeps: true,
               sourceMap: true,
             },
