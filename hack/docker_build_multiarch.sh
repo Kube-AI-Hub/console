@@ -42,9 +42,11 @@ ${CONTAINER_CLI} rm -f predbuild 2>/dev/null || true
 ${CONTAINER_CLI} create \
   --name predbuild ks-console-pre:"${TAG}"
 
-# copy file from preimage container:./out/ ./out/
+# copy files from preimage container into a clean output directory
+rm -rf ./out
+mkdir -p ./out
 ${CONTAINER_CLI} cp \
-  predbuild:/out/ ./out/
+  predbuild:/out/. ./out/
 
 # shellcheck disable=SC2086 # intended splitting of CONTAINER_BUILDER
 ${CONTAINER_CLI} ${CONTAINER_BUILDER} \
