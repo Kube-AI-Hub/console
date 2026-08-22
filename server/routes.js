@@ -30,6 +30,7 @@ const {
   devopsWebhookProxy,
   b2iFileProxy,
   csgHubApiProxy,
+  endpointProxy,
 } = require('./proxy')
 
 const {
@@ -90,6 +91,7 @@ router
   .get('/platform-model/en/settings/locale', setCsgHubEnLocale)
   .get('/platform-model/zhHant/settings/locale', setCsgHubZhHantLocale)
   .get('/platform-model{/*path}', renderCsgHub)
+  .use(proxy('/endpoint{/*path}', endpointProxy))
   .use(proxy('/devops_webhook{/*path}', devopsWebhookProxy))
   .use(proxy('/b2i_download{/*path}', b2iFileProxy))
   .post('/dockerhub{/*path}', parseBody, handleDockerhubProxy)

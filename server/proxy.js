@@ -23,6 +23,7 @@ const { getServerConfig } = require('./libs/utils')
 const { server: serverConfig } = getServerConfig()
 
 const NEED_OMIT_HEADERS = ['cookie', 'referer']
+const CSGHUB_RPROXY_TARGET = 'http://csghub-rproxy.csghub:8083'
 
 const k8sResourceProxy = {
   target: serverConfig.apiServer.url,
@@ -155,9 +156,16 @@ const csgHubApiProxy = {
   },
 }
 
+const endpointProxy = {
+  target: CSGHUB_RPROXY_TARGET,
+  secure: false,
+}
+
 module.exports = {
+  CSGHUB_RPROXY_TARGET,
   k8sResourceProxy,
   devopsWebhookProxy,
   b2iFileProxy,
   csgHubApiProxy,
+  endpointProxy,
 }

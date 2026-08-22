@@ -19,17 +19,29 @@
 const httpProxy = require('http-proxy')
 
 const { getServerConfig } = require('../libs/utils')
+const { CSGHUB_RPROXY_TARGET } = require('../proxy')
 
 const serverConfig = getServerConfig().server
 
-module.exports = function (app) {
+const getWebSocketTarget = url =>
+  url.startsWith('/endpoint/')
+    ? CSGHUB_RPROXY_TARGET
+    : serverConfig.apiServer.wsUrl
+
+module.exports = function(app) {
   const wsProxy = httpProxy.createProxyServer({
     ws: true,
     changeOrigin: true,
   })
 
   app.server.on('upgrade', (req, socket, head) => {
-    const target = serverConfig.apiServer.wsUrl
-    wsProxy.ws(req, socket, head, { target })
+    const isEndpointRequest = req.url.startsWith('/endpoint/')
+    const target = getWebSocketTarget(req.url)
+    wsProxy.ws(req, socket, head, {
+      target,
+      changeOrigin: !isEndpointRequest,
+    })
   })
 }
+
+module.exports.getWebSocketTarget = getWebSocketTarget
