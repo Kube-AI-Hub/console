@@ -31,12 +31,10 @@ const {
   b2iFileProxy,
   csgHubApiProxy,
   endpointProxy,
+  labelStudioProxy,
 } = require('./proxy')
 
-const {
-  handleDockerhubProxy,
-  handleHarborProxy,
-} = require('./controllers/api')
+const { handleDockerhubProxy, handleHarborProxy } = require('./controllers/api')
 
 const {
   handleThirdLogin,
@@ -78,10 +76,14 @@ const parseBody = convert(
 const router = new Router()
 
 router
+  .use(proxy('/platform-model/-/label-studio{/*path}', labelStudioProxy))
   .use(proxy('/platform-model/api/v1{/*path}', csgHubApiProxy))
   .get('/platform-model/internal_api/ping', handleCsgHubPing)
   .post('/platform-model/internal_api/upload', handleCsgHubUpload)
-  .post('/platform-model/internal_api/private_upload', handleCsgHubPrivateUpload)
+  .post(
+    '/platform-model/internal_api/private_upload',
+    handleCsgHubPrivateUpload
+  )
   .get('/platform-model/internal_api/oss_temp_url', handleCsgHubTempUrl)
   .get(
     '/platform-model/:repo_type/:namespace/:name/resolve/:branch{/*path}',

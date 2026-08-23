@@ -161,11 +161,31 @@ const endpointProxy = {
   secure: false,
 }
 
+const LABEL_STUDIO_PREFIX = '/platform-model/-/label-studio'
+const LABEL_STUDIO_TARGET = 'http://csghub-label-studio.csghub:8002'
+
+const labelStudioProxy = {
+  target: LABEL_STUDIO_TARGET,
+  changeOrigin: true,
+  ignorePath: true,
+  secure: false,
+  optionsHandle(options, req) {
+    const parsedUrl = new URL(req.url, 'http://localhost')
+    const suffix = parsedUrl.pathname.replace(
+      /^\/platform-model\/-\/label-studio/,
+      ''
+    )
+    options.target = `${LABEL_STUDIO_TARGET}${suffix || '/'}${parsedUrl.search}`
+  },
+}
+
 module.exports = {
   CSGHUB_RPROXY_TARGET,
+  LABEL_STUDIO_PREFIX,
   k8sResourceProxy,
   devopsWebhookProxy,
   b2iFileProxy,
   csgHubApiProxy,
   endpointProxy,
+  labelStudioProxy,
 }
