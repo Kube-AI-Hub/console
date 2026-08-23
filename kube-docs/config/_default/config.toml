@@ -100,10 +100,10 @@ keywords = "Kube AI Hub, Kubernetes, container platform, DevOps, hybrid cloud, c
 snapshot = "/images/common/snapshot-en.png"
 useSendcloud = false
 mailchimpSubscribeUrl = "https://kubesphere.us10.list-manage.com/subscribe/post?u=c85ea2b944b08b951f607bdd4&id=83f673a2d9"
-hotjarTracking = true
+hotjarTracking = false
 youtubeLink = "https://www.youtube.com/c/Kube AI Hub"
-addLinkedin = true
-addTwitter = true
+addLinkedin = false
+addTwitter = false
 
 [[languages.en.menu.main]]
 weight = 2
