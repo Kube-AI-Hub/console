@@ -67,7 +67,7 @@ const k8sResourceProxy = {
 
           offset += chunk.length
         })
-        proxyRes.pipe = function (res) {
+        proxyRes.pipe = function(res) {
           proxyRes.on('end', () => {
             end = true
             const offset1 = Math.min(offset, maxBufferSize)
@@ -109,7 +109,7 @@ const b2iFileProxy = {
     options.target += `/${req.url.slice(14)}`
   },
   events: {
-    proxyReq(proxyReq, req) {
+    proxyReq(proxyReq) {
       NEED_OMIT_HEADERS.forEach(key => proxyReq.removeHeader(key))
     },
     proxyRes(proxyRes, req, client_res) {
