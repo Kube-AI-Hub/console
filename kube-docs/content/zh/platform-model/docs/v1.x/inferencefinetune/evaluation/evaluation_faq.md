@@ -43,3 +43,16 @@ weight: 6410
 ### 如何使用自定义数据集评测
 
 请参考[自定义评测数据集](./evaluation_with_custom_dataset)文档了解详细操作步骤。
+
+---
+
+### 内网环境没有数据集仓库时，系统推荐为什么是空的？
+
+**原因**：系统推荐原先只列出已入库并打了 `runtime_framework` + `evaluation` 标签的数据集。OpenCompass / lm-evaluation-harness 镜像内已烘焙的评测集默认不会在安装时灌仓，离线或未做多源同步时下拉为空。
+
+**当前行为**：
+1. 选择 **OpenCompass** 或 **lm-evaluation-harness** 时，新建评测页会列出镜像内真正可用的内置数据集（无需仓库已存在）。
+2. 评测成功后，本次用到且平台缺失的内置集会自动建仓、写入文件，并打上 evaluation 与 runtime_framework 标签，可在数据集详情页查看和下载。
+3. **EvalScope** 没有对等内置数据包，仍需同步或使用自定义数据集。
+
+自定义数据集不会在评测后自动导入。

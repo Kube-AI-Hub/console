@@ -43,3 +43,16 @@ weight: 6410
 ### How to use a custom dataset for evaluation
 
 Refer to the [Custom Evaluation Datasets](./evaluation_with_custom_dataset) documentation for detailed steps.
+
+---
+
+### Why is the system-recommended dataset list empty offline?
+
+**Cause**: System recommendations previously listed only dataset repositories that already existed and had `runtime_framework` plus `evaluation` tags. Built-in OpenCompass / lm-evaluation-harness data is baked into the evaluation images and is not imported during install, so the dropdown is empty without internet or multi-source sync.
+
+**Current behavior**:
+1. When you choose **OpenCompass** or **lm-evaluation-harness**, the new evaluation page lists datasets that are actually baked into the image. The repository does not need to exist first.
+2. After a successful evaluation, any built-in datasets used in that job and still missing on the platform are created as public dataset repositories, with files committed and `evaluation` plus `runtime_framework` tags applied, so they appear on the dataset detail page.
+3. **EvalScope** has no equivalent built-in package; continue to sync datasets or use a custom dataset.
+
+Custom datasets are not imported after evaluation.
