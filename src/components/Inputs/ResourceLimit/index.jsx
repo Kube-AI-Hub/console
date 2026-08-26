@@ -284,16 +284,14 @@ export default class ResourceLimit extends React.Component {
 
   static getGpuFromProps(value) {
     // get gpu config from requests/limits field；显存/核心数字段名由后端 supportGpuTypeMetadata[type].memoryName / vcoresName 下发，为空则不限制
-    const supportGpuType = globals.config.supportGpuType
     if (!value) {
-      const type = supportGpuType[0]
       return {
-        type,
+        type: '',
         value: '',
         memory: '',
-        memoryName: getGpuMemoryName(type),
+        memoryName: '',
         vcores: '',
-        vcoresName: getGpuVcoresName(type),
+        vcoresName: '',
       }
     }
     const requests = get(value, 'requests', {})
@@ -303,7 +301,7 @@ export default class ResourceLimit extends React.Component {
     )
     const keySet = new Set(keys.filter(k => k !== 'cpu' && k !== 'memory'))
     const resolvedCard = resolveGpuCardTypeFromResourceKeys(keySet)
-    const type = resolvedCard || supportGpuType[0]
+    const type = resolvedCard || ''
     const hasConfiguredGpu = Boolean(resolvedCard)
     const primaryRaw = requests[type] ?? limits[type]
     const hasPrimary =
@@ -411,10 +409,9 @@ export default class ResourceLimit extends React.Component {
 
   get gpuOption() {
     const { gpuTypeOptions } = this.props
-    if (gpuTypeOptions !== undefined) {
-      return gpuTypeOptions
-    }
-    return getGpuTypeOptions()
+    const options =
+      gpuTypeOptions !== undefined ? gpuTypeOptions : getGpuTypeOptions()
+    return [{ value: '', label: t('NONE') }, ...options]
   }
 
   get gpuType() {
@@ -780,6 +777,22 @@ export default class ResourceLimit extends React.Component {
   }
 
   gpuSelectChange = type => {
+    if (!type) {
+      this.setState(
+        {
+          gpu: {
+            type: '',
+            value: '',
+            memory: '',
+            memoryName: '',
+            vcores: '',
+            vcoresName: '',
+          },
+        },
+        this.checkAndTrigger
+      )
+      return
+    }
     const memoryName = getGpuMemoryName(type)
     const vcoresName = getGpuVcoresName(type)
     this.setState(
@@ -1007,24 +1020,26 @@ export default class ResourceLimit extends React.Component {
                 ></Select>
               </div>
             </div>
-            <div
-              className={classnames(styles.input, {
-                [styles.error]: this.state.workspaceLimitCheck.gpuCardLimitError,
-              })}
-            >
-              <div className={styles.label}>
-                <span>{t('GPU_LIMIT')}</span>
+            {this.state.gpu.type && (
+              <div
+                className={classnames(styles.input, {
+                  [styles.error]: this.state.workspaceLimitCheck.gpuCardLimitError,
+                })}
+              >
+                <div className={styles.label}>
+                  <span>{t('GPU_LIMIT')}</span>
+                </div>
+                <div className={styles.inputBox}>
+                  <Input
+                    name="gpu.value"
+                    value={this.state.gpu.value}
+                    onChange={this.handleGpuInputChange}
+                    placeholder={t('NO_LIMIT')}
+                  />
+                  <span className={styles.unit}>{'卡'}</span>
+                </div>
               </div>
-              <div className={styles.inputBox}>
-                <Input
-                  name="gpu.value"
-                  value={this.state.gpu.value}
-                  onChange={this.handleGpuInputChange}
-                  placeholder={t('NO_LIMIT')}
-                />
-                <span className={styles.unit}>{'卡'}</span>
-              </div>
-            </div>
+            )}
             {this.state.gpu.memoryName && (
               <div className={classnames(styles.input)}>
                 <div className={styles.label}>
