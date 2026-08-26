@@ -21,69 +21,37 @@ Currently, Kube AI Hub on K3s is only for testing and development as some featur
 - For information about the prerequisites for K3s installation, see [the K3s documentation](https://rancher.com/docs/k3s/latest/en/installation/installation-requirements/).
 - You may need to create necessary firewall rules or port forwarding rules depending on your environment. For more information, see [Port Requirements](../../../installing-on-linux/introduction/port-firewall/).
 
-## Step 1: Download KubeKey
+## Step 1: Get KubeKey
 
-Follow the step below to download [KubeKey](../../../installing-on-linux/introduction/kubekey/).
-
-{{< tabs >}}
-
-{{< tab "Good network connections to GitHub/Googleapis" >}}
-
-Download KubeKey from its [GitHub Release Page](https://github.com/kubesphere/kubekey/releases) or use the following command directly.
+KubeKey is included in the Kube AI Hub offline installation package. After extracting the package, select the binary for your architecture:
 
 ```bash
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
-```
+# x86_64 architecture
+mv kk-x86 kk
 
-{{</ tab >}}
+# ARM64 architecture
+mv kk-arm kk
 
-{{< tab "Poor network connections to GitHub/Googleapis" >}}
-
-Run the following command first to make sure you download KubeKey from the correct zone.
-
-```bash
-export KKZONE=cn
-```
-
-Run the following command to download KubeKey:
-
-```bash
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
-```
-
-{{< notice note >}}
-
-After you download KubeKey, if you transfer it to a new machine also with poor network connections to Googleapis, you must run `export KKZONE=cn` again before you proceed with the steps below.
-
-{{</ notice >}} 
-
-{{</ tab >}}
-
-{{</ tabs >}}
-
-{{< notice note >}}
-
-The commands above download the latest release of KubeKey. Note that an earlier version of KubeKey cannot be used to install K3s.
-
-{{</ notice >}}
-
-Make `kk` executable:
-
-```bash
 chmod +x kk
 ```
+
+{{< notice note >}}
+
+Obtain the offline installation package from your delivery channel. The package includes Kubernetes v1.34.4, containerd, and required images.
+
+{{</ notice >}}
 
 ## Step 2: Create a Cluster
 
 1. Create a configuration file of your cluster by running the following command:
 
    ```bash
-   ./kk create config --with-kubernetes v1.21.4-k3s --with-kubesphere v3.4.1
+   ./kk create config --with-kubernetes v1.34.4-k3s --with-kubesphere v3.4.1
    ```
 
    {{< notice note >}}
 
-   KubeKey supports the installation of K3s v1.21.4.
+   KubeKey supports the installation of K3s v1.34.4.
 
    {{</ notice >}} 
 

@@ -92,65 +92,35 @@ ssh -i .ssh/id_rsa2  -p50200 kubesphere@40.81.5.xx
 
 [Kubekey](../../../installing-on-linux/introduction/kubekey/) is a brand-new installation tool which provides an easy, fast and flexible way to install Kubernetes and Kube AI Hub.
 
-1. Download it so that you can generate a configuration file in the next step.
+1. Get KubeKey so that you can generate a configuration file in the next step.
 
-   {{< tabs >}}
-
-   {{< tab "Good network connections to GitHub/Googleapis" >}}
-
-Download KubeKey from its [GitHub Release Page](https://github.com/kubesphere/kubekey/releases) or use the following command directly:
-
-```bash
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
-```
-
-{{</ tab >}}
-
-{{< tab "Poor network connections to GitHub/Googleapis" >}}
-
-Run the following command first to make sure you download KubeKey from the correct zone.
-
-```bash
-export KKZONE=cn
-```
-
-Run the following command to download KubeKey:
-
-```bash
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
-```
-
-{{< notice note >}}
-
-After you download KubeKey, if you transfer it to a new machine also with poor network connections to Googleapis, you must run `export KKZONE=cn` again before you proceed with the steps below.
-
-{{</ notice >}} 
-
-{{</ tab >}}
-
-{{</ tabs >}}
-
-   {{< notice note >}}
-
-The commands above download the latest release of KubeKey. You can change the version number in the command to download a specific version.
-
-{{</ notice >}} 
-
-   Make `kk` executable:
+   KubeKey is included in the Kube AI Hub offline installation package. After extracting the package, select the binary for your architecture:
 
    ```bash
+   # x86_64 architecture
+   mv kk-x86 kk
+
+   # ARM64 architecture
+   mv kk-arm kk
+
    chmod +x kk
    ```
 
-1. Create an example configuration file with default configurations. Here Kubernetes v1.22.12 is used as an example.
+   {{< notice note >}}
+
+   Obtain the offline installation package from your delivery channel. The package includes Kubernetes v1.34.4, containerd, and required images.
+
+   {{</ notice >}}
+
+1. Create an example configuration file with default configurations. Here Kubernetes v1.34.4 is used as an example.
 
    ```bash
-   ./kk create config --with-kubesphere v3.4.1 --with-kubernetes v1.22.12
+   ./kk create config --with-kubesphere v3.4.1 --with-kubernetes v1.34.4
    ```
 
    {{< notice note >}}
 
-- Recommended Kubernetes versions for Kube AI Hub 3.4: v1.20.x, v1.21.x, v1.22.x, v1.23.x, * v1.24.x, * v1.25.x, and * v1.26.x. For Kubernetes versions with an asterisk, some features of edge nodes may be unavailable due to incompatability. Therefore, if you want to use edge nodes, you are advised to install Kubernetes v1.23.x. If you do not specify a Kubernetes version, KubeKey will install Kubernetes v1.23.10 by default. For more information about supported Kubernetes versions, see [Support Matrix](../../../installing-on-linux/introduction/kubekey/#support-matrix).
+- Recommended Kubernetes versions for Kube AI Hub 3.4: v1.28.x, v1.29.x, v1.30.x, v1.31.x, v1.32.x, v1.33.x, and v1.34.x (v1.34.x recommended). If you do not specify a Kubernetes version, KubeKey will install Kubernetes v1.34.4 by default. For more information about supported Kubernetes versions, see [Support Matrix](../../../installing-on-linux/introduction/kubekey/#support-matrix).
 
 - If you do not add the flag `--with-kubesphere` in the command in this step, Kube AI Hub will not be deployed unless you install it using the `addons` field in the configuration file or add this flag again when you use `./kk create cluster` later.
 - If you add the flag `--with-kubesphere` without specifying a Kube AI Hub version, the latest version of Kube AI Hub will be installed.

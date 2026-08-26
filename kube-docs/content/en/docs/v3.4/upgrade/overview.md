@@ -8,11 +8,12 @@ weight: 7100
 
 ## Make Your Upgrade Plan
 
-Kube AI Hub 3.4 is compatible with Kubernetes v1.20.x, v1.21.x, v1.22.x, v1.23.x, * v1.24.x, * v1.25.x, and * v1.26.x:
+Kube AI Hub 3.4 is compatible with Kubernetes v1.28.x, v1.29.x, v1.30.x, v1.31.x, v1.32.x, v1.33.x, and v1.34.x:
 
-- Before you upgrade your cluster to Kube AI Hub 3.4, you need to have a Kube AI Hub cluster running v3.2.x.
+- Before you upgrade your cluster to Kube AI Hub 3.4, you need to have a Kube AI Hub cluster running v3.3.x.
 - You can choose to only upgrade Kube AI Hub to 3.4 or upgrade Kubernetes (to a higher version) and Kube AI Hub (to 3.4) at the same time.
-- For Kubernetes versions with an asterisk, some features of edge nodes may be unavailable due to incompatability. Therefore, if you want to use edge nodes, you are advised to install Kubernetes v1.23.x.
+- It is recommended to upgrade Kubernetes to v1.34.x for optimal compatibility and feature support.
+
 ## Before the Upgrade
 
 {{< notice warning >}}

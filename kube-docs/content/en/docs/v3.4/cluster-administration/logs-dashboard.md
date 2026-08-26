@@ -62,9 +62,9 @@ When installing Kube AI Hub with multiple nodes on Linux, you should create a co
 
 ### Install on Kubernetes
 
-When you [Install Kube AI Hub on Kubernetes](../../installing-on-kubernetes/introduction/overview/), you need to enable the relevant components in the [cluster-configuration.yaml](https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/cluster-configuration.yaml) file.
+When you [Install Kube AI Hub on Kubernetes](../../installing-on-kubernetes/introduction/overview/), you need to enable the relevant components in the `cluster-configuration.yaml` file.
 
-1. Download the [cluster-configuration.yaml](https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/cluster-configuration.yaml) file and edit it using the following command:
+1. Obtain the `cluster-configuration.yaml` file from the delivery channel and edit it using the following command:
 
     ```bash
     vi cluster-configuration.yaml
@@ -104,7 +104,8 @@ When you [Install Kube AI Hub on Kubernetes](../../installing-on-kubernetes/intr
 3. Execute the following command to start installation:
 
     ```bash
-    kubectl apply -f https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/kubesphere-installer.yaml
+    # Obtain the YAML files from the delivery channel
+    kubectl apply -f kubesphere-installer.yaml
     
     kubectl apply -f cluster-configuration.yaml
     ```

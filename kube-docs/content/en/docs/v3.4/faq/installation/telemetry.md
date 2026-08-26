@@ -29,7 +29,7 @@ Telemetry is enabled by default when you install Kube AI Hub, while you also hav
 
 ### Disable Telemetry before installation
 
-When you install Kube AI Hub on an existing Kubernetes cluster, you need to download the file [cluster-configuration.yaml](https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/cluster-configuration.yaml) for cluster settings. If you want to disable Telemetry, do not run `kubectl apply -f` directly for this file.
+When you install Kube AI Hub on an existing Kubernetes cluster, you need to obtain the `cluster-configuration.yaml` file from the delivery channel for cluster settings. If you want to disable Telemetry, do not run `kubectl apply -f` directly for this file.
 
 {{< notice note >}}
 
@@ -37,7 +37,7 @@ If you install Kube AI Hub on Linux, see [Disable Telemetry After Installation](
 
 {{</ notice >}}
 
-1. Download the file [cluster-configuration.yaml](https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/cluster-configuration.yaml) and edit it:
+1. Obtain the `cluster-configuration.yaml` file from the delivery channel and edit it:
 
     ```bash
     vi cluster-configuration.yaml
@@ -57,7 +57,8 @@ If you install Kube AI Hub on Linux, see [Disable Telemetry After Installation](
 3. Save the file and run the following commands to start installation.
 
     ```bash
-    kubectl apply -f https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/kubesphere-installer.yaml
+    # Obtain the YAML files from the delivery channel
+    kubectl apply -f kubesphere-installer.yaml
     
     kubectl apply -f cluster-configuration.yaml
     ```

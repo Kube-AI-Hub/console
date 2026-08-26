@@ -79,7 +79,7 @@ Check the installation with `aws --version`.
 
    {{< notice note >}}
 
-- To install Kube AI Hub 3.4 on Kubernetes, your Kubernetes version must be v1.20.x, v1.21.x, v1.22.x, v1.23.x, * v1.24.x, * v1.25.x, and * v1.26.x. For Kubernetes versions with an asterisk, some features of edge nodes may be unavailable due to incompatability. Therefore, if you want to use edge nodes, you are advised to install Kubernetes v1.23.x.
+- To install Kube AI Hub 3.4 on Kubernetes, your Kubernetes version must be v1.28.x, v1.29.x, v1.30.x, v1.31.x, v1.32.x, v1.33.x, or v1.34.x (v1.34.x recommended).
 - 3 nodes are included in this example. You can add more nodes based on your own needs especially in a production environment.
 - The machine type t3.medium (2 vCPU, 4GB memory) is for minimal installation. If you want to enable pluggable components or use the cluster for production, please select a machine type with more resources.
 - For other settings, you can change them as well based on your own needs or use the default value.
@@ -125,9 +125,11 @@ We will use the kubectl command-line utility for communicating with the cluster 
 - Install Kube AI Hub using kubectl. The following commands are only for the default minimal installation.
 
    ```bash
-   kubectl apply -f https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/kubesphere-installer.yaml
+   ```bash
+   # Obtain the YAML files from the delivery channel
+   kubectl apply -f kubesphere-installer.yaml
 
-   kubectl apply -f https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/cluster-configuration.yaml
+   kubectl apply -f cluster-configuration.yaml
    ```
 
 - Inspect the logs of installation:

@@ -258,65 +258,33 @@ yum install keepalived haproxy psmisc -y
 
 ## 使用 KubeKey 创建 Kubernetes 集群
 
-[KubeKey](https://github.com/kubesphere/kubekey) 是一款用来创建 Kubernetes 集群的工具，高效而便捷。请按照以下步骤下载 KubeKey。
-
-{{< tabs >}}
-
-{{< tab "如果您能正常访问 GitHub/Googleapis" >}}
-
-从 [GitHub Release Page](https://github.com/kubesphere/kubekey/releases) 下载 KubeKey 或者直接使用以下命令。
+KubeKey 已包含在 Kube AI Hub 离线安装包中。解压离线包后，根据您的架构选择对应的二进制文件：
 
 ```bash
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
-```
+# x86_64 架构
+mv kk-x86 kk
 
-{{</ tab >}}
+# ARM64 架构
+mv kk-arm kk
 
-{{< tab "如果您访问 GitHub/Googleapis 受限" >}}
-
-首先运行以下命令，以确保您从正确的区域下载 KubeKey。
-
-```bash
-export KKZONE=cn
-```
-
-运行以下命令来下载 KubeKey：
-
-```bash
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
-```
-
-{{< notice note >}}
-
-下载 KubeKey 之后，如果您将其转移到访问 Googleapis 受限的新机器上，请务必再次运行 `export KKZONE=cn`，然后继续执行以下步骤。
-
-{{</ notice >}} 
-
-{{</ tab >}}
-
-{{</ tabs >}}
-
-{{< notice note >}}
-
-通过以上命令，可以下载 KubeKey 的最新版本。您可以更改命令中的版本号来下载特定的版本。
-
-{{</ notice >}} 
-
-使 `kk` 成为可执行文件：
-
-```bash
 chmod +x kk
 ```
 
-使用默认配置创建一个示例配置文件。此处以 Kubernetes v1.22.12 作为示例。
+{{< notice note >}}
+
+离线安装包请从交付渠道获取。包内已包含 Kubernetes v1.34.4、containerd 及所需镜像。
+
+{{</ notice >}}
+
+使用默认配置创建一个示例配置文件。此处以 Kubernetes v1.34.4 作为示例。
 
 ```bash
-./kk create config --with-kubesphere v3.4.1 --with-kubernetes v1.22.12
+./kk create config --with-kubesphere v3.4.1 --with-kubernetes v1.34.4
 ```
 
 {{< notice note >}}
 
-- 安装 Kube AI Hub 3.4 的建议 Kubernetes 版本：v1.20.x、v1.21.x、v1.22.x、v1.23.x、* v1.24.x、* v1.25.x 和 * v1.26.x。带星号的版本可能出现边缘节点部分功能不可用的情况。因此，如需使用边缘节点，推荐安装 v1.23.x。如果不指定 Kubernetes 版本，KubeKey 将默认安装 Kubernetes v1.23.10。有关受支持的 Kubernetes 版本的更多信息，请参见[支持矩阵](../../../installing-on-linux/introduction/kubekey/#支持矩阵)。
+- 安装 Kube AI Hub 3.4 的建议 Kubernetes 版本：v1.28.x、v1.29.x、v1.30.x、v1.31.x、v1.32.x、v1.33.x 和 v1.34.x（建议 v1.34.x）。如果不指定 Kubernetes 版本，KubeKey 将默认安装 Kubernetes v1.34.4。有关受支持的 Kubernetes 版本的更多信息，请参见[支持矩阵](../../../installing-on-linux/introduction/kubekey/#支持矩阵)。
 
 - 如果您没有在本步骤的命令中添加标志 `--with-kubesphere`，那么除非您使用配置文件中的 `addons` 字段进行安装，或者稍后使用 `./kk create cluster` 时再添加该标志，否则 Kube AI Hub 将不会被部署。
 - 如果您添加标志 `--with-kubesphere` 时未指定 Kube AI Hub 版本，则会安装最新版本的 Kube AI Hub。

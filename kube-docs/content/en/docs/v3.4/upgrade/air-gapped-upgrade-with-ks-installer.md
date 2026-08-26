@@ -11,11 +11,11 @@ ks-installer is recommended for users whose Kubernetes clusters were not set up 
 
 ## Prerequisites
 
-- You need to have a Kube AI Hub cluster running v3.2.x. If your Kube AI Hub version is v3.1.x or earlier, upgrade to v3.2.x first.
+- You need to have a Kube AI Hub cluster running v3.3.x. If your Kube AI Hub version is v3.2.x or earlier, upgrade to v3.3.x first.
 - Read [Release Notes for 3.4.1](../../../v3.4/release/release-v341/) carefully.
 - Back up any important component beforehand.
-- A Docker registry. You need to have a Harbor or other Docker registries. For more information, see [Prepare a Private Image Registry](../../installing-on-linux/introduction/air-gapped-installation/#step-2-prepare-a-private-image-registry).
-- Supported Kubernetes versions of Kube AI Hub 3.4: v1.20.x, v1.21.x, v1.22.x, v1.23.x, * v1.24.x, * v1.25.x, and * v1.26.x. For Kubernetes versions with an asterisk, some features of edge nodes may be unavailable due to incompatability. Therefore, if you want to use edge nodes, you are advised to install Kubernetes v1.23.x.
+- An image registry. You need to have a Harbor or other image registries. For more information, see [Prepare a Private Image Registry](../../installing-on-linux/introduction/air-gapped-installation/#step-1-prepare-a-private-image-registry).
+- Supported Kubernetes versions of Kube AI Hub 3.4: v1.28.x, v1.29.x, v1.30.x, v1.31.x, v1.32.x, v1.33.x, and v1.34.x (v1.34.x recommended).
 
 ## Major Updates
 
@@ -28,27 +28,20 @@ In Kube AI Hub 3.4.1, some changes have made on built-in roles and permissions o
        - Removed permissions of workspace-level custom roles: user management, role management, and user group management.
        - Removed permissions of namespace-level custom roles: user management and role management.
        - After you upgrade Kube AI Hub to 3.4.1, custom roles will be retained, but removed permissions of the custom roles will be revoked.
+
 ## Step 1: Prepare Installation Images
 
 As you install Kube AI Hub in an air-gapped environment, you need to prepare an image package containing all the necessary images in advance.
 
-1. Download the image list file `images-list.txt` from a machine that has access to Internet through the following command:
-
-   ```bash
-   curl -L -O https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/images-list.txt
-   ```
+1. Obtain the image list file `images-list.txt` from your delivery channel.
 
    {{< notice note >}}
 
-   This file lists images under `##+modulename` based on different modules. You can add your own images to this file following the same rule. To view the complete file, see [Appendix](../../installing-on-linux/introduction/air-gapped-installation/#image-list-of-kubesphere-v310).
+   This file lists images under `##+modulename` based on different modules. You can add your own images to this file following the same rule.
 
-   {{</ notice >}} 
+   {{</ notice >}}
 
-2. Download `offline-installation-tool.sh`. 
-
-   ```bash
-   curl -L -O https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/offline-installation-tool.sh
-   ```
+2. Obtain `offline-installation-tool.sh` from your delivery channel.
 
 3. Make the `.sh` file executable.
 
@@ -59,7 +52,6 @@ As you install Kube AI Hub in an air-gapped environment, you need to prepare an 
 4. You can execute the command `./offline-installation-tool.sh -h` to see how to use the script:
 
    ```bash
-   root@master:/home/ubuntu# ./offline-installation-tool.sh -h
    Usage:
    
      ./offline-installation-tool.sh [-l IMAGES-LIST] [-d IMAGES-DIR] [-r PRIVATE-REGISTRY] [-v KUBERNETES-VERSION ]
@@ -70,7 +62,7 @@ As you install Kube AI Hub in an air-gapped environment, you need to prepare an 
      -l IMAGES-LIST         : text file with list of images.
      -r PRIVATE-REGISTRY    : target private registry:port.
      -s                     : save model will be applied. Pull the images in the IMAGES-LIST and save images as a tar.gz file.
-     -v KUBERNETES-VERSION  : download kubernetes' binaries. default: v1.17.9
+     -v KUBERNETES-VERSION  : download kubernetes' binaries. default: v1.34.4
      -h                     : usage message
    ```
 
@@ -82,41 +74,37 @@ As you install Kube AI Hub in an air-gapped environment, you need to prepare an 
 
    {{< notice note >}}
 
-   You can choose to pull images as needed. For example, you can delete `##k8s-images` and related images under it in `images-list.text` if you already have a Kubernetes cluster.
+   You can choose to pull images as needed. For example, you can delete `##k8s-images` and related images under it in `images-list.txt` if you already have a Kubernetes cluster.
 
-   {{</ notice >}} 
+   {{</ notice >}}
 
 ## Step 2: Push Images to Your Private Registry
 
 Transfer your packaged image file to your local machine and execute the following command to push it to the registry.
 
 ```bash
-./offline-installation-tool.sh -l images-list.txt -d ./kubesphere-images -r dockerhub.kubekey.local
+./offline-installation-tool.sh -l images-list.txt -d ./kubesphere-images -r <registry>
 ```
 
 {{< notice note >}}
 
-The domain name is `dockerhub.kubekey.local` in the command. Make sure you use your **own registry address**.
+The `<registry>` is your image registry address. Make sure you use your **own registry address**.
 
-{{</ notice >}} 
+{{</ notice >}}
 
 ## Step 3: Download ks-installer
 
 Similar to installing Kube AI Hub on an existing Kubernetes cluster in an online environment, you also need to download `kubesphere-installer.yaml`.
 
-1. Execute the following command to download ks-installer and transfer it to your machine that serves as the taskbox for installation.
+1. Obtain ks-installer from your delivery channel and transfer it to your machine that serves as the taskbox for installation.
 
-   ```bash
-   curl -L -O https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/kubesphere-installer.yaml
-   ```
-   
-2. Verify that you have specified your private image registry in `spec.local_registry` in `cluster-configuration.yaml`. Note that if your existing cluster was installed in an air-gapped environment, you may already have this field specified. Otherwise, run the following command to edit `cluster-configuration.yaml` of your existing Kube AI Hub v3.1.x cluster and add the private image registry:
+2. Verify that you have specified your private image registry in `spec.local_registry` in `cluster-configuration.yaml`. Note that if your existing cluster was installed in an air-gapped environment, you may already have this field specified. Otherwise, run the following command to edit `cluster-configuration.yaml` of your existing Kube AI Hub cluster and add the private image registry:
 
    ```
    kubectl edit cc -n kubesphere-system
    ```
 
-   For example, `dockerhub.kubekey.local` is the registry address in this tutorial, then use it as the value of `.spec.local_registry` as below:
+   For example, `<registry>` is the registry address in this tutorial, then use it as the value of `.spec.local_registry` as below:
 
    ```yaml
    spec:
@@ -124,18 +112,18 @@ Similar to installing Kube AI Hub on an existing Kubernetes cluster in an online
        storageClass: ""
      authentication:
        jwtSecret: ""
-     local_registry: dockerhub.kubekey.local # Add this line manually; make sure you use your own registry address.
+     local_registry: <registry> # Add this line manually; make sure you use your own registry address.
    ```
 
 3. Save `cluster-configuration.yaml` after you finish editing it. Replace `ks-installer` with your **own registry address** with the following command:
 
    ```bash
-   sed -i "s#^\s*image: kubesphere.*/ks-installer:.*#        image: dockerhub.kubekey.local/kubesphere/ks-installer:v3.4.1#" kubesphere-installer.yaml
+   sed -i "s#^\s*image: kubesphere.*/ks-installer:.*#        image: <registry>/kubesphere/ks-installer:v3.4.1#" kubesphere-installer.yaml
    ```
 
    {{< notice warning >}}
 
-   `dockerhub.kubekey.local` is the registry address in the command. Make sure you use your own registry address.
+   `<registry>` is the registry address in the command. Make sure you use your own registry address.
 
    {{</ notice >}}
 
@@ -168,8 +156,6 @@ NOTES：
      are up and running.
   2. Please change the default password after login.
 
-#####################################################
-https://www.watering.ai/          20xx-xx-xx xx:xx:xx
 #####################################################
 ```
 

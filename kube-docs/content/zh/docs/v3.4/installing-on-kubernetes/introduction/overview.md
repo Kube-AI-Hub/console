@@ -24,9 +24,10 @@ Kube AI Hub 承诺为用户提供即插即用架构，您可以轻松地将 Kube
 1. 执行以下命令以开始安装：
 
    ```bash
-   kubectl apply -f https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/kubesphere-installer.yaml
+   # 从交付渠道获取 YAML 文件
+   kubectl apply -f kubesphere-installer.yaml
 
-   kubectl apply -f https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/cluster-configuration.yaml
+   kubectl apply -f cluster-configuration.yaml
    ```
 
 2. 检查安装日志：

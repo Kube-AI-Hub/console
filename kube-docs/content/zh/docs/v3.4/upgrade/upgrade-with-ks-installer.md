@@ -13,7 +13,7 @@ weight: 7300
 - 您需要有一个运行 Kube AI Hub v3.3.x 的集群。如果您的 Kube AI Hub 是 v3.2.0 或更早的版本，请先升级至 v3.3.x。
 - 请仔细阅读 [3.4.1 版本说明](../../../v3.4/release/release-v341/)。
 - 提前备份所有重要的组件。
-- Kube AI Hub 3.4 支持的 Kubernetes 版本：v1.20.x、v1.21.x、v1.22.x、v1.23.x、* v1.24.x、* v1.25.x 和 * v1.26.x。带星号的版本可能出现边缘节点部分功能不可用的情况。因此，如需使用边缘节点，推荐安装 v1.23.x。
+- Kube AI Hub 3.4 支持的 Kubernetes 版本：v1.28.x、v1.29.x、v1.30.x、v1.31.x、v1.32.x、v1.33.x 和 v1.34.x（建议 v1.34.x）。
 
 ## 重要提示
 
@@ -32,7 +32,8 @@ Kube AI Hub 3.4 对内置角色和自定义角色的授权项做了一些调整�
 运行以下命令升级集群：
 
 ```bash
-kubectl apply -f https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/kubesphere-installer.yaml  --force
+# 从交付渠道获取 YAML 文件
+kubectl apply -f kubesphere-installer.yaml --force
 ```
 
 ## 启用可插拔组件

@@ -1,51 +1,78 @@
 ---
-title: "准备工作"
-keywords: "Kube AI Hub, Kubernetes, 安装, 准备工作"
-description: "确保现有 Kubernetes 集群运行所在的环境满足部署 Kube AI Hub 的前提条件。"
-linkTitle: "准备工作"
+title: "Prerequisites"
+keywords: 'Kubernetes, Kube AI Hub, Prerequisites'
+description: '了解在现有 Kubernetes 集群上安装 Kube AI Hub 的先决条件。'
+linkTitle: "Prerequisites"
 weight: 4120
 ---
 
+您可以在虚拟机和裸机上安装 Kube AI Hub，同时配置 Kubernetes。此外，只要您的 Kubernetes 集群满足以下先决条件，Kube AI Hub 也可以部署在云托管和本地 Kubernetes 集群上。
 
+## Kubernetes 版本
 
-您可以在虚拟机和裸机上安装 Kube AI Hub，并同时配置 Kubernetes。另外，只要 Kubernetes 集群满足以下前提条件，那么您也可以在云托管和本地 Kubernetes 集群上部署 Kube AI Hub。
+- **最低版本**：v1.28.x
+- **建议版本**：v1.34.x
+- **支持版本**：v1.28.x、v1.29.x、v1.30.x、v1.31.x、v1.32.x、v1.33.x、v1.34.x
 
-- 如需在 Kubernetes 上安装 Kube AI Hub 3.4，您的 Kubernetes 版本必须为：v1.20.x、v1.21.x、v1.22.x、v1.23.x、* v1.24.x、* v1.25.x 和 * v1.26.x。带星号的版本可能出现边缘节点部分功能不可用的情况。因此，如需使用边缘节点，推荐安装 v1.23.x。
-- 可用 CPU > 1 核；内存 > 2 G。CPU 必须为 x86_64，暂时不支持 Arm 架构的 CPU。
-- Kubernetes 集群已配置**默认** StorageClass（请使用 `kubectl get sc` 进行确认）。
-- 使用 `--cluster-signing-cert-file` 和 `--cluster-signing-key-file` 参数启动集群时，kube-apiserver 将启用 CSR 签名功能。请参见 [RKE 安装问题](https://github.com/kubesphere/kubesphere/issues/1925#issuecomment-591698309)。
+检查 Kubernetes 版本：
 
-## 预检查
+```bash
+kubectl version
+```
 
-1. 在集群节点中运行 `kubectl version`，确保 Kubernetes 版本可兼容。输出如下所示：
+输出应显示：
 
-    ```bash
-    $ kubectl version
-    Client Version: version.Info{Major:"1", Minor:"19", GitVersion:"v1.19.8", GitCommit:"fd5d41537aee486160ad9b5356a9d82363273721", GitTreeState:"clean", BuildDate:"2021-02-17T12:41:51Z", GoVersion:"go1.15.8", Compiler:"gc", Platform:"linux/amd64"}
-    Server Version: version.Info{Major:"1", Minor:"19", GitVersion:"v1.19.8", GitCommit:"fd5d41537aee486160ad9b5356a9d82363273721", GitTreeState:"clean", BuildDate:"2021-02-17T12:33:08Z", GoVersion:"go1.15.8", Compiler:"gc", Platform:"linux/amd64"}
-    ```
+```
+Client Version: v1.34.x
+Server Version: v1.34.x
+```
 
-    {{< notice note >}}
-请注意 `Server Version` 这一行。如果 `GitVersion` 显示为旧版本，则需要先升级 Kubernetes。
-    {{</ notice >}}
+## 可用资源
 
-2. 检查集群中的可用资源是否满足最低要求。
+- **CPU**：至少 2 核
+- **内存**：至少 4 GB
+- **磁盘**：至少 40 GB
 
-    ```bash
-    $ free -g
-                total        used        free      shared  buff/cache   available
-    Mem:              16          4          10           0           3           2
-    Swap:             0           0           0
-    ```
+## 默认 Storage Class
 
-3. 检查集群中是否有**默认** StorageClass（准备默认 StorageClass 是安装 Kube AI Hub 的前提条件）。
+您的 Kubernetes 集群必须配置默认 Storage Class。检查方法：
 
-    ```bash
-    $ kubectl get sc
-    NAME                      PROVISIONER               AGE
-    glusterfs (default)       kubernetes.io/glusterfs   3d4h
-    ```
+```bash
+kubectl get sc
+```
 
-如果 Kubernetes 集群环境满足上述所有要求，那么您就可以在现有的 Kubernetes 集群上部署 Kube AI Hub 了。
+输出应显示带有 `(default)` 注解的 Storage Class。如果没有，请设置：
 
-有关更多信息，请参见[概述](../overview/)。
+```bash
+kubectl patch storageclass <your-storage-class> -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+```
+
+## 网络要求
+
+- 确保集群节点之间可以相互通信。
+- 集群必须安装 CNI 插件（Calico、Flannel 等）。
+- 如果您计划使用 Kube AI Hub 控制台，请确保端口 `30880` 可访问。
+
+## 容器运行时
+
+集群必须使用 **containerd** 作为容器运行时，不再支持 Docker。
+
+检查容器运行时：
+
+```bash
+kubectl get nodes -o wide
+```
+
+`CONTAINER-RUNTIME` 列应显示 `containerd://...`。
+
+## 架构支持
+
+支持 x86_64 和 ARM64（aarch64）架构。
+
+## Helm 版本
+
+如果您计划使用 Helm 安装 Kube AI Hub，请确保已安装 Helm 3.x：
+
+```bash
+helm version
+```

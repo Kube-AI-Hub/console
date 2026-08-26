@@ -59,9 +59,9 @@ By default, KubeKey will install Elasticsearch internally if Events is enabled. 
 
 ### Installing on Kubernetes
 
-As you [install Kube AI Hub on Kubernetes](../../installing-on-kubernetes/introduction/overview/), you can enable Kube AI Hub Events first in the [cluster-configuration.yaml](https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/cluster-configuration.yaml) file.
+As you [install Kube AI Hub on Kubernetes](../../installing-on-kubernetes/introduction/overview/), you can enable Kube AI Hub Events first in the `cluster-configuration.yaml` file.
 
-1. Download the file [cluster-configuration.yaml](https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/cluster-configuration.yaml) and edit it.
+1. Obtain the `cluster-configuration.yaml` file from the delivery channel and edit it.
 
     ```bash
     vi cluster-configuration.yaml
@@ -93,7 +93,8 @@ By default, ks-installer will install Elasticsearch internally if Events is enab
 3. Execute the following commands to start installation:
 
     ```bash
-    kubectl apply -f https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/kubesphere-installer.yaml
+    # Obtain the YAML files from the delivery channel
+    kubectl apply -f kubesphere-installer.yaml
     
     kubectl apply -f cluster-configuration.yaml
     ```

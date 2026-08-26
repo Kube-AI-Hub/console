@@ -21,7 +21,7 @@ Kube AI Hub 利用 [KubeEdge](https://kubeedge.io/zh/) 将原生容器化应用�
 ## 准备工作
 
 - 您需要启用 [KubeEdge](../../../pluggable-components/kubeedge/)。
-- 为了避免兼容性问题，建议安装 v1.21.x 及以下版本的 Kubernetes。
+- 为了避免兼容性问题，建议安装 v1.28.x 及以上版本的 Kubernetes。
 - 您有一个可用节点作为边缘节点，该节点可以运行 Ubuntu（建议）或 CentOS。本教程以 Ubuntu 18.04 为例。
 - 与 Kubernetes 集群节点不同，边缘节点应部署在单独的网络中。
 

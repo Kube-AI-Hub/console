@@ -21,20 +21,19 @@ weight: 2100
     <th>最低配置</th>
     </tr>
     <tr>
-      <td><b>Ubuntu</b> <i>16.04</i>, <i>18.04</i>, <i>20.04</i>, <i>22.04</i></td>
+      <td><b>Ubuntu</b> <i>22.04</i>, <i>24.04</i>（建议 24.04 及以上）</td>
       <td>2 核 CPU，4 GB 内存，40 GB 磁盘空间</td>
     </tr>
     <tr>
-      <td><b>Debian</b> <i>Buster</i>, <i>Stretch</i></td>
+      <td><b>CentOS</b> <i>9</i> 及以上</td>
       <td>2 核 CPU，4 GB 内存，40 GB 磁盘空间</td>
-    </tr><tr>
-    <td><b>CentOS</b> <i>7.x</i></td>
+    </tr>
+    <tr>
+      <td><b>麒麟 Kylin</b> <i>V10</i></td>
       <td>2 核 CPU，4 GB 内存，40 GB 磁盘空间</td>
-    </tr><tr>
-    <td><b>Red Hat Enterprise Linux 7</b></td>
-      <td>2 核 CPU，4 GB 内存，40 GB 磁盘空间</td>
-    </tr><tr>
-    <td><b>SUSE Linux Enterprise Server 15/openSUSE Leap 15.2</b></td>
+    </tr>
+    <tr>
+      <td><b>openEuler</b> <i>22.03 LTS</i> 及以上</td>
       <td>2 核 CPU，4 GB 内存，40 GB 磁盘空间</td>
     </tr>
   </tbody>
@@ -53,7 +52,7 @@ weight: 2100
 
 ### 容器运行时
 
-您的集群必须有一个可用的容器运行时。如果您使用 KubeKey 搭建集群，KubeKey 会默认安装最新版本的 Docker。或者，您也可以在创建集群前手动安装 Docker 或其他容器运行时。
+集群使用 **containerd** 作为容器运行时，不再支持 Docker。如果您使用 KubeKey 搭建集群，KubeKey 会自动安装 containerd。
 
 <table>
   <tbody>
@@ -62,50 +61,36 @@ weight: 2100
       <th>版本</th>
     </tr>
     <tr>
-      <td>Docker</td>
-      <td>19.3.8 +</td>
-    </tr>
-    <tr>
       <td>containerd</td>
-      <td>最新版</td>
-    </tr><tr>
-      <td>CRI-O（试验版，未经充分测试）</td>
-      <td>最新版</td>
-    </tr><tr>
-      <td>iSula（试验版，未经充分测试）</td>
-      <td>最新版</td>
+      <td>1.7+</td>
     </tr>
   </tbody>
 </table>
 
-
 ### 依赖项要求
 
-KubeKey 可以将 Kubernetes 和 Kube AI Hub 一同安装。针对不同的 Kubernetes 版本，需要安装的依赖项可能有所不同。您可以参考以下列表，查看是否需要提前在节点上安装相关的依赖项。
+KubeKey 可以将 Kubernetes 和 Kube AI Hub 一同安装。根据要安装的 Kubernetes 版本，需要安装的依赖项可能会不同。您可以参考以下列表，查看是否需要提前在节点上安装相关的依赖项。
 
 <table>
   <tbody>
     <tr>
       <th>依赖项</th>
-     <th>Kubernetes 版本 ≥ 1.18</th>
-      <th>Kubernetes 版本 < 1.18</th>
+     <th>Kubernetes 版本 ≥ 1.28</th>
     </tr>
     <tr>
       <td><code>socat</code></td>
      <td>必须</td> 
-      <td>可选但建议</td> 
-     </tr>
+    </tr>
     <tr>
       <td><code>conntrack</code></td>
      <td>必须</td> 
-      <td>可选但建议</td> 
-    </tr><tr>
-    <td><code>ebtables</code></td>
+    </tr>
+    <tr>
+      <td><code>ebtables</code></td>
      <td>可选但建议</td> 
-    <td>可选但建议</td> 
-    </tr><tr>
-    <td><code>ipset</code></td>
-    <td>可选但建议</td> 
+    </tr>
+    <tr>
+      <td><code>ipset</code></td>
      <td>可选但建议</td> 
     </tr>
   </tbody>
@@ -124,82 +109,42 @@ KubeKey 是用 Go 语言开发的一款全新的安装工具，代替了以前�
 {{< notice tip >}}
 
 - 建议您的操作系统处于干净状态（不安装任何其他软件），否则可能会发生冲突。
-- 如果您无法从 `dockerhub.io` 下载容器镜像，建议提前准备仓库的镜像地址（即加速器）。有关更多信息，请参见[为安装配置加速器](../../faq/installation/configure-booster/)。
+- 如果您无法从 `dockerhub.io` 下载容器镜像，建议提前准备仓库的镜像地址（即加速器）。
 
 {{</ notice >}}
 
-## 步骤 2：下载 KubeKey
+## 步骤 2：获取 KubeKey
 
-请按照以下步骤下载 KubeKey。
-
-{{< tabs >}}
-
-{{< tab "如果您能正常访问 GitHub/Googleapis" >}}
-
-从 [GitHub Release Page](https://github.com/kubesphere/kubekey/releases) 下载 KubeKey 或直接使用以下命令(ubuntu使用bash替换sh)。
+KubeKey 已包含在 Kube AI Hub 离线安装包中。解压离线包后，根据您的架构选择对应的二进制文件：
 
 ```bash
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
-```
+# x86_64 架构
+mv kk-x86 kk
 
-{{</ tab >}}
+# ARM64 架构
+mv kk-arm kk
 
-{{< tab "如果您访问 GitHub/Googleapis 受限" >}}
-
-先执行以下命令以确保您从正确的区域下载 KubeKey。
-
-```bash
-export KKZONE=cn
-```
-
-执行以下命令下载 KubeKey。
-
-```bash
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
-```
-
-{{< notice note >}}
-
-在您下载 KubeKey 后，如果您将其传至新的机器，且访问 Googleapis 同样受限，在您执行以下步骤之前请务必再次执行 `export KKZONE=cn` 命令。
-
-{{</ notice >}} 
-
-{{</ tab >}}
-
-{{</ tabs >}}
-
-{{< notice note >}}
-
-执行以上命令会下载最新版 KubeKey，您可以修改命令中的版本号下载指定版本。
-
-{{</ notice >}} 
-
-为 `kk` 添加可执行权限：
-
-```bash
 chmod +x kk
 ```
 
+{{< notice note >}}
+
+离线安装包请从交付渠道获取。包内已包含 Kubernetes v1.34.4、containerd 及所需镜像。
+
+{{</ notice >}}
+
 ## 步骤 3：开始安装
 
-在本快速入门教程中，您只需执行一个命令即可进行安装，其模板如下所示：
+在本快速入门教程中，您只需执行一个命令即可进行安装：
 
 ```bash
-./kk create cluster [--with-kubernetes version] [--with-kubesphere version]
-```
-
-若要同时安装 Kubernetes 和 Kube AI Hub，可参考以下示例命令：
-
-```bash
-./kk create cluster --with-kubernetes v1.22.12 --with-kubesphere v3.4.1
+./kk create cluster -i inventory.yaml -c config.yaml
 ```
 
 {{< notice note >}}
 
-- 安装 Kube AI Hub 3.4 的建议 Kubernetes 版本：v1.20.x、v1.21.x、v1.22.x、v1.23.x、* v1.24.x、* v1.25.x 和 * v1.26.x。带星号的版本可能出现边缘节点部分功能不可用的情况。因此，如需使用边缘节点，推荐安装 v1.23.x。如果不指定 Kubernetes 版本，KubeKey 将默认安装 Kubernetes v1.23.10。有关受支持的 Kubernetes 版本的更多信息，请参见[支持矩阵](../../installing-on-linux/introduction/kubekey/#支持矩阵)。
-
-- 一般来说，对于 All-in-One 安装，您无需更改任何配置。
-- 如果您在这一步的命令中不添加标志 `--with-kubesphere`，则不会部署 Kube AI Hub，KubeKey 将只安装 Kubernetes。如果您添加标志 `--with-kubesphere` 时不指定 Kube AI Hub 版本，则会安装最新版本的 Kube AI Hub。
+- 离线包中包含示例 `inventory.yaml` 和 `config.yaml` 文件。All-in-One 安装只需将单个节点同时配置为 control plane 和 worker 角色。
+- 安装 Kube AI Hub 3.4 的建议 Kubernetes 版本：v1.28.x 及以上，建议 v1.34.x。离线包默认安装 Kubernetes v1.34.4。
 - KubeKey 会默认安装 [OpenEBS](https://openebs.io/) 为开发和测试环境提供 LocalPV 以方便新用户。对于其他存储类型，请参见[持久化存储配置](../../installing-on-linux/persistent-storage-configurations/understand-persistent-storage/)。
 
 {{</ notice >}}
@@ -234,8 +179,6 @@ NOTES：
   2. Please change the default password after login.
 
 #####################################################
-https://www.watering.ai/          20xx-xx-xx xx:xx:xx
-#####################################################
 ```
 
 {{< notice note >}}
@@ -249,7 +192,3 @@ https://www.watering.ai/          20xx-xx-xx xx:xx:xx
 ## 启用可插拔组件（可选）
 
 本指南仅适用于默认的最小化安装。若要在 Kube AI Hub 中启用其他组件，请参见[启用可插拔组件](../../pluggable-components/)。
-
-## 代码演示
-
-<script src="https://asciinema.org/a/362292.js" id="asciicast-362292" async></script>

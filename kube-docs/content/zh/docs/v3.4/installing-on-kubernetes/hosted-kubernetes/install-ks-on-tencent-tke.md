@@ -1,6 +1,6 @@
 ---
 title: "在腾讯云 TKE 安装 Kube AI Hub"
-keywords: "kubesphere, kubernetes, docker, tencent, tke"
+keywords: "kubesphere, kubernetes, tencent, tke"
 description: "介绍如何在腾讯云 TKE 上部署 Kube AI Hub。"
 
 
@@ -14,7 +14,7 @@ weight: 4270
 ### 创建 Kubernetes 集群
 首先按使用环境的资源需求[创建 Kubernetes 集群](https://cloud.tencent.com/document/product/457/32189)，满足以下一些条件即可（如已有环境并满足条件可跳过本节内容）：
 
-- Kube AI Hub 3.4 默认支持的 Kubernetes 版本为 v1.20.x、v1.21.x、* v1.22.x、* v1.23.x、* v1.24.x、* v1.25.x 和 * v1.26.x。带星号的版本可能出现边缘节点部分功能不可用的情况。因此，如需使用边缘节点，推荐安装 v1.21.x；
+- Kube AI Hub 3.4 支持的 Kubernetes 版本为 v1.28.x、v1.29.x、v1.30.x、v1.31.x、v1.32.x、v1.33.x 和 v1.34.x（建议 v1.34.x）；
 - 如果老集群版本不大于1.15.0，需要操作控制台先升级master节点然后升级node节点，依次升级至符合要求版本即可。
 - 工作节点机型配置规格方面选择 `标准型S5` 的 `4核｜8GB` 配置即可，并按需扩展工作节点数量（通常生产环境需要 3 个及以上工作节点）。
 
@@ -29,8 +29,8 @@ weight: 4270
 
 ```bash
 $ kubectl version
-Client Version: version.Info{Major:"1", Minor:"18", GitVersion:"v1.18.4", GitCommit:"c96aede7b5205121079932896c4ad89bb93260af", GitTreeState:"clean", BuildDate:"2020-06-17T11:41:22Z", GoVersion:"go1.13.9", Compiler:"gc", Platform:"linux/amd64"}
-Server Version: version.Info{Major:"1", Minor:"18+", GitVersion:"v1.18.4-tke.2", GitCommit:"f6b0517bc6bc426715a9ff86bd6aef39c81fd64a", GitTreeState:"clean", BuildDate:"2020-08-12T02:18:32Z", GoVersion:"go1.13.15", Compiler:"gc", Platform:"linux/amd64"}
+Client Version: version.Info{Major:"1", Minor:"34", GitVersion:"v1.34.4", GitCommit:"...", GitTreeState:"clean", BuildDate:"2025-xx-xxTxx:xx:xxZ", GoVersion:"go1.23.x", Compiler:"gc", Platform:"linux/amd64"}
+Server Version: version.Info{Major:"1", Minor:"34", GitVersion:"v1.34.4", GitCommit:"...", GitTreeState:"clean", BuildDate:"2025-xx-xxTxx:xx:xxZ", GoVersion:"go1.23.x", Compiler:"gc", Platform:"linux/amd64"}
 ```
 
 
@@ -42,13 +42,14 @@ Server Version: version.Info{Major:"1", Minor:"18+", GitVersion:"v1.18.4-tke.2",
 - 使用 kubectl 执行以下命令安装 Kube AI Hub：
 
 ```bash
-kubectl apply -f https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/kubesphere-installer.yaml
+# 从交付渠道获取 YAML 文件
+kubectl apply -f kubesphere-installer.yaml
 ```
 
-- 下载集群配置文件
+- 获取集群配置文件
 
 ```bash
-wget https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/cluster-configuration.yaml
+# 从交付渠道获取 cluster-configuration.yaml
 ```
 
   {{< notice tip >}}

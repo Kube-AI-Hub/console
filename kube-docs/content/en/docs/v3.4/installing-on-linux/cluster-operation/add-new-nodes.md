@@ -69,9 +69,9 @@ You can skip this step if you already have the configuration file on your machin
    ```bash
    $ kubectl get node
    NAME          STATUS   ROLES           AGE   VERSION
-   master1       Ready    master,worker   20d   v1.17.9
-   node1         Ready    worker          31h   v1.17.9
-   node2         Ready    worker          31h   v1.17.9
+   master1       Ready    master,worker   20d   v1.34.4
+   node1         Ready    worker          31h   v1.34.4
+   node2         Ready    worker          31h   v1.34.4
    ```
 
 ## Add New Master Nodes for High Availability
@@ -119,7 +119,7 @@ The steps of adding master nodes are generally the same as adding worker nodes w
        address: 172.16.0.253
        port: 6443
      kubernetes:
-       version: v1.17.9
+       version: v1.34.4
        imageRepo: kubesphere
        clusterName: cluster.local
        proxyMode: ipvs

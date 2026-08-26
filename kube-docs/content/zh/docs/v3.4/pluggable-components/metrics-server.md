@@ -39,9 +39,9 @@ Kube AI Hub 支持用于[部署](../../project-user-guide/application-workloads/
 
 ### 在 Kubernetes 上安装
 
-当您[在 Kubernetes 上安装 Kube AI Hub](../../installing-on-kubernetes/introduction/overview/) 时，需要先在 [cluster-configuration.yaml](https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/cluster-configuration.yaml) 文件中先启用 Metrics Server组件。
+当您[在 Kubernetes 上安装 Kube AI Hub](../../installing-on-kubernetes/introduction/overview/) 时，需要先在 `cluster-configuration.yaml` 文件中先启用 Metrics Server组件。
 
-1. 下载文件 [cluster-configuration.yaml](https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/cluster-configuration.yaml)，并打开文件进行编辑。
+1. 从交付渠道获取 `cluster-configuration.yaml` 文件，并打开文件进行编辑。
 
     ```bash
     vi cluster-configuration.yaml
@@ -57,7 +57,8 @@ Kube AI Hub 支持用于[部署](../../project-user-guide/application-workloads/
 3. 执行以下命令以开始安装：
 
     ```bash
-    kubectl apply -f https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/kubesphere-installer.yaml
+    # 从交付渠道获取 YAML 文件
+    kubectl apply -f kubesphere-installer.yaml
     
     kubectl apply -f cluster-configuration.yaml
     ```

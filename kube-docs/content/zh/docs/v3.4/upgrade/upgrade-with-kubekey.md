@@ -30,57 +30,25 @@ Kube AI Hub 3.4 对内置角色和自定义角色的授权项做了一些调整�
        - 移除命名空间层级自定义角色授权项：成员管理，角色管理。
        - 升级到 Kube AI Hub 3.4 后，自定义角色会被保留，但是其包含的已被移除的授权项会被删除。
 
-## 下载 KubeKey
+## 获取 KubeKey
 
-升级集群前执行以下命令下载 KubeKey。
-
-{{< tabs >}}
-
-{{< tab "如果您能正常访问 GitHub/Googleapis" >}}
-
-从 [GitHub 发布页面](https://github.com/kubesphere/kubekey/releases)下载 KubeKey 或直接使用以下命令。
+KubeKey 已包含在 Kube AI Hub 离线安装包中。解压离线包后，根据您的架构选择对应的二进制文件：
 
 ```bash
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
-```
+# x86_64 架构
+mv kk-x86 kk
 
-{{</ tab >}}
+# ARM64 架构
+mv kk-arm kk
 
-{{< tab "如果您访问 GitHub/Googleapis 受限" >}}
-
-先执行以下命令以确保您从正确的区域下载 KubeKey。
-
-```bash
-export KKZONE=cn
-```
-
-执行以下命令下载 KubeKey。
-
-```bash
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
-```
-
-{{< notice note >}}
-
-下载 KubeKey 后，如果您将其传至新的机器，且访问 Googleapis 同样受限，请您在执行以下步骤之前务必再次执行 `export KKZONE=cn` 命令。
-
-{{</ notice >}} 
-
-{{</ tab >}}
-
-{{</ tabs >}}
-
-{{< notice note >}}
-
-执行以上命令会下载最新版 KubeKey，您可以修改命令中的版本号以下载指定版本。
-
-{{</ notice >}} 
-
-为 `kk` 添加可执行权限：
-
-```bash
 chmod +x kk
 ```
+
+{{< notice note >}}
+
+离线安装包请从交付渠道获取。包内已包含 Kubernetes v1.34.4、containerd 及所需镜像。
+
+{{</ notice >}}
 
 ## 升级 Kube AI Hub 和 Kubernetes
 
@@ -88,18 +56,18 @@ chmod +x kk
 
 {{< notice info >}}
 
-当升级 Kubernetes 时，KubeKey 将从一个小版本升级到下一个小版本，直到目标版本。例如，您会发现升级过程先从 1.16 先升级到 1.17 然后再升级到 1.18，而不是直接从 1.16 升级到 1.18。
+当升级 Kubernetes 时，KubeKey 将从一个小版本升级到下一个小版本，直到目标版本。例如，您会发现升级过程先从 1.28 先升级到 1.29 然后再升级到 1.30，而不是直接从 1.28 升级到 1.30。
 {{</ notice >}}
 
 ### All-in-One 集群
 
-运行以下命令使用 KubeKey 将您的单节点集群升级至 Kube AI Hub 3.4 和 Kubernetes v1.22.12：
+运行以下命令使用 KubeKey 将您的单节点集群升级至 Kube AI Hub 3.4 和 Kubernetes v1.34.4：
 
 ```bash
-./kk upgrade --with-kubernetes v1.22.12 --with-kubesphere v3.4.1
+./kk upgrade --with-kubernetes v1.34.4 --with-kubesphere v3.4.1
 ```
 
-要将 Kubernetes 升级至特定版本，请在 `--with-kubernetes` 标志后明确指定版本号。以下是可用版本：v1.20.x、v1.21.x、v1.22.x、v1.23.x、* v1.24.x、* v1.25.x 和 * v1.26.x。带星号的版本可能出现边缘节点部分功能不可用的情况。因此，如需使用边缘节点，推荐安装 v1.23.x。
+要将 Kubernetes 升级至特定版本，请在 `--with-kubernetes` 标志后明确指定版本号。以下是可用版本：v1.28.x、v1.29.x、v1.30.x、v1.31.x、v1.32.x、v1.33.x 和 v1.34.x（建议 v1.34.x）。
 
 ### 多节点集群
 
@@ -128,22 +96,22 @@ chmod +x kk
 
 {{< notice note >}}
 
-有关更多信息，请参见[编辑配置文件](../../installing-on-linux/introduction/multioverview/#2-编辑配置文件)，或参考[完整配置文件](https://github.com/kubesphere/kubekey/blob/release-2.2/docs/config-example.md)中的 `Cluster` 部分获取更多信息。
+有关更多信息，请参见[编辑配置文件](../../installing-on-linux/introduction/multioverview/#2-编辑配置文件)。
 
 {{</ notice >}}
 
 #### 步骤 3：升级集群
 
-运行以下命令，将您的集群升级至 Kube AI Hub 3.4 和 Kubernetes v1.22.12：
+运行以下命令，将您的集群升级至 Kube AI Hub 3.4 和 Kubernetes v1.34.4：
 
 ```bash
-./kk upgrade --with-kubernetes v1.22.12 --with-kubesphere v3.4.1 -f sample.yaml
+./kk upgrade --with-kubernetes v1.34.4 --with-kubesphere v3.4.1 -f sample.yaml
 ```
 
-要将 Kubernetes 升级至特定版本，请在 `--with-kubernetes` 标志后明确指定版本号。以下是可用版本：v1.20.x、v1.21.x、v1.22.x、v1.23.x、* v1.24.x、* v1.25.x 和 * v1.26.x。带星号的版本可能出现边缘节点部分功能不可用的情况。因此，如需使用边缘节点，推荐安装 v1.23.x。
+要将 Kubernetes 升级至特定版本，请在 `--with-kubernetes` 标志后明确指定版本号。以下是可用版本：v1.28.x、v1.29.x、v1.30.x、v1.31.x、v1.32.x、v1.33.x 和 v1.34.x（建议 v1.34.x）。
 
 {{< notice note >}}
 
 若要使用 Kube AI Hub 3.4 的新功能，您需要在升级后启用对应的可插拔组件。
 
-{{</ notice >}} 
+{{</ notice >}}

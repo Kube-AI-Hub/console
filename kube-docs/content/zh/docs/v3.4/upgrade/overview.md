@@ -8,13 +8,13 @@ weight: 7100
 
 ## 确定您的升级方案
 
-Kube AI Hub 3.4 与 Kubernetes 1.19.x、1.20.x、1.21.x、* 1.22.x、* 1.23.x、* 1.24.x 兼容：
+Kube AI Hub 3.4 与 Kubernetes 1.28.x、1.29.x、1.30.x、1.31.x、1.32.x、1.33.x、1.34.x 兼容：
 
 - 在您升级集群至 Kube AI Hub 3.4 之前，您的 Kube AI Hub 集群版本必须为 v3.3.x。
 
 - 您可选择只将 Kube AI Hub 升级到 3.4 或者同时升级 Kubernetes（到更高版本）和 Kube AI Hub（到 3.4）。
 
-- 带星号的 Kubernetes 版本可能出现边缘节点部分功能不可用的情况。因此，如需使用边缘节点，推荐安装 Kubernetes v1.21.x 及之前的版本。
+- 建议将 Kubernetes 升级至 v1.34.x 以获得最佳兼容性和功能支持。
 
 ## 升级前
 

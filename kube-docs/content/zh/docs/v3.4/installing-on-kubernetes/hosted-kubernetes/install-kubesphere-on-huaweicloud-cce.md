@@ -1,6 +1,6 @@
 ---
 title: "在华为云 CCE 上安装 Kube AI Hub"
-keywords: "kubesphere, kubernetes, docker, huawei, cce"
+keywords: "kubesphere, kubernetes, huawei, cce"
 description: "了解如何在华为云容器引擎上部署 Kube AI Hub。"
 
 
@@ -15,7 +15,7 @@ weight: 4250
 
 首先按使用环境的资源需求创建 Kubernetes 集群，满足以下一些条件即可（如已有环境并满足条件可跳过本节内容）：
 
-- 如需在 Kubernetes 上安装 Kube AI Hub 3.4，您的 Kubernetes 版本必须为：v1.20.x、v1.21.x、* v1.22.x、* v1.23.x、* v1.24.x、* v1.25.x 和 * v1.26.x。带星号的版本可能出现边缘节点部分功能不可用的情况。因此，如需使用边缘节点，推荐安装 v1.21.x 版本。
+- 如需在 Kubernetes 上安装 Kube AI Hub 3.4，您的 Kubernetes 版本必须为：v1.28.x、v1.29.x、v1.30.x、v1.31.x、v1.32.x、v1.33.x 和 v1.34.x（建议 v1.34.x）。
 - 需要确保 Kubernetes 集群所使用的云主机的网络正常工作，可以通过在创建集群的同时**自动创建**或**使用已有**弹性 IP；或者在集群创建后自行配置网络（如配置 [NAT 网关](https://support.huaweicloud.com/natgateway/)）。
 - 工作节点规格建议选择 `s3.xlarge.2` 的 `4核｜8GB` 配置，并按需扩展工作节点数量（通常生产环境需要 3 个及以上工作节点）。
 
@@ -28,8 +28,8 @@ weight: 4250
 
 ```bash
 $ kubectl version
-Client Version: version.Info{Major:"1", Minor:"18", GitVersion:"v1.18.8", GitCommit:"9f2892aab98fe339f3bd70e3c470144299398ace", GitTreeState:"clean", BuildDate:"2020-08-15T10:08:56Z", GoVersion:"go1.14.7", Compiler:"gc", Platform:"darwin/amd64"}
-Server Version: version.Info{Major:"1", Minor:"17+", GitVersion:"v1.17.9-r0-CCE20.7.1.B003-17.36.3", GitCommit:"136c81cf3bd314fcbc5154e07cbeece860777e93", GitTreeState:"clean", BuildDate:"2020-08-08T06:01:28Z", GoVersion:"go1.13.9", Compiler:"gc", Platform:"linux/amd64"}
+Client Version: version.Info{Major:"1", Minor:"34", GitVersion:"v1.34.4", GitCommit:"...", GitTreeState:"clean", BuildDate:"2025-xx-xxTxx:xx:xxZ", GoVersion:"go1.23.x", Compiler:"gc", Platform:"linux/amd64"}
+Server Version: version.Info{Major:"1", Minor:"34", GitVersion:"v1.34.4", GitCommit:"...", GitTreeState:"clean", BuildDate:"2025-xx-xxTxx:xx:xxZ", GoVersion:"go1.23.x", Compiler:"gc", Platform:"linux/amd64"}
 ```
 
 ## 部署 Kube AI Hub
@@ -72,8 +72,9 @@ volumeBindingMode: Immediate
 接下来就可以使用 [ks-installer](https://github.com/kubesphere/ks-installer) 在已有的 Kubernetes 集群上来部署 Kube AI Hub，建议首先还是以最小功能集进行安装，可执行以下命令：
 
 ```bash
-kubectl apply -f https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/kubesphere-installer.yaml
-kubectl apply -f https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/cluster-configuration.yaml
+# 从交付渠道获取 YAML 文件
+kubectl apply -f kubesphere-installer.yaml
+kubectl apply -f cluster-configuration.yaml
 ```
 
 执行部署命令后，可以进入**工作负载** > **容器组 Pod**，查看 `kubesphere-system` 命名空间下 Pod 的运行状态，以确认最小功能集是否部署成功；其中 `ks-console-*` Pod 进入运行状态后，表示控制台已经可用。

@@ -14,8 +14,8 @@ weight: 7500
 - 您需要有一个运行 Kube AI Hub v3.3.x 的集群。如果您的 Kube AI Hub 是 v3.2.0 或更早的版本，请先升级至 v3.3.x。
 - 请仔细阅读 [3.4.1 版本说明](../../../v3.4/release/release-v341/)。
 - 提前备份所有重要的组件。
-- Docker 仓库。您需要有一个 Harbor 或其他 Docker 仓库。有关更多信息，请参见[准备一个私有镜像仓库](../../installing-on-linux/introduction/air-gapped-installation/#步骤-2准备一个私有镜像仓库)。
-- Kube AI Hub 3.4 支持的 Kubernetes 版本：v1.20.x、v1.21.x、v1.22.x、v1.23.x、* v1.24.x、* v1.25.x 和 * v1.26.x。带星号的版本可能出现边缘节点部分功能不可用的情况。因此，如需使用边缘节点，推荐安装 v1.23.x。
+- 镜像仓库。您需要有一个 Harbor 或其他镜像仓库。有关更多信息，请参见[准备一个私有镜像仓库](../../installing-on-linux/introduction/air-gapped-installation/#步骤-1准备一个私有镜像仓库)。
+- Kube AI Hub 3.4 支持的 Kubernetes 版本：v1.28.x、v1.29.x、v1.30.x、v1.31.x、v1.32.x、v1.33.x 和 v1.34.x（建议 v1.34.x）。
 
 ## 重要提示
 
@@ -32,23 +32,15 @@ Kube AI Hub 3.4 对内置角色和自定义角色的授权项做了一些调整�
 
 当您在离线环境中安装 Kube AI Hub 时，需要事先准备一个包含所有必需镜像的镜像包。
 
-1. 使用以下命令从能够访问互联网的机器上下载镜像清单文件 `images-list.txt`：
-
-   ```bash
-   curl -L -O https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/images-list.txt
-   ```
+1. 从交付渠道获取镜像清单文件 `images-list.txt`。
 
    {{< notice note >}}
 
-   该文件根据不同的模块列出了 `##+modulename` 下的镜像。您可以按照相同的规则把自己的镜像添加到这个文件中。要查看完整文件，请参见[附录](../../installing-on-kubernetes/on-prem-kubernetes/install-ks-on-linux-airgapped/#kubesphere-v332-镜像清单)。
+   该文件根据不同的模块列出了 `##+modulename` 下的镜像。您可以按照相同的规则把自己的镜像添加到这个文件中。
 
-   {{</ notice >}} 
+   {{</ notice >}}
 
-2. 下载 `offline-installation-tool.sh`。
-
-   ```bash
-   curl -L -O https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/offline-installation-tool.sh
-   ```
+2. 从交付渠道获取 `offline-installation-tool.sh`。
 
 3. 使 `.sh` 文件可执行。
 
@@ -59,7 +51,6 @@ Kube AI Hub 3.4 对内置角色和自定义角色的授权项做了一些调整�
 4. 您可以执行命令 `./offline-installation-tool.sh -h` 来查看如何使用脚本：
 
    ```bash
-   root@master:/home/ubuntu# ./offline-installation-tool.sh -h
    Usage:
    
      ./offline-installation-tool.sh [-l IMAGES-LIST] [-d IMAGES-DIR] [-r PRIVATE-REGISTRY] [-v KUBERNETES-VERSION ]
@@ -70,7 +61,7 @@ Kube AI Hub 3.4 对内置角色和自定义角色的授权项做了一些调整�
      -l IMAGES-LIST         : text file with list of images.
      -r PRIVATE-REGISTRY    : target private registry:port.
      -s                     : save model will be applied. Pull the images in the IMAGES-LIST and save images as a tar.gz file.
-     -v KUBERNETES-VERSION  : download kubernetes' binaries. default: v1.17.9
+     -v KUBERNETES-VERSION  : download kubernetes' binaries. default: v1.34.4
      -h                     : usage message
    ```
 
@@ -82,41 +73,37 @@ Kube AI Hub 3.4 对内置角色和自定义角色的授权项做了一些调整�
 
    {{< notice note >}}
 
-   您可以根据需要选择拉取的镜像。例如，如果已经有一个 Kubernetes 集群了，您可以在 `images-list.text` 中删除 `##k8s-images` 和在它下面的相关镜像。
+   您可以根据需要选择拉取的镜像。例如，如果已经有一个 Kubernetes 集群了，您可以在 `images-list.txt` 中删除 `##k8s-images` 和在它下面的相关镜像。
 
-   {{</ notice >}} 
+   {{</ notice >}}
 
 ## 步骤 2：推送镜像至您的私有仓库
 
 将打包的镜像文件传输至您的本地机器，并运行以下命令把它推送至仓库。
 
 ```bash
-./offline-installation-tool.sh -l images-list.txt -d ./kubesphere-images -r dockerhub.kubekey.local
+./offline-installation-tool.sh -l images-list.txt -d ./kubesphere-images -r <registry>
 ```
 
 {{< notice note >}}
 
-命令中的域名是 `dockerhub.kubekey.local`。请确保使用您**自己仓库的地址**。
+命令中的 `<registry>` 是您的镜像仓库地址。请确保使用您**自己仓库的地址**。
 
-{{</ notice >}} 
+{{</ notice >}}
 
 ## 步骤 3：下载 ks-installer
 
 与在现有 Kubernetes 集群上在线安装 Kube AI Hub 相似，您需要事先下载 `kubesphere-installer.yaml`。
 
-1. 执行以下命令下载 ks-installer，并将其传输至您充当任务机的机器，用于安装。
+1. 从交付渠道获取 ks-installer，并将其传输至您充当任务机的机器，用于安装。
 
-   ```bash
-   curl -L -O https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/kubesphere-installer.yaml
-   ```
-   
 2. 验证您已在 `cluster-configuration.yaml` 中的 `spec.local_registry` 字段指定了私有镜像仓库地址。请注意，如果您的已有集群通过离线安装方式搭建，您应该已配置了此地址。如果您的集群采用在线安装方式搭建而需要进行离线升级，执行以下命令编辑您已有 Kube AI Hub 3.4 集群的 `cluster-configuration.yaml` 文件，并添加私有镜像仓库地址：
 
    ```bash
    kubectl edit cc -n kubesphere-system
    ```
 
-   例如，本教程中的仓库地址是 `dockerhub.kubekey.local`，将它用作 `.spec.local_registry` 的值，如下所示：
+   例如，本教程中的仓库地址是 `<registry>`，将它用作 `.spec.local_registry` 的值，如下所示：
 
    ```yaml
    spec:
@@ -124,18 +111,18 @@ Kube AI Hub 3.4 对内置角色和自定义角色的授权项做了一些调整�
        storageClass: ""
      authentication:
        jwtSecret: ""
-     local_registry: dockerhub.kubekey.local # Add this line manually; make sure you use your own registry address.
+     local_registry: <registry> # Add this line manually; make sure you use your own registry address.
    ```
 
 3. 编辑完成后保存 `cluster-configuration.yaml`。使用以下命令将 `ks-installer` 替换为您**自己仓库的地址**。
 
    ```bash
-   sed -i "s#^\s*image: kubesphere.*/ks-installer:.*#        image: dockerhub.kubekey.local/kubesphere/ks-installer:v3.4.1#" kubesphere-installer.yaml
+   sed -i "s#^\s*image: kubesphere.*/ks-installer:.*#        image: <registry>/kubesphere/ks-installer:v3.4.1#" kubesphere-installer.yaml
    ```
 
    {{< notice warning >}}
 
-   命令中的仓库地址是 `dockerhub.kubekey.local`。请确保使用您自己仓库的地址。
+   命令中的仓库地址是 `<registry>`。请确保使用您自己仓库的地址。
 
    {{</ notice >}}
 
@@ -168,8 +155,6 @@ NOTES：
      are up and running.
   2. Please change the default password after login.
 
-#####################################################
-https://www.watering.ai/          20xx-xx-xx xx:xx:xx
 #####################################################
 ```
 

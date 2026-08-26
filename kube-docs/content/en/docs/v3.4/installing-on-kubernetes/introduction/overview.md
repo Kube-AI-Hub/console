@@ -23,9 +23,11 @@ After you make sure your existing Kubernetes cluster meets all the requirements,
 1. Execute the following commands to start installation:
 
    ```bash
-   kubectl apply -f https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/kubesphere-installer.yaml
+   ```bash
+   # Obtain the YAML files from the delivery channel
+   kubectl apply -f kubesphere-installer.yaml
 
-   kubectl apply -f https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/cluster-configuration.yaml
+   kubectl apply -f cluster-configuration.yaml
    ```
 
 2. Inspect the logs of installation:

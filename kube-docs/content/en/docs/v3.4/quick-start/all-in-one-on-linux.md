@@ -1,64 +1,58 @@
 ---
-title: "All-in-One Installation of Kubernetes and Kube AI Hub on Linux"
+title: "All-in-One Installation on Linux"
 keywords: 'Kube AI Hub, Kubernetes, All-in-One, Installation'
-description: 'Install Kube AI Hub on Linux with a minimal installation package. The tutorial serves as a basic kick-starter for you to understand the container platform, paving the way for learning the following guides.'
+description: 'Learn how to install Kube AI Hub on Linux with a minimal installation package. This tutorial serves as the basic knowledge for you to understand the container platform, laying the foundation for learning the following guides.'
 linkTitle: "All-in-One Installation on Linux"
-weight: 2100,
-showSubscribe: true
+weight: 2100
 ---
 
-For those who are new to Kube AI Hub and looking for a quick way to discover the [container platform](https://kubesphere.io/), the all-in-one mode is your best choice to get started. It features rapid deployment and hassle-free configurations with Kube AI Hub and Kubernetes all provisioned on your machine.
-
-## Video Demonstration
-
-{{< youtube PtVQZVb3AgE >}}
+For those who are new to Kube AI Hub and looking for a quick way to get started with the container platform, the all-in-one installation mode is the best choice to help you deploy Kube AI Hub and Kubernetes with zero configuration.
 
 ## Step 1: Prepare a Linux Machine
 
 To get started with all-in-one installation, you only need to prepare one host according to the following requirements for hardware and operating system.
 
-### Hardware recommendations
+### Hardware Recommendations
 
 <table>
   <tbody>
     <tr>
-    <th width='320'>OS</th>
+    <th width='320'>Operating System</th>
     <th>Minimum Requirements</th>
     </tr>
     <tr>
-      <td><b>Ubuntu</b> <i>16.04</i>, <i>18.04</i>, <i>20.04</i>, <i>22.04</i></td>
-      <td>2 CPU cores, 4 GB memory, and 40 GB disk space</td>
+      <td><b>Ubuntu</b> <i>22.04</i>, <i>24.04</i> (24.04 or later recommended)</td>
+      <td>2 CPU cores, 4 GB memory, 40 GB disk space</td>
     </tr>
     <tr>
-      <td><b>Debian</b> <i>Buster</i>, <i>Stretch</i></td>
-      <td>2 CPU cores, 4 GB memory, and 40 GB disk space</td>
-    </tr><tr>
-    <td><b>CentOS</b> <i>7.x</i></td>
-      <td>2 CPU cores, 4 GB memory, and 40 GB disk space</td>
-    </tr><tr>
-    <td><b>Red Hat Enterprise Linux 7</b></td>
-      <td>2 CPU cores, 4 GB memory, and 40 GB disk space</td>
-    </tr><tr>
-    <td><b>SUSE Linux Enterprise Server 15/openSUSE Leap 15.2</b></td>
-      <td>2 CPU cores, 4 GB memory, and 40 GB disk space</td>
+      <td><b>CentOS</b> <i>9</i> or later</td>
+      <td>2 CPU cores, 4 GB memory, 40 GB disk space</td>
+    </tr>
+    <tr>
+      <td><b>Kylin</b> <i>V10</i></td>
+      <td>2 CPU cores, 4 GB memory, 40 GB disk space</td>
+    </tr>
+    <tr>
+      <td><b>openEuler</b> <i>22.03 LTS</i> or later</td>
+      <td>2 CPU cores, 4 GB memory, 40 GB disk space</td>
     </tr>
   </tbody>
 </table>
 
 {{< notice note >}}
 
-The preceding system requirements and the following instructions are for the default minimal installation without any pluggable components enabled. If your machine has at least 8 CPU cores and 16 GB memory, it is recommended that you enable all components. For more information, see [Enable Pluggable Components](../../pluggable-components/).
+The system requirements above and the following instructions apply to minimal default installation without any optional components enabled. If your machine has at least 8 CPU cores and 16 GB memory, it is recommended that you enable all components. For more information, see [Enable Pluggable Components](../../pluggable-components/).
 
 {{</ notice >}}
 
-### Node requirements
+### Node Requirements
 
-- The node can be accessed through `SSH`.
-- `sudo`/`curl`/`openssl`/`tar` should be used.
+- The node must be accessible through `SSH`.
+- `sudo`/`curl`/`openssl`/`tar` should be used on the node.
 
-### Container runtimes
+### Container Runtimes
 
-Your cluster must have an available container runtime. If you use KubeKey to set up a cluster, KubeKey installs the latest version of Docker by default. Alternatively, you can manually install Docker or other container runtimes before you create a cluster.
+The cluster uses **containerd** as the container runtime. Docker is no longer supported. If you use KubeKey to set up a cluster, KubeKey will install containerd automatically.
 
 <table>
   <tbody>
@@ -67,49 +61,36 @@ Your cluster must have an available container runtime. If you use KubeKey to set
       <th>Version</th>
     </tr>
     <tr>
-      <td>Docker</td>
-      <td>19.3.8 +</td>
-    </tr>
-    <tr>
       <td>containerd</td>
-      <td>Latest</td>
-    </tr><tr>
-      <td>CRI-O (experimental, not fully tested)</td>
-      <td>Latest</td>
-    </tr><tr>
-      <td>iSula (experimental, not fully tested)</td>
-      <td>Latest</td>
+      <td>1.7+</td>
     </tr>
   </tbody>
 </table>
 
-### Dependency requirements
+### Dependency Requirements
 
-KubeKey can install Kubernetes and Kube AI Hub together. The dependency that needs to be installed may be different based on the Kubernetes version to be installed. You can refer to the following list to see if you need to install relevant dependencies on your node in advance.
+KubeKey can install Kubernetes and Kube AI Hub together. The dependency that needs to be installed may be different based on the Kubernetes version to be installed. You can refer to the list below to see if you need to install relevant dependencies on your node in advance.
 
 <table>
   <tbody>
     <tr>
       <th>Dependency</th>
-     <th>Kubernetes Version ≥ 1.18</th>
-      <th>Kubernetes Version < 1.18</th>
+     <th>Kubernetes Version ≥ 1.28</th>
     </tr>
     <tr>
       <td><code>socat</code></td>
      <td>Required</td> 
-      <td>Optional but recommended</td> 
-     </tr>
+    </tr>
     <tr>
       <td><code>conntrack</code></td>
      <td>Required</td> 
-      <td>Optional but recommended</td> 
-    </tr><tr>
-    <td><code>ebtables</code></td>
+    </tr>
+    <tr>
+      <td><code>ebtables</code></td>
      <td>Optional but recommended</td> 
-    <td>Optional but recommended</td> 
-    </tr><tr>
-    <td><code>ipset</code></td>
-    <td>Optional but recommended</td> 
+    </tr>
+    <tr>
+      <td><code>ipset</code></td>
      <td>Optional but recommended</td> 
     </tr>
   </tbody>
@@ -117,109 +98,68 @@ KubeKey can install Kubernetes and Kube AI Hub together. The dependency that nee
 
 {{< notice info >}}
 
-Developed in Go, KubeKey represents a brand-new installation tool as a replacement for the ansible-based installer used before. KubeKey provides users with flexible installation choices, as they can install Kube AI Hub and Kubernetes separately or install them at one time, which is convenient and efficient.
+KubeKey is a brand-new installation tool developed in Go, replacing the previous ansible-based installer. KubeKey provides flexible installation options. You can install Kubernetes and Kube AI Hub separately or together, which is convenient and efficient.
 
 {{</ notice >}}
 
-### Network and DNS requirements
+### Network and DNS Requirements
 
-- Make sure the DNS address in `/etc/resolv.conf` is available. Otherwise, it may cause some issues of DNS in the cluster.
-- If your network configuration uses firewall rules or security groups, you must ensure infrastructure components can communicate with each other through specific ports. It is recommended that you turn off the firewall. For more information, see [Port Requirements](../../installing-on-linux/introduction/port-firewall/).
-- Supported CNI plugins: Calico and Flannel. Others (such as Cilium and Kube-OVN) may also work but note that they have not been fully tested.
+{{< content "common/network-requirements.md" >}}
 
 {{< notice tip >}}
 
-- It is recommended that your OS be clean (without any other software installed). Otherwise, there may be conflicts.
-- It is recommended that a registry mirror (a booster) be prepared if you have trouble downloading images from `dockerhub.io`. For more information, see [Configure a Booster for Installation](../../faq/installation/configure-booster/).
+- It's recommended that your OS be clean (without any other software installed). Otherwise, there may be conflicts.
+- If you have trouble downloading images from `dockerhub.io`, it is recommended that you prepare a registry mirror (booster) in advance.
 
 {{</ notice >}}
 
-## Step 2: Download KubeKey
+## Step 2: Get KubeKey
 
-Perform the following steps to download KubeKey.
-
-{{< tabs >}}
-
-{{< tab "Good network connections to GitHub/Googleapis" >}}
-
-Download KubeKey from its [GitHub Release Page](https://github.com/kubesphere/kubekey/releases) or run the following command:
+KubeKey is included in the Kube AI Hub offline installation package. After extracting the package, select the binary for your architecture:
 
 ```bash
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
-```
+# x86_64 architecture
+mv kk-x86 kk
 
-{{</ tab >}}
+# ARM64 architecture
+mv kk-arm kk
 
-{{< tab "Poor network connections to GitHub/Googleapis" >}}
-
-Run the following command first to make sure you download KubeKey from the correct zone.
-
-```bash
-export KKZONE=cn
-```
-
-Run the following command to download KubeKey:
-
-```bash
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
-```
-
-{{< notice note >}}
-
-After you download KubeKey, if you transfer it to a new machine also with poor network connections to Googleapis, you must run `export KKZONE=cn` again before you proceed with the following steps.
-
-{{</ notice >}} 
-
-{{</ tab >}}
-
-{{</ tabs >}}
-
-{{< notice note >}}
-
-The commands above download the latest release of KubeKey. You can change the version number in the command to download a specific version.
-
-{{</ notice >}} 
-
-Make `kk` executable:
-
-```bash
 chmod +x kk
 ```
 
+{{< notice note >}}
+
+Obtain the offline installation package from your delivery channel. The package includes Kubernetes v1.34.4, containerd, and required images.
+
+{{</ notice >}}
+
 ## Step 3: Get Started with Installation
 
-You only need to run one command for all-in-one installation. The template is as follows:
+In this quick start tutorial, you only need to execute one command for installation:
 
 ```bash
-./kk create cluster [--with-kubernetes version] [--with-kubesphere version]
-```
-
-To create a Kubernetes cluster with Kube AI Hub installed, refer to the following command as an example:
-
-```bash
-./kk create cluster --with-kubernetes v1.22.12 --with-kubesphere v3.4.1
+./kk create cluster -i inventory.yaml -c config.yaml
 ```
 
 {{< notice note >}}
 
-- Recommended Kubernetes versions for Kube AI Hub 3.4: v1.20.x, v1.21.x, v1.22.x, v1.23.x, * v1.24.x, * v1.25.x, and * v1.26.x. For Kubernetes versions with an asterisk, some features of edge nodes may be unavailable due to incompatability. Therefore, if you want to use edge nodes, you are advised to install Kubernetes v1.23.x. If you do not specify a Kubernetes version, KubeKey installs Kubernetes v1.23.10 by default. For more information about supported Kubernetes versions, see [Support Matrix](../../installing-on-linux/introduction/kubekey/#support-matrix).
-- For all-in-one installation, you do not need to change any configuration.
-- If you do not add the flag `--with-kubesphere` in the command in this step, Kube AI Hub will not be deployed. KubeKey will install Kubernetes only. If you add the flag `--with-kubesphere` without specifying a Kube AI Hub version, the latest version of Kube AI Hub will be installed.
-- KubeKey will install [OpenEBS](https://openebs.io/) to provision LocalPV for the development and testing environment by default, which is convenient for new users. For other storage classes, see [Persistent Storage Configurations](../../installing-on-linux/persistent-storage-configurations/understand-persistent-storage/).
+- The offline package contains example `inventory.yaml` and `config.yaml` files. For all-in-one installation, configure the single node with both control plane and worker roles.
+- Recommended Kubernetes versions for Kube AI Hub 3.4: v1.28.x or later, v1.34.x recommended. The offline package installs Kubernetes v1.34.4 by default.
+- KubeKey will install [OpenEBS](https://openebs.io/) to provision LocalPV for the development and testing environment by default, which is convenient for new users. For other storage types, see [Persistent Storage Configurations](../../installing-on-linux/persistent-storage-configurations/understand-persistent-storage/).
 
 {{</ notice >}}
 
-After you run the command, you will see a table for environment check. For details, see [Node requirements](#node-requirements) and [Dependency requirements](#dependency-requirements). Type `yes` to continue.
+After you execute the command, KubeKey will check your installation environment and show the results in a table. For more information, see [Node Requirements](#node-requirements) and [Dependency Requirements](#dependency-requirements). Enter `yes` to continue the installation process.
 
 ## Step 4: Verify the Installation
 
-Run the following command to check the result.
+Enter the following command to check the installation result.
 
 ```bash
 kubectl logs -n kubesphere-system $(kubectl get pod -n kubesphere-system -l 'app in (ks-install, ks-installer)' -o jsonpath='{.items[0].metadata.name}') -f
 ```
 
-The output displays the IP address and port number of the web console, which is exposed through `NodePort 30880` by default. Now, you can access the console at `<NodeIP>:30880` with the default account and password (`admin/P@88w0rd`).
+The output displays the IP address and port number of the web console, which is exposed through NodePort `30880` by default. Now, you can access the console at `<NodeIP>:30880` with the default account and password (`admin/P@88w0rd`).
 
 ```bash
 #####################################################
@@ -239,8 +179,6 @@ NOTES：
   2. Please change the default password after login.
 
 #####################################################
-https://www.watering.ai/          20xx-xx-xx xx:xx:xx
-#####################################################
 ```
 
 {{< notice note >}}
@@ -249,11 +187,8 @@ You may need to configure port forwarding rules and open the port in your securi
 
 {{</ notice >}}
 
-After logging in to the console, you can check the status of different components in **System Components**. You may need to wait for some components to be up and running if you want to use related services. You can also use `kubectl get pod --all-namespaces` to inspect the running status of Kube AI Hub workloads.
+After logging in to the console, you can check the status of different components in **System Components**. You may need to wait for some components to be up and running if you want to use related services. You can also use `kubectl get pod --all-namespaces` to check the running status of Kube AI Hub components.
 
 ## Enable Pluggable Components (Optional)
 
-This guide is used only for the minimal installation by default. For more information about how to enable other components in Kube AI Hub, see [Enable Pluggable Components](../../pluggable-components/).
-
-## Code Demonstration
-<script src="https://asciinema.org/a/379741.js" id="asciicast-379741" async></script>
+This guide is only used for minimal installation by default. To enable other components in Kube AI Hub, see [Enable Pluggable Components](../../pluggable-components/).

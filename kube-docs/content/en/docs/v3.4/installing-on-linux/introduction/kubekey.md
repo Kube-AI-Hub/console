@@ -1,89 +1,67 @@
 ---
 title: "KubeKey"
 keywords: 'KubeKey, Installation, Kube AI Hub'
-description: 'Understand what KubeKey is and how it works to help you create, scale and upgrade your Kubernetes cluster.'
+description: 'Learn the KubeKey concept and how KubeKey helps you create, scale, and upgrade Kubernetes clusters.'
 linkTitle: "KubeKey"
 weight: 3120
 ---
 
-Developed in Go, [KubeKey](https://github.com/kubesphere/kubekey) represents a brand-new installation tool as a replacement for the ansible-based installer used before. KubeKey provides you with flexible installation choices, as you can install Kubernetes only or install both Kubernetes and Kube AI Hub.
+KubeKey (developed in Go) is a brand-new installation tool that replaces the previous ansible-based installer. KubeKey provides flexible installation options. You can install Kubernetes only, or install Kubernetes and Kube AI Hub together.
 
-There are several scenarios to use KubeKey:
+KubeKey usage scenarios:
 
 - Install Kubernetes only;
-- Install Kubernetes and Kube AI Hub together in one command;
-- Scale a cluster;
-- Upgrade a cluster;
-- Install Kubernetes-related add-ons (Chart or YAML).
+- Install Kubernetes and Kube AI Hub together with one command;
+- Scale clusters;
+- Upgrade clusters;
+- Install Kubernetes-related plugins (Chart or YAML).
 
-## How Does KubeKey Work
+## How KubeKey Works
 
-After you download KubeKey, you use an executable called `kk` to perform different operations. No matter you use it to create, scale or upgrade a cluster, you must prepare a configuration file using `kk` beforehand. This configuration file contains basic parameters of your cluster, such as host information, network configurations (CNI plugin and Pod and Service CIDR), registry mirrors, add-ons (YAML or Chart) and pluggable component options (if you install Kube AI Hub). For more information, see [an example configuration file](https://github.com/kubesphere/kubekey/blob/release-2.2/docs/config-example.md).
+KubeKey is included in the Kube AI Hub offline installation package. After extracting the package, you can use the executable `kk` for different operations. Whether you use it to create, scale, or upgrade a cluster, you must prepare configuration files first. The configuration files contain basic cluster parameters such as host information, network configuration (CNI plugin, Pod and Service CIDR), registry mirrors, plugins (YAML or Chart), and pluggable component options (if you install Kube AI Hub).
 
-With the configuration file in place, you execute the `./kk` command with varied flags for different operations. After that, KubeKey automatically installs Docker and pulls all the necessary images for installation. When the installation is complete, you can inspect installation logs.
+After preparing the configuration files, you use the `./kk` command with different flags for different operations. KubeKey automatically installs containerd and pulls all necessary images for installation. After installation, you can also check the installation logs.
 
 ## Why KubeKey
 
-- The previous ansible-based installer has a bunch of software dependencies such as Python. KubeKey is developed in Go language to get rid of the problem in a variety of environments, making sure the installation is successful.
-- KubeKey supports multiple installation options, such as [all-in-one installation](../../../quick-start/all-in-one-on-linux/), [multi-node installation](../multioverview/), and [air-gapped installation](../air-gapped-installation/).
-- KubeKey uses Kubeadm to install Kubernetes clusters on nodes in parallel as much as possible in order to reduce installation complexity and improve efficiency. It greatly saves installation time compared to the older installer.
-- KubeKey aims to install clusters as an object, i.e., CaaO.
+- The previous ansible-based installer depended on many software packages such as Python. KubeKey is developed in Go, which eliminates issues in various environments and ensures successful installation.
+- KubeKey supports multiple installation options, such as [All-in-One](../../../quick-start/all-in-one-on-linux/), [Multi-node Installation](../multioverview/), and [Air-gapped Installation](../air-gapped-installation/).
+- KubeKey uses Kubeadm to install Kubernetes clusters in parallel on nodes as much as possible, making installation easier and more efficient. It greatly saves installation time compared to the old installer.
+- KubeKey provides [built-in high availability mode](../../high-availability-configurations/internal-ha-configuration/), supporting one-click installation of HA Kubernetes clusters.
+- KubeKey is designed to install clusters as objects, i.e., CaaO.
 
-## Download KubeKey
+## Get KubeKey
 
-{{< tabs >}}
-
-{{< tab "Good network connections to GitHub/Googleapis" >}}
-
-Download KubeKey from its [GitHub Release Page](https://github.com/kubesphere/kubekey/releases) or use the following command directly.
+KubeKey is included in the Kube AI Hub offline installation package and does not need to be downloaded separately. After extracting the package, select the binary for your architecture:
 
 ```bash
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
-```
+# x86_64 architecture
+mv kk-x86 kk
 
-{{</ tab >}}
+# ARM64 architecture
+mv kk-arm kk
 
-{{< tab "Poor network connections to GitHub/Googleapis" >}}
-
-Run the following command first to make sure you download KubeKey from the correct zone.
-
-```bash
-export KKZONE=cn
-```
-
-Run the following command to download KubeKey:
-
-```bash
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
+chmod +x kk
 ```
 
 {{< notice note >}}
 
-After you download KubeKey, if you transfer it to a new machine also with poor network connections to Googleapis, you must run `export KKZONE=cn` again before you proceed with the steps below.
-
-{{</ notice >}} 
-
-{{</ tab >}}
-
-{{</ tabs >}}
-
-{{< notice note >}}
-
-The commands above download the latest release of KubeKey. You can change the version number in the command to download a specific version.
+Obtain the offline installation package from your delivery channel. The package includes Kubernetes v1.34.4, containerd, and required images.
 
 {{</ notice >}}
 
 ## Support Matrix
 
-If you want to use KubeKey to install both Kubernetes and Kube AI Hub 3.4, see the following table of all supported Kubernetes versions.
+To use KubeKey to install Kubernetes and Kube AI Hub 3.4, see the table below for all supported Kubernetes versions.
 
-| Kube AI Hub version | Supported Kubernetes versions                                |
-| ------------------ | ------------------------------------------------------------ |
-| v3.4.1             | v1.21.x,  v1.22.x,  v1.23.x, * v1.24.x, * v1.25.x, and * v1.26.x |
+| Kube AI Hub Version | Supported Kubernetes Versions |
+| ------------------- | ----------------------------- |
+| v3.4                | v1.28.x, v1.29.x, v1.30.x, v1.31.x, v1.32.x, v1.33.x, v1.34.x (v1.34.x recommended) |
 
-{{< notice note >}} 
+{{< notice note >}}
 
-- You can also run `./kk version --show-supported-k8s` to see all supported Kubernetes versions that can be installed by KubeKey.
-- The Kubernetes versions that can be installed using KubeKey are different from the Kubernetes versions supported by Kube AI Hub 3.4. If you want to [install Kube AI Hub 3.4 on an existing Kubernetes cluster](../../../installing-on-kubernetes/introduction/overview/), your Kubernetes version must be v1.21.x, v1.22.x, v1.23.x, * v1.24.x, * v1.25.x, and * v1.26.x. For Kubernetes versions with an asterisk, some features of edge nodes may be unavailable due to incompatability. Therefore, if you want to use edge nodes, you are advised to install Kubernetes v1.23.x.
+- You can also run `./kk version --show-supported-k8s` to see all supported Kubernetes versions that can be installed with KubeKey.
+- The offline installation package installs Kubernetes v1.34.4 by default.
+- To [install Kube AI Hub 3.4 on an existing Kubernetes cluster](../../../installing-on-kubernetes/introduction/overview/), your Kubernetes version must be v1.28.x or later.
 
 {{</ notice >}}

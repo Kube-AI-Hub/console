@@ -57,9 +57,9 @@ az aks get-credentials --resource-group Kube AI HubRG --name KuberSphereCluster
 ```bash
 $ kubectl get nodes
 NAME                                STATUS   ROLES   AGE   VERSION
-aks-nodepool1-27194461-vmss000000   Ready    agent   77s   v1.17.13
-aks-nodepool1-27194461-vmss000001   Ready    agent   63s   v1.17.13
-aks-nodepool1-27194461-vmss000002   Ready    agent   65s   v1.17.13
+aks-nodepool1-27194461-vmss000000   Ready    agent   77s   v1.34.4
+aks-nodepool1-27194461-vmss000001   Ready    agent   63s   v1.34.4
+aks-nodepool1-27194461-vmss000002   Ready    agent   65s   v1.34.4
 ```
 
 ### 在门户中检查 Azure 资源
@@ -98,9 +98,10 @@ Azure Kubernetes Services 本身将放置在`Kube AI HubRG`中。
 请使用以下命令开始部署 Kube AI Hub。
 
 ```bash
-kubectl apply -f https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/kubesphere-installer.yaml
+# 从交付渠道获取 YAML 文件
+kubectl apply -f kubesphere-installer.yaml
 
-kubectl apply -f https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/cluster-configuration.yaml
+kubectl apply -f cluster-configuration.yaml
 ```
 
 可以通过以下命令检查安装日志：

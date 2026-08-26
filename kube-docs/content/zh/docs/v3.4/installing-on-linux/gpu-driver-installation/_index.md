@@ -26,7 +26,7 @@ weight: 3170
 ## 通用前提
 
 - 具有 `root` 或 `sudo` 权限
-- NVIDIA GPU 节点建议使用 **Ubuntu 22.04/24.04**（deb 包）或 **RHEL 8/9** 及兼容发行版（rpm 包）；昇腾 NPU 节点请参考对应子文档
+- NVIDIA GPU 节点建议使用 **Ubuntu 22.04/24.04**（deb 包）或 **RHEL 8/9** 及兼容发行版（rpm 包）；昇腾 NPU 节点支持 **Ubuntu 22.04/24.04**、**CentOS 9+**、**麒麟 Kylin V10**、**openEuler 22.03 LTS+**，请参考对应子文档
 - 所有节点时间已同步（参见[时间同步配置](../introduction/time-synchronization/)）
 - 安装包版本需与目标硬件型号、操作系统及内核版本匹配；部署时请根据实际环境选择对应版本
 

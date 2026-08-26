@@ -66,45 +66,21 @@ weight: 3320
 
 根据以下步骤在任务机上下载 [KubeKey](../../../installing-on-linux/introduction/kubekey/)。
 
-{{< tabs >}}
-
-{{< tab "如果您能够正常访问 GitHub/Googleapis" >}}
-
-从 [GitHub Release Page](https://github.com/kubesphere/kubekey/releases) 下载 KubeKey 或者直接运行以下命令。
+KubeKey 已内置在 Kube AI Hub 离线安装包中，解压后根据架构选择二进制文件：
 
 ```bash
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
-```
+# x86_64 架构
+mv kk-x86 kk
 
-{{</ tab >}}
+# ARM64 架构
+mv kk-arm kk
 
-{{< tab "如果您访问 GitHub/Googleapis 受限" >}}
-
-首先运行以下命令，确保您从正确的区域下载 KubeKey。
-
-```bash
-export KKZONE=cn
-```
-
-运行以下命令下载 KubeKey：
-
-```bash
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
+chmod +x kk
 ```
 
 {{< notice note >}}
 
-下载 KubeKey 之后，如果您将其转移到访问 Googleapis 受限的新机器上，请务必再次运行 `export KKZONE=cn`，然后继续执行以下步骤。
-
-{{</ notice >}} 
-
-{{</ tab >}}
-
-{{</ tabs >}}
-
-{{< notice note >}}
-
-通过以上的命令，可以下载 KubeKey 的最新版本。您可以更改命令中的版本号来下载特定的版本。
+请从交付渠道获取离线安装包。离线包中已包含 Kubernetes v1.34.4、containerd 及所需镜像。
 
 {{</ notice >}}
 
@@ -124,7 +100,7 @@ chmod +x kk
 
    {{< notice note >}}
 
-   - 安装 Kube AI Hub 3.4 的建议 Kubernetes 版本：v1.20.x、v1.21.x、v1.22.x、v1.23.x、* v1.24.x、* v1.25.x 和 * v1.26.x。带星号的版本可能出现边缘节点部分功能不可用的情况。因此，如需使用边缘节点，推荐安装 v1.23.x。如果不指定 Kubernetes 版本，KubeKey 将默认安装 Kubernetes v1.23.10。有关受支持的 Kubernetes 版本的更多信息，请参见[支持矩阵](../../../installing-on-linux/introduction/kubekey/#支持矩阵)。
+   - 安装 Kube AI Hub 3.4 的建议 Kubernetes 版本：v1.28.x、v1.29.x、v1.30.x、v1.31.x、v1.32.x、v1.33.x 和 v1.34.x（建议 v1.34.x）。如果不指定 Kubernetes 版本，KubeKey 将默认安装 Kubernetes v1.34.4。有关受支持的 Kubernetes 版本的更多信息，请参见[支持矩阵](../../../installing-on-linux/introduction/kubekey/#支持矩阵)。
 
    - 如果您在此步骤的命令中不添加标志 `--with-kubesphere`，则不会部署 Kube AI Hub，只能使用配置文件中的 `addons` 字段安装，或者在您后续使用 `./kk create cluster` 命令时再次添加这个标志。
    - 如果您添加标志 `--with-kubesphere` 时不指定 Kube AI Hub 版本，则会安装最新版本的 Kube AI Hub。

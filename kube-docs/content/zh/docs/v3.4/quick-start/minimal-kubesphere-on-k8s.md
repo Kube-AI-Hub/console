@@ -10,7 +10,7 @@ weight: 2200
 
 ## 准备工作
 
-- 您的 Kubernetes 版本必须为：v1.20.x、v1.21.x、v1.22.x、v1.23.x、* v1.24.x、* v1.25.x 和 * v1.26.x。带星号的版本可能出现边缘节点部分功能不可用的情况。因此，如需使用边缘节点，推荐安装 v1.23.x。
+- 您的 Kubernetes 版本必须为：v1.28.x、v1.29.x、v1.30.x、v1.31.x、v1.32.x、v1.33.x 和 v1.34.x（建议 v1.34.x）。
 - 确保您的机器满足最低硬件要求：CPU > 1 核，内存 > 2 GB。
 - 在安装之前，需要配置 Kubernetes 集群中的**默认**存储类型。
 
@@ -28,9 +28,10 @@ weight: 2200
 1. 执行以下命令开始安装：
 
     ```bash
-    kubectl apply -f https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/kubesphere-installer.yaml
+    # 从交付渠道获取 YAML 文件
+    kubectl apply -f kubesphere-installer.yaml
     
-    kubectl apply -f https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/cluster-configuration.yaml
+    kubectl apply -f cluster-configuration.yaml
     ```
 
 2. 检查安装日志：

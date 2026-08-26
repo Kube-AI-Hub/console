@@ -1,6 +1,6 @@
 ---
 title: "在阿里云 ACK 上安装 Kube AI Hub"
-keywords: "kubesphere, kubernetes, docker, aliyun, ack"
+keywords: "kubesphere, kubernetes, aliyun, ack"
 description: "了解如何在阿里云容器服务 ACK 上部署 Kube AI Hub。"
 
 
@@ -15,7 +15,7 @@ weight: 4250
 
 首先按使用环境的资源需求创建 Kubernetes 集群，满足以下一些条件即可（如已有环境并满足条件可跳过本节内容）：
 
-- Kube AI Hub 3.4 默认支持的 Kubernetes 版本为 v1.20.x、v1.21.x、* v1.22.x、* v1.23.x、* v1.24.x、* v1.25.x 和 * v1.26.x。带星号的版本可能出现边缘节点部分功能不可用的情况。因此，如需使用边缘节点，推荐安装 v1.21.x；
+- Kube AI Hub 3.4 支持的 Kubernetes 版本为 v1.28.x、v1.29.x、v1.30.x、v1.31.x、v1.32.x、v1.33.x 和 v1.34.x（建议 v1.34.x）；
 - 需要确保 Kubernetes 集群所使用的 ECS 实例的网络正常工作，可以通过在创建集群的同时**自动创建**或**使用已有**弹性 IP；或者在集群创建后自行配置网络（如配置 [NAT 网关](https://www.aliyun.com/product/network/nat/)）；
 - 小规模场景下工作节点规格建议选择 `4核｜8GB` 配置，不推荐`2核｜4GB` ，并按需扩展工作节点数量（通常生产环境需要 3 个及以上工作节点），详情可参考[最佳实践- ECS 选型](https://help.aliyun.com/document_detail/98886.html)。
 
@@ -78,9 +78,9 @@ weight: 4250
 ```bash
 shell@Alicloud:~$ kubectl get nodes -o wide
 NAME                       STATUS   ROLES    AGE   VERSION            INTERNAL-IP    EXTERNAL-IP   OS-IMAGE                KERNEL-VERSION                CONTAINER-RUNTIME
-cn-shenzhen.192.168.0.35   Ready    <none>   15m   v1.18.8-aliyun.1   192.168.0.35   <none>        CentOS Linux 7 (Core)   3.10.0-1127.19.1.el7.x86_64   docker://19.3.5
-cn-shenzhen.192.168.0.36   Ready    <none>   15m   v1.18.8-aliyun.1   192.168.0.36   <none>        CentOS Linux 7 (Core)   3.10.0-1127.19.1.el7.x86_64   docker://19.3.5
-cn-shenzhen.192.168.0.37   Ready    <none>   15m   v1.18.8-aliyun.1   192.168.0.37   <none>        CentOS Linux 7 (Core)   3.10.0-1127.19.1.el7.x86_64   docker://19.3.5
+cn-shenzhen.192.168.0.35   Ready    <none>   15m   v1.34.4-aliyun.1   192.168.0.35   <none>        Ubuntu 24.04 LTS   6.8.0-31-generic   containerd://1.7.20
+cn-shenzhen.192.168.0.36   Ready    <none>   15m   v1.34.4-aliyun.1   192.168.0.36   <none>        Ubuntu 24.04 LTS   6.8.0-31-generic   containerd://1.7.20
+cn-shenzhen.192.168.0.37   Ready    <none>   15m   v1.34.4-aliyun.1   192.168.0.37   <none>        Ubuntu 24.04 LTS   6.8.0-31-generic   containerd://1.7.20
 ```
 
 ## 部署 Kube AI Hub
@@ -142,8 +142,7 @@ alicloud-disk-topology               diskplugin.csi.alibabacloud.com   Delete   
 1.使用 [ks-installer](https://github.com/kubesphere/ks-installer) 在已有的 Kubernetes 集群上来部署 Kube AI Hub，下载 YAML 文件:
 
 ```
-wget https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/kubesphere-installer.yaml
-wget https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/cluster-configuration.yaml
+从交付渠道获取 YAML 文件：
 ```
 
 

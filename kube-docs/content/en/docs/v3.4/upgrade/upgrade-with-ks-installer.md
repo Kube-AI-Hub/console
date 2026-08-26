@@ -13,7 +13,7 @@ ks-installer is recommended for users whose Kubernetes clusters were not set up 
 - You need to have a Kube AI Hub cluster running v3.3.x. If your Kube AI Hub version is v3.2.x or earlier, upgrade to v3.3.x first.
 - Read [Release Notes for 3.4.1](../../../v3.4/release/release-v341/) carefully.
 - Back up any important component beforehand.
-- Supported Kubernetes versions of Kube AI Hub 3.4: v1.20.x, v1.21.x, v1.22.x, v1.23.x, * v1.24.x, * v1.25.x, and * v1.26.x. For Kubernetes versions with an asterisk, some features of edge nodes may be unavailable due to incompatability. Therefore, if you want to use edge nodes, you are advised to install Kubernetes v1.23.x.
+- Supported Kubernetes versions of Kube AI Hub 3.4: v1.28.x, v1.29.x, v1.30.x, v1.31.x, v1.32.x, v1.33.x, and v1.34.x (v1.34.x recommended).
 
 ## Major Updates
 
@@ -32,7 +32,8 @@ In Kube AI Hub 3.4.1, some changes have made on built-in roles and permissions o
 Run the following command to upgrade your cluster.
 
 ```bash
-kubectl apply -f https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/kubesphere-installer.yaml  --force
+# Obtain the YAML files from the delivery channel
+kubectl apply -f kubesphere-installer.yaml --force
 ```
 
 ## Enable Pluggable Components

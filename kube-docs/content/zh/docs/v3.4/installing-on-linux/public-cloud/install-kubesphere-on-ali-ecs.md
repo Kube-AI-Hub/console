@@ -24,7 +24,7 @@ Weight: 3240
 
 ## 创建主机
 
-本示例创建 SLB + 6 台 **CentOS Linux release 7.6.1810 (Core)** 的虚拟机，每台配置为 **2 Core 4 GB 40 G**，仅用于最小化安装，若资源充足建议使用每台配置 **4 Core 8 GB 100 G** 以上的虚拟机。
+本示例创建 SLB + 6 台 **Ubuntu 24.04 LTS** 的虚拟机，每台配置为 **2 Core 4 GB 40 G**，仅用于最小化安装，若资源充足建议使用每台配置 **4 Core 8 GB 100 G** 以上的虚拟机。
 
 | 主机IP | 主机名称 | 角色 |
 | --- | --- | --- |
@@ -82,55 +82,25 @@ controlPlaneEndpoint:
 
 ###  获取 Installer
 
-下载可执行安装程序 `kk` 至一台目标机器：
+## 获取 KubeKey
 
-{{< tabs >}}
-
-{{< tab "如果您能正常访问 GitHub/Googleapis" >}}
-
-从 [GitHub Release Page](https://github.com/kubesphere/kubekey/releases) 下载 KubeKey 或直接使用以下命令。
+KubeKey 已包含在 Kube AI Hub 离线安装包中。解压离线包后，根据您的架构选择对应的二进制文件：
 
 ```bash
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
-```
+# x86_64 架构
+mv kk-x86 kk
 
-{{</ tab >}}
+# ARM64 架构
+mv kk-arm kk
 
-{{< tab "如果您访问 GitHub/Googleapis 受限" >}}
-
-先执行以下命令以确保您从正确的区域下载 KubeKey。
-
-```bash
-export KKZONE=cn
-```
-
-执行以下命令下载 KubeKey。
-
-```bash
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
-```
-
-{{< notice note >}}
-
-在您下载 KubeKey 后，如果您将其传至新的机器，且访问 Googleapis 同样受限，在您执行以下步骤之前请务必再次执行 `export KKZONE=cn` 命令。
-
-{{</ notice >}} 
-
-{{</ tab >}}
-
-{{</ tabs >}}
-
-{{< notice note >}}
-
-执行以上命令会下载最新版 KubeKey，您可以修改命令中的版本号下载指定版本。
-
-{{</ notice >}} 
-
-为 `kk` 添加可执行权限：
-
-```bash
 chmod +x kk
 ```
+
+{{< notice note >}}
+
+离线安装包请从交付渠道获取。包内已包含 Kubernetes v1.34.4、containerd 及所需镜像。
+
+{{</ notice >}}
 
 {{< notice tip >}}
 您可以使用高级安装来控制自定义参数或创建多节点集群。具体来说，通过指定配置文件来创建集群。
@@ -141,7 +111,7 @@ chmod +x kk
 在当前位置创建配置文件 `config-sample.yaml`：
 
 ```bash
-./kk create config --with-kubesphere v3.4.1 --with-kubernetes v1.22.12 -f config-sample.yaml
+./kk create config --with-kubesphere v3.4.1 --with-kubernetes v1.34.4 -f config-sample.yaml
 ```
 
 ###  集群配置调整
@@ -186,7 +156,7 @@ metadata:
       address: "39.104.82.170"
       port: 6443
     kubernetes:
-      version: v1.17.9
+      version: v1.34.4
       imageRepo: kubesphere
       clusterName: cluster.local
       masqueradeAll: false  # masqueradeAll tells kube-proxy to SNAT everything if using the pure iptables proxy mode. [Default: false]

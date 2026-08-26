@@ -28,57 +28,25 @@ In Kube AI Hub 3.4.1, some changes have made on built-in roles and permissions o
        - Removed permissions of namespace-level custom roles: user management and role management.
        - After you upgrade Kube AI Hub to 3.4.1, custom roles will be retained, but removed permissions of the custom roles will be revoked.
 
-## Download KubeKey
+## Get KubeKey
 
-Follow the steps below to download KubeKey before you upgrade your cluster.
-
-{{< tabs >}}
-
-{{< tab "Good network connections to GitHub/Googleapis" >}}
-
-Download KubeKey from its [GitHub Release Page](https://github.com/kubesphere/kubekey/releases) or use the following command directly.
+KubeKey is included in the Kube AI Hub offline installation package. After extracting the package, select the binary for your architecture:
 
 ```bash
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
-```
+# x86_64 architecture
+mv kk-x86 kk
 
-{{</ tab >}}
+# ARM64 architecture
+mv kk-arm kk
 
-{{< tab "Poor network connections to GitHub/Googleapis" >}}
-
-Run the following command first to make sure you download KubeKey from the correct zone.
-
-```bash
-export KKZONE=cn
-```
-
-Run the following command to download KubeKey:
-
-```bash
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
-```
-
-{{< notice note >}}
-
-After you download KubeKey, if you transfer it to a new machine also with poor network connections to Googleapis, you must run `export KKZONE=cn` again before you proceed with the steps below.
-
-{{</ notice >}} 
-
-{{</ tab >}}
-
-{{</ tabs >}}
-
-{{< notice note >}}
-
-The commands above download the latest release of KubeKey. You can change the version number in the command to download a specific version.
-
-{{</ notice >}} 
-
-Make `kk` executable:
-
-```bash
 chmod +x kk
 ```
+
+{{< notice note >}}
+
+Obtain the offline installation package from your delivery channel. The package includes Kubernetes v1.34.4, containerd, and required images.
+
+{{</ notice >}}
 
 ## Upgrade Kube AI Hub and Kubernetes
 
@@ -86,19 +54,20 @@ Upgrading steps are different for single-node clusters (all-in-one) and multi-no
 
 {{< notice info >}}
 
-When upgrading Kubernetes, KubeKey will upgrade from one MINOR version to the next MINOR version until the target version. For example, you may see the upgrading process going from 1.16 to 1.17 and to 1.18, instead of directly jumping to 1.18 from 1.16.
+When upgrading Kubernetes, KubeKey will upgrade from one MINOR version to the next MINOR version until the target version. For example, you may see the upgrading process going from 1.28 to 1.29 and to 1.30, instead of directly jumping to 1.30 from 1.28.
 
 {{</ notice >}}
 
 ### All-in-one cluster
 
-Run the following command to use KubeKey to upgrade your single-node cluster to Kube AI Hub 3.4 and Kubernetes v1.22.12:
+Run the following command to use KubeKey to upgrade your single-node cluster to Kube AI Hub 3.4 and Kubernetes v1.34.4:
 
 ```bash
-./kk upgrade --with-kubernetes v1.22.12 --with-kubesphere v3.4.1
+./kk upgrade --with-kubernetes v1.34.4 --with-kubesphere v3.4.1
 ```
 
-To upgrade Kubernetes to a specific version, explicitly provide the version after the flag `--with-kubernetes`. Available versions are v1.20.x, v1.21.x, v1.22.x,  v1.23.x, * v1.24.x, * v1.25.x, and * v1.26.x. For Kubernetes versions with an asterisk, some features of edge nodes may be unavailable due to incompatability. Therefore, if you want to use edge nodes, you are advised to install Kubernetes v1.23.x.
+To upgrade Kubernetes to a specific version, explicitly provide the version after the flag `--with-kubernetes`. Available versions are v1.28.x, v1.29.x, v1.30.x, v1.31.x, v1.32.x, v1.33.x, and v1.34.x (v1.34.x recommended).
+
 ### Multi-node cluster
 
 #### Step 1: Generate a configuration file using KubeKey
@@ -126,21 +95,22 @@ Edit `sample.yaml` based on your cluster configuration. Make sure you replace th
 
 {{< notice note >}}
 
-For more information, see [Edit the configuration file](../../installing-on-linux/introduction/multioverview/#2-edit-the-configuration-file) or refer to the `Cluster` section of [the complete configuration file](https://github.com/kubesphere/kubekey/blob/release-2.2/docs/config-example.md) for more information.
+For more information, see [Edit the configuration file](../../installing-on-linux/introduction/multioverview/#2-edit-the-configuration-file).
 
 {{</ notice >}}
 
 #### Step 3: Upgrade your cluster
-The following command upgrades your cluster to Kube AI Hub 3.4 and Kubernetes v1.22.12:
+
+The following command upgrades your cluster to Kube AI Hub 3.4 and Kubernetes v1.34.4:
 
 ```bash
-./kk upgrade --with-kubernetes v1.22.12 --with-kubesphere v3.4.1 -f sample.yaml
+./kk upgrade --with-kubernetes v1.34.4 --with-kubesphere v3.4.1 -f sample.yaml
 ```
 
-To upgrade Kubernetes to a specific version, explicitly provide the version after the flag `--with-kubernetes`. Available versions are v1.20.x, v1.21.x, * v1.22.x,  * v1.23.x， and v1.24.x. For Kubernetes versions with an asterisk, some features of edge nodes may be unavailable due to incompatability. Therefore, if you want to use edge nodes, you are advised to install Kubernetes v1.23.x.
+To upgrade Kubernetes to a specific version, explicitly provide the version after the flag `--with-kubernetes`. Available versions are v1.28.x, v1.29.x, v1.30.x, v1.31.x, v1.32.x, v1.33.x, and v1.34.x (v1.34.x recommended).
 
 {{< notice note >}}
 
 To use new features of Kube AI Hub 3.4, you may need to enable some pluggable components after the upgrade.
 
-{{</ notice >}} 
+{{</ notice >}}

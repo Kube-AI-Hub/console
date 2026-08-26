@@ -10,11 +10,11 @@ Air-gapped upgrade with KubeKey is recommended for users whose Kube AI Hub and K
 ## Prerequisites
 
 - You need to have a Kube AI Hub cluster running v3.3.x. If your Kube AI Hub version is v3.2.x or earlier, upgrade to v3.3.x first.
-- Your Kubernetes version must be v1.20.x, v1.21.x, v1.22.x, v1.23.x, * v1.24.x, * v1.25.x, and * v1.26.x. For Kubernetes versions with an asterisk, some features of edge nodes may be unavailable due to incompatability. Therefore, if you want to use edge nodes, you are advised to install Kubernetes v1.23.x.
+- Your Kubernetes version must be v1.28.x, v1.29.x, v1.30.x, v1.31.x, v1.32.x, v1.33.x, or v1.34.x.
 - Read [Release Notes for 3.4.1](../../../v3.4/release/release-v341/) carefully.
 - Back up any important component beforehand.
-- A Docker registry. You need to have a Harbor or other Docker registries.
-- Make sure every node can push and pull images from the Docker Registry.
+- An image registry. You need to have a Harbor or other image registries.
+- Make sure every node can push and pull images from the image registry.
 
 ## Major Updates
 
@@ -34,86 +34,60 @@ Upgrading steps are different for single-node clusters (all-in-one) and multi-no
 
 {{< notice info >}}
 
-KubeKey upgrades Kubernetes from one MINOR version to the next MINOR version until the target version. For example, you may see the upgrading process going from 1.16 to 1.17 and to 1.18, instead of directly jumping to 1.18 from 1.16.
+KubeKey upgrades Kubernetes from one MINOR version to the next MINOR version until the target version. For example, you may see the upgrading process going from 1.28 to 1.29 and to 1.30, instead of directly jumping to 1.30 from 1.28.
 
 {{</ notice >}}
 
 
 ### System Requirements
 
-| Systems                                                         | Minimum Requirements (Each node)            |
-| --------------------------------------------------------------- | ------------------------------------------- |
-| **Ubuntu** *16.04, 18.04, 20.04*                                       | CPU: 2 Cores, Memory: 4 G, Disk Space: 40 G |
-| **Debian** *Buster, Stretch*                                    | CPU: 2 Cores, Memory: 4 G, Disk Space: 40 G |
-| **CentOS** *7.x*                                                | CPU: 2 Cores, Memory: 4 G, Disk Space: 40 G |
-| **Red Hat Enterprise Linux** *7*                                | CPU: 2 Cores, Memory: 4 G, Disk Space: 40 G |
-| **SUSE Linux Enterprise Server** *15* **/openSUSE Leap** *15.2* | CPU: 2 Cores, Memory: 4 G, Disk Space: 40 G |
+| Systems | Minimum Requirements (Each node) |
+| ------- | -------------------------------- |
+| **Ubuntu** *22.04*, *24.04* (24.04 or later recommended) | CPU: 2 Cores, Memory: 4 G, Disk Space: 40 G |
+| **CentOS** *9* or later | CPU: 2 Cores, Memory: 4 G, Disk Space: 40 G |
+| **Kylin** *V10* | CPU: 2 Cores, Memory: 4 G, Disk Space: 40 G |
+| **openEuler** *22.03 LTS* or later | CPU: 2 Cores, Memory: 4 G, Disk Space: 40 G |
 
 {{< notice note >}}
 
-[KubeKey](https://github.com/kubesphere/kubekey) uses `/var/lib/docker` as the default directory where all Docker related files, including images, are stored. It is recommended you add additional storage volumes with at least **100G** mounted to `/var/lib/docker` and `/mnt/registry` respectively. See [fdisk](https://www.computerhope.com/unix/fdisk.htm) command for reference.
+KubeKey uses `/var/lib/containerd` as the default directory where all container related files, including images, are stored. It is recommended you add additional storage volumes with at least **100G** mounted to `/var/lib/containerd` and `/mnt/registry` respectively.
 
 {{</ notice >}}
 
 
-### Step 1: Download KubeKey
-1. 1. Run the following commands to download KubeKey.
-   {{< tabs >}}
+### Step 1: Get KubeKey
 
-   {{< tab "Good network connections to GitHub/Googleapis" >}}
+KubeKey is included in the Kube AI Hub offline installation package. After extracting the package, select the binary for your architecture:
 
-   Download KubeKey from its [GitHub Release Page](https://github.com/kubesphere/kubekey/releases) or use the following command directly.
+```bash
+# x86_64 architecture
+mv kk-x86 kk
 
-   ```bash
-   curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
-   ```
+# ARM64 architecture
+mv kk-arm kk
 
-   {{</ tab >}}
+chmod +x kk
+```
 
-   {{< tab "Poor network connections to GitHub/Googleapis" >}}
+{{< notice note >}}
 
-   Run the following command first to make sure you download KubeKey from the correct zone.
+Obtain the offline installation package from your delivery channel. The package includes Kubernetes v1.34.4, containerd, and required images.
 
-   ```bash
-   export KKZONE=cn
-   ```
-
-   Run the following command to download KubeKey:
-
-   ```bash
-   curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
-   ```
-   {{</ tab >}}
-
-   {{</ tabs >}}
-
-2. After you uncompress the file, execute the following command to make `kk` executable:
-
-   ```bash
-   chmod +x kk
-   ```
+{{</ notice >}}
 
 ### Step 2: Prepare installation images
 
 As you install Kube AI Hub and Kubernetes on Linux, you need to prepare an image package containing all the necessary images and download the Kubernetes binary file in advance.
 
-1. Download the image list file `images-list.txt` from a machine that has access to Internet through the following command:
-
-   ```bash
-   curl -L -O https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/images-list.txt
-   ```
+1. Obtain the image list file `images-list.txt` from your delivery channel.
 
    {{< notice note >}}
 
    This file lists images under `##+modulename` based on different modules. You can add your own images to this file following the same rule.
 
-   {{</ notice >}} 
+   {{</ notice >}}
 
-2. Download `offline-installation-tool.sh`.
-
-   ```bash
-   curl -L -O https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/offline-installation-tool.sh
-   ```
+2. Obtain `offline-installation-tool.sh` from your delivery channel.
 
 3. Make the `.sh` file executable.
 
@@ -124,40 +98,33 @@ As you install Kube AI Hub and Kubernetes on Linux, you need to prepare an image
 4. You can execute the command `./offline-installation-tool.sh -h` to see how to use the script:
 
    ```bash
-   root@master:/home/ubuntu# ./offline-installation-tool.sh -h
    Usage:
    
      ./offline-installation-tool.sh [-l IMAGES-LIST] [-d IMAGES-DIR] [-r PRIVATE-REGISTRY] [-v KUBERNETES-VERSION ]
    
    Description:
      -b                     : save kubernetes' binaries.
-     -d IMAGES-DIR          : the dir of files (tar.gz) which generated by `docker save`. default: /home/ubuntu/kubesphere-images
+     -d IMAGES-DIR          : the dir of files (tar.gz) which generated by `docker save`. default: ./kubesphere-images
      -l IMAGES-LIST         : text file with list of images.
      -r PRIVATE-REGISTRY    : target private registry:port.
      -s                     : save model will be applied. Pull the images in the IMAGES-LIST and save images as a tar.gz file.
-     -v KUBERNETES-VERSION  : download kubernetes' binaries. default: v1.17.9
+     -v KUBERNETES-VERSION  : download kubernetes' binaries. default: v1.34.4
      -h                     : usage message
    ```
 
 5. Download the Kubernetes binary file.
 
    ```bash
-   ./offline-installation-tool.sh -b -v v1.22.12 
-   ```
-
-   If you cannot access the object storage service of Google, run the following command instead to add the environment variable to change the source.
-
-   ```bash
-   export KKZONE=cn;./offline-installation-tool.sh -b -v v1.22.12 
+   ./offline-installation-tool.sh -b -v v1.34.4
    ```
 
    {{< notice note >}}
 
-   - You can change the Kubernetes version downloaded based on your needs. Recommended Kubernetes versions for Kube AI Hub 3.4 are v1.20.x, v1.21.x, v1.22.x, v1.23.x, * v1.24.x, * v1.25.x, and * v1.26.x. For Kubernetes versions with an asterisk, some features of edge nodes may be unavailable due to incompatability. Therefore, if you want to use edge nodes, you are advised to install Kubernetes v1.23.x. If you do not specify a Kubernetes version, KubeKey will install Kubernetes v1.23.10 by default. For more information about supported Kubernetes versions, see [Support Matrix](../../installing-on-linux/introduction/kubekey/#support-matrix).
+   - You can change the Kubernetes version downloaded based on your needs. Recommended Kubernetes versions for Kube AI Hub 3.4 are v1.28.x, v1.29.x, v1.30.x, v1.31.x, v1.32.x, v1.33.x, and v1.34.x (v1.34.x recommended). If you do not specify a Kubernetes version, KubeKey will install Kubernetes v1.34.4 by default. For more information about supported Kubernetes versions, see [Support Matrix](../../installing-on-linux/introduction/kubekey/#support-matrix).
 
    - After you run the script, a folder `kubekey` is automatically created. Note that this file and `kk` must be placed in the same directory when you create the cluster later.
 
-   {{</ notice >}} 
+   {{</ notice >}}
 
 6. Pull images in `offline-installation-tool.sh`.
 
@@ -167,38 +134,38 @@ As you install Kube AI Hub and Kubernetes on Linux, you need to prepare an image
 
    {{< notice note >}}
 
-   You can choose to pull images as needed. For example, you can delete `##k8s-images` and related images under it in `images-list.text` if you already have a Kubernetes cluster.
+   You can choose to pull images as needed. For example, you can delete `##k8s-images` and related images under it in `images-list.txt` if you already have a Kubernetes cluster.
 
-   {{</ notice >}} 
+   {{</ notice >}}
 
 ### Step 3: Push images to your private registry
 
 Transfer your packaged image file to your local machine and execute the following command to push it to the registry.
 
 ```bash
-./offline-installation-tool.sh -l images-list.txt -d ./kubesphere-images -r dockerhub.kubekey.local
+./offline-installation-tool.sh -l images-list.txt -d ./kubesphere-images -r <registry>
 ```
 
    {{< notice note >}}
 
-   The domain name is `dockerhub.kubekey.local` in the command. Make sure you use your **own registry address**.
+   The `<registry>` is your image registry address. Make sure you use your **own registry address**.
 
-   {{</ notice >}} 
+   {{</ notice >}}
 
 ### Air-gapped upgrade for all-in-one clusters
 
 #### Example machines
 | Host Name | IP          | Role                 | Port | URL                     |
 | --------- | ----------- | -------------------- | ---- | ----------------------- |
-| master    | 192.168.1.1 | Docker registry      | 5000 | http://192.168.1.1:5000 |
+| master    | 192.168.1.1 | Image registry       | 5000 | http://192.168.1.1:5000 |
 | master    | 192.168.1.1 | master, etcd, worker |      |                         |
 
 #### Versions
 
 |        | Kubernetes | Kube AI Hub |
 | ------ | ---------- | ---------- |
-| Before | v1.18.6    | v3.2.x     |
-| After  | v1.22.12    | v3.3.x     |
+| Before | v1.28.x    | v3.3.x     |
+| After  | v1.34.4    | v3.4.x     |
 
 #### Upgrade a cluster
 
@@ -215,7 +182,7 @@ Execute the following command to generate an example configuration file for inst
 For example:
 
 ```bash
-./kk create config --with-kubernetes v1.22.12 --with-kubesphere v3.4.1 -f config-sample.yaml
+./kk create config --with-kubernetes v1.34.4 --with-kubesphere v3.4.1 -f config-sample.yaml
 ```
 
 {{< notice note >}}
@@ -226,11 +193,11 @@ Make sure the Kubernetes version is the one you downloaded.
 
 #### Edit the configuration file
 
-Edit the configuration file `config-sample.yaml`. Here is [an example for your reference](https://github.com/kubesphere/kubekey/blob/release-2.2/docs/config-example.md).
+Edit the configuration file `config-sample.yaml`.
 
-   {{< notice warning >}} 
+   {{< notice warning >}}
 
-For air-gapped installation, you must specify `privateRegistry`, which is `dockerhub.kubekey.local` in this example.
+For air-gapped installation, you must specify `privateRegistry`, which is `<registry>` in this example.
 
    {{</ notice >}}
 
@@ -238,7 +205,7 @@ For air-gapped installation, you must specify `privateRegistry`, which is `docke
 
 ```yaml
   hosts:
-  - {name: ks.master, address: 192.168.1.1, internalAddress: 192.168.1.1, user: root, password: Qcloud@123}
+  - {name: ks.master, address: 192.168.1.1, internalAddress: 192.168.1.1, user: root, password: <password>}
   roleGroups:
     etcd:
     - ks.master
@@ -253,23 +220,23 @@ Set `privateRegistry` of your `config-sample.yaml` file:
   registry:
     registryMirrors: []
     insecureRegistries: []
-    privateRegistry: dockerhub.kubekey.local
+    privateRegistry: <registry>
 ```
 
-#### Upgrade your single-node cluster to Kube AI Hub 3.4 and Kubernetes v1.22.12
+#### Upgrade your single-node cluster to Kube AI Hub 3.4 and Kubernetes v1.34.4
 
 ```bash
 ./kk upgrade -f config-sample.yaml
 ```
 
-To upgrade Kubernetes to a specific version, explicitly provide the version after the flag `--with-kubernetes`. Available versions are v1.20.x, v1.21.x, v1.22.x, v1.23.x, * v1.24.x, * v1.25.x, and * v1.26.x. For Kubernetes versions with an asterisk, some features of edge nodes may be unavailable due to incompatability. Therefore, if you want to use edge nodes, you are advised to install Kubernetes v1.23.x.
+To upgrade Kubernetes to a specific version, explicitly provide the version after the flag `--with-kubernetes`. Available versions are v1.28.x, v1.29.x, v1.30.x, v1.31.x, v1.32.x, v1.33.x, and v1.34.x (v1.34.x recommended).
 
 ### Air-gapped upgrade for multi-node clusters
 
 #### Example machines
 | Host Name | IP          | Role            | Port | URL                     |
 | --------- | ----------- | --------------- | ---- | ----------------------- |
-| master    | 192.168.1.1 | Docker registry | 5000 | http://192.168.1.1:5000 |
+| master    | 192.168.1.1 | Image registry  | 5000 | http://192.168.1.1:5000 |
 | master    | 192.168.1.1 | master, etcd    |      |                         |
 | slave1    | 192.168.1.2 | worker          |      |                         |
 | slave1    | 192.168.1.3 | worker          |      |                         |
@@ -279,8 +246,8 @@ To upgrade Kubernetes to a specific version, explicitly provide the version afte
 
 |        | Kubernetes | Kube AI Hub |
 | ------ | ---------- | ---------- |
-| Before | v1.18.6    | v3.2.x     |
-| After  | v1.22.12    | v3.3.x     |
+| Before | v1.28.x    | v3.3.x     |
+| After  | v1.34.4    | v3.4.x     |
 
 #### Upgrade a cluster
 
@@ -297,7 +264,7 @@ In this example, Kube AI Hub is installed on multiple nodes, so you need to spec
    For example:
 
 ```bash
-./kk create config --with-kubernetes v1.22.12 --with-kubesphere v3.4.1 -f config-sample.yaml
+./kk create config --with-kubernetes v1.34.4 --with-kubesphere v3.4.1 -f config-sample.yaml
 ```
 
 {{< notice note >}}
@@ -308,11 +275,11 @@ Make sure the Kubernetes version is the one you downloaded.
 
 #### Edit the configuration file
 
-Edit the configuration file `config-sample.yaml`. Here is [an example for your reference](https://github.com/kubesphere/kubekey/blob/release-2.2/docs/config-example.md).
+Edit the configuration file `config-sample.yaml`.
 
-   {{< notice warning >}} 
+   {{< notice warning >}}
 
-   For air-gapped installation, you must specify `privateRegistry`, which is `dockerhub.kubekey.local` in this example.
+   For air-gapped installation, you must specify `privateRegistry`, which is `<registry>` in this example.
 
    {{</ notice >}}
 
@@ -320,9 +287,9 @@ Set `hosts` of your `config-sample.yaml` file:
 
 ```yaml
   hosts:
-  - {name: ks.master, address: 192.168.1.1, internalAddress: 192.168.1.1, user: root, password: Qcloud@123}
-  - {name: ks.slave1, address: 192.168.1.2, internalAddress: 192.168.1.2, user: root, privateKeyPath: "/root/.ssh/kp-qingcloud"}
-  - {name: ks.slave2, address: 192.168.1.3, internalAddress: 192.168.1.3, user: root, privateKeyPath: "/root/.ssh/kp-qingcloud"}
+  - {name: ks.master, address: 192.168.1.1, internalAddress: 192.168.1.1, user: root, password: <password>}
+  - {name: ks.slave1, address: 192.168.1.2, internalAddress: 192.168.1.2, user: root, privateKeyPath: "/root/.ssh/id_rsa"}
+  - {name: ks.slave2, address: 192.168.1.3, internalAddress: 192.168.1.3, user: root, privateKeyPath: "/root/.ssh/id_rsa"}
   roleGroups:
     etcd:
     - ks.master
@@ -337,13 +304,13 @@ Set `privateRegistry` of your `config-sample.yaml` file:
   registry:
     registryMirrors: []
     insecureRegistries: []
-    privateRegistry: dockerhub.kubekey.local
+    privateRegistry: <registry>
 ```
 
-#### Upgrade your multi-node cluster to Kube AI Hub 3.4 and Kubernetes v1.22.12
+#### Upgrade your multi-node cluster to Kube AI Hub 3.4 and Kubernetes v1.34.4
 
 ```bash
 ./kk upgrade -f config-sample.yaml
 ```
 
-To upgrade Kubernetes to a specific version, explicitly provide the version after the flag `--with-kubernetes`. Available versions are v1.20.x, v1.21.x, v1.22.x, v1.23.x, * v1.24.x, * v1.25.x, and * v1.26.x. For Kubernetes versions with an asterisk, some features of edge nodes may be unavailable due to incompatability. Therefore, if you want to use edge nodes, you are advised to install Kubernetes v1.23.x.
+To upgrade Kubernetes to a specific version, explicitly provide the version after the flag `--with-kubernetes`. Available versions are v1.28.x, v1.29.x, v1.30.x, v1.31.x, v1.32.x, v1.33.x, and v1.34.x (v1.34.x recommended).

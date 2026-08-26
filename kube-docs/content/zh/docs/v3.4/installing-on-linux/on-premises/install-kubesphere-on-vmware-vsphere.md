@@ -22,7 +22,7 @@ weight: 3510
 
 ## 创建主机
 
-本示例创建 8 台 **CentOS Linux release 7.6.1810（Core）** 的虚拟机部署默认的最小化安装，每台配置为 2 Core，4 GB，40 G 即可。
+本示例创建 8 台 **Ubuntu 24.04 LTS** 的虚拟机部署默认的最小化安装，每台配置为 2 Core，4 GB，40 G 即可。
 
 | 主机 IP | 主机名称 | 角色 |
 | --- | --- | --- |
@@ -64,7 +64,7 @@ vip 所在的是虚拟 IP，并不需要创建主机，所以只需要创建 8 �
 
     ![0-1-5-兼容性](/images/docs/v3.x/vsphere/kubesphereOnVsphere-zh-0-1-5-compatibility.png)
 
-7. 选择客户机操作系统，Linux CentOS 7 （64 位）。
+7. 选择客户机操作系统，Linux Ubuntu 24.04 LTS （64 位）。
 
     ![0-1-6-系统](/images/docs/v3.x/vsphere/kubesphereOnVsphere-zh-0-1-6-system.png)
 
@@ -277,57 +277,25 @@ ip a s
 systemctl status -l keepalived
 ```
 
-## 下载 KubeKey 安装程序
+## 获取 KubeKey
 
-下载可执行安装程序 `kk` 至一台目标机器：
-
-{{< tabs >}}
-
-{{< tab "如果您能正常访问 GitHub/Googleapis" >}}
-
-从 [GitHub Release Page](https://github.com/kubesphere/kubekey/releases) 下载 KubeKey 或直接使用以下命令。
+KubeKey 已包含在 Kube AI Hub 离线安装包中。解压离线包后，根据您的架构选择对应的二进制文件：
 
 ```bash
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
-```
+# x86_64 架构
+mv kk-x86 kk
 
-{{</ tab >}}
+# ARM64 架构
+mv kk-arm kk
 
-{{< tab "如果您访问 GitHub/Googleapis 受限" >}}
-
-先执行以下命令以确保您从正确的区域下载 KubeKey。
-
-```bash
-export KKZONE=cn
-```
-
-执行以下命令下载 KubeKey。
-
-```bash
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
-```
-
-{{< notice note >}}
-
-在您下载 KubeKey 后，如果您将其传至新的机器，且访问 Googleapis 同样受限，在您执行以下步骤之前请务必再次执行 `export KKZONE=cn` 命令。
-
-{{</ notice >}} 
-
-{{</ tab >}}
-
-{{</ tabs >}}
-
-{{< notice note >}}
-
-执行以上命令会下载最新版 KubeKey，您可以修改命令中的版本号下载指定版本。
-
-{{</ notice >}} 
-
-为 `kk` 添加可执行权限：
-
-```bash
 chmod +x kk
 ```
+
+{{< notice note >}}
+
+离线安装包请从交付渠道获取。包内已包含 Kubernetes v1.34.4、containerd 及所需镜像。
+
+{{</ notice >}}
 
 ## 创建多节点集群
 
@@ -338,12 +306,12 @@ chmod +x kk
 创建配置文件（一个示例配置文件）。
 
 ```bash
-./kk create config --with-kubernetes v1.22.12 --with-kubesphere v3.4.1
+./kk create config --with-kubernetes v1.34.4 --with-kubesphere v3.4.1
 ```
 
 {{< notice note >}}
 
-- 安装 Kube AI Hub 3.4 的建议 Kubernetes 版本：v1.20.x、v1.21.x、v1.22.x、v1.23.x、* v1.24.x、* v1.25.x 和 * v1.26.x。带星号的版本可能出现边缘节点部分功能不可用的情况。因此，如需使用边缘节点，推荐安装 v1.23.x。如果不指定 Kubernetes 版本，KubeKey 将默认安装 Kubernetes v1.23.10。有关受支持的 Kubernetes 版本的更多信息，请参见[支持矩阵](../../../installing-on-linux/introduction/kubekey/#支持矩阵)。
+- 安装 Kube AI Hub 3.4 的建议 Kubernetes 版本：v1.28.x、v1.29.x、v1.30.x、v1.31.x、v1.32.x、v1.33.x 和 v1.34.x（建议 v1.34.x）。如果不指定 Kubernetes 版本，KubeKey 将默认安装 Kubernetes v1.34.4。有关受支持的 Kubernetes 版本的更多信息，请参见[支持矩阵](../../../installing-on-linux/introduction/kubekey/#支持矩阵)。
 
 - 如果您在这一步的命令中不添加标志 `--with-kubesphere`，则不会部署 Kube AI Hub，只能使用配置文件中的 `addons` 字段安装，或者在您后续使用 `./kk create cluster` 命令时再次添加这个标志。
 

@@ -71,9 +71,9 @@ Kube AI Hub 使用一段时间之后，由于工作负载不断增加，您可�
    ```bash
    $ kubectl get node
    NAME          STATUS   ROLES           AGE   VERSION
-   master1       Ready    master,worker   20d   v1.17.9
-   node1         Ready    worker          31h   v1.17.9
-   node2         Ready    worker          31h   v1.17.9
+   master1       Ready    master,worker   20d   v1.34.4
+   node1         Ready    worker          31h   v1.34.4
+   node2         Ready    worker          31h   v1.34.4
    ```
 
 ## 添加主节点以实现高可用

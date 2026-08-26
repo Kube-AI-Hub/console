@@ -10,84 +10,52 @@ weight: 3530
 
 您可以使用 KubeKey 同时安装 K3s 和 Kube AI Hub，也可以将 Kube AI Hub 部署在现有的 K3s 集群上。
 
-{{< notice note >}} 
+{{< notice note >}}
 
 目前，由于功能尚未充分测试，在 K3s 上部署 Kube AI Hub 仅用于测试和开发。
 
-{{</ notice >}} 
+{{</ notice >}}
 
 ## 准备工作
 
 - 有关安装 K3s 的准备工作的更多信息，请参阅 [K3s 文档](https://docs.rancher.cn/docs/k3s/installation/installation-requirements/_index)。
 - 取决于您的网络环境，您可能需要配置防火墙规则和端口转发规则。有关更多信息，请参见[端口要求](../../../installing-on-linux/introduction/port-firewall/)。
 
-## 步骤 1：下载 KubeKey
+## 步骤 1：获取 KubeKey
 
-执行以下步骤下载 [KubeKey](../../../installing-on-linux/introduction/kubekey/)。
-
-{{< tabs >}}
-
-{{< tab "如果您能正常访问 GitHub/Googleapis" >}}
-
-从 [GitHub Release Page](https://github.com/kubesphere/kubekey/releases) 下载 KubeKey 或直接运行以下命令：
+KubeKey 已包含在 Kube AI Hub 离线安装包中。解压离线包后，根据您的架构选择对应的二进制文件：
 
 ```bash
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
-```
+# x86_64 架构
+mv kk-x86 kk
 
-{{</ tab >}}
+# ARM64 架构
+mv kk-arm kk
 
-{{< tab "如果您访问 GitHub/Googleapis 受限" >}}
-
-首先运行以下命令，以确保您从正确的区域下载 KubeKey。
-
-```bash
-export KKZONE=cn
-```
-
-运行以下命令来下载 KubeKey：
-
-```bash
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
-```
-
-{{< notice note >}}
-
-下载 KubeKey 之后，如果您将其转移到访问 Googleapis 受限的新机器上，请务必再次运行 `export KKZONE=cn`，然后继续执行以下步骤。
-
-{{</ notice >}} 
-
-{{</ tab >}}
-
-{{</ tabs >}}
-
-{{< notice note >}}
-
-通过以上的命令可以下载 KubeKey 的最新版本。请注意，更早版本的 KubeKey 无法下载 K3s。
-
-{{</ notice >}}
-
-执行以下命令为 `kk` 文件增加执行权限：
-
-```bash
 chmod +x kk
 ```
+
+{{< notice note >}}
+
+离线安装包请从交付渠道获取。包内已包含 Kubernetes v1.34.4、containerd 及所需镜像。
+
+{{</ notice >}}
 
 ## 步骤 2：创建集群
 
 1. 执行以下命令为集群创建一个配置文件：
 
    ```bash
-   ./kk create config --with-kubernetes v1.21.4-k3s --with-kubesphere v3.4.1
+   ./kk create config --with-kubernetes v1.34.4-k3s --with-kubesphere v3.4.1
    ```
 
    {{< notice note >}}
 
-   - KubeKey v3.0.7 支持安装 K3s v1.21.4。
+   - KubeKey 支持安装 K3s v1.34.4。
 
    - 您可以在以上命令中使用 `-f` 或 `--file` 参数指定配置文件的路径和名称。如未指定路径和名称，KubeKey 将默认在当前目录下创建 `config-sample.yaml` 配置文件。
 
-   {{</ notice >}} 
+   {{</ notice >}}
 
 2. 执行以下命令编辑配置文件（以下以默认配置文件名为例）：
 
@@ -117,7 +85,7 @@ chmod +x kk
        address: ""
        port: 6443
      kubernetes:
-       version: v1.21.4-k3s
+       version: v1.34.4-k3s
        imageRepo: kubesphere
        clusterName: cluster.local
      network:
@@ -130,12 +98,6 @@ chmod +x kk
      addons: []
    ...
    ```
-
-   {{< notice note >}}
-
-   有关配置文件中每个字段的更多信息，请参阅[示例文件](https://github.com/kubesphere/kubekey/blob/release-2.2/docs/config-example.md)。
-
-   {{</ notice >}} 
 
 3. 保存文件并执行以下命令安装 K3s 和 Kube AI Hub：
 
@@ -169,10 +131,7 @@ chmod +x kk
      2. Please change the default password after login.
    
    #####################################################
-   https://www.watering.ai/          20xx-xx-xx xx:xx:xx
-   #####################################################
    ```
-
 
 5. 从安装日志的 `Console`、`Account` 和 `Password` 参数分别获取 Kube AI Hub Web 控制台的地址、系统管理员用户名和系统管理员密码，并使用 Web 浏览器登录 Kube AI Hub Web 控制台。
 
@@ -180,5 +139,4 @@ chmod +x kk
 
    您可以在安装后启用 Kube AI Hub 的可插拔组件，但由于在 K3s 上部署 Kube AI Hub 目前处于测试阶段，某些功能可能不兼容。
    
-   {{</ notice >}} 
-
+   {{</ notice >}}

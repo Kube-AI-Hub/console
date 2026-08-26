@@ -55,7 +55,7 @@ az aks get-credentials --resource-group Kube AI HubRG --name KuberSphereCluster
 ```bash
 $ kubectl get nodes
 NAME                                STATUS   ROLES   AGE   VERSION
-aks-nodepool1-23754246-vmss000000   Ready    agent   38m   v1.16.13
+aks-nodepool1-23754246-vmss000000   Ready    agent   38m   v1.34.4
 ```
 
 ### Check Azure Resources in the Portal
@@ -77,9 +77,10 @@ All the other Resources will be placed in `MC_Kube AI HubRG_KuberSphereCluster_w
 To start deploying Kube AI Hub, use the following commands.
 
 ```bash
-kubectl apply -f https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/kubesphere-installer.yaml
+# Obtain the YAML files from the delivery channel
+kubectl apply -f kubesphere-installer.yaml
 
-kubectl apply -f https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/cluster-configuration.yaml
+kubectl apply -f cluster-configuration.yaml
 ```
 
 You can inspect the logs of installation through the following command:

@@ -14,7 +14,7 @@ This guide walks you through the steps of deploying Kube AI Hub on [Huaiwei CCE]
 
 First, create a Kubernetes cluster based on the requirements below.
 
-- To install Kube AI Hub 3.4 on Kubernetes, your Kubernetes version must be v1.20.x, v1.21.x, v1.22.x, v1.23.x, * v1.24.x, * v1.25.x, and * v1.26.x. For Kubernetes versions with an asterisk, some features of edge nodes may be unavailable due to incompatability. Therefore, if you want to use edge nodes, you are advised to install Kubernetes v1.23.x.
+- To install Kube AI Hub 3.4 on Kubernetes, your Kubernetes version must be v1.28.x, v1.29.x, v1.30.x, v1.31.x, v1.32.x, v1.33.x, or v1.34.x (v1.34.x recommended).
 - Ensure the cloud computing network for your Kubernetes cluster works, or use an elastic IP when you use **Auto Create** or **Select Existing**. You can also configure the network after the cluster is created. Refer to [NAT Gateway](https://support.huaweicloud.com/en-us/productdesc-natgateway/en-us_topic_0086739762.html).
 - Select `s3.xlarge.2` `4-core｜8GB` for nodes and add more if necessary (3 and more nodes are required for a production environment).
 
@@ -27,8 +27,8 @@ After you get the configuration file for kubectl, use kubectl command line to ve
 
 ```bash
 $ kubectl version
-Client Version: version.Info{Major:"1", Minor:"18", GitVersion:"v1.18.8", GitCommit:"9f2892aab98fe339f3bd70e3c470144299398ace", GitTreeState:"clean", BuildDate:"2020-08-15T10:08:56Z", GoVersion:"go1.14.7", Compiler:"gc", Platform:"darwin/amd64"}
-Server Version: version.Info{Major:"1", Minor:"17+", GitVersion:"v1.17.9-r0-CCE20.7.1.B003-17.36.3", GitCommit:"136c81cf3bd314fcbc5154e07cbeece860777e93", GitTreeState:"clean", BuildDate:"2020-08-08T06:01:28Z", GoVersion:"go1.13.9", Compiler:"gc", Platform:"linux/amd64"}
+Client Version: version.Info{Major:"1", Minor:"34", GitVersion:"v1.34.4", GitCommit:"...", GitTreeState:"clean", BuildDate:"2025-xx-xxTxx:xx:xxZ", GoVersion:"go1.23.x", Compiler:"gc", Platform:"linux/amd64"}
+Server Version: version.Info{Major:"1", Minor:"34", GitVersion:"v1.34.4", GitCommit:"...", GitTreeState:"clean", BuildDate:"2025-xx-xxTxx:xx:xxZ", GoVersion:"go1.23.x", Compiler:"gc", Platform:"linux/amd64"}
 ```
 
 ## Deploy Kube AI Hub
@@ -74,9 +74,11 @@ For how to set up or cancel a default StorageClass, refer to Kubernetes official
 Use [ks-installer](https://github.com/kubesphere/ks-installer) to deploy Kube AI Hub on an existing Kubernetes cluster. Execute the following commands directly for a minimal installation:
 
 ```bash
-kubectl apply -f https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/kubesphere-installer.yaml
+```bash
+# Obtain the YAML files from the delivery channel
+kubectl apply -f kubesphere-installer.yaml
 
-kubectl apply -f https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/cluster-configuration.yaml
+kubectl apply -f cluster-configuration.yaml
 ```
 
 Go to **Workload** > **Pod** and check the running status of Pods in the `kubesphere-system` namespace to confirm the minimal deployment. When the `ks-console-*` Pod becomes ready, the Kube AI Hub console is available.

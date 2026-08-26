@@ -93,67 +93,35 @@ ssh -i .ssh/id_rsa2  -p50200 kubesphere@40.81.5.xx
 
 [Kubekey](../../../installing-on-linux/introduction/kubekey/) 是一个全新下载工具，提供简单、快速和灵活的方式来安装 Kubernetes 和 Kube AI Hub。
 
-1. 下载 KubeKey，便于下一步生成配置文件。
+1. 获取 KubeKey，便于下一步生成配置文件。
 
-   {{< tabs >}}
-
-   {{< tab "如果您能正常访问 GitHub/Googleapis">}}
-
-从 KubeKey 的 [Github 发布页面](https://github.com/kubesphere/kubekey/releases)下载，或执行以下命令：
-
-```bash
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
-```
-
-{{</ tab >}}
-
-{{< tab "如果您访问 GitHub/Googleapis 受限" >}}
-
-运行以下命令，确保从正确区域下载 KubeKey。
-
-```bash
-export KKZONE=cn
-```
-
-运行以下命令下载 KubeKey：
-
-```bash
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
-```
-
-{{< notice note >}}
-
-下载 KubeKey 之后，如果在与 Googleapis 网络连接不良的新机器上，则必须再次运行 `export KKZONE=cn`，然后继续执行一下步骤。
-
-{{</ notice >}} 
-
-{{</ tab >}}
-
-{{</ tabs >}}
-
-   {{< notice note >}}
-
-上面的命令会下载 KubeKey 最新版本。您可以在命令中更改版本号以下载特定版本。
-
-{{</ notice >}} 
-
-   给予 `kk` 执行权限:
+   KubeKey 已包含在 Kube AI Hub 离线安装包中。解压离线包后，根据您的架构选择对应的二进制文件：
 
    ```bash
+   # x86_64 架构
+   mv kk-x86 kk
+
+   # ARM64 架构
+   mv kk-arm kk
+
    chmod +x kk
    ```
 
+   {{< notice note >}}
 
+   离线安装包请从交付渠道获取。包内已包含 Kubernetes v1.34.4、containerd 及所需镜像。
 
-1. 使用默认配置创建示例配置文件，这里以 Kubernetes v1.22.12 为例。
+   {{</ notice >}}
+
+1. 使用默认配置创建示例配置文件，这里以 Kubernetes v1.34.4 为例。
 
    ```bash
-   ./kk create config --with-kubesphere v3.4.1 --with-kubernetes v1.22.12
+   ./kk create config --with-kubesphere v3.4.1 --with-kubernetes v1.34.4
    ```
 
    {{< notice note >}}
 
-- Kube AI Hub 3.4 对应 Kubernetes 版本推荐：v1.20.x、v1.21.x、v1.22.x、v1.23.x、* v1.24.x、* v1.25.x 和 * v1.26.x。带星号的版本可能出现边缘节点部分功能不可用的情况。因此，如需使用边缘节点，推荐安装 v1.23.x。如果未指定 Kubernetes 版本，KubeKey 将默认安装 Kubernetes v1.23.10。有关支持的 Kubernetes 版本请参阅[支持矩阵](../../../installing-on-linux/introduction/kubekey/#support-matrix)。
+- Kube AI Hub 3.4 对应 Kubernetes 版本推荐：v1.28.x、v1.29.x、v1.30.x、v1.31.x、v1.32.x、v1.33.x 和 v1.34.x（建议 v1.34.x）。如果未指定 Kubernetes 版本，KubeKey 将默认安装 Kubernetes v1.34.4。有关支持的 Kubernetes 版本请参阅[支持矩阵](../../../installing-on-linux/introduction/kubekey/#support-matrix)。
 - 如果在此步骤中的命令中未添加标志 `--with-kubesphere`，则不会部署 Kube AI Hub，除非您使用配置文件中的 `addons` 字段进行安装，或稍后使用 `./kk create cluster` 时再次添加此标志。
 
 - 如果在未指定 Kube AI Hub 版本的情况下添加标志 --with kubesphere`，将安装 Kube AI Hub 的最新版本。

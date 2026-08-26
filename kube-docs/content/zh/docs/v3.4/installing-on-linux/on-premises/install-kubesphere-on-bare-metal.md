@@ -18,11 +18,11 @@ Kube AI Hub 除了可以在云上安装，还可以在裸机上安装。由于�
 
 ## 准备 Linux 主机
 
-本教程使用 3 台物理机，硬件配置为 **DELL 620 Intel (R) Xeon (R) CPU E5-2640 v2 @ 2.00GHz (32G memory)**。在这 3 台物理机上将安装 **CentOS Linux release 7.6.1810 (Core)** 操作系统，用于 Kube AI Hub 最小化安装。
+本教程使用 3 台物理机，硬件配置为 **DELL 620 Intel (R) Xeon (R) CPU E5-2640 v2 @ 2.00GHz (32G memory)**。在这 3 台物理机上将安装 **Ubuntu 24.04 LTS** 操作系统，用于 Kube AI Hub 最小化安装。
 
 ### 安装 CentOS
 
-请提前下载并安装[ CentOS 镜像](https://www.centos.org/download/)，推荐版本为 CentOS Linux release 7.6.1810 (Core)。请确保根目录已至少分配 200 GB 空间用于存储 Docker 镜像（如果 Kube AI Hub 仅用于测试，您可以跳过这一步）。
+请提前下载并安装 Ubuntu 24.04 LTS 镜像。请确保根目录已至少分配 200 GB 空间用于存储容器镜像（如果 Kube AI Hub 仅用于测试，您可以跳过这一步）。
 
 有关系统要求的更多信息，请参见[系统要求](../../../installing-on-linux/introduction/multioverview/)。
 
@@ -187,59 +187,25 @@ yum install conntrack-tools
 
 {{</ notice >}} 
 
-## 下载 KubeKey
+## 获取 KubeKey
 
-[KubeKey](https://github.com/kubesphere/kubekey) 是新一代 Kubernetes 和 Kube AI Hub 安装器，可帮助您以简单、快速、灵活的方式安装 Kubernetes 和 Kube AI Hub。
-
-请按照以下步骤下载 KubeKey。
-
-{{< tabs >}}
-
-{{< tab "如果您能正常访问 GitHub/Googleapis" >}}
-
-从 [GitHub Release Page](https://github.com/kubesphere/kubekey/releases) 下载 KubeKey 或使用以下命令：
+KubeKey 已包含在 Kube AI Hub 离线安装包中。解压离线包后，根据您的架构选择对应的二进制文件：
 
 ```bash
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
-```
+# x86_64 架构
+mv kk-x86 kk
 
-{{</ tab >}}
+# ARM64 架构
+mv kk-arm kk
 
-{{< tab "如果您访问 GitHub/Googleapis 受限" >}}
-
-先执行以下命令以确保您从正确的区域下载 KubeKey：
-
-```bash
-export KKZONE=cn
-```
-
-执行以下命令下载 KubeKey：
-
-```bash
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
-```
-
-{{< notice note >}}
-
-在您下载 KubeKey 后，如果您将其传至新的机器，且访问 Googleapis 同样受限，在您执行以下步骤之前请务必再次执行 `export KKZONE=cn` 命令。
-
-{{</ notice >}}
-
-{{</ tab >}}
-
-{{</ tabs >}}
-
-{{< notice note >}}
-
-执行以上命令会下载最新版 KubeKey，您可以修改命令中的版本号下载指定版本。
-
-{{</ notice >}} 
-
-为 `kk` 文件添加可执行权限。
-
-```bash
 chmod +x kk
 ```
+
+{{< notice note >}}
+
+离线安装包请从交付渠道获取。包内已包含 Kubernetes v1.34.4、containerd 及所需镜像。
+
+{{</ notice >}}
 
 ## 创建多节点集群
 
@@ -248,12 +214,12 @@ chmod +x kk
 创建安装有 Kube AI Hub 的 Kubernetes 集群（例如使用 `--with-kubesphere v3.4.1`）：
 
 ```bash
-./kk create config --with-kubernetes v1.22.12 --with-kubesphere v3.4.1
+./kk create config --with-kubernetes v1.34.4 --with-kubesphere v3.4.1
 ```
 
-{{< notice note >}} 
+{{< notice note >}}
 
-- 安装 Kube AI Hub 3.4 的建议 Kubernetes 版本：v1.20.x、v1.21.x、v1.22.x、v1.23.x、* v1.24.x、* v1.25.x 和 * v1.26.x。带星号的版本可能出现边缘节点部分功能不可用的情况。因此，如需使用边缘节点，推荐安装 v1.23.x。如果不指定 Kubernetes 版本，KubeKey 将默认安装 Kubernetes v1.23.10。有关受支持的 Kubernetes 版本的更多信息，请参见[支持矩阵](../../../installing-on-linux/introduction/kubekey/#支持矩阵)。
+- 安装 Kube AI Hub 3.4 的建议 Kubernetes 版本：v1.28.x、v1.29.x、v1.30.x、v1.31.x、v1.32.x、v1.33.x 和 v1.34.x（建议 v1.34.x）。如果不指定 Kubernetes 版本，KubeKey 将默认安装 Kubernetes v1.34.4。有关受支持的 Kubernetes 版本的更多信息，请参见[支持矩阵](../../../installing-on-linux/introduction/kubekey/#支持矩阵)。
 
 - 如果您在这一步的命令中不添加标志 `--with-kubesphere`，则不会部署 Kube AI Hub，只能使用配置文件中的 `addons` 字段安装 Kube AI Hub，或者在您后续使用 `./kk create cluster` 命令时再次添加该标志。
 - 如果您添加标志 `--with-kubesphere` 时不指定 Kube AI Hub 版本，则会安装最新版本的 Kube AI Hub。

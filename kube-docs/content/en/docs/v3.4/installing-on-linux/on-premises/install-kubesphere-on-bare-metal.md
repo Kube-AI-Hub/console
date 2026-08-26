@@ -18,11 +18,11 @@ In addition to the deployment on cloud, Kube AI Hub can also be installed on bar
 
 ## Prepare Linux Hosts
 
-This tutorial uses 3 physical machines of **DELL 620 Intel (R) Xeon (R) CPU E5-2640 v2 @ 2.00GHz (32G memory)**, on which **CentOS Linux release 7.6.1810 (Core)** will be installed for the minimal deployment of Kube AI Hub.
+This tutorial uses 3 physical machines of **DELL 620 Intel (R) Xeon (R) CPU E5-2640 v2 @ 2.00GHz (32G memory)**, on which **Ubuntu 24.04 LTS** will be installed for the minimal deployment of Kube AI Hub.
 
 ### Install CentOS
 
-Download and install the [image](https://www.centos.org/download/) first, and CentOS Linux release 7.6.1810 (Core) is recommended. Make sure you allocate at least 200 GB to the root directory where it stores docker images (you can skip this if you are installing Kube AI Hub for testing).
+Download and install the Ubuntu 24.04 LTS image first. Make sure you allocate at least 200 GB to the root directory where it stores container images (you can skip this if you are installing Kube AI Hub for testing).
 
 For more information about the supported systems, see [System Requirements](../../../installing-on-linux/introduction/multioverview/). 
 
@@ -186,59 +186,25 @@ You may not need to install all the dependencies depending on the Kubernetes ver
 
 {{</ notice >}} 
 
-## Download KubeKey
+## Get KubeKey
 
-[Kubekey](https://github.com/kubesphere/kubekey) is the next-gen installer which provides an easy, fast and flexible way to install Kubernetes and Kube AI Hub.
-
-Follow the step below to download KubeKey.
-
-{{< tabs >}}
-
-{{< tab "Good network connections to GitHub/Googleapis" >}}
-
-Download KubeKey from its [GitHub Release Page](https://github.com/kubesphere/kubekey/releases) or use the following command directly.
+KubeKey is included in the Kube AI Hub offline installation package. After extracting the package, select the binary for your architecture:
 
 ```bash
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
-```
+# x86_64 architecture
+mv kk-x86 kk
 
-{{</ tab >}}
+# ARM64 architecture
+mv kk-arm kk
 
-{{< tab "Poor network connections to GitHub/Googleapis" >}}
-
-Run the following command first to make sure you download KubeKey from the correct zone.
-
-```bash
-export KKZONE=cn
-```
-
-Run the following command to download KubeKey:
-
-```bash
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.13 sh -
-```
-
-{{< notice note >}}
-
-After you download KubeKey, if you transfer it to a new machine also with poor network connections to Googleapis, you must run `export KKZONE=cn` again before you proceed with the steps below.
-
-{{</ notice >}} 
-
-{{</ tab >}}
-
-{{</ tabs >}}
-
-{{< notice note >}}
-
-The commands above download the latest release of KubeKey. You can change the version number in the command to download a specific version.
-
-{{</ notice >}} 
-
-Make `kk` executable:
-
-```bash
 chmod +x kk
 ```
+
+{{< notice note >}}
+
+Obtain the offline installation package from your delivery channel. The package includes Kubernetes v1.34.4, containerd, and required images.
+
+{{</ notice >}}
 
 ## Create a Multi-node Cluster
 
@@ -247,12 +213,12 @@ With KubeKey, you can install Kubernetes and Kube AI Hub together. You have the 
 Create a Kubernetes cluster with Kube AI Hub installed (for example, `--with-kubesphere v3.4.1`):
 
 ```bash
-./kk create config --with-kubernetes v1.22.12 --with-kubesphere v3.4.1
+./kk create config --with-kubernetes v1.34.4 --with-kubesphere v3.4.1
 ```
 
-{{< notice note >}} 
+{{< notice note >}}
 
-- Recommended Kubernetes versions for Kube AI Hub 3.4: v1.20.x, v1.21.x, v1.22.x, v1.23.x, * v1.24.x, * v1.25.x, and * v1.26.x. For Kubernetes versions with an asterisk, some features of edge nodes may be unavailable due to incompatability. Therefore, if you want to use edge nodes, you are advised to install Kubernetes v1.23.x. If you do not specify a Kubernetes version, KubeKey will install Kubernetes v1.23.10 by default. For more information about supported Kubernetes versions, see [Support Matrix](../../../installing-on-linux/introduction/kubekey/#support-matrix).
+- Recommended Kubernetes versions for Kube AI Hub 3.4: v1.28.x, v1.29.x, v1.30.x, v1.31.x, v1.32.x, v1.33.x, and v1.34.x (v1.34.x recommended). If you do not specify a Kubernetes version, KubeKey will install Kubernetes v1.34.4 by default. For more information about supported Kubernetes versions, see [Support Matrix](../../../installing-on-linux/introduction/kubekey/#support-matrix).
 
 - If you do not add the flag `--with-kubesphere` in the command above, Kube AI Hub will not be deployed unless you install it using the `addons` field in the configuration file or add this flag again when you use `./kk create cluster` later.
 - If you add the flag `--with-kubesphere` without specifying a Kube AI Hub version, the latest version of Kube AI Hub will be installed.

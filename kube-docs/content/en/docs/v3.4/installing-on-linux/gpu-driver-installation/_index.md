@@ -26,7 +26,7 @@ CPU-only nodes do not require this section. In heterogeneous clusters, apply the
 ## General Prerequisites
 
 - `root` or `sudo` privileges
-- **Ubuntu 22.04/24.04** (deb packages) or **RHEL 8/9** and compatible distributions (rpm packages) is recommended for NVIDIA GPU nodes; see the Ascend guide for NPU nodes
+- **Ubuntu 22.04/24.04** (deb packages) or **RHEL 8/9** and compatible distributions (rpm packages) is recommended for NVIDIA GPU nodes; Ascend NPU nodes support **Ubuntu 22.04/24.04**, **CentOS 9+**, **Kylin V10**, and **openEuler 22.03 LTS+** — see the Ascend guide for details
 - All nodes have synchronized time (see [Time Synchronization](../introduction/time-synchronization/))
 - Package versions must match your hardware model, OS, and kernel version; verify against your deployment environment
 
