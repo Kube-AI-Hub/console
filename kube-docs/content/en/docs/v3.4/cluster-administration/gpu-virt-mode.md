@@ -1,7 +1,7 @@
 ---
 title: "GPU Virtualization Mode (Sharing/Slicing)"
-keywords: "Kube AI Hub, GPU, vGPU, virtualization, sharing, slicing, MIG, HAMi"
-description: "Learn how to configure GPU virtualization modes in Kube AI Hub for GPU sharing and slicing."
+keywords: "Kube AI Hub, GPU, NPU, vGPU, virtualization, sharing, slicing, MIG, HAMi, Ascend, 910C, 310P"
+description: "Configure GPU virtualization modes in Kube AI Hub, including Ascend NPU Runtime + hard-template slicing."
 linkTitle: "GPU Virtualization Mode"
 weight: 8120
 ---
@@ -10,7 +10,7 @@ weight: 8120
 
 GPU Virtualization Mode (also known as sharing/slicing policy) is a node-level feature that configures virtualization for all GPU cards on a node. By setting different virtualization modes, a single physical GPU card can be sliced into multiple vGPUs, enabling multiple tasks to share the same GPU and significantly improving GPU utilization.
 
-The platform supports virtualization schemes from multiple GPU vendors, offering vendor-specific mode options and configuration parameters.
+The platform supports virtualization schemes from multiple GPU / NPU vendors. NVIDIA and Cambricon expose a node-level mode switch. Ascend NPUs do **not** use that switch; they slice through **Ascend Runtime + hard templates** based on the memory request. Resource names, template tables, and YAML examples are in [Ascend NPU Usage](../npu-usage/).
 
 ## Supported Vendors and Modes
 
@@ -49,6 +49,19 @@ The platform supports virtualization schemes from multiple GPU vendors, offering
 | Parameter | Description |
 |-----------|-------------|
 | **Virtualization Num** | Number of virtual instances per GPU |
+
+### Huawei Ascend NPUs
+
+Ascend slicing is **not** the node-level **Set GPU Virtualization Mode** action, and it is not NVIDIA HAMi-Core soft slicing.
+
+| Mode | Description |
+|------|-------------|
+| **Whole card** | Request count only. The workload occupies the full NPU (or a 910C die pair). |
+| **Hard template** | Request count `1` plus `huawei.com/<SKU>-memory` in MiB. The scheduler rounds up to a fixed template (for example 910C `vir06_1c_16g` / `vir12_3c_32g`). Ascend Runtime and the driver create the vNPU. |
+
+Soft slicing is disabled by default. Do not set `huawei.com/vnpu-mode: hami-core` or `huawei.com/*-core` on the Pod; those requests are rejected. If `runtimeClassName` is omitted, the webhook injects `ascend`.
+
+Supported models include 910A, 910B2 / 910B3 / 910B4 / 910B4-1, 310P / 310P48, and 910C. Template sizes and 910C / 310P rules are in [Ascend NPU Usage](../npu-usage/).
 
 ## Configuring GPU Virtualization Mode
 
@@ -89,3 +102,5 @@ After configuration, virtualization status is visible in:
 | Dev/test with shared GPUs | HAMi-Core (NVIDIA) or Env Share (Cambricon) | Flexible slicing, improved utilization |
 | Training tasks requiring full GPU power | Default | No virtualization overhead, maximum performance |
 | Compute-constrained, overcommit needed | HAMi-Core with scaling params | Allows VRAM/compute overcommit allocation |
+| Ascend inference with in-card isolation | Hard template (request memory) | Runtime creates a fixed-size vNPU |
+| Ascend training or ACL Graph / vLLM graph capture | Whole card or a larger template | Small templates can exhaust stream quota |

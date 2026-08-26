@@ -1,6 +1,6 @@
 ---
 title: "Install Huawei Ascend Driver"
-keywords: 'Ascend, NPU, npu-smi, Ascend Docker Runtime, Kube AI Hub'
+keywords: 'Ascend, NPU, npu-smi, Ascend Docker Runtime, Kube AI Hub, 910C, 910B, 310P'
 description: 'Install Huawei Ascend NPU drivers, firmware, and Ascend Docker Runtime on Linux NPU nodes.'
 linkTitle: "Huawei Ascend"
 weight: 3172
@@ -10,7 +10,7 @@ This guide describes how to install Huawei Ascend NPU drivers, firmware, and Asc
 
 ## Prerequisites
 
-- Node has Huawei Ascend NPUs (e.g., 910B; verify against your hardware)
+- Node has Huawei Ascend NPUs (for example 910C, 910B, 310P / 310P48; verify against your hardware)
 - `root` or `sudo` privileges
 - [Time synchronization](../introduction/time-synchronization/) is configured
 - Driver, firmware, and runtime packages matching your NPU model, OS, and architecture are prepared
@@ -102,6 +102,8 @@ Successful NPU information output indicates the driver is installed correctly.
 
 ## Install Ascend Docker Runtime
 
+You must install **Ascend Docker Runtime**. The cluster injects `runtimeClassName: ascend` on NPU Pods by default so this runtime can mount device nodes and driver libraries. Without it, containers cannot use the NPU and `npu-smi` fails.
+
 Verify and install the runtime package:
 
 ```bash
@@ -163,3 +165,4 @@ sudo systemctl restart containerd
 - Confirm the `runtime` path in `/etc/containerd/config.toml` is correct
 - Confirm containerd was restarted
 - Consult Ascend official documentation for CANN/driver and container image compatibility
+- After the cluster is up, request whole cards or hard-template slices as described in [Ascend NPU Usage](../../../cluster-administration/npu-usage/)

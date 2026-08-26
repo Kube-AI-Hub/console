@@ -73,7 +73,9 @@ The CPU resource is measured in CPU units, or **Core** in Kube AI Hub. The memor
 
 {{</ notice >}} 
 
-To set **GPU Type**, select a GPU type from the drop-down list, which defaults to `nvidia.com/gpu`. **GPU Limit** defaults to no limit.
+To set **GPU Type**, select a GPU / NPU type from the drop-down list. The default is `nvidia.com/gpu`. **GPU Limit** defaults to no limit.
+
+For Ascend NPUs, pick the matching SKU, for example `huawei.com/Ascend910C`, `huawei.com/Ascend910B3`, `huawei.com/Ascend310P`, or `huawei.com/Ascend310P48`. For a slice, set the same SKU's `*-memory` in **MiB** (for example `16384`). Do not set a core field. See [Ascend NPU Usage](../../cluster-administration/npu-usage/).
 
 #### **Port Settings**
 

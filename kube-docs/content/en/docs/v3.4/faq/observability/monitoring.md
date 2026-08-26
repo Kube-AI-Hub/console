@@ -12,6 +12,7 @@ This page contains some of the frequently asked questions about monitoring.
 - [Host port 9100 conflict caused by the node exporter](#host-port-9100-conflict-caused-by-the-node-exporter)
 - [Conflicts with the preexisting prometheus operator](#conflicts-with-the-preexisting-prometheus-operator)
 - [GPU monitoring and ClusterConfiguration](#gpu-monitoring-and-clusterconfiguration)
+- [NPU monitoring](#npu-monitoring)
 - [How to change the monitoring data retention period](#how-to-change-the-monitoring-data-retention-period)
 - [No monitoring data for kube-scheduler and kube-controller-manager](#no-monitoring-data-for-kube-scheduler-and-kube-controller-manager)
 - [No monitoring data for the last few minutes](#no-monitoring-data-for-the-last-few-minutes)
@@ -76,6 +77,24 @@ kubectl edit ds -n kubesphere-monitoring-system node-exporter
 ## Conflicts with the preexisting prometheus operator
 
 If you have deployed Prometheus Operator on your own, make sure it is removed before you install Kube AI Hub. Otherwise, there may be conflicts that the built-in Prometheus Operator of Kube AI Hub selects duplicate ServiceMonitor objects.
+
+## GPU monitoring and ClusterConfiguration
+
+GPU monitoring in the console, plus the installer-managed GPU Prometheus rules, gpu-agent `ServiceMonitor`, and dashboards, are controlled by **`ClusterConfiguration.spec.monitoring.gpu.enabled`**. Set it to `true`, then re-apply `cluster-configuration.yaml` or let ks-installer reconcile so `monitoring.enableGPUMonitoring` in `kubesphere-config` and those monitoring resources take effect.
+
+## NPU monitoring
+
+Ascend NPU monitoring uses the same **`spec.monitoring.gpu.enabled`** flag. When it is on, the scrape path is:
+
+`npu-exporter` (`:8082`) → `gpu-agent` (`:9101`) → Prometheus → the Running Status / Monitoring tabs on [GPU Card Management](../../cluster-administration/gpu-management/).
+
+Card-level metrics include utilization, HBM (910 series) or DDR (310P), temperature, and power. Inside a container, `npu-smi info` shows the VF / hard-template name.
+
+{{< notice note >}}
+
+On 310P hard slices, `container_npu_*` and `gpu_agent_pod_*` may be missing or unstable. Use card-level `npu_chip_info_*` metrics and the scheduler allocation (Pod **Scheduled to GPU**) instead. How to request an NPU is in [Ascend NPU Usage](../../cluster-administration/npu-usage/).
+
+{{</ notice >}}
 
 ## How to change the monitoring data retention period
 

@@ -12,6 +12,7 @@ weight: 16320
 - [Node Exporter 引起的主机端口 9100 冲突](../../observability/monitoring/#node-exporter-引起的主机端口-9100-冲突)
 - [与现有的 Prometheus Operator 相冲突](../../observability/monitoring/#与现有的-prometheus-operator-相冲突)
 - [GPU 监控与 ClusterConfiguration](#gpu-监控与-clusterconfiguration)
+- [NPU 监控](#npu-监控)
 - [如何更改监控数据保留期限](../../observability/monitoring/#如何更改监控数据保留期限)
 - [kube-scheduler 和 kube-controller-manager 没有监控数据](../../observability/monitoring/#kube-scheduler-和-kube-controller-manager-没有监控数据)
 - [近几分钟没有监控数据](../../observability/monitoring/#近几分钟没有监控数据)
@@ -80,6 +81,20 @@ kubectl edit svc -n kubesphere-monitoring-system prometheus-k8s
 ## GPU 监控与 ClusterConfiguration
 
 控制台中的 GPU 相关监控能力，以及安装器下发的 GPU Prometheus 规则、gpu-agent `ServiceMonitor`、控制台大盘等，均由 **`ClusterConfiguration` 的 `spec.monitoring.gpu.enabled`** 控制。将其设为 `true` 后，请重新应用 `cluster-configuration.yaml` 或触发 ks-installer 协调，以便 `kubesphere-config` 内的 `monitoring.enableGPUMonitoring` 与上述监控资源生效。
+
+## NPU 监控
+
+昇腾 NPU 监控与 GPU 共用 **`spec.monitoring.gpu.enabled`**。打开后，采集链路为：
+
+`npu-exporter`（`:8082`）→ `gpu-agent`（`:9101`）→ Prometheus → 控制台 [显卡管理](../../cluster-administration/gpu-management/) 的运行状态 / 监控页。
+
+卡级指标包括利用率、HBM（910 系列）或 DDR（310P）、温度和功耗。容器内可执行 `npu-smi info` 查看 VF / 硬模板名。
+
+{{< notice note >}}
+
+310P 硬切分上，`container_npu_*` 与 `gpu_agent_pod_*` 可能不稳定。请以卡级 `npu_chip_info_*` 指标和调度分配（Pod「调度至显卡」）为准。申请方式见 [昇腾 NPU 使用](../../cluster-administration/npu-usage/)。
+
+{{</ notice >}}
 
 ## 如何更改监控数据保留期限
 

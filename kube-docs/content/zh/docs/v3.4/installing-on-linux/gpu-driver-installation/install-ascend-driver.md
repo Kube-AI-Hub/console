@@ -1,6 +1,6 @@
 ---
 title: "安装华为昇腾 (Ascend) 驱动"
-keywords: 'Ascend, 昇腾, NPU, npu-smi, Ascend Docker Runtime, Kube AI Hub'
+keywords: 'Ascend, 昇腾, NPU, npu-smi, Ascend Docker Runtime, Kube AI Hub, 910C, 910B, 310P'
 description: '在 Linux NPU 节点上安装华为昇腾驱动、固件及 Ascend Docker Runtime。'
 linkTitle: "华为昇腾 (Ascend)"
 weight: 3172
@@ -10,7 +10,7 @@ weight: 3172
 
 ## 前提条件
 
-- 节点配备华为昇腾 NPU（如 910B 等，以实际硬件为准）
+- 节点配备华为昇腾 NPU（如 910C、910B、310P / 310P48，以实际硬件为准）
 - 具有 `root` 或 `sudo` 权限
 - 已完成 [时间同步配置](../introduction/time-synchronization/)
 - 已准备与 NPU 型号、操作系统及架构匹配的驱动、固件与 runtime 安装包
@@ -102,6 +102,8 @@ npu-smi info
 
 ## 安装 Ascend Docker Runtime
 
+必须安装 **Ascend Docker Runtime**。集群默认将 `runtimeClassName: ascend` 注入 NPU Pod，由该 runtime 挂载设备节点与驱动库。未安装时，容器内无法使用 NPU，`npu-smi` 也会失败。
+
 校验并安装 runtime 包：
 
 ```bash
@@ -163,3 +165,4 @@ sudo systemctl restart containerd
 - 确认 `/etc/containerd/config.toml` 中 `runtime` 路径正确
 - 确认已重启 containerd
 - 查阅昇腾官方文档确认 CANN/驱动版本与容器镜像兼容
+- 集群创建后的整卡 / 硬模板申请见 [昇腾 NPU 使用](../../../cluster-administration/npu-usage/)

@@ -1,7 +1,7 @@
 ---
 title: "GPU 虚拟化模式（共享/切分策略）"
-keywords: "Kube AI Hub, GPU, vGPU, 虚拟化, 共享, 切分, MIG, HAMi"
-description: "了解如何在 Kube AI Hub 中配置 GPU 虚拟化模式，实现 GPU 共享与切分。"
+keywords: "Kube AI Hub, GPU, NPU, vGPU, 虚拟化, 共享, 切分, MIG, HAMi, 昇腾, 910C, 310P"
+description: "了解如何在 Kube AI Hub 中配置 GPU 虚拟化模式，以及昇腾 NPU 的 Runtime + 硬模板切分。"
 linkTitle: "GPU 虚拟化模式"
 weight: 8120
 ---
@@ -10,7 +10,7 @@ weight: 8120
 
 GPU 虚拟化模式（也称共享/切分策略）是在节点维度对该节点上所有 GPU 显卡进行虚拟化配置的功能。通过设置不同的虚拟化模式，可以将一张物理 GPU 卡切分为多个 vGPU，实现多任务共享同一张显卡，显著提升 GPU 利用率。
 
-平台支持多种 GPU 厂商的虚拟化方案，针对不同厂商提供差异化的模式选项和配置参数。
+平台支持多种 GPU / NPU 厂商的虚拟化方案。NVIDIA 与寒武纪在节点上选择虚拟化模式；昇腾 NPU 不走节点级模式开关，而是通过 **Ascend Runtime + 硬模板** 按显存申请切分。资源名、模板表与 YAML 示例见 [昇腾 NPU 使用](../npu-usage/)。
 
 ## 支持的厂商与模式
 
@@ -49,6 +49,19 @@ GPU 虚拟化模式（也称共享/切分策略）是在节点维度对该节点
 | 参数 | 说明 |
 |------|------|
 | **虚拟化数量（Virtualization Num）** | 单张 GPU 虚拟化的数量 |
+
+### 华为昇腾 NPU
+
+昇腾切分**不是**节点上的「设置 GPU 虚拟化模式」开关，也不是 NVIDIA 的 HAMi-Core 软切分。
+
+| 模式 | 说明 |
+|------|------|
+| **整卡** | 只申请卡数，任务独占整颗（或 910C 的一对）NPU |
+| **硬模板** | 申请卡数 `1` 与 `huawei.com/<SKU>-memory`（MiB）。调度器向上取整到固定模板（如 910C 的 `vir06_1c_16g` / `vir12_3c_32g`），由 Ascend Runtime 与驱动创建 vNPU |
+
+当前默认关闭软切分。不要在 Pod 中填写 `huawei.com/vnpu-mode: hami-core` 或 `huawei.com/*-core`，此类请求会被拒绝。未设置 `runtimeClassName` 时，webhook 会注入 `ascend`。
+
+支持的型号包括 910A、910B2 / 910B3 / 910B4 / 910B4-1、310P / 310P48、910C。完整模板容量与 910C / 310P 规则见 [昇腾 NPU 使用](../npu-usage/)。
 
 ## 配置 GPU 虚拟化模式
 
@@ -89,3 +102,5 @@ GPU 虚拟化模式（也称共享/切分策略）是在节点维度对该节点
 | 开发测试，多人共享 GPU | HAMi-Core（NVIDIA）或 Env Share（寒武纪） | 灵活切分，提升利用率 |
 | 训练任务，需要完整 GPU 性能 | 默认模式 | 无虚拟化开销，最大性能 |
 | 算力紧张，需要超配 | HAMi-Core + 超配参数 | 允许显存/算力超配分配 |
+| 昇腾推理，需要卡内隔离 | 硬模板（按显存申请） | Runtime 创建固定规格 vNPU |
+| 昇腾训练或 ACL Graph / vLLM 图编译 | 整卡或更大硬模板 | 小模板 stream 配额不足时易失败 |

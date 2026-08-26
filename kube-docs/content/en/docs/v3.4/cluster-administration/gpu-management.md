@@ -1,14 +1,14 @@
 ---
 title: "GPU Card Management"
-keywords: "Kube AI Hub, GPU, GPU card, GPU management, vGPU, monitoring"
-description: "Learn how to view and manage GPU card resources in Kube AI Hub clusters."
+keywords: "Kube AI Hub, GPU, NPU, GPU card, GPU management, vGPU, monitoring, Ascend, 910C, 310P"
+description: "View and manage GPU and Ascend NPU card resources in Kube AI Hub clusters."
 linkTitle: "GPU Card Management"
 weight: 8110
 ---
 
 ## Overview
 
-The GPU Card Management page provides a unified view of all physical GPU cards in the cluster, supporting filtering and viewing GPU resource allocation and usage by node, vendor, model, and status.
+The GPU Card Management page provides a unified view of all physical GPU / NPU cards in the cluster. You can filter and inspect allocation and usage by node, vendor, model, and status. How to request an Ascend NPU is in [Ascend NPU Usage](../npu-usage/).
 
 ## Viewing the GPU Card List
 
@@ -32,10 +32,10 @@ The table displays detailed information for each GPU card:
 | **Card Index** | GPU index number within the node |
 | **Card UUID** | Globally unique GPU identifier; click to navigate to GPU card details |
 | **Status** | Healthy or Sub-healthy |
-| **Model** | GPU model, e.g., A100, V100, 910B |
+| **Model** | GPU / NPU model, for example A100, V100, 910C, 910B3, 310P, 310P48 |
 | **NUMA** | NUMA node number the GPU belongs to |
 | **Vendor** | GPU vendor: NVIDIA, Huawei Ascend, Cambricon, etc. |
-| **Virtualization Mode** | Current GPU virtualization running mode |
+| **Virtualization Mode** | Current virtualization mode. Ascend cards show whole-card or a hard template, not NVIDIA HAMi-Core |
 | **vGPU** | vGPU used / total |
 | **Compute** | GPU compute used / total |
 | **Memory** | VRAM used / total (GiB) |
@@ -66,7 +66,7 @@ Click a GPU card's UUID in the list to navigate to its detail page.
 | **Model** | GPU model |
 | **Vendor** | GPU vendor |
 | **NUMA** | NUMA node number |
-| **Virtualization Mode** | Virtualization mode inherited from the node |
+| **Virtualization Mode** | Virtualization mode inherited from the node. Ascend shows whole-card or a hard template, not NVIDIA HAMi-Core |
 | **Total Memory** | Physical VRAM size (GiB) |
 | **Driver Version** | GPU driver version (if available) |
 | **Max Device Split Count** | Maximum concurrent tasks after vGPU slicing (if configured) |
@@ -101,7 +101,7 @@ In **Node Management → Cluster Nodes**, click a node to enter its detail page.
 
 For Pods using GPU resources, the Pod detail page shows **Scheduled to GPU** information, including:
 
-- Allocated GPU UUID with a link to the physical GPU card
+- Allocated GPU / NPU UUID with a link to the physical card
 - Allocated vendor type
-- Allocated VRAM size
-- Allocated compute percentage
+- Allocated memory size
+- Allocated compute percentage (NVIDIA and similar). An Ascend hard slice shows the template name (for example `vir12_3c_32g`) and memory, not a core percentage

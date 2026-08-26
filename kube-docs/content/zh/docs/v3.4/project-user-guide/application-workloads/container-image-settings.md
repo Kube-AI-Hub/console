@@ -73,7 +73,9 @@ CPU 资源以 CPU 单位计量，即 Kube AI Hub 中的 **Core**。内存资源�
 
 {{</ notice >}} 
 
-要设置 **GPU 类型**，请在下拉列表中选择一个 GPU 类型，默认为 `nvidia.com/gpu`。**GPU 限制**默认为不限制。
+要设置 **GPU 类型**，请在下拉列表中选择一个 GPU / NPU 类型。默认为 `nvidia.com/gpu`。**GPU 限制**默认为不限制。
+
+昇腾 NPU 请选择对应 SKU，例如 `huawei.com/Ascend910C`、`huawei.com/Ascend910B3`、`huawei.com/Ascend310P` 或 `huawei.com/Ascend310P48`。切分时填写同 SKU 的 `*-memory`（单位 **MiB**，如 `16384`），不要填写 core。详见 [昇腾 NPU 使用](../../cluster-administration/npu-usage/)。
 
 #### **端口设置**
 
