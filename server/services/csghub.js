@@ -276,14 +276,34 @@ const getCsgHubAssetTags = () => {
   const layoutPath = distPath
     ? path.resolve(distPath, 'src/views/layouts/base.html')
     : ''
+  const sameOriginOpenScript = `<script data-label-studio-same-origin>
+      (function () {
+        var open = window.open;
+        if (typeof open !== 'function') return;
+        window.open = function (url, name, features) {
+          try {
+            var parsed = new URL(String(url), window.location.origin);
+            var idx = parsed.pathname.indexOf('/-/label-studio');
+            if (idx >= 0) {
+              if (parsed.pathname.indexOf('/platform-model/-/label-studio') !== 0) {
+                parsed.pathname = '/platform-model' + parsed.pathname.slice(idx);
+              }
+              url = parsed.pathname + parsed.search + parsed.hash;
+            }
+          } catch (e) {}
+          return open.call(window, url, name, features);
+        };
+      })();
+    </script>`
   try {
     const html = fs.readFileSync(layoutPath, 'utf8')
-    return html
+    const assetTags = html
       .split('\n')
       .filter(line => line.includes('/platform-model/assets/'))
       .join('\n')
+    return `${sameOriginOpenScript}\n${assetTags}`
   } catch (err) {
-    return '<script type="module" src="/platform-model/src/main.js" defer></script>'
+    return `${sameOriginOpenScript}\n<script type="module" src="/platform-model/src/main.js" defer></script>`
   }
 }
 

@@ -163,6 +163,32 @@ const endpointProxy = {
 
 const LABEL_STUDIO_PREFIX = '/platform-model/-/label-studio'
 const LABEL_STUDIO_TARGET = 'http://csghub-label-studio.csghub:8002'
+const LABEL_STUDIO_PATH = '/-/label-studio'
+
+const rewriteLabelStudioLocation = location => {
+  if (!location) return location
+  try {
+    if (/^https?:\/\//i.test(location)) {
+      const url = new URL(location)
+      const idx = url.pathname.indexOf(LABEL_STUDIO_PATH)
+      if (idx < 0) return location
+      return `${LABEL_STUDIO_PREFIX}${url.pathname.slice(idx + LABEL_STUDIO_PATH.length)}${url.search}${url.hash}`
+    }
+    if (location.startsWith(LABEL_STUDIO_PATH)) {
+      return `${LABEL_STUDIO_PREFIX}${location.slice(LABEL_STUDIO_PATH.length)}`
+    }
+    if (location.startsWith('/user/login')) {
+      const url = new URL(location, 'http://localhost')
+      const next = url.searchParams.get('next') || ''
+      if (next.includes(LABEL_STUDIO_PATH) || next.includes(LABEL_STUDIO_PREFIX)) {
+        return `${LABEL_STUDIO_PREFIX}${url.pathname}${url.search}${url.hash}`
+      }
+    }
+    return location
+  } catch (_) {
+    return location
+  }
+}
 
 const labelStudioProxy = {
   target: LABEL_STUDIO_TARGET,
@@ -175,13 +201,24 @@ const labelStudioProxy = {
       /^\/platform-model\/-\/label-studio/,
       ''
     )
-    options.target = `${LABEL_STUDIO_TARGET}${suffix || '/'}${parsedUrl.search}`
+    const base = (options.target || LABEL_STUDIO_TARGET).replace(/\/+$/, '')
+    options.target = `${base}${suffix || '/'}${parsedUrl.search}`
+  },
+  events: {
+    proxyRes(proxyRes) {
+      if (proxyRes.headers.location) {
+        proxyRes.headers.location = rewriteLabelStudioLocation(
+          proxyRes.headers.location
+        )
+      }
+    },
   },
 }
 
 module.exports = {
   CSGHUB_RPROXY_TARGET,
   LABEL_STUDIO_PREFIX,
+  rewriteLabelStudioLocation,
   k8sResourceProxy,
   devopsWebhookProxy,
   b2iFileProxy,
