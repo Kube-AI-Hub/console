@@ -24,7 +24,8 @@ import stripAnsi from 'strip-ansi'
 import classnames from 'classnames'
 
 import CustomRange from 'components/Cards/Monitoring/Controller/TimeSelector/Range/Custom'
-import { Select, Icon, Tooltip } from '@kube-design/components'
+import { saveAs } from 'file-saver'
+import { Select, Icon, Loading, Notify, Tooltip } from '@kube-design/components'
 import { Card } from 'components/Base'
 
 import { dateI18n, getLastTimeRange } from './utils'
@@ -52,6 +53,7 @@ class LogCollectionDetailContainers extends Component {
     startTime: 0,
     endTime: 0,
     timeRangeSelectorVisible: false,
+    isDownloading: false,
   }
 
   intervalOpts = [5, 10, 20].map(second => ({
@@ -163,6 +165,46 @@ class LogCollectionDetailContainers extends Component {
     }))
   }
 
+  handleDownload = async () => {
+    if (this.state.isDownloading) {
+      return
+    }
+
+    const { recent } = this.state
+    const { startTime: start_time, endTime: end_time } = recent
+      ? getLastTimeRange(recent)
+      : this.state
+
+    const { containers: container, pods: pod } = this.store
+    const { cluster, namespaces: namespace } = this.store.pathParams
+
+    this.setState({ isDownloading: true })
+
+    try {
+      const result = await this.store.exportLogs({
+        pod,
+        cluster,
+        namespace,
+        container,
+        start_time,
+        end_time,
+        log_query: this.store.log_query,
+      })
+
+      if (!result) {
+        Notify.info({
+          content: t('NO_LOG_DATA_FOUND_TIP'),
+        })
+        return
+      }
+
+      const blob = new Blob([result], { type: 'text/plain;charset=utf-8' })
+      saveAs(blob, `${container || pod || 'logs'}.log`)
+    } finally {
+      this.setState({ isDownloading: false })
+    }
+  }
+
   render() {
     const { className } = this.props
     const { timeRangeSelectorVisible } = this.state
@@ -221,30 +263,20 @@ class LogCollectionDetailContainers extends Component {
   }
 
   renderExportBtn() {
-    const { recent } = this.state
-    const { startTime: start_time, endTime: end_time } = recent
-      ? getLastTimeRange(recent)
-      : this.state
+    const { isDownloading } = this.state
 
-    const { containers: container, pods: pod } = this.store
-    const { cluster, namespaces: namespace } = this.store.pathParams
-
-    const link = this.store.exportLinkFactory({
-      pod,
-      cluster,
-      namespace,
-      container,
-      start_time,
-      end_time,
-      log_query: this.store.log_query,
-    })
     return (
       <Tooltip content={t('EXPORT_LOGS')}>
-        <a href={link} download>
-          <span className={classnames(styles.filterButton, styles.exportBtn)}>
-            <Icon name={'export'} />
-          </span>
-        </a>
+        <span
+          className={classnames(styles.filterButton, styles.exportBtn)}
+          onClick={this.handleDownload}
+        >
+          {isDownloading ? (
+            <Loading size={16} />
+          ) : (
+            <Icon name={'export'} clickable />
+          )}
+        </span>
       </Tooltip>
     )
   }

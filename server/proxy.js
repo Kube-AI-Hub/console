@@ -22,8 +22,13 @@ const { getServerConfig } = require('./libs/utils')
 
 const { server: serverConfig } = getServerConfig()
 
+const normalizeBaseUrl = url => (url || '').replace(/\/+$/, '')
+
 const NEED_OMIT_HEADERS = ['cookie', 'referer']
 const CSGHUB_RPROXY_TARGET = 'http://csghub-rproxy.csghub:8083'
+const CSGHUB_AIGATEWAY_TARGET =
+  normalizeBaseUrl(serverConfig.csghub?.aiGateway?.url) ||
+  'http://csghub-gateway.csghub:8094'
 
 const k8sResourceProxy = {
   target: serverConfig.apiServer.url,
@@ -135,8 +140,6 @@ const b2iFileProxy = {
   },
 }
 
-const normalizeBaseUrl = url => (url || '').replace(/\/+$/, '')
-
 const csgHubApiProxy = {
   target: normalizeBaseUrl(serverConfig.csghub?.apiServer?.url),
   changeOrigin: true,
@@ -159,6 +162,33 @@ const csgHubApiProxy = {
 const endpointProxy = {
   target: CSGHUB_RPROXY_TARGET,
   secure: false,
+}
+
+const AIGATEWAY_PREFIXES = ['/platform-model/aigateway', '/aigateway']
+
+const rewriteAigatewayPath = pathname => {
+  let suffix = pathname || '/'
+  for (const prefix of AIGATEWAY_PREFIXES) {
+    if (suffix === prefix || suffix.startsWith(`${prefix}/`)) {
+      suffix = suffix.slice(prefix.length) || '/'
+      break
+    }
+  }
+  return suffix
+}
+
+const aigatewayProxy = {
+  target: CSGHUB_AIGATEWAY_TARGET,
+  changeOrigin: true,
+  ignorePath: true,
+  secure: false,
+  optionsHandle(options, req) {
+    const parsedUrl = new URL(req.url, 'http://localhost')
+    const suffix = rewriteAigatewayPath(parsedUrl.pathname)
+    const base =
+      normalizeBaseUrl(options.target) || CSGHUB_AIGATEWAY_TARGET
+    options.target = `${base}${suffix}${parsedUrl.search}`
+  },
 }
 
 const LABEL_STUDIO_PREFIX = '/platform-model/-/label-studio'
@@ -217,6 +247,8 @@ const labelStudioProxy = {
 
 module.exports = {
   CSGHUB_RPROXY_TARGET,
+  CSGHUB_AIGATEWAY_TARGET,
+  rewriteAigatewayPath,
   LABEL_STUDIO_PREFIX,
   rewriteLabelStudioLocation,
   k8sResourceProxy,
@@ -224,5 +256,6 @@ module.exports = {
   b2iFileProxy,
   csgHubApiProxy,
   endpointProxy,
+  aigatewayProxy,
   labelStudioProxy,
 }

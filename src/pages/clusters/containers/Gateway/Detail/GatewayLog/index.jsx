@@ -22,7 +22,8 @@ import { observer, inject } from 'mobx-react'
 import EmptyList from 'components/Cards/EmptyList'
 import SearchInput from 'components/Modals/LogSearch/Logging/SearchInput'
 import { computed, observable, toJS, action } from 'mobx'
-import { Icon, Select, Tooltip } from '@kube-design/components'
+import { saveAs } from 'file-saver'
+import { Icon, Loading, Notify, Select, Tooltip } from '@kube-design/components'
 import classnames from 'classnames'
 import { isArray, isEmpty, min, includes, isString } from 'lodash-es'
 
@@ -57,6 +58,7 @@ class GatewayLog extends React.Component {
 
   state = {
     polling: false,
+    isDownloading: false,
   }
 
   @observable
@@ -327,13 +329,44 @@ class GatewayLog extends React.Component {
     this.refreshQuery()
   }
 
+  handleDownload = async () => {
+    if (this.state.isDownloading) {
+      return
+    }
+
+    const { cluster, namespace, gatewayName } = this.props.match.params
+    const params = {
+      cluster,
+      namespace,
+      gatewayName,
+      ...this.duration,
+      ...this.getQueryParams(),
+    }
+
+    this.setState({ isDownloading: true })
+
+    try {
+      const result = await this.store.exportLogs(params)
+
+      if (!result) {
+        Notify.info({
+          content: t('NO_LOG_DATA_FOUND_TIP'),
+        })
+        return
+      }
+
+      const blob = new Blob([result], { type: 'text/plain;charset=utf-8' })
+      saveAs(blob, `${gatewayName || 'gateway'}.log`)
+    } finally {
+      this.setState({ isDownloading: false })
+    }
+  }
+
   renderOperation() {
     const intervalOpts = [5, 10, 20].map(second => ({
       label: t('REFRESH_INTERVAL_VALUE', { value: second }),
       value: second * 1000,
     }))
-
-    const params = { ...this.duration, ...this.getQueryParams() }
 
     return (
       <div className={styles.filter}>
@@ -351,13 +384,18 @@ class GatewayLog extends React.Component {
           onChange={this.changeFrequency}
         />
 
-        <a href={this.store.exportLinkFactory(params)} download>
-          <span className={classnames(styles.filterButton, styles.exportBtn)}>
-            <Tooltip content={t('EXPORT_LOGS')}>
-              <Icon name={'export'} type="light" />
-            </Tooltip>
-          </span>
-        </a>
+        <span
+          className={classnames(styles.filterButton, styles.exportBtn)}
+          onClick={this.handleDownload}
+        >
+          <Tooltip content={t('EXPORT_LOGS')}>
+            {this.state.isDownloading ? (
+              <Loading size={16} />
+            ) : (
+              <Icon name={'export'} type="light" clickable />
+            )}
+          </Tooltip>
+        </span>
       </div>
     )
   }

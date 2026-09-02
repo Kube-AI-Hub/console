@@ -39,6 +39,8 @@ server:
       # proxied to csghub-server through the platformmodel kapis group.
       url: http://ks-apiserver
       apiBasePath: /kapis/platformmodel.kubesphere.io/api/v1
+    aiGateway:
+      url: http://csghub-gateway.csghub:8094
     onPremise: true
     enableHttps: false
     s3:

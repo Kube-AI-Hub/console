@@ -27,7 +27,8 @@ import AnsiUp from 'ansi_up'
 import LogQueryStore from 'stores/logging/query'
 import HistogramStore from 'stores/logging/histogram'
 
-import { Icon, Select, Tooltip } from '@kube-design/components'
+import { saveAs } from 'file-saver'
+import { Icon, Loading, Notify, Select, Tooltip } from '@kube-design/components'
 import Table from 'components/Tables/Visible'
 import { markAll, esMark, mark } from 'utils/log'
 
@@ -126,6 +127,7 @@ class LogSearchModal extends React.Component {
     showHistogram: true,
     polling: false,
     pollingFrequency: 5000,
+    isDownloading: false,
   }
 
   tableRef = React.createRef()
@@ -386,6 +388,32 @@ class LogSearchModal extends React.Component {
     this.onSearchParamsChange()
   }
 
+  handleDownload = async () => {
+    if (this.state.isDownloading) {
+      return
+    }
+
+    const params = { ...this.duration, ...this.getQueryParams() }
+
+    this.setState({ isDownloading: true })
+
+    try {
+      const result = await this.queryStore.exportLogs(params)
+
+      if (!result) {
+        Notify.info({
+          content: t('NO_LOG_DATA_FOUND_TIP'),
+        })
+        return
+      }
+
+      const blob = new Blob([result], { type: 'text/plain;charset=utf-8' })
+      saveAs(blob, 'logs.log')
+    } finally {
+      this.setState({ isDownloading: false })
+    }
+  }
+
   changeClusterChange = cluster => {
     this.props.searchInputState.setCluster(cluster)
     this.onSearchParamsChange()
@@ -463,7 +491,6 @@ class LogSearchModal extends React.Component {
 
   renderToolBar() {
     const { showHistogram, polling, pollingFrequency } = this.state
-    const params = { ...this.duration, ...this.getQueryParams() }
 
     return (
       <div className={styles.toolbar}>
@@ -478,13 +505,15 @@ class LogSearchModal extends React.Component {
           </span>
         </div>
         <div>
-          <a href={this.queryStore.exportLinkFactory(params)} download>
-            <span className={styles.exportBtn}>
-              <Tooltip content={t('EXPORT')}>
-                <Icon name={'export'} type="light" size={16} />
-              </Tooltip>
-            </span>
-          </a>
+          <span className={styles.exportBtn} onClick={this.handleDownload}>
+            <Tooltip content={t('EXPORT')}>
+              {this.state.isDownloading ? (
+                <Loading size={16} />
+              ) : (
+                <Icon name={'export'} type="light" size={16} clickable />
+              )}
+            </Tooltip>
+          </span>
           <span className={styles.pollingBtn} onClick={this.togglePolling}>
             <Tooltip
               content={

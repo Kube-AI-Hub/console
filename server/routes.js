@@ -31,6 +31,7 @@ const {
   b2iFileProxy,
   csgHubApiProxy,
   endpointProxy,
+  aigatewayProxy,
   labelStudioProxy,
 } = require('./proxy')
 
@@ -77,6 +78,7 @@ const router = new Router()
 
 router
   .use(proxy('/platform-model/-/label-studio{/*path}', labelStudioProxy))
+  .use(proxy('/platform-model/aigateway{/*path}', aigatewayProxy))
   .use(proxy('/platform-model/api/v1{/*path}', csgHubApiProxy))
   .get('/platform-model/internal_api/ping', handleCsgHubPing)
   .post('/platform-model/internal_api/upload', handleCsgHubUpload)
@@ -94,6 +96,7 @@ router
   .get('/platform-model/zhHant/settings/locale', setCsgHubZhHantLocale)
   .get('/platform-model{/*path}', renderCsgHub)
   .use(proxy('/endpoint{/*path}', endpointProxy))
+  .use(proxy('/aigateway{/*path}', aigatewayProxy))
   .use(proxy('/devops_webhook{/*path}', devopsWebhookProxy))
   .use(proxy('/b2i_download{/*path}', b2iFileProxy))
   .post('/dockerhub{/*path}', parseBody, handleDockerhubProxy)

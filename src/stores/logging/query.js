@@ -131,4 +131,14 @@ export default class LoggingQuery extends LoggingStore {
       operation: 'export',
     })}`
   }
+
+  async exportLogs({ cluster, start_time, end_time, ...rest }) {
+    return await request.get(this.getApiPath(cluster), {
+      sort: 'asc',
+      ...rest,
+      start_time: start_time ? Math.floor(start_time / 1000) : undefined,
+      end_time: end_time ? Math.floor(end_time / 1000) : undefined,
+      operation: 'export',
+    })
+  }
 }

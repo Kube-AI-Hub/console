@@ -242,6 +242,29 @@ export default class Gateway extends Base {
     })}`
   }
 
+  async exportLogs({
+    cluster,
+    namespace,
+    gatewayName,
+    start_time,
+    end_time,
+    ...params
+  }) {
+    const api = `${this.gatewayPodsUrl({
+      cluster,
+      namespace,
+      gatewayName,
+    })}/logs`
+
+    return await request.get(api, {
+      sort: 'asc',
+      ...params,
+      start_time: Math.floor(start_time / 1000),
+      end_time: Math.floor(end_time / 1000),
+      operation: 'export',
+    })
+  }
+
   @action
   async getGatewayPods(params) {
     const url = `${this.gatewayPodsUrl(params)}/pods`

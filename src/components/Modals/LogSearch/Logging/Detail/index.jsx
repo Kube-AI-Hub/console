@@ -23,7 +23,8 @@ import { observer } from 'mobx-react'
 import { observable, computed, action } from 'mobx'
 import AnsiUp from 'ansi_up'
 import { get } from 'lodash'
-import { Icon, Select, Tooltip } from '@kube-design/components'
+import { saveAs } from 'file-saver'
+import { Icon, Loading, Notify, Select, Tooltip } from '@kube-design/components'
 
 import PodStore from 'stores/pod'
 import ProjectStore from 'stores/project'
@@ -65,6 +66,7 @@ class DetailModal extends React.Component {
       pollingFrequency: 5000,
       polling: false,
       query: log,
+      isDownloading: false,
     }
   }
 
@@ -351,7 +353,11 @@ class DetailModal extends React.Component {
     )
   }
 
-  renderExportBtn() {
+  handleDownload = async () => {
+    if (this.state.isDownloading) {
+      return
+    }
+
     const {
       pods: pod,
       containers: container,
@@ -362,24 +368,46 @@ class DetailModal extends React.Component {
     } = this.logStore
     const { cluster } = this.props.searchInputState
 
-    const link = this.logStore.exportLinkFactory({
-      cluster,
-      namespaces,
-      pods: pod,
-      containers: container,
-      log_query,
-      start_time,
-      end_time,
-    })
+    this.setState({ isDownloading: true })
+
+    try {
+      const result = await this.logStore.exportLogs({
+        cluster,
+        namespaces,
+        pods: pod,
+        containers: container,
+        log_query,
+        start_time,
+        end_time,
+      })
+
+      if (!result) {
+        Notify.info({
+          content: t('NO_LOG_DATA_FOUND_TIP'),
+        })
+        return
+      }
+
+      const blob = new Blob([result], { type: 'text/plain;charset=utf-8' })
+      saveAs(blob, `${container || pod || 'logs'}.log`)
+    } finally {
+      this.setState({ isDownloading: false })
+    }
+  }
+
+  renderExportBtn() {
+    const { isDownloading } = this.state
 
     return (
-      <a href={link} download>
-        <div className={styles.pollingBtn}>
-          <Tooltip content={t('EXPORT')}>
-            <Icon name={'export'} type="light" />
-          </Tooltip>
-        </div>
-      </a>
+      <div className={styles.pollingBtn} onClick={this.handleDownload}>
+        <Tooltip content={t('EXPORT')}>
+          {isDownloading ? (
+            <Loading size={16} />
+          ) : (
+            <Icon name={'export'} type="light" clickable />
+          )}
+        </Tooltip>
+      </div>
     )
   }
 
