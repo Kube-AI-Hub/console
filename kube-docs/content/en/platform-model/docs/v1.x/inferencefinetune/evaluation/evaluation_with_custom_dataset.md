@@ -98,3 +98,5 @@ doc_to_target: "{{answer}}"
 
 - [Create Model Evaluation Task](./evaluation_create)
 - [Evaluation Framework Overview](./evaluation_framework_intro)
+- [Scoring Plugins and Prompt Templates](./evaluation_scoring_plugins)
+- [Metrics Configuration](./evaluation_metrics_config)

@@ -56,3 +56,23 @@ Refer to the [Custom Evaluation Datasets](./evaluation_with_custom_dataset) docu
 3. **EvalScope** has no equivalent built-in package; continue to sync datasets or use a custom dataset.
 
 Custom datasets are not imported after evaluation.
+
+---
+
+### Should I change Prompt / scoring plugins in Advanced options?
+
+Keep the framework protocol on official recommended sets so scores stay comparable with papers and leaderboards. Change them for custom business sets, production system prompts, protocol ablations, or LLM Judge. See [Scoring Plugins and Prompt Templates](./evaluation_scoring_plugins) and [Metrics Configuration](./evaluation_metrics_config).
+
+Accuracy with the same name is not comparable across OpenCompass, lm-evaluation-harness, and EvalScope.
+
+---
+
+### Can I open details while an evaluation is still running?
+
+Yes. The detail page at least shows the configuration snapshot and status. Scores, coverage, and failure samples are written into the report after the task succeeds.
+
+## Related documentation
+
+- [Scoring Plugins and Prompt Templates](./evaluation_scoring_plugins)
+- [Metrics Configuration](./evaluation_metrics_config)
+- [Custom Evaluation Datasets](./evaluation_with_custom_dataset)

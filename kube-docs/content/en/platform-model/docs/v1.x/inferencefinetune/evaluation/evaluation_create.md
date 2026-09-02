@@ -25,6 +25,7 @@ On the model evaluation task creation page, fill in the following configuration,
 | **Evaluation Framework** | Select the framework: OpenCompass, EvalScope, or lm-evaluation-harness |
 | **Dataset Selection** | Select one or more benchmark datasets from the dataset list |
 | **Resource Type** | **Shared Resources**: uses public compute, requires queuing; **Dedicated Resources**: exclusive compute, billed by time |
+| **Advanced options** | Collapsed. Prompt template and scoring plugins default from the selected dataset and framework; you can leave them unchanged. Overrides are not leaderboard-comparable and are stored in the report snapshot. See [Scoring Plugins and Prompt Templates](./evaluation_scoring_plugins) and [Metrics Configuration](./evaluation_metrics_config). |
 
 ## View Evaluation Results
 
@@ -34,4 +35,6 @@ After creation, use the top navigation to open **Model Training & Evaluation →
 
 - [Evaluation Framework Overview](./evaluation_framework_intro)
 - [Custom Evaluation Datasets](./evaluation_with_custom_dataset)
+- [Scoring Plugins and Prompt Templates](./evaluation_scoring_plugins)
+- [Metrics Configuration](./evaluation_metrics_config)
 - [FAQ](./evaluation_faq)

@@ -47,3 +47,5 @@ An evaluation framework from the ModelScope community with built-in MMLU, CMMLU,
 
 - [Create Model Evaluation Task](./evaluation_create)
 - [Custom Evaluation Datasets](./evaluation_with_custom_dataset)
+- [Scoring Plugins and Prompt Templates](./evaluation_scoring_plugins)
+- [Metrics Configuration](./evaluation_metrics_config)

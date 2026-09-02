@@ -47,3 +47,5 @@ EleutherAI 开发的 Python 评测工具，提供标准化评测流程，支持 
 
 - [创建模型评测任务](./evaluation_create)
 - [自定义评测数据集](./evaluation_with_custom_dataset)
+- [打分插件与 Prompt 模版](./evaluation_scoring_plugins)
+- [指标配置](./evaluation_metrics_config)

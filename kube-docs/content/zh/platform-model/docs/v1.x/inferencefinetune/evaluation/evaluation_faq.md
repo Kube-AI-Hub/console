@@ -56,3 +56,23 @@ weight: 6410
 3. **EvalScope** 没有对等内置数据包，仍需同步或使用自定义数据集。
 
 自定义数据集不会在评测后自动导入。
+
+---
+
+### 高级选项里的 Prompt / 打分插件要不要改？
+
+系统推荐集默认保持框架协议，以便和论文/榜单横比。自定义业务集、线上 system prompt、协议消融或 LLM Judge 才需要改。详见[打分插件与 Prompt 模版](./evaluation_scoring_plugins)和[指标配置](./evaluation_metrics_config)。
+
+同名 Accuracy 不能跨 OpenCompass / lm-evaluation-harness / EvalScope 直接比较。
+
+---
+
+### 评测还在运行时能不能看详情？
+
+可以。详情页至少展示配置快照和状态；分数、覆盖率和失败样例在任务成功后写入报告。
+
+## 相关文档
+
+- [打分插件与 Prompt 模版](./evaluation_scoring_plugins)
+- [指标配置](./evaluation_metrics_config)
+- [自定义评测数据集](./evaluation_with_custom_dataset)

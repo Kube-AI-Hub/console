@@ -25,6 +25,7 @@ weight: 6400
 | **评测框架** | 选择评测框架：OpenCompass、EvalScope 或 lm-evaluation-harness |
 | **数据集选择** | 从数据集列表中选择一个或多个评测基准数据集 |
 | **资源类型** | **共享资源**：使用公共算力，需排队；**专属资源**：独占算力，按时间计费 |
+| **高级选项** | 折叠项。Prompt 模版、打分插件默认来自所选数据集 + 框架，可不改。覆盖后分数不可与官方榜单直接比较，将写入评测报告快照。说明见[打分插件与 Prompt 模版](./evaluation_scoring_plugins)、[指标配置](./evaluation_metrics_config) |
 
 ## 查看评测结果
 
@@ -34,4 +35,6 @@ weight: 6400
 
 - [评测框架介绍](./evaluation_framework_intro)
 - [自定义评测数据集](./evaluation_with_custom_dataset)
+- [打分插件与 Prompt 模版](./evaluation_scoring_plugins)
+- [指标配置](./evaluation_metrics_config)
 - [常见问题](./evaluation_faq)
