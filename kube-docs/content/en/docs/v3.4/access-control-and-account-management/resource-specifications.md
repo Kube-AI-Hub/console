@@ -30,9 +30,13 @@ The Resource Specifications feature allows platform administrators to pre-define
 | **Memory** | Memory size configuration (GiB) |
 | **GPU Model** | Optional; specify a GPU model (e.g., A100, V100) |
 | **GPU Count** | Optional; number of GPU cards |
-| **GPU Memory** | Optional; VRAM allocation per GPU card |
+| **GPU Memory** | Optional; advertised usable VRAM (GB). Used only to compare with **Recommended Minimum GPU Memory** when creating inference or fine-tuning instances. **Not** used for GPU scheduling or vGPU slicing. For unsliced whole-card specifications, fill in the card’s total VRAM |
 
 5. Click **OK** to complete creation.
+
+{{< notice note >}}
+On the inference and fine-tuning create pages, the platform estimates recommended minimum GPU memory (about weight VRAM × 1.5 for inference, × 2.0 for fine-tuning) and compares it with this field. Specifications below the recommendation are marked **Low Memory**. If the field is empty or 0, the page cannot compare VRAM.
+{{</ notice >}}
 
 ## Managing Specifications
 

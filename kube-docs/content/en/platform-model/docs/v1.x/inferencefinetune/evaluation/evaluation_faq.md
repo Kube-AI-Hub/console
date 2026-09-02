@@ -59,9 +59,15 @@ Custom datasets are not imported after evaluation.
 
 ---
 
+### What do framework args, vLLM args, and Advanced options change?
+
+**Framework args** and **vLLM args** change runtime only (batch, generation length, dtype). **Advanced options** change the Prompt protocol or which native metrics to use. After a Prompt override, scores are not leaderboard-comparable. See [Evaluation Custom Parameters](./evaluation_custom_params).
+
+---
+
 ### Should I change Prompt / scoring plugins in Advanced options?
 
-Keep the framework protocol on official recommended sets so scores stay comparable with papers and leaderboards. Change them for custom business sets, production system prompts, protocol ablations, or LLM Judge. See [Scoring Plugins and Prompt Templates](./evaluation_scoring_plugins) and [Metrics Configuration](./evaluation_metrics_config).
+Keep the framework protocol on official recommended sets so scores stay comparable with papers and leaderboards. Change them for custom business sets, production system prompts, protocol ablations, or LLM Judge. See [Evaluation Custom Parameters](./evaluation_custom_params), [Scoring Plugins and Prompt Templates](./evaluation_scoring_plugins), and [Metrics Configuration](./evaluation_metrics_config).
 
 Accuracy with the same name is not comparable across OpenCompass, lm-evaluation-harness, and EvalScope.
 
@@ -73,6 +79,7 @@ Yes. The detail page at least shows the configuration snapshot and status. Score
 
 ## Related documentation
 
+- [Evaluation Custom Parameters](./evaluation_custom_params)
 - [Scoring Plugins and Prompt Templates](./evaluation_scoring_plugins)
 - [Metrics Configuration](./evaluation_metrics_config)
 - [Custom Evaluation Datasets](./evaluation_with_custom_dataset)

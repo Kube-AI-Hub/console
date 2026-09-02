@@ -210,11 +210,11 @@ Supports importing various large and small model types, including Qwen, DeepSeek
 
 #### Public Model Inference Service
 
-Supports deploying and managing public model inference service platforms.
+Supports two kinds of public models: in-cluster local deployments and cloud APIs. Administrators register vendor, Base URL, API key, model list, and optional mapping. Users chat in Public Inference or call the unified OpenAI-compatible gateway.
 
 #### Dedicated Model Instance Deployment
 
-Supports deploying user-dedicated model inference instances with compute resource management, service online/offline control, and deletion.
+Supports deploying user-dedicated model inference instances with compute resource management, service online/offline control, and deletion. The create page estimates recommended minimum GPU memory and compares it with each specification. Engine args, quantization, and multi-node specifications are supported.
 
 #### Service Details
 
@@ -232,7 +232,7 @@ The platform provides GPU-accelerated fine-tuning instance hosting services, sup
 
 #### Model Evaluation
 
-Supports visual interface model evaluation with three mainstream evaluation frameworks: lm-evaluation-harness, OpenCompass, and EvalScope. Supports custom evaluation datasets — users can upload their own datasets for model performance evaluation to meet specific business scenario assessment needs.
+Supports visual interface model evaluation with three mainstream evaluation frameworks: lm-evaluation-harness, OpenCompass, and EvalScope. Supports custom evaluation datasets. The create page can set framework args, vLLM args, and advanced Prompt templates and scoring plugins; overrides are stored in the evaluation report snapshot.
 
 ### Data Management
 

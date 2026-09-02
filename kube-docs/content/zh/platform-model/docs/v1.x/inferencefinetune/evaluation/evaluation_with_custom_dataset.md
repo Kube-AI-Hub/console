@@ -97,6 +97,7 @@ doc_to_target: "{{answer}}"
 ## 相关文档
 
 - [创建模型评测任务](./evaluation_create)
+- [评测自定义参数](./evaluation_custom_params)
 - [评测框架介绍](./evaluation_framework_intro)
 - [打分插件与 Prompt 模版](./evaluation_scoring_plugins)
 - [指标配置](./evaluation_metrics_config)

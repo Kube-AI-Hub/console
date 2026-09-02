@@ -21,11 +21,15 @@ On the model evaluation task creation page, fill in the following configuration,
 | Parameter | Description |
 |-----------|-------------|
 | **Task Name** | Custom evaluation task name |
-| **Model ID** | The model identifier on the platform |
-| **Evaluation Framework** | Select the framework: OpenCompass, EvalScope, or lm-evaluation-harness |
-| **Dataset Selection** | Select one or more benchmark datasets from the dataset list |
-| **Resource Type** | **Shared Resources**: uses public compute, requires queuing; **Dedicated Resources**: exclusive compute, billed by time |
-| **Advanced options** | Collapsed. Prompt template and scoring plugins default from the selected dataset and framework; you can leave them unchanged. Overrides are not leaderboard-comparable and are stored in the report snapshot. See [Scoring Plugins and Prompt Templates](./evaluation_scoring_plugins) and [Metrics Configuration](./evaluation_metrics_config). |
+| **Models** | Platform model IDs; compare up to 3 models in one task |
+| **Description** | Optional note for this evaluation |
+| **Datasets** | **System recommended**: benchmarks available in the selected framework image; **Custom**: existing repositories on the platform. See [Custom Evaluation Datasets](./evaluation_with_custom_dataset) for formats |
+| **Region / Resource** | Cluster and compute specification |
+| **Evaluation Framework** | Choose the framework (OpenCompass, EvalScope, or lm-evaluation-harness), then the framework version |
+| **Framework args / vLLM args** | Shown when the selected version declares engine_args. These change runtime behavior, not the scoring formula |
+| **Advanced options** | Collapsed. Prompt template and scoring plugins default from the selected dataset and framework. Overrides are not leaderboard-comparable |
+
+For parameter boundaries, when to change them, and the report snapshot, see [Evaluation Custom Parameters](./evaluation_custom_params). For Prompt and plugin details, see [Scoring Plugins and Prompt Templates](./evaluation_scoring_plugins) and [Metrics Configuration](./evaluation_metrics_config).
 
 ## View Evaluation Results
 
@@ -34,6 +38,7 @@ After creation, use the top navigation to open **Model Training & Evaluation →
 ## Related Documentation
 
 - [Evaluation Framework Overview](./evaluation_framework_intro)
+- [Evaluation Custom Parameters](./evaluation_custom_params)
 - [Custom Evaluation Datasets](./evaluation_with_custom_dataset)
 - [Scoring Plugins and Prompt Templates](./evaluation_scoring_plugins)
 - [Metrics Configuration](./evaluation_metrics_config)

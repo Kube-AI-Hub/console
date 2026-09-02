@@ -41,6 +41,7 @@ LLM Judge 分数写入报告的 `judge` 字段（裁判模型、rubric、解析�
 
 ## 相关文档
 
+- [评测自定义参数](./evaluation_custom_params)
 - [打分插件与 Prompt 模版](./evaluation_scoring_plugins)
 - [创建模型评测任务](./evaluation_create)
 - [评测框架介绍](./evaluation_framework_intro)

@@ -14,9 +14,9 @@ Evaluation tasks go through the following statuses during execution:
 
 | Status | Description |
 |--------|-------------|
-| **Evaluating** | The evaluation task is running; details are not yet available |
+| **Evaluating** | The task is running. You can open details to inspect the configuration snapshot and status; scores and coverage are written after success |
 | **Completed** | The evaluation has finished; results and detailed reports are viewable |
-| **Failed** | The evaluation task failed; check the logs for details |
+| **Failed** | The evaluation task failed; check the failure reason and logs |
 
 {{< notice note >}}
 Evaluation runtime depends on dataset size, number of benchmarks, and resource configuration. Large-scale evaluations may take a long time — please be patient.
@@ -24,16 +24,16 @@ Evaluation runtime depends on dataset size, number of benchmarks, and resource c
 
 ## View Evaluation Details
 
-When the evaluation task status changes to **Completed**, click the **Details** button in the task list to open the evaluation results page.
+Click **Details** in the task list while the task is running or after it finishes.
 
 The details page contains the following information:
 
 | Information | Description |
 |-------------|-------------|
-| **Overall Score** | Composite score across all evaluation benchmarks |
+| **Overall Score** | Composite score across all evaluation benchmarks (written after success) |
 | **Per-Benchmark Scores** | Individual scores for each benchmark/dataset |
 | **Evaluation Metrics** | Specific metrics such as accuracy, F1 score, BLEU score, etc. |
-| **Evaluation Configuration** | Framework, datasets, and parameter settings used during evaluation |
+| **Report** | Configuration snapshot (framework, Prompt, scoring plugins, engine_args), sample coverage, and failed examples. See [Evaluation Custom Parameters](./evaluation_custom_params) |
 
 The evaluation details page gives you a comprehensive view of model performance across different benchmarks, providing data-driven insights for model selection and optimization.
 

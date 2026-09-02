@@ -22,8 +22,22 @@ On the fine-tuning instance creation page, fill in the following configuration, 
 |-----------|-------------|
 | **Instance Name** | Custom name; must not duplicate existing instances (e.g., `qwen-medical-finetune`) |
 | **Model ID** | The model identifier on the platform; defaults to the currently selected base model |
-| **Region/Resource Config** | Select GPU resources appropriate for the base model size (VRAM must accommodate the model and training gradients) |
+| **Region/Resource Config** | Select a GPU specification for the base model. The page shows **Recommended Minimum GPU Memory**; cards below that value are marked **Low Memory** |
 | **Runtime Framework** | Select the fine-tuning framework: **LLaMA-Factory** or **MS-Swift** |
+
+## Recommended Minimum GPU Memory
+
+The create page estimates the VRAM needed for fine-tuning and compares it with the **GPU Memory (GB)** advertised on each specification:
+
+1. **Weight VRAM** ≈ parameter count (billions) × bytes per parameter (2 for BF16 / F16).
+2. **Fine-tune recommendation** = weight VRAM × **2.0** (KV cache plus optimizer and runtime overhead). If the scanned LoRA estimate is larger, the larger value is used.
+3. Specifications whose advertised VRAM is below the recommendation are marked **Low Memory**. You can still select them, but training is more likely to OOM.
+
+Example: a ~27.78B BF16 model has about 55.56 GB of weights, so the fine-tune recommendation is about **111 GB**.
+
+{{< notice note >}}
+The recommendation is for SKU selection only. It is not used for GPU scheduling or vGPU slicing. Fine-tuning needs more headroom than inference; if training still OOMs, switch to a larger specification or enable quantized fine-tuning such as QLoRA.
+{{</ notice >}}
 
 ## View Instance List
 

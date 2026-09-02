@@ -21,11 +21,15 @@ weight: 6400
 | 参数 | 说明 |
 |------|------|
 | **任务名称** | 自定义评测任务名称 |
-| **模型 ID** | 平台中的模型标识 |
-| **评测框架** | 选择评测框架：OpenCompass、EvalScope 或 lm-evaluation-harness |
-| **数据集选择** | 从数据集列表中选择一个或多个评测基准数据集 |
-| **资源类型** | **共享资源**：使用公共算力，需排队；**专属资源**：独占算力，按时间计费 |
-| **高级选项** | 折叠项。Prompt 模版、打分插件默认来自所选数据集 + 框架，可不改。覆盖后分数不可与官方榜单直接比较，将写入评测报告快照。说明见[打分插件与 Prompt 模版](./evaluation_scoring_plugins)、[指标配置](./evaluation_metrics_config) |
+| **评测模型** | 平台中的模型标识，最多同时对比 3 个模型 |
+| **评测描述** | 可选，说明本次评测目的 |
+| **数据集** | **系统推荐数据集**：当前框架镜像内可用的基准集；**自选数据集**：平台中已有仓库。格式要求见[自定义评测数据集](./evaluation_with_custom_dataset) |
+| **区域 / 资源配置** | 选择集群和算力规格 |
+| **评测框架** | 先选框架（OpenCompass、EvalScope 或 lm-evaluation-harness），再选框架版本 |
+| **评测框架参数 / vLLM 参数** | 所选版本声明了 engine_args 时出现。只影响运行，不改评分公式 |
+| **高级选项** | 折叠项。Prompt 模版、打分插件默认来自所选数据集 + 框架，可不改。覆盖后分数不可与官方榜单直接比较 |
+
+自定义参数的边界、何时该改、以及报告快照见[评测自定义参数](./evaluation_custom_params)。Prompt 与插件细节见[打分插件与 Prompt 模版](./evaluation_scoring_plugins)、[指标配置](./evaluation_metrics_config)。
 
 ## 查看评测结果
 
@@ -34,6 +38,7 @@ weight: 6400
 ## 相关文档
 
 - [评测框架介绍](./evaluation_framework_intro)
+- [评测自定义参数](./evaluation_custom_params)
 - [自定义评测数据集](./evaluation_with_custom_dataset)
 - [打分插件与 Prompt 模版](./evaluation_scoring_plugins)
 - [指标配置](./evaluation_metrics_config)

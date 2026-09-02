@@ -8,13 +8,20 @@ weight: 6200
 
 ## What is Model Inference
 
-The platform provides one-click inference functionality, helping users quickly allocate compute and start inference services on supported model pages — no complex environment configuration needed.
+The platform provides one-click inference functionality, helping users quickly allocate compute and start inference services on supported model pages — no complex environment configuration needed. Under **Model Inference** there are two entry points:
+
+| Entry | Description |
+|-------|-------------|
+| **[Public Inference](./serverless_intro)** | Shared services provisioned by administrators. Includes in-cluster local deployments and cloud API models forwarded through a unified gateway |
+| **[Dedicated Instances](./endpoint_create)** | Exclusive deployments for a model you choose, with specification, framework, replica, and quantization settings |
 
 ## Core Advantages
 
 - **Flexible Invocation**: Provides an intuitive web interface for conversation testing, while also generating standard API interfaces for business code integration.
 - **Rich Framework Support**: Supports multiple mainstream inference frameworks including `vLLM`, `llama.cpp`, `SGLang`, and `TGI`.
 - **Instantly Available**: Eliminates complex configuration by automatically launching container environments with all required dependencies.
+- **VRAM guidance**: The dedicated-instance create page shows **Recommended Minimum GPU Memory** and compares it with each specification.
+- **Dual access**: Public inference covers both local deployments and cloud APIs through one OpenAI-compatible interface.
 
 ## Supported Inference Frameworks
 
@@ -36,5 +43,9 @@ The platform supports multiple inference task types — refer to the correspondi
 
 ## Related Documentation
 
+- [Public Inference Overview](./serverless_intro)
+- [Use Public Inference](./serverless_usage)
+- [Manage Public Inference](./serverless_admin)
 - [Create Dedicated Inference Instance](./endpoint_create)
+- [Use Dedicated Inference Instance](./endpoint_usage)
 - [FAQ](./endpoint_faq)

@@ -41,6 +41,7 @@ LLM Judge scores are stored in the report `judge` object (judge model, rubric, p
 
 ## Related documentation
 
+- [Evaluation Custom Parameters](./evaluation_custom_params)
 - [Scoring Plugins and Prompt Templates](./evaluation_scoring_plugins)
 - [Create Model Evaluation Task](./evaluation_create)
 - [Evaluation Framework Overview](./evaluation_framework_intro)

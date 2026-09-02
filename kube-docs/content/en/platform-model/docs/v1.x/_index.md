@@ -27,9 +27,11 @@ sectionLink:
       - /platform-model/docs/v1.x/space/create_space
       - /platform-model/docs/v1.x/inferencefinetune/notebook/notebook_intro
       - /platform-model/docs/v1.x/inferencefinetune/inference/inference_intro
+      - /platform-model/docs/v1.x/inferencefinetune/inference/serverless_intro
       - /platform-model/docs/v1.x/inferencefinetune/inference/endpoint_create
       - /platform-model/docs/v1.x/inferencefinetune/finetune/finetune_intro
       - /platform-model/docs/v1.x/inferencefinetune/evaluation/evaluation_create
+      - /platform-model/docs/v1.x/inferencefinetune/evaluation/evaluation_custom_params
       - /platform-model/docs/v1.x/datatool/
       - /platform-model/docs/v1.x/mcp/
 ---

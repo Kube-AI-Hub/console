@@ -36,6 +36,28 @@ weight: 6220
 
 ---
 
+### How is Recommended Minimum GPU Memory calculated? Why does a specification show “Low Memory”?
+
+**Details**: The create page estimates weight VRAM from parameter count and precision, then multiplies by **1.5** (KV cache). If the scanned “weights + KV + activation” estimate is larger, the larger value is used. That recommendation is compared with the **GPU Memory (GB)** advertised on each specification; cards below it are marked **Low Memory**.
+
+The recommendation is for selection only and is not used for scheduling or vGPU slicing. You can still pick a Low Memory specification, but OOM is more likely.
+
+---
+
+### Recommended Minimum GPU Memory used to show 1 GB
+
+**Cause**: Some models (for example the Qwen3.8 series) nest `hidden_size` under `text_config` in `config.json`. The old scanner read only top-level fields and then stored 1 GB as a fallback.
+
+**Current behavior**: The page recalculates from parameter count and precision. A ~27.78B BF16 model has about 55.56 GB of weights, so the inference recommendation is about 83 GB. If stored metadata is still the old value, ask an administrator to rescan the model.
+
+---
+
+### What is the difference between public inference and a dedicated instance?
+
+**Public inference** is provisioned by administrators. It includes shared local deployments and cloud API models, under **Model Inference → Public Inference**. Create a **dedicated instance** when you need exclusive compute, custom engine args, or quantization. See [Public Inference Overview](./serverless_intro).
+
+---
+
 ### API call returns 401 Unauthorized
 
 **Cause**: The instance security level is **Private** and the request does not include a valid access token.

@@ -8,7 +8,7 @@ weight: 6435
 
 ## 高级选项放在哪里
 
-创建评测任务时，主流程不变：先选模型、数据集、集群资源，再选**评测框架**和框架版本，以及已有的 engine_args。
+创建评测任务时，主流程不变：先选模型、数据集、集群资源，再选**评测框架**和框架版本，以及已有的评测框架参数 / vLLM 参数。三类自定义参数的边界见[评测自定义参数](./evaluation_custom_params)。
 
 **Prompt 模版**和**打分插件**收在折叠的**高级选项**中，默认不展开。不改则任务与原先一致：使用当前框架 + 数据集自带的官方协议。
 
@@ -50,6 +50,7 @@ OpenCompass **官方集**的 Prompt 大多写死在镜像 config 中，P0 不承
 
 ## 相关文档
 
+- [评测自定义参数](./evaluation_custom_params)
 - [指标配置](./evaluation_metrics_config)
 - [创建模型评测任务](./evaluation_create)
 - [评测框架介绍](./evaluation_framework_intro)

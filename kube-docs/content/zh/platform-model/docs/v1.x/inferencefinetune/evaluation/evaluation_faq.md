@@ -59,9 +59,15 @@ weight: 6410
 
 ---
 
+### 评测框架参数、vLLM 参数和高级选项分别改什么？
+
+**评测框架参数**和 **vLLM 参数**只影响运行（batch、生成长度、dtype 等），不改评分公式。**高级选项**里的 Prompt 模版改题干协议，打分插件改用哪套框架原生指标。覆盖 Prompt 后分数不可与官方榜单横比。详见[评测自定义参数](./evaluation_custom_params)。
+
+---
+
 ### 高级选项里的 Prompt / 打分插件要不要改？
 
-系统推荐集默认保持框架协议，以便和论文/榜单横比。自定义业务集、线上 system prompt、协议消融或 LLM Judge 才需要改。详见[打分插件与 Prompt 模版](./evaluation_scoring_plugins)和[指标配置](./evaluation_metrics_config)。
+系统推荐集默认保持框架协议，以便和论文/榜单横比。自定义业务集、线上 system prompt、协议消融或 LLM Judge 才需要改。详见[评测自定义参数](./evaluation_custom_params)、[打分插件与 Prompt 模版](./evaluation_scoring_plugins)和[指标配置](./evaluation_metrics_config)。
 
 同名 Accuracy 不能跨 OpenCompass / lm-evaluation-harness / EvalScope 直接比较。
 
@@ -73,6 +79,7 @@ weight: 6410
 
 ## 相关文档
 
+- [评测自定义参数](./evaluation_custom_params)
 - [打分插件与 Prompt 模版](./evaluation_scoring_plugins)
 - [指标配置](./evaluation_metrics_config)
 - [自定义评测数据集](./evaluation_with_custom_dataset)

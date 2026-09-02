@@ -25,7 +25,8 @@ weight: 6215
 1. 在实例详情页切换到 **Playground** 页签。
 2. 在输入框中输入提示词（Prompt）。
 3. 调整推理参数（如 Temperature、Top-P、Max Tokens 等）。
-4. 点击**发送**按钮，查看模型推理结果。
+4. 需要控制思维链时，使用**思考模式**开关：关闭后本地推理会发送 `chat_template_kwargs.enable_thinking=false`。
+5. 点击**发送**按钮，查看模型推理结果。支持思考的模型会单独展示思考过程。
 
 {{< notice tip >}}
 Playground 适用于快速验证模型效果和调试提示词，正式生产环境建议通过 API 调用。

@@ -14,6 +14,6 @@ The Resource Management module provides compute support for the full LLM lifecyc
 | Feature | Description |
 |---------|-------------|
 | [Development Environment (Notebook Instances)](./notebook/notebook_intro) | One-click creation of interactive development environments; supports JupyterLab, VS Code, Eclipse Theia |
-| [Model Inference](./inference/inference_intro) | Provides inference capabilities through both `Serverless APIs` and `Dedicated Instances` |
+| [Model Inference](./inference/inference_intro) | Public inference (local deployments and cloud APIs) plus dedicated instances |
 | [Model Fine-tuning](./finetune/finetune_intro) | Customize base models using LLaMA-Factory or MS-Swift frameworks |
-| [Model Evaluation](./evaluation/evaluation_create) | Benchmark testing and performance evaluation using mainstream evaluation frameworks |
+| [Model Evaluation](./evaluation/evaluation_create) | Benchmark testing with optional custom framework args, Prompt templates, and scoring plugins |

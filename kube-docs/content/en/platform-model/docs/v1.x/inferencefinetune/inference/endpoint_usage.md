@@ -25,7 +25,8 @@ The platform provides an interactive Playground (sandbox) for testing model infe
 1. On the instance details page, switch to the **Playground** tab.
 2. Enter a prompt in the input box.
 3. Adjust inference parameters (e.g., Temperature, Top-P, Max Tokens).
-4. Click the **Send** button to view the model inference results.
+4. Use the **Thinking mode** switch to control chain-of-thought. When it is off, local inference sends `chat_template_kwargs.enable_thinking=false`.
+5. Click **Send** to view the result. Models that support thinking show the reasoning block separately.
 
 {{< notice tip >}}
 The Playground is suitable for quick model validation and prompt debugging. For production use, call the API directly.

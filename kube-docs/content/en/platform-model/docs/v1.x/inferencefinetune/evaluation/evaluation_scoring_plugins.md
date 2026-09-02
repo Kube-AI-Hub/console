@@ -8,7 +8,7 @@ weight: 6435
 
 ## Where advanced options live
 
-The create-evaluation flow is unchanged: choose models, datasets, cluster resources, then the **evaluation framework** and version, plus existing engine_args.
+The create-evaluation flow is unchanged: choose models, datasets, cluster resources, then the **evaluation framework** and version, plus existing framework / vLLM args. See [Evaluation Custom Parameters](./evaluation_custom_params) for how the three option groups differ.
 
 **Prompt templates** and **scoring plugins** are in collapsed **Advanced options**. Leave them unchanged to keep today's behavior: the framework plus dataset native protocol.
 
@@ -50,6 +50,7 @@ OpenCompass **official sets** mostly bake prompts into in-image configs. P0 does
 
 ## Related documentation
 
+- [Evaluation Custom Parameters](./evaluation_custom_params)
 - [Metrics configuration](./evaluation_metrics_config)
 - [Create Model Evaluation Task](./evaluation_create)
 - [Evaluation Framework Overview](./evaluation_framework_intro)

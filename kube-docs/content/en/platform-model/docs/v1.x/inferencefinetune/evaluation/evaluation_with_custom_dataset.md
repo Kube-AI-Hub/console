@@ -97,6 +97,7 @@ doc_to_target: "{{answer}}"
 ## Related Documentation
 
 - [Create Model Evaluation Task](./evaluation_create)
+- [Evaluation Custom Parameters](./evaluation_custom_params)
 - [Evaluation Framework Overview](./evaluation_framework_intro)
 - [Scoring Plugins and Prompt Templates](./evaluation_scoring_plugins)
 - [Metrics Configuration](./evaluation_metrics_config)

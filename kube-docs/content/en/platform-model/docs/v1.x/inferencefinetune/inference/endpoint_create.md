@@ -22,10 +22,26 @@ On the dedicated instance creation page, fill in the following configuration, th
 |-----------|-------------|
 | **Instance Name** | Custom name; must not duplicate existing instances |
 | **Model ID** | The model identifier on the platform; defaults to the current model |
-| **Region/Resource Config** | Select compute resource specifications for the inference service (GPU model, VRAM size) |
-| **Runtime Framework** | Select the inference framework: vLLM, SGLang, TGI, or llama.cpp |
-| **Security Level** | **Public**: accessible without authentication (default); **Private**: requires authentication |
-| **Elastic Replicas** | Number of instance replicas, range 1–5 |
+| **Min / Max Replicas** | Replica range. When the minimum is **0**, the instance shuts down automatically after 1 hour with no requests |
+| **Region/Resource Config** | Select a compute specification. The page shows **Recommended Minimum GPU Memory**; cards below that value are marked **Low Memory**. A **multi-node** specification locks the replica count and cannot scale to 0 |
+| **Runtime Framework** | Choose the framework (vLLM, SGLang, TGI, or llama.cpp), then the framework version. Multi-node inference supports only vLLM and SGLang |
+| **Engine Args** | Collapsed. Tunable options for the selected framework version (for example max generation length or dtype). Leave unchanged to use defaults |
+| **Quantization** | Shown when the model repository provides quantized files, such as GGUF or AWQ |
+| **Security Level** | **Public**: accessible without authentication; **Private**: requires authentication |
+
+## Recommended Minimum GPU Memory
+
+The create page estimates the VRAM needed for inference and compares it with the **GPU Memory (GB)** advertised on each specification:
+
+1. **Weight VRAM** ≈ parameter count (billions) × bytes per parameter (2 for BF16 / F16).
+2. **Inference recommendation** = weight VRAM × **1.5** (KV cache). If the scanned “weights + KV + activation” estimate is larger, the larger value is used.
+3. Specifications whose advertised VRAM is below the recommendation are marked **Low Memory**. You can still select them, but inference is more likely to OOM.
+
+Example: a ~27.78B BF16 model has about 55.56 GB of weights, so the inference recommendation is about **83 GB**.
+
+{{< notice note >}}
+The recommendation is for SKU selection only. It is not used for GPU scheduling or vGPU slicing. Administrators must fill in the advertised GPU Memory (GB) with the usable VRAM of the whole card or slice.
+{{</ notice >}}
 
 ## View Instance List
 
@@ -52,4 +68,5 @@ curl https://<instance-address>/v1/chat/completions \
 
 ## Related Documentation
 
+- [Use Dedicated Inference Instance](./endpoint_usage)
 - [FAQ](./endpoint_faq)
