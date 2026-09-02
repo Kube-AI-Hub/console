@@ -57,11 +57,11 @@ GPU 虚拟化模式（也称共享/切分策略）是在节点维度对该节点
 | 模式 | 说明 |
 |------|------|
 | **整卡** | 只申请卡数，任务独占整颗（或 910C 的一对）NPU |
-| **硬模板** | 申请卡数 `1` 与 `huawei.com/<SKU>-memory`（MiB）。调度器向上取整到固定模板（如 910C 的 `vir06_1c_16g` / `vir12_3c_32g`），由 Ascend Runtime 与驱动创建 vNPU |
+| **硬模板** | 申请卡数 `1` 与 `huawei.com/<SKU>-memory`（MiB）。调度器向上取整到固定模板，由 Ascend Runtime 与驱动创建 vNPU。910C 默认使用 Atlas A3 **训练卡**模板 `vir06_1c_16g` / `vir12_3c_32g`；A3 **推理卡**必须改成 `vir05_1c_16g` / `vir10_3c_32g`，见 [昇腾 NPU 使用](../npu-usage/) |
 
 当前默认关闭软切分。不要在 Pod 中填写 `huawei.com/vnpu-mode: hami-core` 或 `huawei.com/*-core`，此类请求会被拒绝。未设置 `runtimeClassName` 时，webhook 会注入 `ascend`。
 
-支持的型号包括 910A、910B2 / 910B3 / 910B4 / 910B4-1、310P / 310P48、910C。完整模板容量与 910C / 310P 规则见 [昇腾 NPU 使用](../npu-usage/)。
+支持的型号包括 910A、910B2 / 910B3 / 910B4 / 910B4-1、310P / 310P48、910C。完整模板容量、910C 训练/推理卡切换步骤与 310P 规则见 [昇腾 NPU 使用](../npu-usage/)。
 
 ## 配置 GPU 虚拟化模式
 

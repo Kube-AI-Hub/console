@@ -100,6 +100,24 @@ npu-smi info
 
 能正常输出 NPU 信息即表示驱动安装成功。
 
+## 硬切分前置：AVI 与模板
+
+整卡调度不依赖 vNPU 模板。若要按显存硬切分，请在**物理机**上启用昇腾虚拟化实例（AVI）容器模式，并确认该卡实际支持的模板名。
+
+```bash
+# 0 = docker / 容器模式
+npu-smi set -t vnpu-mode -d 0
+npu-smi info -t vnpu-mode
+# 期望：vnpu-mode : docker
+
+npu-smi info -m
+npu-smi info -t template-info -i <NPU_ID> -c <CHIP_ID>
+```
+
+`template-info` 必须带 `-i` / `-c`（ID 来自 `npu-smi info -m`）。省略参数时部分驱动会报「不支持」，并不代表 AVI 未开。
+
+Atlas A3（910C）训练卡与推理卡的模板名不同。集群默认按**训练卡**配置（`vir06_1c_16g` / `vir12_3c_32g`）。若查询结果是 `vir05_1c_16g` / `vir10_3c_32g`，安装 HAMi 后必须改 ConfigMap，步骤见 [昇腾 NPU 使用](../../../cluster-administration/npu-usage/)。
+
 ## 安装 Ascend Docker Runtime
 
 必须安装 **Ascend Docker Runtime**。集群默认将 `runtimeClassName: ascend` 注入 NPU Pod，由该 runtime 挂载设备节点与驱动库。未安装时，容器内无法使用 NPU，`npu-smi` 也会失败。
@@ -144,6 +162,8 @@ sudo systemctl restart containerd
 | ------ | ---- | -------- |
 | 固件版本 | `upgrade-tool --device_index -1 --component -1 --version` | 与安装包版本一致 |
 | NPU 驱动 | `npu-smi info` | 显示 NPU 设备信息 |
+| AVI（硬切分） | `npu-smi info -t vnpu-mode` | `vnpu-mode : docker` |
+| vNPU 模板 | `npu-smi info -t template-info -i <NPU_ID> -c <CHIP_ID>` | 训练卡为 `vir06*` / `vir12*`，推理卡为 `vir05*` / `vir10*` |
 | Ascend Docker Runtime | `ls /usr/local/Ascend/Ascend-Docker-Runtime/ascend-docker-runtime` | 文件存在且可执行 |
 | containerd | `systemctl status containerd` | `active (running)` |
 
@@ -166,3 +186,4 @@ sudo systemctl restart containerd
 - 确认已重启 containerd
 - 查阅昇腾官方文档确认 CANN/驱动版本与容器镜像兼容
 - 集群创建后的整卡 / 硬模板申请见 [昇腾 NPU 使用](../../../cluster-administration/npu-usage/)
+- 硬切分 Pod 立刻失败、日志含 `create-vnpu`：对照 `template-info` 与 ConfigMap 模板名是否同为训练或同为推理

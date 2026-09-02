@@ -100,6 +100,24 @@ npu-smi info
 
 Successful NPU information output indicates the driver is installed correctly.
 
+## Hard-slice prerequisites: AVI and templates
+
+Whole-card scheduling does not depend on vNPU template names. For memory-based hard slicing, enable Ascend Virtualization Instance (AVI) in container mode on the **host**, and confirm the templates this card actually supports.
+
+```bash
+# 0 = docker / container mode
+npu-smi set -t vnpu-mode -d 0
+npu-smi info -t vnpu-mode
+# expect: vnpu-mode : docker
+
+npu-smi info -m
+npu-smi info -t template-info -i <NPU_ID> -c <CHIP_ID>
+```
+
+`template-info` requires `-i` / `-c` (IDs from `npu-smi info -m`). Omitting them can print "not supported" even when AVI is on.
+
+Atlas A3 (910C) training and inference cards use different template names. The cluster default is **training** (`vir06_1c_16g` / `vir12_3c_32g`). If the query returns `vir05_1c_16g` / `vir10_3c_32g`, change the HAMi ConfigMap after install. See [Ascend NPU Usage](../../../cluster-administration/npu-usage/).
+
 ## Install Ascend Docker Runtime
 
 You must install **Ascend Docker Runtime**. The cluster injects `runtimeClassName: ascend` on NPU Pods by default so this runtime can mount device nodes and driver libraries. Without it, containers cannot use the NPU and `npu-smi` fails.
@@ -144,6 +162,8 @@ sudo systemctl restart containerd
 | ----- | ------- | --------------- |
 | Firmware version | `upgrade-tool --device_index -1 --component -1 --version` | Matches package version |
 | NPU driver | `npu-smi info` | NPU device information displayed |
+| AVI (hard slice) | `npu-smi info -t vnpu-mode` | `vnpu-mode : docker` |
+| vNPU templates | `npu-smi info -t template-info -i <NPU_ID> -c <CHIP_ID>` | Training: `vir06*` / `vir12*`; inference: `vir05*` / `vir10*` |
 | Ascend Docker Runtime | `ls /usr/local/Ascend/Ascend-Docker-Runtime/ascend-docker-runtime` | File exists and is executable |
 | containerd | `systemctl status containerd` | `active (running)` |
 
@@ -166,3 +186,4 @@ sudo systemctl restart containerd
 - Confirm containerd was restarted
 - Consult Ascend official documentation for CANN/driver and container image compatibility
 - After the cluster is up, request whole cards or hard-template slices as described in [Ascend NPU Usage](../../../cluster-administration/npu-usage/)
+- Hard-slice Pods fail immediately with `create-vnpu` in the log: compare `template-info` with the ConfigMap and keep both on training templates or both on inference templates

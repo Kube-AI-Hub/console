@@ -57,11 +57,11 @@ Ascend slicing is **not** the node-level **Set GPU Virtualization Mode** action,
 | Mode | Description |
 |------|-------------|
 | **Whole card** | Request count only. The workload occupies the full NPU (or a 910C die pair). |
-| **Hard template** | Request count `1` plus `huawei.com/<SKU>-memory` in MiB. The scheduler rounds up to a fixed template (for example 910C `vir06_1c_16g` / `vir12_3c_32g`). Ascend Runtime and the driver create the vNPU. |
+| **Hard template** | Request count `1` plus `huawei.com/<SKU>-memory` in MiB. The scheduler rounds up to a fixed template; Ascend Runtime and the driver create the vNPU. 910C defaults to Atlas A3 **training** templates `vir06_1c_16g` / `vir12_3c_32g`. A3 **inference** cards must use `vir05_1c_16g` / `vir10_3c_32g`. See [Ascend NPU Usage](../npu-usage/). |
 
 Soft slicing is disabled by default. Do not set `huawei.com/vnpu-mode: hami-core` or `huawei.com/*-core` on the Pod; those requests are rejected. If `runtimeClassName` is omitted, the webhook injects `ascend`.
 
-Supported models include 910A, 910B2 / 910B3 / 910B4 / 910B4-1, 310P / 310P48, and 910C. Template sizes and 910C / 310P rules are in [Ascend NPU Usage](../npu-usage/).
+Supported models include 910A, 910B2 / 910B3 / 910B4 / 910B4-1, 310P / 310P48, and 910C. Template sizes, 910C training vs inference switching, and 310P rules are in [Ascend NPU Usage](../npu-usage/).
 
 ## Configuring GPU Virtualization Mode
 

@@ -104,4 +104,4 @@ For Pods using GPU resources, the Pod detail page shows **Scheduled to GPU** inf
 - Allocated GPU / NPU UUID with a link to the physical card
 - Allocated vendor type
 - Allocated memory size
-- Allocated compute percentage (NVIDIA and similar). An Ascend hard slice shows the template name (for example `vir12_3c_32g`) and memory, not a core percentage
+- Allocated compute percentage (NVIDIA and similar). An Ascend hard slice shows the template name and memory, not a core percentage. 910C training cards typically show `vir12_3c_32g`; inference cards typically show `vir10_3c_32g`. A template that does not match the card type fails at slice creation. See [Ascend NPU Usage](../npu-usage/).

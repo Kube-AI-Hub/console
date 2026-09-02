@@ -63,10 +63,59 @@ The scheduler rounds `*-memory` **up** to the smallest template that is at least
 | 310P48 | `vir01` | 6144 | 1 | 1 |
 | 310P48 | `vir02` | 12288 | 2 | 2 |
 | 310P48 | `vir04` | 24576 | 4 | 4 |
-| 910C | `vir06_1c_16g` | 16384 | 6 | 1 |
-| 910C | `vir12_3c_32g` | 32768 | 12 | 3 |
+| 910C (Atlas A3 **training**, default) | `vir06_1c_16g` | 16384 | 6 | 1 |
+| 910C (Atlas A3 **training**, default) | `vir12_3c_32g` | 32768 | 12 | 3 |
 
-The current 910C profile uses Atlas A3 **training** templates (`vir06_1c_16g` / `vir12_3c_32g`). A request of `16384` maps to `vir06_1c_16g`; `20000`–`32768` maps to `vir12_3c_32g`.
+The cluster default is Atlas A3 **training** templates. `16384` maps to `vir06_1c_16g`; `20000`–`32768` maps to `vir12_3c_32g`. On an A3 **inference** card you must switch to the inference templates in the next section, or Runtime `create-vnpu` fails.
+
+## Atlas A3 (910C) training vs inference
+
+Training and inference 910C cards share the resource name `huawei.com/Ascend910C` and about 64 GiB of HBM, but the driver exposes **different vNPU template names**. HAMi picks one name from the ConfigMap `templates` list by memory only. **Do not enable both sets under the same `Ascend910C` entry** — the 16G / 32G names collide.
+
+| Product | Typical spec | Hard templates |
+|---------|--------------|----------------|
+| Atlas A3 **training** (default) | 48 AICore | `vir06_1c_16g`, `vir12_3c_32g` |
+| Atlas A3 **inference** | 40 AICore | `vir05_1c_16g`, `vir10_3c_32g` |
+
+Trust the driver on the node, not the marketing name:
+
+```bash
+npu-smi info -m
+# Use NPU ID and Chip ID from that table:
+npu-smi info -t vnpu-mode
+npu-smi info -t template-info -i <NPU_ID> -c <CHIP_ID>
+```
+
+- Before hard slicing, set AVI to container mode on the host: `npu-smi set -t vnpu-mode -d 0`. Query should show `vnpu-mode : docker`.
+- **Whole-card** requests (no `*-memory`) do not need a matching template name. Training and inference cards both work.
+- Memory must be an integer **MiB** value (`16384` / `32768`). Do not use `16Gi` or `24k`.
+
+### Switching an inference-only cluster
+
+The Chart keeps training templates by default. After you install on inference nodes, edit ConfigMap `hami-scheduler-device` in `kube-system`, key `device-config.yaml`, and **replace** the `templates` list under `commonWord: Ascend910C` with:
+
+```yaml
+        templates:
+          - name: vir05_1c_16g
+            memory: 16384
+            aiCore: 5
+            aiCPU: 1
+          - name: vir10_3c_32g
+            memory: 32768
+            aiCore: 10
+            aiCPU: 3
+```
+
+The Helm source `HAMi/charts/hami/templates/scheduler/device-configmap.yaml` already has those inference templates in comments: uncomment them and comment out the training pair. Then restart the scheduler (and preferably the device plugin):
+
+```bash
+kubectl -n kube-system rollout restart deploy/hami-scheduler
+kubectl -n kube-system rollout restart ds/hami-ascend-device-plugin
+```
+
+Persist the change in the Chart or overlay, then `helm upgrade`. Editing only the live ConfigMap is overwritten by the next Helm upgrade.
+
+Hard-slicing both training and inference cards in one cluster is not supported on a single `Ascend910C` template list. Split by card type, or schedule inference cards as whole cards.
 
 ## 910C and 310P rules
 
@@ -100,7 +149,7 @@ spec:
           huawei.com/Ascend910C: "1"
 ```
 
-32G hard slice (910C → `vir12_3c_32g`):
+32G hard slice (910C training default → `vir12_3c_32g`; inference templates map the same MiB to `vir10_3c_32g`):
 
 ```yaml
 apiVersion: v1
@@ -145,4 +194,4 @@ When you pick an Ascend GPU type on the workload create page, enter memory in Mi
 - Add `--enforce-eager` to disable graph capture
 - Reduce `cudagraph_capture_sizes`, or move to a larger template / whole card
 
-The Pod detail page **Scheduled to GPU** section shows the result. A hard slice lists the template name (for example `vir12_3c_32g`) and memory, not a core percentage. Cluster-side views are in [GPU Card Management](../gpu-management/).
+The Pod detail page **Scheduled to GPU** section shows the result. A hard slice lists the template name (training: `vir12_3c_32g`; inference: `vir10_3c_32g`) and memory, not a core percentage. Cluster-side views are in [GPU Card Management](../gpu-management/).

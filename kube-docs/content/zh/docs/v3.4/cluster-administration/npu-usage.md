@@ -63,10 +63,59 @@ weight: 8115
 | 310P48 | `vir01` | 6144 | 1 | 1 |
 | 310P48 | `vir02` | 12288 | 2 | 2 |
 | 310P48 | `vir04` | 24576 | 4 | 4 |
-| 910C | `vir06_1c_16g` | 16384 | 6 | 1 |
-| 910C | `vir12_3c_32g` | 32768 | 12 | 3 |
+| 910C（Atlas A3 **训练**，默认） | `vir06_1c_16g` | 16384 | 6 | 1 |
+| 910C（Atlas A3 **训练**，默认） | `vir12_3c_32g` | 32768 | 12 | 3 |
 
-当前 910C 配置为 Atlas A3 **训练卡**模板（`vir06_1c_16g` / `vir12_3c_32g`）。例如申请 `16384` 会落到 `vir06_1c_16g`，申请 `20000`～`32768` 会落到 `vir12_3c_32g`。
+集群默认启用 Atlas A3 **训练卡**模板。申请 `16384` 落到 `vir06_1c_16g`，申请 `20000`～`32768` 落到 `vir12_3c_32g`。若节点是 A3 **推理卡**，必须改成下一节的推理模板，否则 Runtime 创建 vNPU 会失败。
+
+## Atlas A3（910C）训练卡与推理卡
+
+910C 训练卡与推理卡共用资源名 `huawei.com/Ascend910C` 和约 64 GiB HBM，但驱动给出的 **vNPU 模板名不同**。HAMi 只按显存从 ConfigMap 的 `templates` 里选一个名字传给 `create-vnpu`，**同一条 `Ascend910C` 配置不能同时启用两套模板**（16G / 32G 会撞车）。
+
+| 产品 | 典型规格 | 硬模板 |
+|------|----------|--------|
+| Atlas A3 **训练**（默认） | 48 AICore | `vir06_1c_16g`、`vir12_3c_32g` |
+| Atlas A3 **推理** | 40 AICore | `vir05_1c_16g`、`vir10_3c_32g` |
+
+以节点上驱动查询结果为准，不要凭产品宣传页猜测：
+
+```bash
+npu-smi info -m
+# 用该表中的 NPU ID、Chip ID：
+npu-smi info -t vnpu-mode
+npu-smi info -t template-info -i <NPU_ID> -c <CHIP_ID>
+```
+
+- 硬切分前，物理机应将 AVI 设为容器模式：`npu-smi set -t vnpu-mode -d 0`，查询应为 `vnpu-mode : docker`。
+- **整卡**（不写 `*-memory`）不依赖模板名，训练卡和推理卡都可以直接申请。
+- 显存必须写 **MiB 整数**（`16384` / `32768`），不要写 `16Gi` 或 `24k`。
+
+### 推理卡集群如何改配置
+
+Chart 默认保留训练模板。推理卡节点安装后，编辑 `kube-system` 中 ConfigMap `hami-scheduler-device` 的 `device-config.yaml`，在 `commonWord: Ascend910C` 下把 `templates` **整表替换**为：
+
+```yaml
+        templates:
+          - name: vir05_1c_16g
+            memory: 16384
+            aiCore: 5
+            aiCPU: 1
+          - name: vir10_3c_32g
+            memory: 32768
+            aiCore: 10
+            aiCPU: 3
+```
+
+Helm Chart 源文件 `HAMi/charts/hami/templates/scheduler/device-configmap.yaml` 里已用注释写出上述推理模板，取消注释并注释掉训练那一组即可。改完后重启调度器（建议同步重启 device-plugin）：
+
+```bash
+kubectl -n kube-system rollout restart deploy/hami-scheduler
+kubectl -n kube-system rollout restart ds/hami-ascend-device-plugin
+```
+
+持久化请改 Chart / overlay 后再 `helm upgrade`。只改集群里的 ConfigMap、不改 Chart 时，下次 Helm 升级会覆盖回去。
+
+同一集群里训练卡和推理卡都要硬切分时，当前不支持共用一套 `Ascend910C` 模板；请按卡型拆集群，或整卡调度推理卡。
 
 ## 910C 与 310P 规则
 
@@ -100,7 +149,7 @@ spec:
           huawei.com/Ascend910C: "1"
 ```
 
-32G 硬切分（910C → `vir12_3c_32g`）：
+32G 硬切分（910C 训练卡默认 → `vir12_3c_32g`；推理卡模板下同样的 MiB 会落到 `vir10_3c_32g`）：
 
 ```yaml
 apiVersion: v1
@@ -145,4 +194,4 @@ spec:
 - 启动参数增加 `--enforce-eager`，关闭 graph 捕获
 - 减少 `cudagraph_capture_sizes`，或改用更大模板 / 整卡
 
-分配结果可在 Pod 详情的「调度至显卡」中查看，硬切分会显示模板名（如 `vir12_3c_32g`）和显存，不会显示 core 比例。集群侧查看方式见 [显卡管理](../gpu-management/)。
+分配结果可在 Pod 详情的「调度至显卡」中查看，硬切分会显示模板名（训练卡如 `vir12_3c_32g`，推理卡如 `vir10_3c_32g`）和显存，不会显示 core 比例。集群侧查看方式见 [显卡管理](../gpu-management/)。
