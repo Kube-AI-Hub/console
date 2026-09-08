@@ -156,6 +156,38 @@ sudo systemctl daemon-reload
 sudo systemctl restart containerd
 ```
 
+KubeKey / containerd 1.7 的 CRI 还要用 **名为 `ascend` 的 runtime**，`RuntimeClass` 的 `handler` 才能对上。在 `[plugins."io.containerd.grpc.v1.cri".containerd.runtimes]` 下增加（不要改掉已有的 `runc`）：
+
+```toml
+[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.ascend]
+  runtime_type = "io.containerd.runc.v2"
+  [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.ascend.options]
+    BinaryName = "/usr/local/Ascend/Ascend-Docker-Runtime/ascend-docker-runtime"
+    SystemdCgroup = true
+```
+
+纯 NPU 节点可以把 `default_runtime_name` 设为 `ascend`；NVIDIA 和昇腾混部时保持 `runc`，只给 NPU Pod 使用 RuntimeClass。
+
+改完后再次 `sudo systemctl restart containerd`。
+
+## 创建 RuntimeClass
+
+集群里必须有名为 `ascend` 的 RuntimeClass，否则 Pod 会报 `RuntimeClass "ascend" not found`。HAMi 的 `ascend-device-plugin` 子 Chart 默认会创建；若没有，手动执行：
+
+```bash
+kubectl apply -f - <<'EOF'
+apiVersion: node.k8s.io/v1
+kind: RuntimeClass
+metadata:
+  name: ascend
+handler: ascend
+EOF
+
+kubectl get runtimeclass ascend
+```
+
+`handler` 必须等于 containerd 里 `runtimes.` 后面的名字（`ascend`）。
+
 ## 验证清单
 
 | 检查项 | 命令 | 期望结果 |
@@ -165,6 +197,8 @@ sudo systemctl restart containerd
 | AVI（硬切分） | `npu-smi info -t vnpu-mode` | `vnpu-mode : docker` |
 | vNPU 模板 | `npu-smi info -t template-info -i <NPU_ID> -c <CHIP_ID>` | 训练卡为 `vir06*` / `vir12*`，推理卡为 `vir05*` / `vir10*` |
 | Ascend Docker Runtime | `ls /usr/local/Ascend/Ascend-Docker-Runtime/ascend-docker-runtime` | 文件存在且可执行 |
+| containerd CRI 名为 `ascend` 的 runtime | `grep -A6 'runtimes.ascend' /etc/containerd/config.toml` | 存在且 `BinaryName` 指向 Ascend Docker Runtime |
+| RuntimeClass | `kubectl get runtimeclass ascend` | `NAME=ascend`，`HANDLER=ascend` |
 | containerd | `systemctl status containerd` | `active (running)` |
 
 ## 故障排查

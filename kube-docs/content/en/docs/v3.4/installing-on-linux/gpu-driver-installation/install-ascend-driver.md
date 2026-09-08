@@ -156,6 +156,38 @@ sudo systemctl daemon-reload
 sudo systemctl restart containerd
 ```
 
+KubeKey / containerd 1.7 CRI also needs a **named runtime `ascend`**, or the RuntimeClass `handler` will not resolve. Add this under `[plugins."io.containerd.grpc.v1.cri".containerd.runtimes]` (keep the existing `runc` runtime):
+
+```toml
+[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.ascend]
+  runtime_type = "io.containerd.runc.v2"
+  [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.ascend.options]
+    BinaryName = "/usr/local/Ascend/Ascend-Docker-Runtime/ascend-docker-runtime"
+    SystemdCgroup = true
+```
+
+On NPU-only nodes you may set `default_runtime_name = "ascend"`. On mixed NVIDIA + Ascend nodes keep `runc` as the default and use RuntimeClass only on NPU Pods.
+
+Restart containerd again after this change.
+
+## Create the RuntimeClass
+
+The cluster must have a RuntimeClass named `ascend`. Otherwise Pods fail with `RuntimeClass "ascend" not found`. The HAMi `ascend-device-plugin` subchart creates it by default. If it is missing:
+
+```bash
+kubectl apply -f - <<'EOF'
+apiVersion: node.k8s.io/v1
+kind: RuntimeClass
+metadata:
+  name: ascend
+handler: ascend
+EOF
+
+kubectl get runtimeclass ascend
+```
+
+`handler` must match the containerd runtime name after `runtimes.` (`ascend`).
+
 ## Verification Checklist
 
 | Check | Command | Expected Result |
@@ -165,6 +197,8 @@ sudo systemctl restart containerd
 | AVI (hard slice) | `npu-smi info -t vnpu-mode` | `vnpu-mode : docker` |
 | vNPU templates | `npu-smi info -t template-info -i <NPU_ID> -c <CHIP_ID>` | Training: `vir06*` / `vir12*`; inference: `vir05*` / `vir10*` |
 | Ascend Docker Runtime | `ls /usr/local/Ascend/Ascend-Docker-Runtime/ascend-docker-runtime` | File exists and is executable |
+| containerd CRI runtime named `ascend` | `grep -A6 'runtimes.ascend' /etc/containerd/config.toml` | Present, `BinaryName` points at Ascend Docker Runtime |
+| RuntimeClass | `kubectl get runtimeclass ascend` | `NAME=ascend`, `HANDLER=ascend` |
 | containerd | `systemctl status containerd` | `active (running)` |
 
 ## Troubleshooting
