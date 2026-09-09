@@ -291,7 +291,7 @@ export default class MeterStore extends base {
       if (metricName.indexOf('_by_model') > -1) {
         return false
       }
-      if (item.data.result) {
+      if (!isEmpty(item.data.result)) {
         const _item = this.setOneSourceAllMeterByType(item, module)
         return this.getOneSourceAllMeterData(_item, params, module)
       }

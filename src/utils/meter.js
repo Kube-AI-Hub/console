@@ -239,25 +239,27 @@ export const getResourceFilters = ({ resources, module }) => {
 }
 
 export const fillEmptyMeterValue = (params, values) => {
+  const safeValues = isUndefined(values) || !isArray(values) ? [] : values
+
   if (!params.step || !params.start || !params.end) {
-    return values
+    return safeValues
   }
 
   const format = num => String(num).replace(/\..*$/, '')
   const step = params.step
   const times = Math.floor((params.end - params.start) / step) + 1
-  const length = isUndefined(values) || !isArray(values) ? 0 : values.length
+  const length = safeValues.length
 
   if (length < times) {
     const newValues = []
-    for (let index = 0; index < times - values.length; index++) {
+    for (let index = 0; index < times - length; index++) {
       const time = format(params.start + index * step)
       newValues.push([time, '0'])
     }
 
-    return [...newValues, ...values]
+    return [...newValues, ...safeValues]
   }
-  return values
+  return safeValues
 }
 
 export const handleValueByUnit = (item, module) => {
