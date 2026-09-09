@@ -287,6 +287,10 @@ export default class MeterStore extends base {
 
   handleAllMeterData = (result, params, module) => {
     const _result = result.results.map(item => {
+      const metricName = get(item, 'metric_name', '')
+      if (metricName.indexOf('_by_model') > -1) {
+        return false
+      }
       if (item.data.result) {
         const _item = this.setOneSourceAllMeterByType(item, module)
         return this.getOneSourceAllMeterData(_item, params, module)
@@ -434,7 +438,18 @@ export default class MeterStore extends base {
       const _result = {}
 
       Object.keys(result).forEach(key => {
-        if (!['currency', 'retention_day'].includes(key) && result[key] > 0) {
+        if (
+          key === 'gpu_model_prices' &&
+          result[key] &&
+          typeof result[key] === 'object'
+        ) {
+          _result.gpuModelPrices = result[key]
+          return
+        }
+        if (
+          !['currency', 'retention_day', 'gpu_model_prices'].includes(key) &&
+          result[key] > 0
+        ) {
           _result[FEE_CONFIG[key]] = result[key]
         }
       })

@@ -41,7 +41,12 @@ import { getTimeStr } from 'components/Cards/Monitoring/Controller/TimeSelector/
 import { COLORS_MAP, DEFAULT_CLUSTER, ICON_TYPES } from 'utils/constants'
 import Button from '@kube-design/components/lib/components/Button'
 import { getWebsiteUrl } from 'utils'
-import { RESOURCES_TYPE, RESOURCE_TITLE, AREA_COLORS } from '../../constats'
+import {
+  RESOURCES_TYPE,
+  RESOURCE_TITLE,
+  AREA_COLORS,
+  GPU_MODEL_METER_TYPES,
+} from '../../constats'
 
 import Crumb from '../../components/Crumb'
 import Title from '../../components/Title'
@@ -52,6 +57,7 @@ import LineChart from '../../components/LineChart'
 import MeterTable from '../../components/Tables'
 import ResourceSelect from '../../components/ResourceSelect'
 import PieChart from '../../components/ConstomPieChart'
+import GpuModelDetail from '../../components/GpuModelDetail'
 
 import * as styles from './index.scss'
 
@@ -108,6 +114,12 @@ class ClusterDetails extends React.Component {
 
   @observable
   resourceLoading = false
+
+  @observable
+  gpuModelData = []
+
+  @observable
+  gpuModelLoading = false
 
   componentDidMount() {
     this.initData()
@@ -435,6 +447,7 @@ class ClusterDetails extends React.Component {
     this.active = { name, type, start }
     this.tableData = []
     this.pieChartData = []
+    this.gpuModelData = []
     this.timeRange = {}
     this.setActiveCrumb({
       name,
@@ -470,6 +483,12 @@ class ClusterDetails extends React.Component {
 
     this.chartData = meterData
 
+    await this.getGpuModelMeterData({
+      params,
+      start,
+      isTime,
+    })
+
     if (type !== 'pods') {
       if (['workspaces', 'cluster', 'nodes'].includes(type)) {
         const childrenList = await this.getChildrenList({
@@ -488,7 +507,8 @@ class ClusterDetails extends React.Component {
         this.childrenResourceList = []
       }
 
-      const defaultType = this.tableData.length > 0 ? this.tableData[0].type : 'cpu'
+      const defaultType =
+        this.tableData.length > 0 ? this.tableData[0].type : 'cpu'
       await this.getResourceMeterData(defaultType)
     } else {
       this.childrenResourceList = []
@@ -937,6 +957,43 @@ class ClusterDetails extends React.Component {
 
     this.tableData = this.setLineChartColor(data)
     this.chartData = data
+
+    await this.getGpuModelMeterData({
+      params,
+      start: params.start,
+      end: params.end,
+      isTime: true,
+    })
+  }
+
+  @action
+  getGpuModelMeterData = async ({ params, start, end, isTime }) => {
+    const { name, type } = this.active
+    if (!name || !type) {
+      this.gpuModelData = []
+      return
+    }
+
+    this.gpuModelLoading = true
+    try {
+      const results = await Promise.all(
+        GPU_MODEL_METER_TYPES.map(meter =>
+          this.setMeterData({
+            params,
+            module: type,
+            meters: [meter],
+            resources: [name],
+            start,
+            end,
+            isTime,
+          })
+        )
+      )
+      this.gpuModelData = flatten(results).filter(item => !isEmpty(item))
+    } catch (err) {
+      this.gpuModelData = []
+    }
+    this.gpuModelLoading = false
   }
 
   @action
@@ -1074,15 +1131,15 @@ class ClusterDetails extends React.Component {
         <div className={styles.childrenResourceContainer}>
           <Loading spinning={this.resourceLoading}>
             <div className={styles.resourceWrapper}>
-            <div className={styles.childrenlistContainer}>
-              <ResourceSelect
-                selectOptions={toJS(this.currentMeterData.sumData)}
-                getResourceMeterData={this.getResourceMeterData}
-                activeName={this.active.name}
-              />
-            </div>
-            <div className={styles.constomChartContainer}>
-              <PieChart data={pieChartData} />
+              <div className={styles.childrenlistContainer}>
+                <ResourceSelect
+                  selectOptions={toJS(this.currentMeterData.sumData)}
+                  getResourceMeterData={this.getResourceMeterData}
+                  activeName={this.active.name}
+                />
+              </div>
+              <div className={styles.constomChartContainer}>
+                <PieChart data={pieChartData} />
               </div>
             </div>
           </Loading>
@@ -1207,6 +1264,13 @@ class ClusterDetails extends React.Component {
                   <MeterTable
                     data={toJS(this.tableData)}
                     priceConfig={this.priceConfig}
+                  />
+                  <GpuModelDetail
+                    data={toJS(this.gpuModelData)}
+                    priceConfig={toJS(this.priceConfig)}
+                    loading={this.gpuModelLoading}
+                    timeRange={toJS(this.timeRange)}
+                    totalData={toJS(this.chartData)}
                   />
                   {this.renderSubResource()}
                 </div>

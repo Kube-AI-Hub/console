@@ -49,7 +49,9 @@ export default class MeterTable extends React.Component {
                 }}
               />
               {t(
-                METER_RESOURCE_TITLE[value].toUpperCase().replace(/\s+/g, '_')
+                (METER_RESOURCE_TITLE[value] || value)
+                  .toUpperCase()
+                  .replace(/\s+/g, '_')
               )}
             </>
           )

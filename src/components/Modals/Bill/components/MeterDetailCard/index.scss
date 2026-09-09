@@ -75,13 +75,31 @@
       }
     }
 
+    .groupWrap {
+      flex: 1 1 auto;
+    }
+
+    .group {
+      & + .group {
+        margin-top: 12px;
+      }
+
+      h5 {
+        margin-bottom: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        color: variables.$dark-color01;
+      }
+    }
+
     ul {
       flex-wrap: wrap;
       display: flex;
       flex: 1 1 auto;
 
       li {
-        width: 30%;
+        width: 22%;
+        min-width: 120px;
         margin-right: 3%;
         margin-bottom: 10px;
 
@@ -110,7 +128,8 @@
       }
     }
     .line {
-      height: 110px;
+      align-self: stretch;
+      min-height: 110px;
       width: 2px;
       border-left: 1px solid variables.$dark-color01;
       margin-right: 40px;

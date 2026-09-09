@@ -1,10 +1,8 @@
 import React from 'react'
-import { get, set, isEmpty, isEqual, isArray, cloneDeep } from 'lodash'
+import { get, isEmpty, isEqual, isArray, cloneDeep } from 'lodash'
 
 import { Loading } from '@kube-design/components'
-import { SimpleArea } from 'components/Charts'
 
-import { getAreaChartOps, getValueByUnit } from 'utils/monitoring'
 import EmptyList from 'components/Cards/EmptyList'
 import MonitorTab from './MonitorTab'
 import {
@@ -19,10 +17,6 @@ export default class LineChart extends React.Component {
     loading: false,
   }
 
-  get priceConfig() {
-    return this.props.priceConfig
-  }
-
   shouldComponentUpdate(nextProps, nextState) {
     return (
       this.state.loading !== nextState.loading ||
@@ -31,7 +25,6 @@ export default class LineChart extends React.Component {
   }
 
   componentDidMount() {
-    // Process data on initial mount
     if (!isEmpty(this.props.chartData)) {
       this.setAreaChartData(this.props.chartData)
     }
@@ -43,18 +36,6 @@ export default class LineChart extends React.Component {
     }
   }
 
-  setNoPriceChartData = data => {
-    const chartData = cloneDeep(data)
-    chartData.forEach(item => {
-      item.title = METER_RESOURCE_TITLE[item.type]
-    })
-
-    this.setState({
-      chartData,
-      loading: false,
-    })
-  }
-
   setAreaChartData = data => {
     this.setState({ loading: true }, () => {
       if (isEmpty(data)) {
@@ -62,50 +43,21 @@ export default class LineChart extends React.Component {
         return
       }
 
-      if (isEmpty(this.priceConfig)) {
-        this.setNoPriceChartData(data)
-      } else {
-        // Deep clone data to avoid mutating props
-        const clonedData = cloneDeep(data)
-        
-        clonedData.forEach(item => {
-          item.values = item.values.map(_item => {
-            const value = get(_item, [1])
+      const chartData = cloneDeep(data).filter(
+        item => METER_RESOURCE_TITLE[item.type]
+      )
+      chartData.forEach(item => {
+        item.title = METER_RESOURCE_TITLE[item.type]
+      })
 
-            const valueConvertedByUnit =
-              value === '-1' ? null : getValueByUnit(value, item.unit.value)
-
-            const priceUnit = this.priceConfig[item.type]
-
-            const valueConvertedByPrice = valueConvertedByUnit * priceUnit
-
-            set(_item, [1], valueConvertedByPrice)
-
-            return _item
-          })
-
-          item.type = METER_RESOURCE_TITLE[item.type]
-        })
-
-        const legend = clonedData.map(record => get(record, `type`))
-        const _result = {
-          title: t('CONSUMER_TRENDS'),
-          unit: this.priceConfig.currency ? this.priceConfig.currency : ' ',
-          data: clonedData,
-          legend,
-        }
-        const chartData = getAreaChartOps(_result)
-        chartData.data.shift()
-
-        this.setState({
-          chartData,
-          loading: false,
-        })
-      }
+      this.setState({
+        chartData,
+        loading: false,
+      })
     })
   }
 
-  renderNoPriceChart = () => {
+  renderUsageChart = () => {
     const { chartData } = this.state
     if (isEmpty(chartData) || !isArray(chartData)) {
       return null
@@ -114,16 +66,22 @@ export default class LineChart extends React.Component {
     const METER_ICON = {
       CPU: 'cpu',
       Memory: 'memory',
+      'GPU Usage': 'gpu',
+      'GPU Memory Usage': 'gpu',
+      'GPU Allocation Count': 'gpu',
       Volumes: 'storage',
       'Net Received': 'network',
       'Net Transmitted': 'network',
     }
 
     const tabs = chartData.map(item => {
-      const config = {
+      const unitLabel = get(item, 'unit.label', get(item, 'unit.value', ''))
+      const unitValue = get(item, 'unit.value', unitLabel)
+      return {
         key: item.title,
         icon: METER_ICON[item.title],
-        unit: item.unit.value,
+        unit: unitValue,
+        displayUnit: unitLabel,
         legend: [item.title],
         title: t(
           METER_RESOURCE_USAGE_TITLE[item.type]
@@ -135,7 +93,6 @@ export default class LineChart extends React.Component {
         titleValue: item.sum_value,
         dot: 3,
       }
-      return config
     })
 
     return <MonitorTab tabs={tabs} />
@@ -152,10 +109,8 @@ export default class LineChart extends React.Component {
               title={t('NO_DATA')}
               desc={t('NO_RESOURCE_FOUND')}
             />
-          ) : isEmpty(this.priceConfig) ? (
-            this.renderNoPriceChart()
           ) : (
-            <SimpleArea width="100%" height={245} {...this.state.chartData} />
+            this.renderUsageChart()
           )}
         </Loading>
       </div>

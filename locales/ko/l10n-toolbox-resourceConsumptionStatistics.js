@@ -22,8 +22,8 @@ module.exports = {
   // Cluster Resource Consumption
   CLUSTER_CONSUMPTION: '클러스터 리소스 사용량',
   CLUSTER_CONSUMPTION_DESC: '클러스터 리소스의 사용량 정보를 봅니다.',
-  CLUSTER_RESOURCE_CONSUMPTION_DESC: '<strong>클러스터</strong>의 CPU, 메모리 및 볼륨 등을 포함한 리소스 사용량',
-  CLUSTER_NODE_CONSUMPTION_DESC: '<strong>노드</strong>의 CPU, 메모리 및 볼륨 등을 포함한 리소스 사용량',
+  CLUSTER_RESOURCE_CONSUMPTION_DESC: '<strong>클러스터</strong>의 CPU, 메모리, GPU 및 볼륨 등을 포함한 리소스 사용량',
+  CLUSTER_NODE_CONSUMPTION_DESC: '<strong>노드</strong>의 CPU, 메모리, GPU 및 볼륨 등을 포함한 리소스 사용량',
   CLUSTER_POD_CONSUMPTION_DESC: '<strong>파드</strong>의 CPU, 메모리 등을 포함한 리소스 사용량',
   CURRENT_RESOURCE_CONSUMPTION: '현재 리소스 사용량',
   VIEW: '보기',
@@ -32,7 +32,7 @@ module.exports = {
   // Workspace Recource Consumption
   WORKSPACE_CONSUMPTION: '워크스페이스 리소스 사용량',
   WORKSPACE_CONSUMPTION_DESC: '워크스페이스 리소스의 사용량 정보를 봅니다.',
-  WORKSPACE_RESOURCE_CONSUMPTION_DESC: '<strong>워크스페이스</strong>의 CPU, 메모리 및 볼륨 등을 포함한 리소스 사용량',
-  WORKSPACE_PROJECT_CONSUMPTION_DESC: '<strong>프로젝트</strong>의 CPU, 메모리 및 볼륨 등을 포함한 리소스 사용량',
+  WORKSPACE_RESOURCE_CONSUMPTION_DESC: '<strong>워크스페이스</strong>의 CPU, 메모리, GPU 및 볼륨 등을 포함한 리소스 사용량',
+  WORKSPACE_PROJECT_CONSUMPTION_DESC: '<strong>프로젝트</strong>의 CPU, 메모리, GPU 및 볼륨 등을 포함한 리소스 사용량',
   PROJECT_CONSUMPTION_DESC: '프로젝트 내 <strong>앱</strong>, <strong>서비스</strong>, 및 <strong>파드</strong>의 CPU, 메모리 등을 포함한 리소스 사용량'
 };

@@ -21,7 +21,19 @@ import classnames from 'classnames'
 import { get, isEmpty, isUndefined } from 'lodash'
 
 import * as styles from './index.scss'
-import { METER_RESOURCE_TITLE } from '../../constats'
+import {
+  METER_COMPUTE_TYPES,
+  METER_NETWORK_TYPES,
+  METER_RESOURCE_TITLE,
+} from '../../constats'
+
+const resourceTitleKey = key => {
+  const title = METER_RESOURCE_TITLE[key]
+  if (!title) {
+    return key
+  }
+  return title.toUpperCase().replace(/\s+/g, '_')
+}
 
 const MeterDetailCard = ({
   className,
@@ -42,7 +54,7 @@ const MeterDetailCard = ({
           .map(key => parseFloat(get(feeData[key], 'value', 0)) * 100)
           .reduce((pev, current) => {
             return pev + current
-          }) / 100
+          }, 0) / 100
     }
 
     return total.toFixed(2)
@@ -57,42 +69,68 @@ const MeterDetailCard = ({
     return isUndefined(value) ? '-' : value < 0 ? 0 : value
   }
 
-  const renderList = (data, type) => {
+  const orderedKeys = data => {
+    const preferred = [...METER_COMPUTE_TYPES, ...METER_NETWORK_TYPES]
+    const keys = Object.keys(data || {}).filter(
+      key => key.indexOf('by_model') === -1
+    )
+    const rest = keys.filter(key => !preferred.includes(key))
+    return [...preferred.filter(key => keys.includes(key)), ...rest]
+  }
+
+  const renderItems = (data, type, keys) => {
+    return keys.map(key => {
+      if (!data[key]) {
+        return null
+      }
+      const dataValue = get(data[key], 'value')
+      const value =
+        type === 'meter' ? handleFixed(dataValue) : handleValue(dataValue)
+
+      return (
+        <li key={key}>
+          <div>{value}</div>
+          <p>
+            <span>{t(resourceTitleKey(key))}</span>
+            <span>({get(data[key], 'unit.label', '-')})</span>
+          </p>
+        </li>
+      )
+    })
+  }
+
+  const renderGroupedList = (data, type) => {
     if (isEmpty(data)) {
       return null
     }
 
-    return type === 'price' && isEmpty(priceConfig) ? (
-      <ul className={styles.noPriceTip}>
-        <li>{t('PRICE_CONFIG_DESC')}</li>
-      </ul>
-    ) : (
-      <ul>
-        {Object.keys(data).map(key => {
-          const dataValue = get(data[key], 'value')
-          const value =
-            type === 'meter' ? handleFixed(dataValue) : handleValue(dataValue)
+    if (type === 'price' && isEmpty(priceConfig)) {
+      return (
+        <ul className={styles.noPriceTip}>
+          <li>{t('PRICE_CONFIG_DESC')}</li>
+        </ul>
+      )
+    }
 
-          if (data[key]) {
-            return (
-              <li key={key}>
-                <div>{value}</div>
-                <p>
-                  <span>
-                    {t(
-                      METER_RESOURCE_TITLE[key]
-                        .toUpperCase()
-                        .replace(/\s+/g, '_')
-                    )}
-                  </span>
-                  <span>({get(data[key], 'unit.label', '-')})</span>
-                </p>
-              </li>
-            )
-          }
-          return null
-        })}
-      </ul>
+    const keys = orderedKeys(data)
+    const computeKeys = keys.filter(key => METER_COMPUTE_TYPES.includes(key))
+    const otherKeys = keys.filter(key => !METER_COMPUTE_TYPES.includes(key))
+
+    return (
+      <div className={styles.groupWrap}>
+        {computeKeys.length > 0 && (
+          <div className={styles.group}>
+            <h5>{t('COMPUTE_RESOURCE')}</h5>
+            <ul>{renderItems(data, type, computeKeys)}</ul>
+          </div>
+        )}
+        {otherKeys.length > 0 && (
+          <div className={styles.group}>
+            <h5>{t('STORAGE_AND_NETWORK')}</h5>
+            <ul>{renderItems(data, type, otherKeys)}</ul>
+          </div>
+        )}
+      </div>
     )
   }
 
@@ -147,9 +185,9 @@ const MeterDetailCard = ({
       <div className={styles.consumContainer}>
         {isEmpty(sumData) && isEmpty(feeData) ? null : (
           <>
-            {renderList(sumData, 'meter')}
+            {renderGroupedList(sumData, 'meter')}
             <div className={styles.line}></div>
-            {renderList(feeData, 'price')}
+            {renderGroupedList(feeData, 'price')}
           </>
         )}
       </div>

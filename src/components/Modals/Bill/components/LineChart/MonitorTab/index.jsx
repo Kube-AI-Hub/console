@@ -19,7 +19,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import classnames from 'classnames'
-import { get, isEmpty, isUndefined } from 'lodash'
+import { isEmpty, isUndefined } from 'lodash'
 
 import { getAreaChartOps } from 'utils/monitoring'
 
@@ -83,7 +83,7 @@ export default class MonitorTab extends React.Component {
               title={
                 !tab.data || isUndefined(tab.titleValue)
                   ? '-'
-                  : `${tab.titleValue} ${tab.unit}`
+                  : `${tab.titleValue} ${tab.displayUnit || tab.unit}`
               }
               description={tab.title}
             />
@@ -104,6 +104,9 @@ export default class MonitorTab extends React.Component {
     }
 
     const config = getAreaChartOps(tab)
+    if (tab.displayUnit) {
+      config.unit = tab.displayUnit
+    }
 
     return (
       <div className={styles.tabContent}>

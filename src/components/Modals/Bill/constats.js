@@ -78,6 +78,9 @@ export const RESOURCE_TITLE = {
 export const METER_RESOURCE_TITLE = {
   cpu: 'CPU',
   memory: 'Memory',
+  gpu: 'GPU Usage',
+  gpu_memory: 'GPU Memory Usage',
+  gpu_allocated: 'GPU Allocation Count',
   disk: 'Volumes',
   net_received: 'Net Received',
   net_transmitted: 'Net Transmitted',
@@ -86,10 +89,29 @@ export const METER_RESOURCE_TITLE = {
 export const METER_RESOURCE_USAGE_TITLE = {
   cpu: 'Meter CPU Usage',
   memory: 'Meter Memory Usage',
+  gpu: 'Meter GPU Usage',
+  gpu_memory: 'Meter GPU Memory Usage',
+  gpu_allocated: 'Meter GPU Allocated',
   disk: 'Meter Volume Usage',
   net_received: 'Meter Net Received Usage',
   net_transmitted: 'Meter Net Transmitted Usage',
 }
+
+export const METER_COMPUTE_TYPES = [
+  'cpu',
+  'memory',
+  'gpu',
+  'gpu_memory',
+  'gpu_allocated',
+]
+
+export const METER_NETWORK_TYPES = ['disk', 'net_received', 'net_transmitted']
+
+export const GPU_MODEL_METER_TYPES = [
+  'gpu_usage_by_model',
+  'gpu_memory_usage_by_model',
+  'gpu_allocated_by_model',
+]
 
 export const MERTER_TYPE = Object.keys(METER_RESOURCE_USAGE_TITLE)
 
@@ -160,12 +182,17 @@ export const FEE_CONFIG = {
   ingress_network_traffic_per_megabytes_per_hour: 'net_received',
   mem_per_gigabytes_per_hour: 'memory',
   pvc_per_gigabytes_per_hour: 'disk',
+  gpu_per_card_per_hour: 'gpu_allocated',
+  gpu_mem_per_gigabytes_per_hour: 'gpu_memory',
   currency: 'currency',
 }
 
 export const METER_RESOURCE_USAGE = {
   cpu: 'cpu_usage',
   memory: 'memory_usage_wo_cache',
+  gpu: 'gpu_usage',
+  gpu_memory: 'gpu_memory_usage',
+  gpu_allocated: 'gpu_allocated',
   net_received: 'net_bytes_received',
   net_transmitted: 'net_bytes_transmitted',
   disk: 'pvc_bytes_total',
@@ -211,6 +238,12 @@ export const PIE_COLORS = [
 export const UNIT_CONFIG = {
   cpu: { label: 'Core', value: 'core' },
   memory: { label: 'Gi', value: 'Gi' },
+  gpu: { label: 'GPU', value: 'gpu' },
+  gpu_memory: { label: 'Gi', value: 'Gi' },
+  gpu_allocated: { label: 'GPU', value: 'gpu' },
+  gpu_usage_by_model: { label: 'GPU', value: 'gpu' },
+  gpu_memory_usage_by_model: { label: 'Gi', value: 'Gi' },
+  gpu_allocated_by_model: { label: 'GPU', value: 'gpu' },
   number: { label: 'M', value: 'Mi' },
   disk: { label: 'GB', value: 'Gi' },
   net_received: { label: 'M', value: 'Mi' },

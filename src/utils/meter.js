@@ -49,6 +49,12 @@ export const getMeterFilter = type => {
       _type === 'cluster' || _type === 'workspace'
         ? `meter_${_type}_memory_usage`
         : `meter_${_type}_memory_usage_wo_cache`,
+    gpu: `meter_${_type}_gpu_usage`,
+    gpu_memory: `meter_${_type}_gpu_memory_usage`,
+    gpu_allocated: `meter_${_type}_gpu_allocated`,
+    gpu_usage_by_model: `meter_${_type}_gpu_usage_by_model`,
+    gpu_memory_usage_by_model: `meter_${_type}_gpu_memory_usage_by_model`,
+    gpu_allocated_by_model: `meter_${_type}_gpu_allocated_by_model`,
     net_transmitted: `meter_${_type}_net_bytes_transmitted`,
     net_received: `meter_${_type}_net_bytes_received`,
   }
@@ -67,7 +73,13 @@ export const getMeterFilter = type => {
 
   return filter => {
     if (filter === 'all') {
-      return METER_FILTER
+      const {
+        gpu_usage_by_model,
+        gpu_memory_usage_by_model,
+        gpu_allocated_by_model,
+        ...totals
+      } = METER_FILTER
+      return totals
     }
     const meters = {}
     filter.forEach(_item => {
@@ -83,6 +95,12 @@ export const getMeterFilterByDic = type => {
     [`meter_${_type}_cpu_usage`]: 'cpu',
     [`meter_${_type}_memory_usage`]: 'memory',
     [`meter_${_type}_memory_usage_wo_cache`]: 'memory',
+    [`meter_${_type}_gpu_usage`]: 'gpu',
+    [`meter_${_type}_gpu_memory_usage`]: 'gpu_memory',
+    [`meter_${_type}_gpu_allocated`]: 'gpu_allocated',
+    [`meter_${_type}_gpu_usage_by_model`]: 'gpu_usage_by_model',
+    [`meter_${_type}_gpu_memory_usage_by_model`]: 'gpu_memory_usage_by_model',
+    [`meter_${_type}_gpu_allocated_by_model`]: 'gpu_allocated_by_model',
     [`meter_${_type}_pvc_bytes_total`]: 'disk',
     [`meter_${_type}_net_bytes_transmitted`]: 'net_transmitted',
     [`meter_${_type}_net_bytes_received`]: 'net_received',
@@ -188,7 +206,8 @@ export const getMetricsFilters = ({ meters, module }) => {
 
   if (!isEmpty(meters)) {
     forOwn(getMeterFilter(module)(meters), value => {
-      meterList.push(value)
+      // Anchor each name so meter_*_gpu_usage does not also match meter_*_gpu_usage_by_model.
+      meterList.push(`${value}$`)
     })
   }
 
