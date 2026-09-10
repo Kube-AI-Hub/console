@@ -89,3 +89,31 @@ test('proxies unauthenticated endpoint HTTP and SSE requests unchanged', async t
   assert.match(stream.headers['content-type'], /^text\/event-stream/)
   assert.equal(stream.body, 'data: first\n\ndata: [DONE]\n\n')
 })
+
+test('endpoint proxy allows a 30-minute streamed request', () => {
+  assert.equal(endpointProxy.timeout, 30 * 60 * 1000)
+  assert.equal(endpointProxy.proxyTimeout, 30 * 60 * 1000)
+})
+
+test('marks event-stream responses as unbuffered', async t => {
+  const upstream = http.createServer((req, res) => {
+    res.writeHead(200, { 'Content-Type': 'text/event-stream; charset=utf-8' })
+    res.end('data: later\n\n')
+  })
+  await listen(upstream)
+  t.after(() => close(upstream))
+
+  endpointProxy.target = `http://127.0.0.1:${upstream.address().port}`
+  const app = new Koa()
+  app.use(proxy('/endpoint{/*path}', endpointProxy))
+  const consoleServer = http.createServer(app.callback())
+  await listen(consoleServer)
+  t.after(() => close(consoleServer))
+
+  const stream = await request(
+    consoleServer.address().port,
+    '/endpoint/inference-service/v1/chat/completions'
+  )
+  assert.equal(stream.headers['x-accel-buffering'], 'no')
+  assert.match(stream.headers['cache-control'] || '', /no-transform/)
+})

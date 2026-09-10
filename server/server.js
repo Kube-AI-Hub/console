@@ -59,4 +59,13 @@ app.server = app.listen(global.PORT, err => {
   console.log(`Dashboard app running at port ${global.PORT}`)
 })
 
+// Node 18+ defaults requestTimeout to 300s, which cuts Playground SSE
+// long before a 30-minute completion finishes.
+if (app.server) {
+  const streamMs = 30 * 60 * 1000
+  app.server.timeout = streamMs
+  app.server.headersTimeout = streamMs
+  app.server.requestTimeout = streamMs
+}
+
 app.apply(wsProxy)

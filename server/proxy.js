@@ -159,9 +159,23 @@ const csgHubApiProxy = {
   },
 }
 
+const STREAM_PROXY_TIMEOUT_MS = 30 * 60 * 1000
+
 const endpointProxy = {
   target: CSGHUB_RPROXY_TARGET,
   secure: false,
+  timeout: STREAM_PROXY_TIMEOUT_MS,
+  proxyTimeout: STREAM_PROXY_TIMEOUT_MS,
+  events: {
+    proxyRes(proxyRes, _req, res) {
+      const contentType = String(proxyRes.headers['content-type'] || '')
+      if (!/event-stream/i.test(contentType)) {
+        return
+      }
+      res.setHeader('X-Accel-Buffering', 'no')
+      res.setHeader('Cache-Control', 'no-cache, no-transform')
+    },
+  },
 }
 
 const AIGATEWAY_PREFIXES = ['/platform-model/aigateway', '/aigateway']
@@ -246,6 +260,7 @@ const labelStudioProxy = {
 }
 
 module.exports = {
+  STREAM_PROXY_TIMEOUT_MS,
   CSGHUB_RPROXY_TARGET,
   CSGHUB_AIGATEWAY_TARGET,
   rewriteAigatewayPath,

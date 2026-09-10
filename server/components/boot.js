@@ -37,6 +37,16 @@ module.exports = function(app) {
     compress({
       threshold: 2048,
       flush: require('zlib').Z_SYNC_FLUSH,
+      filter(contentType) {
+        if (/event-stream/i.test(contentType || '')) {
+          return false
+        }
+        // koa-compress v3 exposes .filter; v5+ dropped it (bundled server.js 500s).
+        if (typeof compress.filter === 'function') {
+          return compress.filter(contentType)
+        }
+        return /text|javascript|json|svg|xml|font/i.test(contentType || '')
+      },
     })
   )
 
