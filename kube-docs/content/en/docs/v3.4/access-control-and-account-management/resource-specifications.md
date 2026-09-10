@@ -59,4 +59,9 @@ After specifications are created, users can select them in the following scenari
 - When creating a model fine-tuning instance, select a GPU resource specification
 - When creating an application Space, select a cloud resource specification
 
-After selecting a specification, the system automatically populates the corresponding CPU, memory, GPU, and other resource configuration parameters.
+After selecting a specification, the system automatically populates the corresponding CPU, memory, GPU, and other resource configuration parameters. The per-replica accelerator count is written to `GPU_NUM`. Inference engine args that contain `${GPU_NUM}` expand from that value (for example `--tensor-parallel-size`).
+
+## Related Documentation
+
+- [Configure Inference Engines](/platform-model/docs/v1.x/inferencefinetune/inference/runtime_framework_admin)
+- [Runtime Framework & Image Management](./runtime-frameworks)

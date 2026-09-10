@@ -14,4 +14,4 @@ Full procedures (tabs, channel fields, model mapping, connection test) are in th
 - [Public Inference Overview](/platform-model/docs/v1.x/inferencefinetune/inference/serverless_intro)
 - [Use Public Inference](/platform-model/docs/v1.x/inferencefinetune/inference/serverless_usage)
 
-The user-facing entry is **Model Inference → Public Inference**. Cloud requests go through `/aigateway` on the console. The request `model` is the platform model ID registered on the channel.
+The user-facing entry is **Model Inference → Public Inference**. Cloud requests go through `/aigateway` on the console. The request `model` is the platform model ID registered on the channel. Launch settings for the runtime framework used by a local deployment are in [Runtime Framework & Image Management](./runtime-frameworks).

@@ -51,4 +51,5 @@ Cloud channels are independent of platform model repositories. You do not need a
 
 - [Public Inference Overview](./serverless_intro)
 - [Use Public Inference](./serverless_usage)
+- [Configure Inference Engines](./runtime_framework_admin)
 - [Resource Specifications](/docs/v3.4/access-control-and-account-management/resource-specifications)

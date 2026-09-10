@@ -48,4 +48,5 @@ weight: 6200
 - [管理公共推理服务](./serverless_admin)
 - [创建推理实例](./endpoint_create)
 - [使用推理实例](./endpoint_usage)
+- [配置推理引擎](./runtime_framework_admin)
 - [常见问题](./endpoint_faq)

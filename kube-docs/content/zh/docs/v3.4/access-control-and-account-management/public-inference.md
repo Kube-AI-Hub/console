@@ -14,4 +14,4 @@ weight: 3210
 - [公共推理服务介绍](/platform-model/docs/v1.x/inferencefinetune/inference/serverless_intro)
 - [使用公共推理服务](/platform-model/docs/v1.x/inferencefinetune/inference/serverless_usage)
 
-用户侧入口为 **模型推理 → 公共推理服务**。云端请求经控制台 `/aigateway` 转发，`model` 使用通道中登记的平台模型 ID。
+用户侧入口为 **模型推理 → 公共推理服务**。云端请求经控制台 `/aigateway` 转发，`model` 使用通道中登记的平台模型 ID。本地部署所选运行时框架的启动配置见 [运行时框架与镜像管理](./runtime-frameworks)。

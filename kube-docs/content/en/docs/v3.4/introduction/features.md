@@ -268,7 +268,7 @@ Manage personal platform resources including Notebook instances, fine-tuning ins
 
 #### Runtime Framework and Image Management
 
-Configure inference engines, model fine-tuning training, model evaluation, and Notebook image configurations.
+Configure inference engines, model fine-tuning, evaluation, and Notebook images. **Launch (KServe / llm-d)** tells KServe how to start vLLM / SGLang. Engine args support `${GPU_NUM}`. See [Configure Inference Engines](/platform-model/docs/v1.x/inferencefinetune/inference/runtime_framework_admin).
 
 #### Compute Specification Management
 

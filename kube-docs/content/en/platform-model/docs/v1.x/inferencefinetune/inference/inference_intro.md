@@ -48,4 +48,5 @@ The platform supports multiple inference task types — refer to the correspondi
 - [Manage Public Inference](./serverless_admin)
 - [Create Dedicated Inference Instance](./endpoint_create)
 - [Use Dedicated Inference Instance](./endpoint_usage)
+- [Configure Inference Engines](./runtime_framework_admin)
 - [FAQ](./endpoint_faq)

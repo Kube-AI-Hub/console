@@ -51,4 +51,5 @@ weight: 6235
 
 - [公共推理服务介绍](./serverless_intro)
 - [使用公共推理服务](./serverless_usage)
+- [配置推理引擎](./runtime_framework_admin)
 - [规格管理](/docs/v3.4/access-control-and-account-management/resource-specifications)

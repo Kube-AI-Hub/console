@@ -59,4 +59,9 @@ weight: 3200
 - 创建模型微调实例时，选择 GPU 资源规格
 - 创建用户空间时，选择云资源规格
 
-选择规格后，系统会自动填充对应的 CPU、内存、GPU 等资源配置参数。
+选择规格后，系统会自动填充对应的 CPU、内存、GPU 等资源配置参数。规格中每副本加速卡数量会写入环境变量 `GPU_NUM`，推理引擎参数里的 `${GPU_NUM}` 据此展开（例如 `--tensor-parallel-size`）。
+
+## 相关文档
+
+- [配置推理引擎](/platform-model/docs/v1.x/inferencefinetune/inference/runtime_framework_admin)
+- [运行时框架与镜像管理](./runtime-frameworks)

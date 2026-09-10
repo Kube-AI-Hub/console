@@ -268,7 +268,7 @@ Kube AI Hub 是面向 GPU/AI 算力场景的异构算力管理平台，提供从
 
 #### 运行时框架与镜像管理
 
-配置推理引擎与大模型微调训练、模型评测、Notebook 镜像等配置信息。
+配置推理引擎与大模型微调训练、模型评测、Notebook 镜像等。推理引擎的**启动配置（KServe / llm-d）**决定 KServe 如何拉起 vLLM / SGLang，引擎参数支持 `${GPU_NUM}`。操作说明见 [配置推理引擎](/platform-model/docs/v1.x/inferencefinetune/inference/runtime_framework_admin)。
 
 #### 算力规格管理
 
