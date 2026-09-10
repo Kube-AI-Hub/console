@@ -197,6 +197,19 @@ export const getTimeParams = ({ isTime, start, end, step = '1h' }) => {
     }
 
     params.step = getMinuteValue(_step)
+
+    // Align start so query_range includes `end` (usually now).
+    const stepSec = getMinuteValue(_step, false)
+    if (
+      params.start &&
+      params.end &&
+      stepSec > 0 &&
+      params.end > params.start
+    ) {
+      params.start =
+        params.end -
+        Math.max(1, Math.floor((params.end - params.start) / stepSec)) * stepSec
+    }
   }
   return params
 }
