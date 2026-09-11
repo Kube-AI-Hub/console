@@ -29,3 +29,4 @@ icon: "/images/docs/platform-model/code.svg"
 ## 相关操作
 
 - [下载代码仓库](./download_codes)
+- [管理后台说明](../admin/admin_intro)

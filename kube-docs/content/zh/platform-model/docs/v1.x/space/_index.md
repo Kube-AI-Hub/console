@@ -69,3 +69,4 @@ icon: "/images/docs/platform-model/space.svg"
 ## 相关操作
 
 - [下载用户空间](./download_space_repo)
+- [管理后台说明](../admin/admin_intro)

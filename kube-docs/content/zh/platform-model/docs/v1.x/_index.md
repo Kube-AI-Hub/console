@@ -34,4 +34,5 @@ sectionLink:
       - /platform-model/docs/v1.x/inferencefinetune/evaluation/evaluation_custom_params
       - /platform-model/docs/v1.x/datatool/
       - /platform-model/docs/v1.x/mcp/
+      - /platform-model/docs/v1.x/admin/
 ---
