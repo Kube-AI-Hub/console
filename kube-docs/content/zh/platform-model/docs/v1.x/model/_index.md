@@ -27,6 +27,10 @@ icon: "/images/docs/platform-model/model.svg"
 - GGUF 格式（适用于 llama.cpp）
 - 其他通用模型权重文件
 
+## 管理后台
+
+管理员可在 **模型管理**（`/admin_panel/models`）搜索模型、新建模型、查看详情（别名、来源、权重）、设置权重、编辑后保存更改，以及行内删除。列表没有批量删除。无镜像时点「同步」只会提示先填写来源，不会发起任务。
+
 ## 相关操作
 
 - [模型卡片](./model_card)
@@ -34,3 +38,4 @@ icon: "/images/docs/platform-model/model.svg"
 - [上传模型](./upload_model)
 - [更新模型](./update_model)
 - [下载模型](./download_models)
+- [管理后台说明](../admin/admin_intro)

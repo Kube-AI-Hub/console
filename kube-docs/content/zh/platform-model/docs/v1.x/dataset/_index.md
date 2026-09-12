@@ -31,6 +31,10 @@ icon: "/images/docs/platform-model/dataset.svg"
 - **权限控制**：支持公开和私有两种可见性设置。
 - **数据处理集成**：可直接将数据集用于平台的模型微调和评测任务。
 
+## 管理后台
+
+管理员可在 **数据集管理**（`/admin_panel/datasets`）搜索数据集、新建数据集，并按来源查看列表。支持行内删除与批量删除。该页没有管理员详情 / 编辑，改可见性或卡片请到前台数据集页面。
+
 ## 相关操作
 
 - [数据集卡片](./dataset_card)
@@ -38,3 +42,4 @@ icon: "/images/docs/platform-model/dataset.svg"
 - [上传数据集](./upload_dataset)
 - [更新数据集](./update_dataset)
 - [下载数据集](./download_datasets)
+- [管理后台说明](../admin/admin_intro)

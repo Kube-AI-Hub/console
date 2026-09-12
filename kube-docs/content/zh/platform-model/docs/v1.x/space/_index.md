@@ -66,6 +66,10 @@ icon: "/images/docs/platform-model/space.svg"
    ```
 3. 提交并推送代码，平台自动部署。
 
+## 管理后台
+
+管理员可在 **用户空间管理**（`/admin_panel/spaces`）搜索 Space 仓库，查看许可证、可见性与权重，进入详情设置权重或改可见性，并支持单条 / 批量删除。这里管理的是用户创建的应用仓库，与 **算力规格管理**（创建应用时可选的 CPU/GPU/NPU 规格）不是同一页。
+
 ## 相关操作
 
 - [下载用户空间](./download_space_repo)
