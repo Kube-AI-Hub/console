@@ -258,7 +258,7 @@ Kube AI Hub 是面向 GPU/AI 算力场景的异构算力管理平台，提供从
 
 #### 账号设置
 
-配置用户的 Access Token 和 SSH Key。
+配置用户的访问令牌和 SSH Key。
 
 ### 管理后台
 

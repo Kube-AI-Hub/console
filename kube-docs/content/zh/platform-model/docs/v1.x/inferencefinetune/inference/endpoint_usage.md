@@ -34,7 +34,7 @@ Playground 适用于快速验证模型效果和调试提示词，正式生产环
 
 ## API 调用文档
 
-在实例详情页切换到 **API** 页签，可查看完整的 API 调用文档及多语言代码示例。
+在实例详情页切换到 **API** 页签，可查看完整的 API 调用文档及多语言代码示例。勾选 **使用我的访问令牌** 后，示例会自动填入当前用户的访问令牌；也可到 **个人设置 → 访问令牌** 中复制。
 
 ### Python 示例
 
@@ -100,7 +100,7 @@ curl -X POST "https://<your-endpoint-url>/v1/chat/completions" \
 ```
 
 {{< notice note >}}
-将示例中的 `<your-endpoint-url>` 替换为概览页面中显示的推理 API 地址，`YOUR_API_KEY` 替换为平台生成的 API 密钥。
+将示例中的 `<your-endpoint-url>` 替换为概览页面中显示的推理 API 地址，`YOUR_API_KEY` 替换为平台 **个人设置 → 访问令牌** 中的访问令牌。
 {{</ notice >}}
 
 ## 实时监控
