@@ -3,6 +3,7 @@ const {
   getCsgHubConfig,
   getAuthorization,
   uploadObject,
+  getPublicObject,
   getTempUrl,
   resolveRepoFile,
   streamResponse,
@@ -64,6 +65,27 @@ const handleCsgHubTempUrl = async ctx => {
   }
 }
 
+const handleCsgHubPublicFile = async ctx => {
+  const objectKey = Array.isArray(ctx.params.path)
+    ? ctx.params.path.join('/')
+    : String(ctx.params.path || '').replace(/^\/+/, '')
+  if (!objectKey) {
+    ctx.status = 404
+    ctx.body = { error: 'not found' }
+    return
+  }
+  try {
+    const result = await getPublicObject(objectKey)
+    ctx.status = 200
+    ctx.type = result.contentType
+    ctx.set('Cache-Control', 'public, max-age=31536000, immutable')
+    ctx.body = result.stream
+  } catch (err) {
+    ctx.status = err.code === 'NoSuchKey' ? 404 : err.status || 500
+    ctx.body = { error: err.message || 'not found' }
+  }
+}
+
 const handleCsgHubResolve = async ctx => {
   try {
     const result = await resolveRepoFile(ctx)
@@ -104,6 +126,7 @@ module.exports = {
   handleCsgHubUpload,
   handleCsgHubPrivateUpload,
   handleCsgHubTempUrl,
+  handleCsgHubPublicFile,
   handleCsgHubResolve,
   renderCsgHub,
   setCsgHubZhLocale: setLocaleCookie('zh'),

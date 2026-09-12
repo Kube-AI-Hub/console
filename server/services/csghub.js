@@ -9,6 +9,9 @@ const { formidable } = require('formidable')
 
 const { getServerConfig } = require('../libs/utils')
 
+const extensionOf = filename =>
+  path.extname(filename || '').replace(/^\./, '').toLowerCase()
+
 const IMAGE_CONTENT_TYPES = {
   jpg: 'image/jpeg',
   jpeg: 'image/jpeg',
@@ -120,9 +123,56 @@ const createMinioClient = storageConfig => {
   })
 }
 
+const envFlag = value => String(value || '').toLowerCase() === 'true'
+
+const s3FromEnv = isPrivate => {
+  const prefix = isPrivate ? 'CSGHUB_PORTAL_PRIVATE_S3' : 'CSGHUB_PORTAL_S3'
+  return {
+    endpoint: process.env[`${prefix}_ENDPOINT`] || '',
+    accessKeyID: process.env[`${prefix}_ACCESS_KEY_ID`] || '',
+    accessKeySecret: process.env[`${prefix}_ACCESS_KEY_SECRET`] || '',
+    region: process.env[`${prefix}_REGION`] || '',
+    bucket: process.env[`${prefix}_BUCKET`] || '',
+    enableSSL: envFlag(process.env[`${prefix}_ENABLE_SSL`]),
+  }
+}
+
 const getStorageConfig = isPrivate => {
   const config = getCsgHubConfig()
-  return isPrivate ? config.privateS3 : config.s3
+  const fromYaml = isPrivate ? config.privateS3 : config.s3
+  if (fromYaml?.endpoint) {
+    return fromYaml
+  }
+  return s3FromEnv(isPrivate)
+}
+
+const publicFileUrl = objectKey => {
+  const basePath = getCsgHubConfig().basePath || '/platform-model'
+  return `${basePath}/internal_api/files/${objectKey}`
+}
+
+const PUBLIC_OBJECT_PREFIXES = [
+  'org_logo/',
+  'avatar/',
+  'comment/',
+  'space/',
+  'admin-photo/',
+]
+
+const isAllowedObjectKey = key =>
+  typeof key === 'string' &&
+  !key.includes('..') &&
+  PUBLIC_OBJECT_PREFIXES.some(prefix => key.startsWith(prefix))
+
+const objectContentType = (meta = {}, objectKey = '') => {
+  const fromMeta =
+    meta['content-type'] ||
+    meta['Content-Type'] ||
+    meta.contentType
+  if (fromMeta) {
+    return fromMeta
+  }
+  return IMAGE_CONTENT_TYPES[extensionOf(objectKey)] || DEFAULT_CONTENT_TYPE
 }
 
 const parseUpload = ctx =>
@@ -168,9 +218,24 @@ const uploadObject = async (ctx, { isPrivate = false } = {}) => {
   const storageConfig = getStorageConfig(isPrivate)
   const client = createMinioClient(storageConfig)
   const namespace = firstValue(fields.namespace) || 'comment'
+  const maxSize = Number(firstValue(fields.file_max_size)) || 0
+  if (maxSize > 0 && file.size > maxSize) {
+    const err = new Error('File size too large')
+    err.status = 400
+    throw err
+  }
+  if (['org-logo', 'user-avatar'].includes(namespace) && file.size > 1024 * 1024) {
+    const err = new Error('File size too large')
+    err.status = 400
+    throw err
+  }
   const objectKey = getObjectKeyByType(namespace)
   const stream = fs.createReadStream(file.filepath)
-  await client.putObject(storageConfig.bucket, objectKey, stream, file.size)
+  const meta = {}
+  if (file.mimetype) {
+    meta['Content-Type'] = file.mimetype
+  }
+  await client.putObject(storageConfig.bucket, objectKey, stream, file.size, meta)
 
   if (isPrivate) {
     const url = await client.presignedGetObject(
@@ -181,11 +246,28 @@ const uploadObject = async (ctx, { isPrivate = false } = {}) => {
     return { url, code: objectKey }
   }
 
-  const protocol = storageConfig.enableSSL ? 'https' : 'http'
-  const endpoint = storageConfig.endpoint?.replace(/^https?:\/\//, '')
   return {
-    url: `${protocol}://${endpoint}/${storageConfig.bucket}/${objectKey}`,
+    url: publicFileUrl(objectKey),
     code: objectKey,
+  }
+}
+
+const getPublicObject = async objectKey => {
+  if (!isAllowedObjectKey(objectKey)) {
+    const err = new Error('not found')
+    err.status = 404
+    throw err
+  }
+
+  const storageConfig = getStorageConfig(false)
+  const client = createMinioClient(storageConfig)
+  const [stream, stat] = await Promise.all([
+    client.getObject(storageConfig.bucket, objectKey),
+    client.statObject(storageConfig.bucket, objectKey).catch(() => null),
+  ])
+  return {
+    stream,
+    contentType: objectContentType(stat?.metaData, objectKey),
   }
 }
 
@@ -205,9 +287,6 @@ const getTempUrl = async objectKey => {
   )
   return { url, code: 'some_key' }
 }
-
-const extensionOf = filename =>
-  path.extname(filename || '').replace(/^\./, '').toLowerCase()
 
 const isImagePath = filename => Boolean(IMAGE_CONTENT_TYPES[extensionOf(filename)])
 
@@ -312,6 +391,7 @@ module.exports = {
   getCsgHubAssetTags,
   getAuthorization,
   uploadObject,
+  getPublicObject,
   getTempUrl,
   resolveRepoFile,
   streamResponse,

@@ -60,6 +60,7 @@ const {
   handleCsgHubPrivateUpload,
   handleCsgHubTempUrl,
   handleCsgHubResolve,
+  handleCsgHubPublicFile,
   renderCsgHub,
   setCsgHubZhLocale,
   setCsgHubEnLocale,
@@ -87,6 +88,7 @@ router
     handleCsgHubPrivateUpload
   )
   .get('/platform-model/internal_api/oss_temp_url', handleCsgHubTempUrl)
+  .get('/platform-model/internal_api/files{/*path}', handleCsgHubPublicFile)
   .get(
     '/platform-model/:repo_type/:namespace/:name/resolve/:branch{/*path}',
     handleCsgHubResolve
