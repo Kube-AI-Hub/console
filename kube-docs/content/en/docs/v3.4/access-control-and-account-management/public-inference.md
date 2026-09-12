@@ -6,7 +6,7 @@ linkTitle: "Public Inference"
 weight: 3210
 ---
 
-Platform administrators manage two kinds of public models in **Platform Management → Public Inference**: in-cluster local deployments, and cloud API channels that forward to external vendors.
+Platform administrators manage two kinds of public models in **Admin Console → Compute Resource → Public Inference**: in-cluster local deployments, and cloud API channels that forward to external vendors.
 
 Full procedures (tabs, channel fields, model mapping, connection test) are in the Industry AI Model Platform docs:
 

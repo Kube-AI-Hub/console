@@ -19,7 +19,7 @@ The Resource Specifications feature allows platform administrators to pre-define
 ## Creating Resource Specifications
 
 1. Log in as a platform administrator.
-2. Navigate to **Platform Management → Resource Specifications**.
+2. Navigate to **Admin Console → Compute Resource → Resource Specifications**.
 3. Click the **Create Specification** button.
 4. Fill in the specification details:
 

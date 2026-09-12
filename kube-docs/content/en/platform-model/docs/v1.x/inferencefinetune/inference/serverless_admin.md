@@ -8,7 +8,7 @@ weight: 6235
 
 ## Admin Entry
 
-Sign in as a platform administrator and open **Platform Management → Public Inference**. The page has two tabs:
+Sign in as a platform administrator and open **Admin Console → Compute Resource → Public Inference**. The page has two tabs:
 
 | Tab | Purpose |
 |-----|---------|

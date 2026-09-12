@@ -76,4 +76,4 @@ Access tokens can be generated in **User Settings → Access Tokens**.
 
 **Cause**: The runtime framework has no **Launch (KServe / llm-d)** JSON, or it is missing `decode` (or the `template` alias). When KServe is enabled, inference must define how to start the process.
 
-**Solution**: An administrator should edit the framework under **Platform Management → Runtime Framework & Image Management** and add launch. See [Configure Inference Engines](./runtime_framework_admin).
+**Solution**: An administrator should edit the framework under **Admin Console → Compute Resource → Runtime Framework & Image Management** and add launch. See [Configure Inference Engines](./runtime_framework_admin).

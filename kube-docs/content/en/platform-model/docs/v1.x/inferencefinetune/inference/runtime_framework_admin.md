@@ -8,7 +8,7 @@ weight: 6236
 
 ## Admin entry
 
-Sign in as a platform administrator and open **Platform Management → Runtime Framework & Image Management** (same admin console as resource specifications and public inference). Tabs map to deploy types:
+Sign in as a platform administrator and open **Admin Console → Compute Resource → Runtime Framework & Image Management** (same group as resource specifications and public inference). Tabs map to deploy types:
 
 | Tab | Use |
 |-----|-----|
@@ -22,7 +22,7 @@ This page covers the **Inference Engine** tab. KServe (including llm-d / LLMISVC
 
 ## List and import
 
-- Search by name, image, version, or model format.
+- Search by name, image, version, or model format, and filter by compute type and status. Search, filters, Import Built-in, and Create sit on one row.
 - **Create** registers a new framework version.
 - **Import Built-in** adds missing rows from the bundled JSON for the current tab. It **does not overwrite** existing rows (including engine args and launch spec).
 - Names ending in `-multi-node` / `-pd` show **Multi-node** / **PD** badges.

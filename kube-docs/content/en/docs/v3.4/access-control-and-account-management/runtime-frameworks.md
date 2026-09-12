@@ -6,7 +6,7 @@ linkTitle: "Runtime Framework & Image Management"
 weight: 3220
 ---
 
-Platform administrators maintain inference, fine-tuning, evaluation, Notebook, and job images in **Platform Management → Runtime Framework & Image Management**. When KServe is enabled, the inference process command comes from **Launch (KServe / llm-d)** (`decode` / `prefill` / `routing`). `${GPU_NUM}` in engine args expands to the SKU per-replica card count.
+Platform administrators maintain inference, fine-tuning, evaluation, Notebook, and job images in **Admin Console → Compute Resource → Runtime Framework & Image Management**. The list can be filtered by compute type and status. When KServe is enabled, the inference process command comes from **Launch (KServe / llm-d)** (`decode` / `prefill` / `routing`). `${GPU_NUM}` in engine args expands to the SKU per-replica card count.
 
 Full procedures (tabs, Import Built-in, engine args, launch, and serving backends) are in the Industry AI Model Platform docs:
 
