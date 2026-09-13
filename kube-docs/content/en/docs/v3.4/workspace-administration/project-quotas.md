@@ -14,7 +14,7 @@ This tutorial demonstrates how to configure quotas for a project.
 
 ## Prerequisites
 
-You have an available workspace, a project and a user (`ws-admin`). The user must have the `admin` role at the workspace level. For more information, see [Create Workspaces, Projects, Users and Roles](../../quick-start/create-workspace-and-project/).
+You have an available tenant (workspace), a project and a user (`ws-admin`). The user must have the `admin` role at the tenant (workspace) level. For more information, see [Create Tenants (Workspaces), Projects, Users and Roles](../../quick-start/create-workspace-and-project/).
 
 {{< notice note >}}
 

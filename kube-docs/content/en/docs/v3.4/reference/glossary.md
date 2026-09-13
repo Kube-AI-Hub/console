@@ -10,21 +10,23 @@ This glossary includes general terms and technical terms that are specific to Ku
 
 ## General
 
-- **Workspace** <br>
-    A logical unit to organize a tenant's workload projects (i.e. Kubernetes namespaces) and DevOps projects. It also features access control of different resources and allows team members to share information.
-- **System workspace** <br>A special place to organize system projects of Kube AI Hub, Kubernetes and optional components such as App Store, service mesh and DevOps.
-- **Workspace member** <br>The users that are invited to a workspace who have certain permissions to work in the workspace.
+- **Tenant (Workspace)** <br>
+    The tenant unit shared by the Console and the Industry AI Model Platform, backed by the Workspace resource. It organizes projects (Kubernetes namespaces) and DevOps projects. The UI label is Tenant (Workspace); APIs and routes still use workspace.
+- **Public tenant** <br>The default tenant named `public`. Every signed-in user belongs to it implicitly. Hub personal repositories and the compute project `spaces` use it. Do not confuse it with the system tenant.
+- **System tenant** <br>The resource named `system-workspace` that organizes system projects of Kube AI Hub, Kubernetes and optional components such as App Store, service mesh and DevOps. Do not create business projects or organizations in it.
+- **Tenant (Workspace) member** <br>The users that are invited to a tenant (workspace) who have certain permissions to work in the tenant (workspace).
+- **Compute project** <br>The project (namespace) selected when creating inference, fine-tune, or notebook instances. Instances attach to the project and consume that namespace quota, not an organization.
 - **Project** <br>
     A project in Kube AI Hub is a Kubernetes namespace.
 - **Multi-cluster project** <br>
     A project whose workloads are deployed across multiple clusters.
 - **Project member** <br>
     The users that are invited to a project who have certain permissions to work in the project.
-- **Workbench** <br>The landing page for a tenant. It displays authorized resources that the tenant can access such as workspaces and projects.
+- **Workbench** <br>The landing page for a tenant. It displays authorized resources that the tenant can access such as tenants (workspaces) and projects.
 - **Volume** <br>
     A Kube AI Hub Volume is a Kubernetes PersistentVolumeClaim (PVC).
 - **Public cluster** <br>
-    Cluster administrators can set cluster visibility so that a cluster is available to certain workspaces. A public cluster means all platform users can access the cluster, in which they are able to create and schedule resources.
+    Cluster administrators can set cluster visibility so that a cluster is available to certain tenants (workspaces). A public cluster means all platform users can access the cluster, in which they are able to create and schedule resources.
 - **KubeKey** <br>
     A brand-new installation tool developed in Go. It is able to install Kube AI Hub and Kubernetes together or install Kubernetes only. It supports the deployment of cloud-native add-ons (YAML or Chart) as it creates a cluster. It can also be used to scale and upgrade a cluster.
 - **ks-installer** <br>

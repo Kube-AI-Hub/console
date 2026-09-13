@@ -19,6 +19,7 @@ sectionLink:
     title: Popular Pages
     description: Get started quickly with these commonly used guides for the platform's core features.
     list:
+      - /platform-model/docs/v1.x/tenancy/
       - /platform-model/docs/v1.x/model/
       - /platform-model/docs/v1.x/model/create_model
       - /platform-model/docs/v1.x/dataset/

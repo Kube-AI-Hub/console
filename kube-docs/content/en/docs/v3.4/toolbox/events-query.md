@@ -28,7 +28,7 @@ This guide demonstrates how you can do multi-level, fine-grained event queries t
 
     {{</ notice >}}
 
-3. You can click the search box and enter a condition to search for events by message, workspace, project, resource type, resource name, reason, category, or time range (for example, use `Time Range:Last 10 minutes` to search for events within the last 10 minutes).
+3. You can click the search box and enter a condition to search for events by message, tenant (workspace), project, resource type, resource name, reason, category, or time range (for example, use `Time Range:Last 10 minutes` to search for events within the last 10 minutes).
 
 4. Click any one of the results from the list, and you can see raw information of it. It is convenient for developers in terms of debugging and analysis.
 

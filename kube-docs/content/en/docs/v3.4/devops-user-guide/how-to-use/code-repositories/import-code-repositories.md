@@ -10,7 +10,7 @@ In Kube AI Hub 3.4, you can import a GitHub, GitLab, Bitbucket, or Git-based rep
 
 ## Prerequisites
 
-- You have a workspace, a DevOps project and a user (`project-regular`) invited to the DevOps project with the `operator` role. If they are not ready yet, please refer to [Create Workspaces, Projects, Users and Roles](../../../../quick-start/create-workspace-and-project/).
+- You have a tenant (workspace), a DevOps project and a user (`project-regular`) invited to the DevOps project with the `operator` role. If they are not ready yet, please refer to [Create Tenants (Workspaces), Projects, Users and Roles](../../../../quick-start/create-workspace-and-project/).
 
 - You need to [enable the Kube AI Hub DevOps system](../../../../pluggable-components/devops/).
 

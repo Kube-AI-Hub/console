@@ -12,7 +12,7 @@ Webhook 是应用程序发送由特定事件触发的通知的一种方式，可
 
 ## 准备工作
 
-您需要准备一个被授予 `platform-admin` 角色的用户。有关详细信息，请参阅[创建企业空间、项目、用户和角色](../../../../quick-start/create-workspace-and-project/)。
+您需要准备一个被授予 `platform-admin` 角色的用户。有关详细信息，请参阅[创建租户(企业空间)、项目、用户和角色](../../../../quick-start/create-workspace-and-project/)。
 
 ## 配置 Webhook 服务器
 

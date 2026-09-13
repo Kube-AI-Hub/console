@@ -125,5 +125,5 @@ If cluster initialization fails, the overview page shows the failed state and it
 ## Next Steps
 
 - Open the related detail pages from the overview cards if you need node, component, or deeper monitoring information.
-- Use the **Cluster visibility** field in **Basic Information** if you need to adjust workspace authorization for the current cluster.
+- Use the **Cluster visibility** field in **Basic Information** if you need to adjust tenant (workspace) authorization for the current cluster.
 - Use the **Tools** card if you need to run cluster commands directly or retrieve the access configuration.

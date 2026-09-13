@@ -16,7 +16,7 @@ weight: 2400
 
 - 您需要启用 [Kube AI Hub 服务网格](../../pluggable-components/service-mesh/)。
 
-- 您需要完成[创建企业空间、项目、用户和角色](../create-workspace-and-project/)中的所有任务。
+- 您需要完成[创建租户(企业空间)、项目、用户和角色](../create-workspace-and-project/)中的所有任务。
 
 - 您需要启用**链路追踪**。有关更多信息，请参见[设置网关](../../project-administration/project-gateway/#设置网关)。
 

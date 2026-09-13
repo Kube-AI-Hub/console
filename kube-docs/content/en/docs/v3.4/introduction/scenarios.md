@@ -66,7 +66,7 @@ Provides standard authentication, custom authentication, and multi-tenant isolat
 
 - **Standard Authentication**: Compatible with LDAP/AD protocols, supports Single Sign-On (SSO)
 - **Custom Authentication**: Integrates with enterprise identity systems
-- **Multi-tenant Isolation**: Three-level resource isolation — platform, workspace, and project
+- **Multi-tenant Isolation**: Three-level resource isolation — platform, tenant (workspace), and project
 
 ### Cluster Management Layer
 

@@ -10,7 +10,7 @@ weight: 11214
 
 ## 准备工作
 
-- 您需要创建一个企业空间、一个 DevOps 项目以及一个用户 (`project-regular`)，必须邀请该用户至该 DevOps 项目中并赋予 `operator` 角色。有关更多信息，请参考[创建企业空间、项目、用户和角色](../../../../quick-start/create-workspace-and-project/)。
+- 您需要创建一个租户(企业空间)、一个 DevOps 项目以及一个用户 (`project-regular`)，必须邀请该用户至该 DevOps 项目中并赋予 `operator` 角色。有关更多信息，请参考[创建租户(企业空间)、项目、用户和角色](../../../../quick-start/create-workspace-and-project/)。
 - 您需要[启用 Kube AI Hub DevOps 系统](../../../../pluggable-components/devops/)。
 
 ## 基本信息

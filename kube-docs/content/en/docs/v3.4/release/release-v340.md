@@ -82,7 +82,7 @@ istio: 1.11.1 -> 1.14.6; kiali: v1.38.1 -> v1.50.1; jaeger: 1.27 -> 1.29.
 - Make sure the cluster is Ready when cleaning up notifications.
 - Fix the webhook validation issue for new clusters. 
 - Fix the incorrect cluster status. 
-- Fix the issue of potentially duplicated entries for granted clusters in the workspace.
+- Fix the issue of potentially duplicated entries for granted clusters in the tenant (workspace).
 
 
 ## App Store

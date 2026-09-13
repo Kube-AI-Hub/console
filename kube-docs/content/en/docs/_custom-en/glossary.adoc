@@ -11,11 +11,11 @@
 |Node
 |A node is each machine that makes up a cluster, which can be either a virtual machine or a physical machine. Each node can operate and process tasks independently.
 
-|Workspace
-|A workspace is the basic logical unit for managing projects and members, serving as the foundation of the Kube AI Hub multi-tenant system.
+|Tenant (Workspace)
+|A tenant (workspace) is the basic logical unit for managing projects and members, serving as the foundation of the Kube AI Hub multi-tenant system.
 
-|Workspace Member
-|A user invited to work in a workspace with specific permissions.
+|Tenant (Workspace) Member
+|A user invited to work in a tenant (workspace) with specific permissions.
 
 |Project
 |A project in Kube AI Hub corresponds to a namespace in Kubernetes.
@@ -27,7 +27,7 @@
 |A user invited to work in a project with specific permissions.
 
 |Console
-|The user login page, displaying resources such as workspaces and projects that the tenant has access to.
+|The user login page, displaying resources such as tenants (workspaces) and projects that the tenant has access to.
 
 |Pod
 |A Pod is the smallest manageable unit of an application in Kubernetes, functioning as the logical host for the application. Each Pod contains one or more containers that share resources such as network and storage. Typically, a Pod is used to run a single instance of a given application.
@@ -102,7 +102,7 @@
 |The communication service address of the host cluster that the Tower agent on the member cluster needs to access when using a proxy connection.
 
 |Cluster Visibility
-|Controls which workspaces are authorized to use the cluster, enabling the workspace to utilize the authorized cluster.
+|Controls which tenants (workspaces) are authorized to use the cluster, enabling the tenant (workspace) to utilize the authorized cluster.
 |===
 
 == Applications and Workloads

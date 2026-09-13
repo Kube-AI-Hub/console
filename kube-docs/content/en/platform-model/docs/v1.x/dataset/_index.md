@@ -28,7 +28,7 @@ The platform supports the following dataset types:
 - **Dataset Upload**: Upload data files in various formats via the Web interface or Git.
 - **Dataset Preview**: Preview Parquet, CSV, JSONL, and other format files online.
 - **Version Control**: Manage datasets with Git versioning.
-- **Access Control**: Supports public and private visibility settings.
+- **Access Control**: Supports public and private visibility. Lists default to public repos ∪ the current tenant; **This tenant** does not include other tenants' public repos.
 - **Processing Integration**: Datasets can be directly used in platform fine-tuning and evaluation tasks.
 
 ## Related Operations
@@ -38,3 +38,4 @@ The platform supports the following dataset types:
 - [Upload Datasets](./upload_dataset)
 - [Update Datasets](./update_dataset)
 - [Download Datasets](./download_datasets)
+- [Tenants and Compute Placement](../tenancy/)

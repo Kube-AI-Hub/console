@@ -23,7 +23,7 @@ For more information, see the [official documentation of Kubernetes](https://kub
 
 ## Prerequisites
 
-You need to create a workspace, a project and a user (`project-regular`). The user must be invited to the project with the role of `operator`. For more information, see [Create Workspaces, Projects, Users and Roles](../../../quick-start/create-workspace-and-project/).
+You need to create a tenant (workspace), a project and a user (`project-regular`). The user must be invited to the project with the role of `operator`. For more information, see [Create Tenants (Workspaces), Projects, Users and Roles](../../../quick-start/create-workspace-and-project/).
 
 ## Create a Kubernetes StatefulSet
 

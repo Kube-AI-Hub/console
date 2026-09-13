@@ -19,7 +19,7 @@ Kube AI Hub provides an easy-to-use multi-cluster feature to help you [build you
 
 ## Manage your Kube AI Hub Multi-cluster Environment
 
-Once you build a multi-cluster environment on Kube AI Hub, you can manage it through the central control plane from your Host Cluster. When creating resources, you can select a specific cluster while the Host Cluster should be avoided in case of overload. It is not recommended to log in to the Kube AI Hub web console of your Member Clusters to create resources on them as some resources (for example, workspaces) won't be synchronized to your Host Cluster for management.
+Once you build a multi-cluster environment on Kube AI Hub, you can manage it through the central control plane from your Host Cluster. When creating resources, you can select a specific cluster while the Host Cluster should be avoided in case of overload. It is not recommended to log in to the Kube AI Hub web console of your Member Clusters to create resources on them as some resources (for example, tenants (workspaces)) won't be synchronized to your Host Cluster for management.
 
 ### Resource Management
 
@@ -27,19 +27,19 @@ It is not recommended that you change a Host Cluster to a Member Cluster or the 
 
 If you want to import the Member Cluster to a new Host Cluster while retaining existing projects, you can follow the steps as below.
 
-1. Run the following command on the Member Cluster to unbind the projects to be retained from your workspace.
+1. Run the following command on the Member Cluster to unbind the projects to be retained from your tenant (workspace).
 
    ```bash
    kubectl label ns <namespace> kubesphere.io/workspace- && kubectl patch ns <namespace>   -p '{"metadata":{"ownerReferences":[]}}' --type=merge
    ```
 
-2. Run the following command on the Member Cluster to clear your workspace.
+2. Run the following command on the Member Cluster to clear your tenant (workspace).
 
    ```bash
    kubectl delete workspacetemplate <workspace name>
    ```
 
-3. When you create a workspace on the new Host Cluster and assign the Member Cluster to this workspace, run the following command on the Member Cluster to bind the projects retained for the workspace.
+3. When you create a tenant (workspace) on the new Host Cluster and assign the Member Cluster to this tenant (workspace), run the following command on the Member Cluster to bind the projects retained for the tenant (workspace).
 
    ```bash
    kuebctl label ns <namespace> kubesphere.io/workspace=<workspace name>
@@ -49,7 +49,7 @@ If you want to import the Member Cluster to a new Host Cluster while retaining e
 
 The users you create through the central control plane from your Host Cluster will be synchronized to Member Clusters. 
 
-If you want to let different users access different clusters, you can create workspaces and [assign different clusters to them](../../../cluster-administration/cluster-settings/cluster-visibility-and-authorization/). After that, you can invite different users to these workspaces per access requirements for these users.
+If you want to let different users access different clusters, you can create tenants (workspaces) and [assign different clusters to them](../../../cluster-administration/cluster-settings/cluster-visibility-and-authorization/). After that, you can invite different users to these tenants (workspaces) per access requirements for these users.
 
 ### Kube AI Hub Components Management
 

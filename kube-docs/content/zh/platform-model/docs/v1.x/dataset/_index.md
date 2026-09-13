@@ -28,7 +28,7 @@ icon: "/images/docs/platform-model/dataset.svg"
 - **数据集上传**：支持通过 Web 界面或 Git 上传各种格式的数据文件。
 - **数据集预览**：支持在线预览 Parquet、CSV、JSONL 等格式文件内容。
 - **版本控制**：基于 Git 对数据集进行版本管理。
-- **权限控制**：支持公开和私有两种可见性设置。
+- **权限控制**：支持公开和私有两种可见性设置。列表默认公开仓 ∪ 当前租户仓；源过滤 **本租户** 不再并入其它租户公开仓。
 - **数据处理集成**：可直接将数据集用于平台的模型微调和评测任务。
 
 ## 管理后台
@@ -43,3 +43,4 @@ icon: "/images/docs/platform-model/dataset.svg"
 - [更新数据集](./update_dataset)
 - [下载数据集](./download_datasets)
 - [管理后台说明](../admin/admin_intro)
+- [租户与算力归属](../tenancy/)

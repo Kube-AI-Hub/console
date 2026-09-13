@@ -25,6 +25,7 @@ On the model evaluation task creation page, fill in the following configuration,
 | **Description** | Optional note for this evaluation |
 | **Datasets** | **System recommended**: benchmarks available in the selected framework image; **Custom**: existing repositories on the platform. See [Custom Evaluation Datasets](./evaluation_with_custom_dataset) for formats |
 | **Region / Resource** | Cluster and compute specification |
+| **Compute project** | The public tenant can only select **space**; an enterprise tenant lists projects you can use |
 | **Evaluation Framework** | Choose the framework (OpenCompass, EvalScope, or lm-evaluation-harness), then the framework version |
 | **Framework args / vLLM args** | Shown when the selected version declares engine_args. These change runtime behavior, not the scoring formula |
 | **Advanced options** | Collapsed. Prompt template and scoring plugins default from the selected dataset and framework. Overrides are not leaderboard-comparable |

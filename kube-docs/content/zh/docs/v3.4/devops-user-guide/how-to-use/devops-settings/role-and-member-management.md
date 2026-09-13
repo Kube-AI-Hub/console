@@ -65,7 +65,7 @@ weight: 11242
 
    {{< notice note >}} 
 
-   必须先邀请用户加入 DevOps 项目所在的企业空间。
+   必须先邀请用户加入 DevOps 项目所在的租户(企业空间)。
 
    {{</ notice >}} 
 

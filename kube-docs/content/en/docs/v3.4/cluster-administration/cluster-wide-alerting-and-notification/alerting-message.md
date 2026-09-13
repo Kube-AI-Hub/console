@@ -11,7 +11,7 @@ Alerting messages record detailed information of alerts triggered based on the a
 ## Prerequisites
 
 - You have enabled [Kube AI Hub Alerting](../../../pluggable-components/alerting/).
-- You need to create a user (`cluster-admin`) and grant it the `clusters-admin` role. For more information, see [Create Workspaces, Projects, Users and Roles](../../../quick-start/create-workspace-and-project/#step-4-create-a-role).
+- You need to create a user (`cluster-admin`) and grant it the `clusters-admin` role. For more information, see [Create Tenants (Workspaces), Projects, Users and Roles](../../../quick-start/create-workspace-and-project/#step-4-create-a-role).
 - You have created a node-level alerting policy and an alert has been triggered. For more information, refer to [Alerting Policies (Node Level)](../alerting-policy/).
 
 ## View Alerting Messages

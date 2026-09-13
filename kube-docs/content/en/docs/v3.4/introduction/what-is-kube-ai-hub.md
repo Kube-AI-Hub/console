@@ -16,7 +16,7 @@ Kube AI Hub is a **heterogeneous compute management platform** built on [Kuberne
 
 - **Unified heterogeneous compute management**: Supports NVIDIA, Huawei Ascend, Cambricon, Iluvatar, and other mainstream GPUs, as well as Intel, AMD, and Hygon CPUs — all managed through a single control plane.
 - **vGPU virtualization**: Fine-grained GPU slicing and sharing across concurrent workloads, significantly improving hardware utilization.
-- **Multi-tenant isolation**: Three-tier permission system across platform, workspace, and project — resources and data are fully isolated between tenants.
+- **Multi-tenant isolation**: Three-tier permission system across platform, tenant (workspace), and project — resources and data are fully isolated between tenants.
 - **Full-stack observability**: Second-level GPU/CPU monitoring, alerting, and log management with support for multiple notification channels.
 - **Modular and pluggable**: All feature modules can be enabled on demand; supports flexible integration with third-party schedulers and storage systems.
 

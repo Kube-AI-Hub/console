@@ -1,38 +1,38 @@
 ---
 title: "Department Management"
 keywords: 'Kube AI Hub, Kubernetes, Department, Role, Permission, Group'
-description: 'Create departments in a workspace and assign users to different departments to implement permission control.'
+description: 'Create departments in a tenant (workspace) and assign users to different departments to implement permission control.'
 linkTitle: "Department Management"
 weight: 9800
 ---
 
-This document describes how to manage workspace departments.
+This document describes how to manage tenant (workspace) departments.
 
-A department in a workspace is a logical unit used for permission control. You can set a workspace role, multiple project roles, and multiple DevOps project roles in a department, and assign users to the department to control user permissions in batches. 
+A department in a tenant (workspace) is a logical unit used for permission control. You can set a tenant (workspace) role, multiple project roles, and multiple DevOps project roles in a department, and assign users to the department to control user permissions in batches. 
 
 ## Prerequisites
 
-- You need to [create a workspace and a user](../../quick-start/create-workspace-and-project/) assigned the `workspace-admin` role in the workspace. This document uses the `demo-ws` workspace and the `ws-admin` account as an example.
-- To set project roles or DevOps project roles in a department, you need to [create at least one project or DevOps project](../../quick-start/create-workspace-and-project/) in the workspace.
+- You need to [create a tenant (workspace) and a user](../../quick-start/create-workspace-and-project/) assigned the `workspace-admin` role in the tenant (workspace). This document uses the `demo-ws` tenant (workspace) and the `ws-admin` account as an example.
+- To set project roles or DevOps project roles in a department, you need to [create at least one project or DevOps project](../../quick-start/create-workspace-and-project/) in the tenant (workspace).
 
 ## Create a Department
 
-1. Log in to the Kube AI Hub web console as `ws-admin` and go to the `demo-ws` workspace.
+1. Log in to the Kube AI Hub web console as `ws-admin` and go to the `demo-ws` tenant (workspace).
 
-2. On the left navigation bar, choose **Departments** under **Workspace Settings**, and click **Set Departments** on the right.
+2. On the left navigation bar, choose **Departments** under **Tenant (Workspace) Settings**, and click **Set Departments** on the right.
 
 3. In the **Set Departments** dialog box, set the following parameters and click **OK** to create a department.
 
    {{< notice note >}}
 
-   * If a department has already been created in the workspace, you can click **Create Department** to add more departments to the workspace.
+   * If a department has already been created in the tenant (workspace), you can click **Create Department** to add more departments to the tenant (workspace).
    * You can create multiple departments and multiple sub-departments in each department. To create a subdepartment, select a department on the left department tree and click **Create Department** on the right.
 
    {{</ notice >}}
 
    * **Name**: Name of the department.
    * **Alias**: Alias of the department.
-   * **Workspace Role**: Role of all department members in the current workspace.
+   * **Tenant (Workspace) Role**: Role of all department members in the current tenant (workspace).
    * **Project Role**: Role of all department members in a project. You can click **Add Project** to specify multiple project roles. Only one role can be specified for each project.
    * **DevOps Project Role**: Role of all department members in a DevOps project. You can click **Add DevOps Project** to specify multiple DevOps project roles. Only one role can be specified for each DevOps project.
 
@@ -47,7 +47,7 @@ A department in a workspace is a logical unit used for permission control. You c
    {{< notice note >}}
 
    * If permissions provided by the department overlap with existing permissions of the user, new permissions are added to the user. Existing permissions of the user are not affected.
-   * Users assigned to a department can perform operations according to the workspace role, project roles, and DevOps project roles associated with the department without being invited to the workspace, projects, and DevOps projects.
+   * Users assigned to a department can perform operations according to the tenant (workspace) role, project roles, and DevOps project roles associated with the department without being invited to the tenant (workspace), projects, and DevOps projects.
 
    {{</ notice >}}
 

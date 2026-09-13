@@ -14,7 +14,7 @@ weight: 11215
 
 - 您需要准备一个 [GitLab](https://gitlab.com/users/sign_in) 帐户以及一个 [Docker Hub](https://hub.docker.com/) 帐户。
 - 您需要[启用 Kube AI Hub DevOps 系统](../../../../pluggable-components/devops/)。
-- 您需要创建一个企业空间、一个 DevOps 项目以及一个用户 (`project-regular`)，该用户必须被邀请至该 DevOps 项目中并赋予 `operator` 角色。有关更多信息，请参考[创建企业空间、项目、用户和角色](../../../../quick-start/create-workspace-and-project/)。
+- 您需要创建一个租户(企业空间)、一个 DevOps 项目以及一个用户 (`project-regular`)，该用户必须被邀请至该 DevOps 项目中并赋予 `operator` 角色。有关更多信息，请参考[创建租户(企业空间)、项目、用户和角色](../../../../quick-start/create-workspace-and-project/)。
 
 ## 动手实验
 

@@ -12,13 +12,13 @@ An app template serves as a way for users to upload, deliver, and manage apps. G
 
 You can deliver Helm charts to the public repository of Kube AI Hub or import a private app repository to offer app templates.
 
-The public repository, also known as the App Store on Kube AI Hub, is accessible to every tenant in a workspace. After [uploading the Helm chart of an app](../../../workspace-administration/upload-helm-based-application/), you can deploy your app to test its functions and submit it for review. Ultimately, you have the option to release it to the App Store after it is approved. For more information, see [Application Lifecycle Management](../../../application-store/app-lifecycle-management/).
+The public repository, also known as the App Store on Kube AI Hub, is accessible to every tenant in a tenant (workspace). After [uploading the Helm chart of an app](../../../workspace-administration/upload-helm-based-application/), you can deploy your app to test its functions and submit it for review. Ultimately, you have the option to release it to the App Store after it is approved. For more information, see [Application Lifecycle Management](../../../application-store/app-lifecycle-management/).
 
-For a private repository, only users with required permissions are allowed to [add private repositories](../../../workspace-administration/app-repository/import-helm-repository/) in a workspace. Generally, the private repository is built based on object storage services, such as MinIO. After imported to Kube AI Hub, these private repositories serve as application pools to provide app templates.
+For a private repository, only users with required permissions are allowed to [add private repositories](../../../workspace-administration/app-repository/import-helm-repository/) in a tenant (workspace). Generally, the private repository is built based on object storage services, such as MinIO. After imported to Kube AI Hub, these private repositories serve as application pools to provide app templates.
 
 {{< notice note >}}
 
-[For individual apps that are uploaded as Helm charts](../../../workspace-administration/upload-helm-based-application/) to Kube AI Hub, they are displayed in the App Store together with built-in apps after approved and released. Besides, when you select app templates from private app repositories, you can also see **Current workspace** in the list, which stores these individual apps uploaded as Helm charts.
+[For individual apps that are uploaded as Helm charts](../../../workspace-administration/upload-helm-based-application/) to Kube AI Hub, they are displayed in the App Store together with built-in apps after approved and released. Besides, when you select app templates from private app repositories, you can also see **Current tenant (workspace)** in the list, which stores these individual apps uploaded as Helm charts.
 
 {{</ notice >}} 
 

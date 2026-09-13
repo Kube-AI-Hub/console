@@ -11,7 +11,7 @@ This section walks you through monitoring a sample web application. The applicat
 ## Prerequisites
 
 - Please make sure you [enable the OpenPitrix system](../../../../pluggable-components/app-store/).
-- You need to create a workspace, a project, and a user account for this tutorial. For more information, see [Create Workspaces, Projects, Users and Roles](../../../../quick-start/create-workspace-and-project/). The account needs to be a platform regular user and to be invited to the workspace with the `self-provisioner` role. Namely, create a user `workspace-self-provisioner` of the `self-provisioner` role, and use this account to create a project (for example, `test`). In this tutorial, you log in as `workspace-self-provisioner` and work in the project `test` in the workspace `demo-workspace`.
+- You need to create a tenant (workspace), a project, and a user account for this tutorial. For more information, see [Create Tenants (Workspaces), Projects, Users and Roles](../../../../quick-start/create-workspace-and-project/). The account needs to be a platform regular user and to be invited to the tenant (workspace) with the `self-provisioner` role. Namely, create a user `workspace-self-provisioner` of the `self-provisioner` role, and use this account to create a project (for example, `test`). In this tutorial, you log in as `workspace-self-provisioner` and work in the project `test` in the tenant (workspace) `demo-workspace`.
 
 - Knowledge of Helm charts and [PromQL](https://prometheus.io/docs/prometheus/latest/querying/examples/).
 
@@ -33,7 +33,7 @@ Find the source code in the folder `helm` in [kubesphere/prometheus-example-app]
 
 ### Step 3: Upload the Helm chart
 
-1. Go to the workspace **Overview** page of `demo-workspace` and navigate to **App Templates** under **App Management**.
+1. Go to the tenant (workspace) **Overview** page of `demo-workspace` and navigate to **App Templates** under **App Management**.
 
 2. Click **Create** and upload `prometheus-example-app-0.1.0.tgz`.
 

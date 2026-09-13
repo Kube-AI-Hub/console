@@ -176,7 +176,7 @@ NFS is incompatible with some applications, for example, Prometheus, which may r
 After you create a storage class, click the name of the storage class to go to its details page. On the details page, click **Edit YAML** to edit the manifest file of the storage class, or click **More** to select an operation from the drop-down menu:
 
 - **Set as Default Storage Class**: Set the storage class as the default storage class in the cluster. Only one default storage class is allowed in a Kube AI Hub cluster.
-- **Set Authorization Rule**: Set authorization rules so that the storage class can be accessed only in specific projects and workspaces.
+- **Set Authorization Rule**: Set authorization rules so that the storage class can be accessed only in specific projects and tenants (workspaces).
 - **Set Volume Operations**: Manage volume features, including: **Volume Cloning**, **Volume Snapshot Creation**, and **Volume Expansion**. Before enabling any features, you should contact your system administrator to confirm that the features are supported by the storage system.
 - **Set Auto Expansion**: Set the system to automatically expand volumes when the remaining volume space is lower than a threshold. You can also enable **Restart workload automatically**.
 - **Delete**: Delete the storage class.

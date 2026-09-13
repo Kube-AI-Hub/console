@@ -13,13 +13,13 @@ This tutorial demonstrates how to quickly deploy [Grafana](https://grafana.com/)
 ## Prerequisites
 
 - You have enabled [OpenPitrix (App Store)](../../../pluggable-components/app-store/).
-- You have completed the tutorial of [Create Workspaces, Projects, Users and Roles](../../../quick-start/create-workspace-and-project/). Namely, you must have a workspace, a project and two users (`ws-admin` and `project-regular`). `ws-admin` must be granted the role of `workspace-admin` in the workspace and `project-regular` must be granted the role of `operator` in the project.
+- You have completed the tutorial of [Create Tenants (Workspaces), Projects, Users and Roles](../../../quick-start/create-workspace-and-project/). Namely, you must have a tenant (workspace), a project and two users (`ws-admin` and `project-regular`). `ws-admin` must be granted the role of `workspace-admin` in the tenant (workspace) and `project-regular` must be granted the role of `operator` in the project.
 
 ## Hands-on Lab
 
 ### Step 1: Add an app repository
 
-1. Log in to the web console of Kube AI Hub as `ws-admin`. In your workspace, go to **App Repositories** under **App Management**, and then click **Add**.
+1. Log in to the web console of Kube AI Hub as `ws-admin`. In your tenant (workspace), go to **App Repositories** under **App Management**, and then click **Add**.
 
 2. In the displayed dialog box, enter `test-repo` for the app repository name and `https://charts.kubesphere.io/main` for the repository URL. Click **Validate** to verify the URL, set **Synchronization Interval** based on your needs, and click **OK**.
 
@@ -39,13 +39,13 @@ This tutorial demonstrates how to quickly deploy [Grafana](https://grafana.com/)
 
    **From App Store**: Choose built-in apps and apps uploaded individually as Helm charts.
 
-   **From App Templates**: Choose apps from private app repositories and the workspace app pool.
+   **From App Templates**: Choose apps from private app repositories and the tenant (workspace) app pool.
 
 3. Select `test-repo` from the drop-down list, which is the private app repository just uploaded.
 
    {{< notice note >}}
 
-   The option **Current workspace** in the list represents the workspace app pool, which contains apps uploaded as Helm charts. They are also part of app templates.
+   The option **Current tenant (workspace)** in the list represents the tenant (workspace) app pool, which contains apps uploaded as Helm charts. They are also part of app templates.
 
    {{</ notice >}} 
 

@@ -65,7 +65,7 @@ In **DevOps Project Roles**, there are three available built-in roles as shown b
 
    {{< notice note >}} 
 
-   The user must be invited to the DevOps project's workspace first.
+   The user must be invited to the DevOps project's tenant (workspace) first.
 
    {{</ notice >}} 
 

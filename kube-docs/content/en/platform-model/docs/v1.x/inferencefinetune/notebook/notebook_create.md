@@ -24,6 +24,7 @@ On the development instance creation page, fill in the following configuration:
 | **Pre-installed Image** | Select a pre-installed development environment image containing the required deep learning framework (e.g., PyTorch, TensorFlow) |
 | **Runtime Framework** | Select the development environment type: JupyterLab, VS Code, or Eclipse Theia |
 | **Region/Resource Config** | Select compute resource specifications (GPU model, VRAM size, CPU/memory configuration) |
+| **Compute project** | The public tenant can only select **space**; an enterprise tenant lists projects you can use. Notebooks are private by default; ordinary project members cannot open someone else's IDE |
 | **Replica Count** | Select the elastic replica range for the instance |
 
 After completing the configuration, click **Create Instance**.

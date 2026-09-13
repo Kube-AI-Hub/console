@@ -11,7 +11,7 @@ weight: 8540
 ## 准备工作
 
 - 您需要启用 [Kube AI Hub 告警系统](../../../pluggable-components/alerting/)。
-- 您需要创建一个用户 (`cluster-admin`) 并授予其 `clusters-admin` 角色。有关更多信息，请参见[创建企业空间、项目、用户和角色](../../../quick-start/create-workspace-and-project/#step-4-create-a-role)。
+- 您需要创建一个用户 (`cluster-admin`) 并授予其 `clusters-admin` 角色。有关更多信息，请参见[创建租户(企业空间)、项目、用户和角色](../../../quick-start/create-workspace-and-project/#step-4-create-a-role)。
 - 您已经创建节点级别的告警策略并已触发该告警。有关更多信息，请参考[告警策略（节点级别）](../alerting-policy/)。
 
 ## 查看告警消息

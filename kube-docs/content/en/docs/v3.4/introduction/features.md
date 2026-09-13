@@ -136,13 +136,13 @@ Records all activities by users, administrators, and other components that impac
 ### Cluster Settings
 
 - **Basic Information**: View cluster name, Kubernetes version, node count, and other basic details
-- **Visibility**: Control which workspaces can access the cluster
+- **Visibility**: Control which tenants (workspaces) can access the cluster
 - **Member Management**: Manage cluster-level user and role assignments
 - **Role Management**: Define custom cluster-level access roles and permission sets
 - **Log Receivers**: Configure log collection backends in cluster settings
 - **Gateway Settings**: Manage cluster or project-level ingress gateways
 
-## Tenant Management (Workspaces)
+## Tenant (Workspace) Management
 
 ### Tenant (Workspace) List
 
@@ -168,7 +168,7 @@ Add and manage users within the organization, configure permissions, roles, and 
 
 ### Platform Roles
 
-Control user access to platform resources, including cluster management, workspace management, and platform user management.
+Control user access to platform resources, including cluster management, tenant (workspace) management, and platform user management.
 
 ### Resource Specifications
 
@@ -179,6 +179,10 @@ Create and manage instance specifications including CPU, memory, disk, and GPU c
 Provides a built-in OAuth service, supporting external user access through multiple methods including LDAP, OIDC, CAS, and OAuth 2.0.
 
 ## Industry AI Model Platform
+
+### Tenants
+
+The Hub shares Console tenants (workspaces). The top bar switches the current tenant; the default is the **public tenant**. Admin numbers and lists count only the current tenant. See [Tenants and Compute Placement](/platform-model/docs/v1.x/tenancy/).
 
 ### Model Hub
 

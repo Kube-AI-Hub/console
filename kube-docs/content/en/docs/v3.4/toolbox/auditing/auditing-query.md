@@ -21,8 +21,8 @@ You need to enable [Kube AI Hub Auditing Logs](../../../pluggable-components/aud
 Any user has the permission to query auditing logs, while the logs that each user is able to see are different.
 
 - If a user has the permission to view resources in a project, it can see the auditing log that happens in this project, such as workload creation in the project.
-- If a user has the permission to list projects in a workspace, it can see the auditing log that happens in this workspace but not in projects, such as project creation in the workspace.
-- If a user has the permission to list projects in a cluster, it can see the auditing log that happens in this cluster but not in workspaces and projects, such as workspace creation in the cluster.
+- If a user has the permission to list projects in a tenant (workspace), it can see the auditing log that happens in this tenant (workspace) but not in projects, such as project creation in the tenant (workspace).
+- If a user has the permission to list projects in a cluster, it can see the auditing log that happens in this cluster but not in tenants (workspaces) and projects, such as tenant (workspace) creation in the cluster.
 
 {{</ notice >}} 
 
@@ -45,8 +45,8 @@ Any user has the permission to query auditing logs, while the logs that each use
          <td>Project where the operation happens. It supports exact query and fuzzy query.</td>
        </tr>
        <tr>
-         <td>Workspace</td>
-         <td>Workspace where the operation happens. It supports exact query and fuzzy query.</td>
+         <td>Tenant (Workspace)</td>
+         <td>Tenant (Workspace) where the operation happens. It supports exact query and fuzzy query.</td>
        </tr>
        <tr>
          <td>Resource Type</td>

@@ -10,7 +10,7 @@ This tutorial demonstrates how to configure Slack notifications and add channels
 
 ## Prerequisites
 
-You have an available [Slack](https://slack.com/) workspace.
+You have an available [Slack](https://slack.com/) tenant (workspace).
 
 ## Obtain a Slack OAuth Token
 
@@ -20,11 +20,11 @@ You need to create a Slack app first so that it can help you send notifications 
 
 2. On the **Your Apps** page, click **Create New App**.
 
-3. In the dialog that appears, enter your app name and select a Slack workspace for it. Click **Create App** to continue.
+3. In the dialog that appears, enter your app name and select a Slack tenant (workspace) for it. Click **Create App** to continue.
 
 4. From the left navigation bar, select **OAuth & Permissions** under **Features**. On the **Auth & Permissions** page, scroll down to **Scopes** and click **Add an OAuth Scope** under **Bot Token Scopes** and **User Token Scopes** respectively. Select the **chart:write** permission for both scopes.
 
-5. Scroll up to **OAuth Tokens & Redirect URLs** and click **Install to Workspace**. Grant the permission to access your workspace for the app and you can find created tokens under **OAuth Tokens for Your Team**.
+5. Scroll up to **OAuth Tokens & Redirect URLs** and click **Install to Tenant (Workspace)**. Grant the permission to access your tenant (workspace) for the app and you can find created tokens under **OAuth Tokens for Your Team**.
 
 ## Configure Slack Notifications on the Kube AI Hub Console
 

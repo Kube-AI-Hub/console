@@ -11,7 +11,7 @@ Kube AI Hub 3.4 提供集群级别的网关，使所有项目共用一个全局�
 
 ## 准备工作
 
-您需要创建一个拥有 `platform-admin` 角色的用户，例如：`admin`。有关更多信息，请参见[创建企业空间、项目、用户和平台角色](../../../quick-start/create-workspace-and-project/).
+您需要创建一个拥有 `platform-admin` 角色的用户，例如：`admin`。有关更多信息，请参见[创建租户(企业空间)、项目、用户和平台角色](../../../quick-start/create-workspace-and-project/).
 
 ## 创建集群网关
 

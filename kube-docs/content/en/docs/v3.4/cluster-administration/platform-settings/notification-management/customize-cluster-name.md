@@ -10,7 +10,7 @@ This document describes how to customize your cluster name in notification messa
 
 ## Prerequisites
 
-You need to have a user with the `platform-admin` role, for example, the `admin` user. For more information, see [Create Workspaces, Projects, Users and Roles](../../../../quick-start/create-workspace-and-project/).
+You need to have a user with the `platform-admin` role, for example, the `admin` user. For more information, see [Create Tenants (Workspaces), Projects, Users and Roles](../../../../quick-start/create-workspace-and-project/).
 
 ## Customize Cluster Name in Notification Messages
 

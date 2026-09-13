@@ -19,6 +19,7 @@ sectionLink:
     title: 快速入口
     description: 通过以下常用文档快速了解平台各项核心功能。
     list:
+      - /platform-model/docs/v1.x/tenancy/
       - /platform-model/docs/v1.x/model/
       - /platform-model/docs/v1.x/model/create_model
       - /platform-model/docs/v1.x/dataset/

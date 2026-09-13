@@ -24,10 +24,11 @@ On the dedicated instance creation page, fill in the following configuration, th
 | **Model ID** | The model identifier on the platform; defaults to the current model |
 | **Min / Max Replicas** | Replica range. When the minimum is **0**, the instance shuts down automatically after 1 hour with no requests |
 | **Region/Resource Config** | Select a compute specification. The page shows **Recommended Minimum GPU Memory**; cards below that value are marked **Low Memory**. A **multi-node** specification locks the replica count and cannot scale to 0 |
+| **Compute project** | The instance lands in this project namespace and consumes its quota. The public tenant can only select **space**; an enterprise tenant lists projects you can use. See [Compute Projects and Visibility](../../tenancy/compute_and_visibility) |
 | **Runtime Framework** | Choose the framework (vLLM, SGLang, TGI, or llama.cpp), then the framework version. Multi-node inference supports only vLLM and SGLang |
 | **Engine Args** | Collapsed. Tunable options for the selected framework version (for example max generation length or dtype). Values that contain `${GPU_NUM}` expand to the SKU per-replica card count. Unchanged fields without that placeholder are not written into the launch command |
 | **Quantization** | Shown when the model repository provides quantized files, such as GGUF or AWQ |
-| **Security Level** | **Public**: accessible without authentication; **Private**: requires authentication |
+| **Security Level** | **Public**: project members see the portal entry; the inference API does not need an access token. **Private**: only the creator sees the portal entry; the API needs an access token that is not checked against the project |
 
 ## Recommended Minimum GPU Memory
 
@@ -71,3 +72,4 @@ curl https://<instance-address>/v1/chat/completions \
 - [Use Dedicated Inference Instance](./endpoint_usage)
 - [Configure Inference Engines](./runtime_framework_admin)
 - [FAQ](./endpoint_faq)
+- [Compute Projects and Visibility](../../tenancy/compute_and_visibility)

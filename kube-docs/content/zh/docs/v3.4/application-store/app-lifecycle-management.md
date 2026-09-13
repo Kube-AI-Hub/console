@@ -8,7 +8,7 @@ weight: 14100
 
 Kube AI Hub 集成了 [OpenPitrix](https://github.com/openpitrix/openpitrix)（一个跨云管理应用程序的开源平台）来构建应用商店，管理应用程序的整个生命周期。应用商店支持两种应用程序部署方式：
 
-- **应用模板**：这种方式让开发者和独立软件供应商 (ISV) 能够与企业空间中的用户共享应用程序。您也可以在企业空间中导入第三方应用仓库。
+- **应用模板**：这种方式让开发者和独立软件供应商 (ISV) 能够与租户(企业空间)中的用户共享应用程序。您也可以在租户(企业空间)中导入第三方应用仓库。
 - **自制应用**：这种方式帮助用户使用多个微服务来快速构建一个完整的应用程序。Kube AI Hub 让用户可以选择现有服务或者创建新的服务，用于在一站式控制台上创建自制应用。
 
 本教程使用 [Redis](https://redis.io/) 作为示例应用程序，演示如何进行应用全生命周期管理，包括提交、审核、测试、发布、升级和下架。
@@ -16,7 +16,7 @@ Kube AI Hub 集成了 [OpenPitrix](https://github.com/openpitrix/openpitrix)（�
 ## 准备工作
 
 - 您需要启用 [Kube AI Hub 应用商店 (OpenPitrix)](../../pluggable-components/app-store/)。
-- 您需要创建一个企业空间、一个项目以及一个用户 (`project-regular`)。有关更多信息，请参见[创建企业空间、项目、用户和角色](../../quick-start/create-workspace-and-project/)。
+- 您需要创建一个租户(企业空间)、一个项目以及一个用户 (`project-regular`)。有关更多信息，请参见[创建租户(企业空间)、项目、用户和角色](../../quick-start/create-workspace-and-project/)。
 
 ## 动手实验
 
@@ -40,11 +40,11 @@ Kube AI Hub 集成了 [OpenPitrix](https://github.com/openpitrix/openpitrix)（�
 
 5. 再创建另一个用户 `isv`，把 `platform-regular` 角色授予它。
 
-6. 邀请上面创建好的两个帐户进入现有的企业空间，例如 `demo-workspace`，并授予它们 `workspace-admin` 角色。
+6. 邀请上面创建好的两个帐户进入现有的租户(企业空间)，例如 `demo-workspace`，并授予它们 `workspace-admin` 角色。
 
 ### 步骤二：上传和提交应用程序
 
-1. 以 `isv` 身份登录控制台，转到您的企业空间。您需要上传示例应用 Redis 至该企业空间，供后续使用。首先，下载应用 [Redis 11.3.4](https://github.com/kubesphere/tutorial/raw/master/tutorial%205%20-%20app-store/redis-11.3.4.tgz)，然后转到**应用模板**，点击**上传模板**。
+1. 以 `isv` 身份登录控制台，转到您的租户(企业空间)。您需要上传示例应用 Redis 至该租户(企业空间)，供后续使用。首先，下载应用 [Redis 11.3.4](https://github.com/kubesphere/tutorial/raw/master/tutorial%205%20-%20app-store/redis-11.3.4.tgz)，然后转到**应用模板**，点击**上传模板**。
 
    {{< notice note >}}
 
@@ -62,7 +62,7 @@ Kube AI Hub 集成了 [OpenPitrix](https://github.com/openpitrix/openpitrix)（�
 
    {{</ notice >}} 
 
-4. 成功上传后，模板列表中会列出应用，状态为**开发中**，意味着该应用正在开发中。上传的应用对同一企业空间下的所有成员均可见。
+4. 成功上传后，模板列表中会列出应用，状态为**开发中**，意味着该应用正在开发中。上传的应用对同一租户(企业空间)下的所有成员均可见。
 
 5. 点击列表中的 Redis 进入应用模板详情页面。您可以点击**编辑**来编辑该应用的基本信息。
 
@@ -109,7 +109,7 @@ Kube AI Hub 集成了 [OpenPitrix](https://github.com/openpitrix/openpitrix)（�
 
 应用获批后，`isv` 便可以将 Redis 应用程序发布至应用商店，让平台上的所有用户都能找到并部署该应用程序。
 
-1. 登出控制台，然后以 `isv` 身份重新登录 Kube AI Hub。转到您的企业空间，点击**应用模板**页面上的 Redis。在详情页面上展开版本菜单，然后点击**发布到商店**。在弹出的提示框中，点击**确定**以确认操作。
+1. 登出控制台，然后以 `isv` 身份重新登录 Kube AI Hub。转到您的租户(企业空间)，点击**应用模板**页面上的 Redis。在详情页面上展开版本菜单，然后点击**发布到商店**。在弹出的提示框中，点击**确定**以确认操作。
 
 2. 在**应用发布**下，您可以查看应用状态。**已上架**意味着它在应用商店中可用。
 
@@ -121,7 +121,7 @@ Kube AI Hub 集成了 [OpenPitrix](https://github.com/openpitrix/openpitrix)（�
 
    {{</ notice >}} 
 
-4. 现在，企业空间中的用户可以从应用商店中部署 Redis。要将应用部署至 Kubernetes，请点击应用转到**应用信息**页面，然后点击**安装**。
+4. 现在，租户(企业空间)中的用户可以从应用商店中部署 Redis。要将应用部署至 Kubernetes，请点击应用转到**应用信息**页面，然后点击**安装**。
 
    {{< notice note >}}
    
@@ -152,7 +152,7 @@ Kube AI Hub 集成了 [OpenPitrix](https://github.com/openpitrix/openpitrix)（�
 
 ### 步骤六：添加新版本
 
-要让企业空间用户能够更新应用，您需要先向 Kube AI Hub 添加新的应用版本。按照下列步骤为示例应用添加新版本。
+要让租户(企业空间)用户能够更新应用，您需要先向 Kube AI Hub 添加新的应用版本。按照下列步骤为示例应用添加新版本。
 
 1. 再次以 `isv` 身份登录 Kube AI Hub，点击**应用模板**，点击列表中的 Redis 应用。
 

@@ -113,4 +113,4 @@ helm uninstall opensearch-master -n kubesphere-logging-system && helm uninstall 
 
 2. In the pop-up window, you can see the time histogram of log counts, the cluster dropdown list, and the log search bar.
 
-3. Click the search bar and enter search conditions. You can search logs by message, workspace, project, resource type, resource name, reason, category, or time range (for example, enter the time range: last 10 minutes to search for logs in the last 10 minutes). Alternatively, click a bar in the time histogram and Kube AI Hub will display logs within that bar's time range.
+3. Click the search bar and enter search conditions. You can search logs by message, tenant (workspace), project, resource type, resource name, reason, category, or time range (for example, enter the time range: last 10 minutes to search for logs in the last 10 minutes). Alternatively, click a bar in the time histogram and Kube AI Hub will display logs within that bar's time range.

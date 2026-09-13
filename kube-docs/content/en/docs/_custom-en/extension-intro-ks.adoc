@@ -78,7 +78,7 @@
 
 .2+|Networking
 |Kube AI Hub Gateway
-|Kube AI Hub Gateway is an extension that aggregates services and manages external access to the Kube AI Hub platform. It has now formed a gateway system with three resource management dimensions: cluster, project, and workspace, supporting the management of cluster gateways, workspace gateways, and project gateways.
+|Kube AI Hub Gateway is an extension that aggregates services and manages external access to the Kube AI Hub platform. It has now formed a gateway system with three resource management dimensions: cluster, project, and tenant (workspace), supporting the management of cluster gateways, tenant (workspace) gateways, and project gateways.
 
 |Kube AI Hub Network
 |Manages network policies and pod IP pools for the cluster. Controls access to and from pods in the cluster and projects; creates pod IP pools and allocates IP addresses to pods from the IP pool.

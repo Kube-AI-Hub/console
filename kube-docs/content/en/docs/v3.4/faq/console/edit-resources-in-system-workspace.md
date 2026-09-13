@@ -6,7 +6,7 @@ linkTitle: 'Edit System Resources on the Console'
 Weight: 16520
 ---
 
-When you install Kube AI Hub, the workspace `system-workspace` is created where all Kube AI Hub system projects and Kubernetes system projects run. To avoid any misoperation on both systems, you are not allowed to edit resources in the workspace directly on the console. However, you can still make adjustments to resources using `kubectl`.
+When you install Kube AI Hub, the tenant (workspace) `system-workspace` is created where all Kube AI Hub system projects and Kubernetes system projects run. To avoid any misoperation on both systems, you are not allowed to edit resources in the tenant (workspace) directly on the console. However, you can still make adjustments to resources using `kubectl`.
 
 This tutorial demonstrates how to enable the editing function of `system-workspace` resources.
 

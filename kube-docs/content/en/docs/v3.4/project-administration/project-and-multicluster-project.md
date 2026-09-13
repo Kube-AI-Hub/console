@@ -14,19 +14,19 @@ This tutorial demonstrates how to manage projects and multi-cluster projects.
 
 ## Prerequisites
 
-- You need to create a workspace and a user (`project-admin`). The user must be invited to the workspace with the role of `workspace-self-provisioner`. For more information, see [Create Workspaces, Projects, Users and Roles](../../quick-start/create-workspace-and-project/).
+- You need to create a tenant (workspace) and a user (`project-admin`). The user must be invited to the tenant (workspace) with the role of `workspace-self-provisioner`. For more information, see [Create Tenants (Workspaces), Projects, Users and Roles](../../quick-start/create-workspace-and-project/).
 - You must enable the multi-cluster feature through [Direction Connection](../../multicluster-management/enable-multicluster/direct-connection/) or [Agent Connection](../../multicluster-management/enable-multicluster/agent-connection/) before you create a multi-cluster project.
 
 ## Projects
 
 ### Create a project
 
-1. Go to the **Projects** page of a workspace and click **Create** on the **Projects** tab.
+1. Go to the **Projects** page of a tenant (workspace) and click **Create** on the **Projects** tab.
 
     {{< notice note >}}
 
 - You can change the cluster where the project will be created on the **Cluster** drop-down menu. The list is only visible after you enable the multi-cluster feature.
-- If you cannot see the **Create** button, it means no cluster is available to use for your workspace. You need to contact the platform administrator or cluster administrator so that workspace resources can be created in the cluster. [To assign a cluster to a workspace](../../cluster-administration/cluster-settings/cluster-visibility-and-authorization/), the platform administrator or cluster administrator needs to edit **Cluster Visibility** on the **Cluster Management** page.
+- If you cannot see the **Create** button, it means no cluster is available to use for your tenant (workspace). You need to contact the platform administrator or cluster administrator so that tenant (workspace) resources can be created in the cluster. [To assign a cluster to a tenant (workspace)](../../cluster-administration/cluster-settings/cluster-visibility-and-authorization/), the platform administrator or cluster administrator needs to edit **Cluster Visibility** on the **Cluster Management** page.
 
     {{</ notice >}}
 
@@ -58,12 +58,12 @@ A project cannot be recovered once deleted and resources in the project will be 
 
 ### Create a multi-cluster project
 
-1. Go to the **Projects** page of a workspace, click the **Multi-cluster Projects** tab and click **Create**.
+1. Go to the **Projects** page of a tenant (workspace), click the **Multi-cluster Projects** tab and click **Create**.
 
     {{< notice note >}}
 
-- If you cannot see the **Create** button, it means no cluster is available to use for your workspace. You need to contact the platform administrator or cluster administrator so that workspace resources can be created in the cluster. [To assign a cluster to a workspace](../../cluster-administration/cluster-settings/cluster-visibility-and-authorization/), the platform administrator or cluster administrator needs to edit **Cluster Visibility** on the **Cluster Management** page.
-- Make sure at least two clusters are assigned to your workspace.
+- If you cannot see the **Create** button, it means no cluster is available to use for your tenant (workspace). You need to contact the platform administrator or cluster administrator so that tenant (workspace) resources can be created in the cluster. [To assign a cluster to a tenant (workspace)](../../cluster-administration/cluster-settings/cluster-visibility-and-authorization/), the platform administrator or cluster administrator needs to edit **Cluster Visibility** on the **Cluster Management** page.
+- Make sure at least two clusters are assigned to your tenant (workspace).
 
     {{</ notice >}}
 

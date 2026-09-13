@@ -24,7 +24,7 @@ The Kube AI Hub Console is built with React and MobX, using a Node.js service la
 |---|---|
 | ks-apiserver | Unified API interface for cluster management, handling inter-module communication and security control |
 | API Gateway | Authentication, request routing, and proxying; supports LDAP/AD/SSO integration |
-| ks-controller-manager | Implements platform business logic, e.g., syncing permissions when a workspace is created |
+| ks-controller-manager | Implements platform business logic, e.g., syncing permissions when a tenant (workspace) is created |
 | GPU Scheduler | Heterogeneous GPU scheduler handling vGPU virtualization slicing and multi-card parallel dispatch |
 
 ## Kubernetes Layer

@@ -13,10 +13,10 @@ weight: 11440
 ## 准备工作
 
 - 准备三个已安装 Kube AI Hub 的 Kubernetes 集群，选择一个集群作为主集群，其余两个作为成员集群。更多关于集群角色与如何在 Kube AI Hub 上启用多集群环境，请参见[多集群管理](../../../multicluster-management/)。
-- 将成员集群设置为[公开集群](../../../cluster-administration/cluster-settings/cluster-visibility-and-authorization/#将集群设置为公开集群)。或者，您可以[在创建企业空间之后设置集群可见性](../../../cluster-administration/cluster-settings/cluster-visibility-and-authorization/#在创建企业空间后设置集群可见性)。
+- 将成员集群设置为[公开集群](../../../cluster-administration/cluster-settings/cluster-visibility-and-authorization/#将集群设置为公开集群)。或者，您可以[在创建租户(企业空间)之后设置集群可见性](../../../cluster-administration/cluster-settings/cluster-visibility-and-authorization/#在创建企业空间后设置集群可见性)。
 - 在主集群上[启用 Kube AI Hub DevOps 系统](../../../pluggable-components/devops/)。
 - 整合 SonarQube 进入流水线。有关更多信息，请参见[将 SonarQube 集成到流水线](../../how-to-integrate/sonarqube/)。
-- 在主集群创建四个帐户： `ws-manager`、`ws-admin`、`project-admin` 和 `project-regular`，然后授予他们不同的角色。有关详细信息，请参见[创建企业空间、项目、用户和角色](../../../quick-start/create-workspace-and-project/#step-1-create-an-account)。
+- 在主集群创建四个帐户： `ws-manager`、`ws-admin`、`project-admin` 和 `project-regular`，然后授予他们不同的角色。有关详细信息，请参见[创建租户(企业空间)、项目、用户和角色](../../../quick-start/create-workspace-and-project/#step-1-create-an-account)。
 
 ## 工作流程概述
 
@@ -44,15 +44,15 @@ weight: 11440
 
 {{</ notice >}}
 
-### 步骤 2：创建企业空间
+### 步骤 2：创建租户(企业空间)
 
-1. 使用 `ws-manager` 帐户登录主集群的 Web 控制台。在**企业空间**页面中，点击**创建**。
+1. 使用 `ws-manager` 帐户登录主集群的 Web 控制台。在**租户(企业空间)**页面中，点击**创建**。
 
-2. 在**基本信息**页面中，将企业空间命名为 `devops-multicluster`，选择 `ws-admin` 为**管理员**，然后点击**下一步**。
+2. 在**基本信息**页面中，将租户(企业空间)命名为 `devops-multicluster`，选择 `ws-admin` 为**管理员**，然后点击**下一步**。
 
 3. 在**集群设置**页面，选择所有集群（总共三个集群），然后点击**创建**。
 
-4. 创建的企业空间会显示在列表。您需要登出控制台并以 `ws-admin` 身份重新登录，以邀请 `project-admin` 与 `project-regular` 至企业空间，然后分别授予他们 `work-space-self-provisioner` 和 `workspace-viwer` 角色。有关更多信息，请参见[创建企业空间、项目、用户和角色](../../../quick-start/create-workspace-and-project/#step-2-create-a-workspace)。
+4. 创建的租户(企业空间)会显示在列表。您需要登出控制台并以 `ws-admin` 身份重新登录，以邀请 `project-admin` 与 `project-regular` 至租户(企业空间)，然后分别授予他们 `work-space-self-provisioner` 和 `workspace-viwer` 角色。有关更多信息，请参见[创建租户(企业空间)、项目、用户和角色](../../../quick-start/create-workspace-and-project/#step-2-create-a-workspace)。
 
 ### 步骤 3：创建 DevOps 项目
 
@@ -66,11 +66,11 @@ weight: 11440
 
    {{</ notice >}}
 
-3. 创建的 DevOps 项目将显示在列表中。请确保邀请用户 `project-regular` 至这个项目，并赋予 `operator` 角色。有关更多信息，请参见[创建企业空间、项目、用户和角色](../../../quick-start/create-workspace-and-project/#step-1-create-an-account)。
+3. 创建的 DevOps 项目将显示在列表中。请确保邀请用户 `project-regular` 至这个项目，并赋予 `operator` 角色。有关更多信息，请参见[创建租户(企业空间)、项目、用户和角色](../../../quick-start/create-workspace-and-project/#step-1-create-an-account)。
 
 ### 步骤 4：在集群上创建项目
 
-提前创建如下表所示的项目。请确保邀请 `project-regular` 用户到这些项目中，并赋予 `operator` 角色。有关更多信息，请参见[创建企业空间、项目、用户和角色](../../../quick-start/create-workspace-and-project/#step-1-create-an-account)。
+提前创建如下表所示的项目。请确保邀请 `project-regular` 用户到这些项目中，并赋予 `operator` 角色。有关更多信息，请参见[创建租户(企业空间)、项目、用户和角色](../../../quick-start/create-workspace-and-project/#step-1-create-an-account)。
 
 | 集群名 | 用途 | 项目名                 |
 | ------ | ---- | ---------------------- |

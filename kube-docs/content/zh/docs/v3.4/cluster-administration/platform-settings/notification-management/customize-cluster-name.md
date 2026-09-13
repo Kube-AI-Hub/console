@@ -10,7 +10,7 @@ weight: 8721
 
 ## 准备工作
 
-您需要有一个具有 `platform-admin` 角色的用户，例如 `admin` 用户。有关更多信息，请参阅[创建企业空间、项目、用户和角色](../../../../quick-start/create-workspace-and-project/)。
+您需要有一个具有 `platform-admin` 角色的用户，例如 `admin` 用户。有关更多信息，请参阅[创建租户(企业空间)、项目、用户和角色](../../../../quick-start/create-workspace-and-project/)。
 
 ## 自定义通知消息中的集群名称
 

@@ -13,7 +13,7 @@ weight: 14350
 ## 准备工作
 
 - 请确保[已启用 OpenPitrix 系统](../../../pluggable-components/app-store/)。
-- 您需要创建一个企业空间、一个项目和一个用户供本教程操作使用。本教程中，以 `admin` 身份在企业空间 `demo` 中的 `demo-project` 项目中进行操作。有关更多信息，请参见[创建企业空间、项目、用户和角色](../../../quick-start/create-workspace-and-project/)。
+- 您需要创建一个租户(企业空间)、一个项目和一个用户供本教程操作使用。本教程中，以 `admin` 身份在租户(企业空间) `demo` 中的 `demo-project` 项目中进行操作。有关更多信息，请参见[创建租户(企业空间)、项目、用户和角色](../../../quick-start/create-workspace-and-project/)。
 - 请确保 Kube AI Hub 项目网关已开启外网访问。有关更多信息，请参见[项目网关](../../../project-administration/project-gateway/)。
 
 ## 动手实验
@@ -22,7 +22,7 @@ weight: 14350
 
 1. 登录 Kube AI Hub 的 Web 控制台。
 
-2. 在 `demo` 企业空间中，进入**应用管理**下的**应用仓库**页面，点击**添加**，弹出仓库配置对话框。
+2. 在 `demo` 租户(企业空间)中，进入**应用管理**下的**应用仓库**页面，点击**添加**，弹出仓库配置对话框。
 
 3. 输入仓库名称和仓库 URL。
 

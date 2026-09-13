@@ -12,7 +12,7 @@ This document describes how to configure a DingTalk conversation or chatbot to r
 
 ## Prerequisites
 
-- You need to have a user with the `platform-admin` role, for example, the `admin` user. For more information, see [Create Workspaces, Projects, Users and Roles](../../../../quick-start/create-workspace-and-project/).
+- You need to have a user with the `platform-admin` role, for example, the `admin` user. For more information, see [Create Tenants (Workspaces), Projects, Users and Roles](../../../../quick-start/create-workspace-and-project/).
 - You need to have a DingTalk account.
 - You need to create an applet on [DingTalk Admin Panel](https://oa.dingtalk.com/index.htm#/microApp/microAppList) and make necessary configurations according to [DingTalk API documentation](https://developers.dingtalk.com/document/app/create-group-session).
 

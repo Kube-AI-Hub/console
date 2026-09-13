@@ -4,14 +4,14 @@
 |Parameter |Description
 
 |CPU Limit
-|Maximum sum of CPU limits for all containers running in a workspace on a single cluster.
+|Maximum sum of CPU limits for all containers running in a tenant (workspace) on a single cluster.
 
 |CPU Request
-|Maximum sum of CPU reservations for all containers running in a workspace on a single cluster.
+|Maximum sum of CPU reservations for all containers running in a tenant (workspace) on a single cluster.
 
 |Memory Limit
-|Maximum sum of memory limits for all containers running in a workspace on a single cluster.
+|Maximum sum of memory limits for all containers running in a tenant (workspace) on a single cluster.
 
 |Memory Request
-|Maximum sum of memory reservations for all containers running in a workspace on a single cluster.
+|Maximum sum of memory reservations for all containers running in a tenant (workspace) on a single cluster.
 |===

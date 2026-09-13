@@ -17,12 +17,12 @@ This tutorial demonstrates how to deploy Litmus on Kube AI Hub and create chaos 
 
 ## Prerequisites
 - You need to enable the [Kube AI Hub App Store (OpenPitrix)](https://v3-1.docs.kubesphere.io/docs/pluggable-components/app-store/).
-- You need to create a workspace, a project, and two accounts (`ws-admin` and `project-regular`). For more information, see [Create Workspaces, Projects, Accounts, and Roles](https://v3-1.docs.kubesphere.io/docs/quick-start/create-workspace-and-project/).
+- You need to create a tenant (workspace), a project, and two accounts (`ws-admin` and `project-regular`). For more information, see [Create Tenants (Workspaces), Projects, Accounts, and Roles](https://v3-1.docs.kubesphere.io/docs/quick-start/create-workspace-and-project/).
 
 ## Hands-on Lab
 
 ### Step 1: Add an app repository
-1. In your workspace, go to **App Repositories** under **App Management**, and then click **Add**.
+1. In your tenant (workspace), go to **App Repositories** under **App Management**, and then click **Add**.
 
 2. In the dialog that appears, set a name for the repository (for example, `litmus`) and enter the URL `https://litmuschaos.github.io/litmus-helm/`. Click **Validate** to verify the URL. Click **OK** to continue.
 
@@ -35,7 +35,7 @@ This tutorial demonstrates how to deploy Litmus on Kube AI Hub and create chaos 
 
    - **From App Store**: Select apps from the official APP Store of Kubephere.
 
-   - **From App Template**: Select apps from workspace app templates and the third-party Helm app templates of App Repository.
+   - **From App Template**: Select apps from tenant (workspace) app templates and the third-party Helm app templates of App Repository.
 
 3. In the drop-down list, choose `litmus`, and then choose `litmus-2-0-0-beta`.
 

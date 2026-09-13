@@ -17,7 +17,7 @@ This tutorial demonstrates how to manage roles and members in a project. At the 
 
 ## Prerequisites
 
-At least one project has been created, such as `demo-project`. Besides, you need a user of the `admin` role (for example, `project-admin`) at the project level. For more information, see [Create Workspaces, Projects, Users and Roles](../../quick-start/create-workspace-and-project/).
+At least one project has been created, such as `demo-project`. Besides, you need a user of the `admin` role (for example, `project-admin`) at the project level. For more information, see [Create Tenants (Workspaces), Projects, Users and Roles](../../quick-start/create-workspace-and-project/).
 
 ## Built-in Roles
 

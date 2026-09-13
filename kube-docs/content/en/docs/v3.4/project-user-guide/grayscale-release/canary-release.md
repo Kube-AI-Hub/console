@@ -16,7 +16,7 @@ This method serves as an efficient way to test performance and reliability of a 
 
 - You need to enable [Kube AI Hub Service Mesh](../../../pluggable-components/service-mesh/).
 - You need to enable [Kube AI Hub Logging](../../../pluggable-components/logging/) so that you can use the Tracing feature.
-- You need to create a workspace, a project and a user (`project-regular`). The user must be invited to the project with the role of `operator`. For more information, see [Create Workspaces, Projects, Users and Roles](../../../quick-start/create-workspace-and-project/).
+- You need to create a tenant (workspace), a project and a user (`project-regular`). The user must be invited to the project with the role of `operator`. For more information, see [Create Tenants (Workspaces), Projects, Users and Roles](../../../quick-start/create-workspace-and-project/).
 - You need to enable **Application Governance** and have an available app so that you can implement the canary release for it. The sample app used in this tutorial is Bookinfo. For more information, see [Deploy and Access Bookinfo](../../../quick-start/deploy-bookinfo-to-k8s/).
 
 ## Step 1: Create a Canary Release Job

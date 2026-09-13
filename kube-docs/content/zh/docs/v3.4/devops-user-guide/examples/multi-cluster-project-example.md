@@ -8,11 +8,11 @@ weight: 11420
 
 ## 准备工作
 
-- 您需要[启用多集群功能](../../../multicluster-management/)并创建一个多集群企业空间。
+- 您需要[启用多集群功能](../../../multicluster-management/)并创建一个多集群租户(企业空间)。
 - 您需要有一个 [Docker Hub](https://hub.docker.com/) 帐户。
 - 您需要在主集群上[启用 Kube AI Hub DevOps 系统](../../../pluggable-components/devops/)。
 - 您需要使用具有 `workspace-self-provisioner` 角色的用户（例如 `project-admin`）创建一个多集群项目，并在主集群上创建一个 DevOps 项目。本教程中的多集群项目创建于主集群和一个成员集群上。
-- 您需要邀请一个用户（例如 `project-regular`）至 DevOps 项目中，赋予 `operator` 角色。有关更多信息，请参见[创建企业空间、项目、用户和角色](../../../quick-start/create-workspace-and-project/)、[多集群管理](../../../multicluster-management/)和[多集群项目](../../../project-administration/project-and-multicluster-project/#多集群项目)。
+- 您需要邀请一个用户（例如 `project-regular`）至 DevOps 项目中，赋予 `operator` 角色。有关更多信息，请参见[创建租户(企业空间)、项目、用户和角色](../../../quick-start/create-workspace-and-project/)、[多集群管理](../../../multicluster-management/)和[多集群项目](../../../project-administration/project-and-multicluster-project/#多集群项目)。
 
 ## 创建 Docker Hub 访问令牌 (Token)
 
@@ -77,7 +77,7 @@ weight: 11420
        DOCKERHUB_CREDENTIAL = credentials('dockerhub')
        // 您在 Kube AI Hub 控制台上创建的 kubeconfig 凭证 ID
        KUBECONFIG_CREDENTIAL_ID = 'kubeconfig'
-       // 您企业空间中的多集群项目名称
+       // 您租户(企业空间)中的多集群项目名称
        MULTI_CLUSTER_PROJECT_NAME = 'demo-multi-cluster'
        // 您用来部署应用的成员集群名称
        // 本教程中，应用部署在主集群和一个成员集群上

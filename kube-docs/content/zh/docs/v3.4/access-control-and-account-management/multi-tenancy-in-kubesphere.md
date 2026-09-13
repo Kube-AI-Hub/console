@@ -26,9 +26,9 @@ Kubernetes 解决了应用编排、容器调度的难题，极大地提高了资
 
 ![multi-tenancy-architecture](/images/docs/v3.x/access-control-and-account-management/multi-tenancy/multi-tenancy-architecture-zh.svg)
 
-在 Kube AI Hub 中[企业空间](../../workspace-administration/what-is-workspace/)是最小的租户单元，企业空间提供了跨集群、跨项目（即 Kubernetes 中的命名空间）共享资源的能力。企业空间中的成员可以在授权集群中创建项目，并通过邀请授权的方式参与项目协同。
+在 Kube AI Hub 中[租户(企业空间)](../../workspace-administration/what-is-workspace/)是最小的租户单元，对应 Workspace 资源，提供了跨集群、跨项目（即 Kubernetes 中的命名空间）共享资源的能力。租户(企业空间)中的成员可以在授权集群中创建项目，并通过邀请授权的方式参与项目协同。行业大模型平台使用同一套租户：默认公共租户 `public`，企业租户在控制台创建。详见 [租户与算力归属](/platform-model/docs/v1.x/tenancy/)。
 
-**用户**是 Kube AI Hub 的帐户实例，可以被设置为平台层面的管理员参与集群的管理，也可以被添加到企业空间中参与项目协同。
+**用户**是 Kube AI Hub 的帐户实例，可以被设置为平台层面的管理员参与集群的管理，也可以被添加到租户(企业空间)中参与项目协同。
 
 多级的权限控制和资源配额限制是 Kube AI Hub 中资源隔离的基础，奠定了多租户最基本的形态。
 
@@ -36,15 +36,15 @@ Kubernetes 解决了应用编排、容器调度的难题，极大地提高了资
 
 与 Kubernetes 相同，Kube AI Hub 通过 RBAC 对用户的权限加以控制，实现逻辑层面的资源隔离。
 
-Kube AI Hub 中的权限控制分为平台、企业空间、项目三个层级，通过角色来控制用户在不同层级的资源访问权限。
+Kube AI Hub 中的权限控制分为平台、租户(企业空间)、项目三个层级，通过角色来控制用户在不同层级的资源访问权限。
 
-1. [平台角色](../../quick-start/create-workspace-and-project/)：主要控制用户对平台资源的访问权限，如集群的管理、企业空间的管理、平台用户的管理等。
-2. [企业空间角色](../../workspace-administration/role-and-member-management/)：主要控制企业空间成员在企业空间下的资源访问权限，如企业空间下项目、DevOps 项目的管理等。
+1. [平台角色](../../quick-start/create-workspace-and-project/)：主要控制用户对平台资源的访问权限，如集群的管理、租户(企业空间)的管理、平台用户的管理等。
+2. [租户(企业空间)角色](../../workspace-administration/role-and-member-management/)：主要控制租户(企业空间)成员在租户(企业空间)下的资源访问权限，如租户(企业空间)下项目、DevOps 项目的管理等。
 3. [项目角色](../../project-administration/role-and-member-management/)：主要控制项目下资源的访问权限，如工作负载的管理、流水线的管理等。
 
 ### 网络隔离
 
-除了逻辑层面的资源隔离，Kube AI Hub 中还可以针对企业空间和项目设置[网络隔离策略](../../pluggable-components/network-policy/)。
+除了逻辑层面的资源隔离，Kube AI Hub 中还可以针对租户(企业空间)和项目设置[网络隔离策略](../../pluggable-components/network-policy/)。
 
 ### 操作审计
 

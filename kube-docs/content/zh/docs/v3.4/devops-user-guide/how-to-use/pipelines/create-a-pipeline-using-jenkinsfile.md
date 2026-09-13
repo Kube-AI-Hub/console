@@ -20,7 +20,7 @@ Kube AI Hub 中可以创建两种类型的流水线：一种是本教程中介�
 
 - 您需要有一个 [Docker Hub](https://hub.docker.com/) 帐户和一个 [GitHub](https://github.com/) 帐户。
 - 您需要[启用 Kube AI Hub DevOps 系统](../../../../pluggable-components/devops/)。
-- 您需要创建一个企业空间、一个 DevOps 项目和一个用户 (`project-regular`)，需要邀请该用户至 DevOps 项目中并赋予 `operator` 角色。如果尚未准备就绪，请参见[创建企业空间、项目、用户和角色](../../../../quick-start/create-workspace-and-project/)。
+- 您需要创建一个租户(企业空间)、一个 DevOps 项目和一个用户 (`project-regular`)，需要邀请该用户至 DevOps 项目中并赋予 `operator` 角色。如果尚未准备就绪，请参见[创建租户(企业空间)、项目、用户和角色](../../../../quick-start/create-workspace-and-project/)。
 - 您需要设置 CI 专用节点用于运行流水线。请参考[为依赖项缓存设置 CI 节点](../../../how-to-use/devops-settings/set-ci-node/)。
 - 您需要安装和配置 SonarQube。请参考[将 SonarQube 集成到流水线](../../../how-to-integrate/sonarqube/)。如果您跳过这一部分，则没有下面的 **SonarQube 分析**阶段。
 
@@ -108,11 +108,11 @@ Kube AI Hub 中可以创建两种类型的流水线：一种是本教程中介�
 
 {{< notice note >}}
 
-您需要提前创建 `project-admin` 帐户，用作 CI/CD 流水线的审核者。有关更多信息，请参见[创建企业空间、项目、用户和角色](../../../../quick-start/create-workspace-and-project/)。
+您需要提前创建 `project-admin` 帐户，用作 CI/CD 流水线的审核者。有关更多信息，请参见[创建租户(企业空间)、项目、用户和角色](../../../../quick-start/create-workspace-and-project/)。
 
 {{</ notice >}}
 
-1. 以 `project-admin` 身份登录 Kube AI Hub。在您创建 DevOps 项目的企业空间中创建以下两个项目。请确保邀请 `project-regular` 帐户至这两个项目中并赋予 `operator` 角色。
+1. 以 `project-admin` 身份登录 Kube AI Hub。在您创建 DevOps 项目的租户(企业空间)中创建以下两个项目。请确保邀请 `project-regular` 帐户至这两个项目中并赋予 `operator` 角色。
 
    | 项目名称               | 别名                    |
    | ---------------------- | ----------------------- |

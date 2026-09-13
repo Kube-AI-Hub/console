@@ -16,7 +16,7 @@ The following parameters are required when creating an application space:
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
-| Owner | Yes | Defaults to the current user; can be switched to an organization you belong to |
+| Owner | Yes | Defaults to the current user; can be switched to an organization you belong to. Personal spaces use the current tenant |
 | Space English Name | Yes | 2–64 characters, must start with a letter, end with a letter or number, only `[a-zA-Z0-9-_.]` allowed, no consecutive `-`, `_`, or `.` |
 | Nickname | No | Optional friendly name |
 | License | Yes | Select an appropriate open-source license from the dropdown |
@@ -26,9 +26,10 @@ The following parameters are required when creating an application space:
 | Docker Template | Docker only | Shown when Docker SDK is selected; choose from platform-provided templates |
 | Cluster | Yes | Select the deployment compute cluster |
 | Cloud Resource | Yes | Select the compute resource specification (CPU/GPU) based on the chosen cluster |
+| Compute project | Yes | The public tenant can only select **space**; an enterprise tenant lists projects you can use |
 | Driver Version | GPU + Gradio/Streamlit only | Shown when GPU resource is selected with Gradio or Streamlit SDK; options: `11.8.0` or `12.1.0` |
 | Environment Variables | No | Optional key-value pairs, supports plain variables and encrypted secrets |
-| Visibility | Yes | **Public**: visible to all users; **Private**: visible only to you and organization members |
+| Visibility | Yes | **Public**: members of the compute project can see the portal entry; opening the URL does not add a project check. **Private**: visible only to you |
 
 ### SDK Types
 

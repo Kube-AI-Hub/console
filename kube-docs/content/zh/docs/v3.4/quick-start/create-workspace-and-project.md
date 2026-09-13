@@ -1,12 +1,12 @@
 ---
-title: "创建企业空间、项目、用户和平台角色"
-keywords: 'Kube AI Hub, Kubernetes, 多租户, 企业空间, 帐户, 平台角色, 项目'
+title: "创建租户(企业空间)、项目、用户和平台角色"
+keywords: 'Kube AI Hub, Kubernetes, 多租户, 租户(企业空间), 帐户, 平台角色, 项目'
 description: '了解如何利用 Kube AI Hub 中的多租户功能在不同级别进行细粒度访问控制。'
-linkTitle: "创建企业空间、项目、用户和平台角色"
+linkTitle: "创建租户(企业空间)、项目、用户和平台角色"
 weight: 2300
 ---
 
-本快速入门演示如何创建企业空间、用户和平台角色。同时，您将学习如何在企业空间中创建项目和 DevOps 项目，用于运行工作负载。完成本教程后，您将熟悉 Kube AI Hub 的多租户管理系统，并使用本教程中创建的资源（例如企业空间和帐户等）完成其他教程中的操作。
+本快速入门演示如何创建租户(企业空间)、用户和平台角色。同时，您将学习如何在租户(企业空间)中创建项目和 DevOps 项目，用于运行工作负载。完成本教程后，您将熟悉 Kube AI Hub 的多租户管理系统，并使用本教程中创建的资源（例如租户(企业空间)和帐户等）完成其他教程中的操作。
 
 ## 准备工作
 
@@ -14,11 +14,11 @@ Kube AI Hub 需要安装在您的机器中。
 
 ## 架构
 
-Kube AI Hub 的多租户系统分**三个**层级，即集群、企业空间和项目。Kube AI Hub 中的项目等同于 Kubernetes 的[命名空间](https://kubernetes.io/zh/docs/concepts/overview/working-with-objects/namespaces/)。
+Kube AI Hub 的多租户系统分**三个**层级，即集群、租户(企业空间)和项目。Kube AI Hub 中的项目等同于 Kubernetes 的[命名空间](https://kubernetes.io/zh/docs/concepts/overview/working-with-objects/namespaces/)。
 
-您需要创建一个新的[企业空间](../../workspace-administration/what-is-workspace/)进行操作，而不是使用系统企业空间，系统企业空间中运行着系统资源，绝大部分仅供查看。出于安全考虑，强烈建议给不同的租户授予不同的权限在企业空间中进行协作。
+您需要创建一个新的[租户(企业空间)](../../workspace-administration/what-is-workspace/)进行操作，而不是使用系统租户 `system-workspace`。`system-workspace` 中运行着系统资源，绝大部分仅供查看。行业大模型平台的默认上下文是 **公共租户** `public`，与 `system-workspace` 不是同一个对象。出于安全考虑，强烈建议给不同的业务团队授予不同的权限在租户(企业空间)中进行协作。
 
-您可以在一个 Kube AI Hub 集群中创建多个企业空间，每个企业空间下可以创建多个项目。Kube AI Hub 为每个级别默认设有多个内置角色。此外，您还可以创建拥有自定义权限的角色。Kube AI Hub 多层次结构适用于具有不同团队或组织以及每个团队中需要不同角色的企业用户。
+您可以在一个 Kube AI Hub 集群中创建多个租户(企业空间)，每个租户(企业空间)下可以创建多个项目。Kube AI Hub 为每个级别默认设有多个内置角色。此外，您还可以创建拥有自定义权限的角色。Kube AI Hub 多层次结构适用于具有不同团队或组织以及每个团队中需要不同角色的企业用户。
 
 ## 动手实验
 
@@ -42,12 +42,12 @@ Kube AI Hub 的多租户系统分**三个**层级，即集群、企业空间和�
        </tr>
        <tr>
          <td><code>platform-self-provisioner</code></td>
-         <td>创建企业空间并成为所创建企业空间的管理员。</td>
+         <td>创建租户(企业空间)并成为所创建租户(企业空间)的管理员。</td>
        </tr>
        </tr>
        <tr>
          <td><code>platform-regular</code></td>
-         <td>平台普通用户，在被邀请加入企业空间或集群之前没有任何资源操作权限。</td>
+         <td>平台普通用户，在被邀请加入租户(企业空间)或集群之前没有任何资源操作权限。</td>
        </tr>
    <tr>
          <td><code>platform-admin</code></td>
@@ -65,7 +65,7 @@ Kube AI Hub 的多租户系统分**三个**层级，即集群、企业空间和�
    完成后，点击**确定**。新创建的用户将显示在**用户**页面。
 
    {{< notice note >}}
-   如果您在此处未指定**平台角色**，该用户将无法执行任何操作。您需要在创建企业空间后，将该用户邀请至企业空间。
+   如果您在此处未指定**平台角色**，该用户将无法执行任何操作。您需要在创建租户(企业空间)后，将该用户邀请至租户(企业空间)。
    {{</ notice >}}
 
 4. 重复以上的步骤创建新用户，这些用户将在其他的教程中使用。
@@ -86,7 +86,7 @@ Kube AI Hub 的多租户系统分**三个**层级，即集群、企业空间和�
        <tr>
          <td><code>ws-admin</code></td>
          <td><code>platform-regular</code></td>
-         <td>被邀请到企业空间后，管理该企业空间中的所有资源（在此示例中，此用户用于邀请新成员加入该企业空间）。</td>
+         <td>被邀请到租户(企业空间)后，管理该租户(企业空间)中的所有资源（在此示例中，此用户用于邀请新成员加入该租户(企业空间)）。</td>
        </tr><tr>
          <td><code>project-admin</code></td>
          <td><code>platform-regular</code></td>
@@ -106,41 +106,41 @@ Kube AI Hub 的多租户系统分**三个**层级，即集群、企业空间和�
    您可以点击用户名称后的 <img src="/images/docs/v3.x/common-icons/three-dots.png" width="15" /> 图标选择启用或禁用某个用户。您也可以勾选多个用户进行批量操作。
 
    {{</ notice >}} 
-### 步骤 2：创建企业空间
+### 步骤 2：创建租户(企业空间) {#step-2-create-a-workspace}
 
-作为管理项目、DevOps 项目和组织成员的基本逻辑单元，企业空间是 Kube AI Hub 多租户系统的基础。
+作为管理项目、DevOps 项目和组织成员的基本逻辑单元，租户(企业空间)是 Kube AI Hub 多租户系统的基础。
 
-1. 在左侧导航栏，选择**企业空间**。企业空间列表中已列出默认企业空间 **system-workspace**，该企业空间包含所有系统项目。其中运行着与系统相关的组件和服务，您无法删除该企业空间。
+1. 在左侧导航栏，选择**租户(企业空间)**。租户(企业空间)列表中已列出默认租户(企业空间) **system-workspace**，该租户(企业空间)包含所有系统项目。其中运行着与系统相关的组件和服务，您无法删除该租户(企业空间)。
 
-2. 在企业空间列表页面，点击**创建**，输入企业空间的名称（例如 **demo-workspace**），并将用户 `ws-admin` 设置为企业空间管理员。完成后，点击**创建**。
+2. 在租户(企业空间)列表页面，点击**创建**，输入租户(企业空间)的名称（例如 **demo-workspace**），并将用户 `ws-admin` 设置为租户(企业空间)管理员。完成后，点击**创建**。
 
    {{< notice note >}}
 
-   如果您已启用[多集群功能](../../multicluster-management/)，您需要为企业空间[分配一个或多个可用集群](../../cluster-administration/cluster-settings/cluster-visibility-and-authorization/#在创建企业空间时选择可用集群)，以便项目可以在集群中创建。
+   如果您已启用[多集群功能](../../multicluster-management/)，您需要为租户(企业空间)[分配一个或多个可用集群](../../cluster-administration/cluster-settings/cluster-visibility-and-authorization/#在创建企业空间时选择可用集群)，以便项目可以在集群中创建。
 
    {{</ notice >}} 
 
-3. 登出控制台，然后以 `ws-admin` 身份重新登录。在**企业空间设置**中，选择**企业空间成员**，然后点击**邀请**。
+3. 登出控制台，然后以 `ws-admin` 身份重新登录。在**租户(企业空间)设置**中，选择**租户(企业空间)成员**，然后点击**邀请**。
 
-4. 邀请 `project-admin` 和 `project-regular` 进入企业空间，分别授予 `demo-workspace-self-provisioner` 和 `demo-workspace-viewer` 角色，点击**确定**。
+4. 邀请 `project-admin` 和 `project-regular` 进入租户(企业空间)，分别授予 `demo-workspace-self-provisioner` 和 `demo-workspace-viewer` 角色，点击**确定**。
 
    {{< notice note >}}
-实际角色名称的格式：`<workspace name>-<role name>`。例如，在名为 `demo-workspace` 的企业空间中，角色 `viewer` 的实际角色名称为 `demo-workspace-viewer`。
+实际角色名称的格式：`<workspace name>-<role name>`。例如，在名为 `demo-workspace` 的租户(企业空间)中，角色 `viewer` 的实际角色名称为 `demo-workspace-viewer`。
    {{</ notice >}}
 
-5. 将 `project-admin` 和 `project-regular` 都添加到企业空间后，点击**确定**。在**企业空间成员**中，您可以看到列出的三名成员。
+5. 将 `project-admin` 和 `project-regular` 都添加到租户(企业空间)后，点击**确定**。在**租户(企业空间)成员**中，您可以看到列出的三名成员。
 
    <table>
      <tbody>
        <tr>
          <th width='150'>用户</th>
-         <th width='150'>分配的企业空间角色</th>
+         <th width='150'>分配的租户(企业空间)角色</th>
          <th>角色权限</th>
        </tr>
        <tr>
          <td><code>ws-admin</code></td>
          <td><code>demo-workspace-admin</code></td>
-         <td>管理指定企业空间中的所有资源（在此示例中，此用户用于邀请新成员加入企业空间）。</td>
+         <td>管理指定租户(企业空间)中的所有资源（在此示例中，此用户用于邀请新成员加入租户(企业空间)）。</td>
        </tr>
        <tr>
          <td><code>project-admin</code></td>

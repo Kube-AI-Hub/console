@@ -14,7 +14,7 @@ Kube AI Hub 使用预留（Request）和限制（Limit）来控制项目中的�
 
 ## 准备工作
 
-您需要有一个可用的企业空间、一个项目和一个用户 (`ws-admin`)。该用户必须在企业空间层级拥有 `admin` 角色。有关更多信息，请参见[创建企业空间、项目、用户和角色](../../quick-start/create-workspace-and-project/)。
+您需要有一个可用的租户(企业空间)、一个项目和一个用户 (`ws-admin`)。该用户必须在租户(企业空间)层级拥有 `admin` 角色。有关更多信息，请参见[创建租户(企业空间)、项目、用户和角色](../../quick-start/create-workspace-and-project/)。
 
 {{< notice note >}}
 

@@ -29,3 +29,4 @@ The Code Hub stores code associated with models and datasets, providing develope
 ## Related Operations
 
 - [Download Code Repositories](./download_codes)
+- [Tenants and Compute Placement](../tenancy/)

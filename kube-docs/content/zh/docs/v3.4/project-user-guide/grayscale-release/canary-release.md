@@ -16,7 +16,7 @@ Kube AI Hub 基于 [Istio](https://istio.io/) 向用户提供部署金丝雀服�
 
 - 您需要启用 [Kube AI Hub 服务网格](../../../pluggable-components/service-mesh/)。
 - 您需要启用 [Kube AI Hub 日志系统](../../../pluggable-components/logging/)以使用 Tracing 功能。
-- 您需要创建一个企业空间、一个项目和一个用户 (`project-regular`)。请务必邀请该用户至项目中并赋予 `operator` 角色。有关更多信息，请参见[创建企业空间、项目、用户和角色](../../../quick-start/create-workspace-and-project/)。
+- 您需要创建一个租户(企业空间)、一个项目和一个用户 (`project-regular`)。请务必邀请该用户至项目中并赋予 `operator` 角色。有关更多信息，请参见[创建租户(企业空间)、项目、用户和角色](../../../quick-start/create-workspace-and-project/)。
 - 您需要开启**应用治理**并有一个可用应用，以便实现该应用的金丝雀发布。本教程中使用的示例应用是 Bookinfo。有关更多信息，请参见[部署 Bookinfo 和管理流量](../../../quick-start/deploy-bookinfo-to-k8s/)。
 
 ## 步骤 1：创建金丝雀发布任务

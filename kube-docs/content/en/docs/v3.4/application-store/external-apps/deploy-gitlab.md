@@ -13,13 +13,13 @@ This tutorial demonstrates how to deploy GitLab on Kube AI Hub.
 ## Prerequisites
 
 - You need to enable [the OpenPitrix system](../../../pluggable-components/app-store/).
-- You need to create a workspace, a project, and two accounts (`ws-admin` and `project-regular`) for this tutorial. The account `ws-admin` must be granted the role of `workspace-admin` in the workspace, and the account `project-regular` must be invited to the project with the role of `operator`. If they are not ready, refer to [Create Workspaces, Projects, Users and Roles](../../../quick-start/create-workspace-and-project/).
+- You need to create a tenant (workspace), a project, and two accounts (`ws-admin` and `project-regular`) for this tutorial. The account `ws-admin` must be granted the role of `workspace-admin` in the tenant (workspace), and the account `project-regular` must be invited to the project with the role of `operator`. If they are not ready, refer to [Create Tenants (Workspaces), Projects, Users and Roles](../../../quick-start/create-workspace-and-project/).
 
 ## Hands-on Lab
 
 ### Step 1: Add an app repository
 
-1. Log in to Kube AI Hub as `ws-admin`. In your workspace, go to **App Repositories** under **App Management**, and then click **Add**.
+1. Log in to Kube AI Hub as `ws-admin`. In your tenant (workspace), go to **App Repositories** under **App Management**, and then click **Add**.
 
 2. In the displayed dialog box, enter `main` for the app repository name and `https://charts.kubesphere.io/main` for the app repository URL. Click **Validate** to verify the URL and you will see a green check mark next to the URL if it is available. Click **OK** to continue.
 

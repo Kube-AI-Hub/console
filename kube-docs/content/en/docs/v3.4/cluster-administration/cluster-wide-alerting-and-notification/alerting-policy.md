@@ -14,7 +14,7 @@ Kube AI Hub also has built-in rule groups. On the **Built-in Rule Groups** tab, 
 
 - You have enabled [Kube AI Hub Alerting](../../../pluggable-components/alerting/).
 - To receive alert notifications, you must configure a [notification channel](../../../cluster-administration/platform-settings/notification-management/configure-email/) beforehand.
-- You need to create a user (`cluster-admin`) and grant it the `clusters-admin` role. For more information, see [Create Workspaces, Projects, Users and Roles](../../../quick-start/create-workspace-and-project/#step-4-create-a-role).
+- You need to create a user (`cluster-admin`) and grant it the `clusters-admin` role. For more information, see [Create Tenants (Workspaces), Projects, Users and Roles](../../../quick-start/create-workspace-and-project/#step-4-create-a-role).
 
 ## Create a Rule Group and Alerting Rules
 

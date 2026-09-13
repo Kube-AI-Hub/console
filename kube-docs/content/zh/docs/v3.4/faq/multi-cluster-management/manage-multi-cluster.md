@@ -18,7 +18,7 @@ Kube AI Hub 提供了易于使用的多集群功能，帮助您[在 Kube AI Hub 
 
 ## 管理 Kube AI Hub 多集群环境
 
-当您在 Kube AI Hub 上创建多集群环境之后，您可以通过主集群的中央控制平面管理该环境。在创建资源的时候，您可以选择一个特定的集群，但是需要避免您的主集群过载。不建议您登录成员集群的 Kube AI Hub Web 控制台去创建资源，因为部分资源（例如：企业空间）将不会同步到您的主集群进行管理。
+当您在 Kube AI Hub 上创建多集群环境之后，您可以通过主集群的中央控制平面管理该环境。在创建资源的时候，您可以选择一个特定的集群，但是需要避免您的主集群过载。不建议您登录成员集群的 Kube AI Hub Web 控制台去创建资源，因为部分资源（例如：租户(企业空间)）将不会同步到您的主集群进行管理。
 
 ### 资源管理
 
@@ -26,19 +26,19 @@ Kube AI Hub 提供了易于使用的多集群功能，帮助您[在 Kube AI Hub 
 
 如果您想在将成员集群导入新的主集群时保留现有项目，请按照以下步骤进行操作。
 
-1. 在成员集群上运行以下命令将需要保留的项目从企业空间解绑。
+1. 在成员集群上运行以下命令将需要保留的项目从租户(企业空间)解绑。
 
    ```bash
    kubectl label ns <namespace> kubesphere.io/workspace- && kubectl patch ns <namespace>   -p '{"metadata":{"ownerReferences":[]}}' --type=merge
    ```
 
-2. 在成员集群运行以下命令清除您的企业空间。
+2. 在成员集群运行以下命令清除您的租户(企业空间)。
 
    ```bash
    kubectl delete workspacetemplate <workspace name>
    ```
 
-3. 当您在主集群中创建新的企业空间，并将成员集群分配到这个企业空间时，请在成员集群运行以下命令将保留的项目绑定至新的企业空间。
+3. 当您在主集群中创建新的租户(企业空间)，并将成员集群分配到这个租户(企业空间)时，请在成员集群运行以下命令将保留的项目绑定至新的租户(企业空间)。
 
    ```bash
    kuebctl label ns <namespace> kubesphere.io/workspace=<workspace name>
@@ -48,7 +48,7 @@ Kube AI Hub 提供了易于使用的多集群功能，帮助您[在 Kube AI Hub 
 
 您通过主集群的中央控制平面创建的用户会被同步至成员集群。
 
-如果您希望让不同的用户访问不同的集群，您可以创建企业空间并[赋予他们不同的集群](../../../cluster-administration/cluster-settings/cluster-visibility-and-authorization/)。 在此之后，您可以根据这些用户的访问要求，邀请不同的用户至这些企业空间。
+如果您希望让不同的用户访问不同的集群，您可以创建租户(企业空间)并[赋予他们不同的集群](../../../cluster-administration/cluster-settings/cluster-visibility-and-authorization/)。 在此之后，您可以根据这些用户的访问要求，邀请不同的用户至这些租户(企业空间)。
 
 ### Kube AI Hub 组件管理
 

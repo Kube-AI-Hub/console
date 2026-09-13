@@ -23,7 +23,7 @@ In Kube AI Hub 3.4.1, some changes have made on built-in roles and permissions o
    - Change of built-in roles: Platform-level built-in roles `users-manager` and `workspace-manager` are removed. If an existing user has been bound to `users-manager` or `workspace-manager`, its role will be changed to `platform-regular` after the upgrade is completed. Role `platform-self-provisioner` is added. For more information about built-in roles, refer to [Create a user](../../quick-start/create-workspace-and-project).
 
    - Some permission of custom roles are removed:
-       - Removed permissions of platform-level custom roles: user management, role management, and workspace management.
+       - Removed permissions of platform-level custom roles: user management, role management, and tenant (workspace) management.
        - Removed permissions of workspace-level custom roles: user management, role management, and user group management.
        - Removed permissions of namespace-level custom roles: user management and role management.
        - After you upgrade Kube AI Hub to 3.4.1, custom roles will be retained, but removed permissions of the custom roles will be revoked.

@@ -8,7 +8,7 @@ weight: 14100
 
 Kube AI Hub integrates [OpenPitrix](https://github.com/openpitrix/openpitrix), an open-source multi-cloud application management platform, to set up the App Store, managing Kubernetes applications throughout their entire lifecycle. The App Store supports two kinds of application deployment:
 
-- **Template-Based Apps** provide a way for developers and independent software vendors (ISVs) to share applications with users in a workspace. You can also import third-party app repositories within a workspace.
+- **Template-Based Apps** provide a way for developers and independent software vendors (ISVs) to share applications with users in a tenant (workspace). You can also import third-party app repositories within a tenant (workspace).
 - **Composed Apps** help users quickly build a complete application using multiple microservices to compose it. Kube AI Hub allows users to select existing services or create new services to create a composed app on the one-stop console.
 
 Using [Redis](https://redis.io/) as an example application, this tutorial demonstrates how to manage the Kubernetes app throughout the entire lifecycle, including submission, review, test, release, upgrade and removal.
@@ -16,7 +16,7 @@ Using [Redis](https://redis.io/) as an example application, this tutorial demons
 ## Prerequisites
 
 - You need to enable the [Kube AI Hub App Store (OpenPitrix)](../../pluggable-components/app-store/).
-- You need to create a workspace, a project and a user (`project-regular`). For more information, see [Create Workspaces, Projects, Users and Roles](../../quick-start/create-workspace-and-project/).
+- You need to create a tenant (workspace), a project and a user (`project-regular`). For more information, see [Create Tenants (Workspaces), Projects, Users and Roles](../../quick-start/create-workspace-and-project/).
 
 ## Hands-on Lab
 
@@ -40,11 +40,11 @@ You need to create two users first, one for ISVs (`isv`) and the other (`reviewe
 
 5. Similarly, create another user `isv`, and grant the role of `platform-regular` to it.
 
-6. Invite both users created above to an existing workspace such as `demo-workspace`, and grant them the role of `workspace-admin`.
+6. Invite both users created above to an existing tenant (workspace) such as `demo-workspace`, and grant them the role of `workspace-admin`.
 
 ### Step 2: Upload and submit an application
 
-1. Log in to Kube AI Hub as `isv` and go to your workspace. You need to upload the example app Redis to this workspace so that it can be used later. First, download the app [Redis 11.3.4](https://github.com/kubesphere/tutorial/raw/master/tutorial%205%20-%20app-store/redis-11.3.4.tgz) and click **Upload Template** in **App Templates**.
+1. Log in to Kube AI Hub as `isv` and go to your tenant (workspace). You need to upload the example app Redis to this tenant (workspace) so that it can be used later. First, download the app [Redis 11.3.4](https://github.com/kubesphere/tutorial/raw/master/tutorial%205%20-%20app-store/redis-11.3.4.tgz) and click **Upload Template** in **App Templates**.
 
    {{< notice note >}}
 
@@ -62,7 +62,7 @@ You need to create two users first, one for ISVs (`isv`) and the other (`reviewe
 
    {{</ notice >}} 
 
-4. The app displays in the template list with the status **Developing** after it is successfully uploaded, which means this app is under development. The uploaded app is visible to all members in the same workspace.
+4. The app displays in the template list with the status **Developing** after it is successfully uploaded, which means this app is under development. The uploaded app is visible to all members in the same tenant (workspace).
 
 5. Go to the detail page of the app template by clicking Redis from the list. You can edit the basic information of this app by clicking **Edit**.
 
@@ -108,7 +108,7 @@ The version number must start with a number and contain decimal points.
 
 After the app is approved, `isv` can release the Redis application to the App Store, allowing all users on the platform to find and deploy this application.
 
-1. Log out of Kube AI Hub and log back in as `isv`. Go to your workspace and click Redis on the **Template-Based Apps** page. On its details page, expand the version menu, then click **Release to Store**. In the pop-up prompt, click **OK** to confirm.
+1. Log out of Kube AI Hub and log back in as `isv`. Go to your tenant (workspace) and click Redis on the **Template-Based Apps** page. On its details page, expand the version menu, then click **Release to Store**. In the pop-up prompt, click **OK** to confirm.
 
 2. Under **App Release**, you can see the app status. **Activated** means it is available in the App Store.
 
@@ -120,7 +120,7 @@ After the app is approved, `isv` can release the Redis application to the App St
 
    {{</ notice >}} 
 
-4. Now, users in the workspace can install Redis from the App Store. To install the app to Kubernetes, click the app to go to its **App Information** page, and click **Install**.
+4. Now, users in the tenant (workspace) can install Redis from the App Store. To install the app to Kubernetes, click the app to go to its **App Information** page, and click **Install**.
    
    {{< notice note >}}
    
@@ -150,7 +150,7 @@ After the app is approved, `isv` can release the Redis application to the App St
 
 ### Step 6: Add a new version
 
-To allow workspace users to upgrade apps, you need to add new app versions to Kube AI Hub first. Follow the steps below to add a new version for the example app.
+To allow tenant (workspace) users to upgrade apps, you need to add new app versions to Kube AI Hub first. Follow the steps below to add a new version for the example app.
 
 1. Log in to Kube AI Hub as `isv` again and navigate to **Template-Based Apps**. Click the app Redis in the list.
 

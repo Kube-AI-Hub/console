@@ -12,7 +12,7 @@ This tutorial describes how to configure a webhook server to receive platform no
 
 ## Prerequisites
 
-You need to prepare a user granted the `platform-admin` role. For more information, see [Create Workspaces, Projects, Users and Roles](../../../../quick-start/create-workspace-and-project/).
+You need to prepare a user granted the `platform-admin` role. For more information, see [Create Tenants (Workspaces), Projects, Users and Roles](../../../../quick-start/create-workspace-and-project/).
 
 ## Configure the Webhook Server
 

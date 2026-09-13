@@ -79,7 +79,7 @@ section4:
 
     - name: Multi-tenant Access Control
       icon: /images/home/multi-tenant-management.svg
-      content: Three-tier permission system across platform, workspace, and project. Supports AD/LDAP integration for secure multi-team resource isolation.
+      content: Three-tier permission system across platform, tenant (workspace), and project. Supports AD/LDAP integration for secure multi-team resource isolation.
 
     - name: Storage & Networking
       icon: /images/home/multi-tenant-management.svg

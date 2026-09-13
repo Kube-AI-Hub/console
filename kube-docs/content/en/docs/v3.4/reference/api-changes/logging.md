@@ -16,7 +16,7 @@ The time format of query parameters must be Unix timestamps (the number of secon
 
 The following APIs are removed:
 
-- GET  /workspaces/{workspace}
+- GET  /workspaces/{tenant (workspace)}
 - GET  /namespaces/{namespace}
 - GET  /namespaces/{namespace}/workloads/{workload}
 - GET  /namespaces/{namespace}/pods/{pod}

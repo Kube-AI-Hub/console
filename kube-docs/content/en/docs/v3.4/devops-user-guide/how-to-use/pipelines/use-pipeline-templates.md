@@ -11,7 +11,7 @@ Kube AI Hub offers a graphical editing panel where the stages and steps of a Jen
 This section describes how to use pipeline templates on Kube AI Hub.
 ## Prerequisites
 
-- You have a workspace, a DevOps project and a user (`project-regular`) invited to the DevOps project with the `operator` role. If they are not ready yet, please refer to [Create Workspaces, Projects, Users and Roles](../../../../quick-start/create-workspace-and-project/).
+- You have a tenant (workspace), a DevOps project and a user (`project-regular`) invited to the DevOps project with the `operator` role. If they are not ready yet, please refer to [Create Tenants (Workspaces), Projects, Users and Roles](../../../../quick-start/create-workspace-and-project/).
 
 - You need to [enable the Kube AI Hub DevOps system](../../../../pluggable-components/devops/).
 

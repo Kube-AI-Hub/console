@@ -79,7 +79,7 @@ section4:
 
     - name: 多租户权限管理
       icon: /images/home/multi-tenant-management.svg
-      content: 提供平台、企业空间、项目三层权限体系，支持 AD/LDAP 集成，保障多团队资源安全隔离
+      content: 提供平台、租户(企业空间)、项目三层权限体系，支持 AD/LDAP 集成，保障多团队资源安全隔离
 
     - name: 存储与网络
       icon: /images/home/multi-tenant-management.svg

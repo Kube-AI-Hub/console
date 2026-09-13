@@ -1,7 +1,7 @@
 ---
 title: "Import a Helm Repository"
 keywords: "Kubernetes, Helm, Kube AI Hub, Application"
-description: "Import a Helm repository to Kube AI Hub to provide app templates for tenants in a workspace."
+description: "Import a Helm repository to Kube AI Hub to provide app templates for tenants in a tenant (workspace)."
 linkTitle: "Import a Helm Repository"
 weight: 9310
 ---
@@ -16,11 +16,11 @@ This tutorial demonstrates how to add an app repository to Kube AI Hub.
 
 - You need to enable the [Kube AI Hub App Store (OpenPitrix)](../../../pluggable-components/app-store/).
 - You need to have an app repository. Refer to [the official documentation of Helm](https://v2.helm.sh/docs/developing_charts/#the-chart-repository-guide) to create repositories or [upload your own apps to the public repository of Kube AI Hub](../upload-app-to-public-repository/). Alternatively, use the example repository in the steps below, which is only for demonstration purposes.
-- You need to create a workspace and a user (`ws-admin`). The user must be granted the role of `workspace-admin` in the workspace. For more information, refer to [Create Workspaces, Projects, Users and Roles](../../../quick-start/create-workspace-and-project/).
+- You need to create a tenant (workspace) and a user (`ws-admin`). The user must be granted the role of `workspace-admin` in the tenant (workspace). For more information, refer to [Create Tenants (Workspaces), Projects, Users and Roles](../../../quick-start/create-workspace-and-project/).
 
 ## Add an App Repository
 
-1. Log in to the web console of Kube AI Hub as `ws-admin`. In your workspace, go to **App Repositories** under **App Management**, and then click **Add**.
+1. Log in to the web console of Kube AI Hub as `ws-admin`. In your tenant (workspace), go to **App Repositories** under **App Management**, and then click **Add**.
 
 2. In the dialog that appears, specify an app repository name and add your repository URL. For example, enter `https://charts.kubesphere.io/main`.
 

@@ -14,7 +14,7 @@ This tutorial demonstrates how to create a pipeline through graphical editing pa
 
 - You need to [enable the Kube AI Hub DevOps System](../../../../pluggable-components/devops/).
 - You need to have a [Docker Hub](https://www.dockerhub.com/) account.
-- You need to create a workspace, a DevOps project, and a user (`project-regular`). This user must be invited to the DevOps project with the `operator` role. See [Create Workspaces, Projects, Users and Roles](../../../../quick-start/create-workspace-and-project/) if they are not ready.
+- You need to create a tenant (workspace), a DevOps project, and a user (`project-regular`). This user must be invited to the DevOps project with the `operator` role. See [Create Tenants (Workspaces), Projects, Users and Roles](../../../../quick-start/create-workspace-and-project/) if they are not ready.
 - Set CI dedicated nodes to run the pipeline. For more information, see [Set CI Node for Dependency Cache](../../../../devops-user-guide/how-to-use/devops-settings/set-ci-node/).
 - Configure your email server for pipeline notifications (optional). For more information, see [Set Email Server for Kube AI Hub Pipelines](../../../../devops-user-guide/how-to-use/pipelines/jenkins-email/).
 - Configure SonarQube to include code analysis as part of the pipeline (optional). For more information, see [Integrate SonarQube into Pipelines](../../../../devops-user-guide/how-to-integrate/sonarqube/).
@@ -59,7 +59,7 @@ This example pipeline includes the following six stages. After the pipeline is c
 
 In this tutorial, the example pipeline will deploy the [sample](https://github.com/kubesphere/devops-maven-sample/tree/sonarqube) app to a project. Hence, you must create the project (for example, `kubesphere-sample-dev`) in advance. The Deployment and Service of the app will be created automatically in the project once the pipeline runs successfully.
 
-You can use the user `project-admin` to create the project. Besides, this user is also the reviewer of the CI/CD pipeline. Make sure the account `project-regular` is invited to the project with the role of `operator`. For more information, see [Create Workspaces, Projects, Users and Roles](../../../../quick-start/create-workspace-and-project/).
+You can use the user `project-admin` to create the project. Besides, this user is also the reviewer of the CI/CD pipeline. Make sure the account `project-regular` is invited to the project with the role of `operator`. For more information, see [Create Tenants (Workspaces), Projects, Users and Roles](../../../../quick-start/create-workspace-and-project/).
 
 ### Step 3: Create a pipeline
 

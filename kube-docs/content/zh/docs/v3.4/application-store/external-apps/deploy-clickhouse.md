@@ -13,7 +13,7 @@ weight: 14340
 ## 准备工作
 
 - 请确保[已启用 OpenPitrix 系统](../../../pluggable-components/app-store/)。
-- 您需要创建一个企业空间、一个项目和一个用户帐户 (`project-regular`) 供本教程操作使用。该帐户需要是平台普通用户，并邀请至项目中赋予 `operator` 角色作为项目操作员。本教程中，请以 `project-regular` 身份登录控制台，在企业空间 `demo-workspace` 中的 `demo-project` 项目中进行操作。有关更多信息，请参见[创建企业空间、项目、用户和角色](../../../quick-start/create-workspace-and-project/)。
+- 您需要创建一个租户(企业空间)、一个项目和一个用户帐户 (`project-regular`) 供本教程操作使用。该帐户需要是平台普通用户，并邀请至项目中赋予 `operator` 角色作为项目操作员。本教程中，请以 `project-regular` 身份登录控制台，在租户(企业空间) `demo-workspace` 中的 `demo-project` 项目中进行操作。有关更多信息，请参见[创建租户(企业空间)、项目、用户和角色](../../../quick-start/create-workspace-and-project/)。
 - 请确保 Kube AI Hub 项目网关已开启外网访问。有关更多信息，请参见[项目网关](../../../project-administration/project-gateway/)。
 
 ## 动手实验
@@ -74,7 +74,7 @@ weight: 14340
 
 ### 步骤 2：添加应用仓库
 
-1. 以 `ws-admin` 身份登录 Kube AI Hub 的 Web 控制台。在企业空间中，进入**应用管理**下的**应用仓库**页面，点击**添加**。
+1. 以 `ws-admin` 身份登录 Kube AI Hub 的 Web 控制台。在租户(企业空间)中，进入**应用管理**下的**应用仓库**页面，点击**添加**。
 
 2. 在出现的对话框中，输入 `clickhouse` 作为应用仓库名称，输入 `https://radondb.github.io/radondb-clickhouse-kubernetes/` 作为仓库的 URL。点击**验证**以验证 URL。在 URL 旁边呈现一个绿色的对号，验证通过后，点击**确定**继续。
 

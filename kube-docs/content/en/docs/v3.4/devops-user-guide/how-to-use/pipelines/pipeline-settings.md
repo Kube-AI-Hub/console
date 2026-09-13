@@ -10,7 +10,7 @@ When you create a pipeline, you can customize its configurations through various
 
 ## Prerequisites
 
-- You need to create a workspace, a DevOps project and a user (`project-regular`). This user must be invited to the DevOps project with the `operator` role. For more information, refer to [Create Workspaces, Projects, Users and Roles](../../../../quick-start/create-workspace-and-project/).
+- You need to create a tenant (workspace), a DevOps project and a user (`project-regular`). This user must be invited to the DevOps project with the `operator` role. For more information, refer to [Create Tenants (Workspaces), Projects, Users and Roles](../../../../quick-start/create-workspace-and-project/).
 - You need to [enable the Kube AI Hub DevOps System](../../../../pluggable-components/devops/).
 
 ## Basic Information

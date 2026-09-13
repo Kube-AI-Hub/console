@@ -1,5 +1,5 @@
 // :ks_include_id: b53ca408cc88447789f75df42c73bcc7
-All workspace members can view basic information about the workspace. The permissions required for other operations are as follows:
+All tenant (workspace) members can view basic information about the tenant (workspace). The permissions required for other operations are as follows:
 
 * Projects
 +
@@ -12,7 +12,7 @@ All workspace members can view basic information about the workspace. The permis
 |Create projects and become an administrator of the created projects.
 
 |Project Management
-|Create, edit, and delete projects in the workspace.
+|Create, edit, and delete projects in the tenant (workspace).
 
 |Project Viewing
 |View all projects and project resources.
@@ -48,9 +48,9 @@ All workspace members can view basic information about the workspace. The permis
 |Permission | Operations Allowed
 
 |Member Viewing
-|View the list of workspace members, view details of workspace members.
+|View the list of tenant (workspace) members, view details of tenant (workspace) members.
 
 |Role Viewing
-|View the list of workspace roles, view details of workspace roles.
+|View the list of tenant (workspace) roles, view details of tenant (workspace) roles.
 |===
 --

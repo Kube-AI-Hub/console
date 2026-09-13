@@ -15,7 +15,7 @@ This document uses HPA based on CPU usage as an example. Operations for HPA base
 ## Prerequisites
 
 - You need to [enable the Metrics Server](../../../pluggable-components/metrics-server/).
-- You need to create a workspace, a project and a user (for example, `project-regular`). `project-regular` must be invited to the project and assigned the `operator` role. For more information, see [Create Workspaces, Projects, Users and Roles](/docs/v3.4/quick-start/create-workspace-and-project/).
+- You need to create a tenant (workspace), a project and a user (for example, `project-regular`). `project-regular` must be invited to the project and assigned the `operator` role. For more information, see [Create Tenants (Workspaces), Projects, Users and Roles](/docs/v3.4/quick-start/create-workspace-and-project/).
 
 ## Create a Service
 

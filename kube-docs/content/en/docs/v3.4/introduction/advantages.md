@@ -45,7 +45,7 @@ Second-level GPU/CPU monitoring across all dimensions, paired with flexible aler
 
 ### Fine-grained Multi-tenant Access Control
 
-Built-in **Platform → Workspace → Project** three-tier permission isolation model with LDAP/AD integration, meeting the fine-grained access control needs of large organizations.
+Built-in **Platform → Tenant (Workspace) → Project** three-tier permission isolation model with LDAP/AD integration, meeting the fine-grained access control needs of large organizations.
 
 - Different teams and departments work independently in isolated namespaces without resource interference
 - Custom roles and permission sets for fine-grained authorization

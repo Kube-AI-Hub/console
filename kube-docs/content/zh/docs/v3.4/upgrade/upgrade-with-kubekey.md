@@ -22,11 +22,11 @@ weight: 7200
 
 Kube AI Hub 3.4 对内置角色和自定义角色的授权项做了一些调整。在您升级到 Kube AI Hub 3.4 时，请注意以下几点：
 
-   - 内置角色调整：移除了平台级内置角色 `users-manager`(用户管理员)和 `workspace-manager`（企业空间管理员），如果已有用户绑定了 `users-manager` 或 `workspace-manager`，他们的角色将会在升级之后变更为 `platform-regular`。增加了平台级内置角色 `platform-self-provisioner`。关于平台角色的具体描述，请参见[创建用户](../../quick-start/create-workspace-and-project/#创建用户)。
+   - 内置角色调整：移除了平台级内置角色 `users-manager`(用户管理员)和 `workspace-manager`（租户(企业空间)管理员），如果已有用户绑定了 `users-manager` 或 `workspace-manager`，他们的角色将会在升级之后变更为 `platform-regular`。增加了平台级内置角色 `platform-self-provisioner`。关于平台角色的具体描述，请参见[创建用户](../../quick-start/create-workspace-and-project/#创建用户)。
 
    - 自定义角色授权项调整：
-       - 移除平台层级自定义角色授权项：用户管理，角色管理，企业空间管理。
-       - 移除企业空间层级自定义角色授权项：成员管理，角色管理，用户组管理。
+       - 移除平台层级自定义角色授权项：用户管理，角色管理，租户(企业空间)管理。
+       - 移除租户(企业空间)层级自定义角色授权项：成员管理，角色管理，用户组管理。
        - 移除命名空间层级自定义角色授权项：成员管理，角色管理。
        - 升级到 Kube AI Hub 3.4 后，自定义角色会被保留，但是其包含的已被移除的授权项会被删除。
 

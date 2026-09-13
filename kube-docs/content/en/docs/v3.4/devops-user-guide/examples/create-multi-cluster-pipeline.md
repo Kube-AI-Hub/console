@@ -13,10 +13,10 @@ This tutorial demonstrates how to create a multi-cluster pipeline on Kube AI Hub
 ## Prerequisites
 
 - You need to have three Kubernetes clusters with Kube AI Hub installed. Choose one cluster as your host cluster and the other two as your member clusters. For more information about cluster roles and how to build a multi-cluster environment on Kube AI Hub, refer to [Multi-cluster Management](../../../multicluster-management/).
-- You need to set your member clusters as [public clusters](../../../cluster-administration/cluster-settings/cluster-visibility-and-authorization/#make-a-cluster-public). Alternatively, you can [set cluster visibility after a workspace is created](../../../cluster-administration/cluster-settings/cluster-visibility-and-authorization/#set-cluster-visibility-after-a-workspace-is-created).
+- You need to set your member clusters as [public clusters](../../../cluster-administration/cluster-settings/cluster-visibility-and-authorization/#make-a-cluster-public). Alternatively, you can [set cluster visibility after a tenant (workspace) is created](../../../cluster-administration/cluster-settings/cluster-visibility-and-authorization/#set-cluster-visibility-after-a-workspace-is-created).
 - You need to [enable the Kube AI Hub DevOps system](../../../pluggable-components/devops/) on your host cluster.
 - You need to integrate SonarQube into your pipeline. For more information, refer to [Integrate SonarQube into Pipelines](../../how-to-integrate/sonarqube/).
-- You need to create four accounts on your host cluster: `ws-manager`, `ws-admin`, `project-admin`, and `project-regular`, and grant these accounts different roles. For more information, refer to [Create Workspaces, Projects, Users and Roles](../../../quick-start/create-workspace-and-project/#step-1-create-an-account).
+- You need to create four accounts on your host cluster: `ws-manager`, `ws-admin`, `project-admin`, and `project-regular`, and grant these accounts different roles. For more information, refer to [Create Tenants (Workspaces), Projects, Users and Roles](../../../quick-start/create-workspace-and-project/#step-1-create-an-account).
 
 ## Workflow Overview
 
@@ -44,15 +44,15 @@ These Kubernetes clusters can be hosted across different cloud providers and the
 
 {{</ notice >}}
 
-### Step 2: Create a workspace
+### Step 2: Create a tenant (workspace)
 
-1. Log in to the web console of the host cluster as `ws-manager`. On the **Workspaces** page, click **Create**.
+1. Log in to the web console of the host cluster as `ws-manager`. On the **Tenants (Workspaces)** page, click **Create**.
 
-2. On the **Basic Information** page, name the workspace `devops-multicluster`, select `ws-admin` for **Administrator**, and click **Next**.
+2. On the **Basic Information** page, name the tenant (workspace) `devops-multicluster`, select `ws-admin` for **Administrator**, and click **Next**.
 
 3. On the **Cluster Settings** page, select all three clusters and click **Create**.
 
-4. The workspace created is displayed in the list. You need to log out of the console and log back in as `ws-admin` to invite both `project-admin` and `project-regular` to the workspace and grant them the role `workspace-self-provisioner` and `workspace-viewer` respectively. For more information, refer to [Create Workspaces, Projects, Users and Roles](../../../quick-start/create-workspace-and-project/#step-2-create-a-workspace).
+4. The tenant (workspace) created is displayed in the list. You need to log out of the console and log back in as `ws-admin` to invite both `project-admin` and `project-regular` to the tenant (workspace) and grant them the role `workspace-self-provisioner` and `workspace-viewer` respectively. For more information, refer to [Create Tenants (Workspaces), Projects, Users and Roles](../../../quick-start/create-workspace-and-project/#step-2-create-a-workspace).
 
 ### Step 3: Create a DevOps project
 
@@ -66,11 +66,11 @@ These Kubernetes clusters can be hosted across different cloud providers and the
 
    {{</ notice >}}
 
-3. The DevOps project created is displayed in the list. Make sure you invite the `project-regular` user to this project and assign it the `operator` role. For more information, refer to [Create Workspaces, Projects, Users and Roles](../../../quick-start/create-workspace-and-project/#step-5-create-a-devops-project-optional).
+3. The DevOps project created is displayed in the list. Make sure you invite the `project-regular` user to this project and assign it the `operator` role. For more information, refer to [Create Tenants (Workspaces), Projects, Users and Roles](../../../quick-start/create-workspace-and-project/#step-5-create-a-devops-project-optional).
 
 ### Step 4: Create projects on clusters
 
-You must create the projects as shown in the table below in advance. Make sure you invite the `project-regular` user to these projects and assign it the `operator` role. For more information about how to create a project, refer to [Create Workspaces, Projects, Users and Roles](../../../quick-start/create-workspace-and-project/#step-3-create-a-project).
+You must create the projects as shown in the table below in advance. Make sure you invite the `project-regular` user to these projects and assign it the `operator` role. For more information about how to create a project, refer to [Create Tenants (Workspaces), Projects, Users and Roles](../../../quick-start/create-workspace-and-project/#step-3-create-a-project).
 
 | Cluster Name | Usage       | Project Name           |
 | ------------ | ----------- | ---------------------- |

@@ -10,7 +10,7 @@ weight: 11430
 
 - You need to [enable the Kube AI Hub DevOps System](../../../pluggable-components/devops/).
 - You need to have a [Docker Hub](https://www.dockerhub.com/) account.
-- You need to create a workspace, a DevOps project, and a user account, and this user needs to be invited into the DevOps project with the role of `operator`. For more information, see [Create Workspaces, Projects, Users and Roles](../../../quick-start/create-workspace-and-project/).
+- You need to create a tenant (workspace), a DevOps project, and a user account, and this user needs to be invited into the DevOps project with the role of `operator`. For more information, see [Create Tenants (Workspaces), Projects, Users and Roles](../../../quick-start/create-workspace-and-project/).
 
 ## Workflow for a Maven Project
 

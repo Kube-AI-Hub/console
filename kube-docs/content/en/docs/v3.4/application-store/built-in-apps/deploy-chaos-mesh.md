@@ -14,7 +14,7 @@ linkTitle: "Deploy Chaos Mesh on Kube AI Hub"
 
 1. Make sure you have installed and enabled the [Kube AI Hub App Store](../../../pluggable-components/app-store/).
 
-2. You need to create a workspace, a project, and a user account (project-regular) for this tutorial. The account needs to be a platform regular user and to be invited as the project operator with the operator role. For more information, see [Create Workspaces, Projects, Users and Roles](../../../quick-start/create-workspace-and-project/).
+2. You need to create a tenant (workspace), a project, and a user account (project-regular) for this tutorial. The account needs to be a platform regular user and to be invited as the project operator with the operator role. For more information, see [Create Tenants (Workspaces), Projects, Users and Roles](../../../quick-start/create-workspace-and-project/).
 
 ## Chaos experiments with Chaos Mesh
 

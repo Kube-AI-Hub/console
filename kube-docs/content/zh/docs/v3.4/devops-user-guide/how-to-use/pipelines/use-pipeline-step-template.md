@@ -11,7 +11,7 @@ weight: 11214
 
 ## 准备工作
 
-- 您需要创建一个企业空间和一个用户 (project-admin)，必须邀请该用户至该企业空间并赋予 workspace-self-provisioner 角色。有关更多信息，请参考[创建企业空间、项目、用户和角色](../../../../quick-start/create-workspace-and-project/)。
+- 您需要创建一个租户(企业空间)和一个用户 (project-admin)，必须邀请该用户至该租户(企业空间)并赋予 workspace-self-provisioner 角色。有关更多信息，请参考[创建租户(企业空间)、项目、用户和角色](../../../../quick-start/create-workspace-and-project/)。
 
 - 您需要[启用 Kube AI Hub DevOps 系统](../../../../pluggable-components/devops/)。
 

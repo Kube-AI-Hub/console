@@ -6,14 +6,14 @@ linkTitle: "Deploy Apps from the App Store"
 weight: 10130
 ---
 
-The [App Store](../../../application-store/) is also the public app repository on the platform, which means every tenant on the platform can view the applications in the Store regardless of which workspace they belong to. The App Store contains 16 featured enterprise-ready containerized apps and apps released by tenants from different workspaces on the platform. Any authenticated users can deploy applications from the Store. This is different from private app repositories which are only accessible to tenants in the workspace where private app repositories are imported.
+The [App Store](../../../application-store/) is also the public app repository on the platform, which means every tenant on the platform can view the applications in the Store regardless of which tenant (workspace) they belong to. The App Store contains 16 featured enterprise-ready containerized apps and apps released by tenants from different tenants (workspaces) on the platform. Any authenticated users can deploy applications from the Store. This is different from private app repositories which are only accessible to tenants in the tenant (workspace) where private app repositories are imported.
 
 This tutorial demonstrates how to quickly deploy [NGINX](https://www.nginx.com/) from the Kube AI Hub App Store powered by [OpenPitrix](https://github.com/openpitrix/openpitrix) and access its service through a NodePort.
 
 ## Prerequisites
 
 - You have enabled [OpenPitrix (App Store)](../../../pluggable-components/app-store/).
-- You need to create a workspace, a project, and a user (`project-regular`) for this tutorial. The user must be invited to the project and granted the `operator` role. For more information, see [Create Workspaces, Projects, Users and Roles](../../../quick-start/create-workspace-and-project/).
+- You need to create a tenant (workspace), a project, and a user (`project-regular`) for this tutorial. The user must be invited to the project and granted the `operator` role. For more information, see [Create Tenants (Workspaces), Projects, Users and Roles](../../../quick-start/create-workspace-and-project/).
 
 ## Hands-on Lab
 

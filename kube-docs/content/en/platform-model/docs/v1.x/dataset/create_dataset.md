@@ -16,7 +16,7 @@ Complete the following fields on the creation page, then click the **Create Data
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
-| **Owner** | Yes | Defaults to the current logged-in user. If you belong to an organization, you can select it as the owner from the dropdown list |
+| **Owner** | Yes | Defaults to the current logged-in user. If you belong to an organization, you can select it as the owner from the dropdown list. Personal repos use the current tenant; org repos follow the org |
 | **Dataset English Name** | Yes | 2–64 characters. Must start with a letter, end with a letter or number, and may only contain letters, numbers, hyphens (`-`), underscores (`_`), and dots (`.`). Special characters cannot appear consecutively |
 | **Nickname** | No | Optional friendly display name; supports Chinese and other characters |
 | **License** | Yes | Select the open-source license type for the dataset |

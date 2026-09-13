@@ -13,7 +13,7 @@ This section describes how to configure and use pipeline step templates in Kube 
 
 ## Prerequisites
 
-- Create a workspace and a user (`project-admin`). Invite this user to the workspace and assign the role "workspace-self-provisioner" to the user. For more information, please refer to [Create Workspaces, Projects, Users and Roles](../../../../quick-start/create-workspace-and-project/).
+- Create a tenant (workspace) and a user (`project-admin`). Invite this user to the tenant (workspace) and assign the role "workspace-self-provisioner" to the user. For more information, please refer to [Create Tenants (Workspaces), Projects, Users and Roles](../../../../quick-start/create-workspace-and-project/).
  
 - [Enable Kube AI Hub DevOps system.](../../../../pluggable-components/devops/).
 

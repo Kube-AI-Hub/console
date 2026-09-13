@@ -6,7 +6,7 @@ linkTitle: "Remove Built-in Apps in Kube AI Hub"
 Weight: 16910
 ---
 
-As an open source and app-centric container platform, Kube AI Hub integrates apps in the App Store that is based on [OpenPitrix](https://github.com/openpitrix/openpitrix). They are accessible to all tenants in a workspace, while you can also remove them from the App Store. This tutorial demonstrates how to remove a built-in app from the App Store.
+As an open source and app-centric container platform, Kube AI Hub integrates apps in the App Store that is based on [OpenPitrix](https://github.com/openpitrix/openpitrix). They are accessible to all tenants in a tenant (workspace), while you can also remove them from the App Store. This tutorial demonstrates how to remove a built-in app from the App Store.
 
 ## Prerequisites
 

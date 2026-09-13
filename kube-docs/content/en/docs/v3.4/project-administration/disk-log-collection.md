@@ -12,7 +12,7 @@ This tutorial demonstrates how to collect logs for an example app.
 
 ## Prerequisites
 
-- You need to create a workspace, a project and a user (`project-admin`). The user must be invited to the project with the role of `admin` at the project level. For more information, see [Create Workspaces, Projects, Users and Roles](../../quick-start/create-workspace-and-project/).
+- You need to create a tenant (workspace), a project and a user (`project-admin`). The user must be invited to the project with the role of `admin` at the project level. For more information, see [Create Tenants (Workspaces), Projects, Users and Roles](../../quick-start/create-workspace-and-project/).
 - You need to enable [the Kube AI Hub Logging System](../../pluggable-components/logging/).
 
 ## Enable Log Collection

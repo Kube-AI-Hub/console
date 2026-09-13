@@ -1,8 +1,8 @@
 ---
-title: "Workspace Network Isolation"
+title: "Tenant (Workspace) Network Isolation"
 keywords: 'Kube AI Hub, Kubernetes, Calico, Network Policy'
-description: 'Enable or disable the network policy in your workspace.'
-linkTitle: "Workspace Network Isolation"
+description: 'Enable or disable the network policy in your tenant (workspace).'
+linkTitle: "Tenant (Workspace) Network Isolation"
 weight: 9500
 ---
 
@@ -10,7 +10,7 @@ weight: 9500
 
 - You have already enabled [Network Policies](../../pluggable-components/network-policy/).
 
-- Use a user of the `workspace-admin` role. For example, use the `ws-admin` user created in [Create Workspaces, Projects, Users and Roles](../../quick-start/create-workspace-and-project/).
+- Use a user of the `workspace-admin` role. For example, use the `ws-admin` user created in [Create Tenants (Workspaces), Projects, Users and Roles](../../quick-start/create-workspace-and-project/).
 
   {{< notice note >}}
 
@@ -18,13 +18,13 @@ weight: 9500
 
   {{</ notice >}}
 
-## Enable or Disable Workspace Network Isolation
+## Enable or Disable Tenant (Workspace) Network Isolation
 
-Workspace network isolation is disabled by default. You can turn on network isolation in **Basic Information** under **Workspace Settings**.
+Tenant (Workspace) network isolation is disabled by default. You can turn on network isolation in **Basic Information** under **Tenant (Workspace) Settings**.
 
 {{< notice note >}}
 
-When network isolation is turned on, egress traffic will be allowed by default, while ingress traffic will be denied for different workspaces. If you need to customize your network policy, you need to turn on [Project Network Isolation](../../project-administration/project-network-isolation/) and add a network policy in **Project Settings**.
+When network isolation is turned on, egress traffic will be allowed by default, while ingress traffic will be denied for different tenants (workspaces). If you need to customize your network policy, you need to turn on [Project Network Isolation](../../project-administration/project-network-isolation/) and add a network policy in **Project Settings**.
 
 {{</ notice >}}
 
@@ -32,6 +32,6 @@ You can also disable network isolation on the **Basic Information** page.
 
 ## Best Practice
 
-To ensure that all Pods in a workspace are secure, a best practice is to enable workspace network isolation.
+To ensure that all Pods in a tenant (workspace) are secure, a best practice is to enable tenant (workspace) network isolation.
 
-When network isolation is on, the workspace cannot be accessed by other workspaces. If a workspace's default network isolation doesn't meet your needs, turn on project network isolation and customize your project's network policy.
+When network isolation is on, the tenant (workspace) cannot be accessed by other tenants (workspaces). If a tenant (workspace)'s default network isolation doesn't meet your needs, turn on project network isolation and customize your project's network policy.

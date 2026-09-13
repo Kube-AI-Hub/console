@@ -26,9 +26,9 @@ To solve the issues above, Kube AI Hub provides a multi-tenant management soluti
 
 ![multi-tenancy-architecture](/images/docs/v3.x/access-control-and-account-management/multi-tenancy/multi-tenancy-architecture.svg)
 
-In Kube AI Hub, the [workspace](../../workspace-administration/what-is-workspace/) is the smallest tenant unit. A workspace enables users to share resources across clusters and projects. Workspace members can create projects in an authorized cluster and invite other members to cooperate in the same project.
+In Kube AI Hub, the [tenant (workspace)](../../workspace-administration/what-is-workspace/) is the smallest tenant unit, backed by the Workspace resource. A tenant (workspace) enables users to share resources across clusters and projects. Tenant (Workspace) members can create projects in an authorized cluster and invite other members to cooperate in the same project. The Industry AI Model Platform uses the same tenants: the default is the public tenant `public`, and enterprise tenants are created in the Console. See [Tenants and Compute Placement](/platform-model/docs/v1.x/tenancy/).
 
-A **user** is the instance of a Kube AI Hub account. Users can be appointed as platform administrators to manage clusters or added to workspaces to cooperate in projects.
+A **user** is the instance of a Kube AI Hub account. Users can be appointed as platform administrators to manage clusters or added to tenants (workspaces) to cooperate in projects.
 
 Multi-level access control and resource quota limits underlie resource isolation in Kube AI Hub. They decide how the multi-tenant architecture is built and administered.
 
@@ -36,15 +36,15 @@ Multi-level access control and resource quota limits underlie resource isolation
 
 Similar to Kubernetes, Kube AI Hub uses RBAC to manage permissions granted to users, thus logically implementing resource isolation.
 
-The access control in Kube AI Hub is divided into three levels: platform, workspace and project. You use roles to control what permissions users have at different levels for different resources.
+The access control in Kube AI Hub is divided into three levels: platform, tenant (workspace) and project. You use roles to control what permissions users have at different levels for different resources.
 
-1. [Platform roles](/docs/v3.4/quick-start/create-workspace-and-project/): Control what permissions platform users have for platform resources, such as clusters, workspaces and platform members.
-2. [Workspace roles](/docs/v3.4/workspace-administration/role-and-member-management/): Control what permissions workspace members have for workspace resources, such as projects (i.e. namespaces) and DevOps projects.
+1. [Platform roles](/docs/v3.4/quick-start/create-workspace-and-project/): Control what permissions platform users have for platform resources, such as clusters, tenants (workspaces) and platform members.
+2. [Tenant (Workspace) roles](/docs/v3.4/workspace-administration/role-and-member-management/): Control what permissions tenant (workspace) members have for tenant (workspace) resources, such as projects (i.e. namespaces) and DevOps projects.
 3. [Project roles](/docs/v3.4/project-administration/role-and-member-management/): Control what permissions project members have for project resources, such as workloads and pipelines.
 
 ### Network isolation
 
-Apart from logically isolating resources, Kube AI Hub also allows you to set [network isolation policies](../../pluggable-components/network-policy/) for workspaces and projects.
+Apart from logically isolating resources, Kube AI Hub also allows you to set [network isolation policies](../../pluggable-components/network-policy/) for tenants (workspaces) and projects.
 
 ### Auditing
 

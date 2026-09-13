@@ -89,7 +89,7 @@ A `Condition` is a filtering expression that can use comparison operators (=, !=
 
  Filter | Description
  ---    | --- 
- `Workspace`              | The workspace where the audit event happens. 
+ `Workspace`              | The tenant (workspace) where the audit event happens. 
  `Devops`                 | The DevOps project where the audit event happens. 
  `Level`                  | The level of auditing logs. 
  `RequestURI`             | RequestURI is the request URI as sent by the client to a server. 

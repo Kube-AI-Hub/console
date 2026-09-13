@@ -42,7 +42,7 @@ include::routes-note-annotations.adoc[]
 |Note
 
 |
-After installing the "Kube AI Hub Gateway" extension and enabling the cluster gateway, workspace gateway, or project gateway, you need to select the corresponding IngressClassName in the **Advanced Settings** tab when creating an Ingress.
+After installing the "Kube AI Hub Gateway" extension and enabling the cluster gateway, tenant (workspace) gateway, or project gateway, you need to select the corresponding IngressClassName in the **Advanced Settings** tab when creating an Ingress.
 |===
 
 After the Ingress is created, it will be displayed in the Ingress list.

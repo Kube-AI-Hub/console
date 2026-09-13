@@ -14,7 +14,7 @@ weight: 14320
 
 - 您需要准备至少 3 个可调度的节点。
 - 您需要启用 [OpenPitrix 系统](../../../pluggable-components/app-store/)。
-- 您需要为本教程创建一个企业空间、一个项目和两个帐户（`ws-admin` 和 `project-regular`）。帐户 `ws-admin` 必须在企业空间中被赋予 `workspace-admin` 角色，帐户 `project-regular` 必须被邀请至项目中赋予 `operator` 角色。若还未创建好，请参考[创建企业空间、项目、用户和角色](../../../quick-start/create-workspace-and-project/)。
+- 您需要为本教程创建一个租户(企业空间)、一个项目和两个帐户（`ws-admin` 和 `project-regular`）。帐户 `ws-admin` 必须在租户(企业空间)中被赋予 `workspace-admin` 角色，帐户 `project-regular` 必须被邀请至项目中赋予 `operator` 角色。若还未创建好，请参考[创建租户(企业空间)、项目、用户和角色](../../../quick-start/create-workspace-and-project/)。
 
 ## **动手实验**
 
@@ -40,7 +40,7 @@ weight: 14320
 
 ### 步骤 2：添加应用仓库
 
-1. 登出 Kube AI Hub，再以 `ws-admin` 身份登录。在企业空间中，访问**应用管理**下的**应用仓库**，然后点击**添加**。
+1. 登出 Kube AI Hub，再以 `ws-admin` 身份登录。在租户(企业空间)中，访问**应用管理**下的**应用仓库**，然后点击**添加**。
 
 2. 在出现的对话框中，输入 `pingcap` 作为应用仓库名称，输入 `https://charts.pingcap.org` 作为 PingCAP Helm 仓库的 URL。点击**验证**以验证 URL，如果可用，您将会在 URL 旁边看到一个绿色的对号。点击**确定**以继续。
 

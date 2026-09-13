@@ -1,12 +1,12 @@
 ---
-title: "Create Workspaces, Projects, Users and Roles"
-keywords: 'Kube AI Hub, Kubernetes, Multi-tenant, Workspace, User, Role, Project'
+title: "Create Tenants (Workspaces), Projects, Users and Roles"
+keywords: 'Kube AI Hub, Kubernetes, Multi-tenant, Tenant (Workspace), User, Role, Project'
 description: 'Take advantage of the multi-tenant system of Kube AI Hub for fine-grained access control at different levels.'
-linkTitle: "Create Workspaces, Projects, Users and Roles"
+linkTitle: "Create Tenants (Workspaces), Projects, Users and Roles"
 weight: 2300
 ---
 
-This quickstart demonstrates how to create workspaces, roles and users which are required for other tutorials. Meanwhile, you will learn how to create projects and DevOps projects within your workspace where your workloads are running. After reading this tutorial, you will become familiar with the multi-tenant management system of Kube AI Hub.
+This quickstart demonstrates how to create tenants (workspaces), roles and users which are required for other tutorials. Meanwhile, you will learn how to create projects and DevOps projects within your tenant (workspace) where your workloads are running. After reading this tutorial, you will become familiar with the multi-tenant management system of Kube AI Hub.
 
 ## Prerequisites
 
@@ -14,11 +14,11 @@ Kube AI Hub needs to be installed in your machine.
 
 ## Architecture
 
-The multi-tenant system of Kube AI Hub features **three** levels of hierarchical structure which are cluster, workspace, and project. A project in Kube AI Hub is a Kubernetes [namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/).
+The multi-tenant system of Kube AI Hub features **three** levels of hierarchical structure which are cluster, tenant (workspace), and project. A project in Kube AI Hub is a Kubernetes [namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/).
 
-You are required to create a new [workspace](../../workspace-administration/what-is-workspace/) to work with instead of using the system workspace where system resources are running and most of them are viewable only. In addition, it is strongly recommended different tenants work with corresponding roles in a workspace for security considerations.
+You are required to create a new [tenant (workspace)](../../workspace-administration/what-is-workspace/) to work with instead of using the system tenant `system-workspace`, where system resources are running and most of them are viewable only. The Industry AI Model Platform defaults to the **public tenant** `public`, which is not `system-workspace`. In addition, it is strongly recommended that different business teams work with corresponding roles in a tenant (workspace) for security considerations.
 
-You can create multiple workspaces within a Kube AI Hub cluster. Under each workspace, you can also create multiple projects. Each level has multiple built-in roles. Besides, Kube AI Hub allows you to create roles with customized authorization as well. The Kube AI Hub hierarchy is applicable for enterprise users with different teams or groups, and different roles within each team.
+You can create multiple tenants (workspaces) within a Kube AI Hub cluster. Under each tenant (workspace), you can also create multiple projects. Each level has multiple built-in roles. Besides, Kube AI Hub allows you to create roles with customized authorization as well. The Kube AI Hub hierarchy is applicable for enterprise users with different teams or groups, and different roles within each team.
 
 ## Hands-on Lab
 
@@ -42,11 +42,11 @@ After Kube AI Hub is installed, you need to add different users with varied role
        </tr>
        <tr>
          <td><code>platform-self-provisioner</code></td>
-         <td>Create workspaces and become the admin of the created workspaces.</td>
+         <td>Create tenants (workspaces) and become the admin of the created tenants (workspaces).</td>
        </tr></tr>
        <tr>
          <td><code>platform-regular</code></td>
-         <td>Has no access to any resources before joining a workspace or cluster.</td>
+         <td>Has no access to any resources before joining a tenant (workspace) or cluster.</td>
        </tr>
    <tr>
          <td><code>platform-admin</code></td>
@@ -64,7 +64,7 @@ After Kube AI Hub is installed, you need to add different users with varied role
    Click **OK** after you finish. The new user will display on the **Users** page.
 
    {{< notice note >}}
-   If you have not specified a platform role, the created user cannot perform any operations. In this case, you need to create a workspace and invite the created user to the workspace.
+   If you have not specified a platform role, the created user cannot perform any operations. In this case, you need to create a tenant (workspace) and invite the created user to the tenant (workspace).
    {{</ notice >}}
 
 4. Repeat the previous steps to create other users that will be used in other tutorials.
@@ -84,7 +84,7 @@ After Kube AI Hub is installed, you need to add different users with varied role
        <tr>
          <td><code>ws-admin</code></td>
          <td><code>platform-regular</code></td>
-         <td>Manage all resources in a workspace after being invited to the workspace (This user is used to invite new members to a workspace in this example).</td>
+         <td>Manage all resources in a tenant (workspace) after being invited to the tenant (workspace) (This user is used to invite new members to a tenant (workspace) in this example).</td>
        </tr><tr>
          <td><code>project-admin</code></td>
          <td><code>platform-regular</code></td>
@@ -104,43 +104,43 @@ After Kube AI Hub is installed, you need to add different users with varied role
    You can click the <img src="/images/docs/v3.x/common-icons/three-dots.png" width="15" /> icon on the right of the username to enable or disable the user. Additionally, you can batch disable and enable users.
 
    {{</ notice >}} 
-### Step 2: Create a workspace
+### Step 2: Create a tenant (workspace) {#step-2-create-a-workspace}
 
-As the basic logic unit for the management of projects, DevOps projects and organization members, workspaces underpin the multi-tenant system of Kube AI Hub.
+As the basic logic unit for the management of projects, DevOps projects and organization members, tenants (workspaces) underpin the multi-tenant system of Kube AI Hub.
 
-1. In the navigation pane on the left, click **Workspaces**. You can see there is only one default workspace `system-workspace`, where system-related components and services run. Deleting this workspace is not allowed.
+1. In the navigation pane on the left, click **Tenants (Workspaces)**. You can see there is only one default tenant (workspace) `system-workspace`, where system-related components and services run. Deleting this tenant (workspace) is not allowed.
 
-2. On the **Workspaces** page on the right, click **Create**, set a name for the new workspace (for example, `demo-workspace`) and set user `ws-admin` as the workspace manager.
+2. On the **Tenants (Workspaces)** page on the right, click **Create**, set a name for the new tenant (workspace) (for example, `demo-workspace`) and set user `ws-admin` as the tenant (workspace) manager.
 
 3. Click **Create** after you finish.
 
    {{< notice note >}}
 
-   If you have enabled the [multi-cluster feature](../../multicluster-management/), you need to [assign an available cluster](../../cluster-administration/cluster-settings/cluster-visibility-and-authorization/#select-available-clusters-when-you-create-a-workspace) (or multiple clusters) to the workspace so that projects can be created on the cluster(s) later.
+   If you have enabled the [multi-cluster feature](../../multicluster-management/), you need to [assign an available cluster](../../cluster-administration/cluster-settings/cluster-visibility-and-authorization/#select-available-clusters-when-you-create-a-workspace) (or multiple clusters) to the tenant (workspace) so that projects can be created on the cluster(s) later.
 
    {{</ notice >}} 
 
-4. Log out of the console and log back in as `ws-admin`. In **Workspace Settings**, select **Workspace Members** and click **Invite**.
+4. Log out of the console and log back in as `ws-admin`. In **Tenant (Workspace) Settings**, select **Tenant (Workspace) Members** and click **Invite**.
 
-5. Invite both `project-admin` and `project-regular` to the workspace. Assign them the role `workspace-self-provisioner` and `workspace-viewer` respectively and click **OK**.
+5. Invite both `project-admin` and `project-regular` to the tenant (workspace). Assign them the role `workspace-self-provisioner` and `workspace-viewer` respectively and click **OK**.
 
    {{< notice note >}}
-The actual role name follows a naming convention: `<workspace name>-<role name>`. For example, in this workspace named `demo-workspace`, the actual role name of the role `viewer` is `demo-workspace-viewer`.
+The actual role name follows a naming convention: `<workspace name>-<role name>`. For example, in this tenant (workspace) named `demo-workspace`, the actual role name of the role `viewer` is `demo-workspace-viewer`.
    {{</ notice >}}
 
-5. After you add both `project-admin` and `project-regular` to the workspace, click **OK**. In **Workspace Members**, you can see three members listed.
+5. After you add both `project-admin` and `project-regular` to the tenant (workspace), click **OK**. In **Tenant (Workspace) Members**, you can see three members listed.
 
    <table>
      <tbody>
        <tr>
          <th width='150'>User</th>
-         <th width='200'>Assigned Workspace Role</th>
+         <th width='200'>Assigned Tenant (Workspace) Role</th>
          <th>Role Permissions</th>
        </tr>
        <tr>
          <td><code>ws-admin</code></td>
          <td><code>demo-workspace-admin</code></td>
-         <td>Manage all resources under the workspace (use this user to invite new members to the workspace).</td>
+         <td>Manage all resources under the tenant (workspace) (use this user to invite new members to the tenant (workspace)).</td>
        </tr>
        <tr>
          <td><code>project-admin</code></td>

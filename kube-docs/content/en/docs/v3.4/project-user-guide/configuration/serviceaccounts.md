@@ -12,7 +12,7 @@ This document describes how to create service accounts on Kube AI Hub.
 
 ## Prerequisites
 
-You have created a workspace, a project, and a user (`project-regular`), invited the user to the project, and assigned it the `operator` role. For more information, see [Create Workspaces, Projects, Users and Roles](../../../quick-start/create-workspace-and-project/).
+You have created a tenant (workspace), a project, and a user (`project-regular`), invited the user to the project, and assigned it the `operator` role. For more information, see [Create Tenants (Workspaces), Projects, Users and Roles](../../../quick-start/create-workspace-and-project/).
 
 ## Create a Service Account
 

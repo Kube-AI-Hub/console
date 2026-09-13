@@ -24,7 +24,7 @@ Kube AI Hub 控制台（Console）基于 React + MobX 构建，通过 Node.js �
 |---|---|
 | ks-apiserver | 集群管理的统一 API 接口，负责集群内部各模块通信与安全控制 |
 | API Gateway | 认证鉴权、请求路由与代理，支持 LDAP/AD/SSO 集成 |
-| ks-controller-manager | 实现平台业务逻辑，例如企业空间创建时同步权限配置 |
+| ks-controller-manager | 实现平台业务逻辑，例如租户(企业空间)创建时同步权限配置 |
 | GPU Scheduler | 异构 GPU 调度器，负责 vGPU 虚拟化切分与多卡并行调度策略 |
 
 ## Kubernetes 层

@@ -36,6 +36,10 @@ The Playground is suitable for quick model validation and prompt debugging. For 
 
 On the instance details page, switch to the **API** tab to view complete API documentation and multi-language code examples.
 
+{{< notice note >}}
+Who sees the portal entry is separate from whether `/endpoint` needs an access token. Public instances: project members see the portal entry; the API still allows anonymous calls. Private instances: only the creator sees the portal entry; the API requires a valid access token that is not checked against the project. See [Compute Projects and Visibility](../../tenancy/compute_and_visibility).
+{{</ notice >}}
+
 ### Python Example
 
 ```python

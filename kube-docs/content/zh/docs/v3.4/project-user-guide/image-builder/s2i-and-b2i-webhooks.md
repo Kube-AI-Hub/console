@@ -14,7 +14,7 @@ Kube AI Hub 提供 Source-to-Image (S2I) 和 Binary-to-Image (B2I) 功能，以�
 ## 准备工作
 
 - 您需要启用 [Kube AI Hub DevOps 系统](../../../pluggable-components/devops/)，该系统已集成 S2I。
-- 您需要创建一个创建企业空间，一个项目 (`demo-project`) 和一个用户 (`project-regular`)。`project-regular` 需要被邀请到项目中，并赋予 `operator` 角色。有关详细信息，请参考[创建企业空间、项目、用户和角色](../../../quick-start/create-workspace-and-project/#step-1-create-an-account)。
+- 您需要创建一个租户(企业空间)，一个项目 (`demo-project`) 和一个用户 (`project-regular`)。`project-regular` 需要被邀请到项目中，并赋予 `operator` 角色。有关详细信息，请参考[创建租户(企业空间)、项目、用户和角色](../../../quick-start/create-workspace-and-project/#step-1-create-an-account)。
 - 您需要创建一个 S2I 镜像构建器和 B2I 镜像构建器。有关更多信息，请参见 [Source to Image：无需 Dockerfile 发布应用](../source-to-image/)和[Binary to Image：发布制品到 Kubernetes](../binary-to-image/)。
 
 ## 配置 S2I Webhook

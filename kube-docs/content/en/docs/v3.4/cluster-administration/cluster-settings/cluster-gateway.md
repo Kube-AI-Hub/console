@@ -10,7 +10,7 @@ Kube AI Hub 3.4 provides cluster-scope gateways to let all projects share a glob
 
 ## Prerequisites
 
-You need to prepare a user with the `platform-admin` role, for example, `admin`. For more information, see [Create Workspaces, Projects, Users and Roles](../../../quick-start/create-workspace-and-project/).
+You need to prepare a user with the `platform-admin` role, for example, `admin`. For more information, see [Create Tenants (Workspaces), Projects, Users and Roles](../../../quick-start/create-workspace-and-project/).
 
 ## Create a Cluster Gateway
 

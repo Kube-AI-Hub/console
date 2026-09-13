@@ -1,7 +1,7 @@
 ---
 title: "导入 Helm 仓库"
 keywords: "Kubernetes, Helm, Kube AI Hub, 应用程序"
-description: "导入 Helm 仓库至 Kube AI Hub，为企业空间中的租户提供应用模板。"
+description: "导入 Helm 仓库至 Kube AI Hub，为租户(企业空间)中的租户提供应用模板。"
 
 linkTitle: "导入 Helm 仓库"
 weight: 9310
@@ -17,11 +17,11 @@ Kube AI Hub 构建的应用仓库可以让用户使用基于 Helm Chart 的 Kube
 
 - 您需要启用 [Kube AI Hub 应用商店 (OpenPitrix)](../../../pluggable-components/app-store/)。
 - 您需要准备一个应用仓库。请参考 [Helm 官方文档](https://v2.helm.sh/docs/developing_charts/#the-chart-repository-guide)创建仓库，或者[上传自己的应用至 Kube AI Hub 公共仓库](../../../workspace-administration/app-repository/upload-app-to-public-repository/)。此外，也可以使用下方步骤中的示例仓库，这里仅用作演示。
-- 您需要创建一个企业空间和一个用户 (`ws-admin`)。该用户必须在企业空间中被授予 `workspace-admin` 角色。有关更多信息，请参考[创建企业空间、项目、用户和角色](../../../quick-start/create-workspace-and-project/)。
+- 您需要创建一个租户(企业空间)和一个用户 (`ws-admin`)。该用户必须在租户(企业空间)中被授予 `workspace-admin` 角色。有关更多信息，请参考[创建租户(企业空间)、项目、用户和角色](../../../quick-start/create-workspace-and-project/)。
 
 ## 添加应用仓库
 
-1. 以 `ws-admin` 身份登录 Kube AI Hub Web 控制台。在企业空间页面，转到**应用管理**下的**应用仓库**，然后点击**添加**。
+1. 以 `ws-admin` 身份登录 Kube AI Hub Web 控制台。在租户(企业空间)页面，转到**应用管理**下的**应用仓库**，然后点击**添加**。
 
 2. 在弹出的对话框中，输入应用仓库名称并添加仓库 URL。例如，输入 `https://charts.kubesphere.io/main`。
 

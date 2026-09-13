@@ -14,7 +14,7 @@ This tutorial demonstrates how to create a PVC, mount a PVC, and use PVC feature
 
 ## Prerequisites
 
-- You need to create a workspace, a project and a user (`project-regular`). The user must be invited to the project with the role of `operator`. For more information, see [Create Workspaces, Projects, Users and Roles](../../../quick-start/create-workspace-and-project/).
+- You need to create a tenant (workspace), a project and a user (`project-regular`). The user must be invited to the project with the role of `operator`. For more information, see [Create Tenants (Workspaces), Projects, Users and Roles](../../../quick-start/create-workspace-and-project/).
 
 - If you want to dynamically provision a volume, you need to [configure a storage class](../../../cluster-administration/storageclass/) that supports dynamic provisioning.
 

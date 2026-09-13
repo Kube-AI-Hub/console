@@ -16,7 +16,7 @@ Kubernetes [保密字典 (Secret)](https://kubernetes.io/zh/docs/concepts/config
 
 ## 准备工作
 
-您需要创建一个企业空间、一个项目和一个用户（例如 `project-regular`）。该用户必须已邀请至该项目，并具有 `operator` 角色。有关更多信息，请参阅[创建企业空间、项目、用户和角色](../../../quick-start/create-workspace-and-project/)。
+您需要创建一个租户(企业空间)、一个项目和一个用户（例如 `project-regular`）。该用户必须已邀请至该项目，并具有 `operator` 角色。有关更多信息，请参阅[创建租户(企业空间)、项目、用户和角色](../../../quick-start/create-workspace-and-project/)。
 
 ## 创建保密字典
 

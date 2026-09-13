@@ -16,7 +16,7 @@
 |Description of the application. The description can contain any characters and is limited to 256 characters.
 
 |Location
-|Workspace, cluster, and project to which the application belongs.
+|Tenant (Workspace), cluster, and project to which the application belongs.
 |===
 --
 

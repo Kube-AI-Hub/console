@@ -15,20 +15,20 @@ Kube AI Hub 中的项目即 Kubernetes [命名空间](https://kubernetes.io/zh/d
 
 ## 准备工作
 
-- 您需要有一个可用的企业空间和一个用户 (`project-admin`)。该用户必须在该企业空间拥有 `workspace-self-provisioner` 角色。有关更多信息，请参见[创建企业空间、项目、用户和角色](../../quick-start/create-workspace-and-project/)。
+- 您需要有一个可用的租户(企业空间)和一个用户 (`project-admin`)。该用户必须在该租户(企业空间)拥有 `workspace-self-provisioner` 角色。有关更多信息，请参见[创建租户(企业空间)、项目、用户和角色](../../quick-start/create-workspace-and-project/)。
 - 在创建多集群项目前，您需要通过[直接连接](../../multicluster-management/enable-multicluster/direct-connection/)或[代理连接](../../multicluster-management/enable-multicluster/agent-connection/)启用多集群功能。
 
 ## 项目
 
 ### 创建项目
 
-1. 前往企业空间的**项目**页面，点击**项目**选项卡下的**创建**。
+1. 前往租户(企业空间)的**项目**页面，点击**项目**选项卡下的**创建**。
 
     {{< notice note >}}
 
 - 您可以在**集群**下拉列表中更改创建项目的集群。该下拉列表只有在启用多集群功能后才可见。
 
-- 如果页面上没有**创建**按钮，则表示您的企业空间没有可用的集群。您需要联系平台管理员或集群管理员，以便在集群中创建企业空间资源。平台管理员或集群管理员需要在**集群管理**页面设置**集群可见性**，才能[将集群分配给企业空间](../../cluster-administration/cluster-settings/cluster-visibility-and-authorization/)。
+- 如果页面上没有**创建**按钮，则表示您的租户(企业空间)没有可用的集群。您需要联系平台管理员或集群管理员，以便在集群中创建租户(企业空间)资源。平台管理员或集群管理员需要在**集群管理**页面设置**集群可见性**，才能[将集群分配给租户(企业空间)](../../cluster-administration/cluster-settings/cluster-visibility-and-authorization/)。
 
     {{</ notice >}}
 
@@ -60,12 +60,12 @@ Kube AI Hub 中的项目即 Kubernetes [命名空间](https://kubernetes.io/zh/d
 
 ### 创建多集群项目
 
-1. 前往企业空间的**项目**页面，点击**多集群项目**选项卡，再点击**创建**。
+1. 前往租户(企业空间)的**项目**页面，点击**多集群项目**选项卡，再点击**创建**。
 
     {{< notice note >}}
 
-- 如果页面上没有**创建**按钮，则表示您的企业空间没有可用的集群。您需要联系平台管理员或集群管理员，以便在集群中创建企业空间资源。平台管理员或集群管理员需要在**集群管理**页面设置**集群可见性**，才能[将集群分配给企业空间](../../cluster-administration/cluster-settings/cluster-visibility-and-authorization/)。
-- 请确保至少有两个集群已分配给您的企业空间。
+- 如果页面上没有**创建**按钮，则表示您的租户(企业空间)没有可用的集群。您需要联系平台管理员或集群管理员，以便在集群中创建租户(企业空间)资源。平台管理员或集群管理员需要在**集群管理**页面设置**集群可见性**，才能[将集群分配给租户(企业空间)](../../cluster-administration/cluster-settings/cluster-visibility-and-authorization/)。
+- 请确保至少有两个集群已分配给您的租户(企业空间)。
 
     {{</ notice >}}
 

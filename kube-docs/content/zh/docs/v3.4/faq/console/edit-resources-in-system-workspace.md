@@ -6,7 +6,7 @@ linkTitle: '在控制台上编辑系统资源'
 Weight: 16520
 ---
 
-当您安装 Kube AI Hub 时，企业空间 `system-workspace` 将被创建，用于运行所有 Kube AI Hub 系统项目和 Kubernetes 系统项目。为了避免对这两个系统的误操作，您不能直接在控制台上编辑该企业空间中的资源。但是，您仍然可以使用 `kubectl` 来修改资源。
+当您安装 Kube AI Hub 时，租户(企业空间) `system-workspace` 将被创建，用于运行所有 Kube AI Hub 系统项目和 Kubernetes 系统项目。为了避免对这两个系统的误操作，您不能直接在控制台上编辑该租户(企业空间)中的资源。但是，您仍然可以使用 `kubectl` 来修改资源。
 
 本教程演示如何启用 `system-workspace` 资源的编辑功能。
 

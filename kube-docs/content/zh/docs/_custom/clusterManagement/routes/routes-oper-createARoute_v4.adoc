@@ -42,7 +42,7 @@ include::routes-note-annotations.adoc[]
 |说明
 
 |
-安装“Kube AI Hub 网关”扩展组件，并启用集群网关、企业空间网关、或项目网关后，创建应用路由时，需要在**高级设置**页签选择对应网关的 IngressClassName。
+安装“Kube AI Hub 网关”扩展组件，并启用集群网关、租户(企业空间)网关、或项目网关后，创建应用路由时，需要在**高级设置**页签选择对应网关的 IngressClassName。
 |===
 
 应用路由创建完成后将显示在应用路由列表中。

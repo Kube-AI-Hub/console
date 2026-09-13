@@ -89,7 +89,7 @@ spec:
 
  过滤器 | 描述信息 
  ---    | --- 
- `Workspace`              | 发生审计事件的企业空间。
+ `Workspace`              | 发生审计事件的租户(企业空间)。
  `DevOps`                | 发生审计事件的 DevOps 项目。 
  `Level`                  | 审计日志的级别。 
  `RequestURI`             | RequestURI 是由客户端发送至服务器的请求 URI。 

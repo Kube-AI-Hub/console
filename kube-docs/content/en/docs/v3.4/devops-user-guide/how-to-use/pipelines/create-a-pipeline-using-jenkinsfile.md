@@ -20,7 +20,7 @@ Two types of pipelines can be created in Kube AI Hub: Pipelines created based on
 
 - You need to have a [Docker Hub](https://hub.docker.com/) account and a [GitHub](https://github.com/) account.
 - You need to [enable the Kube AI Hub DevOps system](../../../../pluggable-components/devops/).
-- You need to create a workspace, a DevOps project, and a user (`project-regular`). This account needs to be invited to the DevOps project with the `operator` role. See [Create Workspaces, Projects, Users and Roles](../../../../quick-start/create-workspace-and-project/) if they are not ready.
+- You need to create a tenant (workspace), a DevOps project, and a user (`project-regular`). This account needs to be invited to the DevOps project with the `operator` role. See [Create Tenants (Workspaces), Projects, Users and Roles](../../../../quick-start/create-workspace-and-project/) if they are not ready.
 - You need to set a CI dedicated node for running pipelines. Refer to [Set a CI Node for Dependency Caching](../../../../devops-user-guide/how-to-use/devops-settings/set-ci-node/).
 - You need to install and configure SonarQube. Refer to [Integrate SonarQube into Pipeline](../../../../devops-user-guide/how-to-integrate/sonarqube/). If you skip this part, there is no **SonarQube Analysis** below.
 
@@ -108,11 +108,11 @@ You need to create two projects, such as `kubesphere-sample-dev` and `kubesphe
 
 {{< notice note >}}
 
-The account `project-admin` needs to be created in advance since it is the reviewer of the CI/CD Pipeline. See [Create Workspaces, Projects, Users and Roles](../../../../quick-start/create-workspace-and-project/) for more information.
+The account `project-admin` needs to be created in advance since it is the reviewer of the CI/CD Pipeline. See [Create Tenants (Workspaces), Projects, Users and Roles](../../../../quick-start/create-workspace-and-project/) for more information.
 
 {{</ notice >}}
 
-1. Use the account `project-admin` to log in to Kube AI Hub. In the same workspace where you create the DevOps project, create two projects as below. Make sure you invite `project-regular` to these two projects with the role of `operator`.
+1. Use the account `project-admin` to log in to Kube AI Hub. In the same tenant (workspace) where you create the DevOps project, create two projects as below. Make sure you invite `project-regular` to these two projects with the role of `operator`.
 
    | Project Name           | Alias                   |
    | ---------------------- | ----------------------- |

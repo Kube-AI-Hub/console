@@ -15,7 +15,7 @@ This tutorial demonstrates how to use Nexus in pipelines on Kube AI Hub.
 - You need to [enable the Kube AI Hub DevOps System](../../../pluggable-components/devops/).
 - You need to [prepare a Nexus instance](https://help.sonatype.com/repomanager3/installation).
 - You need to have a [GitHub](https://github.com/) account.
-- You need to create a workspace, a DevOps project (for example, `demo-devops`), and a user (for example, `project-regular`). This account needs to be invited into the DevOps project with the role of `operator`. For more information, see [Create Workspaces, Projects, Users and Roles](../../../quick-start/create-workspace-and-project/).
+- You need to create a tenant (workspace), a DevOps project (for example, `demo-devops`), and a user (for example, `project-regular`). This account needs to be invited into the DevOps project with the role of `operator`. For more information, see [Create Tenants (Workspaces), Projects, Users and Roles](../../../quick-start/create-workspace-and-project/).
 
 ## Hands-on Lab
 

@@ -20,7 +20,7 @@ On the model creation page, fill in the following form fields:
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
-| Owner | Yes | Defaults to the current user. If the user belongs to an organization, the organization can be selected from the dropdown |
+| Owner | Yes | Defaults to the current user. If the user belongs to an organization, the organization can be selected from the dropdown. Personal repos are written to the **current tenant**; org repos follow the org. Switch tenants in the top bar first; see [Switch Tenants](../tenancy/switch_tenant) |
 | Model English Name | Yes | Unique identifier for the model repository. Must be 2-64 characters, start with a letter, end with a letter or number, and may only contain letters, numbers, hyphens (`-`), underscores (`_`), and dots (`.`). Special characters cannot appear consecutively |
 | Nickname | No | Optional display name for a friendlier presentation of the model name |
 | License | Yes | Select the open-source license type for the model, e.g., Apache-2.0, MIT, GPL-3.0, etc. |
@@ -47,6 +47,6 @@ After creation, you can proceed with the following operations:
 
 The platform provides several ways to browse and find models:
 
-- **Model Hub**: Visit `https://<platform-host>/models` to view all public models. Supports filtering by task type, framework, license, and other criteria.
+- **Model Hub**: Visit `https://<platform-host>/models` to view public models ∪ the current tenant. Supports filtering by task type, framework, license, and source (including **This tenant**).
 - **Personal Models**: Click your profile avatar to access your personal page and view all model repositories you created under the **Models** tab.
 - **Organization Models**: Navigate to the organization page and view all model repositories under the **Models** tab.

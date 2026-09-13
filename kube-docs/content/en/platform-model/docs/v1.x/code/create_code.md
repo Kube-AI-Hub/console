@@ -16,7 +16,7 @@ The following parameters are required when creating a code repository:
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
-| Owner | Yes | Defaults to the current user; can be switched to an organization you belong to |
+| Owner | Yes | Defaults to the current user; can be switched to an organization you belong to. Personal repos use the current tenant; org repos follow the org |
 | Code Repo English Name | Yes | 2–64 characters, must start with a letter, end with a letter or number, only `[a-zA-Z0-9-_.]` allowed, no consecutive `-`, `_`, or `.` |
 | Nickname | No | Optional friendly name |
 | License | Yes | Select an appropriate open-source license from the dropdown |

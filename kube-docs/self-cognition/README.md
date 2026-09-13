@@ -34,7 +34,7 @@ swift sft \
 | `product_intro.jsonl` | 平台定位、架构、应用场景、核心特性 | zh: 20, en: 20, 共 40 条 |
 | `product_install.jsonl` | 安装部署、KubeKey、依赖、容器运行时、K8s 版本 | zh: 15, en: 15, 共 30 条 |
 | `product_multicluster.jsonl` | 多集群管理、可插拔组件、KubeEdge | zh: 5, en: 5, 共 10 条 |
-| `product_access_control.jsonl` | 多租户架构、权限层级、企业空间、网络隔离、审计、外部认证 | zh: 11, en: 11, 共 22 条 |
+| `product_access_control.jsonl` | 多租户架构、权限层级、租户(企业空间)、网络隔离、审计、外部认证 | zh: 11, en: 11, 共 22 条 |
 | `product_cluster_ops.jsonl` | 集群/项目运维、GPU 管理、虚拟化模式、监控告警、日志、工作负载、存储、工具箱 | zh: 21, en: 21, 共 42 条 |
 | `product_model_hub.jsonl` | 模型仓库、数据集、用户空间（Space）、Notebook 开发环境 | zh: 18, en: 18, 共 36 条 |
 | `product_inference_finetune.jsonl` | 推理服务（框架、创建、API 调用）、模型微调（框架、流程、导出）、模型评测（框架选择、创建任务） | zh: 21, en: 20, 共 41 条 |

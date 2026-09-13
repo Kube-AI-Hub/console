@@ -23,6 +23,7 @@ On the fine-tuning instance creation page, fill in the following configuration, 
 | **Instance Name** | Custom name; must not duplicate existing instances (e.g., `qwen-medical-finetune`) |
 | **Model ID** | The model identifier on the platform; defaults to the currently selected base model |
 | **Region/Resource Config** | Select a GPU specification for the base model. The page shows **Recommended Minimum GPU Memory**; cards below that value are marked **Low Memory** |
+| **Compute project** | The public tenant can only select **space**; an enterprise tenant lists projects you can use. Fine-tunes are private by default and have no public switch |
 | **Runtime Framework** | Select the fine-tuning framework: **LLaMA-Factory** or **MS-Swift** |
 
 ## Recommended Minimum GPU Memory

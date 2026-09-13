@@ -15,7 +15,7 @@ The Model Hub is where models are hosted for storage, management, discovery, and
 
 - **Model Upload & Management**: Upload model files via the Web interface, Git command line, or SDK, including large files (via Git LFS).
 - **Version Control**: Manage model files with Git versioning, supporting history browsing and rollbacks.
-- **Model Discovery**: Search and browse open models by tags, task type, framework, and other dimensions.
+- **Model Discovery**: Search and browse models by tags, task type, framework, and source (including **This tenant**). The default list is other tenants' public repos ∪ the current tenant.
 - **Access Control**: Supports public and private visibility settings; private models are accessible only to authorized users.
 - **Model Deployment**: One-click deployment of models as dedicated inference instances, or launch fine-tuning jobs.
 
@@ -34,3 +34,4 @@ The platform is compatible with mainstream model formats, including:
 - [Upload Models](./upload_model)
 - [Update Models](./update_model)
 - [Download Models](./download_models)
+- [Tenants and Compute Placement](../tenancy/)

@@ -76,7 +76,7 @@ Use a **period** or a **conjunction** between two **complete** sentences.
   | Do                                                                                   | Don't                                                                        |
   | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
   | In the top-right corner of this page, click **Save**.                                | In the top-right corner of this page, click Save.                            |
-  | In **Workspaces**, you can see all your workspaces listed.                           | In Workspaces, you can see all your workspaces listed.                       |
+  | In **Tenants (Workspaces)**, you can see all your tenants (workspaces) listed.                           | In Tenants (Workspaces), you can see all your tenants (workspaces) listed.                       |
   | On the **Create Project** Page, click **OK** in the bottom-right corner to continue. | On the Create Project Page, click OK in the bottom-right corner to continue. |
 
 - Mark the content of great importance or deserving special attention to readers in bold. For example:

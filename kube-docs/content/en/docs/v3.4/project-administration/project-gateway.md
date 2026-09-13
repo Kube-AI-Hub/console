@@ -14,7 +14,7 @@ This tutorial demonstrates how to enable a project gateway on Kube AI Hub for ex
 
 ## Prerequisites
 
-You need to create a workspace, a project and a user (`project-admin`). The user must be invited to the project with the role of `admin` at the project level. For more information, see [Create Workspaces, Projects, Users and Roles](../../quick-start/create-workspace-and-project/).
+You need to create a tenant (workspace), a project and a user (`project-admin`). The user must be invited to the project with the role of `admin` at the project level. For more information, see [Create Tenants (Workspaces), Projects, Users and Roles](../../quick-start/create-workspace-and-project/).
 
 ## Enable a Gateway
 

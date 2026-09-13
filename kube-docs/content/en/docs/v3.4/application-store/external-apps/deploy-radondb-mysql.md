@@ -13,7 +13,7 @@ This tutorial demonstrates how to deploy RadonDB MySQL Operator and a RadonDB My
 ## Prerequisites
 
 - You need to enable [the OpenPitrix system](../../../pluggable-components/app-store/).
-- You need to create a workspace, a project, and a user for this tutorial. In this tutorial, you log in as `admin` and work in the project `demo-project` in the workspace `demo`. If they are not ready, refer to [Create Workspaces, Projects, Users and Roles](../../../quick-start/create-workspace-and-project/).
+- You need to create a tenant (workspace), a project, and a user for this tutorial. In this tutorial, you log in as `admin` and work in the project `demo-project` in the tenant (workspace) `demo`. If they are not ready, refer to [Create Tenants (Workspaces), Projects, Users and Roles](../../../quick-start/create-workspace-and-project/).
 - You need to enable the gateway in your project to provide external access. If they are not ready, refer to [Project Gateway](../../../project-administration/project-gateway/).
 
 ## Hands-on Lab
@@ -22,7 +22,7 @@ This tutorial demonstrates how to deploy RadonDB MySQL Operator and a RadonDB My
 
 1. Log in to the Kube AI Hub Web console.
 
-2. In `demo` workspace, go to **App Repositories** under **App Management**, and then click **Create**.
+2. In `demo` tenant (workspace), go to **App Repositories** under **App Management**, and then click **Create**.
 
 3. In the dialog that appears, enter an app repository name and URL.
 

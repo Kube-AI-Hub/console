@@ -14,13 +14,13 @@ weight: 10120
 ## 准备工作
 
 - 您需要启用 [OpenPitrix (App Store)](../../../pluggable-components/app-store/)。
-- 您需要先完成[创建企业空间、项目、用户和角色](../../../quick-start/create-workspace-and-project/)教程。您必须创建一个企业空间、一个项目和两个用户（`ws-admin ` 和 `project-regular`）。`ws-admin` 必须被授予企业空间中的 `workspace-admin` 角色， `project-regular` 必须被授予项目中的 `operator` 角色。
+- 您需要先完成[创建租户(企业空间)、项目、用户和角色](../../../quick-start/create-workspace-and-project/)教程。您必须创建一个租户(企业空间)、一个项目和两个用户（`ws-admin ` 和 `project-regular`）。`ws-admin` 必须被授予租户(企业空间)中的 `workspace-admin` 角色， `project-regular` 必须被授予项目中的 `operator` 角色。
 
 ## 动手实验
 
 ### 步骤 1：添加应用仓库
 
-1. 以 `ws-admin` 用户登录 Kube AI Hub Web 控制台。在您的企业空间中，进入**应用管理**下的**应用仓库**页面，并点击**添加**。
+1. 以 `ws-admin` 用户登录 Kube AI Hub Web 控制台。在您的租户(企业空间)中，进入**应用管理**下的**应用仓库**页面，并点击**添加**。
 
 2. 在弹出的对话框中，将应用仓库名称设置为 `test-repo`，将应用仓库的 URL 设置为 `https://charts.kubesphere.io/main`。点击**验证**对 URL 进行验证，根据您的需要设置**同步间隔**，再点击**确定**。
 
@@ -40,13 +40,13 @@ weight: 10120
 
    **从应用商店**：选择内置的应用和以 Helm Chart 形式单独上传的应用。
 
-   **从应用模板**：从私有应用仓库和企业空间应用池选择应用。
+   **从应用模板**：从私有应用仓库和租户(企业空间)应用池选择应用。
 
 3. 从下拉列表中选择之前添加的私有应用仓库 `test-repo`。
 
    {{< notice note >}}
 
-   下拉列表中的**当前企业空间**选项表示企业空间应用池，包含以 Helm Chart 形式上传的应用。这些应用也属于应用模板。
+   下拉列表中的**当前租户(企业空间)**选项表示租户(企业空间)应用池，包含以 Helm Chart 形式上传的应用。这些应用也属于应用模板。
 
    {{</ notice >}} 
 

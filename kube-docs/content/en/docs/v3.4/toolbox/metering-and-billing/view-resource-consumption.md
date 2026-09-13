@@ -6,7 +6,7 @@ linkTitle: "View Resource Consumption"
 weight: 15410
 ---
 
-Kube AI Hub metering helps you track resource consumption within a given cluster or workspace at a granular level. Different tenants with different roles can only see the data to which they have access. Besides, you can also set prices for varied resources to see billing information.
+Kube AI Hub metering helps you track resource consumption within a given cluster or tenant (workspace) at a granular level. Different tenants with different roles can only see the data to which they have access. Besides, you can also set prices for varied resources to see billing information.
 
 ## Prerequisites 
 
@@ -52,20 +52,20 @@ Kube AI Hub metering helps you track resource consumption within a given cluster
    
    {{</ notice >}} 
 
-## View Workspace (Project) Resource Consumption
+## View Tenant (Workspace) (Project) Resource Consumption
 
-**Workspace (Project) Resource Consumption** contains resource usage information of workspaces (and projects included), such as CPU, memory and storage.
+**Tenant (Workspace) (Project) Resource Consumption** contains resource usage information of tenants (workspaces) (and projects included), such as CPU, memory and storage.
 
 1. Log in to the Kube AI Hub console as `admin`, click <img src="/images/docs/v3.x/toolbox/metering-and-billing/view-resource-consumption/toolbox.png" width='20px' alt="icon" /> in the lower-right corner and select **Metering and Billing**.
 
-2. Click **View Consumption** in the **Workspace (Project) Resource Consumption** section.
+2. Click **View Consumption** in the **Tenant (Workspace) (Project) Resource Consumption** section.
 
-3. On the left side of the dashboard, you can see a list containing all the workspaces in the current cluster. The right part displays detailed consumption information in the selected workspace, the layout of which is basically the same as that of a cluster.
+3. On the left side of the dashboard, you can see a list containing all the tenants (workspaces) in the current cluster. The right part displays detailed consumption information in the selected tenant (workspace), the layout of which is basically the same as that of a cluster.
 
    {{< notice note >}}
 
-   In a multi-cluster architecture, you cannot see the metering and billing information of a workspace if it does not have any available cluster assigned to it. For more information, see [Cluster Visibility and Authorization](../../../cluster-administration/cluster-settings/cluster-visibility-and-authorization/).
+   In a multi-cluster architecture, you cannot see the metering and billing information of a tenant (workspace) if it does not have any available cluster assigned to it. For more information, see [Cluster Visibility and Authorization](../../../cluster-administration/cluster-settings/cluster-visibility-and-authorization/).
 
    {{</ notice >}} 
 
-4. Click a workspace on the left and dive deeper into a project or workload (for example, Deployment and StatefulSet) to see detailed consumption information.
+4. Click a tenant (workspace) on the left and dive deeper into a project or workload (for example, Deployment and StatefulSet) to see detailed consumption information.
