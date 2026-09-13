@@ -27,7 +27,7 @@ module.exports = {
   OPENLDAP_DESC: '負責集中儲存和管理用戶帳號資訊',
   REDIS_DESC: '將結構化的數據儲存在記憶體中的儲存系統',
   TOWER_DESC: '一個可以在集群間通過代理方式創建網路連接的工具',
-  KS_CONTROLLER_MANAGER_DESC: '實現業務邏輯，例如創建企業空間時，為其創建對應的權限；創建服務策略時，生成對應的 Istio 配置等',
+  KS_CONTROLLER_MANAGER_DESC: '實現業務邏輯，例如創建租戶(企業空間)時，為其創建對應的權限；創建服務策略時，生成對應的 Istio 配置等',
   // Kubernetes
   COREDNS_DESC: '為 Kubernetes 集群提供服務發現的功能',
   METRICS_SERVER_DESC: 'Kubernetes 的監控組件，從每個節點的 Kubelet 採集指標資訊',

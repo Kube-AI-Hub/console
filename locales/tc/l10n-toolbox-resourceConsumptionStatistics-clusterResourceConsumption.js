@@ -53,7 +53,7 @@ module.exports = {
   DEPLOYMENT_SCAP: '部署',
   STATEFULSET_SCAP: '有狀態副本集',
   DAEMONSET_SCAP: '守護進程集',
-  WORKSPACE_SCAP: '企業空間',
+  WORKSPACE_SCAP: '租戶(企業空間)',
   CLUSTER_SCAP: '集群',
   PROJECT_SCAP: '項目',
   SERVICE_SCAP: '服務',

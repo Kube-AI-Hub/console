@@ -30,7 +30,7 @@ module.exports = {
   CLUSTER_NAME_DESC: 'The name can contain only lowercase letters, numbers, and hyphens (-), must start with a lowercase letter, and must end with a lowercase letter or number. The maximum length is 32 characters.',
   FEDPROJECT_CANNOT_DEPLOY_APP_TIP: '無法在多集群項目裡部署應用.',
   LATEST_VERSION_SCAP: '最新版本',
-  WORKSPACE_EMPTY_DESC: '請選擇企業空間',
+  WORKSPACE_EMPTY_DESC: '請選擇租戶(企業空間)',
   VERSION_EMPTY_DESC: '請選擇版本',
   // Install > App Settings
   HELM_APP_SCHEMA_FORM_TIP: '此應用支持表單模式，可選擇通過表單或 YAML 編輯器來修改預設應用配置。注意：不同模式之間數據獨立。',

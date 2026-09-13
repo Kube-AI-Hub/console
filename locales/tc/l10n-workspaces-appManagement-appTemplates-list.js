@@ -24,7 +24,7 @@ module.exports = {
   DEVELOP_APP_DESC: '您可以上傳 Helm Chart 或者使用 Kube AI Hub 提供的資源編排工具進行應用模板的開發',
   DEVELOP_APP_TITLE: '開發應用模板',
   HOW_PUBLISH_APP_TITLE: '如何發佈已有應用',
-  HOW_PUBLISH_APP_DESC: 'Kube AI Hub 目前支持將已有應用的 Helm Chart 上傳至企業空間的應用模板，提交審核後，可以將應用發佈在應用商店中。',
+  HOW_PUBLISH_APP_DESC: 'Kube AI Hub 目前支持將已有應用的 Helm Chart 上傳至租戶(企業空間)的應用模板，提交審核後，可以將應用發佈在應用商店中。',
   // List
   APP_STATUS_ACTIVE: '已發布',
   APP_STATUS_DRAFT: 'Unreleased',

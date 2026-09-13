@@ -41,9 +41,9 @@ module.exports = {
   FROM_APP_STORE_DESC: '从 Kube AI Hub 应用商店创建应用。',
   // List > Create > From App Template
   SELECT_APP_REPOSITORY: '选择应用仓库',
-  CURRENT_WORKSPACE: '当前企业空间',
-  FROM_APP_TEMPLATE_DESC: '从企业空间或远程应用仓库中的应用模板创建应用。',
-  APP_TEMPLATES_MODAL_DESC: '从下拉列表中选择当前企业空间或远程应用仓库以查看可用的应用模板。',
+  CURRENT_WORKSPACE: '当前租户(企业空间)',
+  FROM_APP_TEMPLATE_DESC: '从租户(企业空间)或远程应用仓库中的应用模板创建应用。',
+  APP_TEMPLATES_MODAL_DESC: '从下拉列表中选择当前租户(企业空间)或远程应用仓库以查看可用的应用模板。',
   // List > Create > From App Template > App Information
   // List > Create > From App Template > Chart Files
   // List > Edit

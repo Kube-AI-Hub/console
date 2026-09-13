@@ -43,7 +43,7 @@ module.exports = {
   'Chinese is not allowed in the pipeline configuration':
     '配置中不允許含有中文',
   'Clean when aborted': '清理失敗不影響運行',
-  'Clean Workspace': '清理企業空間',
+  'Clean Tenant (Workspace)': '清理租戶(企業空間)',
   'Code Quality Check': '代碼質量檢查',
   COMMIT_ID: 'Commit ID',
   'Config File Path': '配置文件路徑',

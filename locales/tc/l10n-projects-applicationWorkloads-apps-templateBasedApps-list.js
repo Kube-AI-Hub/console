@@ -41,9 +41,9 @@ module.exports = {
   FROM_APP_STORE_DESC: '來自Kube AI Hub官方應用商店，提供高質量應用和簡易的部署方式',
   // List > Create > From App Template
   SELECT_APP_REPOSITORY: 'Select app repository',
-  CURRENT_WORKSPACE: '來自企業空間',
-  FROM_APP_TEMPLATE_DESC: '來自於企業空間的自制應用模板以及應用倉庫中添加的第三方 Helm 應用模板',
-  APP_TEMPLATES_MODAL_DESC: '應用模板來自於企業空間和第三方的 Helm 應用模板，支持一鍵部署並可通過視覺化的方式在 Kube AI Hub 中展示並提供部署及管理的功能',
+  CURRENT_WORKSPACE: '來自租戶(企業空間)',
+  FROM_APP_TEMPLATE_DESC: '來自於租戶(企業空間)的自制應用模板以及應用倉庫中添加的第三方 Helm 應用模板',
+  APP_TEMPLATES_MODAL_DESC: '應用模板來自於租戶(企業空間)和第三方的 Helm 應用模板，支持一鍵部署並可通過視覺化的方式在 Kube AI Hub 中展示並提供部署及管理的功能',
   // List > Create > From App Template > App Information
   // List > Create > From App Template > Chart Files
   // List > Edit

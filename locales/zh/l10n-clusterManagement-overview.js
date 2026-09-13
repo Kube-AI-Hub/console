@@ -23,8 +23,8 @@ module.exports = {
   PROVIDER: '提供商',
   KUBERNETES_VERSION: 'Kubernetes 版本',
   KUBESPHERE_VERSION: 'Kube AI Hub 版本',
-  VISIBILITY_PARTIAL: '对部分企业空间可见',
-  VISIBILITY_PUBLIC: '对所有企业空间可见',
+  VISIBILITY_PARTIAL: '对部分租户(企业空间)可见',
+  VISIBILITY_PUBLIC: '对所有租户(企业空间)可见',
   CLUSTER_BASE_INFO_DESC: '基本信息是当前集群的信息概览，您可以查看和编辑集群的基本信息。',
   // System Components
   // Resource Usage

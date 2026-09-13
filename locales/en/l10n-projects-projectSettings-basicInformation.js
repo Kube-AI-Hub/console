@@ -29,11 +29,11 @@ module.exports = {
   // Manage > Edit Project Quotas
   EDIT_PROJECT_QUOTA: 'Edit Project Quota',
   PROJECT_REMAINING_QUOTAS: 'Project Remaining Quotas',
-  WORKSPACE_REMAINING_QUOTAS: 'Workspace Remaining Quotas',
+  WORKSPACE_REMAINING_QUOTAS: 'Tenant (Workspace) Remaining Quotas',
   // Manage > Edit Default Container Quotas
   GPU_TYPE_SCAP: 'GPU type',
   GPU_LIMIT_SCAP: 'GPU limit',
-  REQUEST_EXCEED_WORKSPACE: 'Resource requests and limits cannot exceed workspace resource limits.',
+  REQUEST_EXCEED_WORKSPACE: 'Resource requests and limits cannot exceed tenant (workspace) resource limits.',
   REQUEST_EXCEED_LIMIT: 'Resource requests cannot be greater than resource limits.',
   REQUEST_EXCEED_AVAILABLE_QUOTA: 'Insufficient resources.',
   GPU_CARD_LIMIT_REQUIRED:
@@ -60,7 +60,7 @@ module.exports = {
   GPU_QUOTA_SECTION: 'GPU Quotas',
   CLUSTER_RESOURCE_REFERENCE: 'Cluster resource reference (allocatable total)',
   CLUSTER_RESOURCE_REFERENCE_DESC:
-    "Sum of each node's allocatable CPU, memory, and configured GPU resources in the cluster. This is not remaining capacity after workloads are scheduled, and it is not the same as project or workspace quotas.",
+    "Sum of each node's allocatable CPU, memory, and configured GPU resources in the cluster. This is not remaining capacity after workloads are scheduled, and it is not the same as project or tenant (workspace) quotas.",
   CLUSTER_RESOURCE_REFERENCE_FEDERATED:
     'This workload spans multiple member clusters. GPU types shown are the union across clusters; allocatable totals are not aggregated here.',
   RESOURCE_TYPE_SCAP: 'Resource type',

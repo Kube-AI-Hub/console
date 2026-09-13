@@ -20,7 +20,7 @@ module.exports = {
   // Banner
   OVERVIEW: 'Overview',
   // Description
-  WORKSPACE_OVERVIEW_DESC: 'View the resource status of the workspace.',
+  WORKSPACE_OVERVIEW_DESC: 'View the resource status of the tenant (workspace).',
   // Statistics
   ROLE_PL: 'Roles',
   // Physical Resources

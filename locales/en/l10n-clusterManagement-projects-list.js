@@ -27,8 +27,8 @@ module.exports = {
   ACTIVE: 'Active',
   // List > Assign Workspace
   PROJECT_ADMINISTRATOR: 'Project Administrator',
-  PROJECT_ADMINISTRATOR_DESC: 'Select a user in the workspace as the project administrator.',
-  PROJECT_ASSIGN_DESC: 'After the project is assigned to a workspace, the workspace cannot be changed.',
+  PROJECT_ADMINISTRATOR_DESC: 'Select a user in the tenant (workspace) as the project administrator.',
+  PROJECT_ASSIGN_DESC: 'After the project is assigned to a tenant (workspace), the tenant (workspace) cannot be changed.',
   // List > Create
   CREATE_PROJECT_DESC: 'Create a project to group resources and control the resource management permissions of different users.',
   PROJECT_NAME_DESC: 'The name can contain only lowercase letters, numbers, and hyphens (-), must start with a lowercase letter, and must end with a lowercase letter or number. The maximum length is 63 characters.',

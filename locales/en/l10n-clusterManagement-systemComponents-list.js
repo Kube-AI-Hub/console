@@ -28,7 +28,7 @@ module.exports = {
   OPENLDAP_DESC: 'Stores and manages user information in a centralized manner.',
   REDIS_DESC: 'Open-source, in-memory data structure store, which is used as a database, cache, and message broker.',
   TOWER_DESC: 'Tool used for network connection between clusters over proxy.',
-  KS_CONTROLLER_MANAGER_DESC: 'Implements service logic. This component creates permissions when a workspace is created and generates Istio configuration for service strategies.',
+  KS_CONTROLLER_MANAGER_DESC: 'Implements service logic. This component creates permissions when a tenant (workspace) is created and generates Istio configuration for service strategies.',
   // Kubernetes
   COREDNS_DESC: 'Provides the service discovery function for the Kubernetes cluster.',
   METRICS_SERVER_DESC: 'Kubernetes monitoring component that collects metrics from kubelet of each node.',

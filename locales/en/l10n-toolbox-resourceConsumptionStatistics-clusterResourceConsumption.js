@@ -54,7 +54,7 @@ module.exports = {
   DEPLOYMENT_SCAP: 'Deployment',
   STATEFULSET_SCAP: 'Statefulset',
   DAEMONSET_SCAP: 'Daemonset',
-  WORKSPACE_SCAP: 'Workspace',
+  WORKSPACE_SCAP: 'Tenant (Workspace)',
   CLUSTER_SCAP: 'Cluster',
   PROJECT_SCAP: 'Project',
   SERVICE_SCAP: 'Service',

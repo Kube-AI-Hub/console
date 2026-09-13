@@ -42,11 +42,11 @@ module.exports = {
   // List > Edit Information
   // List > View YAML
   // Assign Workspace
-  IPPOOL_ASSIGN_WORKSPACE_DESC: 'Assign the pod IP pool to a workspace.',
-  IPPOOL_ASSIGN_WORKSPACE_ALLOCATED_WARNING: 'The pod IP pool is in use and cannot be assigned to another specific workspace.',
-  IPPOOL_ASSIGN_WORKSPACE_CHANGE_WARNING: 'The pod IP pool is in use with a specific workspace assigned. The workspace cannot be changed.',
-  ASSIGN_WORKSPACE: 'Assign Workspace',
-  SELECT_WORKSPACE_DESC: 'Select a workspace.',
+  IPPOOL_ASSIGN_WORKSPACE_DESC: 'Assign the pod IP pool to a tenant (workspace).',
+  IPPOOL_ASSIGN_WORKSPACE_ALLOCATED_WARNING: 'The pod IP pool is in use and cannot be assigned to another specific tenant (workspace).',
+  IPPOOL_ASSIGN_WORKSPACE_CHANGE_WARNING: 'The pod IP pool is in use with a specific tenant (workspace) assigned. The tenant (workspace) cannot be changed.',
+  ASSIGN_WORKSPACE: 'Assign Tenant (Workspace)',
+  SELECT_WORKSPACE_DESC: 'Select a tenant (workspace).',
   // List > Delete
   POD_IP_POOL_LOW: 'pod IP pool',
 }

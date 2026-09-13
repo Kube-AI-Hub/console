@@ -56,11 +56,11 @@ module.exports = {
   NODE_PASSWORD_DESC: 'Enter the password used for SSH login.',
   ADD_NODE_TO_THE_CLUSTER: 'Add node to the cluster',
   // src/pages/workspaces/containers/Clusters
-  WORKSPACE_CLUSTERS_DESC: 'The cluster information shows how cluster resources are used in the workspace.',
+  WORKSPACE_CLUSTERS_DESC: 'The cluster information shows how cluster resources are used in the tenant (workspace).',
   // src/pages/console/components/Cards/Workspace
   DEVOPS_PROJECT_NUMBER: 'DevOps Projects',
   PROJECT_NUMBER: 'Projects',
-  VIEW_WORKSPACE: 'View Workspace',
+  VIEW_WORKSPACE: 'View Tenant (Workspace)',
   MEMBERS: 'Members',
   // src/components/Forms/Cluster/AdvanceSettings
   PRIVATE_REGISTRY: 'Private Registry',

@@ -19,7 +19,7 @@ module.exports = {
   // Banner
   OVERVIEW: '概览',
   // Description
-  WORKSPACE_OVERVIEW_DESC: '企业空间为 Kube AI Hub 提供了安全隔离的、具有访问权限控制的工作平台。这里您可以看到当前企业空间内资源运行的概况。',
+  WORKSPACE_OVERVIEW_DESC: '租户(企业空间)为 Kube AI Hub 提供了安全隔离的、具有访问权限控制的工作平台。这里您可以看到当前租户(企业空间)内资源运行的概况。',
   // Statistics
   ROLE_PL: '角色',
   // Physical Resources

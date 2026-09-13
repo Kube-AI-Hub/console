@@ -18,7 +18,7 @@
 module.exports = {
   // Banner
   DEPARTMENT_PL: 'Departments',
-  DEPARTMENT_DESC: 'A department in a workspace is a logical unit used for permission control. You can set a workspace role, multiple project roles, and multiple DevOps project roles in a department, and assign users to the department to control user permissions in batches.',
+  DEPARTMENT_DESC: 'A department in a tenant (workspace) is a logical unit used for permission control. You can set a tenant (workspace) role, multiple project roles, and multiple DevOps project roles in a department, and assign users to the department to control user permissions in batches.',
   // List
   // List > Not Assigned
   NOT_ASSIGNED_TCAP: 'Not Assigned',
@@ -39,8 +39,8 @@ module.exports = {
   DEVOPS_VALUE: 'DevOps project: {value}',
   DEVOPS_PROJECT_ROLES_VALUE: 'DevOps project role: {value}',
   // List > Set Departments > Workspace Role
-  WORKSPACE_ROLE: 'Workspace Role',
-  GROUP_WORKSPACE_ROLE_DESC: '企業空間角色將授予部門中的所有用戶。',
+  WORKSPACE_ROLE: 'Tenant (Workspace) Role',
+  GROUP_WORKSPACE_ROLE_DESC: '租戶(企業空間)角色將授予部門中的所有用戶。',
   MEMBER_CLUSTER_UPGRADE_TIP: 'Member clusters with versions earlier than {version} do not support this function. Please upgrade the member clusters to {version} or later.',
   // List > Set Departments > Project Role
   PROJECT_ROLE: '項目角色',

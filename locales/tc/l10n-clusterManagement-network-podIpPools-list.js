@@ -41,11 +41,11 @@ module.exports = {
   // List > Edit Information
   // List > View YAML
   // Assign Workspace
-  IPPOOL_ASSIGN_WORKSPACE_DESC: '為 IP 池分配一個企業空間。',
-  IPPOOL_ASSIGN_WORKSPACE_ALLOCATED_WARNING: 'IP 地址範圍已被使用，無法分配给某一個具體的企業空間',
-  IPPOOL_ASSIGN_WORKSPACE_CHANGE_WARNING: 'IP 地址範圍已被使用，且已指定具體的企業空間，無法更改目標企業空間',
-  ASSIGN_WORKSPACE: '分配企業空間',
-  SELECT_WORKSPACE_DESC: '選擇一個企業空間',
+  IPPOOL_ASSIGN_WORKSPACE_DESC: '為 IP 池分配一個租戶(企業空間)。',
+  IPPOOL_ASSIGN_WORKSPACE_ALLOCATED_WARNING: 'IP 地址範圍已被使用，無法分配给某一個具體的租戶(企業空間)',
+  IPPOOL_ASSIGN_WORKSPACE_CHANGE_WARNING: 'IP 地址範圍已被使用，且已指定具體的租戶(企業空間)，無法更改目標租戶(企業空間)',
+  ASSIGN_WORKSPACE: '分配租戶(企業空間)',
+  SELECT_WORKSPACE_DESC: '選擇一個租戶(企業空間)',
   // List > Delete
   POD_IP_POOL_LOW: '容器組 IP 池'
 };

@@ -43,7 +43,7 @@ module.exports = {
   'Change Current Directory': 'Change Current Directory',
   'Chinese is not allowed in the pipeline configuration': 'Chinese is not allowed in the pipeline configuration',
   'Clean when aborted': 'Clean when aborted',
-  'Clean Workspace': 'Clean Workspace',
+  'Clean Tenant (Workspace)': 'Clean Tenant (Workspace)',
   'Code Quality Check': 'Code Quality Check',
   COMMIT_ID: 'Commit ID',
   'Config File Path': 'Config File Path',

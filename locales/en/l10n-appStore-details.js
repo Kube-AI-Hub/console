@@ -32,7 +32,7 @@ module.exports = {
   CLUSTER_NAME_DESC: 'The name can contain only lowercase letters, numbers, and hyphens (-), must start with a lowercase letter, and must end with a lowercase letter or number. The maximum length is 32 characters.',
   FEDPROJECT_CANNOT_DEPLOY_APP_TIP: 'The app cannot be deployed in a multi-cluster project.',
   LATEST_VERSION_SCAP: 'Latest version',
-  WORKSPACE_EMPTY_DESC: 'Please select a workspace',
+  WORKSPACE_EMPTY_DESC: 'Please select a tenant (workspace)',
   VERSION_EMPTY_DESC: 'Please select a version.',
   // Install > App Settings
   HELM_APP_SCHEMA_FORM_TIP: 'You can customize the app settings in a GUI form or a YAML file. Settings in the GUI form and those in the YAML file are independent of each other.',

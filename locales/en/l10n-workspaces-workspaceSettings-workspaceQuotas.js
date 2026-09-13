@@ -18,14 +18,14 @@
 
 module.exports = {
   // Banner
-  WORKSPACE_QUOTA_PL: 'Workspace Quotas',
-  WORKSPACE_QUOTAS_DESC: 'Workspace quotas are used to control the total resource usage of all projects and DevOps projects in a workspace.',
+  WORKSPACE_QUOTA_PL: 'Tenant (Workspace) Quotas',
+  WORKSPACE_QUOTAS_DESC: 'Tenant (Workspace) quotas are used to control the total resource usage of all projects and DevOps projects in a tenant (workspace).',
   // Resource Quotas
   RESOURCE_QUOTA_PL: 'Resource Quotas',
   USED_PERCENT: 'Used: {percent}%',
   RESOURCE_LIMIT: 'Resource limit',
   // Resource Quotas > Edit Quotas
-  EDIT_WORKSPACE_QUOTAS: 'Edit Workspace Quotas',
+  EDIT_WORKSPACE_QUOTAS: 'Edit Tenant (Workspace) Quotas',
   CPU_REQUEST: 'CPU Request',
   CPU_LIMIT: 'CPU Limit',
   MEMORY_REQUEST: 'Memory Request',

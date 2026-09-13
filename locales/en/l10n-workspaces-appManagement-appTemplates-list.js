@@ -25,7 +25,7 @@ module.exports = {
   DEVELOP_APP_DESC: 'You can upload Helm charts or use the resource orchestration tool provided by Kube AI Hub to develop app templates.',
   DEVELOP_APP_TITLE: 'How do I develop app templates?',
   HOW_PUBLISH_APP_TITLE: 'How do I release apps to the App Store?',
-  HOW_PUBLISH_APP_DESC: 'You can upload Helm charts as app templates to workspaces. The apps will be released to the App Store after they are approved.',
+  HOW_PUBLISH_APP_DESC: 'You can upload Helm charts as app templates to tenants (workspaces). The apps will be released to the App Store after they are approved.',
   // List
   APP_STATUS_ACTIVE: 'Released',
   APP_STATUS_DRAFT: 'Unreleased',

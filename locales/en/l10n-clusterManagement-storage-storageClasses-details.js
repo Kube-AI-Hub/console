@@ -27,7 +27,7 @@ module.exports = {
   // More > Edit Authorization Rules
   SET_AUTHORIZATION_RULES: 'Set Authorization Rules',
   AUTHORIZATION_RULES: 'Authorization Rules',
-  AUTHORIZATION_RULES_DESC: 'Set authorization rules so that the storage class can be accessed only in specific projects and workspaces.',
+  AUTHORIZATION_RULES_DESC: 'Set authorization rules so that the storage class can be accessed only in specific projects and tenants (workspaces).',
   AUTHORIZATION_NOT_SUPPORT: 'The cluster currently does not support this feature. Please upgrade Kube AI Hub to v3.3.0 or later, or manually install <a href="https://github.com/kubesphere/storageclass-accessor" target="_blank">storageclass-accessor</a>.',
   OPERATOR_IN: 'In',
   OPERATOR_NOT_IN: 'Not in',

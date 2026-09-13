@@ -30,9 +30,9 @@ module.exports = {
   CONSUMPTION_SINCE_CREATION: '自创建以来已消耗了以下资源。',
   PRICE: '价格',
   // Workspace Recource Consumption
-  WORKSPACE_CONSUMPTION: '企业空间资源消费情况',
-  WORKSPACE_CONSUMPTION_DESC: '查看企业空间的资源消费情况。',
-  WORKSPACE_RESOURCE_CONSUMPTION_DESC: '<strong>企业空间</strong>的 CPU、内存、GPU、卷等资源的消费情况',
-  WORKSPACE_PROJECT_CONSUMPTION_DESC: '企业空间中<strong>项目</strong>的 CPU、内存、GPU、卷等资源的消费情况',
+  WORKSPACE_CONSUMPTION: '租户(企业空间)资源消费情况',
+  WORKSPACE_CONSUMPTION_DESC: '查看租户(企业空间)的资源消费情况。',
+  WORKSPACE_RESOURCE_CONSUMPTION_DESC: '<strong>租户(企业空间)</strong>的 CPU、内存、GPU、卷等资源的消费情况',
+  WORKSPACE_PROJECT_CONSUMPTION_DESC: '租户(企业空间)中<strong>项目</strong>的 CPU、内存、GPU、卷等资源的消费情况',
   PROJECT_CONSUMPTION_DESC: '项目中的<strong>应用</strong>、<strong>服务</strong>、<strong>容器组</strong>的 CPU、内存、GPU、卷等资源的消费情况'
 };

@@ -28,7 +28,7 @@ module.exports = {
   RESOURCE_EVENT_SEARCH_DESC: 'A multi-dimensional resource event search tool for resources.',
   AUDIT_LOG_DESC: 'A multi-dimensional audit log search tool for resources.',
   RESOURCE_CONSUMPTION_STATISTICS: 'Resource Consumption Statistics',
-  METERING_AND_BILLING_DESC: 'View resource consumption of clusters and workspaces.',
+  METERING_AND_BILLING_DESC: 'View resource consumption of clusters and tenants (workspaces).',
   CONTAINER_LOG_SEARCH: 'Container Log Search',
   RESOURCE_EVENT_SEARCH: 'Resource Event Search',
   AUDIT_LOG_SEARCH: 'Audit Log Search',

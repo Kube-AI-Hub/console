@@ -30,9 +30,9 @@ module.exports = {
   CONSUMPTION_SINCE_CREATION: 'has consumed the following resources since it is created.',
   PRICE: 'Price',
   // Workspace Recource Consumption
-  WORKSPACE_CONSUMPTION: 'Workspace Resource Consumption',
-  WORKSPACE_CONSUMPTION_DESC: 'View the consumption information of workspace resources.',
-  WORKSPACE_RESOURCE_CONSUMPTION_DESC: 'Consumption of resources such as CPU, memory, GPU, and volumes of <strong>workspaces</strong>',
-  WORKSPACE_PROJECT_CONSUMPTION_DESC: 'Consumption of resources such as CPU, memory, GPU, and volumes of <strong>projects</strong> in workspaces',
+  WORKSPACE_CONSUMPTION: 'Tenant (Workspace) Resource Consumption',
+  WORKSPACE_CONSUMPTION_DESC: 'View the consumption information of tenant (workspace) resources.',
+  WORKSPACE_RESOURCE_CONSUMPTION_DESC: 'Consumption of resources such as CPU, memory, GPU, and volumes of <strong>tenants (workspaces)</strong>',
+  WORKSPACE_PROJECT_CONSUMPTION_DESC: 'Consumption of resources such as CPU, memory, GPU, and volumes of <strong>projects</strong> in tenants (workspaces)',
   PROJECT_CONSUMPTION_DESC: 'Consumption of CPU, memory, and GPU of <strong>apps</strong>, <strong>services</strong> and <strong>pods</strong> in projects'
 };

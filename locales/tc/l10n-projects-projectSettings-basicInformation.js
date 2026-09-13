@@ -28,11 +28,11 @@ module.exports = {
   // Manage > Edit Project Quotas
   EDIT_PROJECT_QUOTA: 'Edit Project Quota',
   PROJECT_REMAINING_QUOTAS: '項目剩餘配額',
-  WORKSPACE_REMAINING_QUOTAS: '企業空間剩餘配額',
+  WORKSPACE_REMAINING_QUOTAS: '租戶(企業空間)剩餘配額',
   // Manage > Edit Default Container Quotas
   GPU_TYPE_SCAP: 'GPU type',
   GPU_LIMIT_SCAP: 'GPU limit',
-  REQUEST_EXCEED_WORKSPACE: 'Resource requests and limits cannot exceed workspace resource limits.',
+  REQUEST_EXCEED_WORKSPACE: 'Resource requests and limits cannot exceed tenant (workspace) resource limits.',
   REQUEST_EXCEED_LIMIT: '資源預留不能超過資源限制。',
   REQUEST_EXCEED_AVAILABLE_QUOTA: 'Insufficient resources.',
   GPU_CARD_LIMIT_REQUIRED:

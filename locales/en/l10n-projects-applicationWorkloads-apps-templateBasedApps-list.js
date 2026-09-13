@@ -42,9 +42,9 @@ module.exports = {
   FROM_APP_STORE_DESC: 'Create an app from the Kube AI Hub App Store.',
   // List > Create > From App Template
   SELECT_APP_REPOSITORY: 'Select app repository',
-  CURRENT_WORKSPACE: 'Current workspace',
-  FROM_APP_TEMPLATE_DESC: 'Create an app from an app template in the current workspace or in a remote app repository.',
-  APP_TEMPLATES_MODAL_DESC: 'Select the current workspace or a remote app repository from the drop-down list to view the available app templates.',
+  CURRENT_WORKSPACE: 'Current tenant (workspace)',
+  FROM_APP_TEMPLATE_DESC: 'Create an app from an app template in the current tenant (workspace) or in a remote app repository.',
+  APP_TEMPLATES_MODAL_DESC: 'Select the current tenant (workspace) or a remote app repository from the drop-down list to view the available app templates.',
   // List > Create > From App Template > App Information
   // List > Create > From App Template > Chart Files
   // List > Edit

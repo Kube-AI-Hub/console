@@ -28,11 +28,11 @@ module.exports = {
   // Manage > Edit Project Quotas
   EDIT_PROJECT_QUOTA: '编辑项目配额',
   PROJECT_REMAINING_QUOTAS: '项目剩余配额',
-  WORKSPACE_REMAINING_QUOTAS: '企业空间剩余配额',
+  WORKSPACE_REMAINING_QUOTAS: '租户(企业空间)剩余配额',
   // Manage > Edit Default Container Quotas
   GPU_TYPE_SCAP: 'GPU 类型',
   GPU_LIMIT_SCAP: 'GPU 上限',
-  REQUEST_EXCEED_WORKSPACE: '资源预留和资源上限均不能超过企业空间资源上限。',
+  REQUEST_EXCEED_WORKSPACE: '资源预留和资源上限均不能超过租户(企业空间)资源上限。',
   REQUEST_EXCEED_LIMIT: '资源预留不能超过资源上限。',
   REQUEST_EXCEED_AVAILABLE_QUOTA: '资源不足。',
   GPU_CARD_LIMIT_REQUIRED: '已选择 GPU 类型时，必须填写卡数限制（正整数）。',
@@ -58,7 +58,7 @@ module.exports = {
   GPU_QUOTA_SECTION: 'GPU配额',
   CLUSTER_RESOURCE_REFERENCE: '集群资源参考（Allocatable 合计）',
   CLUSTER_RESOURCE_REFERENCE_DESC:
-    '为集群内各节点 allocatable 的 CPU、内存及已配置 GPU 扩展资源之和，仅供参考；不是扣减已调度负载后的剩余量，也与项目/企业空间配额不同。',
+    '为集群内各节点 allocatable 的 CPU、内存及已配置 GPU 扩展资源之和，仅供参考；不是扣减已调度负载后的剩余量，也与项目/租户(企业空间)配额不同。',
   CLUSTER_RESOURCE_REFERENCE_FEDERATED:
     '该工作负载面向多个成员集群，GPU 类型为各集群并集；各集群的 allocatable 合计不在此合并展示。',
   RESOURCE_TYPE_SCAP: '资源类型',
