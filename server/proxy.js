@@ -159,7 +159,111 @@ const csgHubApiProxy = {
   },
 }
 
+const parseCookieValue = (cookieHeader, name) => {
+  if (!cookieHeader) {
+    return ''
+  }
+  const match = String(cookieHeader).match(
+    new RegExp(`(?:^|;\\s*)${name}=([^;]*)`)
+  )
+  if (!match) {
+    return ''
+  }
+  try {
+    return decodeURIComponent(match[1])
+  } catch (err) {
+    return match[1]
+  }
+}
+
+const injectConsoleJwt = (proxyReq, req) => {
+  const existing = req.headers.authorization || req.headers.Authorization
+  if (existing) {
+    return
+  }
+  const token = parseCookieValue(req.headers.cookie, 'kah_token')
+  if (token) {
+    proxyReq.setHeader('Authorization', `Bearer ${token}`)
+  }
+}
+
 const STREAM_PROXY_TIMEOUT_MS = 30 * 60 * 1000
+
+const dongbaApiProxy = {
+  target: normalizeBaseUrl(serverConfig.dongba?.apiServer?.url),
+  changeOrigin: true,
+  ignorePath: true,
+  secure: false,
+  timeout: STREAM_PROXY_TIMEOUT_MS,
+  proxyTimeout: STREAM_PROXY_TIMEOUT_MS,
+  optionsHandle(options, req) {
+    const baseUrl = normalizeBaseUrl(serverConfig.dongba?.apiServer?.url)
+    const apiBasePath = normalizeBaseUrl(
+      serverConfig.dongba?.apiServer?.apiBasePath ||
+        '/kapis/dongba.kubesphere.io/api/v1'
+    )
+    const parsedUrl = new URL(req.url, 'http://localhost')
+    const suffix = parsedUrl.pathname.replace(/^\/dongba\/api\/v1/, '')
+    options.target = `${baseUrl}${apiBasePath}${suffix}${parsedUrl.search}`
+  },
+  events: {
+    proxyReq(proxyReq, req) {
+      injectConsoleJwt(proxyReq, req)
+    },
+    proxyRes(proxyRes, _req, res) {
+      const contentType = String(proxyRes.headers['content-type'] || '')
+      if (!/event-stream/i.test(contentType)) {
+        return
+      }
+      res.setHeader('X-Accel-Buffering', 'no')
+      res.setHeader('Cache-Control', 'no-cache, no-transform')
+    },
+  },
+}
+
+const dongbaFrontendProxy = {
+  target:
+    normalizeBaseUrl(serverConfig.dongba?.frontend?.url) ||
+    'http://dongbaf.dongba-system:3000',
+  changeOrigin: true,
+  ignorePath: true,
+  secure: false,
+  timeout: STREAM_PROXY_TIMEOUT_MS,
+  proxyTimeout: STREAM_PROXY_TIMEOUT_MS,
+  ws: true,
+  optionsHandle(options, req) {
+    const frontendBase =
+      normalizeBaseUrl(serverConfig.dongba?.frontend?.url) ||
+      'http://dongbaf.dongba-system:3000'
+    const parsedUrl = new URL(req.url, 'http://localhost')
+    let pathname = parsedUrl.pathname
+    // Vite `base=/dongba/` prefixes hashed assets in HTML; Nitro still serves
+    // `.output/public/{assets,brand}` at the site root. Strip the console
+    // prefix for those static trees if the upstream has not mirrored them.
+    if (
+      /^\/dongba\/(assets|brand)(\/|$)/.test(pathname) ||
+      /^\/dongba\/(favicon\.ico|apple-touch-icon\.png|manifest\.json|robots\.txt)$/.test(
+        pathname
+      )
+    ) {
+      pathname = pathname.replace(/^\/dongba/, '') || '/'
+    }
+    options.target = `${frontendBase}${pathname}${parsedUrl.search}`
+  },
+  events: {
+    proxyReq(proxyReq, req) {
+      injectConsoleJwt(proxyReq, req)
+    },
+    proxyRes(proxyRes, _req, res) {
+      const contentType = String(proxyRes.headers['content-type'] || '')
+      if (!/event-stream/i.test(contentType)) {
+        return
+      }
+      res.setHeader('X-Accel-Buffering', 'no')
+      res.setHeader('Cache-Control', 'no-cache, no-transform')
+    },
+  },
+}
 
 const endpointProxy = {
   target: CSGHUB_RPROXY_TARGET,
@@ -270,6 +374,8 @@ module.exports = {
   devopsWebhookProxy,
   b2iFileProxy,
   csgHubApiProxy,
+  dongbaApiProxy,
+  dongbaFrontendProxy,
   endpointProxy,
   aigatewayProxy,
   labelStudioProxy,

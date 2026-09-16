@@ -30,6 +30,8 @@ const {
   devopsWebhookProxy,
   b2iFileProxy,
   csgHubApiProxy,
+  dongbaApiProxy,
+  dongbaFrontendProxy,
   endpointProxy,
   aigatewayProxy,
   labelStudioProxy,
@@ -97,6 +99,8 @@ router
   .get('/platform-model/en/settings/locale', setCsgHubEnLocale)
   .get('/platform-model/zhHant/settings/locale', setCsgHubZhHantLocale)
   .get('/platform-model{/*path}', renderCsgHub)
+  .use(proxy('/dongba/api/v1{/*path}', dongbaApiProxy))
+  .use(proxy('/dongba{/*path}', dongbaFrontendProxy))
   .use(proxy('/endpoint{/*path}', endpointProxy))
   .use(proxy('/aigateway{/*path}', aigatewayProxy))
   .use(proxy('/devops_webhook{/*path}', devopsWebhookProxy))

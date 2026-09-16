@@ -57,6 +57,15 @@ server:
       region: ""
       bucket: ""
       enableSSL: false
+  dongba:
+    basePath: /dongba
+    frontend:
+      url: http://dongbaf.dongba-system:3000
+    apiServer:
+      # Dongba API requests are authenticated by kube-server before being
+      # proxied to dongbad through the dongba kapis group.
+      url: http://ks-apiserver
+      apiBasePath: /kapis/dongba.kubesphere.io/api/v1
 
   # docker image search default url
   dockerHubUrl: https://hub.docker.com

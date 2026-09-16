@@ -3,6 +3,19 @@ import { get } from 'lodash'
 
 const TOKEN_KEY = 'kah_token'
 
+const writeTokenCookie = token => {
+  if (typeof document === 'undefined') {
+    return
+  }
+  if (token) {
+    document.cookie = `${TOKEN_KEY}=${encodeURIComponent(
+      token
+    )};path=/;SameSite=Lax`
+    return
+  }
+  document.cookie = `${TOKEN_KEY}=;path=/;max-age=0`
+}
+
 export const getToken = () => {
   try {
     return localStorage.getItem(TOKEN_KEY)
@@ -16,6 +29,7 @@ export const setToken = (token) => {
   try {
     if (token) {
       localStorage.setItem(TOKEN_KEY, token)
+      writeTokenCookie(token)
       // Also set global token for compatibility
       if (typeof globals !== 'undefined') {
         globals.token = token
@@ -29,6 +43,7 @@ export const setToken = (token) => {
 export const removeToken = () => {
   try {
     localStorage.removeItem(TOKEN_KEY)
+    writeTokenCookie('')
     // Also clear global token
     if (typeof globals !== 'undefined') {
       globals.token = null

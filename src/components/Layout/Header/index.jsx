@@ -139,6 +139,13 @@ class Header extends React.Component {
             </Button>
             <Button
               type="flat"
+              icon="application"
+              onClick={this.handleExternalLinkClick('/dongba/')}
+            >
+              {t('DONGBA')}
+            </Button>
+            <Button
+              type="flat"
               icon="dashboard"
               onClick={this.handleLinkClick('/')}
               className={classnames({

@@ -82,7 +82,10 @@ function pathRequiresDocumentNavigation(target) {
     pathname = trimmed.split(/[?#]/)[0] || ''
   }
   return (
-    pathname === '/platform-model' || pathname.startsWith('/platform-model/')
+    pathname === '/platform-model' ||
+    pathname.startsWith('/platform-model/') ||
+    pathname === '/dongba' ||
+    pathname.startsWith('/dongba/')
   )
 }
 
