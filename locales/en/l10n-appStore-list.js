@@ -20,7 +20,7 @@ module.exports = {
   // Head
   APP_STORE: 'App Store',
   LARGE_MODEL: 'Large Model',
-  DONGBA: 'Dongba',
+  DONGBA: 'Ecosystem Plaza',
   HOME_APP_STORE_DESC: 'The official App Store of Kube AI Hub provides deployment and management features that allow users to quickly deploy apps with one click based on app templates.',
   // Discover
   DISCOVER: 'Discover',
