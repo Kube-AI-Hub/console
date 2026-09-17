@@ -62,6 +62,18 @@ class AdminDashboard extends React.Component {
     return (
       <Loading spinning={isLoading}>
         <>
+          <Panel className={styles.info} title={t('DONGBA')}>
+            <Text
+              title={t('DONGBA_DISCOVER')}
+              description={t('DONGBA_DISCOVER_DESC')}
+              onClick={() => window.open('/dongba/', '_blank')}
+            />
+            <Text
+              title={t('DONGBA_RUNTIME')}
+              description={t('DONGBA_RUNTIME_DESC')}
+              onClick={() => window.open('/dongba/console/runtime', '_blank')}
+            />
+          </Panel>
           <Panel className={styles.info} title={t('PLATFORM_INFORMATION')}>
             <Text
               title={version.replace('v', '')}

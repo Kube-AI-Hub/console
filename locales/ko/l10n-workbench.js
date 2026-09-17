@@ -39,5 +39,9 @@ module.exports = {
   NOT_FOUND_DESC: '리소스를 찾을 수 없습니다. 시스템이 {time}s 이내 <a href="{link}">워크벤치</a>로 돌아갑니다.',
   MULTI_CLUSTER_PROJECT_TIP: '프로젝트가 멀티 클러스터에 배포됩니다.',
   NO_HISTORY_TITLE: '최근에 액세스한 리소스를 찾을 수 없음',
-  NO_HISTORY_DESC: '플랫폼 리소스에 액세스할 수 있습니다.'
-};
+  NO_HISTORY_DESC: '플랫폼 리소스에 액세스할 수 있습니다.',
+  DONGBA_DISCOVER: 'Discover in Plaza',
+  DONGBA_DISCOVER_DESC: 'Open Agent Ecosystem Plaza. Deep link, not an iframe.',
+  DONGBA_RUNTIME: 'Plaza runtime',
+  DONGBA_RUNTIME_DESC: 'Open plaza runtime operations at /dongba/console/runtime.',
+}

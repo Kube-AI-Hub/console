@@ -39,5 +39,9 @@ module.exports = {
   NOT_FOUND_DESC: '🙇 對不起沒有找到相關資源，系統將在 {time}s 後返回 <a href="{link}">工作台</a>',
   MULTI_CLUSTER_PROJECT_TIP: '該資源部署在多個集群',
   NO_HISTORY_TITLE: 'No Recently Accessed Resource Found',
-  NO_HISTORY_DESC: 'You can access platform resources.'
+  NO_HISTORY_DESC: 'You can access platform resources.',
+  DONGBA_DISCOVER: '前往廣場發現',
+  DONGBA_DISCOVER_DESC: '開啟智能體生態廣場。深鏈跳轉，不使用 iframe。',
+  DONGBA_RUNTIME: '廣場 Runtime',
+  DONGBA_RUNTIME_DESC: '開啟廣場運行時維運 /dongba/console/runtime。',
 };

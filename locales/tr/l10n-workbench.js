@@ -39,5 +39,9 @@ module.exports = {
   NOT_FOUND_DESC: 'Kaynak bulunamadı. Sistem {time}s içinde <a href="{link}">Workbench</a>\'e dönecektir.',
   MULTI_CLUSTER_PROJECT_TIP: 'Proje birden çok kümeye dağıtılır.',
   NO_HISTORY_TITLE: 'Yakın Zamanda Erişilen Kaynak Bulunamadı',
-  NO_HISTORY_DESC: 'Platform kaynaklarına erişebilirsiniz.'
-};
+  NO_HISTORY_DESC: 'Platform kaynaklarına erişebilirsiniz.',
+  DONGBA_DISCOVER: 'Discover in Plaza',
+  DONGBA_DISCOVER_DESC: 'Open Agent Ecosystem Plaza. Deep link, not an iframe.',
+  DONGBA_RUNTIME: 'Plaza runtime',
+  DONGBA_RUNTIME_DESC: 'Open plaza runtime operations at /dongba/console/runtime.',
+}

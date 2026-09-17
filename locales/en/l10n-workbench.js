@@ -41,4 +41,8 @@ module.exports = {
   MULTI_CLUSTER_PROJECT_TIP: 'The project is deployed across multiple clusters.',
   NO_HISTORY_TITLE: 'No Recently Accessed Resource Found',
   NO_HISTORY_DESC: 'You can access platform resources.',
+  DONGBA_DISCOVER: 'Discover in Plaza',
+  DONGBA_DISCOVER_DESC: 'Open Agent Ecosystem Plaza. Deep link, not an iframe.',
+  DONGBA_RUNTIME: 'Plaza runtime',
+  DONGBA_RUNTIME_DESC: 'Open plaza runtime operations at /dongba/console/runtime.',
 }

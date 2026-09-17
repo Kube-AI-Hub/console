@@ -39,5 +39,9 @@ module.exports = {
   NOT_FOUND_DESC: '🙇 Lo sentimos, no se encontraron recursos relacionados, el sistema volverá a <a href="{link}">Workbench</a> después de {time} s',
   MULTI_CLUSTER_PROJECT_TIP: 'El recurso se implementa en varios grupos.',
   NO_HISTORY_TITLE: 'No Recently Accessed Resource Found',
-  NO_HISTORY_DESC: 'You can access platform resources.'
-};
+  NO_HISTORY_DESC: 'You can access platform resources.',
+  DONGBA_DISCOVER: 'Discover in Plaza',
+  DONGBA_DISCOVER_DESC: 'Open Agent Ecosystem Plaza. Deep link, not an iframe.',
+  DONGBA_RUNTIME: 'Plaza runtime',
+  DONGBA_RUNTIME_DESC: 'Open plaza runtime operations at /dongba/console/runtime.',
+}
