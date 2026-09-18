@@ -242,6 +242,7 @@ const dongbaFrontendProxy = {
     // prefix for those static trees if the upstream has not mirrored them.
     if (
       /^\/dongba\/(assets|brand)(\/|$)/.test(pathname) ||
+      /^\/dongba\/agents\/[^/]+\.svg$/.test(pathname) ||
       /^\/dongba\/(favicon\.ico|apple-touch-icon\.png|manifest\.json|robots\.txt)$/.test(
         pathname
       )
