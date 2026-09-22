@@ -67,6 +67,15 @@ server:
       url: http://ks-apiserver
       apiBasePath: /kapis/dongba.kubesphere.io/api/v1
 
+  # Same-origin shells. Mount only after the upstream URL is signed.
+  # enabled without an http(s) target does not mount and does not show the entry.
+  studio:
+    enabled: false
+    target: ""
+  operations:
+    enabled: false
+    target: ""
+
   # docker image search default url
   dockerHubUrl: https://hub.docker.com
 

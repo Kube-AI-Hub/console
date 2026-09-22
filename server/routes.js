@@ -35,6 +35,8 @@ const {
   endpointProxy,
   aigatewayProxy,
   labelStudioProxy,
+  studioProxy,
+  operationsProxy,
 } = require('./proxy')
 
 const { handleDockerhubProxy, handleHarborProxy } = require('./controllers/api')
@@ -101,6 +103,24 @@ router
   .get('/platform-model{/*path}', renderCsgHub)
   .use(proxy('/dongba/api/v1{/*path}', dongbaApiProxy))
   .use(proxy('/dongba{/*path}', dongbaFrontendProxy))
+
+function refuseUnmountedPortal(ctx) {
+  ctx.status = 404
+  ctx.body = { status: 404, reason: 'NotFound' }
+}
+
+function mountPortal(prefix, portalProxy) {
+  if (portalProxy) {
+    router.use(proxy(`${prefix}{/*path}`, portalProxy))
+    return
+  }
+  router.all(`${prefix}{/*path}`, refuseUnmountedPortal)
+}
+
+mountPortal('/studio', studioProxy)
+mountPortal('/operations', operationsProxy)
+
+router
   .use(proxy('/endpoint{/*path}', endpointProxy))
   .use(proxy('/aigateway{/*path}', aigatewayProxy))
   .use(proxy('/devops_webhook{/*path}', devopsWebhookProxy))

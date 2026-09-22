@@ -19,6 +19,7 @@
 const http = require('http')
 
 const { getServerConfig } = require('./libs/utils')
+const { resolvePortalTarget } = require('./libs/portalMounts')
 
 const { server: serverConfig } = getServerConfig()
 
@@ -364,6 +365,33 @@ const labelStudioProxy = {
   },
 }
 
+function createPortalProxy(target) {
+  const base = normalizeBaseUrl(target)
+  return {
+    target: base,
+    changeOrigin: true,
+    ignorePath: true,
+    secure: false,
+    timeout: STREAM_PROXY_TIMEOUT_MS,
+    proxyTimeout: STREAM_PROXY_TIMEOUT_MS,
+    ws: true,
+    optionsHandle(options, req) {
+      const parsedUrl = new URL(req.url, 'http://localhost')
+      options.target = `${base}${parsedUrl.pathname}${parsedUrl.search}`
+    },
+    events: {
+      proxyReq(proxyReq, req) {
+        injectConsoleJwt(proxyReq, req)
+      },
+    },
+  }
+}
+
+const studioTarget = resolvePortalTarget(serverConfig.studio)
+const operationsTarget = resolvePortalTarget(serverConfig.operations)
+const studioProxy = studioTarget ? createPortalProxy(studioTarget) : null
+const operationsProxy = operationsTarget ? createPortalProxy(operationsTarget) : null
+
 module.exports = {
   STREAM_PROXY_TIMEOUT_MS,
   CSGHUB_RPROXY_TARGET,
@@ -380,4 +408,6 @@ module.exports = {
   endpointProxy,
   aigatewayProxy,
   labelStudioProxy,
+  studioProxy,
+  operationsProxy,
 }

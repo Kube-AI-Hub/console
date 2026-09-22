@@ -19,7 +19,9 @@
 module.exports = {
   // Head
   APP_STORE: 'App Store',
-  LARGE_MODEL: 'Large Model',
+  LARGE_MODEL: 'Models and Data',
+  AGENT_WORKSHOP: 'Agent Workshop',
+  GOVERNANCE: 'Governance',
   DONGBA: 'Ecosystem Plaza',
   HOME_APP_STORE_DESC: 'The official App Store of Kube AI Hub provides deployment and management features that allow users to quickly deploy apps with one click based on app templates.',
   // Discover

@@ -19,6 +19,7 @@
 import React, { Component } from 'react'
 import { inject, observer } from 'mobx-react'
 import cookie from 'utils/cookie'
+import { safeReturnPath } from 'utils/returnPath'
 import { setToken, parseToken, getToken } from 'utils/token'
 import { loadSessionContext } from 'core/session'
 
@@ -85,7 +86,11 @@ function pathRequiresDocumentNavigation(target) {
     pathname === '/platform-model' ||
     pathname.startsWith('/platform-model/') ||
     pathname === '/dongba' ||
-    pathname.startsWith('/dongba/')
+    pathname.startsWith('/dongba/') ||
+    pathname === '/studio' ||
+    pathname.startsWith('/studio/') ||
+    pathname === '/operations' ||
+    pathname.startsWith('/operations/')
   )
 }
 
@@ -184,8 +189,9 @@ class Login extends Component {
 
   navigateAfterLogin = resp => {
     const params = new URLSearchParams(window.location.search)
-    const referer = params.get('referer')
-    const target = resp.redirectUrl || referer || '/'
+    const redirect = safeReturnPath(params.get('redirect'))
+    const referer = safeReturnPath(params.get('referer'))
+    const target = resp.redirectUrl || redirect || referer || '/'
 
     if (pathRequiresDocumentNavigation(target)) {
       window.location.assign(target)

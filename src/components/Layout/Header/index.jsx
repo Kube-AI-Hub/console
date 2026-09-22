@@ -22,6 +22,7 @@ import classnames from 'classnames'
 import { Link } from 'react-router-dom'
 import { Button, Icon, Menu, Dropdown } from '@kube-design/components'
 import { isAppsPage, getWebsiteUrl } from 'utils'
+import { visibleProductEntries } from 'utils/returnPath'
 
 import LoginInfo from '../LoginInfo'
 
@@ -54,6 +55,58 @@ class Header extends React.Component {
     window.open(url, '_blank')
   }
 
+  handleDocumentNav = url => () => {
+    window.location.assign(url)
+  }
+
+  renderProductEntry = entry => {
+    const { location } = this.props
+    const entries = {
+      workbench: {
+        title: 'WORKBENCH',
+        icon: 'dashboard',
+        onClick: this.handleLinkClick('/'),
+        active: location.pathname === '/',
+      },
+      studio: {
+        title: 'AGENT_WORKSHOP',
+        icon: 'strategy-group',
+        onClick: this.handleDocumentNav('/studio/'),
+        active: location.pathname.startsWith('/studio'),
+      },
+      models: {
+        title: 'LARGE_MODEL',
+        icon: 'ai',
+        onClick: this.handleExternalLinkClick('/platform-model/'),
+      },
+      plaza: {
+        title: 'DONGBA',
+        icon: 'application',
+        onClick: this.handleExternalLinkClick('/dongba/'),
+      },
+      operations: {
+        title: 'GOVERNANCE',
+        icon: 'monitor',
+        onClick: this.handleDocumentNav('/operations/'),
+        active: location.pathname.startsWith('/operations'),
+      },
+    }
+    const item = entries[entry]
+    return (
+      <Button
+        key={entry}
+        type="flat"
+        icon={item.icon}
+        onClick={item.onClick}
+        className={classnames({
+          [styles.active]: item.active,
+        })}
+      >
+        {t(item.title)}
+      </Button>
+    )
+  }
+
   renderDocumentList() {
     const { url, api } = getWebsiteUrl()
     return (
@@ -82,7 +135,7 @@ class Header extends React.Component {
   }
 
   render() {
-    const { className, innerRef, location } = this.props
+    const { className, innerRef } = this.props
     const logo = globals.config.logo || '/assets/logo.svg'
 
     return (
@@ -130,30 +183,9 @@ class Header extends React.Component {
                 {t('APP_STORE')}
               </Button>
             )}
-            <Button
-              type="flat"
-              icon="ai"
-              onClick={this.handleExternalLinkClick('/platform-model/')}
-            >
-              {t('LARGE_MODEL')}
-            </Button>
-            <Button
-              type="flat"
-              icon="application"
-              onClick={this.handleExternalLinkClick('/dongba/')}
-            >
-              {t('DONGBA')}
-            </Button>
-            <Button
-              type="flat"
-              icon="dashboard"
-              onClick={this.handleLinkClick('/')}
-              className={classnames({
-                [styles.active]: location.pathname === '/',
-              })}
-            >
-              {t('WORKBENCH')}
-            </Button>
+            {visibleProductEntries(
+              (globals.config && globals.config.portal) || {}
+            ).map(entry => this.renderProductEntry(entry))}
           </div>
         )}
         <div className={styles.right}>

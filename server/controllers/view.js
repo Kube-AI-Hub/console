@@ -33,7 +33,16 @@ const {
   isValidReferer,
 } = require('../libs/utils')
 
-const { client: clientConfig } = getServerConfig()
+const { portalEntryEnabled } = require('../libs/portalMounts')
+
+const serverConfigFull = getServerConfig()
+const clientConfig = {
+  ...serverConfigFull.client,
+  portal: {
+    studio: portalEntryEnabled(serverConfigFull.server.studio),
+    operations: portalEntryEnabled(serverConfigFull.server.operations),
+  },
+}
 
 const renderView = async ctx => {
   const baseGlobals = {
