@@ -70,8 +70,8 @@ server:
   # Same-origin shells. Mount only after the upstream URL is signed.
   # enabled without an http(s) target does not mount and does not show the entry.
   studio:
-    enabled: false
-    target: ""
+    enabled: true
+    target: "http://agent-platform-web.agent-platform.svc:8080"
   operations:
     enabled: false
     target: ""

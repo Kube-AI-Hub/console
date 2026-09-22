@@ -15,7 +15,12 @@ function portalEntryEnabled(section) {
   return Boolean(resolvePortalTarget(section))
 }
 
+function isStudioGatewayPath(pathname) {
+  return typeof pathname === 'string' && pathname.startsWith('/studio')
+}
+
 module.exports = {
   resolvePortalTarget,
   portalEntryEnabled,
+  isStudioGatewayPath,
 }

@@ -1,4 +1,8 @@
-const { resolvePortalTarget, portalEntryEnabled } = require('./portalMounts')
+const {
+  resolvePortalTarget,
+  portalEntryEnabled,
+  isStudioGatewayPath,
+} = require('./portalMounts')
 
 describe('portal mounts', () => {
   it('stays closed unless enabled with an http(s) target', () => {
@@ -11,5 +15,14 @@ describe('portal mounts', () => {
     )
     expect(portalEntryEnabled({ enabled: true, target: 'https://ops.internal' })).toBe(true)
     expect(portalEntryEnabled({ enabled: true, target: '' })).toBe(false)
+  })
+
+  it('treats /studio* as the workshop gateway, including api and preview', () => {
+    expect(isStudioGatewayPath('/studio')).toBe(true)
+    expect(isStudioGatewayPath('/studio/overview')).toBe(true)
+    expect(isStudioGatewayPath('/studio-api/auth/me')).toBe(true)
+    expect(isStudioGatewayPath('/studio-preview/orchestration')).toBe(true)
+    expect(isStudioGatewayPath('/platform-model')).toBe(false)
+    expect(isStudioGatewayPath('/dongba')).toBe(false)
   })
 })

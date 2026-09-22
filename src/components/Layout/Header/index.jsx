@@ -71,7 +71,7 @@ class Header extends React.Component {
       studio: {
         title: 'AGENT_WORKSHOP',
         icon: 'strategy-group',
-        onClick: this.handleDocumentNav('/studio/'),
+        onClick: this.handleDocumentNav('/studio-preview'),
         active: location.pathname.startsWith('/studio'),
       },
       models: {

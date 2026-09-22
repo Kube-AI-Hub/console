@@ -25,6 +25,8 @@ const injectOAuthCredentials = require('./middlewares/injectOAuthCredentials')
 const extractTokenFromQuery = require('./middlewares/extractTokenFromQuery')
 const checkIfExist = require('./middlewares/checkIfExist')
 
+const { isStudioGatewayPath } = require('./libs/portalMounts')
+
 const {
   k8sResourceProxy,
   devopsWebhookProxy,
@@ -117,7 +119,20 @@ function mountPortal(prefix, portalProxy) {
   router.all(`${prefix}{/*path}`, refuseUnmountedPortal)
 }
 
-mountPortal('/studio', studioProxy)
+const studioProxyAll = studioProxy ? proxy('/{*path}', studioProxy) : null
+
+function studioGateway(ctx, next) {
+  if (!isStudioGatewayPath(ctx.path)) {
+    return next()
+  }
+  if (!studioProxyAll) {
+    refuseUnmountedPortal(ctx)
+    return undefined
+  }
+  return studioProxyAll(ctx, next)
+}
+
+router.use(studioGateway)
 mountPortal('/operations', operationsProxy)
 
 router

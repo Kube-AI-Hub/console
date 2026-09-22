@@ -87,8 +87,7 @@ function pathRequiresDocumentNavigation(target) {
     pathname.startsWith('/platform-model/') ||
     pathname === '/dongba' ||
     pathname.startsWith('/dongba/') ||
-    pathname === '/studio' ||
-    pathname.startsWith('/studio/') ||
+    pathname.startsWith('/studio') ||
     pathname === '/operations' ||
     pathname.startsWith('/operations/')
   )
