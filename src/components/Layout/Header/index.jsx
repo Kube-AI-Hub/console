@@ -152,7 +152,7 @@ class Header extends React.Component {
         <Link to={isAppsPage() && !globals.user ? '/apps' : '/'}>
           <svg
             className={styles.logo}
-            viewBox="0 0 148 20"
+            viewBox="0 0 24 20"
             preserveAspectRatio="xMidYMid meet"
           >
             <use href={isAppsPage() ? `/assets/login-logo.svg` : logo} />
