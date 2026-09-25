@@ -71,6 +71,7 @@ const {
   setCsgHubZhLocale,
   setCsgHubEnLocale,
   setCsgHubZhHantLocale,
+  setCsgHubJaLocale,
 } = require('./controllers/csghub')
 
 const parseBody = convert(
@@ -102,6 +103,7 @@ router
   .get('/platform-model/zh/settings/locale', setCsgHubZhLocale)
   .get('/platform-model/en/settings/locale', setCsgHubEnLocale)
   .get('/platform-model/zhHant/settings/locale', setCsgHubZhHantLocale)
+  .get('/platform-model/ja/settings/locale', setCsgHubJaLocale)
   .get('/platform-model{/*path}', renderCsgHub)
   .use(proxy('/dongba/api/v1{/*path}', dongbaApiProxy))
   .use(proxy('/dongba{/*path}', dongbaFrontendProxy))

@@ -132,4 +132,5 @@ module.exports = {
   setCsgHubZhLocale: setLocaleCookie('zh'),
   setCsgHubEnLocale: setLocaleCookie('en'),
   setCsgHubZhHantLocale: setLocaleCookie('zhHant'),
+  setCsgHubJaLocale: setLocaleCookie('ja'),
 }
