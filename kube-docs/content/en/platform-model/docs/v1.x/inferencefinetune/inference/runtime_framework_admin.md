@@ -12,6 +12,7 @@ Sign in as a platform administrator and open **Admin Console → Compute Resourc
 
 | Tab | Use |
 |-----|-----|
+| **Spaces** | Runtime images shared by Gradio / Streamlit / MCP Spaces (`frame_name=space`); built-ins come from the server's `configs/space` |
 | **Inference Engine** | Images and launch settings for dedicated endpoints and public inference |
 | **Finetune** | Fine-tuning images and engine args |
 | **Evaluation** | Evaluation images and engine args |
