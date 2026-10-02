@@ -9,6 +9,9 @@
 # production
 /dist
 
+# build staging
+/.build
+
 # misc
 .DS_Store
 
