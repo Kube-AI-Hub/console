@@ -17,7 +17,7 @@
 
 import React from 'react'
 import { observer } from 'mobx-react'
-import { get } from 'lodash'
+import { get, isEmpty, last } from 'lodash'
 
 import {
   getAreaChartOps,
@@ -108,11 +108,15 @@ class RdmaResource extends React.Component {
     this.setState({ ports: Array.isArray(ports) ? ports : [] })
   }
 
-  // Last sample of a vector result, or 0 when the series is absent. Absence is
-  // normal on a cluster without IB hardware and is not an error.
+  // Last sample of a series, or 0 when it is absent. The monitoring API returns a
+  // matrix (data.result[0].values) for range queries and a vector
+  // (data.result[0].value) for instant ones; handle both. Absence is normal on a
+  // cluster without IB hardware and is not an error.
   getLastValue = metric => {
     const first = get(this.metrics, `${metric}.data.result[0]`, {})
-    return parseFloat(get(first, 'value[1]', 0)) || 0
+    const values = get(first, 'values', [])
+    const point = !isEmpty(values) ? last(values) : get(first, 'value', [])
+    return parseFloat(get(point, '[1]', 0)) || 0
   }
 
   // Nodes with at least one port that is not active/up, worst first. This is the
