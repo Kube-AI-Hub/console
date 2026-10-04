@@ -180,46 +180,40 @@ class RdmaResource extends React.Component {
   ]
 
   getContentOptions = () => {
+    // One chart per tab. The tab order matches getTabOptions: health, ports,
+    // throughput, errors. `data` must be a flat array of series results (the
+    // shape getAreaChartOps expects), not an array of result arrays.
+    const series = (metric, fallback = []) =>
+      get(this.metrics, `${metric}.data.result`, fallback)
+
     const charts = [
       {
         type: 'utilisation',
-        title: 'RDMA_PORT_STATUS',
-        unit: '',
-        legend: ['RDMA_PORT_UP', 'RDMA_PORT_TOTAL'],
-        data: [
-          get(this.metrics, `${MetricTypes.port_up}.data.result`, []),
-          get(this.metrics, `${MetricTypes.port_total}.data.result`, []),
-        ],
+        title: 'RDMA_HEALTH',
+        unit: '%',
+        legend: ['RDMA_HEALTH'],
+        data: [series(MetricTypes.health)],
       },
       {
         type: 'utilisation',
         title: 'RDMA_PORT_STATUS',
         unit: '',
         legend: ['RDMA_PORT_UP', 'RDMA_PORT_TOTAL'],
-        data: [
-          get(this.metrics, `${MetricTypes.port_up}.data.result`, []),
-          get(this.metrics, `${MetricTypes.port_total}.data.result`, []),
-        ],
+        data: [series(MetricTypes.port_up), series(MetricTypes.port_total)],
       },
       {
         type: 'throughput',
         title: 'RDMA_THROUGHPUT',
         unitType: 'throughput',
         legend: ['RDMA_OUT', 'RDMA_IN'],
-        data: [
-          get(this.metrics, `${MetricTypes.tx_bytes}.data.result`, []),
-          get(this.metrics, `${MetricTypes.rx_bytes}.data.result`, []),
-        ],
+        data: [series(MetricTypes.tx_bytes), series(MetricTypes.rx_bytes)],
       },
       {
         type: 'utilisation',
         title: 'RDMA_ERRORS',
         unit: '',
         legend: ['RDMA_RX_ERRORS', 'RDMA_RETRANS'],
-        data: [
-          get(this.metrics, `${MetricTypes.rx_errors}.data.result`, []),
-          get(this.metrics, `${MetricTypes.retrans}.data.result`, []),
-        ],
+        data: [series(MetricTypes.rx_errors), series(MetricTypes.retrans)],
       },
     ]
 
@@ -236,7 +230,11 @@ class RdmaResource extends React.Component {
 
   renderChart(option) {
     const config = getAreaChartOps(option)
-    if (!config.data || config.data.length === 0) return null
+    if (!config.data || config.data.length === 0) {
+      // Every series is empty: either the metric is not collected on this
+      // cluster or the selected range has no samples yet.
+      return <div className={styles.abnormalEmpty}>{t('NO_DATA')}</div>
+    }
     return <SimpleArea key={option.title} width="100%" {...config} />
   }
 
