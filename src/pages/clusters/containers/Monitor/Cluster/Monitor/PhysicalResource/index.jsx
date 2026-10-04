@@ -248,7 +248,7 @@ class ClusterMonitorings extends React.Component {
       title: 'RDMA_HEALTH',
       unit: '%',
       legend: ['RDMA_HEALTH'],
-      data: get(this.metrics, `${MetricTypes.ib_health}.data.result[0]`, {}),
+      data: [get(this.metrics, `${MetricTypes.ib_health}.data.result[0]`, {})],
     },
     {
       type: 'count',
@@ -275,11 +275,9 @@ class ClusterMonitorings extends React.Component {
       title: 'RDMA_LINK_RATE',
       unitType: 'ib-link-rate',
       legend: ['RDMA_LINK_SPEED_TOTAL'],
-      data: get(
-        this.metrics,
-        `${MetricTypes.ib_link_speed}.data.result[0]`,
-        {}
-      ),
+      data: [
+        get(this.metrics, `${MetricTypes.ib_link_speed}.data.result[0]`, {}),
+      ],
     },
     {
       type: 'count',
@@ -297,11 +295,9 @@ class ClusterMonitorings extends React.Component {
       title: 'RDMA_LINK_DOWNED',
       unit: '',
       legend: ['RDMA_LINK_DOWNED'],
-      data: get(
-        this.metrics,
-        `${MetricTypes.ib_link_downed}.data.result[0]`,
-        {}
-      ),
+      data: [
+        get(this.metrics, `${MetricTypes.ib_link_downed}.data.result[0]`, {}),
+      ],
     },
   ]
 
