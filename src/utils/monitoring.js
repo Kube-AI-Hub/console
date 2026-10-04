@@ -71,6 +71,12 @@ const UnitTypes = {
     conditions: [1024 ** 2 / 8, 1024 / 8, 0],
     units: ['Mbps', 'Kbps', 'bps'],
   },
+  // Link rate for InfiniBand ports, which are quoted in bits per second
+  // (400G, 100G). Node-exporter reports bytes per second.
+  'ib-link-rate': {
+    conditions: [1000 ** 4, 1000 ** 3, 1000 ** 2, 1000, 0],
+    units: ['Tbps', 'Gbps', 'Mbps', 'Kbps', 'bps'],
+  },
   number: {
     conditions: [1000 ** 4, 1000 ** 3, 1000 ** 2, 1000, 0],
     units: ['T', 'G', 'M', 'K', ''],
@@ -178,6 +184,12 @@ export const getValueByUnit = (num, unit, precision = 2) => {
       break
     case 'Mbps':
       value = (value * 8) / 1024 / 1024
+      break
+    case 'Gbps':
+    case 'Tbps':
+      // InfiniBand link rates: node-exporter reports bytes/s, IB is quoted in
+      // bits/s (400G per port, not 50GB).
+      value = (value * 8) / 1000 ** (unit === 'Gbps' ? 3 : 4)
       break
     case 'ms':
       value *= 1000

@@ -120,4 +120,11 @@ module.exports = {
   // List > reset
   RESET_ALERTING_POLICY: '重置规则组',
   RESET_ALERTING_POLICY_DESC: '您确定重置规则组吗？',
+  // RDMA / InfiniBand alerting metrics
+  RDMA_PORT_DOWN: 'RDMA 端口断开',
+  RDMA_PORT_DOWN_TCAP: 'RDMA 端口断开',
+  RDMA_LINK_DOWNED_TCAP: 'RDMA 链路中断',
+  RDMA_RX_ERRORS_TCAP: 'RDMA 接收错误',
+  RDMA_RETRANS_TCAP: 'RDMA 重传',
+  RDMA_VL15_DROPPED_TCAP: 'RDMA VL15 丢弃',
 }

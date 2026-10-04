@@ -159,4 +159,17 @@ module.exports = {
   SORT_BY_NAMESPACE_MEMORY_USAGE_WO_CACHE: 'Sort by memory usage',
   POD_USAGE: 'Pod Usage',
   EXPORT: 'Export',
+  // RDMA / InfiniBand cluster card
+  RDMA_STATUS: 'RDMA Status',
+  RDMA_HEALTH: 'Port Health',
+  RDMA_PORT_UP: 'Active Ports',
+  RDMA_PORT_TOTAL: 'Total Ports',
+  RDMA_ABNORMAL_NODES: 'Nodes With Abnormal Ports',
+  RDMA_NO_ABNORMAL_NODES: 'All RDMA ports are active.',
+  RDMA_ABNORMAL_PORTS: '{down}/{total} ports not active',
+  RDMA_LINK_SPEED_TOTAL: 'Total Link Rate',
+  RDMA_OUT: 'Transmitted',
+  RDMA_IN: 'Received',
+  RDMA_RX_ERRORS: 'Receive Errors',
+  RDMA_RETRANS: 'Retransmits',
 }

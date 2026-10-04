@@ -40,6 +40,7 @@ import { Card } from 'components/Base'
 import { StatusCircle } from 'components/Cards/Monitoring'
 import {
   ClusterResourceStatus,
+  RdmaResourceStatus,
   ETCDStatusTab,
   ServiceComponentStatus,
 } from 'clusters/components/Cards/Monitoring'
@@ -510,6 +511,7 @@ class Overview extends React.Component {
         <Columns>
           <Column className="is-12">
             <ClusterResourceStatus cluster={this.cluster} />
+            <RdmaResourceStatus cluster={this.cluster} />
             {this.supportETCD && <ETCDStatusTab cluster={this.cluster} />}
             <ServiceComponentStatus cluster={this.cluster} />
           </Column>

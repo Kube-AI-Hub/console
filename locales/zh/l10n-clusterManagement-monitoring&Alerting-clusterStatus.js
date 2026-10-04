@@ -157,5 +157,18 @@ module.exports = {
   SORT_BY_NODE_LOAD1: '按 1 分钟 CPU 平均负载排行',
   SORT_BY_NAMESPACE_MEMORY_USAGE_WO_CACHE: '按内存用量排行',
   POD_USAGE: '容器组用量',
-  EXPORT: '导出'
+  EXPORT: '导出',
+  // RDMA / InfiniBand cluster card
+  RDMA_STATUS: 'RDMA 状态',
+  RDMA_HEALTH: '端口健康度',
+  RDMA_PORT_UP: '活动端口',
+  RDMA_PORT_TOTAL: '端口总数',
+  RDMA_ABNORMAL_NODES: '存在异常端口的节点',
+  RDMA_NO_ABNORMAL_NODES: '所有 RDMA 端口均正常。',
+  RDMA_ABNORMAL_PORTS: '{down}/{total} 个端口未激活',
+  RDMA_LINK_SPEED_TOTAL: '链路速率合计',
+  RDMA_OUT: '发送',
+  RDMA_IN: '接收',
+  RDMA_RX_ERRORS: '接收错误',
+  RDMA_RETRANS: '重传',
 };

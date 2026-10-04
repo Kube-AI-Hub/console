@@ -1,0 +1,75 @@
+.content {
+  padding: 12px 0;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 0 20px;
+
+  .statTitle {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.67;
+    color: inherit;
+    opacity: 0.7;
+  }
+
+  .statValue {
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 32px;
+
+    span {
+      font-size: 12px;
+    }
+
+    em {
+      margin-left: 4px;
+      font-size: 12px;
+      font-style: normal;
+      opacity: 0.7;
+    }
+  }
+}
+
+.abnormal {
+  padding: 0 0 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+  .abnormalTitle {
+    margin-bottom: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    opacity: 0.7;
+  }
+}
+
+.abnormalEmpty {
+  padding: 8px 0 12px;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.abnormalList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px 0;
+    font-size: 12px;
+  }
+
+  .abnormalNode {
+    font-weight: 600;
+  }
+
+  .abnormalCount {
+    opacity: 0.7;
+  }
+}

@@ -14,6 +14,7 @@ import ConditionCard from './ConditionCard'
 import TaintCard from './TaintCard'
 import GpuTopology from './GpuTopology'
 import GpuCardList from './GpuCardList'
+import RdmaPortList from './RdmaPortList'
 import * as styles from './index.scss'
 
 const STANDARD_CAPACITY_KEYS = ['cpu', 'memory', 'pods', 'ephemeral-storage']
@@ -405,6 +406,9 @@ const METRIC_TYPES = [
   'node_disk_size_capacity',
   'node_time_seconds',
   'node_timex_sync_status',
+  'node_ib_port_up',
+  'node_ib_port_total',
+  'node_ib_link_speed',
 ]
 
 export default
@@ -415,6 +419,7 @@ class RunningStatus extends React.Component {
     super(props)
     this.state = {
       gpulist: [],
+      rdmaPorts: [],
       step: '3m',
       times: 20,
       activeTab: 'gpu',
@@ -430,6 +435,21 @@ class RunningStatus extends React.Component {
   componentDidMount() {
     this.fetchData()
     this.fetchGpuData()
+    this.fetchRdmaData()
+  }
+
+  fetchRdmaData = async () => {
+    try {
+      const result = await request.get(
+        '/kapis/rdma.kubesphere.io/v1alpha1/ports',
+        { nodeName: this.store.detail.name }
+      )
+      this.setState({
+        rdmaPorts: get(result, 'items', []),
+      })
+    } catch (e) {
+      this.setState({ rdmaPorts: [] })
+    }
   }
 
   fetchGpuData = async () => {
@@ -993,6 +1013,7 @@ class RunningStatus extends React.Component {
         {this.renderConditions()}
         {this.renderTanits()}
         <GpuCardList dataSource={this.state.gpulist} />
+        <RdmaPortList dataSource={this.state.rdmaPorts} />
         {this.renderGpuTopology()}
       </div>
     )

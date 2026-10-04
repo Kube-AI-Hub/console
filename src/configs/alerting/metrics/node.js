@@ -128,6 +128,38 @@ export const NODE_ALERTING_CONFIG = {
     prefixIcon: 'pod',
     ruleConfig: PERCENT_RULE_CONFIG,
   },
+  // RDMA / InfiniBand. The metric names here are the Prometheus recording rules,
+  // so alert expressions do not need to repeat the rate window.
+  'ib:portDown': {
+    label: 'RDMA_PORT_DOWN',
+    tcapLabel: 'RDMA_PORT_DOWN_TCAP',
+    prefixIcon: 'network',
+    ruleConfig: BASE_RULE_CONFIG,
+  },
+  'ib:linkDowned': {
+    label: 'RDMA_LINK_DOWNED',
+    tcapLabel: 'RDMA_LINK_DOWNED_TCAP',
+    prefixIcon: 'network',
+    ruleConfig: BASE_RULE_CONFIG,
+  },
+  'ib:rxErrors': {
+    label: 'RDMA_RX_ERRORS',
+    tcapLabel: 'RDMA_RX_ERRORS_TCAP',
+    prefixIcon: 'network',
+    ruleConfig: BASE_RULE_CONFIG,
+  },
+  'ib:retrans': {
+    label: 'RDMA_RETRANS',
+    tcapLabel: 'RDMA_RETRANS_TCAP',
+    prefixIcon: 'network',
+    ruleConfig: BASE_RULE_CONFIG,
+  },
+  'ib:vl15Dropped': {
+    label: 'RDMA_VL15_DROPPED',
+    tcapLabel: 'RDMA_VL15_DROPPED_TCAP',
+    prefixIcon: 'network',
+    ruleConfig: BASE_RULE_CONFIG,
+  },
 }
 
 export default NODE_ALERTING_CONFIG

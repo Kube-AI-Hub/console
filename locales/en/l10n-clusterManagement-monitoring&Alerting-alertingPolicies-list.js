@@ -125,4 +125,11 @@ module.exports = {
   // List > reset
   RESET_ALERTING_POLICY: 'Reset Rule Group',
   RESET_ALERTING_POLICY_DESC: 'Are you sure you want to reset the rule group?',
+  // RDMA / InfiniBand alerting metrics
+  RDMA_PORT_DOWN: 'RDMA Port Down',
+  RDMA_PORT_DOWN_TCAP: 'RDMA port down',
+  RDMA_LINK_DOWNED_TCAP: 'RDMA link down',
+  RDMA_RX_ERRORS_TCAP: 'RDMA receive errors',
+  RDMA_RETRANS_TCAP: 'RDMA retransmits',
+  RDMA_VL15_DROPPED_TCAP: 'RDMA VL15 dropped',
 }

@@ -50,6 +50,19 @@ const MetricTypes = {
   disk_write_throughput: 'node_disk_write_throughput',
   net_transmitted: 'node_net_bytes_transmitted',
   net_received: 'node_net_bytes_received',
+  // InfiniBand / RDMA. These read the Prometheus recording rules, so each node
+  // yields one series per metric rather than one per port.
+  ib_rx_bytes: 'node_ib_rx_bytes',
+  ib_tx_bytes: 'node_ib_tx_bytes',
+  ib_rx_errors: 'node_ib_rx_errors',
+  ib_link_downed: 'node_ib_link_downed',
+  ib_discards: 'node_ib_discards',
+  ib_vl15_dropped: 'node_ib_vl15_dropped',
+  ib_retrans: 'node_ib_retrans',
+  ib_out_of_sequence: 'node_ib_out_of_sequence',
+  ib_slow_restart: 'node_ib_slow_restart',
+  ib_port_up: 'node_ib_port_up',
+  ib_port_total: 'node_ib_port_total',
 }
 
 @inject('detailStore')
@@ -276,6 +289,66 @@ class Monitorings extends React.Component {
             {}
           ),
           get(this.metrics, `${MetricTypes.net_received}.data.result[0]`, {}),
+        ],
+      },
+      {
+        type: 'throughput',
+        title: 'RDMA_THROUGHPUT',
+        unitType: 'throughput',
+        legend: ['RDMA_OUT', 'RDMA_IN'],
+        data: [
+          get(this.metrics, `${MetricTypes.ib_tx_bytes}.data.result[0]`, {}),
+          get(this.metrics, `${MetricTypes.ib_rx_bytes}.data.result[0]`, {}),
+        ],
+      },
+      {
+        type: 'utilisation',
+        title: 'RDMA_PORT_STATUS',
+        unit: '',
+        legend: ['RDMA_PORT_UP', 'RDMA_PORT_TOTAL'],
+        data: [
+          get(this.metrics, `${MetricTypes.ib_port_up}.data.result[0]`, {}),
+          get(this.metrics, `${MetricTypes.ib_port_total}.data.result[0]`, {}),
+        ],
+      },
+      {
+        type: 'utilisation',
+        title: 'RDMA_ERRORS',
+        unit: '',
+        legend: [
+          'RDMA_RX_ERRORS',
+          'RDMA_LINK_DOWNED',
+          'RDMA_DISCARDS',
+          'RDMA_VL15_DROPPED',
+        ],
+        data: [
+          get(this.metrics, `${MetricTypes.ib_rx_errors}.data.result[0]`, {}),
+          get(this.metrics, `${MetricTypes.ib_link_downed}.data.result[0]`, {}),
+          get(this.metrics, `${MetricTypes.ib_discards}.data.result[0]`, {}),
+          get(
+            this.metrics,
+            `${MetricTypes.ib_vl15_dropped}.data.result[0]`,
+            {}
+          ),
+        ],
+      },
+      {
+        type: 'utilisation',
+        title: 'RDMA_CONGESTION',
+        unit: '',
+        legend: ['RDMA_RETRANS', 'RDMA_OUT_OF_SEQUENCE', 'RDMA_SLOW_RESTART'],
+        data: [
+          get(this.metrics, `${MetricTypes.ib_retrans}.data.result[0]`, {}),
+          get(
+            this.metrics,
+            `${MetricTypes.ib_out_of_sequence}.data.result[0]`,
+            {}
+          ),
+          get(
+            this.metrics,
+            `${MetricTypes.ib_slow_restart}.data.result[0]`,
+            {}
+          ),
         ],
       },
     ]
