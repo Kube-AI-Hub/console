@@ -51,6 +51,18 @@ const MetricTypes = {
   pod_running_count: 'cluster_pod_running_count',
   pod_abnormal_count: 'cluster_pod_abnormal_count',
   pod_completed_count: 'cluster_pod_succeeded_count',
+  // InfiniBand / RDMA. These read the Prometheus recording rules, so each metric
+  // is a single cluster-wide series.
+  ib_health: 'cluster_ib_health',
+  ib_port_up: 'cluster_ib_port_up',
+  ib_port_total: 'cluster_ib_port_total',
+  ib_rx_bytes: 'cluster_ib_rx_bytes',
+  ib_tx_bytes: 'cluster_ib_tx_bytes',
+  ib_link_speed: 'cluster_ib_link_speed',
+  ib_rx_errors: 'cluster_ib_rx_errors',
+  ib_retrans: 'cluster_ib_retrans',
+  ib_discards: 'cluster_ib_discards',
+  ib_link_downed: 'cluster_ib_link_downed',
 }
 
 @inject('rootStore')
@@ -230,6 +242,66 @@ class ClusterMonitorings extends React.Component {
           {}
         ),
       ],
+    },
+    {
+      type: 'utilisation',
+      title: 'RDMA_HEALTH',
+      unit: '%',
+      legend: ['RDMA_HEALTH'],
+      data: get(this.metrics, `${MetricTypes.ib_health}.data.result[0]`, {}),
+    },
+    {
+      type: 'count',
+      title: 'RDMA_PORT_STATUS',
+      unit: '',
+      legend: ['RDMA_PORT_UP', 'RDMA_PORT_TOTAL'],
+      data: [
+        get(this.metrics, `${MetricTypes.ib_port_up}.data.result[0]`, {}),
+        get(this.metrics, `${MetricTypes.ib_port_total}.data.result[0]`, {}),
+      ],
+    },
+    {
+      type: 'throughput',
+      title: 'RDMA_THROUGHPUT',
+      unitType: 'throughput',
+      legend: ['RDMA_OUT', 'RDMA_IN'],
+      data: [
+        get(this.metrics, `${MetricTypes.ib_tx_bytes}.data.result[0]`, {}),
+        get(this.metrics, `${MetricTypes.ib_rx_bytes}.data.result[0]`, {}),
+      ],
+    },
+    {
+      type: 'throughput',
+      title: 'RDMA_LINK_RATE',
+      unitType: 'ib-link-rate',
+      legend: ['RDMA_LINK_SPEED_TOTAL'],
+      data: get(
+        this.metrics,
+        `${MetricTypes.ib_link_speed}.data.result[0]`,
+        {}
+      ),
+    },
+    {
+      type: 'count',
+      title: 'RDMA_ERRORS',
+      unit: '',
+      legend: ['RDMA_RX_ERRORS', 'RDMA_RETRANS', 'RDMA_DISCARDS'],
+      data: [
+        get(this.metrics, `${MetricTypes.ib_rx_errors}.data.result[0]`, {}),
+        get(this.metrics, `${MetricTypes.ib_retrans}.data.result[0]`, {}),
+        get(this.metrics, `${MetricTypes.ib_discards}.data.result[0]`, {}),
+      ],
+    },
+    {
+      type: 'count',
+      title: 'RDMA_LINK_DOWNED',
+      unit: '',
+      legend: ['RDMA_LINK_DOWNED'],
+      data: get(
+        this.metrics,
+        `${MetricTypes.ib_link_downed}.data.result[0]`,
+        {}
+      ),
     },
   ]
 

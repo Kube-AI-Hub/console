@@ -167,6 +167,7 @@ module.exports = {
   RDMA_NO_ABNORMAL_NODES: '所有 RDMA 端口均正常。',
   RDMA_ABNORMAL_PORTS: '{down}/{total} 个端口未激活',
   RDMA_LINK_SPEED_TOTAL: '链路速率合计',
+  RDMA_LINK_RATE: 'RDMA 链路速率',
   RDMA_OUT: '发送',
   RDMA_IN: '接收',
   RDMA_RX_ERRORS: '接收错误',

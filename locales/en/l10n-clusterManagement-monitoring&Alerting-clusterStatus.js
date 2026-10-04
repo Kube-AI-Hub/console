@@ -168,6 +168,7 @@ module.exports = {
   RDMA_NO_ABNORMAL_NODES: 'All RDMA ports are active.',
   RDMA_ABNORMAL_PORTS: '{down}/{total} ports not active',
   RDMA_LINK_SPEED_TOTAL: 'Total Link Rate',
+  RDMA_LINK_RATE: 'RDMA Link Rate',
   RDMA_OUT: 'Transmitted',
   RDMA_IN: 'Received',
   RDMA_RX_ERRORS: 'Receive Errors',
