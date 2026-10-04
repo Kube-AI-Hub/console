@@ -183,8 +183,8 @@ class RdmaResource extends React.Component {
         unit: '',
         legend: ['RDMA_PORT_UP', 'RDMA_PORT_TOTAL'],
         data: [
-          get(this.metrics, `${MetricTypes.port_up}.data.result`),
-          get(this.metrics, `${MetricTypes.port_total}.data.result`),
+          get(this.metrics, `${MetricTypes.port_up}.data.result`, []),
+          get(this.metrics, `${MetricTypes.port_total}.data.result`, []),
         ],
       },
       {
@@ -193,8 +193,8 @@ class RdmaResource extends React.Component {
         unit: '',
         legend: ['RDMA_PORT_UP', 'RDMA_PORT_TOTAL'],
         data: [
-          get(this.metrics, `${MetricTypes.port_up}.data.result`),
-          get(this.metrics, `${MetricTypes.port_total}.data.result`),
+          get(this.metrics, `${MetricTypes.port_up}.data.result`, []),
+          get(this.metrics, `${MetricTypes.port_total}.data.result`, []),
         ],
       },
       {
@@ -203,8 +203,8 @@ class RdmaResource extends React.Component {
         unitType: 'throughput',
         legend: ['RDMA_OUT', 'RDMA_IN'],
         data: [
-          get(this.metrics, `${MetricTypes.tx_bytes}.data.result`),
-          get(this.metrics, `${MetricTypes.rx_bytes}.data.result`),
+          get(this.metrics, `${MetricTypes.tx_bytes}.data.result`, []),
+          get(this.metrics, `${MetricTypes.rx_bytes}.data.result`, []),
         ],
       },
       {
@@ -213,8 +213,8 @@ class RdmaResource extends React.Component {
         unit: '',
         legend: ['RDMA_RX_ERRORS', 'RDMA_RETRANS'],
         data: [
-          get(this.metrics, `${MetricTypes.rx_errors}.data.result`),
-          get(this.metrics, `${MetricTypes.retrans}.data.result`),
+          get(this.metrics, `${MetricTypes.rx_errors}.data.result`, []),
+          get(this.metrics, `${MetricTypes.retrans}.data.result`, []),
         ],
       },
     ]

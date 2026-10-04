@@ -222,6 +222,9 @@ export const getChartData = ({
   let maxX = 0
   const valueMap = {}
   valuesData.forEach((values, index) => {
+    // A series may be missing entirely (metric not collected yet); skip it
+    // rather than throwing, which would blank the whole page.
+    if (!isArray(values)) return
     values.forEach(item => {
       const time = parseInt(get(item, [0], 0), 10)
       const value = get(item, [1])
@@ -269,6 +272,8 @@ export const getAreaChartOps = ({
   ...rest
 }) => {
   const seriesData = isArray(data) ? data : []
+  // Guard each series individually: a metric with no data arrives as undefined,
+  // and getChartData iterates every entry.
   const valuesData = seriesData.map(result => get(result, 'values') || [])
 
   let unit = unitType
