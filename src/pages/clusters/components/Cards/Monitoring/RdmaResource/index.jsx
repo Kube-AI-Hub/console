@@ -102,8 +102,10 @@ class RdmaResource extends React.Component {
   }
 
   fetchPorts = async () => {
+    // fetchList already swallows its own errors and returns [], but guard the
+    // shape anyway: the ports list must never be able to break the overview.
     const ports = await this.rdmaStore.fetchList({ limit: -1 })
-    this.setState({ ports: ports || [] })
+    this.setState({ ports: Array.isArray(ports) ? ports : [] })
   }
 
   // Last sample of a vector result, or 0 when the series is absent. Absence is
@@ -117,7 +119,10 @@ class RdmaResource extends React.Component {
   // "which node do I go look at" list for an operator.
   getAbnormalNodes = () => {
     const byNode = {}
-    this.state.ports.forEach(port => {
+    // Defensive: a failed ports fetch must not take the whole overview down.
+    const ports = Array.isArray(this.state.ports) ? this.state.ports : []
+    ports.forEach(port => {
+      if (!port || !port.nodeName) return
       const entry = byNode[port.nodeName] || {
         nodeName: port.nodeName,
         total: 0,

@@ -15,7 +15,7 @@
  * along with KubeSphere Console.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { action, observable } from 'mobx'
+import { action } from 'mobx'
 import { get } from 'lodash'
 
 import Base from './base'
@@ -24,9 +24,6 @@ const RDMA_API = '/kapis/rdma.kubesphere.io/v1alpha1/ports'
 
 export default class RdmaStore extends Base {
   module = 'rdmaPorts'
-
-  @observable
-  isLoading = false
 
   getListUrl = () => RDMA_API
 
@@ -43,8 +40,6 @@ export default class RdmaStore extends Base {
     health,
     ...rest
   } = {}) {
-    this.isLoading = true
-
     const params = { limit, page, sortBy, ascending }
     if (nodeName) params.nodeName = nodeName
     if (device) params.device = device
@@ -78,7 +73,6 @@ export default class RdmaStore extends Base {
         ascending: params.ascending,
         isLoading: false,
       })
-      this.isLoading = false
       return this.list.data
     } catch (e) {
       this.list.update({
@@ -88,7 +82,6 @@ export default class RdmaStore extends Base {
         limit,
         isLoading: false,
       })
-      this.isLoading = false
       return []
     }
   }
