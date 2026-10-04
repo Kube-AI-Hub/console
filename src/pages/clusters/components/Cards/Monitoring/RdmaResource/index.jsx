@@ -180,11 +180,13 @@ class RdmaResource extends React.Component {
   ]
 
   getContentOptions = () => {
-    // One chart per tab. The tab order matches getTabOptions: health, ports,
-    // throughput, errors. `data` must be a flat array of series results (the
-    // shape getAreaChartOps expects), not an array of result arrays.
-    const series = (metric, fallback = []) =>
-      get(this.metrics, `${metric}.data.result`, fallback)
+    // One chart per tab, in the same order as getTabOptions.
+    //
+    // `data` takes one entry per legend item and each entry must be a single
+    // series result (with a `values` array) -- the same shape every other
+    // monitoring card uses. These cluster_ib_* metrics are already aggregated to
+    // one series, so result[0] is the whole series.
+    const point = metric => get(this.metrics, `${metric}.data.result[0]`, {})
 
     const charts = [
       {
@@ -192,28 +194,28 @@ class RdmaResource extends React.Component {
         title: 'RDMA_HEALTH',
         unit: '%',
         legend: ['RDMA_HEALTH'],
-        data: [series(MetricTypes.health)],
+        data: [point(MetricTypes.health)],
       },
       {
         type: 'utilisation',
         title: 'RDMA_PORT_STATUS',
         unit: '',
         legend: ['RDMA_PORT_UP', 'RDMA_PORT_TOTAL'],
-        data: [series(MetricTypes.port_up), series(MetricTypes.port_total)],
+        data: [point(MetricTypes.port_up), point(MetricTypes.port_total)],
       },
       {
         type: 'throughput',
         title: 'RDMA_THROUGHPUT',
         unitType: 'throughput',
         legend: ['RDMA_OUT', 'RDMA_IN'],
-        data: [series(MetricTypes.tx_bytes), series(MetricTypes.rx_bytes)],
+        data: [point(MetricTypes.tx_bytes), point(MetricTypes.rx_bytes)],
       },
       {
         type: 'utilisation',
         title: 'RDMA_ERRORS',
         unit: '',
         legend: ['RDMA_RX_ERRORS', 'RDMA_RETRANS'],
-        data: [series(MetricTypes.rx_errors), series(MetricTypes.retrans)],
+        data: [point(MetricTypes.rx_errors), point(MetricTypes.retrans)],
       },
     ]
 
