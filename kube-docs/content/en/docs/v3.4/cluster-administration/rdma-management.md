@@ -89,6 +89,10 @@ Switch to the **Monitoring** tab on the node details page to see that node's RDM
 
 On **Monitoring & Alerting > Physical Resources Monitoring**, the same data is available cluster-wide, including port health, port status, throughput, link rate, errors and link down.
 
+{{< notice note >}}
+The charts use the same scope as the port list, so **both InfiniBand and RoCE are counted** and the port totals match. Two things to keep in mind: the throughput and error charts only have data for InfiniBand (RoCE adapters do not expose those counters), and the port health ratio counts RoCE ports too, which are usually down, so it reads below 100%.
+{{</ notice >}}
+
 The **RDMA Status** card on **Monitoring & Alerting > Cluster Status > Overview** summarises the cluster: port health, active ports, total throughput, error counts, and the list of nodes with abnormal ports.
 
 ## Prerequisites
