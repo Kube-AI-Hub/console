@@ -33,6 +33,14 @@ const STATE_NAME_KEY = {
   unknown: 'UNKNOWN',
 }
 
+// Both InfiniBand and RoCE ports live under /sys/class/infiniband, and both
+// report a link rate, so the transport is shown explicitly.
+const LINK_LAYER_KEY = {
+  InfiniBand: 'RDMA_LINK_LAYER_IB',
+  Ethernet: 'RDMA_LINK_LAYER_ROCE',
+  unknown: 'UNKNOWN',
+}
+
 const RdmaPortList = ({ dataSource = [], isLoading = false }) => {
   const columns = [
     {
@@ -41,6 +49,13 @@ const RdmaPortList = ({ dataSource = [], isLoading = false }) => {
       isHideable: true,
       width: '10%',
       render: record => record.device,
+    },
+    {
+      title: t('RDMA_PORT_LINK_LAYER'),
+      key: 'linkLayerName',
+      isHideable: true,
+      width: '10%',
+      render: record => t(LINK_LAYER_KEY[record.linkLayerName] || 'UNKNOWN'),
     },
     {
       title: t('RDMA_PORT_NUMBER'),

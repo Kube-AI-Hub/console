@@ -192,6 +192,9 @@ module.exports = {
   // RDMA / InfiniBand port list
   RDMA_PORT_LIST: 'RDMA 端口列表',
   RDMA_PORT_DEVICE: '设备',
+  RDMA_PORT_LINK_LAYER: '链路类型',
+  RDMA_LINK_LAYER_IB: 'InfiniBand',
+  RDMA_LINK_LAYER_ROCE: 'RoCE',
   RDMA_PORT_NUMBER: '端口',
   RDMA_PORT_STATE: '端口状态',
   RDMA_PORT_LINK_SPEED: '链路速率',

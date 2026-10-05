@@ -193,6 +193,9 @@ module.exports = {
   // RDMA / InfiniBand port list
   RDMA_PORT_LIST: 'RDMA Port List',
   RDMA_PORT_DEVICE: 'Device',
+  RDMA_PORT_LINK_LAYER: 'Transport',
+  RDMA_LINK_LAYER_IB: 'InfiniBand',
+  RDMA_LINK_LAYER_ROCE: 'RoCE',
   RDMA_PORT_NUMBER: 'Port',
   RDMA_PORT_STATE: 'Port State',
   RDMA_PORT_LINK_SPEED: 'Link Rate',
