@@ -73,7 +73,10 @@ export default class RdmaStore extends Base {
         ascending: params.ascending,
         isLoading: false,
       })
-      return this.list.data
+      // this.list.data is a mobx ObservableArray, and Array.isArray() is false
+      // for those. Callers use the return value directly (the overview card
+      // checks it before setState), so hand back a plain array.
+      return Array.from(this.list.data)
     } catch (e) {
       this.list.update({
         data: [],
