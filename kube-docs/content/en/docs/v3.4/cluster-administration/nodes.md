@@ -53,6 +53,8 @@ To view node details, click the node. On the details page, you can perform the f
 
 - View the running status of nodes, pods, metadata, monitoring data, and events.
 
+    For nodes with RDMA hardware, the **Running Status** tab also shows the **RDMA Port List** (device, transport, port state, link rate) and the **Monitoring** tab shows RDMA throughput, port status, error and congestion charts. See [RDMA Monitoring](../rdma-management/) for details.
+
     {{< notice note >}}
 Be careful when you add taints as they may cause unexpected behavior, leading to services unavailable. For more information, see [Taints and Tolerations](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/).
     {{</ notice >}}

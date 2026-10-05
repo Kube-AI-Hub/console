@@ -54,6 +54,8 @@ Kubernetes 将容器放入容器组（Pod）中并在节点上运行，从而运
 
 - 查看节点运行状态、容器组、元数据、监控和事件。
 
+    对于配备 RDMA 硬件的节点，**运行状态**标签页还会显示 **RDMA 端口列表**（设备、链路类型、端口状态、链路速率），**监控**标签页会显示 RDMA 吞吐、端口状态、错误和拥塞曲线。详见 [RDMA 监控](../rdma-management/)。
+
     {{< notice note >}}
 请谨慎添加污点，因为它们可能会导致意外行为从而导致服务不可用。有关更多信息，请参阅[污点和容忍度](https://kubernetes.io/zh/docs/concepts/scheduling-eviction/taint-and-toleration/)。
     {{</ notice >}}
