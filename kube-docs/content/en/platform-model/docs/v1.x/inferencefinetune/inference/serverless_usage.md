@@ -52,6 +52,19 @@ Some deployments use `/platform-model/aigateway/v1/chat/completions`. Use the **
 Cloud channels always require an access token. Generate one in **User Settings → Access Tokens**. The gateway rewrites the platform ID to the upstream ID using the administrator’s **model mapping**. Callers do not need to know the upstream name.
 {{</ notice >}}
 
+## Monitoring and Request Logs
+
+A **shared local deployment** in Public Inference uses the same observability as a dedicated instance. See [Use Dedicated Inference Instance](./endpoint_usage):
+
+- **Analysis** tab: resource and traffic metrics, plus LLM serving SLA charts for TTFT, output rate, token volumes, cached tokens and cache hit rate;
+- **Logs** tab: container logs and **request logs** - one row per call, with TTFT, input/output tokens, **cached tokens** and output rate, filterable by time range and user.
+
+Cloud API models are served by upstream providers and do not offer these engine-level metrics or request logs.
+
+{{< notice note >}}
+**Cached tokens in the request log are always 0?** The prefix cache matches in blocks, so a prompt shorter than one block (measured at **544** tokens on this platform) can never hit. That 0 is expected, not a collection failure. See [Model Inference FAQ](./endpoint_faq) for how to tell and reproduce.
+{{</ notice >}}
+
 ## Related Documentation
 
 - [Public Inference Overview](./serverless_intro)

@@ -77,3 +77,23 @@ Access tokens can be generated in **User Settings → Access Tokens**.
 **Cause**: The runtime framework has no **Launch (KServe / llm-d)** JSON, or it is missing `decode` (or the `template` alias). When KServe is enabled, inference must define how to start the process.
 
 **Solution**: An administrator should edit the framework under **Admin Console → Compute Resource → Runtime Framework & Image Management** and add launch. See [Configure Inference Engines](./runtime_framework_admin).
+
+---
+
+### Cached tokens in the request log are always 0
+
+**Explanation**: This is usually expected behavior, not a collection failure.
+
+The prefix cache **matches in blocks**, and the block size is decided by the engine and model (measured at **544** tokens on this platform). Two consequences follow:
+
+- Cached tokens are always a multiple of 544;
+- **A prompt shorter than 544 tokens can never hit**, so it stays 0.
+
+Short prompts (tens to a few hundred tokens) fall into that case, and the **cache hit rate** stays 0 for the same reason.
+
+**How to confirm the cache is working**: send the **same long prompt** (≥ 544 tokens; repeating text is enough) **twice**, then check the request log:
+
+1. First call: cached tokens = 0;
+2. Second call onward: cached tokens is a multiple of 544.
+
+**Also note**: the request log shows only the **last hour** by default. A hit often happens during a load test and then falls outside the default range, so the table still looks all-zero - widen the range to 3 hours or more before drawing any conclusion.

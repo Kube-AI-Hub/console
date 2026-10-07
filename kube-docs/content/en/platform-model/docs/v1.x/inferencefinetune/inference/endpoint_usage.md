@@ -109,7 +109,9 @@ Replace `<your-endpoint-url>` with the inference API URL shown on the overview p
 
 ## Real-Time Monitoring
 
-On the instance details page, switch to the **Analysis** tab to view real-time performance metrics:
+On the instance details page, switch to the **Analysis** tab to view real-time metrics and **LLM serving SLA** charts.
+
+Resource and traffic metrics:
 
 | Metric | Description |
 |--------|-------------|
@@ -120,11 +122,46 @@ On the instance details page, switch to the **Analysis** tab to view real-time p
 | **Inference Latency** | Average response time from request to result |
 | **Throughput** | Number of inference requests processed per second |
 
-Monitoring data helps assess service health and informs resource scaling decisions.
+LLM serving SLA (shown only for deployments whose engine metrics are readable; follows the page time range):
 
-## View Runtime Logs
+| Metric | Description |
+|--------|-------------|
+| **TTFT** | Time to first token, from request to the first token, in ms |
+| **Output Rate** | Tokens generated per second during decode (t/s) |
+| **Input Tokens** | Prompt tokens processed per minute (tok/min) |
+| **Output Tokens** | Tokens generated per minute (tok/min) |
+| **Cached Tokens** | Tokens served from the prefix cache per minute (tok/min) |
+| **Cache Hit Rate** | Cached tokens ÷ queried tokens (%) |
 
-Under the **Analysis** tab, you can also view runtime logs for each replica, including model loading information, request processing records, and error messages, which help troubleshoot inference service issues.
+Monitoring data helps assess service health and informs resource scaling decisions. TTFT and output rate are the two values users feel directly: one decides how long until the first character, the other how smoothly the rest arrives.
+
+## View Logs
+
+On the instance details page, switch to the **Logs** tab, which has two sub-tabs: **Container Logs** and **Request Logs**.
+
+Container logs answer "what is the process doing"; request logs answer "what happened to this call". They sit side by side, with container logs as the default.
+
+### Request Logs
+
+One row per inference call:
+
+| Column | Description |
+|--------|-------------|
+| **Time** | When the request started |
+| **User** | Caller (a masked API key for public inference) |
+| **Status** | HTTP status code; ≥400 is highlighted |
+| **Response Time** | Time the client actually waited, including queueing and network |
+| **TTFT** | Time to first token, as reported by the engine |
+| **Input Tokens** | Prompt tokens for this request |
+| **Output Tokens** | Tokens generated for this request |
+| **Cached Tokens** | Tokens served from the prefix cache for this request |
+| **Output Rate** | Generation rate reported by the engine (t/s) |
+
+Filter by **time range** and **user**. The default range is the last hour, 20 rows per page.
+
+{{< notice note >}}
+**Cached tokens stuck at 0?** The prefix cache matches in blocks, and the block size is decided by the engine and model (measured at **544** tokens on this platform). Cached tokens are therefore always a multiple of 544, and **a prompt shorter than 544 tokens can never hit** - a 0 here is expected, not a collection failure. To confirm the cache works, send the **same long prompt twice** and compare the log: 0 the first time, a multiple of 544 afterwards. If you did hit but cannot see it, widen the range beyond the default hour. See [Model Inference FAQ](./endpoint_faq).
+{{</ notice >}}
 
 ## View Billing Details
 
