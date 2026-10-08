@@ -395,6 +395,7 @@ const operationsProxy = operationsTarget ? createPortalProxy(operationsTarget) :
 module.exports = {
   STREAM_PROXY_TIMEOUT_MS,
   CSGHUB_RPROXY_TARGET,
+  injectConsoleJwt,
   CSGHUB_AIGATEWAY_TARGET,
   rewriteAigatewayPath,
   LABEL_STUDIO_PREFIX,

@@ -14,6 +14,21 @@ test('routes endpoint upgrades to CSGHub rproxy', () => {
   )
 })
 
+test('routes same-origin studio upgrades to the workshop target', () => {
+  // Without this branch the agent workshop terminal socket was proxied to
+  // ks-apiserver, which answered 403 and forced a long-poll fallback.
+  assert.equal(
+    getWebSocketTarget(
+      '/studio-api/twins/admin/demo/shell/socket?cols=90&rows=26'
+    ),
+    'http://agent-platform-web.agent-platform.svc:8080'
+  )
+  assert.equal(
+    getWebSocketTarget('/studio-preview/'),
+    'http://agent-platform-web.agent-platform.svc:8080'
+  )
+})
+
 test('keeps other upgrades on ks-apiserver', () => {
   assert.equal(
     getWebSocketTarget('/kapis/terminal.kubesphere.io/socket'),

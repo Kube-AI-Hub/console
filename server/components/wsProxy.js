@@ -19,14 +19,29 @@
 const httpProxy = require('http-proxy')
 
 const { getServerConfig } = require('../libs/utils')
-const { CSGHUB_RPROXY_TARGET } = require('../proxy')
+const { resolvePortalTarget } = require('../libs/portalMounts')
+const { CSGHUB_RPROXY_TARGET, injectConsoleJwt } = require('../proxy')
 
 const serverConfig = getServerConfig().server
 
-const getWebSocketTarget = url =>
-  url.startsWith('/endpoint/')
-    ? CSGHUB_RPROXY_TARGET
-    : serverConfig.apiServer.wsUrl
+// Same-origin portal shells (e.g. the agent workshop) are mounted on the HTTP
+// side by proxy.js, but every upgrade request lands here first. Without a
+// branch for them the terminal sockets were proxied to ks-apiserver, which
+// answered 403 and forced the browser back to long polling.
+const studioTarget = resolvePortalTarget(serverConfig.studio)
+
+const isStudioUpgrade = url =>
+  typeof url === 'string' && url.startsWith('/studio') && Boolean(studioTarget)
+
+const getWebSocketTarget = url => {
+  if (url.startsWith('/endpoint/')) {
+    return CSGHUB_RPROXY_TARGET
+  }
+  if (isStudioUpgrade(url)) {
+    return studioTarget
+  }
+  return serverConfig.apiServer.wsUrl
+}
 
 module.exports = function(app) {
   const wsProxy = httpProxy.createProxyServer({
@@ -40,6 +55,12 @@ module.exports = function(app) {
     wsProxy.ws(req, socket, head, {
       target,
       changeOrigin: !isEndpointRequest,
+      // The workshop authenticates the shell socket from the caller's session.
+      proxyReqWs(proxyReq, request) {
+        if (isStudioUpgrade(request.url)) {
+          injectConsoleJwt(proxyReq, request)
+        }
+      },
     })
   })
 }
