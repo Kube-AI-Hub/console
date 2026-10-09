@@ -20,9 +20,11 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { toJS } from 'mobx'
 import { get, set, isEmpty, mergeWith, add } from 'lodash'
-import { Form, Input } from '@kube-design/components'
+import { Alert, Form, Input } from '@kube-design/components'
 import { Modal } from 'components/Base'
 import { ResourceLimit } from 'components/Inputs'
+import { cpuFormat, memoryFormat } from 'utils'
+import { fetchClusterResourceSummary } from 'utils/cluster.resource.summary'
 
 import QuotaStore from 'stores/quota'
 import WorkSpaceStore from 'stores/workspace.quota'
@@ -62,6 +64,8 @@ export default class QuotaEditModal extends React.Component {
     this.state = {
       formTemplate: {},
       error: '',
+      clusterError: '',
+      clusterTotals: null,
       leftQuota: {},
     }
   }
@@ -70,6 +74,7 @@ export default class QuotaEditModal extends React.Component {
     if (this.props.detail && this.props.detail.name) {
       this.fetchQuota()
       this.fetchData(this.props.detail)
+      this.fetchClusterTotals()
     }
   }
 
@@ -78,6 +83,81 @@ export default class QuotaEditModal extends React.Component {
     if (visible && visible !== prevProps.visible && detail && detail.name) {
       this.fetchData(detail)
       this.fetchQuota()
+      this.fetchClusterTotals()
+    }
+  }
+
+  /** 拉取集群资源总量，用于校验配额是否超出集群可分配资源 */
+  fetchClusterTotals() {
+    const { cluster } = this.props.detail || {}
+    if (!cluster) {
+      this.setState({ clusterTotals: null })
+      return
+    }
+    fetchClusterResourceSummary(cluster)
+      .then(summary => {
+        this.setState(
+          { clusterTotals: (summary && summary.totals) || null },
+          this.validateClusterQuota
+        )
+      })
+      .catch(() => this.setState({ clusterTotals: null }))
+  }
+
+  /**
+   * 配额超过集群资源总量时提示「资源不足」。
+   * 集群总量接口只提供 CPU、内存、算力卡；应用资源数量（pods 等）没有集群总量，不参与校验。
+   */
+  validateClusterQuota = () => {
+    const { formTemplate, clusterTotals, clusterError } = this.state
+
+    if (!clusterTotals) {
+      if (clusterError) {
+        this.setState({ clusterError: '' })
+      }
+      return
+    }
+
+    const hard = get(formTemplate, 'spec.hard', {})
+    const isNumeric = value =>
+      value !== undefined &&
+      value !== null &&
+      value !== '' &&
+      isFinite(Number(value))
+    let over = false
+
+    const totalCpu = cpuFormat(clusterTotals.cpu)
+    ;['requests.cpu', 'limits.cpu'].forEach(key => {
+      const value = cpuFormat(hard[key])
+      if (isNumeric(value) && Number(value) > totalCpu) {
+        over = true
+      }
+    })
+
+    const totalMemory = memoryFormat(clusterTotals.memory, 'Mi')
+    ;['requests.memory', 'limits.memory'].forEach(key => {
+      const value = memoryFormat(hard[key], 'Mi')
+      if (isNumeric(value) && Number(value) > totalMemory) {
+        over = true
+      }
+    })
+
+    const gpuTotals = {}
+    ;(clusterTotals.gpuResources || []).forEach(item => {
+      gpuTotals[item.resourceName] = Number(item.total)
+    })
+    const supportGpuType = globals.config.supportGpuType || []
+    supportGpuType.forEach(type => {
+      const value = hard[`requests.${type}`]
+      const total = gpuTotals[type]
+      if (isNumeric(value) && total !== undefined && Number(value) > total) {
+        over = true
+      }
+    })
+
+    const nextError = over ? 'clusterExceed' : ''
+    if (nextError !== clusterError) {
+      this.setState({ clusterError: nextError })
     }
   }
 
@@ -255,6 +335,7 @@ export default class QuotaEditModal extends React.Component {
           'spec.hard["requests.memory"]',
           get(value, 'requests.memory', null)
         )
+        this.validateClusterQuota()
       },
       onError: error => {
         this.setState({ error })
@@ -274,7 +355,7 @@ export default class QuotaEditModal extends React.Component {
       isSubmitting,
     } = this.props
 
-    const { error } = this.state
+    const { error, clusterError, clusterTotals } = this.state
 
     return (
       <Modal.Form
@@ -286,7 +367,7 @@ export default class QuotaEditModal extends React.Component {
         onCancel={onCancel}
         visible={visible}
         isSubmitting={isSubmitting}
-        disableOk={!!error}
+        disableOk={!!error || !!clusterError}
       >
         <div className={styles.body}>
           <Form.Item label={t('NAME')}>
@@ -295,16 +376,29 @@ export default class QuotaEditModal extends React.Component {
           <Form.Item>
             <ResourceLimit
               {...this.resourceLimitProps}
+              clusterCapacityTip={{ totals: clusterTotals }}
               extraContentBeforeTip={
                 <GpuQuotas
                   data={this.state.formTemplate}
                   cluster={detail.cluster}
+                  onChange={this.validateClusterQuota}
                 />
               }
             />
           </Form.Item>
+          {clusterError && (
+            <Alert
+              type="error"
+              className="margin-t12"
+              message={t('REQUEST_EXCEED_AVAILABLE_QUOTA')}
+            />
+          )}
           <div className={styles.label}>{t('APPLICATION_RESOURCE_COUNT')}</div>
-          <Quotas data={this.state.formTemplate} isFederated={isFederated} />
+          <Quotas
+            data={this.state.formTemplate}
+            isFederated={isFederated}
+            onChange={this.validateClusterQuota}
+          />
         </div>
       </Modal.Form>
     )

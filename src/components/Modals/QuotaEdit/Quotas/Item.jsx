@@ -22,6 +22,8 @@ import { Input, Select } from '@kube-design/components'
 import { QUOTAS_MAP } from 'utils/constants'
 import { ObjectInput, NumberInput } from 'components/Inputs'
 
+import * as styles from '../quotaRow.scss'
+
 import {
   RESERVED_MODULES,
   FEDERATED_PROJECT_UNSOPPORT_QUOTA,
@@ -84,7 +86,11 @@ export default class QuotaItem extends React.Component {
     const { value } = this.props
 
     return (
-      <ObjectInput value={value} onChange={this.handleLimitValue}>
+      <ObjectInput
+        value={value}
+        onChange={this.handleLimitValue}
+        className={styles.quotaRow}
+      >
         <Select
           name="module"
           options={this.options}

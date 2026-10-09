@@ -23,6 +23,8 @@ import { Select } from '@kube-design/components'
 import { ObjectInput, NumberInput } from 'components/Inputs'
 import { getGpuTypeOptions } from 'utils'
 
+import * as styles from '../quotaRow.scss'
+
 export default class GpuQuotaItem extends React.Component {
   static propTypes = {
     options: PropTypes.array,
@@ -44,7 +46,11 @@ export default class GpuQuotaItem extends React.Component {
     const { value } = this.props
 
     return (
-      <ObjectInput value={value} onChange={this.handleChange}>
+      <ObjectInput
+        value={value}
+        onChange={this.handleChange}
+        className={styles.quotaRow}
+      >
         <Select
           name="type"
           options={this.gpuOptions}

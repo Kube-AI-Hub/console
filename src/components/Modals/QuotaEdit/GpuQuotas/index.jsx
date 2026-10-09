@@ -169,6 +169,9 @@ export default class GpuQuotas extends React.Component {
   handleChange = items => {
     this.setState({ items }, () => {
       this.syncToData(items)
+      if (this.props.onChange) {
+        this.props.onChange()
+      }
     })
   }
 

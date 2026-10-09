@@ -1,0 +1,12 @@
+// 项目配额弹窗里「资源名 + 配额」两列对齐：
+// .form-item .input / .form-item .select 的 max-width: 455px 会让包了单位后缀的
+// 输入框（div 包裹）退化成固有宽度，两行第二列因此错位。这里统一钉成固定宽度。
+.quotaRow {
+  :global {
+    .select,
+    input.input {
+      width: 376px !important;
+      max-width: 376px !important;
+    }
+  }
+}

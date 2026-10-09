@@ -104,6 +104,9 @@ export default class Quotas extends React.Component {
         }
       })
       set(this.props.data, 'spec.hard', merge(template, limits))
+      if (this.props.onChange) {
+        this.props.onChange()
+      }
     })
   }
 
