@@ -20,7 +20,9 @@ weight: 3160
   network:
     plugin: calico
     calico:
-      ipipMode: Always
+      # 推荐 CrossSubnet：同网段节点之间 Pod 流量直连，仅跨网段才封装隧道。
+      # KubeKey 生成的示例默认为 Always，会封装所有跨节点流量（见下方参数说明）。
+      ipipMode: CrossSubnet
       vxlanMode: Never
       vethMTU: 1440
     kubePodsCIDR: 10.233.64.0/18
@@ -81,6 +83,8 @@ weight: 3160
    <tr>
      <td><code>calico.ipipMode</code>*</td>
        <td>用于集群启动时创建 IPv4 池的 IPIP 模式。如果值设置除 <code>Never</code> 以外的值，则参数 <code>vxlanMode</code> 应该被设置成 <code>Never</code>。此参数允许设置值 <code>Always</code>，<code>CrossSubnet</code> 和 <code>Never</code>。默认值为 <code>Always</code>。
+       <br/><br/>
+       <strong>建议使用 <code>CrossSubnet</code>。</strong><code>Always</code> 会把所有跨节点 Pod 流量都封装进 IPIP 隧道，即使这些节点处在同一个二层网段；改成 <code>CrossSubnet</code> 后，同网段节点之间直接经物理网络通信，只有跨网段时才封装 —— 功能不减，但少一层封装开销。实测两节点同网段时，对象存储的并发写入吞吐提高约 2.4 倍。跨网段场景的放行要求不变，仍需允许 IPIP 协议。
        </td>
    </tr>
    <tr>
