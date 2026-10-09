@@ -22,7 +22,10 @@ import { Tooltip, Icon } from '@kube-design/components'
 
 import { cpuFormat, memoryFormat, getVendorDisplayName } from 'utils'
 import { ICON_TYPES, NODE_STATUS } from 'utils/constants'
-import { GPU_VENDOR_FILTERS, renderGpuVendorIcon } from 'utils/gpuVendors'
+import {
+  NODE_DEVICE_VENDOR_FILTERS,
+  renderGpuVendorIcon,
+} from 'utils/gpuVendors'
 import { getNodeStatus, isControlPlaneRoles } from 'utils/node'
 import { getValueByUnit } from 'utils/monitoring'
 import NodeStore from 'stores/node'
@@ -443,7 +446,7 @@ class Nodes extends React.Component {
         dataIndex: 'deviceVendor',
         title: t('FILTER_DEVICE_VENDOR'),
         search: true,
-        filters: GPU_VENDOR_FILTERS,
+        filters: NODE_DEVICE_VENDOR_FILTERS,
       },
       {
         dataIndex: 'xpuModel',
@@ -708,7 +711,7 @@ class Nodes extends React.Component {
         title: this.renderXpuTitle(),
         key: 'xpu',
         dataIndex: 'deviceVendor',
-        filters: GPU_VENDOR_FILTERS,
+        filters: NODE_DEVICE_VENDOR_FILTERS,
         filteredValue: getFilteredValue('deviceVendor'),
         isHideable: true,
         render: (_, record) => {

@@ -41,6 +41,12 @@ export const GPU_VENDOR_FILTERS = [
   { text: t('XPU_VENDOR_MTHREADS'), value: 'mthreads' },
 ]
 
+// Cluster node list treats nodes without an XPU label as CPU.
+export const NODE_DEVICE_VENDOR_FILTERS = [
+  { text: 'CPU', value: 'CPU' },
+  ...GPU_VENDOR_FILTERS,
+]
+
 const GPU_VENDOR_ICONS = {
   nvidia: NvidiaVendorIcon,
   cambricon: CambriconVendorIcon,
