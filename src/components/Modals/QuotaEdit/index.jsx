@@ -296,7 +296,10 @@ export default class QuotaEditModal extends React.Component {
             <ResourceLimit
               {...this.resourceLimitProps}
               extraContentBeforeTip={
-                <GpuQuotas data={this.state.formTemplate} />
+                <GpuQuotas
+                  data={this.state.formTemplate}
+                  cluster={detail.cluster}
+                />
               }
             />
           </Form.Item>

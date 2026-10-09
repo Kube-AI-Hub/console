@@ -814,7 +814,7 @@ export const resolveGpuCardTypeFromResourceKeys = keys => {
 /**
  * Intersect global GPU kinds with cluster-available resource names from ks-apiserver.
  * @param {string[]|undefined} availableResourceNames - from cluster-resources/summary; undefined skips filtering
- * @param {string} [currentType] - always include in options when editing existing workload
+ * @param {string|string[]} [currentType] - always include in options when editing existing workload/quota
  * @returns {{ value: string, label: string }[]|undefined} undefined means use full getGpuTypeOptions()
  */
 export const filterGpuTypeOptionsByCluster = (
@@ -827,15 +827,19 @@ export const filterGpuTypeOptionsByCluster = (
   const allOpts = getGpuTypeOptions()
   const set = new Set(availableResourceNames)
   let opts = allOpts.filter(o => set.has(o.value))
-  if (currentType && !opts.some(o => o.value === currentType)) {
-    opts = [
-      ...opts,
-      {
-        value: currentType,
-        label: getGpuDisplayName(currentType),
-      },
-    ]
-  }
+  // 已选中但集群摘要里没有的类型仍要保留，避免编辑时选项丢失
+  const currentTypes = [].concat(currentType || []).filter(Boolean)
+  currentTypes.forEach(type => {
+    if (!opts.some(o => o.value === type)) {
+      opts = [
+        ...opts,
+        {
+          value: type,
+          label: getGpuDisplayName(type),
+        },
+      ]
+    }
+  })
   opts.sort((a, b) => a.value.localeCompare(b.value))
   return opts
 }

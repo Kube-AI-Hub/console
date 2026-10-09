@@ -29,6 +29,7 @@ class NumberInput extends React.Component {
   static propTypes = {
     unit: PropTypes.string,
     showUnit: PropTypes.bool,
+    suffix: PropTypes.string,
     value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     min: PropTypes.number,
@@ -40,6 +41,7 @@ class NumberInput extends React.Component {
   static defaultProps = {
     unit: '',
     showUnit: false,
+    suffix: '',
     integer: false,
     onChange() {},
   }
@@ -103,6 +105,7 @@ class NumberInput extends React.Component {
       className,
       unit,
       showUnit,
+      suffix,
       value,
       defaultValue,
       onChange,
@@ -121,6 +124,16 @@ class NumberInput extends React.Component {
       ...rest,
       value: isUndefined(formatValue) ? '' : formatValue,
       onChange: this.handleChange,
+    }
+
+    // suffix 只做展示，不会写进 value（unit 会追加到 value 后再 trim）
+    if (suffix) {
+      return (
+        <div className={classnames(className, styles.withUnit)}>
+          <Input {...props} />
+          <span>{suffix}</span>
+        </div>
+      )
     }
 
     if (unit && showUnit) {

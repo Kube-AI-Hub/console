@@ -45,10 +45,14 @@ export default class QuotaItem extends React.Component {
             ? !FEDERATED_PROJECT_UNSOPPORT_QUOTA.includes(key)
             : true)
       )
-      .map(key => ({
-        label: t(`NUMBER_OF_${key.toUpperCase()}`),
-        value: key,
-      }))
+      .map(key => {
+        // 同时展示资源键与名称，避免只看中文名误解；Select 会按 label 和 value 一起搜索
+        const name = t(`NUMBER_OF_${key.toUpperCase()}`)
+        return {
+          label: `${key} - ${name}`,
+          value: key,
+        }
+      })
   }
 
   handleLimitValue = item => {

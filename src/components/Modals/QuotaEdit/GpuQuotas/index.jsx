@@ -21,6 +21,8 @@ import { get, set, omitBy, isEmpty } from 'lodash'
 import { Form } from '@kube-design/components'
 
 import { ArrayInput } from 'components/Inputs'
+import { getGpuTypeOptions, filterGpuTypeOptionsByCluster } from 'utils'
+import { fetchClusterResourceSummary } from 'utils/cluster.resource.summary'
 
 import GpuQuotaItem from './Item'
 
@@ -32,7 +34,12 @@ export default class GpuQuotas extends React.Component {
 
     this.state = {
       items: this.getItemsFromData(props.data),
+      availableGpuResourceNames: undefined,
     }
+  }
+
+  componentDidMount() {
+    this.fetchAvailableGpuResources()
   }
 
   componentDidUpdate(prevProps) {
@@ -41,10 +48,48 @@ export default class GpuQuotas extends React.Component {
         items: this.getItemsFromData(this.props.data),
       })
     }
+
+    if (prevProps.cluster !== this.props.cluster) {
+      this.fetchAvailableGpuResources()
+    }
+  }
+
+  /** 项目配额弹窗会传入集群，用于过滤集群里没有的显卡类型；无集群时退回全局列表 */
+  async fetchAvailableGpuResources() {
+    const { cluster } = this.props
+    if (!cluster) {
+      return
+    }
+    try {
+      const summary = await fetchClusterResourceSummary(cluster)
+      this.setState({
+        availableGpuResourceNames:
+          (summary && summary.availableGpuResourceNames) || [],
+      })
+    } catch (e) {
+      this.setState({ availableGpuResourceNames: undefined })
+    }
   }
 
   get supportGpuType() {
     return globals.config.supportGpuType || []
+  }
+
+  get selectedGpuTypes() {
+    // 只把平台已知的资源名当成"已选类型"保留；搜索时输入的临时文本不应变成选项
+    const support = this.supportGpuType
+    return this.state.items
+      .map(item => item.type)
+      .filter(type => type && support.includes(type))
+  }
+
+  get gpuTypeOptions() {
+    return (
+      filterGpuTypeOptionsByCluster(
+        this.state.availableGpuResourceNames,
+        this.selectedGpuTypes
+      ) || getGpuTypeOptions()
+    )
   }
 
   get dataMode() {
@@ -84,6 +129,7 @@ export default class GpuQuotas extends React.Component {
 
   syncToData = items => {
     const { data } = this.props
+    const validItems = items.filter(({ type }) => this.isValidGpuType(type))
 
     if (this.dataMode === 'defaultResource') {
       const defaultObj = get(data, 'default', {})
@@ -94,8 +140,8 @@ export default class GpuQuotas extends React.Component {
       const newDefaultRequest = omitBy(defaultRequestObj, (_, key) =>
         this.supportGpuType.includes(key)
       )
-      items.forEach(({ type, quota }) => {
-        if (type && quota !== undefined && quota !== '' && Number(quota) >= 0) {
+      validItems.forEach(({ type, quota }) => {
+        if (quota !== undefined && quota !== '' && Number(quota) >= 0) {
           newDefault[type] = String(quota)
           newDefaultRequest[type] = String(quota)
         }
@@ -112,8 +158,8 @@ export default class GpuQuotas extends React.Component {
         type => key === `requests.${type}` || key === `limits.${type}`
       )
     )
-    items.forEach(({ type, quota }) => {
-      if (type && quota !== undefined && quota !== '' && Number(quota) >= 0) {
+    validItems.forEach(({ type, quota }) => {
+      if (quota !== undefined && quota !== '' && Number(quota) >= 0) {
         newHard[`requests.${type}`] = String(quota)
       }
     })
@@ -126,10 +172,13 @@ export default class GpuQuotas extends React.Component {
     })
   }
 
+  /** 只有平台已知的显卡资源名才是合法类型，避免把输入中的临时文本写进配额 */
+  isValidGpuType = type => !!type && this.supportGpuType.includes(type)
+
   checkItemValid = item => {
     if (!item || isEmpty(item)) return true
     return (
-      item.type &&
+      this.isValidGpuType(item.type) &&
       item.quota !== undefined &&
       item.quota !== '' &&
       Number(item.quota) >= 0
@@ -153,7 +202,7 @@ export default class GpuQuotas extends React.Component {
             onChange={this.handleChange}
             checkItemValid={this.checkItemValid}
           >
-            <GpuQuotaItem />
+            <GpuQuotaItem options={this.gpuTypeOptions} />
           </ArrayInput>
         </Form.Item>
       </div>

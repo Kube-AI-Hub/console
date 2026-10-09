@@ -17,14 +17,23 @@
  */
 
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import { Select } from '@kube-design/components'
 import { ObjectInput, NumberInput } from 'components/Inputs'
 import { getGpuTypeOptions } from 'utils'
 
 export default class GpuQuotaItem extends React.Component {
+  static propTypes = {
+    options: PropTypes.array,
+  }
+
+  static defaultProps = {
+    options: undefined,
+  }
+
   get gpuOptions() {
-    return getGpuTypeOptions()
+    return this.props.options || getGpuTypeOptions()
   }
 
   handleChange = item => {
@@ -39,7 +48,7 @@ export default class GpuQuotaItem extends React.Component {
         <Select
           name="type"
           options={this.gpuOptions}
-          searchable={false}
+          searchable
           placeholder={t('SELECT_RESOURCE_TIP')}
         />
         <NumberInput
@@ -48,6 +57,7 @@ export default class GpuQuotaItem extends React.Component {
           placeholder={t('QUOTA')}
           integer
           min={0}
+          suffix={t('GPU_CARD_UNIT')}
         />
       </ObjectInput>
     )

@@ -664,7 +664,9 @@ export default class ResourceLimit extends React.Component {
       'limitMemoryError',
       'gpuLimitError',
     ]
-    return keys.filter(k => w[k] !== '')
+    // 未跑过校验时这些字段是 undefined，只把非空错误字符串算作超限，
+    // 否则弹窗一打开就会误报「资源不足」。
+    return keys.filter(k => !!w[k])
   }
 
   handleCPUChange = value => {
