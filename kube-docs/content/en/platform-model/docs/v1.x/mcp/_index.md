@@ -29,6 +29,19 @@ The platform provides an MCP Hub for hosting and sharing MCP-compliant tool serv
 
 The platform supports deploying MCP services as standalone Spaces, providing standardized API endpoints that MCP-compatible agent frameworks can call directly.
 
+## Viewing the MCP Protocol
+
+Open any MCP repository and switch to the **Schema** tab to see the **tools**, **prompts** and **resources** that service actually exposes, along with the environment variables needed to run it.
+
+The protocol is obtained by **probing the service itself**, not by parsing its source code: the platform performs an MCP handshake against the running service and reads its `tools/list`, `prompts/list` and `resources/list`. What you see is therefore what the service really promises, including anything that varies with its environment.
+
+Discovery is automatic, with nothing to trigger by hand:
+
+- **On successful deployment**: the platform probes once when the Space enters the running state.
+- **Periodic reconciliation**: the platform also looks for services that are running while their protocol is still empty, and fills them in. This covers the rare case where the deploy-time probe did not succeed. The interval defaults to 10 minutes and can be changed with the `STARHUB_SERVER_MCP_SCAN_SCHEMA_REFRESH_INTERVAL` environment variable (a non-positive value disables it).
+
+Because the protocol comes from a running service, an MCP service that has **not been deployed yet** shows an empty Schema tab, with a note that the protocol is fetched automatically once it is deployed. The **MCP Tools** page (`/mcp/servers/tools`) shows the same data as a second view: one row per tool, each opening a detail view with its input parameters.
+
 ## Typical Use Cases
 
 - **Database Queries**: Allow large models to directly query internal databases via MCP.
