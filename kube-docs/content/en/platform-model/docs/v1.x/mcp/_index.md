@@ -42,6 +42,8 @@ Discovery is automatic, with nothing to trigger by hand:
 
 Because the protocol comes from a running service, an MCP service that has **not been deployed yet** shows an empty Schema tab, with a note that the protocol is fetched automatically once it is deployed. The **MCP Tools** page (`/mcp/servers/tools`) shows the same data as a second view: one row per tool, each opening a detail view with its input parameters.
 
+When the protocol is long, a table of contents stays pinned on the left of the page (Server Config / Prompts / Resources / Tools). Clicking an entry scrolls to that section **in place**, which makes it easy to jump straight to a section when a service exposes many tools.
+
 ## Typical Use Cases
 
 - **Database Queries**: Allow large models to directly query internal databases via MCP.
