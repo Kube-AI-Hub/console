@@ -31,6 +31,34 @@ weight: 3140
    chmod +x kk
    ```
 
+4. 在**每个节点**上调大 inotify 上限：
+
+   ```bash
+   cat <<'EOF' | sudo tee /etc/sysctl.d/99-kube-ai-hub-inotify.conf
+   fs.inotify.max_user_instances = 524288
+   fs.inotify.max_user_watches = 524288
+   EOF
+   sudo sysctl --system
+
+   # 验证
+   sysctl fs.inotify.max_user_instances fs.inotify.max_user_watches
+   ```
+
+{{< notice warning >}}
+
+Debian/Ubuntu 默认 `fs.inotify.max_user_instances` 只有 **128**。任何有实际规模的集群
+都会把它用满——kubelet、fluent-bit、以及每个 Pod 一个 containerd-shim 都各占 inotify
+实例——用满后新进程无法再创建实例。此时 HAMi 调度器的 extender 容器会在启动时报
+`Fatal: failed to create cert watcher: too many open files` 并以退出码 255 反复重启。
+现象具有迷惑性：崩溃进程退出时会释放自己占的实例，重试往往又能起来，所以看起来像
+偶发的 `CrashLoopBackOff`。
+
+务必写进 `/etc/sysctl.d/` 并执行 `sysctl --system`；只跑 `sysctl -w` 重启后会失效。
+排查时请直接读**宿主机**的值（`cat /proc/sys/fs/inotify/max_user_instances`），
+容器内看到的是命名空间内的副本，不一定反映宿主机实际限制。
+
+{{</ notice >}}
+
 ## 步骤 1：配置主机清单
 
 编辑 `inventory.yaml`，定义集群节点和角色分组：

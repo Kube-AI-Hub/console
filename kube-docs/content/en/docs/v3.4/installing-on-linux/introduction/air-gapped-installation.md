@@ -31,6 +31,35 @@ You can use the Kube AI Hub offline installation package to install Kubernetes a
    chmod +x kk
    ```
 
+4. Raise the inotify limits on **every node**:
+
+   ```bash
+   cat <<'EOF' | sudo tee /etc/sysctl.d/99-kube-ai-hub-inotify.conf
+   fs.inotify.max_user_instances = 524288
+   fs.inotify.max_user_watches = 524288
+   EOF
+   sudo sysctl --system
+
+   # Verify
+   sysctl fs.inotify.max_user_instances fs.inotify.max_user_watches
+   ```
+
+{{< notice warning >}}
+
+Debian and Ubuntu default `fs.inotify.max_user_instances` to **128**. A cluster of any
+real size exhausts that — kubelet, fluent-bit and one containerd-shim per Pod all hold
+inotify instances — and once it is exhausted no new process can create one. The HAMi
+scheduler's extender container then fails at startup with
+`Fatal: failed to create cert watcher: too many open files` and exits with code 255,
+restarting in a loop. The failure looks intermittent (`CrashLoopBackOff` that heals
+itself), because a dying process releases its instances and the retry can then succeed.
+
+Write the setting to `/etc/sysctl.d/` and run `sysctl --system`; `sysctl -w` alone is
+lost on reboot. When diagnosing, read the value from the **host**
+(`cat /proc/sys/fs/inotify/max_user_instances`) rather than from inside a container.
+
+{{</ notice >}}
+
 ## Step 1: Configure Host Inventory
 
 Edit `inventory.yaml` to define cluster nodes and role groups:
