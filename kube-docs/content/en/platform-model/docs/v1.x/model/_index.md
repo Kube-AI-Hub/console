@@ -27,6 +27,14 @@ The platform is compatible with mainstream model formats, including:
 - GGUF format (for llama.cpp)
 - Other common model weight files
 
+## Public Models
+
+Besides the model repositories users create themselves, the platform has a class of **public models**: an administrator uploads the files into the `public/` directory of the shared model cache, and the platform scans that directory and shows them as `public/<name>`.
+
+They differ from ordinary models in exactly three ways: the source is not Git, there is no version management, and they are read-only. Everything else matches an ordinary model: they can be searched and filtered in the list, browsed in the detail page, and selected and mounted by inference, fine-tuning, and evaluation.
+
+Switch the source filter in the model library to **Public models** to see only this class. A public model's detail page has no branch, commit, new file, upload, edit, delete, or settings entries, and no **Download model** button.
+
 ## Related Operations
 
 - [Model Card](./model_card)

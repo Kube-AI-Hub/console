@@ -10,7 +10,7 @@ weight: 1
 
 section1:
   title: 行业大模型平台文档
-  content: 学习如何使用行业大模型平台管理模型库、数据集、开发环境与用户空间，以及进行模型推理、模型训练评测和资源管理。
+  content: 学习如何使用行业大模型平台管理模型库、数据集、开发环境与用户空间，以及进行模型推理、模型训练评测和资源管理，并用智能体工坊把模型、工具与知识组装成可发布的智能体。
   image: /images/docs/platform-model/banner.png
   version: "v1.x"
 
@@ -33,6 +33,12 @@ sectionLink:
       - /platform-model/docs/v1.x/inferencefinetune/finetune/finetune_intro
       - /platform-model/docs/v1.x/inferencefinetune/evaluation/evaluation_create
       - /platform-model/docs/v1.x/inferencefinetune/evaluation/evaluation_custom_params
+      - /platform-model/docs/v1.x/workshop/
+      - /platform-model/docs/v1.x/workshop/digital-twin
+      - /platform-model/docs/v1.x/workshop/service-expert
+      - /platform-model/docs/v1.x/workshop/publish
+      - /platform-model/docs/v1.x/skills/
+      - /platform-model/docs/v1.x/agents/
       - /platform-model/docs/v1.x/datatool/
       - /platform-model/docs/v1.x/mcp/
       - /platform-model/docs/v1.x/admin/

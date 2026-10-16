@@ -66,6 +66,38 @@ Spaces is a platform for showcasing large model applications. Developers can bui
    ```
 3. Commit and push the code; the platform will automatically deploy.
 
+## Detail tabs
+
+Opening a space detail page (`/spaces/:namespace/:name`) reveals these tabs:
+
+| Tab | Path | Contents |
+|-----|------|----------|
+| Application | default | Run state, access address, build log entry |
+| Analysis | `?tab=analysis` | Resource usage and access trends for the instance |
+| Files | `?tab=files` | Browse, upload, and create files; view commit history |
+| Logs | `?tab=logs` | Container logs of the running instance |
+| Billing | `?tab=billing` | Resource usage and cost breakdown |
+| Settings | `?tab=settings` | Alias, description, visibility, and more |
+
+### Analysis
+
+Shows resource usage and access trends for the running instance, to tell whether the space is starved of resources. Only a running instance has data.
+
+### Logs
+
+Pick an instance to see its **container logs**, to tell whether startup and operation are healthy. Only a running instance has container logs; the page explains why when it is not running.
+
+Reaching this tab through **View logs** on the Application tab lands in the same place.
+
+### Billing
+
+Shows the space's resource usage and cost breakdown by month, with "No data" when there is nothing.
+
+### Settings
+
+Change the alias, description, and visibility. The space's English name and SDK type cannot be changed after creation.
+
 ## Related Operations
 
+- [Create a user space](./create_space)
 - [Download Spaces](./download_space_repo)

@@ -4,7 +4,7 @@ keywords: "Industry AI Model Platform, tenant, workspace, public tenant, compute
 description: "The model platform shares Console tenants (workspaces). Covers the public tenant, enterprise tenants, org binding, list scope, and compute projects."
 linkTitle: "Tenants and Compute Placement"
 weight: 500
-icon: "/images/docs/platform-model/model.svg"
+icon: "/images/docs/platform-model/tenancy.svg"
 ---
 
 A tenant on the Industry AI Model Platform is the same **Tenant (Workspace)** in the Console, backed by the Kubernetes Workspace resource. The platform does not add a separate Tenant CR. Create enterprises, invite members, and set quotas in the Console. The Hub only switches the current tenant, writes new objects into that tenant, and filters lists.

@@ -132,6 +132,12 @@ hasChildren = true
     URL = "platform-model/docs/v1.x"
     weight = 10
 
+    [[languages.en.menu.main]]
+    parent = "Documentation"
+    name = "Agent Workshop"
+    URL = "platform-model/docs/v1.x/workshop"
+    weight = 11
+
 [languages.zh]
 weight = 2
 contentDir = "content/zh"
@@ -174,6 +180,12 @@ name = "文档中心"
     name = "行业大模型平台"
     URL = "platform-model/docs/v1.x"
     weight = 10
+
+    [[languages.zh.menu.main]]
+    parent = "文档中心"
+    name = "智能体工坊"
+    URL = "platform-model/docs/v1.x/workshop"
+    weight = 11
 
 # [languages.tr]
 # weight = 3

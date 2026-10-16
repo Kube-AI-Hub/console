@@ -26,6 +26,18 @@ The Code Hub stores code associated with models and datasets, providing develope
 - Storing data processing scripts paired with datasets
 - Managing AI application project code
 
+## Repository detail
+
+Opening `/codes/:namespace/:name` reveals these tabs:
+
+| Tab | Contents |
+|-----|----------|
+| Overview / card | README, metadata, and download statistics |
+| Files | Browse the tree and file contents, view commit history, create or upload files |
+| Settings | Change the alias, description, tags, and visibility |
+
+The **English name is part of the path and cannot be changed after creation**.
+
 ## Related Operations
 
 - [Download Code Repositories](./download_codes)

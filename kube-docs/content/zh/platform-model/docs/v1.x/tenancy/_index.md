@@ -4,7 +4,7 @@ keywords: "行业大模型平台, 租户, 企业空间, Workspace, 公共租户,
 description: "行业大模型平台与控制台共用租户(企业空间)。说明公共租户、企业租户、组织绑定、列表范围和算力项目。"
 linkTitle: "租户与算力归属"
 weight: 500
-icon: "/images/docs/platform-model/model.svg"
+icon: "/images/docs/platform-model/tenancy.svg"
 ---
 
 行业大模型平台的租户等于控制台里的 **租户(企业空间)**，对应 Kubernetes 的 Workspace 资源。平台不另造一套 Tenant CR。开企业、邀请成员、设配额仍在控制台完成；模型广场只负责切换当前租户、把新建资源写进该租户，以及按租户过滤列表。

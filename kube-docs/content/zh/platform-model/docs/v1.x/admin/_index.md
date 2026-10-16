@@ -4,6 +4,7 @@ keywords: "行业大模型平台, 管理后台, 资产管理, 代码管理, MCP,
 description: "管理员如何在后台管理模型、数据集、代码、技能、MCP 与用户空间，以及与算力规格管理的区别。"
 linkTitle: "管理后台"
 weight: 8000
+icon: "/images/docs/platform-model/admin.svg"
 ---
 
 ## 什么是管理后台

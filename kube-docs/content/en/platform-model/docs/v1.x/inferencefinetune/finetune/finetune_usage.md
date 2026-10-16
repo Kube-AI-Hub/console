@@ -90,3 +90,14 @@ On the instance details page, switch to the **Billing** tab to view resource con
 {{< notice warning >}}
 Fine-tuning instances incur charges continuously while running. Even after a training task completes, charges continue as long as the instance is not stopped. **Stop** the instance promptly after training to avoid unnecessary costs.
 {{</ notice >}}
+
+## Instance Settings
+
+On the instance details page, switch to the **Settings** tab to change the alias, description, and visibility. The instance's English name, base model, and runtime framework cannot be changed after creation.
+
+## Related documents
+
+- [Create a fine-tuning instance](./finetune_create)
+- [Fine-tuning frameworks](./finetune_framework_intro)
+- [Export fine-tuning results](./finetune_export)
+- [Fine-tuning FAQ](./finetune_faq)

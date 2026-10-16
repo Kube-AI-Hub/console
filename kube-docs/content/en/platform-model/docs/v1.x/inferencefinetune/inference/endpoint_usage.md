@@ -182,3 +182,14 @@ Inference instances incur charges while running. To avoid unnecessary costs, **s
 
 - **Stop**: Pauses the inference service, preserves instance configuration, pauses billing, and allows restart at any time.
 - **Delete**: Permanently removes the instance and all associated resources. This action cannot be undone.
+
+## Instance Settings
+
+On the instance details page, switch to the **Settings** tab to change the alias, description, and visibility. The instance's English name, model, and region cannot be changed after creation.
+
+## Related documents
+
+- [Create an inference instance](./endpoint_create)
+- [Inference instance FAQ](./endpoint_faq)
+- [Model inference overview](./inference_intro)
+- [Serverless inference](./serverless_intro)

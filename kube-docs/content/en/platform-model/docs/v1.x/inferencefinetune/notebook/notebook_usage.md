@@ -22,11 +22,26 @@ The development environment depends on the runtime framework selected during ins
 Once the Notebook is launched, the instance continues to consume compute resources and incur charges. Stop the instance promptly when you are done.
 {{</ notice >}}
 
-## View Runtime Logs
+## Detail tabs
 
-In the instance list, click the instance name to open the details page, then switch to the **Analysis** tab to view real-time runtime logs.
+Opening an instance detail page (`/notebooks/:id`) reveals:
 
-The log viewer supports the following:
+| Tab | Contents |
+|-----|----------|
+| Analysis | Resource usage curves for the instance. Development environments hide HTTP traffic metrics |
+| Logs | Startup and runtime logs of the instance |
+| Billing | Resource usage and cost breakdown |
+| Settings | Alias, description, visibility, and more |
+
+A development environment has no Overview tab; the primary action on the detail page is opening the IDE directly.
+
+### Analysis
+
+Shows resource usage curves for the running instance, to tell whether it is starved of CPU, memory, or VRAM. Development environments hide HTTP traffic metrics, since interactive work has no steady request volume.
+
+### Logs
+
+Shows startup and runtime logs of the instance, with:
 
 - **Auto-refresh**: Automatically scrolls to show the latest log entries
 - **Keyword search**: Quickly locate specific log messages
@@ -34,9 +49,9 @@ The log viewer supports the following:
 
 Log content includes environment startup information, dependency installation records, and code execution output, which helps troubleshoot runtime issues.
 
-## View Billing Details
+### Billing
 
-On the instance details page, switch to the **Billing** tab to view resource usage details:
+Shows resource usage details:
 
 | Field | Description |
 |-------|-------------|
@@ -48,6 +63,10 @@ On the instance details page, switch to the **Billing** tab to view resource usa
 {{< notice tip >}}
 Check the billing page regularly to stay informed about resource consumption and avoid unnecessary charges.
 {{</ notice >}}
+
+### Settings
+
+Change the alias, description, and visibility. The instance's English name and runtime framework cannot be changed after creation.
 
 ## Stop the Instance
 

@@ -10,7 +10,7 @@ weight: 1
 
 section1:
   title: Industry AI Model Platform Documentation
-  content: Learn how to manage the model library, datasets, development environments, and user spaces, and perform model inference, model training & evaluation, and resource management on the Industry AI Model Platform.
+  content: Learn how to manage the model library, datasets, development environments, and user spaces, and perform model inference, model training & evaluation, and resource management on the Industry AI Model Platform, and use the Agent Workshop to assemble models, tools, and knowledge into publishable agents.
   image: /images/docs/platform-model/banner.png
   version: "v1.x"
 
@@ -33,6 +33,12 @@ sectionLink:
       - /platform-model/docs/v1.x/inferencefinetune/finetune/finetune_intro
       - /platform-model/docs/v1.x/inferencefinetune/evaluation/evaluation_create
       - /platform-model/docs/v1.x/inferencefinetune/evaluation/evaluation_custom_params
+      - /platform-model/docs/v1.x/workshop/
+      - /platform-model/docs/v1.x/workshop/digital-twin
+      - /platform-model/docs/v1.x/workshop/service-expert
+      - /platform-model/docs/v1.x/workshop/publish
+      - /platform-model/docs/v1.x/skills/
+      - /platform-model/docs/v1.x/agents/
       - /platform-model/docs/v1.x/datatool/
       - /platform-model/docs/v1.x/mcp/
 ---
