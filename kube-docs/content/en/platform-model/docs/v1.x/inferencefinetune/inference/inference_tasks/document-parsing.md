@@ -30,7 +30,7 @@ The same MinerU model can also be deployed with the `vllm` framework. That gives
 Open the overview tab once the endpoint is ready; the page is embedded there, so there is no separate address to find.
 
 1. **Choose a file**: drag in or select a PDF, Office document or image. Bundled examples are offered, so a first run needs no file of your own.
-2. **Pick a tier**:
+2. **Parsing level**: drag the slider; the level name and its trade-off update as you move it.
 
    | Tier | Use |
    |------|-----|
@@ -39,13 +39,23 @@ Open the overview tab once the endpoint is ready; the page is embedded there, so
    | `standard` | Complex layout (default); use it for dense pages, formulas or tables |
    | `advanced` | Highest quality, slower |
 
-3. **OCR mode**: `auto` decides, `txt` uses the PDF text layer only, `ocr` forces recognition of scanned pages.
-4. **Page range**: leave it empty or `all` for every page, or use a range such as `1-10` to try a few pages first.
-5. Click **Parse**. The Markdown appears on the right, ready to copy or download as `.md`.
+3. **Force OCR**: tick it to ignore the PDF text layer and treat the whole document as a scan. Left unticked the engine decides for itself (equivalent to `ocr_mode=auto`); to use the text layer only and skip recognition, pass `ocr_mode=txt` through the API.
+4. **Page range**: two sliders for the first and last page, with a summary such as "pages 3-5 selected (3 of 13)". The page count is only known once a PDF is loaded, so the sliders stay disabled until then; the selection is sent as `page_range`. Trying the first few pages is faster.
+5. Click **Parse**. The stage list on the left lights up as the job advances (preparing request → submitting job → queued → parsing → downloading result → assembling output → done) with a running timer, so a stall is visible where it happens. The result appears on the right.
+
+The middle column previews the **source document** side by side with the result: hover a heading, table or paragraph on either side and the matching block is highlighted on the other; click to pin the selection. The PDF toolbar offers paging, jumping to a page and zooming.
+
+The result pane switches between **Markdown** (rendered) and **JSON** (`middle_json`), and its **Download** menu offers several formats:
+
+| Format | Notes |
+|--------|-------|
+| Markdown / JSON / Structured JSON | The parse artifacts themselves |
+| HTML / LaTeX / DOCX / EPUB / PDF | Converted from the same result in place, **no API token needed**; LaTeX arrives as `_latex.zip` and PDF as `_rendered.pdf` |
+| ZIP | The full artifact bundle, including `images/` |
 
 The first parse loads the model and is slower than later calls; the page says so while it runs. On failure the reason is shown under the button, without losing the selected file and options.
 
-The **API** tab embeds the engine's Swagger UI, so an API call can be made from the page itself.
+The **API** tab embeds the engine's interface documentation (RapiDoc, themed to match the platform), so an API call can be made from the page itself. When the page is opened with `?token=`, calls made there carry that token automatically.
 
 ## Calling the API
 
@@ -108,6 +118,8 @@ print(result["files"][0]["markdown"])
 **Tables or formulas are garbled**: move to `tier=standard` or `advanced`; `flash` does not guarantee complex layouts.
 
 **The endpoint is ready but parsing errors out**: call `/v1/file_parse` once from the **API** tab to tell a request problem from an engine problem. Engine-side checks are in [Custom Inference Engines](../custom_engine).
+
+**Some download formats are greyed out**: parse something first — those formats are converted from the current result, so there is nothing to convert without one. The item stays disabled while it converts.
 
 ## See also
 

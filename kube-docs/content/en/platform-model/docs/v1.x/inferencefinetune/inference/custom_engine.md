@@ -173,11 +173,13 @@ custom_playground = false  → follow the task tag: the four native tasks get th
 - **Relative paths are mandatory**: the platform's inference proxy **strips the `/endpoint/<svc>` prefix** before forwarding and sends no `root_path`. Absolute paths such as `/v1/...` or `/docs` resolve against the platform's own host instead of the engine, showing up as a blank page or a 404. Write `./v1/...` and `./docs`, which work both directly and behind the proxy.
 - **Revalidate static assets**: send `Cache-Control: no-cache` for the page and its assets. They change with the image, and a heuristically cached copy keeps rendering a previous version's page after an upgrade, which is very hard to diagnose from outside.
 - **Bundle example files**: an engine that needs a file from the user should offer examples in the page (one click to fill), so a first run succeeds without preparing anything. The platform does not dictate their form.
-- **Read `?token=` and `?lang=`**: the platform appends the current language and, when the user opts in, an access token. Use them for localization and authentication as needed.
+- **Read `?token=` and `?lang=`**: the platform appends the current language and, when the user opts in, an access token. Use them for localization and authentication as needed. **Note**: the token must also reach the "Try" calls inside the API tab. Without that the in-page calls go out unauthenticated and report 401 while the parse tab works fine — a "half working" state that reads as an engine fault.
 
 ### OpenAPI
 
-Expose `/openapi.json` and `/docs` (Swagger UI), with the interface described by OpenAPI. The platform does not dictate the implementation, only that it is reachable and that its assets use relative paths. Embedding `/docs` as an "API" tab in the page lets a user try and read the API in one place.
+Expose `/openapi.json` and `/docs` (Swagger UI), with the interface described by OpenAPI. The platform does not dictate the implementation, only that it is reachable and that its assets use relative paths. Embedding `/docs` as an "API" tab in the page lets a user try and read the API in one place; a documentation component themed to match the platform (RapiDoc, for instance) is also fine — but then point its `server` at the engine itself (a relative path, as above) and inject the token into its auth configuration.
+
+If an operation can only be performed as a form — a file upload, say — **put `multipart/form-data` first in `requestBody.content`**. Most documentation components preselect the first media type; with `application/json` ahead of it, the Try panel offers only a JSON editor and no file picker, so the operation cannot be tried from the page at all.
 
 ## 7. Verification checklist
 
