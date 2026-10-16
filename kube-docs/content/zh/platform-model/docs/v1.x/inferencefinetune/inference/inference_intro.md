@@ -40,6 +40,9 @@ weight: 6200
 - [文本生成图像（Text to Image）](./inference_tasks/text-to-image)
 - [图像文本生成（Image Text to Text）](./inference_tasks/image-text-to-text)
 - [特征提取（Feature Extraction）](./inference_tasks/feature-extraction)
+- [文档解析（Document Parsing）](./inference_tasks/document-parsing)
+
+自定义引擎（自带的 Playground 与 API）见[自定义推理引擎](./custom_engine)。
 
 ## 相关文档
 
@@ -49,4 +52,5 @@ weight: 6200
 - [创建推理实例](./endpoint_create)
 - [使用推理实例](./endpoint_usage)
 - [配置推理引擎](./runtime_framework_admin)
+- [自定义推理引擎](./custom_engine)
 - [常见问题](./endpoint_faq)

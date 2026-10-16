@@ -40,6 +40,9 @@ The platform supports multiple inference task types — refer to the correspondi
 - [Text to Image](./inference_tasks/text-to-image)
 - [Image Text to Text](./inference_tasks/image-text-to-text)
 - [Feature Extraction](./inference_tasks/feature-extraction)
+- [Document Parsing](./inference_tasks/document-parsing)
+
+Custom engines, which bring their own Playground and API, are covered in [Custom Inference Engines](./custom_engine).
 
 ## Related Documentation
 
@@ -49,4 +52,5 @@ The platform supports multiple inference task types — refer to the correspondi
 - [Create Dedicated Inference Instance](./endpoint_create)
 - [Use Dedicated Inference Instance](./endpoint_usage)
 - [Configure Inference Engines](./runtime_framework_admin)
+- [Custom Inference Engines](./custom_engine)
 - [FAQ](./endpoint_faq)

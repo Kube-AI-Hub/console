@@ -47,10 +47,25 @@ On the **Inference Engine** tab, click **New** or **Edit**. Main fields:
 | **Container port** | Listen port, default `8000`. Keep it aligned with `containerPort` in launch |
 | **Engine args** | JSON array of CLI flags users can override |
 | **Launch (KServe / llm-d)** | JSON object that tells KServe how to start the process |
+| **Inference backend** | `kserve-llmisvc` (LLM engines; single, multi-node, PD) or `kserve-standard` (other inference, single replica) |
+| **Custom Playground** | When on, the endpoint overview embeds the page this engine ships instead of the platform Playground |
 | **Architectures / models** | Optional tags for framework matching |
 | **Enabled** | Disabled versions are hidden on the create page |
 
 Fine-tuning and evaluation forms also accept engine args and launch JSON. KServe / llm-d reads launch only for inference and public inference.
+
+## Custom Playground
+
+The platform Playground covers a few fixed shapes: chat and image generation. Engines such as document parsers or speech synthesizers interact quite differently, so an engine may ship its own page for the overview to embed.
+
+- **When to turn it on**: the engine serves both a page and its API on the same container port (separated by route, without opening another port), and the page reaches its API through **relative** paths.
+- **The engine decides, not the model's task tag**: one model can run under vLLM (which wants the native chat UI) and under a custom engine (which wants its own page). The task tag lives on the model and cannot tell those two deploys apart.
+- **When off**: routing falls back to the task tag — the four native tasks (text generation, image generation, feature extraction, image-text-to-text) get the platform Playground, anything else renders no Playground block.
+- **Not-ready instances**: the page is neither rendered nor requested.
+
+The field is also seeded from `custom_playground` in `configs/inference/*.json`; **Import Built-in** does not overwrite existing rows, so switch it on the edit page for a record that already exists.
+
+The full contract for a custom engine is in [Custom Inference Engines](./custom_engine).
 
 ## Engine args
 
