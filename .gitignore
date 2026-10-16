@@ -26,3 +26,6 @@ yarn-error.log*
 
 *.rdb
 .cache-loader
+
+.work
+outputs/
