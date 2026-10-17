@@ -29,6 +29,8 @@ The same MinerU model can also be deployed with the `vllm` framework. That gives
 
 Open the overview tab once the endpoint is ready; the page is embedded there, so there is no separate address to find.
 
+![The Playground embedded in the endpoint overview](/images/docs/platform-model/inference/document-parsing/overview-playground.png)
+
 1. **Choose a file**: drag in or select a PDF, Office document or image. Bundled examples are offered, so a first run needs no file of your own.
 2. **Parsing level**: drag the slider; the level name and its trade-off update as you move it.
 
@@ -45,7 +47,11 @@ Open the overview tab once the endpoint is ready; the page is embedded there, so
 
 The middle column previews the **source document** side by side with the result: hover a heading, table or paragraph on either side and the matching block is highlighted on the other; click to pin the selection. The PDF toolbar offers paging, jumping to a page and zooming.
 
+![Source document and parsed result side by side, highlighted both ways](/images/docs/platform-model/inference/document-parsing/parse-compare.png)
+
 The result pane switches between **Markdown** (rendered) and **JSON** (`middle_json`), and its **Download** menu offers several formats:
+
+![The rendered formats offered by the Download menu](/images/docs/platform-model/inference/document-parsing/download-menu.png)
 
 | Format | Notes |
 |--------|-------|
@@ -55,7 +61,15 @@ The result pane switches between **Markdown** (rendered) and **JSON** (`middle_j
 
 The first parse loads the model and is slower than later calls; the page says so while it runs. On failure the reason is shown under the button, without losing the selected file and options.
 
-The **API** tab embeds the engine's interface documentation (RapiDoc, themed to match the platform), so an API call can be made from the page itself. When the page is opened with `?token=`, calls made there carry that token automatically.
+The **API** tab embeds the engine's interface documentation (RapiDoc, themed to match the platform), so an API call can be made from the page itself. The documentation follows the platform language: a Chinese interface shows Chinese docs, English shows English ones.
+
+![The API tab: Chinese documentation with three-language code samples](/images/docs/platform-model/inference/document-parsing/api-tab.png)
+
+- Every operation carries **Python / JavaScript / cURL** samples you can copy with one click, so there is no request to assemble by hand.
+- The engine's overall description and the per-operation Authentication block are not rendered — every operation on an endpoint authenticates the same way, so repeating it on each one is noise.
+- With **Use my access token** ticked, `YOUR_TOKEN` in the samples is replaced by your token and the **Try** request carries it too. Untick it and the samples go back to the placeholder rather than leaving a bare `Bearer `.
+- Operations that need no authentication (health check, listing parsing levels) are marked public and their samples carry no credentials at all.
+- For the stock Swagger UI, open `/docs` under the endpoint address.
 
 ## Calling the API
 
@@ -91,7 +105,7 @@ curl "https://<endpoint>/v1/tasks/<task_id>/result" \
   -H "Authorization: Bearer <access-token>"
 ```
 
-The full interface list is on the **API** tab of the overview, or at `/docs` under the endpoint address.
+The full interface list is on the **API** tab of the overview, or at `/docs` under the endpoint address. Every operation on the **API** tab carries Python / JavaScript / cURL samples you can copy directly; with **Use my access token** ticked the samples already contain your token, so there is nothing to substitute by hand.
 
 ## Python example
 
@@ -120,6 +134,10 @@ print(result["files"][0]["markdown"])
 **The endpoint is ready but parsing errors out**: call `/v1/file_parse` once from the **API** tab to tell a request problem from an engine problem. Engine-side checks are in [Custom Inference Engines](../custom_engine).
 
 **Some download formats are greyed out**: parse something first — those formats are converted from the current result, so there is nothing to convert without one. The item stays disabled while it converts.
+
+**The API tab says "no API key in use"**: the page was opened without your token, usually because the browser served a cached copy. Hard-refresh (Ctrl/Cmd + Shift + R); if it persists, check that you are signed in as yourself on the endpoint page.
+
+**The samples on the API tab still show `YOUR_TOKEN`**: untick and re-tick **Use my access token** to reload the samples; if they never refresh, hard-refresh the page as above.
 
 ## See also
 

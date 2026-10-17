@@ -181,6 +181,11 @@ Expose `/openapi.json` and `/docs` (Swagger UI), with the interface described by
 
 If an operation can only be performed as a form — a file upload, say — **put `multipart/form-data` first in `requestBody.content`**. Most documentation components preselect the first media type; with `application/json` ahead of it, the Try panel offers only a JSON editor and no file picker, so the operation cannot be tried from the page at all.
 
+Two requirements that are easy to overlook but immediately visible to users:
+
+- **The spec can be generated rather than written by hand.** With more than a couple of operations, two hand-maintained bilingual YAML files will drift from the code. The engine already shipped this way generates them from the runtime schema (a FastAPI app hands you `app.openapi()`), keeps the Chinese copy in a separate "English source → Chinese" mapping, and falls back to English for anything missing — a missed translation shows English instead of failing the build. Regenerate after touching an operation, and pin "the checked-in spec matches the code" with a unit-test assertion.
+- **The documentation must follow `?lang=`.** Switch the platform to English and both the page and its API documentation should follow; otherwise one is English and the other Chinese, which reads like two products out of step. Reloading the spec on a language change is enough.
+
 ## 7. Verification checklist
 
 Once the engine is registered, confirm in order:
@@ -191,9 +196,13 @@ Once the engine is registered, confirm in order:
 4. **Inspect the pod**: `/mnt/models/model` holds the weights, and the engine log shows **no** attempt to download them.
 5. **Probe passes**: `GET /health` returns 200 and the pod becomes ready.
 6. **Overview page**: the iframe renders and a bundled example completes one call.
-7. **API tab**: Swagger opens and an API call succeeds.
+7. **API tab**: Swagger opens and an API call succeeds. Then check each of these — no overall description or Authentication block, Python / JavaScript / cURL samples on every operation, the translation not reverting to English after clicking through several operations, the samples **and** the Try request changing together when **Use my access token** is toggled, and public operations carrying no credentials in their samples.
 8. **Routing check**: deploy the same model under vLLM and confirm that instance uses the platform Playground, not your page.
 9. **Flag off**: turn off **Custom Playground** in the admin console and confirm the instance falls back to task-tag routing.
+
+{{< notice note >}}
+If the engine supports API-key authentication, be careful not to lock out **the page itself**: an auth middleware will otherwise intercept `/` and the static assets too, so the user gets a 401 in the iframe, never sees the interface, and has nowhere to tick **Use my access token**. Keep the routes needed for the first render public (page, static assets, `/config`, documentation routes) and keep the inference operations authenticated.
+{{< /notice >}}
 
 ## See also
 
