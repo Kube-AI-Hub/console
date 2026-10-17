@@ -1,5 +1,8 @@
 <div class="notices {{ .Get 0 }}">
   {{ $type := .Get 0}}
   <p>{{ i18n $type }}</p>
-  <div>{{ .Inner | markdownify }}</div>
+  {{/* RenderString, not markdownify: markdownify has no page context, so the
+       link render hook cannot resolve relative destinations inside a notice
+       and they stay `./sibling` and land on the 404 page. */}}
+  <div>{{ .Inner | .Page.RenderString }}</div>
 </div>

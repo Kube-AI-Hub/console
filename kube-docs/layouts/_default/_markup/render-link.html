@@ -1,1 +1,25 @@
-<a href="{{ .Destination | safeURL }}"{{ with .Title}} title="{{ . }}"{{ end }}{{ if strings.HasPrefix .Destination "http" }} target="_blank" rel="noopener noreferrer"{{ end }}>{{ .Text }}</a>
+{{- /*
+  Resolve in-repo relative links to real permalinks.
+
+  The docs use pretty URLs, so every page is served from its own directory
+  (`<page>/index.html`). A markdown link written as `./sibling` therefore
+  resolves against `<page>/`, one level too deep, and lands on the SPA 404
+  shell; `../sibling` has the same problem from the other side. Resolving the
+  destination through `.Page.GetPage` yields the permalink the page actually
+  lives at, so the link works regardless of how the source spelled it.
+
+  Anything GetPage cannot resolve (external URLs, anchors, files that are not
+  pages such as images) is left exactly as written.
+*/ -}}
+{{- $dest := .Destination -}}
+{{- $href := $dest -}}
+{{- if or (hasPrefix $dest "./") (hasPrefix $dest "../") -}}
+  {{- $lookup := $dest -}}
+  {{- if hasPrefix $dest "./" -}}
+    {{- $lookup = strings.TrimPrefix "./" $dest -}}
+  {{- end -}}
+  {{- with .Page.GetPage $lookup -}}
+    {{- $href = .RelPermalink -}}
+  {{- end -}}
+{{- end -}}
+<a href="{{ $href | safeURL }}"{{ with .Title}} title="{{ . }}"{{ end }}{{ if strings.HasPrefix $dest "http" }} target="_blank" rel="noopener noreferrer"{{ end }}>{{ .Text }}</a>
