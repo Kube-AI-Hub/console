@@ -2,7 +2,10 @@ baseURL = "https://watering.ai/kube-docs/"
 canonifyURLs = true
 
 enableRobotsTXT = true
-ignoreFiles = [ ".*/_custom" ]
+# Manus authoring scratch lives under content/ but is not content: Hugo copies
+# content/ wholesale, so without this the build carries ~90MB of slide decks
+# and MCP result JSON that nothing links to. `outputs/` is author scratch too.
+ignoreFiles = [ ".*/_custom", "manus-slides/.*", ".*/manus-slides/.*", ".*/\\.manus/.*", ".*/outputs/.*" ]
 
 [caches]
   [caches.images]

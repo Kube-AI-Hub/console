@@ -11,3 +11,9 @@ node_modules
 .idea
 /resources
 
+# Manus authoring scratch: slide decks and MCP call results generated while
+# drafting docs. They are not content, and without these lines Hugo copies
+# them into /public, so every build carries ~90MB of slides nobody links to.
+content/*/manus-slides/
+content/*/.manus/
+
