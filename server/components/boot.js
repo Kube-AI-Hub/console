@@ -78,10 +78,22 @@ module.exports = function(app) {
   // serve static files
   const httpStatic = serverConfig.http.static[process.env.NODE_ENV]
   for (const [k, v] of Object.entries(httpStatic)) {
-    // Enable index.html serving for kube-docs (Hugo site)
-    const staticOptions = k === '/kube-docs' 
-      ? { index: 'index.html', maxage: 604800000 }
-      : { index: false, maxage: 604800000 }
+    // Enable index.html serving for kube-docs (Hugo site).
+    //
+    // HTML must not be cached: a docs deploy replaces these files in place, and
+    // a long max-age on the markup keeps returning users on the previous build
+    // for the whole window — a fixed link still 404s until the cache expires.
+    // Fingerprinted assets keep the long max-age; everything else revalidates.
+    const isKubeDocs = k === '/kube-docs'
+    const staticOptions = {
+      index: isKubeDocs ? 'index.html' : false,
+      maxage: 604800000,
+      setHeaders(res, filePath) {
+        if (isKubeDocs && /\.html?$/i.test(filePath)) {
+          res.setHeader('Cache-Control', 'no-cache')
+        }
+      },
+    }
     app.use(mount(k, serve(root(v), staticOptions)))
   }
 
