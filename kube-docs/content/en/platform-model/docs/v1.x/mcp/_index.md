@@ -44,6 +44,14 @@ Because the protocol comes from a running service, an MCP service that has **not
 
 When the protocol is long, a table of contents stays pinned on the left of the page (Server Config / Prompts / Resources / Tools). Clicking an entry scrolls to that section **in place**, which makes it easy to jump straight to a section when a service exposes many tools.
 
+## Admin console
+
+Administrators can search MCP repositories in **MCP management** (`/admin_panel/mcps`), review the tool count, visibility and weight, open the detail page to set weight or change visibility, and delete one or many.
+
+## Related operations
+
+- [Admin console in detail](../admin/admin_intro)
+
 ## Typical Use Cases
 
 - **Database Queries**: Allow large models to directly query internal databases via MCP.

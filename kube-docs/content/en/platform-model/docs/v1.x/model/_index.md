@@ -42,4 +42,5 @@ Switch the source filter in the model library to **Public models** to see only t
 - [Upload Models](./upload_model)
 - [Update Models](./update_model)
 - [Download Models](./download_models)
+- [Admin console in detail](../admin/admin_intro)
 - [Tenants and Compute Placement](../tenancy/)

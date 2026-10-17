@@ -8,5 +8,5 @@ Kubernetes has announced that in-tree volume plugins will be removed from Kubern
 Supported CSI plugins:
 
 - [neonsan-csi](https://github.com/yunify/qingstor-csi)
-- [qingcloud-csi](../../../installing-on-linux/persistent-storage-configurations/install-qingcloud-csi/)
-- [ceph-csi](../../../installing-on-linux/persistent-storage-configurations/install-ceph-csi-rbd/)
+- [qingcloud-csi](/docs/v3.4/installing-on-linux/persistent-storage-configurations/install-qingcloud-csi/)
+- [ceph-csi](/docs/v3.4/installing-on-linux/persistent-storage-configurations/install-ceph-csi-rbd/)

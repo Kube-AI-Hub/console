@@ -32,4 +32,5 @@ Switch to the public tenant and open Dashboard: the numbers must match the lists
 
 ## Related documentation
 
+- [Admin console in detail](../admin/admin_intro)
 - [Compute projects and visibility](./compute_and_visibility)

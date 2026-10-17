@@ -20,7 +20,7 @@ Use either of the following methods to change the value of the field `enabled`:
   kubectl -n kubesphere-system edit clusterconfiguration ks-installer
   ```
 
-- Log in to the Kube AI Hub web console as `admin`, click **Platform** in the upper-left corner and select **Cluster Management**, and then go to **CRDs** to search for `ClusterConfiguration`. For more information, see [Enable Pluggable Components](../../../pluggable-components/).
+- Log in to the Kube AI Hub web console as `admin`, click **Platform** in the upper-left corner and select **Cluster Management**, and then go to **CRDs** to search for `ClusterConfiguration`. For more information, see [Enable Pluggable Components](/docs/v3.4/pluggable-components/).
 
 {{< notice note >}}
 

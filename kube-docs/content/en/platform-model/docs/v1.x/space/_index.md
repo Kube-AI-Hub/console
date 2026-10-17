@@ -101,3 +101,4 @@ Change the alias, description, and visibility. The space's English name and SDK 
 
 - [Create a user space](./create_space)
 - [Download Spaces](./download_space_repo)
+- [Admin console in detail](../admin/admin_intro)

@@ -38,4 +38,5 @@ The platform supports the following dataset types:
 - [Upload Datasets](./upload_dataset)
 - [Update Datasets](./update_dataset)
 - [Download Datasets](./download_datasets)
+- [Admin console in detail](../admin/admin_intro)
 - [Tenants and Compute Placement](../tenancy/)

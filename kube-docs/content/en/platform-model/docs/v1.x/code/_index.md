@@ -41,4 +41,5 @@ The **English name is part of the path and cannot be changed after creation**.
 ## Related Operations
 
 - [Download Code Repositories](./download_codes)
+- [Admin console in detail](../admin/admin_intro)
 - [Tenants and Compute Placement](../tenancy/)
