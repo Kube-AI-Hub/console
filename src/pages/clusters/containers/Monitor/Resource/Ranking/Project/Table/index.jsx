@@ -203,6 +203,7 @@ class ProjectUsageRank extends React.Component {
         columns={this.columns}
         store={store}
         dataSource={data.toJS()}
+        rowKey="namespace"
         emptyText={<Empty />}
       />
     )

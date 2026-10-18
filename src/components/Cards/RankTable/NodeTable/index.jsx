@@ -256,6 +256,7 @@ class NodeUsageRank extends React.Component {
         columns={this.columns}
         store={store}
         dataSource={data.toJS()}
+        rowKey="node"
         emptyText={<Empty />}
       />
     )
