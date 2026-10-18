@@ -1,0 +1,37 @@
+id: TC-FULL-CLUSTER_STORAGE-SHARED_STORAGE-01
+level: 2
+suite: full
+module: cluster-storage
+submodule: shared-storage
+feature: ""
+title: 共享存储 · 三个页签
+entry_url: "{BASE_URL}/clusters/default/juicefs-storage/overview"
+prd: prd/cluster-storage/shared-storage/_index.md
+design: design/cluster-storage/shared-storage/_index.md
+
+covers:
+- AC-FULL-CLUSTER_STORAGE-SHARED_STORAGE-01
+- AC-FULL-CLUSTER_STORAGE-SHARED_STORAGE-02
+
+story:
+- US1
+- US2
+
+product: 在三个页签之间切换，核对每页主区；改一次配额并确认表格与 PV 同步。
+preconditions:
+- 已登录，且在 default 集群
+- 集群至少有一个共享卷
+steps:
+- 打开 /clusters/default/juicefs-storage/overview，核对卡片与使用率条
+- 点「卷与配额」，核对八列表格与行内「调整配额」
+- 点「性能」，核对六张图或指标未开启提示
+- 在卷页把某个卷的配额从当前值改为 +1TiB 并确定，核对表格配额更新
+- 用 kubectl 核对 PV 的 spec.capacity 与 juicefs quota 等于新值
+expected:
+- 三页都有主区内容，没有未翻译 key
+- 配额改动后表格、PV、JuiceFS quota 三者一致
+troubleshoot:
+- 配额没变时先看一次性 Job 的状态与日志
+- 指标未开启时看驱动 ConfigMap 的 mountPodPatch.mountOptions
+update_automation:
+- 页签名称变化时改 pages/juicefs_storage.py

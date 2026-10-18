@@ -1,0 +1,32 @@
+id: TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-02
+level: 3
+suite: point
+module: cluster-storage
+submodule: shared-storage
+feature: performance
+title: 性能 · 空闲区间的空态
+entry_url: "{BASE_URL}/clusters/default/juicefs-storage/performance"
+prd: prd/cluster-storage/shared-storage/performance.md
+design: design/cluster-storage/shared-storage/performance.md
+
+covers:
+- AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-02
+
+story:
+- US1
+
+product: 所选区间内没有读写时，读写图给出空态而不是零线。
+preconditions:
+- 已登录，且在 default 集群
+- mount pod 的 metrics 已开启
+steps:
+- 打开 /clusters/default/juicefs-storage/performance
+- 选择「最近 10 分钟」
+- 如果读吞吐与写吞吐的曲线全为 0，核对图上是否出现「该时间范围内无读写」
+expected:
+- 无流量时显示空态文案，不画零线
+- 有流量时正常画曲线（此时本用例跳过空态断言）
+troubleshoot:
+- 空态不出现时确认页面是否把「全 0」误判成有数据
+update_automation:
+- 空态文案变化时改 locales

@@ -1,0 +1,39 @@
+id: TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-01
+level: 3
+suite: point
+module: cluster-storage
+submodule: shared-storage
+feature: quota
+title: 卷与配额 · 表格与可读性
+entry_url: "{BASE_URL}/clusters/default/juicefs-storage/volumes"
+prd: prd/cluster-storage/shared-storage/quota.md
+design: design/cluster-storage/shared-storage/quota.md
+
+covers:
+- AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-01
+- AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-03
+
+story:
+- US1
+- US3
+
+product: 卷页八列表格齐全、每行有配额与操作按钮，且表格文字在深色主题下可读。
+preconditions:
+- 已登录，且在 default 集群
+- 集群至少有一个共享卷
+steps:
+- 打开 /clusters/default/juicefs-storage/volumes
+- 读取表头
+- 读取每一行的卷名、目录、配额、已用、使用率、inodes、挂载节点与操作列
+- 对表格区做对比度审计（阈值 4.5:1）
+expected:
+- 表头为卷 / 目录 / 配额 / 已用 / 使用率 / inodes / 挂载节点 / 空
+- 每行配额显示为 TiB/GiB 而非原始字节数
+- 嵌套卷的目录下有「位于 model-cache 内」
+- 每行操作列有「调整配额」
+- 对比度审计返回空列表
+troubleshoot:
+- 配额显示成字节数说明 Table 用了 renderCell 而不是 column.render
+- 文字看不清时确认 SCSS 用了 token
+update_automation:
+- 列顺序变化时改 pages/juicefs_storage.py

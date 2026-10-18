@@ -1,0 +1,32 @@
+id: TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-OVERVIEW-02
+level: 3
+suite: point
+module: cluster-storage
+submodule: shared-storage
+feature: overview
+title: 概览 · 可读性
+entry_url: "{BASE_URL}/clusters/default/juicefs-storage/overview"
+prd: prd/cluster-storage/shared-storage/overview.md
+design: design/cluster-storage/shared-storage/overview.md
+
+covers:
+- AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-OVERVIEW-02
+- AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-OVERVIEW-03
+
+story:
+- US2
+
+product: 概览在深色主题下的文字对比度达标，且不出现未翻译 key。
+preconditions:
+- 已登录，且在 default 集群
+steps:
+- 打开 /clusters/default/juicefs-storage/overview
+- 对卡片区与使用率区做对比度审计（阈值 4.5:1，次要文字 3:1）
+- 检查页面文本里是否有 _PL / _DESC 这类 key
+expected:
+- 对比度审计返回空列表
+- 页面文本里没有未翻译 key
+troubleshoot:
+- 对比度不达标时确认页面 SCSS 是否用了 scss/variables 的 token
+update_automation:
+- 阈值调整时改 helpers/contrast.py 的常量

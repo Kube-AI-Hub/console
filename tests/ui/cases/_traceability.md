@@ -1,0 +1,40 @@
+# 需求 ↔ 技术方案 ↔ 用例 追溯矩阵
+
+由 `generate_case_docs.py` 生成。`覆盖用例` 或 `承接技术方案` 为空，表示这条 AC 还没有用例或还没有技术方案承接。
+
+| 功能点 | AC | 覆盖用例 | 承接技术方案 |
+|--------|----|----------|--------------|
+| cluster-storage/_index | `AC-CORE-CLUSTER_STORAGE-01` | `TC-CORE-CLUSTER_STORAGE-01` | [`design/cluster-storage/_index.md`](../../../design/cluster-storage/_index.md) |
+| cluster-storage/shared-storage/_index | `AC-FULL-CLUSTER_STORAGE-SHARED_STORAGE-01` | `TC-FLOW-SHARED_STORAGE`, `TC-FULL-CLUSTER_STORAGE-SHARED_STORAGE-01` | [`design/cluster-storage/shared-storage/_index.md`](../../../design/cluster-storage/shared-storage/_index.md) |
+| cluster-storage/shared-storage/_index | `AC-FULL-CLUSTER_STORAGE-SHARED_STORAGE-02` | `TC-FLOW-SHARED_STORAGE`, `TC-FULL-CLUSTER_STORAGE-SHARED_STORAGE-01` | [`design/cluster-storage/shared-storage/_index.md`](../../../design/cluster-storage/shared-storage/_index.md) |
+| cluster-storage/shared-storage/overview | `AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-OVERVIEW-01` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-OVERVIEW-01` | [`design/cluster-storage/shared-storage/overview.md`](../../../design/cluster-storage/shared-storage/overview.md) |
+| cluster-storage/shared-storage/overview | `AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-OVERVIEW-02` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-OVERVIEW-02` | [`design/cluster-storage/shared-storage/overview.md`](../../../design/cluster-storage/shared-storage/overview.md) |
+| cluster-storage/shared-storage/overview | `AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-OVERVIEW-03` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-OVERVIEW-02` | [`design/cluster-storage/shared-storage/overview.md`](../../../design/cluster-storage/shared-storage/overview.md) |
+| cluster-storage/shared-storage/performance | `AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-01` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-01` | [`design/cluster-storage/shared-storage/performance.md`](../../../design/cluster-storage/shared-storage/performance.md) |
+| cluster-storage/shared-storage/performance | `AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-02` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-02` | [`design/cluster-storage/shared-storage/performance.md`](../../../design/cluster-storage/shared-storage/performance.md) |
+| cluster-storage/shared-storage/performance | `AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-03` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-01` | [`design/cluster-storage/shared-storage/performance.md`](../../../design/cluster-storage/shared-storage/performance.md) |
+| cluster-storage/shared-storage/performance | `AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-04` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-01` | [`design/cluster-storage/shared-storage/performance.md`](../../../design/cluster-storage/shared-storage/performance.md) |
+| cluster-storage/shared-storage/quota | `AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-01` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-01` | [`design/cluster-storage/shared-storage/quota.md`](../../../design/cluster-storage/shared-storage/quota.md) |
+| cluster-storage/shared-storage/quota | `AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-02` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-02` | [`design/cluster-storage/shared-storage/quota.md`](../../../design/cluster-storage/shared-storage/quota.md) |
+| cluster-storage/shared-storage/quota | `AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-03` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-01` | [`design/cluster-storage/shared-storage/quota.md`](../../../design/cluster-storage/shared-storage/quota.md) |
+
+## 小结
+
+- 需求里的 AC：13 条，其中未覆盖 0 条、无技术方案承接 0 条。
+
+## 用户故事覆盖
+
+| 功能点 | 用户故事 | 覆盖用例 |
+|--------|----------|----------|
+| cluster-storage/_index | `US1` | `TC-CORE-CLUSTER_STORAGE-01` |
+| cluster-storage/shared-storage/_index | `US1` | `TC-FULL-CLUSTER_STORAGE-SHARED_STORAGE-01` |
+| cluster-storage/shared-storage/_index | `US2` | `TC-FLOW-SHARED_STORAGE`, `TC-FULL-CLUSTER_STORAGE-SHARED_STORAGE-01` |
+| cluster-storage/shared-storage/overview | `US1` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-OVERVIEW-01` |
+| cluster-storage/shared-storage/overview | `US2` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-OVERVIEW-02` |
+| cluster-storage/shared-storage/performance | `US1` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-01`, `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-02` |
+| cluster-storage/shared-storage/performance | `US2` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-01` |
+| cluster-storage/shared-storage/quota | `US1` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-01` |
+| cluster-storage/shared-storage/quota | `US2` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-02` |
+| cluster-storage/shared-storage/quota | `US3` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-01` |
+
+- 用户故事：10 条，其中未覆盖 0 条。

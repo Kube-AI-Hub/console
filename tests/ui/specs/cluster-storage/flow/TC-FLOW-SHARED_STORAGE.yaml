@@ -1,0 +1,36 @@
+id: TC-FLOW-SHARED_STORAGE
+level: 3
+suite: flow
+module: cluster-storage
+submodule: flow
+feature: shared-storage
+title: 共享存储 · 从发现到扩容的完整旅程
+entry_url: "{BASE_URL}/clusters/default/juicefs-storage/overview"
+prd: prd/cluster-storage/shared-storage/_index.md
+design: design/cluster-storage/shared-storage/_index.md
+
+covers:
+- AC-FULL-CLUSTER_STORAGE-SHARED_STORAGE-01
+- AC-FULL-CLUSTER_STORAGE-SHARED_STORAGE-02
+
+story:
+- US2
+
+product: 按用户故事的 Independent Test 走完「发现快满 → 调大配额 → 确认生效」。
+preconditions:
+- 已登录，且在 default 集群
+- 集群至少有一个共享卷，且当前使用率低于 90%
+steps:
+- 打开 /clusters/default/juicefs-storage/overview，记下最高使用率的卷
+- 切到「卷与配额」，找到该卷
+- 点「调整配额」，把容量调大 1TiB 并确定
+- 核对表格配额更新
+- 切回概览，核对总配额随之增加
+expected:
+- 整个旅程不超过 5 次交互
+- 配额改动在概览与卷页同时可见
+- 页面上没有未翻译 key
+troubleshoot:
+- 概览没更新时确认写操作后是否重新拉取了 summary
+update_automation:
+- 旅程步骤变化时改 tests/cluster-storage/shared-storage/test_shared_storage.py

@@ -1,0 +1,35 @@
+id: TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-OVERVIEW-01
+level: 3
+suite: point
+module: cluster-storage
+submodule: shared-storage
+feature: overview
+title: 概览 · 汇总数字
+entry_url: "{BASE_URL}/clusters/default/juicefs-storage/overview"
+prd: prd/cluster-storage/shared-storage/overview.md
+design: design/cluster-storage/shared-storage/overview.md
+
+covers:
+- AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-OVERVIEW-01
+
+story:
+- US1
+
+product: 概览四张卡片的数值与各卷使用率条一致，且总配额等于卷页各行配额之和。
+preconditions:
+- 已登录，且在 default 集群
+- 集群至少有两个共享卷
+steps:
+- 打开 /clusters/default/juicefs-storage/overview
+- 读取四张卡片的标题与数值
+- 读取各卷使用率条上的目录、已用/配额与百分比
+- 打开 /clusters/default/juicefs-storage/volumes，把各行配额相加
+expected:
+- 卡片标题依次为共享卷 / 总配额 / 总已用 / 最高使用率
+- 共享卷数等于卷页表格行数
+- 总配额等于卷页各行配额之和（按显示精度允许 0.1 的误差）
+- 最高使用率等于使用率条里的最大值
+troubleshoot:
+- 数字对不上时先确认 /summary 与 /volumes 是否同一时刻返回
+update_automation:
+- 卡片顺序变化时改 pages/juicefs_storage.py 的 card 选择器

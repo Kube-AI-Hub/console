@@ -1,0 +1,40 @@
+id: TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-01
+level: 3
+suite: point
+module: cluster-storage
+submodule: shared-storage
+feature: performance
+title: 性能 · 图表与单位
+entry_url: "{BASE_URL}/clusters/default/juicefs-storage/performance"
+prd: prd/cluster-storage/shared-storage/performance.md
+design: design/cluster-storage/shared-storage/performance.md
+
+covers:
+- AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-01
+- AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-03
+- AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-04
+
+story:
+- US1
+- US2
+
+product: 性能页六张图的标题、单位与空态。
+preconditions:
+- 已登录，且在 default 集群
+- mount pod 的 metrics 已开启且被 Prometheus 抓取
+steps:
+- 打开 /clusters/default/juicefs-storage/performance
+- 选择「最近 1 小时」
+- 读取六张图的标题与单位
+- 检查页面文本里是否有 _PL / _DESC 这类 key
+expected:
+- 六张图都存在，标题依次为读吞吐 / 写吞吐 / 块缓存命中率 / 缓存读延迟 / FUSE 操作延迟 / 对象存储错误
+- 读写的单位是 B/s 系（B/s、KiB/s、MiB/s、GiB/s），不是 Mbps
+- 延迟的单位是 s 或 ms；命中率是 %；错误是次/秒
+- 标题里有「区间合计」
+- 没有未翻译 key
+troubleshoot:
+- 显示 Mbps 说明用了 bandwidth 而不是 throughput
+- 出现 _PL 说明 unitType 不被 getSuitableUnit 识别（例如 time）
+update_automation:
+- 图表标题 key 变化时改 locales

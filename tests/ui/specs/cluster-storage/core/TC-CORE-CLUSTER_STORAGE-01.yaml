@@ -1,0 +1,35 @@
+id: TC-CORE-CLUSTER_STORAGE-01
+level: 1
+suite: core
+module: cluster-storage
+submodule: ""
+feature: ""
+title: 集群存储 · 共享存储入口
+entry_url: "{BASE_URL}/clusters/default/juicefs-storage/overview"
+prd: prd/cluster-storage/_index.md
+design: design/cluster-storage/_index.md
+
+covers:
+- AC-CORE-CLUSTER_STORAGE-01
+
+story:
+- US1
+
+product: 从集群菜单进入共享存储，核对标题、三个页签与概览卡片。
+preconditions:
+- 已登录，且在 default 集群
+- 对 volumes 有 manage 权限
+steps:
+- 打开 /clusters/default/overview
+- 在左侧「存储」分组点「共享存储」
+- 核对页面标题为「共享存储」，页签为概览 / 卷与配额 / 性能
+- 核对概览出现四张卡片，且页面文本里没有 _PL / _DESC 这类未翻译 key
+expected:
+- 页面标题与三个页签可见
+- 四张卡片都有标题与数值
+- 概览卡片里的共享卷数与卷页表格行数一致
+troubleshoot:
+- 菜单项缺失时先确认 console 镜像的 server/config.yaml 里有 juicefs-storage
+- 页面空白时看浏览器控制台是否有 kapis 401
+update_automation:
+- 菜单文案变化时改 helpers/nav.py

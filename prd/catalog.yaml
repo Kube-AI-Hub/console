@@ -1,0 +1,41 @@
+modules:
+- id: cluster-storage
+  title: 集群存储
+  prd: prd/cluster-storage/_index.md
+  design: design/cluster-storage/_index.md
+  tests:
+    L1:
+    - TC-CORE-CLUSTER_STORAGE-01
+  submodules:
+  - id: shared-storage
+    title: 共享存储（JuiceFS）
+    prd: prd/cluster-storage/shared-storage/_index.md
+    design: design/cluster-storage/shared-storage/_index.md
+    tests:
+      L2:
+      - TC-FULL-CLUSTER_STORAGE-SHARED_STORAGE-01
+    features:
+    - id: overview
+      title: 概览
+      prd: prd/cluster-storage/shared-storage/overview.md
+      design: design/cluster-storage/shared-storage/overview.md
+      tests:
+        L3:
+        - TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-OVERVIEW-01
+        - TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-OVERVIEW-02
+    - id: quota
+      title: 卷与配额
+      prd: prd/cluster-storage/shared-storage/quota.md
+      design: design/cluster-storage/shared-storage/quota.md
+      tests:
+        L3:
+        - TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-01
+        - TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-02
+    - id: performance
+      title: 性能
+      prd: prd/cluster-storage/shared-storage/performance.md
+      design: design/cluster-storage/shared-storage/performance.md
+      tests:
+        L3:
+        - TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-01
+        - TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-02

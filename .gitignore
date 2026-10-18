@@ -29,3 +29,10 @@ yarn-error.log*
 
 .work
 outputs/
+
+# SDD UI tests: credentials and artifacts never leave the machine
+tests/ui/.env
+tests/ui/artifacts/
+tests/ui/__pycache__/
+tests/ui/**/__pycache__/
+tests/ui/.venv/
