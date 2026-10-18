@@ -81,6 +81,7 @@ export default class QuotaModal extends Component {
     return {
       value: capacity > 0 ? String(Math.round(capacity / factor)) : '1',
       unit,
+      initialBytes: capacity,
     }
   }
 
@@ -116,7 +117,8 @@ export default class QuotaModal extends Component {
     return ''
   }
 
-  handleValueChange = value => this.setState({ value })
+  // The Input's onChange signature is (event, value), not the value alone.
+  handleValueChange = (_, value) => this.setState({ value })
 
   handleUnitChange = unit => this.setState({ unit })
 
