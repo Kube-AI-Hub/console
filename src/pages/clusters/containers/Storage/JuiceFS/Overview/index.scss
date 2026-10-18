@@ -1,0 +1,123 @@
+.section {
+  margin-top: 12px;
+}
+
+.card {
+  min-height: 96px;
+}
+
+.cardTitle {
+  color: #79879c;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.cardValue {
+  margin-top: 8px;
+  color: #242e42;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 32px;
+}
+
+.cardUnit {
+  margin-left: 6px;
+  color: #79879c;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.usageList {
+  padding: 4px 0;
+}
+
+.usageRow {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+
+  & + & {
+    border-top: 1px solid #e3e9ef;
+  }
+}
+
+.usageName {
+  flex: 0 0 260px;
+  min-width: 0;
+}
+
+.mono {
+  display: block;
+  overflow: hidden;
+  color: #242e42;
+  font-family: monospace;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.usageClaim {
+  display: block;
+  color: #79879c;
+  font-size: 12px;
+}
+
+.usageBar {
+  flex: 1 1 auto;
+  height: 8px;
+  margin: 0 16px;
+  overflow: hidden;
+  background: #eff4f9;
+  border-radius: 4px;
+}
+
+.usageBarFill {
+  height: 100%;
+  border-radius: 4px;
+
+  &[data-level='safe'] {
+    background: #55bc8a;
+  }
+
+  &[data-level='warning'] {
+    background: #f5a623;
+  }
+
+  &[data-level='error'] {
+    background: #ca3a3a;
+  }
+}
+
+.usageValue {
+  flex: 0 0 200px;
+  color: #242e42;
+  font-size: 12px;
+  text-align: right;
+}
+
+.usagePercent {
+  display: inline-block;
+  min-width: 52px;
+  margin-left: 8px;
+  color: #79879c;
+}
+
+.hints {
+  margin-top: 12px;
+}
+
+.hint {
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  color: #242e42;
+  font-size: 12px;
+  line-height: 20px;
+  background: #eff4f9;
+  border-left: 3px solid #3291c8;
+  border-radius: 2px;
+
+  &[data-level='warning'] {
+    background: #fff7e6;
+    border-left-color: #f5a623;
+  }
+}

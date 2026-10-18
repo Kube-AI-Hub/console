@@ -1,0 +1,36 @@
+.body {
+  padding: 4px 0;
+}
+
+.meta {
+  margin-bottom: 20px;
+  padding: 12px;
+  background: #f9fbfd;
+  border-radius: 2px;
+
+  & > div + div {
+    margin-top: 8px;
+  }
+}
+
+.label {
+  display: inline-block;
+  width: 88px;
+  color: #79879c;
+  font-size: 12px;
+}
+
+.mono {
+  color: #242e42;
+  font-family: monospace;
+  font-size: 12px;
+}
+
+.unit {
+  height: 100%;
+  padding: 0 8px;
+  color: #242e42;
+  background: transparent;
+  border: 0;
+  outline: none;
+}

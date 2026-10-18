@@ -1,0 +1,60 @@
+.capacityCell {
+  display: flex;
+  flex-direction: column;
+}
+
+.drift {
+  margin-top: 2px;
+  color: #f5a623;
+  font-size: 12px;
+}
+
+.usageCell {
+  display: flex;
+  align-items: center;
+}
+
+.usageBar {
+  flex: 1 1 auto;
+  height: 6px;
+  min-width: 80px;
+  margin-right: 8px;
+  overflow: hidden;
+  background: #eff4f9;
+  border-radius: 3px;
+}
+
+.usageBarFill {
+  height: 100%;
+  border-radius: 3px;
+
+  &[data-level='safe'] {
+    background: #55bc8a;
+  }
+
+  &[data-level='warning'] {
+    background: #f5a623;
+  }
+
+  &[data-level='error'] {
+    background: #ca3a3a;
+  }
+}
+
+.usagePercent {
+  flex: 0 0 44px;
+  color: #79879c;
+  font-size: 12px;
+  text-align: right;
+}
+
+.mono {
+  color: #242e42;
+  font-family: monospace;
+  font-size: 12px;
+}
+
+.muted {
+  color: #79879c;
+  font-size: 12px;
+}

@@ -30,6 +30,7 @@ import StorageClasses from '../containers/Storage/StorageClasses'
 import VolumeSnapshots from '../containers/Storage/VolumeSnapshots'
 import VolumeSnapshotClasses from '../containers/Storage/VolumeSnapshotClasses'
 import Volumes from '../containers/Storage/Volumes'
+import JuiceFSStorage from '../containers/Storage/JuiceFS'
 import Nodes from '../containers/Nodes'
 import EdgeNodes from '../containers/EdgeNodes/index'
 import GPUs from '../containers/Nodes/Gpus'
@@ -197,6 +198,10 @@ export default [
           {
             path: `${PATH}/volume-snapshot-classes`,
             component: VolumeSnapshotClasses,
+          },
+          {
+            path: `${PATH}/juicefs-storage`,
+            component: JuiceFSStorage,
           },
           {
             path: `${PATH}/monitor-cluster`,

@@ -234,6 +234,14 @@ client:
                 authKey: volumes,
                 requiredClusterVersion: v3.3.0,
               }
+            # Quota, usage and performance of the shared JuiceFS volumes. Gated on
+            # volumes:manage because setting a quota changes cluster storage.
+            - {
+                name: juicefs-storage,
+                title: SHARED_STORAGE,
+                authKey: volumes,
+                authAction: manage,
+              }
         - name: monitoring-alerting
           title: MONITORING_AND_ALERTING
           icon: monitor
