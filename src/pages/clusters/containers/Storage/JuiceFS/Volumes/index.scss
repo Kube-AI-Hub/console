@@ -62,7 +62,7 @@
 
 .usagePercent {
   flex: 0 0 44px;
-  color: variables.$second-text-color;
+  color: variables.$third-text-color;
   font-size: 12px;
   text-align: right;
 }
@@ -74,6 +74,14 @@
 }
 
 .muted {
-  color: variables.$second-text-color;
+  color: variables.$third-text-color;
   font-size: 12px;
+}
+
+// Table headers use the library's #a9d1ea (3.97:1 on the dark card). Lift them to
+// the token that passes AA; the selector matches the library's own rule.
+:global {
+  .table table > thead > tr > th {
+    color: variables.$third-text-color;
+  }
 }

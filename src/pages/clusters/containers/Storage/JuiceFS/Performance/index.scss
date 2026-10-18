@@ -39,7 +39,7 @@
   left: 10px;
   display: flex;
   align-items: baseline;
-  color: variables.$second-text-color;
+  color: variables.$third-text-color;
   font-size: 12px;
 }
 
@@ -51,7 +51,7 @@
 
 .chartTotal {
   margin-left: 10px;
-  color: variables.$second-text-color;
+  color: variables.$third-text-color;
   font-size: 12px;
 }
 
@@ -68,7 +68,7 @@
 
 .empty {
   margin-top: 6px;
-  color: variables.$second-text-color;
+  color: variables.$third-text-color;
   font-size: 12px;
   line-height: 20px;
 }

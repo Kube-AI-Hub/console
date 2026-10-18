@@ -185,7 +185,10 @@
 
 // color
 .text-second {
-  color: variables.$second-text-color !important;
+  // 3.97:1 on the dark card (#4a5aa2) is below WCAG AA for body copy. This
+  // utility is used for page descriptions and hints, so it has to be readable:
+  // $third-text-color gives 4.75:1 and still reads as secondary.
+  color: variables.$third-text-color !important;
 }
 
 .text-third {

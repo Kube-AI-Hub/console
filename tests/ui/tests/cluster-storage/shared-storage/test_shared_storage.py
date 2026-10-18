@@ -42,6 +42,7 @@ def test_full_tabs(storage_page, screenshot):
     screenshot(storage_page.page, "full-volumes")
 
     storage_page.open("performance")
+    # Either the six charts render, or the page says why it cannot (metrics off).
     assert storage_page.chart_titles or "指标未开启" in storage_page.body_text
 
 

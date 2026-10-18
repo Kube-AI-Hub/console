@@ -30,8 +30,13 @@ class SharedStoragePage:
 
     @property
     def content_selector(self) -> str:
-        """The console's content wrapper; `main` does not exist in this layout."""
-        return "[class*=main-content], [class*=wrapper], #root"
+        """The page's own content root.
+
+        Not `main` (this layout has none) and not `#root` (that would include the
+        cluster sidebar and the toolbox panel, whose colours belong to other
+        pages). `.ks-page-main` is the content column the route renders into.
+        """
+        return ".ks-page-main"
 
     def open_tab(self, name: str) -> None:
         self.page.click(f".tabs a:has-text('{name}'), button:has-text('{name}')")
@@ -132,9 +137,10 @@ class SharedStoragePage:
     # ---- performance ----------------------------------------------------
     @property
     def chart_titles(self) -> list[str]:
+        """The six chart titles, or an empty list when the metrics are off."""
         return self.page.evaluate(
             """
-            () => Array.from(document.querySelectorAll('[class*=charts] [class*=title]'))
+            () => Array.from(document.querySelectorAll('[class*=chartName]'))
                     .map((el) => el.textContent.trim())
                     .filter(Boolean)
             """
