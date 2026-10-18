@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2026 Kube AI Hub.
+ *
+ * KubeSphere Console is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * KubeSphere Console is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with KubeSphere Console.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+@use '~scss/variables';
+
 .capacityCell {
   display: flex;
   flex-direction: column;
@@ -5,7 +24,7 @@
 
 .drift {
   margin-top: 2px;
-  color: #f5a623;
+  color: variables.$yellow;
   font-size: 12px;
 }
 
@@ -20,7 +39,7 @@
   min-width: 80px;
   margin-right: 8px;
   overflow: hidden;
-  background: #eff4f9;
+  background: variables.$light-color04;
   border-radius: 3px;
 }
 
@@ -29,32 +48,32 @@
   border-radius: 3px;
 
   &[data-level='safe'] {
-    background: #55bc8a;
+    background: variables.$green;
   }
 
   &[data-level='warning'] {
-    background: #f5a623;
+    background: variables.$yellow;
   }
 
   &[data-level='error'] {
-    background: #ca3a3a;
+    background: variables.$red;
   }
 }
 
 .usagePercent {
   flex: 0 0 44px;
-  color: #79879c;
+  color: variables.$second-text-color;
   font-size: 12px;
   text-align: right;
 }
 
 .mono {
-  color: #242e42;
+  color: variables.$dark;
   font-family: monospace;
   font-size: 12px;
 }
 
 .muted {
-  color: #79879c;
+  color: variables.$second-text-color;
   font-size: 12px;
 }

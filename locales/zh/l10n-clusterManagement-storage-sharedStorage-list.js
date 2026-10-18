@@ -71,6 +71,9 @@ module.exports = {
 
   SHARED_STORAGE_NO_VOLUMES: '没有可管理的共享卷',
 
+  SHARED_STORAGE_NO_TRAFFIC: '该时间范围内无读写',
+  SHARED_STORAGE_RANGE_TOTAL: '区间合计',
+
   // Common
   REFRESH: '刷新',
 };

@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2026 Kube AI Hub.
+ *
+ * KubeSphere Console is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * KubeSphere Console is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with KubeSphere Console.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+@use '~scss/variables';
+
 .charts {
   display: flex;
   flex-wrap: wrap;
@@ -14,9 +33,42 @@
   }
 }
 
+.chartTitle {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  align-items: baseline;
+  color: variables.$second-text-color;
+  font-size: 12px;
+}
+
+.chartName {
+  color: variables.$dark;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.chartTotal {
+  margin-left: 10px;
+  color: variables.$second-text-color;
+  font-size: 12px;
+}
+
+.emptyChart {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+  height: 120px;
+  padding: 12px;
+  background: variables.$lightest;
+  border-radius: variables.$border-radius;
+}
+
 .empty {
-  padding: 24px 0;
-  color: #79879c;
+  margin-top: 6px;
+  color: variables.$second-text-color;
   font-size: 12px;
   line-height: 20px;
 }

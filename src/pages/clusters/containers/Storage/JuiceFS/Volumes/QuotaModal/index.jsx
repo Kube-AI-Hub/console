@@ -140,8 +140,8 @@ export default class QuotaModal extends Component {
         cancelText={t('CANCEL')}
         onOk={this.handleOk}
         onCancel={onCancel}
-        confirmLoading={submitting}
-        disableOk={!!this.validationError || submitting}
+        isSubmitting={submitting}
+        disableSubmit={!!this.validationError || submitting}
         width={560}
       >
         <div className={styles.body}>

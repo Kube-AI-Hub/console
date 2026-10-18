@@ -73,6 +73,9 @@ module.exports = {
 
   SHARED_STORAGE_NO_VOLUMES: 'No shared volumes to manage',
 
+  SHARED_STORAGE_NO_TRAFFIC: 'No read or write in this range',
+  SHARED_STORAGE_RANGE_TOTAL: 'Range total',
+
   // Common
   REFRESH: 'Refresh',
 };
