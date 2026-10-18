@@ -41,6 +41,8 @@ weight: 6200
 - [图像文本生成（Image Text to Text）](./inference_tasks/image-text-to-text)
 - [特征提取（Feature Extraction）](./inference_tasks/feature-extraction)
 - [文档解析（Document Parsing）](./inference_tasks/document-parsing)
+- [语音识别（Speech Recognition）](./inference_tasks/speech-recognition)
+- [语音合成（Speech Synthesis）](./inference_tasks/speech-synthesis)
 
 自定义引擎（自带的 Playground 与 API）见[自定义推理引擎](./custom_engine)。
 
