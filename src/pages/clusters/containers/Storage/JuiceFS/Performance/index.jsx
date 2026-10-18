@@ -53,6 +53,10 @@ export default class SharedPerformance extends React.Component {
   }
 
   componentDidMount() {
+    // The metrics switch is a property of the cluster (it comes from the driver
+    // config via the volume list), so that has to be loaded here too: opening the
+    // performance tab directly would otherwise report "metrics off".
+    this.store.fetchVolumes()
     this.store.fetchPerformance()
   }
 
@@ -133,7 +137,11 @@ export default class SharedPerformance extends React.Component {
   }
 
   render() {
-    const { volumes } = this.store
+    const { volumes, volumesLoading } = this.store
+    // While the list is loading, do not claim the metrics are off.
+    if (volumesLoading && !volumes.length) {
+      return <Loading spinning />
+    }
     const metricsEnabled = volumes.some(volume => volume.metricsEnabled)
 
     if (!metricsEnabled) {
