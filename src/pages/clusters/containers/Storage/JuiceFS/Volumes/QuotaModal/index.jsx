@@ -18,7 +18,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 
-import { Alert, Form, Input } from '@kube-design/components'
+import { Alert, Input } from '@kube-design/components'
 import { Modal } from 'components/Base'
 
 import { formatBytes, usagePercent } from '../../utils'
@@ -166,26 +166,31 @@ export default class QuotaModal extends Component {
             </div>
           </div>
 
-          <Form.Item label={t('SHARED_STORAGE_NEW_CAPACITY')}>
-            <Input
-              name="capacity"
-              value={value}
-              onChange={this.handleValueChange}
-              addonAfter={
-                <select
-                  className={styles.unit}
-                  value={unit}
-                  onChange={e => this.handleUnitChange(e.target.value)}
-                >
-                  {UNITS.map(item => (
-                    <option key={item.value} value={item.value}>
-                      {item.label}
-                    </option>
-                  ))}
-                </select>
-              }
-            />
-          </Form.Item>
+          {/* Not Form.Item: it clones its child and injects its own value/onChange,
+              which overrides this controlled input and leaves the field empty. */}
+          <div className={styles.field}>
+            <label className={styles.fieldLabel}>
+              {t('SHARED_STORAGE_NEW_CAPACITY')}
+            </label>
+            <div className={styles.fieldRow}>
+              <Input
+                name="capacity"
+                value={value}
+                onChange={this.handleValueChange}
+              />
+              <select
+                className={styles.unit}
+                value={unit}
+                onChange={e => this.handleUnitChange(e.target.value)}
+              >
+                {UNITS.map(item => (
+                  <option key={item.value} value={item.value}>
+                    {item.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
           {this.validationError ? (
             <Alert type="error" message={this.validationError} />

@@ -34,3 +34,23 @@
   border: 0;
   outline: none;
 }
+
+.field {
+  margin-bottom: 16px;
+}
+
+.fieldLabel {
+  display: block;
+  margin-bottom: 8px;
+  color: #242e42;
+  font-size: 12px;
+}
+
+.fieldRow {
+  display: flex;
+  align-items: center;
+
+  & > :first-child {
+    flex: 1 1 auto;
+  }
+}
