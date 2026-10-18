@@ -19,7 +19,14 @@ import React from 'react'
 import { observer, inject } from 'mobx-react'
 import { get } from 'lodash'
 
-import { Button, Loading, Table, Level, LevelLeft, LevelRight } from '@kube-design/components'
+import {
+  Button,
+  Loading,
+  Table,
+  Level,
+  LevelLeft,
+  LevelRight,
+} from '@kube-design/components'
 import { Card } from 'components/Base'
 import Empty from 'components/Base/Empty'
 import QuotaModal from './QuotaModal'
@@ -28,22 +35,15 @@ import { formatBytes, usagePercent, usageLevel } from '../utils'
 
 import * as styles from './index.scss'
 
-const COLUMNS = [
-  { title: t('SHARED_STORAGE_VOLUME'), dataIndex: 'name', key: 'name' },
-  { title: t('SHARED_STORAGE_DIRECTORY'), dataIndex: 'path', key: 'path' },
-  { title: t('SHARED_STORAGE_CAPACITY'), dataIndex: 'capacityBytes', key: 'capacity' },
-  { title: t('SHARED_STORAGE_USED'), dataIndex: 'usedBytes', key: 'used' },
-  { title: t('SHARED_STORAGE_USAGE'), dataIndex: 'usage', key: 'usage' },
-  { title: t('SHARED_STORAGE_INODES'), dataIndex: 'inodes', key: 'inodes' },
-  { title: t('SHARED_STORAGE_NODES'), dataIndex: 'nodes', key: 'nodes' },
-]
-
 /**
  * Volume list with the one write action of the page: setting a quota.
  *
  * The quota shown is the PV's capacity, i.e. what the CSI driver writes into the
  * JuiceFS directory quota on every mount. The statfs number kubelet reports can
  * lag a change, which the row says instead of pretending they agree.
+ *
+ * Columns are built with the Table's `render` callback (the component reads
+ * `column.render`, not a per-table renderCell).
  */
 @inject('rootStore')
 @observer
@@ -86,7 +86,27 @@ export default class SharedVolumes extends React.Component {
     }
   }
 
-  renderCapacity = volume => (
+  renderVolume = (_, volume) => (
+    <div>
+      <div className={styles.mono}>{volume.name}</div>
+      <div className={styles.muted}>
+        {volume.claimNamespace}/{volume.claimName}
+      </div>
+    </div>
+  )
+
+  renderDirectory = (_, volume) => (
+    <div>
+      <span className={styles.mono}>{volume.path}</span>
+      {volume.parent ? (
+        <div className={styles.muted}>
+          {t('SHARED_STORAGE_NESTED_IN', { parent: volume.parent })}
+        </div>
+      ) : null}
+    </div>
+  )
+
+  renderCapacity = (_, volume) => (
     <div className={styles.capacityCell}>
       <span>{formatBytes(volume.capacityBytes)}</span>
       {volume.quotaDrift ? (
@@ -97,7 +117,9 @@ export default class SharedVolumes extends React.Component {
     </div>
   )
 
-  renderUsage = volume => {
+  renderUsed = (_, volume) => <span>{formatBytes(volume.usedBytes)}</span>
+
+  renderUsage = (_, volume) => {
     const percent = usagePercent(volume.usedBytes, volume.capacityBytes)
     return (
       <div className={styles.usageCell}>
@@ -113,20 +135,74 @@ export default class SharedVolumes extends React.Component {
     )
   }
 
-  renderInodes = volume => (
-    <span className={styles.muted}>
-      {volume.inodes > 0
-        ? `${volume.inodesUsed} / ${volume.inodes}`
-        : t('SHARED_STORAGE_UNKNOWN')}
-    </span>
-  )
+  renderInodes = (_, volume) =>
+    volume.inodes > 0 ? (
+      <span className={styles.muted}>
+        {volume.inodesUsed} / {volume.inodes}
+      </span>
+    ) : (
+      <span className={styles.muted}>{t('SHARED_STORAGE_UNKNOWN')}</span>
+    )
 
-  renderNodes = volume =>
+  renderNodes = (_, volume) =>
     volume.mountedNodes && volume.mountedNodes.length ? (
       <span className={styles.muted}>{volume.mountedNodes.join(', ')}</span>
     ) : (
       <span className={styles.muted}>{t('SHARED_STORAGE_NOT_MOUNTED')}</span>
     )
+
+  get columns() {
+    return [
+      {
+        title: t('SHARED_STORAGE_VOLUME'),
+        key: 'name',
+        render: this.renderVolume,
+      },
+      {
+        title: t('SHARED_STORAGE_DIRECTORY'),
+        key: 'path',
+        render: this.renderDirectory,
+      },
+      {
+        title: t('SHARED_STORAGE_CAPACITY'),
+        key: 'capacity',
+        render: this.renderCapacity,
+      },
+      {
+        title: t('SHARED_STORAGE_USED'),
+        key: 'used',
+        render: this.renderUsed,
+      },
+      {
+        title: t('SHARED_STORAGE_USAGE'),
+        key: 'usage',
+        render: this.renderUsage,
+      },
+      {
+        title: t('SHARED_STORAGE_INODES'),
+        key: 'inodes',
+        render: this.renderInodes,
+      },
+      {
+        title: t('SHARED_STORAGE_NODES'),
+        key: 'nodes',
+        render: this.renderNodes,
+      },
+      {
+        title: '',
+        key: 'actions',
+        render: (_, volume) => (
+          <Button
+            type="control"
+            onClick={() => this.openQuota(volume)}
+            disabled={volume.capacityBytes <= 0}
+          >
+            {t('SHARED_STORAGE_SET_QUOTA')}
+          </Button>
+        ),
+      },
+    ]
+  }
 
   renderTable() {
     const { volumes, volumesLoading } = this.store
@@ -138,55 +214,10 @@ export default class SharedVolumes extends React.Component {
     return (
       <Loading spinning={volumesLoading}>
         <Table
-          columns={COLUMNS}
+          columns={this.columns}
           dataSource={volumes}
           rowKey="name"
-          renderCell={(column, record) => {
-            switch (column.key) {
-              case 'name':
-                // The volume is the PV; its directory is the next column.
-                return (
-                  <div>
-                    <div className={styles.mono}>{record.name}</div>
-                    <div className={styles.muted}>
-                      {record.claimNamespace}/{record.claimName}
-                    </div>
-                  </div>
-                )
-              case 'path':
-                return (
-                  <div>
-                    <span className={styles.mono}>{record.path}</span>
-                    {record.parent ? (
-                      <div className={styles.muted}>
-                        {t('SHARED_STORAGE_NESTED_IN', {
-                          parent: record.parent,
-                        })}
-                      </div>
-                    ) : null}
-                  </div>
-                )
-              case 'capacity':
-                return this.renderCapacity(record)
-              case 'used':
-                return <span>{formatBytes(record.usedBytes)}</span>
-              case 'usage':
-                return this.renderUsage(record)
-              case 'inodes':
-                return this.renderInodes(record)
-              case 'nodes':
-                return this.renderNodes(record)
-              default:
-                return null
-            }
-          }}
-          actions={[
-            {
-              key: 'quota',
-              text: t('SHARED_STORAGE_SET_QUOTA'),
-              onClick: record => this.openQuota(record),
-            },
-          ]}
+          emptyText={t('SHARED_STORAGE_NO_VOLUMES')}
         />
       </Loading>
     )

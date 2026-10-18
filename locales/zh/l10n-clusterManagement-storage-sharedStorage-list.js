@@ -69,6 +69,8 @@ module.exports = {
   SHARED_STORAGE_OBJECT_ERRORS: '对象存储错误',
   SHARED_STORAGE_PER_SECOND: '次/秒',
 
+  SHARED_STORAGE_NO_VOLUMES: '没有可管理的共享卷',
+
   // Common
   REFRESH: '刷新',
 };

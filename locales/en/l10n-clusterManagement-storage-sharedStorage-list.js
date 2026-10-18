@@ -71,6 +71,8 @@ module.exports = {
   SHARED_STORAGE_OBJECT_ERRORS: 'Object Store Errors',
   SHARED_STORAGE_PER_SECOND: 'ops/s',
 
+  SHARED_STORAGE_NO_VOLUMES: 'No shared volumes to manage',
+
   // Common
   REFRESH: 'Refresh',
 };
