@@ -144,9 +144,10 @@ export default class SharedVolumes extends React.Component {
           renderCell={(column, record) => {
             switch (column.key) {
               case 'name':
+                // The volume is the PV; its directory is the next column.
                 return (
                   <div>
-                    <div className={styles.mono}>{record.path}</div>
+                    <div className={styles.mono}>{record.name}</div>
                     <div className={styles.muted}>
                       {record.claimNamespace}/{record.claimName}
                     </div>
@@ -155,7 +156,7 @@ export default class SharedVolumes extends React.Component {
               case 'path':
                 return (
                   <div>
-                    <span className={styles.mono}>{record.name}</span>
+                    <span className={styles.mono}>{record.path}</span>
                     {record.parent ? (
                       <div className={styles.muted}>
                         {t('SHARED_STORAGE_NESTED_IN', {
