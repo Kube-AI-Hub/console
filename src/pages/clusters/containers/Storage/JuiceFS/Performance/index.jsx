@@ -17,7 +17,7 @@
 
 import React from 'react'
 import { observer, inject } from 'mobx-react'
-import { get, isEmpty, isArray, last } from 'lodash'
+import { get, isEmpty, isArray } from 'lodash'
 
 import { Loading } from '@kube-design/components'
 import { Card } from 'components/Base'
@@ -163,11 +163,16 @@ export default class SharedPerformance extends React.Component {
   }
 
   get charts() {
+    // Every chart needs a legend with one entry per series key. `getChartData`
+    // writes each point under `legend[index]`, so an empty legend silently drops
+    // every value: the curve disappears and the title falls back to a dash, while
+    // the range total (computed from the raw series) still shows a number.
     return [
       {
         title: 'SHARED_STORAGE_READ_THROUGHPUT',
         metric: PerformanceMetrics.readBytes,
         unitType: 'throughput',
+        legend: [t('SHARED_STORAGE_READ_THROUGHPUT')],
         // A rate over the selected window; the title adds the range total.
         summable: true,
         emptyKey: 'SHARED_STORAGE_NO_TRAFFIC',
@@ -176,6 +181,7 @@ export default class SharedPerformance extends React.Component {
         title: 'SHARED_STORAGE_WRITE_THROUGHPUT',
         metric: PerformanceMetrics.writtenBytes,
         unitType: 'throughput',
+        legend: [t('SHARED_STORAGE_WRITE_THROUGHPUT')],
         summable: true,
         emptyKey: 'SHARED_STORAGE_NO_TRAFFIC',
       },
@@ -189,16 +195,19 @@ export default class SharedPerformance extends React.Component {
         title: 'SHARED_STORAGE_CACHE_READ_LATENCY',
         metric: PerformanceMetrics.cacheReadLatency,
         unitType: 'second',
+        legend: [t('SHARED_STORAGE_CACHE_READ_LATENCY')],
       },
       {
         title: 'SHARED_STORAGE_FUSE_LATENCY',
         metric: PerformanceMetrics.fuseLatency,
         unitType: 'second',
+        legend: [t('SHARED_STORAGE_FUSE_LATENCY')],
       },
       {
         title: 'SHARED_STORAGE_OBJECT_ERRORS',
         metric: PerformanceMetrics.objectErrors,
         unit: t('SHARED_STORAGE_PER_SECOND'),
+        legend: [t('SHARED_STORAGE_OBJECT_ERRORS')],
       },
     ]
   }
@@ -239,15 +248,22 @@ export default class SharedPerformance extends React.Component {
    * The last painted value of a chart, in the chart's own unit.
    *
    * `getAreaChartOps` converts the series through `getValueByUnit`, so reading the
-   * converted point keeps the title consistent with the curve. Null means "no
-   * point to show", which the title renders as a dash rather than 0.
+   * converted point keeps the title consistent with the curve.
+   *
+   * `last` is not enough: `rate(...[5m])` returns null for the newest points until
+   * a full window has been scraped, so the last entry of a series that is clearly
+   * drawing a curve can still be null. Walk back to the most recent non-null point
+   * instead of showing a dash next to a visible line.
    */
   lastValue = points => {
     if (!isArray(points) || !points.length) return null
     const key = Object.keys(points[0]).find(item => item !== 'time')
     if (!key) return null
-    const value = get(last(points), key)
-    return value === null || value === undefined ? null : value
+    for (let i = points.length - 1; i >= 0; i -= 1) {
+      const value = get(points[i], key)
+      if (value !== null && value !== undefined) return value
+    }
+    return null
   }
 
   renderChart = chart => {
