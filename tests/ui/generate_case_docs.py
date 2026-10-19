@@ -49,7 +49,11 @@ def read_us(prd_rel: str) -> dict[str, dict]:
             current = m.group(1)
             out[current] = {"title": m.group(2), "priority": m.group(3) or "", "body": []}
             continue
-        if current and line.startswith("### "):
+        if current and line.startswith("##"):
+            # A user story ends at the next heading of any level. Stopping only at
+            # `###` let the last story swallow the sections that follow it
+            # (`## 验收场景`, `## 设计目标`), which then showed up in the generated
+            # case docs as part of that story's text.
             current = None
             continue
         if current:

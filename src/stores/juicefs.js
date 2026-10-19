@@ -122,4 +122,37 @@ export default class JuiceFSStore extends BaseMonitoringStore {
       times: 100,
       ...params,
     })
+
+  /**
+   * Start a throughput benchmark on a volume.
+   *
+   * The API creates a one-shot job and answers immediately with its phase; the
+   * numbers only exist once the job finishes, which is what `fetchBench` polls
+   * for. A 409 means a run is already going on that volume.
+   */
+  @action
+  async startBench(name, params = {}) {
+    const result = await to(
+      request.post(`${this.apiPath}/volumes/${name}/bench`, params)
+    )
+    if (get(result, 'error')) {
+      throw new Error(get(result, 'error'))
+    }
+    return result
+  }
+
+  fetchBench = (jobName, namespace) =>
+    request.get(
+      `${this.apiPath}/bench/${jobName}`,
+      namespace ? { namespace } : undefined
+    )
+
+  /**
+   * Recent runs, newest first.
+   *
+   * Loaded when the tab opens so a reload does not lose the result of the run the
+   * operator just watched.
+   */
+  fetchBenches = namespace =>
+    request.get(`${this.apiPath}/bench`, namespace ? { namespace } : undefined)
 }

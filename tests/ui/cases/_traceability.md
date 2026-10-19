@@ -14,13 +14,14 @@
 | cluster-storage/shared-storage/performance | `AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-02` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-02` | [`design/cluster-storage/shared-storage/performance.md`](../../../design/cluster-storage/shared-storage/performance.md) | [`tests/ui/tests/cluster-storage/shared-storage/test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_PERFORMANCE_02.py`](../../../tests/ui/tests/cluster-storage/shared-storage/test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_PERFORMANCE_02.py) |
 | cluster-storage/shared-storage/performance | `AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-03` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-01` | [`design/cluster-storage/shared-storage/performance.md`](../../../design/cluster-storage/shared-storage/performance.md) | [`tests/ui/tests/cluster-storage/shared-storage/test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_PERFORMANCE_01.py`](../../../tests/ui/tests/cluster-storage/shared-storage/test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_PERFORMANCE_01.py) |
 | cluster-storage/shared-storage/performance | `AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-04` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-01` | [`design/cluster-storage/shared-storage/performance.md`](../../../design/cluster-storage/shared-storage/performance.md) | [`tests/ui/tests/cluster-storage/shared-storage/test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_PERFORMANCE_01.py`](../../../tests/ui/tests/cluster-storage/shared-storage/test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_PERFORMANCE_01.py) |
+| cluster-storage/shared-storage/performance | `AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-05` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-03` | [`design/cluster-storage/shared-storage/performance.md`](../../../design/cluster-storage/shared-storage/performance.md) | [`tests/ui/tests/cluster-storage/shared-storage/test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_PERFORMANCE_03.py`](../../../tests/ui/tests/cluster-storage/shared-storage/test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_PERFORMANCE_03.py) |
 | cluster-storage/shared-storage/quota | `AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-01` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-01` | [`design/cluster-storage/shared-storage/quota.md`](../../../design/cluster-storage/shared-storage/quota.md) | [`tests/ui/tests/cluster-storage/shared-storage/test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_01.py`](../../../tests/ui/tests/cluster-storage/shared-storage/test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_01.py) |
 | cluster-storage/shared-storage/quota | `AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-02` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-02` | [`design/cluster-storage/shared-storage/quota.md`](../../../design/cluster-storage/shared-storage/quota.md) | [`tests/ui/tests/cluster-storage/shared-storage/test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_02.py`](../../../tests/ui/tests/cluster-storage/shared-storage/test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_02.py) |
 | cluster-storage/shared-storage/quota | `AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-03` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-01` | [`design/cluster-storage/shared-storage/quota.md`](../../../design/cluster-storage/shared-storage/quota.md) | [`tests/ui/tests/cluster-storage/shared-storage/test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_01.py`](../../../tests/ui/tests/cluster-storage/shared-storage/test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_01.py) |
 
 ## 小结
 
-- 需求里的 AC：13 条，其中未覆盖 0 条、无技术方案承接 0 条、无用例规格实现 0 条。
+- 需求里的 AC：14 条，其中未覆盖 0 条、无技术方案承接 0 条、无用例规格实现 0 条。
 
 ## 用户故事覆盖
 
@@ -33,8 +34,9 @@
 | cluster-storage/shared-storage/overview | `US2` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-OVERVIEW-02` |
 | cluster-storage/shared-storage/performance | `US1` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-01`, `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-02` |
 | cluster-storage/shared-storage/performance | `US2` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-01` |
+| cluster-storage/shared-storage/performance | `US3` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-03` |
 | cluster-storage/shared-storage/quota | `US1` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-01` |
 | cluster-storage/shared-storage/quota | `US2` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-02` |
 | cluster-storage/shared-storage/quota | `US3` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-01` |
 
-- 用户故事：10 条，其中未覆盖 0 条。
+- 用户故事：11 条，其中未覆盖 0 条。

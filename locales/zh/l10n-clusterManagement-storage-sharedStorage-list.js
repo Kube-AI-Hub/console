@@ -69,6 +69,24 @@ module.exports = {
   SHARED_STORAGE_OBJECT_ERRORS: '对象存储错误',
   SHARED_STORAGE_PER_SECOND: '次/秒',
 
+  // On-demand benchmark
+  SHARED_STORAGE_BENCH: '主动性能测试',
+  SHARED_STORAGE_BENCH_DESC:
+    '在选中的卷上写入一个测试文件再读回，测完自动删除。用来区分「存储慢」和「没有流量」。',
+  SHARED_STORAGE_BENCH_VOLUME: '卷',
+  SHARED_STORAGE_BENCH_FILE_SIZE: '文件大小',
+  SHARED_STORAGE_BENCH_THREADS: '线程数',
+  SHARED_STORAGE_BENCH_START: '开始测试',
+  SHARED_STORAGE_BENCH_RUNNING: '测试中（{seconds}s）',
+  SHARED_STORAGE_BENCH_RUNNING_HINT:
+    '测试在集群里的一次性 Job 中运行，通常十几秒；可以切走，回来时结果还在。',
+  SHARED_STORAGE_BENCH_WRITE: '写吞吐',
+  SHARED_STORAGE_BENCH_READ: '读吞吐',
+  SHARED_STORAGE_BENCH_FAILED: '性能测试失败',
+  SHARED_STORAGE_BENCH_NO_VOLUME: '没有可测试的共享卷',
+  SHARED_STORAGE_BENCH_WARM_CACHE:
+    '每个文件 {size} MiB、{threads} 个线程。读测试用的是本机页缓存（Job 内无法清内核缓存），偏乐观。',
+
   SHARED_STORAGE_NO_VOLUMES: '没有可管理的共享卷',
 
   SHARED_STORAGE_NO_TRAFFIC: '该时间范围内无读写',

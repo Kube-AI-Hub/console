@@ -1,0 +1,119 @@
+/*
+ * Copyright (C) 2026 Kube AI Hub.
+ *
+ * KubeSphere Console is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * KubeSphere Console is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with KubeSphere Console.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+@use '~scss/variables';
+
+.form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  min-width: 140px;
+}
+
+.label {
+  margin-bottom: 6px;
+  color: variables.$third-text-color;
+  font-size: 12px;
+}
+
+.select {
+  box-sizing: border-box;
+  min-width: 140px;
+  height: 32px;
+  padding: 0 8px;
+  color: variables.$dark;
+  font-size: 13px;
+  background: variables.$lightest;
+  border: 1px solid variables.$light-color04;
+  border-radius: variables.$border-radius;
+
+  &:disabled {
+    opacity: 0.6;
+  }
+}
+
+.hint {
+  margin-top: 8px;
+  color: variables.$third-text-color;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.statusText {
+  margin-left: 8px;
+  color: variables.$third-text-color;
+  font-size: 12px;
+}
+
+.results {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  gap: 24px;
+}
+
+.result {
+  display: flex;
+  align-items: baseline;
+}
+
+.resultLabel {
+  margin-right: 8px;
+  color: variables.$third-text-color;
+  font-size: 12px;
+}
+
+.resultValue {
+  margin-right: 8px;
+  color: variables.$dark;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.resultCost {
+  color: variables.$second-text-color;
+  font-size: 12px;
+}
+
+.log {
+  box-sizing: border-box;
+  max-height: 240px;
+  margin-top: 8px;
+  padding: 12px;
+  overflow: auto;
+  color: variables.$second-text-color;
+  font-family: monospace;
+  font-size: 12px;
+  line-height: 18px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  background: variables.$lightest;
+  border-radius: variables.$border-radius;
+}

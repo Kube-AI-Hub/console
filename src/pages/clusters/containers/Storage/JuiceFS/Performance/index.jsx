@@ -28,6 +28,7 @@ import { getAreaChartOps, getValueByUnit } from 'utils/monitoring'
 import { PerformanceMetrics } from 'stores/juicefs'
 
 import { formatBytes } from '../utils'
+import BenchPanel from './BenchPanel'
 
 // `formatBytes` drops the unit at zero ("0"), which reads as a count next to
 // "区间合计". The range total is a byte quantity even when it is zero.
@@ -225,11 +226,16 @@ export default class SharedPerformance extends React.Component {
 
   renderMetricsOff() {
     return (
-      <Card title={t('SHARED_STORAGE_PERFORMANCE')}>
-        <div className={styles.empty}>
-          {t('SHARED_STORAGE_METRICS_OFF_HINT')}
-        </div>
-      </Card>
+      <div>
+        {/* The benchmark does not need client metrics: it measures by doing IO, so
+            keep it available even when the charts have nothing to draw. */}
+        <BenchPanel />
+        <Card title={t('SHARED_STORAGE_PERFORMANCE')}>
+          <div className={styles.empty}>
+            {t('SHARED_STORAGE_METRICS_OFF_HINT')}
+          </div>
+        </Card>
+      </div>
     )
   }
 
@@ -247,6 +253,7 @@ export default class SharedPerformance extends React.Component {
 
     return (
       <Loading spinning={this.store.isLoading}>
+        <BenchPanel />
         <MonitoringController
           title={t('SHARED_STORAGE_PERFORMANCE')}
           step="5m"

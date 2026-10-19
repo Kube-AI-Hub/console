@@ -49,6 +49,7 @@ MODULES = [
                         "tests": {"L3": [
                             "TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-01",
                             "TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-02",
+                            "TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-03",
                         ]},
                     },
                 ],

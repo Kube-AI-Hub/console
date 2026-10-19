@@ -71,6 +71,24 @@ module.exports = {
   SHARED_STORAGE_OBJECT_ERRORS: 'Object Store Errors',
   SHARED_STORAGE_PER_SECOND: 'ops/s',
 
+  // On-demand benchmark
+  SHARED_STORAGE_BENCH: 'Throughput Benchmark',
+  SHARED_STORAGE_BENCH_DESC:
+    'Writes a test file to the selected volume and reads it back, then deletes it. Tells "the storage is slow" apart from "nothing is using it".',
+  SHARED_STORAGE_BENCH_VOLUME: 'Volume',
+  SHARED_STORAGE_BENCH_FILE_SIZE: 'File size',
+  SHARED_STORAGE_BENCH_THREADS: 'Threads',
+  SHARED_STORAGE_BENCH_START: 'Run benchmark',
+  SHARED_STORAGE_BENCH_RUNNING: 'Running ({seconds}s)',
+  SHARED_STORAGE_BENCH_RUNNING_HINT:
+    'The run is a one-shot job in the cluster and usually takes seconds. You can leave the page; the result is still here when you come back.',
+  SHARED_STORAGE_BENCH_WRITE: 'Write',
+  SHARED_STORAGE_BENCH_READ: 'Read',
+  SHARED_STORAGE_BENCH_FAILED: 'The benchmark failed',
+  SHARED_STORAGE_BENCH_NO_VOLUME: 'No shared volume to test',
+  SHARED_STORAGE_BENCH_WARM_CACHE:
+    '{size} MiB per file, {threads} thread(s). The read pass is served from the host page cache (a job cannot drop it), so it is optimistic.',
+
   SHARED_STORAGE_NO_VOLUMES: 'No shared volumes to manage',
 
   SHARED_STORAGE_NO_TRAFFIC: 'No read or write in this range',

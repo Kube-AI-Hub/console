@@ -1,0 +1,41 @@
+id: TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-03
+level: 3
+suite: point
+module: cluster-storage
+submodule: shared-storage
+feature: performance
+title: 性能 · 主动触发读写测试
+entry_url: "{BASE_URL}/clusters/default/juicefs-storage/performance"
+prd: prd/cluster-storage/shared-storage/performance.md
+design: design/cluster-storage/shared-storage/performance.md
+
+covers:
+- AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-05
+
+story:
+- US3
+
+product: 在性能页对一个共享卷发起一次大文件读写测试，并读到吞吐结果。
+preconditions:
+- 已登录，且在 default 集群
+- 至少一个共享卷可写，且余量大于 512 MiB
+- 该卷没有正在运行的测试
+steps:
+- 打开 /clusters/default/juicefs-storage/performance
+- 在「主动性能测试」卡片里选第一个卷、文件大小 256 MiB、线程数 1
+- 点「开始测试」
+- 等待按钮从「测试中」恢复，读取写吞吐与读吞吐
+- 切到「卷与配额」再切回「性能」，确认结果仍在
+expected:
+- 点击后按钮进入「测试中（Ns）」并禁用，其他下拉框同时禁用
+- 结果区出现「写吞吐」与「读吞吐」，数值为正，单位是 MiB/s，并各带一个 s/file 耗时
+- 结果脚注说明读测试使用本机页缓存
+- 切页签回来后结果仍在（由 GET /bench 恢复）
+- 全程页面不出现未翻译 key
+troubleshoot:
+- 按钮一直停在「测试中」：检查 Job 是否 Pending（镜像拉取或 PVC 不可挂载），看 pod 事件
+- 结果区为空但 Job 成功：看 Job 日志里是否有 ITEM/VALUE/COST 表格，可能是客户端版本改了输出格式
+- 返回 409：同一卷已有测试在跑，等它结束或删掉那个 Job
+update_automation:
+- 卡片选择器的 name 变化时改 pages/juicefs_storage.py
+- 结果字段改名时改 BenchPanel 的 data-bench 标记与断言

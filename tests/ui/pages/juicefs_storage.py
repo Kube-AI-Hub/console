@@ -320,3 +320,49 @@ class SharedStoragePage:
     @property
     def body_text(self) -> str:
         return self.page.evaluate("() => document.body.innerText")
+
+    # ---- benchmark -------------------------------------------------------
+    @property
+    def bench_volumes(self) -> list[str]:
+        """Options in the benchmark's volume picker."""
+        return self.page.evaluate(
+            """
+            () => {
+              const select = document.querySelector('select[name=bench-volume]')
+              return select ? Array.from(select.options).map((o) => o.value) : []
+            }
+            """
+        )
+
+    def start_bench(self, size_mib: int = 256, threads: int = 1) -> None:
+        self.page.select_option("select[name=bench-file-size]", str(size_mib))
+        self.page.select_option("select[name=bench-threads]", str(threads))
+        self.page.click("button:has-text('开始测试')")
+
+    @property
+    def bench_running(self) -> bool:
+        """True while the button shows the running label and is disabled."""
+        return self.page.evaluate(
+            """
+            () => {
+              const button = Array.from(document.querySelectorAll('button'))
+                .find((b) => b.textContent.includes('测试中'))
+              return !!button
+            }
+            """
+        )
+
+    def wait_bench_done(self, timeout_ms: int = 180_000) -> dict:
+        """Wait for the result values, then read them."""
+        self.page.wait_for_selector("[data-bench=write]", timeout=timeout_ms)
+        return self.page.evaluate(
+            """
+            () => {
+              const read = (key) => {
+                const el = document.querySelector(`[data-bench=${key}]`)
+                return el ? el.textContent.trim() : ''
+              }
+              return { write: read('write'), read: read('read') }
+            }
+            """
+        )
