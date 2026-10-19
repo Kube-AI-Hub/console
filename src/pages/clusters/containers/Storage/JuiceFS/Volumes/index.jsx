@@ -88,7 +88,9 @@ export default class SharedVolumes extends React.Component {
 
   renderVolume = (_, volume) => (
     <div>
-      <div className={styles.mono}>{volume.name}</div>
+      <div className={styles.mono} data-volume={volume.name}>
+        {volume.name}
+      </div>
       <div className={styles.muted}>
         {volume.claimNamespace}/{volume.claimName}
       </div>
@@ -108,7 +110,7 @@ export default class SharedVolumes extends React.Component {
 
   renderCapacity = (_, volume) => (
     <div className={styles.capacityCell}>
-      <span>{formatBytes(volume.capacityBytes)}</span>
+      <span data-bytes={volume.capacityBytes}>{formatBytes(volume.capacityBytes)}</span>
       {volume.quotaDrift ? (
         <span className={styles.drift} title={t('SHARED_STORAGE_QUOTA_DRIFT')}>
           {t('SHARED_STORAGE_QUOTA_DRIFT')}
@@ -117,7 +119,9 @@ export default class SharedVolumes extends React.Component {
     </div>
   )
 
-  renderUsed = (_, volume) => <span>{formatBytes(volume.usedBytes)}</span>
+  renderUsed = (_, volume) => (
+    <span data-bytes={volume.usedBytes}>{formatBytes(volume.usedBytes)}</span>
+  )
 
   renderUsage = (_, volume) => {
     const percent = usagePercent(volume.usedBytes, volume.capacityBytes)

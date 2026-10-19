@@ -17,17 +17,21 @@
 
 import React from 'react'
 import { observer, inject } from 'mobx-react'
-import { get, isEmpty, isArray } from 'lodash'
+import { get, isEmpty, isArray, last } from 'lodash'
 
 import { Loading } from '@kube-design/components'
 import { Card } from 'components/Base'
 import { Controller as MonitoringController } from 'components/Cards/Monitoring'
 import { MediumArea } from 'components/Charts'
-import { getAreaChartOps } from 'utils/monitoring'
+import { getAreaChartOps, getValueByUnit } from 'utils/monitoring'
 
 import { PerformanceMetrics } from 'stores/juicefs'
 
 import { formatBytes } from '../utils'
+
+// `formatBytes` drops the unit at zero ("0"), which reads as a count next to
+// "区间合计". The range total is a byte quantity even when it is zero.
+const formatTotal = total => (total > 0 ? formatBytes(total) : '0 B')
 
 import * as styles from './index.scss'
 
@@ -153,6 +157,21 @@ export default class SharedPerformance extends React.Component {
     }, 0)
   }
 
+  /**
+   * The last painted value of a chart, in the chart's own unit.
+   *
+   * `getAreaChartOps` converts the series through `getValueByUnit`, so reading the
+   * converted point keeps the title consistent with the curve. Null means "no
+   * point to show", which the title renders as a dash rather than 0.
+   */
+  lastValue = points => {
+    if (!isArray(points) || !points.length) return null
+    const key = Object.keys(points[0]).find(item => item !== 'time')
+    if (!key) return null
+    const value = get(last(points), key)
+    return value === null || value === undefined ? null : value
+  }
+
   renderChart = chart => {
     const data = get(this.metrics, `${chart.metric}.data.result`, [])
     const empty = chart.emptyKey && this.isFlatZero(chart.metric)
@@ -167,14 +186,21 @@ export default class SharedPerformance extends React.Component {
       data,
     })
 
-    // The default title falls back to `${title}_PL` when `unit` is empty; always
-    // give it something to show.
+    // MediumArea's default title prints the last value and then `${title}_PL`
+    // whenever `unit` is empty, so it cannot be used as-is. Render the same
+    // information here (value + unit + name) and add the range total underneath.
+    const current = this.lastValue(config.data)
+    const unit = config.unit || ''
     config.renderTitle = () => (
       <div className={styles.chartTitle}>
+        <span className={styles.chartValue}>
+          {current === null ? '-' : current}
+          {unit ? ` ${unit}` : ''}
+        </span>
         <span className={styles.chartName}>{t(chart.title)}</span>
-        {total > 0 ? (
+        {chart.summable ? (
           <span className={styles.chartTotal}>
-            {t('SHARED_STORAGE_RANGE_TOTAL')} {formatBytes(total)}
+            {t('SHARED_STORAGE_RANGE_TOTAL')} {formatTotal(total)}
           </span>
         ) : null}
       </div>
@@ -186,6 +212,9 @@ export default class SharedPerformance extends React.Component {
           <div className={styles.emptyChart}>
             <span className={styles.chartName}>{t(chart.title)}</span>
             <span className={styles.empty}>{t(chart.emptyKey)}</span>
+            <span className={styles.chartTotal}>
+              {t('SHARED_STORAGE_RANGE_TOTAL')} {formatTotal(total)}
+            </span>
           </div>
         ) : (
           <MediumArea width="100%" height={120} {...config} />

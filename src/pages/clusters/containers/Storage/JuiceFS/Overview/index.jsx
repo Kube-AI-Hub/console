@@ -65,12 +65,18 @@ export default class SharedOverview extends React.Component {
         title: t('SHARED_STORAGE_TOTAL_CAPACITY'),
         value: formatBytes(capacity),
         unit: '',
+        valueBytes: capacity,
       },
       {
         key: 'used',
         title: t('SHARED_STORAGE_TOTAL_USED'),
         value: formatBytes(used),
         unit: `${percent.toFixed(1)}%`,
+        // Kept apart from the value so the two are not read as one number, and
+        // carrying the exact byte count because the visible value is rounded.
+        valueTestId: 'shared-storage-total-used',
+        unitTestId: 'shared-storage-total-used-percent',
+        valueBytes: used,
       },
       {
         key: 'fullest',
@@ -88,10 +94,19 @@ export default class SharedOverview extends React.Component {
           <Column key={card.key}>
             <Card className={styles.card}>
               <div className={styles.cardTitle}>{card.title}</div>
-              <div className={styles.cardValue}>
+              <div
+                className={styles.cardValue}
+                data-test={card.valueTestId}
+                data-bytes={card.valueBytes}
+              >
                 {card.value}
                 {card.unit ? (
-                  <span className={styles.cardUnit}>{card.unit}</span>
+                  <span
+                    className={styles.cardUnit}
+                    data-test={card.unitTestId}
+                  >
+                    {card.unit}
+                  </span>
                 ) : null}
               </div>
             </Card>
