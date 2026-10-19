@@ -84,3 +84,15 @@
   font-size: 12px;
   line-height: 20px;
 }
+
+// Sits between the benchmark card and the charts: it explains why a chart can
+// stay flat right after a run that clearly moved bytes.
+.benchHint {
+  margin: 8px 0;
+  padding: 10px 12px;
+  color: variables.$yellow-color05;
+  font-size: 12px;
+  line-height: 20px;
+  background: variables.$lightest;
+  border-radius: variables.$border-radius;
+}

@@ -18,6 +18,7 @@
 import React from 'react'
 import { observer, inject } from 'mobx-react'
 import { get } from 'lodash'
+import PropTypes from 'prop-types'
 
 import { Alert, Button } from '@kube-design/components'
 import { Card } from 'components/Base'
@@ -46,6 +47,15 @@ const POLL_INTERVAL = 3000
 @inject('rootStore')
 @observer
 export default class BenchPanel extends React.Component {
+  static propTypes = {
+    // Called once a run succeeds, so the page can widen its window and refetch.
+    onFinished: PropTypes.func,
+  }
+
+  static defaultProps = {
+    onFinished: null,
+  }
+
   state = {
     volume: '',
     fileSizeMiB: 256,
@@ -134,8 +144,8 @@ export default class BenchPanel extends React.Component {
         this.stopTimers()
         if (latest.phase === 'Succeeded') {
           // The benchmark just moved real bytes, so the charts have something to
-          // show; refresh them instead of waiting for the next range tick.
-          this.store.fetchPerformance()
+          // show; the parent narrows the window and refetches.
+          if (this.props.onFinished) this.props.onFinished(latest)
         }
       }
     } catch (error) {
@@ -266,7 +276,7 @@ export default class BenchPanel extends React.Component {
           </label>
 
           <Button
-            type="primary"
+            type="control"
             onClick={this.handleStart}
             disabled={this.running || starting || !volume}
             loading={starting}

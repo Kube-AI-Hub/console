@@ -57,6 +57,14 @@ import * as styles from './index.scss'
 @inject('rootStore')
 @observer
 export default class SharedPerformance extends React.Component {
+  state = {
+    // A benchmark moves bytes for a few seconds. Averaged into a 5m step over an
+    // 8h window that burst is nearly invisible, and an operator who just ran a
+    // test sees the chart still saying "no traffic". After a run the page narrows
+    // the window to 30 minutes at a 1m step so the run is actually visible.
+    benchWindow: false,
+  }
+
   get store() {
     return this.props.rootStore.juicefs
   }
@@ -77,12 +85,59 @@ export default class SharedPerformance extends React.Component {
     this.store.fetchPerformance({ ...params, cluster: this.store.cluster })
   }
 
+  /**
+   * Called by the benchmark panel once a run succeeds.
+   *
+   * Two things change: the window narrows (a 30-minute window at a 1m step shows
+   * the burst instead of averaging it away), and the charts are refetched right
+   * away rather than waiting for the next range tick.
+   */
+  handleBenchFinished = () => {
+    this.setState({ benchWindow: true }, () => {
+      this.store.fetchPerformance({
+        cluster: this.store.cluster,
+        step: '1m',
+        times: 30,
+      })
+    })
+  }
+
   isEmptyData = () => {
     const { data } = this.store
     if (isEmpty(data)) return true
     return Object.values(data).every(item =>
       isEmpty(get(item, 'data.result'))
     )
+  }
+
+  /** True when the throughput series carry no nonzero point. */
+  throughputIsZero = () => {
+    const { data } = this.store
+    return [PerformanceMetrics.readBytes, PerformanceMetrics.writtenBytes].every(
+      metric => {
+        const series = get(data, `${metric}.data.result`, [])
+        return (
+          !isArray(series) ||
+          series.every(item =>
+            (item.values || []).every(point => Number(get(point, [1], 0)) === 0)
+          )
+        )
+      }
+    )
+  }
+
+  /**
+   * A successful benchmark that leaves the charts flat means the bytes did not go
+   * through the client Prometheus scrapes.
+   *
+   * The scrape target is the per-class mount pod, whose own mount is read-only
+   * (`ro` in its client options). A write from a pod goes through the separate
+   * client the CSI driver starts for that claim, and that one does not expose
+   * `metrics=`, so its counters never reach Prometheus. Saying this beats leaving
+   * the operator with "no traffic" right after a 300 MiB/s write.
+   */
+  get benchWithoutMetrics() {
+    return this.state.benchWindow && this.throughputIsZero()
   }
 
   get charts() {
@@ -253,11 +308,16 @@ export default class SharedPerformance extends React.Component {
 
     return (
       <Loading spinning={this.store.isLoading}>
-        <BenchPanel />
+        <BenchPanel onFinished={this.handleBenchFinished} />
+        {this.benchWithoutMetrics ? (
+          <div className={styles.benchHint} data-bench-hint="no-metrics">
+            {t('SHARED_STORAGE_BENCH_NO_METRICS')}
+          </div>
+        ) : null}
         <MonitoringController
           title={t('SHARED_STORAGE_PERFORMANCE')}
-          step="5m"
-          times={100}
+          step={this.state.benchWindow ? '1m' : '5m'}
+          times={this.state.benchWindow ? 30 : 100}
           loading={this.store.isLoading}
           isEmpty={this.isEmptyData()}
           onFetch={this.fetchMetrics}

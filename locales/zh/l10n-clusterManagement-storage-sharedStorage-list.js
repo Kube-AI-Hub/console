@@ -84,6 +84,9 @@ module.exports = {
   SHARED_STORAGE_BENCH_READ: '读吞吐',
   SHARED_STORAGE_BENCH_FAILED: '性能测试失败',
   SHARED_STORAGE_BENCH_NO_VOLUME: '没有可测试的共享卷',
+  SHARED_STORAGE_BENCH_NO_METRICS:
+    '测试已经跑完，但曲线仍是 0：写入走的是 CSI 为这个卷单独启动的客户端，而 Prometheus 只抓每节点共享 mount pod 上的 metrics 端点，那个客户端的计数到不了这里。上面的吞吐数字是真实测得的。',
+
   SHARED_STORAGE_BENCH_WARM_CACHE:
     '每个文件 {size} MiB、{threads} 个线程。读测试用的是本机页缓存（Job 内无法清内核缓存），偏乐观。',
 

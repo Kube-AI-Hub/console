@@ -86,6 +86,9 @@ module.exports = {
   SHARED_STORAGE_BENCH_READ: 'Read',
   SHARED_STORAGE_BENCH_FAILED: 'The benchmark failed',
   SHARED_STORAGE_BENCH_NO_VOLUME: 'No shared volume to test',
+  SHARED_STORAGE_BENCH_NO_METRICS:
+    'The run finished but the charts are still zero: the writes went through the client the CSI driver starts for this claim, and Prometheus only scrapes the per-node shared mount pod, so those counters never arrive. The throughput numbers above are real.',
+
   SHARED_STORAGE_BENCH_WARM_CACHE:
     '{size} MiB per file, {threads} thread(s). The read pass is served from the host page cache (a job cannot drop it), so it is optimistic.',
 
