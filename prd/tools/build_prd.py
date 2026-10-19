@@ -260,6 +260,8 @@ def spec_stub(tc: str, level: int, module: str, sub: str, feature: str, title: s
         "preconditions": ["已登录，且在 default 集群"],
         "steps": ["打开 {BASE_URL}/clusters/default/juicefs-storage/overview"],
         "expected": ["页面主区可见且不出现未翻译 key"],
+        # 门禁只告警：提醒这条还是桩，按实际行为改写后删掉这一行。
+        "stub": True,
     }
     return yaml.safe_dump(data, sort_keys=False, allow_unicode=True)
 

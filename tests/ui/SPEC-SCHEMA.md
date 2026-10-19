@@ -89,3 +89,30 @@ python3 prd/tools/check_docs.py
 python3 prd/tools/check_docs.py --strict
 cd tests/ui && python3 generate_case_docs.py
 ```
+
+## 一 spec 一测试文件
+
+用例 YAML 是规格，测试文件是它的实现。对应关系由**路径**决定：
+
+```text
+specs/cluster-storage/shared-storage/TC-L3-...-QUOTA-01.yaml
+tests/cluster-storage/shared-storage/test_TC_L3_..._QUOTA_01.py
+```
+
+- 目录镜像 `specs/{module}/{sub}/`，`core/`、`flow/` 原样镜像。
+- 文件名把 `TC-` 之后的连字符换成下划线，加 `test_` 前缀。
+- 文件里**只有一个**测试函数，函数名与文件名一致，docstring 首行是字面 ID：
+
+```python
+@pytest.mark.point
+def test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_02(storage_page, screenshot):
+    """TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-02 配额弹窗：初始值、下限校验、取消不变、提交生效。"""
+```
+
+`check_docs.py --what tests` 会核对：测试文件是否存在、函数是否恰好一个、docstring 是否声明该 ID、`tests/` 下有没有对不上 spec 的孤儿文件、`suite` 与 `@pytest.mark.*` 是否一致。
+
+### 必填字段
+
+`covers`、`story`、`steps`、`expected` 都不能为空——空 `covers` 的规格能绕过 AC 侧追溯，门禁会报 `ERROR`。
+
+`build_prd.py` 生成的桩带 `stub: true`，门禁只告警，提醒按实际行为改写。

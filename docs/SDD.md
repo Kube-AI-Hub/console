@@ -48,12 +48,13 @@ flowchart LR
 | `tests/ui/SPEC-SCHEMA.md` | 用例 YAML 的字段：`covers`、`story`、`suite` |
 | `tests/ui/specs/{模块}/{子}/TC-*.yaml` | **用例事实源**。人维护 |
 | `tests/ui/cases/{模块}/{子}/TC-*.md` | 由规格生成的可读用例。**不要手改** |
-| `tests/ui/cases/_traceability.md` | 生成的三向矩阵 |
+| `tests/ui/cases/_traceability.md` | 生成的四向矩阵（AC → 用例 → 技术方案 → 测试文件） |
 | `tests/ui/generate_case_docs.py` | 读 `specs/`，写出 `cases/` 与 `_traceability.md` |
-| `tests/ui/tests/{模块}/{子}/test_*.py` | Playwright 自动化 |
+| `tests/ui/tests/{模块}/{子}/test_TC_*.py` | Playwright 自动化。**一 spec 一文件，路径镜像 `specs/`** |
 | `tests/ui/pages/` | 页面对象。选择器放这里，不写进规格 |
 | `tests/ui/helpers/` | 登录、对比度审计、i18n 断言、接口客户端 |
 | `tests/ui/artifacts/` | 跑测试时的截图和日志。不是事实源 |
+| `prd/tools/test_index.py` | spec ↔ 测试文件的路径映射，门禁与矩阵共用 |
 | `bugs/` | 缺陷档案。修复后要回写 `tests/`，不是第二套需求 |
 
 一条功能点在三棵树上的对应关系：
@@ -82,7 +83,7 @@ tests/ui/cases/cluster-storage/shared-storage/TC-L3-CLUSTER-STORAGE-SHARED_STORA
 ## 2. 能力级闭环（改一个功能点）
 
 ```
-tree.py → build_prd.py → prd(AC) → design(承接 AC) → tests(covers) → check_docs → generate_case_docs
+tree.py → build_prd.py → prd(AC) → design(承接 AC) → tests(covers) → 测试文件（路径镜像 spec） → check_docs → generate_case_docs
 ```
 
 1. **改功能树**（结构变了才做）：编辑 [`../prd/tools/tree.py`](../prd/tools/tree.py)。
@@ -95,13 +96,14 @@ tree.py → build_prd.py → prd(AC) → design(承接 AC) → tests(covers) →
 3. **写需求** `prd/<模块>/<子>/<功能>.md`：按模板补 `用户故事 / 验收场景（AC-*）/ 设计目标 / 约束与边界 / UI 交互设计 / 功能需求 / 成功标准 / 明确不做 / 假设`。
 4. **写技术方案** `design/<模块>/<子>/<功能>.md`：删掉「待迁移」标记行，在 `## 关联需求` 列出该功能点需求里的**全部** `AC-*`。决策要写「为什么 + 被否方案 + 何时重新考虑」，坑要写「不知道会怎样」。
 5. **写用例** `tests/ui/specs/<模块>/<子>/<TC>.yaml`：`covers` 指回 `AC-*`，`story` 指回 `US<n>`。
-6. **收敛门禁**：
+6. **写测试** `tests/ui/tests/<模块>/<子>/test_<TC，连字符换下划线>.py`：一个文件一个测试函数，docstring 首行是 `TC-*` 字面 ID。不写测试 = 门禁失败。
+7. **收敛门禁**：
    ```bash
    python3 prd/tools/check_docs.py                       # 全部；未迁移只告警
    python3 prd/tools/check_docs.py --strict              # 告警也失败
    python3 prd/tools/check_docs.py --strict prd/cluster-storage design/cluster-storage
    ```
-7. **重生成用例文档与三向矩阵**：
+8. **重生成用例文档与三向矩阵**：
    ```bash
    cd tests/ui && python3 generate_case_docs.py
    ```
@@ -109,6 +111,27 @@ tree.py → build_prd.py → prd(AC) → design(承接 AC) → tests(covers) →
 ### 用户故事怎么钉到用例
 
 需求里的每条 `### US<n>` 都要能被单独验证，用例 YAML 用 `story` 指回去。一旦该需求写了 `AC-*`，门禁要求**每条 US 至少被一条用例引用**。
+
+### 用例怎么钉到测试（一 spec 一文件）
+
+用例 YAML 只是规格，真正的终点是**会跑的测试文件**。对应关系由路径决定，不靠命名约定：
+
+```text
+tests/ui/specs/cluster-storage/shared-storage/TC-L3-...-QUOTA-01.yaml
+tests/ui/tests/cluster-storage/shared-storage/test_TC_L3_..._QUOTA_01.py
+```
+
+1. **目录镜像**：`specs/{模块}/{子}/` ↔ `tests/{模块}/{子}/`。`core/`、`flow/` 是套件目录，原样镜像。
+2. **文件名镜像**：`TC-<...>.yaml` ↔ `test_<同名，连字符换下划线>.py`。
+3. **一个文件只放一个测试函数**，函数名与文件名一致，docstring 首行是字面 ID：
+
+```python
+@pytest.mark.point
+def test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_02(storage_page, screenshot):
+    """TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-02 配额弹窗：初始值、下限校验、取消不变、提交生效。"""
+```
+
+`check_docs.py --what tests` 会核对：期望的测试文件是否存在、文件里是否恰好一个测试函数且 docstring 声明了该 ID、`tests/` 下有没有对不上任何 spec 的孤儿文件、`suite` 与 `@pytest.mark.*` 是否一致。缺一条就是 `ERROR`。
 
 ### 流程用例（`TC-FLOW-*`）
 
@@ -166,7 +189,7 @@ tree.py → build_prd.py → prd(AC) → design(承接 AC) → tests(covers) →
 ## 7. 给 AI coding 工具的硬要求
 
 1. **改之前先读**：本文件 → 目标模块的 `prd/` 与 `design/` → [`constitution.md`](constitution.md)。
-2. **改完必须收敛**：`python3 prd/tools/check_docs.py --strict` 必须无 `ERROR`；新增功能点必须同时有需求、技术方案、用例。
+2. **改完必须收敛**：`python3 prd/tools/check_docs.py --strict` 必须无 `ERROR`；新增功能点必须同时有需求、技术方案、用例、测试文件（一 spec 一文件）。
 3. **不许绕门禁**：不要为了过门禁去删章节、删 AC，或把 `covers` 指向不存在的 AC。
 4. **UI 改动必须截图**：改任何用户可见的界面，先在真实环境截图记录改动前，改完再截一次；对比度、单位、空态要逐项核对（见 `.cursor/rules/ui-screenshot-verify.mdc`）。
 5. **改了产品代码要跑测试**：前端 `pytest -m point`（相关用例）；后端 `go test`。

@@ -33,6 +33,7 @@ outputs/
 # SDD UI tests: credentials and artifacts never leave the machine
 tests/ui/.env
 tests/ui/artifacts/
+prd/tools/__pycache__/
 tests/ui/__pycache__/
 tests/ui/**/__pycache__/
 tests/ui/.venv/

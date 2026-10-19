@@ -26,6 +26,9 @@ from pathlib import Path
 
 import yaml
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import test_index  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent          # <repo>/prd/tools
 REPO = ROOT.parents[1]
 PRD = REPO / "prd"
@@ -189,6 +192,84 @@ def check_structure(report: Report, catalog: dict) -> None:
             report.error(f"pytest 目录层级不对：tests/{rel}")
 
 
+REQUIRED_SPEC_FIELDS = ("covers", "story", "steps", "expected")
+# `flow` 是规格侧的套件名，pytest 侧统一用 `full`（旅程比单点重）。
+SUITE_MARKERS = {"core": "core", "full": "full", "point": "point", "flow": "full"}
+
+
+def check_test_binding(report: Report) -> None:
+    """一 spec 一测试文件，路径与文件名镜像（见 docs/SDD.md 第 2 节）。
+
+    这一层是 SDD 闭环的最后一环：`check_docs.py` 的其余部分只证明「每条 AC 有
+    用例规格」，证明不了「每条规格有测试在跑」。规格写在 YAML 里、测试写在
+    Python 里，两者之间必须有一条可机器判定的链接，否则漏掉两条谁也不会发现。
+    """
+    if not SPECS.is_dir() or not UI_TESTS.is_dir():
+        return
+
+    spec_map = test_index.specs(SPECS)
+    bound = test_index.bindings(SPECS, UI_TESTS)
+
+    for tid, spec_path in sorted(spec_map.items()):
+        expected = test_index.test_path_for(spec_path, SPECS, UI_TESTS)
+        rel_test = expected.relative_to(UI)
+
+        spec = test_index.load_spec(spec_path)
+        for field in REQUIRED_SPEC_FIELDS:
+            if not spec.get(field):
+                report.error(f"{tid}: spec 缺必填字段 {field}")
+        if spec.get("stub"):
+            report.warn(f"{tid}: spec 还是生成桩（stub: true），请按实际行为改写")
+
+        if not expected.is_file():
+            report.error(f"{tid}: 没有对应的测试文件 {rel_test}（规格有、代码无）")
+            continue
+
+        functions = test_index.test_functions(expected)
+        if len(functions) != 1:
+            report.error(
+                f"{rel_test}: 应恰好有 1 个测试函数（一 spec 一文件），实际 {len(functions)} 个"
+            )
+        hits = bound.get(tid) or []
+        if not hits:
+            report.error(f"{rel_test}: 测试函数的 docstring 里没有 {tid}")
+        elif len(hits) > 1:
+            report.error(f"{rel_test}: 有 {len(hits)} 个函数都声明了 {tid}")
+        else:
+            node = hits[0][1]
+            if node.name != f"test_{tid.replace('-', '_')}":
+                report.error(
+                    f"{rel_test}: 函数名应为 test_{tid.replace('-', '_')}，实际 {node.name}"
+                )
+            expected_marker = SUITE_MARKERS.get(str(spec.get("suite")))
+            if expected_marker and expected_marker not in test_index.function_markers(node):
+                report.error(
+                    f"{rel_test}: 缺 @pytest.mark.{expected_marker}"
+                    f"（spec 的 suite 是 {spec.get('suite')}）"
+                )
+            if test_index.is_skipped(node):
+                report.warn(f"{rel_test}: 整个测试被 skip / xfail，等于没跑")
+
+    # 反向：每个测试文件都要能对上一条 spec，否则就是孤儿。
+    for path in sorted(UI_TESTS.rglob("test_*.py")):
+        rel_test = path.relative_to(UI)
+        expected = test_index.spec_path_for(path, SPECS, UI_TESTS)
+        if not expected.is_file():
+            report.error(f"{rel_test}: 找不到对应的用例规格 {expected.relative_to(UI)}")
+            continue
+        tid = test_index.spec_id(expected)
+        declared = {
+            token
+            for node in test_index.test_functions(path)
+            for token in test_index.function_ids(node)
+        }
+        unknown = sorted(declared - set(spec_map))
+        if unknown:
+            report.error(f"{rel_test}: docstring 里的 {', '.join(unknown)} 不是任何一条规格")
+        if declared and tid not in declared:
+            report.error(f"{rel_test}: 没有声明自己对应的 {tid}")
+
+
 FORK_HEADER = "Copyright (C) 2026 Kube AI Hub"
 
 
@@ -240,6 +321,8 @@ def main() -> int:
     if do_structure:
         check_structure(report, catalog)
         check_css(report)
+    if do_tests:
+        check_test_binding(report)
 
     specs = load_specs()
     covers_by_spec = {tid: [str(a) for a in (spec.get("covers") or [])] for tid, spec in specs.items()}

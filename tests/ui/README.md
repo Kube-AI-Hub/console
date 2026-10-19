@@ -29,11 +29,13 @@ pytest tests/cluster-storage -q    # 只跑某个模块
 ```text
 specs/{module}/{sub}/TC-*.yaml      # 事实源，含 covers / story
 cases/{module}/{sub}/TC-*.md        # 生成物（python generate_case_docs.py）
-tests/{module}/{sub}/test_*.py      # Playwright 编排
+tests/{module}/{sub}/test_TC_*.py   # Playwright 编排，一 spec 一文件，路径镜像 specs/
 pages/                              # 页面对象，选择器只在这里
-helpers/                            # 登录、配置、对比度审计、i18n 断言
+helpers/                            # 登录、配置、对比度审计、i18n 断言、共享步骤
 artifacts/                          # 截图与日志，不入库
 ```
+
+**文件名推导**：`TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-01.yaml` → `test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_01.py`（连字符换下划线、加 `test_` 前缀），放在 `specs/` 里同级的同名目录下。一个文件只放一个测试函数，函数名与文件名一致，docstring 首行是 `TC-*` 字面 ID。`prd/tools/check_docs.py --what tests` 会核对这条对应关系。
 
 ## 选择器约定
 

@@ -42,9 +42,11 @@ pytest -m point
 
 写操作只针对 `ui-it-*` 测试对象，测完删除；不要点受保护实例或现网业务数据。
 
-## 追溯：AC ↔ DES ↔ TC
+## 追溯：AC ↔ DES ↔ TC ↔ 测试
 
 每条 `AC-*` 必须**同时**被一条用例覆盖（`covers`）和一份技术方案承接（`design/` 的 `## 关联需求`）。需求里写了 `AC-*` 时，每条 `US<n>` 还要被一条用例的 `story` 引用。
+
+**每条用例规格必须有一个测试文件**，路径与文件名镜像 `specs/`：`specs/{模块}/{子}/TC-X.yaml` ↔ `tests/{模块}/{子}/test_TC_X.py`。一个文件只放一个测试函数，docstring 首行是 `TC-*` 字面 ID。缺文件、缺 ID、孤儿文件、suite 与 marker 不一致，门禁都会报 `ERROR`。
 
 ```bash
 cd console
@@ -59,6 +61,7 @@ python3 prd/tools/check_docs.py --strict            # 告警也失败
 - SDD 入口：[`../docs/SDD.md`](../docs/SDD.md)
 - 事实源：`ui/specs/{module}/{sub}/TC-*.yaml`（含 `covers`）
 - 生成文档：`python generate_case_docs.py` → `ui/cases/{module}/{sub}/` 与 `ui/cases/_traceability.md`
+- 测试文件：`ui/tests/{module}/{sub}/test_TC_*.py`，**一 spec 一文件、路径镜像 `specs/`**，docstring 首行写 `TC-*` 字面 ID
 - 三大正文：[`../prd/`](../prd/) · [`../design/`](../design/) · 本目录
 - 功能树：[`../prd/catalog.yaml`](../prd/catalog.yaml)
 

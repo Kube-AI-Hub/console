@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import ast
 import re
 import sys
 from pathlib import Path
@@ -211,17 +212,47 @@ def render(spec: dict) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
+def test_bindings() -> dict[str, list[tuple[Path, ast.FunctionDef]]]:
+    """spec id → 绑定了它的 (测试文件, 函数)。
+
+    与 `prd/tools/check_docs.py` 用同一份解析（`prd/tools/test_index.py`），
+    矩阵里看到的「实现」就是门禁判定的那一份，不会两边不一致。
+    """
+    tools = REPO_ROOT / "prd" / "tools"
+    if not tools.is_dir():
+        return {}
+    if str(tools) not in sys.path:
+        sys.path.insert(0, str(tools))
+    import test_index
+
+    return test_index.bindings(SPEC_ROOT, ROOT / "tests")
+
+
+def implementation_cell(spec_ids: list[str], bindings: dict) -> str | None:
+    """`实现` 列：绑定的测试文件，没有就返回 None（调用方记一笔未实现）。"""
+    files = []
+    for spec_id in spec_ids:
+        for path, _node in bindings.get(spec_id, []):
+            rel = path.relative_to(REPO_ROOT)
+            files.append(f"[`{rel}`](../../../{rel})")
+    if not files:
+        return None
+    return ", ".join(sorted(set(files)))
+
+
 def traceability(specs: list[dict]) -> str:
     lines = [
-        "# 需求 ↔ 技术方案 ↔ 用例 追溯矩阵",
+        "# 需求 ↔ 技术方案 ↔ 用例 ↔ 测试 追溯矩阵",
         "",
-        "由 `generate_case_docs.py` 生成。`覆盖用例` 或 `承接技术方案` 为空，表示这条 AC 还没有用例或还没有技术方案承接。",
+        "由 `generate_case_docs.py` 生成。`覆盖用例` 为空表示这条 AC 没有用例规格；"
+        "`实现` 为空表示用例规格还没有测试文件。",
         "",
-        "| 功能点 | AC | 覆盖用例 | 承接技术方案 |",
-        "|--------|----|----------|--------------|",
+        "| 功能点 | AC | 覆盖用例 | 承接技术方案 | 实现 |",
+        "|--------|----|----------|--------------|------|",
     ]
     dmap = catalog_design_map()
     dacs = design_ac_map()
+    bindings = test_bindings()
 
     prd_files: dict[str, dict[str, str]] = {}
     covers_by_ac: dict[str, list[str]] = {}
@@ -237,6 +268,7 @@ def traceability(specs: list[dict]) -> str:
             covers_by_ac.setdefault(ac, []).append(str(spec.get("id") or "?"))
 
     no_design: list[str] = []
+    no_test: list[str] = []
     seen: set[str] = set()
     for prd, acs in sorted(prd_files.items()):
         for ac in sorted(acs):
@@ -250,16 +282,22 @@ def traceability(specs: list[dict]) -> str:
             else:
                 carried = "**（无）**"
                 no_design.append(ac)
+            impl = implementation_cell(covers_by_ac.get(ac, []), bindings)
+            if impl is None:
+                no_test.append(ac)
+                impl = "**（无）**"
             label = prd.replace("prd/", "").replace(".md", "") if prd else ac
-            lines.append(f"| {label} | `{ac}` | {used} | {carried} |")
+            lines.append(f"| {label} | `{ac}` | {used} | {carried} | {impl} |")
 
     lines += ["", "## 小结", ""]
     uncovered = [ac for ac in seen if ac not in covers_by_ac]
-    lines.append(f"- 需求里的 AC：{len(seen)} 条，其中未覆盖 {len(uncovered)} 条、无技术方案承接 {len(no_design)} 条。")
+    lines.append(f"- 需求里的 AC：{len(seen)} 条，其中未覆盖 {len(uncovered)} 条、无技术方案承接 {len(no_design)} 条、无用例规格实现 {len(no_test)} 条。")
     if uncovered:
         lines.append(f"- 未覆盖：{', '.join(f'`{ac}`' for ac in sorted(uncovered))}")
     if no_design:
         lines.append(f"- 无技术方案承接：{', '.join(f'`{ac}`' for ac in sorted(no_design))}")
+    if no_test:
+        lines.append(f"- 无用例规格实现：{', '.join(f'`{ac}`' for ac in sorted(no_test))}")
     if missing_covers:
         lines.append(f"- 没有 `covers` 的用例：{len(missing_covers)} 条")
 
