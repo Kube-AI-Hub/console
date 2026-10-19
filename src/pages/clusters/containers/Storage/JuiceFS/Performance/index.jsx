@@ -81,6 +81,10 @@ export default class SharedPerformance extends React.Component {
     this.store.fetchPerformance()
   }
 
+  componentWillUnmount() {
+    this.clearBenchRetries()
+  }
+
   fetchMetrics = params => {
     this.store.fetchPerformance({ ...params, cluster: this.store.cluster })
   }
@@ -89,17 +93,35 @@ export default class SharedPerformance extends React.Component {
    * Called by the benchmark panel once a run succeeds.
    *
    * Two things change: the window narrows (a 30-minute window at a 1m step shows
-   * the burst instead of averaging it away), and the charts are refetched right
-   * away rather than waiting for the next range tick.
+   * the burst instead of averaging it away), and the charts are refetched.
+   *
+   * The refetch repeats because Prometheus scrapes the mount pod every 30s: a
+   * single fetch right after the run reads the counter from before it started, so
+   * the chart would still say "no traffic" for a run that just moved 400 MiB/s.
+   * Two more attempts at 35s and 70s cover a full scrape plus the query round-trip.
    */
   handleBenchFinished = () => {
     this.setState({ benchWindow: true }, () => {
-      this.store.fetchPerformance({
-        cluster: this.store.cluster,
-        step: '1m',
-        times: 30,
-      })
+      this.fetchBenchWindow()
+      this.clearBenchRetries()
+      this.benchRetries = [
+        setTimeout(this.fetchBenchWindow, 35_000),
+        setTimeout(this.fetchBenchWindow, 70_000),
+      ]
     })
+  }
+
+  fetchBenchWindow = () => {
+    this.store.fetchPerformance({
+      cluster: this.store.cluster,
+      step: '1m',
+      times: 30,
+    })
+  }
+
+  clearBenchRetries = () => {
+    (this.benchRetries || []).forEach(timer => clearTimeout(timer))
+    this.benchRetries = []
   }
 
   isEmptyData = () => {
