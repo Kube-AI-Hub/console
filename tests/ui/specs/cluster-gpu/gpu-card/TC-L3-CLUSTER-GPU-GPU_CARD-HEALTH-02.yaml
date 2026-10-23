@@ -1,0 +1,34 @@
+id: TC-L3-CLUSTER-GPU-GPU_CARD-HEALTH-02
+level: 3
+suite: point
+module: cluster-gpu
+submodule: gpu-card
+feature: health
+title: 健康状态 · 全部健康时不出现亚健康
+entry_url: "{BASE_URL}/clusters/default/nodes/gpu01/status"
+prd: prd/cluster-gpu/gpu-card/health.md
+design: design/cluster-gpu/gpu-card/health.md
+
+covers:
+- AC-L3-CLUSTER-GPU-GPU_CARD-HEALTH-02
+
+story:
+- US2
+
+product: 节点上全部设备健康时，列表每一行都是健康，不出现亚健康。
+preconditions:
+- 已登录，且在 default 集群
+- 目标节点的 register 注解里所有设备 health 均为 true
+steps:
+- 读取节点上 hami.io/node-nvidia-register 注解，确认所有设备 health 为 true
+- 打开 {BASE_URL}/clusters/default/nodes/{node}/status
+- 统计显卡列表里「亚健康」的行数
+expected:
+- 亚健康行数为 0
+- 每行状态文本为「健康」
+- 页面不出现未翻译的 key
+troubleshoot:
+- 出现亚健康时先看 register 注解里是否真有 health:false，再看接口返回值
+- 全部显示亚健康时确认注解解析是否把缺失的 health 字段当成 false
+update_automation:
+- 状态文案变化时改 pages/gpu_cards.py

@@ -1,0 +1,35 @@
+id: TC-L3-CLUSTER-GPU-GPU_CARD-HEALTH-01
+level: 3
+suite: point
+module: cluster-gpu
+submodule: gpu-card
+feature: health
+title: 健康状态 · 故障卡仍列出并标为亚健康
+entry_url: "{BASE_URL}/clusters/default/nodes/gpu01/status"
+prd: prd/cluster-gpu/gpu-card/health.md
+design: design/cluster-gpu/gpu-card/health.md
+
+covers:
+- AC-L3-CLUSTER-GPU-GPU_CARD-HEALTH-01
+
+story:
+- US1
+
+product: 被 device plugin 摘除的卡仍在显卡列表里，状态为亚健康，其余卡为健康。
+preconditions:
+- 已登录，且在 default 集群
+- 目标节点的 register 注解里至少有一张设备 health 为 false，且同一节点至少有一张 health 为 true
+steps:
+- 读取节点上 hami.io/node-nvidia-register 注解，记下 health 为 false 的 UUID 集合
+- 打开 {BASE_URL}/clusters/default/nodes/{node}/status
+- 读取显卡列表每一行的 UUID 与状态
+expected:
+- 注解里 health 为 false 的每个 UUID 都出现在表格里
+- 这些行的状态文本为「亚健康」
+- 注解里 health 为 true 的行状态文本为「健康」
+- 表格行数等于注解里的设备数
+troubleshoot:
+- 故障卡显示健康时确认接口返回的 health 字段；若接口返回 false 而页面显示健康，问题在 record.health 的取值
+- 表格少行时确认该节点 node-gpu-info 注解里的 devices 是否包含这些 UUID
+update_automation:
+- 状态文案变化时改 pages/gpu_cards.py 的 HEALTHY / SUB_HEALTHY 常量

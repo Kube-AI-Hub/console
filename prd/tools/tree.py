@@ -15,6 +15,30 @@ from __future__ import annotations
 
 MODULES = [
     {
+        "id": "cluster-gpu",
+        "title": "集群算力",
+        "goal": "让运维看清每张 GPU 卡的真实健康状态，故障卡一眼可辨，不被健康卡掩盖。",
+        "tests": {"L1": ["TC-CORE-CLUSTER_GPU-01"]},
+        "submodules": [
+            {
+                "id": "gpu-card",
+                "title": "显卡列表",
+                "goal": "节点页与集群页的显卡列表显示每张卡的健康状态；被 device plugin 摘除的故障卡仍显示且标为亚健康。",
+                "tests": {"L2": ["TC-FULL-CLUSTER_GPU-GPU_CARD-01"]},
+                "features": [
+                    {
+                        "id": "health",
+                        "title": "健康状态",
+                        "tests": {"L3": [
+                            "TC-L3-CLUSTER-GPU-GPU_CARD-HEALTH-01",
+                            "TC-L3-CLUSTER-GPU-GPU_CARD-HEALTH-02",
+                        ]},
+                    },
+                ],
+            }
+        ],
+    },
+    {
         "id": "cluster-storage",
         "title": "集群存储",
         "goal": "让运维看清集群共享存储的容量、配额与性能，并能安全地调整配额。",

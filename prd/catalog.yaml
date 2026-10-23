@@ -1,4 +1,28 @@
 modules:
+- id: cluster-gpu
+  title: 集群算力
+  prd: prd/cluster-gpu/_index.md
+  design: design/cluster-gpu/_index.md
+  tests:
+    L1:
+    - TC-CORE-CLUSTER_GPU-01
+  submodules:
+  - id: gpu-card
+    title: 显卡列表
+    prd: prd/cluster-gpu/gpu-card/_index.md
+    design: design/cluster-gpu/gpu-card/_index.md
+    tests:
+      L2:
+      - TC-FULL-CLUSTER_GPU-GPU_CARD-01
+    features:
+    - id: health
+      title: 健康状态
+      prd: prd/cluster-gpu/gpu-card/health.md
+      design: design/cluster-gpu/gpu-card/health.md
+      tests:
+        L3:
+        - TC-L3-CLUSTER-GPU-GPU_CARD-HEALTH-01
+        - TC-L3-CLUSTER-GPU-GPU_CARD-HEALTH-02
 - id: cluster-storage
   title: 集群存储
   prd: prd/cluster-storage/_index.md

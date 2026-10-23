@@ -4,6 +4,10 @@
 
 | 功能点 | AC | 覆盖用例 | 承接技术方案 | 实现 |
 |--------|----|----------|--------------|------|
+| cluster-gpu/_index | `AC-CORE-CLUSTER_GPU-01` | `TC-CORE-CLUSTER_GPU-01` | [`design/cluster-gpu/_index.md`](../../../design/cluster-gpu/_index.md) | [`tests/ui/tests/cluster-gpu/core/test_TC_CORE_CLUSTER_GPU_01.py`](../../../tests/ui/tests/cluster-gpu/core/test_TC_CORE_CLUSTER_GPU_01.py) |
+| cluster-gpu/gpu-card/_index | `AC-FULL-CLUSTER_GPU-GPU_CARD-01` | `TC-FULL-CLUSTER_GPU-GPU_CARD-01` | [`design/cluster-gpu/gpu-card/_index.md`](../../../design/cluster-gpu/gpu-card/_index.md) | [`tests/ui/tests/cluster-gpu/gpu-card/test_TC_FULL_CLUSTER_GPU_GPU_CARD_01.py`](../../../tests/ui/tests/cluster-gpu/gpu-card/test_TC_FULL_CLUSTER_GPU_GPU_CARD_01.py) |
+| cluster-gpu/gpu-card/health | `AC-L3-CLUSTER-GPU-GPU_CARD-HEALTH-01` | `TC-L3-CLUSTER-GPU-GPU_CARD-HEALTH-01` | [`design/cluster-gpu/gpu-card/health.md`](../../../design/cluster-gpu/gpu-card/health.md) | [`tests/ui/tests/cluster-gpu/gpu-card/test_TC_L3_CLUSTER_GPU_GPU_CARD_HEALTH_01.py`](../../../tests/ui/tests/cluster-gpu/gpu-card/test_TC_L3_CLUSTER_GPU_GPU_CARD_HEALTH_01.py) |
+| cluster-gpu/gpu-card/health | `AC-L3-CLUSTER-GPU-GPU_CARD-HEALTH-02` | `TC-L3-CLUSTER-GPU-GPU_CARD-HEALTH-02` | [`design/cluster-gpu/gpu-card/health.md`](../../../design/cluster-gpu/gpu-card/health.md) | [`tests/ui/tests/cluster-gpu/gpu-card/test_TC_L3_CLUSTER_GPU_GPU_CARD_HEALTH_02.py`](../../../tests/ui/tests/cluster-gpu/gpu-card/test_TC_L3_CLUSTER_GPU_GPU_CARD_HEALTH_02.py) |
 | cluster-storage/_index | `AC-CORE-CLUSTER_STORAGE-01` | `TC-CORE-CLUSTER_STORAGE-01` | [`design/cluster-storage/_index.md`](../../../design/cluster-storage/_index.md) | [`tests/ui/tests/cluster-storage/core/test_TC_CORE_CLUSTER_STORAGE_01.py`](../../../tests/ui/tests/cluster-storage/core/test_TC_CORE_CLUSTER_STORAGE_01.py) |
 | cluster-storage/shared-storage/_index | `AC-FULL-CLUSTER_STORAGE-SHARED_STORAGE-01` | `TC-FLOW-SHARED_STORAGE`, `TC-FULL-CLUSTER_STORAGE-SHARED_STORAGE-01` | [`design/cluster-storage/shared-storage/_index.md`](../../../design/cluster-storage/shared-storage/_index.md) | [`tests/ui/tests/cluster-storage/flow/test_TC_FLOW_SHARED_STORAGE.py`](../../../tests/ui/tests/cluster-storage/flow/test_TC_FLOW_SHARED_STORAGE.py), [`tests/ui/tests/cluster-storage/shared-storage/test_TC_FULL_CLUSTER_STORAGE_SHARED_STORAGE_01.py`](../../../tests/ui/tests/cluster-storage/shared-storage/test_TC_FULL_CLUSTER_STORAGE_SHARED_STORAGE_01.py) |
 | cluster-storage/shared-storage/_index | `AC-FULL-CLUSTER_STORAGE-SHARED_STORAGE-02` | `TC-FLOW-SHARED_STORAGE`, `TC-FULL-CLUSTER_STORAGE-SHARED_STORAGE-01` | [`design/cluster-storage/shared-storage/_index.md`](../../../design/cluster-storage/shared-storage/_index.md) | [`tests/ui/tests/cluster-storage/flow/test_TC_FLOW_SHARED_STORAGE.py`](../../../tests/ui/tests/cluster-storage/flow/test_TC_FLOW_SHARED_STORAGE.py), [`tests/ui/tests/cluster-storage/shared-storage/test_TC_FULL_CLUSTER_STORAGE_SHARED_STORAGE_01.py`](../../../tests/ui/tests/cluster-storage/shared-storage/test_TC_FULL_CLUSTER_STORAGE_SHARED_STORAGE_01.py) |
@@ -21,12 +25,17 @@
 
 ## 小结
 
-- 需求里的 AC：14 条，其中未覆盖 0 条、无技术方案承接 0 条、无用例规格实现 0 条。
+- 需求里的 AC：18 条，其中未覆盖 0 条、无技术方案承接 0 条、无用例规格实现 0 条。
 
 ## 用户故事覆盖
 
 | 功能点 | 用户故事 | 覆盖用例 |
 |--------|----------|----------|
+| cluster-gpu/_index | `US1` | `TC-CORE-CLUSTER_GPU-01` |
+| cluster-gpu/gpu-card/_index | `US1` | `TC-FULL-CLUSTER_GPU-GPU_CARD-01` |
+| cluster-gpu/gpu-card/_index | `US2` | `TC-FULL-CLUSTER_GPU-GPU_CARD-01` |
+| cluster-gpu/gpu-card/health | `US1` | `TC-L3-CLUSTER-GPU-GPU_CARD-HEALTH-01` |
+| cluster-gpu/gpu-card/health | `US2` | `TC-L3-CLUSTER-GPU-GPU_CARD-HEALTH-02` |
 | cluster-storage/_index | `US1` | `TC-CORE-CLUSTER_STORAGE-01` |
 | cluster-storage/shared-storage/_index | `US1` | `TC-FULL-CLUSTER_STORAGE-SHARED_STORAGE-01` |
 | cluster-storage/shared-storage/_index | `US2` | `TC-FLOW-SHARED_STORAGE`, `TC-FULL-CLUSTER_STORAGE-SHARED_STORAGE-01` |
@@ -39,4 +48,4 @@
 | cluster-storage/shared-storage/quota | `US2` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-02` |
 | cluster-storage/shared-storage/quota | `US3` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-01` |
 
-- 用户故事：11 条，其中未覆盖 0 条。
+- 用户故事：16 条，其中未覆盖 0 条。
