@@ -56,15 +56,23 @@ class GpuCardsPage:
 
     @property
     def cluster_rows(self) -> list[dict]:
-        """One entry per row: uuid + status text."""
+        """One entry per row: uuid, status text, and the single-card detail link.
+
+        The UUID cell wraps its text in a Tooltip, which renders the content twice
+        (once for the trigger, once for the tooltip body). Read the anchor's own
+        text instead of the cell's `textContent`.
+
+        The node column is also a link (`.../nodes/<node>/status`), so the card
+        link has to come from the UUID cell specifically, not from `row a`.
+        """
         return self.page.evaluate(
             """
             (statusIndex) => Array.from(document.querySelectorAll('tbody tr')).map((row) => {
               const cells = Array.from(row.querySelectorAll('td'))
               const text = (i) => (cells[i] ? cells[i].textContent.trim() : '')
-              const link = row.querySelector('a')
+              const link = cells[2] ? cells[2].querySelector('a') : null
               return {
-                uuid: text(2),
+                uuid: link ? link.textContent.trim() : text(2),
                 status: text(statusIndex),
                 href: link ? link.getAttribute('href') : '',
                 cells: cells.map((c) => c.textContent.trim()),
@@ -94,7 +102,12 @@ class GpuCardsPage:
               return Array.from(root.querySelectorAll('tbody tr')).map((row) => {
                 const cells = Array.from(row.querySelectorAll('td'))
                 const text = (i) => (cells[i] ? cells[i].textContent.trim() : '')
-                return { uuid: text(1), status: text(statusIndex), cells: cells.map((c) => c.textContent.trim()) }
+                const link = row.querySelector('a')
+                return {
+                  uuid: link ? link.textContent.trim() : text(1),
+                  status: text(statusIndex),
+                  cells: cells.map((c) => c.textContent.trim()),
+                }
               })
             }
             """,
@@ -107,29 +120,22 @@ class GpuCardsPage:
         self.page.wait_for_load_state("networkidle", timeout=30_000)
 
     @property
-    def card_attrs(self) -> dict[str, str]:
-        """The side panel's name/value pairs on the single-card detail page."""
+    def card_status(self) -> str:
+        """The value next to the 状态 attribute in the side panel.
+
+        The attribute list renders each pair as "状态:" followed by the value, and
+        the markup nests both inside wrappers whose class names are shared with
+        other panels, so read it from the panel's text instead of a class selector.
+        """
         return self.page.evaluate(
             """
             () => {
-              const out = {}
-              document.querySelectorAll('[class*=attrs] [class*=item], [class*=attrItem]').forEach((el) => {
-                const name = el.querySelector('[class*=name], [class*=label]')
-                const value = el.querySelector('[class*=value], [class*=text]')
-                if (name && value) out[name.textContent.trim()] = value.textContent.trim()
-              })
-              return out
+              const text = document.body.innerText
+              const match = /状态[:：]\\s*\\n?\\s*(健康|亚健康)/.exec(text)
+              return match ? match[1] : ''
             }
             """
         )
-
-    @property
-    def card_status(self) -> str:
-        attrs = self.card_attrs
-        for key in ("状态", "Status"):
-            if key in attrs:
-                return attrs[key]
-        return ""
 
     # ---- API ------------------------------------------------------------
     def gpu_api(self, node: str | None = None) -> dict:
