@@ -53,7 +53,8 @@
 
 ## 失败排查
 
-- 故障卡显示健康时确认接口返回的 health 字段；若接口返回 false 而页面显示健康，问题在 record.health 的取值
+- 故障卡显示健康时先看 hami.io/node-gpu-info 里该 UUID 的 health；若它仍是 true，说明 gpu-agent 还没汇总 register 注解
+- gpu-agent 应监听 register 注解变化并在数秒内重采集；等 5 分钟以上才更新说明监听没生效
 - 表格少行时确认该节点 node-gpu-info 注解里的 devices 是否包含这些 UUID
 
 ## 产品改版后如何更新自动化

@@ -21,15 +21,17 @@
 
 ## 设计目标
 
-- **健康状态的唯一来源是 device plugin 的结论。** 它写在节点注解 `hami.io/node-nvidia-register` 的每个设备的 `health` 字段里；接口读这个字段，页面渲染它。
-- **故障卡不从列表消失。** 只要 register annotation 里还有这条设备记录，它就必须出现在列表里。device plugin 在把卡标记 unhealthy 时**不会**从注解里删掉它，所以「少了一张卡」不是预期行为。
+- **健康状态的唯一判定来源是 device plugin，唯一汇总者是 gpu-agent。** device plugin 把结论写在节点注解 `hami.io/node-nvidia-register` 的每个设备的 `health` 字段里；gpu-agent 汇总后写进 `hami.io/node-gpu-info`；页面只读这份汇总结果。
+- **故障卡不从列表消失。** 只要设备记录还在，它就必须出现在列表里。device plugin 在把卡标记 unhealthy 时**不会**从注解里删掉它，所以「少了一张卡」不是预期行为。
 - **不重复判定。** 页面不调 `nvidia-smi`、不查 Prometheus、不看 allocatable 差额去猜哪张卡坏了。allocatable 变小只说明「少了」，说不出「是哪一张」。
+- **汇总要及时。** 一张卡被摘出可分配池后，页面应在数秒内变色，而不是等下一个采集周期。
 
 ## 约束与边界
 
 - 本功能只读。不提供「重置健康状态」按钮——恢复靠重启 device plugin（由 HAMi 侧操作），页面不代劳。
 - 状态只有两态：健康 / 亚健康。没有「未知」态：没有设备记录的卡不产生行。
 - 与监控的边界：健康与利用率无关。0% 利用率不代表不健康，100% 也不代表健康。
+- 与 gpu-agent 的边界：页面与接口都不解析厂商专属的 register 注解名，只读 `hami.io/node-gpu-info`。厂商注解的差异由 gpu-agent 消化。
 
 ## UI 交互设计
 
@@ -55,13 +57,13 @@
 
 ## 功能需求
 
-- **FR-L3-CLUSTER-GPU-GPU_CARD-HEALTH-01** — 系统 MUST 以 `hami.io/node-nvidia-register` 里每个设备的 `health` 字段作为显卡健康状态的唯一来源。
+- **FR-L3-CLUSTER-GPU-GPU_CARD-HEALTH-01** — 系统 MUST 以 device plugin 写入的 `hami.io/node-nvidia-register` 里每个设备的 `health` 字段作为显卡健康状态的唯一判定来源，并由 gpu-agent 汇总进 `hami.io/node-gpu-info` 供页面读取。
 - **FR-L3-CLUSTER-GPU-GPU_CARD-HEALTH-02** — 系统 MUST 让 `health: false` 的设备仍出现在显卡列表里，并渲染为「亚健康」。
 
 ## 成功标准
 
-- **SC-L3-CLUSTER-GPU-GPU_CARD-HEALTH-01** — 注解变化后，页面在 30 秒内反映新的健康状态（缓存刷新周期 + 前端请求）。
-- **SC-L3-CLUSTER-GPU-GPU_CARD-HEALTH-02** — 列表里的「亚健康」条数等于注解里 `health: false` 的设备数。
+- **SC-L3-CLUSTER-GPU-GPU_CARD-HEALTH-01** — register 注解变化后，页面在 10 秒内反映新的健康状态（gpu-agent 监听去抖 + 接口缓存刷新 + 前端请求）。
+- **SC-L3-CLUSTER-GPU-GPU_CARD-HEALTH-02** — 列表里的「亚健康」条数等于 register 注解里 `health: false` 的设备数。
 
 ## 明确不做
 
@@ -72,6 +74,7 @@
 ## 假设
 
 - HAMi device plugin 会持续写 `hami.io/node-nvidia-register`，且保留 unhealthy 设备的记录。
+- gpu-agent 以 DaemonSet 运行在每个 GPU 节点上，会监听 register 注解变化并汇总进 `hami.io/node-gpu-info`。
 
 ## 验收用例
 

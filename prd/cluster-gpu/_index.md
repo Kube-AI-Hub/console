@@ -16,23 +16,23 @@
 
 ## 设计目标
 
-- **健康状态必须来自调度器的判断，而不是页面的猜测。** HAMi 的 device plugin 是唯一决定「这张卡能不能被分配」的角色；页面与接口都读它的结论，不自己用 NVML 或 `nvidia-smi` 再算一遍。两处各算一次，迟早会对不上。
+- **健康状态必须来自调度器的判断，而不是页面的猜测。** HAMi 的 device plugin 是唯一决定「这张卡能不能被分配」的角色；gpu-agent 汇总它的结论，页面与接口读汇总结果，不自己用 NVML 或 `nvidia-smi` 再算一遍。两处各算一次，迟早会对不上。
 - **故障卡不能从列表里消失。** 被摘出可分配池的卡仍是一张物理卡、仍占着机箱位置、仍需要运维处理。列表必须显示它并标为亚健康，否则「少了几张卡」这件事只能靠人肉数数发现。
-- 同一个事实只有一个家：健康状态的权威值在 device plugin 写的 `hami.io/node-nvidia-register`。
+- 同一个事实只有一个家：健康状态的**判定**在 device plugin 写的 `hami.io/node-nvidia-register`，**汇总**在 gpu-agent 写的 `hami.io/node-gpu-info`，页面只读后者。
 
 ## 约束与边界
 
 - 本模块只读。不在页面里改卡的状态、不重置 GPU、不重启 device plugin。
-- 健康状态的**判定**属于 HAMi（XID 事件、ECC、NVML 事件注册）。本模块只**呈现**它的结论，不复制它的判定逻辑。
+- 健康状态的**判定**属于 HAMi（XID 事件、ECC、NVML 事件注册）；**汇总**属于 gpu-agent。本模块只**呈现**结论，不复制判定逻辑，也不解析厂商专属注解名。
 - 与节点模块的边界：节点页的「运行状态」里的显卡列表（`GpuCardList`）读同一个接口，因此健康语义必须一致；节点页不另算一套。
 - 与监控模块的边界：利用率、显存、温度来自 Prometheus；健康状态不来自监控——一张卡可以利用率 0% 且不健康，也可以 100% 且健康。
 
 ```mermaid
 flowchart LR
   dp["HAMi device plugin<br/>XID / ECC 健康检查"] --> reg["node annotation<br/>hami.io/node-nvidia-register<br/>health=true/false"]
-  agent["HAMi gpu-agent<br/>补充 driver / topology / 用量"] --> info["node annotation<br/>hami.io/node-gpu-info"]
-  reg --> api["kube-server<br/>/kapis/gpu.kubesphere.io/v1alpha1/gpus"]
-  info --> api
+  agent["HAMi gpu-agent<br/>汇总 health + driver / topology / 用量"] --> info["node annotation<br/>hami.io/node-gpu-info<br/>health 已汇总"]
+  reg -->|"watch 变化"| agent
+  info --> api["kube-server<br/>/kapis/gpu.kubesphere.io/v1alpha1/gpus"]
   api --> page["console<br/>集群 → 算力 / 节点 → 运行状态"]
   prom["Prometheus<br/>gpu_card_*"] --> page
 ```
@@ -46,7 +46,6 @@ flowchart LR
 | 单卡详情 | `/clusters/:cluster/nodes/:node/gpus/:uuid/status` | 侧栏属性里的「状态」 |
 
 三处都按同一份数据渲染状态：`health: true` → 「健康」，`health: false` → 「亚健康」。
-
 ## 入口与子模块
 
 - 菜单：集群 → 算力 → 显卡（`clusterNavs` 下的 `gpus`，`authKey: nodes`）。
@@ -55,7 +54,7 @@ flowchart LR
 ## 状态
 
 - 空态：节点没有 GPU 时列表显示「暂无 GPU」。
-- 节点未上报 register annotation：该节点不出现在列表里（没有可展示的卡），而不是显示一排「亚健康」。
+- 节点未上报 `node-gpu-info`：该节点不出现在列表里（没有可展示的卡），而不是显示一排「亚健康」。
 - 全部健康：概览条健康比例为 100%。
 - 有故障卡：故障卡仍列出并标为亚健康，概览比例相应下降。
 
@@ -76,7 +75,7 @@ flowchart LR
 ## 假设
 
 - 集群使用 HAMi 提供 `nvidia.com/gpu`，device plugin 会写 `hami.io/node-nvidia-register`。
-- `gpu-agent` 会写 `hami.io/node-gpu-info`（补充信息与用量）。
+- `gpu-agent` 会监听 register 注解变化，把 driver / 拓扑 / 用量与**汇总后的健康状态**一起写进 `hami.io/node-gpu-info`。
 
 ## 验收用例
 
