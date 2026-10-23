@@ -37,7 +37,31 @@ class GpuCardsPage:
         self.wait_ready()
 
     def wait_ready(self) -> None:
-        self.page.wait_for_load_state("networkidle", timeout=30_000)
+        """Wait until the GPU card table has both its header and its rows.
+
+        `networkidle` is unusable here: the node status page keeps monitoring
+        queries polling (the resource charts auto-refresh), so the network never
+        goes idle and every call times out at 30s.
+
+        Waiting for a generic `tbody tr` is not enough either — the resource
+        totals table renders first, so a generic wait resolves before the GPU
+        table exists and callers see zero rows. The header appears before the
+        rows, so wait for the header first, then for at least one data row.
+        """
+        self.page.wait_for_selector("thead th:has-text('显卡 ID')", timeout=30_000)
+        self.page.wait_for_function(
+            """
+            () => {
+              const table = Array.from(document.querySelectorAll('table')).find((t) =>
+                Array.from(t.querySelectorAll('thead th')).some(
+                  (th) => th.textContent.trim() === '显卡 ID'
+                )
+              )
+              return !!table && table.querySelectorAll('tbody tr').length > 0
+            }
+            """,
+            timeout=30_000,
+        )
 
     @property
     def content_selector(self) -> str:
@@ -84,25 +108,27 @@ class GpuCardsPage:
 
     # ---- node status card -----------------------------------------------
     def gpu_card_rows(self, node: str) -> list[dict]:
-        """Rows of the node page's 显卡列表 panel.
+        """Rows of the node page's 显卡列表 table.
 
-        The node status page renders several panels; scope the query to the one
-        whose title is 显卡列表 so the RDMA table and the topology matrix do not
-        leak in.
+        The node status page renders several tables (resource totals, GPU cards,
+        RDMA ports, the topology matrix). Identify the GPU table by its header
+        (it is the only one with a 显卡 ID column) rather than by a panel title:
+        the panel wrapper has no stable class, and the topology matrix alone has
+        16 rows, so counting rows would pick the wrong table.
         """
         return self.page.evaluate(
             """
             (statusIndex) => {
-              const panels = Array.from(document.querySelectorAll('[class*=panel], section, div'))
-              const panel = panels.find((el) => {
-                const title = el.querySelector('[class*=title], h3, [class*=panelTitle]')
-                return title && title.textContent.trim() === '显卡列表'
-              })
-              const root = panel || document
-              return Array.from(root.querySelectorAll('tbody tr')).map((row) => {
+              const table = Array.from(document.querySelectorAll('table')).find((t) =>
+                Array.from(t.querySelectorAll('thead th')).some(
+                  (th) => th.textContent.trim() === '显卡 ID'
+                )
+              )
+              if (!table) return []
+              return Array.from(table.querySelectorAll('tbody tr')).map((row) => {
                 const cells = Array.from(row.querySelectorAll('td'))
                 const text = (i) => (cells[i] ? cells[i].textContent.trim() : '')
-                const link = row.querySelector('a')
+                const link = cells[1] ? cells[1].querySelector('a') : null
                 return {
                   uuid: link ? link.textContent.trim() : text(1),
                   status: text(statusIndex),
@@ -117,7 +143,9 @@ class GpuCardsPage:
     # ---- single card detail ---------------------------------------------
     def open_card(self, href: str) -> None:
         self.page.goto(self.config.url(href.lstrip("/")), wait_until="domcontentloaded")
-        self.page.wait_for_load_state("networkidle", timeout=30_000)
+        # Same reason as wait_ready: the detail page polls monitoring data, so
+        # wait for the attribute panel instead of network idle.
+        self.page.wait_for_selector("text=显卡 ID", timeout=30_000)
 
     @property
     def card_status(self) -> str:
