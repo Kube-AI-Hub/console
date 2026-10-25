@@ -16,13 +16,14 @@
  * along with KubeSphere Console.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { has, isString } from 'lodash'
+import { has, isEmpty, isString } from 'lodash'
 import React from 'react'
 import { NavLink, withRouter } from 'react-router-dom'
 import { inject, Provider } from 'mobx-react'
 import { compile } from 'path-to-regexp'
 
 import { ICON_TYPES } from 'utils/constants'
+import { listUrlFor, recentlyNotFound } from 'utils/notFound'
 import { renderRoutes } from 'utils/router.config'
 
 import BaseInfo from './BaseInfo'
@@ -39,9 +40,57 @@ class DetailPage extends React.Component {
     }
   }
 
+  componentDidMount() {
+    this.redirectIfNotFound()
+  }
+
   componentDidUpdate(prevProps) {
     if (prevProps.routes !== this.props.routes) {
       this.setState({ routes: this.getEnabledRoutes() })
+    }
+    this.redirectIfNotFound()
+  }
+
+  /**
+   * 详情不存在时回退到该页自己的列表入口。
+   *
+   * 用 `replace` 而不是 `push`：失效地址不进历史，用户点后退不会又回到 404。
+   * 用 ref 去重，避免 `componentDidUpdate` 里重复触发。
+   *
+   * 判定有两个来源：store 的 `notFound`（走 `stores/base.js` 的页面），以及
+   * 「刚发生过同一个资源的 404 且详情为空」（openpitrix 等不走 base store 的页面）。
+   */
+  redirectIfNotFound() {
+    const store = (this.props.stores || {}).detailStore
+    if (!store) {
+      return
+    }
+
+    const params = this.props.match.params || {}
+    const name =
+      params.name || params.podName || params.node || params.containerName || ''
+
+    const missing =
+      store.notFound ||
+      (!store.isLoading && isEmpty(store.detail) && recentlyNotFound(name))
+    if (!missing) {
+      return
+    }
+
+    const url = listUrlFor(this.props)
+    if (!url) {
+      return
+    }
+
+    if (this.redirectedTo === url) {
+      return
+    }
+    this.redirectedTo = url
+
+    const { rootStore } = this.props
+    const routing = rootStore && rootStore.routing
+    if (routing) {
+      routing.replace(url)
     }
   }
 

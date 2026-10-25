@@ -32,6 +32,7 @@ cases/{module}/{sub}/TC-*.md        # 生成物（python generate_case_docs.py�
 tests/{module}/{sub}/test_TC_*.py   # Playwright 编排，一 spec 一文件，路径镜像 specs/
 pages/                              # 页面对象，选择器只在这里
 helpers/                            # 登录、配置、对比度审计、i18n 断言、共享步骤
+_templates/case.yaml                # 用例规格模板，复制到 specs/ 后填写
 artifacts/                          # 截图与日志，不入库
 ```
 

@@ -73,6 +73,11 @@ export default class ImageBuilderDetail extends React.Component {
 
   fetchData = async params => {
     const builderResult = await this.store.fetchDetail(this.params, params)
+
+    if (!builderResult) {
+      return
+    }
+
     const runDetail = await this.s2iRunStore.fetchRunDetail({
       ...this.params,
       runName: get(builderResult, 'status.lastRunName', ''),

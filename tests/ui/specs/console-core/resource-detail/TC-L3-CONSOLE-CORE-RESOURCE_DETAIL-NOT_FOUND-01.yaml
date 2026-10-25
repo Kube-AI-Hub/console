@@ -1,0 +1,40 @@
+id: TC-L3-CONSOLE-CORE-RESOURCE_DETAIL-NOT_FOUND-01
+level: 3
+suite: point
+module: console-core
+submodule: resource-detail
+feature: not-found
+title: 资源不存在 · 中文提示并回退列表
+entry_url: "{BASE_URL}/clusters/default/projects/agent-platform/pods"
+prd: prd/console-core/resource-detail/not-found.md
+design: design/console-core/resource-detail/not-found.md
+
+covers:
+- AC-L3-CONSOLE-CORE-RESOURCE_DETAIL-NOT_FOUND-01
+
+story:
+- US1
+- US2
+
+edge_cases:
+- 提示正文包含资源名
+- 历史里不新增失效地址
+- 页面不出现 NotFound / not found 原文
+
+product: 打开已删除资源的详情链接时，页面给出中文提示并自动回到该资源类型的列表。
+preconditions:
+- 已登录，且在 default 集群
+- agent-platform 项目存在
+steps:
+- 打开 {BASE_URL}/clusters/default/projects/agent-platform/pods/kube-ai-hub-not-exist/resource-status
+- 等待地址栏离开详情路由，读取右上角提示
+expected:
+- 地址栏在 3 秒内变为 /clusters/default/projects/agent-platform/pods
+- 提示标题为「资源不存在」，正文包含 kube-ai-hub-not-exist
+- 页面正文不出现 NotFound 或 not found 原文
+- 列表主区可见，不出现未翻译 key
+troubleshoot:
+- 仍停在详情页时确认该 store 是否继承 stores/base.js
+- 有两条相同提示时检查 notifyResourceNotFound 的去重窗口
+update_automation:
+- 文案变化时改 locales/{en,zh}/l10n-console-resourceDetail.js 与 pages/resource_detail.py

@@ -22,10 +22,15 @@
 | cluster-storage/shared-storage/quota | `AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-01` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-01` | [`design/cluster-storage/shared-storage/quota.md`](../../../design/cluster-storage/shared-storage/quota.md) | [`tests/ui/tests/cluster-storage/shared-storage/test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_01.py`](../../../tests/ui/tests/cluster-storage/shared-storage/test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_01.py) |
 | cluster-storage/shared-storage/quota | `AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-02` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-02` | [`design/cluster-storage/shared-storage/quota.md`](../../../design/cluster-storage/shared-storage/quota.md) | [`tests/ui/tests/cluster-storage/shared-storage/test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_02.py`](../../../tests/ui/tests/cluster-storage/shared-storage/test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_02.py) |
 | cluster-storage/shared-storage/quota | `AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-03` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-01` | [`design/cluster-storage/shared-storage/quota.md`](../../../design/cluster-storage/shared-storage/quota.md) | [`tests/ui/tests/cluster-storage/shared-storage/test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_01.py`](../../../tests/ui/tests/cluster-storage/shared-storage/test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_01.py) |
+| console-core/_index | `AC-CORE-CONSOLE_CORE-01` | `TC-CORE-CONSOLE_CORE-01` | [`design/console-core/_index.md`](../../../design/console-core/_index.md) | [`tests/ui/tests/console-core/core/test_TC_CORE_CONSOLE_CORE_01.py`](../../../tests/ui/tests/console-core/core/test_TC_CORE_CONSOLE_CORE_01.py) |
+| console-core/resource-detail/_index | `AC-FULL-CONSOLE-CORE-RESOURCE_DETAIL-01` | `TC-FULL-CONSOLE-CORE-RESOURCE_DETAIL-01` | [`design/console-core/resource-detail/_index.md`](../../../design/console-core/resource-detail/_index.md) | [`tests/ui/tests/console-core/resource-detail/test_TC_FULL_CONSOLE_CORE_RESOURCE_DETAIL_01.py`](../../../tests/ui/tests/console-core/resource-detail/test_TC_FULL_CONSOLE_CORE_RESOURCE_DETAIL_01.py) |
+| console-core/resource-detail/_index | `AC-FULL-CONSOLE-CORE-RESOURCE_DETAIL-02` | `TC-FULL-CONSOLE-CORE-RESOURCE_DETAIL-02` | [`design/console-core/resource-detail/_index.md`](../../../design/console-core/resource-detail/_index.md) | [`tests/ui/tests/console-core/resource-detail/test_TC_FULL_CONSOLE_CORE_RESOURCE_DETAIL_02.py`](../../../tests/ui/tests/console-core/resource-detail/test_TC_FULL_CONSOLE_CORE_RESOURCE_DETAIL_02.py) |
+| console-core/resource-detail/not-found | `AC-L3-CONSOLE-CORE-RESOURCE_DETAIL-NOT_FOUND-01` | `TC-L3-CONSOLE-CORE-RESOURCE_DETAIL-NOT_FOUND-01` | [`design/console-core/resource-detail/not-found.md`](../../../design/console-core/resource-detail/not-found.md) | [`tests/ui/tests/console-core/resource-detail/test_TC_L3_CONSOLE_CORE_RESOURCE_DETAIL_NOT_FOUND_01.py`](../../../tests/ui/tests/console-core/resource-detail/test_TC_L3_CONSOLE_CORE_RESOURCE_DETAIL_NOT_FOUND_01.py) |
+| console-core/resource-detail/not-found | `AC-L3-CONSOLE-CORE-RESOURCE_DETAIL-NOT_FOUND-02` | `TC-L3-CONSOLE-CORE-RESOURCE_DETAIL-NOT_FOUND-02` | [`design/console-core/resource-detail/not-found.md`](../../../design/console-core/resource-detail/not-found.md) | [`tests/ui/tests/console-core/resource-detail/test_TC_L3_CONSOLE_CORE_RESOURCE_DETAIL_NOT_FOUND_02.py`](../../../tests/ui/tests/console-core/resource-detail/test_TC_L3_CONSOLE_CORE_RESOURCE_DETAIL_NOT_FOUND_02.py) |
 
 ## 小结
 
-- 需求里的 AC：18 条，其中未覆盖 0 条、无技术方案承接 0 条、无用例规格实现 0 条。
+- 需求里的 AC：23 条，其中未覆盖 0 条、无技术方案承接 0 条、无用例规格实现 0 条。
 
 ## 用户故事覆盖
 
@@ -47,5 +52,11 @@
 | cluster-storage/shared-storage/quota | `US1` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-01` |
 | cluster-storage/shared-storage/quota | `US2` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-02` |
 | cluster-storage/shared-storage/quota | `US3` | `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-01` |
+| console-core/_index | `US1` | `TC-CORE-CONSOLE_CORE-01` |
+| console-core/resource-detail/_index | `US1` | `TC-FULL-CONSOLE-CORE-RESOURCE_DETAIL-01` |
+| console-core/resource-detail/_index | `US2` | `TC-FULL-CONSOLE-CORE-RESOURCE_DETAIL-02` |
+| console-core/resource-detail/not-found | `US1` | `TC-L3-CONSOLE-CORE-RESOURCE_DETAIL-NOT_FOUND-01` |
+| console-core/resource-detail/not-found | `US2` | `TC-L3-CONSOLE-CORE-RESOURCE_DETAIL-NOT_FOUND-01` |
+| console-core/resource-detail/not-found | `US3` | `TC-L3-CONSOLE-CORE-RESOURCE_DETAIL-NOT_FOUND-02` |
 
-- 用户故事：16 条，其中未覆盖 0 条。
+- 用户故事：22 条，其中未覆盖 0 条。

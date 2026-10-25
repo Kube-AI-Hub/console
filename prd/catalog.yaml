@@ -1,4 +1,28 @@
 modules:
+- id: console-core
+  title: 控制台基础
+  prd: prd/console-core/_index.md
+  design: design/console-core/_index.md
+  tests:
+    L1:
+    - TC-CORE-CONSOLE_CORE-01
+  submodules:
+  - id: resource-detail
+    title: 资源详情页
+    prd: prd/console-core/resource-detail/_index.md
+    design: design/console-core/resource-detail/_index.md
+    tests:
+      L2:
+      - TC-FULL-CONSOLE-CORE-RESOURCE_DETAIL-01
+    features:
+    - id: not-found
+      title: 资源不存在
+      prd: prd/console-core/resource-detail/not-found.md
+      design: design/console-core/resource-detail/not-found.md
+      tests:
+        L3:
+        - TC-L3-CONSOLE-CORE-RESOURCE_DETAIL-NOT_FOUND-01
+        - TC-L3-CONSOLE-CORE-RESOURCE_DETAIL-NOT_FOUND-02
 - id: cluster-gpu
   title: 集群算力
   prd: prd/cluster-gpu/_index.md

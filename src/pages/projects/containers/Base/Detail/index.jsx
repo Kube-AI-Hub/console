@@ -32,6 +32,10 @@ class DetailPage extends Base {
   // }
 
   componentDidMount() {
+    // 基类的 componentDidMount 负责「详情不存在时回退到列表」。
+    if (super.componentDidMount) {
+      super.componentDidMount()
+    }
     this.props.watch && this.initWebsocket()
   }
 

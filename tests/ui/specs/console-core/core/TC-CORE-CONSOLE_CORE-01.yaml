@@ -1,0 +1,36 @@
+id: TC-CORE-CONSOLE_CORE-01
+level: 1
+suite: core
+module: console-core
+submodule: flow
+feature: page
+title: 控制台基础 · 详情页入口
+entry_url: "{BASE_URL}/clusters/default/projects/agent-platform/pods"
+prd: prd/console-core/_index.md
+design: design/console-core/_index.md
+
+covers:
+- AC-CORE-CONSOLE_CORE-01
+
+story:
+- US1
+
+edge_cases:
+- 详情页主区在请求返回前显示页面级 Loading，返回后消失
+
+product: 任意资源详情入口都能渲染出侧栏与页签，不停在加载中，也不出现未翻译 key。
+preconditions:
+- 已登录，且在 default 集群
+- agent-platform 项目下至少有一个 Pod
+steps:
+- 打开 {BASE_URL}/clusters/default/projects/agent-platform/pods
+- 取第一行的 Pod 名称，打开它的 /resource-status
+- 等待页面稳定，读取侧栏名称与页签
+expected:
+- 侧栏名称等于列表里的 Pod 名称
+- 资源状态页签为选中态，主区有内容
+- 页面不出现形如 FOO_BAR 的未翻译 key
+troubleshoot:
+- 一直转圈时先看详情接口是否 404（该用例要求对象真实存在）
+update_automation:
+- 页签标题变化时改 pages/resource_detail.py 的 TAB_TITLES

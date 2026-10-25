@@ -19,6 +19,7 @@
 import { isArray } from 'lodash'
 import { action, observable } from 'mobx'
 import ObjectMapper from 'utils/object.mapper'
+import { guardNotFound } from 'utils/notFound'
 import BaseStore from '../devops'
 
 export default class CodeQualityStore extends BaseStore {
@@ -27,6 +28,12 @@ export default class CodeQualityStore extends BaseStore {
 
   @observable
   isLoading = true
+
+  // 实例字段的 `fetchDetail` 会覆盖基类构造器里的 404 包装，这里补一次。
+  constructor(...args) {
+    super(...args)
+    guardNotFound(this)
+  }
 
   @action
   fetchDetail = async ({ devops, branch, name, cluster }) => {

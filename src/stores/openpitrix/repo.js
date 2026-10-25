@@ -19,6 +19,7 @@
 import { action, observable } from 'mobx'
 
 import { get } from 'lodash'
+import { guardNotFound } from 'utils/notFound'
 import Base from './base'
 import List from '../base.list'
 
@@ -56,6 +57,13 @@ export default class Repo extends Base {
     this.detail = result || {}
     this.detail.workspace = workspace
     this.isLoading = false
+  }
+
+  // `fetchDetail` 是本类的实例字段，基类构造器里的包装会被它覆盖；
+  // 这里在字段初始化之后再包一次，让 404 也能结束加载并回退。
+  constructor(...args) {
+    super(...args)
+    guardNotFound(this)
   }
 
   @action

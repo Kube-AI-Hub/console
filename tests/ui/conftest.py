@@ -8,6 +8,7 @@ from helpers.auth import login
 from helpers.config import load_config
 from pages.gpu_cards import GpuCardsPage
 from pages.juicefs_storage import SharedStoragePage
+from pages.resource_detail import ResourceDetailPage
 
 ARTIFACTS = Path(__file__).resolve().parent / "artifacts"
 
@@ -75,6 +76,11 @@ def storage_page(page, ui_config):
 @pytest.fixture
 def gpu_page(page, ui_config):
     return GpuCardsPage(page, ui_config)
+
+
+@pytest.fixture
+def detail_page(page, ui_config):
+    return ResourceDetailPage(page, ui_config)
 
 
 @pytest.fixture

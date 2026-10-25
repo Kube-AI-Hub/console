@@ -20,6 +20,7 @@ import { get, isEmpty } from 'lodash'
 import { observable, action } from 'mobx'
 
 import { getFilterString, joinSelector } from 'utils'
+import { guardNotFound } from 'utils/notFound'
 import { CLUSTER_QUERY_STATUS } from 'configs/openpitrix/app'
 
 import ServiceStore from 'stores/service'
@@ -177,6 +178,12 @@ export default class Application extends Base {
     }
 
     this.isLoading = false
+  }
+
+  // 实例字段的 `fetchDetail` 会覆盖基类构造器里的包装，这里补一次。
+  constructor(...args) {
+    super(...args)
+    guardNotFound(this)
   }
 
   @action

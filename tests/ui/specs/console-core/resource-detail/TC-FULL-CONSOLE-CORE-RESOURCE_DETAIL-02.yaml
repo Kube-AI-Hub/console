@@ -1,0 +1,37 @@
+id: TC-FULL-CONSOLE-CORE-RESOURCE_DETAIL-02
+level: 2
+suite: full
+module: console-core
+submodule: resource-detail
+feature: page
+title: 资源详情页 · 不存在时回退
+entry_url: "{BASE_URL}/clusters/default/projects/agent-platform/pods"
+prd: prd/console-core/resource-detail/_index.md
+design: design/console-core/resource-detail/_index.md
+
+covers:
+- AC-FULL-CONSOLE-CORE-RESOURCE_DETAIL-02
+
+story:
+- US2
+
+edge_cases:
+- 回退后浏览器历史里不保留失效地址
+- 提示与回退同时发生，不出现「只提示不回退」
+
+product: 用不存在的资源名打开详情页时，页面结束加载、给出中文提示并回到列表。
+preconditions:
+- 已登录，且在 default 集群
+- agent-platform 项目存在
+steps:
+- 打开 {BASE_URL}/clusters/default/projects/agent-platform/pods/kube-ai-hub-not-exist/resource-status
+- 等待地址栏变化，读取右上角提示
+expected:
+- 地址栏在 3 秒内变为 /clusters/default/projects/agent-platform/pods
+- 提示标题为「资源不存在」，正文包含资源名
+- 页面不出现 NotFound 或 not found 原文
+troubleshoot:
+- 仍停在详情页时先看 store 是否走了 stores/base.js
+- 提示为空时确认 locales/{en,zh} 都有 RESOURCE_NOT_FOUND_* 
+update_automation:
+- 文案变化时改 locales/{en,zh}/l10n-console-resourceDetail.js 与 pages/resource_detail.py

@@ -1,0 +1,38 @@
+id: TC-FULL-CONSOLE-CORE-RESOURCE_DETAIL-01
+level: 2
+suite: full
+module: console-core
+submodule: resource-detail
+feature: page
+title: 资源详情页 · 页签切换
+entry_url: "{BASE_URL}/clusters/default/projects/agent-platform/pods"
+prd: prd/console-core/resource-detail/_index.md
+design: design/console-core/resource-detail/_index.md
+
+covers:
+- AC-FULL-CONSOLE-CORE-RESOURCE_DETAIL-01
+
+story:
+- US1
+
+edge_cases:
+- 页签切换后左侧摘要仍然可见
+- 主区不出现未翻译的 i18n key
+
+product: 资源详情页的页签导航与主区同步，左侧摘要常驻。
+preconditions:
+- 已登录，且在 default 集群
+- agent-platform 项目下至少有一个 Pod
+steps:
+- 打开 {BASE_URL}/clusters/default/projects/agent-platform/pods
+- 取第一行的 Pod 名称，打开它的 /resource-status
+- 依次点击资源状态、元数据、事件页签，每次核对地址栏
+expected:
+- 每次切换后地址栏末尾的页签段与点击的页签一致
+- 左侧摘要的名称始终可见
+- 页面不出现形如 FOO_BAR 的未翻译 key
+troubleshoot:
+- 页签点不动时先确认 Pod 仍存在（列表可能是缓存）
+- 地址栏不变时确认点击的是页签而不是标题
+update_automation:
+- 页签标题变化时改 pages/resource_detail.py 的 TAB_TITLES

@@ -1,0 +1,44 @@
+# 用例规格模板。复制到 specs/{模块}/{子}/{TC-ID}.yaml 后填写。
+# 字段说明见 ../SPEC-SCHEMA.md；追溯规则见 ../../docs/SDD.md 第 2 节。
+#
+# 复制后必须改：id / module / submodule / feature / title / entry_url / prd /
+#               design / covers / story / product / steps / expected
+# 删掉本注释块。
+
+id: TC-L3-MODULE-SUB-FEATURE-01
+level: 3                       # 1 L1 模块 / 2 L2 子模块 / 3 L3 功能点
+suite: point                   # core / full / point / flow
+module: module                 # 与 prd/ 下的目录名一致
+submodule: sub
+feature: feature
+title: （模块 · 功能点，例如「共享存储 · 调整配额」）
+entry_url: "{BASE_URL}/clusters/default/<入口路由>"
+prd: prd/module/sub/feature.md
+design: design/module/sub/feature.md     # 选填；缺失时按 catalog 推导
+
+covers:                        # 本用例覆盖需求里的哪些 AC，必须真实存在于 prd
+- AC-L3-MODULE-SUB-FEATURE-01
+
+story:                         # 本用例验证需求里的哪些用户故事
+- US1
+
+edge_cases:                    # 选填：额外压到的边界
+- （例如：输入非法值时提交按钮禁用）
+
+product: （一句话说明本用例验证的产品行为，不要复述 Given/When/Then）
+preconditions:
+- 已登录，且在 default 集群
+- （数据前置：例如目标命名空间下存在至少一个 <资源>）
+
+steps:
+- 打开 {BASE_URL}/clusters/default/<入口路由>
+- （操作控件并核对结果）
+
+expected:
+- （可观察结果，一条一行；不要写「正常显示」这类无法判定的说法）
+
+troubleshoot:                  # 选填：失败时先看什么
+- （例如：先确认接口返回 200，再看是否被前端缓存挡住）
+
+update_automation:             # 选填：文案或结构变化时要改哪里
+- 文案变化时改 pages/<页面对象>.py

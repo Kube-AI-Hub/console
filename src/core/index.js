@@ -24,6 +24,11 @@ import { LocaleProvider, Loading, Notify } from '@kube-design/components'
 import { isAppsPage, isMemberClusterPage } from 'utils'
 import request from 'utils/request'
 import { removeToken } from 'utils/token'
+import {
+  isNotFound,
+  nameFromError,
+  notifyResourceNotFound,
+} from 'utils/notFound'
 
 import App from './App'
 import GlobalValue from './global'
@@ -36,6 +41,14 @@ window.onunhandledrejection = function (event) {
   const err = event?.reason || event
   if (!err || err.source === 'login') {
     // 忽略已经在登录表单中处理过的错误
+    return
+  }
+
+  // 资源不存在：统一走中文提示，并由详情页骨架负责回退到列表。
+  // 必须在下面的通用提示之前拦掉，否则用户会看到 `NotFound` /
+  // `pods "xxx" not found` 这类后端原文。
+  if (isNotFound(err)) {
+    notifyResourceNotFound(nameFromError(err))
     return
   }
 

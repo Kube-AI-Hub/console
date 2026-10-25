@@ -112,7 +112,11 @@ export default class VolumeDetail extends React.Component {
   fetchData = async () => {
     const { params } = this.props.match
     const { cluster } = params
-    await this.store.fetchDetail(this.props.match.params)
+    const detail = await this.store.fetchDetail(this.props.match.params)
+
+    if (!detail) {
+      return
+    }
 
     const { storageClassName } = this.store.detail
     await this.storageclass.fetchDetail({

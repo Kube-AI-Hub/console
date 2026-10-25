@@ -21,6 +21,7 @@ import { action, observable } from 'mobx'
 
 import { API_VERSIONS, LIST_DEFAULT_ORDER } from 'utils/constants'
 import ObjectMapper from 'utils/object.mapper'
+import { guardNotFound } from 'utils/notFound'
 
 import List from './base.list'
 
@@ -39,8 +40,16 @@ export default class BaseStore {
   @observable
   ksVersion = 3.1
 
+  // 详情请求返回 404 时置 true。详情页骨架据此回退到列表。
+  @observable
+  notFound = false
+
   constructor(module) {
     this.module = module
+    // 详情页的 `render()` 在 `isLoading && !detail.name` 时一直返回 Loading，
+    // 骨架不会挂载，所以「不存在」必须在 store 层结束加载并留下标记。
+    // 26 个 store 重写了 `fetchDetail`，统一在这里包一次。
+    guardNotFound(this)
   }
 
   get apiVersion() {

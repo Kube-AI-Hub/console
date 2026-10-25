@@ -77,7 +77,7 @@ L1/L2 用该层用例 ID 的同后缀：`TC-CORE-CLUSTER_STORAGE-01` → `DES-L1
 ## 怎么改
 
 1. 改功能树时编辑 [`../prd/tools/tree.py`](../prd/tools/tree.py)，跑 `python3 prd/tools/build_prd.py`。
-2. 写或改技术方案。**决策要留「为什么 + 被否方案 + 何时重新考虑」，坑要留「不知道会怎样」**。
+2. 写或改技术方案。**决策要留「为什么 + 被否方案 + 何时重新考虑」，坑要留「不知道会怎样」**。三级模板见 [`templates/L1-module.md`](templates/L1-module.md)、[`templates/L2-submodule.md`](templates/L2-submodule.md)、[`templates/L3-feature.md`](templates/L3-feature.md)，复制后要改什么见 [`templates/README.md`](templates/README.md)。
 3. 跑门禁与生成：
    ```bash
    cd console

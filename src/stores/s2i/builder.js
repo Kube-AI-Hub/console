@@ -22,6 +22,7 @@ import Base from 'stores/base'
 import { generateId } from 'utils'
 import TEMPLATE from 'utils/form.templates'
 import { S2I_SUPPORTED_TYPES, B2I_SUPPORTED_TYPES } from 'utils/constants'
+import { guardNotFound } from 'utils/notFound'
 
 import S2IRunStore from './run'
 
@@ -85,8 +86,10 @@ export default class S2IBuilderStore extends Base {
       undefined,
       undefined,
       error => {
+        // 404 交给 guardNotFound 处理（结束加载、标记 notFound、回退到列表）；
+        // 其余错误维持原来的全局提示。
         if (error.reason === 'NotFound') {
-          return error
+          throw error
         }
         Promise.reject(error)
       }
@@ -95,6 +98,12 @@ export default class S2IBuilderStore extends Base {
     this.detail.cluster = cluster
     this.isLoading = false
     return this.detail
+  }
+
+  // `fetchDetail` 是实例字段，会覆盖基类构造器里的 404 包装，这里补一次。
+  constructor(...args) {
+    super(...args)
+    guardNotFound(this)
   }
 
   updateCreateData(data, isEditor = false) {

@@ -40,12 +40,13 @@ flowchart LR
 | `prd/tools/tree.py` | 功能树的源。新增模块 / 子模块 / 功能点只改这里 |
 | `prd/tools/build_prd.py` | 按 `tree.py` 重写 catalog，并**只补缺失**的需求稿、技术方案稿、L1/L2 用例桩 |
 | `prd/tools/check_docs.py` | **唯一门禁**：三向追溯 + 章节 + 结构 + 套话扫描 |
-| `prd/templates/` | L1/L2/L3 需求模板 |
+| `prd/templates/` | L1/L2/L3 需求模板，复制后要改什么见 [`prd/templates/README.md`](../prd/templates/README.md) |
 | `design/README.md` | 技术方案怎么写 |
-| `design/templates/` | L1/L2/L3 技术方案模板 |
+| `design/templates/` | L1/L2/L3 技术方案模板，复制后要改什么见 [`design/templates/README.md`](../design/templates/README.md) |
 | `tests/README.md` | 三级套件与追溯规则 |
 | `tests/ui/README.md` | 怎么装、怎么跑、选择器约定 |
 | `tests/ui/SPEC-SCHEMA.md` | 用例 YAML 的字段：`covers`、`story`、`suite` |
+| `tests/ui/_templates/case.yaml` | 用例规格模板，复制到 `specs/{模块}/{子}/` 后填写；说明见 [`tests/ui/_templates/README.md`](../tests/ui/_templates/README.md) |
 | `tests/ui/specs/{模块}/{子}/TC-*.yaml` | **用例事实源**。人维护 |
 | `tests/ui/cases/{模块}/{子}/TC-*.md` | 由规格生成的可读用例。**不要手改** |
 | `tests/ui/cases/_traceability.md` | 生成的四向矩阵（AC → 用例 → 技术方案 → 测试文件） |

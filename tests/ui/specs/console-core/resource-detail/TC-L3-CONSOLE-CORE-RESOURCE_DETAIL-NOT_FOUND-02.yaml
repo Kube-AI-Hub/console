@@ -1,0 +1,38 @@
+id: TC-L3-CONSOLE-CORE-RESOURCE_DETAIL-NOT_FOUND-02
+level: 3
+suite: point
+module: console-core
+submodule: resource-detail
+feature: not-found
+title: 资源不存在 · 存在时不误报
+entry_url: "{BASE_URL}/clusters/default/projects/agent-platform/pods"
+prd: prd/console-core/resource-detail/not-found.md
+design: design/console-core/resource-detail/not-found.md
+
+covers:
+- AC-L3-CONSOLE-CORE-RESOURCE_DETAIL-NOT_FOUND-02
+
+story:
+- US3
+
+edge_cases:
+- 提示条数为 0
+- 地址栏停留在该 Pod 的详情路由
+
+product: 资源存在时详情页行为不变，不弹「资源不存在」，也不跳转。
+preconditions:
+- 已登录，且在 default 集群
+- agent-platform 项目下至少有一个 Pod
+steps:
+- 打开 {BASE_URL}/clusters/default/projects/agent-platform/pods
+- 取第一行的 Pod 名称，打开它的 /resource-status
+- 等待 5 秒，统计「资源不存在」提示条数并读取地址栏
+expected:
+- 「资源不存在」提示条数为 0
+- 地址栏仍以 /pods/{pod}/resource-status 结尾
+- 侧栏名称等于该 Pod 名称
+troubleshoot:
+- 出现提示时确认上一个页面是否刚发生过 404（recentlyNotFound 窗口是 5 秒）
+- 被跳转时检查 store.notFound 是否被误置为 true
+update_automation:
+- 提示标题变化时改 pages/resource_detail.py 的 NOT_FOUND_TITLE

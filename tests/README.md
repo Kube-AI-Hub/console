@@ -54,7 +54,7 @@ python3 prd/tools/check_docs.py                     # 全部；未迁移只告�
 python3 prd/tools/check_docs.py --strict            # 告警也失败
 ```
 
-用例规格字段与 `covers` 写法见 [`ui/SPEC-SCHEMA.md`](ui/SPEC-SCHEMA.md)。
+用例规格字段与 `covers` 写法见 [`ui/SPEC-SCHEMA.md`](ui/SPEC-SCHEMA.md)。新用例从 [`ui/_templates/case.yaml`](ui/_templates/case.yaml) 复制，复制后要改什么见 [`ui/_templates/README.md`](ui/_templates/README.md)。
 
 ## 规格与文档
 

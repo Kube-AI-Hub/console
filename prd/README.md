@@ -59,6 +59,10 @@
 
 新增模块/子模块/功能点：先改 [`tools/tree.py`](tools/tree.py)，再跑生成器**补齐缺失文件**（默认不覆盖已有 Markdown）。
 
+## 模板
+
+三级的需求稿分别从 [`templates/L1-module.md`](templates/L1-module.md)、[`templates/L2-submodule.md`](templates/L2-submodule.md)、[`templates/L3-feature.md`](templates/L3-feature.md) 起手。复制后要改什么（标题、上级链接、入口路由、AC 后缀、i18n 文案表）见 [`templates/README.md`](templates/README.md)。
+
 ## 写需求时的自检
 
 - [ ] 「设计目标」写了为什么，而不只是控件叫什么。

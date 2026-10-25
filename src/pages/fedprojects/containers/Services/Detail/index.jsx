@@ -66,10 +66,15 @@ class ServiceDetail extends React.Component {
 
   fetchData = async () => {
     const { params } = this.props.match
-    await this.store.fetchDetail(params)
+    const detail = await this.store.fetchDetail(params)
+
+    if (!detail) {
+      return
+    }
+
     await this.store.fetchResources({
       ...params,
-      clusters: this.store.detail.clusters.map(item => item.name),
+      clusters: (detail.clusters || []).map(item => item.name),
     })
   }
 

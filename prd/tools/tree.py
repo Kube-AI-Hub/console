@@ -15,6 +15,33 @@ from __future__ import annotations
 
 MODULES = [
     {
+        "id": "console-core",
+        "title": "控制台基础",
+        "goal": "让控制台在资源不存在、无权限、加载失败时给出可读的中文反馈，并把用户送回能继续操作的上一级页面，而不是停在空转的详情页上。",
+        "tests": {"L1": ["TC-CORE-CONSOLE_CORE-01"]},
+        "submodules": [
+            {
+                "id": "resource-detail",
+                "title": "资源详情页",
+                "goal": "详情页的公共骨架：加载、不存在、无权限三种结果都收敛到确定的页面状态，提示走 i18n，回退目标取该页自己的列表入口。",
+                "tests": {"L2": [
+                    "TC-FULL-CONSOLE-CORE-RESOURCE_DETAIL-01",
+                    "TC-FULL-CONSOLE-CORE-RESOURCE_DETAIL-02",
+                ]},
+                "features": [
+                    {
+                        "id": "not-found",
+                        "title": "资源不存在",
+                        "tests": {"L3": [
+                            "TC-L3-CONSOLE-CORE-RESOURCE_DETAIL-NOT_FOUND-01",
+                            "TC-L3-CONSOLE-CORE-RESOURCE_DETAIL-NOT_FOUND-02",
+                        ]},
+                    },
+                ],
+            }
+        ],
+    },
+    {
         "id": "cluster-gpu",
         "title": "集群算力",
         "goal": "让运维看清每张 GPU 卡的真实健康状态，故障卡一眼可辨，不被健康卡掩盖。",
