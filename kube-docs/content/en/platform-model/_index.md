@@ -13,7 +13,7 @@ The main navigation areas of the platform are:
 
 - `Model Library`: browse and manage model assets.
 - `Model Inference`: includes the `Serverless APIs` and `Dedicated Instances` submenus.
-- `Model Training & Evaluation`: includes the `Fine-tuning Instances` and `Model Evaluation` submenus.
+- `Model Training & Evaluation`: includes the `Fine-tuning Instances`, `Model Evaluation`, and `Agent Evaluation` submenus.
 - `Datasets`: browse and manage dataset assets.
 - `Development Environment`: create and manage JupyterLab, VS Code, Eclipse Theia, and other development instances.
 - `User Spaces`: manage application spaces and deployed apps.

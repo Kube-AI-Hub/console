@@ -17,3 +17,4 @@ The Resource Management module provides compute support for the full LLM lifecyc
 | [Model Inference](./inference/inference_intro) | Public inference (local deployments and cloud APIs) plus dedicated instances. Creating an instance selects a compute project; see [Compute Projects and Visibility](../tenancy/compute_and_visibility) |
 | [Model Fine-tuning](./finetune/finetune_intro) | Customize base models using LLaMA-Factory or MS-Swift frameworks |
 | [Model Evaluation](./evaluation/evaluation_create) | Benchmark testing with optional custom framework args, Prompt templates, and scoring plugins |
+| [Agent Evaluation](./evaluation/evaluation_agent) | Evaluate a published workshop agent with an agent framework and a dataset |
