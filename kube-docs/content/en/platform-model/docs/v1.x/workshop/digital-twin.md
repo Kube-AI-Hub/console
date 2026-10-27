@@ -1,14 +1,14 @@
 ---
 title: "Digital Twin"
-keywords: "Industry AI Model Platform, Agent Workshop, digital twin, Hermes, persona, run mode, growth"
-description: "A digital twin is an agent running in its own container: configure persona, skills, tools, knowledge, and run mode, verify it in the chat pane, and let it accumulate long-term memory and skills as it works."
+keywords: "Industry AI Model Platform, Agent Workshop, digital twin, Claw, sandbox, persona, run mode, growth"
+description: "A digital twin is an agent that works on its own in a sandbox (Claw): configure persona, skills, tools, knowledge, and run mode, verify it in the chat pane, and let it accumulate long-term memory and skills as it works."
 linkTitle: "Digital Twin"
 weight: 4540
 ---
 
 ## What is a digital twin
 
-A digital twin is an agent that can **execute autonomously**: it runs in its own container, plans its own steps, and calls tools to finish a task instead of waiting for step-by-step instructions.
+A digital twin is **an agent that works on its own in a sandbox (Claw)**: in its own runtime it plans the steps, writes code, and calls skills and tools to finish a task instead of waiting for step-by-step instructions.
 
 It suits roles that need long-term memory, scheduled tasks, and autonomous execution, such as a sales assistant that keeps following up on customer feedback, or an operations assistant that summarizes information every day.
 

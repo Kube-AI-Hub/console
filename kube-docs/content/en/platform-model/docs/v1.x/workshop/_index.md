@@ -37,7 +37,7 @@ Pick a mode when creating an agent; it cannot be changed afterwards. All three s
 
 | Mode | Runtime | Opens after creation | Best for |
 |------|---------|----------------------|----------|
-| Digital twin | Its own Hermes container | `/studio-preview/digital-twin/:namespace/:name` | Roles that need long-term memory, scheduled tasks, and autonomous execution |
+| Digital twin | Autonomous execution in a sandbox (Claw) | `/studio-preview/digital-twin/:namespace/:name` | Roles that need long-term memory, scheduled tasks, and autonomous execution |
 | Service expert · Standard | Shared runtime, no container | `/studio-preview/expert/:id` | A job assistant that is ready once the persona and capabilities are set on one page |
 | Service expert · Workflow | Shared runtime plus a flow canvas | `/studio-preview/orchestration/:id` | Business processes that need multi-step orchestration or multi-role collaboration |
 

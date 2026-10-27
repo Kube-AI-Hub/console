@@ -37,7 +37,7 @@ icon: "/images/docs/platform-model/workshop.svg"
 
 | 模式 | 运行方式 | 创建后进入 | 适合 |
 |------|----------|-----------|------|
-| 数字分身 | 独立的 Hermes 运行容器 | `/studio-preview/digital-twin/:namespace/:name` | 需要长期记忆、定时任务与自主执行的角色 |
+| 数字分身 | 沙箱自主执行（Claw） | `/studio-preview/digital-twin/:namespace/:name` | 需要长期记忆、定时任务与自主执行的角色 |
 | 服务专家 · 标准 | 共享运行时，无需容器 | `/studio-preview/expert/:id` | 一页配完人设与能力即可上岗的岗位助手 |
 | 服务专家 · 工作流 | 共享运行时 + 流程画布 | `/studio-preview/orchestration/:id` | 需要多步骤编排或多角色协作的业务流程 |
 
