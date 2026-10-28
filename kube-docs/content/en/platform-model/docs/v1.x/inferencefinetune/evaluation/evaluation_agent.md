@@ -27,28 +27,56 @@ On the agent evaluation list, click **New evaluation** and fill in:
 | **Task name** | Name of this run |
 | **Agent** | A published agent in the current tenant that has a service address. A workshop jump preselects it |
 | **Service token** | The token copied when the agent was published. The job uses it to call the agent |
-| **Dataset** | At least one. Search or type a path |
+| **Dataset** | At least one. Search or type a path. Each sample becomes one task |
 | **Framework** | `claw-eval`, or another agent framework whose name starts with `claw-eval-` |
 | **Scoring** | Only the base framework `claw-eval` asks for this. Choose **Judge model** or **Code rules** |
 | **Region / project / size** | The same compute request as model evaluation |
 
 ![The create page keeps the agent chosen in the workshop, and defaults the framework to claw-eval](/images/docs/platform-model/evaluation/agent-create.png)
 
-**Judge model** can change the judge name and set a judge prompt. An empty prompt keeps the framework default.
+## Dataset format
+
+The samples in the dataset are the questions for this run: **one sample, one task**. Use JSONL, one object per line:
+
+```json
+{"query": "3 + 5? Reply with the number only.", "reference": "8"}
+{"query": "Summarize in one sentence: the meeting moved to Friday 3pm.", "reference": "The meeting moved to Friday 3pm."}
+```
+
+| Field | Required | Description |
+|------|----------|-------------|
+| `query` | yes | The question sent to the agent |
+| `reference` | no | Reference answer; used when the judge prompt is empty |
+| `rubric` | no | Rubric for this sample only; overrides the page-level judge prompt |
+
+A dataset without usable samples fails the task instead of falling back to the framework's built-in suite. If the dataset already contains claw-eval `task.yaml` files, they run as native tasks.
+
+**Judge model** can change the judge name and set a judge prompt. An empty prompt scores against the reference answer.
 
 ![Judge-model scoring on the base framework](/images/docs/platform-model/evaluation/agent-scoring-judge.png)
 
-**Code rules** hides the judge fields and asks for scoring code instead.
+**Code rules** hides the judge fields and asks for scoring code instead. Define `score(output, sample)` and return a score between 0 and 1:
+
+```python
+def score(output, sample):
+    return 1.0 if sample.get("reference") in output else 0.0
+```
+
+If the code raises or has no `score` function, the task is marked as an execution error instead of silently scoring 0.
 
 ![Code-rule scoring on the base framework](/images/docs/platform-model/evaluation/agent-scoring-code.png)
 
-`claw-eval-codex` uses its own flow, so those scoring controls stay hidden.
+`claw-eval-codex` uses its own flow, so those scoring controls stay hidden and the selected dataset is not used.
 
 ## Results
 
 After you create the task, the **Agent Evaluation** list shows it. The second column is the agent, not a model. Status, download, and details match model evaluation.
 
 ![Agent evaluation list, with the agent in the second column](/images/docs/platform-model/evaluation/agent-list.png)
+
+Once the task succeeds, the top of the **Evaluation report** tab shows an agent result card: tasks, average score, passed, execution errors, and total tokens. The pass line is 0.75 and each sample runs three trials by default; per-sample detail is in the download at the top of the page.
+
+![The result card on an agent evaluation detail page](/images/docs/platform-model/evaluation/agent-result.png)
 
 The model evaluation list does not show these tasks.
 
