@@ -1,0 +1,43 @@
+id: TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-01
+level: 3
+suite: point
+module: cluster-gpu
+submodule: vgpu-mode
+feature: switch
+title: 设置 vGPU 模式 · hami-core 提交与回填
+entry_url: "{BASE_URL}/clusters/default/nodes"
+prd: prd/cluster-gpu/vgpu-mode/switch.md
+design: design/cluster-gpu/vgpu-mode/switch.md
+
+covers:
+- AC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-01
+
+story:
+- US1
+
+edge_cases:
+- 切分数填 0 时前端拦截
+- 提交进行中确定按钮禁用
+
+product: 对话框按当前模式回填，选 hami-core 并填切分数 10 后提交的请求体符合接口契约。
+preconditions:
+- 已登录，且在 default 集群
+- 目标 GPU 节点当前模式为 default
+steps:
+- 打开 {BASE_URL}/clusters/default/nodes
+- 对目标 GPU 节点点「设置vGPU模式」
+- 读取模式下拉的当前值与参数区
+- 选 hami-core，切分数填 10
+- 拦截 PUT /kapis/gpu.kubesphere.io/v1alpha1/device-plugins/gpu/mode 的请求体
+- 点确定
+expected:
+- 打开时模式下拉为 default，参数区为空
+- 选 hami-core 后出现切分数（默认 10）、显存倍率、算力倍率
+- 请求体 mode 为 hami-core
+- 请求体 params.devicesplitcount 为字符串 "10"
+- 提交后出现成功提示
+troubleshoot:
+- 参数是数字而不是字符串时 gpu-agent 会解析失败，注解被丢弃
+- 回填值恒为 10 说明没有读 nodeInfo.gpuModeParams
+update_automation:
+- 接口路径或参数键变化时改 pages/gpu_cards.py 的请求拦截

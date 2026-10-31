@@ -14,6 +14,7 @@ modules:
     tests:
       L2:
       - TC-FULL-CONSOLE-CORE-RESOURCE_DETAIL-01
+      - TC-FULL-CONSOLE-CORE-RESOURCE_DETAIL-02
     features:
     - id: not-found
       title: 资源不存在
@@ -47,6 +48,66 @@ modules:
         L3:
         - TC-L3-CLUSTER-GPU-GPU_CARD-HEALTH-01
         - TC-L3-CLUSTER-GPU-GPU_CARD-HEALTH-02
+  - id: vgpu-mode
+    title: vGPU 模式
+    prd: prd/cluster-gpu/vgpu-mode/_index.md
+    design: design/cluster-gpu/vgpu-mode/_index.md
+    tests:
+      L2:
+      - TC-FULL-CLUSTER-GPU-VGPU_MODE-01
+    features:
+    - id: switch
+      title: 设置 vGPU 模式
+      prd: prd/cluster-gpu/vgpu-mode/switch.md
+      design: design/cluster-gpu/vgpu-mode/switch.md
+      tests:
+        L3:
+        - TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-01
+        - TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-02
+    - id: capacity
+      title: vGPU 资源就绪
+      prd: prd/cluster-gpu/vgpu-mode/capacity.md
+      design: design/cluster-gpu/vgpu-mode/capacity.md
+      tests:
+        L3:
+        - TC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-01
+        - TC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-02
+  - id: gpu-monitor
+    title: GPU 监控
+    prd: prd/cluster-gpu/gpu-monitor/_index.md
+    design: design/cluster-gpu/gpu-monitor/_index.md
+    tests:
+      L2:
+      - TC-FULL-CLUSTER-GPU-GPU_MONITOR-01
+    features:
+    - id: node-metrics
+      title: 节点维度指标
+      prd: prd/cluster-gpu/gpu-monitor/node-metrics.md
+      design: design/cluster-gpu/gpu-monitor/node-metrics.md
+      tests:
+        L3:
+        - TC-L3-CLUSTER-GPU-GPU_MONITOR-NODE_METRICS-01
+    - id: card-metrics
+      title: 卡维度指标
+      prd: prd/cluster-gpu/gpu-monitor/card-metrics.md
+      design: design/cluster-gpu/gpu-monitor/card-metrics.md
+      tests:
+        L3:
+        - TC-L3-CLUSTER-GPU-GPU_MONITOR-CARD_METRICS-01
+    - id: pod-metrics
+      title: 容器/POD 维度指标
+      prd: prd/cluster-gpu/gpu-monitor/pod-metrics.md
+      design: design/cluster-gpu/gpu-monitor/pod-metrics.md
+      tests:
+        L3:
+        - TC-L3-CLUSTER-GPU-GPU_MONITOR-POD_METRICS-01
+    - id: vendor-dispatch
+      title: 厂商与虚拟化方式分派
+      prd: prd/cluster-gpu/gpu-monitor/vendor-dispatch.md
+      design: design/cluster-gpu/gpu-monitor/vendor-dispatch.md
+      tests:
+        L3:
+        - TC-L3-CLUSTER-GPU-GPU_MONITOR-VENDOR_DISPATCH-01
 - id: cluster-storage
   title: 集群存储
   prd: prd/cluster-storage/_index.md

@@ -1,0 +1,35 @@
+id: TC-L3-CLUSTER-GPU-GPU_MONITOR-NODE_METRICS-01
+level: 3
+suite: point
+module: cluster-gpu
+submodule: gpu-monitor
+feature: node-metrics
+title: 节点维度指标 · 总量等于卡数
+entry_url: "{BASE_URL}/clusters/default/nodes/{node}/monitors"
+prd: prd/cluster-gpu/gpu-monitor/node-metrics.md
+design: design/cluster-gpu/gpu-monitor/node-metrics.md
+
+covers:
+- AC-L3-CLUSTER-GPU-GPU_MONITOR-NODE_METRICS-01
+
+story:
+- US1
+
+product: 节点监控页的 GPU 总量等于该节点卡数，利用率是各卡的算术平均。
+preconditions:
+- 已登录，且在 default 集群
+- 节点有 GPU 且指标已被抓取
+steps:
+- 读取该节点的卡数（capacity 的 nvidia.com/gpu）
+- 打开 {BASE_URL}/clusters/default/nodes/{node}/monitors
+- 读取 GPU 图表的图例与数值范围
+expected:
+- GPU 总量显示值等于卡数
+- 利用率曲线取值在 0 到 100 之间
+- 显存曲线单位为 GiB
+- 不出现未翻译的 key
+troubleshoot:
+- 总量与卡数不符时查 node:gpu_total:count 规则
+- 曲线恒为 0 时确认 gpu_card_utilisation 有序列
+update_automation:
+- 聚合口径变化时同步改本用例

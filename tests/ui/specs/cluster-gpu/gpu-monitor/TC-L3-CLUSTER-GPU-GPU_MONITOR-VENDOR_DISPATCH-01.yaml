@@ -1,0 +1,36 @@
+id: TC-L3-CLUSTER-GPU-GPU_MONITOR-VENDOR_DISPATCH-01
+level: 3
+suite: point
+module: cluster-gpu
+submodule: gpu-monitor
+feature: vendor-dispatch
+title: 厂商与虚拟化方式分派 · hami-core 下 Pod 指标来自 vGPUmonitor
+entry_url: "{BASE_URL}/clusters/default/projects/{ns}/pods/{pod}/monitors"
+prd: prd/cluster-gpu/gpu-monitor/vendor-dispatch.md
+design: design/cluster-gpu/gpu-monitor/vendor-dispatch.md
+
+covers:
+- AC-L3-CLUSTER-GPU-GPU_MONITOR-VENDOR_DISPATCH-01
+
+story:
+- US1
+- US2
+
+product: hami-core 模式下，Pod 的 GPU 指标来自 vGPUmonitor 的容器级数据，而不是按卡分摊。
+preconditions:
+- 已登录，且在 default 集群
+- 节点已切成 hami-core，且有一个申请 vGPU 的 Pod 在跑
+steps:
+- 读取节点模式，确认是 hami-core
+- 打开该 Pod 的监控页，记录显存用量
+- 在同节点上再启动一个 GPU Pod，观察两个 Pod 的显存曲线
+expected:
+- 两个 Pod 的显存曲线不同（不是同一张卡的相同值）
+- 显存用量与容器内 nvidia-smi 观察到的量接近
+- 页面不展示厂商原始指标名
+- 不出现未翻译的 key
+troubleshoot:
+- 两个 Pod 数值相同说明退化成了卡级分摊
+- 全为空时确认 vGPUmonitor 的 9394 端口可抓取
+update_automation:
+- 分派规则变化时同步改

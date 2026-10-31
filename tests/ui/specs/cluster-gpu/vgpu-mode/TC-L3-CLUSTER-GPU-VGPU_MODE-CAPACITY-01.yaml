@@ -1,0 +1,37 @@
+id: TC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-01
+level: 3
+suite: point
+module: cluster-gpu
+submodule: vgpu-mode
+feature: capacity
+title: vGPU 资源就绪 · hami-core 下容量等于卡数乘切分数
+entry_url: "{BASE_URL}/clusters/default/nodes/{node}/status"
+prd: prd/cluster-gpu/vgpu-mode/capacity.md
+design: design/cluster-gpu/vgpu-mode/capacity.md
+
+covers:
+- AC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-01
+
+story:
+- US1
+
+product: hami-core 模式下节点运行状态页显示 nvidia.com/vgpu 总量等于卡数乘切分数，显卡列表每行 vGPU 为 0/切分数。
+preconditions:
+- 已登录，且在 default 集群
+- 目标节点已切成 hami-core，切分数 10，且资源已就绪（nvidia.com/vgpu 非零）
+steps:
+- 读取节点 capacity 里的 nvidia.com/gpu 卡数与 nvidia.com/vgpu 总量
+- 打开 {BASE_URL}/clusters/default/nodes/{node}/status
+- 读取资源总量里的 nvidia.com/vgpu 与 nvidia.com/gpumem
+- 读取显卡列表的 vGPU 列
+expected:
+- 页面 nvidia.com/vgpu 总量等于卡数乘 10
+- 页面数值与 kubectl 读到的 capacity 一致
+- 显卡列表行数等于卡数
+- 每行 vGPU 列形如 0/10
+- 不出现未翻译的 key
+troubleshoot:
+- 总量为 0 时确认节点 vgpu=on 且 devices.nvidia.resourceCountName 是 nvidia.com/vgpu
+- 显卡列表行数少于卡数时看 node-gpu-info 的 devices 数组
+update_automation:
+- 资源名变化时改本用例与 pages/gpu_cards.py

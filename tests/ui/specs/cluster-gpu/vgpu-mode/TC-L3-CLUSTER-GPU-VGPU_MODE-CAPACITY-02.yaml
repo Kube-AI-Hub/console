@@ -1,0 +1,36 @@
+id: TC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-02
+level: 3
+suite: point
+module: cluster-gpu
+submodule: vgpu-mode
+feature: capacity
+title: vGPU 资源就绪 · 切回 default 后 vGPU 归零
+entry_url: "{BASE_URL}/clusters/default/nodes/{node}/status"
+prd: prd/cluster-gpu/vgpu-mode/capacity.md
+design: design/cluster-gpu/vgpu-mode/capacity.md
+
+covers:
+- AC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-02
+
+story:
+- US2
+
+product: 切回 default 后，节点运行状态页的 nvidia.com/gpu 回到卡数，nvidia.com/vgpu 不再非零。
+preconditions:
+- 已登录，且在 default 集群
+- 目标节点当前为 hami-core 模式
+steps:
+- 把节点切回 default 并等待资源就绪
+- 打开 {BASE_URL}/clusters/default/nodes/{node}/status
+- 读取资源总量里的 GPU 相关条目
+- 读取节点 capacity
+expected:
+- 页面 nvidia.com/gpu 等于卡数
+- 页面不出现非零的 nvidia.com/vgpu
+- 页面数值与 capacity 一致
+- 显卡列表的模式列显示 default
+troubleshoot:
+- nvidia.com/vgpu 仍非零时确认节点 label vgpu 已变 off 且 hami-device-plugin 的 nodeconfig 已改回 default
+- 容量迟迟不变时等 device plugin 重新注册（最长 5 分钟）
+update_automation:
+- 资源名或模式文案变化时同步改

@@ -62,7 +62,67 @@ MODULES = [
                         ]},
                     },
                 ],
-            }
+            },
+            {
+                "id": "vgpu-mode",
+                "title": "vGPU 模式",
+                "goal": "节点维度的 GPU 虚拟化方式可切换、可观察：选哪种模式、切完什么时候生效、切完资源名与容量对不对。",
+                "tests": {"L2": ["TC-FULL-CLUSTER-GPU-VGPU_MODE-01"]},
+                "features": [
+                    {
+                        "id": "switch",
+                        "title": "设置 vGPU 模式",
+                        "tests": {"L3": [
+                            "TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-01",
+                            "TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-02",
+                        ]},
+                    },
+                    {
+                        "id": "capacity",
+                        "title": "vGPU 资源就绪",
+                        "tests": {"L3": [
+                            "TC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-01",
+                            "TC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-02",
+                        ]},
+                    },
+                ],
+            },
+            {
+                "id": "gpu-monitor",
+                "title": "GPU 监控",
+                "goal": "节点、卡、容器/POD 三个维度的 GPU 指标口径一致；不同厂商、不同虚拟化方式用同一套指标名展示。",
+                "tests": {"L2": ["TC-FULL-CLUSTER-GPU-GPU_MONITOR-01"]},
+                "features": [
+                    {
+                        "id": "node-metrics",
+                        "title": "节点维度指标",
+                        "tests": {"L3": [
+                            "TC-L3-CLUSTER-GPU-GPU_MONITOR-NODE_METRICS-01",
+                        ]},
+                    },
+                    {
+                        "id": "card-metrics",
+                        "title": "卡维度指标",
+                        "tests": {"L3": [
+                            "TC-L3-CLUSTER-GPU-GPU_MONITOR-CARD_METRICS-01",
+                        ]},
+                    },
+                    {
+                        "id": "pod-metrics",
+                        "title": "容器/POD 维度指标",
+                        "tests": {"L3": [
+                            "TC-L3-CLUSTER-GPU-GPU_MONITOR-POD_METRICS-01",
+                        ]},
+                    },
+                    {
+                        "id": "vendor-dispatch",
+                        "title": "厂商与虚拟化方式分派",
+                        "tests": {"L3": [
+                            "TC-L3-CLUSTER-GPU-GPU_MONITOR-VENDOR_DISPATCH-01",
+                        ]},
+                    },
+                ],
+            },
         ],
     },
     {

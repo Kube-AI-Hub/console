@@ -1,0 +1,37 @@
+id: TC-L3-CLUSTER-GPU-GPU_MONITOR-POD_METRICS-01
+level: 3
+suite: point
+module: cluster-gpu
+submodule: gpu-monitor
+feature: pod-metrics
+title: 容器/POD 维度指标 · 分配量与注解一致
+entry_url: "{BASE_URL}/clusters/default/projects/{ns}/pods/{pod}/monitors"
+prd: prd/cluster-gpu/gpu-monitor/pod-metrics.md
+design: design/cluster-gpu/gpu-monitor/pod-metrics.md
+
+covers:
+- AC-L3-CLUSTER-GPU-GPU_MONITOR-POD_METRICS-01
+
+story:
+- US1
+- US2
+- US3
+
+product: GPU Pod 的监控页有显存、使用量、分配量三条曲线，分配量与分配注解条数一致。
+preconditions:
+- 已登录，且在 default 集群
+- 目标 Pod 已申请 GPU 且处于 Running
+steps:
+- 读取 Pod 的 hami.io/vgpu-devices-allocated 注解，数出设备条数
+- 打开该 Pod 的监控页
+- 读取 GPU 分配量曲线的值
+expected:
+- 出现 GPU 显存用量、使用量、分配量三条曲线
+- 分配量曲线的值等于注解里的设备条数
+- 显存用量非零
+- 不出现未翻译的 key
+troubleshoot:
+- 分配量为 0 时确认 Pod 注解存在（default 模式下由 gpu-agent 补写）
+- 曲线为空时确认 pod:gpu_allocated:count 规则已加载
+update_automation:
+- 注解键变化时改本用例

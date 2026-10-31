@@ -1,0 +1,38 @@
+id: TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-02
+level: 3
+suite: point
+module: cluster-gpu
+submodule: vgpu-mode
+feature: switch
+title: 设置 vGPU 模式 · 切回 default 时 params 为空对象
+entry_url: "{BASE_URL}/clusters/default/nodes"
+prd: prd/cluster-gpu/vgpu-mode/switch.md
+design: design/cluster-gpu/vgpu-mode/switch.md
+
+covers:
+- AC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-02
+
+story:
+- US1
+- US2
+
+product: 从 hami-core 切回 default 时，请求体只带 mode，params 是空对象，切换完成后 vgpu 标签回到 off。
+preconditions:
+- 已登录，且在 default 集群
+- 目标 GPU 节点当前模式为 hami-core
+steps:
+- 打开 {BASE_URL}/clusters/default/nodes
+- 对目标节点点「设置vGPU模式」，选 default
+- 拦截提交请求体
+- 点确定
+- 等待切换完成，读取节点 label vgpu
+expected:
+- 选 default 后参数区为空（不残留 hami-core 的三个输入）
+- 请求体 mode 为 default
+- 请求体 params 是 {}（不是 null，也不含 devicesplitcount）
+- 切换完成后节点 label vgpu 为 off
+troubleshoot:
+- params 残留旧键时 gpu-agent 会把它们写进 ConfigMap，切回 default 后仍带着切分数
+- vgpu 标签不变时看 gpu-agent 日志里的 patchNodeVGPULabel
+update_automation:
+- 参数键变化时同步改本用例

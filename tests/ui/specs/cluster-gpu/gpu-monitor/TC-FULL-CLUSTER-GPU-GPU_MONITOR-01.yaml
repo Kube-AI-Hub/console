@@ -1,0 +1,41 @@
+id: TC-FULL-CLUSTER-GPU-GPU_MONITOR-01
+level: 2
+suite: full
+module: cluster-gpu
+submodule: gpu-monitor
+feature: page
+title: GPU 监控 · 节点/卡/Pod 三个维度
+entry_url: "{BASE_URL}/clusters/default/nodes/{node}/monitors"
+prd: prd/cluster-gpu/gpu-monitor/_index.md
+design: design/cluster-gpu/gpu-monitor/_index.md
+
+covers:
+- AC-FULL-CLUSTER-GPU-GPU_MONITOR-01
+
+story:
+- US1
+- US2
+- US3
+- US4
+
+product: 节点监控、单卡监控、Pod 监控三处都有 GPU 指标曲线，单位正确且不出现未翻译 key。
+preconditions:
+- 已登录，且在 default 集群
+- 目标节点有 GPU 且 gpu-agent 的指标已被 Prometheus 抓取
+- 该节点上至少有一个申请了 GPU 的 Pod
+steps:
+- 打开 {BASE_URL}/clusters/default/nodes/{node}/monitors，读取 GPU 相关图表
+- 打开 {BASE_URL}/clusters/default/nodes/{node}/status，点某张卡的 UUID 进入详情，切到 Monitoring 页签
+- 打开该节点上一个 GPU Pod 的监控页
+expected:
+- 节点监控页出现 GPU 利用率、显存用量、分配量三条曲线
+- 单卡监控页出现使用率、显存用量、分配率、功耗、温度五条曲线
+- Pod 监控页出现 GPU 显存用量、使用量、分配量三条曲线
+- 利用率为百分比，显存为 GiB，功耗为 W，温度为 °C
+- 三处都不出现未翻译的 key
+troubleshoot:
+- 曲线为空时先 curl hami-gpu-agent:9101/metrics 确认 gpu_card_ 序列存在
+- Pod 监控为空时确认 recording rule pod:gpu_* 已加载
+- 单卡页数值与其它卡相同说明 gpu_uuid 没传
+update_automation:
+- 指标名或单位变化时同步改 pages 与 expected
