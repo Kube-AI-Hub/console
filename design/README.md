@@ -69,7 +69,7 @@ L1/L2 用该层用例 ID 的同后缀：`TC-CORE-CLUSTER_STORAGE-01` → `DES-L1
 
 | 事实 | 唯一正文 |
 |------|----------|
-| 架构铁律 C1–C5 | [`../docs/constitution.md`](../docs/constitution.md) |
+| 架构铁律 C1–C5 与「UI 与交互设计原则」 | [`../docs/constitution.md`](../docs/constitution.md) |
 | 主题色 token | `console/src/scss/variables.scss` |
 | 指标名与单位 | `kube-server/pkg/models/monitoring/named_metrics.go`、`prometheus/promql.go` |
 | **能力级技术方案** | **本目录** |

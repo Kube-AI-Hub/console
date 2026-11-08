@@ -14,7 +14,7 @@
 | 需求 `prd/` | **做什么**、验收是什么（`AC-*`） | [`../prd/README.md`](../prd/README.md) |
 | 技术方案 `design/` | **为什么这么实现**（`DES`/`DEC`/`CON`/`INV`/`GOT`） | [`../design/README.md`](../design/README.md) |
 | 用例 `tests/` | **怎么验证**（`TC-*`） | [`../tests/README.md`](../tests/README.md) |
-| 架构铁律 | 不可违反的约束 C1–C5 | [`constitution.md`](constitution.md) |
+| 架构铁律 | 不可违反的约束 C1–C5 与「UI 与交互设计原则」 | [`constitution.md`](constitution.md) |
 
 三份文档用同一套后缀 ID 互相钉住：
 
@@ -34,7 +34,7 @@ flowchart LR
 | 路径 | 功能 |
 |------|------|
 | `docs/SDD.md` | **本文件**。唯一入口 |
-| `docs/constitution.md` | 架构铁律 C1–C5：接口、生成物、主题 token、指标白名单、契约版本 |
+| `docs/constitution.md` | 架构铁律 C1–C5：接口、生成物、主题 token、指标白名单、契约版本；文末附 UI 与交互设计原则 |
 | `prd/README.md` | 需求怎么写：L1–L3 章节序、ID 规则、自检 |
 | `prd/catalog.yaml` | 功能树索引。**生成物，不要手改** |
 | `prd/tools/tree.py` | 功能树的源。新增模块 / 子模块 / 功能点只改这里 |
@@ -77,7 +77,7 @@ tests/ui/cases/cluster-storage/shared-storage/TC-L3-CLUSTER-STORAGE-SHARED_STORA
 | **Small feature** | 单模块、无跨模块契约 | 只补对应 **L3** 的需求 + 技术方案 + 用例 |
 | **Full SDD** | 新能力、跨模块、新增或变更契约、触碰宪法 | 补 L1–L3 三类文档；需求先行、技术方案承接、用例覆盖 |
 
-判断口诀：**要改别人依赖的契约、要动 C1–C5、要动页面可见的主题色或指标口径，就是 Full SDD。**
+判断口诀：**要改别人依赖的契约、要动 C1–C5、要动页面结构 / 交互 / 主题色或指标口径，就是 Full SDD。**
 
 ---
 
@@ -156,7 +156,7 @@ def test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_02(storage_page, screenshot)
 
 | 事实 | 唯一正文 |
 |------|----------|
-| 架构铁律 C1–C5 | [`constitution.md`](constitution.md) |
+| 架构铁律 C1–C5 与「UI 与交互设计原则」 | [`constitution.md`](constitution.md) |
 | 接口契约与错误码 | `kube-server/pkg/kapis/<group>` 的 `register.go` + design 的 `CON-*` |
 | 主题色与间距 | `console/src/scss/variables.scss`（design 只引用 token 名） |
 | 指标名与单位 | `kube-server/pkg/models/monitoring/named_metrics.go` + `prometheus/promql.go` |
@@ -192,5 +192,5 @@ def test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_02(storage_page, screenshot)
 1. **改之前先读**：本文件 → 目标模块的 `prd/` 与 `design/` → [`constitution.md`](constitution.md)。
 2. **改完必须收敛**：`python3 prd/tools/check_docs.py --strict` 必须无 `ERROR`；新增功能点必须同时有需求、技术方案、用例、测试文件（一 spec 一文件）。
 3. **不许绕门禁**：不要为了过门禁去删章节、删 AC，或把 `covers` 指向不存在的 AC。
-4. **UI 改动必须截图**：改任何用户可见的界面，先在真实环境截图记录改动前，改完再截一次；对比度、单位、空态要逐项核对（见 `.cursor/rules/ui-screenshot-verify.mdc`）。
+4. **UI 改动先过原则再截图**：按 [`constitution.md`](constitution.md) 的「UI 与交互设计原则」核对——一个主任务、一个入口、一套共享组件、点击即反馈、等待可见；再在真实环境截图记录改动前后，对比度、单位、空态逐项核对（见 `.cursor/rules/ui-screenshot-verify.mdc`）。
 5. **改了产品代码要跑测试**：前端 `pytest -m point`（相关用例）；后端 `go test`。
