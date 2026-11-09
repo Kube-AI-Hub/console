@@ -1,0 +1,221 @@
+/**
+ * Motion primitives, shared as plain CSS so any component can compose them
+ * without importing JavaScript.
+ *
+ * Every hover rule is wrapped in `@media (hover: hover) and (pointer: fine)`.
+ * On touch devices `:hover` sticks after a tap, which makes an interface feel
+ * broken; gating the rule is the only reliable fix.
+ */
+
+/* ---- Spotlight: a radial highlight that follows the pointer ----
+   The component writes the pointer position into --ai-mx / --ai-my.
+   dataelem uses the same technique (a 260px circle at the pointer) to make a
+   surface feel lit from the cursor rather than painted flat. */
+.ai-spotlight {
+  position: relative;
+  isolation: isolate;
+}
+
+.ai-spotlight::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  opacity: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    280px circle at var(--ai-mx, 50%) var(--ai-my, 50%),
+    rgb(var(--ai-accent) / 0.18),
+    transparent 72%
+  );
+  transition: opacity var(--ai-duration-base) var(--ai-ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ai-spotlight:hover::before {
+    opacity: 1;
+  }
+}
+
+/* ---- Hover lift ----
+   Three cues stacked, matching the reference site:
+     1. the card rises a few pixels
+     2. a coloured glow appears, tinted by the accent rather than neutral grey
+     3. a 1px inset highlight on the top edge, which reads as a lit surface
+   The glow uses the accent so a violet page glows violet and a green page
+   glows green; a neutral shadow would flatten that distinction again. */
+.ai-lift {
+  transition:
+    transform var(--ai-duration-base) var(--ai-ease-out),
+    box-shadow var(--ai-duration-base) var(--ai-ease-out),
+    border-color var(--ai-duration-base) var(--ai-ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ai-lift:hover {
+    transform: translateY(var(--ai-lift));
+    border-color: rgb(var(--ai-accent) / 0.4);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.06),
+      0 18px 40px -18px rgb(var(--ai-accent) / 0.45),
+      0 8px 20px -12px rgb(0 0 0 / 0.4);
+  }
+}
+
+/* Light mode cannot carry an inset white highlight (it would be invisible) and
+   needs a softer glow, so the shadow is redefined rather than inherited. */
+:root[data-theme='light'] .ai-lift:hover {
+  box-shadow:
+    0 14px 32px -16px rgb(var(--ai-accent) / 0.4),
+    0 6px 16px -10px rgb(20 33 90 / 0.16);
+}
+
+/* Pressed state: the card settles back down, so a click feels physical. */
+.ai-lift:active {
+  transform: translateY(0);
+  transition-duration: var(--ai-duration-fast);
+}
+
+/* ---- Ambient backdrop ----
+   dataelem does not paint a flat page: several soft radial washes sit behind
+   the content, brightest near the focal point, so the shell has depth and the
+   cards have something to sit on. Applied to the root surface in dark mode,
+   where a flat fill looks especially dead.
+
+   `pointer-events: none` and `aria-hidden` keep it decorative; it never
+   intercepts input and is not announced. */
+.ai-ambient {
+  position: relative;
+  isolation: isolate;
+}
+
+.ai-ambient::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      60% 45% at 50% 0%,
+      rgb(var(--ai-accent) / 0.1),
+      transparent 70%
+    ),
+    radial-gradient(
+      45% 35% at 85% 25%,
+      rgb(var(--ai-accent) / 0.06),
+      transparent 70%
+    ),
+    radial-gradient(
+      50% 40% at 15% 80%,
+      rgb(var(--ai-accent) / 0.05),
+      transparent 70%
+    );
+}
+
+/* Light mode gets a much weaker wash: the same opacity over a near-white page
+   turns it into a colour block. */
+:root[data-theme='light'] .ai-ambient::before {
+  background:
+    radial-gradient(60% 45% at 50% 0%, rgb(var(--ai-accent) / 0.05), transparent 70%),
+    radial-gradient(45% 35% at 85% 25%, rgb(var(--ai-accent) / 0.03), transparent 70%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Nothing here animates, but a static wash still costs a repaint on scroll
+     in some engines; dropping it is the safer choice. */
+  .ai-ambient::before {
+    display: none;
+  }
+}
+
+/* ---- Reveal: staggered entrance once the element scrolls into view ----
+   The delay is set per item by the component; the default keeps siblings from
+   arriving in one flat block. */
+.ai-reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity var(--ai-duration-slow) var(--ai-ease-out),
+    transform var(--ai-duration-slow) var(--ai-ease-out);
+  transition-delay: var(--ai-reveal-delay, 0ms);
+}
+
+.ai-reveal[data-visible='true'] {
+  opacity: 1;
+  transform: none;
+}
+
+/* Without JS (or when the observer never fires) content must still be
+   readable: a no-motion environment gets the final state immediately. */
+@media (prefers-reduced-motion: reduce) {
+  .ai-reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---- Stream reveal: a chunk of freshly arrived text ----
+   Used by the assistant transcript. Kept short so tokens do not lag behind the
+   stream: the user must be able to follow the output as it lands. */
+@keyframes ai-stream-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.ai-stream-in {
+  animation: ai-stream-in 180ms var(--ai-ease-out) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-stream-in {
+    animation: none;
+  }
+}
+
+/* ---- Press feedback ----
+   Applies to anything clickable; the scale is deliberately small because it
+   runs on every click. */
+.ai-pressable {
+  transition: transform var(--ai-duration-fast) var(--ai-ease-out);
+}
+
+.ai-pressable:active {
+  transform: scale(0.98);
+}
+
+/* ---- Mobile basics ----
+   Applied to the library root only, so the host page keeps its own scrolling
+   behaviour. These three rules cover the failures that are invisible in a
+   desktop screenshot but obvious on a phone. */
+@media (max-width: 39.9375rem) {
+  .ai-root {
+    /* A single over-wide child (a table, a long token) must scroll inside its
+       own container instead of shifting the whole page sideways. */
+    overflow-x: clip;
+  }
+
+  /* iOS zooms the viewport when a focused field's text is under 16px. The
+     inputs are 14px by design, so pin the computed size on small screens
+     rather than inflating the whole type scale. */
+  .ai-root input,
+  .ai-root textarea,
+  .ai-root select {
+    font-size: 16px;
+  }
+
+  /* Text inputs also need a minimum height once the font grows, otherwise the
+     glyphs are clipped by the fixed 36px control height. */
+  .ai-root input:not([type='checkbox']):not([type='radio']),
+  .ai-root textarea,
+  .ai-root select {
+    min-height: 36px;
+  }
+}

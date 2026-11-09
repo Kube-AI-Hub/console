@@ -1,0 +1,390 @@
+/**
+ * Design tokens, in two layers.
+ *
+ * Layer 1 (raw): the exact palette from console's SCSS
+ * (`console/src/scss/variables.scss`). Values are copied 1:1 as `r, g, b`
+ * triples so they can be composed with arbitrary alpha at use sites:
+ * `rgb(var(--ai-accent) / 0.12)`. Keeping the raw names lets anyone trace a
+ * token back to the SCSS variable it came from.
+ *
+ * Layer 2 (semantic): the names components are allowed to use. Light mode
+ * overrides only this layer, which is what makes one component tree render
+ * correctly in both themes.
+ *
+ * Naming note: console calls its violet ramp `$green-color*`. That is a
+ * historical accident, not a description. Here it is `--ai-raw-violet-*`, and
+ * the mapping back to SCSS is documented per token.
+ */
+
+:root {
+  /* ---- Layer 1: raw ramps, mirrored from variables.scss ---- */
+
+  /* $light-color01..08 — the navy shell, darkest to lightest */
+  --ai-raw-navy-900: 11 24 77; /* $light-color01 #0b184d */
+  --ai-raw-navy-800: 20 33 90; /* $light-color02 #14215a */
+  --ai-raw-navy-700: 31 44 106; /* $light-color03 #1f2c6a */
+  --ai-raw-navy-600: 44 58 124; /* $light-color04 #2c3a7c */
+  --ai-raw-navy-500: 58 73 143; /* $light-color05 #3a498f */
+  --ai-raw-navy-400: 74 90 162; /* $light-color06 #4a5aa2 */
+  --ai-raw-navy-300: 92 108 182; /* $light-color07 #5c6cb6 */
+  --ai-raw-navy-200: 112 127 201; /* $light-color08 #707fc9 */
+
+  /* $dark-color01..08 — the ice foreground, dimmest to brightest */
+  --ai-raw-ice-100: 169 209 234; /* $dark-color01 #a9d1ea */
+  --ai-raw-ice-200: 181 215 236; /* $dark-color02 #b5d7ec */
+  --ai-raw-ice-300: 191 220 240; /* $dark-color03 #bfdcf0 */
+  --ai-raw-ice-400: 201 225 243; /* $dark-color04 #c9e1f3 */
+  --ai-raw-ice-500: 207 228 242; /* $dark-color05 #cfe4f2 */
+  --ai-raw-ice-600: 217 233 245; /* $dark-color06 #d9e9f5 */
+  --ai-raw-ice-700: 222 235 246; /* $dark-color07 #deebf6 */
+  --ai-raw-ice-800: 249 251 253; /* $dark-color08 #f9fbfd */
+
+  /* $green-color01..05 — actually violet */
+  --ai-raw-violet-100: 107 41 250; /* $green-color01 #6b29fa */
+  --ai-raw-violet-200: 139 97 235; /* $green-color02 #8b61eb */
+  --ai-raw-violet-300: 169 129 248; /* $green-color03 #a981f8 — primary */
+  --ai-raw-violet-400: 196 175 240; /* $green-color04 #c4aff0 */
+  --ai-raw-violet-500: 213 197 246; /* $green-color05 #d5c5f6 */
+
+  /* $blue-color01..05 — the cyan accent */
+  --ai-raw-cyan-100: 50 110 147; /* $blue-color01 #326e93 */
+  --ai-raw-cyan-200: 51 133 176; /* $blue-color02 #3385b0 */
+  --ai-raw-cyan-300: 50 157 206; /* $blue-color03 #329dce — $sub */
+  --ai-raw-cyan-400: 126 184 220; /* $blue-color04 #7eb8dc */
+  --ai-raw-cyan-500: 199 222 239; /* $blue-color05 #c7deef */
+
+  /* $red-color01..05 */
+  --ai-raw-red-100: 140 50 49; /* $red-color01 #8c3231 */
+  --ai-raw-red-200: 171 47 41; /* $red-color02 #ab2f29 */
+  --ai-raw-red-300: 202 38 33; /* $red-color03 #ca2621 — $danger */
+  --ai-raw-red-400: 234 133 115; /* $red-color04 #ea8573 */
+  --ai-raw-red-500: 250 231 229; /* $red-color05 #fae7e5 */
+
+  /* $yellow-color01..05 */
+  --ai-raw-amber-100: 141 102 62; /* $yellow-color01 #8d663e */
+  --ai-raw-amber-200: 224 153 44; /* $yellow-color02 #e0992c */
+  --ai-raw-amber-300: 245 166 35; /* $yellow-color03 #f5a623 — $warning */
+  --ai-raw-amber-400: 255 199 129; /* $yellow-color04 #ffc781 */
+  --ai-raw-amber-500: 255 225 190; /* $yellow-color05 #ffe1be */
+
+  /* Status glyph colours, taken from the $icon-status-* SVG fills */
+  --ai-raw-status-info: 33 145 202; /* #2191ca */
+  --ai-raw-status-success: 0 170 114; /* #00aa72 */
+  --ai-raw-status-warning: 245 196 20; /* #f5c414 */
+  --ai-raw-status-error: 202 38 33; /* #ca2621 */
+
+  /* Kube AI Hub mint — shared with the workshop and the marketing site, so the
+     green palette matches the rest of the product rather than inventing a new
+     green. Not present in console's SCSS. */
+  --ai-raw-mint-300: 120 240 205;
+  --ai-raw-mint-400: 57 229 184; /* brand #39E5B8 */
+  --ai-raw-mint-500: 32 201 158; /* #20c99e */
+  --ai-raw-mint-600: 14 190 132; /* #0ebe84 — readable on white */
+
+  /* Accent-tinted dark shells.
+     The navy ramp above is console's own. These two ramps reuse its exact
+     lightness and saturation profile and only rotate the hue, so switching
+     accent changes the whole page tint without changing any contrast ratio:
+     violet sits at hue 258 (the accent is 260), green at 186 (adjacent to the
+     mint accent at 164, so surfaces read green without competing with it). */
+  /* dataelem's deep shell, used as the green palette's surfaces.
+     That site layers a near-black teal page under a lighter panel, which gives
+     cards something to sit on top of. Only the green palette uses these: at
+     hue 186 they read as teal, which is wrong for violet. */
+  --ai-raw-abyss-950: 0 21 28; /* #00151C */
+  --ai-raw-abyss-900: 0 30 40; /* #001E28 */
+  --ai-raw-abyss-800: 10 61 77; /* #0A3D4D */
+  --ai-raw-abyss-700: 0 46 60; /* #002E3C */
+
+  /* Accent-tinted light shells.
+     Same construction as the dark ramps: console's ice ramp lightness profile,
+     hue rotated, saturation ramped down as lightness rises so the page stays
+     near-white while surfaces and borders carry the hue. The tint has to be
+     perceptible — an almost-white page makes the two light themes look
+     identical, which defeats the point of a palette switch. */
+  --ai-raw-violet-lite-bg: 247 246 250; /* #f7f6fa */
+  --ai-raw-violet-lite-elevated: 254 254 254; /* #fefefe */
+  --ai-raw-violet-lite-700: 243 241 248; /* #f3f1f8 */
+  --ai-raw-violet-lite-600: 234 230 244; /* #eae6f4 */
+  --ai-raw-violet-lite-500: 225 219 240; /* #e1dbf0 */
+  --ai-raw-violet-lite-400: 219 212 237; /* #dbd4ed */
+  --ai-raw-violet-lite-300: 209 198 233; /* #d1c6e9 */
+  --ai-raw-violet-lite-200: 195 181 227; /* #c3b5e3 */
+
+  --ai-raw-green-lite-bg: 246 250 250; /* #f6fafa */
+  --ai-raw-green-lite-elevated: 254 254 254; /* #fefefe */
+  --ai-raw-green-lite-700: 241 248 248; /* #f1f8f8 */
+  --ai-raw-green-lite-600: 230 243 244; /* #e6f3f4 */
+  --ai-raw-green-lite-500: 219 238 240; /* #dbeef0 */
+  --ai-raw-green-lite-400: 212 235 237; /* #d4ebed */
+  --ai-raw-green-lite-300: 198 229 233; /* #c6e5e9 */
+  --ai-raw-green-lite-200: 181 223 227; /* #b5dfe3 */
+
+  --ai-raw-white: 255 255 255;
+
+  /* ---- Layer 2: semantic, dark (console's native theme) ---- */
+
+  --ai-bg: var(--ai-raw-navy-800); /* $bg-color */
+  --ai-bg-elevated: var(--ai-raw-navy-700);
+  --ai-bg-overlay: var(--ai-raw-navy-600); /* $card-bg-color */
+  --ai-bg-deep: var(--ai-raw-navy-900); /* $th-bg-color */
+
+  --ai-surface-1: var(--ai-raw-navy-600); /* $card-bg-color */
+  --ai-surface-2: var(--ai-raw-navy-500); /* $btn-default-hover-bg */
+  --ai-surface-3: var(--ai-raw-navy-400);
+
+  --ai-fg: var(--ai-raw-ice-700); /* $text-color */
+  --ai-fg-secondary: var(--ai-raw-ice-100); /* $second-text-color */
+  --ai-fg-muted: var(--ai-raw-ice-400); /* $third-text-color */
+  --ai-fg-faint: var(--ai-raw-ice-300); /* $placeholder-color */
+
+  --ai-line: var(--ai-raw-navy-200); /* $border-color */
+  --ai-line-strong: var(--ai-raw-navy-300); /* $border-hover-color */
+
+  /* console's primary is violet, not green — see the naming note above.
+     The accent block is overridden by the `data-accent` palettes below. */
+  --ai-accent: var(--ai-raw-violet-300); /* $primary */
+  --ai-accent-hover: var(--ai-raw-violet-400);
+  --ai-accent-fg: var(--ai-raw-navy-900);
+  --ai-accent-soft: var(--ai-raw-violet-200);
+  --ai-accent-strong: var(--ai-raw-violet-100); /* $green-color01 */
+
+  --ai-info: var(--ai-raw-status-info);
+  --ai-success: var(--ai-raw-status-success);
+  --ai-warning: var(--ai-raw-status-warning);
+  --ai-danger: var(--ai-raw-status-error);
+  --ai-danger-fg: var(--ai-raw-white);
+  --ai-sub: var(--ai-raw-cyan-300); /* $sub */
+
+  --ai-ring: var(--ai-accent-strong);
+
+  /* Navigation and table surfaces console styles separately */
+  --ai-nav-bg: rgb(20 33 90 / 0.58);
+  --ai-th-bg: var(--ai-raw-navy-900); /* $th-bg-color */
+  --ai-row-hover-bg: rgb(var(--ai-raw-navy-500) / 0.55);
+
+  /* ---- Geometry ---- */
+  --ai-radius-sm: 4px; /* $border-radius */
+  --ai-radius-md: 6px;
+  --ai-radius-lg: 10px;
+  --ai-radius-xl: 14px;
+  --ai-radius-pill: 999px;
+
+  /* ---- Motion ---- */
+  --ai-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ai-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ai-duration-fast: 140ms;
+  --ai-duration-base: 220ms;
+  --ai-duration-slow: 380ms; /* $trans-speed is 0.3s; kept close */
+  --ai-lift: -3px;
+
+  /* ---- Typography ---- */
+  --ai-font-sans: 'PingFang SC', 'Lantinghei SC', 'Helvetica Neue', Helvetica,
+    Arial, 'Microsoft YaHei', '微软雅黑', STHeitiSC-Light, simsun, '宋体',
+    'WenQuanYi Zen Hei', 'WenQuanYi Micro Hei', sans-serif; /* $font-family */
+  --ai-font-mono: 'PT Mono', Monaco, Menlo, Consolas, 'Courier New', monospace; /* $font-family-code */
+
+  /* ---- Layout ---- */
+  --ai-nav-width: 260px; /* $nav-width */
+  --ai-nav-width-narrow: 240px; /* $narrow-nav-width */
+  --ai-header-height: 68px; /* $header-height */
+  --ai-content-width: 1164px; /* $content-width */
+  --ai-detail-info-width: 354px; /* $detail-info-width */
+  --ai-modal-width: 691px; /* $modal-width */
+
+  color-scheme: dark;
+}
+
+/**
+ * Light theme.
+ *
+ * console only ships a dark theme, so this layer is new: it reuses the same
+ * ramps but walks them in the opposite direction, which keeps the palette
+ * coherent instead of introducing a second set of brand colours.
+ *
+ * The accent moves one step deeper because #a981f8 does not hold contrast on a
+ * near-white background; the hue is unchanged.
+ */
+:root[data-theme='light'] {
+  --ai-bg: var(--ai-raw-ice-800); /* #f9fbfd */
+  --ai-bg-elevated: var(--ai-raw-white);
+  --ai-bg-overlay: var(--ai-raw-white);
+  --ai-bg-deep: var(--ai-raw-ice-600); /* #d9e9f5 */
+
+  --ai-surface-1: var(--ai-raw-white);
+  --ai-surface-2: var(--ai-raw-ice-600);
+  --ai-surface-3: var(--ai-raw-ice-400);
+
+  --ai-fg: var(--ai-raw-navy-800); /* #14215a */
+  --ai-fg-secondary: var(--ai-raw-navy-700);
+  --ai-fg-muted: var(--ai-raw-navy-400);
+  --ai-fg-faint: var(--ai-raw-navy-300);
+
+  --ai-line: var(--ai-raw-ice-300); /* #bfdcf0 */
+  --ai-line-strong: var(--ai-raw-ice-100);
+
+  /* The accent family and the surface tint are supplied by the per-accent
+     light blocks below, so this rule only carries the neutral defaults. */
+  --ai-info: var(--ai-raw-cyan-100);
+  --ai-success: 0 138 92; /* #00aa72 darkened for white background */
+  --ai-warning: var(--ai-raw-amber-200);
+  --ai-danger: var(--ai-raw-red-200);
+  --ai-danger-fg: var(--ai-raw-white);
+  --ai-sub: var(--ai-raw-cyan-100);
+
+  --ai-nav-bg: rgb(249 251 253 / 0.8);
+  --ai-th-bg: var(--ai-raw-ice-600);
+  --ai-row-hover-bg: rgb(var(--ai-raw-ice-500) / 0.6);
+
+  color-scheme: light;
+}
+
+/**
+ * Accent palettes.
+ *
+ * Mode (dark/light) and accent (violet/green) are independent axes, so they are
+ * separate attributes on <html>. A palette only redefines the accent family and
+ * the ring: everything else keeps its semantic role, which is why one component
+ * tree works across all four combinations.
+ *
+ * `violet` is console's existing primary ($green-color03, #a981f8 — the SCSS
+ * name is a historical accident). `green` is the Kube AI Hub mint already used
+ * by the workshop and the marketing site.
+ */
+
+/* ---- violet (default) ----
+   The dark palette is scoped to `[data-theme='dark']` explicitly. Without the
+   qualifier it also matched in light mode, and because both selectors have the
+   same specificity the later (light) rule won — but only after the attribute
+   order happened to differ, which made the dark value leak into light.
+
+   Dark mode also swaps the *surface* ramp, not just the accent: the page shell,
+   cards and hovers are tinted toward the accent's hue. A violet interface on a
+   navy background looks like an unfinished theme, which is why the two dark
+   palettes each carry their own shell. */
+:root[data-accent='violet'][data-theme='dark'] {
+  /* console's own dark shell, unchanged: $light-color01..04 walk from #0b184d
+     to #2c3a7c at hue 229 (blue-violet). The accent is the same product's
+     $primary #a981f8, so this palette is the shipped console look.
+     Do not substitute the teal `abyss` ramp here — at hue 186 it turns the
+     purple page visibly green. */
+  --ai-bg: var(--ai-raw-navy-900);
+  --ai-bg-elevated: var(--ai-raw-navy-700);
+  --ai-bg-overlay: var(--ai-raw-navy-600);
+  --ai-bg-deep: var(--ai-raw-navy-900);
+  --ai-surface-1: var(--ai-raw-navy-600);
+  --ai-surface-2: var(--ai-raw-navy-500);
+  --ai-surface-3: var(--ai-raw-navy-400);
+  --ai-th-bg: var(--ai-raw-navy-900);
+  --ai-row-hover-bg: rgb(var(--ai-raw-navy-500) / 0.55);
+  --ai-nav-bg: rgb(11 24 77 / 0.62);
+  /* Borders carry the accent hue too: a neutral border on a tinted page reads
+     as a seam between two different designs. */
+  --ai-line: 62 76 146;
+  --ai-line-strong: 92 108 182;
+
+  --ai-accent: var(--ai-raw-violet-300);
+  --ai-accent-hover: var(--ai-raw-violet-400);
+  --ai-accent-soft: var(--ai-raw-violet-200);
+  --ai-accent-strong: var(--ai-raw-violet-100);
+  --ai-accent-fg: var(--ai-raw-navy-900);
+  --ai-ring: var(--ai-raw-violet-400);
+}
+
+:root[data-accent='violet'][data-theme='light'] {
+  --ai-bg: var(--ai-raw-violet-lite-bg);
+  --ai-bg-elevated: var(--ai-raw-violet-lite-elevated);
+  --ai-bg-overlay: var(--ai-raw-violet-lite-elevated);
+  --ai-bg-deep: var(--ai-raw-violet-lite-600);
+  --ai-surface-1: var(--ai-raw-violet-lite-elevated);
+  --ai-surface-2: var(--ai-raw-violet-lite-600);
+  --ai-surface-3: var(--ai-raw-violet-lite-400);
+  --ai-line: var(--ai-raw-violet-lite-300);
+  --ai-line-strong: var(--ai-raw-violet-lite-200);
+  --ai-th-bg: var(--ai-raw-violet-lite-600);
+  --ai-row-hover-bg: rgb(var(--ai-raw-violet-lite-500) / 0.6);
+  --ai-nav-bg: rgb(247 246 250 / 0.8);
+
+  --ai-accent: var(--ai-raw-violet-100);
+  --ai-accent-hover: var(--ai-raw-violet-200);
+  --ai-accent-soft: var(--ai-raw-violet-300);
+  --ai-accent-strong: var(--ai-raw-violet-100);
+  --ai-accent-fg: var(--ai-raw-white);
+  --ai-ring: var(--ai-raw-violet-100);
+}
+
+/* ---- green (Kube AI Hub mint) ----
+   The mint ramp is one step deeper in light mode: #39E5B8 is too light to hold
+   contrast on a near-white surface. Same hue, one step down.
+
+   The dark shell is tinted teal-green rather than navy, so the whole page reads
+   as the green theme instead of a green accent on a blue page. */
+:root[data-accent='green'][data-theme='dark'] {
+  /* dataelem's own deep shell: #00151C page, #001E28 panels, #0A3D4D borders.
+     Using the real values (not a hue rotation) keeps the green theme identical
+     to the reference instead of merely similar. */
+  --ai-bg: var(--ai-raw-abyss-950);
+  --ai-bg-elevated: var(--ai-raw-abyss-900);
+  --ai-bg-overlay: var(--ai-raw-abyss-800);
+  --ai-bg-deep: var(--ai-raw-abyss-950);
+  --ai-surface-1: var(--ai-raw-abyss-900);
+  --ai-surface-2: var(--ai-raw-abyss-700);
+  --ai-surface-3: var(--ai-raw-abyss-800);
+  --ai-th-bg: var(--ai-raw-abyss-950);
+  --ai-row-hover-bg: rgb(var(--ai-raw-abyss-800) / 0.7);
+  --ai-nav-bg: rgb(0 21 28 / 0.72);
+  --ai-line: 28 69 82; /* dataelem's --line */
+  --ai-line-strong: 42 92 108;
+
+  --ai-accent: var(--ai-raw-mint-400);
+  --ai-accent-hover: var(--ai-raw-mint-300);
+  --ai-accent-soft: var(--ai-raw-mint-600);
+  --ai-accent-strong: var(--ai-raw-mint-500);
+  --ai-accent-fg: var(--ai-raw-abyss-950);
+  --ai-ring: var(--ai-raw-mint-300);
+}
+
+:root[data-accent='green'][data-theme='light'] {
+  --ai-bg: var(--ai-raw-green-lite-bg);
+  --ai-bg-elevated: var(--ai-raw-green-lite-elevated);
+  --ai-bg-overlay: var(--ai-raw-green-lite-elevated);
+  --ai-bg-deep: var(--ai-raw-green-lite-600);
+  --ai-surface-1: var(--ai-raw-green-lite-elevated);
+  --ai-surface-2: var(--ai-raw-green-lite-600);
+  --ai-surface-3: var(--ai-raw-green-lite-400);
+  --ai-line: var(--ai-raw-green-lite-300);
+  --ai-line-strong: var(--ai-raw-green-lite-200);
+  --ai-th-bg: var(--ai-raw-green-lite-600);
+  --ai-row-hover-bg: rgb(var(--ai-raw-green-lite-500) / 0.6);
+  --ai-nav-bg: rgb(246 250 250 / 0.8);
+
+  --ai-accent: var(--ai-raw-mint-600);
+  --ai-accent-hover: var(--ai-raw-mint-500);
+  --ai-accent-soft: var(--ai-raw-mint-400);
+  --ai-accent-strong: var(--ai-raw-mint-600);
+  --ai-accent-fg: var(--ai-raw-white);
+  --ai-ring: var(--ai-raw-mint-600);
+}
+
+/* The base element styles are opt-in via `.ai-root` so the library never
+   restyles a host application's body. */
+.ai-root {
+  font-family: var(--ai-font-sans);
+  color: rgb(var(--ai-fg));
+  background-color: rgb(var(--ai-bg));
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Motion is a preference, not a decoration: honour it globally so every
+   component inherits the reduced behaviour without repeating the query. */
+@media (prefers-reduced-motion: reduce) {
+  .ai-root *,
+  .ai-root *::before,
+  .ai-root *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

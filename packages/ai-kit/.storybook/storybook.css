@@ -1,0 +1,170 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Docs-page theming.
+ *
+ * Storybook ships the docs frame with a fixed light palette: `.sbdocs h1` is
+ * #2e3438, `.sbdocs-wrapper` is white, and the prop table has its own greys.
+ * Those rules live in the addon's stylesheet and win over a plain token
+ * declaration, so the frame stayed light even once `.ai-root` wrapped it.
+ *
+ * These overrides re-point the frame's colours at the ai-kit tokens. They are
+ * scoped to the docs container, so nothing here can affect a component.
+ */
+
+/* --- Surface --- */
+
+.sbdocs-wrapper,
+.sbdocs-content {
+  background-color: rgb(var(--ai-bg)) !important;
+}
+
+/* The default container adds its own padding; `DocsContainer` supplies the
+   spacing so the toggle row and the content share one left edge. */
+.ai-root .sbdocs-wrapper {
+  padding: 0 0 4rem !important;
+  display: block;
+}
+
+/*
+ * The content column is centred and capped here, matching the toggle row.
+ * Storybook's own `.sbdocs-content` sets `max-width: none` and no centring.
+ * Below `sm` the gutters shrink so the text does not start flush against the
+ * screen edge.
+ */
+.ai-root .sbdocs-content {
+  max-width: 56rem;
+  margin-inline: auto;
+  padding: 1.5rem 1.25rem 0;
+}
+
+@media (max-width: 39.9375rem) {
+  /* The prop table is wider than a phone; let it scroll on its own instead of
+     widening the page. */
+  .ai-root .sbdocs [class*='rounded-ai-lg'] {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+
+  .ai-root .sbdocs table {
+    min-width: 30rem;
+  }
+}
+
+/* --- Typography --- */
+
+.sbdocs h1,
+.sbdocs h2,
+.sbdocs h3,
+.sbdocs h4 {
+  color: rgb(var(--ai-fg)) !important;
+  font-family: var(--ai-font-sans);
+}
+
+.sbdocs h1 {
+  font-size: 1.5rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.sbdocs h2 {
+  font-size: 1.125rem;
+  border-bottom-color: rgb(var(--ai-line)) !important;
+}
+
+.sbdocs p,
+.sbdocs li {
+  color: rgb(var(--ai-fg-secondary));
+}
+
+.sbdocs a {
+  color: rgb(var(--ai-accent));
+}
+
+.sbdocs code,
+.sbdocs pre {
+  background-color: rgb(var(--ai-surface-2)) !important;
+  color: rgb(var(--ai-fg)) !important;
+  border-color: rgb(var(--ai-line)) !important;
+}
+
+/* --- Prop table ---
+   The table renders inside the card supplied by `ComponentDocs`, so it only
+   needs its own colours neutralised; borders come from the card. */
+
+/*
+ * Cards built with ai-kit utilities.
+ *
+ * `.sbdocs` ships load-bearing rules with higher specificity, so `bg-ai-surface-1`
+ * stayed a near-white `#fefefe` on a dark page and the existing border colour was
+ * discarded. Re-assert both through the token, scoped to the docs frame.
+ */
+.ai-root .sbdocs [class*='rounded-ai-lg'][class*='bg-ai-surface-1'] {
+  background-color: rgb(var(--ai-surface-1)) !important;
+  border-color: rgb(var(--ai-line)) !important;
+}
+
+.ai-root .sbdocs table {
+  color: rgb(var(--ai-fg));
+  font-family: var(--ai-font-sans);
+  /* The card already draws the outline; the table only needs its own corners
+     rounded so it does not poke through the card's radius. */
+  border: 0 !important;
+  border-radius: calc(var(--ai-radius-lg) - 4px);
+  overflow: hidden;
+  margin-bottom: 0 !important;
+}
+
+
+.ai-root .sbdocs table thead th:last-child,
+.ai-root .sbdocs table tbody td:last-child {
+  border-right: 0 !important;
+}
+
+.ai-root .sbdocs thead th,
+.ai-root .sbdocs .sb-argstableBlock-head {
+  background-color: rgb(var(--ai-surface-2)) !important;
+  color: rgb(var(--ai-fg-muted)) !important;
+  border-color: rgb(var(--ai-line)) !important;
+}
+
+.ai-root .sbdocs thead th span {
+  color: rgb(var(--ai-fg-muted)) !important;
+}
+
+.ai-root .sbdocs tbody td {
+  background-color: transparent !important;
+  color: rgb(var(--ai-fg)) !important;
+  border-color: rgb(var(--ai-line)) !important;
+}
+
+.ai-root .sbdocs tbody tr {
+  border-color: rgb(var(--ai-line)) !important;
+}
+
+.ai-root .sbdocs .sb-argstableBlock-body tr:nth-child(even) {
+  background-color: rgb(var(--ai-surface-1)) !important;
+}
+
+/* Required marker and default-value chips were a saturated light-theme blue.
+   Scoped to the table: the same generated `css-*` classes appear inside the
+   example canvases, where they must keep their own colours. */
+.ai-root .sbdocs table span[class*='css-'] {
+  color: rgb(var(--ai-fg-secondary));
+}
+
+/* --- Example canvases ---
+   The story itself already draws its own surface; the frame only needs to stop
+   painting a white backdrop behind it. */
+
+.ai-root .docs-story,
+.ai-root .sbdocs .docs-story {
+  background-color: rgb(var(--ai-bg)) !important;
+}
+
+.ai-root .ai-docs-story {
+  border-radius: var(--ai-radius-lg);
+}
