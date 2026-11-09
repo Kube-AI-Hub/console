@@ -75,7 +75,10 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
   const activeKey = NAV.find((entry) => location.includes(`/${entry.key}`))?.key;
 
   return (
-    <div className="flex min-h-dvh bg-ai-bg text-ai-fg">
+    // `ai-ambient` adds ai-kit's brand-coloured radial wash behind the page. It is
+    // part of the library's look (the Storybook examples all sit on it), so the
+    // shell opts in here rather than each page repeating the class.
+    <div className="ai-ambient flex min-h-dvh bg-ai-bg text-ai-fg">
       {/* Keyboard users and agents land here first; without it the first Tab goes
           to the sidebar instead of the page content. */}
       <a
@@ -90,7 +93,7 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
           <Menu items={items} {...(activeKey ? { activeKey } : {})} />
         </Drawer>
       ) : (
-        <aside className="flex w-56 shrink-0 flex-col border-r border-ai-line bg-ai-bg-elevated">
+        <aside className="flex w-56 shrink-0 flex-col border-r border-ai-line bg-ai-bg-elevated/40 backdrop-blur-sm">
           <div className="shrink-0 px-4 py-4 text-sm font-semibold leading-none">{t('app.name')}</div>
           <nav aria-label={t('nav.primary')} className="min-w-0 flex-1 overflow-y-auto px-2">
             <Menu items={items} {...(activeKey ? { activeKey } : {})} />
@@ -116,7 +119,7 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
             {t('app.name')}
           </Link>
         </header>
-        <main id="main" className="min-w-0 flex-1 p-4 sm:p-6">
+        <main id="main" className="min-w-0 flex-1 px-4 pt-4 pb-16 sm:px-6 sm:pt-8 sm:pb-24">
           {/* A resource list reads badly at 1600px wide; the column is capped and
               centred the same way the Storybook examples are. */}
           <div className="mx-auto w-full max-w-5xl">{children}</div>
