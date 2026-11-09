@@ -1,15 +1,21 @@
 {
   "name": "@kube-ai-hub/ai-kit",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "description": "Console UI library: theme tokens, motion primitives, base components and schema-driven list/detail/form.",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kube-AI-Hub/console.git",
+    "directory": "packages/ai-kit"
+  },
   "sideEffects": [
     "*.css"
   ],
   "files": [
-    "dist"
+    "dist",
+    "LICENSE",
+    "README.md"
   ],
   "main": "./dist/index.js",
   "module": "./dist/index.js",
