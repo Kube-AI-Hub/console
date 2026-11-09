@@ -1,4 +1,4 @@
-import { resourcePath, type UpstreamConfig } from './config';
+import { kubeResourcePath, resourcePath, type UpstreamConfig } from './config';
 import { badRequest, normaliseUpstreamError, upstreamUnreachable, type BffError } from './errors';
 
 /**
@@ -115,6 +115,12 @@ export interface ConfigMapClientDeps {
 }
 
 export function createConfigMapService({ config, fetchImpl }: ConfigMapClientDeps) {
+  /** One place decides which upstream path family is in use. */
+  const pathFor = (cluster: string, namespace: string, resource: string): string =>
+    config.mode === 'kube'
+      ? kubeResourcePath(cluster, namespace, resource)
+      : resourcePath(config, cluster, namespace, resource);
+
   async function list(query: ListQuery, token: string | undefined) {
     const params = new URLSearchParams({
       sortBy: query.sortBy,
@@ -123,8 +129,17 @@ export function createConfigMapService({ config, fetchImpl }: ConfigMapClientDep
       limit: String(query.pageSize),
     });
     if (query.keyword) params.set('fieldSelector', `metadata.name=~${query.keyword}`);
+    if (config.mode === 'kube') {
+      // Plain kube API has no sortBy/page/limit. Ask for everything and let the
+      // service sort and slice, so the harness still shows real ordering.
+      params.delete('sortBy');
+      params.delete('ascending');
+      params.delete('page');
+      params.delete('limit');
+      params.delete('fieldSelector');
+    }
 
-    const url = `${config.baseUrl}${resourcePath(config, query.cluster, query.namespace, 'configmaps')}?${params}`;
+    const url = `${config.baseUrl}${pathFor(query.cluster, query.namespace, 'configmaps')}?${params}`;
     let response: Response;
     try {
       response = await fetchImpl(url, { headers: authHeaders(token) });
@@ -134,17 +149,30 @@ export function createConfigMapService({ config, fetchImpl }: ConfigMapClientDep
     if (!response.ok) throw await normaliseUpstreamError(response);
 
     const body = (await response.json()) as UpstreamList;
-    const items = (body.items ?? []).map(toSummary);
+    let items = (body.items ?? []).map(toSummary);
+
+    if (config.mode === 'kube') {
+      if (query.keyword) items = items.filter((item) => item.name.includes(query.keyword));
+      const dir = query.order === 'asc' ? 1 : -1;
+      items.sort((a, b) =>
+        query.sortBy === 'name'
+          ? a.name.localeCompare(b.name) * (query.order === 'asc' ? 1 : -1)
+          : (Date.parse(a.createdAt) - Date.parse(b.createdAt)) * dir,
+      );
+    }
+
+    const total = config.mode === 'kube' ? items.length : (body.totalItems ?? items.length);
+    const start = (query.page - 1) * query.pageSize;
     return {
-      items,
-      total: body.totalItems ?? items.length,
+      items: config.mode === 'kube' ? items.slice(start, start + query.pageSize) : items,
+      total,
       page: query.page,
       pageSize: query.pageSize,
     };
   }
 
   async function get(query: { cluster: string; namespace: string; name: string }, token: string | undefined) {
-    const url = `${config.baseUrl}${resourcePath(config, query.cluster, query.namespace, `configmaps/${encodeURIComponent(query.name)}`)}`;
+    const url = `${config.baseUrl}${pathFor(query.cluster, query.namespace, `configmaps/${encodeURIComponent(query.name)}`)}`;
     let response: Response;
     try {
       response = await fetchImpl(url, { headers: authHeaders(token) });
@@ -156,7 +184,7 @@ export function createConfigMapService({ config, fetchImpl }: ConfigMapClientDep
   }
 
   async function remove(query: { cluster: string; namespace: string; name: string }, token: string | undefined) {
-    const url = `${config.baseUrl}${resourcePath(config, query.cluster, query.namespace, `configmaps/${encodeURIComponent(query.name)}`)}`;
+    const url = `${config.baseUrl}${pathFor(query.cluster, query.namespace, `configmaps/${encodeURIComponent(query.name)}`)}`;
     let response: Response;
     try {
       // Kube deletes are async; `deleteOptions` without a propagation policy keeps
