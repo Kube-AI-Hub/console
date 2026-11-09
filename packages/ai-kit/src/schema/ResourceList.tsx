@@ -360,23 +360,34 @@ export function ResourceList<TRow>({
            * keeps the tint; the button sits on the page background, aligned with
            * the right edge of the table it operates on.
            */}
-          {bulkActions.length > 0 ? (
-            <>
-              <span
-                // Fixed width, right-aligned, tabular figures: the count grows
-                // leftward into reserved space so the actions never shift as it
-                // crosses 9 → 10 → 100.
-                className="flex h-11 shrink-0 items-center justify-end rounded-ai-md bg-ai-surface-2 px-3 text-xs tabular-nums text-ai-fg-secondary sm:h-9"
-              >
-                已选 {selectedKeys.length} 项
-              </span>
-              <div className="flex h-11 items-center gap-2 sm:h-9">
+          {/*
+           * Right-hand cluster: selection count, then bulk actions, then the
+           * primary action. One `ml-auto` on the whole cluster keeps the search
+           * on the left and everything actionable flush with the table's right
+           * edge.
+           *
+           * The primary action goes last, not first: it stays in the same place
+           * whether or not rows are selected, so its position never depends on a
+           * transient state. Bulk actions sit immediately before it and disappear
+           * when nothing is selected.
+           */}
+          <div className="ml-auto flex h-11 items-center gap-2 sm:h-9">
+            {bulkActions.length > 0 ? (
+              <>
+                <span
+                  // Fixed width, right-aligned, tabular figures: the count grows
+                  // leftward into reserved space so the actions never shift as it
+                  // crosses 9 → 10 → 100.
+                  className="flex h-full shrink-0 items-center justify-end rounded-ai-md bg-ai-surface-2 px-3 text-xs tabular-nums text-ai-fg-secondary"
+                >
+                  已选 {selectedKeys.length} 项
+                </span>
                 {bulkActions.map((action) => (
                   <Button
                     key={action.key}
                     // `md` is h-9 on desktop, matching the search field exactly. The
-                    // base `min-h-11` touch floor is cleared here so the bar cannot
-                    // grow taller than the field it sits beside.
+                    // base `min-h-11` touch floor is cleared so the row cannot grow
+                    // taller than the field beside it.
                     size="md"
                     variant={action.tone === 'danger' ? 'danger' : 'secondary'}
                     className="min-h-0 px-3"
@@ -390,20 +401,8 @@ export function ResourceList<TRow>({
                     {action.label}
                   </Button>
                 ))}
-              </div>
-            </>
-          ) : null}
-
-          {/*
-           * The primary action shares the toolbar row instead of occupying a
-           * header row of its own.
-           *
-           * It sits after the selection controls and is pushed right, so a page
-           * with nothing selected shows search on the left and create on the
-           * right — one row instead of two — and a selection inserts the count
-           * and bulk action between them without moving either.
-           */}
-          <div className="ml-auto flex h-11 items-center gap-2 sm:h-9">
+              </>
+            ) : null}
             {primaryAction ? (
               <Button
                 size="md"
