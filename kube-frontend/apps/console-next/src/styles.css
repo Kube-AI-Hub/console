@@ -26,8 +26,22 @@ body {
 }
 
 /* A focus ring on every keyboard-reachable element, not only the ones that opt
- * in: an agent driving the UI by keyboard needs the same affordance as a person. */
+ * in: an agent driving the UI by keyboard needs the same affordance as a person.
+ *
+ * ai-kit components draw their own ring (`focus-visible:ring-2` on buttons,
+ * `focus-within:ring-2` on field wrappers). Adding an outline on top produced a
+ * doubled, offset frame — the outline sits 2px outside the border while the ring
+ * hugs it. Components opt out themselves; this is the fallback for plain HTML.
+ */
 :focus-visible {
   outline: 2px solid rgb(var(--ai-accent));
   outline-offset: 2px;
+}
+
+/* A field wrapper owns the focus ring for the input inside it; the inner input
+ * must not also draw the browser's outline. The two land at different offsets
+ * (ring hugs the border, outline sits 2px outside), which reads as a double
+ * frame around the search box. */
+[data-ai-field-input]:focus-visible {
+  outline: none;
 }

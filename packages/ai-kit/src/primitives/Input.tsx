@@ -31,16 +31,22 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(function Inp
   }
   return (
     <div
+      data-ai-field=""
       className={cn(
         'flex h-9 items-center gap-2 rounded-ai-md border border-ai-line bg-ai-surface-1 px-3',
         'transition-colors duration-ai-fast hover:border-ai-line-strong',
         'focus-within:border-ai-accent focus-within:ring-2 focus-within:ring-ai-accent/25',
+        // The wrapper draws the focus ring; the inner input is `outline-none`.
+        // Without this the browser's global focus outline lands on the wrapper's
+        // child and shows up offset by the 2px ring, reading as a double frame.
+        'focus-within:outline-none',
         className,
       )}
     >
       {leading ? <span className="shrink-0 text-ai-fg-muted" aria-hidden="true">{leading}</span> : null}
       <input
         ref={ref}
+        data-ai-field-input=""
         className="h-full min-w-0 flex-1 bg-transparent text-sm text-ai-fg outline-none placeholder:text-ai-fg-faint disabled:cursor-not-allowed"
         {...props}
       />

@@ -355,14 +355,26 @@ export function ResourceList<TRow>({
            * disabled keeps the row the same width but adds two dead controls to
            * every visit; a selection bar is the pattern people expect from a list.
            */}
+          {/*
+           * The bar must be exactly as tall as the search field.
+           *
+           * It appears only after a selection, so a taller bar pushes the table
+           * down at the moment the user is aiming at it — the row they just
+           * selected jumps away. `h-9` matches the desktop field height, and the
+           * buttons drop their own vertical padding so they cannot exceed it.
+           */}
           {bulkActions.length > 0 ? (
-            <div className="flex items-center gap-2 rounded-ai-md bg-ai-surface-2 px-2 py-1">
+            <div className="flex h-11 items-center gap-2 rounded-ai-md bg-ai-surface-2 px-2 sm:h-9">
               <span className="text-xs text-ai-fg-secondary">已选 {selectedKeys.length} 项</span>
               {bulkActions.map((action) => (
                 <Button
                   key={action.key}
-                  size="sm"
+                  // `md` is h-9 on desktop, matching the search field exactly. The
+                  // base `min-h-11` touch floor is cleared here so the bar cannot
+                  // grow taller than the field it sits beside.
+                  size="md"
                   variant={action.tone === 'danger' ? 'danger' : 'secondary'}
+                  className="min-h-0 px-3"
                   onClick={() => {
                     if (action.confirm && !window.confirm(action.confirm)) return;
                     onBulkAction?.(action.key, selectedKeys);
