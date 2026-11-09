@@ -363,39 +363,47 @@ export function ResourceList<TRow>({
            * selected jumps away. `h-9` matches the desktop field height, and the
            * buttons drop their own vertical padding so they cannot exceed it.
            */}
+          {/*
+           * Two separate pieces: the count chip, then the actions pushed to the
+           * right edge of the toolbar.
+           *
+           * The chip used to wrap both, so its tinted background also covered the
+           * buttons and made the danger action read as part of the label. The chip
+           * keeps the tint; the button sits on the page background, aligned with
+           * the right edge of the table it operates on.
+           */}
           {bulkActions.length > 0 ? (
-            <div className="flex h-11 items-center gap-3 rounded-ai-md bg-ai-surface-2 px-3 sm:h-9">
-              {/*
-               * Fixed width, right-aligned count.
-               *
-               * The label is sized for three digits and aligned to the right so
-               * the number grows leftward into reserved space. Without this the
-               * button shifts as the count crosses 9 → 10 → 100 and the user's
-               * pointer lands next to it instead of on it.
-               */}
-              <span className="w-14 shrink-0 text-right text-xs tabular-nums text-ai-fg-secondary">
+            <>
+              <span
+                // Fixed width, right-aligned, tabular figures: the count grows
+                // leftward into reserved space so the actions never shift as it
+                // crosses 9 → 10 → 100.
+                className="flex h-11 shrink-0 items-center justify-end rounded-ai-md bg-ai-surface-2 px-3 text-xs tabular-nums text-ai-fg-secondary sm:h-9"
+              >
                 已选 {selectedKeys.length} 项
               </span>
-              {bulkActions.map((action) => (
-                <Button
-                  key={action.key}
-                  // `md` is h-9 on desktop, matching the search field exactly. The
-                  // base `min-h-11` touch floor is cleared here so the bar cannot
-                  // grow taller than the field it sits beside.
-                  size="md"
-                  variant={action.tone === 'danger' ? 'danger' : 'secondary'}
-                  className="min-h-0 px-3"
-                  onClick={() => {
-                    if (action.confirm && !window.confirm(action.confirm)) return;
-                    onBulkAction?.(action.key, selectedKeys);
-                  }}
-                  {...(action.aiId ? { 'data-ai-id': action.aiId } : {})}
-                  {...(action.aiNeeds?.length ? { 'data-ai-needs': action.aiNeeds.join(' ') } : {})}
-                >
-                  {action.label}
-                </Button>
-              ))}
-            </div>
+              <div className="ml-auto flex h-11 items-center gap-2 sm:h-9">
+                {bulkActions.map((action) => (
+                  <Button
+                    key={action.key}
+                    // `md` is h-9 on desktop, matching the search field exactly. The
+                    // base `min-h-11` touch floor is cleared here so the bar cannot
+                    // grow taller than the field it sits beside.
+                    size="md"
+                    variant={action.tone === 'danger' ? 'danger' : 'secondary'}
+                    className="min-h-0 px-3"
+                    onClick={() => {
+                      if (action.confirm && !window.confirm(action.confirm)) return;
+                      onBulkAction?.(action.key, selectedKeys);
+                    }}
+                    {...(action.aiId ? { 'data-ai-id': action.aiId } : {})}
+                    {...(action.aiNeeds?.length ? { 'data-ai-needs': action.aiNeeds.join(' ') } : {})}
+                  >
+                    {action.label}
+                  </Button>
+                ))}
+              </div>
+            </>
           ) : null}
         </div>
       ) : null}
