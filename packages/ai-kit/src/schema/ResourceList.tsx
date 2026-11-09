@@ -292,33 +292,21 @@ export function ResourceList<TRow>({
   return (
     <div className={cn('flex flex-col gap-4', className)}>
       {/*
-       * Title and primary action share one row on wide screens.
+       * The header carries identity only.
        *
-       * The action used to sit inside the toolbar, which put it on the same line
-       * as the search box and left the header looking empty while the button
-       * floated in the middle. A page header answers "what is this" and "what can
-       * I do" — those belong together, above the list.
+       * The primary action lives in the toolbar below, on the same row as search
+       * and any bulk action. Keeping it here would occupy a second row for one
+       * button: the title block is one line of text, and a header row whose right
+       * half is empty wastes the vertical space a resource list needs most.
        */}
-      {schema.title || schema.description || primaryAction ? (
-        <header className="flex flex-wrap items-start justify-between gap-3">
-          <div className="min-w-0">
-            {schema.title ? <h2 className="text-base font-semibold text-ai-fg">{schema.title}</h2> : null}
-            {schema.description ? <p className="mt-1 text-xs text-ai-fg-muted">{schema.description}</p> : null}
-          </div>
-          {primaryAction ? (
-            <Button
-              size="sm"
-              variant="primary"
-              onClick={() => onAction?.(primaryAction.key, undefined as unknown as TRow)}
-              {...(primaryAction.aiId ? { 'data-ai-id': primaryAction.aiId } : {})}
-            >
-              {primaryAction.label}
-            </Button>
-          ) : null}
+      {schema.title || schema.description ? (
+        <header className="flex min-w-0 flex-col gap-1">
+          {schema.title ? <h2 className="text-base font-semibold text-ai-fg">{schema.title}</h2> : null}
+          {schema.description ? <p className="text-xs text-ai-fg-muted">{schema.description}</p> : null}
         </header>
       ) : null}
 
-      {hasToolbar || bulkActions.length > 0 ? (
+      {hasToolbar || bulkActions.length > 0 || primaryAction ? (
         <div className="flex flex-wrap items-center gap-2">
           {schema.search ? (
             <Input
@@ -382,7 +370,7 @@ export function ResourceList<TRow>({
               >
                 已选 {selectedKeys.length} 项
               </span>
-              <div className="ml-auto flex h-11 items-center gap-2 sm:h-9">
+              <div className="flex h-11 items-center gap-2 sm:h-9">
                 {bulkActions.map((action) => (
                   <Button
                     key={action.key}
@@ -405,6 +393,29 @@ export function ResourceList<TRow>({
               </div>
             </>
           ) : null}
+
+          {/*
+           * The primary action shares the toolbar row instead of occupying a
+           * header row of its own.
+           *
+           * It sits after the selection controls and is pushed right, so a page
+           * with nothing selected shows search on the left and create on the
+           * right — one row instead of two — and a selection inserts the count
+           * and bulk action between them without moving either.
+           */}
+          <div className="ml-auto flex h-11 items-center gap-2 sm:h-9">
+            {primaryAction ? (
+              <Button
+                size="md"
+                variant="primary"
+                className="min-h-0 px-3"
+                onClick={() => onAction?.(primaryAction.key, undefined as unknown as TRow)}
+                {...(primaryAction.aiId ? { 'data-ai-id': primaryAction.aiId } : {})}
+              >
+                {primaryAction.label}
+              </Button>
+            ) : null}
+          </div>
         </div>
       ) : null}
 

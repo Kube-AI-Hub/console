@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
 import { ResourceList, type ListSchema } from '../src/schema/ResourceList';
-import { Button } from '../src/primitives/Button';
 
 /**
  * Port of `console/src/pages/projects/containers/ConfigMaps/index.jsx`.
@@ -78,9 +77,24 @@ const schema: ListSchema<ConfigMapRow> = {
     { key: 'delete', label: '删除', tone: 'danger', confirm: '确认删除该配置字典？' },
   ],
   selection: 'multiple',
-  actions: [{ key: 'bulk-delete', label: '批量删除', tone: 'danger', confirm: '确认删除所选配置字典？' }],
+  // The primary action is declared on the schema, not rendered beside it: the
+  // list owns the toolbar row, so a page-level button would occupy a second row
+  // and drift from the other consumers of this component.
+  primaryAction: { key: 'create', label: '创建', aiId: 'configmaps:create' },
+  actions: [
+    {
+      key: 'bulk-delete',
+      label: '批量删除',
+      tone: 'danger',
+      confirm: '确认删除所选配置字典？',
+      aiId: 'configmaps:bulk-delete',
+      aiNeeds: ['configmaps:row-select'],
+    },
+  ],
   empty: { title: '暂无配置字典', description: '创建第一个配置字典以挂载到工作负载。' },
   pagination: { page: 1, pageSize: 20, total: ROWS.length },
+  sort: { key: 'createTime', order: 'desc' },
+  sortableKeys: ['name', 'createTime'],
 };
 
 const meta: Meta = {
@@ -93,26 +107,33 @@ export const PortedFromConsole: StoryObj = {
   render: () => {
     const [search, setSearch] = React.useState('');
     const [selected, setSelected] = React.useState<string[]>([]);
+    const [sort, setSort] = React.useState<{ key: string; order: 'asc' | 'desc' }>({ key: 'createTime', order: 'desc' });
     const rows = search ? ROWS.filter((row) => row.name.includes(search)) : ROWS;
     return (
       <div className="mx-auto max-w-5xl">
-          <div className="mb-6 flex items-center justify-between">
-            <p className="text-xs text-ai-fg-muted">
-              原页面 147 行（含 mobx 装饰器样板）；此处的资源特定部分即下面的 schema。
-            </p>
-            <Button variant="primary" size="sm">创建</Button>
-          </div>
-          <ResourceList
-            schema={{ ...schema, pagination: { ...schema.pagination!, total: rows.length } }}
-            rows={rows}
-            searchValue={search}
-            onSearchChange={setSearch}
-            selectedKeys={selected}
-            onSelectionChange={setSelected}
-            onPageChange={() => undefined}
-            onAction={(action, row) => console.log(action, row.name)}
-            onBulkAction={(action, keys) => console.log(action, keys)}
-          />
+        {/*
+         * No page-level button and no page-level row: everything from the title
+         * down is `ResourceList`. That is the claim the story makes — the
+         * resource-specific part is the schema above, and the layout (search,
+         * selection, primary action on one row) comes from the component, so this
+         * page cannot drift from the app that uses it.
+         */}
+        <ResourceList
+          schema={{
+            ...schema,
+            sort,
+            pagination: { ...schema.pagination!, total: rows.length },
+          }}
+          rows={rows}
+          searchValue={search}
+          onSearchChange={setSearch}
+          selectedKeys={selected}
+          onSelectionChange={setSelected}
+          onPageChange={() => undefined}
+          onSortChange={(next) => next && setSort({ key: next.key, order: next.order })}
+          onAction={(action, row) => console.log(action, row?.name)}
+          onBulkAction={(action, keys) => console.log(action, keys)}
+        />
       </div>
     );
   },
