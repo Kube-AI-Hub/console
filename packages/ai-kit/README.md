@@ -2,7 +2,7 @@
 
 Console 的新界面库。替代 `@kube-design/components`，并补上「列表 / 详情 / 表单」三类 schema 驱动的公共组件。
 
-采用 [Apache License 2.0](./LICENSE) 开源发布。本包单独授权，不随仓库根目录的 AGPL-3.0 传播；引用本库的下游项目只需遵守 Apache 2.0 的署名与 NOTICE 义务。
+采用 [Apache License 2.0](./LICENSE) 开源发布。
 
 ## 为什么另起一个库
 
@@ -261,8 +261,6 @@ import { ThemeProvider } from '@kube-ai-hub/ai-kit';
 Copyright 2026 Kube AI Hub.
 
 以 [Apache License, Version 2.0](./LICENSE) 授权。你可以自由使用、修改与再分发，包括商业用途，条件是保留版权与许可声明、在修改过的文件中标注变更，并按需附带 NOTICE 文件。
-
-本包是独立授权的组件：它不继承本仓库根目录 `LICENSE` 的 AGPL-3.0。把 ai-kit 引入其他项目、产品或服务时，只需满足 Apache 2.0 的义务。
 
 `package.json` 中的 `license` 字段与本文件一致，均为 `Apache-2.0`。
 
