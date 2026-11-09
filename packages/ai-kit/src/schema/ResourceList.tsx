@@ -364,8 +364,18 @@ export function ResourceList<TRow>({
            * buttons drop their own vertical padding so they cannot exceed it.
            */}
           {bulkActions.length > 0 ? (
-            <div className="flex h-11 items-center gap-2 rounded-ai-md bg-ai-surface-2 px-2 sm:h-9">
-              <span className="text-xs text-ai-fg-secondary">已选 {selectedKeys.length} 项</span>
+            <div className="flex h-11 items-center gap-3 rounded-ai-md bg-ai-surface-2 px-3 sm:h-9">
+              {/*
+               * Fixed width, right-aligned count.
+               *
+               * The label is sized for three digits and aligned to the right so
+               * the number grows leftward into reserved space. Without this the
+               * button shifts as the count crosses 9 → 10 → 100 and the user's
+               * pointer lands next to it instead of on it.
+               */}
+              <span className="w-14 shrink-0 text-right text-xs tabular-nums text-ai-fg-secondary">
+                已选 {selectedKeys.length} 项
+              </span>
               {bulkActions.map((action) => (
                 <Button
                   key={action.key}
