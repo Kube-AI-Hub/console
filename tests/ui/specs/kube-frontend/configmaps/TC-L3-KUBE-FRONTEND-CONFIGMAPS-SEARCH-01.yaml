@@ -5,7 +5,7 @@ module: kube-frontend
 submodule: configmaps
 feature: search
 title: "配置字典 · 按名称搜索"
-entry_url: "{BASE_URL}/c/host/p/default/configmaps"
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps"
 prd: prd/kube-frontend/configmaps/search.md
 design: design/kube-frontend/configmaps/search.md
 
@@ -21,7 +21,7 @@ preconditions:
 - 已登录
 - 该空间下对象名包含 nginx
 steps:
-- 打开 {BASE_URL}/c/host/p/default/configmaps
+- 打开 {BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps
 - 在搜索框输入 nginx
 - 等待 250ms
 expected:

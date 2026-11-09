@@ -3,7 +3,7 @@
 - **用例 ID**: `TC-CORE-KUBE_FRONTEND-01`
 - **级别**: L1  **套件**: `core`
 - **模块**: `kube-frontend` / `configmaps` `page`
-- **入口**: `{BASE_URL}/c/host/p/default/configmaps`
+- **入口**: `{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps`
 - **需求**: `prd/kube-frontend/_index.md`
 
 ## 产品功能
@@ -31,7 +31,7 @@
 ### US1 - 作为平台工程师，看到迁移后的配置字典页面与老控制台行为一致
 
 
-**Independent Test**：打开 `/c/:cluster/p/:namespace/configmaps`，能列出真实 ConfigMap、按名称搜索、按名称与创建时间排序、翻页，结果与老控制台同一 namespace 下一致。
+**Independent Test**：打开 `/kube-frontend/:workspace/clusters/:cluster/projects/:namespace/configmaps`，能列出真实 ConfigMap、按名称搜索、按名称与创建时间排序、翻页，结果与老控制台同一 namespace 下一致。
 
 ### US2 - 作为智能体，在不知道页面文案的情况下完成一次删除
 
@@ -50,7 +50,7 @@
 
 ## 测试步骤
 
-1. 打开 {BASE_URL}/c/host/p/default/configmaps
+1. 打开 {BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps
 2. 记录列表中的对象名称
 3. 在老 console 打开同一空间的配置字典页
 4. 对比两边的名称集合

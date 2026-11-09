@@ -19,9 +19,20 @@ export default defineConfig({
   ],
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/index.ts'),
+      /*
+       * Two entries: the component library and the Tailwind preset.
+       *
+       * `package.json` already advertises `./tailwind.preset`, but the build only
+       * emitted `index.js` — so a consumer that followed the export map resolved
+       * nothing, Tailwind never loaded the preset, and every `rounded-ai-*` /
+       * `bg-ai-surface-*` class silently did not exist.
+       */
+      entry: {
+        index: resolve(__dirname, 'src/index.ts'),
+        'tailwind.preset': resolve(__dirname, 'src/tailwind.preset.ts'),
+      },
       formats: ['es'],
-      fileName: () => 'index.js',
+      fileName: (_format, entryName) => `${entryName}.js`,
     },
     rollupOptions: {
       external: [

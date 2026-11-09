@@ -1,8 +1,9 @@
-/* The app's only stylesheet.
- *
- * ai-kit tokens and component CSS arrive through the ui package, so there is one
- * import and one cascade. Tailwind utilities sit on top of the shared preset, so
- * class names match the library exactly. */
+/* Tailwind must load ai-kit's preset before the stylesheet can resolve the
+ * library's utility classes (`rounded-ai-md`, `bg-ai-surface-1`, …). Without it
+ * Tailwind only emits the core utilities, so ai-kit's components render with no
+ * radius, no surface colour and a plain black border. */
+@config "../tailwind.config.cjs";
+
 @import 'tailwindcss';
 @import '@kube-ai-hub/ui/styles.css';
 

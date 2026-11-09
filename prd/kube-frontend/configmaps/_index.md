@@ -4,7 +4,7 @@
 
 `kube-frontend` 的第一个资源模块。它是 schema 抽象的验收用例：如果这一页需要手写页面骨架，说明抽象不成立，后续 24 个资源模块会退化成 24 份手写代码。
 
-入口：`/c/:cluster/p/:namespace/configmaps`，从侧栏「配置字典」进入。
+入口：`/kube-frontend/:workspace/clusters/:cluster/projects/:namespace/configmaps`，从侧栏「配置字典」进入。
 
 ## 用户故事
 

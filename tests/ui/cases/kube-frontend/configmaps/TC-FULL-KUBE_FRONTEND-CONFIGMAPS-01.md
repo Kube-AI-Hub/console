@@ -3,7 +3,7 @@
 - **用例 ID**: `TC-FULL-KUBE_FRONTEND-CONFIGMAPS-01`
 - **级别**: L2  **套件**: `full`
 - **模块**: `kube-frontend` / `configmaps` `page`
-- **入口**: `{BASE_URL}/c/host/p/default/configmaps`
+- **入口**: `{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps`
 - **需求**: `prd/kube-frontend/configmaps/_index.md`
 
 ## 产品功能
@@ -45,7 +45,7 @@
 
 ## 测试步骤
 
-1. 打开 {BASE_URL}/c/host/p/default/configmaps
+1. 打开 {BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps
 2. 记录每行的名称、键、创建时间
 3. 用 kubectl -n default get configmaps 导出同一份数据并逐项比对
 4. 在页面上删除本用例临时创建的那条并在确认框点确定

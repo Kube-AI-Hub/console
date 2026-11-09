@@ -18,7 +18,11 @@ function IndexPage() {
       <p className="text-xs text-ai-fg-muted">选择模块进入。</p>
       <ul className="flex flex-col gap-2 text-sm">
         <li>
-          <Link to="/c/$cluster/p/$namespace/configmaps" params={{ cluster: 'host', namespace: 'default' }} className="text-ai-accent hover:underline">
+          <Link
+            to="/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/configmaps"
+            params={{ workspace: 'system-workspace', cluster: 'host', namespace: 'default' }}
+            className="text-ai-accent hover:underline"
+          >
             配置字典
           </Link>
         </li>

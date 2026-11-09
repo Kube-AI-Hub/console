@@ -5,7 +5,7 @@ module: kube-frontend
 submodule: configmaps
 feature: delete
 title: "配置字典 · 批量删除按钮可用性"
-entry_url: "{BASE_URL}/c/host/p/default/configmaps"
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps"
 prd: prd/kube-frontend/configmaps/delete.md
 design: design/kube-frontend/configmaps/delete.md
 
@@ -21,7 +21,7 @@ preconditions:
 - 已登录
 - 列表已加载
 steps:
-- 打开 {BASE_URL}/c/host/p/default/configmaps
+- 打开 {BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps
 - 观察「批量删除」
 - 勾选一行
 expected:

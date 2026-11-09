@@ -5,7 +5,7 @@ module: kube-frontend
 submodule: configmaps
 feature: page
 title: 新前端 · 入口与页面骨架
-entry_url: "{BASE_URL}/c/host/p/default/configmaps"
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps"
 prd: prd/kube-frontend/_index.md
 design: design/kube-frontend/_index.md
 
@@ -22,7 +22,7 @@ preconditions:
 - 已登录，且在 host 集群的 default 项目空间
 - 该空间下至少有一条 ConfigMap
 steps:
-- 打开 {BASE_URL}/c/host/p/default/configmaps
+- 打开 {BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps
 - 记录列表中的对象名称
 - 在老 console 打开同一空间的配置字典页
 - 对比两边的名称集合

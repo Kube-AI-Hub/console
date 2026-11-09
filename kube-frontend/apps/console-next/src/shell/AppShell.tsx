@@ -8,12 +8,31 @@ import { useT } from '@/i18n';
 interface NavEntry {
   key: string;
   labelKey: Parameters<ReturnType<typeof useT>>[0];
-  href: string;
+  /**
+   * Builder rather than a literal: every console route carries the current
+   * workspace, cluster and namespace, so the sidebar has to fill them from the
+   * route the user is on. A literal would render `$workspace` into the link.
+   */
+  build: (params: Scope) => string;
 }
 
 const NAV: readonly NavEntry[] = [
-  { key: 'configmaps', labelKey: 'configmaps.title', href: '/c/$cluster/p/$namespace/configmaps' },
+  {
+    key: 'configmaps',
+    labelKey: 'configmaps.title',
+    build: ({ workspace, cluster, namespace }) =>
+      `/kube-frontend/${workspace}/clusters/${cluster}/projects/${namespace}/configmaps`,
+  },
 ];
+
+/** Defaults used by the landing route and by any page without route params. */
+export interface Scope {
+  workspace: string;
+  cluster: string;
+  namespace: string;
+}
+
+export const DEFAULT_SCOPE: Scope = { workspace: 'system-workspace', cluster: 'host', namespace: 'default' };
 
 /**
  * Application shell: a sidebar on wide screens, a drawer on phones.
@@ -28,15 +47,29 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
   const [drawerOpen, setDrawerOpen] = React.useState(false);
   const location = useRouterState({ select: (state) => state.location.pathname });
 
+  /*
+   * Scope read from the URL, with a default for pages outside a resource route.
+   *
+   * The sidebar used to carry a literal path, which rendered `$workspace` into
+   * the href and produced a dead link. Deriving it from the location keeps the
+   * links valid on every page and preserves the user's current project.
+   */
+  const scope = React.useMemo<Scope>(() => {
+    const match = /^\/kube-frontend\/([^/]+)\/clusters\/([^/]+)\/projects\/([^/]+)/.exec(location);
+    return match?.[1] && match[2] && match[3]
+      ? { workspace: decodeURIComponent(match[1]), cluster: decodeURIComponent(match[2]), namespace: decodeURIComponent(match[3]) }
+      : DEFAULT_SCOPE;
+  }, [location]);
+
   const items = React.useMemo<MenuNode[]>(
     () =>
       NAV.map((entry) => ({
         key: entry.key,
         label: t(entry.labelKey),
-        href: entry.href,
+        href: entry.build(scope),
         onClick: () => setDrawerOpen(false),
       })),
-    [t],
+    [t, scope],
   );
 
   const activeKey = NAV.find((entry) => location.includes(`/${entry.key}`))?.key;
@@ -84,7 +117,9 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
           </Link>
         </header>
         <main id="main" className="min-w-0 flex-1 p-4 sm:p-6">
-          {children}
+          {/* A resource list reads badly at 1600px wide; the column is capped and
+              centred the same way the Storybook examples are. */}
+          <div className="mx-auto w-full max-w-5xl">{children}</div>
         </main>
       </div>
     </div>

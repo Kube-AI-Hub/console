@@ -5,7 +5,7 @@ module: kube-frontend
 submodule: configmaps
 feature: page
 title: 配置字典 · 列表与 kubectl 逐项核对
-entry_url: "{BASE_URL}/c/host/p/default/configmaps"
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps"
 prd: prd/kube-frontend/configmaps/_index.md
 design: design/kube-frontend/configmaps/_index.md
 
@@ -21,7 +21,7 @@ preconditions:
 - 已登录，且在 host 集群的 default 项目空间
 - 该空间下至少有两条 ConfigMap，其中一条由本用例临时创建
 steps:
-- 打开 {BASE_URL}/c/host/p/default/configmaps
+- 打开 {BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps
 - 记录每行的名称、键、创建时间
 - 用 kubectl -n default get configmaps 导出同一份数据并逐项比对
 - 在页面上删除本用例临时创建的那条并在确认框点确定

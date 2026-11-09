@@ -5,7 +5,7 @@ module: kube-frontend
 submodule: configmaps
 feature: search
 title: "配置字典 · 搜索无结果"
-entry_url: "{BASE_URL}/c/host/p/default/configmaps"
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps"
 prd: prd/kube-frontend/configmaps/search.md
 design: design/kube-frontend/configmaps/search.md
 
@@ -20,7 +20,7 @@ product: 无匹配时呈现空态，而不是空表。
 preconditions:
 - 已登录
 steps:
-- 打开 {BASE_URL}/c/host/p/default/configmaps
+- 打开 {BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps
 - 输入一个不存在的名称
 - 等待请求完成
 expected:

@@ -44,17 +44,17 @@ function renderPage() {
   const rootRoute = createRootRoute();
   const listRoute = createRoute({
     getParentRoute: () => rootRoute,
-    path: '/c/$cluster/p/$namespace/configmaps',
-    component: () => <ConfigMapsPage cluster="host" namespace="default" />,
+    path: '/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/configmaps',
+    component: () => <ConfigMapsPage workspace="system-workspace" cluster="host" namespace="default" />,
   });
   const detailRoute = createRoute({
     getParentRoute: () => rootRoute,
-    path: '/c/$cluster/p/$namespace/configmaps/$name',
+    path: '/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/configmaps/$name',
     component: () => null,
   });
   const router = createRouter({
     routeTree: rootRoute.addChildren([listRoute.addChildren([detailRoute])]),
-    history: createMemoryHistory({ initialEntries: ['/c/host/p/default/configmaps'] }),
+    history: createMemoryHistory({ initialEntries: ['/kube-frontend/system-workspace/clusters/host/projects/default/configmaps'] }),
   });
 
   return render(
@@ -144,38 +144,47 @@ describe('ConfigMaps list', () => {
     expect(currentSurface().querySelector('[data-ai-id="configmaps:retry"]')).toBeNull();
   });
 
-  it('toggles sort order when the active header is clicked again', async () => {
+  it('requests a new sort when a different header is clicked', async () => {
+    // The list opens on createdAt/desc; clicking "name" must ask the server to
+    // sort by name ascending, not merely re-fetch the same order.
     const fetchMock = stubFetch(() => new Response(JSON.stringify({ items: rows, total: 2, page: 1, pageSize: 10 }), { status: 200 }));
     renderPage();
     await waitFor(() => expect(screen.getByText('app-config')).toBeInTheDocument());
 
-    const header = currentSurface().querySelector('[data-ai-id="configmaps:sort:createdAt"]') as HTMLElement;
+    const header = currentSurface().querySelector('thead th:nth-child(2) button') as HTMLElement;
     await userEvent.click(header);
     await waitFor(() => {
       const last = new URL(String((fetchMock.mock.calls.at(-1) as unknown as [string])[0]), 'http://localhost');
+      expect(last.searchParams.get('sortBy')).toBe('name');
       expect(last.searchParams.get('order')).toBe('asc');
     });
   });
 
-  it('keeps the checkbox label accessible for assistive tech', async () => {
+  it('provides a select-all checkbox plus one per row', async () => {
     stubFetch(() => new Response(JSON.stringify({ items: rows, total: 2, page: 1, pageSize: 10 }), { status: 200 }));
     renderPage();
     await waitFor(() => expect(screen.getByText('app-config')).toBeInTheDocument());
-    expect(screen.getAllByRole('checkbox').length).toBe(2);
+    // Table renders a header select-all in addition to the two row checkboxes.
+    expect(screen.getAllByRole('checkbox')).toHaveLength(3);
   });
 
-  it('disables the bulk action until something is selected', async () => {
+  it('reveals the bulk action only once something is selected', async () => {
+    // The control is not rendered until a row is chosen: a permanently disabled
+    // button is a dead control on every visit and still needs explaining.
     stubFetch(() => new Response(JSON.stringify({ items: rows, total: 2, page: 1, pageSize: 10 }), { status: 200 }));
     renderPage();
     await waitFor(() => expect(screen.getByText('app-config')).toBeInTheDocument());
 
-    const bulk = currentSurface().querySelector('[data-ai-id="configmaps:bulk-delete"]') as HTMLButtonElement;
-    expect(bulk).toBeDisabled();
-    expect(bulk).toHaveAttribute('data-ai-needs', 'configmaps:row-select');
+    expect(currentSurface().querySelector('[data-ai-id="configmaps:bulk-delete"]')).toBeNull();
 
-    await userEvent.click(screen.getAllByRole('checkbox')[0]!);
+    // Index 0 is the header select-all; row checkboxes start at 1.
+    await userEvent.click(screen.getAllByRole('checkbox')[1]!);
+    const bulk = currentSurface().querySelector('[data-ai-id="configmaps:bulk-delete"]') as HTMLButtonElement;
+    expect(bulk).not.toBeNull();
     expect(bulk).not.toBeDisabled();
-    expect(within(bulk).getByText(/\(1\)/)).toBeInTheDocument();
+    expect(bulk).toHaveAttribute('data-ai-needs', 'configmaps:row-select');
+    // The count states the scope of the next click.
+    expect(currentSurface().textContent).toContain('已选 1 项');
   });
 
   it('retries a transient upstream failure before giving up', async () => {

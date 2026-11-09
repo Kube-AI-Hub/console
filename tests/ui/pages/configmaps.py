@@ -14,9 +14,20 @@ from playwright.sync_api import Locator, Page, expect
 class ConfigMapsPage:
     """配置字典列表与详情。"""
 
-    def __init__(self, page: Page, base_url: str, cluster: str = "host", namespace: str = "default") -> None:
+    def __init__(
+        self,
+        page: Page,
+        base_url: str,
+        cluster: str = "host",
+        namespace: str = "default",
+        workspace: str = "system-workspace",
+    ) -> None:
         self.page = page
-        self.url = f"{base_url}/c/{cluster}/p/{namespace}/configmaps"
+        # Mirrors the old console project path, prefixed so both apps can serve
+        # the same host without colliding.
+        self.url = (
+            f"{base_url}/kube-frontend/{workspace}/clusters/{cluster}/projects/{namespace}/configmaps"
+        )
 
     @property
     def surface(self) -> Locator:

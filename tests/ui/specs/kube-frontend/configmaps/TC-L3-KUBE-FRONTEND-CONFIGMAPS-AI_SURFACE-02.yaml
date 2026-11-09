@@ -5,7 +5,7 @@ module: kube-frontend
 submodule: configmaps
 feature: ai-surface
 title: "配置字典 · 句柄唯一且不依赖文案"
-entry_url: "{BASE_URL}/c/host/p/default/configmaps"
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps"
 prd: prd/kube-frontend/configmaps/ai-surface.md
 design: design/kube-frontend/configmaps/ai-surface.md
 
@@ -21,7 +21,7 @@ preconditions:
 - 已登录
 - 列表已加载
 steps:
-- 打开 {BASE_URL}/c/host/p/default/configmaps
+- 打开 {BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps
 - 枚举所有 data-ai-id
 expected:
 - 取值在页面内唯一

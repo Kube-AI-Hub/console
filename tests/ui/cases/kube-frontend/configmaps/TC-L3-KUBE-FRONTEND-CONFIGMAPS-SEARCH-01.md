@@ -3,7 +3,7 @@
 - **用例 ID**: `TC-L3-KUBE-FRONTEND-CONFIGMAPS-SEARCH-01`
 - **级别**: L3  **套件**: `point`
 - **模块**: `kube-frontend` / `configmaps` `search`
-- **入口**: `{BASE_URL}/c/host/p/default/configmaps`
+- **入口**: `{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps`
 - **需求**: `prd/kube-frontend/configmaps/search.md`
 
 ## 产品功能
@@ -45,7 +45,7 @@
 
 ## 测试步骤
 
-1. 打开 {BASE_URL}/c/host/p/default/configmaps
+1. 打开 {BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps
 2. 在搜索框输入 nginx
 3. 等待 250ms
 

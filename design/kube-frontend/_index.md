@@ -54,7 +54,7 @@
 
 | 子模块 | 入口 | 说明 |
 |---|---|---|
-| 配置字典 | `/c/:cluster/p/:namespace/configmaps` | 首个资源模块 |
+| 配置字典 | `/kube-frontend/:workspace/clusters/:cluster/projects/:namespace/configmaps` | 首个资源模块 |
 
 ## 运行时拓扑
 

@@ -5,7 +5,7 @@ module: kube-frontend
 submodule: configmaps
 feature: delete
 title: "配置字典 · 删除并刷新"
-entry_url: "{BASE_URL}/c/host/p/default/configmaps"
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps"
 prd: prd/kube-frontend/configmaps/delete.md
 design: design/kube-frontend/configmaps/delete.md
 
@@ -21,7 +21,7 @@ preconditions:
 - 已登录
 - 存在一条测试专用的 ConfigMap
 steps:
-- 打开 {BASE_URL}/c/host/p/default/configmaps
+- 打开 {BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps
 - 点击该行「删除」
 - 在确认框点确定
 expected:

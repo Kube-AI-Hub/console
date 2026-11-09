@@ -27,6 +27,7 @@ export {
   Empty,
   Menu,
   Pagination,
+  ResourceList,
   Skeleton,
   Table,
   Tooltip,
@@ -35,4 +36,13 @@ export {
   useMediaQuery,
 } from '@kube-ai-hub/ai-kit';
 
-export type { MenuNode, TableColumn } from '@kube-ai-hub/ai-kit';
+export type {
+  ListAction,
+  ListColumn,
+  ListFilter,
+  ListSchema,
+  MenuNode,
+  ResourceListProps,
+  SortOrder,
+  TableColumn,
+} from '@kube-ai-hub/ai-kit';

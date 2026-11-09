@@ -5,7 +5,7 @@ module: kube-frontend
 submodule: configmaps
 feature: ai-surface
 title: "配置字典 · 状态可读"
-entry_url: "{BASE_URL}/c/host/p/default/configmaps"
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps"
 prd: prd/kube-frontend/configmaps/ai-surface.md
 design: design/kube-frontend/configmaps/ai-surface.md
 
@@ -20,7 +20,7 @@ product: 区域根元素发布四态之一，加载中标记 aria-busy。
 preconditions:
 - 已登录
 steps:
-- 打开 {BASE_URL}/c/host/p/default/configmaps
+- 打开 {BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps
 - 加载过程中读取 data-ai-state
 - 加载完成后再次读取
 expected:

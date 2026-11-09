@@ -7,6 +7,10 @@ const buttonVariants = cva(
   [
     'ai-pressable inline-flex items-center justify-center gap-2 whitespace-nowrap',
     'rounded-ai-md text-sm font-medium',
+    // A 44px floor below `sm`. Desktop density is fine with an 36px control, but
+    // on a phone that is below the recommended touch target and misses become
+    // clicks on the neighbouring control.
+    'min-h-11 sm:min-h-9',
     // Transition the shadow and transform too, not just colour: the hover state
     // now moves the button, and a colour-only transition would snap.
     'transition-[background-color,border-color,color,box-shadow,transform] duration-ai-base ease-ai-out',

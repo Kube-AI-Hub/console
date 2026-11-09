@@ -3,7 +3,7 @@
 - **用例 ID**: `TC-L3-KUBE-FRONTEND-CONFIGMAPS-AI_SURFACE-02`
 - **级别**: L3  **套件**: `point`
 - **模块**: `kube-frontend` / `configmaps` `ai-surface`
-- **入口**: `{BASE_URL}/c/host/p/default/configmaps`
+- **入口**: `{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps`
 - **需求**: `prd/kube-frontend/configmaps/ai-surface.md`
 
 ## 产品功能
@@ -45,7 +45,7 @@
 
 ## 测试步骤
 
-1. 打开 {BASE_URL}/c/host/p/default/configmaps
+1. 打开 {BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps
 2. 枚举所有 data-ai-id
 
 ## 期望结果

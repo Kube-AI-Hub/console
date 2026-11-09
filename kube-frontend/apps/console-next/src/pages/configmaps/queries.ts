@@ -46,7 +46,7 @@ export function useDeleteConfigMaps(params: { cluster: string; namespace: string
 
 /** Register this page in the agent manifest. Called once when the module loads. */
 export const configMapsPage: AiPage = {
-  path: '/c/$cluster/p/$namespace/configmaps',
+  path: '/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/configmaps',
   title: '配置字典',
   description: '列出项目内的 ConfigMap，可搜索、排序、批量删除。',
   surfaceId: 'configmaps:surface',

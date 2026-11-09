@@ -10,7 +10,7 @@
 
 ### US1 - 作为平台工程师，看到迁移后的配置字典页面与老控制台行为一致
 
-**Independent Test**：打开 `/c/:cluster/p/:namespace/configmaps`，能列出真实 ConfigMap、按名称搜索、按名称与创建时间排序、翻页，结果与老控制台同一 namespace 下一致。
+**Independent Test**：打开 `/kube-frontend/:workspace/clusters/:cluster/projects/:namespace/configmaps`，能列出真实 ConfigMap、按名称搜索、按名称与创建时间排序、翻页，结果与老控制台同一 namespace 下一致。
 
 ### US2 - 作为智能体，在不知道页面文案的情况下完成一次删除
 

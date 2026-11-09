@@ -5,7 +5,7 @@ module: kube-frontend
 submodule: configmaps
 feature: mobile
 title: "配置字典 · 窄屏无横向滚动"
-entry_url: "{BASE_URL}/c/host/p/default/configmaps"
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps"
 prd: prd/kube-frontend/configmaps/mobile.md
 design: design/kube-frontend/configmaps/mobile.md
 
@@ -20,7 +20,7 @@ product: 375px 下页面不出现横向滚动，侧栏改为抽屉。
 preconditions:
 - 视口宽 375px
 steps:
-- 打开 {BASE_URL}/c/host/p/default/configmaps
+- 打开 {BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps
 - 读取 document.documentElement.scrollWidth
 - 点击导航按钮
 expected:

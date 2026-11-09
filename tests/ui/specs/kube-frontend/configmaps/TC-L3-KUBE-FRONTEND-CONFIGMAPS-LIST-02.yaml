@@ -5,7 +5,7 @@ module: kube-frontend
 submodule: configmaps
 feature: list
 title: "配置字典 · 列头切换排序"
-entry_url: "{BASE_URL}/c/host/p/default/configmaps"
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps"
 prd: prd/kube-frontend/configmaps/list.md
 design: design/kube-frontend/configmaps/list.md
 
@@ -21,7 +21,7 @@ preconditions:
 - 已登录
 - 列表已加载且总数大于一页
 steps:
-- 打开 {BASE_URL}/c/host/p/default/configmaps
+- 打开 {BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps
 - 点击「名称」列头
 - 再次点击「名称」列头
 expected:

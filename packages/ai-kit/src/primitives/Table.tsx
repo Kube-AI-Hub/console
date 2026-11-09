@@ -48,6 +48,13 @@ export interface TableProps<T> {
   /** Shown when `rows` is empty and not loading. */
   empty?: React.ReactNode;
   onRowClick?: (row: T) => void;
+  /**
+   * Extra attributes for each `<tr>`.
+   *
+   * The frontend publishes a stable handle per record (`data-ai-row`) so an agent
+   * can target a row without parsing its cells.
+   */
+  rowAttributes?: (row: T) => Record<string, string>;
   className?: string;
   /** Current sort, when the host owns the order. */
   sorter?: TableSortState;
@@ -79,6 +86,7 @@ export function Table<T>({
   loading = false,
   empty,
   onRowClick,
+  rowAttributes,
   className,
   sorter,
   onSortChange,
@@ -149,13 +157,20 @@ export function Table<T>({
             {expandedRow ? <th scope="col" className="w-8 px-2 py-2" aria-label="展开" /> : null}
             {selection ? (
               <th scope="col" className="w-10 px-3 py-2 text-ai-fg-muted">
-                <input
-                  type="checkbox"
-                  aria-label="全选"
-                  checked={allSelected}
-                  onChange={toggleAll}
-                  className="size-3.5 accent-[rgb(var(--ai-accent))]"
-                />
+                {/*
+                 * The label supplies a 44px tap area on phones while the box
+                 * itself stays 14px, so density on desktop is unchanged but a
+                 * thumb can hit it. Below 44px, tapping selects the wrong row.
+                 */}
+                <label className="grid size-11 cursor-pointer place-items-center sm:size-auto">
+                  <input
+                    type="checkbox"
+                    aria-label="全选"
+                    checked={allSelected}
+                    onChange={toggleAll}
+                    className="size-3.5 shrink-0 accent-[rgb(var(--ai-accent))]"
+                  />
+                </label>
               </th>
             ) : null}
             {columns.map((column) => {
@@ -230,6 +245,7 @@ export function Table<T>({
                   <tr
                     data-selected={isSelected ? 'true' : undefined}
                     onClick={onRowClick ? () => onRowClick(row) : undefined}
+                    {...(rowAttributes ? rowAttributes(row) : {})}
                     className={cn(
                       'border-b border-ai-line transition-colors duration-ai-fast',
                       !isExpanded && 'last:border-b-0',
@@ -264,14 +280,16 @@ export function Table<T>({
                     ) : null}
                     {selection ? (
                       <td className="px-3 py-2.5" onClick={(event) => event.stopPropagation()}>
-                        <input
-                          type="checkbox"
-                          aria-label={`选择第 ${index + 1} 行`}
-                          checked={isSelected}
-                          disabled={!(selection.isRowSelectable?.(row) ?? true)}
-                          onChange={() => toggleOne(key)}
-                          className="size-3.5 accent-[rgb(var(--ai-accent))]"
-                        />
+                        <label className="grid size-11 cursor-pointer place-items-center sm:size-auto">
+                          <input
+                            type="checkbox"
+                            aria-label={`选择第 ${index + 1} 行`}
+                            checked={isSelected}
+                            disabled={!(selection.isRowSelectable?.(row) ?? true)}
+                            onChange={() => toggleOne(key)}
+                            className="size-3.5 shrink-0 accent-[rgb(var(--ai-accent))]"
+                          />
+                        </label>
                       </td>
                     ) : null}
                     {columns.map((column) => (

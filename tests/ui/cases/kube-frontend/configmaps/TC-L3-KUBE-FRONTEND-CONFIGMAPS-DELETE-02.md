@@ -3,7 +3,7 @@
 - **用例 ID**: `TC-L3-KUBE-FRONTEND-CONFIGMAPS-DELETE-02`
 - **级别**: L3  **套件**: `point`
 - **模块**: `kube-frontend` / `configmaps` `delete`
-- **入口**: `{BASE_URL}/c/host/p/default/configmaps`
+- **入口**: `{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps`
 - **需求**: `prd/kube-frontend/configmaps/delete.md`
 
 ## 产品功能
@@ -45,7 +45,7 @@
 
 ## 测试步骤
 
-1. 打开 {BASE_URL}/c/host/p/default/configmaps
+1. 打开 {BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps
 2. 点击该行「删除」
 3. 在确认框点确定
 

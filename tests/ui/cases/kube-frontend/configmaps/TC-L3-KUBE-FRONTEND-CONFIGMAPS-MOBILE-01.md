@@ -3,7 +3,7 @@
 - **用例 ID**: `TC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-01`
 - **级别**: L3  **套件**: `point`
 - **模块**: `kube-frontend` / `configmaps` `mobile`
-- **入口**: `{BASE_URL}/c/host/p/default/configmaps`
+- **入口**: `{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps`
 - **需求**: `prd/kube-frontend/configmaps/mobile.md`
 
 ## 产品功能
@@ -44,7 +44,7 @@
 
 ## 测试步骤
 
-1. 打开 {BASE_URL}/c/host/p/default/configmaps
+1. 打开 {BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps
 2. 读取 document.documentElement.scrollWidth
 3. 点击导航按钮
 

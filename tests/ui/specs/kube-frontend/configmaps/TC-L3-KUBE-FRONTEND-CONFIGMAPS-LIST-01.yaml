@@ -5,7 +5,7 @@ module: kube-frontend
 submodule: configmaps
 feature: list
 title: "配置字典 · 列表默认视图"
-entry_url: "{BASE_URL}/c/host/p/default/configmaps"
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps"
 prd: prd/kube-frontend/configmaps/list.md
 design: design/kube-frontend/configmaps/list.md
 
@@ -21,7 +21,7 @@ preconditions:
 - 已登录，且在 host 集群的 default 项目空间
 - 该空间下至少有两条 ConfigMap
 steps:
-- 打开 {BASE_URL}/c/host/p/default/configmaps
+- 打开 {BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps
 - 核对表头与首行内容
 expected:
 - 表头依次为 名称、键、创建时间、操作

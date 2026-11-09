@@ -3,7 +3,7 @@
 - **用例 ID**: `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-02`
 - **级别**: L3  **套件**: `point`
 - **模块**: `kube-frontend` / `configmaps` `list`
-- **入口**: `{BASE_URL}/c/host/p/default/configmaps`
+- **入口**: `{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps`
 - **需求**: `prd/kube-frontend/configmaps/list.md`
 
 ## 产品功能
@@ -45,7 +45,7 @@
 
 ## 测试步骤
 
-1. 打开 {BASE_URL}/c/host/p/default/configmaps
+1. 打开 {BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps
 2. 点击「名称」列头
 3. 再次点击「名称」列头
 

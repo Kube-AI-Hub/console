@@ -11,7 +11,9 @@ const fieldBase = [
   'aria-[invalid=true]:border-ai-danger aria-[invalid=true]:focus-visible:ring-ai-danger/25',
 ].join(' ');
 
-export const inputClassName = cn(fieldBase, 'h-9 px-3 text-sm');
+// 44px on phones, denser from `sm` up. A 36px field is below the recommended
+// touch target and is the control people hit most often.
+export const inputClassName = cn(fieldBase, 'min-h-11 sm:min-h-9 px-3 text-sm');
 export const textareaClassName = cn(fieldBase, 'min-h-20 resize-y px-3 py-2 text-sm leading-6');
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {

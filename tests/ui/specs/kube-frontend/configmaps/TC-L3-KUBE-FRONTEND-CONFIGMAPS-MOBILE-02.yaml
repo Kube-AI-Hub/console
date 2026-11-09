@@ -5,7 +5,7 @@ module: kube-frontend
 submodule: configmaps
 feature: mobile
 title: "配置字典 · 窄屏列折叠"
-entry_url: "{BASE_URL}/c/host/p/default/configmaps"
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps"
 prd: prd/kube-frontend/configmaps/mobile.md
 design: design/kube-frontend/configmaps/mobile.md
 
@@ -21,7 +21,7 @@ preconditions:
 - 视口宽 375px
 - 列表已加载
 steps:
-- 打开 {BASE_URL}/c/host/p/default/configmaps
+- 打开 {BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps
 - 查看表头
 expected:
 - 「键」与「创建时间」列不显示

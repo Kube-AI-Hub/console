@@ -3,7 +3,7 @@ import { cn } from '../utils/cn';
 import { Button } from '../primitives/Button';
 import { Input } from '../primitives/Input';
 import { Select } from '../primitives/Select';
-import { Table, type TableColumn } from '../primitives/Table';
+import { Table, type SortOrder, type TableColumn, type TableSortState } from '../primitives/Table';
 import { Pagination } from '../primitives/Navigation';
 import { Badge, Empty } from '../primitives/Display';
 import { Dropdown } from '../primitives/Navigation';
@@ -35,6 +35,19 @@ export interface ListAction<TRow> {
   key: string;
   label: React.ReactNode;
   tone?: 'default' | 'danger';
+  /**
+   * Stable automation handle, rendered as `data-ai-id`.
+   *
+   * The label is localised and may change; automation targets the handle.
+   */
+  aiId?: string;
+  /**
+   * Handles that must run before this one, rendered as `data-ai-needs`.
+   *
+   * A bulk action cannot run without a selection, and an agent should read that
+   * from the DOM rather than infer it from a disabled attribute.
+   */
+  aiNeeds?: string[];
   /** Ask for confirmation before invoking `onAction`. */
   confirm?: string;
   /** Only show for matching rows. */
@@ -52,9 +65,34 @@ export interface ListSchema<TRow> {
   actions?: Array<ListAction<TRow>>;
   /** Row-level actions rendered as a dropdown in the last column. */
   rowActions?: Array<ListAction<TRow>>;
+  /**
+   * The page's one primary action, shown in the header.
+   *
+   * Kept separate from `actions` (which are bulk operations on a selection):
+   * a create button is always visible and sits opposite the title, while bulk
+   * actions only appear once rows are selected.
+   */
+  primaryAction?: { key: string; label: React.ReactNode; aiId?: string };
   selection?: 'none' | 'multiple';
   empty?: { title?: React.ReactNode; description?: React.ReactNode };
   pagination?: { pageSize: number; total: number; page: number };
+  /**
+   * Extra attributes for each row element.
+   *
+   * Used by the frontend to publish a stable handle per record (`data-ai-row`),
+   * which automation uses to target one row without reading its cells.
+   */
+  rowAttributes?: (row: TRow) => Record<string, string>;
+  /**
+   * Current sort, when the host owns the order.
+   *
+   * Sorting stays controlled rather than internal because a resource list is
+   * paged on the server: sorting one page in the browser produces an order that
+   * is wrong across pages.
+   */
+  sort?: { key: string; order: SortOrder };
+  /** Columns that can be sorted; defaults to none. */
+  sortableKeys?: string[];
 }
 
 export interface ResourceListProps<TRow> {
@@ -69,6 +107,8 @@ export interface ResourceListProps<TRow> {
   selectedKeys?: string[];
   onSelectionChange?: (keys: string[]) => void;
   onPageChange?: (page: number) => void;
+  /** Called with the next sort when a sortable header is clicked. */
+  onSortChange?: (sort: { key: string; order: SortOrder } | undefined) => void;
   onAction?: (action: string, row: TRow) => void;
   /** Called with the primary action key and the current selection. */
   onBulkAction?: (action: string, keys: string[]) => void;
@@ -138,6 +178,7 @@ export function ResourceList<TRow>({
   selectedKeys = [],
   onSelectionChange,
   onPageChange,
+  onSortChange,
   onAction,
   onBulkAction,
   className,
@@ -151,11 +192,13 @@ export function ResourceList<TRow>({
   );
 
   const columns: Array<TableColumn<TRow>> = React.useMemo(() => {
+    const sortableKeys = new Set(schema.sortableKeys ?? []);
     const mapped: Array<TableColumn<TRow>> = schema.columns.map((column) => ({
       key: column.key,
       title: column.title,
       width: column.width,
       align: column.align,
+      sortable: sortableKeys.has(column.key),
       className: columnVisibilityClass(column),
       render: (row, index) => {
         if (column.render) return column.render(row, index);
@@ -229,26 +272,59 @@ export function ResourceList<TRow>({
     }
 
     return mapped;
-  }, [schema.columns, schema.rowActions, onAction]);
+  }, [schema.columns, schema.sortableKeys, schema.rowActions, onAction]);
 
-  const hasToolbar = Boolean(schema.search || schema.filters?.length || schema.actions?.length);
+  const hasToolbar = Boolean(schema.search || schema.filters?.length);
+
+  /**
+   * The one action the page is for.
+   *
+   * Declared through `schema.primaryAction` rather than inferred from `actions`,
+   * because "create" and "delete selected" are different kinds of control: the
+   * first is always available and belongs in the header, the second only exists
+   * once rows are selected and belongs next to the search box.
+   */
+  const primaryAction = schema.primaryAction;
+
+  /** Actions that operate on the current selection; rendered only when non-empty. */
+  const bulkActions = selectedKeys.length > 0 ? (schema.actions ?? []) : [];
 
   return (
-    <div className={cn('flex flex-col gap-3', className)}>
-      {schema.title || schema.description ? (
-        <header>
-          {schema.title ? <h2 className="text-base font-semibold text-ai-fg">{schema.title}</h2> : null}
-          {schema.description ? <p className="mt-1 text-xs text-ai-fg-muted">{schema.description}</p> : null}
+    <div className={cn('flex flex-col gap-4', className)}>
+      {/*
+       * Title and primary action share one row on wide screens.
+       *
+       * The action used to sit inside the toolbar, which put it on the same line
+       * as the search box and left the header looking empty while the button
+       * floated in the middle. A page header answers "what is this" and "what can
+       * I do" — those belong together, above the list.
+       */}
+      {schema.title || schema.description || primaryAction ? (
+        <header className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            {schema.title ? <h2 className="text-base font-semibold text-ai-fg">{schema.title}</h2> : null}
+            {schema.description ? <p className="mt-1 text-xs text-ai-fg-muted">{schema.description}</p> : null}
+          </div>
+          {primaryAction ? (
+            <Button
+              size="sm"
+              variant="primary"
+              onClick={() => onAction?.(primaryAction.key, undefined as unknown as TRow)}
+              {...(primaryAction.aiId ? { 'data-ai-id': primaryAction.aiId } : {})}
+            >
+              {primaryAction.label}
+            </Button>
+          ) : null}
         </header>
       ) : null}
 
-      {hasToolbar ? (
+      {hasToolbar || bulkActions.length > 0 ? (
         <div className="flex flex-wrap items-center gap-2">
           {schema.search ? (
             <Input
               // Full width on a phone so the search field is reachable; a fixed
               // 224px box pushed the action buttons onto a second line.
-              className="w-full sm:w-56"
+              className="w-full sm:w-64"
               value={searchValue ?? ''}
               placeholder={schema.search.placeholder ?? '搜索'}
               aria-label={schema.search.placeholder ?? '搜索'}
@@ -274,9 +350,15 @@ export function ResourceList<TRow>({
             />
           ))}
 
-          <div className="ml-auto flex items-center gap-2">
-            {selectedKeys.length > 0 && schema.actions?.length ? (
-              schema.actions.map((action) => (
+          {/*
+           * Bulk actions appear only once something is selected. Rendering them
+           * disabled keeps the row the same width but adds two dead controls to
+           * every visit; a selection bar is the pattern people expect from a list.
+           */}
+          {bulkActions.length > 0 ? (
+            <div className="flex items-center gap-2 rounded-ai-md bg-ai-surface-2 px-2 py-1">
+              <span className="text-xs text-ai-fg-secondary">已选 {selectedKeys.length} 项</span>
+              {bulkActions.map((action) => (
                 <Button
                   key={action.key}
                   size="sm"
@@ -285,12 +367,14 @@ export function ResourceList<TRow>({
                     if (action.confirm && !window.confirm(action.confirm)) return;
                     onBulkAction?.(action.key, selectedKeys);
                   }}
+                  {...(action.aiId ? { 'data-ai-id': action.aiId } : {})}
+                  {...(action.aiNeeds?.length ? { 'data-ai-needs': action.aiNeeds.join(' ') } : {})}
                 >
-                  {action.label}（{selectedKeys.length}）
+                  {action.label}
                 </Button>
-              ))
-            ) : null}
-          </div>
+              ))}
+            </div>
+          ) : null}
         </div>
       ) : null}
 
@@ -299,6 +383,16 @@ export function ResourceList<TRow>({
         rows={rows}
         rowKey={keyOf}
         loading={loading}
+        {...(schema.rowAttributes ? { rowAttributes: schema.rowAttributes } : {})}
+        {...(schema.sort ? { sorter: { key: schema.sort.key, order: schema.sort.order } satisfies TableSortState } : {})}
+        {...(schema.sortableKeys?.length
+          ? {
+              // The cycle lives here so every host behaves the same: a new column
+              // starts ascending, clicking the active one flips it.
+              onSortChange: (next: TableSortState | undefined) =>
+                onSortChange?.(next ? { key: next.key, order: next.order } : undefined),
+            }
+          : {})}
         selection={
           schema.selection === 'multiple' && onSelectionChange
             ? { selectedKeys, onChange: onSelectionChange }

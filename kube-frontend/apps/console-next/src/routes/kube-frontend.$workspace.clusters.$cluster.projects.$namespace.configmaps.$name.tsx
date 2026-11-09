@@ -12,14 +12,18 @@ import { useConfigMap } from '@/pages/configmaps/queries';
  * as modals, and rebuilding those comes after the framework proves itself on
  * the list. The route exists now so the list's link is real rather than a
  * placeholder that 404s.
+ *
+ * The path keeps the same shape as the list route, one segment deeper.
  */
-export const Route = createFileRoute('/c/$cluster/p/$namespace/configmaps/$name')({
+export const Route = createFileRoute(
+  '/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/configmaps/$name',
+)({
   component: ConfigMapDetailRoute,
 });
 
 function ConfigMapDetailRoute() {
   const t = useT();
-  const { cluster, namespace, name } = Route.useParams();
+  const { cluster, namespace, name, workspace } = Route.useParams();
   const query = useConfigMap({ cluster, namespace, name });
 
   const state = query.isPending ? 'loading' : query.isError ? 'error' : 'ready';
@@ -28,8 +32,8 @@ function ConfigMapDetailRoute() {
     <AiSurface as="section" aiId="configmap-detail:surface" state={state} className="flex min-w-0 flex-col gap-4">
       <div>
         <Link
-          to="/c/$cluster/p/$namespace/configmaps"
-          params={{ cluster, namespace }}
+          to="/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/configmaps"
+          params={{ workspace, cluster, namespace }}
           className="text-xs text-ai-accent hover:underline"
           {...actionProps('configmap-detail:back')}
         >
