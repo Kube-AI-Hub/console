@@ -1,0 +1,37 @@
+id: TC-CORE-KUBE_FRONTEND-01
+level: 1
+suite: core
+module: kube-frontend
+submodule: configmaps
+feature: page
+title: 新前端 · 入口与页面骨架
+entry_url: "{BASE_URL}/c/host/p/default/configmaps"
+prd: prd/kube-frontend/_index.md
+design: design/kube-frontend/_index.md
+
+covers:
+- AC-CORE-KUBE_FRONTEND-01
+
+story:
+- US1
+- US2
+- US3
+
+product: 新前端能独立提供配置字典页，且与老 console 同一命名空间下看到同一批对象。
+preconditions:
+- 已登录，且在 host 集群的 default 项目空间
+- 该空间下至少有一条 ConfigMap
+steps:
+- 打开 {BASE_URL}/c/host/p/default/configmaps
+- 记录列表中的对象名称
+- 在老 console 打开同一空间的配置字典页
+- 对比两边的名称集合
+expected:
+- 新前端页面渲染出版头、工具条与列表
+- 两边名称集合一致
+- 新前端不出现老 console 的侧栏与页头
+troubleshoot:
+- 名称不一致时先确认是否同一 namespace 与同一 cluster
+- 页面 403 时确认 token 与权限
+update_automation:
+- 入口路由变化时同步本文件与 pages 下的页面对象

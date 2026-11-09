@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-CONFIGMAPS-DELETE-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: configmaps
+feature: delete
+title: "配置字典 · 批量删除按钮可用性"
+entry_url: "{BASE_URL}/c/host/p/default/configmaps"
+prd: prd/kube-frontend/configmaps/delete.md
+design: design/kube-frontend/configmaps/delete.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CONFIGMAPS-DELETE-01
+
+story:
+- US1
+- US2
+
+product: 未选中时禁用并暴露前置依赖。
+preconditions:
+- 已登录
+- 列表已加载
+steps:
+- 打开 {BASE_URL}/c/host/p/default/configmaps
+- 观察「批量删除」
+- 勾选一行
+expected:
+- 未选中时按钮 disabled
+- 按钮带 data-ai-needs="configmaps:row-select"
+- 勾选后按钮可用且显示 (1)
+troubleshoot:
+- 先确认 BFF 返回的状态码与 code，再看页面状态属性
+update_automation:
+- 文案变化时改 packages/locales/src/index.ts

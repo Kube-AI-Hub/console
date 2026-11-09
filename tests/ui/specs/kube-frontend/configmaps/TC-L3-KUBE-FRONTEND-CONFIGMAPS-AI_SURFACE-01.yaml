@@ -1,0 +1,33 @@
+id: TC-L3-KUBE-FRONTEND-CONFIGMAPS-AI_SURFACE-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: configmaps
+feature: ai-surface
+title: "配置字典 · 状态可读"
+entry_url: "{BASE_URL}/c/host/p/default/configmaps"
+prd: prd/kube-frontend/configmaps/ai-surface.md
+design: design/kube-frontend/configmaps/ai-surface.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CONFIGMAPS-AI_SURFACE-01
+
+story:
+- US1
+- US2
+
+product: 区域根元素发布四态之一，加载中标记 aria-busy。
+preconditions:
+- 已登录
+steps:
+- 打开 {BASE_URL}/c/host/p/default/configmaps
+- 加载过程中读取 data-ai-state
+- 加载完成后再次读取
+expected:
+- 加载中为 loading 且 aria-busy=true
+- 完成后为 ready 或 empty
+- 请求失败时为 error
+troubleshoot:
+- 先确认 BFF 返回的状态码与 code，再看页面状态属性
+update_automation:
+- 文案变化时改 packages/locales/src/index.ts

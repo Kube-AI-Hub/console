@@ -1,0 +1,33 @@
+id: TC-L3-KUBE-FRONTEND-CONFIGMAPS-AI_SURFACE-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: configmaps
+feature: ai-surface
+title: "配置字典 · 句柄唯一且不依赖文案"
+entry_url: "{BASE_URL}/c/host/p/default/configmaps"
+prd: prd/kube-frontend/configmaps/ai-surface.md
+design: design/kube-frontend/configmaps/ai-surface.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CONFIGMAPS-AI_SURFACE-02
+
+story:
+- US1
+- US2
+
+product: 所有可交互元素都能用 data-ai-id 定位。
+preconditions:
+- 已登录
+- 列表已加载
+steps:
+- 打开 {BASE_URL}/c/host/p/default/configmaps
+- 枚举所有 data-ai-id
+expected:
+- 取值在页面内唯一
+- 每行有 data-ai-row=<资源名>
+- 存在 configmaps:bulk-delete 且带 data-ai-needs
+troubleshoot:
+- 先确认 BFF 返回的状态码与 code，再看页面状态属性
+update_automation:
+- 文案变化时改 packages/locales/src/index.ts

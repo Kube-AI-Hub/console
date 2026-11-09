@@ -149,3 +149,60 @@ modules:
         - TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-01
         - TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-02
         - TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-03
+- id: kube-frontend
+  title: 新前端
+  prd: prd/kube-frontend/_index.md
+  design: design/kube-frontend/_index.md
+  tests:
+    L1:
+    - TC-CORE-KUBE_FRONTEND-01
+  submodules:
+  - id: configmaps
+    title: 配置字典
+    prd: prd/kube-frontend/configmaps/_index.md
+    design: design/kube-frontend/configmaps/_index.md
+    tests:
+      L2:
+      - TC-FULL-KUBE_FRONTEND-CONFIGMAPS-01
+    features:
+    - id: list
+      title: 配置字典列表
+      prd: prd/kube-frontend/configmaps/list.md
+      design: design/kube-frontend/configmaps/list.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-01
+        - TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-02
+        - TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-03
+    - id: search
+      title: 按名称搜索
+      prd: prd/kube-frontend/configmaps/search.md
+      design: design/kube-frontend/configmaps/search.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CONFIGMAPS-SEARCH-01
+        - TC-L3-KUBE-FRONTEND-CONFIGMAPS-SEARCH-02
+    - id: delete
+      title: 删除配置字典
+      prd: prd/kube-frontend/configmaps/delete.md
+      design: design/kube-frontend/configmaps/delete.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CONFIGMAPS-DELETE-01
+        - TC-L3-KUBE-FRONTEND-CONFIGMAPS-DELETE-02
+    - id: ai-surface
+      title: 智能体可操作性
+      prd: prd/kube-frontend/configmaps/ai-surface.md
+      design: design/kube-frontend/configmaps/ai-surface.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CONFIGMAPS-AI_SURFACE-01
+        - TC-L3-KUBE-FRONTEND-CONFIGMAPS-AI_SURFACE-02
+    - id: mobile
+      title: 移动端适配
+      prd: prd/kube-frontend/configmaps/mobile.md
+      design: design/kube-frontend/configmaps/mobile.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-01
+        - TC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-02

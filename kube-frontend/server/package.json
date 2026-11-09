@@ -1,0 +1,21 @@
+{
+  "name": "@kube-ai-hub/bff",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Backend for frontend: auth passthrough, error normalisation, upstream calls.",
+  "license": "Apache-2.0",
+  "scripts": {
+    "dev": "tsx watch src/dev.ts",
+    "start": "tsx src/dev.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "lint": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

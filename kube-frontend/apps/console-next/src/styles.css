@@ -1,0 +1,32 @@
+/* The app's only stylesheet.
+ *
+ * ai-kit tokens and component CSS arrive through the ui package, so there is one
+ * import and one cascade. Tailwind utilities sit on top of the shared preset, so
+ * class names match the library exactly. */
+@import 'tailwindcss';
+@import '@kube-ai-hub/ui/styles.css';
+
+/* The shell fills the viewport. `100dvh` rather than `100vh` because mobile
+ * browsers shrink `vh` as the address bar retracts, making a full-height layout
+ * jump on scroll. */
+html,
+body,
+#root {
+  height: 100%;
+  min-height: 100dvh;
+}
+
+body {
+  margin: 0;
+  background-color: rgb(var(--ai-bg));
+  color: rgb(var(--ai-fg));
+  font-family: var(--ai-font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* A focus ring on every keyboard-reachable element, not only the ones that opt
+ * in: an agent driving the UI by keyboard needs the same affordance as a person. */
+:focus-visible {
+  outline: 2px solid rgb(var(--ai-accent));
+  outline-offset: 2px;
+}

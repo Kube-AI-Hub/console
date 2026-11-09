@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: configmaps
+feature: mobile
+title: "配置字典 · 窄屏无横向滚动"
+entry_url: "{BASE_URL}/c/host/p/default/configmaps"
+prd: prd/kube-frontend/configmaps/mobile.md
+design: design/kube-frontend/configmaps/mobile.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-01
+
+story:
+- US1
+- US2
+
+product: 375px 下页面不出现横向滚动，侧栏改为抽屉。
+preconditions:
+- 视口宽 375px
+steps:
+- 打开 {BASE_URL}/c/host/p/default/configmaps
+- 读取 document.documentElement.scrollWidth
+- 点击导航按钮
+expected:
+- scrollWidth 不大于视口宽
+- 侧栏不显示，出现导航按钮
+- 按钮命中区域不小于 44x44
+- 点击后抽屉打开
+troubleshoot:
+- 先确认 BFF 返回的状态码与 code，再看页面状态属性
+update_automation:
+- 文案变化时改 packages/locales/src/index.ts

@@ -210,3 +210,4 @@ export {
 
 /* Utils */
 export { cn } from './utils/cn';
+export { useMediaQuery, useIsMobile, useIsCompact } from './utils/useMediaQuery';

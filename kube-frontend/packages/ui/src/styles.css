@@ -1,0 +1,5 @@
+/* Re-export ai-kit's stylesheet.
+ *
+ * The app imports this once. Splitting the CSS between app and package is how a
+ * token ends up declared twice and drifts. */
+@import '@kube-ai-hub/ai-kit/styles.css';

@@ -1,0 +1,38 @@
+id: TC-FULL-KUBE_FRONTEND-CONFIGMAPS-01
+level: 2
+suite: full
+module: kube-frontend
+submodule: configmaps
+feature: page
+title: 配置字典 · 列表与 kubectl 逐项核对
+entry_url: "{BASE_URL}/c/host/p/default/configmaps"
+prd: prd/kube-frontend/configmaps/_index.md
+design: design/kube-frontend/configmaps/_index.md
+
+covers:
+- AC-FULL-KUBE_FRONTEND-CONFIGMAPS-01
+
+story:
+- US1
+- US2
+
+product: 页面展示的配置字典与集群实际对象一致，并能在页面上完成一次删除。
+preconditions:
+- 已登录，且在 host 集群的 default 项目空间
+- 该空间下至少有两条 ConfigMap，其中一条由本用例临时创建
+steps:
+- 打开 {BASE_URL}/c/host/p/default/configmaps
+- 记录每行的名称、键、创建时间
+- 用 kubectl -n default get configmaps 导出同一份数据并逐项比对
+- 在页面上删除本用例临时创建的那条并在确认框点确定
+- 再执行一次 kubectl get 确认对象已不存在
+expected:
+- 名称集合与 kubectl 一致
+- 每条记录的键集合与 kubectl 输出一致
+- 分页显示的总数等于 kubectl 返回的对象数
+- 删除后页面不再出现该对象，kubectl 返回 NotFound
+troubleshoot:
+- 总数不一致时先确认是否有分页或 fieldSelector 影响了计数
+- 删除无效时确认 token 是否有 configmaps 的 delete 权限
+update_automation:
+- 路由或 kubectl 命令变化时同步本文件

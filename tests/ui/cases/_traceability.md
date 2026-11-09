@@ -37,10 +37,23 @@
 | console-core/resource-detail/_index | `AC-FULL-CONSOLE-CORE-RESOURCE_DETAIL-02` | `TC-FULL-CONSOLE-CORE-RESOURCE_DETAIL-02` | [`design/console-core/resource-detail/_index.md`](../../../design/console-core/resource-detail/_index.md) | [`tests/ui/tests/console-core/resource-detail/test_TC_FULL_CONSOLE_CORE_RESOURCE_DETAIL_02.py`](../../../tests/ui/tests/console-core/resource-detail/test_TC_FULL_CONSOLE_CORE_RESOURCE_DETAIL_02.py) |
 | console-core/resource-detail/not-found | `AC-L3-CONSOLE-CORE-RESOURCE_DETAIL-NOT_FOUND-01` | `TC-L3-CONSOLE-CORE-RESOURCE_DETAIL-NOT_FOUND-01` | [`design/console-core/resource-detail/not-found.md`](../../../design/console-core/resource-detail/not-found.md) | [`tests/ui/tests/console-core/resource-detail/test_TC_L3_CONSOLE_CORE_RESOURCE_DETAIL_NOT_FOUND_01.py`](../../../tests/ui/tests/console-core/resource-detail/test_TC_L3_CONSOLE_CORE_RESOURCE_DETAIL_NOT_FOUND_01.py) |
 | console-core/resource-detail/not-found | `AC-L3-CONSOLE-CORE-RESOURCE_DETAIL-NOT_FOUND-02` | `TC-L3-CONSOLE-CORE-RESOURCE_DETAIL-NOT_FOUND-02` | [`design/console-core/resource-detail/not-found.md`](../../../design/console-core/resource-detail/not-found.md) | [`tests/ui/tests/console-core/resource-detail/test_TC_L3_CONSOLE_CORE_RESOURCE_DETAIL_NOT_FOUND_02.py`](../../../tests/ui/tests/console-core/resource-detail/test_TC_L3_CONSOLE_CORE_RESOURCE_DETAIL_NOT_FOUND_02.py) |
+| kube-frontend/_index | `AC-CORE-KUBE_FRONTEND-01` | `TC-CORE-KUBE_FRONTEND-01` | [`design/kube-frontend/_index.md`](../../../design/kube-frontend/_index.md) | [`tests/ui/tests/kube-frontend/core/test_TC_CORE_KUBE_FRONTEND_01.py`](../../../tests/ui/tests/kube-frontend/core/test_TC_CORE_KUBE_FRONTEND_01.py) |
+| kube-frontend/configmaps/_index | `AC-FULL-KUBE_FRONTEND-CONFIGMAPS-01` | `TC-FULL-KUBE_FRONTEND-CONFIGMAPS-01` | [`design/kube-frontend/configmaps/_index.md`](../../../design/kube-frontend/configmaps/_index.md) | [`tests/ui/tests/kube-frontend/configmaps/test_TC_FULL_KUBE_FRONTEND_CONFIGMAPS_01.py`](../../../tests/ui/tests/kube-frontend/configmaps/test_TC_FULL_KUBE_FRONTEND_CONFIGMAPS_01.py) |
+| kube-frontend/configmaps/ai-surface | `AC-L3-KUBE-FRONTEND-CONFIGMAPS-AI_SURFACE-01` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-AI_SURFACE-01` | [`design/kube-frontend/configmaps/ai-surface.md`](../../../design/kube-frontend/configmaps/ai-surface.md) | [`tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_AI_SURFACE_01.py`](../../../tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_AI_SURFACE_01.py) |
+| kube-frontend/configmaps/ai-surface | `AC-L3-KUBE-FRONTEND-CONFIGMAPS-AI_SURFACE-02` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-AI_SURFACE-02` | [`design/kube-frontend/configmaps/ai-surface.md`](../../../design/kube-frontend/configmaps/ai-surface.md) | [`tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_AI_SURFACE_02.py`](../../../tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_AI_SURFACE_02.py) |
+| kube-frontend/configmaps/delete | `AC-L3-KUBE-FRONTEND-CONFIGMAPS-DELETE-01` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-DELETE-01` | [`design/kube-frontend/configmaps/delete.md`](../../../design/kube-frontend/configmaps/delete.md) | [`tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_DELETE_01.py`](../../../tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_DELETE_01.py) |
+| kube-frontend/configmaps/delete | `AC-L3-KUBE-FRONTEND-CONFIGMAPS-DELETE-02` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-DELETE-02` | [`design/kube-frontend/configmaps/delete.md`](../../../design/kube-frontend/configmaps/delete.md) | [`tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_DELETE_02.py`](../../../tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_DELETE_02.py) |
+| kube-frontend/configmaps/list | `AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-01` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-01` | [`design/kube-frontend/configmaps/list.md`](../../../design/kube-frontend/configmaps/list.md) | [`tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_01.py`](../../../tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_01.py) |
+| kube-frontend/configmaps/list | `AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-02` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-02` | [`design/kube-frontend/configmaps/list.md`](../../../design/kube-frontend/configmaps/list.md) | [`tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_02.py`](../../../tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_02.py) |
+| kube-frontend/configmaps/list | `AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-03` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-03` | [`design/kube-frontend/configmaps/list.md`](../../../design/kube-frontend/configmaps/list.md) | [`tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_03.py`](../../../tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_03.py) |
+| kube-frontend/configmaps/mobile | `AC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-01` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-01` | [`design/kube-frontend/configmaps/mobile.md`](../../../design/kube-frontend/configmaps/mobile.md) | [`tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_MOBILE_01.py`](../../../tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_MOBILE_01.py) |
+| kube-frontend/configmaps/mobile | `AC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-02` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-02` | [`design/kube-frontend/configmaps/mobile.md`](../../../design/kube-frontend/configmaps/mobile.md) | [`tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_MOBILE_02.py`](../../../tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_MOBILE_02.py) |
+| kube-frontend/configmaps/search | `AC-L3-KUBE-FRONTEND-CONFIGMAPS-SEARCH-01` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-SEARCH-01` | [`design/kube-frontend/configmaps/search.md`](../../../design/kube-frontend/configmaps/search.md) | [`tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_SEARCH_01.py`](../../../tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_SEARCH_01.py) |
+| kube-frontend/configmaps/search | `AC-L3-KUBE-FRONTEND-CONFIGMAPS-SEARCH-02` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-SEARCH-02` | [`design/kube-frontend/configmaps/search.md`](../../../design/kube-frontend/configmaps/search.md) | [`tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_SEARCH_02.py`](../../../tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_SEARCH_02.py) |
 
 ## 小结
 
-- 需求里的 AC：33 条，其中未覆盖 0 条、无技术方案承接 0 条、无用例规格实现 0 条。
+- 需求里的 AC：46 条，其中未覆盖 0 条、无技术方案承接 0 条、无用例规格实现 0 条。
 
 ## 用户故事覆盖
 
@@ -87,5 +100,20 @@
 | console-core/resource-detail/not-found | `US1` | `TC-L3-CONSOLE-CORE-RESOURCE_DETAIL-NOT_FOUND-01` |
 | console-core/resource-detail/not-found | `US2` | `TC-L3-CONSOLE-CORE-RESOURCE_DETAIL-NOT_FOUND-01` |
 | console-core/resource-detail/not-found | `US3` | `TC-L3-CONSOLE-CORE-RESOURCE_DETAIL-NOT_FOUND-02` |
+| kube-frontend/_index | `US1` | `TC-CORE-KUBE_FRONTEND-01` |
+| kube-frontend/_index | `US2` | `TC-CORE-KUBE_FRONTEND-01` |
+| kube-frontend/_index | `US3` | `TC-CORE-KUBE_FRONTEND-01` |
+| kube-frontend/configmaps/_index | `US1` | `TC-FULL-KUBE_FRONTEND-CONFIGMAPS-01` |
+| kube-frontend/configmaps/_index | `US2` | `TC-FULL-KUBE_FRONTEND-CONFIGMAPS-01` |
+| kube-frontend/configmaps/ai-surface | `US1` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-AI_SURFACE-01`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-AI_SURFACE-02` |
+| kube-frontend/configmaps/ai-surface | `US2` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-AI_SURFACE-01`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-AI_SURFACE-02` |
+| kube-frontend/configmaps/delete | `US1` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-DELETE-01`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-DELETE-02` |
+| kube-frontend/configmaps/delete | `US2` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-DELETE-01`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-DELETE-02` |
+| kube-frontend/configmaps/list | `US1` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-01`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-02`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-03` |
+| kube-frontend/configmaps/list | `US2` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-01`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-02`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-03` |
+| kube-frontend/configmaps/mobile | `US1` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-01`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-02` |
+| kube-frontend/configmaps/mobile | `US2` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-01`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-02` |
+| kube-frontend/configmaps/search | `US1` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-SEARCH-01`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-SEARCH-02` |
+| kube-frontend/configmaps/search | `US2` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-SEARCH-01`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-SEARCH-02` |
 
-- 用户故事：41 条，其中未覆盖 0 条。
+- 用户故事：56 条，其中未覆盖 0 条。

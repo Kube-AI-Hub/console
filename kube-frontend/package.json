@@ -1,0 +1,27 @@
+{
+  "name": "kube-frontend",
+  "private": true,
+  "type": "module",
+  "description": "Console frontend rewrite: React 19 + TanStack + Tailwind 4 on the ai-kit design system.",
+  "license": "Apache-2.0",
+  "packageManager": "pnpm@10.12.4",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @kube-ai-hub/console-next dev",
+    "build": "pnpm --filter @kube-ai-hub/console-next build",
+    "preview": "pnpm --filter @kube-ai-hub/console-next preview",
+    "bff": "pnpm --filter @kube-ai-hub/bff dev",
+    "typecheck": "pnpm -r typecheck && pnpm typecheck:config",
+    "typecheck:config": "tsc --noEmit -p config/tsconfig.json",
+    "test": "pnpm test:config && pnpm -r test",
+    "test:config": "vitest run --config config/vitest.config.ts",
+    "lint": "pnpm -r lint"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

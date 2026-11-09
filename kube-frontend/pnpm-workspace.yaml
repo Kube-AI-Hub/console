@@ -1,0 +1,47 @@
+# kube-frontend workspace — one app, a few shared packages.
+#
+# The layout follows the engineering skeleton used by bisheng's frontend: a
+# `catalog` holds the single source of truth for every dependency both the app
+# and the packages share, and each package declares `catalog:` instead of a
+# range. Two copies of React or TanStack would break hooks and router context
+# in ways that only show up at runtime, so the versions are pinned once here.
+packages:
+  - apps/*
+  - packages/*
+  - server
+
+catalog:
+  # Framework. React 19 and Vite are the same generation dongba runs on; a
+  # rewrite starts clean, so there is no reason to adopt an older one.
+  react: 19.2.0
+  react-dom: 19.2.0
+  '@types/react': 19.2.2
+  '@types/react-dom': 19.2.1
+  vite: 6.4.5
+  '@vitejs/plugin-react': 4.7.0
+
+  # Routing and data. File routing matches the nine top-level modules and their
+  # nesting; Query covers the list/detail caching every resource page needs.
+  '@tanstack/react-router': 1.139.5
+  '@tanstack/router-plugin': 1.139.5
+  '@tanstack/react-query': 5.90.5
+  '@tanstack/react-query-devtools': 5.90.5
+
+  # Styling. Tailwind 4 with the Vite plugin, matching ai-kit's preset.
+  tailwindcss: 4.1.16
+  '@tailwindcss/vite': 4.1.16
+  clsx: 2.1.1
+  tailwind-merge: 3.3.1
+
+  # Types and tooling.
+  typescript: 5.9.3
+  '@types/node': 22.18.12
+  vitest: 2.1.9
+  jsdom: 25.0.1
+  '@testing-library/react': 16.3.0
+  '@testing-library/user-event': 14.6.1
+  '@testing-library/jest-dom': 6.9.1
+
+  # BFF. A small Node server, no framework: the job is to forward with auth and
+  # normalise errors, which `node:http` and `fetch` already cover.
+  tsx: 4.20.6

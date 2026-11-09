@@ -1,0 +1,33 @@
+id: TC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: configmaps
+feature: mobile
+title: "配置字典 · 窄屏列折叠"
+entry_url: "{BASE_URL}/c/host/p/default/configmaps"
+prd: prd/kube-frontend/configmaps/mobile.md
+design: design/kube-frontend/configmaps/mobile.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-02
+
+story:
+- US1
+- US2
+
+product: 窄屏隐藏辅助列，保留名称与操作。
+preconditions:
+- 视口宽 375px
+- 列表已加载
+steps:
+- 打开 {BASE_URL}/c/host/p/default/configmaps
+- 查看表头
+expected:
+- 「键」与「创建时间」列不显示
+- 名称与操作列可见
+- 操作按钮高度不小于 44px
+troubleshoot:
+- 先确认 BFF 返回的状态码与 code，再看页面状态属性
+update_automation:
+- 文案变化时改 packages/locales/src/index.ts

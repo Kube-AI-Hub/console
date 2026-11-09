@@ -167,6 +167,63 @@ MODULES = [
             }
         ],
     },
+    {
+        "id": "kube-frontend",
+        "title": "新前端",
+        "goal": "用 Apache 2.0 的 kube-frontend 替代 AGPL 的 console 页面：同一批资源用 schema 驱动重建，界面可被智能体操作，移动端可用。",
+        "tests": {"L1": ["TC-CORE-KUBE_FRONTEND-01"]},
+        "submodules": [
+            {
+                "id": "configmaps",
+                "title": "配置字典",
+                "goal": "项目内的 ConfigMap 列表能列出真实数据、按名称搜索、按名称与创建时间排序、分页，并能删除单条或所选多条。",
+                "tests": {"L2": ["TC-FULL-KUBE_FRONTEND-CONFIGMAPS-01"]},
+                "features": [
+                    {
+                        "id": "list",
+                        "title": "配置字典列表",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-01",
+                            "TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-02",
+                            "TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-03",
+                        ]},
+                    },
+                    {
+                        "id": "search",
+                        "title": "按名称搜索",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-CONFIGMAPS-SEARCH-01",
+                            "TC-L3-KUBE-FRONTEND-CONFIGMAPS-SEARCH-02",
+                        ]},
+                    },
+                    {
+                        "id": "delete",
+                        "title": "删除配置字典",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-CONFIGMAPS-DELETE-01",
+                            "TC-L3-KUBE-FRONTEND-CONFIGMAPS-DELETE-02",
+                        ]},
+                    },
+                    {
+                        "id": "ai-surface",
+                        "title": "智能体可操作性",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-CONFIGMAPS-AI_SURFACE-01",
+                            "TC-L3-KUBE-FRONTEND-CONFIGMAPS-AI_SURFACE-02",
+                        ]},
+                    },
+                    {
+                        "id": "mobile",
+                        "title": "移动端适配",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-01",
+                            "TC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-02",
+                        ]},
+                    },
+                ],
+            },
+        ],
+    },
 ]
 
 
