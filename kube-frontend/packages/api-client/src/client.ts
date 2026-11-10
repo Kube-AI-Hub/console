@@ -24,7 +24,7 @@ export interface RequestOptions {
  * `fetch` directly is what lets an error surface as `[object Object]`.
  */
 export function createClient(options: ClientOptions = {}) {
-  const baseUrl = options.baseUrl ?? '/api';
+  const baseUrl = options.baseUrl ?? '';
 
   async function request<T>(path: string, init: RequestOptions = {}): Promise<T> {
     // Resolved per call, not captured at construction: a stub installed after the
@@ -72,22 +72,73 @@ export function createClient(options: ClientOptions = {}) {
 
 async function toApiError(response: Response): Promise<ApiError> {
   const fallback: ApiErrorBody = {
-    code: response.status === 403 ? 'forbidden' : response.status === 404 ? 'not_found' : 'http_error',
+    code: codeForStatus(response.status),
     message: response.statusText || 'request failed',
   };
   try {
-    const body = (await response.json()) as Partial<ApiErrorBody>;
+    const body = (await response.json()) as Partial<ApiErrorBody> & {
+      /** kube-apiserver's `Status` object uses `reason` and a numeric `code`. */
+      reason?: string;
+      code?: string | number;
+    };
+    /*
+     * A string `code` is the BFF's own vocabulary (`upstream_unreachable`,
+     * `invalid_credentials`) and is more specific than anything derivable from
+     * the status — `kube Status` uses a numeric one, which is not a code at all.
+     * It is kept in `details.serverCode` so a caller that needs the distinction
+     * can read it; `code` stays the coarse status class the rest of the app
+     * branches on.
+     */
+    const serverCode = typeof body.code === 'string' ? body.code : undefined;
+    // A kube `Status` carries `reason`; that is the one upstream the app reads.
+    const code = body.reason ? codeForReason(body.reason) : (serverCode ?? fallback.code);
+    const details =
+      serverCode === undefined || serverCode === code
+        ? body.details
+        : { ...(typeof body.details === 'object' && body.details !== null ? body.details : {}), serverCode };
     return new ApiError(
       {
-        code: body.code ?? fallback.code,
+        code,
         message: body.message ?? fallback.message,
-        ...(body.details === undefined ? {} : { details: body.details }),
+        ...(details === undefined ? {} : { details }),
       },
       response.status,
     );
   } catch {
     // Upstream returned HTML (a proxy error page) — keep the status-derived code.
     return new ApiError(fallback, response.status);
+  }
+}
+
+/** Map an HTTP status to the error vocabulary the UI branches on. */
+function codeForStatus(status: number): string {
+  if (status === 401) return 'unauthorized';
+  if (status === 403) return 'forbidden';
+  if (status === 404) return 'not_found';
+  if (status === 409) return 'conflict';
+  if (status === 422) return 'invalid';
+  if (status >= 500) return 'upstream_error';
+  return 'http_error';
+}
+
+/** Map kube `Status.reason` to the same vocabulary. */
+function codeForReason(reason: string): string {
+  switch (reason) {
+    case 'Unauthorized':
+      return 'unauthorized';
+    case 'Forbidden':
+      return 'forbidden';
+    case 'NotFound':
+      return 'not_found';
+    case 'AlreadyExists':
+    case 'Conflict':
+      return 'conflict';
+    case 'Invalid':
+      return 'invalid';
+    case 'Timeout':
+      return 'timeout';
+    default:
+      return 'http_error';
   }
 }
 
