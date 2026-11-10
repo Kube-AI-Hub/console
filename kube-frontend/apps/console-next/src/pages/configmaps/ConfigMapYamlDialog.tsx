@@ -39,12 +39,15 @@ export function ConfigMapYamlDialog({
   const t = useT();
   const [text, setText] = React.useState(initialYaml);
   const [error, setError] = React.useState<string | null>(null);
+  /** Parser feedback from the editor; separate from `error`, which is submit-time. */
+  const [syntaxError, setSyntaxError] = React.useState<string | null>(null);
 
   // Re-seed on open: the same dialog instance edits different objects over time.
   React.useEffect(() => {
     if (open) {
       setText(initialYaml);
       setError(null);
+      setSyntaxError(null);
     }
   }, [open, initialYaml]);
 
@@ -63,7 +66,10 @@ export function ConfigMapYamlDialog({
     const object = parsed as Record<string, unknown>;
     const metadata = (object['metadata'] ?? {}) as Record<string, unknown>;
     if (lockName && metadata['name'] !== lockName) {
-      setError(t('configmaps.validate.namePattern'));
+      // Not `namePattern`: the name is well-formed, it just may not change.
+      // Telling the reader their name is invalid when the real problem is that
+      // renaming is unsupported sends them editing the wrong thing.
+      setError(t('configmaps.yaml.nameLocked', { name: lockName }));
       return;
     }
     setError(null);
@@ -103,7 +109,7 @@ export function ConfigMapYamlDialog({
           </Button>
           <Button
             size="sm"
-            disabled={pending || error !== null}
+            disabled={pending || error !== null || syntaxError !== null}
             {...actionProps('configmaps:yaml-submit')}
             onClick={submit}
           >
@@ -116,6 +122,13 @@ export function ConfigMapYamlDialog({
         <YamlEditor
           value={text}
           onChange={setText}
+          /*
+           * A document that does not parse cannot be submitted, and saying so
+           * before the click is the difference between a form that guides and one
+           * that rejects. Without this the editor accepted anything and the
+           * failure only appeared as a generic message after pressing submit.
+           */
+          onValidityChange={(problem) => setSyntaxError(problem)}
           height="52vh"
           ariaLabel={title}
           toolbar={
@@ -144,9 +157,10 @@ export function ConfigMapYamlDialog({
             </>
           }
         />
-        {error ? (
+        {error ?? syntaxError ? (
           <p role="alert" className="text-xs text-ai-danger">
-            {error}
+            {/* A submit-time message is more specific, so it wins. */}
+            {error ?? t('configmaps.yaml.invalid')}
           </p>
         ) : null}
       </div>

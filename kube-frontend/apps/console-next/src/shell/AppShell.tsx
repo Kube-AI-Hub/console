@@ -437,7 +437,10 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
         {isMobile ? (
           <button
             type="button"
-            className={cn('grid size-11 place-items-center rounded-ai-md hover:bg-ai-surface-2', FOCUS_RING)}
+            // `shrink-0`: the header is a flex row, and at 375px the button was
+            // squeezed to 43px — one pixel under the 44px touch minimum the
+            // mobile spec promises.
+            className={cn('grid size-11 shrink-0 place-items-center rounded-ai-md hover:bg-ai-surface-2', FOCUS_RING)}
             {...actionProps('shell:nav-toggle', { label: t('nav.toggle') })}
             onClick={() => setDrawerOpen(true)}
           >

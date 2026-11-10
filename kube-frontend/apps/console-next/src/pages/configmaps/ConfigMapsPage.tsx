@@ -167,7 +167,9 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
       rowKey: 'name',
       // Stable per-record handle for automation; the row key is the resource name.
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
-      search: { placeholder: t('configmaps.searchPlaceholder'), keys: ['name'] },
+      // `aiId` matches the `configmaps:search` action in the page manifest; the two
+      // are one declaration of the same handle and must not drift apart.
+      search: { placeholder: t('configmaps.searchPlaceholder'), keys: ['name'], aiId: 'configmaps:search' },
       /*
        * The project picker comes from a shared hook so every resource page gets the
        * same behaviour — including the rule that it never blocks the table.
@@ -175,6 +177,10 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
       filters: [projectFilterControl],
       selection: 'multiple',
       sortableKeys: ['name', 'createTime'],
+      // Matches the `configmaps:sort:*` handles the page objects already target.
+      sortAiPrefix: 'configmaps',
+      // And `configmaps:select:<name>` for the row checkboxes.
+      selectAiId: 'configmaps:select',
       sort: { key: sortBy, order },
       primaryAction: { key: 'create', label: t('configmaps.action.create'), aiId: 'configmaps:create' },
       actions: [
@@ -263,7 +269,13 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
           },
         },
         {
-          key: 'createdAt',
+          /*
+           * `createTime`, not `createdAt`: a column is sortable only when its key
+           * is listed in `sortableKeys`, which carries the API's sort names. A
+           * display-only key here silently disabled sorting on this column while
+           * the default order still sorted by it — the header looked inert.
+           */
+          key: 'createTime',
           title: t('configmaps.column.createdAt'),
           width: 170,
           hideBelow: 'lg',
