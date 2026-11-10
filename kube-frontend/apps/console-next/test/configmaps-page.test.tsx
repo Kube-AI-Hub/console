@@ -236,18 +236,23 @@ describe('ConfigMaps list', () => {
     });
   });
 
-  it('reveals the bulk delete action only after a row is selected', async () => {
+  it('keeps the bulk delete disabled until a row is selected', async () => {
     stubFetch(() => json(listBody));
     renderPage();
     await screen.findByText('app-config');
 
-    expect(screen.queryByText(/批量删除/)).toBeNull();
+    // The requirement is "visible but disabled", not "absent": a control that
+    // disappears reads as a missing feature, and an automation cannot tell it
+    // apart from one the page forgot to render.
+    const bulk = await screen.findByText(/批量删除/);
+    const bulkButton = bulk.closest('button');
+    expect(bulkButton?.disabled).toBe(true);
+    expect(bulkButton?.getAttribute('data-ai-needs')).toBe('configmaps:row-select');
 
     const rowCheckboxes = screen.getAllByRole('checkbox').filter((box) => box.getAttribute('aria-label')?.startsWith('选择第'));
     await userEvent.click(rowCheckboxes[0]!);
 
-    const bulk = await screen.findByText(/批量删除/);
-    expect(bulk.closest('[data-ai-needs]')?.getAttribute('data-ai-needs')).toBe('configmaps:row-select');
+    await waitFor(() => expect(bulk.closest('button')?.disabled).toBe(false));
   });
 
   it('opens the create dialog from the primary action', async () => {
