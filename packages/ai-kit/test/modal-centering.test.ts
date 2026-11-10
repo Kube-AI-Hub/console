@@ -23,13 +23,28 @@ function read(relative: string): string {
 }
 
 describe('Modal centring', () => {
-  it('animates with a keyframe set that keeps the centring translate', () => {
+  it('does not move the element in the keyframes', () => {
     const preset = read('src/tailwind.preset.ts');
-    const keyframes = preset.slice(preset.indexOf("'ai-pop-in'"), preset.indexOf("'ai-slide-up'"));
+    const keyframes = preset.slice(preset.indexOf("'ai-pop-in': {"), preset.indexOf("'ai-sheet-in'"));
 
     expect(keyframes).toBeTruthy();
-    // The whole point: the translate must be present in both endpoints.
-    expect(keyframes).toContain('translate(-50%, -50%)');
+    /*
+     * The centring offset lives on the element's `translate` property, which the
+     * modal sets with `-translate-x-1/2 -translate-y-1/2`. The keyframes must not
+     * repeat it in `transform`: doing so offset the dialog twice while animating
+     * and, with no fill-mode, made it slide in from the top-left as the animation
+     * released. Only scale and opacity belong in the keyframes.
+     */
+    expect(keyframes).not.toContain('translate');
+    expect(keyframes).toContain('scale');
+  });
+
+  it('keeps the final frame applied, as the sheet animation does', () => {
+    const preset = read('src/tailwind.preset.ts');
+    const line = preset.split('\n').find((row) => row.includes("'ai-pop-in': 'ai-pop-in")) ?? '';
+
+    // Without `both`, the end frame is dropped the moment the animation finishes.
+    expect(line).toMatch(/\bboth\b/);
   });
 
   it('does not use an animation that ends at transform:none', () => {
@@ -50,6 +65,6 @@ describe('Modal centring', () => {
 
   it('registers the animation so the utility class exists', () => {
     const preset = read('src/tailwind.preset.ts');
-    expect(preset).toContain("'ai-pop-in': 'ai-pop-in var(--ai-duration-base) var(--ai-ease-out)'");
+    expect(preset).toMatch(/'ai-pop-in': 'ai-pop-in [^']*\bboth'/);
   });
 });

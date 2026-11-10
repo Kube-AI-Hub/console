@@ -126,6 +126,13 @@ export interface DropdownItem {
   onSelect?: () => void;
   danger?: boolean;
   disabled?: boolean;
+  /**
+   * Marks a choice as current.
+   *
+   * Used by the language switcher: the menu stays a menu, but the reader can see
+   * which option is active without guessing from the page's language.
+   */
+  checked?: boolean;
   /** Renders a separator above this item. */
   dividerBefore?: boolean;
 }
@@ -156,7 +163,7 @@ export function Dropdown({
         <DropdownMenuPrimitive.Content
           align={align}
           sideOffset={6}
-          className="z-50 min-w-40 rounded-ai-md border border-ai-line bg-ai-bg-overlay p-1 shadow-ai-pop animate-ai-scale-in"
+          className="z-50 min-w-44 rounded-ai-md border border-ai-line bg-ai-bg-overlay p-1 shadow-ai-pop animate-ai-scale-in"
         >
           {items.map((item) => (
             <React.Fragment key={item.key}>
@@ -170,15 +177,34 @@ export function Dropdown({
                   item.onSelect?.();
                 }}
                 className={cn(
-                  'flex cursor-pointer select-none items-center rounded-ai-sm px-2 py-1.5 text-xs outline-none',
+                  'flex cursor-pointer select-none items-center gap-2 rounded-ai-sm px-2 py-1.5 text-xs outline-none',
                   'transition-colors duration-ai-fast',
                   item.danger
                     ? 'text-ai-danger data-[highlighted]:bg-ai-danger/10'
-                    : 'text-ai-fg-secondary data-[highlighted]:bg-ai-surface-2 data-[highlighted]:text-ai-fg',
+                    : item.checked
+                      ? 'text-ai-accent data-[highlighted]:bg-ai-surface-2'
+                      : 'text-ai-fg-secondary data-[highlighted]:bg-ai-surface-2 data-[highlighted]:text-ai-fg',
                   'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
                 )}
               >
-                {item.label}
+                <span className="truncate">{item.label}</span>
+                {/*
+                 * The check sits at the far right, which is where the eye looks
+                 * for a current selection. It is always rendered, only made
+                 * invisible when unchecked: dropping it from the DOM would change
+                 * the row's width and shift every label sideways as the choice
+                 * moves.
+                 */}
+                <svg
+                  viewBox="0 0 24 24"
+                  className={cn('ml-auto size-3.5 shrink-0', item.checked ? 'visible' : 'invisible')}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.4"
+                  aria-hidden="true"
+                >
+                  <path d="m5 13 4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </DropdownMenuPrimitive.Item>
             </React.Fragment>
           ))}
@@ -229,26 +255,199 @@ export function Breadcrumb({ items, className }: BreadcrumbProps): React.ReactEl
 
 /* ---------------- Pagination ---------------- */
 
+/**
+ * Text the pagination controls announce.
+ *
+ * Defaults are Chinese because that is the product's primary language; a host
+ * that offers its own language switcher passes translated strings so an English
+ * reader is not told "上一页" by their screen reader.
+ */
+export interface PaginationLabels {
+  previous: string;
+  next: string;
+  /** "1-10 of 3487"; both numbers are interpolated. */
+  range?: (from: number, to: number, total: number) => string;
+  /** Accessible name for the page selector. */
+  goToPage?: string;
+  /** Label for the "jump to page" input. */
+  jumpTo?: string;
+}
+
 export interface PaginationProps {
   page: number;
   pageSize: number;
   total: number;
   onChange: (page: number) => void;
+  /**
+   * Rows per page, when the caller offers a choice.
+   *
+   * Given both this and `onPageSizeChange`, a size picker appears. A cursor-paged
+   * list cannot honour an arbitrary jump, so it simply omits them.
+   */
+  onPageSizeChange?: (pageSize: number) => void;
+  pageSizeOptions?: number[];
+  /**
+   * How pages can be reached.
+   *
+   * `numbered` renders clickable page numbers and a jump field, which suits
+   * offset-paged APIs. `sequential` renders only prev/next plus a counter, for
+   * cursor-paged collections where page N is unreachable without walking every
+   * cursor before it — offering numbers there would be offering dead controls.
+   */
+  mode?: 'numbered' | 'sequential';
   className?: string;
+  labels?: Partial<PaginationLabels>;
 }
 
-export function Pagination({ page, pageSize, total, onChange, className }: PaginationProps): React.ReactElement {
+const DEFAULT_PAGINATION_LABELS: PaginationLabels = {
+  previous: '上一页',
+  next: '下一页',
+  range: (from, to, total) => `第 ${from}-${to} 条，共 ${total} 条`,
+  goToPage: '选择页码',
+  jumpTo: '跳至',
+};
+
+const DEFAULT_PAGE_SIZES = [10, 20, 50, 100];
+
+/**
+ * Page numbers to render, with gaps folded into an ellipsis.
+ *
+ * A 349-page list cannot render every number, and a window that jumps to a
+ * truncated list as the reader moves is disorienting; showing the first, last and
+ * a few around the current page is the shape people already read.
+ */
+function pageWindow(page: number, pageCount: number): Array<number | 'gap'> {
+  if (pageCount <= 7) return Array.from({ length: pageCount }, (_, index) => index + 1);
+  const pages = new Set<number>([1, pageCount, page - 1, page, page + 1]);
+  // Keep the window stable at the edges: a bare "1 … 2 3 4" wastes the slot.
+  if (page <= 3) [2, 3, 4].forEach((value) => pages.add(value));
+  if (page >= pageCount - 2) [pageCount - 1, pageCount - 2, pageCount - 3].forEach((value) => pages.add(value));
+
+  const sorted = [...pages].filter((value) => value >= 1 && value <= pageCount).sort((a, b) => a - b);
+  const result: Array<number | 'gap'> = [];
+  let previous = 0;
+  for (const value of sorted) {
+    if (previous && value - previous > 1) result.push('gap');
+    result.push(value);
+    previous = value;
+  }
+  return result;
+}
+
+export function Pagination({
+  page,
+  pageSize,
+  total,
+  onChange,
+  onPageSizeChange,
+  pageSizeOptions = DEFAULT_PAGE_SIZES,
+  mode = 'numbered',
+  className,
+  labels,
+}: PaginationProps): React.ReactElement {
+  const text = { ...DEFAULT_PAGINATION_LABELS, ...labels };
   const pageCount = Math.max(1, Math.ceil(total / Math.max(1, pageSize)));
   const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const to = Math.min(total, page * pageSize);
+  const [jumpValue, setJumpValue] = React.useState('');
+
+  const goTo = (target: number): void => {
+    // Clamp rather than ignore: a typed "999" on a 3-page list should land on the
+    // last page, not look broken.
+    const next = Math.min(Math.max(1, Math.trunc(target) || 1), pageCount);
+    if (next !== page) onChange(next);
+  };
+
+  /** Accepts "12" as well as "12/349", which is what people paste. */
+  const submitJump = (): void => {
+    const parsed = Number.parseInt(jumpValue.split('/')[0]?.trim() ?? '', 10);
+    setJumpValue('');
+    if (Number.isFinite(parsed)) goTo(parsed);
+  };
 
   return (
-    <div className={cn('flex items-center justify-between gap-3 text-xs text-ai-fg-muted', className)}>
-      <span>第 {from}-{to} 条，共 {total} 条</span>
+    <div className={cn('flex flex-wrap items-center justify-between gap-3 text-xs text-ai-fg-muted', className)}>
+      <div className="flex items-center gap-3">
+        <span>{text.range?.(from, to, total)}</span>
+        {onPageSizeChange ? (
+          <label className="flex items-center gap-1">
+            <select
+              className="h-7 rounded-ai-sm border border-ai-line bg-ai-surface-1 px-1.5 text-xs text-ai-fg-secondary"
+              value={pageSize}
+              aria-label={text.jumpTo}
+              onChange={(event) => onPageSizeChange(Number(event.target.value))}
+            >
+              {pageSizeOptions.map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
+            </select>
+            <span>/ 页</span>
+          </label>
+        ) : null}
+      </div>
+
       <div className="flex items-center gap-1">
-        <PageButton label="上一页" disabled={page <= 1} onClick={() => onChange(page - 1)} direction="prev" />
-        <span className="px-2 tabular-nums text-ai-fg-secondary">{page} / {pageCount}</span>
-        <PageButton label="下一页" disabled={page >= pageCount} onClick={() => onChange(page + 1)} direction="next" />
+        <PageButton label={text.previous} disabled={page <= 1} onClick={() => onChange(page - 1)} direction="prev" />
+
+        {/*
+         * Explicit page buttons, not a "x / y" counter: with hundreds of pages the
+         * reader needs to land somewhere specific, and prev/next alone means
+         * dozens of clicks. Only for offset-paged lists; see `mode`.
+         */}
+        {mode === 'numbered' ? (
+        <nav aria-label={text.goToPage} className="hidden items-center gap-0.5 sm:flex">
+          {pageWindow(page, pageCount).map((entry, index) =>
+            entry === 'gap' ? (
+              <span key={`gap-${index}`} className="px-1 text-ai-fg-faint" aria-hidden="true">
+                …
+              </span>
+            ) : (
+              <button
+                key={entry}
+                type="button"
+                aria-current={entry === page ? 'page' : undefined}
+                aria-label={`${text.goToPage} ${entry}`}
+                onClick={() => goTo(entry)}
+                className={cn(
+                  'grid size-7 place-items-center rounded-ai-sm text-xs tabular-nums transition-colors duration-ai-fast',
+                  entry === page
+                    ? 'bg-ai-accent-soft font-medium text-ai-accent'
+                    : 'text-ai-fg-secondary hover:bg-ai-surface-2 hover:text-ai-fg',
+                )}
+              >
+                {entry}
+              </button>
+            ),
+          )}
+        </nav>
+        ) : (
+          <span className="px-2 tabular-nums text-ai-fg-secondary">
+            {page} / {pageCount}
+          </span>
+        )}
+
+        {/* Phone: the numbers do not fit, so a typeable page field takes their place. */}
+        {mode === 'numbered' ? (
+          <span className="flex items-center gap-1 sm:hidden">
+            <input
+              className="h-7 w-12 rounded-ai-sm border border-ai-line bg-ai-surface-1 px-1.5 text-center text-xs tabular-nums text-ai-fg-secondary"
+              inputMode="numeric"
+              aria-label={text.jumpTo}
+              placeholder={String(page)}
+              value={jumpValue}
+              onChange={(event) => setJumpValue(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') submitJump();
+              }}
+              onBlur={submitJump}
+            />
+            <span className="tabular-nums">/ {pageCount}</span>
+          </span>
+        ) : null}
+
+        <PageButton label={text.next} disabled={page >= pageCount} onClick={() => onChange(page + 1)} direction="next" />
       </div>
     </div>
   );
@@ -272,7 +471,7 @@ function PageButton({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        'grid size-7 place-items-center rounded-ai-sm border border-ai-line text-ai-fg-secondary',
+        'grid size-11 place-items-center rounded-ai-sm border border-ai-line text-ai-fg-secondary sm:size-7',
         'transition-colors duration-ai-fast hover:border-ai-line-strong hover:bg-ai-surface-2 hover:text-ai-fg',
         'disabled:pointer-events-none disabled:opacity-40',
       )}

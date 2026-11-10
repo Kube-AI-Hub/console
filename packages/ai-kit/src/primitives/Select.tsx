@@ -60,6 +60,7 @@ export function Select({
   const [query, setQuery] = React.useState('');
   const listId = React.useId();
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const anchorRef = React.useRef<HTMLButtonElement>(null);
 
   const commit = (next: string) => {
     if (controlledValue === undefined) setInternalValue(next);
@@ -77,6 +78,12 @@ export function Select({
   // Outside-click dismissal has to be handled here because Radix's own
   // detection cannot tell the anchor input apart from foreign clicks.
   const rootRef = React.useRef<HTMLDivElement>(null);
+
+  // The closed state is a button and the open state is an input; moving focus on
+  // open is what lets the reader start typing immediately after clicking.
+  React.useEffect(() => {
+    if (open) inputRef.current?.focus();
+  }, [open]);
   React.useEffect(() => {
     if (!open) return;
     const onPointerDown = (event: MouseEvent) => {
@@ -120,47 +127,79 @@ export function Select({
         }}
       >
         <Popover.Anchor asChild>
-          <input
-            ref={inputRef}
-            id={id}
-            role="combobox"
-            autoComplete="off"
-            aria-expanded={open}
-            aria-controls={listId}
-            aria-autocomplete="list"
-            aria-label={aria['aria-label']}
-            aria-invalid={aria['aria-invalid']}
-            disabled={disabled}
-            className={cn(inputClassName, className)}
-            value={open ? query : selectedLabel}
-            placeholder={selectedLabel || placeholder}
-            onFocus={() => setOpen(true)}
-            onMouseDown={() => setOpen(true)}
-            onBlur={(event) => {
-              // Only reset when focus truly left the combobox. Clearing on any
-              // blur wiped the filter in the same tick as an option click, and
-              // the list re-rendered under the pointer.
-              const next = event.relatedTarget as Node | null;
-              if (next && event.currentTarget.parentElement?.contains(next)) return;
-              setQuery('');
-            }}
-            onChange={(event) => {
-              setQuery(event.target.value);
-              setOpen(true);
-            }}
-            onKeyDown={(event) => {
-              if (event.key === 'Escape') {
+          {/*
+           * The closed state is a plain div, not the input.
+           *
+           * An `<input>` cannot ellipsise its value: a long project name scrolls
+           * to its end and looks truncated at the start. Rendering the selection
+           * as text when the list is closed keeps the familiar "name…" shape and
+           * one click still swaps in the input for typing.
+           */}
+          {open ? (
+            <input
+              ref={inputRef}
+              id={id}
+              role="combobox"
+              autoComplete="off"
+              aria-expanded={open}
+              aria-controls={listId}
+              aria-autocomplete="list"
+              aria-label={aria['aria-label']}
+              aria-invalid={aria['aria-invalid']}
+              disabled={disabled}
+              className={cn(inputClassName, className)}
+              value={query}
+              placeholder={selectedLabel || placeholder}
+              onBlur={(event) => {
+                // Only reset when focus truly left the combobox. Clearing on any
+                // blur wiped the filter in the same tick as an option click, and
+                // the list re-rendered under the pointer.
+                const next = event.relatedTarget as Node | null;
+                if (next && event.currentTarget.parentElement?.contains(next)) return;
                 setQuery('');
-                setOpen(false);
-                return;
-              }
-              if (event.key === 'Enter') {
-                event.preventDefault();
-                const first = filtered.find((option) => !option.disabled);
-                if (first) choose(first);
-              }
-            }}
-          />
+              }}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setOpen(true);
+              }}
+              onKeyDown={(event) => {
+                if (event.key === 'Escape') {
+                  setQuery('');
+                  setOpen(false);
+                  return;
+                }
+                if (event.key === 'Enter') {
+                  event.preventDefault();
+                  const first = filtered.find((option) => !option.disabled);
+                  if (first) choose(first);
+                }
+              }}
+            />
+          ) : (
+            <button
+              ref={anchorRef}
+              type="button"
+              id={id}
+              role="combobox"
+              aria-expanded={false}
+              aria-controls={listId}
+              aria-label={aria['aria-label']}
+              aria-invalid={aria['aria-invalid']}
+              disabled={disabled}
+              className={cn(
+                inputClassName,
+                className,
+                'flex items-center justify-between gap-2 text-left',
+                selectedLabel ? 'text-ai-fg' : 'text-ai-fg-faint',
+              )}
+              // The full name is in the title so a hover reveals what the ellipsis hides.
+              title={selectedLabel || placeholder}
+              onClick={() => setOpen(true)}
+            >
+              <span className="min-w-0 flex-1 truncate">{selectedLabel || placeholder}</span>
+              <ChevronDown className="size-4 shrink-0 text-ai-fg-muted" />
+            </button>
+          )}
         </Popover.Anchor>
         <Popover.Portal>
           <Popover.Content

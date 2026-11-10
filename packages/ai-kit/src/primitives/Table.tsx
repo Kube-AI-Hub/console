@@ -43,6 +43,13 @@ export interface TableProps<T> {
     onChange: (keys: string[]) => void;
     /** Disable selection for a specific row. */
     isRowSelectable?: (row: T) => boolean;
+    /**
+     * Accessible names for the checkboxes.
+     *
+     * `row` receives the 1-based position so a host can say "Select row 2" in its
+     * own language instead of leaving a Chinese label in an English page.
+     */
+    labels?: { selectAll?: string; row?: (index: number) => string };
   };
   loading?: boolean;
   /** Shown when `rows` is empty and not loading. */
@@ -165,7 +172,7 @@ export function Table<T>({
                 <label className="grid size-11 cursor-pointer place-items-center sm:size-auto">
                   <input
                     type="checkbox"
-                    aria-label="全选"
+                    aria-label={selection.labels?.selectAll ?? '全选'}
                     checked={allSelected}
                     onChange={toggleAll}
                     className="size-3.5 shrink-0 accent-[rgb(var(--ai-accent))]"
@@ -283,7 +290,7 @@ export function Table<T>({
                         <label className="grid size-11 cursor-pointer place-items-center sm:size-auto">
                           <input
                             type="checkbox"
-                            aria-label={`选择第 ${index + 1} 行`}
+                            aria-label={selection.labels?.row?.(index + 1) ?? `选择第 ${index + 1} 行`}
                             checked={isSelected}
                             disabled={!(selection.isRowSelectable?.(row) ?? true)}
                             onChange={() => toggleOne(key)}

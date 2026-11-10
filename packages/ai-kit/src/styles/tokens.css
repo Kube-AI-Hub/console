@@ -156,6 +156,21 @@
   --ai-danger-fg: var(--ai-raw-white);
   --ai-sub: var(--ai-raw-cyan-300); /* $sub */
 
+  /*
+   * Code editor highlighting.
+   *
+   * CodeMirror's built-in palette assumes a white page: property names come out
+   * `rgb(0,0,204)`, which on this navy panel is nearly the background colour.
+   * These are chosen for contrast against `--ai-bg-elevated`; the light palette
+   * below redefines the same names.
+   */
+  --ai-code-property: var(--ai-raw-cyan-400);
+  --ai-code-string: var(--ai-raw-green-lite-200);
+  --ai-code-literal: var(--ai-raw-violet-400);
+  --ai-code-keyword: var(--ai-raw-green-lite-300);
+  --ai-code-comment: var(--ai-raw-ice-100);
+  --ai-code-punctuation: var(--ai-raw-ice-300);
+
   --ai-ring: var(--ai-accent-strong);
 
   /* Navigation and table surfaces console styles separately */
@@ -231,6 +246,15 @@
   --ai-danger: var(--ai-raw-red-200);
   --ai-danger-fg: var(--ai-raw-white);
   --ai-sub: var(--ai-raw-cyan-100);
+
+  /* Code editor, light: the dark set is tuned for the navy panel and washes out
+     on white, so each name maps to a darker ramp step. */
+  --ai-code-property: var(--ai-raw-cyan-100);
+  --ai-code-string: 0 112 74; /* darkened green for a white background */
+  --ai-code-literal: var(--ai-raw-violet-100);
+  --ai-code-keyword: var(--ai-raw-red-100);
+  --ai-code-comment: var(--ai-raw-navy-400);
+  --ai-code-punctuation: var(--ai-raw-navy-300);
 
   --ai-nav-bg: rgb(249 251 253 / 0.8);
   --ai-th-bg: var(--ai-raw-ice-600);

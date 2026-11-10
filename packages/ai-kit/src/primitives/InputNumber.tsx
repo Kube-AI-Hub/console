@@ -52,6 +52,7 @@ export const InputNumber = React.forwardRef<HTMLInputElement, InputNumberProps>(
     >
       <input
         ref={ref}
+        data-ai-field-input=""
         inputMode="decimal"
         value={current ?? ''}
         disabled={disabled}
@@ -64,7 +65,7 @@ export const InputNumber = React.forwardRef<HTMLInputElement, InputNumberProps>(
           const parsed = Number(raw);
           if (Number.isFinite(parsed)) commit(parsed);
         }}
-        className="h-full min-w-0 flex-1 bg-transparent px-3 text-sm text-ai-fg outline-none"
+        className="h-full min-w-0 flex-1 bg-transparent px-3 text-sm text-ai-fg outline-none focus-visible:outline-none"
         {...props}
       />
       <div className="flex flex-col border-l border-ai-line">

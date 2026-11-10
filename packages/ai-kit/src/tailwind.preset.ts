@@ -129,14 +129,21 @@ const aiKitPreset: Partial<Config> = {
         /**
          * Entrance for elements that are centred with `translate`.
          *
-         * `ai-scale-in` animates `transform` and ends at `none`, which wipes out
-         * a centring transform and leaves the element anchored at its top-left
-         * corner. This variant scales through a CSS variable so the element's
-         * own `translate` survives, and it composes the two in one transform.
+         * Only `scale` and `opacity` are animated here. The centring offset lives
+         * on the element's own `translate` property (`-translate-x-1/2`), which is
+         * a separate property from `transform` — so this animation cannot fight
+         * it and needs no compose trick.
+         *
+         * The previous version animated `transform: translate(-50%,-50%) scale(..)`
+         * on top of a static `translate: -50% -50%`. During the animation the
+         * element was offset twice, and `fill-mode: none` dropped the `to` frame
+         * the moment it ended, so the dialog slid from up-left down-right into
+         * place instead of appearing centred. `both` keeps the end state applied,
+         * matching `ai-sheet-in`.
          */
         'ai-pop-in': {
-          from: { opacity: '0', transform: 'translate(-50%, -50%) scale(var(--ai-pop-scale))' },
-          to: { opacity: '1', transform: 'translate(-50%, -50%) scale(1)' },
+          from: { opacity: '0', transform: 'scale(var(--ai-pop-scale))' },
+          to: { opacity: '1', transform: 'scale(1)' },
         },
         /**
          * Bottom-sheet entrance for the modal on phones.
@@ -158,7 +165,9 @@ const aiKitPreset: Partial<Config> = {
       animation: {
         'ai-fade-in': 'ai-fade-in var(--ai-duration-base) var(--ai-ease-out)',
         'ai-scale-in': 'ai-scale-in var(--ai-duration-base) var(--ai-ease-out)',
-        'ai-pop-in': 'ai-pop-in var(--ai-duration-base) var(--ai-ease-out)',
+        // `both`, like `ai-sheet-in`: without it the final keyframe is dropped
+        // when the animation ends and the element snaps to a different transform.
+        'ai-pop-in': 'ai-pop-in var(--ai-duration-base) var(--ai-ease-out) both',
         'ai-slide-up': 'ai-slide-up var(--ai-duration-base) var(--ai-ease-out)',
         // `both` keeps the final keyframe applied after the animation ends, so
         // the element does not snap back to its pre-animation transform.

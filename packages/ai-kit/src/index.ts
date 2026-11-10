@@ -208,6 +208,10 @@ export {
   type ResourceFormProps,
 } from './schema/ResourceForm';
 
+/* Editor */
+export { YamlEditor, type YamlEditorProps } from './editor/YamlEditor';
+export { fieldsFor, detectKind, lastSegment, depthOf, type FieldSpec } from './editor/k8s-fields';
+
 /* Utils */
 export { cn } from './utils/cn';
 export { useMediaQuery, useIsMobile, useIsCompact } from './utils/useMediaQuery';

@@ -212,10 +212,17 @@ describe('Select searchable', () => {
   it('accepts typed input and filters the list', async () => {
     const onValueChange = vi.fn();
     render(<Select searchable options={OPTIONS} onValueChange={onValueChange} aria-label="命名空间" />);
-    const input = screen.getByRole('combobox');
 
+    /*
+     * Closed state is a <button>, open state swaps in an <input>. The button is
+     * what lets CSS ellipsise a long selected project name; an <input> cannot
+     * render a text-overflow ellipsis. Typing starts after the click that opens it.
+     */
+    const trigger = screen.getByRole('combobox');
+    await userEvent.click(trigger);
+    const input = screen.getByRole('combobox');
     expect(input.tagName).toBe('INPUT');
-    await userEvent.click(input);
+
     await userEvent.type(input, 'kube');
 
     expect(await screen.findByRole('option', { name: 'kube-system' })).toBeInTheDocument();

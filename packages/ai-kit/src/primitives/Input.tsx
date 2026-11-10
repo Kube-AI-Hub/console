@@ -27,13 +27,17 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(function Inp
   ref,
 ) {
   if (!leading && !trailing) {
-    return <input ref={ref} className={cn(inputClassName, className)} {...props} />;
+    // `data-ai-field-input` marks the input as one whose focus indicator ai-kit
+    // owns (`focus-visible:ring-2`). A host's global focus outline is expected to
+    // skip this element; without the marker the app's fallback rule painted a
+    // second frame 2px outside the ring.
+    return <input ref={ref} data-ai-field-input="" className={cn(inputClassName, className)} {...props} />;
   }
   return (
     <div
       data-ai-field=""
       className={cn(
-        'flex h-9 items-center gap-2 rounded-ai-md border border-ai-line bg-ai-surface-1 px-3',
+        'flex min-h-11 items-center gap-2 rounded-ai-md border border-ai-line bg-ai-surface-1 px-3 sm:min-h-9',
         'transition-colors duration-ai-fast hover:border-ai-line-strong',
         'focus-within:border-ai-accent focus-within:ring-2 focus-within:ring-ai-accent/25',
         // The wrapper draws the focus ring; the inner input is `outline-none`.
@@ -47,7 +51,10 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(function Inp
       <input
         ref={ref}
         data-ai-field-input=""
-        className="h-full min-w-0 flex-1 bg-transparent text-sm text-ai-fg outline-none placeholder:text-ai-fg-faint disabled:cursor-not-allowed"
+        // The wrapper draws the focus ring, so the inner input must not draw one
+        // too. This is the standard opt-out the host's global `:focus-visible`
+        // fallback is written to defer to (see `styles.css`).
+        className="h-full min-w-0 flex-1 bg-transparent text-sm text-ai-fg outline-none focus-visible:outline-none placeholder:text-ai-fg-faint disabled:cursor-not-allowed"
         {...props}
       />
       {trailing ? <span className="shrink-0 text-ai-fg-muted">{trailing}</span> : null}
@@ -61,7 +68,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(fun
   { className, ...props },
   ref,
 ) {
-  return <textarea ref={ref} className={cn(textareaClassName, className)} {...props} />;
+  return <textarea ref={ref} data-ai-field-input="" className={cn(textareaClassName, className)} {...props} />;
 });
 
 /* ---------------- Password ---------------- */
@@ -109,7 +116,11 @@ export const InputPassword = React.forwardRef<HTMLInputElement, InputPasswordPro
             disabled={disabled}
             aria-label={visible ? '隐藏密码' : '显示密码'}
             aria-pressed={visible}
-            className="grid size-5 place-items-center rounded text-ai-fg-muted transition-colors duration-ai-fast hover:text-ai-fg disabled:cursor-not-allowed"
+            // `focus-visible:ring-2` and not just an outline: this is a 20px
+            // button inside the field, so the browser's default ring at
+            // `outline-offset: 2px` would spill outside the wrapper's border. The
+            // inset ring stays within the control.
+            className="grid size-5 place-items-center rounded text-ai-fg-muted transition-colors duration-ai-fast hover:text-ai-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ai-ring disabled:cursor-not-allowed"
           >
             {visible ? <EyeOffIcon className="size-3.5" /> : <EyeIcon className="size-3.5" />}
           </button>

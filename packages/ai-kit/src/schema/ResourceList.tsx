@@ -23,12 +23,40 @@ export interface ListColumn<TRow> {
   render?: (row: TRow, index: number) => React.ReactNode;
   /** Hide below this breakpoint; keeps wide tables readable on laptops. */
   hideBelow?: 'md' | 'lg' | 'xl';
+  /**
+   * Let the cell grow to several lines instead of one.
+   *
+   * For columns holding a list of names — a ConfigMap's keys, a pod's containers —
+   * one line hides most of the value and forces horizontal scrolling. Wrapping
+   * trades row height for being able to read the cell.
+   */
+  wrap?: boolean;
 }
+
+/**
+ * Radix `Select` refuses an option whose value is the empty string — it reserves
+ * that for "no selection". A filter's "all" option is a real choice, so it needs a
+ * sentinel; `''` still means "all" to callers, so no page has to know about this.
+ */
+const ALL_OPTION = '__all__';
 
 export interface ListFilter {
   key: string;
   title: string;
+  /** Label for the "no filter" option; defaults to `全部{title}`. */
+  allLabel?: string;
   options: Array<{ value: string; label: string }>;
+  /**
+   * Let the reader type to narrow the options.
+   *
+   * For lists long enough that scrolling to an entry is slower than typing part
+   * of its name — projects, namespaces — a plain popup is unusable.
+   */
+  searchable?: boolean;
+  /** Text shown when nothing matches the typed filter. */
+  emptyText?: string;
+  /** Trigger width; defaults to 160px, enough for short values only. */
+  widthClass?: string;
 }
 
 export interface ListAction<TRow> {
@@ -75,7 +103,47 @@ export interface ListSchema<TRow> {
   primaryAction?: { key: string; label: React.ReactNode; aiId?: string };
   selection?: 'none' | 'multiple';
   empty?: { title?: React.ReactNode; description?: React.ReactNode };
-  pagination?: { pageSize: number; total: number; page: number };
+  pagination?: {
+    pageSize: number;
+    total: number;
+    page: number;
+    /**
+     * Sizes the reader may choose from.
+     *
+     * Omitted when the list cannot honour a jump — a cursor-paged collection can
+     * only walk forward, so offering "100 per page" would be a dead control.
+     */
+    pageSizeOptions?: number[];
+    /**
+     * How pages are reached; see `PaginationProps.mode`.
+     *
+     * Cursor-paged collections must use `sequential`: page numbers would be dead
+     * controls because page N is only reachable by walking every cursor before it.
+     */
+    mode?: 'numbered' | 'sequential';
+  };
+  /**
+   * Accessible names for the built-in controls.
+   *
+   * These are screen-reader text, not visible copy, so a host with its own
+   * language switcher must supply them or the reader hears the library's default
+   * language in the middle of a translated page.
+   */
+  labels?: {
+    selectAll?: string;
+    selectRow?: (index: number) => string;
+    moreActions?: string;
+    previous?: string;
+    next?: string;
+    /** Prefix for the bulk-action count, e.g. 已选. */
+    selected?: (count: number) => string;
+    /** "1-10 of 3487"; the pager's range sentence. */
+    range?: (from: number, to: number, total: number) => string;
+    /** Accessible name for the page selector. */
+    goToPage?: string;
+    /** Label for the page-jump field. */
+    jumpTo?: string;
+  };
   /**
    * Extra attributes for each row element.
    *
@@ -107,6 +175,8 @@ export interface ResourceListProps<TRow> {
   selectedKeys?: string[];
   onSelectionChange?: (keys: string[]) => void;
   onPageChange?: (page: number) => void;
+  /** Provide together with `pagination.pageSizeOptions` to show a size picker. */
+  onPageSizeChange?: (pageSize: number) => void;
   /** Called with the next sort when a sortable header is clicked. */
   onSortChange?: (sort: { key: string; order: SortOrder } | undefined) => void;
   onAction?: (action: string, row: TRow) => void;
@@ -162,7 +232,9 @@ const hideBelowClass: Record<NonNullable<ListColumn<unknown>['hideBelow']>, stri
  * string so Tailwind can see the literal class names at build time.
  */
 export function columnVisibilityClass<TRow>(column: ListColumn<TRow>): string {
-  return column.hideBelow ? hideBelowClass[column.hideBelow] : '';
+  return [column.hideBelow ? hideBelowClass[column.hideBelow] : '', column.wrap ? 'whitespace-normal' : '']
+    .filter(Boolean)
+    .join(' ');
 }
 
 /* ---------------- Component ---------------- */
@@ -178,6 +250,7 @@ export function ResourceList<TRow>({
   selectedKeys = [],
   onSelectionChange,
   onPageChange,
+  onPageSizeChange,
   onSortChange,
   onAction,
   onBulkAction,
@@ -247,7 +320,7 @@ export function ResourceList<TRow>({
             <Dropdown
               align="end"
               trigger={
-                <Button variant="ghost" size="icon" aria-label="更多操作" onClick={(event) => event.stopPropagation()}>
+                <Button variant="ghost" size="icon" aria-label={schema.labels?.moreActions ?? '更多操作'} onClick={(event) => event.stopPropagation()}>
                   <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="size-4">
                     <circle cx="12" cy="5" r="1.6" />
                     <circle cx="12" cy="12" r="1.6" />
@@ -308,6 +381,32 @@ export function ResourceList<TRow>({
 
       {hasToolbar || bulkActions.length > 0 || primaryAction ? (
         <div className="flex flex-wrap items-center gap-2">
+          {/*
+           * Filters come before the search box.
+           *
+           * A filter narrows the whole set, while the search box narrows within it:
+           * reading left to right, "which project" is a bigger question than "which
+           * name", and putting the coarse control first matches the order the two
+           * are actually used in. It also keeps the search box — the control people
+           * reach for most — in a fixed position rather than shifting with the
+           * number of filters.
+           */}
+          {schema.filters?.map((filter) => (
+            <Select
+              key={filter.key}
+              className={cn('shrink-0', filter.widthClass ?? 'w-40')}
+              aria-label={filter.title}
+              placeholder={filter.title}
+              value={filters?.[filter.key] || ALL_OPTION}
+              onValueChange={(value) =>
+                onFiltersChange?.({ ...filters, [filter.key]: value === ALL_OPTION ? '' : value })
+              }
+              options={[{ value: ALL_OPTION, label: filter.allLabel ?? `全部${filter.title}` }, ...filter.options]}
+              {...(filter.searchable ? { searchable: true } : {})}
+              {...(filter.emptyText ? { emptyText: filter.emptyText } : {})}
+            />
+          ))}
+
           {schema.search ? (
             <Input
               // Full width on a phone so the search field is reachable; a fixed
@@ -325,18 +424,6 @@ export function ResourceList<TRow>({
               }
             />
           ) : null}
-
-          {schema.filters?.map((filter) => (
-            <Select
-              key={filter.key}
-              className="w-40"
-              aria-label={filter.title}
-              placeholder={filter.title}
-              value={filters?.[filter.key] ?? ''}
-              onValueChange={(value) => onFiltersChange?.({ ...filters, [filter.key]: value })}
-              options={[{ value: '', label: `全部${filter.title}` }, ...filter.options]}
-            />
-          ))}
 
           {/*
            * Bulk actions appear only once something is selected. Rendering them
@@ -380,7 +467,7 @@ export function ResourceList<TRow>({
                   // crosses 9 → 10 → 100.
                   className="flex h-full shrink-0 items-center justify-end rounded-ai-md bg-ai-surface-2 px-3 text-xs tabular-nums text-ai-fg-secondary"
                 >
-                  已选 {selectedKeys.length} 项
+                  {schema.labels?.selected ? schema.labels.selected(selectedKeys.length) : `已选 ${selectedKeys.length} 项`}
                 </span>
                 {bulkActions.map((action) => (
                   <Button
@@ -390,7 +477,7 @@ export function ResourceList<TRow>({
                     // taller than the field beside it.
                     size="md"
                     variant={action.tone === 'danger' ? 'danger' : 'secondary'}
-                    className="min-h-0 px-3"
+                    className="px-3 sm:min-h-0"
                     onClick={() => {
                       if (action.confirm && !window.confirm(action.confirm)) return;
                       onBulkAction?.(action.key, selectedKeys);
@@ -407,7 +494,7 @@ export function ResourceList<TRow>({
               <Button
                 size="md"
                 variant="primary"
-                className="min-h-0 px-3"
+                className="px-3 sm:min-h-0"
                 onClick={() => onAction?.(primaryAction.key, undefined as unknown as TRow)}
                 {...(primaryAction.aiId ? { 'data-ai-id': primaryAction.aiId } : {})}
               >
@@ -435,7 +522,11 @@ export function ResourceList<TRow>({
           : {})}
         selection={
           schema.selection === 'multiple' && onSelectionChange
-            ? { selectedKeys, onChange: onSelectionChange }
+            ? {
+                selectedKeys,
+                onChange: onSelectionChange,
+                ...(schema.labels ? { labels: { ...(schema.labels.selectAll ? { selectAll: schema.labels.selectAll } : {}), ...(schema.labels.selectRow ? { row: schema.labels.selectRow } : {}) } } : {}),
+              }
             : undefined
         }
         empty={
@@ -452,6 +543,25 @@ export function ResourceList<TRow>({
           pageSize={schema.pagination.pageSize}
           total={schema.pagination.total}
           onChange={onPageChange}
+          {...(onPageSizeChange ? { onPageSizeChange } : {})}
+          {...(schema.pagination.pageSizeOptions ? { pageSizeOptions: schema.pagination.pageSizeOptions } : {})}
+          {...(schema.pagination.mode ? { mode: schema.pagination.mode } : {})}
+          /*
+           * Forward every label the pager understands, not just prev/next: the
+           * range sentence and the page-selector name are the two strings a reader
+           * actually sees most.
+           */
+          {...(schema.labels
+            ? {
+                labels: {
+                  ...(schema.labels.previous ? { previous: schema.labels.previous } : {}),
+                  ...(schema.labels.next ? { next: schema.labels.next } : {}),
+                  ...(schema.labels.range ? { range: schema.labels.range } : {}),
+                  ...(schema.labels.goToPage ? { goToPage: schema.labels.goToPage } : {}),
+                  ...(schema.labels.jumpTo ? { jumpTo: schema.labels.jumpTo } : {}),
+                },
+              }
+            : {})}
         />
       ) : null}
     </div>

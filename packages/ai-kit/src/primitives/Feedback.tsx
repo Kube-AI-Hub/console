@@ -59,11 +59,17 @@ export interface ModalProps {
   description?: React.ReactNode;
   children?: React.ReactNode;
   footer?: React.ReactNode;
-  /** Width preset; defaults to a comfortable form width. */
-  size?: 'sm' | 'md' | 'lg';
+  /**
+   * Width preset; defaults to a comfortable form width.
+   *
+   * `xl` matches the old console's 960px create dialog: the two-step ConfigMap
+   * form and the YAML editor both need the room, and `lg` forces the data editor
+   * to scroll horizontally.
+   */
+  size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
-const modalSizes = { sm: 'max-w-sm', md: 'max-w-lg', lg: 'max-w-2xl' } as const;
+const modalSizes = { sm: 'max-w-sm', md: 'max-w-lg', lg: 'max-w-2xl', xl: 'max-w-4xl' } as const;
 
 export function Modal({ open, onOpenChange, title, description, children, footer, size = 'md' }: ModalProps): React.ReactElement {
   return (
