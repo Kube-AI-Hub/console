@@ -1,8 +1,9 @@
 import * as React from 'react';
 import type { Preview } from '@storybook/react';
 import { DocsContext, DocsContainer as StorybookDocsContainer } from '@storybook/blocks';
-import { ThemeProvider } from '../src/theme/ThemeProvider';
+import { ThemeProvider, useTheme } from '../src/theme/ThemeProvider';
 import { ThemeToggle, AccentToggle } from '../src/theme/ThemeToggle';
+import { themes } from '@storybook/theming';
 import '../src/styles/tokens.css';
 import '../src/styles/motion.css';
 import './storybook.css';
@@ -38,25 +39,78 @@ function DocsContainer({
 }): React.ReactElement {
   return (
     <ThemeProvider defaultTheme="dark" defaultAccent="violet">
-      <div className="ai-root ai-ambient min-h-screen bg-ai-bg text-ai-fg">
-        {/* Same column and inset as the docs content, so the toggles line up
-            with the title below instead of sitting on their own grid. */}
-        <div className="mx-auto flex max-w-4xl items-center justify-end gap-2 px-5 pt-6 sm:px-2">
-          <AccentToggle />
-          <ThemeToggle />
-        </div>
-        {/*
-         * Delegate to Storybook's own container instead of re-implementing it.
-         * The blocks depend on more than `DocsContext` — they read typography and
-         * colours from `theme` — and a hand-rolled provider failed one requirement
-         * at a time. This one supplies everything; the wrapper above only adds
-         * the ai-kit tokens.
-         */}
-        <StorybookDocsContainer context={context} theme={theme}>
-          {children}
-        </StorybookDocsContainer>
-      </div>
+      <DocsFrame context={context} theme={theme}>
+        {children}
+      </DocsFrame>
     </ThemeProvider>
+  );
+}
+
+/**
+ * The docs frame, inside the provider so it can read the current mode.
+ *
+ * The surrounding chrome (`appBg`, `appContentBg`, borders) is driven by the
+ * theme object handed to the docs container, which is why it is resolved from
+ * `useTheme` rather than passed through: left at Storybook's default the page
+ * went light while its panels stayed dark.
+ *
+ * The code-block colours are **not** part of this: Storybook 8's theme type has
+ * no `codeBg` / token palette (`@storybook/theming` exposes only `fontCode`), and
+ * Prism's token colours come from a separate stylesheet that never consults the
+ * theme at all. Those are re-pointed at the ai-kit tokens in `storybook.css`.
+ */
+function DocsFrame({
+  context,
+  theme,
+  children,
+}: {
+  context: React.ContextType<typeof DocsContext>;
+  theme?: Parameters<typeof StorybookDocsContainer>[0]['theme'];
+  children?: React.ReactNode;
+}): React.ReactElement {
+  const { theme: mode } = useTheme();
+  /*
+   * Only the palettes are overridden, not the whole theme object.
+   *
+   * Spreading `themes[mode]` over the incoming theme looked tidy but broke the
+   * story previews: that object is Storybook's *manager* palette and does not
+   * carry everything the docs blocks require, so every `Canvas` rendered its
+   * error placeholder while the surrounding prose still painted. Taking the two
+   * colour families across keeps the host theme intact.
+   */
+  const palette = themes[mode];
+  const resolved = {
+    ...(theme ?? themes.light),
+    base: palette.base,
+    colorPrimary: palette.colorPrimary,
+    colorSecondary: palette.colorSecondary,
+    appBg: palette.appBg,
+    appContentBg: palette.appContentBg,
+    appPreviewBg: palette.appPreviewBg,
+    appBorderColor: palette.appBorderColor,
+    fontBase: palette.fontBase,
+    fontCode: palette.fontCode,
+  };
+
+  return (
+    <div className="ai-root ai-ambient min-h-screen bg-ai-bg text-ai-fg">
+      {/* Same column and inset as the docs content, so the toggles line up
+          with the title below instead of sitting on their own grid. */}
+      <div className="mx-auto flex max-w-4xl items-center justify-end gap-2 px-5 pt-6 sm:px-2">
+        <AccentToggle />
+        <ThemeToggle />
+      </div>
+      {/*
+       * Delegate to Storybook's own container instead of re-implementing it.
+       * The blocks depend on more than `DocsContext` — they read typography and
+       * colours from `theme` — and a hand-rolled provider failed one requirement
+       * at a time. This one supplies everything; the wrapper above only adds
+       * the ai-kit tokens.
+       */}
+      <StorybookDocsContainer context={context} theme={resolved}>
+        {children}
+      </StorybookDocsContainer>
+    </div>
   );
 }
 

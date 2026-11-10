@@ -196,6 +196,29 @@ const theme = EditorView.theme({
   '.cm-foldGutter .cm-gutterElement': { padding: '0 1px' },
   '.cm-activeLine': { backgroundColor: 'rgb(var(--ai-surface-2))' },
   '.cm-activeLineGutter': { backgroundColor: 'rgb(var(--ai-surface-2))' },
+  /*
+   * Selection colours, matched to the specificity CodeMirror's own defaults use.
+   *
+   * Without these the selection falls back to CodeMirror's built-in palette — a
+   * light-theme wash (`#d9d9d9` / `#d7d4f0`) — so Select All on a dark page turned
+   * the document near-white and the syntax colours vanished into it.
+   *
+   * The selector is not `.cm-focused .cm-selectionBackground`: the built-in rule
+   * is `.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground`,
+   * which is more specific and won regardless of declaration order. Spelling out
+   * the same chain puts this on equal footing, and later in the sheet.
+   *
+   * The accent at low alpha, so the text underneath stays readable in both
+   * themes and the selection reads as this app's rather than the browser's.
+   */
+  '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground': {
+    backgroundColor: 'rgb(var(--ai-accent) / 0.28)',
+  },
+  '.cm-selectionBackground': { backgroundColor: 'rgb(var(--ai-accent) / 0.28)' },
+  // The browser paints the native selection over the text itself; left alone it
+  // stays the OS default (light blue) on top of the layer above.
+  '.cm-content ::selection': { backgroundColor: 'rgb(var(--ai-accent) / 0.28)' },
+  '.cm-selectionMatch': { backgroundColor: 'rgb(var(--ai-accent) / 0.16)' },
   '.cm-scroller': { overflow: 'auto' },
   '.cm-tooltip': {
     backgroundColor: 'rgb(var(--ai-bg-overlay))',
@@ -207,4 +230,20 @@ const theme = EditorView.theme({
     color: 'rgb(var(--ai-accent))',
   },
   '.cm-lintRange-error': { textDecoration: 'underline wavy rgb(var(--ai-danger))' },
+}, {
+  /*
+   * Marks the theme as dark for CodeMirror's internal defaults.
+   *
+   * Without it CodeMirror treats the editor as light and installs its built-in
+   * light palette for selection and highlights, which then competes with the
+   * rules above at a higher specificity
+   * (`.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground`
+   * beat `.cm-focused .cm-selectionBackground`) and won: Select All painted the
+   * document near-white on a dark page.
+   *
+   * The editor follows the app's `data-theme` through CSS variables, so the
+   * attributes are set in CSS below rather than at construction — but the `dark`
+   * flag has to be decided here, and the app ships dark by default.
+   */
+  dark: true,
 });

@@ -21,6 +21,14 @@
   background-color: rgb(var(--ai-bg)) !important;
 }
 
+/* Each `<Canvas>` frame: upstream fills it with a hard-coded `#1b1c1d` and a
+   translucent white border. On a navy page that reads as a black slab, hiding
+   the story's own surface underneath. */
+.ai-root .sbdocs-preview {
+  background-color: rgb(var(--ai-surface-1)) !important;
+  border-color: rgb(var(--ai-line)) !important;
+}
+
 /* The default container adds its own padding; `DocsContainer` supplies the
    spacing so the toggle row and the content share one left edge. */
 .ai-root .sbdocs-wrapper {
@@ -89,6 +97,167 @@
   background-color: rgb(var(--ai-surface-2)) !important;
   color: rgb(var(--ai-fg)) !important;
   border-color: rgb(var(--ai-line)) !important;
+}
+
+/* --- Docs code panel shell and its toolbar ---
+ *
+ * `@storybook/addon-docs` wraps every source snippet in a panel whose own
+ * palette is hard-coded: a `#0f0f10` shell behind the `pre`, a `#1b1c1d`
+ * toolbar strip carrying the language label and "Copy", a
+ * `rgba(255,255,255,.1)` frame, and a `#2e3438` label colour. Only the `pre`
+ * was re-pointed above, so on a dark page the strip around the code and the
+ * buttons read as near-black blocks glued onto the navy code, and "Show code"
+ * rendered grey-on-grey.
+ *
+ * The shell and toolbar carry no semantic class — just generated `css-*`
+ * hashes that change between builds — so they are reached from the `pre` they
+ * contain, scoped to `.sbdocs-preview` (only source snippets live there; story
+ * canvases keep their own `pre`). The toggle button does have a stable
+ * `docblock-*` name. */
+
+/* Panel body: same surface as the code it holds, rounded and outlined so the
+   snippet reads as a card instead of a black band. */
+.sbdocs-preview > div:has(pre) {
+  background-color: rgb(var(--ai-surface-2)) !important;
+  border: 1px solid rgb(var(--ai-line)) !important;
+  border-radius: var(--ai-radius-md) !important;
+  overflow: hidden;
+}
+
+/* Toolbar strip: one step down from the code so the label stays legible. */
+.sbdocs-preview > div:has(pre) > div {
+  background-color: rgb(var(--ai-surface-1)) !important;
+  border-bottom: 1px solid rgb(var(--ai-line));
+}
+
+/* Buttons inside those panels inherit `background: #0f0f10` from upstream. */
+.sbdocs-preview > div:has(pre) button {
+  background-color: rgb(var(--ai-surface-1)) !important;
+  color: rgb(var(--ai-fg-secondary)) !important;
+  border-radius: var(--ai-radius-sm) !important;
+}
+
+/* The scroll-area wrapper around the `pre` paints its own lighter grey; match
+   it to the code so no banding shows behind the snippet. */
+.sbdocs-preview > div:has(pre) div:has(pre) {
+  background-color: rgb(var(--ai-surface-2)) !important;
+}
+
+/* Show code / Hide code. Upstream paints the button with the shell colour and
+   let the label keep the light-theme grey, which is all but invisible. */
+.sbdocs button.docblock-code-toggle {
+  background-color: rgb(var(--ai-surface-1)) !important;
+  color: rgb(var(--ai-fg-secondary)) !important;
+  border: 1px solid rgb(var(--ai-line)) !important;
+  border-radius: var(--ai-radius-md) !important;
+  font-family: var(--ai-font-sans);
+}
+
+.sbdocs button.docblock-code-toggle:hover,
+.sbdocs button.docblock-code-toggle:focus-visible {
+  background-color: rgb(var(--ai-surface-2)) !important;
+  color: rgb(var(--ai-fg)) !important;
+  border-color: rgb(var(--ai-line-strong)) !important;
+}
+
+/* --- Code block tokens ---
+ *
+ * The `pre` background above already follows the theme, but Prism's token colours
+ * are a separate stylesheet from `@storybook/components` — a dark one (`#ededed`
+ * punctuation, `#96cbfe` properties) that is chosen once and does not know about
+ * our `data-theme`. On a light background those came out white-on-pale-lilac and
+ * pale-blue-on-pale-lilac, which is unreadable.
+ *
+ * Each token is re-pointed at an ai-kit token rather than a literal colour, so
+ * both themes stay in step with the palette and neither needs maintaining on its
+ * own. The dark rules are the meaning-preserving mapping for the dark background;
+ * the light rules darken the same hues enough to sit on a light surface.
+ *
+ * `!important` is required: the upstream rule is
+ * `pre[class*='language-'] .token.keyword` (specificity 0,2,1), higher than a
+ * two-class selector here.
+ */
+
+/* Punctuation and plain text: the code's own foreground. */
+.ai-root .sbdocs pre .token.punctuation,
+.ai-root .sbdocs pre .token.operator,
+.ai-root .sbdocs pre .token.operator.arrow {
+  color: rgb(var(--ai-fg-secondary));
+}
+
+/* Comments: dimmed until they are readable, not decorative. */
+.ai-root .sbdocs pre .token.comment {
+  color: rgb(var(--ai-fg-muted));
+  font-style: italic;
+}
+
+/* Strings and regexes. */
+.ai-root .sbdocs pre .token.string,
+.ai-root .sbdocs pre .token.regex,
+.ai-root .sbdocs pre .token.important {
+  color: rgb(var(--ai-success));
+}
+
+/* Keywords and control flow. */
+.ai-root .sbdocs pre .token.keyword,
+.ai-root .sbdocs pre .token.boolean,
+.ai-root .sbdocs pre .token.atrule {
+  color: rgb(var(--ai-accent));
+}
+
+/* Identifiers, properties and function names. */
+.ai-root .sbdocs pre .token.function,
+.ai-root .sbdocs pre .token.function-variable,
+.ai-root .sbdocs pre .token.maybe-class-name,
+.ai-root .sbdocs pre .token.method,
+.ai-root .sbdocs pre .token.property-access,
+.ai-root .sbdocs pre .token.literal-property.property,
+.ai-root .sbdocs pre .token.property {
+  color: rgb(var(--ai-info));
+}
+
+/* Numbers and constants. */
+.ai-root .sbdocs pre .token.number,
+.ai-root .sbdocs pre .token.constant,
+.ai-root .sbdocs pre .token.symbol {
+  color: rgb(var(--ai-warning));
+}
+
+/* Tags, attributes and parameters. */
+.ai-root .sbdocs pre .token.tag,
+.ai-root .sbdocs pre .token.attr-name,
+.ai-root .sbdocs pre .token.parameter {
+  color: rgb(var(--ai-danger));
+}
+
+/*
+ * Light mode needs the same hues a few steps darker: the semantic tokens are
+ * tuned to sit on the navy panel and several wash out on white. These reuse
+ * tokens that `tokens.css` already redefines for light — `--ai-accent` is the
+ * light violet there, and `--ai-accent-strong` is the darkest step of the ramp —
+ * so the palette stays the single source rather than a second list of hexes.
+ */
+:root[data-theme='light'] .ai-root .sbdocs pre .token.function,
+:root[data-theme='light'] .ai-root .sbdocs pre .token.function-variable,
+:root[data-theme='light'] .ai-root .sbdocs pre .token.maybe-class-name,
+:root[data-theme='light'] .ai-root .sbdocs pre .token.method,
+:root[data-theme='light'] .ai-root .sbdocs pre .token.property-access,
+:root[data-theme='light'] .ai-root .sbdocs pre .token.literal-property.property,
+:root[data-theme='light'] .ai-root .sbdocs pre .token.property {
+  color: rgb(var(--ai-accent-strong));
+}
+
+:root[data-theme='light'] .ai-root .sbdocs pre .token.string,
+:root[data-theme='light'] .ai-root .sbdocs pre .token.regex,
+:root[data-theme='light'] .ai-root .sbdocs pre .token.important {
+  /* `--ai-success` is already darkened for white in the light block. */
+  color: rgb(var(--ai-success));
+}
+
+:root[data-theme='light'] .ai-root .sbdocs pre .token.keyword,
+:root[data-theme='light'] .ai-root .sbdocs pre .token.boolean,
+:root[data-theme='light'] .ai-root .sbdocs pre .token.atrule {
+  color: rgb(var(--ai-accent-strong));
 }
 
 /* --- Prop table ---
