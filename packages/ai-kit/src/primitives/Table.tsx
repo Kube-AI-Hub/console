@@ -26,6 +26,15 @@ export interface TableColumn<T> {
    * sort server-side, so it only reports the requested order.
    */
   sortable?: boolean;
+  /**
+   * Handle for the sort control, rendered as `data-ai-id`.
+   *
+   * Sorting happens server-side, so an automation has no other way to press the
+   * header: the button carries no stable text (the label is the column title and
+   * changes with locale) and no column index is survivable once a column is
+   * inserted. Without it the "sort by X" step is unaddressable.
+   */
+  sortAiId?: string;
 }
 
 export interface TableSortState {
@@ -50,6 +59,14 @@ export interface TableProps<T> {
      * own language instead of leaving a Chinese label in an English page.
      */
     labels?: { selectAll?: string; row?: (index: number) => string };
+    /**
+     * Handle for a row's checkbox, rendered as `<aiId>:<row key>`.
+     *
+     * Selection drives the bulk actions, so an automation has to reach a specific
+     * row's checkbox by name. Settling for "the nth checkbox" breaks the moment a
+     * column or a row is inserted.
+     */
+    aiId?: string;
   };
   loading?: boolean;
   /** Shown when `rows` is empty and not loading. */
@@ -205,6 +222,7 @@ export function Table<T>({
                   {column.sortable ? (
                     <button
                       type="button"
+                      {...(column.sortAiId ? { 'data-ai-id': column.sortAiId } : {})}
                       onClick={() => cycleSort(column.key)}
                       className={cn(
                         'inline-flex items-center gap-1 transition-colors duration-ai-fast hover:text-ai-fg',
@@ -290,6 +308,7 @@ export function Table<T>({
                         <label className="grid size-11 cursor-pointer place-items-center sm:size-auto">
                           <input
                             type="checkbox"
+                            {...(selection.aiId ? { 'data-ai-id': `${selection.aiId}:${key}` } : {})}
                             aria-label={selection.labels?.row?.(index + 1) ?? `选择第 ${index + 1} 行`}
                             checked={isSelected}
                             disabled={!(selection.isRowSelectable?.(row) ?? true)}

@@ -89,7 +89,19 @@ export interface ListSchema<TRow> {
   rowKey: keyof TRow | ((row: TRow) => string);
   columns: Array<ListColumn<TRow>>;
   filters?: ListFilter[];
-  search?: { placeholder?: string; keys?: string[] };
+  search?: {
+    placeholder?: string;
+    keys?: string[];
+    /**
+     * Stable handle for the search input, rendered as `data-ai-id`.
+     *
+     * Optional so a list without automation still works, but any page that
+     * declares the search in its agent manifest must set it: without the
+     * attribute the declared id points at nothing, and every automation that
+     * types into the box times out on a page that looks fine to a human.
+     */
+    aiId?: string;
+  };
   actions?: Array<ListAction<TRow>>;
   /** Row-level actions rendered as a dropdown in the last column. */
   rowActions?: Array<ListAction<TRow>>;
@@ -161,6 +173,15 @@ export interface ListSchema<TRow> {
   sort?: { key: string; order: SortOrder };
   /** Columns that can be sorted; defaults to none. */
   sortableKeys?: string[];
+  /**
+   * Prefix for the sort handles, rendered as `<prefix>:sort:<column key>`.
+   *
+   * Set it on any page whose automation sorts a column; the old console's list
+   * pages all did. Omitted, the headers still sort but carry no handle.
+   */
+  sortAiPrefix?: string;
+  /** Prefix for row-checkbox handles, rendered as `<selectAiId>:<row key>`. */
+  selectAiId?: string;
 }
 
 export interface ResourceListProps<TRow> {
@@ -272,6 +293,11 @@ export function ResourceList<TRow>({
       width: column.width,
       align: column.align,
       sortable: sortableKeys.has(column.key),
+      // `<column key>:sort` matches the convention the page objects and the agent
+      // manifest already use (`configmaps:sort:name`).
+      ...(sortableKeys.has(column.key) && schema.sortAiPrefix
+        ? { sortAiId: `${schema.sortAiPrefix}:sort:${column.key}` }
+        : {}),
       className: columnVisibilityClass(column),
       render: (row, index) => {
         if (column.render) return column.render(row, index);
@@ -360,7 +386,8 @@ export function ResourceList<TRow>({
   const primaryAction = schema.primaryAction;
 
   /** Actions that operate on the current selection; rendered only when non-empty. */
-  const bulkActions = selectedKeys.length > 0 ? (schema.actions ?? []) : [];
+  const bulkActions = schema.actions ?? [];
+  const hasSelection = selectedKeys.length > 0;
 
   return (
     <div className={cn('flex flex-col gap-4', className)}>
@@ -415,6 +442,7 @@ export function ResourceList<TRow>({
               value={searchValue ?? ''}
               placeholder={schema.search.placeholder ?? '搜索'}
               aria-label={schema.search.placeholder ?? '搜索'}
+              {...(schema.search.aiId ? { 'data-ai-id': schema.search.aiId } : {})}
               onChange={(event) => onSearchChange?.(event.target.value)}
               leading={
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true" className="size-3.5">
@@ -461,6 +489,8 @@ export function ResourceList<TRow>({
           <div className="ml-auto flex h-11 items-center gap-2 sm:h-9">
             {bulkActions.length > 0 ? (
               <>
+                {/* Shown only with a selection. */}
+                {hasSelection ? (
                 <span
                   // Fixed width, right-aligned, tabular figures: the count grows
                   // leftward into reserved space so the actions never shift as it
@@ -469,6 +499,7 @@ export function ResourceList<TRow>({
                 >
                   {schema.labels?.selected ? schema.labels.selected(selectedKeys.length) : `已选 ${selectedKeys.length} 项`}
                 </span>
+                ) : null}
                 {bulkActions.map((action) => (
                   <Button
                     key={action.key}
@@ -478,7 +509,15 @@ export function ResourceList<TRow>({
                     size="md"
                     variant={action.tone === 'danger' ? 'danger' : 'secondary'}
                     className="px-3 sm:min-h-0"
+                    /*
+                     * Kept mounted and disabled when nothing is selected, rather
+                     * than removed: the requirement is that 批量删除 stays visible
+                     * and disabled, and an absent control is indistinguishable
+                     * from a missing feature.
+                     */
+                    disabled={!hasSelection}
                     onClick={() => {
+                      if (!hasSelection) return;
                       if (action.confirm && !window.confirm(action.confirm)) return;
                       onBulkAction?.(action.key, selectedKeys);
                     }}
@@ -525,6 +564,7 @@ export function ResourceList<TRow>({
             ? {
                 selectedKeys,
                 onChange: onSelectionChange,
+                ...(schema.selectAiId ? { aiId: schema.selectAiId } : {}),
                 ...(schema.labels ? { labels: { ...(schema.labels.selectAll ? { selectAll: schema.labels.selectAll } : {}), ...(schema.labels.selectRow ? { row: schema.labels.selectRow } : {}) } } : {}),
               }
             : undefined
