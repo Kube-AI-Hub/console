@@ -275,6 +275,9 @@ export function configMapsApi(client: Client) {
     async patch(params: ResourceRef & { body: unknown }): Promise<ConfigMapDetail> {
       const item = await client.request<KubeConfigMap>(`${writePath(params.cluster, params.namespace)}/${encodeURIComponent(params.name)}`, {
         method: 'PATCH',
+        // Without the patch media type kube-apiserver answers 415; this is what
+        // made "编辑信息" silently keep its dialog open.
+        contentType: 'application/merge-patch+json',
         body: params.body,
       });
       return toDetail(item);

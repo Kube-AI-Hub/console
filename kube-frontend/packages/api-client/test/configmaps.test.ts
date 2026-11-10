@@ -13,12 +13,13 @@ import { configMapsApi } from '../src/configmaps';
  */
 
 function recordingClient() {
-  const calls: Array<{ url: string; method: string }> = [];
+  const calls: Array<{ url: string; method: string; contentType: string | undefined }> = [];
   const client = createClient({
     fetchImpl: (async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
       const method = (init?.method ?? 'GET').toUpperCase();
-      calls.push({ url, method });
+      const headers = (init?.headers ?? {}) as Record<string, string>;
+      calls.push({ url, method, contentType: headers['Content-Type'] ?? headers['content-type'] });
       // Enough of an object for the mappers to run.
       const body =
         method === 'GET' && !url.match(/\/configmaps\/[^/]+$/)
@@ -52,6 +53,20 @@ describe('ConfigMaps transport', () => {
     await api.remove({ cluster: 'host', namespace: 'ns', names: ['x'] });
     expect(calls[0]?.url).toContain('/api/v1/namespaces/ns/configmaps/x');
     expect(calls[0]?.method).toBe('DELETE');
+  });
+
+  it('sends PATCH with a merge-patch media type', async () => {
+    /*
+     * kube-apiserver answers 415 to a patch sent as `application/json`; the patch
+     * strategy has to be in the content type. This was a live bug: "编辑信息"
+     * submitted, the request failed, and the dialog simply stayed open with no
+     * message because the only thing rendered was the generic error.
+     */
+    const { api, calls } = recordingClient();
+    await api.patch({ cluster: 'host', namespace: 'ns', name: 'x', body: { metadata: {} } });
+
+    expect(calls[0]?.method).toBe('PATCH');
+    expect(calls[0]?.contentType).toBe('application/merge-patch+json');
   });
 
   it('re-reads the resourceVersion from kapis before writing', async () => {

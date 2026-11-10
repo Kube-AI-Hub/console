@@ -14,6 +14,15 @@ export interface RequestOptions {
   signal?: AbortSignal;
   /** Query parameters; `undefined` values are dropped. */
   query?: Record<string, string | number | boolean | undefined>;
+  /**
+   * Override the request content type.
+   *
+   * `PATCH` is the reason this exists: kube-apiserver rejects a patch sent as
+   * `application/json` with 415 and needs the patch strategy in the media type
+   * (`application/merge-patch+json`, `application/strategic-merge-patch+json`).
+   * Every other verb is fine with the default.
+   */
+  contentType?: string;
 }
 
 /**
@@ -38,7 +47,7 @@ export function createClient(options: ClientOptions = {}) {
     }
 
     const headers: Record<string, string> = { Accept: 'application/json' };
-    if (init.body !== undefined) headers['Content-Type'] = 'application/json';
+    if (init.body !== undefined) headers['Content-Type'] = init.contentType ?? 'application/json';
     const token = options.getToken?.();
     if (token) headers.Authorization = `Bearer ${token}`;
 
