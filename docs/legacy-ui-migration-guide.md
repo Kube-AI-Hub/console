@@ -135,7 +135,144 @@ flowchart TD
 
 端到端用例**必须能在失败时自清理**，否则残留对象会让下一次跑挂掉（曾因此误判）。
 
-## 7. 高频坑清单
+## 7. 怎么调试和测试 UI 交互
+
+> 这一节讲「怎么把页面跑起来、怎么点、怎么断言」，与第 6 节的分层对应：第 6 节说该测什么，这里说具体怎么测。
+
+### 7.1 三层环境，各自能证明什么
+
+| 环境 | 怎么起 | 能证明 | **不能**证明 |
+|---|---|---|---|
+| Storybook | `cd console/packages/ai-kit && pnpm storybook`（默认 6106） | 组件在深浅色、两种色调下的样子；键盘与焦点态 | 真实数据、真实路由、真实权限 |
+| 本地全栈 | `scripts/dev-stack.sh start`（5174） | 登录 → 列表 → 子页面的完整链路，请求真的到了 apiserver | 部署环境的行为（ingress、TLS、集群策略） |
+| 部署环境 | A100 `https://agentplatform.phanthy.com`、B200 `http://sgb000.tail94228b.ts.net` | 用户真正看到的东西 | —— |
+
+规则：**组件问题在 Storybook 定位，交互问题在本地全栈定位，最终结论必须在部署环境复核**。只跑通本地就说「完成」最常见的后果，是 ingress 的路径前缀或 TLS 行为不一样。
+
+### 7.2 起本地全栈
+
+```bash
+cd console/kube-frontend
+KS_API_URL=https://agentplatform.phanthy.com KS_API_MODE=kapis ./scripts/dev-stack.sh start
+./scripts/dev-stack.sh status    # 三个端口各自在不在，BFF 的 list 探针返回什么
+./scripts/dev-stack.sh stop
+```
+
+- 三个进程：`kubectl proxy`（仅 `kube` 模式）→ BFF（8091）→ 静态站点（5174，把 `/api`、`/kapis`、`/apis` 转给 BFF）。
+- `KS_API_MODE=kube` 是**无鉴权的临时 harness**，用本机 `kubectl` 凭据，分页与排序由 BFF 模拟。它只用来在没有 JWT 时看页面，任何「接口对不对」的结论都不能从这里得出。
+- `kapis` 模式需要可用的 `ks-apiserver` 地址；`KS_API_INSECURE=1` 用于自签证书。
+- `dev-stack.sh start` 会先构建 ai-kit 与 console-next 再起服务；改了 `packages/` 里的东西重新 `start`。只想改页面、要 HMR 时用 `pnpm dev`，但要另外 `pnpm bff`——Vite 把 `/api` 代理到 `BFF_URL`（默认 `http://127.0.0.1:8091`），BFF 默认端口却是 8080；两者对不上时所有请求都会 504，看起来像"页面加载不出来"。
+
+### 7.3 用户登录：怎么登、怎么绕过、登不上怎么查
+
+登录是调试其它一切的前提，也是唯一一条浏览器不接触 `client_secret` 的链路：
+
+```text
+浏览器 /login  ──POST /api/session/login {username, password}──▶  BFF
+BFF 注入 client_id / client_secret ──POST /oauth/token──▶ ks-apiserver
+BFF 返回 {token, user} ──▶ 浏览器写入 localStorage['kubesphere-token']
+```
+
+**手工登录**：打开 `/login`，输账号密码。密码**按原样发送**，不做旧的 `mix(salt, base64(pw))` 变换——旧变换不仅不保密，还让含 `@` 的密码解不回来。
+
+**验证会话的三个接口**：
+
+```bash
+# 登录（成功 200 返回 {token, user}；密码错 400 invalid_credentials）
+curl -s -X POST -H 'Content-Type: application/json' \
+  -d '{"username":"admin","password":"……"}' http://127.0.0.1:8091/api/session/login
+
+# 当前用户：会向上游再查一次用户，token 被吊销时返回 401，不是 200
+curl -s -o /dev/null -w '%{http_code}\n' -H "Authorization: Bearer $TOKEN" \
+  http://127.0.0.1:8091/api/session/me
+
+# 退出：总是 204，上游失败也不报错
+curl -s -o /dev/null -w '%{http_code}\n' -X POST -H "Authorization: Bearer $TOKEN" \
+  http://127.0.0.1:8091/api/session/logout
+```
+
+**跳过登录页手工塞 token**（只用于调试，不进用例）：
+
+```js
+// 浏览器控制台，必须先在一个有 origin 的页面上执行
+localStorage.setItem('kubesphere-token', localStorage.getItem('kah_token'))
+```
+
+旧 console 的 `kah_token` 可以直接复用；新 console 只认 `kubesphere-token`。**别的键名都不生效**——这是「明明登录了，刷新又回登录页」的头号原因。
+
+**登录失败的排查顺序**（错误码由 BFF 归一，可以直接对照）：
+
+| 页面文案 | BFF 返回 | 真正的原因 |
+|---|---|---|
+| 用户名或密码不正确 | `400 invalid_credentials` | 账号密码错，或该账号还没初始化 |
+| 控制台的登录凭据未配置正确 | `400/invalid_client` | `KS_OAUTH_CLIENT_ID` / `KS_OAUTH_CLIENT_SECRET` 与该集群注册的客户端不一致 |
+| 无法连接集群 | `502 upstream_unreachable` | `KS_API_URL` 不通，或 TLS 证书校验失败（试 `KS_API_INSECURE=1`） |
+| 失败次数过多 | `400 too_many_attempts` | 触发上游限流，换账号或等窗口过去 |
+
+排查时**先直接打 `/oauth/token`**，这样能立刻分清是集群不认这组凭据，还是 BFF 没把请求发出去：
+
+```bash
+curl -s -X POST \
+  -d 'grant_type=password&username=admin&password=……&client_id=kubesphere&client_secret=kubesphere' \
+  https://<ks-apiserver>/oauth/token
+```
+
+默认客户端的值来自旧 console 的 `server/config.yaml`；本集群实际注册的是 `kube-ai-hub` / `kube-ai-hub`，所以一处能登、另一处报 `invalid_client` 时先怀疑这里，不要怀疑密码。
+
+**几个实测过的陷阱**：
+
+- 未登录访问深链接会跳到 `/login?redirect=<原地址>`，登录后回到原页面。`redirect` 只接受同源绝对路径（`//host`、`/\host` 一律拒绝），调试时别拿它当任意跳转用。
+- 账号 `initialized === false` 时 token 是有效的，但之后每个请求都 403。这个分支故意停在登录页并提示，而不是"登进去看一片 403"。
+- 有一个**过期但结构完整**的 token 时，页面看起来已登录、`/api/session/me` 却返回 401。此时 AuthProvider 会清掉 token 回登录页，不会让页面停在"每个请求都失败"的状态。
+
+### 7.4 在浏览器里调试交互
+
+**先看状态，再看界面**。每个页面区域都带 `data-ai-state`（`loading` / `ready` / `empty` / `error`），交互有没有真的发生，看它比看截图快：
+
+```js
+document.querySelector('[data-ai-id="configmaps:surface"]').dataset.aiState
+```
+
+- `data-ai-id` 同时服务自动化和智能体，是稳定的；`css-*` 哈希类名每次构建都变，不要拿来选择。
+- 请求链路直接看 Network 里 `/kapis/...` 与 `/api/v1/...` 的往返；BFF 不做字段映射，看到什么就是 apiserver 返回什么。
+- 深浅色与色调在 `document.documentElement` 上是 `data-theme` / `data-accent`，配合 `localStorage` 的 `ai-kit-theme` / `ai-kit-accent` 复现某个主题状态。
+- 改了用户可见的东西，按 `.cursor/rules/ui-screenshot-verify.mdc` 在**真实环境**留改前/改后截图，用 `getBoundingClientRect()` 量对齐，不要靠肉眼判断"差不多"。
+
+### 7.5 单测与契约测试
+
+```bash
+cd console/kube-frontend
+pnpm typecheck        # 全量；ai-kit 用自己的 tsc，别用全局旧版
+pnpm test             # config/ 架构约束 + 各包单测
+```
+
+- 架构约束在 `config/`：包边界、`data-ai-id` 契约、依赖方向。它们读源码断言约定，是防"改回去也没人发现"的那一层。
+- 组件行为在 `apps/console-next/test/`：登录错误文案、主题切换不闪、焦点环只有一圈等。
+- 断言要落在**可观察的结果**上（文案、`data-ai-state`、`localStorage`），不要断言某个组件内部 state 或某个 `css-*` 类名。
+
+### 7.6 端到端：Playwright 用例
+
+```bash
+cd console/tests/ui
+cp env.example .env        # 填 KA_BASE_URL / KA_PASSWORD
+pytest -m core -q          # L1 冒烟，先保证能登进去
+pytest -m point tests/kube-frontend/login tests/kube-frontend/configmaps -q
+```
+
+用例结构（详见该目录 `README.md`）：`specs/` 是事实源，`cases/` 是生成物，`tests/` 是按 spec 一比一镜像的编排，选择器只写在 `pages/`。
+
+**登录相关的既有夹具**，不要自己重写一遍：
+
+- `logged_in_context`（session 级）：真登一次拿 token，再通过 `add_init_script` 注入 `kubesphere-token`、`kah_token`、`token` 三个键，之后每个 `page` 都是已登录的。
+- `anonymous_page`：**没有** token，登录/退出用例专用。用已登录的 `page` 测登录，测的是"已登录的人看登录页"，那是另一件事。
+- `login_page`：页面对象，`sign_in()` / `sign_out()` / `field_errors` 都已封装。
+- `seeded_configmaps`：造出用例需要的对象，**失败也清理**。没有这个夹具的用例只在"集群碰巧有这些对象"时通过。
+
+**断言登录成功的正确写法**（来自 `test_TC_L2_KUBE_FRONTEND_LOGIN_01`）：等 URL 落到目标页 → 等 `data-ai-state` 离开 `loading` → 再断言 `localStorage` 里有 token。只等 URL 会拿到还在加载的页面，只等 localStorage 会拿到 `beforeLoad` 跳转前的瞬间。
+
+**失败时先看三样**：用例里主动调用 `screenshot(page, "…")` 留在 `artifacts/<test>/` 的图（失败时不会自动截图，要留证据就在断言前后各拍一张）、Playwright trace，以及 BFF 的 `.dev-stack-bff.log`。用例失败不一定是页面的问题——集群里残留对象、token 过期、上游 5xx 都会表现成同一个"断言没过"。
+
+## 8. 高频坑清单
 
 按踩过的频率排序，迁新资源时逐条对照：
 
@@ -152,7 +289,7 @@ flowchart TD
 | 9 | 列表和详情各写一份格式化 | 同一字段两处显示不同 | 抽共享模块 |
 | 10 | `tsconfig` 的 `lib` 不同 | BFF 不能 import 浏览器包 | 服务端与浏览器共用逻辑要选无 DOM 依赖的落点 |
 
-## 8. 文档与门禁
+## 9. 文档与门禁
 
 三类文档同后缀互相钉住，改功能时同步：
 
@@ -164,7 +301,7 @@ flowchart TD
 
 > 门禁**不检查编号重复**。过程中同一文件里出现过 4 组重复的 `DEC` 编号（新决策插在文件顶部撞了号），门禁全绿。迁移时新增决策请追加到文件末尾并按现有最大号续编。
 
-## 9. 交付前自检
+## 10. 交付前自检
 
 - [ ] 列表列、值格式、行操作顺序与旧版逐项对照过
 - [ ] 每个子页面都单独截图核对过（创建/编辑信息/编辑设置/编辑 YAML/删除/详情）
@@ -172,5 +309,6 @@ flowchart TD
 - [ ] 推翻过自己先前的判断的，补了"被否方案"和原因
 - [ ] 截图使用标准桌面视口
 - [ ] 端到端用例失败时也会清理测试数据
+- [ ] 登录链路自己走通过一次：手工登录、深链接回到原页、退出后 token 失效（第 7.3/7.6 节）
 - [ ] `typecheck` / 单测 / 契约测试 / `check_docs --strict` 全绿
 - [ ] 测试数据已清理，环境回到基线
