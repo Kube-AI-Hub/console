@@ -1,0 +1,33 @@
+id: TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-04
+level: 3
+suite: point
+module: kube-frontend
+submodule: configmaps
+feature: list
+title: "配置字典 · 项目筛选切换命名空间"
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps"
+prd: prd/kube-frontend/configmaps/list.md
+design: design/kube-frontend/configmaps/list.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-04
+
+story:
+- US3
+
+product: 选中某个项目时请求该项目的命名空间；选择「全部项目」时去掉命名空间段，并把页码重置为第 1 页。
+preconditions:
+- 已登录
+- 集群内至少存在两个项目
+steps:
+- 打开 {BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps
+- 在「项目」筛选器中选择一个非当前项目
+- 再选择「全部项目」
+expected:
+- 第一次选择后请求路径包含 namespaces/<该项目>，且 query 带 page=1
+- 第二次选择后请求路径不含 namespaces/ 段
+- 两次选择后页码均为 1
+troubleshoot:
+- 先看请求路径：筛选必须体现在路径的命名空间段上，只加查询参数说明实现未按 DEC-LIST-03 落地
+update_automation:
+- 文案变化时改 packages/locales/src/index.ts

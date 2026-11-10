@@ -1,0 +1,36 @@
+id: TC-L2-KUBE-FRONTEND-LOGIN-01
+level: 2
+suite: login
+module: kube-frontend
+submodule: login
+feature: session
+title: 新前端 · 未登录访问深链接后登录回跳
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps"
+prd: prd/kube-frontend/login.md
+design: design/kube-frontend/login.md
+
+covers:
+- AC-L2-KUBE-FRONTEND-LOGIN-01
+- AC-L2-KUBE-FRONTEND-LOGIN-06
+
+story:
+- US1
+
+product: 未登录的用户访问受保护页面时被带到登录页，登录后回到原来要去的页面。
+preconditions:
+- 浏览器 localStorage 中没有 kubesphere-token
+- 有一个可用的账号
+steps:
+- 清空 localStorage 后打开配置字典深链接
+- 记录地址栏的路径与查询串
+- 输入账号与密码并提交
+- 观察地址栏与页面内容
+expected:
+- 第二步被重定向到 /login，且 redirect 参数等于第一步的路径与查询串
+- 提交后落在第一步的配置字典页，而不是首页
+- 列表面板进入 ready 或 empty 状态
+troubleshoot:
+- 停在 /login 时看表单内的错误提示，区分密码错误与连不上集群
+- redirect 丢失时检查 __root 的 beforeLoad 是否仍在传 search
+update_automation:
+- 登录页字段 id 变更时同步 pages 下的登录页对象

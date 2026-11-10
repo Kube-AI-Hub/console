@@ -1,0 +1,37 @@
+id: TC-L3-KUBE-FRONTEND-CONFIGMAPS-CREATE-04
+level: 3
+suite: point
+module: kube-frontend
+submodule: configmaps
+feature: create
+title: "配置字典 · 创建时选择项目"
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps"
+prd: prd/kube-frontend/configmaps/create.md
+design: design/kube-frontend/configmaps/create.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CONFIGMAPS-CREATE-04
+
+story:
+- US1
+
+product: 创建配置字典时可以在弹窗内选择项目，对象创建到所选项目。
+preconditions:
+- 已登录
+- 集群内至少存在两个项目
+steps:
+- 打开 {BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps
+- 点击「创建」
+- 在「项目」下拉中选择另一个项目
+- 填写名称，进入数据设置，添加一条键值并保存
+- 提交创建
+expected:
+- 「项目」是必填字段，打开时预填当前页面的项目
+- 选择另一个项目后，下拉显示该项目名
+- 提交后对象出现在所选项目的列表中，而不是原项目
+- 在原项目的列表中看不到该对象
+troubleshoot:
+- 对象落错项目时检查提交是否用了弹窗内的 namespace，而不是 props
+- 无法进入下一步且提示「请选择项目」时，是「全部项目」视图下未选择项目
+update_automation:
+- 项目的选项来自 useProjectOptions，断言时不要依赖固定项目名

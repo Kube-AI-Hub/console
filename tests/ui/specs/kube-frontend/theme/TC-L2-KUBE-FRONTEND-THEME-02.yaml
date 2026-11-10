@@ -1,0 +1,35 @@
+id: TC-L2-KUBE-FRONTEND-THEME-02
+level: 2
+suite: theme
+module: kube-frontend
+submodule: theme
+feature: theme
+title: 新前端 · 手机宽度下的主题切换按钮
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps"
+prd: prd/kube-frontend/theme.md
+design: design/kube-frontend/theme.md
+
+covers:
+- AC-L2-KUBE-FRONTEND-THEME-04
+- AC-L2-KUBE-FRONTEND-THEME-05
+
+story:
+- US2
+
+product: 手机宽度下切换按钮可点中，且弹层与页面同主题。
+preconditions:
+- 已登录，视口宽度 390px
+steps:
+- 打开配置字典列表
+- 测量切换按钮与语言切换按钮的高度
+- 检查页面是否出现横向滚动
+- 打开某行的「更多操作」菜单，读取其计算背景色
+expected:
+- 两个按钮高度一致且不小于 44px
+- 无横向滚动，顶栏各按钮在同一行
+- 菜单背景为当前主题的浅色或深色，而不是固定的白或黑
+troubleshoot:
+- 按钮偏小说明调用处没有覆盖 size-9
+- 菜单背景与页面不一致时检查是否给容器而非 html 设了主题属性
+update_automation:
+- 顶栏布局调整时同步本用例的尺寸断言

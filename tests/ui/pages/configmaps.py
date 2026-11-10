@@ -97,6 +97,46 @@ class ConfigMapsPage:
             if value
         ]
 
+    # ---------------- Row actions and dialogs ----------------
+
+    @property
+    def create_button(self) -> Locator:
+        return self.surface.locator('[data-ai-id="configmaps:create"]')
+
+    def open_row_menu(self, name: str) -> None:
+        """打开某一行的「更多操作」菜单。"""
+        self.surface.locator(f'[data-ai-row="{name}"] button[aria-label="更多操作"]').click()
+
+    def click_row_action(self, action: str) -> None:
+        """点击已展开的菜单项，`action` 是可见文案。"""
+        self.page.get_by_role("menuitem", name=action, exact=True).click()
+
+    def open_detail(self, name: str) -> None:
+        self.surface.locator(f'[data-ai-id="configmaps:open:{name}"]').click()
+        expect(self.page.locator('[data-ai-id="configmap-detail:surface"]')).to_be_visible()
+
+    @property
+    def detail_surface(self) -> Locator:
+        return self.page.locator('[data-ai-id="configmap-detail:surface"]')
+
+    @property
+    def detail_data_rows(self) -> Locator:
+        return self.detail_surface.locator("[data-ai-row]")
+
+    @property
+    def dialog(self) -> Locator:
+        return self.page.get_by_role("dialog")
+
+    def fill_dialog_field(self, ai_id: str, value: str) -> None:
+        self.page.locator(f'[data-ai-id="{ai_id}"]').fill(value)
+
+    def confirm_dialog(self, ai_id: str) -> None:
+        self.page.locator(f'[data-ai-id="{ai_id}"]').click()
+
+    @property
+    def toast_text(self) -> list[str]:
+        return [text.strip() for text in self.page.get_by_role("status").all_inner_texts() if text.strip()]
+
 
 class AppShell:
     """应用壳：宽屏侧栏，窄屏抽屉。"""

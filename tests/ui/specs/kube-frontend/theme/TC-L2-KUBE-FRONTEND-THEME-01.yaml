@@ -1,0 +1,36 @@
+id: TC-L2-KUBE-FRONTEND-THEME-01
+level: 2
+suite: theme
+module: kube-frontend
+submodule: theme
+feature: theme
+title: 新前端 · 深浅色切换与刷新保持
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps"
+prd: prd/kube-frontend/theme.md
+design: design/kube-frontend/theme.md
+
+covers:
+- AC-L2-KUBE-FRONTEND-THEME-01
+- AC-L2-KUBE-FRONTEND-THEME-02
+- AC-L2-KUBE-FRONTEND-THEME-03
+
+story:
+- US1
+
+product: 顶栏可切换深浅色，切换即时生效并在刷新后保持，首屏不闪。
+preconditions:
+- 已登录，localStorage 中没有 ai-kit-theme
+steps:
+- 打开配置字典列表，读取 <html> 的 data-theme 与 data-accent
+- 点击顶栏的深浅色切换按钮
+- 读取 <html> 的 data-theme 与 body 的计算背景色
+- 刷新页面，立即读取 <html> 的 data-theme
+expected:
+- 第一步为 dark / violet
+- 第三步变为 light，body 背景为浅色，切换按钮 aria-pressed 为 false
+- 第四步立即为 light，不出现一帧 dark
+troubleshoot:
+- 刷新后先 dark 再 light 说明 index.html 的引导脚本缺失或被移除
+- 弹层仍是深色说明属性挂在了容器上而不是 html 上
+update_automation:
+- 存储键变化时同步 index.html 与 ThemeProvider

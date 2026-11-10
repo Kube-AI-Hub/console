@@ -1,0 +1,32 @@
+id: TC-L3-KUBE-FRONTEND-CONFIGMAPS-EDIT-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: configmaps
+feature: edit
+title: "配置字典 · 编辑信息只改注解"
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps"
+prd: prd/kube-frontend/configmaps/edit.md
+design: design/kube-frontend/configmaps/edit.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CONFIGMAPS-EDIT-01
+
+story:
+- US1
+
+product: 编辑信息弹窗中名称只读，别名与描述可改。
+preconditions:
+- 已登录
+- 项目 default 中至少存在一个配置字典
+steps:
+- 打开行操作「编辑信息」
+- 尝试修改名称
+- 清空别名后提交
+expected:
+- 名称字段为禁用状态
+- 提交后 kubectl get 的 kubesphere.io/alias-name 被移除，description 更新
+troubleshoot:
+- 先确认 BFF 返回的状态码与 code，再看页面状态属性
+update_automation:
+- 文案变化时改 packages/locales/src/index.ts

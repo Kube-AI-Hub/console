@@ -1,0 +1,35 @@
+id: TC-L2-KUBE-FRONTEND-LOGIN-03
+level: 2
+suite: login
+module: kube-frontend
+submodule: login
+feature: session
+title: 新前端 · 退出登录后 token 失效
+entry_url: "{BASE_URL}/"
+prd: prd/kube-frontend/login.md
+design: design/kube-frontend/login.md
+
+covers:
+- AC-L2-KUBE-FRONTEND-LOGIN-04
+- AC-L2-KUBE-FRONTEND-LOGIN-05
+
+story:
+- US3
+
+product: 退出登录不仅清掉浏览器里的 token，集群侧也一并注销。
+preconditions:
+- 已登录并停留在任意控制台页面
+steps:
+- 记录当前 token
+- 打开右上角账号菜单，点击「退出登录」
+- 用记录的 token 直接请求 kapis 的 configmaps 资源
+- 把记录的 token 写回 localStorage 后刷新页面
+expected:
+- 退出后地址为 /login，localStorage 中没有 kubesphere-token
+- 第三步返回 401
+- 第四步不渲染控制台外壳，回到 /login
+troubleshoot:
+- 第三步仍为 200 时检查登出是否真的调用了 GET /oauth/logout
+- 第四步闪出控制台再跳走，说明闸门放在了 effect 里而不是渲染前
+update_automation:
+- 账号菜单的 data-ai-id 变更时同步断言

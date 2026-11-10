@@ -11,7 +11,9 @@
 - `AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-01`
 - `AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-02`
 - `AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-03`
-
+- `AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-04`
+- `AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-05`
+- `AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-06`
 ## 设计目标与非目标
 
 **目标**：行为可预测、失败可解释、实现可被架构测试约束。
@@ -22,6 +24,7 @@
 
 - 状态与文案分离：组件只接收 props，文案来自 `packages/locales`。
 - 所有可交互元素经 `AiButton` / `actionProps`，保证 `data-ai-id` 不缺失。
+- 键列截断到 50 个字符，按码点而非 UTF-16 单元计数。
 
 ## 方案决策
 
@@ -56,6 +59,22 @@
 
 见 L1 的 `/api/configmaps` 契约；本功能点不新增端点。
 
+### DEC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-03 — 项目筛选等价于切换命名空间
+
+**为什么**：kapis 没有「跨多个命名空间过滤」的参数。项目筛选若只是加一个查询参数，服务端会忽略它，于是筛选器显示的与列表展示的不是同一批数据——这正是「全部项目只显示一条」那次缺陷的成因。选中项目时请求该项目的命名空间；「全部项目」时去掉命名空间段，走集群级集合。
+
+**被否方案**：前端先拉全部再本地过滤。集群级集合在大集群上要扫描全部命名空间，单页耗时以秒计，且无法分页。
+
+**何时重新考虑**：kapis 提供带命名空间过滤的集合端点时。
+
+### DEC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-04 — 分页参数对齐旧 console
+
+**为什么**：旧 console 直接发送 `page` 与 `limit`，由 kapis 完成切片，并读取 `totalItems` 作为总数。这与旧版保持一致，页码可以任意跳转。
+
+**被否方案**：使用 `continue` 游标。游标只能顺序前进，无法随机跳页，且事后证明它在产品路径上并不必要——那次判断依据的是开发 harness（`kubectl proxy`）的行为，而它不实现 kapis 分页。
+
+**何时重新考虑**：上游切到只支持游标的存储。
+
 ## 不变量
 
 - **INV-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-01** — 页面只通过 `AiSurface` 发布状态，不自行拼装属性。
@@ -81,3 +100,17 @@
 - `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-01`
 - `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-02`
 - `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-03`
+- `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-04`
+
+### DEC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-05 — 键列截断而非换行
+
+**为什么**：自动生成的 ConfigMap（Spring 的 `application-*.properties`、Helm 渲染的合并配置）
+动辄几十个键。换行渲染在实测里让该行高度达到其他行的数倍，滚动时整张表的行高来回跳，比看不到
+几个键更难用。截断让每行等高，完整内容留在 `title` 与详情页，信息仍然可达。
+
+按码点计数（`Array.from`）而不是 `slice(0, 50)`：键名是任意用户文本，按 UTF-16 单元切会从
+代理对中间截断，渲染出替换字符。
+
+**被否方案**：`wrap: true` 多行展示。可读性更好，但破坏了表格的行节奏，且列宽会随数据变化。
+**被否方案**：CSS `truncate`（`text-overflow: ellipsis`）。更省事，但截断位置取决于列宽而不是
+50 个字符，无法满足「超过 50 个字符」这一明确阈值，也在窄屏下不可预测。

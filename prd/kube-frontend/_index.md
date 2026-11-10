@@ -78,6 +78,9 @@ flowchart LR
 | 配置字典删除（单条 / 批量） | 已实现 |
 | 配置字典详情（只读） | 已实现 |
 | 创建 / 编辑（表单） | 未覆盖，见「明确不做」 |
+| 登录 / 登出 | 已实现，见 [`login.md`](login.md) |
+| 深浅色主题切换 | 已实现，见 [`theme.md`](theme.md) |
+| 第三方登录 / 注册 / 找回密码 | 未覆盖 |
 | 其他资源模块 | 未覆盖 |
 
 ## 功能需求
@@ -98,10 +101,15 @@ flowchart LR
 ## 假设
 
 - ks-apiserver 的 `namespaces/:ns/configmaps` 在 kapis 下可用，且支持 `sortBy` / `ascending` / `page` / `limit`。
-- 登录态由外层平台提供，token 存放在 `localStorage` 的 `kubesphere-token`。
+- 登录由本前端自己完成（见 [`login.md`](login.md)），token 存放在 `localStorage` 的 `kubesphere-token`，与老 console 使用同一个键，会话可互通。
 
 ## 验收用例
 
 - `TC-CORE-KUBE_FRONTEND-01`（US1）
 - `TC-L3-KUBE-FRONTEND-CONFIGMAPS-AI_SURFACE-01`（US2）
 - `TC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-01`（US3）
+- `TC-L2-KUBE-FRONTEND-LOGIN-01`（登录 US1）
+- `TC-L2-KUBE-FRONTEND-LOGIN-02`（登录 US2）
+- `TC-L2-KUBE-FRONTEND-LOGIN-03`（登录 US3）
+- `TC-L2-KUBE-FRONTEND-THEME-01`（主题 US1）
+- `TC-L2-KUBE-FRONTEND-THEME-02`（主题 US2）

@@ -9,6 +9,7 @@ from helpers.config import load_config
 from pages.gpu_cards import GpuCardsPage
 from pages.juicefs_storage import SharedStoragePage
 from pages.resource_detail import ResourceDetailPage
+from pages.login import LoginPage
 from pages.configmaps import ConfigMapsPage
 
 ARTIFACTS = Path(__file__).resolve().parent / "artifacts"
@@ -63,6 +64,24 @@ def logged_in_context(browser, ui_config):
 
 
 @pytest.fixture
+def anonymous_page(browser, ui_config):
+    """A context with no token.
+
+    The default `page` is already signed in, which is right for every resource
+    test and wrong for the login tests: they need to watch a session start and
+    end, and a pre-seeded token hides exactly the behaviour under test.
+    """
+    context = browser.new_context(
+        viewport={"width": 1600, "height": 900},
+        locale="zh-CN",
+        ignore_https_errors=True,
+    )
+    page = context.new_page()
+    yield page
+    context.close()
+
+
+@pytest.fixture
 def page(logged_in_context):
     page = logged_in_context.new_page()
     yield page
@@ -87,6 +106,11 @@ def detail_page(page, ui_config):
 @pytest.fixture
 def configmaps_page(page, ui_config):
     return ConfigMapsPage(page, ui_config.base_url)
+
+
+@pytest.fixture
+def login_page(anonymous_page, ui_config):
+    return LoginPage(anonymous_page, ui_config.base_url)
 
 
 @pytest.fixture

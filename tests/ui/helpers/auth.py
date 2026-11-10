@@ -1,9 +1,10 @@
 """Log in through the console login page and keep the session.
 
-The console encrypts the password before posting it to `/oauth/token`
+The old console encrypts the password before posting it to `/oauth/token`
 (`src/utils/index.js: encrypt`). Reproducing that here is what lets the tests log
 in without a browser round-trip, and keeps them working when the login page
-changes.
+changes. `encrypt` is only meaningful for that app: the new frontend's login page
+(when `KA_BASE_URL` points at it) posts the password as typed.
 """
 
 from __future__ import annotations
@@ -48,7 +49,8 @@ def login(page: Any, config: UiConfig) -> str:
     page.wait_for_url(lambda url: LOGIN_PATH not in url, timeout=30_000)
 
     token = page.evaluate(
-        """() => localStorage.getItem('kah_token') || localStorage.getItem('token') || ''"""
+        """() => localStorage.getItem('kah_token') || localStorage.getItem('token')
+            || localStorage.getItem('kubesphere-token') || ''"""
     )
     if not token:
         raise RuntimeError("logged in but no token in localStorage")

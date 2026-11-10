@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-05
+level: 3
+suite: point
+module: kube-frontend
+submodule: configmaps
+feature: list
+title: "配置字典 · 键列截断到 50 个字符"
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps"
+prd: prd/kube-frontend/configmaps/list.md
+design: design/kube-frontend/configmaps/list.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-05
+
+story:
+- US2
+
+product: 键列最多显示 50 个字符，超出以 `...` 结尾，完整键名经悬停提示可读；未超长时原样显示。
+preconditions:
+- 已登录
+- 当前项目内同时存在「键名拼接超过 50 个字符」与「键名很短」的 ConfigMap
+steps:
+- 打开 {BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps
+- 找到键名很多的那条 ConfigMap，读取其「键」列文本
+- 悬停该单元格，读取提示文本
+- 读取另一条短键名 ConfigMap 的「键」列文本
+expected:
+- 超长单元格文本为前 50 个字符加 `...`，共 53 个字符
+- 提示文本为完整的合键名，长度大于 50
+- 短键名单元格原样显示，不带省略号，且没有提示
+- 该行高度与其他行一致（未被撑成多行）
+troubleshoot:
+- 显示 53 个以上字符时检查是否漏了 `Array.from` 的码点计数
+- 单元格多行时可能被改回了 wrap 渲染，见 DEC-LIST-03
+update_automation:
+- 阈值变更时同步本文件的 50 与 KEYS_PREVIEW_LENGTH

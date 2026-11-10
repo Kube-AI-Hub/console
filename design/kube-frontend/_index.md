@@ -54,6 +54,8 @@
 
 | 子模块 | 入口 | 说明 |
 |---|---|---|
+| 登录 | `/login` | 见 [`login.md`](login.md) |
+| 主题 | `<html data-theme>` | 见 [`theme.md`](theme.md) |
 | 配置字典 | `/kube-frontend/:workspace/clusters/:cluster/projects/:namespace/configmaps` | 首个资源模块 |
 
 ## 运行时拓扑
@@ -101,6 +103,7 @@ flowchart LR
 - `GET /api/configmaps/:name?cluster&namespace`
 - `DELETE /api/configmaps?cluster&namespace&name`（可重复）
 - `GET /api/ai/manifest`
+- `POST /api/session/login` / `GET /api/session/me` / `POST /api/session/logout`（见 [`login.md`](login.md)）
 - 错误体统一为 `{ code, message, status }`。
 
 ## 不变量

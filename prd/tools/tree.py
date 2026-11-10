@@ -186,6 +186,7 @@ MODULES = [
                             "TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-01",
                             "TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-02",
                             "TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-03",
+                            "TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-04",
                         ]},
                     },
                     {
@@ -202,6 +203,32 @@ MODULES = [
                         "tests": {"L3": [
                             "TC-L3-KUBE-FRONTEND-CONFIGMAPS-DELETE-01",
                             "TC-L3-KUBE-FRONTEND-CONFIGMAPS-DELETE-02",
+                        ]},
+                    },
+                    {
+                        "id": "detail",
+                        "title": "配置字典详情",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-CONFIGMAPS-DETAIL-01",
+                            "TC-L3-KUBE-FRONTEND-CONFIGMAPS-DETAIL-02",
+                        ]},
+                    },
+                    {
+                        "id": "create",
+                        "title": "创建配置字典",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-CONFIGMAPS-CREATE-01",
+                            "TC-L3-KUBE-FRONTEND-CONFIGMAPS-CREATE-02",
+                            "TC-L3-KUBE-FRONTEND-CONFIGMAPS-CREATE-03",
+                        ]},
+                    },
+                    {
+                        "id": "edit",
+                        "title": "编辑配置字典",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-CONFIGMAPS-EDIT-01",
+                            "TC-L3-KUBE-FRONTEND-CONFIGMAPS-EDIT-02",
+                            "TC-L3-KUBE-FRONTEND-CONFIGMAPS-EDIT-03",
                         ]},
                     },
                     {
