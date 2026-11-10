@@ -7,8 +7,13 @@ pytestmark = pytest.mark.ui
 
 
 @pytest.mark.point
-def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_DELETE_01(configmaps_page, screenshot):
+def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_DELETE_01(configmaps_page, seeded_configmaps, screenshot):
     """TC-L3-KUBE-FRONTEND-CONFIGMAPS-DELETE-01 批量删除可用性：未选中禁用且带 data-ai-needs。"""
+
+    # The list is empty on a fresh cluster; seed two objects so the case does
+    # not depend on whatever happens to be deployed.
+    seeded_configmaps["create"]("case-a", {"key-a": "1"})
+    seeded_configmaps["create"]("case-b", {"key-b": "2"})
 
     configmaps_page.open()
     configmaps_page.wait_ready()

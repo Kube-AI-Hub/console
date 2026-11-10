@@ -7,8 +7,13 @@ pytestmark = pytest.mark.ui
 
 
 @pytest.mark.point
-def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_03(configmaps_page, screenshot):
+def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_03(configmaps_page, seeded_configmaps, screenshot):
     """TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-03 翻页清空已选：批量删除回到禁用。"""
+
+    # The list is empty on a fresh cluster; seed two objects so the case does
+    # not depend on whatever happens to be deployed.
+    seeded_configmaps["create"]("case-a", {"key-a": "1"})
+    seeded_configmaps["create"]("case-b", {"key-b": "2"})
 
     configmaps_page.open()
     configmaps_page.wait_ready()

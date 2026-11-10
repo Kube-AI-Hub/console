@@ -18,7 +18,7 @@ def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_MOBILE_02(configmaps_page, screenshot):
         pytest.skip("没有数据可断言列折叠")
 
     headers = configmaps_page.headers
-    assert "键" not in headers, headers
-    assert "创建时间" not in headers, headers
+    # 字段 column is the one that disappears below `md`; the PRD hides it, not 项目.
+    assert "字段" not in headers, headers
     assert "名称" in headers, headers
     screenshot(configmaps_page.page, "mobile-list")

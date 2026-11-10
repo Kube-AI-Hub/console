@@ -17,5 +17,5 @@ def test_TC_FULL_KUBE_FRONTEND_CONFIGMAPS_01(configmaps_page, screenshot):
     assert len(names) == len(set(names)), f"重复行：{names}"
 
     if configmaps_page.state == "ready":
-        assert configmaps_page.headers[:3] == ["名称", "键", "创建时间"], configmaps_page.headers
+        assert configmaps_page.headers[:4] == ["名称", "项目", "字段", "创建时间"], configmaps_page.headers
     screenshot(configmaps_page.page, "full-configmaps")

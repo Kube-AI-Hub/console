@@ -19,8 +19,12 @@ def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_CREATE_03(configmaps_page, screenshot):
     expect(editor).to_be_visible()
 
     editor.click()
+    # Select, delete, then type: a select-all followed by a bulk insert is treated
+    # as a paste by CodeMirror and does not produce the incremental update the
+    # validator listens for.
     configmaps_page.page.keyboard.press("ControlOrMeta+a")
-    configmaps_page.page.keyboard.type("this: [is: not: valid")
+    configmaps_page.page.keyboard.press("Delete")
+    configmaps_page.page.keyboard.type("this: [is: not: valid", delay=20)
     expect(configmaps_page.dialog.get_by_text("YAML 格式有误")).to_be_visible()
 
     screenshot(configmaps_page.page, "create-yaml-invalid")

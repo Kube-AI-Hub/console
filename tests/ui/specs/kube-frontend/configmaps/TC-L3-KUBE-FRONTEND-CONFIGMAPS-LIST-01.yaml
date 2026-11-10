@@ -16,7 +16,7 @@ story:
 - US1
 - US2
 
-product: 默认按创建时间倒序，每行显示名称、键、创建时间。
+product: 默认按创建时间倒序，每行显示名称、项目、字段、创建时间。
 preconditions:
 - 已登录，且在 host 集群的 default 项目空间
 - 该空间下至少有两条 ConfigMap
@@ -24,9 +24,9 @@ steps:
 - 打开 {BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps
 - 核对表头与首行内容
 expected:
-- 表头依次为 名称、键、创建时间、操作
+- 表头依次为 名称、项目、字段、创建时间
 - 首行是最近创建的一条
-- 「键」列显示该对象全部键名，逗号分隔
+- 「字段」列显示该对象全部键名，逗号分隔
 - 无键的对象显示 -
 troubleshoot:
 - 先确认 BFF 返回的状态码与 code，再看页面状态属性

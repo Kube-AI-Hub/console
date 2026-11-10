@@ -58,7 +58,17 @@ class ConfigMapsPage:
 
     @property
     def headers(self) -> list[str]:
-        return [text.strip() for text in self.surface.locator("thead th").all_inner_texts() if text.strip()]
+        """Only the headers actually rendered, which differs by viewport.
+
+        `all_inner_texts` includes `display: none` cells, so a phone-width check
+        that a column is folded away read the hidden header and reported it as
+        visible.
+        """
+        return [
+            text.strip()
+            for text in self.surface.locator("thead th:visible").all_inner_texts()
+            if text.strip()
+        ]
 
     @property
     def search_box(self) -> Locator:
@@ -79,10 +89,19 @@ class ConfigMapsPage:
         return self.surface.locator('[data-ai-id="configmaps:bulk-delete"]')
 
     def select_row(self, name: str) -> None:
-        self.surface.locator(f'[data-ai-id="configmaps:select:{name}"] input[type="checkbox"]').check()
+        # The handle sits on the checkbox itself, not a wrapper: the label around
+        # it is the enlarged touch target, not the targetable control.
+        self.surface.locator(f'input[data-ai-id="configmaps:select:{name}"]').check()
 
     def delete_row(self, name: str) -> None:
-        self.surface.locator(f'[data-ai-id="configmaps:delete:{name}"]').click()
+        """Delete a row the way a person does: open its menu, choose 删除.
+
+        There is no per-row delete button on screen — the action lives in the
+        overflow menu — so addressing one by id would test a control that does
+        not exist.
+        """
+        self.open_row_menu(name)
+        self.click_row_action("删除")
 
     @property
     def retry_button(self) -> Locator:
