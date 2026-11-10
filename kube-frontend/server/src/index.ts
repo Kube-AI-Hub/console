@@ -1,135 +1,79 @@
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import { loadConfig, type UpstreamConfig } from './config';
-import { badRequest, type BffError } from './errors';
-import {
-  createConfigMapService,
-  isBffError,
-  parseListQuery,
-  type ConfigMapDetail,
-  type ConfigMapSummary,
-} from './configmaps';
+import type { BffError } from './errors';
+import { isProxiedPath, proxyRequest } from './proxy';
+import { bearerToken, login, logout, resolveCurrentUser, type OAuthClientConfig } from './auth/session';
+import { badRequest } from './errors';
 
 export interface HandlerDeps {
   config: UpstreamConfig;
   fetchImpl?: typeof fetch;
   /** Page manifest for `/api/ai/manifest`; served verbatim. */
   manifest?: () => Promise<unknown>;
+  /** OAuth client used for the password grant; defaults to the old console's. */
+  oauthClient?: OAuthClientConfig;
 }
 
-export interface ListResult<T> {
-  items: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-}
+/** Largest login body accepted, in bytes. A password grant is a few hundred. */
+const MAX_LOGIN_BODY = 8 * 1024;
 
-type Service = ReturnType<typeof createConfigMapService>;
+async function readBody(request: IncomingMessage): Promise<string> {
+  const chunks: Buffer[] = [];
+  let size = 0;
+  for await (const chunk of request) {
+    const buffer = chunk as Buffer;
+    size += buffer.length;
+    // Refuse rather than buffer without bound: this endpoint is unauthenticated.
+    if (size > MAX_LOGIN_BODY) throw badRequest('request body too large');
+    chunks.push(buffer);
+  }
+  return Buffer.concat(chunks).toString('utf8');
+}
 
 /**
- * Route table.
+ * Request handler.
  *
- * Kept as data so the set of endpoints is readable in one place — the app's
- * client and the BFF's routes have to agree, and a table is easy to diff
- * against `packages/api-client`.
+ * Two jobs only: serve the AI manifest, and forward everything addressed to the
+ * cluster. There is deliberately no per-resource route table. The old console
+ * forwards `/{k}api{s}/{*path}` in one rule (`console/server/routes.js:153`) and
+ * the same choice applies here — the API surface is defined by ks-apiserver, and
+ * mirroring it would create a second definition that drifts.
  */
 export function createHandler(deps: HandlerDeps) {
-  const service: Service = createConfigMapService({
-    config: deps.config,
-    fetchImpl: deps.fetchImpl ?? fetch,
-  });
+  const oauthClient = deps.oauthClient ?? { clientId: 'kubesphere', clientSecret: 'kubesphere' };
 
   return async function handle(request: IncomingMessage, response: ServerResponse): Promise<void> {
     const url = new URL(request.url ?? '/', `http://${request.headers.host ?? 'localhost'}`);
-    const token = bearerToken(request);
 
     try {
-      const route = matchRoute(url.pathname);
-      if (!route) return send(response, 404, { code: 'not_found', message: 'no such endpoint', status: 404 });
-
-      switch (route.kind) {
-        case 'manifest': {
-          const manifest = await deps.manifest?.();
-          return send(response, 200, manifest ?? []);
-        }
-        case 'configmaps': {
-          switch (request.method) {
-            case 'GET': {
-              const query = parseListQuery(url.searchParams);
-              if (isBffError(query)) return send(response, query.status, query);
-              const result: ListResult<ConfigMapSummary> = await service.list(query, token);
-              return send(response, 200, result);
-            }
-            case 'DELETE': {
-              const names = url.searchParams.getAll('name');
-              if (!names.length) return send(response, 400, badRequest('name is required'));
-              for (const name of names) {
-                await service.remove(
-                  {
-                    cluster: requireParam(url, 'cluster'),
-                    namespace: requireParam(url, 'namespace'),
-                    name,
-                  },
-                  token,
-                );
-              }
-              return send(response, 204, undefined);
-            }
-            default:
-              return send(response, 405, { code: 'method_not_allowed', message: 'method not allowed', status: 405 });
-          }
-        }
-        case 'configmap': {
-          const params = {
-            cluster: requireParam(url, 'cluster'),
-            namespace: requireParam(url, 'namespace'),
-            name: route.name,
-          };
-          if (request.method === 'GET') {
-            const detail: ConfigMapDetail = await service.get(params, token);
-            return send(response, 200, detail);
-          }
-          return send(response, 405, { code: 'method_not_allowed', message: 'method not allowed', status: 405 });
-        }
+      if (url.pathname === '/api/ai/manifest') {
+        // A failure here must not take the page down: an agent that sees "no
+        // declared pages" can still browse, whereas a 500 gives it nothing.
+        const manifest = await deps.manifest?.().catch(() => []);
+        return send(response, 200, manifest ?? []);
       }
+
+      if (url.pathname.startsWith('/api/session')) {
+        return await handleSession(deps, oauthClient, request, response, url.pathname);
+      }
+
+      if (isProxiedPath(url.pathname)) {
+        return await proxyRequest(deps.config, request, response);
+      }
+
+      return send(response, 404, { code: 'not_found', message: 'no such endpoint', status: 404 });
     } catch (cause) {
-      if (isBffError(cause)) return send(response, cause.status, cause);
-      return send(response, 500, {
-        code: 'internal_error',
-        message: cause instanceof Error ? cause.message : 'internal error',
-        status: 500,
+      const status = (cause as { status?: number }).status;
+      if (typeof status === 'number') return send(response, status, cause as BffError);
+      // A failed upstream connection surfaces as a socket error; report it as a
+      // gateway problem rather than blaming this process.
+      return send(response, 502, {
+        code: 'upstream_unreachable',
+        message: cause instanceof Error ? cause.message : 'upstream unreachable',
+        status: 502,
       } satisfies BffError);
     }
   };
-}
-
-type Route = { kind: 'manifest' } | { kind: 'configmaps' } | { kind: 'configmap'; name: string };
-
-/**
- * `/api/configmaps` and `/api/configmaps/:name`.
- *
- * The name is the last path segment; anything deeper is not a supported
- * endpoint. A prefix match would make `/api/configmaps/x/y` silently act on
- * `x`, which is worse than a 404.
- */
-export function matchRoute(pathname: string): Route | null {
-  if (pathname === '/api/ai/manifest') return { kind: 'manifest' };
-  if (pathname === '/api/configmaps' || pathname === '/api/configmaps/') return { kind: 'configmaps' };
-  const match = /^\/api\/configmaps\/([^/]+)\/?$/.exec(pathname);
-  if (match?.[1]) return { kind: 'configmap', name: decodeURIComponent(match[1]) };
-  return null;
-}
-
-export function bearerToken(request: IncomingMessage): string | undefined {
-  const header = request.headers.authorization;
-  if (typeof header !== 'string') return undefined;
-  const [scheme, value] = header.split(' ');
-  return scheme?.toLowerCase() === 'bearer' && value ? value : undefined;
-}
-
-function requireParam(url: URL, key: string): string {
-  const value = url.searchParams.get(key);
-  if (!value) throw badRequest(`${key} is required`);
-  return value;
 }
 
 export function send(response: ServerResponse, status: number, body: unknown): void {
@@ -142,10 +86,68 @@ export function send(response: ServerResponse, status: number, body: unknown): v
     .writeHead(status, {
       'Content-Type': 'application/json; charset=utf-8',
       'Content-Length': Buffer.byteLength(payload),
-      // The API is user-scoped; a shared cache would serve one user's list to another.
       'Cache-Control': 'no-store',
     })
     .end(payload);
+}
+
+/**
+ * `/api/session/*` — the three calls that involve a credential.
+ *
+ * Only these three, not a general auth service: the token is otherwise just a
+ * bearer header that the proxy forwards. Keeping the surface this small is what
+ * lets the proxy stay a transparent forwarder.
+ */
+async function handleSession(
+  deps: HandlerDeps,
+  oauthClient: OAuthClientConfig,
+  request: IncomingMessage,
+  response: ServerResponse,
+  pathname: string,
+): Promise<void> {
+  const fetchImpl = deps.fetchImpl ?? fetch;
+
+  if (pathname === '/api/session/login') {
+    if (request.method !== 'POST') return send(response, 405, { code: 'method_not_allowed', status: 405 });
+    let body: Record<string, unknown>;
+    try {
+      const parsed = JSON.parse(await readBody(request)) as unknown;
+      body = parsed && typeof parsed === 'object' ? (parsed as Record<string, unknown>) : {};
+    } catch (cause) {
+      return send(response, 400, badRequest(cause instanceof Error ? cause.message : 'body must be JSON'));
+    }
+
+    const username = typeof body['username'] === 'string' ? body['username'].trim() : '';
+    const password = typeof body['password'] === 'string' ? body['password'] : '';
+    if (!username || !password) {
+      return send(response, 400, badRequest('username and password are required'));
+    }
+
+    const result = await login(deps.config, oauthClient, { username, password }, fetchImpl);
+    return result.ok ? send(response, 200, result.session) : send(response, result.error.status, result.error);
+  }
+
+  if (pathname === '/api/session/me') {
+    const token = bearerToken(request.headers.authorization);
+    // Asking ks-apiserver, not just decoding: a revoked token still parses.
+    const user = await resolveCurrentUser(deps.config, token, fetchImpl);
+    // 401 rather than 200-with-null: the client's interceptor already treats 401
+    // as "log in again", so reusing it avoids a second branch that only the
+    // login screen would know about.
+    if (!user) return send(response, 401, { code: 'unauthorized', message: 'not signed in', status: 401 });
+    return send(response, 200, { user });
+  }
+
+  if (pathname === '/api/session/logout') {
+    if (request.method !== 'POST') return send(response, 405, { code: 'method_not_allowed', status: 405 });
+    await logout(deps.config, bearerToken(request.headers.authorization), fetchImpl);
+    // Always 204: the browser has already discarded the token, and reporting an
+    // upstream failure here would leave the reader stuck on a page they left.
+    response.writeHead(204, { 'Cache-Control': 'no-store' }).end();
+    return;
+  }
+
+  return send(response, 404, { code: 'not_found', message: 'no such endpoint', status: 404 });
 }
 
 export async function startServer(port: number, deps: HandlerDeps): Promise<ReturnType<typeof createServer>> {

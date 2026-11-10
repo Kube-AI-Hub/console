@@ -1,227 +1,221 @@
-import { describe, expect, it, vi } from 'vitest';
-import { codeForStatus, normaliseUpstreamError, upstreamUnreachable } from '../src/errors';
-import { parseListQuery, toSummary } from '../src/configmaps';
-import { loadConfig, resourcePath } from '../src/config';
+import { createServer, type IncomingMessage, type Server } from 'node:http';
+import { afterEach, describe, expect, it } from 'vitest';
+import { createHandler, type HandlerDeps } from '../src/index';
+import { isProxiedPath } from '../src/proxy';
+import type { UpstreamConfig } from '../src/config';
 
 /**
- * BFF behaviour, tested without a network.
+ * These tests run against a real HTTP server standing in for ks-apiserver.
  *
- * The BFF is where upstream quirks are supposed to disappear. If these mappings
- * are wrong the page shows the wrong state — a 403 rendered as "retry" is the
- * failure that wastes a user's time most reliably.
+ * The BFF is now a proxy: what matters is that the method, path, query, body and
+ * Authorization header arrive unchanged, and that the response comes back as it
+ * was sent. Mocking `http.request` would test the mock, not the contract.
  */
 
-describe('status to code', () => {
-  it.each([
-    [401, 'unauthorized'],
-    [403, 'forbidden'],
-    [404, 'not_found'],
-    [409, 'conflict'],
-    [422, 'invalid'],
-    [429, 'rate_limited'],
-    [500, 'upstream_error'],
-    [418, 'http_error'],
-  ])('maps %i to %s', (status, code) => {
-    expect(codeForStatus(status)).toBe(code);
-  });
+interface Recorded {
+  method: string | undefined;
+  url: string | undefined;
+  headers: IncomingMessage['headers'];
+  body: string;
+}
+
+const servers: Server[] = [];
+
+afterEach(async () => {
+  await Promise.all(
+    servers.splice(0).map((server) => new Promise<void>((resolve) => server.close(() => resolve()))),
+  );
 });
 
-describe('normaliseUpstreamError', () => {
-  it('keeps the kube message and the status-derived code', async () => {
-    const response = new Response(JSON.stringify({ message: 'configmaps is forbidden' }), {
-      status: 403,
-      headers: { 'content-type': 'application/json' },
+/** Start a fake upstream that records what it received. */
+async function fakeUpstream(
+  respond: (recorded: Recorded) => { status: number; body: string; headers?: Record<string, string> },
+): Promise<{ baseUrl: string; recorded: Recorded[] }> {
+  const recorded: Recorded[] = [];
+  const server = createServer((request, response) => {
+    const chunks: Buffer[] = [];
+    request.on('data', (chunk: Buffer) => chunks.push(chunk));
+    request.on('end', () => {
+      const entry: Recorded = {
+        method: request.method,
+        url: request.url,
+        headers: request.headers,
+        body: Buffer.concat(chunks).toString('utf8'),
+      };
+      recorded.push(entry);
+      const result = respond(entry);
+      response.writeHead(result.status, { 'content-type': 'application/json', ...result.headers });
+      response.end(result.body);
     });
-    const error = await normaliseUpstreamError(response);
-    expect(error).toEqual({ code: 'forbidden', message: 'configmaps is forbidden', status: 403 });
   });
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+  servers.push(server);
+  const address = server.address();
+  if (address === null || typeof address === 'string') throw new Error('no port');
+  return { baseUrl: `http://127.0.0.1:${address.port}`, recorded };
+}
 
-  it('survives an HTML proxy error page', async () => {
-    const response = new Response('<html>502 Bad Gateway</html>', {
-      status: 502,
-      statusText: 'Bad Gateway',
-      headers: { 'content-type': 'text/html' },
-    });
-    const error = await normaliseUpstreamError(response);
-    expect(error.code).toBe('upstream_error');
-    expect(error.message).toBe('Bad Gateway');
-  });
-
-  it('survives malformed JSON', async () => {
-    const response = new Response('{not json', {
-      status: 500,
-      statusText: 'Internal Server Error',
-      headers: { 'content-type': 'application/json' },
-    });
-    const error = await normaliseUpstreamError(response);
-    expect(error.code).toBe('upstream_error');
-  });
-
-  it('wraps a transport failure as 502', () => {
-    const error = upstreamUnreachable(new Error('ECONNREFUSED'));
-    expect(error.status).toBe(502);
-    expect(error.code).toBe('upstream_unreachable');
-  });
-});
-
-describe('parseListQuery', () => {
-  const valid = (overrides: Record<string, string> = {}) => {
-    const params = new URLSearchParams({ cluster: 'host', namespace: 'default', ...overrides });
-    return parseListQuery(params);
+/** Start the BFF on an ephemeral port, pointed at `upstream`. */
+async function startBff(upstream: string, overrides: Partial<UpstreamConfig> = {}): Promise<string> {
+  const config: UpstreamConfig = {
+    baseUrl: upstream,
+    apiPrefix: '/kapis/resources.kubesphere.io/v1alpha3',
+    mode: 'kapis',
+    ...overrides,
   };
+  const deps: HandlerDeps = { config, manifest: async () => [] };
+  const server = createServer((request, response) => void createHandler(deps)(request, response));
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+  servers.push(server);
+  const address = server.address();
+  if (address === null || typeof address === 'string') throw new Error('no port');
+  return `http://127.0.0.1:${address.port}`;
+}
 
-  it('applies documented defaults', () => {
-    const result = valid();
-    expect(result).toMatchObject({ page: 1, pageSize: 10, sortBy: 'createdAt', order: 'desc', keyword: '' });
-  });
+const KAPIS = '/kapis/resources.kubesphere.io/v1alpha3/namespaces/demo/configmaps';
 
-  it('rejects a missing namespace', () => {
-    const result = parseListQuery(new URLSearchParams({ cluster: 'host' }));
-    expect('code' in result && result.code).toBe('invalid_request');
-  });
+describe('isProxiedPath', () => {
+  it.each(['/kapis/x', '/kapis/', '/api/v1/namespaces/x', '/apis/apps/v1/deployments'])(
+    'forwards %s',
+    (path) => {
+      expect(isProxiedPath(path)).toBe(true);
+    },
+  );
 
-  it('rejects an out-of-range page size', () => {
-    const result = valid({ pageSize: '500' });
-    expect('code' in result && result.status).toBe(400);
-  });
-
-  it('rejects a sort field the columns do not have', () => {
-    // Without this the upstream silently ignores the parameter and the header
-    // arrow points the wrong way.
-    const result = valid({ sortBy: 'cpu' });
-    expect('status' in result && result.status).toBe(400);
-  });
-
-  it('trims the keyword so a trailing space does not narrow the search', () => {
-    const result = valid({ keyword: '  app  ' });
-    expect('keyword' in result && result.keyword).toBe('app');
+  it('does not forward app routes', () => {
+    expect(isProxiedPath('/')).toBe(false);
+    expect(isProxiedPath('/api/ai/manifest')).toBe(false);
   });
 });
 
-describe('toSummary', () => {
-  it('reads the description annotation and sorts keys', () => {
-    const summary = toSummary({
-      metadata: {
-        name: 'app-config',
-        namespace: 'default',
-        creationTimestamp: '2026-11-01T08:12:00Z',
-        annotations: { 'kubesphere.io/description': '主配置' },
-      },
-      data: { 'log.yaml': '', 'app.yaml': '' },
+describe('proxy', () => {
+  it('forwards GET with query and Authorization unchanged', async () => {
+    const upstream = await fakeUpstream(() => ({ status: 200, body: '{"items":[]}' }));
+    const bff = await startBff(upstream.baseUrl);
+
+    const response = await fetch(`${bff}${KAPIS}?page=2&limit=10`, {
+      headers: { authorization: 'Bearer token-abc' },
     });
-    expect(summary).toMatchObject({
-      name: 'app-config',
-      description: '主配置',
-      keys: ['app.yaml', 'log.yaml'],
-    });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ items: [] });
+    expect(upstream.recorded).toHaveLength(1);
+    const call = upstream.recorded[0]!;
+    expect(call.method).toBe('GET');
+    expect(call.url).toBe(`${KAPIS}?page=2&limit=10`);
+    expect(call.headers.authorization).toBe('Bearer token-abc');
   });
 
-  it('treats a missing data block as no keys rather than throwing', () => {
-    const summary = toSummary({ metadata: { name: 'empty' } });
-    expect(summary.keys).toEqual([]);
-    expect(summary.description).toBe('');
+  it.each(['POST', 'PUT', 'PATCH', 'DELETE'])('forwards %s with the body intact', async (method) => {
+    const upstream = await fakeUpstream(() => ({ status: 201, body: '{"ok":true}' }));
+    const bff = await startBff(upstream.baseUrl);
+    const payload = JSON.stringify({ kind: 'ConfigMap', data: { key: 'value' } });
+
+    const response = await fetch(`${bff}${KAPIS}/app-config`, {
+      method,
+      headers: { 'content-type': 'application/json' },
+      ...(method === 'DELETE' ? {} : { body: payload }),
+    });
+
+    expect(response.status).toBe(201);
+    const call = upstream.recorded[0]!;
+    expect(call.method).toBe(method);
+    expect(call.url).toBe(`${KAPIS}/app-config`);
+    if (method !== 'DELETE') expect(call.body).toBe(payload);
+  });
+
+  it('passes the upstream status and body through, including errors', async () => {
+    const upstream = await fakeUpstream(() => ({
+      status: 409,
+      body: '{"kind":"Status","message":"already exists"}',
+    }));
+    const bff = await startBff(upstream.baseUrl);
+
+    const response = await fetch(`${bff}${KAPIS}`, { method: 'POST', body: '{}' });
+
+    expect(response.status).toBe(409);
+    expect(await response.json()).toEqual({ kind: 'Status', message: 'already exists' });
+  });
+
+  it('forwards the plain kube API paths without rewriting them in kapis mode', async () => {
+    const upstream = await fakeUpstream(() => ({ status: 200, body: '{}' }));
+    const bff = await startBff(upstream.baseUrl);
+
+    await fetch(`${bff}/api/v1/namespaces/demo/configmaps/app-config`);
+
+    expect(upstream.recorded[0]?.url).toBe('/api/v1/namespaces/demo/configmaps/app-config');
+  });
+
+  it('rewrites a kapis path for kubectl proxy and drops kapis-only parameters', async () => {
+    const upstream = await fakeUpstream(() => ({ status: 200, body: '{"kind":"ConfigMapList","items":[]}' }));
+    const bff = await startBff(upstream.baseUrl, { mode: 'kube' });
+
+    await fetch(`${bff}${KAPIS}?page=2&limit=10&sortBy=name&ascending=false`);
+
+    // The plain kube API rejects these with a 400; the harness emulates them
+    // locally instead (see `emulateKapisList`).
+    expect(upstream.recorded[0]?.url).toBe('/api/v1/namespaces/demo/configmaps');
+  });
+
+  it('emulates kapis paging on the harness so a paged list can be checked locally', async () => {
+    const items = Array.from({ length: 5 }, (_, index) => ({
+      metadata: { name: `cm-${index}`, creationTimestamp: `2026-01-0${index + 1}T00:00:00Z` },
+    }));
+    const upstream = await fakeUpstream(() => ({
+      status: 200,
+      body: JSON.stringify({ kind: 'ConfigMapList', apiVersion: 'v1', items }),
+    }));
+    const bff = await startBff(upstream.baseUrl, { mode: 'kube' });
+
+    const response = await fetch(`${bff}${KAPIS}?page=2&limit=2&sortBy=name&ascending=true`);
+    const body = (await response.json()) as { items: Array<{ metadata: { name: string } }>; totalItems: number };
+
+    // Sorted by name then sliced: page 2 of 2 is `cm-2`, `cm-3`.
+    expect(body.totalItems).toBe(5);
+    expect(body.items.map((item) => item.metadata.name)).toEqual(['cm-2', 'cm-3']);
+  });
+
+  it('drops cookie so a browser session never reaches the cluster', async () => {
+    const upstream = await fakeUpstream(() => ({ status: 200, body: '{}' }));
+    const bff = await startBff(upstream.baseUrl);
+
+    await fetch(`${bff}${KAPIS}`, { headers: { cookie: 'session=secret', referer: 'http://x/' } });
+
+    const call = upstream.recorded[0]!;
+    expect(call.headers.cookie).toBeUndefined();
+    expect(call.headers.referer).toBeUndefined();
   });
 });
 
-describe('resource path', () => {
-  const config = loadConfig({ KS_API_URL: 'http://up', KS_API_PREFIX: '/kapis/x' });
+describe('routes', () => {
+  it('serves the manifest', async () => {
+    const upstream = await fakeUpstream(() => ({ status: 200, body: '{}' }));
+    const bff = await startBff(upstream.baseUrl);
 
-  it('omits the cluster segment for the host cluster', () => {
-    expect(resourcePath(config, 'host', 'default', 'configmaps')).toBe('/kapis/x/namespaces/default/configmaps');
+    const response = await fetch(`${bff}/api/ai/manifest`);
+
+    expect(response.status).toBe(200);
+    expect(upstream.recorded).toHaveLength(0);
   });
 
-  it('inserts the member cluster segment otherwise', () => {
-    expect(resourcePath(config, 'gpu01', 'ai', 'configmaps')).toBe('/kapis/x/clusters/gpu01/namespaces/ai/configmaps');
+  it('returns 404 for an unknown app path', async () => {
+    const upstream = await fakeUpstream(() => ({ status: 200, body: '{}' }));
+    const bff = await startBff(upstream.baseUrl);
+
+    const response = await fetch(`${bff}/api/configmaps`);
+
+    expect(response.status).toBe(404);
   });
 
-  it('encodes the namespace', () => {
-    expect(resourcePath(config, 'host', 'a/b', 'configmaps')).toContain('namespaces/a%2Fb');
-  });
-});
+  it('reports an unreachable upstream as 502 rather than a crash', async () => {
+    // Port 1 is reserved and refuses connections, which is what a wrong
+    // KS_API_URL looks like in practice.
+    const bff = await startBff('http://127.0.0.1:1');
 
-describe('service list', () => {
-  it('forwards the bearer token and never caches', async () => {
-    const fetchImpl = vi.fn(async () =>
-      new Response(JSON.stringify({ items: [], totalItems: 0 }), {
-        status: 200,
-        headers: { 'content-type': 'application/json' },
-      }),
-    );
-    const { createConfigMapService } = await import('../src/configmaps');
-    const service = createConfigMapService({
-      config: { baseUrl: 'http://up', apiPrefix: '/kapis/x' },
-      fetchImpl: fetchImpl as unknown as typeof fetch,
-    });
-    await service.list(
-      { cluster: 'host', namespace: 'default', page: 1, pageSize: 10, sortBy: 'name', order: 'asc', keyword: '' },
-      'token-123',
-    );
-    const call = fetchImpl.mock.calls[0] as unknown as [string, RequestInit];
-    expect(String(call[0])).toContain('/kapis/x/namespaces/default/configmaps');
-    expect((call[1].headers as Record<string, string>).Authorization).toBe('Bearer token-123');
-  });
-});
+    const response = await fetch(`${bff}${KAPIS}`);
 
-describe('kube mode (development harness)', () => {
-  /**
-   * `kube` mode exists so the app can be driven against real cluster data through
-   * `kubectl proxy` when no KubeSphere JWT is available. It has no server-side
-   * sorting, so the service must sort and page locally — otherwise the harness
-   * would show data in a different order than production and prove nothing.
-   */
-  const items = [
-    { metadata: { name: 'b-older', creationTimestamp: '2026-11-01T00:00:00Z' }, data: { k: 'v' } },
-    { metadata: { name: 'a-newest', creationTimestamp: '2026-11-09T00:00:00Z' }, data: { k: 'v' } },
-    { metadata: { name: 'c-middle', creationTimestamp: '2026-11-05T00:00:00Z' }, data: { k: 'v' } },
-  ];
-
-  async function listWith(overrides: Record<string, unknown> = {}) {
-    const fetchImpl = vi.fn(async () =>
-      new Response(JSON.stringify({ items }), { status: 200, headers: { 'content-type': 'application/json' } }),
-    );
-    const { createConfigMapService } = await import('../src/configmaps');
-    const service = createConfigMapService({
-      config: { baseUrl: 'http://proxy', apiPrefix: '/kapis', mode: 'kube' },
-      fetchImpl: fetchImpl as unknown as typeof fetch,
-    });
-    const result = await service.list(
-      { cluster: 'host', namespace: 'demo', page: 1, pageSize: 10, sortBy: 'createdAt', order: 'desc', keyword: '', ...overrides },
-      undefined,
-    );
-    return { result, fetchImpl };
-  }
-
-  it('addresses kube API paths rather than kapis', async () => {
-    const { fetchImpl } = await listWith();
-    expect(String((fetchImpl.mock.calls[0] as unknown as [string])[0])).toContain('/api/v1/namespaces/demo/configmaps');
-  });
-
-  it('drops kapis-only parameters the plain API rejects', async () => {
-    const { fetchImpl } = await listWith();
-    const url = new URL(String((fetchImpl.mock.calls[0] as unknown as [string])[0]));
-    for (const param of ['sortBy', 'ascending', 'page', 'limit']) {
-      expect(url.searchParams.has(param)).toBe(false);
-    }
-  });
-
-  it('sorts newest first locally so the harness matches production order', async () => {
-    const { result } = await listWith();
-    expect(result.items.map((item) => item.name)).toEqual(['a-newest', 'c-middle', 'b-older']);
-  });
-
-  it('sorts by name ascending when asked', async () => {
-    const { result } = await listWith({ sortBy: 'name', order: 'asc' });
-    expect(result.items.map((item) => item.name)).toEqual(['a-newest', 'b-older', 'c-middle']);
-  });
-
-  it('pages and reports the unpaged total', async () => {
-    const { result } = await listWith({ page: 2, pageSize: 2 });
-    expect(result.items).toHaveLength(1);
-    expect(result.total).toBe(3);
-  });
-
-  it('filters by name locally', async () => {
-    const { result } = await listWith({ keyword: 'middle' });
-    expect(result.items.map((item) => item.name)).toEqual(['c-middle']);
+    expect(response.status).toBe(502);
+    const body = (await response.json()) as { code: string };
+    expect(body.code).toBe('upstream_unreachable');
   });
 });
