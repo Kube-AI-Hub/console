@@ -1,5 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { configMapsApi, type ListParams, type ConfigMapSummary } from '@kube-ai-hub/api-client';
+import {
+  configMapsApi,
+  type ConfigMapInput,
+  type ConfigMapSummary,
+  type KubeConfigMap,
+  type ListParams,
+} from '@kube-ai-hub/api-client';
 import { registerPage, type AiPage } from '@kube-ai-hub/ai-surface';
 import { api } from '@/api';
 
@@ -13,7 +19,16 @@ import { api } from '@/api';
 export interface ConfigMapsQuery extends Omit<ListParams, 'signal'> {}
 
 export function configMapsKey(params: ConfigMapsQuery) {
-  return ['configmaps', params.cluster, params.namespace, params.page, params.pageSize, params.sortBy, params.order, params.keyword] as const;
+  return [
+    'configmaps',
+    params.cluster,
+    params.namespace,
+    params.page,
+    params.pageSize,
+    params.sortBy,
+    params.order,
+    params.keyword,
+  ] as const;
 }
 
 export function useConfigMaps(params: ConfigMapsQuery) {
@@ -23,8 +38,7 @@ export function useConfigMaps(params: ConfigMapsQuery) {
   });
 }
 
-export function useConfigMap(params: { cluster: string; namespace: string; name: string }) {
-  return useQuery({
+export function useConfigMap(params: { cluster: string; namespace: string; name: string }) {  return useQuery({
     queryKey: ['configmap', params.cluster, params.namespace, params.name],
     queryFn: ({ signal }) => configMapsApi(api).get({ ...params, signal }),
   });
@@ -40,8 +54,54 @@ export function useDeleteConfigMaps(params: { cluster: string; namespace: string
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (names: string[]) => configMapsApi(api).remove({ ...params, names }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['configmaps'] }),
+    onSuccess: () => invalidateAll(queryClient),
   });
+}
+
+/** Create one. */
+export function useCreateConfigMap(params: { cluster: string }) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: ConfigMapInput) => configMapsApi(api).create(input, params.cluster),
+    onSuccess: () => invalidateAll(queryClient),
+  });
+}
+
+/**
+ * Replace an object, used by both the data editor and the YAML editor.
+ *
+ * Takes the whole body rather than a patch: the two editors both produce a
+ * complete object, and sending it whole is what makes "edit YAML" able to change
+ * anything the user can see.
+ */
+export function useUpdateConfigMap(params: { cluster: string; namespace: string }) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: KubeConfigMap) => configMapsApi(api).update({ ...params, body }),
+    onSuccess: () => invalidateAll(queryClient),
+  });
+}
+
+/** Partial update, used by the basic-information dialog. */
+export function usePatchConfigMap(params: { cluster: string; namespace: string; name: string }) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: unknown) => configMapsApi(api).patch({ ...params, body }),
+    onSuccess: () => invalidateAll(queryClient),
+  });
+}
+
+/**
+ * Refresh everything ConfigMap-shaped after a write.
+ *
+ * Both prefixes, because the list and the detail are cached separately and a
+ * detail page left stale after an edit is the more confusing of the two.
+ */
+function invalidateAll(queryClient: ReturnType<typeof useQueryClient>): Promise<void> {
+  return Promise.all([
+    queryClient.invalidateQueries({ queryKey: ['configmaps'] }),
+    queryClient.invalidateQueries({ queryKey: ['configmap'] }),
+  ]).then(() => undefined);
 }
 
 /** Register this page in the agent manifest. Called once when the module loads. */

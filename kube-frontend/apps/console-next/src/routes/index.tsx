@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { useT } from '@/i18n';
 
 /**
  * Landing route.
@@ -12,10 +13,11 @@ export const Route = createFileRoute('/')({
 });
 
 function IndexPage() {
+  const t = useT();
   return (
     <div className="flex flex-col gap-3">
-      <h1 className="text-base font-semibold text-ai-fg">智算平台</h1>
-      <p className="text-xs text-ai-fg-muted">选择模块进入。</p>
+      <h1 className="text-base font-semibold text-ai-fg">{t('app.name')}</h1>
+      <p className="text-xs text-ai-fg-muted">{t('index.chooseModule')}</p>
       <ul className="flex flex-col gap-2 text-sm">
         <li>
           <Link
@@ -23,7 +25,7 @@ function IndexPage() {
             params={{ workspace: 'system-workspace', cluster: 'host', namespace: 'default' }}
             className="text-ai-accent hover:underline"
           >
-            配置字典
+            {t('configmaps.title')}
           </Link>
         </li>
       </ul>

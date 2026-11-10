@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Outlet, useRouterState } from '@tanstack/react-router';
 import { ConfigMapsPage } from '@/pages/configmaps/ConfigMapsPage';
 
 /**
@@ -17,5 +17,14 @@ export const Route = createFileRoute('/kube-frontend/$workspace/clusters/$cluste
 
 function ConfigMapsRoute() {
   const { workspace, cluster, namespace } = Route.useParams();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  /*
+   * This route is the parent of `$name`, so TanStack renders it for both the list
+   * and the detail. Rendering the list unconditionally would hide the child; a
+   * file-route `index` would be cleaner but the parent segment carries a param,
+   * so the split has to happen here.
+   */
+  const isDetail = /\.configmaps\/[^/]+$/.test(pathname) || /\/configmaps\/.+$/.test(pathname);
+  if (isDetail) return <Outlet />;
   return <ConfigMapsPage workspace={workspace} cluster={cluster} namespace={namespace} />;
 }

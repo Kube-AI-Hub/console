@@ -1,9 +1,35 @@
 <!doctype html>
-<html lang="zh-CN" data-theme="dark" data-accent="green">
+<html lang="zh-CN" data-theme="dark" data-accent="violet">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>智算平台</title>
+    <!--
+      Restore the stored theme before the first paint.
+
+      The `data-theme` attribute above is only the default for a reader with no
+      preference: React cannot run early enough to apply a stored one, so without
+      this inline script someone on the light theme sees a dark frame first and
+      then a flash to light.
+
+      This is a copy of `themeBootstrapScript` in ai-kit's ThemeProvider (a
+      string constant cannot be imported into a static template). The two are
+      kept honest by `test/theme-bootstrap.test.ts`, which fails if they drift.
+    -->
+    <script>
+      (function () {
+        try {
+          var m = localStorage.getItem('ai-kit-theme');
+          if (m === 'light' || m === 'dark') {
+            document.documentElement.setAttribute('data-theme', m);
+          }
+          var a = localStorage.getItem('ai-kit-accent');
+          if (a === 'violet' || a === 'green') {
+            document.documentElement.setAttribute('data-accent', a);
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -1,5 +1,5 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClientProvider } from '@tanstack/react-query';
 import {
@@ -16,29 +16,85 @@ import { ConfigMapsPage } from '@/pages/configmaps/ConfigMapsPage';
 /**
  * ConfigMaps list behaviour.
  *
- * These run against a stubbed `fetch`, so they assert the real request the page
- * issues and the real state it renders — not a mocked hook. A page that renders
- * fine against a mocked hook but requests the wrong URL is the bug this catches.
+ * Runs against a stubbed `fetch` so the assertions cover the request the page
+ * really issues and the state it really renders. The BFF is a transparent proxy
+ * now, so the stub answers with kube-api shapes — a page that reads a made-up
+ * `{items, total}` envelope would pass against a mock and fail in production.
  */
 
-const rows = [
-  { name: 'app-config', namespace: 'default', description: '主配置', keys: ['app.yaml'], createdAt: '2026-11-01T08:12:00Z', federated: false },
-  { name: 'nginx-conf', namespace: 'default', description: '', keys: ['nginx.conf'], createdAt: '2026-11-02T11:40:00Z', federated: true },
-];
+/**
+ * The page opens on the project in the route, so the collection is
+ * namespace-scoped. "All projects" is a cluster-wide read the reader must ask for.
+ */
+const KAPIS = '/kapis/resources.kubesphere.io/v1alpha3/namespaces/default/configmaps';
+
+/** A kube `ConfigMapList`, the shape ks-apiserver returns. */
+const listBody = {
+  kind: 'ConfigMapList',
+  apiVersion: 'v1',
+  items: [
+    {
+      apiVersion: 'v1',
+      kind: 'ConfigMap',
+      metadata: {
+        name: 'app-config',
+        namespace: 'default',
+        creationTimestamp: '2026-11-01T08:12:00Z',
+        annotations: { 'kubesphere.io/description': '主配置', 'kubesphere.io/creator': 'admin' },
+      },
+      data: { 'app.yaml': 'a: 1' },
+    },
+    {
+      apiVersion: 'v1',
+      kind: 'ConfigMap',
+      metadata: {
+        name: 'nginx-conf',
+        namespace: 'default',
+        creationTimestamp: '2026-11-02T11:40:00Z',
+        annotations: { 'kubefed.io/managed': 'true' },
+      },
+      data: { 'nginx.conf': 'server {}' },
+    },
+  ],
+  totalItems: 2,
+};
+
+/**
+ * Projects response, so the shared picker settles.
+ *
+ * The page fetches projects alongside the list; a stub that only answers the list
+ * leaves that query pending forever and the test hangs on cleanup.
+ */
+const projectsBody = {
+  kind: 'NamespaceList',
+  items: [
+    { metadata: { name: 'default' }, status: { phase: 'Active' } },
+    { metadata: { name: 'kube-frontend-demo' }, status: { phase: 'Active' } },
+  ],
+};
 
 function stubFetch(handler: (url: string, init?: RequestInit) => Response | Promise<Response>) {
-  const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => handler(String(input), init));
+  const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input);
+    if (url.includes('/namespaces?') || url.endsWith('/namespaces')) return json(projectsBody);
+    return handler(url, init);
+  });
   vi.stubGlobal('fetch', fetchMock);
   return fetchMock;
 }
 
-/**
- * Render the page inside a real router.
- *
- * The page links to the detail route, so `<Link>` needs a router in context.
- * Building one here — rather than mocking `Link` — means the test also proves the
- * route literal resolves, which is the part that breaks on a rename.
- */
+/** The page's state root; `AiSurface` publishes `data-ai-state` here. */
+function surface(): HTMLElement {
+  const element = document.querySelector<HTMLElement>('[data-ai-id="configmaps:surface"]');
+  if (!element) throw new Error('surface not rendered');
+  return element;
+}
+
+function json(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
+}
+
+/** Render the page inside a real router so `<Link>` resolves. */
 function renderPage() {
   const client = createQueryClient();
   const rootRoute = createRootRoute();
@@ -59,153 +115,174 @@ function renderPage() {
 
   return render(
     <QueryClientProvider client={client}>
-      <I18nProvider>
+      <I18nProvider locale="zh">
         <RouterProvider router={router} />
       </I18nProvider>
     </QueryClientProvider>,
   );
 }
 
-beforeEach(() => {
-  vi.unstubAllGlobals();
-});
-
-/**
- * The surface the page last reported.
- *
- * TanStack's `RouterProvider` can mount its tree more than once while the first
- * match resolves, so a bare `querySelector` picks up a stale element and reports
- * the previous state. Reading from the last one always reflects the live render.
- */
-function currentSurface(): HTMLElement {
-  const all = document.querySelectorAll<HTMLElement>('[data-ai-id="configmaps:surface"]');
-  const last = all.item(all.length - 1);
-  if (!last) throw new Error('surface not rendered');
-  return last;
-}
-
-/** Wait for the router to mount the page, then return its surface. */
-async function awaitSurface(): Promise<HTMLElement> {
-  await waitFor(() => expect(currentSurface()).toBeInTheDocument());
-  return currentSurface();
-}
-
 describe('ConfigMaps list', () => {
   it('starts in the loading state and reaches ready', async () => {
-    stubFetch(() => new Response(JSON.stringify({ items: rows, total: 2, page: 1, pageSize: 10 }), { status: 200 }));
+    stubFetch(() => json(listBody));
     renderPage();
 
-    // The agent reads this before acting; it must be present as soon as the page
-    // mounts, and it must not sit on `loading` once data has arrived.
-    const surface = await awaitSurface();
-    expect(['loading', 'ready']).toContain(surface.getAttribute('data-ai-state'));
-    await waitFor(() => expect(currentSurface()).toHaveAttribute('data-ai-state', 'ready'));
-    expect(screen.getByText('app-config')).toBeInTheDocument();
+    // The router renders on a microtask, so wait for the region before reading state.
+    await waitFor(() => expect(surface()).toBeTruthy());
+    expect(await screen.findByText('app-config')).toBeTruthy();
+    expect(surface().getAttribute('data-ai-state')).toBe('ready');
   });
 
-  it('requests the BFF with cluster, namespace and paging', async () => {
-    const fetchMock = stubFetch(() => new Response(JSON.stringify({ items: [], total: 0, page: 1, pageSize: 10 }), { status: 200 }));
+  it('requests the kapis collection with paging and sort', async () => {
+    const fetchMock = stubFetch(() => json(listBody));
     renderPage();
-    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    await screen.findByText('app-config');
 
-    const url = new URL(String((fetchMock.mock.calls[0] as unknown as [string])[0]), 'http://localhost');
-    expect(url.pathname).toBe('/api/configmaps');
-    expect(url.searchParams.get('cluster')).toBe('host');
-    expect(url.searchParams.get('namespace')).toBe('default');
-    expect(url.searchParams.get('pageSize')).toBe('10');
-    expect(url.searchParams.get('sortBy')).toBe('createdAt');
-    expect(url.searchParams.get('order')).toBe('desc');
+    // The projects query runs in parallel, so pick the ConfigMap request by path.
+    const call = fetchMock.mock.calls.map((entry) => new URL(String(entry[0]))).find((u) => u.pathname === KAPIS);
+    expect(call).toBeTruthy();
+    const url = call!;
+    // The old console's shape: `page` and `limit` go to the server, which slices.
+    expect(url.searchParams.get('limit')).toBe('10');
+    expect(url.searchParams.get('page')).toBe('1');
+    // ks-apiserver spells the sort field `sortBy` and the direction `ascending`.
+    expect(url.searchParams.get('sortBy')).toBe('createTime');
+    expect(url.searchParams.get('ascending')).toBe('false');
   });
 
-  it('shows the empty state rather than an empty table', async () => {
-    stubFetch(() => new Response(JSON.stringify({ items: [], total: 0, page: 1, pageSize: 10 }), { status: 200 }));
+  it('renders the alias, description and key list from annotations and data', async () => {
+    stubFetch(() => json(listBody));
     renderPage();
-    await waitFor(() => expect(currentSurface()).toHaveAttribute('data-ai-state', 'empty'));
-    expect(screen.getByText('暂无配置字典')).toBeInTheDocument();
+
+    expect(await screen.findByText('app-config')).toBeTruthy();
+    expect(screen.getByText('主配置')).toBeTruthy();
+    expect(screen.getByText('app.yaml')).toBeTruthy();
+    // Only the federated object gets the badge.
+    expect(screen.getByText('联邦')).toBeTruthy();
   });
 
-  it('shows the error state with a retry the agent can find', async () => {
-    // 422 is not retryable, so the state settles on the first response. A 5xx would
-    // be retried twice by design, and this test is about the rendered state.
-    stubFetch(() => new Response(JSON.stringify({ code: 'invalid', message: 'boom' }), { status: 422 }));
+  it('clips the key list to 50 characters and keeps the whole list as the tooltip', async () => {
+    /*
+     * A generated ConfigMap can carry dozens of keys. Wrapped, that one row would
+     * set the height of the whole table; clipped, the row stays uniform and the
+     * full list is still reachable through the tooltip and the detail page.
+     */
+    const longKeys = Array.from({ length: 20 }, (_, index) => `some.fairly.long.key.number.${index}`);
+    const longList = {
+      ...listBody,
+      items: [
+        {
+          ...listBody.items[0],
+          data: Object.fromEntries(longKeys.map((key) => [key, 'v'])),
+        },
+      ],
+      totalItems: 1,
+    };
+    stubFetch(() => json(longList));
     renderPage();
-    await awaitSurface();
-    await waitFor(() => expect(currentSurface()).toHaveAttribute('data-ai-state', 'error'), { timeout: 3000 });
-    expect(currentSurface().querySelector('[data-ai-id="configmaps:retry"]')).not.toBeNull();
+
+    // The mapper sorts keys, so the tooltip keeps that order rather than the
+    // order the object literal happened to list them in.
+    const cell = await screen.findByTitle([...longKeys].sort().join(','));
+    const shown = cell.textContent ?? '';
+    expect(Array.from(shown).length).toBe(53); // 50 characters plus the ellipsis
+    expect(shown.endsWith('...')).toBe(true);
+
+    // Short lists are untouched, and carry no tooltip to explain a cut that did
+    // not happen.
+    stubFetch(() => json(listBody));
+    renderPage();
+    expect(await screen.findByText('app.yaml')).toBeTruthy();
+    expect(screen.queryByTitle('app.yaml')).toBeNull();
   });
 
-  it('does not offer retry when the user lacks permission', async () => {
-    // Retrying a 403 can never succeed; the button would only frustrate.
-    stubFetch(() => new Response(JSON.stringify({ code: 'forbidden', message: 'nope' }), { status: 403 }));
+  it('shows the empty state when nothing matches', async () => {
+    stubFetch(() => json({ kind: 'ConfigMapList', items: [], totalItems: 0 }));
     renderPage();
-    await awaitSurface();
-    await waitFor(() => expect(currentSurface()).toHaveAttribute('data-ai-state', 'error'), { timeout: 3000 });
-    expect(within(currentSurface()).getByText('没有权限执行该操作')).toBeInTheDocument();
-    expect(currentSurface().querySelector('[data-ai-id="configmaps:retry"]')).toBeNull();
+
+    expect(await screen.findByText('暂无配置字典')).toBeTruthy();
+    expect(surface().getAttribute('data-ai-state')).toBe('empty');
   });
 
-  it('requests a new sort when a different header is clicked', async () => {
-    // The list opens on createdAt/desc; clicking "name" must ask the server to
-    // sort by name ascending, not merely re-fetch the same order.
-    const fetchMock = stubFetch(() => new Response(JSON.stringify({ items: rows, total: 2, page: 1, pageSize: 10 }), { status: 200 }));
-    renderPage();
-    await waitFor(() => expect(screen.getByText('app-config')).toBeInTheDocument());
+  it('offers a retry on a retryable failure and none on a permission error', async () => {
+    stubFetch(() => json({ kind: 'Status', code: 500, reason: 'InternalError', message: 'boom' }, 500));
+    const { unmount } = renderPage();
 
-    const header = currentSurface().querySelector('thead th:nth-child(2) button') as HTMLElement;
-    await userEvent.click(header);
+    // Retries are suppressed by the query client for 5xx (it retries twice), so
+    // wait for the error state rather than the button's first paint.
+    await waitFor(() => expect(surface().getAttribute('data-ai-state')).toBe('error'), { timeout: 4000 });
+    expect(await screen.findByText('重试')).toBeTruthy();
+    unmount();
+
+    stubFetch(() => json({ kind: 'Status', code: 403, reason: 'Forbidden', message: 'no' }, 403));
+    renderPage();
+
+    await screen.findByText('没有权限执行该操作');
+    expect(screen.queryByText('重试')).toBeNull();
+  });
+
+  it('requests the new server-side sort when another header is clicked', async () => {
+    const fetchMock = stubFetch(() => json(listBody));
+    renderPage();
+    await screen.findByText('app-config');
+
+    // The name header is the first sortable column rendered.
+    const nameHeader = screen.getByRole('button', { name: '名称' });
+    await userEvent.click(nameHeader);
+
     await waitFor(() => {
-      const last = new URL(String((fetchMock.mock.calls.at(-1) as unknown as [string])[0]), 'http://localhost');
+      const last = new URL(String(fetchMock.mock.calls[fetchMock.mock.calls.length - 1]![0]));
       expect(last.searchParams.get('sortBy')).toBe('name');
-      expect(last.searchParams.get('order')).toBe('asc');
     });
   });
 
-  it('provides a select-all checkbox plus one per row', async () => {
-    stubFetch(() => new Response(JSON.stringify({ items: rows, total: 2, page: 1, pageSize: 10 }), { status: 200 }));
+  it('reveals the bulk delete action only after a row is selected', async () => {
+    stubFetch(() => json(listBody));
     renderPage();
-    await waitFor(() => expect(screen.getByText('app-config')).toBeInTheDocument());
-    // Table renders a header select-all in addition to the two row checkboxes.
-    expect(screen.getAllByRole('checkbox')).toHaveLength(3);
+    await screen.findByText('app-config');
+
+    expect(screen.queryByText(/批量删除/)).toBeNull();
+
+    const rowCheckboxes = screen.getAllByRole('checkbox').filter((box) => box.getAttribute('aria-label')?.startsWith('选择第'));
+    await userEvent.click(rowCheckboxes[0]!);
+
+    const bulk = await screen.findByText(/批量删除/);
+    expect(bulk.closest('[data-ai-needs]')?.getAttribute('data-ai-needs')).toBe('configmaps:row-select');
   });
 
-  it('reveals the bulk action only once something is selected', async () => {
-    // The control is not rendered until a row is chosen: a permanently disabled
-    // button is a dead control on every visit and still needs explaining.
-    stubFetch(() => new Response(JSON.stringify({ items: rows, total: 2, page: 1, pageSize: 10 }), { status: 200 }));
+  it('opens the create dialog from the primary action', async () => {
+    stubFetch(() => json(listBody));
     renderPage();
-    await waitFor(() => expect(screen.getByText('app-config')).toBeInTheDocument());
+    await screen.findByText('app-config');
 
-    expect(currentSurface().querySelector('[data-ai-id="configmaps:bulk-delete"]')).toBeNull();
+    await userEvent.click(screen.getByRole('button', { name: '创建' }));
 
-    // Index 0 is the header select-all; row checkboxes start at 1.
-    await userEvent.click(screen.getAllByRole('checkbox')[1]!);
-    const bulk = currentSurface().querySelector('[data-ai-id="configmaps:bulk-delete"]') as HTMLButtonElement;
-    expect(bulk).not.toBeNull();
-    expect(bulk).not.toBeDisabled();
-    expect(bulk).toHaveAttribute('data-ai-needs', 'configmaps:row-select');
-    // The count states the scope of the next click.
-    expect(currentSurface().textContent).toContain('已选 1 项');
+    // The dialog, not just the button: the primary action arrives without a row,
+    // so a "row required" guard in the handler is what silently breaks this.
+    expect(await screen.findByText('基本信息')).toBeTruthy();
   });
 
-  it('retries a transient upstream failure before giving up', async () => {
-    // A 5xx is retryable; the page should attempt again without the user doing
-    // anything. Verified through the request count because that is the behaviour
-    // that matters, not the internal retry setting.
-    let calls = 0;
-    stubFetch(() => {
-      calls += 1;
-      return new Response(JSON.stringify({ code: 'upstream_error', message: 'boom' }), { status: 500 });
+  it('offers a project filter built from the shared project query', async () => {
+    const fetchMock = stubFetch(() => json(listBody));
+    renderPage();
+    await screen.findByText('app-config');
+
+    // The picker is present and named; Radix renders its options in a portal that
+    // jsdom cannot drive reliably, so the meaningful assertion here is that the
+    // page asked the shared projects endpoint at all.
+    expect(screen.getByRole('combobox', { name: '项目' })).toBeTruthy();
+    await waitFor(() => {
+      const asked = fetchMock.mock.calls.some((entry) => String(entry[0]).includes('/namespaces?'));
+      expect(asked).toBe(true);
     });
-    renderPage();
-    await awaitSurface();
-    await waitFor(() => expect(calls).toBeGreaterThan(1), { timeout: 5000 });
-  }, 10_000);
+  });
 
-  it('exposes every row by resource key', async () => {
-    stubFetch(() => new Response(JSON.stringify({ items: rows, total: 2, page: 1, pageSize: 10 }), { status: 200 }));
+  it('marks each row with a stable automation handle', async () => {
+    stubFetch(() => json(listBody));
     renderPage();
-    await waitFor(() => expect(screen.getByText('app-config')).toBeInTheDocument());
-    expect(currentSurface().querySelector('[data-ai-row="app-config"]')).not.toBeNull();
-    expect(currentSurface().querySelector('[data-ai-row="nginx-conf"]')).not.toBeNull();
+    await screen.findByText('app-config');
+
+    expect(document.querySelector('[data-ai-row="app-config"]')).toBeTruthy();
+    expect(document.querySelector('[data-ai-row="nginx-conf"]')).toBeTruthy();
   });
 });

@@ -1,4 +1,4 @@
-import { createClient } from '@kube-ai-hub/api-client';
+import { createClient, configMapsApi } from '@kube-ai-hub/api-client';
 
 /**
  * The app's single API client.
@@ -22,3 +22,5 @@ export const api = createClient({
 });
 
 export const TOKEN_STORAGE_KEY = TOKEN_KEY;
+
+export { configMapsApi };
