@@ -72,3 +72,26 @@ pnpm bff        # BFF，默认 8080
 pnpm typecheck
 pnpm test
 ```
+
+### 对着真实接口跑
+
+`scripts/dev-stack.sh` 把 BFF 和静态站点一起拉起来，BFF 按 `/kapis/*`、`/api/v1/*`、`/apis/*`
+前缀透传给 `ks-apiserver`，不做字段映射：
+
+```bash
+KS_API_URL=http://ks-apiserver KS_API_MODE=kapis ./scripts/dev-stack.sh start
+./scripts/dev-stack.sh smoke     # list/create/read/patch/put/delete 全链路
+./scripts/dev-stack.sh stop
+```
+
+`KS_API_MODE=kapis` 直连 `ks-apiserver`；`kube` 模式改用本机 `kubectl proxy`（无鉴权，
+分页排序由 BFF 模拟），适合没有 token 时快速看页面。kapis 模式在浏览器
+`localStorage` 里放一个 JWT 到 `kubesphere-token`。
+
+登录本身由前端自己完成，不再需要手工塞 JWT：打开 `/login` 输入账号密码即可。凭据由 BFF
+代为提交给 `/oauth/token`（`client_secret` 不下发到浏览器），默认用 `kubesphere` 客户端，
+可用 `KS_OAUTH_CLIENT_ID` / `KS_OAUTH_CLIENT_SECRET` 覆盖（本集群是 `kube-ai-hub`）。
+
+注意读和写走的是不同的门：读走 `/kapis/resources.kubesphere.io/v1alpha3/...`，
+写（POST/PUT/PATCH/DELETE）走 `/api/v1/...`。kapis 的 resources 端点只注册了 GET，
+写过去会拿到 405。
