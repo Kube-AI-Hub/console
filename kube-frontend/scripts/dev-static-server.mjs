@@ -11,6 +11,19 @@
  * Usage: dev-static-server.mjs <distDir> <port> <bffUrl>
  */
 import { createServer } from 'node:http';
+import { Agent, setGlobalDispatcher } from 'undici';
+
+/** Per-request ceiling for proxied API calls. */
+const UPSTREAM_TIMEOUT_MS = 60_000;
+
+/*
+ * One kept-alive connection pool for upstream calls.
+ *
+ * The default dispatcher opens a connection per request; under a test run that is
+ * thousands of connections to one process, and the resulting queueing looked like
+ * upstream failure.
+ */
+setGlobalDispatcher(new Agent({ keepAliveTimeout: 10_000, connections: 32 }));
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
 
@@ -54,9 +67,16 @@ createServer(async (request, response) => {
         body = Buffer.concat(chunks);
       }
 
+      /*
+       * A deadline and a kept-alive agent. Without them a handful of slow upstream
+       * calls (a cluster-wide list, a cold login) queued behind each other and
+       * later requests saw their own login time out — the suite then reported
+       * "502 Bad Gateway" for a stack that was healthy when probed by hand.
+       */
       const upstream = await fetch(`${bffUrl}${request.url}`, {
         method: request.method,
         headers,
+        signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
         ...(body && body.length ? { body } : {}),
       });
       const payload = Buffer.from(await upstream.arrayBuffer());

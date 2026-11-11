@@ -63,6 +63,18 @@ export function createHandler(deps: HandlerDeps) {
 
       return send(response, 404, { code: 'not_found', message: 'no such endpoint', status: 404 });
     } catch (cause) {
+      /*
+       * The response may already be under way — a streamed proxy body aborts
+       * mid-transfer, or `writeHead` has run and `end` then throws. Writing a
+       * second status line is `ERR_HTTP_HEADERS_SENT`, which used to take the
+       * whole process down (an unhandled rejection in `handle`), killing every
+       * other session with it. Once the head is sent there is nothing left to
+       * report, so the request is simply abandoned.
+       */
+      if (response.headersSent) {
+        if (!response.writableEnded) response.destroy();
+        return;
+      }
       const status = (cause as { status?: number }).status;
       if (typeof status === 'number') return send(response, status, cause as BffError);
       // A failed upstream connection surfaces as a socket error; report it as a
@@ -77,6 +89,9 @@ export function createHandler(deps: HandlerDeps) {
 }
 
 export function send(response: ServerResponse, status: number, body: unknown): void {
+  // Defensive: every caller is expected to have checked, but a duplicate send is
+  // a process-killing error and the cost of checking here is one comparison.
+  if (response.headersSent) return;
   if (body === undefined) {
     response.writeHead(status).end();
     return;
@@ -153,7 +168,20 @@ async function handleSession(
 export async function startServer(port: number, deps: HandlerDeps): Promise<ReturnType<typeof createServer>> {
   const handler = createHandler(deps);
   const server = createServer((request, response) => {
-    void handler(request, response);
+    /*
+     * Never let one request take the process down. `handle` already answers every
+     * error path it knows about; this is the last resort for the ones it does not
+     * (a bug in a handler, a stream error after the head went out), and it keeps
+     * every other session alive.
+     */
+    void handler(request, response).catch(() => {
+      if (!response.headersSent) {
+        response.writeHead(502, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({ code: 'upstream_unreachable', message: 'request failed', status: 502 }));
+      } else if (!response.writableEnded) {
+        response.destroy();
+      }
+    });
   });
   await new Promise<void>((resolve) => server.listen(port, '0.0.0.0', resolve));
   return server;

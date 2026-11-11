@@ -219,3 +219,52 @@ describe('routes', () => {
     expect(body.code).toBe('upstream_unreachable');
   });
 });
+
+describe('resilience', () => {
+  it('does not crash when a handler fails after the head is sent', async () => {
+    /*
+     * Regression: an upstream that aborts mid-response used to make the proxy's
+     * rejection handler call `send` again on a finished response. Node throws
+     * `ERR_HTTP_HEADERS_SENT`, the rejection went unhandled, and the BFF process
+     * exited — taking every other session with it. The connection may still drop,
+     * but the server must keep answering.
+     */
+    const upstream = createServer((_request, response) => {
+      response.writeHead(200, { 'content-type': 'application/json' });
+      response.write('{"items":[');
+      // Abort mid-body: the BFF has already forwarded the head.
+      response.destroy();
+    });
+    await new Promise<void>((resolve) => upstream.listen(0, '127.0.0.1', resolve));
+    servers.push(upstream);
+    const address = upstream.address();
+    if (address === null || typeof address === 'string') throw new Error('no port');
+
+    const bff = await startBff(`http://127.0.0.1:${address.port}`);
+    await fetch(`${bff}${KAPIS}`).catch(() => undefined);
+
+    // The process is the test runner itself, so surviving means the next call works.
+    const healthy = await fetch(`${bff}/api/ai/manifest`);
+    expect(healthy.status).toBe(200);
+  });
+
+  it('answers 502 instead of throwing when the handler does', async () => {
+    const server = createServer((_request, response) => {
+      const handler = async (): Promise<void> => {
+        throw new Error('boom');
+      };
+      void handler().catch(() => {
+        if (!response.headersSent) {
+          response.writeHead(502, { 'content-type': 'application/json' });
+          response.end('{"code":"upstream_unreachable"}');
+        }
+      });
+    });
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    servers.push(server);
+    const address = server.address();
+    if (address === null || typeof address === 'string') throw new Error('no port');
+    const response = await fetch(`http://127.0.0.1:${address.port}/`);
+    expect(response.status).toBe(502);
+  });
+});
