@@ -165,6 +165,21 @@ interface ModuleChild {
   labelKey: Parameters<ReturnType<typeof useT>>[0];
   icon: IconName;
   path: string;
+  /**
+   * Heading a child is grouped under, as a locale key.
+   *
+   * The old console nests 集群管理 → 配置 → 配置字典 and the resource pages will keep
+   * arriving, so a child carries its group instead of the menu assuming one flat
+   * list. Children without a group render at the top level.
+   */
+  groupKey?: Parameters<ReturnType<typeof useT>>[0];
+  /**
+   * Resolve the target from the current scope, when the destination needs it.
+   *
+   * A cluster-scoped page has no cluster id in the menu definition, so it reads the
+   * cluster the reader is already in. `path` is then only the static fallback.
+   */
+  build?: (scope: Scope) => string;
 }
 
 interface ModuleEntry {
@@ -176,6 +191,24 @@ interface ModuleEntry {
   /** Present when the entry opens a menu instead of navigating. */
   children?: readonly ModuleChild[];
   matches: (pathname: string) => boolean;
+}
+
+/** Where a module child points, given the scope the shell is currently in. */
+function childHref(child: ModuleChild, scope: Scope): string {
+  return child.build ? child.build(scope) : child.path;
+}
+
+/**
+ * Whether a child's own route is the current page.
+ *
+ * Compared against the built href, not the static `path`: `cluster-configmaps`
+ * shares `/clusters` with the clusters entry, and a prefix test on the static path
+ * would highlight both.
+ */
+function childMatches(child: ModuleChild, pathname: string, scope: Scope): boolean {
+  if (!child.build) return pathname.startsWith(child.path);
+  const href = child.build(scope);
+  return pathname === href || pathname.startsWith(`${href}/`);
 }
 
 /**
@@ -202,6 +235,22 @@ const MODULES: readonly ModuleEntry[] = [
     path: `${BASE}/clusters`,
     children: [
       { key: 'clusters', labelKey: 'admin.clusters', icon: 'cluster', path: `${BASE}/clusters` },
+      /*
+       * 集群管理 → 配置 → 配置字典.
+       *
+       * The cluster console's ConfigMap page belongs to a cluster, and the menu has
+       * no cluster id of its own, so the entry builds its target from the shell's
+       * scope — whatever cluster the reader is currently in, falling back to the
+       * default. `path` is the static form, used only when `build` is absent.
+       */
+      {
+        key: 'cluster-configmaps',
+        labelKey: 'admin.cluster.configmaps',
+        icon: 'catalog',
+        path: `${BASE}/clusters`,
+        groupKey: 'admin.cluster.groupConfig',
+        build: ({ cluster }) => `${BASE}/clusters/${cluster}/configmaps`,
+      },
       { key: 'access', labelKey: 'admin.access', icon: 'key', path: `${BASE}/access` },
       { key: 'appsManage', labelKey: 'admin.appsManage', icon: 'openpitrix', path: `${BASE}/apps-manage` },
       { key: 'settings', labelKey: 'admin.settings', icon: 'cogwheel', path: `${BASE}/settings` },
@@ -518,8 +567,8 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
               key={item.key}
               module={item}
               active={activeModuleKey === item.key}
-              {...(item.children?.find((child) => location.startsWith(child.path))?.key
-                ? { activeChildKey: item.children.find((child) => location.startsWith(child.path))!.key }
+              {...(item.children?.find((child) => childMatches(child, location, scope))?.key
+                ? { activeChildKey: item.children.find((child) => childMatches(child, location, scope))!.key }
                 : {})}
               label={t(item.labelKey)}
             />
@@ -540,28 +589,56 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
                 <Icon name="apps" size={14} />
               </button>
             }
-            items={MODULES.flatMap<DropdownItem>((item) =>
-              item.children
-                ? item.children.map((child) => ({
-                    key: child.key,
+            items={MODULES.flatMap<DropdownItem>((item) => {
+              if (!item.children) {
+                return [
+                  {
+                    key: item.key,
+                    label: t(item.labelKey),
+                    checked: activeModuleKey === item.key,
+                    onSelect: () => window.location.assign(item.path),
+                  },
+                ];
+              }
+              /*
+               * Grouped children carry a heading. A heading is a disabled item so it
+               * stays out of the keyboard cycle: picking it would mean nothing.
+               */
+              const rows: DropdownItem[] = [];
+              let lastGroup: string | undefined;
+              for (const child of item.children) {
+                if (child.groupKey && child.groupKey !== lastGroup) {
+                  /*
+                   * The heading rides on an ordinary item whose `onSelect` does
+                   * nothing: `DropdownItem` has no non-interactive kind, and a
+                   * `disabled` one is dropped from the DOM by Radix, which made the
+                   * heading vanish rather than merely read as a label.
+                   */
+                  rows.push({
+                    key: `${item.key}:group:${child.groupKey}`,
                     label: (
-                      <span className="flex items-center gap-2">
-                        <Icon name={child.icon} size={14} />
-                        {t(child.labelKey)}
+                      <span className="text-[11px] font-medium uppercase tracking-wide text-ai-fg-faint">
+                        {t(child.groupKey)}
                       </span>
                     ),
-                    checked: location.startsWith(child.path),
-                    onSelect: () => window.location.assign(child.path),
-                  }))
-                : [
-                    {
-                      key: item.key,
-                      label: t(item.labelKey),
-                      checked: activeModuleKey === item.key,
-                      onSelect: () => window.location.assign(item.path),
-                    },
-                  ],
-            )}
+                    onSelect: () => undefined,
+                  });
+                  lastGroup = child.groupKey;
+                }
+                rows.push({
+                  key: child.key,
+                  label: (
+                    <span className={cn('flex items-center gap-2', child.groupKey ? 'pl-3' : undefined)}>
+                      <Icon name={child.icon} size={14} />
+                      {t(child.labelKey)}
+                    </span>
+                  ),
+                  checked: childMatches(child, location, scope),
+                  onSelect: () => window.location.assign(childHref(child, scope)),
+                });
+              }
+              return rows;
+            })}
           />
           <Dropdown
             align="end"
