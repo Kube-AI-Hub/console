@@ -52,6 +52,7 @@ export const zh = {
   'locale.en': 'English',
 
   'common.loading': '加载中',
+  'common.loadingSubject': '正在加载 {subject}…',
   'common.retry': '重试',
   'login.welcome': '欢迎登录',
   'login.username': '用户名或邮箱',
@@ -364,6 +365,7 @@ export const en: Record<LocaleKey, string> = {
   'locale.en': 'English',
 
   'common.loading': 'Loading',
+  'common.loadingSubject': 'Loading {subject}…',
   'common.retry': 'Retry',
   'login.welcome': 'Welcome',
   'login.username': 'Username or email',

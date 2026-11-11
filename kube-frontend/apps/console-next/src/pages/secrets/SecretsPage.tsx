@@ -30,6 +30,7 @@ import { formatTimestamp } from '@/lib/time';
 import { SecretCreateDialog } from './SecretCreateDialog';
 import { SecretEditSettingsDialog } from './SecretEditDialogs';
 import { SECRET_TYPE_LABEL } from './secretTypes';
+import { LoadingDialog } from '@/components/resource/LoadingDialog';
 
 export interface SecretsPageProps {
   workspace: string;
@@ -55,6 +56,8 @@ type SortKey = 'name' | 'createTime';
 
 type Dialog =
   | { kind: 'none' }
+  /* The object is being fetched; shown so the click has a visible answer. */
+  | { kind: 'loading'; target: 'editInfo' | 'editSettings' | 'editYaml'; subject: string }
   | { kind: 'create'; namespace: string }
   | { kind: 'delete'; names: string[] }
   | { kind: 'editInfo'; detail: SecretDetail }
@@ -113,6 +116,7 @@ export function SecretsPage({ workspace, cluster, namespace }: SecretsPageProps)
    */
   const openWithDetail = React.useCallback(
     async (kind: 'editInfo' | 'editSettings' | 'editYaml', name: string) => {
+      setDialog({ kind: 'loading', target: kind, subject: name });
       try {
         const detail = await api.get({ cluster, namespace: projectFilter, name });
         setDialog({ kind, detail });
@@ -156,15 +160,16 @@ export function SecretsPage({ workspace, cluster, namespace }: SecretsPageProps)
           render: (row) => (
             <span className="flex min-w-0 flex-col">
               <span className="flex items-center gap-1.5">
-                <Link
-                  to="/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/secrets/$name"
-                  params={{ workspace, cluster, namespace: row.namespace || projectFilter, name: row.name }}
+                <a
+                  // See ConfigMapsPage: one route per page, so this is a plain
+                  // link with the same URL shape the old console used.
+                  href={`/kube-frontend/${workspace}/clusters/${cluster}/projects/${row.namespace || projectFilter}/secrets/${row.name}`}
                   className="truncate font-medium text-ai-fg hover:text-ai-accent"
                   title={row.name}
                   {...actionProps(`secrets:open:${row.name}`)}
                 >
                   {row.alias || row.name}
-                </Link>
+                </a>
                 {row.isDefault ? <Badge tone="info">{t('secrets.defaultBadge')}</Badge> : null}
                 {row.federated ? <Badge tone="info">{t('resource.federated')}</Badge> : null}
               </span>
@@ -302,6 +307,21 @@ export function SecretsPage({ workspace, cluster, namespace }: SecretsPageProps)
           setDialog({ kind: 'none' });
         }}
       />
+
+      {dialog.kind === 'loading' ? (
+        <LoadingDialog
+          open
+          title={
+            dialog.target === 'editInfo'
+              ? t('resource.action.editInfo')
+              : dialog.target === 'editYaml'
+                ? t('resource.action.editYaml')
+                : t('resource.action.editSettings')
+          }
+          subject={dialog.subject}
+          size="xl"
+        />
+      ) : null}
 
       {dialog.kind === 'delete' ? (
         <DeleteDialog

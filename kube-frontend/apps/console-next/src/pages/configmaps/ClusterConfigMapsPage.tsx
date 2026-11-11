@@ -14,6 +14,7 @@ import { ConfigMapCreateDialog } from './ConfigMapCreateDialog';
 import { ConfigMapDeleteDialog } from './ConfigMapDeleteDialog';
 import { ConfigMapEditInfoDialog, ConfigMapEditSettingsDialog } from './ConfigMapEditDialogs';
 import { DialogSuspense } from '@/components/resource/DialogSuspense';
+import { LoadingDialog } from '@/components/resource/LoadingDialog';
 
 const ConfigMapYamlDialog = React.lazy(() => import('./ConfigMapYamlDialog'));
 
@@ -28,6 +29,11 @@ const KEYS_PREVIEW_LENGTH = 50;
 
 type Dialog =
   | { kind: 'none' }
+  /*
+   * The object is being fetched. Shown as a dialog rather than nothing: the click
+   * already happened, and a silent wait reads as a frozen page.
+   */
+  | { kind: 'loading'; target: 'editInfo' | 'editSettings' | 'editYaml'; subject: string }
   | { kind: 'create'; namespace: string }
   | { kind: 'delete'; names: string[]; namespace: string }
   | { kind: 'editInfo'; detail: ConfigMapDetail }
@@ -67,6 +73,8 @@ export function ClusterConfigMapsPage({ cluster, namespace }: ClusterConfigMapsP
 
   const openWithDetail = React.useCallback(
     async (kind: 'editInfo' | 'editSettings' | 'editYaml', row: { name: string; namespace: string }) => {
+      // Open first, fetch second: the reader's click gets an answer immediately.
+      setDialog({ kind: 'loading', target: kind, subject: row.name });
       const detail = await loadDetail(row);
       setDialog(detail ? { kind, detail } : { kind: 'none' });
     },
@@ -280,6 +288,21 @@ export function ClusterConfigMapsPage({ cluster, namespace }: ClusterConfigMapsP
           setDialog({ kind: 'none' });
         }}
       />
+
+      {dialog.kind === 'loading' ? (
+        <LoadingDialog
+          open
+          title={
+            dialog.target === 'editInfo'
+              ? t('configmaps.action.editInfo')
+              : dialog.target === 'editYaml'
+                ? t('configmaps.action.editYaml')
+                : t('configmaps.action.editSettings')
+          }
+          subject={dialog.subject}
+          size="xl"
+        />
+      ) : null}
 
       {dialog.kind === 'delete' ? (
         <ConfigMapDeleteDialog

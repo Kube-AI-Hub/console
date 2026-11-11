@@ -15,6 +15,7 @@ import { ConfigMapEditInfoDialog, ConfigMapEditSettingsDialog } from './ConfigMa
 import { toYaml } from './yaml';
 
 import { DialogSuspense } from '@/components/resource/DialogSuspense';
+import { LoadingDialog } from '@/components/resource/LoadingDialog';
 
 /*
  * The YAML editor is 188 KB gzip of CodeMirror. A list page must not pay for it
@@ -43,6 +44,8 @@ const KEYS_PREVIEW_LENGTH = 50;
 /** Which dialog is open, if any. */
 type Dialog =
   | { kind: 'none' }
+  /* The object is being fetched; shown so the click has a visible answer. */
+  | { kind: 'loading'; target: 'editInfo' | 'editSettings' | 'editYaml'; subject: string }
   /*
    * `namespace` lives in the dialog state rather than in the create component:
    * the chosen project decides which object the name check runs against and where
@@ -89,6 +92,7 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
    */
   const openWithDetail = React.useCallback(
     async (kind: 'editInfo' | 'editSettings' | 'editYaml', name: string) => {
+      setDialog({ kind: 'loading', target: kind, subject: name });
       const detail = await loadDetail({ name, namespace: list.activeNamespace || namespace });
       setDialog(detail ? { kind, detail } : { kind: 'none' });
     },
@@ -141,15 +145,19 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
           render: (row) => (
             <span className="flex min-w-0 flex-col">
               <span className="flex items-center gap-1.5">
-                <Link
-                  to="/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/configmaps/$name"
-                  params={{ workspace, cluster, namespace, name: row.name }}
+                <a
+                  // A plain `<a href>`: the detail view lives in the same file as
+                  // this list (one route per page), so there is no separate typed
+                  // route to point at. The project layout's click handler turns a
+                  // left click into a client-side transition, and Ctrl/⌘-click
+                  // still opens a new tab because it is a real link.
+                  href={`/kube-frontend/${workspace}/clusters/${cluster}/projects/${namespace}/configmaps/${row.name}`}
                   className="truncate font-medium text-ai-fg hover:text-ai-accent"
                   title={row.name}
                   {...actionProps(`configmaps:open:${row.name}`)}
                 >
                   {row.alias || row.name}
-                </Link>
+                </a>
                 {row.federated ? <Badge tone="info">{t('configmaps.federated')}</Badge> : null}
               </span>
               <span className="truncate text-[11px] text-ai-fg-muted">{row.description || '-'}</span>
@@ -340,6 +348,21 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
        * object typed as a detail would let the basic-info dialog send an
        * annotation set that dropped the creator note.
        */}
+      {dialog.kind === 'loading' ? (
+        <LoadingDialog
+          open
+          title={
+            dialog.target === 'editInfo'
+              ? t('configmaps.action.editInfo')
+              : dialog.target === 'editYaml'
+                ? t('configmaps.action.editYaml')
+                : t('configmaps.action.editSettings')
+          }
+          subject={dialog.subject}
+          size="xl"
+        />
+      ) : null}
+
       {dialog.kind === 'delete' ? (
         <ConfigMapDeleteDialog
           open

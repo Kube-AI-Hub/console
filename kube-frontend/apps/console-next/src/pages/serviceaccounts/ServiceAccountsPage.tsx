@@ -30,6 +30,7 @@ import { toYaml } from '@/components/resource/yaml';
 import { formatTimestamp } from '@/lib/time';
 import { ServiceAccountCreateDialog } from './ServiceAccountCreateDialog';
 import { ServiceAccountRoleDialog } from './ServiceAccountRoleDialog';
+import { LoadingDialog } from '@/components/resource/LoadingDialog';
 
 export interface ServiceAccountsPageProps {
   workspace: string;
@@ -43,6 +44,8 @@ type SortKey = 'name' | 'createTime';
 
 type Dialog =
   | { kind: 'none' }
+  /* The object is being fetched; shown so the click has a visible answer. */
+  | { kind: 'loading'; target: 'editInfo' | 'role' | 'editYaml'; subject: string }
   | { kind: 'create'; namespace: string }
   | { kind: 'delete'; names: string[] }
   | { kind: 'editInfo'; detail: ServiceAccountDetail }
@@ -93,6 +96,7 @@ export function ServiceAccountsPage({ workspace, cluster, namespace }: ServiceAc
 
   const openWithDetail = React.useCallback(
     async (kind: 'editInfo' | 'role' | 'editYaml', name: string) => {
+      setDialog({ kind: 'loading', target: kind, subject: name });
       try {
         const detail = await api.get({ cluster, namespace: projectFilter, name });
         setDialog({ kind, detail });
@@ -142,15 +146,15 @@ export function ServiceAccountsPage({ workspace, cluster, namespace }: ServiceAc
           render: (row) => (
             <span className="flex min-w-0 flex-col">
               <span className="flex items-center gap-1.5">
-                <Link
-                  to="/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/serviceaccounts/$name"
-                  params={{ workspace, cluster, namespace: row.namespace || projectFilter, name: row.name }}
+                <a
+                  // See ConfigMapsPage: one route per page, so this is a plain link.
+                  href={`/kube-frontend/${workspace}/clusters/${cluster}/projects/${row.namespace || projectFilter}/serviceaccounts/${row.name}`}
                   className="truncate font-medium text-ai-fg hover:text-ai-accent"
                   title={row.name}
                   {...actionProps(`serviceaccounts:open:${row.name}`)}
                 >
                   {row.alias || row.name}
-                </Link>
+                </a>
                 {row.federated ? <Badge tone="info">{t('resource.federated')}</Badge> : null}
               </span>
               <span className="truncate text-[11px] text-ai-fg-muted">{row.description || '-'}</span>
@@ -305,6 +309,21 @@ export function ServiceAccountsPage({ workspace, cluster, namespace }: ServiceAc
           setDialog({ kind: 'none' });
         }}
       />
+
+      {dialog.kind === 'loading' ? (
+        <LoadingDialog
+          open
+          title={
+            dialog.target === 'editInfo'
+              ? t('serviceaccounts.action.edit')
+              : dialog.target === 'editYaml'
+                ? t('resource.action.editYaml')
+                : t('serviceaccounts.action.changeRole')
+          }
+          subject={dialog.subject}
+          size="xl"
+        />
+      ) : null}
 
       {dialog.kind === 'delete' ? (
         <DeleteDialog
