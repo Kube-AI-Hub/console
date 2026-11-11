@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/serviceaccounts/detail.md`](../../../../prd/kube-frontend/serviceaccounts/detail.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE_FRONTEND-SERVICEACCOUNTS-DETAIL-02** — Given 详情已打开，When 点「显示明文」，Then 该令牌的值以明文显示；When 点「下载」，Then 浏览器下载 `kubeconfig.yaml`；When 打开没有令牌的服务账户，Then 数据区提示当前没有令牌且不报错。
+- **AC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-DETAIL-02** — Given 详情已打开，When 点「显示明文」，Then 该令牌的值以明文显示；When 点「下载」，Then 浏览器下载 `kubeconfig.yaml`；When 打开没有令牌的服务账户，Then 数据区提示当前没有令牌且不报错。
 
 ### 关联设计
 

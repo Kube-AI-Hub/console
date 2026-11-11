@@ -8,7 +8,7 @@ pytestmark = pytest.mark.ui
 
 @pytest.mark.full
 def test_TC_FULL_KUBE_FRONTEND_SECRETS_01(secrets_page, e2e_objects, screenshot):
-    """TC-FULL-KUBE_FRONTEND-SECRETS-01 保密字典：四种类型的详情按各自结构展示，且默认遮挡。"""
+    """TC-FULL-KUBE-FRONTEND-SECRETS-01 保密字典：四种类型的详情按各自结构展示，且默认遮挡。"""
 
     # The four payloads kube-apiserver accepts, one object each.
     cases = {

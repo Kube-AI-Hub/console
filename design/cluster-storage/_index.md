@@ -6,7 +6,7 @@
 
 ## 关联需求
 
-- `AC-CORE-CLUSTER_STORAGE-01`
+- `AC-CORE-CLUSTER-STORAGE-01`
 
 ## 设计目标与非目标
 
@@ -89,4 +89,4 @@ flowchart TB
 
 ## 验收用例
 
-- `TC-CORE-CLUSTER_STORAGE-01`
+- `TC-CORE-CLUSTER-STORAGE-01`

@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/serviceaccounts/list.md`](../../../../prd/kube-frontend/serviceaccounts/list.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE_FRONTEND-SERVICEACCOUNTS-LIST-02** — Given 列表已加载，When 点击「保密字典」列中的某个名称，Then 进入该 Secret 的详情页（`/projects/<ns>/secrets/<name>`）；When 点击「名称」列头，Then 请求按 `sortBy=name` 重新发起。
+- **AC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-LIST-02** — Given 列表已加载，When 点击「保密字典」列中的某个名称，Then 进入该 Secret 的详情页（`/projects/<ns>/secrets/<name>`）；When 点击「名称」列头，Then 请求按 `sortBy=name` 重新发起。
 
 ### 关联设计
 

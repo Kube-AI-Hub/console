@@ -10,7 +10,7 @@
 
 ## 关联需求
 
-- `AC-FULL-KUBE_FRONTEND-SECRETS-01`
+- `AC-FULL-KUBE-FRONTEND-SECRETS-01`
 
 ## 设计目标与非目标
 
@@ -72,7 +72,7 @@ flowchart TD
 
 ## 关键契约与依赖
 
-### CON-FULL-KUBE_FRONTEND-SECRETS-01 — 端点与注解
+### CON-FULL-KUBE-FRONTEND-SECRETS-01 — 端点与注解
 
 | 操作 | 方法与路径 |
 |---|---|
@@ -85,7 +85,7 @@ flowchart TD
 
 与老控制台（`stores/secret.js` + `stores/base.js`）完全一致，后端不需要任何改动。
 
-### CON-FULL-KUBE_FRONTEND-SECRETS-02 — 注解
+### CON-FULL-KUBE-FRONTEND-SECRETS-02 — 注解
 
 | 注解 | 含义 |
 |---|---|
@@ -97,19 +97,19 @@ flowchart TD
 
 ## 不变量
 
-- **INV-FULL-KUBE_FRONTEND-SECRETS-01** — 页面初次渲染时，任何 Secret 的值都以等长 `*` 出现；明文只在用户点击「显示明文」之后出现，且该状态不持久化。
-- **INV-FULL-KUBE_FRONTEND-SECRETS-02** — `data` 中的每个值在提交前都经过 `safeBtoa`，在展示时经过 `safeAtob`；两者互逆（含中文、emoji、换行）。
-- **INV-FULL-KUBE_FRONTEND-SECRETS-03** — 详情与列表对同一字段只使用一份格式化实现（`lib/time.ts`、`SecretSettingsEditor` 的类型表）。
+- **INV-FULL-KUBE-FRONTEND-SECRETS-01** — 页面初次渲染时，任何 Secret 的值都以等长 `*` 出现；明文只在用户点击「显示明文」之后出现，且该状态不持久化。
+- **INV-FULL-KUBE-FRONTEND-SECRETS-02** — `data` 中的每个值在提交前都经过 `safeBtoa`，在展示时经过 `safeAtob`；两者互逆（含中文、emoji、换行）。
+- **INV-FULL-KUBE-FRONTEND-SECRETS-03** — 详情与列表对同一字段只使用一份格式化实现（`lib/time.ts`、`SecretSettingsEditor` 的类型表）。
 
 ## 已知坑
 
-- **GOT-FULL-KUBE_FRONTEND-SECRETS-01** — `btoa` 只接受 Latin-1。直接用 `btoa(value)` 保存含中文的密码会抛 `InvalidCharacterError`，表现为「点创建没反应」。
+- **GOT-FULL-KUBE-FRONTEND-SECRETS-01** — `btoa` 只接受 Latin-1。直接用 `btoa(value)` 保存含中文的密码会抛 `InvalidCharacterError`，表现为「点创建没反应」。
   处置：`safeBtoa` 先用 `TextEncoder` 转 UTF-8 字节再编码；`safeAtob` 用 `TextDecoder(fatal)` 解码，失败时退回 Latin-1，保证任意字节都不崩。
-- **GOT-FULL-KUBE_FRONTEND-SECRETS-02** — `actionProps()` 的展开位置会覆盖业务 handler。`{...actionProps(id)}` 放在 `onChange` 之后时，`onChange` 被覆盖，表现为「下拉框选了没反应」。
+- **GOT-FULL-KUBE-FRONTEND-SECRETS-02** — `actionProps()` 的展开位置会覆盖业务 handler。`{...actionProps(id)}` 放在 `onChange` 之后时，`onChange` 被覆盖，表现为「下拉框选了没反应」。
   处置：所有带业务回调的控件把 `actionProps` 放在回调**之前**；契约测试扫描这一点。
-- **GOT-FULL-KUBE_FRONTEND-SECRETS-03** — ai-kit 的可搜索 `Select` 是一个 combobox（关闭时是 button、打开时是 input），且不透传额外属性。挂在它上面的 `data-ai-id` 不会出现在 DOM 里，自动化会超时。
+- **GOT-FULL-KUBE-FRONTEND-SECRETS-03** — ai-kit 的可搜索 `Select` 是一个 combobox（关闭时是 button、打开时是 input），且不透传额外属性。挂在它上面的 `data-ai-id` 不会出现在 DOM 里，自动化会超时。
   处置：用 `AiSurface` 包一层承载句柄；`aria-label` 仍是文本定位的锚点。
-- **GOT-FULL-KUBE_FRONTEND-SECRETS-04** — `kubectl create secret docker-registry` 生成的 `.dockerconfigjson` 通常只有 `auth` 字段而没有 `username`/`password`。表单只读这两个字段时会把它们显示为空，保存后就把 `auth` 覆盖成空账号。
+- **GOT-FULL-KUBE-FRONTEND-SECRETS-04** — `kubectl create secret docker-registry` 生成的 `.dockerconfigjson` 通常只有 `auth` 字段而没有 `username`/`password`。表单只读这两个字段时会把它们显示为空，保存后就把 `auth` 覆盖成空账号。
   处置：编辑器优先使用 `username`/`password`，缺失时从 `auth` 解出；保存时总是同时写 `auth`。
 
 ## 测试与可观测
@@ -137,11 +137,11 @@ flowchart TD
 
 ## 验收用例
 
-- `TC-FULL-KUBE_FRONTEND-SECRETS-01`
+- `TC-FULL-KUBE-FRONTEND-SECRETS-01`
 
 ## 方案决策（本层）
 
-### DEC-FULL-KUBE_FRONTEND-SECRETS-01 — 抽取通用 `resourceApi`，配置字典不重写
+### DEC-FULL-KUBE-FRONTEND-SECRETS-01 — 抽取通用 `resourceApi`，配置字典不重写
 
 **为什么**：配置字典的 `configmaps.ts` 把「读 kapis / 写 `/api/v1` / 读取资源版本 / merge patch / 批量删除」写在一处，保密字典与服务账户需要一字不差的能力。第二个（第三个）使用者出现时抽取，是配置字典技术方案中「列定义放组件内」那条决策写明的触发条件。
 
@@ -151,19 +151,19 @@ flowchart TD
 
 **何时重新考虑**：配置字典需要新能力（例如跨项目批量）时，顺带迁移。
 
-### DEC-FULL-KUBE_FRONTEND-SECRETS-02 — 通用弹窗放 `components/resource`，不进 `packages/ui`
+### DEC-FULL-KUBE-FRONTEND-SECRETS-02 — 通用弹窗放 `components/resource`，不进 `packages/ui`
 
 **为什么**：删除确认、编辑信息、YAML 编辑都依赖 i18n、`actionProps`、`api-client` 的注解常量——这些正是 `packages/ui` 契约禁止的。放在应用层的 `components/resource` 既不违反边界，又能被三个资源共用。
 
 **被否方案**：放进 `packages/ui`。会立刻触发 `dependency-contracts.test.ts` 失败，而且把「业务动作」塞进展示层。
 
-### DEC-FULL-KUBE_FRONTEND-SECRETS-03 — 遮挡使用等长 `*` 而不是固定占位符
+### DEC-FULL-KUBE-FRONTEND-SECRETS-03 — 遮挡使用等长 `*` 而不是固定占位符
 
 **为什么**：老控制台（`SecretDetail.convert`）用等长 `*`。长度本身是有用信息（例如确认证书是否被截断），而固定 `•••••` 会让所有值看起来一样长，反而诱导用户误以为内容一致。
 
 **被否方案**：不渲染值、只提供「点击查看」。遮挡比隐藏更能表达「这里有东西，只是没显示」。
 
-### DEC-FULL-KUBE_FRONTEND-SECRETS-04 — 编辑设置锁定类型
+### DEC-FULL-KUBE-FRONTEND-SECRETS-04 — 编辑设置锁定类型
 
 **为什么**：上游按类型校验 `data`（TLS 必须有 `tls.crt`），在本对话框内换类型通常会在提交时被拒，而数据已经被清空。老控制台的 `secret.edit` 同样传 `disableSelect`。
 
@@ -171,13 +171,13 @@ flowchart TD
 
 **何时重新考虑**：当「转换类型」成为常见诉求，并定义出确定的转换规则。
 
-### DEC-FULL-KUBE_FRONTEND-SECRETS-05 — 类型表只在前端维护一份
+### DEC-FULL-KUBE-FRONTEND-SECRETS-05 — 类型表只在前端维护一份
 
 **为什么**：类型到中文名、到必填键、到编辑器的映射集中在一个模块（`secretTypes.ts` + `SecretSettingsEditor`），列表、详情、创建、编辑都读它。四份分散的 `switch` 是「改一处漏三处」的根源。
 
 **被否方案**：让后端返回类型的中文名。ks-apiserver 没有这个接口，且老控制台也是前端翻译。
 
-### DEC-FULL-KUBE_FRONTEND-SECRETS-06 — 不迁移镜像仓库「验证」按钮
+### DEC-FULL-KUBE-FRONTEND-SECRETS-06 — 不迁移镜像仓库「验证」按钮
 
 **为什么**：老控制台的「验证」调用 `kapis/.../registrysecrets/{name}/verify`，需要一个**已存在**的 Secret 名称。在创建弹窗里名称还是草稿，点击只会 404；在编辑弹窗里能验证，但它的作用是「确认这组账号能登录」，而这一步在拉取镜像时必然会被验证，且失败信息比这个接口更具体。更关键的是：该接口在本仓库 `kube-server` 中没有注册，属于 KubeSphere 企业版能力，迁移过来在开源部署上就是死按钮。
 
@@ -185,12 +185,12 @@ flowchart TD
 
 **何时重新考虑**：确认真实部署上该端点可用、且用户明确提出需要预验证时。
 
-### DEC-FULL-KUBE_FRONTEND-SECRETS-07 — 允许含中文的值，并给出提示
+### DEC-FULL-KUBE-FRONTEND-SECRETS-07 — 允许含中文的值，并给出提示
 
 **为什么**：老控制台的 `dataValidator` 拒绝含中文的键与值（`SECRET_NO_CHINESE_CODE_DESC`）。但 kube-apiserver 对 `data` 只要求是 base64，任何 UTF-8 文本都合法；拒绝会迫使用户放弃更易读的密码。新前端在子表单里提示「将以 UTF-8 编码保存（旧控制台会拒绝含中文的值）」，不阻断提交。
 
 **被否方案**：继续拒绝。用户被老控制台拒绝后会用 `kubectl` 绕过，结果更糟。
 
-### DEC-FULL-KUBE_FRONTEND-SECRETS-08 — 列表禁止显示键名
+### DEC-FULL-KUBE-FRONTEND-SECRETS-08 — 列表禁止显示键名
 
 **为什么**：Secret 的键名通常直接暴露用途（`password`、`aws_secret_access_key`），而列表常被截图、共享给同事。老控制台在列表只显示字段数，这一点值得照搬，甚至应写进「明确不做」以防被「顺便加上」。

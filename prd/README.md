@@ -40,6 +40,20 @@
 - **AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-01** — Given 已登录，When 打开配额表单，Then 初始值等于当前配额。
 ```
 
+**一个 ID 只有一种拼写。** 分隔符由路径决定，不是随手写的：
+
+| 段 | 分隔符 | 来源 | 例 |
+|---|---|---|---|
+| 层级 | `-` | `CORE` / `FULL` / `L2` / `L3` | `TC-L3-` |
+| 模块 | `-` | `specs/` 下的模块目录链 | `cluster-storage` → `CLUSTER-STORAGE` |
+| 子模块、特性 | `_` | `submodule` / `feature` 字段 | `shared-storage` → `SHARED_STORAGE` |
+
+各段之间用 `-` 连接：`TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-01`。
+
+写成 `TC-L3-CLUSTER_STORAGE-...`（模块用了 `_`）或 `TC-L3-...-SHARED-STORAGE-...`（特性用了 `-`）都会被 `check_docs.py` 报出来。这不只是格式偏好：两种拼写并存的直接后果是同一条 `AC` 被当成两条——需求稿里那条显示「没有被任何用例覆盖」，而覆盖它的用例就在隔壁目录。
+
+`check_id_spelling` 负责这条检查，报错会给出应写的完整 ID。
+
 ## 平台级约束（必须保留）
 
 | 主题 | 必须保住的目标 |

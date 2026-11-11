@@ -7,7 +7,7 @@ pytestmark = pytest.mark.ui
 
 @pytest.mark.full
 def test_TC_FULL_CLUSTER_GPU_GPU_CARD_01(gpu_page, ui_config, screenshot):
-    """TC-FULL-CLUSTER_GPU-GPU_CARD-01 集群页与节点页对同一张卡显示相同状态。"""
+    """TC-FULL-CLUSTER-GPU-GPU_CARD-01 集群页与节点页对同一张卡显示相同状态。"""
     gpu_page.open_cluster()
     cluster_rows = gpu_page.cluster_rows
     assert cluster_rows, "集群显卡列表没有数据行"

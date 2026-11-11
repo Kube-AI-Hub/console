@@ -8,7 +8,7 @@ pytestmark = pytest.mark.ui
 
 @pytest.mark.core
 def test_TC_CORE_KUBE_FRONTEND_01(configmaps_page, screenshot):
-    """TC-CORE-KUBE_FRONTEND-01 新前端入口：页头、工具条、列表存在，且不出现老 console 的侧栏。"""
+    """TC-CORE-KUBE-FRONTEND-01 新前端入口：页头、工具条、列表存在，且不出现老 console 的侧栏。"""
 
     configmaps_page.open()
     configmaps_page.wait_ready()

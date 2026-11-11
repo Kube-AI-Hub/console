@@ -1,4 +1,4 @@
-id: TC-FULL-KUBE_FRONTEND-CLUSTER_CONFIGMAPS-01
+id: TC-FULL-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-01
 level: 2
 suite: full
 module: kube-frontend

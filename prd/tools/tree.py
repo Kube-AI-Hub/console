@@ -18,7 +18,7 @@ MODULES = [
         "id": "console-core",
         "title": "控制台基础",
         "goal": "让控制台在资源不存在、无权限、加载失败时给出可读的中文反馈，并把用户送回能继续操作的上一级页面，而不是停在空转的详情页上。",
-        "tests": {"L1": ["TC-CORE-CONSOLE_CORE-01"]},
+        "tests": {"L1": ["TC-CORE-CONSOLE-CORE-01"]},
         "submodules": [
             {
                 "id": "resource-detail",
@@ -45,13 +45,13 @@ MODULES = [
         "id": "cluster-gpu",
         "title": "集群算力",
         "goal": "让运维看清每张 GPU 卡的真实健康状态，故障卡一眼可辨，不被健康卡掩盖。",
-        "tests": {"L1": ["TC-CORE-CLUSTER_GPU-01"]},
+        "tests": {"L1": ["TC-CORE-CLUSTER-GPU-01"]},
         "submodules": [
             {
                 "id": "gpu-card",
                 "title": "显卡列表",
                 "goal": "节点页与集群页的显卡列表显示每张卡的健康状态；被 device plugin 摘除的故障卡仍显示且标为亚健康。",
-                "tests": {"L2": ["TC-FULL-CLUSTER_GPU-GPU_CARD-01"]},
+                "tests": {"L2": ["TC-FULL-CLUSTER-GPU-GPU_CARD-01"]},
                 "features": [
                     {
                         "id": "health",
@@ -129,13 +129,13 @@ MODULES = [
         "id": "cluster-storage",
         "title": "集群存储",
         "goal": "让运维看清集群共享存储的容量、配额与性能，并能安全地调整配额。",
-        "tests": {"L1": ["TC-CORE-CLUSTER_STORAGE-01"]},
+        "tests": {"L1": ["TC-CORE-CLUSTER-STORAGE-01"]},
         "submodules": [
             {
                 "id": "shared-storage",
                 "title": "共享存储（JuiceFS）",
                 "goal": "一页看清共享卷的配额、用量与性能；配额改动即时生效且不会被下一次挂载改回。",
-                "tests": {"L2": ["TC-FULL-CLUSTER_STORAGE-SHARED_STORAGE-01"]},
+                "tests": {"L2": ["TC-FULL-CLUSTER-STORAGE-SHARED_STORAGE-01"]},
                 "features": [
                     {
                         "id": "overview",
@@ -171,13 +171,13 @@ MODULES = [
         "id": "kube-frontend",
         "title": "新前端",
         "goal": "用 Apache 2.0 的 kube-frontend 替代 AGPL 的 console 页面：同一批资源用 schema 驱动重建，界面可被智能体操作，移动端可用。",
-        "tests": {"L1": ["TC-CORE-KUBE_FRONTEND-01"]},
+        "tests": {"L1": ["TC-CORE-KUBE-FRONTEND-01"]},
         "submodules": [
             {
                 "id": "configmaps",
                 "title": "配置字典",
                 "goal": "项目内的 ConfigMap 列表能列出真实数据、按名称搜索、按名称与创建时间排序、分页，并能删除单条或所选多条。",
-                "tests": {"L2": ["TC-FULL-KUBE_FRONTEND-CONFIGMAPS-01"]},
+                "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-CONFIGMAPS-01"]},
                 "features": [
                     {
                         "id": "list",
@@ -253,7 +253,7 @@ MODULES = [
                 "id": "secrets",
                 "title": "保密字典",
                 "goal": "项目内的 Secret 能按类型正确展示与编辑：Opaque / TLS / 镜像仓库 / 用户名密码各自有对应的录入与展示方式，明文默认遮挡，镜像仓库密钥可设为默认。",
-                "tests": {"L2": ["TC-FULL-KUBE_FRONTEND-SECRETS-01"]},
+                "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-SECRETS-01"]},
                 "features": [
                     {
                         "id": "list",
@@ -323,7 +323,7 @@ MODULES = [
                 "id": "serviceaccounts",
                 "title": "服务账户",
                 "goal": "项目内的 ServiceAccount 可浏览、创建、改角色；详情能从关联的 token Secret 生成 kubeconfig 并复制下载，让命令行访问不必再去拼证书。",
-                "tests": {"L2": ["TC-FULL-KUBE_FRONTEND-SERVICEACCOUNTS-01"]},
+                "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-SERVICEACCOUNTS-01"]},
                 "features": [
                     {
                         "id": "list",
@@ -397,7 +397,7 @@ MODULES = [
                 "id": "cluster-configmaps",
                 "title": "集群配置字典",
                 "goal": "在集群管理下浏览集群内所有项目的 ConfigMap，可按项目筛选、按名称搜索与排序，并对单条对象完成编辑信息、编辑 YAML、编辑设置与删除；联邦对象只读。",
-                "tests": {"L2": ["TC-FULL-KUBE_FRONTEND-CLUSTER_CONFIGMAPS-01"]},
+                "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-01"]},
                 "features": [
                     {
                         "id": "list",

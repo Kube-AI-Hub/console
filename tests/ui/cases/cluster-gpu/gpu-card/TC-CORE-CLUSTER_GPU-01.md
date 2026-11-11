@@ -1,6 +1,6 @@
-# TC-CORE-CLUSTER_GPU-01 集群算力 · 入口与显卡总览
+# TC-CORE-CLUSTER-GPU-01 集群算力 · 入口与显卡总览
 
-- **用例 ID**: `TC-CORE-CLUSTER_GPU-01`
+- **用例 ID**: `TC-CORE-CLUSTER-GPU-01`
 - **级别**: L1  **套件**: `core`
 - **模块**: `cluster-gpu` / `gpu-card` `page`
 - **入口**: `{BASE_URL}/clusters/default/gpus`
@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/cluster-gpu/_index.md`](../../../../prd/cluster-gpu/_index.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-CORE-CLUSTER_GPU-01** — Given 已登录且对 `nodes` 有 view 权限，When 打开 `/clusters/default/gpus`，Then 页面标题为「显卡」、显卡列表可见、顶部显示健康显卡比例，且不出现任何未翻译的 key。
+- **AC-CORE-CLUSTER-GPU-01** — Given 已登录且对 `nodes` 有 view 权限，When 打开 `/clusters/default/gpus`，Then 页面标题为「显卡」、显卡列表可见、顶部显示健康显卡比例，且不出现任何未翻译的 key。
 
 ### 关联设计
 

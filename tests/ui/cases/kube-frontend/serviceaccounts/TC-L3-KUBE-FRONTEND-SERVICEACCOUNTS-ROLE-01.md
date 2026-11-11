@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/serviceaccounts/role.md`](../../../../prd/kube-frontend/serviceaccounts/role.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE_FRONTEND-SERVICEACCOUNTS-ROLE-01** — Given 一条带角色的服务账户，When 打开「修改角色」，Then 选择器预选当前角色且选项来自该项目的角色列表；When 选择另一个角色并确认，Then 请求为 `PATCH` 且 `content-type: application/merge-patch+json`，`metadata.annotations['iam.kubesphere.io/role']` 更新为新值，`secrets[]` 等其他字段不变。
+- **AC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-ROLE-01** — Given 一条带角色的服务账户，When 打开「修改角色」，Then 选择器预选当前角色且选项来自该项目的角色列表；When 选择另一个角色并确认，Then 请求为 `PATCH` 且 `content-type: application/merge-patch+json`，`metadata.annotations['iam.kubesphere.io/role']` 更新为新值，`secrets[]` 等其他字段不变。
 
 ### 关联设计
 

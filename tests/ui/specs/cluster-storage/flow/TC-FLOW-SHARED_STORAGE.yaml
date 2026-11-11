@@ -10,8 +10,8 @@ prd: prd/cluster-storage/shared-storage/_index.md
 design: design/cluster-storage/shared-storage/_index.md
 
 covers:
-- AC-FULL-CLUSTER_STORAGE-SHARED_STORAGE-01
-- AC-FULL-CLUSTER_STORAGE-SHARED_STORAGE-02
+- AC-FULL-CLUSTER-STORAGE-SHARED_STORAGE-01
+- AC-FULL-CLUSTER-STORAGE-SHARED_STORAGE-02
 
 story:
 - US2

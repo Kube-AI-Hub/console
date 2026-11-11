@@ -1,4 +1,4 @@
-id: TC-FULL-KUBE_FRONTEND-CONFIGMAPS-01
+id: TC-FULL-KUBE-FRONTEND-CONFIGMAPS-01
 level: 2
 suite: full
 module: kube-frontend
@@ -10,7 +10,7 @@ prd: prd/kube-frontend/configmaps/_index.md
 design: design/kube-frontend/configmaps/_index.md
 
 covers:
-- AC-FULL-KUBE_FRONTEND-CONFIGMAPS-01
+- AC-FULL-KUBE-FRONTEND-CONFIGMAPS-01
 
 story:
 - US1

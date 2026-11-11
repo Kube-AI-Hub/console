@@ -18,7 +18,7 @@
 
 ## 验收场景
 
-- **AC-FULL-KUBE_FRONTEND-CONFIGMAPS-01** — Given 项目内有真实 ConfigMap，When 打开列表并逐项核对，Then 名称、键、创建时间与 `kubectl` 输出一致，且分页总数与实际对象数一致。
+- **AC-FULL-KUBE-FRONTEND-CONFIGMAPS-01** — Given 项目内有真实 ConfigMap，When 打开列表并逐项核对，Then 名称、键、创建时间与 `kubectl` 输出一致，且分页总数与实际对象数一致。
 
 ## 页面结构
 
@@ -81,4 +81,4 @@
 
 ## 验收用例
 
-- `TC-FULL-KUBE_FRONTEND-CONFIGMAPS-01`
+- `TC-FULL-KUBE-FRONTEND-CONFIGMAPS-01`

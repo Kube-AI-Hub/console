@@ -56,24 +56,24 @@ console（展示）
 
 ## 关键契约与依赖
 
-- **CON-FULL-CLUSTER_GPU-GPU_MONITOR-01** — 卡级指标名固定为 `gpu_card_utilisation` / `gpu_card_memory_used_bytes` / `gpu_card_memory_total_bytes` / `gpu_card_power_watts` / `gpu_card_temperature_celsius` / `gpu_agent_card_allocation_rate`，标签 `node/uuid/vendor/model/device_index`。
-- **CON-FULL-CLUSTER_GPU-GPU_MONITOR-02** — Pod 级指标名固定为 `gpu_agent_pod_utilisation` / `gpu_agent_pod_memory_used_bytes` / `gpu_agent_pod_gpu_allocation`，标签 `node/namespace/pod/vendor/model`。
-- **CON-FULL-CLUSTER_GPU-GPU_MONITOR-03** — 指标名与标签的定义正文在 `HAMi` 的 `pkg/gpu-agent/exporter/prometheus.go`；改这里必须同步改 `cluster-gpu-k8s-rules`。
-- **CON-FULL-CLUSTER_GPU-GPU_MONITOR-04** — kapis 侧的查询模板在 `promql.go`，每条都用 `max without(instance, pod, container, endpoint, job, service)` 合并多实例碎片。
+- **CON-FULL-CLUSTER-GPU-GPU_MONITOR-01** — 卡级指标名固定为 `gpu_card_utilisation` / `gpu_card_memory_used_bytes` / `gpu_card_memory_total_bytes` / `gpu_card_power_watts` / `gpu_card_temperature_celsius` / `gpu_agent_card_allocation_rate`，标签 `node/uuid/vendor/model/device_index`。
+- **CON-FULL-CLUSTER-GPU-GPU_MONITOR-02** — Pod 级指标名固定为 `gpu_agent_pod_utilisation` / `gpu_agent_pod_memory_used_bytes` / `gpu_agent_pod_gpu_allocation`，标签 `node/namespace/pod/vendor/model`。
+- **CON-FULL-CLUSTER-GPU-GPU_MONITOR-03** — 指标名与标签的定义正文在 `HAMi` 的 `pkg/gpu-agent/exporter/prometheus.go`；改这里必须同步改 `cluster-gpu-k8s-rules`。
+- **CON-FULL-CLUSTER-GPU-GPU_MONITOR-04** — kapis 侧的查询模板在 `promql.go`，每条都用 `max without(instance, pod, container, endpoint, job, service)` 合并多实例碎片。
 
 ## 不变量
 
-- **INV-FULL-CLUSTER_GPU-GPU_MONITOR-01** — 同一 UUID 在卡级序列里只有一条（`max without` 去重后）。
-- **INV-FULL-CLUSTER_GPU-GPU_MONITOR-02** — `node:gpu_total:count` 等于该节点卡级序列条数。
-- **INV-FULL-CLUSTER_GPU-GPU_MONITOR-03** — `pod:gpu_allocated:count` 等于该 Pod 的 `vgpu-devices-allocated` 注解设备条数。
+- **INV-FULL-CLUSTER-GPU-GPU_MONITOR-01** — 同一 UUID 在卡级序列里只有一条（`max without` 去重后）。
+- **INV-FULL-CLUSTER-GPU-GPU_MONITOR-02** — `node:gpu_total:count` 等于该节点卡级序列条数。
+- **INV-FULL-CLUSTER-GPU-GPU_MONITOR-03** — `pod:gpu_allocated:count` 等于该 Pod 的 `vgpu-devices-allocated` 注解设备条数。
 
 ## 已知坑
 
-- **GOT-FULL-CLUSTER_GPU-GPU_MONITOR-01** — **改 gpu-agent 的指标名或标签而不改 recording rules，Pod/工作负载监控会静默变空**。`pod:gpu_*` 的表达式直接引用 `gpu_agent_pod_*`，名字变了规则就算不出东西，Prometheus 不报错，页面只是没有曲线。
-- **GOT-FULL-CLUSTER_GPU-GPU_MONITOR-02** — `max without(instance, pod, ...)` 是为了合并 gpu-agent 重启前后的多个 Pod 实例。去掉它会让曲线断裂成多段。
-- **GOT-FULL-CLUSTER_GPU-GPU_MONITOR-03** — `node_gpu_utilisation` 在 `handler.go` 里被乘了 100（`v * 100`），而 `gpu_card_utilisation` 本身就是 0–100。两处口径不同，改的时候要一起看。
-- **GOT-FULL-CLUSTER_GPU-GPU_MONITOR-04** — 单卡监控页必须传 `gpu_uuid`，否则会拿到同节点全部卡的序列并混在一起。
-- **GOT-FULL-CLUSTER_GPU-GPU_MONITOR-05** — gpu-agent 的内部 pod-resources gRPC 超时是 10s，ServiceMonitor 的 `scrapeTimeout` 必须大于它（当前 30s），否则 agent 一卡顿所有抓取就失败、图表全空。
+- **GOT-FULL-CLUSTER-GPU-GPU_MONITOR-01** — **改 gpu-agent 的指标名或标签而不改 recording rules，Pod/工作负载监控会静默变空**。`pod:gpu_*` 的表达式直接引用 `gpu_agent_pod_*`，名字变了规则就算不出东西，Prometheus 不报错，页面只是没有曲线。
+- **GOT-FULL-CLUSTER-GPU-GPU_MONITOR-02** — `max without(instance, pod, ...)` 是为了合并 gpu-agent 重启前后的多个 Pod 实例。去掉它会让曲线断裂成多段。
+- **GOT-FULL-CLUSTER-GPU-GPU_MONITOR-03** — `node_gpu_utilisation` 在 `handler.go` 里被乘了 100（`v * 100`），而 `gpu_card_utilisation` 本身就是 0–100。两处口径不同，改的时候要一起看。
+- **GOT-FULL-CLUSTER-GPU-GPU_MONITOR-04** — 单卡监控页必须传 `gpu_uuid`，否则会拿到同节点全部卡的序列并混在一起。
+- **GOT-FULL-CLUSTER-GPU-GPU_MONITOR-05** — gpu-agent 的内部 pod-resources gRPC 超时是 10s，ServiceMonitor 的 `scrapeTimeout` 必须大于它（当前 30s），否则 agent 一卡顿所有抓取就失败、图表全空。
 
 ## 测试与可观测
 
@@ -81,7 +81,7 @@ console（展示）
   - `curl -s hami-gpu-agent:9101/metrics | grep -c gpu_card_`
   - `curl -s 'prometheus:9090/api/v1/query?query=node:gpu_total:count'`
   - 页面三个维度逐一截图。
-- UI 用例：`TC-FULL-CLUSTER_GPU-GPU_MONITOR-01` 与四个 L3 用例。
+- UI 用例：`TC-FULL-CLUSTER-GPU-GPU_MONITOR-01` 与四个 L3 用例。
 
 ## 明确不做
 
@@ -103,4 +103,4 @@ console（展示）
 
 ## 验收用例
 
-- `TC-FULL-CLUSTER_GPU-GPU_MONITOR-01`
+- `TC-FULL-CLUSTER-GPU-GPU_MONITOR-01`

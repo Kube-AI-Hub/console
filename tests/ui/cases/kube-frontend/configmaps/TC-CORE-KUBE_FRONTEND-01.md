@@ -1,6 +1,6 @@
-# TC-CORE-KUBE_FRONTEND-01 新前端 · 入口与页面骨架
+# TC-CORE-KUBE-FRONTEND-01 新前端 · 入口与页面骨架
 
-- **用例 ID**: `TC-CORE-KUBE_FRONTEND-01`
+- **用例 ID**: `TC-CORE-KUBE-FRONTEND-01`
 - **级别**: L1  **套件**: `core`
 - **模块**: `kube-frontend` / `configmaps` `page`
 - **入口**: `{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps`
@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/_index.md`](../../../../prd/kube-frontend/_index.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-CORE-KUBE_FRONTEND-01** — Given 新前端与老 console 同时运行，When 访问新前端的配置字典页，Then 列出的对象与老 console 同一 namespace 的列表一致。
+- **AC-CORE-KUBE-FRONTEND-01** — Given 新前端与老 console 同时运行，When 访问新前端的配置字典页，Then 列出的对象与老 console 同一 namespace 的列表一致。
 
 ### 关联设计
 

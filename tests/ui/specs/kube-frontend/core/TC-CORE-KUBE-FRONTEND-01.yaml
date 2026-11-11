@@ -1,4 +1,4 @@
-id: TC-CORE-KUBE_FRONTEND-01
+id: TC-CORE-KUBE-FRONTEND-01
 level: 1
 suite: core
 module: kube-frontend
@@ -10,7 +10,7 @@ prd: prd/kube-frontend/_index.md
 design: design/kube-frontend/_index.md
 
 covers:
-- AC-CORE-KUBE_FRONTEND-01
+- AC-CORE-KUBE-FRONTEND-01
 
 story:
 - US1

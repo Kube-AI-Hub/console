@@ -8,7 +8,7 @@
 
 ## 关联需求
 
-- `AC-CORE-KUBE_FRONTEND-01`
+- `AC-CORE-KUBE-FRONTEND-01`
 - `FR-CORE-KUBE_FRONTEND-01`
 - `SC-CORE-KUBE_FRONTEND-01`
 
@@ -26,7 +26,7 @@
 
 ## 方案决策
 
-### DEC-CORE-KUBE_FRONTEND-01 — 重写而非改造
+### DEC-CORE-KUBE-FRONTEND-01 — 重写而非改造
 
 **为什么**：AGPL 覆盖网络服务，改造 console 会持续扩大源码开放义务。
 
@@ -34,19 +34,19 @@
 
 **何时重新考虑**：若上游改为宽松许可，可转为渐进迁移。
 
-### DEC-CORE-KUBE_FRONTEND-02 — 技术栈取 dongba、骨架取 bisheng
+### DEC-CORE-KUBE-FRONTEND-02 — 技术栈取 dongba、骨架取 bisheng
 
 **为什么**：重写没有历史包袱，适合最新一代（React 19 / Vite / TanStack）；而多包共用、版本漂移、架构约束是工程问题，bisheng 的 `catalog` + `packages/*` + `config/*.test.ts` 已经验证过。
 
 **被否方案**：沿用 bisheng 全栈（React 18 + recoil）——recoil 已归档，是已知技术债，不应带进新项目。
 
-### DEC-CORE-KUBE_FRONTEND-03 — BFF 而非直连
+### DEC-CORE-KUBE-FRONTEND-03 — BFF 而非直连
 
 **为什么**：上游错误形态有三种（`{message}`、kube `Status`、代理 HTML），直连会让每个页面各解析一遍；token 也应只在一个进程里出现。
 
 **被否方案**：前端直连 ks-apiserver + 每个页面各自处理错误。会在 24 个资源模块里重复 24 次。
 
-### DEC-CORE-KUBE_FRONTEND-04 — 按产品功能区拆包，不按页面预加载
+### DEC-CORE-KUBE-FRONTEND-04 — 按产品功能区拆包，不按页面预加载
 
 **为什么**：使用者是企业内部的算力运维人员，一天在同类资源页之间来回几十次，判断标准是"切换像桌面应用"，首屏慢 1–2 秒可以接受。但产品有 24 个资源模块，若照 dongba 的做法把整站模块写进 `<head>` 预加载，首屏会随页面数线性增长，到后期不可接受。
 
@@ -60,7 +60,7 @@
 
 **何时重新考虑**：若首屏 P95 在弱网下超过 5 秒，再引入按区的服务端预取（见 [`DEC-...-05`](#dec-core-kube_frontend-05--共享层预取由交互意图触发)）。
 
-### DEC-CORE-KUBE_FRONTEND-05 — 共享层预取由交互意图触发
+### DEC-CORE-KUBE-FRONTEND-05 — 共享层预取由交互意图触发
 
 **为什么**：区级拆包后跨区首次切换要付一次加载。在导航上 `onPointerEnter` / `onFocus` 时预取目标区的共享块，让"决定要点"的 200–400 ms 覆盖掉下载时间；`defaultPreload: 'intent'` 已有的机制可复用，只需把预取目标从路由 chunk 扩展到区级共享块。
 
@@ -68,7 +68,7 @@
 
 **被否方案**：`<link rel="prefetch">` 预取全部区。移动网络下会与首屏请求抢带宽。
 
-### DEC-CORE-KUBE_FRONTEND-06 — 构建期把第三方依赖按稳定性分块
+### DEC-CORE-KUBE-FRONTEND-06 — 构建期把第三方依赖按稳定性分块
 
 **为什么**：Vite 默认把"首屏用不到的共享依赖"放进同一个大 chunk，任何依赖升级都会换掉它的哈希，整块缓存失效。按变更频率分块——`react` 系（极少变）、`radix`/`tanstack` 系（偶尔变）、`ai-kit`（随产品变）——让改业务代码只失效对应的小块。
 
@@ -76,7 +76,7 @@
 
 **被否方案**：不配 `manualChunks`，全交给 Vite 默认策略（当前状态：一个 150.8 KB 的主 chunk 装下了全部共享依赖，改任何一处依赖都整块失效）。
 
-### DEC-CORE-KUBE_FRONTEND-07 — 减小页面文件对 CSS 与共享 chunk 的牵连
+### DEC-CORE-KUBE-FRONTEND-07 — 减小页面文件对 CSS 与共享 chunk 的牵连
 
 **为什么**：开发期实测，编辑任何一个带 Tailwind 类名的页面文件，HMR 都会连带刷新 `/src/styles.css` 与承载该页面的 chunk。页面越集中在少数文件里，每次保存重建的 CSS 越大，热更新越慢；多人同时改不同页面时，重建还会互相打断。
 
@@ -150,18 +150,18 @@ flowchart LR
 
 ## 不变量
 
-- **INV-CORE-KUBE_FRONTEND-01** — `packages/ui` 不出现状态库、请求、i18n、路由的 import。
-- **INV-CORE-KUBE_FRONTEND-02** — 共享依赖一律写 `catalog:`。
-- **INV-CORE-KUBE_FRONTEND-03** — 页面根元素恰好一个 `data-ai-state`。
-- **INV-CORE-KUBE_FRONTEND-04** — 页面内不使用裸 `<button>`，一律经 `AiButton` 或 `actionProps`。
+- **INV-CORE-KUBE-FRONTEND-01** — `packages/ui` 不出现状态库、请求、i18n、路由的 import。
+- **INV-CORE-KUBE-FRONTEND-02** — 共享依赖一律写 `catalog:`。
+- **INV-CORE-KUBE-FRONTEND-03** — 页面根元素恰好一个 `data-ai-state`。
+- **INV-CORE-KUBE-FRONTEND-04** — 页面内不使用裸 `<button>`，一律经 `AiButton` 或 `actionProps`。
 
 ## 已知坑
 
-- **GOT-CORE-KUBE_FRONTEND-01** — `createClient` 若在构造时捕获 `globalThis.fetch`，后续安装的 stub 不生效，测试会一直停在 `loading`。已改为每次请求解析。
-- **GOT-CORE-KUBE_FRONTEND-02** — `exactOptionalPropertyTypes` 下不能把 `undefined` 传给可选属性（如 `activeKey`），需要条件展开。
-- **GOT-CORE-KUBE_FRONTEND-03** — Tailwind 4 的 `@import` 解析在 CSS 注释含撇号时会报 `Unterminated string`。
-- **GOT-CORE-KUBE_FRONTEND-04** — ai-kit 以 `dist` 提供，新增导出后必须重建 ai-kit，否则消费方构建失败。
-- **GOT-CORE-KUBE_FRONTEND-05** — 开发期编辑任何带 Tailwind 类名的页面文件，都会连带触发 `/src/styles.css` 整体重建，日志里的 `hmr update /src/styles.css, /src/pages/...` 即由此而来。改样式扫描范围（`DEC-CORE-KUBE_FRONTEND-07`）之前，这是保存变慢的主因。
+- **GOT-CORE-KUBE-FRONTEND-01** — `createClient` 若在构造时捕获 `globalThis.fetch`，后续安装的 stub 不生效，测试会一直停在 `loading`。已改为每次请求解析。
+- **GOT-CORE-KUBE-FRONTEND-02** — `exactOptionalPropertyTypes` 下不能把 `undefined` 传给可选属性（如 `activeKey`），需要条件展开。
+- **GOT-CORE-KUBE-FRONTEND-03** — Tailwind 4 的 `@import` 解析在 CSS 注释含撇号时会报 `Unterminated string`。
+- **GOT-CORE-KUBE-FRONTEND-04** — ai-kit 以 `dist` 提供，新增导出后必须重建 ai-kit，否则消费方构建失败。
+- **GOT-CORE-KUBE-FRONTEND-05** — 开发期编辑任何带 Tailwind 类名的页面文件，都会连带触发 `/src/styles.css` 整体重建，日志里的 `hmr update /src/styles.css, /src/pages/...` 即由此而来。改样式扫描范围（`DEC-CORE-KUBE-FRONTEND-07`）之前，这是保存变慢的主因。
 
 ## 测试与可观测
 
@@ -175,7 +175,7 @@ flowchart LR
 - 不改 `console/src`。
 - 不做创建 / 编辑表单与其他资源模块。
 - 不做 SSR 与 Cloudflare 部署。
-- **不做整站预加载**：不把所有模块写进 `<head>` 的 `modulepreload`，也不在首屏预取未访问区的共享块。理由与替代做法见 `DEC-CORE-KUBE_FRONTEND-04` / `-05`。
+- **不做整站预加载**：不把所有模块写进 `<head>` 的 `modulepreload`，也不在首屏预取未访问区的共享块。理由与替代做法见 `DEC-CORE-KUBE-FRONTEND-04` / `-05`。
 
 ## 后续改进
 
@@ -185,4 +185,4 @@ flowchart LR
 
 ## 验收用例
 
-- `TC-CORE-KUBE_FRONTEND-01`
+- `TC-CORE-KUBE-FRONTEND-01`

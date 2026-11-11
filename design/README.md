@@ -41,7 +41,7 @@ tests    L1/L2/L3 用例        TC-*      怎么验证
 | 不变量 | `INV-<同上>-<NN>` | `INV-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-01` |
 | 已知坑 | `GOT-<同上>-<NN>` | `GOT-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-01` |
 
-L1/L2 用该层用例 ID 的同后缀：`TC-CORE-CLUSTER_STORAGE-01` → `DES-L1-CLUSTER-STORAGE`。
+L1/L2 用该层用例 ID 的同后缀：`TC-CORE-CLUSTER-STORAGE-01` → `DES-L1-CLUSTER-STORAGE`。
 
 **编号由用例 ID 机械推导**（`prd/tools/build_prd.py` 的 `design_id_for`），不要手工造。本仓库用例 ID **含下划线**，推导时用**前缀替换**而不是 slugify。
 

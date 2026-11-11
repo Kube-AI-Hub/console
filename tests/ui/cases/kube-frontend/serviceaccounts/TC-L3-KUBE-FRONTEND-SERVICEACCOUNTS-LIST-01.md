@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/serviceaccounts/list.md`](../../../../prd/kube-frontend/serviceaccounts/list.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE_FRONTEND-SERVICEACCOUNTS-LIST-01** — Given 项目内有多条 ServiceAccount，When 打开列表，Then 每行显示名称（别名替换名称，第二行为描述或 `-`）、角色、保密字典链接、创建时间；没有角色的行角色列为空。
+- **AC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-LIST-01** — Given 项目内有多条 ServiceAccount，When 打开列表，Then 每行显示名称（别名替换名称，第二行为描述或 `-`）、角色、保密字典链接、创建时间；没有角色的行角色列为空。
 
 ### 关联设计
 

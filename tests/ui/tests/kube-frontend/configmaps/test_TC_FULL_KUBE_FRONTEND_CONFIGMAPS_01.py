@@ -8,7 +8,7 @@ pytestmark = pytest.mark.ui
 
 @pytest.mark.full
 def test_TC_FULL_KUBE_FRONTEND_CONFIGMAPS_01(configmaps_page, screenshot):
-    """TC-FULL-KUBE_FRONTEND-CONFIGMAPS-01 配置字典：列表与行数一致，删除后消失。"""
+    """TC-FULL-KUBE-FRONTEND-CONFIGMAPS-01 配置字典：列表与行数一致，删除后消失。"""
 
     configmaps_page.open()
     configmaps_page.wait_ready()

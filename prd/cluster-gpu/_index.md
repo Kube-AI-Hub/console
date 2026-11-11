@@ -12,7 +12,7 @@
 
 ## 验收场景
 
-- **AC-CORE-CLUSTER_GPU-01** — Given 已登录且对 `nodes` 有 view 权限，When 打开 `/clusters/default/gpus`，Then 页面标题为「显卡」、显卡列表可见、顶部显示健康显卡比例，且不出现任何未翻译的 key。
+- **AC-CORE-CLUSTER-GPU-01** — Given 已登录且对 `nodes` 有 view 权限，When 打开 `/clusters/default/gpus`，Then 页面标题为「显卡」、显卡列表可见、顶部显示健康显卡比例，且不出现任何未翻译的 key。
 
 ## 设计目标
 
@@ -79,4 +79,4 @@ flowchart LR
 
 ## 验收用例
 
-- `TC-CORE-CLUSTER_GPU-01`
+- `TC-CORE-CLUSTER-GPU-01`

@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/serviceaccounts/create.md`](../../../../prd/kube-frontend/serviceaccounts/create.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE_FRONTEND-SERVICEACCOUNTS-CREATE-01** — Given 创建弹窗已打开，When 名称非法或与同项目已有对象重名，Then 提示对应错误且不提交；When 填写合法名称并选择角色，Then 提交后对象创建到所选项目，`metadata.annotations['iam.kubesphere.io/role']` 等于所选角色，描述写入 `kubesphere.io/description`。
+- **AC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-CREATE-01** — Given 创建弹窗已打开，When 名称非法或与同项目已有对象重名，Then 提示对应错误且不提交；When 填写合法名称并选择角色，Then 提交后对象创建到所选项目，`metadata.annotations['iam.kubesphere.io/role']` 等于所选角色，描述写入 `kubesphere.io/description`。
 
 ### 关联设计
 

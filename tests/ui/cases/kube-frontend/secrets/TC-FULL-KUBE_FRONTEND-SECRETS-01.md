@@ -1,6 +1,6 @@
-# TC-FULL-KUBE_FRONTEND-SECRETS-01 保密字典 · 四种类型的详情结构
+# TC-FULL-KUBE-FRONTEND-SECRETS-01 保密字典 · 四种类型的详情结构
 
-- **用例 ID**: `TC-FULL-KUBE_FRONTEND-SECRETS-01`
+- **用例 ID**: `TC-FULL-KUBE-FRONTEND-SECRETS-01`
 - **级别**: L2  **套件**: `full`
 - **模块**: `kube-frontend` / `secrets` `page`
 - **入口**: `{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/secrets`
@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/secrets/_index.md`](../../../../prd/kube-frontend/secrets/_index.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-FULL-KUBE_FRONTEND-SECRETS-01** — Given 项目内已有 Opaque / TLS / 镜像仓库 / 用户名密码四种 Secret，When 依次打开它们的详情，Then 每种类型的数据区都按该类型的结构展示（用户名密码显示两行、TLS 显示证书与私钥两块、镜像仓库逐条显示地址与账号），且初始均为遮挡状态。
+- **AC-FULL-KUBE-FRONTEND-SECRETS-01** — Given 项目内已有 Opaque / TLS / 镜像仓库 / 用户名密码四种 Secret，When 依次打开它们的详情，Then 每种类型的数据区都按该类型的结构展示（用户名密码显示两行、TLS 显示证书与私钥两块、镜像仓库逐条显示地址与账号），且初始均为遮挡状态。
 
 ### 关联设计
 

@@ -1,6 +1,6 @@
-# TC-FULL-CLUSTER_GPU-GPU_CARD-01 显卡列表 · 集群页与节点页一致
+# TC-FULL-CLUSTER-GPU-GPU_CARD-01 显卡列表 · 集群页与节点页一致
 
-- **用例 ID**: `TC-FULL-CLUSTER_GPU-GPU_CARD-01`
+- **用例 ID**: `TC-FULL-CLUSTER-GPU-GPU_CARD-01`
 - **级别**: L2  **套件**: `full`
 - **模块**: `cluster-gpu` / `gpu-card` `page`
 - **入口**: `{BASE_URL}/clusters/default/gpus`
@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/cluster-gpu/gpu-card/_index.md`](../../../../prd/cluster-gpu/gpu-card/_index.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-FULL-CLUSTER_GPU-GPU_CARD-01** — Given 已登录且集群有 GPU 节点，When 打开显卡列表，Then 表格列齐全、每行有状态标记、点 UUID 可进入单卡详情且状态一致。
+- **AC-FULL-CLUSTER-GPU-GPU_CARD-01** — Given 已登录且集群有 GPU 节点，When 打开显卡列表，Then 表格列齐全、每行有状态标记、点 UUID 可进入单卡详情且状态一致。
 
 ### 关联设计
 

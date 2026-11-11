@@ -9,7 +9,7 @@ pytestmark = pytest.mark.ui
 
 @pytest.mark.core
 def test_TC_CORE_CLUSTER_STORAGE_01(storage_page, screenshot):
-    """TC-CORE-CLUSTER_STORAGE-01 入口：标题、三个页签、概览卡片、无未翻译 key。"""
+    """TC-CORE-CLUSTER-STORAGE-01 入口：标题、三个页签、概览卡片、无未翻译 key。"""
     storage_page.open("overview")
 
     assert storage_page.page.title()

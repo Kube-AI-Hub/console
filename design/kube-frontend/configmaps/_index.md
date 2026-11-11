@@ -8,7 +8,7 @@
 
 ## 关联需求
 
-- `AC-FULL-KUBE_FRONTEND-CONFIGMAPS-01`
+- `AC-FULL-KUBE-FRONTEND-CONFIGMAPS-01`
 - `FR-FULL-KUBE_FRONTEND-CONFIGMAPS-01`
 - `SC-FULL-KUBE_FRONTEND-CONFIGMAPS-01`
 
@@ -25,19 +25,19 @@
 
 ## 方案决策
 
-### DEC-FULL-KUBE_FRONTEND-CONFIGMAPS-01 — 查询键由请求参数派生
+### DEC-FULL-KUBE-FRONTEND-CONFIGMAPS-01 — 查询键由请求参数派生
 
 **为什么**：`queryKey` 与请求参数来自同一对象，切换 namespace 时不可能返回旧缓存。两者分开拼装是"切了项目还看到上一个项目数据"的常见来源。
 
 **被否方案**：以 namespace 为键、其余参数放 `select` 过滤——会把分页做成客户端行为，与实际不符。
 
-### DEC-FULL-KUBE_FRONTEND-CONFIGMAPS-02 — 删除后失效列表而非本地移除
+### DEC-FULL-KUBE-FRONTEND-CONFIGMAPS-02 — 删除后失效列表而非本地移除
 
 **为什么**：上游无事务，批量删除可能部分成功。本地移除会把部分失败显示成全部成功。
 
 **被否方案**：乐观更新 + 回滚。实现复杂度高，且与本期的"正确优先"目标不符。
 
-### DEC-FULL-KUBE_FRONTEND-CONFIGMAPS-03 — 选态在翻页/排序/搜索时清空
+### DEC-FULL-KUBE-FRONTEND-CONFIGMAPS-03 — 选态在翻页/排序/搜索时清空
 
 **为什么**：对看不见的行执行批量删除是删错对象的主要来源。
 
@@ -93,14 +93,14 @@
 
 ## 不变量
 
-- **INV-FULL-KUBE_FRONTEND-CONFIGMAPS-01** — 请求参数与查询键同源。
-- **INV-FULL-KUBE_FRONTEND-CONFIGMAPS-02** — 列表状态四态互斥，同一时刻只有一个。
+- **INV-FULL-KUBE-FRONTEND-CONFIGMAPS-01** — 请求参数与查询键同源。
+- **INV-FULL-KUBE-FRONTEND-CONFIGMAPS-02** — 列表状态四态互斥，同一时刻只有一个。
 
 ## 已知坑
 
-- **GOT-FULL-KUBE_FRONTEND-CONFIGMAPS-01** — 上游以 `ascending=true/false` 表示方向，而不是 `asc/desc`；BFF 负责转换。
-- **GOT-FULL-KUBE_FRONTEND-CONFIGMAPS-02** — 描述来自注解 `kubesphere.io/description`，不是字段。
-- **GOT-FULL-KUBE_FRONTEND-CONFIGMAPS-03** — 5xx 会按重试策略重试两次，页面的 `error` 态会延迟约 2 秒；权限与校验错误不重试。
+- **GOT-FULL-KUBE-FRONTEND-CONFIGMAPS-01** — 上游以 `ascending=true/false` 表示方向，而不是 `asc/desc`；BFF 负责转换。
+- **GOT-FULL-KUBE-FRONTEND-CONFIGMAPS-02** — 描述来自注解 `kubesphere.io/description`，不是字段。
+- **GOT-FULL-KUBE-FRONTEND-CONFIGMAPS-03** — 5xx 会按重试策略重试两次，页面的 `error` 态会延迟约 2 秒；权限与校验错误不重试。
 
 ## 测试与可观测
 
@@ -120,4 +120,4 @@
 
 ## 验收用例
 
-- `TC-FULL-KUBE_FRONTEND-CONFIGMAPS-01`
+- `TC-FULL-KUBE-FRONTEND-CONFIGMAPS-01`

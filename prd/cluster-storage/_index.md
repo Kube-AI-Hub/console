@@ -12,7 +12,7 @@
 
 ## 验收场景
 
-- **AC-CORE-CLUSTER_STORAGE-01** — Given 已登录且对 `volumes` 有 manage 权限，When 打开 `/clusters/default/juicefs-storage/overview`，Then 页面标题为「共享存储」、三个页签可见、概览卡片显示共享卷数与总配额，且不出现任何未翻译的 key。
+- **AC-CORE-CLUSTER-STORAGE-01** — Given 已登录且对 `volumes` 有 manage 权限，When 打开 `/clusters/default/juicefs-storage/overview`，Then 页面标题为「共享存储」、三个页签可见、概览卡片显示共享卷数与总配额，且不出现任何未翻译的 key。
 
 ## 设计目标
 
@@ -82,4 +82,4 @@ flowchart LR
 
 ## 验收用例
 
-- `TC-CORE-CLUSTER_STORAGE-01`
+- `TC-CORE-CLUSTER-STORAGE-01`

@@ -1,6 +1,6 @@
-# TC-CORE-CONSOLE_CORE-01 控制台基础 · 详情页入口
+# TC-CORE-CONSOLE-CORE-01 控制台基础 · 详情页入口
 
-- **用例 ID**: `TC-CORE-CONSOLE_CORE-01`
+- **用例 ID**: `TC-CORE-CONSOLE-CORE-01`
 - **级别**: L1  **套件**: `core`
 - **模块**: `console-core` / `flow` `page`
 - **入口**: `{BASE_URL}/clusters/default/projects/agent-platform/pods`
@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/console-core/_index.md`](../../../../prd/console-core/_index.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-CORE-CONSOLE_CORE-01** — Given 已登录且已选中某个集群，When 打开任意资源详情页的入口路由，Then 页面主区渲染出侧栏与页签，不出现未翻译的 i18n key，也不出现「加载中」常驻。
+- **AC-CORE-CONSOLE-CORE-01** — Given 已登录且已选中某个集群，When 打开任意资源详情页的入口路由，Then 页面主区渲染出侧栏与页签，不出现未翻译的 i18n key，也不出现「加载中」常驻。
 
 ### 关联设计
 

@@ -16,7 +16,7 @@
 
 ## 验收场景
 
-- **AC-L3-KUBE_FRONTEND-SERVICEACCOUNTS-AI_SURFACE-01** — Given 打开服务账户列表与详情，Then `serviceaccounts:surface` 与 `serviceaccount-detail:surface` 的 `data-ai-state` 为四态之一；每行带 `data-ai-row`；`serviceaccounts:bulk-delete` 带 `data-ai-needs="serviceaccounts:row-select"`；详情中存在 `serviceaccount-detail:kubeconfig:<secret>` 与 `serviceaccount-detail:toggle:<secret>`，后者 `aria-pressed` 初始为 `false`。
+- **AC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-AI_SURFACE-01** — Given 打开服务账户列表与详情，Then `serviceaccounts:surface` 与 `serviceaccount-detail:surface` 的 `data-ai-state` 为四态之一；每行带 `data-ai-row`；`serviceaccounts:bulk-delete` 带 `data-ai-needs="serviceaccounts:row-select"`；详情中存在 `serviceaccount-detail:kubeconfig:<secret>` 与 `serviceaccount-detail:toggle:<secret>`，后者 `aria-pressed` 初始为 `false`。
 
 ## 设计目标
 

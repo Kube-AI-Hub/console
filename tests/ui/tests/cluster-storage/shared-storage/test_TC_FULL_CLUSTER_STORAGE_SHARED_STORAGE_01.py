@@ -9,7 +9,7 @@ pytestmark = pytest.mark.ui
 
 @pytest.mark.full
 def test_TC_FULL_CLUSTER_STORAGE_SHARED_STORAGE_01(storage_page, screenshot):
-    """TC-FULL-CLUSTER_STORAGE-SHARED_STORAGE-01 三个页签逐一点开；改一次配额后概览与卷页同步。"""
+    """TC-FULL-CLUSTER-STORAGE-SHARED_STORAGE-01 三个页签逐一点开；改一次配额后概览与卷页同步。"""
     storage_page.open("overview")
     assert storage_page.usage_rows, "概览没有使用率行"
     capacity_before = storage_page.cards[1]["value"]

@@ -197,6 +197,83 @@ REQUIRED_SPEC_FIELDS = ("covers", "story", "steps", "expected")
 SUITE_MARKERS = {"core": "core", "full": "full", "point": "point", "flow": "full"}
 
 
+#: `TC-<level>-<MODULE-SEGMENTS>-<feature>`; the module keeps `-`, the rest uses `_`.
+ID_LEVELS = ("CORE", "FULL", "L2", "L3", "FLOW", "BUG")
+
+
+def check_id_spelling(report: Report) -> None:
+    """One spelling per id, everywhere.
+
+    A second spelling is not a dialect to tolerate: it splits one criterion into
+    two, and the damage surfaces as a coverage error far from the line that caused
+    it — an AC "covered by nothing" while the spec covering it sits in the tree.
+
+    The shape comes from the path the id mirrors (`prd/README.md`), and it is the
+    same rule for both fields:
+
+        TC-<level>-<MODULE>-<SUBMODULE>-<FEATURE>-<NN>
+
+    Every segment folds `-` to `_`; the segments themselves are joined with `-`.
+    So `cluster-storage/shared-storage` + `quota` is
+    `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-01`, never
+    `TC-L3-CLUSTER_STORAGE-...` or `TC-L3-CLUSTER-STORAGE-SHARED-STORAGE-...`.
+
+    Which segments are present is not enforced: a level-1 case names only its
+    module, a journey names a scenario, and a level-2 case has no feature point.
+    """
+    if not SPECS.is_dir():
+        return
+
+    def fold(value: str) -> str:
+        return "_".join(word.upper() for word in value.split("-") if word)
+
+    for path in sorted(SPECS.rglob("*.yaml")):
+        spec = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        tid = str(spec.get("id") or "")
+        if not tid:
+            continue
+        rel = path.relative_to(REPO).as_posix()
+        # A journey names a scenario and mirrors no directory, so it is exempt
+        # from the shape check; its separators are the author's.
+        if tid.startswith("TC-FLOW-"):
+            continue
+        m = re.match(rf"^TC-(?P<level>{'|'.join(ID_LEVELS)})-(?P<rest>.+)-(?P<nn>\d+)$", tid)
+        if not m:
+            report.error(f"{rel}: 用例 ID 应为 TC-<层级>-<模块>-<特性>-<两位序号>（当前 {tid}）")
+            continue
+        level, rest = m.group("level"), m.group("rest")
+
+        # The module IS a hyphenated path: `cluster-gpu` stays `CLUSTER-GPU`.
+        module = "-".join(str(spec.get("module") or "").split("/")).upper().strip("-")
+        submodule = fold(str(spec.get("submodule") or ""))
+        # A level-2 case covers "the page"; `feature: page` names the whole page
+        # rather than a point on it, so it contributes no segment.
+        feature = "" if level in ("CORE", "FULL") else fold(str(spec.get("feature") or ""))
+
+        declared = [part for part in (module, submodule, feature) if part]
+        if declared:
+            body = "-".join(declared)
+            # Level 3: the fields match the directories exactly, so the whole id is
+            # checkable. Levels 1 and 2 reuse the fields for other things (a level-1
+            # case may name a workflow, a level-2 one a landing page), so only the
+            # separators of what they wrote are checked below.
+            if level == "L3" and rest != body:
+                report.error(f"{rel}: 用例 ID 应写作 TC-{level}-{body}-{m.group('nn')}（当前 {tid}）")
+            elif level != "L3":
+                # Neither field may smuggle a hyphen into the feature side.
+                for seg_label, seg_value in (("子模块", submodule), ("特性", feature)):
+                    if "-" in seg_value:
+                        report.error(f"{rel}: 用例 ID 的{seg_label}段应用 `_`（当前 {tid}）")
+
+        # `covers` names the criteria this case satisfies; only the module
+        # segment is fixed here, the rest belongs to the PRD.
+        if module:
+            module_ac = f"AC-{level}-{module}-"
+            for ac in spec.get("covers") or []:
+                if not str(ac).startswith(module_ac):
+                    report.error(f"{tid}: covers 里的 {ac} 模块段应写作 {module_ac}…")
+
+
 def check_test_binding(report: Report) -> None:
     """一 spec 一测试文件，路径与文件名镜像（见 docs/SDD.md 第 2 节）。
 
@@ -323,6 +400,7 @@ def main() -> int:
         check_css(report)
     if do_tests:
         check_test_binding(report)
+        check_id_spelling(report)
 
     specs = load_specs()
     covers_by_spec = {tid: [str(a) for a in (spec.get("covers") or [])] for tid, spec in specs.items()}

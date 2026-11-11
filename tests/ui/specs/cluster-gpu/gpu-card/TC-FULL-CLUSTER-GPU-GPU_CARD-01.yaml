@@ -1,4 +1,4 @@
-id: TC-FULL-CLUSTER_GPU-GPU_CARD-01
+id: TC-FULL-CLUSTER-GPU-GPU_CARD-01
 level: 2
 suite: full
 module: cluster-gpu
@@ -10,7 +10,7 @@ prd: prd/cluster-gpu/gpu-card/_index.md
 design: design/cluster-gpu/gpu-card/_index.md
 
 covers:
-- AC-FULL-CLUSTER_GPU-GPU_CARD-01
+- AC-FULL-CLUSTER-GPU-GPU_CARD-01
 
 story:
 - US1

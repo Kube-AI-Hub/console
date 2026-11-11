@@ -105,3 +105,44 @@ kube-frontend/apps/console-next/src/shell/AppShell.tsx   # 侧栏新增「保密
 - [ ] 推翻先前判断处补「被否方案」
 - [ ] 端到端用例失败时自清理
 - [ ] 全部门禁通过
+
+---
+
+## 6. 执行结果（2026-11-11）
+
+### 6.1 交付
+
+| 类别 | 内容 |
+|---|---|
+| 代码 | `pages/secrets`（8 文件）、`pages/serviceaccounts`（5 文件）、`lib/`（4 文件）、`components/resource/`（5 文件）、4 个路由文件、侧栏两个入口 |
+| 共享层 | `api-client/src/resources.ts`（通用资源 API）、`secrets.ts`、`serviceaccounts.ts`；文案 zh/en 各补 120+ key |
+| 文档 | `prd/`+`design/` 各 19 份（2×L2 + 17×L3），`tree.py` 新增两个子模块 |
+| 用例 | 28 条规格（L2×2、L3×26）+ 28 个 Playwright 文件 + 2 个页面对象 + 5 个 fixture |
+| 单元测试 | console-next 88、api-client 46、BFF 36、架构契约 166（全部通过）；`check_docs --strict` 0 错误 |
+
+### 6.2 真实环境验证（A100，经本地 BFF → ks-apiserver）
+
+- 三套 E2E 在稳定构建上全部通过：ConfigMaps 20 通过（4 条因数据条件 skip）、Secrets 15、ServiceAccounts 13。
+- 过程中发现并修复的真实缺陷（均已补回归用例）：
+  1. BFF 在响应头已发出后再次 `send` 会**进程崩溃**（`ERR_HTTP_HEADERS_SENT`）——已改为放弃该请求并加兜底 catch。
+  2. 会话校验一次网络失败就**永久清除 token**，表现为页面突然回到登录页——已改为仅 401/403 清除，传输错误重试后保留会话。
+  3. 「设为默认镜像仓库」在读取旧默认值完成前就能确认，导致两个默认——已改为确认前必须已知旧默认。
+  4. kubeconfig 预览按「值替换」遮挡，token 被改写时**不遮挡**；且测试场景下会把 token 遮成空串——已改为按 `token:` 位置遮挡。
+  5. 角色下拉把 `role-template-*` 聚合模板当成可选角色（27 个里只有 3 个可用）——已按 `annotation=kubesphere.io:creator` 过滤。
+  6. 创建弹窗的项目在列表筛选晚到时不会被回填——三个创建弹窗均补「晚到回填」。
+  7. Vite 开发代理只转发 `/api`，`/kapis` 落到 SPA 回退，资源页全部显示「资源不存在」——已补 `/kapis`、`/apis`。
+  8. `dev-static-server.mjs` 无上游超时、无连接复用——已加 60s 超时与 keep-alive 池。
+
+### 6.3 复核说明
+
+- 验证期间另一位并行工作者在同一 checkout 修改 ConfigMaps 相关文件，导致开发服务器反复重启、构建产物被替换；最终验收改用固定构建 + 独立预览端口完成，期间未修改对方文件。
+- 测试数据清理：`tc-e2e-*`、`tc-create-*`、`tc-dbg*` 在 `default`、`kube-frontend-demo` 两个命名空间下复核为 0 条。
+
+### 6.4 验收清单
+
+- [x] 列表列、值格式、行操作顺序与旧版逐项对照（见 design 的对照表）
+- [x] 每个子页面单独截图核对（`tests/ui/artifacts/`）
+- [x] 每处差异标注照搬/改进/不迁移并写进文档（DEC 系列）
+- [x] 推翻先前判断处补「被否方案」（如遮挡方式的第二次决策）
+- [x] 端到端用例失败时自清理（fixture `finally`）
+- [x] 全部门禁通过

@@ -1,6 +1,6 @@
-# TC-CORE-CLUSTER_STORAGE-01 集群存储 · 共享存储入口
+# TC-CORE-CLUSTER-STORAGE-01 集群存储 · 共享存储入口
 
-- **用例 ID**: `TC-CORE-CLUSTER_STORAGE-01`
+- **用例 ID**: `TC-CORE-CLUSTER-STORAGE-01`
 - **级别**: L1  **套件**: `core`
 - **模块**: `cluster-storage` / `` ``
 - **入口**: `{BASE_URL}/clusters/default/juicefs-storage/overview`
@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/cluster-storage/_index.md`](../../../../prd/cluster-storage/_index.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-CORE-CLUSTER_STORAGE-01** — Given 已登录且对 `volumes` 有 manage 权限，When 打开 `/clusters/default/juicefs-storage/overview`，Then 页面标题为「共享存储」、三个页签可见、概览卡片显示共享卷数与总配额，且不出现任何未翻译的 key。
+- **AC-CORE-CLUSTER-STORAGE-01** — Given 已登录且对 `volumes` 有 manage 权限，When 打开 `/clusters/default/juicefs-storage/overview`，Then 页面标题为「共享存储」、三个页签可见、概览卡片显示共享卷数与总配额，且不出现任何未翻译的 key。
 
 ### 关联设计
 

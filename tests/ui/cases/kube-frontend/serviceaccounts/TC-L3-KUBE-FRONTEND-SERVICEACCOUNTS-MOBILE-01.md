@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/serviceaccounts/mobile.md`](../../../../prd/kube-frontend/serviceaccounts/mobile.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE_FRONTEND-SERVICEACCOUNTS-MOBILE-01** — Given 375px 宽视口打开服务账户列表与详情，When 等待加载完成，Then 列表页 `scrollWidth` 不超过视口、导航收进抽屉、触控目标不小于 44px，只显示名称列；详情页属性区单列、kubeconfig 预览可滚动且不撑破页面。
+- **AC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-MOBILE-01** — Given 375px 宽视口打开服务账户列表与详情，When 等待加载完成，Then 列表页 `scrollWidth` 不超过视口、导航收进抽屉、触控目标不小于 44px，只显示名称列；详情页属性区单列、kubeconfig 预览可滚动且不撑破页面。
 
 ### 关联设计
 

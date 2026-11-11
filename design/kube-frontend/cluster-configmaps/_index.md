@@ -152,4 +152,4 @@ pages/configmaps/controller.ts                               两页共享：状�
 
 ## 验收用例
 
-- `TC-FULL-KUBE_FRONTEND-CLUSTER_CONFIGMAPS-01`
+- `TC-FULL-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-01`

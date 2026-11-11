@@ -1,4 +1,4 @@
-id: TC-CORE-CLUSTER_STORAGE-01
+id: TC-CORE-CLUSTER-STORAGE-01
 level: 1
 suite: core
 module: cluster-storage
@@ -10,7 +10,7 @@ prd: prd/cluster-storage/_index.md
 design: design/cluster-storage/_index.md
 
 covers:
-- AC-CORE-CLUSTER_STORAGE-01
+- AC-CORE-CLUSTER-STORAGE-01
 
 story:
 - US1

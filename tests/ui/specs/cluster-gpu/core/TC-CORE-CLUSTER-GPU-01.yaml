@@ -1,4 +1,4 @@
-id: TC-CORE-CLUSTER_GPU-01
+id: TC-CORE-CLUSTER-GPU-01
 level: 1
 suite: core
 module: cluster-gpu
@@ -10,7 +10,7 @@ prd: prd/cluster-gpu/_index.md
 design: design/cluster-gpu/_index.md
 
 covers:
-- AC-CORE-CLUSTER_GPU-01
+- AC-CORE-CLUSTER-GPU-01
 
 story:
 - US1

@@ -6,7 +6,7 @@
 
 ## 关联需求
 
-- `AC-CORE-CLUSTER_GPU-01`
+- `AC-CORE-CLUSTER-GPU-01`
 
 ## 设计目标与非目标
 
@@ -57,16 +57,16 @@ flowchart TD
 
 ## 关键共享契约
 
-- **CON-CORE-CLUSTER_GPU-01** — `GET /kapis/gpu.kubesphere.io/v1alpha1/gpus` 的每个 item 含 `health`（bool）；`health` 取自 `hami.io/node-gpu-info`，由 gpu-agent 从 device plugin 的 register 注解汇总。接口不解析 register 注解，也不从 allocatable 差额推断。字段语义见 `gpu-card/health.md` 的「对外契约」。
+- **CON-CORE-CLUSTER-GPU-01** — `GET /kapis/gpu.kubesphere.io/v1alpha1/gpus` 的每个 item 含 `health`（bool）；`health` 取自 `hami.io/node-gpu-info`，由 gpu-agent 从 device plugin 的 register 注解汇总。接口不解析 register 注解，也不从 allocatable 差额推断。字段语义见 `gpu-card/health.md` 的「对外契约」。
 
 ## 不变量
 
-- **INV-CORE-CLUSTER_GPU-01** — 同一个节点上，接口返回的设备集合等于该节点 `hami.io/node-gpu-info` 里的设备集合（按 UUID 一一对应）。
+- **INV-CORE-CLUSTER-GPU-01** — 同一个节点上，接口返回的设备集合等于该节点 `hami.io/node-gpu-info` 里的设备集合（按 UUID 一一对应）。
 
 ## 已知坑
 
-- **GOT-CORE-CLUSTER_GPU-01** — `node-gpu-info` 与 `node-nvidia-register` 是两份注解、两个写者。gpu-agent 负责把前者的 health 从后者汇总过来；历史上它把 `health` 硬编码为 `true`，导致故障卡永远显示健康。**接口层不要自己再扫一遍 register 注解**，否则同一份事实有两个解析点。细节见 `gpu-card/health.md`。
-- **GOT-CORE-CLUSTER_GPU-02** — allocatable 小于 capacity 时，差额说不出是哪几张卡。只能用 register annotation 的逐设备 `health` 定位。
+- **GOT-CORE-CLUSTER-GPU-01** — `node-gpu-info` 与 `node-nvidia-register` 是两份注解、两个写者。gpu-agent 负责把前者的 health 从后者汇总过来；历史上它把 `health` 硬编码为 `true`，导致故障卡永远显示健康。**接口层不要自己再扫一遍 register 注解**，否则同一份事实有两个解析点。细节见 `gpu-card/health.md`。
+- **GOT-CORE-CLUSTER-GPU-02** — allocatable 小于 capacity 时，差额说不出是哪几张卡。只能用 register annotation 的逐设备 `health` 定位。
 
 ## 测试与可观测
 
@@ -89,4 +89,4 @@ flowchart TD
 
 ## 验收用例
 
-- `TC-CORE-CLUSTER_GPU-01`
+- `TC-CORE-CLUSTER-GPU-01`

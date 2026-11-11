@@ -12,7 +12,7 @@
 
 ## 验收场景
 
-- **AC-L3-KUBE_FRONTEND-SERVICEACCOUNTS-DELETE-01** — Given 打开删除弹窗，When 输入与名称不一致，Then 确认禁用；When 输入一致并确认，Then 对象被删除、列表刷新、选择清空；批量删除要求输入以逗号加空格分隔的全部名称。
+- **AC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-DELETE-01** — Given 打开删除弹窗，When 输入与名称不一致，Then 确认禁用；When 输入一致并确认，Then 对象被删除、列表刷新、选择清空；批量删除要求输入以逗号加空格分隔的全部名称。
 
 ## 设计目标
 

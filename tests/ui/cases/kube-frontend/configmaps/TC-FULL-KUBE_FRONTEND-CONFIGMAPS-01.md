@@ -1,6 +1,6 @@
-# TC-FULL-KUBE_FRONTEND-CONFIGMAPS-01 配置字典 · 列表与 kubectl 逐项核对
+# TC-FULL-KUBE-FRONTEND-CONFIGMAPS-01 配置字典 · 列表与 kubectl 逐项核对
 
-- **用例 ID**: `TC-FULL-KUBE_FRONTEND-CONFIGMAPS-01`
+- **用例 ID**: `TC-FULL-KUBE-FRONTEND-CONFIGMAPS-01`
 - **级别**: L2  **套件**: `full`
 - **模块**: `kube-frontend` / `configmaps` `page`
 - **入口**: `{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps`
@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/configmaps/_index.md`](../../../../prd/kube-frontend/configmaps/_index.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-FULL-KUBE_FRONTEND-CONFIGMAPS-01** — Given 项目内有真实 ConfigMap，When 打开列表并逐项核对，Then 名称、键、创建时间与 `kubectl` 输出一致，且分页总数与实际对象数一致。
+- **AC-FULL-KUBE-FRONTEND-CONFIGMAPS-01** — Given 项目内有真实 ConfigMap，When 打开列表并逐项核对，Then 名称、键、创建时间与 `kubectl` 输出一致，且分页总数与实际对象数一致。
 
 ### 关联设计
 

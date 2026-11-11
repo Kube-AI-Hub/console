@@ -10,7 +10,7 @@ SERVICE_ACCOUNT = "default"
 
 @pytest.mark.full
 def test_TC_FULL_KUBE_FRONTEND_SERVICEACCOUNTS_01(serviceaccounts_page, e2e_objects, screenshot):
-    """TC-FULL-KUBE_FRONTEND-SERVICEACCOUNTS-01 服务账户：详情属性与 kubeconfig。"""
+    """TC-FULL-KUBE-FRONTEND-SERVICEACCOUNTS-01 服务账户：详情属性与 kubeconfig。"""
 
     token_secret = e2e_objects["account_token"](e2e_objects["unique"]() + "-token", SERVICE_ACCOUNT)
     name = e2e_objects["service_account"](

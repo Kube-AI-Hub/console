@@ -16,8 +16,8 @@
 
 ## 验收场景
 
-- **AC-L3-KUBE_FRONTEND-SERVICEACCOUNTS-CREATE-01** — Given 创建弹窗已打开，When 名称非法或与同项目已有对象重名，Then 提示对应错误且不提交；When 填写合法名称并选择角色，Then 提交后对象创建到所选项目，`metadata.annotations['iam.kubesphere.io/role']` 等于所选角色，描述写入 `kubesphere.io/description`。
-- **AC-L3-KUBE_FRONTEND-SERVICEACCOUNTS-CREATE-02** — Given 角色保持「不设置」，When 提交，Then 对象被创建且不带角色注解；When 切换项目，Then 角色选择被清空并重新加载该项目的角色列表。
+- **AC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-CREATE-01** — Given 创建弹窗已打开，When 名称非法或与同项目已有对象重名，Then 提示对应错误且不提交；When 填写合法名称并选择角色，Then 提交后对象创建到所选项目，`metadata.annotations['iam.kubesphere.io/role']` 等于所选角色，描述写入 `kubesphere.io/description`。
+- **AC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-CREATE-02** — Given 角色保持「不设置」，When 提交，Then 对象被创建且不带角色注解；When 切换项目，Then 角色选择被清空并重新加载该项目的角色列表。
 
 ## 设计目标
 

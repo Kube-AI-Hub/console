@@ -16,7 +16,7 @@
 
 ## 验收场景
 
-- **AC-CORE-CONSOLE_CORE-01** — Given 已登录且已选中某个集群，When 打开任意资源详情页的入口路由，Then 页面主区渲染出侧栏与页签，不出现未翻译的 i18n key，也不出现「加载中」常驻。
+- **AC-CORE-CONSOLE-CORE-01** — Given 已登录且已选中某个集群，When 打开任意资源详情页的入口路由，Then 页面主区渲染出侧栏与页签，不出现未翻译的 i18n key，也不出现「加载中」常驻。
 
 ## 设计目标
 
@@ -87,4 +87,4 @@ flowchart LR
 
 ## 验收用例
 
-- L1：`TC-CORE-CONSOLE_CORE-01`
+- L1：`TC-CORE-CONSOLE-CORE-01`

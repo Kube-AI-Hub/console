@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/serviceaccounts/create.md`](../../../../prd/kube-frontend/serviceaccounts/create.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE_FRONTEND-SERVICEACCOUNTS-CREATE-02** — Given 角色保持「不设置」，When 提交，Then 对象被创建且不带角色注解；When 切换项目，Then 角色选择被清空并重新加载该项目的角色列表。
+- **AC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-CREATE-02** — Given 角色保持「不设置」，When 提交，Then 对象被创建且不带角色注解；When 切换项目，Then 角色选择被清空并重新加载该项目的角色列表。
 
 ### 关联设计
 

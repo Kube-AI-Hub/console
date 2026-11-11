@@ -22,8 +22,8 @@
 
 ## 验收场景
 
-- **AC-L3-KUBE_FRONTEND-SERVICEACCOUNTS-DETAIL-01** — Given 一个有令牌 Secret 的服务账户，When 打开详情，Then 属性区依次显示集群、项目、角色、创建时间（`YYYY-MM-DD HH:mm:ss`）、创建者；数据区显示该令牌的键值（默认遮挡）以及一段 kubeconfig，其中 `server` 为 `https://kubernetes.default.svc:443`、`current-context` 为 `<sa>@local`。
-- **AC-L3-KUBE_FRONTEND-SERVICEACCOUNTS-DETAIL-02** — Given 详情已打开，When 点「显示明文」，Then 该令牌的值以明文显示；When 点「下载」，Then 浏览器下载 `kubeconfig.yaml`；When 打开没有令牌的服务账户，Then 数据区提示当前没有令牌且不报错。
+- **AC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-DETAIL-01** — Given 一个有令牌 Secret 的服务账户，When 打开详情，Then 属性区依次显示集群、项目、角色、创建时间（`YYYY-MM-DD HH:mm:ss`）、创建者；数据区显示该令牌的键值（默认遮挡）以及一段 kubeconfig，其中 `server` 为 `https://kubernetes.default.svc:443`、`current-context` 为 `<sa>@local`。
+- **AC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-DETAIL-02** — Given 详情已打开，When 点「显示明文」，Then 该令牌的值以明文显示；When 点「下载」，Then 浏览器下载 `kubeconfig.yaml`；When 打开没有令牌的服务账户，Then 数据区提示当前没有令牌且不报错。
 
 ## 设计目标
 

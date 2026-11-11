@@ -16,7 +16,7 @@
 
 ## 验收场景
 
-- **AC-FULL-CLUSTER_GPU-GPU_CARD-01** — Given 已登录且集群有 GPU 节点，When 打开显卡列表，Then 表格列齐全、每行有状态标记、点 UUID 可进入单卡详情且状态一致。
+- **AC-FULL-CLUSTER-GPU-GPU_CARD-01** — Given 已登录且集群有 GPU 节点，When 打开显卡列表，Then 表格列齐全、每行有状态标记、点 UUID 可进入单卡详情且状态一致。
 
 ## 设计目标
 
@@ -81,4 +81,4 @@
 
 ## 验收用例
 
-- `TC-FULL-CLUSTER_GPU-GPU_CARD-01`
+- `TC-FULL-CLUSTER-GPU-GPU_CARD-01`

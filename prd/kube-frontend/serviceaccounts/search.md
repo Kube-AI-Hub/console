@@ -12,7 +12,7 @@
 
 ## 验收场景
 
-- **AC-L3-KUBE_FRONTEND-SERVICEACCOUNTS-SEARCH-01** — Given 列表已加载，When 在搜索框输入关键字，Then 请求带 `name=<关键字>` 且 `page=1`，列表与总数只包含匹配项，已选项被清空。
+- **AC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-SEARCH-01** — Given 列表已加载，When 在搜索框输入关键字，Then 请求带 `name=<关键字>` 且 `page=1`，列表与总数只包含匹配项，已选项被清空。
 
 ## 设计目标
 

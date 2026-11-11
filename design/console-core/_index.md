@@ -6,7 +6,7 @@
 
 ## 关联需求
 
-- `AC-CORE-CONSOLE_CORE-01`
+- `AC-CORE-CONSOLE-CORE-01`
 
 ## 设计目标与非目标
 
@@ -68,7 +68,7 @@ flowchart LR
 
 ## 测试与可观测
 
-- **自动化**：L1 冒烟 `TC-CORE-CONSOLE_CORE-01`；子模块与功能点的用例在对应文档的「验收用例」一节。
+- **自动化**：L1 冒烟 `TC-CORE-CONSOLE-CORE-01`；子模块与功能点的用例在对应文档的「验收用例」一节。
 - **手动验证**：用不存在的名字打开 5 类资源的详情页，核对提示语言与地址栏。
 - **日志 / 指标**：无新增后端指标；浏览器控制台不应出现未捕获的 404 rejection。
 
@@ -89,5 +89,5 @@ flowchart LR
 
 ## 验收用例
 
-- L1 核心路径：`TC-CORE-CONSOLE_CORE-01`
+- L1 核心路径：`TC-CORE-CONSOLE-CORE-01`
 - 子模块与功能点用例见 [`resource-detail/`](./resource-detail/_index.md) 与 [`not-found.md`](./resource-detail/not-found.md)

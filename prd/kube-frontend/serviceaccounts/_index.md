@@ -25,7 +25,7 @@
 
 ## 验收场景
 
-- **AC-FULL-KUBE_FRONTEND-SERVICEACCOUNTS-01** — Given 项目内有一个带令牌 Secret 的服务账户，When 打开它的详情，Then 属性区显示集群、项目、角色、创建时间、创建者；数据区按令牌 Secret 展示键值（默认遮挡）并给出 kubeconfig 文本，可下载。
+- **AC-FULL-KUBE-FRONTEND-SERVICEACCOUNTS-01** — Given 项目内有一个带令牌 Secret 的服务账户，When 打开它的详情，Then 属性区显示集群、项目、角色、创建时间、创建者；数据区按令牌 Secret 展示键值（默认遮挡）并给出 kubeconfig 文本，可下载。
 
 ## 页面结构
 
@@ -101,4 +101,4 @@
 
 ## 验收用例
 
-- `TC-FULL-KUBE_FRONTEND-SERVICEACCOUNTS-01`
+- `TC-FULL-KUBE-FRONTEND-SERVICEACCOUNTS-01`

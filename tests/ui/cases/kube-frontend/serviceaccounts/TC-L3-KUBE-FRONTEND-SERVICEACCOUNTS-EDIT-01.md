@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/serviceaccounts/edit.md`](../../../../prd/kube-frontend/serviceaccounts/edit.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE_FRONTEND-SERVICEACCOUNTS-EDIT-01** — Given 一条服务账户，When 打开「编辑」，Then 名称只读、别名与描述可改；保存后 `iam.kubesphere.io/role` 与 `secrets[]` 保持不变；When 打开「编辑 YAML」并修改名称，Then 提示名称锁定且提交禁用。
+- **AC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-EDIT-01** — Given 一条服务账户，When 打开「编辑」，Then 名称只读、别名与描述可改；保存后 `iam.kubesphere.io/role` 与 `secrets[]` 保持不变；When 打开「编辑 YAML」并修改名称，Then 提示名称锁定且提交禁用。
 
 ### 关联设计
 

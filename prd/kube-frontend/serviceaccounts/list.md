@@ -16,8 +16,8 @@
 
 ## 验收场景
 
-- **AC-L3-KUBE_FRONTEND-SERVICEACCOUNTS-LIST-01** — Given 项目内有多条 ServiceAccount，When 打开列表，Then 每行显示名称（别名替换名称，第二行为描述或 `-`）、角色、保密字典链接、创建时间；没有角色的行角色列为空。
-- **AC-L3-KUBE_FRONTEND-SERVICEACCOUNTS-LIST-02** — Given 列表已加载，When 点击「保密字典」列中的某个名称，Then 进入该 Secret 的详情页（`/projects/<ns>/secrets/<name>`）；When 点击「名称」列头，Then 请求按 `sortBy=name` 重新发起。
+- **AC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-LIST-01** — Given 项目内有多条 ServiceAccount，When 打开列表，Then 每行显示名称（别名替换名称，第二行为描述或 `-`）、角色、保密字典链接、创建时间；没有角色的行角色列为空。
+- **AC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-LIST-02** — Given 列表已加载，When 点击「保密字典」列中的某个名称，Then 进入该 Secret 的详情页（`/projects/<ns>/secrets/<name>`）；When 点击「名称」列头，Then 请求按 `sortBy=name` 重新发起。
 
 ## 设计目标
 

@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/serviceaccounts/detail.md`](../../../../prd/kube-frontend/serviceaccounts/detail.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE_FRONTEND-SERVICEACCOUNTS-DETAIL-01** — Given 一个有令牌 Secret 的服务账户，When 打开详情，Then 属性区依次显示集群、项目、角色、创建时间（`YYYY-MM-DD HH:mm:ss`）、创建者；数据区显示该令牌的键值（默认遮挡）以及一段 kubeconfig，其中 `server` 为 `https://kubernetes.default.svc:443`、`current-context` 为 `<sa>@local`。
+- **AC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-DETAIL-01** — Given 一个有令牌 Secret 的服务账户，When 打开详情，Then 属性区依次显示集群、项目、角色、创建时间（`YYYY-MM-DD HH:mm:ss`）、创建者；数据区显示该令牌的键值（默认遮挡）以及一段 kubeconfig，其中 `server` 为 `https://kubernetes.default.svc:443`、`current-context` 为 `<sa>@local`。
 
 ### 关联设计
 

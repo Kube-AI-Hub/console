@@ -18,8 +18,8 @@
 
 文案来自需求 [`prd/cluster-storage/shared-storage/_index.md`](../../../../prd/cluster-storage/shared-storage/_index.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-FULL-CLUSTER_STORAGE-SHARED_STORAGE-01** — Given 已登录，When 在三个页签之间切换，Then 每页的主区都出现：概览有卡片与使用率条，卷页有八列表格，性能页有六张图或指标未开启提示。
-- **AC-FULL-CLUSTER_STORAGE-SHARED_STORAGE-02** — Given 已登录且集群有共享卷，When 从卷页把某个卷的配额改大，Then 表格配额更新、PV 的 `spec.capacity` 更新、JuiceFS 目录 quota 同步更新。
+- **AC-FULL-CLUSTER-STORAGE-SHARED_STORAGE-01** — Given 已登录，When 在三个页签之间切换，Then 每页的主区都出现：概览有卡片与使用率条，卷页有八列表格，性能页有六张图或指标未开启提示。
+- **AC-FULL-CLUSTER-STORAGE-SHARED_STORAGE-02** — Given 已登录且集群有共享卷，When 从卷页把某个卷的配额改大，Then 表格配额更新、PV 的 `spec.capacity` 更新、JuiceFS 目录 quota 同步更新。
 
 ### 关联设计
 

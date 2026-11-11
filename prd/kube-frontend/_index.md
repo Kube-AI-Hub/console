@@ -22,7 +22,7 @@
 
 ## 验收场景
 
-- **AC-CORE-KUBE_FRONTEND-01** — Given 新前端与老 console 同时运行，When 访问新前端的配置字典页，Then 列出的对象与老 console 同一 namespace 的列表一致。
+- **AC-CORE-KUBE-FRONTEND-01** — Given 新前端与老 console 同时运行，When 访问新前端的配置字典页，Then 列出的对象与老 console 同一 namespace 的列表一致。
 
 ## 设计目标
 
@@ -105,7 +105,7 @@ flowchart LR
 
 ## 验收用例
 
-- `TC-CORE-KUBE_FRONTEND-01`（US1）
+- `TC-CORE-KUBE-FRONTEND-01`（US1）
 - `TC-L3-KUBE-FRONTEND-CONFIGMAPS-AI_SURFACE-01`（US2）
 - `TC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-01`（US3）
 - `TC-L2-KUBE-FRONTEND-LOGIN-01`（登录 US1）

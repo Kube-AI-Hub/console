@@ -16,7 +16,7 @@
 
 ## 验收场景
 
-- **AC-L3-KUBE_FRONTEND-SERVICEACCOUNTS-EDIT-01** — Given 一条服务账户，When 打开「编辑」，Then 名称只读、别名与描述可改；保存后 `iam.kubesphere.io/role` 与 `secrets[]` 保持不变；When 打开「编辑 YAML」并修改名称，Then 提示名称锁定且提交禁用。
+- **AC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-EDIT-01** — Given 一条服务账户，When 打开「编辑」，Then 名称只读、别名与描述可改；保存后 `iam.kubesphere.io/role` 与 `secrets[]` 保持不变；When 打开「编辑 YAML」并修改名称，Then 提示名称锁定且提交禁用。
 
 ## 设计目标
 

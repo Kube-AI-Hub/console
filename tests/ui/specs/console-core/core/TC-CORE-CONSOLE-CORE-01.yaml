@@ -1,4 +1,4 @@
-id: TC-CORE-CONSOLE_CORE-01
+id: TC-CORE-CONSOLE-CORE-01
 level: 1
 suite: core
 module: console-core
@@ -10,7 +10,7 @@ prd: prd/console-core/_index.md
 design: design/console-core/_index.md
 
 covers:
-- AC-CORE-CONSOLE_CORE-01
+- AC-CORE-CONSOLE-CORE-01
 
 story:
 - US1

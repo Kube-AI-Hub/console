@@ -6,7 +6,7 @@
 
 ## 关联需求
 
-- `AC-FULL-CLUSTER_GPU-GPU_CARD-01`
+- `AC-FULL-CLUSTER-GPU-GPU_CARD-01`
 
 ## 设计目标与非目标
 
@@ -42,16 +42,16 @@ console
 
 ## 关键契约与依赖
 
-- **CON-FULL-CLUSTER_GPU-GPU_CARD-01** — 集群页与节点页返回的同一个 UUID 的 `health` 必须相同（同一个缓存条目）。
+- **CON-FULL-CLUSTER-GPU-GPU_CARD-01** — 集群页与节点页返回的同一个 UUID 的 `health` 必须相同（同一个缓存条目）。
 - 健康字段的语义与来源见 `health.md` 的「对外契约」一节。
 
 ## 不变量
 
-- **INV-FULL-CLUSTER_GPU-GPU_CARD-01** — 节点页的行数等于该节点 register annotation 的设备数。
+- **INV-FULL-CLUSTER-GPU-GPU_CARD-01** — 节点页的行数等于该节点 register annotation 的设备数。
 
 ## 已知坑
 
-- **GOT-FULL-CLUSTER_GPU-GPU_CARD-01** — 节点页的 `GpuCardList` 与集群页的 `Gpus` 各自写了一份 `record.health ? 'Running' : 'Warning'` 映射。改语义要两处一起改，否则两个页面会不一致。
+- **GOT-FULL-CLUSTER-GPU-GPU_CARD-01** — 节点页的 `GpuCardList` 与集群页的 `Gpus` 各自写了一份 `record.health ? 'Running' : 'Warning'` 映射。改语义要两处一起改，否则两个页面会不一致。
 
 ## 测试与可观测
 
@@ -71,4 +71,4 @@ console
 
 ## 验收用例
 
-- `TC-FULL-CLUSTER_GPU-GPU_CARD-01`
+- `TC-FULL-CLUSTER-GPU-GPU_CARD-01`

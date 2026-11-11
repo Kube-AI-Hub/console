@@ -135,4 +135,4 @@ Pod 监控 /clusters/:cluster/projects/:ns/pods/:pod/monitors
 
 ## 验收用例
 
-- `TC-FULL-CLUSTER_GPU-GPU_MONITOR-01`
+- `TC-FULL-CLUSTER-GPU-GPU_MONITOR-01`

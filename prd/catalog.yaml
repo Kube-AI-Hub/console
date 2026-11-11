@@ -5,7 +5,7 @@ modules:
   design: design/console-core/_index.md
   tests:
     L1:
-    - TC-CORE-CONSOLE_CORE-01
+    - TC-CORE-CONSOLE-CORE-01
   submodules:
   - id: resource-detail
     title: 资源详情页
@@ -30,7 +30,7 @@ modules:
   design: design/cluster-gpu/_index.md
   tests:
     L1:
-    - TC-CORE-CLUSTER_GPU-01
+    - TC-CORE-CLUSTER-GPU-01
   submodules:
   - id: gpu-card
     title: 显卡列表
@@ -38,7 +38,7 @@ modules:
     design: design/cluster-gpu/gpu-card/_index.md
     tests:
       L2:
-      - TC-FULL-CLUSTER_GPU-GPU_CARD-01
+      - TC-FULL-CLUSTER-GPU-GPU_CARD-01
     features:
     - id: health
       title: 健康状态
@@ -114,7 +114,7 @@ modules:
   design: design/cluster-storage/_index.md
   tests:
     L1:
-    - TC-CORE-CLUSTER_STORAGE-01
+    - TC-CORE-CLUSTER-STORAGE-01
   submodules:
   - id: shared-storage
     title: 共享存储（JuiceFS）
@@ -122,7 +122,7 @@ modules:
     design: design/cluster-storage/shared-storage/_index.md
     tests:
       L2:
-      - TC-FULL-CLUSTER_STORAGE-SHARED_STORAGE-01
+      - TC-FULL-CLUSTER-STORAGE-SHARED_STORAGE-01
     features:
     - id: overview
       title: 概览
@@ -155,7 +155,7 @@ modules:
   design: design/kube-frontend/_index.md
   tests:
     L1:
-    - TC-CORE-KUBE_FRONTEND-01
+    - TC-CORE-KUBE-FRONTEND-01
   submodules:
   - id: configmaps
     title: 配置字典
@@ -163,7 +163,7 @@ modules:
     design: design/kube-frontend/configmaps/_index.md
     tests:
       L2:
-      - TC-FULL-KUBE_FRONTEND-CONFIGMAPS-01
+      - TC-FULL-KUBE-FRONTEND-CONFIGMAPS-01
     features:
     - id: list
       title: 配置字典列表
@@ -239,7 +239,7 @@ modules:
     design: design/kube-frontend/secrets/_index.md
     tests:
       L2:
-      - TC-FULL-KUBE_FRONTEND-SECRETS-01
+      - TC-FULL-KUBE-FRONTEND-SECRETS-01
     features:
     - id: list
       title: 保密字典列表
@@ -309,7 +309,7 @@ modules:
     design: design/kube-frontend/serviceaccounts/_index.md
     tests:
       L2:
-      - TC-FULL-KUBE_FRONTEND-SERVICEACCOUNTS-01
+      - TC-FULL-KUBE-FRONTEND-SERVICEACCOUNTS-01
     features:
     - id: list
       title: 服务账户列表
@@ -383,7 +383,7 @@ modules:
     design: design/kube-frontend/cluster-configmaps/_index.md
     tests:
       L2:
-      - TC-FULL-KUBE_FRONTEND-CLUSTER_CONFIGMAPS-01
+      - TC-FULL-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-01
     features:
     - id: list
       title: 集群配置字典列表

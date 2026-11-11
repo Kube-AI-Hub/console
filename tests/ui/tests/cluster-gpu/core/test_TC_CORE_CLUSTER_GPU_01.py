@@ -11,7 +11,7 @@ pytestmark = pytest.mark.ui
 
 @pytest.mark.core
 def test_TC_CORE_CLUSTER_GPU_01(gpu_page, ui_config, screenshot):
-    """TC-CORE-CLUSTER_GPU-01 集群算力入口可打开，显卡列表与健康比例可见，无未翻译 key。"""
+    """TC-CORE-CLUSTER-GPU-01 集群算力入口可打开，显卡列表与健康比例可见，无未翻译 key。"""
     gpu_page.open_cluster()
 
     text = gpu_page.body_text

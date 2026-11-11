@@ -1,6 +1,6 @@
-# TC-FULL-KUBE_FRONTEND-SERVICEACCOUNTS-01 服务账户 · 详情属性与 kubeconfig
+# TC-FULL-KUBE-FRONTEND-SERVICEACCOUNTS-01 服务账户 · 详情属性与 kubeconfig
 
-- **用例 ID**: `TC-FULL-KUBE_FRONTEND-SERVICEACCOUNTS-01`
+- **用例 ID**: `TC-FULL-KUBE-FRONTEND-SERVICEACCOUNTS-01`
 - **级别**: L2  **套件**: `full`
 - **模块**: `kube-frontend` / `serviceaccounts` `page`
 - **入口**: `{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/serviceaccounts`
@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/serviceaccounts/_index.md`](../../../../prd/kube-frontend/serviceaccounts/_index.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-FULL-KUBE_FRONTEND-SERVICEACCOUNTS-01** — Given 项目内有一个带令牌 Secret 的服务账户，When 打开它的详情，Then 属性区显示集群、项目、角色、创建时间、创建者；数据区按令牌 Secret 展示键值（默认遮挡）并给出 kubeconfig 文本，可下载。
+- **AC-FULL-KUBE-FRONTEND-SERVICEACCOUNTS-01** — Given 项目内有一个带令牌 Secret 的服务账户，When 打开它的详情，Then 属性区显示集群、项目、角色、创建时间、创建者；数据区按令牌 Secret 展示键值（默认遮挡）并给出 kubeconfig 文本，可下载。
 
 ### 关联设计
 
