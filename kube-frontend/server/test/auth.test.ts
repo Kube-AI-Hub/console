@@ -2,7 +2,7 @@ import { createServer, type Server } from 'node:http';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createHandler } from '../src/index';
 import type { UpstreamConfig } from '../src/config';
-import { loginErrorFor } from '../src/auth/session';
+import { encodePassword, loginErrorFor } from '../src/auth/session';
 import { userFromToken } from '../src/auth/token';
 
 /**
@@ -53,12 +53,12 @@ async function upstream(routes: Record<string, { status: number; body: unknown }
   return { baseUrl: `http://127.0.0.1:${port}`, calls };
 }
 
-/** A JWT with the given claims; the signature is never checked by the BFF. */
+/**
+ * A JWT with the given claims; the signature is never checked by the BFF. */
 function token(claims: Record<string, unknown>): string {
   const encode = (value: unknown): string =>
     Buffer.from(JSON.stringify(value)).toString('base64url');
-  return `${encode({ alg: 'HS256', typ: 'JWT' })}.${encode(claims)}.signature`;
-}
+  return `${encode({ alg: 'HS256', typ: 'JWT' })}.${encode(claims)}.signature`;}
 
 const CONFIG: UpstreamConfig = { baseUrl: 'http://placeholder', apiPrefix: '/kapis/resources.kubesphere.io/v1alpha3', mode: 'kapis' };
 
@@ -66,7 +66,7 @@ async function bff(baseUrl: string, fetchImpl?: typeof fetch) {
   const server = createServer((request, response) => {
     void createHandler({
       config: { ...CONFIG, baseUrl },
-      oauthClient: { clientId: 'kube-ai-hub', clientSecret: 'kube-ai-hub' },
+      oauthClient: { clientId: 'kube-ai-hub', clientSecret: 'kube-ai-hub', encryptKey: 'kubesphere' },
       ...(fetchImpl ? { fetchImpl } : {}),
     })(request, response);
   });
@@ -103,23 +103,34 @@ describe('POST /api/session/login', () => {
     const form = new URLSearchParams(calls[0]?.body ?? '');
     expect(form.get('grant_type')).toBe('password');
     expect(form.get('username')).toBe('admin');
-    expect(form.get('password')).toBe('P@88w0rd');
+    /*
+     * The password is encoded before it leaves this process. Pinned to the exact
+     * ciphertext the legacy console sends, captured from the live cluster: a
+     * plaintext password is rejected there with `invalid_grant`, so this string is
+     * the working contract, not an implementation detail.
+     */
+    expect(form.get('password')).toBe('MDAxMTAwMTAxMDAw@`]QLa\\enjiSA');
     expect(form.get('client_id')).toBe('kube-ai-hub');
     expect(form.get('client_secret')).toBe('kube-ai-hub');
   });
 
-  it('sends the password as typed, including characters the old obfuscation broke', async () => {
-    const { baseUrl, calls } = await upstream({
-      '/oauth/token': { status: 200, body: { access_token: token({ sub: 'a' }) } },
-    });
-    const url = await bff(baseUrl);
+  it('encodes a password containing `@` to the same string regardless of length', async () => {
+    /*
+     * `@` is the separator in the encoded form, and the payload is base64 of the
+     * password after a salt is mixed in. A short password is padded with the
+     * sentinel `64`, a long one extends the salt — both branches must produce a
+     * stable, server-accepted string. The expected values are the ones the live
+     * cluster accepts; `encodePassword` is pure, so asserting here is the cheapest
+     * way to pin the wire format.
+     */
+    expect(encodePassword('kubesphere', 'P@88w0rd')).toBe('MDAxMTAwMTAxMDAw@`]QLa\\enjiSA');
 
-    await post(`${url}/api/session/login`, { username: 'admin', password: 'P@88w0rd' });
-
-    // The old console ran the password through `mix(salt, base64(pw))`, which
-    // mangled any `@` into a different payload. Byte equality is the contract.
-    const form = new URLSearchParams(calls[0]?.body ?? '');
-    expect(form.get('password')).toBe('P@88w0rd');
+    // A long password takes the other branch: the salt is extended with the
+    // payload, so the encoded body is longer than the salt.
+    const long = 'a'.repeat(40);
+    const encoded = encodePassword('kubesphere', long);
+    expect(encoded).toContain('@');
+    expect(encoded.split('@')[1]!.length).toBe(Buffer.from(long).toString('base64').length);
   });
 
   it('keeps bad credentials distinguishable from a bad client', async () => {

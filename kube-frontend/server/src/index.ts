@@ -40,7 +40,7 @@ async function readBody(request: IncomingMessage): Promise<string> {
  * mirroring it would create a second definition that drifts.
  */
 export function createHandler(deps: HandlerDeps) {
-  const oauthClient = deps.oauthClient ?? { clientId: 'kubesphere', clientSecret: 'kubesphere' };
+  const oauthClient = deps.oauthClient ?? { clientId: 'kubesphere', clientSecret: 'kubesphere', encryptKey: 'kubesphere' };
 
   return async function handle(request: IncomingMessage, response: ServerResponse): Promise<void> {
     const url = new URL(request.url ?? '/', `http://${request.headers.host ?? 'localhost'}`);

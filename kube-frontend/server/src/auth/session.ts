@@ -31,13 +31,59 @@ export { currentUser };
 export interface OAuthClientConfig {
   clientId: string;
   clientSecret: string;
+  /**
+   * The salt ks-apiserver expects the password to be mixed with.
+   *
+   * Read from the console's own `config.encryptKey` upstream (this install sets
+   * `kubesphere`). Kept in the same object as the client credentials because it
+   * is part of the same exchange: the three values must come from one install.
+   */
+  encryptKey: string;
 }
 
 export function oauthClientFromEnv(env: NodeJS.ProcessEnv = process.env): OAuthClientConfig {
   return {
     clientId: env['KS_OAUTH_CLIENT_ID'] ?? 'kubesphere',
     clientSecret: env['KS_OAUTH_CLIENT_SECRET'] ?? 'kubesphere',
+    encryptKey: env['KS_OAUTH_ENCRYPT_KEY'] ?? 'kubesphere',
   };
+}
+
+/**
+ * The password encoding ks-apiserver requires on `/oauth/token`.
+ *
+ * This install's server expects the old console's `mix(salt, base64(pw))` form,
+ * not the plaintext: posting `P@88w0rd` answers `invalid_grant: incorrect
+ * password`, while the mixed form is accepted. Verified against the live
+ * cluster by reproducing the ciphertext the legacy console sends
+ * (`MDAxMTAwMTAxMDAw@`]QLa\enjiSA` for that password with salt `kubesphere`).
+ *
+ * It provides no secrecy — the salt is public and the transform is reversible —
+ * so it is not a security measure and must not be described as one. It is a wire
+ * format, which is why it lives here in the BFF rather than in the browser: the
+ * reader types and sees the password, and only this process encodes it.
+ *
+ * A server that accepts plaintext ignores the difference, so encoding
+ * unconditionally is safe for both.
+ */
+export function encodePassword(salt: string, password: string): string {
+  return mix(salt, Buffer.from(password, 'utf8').toString('base64'));
+}
+
+/** The old console's `mix` (`console/src/utils/index.js:889`), ported verbatim. */
+function mix(salt: string, encoded: string): string {
+  let key = salt;
+  if (encoded.length > key.length) key += encoded.slice(0, encoded.length - key.length);
+
+  const prefix: string[] = [];
+  const out: string[] = [];
+  for (let index = 0; index < key.length; index += 1) {
+    const tomix = encoded.length > index ? encoded.charCodeAt(index) : 64;
+    const sum = key.charCodeAt(index) + tomix;
+    prefix.push(sum % 2 === 0 ? '0' : '1');
+    out.push(String.fromCharCode(Math.floor(sum / 2)));
+  }
+  return `${Buffer.from(prefix.join(''), 'utf8').toString('base64')}@${out.join('')}`;
 }
 
 /** The upstream base URL with `path` appended; `baseUrl` may carry no trailing slash. */
@@ -100,10 +146,12 @@ export interface LoginInput {
 /**
  * Exchange a username and password for a token.
  *
- * The password is sent as typed. The old console ran it through a homegrown
- * `mix(salt, base64(password))` obfuscation before sending, which the server
- * undid; that added no secrecy (the salt is public and the transform is
- * reversible) and did break passwords containing `@`, so it is not carried over.
+ * The password arrives as typed and is encoded here — see `encodePassword` for
+ * why the encoding is required and why it belongs in this process rather than in
+ * the browser. The comment that used to sit here said the transform was dropped
+ * because it "broke passwords containing `@`"; the live cluster disproved that,
+ * and a login that cannot happen at all is a worse bug than one that only works
+ * with a different encoding.
  */
 export async function login(
   config: UpstreamConfig,
@@ -113,7 +161,7 @@ export async function login(
 ): Promise<{ ok: true; session: SessionResponse } | { ok: false; error: LoginErrorBody }> {
   const form = new URLSearchParams({
     username: input.username,
-    password: input.password,
+    password: encodePassword(client.encryptKey, input.password),
     grant_type: 'password',
     client_id: client.clientId,
     client_secret: client.clientSecret,
