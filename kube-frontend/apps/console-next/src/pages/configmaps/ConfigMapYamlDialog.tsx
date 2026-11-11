@@ -1,8 +1,15 @@
 import * as React from 'react';
-import { Button, Icon, Modal, YamlEditor, cn } from '@kube-ai-hub/ui';
+import { Button, Icon, Modal, cn } from '@kube-ai-hub/ui';
+/*
+ * The `ui/editor` subpath, not the barrel: the barrel is in the always-loaded
+ * `app-shared` chunk, so re-exporting the editor there pulled CodeMirror into
+ * every page's first load. This dialog is itself lazy-loaded.
+ */
+import { YamlEditor } from '@kube-ai-hub/ui/editor';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
+import { parse as parseYaml } from 'yaml';
 import { useT } from '@/i18n';
+export { toYaml } from './yaml';
 
 /**
  * YAML dialog, shared by create and edit.
@@ -168,12 +175,12 @@ export function ConfigMapYamlDialog({
   );
 }
 
-/**
- * Serialise an object for the editor.
+/*
+ * Default export for `React.lazy`.
  *
- * `noRefs` because a shared reference would otherwise become an anchor, which is
- * valid YAML but unreadable in a hand-editing dialog.
+ * The editor and its CodeMirror dependencies are 188 KB gzip and no list page
+ * needs them until a dialog opens, so the only way to keep them off the first
+ * load is to import this module dynamically. The named export stays for the
+ * existing imports.
  */
-export function toYaml(object: unknown): string {
-  return stringifyYaml(object, { lineWidth: 0 } as Parameters<typeof stringifyYaml>[1]);
-}
+export default ConfigMapYamlDialog;

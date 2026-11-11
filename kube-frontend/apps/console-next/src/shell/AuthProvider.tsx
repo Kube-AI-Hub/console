@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { isTokenExpired, sessionApi, userFromToken, type SessionUser } from '@kube-ai-hub/api-client';
+import { ApiError, isTokenExpired, sessionApi, userFromToken, type SessionUser } from '@kube-ai-hub/api-client';
 import { api, TOKEN_STORAGE_KEY } from '@/api';
 
 /**
@@ -59,25 +59,63 @@ export function AuthProvider({ children }: { children: React.ReactNode }): React
    * stale session shows the login page instead of a console whose every request
    * fails.
    */
+  /*
+   * `me` is called once on mount, not on every render: it is the only way to
+   * tell a revoked token from an expired one, since a JWT stays self-consistent
+   * after the cluster has forgotten it. A 401 clears the stored token, so a
+   * stale session shows the login page instead of a console whose every request
+   * fails.
+   *
+   * **Never** clear the token for a transport failure. This effect runs once per
+   * app mount, and the page the reader landed on immediately refetches its own
+   * data anyway; an already-authenticated session that hit one slow or dropped
+   * `/me` (a cold BFF, a flaky network) was being signed out permanently — the
+   * symptom was a page that bounced back to the login screen on a later
+   * navigation, with the stored session silently gone.
+   */
   React.useEffect(() => {
-    if (!readToken()) {
+    const stored = readToken();
+    if (!stored) {
       setReady(true);
       return;
     }
+    // A token that cannot be decoded is unusable without a round trip.
+    const derived = userFromToken(stored);
+    if (!derived) {
+      writeToken(null);
+      setUser(null);
+      setReady(true);
+      return;
+    }
+
     let cancelled = false;
-    sessionApi(api)
-      .me()
-      .then((fresh) => {
-        if (!cancelled) setUser(fresh);
-      })
-      .catch(() => {
-        if (cancelled) return;
-        writeToken(null);
-        setUser(null);
-      })
-      .finally(() => {
-        if (!cancelled) setReady(true);
-      });
+    const validate = (attempt: number): Promise<void> =>
+      sessionApi(api)
+        .me()
+        .then((fresh) => {
+          if (!cancelled) setUser(fresh);
+        })
+        .catch(async (error: unknown) => {
+          if (cancelled) return;
+          const status = error instanceof ApiError ? error.status : 0;
+          // A definite rejection means the cluster forgot the session.
+          if (status === 401 || status === 403) {
+            writeToken(null);
+            setUser(null);
+            return;
+          }
+          // Anything else (502 from the BFF, a timeout, a 5xx) is worth a retry;
+          // after that, keep the self-consistent session and let each request
+          // decide for itself.
+          if (attempt < 2) {
+            await new Promise((resolve) => setTimeout(resolve, 400));
+            return validate(attempt + 1);
+          }
+          if (!cancelled) setUser(derived);
+        });
+    void validate(1).finally(() => {
+      if (!cancelled) setReady(true);
+    });
     return () => {
       cancelled = true;
     };

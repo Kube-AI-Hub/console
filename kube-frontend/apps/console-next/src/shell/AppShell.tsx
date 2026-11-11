@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useRouterState } from '@tanstack/react-router';
+import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { Drawer, Dropdown, Icon, Menu, ThemeToggle, cn, useIsMobile, type DropdownItem, type IconName, type MenuNode } from '@kube-ai-hub/ui';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { useLocale, useT } from '@/i18n';
@@ -59,6 +59,26 @@ const NAV: readonly NavGroup[] = [
         icon: 'catalog',
         build: ({ workspace, cluster, namespace }) =>
           `/kube-frontend/${workspace}/clusters/${cluster}/projects/${namespace}/configmaps`,
+      },
+      /*
+       * Both entries share the sidebar's `active` test, which looks for `/<key>`
+       * anywhere in the pathname. That is why the keys are not prefixes of one
+       * another and why `serviceaccounts` must not be shortened to `services`: a
+       * `secrets` link would then light up the Services entry (if one is added).
+       */
+      {
+        key: 'secrets',
+        labelKey: 'secrets.title',
+        icon: 'key',
+        build: ({ workspace, cluster, namespace }) =>
+          `/kube-frontend/${workspace}/clusters/${cluster}/projects/${namespace}/secrets`,
+      },
+      {
+        key: 'serviceaccounts',
+        labelKey: 'serviceaccounts.title',
+        icon: 'user-profile',
+        build: ({ workspace, cluster, namespace }) =>
+          `/kube-frontend/${workspace}/clusters/${cluster}/projects/${namespace}/serviceaccounts`,
       },
     ],
   },
@@ -349,6 +369,29 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
   const [drawerOpen, setDrawerOpen] = React.useState(false);
   const [collapsed, setCollapsed] = React.useState(readStoredCollapsed);
   const location = useRouterState({ select: (state) => state.location.pathname });
+  const navigate = useNavigate();
+
+  /*
+   * Client-side navigation for the sidebar.
+   *
+   * Without this every click between two resource pages was a full document
+   * load: ~1.5 MB of JS re-fetched, the session re-validated, the shell rebuilt.
+   * Same area or not, the page flashed. Handing the click to the router keeps the
+   * SPA alive, so a switch inside the workbench costs only the data request.
+   *
+   * Modified clicks and explicit targets stay with the browser — "open in new
+   * tab" must still work.
+   */
+  const onNavigate = React.useCallback(
+    (href: string, event: React.MouseEvent<HTMLAnchorElement>): boolean => {
+      if (event.defaultPrevented) return false;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return false;
+      if (event.currentTarget.target && event.currentTarget.target !== '_self') return false;
+      void navigate({ href });
+      return true;
+    },
+    [navigate],
+  );
   const platform = activePlatform(location);
 
   /**
@@ -553,7 +596,7 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
                   <p className="px-3 text-[11px] font-medium uppercase tracking-wide text-ai-fg-faint">
                     {t(group.titleKey)}
                   </p>
-                  <Menu items={groupItems(group)} {...(activeKey ? { activeKey } : {})} />
+                  <Menu items={groupItems(group)} onNavigate={onNavigate} {...(activeKey ? { activeKey } : {})} />
                 </div>
               ))}
             </div>
@@ -580,7 +623,7 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
                       {t(group.titleKey)}
                     </p>
                   )}
-                  <Menu items={groupItems(group)} collapsed={collapsed} {...(activeKey ? { activeKey } : {})} />
+                  <Menu items={groupItems(group)} collapsed={collapsed} onNavigate={onNavigate} {...(activeKey ? { activeKey } : {})} />
                 </div>
               ))}
             </nav>

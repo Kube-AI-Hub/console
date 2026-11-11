@@ -10,6 +10,10 @@
       "types": "./src/index.ts",
       "import": "./src/index.ts"
     },
+    "./editor": {
+      "types": "./src/editor.ts",
+      "import": "./src/editor.ts"
+    },
     "./styles.css": "./src/styles.css",
     "./tailwind.preset": {
       "types": "./src/preset.ts",

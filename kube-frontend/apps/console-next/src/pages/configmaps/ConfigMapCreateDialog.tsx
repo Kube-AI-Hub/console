@@ -4,7 +4,11 @@ import { actionProps } from '@kube-ai-hub/ai-surface';
 import type { ConfigMapInput } from '@kube-ai-hub/api-client';
 import { useT } from '@/i18n';
 import { ConfigMapDataEditor } from './ConfigMapDataEditor';
-import { ConfigMapYamlDialog, toYaml } from './ConfigMapYamlDialog';
+import { DialogSuspense } from '@/components/resource/DialogSuspense';
+import { toYaml } from './yaml';
+
+/* Editor on demand; see `ConfigMapsPage`. */
+const ConfigMapYamlDialog = React.lazy(() => import('./ConfigMapYamlDialog'));
 
 /**
  * Create dialog, two steps, with a YAML escape hatch.
@@ -90,6 +94,19 @@ export function ConfigMapCreateDialog({
       setDraft({ ...EMPTY, namespace });
       setErrors({});
     }
+  }, [open, namespace]);
+
+  /*
+   * Track a late-arriving seed.
+   *
+   * The caller's project can become known after the dialog opens: the list's
+   * project filter defaults to the route's namespace, but on a slow load the
+   * dialog may mount while that value is still empty. Re-seeding only while the
+   * reader has not chosen anything keeps their choice authoritative.
+   */
+  React.useEffect(() => {
+    if (!open || !namespace) return;
+    setDraft((current) => (current.namespace === '' && current.name === '' ? { ...current, namespace } : current));
   }, [open, namespace]);
 
   const validateBasics = (): boolean => {
@@ -245,34 +262,36 @@ export function ConfigMapCreateDialog({
         </div>
       </Modal>
 
-      <ConfigMapYamlDialog
-        open={open && yamlOpen}
-        onOpenChange={(next) => setYamlOpen(next)}
-        initialYaml={toYaml({
-          apiVersion: 'v1',
-          kind: 'ConfigMap',
-          metadata: {
-            name: draft.name || 'my-configmap',
-            namespace: draft.namespace || null,
-            ...(draft.alias || draft.description
-              ? {
-                  annotations: {
-                    ...(draft.alias ? { 'kubesphere.io/alias-name': draft.alias } : {}),
-                    ...(draft.description ? { 'kubesphere.io/description': draft.description } : {}),
-                  },
-                }
-              : {}),
-          },
-          data: draft.data,
-        })}
-        title={t('configmaps.create.title')}
-        submitLabel={t('configmaps.create.submit')}
-        pending={pending}
-        onSubmit={(object) => {
-          setYamlOpen(false);
-          void (onSubmitYaml ?? (() => undefined))(object);
-        }}
-      />
+      <DialogSuspense>
+        <ConfigMapYamlDialog
+          open={open && yamlOpen}
+          onOpenChange={(next) => setYamlOpen(next)}
+          initialYaml={toYaml({
+            apiVersion: 'v1',
+            kind: 'ConfigMap',
+            metadata: {
+              name: draft.name || 'my-configmap',
+              namespace: draft.namespace || null,
+              ...(draft.alias || draft.description
+                ? {
+                    annotations: {
+                      ...(draft.alias ? { 'kubesphere.io/alias-name': draft.alias } : {}),
+                      ...(draft.description ? { 'kubesphere.io/description': draft.description } : {}),
+                    },
+                  }
+                : {}),
+            },
+            data: draft.data,
+          })}
+          title={t('configmaps.create.title')}
+          submitLabel={t('configmaps.create.submit')}
+          pending={pending}
+          onSubmit={(object) => {
+            setYamlOpen(false);
+            void (onSubmitYaml ?? (() => undefined))(object);
+          }}
+        />
+      </DialogSuspense>
     </>
   );
 }

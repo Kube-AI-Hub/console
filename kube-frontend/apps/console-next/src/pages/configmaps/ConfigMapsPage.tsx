@@ -19,7 +19,15 @@ import { ConfigMapCreateDialog } from './ConfigMapCreateDialog';
 import { ConfigMapDeleteDialog } from './ConfigMapDeleteDialog';
 import { formatTimestamp } from './format';
 import { ConfigMapEditInfoDialog, ConfigMapEditSettingsDialog } from './ConfigMapEditDialogs';
-import { ConfigMapYamlDialog, toYaml } from './ConfigMapYamlDialog';
+import { toYaml } from './yaml';
+
+import { DialogSuspense } from '@/components/resource/DialogSuspense';
+
+/*
+ * The YAML editor is 188 KB gzip of CodeMirror. A list page must not pay for it
+ * before a dialog opens, so it is imported on demand (DEC-CORE-KUBE_FRONTEND-04).
+ */
+const ConfigMapYamlDialog = React.lazy(() => import('./ConfigMapYamlDialog'));
 
 export interface ConfigMapsPageProps {
   /** Workspace segment; carried for route parity, not used for fetching yet. */
@@ -448,19 +456,21 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
       ) : null}
 
       {dialog.kind === 'editYaml' ? (
-        <ConfigMapYamlDialog
-          open
-          onOpenChange={(open) => !open && setDialog({ kind: 'none' })}
-          initialYaml={toYaml(dialog.detail.raw)}
-          lockName={dialog.detail.name}
-          title={t('configmaps.edit.yamlTitle')}
-          submitLabel={t('common.confirm')}
-          pending={update.isPending}
-          onSubmit={async (object) => {
-            await update.mutateAsync(object as never);
-            setDialog({ kind: 'none' });
-          }}
-        />
+        <DialogSuspense>
+  <ConfigMapYamlDialog
+            open
+            onOpenChange={(open) => !open && setDialog({ kind: 'none' })}
+            initialYaml={toYaml(dialog.detail.raw)}
+            lockName={dialog.detail.name}
+            title={t('configmaps.edit.yamlTitle')}
+            submitLabel={t('common.confirm')}
+            pending={update.isPending}
+            onSubmit={async (object) => {
+              await update.mutateAsync(object as never);
+              setDialog({ kind: 'none' });
+            }}
+          />
+        </DialogSuspense>
       ) : null}
 
     </AiSurface>

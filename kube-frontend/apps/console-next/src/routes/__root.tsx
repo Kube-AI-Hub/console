@@ -1,5 +1,7 @@
 import * as React from 'react';
 import { createRootRoute, Outlet, redirect, useRouterState } from '@tanstack/react-router';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { createQueryClient } from '@/query';
 import { isTokenExpired } from '@kube-ai-hub/api-client';
 import { AppShell } from '@/shell/AppShell';
 import { AuthProvider, readToken, useAuth } from '@/shell/AuthProvider';
@@ -69,6 +71,17 @@ function AuthenticatedShell({ children }: { children: React.ReactNode }): React.
     }
   }, [ready, user]);
 
-  if (!ready || !user) return <div className="min-h-screen" aria-busy="true" />;
+  /*
+   * Cheap guard for layouts that render outside this app's providers (a test
+   * mounting one page, or a future storybook entry): a page that needs the query
+   * client would otherwise throw "No QueryClient set" and show a blank screen.
+   */
+  if (!ready || !user) {
+    return (
+      <QueryClientProvider client={createQueryClient()}>
+        <div className="min-h-screen" aria-busy="true" />
+      </QueryClientProvider>
+    );
+  }
   return <AppShell>{children}</AppShell>;
 }
