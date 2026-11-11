@@ -31,6 +31,23 @@ export interface MenuProps {
   defaultOpenKeys?: string[];
   /** Collapse to icon-only rail. */
   collapsed?: boolean;
+  /**
+   * Router navigation for a link node, replacing the browser's default.
+   *
+   * An `<a href>` always costs a full document load, which for this console means
+   * re-fetching every chunk and re-running the session check — measured at ~1.5 MB
+   * of JS and a visible blank frame on each click between resource pages. Pass
+   * the router's own click handler here to keep the SPA alive.
+   *
+   * Receives the href and the originating click so the host can decide (a
+   * modified click, a different origin or a `target` still belongs to the
+   * browser). Returning `true` means "handled"; `false` falls through to the
+   * browser's default navigation.
+   *
+   * Kept as a prop rather than an `<Link>` element so this package stays free of
+   * router imports (its contract: no routing).
+   */
+  onNavigate?: (href: string, event: React.MouseEvent<HTMLAnchorElement>) => boolean;
   className?: string;
   'aria-label'?: string;
 }
@@ -45,6 +62,7 @@ export function Menu({
   activeKey,
   defaultOpenKeys,
   collapsed = false,
+  onNavigate,
   className,
   ...aria
 }: MenuProps): React.ReactElement {
@@ -100,7 +118,17 @@ export function Menu({
           title={collapsed ? String(node.label) : undefined}
           className={classes}
           style={indent}
-          onClick={node.onClick}
+          onClick={(event) => {
+            /*
+             * Router first: a full document load re-downloads every chunk and
+             * re-runs the session check, which is what made switching between
+             * two resource pages feel like a page reload.
+             */
+            if (!node.disabled && onNavigate?.(node.href as string, event)) {
+              event.preventDefault();
+            }
+            node.onClick?.();
+          }}
         >
           {content}
         </a>

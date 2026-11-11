@@ -44,7 +44,13 @@ export {
   themeBootstrapScript,
   Tooltip,
   Modal,
-  YamlEditor,
+  /*
+   * `YamlEditor` is deliberately not re-exported.
+   *
+   * This barrel is what every page imports, so re-exporting the editor tied
+   * CodeMirror (188 KB gzip) to every first load. Consumers import it from
+   * `@kube-ai-hub/ai-kit` inside the dialog chunk that actually renders it.
+   */
   cn,
   useIsMobile,
   useMediaQuery,
@@ -53,7 +59,6 @@ export {
 export type {
   ButtonProps,
   DropdownItem,
-  YamlEditorProps,
   DropdownProps,
   IconName,
   ListAction,
@@ -61,6 +66,7 @@ export type {
   ListFilter,
   ListSchema,
   MenuNode,
+  MenuProps,
   ResourceListProps,
   SelectOption,
   SelectProps,
