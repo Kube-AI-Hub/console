@@ -39,6 +39,15 @@ def test_TC_FULL_KUBE_FRONTEND_SERVICEACCOUNTS_01(serviceaccounts_page, e2e_obje
     # is that the page's document carries the token that is stored — read after the
     # page has rendered. A mismatch means the preview disagrees with the Secret,
     # which is exactly the failure worth reporting.
+    # The detail page fetches the token Secret in its own request; wait until a read
+    # already returns a populated token before judging the rendered document,
+    # otherwise the assertion races the page's own fetch.
+    deadline = time.time() + 20
+    while time.time() < deadline:
+        stored = (e2e_objects["get"]("secrets", token_secret).get("data") or {}).get("token", "")
+        if stored:
+            break
+        time.sleep(0.5)
     serviceaccounts_page.open_detail(name)
     serviceaccounts_page.reveal()
     kubeconfig = serviceaccounts_page.kubeconfig(token_secret)

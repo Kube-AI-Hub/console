@@ -12,6 +12,8 @@ def test_TC_L3_KUBE_FRONTEND_SERVICEACCOUNTS_ROLE_01(serviceaccounts_page, e2e_o
 
     name = e2e_objects["service_account"](e2e_objects["unique"](), role="viewer")
     serviceaccounts_page.open()
+    serviceaccounts_page.page.reload()
+    serviceaccounts_page.wait_ready()
     serviceaccounts_page.open_row_menu(name)
 
     with serviceaccounts_page.page.expect_request(lambda request: request.method == "PATCH" and "/serviceaccounts/" in request.url) as request_info:

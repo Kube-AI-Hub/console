@@ -19,7 +19,8 @@ def test_TC_L3_KUBE_FRONTEND_SERVICEACCOUNTS_DETAIL_01(serviceaccounts_page, e2e
     import base64
 
     name = e2e_objects["service_account"](e2e_objects["unique"](), role="operator", secrets=[token_secret])
-    # Wait for the controller-populated token before the page opens.
+    # Wait for the controller-populated token before the page opens, and for the
+    # account to report the binding — a freshly patched list can lag by a moment.
     e2e_objects["token_data"](token_secret)
     serviceaccounts_page.open_detail(name)
 

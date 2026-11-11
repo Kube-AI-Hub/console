@@ -74,6 +74,15 @@ class SecretsPage:
     def row(self, name: str) -> Locator:
         return self.surface.locator(f'[data-ai-row="{name}"]')
 
+    def wait_for_row(self, name: str, timeout_ms: int = 10_000) -> None:
+        """Wait until the list shows a row.
+
+        A list request issued just before the object was created caches a page
+        without it; this waits for the next fetch that has it instead of assuming
+        the first render is current.
+        """
+        expect(self.row(name)).to_be_visible(timeout=timeout_ms)
+
     def row_text(self, name: str) -> str:
         return self.row(name).inner_text()
 

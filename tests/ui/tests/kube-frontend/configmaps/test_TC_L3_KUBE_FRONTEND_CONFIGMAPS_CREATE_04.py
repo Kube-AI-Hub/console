@@ -38,7 +38,9 @@ def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_CREATE_04(configmaps_page, ui_config, sc
 
     dialog.get_by_role("textbox", name="名称").fill(name)
     dialog.get_by_role("button", name="下一步").click()
-    dialog.get_by_role("button", name="创建").click()
+    # The Create button only exists on the data step; a slower first render means
+    # the click that just happened may not have re-rendered yet.
+    dialog.get_by_role("button", name="创建").click(timeout=15_000)
 
     expect(dialog).to_be_hidden()
     screenshot(page, "create-project-created")

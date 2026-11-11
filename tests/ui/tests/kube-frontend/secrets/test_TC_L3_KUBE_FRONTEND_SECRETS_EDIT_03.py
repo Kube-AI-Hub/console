@@ -12,6 +12,8 @@ def test_TC_L3_KUBE_FRONTEND_SECRETS_EDIT_03(secrets_page, e2e_objects, screensh
 
     name = e2e_objects["secret"](e2e_objects["unique"](), data={"k": "v"})
     secrets_page.open()
+    # A list fetch that started before the create could cache a page without it.
+    secrets_page.wait_for_row(name)
     secrets_page.open_row_menu(name)
     secrets_page.click_row_action("编辑 YAML")
 

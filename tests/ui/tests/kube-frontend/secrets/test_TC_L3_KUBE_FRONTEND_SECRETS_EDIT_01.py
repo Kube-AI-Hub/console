@@ -12,6 +12,7 @@ def test_TC_L3_KUBE_FRONTEND_SECRETS_EDIT_01(secrets_page, e2e_objects, screensh
 
     name = e2e_objects["secret"](e2e_objects["unique"](), data={"password": "keep"}, annotations={"kubesphere.io/creator": "admin"})
     secrets_page.open()
+    secrets_page.wait_for_row(name)
     secrets_page.open_row_menu(name)
     secrets_page.click_row_action("编辑信息")
     expect(secrets_page.dialog).to_be_visible()
