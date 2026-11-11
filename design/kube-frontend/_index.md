@@ -46,6 +46,48 @@
 
 **被否方案**：前端直连 ks-apiserver + 每个页面各自处理错误。会在 24 个资源模块里重复 24 次。
 
+### DEC-CORE-KUBE_FRONTEND-04 — 按产品功能区拆包，不按页面预加载
+
+**为什么**：使用者是企业内部的算力运维人员，一天在同类资源页之间来回几十次，判断标准是"切换像桌面应用"，首屏慢 1–2 秒可以接受。但产品有 24 个资源模块，若照 dongba 的做法把整站模块写进 `<head>` 预加载，首屏会随页面数线性增长，到后期不可接受。
+
+于是取中点：**按顶部导航的产品功能区切分构建产物**——工作台（项目资源）、平台管理、应用商店、登录各自一组共享依赖，同区页面之间零额外下载，跨区切换才拉一组新的（每区有上限）。页面级 chunk 仍保留，只承载该页面的业务代码。
+
+**实测依据**（生产构建，gzip）：首屏约 332 KB，其中 React/Radix/ai-kit 共享层 150.8 KB、图标雪碧图 113.4 KB、路由壳 31.3 KB、configmaps 自身约 23 KB；configmaps → secrets 客户端切换只新增 12 KB，无 document、无 CSS 请求。即**首屏的 84% 是共享层**，切页面的增量很小——所以优化的对象是共享层怎么切块，而不是页面。
+
+**被否方案**：整站 `modulepreload`（dongba 现做法）。实测其两个 console 文档预加载同一组 65 个模块、首屏 JS 1836 KB；页面数翻倍时这一数字同步翻倍，而绝大多数用户一次只用一个区。
+
+**被否方案**：完全按页面懒加载、不做区级共享块。同一区页面之间会重复下载 Radix/Select 等重复依赖，且每次切换都有可见的空白帧。
+
+**何时重新考虑**：若首屏 P95 在弱网下超过 5 秒，再引入按区的服务端预取（见 [`DEC-...-05`](#dec-core-kube_frontend-05--共享层预取由交互意图触发)）。
+
+### DEC-CORE-KUBE_FRONTEND-05 — 共享层预取由交互意图触发
+
+**为什么**：区级拆包后跨区首次切换要付一次加载。在导航上 `onPointerEnter` / `onFocus` 时预取目标区的共享块，让"决定要点"的 200–400 ms 覆盖掉下载时间；`defaultPreload: 'intent'` 已有的机制可复用，只需把预取目标从路由 chunk 扩展到区级共享块。
+
+**约束**：预取必须可被 `Save-Data` 与 `prefers-reduced-data` 关闭，且不得在首屏触发——否则等于退化成整站预加载。
+
+**被否方案**：`<link rel="prefetch">` 预取全部区。移动网络下会与首屏请求抢带宽。
+
+### DEC-CORE-KUBE_FRONTEND-06 — 构建期把第三方依赖按稳定性分块
+
+**为什么**：Vite 默认把"首屏用不到的共享依赖"放进同一个大 chunk，任何依赖升级都会换掉它的哈希，整块缓存失效。按变更频率分块——`react` 系（极少变）、`radix`/`tanstack` 系（偶尔变）、`ai-kit`（随产品变）——让改业务代码只失效对应的小块。
+
+**已知代价**：分块过细会增加请求数，每个 chunk 都带一份模块运行时代码。以 3–5 个 vendor 块为上限，不按单个库切。
+
+**被否方案**：不配 `manualChunks`，全交给 Vite 默认策略（当前状态：一个 150.8 KB 的主 chunk 装下了全部共享依赖，改任何一处依赖都整块失效）。
+
+### DEC-CORE-KUBE_FRONTEND-07 — 减小页面文件对 CSS 与共享 chunk 的牵连
+
+**为什么**：开发期实测，编辑任何一个带 Tailwind 类名的页面文件，HMR 都会连带刷新 `/src/styles.css` 与承载该页面的 chunk。页面越集中在少数文件里，每次保存重建的 CSS 越大，热更新越慢；多人同时改不同页面时，重建还会互相打断。
+
+拆法：
+- **样式按区**：依据现有 `tailwind.config.cjs` 的 `content` 扫描范围，把 `styles.css` 拆成"基础 + 区级"入口，区级入口只扫描该区的页面（`@source` 限定目录）。只改某区页面时，只有该区的 CSS 失效。
+- **共享组件下沉**：页面之间重复引用的组件与 hook 移到 `packages/` 或 `components/`，让页面文件只描述该页的列/字段/表单，减少单文件体积与重建扇出。
+
+**验证方式**：改动一次页面文件后，Vite 日志里应只出现该页面自身的 update 与所属区的 CSS，不再出现全局 `styles.css`。
+
+**被否方案**：不做拆分，靠"少改页面文件"约束开发习惯。靠人记住的约束不成立。
+
 ## 系统现状
 
 老 console 是 24 个资源模块的集合，列表页靠 `withList` HOC 压缩样板。新前端首批只迁 ConfigMaps，用它验证 schema 抽象。
@@ -119,6 +161,7 @@ flowchart LR
 - **GOT-CORE-KUBE_FRONTEND-02** — `exactOptionalPropertyTypes` 下不能把 `undefined` 传给可选属性（如 `activeKey`），需要条件展开。
 - **GOT-CORE-KUBE_FRONTEND-03** — Tailwind 4 的 `@import` 解析在 CSS 注释含撇号时会报 `Unterminated string`。
 - **GOT-CORE-KUBE_FRONTEND-04** — ai-kit 以 `dist` 提供，新增导出后必须重建 ai-kit，否则消费方构建失败。
+- **GOT-CORE-KUBE_FRONTEND-05** — 开发期编辑任何带 Tailwind 类名的页面文件，都会连带触发 `/src/styles.css` 整体重建，日志里的 `hmr update /src/styles.css, /src/pages/...` 即由此而来。改样式扫描范围（`DEC-CORE-KUBE_FRONTEND-07`）之前，这是保存变慢的主因。
 
 ## 测试与可观测
 
@@ -132,6 +175,7 @@ flowchart LR
 - 不改 `console/src`。
 - 不做创建 / 编辑表单与其他资源模块。
 - 不做 SSR 与 Cloudflare 部署。
+- **不做整站预加载**：不把所有模块写进 `<head>` 的 `modulepreload`，也不在首屏预取未访问区的共享块。理由与替代做法见 `DEC-CORE-KUBE_FRONTEND-04` / `-05`。
 
 ## 后续改进
 
