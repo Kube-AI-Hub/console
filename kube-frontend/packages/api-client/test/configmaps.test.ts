@@ -32,6 +32,32 @@ function recordingClient() {
 }
 
 describe('ConfigMaps transport', () => {
+  it('reads the cluster-wide collection with no scope segment when scope is cluster', async () => {
+    /*
+     * The cluster console and the project console are different collections, not
+     * one collection with a filter: the cluster view has no segment between the
+     * prefix and `configmaps`, which is what makes it span every project.
+     *
+     * Verified against a live ks-apiserver: the bare collection answers 200 with
+     * thousands of items across namespaces, while `/klusters/<id>` answers 404 —
+     * so the plan's initial guess was wrong and this test pins the working shape.
+     */
+    const { api, calls } = recordingClient();
+    await api.list({ cluster: 'default', namespace: '', page: 1, pageSize: 10, scope: 'cluster' });
+
+    expect(calls[0]?.url).toContain('/kapis/resources.kubesphere.io/v1alpha3/configmaps');
+    expect(calls[0]?.url).not.toContain('/namespaces/');
+    expect(calls[0]?.url).not.toContain('/klusters/');
+  });
+
+  it('reads the project collection by default', async () => {
+    const { api, calls } = recordingClient();
+    await api.list({ cluster: 'default', namespace: 'ns', page: 1, pageSize: 10 });
+
+    expect(calls[0]?.url).toContain('/kapis/resources.kubesphere.io/v1alpha3/clusters/default/namespaces/ns/configmaps');
+    expect(calls[0]?.url).not.toContain('/klusters/');
+  });
+
   it('reads through kapis', async () => {
     const { api, calls } = recordingClient();
     await api.list({ cluster: 'host', namespace: 'ns', page: 1, pageSize: 10 });
@@ -55,8 +81,7 @@ describe('ConfigMaps transport', () => {
     expect(calls[0]?.method).toBe('DELETE');
   });
 
-  it('sends PATCH with a merge-patch media type', async () => {
-    /*
+  it('sends PATCH with a merge-patch media type', async () => {    /*
      * kube-apiserver answers 415 to a patch sent as `application/json`; the patch
      * strategy has to be in the content type. This was a live bug: "编辑信息"
      * submitted, the request failed, and the dialog simply stayed open with no

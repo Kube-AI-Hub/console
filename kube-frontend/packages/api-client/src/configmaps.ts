@@ -58,10 +58,31 @@ export interface KubeConfigMap {
   binaryData?: Record<string, string>;
 }
 
+/**
+ * Which page the caller is on: the project console or the cluster console.
+ *
+ * These are two separate pages in the old console and they read differently.
+ * `project` reads the namespaced collection; `cluster` reads the collection with
+ * no scope segment at all, which spans every project in the cluster.
+ *
+ * Verified against a live ks-apiserver: `/kapis/resources.kubesphere.io/v1alpha3/configmaps`
+ * answers 200 with 3490 items across many namespaces, while
+ * `.../klusters/<id>/configmaps` answers 404 — the `klusters` segment in the old
+ * console's `base.js` is not served by this version.
+ */
+export type ConfigMapScope = 'project' | 'cluster';
+
 export interface ListParams {
   cluster: string;
-  /** Empty string lists across every project in the cluster. */
+  /**
+   * Project to read. Empty string lists across every project.
+   *
+   * Required for `scope: 'project'` only in the sense that the caller decides;
+   * for `scope: 'cluster'` it is ignored.
+   */
   namespace: string;
+  /** Defaults to `project`. */
+  scope?: ConfigMapScope;
   page: number;
   pageSize: number;
   /** Matches the column key; `createTime` is the API's spelling. */
@@ -97,8 +118,13 @@ export interface ResourceRef {
  * projects" is expressed — there is no query parameter for it — and it is much
  * slower than a per-project query because the server walks every namespace.
  */
-function collectionPath(cluster: string, namespace: string): string {
-  return `${resourcePath('kapis', cluster, namespace)}`;
+function collectionPath(cluster: string, namespace: string, scope: ConfigMapScope = 'project'): string {
+  return `${resourcePath('kapis', cluster, namespace, scope)}`;
+}
+
+/** Read collection URL for the cluster console: no scope segment, every project. */
+function clusterCollectionPath(cluster: string): string {
+  return collectionPath(cluster, '', 'cluster');
 }
 
 /**
@@ -118,8 +144,18 @@ function writePath(cluster: string, namespace: string): string {
 }
 
 /** Shared shape of the two collections above. */
-function resourcePath(kind: 'kapis' | 'kube', cluster: string, namespace: string): string {
-  const clusterSegment = cluster && cluster !== 'host' ? `clusters/${encodeURIComponent(cluster)}/` : '';
+function resourcePath(kind: 'kapis' | 'kube', cluster: string, namespace: string, scope: ConfigMapScope = 'project'): string {
+  /*
+   * Cluster scope has no scope segment at all — not `klusters/<id>`, which this
+   * ks-apiserver does not serve. The bare collection is what walks every project;
+   * the reader filters afterwards.
+   */
+  const clusterSegment =
+    scope === 'cluster'
+      ? ''
+      : cluster && cluster !== 'host'
+        ? `clusters/${encodeURIComponent(cluster)}/`
+        : '';
   const namespaceSegment = namespace ? `namespaces/${encodeURIComponent(namespace)}/` : '';
   const prefix = kind === 'kapis' ? '/kapis/resources.kubesphere.io/v1alpha3' : '/api/v1';
   return `${prefix}/${clusterSegment}${namespaceSegment}configmaps`;
@@ -201,11 +237,12 @@ export function configMapsApi(client: Client) {
      * that way; the old store checks both.
      */
     async list(params: ListParams): Promise<ListResult<ConfigMapSummary>> {
+      const scope = params.scope ?? 'project';
       const body = await client.request<{
         items?: KubeConfigMap[];
         totalItems?: number;
         total_count?: number;
-      }>(collectionPath(params.cluster, params.namespace), {
+      }>(scope === 'cluster' ? clusterCollectionPath(params.cluster) : collectionPath(params.cluster, params.namespace), {
         query: {
           page: params.page,
           limit: params.pageSize,

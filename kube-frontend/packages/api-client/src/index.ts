@@ -15,6 +15,7 @@ export {
   toSummary,
   type ConfigMapDetail,
   type ConfigMapInput,
+  type ConfigMapScope,
   type ConfigMapSummary,
   type ConfigMapsApi,
   type KubeConfigMap,
