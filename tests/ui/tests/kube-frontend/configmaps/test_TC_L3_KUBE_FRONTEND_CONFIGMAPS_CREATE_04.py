@@ -17,7 +17,7 @@ OTHER_PROJECT = "default"
 def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_CREATE_04(configmaps_page, ui_config, screenshot):
     """TC-L3-KUBE-FRONTEND-CONFIGMAPS-CREATE-04 创建时选择项目，对象落在所选项目。"""
 
-    configmaps_page.url = f"{ui_config.base_url}/kube-frontend/system-workspace/clusters/host/projects/kube-frontend-demo/configmaps"
+    configmaps_page.url = f"{ui_config.app}/kube-frontend/system-workspace/clusters/host/projects/kube-frontend-demo/configmaps"
     configmaps_page.open()
     configmaps_page.wait_ready()
 
@@ -48,7 +48,7 @@ def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_CREATE_04(configmaps_page, ui_config, sc
     # explicitly: the BFF reads the token from the request, not from the browser.
     token = page.evaluate("() => localStorage.getItem('kubesphere-token')")
     headers = api_headers(token)
-    url = f"{ui_config.base_url}/api/v1/namespaces/{OTHER_PROJECT}/configmaps/{name}"
+    url = f"{ui_config.app}/api/v1/namespaces/{OTHER_PROJECT}/configmaps/{name}"
     try:
         created = page.request.get(url, headers=headers)
         assert created.status == 200, created.status

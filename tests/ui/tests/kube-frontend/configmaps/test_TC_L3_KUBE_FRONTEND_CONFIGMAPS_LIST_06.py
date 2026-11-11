@@ -14,7 +14,7 @@ TIMESTAMP = re.compile(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$")
 def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_06(configmaps_page, ui_config, screenshot):
     """TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-06 名称列首行是别名，创建时间固定格式。"""
 
-    configmaps_page.url = f"{ui_config.base_url}/kube-frontend/system-workspace/clusters/host/projects/kube-frontend-demo/configmaps"
+    configmaps_page.url = f"{ui_config.app}/kube-frontend/system-workspace/clusters/host/projects/kube-frontend-demo/configmaps"
     configmaps_page.open()
     configmaps_page.wait_ready()
 

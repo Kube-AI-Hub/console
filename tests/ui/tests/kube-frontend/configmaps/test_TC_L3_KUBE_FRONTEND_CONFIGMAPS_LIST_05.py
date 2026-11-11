@@ -14,7 +14,7 @@ def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_05(configmaps_page, ui_config, scre
 
     # Point at the project that holds the fixture ConfigMap rather than relying on
     # the default namespace happening to have a wide one.
-    configmaps_page.url = f"{ui_config.base_url}/kube-frontend/system-workspace/clusters/host/projects/kube-frontend-demo/configmaps"
+    configmaps_page.url = f"{ui_config.app}/kube-frontend/system-workspace/clusters/host/projects/kube-frontend-demo/configmaps"
     configmaps_page.open()
     configmaps_page.wait_ready()
 

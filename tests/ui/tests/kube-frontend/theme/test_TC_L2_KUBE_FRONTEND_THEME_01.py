@@ -16,7 +16,7 @@ def theme_of(page) -> str | None:
 def test_TC_L2_KUBE_FRONTEND_THEME_01(page, ui_config, configmaps_page, screenshot):
     """TC-L2-KUBE-FRONTEND-THEME-01 切换深浅色并在刷新后保持。"""
 
-    configmaps_page.url = f"{ui_config.base_url}/kube-frontend/system-workspace/clusters/host/projects/kube-frontend-demo/configmaps"
+    configmaps_page.url = f"{ui_config.app}/kube-frontend/system-workspace/clusters/host/projects/kube-frontend-demo/configmaps"
     configmaps_page.open()
     configmaps_page.wait_ready()
 

@@ -16,7 +16,7 @@ def test_TC_L2_KUBE_FRONTEND_THEME_02(page, ui_config, configmaps_page, screensh
     original = page.viewport_size
     page.set_viewport_size({"width": 390, "height": 780})
     try:
-        configmaps_page.url = f"{ui_config.base_url}/kube-frontend/system-workspace/clusters/host/projects/kube-frontend-demo/configmaps"
+        configmaps_page.url = f"{ui_config.app}/kube-frontend/system-workspace/clusters/host/projects/kube-frontend-demo/configmaps"
         configmaps_page.open()
         configmaps_page.wait_ready()
 
