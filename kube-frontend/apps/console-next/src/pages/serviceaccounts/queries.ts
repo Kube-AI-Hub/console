@@ -10,6 +10,7 @@ import {
   type ServiceAccountSummary,
 } from '@kube-ai-hub/api-client';
 import { registerPage, type AiPage } from '@kube-ai-hub/ai-surface';
+import { ApiError } from '@kube-ai-hub/api-client';
 import { api } from '@/api';
 
 /**
@@ -57,10 +58,33 @@ export function useServiceAccount(params: { cluster: string; namespace: string; 
 export function useServiceAccountSecrets(params: { cluster: string; namespace: string; names: string[] }) {
   return useQuery({
     queryKey: ['serviceaccount-secrets', params.cluster, params.namespace, ...params.names],
-    queryFn: ({ signal }) =>
-      Promise.all(
-        params.names.map((name) => secretsApi(api).get({ cluster: params.cluster, namespace: params.namespace, name, signal })),
-      ),
+    queryFn: async ({ signal }) => {
+      const deadline = Date.now() + 15_000;
+      for (;;) {
+        const items = await Promise.all(
+          params.names.map((name) =>
+            secretsApi(api).get({ cluster: params.cluster, namespace: params.namespace, name, signal }),
+          ),
+        );
+        // Wait for the api-server to finish populating the token; retrying the
+        // whole query would restart the cache entry, so the wait lives here.
+        const complete = items.every((item) => Boolean(item.data['token']));
+        if (complete || Date.now() > deadline) return items;
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+    },
+    /*
+     * A token Secret can exist for a moment without its `token`/`ca.crt`: the
+     * api-server fills them in asynchronously after creation, and a Secret bound to
+     * the account a second ago may still be empty when this page reads it. The page
+     * reads each Secret once, so an empty payload would leave the kubeconfig blank
+     * until a reload — poll until every token looks like a JWT (or the wait runs out).
+     */
+    retry: (failureCount, error) => {
+      if (failureCount >= 3) return false;
+      return !(error instanceof ApiError) || error.retryable;
+    },
+    retryDelay: 500,
     enabled: params.names.length > 0,
   });
 }

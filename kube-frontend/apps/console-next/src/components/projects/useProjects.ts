@@ -53,6 +53,12 @@ export function useProjects(cluster: string) {
     retry: 1,
   });
 
+  /*
+   * A page walk publishes each page through `partial`. Dropping it on a refetch
+   * (window focus, an invalidation) empties every project picker for a moment —
+   * a create dialog seeded from the current project then had nothing to select.
+   * Keeping the last complete result until the new one arrives avoids that blink.
+   */
   return { ...query, data: query.data ?? partial };
 }
 
