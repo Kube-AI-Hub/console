@@ -114,6 +114,14 @@ export interface ListSchema<TRow> {
    */
   primaryAction?: { key: string; label: React.ReactNode; aiId?: string };
   selection?: 'none' | 'multiple';
+  /**
+   * Whether a row can be selected.
+   *
+   * Selection drives bulk actions, so a row that may not be acted on — a
+   * cluster-federated object, say — must not be checkable either. Returning false
+   * disables the checkbox and keeps it out of select-all.
+   */
+  isRowSelectable?: (row: TRow) => boolean;
   empty?: { title?: React.ReactNode; description?: React.ReactNode };
   pagination?: {
     pageSize: number;
@@ -564,6 +572,7 @@ export function ResourceList<TRow>({
             ? {
                 selectedKeys,
                 onChange: onSelectionChange,
+                ...(schema.isRowSelectable ? { isRowSelectable: schema.isRowSelectable } : {}),
                 ...(schema.selectAiId ? { aiId: schema.selectAiId } : {}),
                 ...(schema.labels ? { labels: { ...(schema.labels.selectAll ? { selectAll: schema.labels.selectAll } : {}), ...(schema.labels.selectRow ? { row: schema.labels.selectRow } : {}) } } : {}),
               }

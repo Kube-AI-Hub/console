@@ -21,6 +21,7 @@ export interface ConfigMapsQuery extends Omit<ListParams, 'signal'> {}
 export function configMapsKey(params: ConfigMapsQuery) {
   return [
     'configmaps',
+    params.scope ?? 'project',
     params.cluster,
     params.namespace,
     params.page,

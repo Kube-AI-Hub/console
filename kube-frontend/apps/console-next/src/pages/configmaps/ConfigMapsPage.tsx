@@ -2,18 +2,11 @@ import * as React from 'react';
 import { Link } from '@tanstack/react-router';
 import { ApiError, type ConfigMapDetail, type ConfigMapInput } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { AiButton, AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
+import { AiButton, AiSurface, Badge, ResourceList, type ListSchema } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient, configMapsApi } from '@/api';
-import {
-  ensureConfigMapsRegistered,
-  useConfigMaps,
-  useCreateConfigMap,
-  useDeleteConfigMaps,
-  usePatchConfigMap,
-  useUpdateConfigMap,
-  type ConfigMapSummary,
-} from './queries';
+import { ensureConfigMapsRegistered, type ConfigMapSummary } from './queries';
+import { useConfigMapListController } from './controller';
 import { useProjectFilter, useProjectOptions } from '@/components/projects/useProjects';
 import { ConfigMapCreateDialog } from './ConfigMapCreateDialog';
 import { ConfigMapDeleteDialog } from './ConfigMapDeleteDialog';
@@ -47,9 +40,6 @@ const PAGE_SIZE = 10;
  */
 const KEYS_PREVIEW_LENGTH = 50;
 
-/** Sort keys the server understands; matches the columns that can be sorted. */
-type SortKey = 'name' | 'createTime';
-
 /** Which dialog is open, if any. */
 type Dialog =
   | { kind: 'none' }
@@ -77,72 +67,15 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
   const t = useT();
   ensureConfigMapsRegistered();
 
-  const [page, setPage] = React.useState(1);
-  const [keyword, setKeyword] = React.useState('');
-  // Debounced so typing does not issue one request per keystroke.
-  const [debouncedKeyword, setDebouncedKeyword] = React.useState('');
-  const [sortBy, setSortBy] = React.useState<SortKey>('createTime');
-  const [order, setOrder] = React.useState<SortOrder>('desc');
-  const [selected, setSelected] = React.useState<string[]>([]);
+  const list = useConfigMapListController({ scope: 'project', cluster, namespace, pageSize: PAGE_SIZE });
+  const { page, setPage, keyword, setKeyword, sortBy, order, sortByKey, selected, setSelected } = list;
+  const { projectFilter, setProjectFilter, query, items, total, remove, create, update, patch, loadDetail } = list;
   const [dialog, setDialog] = React.useState<Dialog>({ kind: 'none' });
-  /*
-   * Project filter.
-   *
-   * Defaults to the project in the route, because the route is a project page:
-   * arriving at `/projects/<ns>/configmaps` should show that project. "All
-   * projects" is an explicit choice, and it is the expensive one — the server
-   * walks every namespace — so it must not be the accidental default.
-   */
-  const [projectFilter, setProjectFilter] = React.useState(namespace);
-
-  React.useEffect(() => {
-    setProjectFilter(namespace);
-  }, [cluster, namespace]);
 
   const projectFilterControl = useProjectFilter(cluster, t('configmaps.filter.projectLabel'), t('configmaps.filter.project'));
   // Same cached query the filter uses, so the dialog opens with options already
   // resolved instead of issuing its own cluster-wide project read.
   const projectOptions = useProjectOptions(cluster);
-
-  React.useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setDebouncedKeyword(keyword.trim());
-      // A new search starts at page one; otherwise the user lands on an empty
-      // page three of a two-page result.
-      setPage(1);
-    }, 250);
-    return () => window.clearTimeout(timer);
-  }, [keyword]);
-
-  /**
-   * Namespace to query. Empty means the whole cluster.
-   *
-   * A specific project keeps the fast per-namespace path; "all" pays for the
-   * cluster-wide walk, which is the only way to show every project's objects.
-   */
-  const activeNamespace = projectFilter;
-  const query = useConfigMaps({
-    cluster,
-    namespace: activeNamespace,
-    page,
-    pageSize: PAGE_SIZE,
-    sortBy,
-    order,
-    keyword: debouncedKeyword,
-  });
-  const remove = useDeleteConfigMaps({ cluster, namespace: activeNamespace });
-  const create = useCreateConfigMap({ cluster });
-  const update = useUpdateConfigMap({ cluster, namespace: activeNamespace });
-  const patch = usePatchConfigMap({ cluster, namespace: activeNamespace, name: dialog.kind === 'editInfo' ? dialog.detail.name : '' });
-
-  const items = query.data?.items ?? [];
-  const total = query.data?.total ?? 0;
-
-  // Selection is cleared whenever the visible page changes: acting on rows the
-  // user can no longer see is the main way a bulk action deletes the wrong thing.
-  React.useEffect(() => {
-    setSelected([]);
-  }, [cluster, activeNamespace, page, debouncedKeyword, sortBy, order]);
 
   const mutationError = [remove.error, create.error, update.error, patch.error].find((error) => error !== null);
   const api = configMapsApi(apiClient);
@@ -156,16 +89,10 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
    */
   const openWithDetail = React.useCallback(
     async (kind: 'editInfo' | 'editSettings' | 'editYaml', name: string) => {
-      try {
-        const detail = await api.get({ cluster, namespace, name });
-        setDialog({ kind, detail });
-      } catch {
-        // The error surfaces through `mutationError`-style state; a dialog that
-        // fails to load should not open half-populated.
-        setDialog({ kind: 'none' });
-      }
+      const detail = await loadDetail({ name, namespace: list.activeNamespace || namespace });
+      setDialog(detail ? { kind, detail } : { kind: 'none' });
     },
-    [api, cluster, namespace],
+    [loadDetail, list.activeNamespace, namespace],
   );
 
   const schema = React.useMemo<ListSchema<ConfigMapSummary>>(
@@ -355,9 +282,7 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
         onPageChange={setPage}
         onSortChange={(next) => {
           if (!next) return;
-          setSortBy(next.key as SortKey);
-          setOrder(next.order);
-          setPage(1);
+          sortByKey(next.key, next.order);
         }}
         onAction={(action, row) => {
           // The primary action arrives without a row; check it before the "is this
