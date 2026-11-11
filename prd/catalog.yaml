@@ -377,3 +377,68 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-MOBILE-01
+  - id: cluster-configmaps
+    title: 集群配置字典
+    prd: prd/kube-frontend/cluster-configmaps/_index.md
+    design: design/kube-frontend/cluster-configmaps/_index.md
+    tests:
+      L2:
+      - TC-FULL-KUBE_FRONTEND-CLUSTER_CONFIGMAPS-01
+    features:
+    - id: list
+      title: 集群配置字典列表
+      prd: prd/kube-frontend/cluster-configmaps/list.md
+      design: design/kube-frontend/cluster-configmaps/list.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-LIST-01
+        - TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-LIST-02
+    - id: search
+      title: 按名称搜索
+      prd: prd/kube-frontend/cluster-configmaps/search.md
+      design: design/kube-frontend/cluster-configmaps/search.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-SEARCH-01
+    - id: detail
+      title: 集群配置字典详情
+      prd: prd/kube-frontend/cluster-configmaps/detail.md
+      design: design/kube-frontend/cluster-configmaps/detail.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-DETAIL-01
+    - id: create
+      title: 创建配置字典
+      prd: prd/kube-frontend/cluster-configmaps/create.md
+      design: design/kube-frontend/cluster-configmaps/create.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-CREATE-01
+    - id: edit
+      title: 编辑配置字典
+      prd: prd/kube-frontend/cluster-configmaps/edit.md
+      design: design/kube-frontend/cluster-configmaps/edit.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-EDIT-01
+    - id: delete
+      title: 删除配置字典
+      prd: prd/kube-frontend/cluster-configmaps/delete.md
+      design: design/kube-frontend/cluster-configmaps/delete.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-DELETE-01
+    - id: ai-surface
+      title: 智能体可操作性
+      prd: prd/kube-frontend/cluster-configmaps/ai-surface.md
+      design: design/kube-frontend/cluster-configmaps/ai-surface.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-AI_SURFACE-01
+    - id: mobile
+      title: 移动端适配
+      prd: prd/kube-frontend/cluster-configmaps/mobile.md
+      design: design/kube-frontend/cluster-configmaps/mobile.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-MOBILE-01
