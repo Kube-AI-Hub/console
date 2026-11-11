@@ -249,6 +249,150 @@ MODULES = [
                     },
                 ],
             },
+            {
+                "id": "secrets",
+                "title": "保密字典",
+                "goal": "项目内的 Secret 能按类型正确展示与编辑：Opaque / TLS / 镜像仓库 / 用户名密码各自有对应的录入与展示方式，明文默认遮挡，镜像仓库密钥可设为默认。",
+                "tests": {"L2": ["TC-FULL-KUBE_FRONTEND-SECRETS-01"]},
+                "features": [
+                    {
+                        "id": "list",
+                        "title": "保密字典列表",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-SECRETS-LIST-01",
+                            "TC-L3-KUBE-FRONTEND-SECRETS-LIST-02",
+                        ]},
+                    },
+                    {
+                        "id": "search",
+                        "title": "按名称搜索",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-SECRETS-SEARCH-01",
+                        ]},
+                    },
+                    {
+                        "id": "detail",
+                        "title": "保密字典详情",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-SECRETS-DETAIL-01",
+                            "TC-L3-KUBE-FRONTEND-SECRETS-DETAIL-02",
+                        ]},
+                    },
+                    {
+                        "id": "create",
+                        "title": "创建保密字典",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-SECRETS-CREATE-01",
+                            "TC-L3-KUBE-FRONTEND-SECRETS-CREATE-02",
+                            "TC-L3-KUBE-FRONTEND-SECRETS-CREATE-03",
+                        ]},
+                    },
+                    {
+                        "id": "edit",
+                        "title": "编辑保密字典",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-SECRETS-EDIT-01",
+                            "TC-L3-KUBE-FRONTEND-SECRETS-EDIT-02",
+                            "TC-L3-KUBE-FRONTEND-SECRETS-EDIT-03",
+                        ]},
+                    },
+                    {
+                        "id": "delete",
+                        "title": "删除保密字典",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-SECRETS-DELETE-01",
+                        ]},
+                    },
+                    {
+                        "id": "ai-surface",
+                        "title": "智能体可操作性",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-SECRETS-AI_SURFACE-01",
+                        ]},
+                    },
+                    {
+                        "id": "mobile",
+                        "title": "移动端适配",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-SECRETS-MOBILE-01",
+                        ]},
+                    },
+                ],
+            },
+            {
+                "id": "serviceaccounts",
+                "title": "服务账户",
+                "goal": "项目内的 ServiceAccount 可浏览、创建、改角色；详情能从关联的 token Secret 生成 kubeconfig 并复制下载，让命令行访问不必再去拼证书。",
+                "tests": {"L2": ["TC-FULL-KUBE_FRONTEND-SERVICEACCOUNTS-01"]},
+                "features": [
+                    {
+                        "id": "list",
+                        "title": "服务账户列表",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-LIST-01",
+                            "TC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-LIST-02",
+                        ]},
+                    },
+                    {
+                        "id": "search",
+                        "title": "按名称搜索",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-SEARCH-01",
+                        ]},
+                    },
+                    {
+                        "id": "detail",
+                        "title": "服务账户详情与 kubeconfig",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-DETAIL-01",
+                            "TC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-DETAIL-02",
+                        ]},
+                    },
+                    {
+                        "id": "create",
+                        "title": "创建服务账户",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-CREATE-01",
+                            "TC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-CREATE-02",
+                        ]},
+                    },
+                    {
+                        "id": "edit",
+                        "title": "编辑服务账户",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-EDIT-01",
+                        ]},
+                    },
+                    {
+                        "id": "role",
+                        "title": "修改角色",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-ROLE-01",
+                        ]},
+                    },
+                    {
+                        "id": "delete",
+                        "title": "删除服务账户",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-DELETE-01",
+                        ]},
+                    },
+                    {
+                        "id": "ai-surface",
+                        "title": "智能体可操作性",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-AI_SURFACE-01",
+                        ]},
+                    },
+                    {
+                        "id": "mobile",
+                        "title": "移动端适配",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-MOBILE-01",
+                        ]},
+                    },
+                ],
+            },
         ],
     },
 ]

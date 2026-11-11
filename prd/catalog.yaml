@@ -233,3 +233,147 @@ modules:
         L3:
         - TC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-01
         - TC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-02
+  - id: secrets
+    title: 保密字典
+    prd: prd/kube-frontend/secrets/_index.md
+    design: design/kube-frontend/secrets/_index.md
+    tests:
+      L2:
+      - TC-FULL-KUBE_FRONTEND-SECRETS-01
+    features:
+    - id: list
+      title: 保密字典列表
+      prd: prd/kube-frontend/secrets/list.md
+      design: design/kube-frontend/secrets/list.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-SECRETS-LIST-01
+        - TC-L3-KUBE-FRONTEND-SECRETS-LIST-02
+    - id: search
+      title: 按名称搜索
+      prd: prd/kube-frontend/secrets/search.md
+      design: design/kube-frontend/secrets/search.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-SECRETS-SEARCH-01
+    - id: detail
+      title: 保密字典详情
+      prd: prd/kube-frontend/secrets/detail.md
+      design: design/kube-frontend/secrets/detail.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-SECRETS-DETAIL-01
+        - TC-L3-KUBE-FRONTEND-SECRETS-DETAIL-02
+    - id: create
+      title: 创建保密字典
+      prd: prd/kube-frontend/secrets/create.md
+      design: design/kube-frontend/secrets/create.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-SECRETS-CREATE-01
+        - TC-L3-KUBE-FRONTEND-SECRETS-CREATE-02
+        - TC-L3-KUBE-FRONTEND-SECRETS-CREATE-03
+    - id: edit
+      title: 编辑保密字典
+      prd: prd/kube-frontend/secrets/edit.md
+      design: design/kube-frontend/secrets/edit.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-SECRETS-EDIT-01
+        - TC-L3-KUBE-FRONTEND-SECRETS-EDIT-02
+        - TC-L3-KUBE-FRONTEND-SECRETS-EDIT-03
+    - id: delete
+      title: 删除保密字典
+      prd: prd/kube-frontend/secrets/delete.md
+      design: design/kube-frontend/secrets/delete.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-SECRETS-DELETE-01
+    - id: ai-surface
+      title: 智能体可操作性
+      prd: prd/kube-frontend/secrets/ai-surface.md
+      design: design/kube-frontend/secrets/ai-surface.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-SECRETS-AI_SURFACE-01
+    - id: mobile
+      title: 移动端适配
+      prd: prd/kube-frontend/secrets/mobile.md
+      design: design/kube-frontend/secrets/mobile.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-SECRETS-MOBILE-01
+  - id: serviceaccounts
+    title: 服务账户
+    prd: prd/kube-frontend/serviceaccounts/_index.md
+    design: design/kube-frontend/serviceaccounts/_index.md
+    tests:
+      L2:
+      - TC-FULL-KUBE_FRONTEND-SERVICEACCOUNTS-01
+    features:
+    - id: list
+      title: 服务账户列表
+      prd: prd/kube-frontend/serviceaccounts/list.md
+      design: design/kube-frontend/serviceaccounts/list.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-LIST-01
+        - TC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-LIST-02
+    - id: search
+      title: 按名称搜索
+      prd: prd/kube-frontend/serviceaccounts/search.md
+      design: design/kube-frontend/serviceaccounts/search.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-SEARCH-01
+    - id: detail
+      title: 服务账户详情与 kubeconfig
+      prd: prd/kube-frontend/serviceaccounts/detail.md
+      design: design/kube-frontend/serviceaccounts/detail.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-DETAIL-01
+        - TC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-DETAIL-02
+    - id: create
+      title: 创建服务账户
+      prd: prd/kube-frontend/serviceaccounts/create.md
+      design: design/kube-frontend/serviceaccounts/create.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-CREATE-01
+        - TC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-CREATE-02
+    - id: edit
+      title: 编辑服务账户
+      prd: prd/kube-frontend/serviceaccounts/edit.md
+      design: design/kube-frontend/serviceaccounts/edit.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-EDIT-01
+    - id: role
+      title: 修改角色
+      prd: prd/kube-frontend/serviceaccounts/role.md
+      design: design/kube-frontend/serviceaccounts/role.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-ROLE-01
+    - id: delete
+      title: 删除服务账户
+      prd: prd/kube-frontend/serviceaccounts/delete.md
+      design: design/kube-frontend/serviceaccounts/delete.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-DELETE-01
+    - id: ai-surface
+      title: 智能体可操作性
+      prd: prd/kube-frontend/serviceaccounts/ai-surface.md
+      design: design/kube-frontend/serviceaccounts/ai-surface.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-AI_SURFACE-01
+    - id: mobile
+      title: 移动端适配
+      prd: prd/kube-frontend/serviceaccounts/mobile.md
+      design: design/kube-frontend/serviceaccounts/mobile.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-MOBILE-01
