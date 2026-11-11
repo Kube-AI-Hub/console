@@ -64,11 +64,11 @@
 
 ## 功能需求
 
-- **FR-FULL-KUBE_FRONTEND-CONFIGMAPS-01** — 列表必须支持按名称与创建时间排序、按名称搜索、分页。
+- **FR-FULL-KUBE-FRONTEND-CONFIGMAPS-01** — 列表必须支持按名称与创建时间排序、按名称搜索、分页。
 
 ## 成功标准
 
-- **SC-FULL-KUBE_FRONTEND-CONFIGMAPS-01** — 真实集群上与 `kubectl` 逐项核对无差异。
+- **SC-FULL-KUBE-FRONTEND-CONFIGMAPS-01** — 真实集群上与 `kubectl` 逐项核对无差异。
 
 ## 明确不做
 

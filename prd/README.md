@@ -50,7 +50,7 @@
 
 各段之间用 `-` 连接：`TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-01`。
 
-写成 `TC-L3-CLUSTER_STORAGE-...`（模块用了 `_`）或 `TC-L3-...-SHARED-STORAGE-...`（特性用了 `-`）都会被 `check_docs.py` 报出来。这不只是格式偏好：两种拼写并存的直接后果是同一条 `AC` 被当成两条——需求稿里那条显示「没有被任何用例覆盖」，而覆盖它的用例就在隔壁目录。
+写成 `TC-L3-CLUSTER-STORAGE-...`（模块用了 `_`）或 `TC-L3-...-SHARED-STORAGE-...`（特性用了 `-`）都会被 `check_docs.py` 报出来。这不只是格式偏好：两种拼写并存的直接后果是同一条 `AC` 被当成两条——需求稿里那条显示「没有被任何用例覆盖」，而覆盖它的用例就在隔壁目录。
 
 `check_id_spelling` 负责这条检查，报错会给出应写的完整 ID。
 

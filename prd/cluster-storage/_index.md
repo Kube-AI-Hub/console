@@ -63,11 +63,11 @@ flowchart LR
 
 ## 功能需求
 
-- **FR-CORE-CLUSTER_STORAGE-01** — 系统 MUST 在集群存储分组下提供共享存储入口，且只有具备 `volumes:manage` 的用户可见。
+- **FR-CORE-CLUSTER-STORAGE-01** — 系统 MUST 在集群存储分组下提供共享存储入口，且只有具备 `volumes:manage` 的用户可见。
 
 ## 成功标准
 
-- **SC-CORE-CLUSTER_STORAGE-01** — 从集群总览到共享存储概览不超过两次点击；概览首屏在 3 秒内出现卡片。
+- **SC-CORE-CLUSTER-STORAGE-01** — 从集群总览到共享存储概览不超过两次点击；概览首屏在 3 秒内出现卡片。
 
 ## 明确不做
 

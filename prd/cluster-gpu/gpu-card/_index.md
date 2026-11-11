@@ -60,11 +60,11 @@
 
 ## 功能需求
 
-- **FR-FULL-CLUSTER_GPU-GPU_CARD-01** — 系统 MUST 让集群页与节点页共用同一个显卡接口与同一套健康语义。
+- **FR-FULL-CLUSTER-GPU-GPU_CARD-01** — 系统 MUST 让集群页与节点页共用同一个显卡接口与同一套健康语义。
 
 ## 成功标准
 
-- **SC-FULL-CLUSTER_GPU-GPU_CARD-01** — 集群页与节点页对同一张卡显示的状态一致。
+- **SC-FULL-CLUSTER-GPU-GPU_CARD-01** — 集群页与节点页对同一张卡显示的状态一致。
 
 ## 明确不做
 

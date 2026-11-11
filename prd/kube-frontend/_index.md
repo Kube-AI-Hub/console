@@ -85,11 +85,11 @@ flowchart LR
 
 ## 功能需求
 
-- **FR-CORE-KUBE_FRONTEND-01** — 新前端必须与老 console 物理隔离：不同目录、不同授权、无源码引用。
+- **FR-CORE-KUBE-FRONTEND-01** — 新前端必须与老 console 物理隔离：不同目录、不同授权、无源码引用。
 
 ## 成功标准
 
-- **SC-CORE-KUBE_FRONTEND-01** — 架构约束测试覆盖包边界、依赖归属、AI 句柄，全部通过；新增违规会使测试失败。
+- **SC-CORE-KUBE-FRONTEND-01** — 架构约束测试覆盖包边界、依赖归属、AI 句柄，全部通过；新增违规会使测试失败。
 
 ## 明确不做
 

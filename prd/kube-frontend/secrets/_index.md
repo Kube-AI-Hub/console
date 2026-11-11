@@ -66,12 +66,12 @@
 
 ## 功能需求
 
-- **FR-FULL-KUBE_FRONTEND-SECRETS-01** — 四种已知类型的详情数据区必须各自按类型结构渲染，且默认遮挡。
-- **FR-FULL-KUBE_FRONTEND-SECRETS-02** — 列表必须显示名称、类型、字段数、创建时间，并支持按名称与创建时间排序。
+- **FR-FULL-KUBE-FRONTEND-SECRETS-01** — 四种已知类型的详情数据区必须各自按类型结构渲染，且默认遮挡。
+- **FR-FULL-KUBE-FRONTEND-SECRETS-02** — 列表必须显示名称、类型、字段数、创建时间，并支持按名称与创建时间排序。
 
 ## 成功标准
 
-- **SC-FULL-KUBE_FRONTEND-SECRETS-01** — 四种类型各建一条后，详情页展示的键与 `kubectl get secret <name> -o json` 的 `data` 键完全一致。
+- **SC-FULL-KUBE-FRONTEND-SECRETS-01** — 四种类型各建一条后，详情页展示的键与 `kubectl get secret <name> -o json` 的 `data` 键完全一致。
 
 ## 明确不做
 

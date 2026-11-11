@@ -58,13 +58,13 @@ Tabs:   概览 | 卷与配额 | 性能
 
 ## 功能需求
 
-- **FR-FULL-CLUSTER_STORAGE-SHARED_STORAGE-01** — 系统 MUST 让三个页签共享同一份卷列表，并在任一页签的写操作后刷新三页的数据。
-- **FR-FULL-CLUSTER_STORAGE-SHARED_STORAGE-02** — 系统 MUST 在卷页提供配额调整入口，并保证改完之后 PV 与 JuiceFS quota 一致。
+- **FR-FULL-CLUSTER-STORAGE-SHARED_STORAGE-01** — 系统 MUST 让三个页签共享同一份卷列表，并在任一页签的写操作后刷新三页的数据。
+- **FR-FULL-CLUSTER-STORAGE-SHARED_STORAGE-02** — 系统 MUST 在卷页提供配额调整入口，并保证改完之后 PV 与 JuiceFS quota 一致。
 
 ## 成功标准
 
-- **SC-FULL-CLUSTER_STORAGE-SHARED_STORAGE-01** — 三个页签首次渲染均在 3 秒内出现主区内容（不含图表数据加载）。
-- **SC-FULL-CLUSTER_STORAGE-SHARED_STORAGE-02** — 配额改动从提交到表格更新不超过 10 秒（含一次 Job 执行）。
+- **SC-FULL-CLUSTER-STORAGE-SHARED_STORAGE-01** — 三个页签首次渲染均在 3 秒内出现主区内容（不含图表数据加载）。
+- **SC-FULL-CLUSTER-STORAGE-SHARED_STORAGE-02** — 配额改动从提交到表格更新不超过 10 秒（含一次 Job 执行）。
 
 ## 明确不做
 

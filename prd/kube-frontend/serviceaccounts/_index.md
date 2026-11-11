@@ -69,12 +69,12 @@
 
 ## 功能需求
 
-- **FR-FULL-KUBE_FRONTEND-SERVICEACCOUNTS-01** — 列表必须展示角色与令牌 Secret 名称，角色不在时留空而不显示占位词。
-- **FR-FULL-KUBE_FRONTEND-SERVICEACCOUNTS-02** — 详情必须为每个令牌 Secret 生成 kubeconfig，并提供复制与下载。
+- **FR-FULL-KUBE-FRONTEND-SERVICEACCOUNTS-01** — 列表必须展示角色与令牌 Secret 名称，角色不在时留空而不显示占位词。
+- **FR-FULL-KUBE-FRONTEND-SERVICEACCOUNTS-02** — 详情必须为每个令牌 Secret 生成 kubeconfig，并提供复制与下载。
 
 ## 成功标准
 
-- **SC-FULL-KUBE_FRONTEND-SERVICEACCOUNTS-01** — 下载的 kubeconfig 用 `kubectl --kubeconfig` 在集群内可直连（`kubectl get ns` 成功，且权限与角色一致）。
+- **SC-FULL-KUBE-FRONTEND-SERVICEACCOUNTS-01** — 下载的 kubeconfig 用 `kubectl --kubeconfig` 在集群内可直连（`kubectl get ns` 成功，且权限与角色一致）。
 
 ## 明确不做
 
