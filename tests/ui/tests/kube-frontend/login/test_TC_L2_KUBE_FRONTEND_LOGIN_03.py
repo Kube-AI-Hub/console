@@ -16,7 +16,7 @@ def test_TC_L2_KUBE_FRONTEND_LOGIN_03(anonymous_page, ui_config, login_page, scr
     # `/login` correctly lands on the home page, which has no account menu.
     page.goto(f"{ui_config.base_url}{deep_link}")
     page.wait_for_url("**/login**")
-    login_page.sign_in(ui_config.username, ui_config.password)
+    login_page.sign_in(ui_config.login_user, ui_config.login_pass)
     page.wait_for_url(f"**{deep_link}")
     # The shell paints before `/api/session/me` settles; signing out needs the
     # account menu, which only renders once that call has answered.
