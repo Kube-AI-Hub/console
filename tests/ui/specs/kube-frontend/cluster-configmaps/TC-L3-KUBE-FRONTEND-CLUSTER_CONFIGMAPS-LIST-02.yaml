@@ -1,0 +1,32 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-LIST-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-configmaps
+feature: list
+title: "集群配置字典 · 项目筛选"
+entry_url: "{BASE_URL}/kube-frontend/clusters/host/configmaps"
+prd: prd/kube-frontend/cluster-configmaps/list.md
+design: design/kube-frontend/cluster-configmaps/list.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-LIST-02
+
+story:
+- US1
+
+product: 项目筛选在「全部项目」与单个项目之间切换，列表随之收窄或恢复。
+preconditions:
+- 已登录，且为集群管理员
+- 集群内至少两个项目各有 ConfigMap
+steps:
+- 打开 {BASE_URL}/kube-frontend/clusters/host/configmaps
+- 在项目筛选器中选择一个项目
+- 再选择「全部项目」
+expected:
+- 选择单个项目后列表只剩该项目的对象，页码回到 1
+- 选择「全部项目」后恢复跨项目结果
+troubleshoot:
+- 筛选后为空时确认该项目下确实有 ConfigMap
+update_automation:
+- 筛选器选项来自 /kapis/.../namespaces，变化时同步本文件

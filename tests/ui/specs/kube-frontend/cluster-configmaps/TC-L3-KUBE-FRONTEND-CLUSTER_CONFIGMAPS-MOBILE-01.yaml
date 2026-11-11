@@ -1,0 +1,32 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-MOBILE-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-configmaps
+feature: mobile
+title: "集群配置字典 · 手机宽度"
+entry_url: "{BASE_URL}/kube-frontend/clusters/host/configmaps"
+prd: prd/kube-frontend/cluster-configmaps/mobile.md
+design: design/kube-frontend/cluster-configmaps/mobile.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-MOBILE-01
+
+story:
+- US1
+
+product: 390px 下无整页横向滚动，「项目」列仍可见。
+preconditions:
+- 已登录，且为集群管理员
+steps:
+- 以 390×780 视口打开 {BASE_URL}/kube-frontend/clusters/host/configmaps
+- 测量 scrollWidth 与 clientWidth
+- 核对表头
+expected:
+- scrollWidth 等于 clientWidth
+- 表头仍包含「项目」
+- 触控目标不小于 44px
+troubleshoot:
+- 截图看起来超宽时先量 scrollWidth，注意 deviceScaleFactor
+update_automation:
+- 断点变化时同步本文件

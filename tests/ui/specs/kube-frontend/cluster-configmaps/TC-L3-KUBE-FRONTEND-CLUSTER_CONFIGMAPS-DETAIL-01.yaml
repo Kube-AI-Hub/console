@@ -1,0 +1,33 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-DETAIL-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-configmaps
+feature: detail
+title: "集群配置字典 · 详情按项目定位"
+entry_url: "{BASE_URL}/kube-frontend/clusters/host/configmaps"
+prd: prd/kube-frontend/cluster-configmaps/detail.md
+design: design/kube-frontend/cluster-configmaps/detail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-DETAIL-01
+
+story:
+- US1
+
+product: 同名对象分属两个项目时，详情页各自打开对应项目的对象。
+preconditions:
+- 已登录，且为集群管理员
+- 两个项目中存在同名 ConfigMap
+steps:
+- 打开 {BASE_URL}/kube-frontend/clusters/host/configmaps
+- 分别点击两条同名对象的名称进入详情
+- 核对属性区的「项目」
+- 核对 URL 的 namespace 参数
+expected:
+- 两次详情分别显示对应项目的对象
+- URL 分别带各自的 ?namespace=
+troubleshoot:
+- 详情显示「未找到」时检查 URL 是否缺 namespace
+update_automation:
+- 详情路由变化时同步本文件

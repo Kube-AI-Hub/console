@@ -1,0 +1,32 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-AI_SURFACE-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-configmaps
+feature: ai-surface
+title: "集群配置字典 · 智能体句柄"
+entry_url: "{BASE_URL}/kube-frontend/clusters/host/configmaps"
+prd: prd/kube-frontend/cluster-configmaps/ai-surface.md
+design: design/kube-frontend/cluster-configmaps/ai-surface.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-AI_SURFACE-01
+
+story:
+- US1
+
+product: "页面暴露稳定的 cluster-configmaps: 前缀句柄，行句柄包含项目。"
+preconditions:
+- 已登录，且为集群管理员
+steps:
+- 打开 {BASE_URL}/kube-frontend/clusters/host/configmaps
+- 检查 data-ai-id 与 data-ai-row
+- 通过句柄执行一次搜索
+expected:
+- 存在 cluster-configmaps:surface / :search / :create / :select:<ns>/<name> / :bulk-delete
+- 行句柄形如 <ns>/<name>，页内唯一
+- 搜索后 data-ai-state 仍可读
+troubleshoot:
+- 句柄缺失时先看组件是否走了 AiButton 或 actionProps
+update_automation:
+- 句柄改名时同步 design 与页面清单

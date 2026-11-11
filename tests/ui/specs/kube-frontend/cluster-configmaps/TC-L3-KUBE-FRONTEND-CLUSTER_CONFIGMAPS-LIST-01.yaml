@@ -1,0 +1,33 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-LIST-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-configmaps
+feature: list
+title: "集群配置字典 · 列表默认视图"
+entry_url: "{BASE_URL}/kube-frontend/clusters/host/configmaps"
+prd: prd/kube-frontend/cluster-configmaps/list.md
+design: design/kube-frontend/cluster-configmaps/list.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-LIST-01
+
+story:
+- US1
+
+product: 默认按创建时间倒序，表头为 名称、项目、字段、创建时间，行来自不同项目。
+preconditions:
+- 已登录，且为集群管理员
+- 集群内至少两个项目各有 ConfigMap
+steps:
+- 打开 {BASE_URL}/kube-frontend/clusters/host/configmaps
+- 核对表头与首行内容
+- 检查多行是否来自不同项目
+expected:
+- 表头依次为 名称、项目、字段、创建时间
+- 默认按创建时间倒序
+- 每行「项目」列非空，且出现至少两个不同的项目名
+troubleshoot:
+- 先确认 BFF 返回的状态码与 code，再看页面 data-ai-state
+update_automation:
+- 文案变化时改 packages/locales/src/index.ts

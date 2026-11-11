@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-CREATE-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-configmaps
+feature: create
+title: "集群配置字典 · 创建必须选项目"
+entry_url: "{BASE_URL}/kube-frontend/clusters/host/configmaps"
+prd: prd/kube-frontend/cluster-configmaps/create.md
+design: design/kube-frontend/cluster-configmaps/create.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-CREATE-01
+
+story:
+- US3
+
+product: 创建入口在未选项目时阻止进入下一步，选定项目后可创建。
+preconditions:
+- 已登录，且为集群管理员
+- 集群内至少一个项目
+steps:
+- 在筛选器选择「全部项目」
+- 打开 {BASE_URL}/kube-frontend/clusters/host/configmaps
+- 点击「创建」
+- 不选项目直接下一步
+- 选择项目、填写名称与键值后提交
+expected:
+- 未选项目时提示必须选择项目且停留在第一步
+- 提交成功后列表可按该项目筛选到新对象
+troubleshoot:
+- 创建失败时确认对目标项目的 configmaps 有 create 权限
+update_automation:
+- 创建弹窗字段变化时同步本文件

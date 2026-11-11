@@ -1,0 +1,32 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-EDIT-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-configmaps
+feature: edit
+title: "集群配置字典 · 编辑写入对象所属项目"
+entry_url: "{BASE_URL}/kube-frontend/clusters/host/configmaps"
+prd: prd/kube-frontend/cluster-configmaps/edit.md
+design: design/kube-frontend/cluster-configmaps/edit.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-EDIT-01
+
+story:
+- US2
+
+product: 编辑设置修改的是该对象所在项目的那一条，不影响其他项目的同名对象。
+preconditions:
+- 已登录，且为集群管理员
+- 两个项目中存在同名 ConfigMap
+steps:
+- 打开 {BASE_URL}/kube-frontend/clusters/host/configmaps
+- 对项目 A 的对象打开「编辑设置」并改一个值保存
+- 查看项目 B 的同名对象
+expected:
+- 项目 A 的对象值已更新
+- 项目 B 的同名对象未被修改
+troubleshoot:
+- 保存后值未变时看写请求的 namespace 是否为目标项目
+update_automation:
+- 编辑弹窗字段变化时同步本文件

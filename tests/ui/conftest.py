@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from uuid import uuid4
 
 import pytest
 
@@ -11,6 +12,7 @@ from pages.juicefs_storage import SharedStoragePage
 from pages.resource_detail import ResourceDetailPage
 from pages.login import LoginPage
 from pages.configmaps import ConfigMapsPage
+from pages.cluster_configmaps import ClusterConfigMapsPage
 from pages.secrets import SecretsPage
 from pages.serviceaccounts import ServiceAccountsPage
 
@@ -227,6 +229,12 @@ def configmaps_page(page, ui_config):
 
 
 @pytest.fixture
+def cluster_configmaps_page(page, ui_config):
+    """The cluster console's ConfigMap list; same app, no workspace segment."""
+    return ClusterConfigMapsPage(page, app_base(ui_config))
+
+
+@pytest.fixture
 def seeded_configmaps(ui_config, session_token):
     """A project holding a known pair of ConfigMaps, deleted afterwards.
 
@@ -243,15 +251,26 @@ def seeded_configmaps(ui_config, session_token):
     api = ApiClient(app_base(ui_config), session_token)
     created: list[str] = []
 
-    def create(name: str, data: dict[str, str], annotations: dict[str, str] | None = None) -> str:
+    def create(
+        name: str,
+        data: dict[str, str],
+        annotations: dict[str, str] | None = None,
+        target_namespace: str | None = None,
+    ) -> str:
+        """Create one object; `target_namespace` defaults to the fixture's own.
+
+        Cluster-level cases need the same name in two projects, so the namespace is
+        a parameter rather than a closure constant.
+        """
+        ns = target_namespace or namespace
         body = {
             "apiVersion": "v1",
             "kind": "ConfigMap",
-            "metadata": {"name": name, "namespace": namespace, **(annotations or {})},
+            "metadata": {"name": name, "namespace": ns, **(annotations or {})},
             "data": data,
         }
-        if api.create("configmaps", body, namespace) in (200, 201):
-            created.append(name)
+        if api.create("configmaps", body, ns) in (200, 201):
+            created.append((ns, name))
         return name
 
     try:
@@ -260,8 +279,31 @@ def seeded_configmaps(ui_config, session_token):
         # Unconditional: a failed assertion must not leave objects behind for the
         # next run to trip over — that is how earlier leftovers were misread as
         # product bugs.
-        for name in created:
-            api.delete("configmaps", name, namespace)
+        for ns, name in created:
+            api.delete("configmaps", name, ns)
+
+
+@pytest.fixture
+def cluster_configmaps_edit_fixture(seeded_configmaps):
+    """The same ConfigMap name in two projects.
+
+    Edit and delete are addressed by `(project, name)`, and the failure they guard
+    against only shows up when the name also exists elsewhere: a write that
+    ignores the project either 404s or hits the wrong object. Two projects are
+    enough to tell those apart.
+    """
+    first = seeded_configmaps
+    names = {
+        "default": f"tc-cluster-{uuid4().hex[:8]}",
+        "kube-frontend-demo": f"tc-cluster-{uuid4().hex[:8]}",
+    }
+    for namespace, name in names.items():
+        first["create"](name, {"k": "v1"}, None, namespace)
+
+    name = next(iter(names.values()))
+    # The fixture exposes the name under each project; tests assert that only the
+    # targeted one changed.
+    return ("default", names["default"], "kube-frontend-demo")
 
 
 @pytest.fixture

@@ -1,0 +1,33 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-SEARCH-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-configmaps
+feature: search
+title: "集群配置字典 · 按名称搜索"
+entry_url: "{BASE_URL}/kube-frontend/clusters/host/configmaps"
+prd: prd/kube-frontend/cluster-configmaps/search.md
+design: design/kube-frontend/cluster-configmaps/search.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-SEARCH-01
+
+story:
+- US1
+
+product: 搜索跨项目按名称过滤，清空后恢复完整列表。
+preconditions:
+- 已登录，且为集群管理员
+- 集群内已知某个 ConfigMap 的名称片段
+steps:
+- 打开 {BASE_URL}/kube-frontend/clusters/host/configmaps
+- 在搜索框输入该名称片段
+- 清空搜索框
+expected:
+- 结果回到第 1 页且只显示名称匹配的对象
+- 结果可来自任意项目
+- 清空后恢复完整列表
+troubleshoot:
+- 结果未变化时确认防抖 250ms 已过
+update_automation:
+- 搜索参数名变化时同步本文件

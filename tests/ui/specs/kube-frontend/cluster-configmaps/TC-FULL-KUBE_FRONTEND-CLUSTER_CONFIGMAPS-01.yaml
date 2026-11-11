@@ -1,0 +1,35 @@
+id: TC-FULL-KUBE_FRONTEND-CLUSTER_CONFIGMAPS-01
+level: 2
+suite: full
+module: kube-frontend
+submodule: cluster-configmaps
+feature: page
+title: 集群配置字典 · 与 kubectl 逐项核对
+entry_url: "{BASE_URL}/kube-frontend/clusters/host/configmaps"
+prd: prd/kube-frontend/cluster-configmaps/_index.md
+design: design/kube-frontend/cluster-configmaps/_index.md
+
+covers:
+- AC-FULL-KUBE-FRONTEND-CLUSTER-CONFIGMAPS-01
+
+story:
+- US1
+- US2
+- US3
+
+product: 页面展示的是集群内全部项目的 ConfigMap，与 kubectl get configmap -A 一致。
+preconditions:
+- 已登录，且为集群管理员
+- 集群内至少两个项目各有 ConfigMap
+steps:
+- 打开 {BASE_URL}/kube-frontend/clusters/host/configmaps
+- 记录表头、首行与分页总数
+- 用 kubectl get configmap -A 导出同一份数据并比对总数
+expected:
+- 表头为 名称、项目、字段、创建时间
+- 首行来自任意项目且「项目」列非空
+- 分页总数与 kubectl 返回的条目数一致
+troubleshoot:
+- 总数不一致时先确认是否有项目被 RBAC 过滤
+update_automation:
+- 路由变化时同步本文件

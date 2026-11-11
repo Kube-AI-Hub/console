@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-DELETE-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-configmaps
+feature: delete
+title: "集群配置字典 · 删除按项目定位"
+entry_url: "{BASE_URL}/kube-frontend/clusters/host/configmaps"
+prd: prd/kube-frontend/cluster-configmaps/delete.md
+design: design/kube-frontend/cluster-configmaps/delete.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-DELETE-01
+
+story:
+- US2
+
+product: 删除只影响所选对象；跨项目批量选择时拒绝执行。
+preconditions:
+- 已登录，且为集群管理员
+- 两个项目中存在同名 ConfigMap
+steps:
+- 打开 {BASE_URL}/kube-frontend/clusters/host/configmaps
+- 对项目 A 的对象执行删除并确认
+- 查看项目 B 的同名对象
+- 同时选中两个项目的行并点批量删除
+expected:
+- 项目 A 的对象消失
+- 项目 B 的同名对象仍在
+- 跨项目批量删除被拒绝并提示先按项目筛选
+troubleshoot:
+- 删除后仍在时确认删除请求的 namespace
+update_automation:
+- 删除弹窗文案变化时同步本文件
