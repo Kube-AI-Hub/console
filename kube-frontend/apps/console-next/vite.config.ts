@@ -87,6 +87,29 @@ export default defineConfig({
   },
   server: {
     port: 5174,
+    /*
+     * Refuse to start on a taken port instead of silently moving to 5175.
+     *
+     * Without this, a second `pnpm dev` starts happily on the next free port and
+     * both instances write the generated `routeTree.gen.ts`. Each write triggers
+     * the other's watcher, which reloads the page, which regenerates the tree:
+     * four instances once produced a page that reloaded ~35 times in eight
+     * seconds, with the Vite log repeating
+     * "routeTree.gen.ts was modified by another process".
+     *
+     * Failing loudly is the fix: the port is the thing the reader has bookmarked,
+     * and a second server there is always a mistake, never a feature.
+     */
+    strictPort: true,
+    watch: {
+      /*
+       * The router plugin writes generated files through a temp directory; those
+       * writes are the plugin's own output arriving as if they were an edit. The
+       * generated tree itself is rebuilt by the plugin on real changes, so it does
+       * not need watching.
+       */
+      ignored: ['**/.tanstack/tmp/**', '**/src/routeTree.gen.ts'],
+    },
     proxy: {
       /*
        * The BFF is a separate process; proxying keeps the app same-origin in
