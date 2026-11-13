@@ -18,7 +18,9 @@
 
 import Affinity from 'components/EditForms/Workload/Affinity'
 import TerminationSeconds from 'components/EditForms/Workload/TerminationSeconds'
-// import IPPool from 'components/EditForms/Workload/IPPool'
+import AdvanceSettings from 'components/Forms/Workload/AdvanceSettings'
+import JobContainerSettings from 'components/Forms/Job/ContainerSettings'
+import JobSettings from 'components/Forms/Job/JobSettings'
 import PodTemplate from 'components/EditForms/Workload/PodTemplate'
 import UpdateStrategy from 'components/EditForms/Workload/UpdateStrategy'
 import VolumeSettings from 'components/EditForms/Workload/VolumeSettings'
@@ -55,12 +57,12 @@ export default {
       title: 'POD_GRACE_PERIOD',
       component: TerminationSeconds,
     },
-    //    {
-    //      icon: 'eip-group',
-    //      name: 'ippools',
-    //      title: 'POD_IP_POOL',
-    //      component: IPPool,
-    //    },
+    {
+      icon: 'slider',
+      name: 'advanceSettings',
+      title: 'ADVANCED_SETTINGS',
+      component: AdvanceSettings,
+    },
   ],
   statefulsets: [
     {
@@ -87,6 +89,18 @@ export default {
       title: 'STORAGE',
       component: VolumeSettings,
     },
+    {
+      icon: 'group',
+      name: 'deploymentMode',
+      title: 'POD_SCHEDULING_RULES',
+      component: Affinity,
+    },
+    {
+      icon: 'slider',
+      name: 'advanceSettings',
+      title: 'ADVANCED_SETTINGS',
+      component: AdvanceSettings,
+    },
   ],
   daemonsets: [
     {
@@ -112,6 +126,58 @@ export default {
       name: 'podMode',
       title: 'POD_GRACE_PERIOD',
       component: TerminationSeconds,
+    },
+    {
+      icon: 'group',
+      name: 'deploymentMode',
+      title: 'POD_SCHEDULING_RULES',
+      component: Affinity,
+    },
+    {
+      icon: 'slider',
+      name: 'advanceSettings',
+      title: 'ADVANCED_SETTINGS',
+      component: AdvanceSettings,
+    },
+  ],
+  cronjobs: [
+    {
+      icon: 'cron-job',
+      name: 'jobSettings',
+      title: 'STRATEGY_SETTINGS',
+      component: JobSettings,
+      prefix: 'spec.jobTemplate.spec.',
+    },
+    {
+      icon: 'container',
+      name: 'podTemplate',
+      title: 'POD_SETTINGS',
+      component: JobContainerSettings,
+      prefix: 'spec.jobTemplate.spec.template.',
+      supportGpuSelect: true,
+    },
+    {
+      icon: 'storage',
+      name: 'volumeSettings',
+      title: 'STORAGE',
+      component: VolumeSettings,
+      prefix: 'spec.jobTemplate.spec.template.',
+    },
+    {
+      icon: 'slider',
+      name: 'advanceSettings',
+      title: 'ADVANCED_SETTINGS',
+      component: AdvanceSettings,
+      prefix: 'spec.jobTemplate.spec.template.',
+    },
+  ],
+  jobs: [
+    {
+      icon: 'job',
+      name: 'jobSettings',
+      title: 'STRATEGY_SETTINGS',
+      component: JobSettings,
+      withMetadata: true,
     },
   ],
 }

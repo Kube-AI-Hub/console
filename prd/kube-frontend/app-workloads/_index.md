@@ -124,6 +124,7 @@
 | 详情 | `detail.md` | `detail.md` |
 | 重新部署 | `redeploy.md` | `redeploy.md` |
 | 编辑 YAML | `edit-yaml.md` | `edit-yaml.md` |
+| 编辑设置 | `edit-settings.md` | `edit-settings.md` |
 | 删除 | `delete.md` | `delete.md` |
 
 ## 验收用例
@@ -138,6 +139,7 @@
 - `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-02`
 - `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-REDEPLOY-01`
 - `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_YAML-01`
+- `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-01`
 - `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DELETE-01`
 
 ## 服务的端口编辑

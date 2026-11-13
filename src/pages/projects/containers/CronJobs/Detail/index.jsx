@@ -80,6 +80,19 @@ export default class JobDetail extends React.Component {
         }),
     },
     {
+      key: 'editConfigTemplate',
+      icon: 'storage',
+      text: t('EDIT_SETTINGS'),
+      action: 'edit',
+      onClick: () =>
+        this.trigger('workload.template.edit', {
+          detail: this.store.detail,
+          ...this.props.match.params,
+          success: this.fetchData,
+          supportGpuSelect: true,
+        }),
+    },
+    {
       key: 'start',
       icon: 'start',
       text: t('START'),
@@ -141,10 +154,14 @@ export default class JobDetail extends React.Component {
         simplifyGpuName: true,
       }
     )
-    const limitsLines = formatAggregatedContainersResourceLines(containers, 'limits', {
-      multiplier: Number.isFinite(replicas) ? replicas : 1,
-      simplifyGpuName: true,
-    })
+    const limitsLines = formatAggregatedContainersResourceLines(
+      containers,
+      'limits',
+      {
+        multiplier: Number.isFinite(replicas) ? replicas : 1,
+        simplifyGpuName: true,
+      }
+    )
 
     const { cluster, namespace } = this.props.match.params
 

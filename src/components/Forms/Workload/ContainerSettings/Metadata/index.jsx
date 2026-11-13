@@ -41,7 +41,7 @@ export default class Metadata extends React.Component {
           rules={[{ validator: this.metaDataValidator }]}
         >
           <PropertiesInput
-            name="spec.template.metadata.annotations"
+            name={this.props.name || 'spec.template.metadata.annotations'}
             addText={t('ADD')}
             hiddenKeys={globals.config.preservedAnnotations}
             onError={this.handleMetaError}

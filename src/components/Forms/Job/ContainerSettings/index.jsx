@@ -36,6 +36,13 @@ export default class PodTemplate extends Base {
     ]
   }
 
+  handleContainer = data => {
+    Base.prototype.handleContainer.call(this, data)
+    if (this.props.formProps) {
+      this.props.formProps.onChange()
+    }
+  }
+
   renderRestartPolicy() {
     return (
       <Form.Item label={t('RESTART_POLICY')} desc={t(`RESTART_POLICY_DESC`)}>
@@ -56,7 +63,7 @@ export default class PodTemplate extends Base {
     }
 
     return (
-      <Form data={this.formTemplate} ref={formRef}>
+      <Form data={this.formTemplate} ref={formRef} {...this.props.formProps}>
         {this.renderRestartPolicy()}
         {this.renderContainerList()}
       </Form>
