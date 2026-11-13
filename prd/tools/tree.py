@@ -394,6 +394,208 @@ MODULES = [
                 ],
             },
             {
+                "id": "platform-settings",
+                "title": "平台设置",
+                "goal": "平台自身的配置：平台名称/描述/控制台地址，以及五种通知渠道是否已配置。两者都只读——渠道凭据是可读性受限的 Secret，编辑属于平台侧表单。",
+                "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-PLATFORM_SETTINGS-01"]},
+                "features": [
+                    {
+                        "id": "info",
+                        "title": "平台信息",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-INFO-01"]},
+                    },
+                    {
+                        "id": "notifications",
+                        "title": "通知渠道",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-NOTIFICATIONS-01"]},
+                    },
+                ],
+            },
+            {
+                "id": "access-control",
+                "title": "访问控制",
+                "goal": "平台级的三张表：用户（状态、平台角色、最近登录）、平台角色（规则数、是否模板）、企业空间（状态、集群关联）。这些记录不属于任何项目，页面不出现项目工作区栏。",
+                "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-01"]},
+                "features": [
+                    {
+                        "id": "users",
+                        "title": "用户列表",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-01"]},
+                    },
+                    {
+                        "id": "platform-roles",
+                        "title": "平台角色列表",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-01"]},
+                    },
+                    {
+                        "id": "workspaces",
+                        "title": "企业空间列表",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACES-01"]},
+                    },
+                ],
+            },
+            {
+                "id": "cluster-management",
+                "title": "集群管理",
+                "goal": "集群级视角：节点按就绪状态、角色与可分配资源展示；项目列出集群内全部项目空间及其所属企业空间。这些页面不属于任何项目，因此没有项目工作区栏。",
+                "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-CLUSTER_MANAGEMENT-01"]},
+                "features": [
+                    {
+                        "id": "nodes",
+                        "title": "节点列表",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-01"]},
+                    },
+                    {
+                        "id": "components",
+                        "title": "系统组件",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-COMPONENTS-01"]},
+                    },
+                    {
+                        "id": "storage-classes",
+                        "title": "存储类型",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-01"]},
+                    },
+                    {
+                        "id": "projects",
+                        "title": "项目列表",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-PROJECTS-01"]},
+                    },
+                ],
+            },
+            {
+                "id": "project-settings",
+                "title": "项目设置",
+                "goal": "项目可访问性与权限：项目角色按规则数与是否模板展示，详情列出权限规则；项目成员按状态、角色与最近活动展示。",
+                "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-PROJECT_SETTINGS-01"]},
+                "features": [
+                    {
+                        "id": "base-info",
+                        "title": "项目基本信息",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-BASE_INFO-01"]},
+                    },
+                    {
+                        "id": "roles",
+                        "title": "项目角色列表",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-01"]},
+                    },
+                    {
+                        "id": "role-rules",
+                        "title": "角色权限规则",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLE_RULES-01"]},
+                    },
+                    {
+                        "id": "network-isolation",
+                        "title": "网络隔离",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-01"]},
+                    },
+                    {
+                        "id": "members",
+                        "title": "项目成员列表",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-01"]},
+                    },
+                ],
+            },
+            {
+                "id": "monitoring",
+                "title": "监控告警",
+                "goal": "项目内的告警消息与告警策略各自一张列表：消息按触发状态与级别展示，策略按启用状态与规则数展示；模块未安装时页面显示空态而不是报错。",
+                "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-MONITORING-01"]},
+                "features": [
+                    {
+                        "id": "alerts",
+                        "title": "告警消息列表",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-MONITORING-ALERTS-01"]},
+                    },
+                    {
+                        "id": "rules",
+                        "title": "告警策略列表",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-MONITORING-RULES-01"]},
+                    },
+                ],
+            },
+            {
+                "id": "storage",
+                "title": "存储",
+                "goal": "项目内的存储卷与存储卷快照能按老 console 的列展示：状态来自 PVC 的 phase 与扩容条件，容量与访问模式按原样呈现；详情给出持久卷/来源卷的对应关系。",
+                "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-STORAGE-01"]},
+                "features": [
+                    {
+                        "id": "list",
+                        "title": "存储列表",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-STORAGE-LIST-01",
+                            "TC-L3-KUBE-FRONTEND-STORAGE-LIST-02",
+                        ]},
+                    },
+                    {
+                        "id": "detail",
+                        "title": "存储详情",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-STORAGE-DETAIL-01"]},
+                    },
+                    {
+                        "id": "edit-yaml",
+                        "title": "编辑 YAML",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-STORAGE-EDIT_YAML-01"]},
+                    },
+                    {
+                        "id": "delete",
+                        "title": "删除存储对象",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-STORAGE-DELETE-01"]},
+                    },
+                ],
+            },
+            {
+                "id": "app-workloads",
+                "title": "应用负载",
+                "goal": "项目内的八种应用负载（部署、有状态副本集、守护进程集、任务、定时任务、容器组、服务、应用路由）用一套列表与详情呈现：状态按老 console 的规则派生，重新部署只打 Pod 模板注解，写操作走正确的 API 组。",
+                "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-APP_WORKLOADS-01"]},
+                "features": [
+                    {
+                        "id": "list",
+                        "title": "工作负载列表",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-01",
+                            "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-02",
+                        ]},
+                    },
+                    {
+                        "id": "status",
+                        "title": "状态派生",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-STATUS-01",
+                        ]},
+                    },
+                    {
+                        "id": "detail",
+                        "title": "负载详情",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-01",
+                        ]},
+                    },
+                    {
+                        "id": "redeploy",
+                        "title": "重新部署",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-REDEPLOY-01",
+                        ]},
+                    },
+                    {
+                        "id": "edit-yaml",
+                        "title": "编辑 YAML",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_YAML-01",
+                        ]},
+                    },
+                    {
+                        "id": "delete",
+                        "title": "删除负载",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DELETE-01",
+                        ]},
+                    },
+                ],
+            },
+            {
                 "id": "cluster-configmaps",
                 "title": "集群配置字典",
                 "goal": "在集群管理下浏览集群内所有项目的 ConfigMap，可按项目筛选、按名称搜索与排序，并对单条对象完成编辑信息、编辑 YAML、编辑设置与删除；联邦对象只读。",

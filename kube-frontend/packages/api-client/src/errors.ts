@@ -37,6 +37,14 @@ export class ApiError extends Error {
   }
 
   get isNotFound(): boolean {
-    return this.status === 404 || this.code === 'not_found';
+    if (this.status === 404 || this.code === 'not_found') return true;
+    /*
+     * Some aggregated APIs answer 500 for a missing object: IAM's users endpoint
+     * returns `500` with `user.iam.kubesphere.io "x" not found`. Treating that as a
+     * server failure makes "did my delete work?" unanswerable — the page shows a retry
+     * button for an object that is already gone. The message is the only signal such an
+     * endpoint gives, so it is checked last and narrowly.
+     */
+    return this.status >= 500 && /\bnot found\b/i.test(this.message);
   }
 }

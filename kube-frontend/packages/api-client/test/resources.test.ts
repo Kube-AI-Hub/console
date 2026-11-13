@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createClient } from '../src/client';
-import { resourceApi } from '../src/resources';
+import { kubePrefix, resourceApi } from '../src/resources';
 import { secretsApi, toKubeSecret, toSecretSummary, secretKeyProblem, isSystemManagedSecret } from '../src/secrets';
 import { serviceAccountsApi, toKubeServiceAccount, toServiceAccountSummary, ROLE_ANNOTATION } from '../src/serviceaccounts';
 
@@ -229,5 +229,33 @@ describe('serviceAccountsApi', () => {
     expect(calls[0]?.method).toBe('PATCH');
     expect(calls[0]?.contentType).toBe('application/merge-patch+json');
     expect(JSON.parse(calls[0]?.body ?? '{}')).toEqual({ metadata: { annotations: { [ROLE_ANNOTATION]: 'project-editor' } } });
+  });
+});
+
+describe('api group routing', () => {
+  /**
+   * `/api/v1` serves only the core group; a Deployment written there is a 404.
+   * This table is the fix for the first workload YAML edit that failed that way,
+   * so the mapping itself is pinned down here.
+   */
+  it('sends core resources to /api/v1', () => {
+    for (const resource of ['configmaps', 'secrets', 'serviceaccounts', 'services', 'pods']) {
+      expect(kubePrefix(resource), resource).toBe('/api/v1');
+    }
+  });
+
+  it('sends grouped resources to their own apis path', () => {
+    expect(kubePrefix('deployments')).toBe('/apis/apps/v1');
+    expect(kubePrefix('statefulsets')).toBe('/apis/apps/v1');
+    expect(kubePrefix('daemonsets')).toBe('/apis/apps/v1');
+    expect(kubePrefix('jobs')).toBe('/apis/batch/v1');
+    expect(kubePrefix('cronjobs')).toBe('/apis/batch/v1');
+    expect(kubePrefix('ingresses')).toBe('/apis/networking.k8s.io/v1');
+  });
+
+  it('falls back to core for an unlisted resource', () => {
+    // A wrong guess is better than a crash, and the failure mode (404 on write) is
+    // visible; a missing entry is caught the first time the resource is edited.
+    expect(kubePrefix('unknown-resource')).toBe('/api/v1');
   });
 });

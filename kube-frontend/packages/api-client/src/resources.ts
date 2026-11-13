@@ -62,8 +62,8 @@ export interface KubeObject {
  * `.../<resource>` without the `namespaces/<ns>` segment. That is how "all
  * projects" is expressed — there is no query parameter for it.
  */
-function collectionPath(cluster: string, namespace: string, resource: string): string {
-  return `${resourcePath('kapis', cluster, namespace, resource)}`;
+function collectionPath(cluster: string, namespace: string, resource: string, kapisPrefix: string = KAPIS_RESOURCES): string {
+  return `${resourcePath('kapis', cluster, namespace, resource, kapisPrefix)}`;
 }
 
 /**
@@ -73,26 +73,85 @@ function collectionPath(cluster: string, namespace: string, resource: string): s
  * registers GET only and answers 405 to POST/PUT/PATCH/DELETE. ks-apiserver
  * forwards `/api/v1` to kube-apiserver through its generic proxy.
  */
-function writePath(cluster: string, namespace: string, resource: string): string {
-  return resourcePath('kube', cluster, namespace, resource);
+/**
+ * The API group a resource is served from.
+ *
+ * Writes go through the real Kubernetes endpoint, and `/api/v1` only serves the
+ * **core** group. Everything else lives under `/apis/<group>/<version>`: a
+ * Deployment written to `/api/v1/...` is answered with 404 "the server could not
+ * find the requested resource" — which is how this table came to exist (the first
+ * workload YAML edit failed exactly that way).
+ *
+ * Unlisted resources fall back to the core group, which is right for ConfigMaps,
+ * Secrets, ServiceAccounts, Services, Pods and PVCs. A new resource in another
+ * group must be added here; the alternative is a silent 404 on its writes.
+ */
+const RESOURCE_GROUPS: Readonly<Record<string, string>> = {
+  // apps/v1
+  deployments: 'apps/v1',
+  statefulsets: 'apps/v1',
+  daemonsets: 'apps/v1',
+  replicasets: 'apps/v1',
+  // batch/v1
+  jobs: 'batch/v1',
+  cronjobs: 'batch/v1',
+  // networking.k8s.io/v1
+  ingresses: 'networking.k8s.io/v1',
+  networkpolicies: 'networking.k8s.io/v1',
+  // autoscaling
+  horizontalpodautoscalers: 'autoscaling/v2',
+  // policy
+  poddisruptionbudgets: 'policy/v1',
+};
+
+/** `/api/v1` for core resources, `/apis/<group>/<version>` for the rest. */
+export function kubePrefix(resource: string): string {
+  const group = RESOURCE_GROUPS[resource];
+  return group ? `/apis/${group}` : '/api/v1';
 }
 
-function resourcePath(kind: 'kapis' | 'kube', cluster: string, namespace: string, resource: string): string {
+function writePath(cluster: string, namespace: string, resource: string): string {
+  return resourcePath('kube', cluster, namespace, resource, KAPIS_RESOURCES);
+}
+
+/** Default kapis group: the generic resource proxy. */
+export const KAPIS_RESOURCES = '/kapis/resources.kubesphere.io/v1alpha3';
+
+/**
+ * Alerting lives under its own kapis group.
+ *
+ * Not every KubeSphere resource is served by the generic resources proxy: alerting
+ * has its own aggregated API (`alerting.kubesphere.io`), and asking the generic
+ * proxy for `alerts` answers 404. The group is therefore a parameter, not a
+ * constant.
+ */
+export const KAPIS_ALERTING = '/kapis/alerting.kubesphere.io/v1alpha2';
+
+function resourcePath(
+  kind: 'kapis' | 'kube',
+  cluster: string,
+  namespace: string,
+  resource: string,
+  kapisPrefix: string,
+): string {
   const clusterSegment = cluster && cluster !== 'host' ? `clusters/${encodeURIComponent(cluster)}/` : '';
   const namespaceSegment = namespace ? `namespaces/${encodeURIComponent(namespace)}/` : '';
-  const prefix = kind === 'kapis' ? '/kapis/resources.kubesphere.io/v1alpha3' : '/api/v1';
+  const prefix = kind === 'kapis' ? kapisPrefix : kubePrefix(resource);
   return `${prefix}/${clusterSegment}${namespaceSegment}${resource}`;
 }
 
 export interface ResourceApiOptions<TItem, TSummary, TDetail> {
   /** kapis resource segment, e.g. `secrets`. */
   resource: string;
+  /** kapis group; defaults to the generic resources proxy. */
+  kapisPrefix?: string;
   toSummary(item: TItem): TSummary;
   toDetail(item: TItem): TDetail;
 }
 
 export function resourceApi<TItem extends KubeObject, TSummary, TDetail>(client: Client, options: ResourceApiOptions<TItem, TSummary, TDetail>) {
   const { resource } = options;
+  const kapisPrefix = options.kapisPrefix ?? KAPIS_RESOURCES;
 
   return {
     /**
@@ -103,11 +162,11 @@ export function resourceApi<TItem extends KubeObject, TSummary, TDetail>(client:
      * versions spell it that way.
      */
     async list(params: ResourceListParams): Promise<ResourceListResult<TSummary>> {
-      const body = await client.request<{
+      const response = await client.request<{
         items?: TItem[];
         totalItems?: number;
         total_count?: number;
-      }>(collectionPath(params.cluster, params.namespace, resource), {
+      }>(collectionPath(params.cluster, params.namespace, resource, kapisPrefix), {
         query: {
           page: params.page,
           limit: params.pageSize,
@@ -118,6 +177,13 @@ export function resourceApi<TItem extends KubeObject, TSummary, TDetail>(client:
         ...(params.signal ? { signal: params.signal } : {}),
       });
 
+      /*
+       * A `200` with an empty body is not an error: an aggregated API whose module
+       * is not installed (alerting on a cluster without it) answers exactly that.
+       * Parsing it as "no body" and then reading `.items` threw, which surfaced as a
+       * red error page for a resource that simply has nothing to show.
+       */
+      const body = response ?? {};
       const items = (body.items ?? []).map(options.toSummary);
       return {
         items,
@@ -129,7 +195,7 @@ export function resourceApi<TItem extends KubeObject, TSummary, TDetail>(client:
 
     async get(params: ResourceRef & { signal?: AbortSignal }): Promise<TDetail> {
       const item = await client.request<TItem>(
-        `${collectionPath(params.cluster, params.namespace, resource)}/${encodeURIComponent(params.name)}`,
+        `${collectionPath(params.cluster, params.namespace, resource, kapisPrefix)}/${encodeURIComponent(params.name)}`,
         { ...(params.signal ? { signal: params.signal } : {}) },
       );
       return options.toDetail(item);
@@ -153,7 +219,7 @@ export function resourceApi<TItem extends KubeObject, TSummary, TDetail>(client:
     async update(params: { cluster: string; namespace: string; body: KubeObject }): Promise<TDetail> {
       const name = params.body.metadata?.name ?? '';
       const current = await client.request<TItem>(
-        `${collectionPath(params.cluster, params.namespace, resource)}/${encodeURIComponent(name)}`,
+        `${collectionPath(params.cluster, params.namespace, resource, kapisPrefix)}/${encodeURIComponent(name)}`,
       );
       const resourceVersion = current.metadata?.resourceVersion;
       const body: KubeObject = {
