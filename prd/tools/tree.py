@@ -451,6 +451,11 @@ MODULES = [
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-COMPONENTS-01"]},
                     },
                     {
+                        "id": "persistent-volumes",
+                        "title": "持久卷",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-PERSISTENT_VOLUMES-01"]},
+                    },
+                    {
                         "id": "storage-classes",
                         "title": "存储类型",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-01"]},

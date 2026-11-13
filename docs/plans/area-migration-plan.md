@@ -2261,3 +2261,38 @@ click2:  ['zzzzzzzz', 'zyp001', 'zupin']      ← 降序
 现在都等待首个期望值出现再断言。
 
 **验证**：cluster-management **8 通过**；console-next 单测 98 通过。
+
+### 48.14 第 72 轮：集群作用域缺口分析 + 迁移持久卷
+
+先回答一个问题：老 console 的 18 个集群页里，哪些是**能力真缺**，哪些是现代设计用别的方式覆盖了？
+
+核对结论：
+
+| 老集群页 | 现状 |
+| --- | --- |
+| 配置字典 / 节点 / 项目 / 系统组件 / 存储类型 | 已迁移 |
+| 保密字典 / 服务账户 | **项目页已带「项目」列 + 全部项目模式**，能力等价 |
+| 工作负载 / 角色 / 成员 / 网络策略 | 项目页支持「全部项目」筛选（`__all__` 哨兵会被映射成空命名空间） |
+| **持久卷** | **集群独有资源，此前完全缺失** |
+| 概览 / 监控 / 自定义监控 / CRD 浏览器 / 边缘节点 / 日志 / 网关 / kubeconfig / 可见性 | 已在 `CLUSTER_UNMIGRATED` 登记原因 |
+
+因此本轮只做真正缺的那一页：**持久卷**。
+
+实测性能（决定了实现方式）：
+
+| 接口 | 耗时 |
+| --- | --- |
+| `/api/v1/persistentvolumes`（核心） | **24s** |
+| `/kapis/.../persistentvolumes`（代理） | **63s** |
+
+所以读核心 API，并把加载骨架覆盖到重查阶段。
+
+页面结果（170 个卷、七列）：
+
+```
+csghub-minio-a100-disk1 / local-static | Bound | 5Ti | RWO | kubesphere-system/csghub-minio-a100-data | Retain
+kubeaihub-model-cache / juicefs-shared  | Bound | 1Ti | RWX | spaces/csghub-model-cache | Retain
+```
+
+**验证**：cluster-management **9 通过**；架构契约 465；api-client 164；console-next 98；文档门禁 0 错；
+一致性核对缺口 0、未登记 0。

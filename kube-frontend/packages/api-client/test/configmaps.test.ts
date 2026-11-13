@@ -110,7 +110,7 @@ describe('ConfigMaps transport', () => {
     // verified against the live cluster, where `metadata.annotations` came back empty.
     const calls: Array<{ method: string; body?: unknown }> = [];
     const client = {
-      async request(url: string, init?: { method?: string; body?: unknown }) {
+      async request(_url: string, init?: { method?: string; body?: unknown }) {
         if (!init?.method || init.method === 'GET') {
           return {
             metadata: {

@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/configmaps/_index.md`](../../../../prd/kube-frontend/configmaps/_index.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-CONFIGMAPS-BULK_DELETE-01** — （需求里找不到这条 AC，请先补需求或改 `covers`）
+- **AC-L3-KUBE-FRONTEND-CONFIGMAPS-BULK_DELETE-01** — 已知选中两个配置字典，当点批量删除，则确认框要求输入数量 `2`（而不是逐个名字的拼接），输入后确认按钮可用；确认后两个对象都不再存在。
 
 ### 关联设计
 

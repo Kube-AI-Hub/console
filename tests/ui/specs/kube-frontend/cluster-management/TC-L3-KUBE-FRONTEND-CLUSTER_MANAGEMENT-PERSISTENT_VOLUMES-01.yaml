@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-PERSISTENT_VOLUMES-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: persistent-volumes
+title: 持久卷 · 七列与绑定声明
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/persistentvolumes'
+prd: prd/kube-frontend/cluster-management/persistent-volumes.md
+design: design/kube-frontend/cluster-management/persistent-volumes.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-PERSISTENT_VOLUMES-01
+
+story:
+- US1
+
+product: 持久卷列表显示七列；已绑定卷的绑定声明为 <命名空间>/<声明名>；行数与核心 API 一致。
+preconditions:
+- 已登录，且有集群权限
+- 集群存在持久卷
+steps:
+- 用核心 API 读取持久卷数量
+- 打开持久卷页，核对表头与行数
+- 核对已绑定卷的绑定声明格式
+expected:
+- 表头依次为 名称、状态、容量、访问模式、绑定声明、回收策略、创建时间
+- 行数等于 API 返回数量
+- 已绑定卷的绑定声明含斜杠，未绑定的为 -
+performance:
+- 该列表通过核心 API 读取，本集群实测约 24 秒（kapis 代理需 63 秒）
+troubleshoot:
+- 行数不符时确认没有分页（本页一次取全量）
+- 绑定声明只有名字说明未拼命名空间
+update_automation:
+- 列变化时改 pages/cluster_management.py

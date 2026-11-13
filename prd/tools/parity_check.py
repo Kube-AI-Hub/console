@@ -61,6 +61,7 @@ CLUSTER_PAGES = {
     "projects": "namespaces",
     "servicecomponents": "components",
     "storage": "storageclasses",
+    "persistentvolumes": "persistentvolumes",
 }
 
 #: 集群作用域里明确不迁移的页面与原因。

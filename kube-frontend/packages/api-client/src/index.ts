@@ -209,9 +209,11 @@ export {
   toComponentSummary,
   toNamespaceSummary,
   toNodeSummary,
+  toPersistentVolumeSummary,
+  persistentVolumesApi,
   toProjectGateway,
 } from './storage';
-export type { ComponentSummary, NamespaceSummary, NodeSummary, ProjectGateway } from './storage';
+export type { ComponentSummary, NamespaceSummary, NodeSummary, PersistentVolumeSummary, ProjectGateway } from './storage';
 export {
   accessModeLabel,
   claimStatus,

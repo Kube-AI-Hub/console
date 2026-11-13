@@ -170,6 +170,7 @@ export const AREAS: readonly Area[] = [
       // could not reach it.
       { key: 'configmaps', path: 'configmaps', titleKey: 'clusterConfigMaps.title', status: 'ready' },
       { key: 'storageclasses', path: 'storageclasses', titleKey: 'cluster.storageClasses.title', status: 'ready' },
+      { key: 'persistentvolumes', path: 'persistentvolumes', titleKey: 'cluster.persistentVolumes.title', status: 'ready' },
     ],
   },
   {
