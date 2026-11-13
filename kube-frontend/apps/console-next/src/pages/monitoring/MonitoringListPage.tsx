@@ -149,7 +149,18 @@ export function MonitoringListPage({ kind, cluster, namespace }: MonitoringListP
             ],
       rowActions: [
         { key: 'detail', label: t('monitoring.action.detail') },
-        ...(descriptor.allowToggle ? [{ key: 'toggle', label: t('monitoring.action.toggle') }] : []),
+        /*
+         * 启用/停用 are two entries whose `visible` predicates are mutually exclusive:
+         * a row action's label is static, so one entry cannot rename itself per row.
+         * The old console shows whichever applies; the same is done here with an
+         * enabled/disabled pair.
+         */
+        ...(descriptor.allowToggle
+          ? [
+              { key: 'disable', label: t('monitoring.action.disable'), visible: (row: Row) => (row as AlertingRuleSummary).enabled },
+              { key: 'enable', label: t('monitoring.action.enable'), visible: (row: Row) => !(row as AlertingRuleSummary).enabled },
+            ]
+          : []),
         ...(descriptor.allowDelete ? [{ key: 'delete', label: t('common.delete'), tone: 'danger' as const }] : []),
       ],
       empty: { title: t(descriptor.emptyTitleKey), description: t(descriptor.emptyDescriptionKey) },
@@ -197,11 +208,10 @@ export function MonitoringListPage({ kind, cluster, namespace }: MonitoringListP
           if (!row) return;
           if (action === 'delete') setToDelete([row.name]);
           if (action === 'detail') setDetail(row);
-          if (action === 'toggle') {
+          if (action === 'enable' || action === 'disable') {
             // The label the platform evaluates on flips; the list refetches so the
             // status badge reflects what is now stored, not what we hoped.
-            const rule = row as AlertingRuleSummary;
-            toggle.mutate({ name: rule.name, enabled: !rule.enabled });
+            toggle.mutate({ name: row.name, enabled: action === 'enable' });
           }
         }}
       />
