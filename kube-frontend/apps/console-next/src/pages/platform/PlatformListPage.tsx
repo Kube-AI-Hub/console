@@ -11,6 +11,7 @@ import { PLATFORM_DESCRIPTORS, useCreateWorkspace, useDeleteClusterRole, useDele
 import { WorkspaceEditorDialog } from './WorkspaceEditorDialog';
 import { RoleEditorDialog } from './RoleEditorDialog';
 import { DeleteDialog } from '@/components/resource/DeleteDialog';
+import { useSetUserActive } from './queries';
 import { MutationAlert } from '@/components/resource/ResourceErrorPanel';
 import { UserCreateDialog } from './UserCreateDialog';
 import { UserRoleDialog } from './UserRoleDialog';
@@ -42,6 +43,7 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
   const [deleteTarget, setDeleteTarget] = React.useState<UserSummary | null>(null);
   const setRole = useSetUserRole();
   const removeUser = useDeleteUser();
+  const setUserActive = useSetUserActive();
   const [roleEditor, setRoleEditor] = React.useState<{ name: string; alias: string; description: string } | null | 'new'>(null);
   const [deleteRole, setDeleteRole] = React.useState<ClusterRoleSummary | null>(null);
   const removeRole = useDeleteClusterRole();
@@ -206,8 +208,28 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
       rowActions:
         kind === 'users'
           ? [
+              /*
+               * Two mutually exclusive entries: a row action's label is static, so a single
+               * 'toggle' would claim the wrong state for half the rows. The admin account is
+               * never disabled or deleted here — that would lock the platform out of itself.
+               */
+              {
+                key: 'enableUser',
+                label: t('platform.users.enable'),
+                visible: (row: Row) => (row as UserSummary).status === 'Disabled',
+              },
+              {
+                key: 'disableUser',
+                label: t('platform.users.disable'),
+                visible: (row: Row) => (row as UserSummary).status !== 'Disabled' && (row as UserSummary).username !== 'admin',
+              },
               { key: 'changeRole', label: t('platform.users.changeRole') },
-              { key: 'delete', label: t('common.delete'), tone: 'danger' as const },
+              {
+                key: 'delete',
+                label: t('common.delete'),
+                tone: 'danger' as const,
+                visible: (row: Row) => (row as UserSummary).username !== 'admin',
+              },
             ]
           : kind === 'clusterroles'
             ? [
@@ -271,6 +293,8 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
           }
           if (!row) return;
           if (action === 'changeRole') setRoleTarget(row as UserSummary);
+          if (action === 'enableUser') setUserActive.mutate({ name: (row as UserSummary).username, active: true });
+          if (action === 'disableUser') setUserActive.mutate({ name: (row as UserSummary).username, active: false });
           if (action === 'edit' && kind === 'clusterroles') {
             const role = row as ClusterRoleSummary;
             setRoleEditor({ name: role.name, alias: role.alias, description: role.description });
@@ -287,7 +311,7 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
         }}
       />
 
-      <MutationAlert error={setRole.error ?? removeUser.error ?? removeRole.error ?? createWorkspace.error ?? updateWorkspace.error ?? removeWorkspace.error} />
+      <MutationAlert error={setUserActive.error ?? setRole.error ?? removeUser.error ?? removeRole.error ?? createWorkspace.error ?? updateWorkspace.error ?? removeWorkspace.error} />
 
       <WorkspaceEditorDialog
         open={workspaceEditor !== null}

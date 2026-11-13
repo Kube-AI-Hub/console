@@ -1,0 +1,38 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-05
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: users
+title: 用户列表 · 停用、启用与删除账号
+entry_url: '{BASE_URL}/kube-frontend/access/users'
+prd: prd/kube-frontend/access-control/users.md
+design: design/kube-frontend/access-control/users.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-05
+
+story:
+- US2
+
+product: 非 admin 用户可停用/启用与删除：停用写 status.state=Disabled 并让行操作换成「启用」，删除后从列表消失；admin 不提供这两项。
+preconditions:
+- 已登录平台管理
+- 用例自行创建临时用户（tc-e2e- 前缀），finally 中确保删除
+steps:
+- 用 API 创建临时用户
+- 在用户列表中搜索该用户，执行「停用」，回读 status.state
+- 确认行操作变为「启用」，执行后回读 Active
+- 执行「删除」并确认，核对列表不再包含
+- 核对 admin 行没有「停用」与「删除」
+expected:
+- 停用后 status.state 为 Disabled
+- 启用后回到 Active
+- 删除后用户不在列表中
+- admin 行不提供停用/删除
+troubleshoot:
+- 停用返回 405：PATCH 不被支持，必须 GET 后 PUT 整对象
+- 第二次切换 409：PUT 前没有重新 GET（resourceVersion 过期）
+- 删除后仍可见：列表未失效或搜索条件未变
+update_automation:
+- 选择器见 pages/access_control.py 与 PlatformListPage.tsx

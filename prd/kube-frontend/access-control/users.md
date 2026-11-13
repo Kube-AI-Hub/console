@@ -14,6 +14,12 @@
 
 **Independent Test**：打开用户页，核对四列与某个用户的平台角色注解一致。
 
+### US2 - 停用、启用与删除账号 (Priority: P1)
+
+作为 **平台管理员**，我希望 **停用不再使用的账号或直接删除**，以便 **不让离职账号继续持有凭据**。
+
+**Independent Test**：创建一个临时用户 → 停用 → 回读 Disabled → 启用 → 回读 Active → 删除 → 列表不再包含。
+
 ## 验收场景
 
 - **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-03** — 已知用户列表有数据，当行操作「修改平台角色」并选择平台管理员，则 `iam.kubesphere.io/platform-role` 变为 `platform-admin`；当「删除」并确认，则该用户不再出现在列表结果中。
@@ -22,6 +28,7 @@
 
 - **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-01** — 已知平台上有用户，当打开用户页，则显示用户名、状态、平台角色、最近登录四列。
 - **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-04** — 已知用户列表有数据，当点击名称列排序，则顺序变为升序；再次点击，则变为降序（两次结果不同）。
+- **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-05** — 已知平台上有非 admin 用户，当对其执行「停用」，则该用户 `status.state` 变为 `Disabled`，行操作变为「启用」；执行「启用」后回到 `Active`；执行「删除」并确认后该用户从列表中消失；admin 账号不提供「停用」与「删除」。
 
 ## 设计目标
 

@@ -116,3 +116,13 @@ export const PLATFORM_DESCRIPTORS: Record<PlatformKind, PlatformDescriptor> = {
     emptyDescriptionKey: 'platform.workspaces.emptyDescription',
   },
 };
+
+/** Enable or disable a user account; the list is refetched because the status column is the
+ * only feedback and it comes from the object, not from local state. */
+export function useSetUserActive() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { name: string; active: boolean }) => usersWriteApi(api).setActive(input),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['platform', 'users'] }),
+  });
+}

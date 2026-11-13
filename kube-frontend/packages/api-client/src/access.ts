@@ -498,6 +498,28 @@ export function usersWriteApi(client: Client) {
     },
 
     /**
+     * Enable or disable a user account.
+     *
+     * Not a merge patch: the IAM users endpoint answers **405** to PATCH (verified
+     * against the live cluster), so the whole object is PUT with `status.state` set —
+     * the same shape the old console sends. The object is read first because a PUT with
+     * a stale `resourceVersion` is rejected with 409; without the read, a second toggle
+     * would fail.
+     */
+    async setActive(params: { name: string; active: boolean }): Promise<UserSummary> {
+      const path = `${KAPIS_IAM}/users/${encodeURIComponent(params.name)}`;
+      const current = await client.request<KubeAccess>(path);
+      const updated = await client.request<KubeAccess>(path, {
+        method: 'PUT',
+        body: {
+          ...current,
+          status: { ...((current?.status ?? {}) as Record<string, unknown>), state: params.active ? 'Active' : 'Disabled' },
+        },
+      });
+      return toUserSummary(updated ?? {});
+    },
+
+    /**
      * Change a user's platform role.
      *
      * A **PUT**, not a merge patch: the IAM users endpoint answers 405 to PATCH
