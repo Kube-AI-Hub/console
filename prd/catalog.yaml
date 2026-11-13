@@ -414,6 +414,7 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-01
+        - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-02
     - id: platform-roles
       title: 平台角色列表
       prd: prd/kube-frontend/access-control/platform-roles.md
@@ -428,6 +429,42 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACES-01
+    - id: workspace-detail
+      title: 企业空间详情
+      prd: prd/kube-frontend/access-control/workspace-detail.md
+      design: design/kube-frontend/access-control/workspace-detail.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_DETAIL-01
+    - id: user-detail
+      title: 用户详情
+      prd: prd/kube-frontend/access-control/user-detail.md
+      design: design/kube-frontend/access-control/user-detail.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USER_DETAIL-01
+  - id: workbench
+    title: 工作台
+    prd: prd/kube-frontend/workbench/_index.md
+    design: design/kube-frontend/workbench/_index.md
+    tests:
+      L2:
+      - TC-FULL-KUBE-FRONTEND-WORKBENCH-01
+    features:
+    - id: entry
+      title: 工作台入口
+      prd: prd/kube-frontend/workbench/entry.md
+      design: design/kube-frontend/workbench/entry.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-WORKBENCH-ENTRY-01
+    - id: context
+      title: 项目上下文栏
+      prd: prd/kube-frontend/workbench/context.md
+      design: design/kube-frontend/workbench/context.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-WORKBENCH-CONTEXT-01
   - id: cluster-management
     title: 集群管理
     prd: prd/kube-frontend/cluster-management/_index.md
@@ -450,6 +487,8 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-01
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-03
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-04
     - id: components
       title: 系统组件
       prd: prd/kube-frontend/cluster-management/components.md
@@ -486,6 +525,7 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-PERSISTENT_VOLUMES-01
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-PERSISTENT_VOLUMES-02
     - id: storage-classes
       title: 存储类型
       prd: prd/kube-frontend/cluster-management/storage-classes.md
@@ -507,6 +547,13 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-SETTINGS-01
+    - id: visibility
+      title: 集群可见性
+      prd: prd/kube-frontend/cluster-management/visibility.md
+      design: design/kube-frontend/cluster-management/visibility.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-VISIBILITY-01
     - id: monitor
       title: 集群监控
       prd: prd/kube-frontend/cluster-management/monitor.md
@@ -528,6 +575,8 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-01
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-03
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-04
     - id: custom-resources
       title: 自定义资源
       prd: prd/kube-frontend/cluster-management/custom-resources.md
@@ -558,6 +607,7 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-01
+        - TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-04
     - id: role-rules
       title: 角色权限规则
       prd: prd/kube-frontend/project-settings/role-rules.md
@@ -579,6 +629,7 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-01
+        - TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-02
     - id: gateway
       title: 网关设置
       prd: prd/kube-frontend/project-settings/gateway.md
@@ -713,68 +764,3 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DELETE-01
-  - id: cluster-configmaps
-    title: 集群配置字典
-    prd: prd/kube-frontend/cluster-configmaps/_index.md
-    design: design/kube-frontend/cluster-configmaps/_index.md
-    tests:
-      L2:
-      - TC-FULL-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-01
-    features:
-    - id: list
-      title: 集群配置字典列表
-      prd: prd/kube-frontend/cluster-configmaps/list.md
-      design: design/kube-frontend/cluster-configmaps/list.md
-      tests:
-        L3:
-        - TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-LIST-01
-        - TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-LIST-02
-    - id: search
-      title: 按名称搜索
-      prd: prd/kube-frontend/cluster-configmaps/search.md
-      design: design/kube-frontend/cluster-configmaps/search.md
-      tests:
-        L3:
-        - TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-SEARCH-01
-    - id: detail
-      title: 集群配置字典详情
-      prd: prd/kube-frontend/cluster-configmaps/detail.md
-      design: design/kube-frontend/cluster-configmaps/detail.md
-      tests:
-        L3:
-        - TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-DETAIL-01
-    - id: create
-      title: 创建配置字典
-      prd: prd/kube-frontend/cluster-configmaps/create.md
-      design: design/kube-frontend/cluster-configmaps/create.md
-      tests:
-        L3:
-        - TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-CREATE-01
-    - id: edit
-      title: 编辑配置字典
-      prd: prd/kube-frontend/cluster-configmaps/edit.md
-      design: design/kube-frontend/cluster-configmaps/edit.md
-      tests:
-        L3:
-        - TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-EDIT-01
-    - id: delete
-      title: 删除配置字典
-      prd: prd/kube-frontend/cluster-configmaps/delete.md
-      design: design/kube-frontend/cluster-configmaps/delete.md
-      tests:
-        L3:
-        - TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-DELETE-01
-    - id: ai-surface
-      title: 智能体可操作性
-      prd: prd/kube-frontend/cluster-configmaps/ai-surface.md
-      design: design/kube-frontend/cluster-configmaps/ai-surface.md
-      tests:
-        L3:
-        - TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-AI_SURFACE-01
-    - id: mobile
-      title: 移动端适配
-      prd: prd/kube-frontend/cluster-configmaps/mobile.md
-      design: design/kube-frontend/cluster-configmaps/mobile.md
-      tests:
-        L3:
-        - TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-MOBILE-01

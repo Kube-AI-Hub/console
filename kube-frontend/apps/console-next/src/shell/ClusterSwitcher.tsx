@@ -103,7 +103,19 @@ export function ClusterSwitcher({ current, collapsed = false }: ClusterSwitcherP
         onOpenChange={setOpen}
         title={t('cluster.switch.title')}
         footer={
-          <div className="flex justify-end">
+          <div className="flex items-center justify-between gap-2">
+            {/*
+             * The way back to the fleet. The switcher answers "which cluster", but the
+             * next question is often "which clusters are there, and how do I add one" —
+             * and that page is otherwise only reachable from the header menu.
+             */}
+            <Button
+              variant="ghost"
+              onClick={() => window.location.assign('/kube-frontend/clusters')}
+              {...actionProps('clusters:switch-manage')}
+            >
+              {t('cluster.switch.manage')}
+            </Button>
             <Button variant="secondary" onClick={() => setOpen(false)} {...actionProps('clusters:switch-cancel')}>
               {t('common.cancel')}
             </Button>

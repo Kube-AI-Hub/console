@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import type { RequestOptions } from '../src/client';
 import {
   clusterAgentApi,
   clusterImportApi,
@@ -24,17 +25,20 @@ interface Call {
   contentType?: string;
 }
 
-function recordingClient(response: unknown = {}): { client: { request: <T>(path: string, init?: Record<string, unknown>) => Promise<T> }; calls: Call[] } {
+function recordingClient(response: unknown = {}): {
+  client: { request: <T>(path: string, init?: RequestOptions) => Promise<T> };
+  calls: Call[];
+} {
   const calls: Call[] = [];
   return {
     calls,
     client: {
-      async request<T>(path: string, init?: Record<string, unknown>): Promise<T> {
+      async request<T>(path: string, init?: RequestOptions): Promise<T> {
         calls.push({
           path,
-          ...(init?.['method'] ? { method: String(init['method']) } : {}),
-          ...(init?.['body'] ? { body: init['body'] } : {}),
-          ...(init?.['contentType'] ? { contentType: String(init['contentType']) } : {}),
+          ...(init?.method ? { method: init.method } : {}),
+          ...(init?.body ? { body: init.body } : {}),
+          ...(init?.contentType ? { contentType: init.contentType } : {}),
         });
         return response as T;
       },
@@ -71,16 +75,18 @@ describe('clusterImportApi', () => {
   it('creates through the native API group', async () => {
     const { client, calls } = recordingClient();
     await clusterImportApi(client).import({ name: 'member', mode: 'proxy' });
+    expect(calls).toHaveLength(1);
     // kapis rejects writes for this group with 400 wrong GroupVersionKind.
-    expect(calls[0].path).toBe('/apis/cluster.kubesphere.io/v1alpha1/clusters');
-    expect(calls[0].method).toBe('POST');
+    expect(calls[0]?.path).toBe('/apis/cluster.kubesphere.io/v1alpha1/clusters');
+    expect(calls[0]?.method).toBe('POST');
   });
 
   it('validates through the kapis validation endpoint before creating', async () => {
     const { client, calls } = recordingClient();
     await clusterImportApi(client).validate({ name: 'member', mode: 'direct', kubeconfig: 'apiVersion: v1\n' });
-    expect(calls[0].path).toBe('/kapis/cluster.kubesphere.io/v1alpha1/clusters/validation');
-    expect(calls[0].method).toBe('POST');
+    expect(calls).toHaveLength(1);
+    expect(calls[0]?.path).toBe('/kapis/cluster.kubesphere.io/v1alpha1/clusters/validation');
+    expect(calls[0]?.method).toBe('POST');
   });
 });
 
@@ -94,12 +100,13 @@ describe('clusterWriteApi.updateBasicInfo', () => {
       provider: 'Kube AI Hub',
       description: 'primary',
     });
-    const body = calls[0].body as {
+    expect(calls).toHaveLength(1);
+    const body = calls[0]?.body as {
       metadata: { annotations: Record<string, unknown>; labels: Record<string, unknown> };
       spec: { provider: string };
     };
-    expect(calls[0].method).toBe('PATCH');
-    expect(calls[0].contentType).toBe('application/merge-patch+json');
+    expect(calls[0]?.method).toBe('PATCH');
+    expect(calls[0]?.contentType).toBe('application/merge-patch+json');
     expect(body.metadata.annotations['kubesphere.io/alias-name']).toBe('生产集群');
     expect(body.metadata.annotations['kubesphere.io/description']).toBe('primary');
     expect(body.metadata.labels['cluster.kubesphere.io/group']).toBe('production');
@@ -109,7 +116,8 @@ describe('clusterWriteApi.updateBasicInfo', () => {
   it('sends null to clear a field, because an absent key leaves the old value alone', async () => {
     const { client, calls } = recordingClient();
     await clusterWriteApi(client).updateBasicInfo({ cluster: 'host', alias: '', group: '', provider: '', description: '' });
-    const body = calls[0].body as {
+    expect(calls).toHaveLength(1);
+    const body = calls[0]?.body as {
       metadata: { annotations: Record<string, unknown>; labels: Record<string, unknown> };
       spec: { provider: string };
     };

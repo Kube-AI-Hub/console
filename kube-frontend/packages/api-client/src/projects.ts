@@ -15,10 +15,21 @@ export interface Project {
   alias: string;
   /** `status.phase`, e.g. `Active` or `Terminating`. */
   phase: string;
+  /**
+   * The enterprise space (tenant) this project belongs to, from the
+   * `kubesphere.io/workspace` label.
+   *
+   * A project is created *inside* a workspace, and a workspace only manages its own
+   * projects — so a project picker that ignores this offers projects the reader is not
+   * governing. That is a hierarchy bug, not a convenience.
+   */
+  workspace: string;
 }
 
 /** Annotation carrying the human-friendly project name. */
 const ALIAS_ANNOTATION = 'kubesphere.io/alias-name';
+/** Label carrying the owning enterprise space. */
+const WORKSPACE_LABEL = 'kubesphere.io/workspace';
 
 /**
  * Ceiling on cursors walked.
@@ -37,7 +48,7 @@ function namespacesPath(cluster: string): string {
 
 interface NamespacePage {
   items?: Array<{
-    metadata?: { name?: string; annotations?: Record<string, string> };
+    metadata?: { name?: string; annotations?: Record<string, string>; labels?: Record<string, string> };
     status?: { phase?: string };
   }>;
   totalItems?: number;
@@ -96,6 +107,7 @@ export function projectsApi(client: Client) {
             name,
             alias: item.metadata?.annotations?.[ALIAS_ANNOTATION] ?? '',
             phase: item.status?.phase ?? '',
+            workspace: item.metadata?.labels?.[WORKSPACE_LABEL] ?? '',
           });
         }
 

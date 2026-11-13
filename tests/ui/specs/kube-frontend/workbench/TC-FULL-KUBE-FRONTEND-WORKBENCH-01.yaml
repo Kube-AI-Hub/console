@@ -1,0 +1,31 @@
+id: TC-FULL-KUBE-FRONTEND-WORKBENCH-01
+level: 2
+suite: full
+module: kube-frontend
+submodule: workbench
+feature: entry
+title: 工作台到项目的完整路径
+entry_url: '{BASE_URL}/kube-frontend/'
+prd: prd/kube-frontend/workbench/_index.md
+design: design/kube-frontend/workbench/_index.md
+
+covers:
+- AC-FULL-KUBE-FRONTEND-WORKBENCH-01
+
+story:
+- US1
+
+product: 从工作台入口进入项目控制台，页头、侧栏与上下文栏同时在位。
+preconditions:
+- 已登录
+steps:
+- 打开工作台并等待就绪
+- 若有项目则进入第一个
+- 核对项目控制台的三处结构
+expected:
+- 工作台就绪且列出企业空间
+- 进入项目后出现项目区侧栏与上下文栏
+troubleshoot:
+- 上下文栏缺失：项目路由未匹配
+update_automation:
+- 与 ENTRY-01 共用页面对象

@@ -34,6 +34,14 @@ export interface SelectProps {
   'aria-label'?: string;
   /** Stable automation handle, rendered on whichever element acts as the trigger. */
   'data-ai-id'?: string;
+  /**
+   * Called when the popup opens.
+   *
+   * Long option lists are better fetched on demand than with the page: a project page
+   * that renders a cluster picker does not need every cluster until the reader asks for
+   * them, and the extra request delays the page it sits on.
+   */
+  onOpenChange?: (open: boolean) => void;
 }
 
 /**
@@ -54,11 +62,21 @@ export function Select({
   className,
   searchable = false,
   emptyText = '无匹配项',
+  onOpenChange,
   ...aria
 }: SelectProps): React.ReactElement {
   const [internalValue, setInternalValue] = React.useState(defaultValue ?? '');
   const value = controlledValue ?? internalValue;
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpenState] = React.useState(false);
+
+  /** Every open/close goes through here so a caller that lazy-loads hears about all of them. */
+  const setOpen = React.useCallback(
+    (next: boolean) => {
+      setOpenState(next);
+      onOpenChange?.(next);
+    },
+    [onOpenChange],
+  );
   const [query, setQuery] = React.useState('');
   const listId = React.useId();
   const inputRef = React.useRef<HTMLInputElement>(null);

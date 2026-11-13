@@ -1,34 +1,22 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
-import { useT } from '@/i18n';
+import * as React from 'react';
+import { createFileRoute, redirect } from '@tanstack/react-router';
+import { WorkbenchPage } from '@/pages/workbench/WorkbenchPage';
 
 /**
- * Landing route.
+ * `/` — kept as a redirect into the console's own prefix.
  *
- * Deliberately thin: it names the modules that exist rather than pretending to
- * be a dashboard. A dashboard built before the modules do would be a screen of
- * zeros that has to be rewritten on the first real page.
+ * The app used to render its landing page here, which is why the header's 工作台 entry
+ * (`/kube-frontend/`) pointed at nothing. The canonical workbench now lives under the
+ * prefix like every other route; this route only keeps an old bookmark working.
  */
 export const Route = createFileRoute('/')({
-  component: IndexPage,
+  beforeLoad: () => {
+    throw redirect({ to: '/kube-frontend' });
+  },
+  component: fallback,
 });
 
-function IndexPage() {
-  const t = useT();
-  return (
-    <div className="flex flex-col gap-3">
-      <h1 className="text-base font-semibold text-ai-fg">{t('app.name')}</h1>
-      <p className="text-xs text-ai-fg-muted">{t('index.chooseModule')}</p>
-      <ul className="flex flex-col gap-2 text-sm">
-        <li>
-          <Link
-            to="/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/configmaps"
-            params={{ workspace: 'system-workspace', cluster: 'host', namespace: 'default' }}
-            className="text-ai-accent hover:underline"
-          >
-            {t('configmaps.title')}
-          </Link>
-        </li>
-      </ul>
-    </div>
-  );
+/** Never rendered: `beforeLoad` always redirects. Kept so the route has a component. */
+function fallback(): React.ReactElement {
+  return <WorkbenchPage />;
 }

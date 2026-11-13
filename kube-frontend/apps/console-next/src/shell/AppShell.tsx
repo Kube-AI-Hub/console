@@ -200,9 +200,9 @@ function childHref(child: ModuleChild, scope: Scope): string {
 /**
  * Whether a child's own route is the current page.
  *
- * Compared against the built href, not the static `path`: `cluster-configmaps`
- * shares `/clusters` with the clusters entry, and a prefix test on the static path
- * would highlight both.
+ * Compared against the built href, not the static `path`: two entries can share the
+ * static prefix `/clusters` while pointing at different pages, and a prefix test on the
+ * static path would highlight both.
  */
 function childMatches(child: ModuleChild, pathname: string, scope: Scope): boolean {
   if (!child.build) return pathname.startsWith(child.path);
@@ -234,22 +234,6 @@ const MODULES: readonly ModuleEntry[] = [
     path: `${BASE}/clusters`,
     children: [
       { key: 'clusters', labelKey: 'admin.clusters', icon: 'cluster', path: `${BASE}/clusters` },
-      /*
-       * 集群管理 → 配置 → 配置字典.
-       *
-       * The cluster console's ConfigMap page belongs to a cluster, and the menu has
-       * no cluster id of its own, so the entry builds its target from the shell's
-       * scope — whatever cluster the reader is currently in, falling back to the
-       * default. `path` is the static form, used only when `build` is absent.
-       */
-      {
-        key: 'cluster-configmaps',
-        labelKey: 'admin.cluster.configmaps',
-        icon: 'catalog',
-        path: `${BASE}/clusters`,
-        groupKey: 'admin.cluster.groupConfig',
-        build: ({ cluster }) => `${BASE}/clusters/${cluster}/configmaps`,
-      },
       { key: 'access', labelKey: 'admin.access', icon: 'key', path: `${BASE}/access` },
       { key: 'appsManage', labelKey: 'admin.appsManage', icon: 'openpitrix', path: `${BASE}/apps-manage` },
       { key: 'settings', labelKey: 'admin.settings', icon: 'cogwheel', path: `${BASE}/settings` },

@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-WORKBENCH-CONTEXT-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: workbench
+feature: context
+title: 项目上下文栏 · 三级与不跨租户
+entry_url: '{BASE_URL}/kube-frontend/<ws>/clusters/<c>/projects/<ns>/configmaps'
+prd: prd/kube-frontend/workbench/context.md
+design: design/kube-frontend/workbench/context.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-WORKBENCH-CONTEXT-01
+
+story:
+- US1
+
+product: 项目页顶部显示企业空间/集群/项目三级；项目下拉只含当前企业空间的项目。
+preconditions:
+- 已登录
+- 集群上至少两个企业空间各有项目
+steps:
+- 读取集群命名空间与其企业空间标签
+- 打开某企业空间下某项目的页面
+- 核对上下文栏三级
+- 打开项目下拉，确认只含本企业空间项目
+expected:
+- 上下文栏显示企业空间、集群选择器、项目选择器
+- 项目下拉含当前项目
+- 其它企业空间的项目不出现
+troubleshoot:
+- 出现其它企业空间项目：项目下拉未传 workspace 过滤
+update_automation:
+- 选择器变化时改 shell/WorkspaceBar 的 aiId

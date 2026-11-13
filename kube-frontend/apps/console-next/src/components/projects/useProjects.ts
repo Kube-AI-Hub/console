@@ -62,13 +62,43 @@ export function useProjects(cluster: string) {
   return { ...query, data: query.data ?? partial };
 }
 
-/** Options for a project `Select`, without the "all" entry. */
-export function useProjectOptions(cluster: string): Array<{ value: string; label: string }> {
+/**
+ * Options for a project `Select`, without the "all" entry.
+ *
+ * `workspace` narrows the list to the projects that enterprise space manages. A project
+ * belongs to exactly one workspace, and a workspace only governs its own — a picker that
+ * ignores this offers projects the reader is not governing, which is a hierarchy bug
+ * rather than a convenience. Omit it only where the caller genuinely wants every project
+ * in the cluster (a cluster administrator's list filter, for example).
+ */
+export function useProjectOptions(cluster: string, workspace?: string): Array<{ value: string; label: string }> {
   const { data } = useProjects(cluster);
-  return React.useMemo(
-    () => selectableProjects(data).map((project) => ({ value: project.name, label: projectLabel(project) })),
-    [data],
-  );
+  return React.useMemo(() => {
+    const projects = selectableProjects(data);
+    const scoped = workspace ? projects.filter((project) => project.workspace === workspace) : projects;
+    return scoped.map((project) => ({ value: project.name, label: projectLabel(project) }));
+  }, [data, workspace]);
+}
+
+/**
+ * Every project of a cluster grouped by its enterprise space, for the workbench.
+ *
+ * A namespace without the `kubesphere.io/workspace` label is not a project — it is a plain
+ * namespace (a system one, or one created outside the console). Those are dropped: listing
+ * them under "no enterprise space" would suggest the platform has projects nobody owns.
+ */
+export function useProjectsByWorkspace(cluster: string): Map<string, Project[]> {
+  const { data } = useProjects(cluster);
+  return React.useMemo(() => {
+    const grouped = new Map<string, Project[]>();
+    for (const project of selectableProjects(data)) {
+      if (!project.workspace) continue;
+      const list = grouped.get(project.workspace);
+      if (list) list.push(project);
+      else grouped.set(project.workspace, [project]);
+    }
+    return grouped;
+  }, [data]);
 }
 
 /**

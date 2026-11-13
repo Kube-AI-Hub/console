@@ -420,7 +420,7 @@ MODULES = [
                     {
                         "id": "users",
                         "title": "用户列表",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-01"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-01", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-02"]},
                     },
                     {
                         "id": "platform-roles",
@@ -441,6 +441,24 @@ MODULES = [
                         "id": "user-detail",
                         "title": "用户详情",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USER_DETAIL-01"]},
+                    },
+                ],
+            },
+            {
+                "id": "workbench",
+                "title": "工作台",
+                "goal": "工作台是进入项目控制台的入口：按企业空间列出项目，点项目进入该项目；顶部「工作台」入口必须可达。",
+                "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-WORKBENCH-01"]},
+                "features": [
+                    {
+                        "id": "entry",
+                        "title": "工作台入口",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-WORKBENCH-ENTRY-01"]},
+                    },
+                    {
+                        "id": "context",
+                        "title": "项目上下文栏",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-WORKBENCH-CONTEXT-01"]},
                     },
                 ],
             },
@@ -692,71 +710,7 @@ MODULES = [
                     },
                 ],
             },
-            {
-                "id": "cluster-configmaps",
-                "title": "集群配置字典",
-                "goal": "在集群管理下浏览集群内所有项目的 ConfigMap，可按项目筛选、按名称搜索与排序，并对单条对象完成编辑信息、编辑 YAML、编辑设置与删除；联邦对象只读。",
-                "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-01"]},
-                "features": [
-                    {
-                        "id": "list",
-                        "title": "集群配置字典列表",
-                        "tests": {"L3": [
-                            "TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-LIST-01",
-                            "TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-LIST-02",
-                        ]},
-                    },
-                    {
-                        "id": "search",
-                        "title": "按名称搜索",
-                        "tests": {"L3": [
-                            "TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-SEARCH-01",
-                        ]},
-                    },
-                    {
-                        "id": "detail",
-                        "title": "集群配置字典详情",
-                        "tests": {"L3": [
-                            "TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-DETAIL-01",
-                        ]},
-                    },
-                    {
-                        "id": "create",
-                        "title": "创建配置字典",
-                        "tests": {"L3": [
-                            "TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-CREATE-01",
-                        ]},
-                    },
-                    {
-                        "id": "edit",
-                        "title": "编辑配置字典",
-                        "tests": {"L3": [
-                            "TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-EDIT-01",
-                        ]},
-                    },
-                    {
-                        "id": "delete",
-                        "title": "删除配置字典",
-                        "tests": {"L3": [
-                            "TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-DELETE-01",
-                        ]},
-                    },
-                    {
-                        "id": "ai-surface",
-                        "title": "智能体可操作性",
-                        "tests": {"L3": [
-                            "TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-AI_SURFACE-01",
-                        ]},
-                    },
-                    {
-                        "id": "mobile",
-                        "title": "移动端适配",
-                        "tests": {"L3": [
-                            "TC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-MOBILE-01",
-                        ]},
-                    },
-                ],
-            },
+            
         ],
     },
 ]

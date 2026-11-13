@@ -1,29 +1,20 @@
 import * as React from 'react';
-import { configMapsApi, type ConfigMapDetail, type ConfigMapScope } from '@kube-ai-hub/api-client';
+import { configMapsApi, type ConfigMapDetail } from '@kube-ai-hub/api-client';
 import { useConfigMaps, useCreateConfigMap, useDeleteConfigMaps, usePatchConfigMap, useUpdateConfigMap } from './queries';
 import { api } from '@/api';
 
 /**
- * Shared list state and data for the two ConfigMap pages.
+ * List state and data for the ConfigMap page.
  *
- * The project console (`/projects/:ns/configmaps`) and the cluster console
- * (`/clusters/:c/configmaps`) show the same resource from two collections. Their
- * columns differ and their create flow differs — the cluster page must ask which
- * project — but everything below that line is identical: page, sort, selection,
- * the query and the four mutations.
- *
- * Duplicating that would mean fixing every list bug twice; folding the two pages
- * together would mean a `scope === 'cluster'` branch in every handler. This hook is
- * the middle: one state machine, two thin pages.
- *
- * See `design/kube-frontend/cluster-configmaps/list.md`
- * (DEC-L3-KUBE-FRONTEND-CLUSTER_CONFIGMAPS-LIST-01).
+ * One page, two collections: `namespace` picks the project, and an empty `namespace`
+ * (the filter's 全部项目) reads the cluster-wide collection. That is why there is no
+ * separate cluster-level page: cross-project viewing is a filter here, not a second
+ * screen with its own columns and its own create flow.
  */
 export interface ConfigMapListScope {
-  scope: ConfigMapScope;
   cluster: string;
   /**
-   * The page's own project, from the route. Ignored when `scope` is `cluster`.
+   * The page's own project, from the route.
    *
    * Used as the starting value of the project filter, so arriving at
    * `/projects/<ns>/configmaps` shows that project rather than the whole cluster.
@@ -34,7 +25,7 @@ export interface ConfigMapListScope {
 export type ConfigMapSortKey = 'name' | 'createTime';
 export type ConfigMapOrder = 'asc' | 'desc';
 
-export function useConfigMapListController({ scope, cluster, namespace, pageSize = 10 }: ConfigMapListScope & { pageSize?: number }) {
+export function useConfigMapListController({ cluster, namespace, pageSize = 10 }: ConfigMapListScope & { pageSize?: number }) {
   const [page, setPage] = React.useState(1);
   const [keyword, setKeyword] = React.useState('');
   const [debouncedKeyword, setDebouncedKeyword] = React.useState('');
@@ -42,19 +33,15 @@ export function useConfigMapListController({ scope, cluster, namespace, pageSize
   const [order, setOrder] = React.useState<ConfigMapOrder>('desc');
   const [selected, setSelected] = React.useState<string[]>([]);
   /*
-   * Project filter.
-   *
-   * The start value is the only thing that differs between the pages: the project
-   * page starts at its route's namespace, the cluster page starts at its
-   * `?namespace=` (empty meaning every project). Everything after that is shared —
-   * and once a project is chosen both read the per-namespace collection, because
-   * kapis has no namespace parameter for the cluster-wide endpoint.
+   * Project filter: the route's project to begin with, empty meaning every project.
+   * Once a project is chosen the list reads the per-namespace collection, because kapis
+   * has no namespace parameter for the cluster-wide endpoint.
    */
   const [projectFilter, setProjectFilter] = React.useState(namespace ?? '');
 
   React.useEffect(() => {
     setProjectFilter(namespace ?? '');
-  }, [cluster, scope, namespace]);
+  }, [cluster, namespace]);
 
   React.useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -69,15 +56,13 @@ export function useConfigMapListController({ scope, cluster, namespace, pageSize
   /**
    * What the query reads.
    *
-   * Cluster scope with no project chosen uses `/klusters/<id>`; anything narrower
-   * uses the namespaced collection. Neither needs a special case in the page: the
-   * filter value is the whole input.
+   * An empty project means the cluster-wide collection (`/configmaps`); anything else
+   * means `/namespaces/<ns>/configmaps`. The API client decides that from the empty
+   * namespace, so the page needs no scope flag.
    */
-  const activeScope: ConfigMapScope = scope === 'cluster' && projectFilter === '' ? 'cluster' : 'project';
   const activeNamespace = projectFilter;
 
   const query = useConfigMaps({
-    scope: activeScope,
     cluster,
     namespace: activeNamespace,
     page,
@@ -106,7 +91,7 @@ export function useConfigMapListController({ scope, cluster, namespace, pageSize
   // reader can no longer see is the main way a bulk action deletes the wrong thing.
   React.useEffect(() => {
     setSelected([]);
-  }, [cluster, activeScope, activeNamespace, page, debouncedKeyword, sortBy, order]);
+  }, [cluster, activeNamespace, page, debouncedKeyword, sortBy, order]);
 
   const sortByKey = React.useCallback((key: string, nextOrder: ConfigMapOrder) => {
     setSortBy(key as ConfigMapSortKey);
@@ -142,7 +127,6 @@ export function useConfigMapListController({ scope, cluster, namespace, pageSize
     projectFilter,
     setProjectFilter,
     activeNamespace,
-    activeScope,
     pageSize,
     query,
     items: query.data?.items ?? [],

@@ -179,10 +179,6 @@ export const AREAS: readonly Area[] = [
       { key: 'nodes', path: 'nodes', titleKey: 'cluster.nodes.title', status: 'ready', groupKey: 'cluster.nav.groupResource' },
       { key: 'namespaces', path: 'namespaces', titleKey: 'cluster.projects.title', status: 'ready', groupKey: 'cluster.nav.groupResource' },
       { key: 'components', path: 'components', titleKey: 'cluster.components.title', status: 'ready', groupKey: 'cluster.nav.groupResource' },
-      // The cluster console's ConfigMap list spans every project; the project console
-      // has its own page. It existed as a route but was missing here, so the sidebar
-      // could not reach it.
-      { key: 'configmaps', path: 'configmaps', titleKey: 'clusterConfigMaps.title', status: 'ready', groupKey: 'nav.groupConfig' },
       { key: 'storageclasses', path: 'storageclasses', titleKey: 'cluster.storageClasses.title', status: 'ready', groupKey: 'nav.groupStorage' },
       { key: 'persistentvolumes', path: 'persistentvolumes', titleKey: 'cluster.persistentVolumes.title', status: 'ready', groupKey: 'nav.groupStorage' },
       // Editable cluster attributes. Only the description is writable: the rest of the

@@ -71,7 +71,7 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
   const t = useT();
   ensureConfigMapsRegistered();
 
-  const list = useConfigMapListController({ scope: 'project', cluster, namespace, pageSize: PAGE_SIZE });
+  const list = useConfigMapListController({ cluster, namespace, pageSize: PAGE_SIZE });
   const { page, setPage, keyword, setKeyword, sortBy, order, sortByKey, selected, setSelected } = list;
   const { projectFilter, setProjectFilter, query, items, total, remove, create, update, patch, loadDetail } = list;
   const [dialog, setDialog] = React.useState<Dialog>({ kind: 'none' });

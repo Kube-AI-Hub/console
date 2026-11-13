@@ -57,7 +57,6 @@ PROJECT_PAGES = {
 #: 老 console 里**集群作用域**的一级页面目录 → 迁移后的路由段。
 #: 与 PROJECT_PAGES 分开，因为它们的作用域不同（集群级列表跨全部命名空间）。
 CLUSTER_PAGES = {
-    "configmaps": "configmaps",
     "nodes": "nodes",
     "projects": "namespaces",
     "servicecomponents": "components",
