@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/project-settings/_index.md`](../../../../prd/kube-frontend/project-settings/_index.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-FULL-KUBE-FRONTEND-PROJECT_SETTINGS-01** — 已知已登录且有项目权限，当在两个页签之间切换，则每次都显示对应列表（或空态），页签高亮跟随，切换不产生文档请求。
+- **AC-FULL-KUBE-FRONTEND-PROJECT_SETTINGS-01** — 已知已登录且有项目权限，当在六个页签之间切换，则每次都显示对应页面或其空态，页签高亮跟随，且切换不产生文档请求。
 
 ### 关联设计
 
@@ -28,11 +28,11 @@
 
 文案来自需求 [`prd/kube-frontend/project-settings/_index.md`](../../../../prd/kube-frontend/project-settings/_index.md)，与用例的 `story` 对应；改需求即改这里。
 
-### US1 - 在角色与成员之间切换 (Priority: P1)
+### US1 - 在一个功能区里完成项目配置 (Priority: P1)
 
-作为 **项目管理员**，我希望 **在同一个功能区的两个页签之间切换**，以便 **对照某人的角色和它能做什么**。
+作为 **项目管理员**，我希望 **项目的权限与运行配置都在同一排页签里**，以便 **不必为了开个日志收集去另一个菜单找**。
 
-**Independent Test**：从角色切到成员再切回，核对页签高亮与工作区栏项目不变，且没有整页刷新。
+**Independent Test**：在六个页签之间依次切换，每次显示对应页面（或空态），页签高亮跟随，切换不产生文档请求。
 
 ## 前置与配置
 
