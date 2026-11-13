@@ -42,7 +42,7 @@ def test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_LOGGING_01(project_settings_page, 
     toggle = ui.page.locator('[data-ai-id="log-collection:toggle"]')
 
     try:
-        ui.page.goto(f"{ui.base_url}/kube-frontend/system-workspace/clusters/{ui.cluster}/projects/default/logging")
+        ui.page.goto(f"{ui.base_url}/kube-frontend/system-workspace/clusters/{ui.cluster}/projects/default/log-collections")
         surface = ui.page.locator('[data-ai-id="log-collection:surface"]').last
         expect(surface).to_be_visible(timeout=30_000)
         expect(surface).not_to_have_attribute("data-ai-state", "loading", timeout=60_000)

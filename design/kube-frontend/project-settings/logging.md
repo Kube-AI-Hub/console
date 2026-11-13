@@ -56,7 +56,7 @@
 ## 仓库落点
 
 - 页面：`apps/console-next/src/pages/settings/LogCollectionPage.tsx`
-- 路由：`apps/console-next/src/routes/kube-frontend.$workspace.clusters.$cluster.projects.$namespace/logging/`
+- 路由：`apps/console-next/src/routes/kube-frontend.$workspace.clusters.$cluster.projects.$namespace/log-collections/`（段名沿用老 console 的 `/log-collections`，书签可映射）
 - 区域注册：`areas/registry.ts`（settings 增加 logging）
 - 接口：`packages/api-client/src/iam.ts` 的 `logCollectionApi` / `LOG_COLLECTION_LABEL`
 - 文案：`packages/locales/src/index.ts`（`logCollection.*`）

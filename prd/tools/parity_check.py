@@ -51,6 +51,7 @@ PROJECT_PAGES = {
     "baseinfo": "baseinfo",
     "networkpolicies": "networkpolicies",
     "gateway": "gateways",
+    "logcollection": "log-collections",
 }
 
 #: 老 console 里**集群作用域**的一级页面目录 → 迁移后的路由段。
@@ -84,7 +85,6 @@ UNMIGRATED = {
     "applications_template": "应用模板：依赖 openpitrix 模块",
     "imagebuilder": "镜像构建器：依赖 devops 模块",
     "grayrelease": "灰度发布：依赖 servicemesh 模块",
-    "logcollection": "日志收集：需要日志组件配置",
     "custommonitoring": "自定义监控：需要图表引擎",
 }
 

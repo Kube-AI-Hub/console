@@ -59,7 +59,7 @@
 | 项目成员 | `…/members` |
 | 网络隔离 | `…/networkpolicies` |
 | 网关设置 | `…/gateways` |
-| 日志收集 | `…/logging` |
+| 日志收集 | `…/log-collections` |
 
 ## 文案与校验
 
