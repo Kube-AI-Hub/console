@@ -58,6 +58,12 @@ module.exports = {
   KUBE_CONFIG_IS_EXPIRED: 'KubeConfig has expired',
   EXPIRE_DATE: 'Expiration Time',
   LAST_KUBE_CONFIG_EXPIRED: 'KubeConfig expires in <span class="kubeConfig_expired">{count}</span> days',
+  JWT_SECRET_MISMATCH_TITLE: 'jwtSecret of {name} does not match the host cluster',
+  JWT_SECRET_MISMATCH_DESC: 'The current sign-in cannot be used on this cluster. Copy jwtSecret from the host cluster into the member cluster configuration.',
+  JWT_SECRET_MISMATCH_HOST_STEP: 'On the host cluster, run:',
+  JWT_SECRET_MISMATCH_MEMBER_STEP: 'On the member cluster, run:',
+  JWT_SECRET_MISMATCH_APPLY: 'Set authentication.jwtSecret to the value from the host cluster, set multicluster.clusterRole to member, save, and wait for the change to take effect.',
+  JWT_SECRET_MISMATCH_CARD: 'jwtSecret does not match the host cluster',
   VALIDATION_FAILED: 'Validation failed.',
   NO_CLUSTER_TIP_DESC: 'A cluster is a group of nodes (physical or virtual machines) running Kube AI Hub.',
   // List > Remove Cluster

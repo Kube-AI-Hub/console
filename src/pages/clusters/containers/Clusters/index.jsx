@@ -25,10 +25,19 @@ import Banner from 'components/Cards/Banner'
 import EmptyList from 'components/Cards/EmptyList'
 import ClusterCard from 'clusters/components/Cards/Cluster'
 import ClusterStore from 'stores/cluster'
+import { showNameAndAlias } from 'utils'
 import { trigger } from 'utils/action'
+import request from 'utils/request'
 
 import EditBasicInfoModal from 'clusters/components/Modals/EditBasicInfo'
 import * as styles from './index.scss'
+
+const HOST_JWT_SECRET_COMMAND = [
+  'kubectl -n kubesphere-system get cm kubesphere-config -o yaml',
+  '| grep -v "apiVersion" | grep jwtSecret',
+].join(' ')
+const MEMBER_CLUSTER_CONFIG_COMMAND =
+  'kubectl edit cc ks-installer -n kubesphere-system'
 
 @inject('rootStore')
 @observer
@@ -41,11 +50,17 @@ class Clusters extends React.Component {
     this.hostStore = new ClusterStore()
     this.state = {
       filters: {},
+      jwtMismatchClusters: [],
     }
+    this.jwtProbeSeq = 0
   }
 
   componentDidMount() {
     this.initData()
+  }
+
+  componentWillUnmount() {
+    this.jwtProbeSeq = -1
   }
 
   get authKey() {
@@ -72,11 +87,51 @@ class Clusters extends React.Component {
   }
 
   fetchData = (params = {}) => {
-    this.store.fetchListByUser({
-      ...params,
-      limit: 10,
-      labelSelector: '!cluster-role.kubesphere.io/host',
+    this.store
+      .fetchListByUser({
+        ...params,
+        limit: 10,
+        labelSelector: '!cluster-role.kubesphere.io/host',
+      })
+      .then(data => this.probeProxyJwtSecret(data))
+  }
+
+  probeProxyJwtSecret = async clusters => {
+    const seq = this.jwtProbeSeq + 1
+    this.jwtProbeSeq = seq
+    const proxyClusters = (clusters || []).filter(
+      item => item.connectionType === 'proxy' && !item.isHost
+    )
+    const results = await Promise.all(
+      proxyClusters.map(async item => {
+        const mismatched = await this.clusterJwtSecretMismatched(item.name)
+        return mismatched ? item : null
+      })
+    )
+    if (this.jwtProbeSeq !== seq) {
+      return
+    }
+    this.setState({
+      jwtMismatchClusters: results.filter(Boolean),
     })
+  }
+
+  clusterJwtSecretMismatched = async name => {
+    try {
+      await request.get(
+        `kapis/version/klusters/${name}/`,
+        {},
+        {},
+        (first, second) => {
+          const error = second && second.message ? second : first
+          return Promise.reject(error)
+        }
+      )
+      return false
+    } catch (error) {
+      const message = String((error && error.message) || '').toLowerCase()
+      return message.includes('signature is invalid')
+    }
   }
 
   fetchHostData = (params = {}) => {
@@ -238,6 +293,7 @@ class Clusters extends React.Component {
               {t('MEMBER_CLUSTER_TCAP_PL')}{' '}
               <span className={styles.total}>{total}</span>
             </div>
+            {this.renderJwtMismatchHint()}
             {_data.map(item => (
               <ClusterCard
                 key={item.name}
@@ -245,6 +301,9 @@ class Clusters extends React.Component {
                 onEnter={this.enterCluster}
                 isOperation={this.isOperation}
                 itemActions={this.getItemActions(item)}
+                jwtSecretMismatch={this.state.jwtMismatchClusters.some(
+                  cluster => cluster.name === item.name
+                )}
               />
             ))}
             <div className="text-right margin-t12">
@@ -281,6 +340,31 @@ class Clusters extends React.Component {
       filters,
     })
     this.handleSearch(filters)
+  }
+
+  renderJwtMismatchHint() {
+    const { jwtMismatchClusters } = this.state
+    if (isEmpty(jwtMismatchClusters)) {
+      return null
+    }
+
+    const name = jwtMismatchClusters
+      .map(item => showNameAndAlias(item))
+      .join(', ')
+
+    return (
+      <div className={styles.jwtHint}>
+        <div className={styles.jwtHintTitle}>
+          {t('JWT_SECRET_MISMATCH_TITLE', { name })}
+        </div>
+        <p>{t('JWT_SECRET_MISMATCH_DESC')}</p>
+        <p>{t('JWT_SECRET_MISMATCH_HOST_STEP')}</p>
+        <pre className={styles.jwtCommand}>{HOST_JWT_SECRET_COMMAND}</pre>
+        <p>{t('JWT_SECRET_MISMATCH_MEMBER_STEP')}</p>
+        <pre className={styles.jwtCommand}>{MEMBER_CLUSTER_CONFIG_COMMAND}</pre>
+        <p>{t('JWT_SECRET_MISMATCH_APPLY')}</p>
+      </div>
+    )
   }
 
   renderSearch() {

@@ -180,10 +180,11 @@ function handleResponse(response, reject, request = {}) {
 
         // 成员集群用自己的 token 缓存校验主集群签发的登录 token，缓存未命中时也是 401。
         // 这不是本机会话失效，不能清掉 token。
-        const memberClusterTokenError = isMemberClusterPage(
-          window.location.pathname,
-          data.message || 'Please login again'
-        )
+        const message = data.message || 'Please login again'
+        // 列表页路径本身没有集群名。探测成员集群时要看请求地址，避免 401 被当成会话失效。
+        const memberClusterTokenError =
+          isMemberClusterPage(window.location.pathname, message) ||
+          isMemberClusterPage(request.url, message)
 
         // 登录请求的 401 是正常的凭据错误；成员集群 token 校验失败也不是会话失效。
         if (!isLoginRequest && !memberClusterTokenError) {

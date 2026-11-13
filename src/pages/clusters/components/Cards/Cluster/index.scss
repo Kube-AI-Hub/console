@@ -51,3 +51,9 @@
   display: flex;
   align-items: center;
 }
+
+.jwtMismatch {
+  margin-top: 12px;
+  color: variables.$yellow-color04;
+  font-weight: 600;
+}
