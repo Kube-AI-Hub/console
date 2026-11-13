@@ -33,17 +33,24 @@ describe('ConfigMapDeleteDialog', () => {
     await waitFor(() => expect(confirm.hasAttribute('disabled')).toBe(false));
   });
 
-  it('asks for every name joined by comma and space when deleting several', () => {
-    expect(expectedConfirmation(['a', 'b', 'c'])).toBe('a, b, c');
+  it('asks for the count when deleting several', () => {
+    // The old console asks for the names joined by ", ", which nobody types correctly:
+    // its bulk confirm button is disabled in practice. This console asks for the count
+    // instead, so the action can actually be completed.
+    expect(expectedConfirmation(['a', 'b', 'c'])).toBe('3');
   });
 
-  it('rejects a bulk confirmation that only lists one name', async () => {
+  it('rejects a bulk confirmation that names one object instead of the count', async () => {
     renderZh(
       <ConfigMapDeleteDialog open onOpenChange={() => undefined} names={['a', 'b']} onConfirm={() => undefined} />,
     );
 
     await userEvent.type(screen.getByRole('textbox'), 'a');
     expect(screen.getByRole('button', { name: '删除' }).hasAttribute('disabled')).toBe(true);
+
+    await userEvent.clear(screen.getByRole('textbox'));
+    await userEvent.type(screen.getByRole('textbox'), '2');
+    await waitFor(() => expect(screen.getByRole('button', { name: '删除' }).hasAttribute('disabled')).toBe(false));
   });
 });
 

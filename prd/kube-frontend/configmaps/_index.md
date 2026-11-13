@@ -19,6 +19,7 @@
 ## 验收场景
 
 - **AC-FULL-KUBE-FRONTEND-CONFIGMAPS-01** — Given 项目内有真实 ConfigMap，When 打开列表并逐项核对，Then 名称、键、创建时间与 `kubectl` 输出一致，且分页总数与实际对象数一致。
+- **AC-L3-KUBE-FRONTEND-CONFIGMAPS-BULK_DELETE-01** — 已知选中两个配置字典，当点批量删除，则确认框要求输入数量 `2`（而不是逐个名字的拼接），输入后确认按钮可用；确认后两个对象都不再存在。
 
 ## 页面结构
 

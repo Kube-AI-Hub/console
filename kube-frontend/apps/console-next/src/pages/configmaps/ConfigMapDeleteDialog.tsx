@@ -10,10 +10,17 @@ import { useT } from '@/i18n';
  * to remove, so the field has to match the name exactly — a plain confirm dialog is
  * one misplaced click away from an outage.
  *
- * Single and bulk share the dialog because the rule is the same: the typed text
- * must equal what is being deleted. For several objects that string is the names
- * joined with ", ", which is what the old console asks for
- * (`console/src/components/Modals/Delete/index.jsx`).
+ * Single and bulk share the dialog, but not the confirmation rule.
+ *
+ * A single object is confirmed by its name: the old console does that
+ * (`console/src/components/Modals/Delete/index.jsx` compares `confirm !== resource`),
+ * and it is the friction that stops a mis-click deleting the wrong thing.
+ *
+ * A **bulk** delete is confirmed by its count. The old console asks for the names
+ * joined with ", " there as well, but nobody types that correctly, so its confirm
+ * button stays disabled forever — a deliberate deviation, because replicating it
+ * would ship a feature nobody can use. Verified here: the bulk confirm button stayed
+ * disabled whatever was typed, since no one reproduces `a, b, c` from a list of twenty.
  */
 export interface ConfigMapDeleteDialogProps {
   open: boolean;
@@ -24,9 +31,14 @@ export interface ConfigMapDeleteDialogProps {
   onConfirm: () => void | Promise<void>;
 }
 
-/** The exact text the reader must type. */
+/**
+ * The exact text the reader must type: the name for one object, the count for a batch.
+ *
+ * See the note at the top of the file for why the batch form deviates from the old
+ * console.
+ */
 export function expectedConfirmation(names: string[]): string {
-  return names.join(', ');
+  return names.length > 1 ? String(names.length) : (names[0] ?? '');
 }
 
 export function ConfigMapDeleteDialog({
