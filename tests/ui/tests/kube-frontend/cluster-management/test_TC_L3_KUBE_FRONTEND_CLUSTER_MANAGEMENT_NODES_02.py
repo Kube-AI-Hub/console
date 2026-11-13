@@ -48,13 +48,20 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_NODES_02(cluster_management_page
 
     # The percentages come from a second request (node metrics), so a row sampled as soon
     # as the node list settles still shows "-". Wait for the first expected percentage.
+    # Utilisation is a live metric: the node list, the metrics request and the page's own
+    # read happen at different instants, so the same node legitimately reads 3% and then
+    # 5%. Comparisons allow a few points of drift; anything larger means the unit
+    # conversion is wrong, which is what this case is actually guarding.
+    def _percent_in(text: str) -> list[int]:
+        return [int(part.rstrip("%")) for part in text.split() if part.endswith("%") and part.rstrip("%").isdigit()]
+
     first_name = next(iter(usage))
     first_capacity = capacity.get(first_name, {}).get("cpu")
     if usage[first_name].get("cpu") and first_capacity:
         first_expected = round(_quantity(usage[first_name]["cpu"]) / _quantity(first_capacity) * 100)
         for _ in range(40):
             row = surface.locator(f'[data-ai-row="{first_name}"]')
-            if row.count() and f"{first_expected}%" in row.inner_text():
+            if row.count() and any(abs(value - first_expected) <= 5 for value in _percent_in(row.inner_text())):
                 break
             ui.page.wait_for_timeout(1500)
 
@@ -67,7 +74,8 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_NODES_02(cluster_management_page
         cpu_capacity = capacity.get(name, {}).get("cpu")
         if used.get("cpu") and cpu_capacity:
             expected = round(_quantity(used["cpu"]) / _quantity(cpu_capacity) * 100)
-            assert f"{expected}%" in text, (name, expected, text)
+            shown = _percent_in(text)
+            assert any(abs(value - expected) <= 5 for value in shown), (name, expected, shown, text)
             checked += 1
     assert checked > 0, "no node row carried a CPU percentage"
 
