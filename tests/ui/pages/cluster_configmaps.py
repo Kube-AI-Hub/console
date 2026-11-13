@@ -132,7 +132,27 @@ class ClusterConfigMapsPage:
     def row_checkbox(self, project: str, name: str) -> Locator:
         return self.surface.locator(f'input[data-ai-id="cluster-configmaps:select:{project}/{name}"]')
 
+    def ensure_row(self, project: str, name: str, timeout: int = 180) -> None:
+        """Make sure a specific row is on screen, searching for it if needed.
+
+        This page lists every project's objects, ten per page. A newly created object
+        is therefore not necessarily on the page that happens to be rendered, and the
+        row locator then waits 30 seconds for a row that exists but is not loaded.
+        Searching by name is what a person does here anyway.
+        """
+        key = f"{project}/{name}"
+        deadline = time.time() + timeout
+        while time.time() < deadline:
+            if key in self.row_keys:
+                return
+            self.search(name)
+            if key in self.row_keys:
+                return
+            time.sleep(1)
+        raise AssertionError(f"row {key} never appeared; rows={self.row_keys[:5]}")
+
     def open_row_menu(self, project: str, name: str) -> None:
+        self.ensure_row(project, name)
         self.surface.locator(f'[data-ai-id="cluster-configmaps:open:{project}/{name}"]').locator(
             "xpath=ancestor::tr"
         ).locator("button[aria-haspopup='menu']").click()

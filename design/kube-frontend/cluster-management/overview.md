@@ -27,7 +27,7 @@
 
 ### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-OVERVIEW-01 — 两个数据源，各自独立降级
 
-**为什么**：集群对象是静态事实（版本、模块、就绪），监控是随时间变化的测量。把两者放进同一个查询，会让「没有监控后端」这种常见部署形态变成整页失败，连版本都看不到。实测 B200 上 metrics.k8s.io 未路由，但 KubeSphere 监控可用；反过来也有只装 metrics-server 的集群。分开即可让任一侧缺失只影响自己那块。
+**为什么**：集群对象是静态事实（版本、模块、就绪），监控是随时间变化的测量。把两者放进同一个查询，会让「没有监控后端」这种常见部署形态变成整页失败，连版本都看不到。B200 上两者都可用，但也存在只装其中一个的集群（首次探测该集群 metrics 返回 404，复测 200，正说明任一接口都可能瞬时缺失）。分开即可让任一侧缺失只影响自己那块。
 
 **被否方案**：一个聚合 hook 里并发取两份数据、任一处失败就整体报错。省一次加载态，代价是一个面板的缺失抹掉另一面板的全部信息。
 
@@ -35,7 +35,7 @@
 
 ### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-OVERVIEW-02 — 用 KubeSphere 监控 API，不用 metrics.k8s.io
 
-**为什么**：集群级用量（总容量、已分配、容器组配额、GPU 总量）只有 KubeSphere 的 named metrics 才有；metrics.k8s.io 只给「当前用量」，且 B200 上直接 404。老 console 的仪表盘同样读 KubeSphere 监控。
+**为什么**：集群级用量（总容量、已分配、容器组配额、GPU 总量）只有 KubeSphere 的 named metrics 才有；metrics.k8s.io 只给「当前用量」，没有总容量、已分配与配额。老 console 的仪表盘同样读 KubeSphere 监控。
 
 **被否方案**：metrics.k8s.io 求和。拿不到总容量与配额，无法算百分比，也无法区分「已分配」。
 

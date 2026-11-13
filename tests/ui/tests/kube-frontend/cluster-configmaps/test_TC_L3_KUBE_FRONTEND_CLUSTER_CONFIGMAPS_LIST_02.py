@@ -17,13 +17,17 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_CONFIGMAPS_LIST_02(cluster_configmaps_page,
     # Narrow to the first project seen, then widen again. The filter is a Select;
     # picking its option by accessible name keeps this independent of its markup.
     target = sorted(projects)[0]
-    cluster_configmaps_page.surface.get_by_role("button", name="全部项目").first.click()
+    # The project filter is a select trigger, so its role is `combobox`, not
+    # `button` — targeting the role spent 30 seconds waiting for a match that cannot
+    # exist. Its stable handle is what automation should use.
+    filter_trigger = page.locator('[data-ai-id="cluster-configmaps:filter:project"]')
+    filter_trigger.click()
     page.get_by_role("option", name=target, exact=True).click()
     cluster_configmaps_page.wait_ready()
 
     assert cluster_configmaps_page.row_projects <= {target}, cluster_configmaps_page.row_projects
 
-    cluster_configmaps_page.surface.get_by_role("button", name=target).first.click()
+    filter_trigger.click()
     page.get_by_role("option", name="全部项目", exact=True).click()
     cluster_configmaps_page.wait_ready()
 

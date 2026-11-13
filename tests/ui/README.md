@@ -42,6 +42,6 @@ cd kube-frontend && node scripts/dev-static-server.mjs apps/console-next/dist 51
 
 以下情况用例会**如实跳过并说明原因**，不是失败：
 
-- B200 没有 metrics-server：节点/项目用量列降级为 `-`
+- 指标接口偶发不可用：节点/项目用量列降级为 `-`（B200 复测可用，不要据此跳过）
 - 告警模块未安装：策略开关无数据可验证
 - 集群缺少某个资源（网络策略、快照 CRD 等）
