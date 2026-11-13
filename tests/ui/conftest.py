@@ -72,19 +72,33 @@ def _app_token(ui_config) -> str:
     the same token type the UI stores.
     """
     import json
+    import time
     import urllib.request
 
-    request = urllib.request.Request(
-        f"{app_base(ui_config)}/api/session/login",
-        data=json.dumps({"username": ui_config.username, "password": ui_config.password}).encode("utf-8"),
-        headers={"Content-Type": "application/json"},
-        method="POST",
-    )
-    try:
-        with urllib.request.urlopen(request, timeout=30) as response:
-            session = json.loads(response.read().decode("utf-8"))
-    except Exception as error:  # noqa: BLE001 - re-raised with context for the report
-        raise RuntimeError(f"could not sign in through {app_base(ui_config)}/api/session/login: {error}") from error
+    url = f"{app_base(ui_config)}/api/session/login"
+    body = json.dumps({"username": ui_config.username, "password": ui_config.password}).encode("utf-8")
+    last_error: Exception | None = None
+    # The dev static server proxies to the BFF, and under parallel load that proxy has been
+    # measured answering 502 or stalling for 20s+ while the same request straight to the BFF
+    # returns in a second. Retrying here keeps a slow proxy from failing every case in the run
+    # with a login error that says nothing about the page under test.
+    for attempt in range(3):
+        request = urllib.request.Request(
+            url,
+            data=body,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=30) as response:
+                session = json.loads(response.read().decode("utf-8"))
+            break
+        except Exception as error:  # noqa: BLE001 - retried, then re-raised with context
+            last_error = error
+            if attempt < 2:
+                time.sleep(2 * (attempt + 1))
+    else:
+        raise RuntimeError(f"could not sign in through {url}: {last_error}") from last_error
     token = str(session.get("token") or "")
     if not token:
         raise RuntimeError(f"login through {app_base(ui_config)} returned no token")
