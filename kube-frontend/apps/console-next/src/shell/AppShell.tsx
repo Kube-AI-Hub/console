@@ -288,7 +288,7 @@ function ModuleLink({
     // element invisible to keyboard users.
     FOCUS_RING,
     active
-      ? 'bg-ai-accent-soft font-medium text-ai-accent'
+      ? 'bg-ai-accent font-medium text-ai-accent-fg'
       : 'text-ai-fg-secondary hover:bg-ai-surface-2 hover:text-ai-fg',
   );
 

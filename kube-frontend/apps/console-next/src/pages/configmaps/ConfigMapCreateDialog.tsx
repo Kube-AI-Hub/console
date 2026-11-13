@@ -339,7 +339,7 @@ function StepDot({
       <span
         className={cn(
           'grid size-5 place-items-center rounded-full text-[10px]',
-          active ? 'bg-ai-accent text-ai-accent-fg' : done ? 'bg-ai-accent-soft text-ai-accent' : 'bg-ai-surface-2',
+          active || done ? 'bg-ai-accent text-ai-accent-fg' : 'bg-ai-surface-2',
         )}
       >
         {index}

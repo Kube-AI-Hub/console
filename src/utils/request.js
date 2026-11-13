@@ -23,6 +23,7 @@ import { Notify } from '@kube-design/components'
 
 import { getClusterUrl, safeParseJSON } from './index'
 import { getToken, removeToken } from './token'
+import { isLoginRequestUrl, mapOAuthLoginMessage } from './loginError'
 
 const methods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
 
@@ -172,17 +173,13 @@ function handleResponse(response, reject, request = {}) {
   const contentType = response.headers.get('content-type')
   if (contentType && contentType.includes('json')) {
     return response.json().then(data => {
+      const isLoginRequest = isLoginRequestUrl(request.url)
+
       if (response.status === 401) {
         console.warn('Unauthorized', response, response.ok)
 
-        // 检查是否是登录相关的请求 - 这些请求的 401 是正常的业务错误，不应该触发会话超时处理
-        const isLoginRequest =
-          request.url &&
-          (request.url.includes('/login') || request.url.startsWith('/oauth/'))
-
-        // 只有非登录请求的 401 才是真正的会话超时
+        // Login 401 is a normal credential failure; everything else is session timeout.
         if (!isLoginRequest) {
-          // Remove token and redirect to login
           removeToken()
           const pathname = window.location.pathname
           if (pathname !== '/login') {
@@ -190,30 +187,12 @@ function handleResponse(response, reject, request = {}) {
           }
         }
 
-        // 返回错误信息给调用者处理，同时标记来源便于全局错误处理识别
-        // 对于 OAuth 错误，将 error_description 映射到友好的 i18n key
-        let message = data.message || 'Please login again'
-        if (isLoginRequest && data.error === 'invalid_grant') {
-          const errorDesc = (data.error_description || '').toLowerCase()
-          if (
-            errorDesc.includes('incorrect password') ||
-            errorDesc.includes('password')
-          ) {
-            message = 'INCORRECT_PASSWORD'
-          } else if (
-            errorDesc.includes('user not found') ||
-            errorDesc.includes('user does not exist')
-          ) {
-            message = 'USER_NOT_FOUND'
-          } else {
-            message = 'INCORRECT_USERNAME_OR_PASSWORD'
-          }
-        }
-
         const loginError = {
           status: 401,
           reason: data.reason || 'Unauthorized',
-          message,
+          message: isLoginRequest
+            ? mapOAuthLoginMessage(data, 401)
+            : data.message || 'Please login again',
           error: data.error,
           error_description: data.error_description,
         }
@@ -223,38 +202,19 @@ function handleResponse(response, reject, request = {}) {
         return Promise.reject(loginError)
       }
 
-      // 处理 OAuth 登录 400 错误（如密码错误）
-      if (response.status === 400) {
-        const isLoginRequest =
-          request.url &&
-          (request.url.includes('/login') || request.url.startsWith('/oauth/'))
-
-        if (isLoginRequest && data.error === 'invalid_grant') {
-          const errorDesc = (data.error_description || '').toLowerCase()
-          let message = 'INCORRECT_USERNAME_OR_PASSWORD'
-
-          if (
-            errorDesc.includes('incorrect password') ||
-            errorDesc.includes('password')
-          ) {
-            message = 'INCORRECT_PASSWORD'
-          } else if (
-            errorDesc.includes('user not found') ||
-            errorDesc.includes('user does not exist')
-          ) {
-            message = 'USER_NOT_FOUND'
-          }
-
-          const loginError = {
-            status: 400,
-            reason: data.error,
-            message,
-            error: data.error,
-            error_description: data.error_description,
-            source: 'login',
-          }
-          return Promise.reject(loginError)
-        }
+      // OAuth password grant failures: wrong password (400) or auth rate limit (429).
+      if (
+        isLoginRequest &&
+        (response.status === 400 || response.status === 429)
+      ) {
+        return Promise.reject({
+          status: response.status,
+          reason: data.error || response.statusText,
+          message: mapOAuthLoginMessage(data, response.status),
+          error: data.error,
+          error_description: data.error_description,
+          source: 'login',
+        })
       }
 
       if (response.status === 403) {

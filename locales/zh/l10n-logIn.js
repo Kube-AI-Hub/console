@@ -35,6 +35,7 @@ module.exports = {
   INCORRECT_USERNAME_OR_PASSWORD: '用户名或密码错误。',
   INCORRECT_PASSWORD: '密码不正确。',
   USER_NOT_FOUND: '用户不存在。',
+  LOGIN_FAILED: '登录失败，请稍后重试。',
   // Change password upon first login
   CHANGE_PASSWORD_TIP: '初次登录请修改密码。',
   SUBMIT: '提交',

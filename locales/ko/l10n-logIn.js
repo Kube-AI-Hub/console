@@ -33,6 +33,7 @@ module.exports = {
   INCORRECT_USERNAME_OR_PASSWORD: '사용자 이름 또는 비밀번호가 잘못되었습니다.',
   INCORRECT_PASSWORD: '비밀번호가 잘못되었습니다.',
   USER_NOT_FOUND: '사용자를 찾을 수 없습니다.',
+  LOGIN_FAILED: 'Login failed. Please try again later.',
   // Change password upon first login
   CHANGE_PASSWORD_TIP: '첫 로그인입니다. 비밀번호를 변경하시기 바랍니다.',
   SUBMIT: '제출',

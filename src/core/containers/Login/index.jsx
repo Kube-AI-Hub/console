@@ -21,6 +21,7 @@ import { inject, observer } from 'mobx-react'
 import cookie from 'utils/cookie'
 import { safeReturnPath } from 'utils/returnPath'
 import { setToken, parseToken, getToken } from 'utils/token'
+import { mapOAuthLoginMessage } from 'utils/loginError'
 import { loadSessionContext } from 'core/session'
 
 import {
@@ -307,10 +308,12 @@ class Login extends Component {
       return
     }
 
-    // 登录失败
+    // 登录失败：优先用已映射的 i18n key，否则按 OAuth 响应再映射一次
     this.setState({
       isSubmmiting: false,
-      errorMessage: resp?.error_description || resp?.message || resp?.error || 'LOGIN_FAILED',
+      errorMessage:
+        resp?.message ||
+        mapOAuthLoginMessage(resp || {}, resp?.status || resp?.code),
       errorCount: resp?.errorCount || 0,
     })
   }
@@ -349,7 +352,8 @@ class Login extends Component {
           console.error('Login error:', err)
           this.setState({
             isSubmmiting: false,
-            errorMessage: err.message || 'LOGIN_FAILED',
+            errorMessage:
+              err.message || mapOAuthLoginMessage(err || {}, err.status),
             errorCount: 0,
           })
         })
@@ -366,7 +370,8 @@ class Login extends Component {
           console.error('Login error:', err)
           this.setState({
             isSubmmiting: false,
-            errorMessage: err.message || err.error_description || err.error || 'LOGIN_FAILED',
+            errorMessage:
+              err.message || mapOAuthLoginMessage(err || {}, err.status),
             errorCount: 0,
           })
         })

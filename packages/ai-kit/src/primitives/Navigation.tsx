@@ -428,7 +428,7 @@ export function Pagination({
                 className={cn(
                   'grid size-7 place-items-center rounded-ai-sm text-xs tabular-nums transition-colors duration-ai-fast',
                   entry === page
-                    ? 'bg-ai-accent-soft font-medium text-ai-accent'
+                    ? 'bg-ai-accent font-medium text-ai-accent-fg'
                     : 'text-ai-fg-secondary hover:bg-ai-surface-2 hover:text-ai-fg',
                 )}
               >

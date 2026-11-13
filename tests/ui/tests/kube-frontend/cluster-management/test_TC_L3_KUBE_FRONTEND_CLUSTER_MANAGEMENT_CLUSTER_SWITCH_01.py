@@ -39,6 +39,10 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_SWITCH_01(cluster_fleet_
 
         switcher = ui.open_switcher()
         expect(switcher.locator(f'[data-ai-id="clusters:switch-to:{target}"]')).to_be_visible(timeout=20_000)
+        # The way back to the fleet: "which clusters are there / how do I add one" is the
+        # next question after "which cluster", and that page is otherwise only reachable
+        # from the header menu.
+        expect(switcher.locator('[data-ai-id="clusters:switch-manage"]')).to_be_visible()
         # The current cluster stays in the list, marked ready-or-not, so the reader can see
         # where they are as well as where they can go.
         assert switcher.locator(f'[data-ai-id="clusters:switch-to:{origin}"]').count() == 1

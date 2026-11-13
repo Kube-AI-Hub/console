@@ -33,6 +33,7 @@ module.exports = {
   INCORRECT_USERNAME_OR_PASSWORD: 'Nieprawidłowa nazwa użytkownika lub hasło.',
   INCORRECT_PASSWORD: 'Nieprawidłowe hasło.',
   USER_NOT_FOUND: 'Użytkownik nie znaleziony.',
+  LOGIN_FAILED: 'Login failed. Please try again later.',
   // Change password upon first login
   CHANGE_PASSWORD_TIP: 'You are logging in for the first time. Please change your password.',
   SUBMIT: 'Submit',

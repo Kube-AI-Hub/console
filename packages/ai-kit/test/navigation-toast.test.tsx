@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import * as React from 'react';
 import { ToastProvider, useToast } from '../src/primitives/Toast';
 import { Menu, Collapse, type MenuNode } from '../src/primitives/Menu';
+import { Pagination } from '../src/primitives/Navigation';
 
 describe('Toast', () => {
   function Emitter({ onReady }: { onReady: (api: ReturnType<typeof useToast>) => void }): null {
@@ -140,5 +141,16 @@ describe('Collapse', () => {
     await userEvent.click(screen.getByText('第二项'));
     expect(screen.queryByText('内容一')).not.toBeInTheDocument();
     expect(screen.getByText('内容二')).toBeInTheDocument();
+  });
+});
+
+describe('Pagination', () => {
+  it('paints the current page with the accent fill and contrasting text', () => {
+    render(<Pagination page={1} pageSize={20} total={95} onChange={() => undefined} />);
+    const current = screen.getByRole('button', { current: 'page' });
+    expect(current.className).toContain('bg-ai-accent');
+    expect(current.className).toContain('text-ai-accent-fg');
+    expect(current.className).not.toContain('bg-ai-accent-soft');
+    expect(current.className).not.toContain('text-ai-accent ');
   });
 });

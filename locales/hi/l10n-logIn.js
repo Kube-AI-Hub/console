@@ -33,6 +33,7 @@ module.exports = {
   INCORRECT_USERNAME_OR_PASSWORD: 'गलत उपयोगकर्ता नाम या पासवर्ड।',
   INCORRECT_PASSWORD: 'गलत पासवर्ड।',
   USER_NOT_FOUND: 'उपयोगकर्ता नहीं मिला।',
+  LOGIN_FAILED: 'Login failed. Please try again later.',
   // Change password upon first login
   CHANGE_PASSWORD_TIP: 'You are logging in for the first time. Please change your password.',
   SUBMIT: 'Submit',

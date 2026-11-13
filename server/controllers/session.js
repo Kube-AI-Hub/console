@@ -70,14 +70,15 @@ const mapLoginError = (err, { includeErrorDescription } = {}) => {
     case 400:
     case 401: {
       const errorDesc = (err.error_description || '').toLowerCase()
-      let message = 'INCORRECT_USERNAME_OR_PASSWORD' // 默认值
+      let message = 'INCORRECT_USERNAME_OR_PASSWORD'
 
-      if (err.error === 'invalid_grant') {
-        // 根据 error_description 映射到更具体的错误消息
-        if (
-          errorDesc.includes('incorrect password') ||
-          errorDesc.includes('password')
-        ) {
+      if (
+        errorDesc.includes('rate limit') ||
+        errorDesc.includes('too many')
+      ) {
+        message = 'TOO_MANY_FAILURES'
+      } else if (err.error === 'invalid_grant') {
+        if (errorDesc.includes('incorrect password')) {
           message = 'INCORRECT_PASSWORD'
         } else if (
           errorDesc.includes('user not found') ||
