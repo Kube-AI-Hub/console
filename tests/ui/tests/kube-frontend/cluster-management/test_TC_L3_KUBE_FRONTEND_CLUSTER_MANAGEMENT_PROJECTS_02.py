@@ -17,9 +17,20 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_PROJECTS_02(cluster_management_p
     ui = cluster_management_page
     assert ui.api is not None
 
-    status, body = ui.api.request("GET", POD_METRICS)
+    # PERFORMANCE: the cluster-wide pod metrics list takes tens of seconds on this
+    # cluster (it scales with pod count). Retry rather than skip on one slow failure —
+    # a slow read is the condition this case tolerates, not a reason to report "no data".
+    status, body = 0, {}
+    for _ in range(3):
+        try:
+            status, body = ui.api.request("GET", POD_METRICS, timeout=180)
+        except Exception:
+            status, body = 0, {}
+            continue
+        if status == 200:
+            break
     if status != 200:
-        pytest.skip("metrics.k8s.io 不可用，用量列降级")
+        pytest.skip(f"metrics.k8s.io 不可用（{status}），用量列降级")
     items = body.get("items") or [] if isinstance(body, dict) else []
     if not items:
         pytest.skip("没有 Pod 指标可核对")
