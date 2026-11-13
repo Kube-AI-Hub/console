@@ -109,8 +109,8 @@ generate_case_docs.py → check_docs.py --strict → parity_check.py
 | 应用路由 | `.../ingresses` | ✅ | 列表、详情、编辑信息、编辑 YAML、编辑路由规则、删除 |
 | 存储卷 | `.../persistentvolumeclaims` | ✅ | 列表（含挂载状态）、详情（含供应者/快照类型）、编辑信息、编辑 YAML、扩容、删除 |
 | 存储卷快照 | `.../volumesnapshots` | ✅（空态） | 列表；本集群无 CRD，恒为空列表 |
-| 告警消息 | `.../alerts` | ✅（空态） | 列表；告警后端未就绪，返回空 |
-| 告警策略 | `.../alertingrules` | ⚠️ 只读 | 列表与启用/停用；规则编辑未迁移（见 §5.3） |
+| 告警消息 | `.../alerts` | ⚠️ 待核 | 返回空；与告警策略同源问题，下一轮一并核对 |
+| 告警策略 | `.../alertingrules` | ⚠️ **读错资源** | 读 `alertingrules`（本集群不存在）→ 恒为空；应改读 RuleGroup（见 §5.3） |
 | 项目基本信息 | `.../baseinfo` | ✅ | 属性 + 配额（编辑） |
 | 项目角色 | `.../roles` | ✅ | 列表、编辑信息、编辑权限、删除；模板角色只读 |
 | 项目成员 | `.../members` | ✅ | 列表与详情 |
@@ -169,15 +169,26 @@ generate_case_docs.py → check_docs.py --strict → parity_check.py
 | 写（注册新集群） | 需平台侧注册接口与 kubeconfig 校验，当前未验证 |
 | 结论 | 列表页可做但只有一个集群可验证；注册流程未做 |
 
-### 5.3 告警规则编辑
+### 5.3 告警规则：资源模型不匹配（**可实现，下一轮做**）
+
+上一版把这条写成「告警模块未安装」。本轮穷举后发现**写错了**，实际是资源名不同：
 
 | 探测 | 结果 |
 | --- | --- |
-| `/kapis/alerting.kubesphere.io/v2beta1/alertingrules` | **404 Page Not Found** |
-| `/kapis/alerting.kubesphere.io/v1alpha1/alertingrules` | 200 但**空响应体** |
-| `/apis/alerting.kubesphere.io/v2beta1/alertingrules` | 404 |
+| `/apis/alerting.kubesphere.io` | 200，group 存在，版本 **v2beta1** |
+| `/apis/alerting.kubesphere.io/v2beta1` 的资源清单 | `rulegroups`（有命名空间）/ `clusterrulegroups` / `globalrulegroups` |
+| `alertingrules`（老 console 用的名字） | 各路径 404，或 200 空体 |
+| `/apis/alerting.kubesphere.io/v2beta1/globalrulegroups` | 200，**18 条**，含真实 Prometheus 规则 |
+| `clusterrulegroups` / 命名空间级 `rulegroups` | 200，**0 条** |
 
-集群对象 `status.configz.alerting` 为 `true`，但 API 不返回任何对象，因此规则编辑无法验证。
+**结论**：告警模块装着，但本集群是 KubeSphere 3.4（Whizard 模型：RuleGroup），老 console 的「告警策略」对应 3.3 的 `AlertingRule`。当前页面读 `alertingrules`，所以恒为空——**这不是环境阻塞，是读了不存在的资源**。
+
+下一轮做法：
+
+1. `ruleGroupApi` 读 `globalrulegroups` + `clusterrulegroups`（+ 命名空间级 `rulegroups`）；
+2. 「告警策略」页改为按规则组展示：组名、规则数、严重度分布、创建时间，可展开看规则；
+3. 18 条全局规则属平台托管（`alertmanager-rules`、`node-exporter-rules` 等），**只读**；自定义规则组当前 0 条，创建入口先不做；
+4. 版本兼容：若 `alertingrules` 仍存在（其他集群），沿用原实现。
 
 ### 5.4 任务重跑与容器组重新调度
 
