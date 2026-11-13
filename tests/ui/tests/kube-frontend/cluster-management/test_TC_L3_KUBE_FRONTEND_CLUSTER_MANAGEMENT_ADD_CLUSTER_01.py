@@ -82,11 +82,17 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_ADD_CLUSTER_01(cluster_managemen
         # how the member cluster joins: a proxy cluster carries no kubeconfig, because the
         # agent dials out instead.
         proxy_name = f"tc-e2e-proxy-{uuid.uuid4().hex[:6]}"
+        alias = f"成员集群-{uuid.uuid4().hex[:4]}"
+        description = "created by the add-cluster case"
         proxy_names.append(proxy_name)
         ui.page.locator('[data-ai-id="clusters:add"]').click()
         proxy_dialog = ui.page.get_by_role("dialog")
         expect(proxy_dialog).to_be_visible(timeout=20_000)
         proxy_dialog.locator("#ai-field-cluster-name").fill(proxy_name)
+        # Alias and description are collected up front, as the old console's basic-info step
+        # does: they land as annotations, which is where every later page reads them from.
+        proxy_dialog.locator("#ai-field-cluster-alias").fill(alias)
+        proxy_dialog.locator("#ai-field-cluster-description").fill(description)
         proxy_dialog.locator('[data-ai-id="clusters:add-mode:proxy"]').check()
         # The kubeconfig field is gone in this mode; a leftover textarea would be a form
         # that collects something it will not send.
@@ -100,6 +106,14 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_ADD_CLUSTER_01(cluster_managemen
         proxy_connection = ((proxy_body.get("spec") or {}).get("connection")) or {}
         assert proxy_connection.get("type") == "proxy", proxy_connection
         assert "kubeconfig" not in proxy_connection, proxy_connection
+        annotations = (proxy_body.get("metadata") or {}).get("annotations") or {}
+        assert annotations.get("kubesphere.io/alias-name") == alias, annotations
+        assert annotations.get("kubesphere.io/description") == description, annotations
+        # The list shows the alias with the object name underneath, so both are visible.
+        surface_after = ui.page.locator('[data-ai-id="clusters:surface"]').last
+        row = surface_after.locator(f'[data-ai-row="{proxy_name}"]')
+        expect(row).to_be_visible(timeout=30_000)
+        assert alias in row.inner_text() and proxy_name in row.inner_text(), row.inner_text()[:160]
         screenshot(ui.page, "cluster-add")
     finally:
         # Unconditional: a half-finished import would sit in the fleet list as a cluster

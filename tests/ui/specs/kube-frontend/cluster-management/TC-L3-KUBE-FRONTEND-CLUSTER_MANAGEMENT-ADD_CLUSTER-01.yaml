@@ -11,9 +11,11 @@ design: design/kube-frontend/cluster-management/add-cluster.md
 
 covers:
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-01
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-02
 
 story:
 - US1
+- US2
 
 product: 集群列表的主操作「添加集群」用 kubeconfig 导入集群；提交后创建 Cluster 对象并刷新列表。
 preconditions:

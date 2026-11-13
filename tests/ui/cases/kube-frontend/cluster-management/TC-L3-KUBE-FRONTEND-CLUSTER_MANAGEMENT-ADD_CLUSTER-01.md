@@ -19,6 +19,7 @@
 文案来自需求 [`prd/kube-frontend/cluster-management/add-cluster.md`](../../../../prd/kube-frontend/cluster-management/add-cluster.md)，与用例的 `covers` 对应；改需求即改这里。
 
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-01** — 已登录平台管理，当在集群列表点「添加集群」并提交合法的名称与 kubeconfig，则创建出 `cluster.kubesphere.io/v1alpha1` 的 Cluster 对象，`spec.connection.type` 为 `direct`、`spec.connection.kubeconfig` 为 kubeconfig 的 base64、`spec.joinFederation` 为 `true`，且列表中立即出现该集群。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-02** — 已知填写了可选的别名与描述并选择「代理连接」，当提交，则对象的 `spec.connection` 只有 `type: proxy`（**没有 kubeconfig 键**），`kubesphere.io/alias-name` 与 `kubesphere.io/description` 注解等于填写值，列表行显示别名与对象名；该集群在部署代理前保持未就绪，状态列显示原因。
 
 ### 关联设计
 
@@ -33,6 +34,12 @@
 作为 **平台管理员**，我希望 **在集群列表里粘贴成员集群的 kubeconfig 完成接入**，以便 **在不离开控制台的情况下把新集群纳入管理**。
 
 **Independent Test**：在集群列表点「添加集群」，填入名称与 kubeconfig 并确认；列表中应出现该集群，且集群对象中存在 base64 编码的 kubeconfig。
+
+### US2 - 接入时就填好别名与描述 (Priority: P2)
+
+作为 **平台管理员**，我希望 **在接入时顺便起一个好认的别名并写一句描述**，以便 **列表与切换器里显示的是我认得出的名字，而不是对象名**。
+
+**Independent Test**：用代理连接创建一个带别名与描述的集群，回读注解与列表行。
 
 ## 前置与配置
 

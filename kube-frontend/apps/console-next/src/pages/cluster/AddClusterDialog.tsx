@@ -48,6 +48,8 @@ export function AddClusterDialog({ open, onOpenChange, onCreated }: AddClusterDi
   const [name, setName] = React.useState('');
   const [kubeconfig, setKubeconfig] = React.useState('');
   const [provider, setProvider] = React.useState('');
+  const [alias, setAlias] = React.useState('');
+  const [description, setDescription] = React.useState('');
   const [nameError, setNameError] = React.useState<string | null>(null);
   const [kubeconfigError, setKubeconfigError] = React.useState<string | null>(null);
 
@@ -59,12 +61,21 @@ export function AddClusterDialog({ open, onOpenChange, onCreated }: AddClusterDi
     setName('');
     setKubeconfig('');
     setProvider('');
+    setAlias('');
+    setDescription('');
     setNameError(null);
     setKubeconfigError(null);
   }, [open]);
 
   const mutation = useMutation({
-    mutationFn: async (input: { name: string; mode: ClusterConnectionMode; kubeconfig?: string; provider?: string }) => {
+    mutationFn: async (input: {
+      name: string;
+      mode: ClusterConnectionMode;
+      kubeconfig?: string;
+      provider?: string;
+      alias?: string;
+      description?: string;
+    }) => {
       const api = clusterImportApi(apiClient);
       if (input.mode === 'direct') {
         /*
@@ -110,8 +121,10 @@ export function AddClusterDialog({ open, onOpenChange, onCreated }: AddClusterDi
       mode,
       ...(mode === 'direct' ? { kubeconfig: trimmedConfig } : {}),
       ...(provider.trim() ? { provider: provider.trim() } : {}),
+      ...(alias.trim() ? { alias: alias.trim() } : {}),
+      ...(description.trim() ? { description: description.trim() } : {}),
     });
-  }, [kubeconfig, mode, mutation, name, provider, t]);
+  }, [alias, description, kubeconfig, mode, mutation, name, provider, t]);
 
   const requestError = mutation.error
     ? mutation.error instanceof ApiError && mutation.error.isPermission
@@ -183,6 +196,20 @@ export function AddClusterDialog({ open, onOpenChange, onCreated }: AddClusterDi
           {nameError ? <span className="text-[11px] text-ai-danger" role="alert">{nameError}</span> : null}
         </label>
 
+        <label className="flex flex-col gap-1 text-xs text-ai-fg-secondary" htmlFor="ai-field-cluster-alias">
+          {t('cluster.edit.alias')}
+          <input
+            id="ai-field-cluster-alias"
+            value={alias}
+            maxLength={63}
+            onChange={(event) => setAlias(event.target.value)}
+            className="h-9 rounded-ai-md border border-ai-line bg-ai-surface px-2 text-sm text-ai-fg"
+            placeholder={t('cluster.add.aliasPlaceholder')}
+            {...actionProps('clusters:add-alias')}
+          />
+          <span className="text-[11px] text-ai-fg-muted">{t('cluster.edit.aliasHint')}</span>
+        </label>
+
         <label className="flex flex-col gap-1 text-xs text-ai-fg-secondary" htmlFor="ai-field-cluster-provider">
           {t('cluster.edit.provider')}
           <input
@@ -194,6 +221,18 @@ export function AddClusterDialog({ open, onOpenChange, onCreated }: AddClusterDi
             {...actionProps('clusters:add-provider')}
           />
           <span className="text-[11px] text-ai-fg-muted">{t('cluster.edit.providerHint')}</span>
+        </label>
+
+        <label className="flex flex-col gap-1 text-xs text-ai-fg-secondary" htmlFor="ai-field-cluster-description">
+          {t('cluster.edit.descriptionLabel')}
+          <Textarea
+            id="ai-field-cluster-description"
+            value={description}
+            maxLength={256}
+            rows={2}
+            onChange={(event) => setDescription(event.target.value)}
+            {...actionProps('clusters:add-description')}
+          />
         </label>
 
         {mode === 'direct' ? (
@@ -218,7 +257,11 @@ export function AddClusterDialog({ open, onOpenChange, onCreated }: AddClusterDi
             className="rounded-ai-md border border-ai-line bg-ai-surface-2/40 p-3 text-xs text-ai-fg-secondary"
             data-ai-id="clusters:add-proxy-tip"
           >
-            {t('cluster.add.proxyTip')}
+            <p>{t('cluster.add.proxyTip')}</p>
+            {/* What happens after submit: the object exists immediately, readiness waits for
+                the agent. Saying so here is the difference between "it is broken" and "it is
+                waiting". */}
+            <p className="mt-2 text-ai-fg-muted">{t('cluster.add.proxyNext')}</p>
           </div>
         )}
 

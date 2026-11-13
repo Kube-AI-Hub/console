@@ -854,6 +854,9 @@ export function clusterImportBody(params: {
   mode: ClusterConnectionMode;
   kubeconfig?: string;
   provider?: string;
+  /** Friendly name; the old console's basic-information step collects it up front. */
+  alias?: string;
+  description?: string;
 }): Record<string, unknown> {
   const connection: Record<string, unknown> = { type: params.mode };
   if (params.mode === 'direct') {
@@ -865,10 +868,23 @@ export function clusterImportBody(params: {
   }
   // Proxy mode carries **no** kubeconfig key at all: the agent dials out, and a stale
   // kubeconfig left in the spec would be read as a direct connection.
+  /*
+   * Alias and description travel as annotations, which is where the platform reads them
+   * from afterwards (the list, the switcher, 编辑信息). Setting them now rather than after
+   * creation keeps the two entry points from disagreeing: a cluster created without an
+   * alias and renamed a second later is the same object either way.
+   */
+  const annotations: Record<string, string> = {};
+  if (params.alias?.trim()) annotations[ALIAS_ANNOTATION] = params.alias.trim();
+  if (params.description?.trim()) annotations[DESCRIPTION_ANNOTATION] = params.description.trim();
+
   return {
     apiVersion: 'cluster.kubesphere.io/v1alpha1',
     kind: 'Cluster',
-    metadata: { name: params.name.trim() },
+    metadata: {
+      name: params.name.trim(),
+      ...(Object.keys(annotations).length ? { annotations } : {}),
+    },
     spec: {
       provider: params.provider?.trim() ?? '',
       connection,
@@ -895,6 +911,8 @@ export function clusterImportApi(client: Client) {
       mode: ClusterConnectionMode;
       kubeconfig?: string;
       provider?: string;
+      alias?: string;
+      description?: string;
     }): Promise<void> {
       await client.request('/apis/cluster.kubesphere.io/v1alpha1/clusters', {
         method: 'POST',
@@ -914,6 +932,8 @@ export function clusterImportApi(client: Client) {
       mode: ClusterConnectionMode;
       kubeconfig?: string;
       provider?: string;
+      alias?: string;
+      description?: string;
     }): Promise<void> {
       await client.request('/kapis/cluster.kubesphere.io/v1alpha1/clusters/validation', {
         method: 'POST',
@@ -976,4 +996,3 @@ export function clustersApi(client: Client) {
 }
 
 export type ClustersApi = ReturnType<typeof clustersApi>;
-
