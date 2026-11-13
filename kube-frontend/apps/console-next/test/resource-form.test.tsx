@@ -12,7 +12,6 @@ import { ResourceForm, type FormSchema } from '@kube-ai-hub/ui';
  */
 
 const schema: FormSchema = {
-  title: 'test',
   submit: { label: '确 认', cancelLabel: '取 消' },
   fields: [
     { key: 'name', label: '名称', type: 'text', required: true },

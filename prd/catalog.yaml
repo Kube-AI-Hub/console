@@ -589,6 +589,13 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-STATUS-01
+    - id: revisions
+      title: 版本历史与回滚
+      prd: prd/kube-frontend/app-workloads/revisions.md
+      design: design/kube-frontend/app-workloads/revisions.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-REVISIONS-01
     - id: detail
       title: 负载详情
       prd: prd/kube-frontend/app-workloads/detail.md

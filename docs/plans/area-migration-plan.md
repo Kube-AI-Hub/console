@@ -1855,3 +1855,47 @@ Ingress 的规则是三层嵌套（rule → path → backend），而编辑器�
 | api-client 单测 | 146 通过 |
 | console-next 单测 | 92 通过 |
 | 文档门禁 | errors=0 warnings=0 |
+
+## 46. 第 52–53 轮：部署的版本历史与回滚（2026-11-13）
+
+### 46.1 交付
+
+| 层 | 内容 |
+|---|---|
+| api-client | `revisions()`、`rollback()`、`toWorkloadRevision()`；`WorkloadRevision` 类型 |
+| 页面 | 部署详情「版本历史」表：版本、镜像、副本、创建时间、回滚 |
+| 文档 | PRD + 设计各 1 份；用例 1 条；单测 4 条 |
+
+实测（三个版本的部署）：
+
+| 版本 | 镜像 | 副本 |
+|---|---|---|
+| **3（当前）** | nginx:1.29 | 1 |
+| 2 | nginx:1.28 | 1 |
+| 1 | nginx:1.27 | 0 |
+
+对版本 1 回滚后镜像恢复为 `nginx:1.27`，且 ReplicaSet 数量从 2 变为 3——**回滚生成了新版本，没有抹掉历史**。
+
+### 46.2 两个关键实现判断
+
+1. **回滚没有 API**：Kubernetes 用「把目标版本的 pod template 写回 Deployment」实现回滚（`kubectl rollout undo` 就是这么做的）。实现照此办理，并且**不修改 Deployment 自身的 revision 注解**——否则历史会出现"回退"，而 Kubernetes 从不这样做。
+2. **当前版本不提供回滚按钮**：对当前版本回滚是空操作，却会滚动重启所有 Pod。**看不出效果却会重启的按钮比没有按钮更危险。**
+
+### 46.3 两个必须避开的坑
+
+- **ReplicaSet 归属**：按标签选择器查出来的 ReplicaSet 可能包含别的对象的，必须再用 `ownerReferences` 确认。否则会列出别人的版本。
+- **模板里的 `metadata.creationTimestamp`** 是控制器写的；原样回写会让 patch 与控制器争同一字段，须剔除。
+
+### 46.4 契约测试抓到的问题
+
+回滚按钮最初写成裸 `<button>`，被 `ai-surface-contract` 拦下——项目规定所有可交互元素必须带 `actionProps`/`data-ai-id`，否则 AI 代理只能靠文本定位。改用 `Button` 组件后通过。这类约束正是契约测试存在的意义。
+
+### 46.5 验证
+
+| 项 | 结果 |
+|---|---|
+| app-workloads 套件 | **23 通过** |
+| 架构契约 | 454 通过 |
+| api-client 单测 | 150 通过（新增 4 条） |
+| console-next 单测 | 95 通过 |
+| 文档门禁 | errors=0 warnings=0 |

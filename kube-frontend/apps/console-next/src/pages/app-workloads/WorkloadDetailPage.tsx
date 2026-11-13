@@ -2,9 +2,19 @@ import * as React from 'react';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiButton, AiSurface, Badge, Button, Icon, Skeleton } from '@kube-ai-hub/ui';
-import type { WorkloadKind } from '@kube-ai-hub/api-client';
+import type { WorkloadKind, WorkloadRevision } from '@kube-ai-hub/api-client';
 import { useT } from '@/i18n';
-import { useDeleteWorkload, useRestartWorkload, useScaleWorkload, useUpdateWorkload, useWorkload, useWorkloadAutoscaling, type WorkloadDescriptor } from './queries';
+import {
+  useDeleteWorkload,
+  useRestartWorkload,
+  useRollbackWorkload,
+  useScaleWorkload,
+  useUpdateWorkload,
+  useWorkload,
+  useWorkloadAutoscaling,
+  useWorkloadRevisions,
+  type WorkloadDescriptor,
+} from './queries';
 import { EditInfoDialog } from '@/components/resource/EditInfoDialog';
 import { ReplicasDialog } from './ReplicasDialog';
 import { DeleteDialog } from '@/components/resource/DeleteDialog';
@@ -46,6 +56,9 @@ export function WorkloadDetailPage({ descriptor, cluster, namespace, name }: Wor
   const restart = useRestartWorkload(kind, { cluster, namespace });
   const scale = useScaleWorkload(kind, { cluster, namespace });
   const autoscaling = useWorkloadAutoscaling(kind, { cluster, namespace, name });
+  const revisions = useWorkloadRevisions(kind, { cluster, namespace, name });
+  const rollback = useRollbackWorkload(kind, { cluster, namespace });
+  const [rollbackTarget, setRollbackTarget] = React.useState<WorkloadRevision | null>(null);
   const [dialog, setDialog] = React.useState<Dialog>('none');
 
   const detail = query.data;
@@ -224,6 +237,61 @@ export function WorkloadDetailPage({ descriptor, cluster, namespace, name }: Wor
             </section>
           ) : null}
 
+          {/*
+            * 版本历史: a Deployment keeps one ReplicaSet per revision, and rolling back
+            * is putting an older revision's template back. The old console exposes the
+            * same list; the current revision is marked rather than hidden so the reader
+            * can see where they are in the history.
+            */}
+          {kind === 'deployments' && (revisions.data?.length ?? 0) > 0 ? (
+            <section className="rounded-ai-md border border-ai-line p-4" data-ai-id="deployments-detail:revisions">
+              <h2 className="mb-3 text-sm font-medium text-ai-fg">{t('workloads.detail.revisions')}</h2>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="text-ai-fg-muted">
+                      <th className="pb-2 pr-4 font-medium">{t('workloads.field.revision')}</th>
+                      <th className="pb-2 pr-4 font-medium">{t('workloads.detail.containers')}</th>
+                      <th className="pb-2 pr-4 font-medium">{t('workloads.field.replicas')}</th>
+                      <th className="pb-2 pr-4 font-medium">{t('workloads.field.createdAt')}</th>
+                      <th className="pb-2 font-medium">{t('workloads.field.actions')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(revisions.data ?? []).map((revision) => (
+                      <tr key={revision.replicaSet} className="border-t border-ai-line" data-ai-row={`rev-${revision.revision}`}>
+                        <td className="py-1.5 pr-4 tabular-nums text-ai-fg">
+                          {revision.revision}
+                          {revision.current ? (
+                            <span className="ml-1.5 rounded-ai-sm bg-ai-accent/10 px-1 text-[10px] text-ai-accent">
+                              {t('workloads.revision.current')}
+                            </span>
+                          ) : null}
+                        </td>
+                        <td className="py-1.5 pr-4 font-mono text-[11px] text-ai-fg-secondary">{revision.images.join(', ') || '-'}</td>
+                        <td className="py-1.5 pr-4 tabular-nums text-ai-fg-secondary">{revision.replicas}</td>
+                        <td className="py-1.5 pr-4 tabular-nums text-ai-fg-muted">{formatTimestamp(revision.createdAt)}</td>
+                        <td className="py-1.5">
+                          {/* Rolling back to the revision you are on would be a no-op. */}
+                          {revision.current ? null : (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              {...actionProps(`deployments-detail:rollback-${revision.revision}`)}
+                              onClick={() => setRollbackTarget(revision)}
+                            >
+                              {t('workloads.action.rollback')}
+                            </Button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          ) : null}
+
           {detail.images.length > 0 ? (
             <section className="rounded-ai-md border border-ai-line p-4" data-ai-id={`${kind}-detail:containers`}>
               <h2 className="mb-3 text-sm font-medium text-ai-fg">{t('workloads.detail.containers')}</h2>
@@ -291,6 +359,23 @@ export function WorkloadDetailPage({ descriptor, cluster, namespace, name }: Wor
           onSubmit={async (object) => {
             await update.mutateAsync(object as never);
             setDialog('none');
+          }}
+        />
+      ) : null}
+
+      {rollbackTarget ? (
+        // A rollback restarts every pod at once; it gets the same confirmation as a
+        // destructive action rather than firing on one click from a table row.
+        <DeleteDialog
+          open
+          onOpenChange={(open) => !open && setRollbackTarget(null)}
+          names={[detail?.name ?? name]}
+          resource={kind}
+          noun={t('workloads.action.rollback')}
+          pending={rollback.isPending}
+          onConfirm={async () => {
+            await rollback.mutateAsync({ name: detail?.name ?? name, replicaSet: rollbackTarget.replicaSet });
+            setRollbackTarget(null);
           }}
         />
       ) : null}

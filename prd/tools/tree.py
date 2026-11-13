@@ -566,6 +566,11 @@ MODULES = [
                         ]},
                     },
                     {
+                        "id": "revisions",
+                        "title": "版本历史与回滚",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_WORKLOADS-REVISIONS-01"]},
+                    },
+                    {
                         "id": "detail",
                         "title": "负载详情",
                         "tests": {"L3": [

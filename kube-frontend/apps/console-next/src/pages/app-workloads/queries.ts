@@ -73,6 +73,27 @@ export function useEditWorkloadInfo(kind: WorkloadKind, params: { cluster: strin
  * no reverse lookup. The read is cheap (a project has a handful) and only runs for the
  * three kinds an HPA can target.
  */
+/** ReplicaSets owned by a deployment, one row per revision. */
+export function useWorkloadRevisions(kind: WorkloadKind, params: { cluster: string; namespace: string; name: string }) {
+  return useQuery({
+    queryKey: ['revisions', params.cluster, params.namespace, kind, params.name],
+    // Only Deployments keep revision history; the others have no ReplicaSet per change.
+    enabled: kind === 'deployments' && Boolean(params.name),
+    queryFn: ({ signal }) => workloadsApi(api, kind).revisions({ ...params, signal } as never),
+  });
+}
+
+export function useRollbackWorkload(kind: WorkloadKind, params: { cluster: string; namespace: string }) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { name: string; replicaSet: string }) => workloadsApi(api, kind).rollback({ ...params, ...input }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['revisions'] });
+      invalidate(queryClient, kind);
+    },
+  });
+}
+
 export function useWorkloadAutoscaling(
   kind: WorkloadKind,
   params: { cluster: string; namespace: string; name: string },

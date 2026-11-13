@@ -1,5 +1,5 @@
 import type { Client } from './client';
-import { annotationKeys, baseOf, resourceApi, type KubeObject, type ResourceBase } from './resources';
+import { annotationKeys, baseOf, kubePrefix, resourceApi, type KubeObject, type ResourceBase } from './resources';
 
 /**
  * Application workloads: the resources the old console groups under 应用负载.
@@ -522,6 +522,66 @@ export function workloadsApi(client: Client, kind: WorkloadKind) {
       });
     },
 
+    /** ReplicaSets owned by a Deployment, newest revision first. */
+    async revisions(params: { cluster: string; namespace: string; name: string }): Promise<WorkloadRevision[]> {
+      // The raw objects are needed here (annotations, ownerReferences), so these two
+      // calls go through the client rather than the summarising API.
+      const deployment = await client.request<KubeWorkload>(workloadPath(params.cluster, 'deployments', params.namespace, params.name));
+      const currentRevision = Number(
+        ((deployment?.metadata?.annotations ?? {}) as Record<string, string>)['deployment.kubernetes.io/revision'] ?? 0,
+      );
+      const selector = (((deployment?.spec ?? {})['selector'] as Record<string, unknown> | undefined)?.['matchLabels'] ?? {}) as Record<
+        string,
+        string
+      >;
+      const labelSelector = Object.entries(selector)
+        .map(([key, value]) => `${key}=${value}`)
+        .join(',');
+      const sets = await client.request<{ items?: KubeReplicaSet[] }>(
+        `${workloadPath(params.cluster, 'replicasets', params.namespace)}?labelSelector=${encodeURIComponent(labelSelector)}`,
+      );
+      return (sets?.items ?? [])
+        .filter((item) =>
+          ((item.metadata as Record<string, unknown> | undefined)?.['ownerReferences'] as Array<Record<string, unknown>> | undefined ?? []).some(
+            (owner) => owner['kind'] === 'Deployment' && owner['name'] === params.name,
+          ),
+        )
+        .map((item) => toWorkloadRevision(item, currentRevision))
+        .sort((a, b) => b.revision - a.revision || (a.createdAt < b.createdAt ? 1 : -1));
+    },
+
+    /**
+     * Roll a Deployment back to one of its revisions.
+     *
+     * There is no rollback endpoint: Kubernetes performs one as a patch of the pod
+     * template, so the revision's template is read from its ReplicaSet and written
+     * back onto the Deployment. The Deployment's revision annotation is left alone, so
+     * the rollback becomes a further revision instead of erasing the history it came
+     * from.
+     */
+    async rollback(params: { cluster: string; namespace: string; name: string; replicaSet: string }): Promise<WorkloadDetail> {
+      const target = await client.request<KubeReplicaSet>(
+        workloadPath(params.cluster, 'replicasets', params.namespace, params.replicaSet),
+      );
+      const template = revisionTemplate(target ?? {});
+      if (!template) throw new Error(`revision ${params.replicaSet} not found`);
+      // Strip what the deployment controller stamps on; leaving it in makes the patch
+      // fight the controller over the same fields.
+      const clean: Record<string, unknown> = { ...template };
+      const metadata = clean['metadata'] as Record<string, unknown> | undefined;
+      if (metadata) {
+        const { creationTimestamp: _drop, ...rest } = metadata;
+        void _drop;
+        clean['metadata'] = rest;
+      }
+      return api.patch({
+        cluster: params.cluster,
+        namespace: params.namespace,
+        name: params.name,
+        body: { spec: { template: clean } },
+      });
+    },
+
     restart(params: { cluster: string; namespace: string; name: string }): Promise<WorkloadDetail> {
       return api.patch({
         cluster: params.cluster,
@@ -607,4 +667,59 @@ export function hpaFor(item: KubeHpa, kind: WorkloadKind, name: string): boolean
     daemonsets: 'daemonset',
   };
   return targetKind === expected[kind] && String(ref['name'] ?? '') === name;
+}
+
+/**
+ * One revision of a Deployment.
+ *
+ * Kubernetes keeps a ReplicaSet per revision: the revision number and the pod
+ * template it ran are in annotations, and a rollback is a patch of the Deployment's
+ * template back to an older revision's template. There is no rollback API.
+ */
+export interface WorkloadRevision {
+  /** The ReplicaSet's name; the row key. */
+  replicaSet: string;
+  /** `deployment.kubernetes.io/revision`; 0 when the annotation is missing. */
+  revision: number;
+  replicas: number;
+  /** `deployment.kubernetes.io/revision-history` image list, flattened. */
+  images: string[];
+  /** When this revision was created. */
+  createdAt: string;
+  /** True for the revision the Deployment currently points at. */
+  current: boolean;
+}
+
+interface KubeReplicaSet extends KubeObject {
+  spec?: Record<string, unknown>;
+  status?: Record<string, unknown>;
+}
+
+export function toWorkloadRevision(item: KubeReplicaSet, currentRevision: number): WorkloadRevision {
+  const annotations = (item.metadata?.annotations ?? {}) as Record<string, string>;
+  const revision = Number(annotations['deployment.kubernetes.io/revision'] ?? 0);
+  const template = ((item.spec ?? {})['template'] ?? {}) as Record<string, unknown>;
+  const containers = (((template['spec'] as Record<string, unknown> | undefined)?.['containers'] ?? []) as Array<Record<string, unknown>>);
+  return {
+    replicaSet: item.metadata?.name ?? '',
+    revision: Number.isFinite(revision) ? revision : 0,
+    replicas: Number((item.spec ?? {})['replicas'] ?? 0),
+    images: containers.map((container) => String(container['image'] ?? '')).filter(Boolean),
+    createdAt: String(item.metadata?.creationTimestamp ?? ''),
+    current: Number.isFinite(revision) && revision === currentRevision,
+  };
+}
+
+/** The pod template of one revision, ready to be patched back onto the Deployment. */
+export function revisionTemplate(item: KubeReplicaSet): Record<string, unknown> | undefined {
+  const template = ((item.spec ?? {})['template'] ?? undefined) as Record<string, unknown> | undefined;
+  return template;
+}
+
+/** Cluster/namespace-aware path for a core-group resource (deployments, replicasets). */
+function workloadPath(cluster: string, resource: string, namespace: string, name?: string): string {
+  const clusterSegment = cluster && cluster !== 'host' ? `clusters/${encodeURIComponent(cluster)}/` : '';
+  const namespaceSegment = namespace ? `namespaces/${encodeURIComponent(namespace)}/` : '';
+  const suffix = name ? `/${encodeURIComponent(name)}` : '';
+  return `${kubePrefix(resource)}/${clusterSegment}${namespaceSegment}${resource}${suffix}`;
 }

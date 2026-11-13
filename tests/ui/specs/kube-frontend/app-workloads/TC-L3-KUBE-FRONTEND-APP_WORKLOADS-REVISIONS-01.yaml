@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-REVISIONS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: revisions
+title: 部署详情 · 版本历史与回滚
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/deployments'
+prd: prd/kube-frontend/app-workloads/revisions.md
+design: design/kube-frontend/app-workloads/revisions.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-REVISIONS-01
+
+story:
+- US1
+
+product: 部署详情列出各版本（版本号、镜像、副本、时间），当前版本带标记且不可回滚；回滚把服务端模板恢复为该版本的镜像。
+preconditions:
+- 由夹具创建一个部署并依次改两次镜像，形成三个版本，用例结束无条件删除
+- 已登录，且在 host 集群的 default 项目空间
+steps:
+- 打开该部署详情
+- 读取版本表
+- 对版本 1 点「回滚」并确认
+- 用 API 读取容器镜像
+expected:
+- 版本表按版本号降序，最新版本带「当前」标记
+- 非当前版本各有回滚按钮
+- 回滚后镜像恢复为版本 1 的镜像
+troubleshoot:
+- 表不出现说明 revisions 查询未启用（仅 deployments）或没有 ReplicaSet
+- 回滚无效说明模板 patch 路径不对（应为 spec.template）
+update_automation:
+- 版本字段变化时改 api-client 的 toWorkloadRevision

@@ -3,7 +3,7 @@ import { toAlertSummary, toAlertingRuleSummary } from '../src/alerting';
 import { toComponentSummary } from '../src/storage';
 import { toNetworkPolicySummary, toSelector } from '../src/iam';
 import { toStorageClassSummary, quantityToNumber, usagePercent } from '../src/storage';
-import { toWorkloadSummary } from '../src/workloads';
+import { toWorkloadRevision, toWorkloadSummary, revisionTemplate } from '../src/workloads';
 
 /**
  * Row mappers that turn a Kubernetes object into a table row.
@@ -216,5 +216,40 @@ describe('pod metric shapes', () => {
 
     const containerCores = pod.containers.reduce((sum, c) => sum + quantityToNumber(c.usage.cpu), 0);
     expect(containerCores).toBeCloseTo(0.0117, 3);
+  });
+});
+
+describe('deployment revisions', () => {
+  const rs = (name: string, revision: string, replicas: number, image: string) => ({
+    metadata: {
+      name,
+      creationTimestamp: '2026-11-01T10:00:00Z',
+      annotations: { 'deployment.kubernetes.io/revision': revision },
+    },
+    spec: { replicas, template: { metadata: { creationTimestamp: null }, spec: { containers: [{ name: 'c', image }] } } },
+  });
+
+  it('reads the revision number and images from the ReplicaSet', () => {
+    const row = toWorkloadRevision(rs('d-abc', '3', 2, 'nginx:1.29'), 3);
+    expect(row.revision).toBe(3);
+    expect(row.replicas).toBe(2);
+    expect(row.images).toEqual(['nginx:1.29']);
+    expect(row.current).toBe(true);
+  });
+
+  it('marks only the revision the Deployment points at as current', () => {
+    expect(toWorkloadRevision(rs('d-old', '2', 0, 'nginx:1.28'), 3).current).toBe(false);
+  });
+
+  it('treats a missing revision annotation as zero', () => {
+    // Number('') is 0 and Number(undefined) is NaN; both must end up usable for sorting.
+    const row = toWorkloadRevision({ metadata: { name: 'd' } } as never, 3);
+    expect(row.revision).toBe(0);
+    expect(row.current).toBe(false);
+  });
+
+  it('exposes the template a rollback writes back', () => {
+    const template = revisionTemplate(rs('d-abc', '1', 1, 'nginx:1.27'));
+    expect((template as { spec: { containers: Array<{ image: string }> } }).spec.containers[0].image).toBe('nginx:1.27');
   });
 });
