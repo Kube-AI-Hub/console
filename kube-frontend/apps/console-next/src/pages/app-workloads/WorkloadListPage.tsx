@@ -442,6 +442,8 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
           names={[dialog.row.name]}
           resource={kind}
           noun={t('workloads.action.start')}
+          title={t('workloads.action.start')}
+          confirmLabel={t('workloads.action.start')}
           pending={scale.isPending}
           onConfirm={async () => {
             // One replica is the smallest running state; the old console restores the
@@ -459,6 +461,8 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
           names={dialog.rows.map((row) => row.name)}
           resource={kind}
           noun={t('workloads.action.bulkStop')}
+          title={t('workloads.action.bulkStop')}
+          confirmLabel={t('workloads.action.bulkStop')}
           pending={scale.isPending}
           onConfirm={async () => {
             // Sequentially: each scale is its own object, and firing twenty at once
@@ -493,6 +497,8 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
           names={[dialog.row.name]}
           resource={kind}
           noun={t('workloads.action.redeploy')}
+          title={t('workloads.action.redeploy')}
+          confirmLabel={t('workloads.action.redeploy')}
           pending={redeploy.isPending}
           onConfirm={async () => {
             await redeploy.mutateAsync(dialog.row.name);
@@ -508,6 +514,8 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
           names={[dialog.row.name]}
           resource={kind}
           noun={t('workloads.action.stop')}
+          title={t('workloads.action.stop')}
+          confirmLabel={t('workloads.action.stop')}
           pending={scale.isPending}
           onConfirm={async () => {
             // Scale to zero keeps the object and its history; deleting would lose both.

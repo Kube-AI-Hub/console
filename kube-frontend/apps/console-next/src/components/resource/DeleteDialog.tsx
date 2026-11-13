@@ -27,6 +27,16 @@ export interface DeleteDialogProps {
   onConfirm: () => void | Promise<void>;
   /** The noun in the title, e.g. `保密字典`. */
   noun: string;
+  /**
+   * Override the title, for confirmations that are not deletions.
+   *
+   * The dialog is reused by 停止 / 启动 / 重新部署 / 回滚, and its default title is
+   * `删除{noun}` — which rendered as "删除停止" with the confirm button reading
+   * "删除". The typed-name friction is the same; the words are not.
+   */
+  title?: string;
+  /** Override the confirm button label, for the same reason. */
+  confirmLabel?: string;
 }
 
 /**
@@ -49,6 +59,8 @@ export function DeleteDialog({
   pending = false,
   onConfirm,
   noun,
+  title,
+  confirmLabel,
 }: DeleteDialogProps): React.ReactElement {
   const t = useT();
   const [typed, setTyped] = React.useState('');
@@ -67,7 +79,7 @@ export function DeleteDialog({
       open={open}
       onOpenChange={onOpenChange}
       size="sm"
-      title={bulk ? t('delete.bulkTitle', { noun }) : t('delete.title', { noun })}
+      title={title ?? (bulk ? t('delete.bulkTitle', { noun }) : t('delete.title', { noun }))}
       description={bulk ? t('delete.bulkHint', { names: expected }) : t('delete.singleHint', { name: expected })}
       footer={
         <div className="flex justify-end gap-2">
@@ -81,7 +93,7 @@ export function DeleteDialog({
             {...actionProps(`${resource}:delete-confirm`)}
             onClick={() => void onConfirm()}
           >
-            {t('common.delete')}
+            {confirmLabel ?? t('common.delete')}
           </Button>
         </div>
       }

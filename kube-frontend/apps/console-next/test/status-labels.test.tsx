@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { describe, expect, it } from 'vitest';
 import { statusLabel } from '@/lib/status';
 import { zh } from '@kube-ai-hub/locales';

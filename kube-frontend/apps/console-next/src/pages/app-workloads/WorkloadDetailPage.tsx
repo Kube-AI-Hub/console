@@ -518,6 +518,8 @@ export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, 
           names={[detail?.name ?? name]}
           resource={kind}
           noun={t('workloads.action.rollback')}
+          title={t('workloads.action.rollback')}
+          confirmLabel={t('workloads.action.rollback')}
           pending={rollback.isPending}
           onConfirm={async () => {
             await rollback.mutateAsync({ name: detail?.name ?? name, replicaSet: rollbackTarget.replicaSet });
