@@ -16,7 +16,7 @@ story:
 - US1
 - US2
 
-product: 未选中时禁用并暴露前置依赖。
+product: 批量删除控件的可用性（未选中禁用、声明 row-select 依赖、选中后可用）；删除结果由 DELETE-02 与 BULK_DELETE-01 验证。
 preconditions:
 - 已登录
 - 列表已加载

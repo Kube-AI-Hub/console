@@ -24,7 +24,8 @@ export interface ConfigMapEditInfoDialogProps {
   onOpenChange: (open: boolean) => void;
   detail: ConfigMapDetail;
   pending?: boolean;
-  onSubmit: (annotations: Record<string, string>) => void | Promise<void>;
+  /** A JSON merge patch: `null` deletes the key, an absent key leaves it alone. */
+  onSubmit: (annotations: Record<string, string | null>) => void | Promise<void>;
 }
 
 export function ConfigMapEditInfoDialog({
@@ -54,13 +55,18 @@ export function ConfigMapEditInfoDialog({
     setErrors(next);
     if (Object.keys(next).length) return;
 
-    // Merge rather than replace: the object carries annotations this dialog does
-    // not show (creator, kubefed markers), and dropping them would orphan it.
-    const annotations = { ...detail.annotations };
-    if (alias.trim()) annotations[annotationKeys.alias] = alias.trim();
-    else delete annotations[annotationKeys.alias];
-    if (description.trim()) annotations[annotationKeys.description] = description.trim();
-    else delete annotations[annotationKeys.description];
+    /*
+     * Build a JSON merge patch, not a replacement map.
+     *
+     * Under RFC 7386 a key set to `null` is deleted, while an **absent** key means
+     * "leave it alone". Clearing the alias therefore has to send
+     * `{ "kubesphere.io/alias-name": null }` — omitting the key silently did nothing,
+     * which is why clearing an alias appeared to work (the dialog closed) but the
+     * annotation stayed.
+     */
+    const annotations: Record<string, string | null> = {};
+    annotations[annotationKeys.alias] = alias.trim() ? alias.trim() : null;
+    annotations[annotationKeys.description] = description.trim() ? description.trim() : null;
 
     void onSubmit(annotations);
   };
