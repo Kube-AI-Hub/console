@@ -575,17 +575,10 @@ export const isMemberClusterPage = (path = location.pathname, message) => {
     'signature is invalid',
     'token not found in cache',
   ]
-  const lowerMessage = message.toLowerCase()
+  const lowerMessage = String(message || '').toLowerCase()
+  const memberTokenError = rules.some(item => lowerMessage.indexOf(item) > -1)
 
-  let isTokenOut = true
-
-  rules.forEach(item => {
-    if (lowerMessage.indexOf(item) > -1) {
-      isTokenOut = false
-    }
-  })
-
-  return clusterName !== 'host' && !isTokenOut
+  return clusterName !== 'host' && memberTokenError
 }
 
 export const getClusterUrl = url => {
@@ -805,7 +798,9 @@ export const getGpuDisplayName = resourceName => {
  */
 export const resolveGpuCardTypeFromResourceKeys = keys => {
   const raw = keys instanceof Set ? [...keys] : keys
-  const keySet = new Set((raw || []).filter(k => k && k !== 'cpu' && k !== 'memory'))
+  const keySet = new Set(
+    (raw || []).filter(k => k && k !== 'cpu' && k !== 'memory')
+  )
   if (keySet.size === 0) return ''
   const supportGpuType = globals.config.supportGpuType || []
   return supportGpuType.find(rn => keySet.has(rn)) || ''
@@ -825,8 +820,8 @@ export const filterGpuTypeOptionsByCluster = (
     return undefined
   }
   const allOpts = getGpuTypeOptions()
-  const set = new Set(availableResourceNames)
-  let opts = allOpts.filter(o => set.has(o.value))
+  const availableNames = new Set(availableResourceNames)
+  let opts = allOpts.filter(o => availableNames.has(o.value))
   // 已选中但集群摘要里没有的类型仍要保留，避免编辑时选项丢失
   const currentTypes = [].concat(currentType || []).filter(Boolean)
   currentTypes.forEach(type => {

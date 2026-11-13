@@ -21,7 +21,7 @@ import qs from 'qs'
 import { isObject, get, set, merge, isEmpty } from 'lodash'
 import { Notify } from '@kube-design/components'
 
-import { getClusterUrl, safeParseJSON } from './index'
+import { getClusterUrl, isMemberClusterPage, safeParseJSON } from './index'
 import { getToken, removeToken } from './token'
 
 const methods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
@@ -180,8 +180,16 @@ function handleResponse(response, reject, request = {}) {
           request.url &&
           (request.url.includes('/login') || request.url.startsWith('/oauth/'))
 
+        // 成员集群用自己的 token 缓存校验主集群签发的登录 token，缓存未命中时也是 401。
+        // 这不是本机会话失效，不能清掉 token。
+        let message = data.message || 'Please login again'
+        const memberClusterTokenError = isMemberClusterPage(
+          window.location.pathname,
+          message
+        )
+
         // 只有非登录请求的 401 才是真正的会话超时
-        if (!isLoginRequest) {
+        if (!isLoginRequest && !memberClusterTokenError) {
           // Remove token and redirect to login
           removeToken()
           const pathname = window.location.pathname
@@ -189,10 +197,6 @@ function handleResponse(response, reject, request = {}) {
             window.location.replace(`/login?referer=${pathname}`)
           }
         }
-
-        // 返回错误信息给调用者处理，同时标记来源便于全局错误处理识别
-        // 对于 OAuth 错误，将 error_description 映射到友好的 i18n key
-        let message = data.message || 'Please login again'
         if (isLoginRequest && data.error === 'invalid_grant') {
           const errorDesc = (data.error_description || '').toLowerCase()
           if (
