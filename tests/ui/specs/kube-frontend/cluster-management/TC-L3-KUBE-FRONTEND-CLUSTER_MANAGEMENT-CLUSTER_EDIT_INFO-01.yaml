@@ -1,0 +1,41 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EDIT_INFO-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: cluster-edit-info
+title: 编辑集群信息 · 四个字段写回与清空
+entry_url: '{BASE_URL}/kube-frontend/clusters'
+prd: prd/kube-frontend/cluster-management/cluster-edit-info.md
+design: design/kube-frontend/cluster-management/cluster-edit-info.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EDIT_INFO-01
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EDIT_INFO-02
+
+story:
+- US1
+
+product: 集群列表的行操作「编辑信息」修改别名、标签、供应商与描述；清空即删除对应键。
+preconditions:
+- 已登录，且有平台管理权限
+- 集群对象可写
+steps:
+- 打开集群列表，对目标集群点「编辑信息」
+- 填入别名/标签/供应商/描述并确认
+- 读回集群对象逐项核对，并检查列表名称列显示别名
+- 再次打开清空别名/标签/描述并确认
+- 读回确认对应键已删除
+- 清理：把集群的注解/标签/供应商恢复原值
+expected:
+- 名称字段禁用
+- 四个字段写入对象
+- 列表主行显示别名、副行显示对象名
+- 清空后注解与标签键被删除
+performance:
+- 无特殊要求；保存为单次 PATCH
+troubleshoot:
+- 显示已保存但值没变：清空必须发 null（merge patch 缺失键=不修改）
+- 名称列读到别的列：用 data-ai-id 定位而不是 td 序号
+update_automation:
+- 字段变化时改 pages/cluster_fleet.py 的 open_edit 与字段选择器

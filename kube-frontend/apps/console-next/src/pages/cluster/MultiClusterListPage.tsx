@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMulticluster } from '@/shell/useMulticluster';
 import { Link } from '@tanstack/react-router';
 import { clustersApi, type ClusterSummary } from '@kube-ai-hub/api-client';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
@@ -9,6 +10,7 @@ import { useResourceListState } from '@/components/resource/useResourceListState
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
 import { AddClusterDialog } from './AddClusterDialog';
+import { ClusterEditDialog } from './ClusterEditDialog';
 
 /**
  * 集群列表（多集群）.
@@ -26,9 +28,11 @@ type SortKey = 'name' | 'createTime' | 'nodeCount';
 
 export function MultiClusterListPage(_props: MultiClusterListPageProps): React.ReactElement {
   const t = useT();
+  const { multicluster, loading: configLoading } = useMulticluster();
   const queryClient = useQueryClient();
   const list = useResourceListState<SortKey>({ defaultSortBy: 'name' });
   const [adding, setAdding] = React.useState(false);
+  const [editing, setEditing] = React.useState<ClusterSummary | null>(null);
 
   const query = useQuery({
     queryKey: ['clusters'],
@@ -39,6 +43,20 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
   });
 
   const all = query.data?.items ?? [];
+
+  /*
+   * A single-cluster installation has no fleet to manage: the old console redirects
+   * `/clusters` straight into its only cluster's overview, and a list of one row is a
+   * click between the reader and where they were going.
+   *
+   * Guarded on `configLoading`: acting on the default (`true`) before configz answers
+   * would flash the list and then jump.
+   */
+  React.useEffect(() => {
+    if (configLoading || multicluster || all.length !== 1) return;
+    const only = all[0]?.name;
+    if (only) window.location.replace(`/kube-frontend/clusters/${encodeURIComponent(only)}/overview`);
+  }, [all, configLoading, multicluster]);
   const keyword = list.search.trim().toLowerCase();
   const filtered = keyword
     ? all.filter((row) => row.name.toLowerCase().includes(keyword) || row.provider.toLowerCase().includes(keyword))
@@ -68,15 +86,22 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
           render: (row: ClusterSummary) => (
             <span className="flex min-w-0 flex-col" data-ai-id={`clusters:name:${row.name}`}>
               {/* Linked to the cluster console: the next question about a cluster is
-                  always inside it, never in this list. */}
+                  always inside it, never in this list.
+
+                  The alias is what the reader named it; the object name (or the provider,
+                  when there is no alias) stays underneath so the two are never confused —
+                  the old console's `showNameAndAlias`. */}
               <Link
                 to="/kube-frontend/clusters/$cluster/overview"
                 params={{ cluster: row.name }}
                 className="truncate font-medium text-ai-accent hover:underline"
+                title={row.name}
               >
-                {row.name}
+                {row.alias || row.name}
               </Link>
-              <span className="truncate text-[11px] text-ai-fg-muted">{row.provider || '-'}</span>
+              <span className="truncate text-[11px] text-ai-fg-muted">
+                {row.alias ? row.name : row.provider || '-'}
+              </span>
             </span>
           ),
         },
@@ -128,6 +153,7 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
         },
       ],
       primaryAction: { key: 'add', label: t('cluster.add.title'), aiId: 'clusters:add' },
+      rowActions: [{ key: 'edit', label: t('resource.action.editInfo'), aiId: 'clusters:edit' }],
       empty: { title: t('cluster.list.emptyTitle'), description: t('cluster.list.emptyDescription') },
       labels: {
         selectAll: t('table.selectAll'),
@@ -163,16 +189,25 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
         onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
           if (next) list.setSort(next);
         }}
-        onAction={(action) => {
-          // The primary action arrives without a row; anything else here would be a row
-          // action, and this list has none yet.
-          if (action === 'add') setAdding(true);
+        onAction={(action, row) => {
+          // The primary action arrives without a row. (An `onClick` on `primaryAction`
+          // type-checks and does nothing — the click comes back through here.)
+          if (action === 'add') return setAdding(true);
+          if (action === 'edit' && row) setEditing(row as ClusterSummary);
         }}
       />
       <AddClusterDialog
         open={adding}
         onOpenChange={setAdding}
         onCreated={() => void queryClient.invalidateQueries({ queryKey: ['clusters'] })}
+      />
+      <ClusterEditDialog
+        open={editing !== null}
+        onOpenChange={(next) => {
+          if (!next) setEditing(null);
+        }}
+        cluster={editing}
+        onSaved={() => void queryClient.invalidateQueries({ queryKey: ['clusters'] })}
       />
     </AiSurface>
   );

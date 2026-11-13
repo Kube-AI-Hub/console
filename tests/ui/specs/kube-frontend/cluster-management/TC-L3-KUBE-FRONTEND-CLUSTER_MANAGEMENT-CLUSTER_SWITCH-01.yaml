@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_SWITCH-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: cluster-switch
+title: 集群切换 · 侧栏顶部切换器往返
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/overview'
+prd: prd/kube-frontend/cluster-management/cluster-switch.md
+design: design/kube-frontend/cluster-management/cluster-switch.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_SWITCH-01
+
+story:
+- US1
+
+product: 集群控制台侧栏顶部提供切换器，选择其他集群后落到其概览，并可切回。
+preconditions:
+- 已登录，且有平台管理权限
+- 平台为多集群模式
+- 至少两个集群（用例自行创建一个，结束删除）
+steps:
+- 在原集群概览打开切换器，核对当前集群与目标集群都在列表里
+- 选择目标集群
+- 核对地址为该集群 overview、切换器显示新集群、菜单高亮概览
+- 再切回原集群
+expected:
+- 切换后地址为 /clusters/<目标>/overview
+- 切换器显示目标集群（别名优先）
+- 侧栏高亮「集群概览」
+troubleshoot:
+- 切换无效：切换器按钮需可点击（单集群安装不打开对话框）
+- URL 断言失败：用正则匹配路径，避免 glob 与完整 URL 的歧义
+update_automation:
+- 选择器变化时改 pages/cluster_fleet.py 的 open_switcher

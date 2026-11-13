@@ -1,17 +1,18 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
+  clusterAgentApi,
   clusterApi,
   clusterMetricsApi,
   componentMetricsApi,
   type ClusterDetail,
 } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { AiSurface, Badge } from '@kube-ai-hub/ui';
+import { AiSurface, Badge, Button } from '@kube-ai-hub/ui';
 import type { LocaleKey } from '@kube-ai-hub/locales';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
-import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
+import { ResourceErrorPanel, errorMessage } from '@/components/resource/ResourceErrorPanel';
 import { DefinitionRow } from '@/components/resource/DefinitionRow';
 
 /**
@@ -61,6 +62,9 @@ export function ClusterOverviewPage({ cluster }: ClusterOverviewPageProps): Reac
       {detail.data ? (
         <React.Fragment>
           <BasicInfoPanel detail={detail.data} />
+          {/* A proxy cluster stays not-ready until its agent is installed, so the
+              instructions are part of the page, not a separate document. */}
+          <ProxyAgentPanel cluster={cluster} detail={detail.data} />
           <UsagePanel cluster={cluster} />
           <KubernetesStatusPanel cluster={cluster} />
           <ModulesPanel detail={detail.data} />
@@ -77,6 +81,77 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
       <h2 className="mb-3 text-sm font-medium text-ai-fg">{title}</h2>
       {children}
     </section>
+  );
+}
+
+/**
+ * 代理接入：the manifest a proxy-mode member cluster has to apply.
+ *
+ * A proxy cluster carries no kubeconfig, so nothing can be verified up front: the agent
+ * dials out and the cluster becomes ready afterwards. Without this panel the reader has
+ * created a cluster and has no next step — the old console shows the same document on the
+ * cluster overview while it is initialising.
+ *
+ * Rendered only for proxy clusters that are not ready yet; a ready cluster's agent is
+ * already running, and a direct cluster never had one.
+ */
+function ProxyAgentPanel({ cluster, detail }: { cluster: string; detail: ClusterDetail }): React.ReactElement | null {
+  const t = useT();
+  const [copied, setCopied] = React.useState(false);
+  const isProxy = detail.connectionType === 'proxy';
+  const query = useQuery({
+    queryKey: ['cluster-agent', cluster],
+    enabled: isProxy && !detail.ready,
+    staleTime: 60_000,
+    retry: false,
+    queryFn: ({ signal }) => clusterAgentApi(apiClient).deployment({ cluster, signal }),
+  });
+
+  if (!isProxy || detail.ready) return null;
+
+  const copy = async (): Promise<void> => {
+    try {
+      await navigator.clipboard.writeText(query.data ?? '');
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2_000);
+    } catch {
+      // Clipboard blocked (insecure origin): the text is on screen and selectable.
+    }
+  };
+
+  return (
+    <Panel title={t('cluster.add.agentTitle')}>
+      <div className="flex flex-col gap-2" data-ai-id="overview:agent-panel">
+        <p className="text-sm text-ai-fg-secondary">{t('cluster.add.agentDesc')}</p>
+        {query.isError ? (
+          /*
+           * The manifest comes from the platform's agent service. When that service is
+           * not installed the endpoint answers 404 with a message about `tower`; saying
+           * so is more useful than "not found", because it explains why the cluster will
+           * never become ready.
+           */
+          <div className="flex flex-col gap-1" role="alert" data-ai-id="overview:agent-unavailable">
+            <p className="text-xs text-ai-danger">{t('cluster.add.agentUnavailable')}</p>
+            <p className="text-[11px] text-ai-fg-muted">{errorMessage(t, query.error)}</p>
+          </div>
+        ) : null}
+        {query.data ? (
+          <React.Fragment>
+            <Button variant="secondary" size="sm" onClick={() => void copy()} {...actionProps('overview:agent-copy')}>
+              {copied ? t('cluster.add.agentCopied') : t('cluster.add.agentCopy')}
+            </Button>
+            <pre
+              className="max-h-80 overflow-auto rounded-ai-md border border-ai-line bg-ai-surface p-3 font-mono text-[11px] text-ai-fg-secondary"
+              data-ai-id="overview:agent-manifest"
+            >
+              {query.data}
+            </pre>
+          </React.Fragment>
+        ) : query.isPending ? (
+          <p className="text-xs text-ai-fg-muted">{t('common.loading')}</p>
+        ) : null}
+      </div>
+    </Panel>
   );
 }
 

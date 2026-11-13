@@ -456,6 +456,21 @@ MODULES = [
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-COMPONENTS-01"]},
                     },
                     {
+                        "id": "cluster-edit-info",
+                        "title": "编辑集群信息",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EDIT_INFO-01"]},
+                    },
+                    {
+                        "id": "cluster-switch",
+                        "title": "集群切换与作用域侧栏",
+                        "tests": {
+                            "L3": [
+                                "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_SWITCH-01",
+                                "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_SWITCH-02",
+                            ]
+                        },
+                    },
+                    {
                         "id": "add-cluster",
                         "title": "添加集群",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-01"]},

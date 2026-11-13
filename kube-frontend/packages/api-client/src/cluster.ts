@@ -50,6 +50,10 @@ export interface ClusterDetail {
   modules: ClusterModule[];
   /** The description annotation, when the platform wrote one. */
   description: string;
+  /** `kubesphere.io/alias-name`; the list shows it instead of the name when set. */
+  alias: string;
+  /** `cluster.kubesphere.io/group` label, e.g. `production`. */
+  group: string;
 }
 
 export interface ClusterModule {
@@ -58,6 +62,23 @@ export interface ClusterModule {
 }
 
 const DESCRIPTION_ANNOTATION = 'kubesphere.io/description';
+const ALIAS_ANNOTATION = 'kubesphere.io/alias-name';
+/** The platform's preset tags. The label carries the value, not a free-text tag. */
+const GROUP_LABEL = 'cluster.kubesphere.io/group';
+/** Preset tags the old console offers in 编辑信息. */
+export const CLUSTER_GROUPS = ['production', 'development', 'testing'] as const;
+export type ClusterGroup = (typeof CLUSTER_GROUPS)[number];
+/** Providers the old console offers; the field also accepts anything typed. */
+export const CLUSTER_PROVIDERS = [
+  'Kube AI Hub',
+  'Aliyun ACK',
+  'Azure Kubernetes Service',
+  'Amazon EKS',
+  'Google GKE',
+  'Tencent TKE',
+  'Huawei CCE',
+  'Bare Metal',
+] as const;
 
 interface KubeCluster extends KubeObject {
   spec?: {
@@ -97,6 +118,8 @@ export function toClusterDetail(cluster: KubeCluster): ClusterDetail {
       .map(([key, enabled]) => ({ key, enabled: enabled === true }))
       .sort((a, b) => a.key.localeCompare(b.key)),
     description: cluster.metadata?.annotations?.[DESCRIPTION_ANNOTATION] ?? '',
+    alias: cluster.metadata?.annotations?.[ALIAS_ANNOTATION] ?? '',
+    group: cluster.metadata?.labels?.[GROUP_LABEL] ?? '',
   };
 }
 
@@ -355,6 +378,47 @@ export function clusterWriteApi(client: Client) {
           method: 'PATCH',
           contentType: 'application/merge-patch+json',
           body: { metadata: { annotations: { [DESCRIPTION_ANNOTATION]: value === '' ? null : value } } },
+        },
+      );
+    },
+
+    /**
+     * The 编辑信息 fields: alias, tag, provider, description.
+     *
+     * Every field is a merge patch against the object, and empty means "delete this key":
+     * an absent key leaves the old value alone (RFC 7386), so clearing an alias by simply
+     * not sending it is a no-op that looks saved. The three editable metadata slots use
+     * `null` to remove the entry; `spec.provider` is a plain string, so an empty string
+     * is the correct way to clear it.
+     */
+    async updateBasicInfo(params: {
+      cluster: string;
+      alias: string;
+      group: string;
+      provider: string;
+      description: string;
+    }): Promise<void> {
+      const trimmed = {
+        alias: params.alias.trim(),
+        group: params.group.trim(),
+        provider: params.provider.trim(),
+        description: params.description.trim(),
+      };
+      await client.request(
+        `/apis/cluster.kubesphere.io/v1alpha1/clusters/${encodeURIComponent(params.cluster)}`,
+        {
+          method: 'PATCH',
+          contentType: 'application/merge-patch+json',
+          body: {
+            metadata: {
+              annotations: {
+                [ALIAS_ANNOTATION]: trimmed.alias === '' ? null : trimmed.alias,
+                [DESCRIPTION_ANNOTATION]: trimmed.description === '' ? null : trimmed.description,
+              },
+              labels: { [GROUP_LABEL]: trimmed.group === '' ? null : trimmed.group },
+            },
+            spec: { provider: trimmed.provider },
+          },
         },
       );
     },
@@ -688,6 +752,14 @@ export interface ClusterSummary {
   /** Where the platform reaches the cluster's API server. */
   endpoint: string;
   createdAt: string;
+  /** Shown instead of the name when set (the old console's `showNameAndAlias`). */
+  alias: string;
+  /** Preset tag from the `cluster.kubesphere.io/group` label. */
+  group: string;
+  /** `direct` / `proxy` — how the platform reaches this cluster. */
+  connectionType: string;
+  /** The description annotation; editable from the list's 编辑信息. */
+  description: string;
 }
 
 /** A cluster object flattened for the list. */
@@ -704,6 +776,10 @@ export function toClusterSummary(cluster: KubeCluster): ClusterSummary {
     readyMessage: detail.readyMessage,
     endpoint: detail.kubernetesAPIEndpoint,
     createdAt: cluster.metadata?.creationTimestamp ?? '',
+    alias: detail.alias,
+    group: detail.group,
+    connectionType: detail.connectionType,
+    description: detail.description,
   };
 }
 
@@ -714,6 +790,136 @@ export function toClusterSummary(cluster: KubeCluster): ClusterSummary {
  * observed to omit recently created objects, and a list that disagrees with the
  * detail page is worse than a slow one.
  */
+/**
+ * Import an existing cluster by its kubeconfig.
+ *
+ * This is the "import" half of the old console's 添加集群 (`cluster.add`), which also
+ * offers provisioning a new cluster through KubeKey. Provisioning needs the kubekey API
+ * and a set of hosts; importing needs only the kubeconfig a member cluster is joined
+ * with, so only that is offered here.
+ *
+ * The console encodes the kubeconfig with `btoa` before sending it: the field is
+ * base64 in the object, and sending the YAML as-is produces a cluster that never
+ * connects back. `spec.joinFederation` is what makes the member cluster appear in the
+ * platform's federation.
+ */
+/** How the platform reaches a member cluster. */
+export type ClusterConnectionMode = 'direct' | 'proxy';
+
+/** The object body 添加集群 posts, shared by validation and creation. */
+export function clusterImportBody(params: {
+  name: string;
+  mode: ClusterConnectionMode;
+  kubeconfig?: string;
+  provider?: string;
+}): Record<string, unknown> {
+  const connection: Record<string, unknown> = { type: params.mode };
+  if (params.mode === 'direct') {
+    const kubeconfig = (params.kubeconfig ?? '').trim();
+    if (!kubeconfig) throw new Error('kubeconfig is required for a direct connection');
+    // Base64 in the object: the field is not YAML, and sending YAML produces a cluster
+    // that never connects back (the old console's `safeBtoa` exists for this).
+    connection['kubeconfig'] = btoa(unescape(encodeURIComponent(kubeconfig)));
+  }
+  // Proxy mode carries **no** kubeconfig key at all: the agent dials out, and a stale
+  // kubeconfig left in the spec would be read as a direct connection.
+  return {
+    apiVersion: 'cluster.kubesphere.io/v1alpha1',
+    kind: 'Cluster',
+    metadata: { name: params.name.trim() },
+    spec: {
+      provider: params.provider?.trim() ?? '',
+      connection,
+      joinFederation: true,
+    },
+  };
+}
+
+/**
+ * Import an existing cluster, either directly or through the agent.
+ *
+ * This is the import half of the old console's 添加集群 (`cluster.add`): provisioning a
+ * brand-new cluster with KubeKey needs the kubekey API and a host inventory, which this
+ * installation does not have.
+ *
+ * The two modes differ in one visible way: a direct connection must carry a kubeconfig
+ * and the platform verifies it before the object is created; a proxy connection carries
+ * none, because the member cluster installs an agent that dials out.
+ */
+export function clusterImportApi(client: Client) {
+  return {
+    async import(params: {
+      name: string;
+      mode: ClusterConnectionMode;
+      kubeconfig?: string;
+      provider?: string;
+    }): Promise<void> {
+      await client.request('/apis/cluster.kubesphere.io/v1alpha1/clusters', {
+        method: 'POST',
+        body: clusterImportBody(params),
+      });
+    },
+
+    /**
+     * Ask the platform whether it can reach the cluster this object describes.
+     *
+     * The old console runs this before creating a direct cluster, so a wrong kubeconfig
+     * is reported instead of producing a cluster that never becomes ready. A proxy
+     * cluster has nothing to reach yet and skips it.
+     */
+    async validate(params: {
+      name: string;
+      mode: ClusterConnectionMode;
+      kubeconfig?: string;
+      provider?: string;
+    }): Promise<void> {
+      await client.request('/kapis/cluster.kubesphere.io/v1alpha1/clusters/validation', {
+        method: 'POST',
+        body: clusterImportBody(params),
+      });
+    },
+  };
+}
+
+/**
+ * Whether the installation runs as a federation of clusters.
+ *
+ * The old console reads `ksConfig.multicluster`, injected by its server. This app has no
+ * server-rendered config, so it asks the same endpoint the old server asked:
+ * `/kapis/config.kubesphere.io/v1alpha2/configs/configz`. It decides whether the cluster
+ * switcher appears and whether `/clusters` may redirect a single-cluster installation.
+ */
+export function platformConfigApi(client: Client) {
+  return {
+    async configz(params: { signal?: AbortSignal } = {}): Promise<{ multicluster: boolean }> {
+      const body = await client.request<Record<string, unknown>>(
+        '/kapis/config.kubesphere.io/v1alpha2/configs/configz',
+        params.signal ? { signal: params.signal } : {},
+      );
+      return { multicluster: body?.['multicluster'] === true };
+    },
+  };
+}
+
+/**
+ * The agent manifests a proxy-mode member cluster has to apply.
+ *
+ * Only meaningful for `connection.type: proxy` before the cluster is ready: without it
+ * the reader has created a cluster and has no idea what to do next. The endpoint returns
+ * a YAML document assembled by ks-apiserver.
+ */
+export function clusterAgentApi(client: Client) {
+  return {
+    async deployment(params: { cluster: string; signal?: AbortSignal }): Promise<string> {
+      const body = await client.request<string | Record<string, unknown>>(
+        `/kapis/cluster.kubesphere.io/v1alpha1/clusters/${encodeURIComponent(params.cluster)}/agent/deployment`,
+        params.signal ? { signal: params.signal } : {},
+      );
+      return typeof body === 'string' ? body : JSON.stringify(body, null, 2);
+    },
+  };
+}
+
 export function clustersApi(client: Client) {
   return {
     async list(params: { signal?: AbortSignal } = {}): Promise<{ items: ClusterSummary[]; total: number }> {

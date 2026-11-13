@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ApiError, clusterImportApi } from '@kube-ai-hub/api-client';
+import { ApiError, clusterImportApi, type ClusterConnectionMode } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { Button, Modal, Textarea } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
@@ -8,16 +8,24 @@ import { api as apiClient } from '@/api';
 import { errorMessage } from '@/components/resource/ResourceErrorPanel';
 
 /**
- * 添加集群 — import an existing cluster with its kubeconfig.
+ * 添加集群 — import an existing cluster, directly or through an agent.
  *
- * The old console's 添加集群 offers two ways in: import an existing cluster, or
- * provision a new one with KubeKey. Only the import half is offered here: provisioning
- * needs the kubekey API plus a host inventory, while importing is a single object write
- * and is how a member cluster actually joins a running platform.
+ * The old console's 添加集群 offers two ways in: provision a new cluster with KubeKey, or
+ * import an existing one. Provisioning needs the kubekey API plus a host inventory, which
+ * this installation does not run, so importing is what is offered here — in both of the
+ * connection modes the platform supports.
  *
- * Both fields are validated before the request: a name that Kubernetes rejects and a
- * kubeconfig that is not a kubeconfig both come back as a 422 whose message says nothing
- * a reader can act on.
+ * The modes differ in what the reader has to supply:
+ *
+ * - **直接连接** carries a kubeconfig and the platform *checks it first*
+ *   (`/clusters/validation`). A wrong kubeconfig is then reported immediately instead of
+ *   producing a cluster that never becomes ready.
+ * - **代理连接** carries no kubeconfig: the member cluster installs an agent that dials
+ *   out. Nothing can be validated up front, so the dialog explains what to run next.
+ *
+ * Name and kubeconfig are checked before the request too: a name Kubernetes rejects and a
+ * pasted non-kubeconfig both come back as a 422 whose message says nothing a reader can
+ * act on.
  */
 export interface AddClusterDialogProps {
   open: boolean;
@@ -28,22 +36,61 @@ export interface AddClusterDialogProps {
 
 const NAME_PATTERN = /^[a-z][a-z0-9-]*[a-z0-9]$/;
 
+/** A kubeconfig always carries these three; checking for them catches a wrong paste. */
+function looksLikeKubeconfig(text: string): boolean {
+  return text.includes('apiVersion') && text.includes('clusters:') && text.includes('server:');
+}
+
 export function AddClusterDialog({ open, onOpenChange, onCreated }: AddClusterDialogProps): React.ReactElement {
   const t = useT();
   const queryClient = useQueryClient();
+  const [mode, setMode] = React.useState<ClusterConnectionMode>('direct');
   const [name, setName] = React.useState('');
   const [kubeconfig, setKubeconfig] = React.useState('');
+  const [provider, setProvider] = React.useState('');
   const [nameError, setNameError] = React.useState<string | null>(null);
   const [kubeconfigError, setKubeconfigError] = React.useState<string | null>(null);
 
+  React.useEffect(() => {
+    if (open) return;
+    // Reopening starts clean: a half-typed kubeconfig from the previous attempt is not
+    // something the reader wants to be handed back.
+    setMode('direct');
+    setName('');
+    setKubeconfig('');
+    setProvider('');
+    setNameError(null);
+    setKubeconfigError(null);
+  }, [open]);
+
   const mutation = useMutation({
-    mutationFn: (input: { name: string; kubeconfig: string }) => clusterImportApi(apiClient).import(input),
+    mutationFn: async (input: { name: string; mode: ClusterConnectionMode; kubeconfig?: string; provider?: string }) => {
+      const api = clusterImportApi(apiClient);
+      if (input.mode === 'direct') {
+        /*
+         * Validate before creating. The old console does the same and it is the
+         * difference between "this kubeconfig cannot reach the cluster" and a cluster
+         * object that sits not-ready forever with no explanation.
+         *
+         * A validation endpoint that is missing (older/newer installations) must not make
+         * the feature unusable: only the endpoint's actual refusal stops the create.
+         */
+        try {
+          await api.validate(input);
+        } catch (error) {
+          if (error instanceof ApiError && error.isNotFound) {
+            // No validation endpoint on this installation — carry on.
+          } else {
+            throw error;
+          }
+        }
+      }
+      await api.import(input);
+    },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['clusters'] });
       onCreated?.();
       onOpenChange(false);
-      setName('');
-      setKubeconfig('');
     },
   });
 
@@ -52,14 +99,19 @@ export function AddClusterDialog({ open, onOpenChange, onCreated }: AddClusterDi
     const trimmedConfig = kubeconfig.trim();
     const invalidName = !NAME_PATTERN.test(trimmedName);
     setNameError(invalidName ? t('cluster.add.nameInvalid') : null);
-    // A kubeconfig always carries these three keys; checking for them catches a paste of
-    // the wrong document without pretending to parse YAML here.
-    const looksLikeKubeconfig =
-      trimmedConfig.includes('apiVersion') && trimmedConfig.includes('clusters:') && trimmedConfig.includes('server:');
-    setKubeconfigError(looksLikeKubeconfig ? null : t('cluster.add.kubeconfigInvalid'));
-    if (invalidName || !looksLikeKubeconfig) return;
-    mutation.mutate({ name: trimmedName, kubeconfig: trimmedConfig });
-  }, [kubeconfig, mutation, name, t]);
+
+    // Proxy mode has no kubeconfig to check: the agent dials out.
+    const configIsValid = mode === 'proxy' || looksLikeKubeconfig(trimmedConfig);
+    setKubeconfigError(configIsValid ? null : t('cluster.add.kubeconfigInvalid'));
+
+    if (invalidName || !configIsValid) return;
+    mutation.mutate({
+      name: trimmedName,
+      mode,
+      ...(mode === 'direct' ? { kubeconfig: trimmedConfig } : {}),
+      ...(provider.trim() ? { provider: provider.trim() } : {}),
+    });
+  }, [kubeconfig, mode, mutation, name, provider, t]);
 
   const requestError = mutation.error
     ? mutation.error instanceof ApiError && mutation.error.isPermission
@@ -79,12 +131,44 @@ export function AddClusterDialog({ open, onOpenChange, onCreated }: AddClusterDi
             {t('common.cancel')}
           </Button>
           <Button variant="primary" onClick={submit} loading={mutation.isPending} {...actionProps('clusters:add-submit')}>
-            {t('common.confirm')}
+            {mutation.isPending && mode === 'direct' ? t('cluster.add.validating') : t('common.confirm')}
           </Button>
         </div>
       }
     >
       <div className="flex flex-col gap-3">
+        <fieldset className="flex flex-col gap-1 text-xs text-ai-fg-secondary">
+          <legend className="mb-1">{t('cluster.add.mode')}</legend>
+          <div className="flex gap-2" role="radiogroup" aria-label={t('cluster.add.mode')}>
+            {(
+              [
+                { value: 'direct', label: t('cluster.add.modeDirect') },
+                { value: 'proxy', label: t('cluster.add.modeProxy') },
+              ] as const
+            ).map((option) => (
+              <label
+                key={option.value}
+                className={`flex cursor-pointer items-center gap-1.5 rounded-ai-md border px-3 py-2 text-sm ${
+                  mode === option.value
+                    ? 'border-ai-accent bg-ai-surface-2 text-ai-fg'
+                    : 'border-ai-line text-ai-fg-secondary'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="cluster-add-mode"
+                  value={option.value}
+                  checked={mode === option.value}
+                  onChange={() => setMode(option.value)}
+                  data-ai-id={`clusters:add-mode:${option.value}`}
+                />
+                {option.label}
+              </label>
+            ))}
+          </div>
+          <span className="text-[11px] text-ai-fg-muted">{t('cluster.add.modeDesc')}</span>
+        </fieldset>
+
         <label className="flex flex-col gap-1 text-xs text-ai-fg-secondary" htmlFor="ai-field-cluster-name">
           {t('cluster.add.name')}
           <input
@@ -99,22 +183,48 @@ export function AddClusterDialog({ open, onOpenChange, onCreated }: AddClusterDi
           {nameError ? <span className="text-[11px] text-ai-danger" role="alert">{nameError}</span> : null}
         </label>
 
-        <label className="flex flex-col gap-1 text-xs text-ai-fg-secondary" htmlFor="ai-field-cluster-kubeconfig">
-          {t('cluster.add.kubeconfig')}
-          <Textarea
-            id="ai-field-cluster-kubeconfig"
-            value={kubeconfig}
-            onChange={(event) => setKubeconfig(event.target.value)}
-            rows={8}
-            className="font-mono text-[11px]"
-            placeholder="apiVersion: v1&#10;clusters:&#10;- cluster:&#10;    server: https://…"
-            {...actionProps('clusters:add-kubeconfig')}
+        <label className="flex flex-col gap-1 text-xs text-ai-fg-secondary" htmlFor="ai-field-cluster-provider">
+          {t('cluster.edit.provider')}
+          <input
+            id="ai-field-cluster-provider"
+            value={provider}
+            onChange={(event) => setProvider(event.target.value)}
+            className="h-9 rounded-ai-md border border-ai-line bg-ai-surface px-2 text-sm text-ai-fg"
+            placeholder="Kube AI Hub"
+            {...actionProps('clusters:add-provider')}
           />
-          <span className="text-[11px] text-ai-fg-muted">{t('cluster.add.kubeconfigHint')}</span>
-          {kubeconfigError ? (
-            <span className="text-[11px] text-ai-danger" role="alert">{kubeconfigError}</span>
-          ) : null}
+          <span className="text-[11px] text-ai-fg-muted">{t('cluster.edit.providerHint')}</span>
         </label>
+
+        {mode === 'direct' ? (
+          <label className="flex flex-col gap-1 text-xs text-ai-fg-secondary" htmlFor="ai-field-cluster-kubeconfig">
+            {t('cluster.add.kubeconfig')}
+            <Textarea
+              id="ai-field-cluster-kubeconfig"
+              value={kubeconfig}
+              onChange={(event) => setKubeconfig(event.target.value)}
+              rows={8}
+              className="font-mono text-[11px]"
+              placeholder="apiVersion: v1&#10;clusters:&#10;- cluster:&#10;    server: https://…"
+              {...actionProps('clusters:add-kubeconfig')}
+            />
+            <span className="text-[11px] text-ai-fg-muted">{t('cluster.add.kubeconfigHint')}</span>
+            {kubeconfigError ? (
+              <span className="text-[11px] text-ai-danger" role="alert">{kubeconfigError}</span>
+            ) : null}
+          </label>
+        ) : (
+          <div
+            className="rounded-ai-md border border-ai-line bg-ai-surface-2/40 p-3 text-xs text-ai-fg-secondary"
+            data-ai-id="clusters:add-proxy-tip"
+          >
+            {t('cluster.add.proxyTip')}
+          </div>
+        )}
+
+        {mode === 'direct' ? (
+          <p className="text-[11px] text-ai-fg-muted">{t('cluster.add.directTip')}</p>
+        ) : null}
 
         {requestError ? (
           <p className="text-xs text-ai-danger" role="alert" data-ai-id="clusters:add-error">

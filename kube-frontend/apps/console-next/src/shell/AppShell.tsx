@@ -7,6 +7,8 @@ import { useAuth } from '@/shell/AuthProvider';
 import { SharedChunkWarmer } from '@/shell/preload';
 import { areasFor, areaPages, areaOfPage, type Area } from '@/areas/registry';
 import { projectPageSegment } from '@/areas/scope';
+import { ClusterSwitcher } from '@/shell/ClusterSwitcher';
+import { readLastCluster } from '@/lib/lastCluster';
 
 /**
  * Scope carried by every console route.
@@ -410,6 +412,7 @@ function readStoredCollapsed(): boolean {
  */
 export function AppShell({ children }: { children: React.ReactNode }): React.ReactElement {
   const t = useT();
+  const { user } = useAuth();
   const { locale, setLocale } = useLocale();
   const isMobile = useIsMobile();
   const [drawerOpen, setDrawerOpen] = React.useState(false);
@@ -468,8 +471,14 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
           cluster: decodeURIComponent(match[2]),
           namespace: decodeURIComponent(match[3]),
         }
-      : DEFAULT_SCOPE;
-  }, [location]);
+      : {
+          ...DEFAULT_SCOPE,
+          // A cluster console URL names its cluster; everything else falls back to the one
+          // the reader was last in, then to the default. Without this the header's 集群管理
+          // entry sends everyone to `host` even after they switched away from it.
+          cluster: readLastCluster(user?.name ?? '') || DEFAULT_SCOPE.cluster,
+        };
+  }, [location, user?.name]);
 
   /*
    * The active sidebar row is the area the current page belongs to, resolved from
@@ -491,10 +500,38 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
     return { cluster: decodeURIComponent(match[1]), segment: match[2] ? decodeURIComponent(match[2]) : '' };
   }, [location]);
 
+  /**
+   * The platform's own pages — the fleet list and the two platform areas.
+   *
+   * They are neither a project nor one cluster, so neither of those menus belongs there.
+   * The old console gives `/access` and `/settings` a platform sidebar and leaves
+   * `/clusters` full width; this app shows the platform menu on all three, so a reader
+   * always has a way to the sibling platform pages instead of a project menu that would
+   * silently move them into `default`.
+   */
+  const platformChildren = React.useMemo(
+    () => MODULES.find((module) => module.key === 'platform')?.children ?? [],
+    [],
+  );
+
+  const platformScope = React.useMemo(() => {
+    if (clusterPath) return false;
+    if (location === `${BASE}/clusters` || location === `${BASE}/clusters/`) return true;
+    return [`${BASE}/access`, `${BASE}/settings`, `${BASE}/apps-manage`].some(
+      (root) => location === root || location.startsWith(`${root}/`),
+    );
+  }, [clusterPath, location]);
+
+  const platformActiveChild = platformScope
+    ? platformChildren.find((child) => childMatches(child, location, scope))
+    : undefined;
+
   const activeArea = clusterPath ? areaOfPage('cluster', clusterPath.segment) : areaOfPage('project', projectPageSegment(location));
   const activeKey = clusterPath
     ? (clusterPath.segment || activeArea?.defaultPage || '')
-    : activeArea?.key;
+    : platformScope
+      ? platformActiveChild?.key
+      : activeArea?.key;
 
   /**
    * Sidebar rows: one per project area, with the drawer closing on navigation.
@@ -515,6 +552,25 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
         })),
       );
     }
+    if (platformScope) {
+      /*
+       * The platform entries, taken from the header's own menu rather than a second list:
+       * 集群管理 / 配置字典 / 访问控制 / 应用商店管理 / 平台设置. `childMatches` is the same
+       * comparison the header uses, so the two surfaces never disagree about the current
+       * page.
+       */
+      return platformChildren.map((child) => ({
+        key: child.key,
+        label: (
+          <span className="flex items-center gap-2">
+            <Icon name={child.icon} size={14} />
+            {t(child.labelKey)}
+          </span>
+        ),
+        href: childHref(child, scope),
+        onClick: () => setDrawerOpen(false),
+      }));
+    }
     return areasFor('project').map((area) => {
       const entry = areaEntry(area, scope);
       return {
@@ -525,7 +581,7 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
         onClick: () => setDrawerOpen(false),
       };
     });
-  }, [clusterPath, scope, t]);
+  }, [clusterPath, location, platformChildren, platformScope, scope, t]);
 
   const localeButton = (
     <button
@@ -709,6 +765,9 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
         {isMobile ? (
           <Drawer open={drawerOpen} onOpenChange={setDrawerOpen} title={t('app.name')} side="left">
             <div className="flex flex-col gap-3">
+              {clusterPath ? (
+                <ClusterSwitcher current={clusterPath.cluster} />
+              ) : null}
               <div className="flex flex-col gap-1">
                 <Menu items={sidebarItems} onNavigate={onNavigate} {...(activeKey ? { activeKey } : {})} />
               </div>
@@ -725,6 +784,16 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
             )}
           >
             <nav aria-label={t('nav.primary')} className="flex min-w-0 flex-1 flex-col gap-3 overflow-y-auto px-2 py-3">
+              {clusterPath ? (
+                /*
+                 * The old console opens the cluster console with this block: the cluster
+                 * you are in, and a way to the others. It sits above the menu because it
+                 * scopes everything below it.
+                 */
+                <div className="border-b border-ai-line pb-2">
+                  <ClusterSwitcher current={clusterPath.cluster} collapsed={collapsed} />
+                </div>
+              ) : null}
               <Menu
                 items={sidebarItems}
                 collapsed={collapsed}

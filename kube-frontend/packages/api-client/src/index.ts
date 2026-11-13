@@ -264,7 +264,12 @@ export {
   clusterApi,
   clusterMetricsApi,
   clusterWriteApi,
+  clusterAgentApi,
+  CLUSTER_GROUPS,
+  CLUSTER_PROVIDERS,
   clusterImportApi,
+  clusterImportBody,
+  platformConfigApi,
   clustersApi,
   componentMetricsApi,
   customResourcesApi,
@@ -276,7 +281,9 @@ export {
   toMetricValues,
 } from './cluster';
 export type {
+  ClusterConnectionMode,
   ClusterDetail,
+  ClusterGroup,
   ClusterModule,
   ClusterSummary,
   ClustersApi,

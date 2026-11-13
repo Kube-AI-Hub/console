@@ -13,6 +13,7 @@ from pages.resource_detail import ResourceDetailPage
 from pages.login import LoginPage
 from pages.configmaps import ConfigMapsPage
 from pages.cluster_configmaps import ClusterConfigMapsPage
+from pages.cluster_fleet import ClusterFleetPage
 from pages.secrets import SecretsPage
 from pages.serviceaccounts import ServiceAccountsPage
 from pages.access_control import AccessControlPage
@@ -555,6 +556,12 @@ def access_control_page(page, ui_config, session_token):
 def cluster_management_page(page, ui_config, session_token):
     """集群管理（节点、项目）。集群作用域：地址里没有 workspace 与项目段。"""
     return ClusterManagementPage(page, app_base(ui_config), api=ApiClient(app_base(ui_config), session_token))
+
+
+@pytest.fixture
+def cluster_fleet_page(page, ui_config, session_token):
+    """集群列表与切换器。平台作用域：地址里没有 workspace 与 cluster 段。"""
+    return ClusterFleetPage(page, app_base(ui_config), api=ApiClient(app_base(ui_config), session_token))
 
 
 @pytest.fixture

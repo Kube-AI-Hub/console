@@ -161,8 +161,9 @@ generate_case_docs.py → check_docs.py --strict → parity_check.py
 
 ### 5.2 多集群：集群注册
 
-列表已迁移（§17）。**注册**新集群未做：需要平台侧注册接口与 kubeconfig 校验，当前只有 1 个集群对象，
-且没有第二个集群可以用来验证「注册后能被列表看到、能被打开」。
+**已由并行会话完成**（提交 `c8815dc16`：集群列表页加「添加集群」，用 kubeconfig 导入）。
+本会话上一轮交付了列表页本身（§17），该提交在它之上加了导入入口。
+未验证的部分：导入成功后成员集群是否真正可用（需要第二个真实集群）。
 
 ### 5.3 告警规则的批量导入/导出
 
@@ -1259,3 +1260,53 @@ assert "8 位" in dialog.inner_text()
 
 **验证**：全量 E2E **153 通过 / 3 跳过 / 0 失败**（4 分 09 秒）；文档门禁 0 错；一致性核对仅剩
 并行会话的 `logging`。
+
+### 48.27 集群管理与切换：对齐老 console 的三个交互
+
+#### 1) 添加集群支持两种连接方式
+
+老 console 的 `cluster.add` 有两条路径（KubeKey 新建 / 导入），导入又分两种连接方式：
+
+| 方式 | 对象形态 | 行为 |
+| --- | --- | --- |
+| 直接连接 `direct` | `spec.connection = {type: direct, kubeconfig: base64}` | 创建前调 `POST /kapis/cluster.kubesphere.io/v1alpha1/clusters/validation` 校验连通性 |
+| 代理连接 `proxy` | `spec.connection = {type: proxy}`，**无 kubeconfig 键** | 不做校验；成员集群需部署 agent |
+
+**校验顺序是重点**：老 console 先 `validate` 再 `create`。实测这个端点要求 base64（传原始 YAML 返回
+`illegal base64 data`），且完整但不可达的 kubeconfig 会在 10 秒后返回连接错误——用例据此断言
+「对话框保持打开 + 对象未被创建」，而不是期望它成功。
+
+**环境限制**：本平台未部署 tower 代理组件，`clusters/<id>/agent/deployment` 返回
+`cannot generate agent deployment yaml ... because tower...`。因此：
+- proxy 模式仍可创建对象（`type=proxy`、无 kubeconfig），但会长期未就绪；
+- 概览页显示接入面板并**据实说明**「本平台可能未部署代理组件」，而不是假装在加载。
+
+#### 2) 集群列表支持编辑信息
+
+行操作「编辑信息」改四项：别名（`kubesphere.io/alias-name`）、标签（`cluster.kubesphere.io/group`）、
+供应商（`spec.provider`）、描述（`kubesphere.io/description`）；名称只读。
+
+**清空必须发 `null`**：merge patch 里「键缺失 = 不修改」，这是本项目反复踩过的坑；用例专门测了
+清空后注解键消失。列表名称列改为「别名优先、副行对象名」，与老 console 的 `showNameAndAlias` 一致。
+
+顺带修了一个自己写错的定位：名称列一开始用 `td` 序号取，取到的是状态列；改用 `data-ai-id`。
+
+#### 3) 集群切换 + 侧栏按作用域
+
+**不把列表改成弹窗**——老 console 两者都有：列表承担增删改与深链接，切换器承担「已在集群里」的快速跳转。
+
+| 路径 | 侧栏 |
+| --- | --- |
+| `/clusters/<id>/…` | 顶部**集群切换器** + 集群菜单 |
+| `/clusters`、`/access/*`、`/settings/*` | 平台导航（集群管理/配置字典/访问控制/应用商店管理/平台设置） |
+| 项目页 | 项目区（不变） |
+
+切换器读 `configz.multicluster` 判断是否多集群；选择后跳到目标集群的 `overview`（与老 console 的
+`enterCluster` 一致），并记住选择（`kube-frontend:last-cluster:<用户名>`），用于构造无集群段的链接。
+单集群安装不显示切换入口，且 `/clusters` 直接进入该集群概览。
+
+**踩到的一个坑**：`Menu` 只认 `activeKey`，给条目传 `checked` 不会产生 `aria-current`——平台导航
+一开始完全没有高亮，改为把匹配项折进 `activeKey`。
+
+**验证**：全量 E2E **156 通过 / 3 跳过 / 0 失败**（3 分 59 秒）；集群管理套件 20 通过；
+架构契约 552；api-client 178；文档门禁 0 错。

@@ -10,12 +10,25 @@ pytestmark = pytest.mark.ui
 
 CLUSTERS_WRITE = "/apis/cluster.kubesphere.io/v1alpha1/clusters"
 
+#: Complete but unreachable. The validation endpoint parses it and then fails to connect,
+#: which is the realistic case: a kubeconfig that is well-formed but points nowhere.
 KUBECONFIG = """apiVersion: v1
 kind: Config
+current-context: member
 clusters:
 - cluster:
     server: https://10.0.0.9:6443
+    insecure-skip-tls-verify: true
   name: member
+contexts:
+- context:
+    cluster: member
+    user: member
+  name: member
+users:
+- name: member
+  user:
+    token: dummy
 """
 
 
@@ -32,6 +45,7 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_ADD_CLUSTER_01(cluster_managemen
     expect(surface).to_be_visible(timeout=30_000)
     expect(surface).not_to_have_attribute("data-ai-state", "loading", timeout=60_000)
 
+    proxy_names: list[str] = []
     try:
         ui.page.locator('[data-ai-id="clusters:add"]').click()
         dialog = ui.page.get_by_role("dialog")
@@ -51,22 +65,45 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_ADD_CLUSTER_01(cluster_managemen
         expect(dialog).to_contain_text("不像 kubeconfig", timeout=15_000)
         assert ui.api.request("GET", f"{CLUSTERS_WRITE}/{name}")[0] != 200, "非法内容竟创建了集群"
 
+        # A well-formed kubeconfig that cannot be reached is refused **before** the object
+        # is created: the platform validates the connection first. Creating it anyway would
+        # leave a cluster in the list that can never become ready.
         dialog.locator("#ai-field-cluster-kubeconfig").fill(KUBECONFIG)
         ui.page.locator('[data-ai-id="clusters:add-submit"]').click()
-        expect(ui.page.get_by_role("dialog")).to_have_count(0, timeout=30_000)
-        expect(surface.locator(f'[data-ai-row="{name}"]')).to_have_count(1, timeout=30_000)
+        expect(dialog).to_be_visible()
+        expect(dialog.locator('[data-ai-id="clusters:add-error"]')).to_be_visible(timeout=60_000)
+        assert ui.api.request("GET", f"{CLUSTERS_WRITE}/{name}")[0] != 200, "校验失败的集群竟被创建"
+        ui.page.keyboard.press("Escape")
+        ui.page.wait_for_timeout(500)
 
-        status, body = ui.api.request("GET", f"{CLUSTERS_WRITE}/{name}")
-        assert status == 200, (status, body)
-        connection = ((body.get("spec") or {}).get("connection")) or {}
-        assert connection.get("type") == "direct", connection
-        encoded = connection.get("kubeconfig") or ""
-        # The field is base64 in the object; sending the YAML as-is creates a cluster that
-        # never connects, which is what the old console's `safeBtoa` prevents.
-        assert "apiVersion" in base64.b64decode(encoded).decode("utf-8", "ignore"), encoded[:40]
-        assert (body.get("spec") or {}).get("joinFederation") is True, body.get("spec")
+        # ---- 代理连接: no kubeconfig at all ----
+        #
+        # The two modes differ in exactly one visible way, and it is the one that decides
+        # how the member cluster joins: a proxy cluster carries no kubeconfig, because the
+        # agent dials out instead.
+        proxy_name = f"tc-e2e-proxy-{uuid.uuid4().hex[:6]}"
+        proxy_names.append(proxy_name)
+        ui.page.locator('[data-ai-id="clusters:add"]').click()
+        proxy_dialog = ui.page.get_by_role("dialog")
+        expect(proxy_dialog).to_be_visible(timeout=20_000)
+        proxy_dialog.locator("#ai-field-cluster-name").fill(proxy_name)
+        proxy_dialog.locator('[data-ai-id="clusters:add-mode:proxy"]').check()
+        # The kubeconfig field is gone in this mode; a leftover textarea would be a form
+        # that collects something it will not send.
+        expect(proxy_dialog.locator("#ai-field-cluster-kubeconfig")).to_have_count(0)
+        expect(proxy_dialog.locator('[data-ai-id="clusters:add-proxy-tip"]')).to_be_visible()
+        ui.page.locator('[data-ai-id="clusters:add-submit"]').click()
+        expect(ui.page.get_by_role("dialog")).to_have_count(0, timeout=30_000)
+
+        proxy_status, proxy_body = ui.api.request("GET", f"{CLUSTERS_WRITE}/{proxy_name}")
+        assert proxy_status == 200, (proxy_status, proxy_body)
+        proxy_connection = ((proxy_body.get("spec") or {}).get("connection")) or {}
+        assert proxy_connection.get("type") == "proxy", proxy_connection
+        assert "kubeconfig" not in proxy_connection, proxy_connection
         screenshot(ui.page, "cluster-add")
     finally:
         # Unconditional: a half-finished import would sit in the fleet list as a cluster
         # that never becomes ready.
         ui.api.request("DELETE", f"{CLUSTERS_WRITE}/{name}")
+        for proxy_name in proxy_names:
+            ui.api.request("DELETE", f"{CLUSTERS_WRITE}/{proxy_name}")

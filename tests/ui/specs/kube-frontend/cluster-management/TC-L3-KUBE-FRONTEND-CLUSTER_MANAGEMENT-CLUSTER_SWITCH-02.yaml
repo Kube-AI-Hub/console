@@ -1,0 +1,32 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_SWITCH-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: cluster-switch
+title: 侧栏按作用域切换 · 平台/集群
+entry_url: '{BASE_URL}/kube-frontend/clusters'
+prd: prd/kube-frontend/cluster-management/cluster-switch.md
+design: design/kube-frontend/cluster-management/cluster-switch.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_SWITCH-02
+
+story:
+- US2
+
+product: 平台页侧栏是平台导航且高亮当前项；集群页侧栏是集群菜单并显示切换器；两处都不出现项目区条目。
+preconditions:
+- 已登录，且有平台管理权限
+steps:
+- 访问 /clusters，读取侧栏条目与高亮项
+- 访问 /access/users，读取高亮项
+- 访问 /clusters/<集群>/nodes，读取侧栏条目、高亮项与切换器
+expected:
+- 平台页侧栏含 集群管理/访问控制/平台设置，不含 工作负载/存储/项目设置
+- /access/users 高亮「访问控制」
+- 集群页侧栏含 集群概览/节点/项目/配置字典，不含 工作负载，高亮「节点」，切换器可见
+troubleshoot:
+- 高亮错位：Menu 只认 activeKey，条目上的 checked 不生效
+update_automation:
+- 侧栏结构变化时改 pages/cluster_fleet.py 的 side_nav / active_nav
