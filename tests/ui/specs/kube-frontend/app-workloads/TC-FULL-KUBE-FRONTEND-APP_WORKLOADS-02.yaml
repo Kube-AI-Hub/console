@@ -1,0 +1,39 @@
+id: TC-FULL-KUBE-FRONTEND-APP_WORKLOADS-02
+level: 2
+suite: full
+module: kube-frontend
+submodule: app-workloads
+feature: page
+title: 应用负载 · 停止与启动的状态化操作
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/deployments'
+prd: prd/kube-frontend/app-workloads/_index.md
+design: design/kube-frontend/app-workloads/_index.md
+
+covers:
+- AC-FULL-KUBE-FRONTEND-APP_WORKLOADS-03
+- AC-FULL-KUBE-FRONTEND-APP_WORKLOADS-04
+
+story:
+- US1
+
+product: 运行中的控制器提供「停止」，已停止的提供「启动」；定时任务可暂停与恢复。
+preconditions:
+- 由夹具创建 tc-e2e- 前缀的部署（replicas=2）与定时任务，用例结束无条件删除
+- 已登录，且在 host 集群的 default 项目空间
+steps:
+- 打开部署列表并定位运行中的部署，读取其行操作
+- 点「停止」并确认，用 API 核对 replicas
+- 重新加载并定位同一部署，读取其行操作
+- 点「启动」并确认，用 API 核对 replicas
+- 打开定时任务列表，对该任务点「暂停/启动」，用 API 核对 spec.suspend
+expected:
+- 运行中的部署行操作含「停止」且不含「启动」
+- 停止后 replicas 为 0
+- 已停止的部署行操作只含「启动」
+- 启动后 replicas 为 1
+- 定时任务 suspend 被取反
+troubleshoot:
+- 两个操作都在列表出现时说明 visible 谓词失效
+- replicas 未变化时确认写的是 merge patch 的 spec.replicas
+update_automation:
+- 行操作变化时改 pages/app_workloads.py

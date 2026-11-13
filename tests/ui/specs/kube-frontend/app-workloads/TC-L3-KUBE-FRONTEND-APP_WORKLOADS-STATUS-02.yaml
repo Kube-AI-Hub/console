@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-STATUS-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: status
+title: 状态派生 · Pending 容器组显示等待中
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/pods"
+prd: prd/kube-frontend/app-workloads/status.md
+design: design/kube-frontend/app-workloads/status.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-STATUS-02
+
+story:
+- US1
+
+product: phase 为 Pending 的容器组，列表状态显示「等待中」。
+preconditions:
+- 由用例的 fixture 创建一个带不可满足 nodeSelector 的容器组，用例结束后无条件删除
+- 已登录，且在 host 集群的 default 项目空间
+steps:
+- 等待 API 报告容器组 phase=Pending
+- 打开容器组列表
+- 读取目标行的状态徽章
+expected:
+- 状态徽章显示「等待中」
+- 该行在容器组列表里可见
+troubleshoot:
+- 先确认容器组 phase 确实是 Pending；Running 且容器未就绪也映射为等待中
+- 徽章为「已终止」时检查 phase 是否为 Succeeded/Failed
+update_automation:
+- 文案变化时改 packages/locales/src/index.ts
+- 状态派生变化时改 packages/api-client/src/workloads.ts 与对应单测

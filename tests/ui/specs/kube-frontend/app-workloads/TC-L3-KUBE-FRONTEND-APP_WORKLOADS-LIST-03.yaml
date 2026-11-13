@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: list
+title: 工作负载列表 · 空态
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/ingresses"
+prd: prd/kube-frontend/app-workloads/list.md
+design: design/kube-frontend/app-workloads/list.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-03
+
+story:
+- US1
+
+product: 项目内没有该类型对象时，列表显示空态标题与说明，而不是空白表格。
+preconditions:
+- 已登录，且在 host 集群的 default 项目空间
+- 该类型（应用路由）在 default 项目里没有对象；若已有对象，用例会明确跳过而不是伪造空态
+steps:
+- 用 API 确认应用路由总数为 0
+- 打开应用路由列表
+- 读取主区 state、空态标题与说明
+expected:
+- 主区 data-ai-state 为 empty
+- 显示「暂无应用路由」与「创建应用路由后，这里会列出它们。」
+troubleshoot:
+- 先确认该类型确实没有对象；有对象时这个用例应跳过
+- 文案缺失时看描述符的 emptyTitleKey / emptyDescriptionKey
+update_automation:
+- 文案变化时改 packages/locales/src/index.ts
+- 空态结构变化时改 pages/app_workloads.py

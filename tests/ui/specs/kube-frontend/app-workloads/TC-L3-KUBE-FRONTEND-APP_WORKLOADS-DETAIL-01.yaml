@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: detail
+title: 负载详情 · 六项属性与容器镜像
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/deployments"
+prd: prd/kube-frontend/app-workloads/detail.md
+design: design/kube-frontend/app-workloads/detail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-01
+
+story:
+- US1
+
+product: 点击列表名称进入详情，属性块展示集群、项目、应用、副本、创建时间、创建者，并列出容器镜像。
+preconditions:
+- 由用例的 fixture 创建一个带固定镜像的 tc-e2e- 部署，用例结束后无条件删除
+- 已登录，且在 host 集群的 default 项目空间
+steps:
+- 打开部署列表并点击目标部署的名称
+- 等待详情主区就绪
+- 读取属性标签、集群/项目/副本的值与容器镜像
+expected:
+- URL 以 /deployments/<name> 结尾
+- 属性标签依次为 集群、项目、应用、副本、创建时间、创建者
+- 集群为 host，项目为 default，副本为 0/1
+- 容器镜像块出现且包含创建时指定的镜像
+troubleshoot:
+- 详情显示成列表时先看路由文件夹的 route.tsx 是否渲染 Outlet
+- 属性缺失时看 WorkloadDetailPage 的 Row 是否仍在渲染
+update_automation:
+- 文案变化时改 packages/locales/src/index.ts
+- 属性顺序变化时改 pages/app_workloads.py

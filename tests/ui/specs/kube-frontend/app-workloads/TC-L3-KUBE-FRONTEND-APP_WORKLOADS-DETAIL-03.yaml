@@ -1,0 +1,33 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: detail
+title: 负载详情 · 容器组与服务的专属属性
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/spaces/pods'
+prd: prd/kube-frontend/app-workloads/detail.md
+design: design/kube-frontend/app-workloads/detail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-03
+
+story:
+- US1
+
+product: 容器组详情显示节点、IP、QoS 与重启次数；服务详情显示类型、虚拟 IP、选择器与会话亲和性。
+preconditions:
+- 已登录，且在 host 集群的 spaces 项目空间（该项目有容器组与服务）
+steps:
+- 打开容器组列表并进入任一容器组的详情
+- 读取属性名
+- 打开服务列表并进入任一服务的详情
+- 读取属性名
+expected:
+- 容器组详情的属性含 状态、所在节点、容器组 IP、节点 IP、QoS 等级、重启次数
+- 服务详情的属性含 服务类型、虚拟 IP、外部地址、选择器、会话亲和性
+troubleshoot:
+- 属性缺失时看 api-client 的 kindAttributes 是否覆盖该 kind
+- 值为空显示 - 属正常（例如未分配外部地址）
+update_automation:
+- 属性增减时改 prd/design 的字段表与 kindAttributes

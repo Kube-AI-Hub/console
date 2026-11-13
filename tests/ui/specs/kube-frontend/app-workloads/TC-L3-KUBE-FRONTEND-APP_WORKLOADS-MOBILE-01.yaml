@@ -1,0 +1,33 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-MOBILE-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: mobile
+title: 移动端 · 新功能区页面可横向容纳且触摸目标达标
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/spaces/deployments'
+prd: prd/kube-frontend/app-workloads/_index.md
+design: design/kube-frontend/app-workloads/_index.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-MOBILE-01
+
+story:
+- US1
+
+product: 375px 宽度下，后续迁移的各功能区页面不出现横向滚动，且可见的按钮与链接不小于 24×24。
+preconditions:
+- 已登录
+- 各页面在 375×812 视口下访问
+steps:
+- 依次打开部署、存储卷、项目基本信息、集群系统组件、平台用户页
+- 读取 document 宽度与窗口宽度
+- 遍历可见的 button 与带 data-ai-id 的链接，读取其宽高
+expected:
+- 所有页面 document 宽度不超过窗口宽度（无横向滚动）
+- 没有小于 24×24 的可见交互目标
+troubleshoot:
+- 出现横向滚动时检查表格容器是否 overflow-x-auto
+- 触摸目标过小：页签应为 h-11 sm:h-9、排序按钮应 min-h-11 sm:min-h-0
+update_automation:
+- 新增功能区时把页面加入 checks 列表

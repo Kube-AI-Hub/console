@@ -1,0 +1,34 @@
+id: TC-FULL-KUBE-FRONTEND-APP_WORKLOADS-04
+level: 2
+suite: full
+module: kube-frontend
+submodule: app-workloads
+feature: page
+title: 应用负载 · 详情的扩缩容与编辑信息
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/deployments'
+prd: prd/kube-frontend/app-workloads/_index.md
+design: design/kube-frontend/app-workloads/_index.md
+
+covers:
+- AC-FULL-KUBE-FRONTEND-APP_WORKLOADS-06
+
+story:
+- US1
+
+product: 部署详情提供编辑信息与扩缩容；改动落到对象上。
+preconditions:
+- 由夹具创建 tc-e2e- 前缀的部署（replicas=1），用例结束无条件删除
+- 已登录，且在 host 集群的 default 项目空间
+steps:
+- 打开该部署详情，读取操作按钮
+- 点「编辑信息」填写别名并确认，用 API 核对注解
+- 点「扩缩容」填写 3 并确认，用 API 核对 replicas
+expected:
+- 详情操作依次含 编辑信息、扩缩容、重新部署、编辑 YAML、删除
+- kubesphere.io/alias-name 等于填写内容
+- spec.replicas 为 3
+troubleshoot:
+- 扩缩容无效果时确认写的是 merge patch 的 spec.replicas
+- 编辑信息 405 时确认 PUT 目标是对象地址而不是集合地址
+update_automation:
+- 详情页操作变化时改 pages/app_workloads.py

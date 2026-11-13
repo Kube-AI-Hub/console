@@ -1,0 +1,41 @@
+id: TC-FULL-KUBE-FRONTEND-APP_WORKLOADS-01
+level: 2
+suite: full
+module: kube-frontend
+submodule: app-workloads
+feature: page
+title: 应用负载 · 区域页签切换与工作区上下文
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/deployments"
+prd: prd/kube-frontend/app-workloads/_index.md
+design: design/kube-frontend/app-workloads/_index.md
+
+covers:
+- AC-FULL-KUBE-FRONTEND-APP_WORKLOADS-01
+- AC-FULL-KUBE-FRONTEND-APP_WORKLOADS-02
+
+story:
+- US1
+- US2
+- US3
+
+product: 应用负载是一个功能区：八个页签共用工作区栏，页签切换是客户端跳转，不刷新文档。
+preconditions:
+- 已登录，且在 host 集群的 default 项目空间
+- 部署列表可以没有对象；空态同样算列表已出现
+steps:
+- 打开部署列表，记录页签、工作区栏与页面状态
+- 依次点击容器组、服务、部署页签
+- 每次切换后读取 URL、当前页签的 aria-current 与页签文案
+- 整个切换过程监听 document 类型的请求
+expected:
+- 部署列表出现（有数据或空态），页签高亮对应当前路由
+- URL 依次落到 …/pods、…/services、…/deployments
+- 每次切换期间 document 请求数为 0
+- 工作区栏始终显示 default 项目
+- 最终回到部署列表，页签仍高亮部署
+troubleshoot:
+- 页签切换出现 document 请求时先看 AreaTabs 的点击是否被 preventDefault
+- 工作区栏为空时先看项目列表请求是否返回 200
+update_automation:
+- 文案变化时改 packages/locales/src/index.ts
+- 句柄变化时改 pages/app_workloads.py

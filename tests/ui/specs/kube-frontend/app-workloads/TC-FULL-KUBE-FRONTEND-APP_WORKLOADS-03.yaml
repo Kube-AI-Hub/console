@@ -1,0 +1,35 @@
+id: TC-FULL-KUBE-FRONTEND-APP_WORKLOADS-03
+level: 2
+suite: full
+module: kube-frontend
+submodule: app-workloads
+feature: page
+title: 应用负载 · 创建部署与名称校验
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/deployments'
+prd: prd/kube-frontend/app-workloads/_index.md
+design: design/kube-frontend/app-workloads/_index.md
+
+covers:
+- AC-FULL-KUBE-FRONTEND-APP_WORKLOADS-05
+
+story:
+- US1
+
+product: 列表头部「创建」打开表单，填写名称/镜像/副本数即可创建；非法名称被拦下。
+preconditions:
+- 已登录，且在 host 集群的 default 项目空间
+- 用例自行创建的部署在结束时无条件删除
+steps:
+- 打开部署列表并点「创建」
+- 输入非法名称（含大写），点确认
+- 改为合法名称与镜像、副本数 2，点确认
+- 用 API 核对对象
+expected:
+- 点「创建」后表单出现且名称为空
+- 非法名称时提交被拦下并提示
+- 提交后对象存在，replicas 为 2，镜像等于填写值
+troubleshoot:
+- 表单不出现时确认创建按钮是 primaryAction 而不是批量操作
+- 提交无响应时看表单校验是否把必填字段判空
+update_automation:
+- 字段变化时改 pages/app_workloads.py

@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-REDEPLOY-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: redeploy
+title: 重新部署 · 加载对话框与 restartedAt 注解
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/deployments"
+prd: prd/kube-frontend/app-workloads/redeploy.md
+design: design/kube-frontend/app-workloads/redeploy.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-REDEPLOY-01
+
+story:
+- US1
+
+product: 详情页点「重新部署」立即显示加载对话框，请求完成后 Pod 模板带上 restartedAt 注解。
+preconditions:
+- 由用例的 fixture 创建一个 tc-e2e- 前缀的部署，用例结束后无条件删除
+- 已登录，且在 host 集群的 default 项目空间
+steps:
+- 打开该部署的详情
+- 点击「重新部署」，立即读取加载对话框
+- 轮询 Deployment，直到 spec.template.metadata.annotations 出现 restartedAt
+expected:
+- 请求在途时加载对话框可见，标题为「重新部署」
+- 请求结束后对话框关闭
+- 注解 kubectl.kubernetes.io/restartedAt 存在且非空
+troubleshoot:
+- 对话框一闪而过时用路由延迟把请求留在途中，再断言可见
+- 注解缺失时确认 PATCH 打到 /apis/apps/v1 而不是 /api/v1
+update_automation:
+- 文案变化时改 packages/locales/src/index.ts
+- 句柄变化时改 pages/app_workloads.py 与 apps/console-next/src/pages/app-workloads/WorkloadDetailPage.tsx 的别处引用

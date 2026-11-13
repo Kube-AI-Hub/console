@@ -1,0 +1,32 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-05
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: detail
+title: 服务详情 · 端口表
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/services'
+prd: prd/kube-frontend/app-workloads/detail.md
+design: design/kube-frontend/app-workloads/detail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-05
+
+story:
+- US1
+
+product: 服务详情显示端口表（端口名、服务端口、容器端口、节点端口）；ClusterIP 服务的节点端口为 -；无端口的服务不显示该表。
+preconditions:
+- 由夹具创建一个 tc-e2e- ClusterIP 服务（80 → 8080），用例结束无条件删除
+- 已登录，且在 host 集群的 default 项目空间
+steps:
+- 打开该服务详情
+- 读取端口表
+expected:
+- 表头依次为 端口名、服务端口、容器端口、节点端口
+- 服务端口 80、容器端口 8080、节点端口为 -
+troubleshoot:
+- 表不出现说明 detail.ports 为空或 kind 不是 services
+- 节点端口显示 0 说明应显示 -（ClusterIP 没有节点端口）
+update_automation:
+- 端口字段变化时改 api-client 的 servicePortsOf

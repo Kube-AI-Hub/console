@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DELETE-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: delete
+title: 删除负载 · 行操作删除并确认
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/deployments"
+prd: prd/kube-frontend/app-workloads/delete.md
+design: design/kube-frontend/app-workloads/delete.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-DELETE-01
+
+story:
+- US1
+
+product: 行操作「删除」在输入名称后确认，行消失且对象从 API 返回 404。
+preconditions:
+- 由用例的 fixture 创建一个 tc-e2e- 前缀的部署，用例结束后无条件删除（已删除时容忍 404）
+- 已登录，且在 host 集群的 default 项目空间
+steps:
+- 打开部署列表
+- 打开目标行的更多操作并选择「删除」
+- 在确认框输入对象名并提交
+expected:
+- 确认按钮只有在名称完全一致时才可用
+- 提交后对话框关闭，目标行从列表消失
+- 用 API 读取该部署返回 404
+troubleshoot:
+- 行不消失时看删除后是否 invalidateQueries 重新拉取
+- 删除 404 但行仍在时看列表是否命中旧缓存
+update_automation:
+- 文案变化时改 packages/locales/src/index.ts
+- 确认框结构变化时改 pages/app_workloads.py

@@ -1,0 +1,37 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: list
+title: 工作负载列表 · 表格列与可点击名称
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/deployments"
+prd: prd/kube-frontend/app-workloads/list.md
+design: design/kube-frontend/app-workloads/list.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-01
+
+story:
+- US1
+
+product: 部署列表以表格展示名称、状态、就绪与创建时间，名称是进入详情的链接。
+preconditions:
+- 由用例的 fixture 创建一个 tc-e2e- 前缀的部署，用例结束后无条件删除
+- 已登录，且在 host 集群的 default 项目空间
+steps:
+- 打开部署列表
+- 核对表头顺序
+- 读取目标行的名称链接、状态徽章与就绪计数
+- 点击名称进入详情
+expected:
+- 表头依次为 名称、状态、就绪、创建时间
+- 目标行出现，名称是链接且 data-ai-id 为 deployments:open:<name>
+- 状态徽章显示「更新中」，就绪列显示 0/1
+- 点击名称后 URL 以 /deployments/<name> 结尾
+troubleshoot:
+- 行不存在时先确认对象已创建，再确认列表请求带了排序参数
+- 名称不可点时检查 ResourceList 的 render 是否仍输出 <a>
+update_automation:
+- 文案变化时改 packages/locales/src/index.ts
+- 句柄变化时改 pages/app_workloads.py

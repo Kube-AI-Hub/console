@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-STATUS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: status
+title: 状态派生 · 部分就绪的部署显示更新中
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/deployments"
+prd: prd/kube-frontend/app-workloads/status.md
+design: design/kube-frontend/app-workloads/status.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-STATUS-01
+
+story:
+- US1
+
+product: spec.replicas=3 而 status.readyReplicas 为 0 的部署，列表状态显示「更新中」。
+preconditions:
+- 由用例的 fixture 创建一个 spec.replicas 为 3、镜像无法拉取的部署，用例结束后无条件删除
+- 已登录，且在 host 集群的 default 项目空间
+steps:
+- 创建部署后立即打开部署列表，不等待 Pod 就绪
+- 读取目标行的状态徽章与就绪计数
+- 用 API 核对 status.readyReplicas 为 0（或缺失）
+expected:
+- 状态徽章显示「更新中」，不显示「运行中」
+- 就绪列为 0/3
+troubleshoot:
+- 状态为「运行中」时先看是否真的已有 3 个就绪副本
+- 徽章文案缺失时看 WORKLOAD_STATUS_KEYS 映射
+update_automation:
+- 文案变化时改 packages/locales/src/index.ts
+- 状态派生变化时改 packages/api-client/src/workloads.ts 与对应单测

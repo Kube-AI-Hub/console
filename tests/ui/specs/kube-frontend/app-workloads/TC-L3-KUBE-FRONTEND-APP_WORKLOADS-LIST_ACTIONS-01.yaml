@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_ACTIONS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: list-actions
+title: 工作负载列表 · 扩缩容与重新部署
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/deployments'
+prd: prd/kube-frontend/app-workloads/_index.md
+design: design/kube-frontend/app-workloads/_index.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_ACTIONS-01
+
+story:
+- US1
+
+product: 部署列表的行操作包含扩缩容与重新部署；扩缩容改 spec.replicas；重新部署写入模板注解。
+preconditions:
+- 由夹具创建一个 1 副本的 tc-e2e- 部署，用例结束无条件删除
+- 已登录，且在 host 集群的 default 项目空间
+steps:
+- 打开部署列表，打开该行的操作菜单并读取菜单项
+- 点「扩缩容」改为 3 并确认
+- 用 API 读取 spec.replicas
+- 点「重新部署」并确认，用 API 读取模板注解
+expected:
+- 菜单含 扩缩容 与 重新部署
+- spec.replicas 为 3
+- 模板注解 kubectl.kubernetes.io/restartedAt 存在且为本次时间
+troubleshoot:
+- 菜单缺少两项说明 allowScale/allowRedeploy 未接到行操作
+- 重新部署无效说明注解没写到 template.metadata
+update_automation:
+- 行操作变化时改 pages/app_workloads.py 的菜单断言

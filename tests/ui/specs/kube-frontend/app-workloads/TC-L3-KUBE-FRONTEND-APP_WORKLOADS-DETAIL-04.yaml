@@ -1,0 +1,33 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-04
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: detail
+title: 负载详情 · 自动伸缩区块
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/spaces/deployments'
+prd: prd/kube-frontend/app-workloads/detail.md
+design: design/kube-frontend/app-workloads/detail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-04
+
+story:
+- US1
+
+product: 有 HPA 的部署在详情页显示自动伸缩区块（策略、副本范围、当前副本、触发指标）；没有 HPA 的不显示该区块。
+preconditions:
+- 已登录，且在 host 集群有 HPA 的项目中
+- 由夹具创建一个带 HPA 的部署（min=1, max=3, cpu 30%），用例结束无条件删除两者
+steps:
+- 打开该部署的详情
+- 读取自动伸缩区块
+- 另开一个没有 HPA 的部署详情
+expected:
+- 有 HPA 的部署显示区块，副本范围为 1 – 3，触发指标含 cpu 与 30%
+- 没有 HPA 的部署不显示该区块
+troubleshoot:
+- 区块不出现时看 hpaFor 的 scaleTargetRef 匹配（kind 需小写比较）
+- 数值不对时看 toWorkloadAutoscaling 的字段读取
+update_automation:
+- HPA 字段变化时改 api-client 的 toWorkloadAutoscaling
