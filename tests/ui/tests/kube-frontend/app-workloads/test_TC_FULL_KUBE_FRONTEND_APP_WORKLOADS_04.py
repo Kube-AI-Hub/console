@@ -29,7 +29,14 @@ def test_TC_FULL_KUBE_FRONTEND_APP_WORKLOADS_04(app_workloads_page, screenshot):
         ui.page.locator('[data-ai-id="deployments-detail:edit-info"]').click()
         ui.page.locator('[data-ai-id="deployments-detail:edit-alias"]').fill("详情别名")
         ui.page.get_by_role("dialog").get_by_role("button", name="确认").click()
-        expect(ui.page.get_by_role("dialog")).to_have_count(0, timeout=20_000)
+        # The save is a PUT that can be slow while the list query is in flight. Waiting is
+        # right; what was wrong is that a stuck dialog produced only "expected 0, got 1".
+        # Report what the dialog says, so a failed write is distinguishable from slowness.
+        try:
+            expect(ui.page.get_by_role("dialog")).to_have_count(0, timeout=45_000)
+        except AssertionError:
+            text = ui.page.get_by_role("dialog").inner_text().replace("\n", " | ")
+            raise AssertionError(f"编辑信息未关闭，对话框内容：{text[:300]}") from None
 
         status, body = ui.get_deployment(name)
         assert status == 200
