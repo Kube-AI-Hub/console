@@ -29,9 +29,16 @@ export interface DeleteDialogProps {
   noun: string;
 }
 
-/** The exact text the reader must type. */
+/**
+ * The exact text the reader must type.
+ *
+ * One name is typed verbatim — that is the friction that stops a mis-click deleting
+ * something. A batch is confirmed by its **count**: asking the reader to type
+ * `a, b, c` exactly is friction nobody satisfies, and the delete button simply stayed
+ * disabled however carefully the names were copied.
+ */
 export function expectedConfirmation(names: string[]): string {
-  return names.join(', ');
+  return names.length > 1 ? String(names.length) : (names[0] ?? '');
 }
 
 export function DeleteDialog({

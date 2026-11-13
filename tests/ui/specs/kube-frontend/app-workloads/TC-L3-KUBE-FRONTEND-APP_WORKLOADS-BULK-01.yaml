@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-BULK-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: bulk
+title: 工作负载列表 · 批量停止与批量删除
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/deployments'
+prd: prd/kube-frontend/app-workloads/_index.md
+design: design/kube-frontend/app-workloads/_index.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-BULK-01
+
+story:
+- US1
+
+product: 可扩缩容的工作负载在选中行后提供「批量停止」与「批量删除」；不能扩缩容的类型只有「批量删除」；批量停止把选中对象缩到 0 副本。
+preconditions:
+- 由夹具创建两个 tc-e2e- 部署，用例结束无条件删除
+- 已登录，且在 host 集群的 default 项目空间
+steps:
+- 打开部署列表，选中两个部署
+- 读取批量操作项
+- 点「批量停止」并确认
+- 用 API 读取两者的 spec.replicas
+- 对任务列表做同样的选择并读取批量操作项
+expected:
+- 部署页批量项含「批量停止」与「批量删除」
+- 两个部署的 spec.replicas 都变为 0
+- 任务页批量项只有「批量删除」
+troubleshoot:
+- 没有批量项说明 selection 未生效或 onSelectionChange 未传
+- 只停了一个说明批量执行被中断
+update_automation:
+- 批量项变化时改 pages/app_workloads.py

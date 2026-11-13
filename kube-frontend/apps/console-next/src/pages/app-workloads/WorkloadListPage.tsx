@@ -64,6 +64,7 @@ type Dialog =
   | { kind: 'servicePorts'; row: WorkloadSummary }
   | { kind: 'ingressRules'; row: WorkloadSummary }
   | { kind: 'replicas'; row: WorkloadSummary }
+  | { kind: 'bulk-stop'; rows: WorkloadSummary[] }
   | { kind: 'redeployConfirm'; row: WorkloadSummary };
 
 export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: WorkloadListPageProps): React.ReactElement {
@@ -132,6 +133,21 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
         ? { primaryAction: { key: 'create', label: t('workloads.action.create'), aiId: `${kind}:create` } }
         : {}),
       actions: [
+        /*
+         * 批量停止 scales every selected workload to zero. It is offered only for the
+         * kinds that have replicas — the old console puts it on Deployments — because a
+         * Job or a bare pod has nothing to scale.
+         */
+        ...(descriptor.allowScale
+          ? [
+              {
+                key: 'bulk-stop',
+                label: t('workloads.action.bulkStop'),
+                aiId: `${kind}:bulk-stop`,
+                aiNeeds: [`${kind}:row-select`],
+              },
+            ]
+          : []),
         {
           key: 'bulk-delete',
           label: t('workloads.action.bulkDelete'),
@@ -341,8 +357,14 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
           }
         }}
         onBulkAction={(action, keys) => {
-          if (action !== 'bulk-delete' || keys.length === 0) return;
-          setDialog({ kind: 'delete', rows: rows.filter((row) => keys.includes(row.name)) });
+          if (keys.length === 0) return;
+          if (action === 'bulk-delete') {
+            setDialog({ kind: 'delete', rows: rows.filter((row) => keys.includes(row.name)) });
+            return;
+          }
+          if (action === 'bulk-stop') {
+            setDialog({ kind: 'bulk-stop', rows: rows.filter((row) => keys.includes(row.name)) });
+          }
         }}
       />
 
@@ -425,6 +447,25 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
             // One replica is the smallest running state; the old console restores the
             // previous count, but the list summary does not carry it.
             await scale.mutateAsync({ name: dialog.row.name, replicas: 1 });
+            setDialog({ kind: 'none' });
+          }}
+        />
+      ) : null}
+
+      {dialog.kind === 'bulk-stop' ? (
+        <DeleteDialog
+          open
+          onOpenChange={(open) => !open && setDialog({ kind: 'none' })}
+          names={dialog.rows.map((row) => row.name)}
+          resource={kind}
+          noun={t('workloads.action.bulkStop')}
+          pending={scale.isPending}
+          onConfirm={async () => {
+            // Sequentially: each scale is its own object, and firing twenty at once
+            // turns one slow request into twenty competing ones.
+            for (const row of dialog.rows) {
+              await scale.mutateAsync({ name: row.name, replicas: 0 });
+            }
             setDialog({ kind: 'none' });
           }}
         />
