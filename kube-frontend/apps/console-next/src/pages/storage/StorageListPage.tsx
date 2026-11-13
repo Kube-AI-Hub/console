@@ -184,6 +184,8 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
             // PERFORMANCE: this depends on listing every pod in the project, which takes
             // over a minute on a large project against this API. The title says so, so a
             // long wait is explained rather than looking like a stuck page.
+            // The pod list failed: say so rather than sitting on 计算中 for ever.
+            if (pods.isError) return <span className="text-ai-fg-muted">{t('storage.mount.unknown')}</span>;
             if (row.inUse === undefined) {
               return (
                 <span className="text-ai-fg-muted" title={t('storage.mount.computingHint')}>
@@ -200,8 +202,11 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
         },
       ],
       // Same order as the old console: 编辑信息 before 编辑 YAML, delete last.
+      // Order matches every other list: the two edit entries together, then the
+      // resource-specific action, then delete last.
       rowActions: [
         { key: 'editInfo', label: t('resource.action.editInfo') },
+        { key: 'editYaml', label: t('resource.action.editYaml') },
         /*
          * 扩容 is claim-only (a snapshot has no capacity to grow) and class-gated:
          * a StorageClass without `allowVolumeExpansion` makes the apiserver reject the
@@ -216,7 +221,6 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
               },
             ]
           : []),
-        { key: 'editYaml', label: t('resource.action.editYaml') },
         { key: 'delete', label: t('common.delete'), tone: 'danger' as const },
       ],
       empty: { title: t(descriptor.emptyTitleKey), description: t(descriptor.emptyDescriptionKey) },

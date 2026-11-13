@@ -133,7 +133,13 @@ export function useProjectPods(namespace: string) {
     queryKey: ['storage-pods', namespace],
     enabled: Boolean(namespace),
     staleTime: 60_000,
-    retry: false,
+    /*
+     * One retry, not zero: this is the slowest call the page makes (~25s, up to minutes
+     * under load) and a single timeout left the mount column reading 计算中 forever with
+     * no failure state — indistinguishable from a hang. `isError` then lets the column
+     * say 未知 instead.
+     */
+    retry: 1,
     queryFn: async ({ signal }) => {
       const body = await api.request<{ items?: Array<Record<string, unknown>> }>(
         `/api/v1/namespaces/${encodeURIComponent(namespace)}/pods`,
