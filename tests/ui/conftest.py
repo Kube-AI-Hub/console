@@ -15,8 +15,25 @@ from pages.configmaps import ConfigMapsPage
 from pages.cluster_configmaps import ClusterConfigMapsPage
 from pages.secrets import SecretsPage
 from pages.serviceaccounts import ServiceAccountsPage
+from pages.access_control import AccessControlPage
+from pages.cluster_management import ClusterManagementPage
+from pages.monitoring import MonitoringPage
+from pages.platform_settings import PlatformSettingsPage
+from pages.project_settings import ProjectSettingsPage
+from pages.storage import StoragePage
+from pages.app_workloads import AppWorkloadsPage
 
 ARTIFACTS = Path(__file__).resolve().parent / "artifacts"
+
+# Shared clusters answer slowly under load (a pod list on the A100 environment took
+# 17s against the same API that answered a deployment list in 3s). Playwright's 5s
+# default then reports "still loading" or "dialog still open" for a request that is
+# merely in flight — a red suite that says nothing about the product. Raised once,
+# here, instead of sprinkling `timeout=` through every assertion.
+from playwright.sync_api import expect as _expect  # noqa: E402
+
+_expect.set_options(timeout=20_000)
+
 
 
 
@@ -113,6 +130,17 @@ class ApiClient:
 
     def get(self, kind: str, name: str, namespace: str = "default") -> dict:
         status, body = self.request("GET", f"/api/v1/namespaces/{namespace}/{kind}/{name}")
+        return {"__status": status, **body}
+
+    def get_kapis(self, kind: str, name: str, namespace: str = "default") -> dict:
+        """Read a resource the way the pages do.
+
+        Writes go to `/api/v1`, but the console reads through ks-apiserver's kapis
+        endpoint, which is a *different* path and can lag the write by a moment. A
+        test that waits only on `/api/v1` is waiting on the wrong source: the page
+        can still render the stale object underneath it.
+        """
+        status, body = self.request("GET", f"/kapis/resources.kubesphere.io/v1alpha3/namespaces/{namespace}/{kind}/{name}")
         return {"__status": status, **body}
 
     def delete(self, kind: str, name: str, namespace: str = "default") -> int:
@@ -406,10 +434,14 @@ def e2e_objects(ui_config, session_token):
             except Exception:  # noqa: BLE001 - undecodable is simply "not ready"
                 decoded = ""
             if decoded.count(".") == 2 and data.get("ca.crt"):
-                # Stable across two reads: the controller has finished writing.
+                # Stable across two reads *and* visible through kapis: the controller
+                # has finished writing, and the endpoint the page reads has caught up.
+                # `/api/v1` alone is not enough — it is the write path, while the page
+                # reads kapis, which can still serve the pre-token object.
                 time.sleep(0.3)
                 again = (api.get("secrets", name, namespace).get("data") or {}).get("token")
-                if again == token:
+                via_kapis = (api.get_kapis("secrets", name, namespace).get("data") or {}).get("token")
+                if again == token and via_kapis == token:
                     return data
             last = data
             time.sleep(0.25)
@@ -448,8 +480,73 @@ def serviceaccounts_page(page, ui_config):
 
 
 @pytest.fixture
+def platform_settings_page(page, ui_config, session_token):
+    """平台设置（平台信息、通知渠道）。平台作用域，无集群与项目段。"""
+    return PlatformSettingsPage(page, app_base(ui_config), api=ApiClient(app_base(ui_config), session_token))
+
+
+@pytest.fixture
+def access_control_page(page, ui_config, session_token):
+    """访问控制（用户、平台角色、企业空间）。平台作用域：地址里没有集群与项目段。"""
+    return AccessControlPage(page, app_base(ui_config), api=ApiClient(app_base(ui_config), session_token))
+
+
+@pytest.fixture
+def cluster_management_page(page, ui_config, session_token):
+    """集群管理（节点、项目）。集群作用域：地址里没有 workspace 与项目段。"""
+    return ClusterManagementPage(page, app_base(ui_config), api=ApiClient(app_base(ui_config), session_token))
+
+
+@pytest.fixture
+def project_settings_page(page, ui_config, session_token):
+    """项目设置（项目角色、项目成员）。
+
+    带 `ApiClient`：用例要先用 IAM 接口确认数据存在（角色、规则、成员），否则
+    「列与注解一致」这类断言可能在空数据上变成假通过。
+    """
+    return ProjectSettingsPage(page, app_base(ui_config), api=ApiClient(app_base(ui_config), session_token))
+
+
+@pytest.fixture
+def monitoring_page(page, ui_config, session_token):
+    """监控告警列表（告警消息、告警策略）。
+
+    与其它页面对象一样带 `ApiClient`：用例需要先用 API 确认该页确实没有数据，
+    否则「空态」断言可能在有数据的集群上悄悄变成假通过。
+    """
+    return MonitoringPage(page, app_base(ui_config), api=ApiClient(app_base(ui_config), session_token))
+
+
+@pytest.fixture
+def storage_page(page, ui_config, session_token):
+    """存储卷与存储卷快照的列表/详情。
+
+    与 `app_workloads_page` 同样拿到 `ApiClient`：存储卷的前置数据走核心组
+    `/api/v1`，页面读 kapis；两者共用一个会话令牌。
+    """
+    return StoragePage(page, app_base(ui_config), api=ApiClient(app_base(ui_config), session_token))
+
+
+@pytest.fixture
+def app_workloads_page(page, ui_config, session_token):
+    """应用负载列表与详情。
+
+    页面对象同时拿到一个 `ApiClient`：Deployment / Pod 的前置数据必须走原生 kube
+    endpoint（kapis 的 resources 端点只注册了 GET），而页面读的是 kapis。两者共用
+    同一个会话令牌，避免在用例里重新登录或复制 URL 拼装逻辑。
+    """
+    return AppWorkloadsPage(page, app_base(ui_config), api=ApiClient(app_base(ui_config), session_token))
+
+
+@pytest.fixture
 def login_page(anonymous_page, ui_config):
-    return LoginPage(anonymous_page, ui_config.base_url)
+    """The migrated login page.
+
+    Uses `app`, not `base_url`: `base_url` is the **old** console, whose login form
+    has different markup. Pointing here means the login specs exercise the page this
+    project ships, which is the only thing they can regress.
+    """
+    return LoginPage(anonymous_page, app_base(ui_config))
 
 
 @pytest.fixture

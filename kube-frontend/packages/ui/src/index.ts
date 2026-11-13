@@ -24,6 +24,9 @@ export type { AiButtonProps, AiSurfaceProps } from './ai-controls';
 export {
   Badge,
   Button,
+  ResourceForm,
+  Switch,
+  type FormSchema,
   Drawer,
   Dropdown,
   Empty,

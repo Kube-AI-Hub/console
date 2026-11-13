@@ -5,7 +5,9 @@
 
 from __future__ import annotations
 
-from playwright.sync_api import Locator, Page, expect
+import time
+
+from playwright.sync_api import Locator, Page, TimeoutError as PlaywrightTimeoutError, expect
 
 
 class ServiceAccountsPage:
@@ -74,7 +76,24 @@ class ServiceAccountsPage:
         self.page.wait_for_timeout(400)
         self.wait_ready()
 
+    def ensure_row(self, name: str) -> None:
+        """Make sure `name` is on screen, searching for it if the first page misses it.
+
+        `open()` waits for the list to be ready, which says nothing about *this*
+        object: a freshly created account can sit on page 2, or behind the page's
+        cached first page. Searching by name is how a person finds it too, and it
+        removes the "row not found" flake that appeared only in full-suite runs.
+        """
+        try:
+            self.row(name).wait_for(state="visible", timeout=4000)
+            return
+        except PlaywrightTimeoutError:
+            pass
+        self.search(name)
+        self.row(name).wait_for(state="visible", timeout=15000)
+
     def open_row_menu(self, name: str) -> None:
+        self.ensure_row(name)
         self.row(name).locator('button[aria-label="更多操作"]').click()
 
     def click_row_action(self, action: str) -> None:
@@ -99,17 +118,26 @@ class ServiceAccountsPage:
         The section paints before its Secret query resolves (masking an empty
         document); reading immediately returns `token: ""`.
         """
-        element = self.page.locator(f'[data-ai-id="serviceaccount-detail:kubeconfig:{secret}"]')
+        selector = f'[data-ai-id="serviceaccount-detail:kubeconfig:{secret}"]'
+        element = self.page.locator(selector)
         element.wait_for(state="visible")
         expect(self.page.locator(f'[data-ai-id="serviceaccount-detail:toggle:{secret}"]')).to_be_visible()
-        self.page.wait_for_function(
-            """(selector) => {
-                const el = document.querySelector(selector);
-                return Boolean(el && el.textContent && el.textContent.includes('ca.crt') === false && el.textContent.includes('token:'));
-            }""",
-            arg=f'[data-ai-id="serviceaccount-detail:kubeconfig:{secret}"]',
-        )
-        return element.inner_text()
+
+        # Poll in Python rather than in a JS predicate: the check is "the token line
+        # holds a real value", and the masked document also has a `token:` line
+        # (`token: '****'`). Returning on that made the caller compare the mask with
+        # the real token — a failure that looks like a broken preview but is really a
+        # read that happened one render too early.
+        deadline = time.time() + 30
+        text = ""
+        while time.time() < deadline:
+            text = element.inner_text()
+            line = next((row for row in text.splitlines() if "token:" in row), "")
+            value = line.split("token:", 1)[1].strip().strip("'\"") if line else ""
+            if value and set(value) != {"*"}:
+                return text
+            time.sleep(0.25)
+        return text
 
     def reveal_token_block(self, secret: str) -> None:
         toggle = self.page.locator(f'[data-ai-id="serviceaccount-detail:toggle:{secret}"]')
@@ -121,11 +149,29 @@ class ServiceAccountsPage:
         """First token block's mask toggle."""
         return self.page.locator('[data-ai-id^="serviceaccount-detail:toggle:"]').first
 
+    def wait_for_secret_section(self, timeout: int = 90_000) -> None:
+        """Wait until the token Secret section has rendered.
+
+        The section comes from its **own** query: the account detail resolves first,
+        and the token Secret is fetched (and polled until it is populated)
+        afterwards. Touching the mask toggle right after the detail loads used to
+        race that request — on a loaded cluster the gap is tens of seconds, so the
+        old code either timed out waiting for the toggle or unmasked an empty
+        document and produced a kubeconfig with `token: ""`.
+        """
+        self.page.locator('[data-ai-id^="serviceaccount-detail:toggle:"]').first.wait_for(state="visible", timeout=timeout)
+
     @property
     def values_revealed(self) -> bool:
-        return self.toggle_values.get_attribute("aria-pressed") == "true"
+        toggle = self.toggle_values
+        # `count()` does not auto-wait: asking "is it already unmasked" must not
+        # block, or the caller cannot distinguish "masked" from "not rendered yet".
+        if toggle.count() == 0:
+            return False
+        return toggle.get_attribute("aria-pressed") == "true"
 
     def reveal(self) -> None:
+        self.wait_for_secret_section()
         if not self.values_revealed:
             self.toggle_values.click()
 

@@ -176,6 +176,14 @@ export function Table<T>({
       )}
     >
       <table className="w-full border-collapse text-sm text-ai-fg-secondary">
+        {/*
+         * No header when there is nothing to head. The old console renders an empty
+         * card in that case, and a header row above "no data" reads as a table that
+         * failed to load its rows rather than as a list that is legitimately empty.
+         * Kept while loading: the skeleton rows sit under it, so removing it there
+         * would make the table jump when data arrives.
+         */}
+        {loading || rows.length > 0 ? (
         <thead>
           <tr className="border-b border-ai-line bg-ai-th-bg">
             {expandedRow ? <th scope="col" className="w-8 px-2 py-2" aria-label="展开" /> : null}
@@ -225,7 +233,13 @@ export function Table<T>({
                       {...(column.sortAiId ? { 'data-ai-id': column.sortAiId } : {})}
                       onClick={() => cycleSort(column.key)}
                       className={cn(
-                        'inline-flex items-center gap-1 transition-colors duration-ai-fast hover:text-ai-fg',
+                        /*
+                         * The header cell is only as tall as its text, which leaves the
+                         * sort control under the 44px touch minimum. Filling the cell's
+                         * height on a touch viewport (`pointer-coarse`) gives a thumb a
+                         * target without changing the row height on desktop.
+                         */
+                        'inline-flex min-h-11 items-center gap-1 transition-colors duration-ai-fast hover:text-ai-fg sm:min-h-0',
                         active && 'text-ai-accent',
                       )}
                     >
@@ -240,6 +254,7 @@ export function Table<T>({
             })}
           </tr>
         </thead>
+        ) : null}
         <tbody>
           {loading ? (
             Array.from({ length: 3 }, (_, index) => (

@@ -164,7 +164,7 @@ export function SecretsPage({ workspace, cluster, namespace }: SecretsPageProps)
                   // See ConfigMapsPage: one route per page, so this is a plain
                   // link with the same URL shape the old console used.
                   href={`/kube-frontend/${workspace}/clusters/${cluster}/projects/${row.namespace || projectFilter}/secrets/${row.name}`}
-                  className="truncate font-medium text-ai-fg hover:text-ai-accent"
+                  className="inline-flex min-h-6 items-center truncate font-medium text-ai-fg hover:text-ai-accent"
                   title={row.name}
                   {...actionProps(`secrets:open:${row.name}`)}
                 >

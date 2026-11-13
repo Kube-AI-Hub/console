@@ -7,6 +7,9 @@ URL 形状、跨项目的行句柄，以及创建时必须选项目——所以�
 
 from __future__ import annotations
 
+import re
+import time
+
 from playwright.sync_api import Locator, Page, expect
 
 from pages.configmaps import ConfigMapsPage
@@ -36,9 +39,14 @@ class ClusterConfigMapsPage:
         expect(self.surface).to_be_visible()
 
     def wait_ready(self) -> None:
-        """Wait until the page has left the loading state."""
+        """Wait until the page has left the loading state.
+
+        The second assertion matches either settled state. It needs a **regex**:
+        Playwright treats a plain string as a literal, so `"ready|empty"` never
+        matched anything and this wait always failed once the page had loaded.
+        """
         expect(self.surface).not_to_have_attribute("data-ai-state", "loading")
-        expect(self.surface).to_have_attribute("data-ai-state", "ready|empty")
+        expect(self.surface).to_have_attribute("data-ai-state", re.compile("^(ready|empty)$"))
 
     @property
     def rows(self) -> Locator:
@@ -69,9 +77,20 @@ class ClusterConfigMapsPage:
         return self.surface.locator('[data-ai-id="cluster-configmaps:search"]')
 
     def search(self, keyword: str) -> None:
+        """Type a keyword and wait until the list actually reflects it.
+
+        A fixed sleep is not enough: the field debounces, then the request has to
+        come back, and until it does the previous page of rows is still on screen —
+        so a caller reading rows straight after `fill` sees the *unfiltered* list
+        and concludes the search is broken.
+        """
         self.search_box.fill(keyword)
-        # The field debounces for 250ms before issuing the request.
-        self.page.wait_for_timeout(600)
+        deadline = time.time() + 20
+        while time.time() < deadline:
+            names = [key.split("/", 1)[1] for key in self.row_keys]
+            if names and all(keyword in name for name in names):
+                return
+            time.sleep(0.25)
 
     @property
     def create_button(self) -> Locator:

@@ -152,7 +152,7 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
                   // left click into a client-side transition, and Ctrl/⌘-click
                   // still opens a new tab because it is a real link.
                   href={`/kube-frontend/${workspace}/clusters/${cluster}/projects/${namespace}/configmaps/${row.name}`}
-                  className="truncate font-medium text-ai-fg hover:text-ai-accent"
+                  className="inline-flex min-h-6 items-center truncate font-medium text-ai-fg hover:text-ai-accent"
                   title={row.name}
                   {...actionProps(`configmaps:open:${row.name}`)}
                 >

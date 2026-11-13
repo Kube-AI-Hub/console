@@ -4,6 +4,9 @@ import { Drawer, Dropdown, Icon, Menu, ThemeToggle, cn, useIsMobile, type Dropdo
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { useLocale, useT } from '@/i18n';
 import { useAuth } from '@/shell/AuthProvider';
+import { SharedChunkWarmer } from '@/shell/preload';
+import { areasFor, areaPages, areaOfPage, type Area } from '@/areas/registry';
+import { projectPageSegment } from '@/areas/scope';
 
 /**
  * Scope carried by every console route.
@@ -42,47 +45,41 @@ interface NavEntry {
  * dropped in the collapsed rail, where they would sit above icon-only rows as
  * blank space.
  */
-interface NavGroup {
-  key: string;
-  titleKey: Parameters<ReturnType<typeof useT>>[0];
-  items: readonly NavEntry[];
+/**
+ * Sidebar groups, derived from the area registry.
+ *
+ * The sidebar used to spell out each entry with its own `build`, which meant a new
+ * page had to be remembered here *and* in the old console's navigation. Now the
+ * registry is the only list: every project area contributes its pages in the order
+ * the old console lists them, and its pages are reached through the area's tabs
+ * rather than as separate sidebar rows.
+ *
+ * The sidebar therefore answers "which area" and the tabs answer "which page in
+ * it" — the same split the old console had, and the reason forty pages can exist
+ * without a forty-row sidebar.
+ */
+function areaEntry(area: Area, scope: Scope): NavEntry {
+  const pages = areaPages(area);
+  /*
+   * The default page is the one the bare area opens. It is declared by the area,
+   * not taken as `pages[0]`: the old console's 配置 lists 保密字典 first but opens
+   * 配置字典, and picking by position would silently change where a link lands.
+   */
+  const target = pages.find((page) => page.key === (area.defaultPage ?? pages[0]?.key));
+  return {
+    key: area.key,
+    labelKey: area.titleKey,
+    icon: area.icon,
+    build: () => {
+      if (!target) return `/kube-frontend/${scope.workspace}/clusters/${scope.cluster}/projects/${scope.namespace}`;
+      return projectPageHref(scope, target.path);
+    },
+  };
 }
 
-const NAV: readonly NavGroup[] = [
-  {
-    key: 'config',
-    titleKey: 'nav.groupConfig',
-    items: [
-      {
-        key: 'configmaps',
-        labelKey: 'configmaps.title',
-        icon: 'catalog',
-        build: ({ workspace, cluster, namespace }) =>
-          `/kube-frontend/${workspace}/clusters/${cluster}/projects/${namespace}/configmaps`,
-      },
-      /*
-       * Both entries share the sidebar's `active` test, which looks for `/<key>`
-       * anywhere in the pathname. That is why the keys are not prefixes of one
-       * another and why `serviceaccounts` must not be shortened to `services`: a
-       * `secrets` link would then light up the Services entry (if one is added).
-       */
-      {
-        key: 'secrets',
-        labelKey: 'secrets.title',
-        icon: 'key',
-        build: ({ workspace, cluster, namespace }) =>
-          `/kube-frontend/${workspace}/clusters/${cluster}/projects/${namespace}/secrets`,
-      },
-      {
-        key: 'serviceaccounts',
-        labelKey: 'serviceaccounts.title',
-        icon: 'user-profile',
-        build: ({ workspace, cluster, namespace }) =>
-          `/kube-frontend/${workspace}/clusters/${cluster}/projects/${namespace}/serviceaccounts`,
-      },
-    ],
-  },
-];
+function projectPageHref({ workspace, cluster, namespace }: Scope, path: string): string {
+  return `/kube-frontend/${encodeURIComponent(workspace)}/clusters/${encodeURIComponent(cluster)}/projects/${encodeURIComponent(namespace)}/${path}`;
+}
 
 const SIDEBAR_KEY = 'kube-frontend-sidebar';
 
@@ -474,19 +471,34 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
       : DEFAULT_SCOPE;
   }, [location]);
 
-  const activeKey = NAV.flatMap((group) => group.items).find((entry) => location.includes(`/${entry.key}`))?.key;
+  /*
+   * The active sidebar row is the area the current page belongs to, resolved from
+   * the page segment through the registry — not a substring match on the URL.
+   * Substring matching broke as soon as an area key was a prefix of another
+   * (`services` inside `serviceaccounts`).
+   */
+  const activeArea = areaOfPage('project', projectPageSegment(location));
+  const activeKey = activeArea?.key;
 
-  /** Menu nodes for one group, with the drawer closing on navigation. */
-  const groupItems = React.useCallback(
-    (group: NavGroup): MenuNode[] =>
-      group.items.map((entry) => ({
-        key: entry.key,
-        label: t(entry.labelKey),
-        icon: <Icon name={entry.icon} size={14} />,
-        href: entry.build(scope),
-        onClick: () => setDrawerOpen(false),
-      })),
-    [t, scope],
+  /**
+   * Sidebar rows: one per project area, with the drawer closing on navigation.
+   *
+   * Memoised on the scope and language so typing in a page's search box does not
+   * rebuild the sidebar's nodes.
+   */
+  const sidebarItems = React.useMemo<MenuNode[]>(
+    () =>
+      areasFor('project').map((area) => {
+        const entry = areaEntry(area, scope);
+        return {
+          key: entry.key,
+          label: t(entry.labelKey),
+          icon: <Icon name={entry.icon} size={14} />,
+          href: entry.build(scope),
+          onClick: () => setDrawerOpen(false),
+        };
+      }),
+    [scope, t],
   );
 
   const localeButton = (
@@ -508,6 +520,9 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
     // part of the library's look (the Storybook examples all sit on it), so the
     // shell opts in here rather than each page repeating the class.
     <div className="ai-ambient relative flex min-h-dvh flex-col bg-ai-bg text-ai-fg">
+      {/* Warms the chunks several areas share (the YAML editor) while the first
+          screen settles, instead of paying for them on the first "edit YAML". */}
+      <SharedChunkWarmer />
       {/* Keyboard users and agents land here first; without it the first Tab goes
           to the sidebar instead of the page content. */}
       <a
@@ -668,14 +683,9 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
         {isMobile ? (
           <Drawer open={drawerOpen} onOpenChange={setDrawerOpen} title={t('app.name')} side="left">
             <div className="flex flex-col gap-3">
-              {NAV.map((group) => (
-                <div key={group.key} className="flex flex-col gap-1">
-                  <p className="px-3 text-[11px] font-medium uppercase tracking-wide text-ai-fg-faint">
-                    {t(group.titleKey)}
-                  </p>
-                  <Menu items={groupItems(group)} onNavigate={onNavigate} {...(activeKey ? { activeKey } : {})} />
-                </div>
-              ))}
+              <div className="flex flex-col gap-1">
+                <Menu items={sidebarItems} onNavigate={onNavigate} {...(activeKey ? { activeKey } : {})} />
+              </div>
             </div>
           </Drawer>
         ) : (
@@ -689,20 +699,12 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
             )}
           >
             <nav aria-label={t('nav.primary')} className="flex min-w-0 flex-1 flex-col gap-3 overflow-y-auto px-2 py-3">
-              {NAV.map((group, index) => (
-                <div key={group.key} className="flex flex-col gap-1">
-                  {/* Collapsed rails have no room for a title; a rule between groups
-                      keeps them visually separated without the empty line. */}
-                  {collapsed ? (
-                    index > 0 ? <div className="mx-2 my-1 border-t border-ai-line" /> : null
-                  ) : (
-                    <p className="px-3 text-[11px] font-medium uppercase tracking-wide text-ai-fg-faint">
-                      {t(group.titleKey)}
-                    </p>
-                  )}
-                  <Menu items={groupItems(group)} collapsed={collapsed} onNavigate={onNavigate} {...(activeKey ? { activeKey } : {})} />
-                </div>
-              ))}
+              <Menu
+                items={sidebarItems}
+                collapsed={collapsed}
+                onNavigate={onNavigate}
+                {...(activeKey ? { activeKey } : {})}
+              />
             </nav>
 
             {/*

@@ -9,7 +9,7 @@
 
 from __future__ import annotations
 
-from playwright.sync_api import Locator, Page, expect
+from playwright.sync_api import Locator, Page, TimeoutError as PlaywrightTimeoutError, expect
 
 
 class SecretsPage:
@@ -100,7 +100,23 @@ class SecretsPage:
     def create_button(self) -> Locator:
         return self.page.locator('[data-ai-id="secrets:create"]').last
 
+    def ensure_row(self, name: str) -> None:
+        """确保目标行在屏幕上；首页没有时用搜索定位。
+
+        `open()` 只等列表就绪，不代表**这个对象**在屏幕上：新建的对象可能落在第二页，
+        或被执行计划缓存的第一页挡住。按名称搜索既是用户的真实做法，也消除了只在
+        全量运行时出现的 "row not found" 抖动。
+        """
+        try:
+            self.row(name).wait_for(state="visible", timeout=4000)
+            return
+        except PlaywrightTimeoutError:
+            pass
+        self.search(name)
+        self.row(name).wait_for(state="visible", timeout=15000)
+
     def open_row_menu(self, name: str) -> None:
+        self.ensure_row(name)
         self.row(name).locator('button[aria-label="更多操作"]').click()
 
     def click_row_action(self, action: str) -> None:

@@ -14,7 +14,7 @@ def test_TC_L2_KUBE_FRONTEND_LOGIN_03(anonymous_page, ui_config, login_page, scr
 
     # Enter through a deep link so signing in has somewhere to return to: a bare
     # `/login` correctly lands on the home page, which has no account menu.
-    page.goto(f"{ui_config.base_url}{deep_link}")
+    page.goto(f"{ui_config.app}{deep_link}")
     page.wait_for_url("**/login**")
     login_page.sign_in(ui_config.login_user, ui_config.login_pass)
     page.wait_for_url(f"**{deep_link}")
@@ -33,14 +33,14 @@ def test_TC_L2_KUBE_FRONTEND_LOGIN_03(anonymous_page, ui_config, login_page, scr
     # Asked from Python rather than from the page: the page has just navigated to
     # /login and an in-page fetch races that navigation (net::ERR_ABORTED).
     revoked = page.request.get(
-        f"{ui_config.base_url}/kapis/resources.kubesphere.io/v1alpha3/namespaces/default/configmaps",
+        f"{ui_config.app}/kapis/resources.kubesphere.io/v1alpha3/namespaces/default/configmaps",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert revoked.status == 401, revoked.status
 
     # A revoked token written back must not paint the console.
     page.evaluate("(token) => localStorage.setItem('kubesphere-token', token)", token)
-    page.goto(f"{ui_config.base_url}{deep_link}")
+    page.goto(f"{ui_config.app}{deep_link}")
     page.wait_for_url("**/login**")
     assert page.locator("aside").count() == 0
     screenshot(page, "login-after-logout")

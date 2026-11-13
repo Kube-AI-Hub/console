@@ -149,7 +149,7 @@ export function ServiceAccountsPage({ workspace, cluster, namespace }: ServiceAc
                 <a
                   // See ConfigMapsPage: one route per page, so this is a plain link.
                   href={`/kube-frontend/${workspace}/clusters/${cluster}/projects/${row.namespace || projectFilter}/serviceaccounts/${row.name}`}
-                  className="truncate font-medium text-ai-fg hover:text-ai-accent"
+                  className="inline-flex min-h-6 items-center truncate font-medium text-ai-fg hover:text-ai-accent"
                   title={row.name}
                   {...actionProps(`serviceaccounts:open:${row.name}`)}
                 >

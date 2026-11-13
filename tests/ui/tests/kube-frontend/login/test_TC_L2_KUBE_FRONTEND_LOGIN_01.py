@@ -16,7 +16,7 @@ def test_TC_L2_KUBE_FRONTEND_LOGIN_01(anonymous_page, ui_config, login_page, scr
     destination = "/kube-frontend/system-workspace/clusters/host/projects/default/configmaps"
 
     # 1. A protected deep link goes to /login and keeps the destination.
-    page.goto(f"{ui_config.base_url}{destination}")
+    page.goto(f"{ui_config.app}{destination}")
     page.wait_for_url("**/login**")
     expect(login_page.surface).to_be_visible()
 

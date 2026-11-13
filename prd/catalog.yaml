@@ -377,6 +377,246 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-SERVICEACCOUNTS-MOBILE-01
+  - id: platform-settings
+    title: 平台设置
+    prd: prd/kube-frontend/platform-settings/_index.md
+    design: design/kube-frontend/platform-settings/_index.md
+    tests:
+      L2:
+      - TC-FULL-KUBE-FRONTEND-PLATFORM_SETTINGS-01
+    features:
+    - id: info
+      title: 平台信息
+      prd: prd/kube-frontend/platform-settings/info.md
+      design: design/kube-frontend/platform-settings/info.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-INFO-01
+    - id: notifications
+      title: 通知渠道
+      prd: prd/kube-frontend/platform-settings/notifications.md
+      design: design/kube-frontend/platform-settings/notifications.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-NOTIFICATIONS-01
+  - id: access-control
+    title: 访问控制
+    prd: prd/kube-frontend/access-control/_index.md
+    design: design/kube-frontend/access-control/_index.md
+    tests:
+      L2:
+      - TC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-01
+    features:
+    - id: users
+      title: 用户列表
+      prd: prd/kube-frontend/access-control/users.md
+      design: design/kube-frontend/access-control/users.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-01
+    - id: platform-roles
+      title: 平台角色列表
+      prd: prd/kube-frontend/access-control/platform-roles.md
+      design: design/kube-frontend/access-control/platform-roles.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-01
+    - id: workspaces
+      title: 企业空间列表
+      prd: prd/kube-frontend/access-control/workspaces.md
+      design: design/kube-frontend/access-control/workspaces.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACES-01
+  - id: cluster-management
+    title: 集群管理
+    prd: prd/kube-frontend/cluster-management/_index.md
+    design: design/kube-frontend/cluster-management/_index.md
+    tests:
+      L2:
+      - TC-FULL-KUBE-FRONTEND-CLUSTER_MANAGEMENT-01
+    features:
+    - id: nodes
+      title: 节点列表
+      prd: prd/kube-frontend/cluster-management/nodes.md
+      design: design/kube-frontend/cluster-management/nodes.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-01
+    - id: components
+      title: 系统组件
+      prd: prd/kube-frontend/cluster-management/components.md
+      design: design/kube-frontend/cluster-management/components.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-COMPONENTS-01
+    - id: storage-classes
+      title: 存储类型
+      prd: prd/kube-frontend/cluster-management/storage-classes.md
+      design: design/kube-frontend/cluster-management/storage-classes.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-01
+    - id: projects
+      title: 项目列表
+      prd: prd/kube-frontend/cluster-management/projects.md
+      design: design/kube-frontend/cluster-management/projects.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-PROJECTS-01
+  - id: project-settings
+    title: 项目设置
+    prd: prd/kube-frontend/project-settings/_index.md
+    design: design/kube-frontend/project-settings/_index.md
+    tests:
+      L2:
+      - TC-FULL-KUBE-FRONTEND-PROJECT_SETTINGS-01
+    features:
+    - id: base-info
+      title: 项目基本信息
+      prd: prd/kube-frontend/project-settings/base-info.md
+      design: design/kube-frontend/project-settings/base-info.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-BASE_INFO-01
+    - id: roles
+      title: 项目角色列表
+      prd: prd/kube-frontend/project-settings/roles.md
+      design: design/kube-frontend/project-settings/roles.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-01
+    - id: role-rules
+      title: 角色权限规则
+      prd: prd/kube-frontend/project-settings/role-rules.md
+      design: design/kube-frontend/project-settings/role-rules.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLE_RULES-01
+    - id: network-isolation
+      title: 网络隔离
+      prd: prd/kube-frontend/project-settings/network-isolation.md
+      design: design/kube-frontend/project-settings/network-isolation.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-01
+    - id: members
+      title: 项目成员列表
+      prd: prd/kube-frontend/project-settings/members.md
+      design: design/kube-frontend/project-settings/members.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-01
+  - id: monitoring
+    title: 监控告警
+    prd: prd/kube-frontend/monitoring/_index.md
+    design: design/kube-frontend/monitoring/_index.md
+    tests:
+      L2:
+      - TC-FULL-KUBE-FRONTEND-MONITORING-01
+    features:
+    - id: alerts
+      title: 告警消息列表
+      prd: prd/kube-frontend/monitoring/alerts.md
+      design: design/kube-frontend/monitoring/alerts.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-MONITORING-ALERTS-01
+    - id: rules
+      title: 告警策略列表
+      prd: prd/kube-frontend/monitoring/rules.md
+      design: design/kube-frontend/monitoring/rules.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-MONITORING-RULES-01
+  - id: storage
+    title: 存储
+    prd: prd/kube-frontend/storage/_index.md
+    design: design/kube-frontend/storage/_index.md
+    tests:
+      L2:
+      - TC-FULL-KUBE-FRONTEND-STORAGE-01
+    features:
+    - id: list
+      title: 存储列表
+      prd: prd/kube-frontend/storage/list.md
+      design: design/kube-frontend/storage/list.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-STORAGE-LIST-01
+        - TC-L3-KUBE-FRONTEND-STORAGE-LIST-02
+    - id: detail
+      title: 存储详情
+      prd: prd/kube-frontend/storage/detail.md
+      design: design/kube-frontend/storage/detail.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-STORAGE-DETAIL-01
+    - id: edit-yaml
+      title: 编辑 YAML
+      prd: prd/kube-frontend/storage/edit-yaml.md
+      design: design/kube-frontend/storage/edit-yaml.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-STORAGE-EDIT_YAML-01
+    - id: delete
+      title: 删除存储对象
+      prd: prd/kube-frontend/storage/delete.md
+      design: design/kube-frontend/storage/delete.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-STORAGE-DELETE-01
+  - id: app-workloads
+    title: 应用负载
+    prd: prd/kube-frontend/app-workloads/_index.md
+    design: design/kube-frontend/app-workloads/_index.md
+    tests:
+      L2:
+      - TC-FULL-KUBE-FRONTEND-APP_WORKLOADS-01
+    features:
+    - id: list
+      title: 工作负载列表
+      prd: prd/kube-frontend/app-workloads/list.md
+      design: design/kube-frontend/app-workloads/list.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-01
+        - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-02
+    - id: status
+      title: 状态派生
+      prd: prd/kube-frontend/app-workloads/status.md
+      design: design/kube-frontend/app-workloads/status.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-STATUS-01
+    - id: detail
+      title: 负载详情
+      prd: prd/kube-frontend/app-workloads/detail.md
+      design: design/kube-frontend/app-workloads/detail.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-01
+    - id: redeploy
+      title: 重新部署
+      prd: prd/kube-frontend/app-workloads/redeploy.md
+      design: design/kube-frontend/app-workloads/redeploy.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-REDEPLOY-01
+    - id: edit-yaml
+      title: 编辑 YAML
+      prd: prd/kube-frontend/app-workloads/edit-yaml.md
+      design: design/kube-frontend/app-workloads/edit-yaml.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_YAML-01
+    - id: delete
+      title: 删除负载
+      prd: prd/kube-frontend/app-workloads/delete.md
+      design: design/kube-frontend/app-workloads/delete.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DELETE-01
   - id: cluster-configmaps
     title: 集群配置字典
     prd: prd/kube-frontend/cluster-configmaps/_index.md
