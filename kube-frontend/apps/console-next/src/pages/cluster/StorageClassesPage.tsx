@@ -32,7 +32,23 @@ export function StorageClassesPage({ cluster }: StorageClassesPageProps): React.
     queryFn: ({ signal }) => storageClassesApi(apiClient).list({ ...toListParams(list, { cluster, namespace: '' }, 200), signal }),
   });
 
-  const rows = (query.data?.items ?? []) as StorageClassSummary[];
+  /*
+   * Sorted here, not by the server.
+   *
+   * `storageclasses` is a cluster-scoped core resource read from `storage.k8s.io`; the
+   * `sortBy`/`ascending` query parameters are a KubeSphere convention that the core API
+   * ignores, so the sort control used to do nothing at all. The whole collection is
+   * fetched anyway (a cluster has a handful), so ordering it locally is both correct
+   * and cheap.
+   */
+  const rows = React.useMemo(() => {
+    const items = [...((query.data?.items ?? []) as StorageClassSummary[])];
+    return items.sort((a, b) => {
+      const direction = list.order === 'asc' ? 1 : -1;
+      if (list.sortBy === 'createTime') return a.createdAt.localeCompare(b.createdAt) * direction;
+      return a.name.localeCompare(b.name) * direction;
+    });
+  }, [query.data, list.sortBy, list.order]);
   const total = query.data?.total ?? 0;
 
   const schema = React.useMemo<ListSchema<StorageClassSummary>>(

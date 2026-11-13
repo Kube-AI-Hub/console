@@ -1,0 +1,32 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-SORT-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: sort
+title: 集群页 · 存储类型与系统组件的名称排序可切换
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/storageclasses'
+prd: prd/kube-frontend/cluster-management/_index.md
+design: design/kube-frontend/cluster-management/_index.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-SORT-01
+
+story:
+- US1
+
+product: 存储类型与系统组件点击名称列可在升降序间切换，顺序确实改变。
+preconditions:
+- 已登录，且有集群权限
+- 两个页面各有至少两条数据
+steps:
+- 打开存储类型页，点击名称排序两次，记录两次顺序
+- 打开系统组件页，同样操作
+expected:
+- 两个页面两次点击的顺序不同，且分别为升序与降序
+- 系统组件的初始顺序仍是不健康在前
+troubleshoot:
+- 点击无效：存储类型走核心 API，服务端会忽略 sortBy（应本地排序）
+- 点击无效：系统组件的行排序曾写死为健康度，未使用排序状态
+update_automation:
+- 排序实现变化时改对应页面与其单测

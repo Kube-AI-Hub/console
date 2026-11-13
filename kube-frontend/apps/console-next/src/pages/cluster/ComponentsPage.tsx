@@ -26,7 +26,9 @@ export interface ComponentsPageProps {
 
 export function ComponentsPage({ cluster: _cluster }: ComponentsPageProps): React.ReactElement {
   const t = useT();
-  const list = useResourceListState<'name' | 'createTime'>({ defaultSortBy: 'name' });
+  // Default to health so a broken component is not buried among 49 rows; the sort
+  // control then works like everywhere else.
+  const list = useResourceListState<'name' | 'createTime' | 'health'>({ defaultSortBy: 'health', defaultOrder: 'asc' });
 
   const query = useQuery({
     queryKey: ['components'],
@@ -36,8 +38,23 @@ export function ComponentsPage({ cluster: _cluster }: ComponentsPageProps): Reac
   const all = query.data?.items ?? [];
   const keyword = list.search.trim().toLowerCase();
   const filtered = keyword ? all.filter((row) => row.name.toLowerCase().includes(keyword)) : all;
-  // Unhealthy first: a sorted-by-name list buries the one broken component.
-  const rows = [...filtered].sort((a, b) => Number(a.up) - Number(b.up) || a.name.localeCompare(b.name));
+  /*
+   * Ordered by whatever the sort control says, and the control starts on health so the
+   * one broken component is not buried among the rest.
+   *
+   * The order used to be hard-coded to health-then-name while the schema still offered a
+   * sortable name column: clicking it changed the state, re-rendered, and produced the
+   * same order — a control that does nothing.
+   */
+  const rows = React.useMemo(() => {
+    const items = [...filtered];
+    const direction = list.order === 'asc' ? 1 : -1;
+    return items.sort((a, b) => {
+      if (list.sortBy === 'health') return (Number(a.up) - Number(b.up)) * direction || a.name.localeCompare(b.name);
+      if (list.sortBy === 'createTime') return a.createdAt.localeCompare(b.createdAt) * direction;
+      return a.name.localeCompare(b.name) * direction;
+    });
+  }, [filtered, list.sortBy, list.order]);
   const total = rows.length;
 
   const schema = React.useMemo<ListSchema<ComponentSummary>>(
@@ -47,7 +64,7 @@ export function ComponentsPage({ cluster: _cluster }: ComponentsPageProps): Reac
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
       search: { placeholder: t('cluster.searchPlaceholder'), keys: ['name'], aiId: 'components:search' },
-      sortableKeys: ['name'],
+      sortableKeys: ['name', 'health'],
       sortAiPrefix: 'components',
       sort: { key: list.sortBy, order: list.order },
       columns: [

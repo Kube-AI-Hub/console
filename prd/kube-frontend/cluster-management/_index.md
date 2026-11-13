@@ -29,6 +29,7 @@
 
 - **AC-FULL-KUBE-FRONTEND-CLUSTER_MANAGEMENT-01** — 已知已登录且有集群权限，当在两个页签之间切换，则每次都显示对应列表（或空态），页签高亮跟随，切换不产生文档请求。
 - **AC-FULL-KUBE-FRONTEND-CLUSTER_MANAGEMENT-02** — 已知在集群级页面，当观察页面顶部，则**不出现**项目工作区栏（`data-ai-id="workspace-bar"`）。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-SORT-01** — 已知存储类型与系统组件页各有数据，当点击名称列排序，则顺序变为升序；再次点击变为降序，两次结果不同；系统组件页的初始顺序仍为不健康在前。
 
 ## 设计目标
 
