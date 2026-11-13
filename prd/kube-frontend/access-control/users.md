@@ -20,6 +20,12 @@
 
 **Independent Test**：创建一个临时用户 → 停用 → 回读 Disabled → 启用 → 回读 Active → 删除 → 列表不再包含。
 
+### US3 - 修正账号的邮箱与描述 (Priority: P2)
+
+作为 **平台管理员**，我希望 **改掉用户的邮箱与描述**，以便 **账号信息与本人对得上**。
+
+**Independent Test**：创建临时用户 → 编辑邮箱与描述 → 回读两个字段 → 删除。
+
 ## 验收场景
 
 - **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-03** — 已知用户列表有数据，当行操作「修改平台角色」并选择平台管理员，则 `iam.kubesphere.io/platform-role` 变为 `platform-admin`；当「删除」并确认，则该用户不再出现在列表结果中。
@@ -29,6 +35,7 @@
 - **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-01** — 已知平台上有用户，当打开用户页，则显示用户名、状态、平台角色、最近登录四列。
 - **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-04** — 已知用户列表有数据，当点击名称列排序，则顺序变为升序；再次点击，则变为降序（两次结果不同）。
 - **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-05** — 已知平台上有非 admin 用户，当对其执行「停用」，则该用户 `status.state` 变为 `Disabled`，行操作变为「启用」；执行「启用」后回到 `Active`；执行「删除」并确认后该用户从列表中消失；admin 账号不提供「停用」与「删除」。
+- **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-06** — 已知平台上有用户，当对某人执行「编辑信息」并填写新的邮箱与描述后保存，则该用户的 `spec.email` 变为新邮箱、`kubesphere.io/description` 注解变为新描述；邮箱非法时提交被拦下并提示。
 
 ## 设计目标
 
@@ -54,7 +61,6 @@
 
 ## 明确不做
 
-- 编辑用户信息（邮箱、描述）：写接口未验证，另立功能点。
 
 ## 假设
 

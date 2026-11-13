@@ -126,3 +126,12 @@ export function useSetUserActive() {
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['platform', 'users'] }),
   });
 }
+
+/** Edit a user's email and description; the list is refetched because both are columns. */
+export function useUpdateUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { name: string; email: string; description: string }) => usersWriteApi(api).updateUser(input),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['platform', 'users'] }),
+  });
+}

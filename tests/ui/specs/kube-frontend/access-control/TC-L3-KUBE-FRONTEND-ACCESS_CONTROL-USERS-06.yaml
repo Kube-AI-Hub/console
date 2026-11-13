@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-06
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: users
+title: 用户列表 · 编辑邮箱与描述
+entry_url: '{BASE_URL}/kube-frontend/access/users'
+prd: prd/kube-frontend/access-control/users.md
+design: design/kube-frontend/access-control/users.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-06
+
+story:
+- US3
+
+product: 在用户列表对某人「编辑信息」：改邮箱与描述，保存后回读 spec.email 与 kubesphere.io/description 注解；邮箱非法时拦截。
+preconditions:
+- 已登录平台管理
+- 用例自行创建临时用户（tc-e2e- 前缀），finally 中删除
+steps:
+- 用 API 创建临时用户（邮箱 A）
+- 在用户列表搜索该用户，执行「编辑信息」
+- 弹出窗口后把邮箱改为 B、描述改为文本并保存
+- 用 API 回读 spec.email 与 description 注解
+expected:
+- 弹窗打开后邮箱输入框有初始值
+- 保存后 spec.email 等于 B，description 注解等于输入描述
+- 邮箱非法时提交被拦下并提示
+troubleshoot:
+- 保存返回 405：编辑走了 PATCH，必须 GET 后 PUT
+- 邮箱没变：写到了注解而不是 spec.email
+- 弹窗为空：打开时没有读取用户详情（列表行不含描述）
+update_automation:
+- 选择器见 pages/access_control.py 与 UserEditDialog.tsx

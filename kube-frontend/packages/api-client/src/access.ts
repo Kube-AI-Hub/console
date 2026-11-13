@@ -169,8 +169,14 @@ export function userDetailApi(client: Client) {
       });
       const status = (item.status ?? {}) as Record<string, unknown>;
       const summary = toUserSummary(item);
+      const spec = (item.spec ?? {}) as Record<string, unknown>;
+      // The list row reads the email annotation, but the object's authoritative email is
+      // `spec.email` (the console writes edits there). Preferring the spec field is what makes
+      // the edit dialog open on the real value instead of an empty box.
+      const email = String(spec['email'] ?? summary.email ?? '');
       return {
         ...summary,
+        email,
         state: String(status['state'] ?? 'Active'),
         lastLoginTime: String(status['lastLoginTime'] ?? summary.lastLogin),
         description: ((item.metadata?.annotations ?? {}) as Record<string, string>)['kubesphere.io/description'] ?? '',
@@ -539,6 +545,34 @@ export function usersWriteApi(client: Client) {
      * a stale `resourceVersion` is rejected with 409; without the read, a second toggle
      * would fail.
      */
+    /**
+     * Edit a user's email and description.
+     *
+     * Same PUT shape as the other user writes (the IAM endpoint answers 405 to PATCH), and the
+     * object is read first so the update carries a current `resourceVersion` instead of a stale
+     * one. Only these two fields are touched: everything else on the object belongs to the
+     * platform.
+     */
+    async updateUser(params: { name: string; email: string; description: string }): Promise<UserSummary> {
+      const path = `${KAPIS_IAM}/users/${encodeURIComponent(params.name)}`;
+      const current = await client.request<KubeAccess>(path);
+      const updated = await client.request<KubeAccess>(path, {
+        method: 'PUT',
+        body: {
+          ...current,
+          spec: { ...((current?.spec ?? {}) as Record<string, unknown>), email: params.email },
+          metadata: {
+            ...current?.metadata,
+            annotations: {
+              ...((current?.metadata?.annotations ?? {}) as Record<string, string>),
+              'kubesphere.io/description': params.description,
+            },
+          },
+        },
+      });
+      return toUserSummary(updated ?? {});
+    },
+
     async setActive(params: { name: string; active: boolean }): Promise<UserSummary> {
       const path = `${KAPIS_IAM}/users/${encodeURIComponent(params.name)}`;
       const current = await client.request<KubeAccess>(path);

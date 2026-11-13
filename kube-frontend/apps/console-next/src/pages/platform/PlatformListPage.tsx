@@ -11,7 +11,8 @@ import { PLATFORM_DESCRIPTORS, useCreateWorkspace, useDeleteClusterRole, useDele
 import { WorkspaceEditorDialog } from './WorkspaceEditorDialog';
 import { RoleEditorDialog } from './RoleEditorDialog';
 import { DeleteDialog } from '@/components/resource/DeleteDialog';
-import { useSetUserActive } from './queries';
+import { useSetUserActive, useUpdateUser } from './queries';
+import { UserEditDialog } from './UserEditDialog';
 import { MutationAlert } from '@/components/resource/ResourceErrorPanel';
 import { UserCreateDialog } from './UserCreateDialog';
 import { UserRoleDialog } from './UserRoleDialog';
@@ -44,6 +45,8 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
   const setRole = useSetUserRole();
   const removeUser = useDeleteUser();
   const setUserActive = useSetUserActive();
+  const updateUser = useUpdateUser();
+  const [editTarget, setEditTarget] = React.useState<UserSummary | null>(null);
   const [roleEditor, setRoleEditor] = React.useState<{ name: string; alias: string; description: string } | null | 'new'>(null);
   const [deleteRole, setDeleteRole] = React.useState<ClusterRoleSummary | null>(null);
   const removeRole = useDeleteClusterRole();
@@ -229,6 +232,7 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
                 label: t('platform.users.disable'),
                 visible: (row: Row) => (row as UserSummary).status !== 'Disabled' && (row as UserSummary).username !== 'admin',
               },
+              { key: 'editUser', label: t('resource.action.editInfo') },
               { key: 'changeRole', label: t('platform.users.changeRole') },
               {
                 key: 'delete',
@@ -299,6 +303,7 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
           }
           if (!row) return;
           if (action === 'changeRole') setRoleTarget(row as UserSummary);
+          if (action === 'editUser') setEditTarget(row as UserSummary);
           if (action === 'enableUser') setUserActive.mutate({ name: (row as UserSummary).username, active: true });
           if (action === 'disableUser') setUserActive.mutate({ name: (row as UserSummary).username, active: false });
           if (action === 'edit' && kind === 'clusterroles') {
@@ -317,7 +322,7 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
         }}
       />
 
-      <MutationAlert error={setUserActive.error ?? setRole.error ?? removeUser.error ?? removeRole.error ?? createWorkspace.error ?? updateWorkspace.error ?? removeWorkspace.error} />
+      <MutationAlert error={updateUser.error ?? setUserActive.error ?? setRole.error ?? removeUser.error ?? removeRole.error ?? createWorkspace.error ?? updateWorkspace.error ?? removeWorkspace.error} />
 
       <WorkspaceEditorDialog
         open={workspaceEditor !== null}
@@ -335,6 +340,19 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
           setWorkspaceEditor(null);
         }}
       />
+
+      {editTarget ? (
+        <UserEditDialog
+          name={editTarget.username}
+          pending={updateUser.isPending}
+          {...(updateUser.error ? { error: updateUser.error } : {})}
+          onCancel={() => setEditTarget(null)}
+          onSubmit={async (values) => {
+            await updateUser.mutateAsync({ name: editTarget.username, ...values });
+            setEditTarget(null);
+          }}
+        />
+      ) : null}
 
       {deleteWorkspace ? (
         <DeleteDialog

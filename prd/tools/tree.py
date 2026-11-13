@@ -420,7 +420,7 @@ MODULES = [
                     {
                         "id": "users",
                         "title": "用户列表",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-01", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-02", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-05"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-01", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-02", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-05", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-06"]},
                     },
                     {
                         "id": "platform-roles",
