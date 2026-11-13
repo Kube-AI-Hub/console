@@ -2373,3 +2373,85 @@ kubeaihub-model-cache / juicefs-shared  | Bound | 1Ti | RWX | spaces/csghub-mode
 用例在遇到「未知」时也会如实跳过并说明原因，而不是笼统地报「未解析」。
 
 **验证**：storage 9 通过（MOUNT_01 修复后 91 秒通过）；架构契约 467；console-next 103；文档门禁 0 错。
+
+## 49. 第 76 轮：集群概览迁移（2026-11-13，B200）
+
+### 49.1 为什么这一轮能做
+
+前几轮把「集群概览」判为环境不可用，依据是 A100 上 `clusters/host` 返回 500、监控 API 未路由。
+切到 B200 后重新探测：
+
+| 探测 | A100 | B200 |
+| --- | --- | --- |
+| `/kapis/cluster.kubesphere.io/v1alpha1/clusters` | 500 | **200，1 个对象** |
+| `/kapis/monitoring.kubesphere.io/v1alpha3/cluster` | 404 | **200，12 个指标** |
+| `/kapis/monitoring.kubesphere.io/v1alpha3/components/apiserver` | 404 | **200** |
+| `metrics.k8s.io` | 200 | **404（未路由）** |
+
+这又是一次「环境差异不等于功能不可用」。**换了参考环境就必须重测此前的阻塞项**，
+否则会一直沿用错误的边界。
+
+### 49.2 交付
+
+| 层 | 内容 |
+| --- | --- |
+| api-client | `clusterApi`、`clusterMetricsApi`、`componentMetricsApi`、`toClusterDetail`、`toMetricValues` |
+| 页面 | 基本信息 / 资源用量 / Kubernetes 状态 / 已启用模块 四块 |
+| 路由 | `/kube-frontend/clusters/<id>/overview`，并成为集群管理默认页 |
+| 文档 | PRD + 设计各 1 份；spec 1 条（覆盖 2 条 AC、4 条 US） |
+| 测试 | 页面对象 `pages/cluster_overview.py` + E2E 1 条 |
+
+### 49.3 三个来自实测的设计决定
+
+1. **GPU 按卡计数，不按百分比**。B200 有 15 张卡、已分配 6 张、利用率 26%。「6 / 15」直接回答
+   「还能不能再起一个 GPU 任务」，「40%」不能——而且「已分配满、利用率低」正是需要被看见的组合。
+2. **两个数据源独立降级**。集群对象是静态事实（版本、就绪、模块），监控是测量值。合成一个查询会让
+   「没装监控」这种常见部署形态变成整页失败。实测 B200 没有 metrics-server 却有 KubeSphere 监控——
+   反过来也成立。
+3. **模块列表读 `status.configz`，未知键原样显示**。该集群实测含 `dongba`、`platformModel`、
+   `network.ippool` 等非标准键。按老 console 的六个固定图标渲染会低报已装模块；按白名单过滤同样会漏。
+
+### 49.4 两个必须避开的读取陷阱
+
+- **`scheduler_schedule_attempts` 是按 result 标签分多条序列**（`scheduled` / `unschedulable`）。
+  只取第一条会把两个语义完全不同的数混成一个。
+- **指标缺失 ≠ 指标为 0**。监控 API 对不存在的指标不返回该 `metric_name`，对存在但无数据的返回空
+  `result`。两者都必须渲染成「不可用」而不是 0%，否则「没装监控」会被读成「集群完全空闲」。
+
+### 49.5 顺带修掉一个让整轮测试崩掉的真缺陷
+
+本轮重建前端时 5178 的静态服务进程**退出**了，直接导致上一轮「20 个用例同时失败」。根因在
+`kube-frontend/scripts/dev-static-server.mjs`：
+
+```js
+} catch {
+  const shell = await readFile(join(distDir, 'index.html'));  // ← 没有二次保护
+}
+```
+
+`vite build` 会清空并重写 `dist/`，中间有一瞬间连 `index.html` 都不存在。这个 reject 逃出
+请求处理器 → 未处理的 Promise 拒绝 → 进程退出。**端口消失的表现与产品故障完全一致**，这是它被
+误判为代码问题两次的原因。
+
+修复：外壳读取加二次保护，输出 `503 + Retry-After: 1`（「服务正常，产物正在替换」比死掉更准确）。
+实测：构建窗口内返回 503，窗口结束自动恢复 200，进程不再退出。
+
+**教训**：大批量同时失败时，先 `curl` 端口，再怀疑代码。
+
+### 49.6 验证
+
+| 项 | 结果 |
+| --- | --- |
+| 新用例 | 1 通过（3.7 秒） |
+| 架构契约 | 479 通过 |
+| 文档门禁 | **errors=0 warnings=0** |
+| 一致性核对 | 待处理 **0**（集群页 7 个） |
+| 移动端 390px | 无横向滚动；交互目标均 ≥24×24 |
+
+### 49.7 同时进行的模型配置调整
+
+用户要求「增加模型请求的延时等待」。`llm-pi-ai` / `llm-deepseek` 的 `streamIdleTimeoutMs`
+默认 300000（5 分钟），慢模型在长上下文下会读超时被判失败。已在本机 DSH profile
+（`~/.dsh/profiles/desktop/cordis.patch.yml`）改为 172800000（48 小时，与 SDK minimal bundle 一致），
+并保留备份。该改动作用于 harness，不进入本仓库。
+

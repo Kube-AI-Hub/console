@@ -99,9 +99,24 @@ createServer(async (request, response) => {
     const file = await readFile(filePath);
     response.writeHead(200, { 'content-type': contentTypes[extname(filePath)] ?? 'application/octet-stream' }).end(file);
   } catch {
-    // Client-side routes have no file on disk; hand back the SPA shell.
-    const shell = await readFile(join(distDir, 'index.html'));
-    response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }).end(shell);
+    /*
+     * Client-side routes have no file on disk; hand back the SPA shell.
+     *
+     * The shell read needs its own guard. During `vite build` the output directory is
+     * emptied and rewritten, so there is a window where even `index.html` does not
+     * exist. Letting that rejection escape killed this process — the port went away
+     * mid-run and every browser case in flight failed with a connection error, which
+     * looks exactly like a product outage. A 503 with Retry-After is the accurate
+     * answer: the server is fine, the artifact is being replaced.
+     */
+    try {
+      const shell = await readFile(join(distDir, 'index.html'));
+      response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }).end(shell);
+    } catch {
+      response
+        .writeHead(503, { 'content-type': 'text/plain; charset=utf-8', 'retry-after': '1' })
+        .end('build in progress: dist/index.html is not available yet');
+    }
   }
 }).listen(port, '127.0.0.1', () => {
   console.log(`[dev-static] ${distDir} on http://127.0.0.1:${port} -> ${bffUrl}`);

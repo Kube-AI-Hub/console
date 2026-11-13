@@ -6,10 +6,10 @@
 
 ## 概述
 
-- **路由**：`/kube-frontend/clusters/:cluster/{nodes,namespaces}`
+- **路由**：`/kube-frontend/clusters/:cluster/{overview,nodes,namespaces,components,storageclasses,persistentvolumes,configmaps}`
 - **谁用**：集群管理员，判断节点是否健康、集群里有哪些项目。
-- **做哪几步**：打开节点 → 看就绪状态与可分配 CPU/内存；切到项目 → 看项目与其所属企业空间。
-- **看到什么**：节点两行（名称 + 内网 IP）、状态徽章、角色、CPU、内存；项目两行（名称 + 描述）、状态、企业空间、创建时间。
+- **做哪几步**：先看概览（集群身份、用量、模块） → 切到节点看就绪状态与 CPU/内存使用率；切到项目 → 看项目、所属企业空间与用量。
+- **看到什么**：概览分四块——基本信息（版本、就绪、连接方式）、资源用量（已用/总量 + 已分配）、Kubernetes 状态（请求速率/延迟/调度）、已启用模块；节点两行（名称 + 内网 IP）、状态徽章、角色、CPU 与内存使用率；项目两行（名称 + 描述）、状态、企业空间、CPU/内存/容器组用量。
 
 ## 用户故事
 
@@ -49,6 +49,7 @@
 
 | 页签 | 路由 |
 |---|---|
+| 集群概览 | `/kube-frontend/clusters/<id>/overview` |
 | 节点 | `/kube-frontend/clusters/<id>/nodes` |
 | 项目 | `/kube-frontend/clusters/<id>/namespaces` |
 
@@ -67,13 +68,15 @@
 
 | 功能点 | 需求 |
 |---|---|
+| 集群概览 | [overview.md](./overview.md) |
 | 节点 | [nodes.md](./nodes.md) |
 | 项目 | [projects.md](./projects.md) |
 
 ## 明确不做
 
 - 节点排空/污点编辑、项目创建/编辑/删除。
-- 集群概览与集群设置：本集群的 `clusters/host` 资源返回 500、监控 API 未路由，无法验证。
+- 集群设置（编辑描述、可见性、可插拔组件开关）：需要平台侧写接口，当前迁移范围外。
+- 集群概览的趋势曲线与历史：需要指标历史接口，概览只取当前值（见 [overview.md](./overview.md)）。
 - 节点详情的 Pod 列表（需要按节点过滤 Pod）。
 
 ## 假设
@@ -83,11 +86,13 @@
 ## 验收用例
 
 - `TC-FULL-KUBE-FRONTEND-CLUSTER_MANAGEMENT-01`
+- `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-01`
 
 ## 功能需求
 
 - **FR-FULL-KUBE-FRONTEND-CLUSTER_MANAGEMENT-01** — 两个页面共用列表组件，差异由描述符表达。
 - **FR-FULL-KUBE-FRONTEND-CLUSTER_MANAGEMENT-02** — 集群级页面不渲染项目工作区栏。
+- **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-01** — 概览的静态事实来自集群对象，测量值来自 KubeSphere 监控，两者独立降级。
 
 ## 成功标准
 

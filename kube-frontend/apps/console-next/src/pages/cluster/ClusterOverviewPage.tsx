@@ -42,17 +42,17 @@ export function ClusterOverviewPage({ cluster }: ClusterOverviewPageProps): Reac
   });
 
   if (detail.isError) {
-    return <ResourceErrorPanel error={detail.error} onRetry={() => void detail.refetch()} retryAiId="cluster-overview:retry" />;
+    return <ResourceErrorPanel error={detail.error} onRetry={() => void detail.refetch()} retryAiId="overview:retry" />;
   }
 
   const state = detail.isLoading ? 'loading' : 'ready';
 
   return (
     <AiSurface
-      aiId="cluster-overview:surface"
+      aiId="overview:surface"
       state={detail.data ? state : 'loading'}
       className="flex flex-col gap-4"
-      {...actionProps('cluster-overview:surface')}
+      {...actionProps('overview:surface')}
     >
       <header className="flex flex-col gap-1">
         <h1 className="text-lg font-semibold text-ai-fg">{t('cluster.overview.title')}</h1>
@@ -97,32 +97,32 @@ function BasicInfoPanel({ detail }: { detail: ClusterDetail }): React.ReactEleme
           */}
         <div className="flex flex-col gap-1 sm:col-span-2">
           <dt className="text-ai-fg-muted">{t('cluster.column.status')}</dt>
-          <dd className="flex flex-wrap items-center gap-2" {...actionProps('cluster-overview:status')}>
+          <dd className="flex flex-wrap items-center gap-2" {...actionProps('overview:status')}>
             <Badge tone={detail.ready && detail.enabled ? 'success' : 'warning'}>{status}</Badge>
             {detail.readyMessage ? <span className="text-xs text-ai-fg-muted">{detail.readyMessage}</span> : null}
           </dd>
         </div>
-        <DefinitionRow label={t('cluster.overview.provider')} value={detail.provider || '-'} aiId="cluster-overview:provider" />
+        <DefinitionRow label={t('cluster.overview.provider')} value={detail.provider || '-'} aiId="overview:provider" />
         <DefinitionRow
           label={t('cluster.overview.kubernetesVersion')}
           value={detail.kubernetesVersion || '-'}
-          aiId="cluster-overview:kubernetes-version"
+          aiId="overview:kubernetes-version"
         />
         <DefinitionRow
           label={t('cluster.overview.kubeSphereVersion')}
           value={detail.kubeSphereVersion || '-'}
-          aiId="cluster-overview:kubesphere-version"
+          aiId="overview:kubesphere-version"
         />
-        <DefinitionRow label={t('cluster.overview.nodeCount')} value={String(detail.nodeCount)} aiId="cluster-overview:node-count" />
+        <DefinitionRow label={t('cluster.overview.nodeCount')} value={String(detail.nodeCount)} aiId="overview:node-count" />
         <DefinitionRow
           label={t('cluster.overview.connectionType')}
           value={detail.connectionType || '-'}
-          aiId="cluster-overview:connection"
+          aiId="overview:connection"
         />
         <DefinitionRow
           label={t('cluster.overview.apiEndpoint')}
           value={detail.kubernetesAPIEndpoint || '-'}
-          aiId="cluster-overview:api-endpoint"
+          aiId="overview:api-endpoint"
         />
         {detail.description ? (
           <div className="flex flex-col gap-1 sm:col-span-2">
@@ -160,7 +160,7 @@ function UsagePanel({ cluster }: { cluster: string }): React.ReactElement {
          * Not an error page: the rest of the overview is still valid. Saying so
          * explicitly stops the empty panel from reading as "this cluster uses nothing".
          */
-        <div className="flex flex-col gap-1 text-sm" {...actionProps('cluster-overview:no-metrics')}>
+        <div className="flex flex-col gap-1 text-sm" {...actionProps('overview:no-metrics')}>
           <span className="text-ai-fg">{t('cluster.overview.noMetrics')}</span>
           <span className="text-xs text-ai-fg-muted">{t('cluster.overview.noMetricsHint')}</span>
         </div>
@@ -174,7 +174,7 @@ function UsagePanel({ cluster }: { cluster: string }): React.ReactElement {
             total={formatCores(usage.data.cpuTotalCores)}
             allocated={formatCores(usage.data.cpuAllocatedCores)}
             ratioValue={ratio(usage.data.cpuUsedCores, usage.data.cpuTotalCores)}
-            aiId="cluster-overview:usage-cpu"
+            aiId="overview:usage-cpu"
           />
           <UsageRow
             label={t('cluster.overview.memory')}
@@ -182,21 +182,21 @@ function UsagePanel({ cluster }: { cluster: string }): React.ReactElement {
             total={formatBytes(usage.data.memoryTotalBytes)}
             allocated={formatBytes(usage.data.memoryAllocatedBytes)}
             ratioValue={ratio(usage.data.memoryUsedBytes, usage.data.memoryTotalBytes)}
-            aiId="cluster-overview:usage-memory"
+            aiId="overview:usage-memory"
           />
           <UsageRow
             label={t('cluster.overview.pods')}
             used={String(usage.data.podRunning)}
             total={String(usage.data.podCapacity)}
             ratioValue={ratio(usage.data.podRunning, usage.data.podCapacity)}
-            aiId="cluster-overview:usage-pods"
+            aiId="overview:usage-pods"
           />
           <UsageRow
             label={t('cluster.overview.nodes')}
             used={String(usage.data.nodeReady)}
             total={String(usage.data.nodeTotal)}
             ratioValue={ratio(usage.data.nodeReady, usage.data.nodeTotal)}
-            aiId="cluster-overview:usage-nodes"
+            aiId="overview:usage-nodes"
           />
           {/*
             * GPUs only when the cluster reports a total. A cluster with none would
@@ -220,7 +220,7 @@ function UsagePanel({ cluster }: { cluster: string }): React.ReactElement {
                   ? undefined
                   : `${t('cluster.overview.gpuUtilisation')} ${percent(usage.data.gpuUtilisation)}`
               }
-              aiId="cluster-overview:usage-gpu"
+              aiId="overview:usage-gpu"
             />
           ) : null}
         </dl>
@@ -294,7 +294,7 @@ function KubernetesStatusPanel({ cluster }: { cluster: string }): React.ReactEle
   return (
     <Panel title={t('cluster.overview.kubernetesStatus')}>
       {status.isError ? (
-        <div className="flex flex-col gap-1 text-sm" {...actionProps('cluster-overview:no-kubernetes-status')}>
+        <div className="flex flex-col gap-1 text-sm" {...actionProps('overview:no-kubernetes-status')}>
           <span className="text-ai-fg">{t('cluster.overview.noMetrics')}</span>
         </div>
       ) : status.isLoading || !status.data ? (
@@ -308,7 +308,7 @@ function KubernetesStatusPanel({ cluster }: { cluster: string }): React.ReactEle
                 ? '-'
                 : `${round(status.data.requestRate)} ${t('cluster.overview.requestRateUnit')}`
             }
-            aiId="cluster-overview:request-rate"
+            aiId="overview:request-rate"
           />
           <StatusNumber
             label={t('cluster.overview.requestLatency')}
@@ -317,12 +317,12 @@ function KubernetesStatusPanel({ cluster }: { cluster: string }): React.ReactEle
                 ? '-'
                 : formatLatency(status.data.requestLatencySeconds)
             }
-            aiId="cluster-overview:request-latency"
+            aiId="overview:request-latency"
           />
           <StatusNumber
             label={t('cluster.overview.scheduled')}
             value={status.data.scheduled === undefined ? '-' : String(status.data.scheduled)}
-            aiId="cluster-overview:scheduled"
+            aiId="overview:scheduled"
           />
           {/*
             * Emphasised only when non-zero: a scheduler refusing pods is the one number
@@ -332,7 +332,7 @@ function KubernetesStatusPanel({ cluster }: { cluster: string }): React.ReactEle
             label={t('cluster.overview.unschedulable')}
             value={status.data.unschedulable === undefined ? '-' : String(status.data.unschedulable)}
             tone={status.data.unschedulable ? 'warning' : undefined}
-            aiId="cluster-overview:unschedulable"
+            aiId="overview:unschedulable"
           />
         </dl>
       )}
@@ -385,7 +385,7 @@ function ModulesPanel({ detail }: { detail: ClusterDetail }): React.ReactElement
   const disabled = detail.modules.filter((m) => !m.enabled);
   return (
     <Panel title={t('cluster.overview.modules')}>
-      <ul className="flex flex-wrap gap-2" {...actionProps('cluster-overview:modules')}>
+      <ul className="flex flex-wrap gap-2" {...actionProps('overview:modules')}>
         {enabled.map((module) => (
           <li key={module.key} title={module.key}>
             <Badge tone="success">{moduleLabel(t, module.key)}</Badge>

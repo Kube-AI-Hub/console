@@ -441,6 +441,11 @@ MODULES = [
                 "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-CLUSTER_MANAGEMENT-01"]},
                 "features": [
                     {
+                        "id": "overview",
+                        "title": "集群概览",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-01"]},
+                    },
+                    {
                         "id": "nodes",
                         "title": "节点列表",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-01"]},
