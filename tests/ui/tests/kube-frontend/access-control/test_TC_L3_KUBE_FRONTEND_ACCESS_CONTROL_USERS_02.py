@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from uuid import uuid4
+
 import pytest
 from playwright.sync_api import expect
 
@@ -8,13 +10,24 @@ pytestmark = pytest.mark.ui
 USERS = "/kapis/iam.kubesphere.io/v1alpha2/users"
 
 
+def _exists(ui, username: str) -> bool:
+    """Whether the user exists, answered from the list.
+
+    `GET /users/<missing>` comes back 500 from this deployment, not 404, so a status
+    check would be reading the BFF's error mapping rather than whether the user is there.
+    """
+    status, body = ui.api.request("GET", f"{USERS}?limit=-1")
+    assert status == 200, status
+    return any((item.get("metadata") or {}).get("name") == username for item in body.get("items") or [])
+
+
 @pytest.mark.point
 def test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_USERS_02(access_control_page, screenshot):
     """TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-02 用户：创建与密码校验。"""
 
     ui = access_control_page
     assert ui.api is not None
-    name = f"tc-e2e-u{int(__import__('time').time() * 1000) % 1_000_000}"
+    name = f"tc-e2e-u{uuid4().int % 1_000_000}"
     try:
         ui.open("users")
         ui.wait_ready("users")
@@ -23,20 +36,27 @@ def test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_USERS_02(access_control_page, screen
         expect(dialog).to_be_visible()
 
         # An illegal user name is refused before a request is made.
+        #
+        # The check that was here asserted the dialog contains "8 位" — but that text is
+        # the field's static hint and is always present, so it passed whether or not the
+        # password was rejected. "The dialog is still open" plus "no user exists" is what
+        # actually distinguishes a refused submit from a successful one.
         ui.page.locator("#ai-field-name").fill("Bad Name")
-        ui.page.locator("#ai-field-email").fill("u@example.com")
+        # IAM enforces a unique email, not just a unique name: reusing one address made
+        # the second run fail with 409, which read as "the dialog will not close".
+        ui.page.locator("#ai-field-email").fill(f"{name}@example.com")
         ui.page.locator("#ai-field-password").fill("Strong12345")
         dialog.get_by_role("button", name="确认").click()
-        ui.page.wait_for_timeout(500)
         expect(dialog).to_be_visible()
+        expect(dialog).to_have_count(1, timeout=15_000)
+        assert _exists(ui, "Bad Name") is False, "非法用户名竟然被创建"
 
-        # So is a password the platform would reject, with the reason spelled out.
+        # So is a password the platform would reject.
         ui.page.locator("#ai-field-name").fill(name)
         ui.page.locator("#ai-field-password").fill("short")
         dialog.get_by_role("button", name="确认").click()
-        ui.page.wait_for_timeout(500)
-        expect(dialog).to_be_visible()
-        assert "8 位" in dialog.inner_text()
+        expect(dialog).to_have_count(1, timeout=15_000)
+        assert _exists(ui, name) is False, "短密码竟然创建了用户"
 
         ui.page.locator("#ai-field-password").fill("Strong12345")
         dialog.get_by_role("button", name="确认").click()

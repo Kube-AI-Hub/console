@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from uuid import uuid4
+
 import time
 
 import pytest
@@ -16,7 +18,7 @@ def test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_WORKSPACES_02(access_control_page, s
 
     ui = access_control_page
     assert ui.api is not None
-    name = f"tc-e2e-ws{int(time.time() * 1000) % 1_000_000}"
+    name = f"tc-e2e-ws{uuid4().int % 1_000_000}"
     try:
         ui.open("workspaces")
         ui.wait_ready("workspaces")

@@ -109,6 +109,44 @@ tree.py → build_prd.py → prd(AC) → design(承接 AC) → tests(covers) →
    cd tests/ui && python3 generate_case_docs.py
    ```
 
+### 减少往返：先问「这类错误能不能静态检出」
+
+迁移期统计：125 条 feat 对 123 条 fix，几乎一条功能配一次修补。把 fix 归类后发现，多数不是逻辑
+错误，而是**声明与实现不一致**这类机械问题——它们不需要跑浏览器就能发现。
+
+写代码前先问三个问题，能省掉整轮往返：
+
+| 问题 | 落到哪里 |
+| --- | --- |
+| 这个约束能否用契约测试静态检查？ | `kube-frontend/config/*.test.ts` |
+| 这段机械登记能否交给脚本？ | `prd/tools/add_feature.py` |
+| 这次改动该跑哪些检查？ | `prd/tools/verify.py` |
+
+已有护栏（`config/consistency-contracts.test.ts`）：中英文键集合一致、字面 `t()` 键都存在、
+每个 `*Api` 都从 barrel 导出、`Row`/`statusLabel`/`ErrorPanel` 只有一份实现、页面不手写确认框。
+**第一次运行就抓出 3 个未被引用的详情页组件（700+ 行）和 4 处样式漂移。**
+
+### 开页一条命令
+
+```bash
+python3 prd/tools/add_feature.py --submodule cluster-management --feature node-pools \
+    --title 节点池 --scope cluster
+```
+
+生成 PRD 树节点、需求、技术方案、用例规格、测试骨架、区域注册表条目，产物直接通过 `--strict` 门禁。
+脚本不写页面代码、不猜字段、不填决策——那些是迁移本身的工作。
+
+### 测试残留会伪装成产品缺陷
+
+用例在 `finally` 里删自己创建的对象，但进程被中断/超时/fixture 中途失败时删不掉。残留对象让列表
+变长、出现分页、「第一行」不再是目标对象，**后续用例开始莫名失败**。一次清理在单个命名空间里
+找出 46 个残留。跑全量前先 dry-run 一次：
+
+```bash
+python3 prd/tools/cleanup_test_objects.py          # 看有什么
+python3 prd/tools/cleanup_test_objects.py --apply  # 真的删
+```
+
 ### 验证节奏：快反馈用并发，判定用串行
 
 迁移一页就跑一次全量是不现实的：145 个用例串行要 14 分钟，而绝大多数时间花在「每个用例重新
