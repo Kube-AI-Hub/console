@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { clustersApi, type ClusterSummary } from '@kube-ai-hub/api-client';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
@@ -8,6 +8,7 @@ import { api as apiClient } from '@/api';
 import { useResourceListState } from '@/components/resource/useResourceListState';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
+import { AddClusterDialog } from './AddClusterDialog';
 
 /**
  * 集群列表（多集群）.
@@ -25,7 +26,9 @@ type SortKey = 'name' | 'createTime' | 'nodeCount';
 
 export function MultiClusterListPage(_props: MultiClusterListPageProps): React.ReactElement {
   const t = useT();
+  const queryClient = useQueryClient();
   const list = useResourceListState<SortKey>({ defaultSortBy: 'name' });
+  const [adding, setAdding] = React.useState(false);
 
   const query = useQuery({
     queryKey: ['clusters'],
@@ -124,6 +127,7 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
           ),
         },
       ],
+      primaryAction: { key: 'add', label: t('cluster.add.title'), aiId: 'clusters:add' },
       empty: { title: t('cluster.list.emptyTitle'), description: t('cluster.list.emptyDescription') },
       labels: {
         selectAll: t('table.selectAll'),
@@ -159,6 +163,16 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
         onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
           if (next) list.setSort(next);
         }}
+        onAction={(action) => {
+          // The primary action arrives without a row; anything else here would be a row
+          // action, and this list has none yet.
+          if (action === 'add') setAdding(true);
+        }}
+      />
+      <AddClusterDialog
+        open={adding}
+        onOpenChange={setAdding}
+        onCreated={() => void queryClient.invalidateQueries({ queryKey: ['clusters'] })}
       />
     </AiSurface>
   );

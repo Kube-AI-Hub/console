@@ -79,7 +79,23 @@ class ClusterManagementPage:
         return [str(v) for v in values]
 
     def active_tab(self) -> str | None:
+        """Retained for the project console, which still uses area tabs."""
         return self.page.locator('[data-ai-id^="area-tabs:"] a[aria-current="page"]').get_attribute("data-ai-id")
+
+    # ---------------- 侧栏导航 ----------------
+
+    def nav(self, label: str) -> None:
+        """Follow a cluster-level sidebar entry by its visible label.
+
+        The cluster console lists its pages in the left sidebar (old-console interaction);
+        the tab strip that used to mirror them was removed so the menu exists once.
+        """
+        self.page.locator("aside, nav").get_by_role("link", name=label, exact=True).first.click()
+
+    def active_nav(self) -> str | None:
+        """The path segment of the highlighted sidebar entry, e.g. `nodes`."""
+        href = self.page.locator('aside a[aria-current="page"], nav a[aria-current="page"]').first.get_attribute("href")
+        return href.rsplit("/", 1)[-1] if href else None
 
     @property
     def workspace_bar_count(self) -> int:

@@ -477,8 +477,24 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
    * Substring matching broke as soon as an area key was a prefix of another
    * (`services` inside `serviceaccounts`).
    */
-  const activeArea = areaOfPage('project', projectPageSegment(location));
-  const activeKey = activeArea?.key;
+  /**
+   * The cluster console (`/kube-frontend/clusters/<id>/<page>`) is its own scope.
+   *
+   * The sidebar there is the cluster's menu — 节点、项目、配置字典… — rather than the
+   * project areas: those pages live under a project, and offering them from a cluster
+   * console silently teleports the reader into one (usually `default`). The old console
+   * puts the cluster menu in the sidebar, which is what "进入集群后管理它" looks like.
+   */
+  const clusterPath = React.useMemo(() => {
+    const match = /^\/kube-frontend\/clusters\/([^/]+)(?:\/([^/?#]+))?/.exec(location);
+    if (!match?.[1]) return null;
+    return { cluster: decodeURIComponent(match[1]), segment: match[2] ? decodeURIComponent(match[2]) : '' };
+  }, [location]);
+
+  const activeArea = clusterPath ? areaOfPage('cluster', clusterPath.segment) : areaOfPage('project', projectPageSegment(location));
+  const activeKey = clusterPath
+    ? (clusterPath.segment || activeArea?.defaultPage || '')
+    : activeArea?.key;
 
   /**
    * Sidebar rows: one per project area, with the drawer closing on navigation.
@@ -486,20 +502,30 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
    * Memoised on the scope and language so typing in a page's search box does not
    * rebuild the sidebar's nodes.
    */
-  const sidebarItems = React.useMemo<MenuNode[]>(
-    () =>
-      areasFor('project').map((area) => {
-        const entry = areaEntry(area, scope);
-        return {
-          key: entry.key,
-          label: t(entry.labelKey),
-          icon: <Icon name={entry.icon} size={14} />,
-          href: entry.build(scope),
+  const sidebarItems = React.useMemo<MenuNode[]>(() => {
+    if (clusterPath) {
+      const root = `/kube-frontend/clusters/${encodeURIComponent(clusterPath.cluster)}`;
+      return areasFor('cluster').flatMap((area) =>
+        areaPages(area).map((page) => ({
+          key: page.key,
+          label: t(page.titleKey),
+          icon: <Icon name={area.icon} size={14} />,
+          href: `${root}/${page.path}`,
           onClick: () => setDrawerOpen(false),
-        };
-      }),
-    [scope, t],
-  );
+        })),
+      );
+    }
+    return areasFor('project').map((area) => {
+      const entry = areaEntry(area, scope);
+      return {
+        key: entry.key,
+        label: t(entry.labelKey),
+        icon: <Icon name={entry.icon} size={14} />,
+        href: entry.build(scope),
+        onClick: () => setDrawerOpen(false),
+      };
+    });
+  }, [clusterPath, scope, t]);
 
   const localeButton = (
     <button

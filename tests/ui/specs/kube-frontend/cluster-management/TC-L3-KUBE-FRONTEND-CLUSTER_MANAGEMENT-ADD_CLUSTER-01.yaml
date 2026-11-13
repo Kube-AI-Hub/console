@@ -1,0 +1,39 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: add-cluster
+title: 添加集群 · 导入 kubeconfig 并出现在列表
+entry_url: '{BASE_URL}/kube-frontend/clusters'
+prd: prd/kube-frontend/cluster-management/add-cluster.md
+design: design/kube-frontend/cluster-management/add-cluster.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-01
+
+story:
+- US1
+
+product: 集群列表的主操作「添加集群」用 kubeconfig 导入集群；提交后创建 Cluster 对象并刷新列表。
+preconditions:
+- 已登录，且有平台管理权限
+- 平台启用多集群联邦
+steps:
+- 打开集群列表，点「添加集群」
+- 分别提交非法名称与非 kubeconfig 内容，确认被拦下且未发请求
+- 填入合法名称与 kubeconfig 并确认
+- 读回 Cluster 对象核对 connection 与 joinFederation
+- 清理：删除该集群对象
+expected:
+- 名称非法时提示「名称只能包含小写字母、数字与连字符…」
+- 内容非 kubeconfig 时提示「这段内容不像 kubeconfig…」
+- 合法提交后对话框关闭，列表出现该集群
+- 对象的 spec.connection.type 为 direct，kubeconfig 为 base64，joinFederation 为 true
+performance:
+- 无特殊要求；创建为单次 POST
+troubleshoot:
+- 对话框不打开：主操作要用 onAction 承接，primaryAction 上的 onClick 无效
+- 对象创建了但列表没变：检查列表查询是否失效
+update_automation:
+- 字段变化时改 pages/cluster_management.py 的 add 相关选择器

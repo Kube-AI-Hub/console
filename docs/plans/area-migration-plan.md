@@ -1175,3 +1175,40 @@ assert "8 位" in dialog.inner_text()
 顺带补了一个边界断言：未知集群 id 必须给出「资源不存在 + 重试」，而不是渲染一个空控制台。
 
 **结论：路由正常。**
+
+### 48.26 集群管理交互对齐老 console
+
+按老 console 的交互补齐两件事：
+
+**1. 集群列表支持添加集群**
+
+老 console 的 `cluster.add`（`src/actions/cluster.js`）有两条路径：KubeKey 新建、导入已有集群。
+本页只做**导入**：新建需要 kubekey 控制器与主机清单，而导入是一次对象写入，也是平台日常动作。
+
+实现要点：
+
+| 要点 | 说明 |
+| --- | --- |
+| 写接口 | `POST /apis/cluster.kubesphere.io/v1alpha1/clusters`（kapis 对该组写请求返回 400） |
+| kubeconfig | **必须 `btoa` 编码**后写入 `spec.connection.kubeconfig`；直接发 YAML 会创建一个永远连不上的集群（老 console 的 `safeBtoa` 就是为此） |
+| 联邦 | `spec.joinFederation: true` |
+| 校验 | 名称（小写/数字/连字符）与 kubeconfig（含 `apiVersion`、`clusters`、`server`）在**发请求前**拦下；不做 YAML 解析，只为拦住「粘错文档」 |
+
+实测：通过界面导入后读回对象，`type=direct`、kubeconfig base64 可解、`joinFederation=true`，
+列表立即出现该集群。
+
+**走过的一个坑**：`primaryAction` 只带 `key`，点击经 `onAction` 回到页面；我第一版给它加了
+`onClick`，**TypeScript 没报错但运行时不生效**——按钮点了没反应。这类「schema 形状不匹配却静默失败」
+正是本轮之前加的「能力接线契约」想覆盖的方向。
+
+**2. 集群详情页左侧栏显示集群级菜单**
+
+原来 `/clusters/<id>/…` 的左侧栏仍是**项目区条目**，而集群页的导航在**页签条**里。
+按老 console 改为：进入集群后，左侧栏即集群菜单（集群概览/节点/项目/系统组件/配置字典/存储类型/
+持久卷/集群设置/集群监控/节点用量/自定义资源），当前页高亮。
+
+同时**删掉了重复的页签条**——同一份 12 项目录在侧栏和页签各出现一次不是特性。集群布局路由因此
+只剩 `<Outlet/>`。用例从「点页签」改为「点侧栏」，并断言高亮项。
+
+**验证**：全量 E2E **153 通过 / 3 跳过 / 0 失败**（4 分 09 秒）；文档门禁 0 错；一致性核对仅剩
+并行会话的 `logging`。
