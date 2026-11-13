@@ -337,7 +337,12 @@ export function ResourceForm<TValues extends Record<string, unknown>>({
         const id = `ai-field-${firstInvalid.key.replace(/\./g, '-')}`;
         const target = formRef.current?.querySelector<HTMLElement>(`#${CSS.escape(id)}`);
         target?.focus();
-        target?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        // Guarded because not every DOM implementation has it: jsdom does not, and an
+        // unguarded call throws inside an event handler, which surfaces as an unhandled
+        // rejection that masks the next real failure in the suite.
+        if (typeof target?.scrollIntoView === 'function') {
+          target.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }
       }
       return;
     }
