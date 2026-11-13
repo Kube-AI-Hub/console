@@ -1,0 +1,38 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_DETAIL-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: workspace-detail
+title: 企业空间详情 · 基本信息与项目列表
+entry_url: '{BASE_URL}/kube-frontend/access/workspaces'
+prd: prd/kube-frontend/access-control/workspace-detail.md
+design: design/kube-frontend/access-control/workspace-detail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_DETAIL-01
+
+story:
+- US1
+
+product: 从企业空间列表点名称进入详情：基本信息（名称/别名/管理员/创建者/创建时间/部署集群/描述）+ 该企业空间下的项目列表（状态、创建时间，可点进项目控制台）。
+preconditions:
+- 已登录平台管理
+- 平台上至少有一个企业空间
+steps:
+- 用 API 读取企业空间列表，取第一个并读取其对象与带该企业空间标签的命名空间
+- 打开企业空间列表，点击该企业空间名称
+- 核对 URL、基本信息与对象一致
+- 核对项目数量与带标签的命名空间数一致
+- 点击第一个项目名，核对进入该项目控制台
+expected:
+- 详情页可达且状态 ready
+- 管理员等于 spec.template.spec.manager，创建者等于 kubesphere.io/creator
+- 项目数等于带 kubesphere.io/workspace 标签的命名空间数
+- 项目名称链接可达项目控制台
+troubleshoot:
+- 项目数与标签数不一致：可能读的是 resources 代理缓存而不是 resources 接口
+- 管理员显示空：应从 spec.template.spec.manager 取
+- 项目链接 404：项目 URL 缺少 workspace 段
+update_automation:
+- 选择器见 pages/access_control.py 与 WorkspaceDetailPage.tsx

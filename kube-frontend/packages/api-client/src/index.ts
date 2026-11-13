@@ -120,9 +120,9 @@ export {
   toNotificationChannels,
   toClusterRoleSummary,
   toUserSummary,
-  toWorkspaceSummary,
   KAPIS_TENANT,
   usersApi,
+  workspaceDetailApi,
   workspacesApi,
   workspacesWriteApi,
 } from './access';
@@ -136,6 +136,8 @@ export type {
   NotificationChannelKey,
   PlatformInfo,
   UserSummary,
+  WorkspaceDetail,
+  WorkspaceProject,
   WorkspaceSummary,
 } from './access';
 export {

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Link } from '@tanstack/react-router';
 import { type ClusterRoleSummary, type UserSummary, type WorkspaceSummary } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
@@ -158,7 +159,13 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
                     const ws = row as WorkspaceSummary;
                     return (
                       <span className="flex min-w-0 flex-col">
-                        <span className="truncate font-medium text-ai-fg">{ws.alias || ws.name}</span>
+                        <Link
+                          to="/kube-frontend/access/workspaces/$name"
+                          params={{ name: ws.name }}
+                          className="truncate font-medium text-ai-accent hover:underline"
+                        >
+                          {ws.alias || ws.name}
+                        </Link>
                         <span className="truncate text-[11px] text-ai-fg-muted">{ws.description || '-'}</span>
                       </span>
                     );

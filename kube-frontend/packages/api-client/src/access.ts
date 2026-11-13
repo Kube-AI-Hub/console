@@ -185,6 +185,79 @@ export function workspacesWriteApi(client: Client) {
  * KubeSphere's own list parameters (`page`, `limit`, `sortBy`, `ascending`, `name`) are
  * served by this endpoint too, so pagination and search behave the same.
  */
+/**
+ * One workspace, as its detail page shows it.
+ *
+ * Read from the tenant API (the same store it is written to), and its projects from the
+ * resources proxy filtered by the `kubesphere.io/workspace` label — that label is the only
+ * thing that ties a namespace to a workspace.
+ */
+export interface WorkspaceDetail {
+  name: string;
+  alias: string;
+  description: string;
+  creator: string;
+  createdAt: string;
+  /** `spec.template.spec.manager`, the account that administers the workspace. */
+  manager: string;
+  /** Clusters the workspace is placed on, from `spec.placement.clusters`. */
+  clusters: string[];
+}
+
+export interface WorkspaceProject {
+  name: string;
+  alias: string;
+  status: string;
+  createdAt: string;
+  creator: string;
+}
+
+export function workspaceDetailApi(client: Client) {
+  const path = (name: string) => `${KAPIS_TENANT}/workspaces/${encodeURIComponent(name)}`;
+  return {
+    async get(params: { name: string; signal?: AbortSignal }): Promise<WorkspaceDetail> {
+      const item = await client.request<KubeAccess>(path(params.name), {
+        ...(params.signal ? { signal: params.signal } : {}),
+      });
+      const spec = (item.spec ?? {}) as Record<string, unknown>;
+      const template = (spec['template'] ?? {}) as Record<string, unknown>;
+      const templateSpec = (template['spec'] ?? {}) as Record<string, unknown>;
+      const placement = (spec['placement'] ?? {}) as Record<string, unknown>;
+      const clusters = ((placement['clusters'] ?? []) as Array<Record<string, unknown>>)
+        .map((entry) => String(entry['name'] ?? ''))
+        .filter(Boolean);
+      const annotations = (item.metadata?.annotations ?? {}) as Record<string, string>;
+      return {
+        name: item.metadata?.name ?? '',
+        alias: annotations['kubesphere.io/alias-name'] ?? '',
+        description: annotations['kubesphere.io/description'] ?? '',
+        creator: ((item.metadata?.annotations ?? {}) as Record<string, string>)['kubesphere.io/creator'] ?? '',
+        createdAt: item.metadata?.creationTimestamp ?? '',
+        manager: String(templateSpec['manager'] ?? ''),
+        clusters,
+      };
+    },
+
+    /** The workspace's projects (namespaces carrying its label). */
+    async projects(params: { name: string; signal?: AbortSignal }): Promise<WorkspaceProject[]> {
+      const body = await client.request<{ items?: KubeAccess[] }>(`/kapis/resources.kubesphere.io/v1alpha3/namespaces`, {
+        query: { labelSelector: `kubesphere.io/workspace=${params.name}`, limit: -1 },
+        ...(params.signal ? { signal: params.signal } : {}),
+      });
+      return (body?.items ?? []).map((item) => {
+        const annotations = (item.metadata?.annotations ?? {}) as Record<string, string>;
+        return {
+          name: item.metadata?.name ?? '',
+          alias: annotations['kubesphere.io/alias-name'] ?? '',
+          status: String((item.status ?? {})['phase'] ?? ''),
+          createdAt: item.metadata?.creationTimestamp ?? '',
+          creator: ((item.metadata?.annotations ?? {}) as Record<string, string>)['kubesphere.io/creator'] ?? '',
+        };
+      });
+    },
+  };
+}
+
 export function workspacesApi(client: Client) {
   return {
     async list(params: {

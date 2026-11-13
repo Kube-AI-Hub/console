@@ -432,6 +432,11 @@ MODULES = [
                         "title": "企业空间列表",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACES-01"]},
                     },
+                    {
+                        "id": "workspace-detail",
+                        "title": "企业空间详情",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_DETAIL-01"]},
+                    },
                 ],
             },
             {
