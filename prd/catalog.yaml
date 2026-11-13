@@ -424,6 +424,7 @@ modules:
         L3:
         - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-01
         - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-02
+        - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-04
     - id: workspaces
       title: 企业空间列表
       prd: prd/kube-frontend/access-control/workspaces.md
@@ -535,6 +536,7 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-01
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-02
     - id: projects
       title: 项目列表
       prd: prd/kube-frontend/cluster-management/projects.md
@@ -556,6 +558,13 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-VISIBILITY-01
+    - id: cluster-members
+      title: 集群成员
+      prd: prd/kube-frontend/cluster-management/cluster-members.md
+      design: design/kube-frontend/cluster-management/cluster-members.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_MEMBERS-01
     - id: monitor
       title: 集群监控
       prd: prd/kube-frontend/cluster-management/monitor.md

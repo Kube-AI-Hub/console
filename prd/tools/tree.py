@@ -529,6 +529,11 @@ MODULES = [
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-VISIBILITY-01"]},
                     },
                     {
+                        "id": "cluster-members",
+                        "title": "集群成员",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_MEMBERS-01"]},
+                    },
+                    {
                         "id": "monitor",
                         "title": "集群监控",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01"]},

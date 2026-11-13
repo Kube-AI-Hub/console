@@ -150,6 +150,7 @@ export {
   LOG_COLLECTION_LABEL,
   logCollectionApi,
   isTemplateRole,
+  clusterMembersApi,
   membersApi,
   membersWriteApi,
   NETWORK_ISOLATE_ANNOTATION,
@@ -173,6 +174,7 @@ export {
 export type {
   IamKind,
   MemberDetail,
+  ClusterMemberSummary,
   MemberSummary,
   MembersApi,
   NetworkPolicySummary,

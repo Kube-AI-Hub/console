@@ -217,6 +217,45 @@ export function membersWriteApi(client: Client) {
   };
 }
 
+/**
+ * One cluster member: an account bound to a cluster role.
+ *
+ * KubeSphere exposes cluster members through the IAM aggregate (the same shape as project
+ * members, one scope up): role from `iam.kubesphere.io/clusterrole`, state from
+ * `status.state`, last sign-in from `status.lastLoginTime`.
+ */
+export interface ClusterMemberSummary extends ResourceBase {
+  username: string;
+  /** `cluster-admin` / `cluster-regular` / a custom cluster role. */
+  role: string;
+  /** `Active` / `Disabled` — a member with no reported state has never been disabled. */
+  status: string;
+  lastLogin: string;
+}
+
+export function clusterMembersApi(client: Client) {
+  return {
+    async list(params: { cluster: string; signal?: AbortSignal }): Promise<{ items: ClusterMemberSummary[] }> {
+      const body = await client.request<{ items?: KubeIam[] }>(`${KAPIS_IAM}/clustermembers`, {
+        query: { limit: -1 },
+        ...(params.signal ? { signal: params.signal } : {}),
+      });
+      const items = (body?.items ?? []).map((item) => {
+        const annotations = (item.metadata?.annotations ?? {}) as Record<string, string>;
+        const status = (item.status ?? {}) as Record<string, unknown>;
+        return {
+          ...baseOf(item),
+          username: item.metadata?.name ?? '',
+          role: annotations['iam.kubesphere.io/clusterrole'] ?? '',
+          status: status['state'] === undefined ? 'Active' : String(status['state']),
+          lastLogin: String(status['lastLoginTime'] ?? annotations['iam.kubesphere.io/last-login-time'] ?? ''),
+        };
+      });
+      return { items };
+    },
+  };
+}
+
 export function membersApi(client: Client) {
   return {
     ...resourceApi<KubeIam, MemberSummary, MemberDetail>(client, {
