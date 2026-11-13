@@ -8,6 +8,7 @@
 
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-01
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-03
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-04
 
 ## 概述
 
@@ -49,6 +50,15 @@ CPU 换算成核（1 位小数），内存与存储换算成 GiB/TiB，pods 显�
 **被否方案**：显示原始字符串并加 tooltip。读者要的不是原值，是能比较的量级。
 
 **何时重新考虑**：需要精确字节数用于容量规划时（那时提供切换）。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-04 — 停止调度是行操作，不弹确认
+
+**为什么**：cordon 可逆、不驱逐任何运行中的容器组，只阻止新调度。加确认框会让一件安全操作变得像危险操作，久而久之读者对确认框麻木。
+反馈由状态列的「已停止调度」承担，且列表会 invalidate 重取——不是页面记住一次点击。
+
+**被否方案**：弹窗确认。可逆操作不需要二次确认。
+
+**何时重新考虑**：平台提供「排空」（驱逐容器组）时，那才是危险操作，需要确认。
 
 ## 系统现状
 

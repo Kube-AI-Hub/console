@@ -212,6 +212,14 @@ export interface NodeSummary extends ResourceBase {
   cpu: string;
   /** `status.allocatable.memory`. */
   memory: string;
+  /**
+   * Whether the scheduler may place new pods on this node.
+   *
+   * `spec.unschedulable: true` — the old console's 停止调度. A cordoned node still runs
+   * what it runs; it only stops taking new work, which is why this is a column-worthy
+   * fact and not just a flag in a detail page.
+   */
+  unschedulable: boolean;
   /** Current usage from the metrics API, absent when metrics are unavailable. */
   cpuUsage?: string;
   memoryUsage?: string;
@@ -362,6 +370,7 @@ export function toNodeSummary(item: KubeNode): NodeSummary {
     internalIP: nodeAddress(item, 'InternalIP'),
     cpu: String(allocatable['cpu'] ?? ''),
     memory: String(allocatable['memory'] ?? ''),
+    unschedulable: (item.spec ?? {})['unschedulable'] === true,
   };
 }
 
@@ -391,6 +400,25 @@ export function nodesApi(client: Client) {
       toDetail: toNodeDetail,
     }),
     kind: 'nodes' as const,
+  };
+}
+
+/**
+ * Cordon and uncordon a node — the old console's 停止调度 / 启动调度.
+ *
+ * `spec.unschedulable` on the node itself; the scheduler honours it immediately. A merge
+ * patch, because the node object is owned by kubelet and the cloud controller, and a PUT
+ * would race them for every other field.
+ */
+export function nodesWriteApi(client: Client) {
+  return {
+    async setUnschedulable(params: { name: string; unschedulable: boolean }): Promise<void> {
+      await client.request(`/api/v1/nodes/${encodeURIComponent(params.name)}`, {
+        method: 'PATCH',
+        contentType: 'application/merge-patch+json',
+        body: { spec: { unschedulable: params.unschedulable } },
+      });
+    },
   };
 }
 

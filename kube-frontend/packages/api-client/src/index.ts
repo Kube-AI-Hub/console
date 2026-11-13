@@ -220,6 +220,7 @@ export {
   usagePercent,
   nodeStatus,
   nodesApi,
+  nodesWriteApi,
   toComponentSummary,
   toNamespaceSummary,
   toNodeDetail,

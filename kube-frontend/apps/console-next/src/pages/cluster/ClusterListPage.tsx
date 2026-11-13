@@ -1,8 +1,10 @@
 import * as React from 'react';
-import { type NamespaceSummary, type NodeSummary } from '@kube-ai-hub/api-client';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { nodesWriteApi, type NamespaceSummary, type NodeSummary } from '@kube-ai-hub/api-client';
 import { Link } from '@tanstack/react-router';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
+import { api as apiClient } from '@/api';
 import { useT } from '@/i18n';
 import { useResourceListState, toListParams } from '@/components/resource/useResourceListState';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -33,6 +35,22 @@ export function ClusterListPage({ kind, cluster }: ClusterListPageProps): React.
   // Cluster-scoped: no project filter, and nothing to reset when the caller changes
   // project — the page has no project context by design.
   const list = useResourceListState<SortKey>({ defaultSortBy: 'name', resetOn: [cluster] });
+  const queryClient = useQueryClient();
+
+  /*
+   * 停止调度 / 启动调度 — the old console's cordon and uncordon.
+   *
+   * Cordon is reversible and evicts nothing, so it is a row action without a confirmation
+   * dialog: the status column is the feedback, and it updates because the list is
+   * invalidated, not because the page remembers a click.
+   */
+  const cordon = useMutation({
+    mutationFn: (input: { name: string; unschedulable: boolean }) =>
+      nodesWriteApi(apiClient).setUnschedulable(input),
+    // Invalidate the list's own key (see `clusterKey`): a cordon changes a node's
+    // schedulability, which is what decides whether the row offers 停止 or 启动调度.
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['cluster', kind] }),
+  });
   // Empty namespace = cluster-wide collection; the API layer already treats it that way.
   const query = useClusterList(kind, toListParams(list, { cluster, namespace: '' }, PAGE_SIZE));
   // Usage comes from the metrics API and is merged onto the node rows below.
@@ -55,6 +73,24 @@ export function ClusterListPage({ kind, cluster }: ClusterListPageProps): React.
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
       search: { placeholder: t('cluster.searchPlaceholder'), aiId: `${kind}:search` },
+      ...(kind === 'nodes'
+        ? {
+            rowActions: [
+              {
+                key: 'cordon',
+                label: t('node.action.cordon'),
+                aiId: 'nodes:cordon',
+                visible: (row: Row) => !(row as NodeSummary).unschedulable,
+              },
+              {
+                key: 'uncordon',
+                label: t('node.action.uncordon'),
+                aiId: 'nodes:uncordon',
+                visible: (row: Row) => (row as NodeSummary).unschedulable,
+              },
+            ],
+          }
+        : {}),
       sortableKeys: ['name', 'createTime'],
       sortAiPrefix: kind,
       sort: { key: list.sortBy, order: list.order },
@@ -89,7 +125,17 @@ export function ClusterListPage({ kind, cluster }: ClusterListPageProps): React.
                 hideBelow: 'md',
                 render: (row: Row) => {
                   const node = row as NodeSummary;
-                  return <Badge tone={node.status === 'Ready' ? 'success' : 'danger'}>{node.status}</Badge>;
+                  return (
+                    <span className="flex flex-col gap-0.5">
+                      <Badge tone={node.status === 'Ready' ? 'success' : 'danger'}>{node.status}</Badge>
+                      {/* Cordoned is a second fact: the node is healthy but takes no new pods. */}
+                      {node.unschedulable ? (
+                        <span className="text-[11px] text-ai-fg-muted" data-ai-id={`nodes:cordoned:${node.name}`}>
+                          {t('node.status.cordoned')}
+                        </span>
+                      ) : null}
+                    </span>
+                  );
                 },
               },
               {
@@ -196,7 +242,6 @@ export function ClusterListPage({ kind, cluster }: ClusterListPageProps): React.
                 render: (row) => <span className="tabular-nums text-ai-fg-muted">{formatTimestamp(row.createdAt)}</span>,
               },
             ],
-      rowActions: [],
       empty: {
         title: t(CLUSTER_DESCRIPTORS[kind].emptyTitleKey),
         description: t(CLUSTER_DESCRIPTORS[kind].emptyDescriptionKey),
@@ -235,6 +280,11 @@ export function ClusterListPage({ kind, cluster }: ClusterListPageProps): React.
         onPageChange={list.setPage}
         onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
           if (next) list.setSort(next);
+        }}
+        onAction={(action, row) => {
+          const node = row as NodeSummary;
+          if (action === 'cordon') cordon.mutate({ name: node.name, unschedulable: true });
+          if (action === 'uncordon') cordon.mutate({ name: node.name, unschedulable: false });
         }}
       />
     </AiSurface>

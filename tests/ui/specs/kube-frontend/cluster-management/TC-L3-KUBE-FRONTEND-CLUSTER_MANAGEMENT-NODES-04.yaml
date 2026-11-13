@@ -1,0 +1,38 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-04
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: nodes
+title: 节点列表 · 停止调度与启动调度
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/nodes'
+prd: prd/kube-frontend/cluster-management/nodes.md
+design: design/kube-frontend/cluster-management/nodes.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-04
+
+story:
+- US3
+
+product: 节点行操作提供「停止调度 / 启动调度」，写 spec.unschedulable；状态列出现「已停止调度」，行操作随状态互换。
+preconditions:
+- 已登录，且对 host 集群有节点管理权限
+- 用例记录节点原始 spec.unschedulable，finally 中还原
+steps:
+- 用 API 读取第一个节点，记下 spec.unschedulable
+- 打开节点列表，对可调度节点执行「停止调度」
+- 回读节点，核对 spec.unschedulable 为 true，状态列出现「已停止调度」
+- 打开该行菜单，核对操作变为「启动调度」
+- 执行「启动调度」，回读并核对不再为 true
+expected:
+- 停止调度后 spec.unschedulable 为 true
+- 状态列出现「已停止调度」提示
+- 行操作在「停止调度 / 启动调度」之间互换（互斥，不是同一个标签）
+- 启动调度后该字段不再为 true
+troubleshoot:
+- 操作后行操作没变：列表未按正确 query key 失效（应为 ['cluster', kind]）
+- 回读仍为 true：写的是 annotations 或没写 spec
+- 菜单两个操作同时出现：visible 条件写反
+update_automation:
+- 选择器见 pages/cluster_management.py 与 ClusterListPage.tsx
