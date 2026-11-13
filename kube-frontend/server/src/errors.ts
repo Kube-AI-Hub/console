@@ -50,8 +50,20 @@ export async function normaliseUpstreamError(response: Response): Promise<BffErr
       // Malformed JSON from upstream: keep the status text.
     }
   } else {
-    // Drain the body so the socket is released; HTML pages are not useful to the UI.
-    await response.text().catch(() => undefined);
+    /*
+     * Not JSON. Text is often the *only* place the reason exists: an admission
+     * webhook rejection comes back as plain text ("admission webhook
+     * users.iam.kubesphere.io denied the request: user email: x already exists"),
+     * and replacing it with the status text reduced that to "Conflict" — which tells
+     * the reader nothing about what to change.
+     *
+     * HTML is still dropped: a proxy error page is not a message for a user.
+     */
+    const text = await response.text().catch(() => '');
+    const looksLikeMarkup = /^\s*<(!doctype|html)/i.test(text);
+    if (text && !looksLikeMarkup) {
+      message = text.trim().slice(0, 300);
+    }
   }
 
   return details === undefined

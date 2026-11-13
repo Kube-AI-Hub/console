@@ -74,6 +74,15 @@ export interface ResourceFormProps<TValues extends Record<string, unknown>> {
   onCancel?: () => void;
   submitting?: boolean;
   className?: string;
+  /**
+   * Turn a failed submit into a sentence.
+   *
+   * Defaults to the error's own message, which for upstream API failures is often the
+   * bare HTTP reason ("Conflict"). A caller that knows what it is creating can say
+   * "a user with that name already exists" instead — ai-kit has no locales, so the
+   * caller is the only one who can phrase it.
+   */
+  describeError?: (error: unknown) => string;
 }
 
 /* ---------------- Validation ---------------- */
@@ -294,6 +303,7 @@ const columnClass: Record<1 | 2 | 3, string> = {
 };
 
 export function ResourceForm<TValues extends Record<string, unknown>>({
+  describeError,
   schema,
   values,
   defaultValues,
@@ -357,7 +367,7 @@ export function ResourceForm<TValues extends Record<string, unknown>>({
     try {
       await onSubmit(current as TValues);
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : String(error));
+      setSubmitError(describeError ? describeError(error) : error instanceof Error ? error.message : String(error));
     }
   };
 

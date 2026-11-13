@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from uuid import uuid4
+
 import time
 
 import pytest
@@ -16,7 +18,7 @@ def test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_ROLES_02(project_settings_page, sc
 
     ui = project_settings_page
     assert ui.api is not None
-    name = f"tc-e2e-er{int(time.time() * 1000) % 1_000_000}"
+    name = f"tc-e2e-er{uuid4().int % 1_000_000}"
     status, _ = ui.api.request(
         "POST",
         ROLES,

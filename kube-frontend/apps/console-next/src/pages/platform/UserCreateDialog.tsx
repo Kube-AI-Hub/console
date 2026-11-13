@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Modal, ResourceForm, type FormSchema } from '@kube-ai-hub/ui';
-import { ASSIGNABLE_PLATFORM_ROLES, passwordProblem, usersWriteApi, type AssignablePlatformRole } from '@kube-ai-hub/api-client';
+import { ApiError, ASSIGNABLE_PLATFORM_ROLES, passwordProblem, usersWriteApi, type AssignablePlatformRole } from '@kube-ai-hub/api-client';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 
@@ -110,6 +110,23 @@ export function UserCreateDialog({ open, onOpenChange }: UserCreateDialogProps):
         defaultValues={{ platformRole: 'platform-regular' }}
         submitting={create.isPending}
         onCancel={() => onOpenChange(false)}
+        /*
+         * A taken name comes back as 409 with the message "Conflict", which says
+         * nothing about what to change. The form has no locales, so the sentence is
+         * supplied here.
+         */
+        describeError={(error) => {
+          if (!(error instanceof ApiError)) return error instanceof Error ? error.message : t('error.unknown');
+          /*
+           * A conflict can be about the name *or* the email — IAM enforces both. Keep
+           * the upstream sentence when it says which; fall back to a generic one only
+           * when the message is the bare "Conflict" that a proxy adds.
+           */
+          if (error.isConflict && !/already exists|已被占用|已存在/i.test(error.message)) {
+            return t('platform.users.create.conflict');
+          }
+          return error.message;
+        }}
         onSubmit={async (raw) => {
           const values = raw as Record<string, unknown>;
           await create.mutateAsync({

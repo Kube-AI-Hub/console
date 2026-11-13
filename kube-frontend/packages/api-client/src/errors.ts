@@ -31,6 +31,17 @@ export class ApiError extends Error {
     return this.status >= 500 || this.code === 'network_error' || this.code === 'timeout';
   }
 
+  /**
+   * True when the object already exists.
+   *
+   * Worth its own getter because the raw message for a 409 is the HTTP reason
+   * ("Conflict"), which tells a reader nothing about what to change. Callers use this
+   * to say "that name is taken" instead.
+   */
+  get isConflict(): boolean {
+    return this.status === 409 || this.code === 'conflict' || /\balready exists\b/i.test(this.message);
+  }
+
   /** True when the user simply is not allowed; the UI should not offer retry. */
   get isPermission(): boolean {
     return this.status === 403 || this.code === 'forbidden';
