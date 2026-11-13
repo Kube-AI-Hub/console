@@ -532,10 +532,15 @@ export function workloadsApi(client: Client, kind: WorkloadKind) {
      */
     async pods(params: { cluster: string; namespace: string; name: string }): Promise<WorkloadPod[]> {
       const owner = await client.request<KubeWorkload>(workloadPath(params.cluster, kind, params.namespace, params.name));
-      const selector = (((owner?.spec ?? {})['selector'] as Record<string, unknown> | undefined)?.['matchLabels'] ?? {}) as Record<
-        string,
-        string
-      >;
+      /*
+       * Two selector shapes: a workload's is `{ matchLabels: {...} }`, a Service's is a
+       * flat map. Reading the workload shape for a service yields `{}` and quietly
+       * lists nothing, so both are handled explicitly.
+       */
+      const rawSelector = (owner?.spec ?? {})['selector'] as Record<string, unknown> | undefined;
+      const selector = (
+        kind === 'services' ? (rawSelector ?? {}) : ((rawSelector?.['matchLabels'] as Record<string, unknown> | undefined) ?? {})
+      ) as Record<string, string>;
       const pairs = Object.entries(selector);
       if (pairs.length === 0) return [];
       const labelSelector = pairs.map(([key, value]) => `${key}=${value}`).join(',');

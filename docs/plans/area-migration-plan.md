@@ -1990,3 +1990,29 @@ KubeSphere 的账号级限流（`auth rate limit exceeded`），因此停止尝�
 - 直连 ks-apiserver 时需自行带 `client_id=kubesphere`、`client_secret=kubesphere`（实测错误的 secret 返回 `invalid_client`，正确的 secret + 错误密码返回 `invalid_grant`）。
 
 **待办**：拿到正确的 B200 admin 密码后，把 `tests/ui` 的 `KA_APP_URL` 指向该隧道即可复跑全部用例。
+
+### 48.3 第 57 轮：服务的关联容器组
+
+核对老 console 各资源详情页的子区块，发现 5 处未迁移：
+
+| 资源 | 老 console 子区块 | 结论 |
+| --- | --- | --- |
+| 服务 | ResourceStatus（关联容器组） | **本轮补上** |
+| 存储卷 | Snapshots（快照列表） | 本集群无 VolumeSnapshot CRD，数据恒为空，**不做** |
+| 有状态副本集 | ServiceCard（关联服务） | 待办 |
+| 任务 | ExcuteRecords（执行记录） | 待办 |
+| 定时任务 | JobRecords（任务记录） | 待办 |
+
+**实现要点**：`pods()` 原先只认工作负载的 `spec.selector.matchLabels`；**Service 的选择器是扁平的
+`spec.selector`**。按工作负载形状去读服务会得到空对象，"关联容器组"于是静默列 0 行——不报错、
+什么都不显示，是最难排查的失败。两种形状现已分开处理。
+
+实测（`spaces` 项目的服务 `g0obazytvegw`）：
+
+```
+service pods block: 1
+容器组名称 / 状态 / 所在节点 / 重启次数 / 创建时间
+agent-memory-embedding-restored-20261102-56bc4947f6-f7f7c | Running | sagesuite-demo
+```
+
+**验证**：app-workloads 25 通过；架构契约 454；api-client 157；文档门禁 0 错。

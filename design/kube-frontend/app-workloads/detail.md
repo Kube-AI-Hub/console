@@ -8,6 +8,8 @@
 
 ## 关联需求
 
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-SERVICE_PODS-01
+
 - AC-L3-KUBE-FRONTEND-APP_WORKLOADS-PODS_BLOCK-01
 
 - AC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-05
@@ -117,3 +119,11 @@
 **被否方案**：整行可点。会与将来的行操作菜单冲突，且"点哪里都能走"在小屏幕上容易误触。
 
 **何时重新考虑**：需要从摘要直接展开 Pod 详情时，改为行内展开面板。
+
+### DEC-L3-KUBE-FRONTEND-APP-WORKLOADS-DETAIL-07 — 选择器有两种形状，必须分开读
+
+**为什么**：工作负载的选择器是 `spec.selector.matchLabels = { k: v }`，而 **Service 的是扁平的 `spec.selector = { k: v }`**。按工作负载的形状去读服务，会得到空对象，于是"关联容器组"静默地列出 0 行——页面不报错，只是什么都不显示，最难排查的那类失败。
+
+**被否方案**：无论类型都先取 `matchLabels`、为空再退回顶层。能work，但把"两种形状"这个事实藏进了回退逻辑，后来人看不出为什么。
+
+**何时重新考虑**：出现第三种选择器形状（例如带 `matchExpressions`）时，改为按类型返回不同的构造器。

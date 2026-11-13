@@ -77,8 +77,9 @@ export function useEditWorkloadInfo(kind: WorkloadKind, params: { cluster: strin
 export function useWorkloadPods(kind: WorkloadKind, params: { cluster: string; namespace: string; name: string }) {
   return useQuery({
     queryKey: ['workload-pods', params.cluster, params.namespace, kind, params.name],
-    // Only the kinds that name their pods through a selector have any to list.
-    enabled: ['deployments', 'statefulsets', 'daemonsets'].includes(kind),
+    // Services select their pods too, by their own `spec.selector`; the kinds
+    // without a selector (jobs, cronjobs, ingresses) show no block.
+    enabled: ['deployments', 'statefulsets', 'daemonsets', 'services'].includes(kind),
     queryFn: ({ signal }) => workloadsApi(api, kind).pods({ ...params, signal } as never),
     // Pods come and go; a stale list would show a pod that has already been replaced.
     refetchInterval: 15_000,

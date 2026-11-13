@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-SERVICE_PODS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: service-pods
+title: 服务详情 · 关联容器组与端口
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/services'
+prd: prd/kube-frontend/app-workloads/detail.md
+design: design/kube-frontend/app-workloads/detail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-SERVICE_PODS-01
+
+story:
+- US1
+
+product: 服务详情同时显示端口表与关联容器组；容器组按服务的扁平选择器（spec.selector）匹配。
+preconditions:
+- 由夹具创建一个部署（2 副本）与一个选择它的服务，用例结束无条件删除两者
+- 已登录，且在 host 集群的 default 项目空间
+steps:
+- 打开该服务详情
+- 读取关联容器组表
+- 用 API 按服务选择器统计 Pod
+expected:
+- 服务详情出现「关联容器组」区块
+- 行数等于服务选择器匹配到的 Pod 数
+- 同时存在「端口」区块
+troubleshoot:
+- 区块不出现说明按 workload 的 matchLabels 形状读了服务选择器（服务是扁平 map）
+- 行数为 0 而 API 有匹配，多为选择器解析错误
+update_automation:
+- 选择器形状变化时改 api-client 的 pods()
