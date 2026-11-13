@@ -136,7 +136,9 @@
   --ai-fg: var(--ai-raw-ice-700); /* $text-color */
   --ai-fg-secondary: var(--ai-raw-ice-100); /* $second-text-color */
   --ai-fg-muted: var(--ai-raw-ice-400); /* $third-text-color */
-  --ai-fg-faint: var(--ai-raw-ice-300); /* $placeholder-color */
+  /* Not ice-300: that step is only 1.18× the body colour, so a placeholder
+     reads as text already typed. 148 176 210 stays ≥4.5:1 on the field surface. */
+  --ai-fg-faint: 148 176 210;
 
   --ai-line: var(--ai-raw-navy-200); /* $border-color */
   --ai-line-strong: var(--ai-raw-navy-300); /* $border-hover-color */
