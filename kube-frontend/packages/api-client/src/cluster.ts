@@ -672,3 +672,60 @@ export function customResourcesApi(client: Client) {
 }
 
 export type CustomResourcesApi = ReturnType<typeof customResourcesApi>;
+
+/** One row of the platform's cluster list. */
+export interface ClusterSummary {
+  name: string;
+  /** Whether the object is enabled for use. */
+  enabled: boolean;
+  provider: string;
+  kubernetesVersion: string;
+  kubeSphereVersion: string;
+  nodeCount: number;
+  ready: boolean;
+  /** Why it is or is not ready — the actionable half of the status. */
+  readyMessage: string;
+  /** Where the platform reaches the cluster's API server. */
+  endpoint: string;
+  createdAt: string;
+}
+
+/** A cluster object flattened for the list. */
+export function toClusterSummary(cluster: KubeCluster): ClusterSummary {
+  const detail = toClusterDetail(cluster);
+  return {
+    name: detail.name,
+    enabled: detail.enabled,
+    provider: detail.provider,
+    kubernetesVersion: detail.kubernetesVersion,
+    kubeSphereVersion: detail.kubeSphereVersion,
+    nodeCount: detail.nodeCount,
+    ready: detail.ready,
+    readyMessage: detail.readyMessage,
+    endpoint: detail.kubernetesAPIEndpoint,
+    createdAt: cluster.metadata?.creationTimestamp ?? '',
+  };
+}
+
+/**
+ * The platform's cluster list.
+ *
+ * Read through kapis, like the cluster detail page: the `resources` proxy has been
+ * observed to omit recently created objects, and a list that disagrees with the
+ * detail page is worse than a slow one.
+ */
+export function clustersApi(client: Client) {
+  return {
+    async list(params: { signal?: AbortSignal } = {}): Promise<{ items: ClusterSummary[]; total: number }> {
+      const body = await client.request<{ items?: KubeCluster[] }>(
+        '/kapis/cluster.kubesphere.io/v1alpha1/clusters',
+        params.signal ? { signal: params.signal } : {},
+      );
+      const items = (body?.items ?? []).map(toClusterSummary);
+      return { items, total: items.length };
+    },
+  };
+}
+
+export type ClustersApi = ReturnType<typeof clustersApi>;
+

@@ -499,6 +499,13 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODE_USAGE-01
+    - id: cluster-list
+      title: 集群列表
+      prd: prd/kube-frontend/cluster-management/cluster-list.md
+      design: design/kube-frontend/cluster-management/cluster-list.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-01
     - id: custom-resources
       title: 自定义资源
       prd: prd/kube-frontend/cluster-management/custom-resources.md

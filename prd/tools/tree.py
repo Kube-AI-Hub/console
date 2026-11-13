@@ -486,6 +486,11 @@ MODULES = [
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODE_USAGE-01"]},
                     },
                     {
+                        "id": "cluster-list",
+                        "title": "集群列表",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-01"]},
+                    },
+                    {
                         "id": "custom-resources",
                         "title": "自定义资源",
                         "tests": {"L3": [
