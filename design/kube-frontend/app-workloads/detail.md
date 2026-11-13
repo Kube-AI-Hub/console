@@ -8,6 +8,8 @@
 
 ## 关联需求
 
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-STATEFUL_SERVICE-01
+
 - AC-L3-KUBE-FRONTEND-APP_WORKLOADS-SERVICE_PODS-01
 
 - AC-L3-KUBE-FRONTEND-APP_WORKLOADS-PODS_BLOCK-01
@@ -127,3 +129,13 @@
 **被否方案**：无论类型都先取 `matchLabels`、为空再退回顶层。能work，但把"两种形状"这个事实藏进了回退逻辑，后来人看不出为什么。
 
 **何时重新考虑**：出现第三种选择器形状（例如带 `matchExpressions`）时，改为按类型返回不同的构造器。
+
+### DEC-L3-KUBE-FRONTEND-APP-WORKLOADS-DETAIL-08 — 关联服务按 `serviceName` 声明取，并显式报告"不存在"
+
+**为什么**：有状态副本集不是"选择"服务，而是用 `spec.serviceName` **声明**一个服务来治理它的 pod DNS（`<pod>.<service>`）。因此这里不做选择器匹配——那会推测出一个对象并未声明的联系。
+
+**关键点**：`serviceName` 可以指向一个**不存在**的服务，apply 不会失败，但 pod 拿不到 DNS 记录。这是常见配置错误且很难从症状反推。所以区块在找不到服务时显示「指向的服务 X 不存在」，而不是渲染一个空白区块——空白会被读成"没有关联服务"。
+
+**被否方案**：服务不存在时不渲染区块。等于把"配置错了"和"没配置"混为一谈。
+
+**何时重新考虑**：平台开始校验 `serviceName` 时。

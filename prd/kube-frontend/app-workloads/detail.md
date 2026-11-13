@@ -16,6 +16,8 @@
 
 ## 验收场景
 
+- **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-STATEFUL_SERVICE-01** — 已知一个有状态副本集的 `spec.serviceName` 指向一个存在的 headless 服务，当打开其详情，则显示「关联服务」区块，含服务名称、类型（Headless）、虚拟 IP（None）与端口；当 `serviceName` 指向不存在的服务，则该区块显示显式的错误提示而不是空白。
+
 - **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-SERVICE_PODS-01** — 已知一个服务选中了某些容器组，当打开其详情，则同时显示「端口」与「关联容器组」两个区块，且容器组行数等于该服务 `spec.selector` 匹配到的 Pod 数。
 
 - **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-PODS_BLOCK-01** — 已知一个部署有就绪的容器组，当打开其详情，则显示「关联容器组」表（容器组名称、状态、所在节点、重启次数、创建时间），行数与该部署选择器匹配到的 Pod 数一致；当点击其中的容器组名称，则跳转到该容器组的详情页。

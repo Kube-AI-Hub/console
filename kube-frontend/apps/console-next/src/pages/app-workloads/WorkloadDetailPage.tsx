@@ -13,6 +13,7 @@ import {
   useWorkload,
   useWorkloadAutoscaling,
   useWorkloadPods,
+  useWorkloadService,
   useWorkloadRevisions,
   type WorkloadDescriptor,
 } from './queries';
@@ -61,6 +62,7 @@ export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, 
   const autoscaling = useWorkloadAutoscaling(kind, { cluster, namespace, name });
   const revisions = useWorkloadRevisions(kind, { cluster, namespace, name });
   const pods = useWorkloadPods(kind, { cluster, namespace, name });
+  const governing = useWorkloadService(kind, { cluster, namespace, name });
   const rollback = useRollbackWorkload(kind, { cluster, namespace });
   const [rollbackTarget, setRollbackTarget] = React.useState<WorkloadRevision | null>(null);
   const [dialog, setDialog] = React.useState<Dialog>('none');
@@ -238,6 +240,31 @@ export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, 
                   </tbody>
                 </table>
               </div>
+            </section>
+          ) : null}
+
+          {/*
+            * 关联服务: a StatefulSet's `spec.serviceName` names the service that governs
+            * its pod DNS. The relationship is declared, not inferred from a selector, so
+            * this block reports exactly what the field says — including when it names a
+            * service that does not exist, which is a common configuration mistake.
+            */}
+          {kind === 'statefulsets' && governing.data?.name ? (
+            <section className="rounded-ai-md border border-ai-line p-4" data-ai-id="statefulsets-detail:service">
+              <h2 className="mb-3 text-sm font-medium text-ai-fg">{t('workloads.detail.service')}</h2>
+              {governing.data.exists ? (
+                <dl className="grid grid-cols-1 gap-3 text-xs sm:grid-cols-[minmax(6rem,auto)_1fr]">
+                  <Row label={t('workloads.field.serviceName')} value={governing.data.name} />
+                  <Row label={t('workloads.field.serviceType')} value={governing.data.type} />
+                  <Row label={t('workloads.field.clusterIP')} value={governing.data.clusterIP || '-'} />
+                  <Row label={t('workloads.detail.ports')} value={governing.data.ports.join(', ') || '-'} />
+                </dl>
+              ) : (
+                // Naming a missing service breaks pod DNS without failing the apply.
+                <p className="text-xs text-ai-danger" data-ai-id="statefulsets-detail:service-missing">
+                  {t('workloads.service.missing', { name: governing.data.name })}
+                </p>
+              )}
             </section>
           ) : null}
 

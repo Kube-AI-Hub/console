@@ -73,6 +73,16 @@ export function useEditWorkloadInfo(kind: WorkloadKind, params: { cluster: strin
  * no reverse lookup. The read is cheap (a project has a handful) and only runs for the
  * three kinds an HPA can target.
  */
+/** The service a StatefulSet points at through `spec.serviceName`. */
+export function useWorkloadService(kind: WorkloadKind, params: { cluster: string; namespace: string; name: string }) {
+  return useQuery({
+    queryKey: ['workload-service', params.cluster, params.namespace, kind, params.name],
+    // Only StatefulSets declare a governing service.
+    enabled: kind === 'statefulsets' && Boolean(params.name),
+    queryFn: ({ signal }) => workloadsApi(api, kind).service({ ...params, signal } as never),
+  });
+}
+
 /** Pods belonging to one workload, newest first. */
 export function useWorkloadPods(kind: WorkloadKind, params: { cluster: string; namespace: string; name: string }) {
   return useQuery({

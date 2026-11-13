@@ -552,6 +552,22 @@ export function workloadsApi(client: Client, kind: WorkloadKind) {
         .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
     },
 
+    /**
+     * The service a StatefulSet names through `spec.serviceName`.
+     *
+     * Returns `exists: false` when the field is empty or points at nothing, so the page
+     * can say which of the two happened instead of showing an empty block.
+     */
+    async service(params: { cluster: string; namespace: string; name: string }): Promise<WorkloadService> {
+      const owner = await client.request<KubeWorkload>(workloadPath(params.cluster, kind, params.namespace, params.name));
+      const serviceName = String((owner?.spec ?? {})['serviceName'] ?? '');
+      if (!serviceName) return toWorkloadService(undefined, '');
+      const service = await client
+        .request<KubeService>(workloadPath(params.cluster, 'services', params.namespace, serviceName))
+        .catch(() => undefined);
+      return toWorkloadService(service, serviceName);
+    },
+
     /** ReplicaSets owned by a Deployment, newest revision first. */
     async revisions(params: { cluster: string; namespace: string; name: string }): Promise<WorkloadRevision[]> {
       // The raw objects are needed here (annotations, ownerReferences), so these two
@@ -778,4 +794,45 @@ export function toWorkloadPod(item: KubeWorkload): WorkloadPod {
     // `deletionTimestamp` is not in the shared metadata type; it is read through a record.
     terminating: Boolean((item.metadata as Record<string, unknown> | undefined)?.['deletionTimestamp']),
   };
+}
+
+/**
+ * The headless service a StatefulSet points at.
+ *
+ * `spec.serviceName` is the field, not a selector match: a StatefulSet names the
+ * service that governs its pod DNS (`<pod>.<service>`), so the relationship is declared
+ * rather than inferred. `undefined` means "no such service", which is a normal answer —
+ * the field can name something that was never created.
+ */
+export interface WorkloadService {
+  name: string;
+  /** `ClusterIP` / `Headless` (a `clusterIP: None` service) / other type. */
+  type: string;
+  /** The cluster IP, or `None` for a headless service. */
+  clusterIP: string;
+  ports: string[];
+  /** False when `spec.serviceName` named a service that does not exist. */
+  exists: boolean;
+}
+
+export function toWorkloadService(item: KubeService | undefined, name: string): WorkloadService {
+  if (!item) return { name, exists: false, type: '', clusterIP: '', ports: [] };
+  const spec = (item.spec ?? {}) as Record<string, unknown>;
+  const ports = ((spec['ports'] ?? []) as Array<Record<string, unknown>>).map((port) =>
+    port['port'] === undefined ? '' : `${String(port['port'])}/${String(port['protocol'] ?? 'TCP')}`,
+  );
+  const clusterIP = String(spec['clusterIP'] ?? '');
+  return {
+    name,
+    exists: true,
+    // `clusterIP: None` is how Kubernetes spells a headless service; showing "None"
+    // as the type is clearer than calling it ClusterIP.
+    type: clusterIP === 'None' ? 'Headless' : String(spec['type'] ?? 'ClusterIP'),
+    clusterIP,
+    ports: ports.filter(Boolean),
+  };
+}
+
+interface KubeService extends KubeObject {
+  spec?: Record<string, unknown>;
 }

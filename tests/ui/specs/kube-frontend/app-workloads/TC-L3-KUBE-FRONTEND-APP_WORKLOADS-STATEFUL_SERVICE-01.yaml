@@ -1,0 +1,33 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-STATEFUL_SERVICE-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: stateful-service
+title: 有状态副本集详情 · 关联服务
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/statefulsets'
+prd: prd/kube-frontend/app-workloads/detail.md
+design: design/kube-frontend/app-workloads/detail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-STATEFUL_SERVICE-01
+
+story:
+- US1
+
+product: 有状态副本集详情按 spec.serviceName 显示关联服务（名称、类型、虚拟 IP、端口）；指向不存在的服务时显式报错。
+preconditions:
+- 由夹具创建一个 headless 服务与一个指向它的有状态副本集，用例结束无条件删除两者
+- 已登录，且在 host 集群的 default 项目空间
+steps:
+- 打开该有状态副本集详情
+- 读取关联服务区块
+expected:
+- 区块显示服务名称
+- 服务类型为 Headless（clusterIP: None）
+- 端口列出
+troubleshoot:
+- 区块不出现说明 spec.serviceName 为空
+- 显示「不存在」提示说明夹具创建顺序有误（服务应先建）
+update_automation:
+- 字段变化时改 api-client 的 toWorkloadService

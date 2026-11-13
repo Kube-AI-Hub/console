@@ -3,7 +3,7 @@ import { toAlertSummary, toAlertingRuleSummary } from '../src/alerting';
 import { toComponentSummary } from '../src/storage';
 import { toNetworkPolicySummary, toSelector } from '../src/iam';
 import { toStorageClassSummary, mountsOf, withMountState, quantityToNumber, usagePercent } from '../src/storage';
-import { toWorkloadPod, toWorkloadRevision, toWorkloadSummary, revisionTemplate } from '../src/workloads';
+import { toWorkloadService, toWorkloadPod, toWorkloadRevision, toWorkloadSummary, revisionTemplate } from '../src/workloads';
 
 /**
  * Row mappers that turn a Kubernetes object into a table row.
@@ -309,5 +309,33 @@ describe('mount state', () => {
   it('does not attach a mount state to snapshots', () => {
     const snapshots = [{ kind: 'volumesnapshots' as const, name: 'snap' }];
     expect(withMountState(snapshots, new Set(['snap']))[0]).not.toHaveProperty('inUse');
+  });
+});
+
+describe('statefulset governing service', () => {
+  it('reports a headless service as Headless, not ClusterIP', () => {
+    // `clusterIP: None` is how Kubernetes spells a headless service; calling it
+    // ClusterIP hides the one property that matters for pod DNS.
+    const svc = toWorkloadService(
+      { metadata: { name: 'db' }, spec: { clusterIP: 'None', ports: [{ port: 5432, protocol: 'TCP' }] } } as never,
+      'db',
+    );
+    expect(svc.exists).toBe(true);
+    expect(svc.type).toBe('Headless');
+    expect(svc.clusterIP).toBe('None');
+    expect(svc.ports).toEqual(['5432/TCP']);
+  });
+
+  it('reports a named service that does not exist', () => {
+    // Naming a missing service breaks pod DNS without failing the apply, so the page
+    // has to say "missing" rather than render an empty block.
+    const svc = toWorkloadService(undefined, 'typo-service');
+    expect(svc.exists).toBe(false);
+    expect(svc.name).toBe('typo-service');
+  });
+
+  it('defaults the protocol to TCP', () => {
+    const svc = toWorkloadService({ metadata: { name: 's' }, spec: { clusterIP: '10.0.0.1', ports: [{ port: 80 }] } } as never, 's');
+    expect(svc.ports).toEqual(['80/TCP']);
   });
 });
