@@ -79,7 +79,7 @@ export function SecretsPage({ workspace, cluster, namespace }: SecretsPageProps)
   const t = useT();
   ensureSecretsRegistered();
 
-  const projectFilterControl = useProjectFilter(cluster, t('secrets.filter.projectLabel'), t('secrets.filter.project'));
+  const projectFilterControl = useProjectFilter(cluster, t('secrets.filter.projectLabel'), t('secrets.filter.project'), undefined, 'secrets:filter:project');
   // Same cached query the filter uses, so the dialog opens with options resolved.
   const projectOptions = useProjectOptions(cluster);
 

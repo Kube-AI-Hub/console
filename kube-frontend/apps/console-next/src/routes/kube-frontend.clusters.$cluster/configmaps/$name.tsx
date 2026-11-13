@@ -10,6 +10,7 @@ import { toYaml } from '@/pages/configmaps/yaml';
 import { ConfigMapDeleteDialog } from '@/pages/configmaps/ConfigMapDeleteDialog';
 import { ConfigMapEditInfoDialog, ConfigMapEditSettingsDialog } from '@/pages/configmaps/ConfigMapEditDialogs';
 import { DialogSuspense } from '@/components/resource/DialogSuspense';
+import { DefinitionRow as Row } from '@/components/resource/DefinitionRow';
 
 const ConfigMapYamlDialog = React.lazy(() => import('@/pages/configmaps/ConfigMapYamlDialog'));
 
@@ -197,7 +198,7 @@ function ClusterConfigMapDetailRoute() {
             names={[name]}
             pending={remove.isPending}
             onConfirm={async () => {
-              await remove.mutateAsync([name]);
+              await remove.mutateAsync({ names: [name], namespace });
               setDialog('none');
               // The object is gone; staying here would show a 404 on the next refetch.
               void navigate({ to: listRoute, params: { cluster }, search: namespace ? { namespace } : {} });
@@ -209,13 +210,5 @@ function ClusterConfigMapDetailRoute() {
   );
 }
 
-function Row({ label, value }: { label: string; value: string }): React.ReactElement {
-  return (
-    <>
-      <dt className="text-ai-fg-muted">{label}</dt>
-      <dd className="min-w-0 break-all text-ai-fg">{value}</dd>
-    </>
-  );
-}
 
 export type { ConfigMapDetail };

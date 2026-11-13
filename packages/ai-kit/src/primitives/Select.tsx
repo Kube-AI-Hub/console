@@ -32,6 +32,8 @@ export interface SelectProps {
   emptyText?: string;
   'aria-invalid'?: boolean;
   'aria-label'?: string;
+  /** Stable automation handle, rendered on whichever element acts as the trigger. */
+  'data-ai-id'?: string;
 }
 
 /**
@@ -146,6 +148,7 @@ export function Select({
               aria-autocomplete="list"
               aria-label={aria['aria-label']}
               aria-invalid={aria['aria-invalid']}
+              {...(aria['data-ai-id'] ? { 'data-ai-id': aria['data-ai-id'] } : {})}
               disabled={disabled}
               className={cn(inputClassName, className)}
               value={query}
@@ -185,6 +188,7 @@ export function Select({
               aria-controls={listId}
               aria-label={aria['aria-label']}
               aria-invalid={aria['aria-invalid']}
+              {...(aria['data-ai-id'] ? { 'data-ai-id': aria['data-ai-id'] } : {})}
               disabled={disabled}
               className={cn(
                 inputClassName,
@@ -256,6 +260,7 @@ export function Select({
         id={id}
         aria-label={aria['aria-label']}
         aria-invalid={aria['aria-invalid']}
+        {...(aria['data-ai-id'] ? { 'data-ai-id': aria['data-ai-id'] } : {})}
         className={cn(
           'flex h-9 w-full items-center justify-between gap-2 rounded-ai-md border border-ai-line',
           'bg-ai-surface-1 px-3 text-sm text-ai-fg',

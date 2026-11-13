@@ -40,7 +40,7 @@ export function MonitoringListPage({ kind, cluster, namespace }: MonitoringListP
   const toggle = useToggleRule({ cluster, namespace: projectFilter });
   const [toDelete, setToDelete] = React.useState<string[] | null>(null);
   const [detail, setDetail] = React.useState<Row | null>(null);
-  const projectFilterControl = useProjectFilter(cluster, t('monitoring.filter.projectLabel'), t('monitoring.filter.project'));
+  const projectFilterControl = useProjectFilter(cluster, t('monitoring.filter.projectLabel'), t('monitoring.filter.project'), undefined, 'monitoring:filter:project');
 
   const rows = (query.data?.items ?? []) as Row[];
   const total = query.data?.total ?? 0;

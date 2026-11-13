@@ -77,7 +77,14 @@ export function useProjectOptions(cluster: string): Array<{ value: string; label
  * Returns a plain object so a page can place it in a schema without importing
  * query machinery; every resource list gets the same picker from one line.
  */
-export function useProjectFilter(cluster: string, title: string, allLabel: string, emptyText?: string) {
+export function useProjectFilter(
+  cluster: string,
+  title: string,
+  allLabel: string,
+  emptyText?: string,
+  /** Stable automation handle for the trigger, e.g. `secrets:filter:project`. */
+  aiId?: string,
+) {
   const options = useProjectOptions(cluster);
   return React.useMemo(
     () => ({
@@ -92,7 +99,8 @@ export function useProjectFilter(cluster: string, title: string, allLabel: strin
       // Wider than the default 160px so a typical name fits; the trigger still
       // ellipsises anything longer instead of stretching the toolbar.
       widthClass: 'w-full sm:w-64',
+      ...(aiId ? { aiId } : {}),
     }),
-    [options, title, allLabel, emptyText],
+    [options, title, allLabel, emptyText, aiId],
   );
 }

@@ -57,6 +57,15 @@ export interface ListFilter {
   emptyText?: string;
   /** Trigger width; defaults to 160px, enough for short values only. */
   widthClass?: string;
+  /**
+   * Automation handle, rendered as `data-ai-id` on the trigger.
+   *
+   * Without one the trigger is reachable only by its accessible name, and its
+   * role is `combobox`, not `button` — that is what Radix renders for a select
+   * trigger. Automation that assumed `button` waited 30 seconds per attempt for
+   * a match that never came.
+   */
+  aiId?: string;
 }
 
 export interface ListAction<TRow> {
@@ -443,6 +452,7 @@ export function ResourceList<TRow>({
               onValueChange={(value) =>
                 onFiltersChange?.({ ...filters, [filter.key]: value === ALL_OPTION ? '' : value })
               }
+              {...(filter.aiId ? { 'data-ai-id': filter.aiId } : {})}
               options={[{ value: ALL_OPTION, label: filter.allLabel ?? `全部${filter.title}` }, ...filter.options]}
               {...(filter.searchable ? { searchable: true } : {})}
               {...(filter.emptyText ? { emptyText: filter.emptyText } : {})}

@@ -42,7 +42,13 @@ export function SettingsListPage({ kind, cluster, namespace }: SettingsListPageP
 
   const list = useResourceListState<SortKey>({ defaultSortBy: 'createTime', resetOn: [cluster, projectFilter] });
   const query = useSettingsList(kind, toListParams(list, { cluster, namespace: projectFilter }, PAGE_SIZE));
-  const projectFilterControl = useProjectFilter(cluster, t('settings.filter.projectLabel'), t('settings.filter.project'));
+  const projectFilterControl = useProjectFilter(
+    cluster,
+    t('settings.filter.projectLabel'),
+    t('settings.filter.project'),
+    undefined,
+    'settings:filter:project',
+  );
 
   const [roleName, setRoleName] = React.useState<string | null>(null);
   const [editRole, setEditRole] = React.useState<RoleSummary | null>(null);

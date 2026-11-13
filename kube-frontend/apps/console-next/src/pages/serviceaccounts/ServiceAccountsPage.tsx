@@ -69,6 +69,8 @@ export function ServiceAccountsPage({ workspace, cluster, namespace }: ServiceAc
     cluster,
     t('serviceaccounts.filter.projectLabel'),
     t('serviceaccounts.filter.project'),
+    undefined,
+    'serviceaccounts:filter:project',
   );
   const projectOptions = useProjectOptions(cluster);
 

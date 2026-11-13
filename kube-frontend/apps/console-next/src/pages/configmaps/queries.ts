@@ -54,7 +54,20 @@ export function useConfigMap(params: { cluster: string; namespace: string; name:
 export function useDeleteConfigMaps(params: { cluster: string; namespace: string }) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (names: string[]) => configMapsApi(api).remove({ ...params, names }),
+    /*
+     * The namespace is a per-call argument, not a hook parameter.
+     *
+     * The cluster-wide list has an empty "namespace" while showing objects from
+     * every project, so using the list's namespace to address a write produced
+     * `DELETE /api/v1/configmaps/<name>` — no `namespaces/<ns>` segment, 404, and
+     * the object stayed. A delete is addressed by the object's own project.
+     */
+    mutationFn: (input: { names: string[]; namespace?: string }) =>
+      configMapsApi(api).remove({
+        cluster: params.cluster,
+        namespace: input.namespace ?? params.namespace,
+        names: input.names,
+      }),
     onSuccess: () => invalidateAll(queryClient),
   });
 }

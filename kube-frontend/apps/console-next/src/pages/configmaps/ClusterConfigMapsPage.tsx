@@ -66,7 +66,13 @@ export function ClusterConfigMapsPage({ cluster, namespace }: ClusterConfigMapsP
   const { projectFilter, setProjectFilter, query, items, total, remove, create, update, patch, loadDetail } = list;
   const [dialog, setDialog] = React.useState<Dialog>({ kind: 'none' });
 
-  const projectFilterControl = useProjectFilter(cluster, t('configmaps.filter.projectLabel'), t('clusterConfigmaps.filter.allProjects'));
+  const projectFilterControl = useProjectFilter(
+    cluster,
+    t('configmaps.filter.projectLabel'),
+    t('clusterConfigmaps.filter.allProjects'),
+    undefined,
+    'cluster-configmaps:filter:project',
+  );
   const projectOptions = useProjectOptions(cluster);
 
   const mutationError = [remove.error, create.error, update.error, patch.error].find((error) => error !== null);
@@ -86,7 +92,17 @@ export function ClusterConfigMapsPage({ cluster, namespace }: ClusterConfigMapsP
     () => ({
       title: t('clusterConfigmaps.title'),
       description: t('clusterConfigmaps.description'),
-      rowKey: 'name',
+      /*
+       * The key must be namespace/name, not name.
+       *
+       * This list spans every project, and the same name is common across them:
+       * `kube-root-ca.crt` exists in most namespaces. Keyed by name alone, selection
+       * state collides across rows and the row-checkbox handles are emitted as
+       * `select:<name>` — duplicates that address the wrong object. `data-ai-row` was
+       * already namespace/name, which is why the mismatch showed up only on the
+       * checkbox handles.
+       */
+      rowKey: (row: ConfigMapSummary) => `${row.namespace}/${row.name}`,
       rowAttributes: (row) => ({ 'data-ai-row': `${row.namespace}/${row.name}` }),
       search: { placeholder: t('configmaps.searchPlaceholder'), aiId: 'cluster-configmaps:search' },
       filters: [projectFilterControl],
@@ -321,7 +337,7 @@ export function ClusterConfigMapsPage({ cluster, namespace }: ClusterConfigMapsP
           names={dialog.names}
           pending={remove.isPending}
           onConfirm={async () => {
-            await remove.mutateAsync(dialog.names);
+            await remove.mutateAsync({ names: dialog.names, namespace: dialog.namespace });
             setSelected([]);
             setDialog({ kind: 'none' });
           }}

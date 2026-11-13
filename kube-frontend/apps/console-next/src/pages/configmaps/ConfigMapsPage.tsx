@@ -76,7 +76,7 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
   const { projectFilter, setProjectFilter, query, items, total, remove, create, update, patch, loadDetail } = list;
   const [dialog, setDialog] = React.useState<Dialog>({ kind: 'none' });
 
-  const projectFilterControl = useProjectFilter(cluster, t('configmaps.filter.projectLabel'), t('configmaps.filter.project'));
+  const projectFilterControl = useProjectFilter(cluster, t('configmaps.filter.projectLabel'), t('configmaps.filter.project'), undefined, 'configmaps:filter:project');
   // Same cached query the filter uses, so the dialog opens with options already
   // resolved instead of issuing its own cluster-wide project read.
   const projectOptions = useProjectOptions(cluster);
@@ -371,7 +371,8 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
           names={dialog.names}
           pending={remove.isPending}
           onConfirm={async () => {
-            await remove.mutateAsync(dialog.names);
+            // This list is always scoped to one project, so its namespace is the answer.
+            await remove.mutateAsync({ names: dialog.names, namespace: projectFilter || namespace });
             setSelected([]);
             setDialog({ kind: 'none' });
           }}

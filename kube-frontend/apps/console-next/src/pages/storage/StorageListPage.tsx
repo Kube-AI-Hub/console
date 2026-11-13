@@ -81,7 +81,7 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
   const mounted = pods.data ? mountsOf(pods.data) : undefined;
   const rows = withMountState((query.data?.items ?? []) as StorageSummary[], mounted);
   const total = query.data?.total ?? 0;
-  const projectFilterControl = useProjectFilter(cluster, t('storage.filter.projectLabel'), t('storage.filter.project'));
+  const projectFilterControl = useProjectFilter(cluster, t('storage.filter.projectLabel'), t('storage.filter.project'), undefined, 'storage:filter:project');
 
   React.useEffect(() => {
     if (dialog.kind === 'loading' && detail.data) setDialog({ kind: 'editYaml', detail: detail.data });

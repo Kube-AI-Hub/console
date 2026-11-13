@@ -87,7 +87,7 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
   const rows = query.data?.items ?? [];
   const total = query.data?.total ?? 0;
   const api = workloadsApi(apiClient, kind);
-  const projectFilterControl = useProjectFilter(cluster, t('workloads.filter.projectLabel'), t('workloads.filter.project'));
+  const projectFilterControl = useProjectFilter(cluster, t('workloads.filter.projectLabel'), t('workloads.filter.project'), undefined, 'workloads:filter:project');
 
   /** Opens the dialog frame first, then fills it: a silent wait reads as a dead click. */
   const openWithDetail = React.useCallback(
