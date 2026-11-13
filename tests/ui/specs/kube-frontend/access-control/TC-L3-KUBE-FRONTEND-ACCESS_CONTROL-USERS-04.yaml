@@ -1,0 +1,33 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-04
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: users
+title: 用户列表 · 按名称排序可切换升降序
+entry_url: '{BASE_URL}/kube-frontend/access/users'
+prd: prd/kube-frontend/access-control/users.md
+design: design/kube-frontend/access-control/users.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-04
+
+story:
+- US1
+
+product: 点击名称列排序在升序与降序间切换，列表顺序随之改变。
+preconditions:
+- 已登录，且有平台权限
+- 用户列表至少有两条数据
+steps:
+- 打开用户列表，记录当前顺序
+- 点击名称列排序，记录顺序
+- 再次点击，记录顺序
+expected:
+- 两次点击后顺序不同
+- 一次为升序、一次为降序
+troubleshoot:
+- 点击无效说明排序回调丢弃了 undefined（本页默认降序，首次点击会走该分支）
+- 顺序不变说明服务端未收到 sortBy/ascending 参数
+update_automation:
+- 排序语义变化时改 ai-kit 的 Table.cycleSort 与其单测

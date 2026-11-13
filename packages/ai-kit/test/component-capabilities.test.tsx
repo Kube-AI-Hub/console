@@ -193,7 +193,7 @@ const COLUMNS: Array<TableColumn<Row>> = [
 ];
 
 describe('Table sorting', () => {
-  it('cycles asc, desc then none and reports each step', async () => {
+  it('cycles asc then desc, and wraps back to asc', async () => {
     const onSortChange = vi.fn();
     const { rerender } = render(
       <Table columns={COLUMNS} rows={ROWS} rowKey={(row) => row.name} onSortChange={onSortChange} />,
@@ -223,8 +223,11 @@ describe('Table sorting', () => {
         onSortChange={onSortChange}
       />,
     );
+    // Wraps back to asc. Ending the cycle at "no sort" left every consumer in this
+    // console — all of which sort server-side and ignore the undefined step — with a
+    // column that looked unsortable the moment it was already descending.
     await userEvent.click(screen.getByRole('button', { name: /名称/ }));
-    expect(onSortChange).toHaveBeenLastCalledWith(undefined);
+    expect(onSortChange).toHaveBeenLastCalledWith({ key: 'name', order: 'asc' });
   });
 
   it('exposes aria-sort on the sorted column only', () => {

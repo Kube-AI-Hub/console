@@ -2145,3 +2145,33 @@ cd kube-frontend && node scripts/dev-static-server.mjs apps/console-next/dist 51
 ```
 
 **遇到大批量同时失败时先确认这两个端口**，再怀疑代码。
+
+### 48.8 第 67 轮：排序控件在默认降序的页面上是死的
+
+用脚本对 14 个列表页逐一检查排序，发现**访问控制三页（用户、平台角色、企业空间）点击排序毫无反应**。
+
+根因在 `Table.cycleSort` 的三态循环：
+
+```
+不同列 → asc ；同列且 asc → desc ；同列且 desc → undefined（取消排序）
+```
+
+而 `useResourceListState` 的**默认排序是 `desc`**，9 个页面又都写成 `if (next) list.setSort(next)`——
+于是**第一次点击就走进「取消排序」分支，被页面丢弃**，状态不变、不发请求，看起来就是"排序坏了"。
+
+`Table` 原本的单测甚至锁定了这个三态行为（`cycles asc, desc then none`），但它从未在任何页面上被正确消费。
+
+修复：改为两态（asc ↔ desc）。理由是这些列表**永远有排序**（服务端总要 `sortBy`/`ascending`），
+「无排序」是一个不存在于数据模型的状态；一个所有消费者都丢弃的状态就是死控件。
+
+实测（用户页）：
+
+```
+initial: ['zzzzzzzz', 'zyp001', 'zupin']      ← 默认降序
+click1:  ['1014169576', '1234', '1234321']    ← 升序
+click2:  ['zzzzzzzz', 'zyp001', 'zupin']      ← 降序
+```
+
+新增用例 `ACCESS_CONTROL-USERS-04` 锁定该行为。
+
+**验证**：ai-kit 153 通过；架构契约 454；console-next 98；access-control 8 通过 + 1 抖动（单跑通过）；文档门禁 0 错。

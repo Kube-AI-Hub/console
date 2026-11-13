@@ -140,11 +140,20 @@ export function Table<T>({
     );
   };
 
+  /*
+   * Two states, not three: asc and desc.
+   *
+   * The cycle used to end with "no sort" and report `undefined`, but every consumer in
+   * this console sorts server-side and always sends a key — all nine of them ignore the
+   * `undefined` step. Worse, the tables default to `desc`, so the *first* click on the
+   * active column asked for "no sort", the page dropped it, and the column looked
+   * permanently unsortable. A state no consumer honours is a dead control.
+   */
   const cycleSort = (key: string) => {
     if (!onSortChange) return;
     if (sorter?.key !== key) onSortChange({ key, order: 'asc' });
     else if (sorter.order === 'asc') onSortChange({ key, order: 'desc' });
-    else onSortChange(undefined);
+    else onSortChange({ key, order: 'asc' });
   };
 
   const toggleExpanded = (key: string) => {

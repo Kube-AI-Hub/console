@@ -21,6 +21,7 @@
 - **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-02** — 已知在用户页，当点「创建」填写用户名、邮箱、密码与平台角色并确认，则用户被创建且 `iam.kubesphere.io/platform-role` 注解等于所选角色；用户名非法或密码弱于规则时提交被拦下并给出提示。
 
 - **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-01** — 已知平台上有用户，当打开用户页，则显示用户名、状态、平台角色、最近登录四列。
+- **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-04** — 已知用户列表有数据，当点击名称列排序，则顺序变为升序；再次点击，则变为降序（两次结果不同）。
 
 ## 设计目标
 
