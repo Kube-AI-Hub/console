@@ -69,10 +69,9 @@ export function EditInfoDialog({
      * show (creator, kubeconfig, managed-by markers), and dropping them would detach
      * the object from how it was created.
      *
-     * A cleared field is removed from the map here, which is what the pages that PUT
-     * the whole object expect. Pages that send a JSON merge patch pass the patch
-     * through `annotationMergePatch()` so the removal survives: under RFC 7386 an absent key
-     * means "leave it alone", so omitting a cleared annotation silently did nothing.
+     * A cleared field is removed from the map here. Every page using this dialog PUTs
+     * the whole object, so a removed key is a real removal; the pages that send a merge
+     * patch use their own dialog, which emits `null` for a cleared field (RFC 7386).
      */
     const merged: Record<string, string> = { ...annotations };
     if (trimmedAlias) merged[annotationKeys.alias] = trimmedAlias;
@@ -140,27 +139,4 @@ export function EditInfoDialog({
       </div>
     </Modal>
   );
-}
-
-/**
- * Turn a complete annotation map into a JSON merge patch relative to `before`.
- *
- * Keys that disappeared become `null` (deleted), keys that changed become their new
- * value, and untouched keys are omitted so the server leaves them alone. Pages that
- * PUT the whole object ignore this; pages that send a merge patch need it, because
- * under RFC 7386 an absent key means "leave it alone" and a cleared annotation would
- * silently stay.
- */
-export function annotationMergePatch(
-  before: Record<string, string>,
-  after: Record<string, string>,
-): Record<string, string | null> {
-  const patch: Record<string, string | null> = {};
-  for (const key of Object.keys(before)) {
-    if (!(key in after)) patch[key] = null;
-  }
-  for (const [key, value] of Object.entries(after)) {
-    if (before[key] !== value) patch[key] = value;
-  }
-  return patch;
 }
