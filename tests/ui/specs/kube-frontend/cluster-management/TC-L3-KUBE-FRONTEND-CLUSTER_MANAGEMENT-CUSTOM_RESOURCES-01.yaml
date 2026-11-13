@@ -1,0 +1,41 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_RESOURCES-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: custom-resources
+title: 自定义资源 · 列表与作用域一致
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/custom-resources'
+prd: prd/kube-frontend/cluster-management/custom-resources.md
+design: design/kube-frontend/cluster-management/custom-resources.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_RESOURCES-01
+
+story:
+- US1
+- US2
+- US3
+
+product: 自定义资源页列出集群全部 CRD，显示类型、组/存储版本、全名、作用域、是否已提供与创建时间；行数与接口一致。
+preconditions:
+- 已登录，且对集群 host 有读取权限
+- 集群注册了至少一个 CRD
+steps:
+- 用 API 读取 customresourcedefinitions（limit=-1），记下总数与其中一个 CRD 的 kind、scope、served
+- 打开自定义资源页，等待 surface 就绪
+- 核对行数与接口一致
+- 搜索某个 kind，核对首行即该 CRD
+- 核对首行的作用域文案与接口 spec.scope 一致
+expected:
+- 页面状态 ready，行数与接口返回的 CRD 数一致（少行说明漏了 limit=-1）
+- 表头包含 类型、名称、作用域、已提供、创建时间
+- 搜索 kind 后首行是它，且副行显示 组/版本
+- 作用域为「集群级」或「命名空间级」，与接口一致
+troubleshoot:
+- 全部显示「未提供」：served 读错了层级（应是 spec.versions[].served）
+- 行数少于接口：请求没带 limit=-1
+- 搜索无结果：搜索应同时匹配 kind 与全名
+- 排序无效：apiextensions 没有服务端排序，必须本地排
+update_automation:
+- 列或标识变化时改 pages/cluster_management.py 与 CustomResourcesPage.tsx

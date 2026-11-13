@@ -443,6 +443,11 @@ MODULES = [
                     "title": "节点用量",
                     "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODE_USAGE-01"]},
                 },
+                    {
+                        "id": "custom-resources",
+                        "title": "自定义资源",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_RESOURCES-01"]},
+                    },
 },
                 "features": [
                     {

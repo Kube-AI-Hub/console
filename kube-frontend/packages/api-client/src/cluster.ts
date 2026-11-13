@@ -527,3 +527,83 @@ export function nodeUsageApi(client: Client) {
 
 export type NodeUsageApi = ReturnType<typeof nodeUsageApi>;
 
+
+/* ------------------------------------------------------------------ *
+ * Custom resource definitions.
+ * ------------------------------------------------------------------ */
+
+/** One CRD, flattened to what the list shows. */
+export interface CustomResourceSummary {
+  /** `metadata.name`, the full `<plural>.<group>` form. */
+  name: string;
+  /** `spec.names.kind`, e.g. `RuleGroup`. */
+  kind: string;
+  group: string;
+  /** Versions the CRD serves, storage version first. */
+  versions: string[];
+  /** `Cluster` or `Namespaced`. */
+  scope: string;
+  /** Whether users can create instances of it (deprecated CRDs cannot). */
+  served: boolean;
+  createdAt: string;
+}
+
+interface KubeCrd extends KubeObject {
+  spec?: {
+    group?: string;
+    scope?: string;
+    names?: { kind?: string; plural?: string; singular?: string };
+    versions?: Array<{ name?: string; served?: boolean; storage?: boolean }>;
+  };
+}
+
+export function toCustomResourceSummary(crd: KubeCrd): CustomResourceSummary {
+  const versions = crd.spec?.versions ?? [];
+  return {
+    name: crd.metadata?.name ?? '',
+    kind: crd.spec?.names?.kind ?? '',
+    group: crd.spec?.group ?? '',
+    /*
+     * Storage version first, then the rest in declaration order: the storage version
+     * is the one the API server round-trips through, so it is what a reader looking at
+     * a mismatch wants to see first.
+     */
+    versions: [...versions]
+      .sort((a, b) => Number(b.storage === true) - Number(a.storage === true))
+      .map((version) => version.name ?? '')
+      .filter(Boolean),
+    scope: crd.spec?.scope ?? '',
+    served: versions.some((version) => version.served !== false),
+    createdAt: crd.metadata?.creationTimestamp ?? '',
+  };
+}
+
+/**
+ * CRD list.
+ *
+ * Read through the real apiextensions group rather than the resources proxy: this is
+ * the authoritative list of what the cluster can serve, and the proxy has been seen to
+ * lag on other resources. `served` is derived from the versions, because a CRD whose
+ * every version is unserved still exists and still appears in the list.
+ */
+export function customResourcesApi(client: Client) {
+  return {
+    async list(params: { cluster: string; signal?: AbortSignal }): Promise<{
+      items: CustomResourceSummary[];
+      total: number;
+    }> {
+      const body = await client.request<{ items?: KubeCrd[] }>(
+        '/apis/apiextensions.k8s.io/v1/customresourcedefinitions',
+        {
+          query: { limit: -1 },
+          ...(params.signal ? { signal: params.signal } : {}),
+        },
+      );
+      const items = (body?.items ?? []).map(toCustomResourceSummary);
+      return { items, total: items.length };
+    },
+  };
+}
+
+export type CustomResourcesApi = ReturnType<typeof customResourcesApi>;
+

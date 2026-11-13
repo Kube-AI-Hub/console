@@ -255,6 +255,29 @@ export { isTokenExpired, userFromToken } from './token';
  * the first down: installations without a monitoring backend still have versions,
  * readiness and the installed-module list.
  */
-export { clusterApi, clusterMetricsApi, clusterWriteApi, componentMetricsApi, nodeUsageApi, rangeMetricsApi, toClusterDetail, toMetricValues } from './cluster';
-export type { ClusterDetail, ClusterModule, ClusterUsage, KubernetesStatus, MetricSeries, NodeUsage, NodeUsageApi, RangeMetricsApi, SeriesPoint } from './cluster';
+export {
+  clusterApi,
+  clusterMetricsApi,
+  clusterWriteApi,
+  componentMetricsApi,
+  customResourcesApi,
+  nodeUsageApi,
+  rangeMetricsApi,
+  toClusterDetail,
+  toCustomResourceSummary,
+  toMetricValues,
+} from './cluster';
+export type {
+  ClusterDetail,
+  ClusterModule,
+  ClusterUsage,
+  CustomResourceSummary,
+  CustomResourcesApi,
+  KubernetesStatus,
+  MetricSeries,
+  NodeUsage,
+  NodeUsageApi,
+  RangeMetricsApi,
+  SeriesPoint,
+} from './cluster';
 
