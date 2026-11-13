@@ -53,6 +53,29 @@ PROJECT_PAGES = {
     "gateway": "gateways",
 }
 
+#: 老 console 里**集群作用域**的一级页面目录 → 迁移后的路由段。
+#: 与 PROJECT_PAGES 分开，因为它们的作用域不同（集群级列表跨全部命名空间）。
+CLUSTER_PAGES = {
+    "configmaps": "configmaps",
+    "nodes": "nodes",
+    "projects": "namespaces",
+    "servicecomponents": "components",
+    "storage": "storageclasses",
+}
+
+#: 集群作用域里明确不迁移的页面与原因。
+CLUSTER_UNMIGRATED = {
+    "overview": "集群概览：需要指标时间序列",
+    "monitor": "集群监控：需要指标接口",
+    "custommonitoring": "自定义监控：需要图表引擎",
+    "customresources": "CRD 资源浏览器：通用 YAML 客户端，属独立需求",
+    "edgenodes": "边缘节点：本部署无边缘节点",
+    "logcollections": "日志收集：需要日志组件配置",
+    "gateway": "集群网关：本集群无网关控制器实例",
+    "kubeconfig": "集群 kubeconfig 管理：需要生成与轮换逻辑",
+    "visibility": "集群可见性：依赖平台审计模块",
+}
+
 #: 老 console 里有、本轮明确不迁移的页面，以及原因。
 UNMIGRATED = {
     "overview": "项目概览：需要配额/用量接口，单独立项",
@@ -142,6 +165,14 @@ def main() -> int:
         if key not in registry:
             report["unregistered"].append(key)
 
+    # 集群级：老页面 → 是否已迁移。此前只查「多余」与「未登记」，一条**没迁移的**
+    # 集群页因此完全不出现在报告里——缺口必须自己浮出来，不能靠人记得去数。
+    for old, segment in CLUSTER_PAGES.items():
+        if not (OLD / "clusters/containers" / old).exists():
+            continue
+        if segment not in segments["cluster"]:
+            report["missing"].append(f"cluster:{old} -> {segment}（老页面存在，迁移后没有该路由）")
+
     for segment in sorted(segments["cluster"]):
         files = page_files(cluster_dir, segment)
         key = f"cluster:{segment}"
@@ -167,8 +198,11 @@ def main() -> int:
         for item in items:
             print(f"  - {item}")
 
-    print("\n显式决定不迁移的页面：")
+    print("\n显式决定不迁移的页面（项目作用域）：")
     for name, why in UNMIGRATED.items():
+        print(f"  - {name}：{why}")
+    print("\n显式决定不迁移的页面（集群作用域）：")
+    for name, why in CLUSTER_UNMIGRATED.items():
         print(f"  - {name}：{why}")
 
     print("\n每页的文件：")

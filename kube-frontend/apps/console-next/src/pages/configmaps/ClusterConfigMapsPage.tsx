@@ -214,7 +214,16 @@ export function ClusterConfigMapsPage({ cluster, namespace }: ClusterConfigMapsP
       <ResourceList
         schema={schema}
         rows={items}
-        loading={state === 'loading'}
+        /*
+         * `isFetching`, not just the first load.
+         *
+         * Listing ConfigMaps across every project takes ~25s on this cluster, so a
+         * search, sort or project change leaves the previous rows on screen for that
+         * long. With no in-flight indication the page looks like it ignored the input.
+         * The surface state stays `ready` (there is data), while the table shows its
+         * skeleton until the new rows arrive.
+         */
+        loading={query.isFetching}
         searchValue={keyword}
         onSearchChange={setKeyword}
         filters={{ project: projectFilter }}

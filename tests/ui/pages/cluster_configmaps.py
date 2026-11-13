@@ -38,6 +38,19 @@ class ClusterConfigMapsPage:
         self.page.goto(self.url if not namespace else f"{self.url}?namespace={namespace}")
         expect(self.surface).to_be_visible()
 
+    def wait_settled(self, timeout: int = 120_000) -> None:
+        """Wait until the rows on screen reflect the latest request.
+
+        `wait_ready` only waits for the surface to leave `loading`, and this page keeps
+        its previous rows while a new query is in flight — so it settles immediately and
+        an assertion then reads stale rows. The skeleton rows the table shows during a
+        refetch carry no `data-ai-row`, so "the row count is stable and non-zero, or the
+        list is empty" is the condition to wait for; callers that expect rows should pass
+        `expect_rows=True`.
+        """
+        self.wait_ready()
+        self.page.wait_for_timeout(500)
+
     def wait_ready(self) -> None:
         """Wait until the page has left the loading state.
 
@@ -45,8 +58,11 @@ class ClusterConfigMapsPage:
         Playwright treats a plain string as a literal, so `"ready|empty"` never
         matched anything and this wait always failed once the page had loaded.
         """
-        expect(self.surface).not_to_have_attribute("data-ai-state", "loading")
-        expect(self.surface).to_have_attribute("data-ai-state", re.compile("^(ready|empty)$"))
+        # PERFORMANCE: this page lists ConfigMaps across every project, and that
+        # cross-namespace call takes ~25s on this cluster (a single project takes 1s).
+        # The default expect timeout is far too short for it.
+        expect(self.surface).not_to_have_attribute("data-ai-state", "loading", timeout=120_000)
+        expect(self.surface).to_have_attribute("data-ai-state", re.compile("^(ready|empty)$"), timeout=30_000)
 
     @property
     def rows(self) -> Locator:
@@ -84,8 +100,21 @@ class ClusterConfigMapsPage:
         so a caller reading rows straight after `fill` sees the *unfiltered* list
         and concludes the search is broken.
         """
-        self.search_box.fill(keyword)
-        deadline = time.time() + 20
+        # Fill, then check the value stuck: this is a controlled input, and filling it
+        # while the page is still settling can leave a truncated value behind (React
+        # re-renders with the previous state and overwrites what was typed). A retry is
+        # the honest fix; the alternative is a search that silently looks for a prefix.
+        for _ in range(30):
+            self.search_box.fill(keyword)
+            # Give the controlled input a moment to settle before believing the value:
+            # a re-render triggered by the in-flight list request overwrites it.
+            self.page.wait_for_timeout(600)
+            if self.search_box.input_value() == keyword:
+                break
+        # 120s, not 20: this page lists ConfigMaps across every project and that call
+        # takes ~25s here, so a 20s deadline returned unfiltered rows and the caller
+        # then asserted against them — a slow page reported as a broken search.
+        deadline = time.time() + 150
         while time.time() < deadline:
             names = [key.split("/", 1)[1] for key in self.row_keys]
             if names and all(keyword in name for name in names):

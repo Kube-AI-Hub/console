@@ -165,6 +165,10 @@ export const AREAS: readonly Area[] = [
       { key: 'nodes', path: 'nodes', titleKey: 'cluster.nodes.title', status: 'ready' },
       { key: 'namespaces', path: 'namespaces', titleKey: 'cluster.projects.title', status: 'ready' },
       { key: 'components', path: 'components', titleKey: 'cluster.components.title', status: 'ready' },
+      // The cluster console's ConfigMap list spans every project; the project console
+      // has its own page. It existed as a route but was missing here, so the sidebar
+      // could not reach it.
+      { key: 'configmaps', path: 'configmaps', titleKey: 'clusterConfigMaps.title', status: 'ready' },
       { key: 'storageclasses', path: 'storageclasses', titleKey: 'cluster.storageClasses.title', status: 'ready' },
     ],
   },
