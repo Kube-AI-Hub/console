@@ -47,6 +47,18 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_PROJECTS_02(cluster_management_p
     for column in ("CPU 使用率", "内存使用率", "容器组数"):
         assert column in headers, headers
 
+    # The page reads pod metrics in a second request that takes ~25s here; sampling the
+    # row right after the list settles reads the pre-metrics zeros. Wait for the first
+    # expectation to appear before asserting any of them.
+    first_namespace, first_expected = counts.most_common(1)[0]
+    for _ in range(80):
+        row = surface.locator(f'[data-ai-row="{first_namespace}"]')
+        if row.count():
+            cells = [cell.strip() for cell in row.locator("td").all_inner_texts()]
+            if str(first_expected) in cells:
+                break
+        ui.page.wait_for_timeout(2000)
+
     checked = 0
     for namespace, expected in counts.most_common(5):
         row = surface.locator(f'[data-ai-row="{namespace}"]')

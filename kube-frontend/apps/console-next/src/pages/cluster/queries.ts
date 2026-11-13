@@ -113,8 +113,17 @@ export function useProjectPods() {
 /** Attach aggregated usage to project rows; rows without pods report zeros. */
 export function withProjectUsage(
   rows: NamespaceSummary[],
-  usage: Record<string, { cpuCores: number; memoryBytes: number; podCount: number }>,
-): Array<NamespaceSummary & ProjectUsage> {
+  /**
+   * `undefined` until the metrics list has arrived.
+   *
+   * Without this the rows carried `0` / `0` / `0` before the read finished, which says
+   * "this project uses nothing and runs no pods" — a claim the data does not support.
+   * A project with genuinely no pods is absent *within* a loaded map, which is a
+   * different answer and still reports zeros.
+   */
+  usage: Record<string, { cpuCores: number; memoryBytes: number; podCount: number }> | undefined,
+): Array<NamespaceSummary & Partial<ProjectUsage>> {
+  if (!usage) return rows;
   return rows.map((row) => {
     const entry = usage[row.name] ?? { cpuCores: 0, memoryBytes: 0, podCount: 0 };
     return {

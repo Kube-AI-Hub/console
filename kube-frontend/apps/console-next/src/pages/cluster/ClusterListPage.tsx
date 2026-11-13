@@ -43,7 +43,7 @@ export function ClusterListPage({ kind, cluster }: ClusterListPageProps): React.
   const rows = (kind === 'nodes'
     ? withNodeUsage(baseRows as NodeSummary[], nodeUsage.data ?? {})
     : kind === 'namespaces'
-      ? withProjectUsage(baseRows as NamespaceSummary[], projectPods.data ?? {})
+      ? withProjectUsage(baseRows as NamespaceSummary[], projectPods.data)
       : baseRows) as Row[];
   const total = query.data?.total ?? 0;
 
