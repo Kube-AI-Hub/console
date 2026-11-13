@@ -361,3 +361,90 @@ export function clusterWriteApi(client: Client) {
   };
 }
 
+
+/* ------------------------------------------------------------------ *
+ * Range queries (trends).
+ * ------------------------------------------------------------------ */
+
+/** One point in a series: epoch seconds and the value at that moment. */
+export interface SeriesPoint {
+  /** Epoch milliseconds, so a chart can label an axis without converting twice. */
+  at: number;
+  value: number;
+}
+
+export interface MetricSeries {
+  /** Metric name as requested, e.g. `cluster_cpu_usage`. */
+  name: string;
+  points: SeriesPoint[];
+}
+
+/**
+ * Time-series reads from the same monitoring API as the current values.
+ *
+ * The difference is `start`/`end`/`step`: the API answers `matrix` instead of
+ * `vector`, and each sample carries an array of [timestamp, value] pairs. A trend
+ * view that asked for `last` would plot a single point and call it a chart.
+ */
+export function rangeMetricsApi(client: Client) {
+  return {
+    async cluster(params: {
+      cluster: string;
+      metrics: string[];
+      /** Epoch milliseconds. */
+      start: number;
+      end: number;
+      /** Prometheus duration, e.g. `60s`. */
+      step: string;
+      scope?: 'cluster' | 'node' | 'namespace';
+      node?: string;
+      namespace?: string;
+      signal?: AbortSignal;
+    }): Promise<MetricSeries[]> {
+      const body = await client.request<{
+        results?: Array<{
+          metric_name?: string;
+          data?: {
+            resultType?: string;
+            result?: Array<{ metric?: Record<string, string>; values?: Array<[number, string]> }>;
+          };
+        }>;
+      }>(`/kapis/monitoring.kubesphere.io/v1alpha3/${params.scope ?? 'cluster'}`, {
+        query: {
+          metrics_filter: params.metrics.map((metric) => `${metric}$`).join('|'),
+          start: Math.round(params.start / 1000),
+          end: Math.round(params.end / 1000),
+          step: params.step,
+          cluster: params.cluster,
+          ...(params.node ? { node: params.node } : {}),
+          ...(params.namespace ? { namespace: params.namespace } : {}),
+        },
+        ...(params.signal ? { signal: params.signal } : {}),
+      });
+
+      const out: MetricSeries[] = [];
+      for (const result of body?.results ?? []) {
+        const name = result.metric_name;
+        // A range answer is `matrix`; a `vector` here means the backend ignored the
+        // range parameters, and plotting it as one point is more honest than
+        // pretending it is a trend.
+        const series = result.data?.result ?? [];
+        const points: SeriesPoint[] = [];
+        for (const sample of series) {
+          for (const [at, value] of sample.values ?? []) {
+            const parsed = Number.parseFloat(value);
+            if (!Number.isFinite(parsed)) continue;
+            points.push({ at: at * 1000, value: parsed });
+          }
+        }
+        if (!name || points.length === 0) continue;
+        points.sort((a, b) => a.at - b.at);
+        out.push({ name, points });
+      }
+      return out;
+    },
+  };
+}
+
+export type RangeMetricsApi = ReturnType<typeof rangeMetricsApi>;
+

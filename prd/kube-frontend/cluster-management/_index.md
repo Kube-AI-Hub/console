@@ -54,6 +54,7 @@
 | 节点 | `/kube-frontend/clusters/<id>/nodes` |
 | 项目 | `/kube-frontend/clusters/<id>/namespaces` |
 | 集群设置 | `/kube-frontend/clusters/<id>/settings` |
+| 集群监控 | `/kube-frontend/clusters/<id>/monitor` |
 
 ## 文案与校验
 
@@ -74,6 +75,7 @@
 | 节点 | [nodes.md](./nodes.md) |
 | 项目 | [projects.md](./projects.md) |
 | 集群设置 | [settings.md](./settings.md) |
+| 集群监控 | [monitor.md](./monitor.md) |
 
 ## 明确不做
 
@@ -91,6 +93,7 @@
 - `TC-FULL-KUBE-FRONTEND-CLUSTER_MANAGEMENT-01`
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-01`
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-SETTINGS-01`
+- `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01`
 
 ## 功能需求
 

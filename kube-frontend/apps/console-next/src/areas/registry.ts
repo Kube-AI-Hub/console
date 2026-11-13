@@ -178,6 +178,10 @@ export const AREAS: readonly Area[] = [
       // object is owned by the installer, and a console that edited it would disagree
       // with the thing that actually configures the cluster.
       { key: 'settings', path: 'settings', titleKey: 'cluster.settings.title', status: 'ready' },
+      // Trends over time. The old console puts these under 集群监控; the numbers come
+      // from the monitoring API's range query, which is a different read from the
+      // current-value panel on the overview.
+      { key: 'monitor', path: 'monitor', titleKey: 'cluster.monitor.title', status: 'ready' },
     ],
   },
   {

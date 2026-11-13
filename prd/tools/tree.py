@@ -475,6 +475,11 @@ MODULES = [
                         "title": "集群设置",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-SETTINGS-01"]},
                     },
+                    {
+                        "id": "monitor",
+                        "title": "集群监控",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01"]},
+                    },
                 ],
             },
             {

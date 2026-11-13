@@ -1,0 +1,43 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: monitor
+title: 集群监控 · 四个趋势与时间窗切换
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/monitor'
+prd: prd/kube-frontend/cluster-management/monitor.md
+design: design/kube-frontend/cluster-management/monitor.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-02
+
+story:
+- US1
+- US2
+- US3
+
+product: 集群监控显示 CPU/内存/容器组/节点四条趋势，每张卡片有曲线与最小/最大/当前值；切换时间窗会按新区间重新取数。
+preconditions:
+- 已登录，且对集群 host 有读取权限
+- KubeSphere 监控的 range query 可用
+steps:
+- 用 API 取最近 1 小时的 cluster_cpu_usage 与 cluster_cpu_total，按时间戳相除得到百分比区间
+- 打开集群监控页，等待 surface 就绪
+- 核对四张卡片都存在且都画出了曲线
+- 核对 CPU 与内存的当前值为 0-100 的百分比，容器组与节点为整数
+- 点「最近 24 小时」，核对重新取数且当前值更新
+- 核对单条曲线点数不超过 200
+expected:
+- 四张卡片齐全，各有最小/最大/当前三个数值
+- 百分比由用量与总量相除得到（不得出现大于 100 的值）
+- 切换时间窗后请求区间变化、数值更新
+- 曲线点数与步长匹配，不随窗口线性膨胀
+troubleshoot:
+- 百分比大于 100：说明直接把字节/核当成了百分比，需除以总量
+- 曲线贴底一条直线：说明用了固定 0-100 刻度而不是按峰值缩放
+- 切换窗口后数值不变：检查 query key 是否包含区间，或 end 是否每次渲染都重算
+- 卡片显示无数据：确认 range query 返回 matrix 且 step 在保留期内
+update_automation:
+- 卡片或标识变化时改 pages/cluster_monitor.py 与 ClusterMonitorPage.tsx

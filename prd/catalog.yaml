@@ -485,6 +485,13 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-SETTINGS-01
+    - id: monitor
+      title: 集群监控
+      prd: prd/kube-frontend/cluster-management/monitor.md
+      design: design/kube-frontend/cluster-management/monitor.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01
   - id: project-settings
     title: 项目设置
     prd: prd/kube-frontend/project-settings/_index.md

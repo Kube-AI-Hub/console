@@ -18,6 +18,7 @@ from pages.serviceaccounts import ServiceAccountsPage
 from pages.access_control import AccessControlPage
 from pages.cluster_management import ClusterManagementPage
 from pages.cluster_overview import ClusterOverviewPage
+from pages.cluster_monitor import ClusterMonitorPage
 from pages.cluster_settings import ClusterSettingsPage
 from pages.monitoring import MonitoringPage
 from pages.platform_settings import PlatformSettingsPage
@@ -566,6 +567,12 @@ def cluster_overview_page(page, ui_config, session_token):
 def cluster_settings_page(page, ui_config, session_token):
     """集群设置。只写描述注解，用例必须在 finally 里还原原值。"""
     return ClusterSettingsPage(page, app_base(ui_config), ui_config.cluster, api=ApiClient(app_base(ui_config), session_token))
+
+
+@pytest.fixture
+def cluster_monitor_page(page, ui_config, session_token):
+    """集群监控。只读趋势页，读 range query。"""
+    return ClusterMonitorPage(page, app_base(ui_config), ui_config.cluster, api=ApiClient(app_base(ui_config), session_token))
 
 
 @pytest.fixture
