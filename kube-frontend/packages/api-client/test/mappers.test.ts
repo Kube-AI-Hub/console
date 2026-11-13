@@ -3,7 +3,7 @@ import { toAlertSummary, toAlertingRuleSummary } from '../src/alerting';
 import { toComponentSummary } from '../src/storage';
 import { toNetworkPolicySummary, toSelector } from '../src/iam';
 import { toStorageClassSummary, mountsOf, withMountState, quantityToNumber, usagePercent } from '../src/storage';
-import { toWorkloadService, toWorkloadPod, toWorkloadRevision, toWorkloadSummary, revisionTemplate } from '../src/workloads';
+import { toJobRun, toWorkloadService, toWorkloadPod, toWorkloadRevision, toWorkloadSummary, revisionTemplate } from '../src/workloads';
 
 /**
  * Row mappers that turn a Kubernetes object into a table row.
@@ -337,5 +337,44 @@ describe('statefulset governing service', () => {
   it('defaults the protocol to TCP', () => {
     const svc = toWorkloadService({ metadata: { name: 's' }, spec: { clusterIP: '10.0.0.1', ports: [{ port: 80 }] } } as never, 's');
     expect(svc.ports).toEqual(['80/TCP']);
+  });
+});
+
+describe('job runs', () => {
+  it('numbers runs and reports the exit code of the failed container', () => {
+    const run = toJobRun(
+      {
+        metadata: { name: 'job-abcde', creationTimestamp: '2026-11-01T10:00:00Z' },
+        status: {
+          phase: 'Failed',
+          startTime: '2026-11-01T10:00:02Z',
+          completionTime: '2026-11-01T10:00:30Z',
+          containerStatuses: [{ state: { terminated: { reason: 'Error', exitCode: 1 } } }],
+        },
+      } as never,
+      2,
+    );
+    expect(run.index).toBe(2);
+    expect(run.phase).toBe('Failed');
+    expect(run.reason).toBe('Error');
+    expect(run.exitCode).toBe(1);
+    expect(run.endTime).toBe('2026-11-01T10:00:30Z');
+  });
+
+  it('reports an OOM kill, which is the common reason a job fails', () => {
+    const run = toJobRun(
+      { metadata: { name: 'p' }, status: { phase: 'Failed', containerStatuses: [{ state: { terminated: { reason: 'OOMKilled', exitCode: 137 } } }] } } as never,
+      1,
+    );
+    expect(run.reason).toBe('OOMKilled');
+    expect(run.exitCode).toBe(137);
+  });
+
+  it('reports zero for a clean run with no termination record yet', () => {
+    const run = toJobRun({ metadata: { name: 'p', creationTimestamp: '2026-11-01T10:00:00Z' }, status: { phase: 'Running' } } as never, 1);
+    expect(run.exitCode).toBe(0);
+    expect(run.reason).toBe('');
+    // Falling back to creation time keeps the ordering stable for a run still going.
+    expect(run.startTime).toBe('2026-11-01T10:00:00Z');
   });
 });

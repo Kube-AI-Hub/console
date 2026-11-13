@@ -8,6 +8,8 @@
 
 ## 关联需求
 
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-JOB_RUNS-01
+
 - AC-L3-KUBE-FRONTEND-APP_WORKLOADS-STATEFUL_SERVICE-01
 
 - AC-L3-KUBE-FRONTEND-APP_WORKLOADS-SERVICE_PODS-01
@@ -139,3 +141,13 @@
 **被否方案**：服务不存在时不渲染区块。等于把"配置错了"和"没配置"混为一谈。
 
 **何时重新考虑**：平台开始校验 `serviceName` 时。
+
+### DEC-L3-KUBE-FRONTEND-APP-WORKLOADS-DETAIL-09 — 执行记录按 `job-name` 标签取 Pod，退出码取最大值
+
+**为什么**：一个任务的历史就是它启动过的 Pod——每次重试是另一个 Pod，其 phase 与退出码正是"为什么失败"的答案。按 `job-name` 标签选中（任务控制器给每个 Pod 打这个标签），而不是按名字前缀匹配：前缀会误收名字开头相同的另一个任务。
+
+退出码取各容器终止码的**最大值**：一个 Pod 里有多个容器时，任何一个非零都说明这次执行失败。
+
+**已知限制**：Pod 可能已被清理（`ttlSecondsAfterFinished` 或集群的历史清理）。此时区块不显示——**这是事实，不是缺陷**：历史确实已经不在了，伪造一行比不显示更糟。
+
+**何时重新考虑**：平台开始保留任务历史（例如写入日志系统）时，改为从那里读。

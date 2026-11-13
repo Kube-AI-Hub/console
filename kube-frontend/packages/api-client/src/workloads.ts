@@ -553,6 +553,26 @@ export function workloadsApi(client: Client, kind: WorkloadKind) {
     },
 
     /**
+     * The pods a Job started, oldest first.
+     *
+     * Selected by the Job's `job-name` label, which is the label the Job controller
+     * stamps on every pod it creates; a name prefix would also match another job whose
+     * name begins the same way.
+     */
+    async runs(params: { cluster: string; namespace: string; name: string }): Promise<JobRun[]> {
+      const labelSelector = `job-name=${params.name}`;
+      const body = await client.request<{ items?: KubePod[] }>(
+        `${workloadPath(params.cluster, 'pods', params.namespace)}?labelSelector=${encodeURIComponent(labelSelector)}`,
+      );
+      return (body?.items ?? [])
+        .slice()
+        // Oldest first, so run 1 is the first attempt and the numbering matches the
+        // order the retries actually happened in.
+        .sort((a, b) => String(a.metadata?.creationTimestamp ?? '').localeCompare(String(b.metadata?.creationTimestamp ?? '')))
+        .map((item, index) => toJobRun(item, index + 1));
+    },
+
+    /**
      * The service a StatefulSet names through `spec.serviceName`.
      *
      * Returns `exists: false` when the field is empty or points at nothing, so the page
@@ -835,4 +855,54 @@ export function toWorkloadService(item: KubeService | undefined, name: string): 
 
 interface KubeService extends KubeObject {
   spec?: Record<string, unknown>;
+}
+
+/**
+ * One run of a Job — the pod it started and how that pod ended.
+ *
+ * A Job's history *is* its pods: each retry is another pod, and its phase plus exit
+ * codes explain why the Job failed. The old console calls this 执行记录 and numbers the
+ * runs, which is what makes "the third retry is the one that broke" readable.
+ */
+export interface JobRun {
+  /** 1-based, oldest first, so the numbers line up with what the old console shows. */
+  index: number;
+  pod: string;
+  phase: string;
+  startTime: string;
+  endTime: string;
+  /** Why the container stopped: `Completed`, `OOMKilled`, `Error`, … */
+  reason: string;
+  /** Highest exit code across containers; 0 for a clean run. */
+  exitCode: number;
+}
+
+interface KubePod extends KubeObject {
+  spec?: Record<string, unknown>;
+  status?: Record<string, unknown>;
+}
+
+export function toJobRun(item: KubePod, index: number): JobRun {
+  const status = (item.status ?? {}) as Record<string, unknown>;
+  const statuses = [
+    ...((status['containerStatuses'] ?? []) as Array<Record<string, unknown>>),
+    ...((status['initContainerStatuses'] ?? []) as Array<Record<string, unknown>>),
+  ];
+  const terminations = statuses
+    .map((entry) => (((entry['state'] as Record<string, unknown> | undefined)?.['terminated'] ?? entry['lastState']) as Record<string, unknown> | undefined))
+    .filter((value): value is Record<string, unknown> => Boolean(value));
+  const terminated = (status['containerStatuses'] ?? []) as Array<Record<string, unknown>>;
+  const reason =
+    terminations.map((entry) => String(entry['reason'] ?? '')).find(Boolean) ??
+    String(((terminated[0]?.['state'] as Record<string, unknown> | undefined)?.['terminated'] as Record<string, unknown> | undefined)?.['reason'] ?? '');
+  const exitCodes = terminations.map((entry) => Number(entry['exitCode'] ?? 0)).filter((value) => Number.isFinite(value));
+  return {
+    index,
+    pod: item.metadata?.name ?? '',
+    phase: String(status['phase'] ?? ''),
+    startTime: String(status['startTime'] ?? item.metadata?.creationTimestamp ?? ''),
+    endTime: String(status['completionTime'] ?? ''),
+    reason,
+    exitCode: exitCodes.length === 0 ? 0 : Math.max(...exitCodes),
+  };
 }

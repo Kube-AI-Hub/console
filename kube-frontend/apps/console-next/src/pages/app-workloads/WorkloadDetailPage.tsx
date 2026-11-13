@@ -12,6 +12,7 @@ import {
   useUpdateWorkload,
   useWorkload,
   useWorkloadAutoscaling,
+  useJobRuns,
   useWorkloadPods,
   useWorkloadService,
   useWorkloadRevisions,
@@ -63,6 +64,7 @@ export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, 
   const revisions = useWorkloadRevisions(kind, { cluster, namespace, name });
   const pods = useWorkloadPods(kind, { cluster, namespace, name });
   const governing = useWorkloadService(kind, { cluster, namespace, name });
+  const runs = useJobRuns(kind, { cluster, namespace, name });
   const rollback = useRollbackWorkload(kind, { cluster, namespace });
   const [rollbackTarget, setRollbackTarget] = React.useState<WorkloadRevision | null>(null);
   const [dialog, setDialog] = React.useState<Dialog>('none');
@@ -235,6 +237,58 @@ export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, 
                         <td className="py-1.5 pr-4 tabular-nums text-ai-fg">{port.port}</td>
                         <td className="py-1.5 pr-4 tabular-nums text-ai-fg-secondary">{port.targetPort || '-'}</td>
                         <td className="py-1.5 tabular-nums text-ai-fg-secondary">{port.nodePort ?? '-'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          ) : null}
+
+          {/*
+            * 执行记录: a Job's history is the pods it started — each retry is another
+            * pod, and its phase and exit code are the answer to "why did this fail".
+            * The old console numbers the runs, which is what makes "the third retry is
+            * the one that broke" readable.
+            */}
+          {kind === 'jobs' && (runs.data?.length ?? 0) > 0 ? (
+            <section className="rounded-ai-md border border-ai-line p-4" data-ai-id="jobs-detail:runs">
+              <h2 className="mb-3 text-sm font-medium text-ai-fg">{t('workloads.detail.runs')}</h2>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="text-ai-fg-muted">
+                      <th className="pb-2 pr-4 font-medium">{t('workloads.field.runIndex')}</th>
+                      <th className="pb-2 pr-4 font-medium">{t('workloads.field.podName')}</th>
+                      <th className="pb-2 pr-4 font-medium">{t('workloads.field.podStatus')}</th>
+                      <th className="pb-2 pr-4 font-medium">{t('workloads.field.exitCode')}</th>
+                      <th className="pb-2 pr-4 font-medium">{t('workloads.field.startedAt')}</th>
+                      <th className="pb-2 font-medium">{t('workloads.field.finishedAt')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(runs.data ?? []).map((run) => (
+                      <tr key={run.pod} className="border-t border-ai-line" data-ai-row={`run-${run.index}`}>
+                        <td className="py-1.5 pr-4 tabular-nums text-ai-fg-secondary">{run.index}</td>
+                        <td className="py-1.5 pr-4">
+                          <a
+                            href={`/kube-frontend/${workspace}/clusters/${cluster}/projects/${namespace}/pods/${run.pod}`}
+                            className="inline-flex min-h-6 items-center font-mono text-[11px] text-ai-accent hover:underline"
+                            {...actionProps(`jobs-detail:run-pod:${run.index}`)}
+                            data-ai-id={`jobs-detail:run-pod:${run.index}`}
+                          >
+                            {run.pod}
+                          </a>
+                        </td>
+                        <td className="py-1.5 pr-4">
+                          <Badge tone={run.phase === 'Succeeded' ? 'success' : run.phase === 'Failed' ? 'danger' : 'warning'}>
+                            {run.phase || '-'}
+                          </Badge>
+                          {run.reason ? <span className="ml-1.5 text-[11px] text-ai-fg-muted">{run.reason}</span> : null}
+                        </td>
+                        <td className="py-1.5 pr-4 tabular-nums text-ai-fg-secondary">{run.exitCode}</td>
+                        <td className="py-1.5 pr-4 tabular-nums text-ai-fg-muted">{run.startTime ? formatTimestamp(run.startTime) : '-'}</td>
+                        <td className="py-1.5 tabular-nums text-ai-fg-muted">{run.endTime ? formatTimestamp(run.endTime) : '-'}</td>
                       </tr>
                     ))}
                   </tbody>

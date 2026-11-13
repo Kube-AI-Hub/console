@@ -73,6 +73,15 @@ export function useEditWorkloadInfo(kind: WorkloadKind, params: { cluster: strin
  * no reverse lookup. The read is cheap (a project has a handful) and only runs for the
  * three kinds an HPA can target.
  */
+/** A Job's runs, one row per pod it started. */
+export function useJobRuns(kind: WorkloadKind, params: { cluster: string; namespace: string; name: string }) {
+  return useQuery({
+    queryKey: ['job-runs', params.cluster, params.namespace, params.name],
+    enabled: kind === 'jobs' && Boolean(params.name),
+    queryFn: ({ signal }) => workloadsApi(api, kind).runs({ ...params, signal } as never),
+  });
+}
+
 /** The service a StatefulSet points at through `spec.serviceName`. */
 export function useWorkloadService(kind: WorkloadKind, params: { cluster: string; namespace: string; name: string }) {
   return useQuery({

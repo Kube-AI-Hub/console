@@ -1,0 +1,33 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-JOB_RUNS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: job-runs
+title: 任务详情 · 执行记录
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/jobs'
+prd: prd/kube-frontend/app-workloads/detail.md
+design: design/kube-frontend/app-workloads/detail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-JOB_RUNS-01
+
+story:
+- US1
+
+product: 任务详情列出其每次执行的容器组（序号、名称、状态、退出码、开始/结束时间），序号从 1 递增。
+preconditions:
+- 由夹具创建一个正常结束的 tc-e2e- 任务并等待其完成，用例结束无条件删除
+- 已登录，且在 host 集群的 default 项目空间
+steps:
+- 打开该任务详情
+- 读取执行记录表
+expected:
+- 表头为 序号、容器组名称、状态、退出码、开始时间、结束时间
+- 至少一行，序号从 1 开始
+- 状态为 Succeeded，退出码为 0
+troubleshoot:
+- 区块不出现说明该任务的 Pod 已被受控清理（ttlSecondsAfterFinished 或历史清理）
+- 序号不从 1 开始说明排序用了完成时间而非创建时间
+update_automation:
+- 字段变化时改 api-client 的 toJobRun
