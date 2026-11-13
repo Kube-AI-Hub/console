@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: storage-classes
+title: 存储类型 · 六列与能力标记
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/storageclasses'
+prd: prd/kube-frontend/cluster-management/storage-classes.md
+design: design/kube-frontend/cluster-management/storage-classes.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-01
+
+story:
+- US1
+
+product: 存储类型列表显示六列；默认类型带徽标；能力列只列出实际支持的能力。
+preconditions:
+- 已登录，且有集群权限
+- 集群内至少有一个存储类型
+steps:
+- 用 API 读取存储类型及其 allowVolumeExpansion
+- 打开存储类型页，核对表头与行数
+- 核对默认类型的徽标
+- 核对不支持扩容的那一行能力列
+expected:
+- 表头依次为 名称、供应者、存储卷数、能力、回收策略、创建时间
+- 行数与 API 一致
+- 默认类型行含「默认」徽标
+- 不支持扩容的行不出现「扩容」徽标
+troubleshoot:
+- 每行都显示三个能力说明渲染了全部徽标（应按支持与否渲染）
+- 存储卷数为 0 而平台未上报时，应显示 - 而不是 0
+update_automation:
+- 能力字段变化时改 api-client 的 toStorageClassSummary

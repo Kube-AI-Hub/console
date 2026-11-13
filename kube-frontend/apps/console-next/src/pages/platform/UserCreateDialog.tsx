@@ -1,0 +1,126 @@
+import * as React from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Modal, ResourceForm, type FormSchema } from '@kube-ai-hub/ui';
+import { ASSIGNABLE_PLATFORM_ROLES, passwordProblem, usersWriteApi, type AssignablePlatformRole } from '@kube-ai-hub/api-client';
+import { useT } from '@/i18n';
+import { api as apiClient } from '@/api';
+
+/**
+ * 创建用户.
+ *
+ * Four fields, because that is what the platform needs: a name, an email, a password
+ * and a platform role. Everything else (workspace memberships, quotas) is assigned
+ * after the account exists.
+ *
+ * The password is validated here rather than letting the apiserver answer 400: the
+ * platform's rule is short and stable, and "password too short" is more useful than a
+ * generic rejection.
+ */
+export interface UserCreateDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export function UserCreateDialog({ open, onOpenChange }: UserCreateDialogProps): React.ReactElement {
+  const t = useT();
+  const queryClient = useQueryClient();
+  const create = useMutation({
+    mutationFn: (input: { name: string; email: string; password: string; platformRole: AssignablePlatformRole }) =>
+      usersWriteApi(apiClient).create(input),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['platform', 'users'] }),
+  });
+
+  const schema = React.useMemo<FormSchema>(
+    () => ({
+      title: t('platform.users.create'),
+      submit: { label: t('common.confirm'), cancelLabel: t('common.cancel') },
+      fields: [
+        {
+          key: 'name',
+          label: t('platform.users.field.name'),
+          type: 'text',
+          required: true,
+          hint: t('platform.users.field.nameHint'),
+          rules: [
+            {
+              validate: (value) => {
+                const name = String(value ?? '').trim();
+                if (!name) return null;
+                return /^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$/.test(name) ? null : t('platform.users.field.nameInvalid');
+              },
+            },
+          ],
+        },
+        {
+          key: 'email',
+          label: t('platform.users.field.email'),
+          type: 'text',
+          required: true,
+          rules: [
+            {
+              validate: (value) => {
+                const email = String(value ?? '').trim();
+                if (!email) return null;
+                return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) ? null : t('platform.users.field.emailInvalid');
+              },
+            },
+          ],
+        },
+        {
+          key: 'password',
+          label: t('platform.users.field.password'),
+          type: 'password',
+          required: true,
+          hint: t('platform.users.field.passwordHint'),
+          rules: [
+            {
+              validate: (value) => {
+                const password = String(value ?? '');
+                if (!password) return null;
+                const problem = passwordProblem(password);
+                if (!problem) return null;
+                const messages: Record<string, string> = {
+                  'too-short': t('platform.users.field.passwordShort'),
+                  'no-letter': t('platform.users.field.passwordLetter'),
+                  'no-digit': t('platform.users.field.passwordDigit'),
+                };
+                return messages[problem] ?? t('platform.users.field.passwordShort');
+              },
+            },
+          ],
+        },
+        {
+          key: 'platformRole',
+          label: t('platform.users.field.platformRole'),
+          type: 'select',
+          required: true,
+          options: ASSIGNABLE_PLATFORM_ROLES.map((role) => ({ value: role, label: t(`platform.role.${role}` as never) })),
+        },
+      ],
+    }),
+    [t],
+  );
+
+  if (!open) return <></>;
+
+  return (
+    <Modal open={open} onOpenChange={onOpenChange} size="md" title={t('platform.users.create')}>
+      <ResourceForm
+        schema={schema}
+        defaultValues={{ platformRole: 'platform-regular' }}
+        submitting={create.isPending}
+        onCancel={() => onOpenChange(false)}
+        onSubmit={async (raw) => {
+          const values = raw as Record<string, unknown>;
+          await create.mutateAsync({
+            name: String(values['name'] ?? '').trim(),
+            email: String(values['email'] ?? '').trim(),
+            password: String(values['password'] ?? ''),
+            platformRole: String(values['platformRole'] ?? 'platform-regular') as AssignablePlatformRole,
+          });
+          onOpenChange(false);
+        }}
+      />
+    </Modal>
+  );
+}

@@ -1,0 +1,69 @@
+id: TC-L3-KUBE-FRONTEND-STORAGE-DELETE-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: storage
+feature: delete
+title: 存储 · 删除存储卷
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/persistentvolumeclaims'
+prd: prd/kube-frontend/storage/delete.md
+design: design/kube-frontend/storage/delete.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-STORAGE-DELETE-01
+
+story:
+- US1
+
+product:
+- 确
+- 认
+- 删
+- 除
+- 后
+- 对
+- 话
+- 框
+- 关
+- 闭
+- ，
+- 该
+- 行
+- 消
+- 失
+- ，
+- 对
+- 象
+- 在
+-  
+- A
+- P
+- I
+-  
+- 上
+- 也
+- 不
+- 存
+- 在
+- 。
+
+preconditions:
+- 由夹具创建一个 tc-e2e- 前缀的存储卷
+- 已登录，且在 host 集群的 default 项目空间
+
+steps:
+- 打开列表并定位该行
+- 行操作点删除并确认
+- 核对行消失
+- 用 API 核对对象返回 404
+
+expected:
+- 确认后对话框关闭
+- 该行不再出现在列表中
+- API 返回 404
+
+troubleshoot:
+- 行仍在时看列表是否重新拉取
+
+update_automation:
+- 删除确认文案变化时改 locales

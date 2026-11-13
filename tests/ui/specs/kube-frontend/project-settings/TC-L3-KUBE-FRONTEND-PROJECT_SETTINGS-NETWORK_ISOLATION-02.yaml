@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: project-settings
+feature: network-isolation
+title: 网络隔离 · 创建与删除网络策略
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/networkpolicies'
+prd: prd/kube-frontend/project-settings/network-isolation.md
+design: design/kube-frontend/project-settings/network-isolation.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-03
+
+story:
+- US1
+
+product: 可创建入站/出站策略并指定各方选择器；创建后 spec 结构正确；可删除。
+preconditions:
+- 已登录，且在 host 集群的 default 项目空间
+- 用例自行创建的策略在结束时无条件删除
+steps:
+- 打开网络隔离页点「创建网络策略」
+- 填写名称、作用对象 app=web、方向入站、对方 role=frontend，确认
+- 用 API 读取该策略
+- 删除该策略并确认不存在
+expected:
+- spec.podSelector.matchLabels 为 {app: web}
+- spec.ingress[0].from[0].podSelector.matchLabels 为 {role: frontend}
+- 删除后 API 返回不存在
+troubleshoot:
+- 422「must specify a peer」说明 from 里直接放了选择器，应包一层 podSelector
+- 留空对方选择器表示拒绝全部，不产生 from/to 规则
+update_automation:
+- 规则编辑器变化时改 api-client 的 networkPoliciesWriteApi

@@ -1,0 +1,72 @@
+id: TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLE_RULES-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: project-settings
+feature: role-rules
+title: 项目角色 · 详情列出权限规则
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/roles'
+prd: prd/kube-frontend/project-settings/role-rules.md
+design: design/kube-frontend/project-settings/role-rules.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLE_RULES-01
+
+story:
+- US1
+
+product:
+- 对
+- 某
+- 角
+- 色
+- 点
+- 详
+- 情
+- ，
+- 弹
+- 窗
+- 列
+- 出
+- 其
+- 权
+- 限
+- 规
+- 则
+- ，
+- 行
+- 数
+- 等
+- 于
+-  
+- r
+- u
+- l
+- e
+- s
+-  
+- 数
+- 量
+- 。
+
+preconditions:
+- 已登录，且在 host 集群的 default 项目空间
+- 该项目内至少有一个带规则的角色
+
+steps:
+- 打开项目角色页
+- 对第一行点「详情」
+- 读取弹窗内规则表
+- 用 API 核对该角色的 rules 数量
+
+expected:
+- 弹窗出现并含规则表
+- 规则表行数等于 API 返回的 rules 数量
+- 表头为 API 组、资源、动作
+
+troubleshoot:
+- 弹窗为空说明详情请求失败或 rules 为空
+- 行数不符时看 toRoleRule 的数组拼接
+
+update_automation:
+- 规则结构变化时改 api-client 的 iam.ts

@@ -1,0 +1,83 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: nodes
+title: 节点 · 列表五列与就绪状态
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/nodes'
+prd: prd/kube-frontend/cluster-management/nodes.md
+design: design/kube-frontend/cluster-management/nodes.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-01
+
+story:
+- US1
+
+product:
+- 节
+- 点
+- 列
+- 表
+- 显
+- 示
+- 名
+- 称
+- 、
+- 状
+- 态
+- 、
+- 角
+- 色
+- 、
+- C
+- P
+- U
+- 、
+- 内
+- 存
+- ，
+- 状
+- 态
+- 为
+-  
+- R
+- e
+- a
+- d
+- y
+-  
+- 或
+-  
+- N
+- o
+- t
+- R
+- e
+- a
+- d
+- y
+- 。
+
+preconditions:
+- 已登录，且有集群权限
+- 集群内至少有一个节点
+
+steps:
+- 打开节点页
+- 核对表头
+- 读取第一行的状态徽章
+- 用 API 核对节点数
+
+expected:
+- 表头依次为 名称、状态、角色、CPU、内存
+- 状态为 Ready 或 NotReady 或 Unknown
+- 行数与 API 返回的节点数一致
+
+troubleshoot:
+- 状态与 kubectl 不一致时看 nodeStatus 的 Ready 条件判断
+- 角色为空时看 nodeRole 的缺省值
+
+update_automation:
+- 节点列变化时改 pages/cluster_management.py

@@ -1,0 +1,64 @@
+id: TC-FULL-KUBE-FRONTEND-PROJECT_SETTINGS-01
+level: 2
+suite: full
+module: kube-frontend
+submodule: project-settings
+feature: page
+title: 项目设置 · 角色与成员切换不刷新
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/roles'
+prd: prd/kube-frontend/project-settings/_index.md
+design: design/kube-frontend/project-settings/_index.md
+
+covers:
+- AC-FULL-KUBE-FRONTEND-PROJECT_SETTINGS-01
+
+story:
+- US1
+
+product:
+- 项
+- 目
+- 角
+- 色
+- 与
+- 项
+- 目
+- 成
+- 员
+- 在
+- 同
+- 一
+- 个
+- 功
+- 能
+- 区
+- ，
+- 切
+- 换
+- 是
+- 客
+- 户
+- 端
+- 跳
+- 转
+- 。
+
+preconditions:
+- 已登录，且在 host 集群的 default 项目空间
+
+steps:
+- 打开项目角色页
+- 切到项目成员页签
+- 再切回项目角色
+- 统计切换期间的文档请求
+
+expected:
+- 两个页面各自出现列表或空态
+- 切换后对应页签高亮
+- 切换期间文档请求为 0
+
+troubleshoot:
+- 出现文档请求说明页签退化成整页跳转
+
+update_automation:
+- 页签结构变化时改 pages/project_settings.py

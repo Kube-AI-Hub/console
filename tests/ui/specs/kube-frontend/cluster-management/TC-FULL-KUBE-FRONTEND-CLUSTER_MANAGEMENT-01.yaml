@@ -1,0 +1,76 @@
+id: TC-FULL-KUBE-FRONTEND-CLUSTER_MANAGEMENT-01
+level: 2
+suite: full
+module: kube-frontend
+submodule: cluster-management
+feature: page
+title: 集群管理 · 切换不刷新且没有项目工作区栏
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/nodes'
+prd: prd/kube-frontend/cluster-management/_index.md
+design: design/kube-frontend/cluster-management/_index.md
+
+covers:
+- AC-FULL-KUBE-FRONTEND-CLUSTER_MANAGEMENT-01
+- AC-FULL-KUBE-FRONTEND-CLUSTER_MANAGEMENT-02
+
+story:
+- US1
+- US2
+
+product:
+- 集
+- 群
+- 级
+- 页
+- 面
+- 在
+- 节
+- 点
+- 与
+- 项
+- 目
+- 之
+- 间
+- 切
+- 换
+- 是
+- 客
+- 户
+- 端
+- 跳
+- 转
+- ，
+- 且
+- 不
+- 出
+- 现
+- 项
+- 目
+- 工
+- 作
+- 区
+- 栏
+- 。
+
+preconditions:
+- 已登录，且有集群权限
+
+steps:
+- 打开节点页
+- 确认页面没有项目工作区栏
+- 切到项目页签
+- 再切回节点
+- 统计切换期间的文档请求
+
+expected:
+- 两个页面各自出现列表或空态
+- 页面不出现 data-ai-id=workspace-bar
+- 切换后对应页签高亮
+- 切换期间文档请求为 0
+
+troubleshoot:
+- 出现工作区栏说明集群页复用了项目布局
+- 出现文档请求说明页签退化成整页跳转
+
+update_automation:
+- 布局变化时改 routes/kube-frontend.clusters.$cluster/route.tsx

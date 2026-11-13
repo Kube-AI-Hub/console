@@ -1,0 +1,70 @@
+id: TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-INFO-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: platform-settings
+feature: info
+title: 平台信息 · 三行属性
+entry_url: '{BASE_URL}/kube-frontend/settings/info'
+prd: prd/kube-frontend/platform-settings/info.md
+design: design/kube-frontend/platform-settings/info.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-INFO-01
+
+story:
+- US1
+
+product:
+- 平
+- 台
+- 信
+- 息
+- 页
+- 显
+- 示
+- 平
+- 台
+- 名
+- 称
+- 、
+- 平
+- 台
+- 描
+- 述
+- 、
+- 控
+- 制
+- 台
+- 地
+- 址
+- 三
+- 行
+- ，
+- 缺
+- 失
+- 时
+- 显
+- 示
+-  
+- -
+- 。
+
+preconditions:
+- 已登录，且有平台权限
+- 平台配置 kubesphere-config 可读
+
+steps:
+- 打开平台信息页
+- 核对属性名
+- 读取三个值
+
+expected:
+- 属性名依次为 平台名称、平台描述、控制台地址
+- 值为 - 或非空字符串
+
+troubleshoot:
+- 三行都为空说明没有 console 段（属正常），看页面是否显示 - 而不是空白
+
+update_automation:
+- 属性变化时改 pages/platform_settings.py

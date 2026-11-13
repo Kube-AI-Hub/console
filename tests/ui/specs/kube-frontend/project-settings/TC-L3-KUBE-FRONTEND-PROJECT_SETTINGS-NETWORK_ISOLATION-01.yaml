@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: project-settings
+feature: network-isolation
+title: 网络隔离 · 策略列表与隔离开关
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/spaces/networkpolicies'
+prd: prd/kube-frontend/project-settings/network-isolation.md
+design: design/kube-frontend/project-settings/network-isolation.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-01
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-02
+
+story:
+- US1
+
+product: 网络隔离页显示策略四列与项目级开关；开关写入命名空间注解并可还原。
+preconditions:
+- 已登录，且在 host 集群的 spaces 项目空间（该项目有多条网络策略）
+- 用例结束时把隔离开关恢复为用例开始前的状态
+steps:
+- 用 API 读取策略数量与隔离开关初值
+- 打开网络隔离页，核对列与行数
+- 打开或关闭开关，用 API 核对注解
+- 还原开关
+expected:
+- 表头依次为 名称、策略类型、规则数、创建时间
+- 列表行数与 API 返回一致
+- 开关状态与 kubesphere.io/network-isolate 注解一致
+troubleshoot:
+- 行数不符时看是否有分页（每页 10 条）
+- 注解未变化时确认写的是 merge patch 到核心组
+update_automation:
+- 列变化时改 pages/project_settings.py

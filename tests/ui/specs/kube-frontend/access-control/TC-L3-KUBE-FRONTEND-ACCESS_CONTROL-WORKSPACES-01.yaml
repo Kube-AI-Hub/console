@@ -1,0 +1,67 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACES-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: workspaces
+title: 企业空间 · 列表四列
+entry_url: '{BASE_URL}/kube-frontend/access/workspaces'
+prd: prd/kube-frontend/access-control/workspaces.md
+design: design/kube-frontend/access-control/workspaces.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACES-01
+
+story:
+- US1
+
+product:
+- 企
+- 业
+- 空
+- 间
+-  
+- ·
+-  
+- 列
+- 表
+- 四
+- 列
+- ：
+- 列
+- 集
+- 合
+- 与
+- 老
+-  
+- c
+- o
+- n
+- s
+- o
+- l
+- e
+-  
+- 一
+- 致
+- 。
+
+preconditions:
+- 已登录，且有平台权限
+- 该页至少有一条数据（用例先用 API 确认）
+
+steps:
+- 打开该页
+- 核对表头
+- 读取第一行
+
+expected:
+- 表头依次为 ["名称", "状态", "集群", "创建时间"]
+- 第一行有内容
+
+troubleshoot:
+- 缺列时看 PlatformListPage 的 columns
+- 空列表时用例 skip 而不是失败
+
+update_automation:
+- 列变化时改 pages/access_control.py

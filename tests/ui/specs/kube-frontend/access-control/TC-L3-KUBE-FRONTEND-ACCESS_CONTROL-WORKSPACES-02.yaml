@@ -1,0 +1,37 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACES-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: workspaces
+title: 企业空间 · 创建、编辑与删除
+entry_url: '{BASE_URL}/kube-frontend/access/workspaces'
+prd: prd/kube-frontend/access-control/workspaces.md
+design: design/kube-frontend/access-control/workspaces.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACES-02
+
+story:
+- US1
+
+product: 企业空间可由「创建」建立，可改别名与描述，可删除；别名写在注解上。
+preconditions:
+- 已登录，且有平台权限
+- 用例自行创建的企业空间在结束时无条件删除
+steps:
+- 打开企业空间页并点「创建」，填写名称与别名
+- 用 tenant 接口读取该对象
+- 行操作「编辑企业空间」改别名并确认
+- 再次读取
+- 行操作「删除」并确认
+- 用列表接口确认已不存在
+expected:
+- 创建后名称存在且 kubesphere.io/alias-name 为填写的别名
+- 编辑后别名更新
+- 删除后不在列表中
+troubleshoot:
+- 创建 404 说明路径写成了 /apis/tenant...（该组只经 kapis 暴露）
+- 编辑 500 说明用了 merge patch（该接口只接受 PUT）
+update_automation:
+- 字段变化时改 api-client 的 workspacesWriteApi

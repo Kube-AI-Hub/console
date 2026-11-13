@@ -1,0 +1,75 @@
+id: TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-NOTIFICATIONS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: platform-settings
+feature: notifications
+title: 通知渠道 · 五行状态与 Secret 一致
+entry_url: '{BASE_URL}/kube-frontend/settings/notifications'
+prd: prd/kube-frontend/platform-settings/notifications.md
+design: design/kube-frontend/platform-settings/notifications.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-NOTIFICATIONS-01
+
+story:
+- US1
+
+product:
+- 五
+- 个
+- 渠
+- 道
+- 依
+- 序
+- 显
+- 示
+- ，
+- 状
+- 态
+- 与
+-  
+- <
+- c
+- h
+- a
+- n
+- n
+- e
+- l
+- >
+- s
+-  
+- S
+- e
+- c
+- r
+- e
+- t
+-  
+- 是
+- 否
+- 存
+- 在
+- 一
+- 致
+- 。
+
+preconditions:
+- 已登录，且有平台权限
+- 可读取 kubesphere-monitoring-system 中的 Secret 列表
+
+steps:
+- 读取平台的 Secret 名称列表
+- 打开通知渠道页
+- 逐行核对渠道名与徽标
+
+expected:
+- 五行依次为 邮件、钉钉、企业微信、Slack、Webhook
+- 每行的已配置/未配置与对应 Secret 是否存在一致
+
+troubleshoot:
+- 徽标与 Secret 不符时看 toNotificationChannels 的命名规则
+
+update_automation:
+- 渠道增减时改 api-client 的 NOTIFICATION_CHANNELS

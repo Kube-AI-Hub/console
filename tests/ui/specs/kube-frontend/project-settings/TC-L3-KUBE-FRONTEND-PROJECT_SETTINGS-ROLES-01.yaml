@@ -1,0 +1,65 @@
+id: TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: project-settings
+feature: roles
+title: 项目角色 · 列表列与模板徽标
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/roles'
+prd: prd/kube-frontend/project-settings/roles.md
+design: design/kube-frontend/project-settings/roles.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-01
+
+story:
+- US1
+
+product:
+- 角
+- 色
+- 列
+- 表
+- 显
+- 示
+- 名
+- 称
+- 、
+- 规
+- 则
+- 数
+- 、
+- 创
+- 建
+- 时
+- 间
+- ，
+- 模
+- 板
+- 角
+- 色
+- 带
+- 徽
+- 标
+- 。
+
+preconditions:
+- 已登录，且在 host 集群的 default 项目空间
+- 该项目内至少有一个角色（含 role-template-* 模板角色）
+
+steps:
+- 打开项目角色页
+- 核对表头
+- 找到一个 role-template-* 角色并核对其徽标
+
+expected:
+- 表头依次为 名称、规则数、创建时间
+- 模板角色行显示「模板」徽标
+- 规则数为数字
+
+troubleshoot:
+- 缺列时看 SettingsListPage 的 columns
+- 徽标缺失时看 isTemplateRole 的判定
+
+update_automation:
+- 列变化时改 pages/project_settings.py 的 headers 断言

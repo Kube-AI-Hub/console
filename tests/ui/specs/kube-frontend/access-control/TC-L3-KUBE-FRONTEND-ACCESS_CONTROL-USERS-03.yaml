@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: users
+title: 用户 · 修改平台角色与删除
+entry_url: '{BASE_URL}/kube-frontend/access/users'
+prd: prd/kube-frontend/access-control/users.md
+design: design/kube-frontend/access-control/users.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-03
+
+story:
+- US1
+
+product: 用户行操作提供「修改平台角色」与「删除」；改角色写注解，删除后该用户不再出现在列表里。
+preconditions:
+- 由夹具通过 IAM 接口创建一个 tc-e2e- 用户，用例结束无条件删除
+- 已登录，且有平台权限
+steps:
+- 打开用户页并定位该用户
+- 行操作点「修改平台角色」，选择平台管理员并确认
+- 用 IAM 接口读取该用户
+- 行操作点「删除」，输入用户名并确认
+- 用列表接口确认该用户已不存在
+expected:
+- 行操作包含「修改平台角色」与「删除」
+- iam.kubesphere.io/platform-role 变为 platform-admin
+- 删除后该用户不在列表结果中
+troubleshoot:
+- 改角色返回 405 说明用了 PATCH；IAM 的 users 端点只接受 PUT
+- 删除后 GET 返回 500 是该端点的固有行为，应按「不存在」处理
+update_automation:
+- 角色清单变化时改 api-client 的 ASSIGNABLE_PLATFORM_ROLES

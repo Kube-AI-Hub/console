@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-MONITORING-RULES-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: monitoring
+feature: rules
+title: 告警策略 · 启用停用写入标签
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/alertingrules'
+prd: prd/kube-frontend/monitoring/rules.md
+design: design/kube-frontend/monitoring/rules.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-MONITORING-RULES-02
+
+story:
+- US1
+
+product: 点「启用/停用」会取反 alerting.kubesphere.io/enable 标签，列表状态随之变化。
+preconditions:
+- 由夹具通过 IAM/告警接口创建一个 tc-e2e- 前缀的告警策略，用例结束无条件删除
+- 已登录，且在 host 集群的 default 项目空间
+steps:
+- 打开告警策略页并定位该策略
+- 读取当前状态
+- 点「启用/停用」
+- 用 API 读取该策略的标签
+expected:
+- 标签 alerting.kubesphere.io/enable 被取反
+- 列表状态徽章与标签一致
+troubleshoot:
+- 标签未变化时确认写的是 label 而不是 annotation
+- 接口返回空体说明告警模块未安装，用例会自动跳过
+update_automation:
+- 开关实现变化时改 api-client 的 alerting.ts

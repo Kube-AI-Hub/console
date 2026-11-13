@@ -1,0 +1,63 @@
+id: TC-L3-KUBE-FRONTEND-MONITORING-RULES-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: monitoring
+feature: rules
+title: 告警策略 · 模块缺失时为空态
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/alertingrules'
+prd: prd/kube-frontend/monitoring/rules.md
+design: design/kube-frontend/monitoring/rules.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-MONITORING-RULES-01
+
+story:
+- US1
+
+product:
+- 告
+- 警
+- 策
+- 略
+- 页
+- 在
+- 没
+- 有
+- 数
+- 据
+- 时
+- 显
+- 示
+- 空
+- 态
+- ，
+- 不
+- 显
+- 示
+- 错
+- 误
+- 面
+- 板
+- 。
+
+preconditions:
+- 已登录，且在 host 集群的 default 项目空间
+- 先通过 API 确认该页没有数据（模块未安装时接口返回空响应体）
+
+steps:
+- 打开该页
+- 读取页面状态与空态文案
+- 统计表头数量
+
+expected:
+- data-ai-state 为 empty
+- 显示空态标题与说明
+- thead 数量为 0
+
+troubleshoot:
+- 出现错误面板说明空响应体没有被当成空列表
+- 状态为 error 时看 kapis 前缀是否正确
+
+update_automation:
+- 文案变化时改 packages/locales/src/index.ts

@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: users
+title: 用户 · 创建与密码校验
+entry_url: '{BASE_URL}/kube-frontend/access/users'
+prd: prd/kube-frontend/access-control/users.md
+design: design/kube-frontend/access-control/users.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-02
+
+story:
+- US1
+
+product: 平台用户可由「创建」表单建立；弱密码与非法的用户名被拦下；创建后平台角色写在注解上。
+preconditions:
+- 已登录，且有平台权限
+- 用例自行创建的用户在结束时无条件删除
+steps:
+- 打开用户页并点「创建」
+- 填写非法用户名，点确认
+- 改为合法用户名、邮箱与弱密码，点确认
+- 改为强密码并选择平台角色，点确认
+- 用 IAM 接口读取该用户
+expected:
+- 非法用户名时提交被拦下
+- 弱密码时提交被拦下并说明原因
+- 提交后用户存在，且 iam.kubesphere.io/platform-role 等于所选角色
+troubleshoot:
+- 创建失败时确认写的是 iam.kubesphere.io 而不是核心组
+- 角色为空说明注解没写到 metadata.annotations
+update_automation:
+- 密码规则变化时改 api-client 的 passwordProblem

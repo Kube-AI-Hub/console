@@ -1,0 +1,81 @@
+id: TC-L3-KUBE-FRONTEND-STORAGE-EDIT_YAML-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: storage
+feature: edit-yaml
+title: 存储 · 编辑 YAML 先弹加载框
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/persistentvolumeclaims'
+prd: prd/kube-frontend/storage/edit-yaml.md
+design: design/kube-frontend/storage/edit-yaml.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-STORAGE-EDIT_YAML-01
+
+story:
+- US1
+
+product:
+- 点
+- 击
+- 编
+- 辑
+-  
+- Y
+- A
+- M
+- L
+-  
+- 后
+- 先
+- 出
+- 现
+- 加
+- 载
+- 对
+- 话
+- 框
+- ，
+- 再
+- 出
+- 现
+- 预
+- 填
+- 当
+- 前
+- 对
+- 象
+- 的
+- 编
+- 辑
+- 器
+- ；
+- 取
+- 消
+- 不
+- 修
+- 改
+- 对
+- 象
+- 。
+
+preconditions:
+- 由夹具创建一个 tc-e2e- 前缀的存储卷，用例结束无条件删除
+- 已登录，且在 host 集群的 default 项目空间
+
+steps:
+- 在列表对该行点「编辑 YAML」
+- 观察加载对话框
+- 等待编辑器出现并读取内容
+- 点取消
+
+expected:
+- 点击后立即出现 data-ai-id=dialog:loading
+- 编辑器预填包含该对象名
+- 取消后对象仍存在且内容未变
+
+troubleshoot:
+- 没有加载框说明读取详情的顺序被改成了先取后弹
+
+update_automation:
+- 弹窗结构变化时改 pages/storage.py

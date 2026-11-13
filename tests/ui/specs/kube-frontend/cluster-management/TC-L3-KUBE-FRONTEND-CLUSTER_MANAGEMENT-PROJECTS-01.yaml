@@ -1,0 +1,61 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-PROJECTS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: projects
+title: 项目 · 列表四列与企业空间
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/namespaces'
+prd: prd/kube-frontend/cluster-management/projects.md
+design: design/kube-frontend/cluster-management/projects.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-PROJECTS-01
+
+story:
+- US1
+
+product:
+- 项
+- 目
+- 列
+- 表
+- 显
+- 示
+- 名
+- 称
+- 、
+- 状
+- 态
+- 、
+- 企
+- 业
+- 空
+- 间
+- 、
+- 创
+- 建
+- 时
+- 间
+- 。
+
+preconditions:
+- 已登录，且有集群权限
+- 集群内至少有一个项目
+
+steps:
+- 打开项目页
+- 核对表头
+- 核对第一行的企业空间与 API 的 kubesphere.io/workspace 标签一致
+
+expected:
+- 表头依次为 名称、状态、企业空间、创建时间
+- 企业空间等于标签值
+- 状态为 Active 或 Terminating
+
+troubleshoot:
+- 企业空间为空说明读错了标签位置
+- 首屏慢时确认页面处于 loading 而不是空白
+
+update_automation:
+- 项目列变化时改 pages/cluster_management.py

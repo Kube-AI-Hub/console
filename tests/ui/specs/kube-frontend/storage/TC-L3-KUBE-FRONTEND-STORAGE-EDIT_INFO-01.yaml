@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-STORAGE-EDIT_INFO-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: storage
+feature: edit-info
+title: 存储 · 编辑信息写入别名
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/persistentvolumeclaims'
+prd: prd/kube-frontend/storage/list.md
+design: design/kube-frontend/storage/list.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-STORAGE-LIST-03
+
+story:
+- US1
+
+product: 在存储卷列表点「编辑信息」填写别名后，对象的 kubesphere.io/alias-name 注解被更新。
+preconditions:
+- 由夹具创建一个 tc-e2e- 前缀的存储卷，用例结束后无条件删除
+- 已登录，且在 host 集群的 default 项目空间
+steps:
+- 打开列表并按名称定位该对象
+- 行操作点「编辑信息」
+- 在别名输入框填写内容并确认
+- 用 API 读取该对象的注解
+expected:
+- 弹出编辑信息对话框且名称只读
+- 确认后对话框关闭
+- kubesphere.io/alias-name 等于填写的内容
+troubleshoot:
+- 若 PUT 返回 405，说明更新请求发到了集合地址（body.metadata.name 缺失）
+- 若注解未变化，先看是否为模板对象的写保护
+update_automation:
+- 对话框字段变化时改 pages/storage.py

@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLE_RULES-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: project-settings
+feature: role-rules
+title: 项目角色 · 编辑权限
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/roles'
+prd: prd/kube-frontend/project-settings/role-rules.md
+design: design/kube-frontend/project-settings/role-rules.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLE_RULES-02
+
+story:
+- US1
+
+product: 角色行操作含「编辑权限」；对话框先开再加载规则；提交后 rules 被整体替换。
+preconditions:
+- 由夹具通过原生 RBAC 创建一个带一条规则的项目角色，用例结束无条件删除
+- 已登录，且在 host 集群的 default 项目空间
+steps:
+- 打开角色列表，读取行操作
+- 点「编辑权限」，读取文本框内容
+- 改为两行规则并确认
+- 用 API 读取 rules
+expected:
+- 行操作含 编辑权限
+- 对话框出现且已载入原规则（形如 ` | pods | get`）
+- 提交后 rules 为两条，第一条 apiGroups 为 ['']（核心组）
+troubleshoot:
+- 对话框空白说明加载态没有被替换
+- 只有一条规则说明没有整体替换，而是追加
+update_automation:
+- 规则格式变化时改 api-client 的 projectRolesWriteApi

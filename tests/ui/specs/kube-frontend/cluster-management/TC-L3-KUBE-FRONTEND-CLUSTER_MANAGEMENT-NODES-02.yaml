@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: nodes
+title: 节点列表 · CPU 与内存使用率
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/nodes'
+prd: prd/kube-frontend/cluster-management/nodes.md
+design: design/kube-frontend/cluster-management/nodes.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-02
+
+story:
+- US1
+
+product: 节点列表显示 CPU 与内存使用率百分比，取值来自 metrics.k8s.io 与节点可分配量之比。
+preconditions:
+- 已登录，且有集群权限
+- 集群可访问 metrics.k8s.io（不可用时降级为 -）
+steps:
+- 用 API 读取节点指标与节点可分配量
+- 打开节点列表
+- 读取 CPU 使用率与内存使用率单元格
+expected:
+- 表头含「CPU 使用率」「内存使用率」
+- 每格为 0–100 的整数百分比，或为 -（指标不可用）
+- 百分比与 API 数值相符（允许四舍五入差 1）
+troubleshoot:
+- 全部为 - 说明 metrics.k8s.io 不可用（需 metrics-server）
+- 出现 3000% 之类说明单位未换算（n 与 m 混用）
+update_automation:
+- 列变化时改 pages/cluster_management.py

@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: platform-roles
+title: 平台角色 · 创建与删除
+entry_url: '{BASE_URL}/kube-frontend/access/clusterroles'
+prd: prd/kube-frontend/access-control/platform-roles.md
+design: design/kube-frontend/access-control/platform-roles.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-02
+
+story:
+- US1
+
+product: 平台角色可由「创建」建立，规则写入 RBAC；模板角色不提供编辑与删除。
+preconditions:
+- 已登录，且有平台权限
+- 用例自行创建的角色在结束时无条件删除（走原生 RBAC 接口）
+steps:
+- 打开平台角色页并点「创建」
+- 填写名称、别名、资源与动作预设，点确认
+- 用原生 RBAC 接口读取该角色
+- 回到列表删除该角色
+- 另取一个 role-template-* 角色查看行操作
+expected:
+- 创建后 rules 非空，且 apiGroups 为 ['']（核心组），resources 为填写的两项
+- 删除后该角色不存在
+- 模板角色的行操作中没有编辑与删除
+troubleshoot:
+- rules 为空说明写到了 iam.kubesphere.io（该层会丢弃规则）
+- 422 且提示 apiGroups 时确认空组被写成 [''] 而不是 []
+update_automation:
+- 规则编辑器变化时改 pages/platform_settings.py 或 access_control.py

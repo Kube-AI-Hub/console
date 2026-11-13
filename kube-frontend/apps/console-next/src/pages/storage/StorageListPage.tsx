@@ -1,0 +1,340 @@
+import * as React from 'react';
+import { type StorageDetail, type StorageKind, type StorageSummary } from '@kube-ai-hub/api-client';
+import { actionProps } from '@kube-ai-hub/ai-surface';
+import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
+import { useT } from '@/i18n';
+
+import { useProjectFilter } from '@/components/projects/useProjects';
+import { useResourceListState, toListParams } from '@/components/resource/useResourceListState';
+import { DeleteDialog } from '@/components/resource/DeleteDialog';
+import { EditInfoDialog } from '@/components/resource/EditInfoDialog';
+import { LoadingDialog } from '@/components/resource/LoadingDialog';
+import { MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
+import { YamlDialog } from '@/components/resource/YamlDialog';
+import { toYaml } from '@/components/resource/yaml';
+import { formatTimestamp } from '@/lib/time';
+import { useDeleteStorage, useExpandableClasses, useExpandStorage, useStorageList, useStorageOne, useUpdateStorage, STORAGE_DESCRIPTORS } from './queries';
+import { ExpandVolumeDialog } from './ExpandVolumeDialog';
+import { api as apiClient } from '@/api';
+import { storageApi } from '@kube-ai-hub/api-client';
+
+/**
+ * The storage list, shared by 存储卷 and 存储卷快照.
+ *
+ * Both kinds differ only in columns, so they share this page and take a descriptor
+ * — the same arrangement the application workloads use, and the reason a third
+ * storage kind would be a descriptor rather than another page.
+ */
+export interface StorageListPageProps {
+  kind: StorageKind;
+  workspace: string;
+  cluster: string;
+  namespace: string;
+}
+
+const PAGE_SIZE = 10;
+
+type SortKey = 'name' | 'createTime';
+
+type Dialog =
+  | { kind: 'none' }
+  | { kind: 'delete'; rows: StorageSummary[] }
+  | { kind: 'loading'; subject: string }
+  | { kind: 'editYaml'; detail?: StorageDetail; subject?: string }
+  | { kind: 'editInfo'; row: StorageSummary }
+  | { kind: 'expand'; row: StorageSummary };
+
+export function StorageListPage({ kind, workspace, cluster, namespace }: StorageListPageProps): React.ReactElement {
+  const t = useT();
+  const descriptor = STORAGE_DESCRIPTORS[kind]!;
+  const [projectFilter, setProjectFilter] = React.useState(namespace);
+  React.useEffect(() => setProjectFilter(namespace), [cluster, namespace]);
+
+  const list = useResourceListState<SortKey>({ defaultSortBy: 'createTime', resetOn: [cluster, projectFilter] });
+  const query = useStorageList(kind, toListParams(list, { cluster, namespace: projectFilter }, PAGE_SIZE));
+  const remove = useDeleteStorage(kind, { cluster, namespace: projectFilter });
+  const expand = useExpandStorage({ cluster, namespace: projectFilter });
+  const expandableClasses = useExpandableClasses();
+  const [dialog, setDialog] = React.useState<Dialog>({ kind: 'none' });
+  const [editing, setEditing] = React.useState<string | null>(null);
+  const api = storageApi(apiClient, kind);
+
+  // The edit dialog needs the full object; the list only has a summary.
+  const detail = useStorageOne(kind, { cluster, namespace: projectFilter, name: editing ?? '' });
+  const update = useUpdateStorage(kind, { cluster, namespace: projectFilter });
+
+  const rows = query.data?.items ?? [];
+  const total = query.data?.total ?? 0;
+  const projectFilterControl = useProjectFilter(cluster, t('storage.filter.projectLabel'), t('storage.filter.project'));
+
+  React.useEffect(() => {
+    if (dialog.kind === 'loading' && detail.data) setDialog({ kind: 'editYaml', detail: detail.data });
+  }, [dialog.kind, detail.data]);
+
+  React.useEffect(() => {
+    if (dialog.kind === 'loading' && detail.isError) {
+      setDialog({ kind: 'none' });
+      setEditing(null);
+    }
+  }, [dialog.kind, detail.isError]);
+
+  const schema = React.useMemo<ListSchema<StorageSummary>>(
+    () => ({
+      title: t(descriptor.titleKey),
+      description: t(descriptor.descriptionKey),
+      rowKey: 'name',
+      rowAttributes: (row) => ({ 'data-ai-row': row.name }),
+      search: { placeholder: t('storage.searchPlaceholder'), keys: ['name'], aiId: `${kind}:search` },
+      filters: [projectFilterControl],
+      selection: 'multiple',
+      sortableKeys: ['name', 'createTime'],
+      sortAiPrefix: kind,
+      selectAiId: `${kind}:select`,
+      sort: { key: list.sortBy, order: list.order },
+      actions: [
+        {
+          key: 'bulk-delete',
+          label: t('storage.action.bulkDelete'),
+          tone: 'danger',
+          aiId: `${kind}:bulk-delete`,
+          aiNeeds: [`${kind}:row-select`],
+        },
+      ],
+      columns: [
+        {
+          key: 'name',
+          title: t('storage.column.name'),
+          render: (row) => (
+            <span className="flex min-w-0 flex-col">
+              <span className="flex items-center gap-1.5">
+                <a
+                  href={`/kube-frontend/${workspace}/clusters/${cluster}/projects/${row.namespace || projectFilter}/${kind}/${row.name}`}
+                  className="inline-flex min-h-6 items-center truncate font-medium text-ai-fg hover:text-ai-accent"
+                  title={row.name}
+                  {...actionProps(`${kind}:open:${row.name}`)}
+                >
+                  {row.alias || row.name}
+                </a>
+                {row.federated ? <Badge tone="info">{t('resource.federated')}</Badge> : null}
+              </span>
+              <span className="truncate text-[11px] text-ai-fg-muted">{row.storageClass || '-'}</span>
+            </span>
+          ),
+        },
+        {
+          key: 'status',
+          title: t('storage.column.status'),
+          width: 150,
+          hideBelow: 'md',
+          render: (row) => <Badge tone={storageTone(row.status)}>{storageStatusLabel(t, row.status)}</Badge>,
+        },
+        {
+          key: 'capacity',
+          title: t('storage.column.capacity'),
+          width: 110,
+          hideBelow: 'lg',
+          render: (row) => <span className="tabular-nums text-ai-fg-secondary">{row.capacity || '-'}</span>,
+        },
+        // Access modes are a claim concept; a snapshot has none.
+        ...(kind === 'persistentvolumeclaims'
+          ? [
+              {
+                key: 'accessModes',
+                title: t('storage.column.accessModes'),
+                width: 130,
+                hideBelow: 'xl' as const,
+                render: (row: StorageSummary) => (
+                  <span className="truncate text-ai-fg-secondary">{row.accessModes.join(', ') || '-'}</span>
+                ),
+              },
+            ]
+          : []),
+        {
+          key: 'createTime',
+          title: t('storage.column.createdAt'),
+          width: 170,
+          hideBelow: 'xl',
+          render: (row) => <span className="tabular-nums text-ai-fg-muted">{formatTimestamp(row.createdAt)}</span>,
+        },
+      ],
+      // Same order as the old console: 编辑信息 before 编辑 YAML, delete last.
+      rowActions: [
+        { key: 'editInfo', label: t('resource.action.editInfo') },
+        /*
+         * 扩容 is claim-only (a snapshot has no capacity to grow) and class-gated:
+         * a StorageClass without `allowVolumeExpansion` makes the apiserver reject the
+         * write, so the control is hidden rather than offered and failed.
+         */
+        ...(kind === 'persistentvolumeclaims'
+          ? [
+              {
+                key: 'expand',
+                label: t('storage.action.expand'),
+                visible: (row: StorageSummary) => expandableClasses.data?.[row.storageClass] === true,
+              },
+            ]
+          : []),
+        { key: 'editYaml', label: t('resource.action.editYaml') },
+        { key: 'delete', label: t('common.delete'), tone: 'danger' as const },
+      ],
+      empty: { title: t(descriptor.emptyTitleKey), description: t(descriptor.emptyDescriptionKey) },
+      labels: {
+        selectAll: t('table.selectAll'),
+        selectRow: (index) => t('table.selectRow', { index }),
+        moreActions: t('table.moreActions'),
+        previous: t('table.previous'),
+        next: t('table.next'),
+        selected: (count) => t('table.selectedCount', { count }),
+      },
+      pagination: { page: list.page, pageSize: PAGE_SIZE, total },
+    }),
+    [cluster, descriptor, kind, list, projectFilter, projectFilterControl, t, total, workspace],
+  );
+
+  const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
+
+  if (state === 'error') {
+    return (
+      <AiSurface as="section" aiId={`${kind}:surface`} state="error" className="min-w-0">
+        <ResourceErrorPanel error={query.error} onRetry={() => void query.refetch()} retryAiId={`${kind}:retry`} />
+      </AiSurface>
+    );
+  }
+
+  return (
+    <AiSurface as="section" aiId={`${kind}:surface`} state={state} className="min-w-0">
+      <ResourceList
+        schema={schema}
+        rows={rows}
+        loading={state === 'loading'}
+        searchValue={list.keyword}
+        onSearchChange={list.setKeyword}
+        filters={{ project: projectFilter }}
+        onFiltersChange={(next) => {
+          setProjectFilter(next['project'] ?? '');
+          list.setPage(1);
+        }}
+        selectedKeys={list.selected}
+        onSelectionChange={list.setSelected}
+        onPageChange={list.setPage}
+        onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
+          if (next) list.setSort(next);
+        }}
+        onAction={(action, row) => {
+          if (!row) return;
+          if (action === 'delete') return setDialog({ kind: 'delete', rows: [row] });
+          if (action === 'editInfo') return setDialog({ kind: 'editInfo', row });
+          if (action === 'expand') return setDialog({ kind: 'expand', row });
+          if (action === 'editYaml') {
+            // Frame first, data second: the dialog is on screen while the object loads.
+            setDialog({ kind: 'loading', subject: row.name });
+            setEditing(row.name);
+          }
+        }}
+        onBulkAction={(action, keys) => {
+          if (action !== 'bulk-delete' || keys.length === 0) return;
+          setDialog({ kind: 'delete', rows: rows.filter((row) => keys.includes(row.name)) });
+        }}
+      />
+
+      <MutationAlert error={remove.error ?? update.error ?? expand.error} />
+
+      {dialog.kind === 'delete' ? (
+        <DeleteDialog
+          open
+          onOpenChange={(open) => !open && setDialog({ kind: 'none' })}
+          names={dialog.rows.map((row) => row.name)}
+          resource={kind}
+          noun={t(descriptor.titleKey)}
+          pending={remove.isPending}
+          onConfirm={async () => {
+            await remove.mutateAsync(dialog.rows.map((row) => row.name));
+            list.setSelected([]);
+            setDialog({ kind: 'none' });
+          }}
+        />
+      ) : null}
+
+      <LoadingDialog
+        open={dialog.kind === 'loading'}
+        title={t('resource.action.editYaml')}
+        {...(dialog.kind === 'loading' ? { subject: dialog.subject } : {})}
+      />
+
+      {dialog.kind === 'expand' ? (
+        <ExpandVolumeDialog
+          open
+          name={dialog.row.name}
+          current={dialog.row.capacity}
+          pending={expand.isPending}
+          onOpenChange={(open) => !open && setDialog({ kind: 'none' })}
+          onSubmit={async (storage) => {
+            await expand.mutateAsync({ name: dialog.row.name, storageClass: dialog.row.storageClass, storage });
+            setDialog({ kind: 'none' });
+          }}
+        />
+      ) : null}
+
+      {dialog.kind === 'editInfo' ? (
+        <EditInfoDialog
+          open
+          onOpenChange={(open) => !open && setDialog({ kind: 'none' })}
+          resource={kind}
+          name={dialog.row.name}
+          alias={dialog.row.alias}
+          description={dialog.row.description}
+          annotations={dialog.row.annotations}
+          pending={update.isPending}
+          onSubmit={async (annotations) => {
+            // `update()` derives the object name from `body.metadata.name` and PUTs the
+            // whole object; a bare annotation patch has no name and would be sent to
+            // the collection URL (405). Fetch the object and carry the edited map.
+            const detail = await api.get({ cluster, namespace: projectFilter, name: dialog.row.name });
+            await update.mutateAsync({ ...detail.raw, metadata: { ...detail.raw.metadata, annotations } });
+            setDialog({ kind: 'none' });
+          }}
+        />
+      ) : null}
+
+      {dialog.kind === 'editYaml' ? (
+        <YamlDialog
+          open
+          onOpenChange={(open) => !open && setDialog({ kind: 'none' })}
+          initialYaml={toYaml(dialog.detail!.raw)}
+          lockName={dialog.detail!.name}
+          title={t('resource.action.editYaml')}
+          submitLabel={t('common.confirm')}
+          pending={update.isPending}
+          onSubmit={async (object) => {
+            await update.mutateAsync(object as never);
+            setDialog({ kind: 'none' });
+            setEditing(null);
+          }}
+        />
+      ) : null}
+    </AiSurface>
+  );
+}
+
+/** Status → badge tone: only a bound claim and a ready snapshot are healthy. */
+function storageTone(status: string): 'success' | 'warning' | 'danger' | 'neutral' | 'info' {
+  if (status === 'Bound' || status === 'Ready') return 'success';
+  if (status === 'Pending' || status === 'Resizing' || status === 'FileSystemResizePending') return 'warning';
+  if (status === 'Lost') return 'danger';
+  return 'neutral';
+}
+
+/** Status → locale key, falling back to the raw value for the resize conditions. */
+function storageStatusLabel(t: (key: never) => string, status: string): string {
+  const labels: Record<string, string> = {
+    Bound: 'storage.status.bound',
+    Pending: 'storage.status.pending',
+    Lost: 'storage.status.lost',
+    Ready: 'storage.status.ready',
+    Resizing: 'storage.status.resizing',
+    FileSystemResizePending: 'storage.status.resizePending',
+  };
+  const key = labels[status];
+  return key ? t(key as never) : status;
+}
+

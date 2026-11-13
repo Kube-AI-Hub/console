@@ -1,0 +1,69 @@
+id: TC-FULL-KUBE-FRONTEND-STORAGE-01
+level: 2
+suite: full
+module: kube-frontend
+submodule: storage
+feature: page
+title: 存储 · 两个页签之间切换不刷新
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/persistentvolumeclaims'
+prd: prd/kube-frontend/storage/_index.md
+design: design/kube-frontend/storage/_index.md
+
+covers:
+- AC-FULL-KUBE-FRONTEND-STORAGE-01
+- AC-FULL-KUBE-FRONTEND-STORAGE-02
+
+story:
+- US1
+
+product:
+- 存
+- 储
+- 卷
+- 与
+- 存
+- 储
+- 卷
+- 快
+- 照
+- 在
+- 同
+- 一
+- 个
+- 功
+- 能
+- 区
+- ，
+- 切
+- 换
+- 页
+- 签
+- 是
+- 客
+- 户
+- 端
+- 跳
+- 转
+- 。
+
+preconditions:
+- 已登录，且在 host 集群的 default 项目空间
+- fixture 提供一个已登录的浏览器上下文
+
+steps:
+- 打开存储卷页
+- 切到存储卷快照页签
+- 再切回存储卷
+- 统计切换期间的文档请求
+
+expected:
+- 两个页面各自出现列表或空态
+- 每次切换后对应页签高亮
+- 切换期间文档请求为 0
+- 工作区栏显示的项目始终是 default
+
+troubleshoot:
+- 出现文档请求说明页签退化成整页跳转，检查 AreaTabs 的 <a> 是否被 onNavigate 接管
+
+update_automation:
+- 页签结构变化时改 pages/storage.py 的选择器

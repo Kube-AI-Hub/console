@@ -1,0 +1,76 @@
+id: TC-L3-KUBE-FRONTEND-STORAGE-DETAIL-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: storage
+feature: detail
+title: 存储 · 详情八项属性
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/persistentvolumeclaims'
+prd: prd/kube-frontend/storage/detail.md
+design: design/kube-frontend/storage/detail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-STORAGE-DETAIL-01
+
+story:
+- US1
+
+product:
+- 详
+- 情
+- 按
+- 顺
+- 序
+- 显
+- 示
+- 集
+- 群
+- 、
+- 项
+- 目
+- 、
+- 存
+- 储
+- 类
+- 型
+- 、
+- 容
+- 量
+- 、
+- 访
+- 问
+- 模
+- 式
+- 、
+- 持
+- 久
+- 卷
+- 、
+- 创
+- 建
+- 时
+- 间
+- 、
+- 创
+- 建
+- 者
+- 。
+
+preconditions:
+- 由夹具创建一个 tc-e2e- 前缀的存储卷，用例结束无条件删除
+- 已登录，且在 host 集群的 default 项目空间
+
+steps:
+- 从列表点击名称进入详情
+- 读取属性名序列
+- 核对集群与项目两行的值
+
+expected:
+- 属性名依次为 集群、项目、存储类型、容量、访问模式、持久卷、创建时间、创建者
+- 集群为 host，项目为 default
+
+troubleshoot:
+- 属性缺失时看 StorageDetailPage 的 Row 列表
+
+update_automation:
+- 属性变化时同步改 prd 与 design 的字段表

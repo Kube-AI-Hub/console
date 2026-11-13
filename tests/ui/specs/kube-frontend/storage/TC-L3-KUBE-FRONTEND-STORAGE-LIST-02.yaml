@@ -1,0 +1,61 @@
+id: TC-L3-KUBE-FRONTEND-STORAGE-LIST-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: storage
+feature: list
+title: 存储 · 空项目不渲染表头
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/persistentvolumeclaims'
+prd: prd/kube-frontend/storage/list.md
+design: design/kube-frontend/storage/list.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-STORAGE-LIST-02
+
+story:
+- US1
+
+product:
+- 没
+- 有
+- 存
+- 储
+- 卷
+- 时
+- 显
+- 示
+- 空
+- 态
+- 标
+- 题
+- 与
+- 说
+- 明
+- ，
+- 且
+- 不
+- 渲
+- 染
+- 表
+- 头
+- 。
+
+preconditions:
+- 已登录，且在 host 集群中一个没有存储卷的项目空间
+- 先通过 API 确认该项目确实没有存储卷
+
+steps:
+- 打开该项目的存储卷列表
+- 读取页面状态与空态文案
+- 统计表头数量
+
+expected:
+- data-ai-state 为 empty
+- 显示空态标题与说明
+- thead 数量为 0
+
+troubleshoot:
+- 表头仍存在时看共享 Table 的 loading || rows.length > 0 条件
+
+update_automation:
+- 空态文案变化时改 packages/locales/src/index.ts

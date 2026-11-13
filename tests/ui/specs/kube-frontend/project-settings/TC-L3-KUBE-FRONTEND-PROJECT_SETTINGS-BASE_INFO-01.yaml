@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-BASE_INFO-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: project-settings
+feature: base-info
+title: 项目基本信息 · 属性与配额空态
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/spaces/baseinfo'
+prd: prd/kube-frontend/project-settings/base-info.md
+design: design/kube-frontend/project-settings/base-info.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-BASE_INFO-01
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-BASE_INFO-02
+
+story:
+- US1
+
+product: 基本信息页显示项目六项属性，企业空间与项目列表一致；没有配额时给出明确说明。
+preconditions:
+- 已登录，且在 host 集群的 spaces 项目空间
+- 用 API 确认该项目是否存在 ResourceQuota，用例据此断言配额区块的两种形态
+steps:
+- 打开基本信息页
+- 读取属性名序列与企业空间的值
+- 读取配额区的内容
+expected:
+- 属性名依次为 名称、别名、企业空间、描述、创建者、创建时间
+- 企业空间与 API 的 kubesphere.io/workspace 标签一致
+- 有配额时显示三列表；无配额时显示「该项目没有设置资源配额」
+troubleshoot:
+- 企业空间显示成项目名说明取错了标签（kubesphere.io/namespace）
+- 整页报错说明配额请求失败被当成了致命错误
+update_automation:
+- 属性变化时同步改 prd 与 design 的字段表

@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-PROJECTS-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: projects
+title: 项目列表 · CPU/内存用量与容器组数
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/namespaces'
+prd: prd/kube-frontend/cluster-management/projects.md
+design: design/kube-frontend/cluster-management/projects.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-PROJECTS-02
+
+story:
+- US1
+
+product: 项目列表显示按项目聚合的 CPU、内存用量与容器组数，数值来自 metrics.k8s.io/pods 的容器用量之和。
+preconditions:
+- 已登录，且有集群权限
+- 集群可访问 metrics.k8s.io（不可用时降级为 0）
+steps:
+- 用 API 读取全部 Pod 指标，按命名空间汇总
+- 打开项目列表
+- 对比有 Pod 的项目行的容器组数
+expected:
+- 表头含 CPU 使用率、内存使用率、容器组数
+- 有 Pod 的项目，其容器组数与 API 统计一致
+- 用量非零（容器用量之和），不是全 0
+troubleshoot:
+- 容器组数对但用量为 0：pod 的 usage 在 containers[] 里，不在顶层
+- 全为 0：metrics.k8s.io 不可用
+update_automation:
+- 列变化时改 pages/cluster_management.py

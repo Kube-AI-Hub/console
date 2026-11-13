@@ -1,0 +1,31 @@
+id: TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: project-settings
+feature: roles
+title: 项目角色 · 模板角色只读
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/roles'
+prd: prd/kube-frontend/project-settings/roles.md
+design: design/kube-frontend/project-settings/roles.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-03
+
+story:
+- US1
+
+product: role-template-* 角色的行操作只提供「详情」，不提供编辑、编辑权限与删除。
+preconditions:
+- 已登录，且在 host 集群的 default 项目空间
+- 该项目至少有一个 role-template-* 角色
+steps:
+- 打开角色列表并搜索一个 role-template-* 角色
+- 打开其行操作菜单
+expected:
+- 菜单只有「详情」，没有「编辑信息」「编辑权限」「删除」
+troubleshoot:
+- 出现编辑/删除说明 system 判定失效（isTemplateRole）
+- 找不到模板角色时用例跳过
+update_automation:
+- 模板判定规则变化时改 api-client 的 isTemplateRole

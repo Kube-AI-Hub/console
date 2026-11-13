@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-QUOTA-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: project-settings
+feature: quota
+title: 项目配额 · 编辑写入 ResourceQuota
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/baseinfo'
+prd: prd/kube-frontend/project-settings/base-info.md
+design: design/kube-frontend/project-settings/base-info.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-BASE_INFO-03
+
+story:
+- US1
+
+product: 基本信息页的「编辑配额」写入 ResourceQuota；留空的项不产生限制，非法数量被拦下。
+preconditions:
+- 已登录，且在 host 集群的 default 项目空间
+- 用例结束时删除自己创建的配额对象，恢复原状
+steps:
+- 打开基本信息页并点「编辑配额」
+- 填写非法数量（abc），点确认
+- 改为 requests.cpu=2、requests.memory=4Gi，点确认
+- 用 API 读取 ResourceQuota
+expected:
+- 非法数量时提交被拦下并提示
+- 提交后存在一个 ResourceQuota，其 spec.hard 含 requests.cpu=2 与 requests.memory=4Gi
+- 未填写的项不出现在 spec.hard 中（表示不限制）
+troubleshoot:
+- hard 为空时检查表单键是否含点号（会被当成嵌套路径）
+- 出现两个配额对象时检查是否复用了已有对象名
+update_automation:
+- 配额资源增减时改 api-client 的 QUOTA_RESOURCES

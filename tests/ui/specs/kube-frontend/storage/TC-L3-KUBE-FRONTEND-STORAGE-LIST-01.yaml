@@ -1,0 +1,72 @@
+id: TC-L3-KUBE-FRONTEND-STORAGE-LIST-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: storage
+feature: list
+title: 存储 · 列表五列与名称链接
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/persistentvolumeclaims'
+prd: prd/kube-frontend/storage/list.md
+design: design/kube-frontend/storage/list.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-STORAGE-LIST-01
+
+story:
+- US1
+
+product:
+- 存
+- 储
+- 卷
+- 列
+- 表
+- 显
+- 示
+- 名
+- 称
+- 、
+- 状
+- 态
+- 、
+- 容
+- 量
+- 、
+- 访
+- 问
+- 模
+- 式
+- 、
+- 创
+- 建
+- 时
+- 间
+- ，
+- 名
+- 称
+- 可
+- 点
+- 进
+- 详
+- 情
+- 。
+
+preconditions:
+- 由夹具创建一个 tc-e2e- 前缀的存储卷，用例结束无条件删除
+- 已登录，且在 host 集群的 default 项目空间
+
+steps:
+- 打开存储卷列表
+- 核对表头
+- 核对目标行存在且名称是链接
+
+expected:
+- 表头依次为 名称、状态、容量、访问模式、创建时间
+- 目标行出现
+- 名称链接指向该对象的详情地址
+
+troubleshoot:
+- 缺列时先看 StorageListPage 的 columns 与 hideBelow 断点
+
+update_automation:
+- 列变化时改 pages/storage.py 的 headers 断言

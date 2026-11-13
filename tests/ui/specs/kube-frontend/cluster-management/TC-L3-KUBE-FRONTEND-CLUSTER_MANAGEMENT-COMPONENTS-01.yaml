@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-COMPONENTS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: components
+title: 系统组件 · 三列与不健康优先
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/components'
+prd: prd/kube-frontend/cluster-management/components.md
+design: design/kube-frontend/cluster-management/components.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-COMPONENTS-01
+
+story:
+- US1
+
+product: 系统组件列表显示三列；健康后端为 健康/总数；不健康的排在健康的前面。
+preconditions:
+- 已登录，且有集群权限
+- 平台有组件数据
+steps:
+- 用 API 读取组件数量
+- 打开系统组件页，核对表头与行数
+- 读取第一行的健康列
+expected:
+- 表头依次为 名称、健康后端、启动时间
+- 行数与 API 一致
+- 若存在不健康组件，第一行是不健康的那一个
+troubleshoot:
+- 列表为空说明裸数组响应没有被正确解析
+- 顺序不对时看排序谓词是否以 up 升序
+update_automation:
+- 列变化时改 pages/cluster_management.py

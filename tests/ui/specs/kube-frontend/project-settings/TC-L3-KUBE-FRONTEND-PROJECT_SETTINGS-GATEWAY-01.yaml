@@ -1,0 +1,37 @@
+id: TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: project-settings
+feature: gateway
+title: 网关设置 · 无网关时创建并显示状态
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/gateways'
+prd: prd/kube-frontend/project-settings/gateway.md
+design: design/kube-frontend/project-settings/gateway.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-01
+
+story:
+- US1
+
+product: 项目没有网关时显示空态与创建入口；创建后显示名称、访问方式、地址与控制器消息；可删除。
+preconditions:
+- 已登录，且在 host 集群的 default 项目空间
+- 该项目当前没有网关；用例结束时删除自己创建的网关
+steps:
+- 打开网关设置页，确认空态
+- 点「创建网关」
+- 等待页面切到信息态，读取字段
+- 用 API 确认 Gateway 对象存在
+- 删除该网关并确认页面回到空态
+expected:
+- 初始显示空态与创建入口
+- 创建后显示网关名称与状态徽标
+- API 中存在该 Gateway 对象
+- 删除后对象不存在
+troubleshoot:
+- 状态长期为「部署中」说明控制器未装 Helm chart，属环境限制
+- 访问方式与地址为空时，看 status.conditions 与 loadBalancer
+update_automation:
+- 网关字段变化时改 api-client 的 toProjectGateway

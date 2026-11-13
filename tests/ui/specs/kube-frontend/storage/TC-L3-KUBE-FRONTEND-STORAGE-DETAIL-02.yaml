@@ -1,0 +1,32 @@
+id: TC-L3-KUBE-FRONTEND-STORAGE-DETAIL-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: storage
+feature: detail
+title: 存储详情 · 状态与供应者
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/csghub/persistentvolumeclaims'
+prd: prd/kube-frontend/storage/detail.md
+design: design/kube-frontend/storage/detail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-STORAGE-DETAIL-02
+
+story:
+- US1
+
+product: 存储卷详情的属性含状态与供应者，且状态以中文呈现，与列表一致。
+preconditions:
+- 由夹具创建一个 tc-e2e- 存储卷，用例结束无条件删除
+- 已登录，且在 host 集群的 default 项目空间
+steps:
+- 打开该存储卷详情
+- 读取属性名与状态值
+expected:
+- 属性名含 状态 与 供应者
+- 状态值为中文（已绑定/等待中/已丢失），与列表用的词一致
+troubleshoot:
+- 缺少属性时看 toStorageDetail 与 StorageDetailPage 是否同步
+- 状态显示英文说明 statusKey 未覆盖该值
+update_automation:
+- 属性变化时改 prd/design 的字段表

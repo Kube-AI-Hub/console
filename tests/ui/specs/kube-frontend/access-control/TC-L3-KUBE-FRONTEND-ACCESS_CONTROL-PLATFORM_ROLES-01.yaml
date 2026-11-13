@@ -1,0 +1,72 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: platform-roles
+title: 平台角色 · 列表三列与模板徽标
+entry_url: '{BASE_URL}/kube-frontend/access/clusterroles'
+prd: prd/kube-frontend/access-control/platform-roles.md
+design: design/kube-frontend/access-control/platform-roles.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-01
+
+story:
+- US1
+
+product:
+- 平
+- 台
+- 角
+- 色
+-  
+- ·
+-  
+- 列
+- 表
+- 三
+- 列
+- 与
+- 模
+- 板
+- 徽
+- 标
+- ：
+- 列
+- 集
+- 合
+- 与
+- 老
+-  
+- c
+- o
+- n
+- s
+- o
+- l
+- e
+-  
+- 一
+- 致
+- 。
+
+preconditions:
+- 已登录，且有平台权限
+- 该页至少有一条数据（用例先用 API 确认）
+
+steps:
+- 打开该页
+- 核对表头
+- 读取第一行
+
+expected:
+- 表头依次为 ["名称", "规则数", "创建时间"]
+- 第一行有内容
+
+troubleshoot:
+- 缺列时看 PlatformListPage 的 columns
+- 空列表时用例 skip 而不是失败
+
+update_automation:
+- 列变化时改 pages/access_control.py

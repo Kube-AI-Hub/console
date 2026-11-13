@@ -1,0 +1,65 @@
+id: TC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-01
+level: 2
+suite: full
+module: kube-frontend
+submodule: access-control
+feature: page
+title: 访问控制 · 三页签切换且无项目工作区栏
+entry_url: '{BASE_URL}/kube-frontend/access/users'
+prd: prd/kube-frontend/access-control/_index.md
+design: design/kube-frontend/access-control/_index.md
+
+covers:
+- AC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-01
+
+story:
+- US1
+- US2
+
+product:
+- 平
+- 台
+- 级
+- 三
+- 张
+- 表
+- 在
+- 客
+- 户
+- 端
+- 切
+- 换
+- ，
+- 且
+- 不
+- 出
+- 现
+- 项
+- 目
+- 工
+- 作
+- 区
+- 栏
+- 。
+
+preconditions:
+- 已登录，且有平台权限
+
+steps:
+- 打开用户页
+- 确认没有项目工作区栏
+- 依次切到平台角色、企业空间、用户
+- 统计切换期间的文档请求
+
+expected:
+- 每页显示对应列表或空态
+- 页面不出现 workspace-bar
+- 切换后页签高亮跟随
+- 切换期间文档请求为 0
+
+troubleshoot:
+- 出现工作区栏说明平台页复用了项目布局
+- 出现文档请求说明页签退化成整页跳转
+
+update_automation:
+- 布局变化时改 routes/kube-frontend.access/route.tsx
