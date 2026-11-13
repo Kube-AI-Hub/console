@@ -83,7 +83,13 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
                   const user = row as UserSummary;
                   return (
                     <span className="flex min-w-0 flex-col" {...actionProps(`${kind}:name:${user.name}`)}>
-                      <span className="truncate font-medium text-ai-fg">{user.username}</span>
+                      <Link
+                        to="/kube-frontend/access/users/$name"
+                        params={{ name: user.username }}
+                        className="truncate font-medium text-ai-accent hover:underline"
+                      >
+                        {user.username}
+                      </Link>
                       <span className="truncate text-[11px] text-ai-fg-muted">{user.email || '-'}</span>
                     </span>
                   );

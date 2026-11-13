@@ -136,6 +136,67 @@ export function clusterRolesApi(client: Client) {
  */
 export const KAPIS_TENANT = '/kapis/tenant.kubesphere.io/v1alpha2';
 
+/**
+ * One platform user, plus the sign-in history the old console shows on its detail page.
+ *
+ * The user object carries `status.state` (Active/Disabled) and `status.lastLoginTime`; the
+ * history is a separate collection under the same user (`/loginrecords`), created by the
+ * apiserver on each sign-in. Reading both here keeps the page to two calls.
+ */
+export interface UserDetail extends UserSummary {
+  /** `status.state` — absent means the platform never disabled the account. */
+  state: string;
+  /** `status.lastLoginTime` (the authoritative one; the annotation is only a fallback). */
+  lastLoginTime: string;
+  description: string;
+  createdAt: string;
+}
+
+export interface LoginRecord {
+  /** Object name, unique per sign-in. */
+  name: string;
+  time: string;
+  provider: string;
+  reason: string;
+}
+
+export function userDetailApi(client: Client) {
+  const path = (name: string) => `${KAPIS_IAM}/users/${encodeURIComponent(name)}`;
+  return {
+    async get(params: { name: string; signal?: AbortSignal }): Promise<UserDetail> {
+      const item = await client.request<KubeAccess>(path(params.name), {
+        ...(params.signal ? { signal: params.signal } : {}),
+      });
+      const status = (item.status ?? {}) as Record<string, unknown>;
+      const summary = toUserSummary(item);
+      return {
+        ...summary,
+        state: String(status['state'] ?? 'Active'),
+        lastLoginTime: String(status['lastLoginTime'] ?? summary.lastLogin),
+        description: ((item.metadata?.annotations ?? {}) as Record<string, string>)['kubesphere.io/description'] ?? '',
+        createdAt: item.metadata?.creationTimestamp ?? '',
+      };
+    },
+
+    /** The last few sign-ins; the endpoint pages, so a small limit keeps the page quick. */
+    async loginRecords(params: { name: string; limit?: number; signal?: AbortSignal }): Promise<LoginRecord[]> {
+      const body = await client.request<{ items?: KubeAccess[] }>(`${path(params.name)}/loginrecords`, {
+        query: { limit: params.limit ?? 10, sortBy: 'createTime', ascending: false },
+        ...(params.signal ? { signal: params.signal } : {}),
+      });
+      return (body?.items ?? []).map((item) => {
+        const spec = (item.spec ?? {}) as Record<string, unknown>;
+        return {
+          name: item.metadata?.name ?? '',
+          time: item.metadata?.creationTimestamp ?? '',
+          provider: String(spec['provider'] ?? ''),
+          reason: String(spec['reason'] ?? ''),
+        };
+      });
+    },
+  };
+}
+
 export function workspacesWriteApi(client: Client) {
   const path = (name?: string) => `${KAPIS_TENANT}/workspaces${name ? `/${encodeURIComponent(name)}` : ''}`;
   return {
