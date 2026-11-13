@@ -62,7 +62,7 @@ export interface KubeObject {
  * `.../<resource>` without the `namespaces/<ns>` segment. That is how "all
  * projects" is expressed — there is no query parameter for it.
  */
-function collectionPath(cluster: string, namespace: string, resource: string, kapisPrefix: string = KAPIS_RESOURCES): string {
+export function collectionPath(cluster: string, namespace: string, resource: string, kapisPrefix: string = KAPIS_RESOURCES): string {
   return `${resourcePath('kapis', cluster, namespace, resource, kapisPrefix)}`;
 }
 

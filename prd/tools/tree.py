@@ -543,7 +543,7 @@ MODULES = [
                     {
                         "id": "roles",
                         "title": "项目角色列表",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-01"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-01", "TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-04"]},
                     },
                     {
                         "id": "role-rules",

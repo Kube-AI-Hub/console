@@ -1,0 +1,39 @@
+id: TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-04
+level: 3
+suite: point
+module: kube-frontend
+submodule: project-settings
+feature: roles
+title: 项目角色 · 从模板创建角色
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/roles'
+prd: prd/kube-frontend/project-settings/roles.md
+design: design/kube-frontend/project-settings/roles.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-04
+
+story:
+- US2
+
+product: 从项目角色页创建角色：选择平台模板，复制其规则；创建后角色在原生 RBAC 与 kapis 读取中都有规则。
+preconditions:
+- 已登录，且对 default 项目有管理权限
+- 项目内存在 role-template-* 模板角色
+- 用例使用 tc-e2e- 前缀名称，finally 中删除
+steps:
+- 打开项目角色页，点「创建角色」
+- 填名称并选择一个模板角色
+- 提交
+- 用原生 RBAC 接口回读该角色的 rules 条数
+- 用 kapis 回读别名注解
+- 删除该角色
+expected:
+- 创建成功，角色出现在列表
+- rules 条数等于所选模板的 rules 条数（不是 0）
+- 别名写入 kubesphere.io/alias-name
+troubleshoot:
+- rules 为 0：创建走了 kapis 而不是原生 RBAC（kapis 会丢 rules）
+- 创建 422：名称不合法或模板未选
+- 列表不刷新：失效键应为 ['settings','roles']
+update_automation:
+- 选择器见 pages/project_settings.py 与 RoleCreateDialog.tsx

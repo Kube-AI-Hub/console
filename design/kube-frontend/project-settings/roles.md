@@ -9,6 +9,7 @@
 - AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-02
 
 - AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-01
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-04
 
 ## 概述
 
@@ -32,7 +33,24 @@
 
 **何时重新考虑**：出现「按权限搜索角色」的需求时。
 
-## 系统现状
+### DEC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-04 — 创建走原生 RBAC，规则才不会被丢弃
+
+**为什么**：实测通过 IAM 聚合接口 `POST /kapis/iam.kubesphere.io/v1alpha2/namespaces/<ns>/roles` 创建角色时，`rules` 会被丢弃——回读得到 `rules: null`，`managedFields` 里是 `f:rules: {}`。同一个对象若创建在 `/apis/rbac.authorization.k8s.io/v1/namespaces/<ns>/roles` 上则规则保留，而 kapis 仍能正常读回（别名等注解也在）。
+因此**写入走原生 RBAC，读取继续走 kapis**。
+
+**被否方案**：kapis 创建后再 PATCH 规则。两步之间存在一个「有角色但无规则」的窗口，且失败时留下半个对象。
+
+**何时重新考虑**：上游修复 kapis 创建路径的规则透传时。
+
+### DEC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-05 — 创建必须选模板
+
+**为什么**：平台的角色规则是能力清单，从零选规则容易选出「看起来能用、实际缺关键动词」的角色。老 console 的创建流程也是「选模板 → 复制」。模板下拉显示每个模板的规则数，让选择有信息量。
+
+**被否方案**：允许创建空角色再编辑权限。会得到一批没有规则的角色，且没有任何提示它们不生效。
+
+**何时重新考虑**：平台提供从 YAML 导入角色时。
+
+## 系统现状## 系统现状
 
 老 console 的角色列表有名称、描述、创建时间；本模块把描述折进副行，加入规则数。
 

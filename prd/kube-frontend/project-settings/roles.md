@@ -14,11 +14,18 @@
 
 **Independent Test**：打开角色列表，核对列与模板徽标。
 
+### US2 - 从模板创建一个项目角色 (Priority: P1)
+
+作为 **项目管理员**，我希望 **以平台模板为基础创建本项目自己的角色**，以便 **不用从零写权限规则**。
+
+**Independent Test**：选一个模板创建角色 → 回读该角色的 `rules` 条数等于模板条数 → 删除。
+
 ## 验收场景
 
 - **AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-02** — 已知角色列表中有一个非模板角色，当「编辑信息」并填写别名，则该角色的 `kubesphere.io/alias-name` 注解被更新；当「删除」并确认，则该角色从列表消失且 API 返回 404。
 - **AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-03** — 已知列表中有 `role-template-*` 角色，当打开其行操作，则只提供「详情」，不提供编辑与删除（平台拒绝写模板角色）。
 - **AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-01** — 已知项目内至少有一个角色，当打开角色列表，则显示名称、规则数、创建时间三列，且 `role-template-*` 的行带「模板」徽标。
+- **AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-04** — 已知项目内有可用的 `role-template-*` 模板角色，当点「创建角色」、填写合法名称并选择一个模板后提交，则项目中出现该角色，其 `rules` 条数等于所选模板的 `rules` 条数，别名写入 `kubesphere.io/alias-name`；该角色可被删除。
 
 ## 设计目标
 

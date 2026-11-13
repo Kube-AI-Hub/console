@@ -1,5 +1,6 @@
 import type { Client } from './client';
 import { baseOf, resourceApi, type KubeObject, type ResourceBase } from './resources';
+import { collectionPath } from './resources';
 
 /**
  * Project access: roles and members.
@@ -16,6 +17,8 @@ export type IamKind = 'roles' | 'members';
 
 /** IAM group prefix. */
 export const KAPIS_IAM = '/kapis/iam.kubesphere.io/v1alpha2';
+/** Native RBAC group: the only path that keeps a role's `rules` on create. */
+const KAPIS_RBAC = '/apis/rbac.authorization.k8s.io/v1';
 
 interface KubeIam extends KubeObject {
   rules?: Array<Record<string, unknown>>;
@@ -563,6 +566,40 @@ export function projectRolesWriteApi(client: Client) {
   const path = (namespace: string, name: string) =>
     `/apis/rbac.authorization.k8s.io/v1/namespaces/${encodeURIComponent(namespace)}/roles/${encodeURIComponent(name)}`;
   return {
+    /**
+     * Create a project role, optionally from a template's rules.
+     *
+     * Written to the **native RBAC group**, because the IAM aggregate accepts the create
+     * but drops `rules` on the floor: measured, a role POSTed through kapis comes back
+     * with `rules: null` and `managedFields` showing `f:rules: {}`. The same object created
+     * at /apis/rbac.authorization.k8s.io keeps the rules, and kapis reads it back fine —
+     * so the write goes where it is honoured and the read keeps using kapis.
+     */
+    async createRole(params: {
+      namespace: string;
+      name: string;
+      alias: string;
+      description: string;
+      rules: Array<{ apiGroups: string[]; resources: string[]; verbs: string[] }>;
+    }): Promise<void> {
+      const annotations: Record<string, string> = {};
+      if (params.alias.trim()) annotations['kubesphere.io/alias-name'] = params.alias.trim();
+      if (params.description.trim()) annotations['kubesphere.io/description'] = params.description.trim();
+      await client.request(collectionPath('', params.namespace, 'roles', KAPIS_RBAC), {
+        method: 'POST',
+        body: {
+          apiVersion: 'rbac.authorization.k8s.io/v1',
+          kind: 'Role',
+          metadata: {
+            name: params.name.trim(),
+            namespace: params.namespace,
+            ...(Object.keys(annotations).length ? { annotations } : {}),
+          },
+          rules: params.rules,
+        },
+      });
+    },
+
     /** Read a project role's rules in the shape the editor uses (one line per rule). */
     async rules(params: { namespace: string; name: string }): Promise<Array<{ apiGroups: string; resources: string; verbs: string }>> {
       const item = await client.request<KubeIam>(path(params.namespace, params.name));

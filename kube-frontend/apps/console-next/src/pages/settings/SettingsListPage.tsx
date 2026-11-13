@@ -14,6 +14,7 @@ import { EditInfoDialog } from '@/components/resource/EditInfoDialog';
 import { formatTimestamp } from '@/lib/time';
 import { SETTINGS_DESCRIPTORS, useDeleteRole, useMemberWrites, useSettingsList, useUpdateRole, type SettingsKind } from './queries';
 import { MemberDialog } from './MemberDialog';
+import { RoleCreateDialog } from './RoleCreateDialog';
 
 /**
  * Project settings: 角色 and 成员.
@@ -58,6 +59,7 @@ export function SettingsListPage({ kind, cluster, namespace }: SettingsListPageP
   const updateRole = useUpdateRole({ cluster, namespace: projectFilter });
   const memberWrites = useMemberWrites({ cluster, namespace: projectFilter });
   const [inviting, setInviting] = React.useState(false);
+  const [creatingRole, setCreatingRole] = React.useState(false);
   const [editingMember, setEditingMember] = React.useState<MemberSummary | null>(null);
   const [removingMember, setRemovingMember] = React.useState<MemberSummary | null>(null);
   const removeRole = useDeleteRole({ cluster, namespace: projectFilter });
@@ -156,6 +158,9 @@ export function SettingsListPage({ kind, cluster, namespace }: SettingsListPageP
        * Inviting is the members page's primary action, as it is in the old console; roles
        * have no create action because a project role is made by copying a template.
        */
+      ...(kind === 'roles'
+        ? { primaryAction: { key: 'createRole', label: t('settings.roles.create'), aiId: 'roles:create' } }
+        : {}),
       ...(kind === 'members'
         ? { primaryAction: { key: 'invite', label: t('settings.members.invite'), aiId: 'members:invite' } }
         : {}),
@@ -244,6 +249,10 @@ export function SettingsListPage({ kind, cluster, namespace }: SettingsListPageP
         }}
         onAction={(action, row) => {
           // The primary action arrives without a row; handle it before the guard.
+          if (action == 'createRole') {
+            setCreatingRole(true);
+            return;
+          }
           if (action == 'invite') {
             setInviting(true);
             return;
@@ -271,6 +280,13 @@ export function SettingsListPage({ kind, cluster, namespace }: SettingsListPageP
 
       <MutationAlert
         error={updateRole.error ?? removeRole.error ?? memberWrites.invite.error ?? memberWrites.updateRole.error}
+      />
+
+      <RoleCreateDialog
+        open={creatingRole}
+        onOpenChange={setCreatingRole}
+        cluster={cluster}
+        namespace={projectFilter}
       />
 
       <MemberDialog
