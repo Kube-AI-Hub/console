@@ -7,9 +7,10 @@
       display: inline-block;
       height: 20px;
       padding: 0 4px;
-      border-radius: 1px;
-      background-color: variables.$light-color04;
-      @include mixins.TypographyParagraphCode;
+      border-radius: 2px;
+      background-color: variables.$dark-color08;
+      @include mixins.TypographyParagraphCode(variables.$light-color01);
+      font-weight: 600;
       line-height: 20px;
     }
   }
