@@ -1930,3 +1930,22 @@ Ingress 的规则是三层嵌套（rule → path → backend），而编辑器�
 | console-next 单测 | 95 通过 |
 | api-client 单测 | 152 通过 |
 | 文档门禁 | errors=0 warnings=0 |
+
+### 47.4 追加（用户反馈）：容器组名称可点击进入详情
+
+**问题**：关联容器组表里的 Pod 名称是纯文本。看到某个 Pod 不正常后，下一个问题一定是"它怎么了"，而答案在容器组详情页（专属属性、镜像、YAML），不在摘要表里。纯文本等于要求读者复制名字再自己寻址。
+
+**修改**：Pod 名称改为链接，指向 `/kube-frontend/<ws>/clusters/<cluster>/projects/<ns>/pods/<name>`。
+
+**顺带的改动**：详情页原先没有 `workspace` 参数（不需要它）；要拼 Pod 详情地址就必须有，因此给 `WorkloadDetailPage` 增加该 prop，并更新 **8 个** 详情路由传参。
+
+**实测**：
+
+```
+pod links: 1
+href: /kube-frontend/system-workspace/clusters/host/projects/spaces/pods/agent-asr-restored-...-7gmrs
+url after click: .../projects/spaces/pods/agent-asr-restored-...-7gmrs
+pod detail state: ready
+```
+
+用例 `PODS_BLOCK-01` 增加了"点击名称 → 跳到容器组详情并进入 ready"的断言。

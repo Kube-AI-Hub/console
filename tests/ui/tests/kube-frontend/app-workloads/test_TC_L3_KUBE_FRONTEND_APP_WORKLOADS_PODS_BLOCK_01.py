@@ -49,6 +49,18 @@ def test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_PODS_BLOCK_01(app_workloads_page, scr
         for row in block.locator("tbody tr").all():
             cells = [cell.strip() for cell in row.locator("td").all_inner_texts()]
             assert cells[1] != "", cells[1:2]
+
+        # The pod name links into that pod's own page: "why is this one unhealthy" is
+        # answered there, not in this summary.
+        pod_link = block.locator('[data-ai-id^="deployments-detail:pod:"]').first
+        expect(pod_link).to_be_visible()
+        href = pod_link.get_attribute("href") or ""
+        assert "/pods/" in href, href
+        pod_link.click()
+        pod_surface = ui.page.locator('[data-ai-id="pods-detail:surface"]')
+        expect(pod_surface).to_be_visible(timeout=30_000)
+        expect(pod_surface).not_to_have_attribute("data-ai-state", "loading", timeout=90_000)
+        assert "/pods/" in ui.page.url, ui.page.url
         screenshot(ui.page, "workload-pods-block")
     finally:
         ui.delete_deployment(name)

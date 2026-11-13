@@ -40,6 +40,8 @@ import { formatTimestamp } from '@/lib/time';
  */
 export interface WorkloadDetailPageProps {
   descriptor: WorkloadDescriptor;
+  /** Needed to build links to other pages; the route always carries it. */
+  workspace: string;
   cluster: string;
   namespace: string;
   name: string;
@@ -47,7 +49,7 @@ export interface WorkloadDetailPageProps {
 
 type Dialog = 'none' | 'loading' | 'editYaml' | 'delete' | 'editInfo' | 'scale';
 
-export function WorkloadDetailPage({ descriptor, cluster, namespace, name }: WorkloadDetailPageProps): React.ReactElement {
+export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, name }: WorkloadDetailPageProps): React.ReactElement {
   const t = useT();
   const kind: WorkloadKind = descriptor.kind;
   const navigate = useNavigate();
@@ -261,7 +263,21 @@ export function WorkloadDetailPage({ descriptor, cluster, namespace, name }: Wor
                   <tbody>
                     {(pods.data ?? []).map((pod) => (
                       <tr key={pod.name} className="border-t border-ai-line" data-ai-row={pod.name}>
-                        <td className="py-1.5 pr-4 font-mono text-[11px] text-ai-fg-secondary">{pod.name}</td>
+                        <td className="py-1.5 pr-4">
+                          {/*
+                           * A pod row is the usual way into that pod's own page — the
+                           * question "why is this one unhealthy" is answered there
+                           * (its attributes, images, YAML), not in this summary.
+                           */}
+                          <a
+                            href={`/kube-frontend/${workspace}/clusters/${cluster}/projects/${namespace}/pods/${pod.name}`}
+                            className="inline-flex min-h-6 items-center font-mono text-[11px] text-ai-accent hover:underline"
+                            {...actionProps(`deployments-detail:pod:${pod.name}`)}
+                            data-ai-id={`${kind}-detail:pod:${pod.name}`}
+                          >
+                            {pod.name}
+                          </a>
+                        </td>
                         <td className="py-1.5 pr-4">
                           <Badge tone={pod.terminating ? 'neutral' : pod.phase === 'Running' ? 'success' : 'warning'}>
                             {pod.terminating ? t('workloads.pod.terminating') : pod.phase || '-'}

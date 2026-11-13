@@ -15,8 +15,8 @@ export const Route = createFileRoute('/kube-frontend/$workspace/clusters/$cluste
 });
 
 function statefulsetsDetailRoute(): React.ReactElement {
-  const { cluster, namespace, name } = Route.useParams();
+  const { workspace, cluster, namespace, name } = Route.useParams();
   const descriptor = WORKLOAD_DESCRIPTORS['statefulsets']!;
   ensureWorkloadPageRegistered(descriptor);
-  return <WorkloadDetailPage descriptor={descriptor} cluster={cluster} namespace={namespace} name={name} />;
+  return <WorkloadDetailPage descriptor={descriptor} workspace={workspace} cluster={cluster} namespace={namespace} name={name} />;
 }
