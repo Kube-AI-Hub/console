@@ -15,10 +15,23 @@ def test_TC_L3_KUBE_FRONTEND_MONITORING_RULES_02(monitoring_page, screenshot):
     ui = monitoring_page
     assert ui.api is not None
 
-    # The alerting module is not installed on every cluster: its API answers 200 with
-    # an empty body, and there is nothing to toggle. Say so instead of failing.
+    # The page reads \`alertingrules\`. On this cluster that resource does not exist at all:
+    # the alerting module is installed, but KubeSphere 3.4 uses the Whizard model, where
+    # rules live in globalrulegroups / clusterrulegroups / rulegroups. So the empty result
+    # is a **resource-name mismatch in the product**, not a missing module — the skip says
+    # which, because "module not installed" sent the previous two rounds looking in the
+    # wrong direction.
     status, existing = ui.api.request("GET", f"{ALERTING}/alertingrules?limit=1")
     if status != 200 or not isinstance(existing, dict) or not existing.get("items"):
+        _, group = ui.api.request("GET", "/apis/alerting.kubesphere.io/v2beta1")
+        serves_rulegroups = isinstance(group, dict) and any(
+            resource.get("name") == "globalrulegroups" for resource in group.get("resources") or []
+        )
+        if serves_rulegroups:
+            pytest.skip(
+                "本集群告警用 RuleGroup 模型（globalrulegroups/clusterrulegroups），"
+                "页面读的 alertingrules 资源不存在——是产品侧资源名不匹配，不是模块未安装"
+            )
         pytest.skip("告警模块未安装（接口返回空体），没有可切换的策略")
 
     name = existing["items"][0]["metadata"]["name"]
