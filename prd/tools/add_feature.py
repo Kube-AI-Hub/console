@@ -40,46 +40,67 @@ def camel(feature: str) -> str:
 
 
 def add_tree_node(submodule: str, feature: str, title: str, tc: str) -> bool:
-    """插入功能节点，紧跟在同子模块已有节点之后。
+    """Append a feature node to the submodule's `features` list.
 
-    定位方式是「该子模块 id 的块」——树是嵌套字面量，正则改不动结构，只能按缩进找插入点。
+    The tree is a nested literal, so this finds the submodule's `"features": [` array and
+    inserts before its closing bracket. Counting braces from the `"id": "<submodule>"`
+    marker does **not** work: the first `{` after it belongs to the inline `"tests"`
+    object, so the "end of block" lands just after that line and the new node is written
+    outside the array. That is not a syntax error the gate would catch on its own — it
+    produces a `tree.py` that fails to import, which only surfaces the next time
+    `build_prd.py` runs.
     """
     text = TREE.read_text(encoding="utf-8")
     marker = f'"id": "{submodule}"'
     start = text.find(marker)
     if start == -1:
         raise SystemExit(f"tree.py 里找不到子模块 {submodule!r}")
-    # The submodule block ends at the next line whose indent is <= its own.
-    line_start = text.rfind("\n", 0, start) + 1
-    indent = len(text[line_start:start]) - len(text[line_start:start].lstrip())
-    cursor = start
-    depth = 0
-    block_end = None
+
+    features_at = text.find('"features": [', start)
+    if features_at == -1:
+        raise SystemExit(f"子模块 {submodule!r} 没有 features 数组")
+
+    # Find the closing bracket of this array by bracket depth, ignoring nested arrays.
+    cursor = features_at + len('"features": [')
+    depth = 1
+    end = None
     while cursor < len(text):
         ch = text[cursor]
-        if ch == "{":
+        if ch == "[":
             depth += 1
-        elif ch == "}":
+        elif ch == "]":
             depth -= 1
             if depth == 0:
-                block_end = cursor
+                end = cursor
                 break
         cursor += 1
-    if block_end is None:
-        raise SystemExit("找不到子模块块的结尾")
-    # Insert before the closing brace of `pages`/list; use the last node's indent.
-    tail = text[:block_end]
-    last_node = tail.rfind('"id":')
-    node_indent = tail.rfind("\n", 0, last_node) + 1
-    node_indent = len(tail[node_indent:last_node]) - len(tail[node_indent:last_node].lstrip())
+    if end is None:
+        raise SystemExit("找不到 features 数组的结尾")
+
+    # Indent from the array's first entry, falling back to the marker's indent + 8.
+    first_newline = text.find("\n", features_at) + 1
+    first_line = text[first_newline : text.find("\n", first_newline)]
+    indent = len(first_line) - len(first_line.lstrip()) or 20
+
     node = (
-        f'{" " * node_indent}{{\n'
-        f'{" " * (node_indent + 4)}"id": "{feature}",\n'
-        f'{" " * (node_indent + 4)}"title": "{title}",\n'
-        f'{" " * (node_indent + 4)}"tests": {{"L3": ["{tc}"]}},\n'
-        f'{" " * node_indent}}},\n'
+        f'{" " * indent}{{\n'
+        f'{" " * (indent + 4)}"id": "{feature}",\n'
+        f'{" " * (indent + 4)}"title": "{title}",\n'
+        f'{" " * (indent + 4)}"tests": {{"L3": ["{tc}"]}},\n'
+        f'{" " * indent}}},\n'
     )
-    text = text[:block_end] + node + text[block_end:]
+
+    # Insert before the bracket, keeping the trailing newline of the previous entry.
+    bracket_line_start = text.rfind("\n", 0, end) + 1
+    text = text[:bracket_line_start] + node + text[bracket_line_start:]
+
+    # Refuse to write a tree that does not parse: a corrupt tree only fails later, in
+    # build_prd, far from the command that broke it.
+    try:
+        compile(text, str(TREE), "exec")
+    except SyntaxError as error:
+        raise SystemExit(f"插入后会破坏 tree.py 语法，已中止：{error}") from error
+
     TREE.write_text(text, encoding="utf-8")
     return True
 
