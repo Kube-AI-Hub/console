@@ -50,6 +50,8 @@ export interface ClusterDetail {
   modules: ClusterModule[];
   /** The description annotation, when the platform wrote one. */
   description: string;
+  /** `public` or `private`; private is the platform default when the label is absent. */
+  visibility: string;
   /** `kubesphere.io/alias-name`; the list shows it instead of the name when set. */
   alias: string;
   /** `cluster.kubesphere.io/group` label, e.g. `production`. */
@@ -65,6 +67,8 @@ const DESCRIPTION_ANNOTATION = 'kubesphere.io/description';
 const ALIAS_ANNOTATION = 'kubesphere.io/alias-name';
 /** The platform's preset tags. The label carries the value, not a free-text tag. */
 const GROUP_LABEL = 'cluster.kubesphere.io/group';
+/** Public clusters are visible to every enterprise space; private ones only to those granted. */
+const VISIBILITY_LABEL = 'cluster.kubesphere.io/visibility';
 /** Preset tags the old console offers in 编辑信息. */
 export const CLUSTER_GROUPS = ['production', 'development', 'testing'] as const;
 export type ClusterGroup = (typeof CLUSTER_GROUPS)[number];
@@ -118,6 +122,7 @@ export function toClusterDetail(cluster: KubeCluster): ClusterDetail {
       .map(([key, enabled]) => ({ key, enabled: enabled === true }))
       .sort((a, b) => a.key.localeCompare(b.key)),
     description: cluster.metadata?.annotations?.[DESCRIPTION_ANNOTATION] ?? '',
+    visibility: cluster.metadata?.labels?.[VISIBILITY_LABEL] ?? 'private',
     alias: cluster.metadata?.annotations?.[ALIAS_ANNOTATION] ?? '',
     group: cluster.metadata?.labels?.[GROUP_LABEL] ?? '',
   };
@@ -421,6 +426,21 @@ export function clusterWriteApi(client: Client) {
           },
         },
       );
+    },
+
+    /**
+     * Set the cluster's visibility.
+     *
+     * A label, not a CR: the platform reads `cluster.kubesphere.io/visibility` to decide whether
+     * enterprise space can see the cluster. Merge patch on that one key, because the same
+     * object carries the workspace label and the role label.
+     */
+    async setVisibility(params: { cluster: string; visibility: 'public' | 'private' }): Promise<void> {
+      await client.request(`/apis/cluster.kubesphere.io/v1alpha1/clusters/${encodeURIComponent(params.cluster)}`, {
+        method: 'PATCH',
+        contentType: 'application/merge-patch+json',
+        body: { metadata: { labels: { [VISIBILITY_LABEL]: params.visibility } } },
+      });
     },
 
     /**

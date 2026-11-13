@@ -1,0 +1,37 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-VISIBILITY-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: visibility
+title: 集群可见性 · 公开/私有标签读写
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/visibility'
+prd: prd/kube-frontend/cluster-management/visibility.md
+design: design/kube-frontend/cluster-management/visibility.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-VISIBILITY-01
+
+story:
+- US1
+
+product: 集群可见性以 cluster.kubesphere.io/visibility 标签表达（public/private），页面切换即写入该标签；其它标签不受影响。
+preconditions:
+- 已登录平台管理，且对 host 集群有管理权限
+- 用例记录原始标签值，finally 中还原
+steps:
+- 读取集群对象，记下 visibility 标签与 workspace 标签
+- 打开集群可见性页，核对当前值与标签一致
+- 选择与当前值相反的一项
+- 回读标签，核对已变更且 workspace 标签未变
+- 再切回原值并回读
+expected:
+- 页面当前值与标签一致（缺省 private）
+- 切换后标签变更，且只变更该标签
+- 切回后标签恢复
+troubleshoot:
+- 切换后标签未变：确认写的是 label 而非 annotation
+- 其它标签丢失：说明用了 PUT 而非 merge patch
+- 点击后界面没变化：单选应本地先生效再等 refetch
+update_automation:
+- 选择器见 pages/cluster_management.py 与 ClusterVisibilityPage.tsx

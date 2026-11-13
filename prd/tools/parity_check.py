@@ -67,15 +67,10 @@ CLUSTER_PAGES = {
 
 #: 集群作用域里明确不迁移的页面与原因。
 CLUSTER_UNMIGRATED = {
-    "overview": "集群概览：需要指标时间序列",
-    "monitor": "集群监控：需要指标接口",
     "custommonitoring": "自定义监控：需要图表引擎",
-    "customresources": "CRD 资源浏览器：通用 YAML 客户端，属独立需求",
-    "edgenodes": "边缘节点：本部署无边缘节点",
     "logcollections": "日志收集：需要日志组件配置",
     "gateway": "集群网关：本集群无网关控制器实例",
     "kubeconfig": "集群 kubeconfig 管理：需要生成与轮换逻辑",
-    "visibility": "集群可见性：依赖平台审计模块",
 }
 
 #: 老 console 里有、本轮明确不迁移的页面，以及原因。
