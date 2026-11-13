@@ -279,6 +279,41 @@ export interface WorkspaceProject {
   creator: string;
 }
 
+/**
+ * One workspace member: an account bound to a workspace role.
+ *
+ * Same shape as cluster and project members, one scope up. Read from the IAM aggregate; the
+ * tenant path has no members endpoint (it answers 404), which is why this lives here.
+ */
+export interface WorkspaceMemberSummary {
+  username: string;
+  /** `iam.kubesphere.io/workspacerole`. */
+  role: string;
+  status: string;
+  lastLogin: string;
+}
+
+export function workspaceMembersApi(client: Client) {
+  return {
+    async list(params: { workspace: string; signal?: AbortSignal }): Promise<WorkspaceMemberSummary[]> {
+      const body = await client.request<{ items?: KubeAccess[] }>(
+        `${KAPIS_IAM}/workspaces/${encodeURIComponent(params.workspace)}/workspacemembers`,
+        { query: { limit: -1 }, ...(params.signal ? { signal: params.signal } : {}) },
+      );
+      return (body?.items ?? []).map((item) => {
+        const annotations = (item.metadata?.annotations ?? {}) as Record<string, string>;
+        const status = (item.status ?? {}) as Record<string, unknown>;
+        return {
+          username: item.metadata?.name ?? '',
+          role: annotations['iam.kubesphere.io/workspacerole'] ?? '',
+          status: status['state'] === undefined ? 'Active' : String(status['state']),
+          lastLogin: String(status['lastLoginTime'] ?? annotations['iam.kubesphere.io/last-login-time'] ?? ''),
+        };
+      });
+    },
+  };
+}
+
 export function workspaceDetailApi(client: Client) {
   const path = (name: string) => `${KAPIS_TENANT}/workspaces/${encodeURIComponent(name)}`;
   return {
@@ -616,14 +651,78 @@ export function usersWriteApi(client: Client) {
 }
 
 /**
- * Password rules the platform enforces on creation.
+ * The signed-in account's own settings.
  *
- * Checked here so a weak password is refused with an explanation instead of a generic
- * 400 from the apiserver.
+ * Separate from `usersWriteApi` because these two writes are the ones a user performs on
+ * *their own* object: an administrator creating any account is a different authority than
+ * a regular user changing their own email. Both were verified against the live cluster as
+ * `platform-regular` — no platform role is needed, which is the whole point of a personal
+ * settings dialog.
+ */
+export function userSettingsApi(client: Client) {
+  const path = (name: string) => `${KAPIS_IAM}/users/${encodeURIComponent(name)}`;
+  return {
+    /**
+     * Change the email on one's own account.
+     *
+     * A whole-object PUT, because the IAM users endpoint answers **405** to PATCH (the same
+     * finding as `setActive`). The object is read first for a current `resourceVersion` —
+     * a stale one is rejected with 409 — and everything except `spec.email` is sent back
+     * untouched: dropping the `platform-role` annotation in a PUT would silently demote the
+     * account, which is a far worse outcome than the edit failing.
+     */
+    async updateProfile(params: { name: string; email: string }): Promise<UserSummary> {
+      const current = await client.request<KubeAccess>(path(params.name));
+      const updated = await client.request<KubeAccess>(path(params.name), {
+        method: 'PUT',
+        body: {
+          ...current,
+          spec: { ...((current?.spec ?? {}) as Record<string, unknown>), email: params.email },
+        },
+      });
+      return toUserSummary(updated ?? {});
+    },
+
+    /**
+     * Change one's own password.
+     *
+     * Its own endpoint (`/users/<name>/password`), and the only write in the console that
+     * the platform authorises by knowing the **current** password rather than by a role
+     * binding. It answers `200 {"message":"success"}`; a wrong current password is a **400
+     * with a plain-text body** (`incorrect old password`), and a password that breaks the
+     * platform rule is a 422 whose body is the whole admission regex — neither is fit to
+     * show a reader, so the caller phrases both.
+     *
+     * The session survives this call: verified that the same token still answers
+     * `/api/session/me` with 200 afterwards. Whoever calls this must sign out explicitly,
+     * or "changed my password" leaves the old session usable.
+     */
+    async changePassword(params: { name: string; currentPassword: string; password: string }): Promise<void> {
+      await client.request<void>(`${path(params.name)}/password`, {
+        method: 'PUT',
+        body: { currentPassword: params.currentPassword, password: params.password },
+      });
+    },
+  };
+}
+
+/**
+ * Password rules the platform enforces.
+ *
+ * Checked here so a weak password is refused with a sentence instead of the apiserver's
+ * 422, whose body is the entire admission regex:
+ * `spec.password in body should match '^(.*[a-z].*[A-Z].*[0-9].*)$|...'`.
+ *
+ * The rule is the platform's, not this console's: the User CRD requires 8+ characters and
+ * **all three** of a lowercase letter, an uppercase letter and a digit. The uppercase
+ * requirement was missing here until the personal-settings dialog needed the same rule —
+ * without it the create-user form accepted `abcdefgh1`, which the server then rejected.
  */
 export function passwordProblem(password: string): string | null {
   if (password.length < 8) return 'too-short';
   if (!/[A-Za-z]/.test(password)) return 'no-letter';
+  if (!/[a-z]/.test(password)) return 'no-lower';
+  if (!/[A-Z]/.test(password)) return 'no-upper';
   if (!/[0-9]/.test(password)) return 'no-digit';
   return null;
 }

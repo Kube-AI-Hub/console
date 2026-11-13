@@ -125,6 +125,7 @@ export {
   KAPIS_TENANT,
   usersApi,
   workspaceDetailApi,
+  workspaceMembersApi,
   workspacesApi,
   workspacesWriteApi,
 } from './access';
@@ -142,6 +143,7 @@ export type {
   UserDetail,
   UserSummary,
   WorkspaceDetail,
+  WorkspaceMemberSummary,
   WorkspaceProject,
   WorkspaceSummary,
 } from './access';

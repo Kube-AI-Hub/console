@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
-import { workspaceDetailApi, type WorkspaceProject } from '@kube-ai-hub/api-client';
+import { workspaceDetailApi, workspaceMembersApi, type WorkspaceMemberSummary, type WorkspaceProject } from '@kube-ai-hub/api-client';
 import { AiSurface, Badge, Skeleton } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
@@ -31,6 +31,11 @@ export function WorkspaceDetailPage(_props: WorkspaceDetailPageProps): React.Rea
     queryKey: ['workspace-detail', name],
     queryFn: ({ signal }) => api.get({ name, signal }),
   });
+  const members = useQuery({
+    queryKey: ['workspace-members', name],
+    queryFn: ({ signal }) => workspaceMembersApi(apiClient).list({ workspace: name, signal }),
+  });
+
   const projects = useQuery({
     queryKey: ['workspace-projects', name],
     queryFn: ({ signal }) => api.projects({ name, signal }),
@@ -71,6 +76,32 @@ export function WorkspaceDetailPage(_props: WorkspaceDetailPageProps): React.Rea
             <dl className="mt-2 grid grid-cols-1 gap-y-2 text-sm">
               <DefinitionRow label={t('workspace.detail.description')} value={workspace.description || '-'} />
             </dl>
+          </section>
+
+          <section className="rounded-lg border border-ai-border bg-ai-surface p-4" data-ai-id="workspace-detail:members">
+            <h2 className="mb-3 text-sm font-medium text-ai-fg">
+              {t('workspace.detail.members')} ({members.data?.length ?? 0})
+            </h2>
+            {members.isPending ? <Skeleton className="h-20 w-full" /> : null}
+            {members.isError ? (
+              <p className="text-xs text-ai-fg-muted">{t('workspace.detail.membersUnavailable')}</p>
+            ) : null}
+            {members.data && members.data.length === 0 ? (
+              <p className="text-xs text-ai-fg-muted">{t('workspace.detail.noMembers')}</p>
+            ) : null}
+            {members.data && members.data.length > 0 ? (
+              <ul className="flex flex-col divide-y divide-ai-line text-sm" data-ai-id="workspace-detail:member-list">
+                {members.data.map((member: WorkspaceMemberSummary) => (
+                  <li key={member.username} className="flex items-center justify-between gap-3 py-2" data-ai-row={member.username}>
+                    <span className="truncate font-medium text-ai-fg">{member.username}</span>
+                    <span className="flex items-center gap-3 text-xs text-ai-fg-muted">
+                      <span>{member.role || '-'}</span>
+                      <Badge tone={member.status === 'Active' ? 'success' : 'danger'}>{member.status}</Badge>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
           </section>
 
           <section className="rounded-lg border border-ai-border bg-ai-surface p-4" data-ai-id="workspace-detail:projects">

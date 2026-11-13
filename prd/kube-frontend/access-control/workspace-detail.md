@@ -16,9 +16,16 @@
 
 **Independent Test**：打开企业空间详情，核对项目数与带该企业空间标签的命名空间数一致；点项目名进入其控制台。
 
+### US2 - 看清这个企业空间里谁能进 (Priority: P1)
+
+作为 **平台管理员**，我希望 **在企业空间详情看到成员与他们的企业空间角色**，以便 **在交接或审计时知道谁能进入这个租户**。
+
+**Independent Test**：打开企业空间详情，核对成员条数等于 workspacemembers 接口返回数，角色列等于 `iam.kubesphere.io/workspacerole` 注解。
+
 ## 验收场景
 
 - **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_DETAIL-01** — 已知平台上有企业空间，当从列表点名称进入详情，则显示名称、别名、管理员、创建者、创建时间、部署集群与描述；项目区块列出该企业空间下的全部项目（数量等于带 `kubesphere.io/workspace=<名称>` 标签的命名空间数），每项显示状态与创建时间，点名称进入该项目控制台；没有项目时显示空态说明。
+- **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_DETAIL-02** — 已知企业空间有成员，当打开企业空间详情，则「成员」区块逐条列出用户名、企业空间角色与状态，条数等于 `/kapis/iam.kubesphere.io/v1alpha2/workspaces/<名称>/workspacemembers` 返回条数；没有成员或接口不可用时显示说明而非空表。
 
 ## 设计目标
 
@@ -59,6 +66,7 @@
 ## 验收用例
 
 - `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_DETAIL-01`
+- `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_DETAIL-02`
 
 ## 功能需求
 

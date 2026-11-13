@@ -440,6 +440,7 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_DETAIL-01
+        - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_DETAIL-02
     - id: user-detail
       title: 用户详情
       prd: prd/kube-frontend/access-control/user-detail.md
