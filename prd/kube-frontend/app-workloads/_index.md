@@ -155,3 +155,7 @@
 ## 列表行操作
 
 - **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_ACTIONS-01** — 已知一个部署，当打开其行操作菜单，则含「扩缩容」与「重新部署」；当扩缩容改为 3，则 `spec.replicas` 为 3；当重新部署并确认，则模板注解 `kubectl.kubernetes.io/restartedAt` 存在。
+
+## 表单交互
+
+- **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-FORM_UX-01** — 已知创建表单有必填字段，当在未填写时提交，则焦点移到第一个未通过校验的字段；当提交被服务端拒绝（例如同名对象已存在），则对话框保持打开、在表单内显示失败原因，且用户已填内容不被清空。

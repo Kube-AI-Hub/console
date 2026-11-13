@@ -307,6 +307,7 @@ export function ResourceForm<TValues extends Record<string, unknown>>({
   const current = (values ?? internal) as Record<string, unknown>;
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [touched, setTouched] = React.useState<Record<string, boolean>>({});
+  const [submitError, setSubmitError] = React.useState<string>('');
 
   const update = (key: string, next: unknown) => {
     const updated = setByPath(current, key, next);
@@ -314,19 +315,51 @@ export function ResourceForm<TValues extends Record<string, unknown>>({
     onChange?.(updated as TValues);
   };
 
+  const formRef = React.useRef<HTMLFormElement>(null);
+
   const commit = async (event: React.FormEvent) => {
     event.preventDefault();
+    setSubmitError('');
     const nextErrors = validateForm(schema, current);
     setErrors(nextErrors);
     setTouched(Object.fromEntries(schema.fields.map((field) => [field.key, true])));
-    if (Object.keys(nextErrors).length) return;
-    await onSubmit(current as TValues);
+    if (Object.keys(nextErrors).length) {
+      /*
+       * Move the caret to the first field that failed.
+       *
+       * Without this a rejected submit looks like nothing happened whenever the
+       * offending field is below the fold — the message is rendered but out of view.
+       * The fields are rendered in schema order, so the first key in that order (not in
+       * the object's key order) is the one nearest the top.
+       */
+      const firstInvalid = schema.fields.find((field) => nextErrors[field.key]);
+      if (firstInvalid) {
+        const id = `ai-field-${firstInvalid.key.replace(/\./g, '-')}`;
+        const target = formRef.current?.querySelector<HTMLElement>(`#${CSS.escape(id)}`);
+        target?.focus();
+        target?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+      return;
+    }
+    /*
+     * A rejected submit is caught here, not left to become an unhandled rejection.
+     *
+     * Every caller passes `mutateAsync`, which throws on failure; without this the
+     * dialog stays open with the user's input intact but shows nothing, and the only
+     * trace is a console error. The message is surfaced above the submit row, and the
+     * values are left in place so the user can fix and retry instead of retyping.
+     */
+    try {
+      await onSubmit(current as TValues);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : String(error));
+    }
   };
 
   const columns = schema.layout?.columns ?? 2;
 
   return (
-    <form onSubmit={commit} noValidate className={cn('flex flex-col gap-4', className)}>
+    <form ref={formRef} onSubmit={commit} noValidate className={cn('flex flex-col gap-4', className)}>
       <div className={cn('grid gap-4', columnClass[columns])}>
         {schema.fields.map((field) => {
           if (field.visible && !field.visible(current)) return null;
@@ -354,6 +387,12 @@ export function ResourceForm<TValues extends Record<string, unknown>>({
           );
         })}
       </div>
+
+      {submitError ? (
+        <p role="alert" data-ai-id="form:submit-error" className="rounded-ai-sm border border-ai-danger/40 bg-ai-danger/10 px-2 py-1.5 text-xs text-ai-danger">
+          {submitError}
+        </p>
+      ) : null}
 
       <div className="flex justify-end gap-2">
         {onCancel ? (

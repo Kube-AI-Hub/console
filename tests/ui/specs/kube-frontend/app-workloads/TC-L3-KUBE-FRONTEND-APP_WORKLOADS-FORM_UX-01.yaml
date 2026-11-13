@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-FORM_UX-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: form-ux
+title: 表单 · 校验聚焦与提交失败提示
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/deployments'
+prd: prd/kube-frontend/app-workloads/_index.md
+design: design/kube-frontend/app-workloads/_index.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-FORM_UX-01
+
+story:
+- US1
+
+product: 提交被校验拦下时焦点落到第一个错误字段；提交被服务端拒绝时对话框内显示原因并保留输入。
+preconditions:
+- 由夹具先创建一个已存在的部署（名字将被复用），用例结束无条件删除
+- 已登录，且在 host 集群的 default 项目空间
+steps:
+- 打开创建对话框，直接点确认
+- 读取当前焦点元素
+- 填写与既有部署同名的名称并提交
+- 读取表单错误区与名称输入框
+expected:
+- 焦点在名称字段（ai-field-name）
+- 对话框保持打开，错误区显示「already exists」类原因
+- 名称输入框仍保留用户填写的值
+troubleshoot:
+- 无错误区说明异常未被 ResourceForm 捕获（会变成 unhandled rejection）
+- 对话框关闭说明失败路径错误地调用了关闭
+update_automation:
+- ResourceForm 的提交行为变化时改 packages/ai-kit 及其单测

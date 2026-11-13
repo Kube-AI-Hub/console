@@ -1,4 +1,4 @@
-# TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-02 项目角色 · 编辑权限
+# TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-02 项目角色 · 编辑信息与删除
 
 - **用例 ID**: `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-02`
 - **级别**: L3  **套件**: `point`
@@ -8,7 +8,7 @@
 
 ## 产品功能
 
-角色行操作含「编辑权限」；对话框先开再加载规则；提交后 rules 被整体替换。
+非模板角色的行操作提供「编辑信息」与「删除」；编辑写别名注解，删除后对象不存在。
 
 ### 关联需求
 
@@ -36,27 +36,26 @@
 
 ## 前置与配置
 
-- 由夹具通过原生 RBAC 创建一个带一条规则的项目角色，用例结束无条件删除
+- 由夹具通过原生 RBAC 创建一个 tc-e2e- 项目角色，用例结束无条件删除
 - 已登录，且在 host 集群的 default 项目空间
 
 ## 测试步骤
 
-1. 打开角色列表，读取行操作
-2. 点「编辑权限」，读取文本框内容
-3. 改为两行规则并确认
-4. 用 API 读取 rules
+1. 打开角色列表并定位该角色
+2. 行操作「编辑信息」，填写别名并确认
+3. 用 API 读取注解
+4. 行操作「删除」并确认，读取状态码
 
 ## 期望结果
 
-- 行操作含 编辑权限
-- 对话框出现且已载入原规则（形如 ` | pods | get`）
-- 提交后 rules 为两条，第一条 apiGroups 为 ['']（核心组）
+- 别名写入 kubesphere.io/alias-name 注解
+- 删除后 GET 返回 404
 
 ## 失败排查
 
-- 对话框空白说明加载态没有被替换
-- 只有一条规则说明没有整体替换，而是追加
+- 别名未变时确认写的是 metadata.annotations
+- 删除按钮不出现说明被当成模板角色
 
 ## 产品改版后如何更新自动化
 
-- 规则格式变化时改 api-client 的 projectRolesWriteApi
+- 行操作变化时改 pages/project_settings.py
