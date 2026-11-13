@@ -1,5 +1,7 @@
 pytest>=8
 pytest-playwright>=0.5
+# Parallel runs: `-n 4` turns the 14-minute suite into ~4 minutes.
+pytest-xdist>=3.5
 playwright>=1.44
 python-dotenv>=1.0
 PyYAML>=6.0

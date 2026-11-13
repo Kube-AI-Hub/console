@@ -14,8 +14,10 @@ def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_CREATE_01(configmaps_page, seeded_config
     # not depend on whatever happens to be deployed.
     seeded_configmaps["create"]("case-a", {"key-a": "1"})
     seeded_configmaps["create"]("case-b", {"key-b": "2"})
-    # The duplicate-name case needs a name that certainly exists.
-    seeded_configmaps["create"]("app-config", {"app.yaml": "a: 1"})
+    # The duplicate-name case needs a name that certainly exists. Use the name the
+    # fixture actually created (it is prefixed per run/test so parallel workers do not
+    # share objects) rather than a fixed literal.
+    existing = seeded_configmaps["create"]("app-config", {"app.yaml": "a: 1"})
 
     configmaps_page.open()
     configmaps_page.wait_ready()
@@ -25,7 +27,7 @@ def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_CREATE_01(configmaps_page, seeded_config
     configmaps_page.confirm_dialog("configmaps:create-next")
     expect(configmaps_page.dialog.get_by_text("名称无效")).to_be_visible()
 
-    configmaps_page.fill_dialog_field("configmaps:field-name", "app-config")
+    configmaps_page.fill_dialog_field("configmaps:field-name", existing)
     configmaps_page.confirm_dialog("configmaps:create-next")
     expect(configmaps_page.dialog.get_by_text("名称已存在，请输入其他名称。")).to_be_visible()
 

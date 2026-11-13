@@ -10,10 +10,9 @@ pytestmark = pytest.mark.ui
 def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_DETAIL_01(configmaps_page, seeded_configmaps, screenshot):
     """TC-L3-KUBE-FRONTEND-CONFIGMAPS-DETAIL-01 详情：属性区四项齐全，数据分区逐条展示键值。"""
 
-    # The list is empty on a fresh cluster; seed two objects so the case does
-    # not depend on whatever happens to be deployed.
-    seeded_configmaps["create"]("case-a", {"key-a": "1"})
-    seeded_configmaps["create"]("case-b", {"key-b": "2"})
+    # Its own object: under a parallel run "the first row" can be another worker's
+    # object, which that worker may delete before the detail page opens.
+    name = seeded_configmaps["create"]("case-a", {"key-a": "1", "key-b": "2"})
 
     configmaps_page.open()
     configmaps_page.wait_ready()
@@ -21,7 +20,7 @@ def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_DETAIL_01(configmaps_page, seeded_config
     if configmaps_page.state != "ready" or not configmaps_page.row_names():
         pytest.skip(f"没有对象可打开，当前状态 {configmaps_page.state}")
 
-    name = configmaps_page.row_names()[0]
+    configmaps_page.search(name)
     # Read the key list before navigating: the detail page replaces the list, so
     # the row is gone by the time the assertions run.
     keys_cell = configmaps_page.surface.locator(f'[data-ai-row="{name}"] td').nth(3).inner_text()

@@ -8,7 +8,7 @@ TOGGLE = 'button[aria-label*="深浅色"]'
 
 
 @pytest.mark.core
-def test_TC_L2_KUBE_FRONTEND_THEME_02(page, ui_config, configmaps_page, screenshot):
+def test_TC_L2_KUBE_FRONTEND_THEME_02(page, ui_config, configmaps_page, seeded_configmaps, screenshot):
     """TC-L2-KUBE-FRONTEND-THEME-02 手机宽度下按钮尺寸，以及弹层跟随主题。"""
 
     # Scoped viewport: `page` belongs to the session-wide context, so a size left
@@ -16,9 +16,14 @@ def test_TC_L2_KUBE_FRONTEND_THEME_02(page, ui_config, configmaps_page, screensh
     original = page.viewport_size
     page.set_viewport_size({"width": 390, "height": 780})
     try:
-        configmaps_page.url = f"{ui_config.app}/kube-frontend/system-workspace/clusters/host/projects/kube-frontend-demo/configmaps"
+        # Its own object in a project that exists on any cluster. `kube-frontend-demo`
+        # only exists on one environment, so the menu button was simply absent elsewhere
+        # and the case read as a theme defect.
+        name = seeded_configmaps["create"]("case-a", {"key-a": "1"})
+        configmaps_page.url = f"{ui_config.app}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps"
         configmaps_page.open()
         configmaps_page.wait_ready()
+        configmaps_page.search(name)
 
         toggle_box = page.locator(TOGGLE).bounding_box()
         locale_box = page.locator('[data-ai-id="shell:locale-switch"]').bounding_box()

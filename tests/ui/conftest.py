@@ -17,6 +17,8 @@ from pages.secrets import SecretsPage
 from pages.serviceaccounts import ServiceAccountsPage
 from pages.access_control import AccessControlPage
 from pages.cluster_management import ClusterManagementPage
+from pages.cluster_overview import ClusterOverviewPage
+from pages.cluster_settings import ClusterSettingsPage
 from pages.monitoring import MonitoringPage
 from pages.platform_settings import PlatformSettingsPage
 from pages.project_settings import ProjectSettingsPage
@@ -292,6 +294,13 @@ def seeded_configmaps(ui_config, session_token):
     namespace = "default"
     api = ApiClient(app_base(ui_config), session_token)
     created: list[str] = []
+    # Unique per fixture instance, i.e. per worker/test.
+    #
+    # These names used to be fixed (`case-a`, `case-b`) and seven cases create them;
+    # run the suite in parallel and one worker's teardown deletes the object another is
+    # still asserting on, which reads as a product bug. Callers read the real names back
+    # from the page, so the prefix is invisible to them.
+    token = f"pw{uuid4().hex[:6]}"
 
     def create(
         name: str,
@@ -305,10 +314,14 @@ def seeded_configmaps(ui_config, session_token):
         a parameter rather than a closure constant.
         """
         ns = target_namespace or namespace
+        name = f"{token}-{name}"
         body = {
             "apiVersion": "v1",
             "kind": "ConfigMap",
-            "metadata": {"name": name, "namespace": ns, **(annotations or {})},
+            # `annotations` goes where Kubernetes reads it. It used to be merged straight
+            # into `metadata`, so every caller that passed `{"kubesphere.io/alias-name":
+            # ...}` wrote a metadata field the API ignores and the console never showed.
+            "metadata": {"name": name, "namespace": ns, **({"annotations": annotations} if annotations else {})},
             "data": data,
         }
         if api.create("configmaps", body, ns) in (200, 201):
@@ -509,6 +522,18 @@ def access_control_page(page, ui_config, session_token):
 def cluster_management_page(page, ui_config, session_token):
     """集群管理（节点、项目）。集群作用域：地址里没有 workspace 与项目段。"""
     return ClusterManagementPage(page, app_base(ui_config), api=ApiClient(app_base(ui_config), session_token))
+
+
+@pytest.fixture
+def cluster_overview_page(page, ui_config, session_token):
+    """集群概览。同样是集群作用域，但读两份互不依赖的数据（集群对象 + 监控）。"""
+    return ClusterOverviewPage(page, app_base(ui_config), ui_config.cluster, api=ApiClient(app_base(ui_config), session_token))
+
+
+@pytest.fixture
+def cluster_settings_page(page, ui_config, session_token):
+    """集群设置。只写描述注解，用例必须在 finally 里还原原值。"""
+    return ClusterSettingsPage(page, app_base(ui_config), ui_config.cluster, api=ApiClient(app_base(ui_config), session_token))
 
 
 @pytest.fixture

@@ -12,8 +12,9 @@ def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_EDIT_01(configmaps_page, seeded_configma
 
     # The list is empty on a fresh cluster; seed two objects so the case does
     # not depend on whatever happens to be deployed.
-    seeded_configmaps["create"]("case-a", {"key-a": "1"})
-    seeded_configmaps["create"]("case-b", {"key-b": "2"})
+    # Its own object, not "the first row": under a parallel run another worker's
+    # teardown can remove the row this test just looked at.
+    name = seeded_configmaps["create"]("case-a", {"key-a": "1"})
 
     configmaps_page.open()
     configmaps_page.wait_ready()
@@ -21,7 +22,8 @@ def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_EDIT_01(configmaps_page, seeded_configma
     if configmaps_page.state != "ready" or not configmaps_page.row_names():
         pytest.skip(f"没有对象可编辑，当前状态 {configmaps_page.state}")
 
-    name = configmaps_page.row_names()[0]
+    # Narrow to its own object: under -n the page may hold other workers' objects too.
+    configmaps_page.search(name)
     configmaps_page.open_row_menu(name)
     configmaps_page.click_row_action("编辑信息")
 
@@ -37,6 +39,8 @@ def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_EDIT_01(configmaps_page, seeded_configma
     assert stored["__status"] == 200
     assert (stored["metadata"].get("annotations") or {}).get("kubesphere.io/alias-name") == "别名-edit01"
 
+    # Narrow to its own object: under -n the page may hold other workers' objects too.
+    configmaps_page.search(name)
     configmaps_page.open_row_menu(name)
     configmaps_page.click_row_action("编辑信息")
     configmaps_page.fill_dialog_field("configmaps:edit-alias", "")

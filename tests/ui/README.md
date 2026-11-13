@@ -1,56 +1,47 @@
-# UI 集成测试（Playwright）
+# console-next E2E
 
-覆盖智算平台控制台里本仓库维护的页面。用例事实源在 [`specs/`](specs/)，可读文档在 [`cases/`](cases/)（生成物）。
+## 环境
 
-## 安装
+以 **B200（`https://console-dev.brightaitoken.ai`，启用多集群）为参考环境**。A100 的接口慢 30-100 倍
+（实测同一列表 A100 25 秒、B200 0.7 秒），且缺 `kube-frontend-demo` 等项目，跑整套会大量超时与误报。
 
-```bash
-cd console/tests/ui
-python3 -m venv .venv && . .venv/bin/activate
-pip install -r requirements.txt
-python -m playwright install chromium
-cp env.example .env      # 填 KA_PASSWORD
+```
+# 1) 隧道：console 与 BFF 上游
+ssh -N -L 18088:172.16.10.20:30880 sgb000
+
+# 2) BFF 指向 B200
+cd kube-frontend/server && BFF_PORT=8092 KS_API_URL=http://127.0.0.1:18088 ./node_modules/.bin/tsx src/dev.ts
+
+# 3) 前端
+cd kube-frontend && node scripts/dev-static-server.mjs apps/console-next/dist 5178 http://127.0.0.1:8092
 ```
 
-## 跑
+`.env` 里的 `KA_APP_URL` 指向 5178、`KA_PASSWORD` 为 B200 的 admin 口令。
 
-```bash
-pytest -m core                     # L1 冒烟
-pytest -m full                     # L2 一页 / 一条流程
-pytest -m point                    # L3 功能点（含对比度与未翻译 key 断言）
-pytest -m ui                       # 全部
-pytest tests/cluster-storage -q    # 只跑某个模块
-```
+## 跑法
 
-同一环境**串行**执行，不要加 `-n`。
+| 场景 | 命令 | 耗时 |
+| --- | --- | --- |
+| 快速反馈（改完一页就跑） | `pytest tests/kube-frontend/<模块> -n 4` | 20–45 秒 |
+| 全量 | `pytest tests/kube-frontend -n 4` | ~4 分钟 |
+| 最终关卡（提交前） | `pytest tests/kube-frontend`（串行） | ~15 分钟 |
 
-## 目录
+**为什么要有并发**：145 个用例串行 14 分半，几乎全部是「每个用例重新打开一次单页应用」的固定成本
+（每个约 5.4 秒），不是接口等待。`-n 4` 把 3 个模块 42 个用例从约 4 分钟压到 1 分钟。
 
-```text
-specs/{module}/{sub}/TC-*.yaml      # 事实源，含 covers / story
-cases/{module}/{sub}/TC-*.md        # 生成物（python generate_case_docs.py）
-tests/{module}/{sub}/test_TC_*.py   # Playwright 编排，一 spec 一文件，路径镜像 specs/
-pages/                              # 页面对象，选择器只在这里
-helpers/                            # 登录、配置、对比度审计、i18n 断言、共享步骤
-_templates/case.yaml                # 用例规格模板，复制到 specs/ 后填写
-artifacts/                          # 截图与日志，不入库
-```
+**并发的前提**：用例之间不能共享可变对象。为此：
 
-**文件名推导**：`TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-QUOTA-01.yaml` → `test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_01.py`（连字符换下划线、加 `test_` 前缀），放在 `specs/` 里同级的同名目录下。一个文件只放一个测试函数，函数名与文件名一致，docstring 首行是 `TC-*` 字面 ID。`prd/tools/check_docs.py --what tests` 会核对这条对应关系。
+- 夹具创建的对象名带**每次运行唯一的前缀**（`pw<6 位>`），并发时不会互相删除；
+- 需要「已存在的对象」的用例，用**夹具返回的真实名字**，不要写死字面量；
+- 要操作某一行的用例，**自己创建再按名搜索**，不要取「第一行的名字」——并发时那一行随时可能消失。
 
-## 选择器约定
+串行跑仍然保留为最终关卡：少数用例依赖集群整体状态（列表总量、排序首页），并发下偶发失败，
+串行是判定「是否真的坏了」的基准。
 
-- 选择器只写在 `pages/`，用例里不出现 CSS。
-- 优先用文本与 `name` 属性定位；`[class*=x]` 只用于样式类名稳定的结构（卡片、表格行）。
-- 页面结构变了改 `pages/`，不要改用例步骤。
+## 环境相关的跳过
 
-## 对比度与未翻译 key
+以下情况用例会**如实跳过并说明原因**，不是失败：
 
-- `helpers/contrast.py` 在浏览器里遍历容器内的文本节点，取 `color` 与最近的不透明背景，按 WCAG 2.1 算比值；正文阈值 4.5:1（`KA_CONTRAST_TEXT`）。
-- `untranslated_keys()` 找形如 `SHARED_STORAGE_XXX_PL` 的可见文本——控制台缺翻译时会直接显示 key。
-
-这两条是硬断言：改颜色或改文案后跑 `pytest -m point` 就能拦住「文字看不清」「页面出现 _PL」这两类回归。
-
-## 截图
-
-每个用例失败时保留 `artifacts/<test>/` 下的截图。做 UI 改动时按 `.cursor/rules/ui-screenshot-verify.mdc` 在真实环境留 before / after 两套图。
+- B200 没有 metrics-server：节点/项目用量列降级为 `-`
+- 告警模块未安装：策略开关无数据可验证
+- 集群缺少某个资源（网络策略、快照 CRD 等）
