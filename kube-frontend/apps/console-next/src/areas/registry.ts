@@ -155,13 +155,16 @@ export const AREAS: readonly Area[] = [
     scope: 'cluster',
     titleKey: 'nav.groupCluster',
     icon: 'cluster',
-    defaultPage: 'nodes',
+    defaultPage: 'overview',
     /*
      * Cluster-scoped: the pages sit under `/kube-frontend/clusters/<id>/…` with no
      * workspace and no project. The old console puts them in 集群管理, reached from
      * the platform switcher rather than from inside a project.
      */
     pages: [
+      // Overview is the landing page, as it is in the old console: the first question
+      // about a cluster is "what is it and is anything wrong", not "list its nodes".
+      { key: 'overview', path: 'overview', titleKey: 'cluster.overview.title', status: 'ready' },
       { key: 'nodes', path: 'nodes', titleKey: 'cluster.nodes.title', status: 'ready' },
       { key: 'namespaces', path: 'namespaces', titleKey: 'cluster.projects.title', status: 'ready' },
       { key: 'components', path: 'components', titleKey: 'cluster.components.title', status: 'ready' },

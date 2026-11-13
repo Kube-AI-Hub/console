@@ -237,3 +237,15 @@ export type {
 } from './session';
 export { isLoginErrorCode, sessionApi } from './session';
 export { isTokenExpired, userFromToken } from './token';
+
+/**
+ * The cluster console's overview.
+ *
+ * Reads the `cluster.kubesphere.io` object (what the cluster is) and the KubeSphere
+ * monitoring API (how busy it is). Two sources, because losing the second must not take
+ * the first down: installations without a monitoring backend still have versions,
+ * readiness and the installed-module list.
+ */
+export { clusterApi, clusterMetricsApi, componentMetricsApi, toClusterDetail, toMetricValues } from './cluster';
+export type { ClusterDetail, ClusterModule, ClusterUsage, KubernetesStatus } from './cluster';
+
