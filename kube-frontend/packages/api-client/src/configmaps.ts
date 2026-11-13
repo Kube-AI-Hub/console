@@ -294,9 +294,20 @@ export function configMapsApi(client: Client) {
         `${collectionPath(params.cluster, params.namespace)}/${encodeURIComponent(name)}`,
       );
       const resourceVersion = current.metadata?.resourceVersion;
+      /*
+       * PUT replaces the object, so a caller that sends only one field would wipe the
+       * rest. The current object is read here anyway for `resourceVersion`; merging it
+       * in is what keeps a data-only edit from deleting every annotation — verified
+       * against the live cluster, where that left `metadata.annotations` empty.
+       *
+       * The caller's fields still win, so `null` or an omitted nested value clears
+       * deliberately.
+       */
       const body: KubeConfigMap = {
+        ...(current as object),
         ...params.body,
         metadata: {
+          ...(current.metadata ?? {}),
           ...params.body.metadata,
           ...(resourceVersion ? { resourceVersion } : {}),
         },

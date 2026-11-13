@@ -222,9 +222,24 @@ export function resourceApi<TItem extends KubeObject, TSummary, TDetail>(client:
         `${collectionPath(params.cluster, params.namespace, resource, kapisPrefix)}/${encodeURIComponent(name)}`,
       );
       const resourceVersion = current.metadata?.resourceVersion;
+      /*
+       * PUT replaces the object, so anything the caller did not send disappears.
+       *
+       * The current object is already read here for its `resourceVersion`; merging its
+       * metadata and its top-level fields into the body is what keeps a field-only edit
+       * from wiping the rest. Without it, editing a ConfigMap's data deleted every
+       * annotation on it (creator, alias) — verified against the live cluster, where a
+       * data-only PUT left `metadata.annotations` empty.
+       *
+       * What the caller sends still wins: an explicit `null` in the body overrides the
+       * stored value, so a field can be cleared deliberately.
+       */
+      const stored = current as unknown as Record<string, unknown>;
       const body: KubeObject = {
+        ...(stored as object),
         ...params.body,
         metadata: {
+          ...(current.metadata ?? {}),
           ...params.body.metadata,
           ...(resourceVersion ? { resourceVersion } : {}),
         },

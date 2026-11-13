@@ -105,6 +105,39 @@ describe('ConfigMaps transport', () => {
     expect(calls[1]?.url).toContain('/api/v1/');
   });
 
+  it('keeps the stored fields a partial update does not mention', async () => {
+    // PUT replaces the object, so a data-only edit used to delete every annotation —
+    // verified against the live cluster, where `metadata.annotations` came back empty.
+    const calls: Array<{ method: string; body?: unknown }> = [];
+    const client = {
+      async request(url: string, init?: { method?: string; body?: unknown }) {
+        if (!init?.method || init.method === 'GET') {
+          return {
+            metadata: {
+              name: 'x',
+              namespace: 'ns',
+              resourceVersion: '42',
+              annotations: { 'kubesphere.io/creator': 'admin' },
+              labels: { team: 'a' },
+            },
+            data: { k: 'v1' },
+          };
+        }
+        calls.push({ method: init.method, body: init.body });
+        return { metadata: { name: 'x', namespace: 'ns' }, data: { k: 'v2' } };
+      },
+    } as never;
+    const { api } = { api: configMapsApi(client) };
+    await api.update({ cluster: 'host', namespace: 'ns', body: { metadata: { name: 'x', namespace: 'ns' }, data: { k: 'v2' } } as never });
+
+    const put = calls.find((call) => call.method === 'PUT');
+    const body = put?.body as { metadata?: Record<string, unknown>; data?: unknown };
+    expect(body.metadata?.annotations).toEqual({ 'kubesphere.io/creator': 'admin' });
+    expect(body.metadata?.labels).toEqual({ team: 'a' });
+    expect(body.metadata?.resourceVersion).toBe('42');
+    expect(body.data).toEqual({ k: 'v2' });
+  });
+
   it('lists across every project when no namespace is given', async () => {
     const { api, calls } = recordingClient();
     await api.list({ cluster: 'host', namespace: '', page: 1, pageSize: 10 });
