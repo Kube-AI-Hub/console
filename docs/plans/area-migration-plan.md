@@ -2,6 +2,7 @@
 
 > 方法依据：`docs/legacy-ui-migration-guide.md`、`docs/SDD.md`。
 > **验证基准环境：B200**（本地 BFF `127.0.0.1:8092` + 前端 `127.0.0.1:5178`，集群 `host`）。
+> **老 console 主机（console-dev.brightaitoken.com）自 2026-11-14 起不可解析（NXDOMAIN）**：依赖「新旧页面对现」的用例自动跳过，其余验证仍走本地 BFF 8092 + 前端 5178。
 > A100 上的旧结论已全部按 B200 重新核对；未复核的结论不再作为依据（见 §5）。
 
 ---
@@ -11,12 +12,12 @@
 
 | 项 | 状态 |
 | --- | --- |
-| 功能区 | **8 个**：配置、应用负载、存储、监控告警、项目设置、集群管理、访问控制、平台设置 |
-| 已迁移页面 | **38 个**（项目级 21、集群级 12、平台级 5） |
+| 功能区 | **9 个**：项目概览、配置、应用负载、存储、监控告警、项目设置、集群管理、访问控制、平台设置 |
+| 已迁移页面 | **40 个**（项目级 22、集群级 13、平台级 5） |
 | 规格 ↔ 测试 | 一一对应，无孤儿文件（`parity_check.py` 待处理 0） |
 | 文档门禁 | `check_docs.py --strict`：errors=0、warnings=0 |
 | 用例执行 | 串行 145 条约 14.5 分钟；`-n 4` 约 3.8 分钟（见 §10） |
-| 写能力 | 19 项（见 §4.4） |
+| 写能力 | 21 项（见 §4.4） |
 | 未迁移 | 2 项（operations、网关控制器） |
 | 全量 E2E（B200） | **147 通过 / 3 跳过 / 0 失败**，`-n 4` 约 3.6 分钟（`verify.py` 全流程 4.5 分钟） |
 
@@ -32,13 +33,14 @@
 
 | 功能区 | 作用域 | 新 UI 路由前缀 | 页面数 |
 | --- | --- | --- | --- |
-| 配置 | 项目 | `/kube-frontend/:ws/clusters/:c/projects/:ns/{configmaps,secrets,serviceaccounts}` | 3 |
+| 项目概览 | 项目 | `.../projects/:ns/overview` | 1 |
+| 配置 | 项目 | `.../{secrets,configmaps,serviceaccounts}` | 3 |
 | 应用负载 | 项目 | `.../{deployments,statefulsets,daemonsets,jobs,cronjobs,pods,services,ingresses}` | 8 |
 | 存储 | 项目 | `.../{persistentvolumeclaims,volumesnapshots}` | 2 |
 | 监控告警 | 项目 | `.../{alerts,alertingrules}` | 2 |
-| 项目设置 | 项目 | `.../{baseinfo,roles,members,networkpolicies,gateways}` | 5 |
-| 集群管理 | 集群 | `/kube-frontend/clusters/:c/{overview,nodes,namespaces,components,configmaps,storageclasses,persistentvolumes,settings}` | 8 |
-| 访问控制 | 平台 | `/kube-frontend/access/{users,clusterroles,workspaces}` | 3 |
+| 项目设置 | 项目 | `.../{baseinfo,roles,members,networkpolicies,gateways,log-collections}` | 6 |
+| 集群管理 | 集群 | `/kube-frontend/clusters/:c/{overview,nodes,namespaces,components,storageclasses,persistentvolumes,settings,visibility,members,log-collections,monitor,node-usage,custom-resources}` | 13 |
+| 访问控制 | 平台 | `/kube-frontend/access/{users,clusterroles,workspaces}`（另有用户/企业空间/平台角色详情） | 3 + 3 详情 |
 | 平台设置 | 平台 | `/kube-frontend/settings/{info,notifications}` | 2 |
 
 **为什么按功能区而不按资源平铺**：实测瓶颈不是首屏体积（页面 chunk 2–5 KB 懒加载），而是开发期模块图——
@@ -147,11 +149,11 @@ generate_case_docs.py → check_docs.py --strict → parity_check.py
 | 平台信息 | `/kube-frontend/settings/info` | ✅ 只读 |
 | 通知渠道 | `/kube-frontend/settings/notifications` | ✅ 状态列表 |
 
-### 4.4 写能力清单（19 项）
+### 4.4 写能力清单（21 项）
 
 编辑信息（注解）、编辑 YAML、扩缩容、重新部署、停止/启动、批量停止、批量删除、服务端口、路由规则、
-存储扩容、项目配额、创建用户、用户改角色/删除、平台角色规则、企业空间增改删、项目角色规则、网络策略创建/删除、
-网关创建/删除、集群描述编辑。
+存储扩容、项目配额、创建用户、用户改角色/删除、用户停用/启用、平台角色规则、企业空间增改删、
+项目角色规则与创建（模板复制）、网络策略创建/删除、网关创建/删除、集群描述编辑。
 
 ---
 
