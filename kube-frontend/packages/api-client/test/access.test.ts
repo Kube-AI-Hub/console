@@ -37,15 +37,35 @@ describe('user summary', () => {
     expect(toUserSummary({ metadata: { name: 'bob' }, status: { state: 'Disabled' } }).status).toBe('Disabled');
   });
 
-  it('reads the last sign-in and email from annotations', () => {
+  it('reads the last sign-in from its annotation', () => {
     const user = toUserSummary({
       metadata: {
         name: 'carol',
-        annotations: { 'iam.kubesphere.io/last-login-time': '2026-11-01T08:00:00Z', email: 'c@example.com' },
+        annotations: { 'iam.kubesphere.io/last-login-time': '2026-11-01T08:00:00Z' },
       },
     });
     expect(user.lastLogin).toBe('2026-11-01T08:00:00Z');
-    expect(user.email).toBe('c@example.com');
+  });
+
+  /*
+   * `spec.email` wins over the annotation.
+   *
+   * Every write path in this console (create, admin edit, personal settings) sets the spec
+   * field, and so does the old console's mapper; reading the annotation first left the 邮箱
+   * column blank for every account that had one. The annotation stays as a fallback for
+   * installations that only carry it.
+   */
+  it('prefers spec.email and falls back to the annotation', () => {
+    const withSpec = toUserSummary({
+      metadata: { name: 'carol', annotations: { email: 'stale@example.com' } },
+      spec: { email: 'c@example.com' },
+    });
+    expect(withSpec.email).toBe('c@example.com');
+
+    const annotationOnly = toUserSummary({
+      metadata: { name: 'dave', annotations: { email: 'd@example.com' } },
+    });
+    expect(annotationOnly.email).toBe('d@example.com');
   });
 });
 

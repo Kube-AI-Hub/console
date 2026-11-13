@@ -8,6 +8,7 @@ import { SharedChunkWarmer } from '@/shell/preload';
 import { areasFor, areaPages, areaOfPage, type Area } from '@/areas/registry';
 import { projectPageSegment } from '@/areas/scope';
 import { ClusterSwitcher } from '@/shell/ClusterSwitcher';
+import { UserSettingsDialog } from '@/shell/UserSettingsDialog';
 import { readLastCluster } from '@/lib/lastCluster';
 
 /**
@@ -867,39 +868,64 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
 }
 
 /**
- * The signed-in account, with sign-out.
+ * The signed-in account: personal settings and sign-out.
  *
  * The old console put this at the bottom of the sidebar; here it sits in the top
  * bar next to the language switch, because the sidebar's bottom edge is taken by
  * the collapse control and a second control there competes with it.
+ *
+ * 用户设置 is here rather than in the sidebar because it is not a place in the console —
+ * it is a property of the account, like the language switch beside it, and the old console
+ * reached it the same way (头像 → 用户设置).
  */
 function UserMenu(): React.ReactElement | null {
   const t = useT();
   const { user, signOut } = useAuth();
+  const [settingsOpen, setSettingsOpen] = React.useState(false);
 
   if (!user) return null;
   const label = user.displayName ?? user.name;
+  const leave = (): void => void signOut().then(() => window.location.assign('/login'));
 
   return (
-    <Dropdown
-      align="end"
-      trigger={
-        <button
-          type="button"
-          className={cn('inline-flex h-11 max-w-[180px] items-center gap-1.5 rounded-ai-md px-2 text-xs text-ai-fg-secondary hover:bg-ai-surface-2 hover:text-ai-fg sm:h-9', FOCUS_RING)}
-          title={label}
-          {...actionProps('shell:user-menu', { label })}
-        >
-          <Icon name="user-profile" size={14} />
-          {/* The name is truncated rather than wrapped: a long account name must not
-              push the language switch or the module links out of the header. */}
-          <span className="hidden truncate sm:inline">{label}</span>
-        </button>
-      }
-      items={[
-        ...(user.email ? [{ key: 'email', label: user.email, disabled: true }] : []),
-        { key: 'signout', label: t('login.signOut'), onSelect: () => void signOut().then(() => window.location.assign('/login')) },
-      ]}
-    />
+    <React.Fragment>
+      <Dropdown
+        align="end"
+        trigger={
+          <button
+            type="button"
+            className={cn('inline-flex h-11 max-w-[180px] items-center gap-1.5 rounded-ai-md px-2 text-xs text-ai-fg-secondary hover:bg-ai-surface-2 hover:text-ai-fg sm:h-9', FOCUS_RING)}
+            title={label}
+            {...actionProps('shell:user-menu', { label })}
+          >
+            <Icon name="user-profile" size={14} />
+            {/* The name is truncated rather than wrapped: a long account name must not
+                push the language switch or the module links out of the header. */}
+            <span className="hidden truncate sm:inline">{label}</span>
+          </button>
+        }
+        items={[
+          ...(user.email ? [{ key: 'email', label: user.email, disabled: true }] : []),
+          {
+            key: 'settings',
+            // The handle sits on the label because `DropdownItem` has no id of its own; the
+            // menu item is what handles the click, so a test (or an agent) targets the label.
+            label: <span {...actionProps('shell:user-settings')}>{t('userSettings.title')}</span>,
+            onSelect: () => setSettingsOpen(true),
+          },
+          { key: 'signout', label: t('login.signOut'), onSelect: leave },
+        ]}
+      />
+      <UserSettingsDialog
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+        /*
+         * A password change ends the session: the platform keeps the old token valid (verified),
+         * so the console has to sign out itself. Same sequence as 退出登录, so there is one way
+         * to leave the console rather than two.
+         */
+        onSignedOut={leave}
+      />
+    </React.Fragment>
   );
 }

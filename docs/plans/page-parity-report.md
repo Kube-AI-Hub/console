@@ -133,7 +133,7 @@
 | --- | --- | --- |
 | 平台角色列表 | ACCESS_CONTROL-PLATFORM_ROLES-01, ACCESS_CONTROL-PLATFORM_ROLES-02, ACCESS_CONTROL-PLATFORM_ROLES-03, ACCESS_CONTROL-PLATFORM_ROLES-04 | 规则的多条编辑（当前一次一条）。 |
 | 用户详情 | ACCESS_CONTROL-USER_DETAIL-01 | 停用/启用与删除：在用户列表的行操作里完成，详情页只读。；该用户在项目/企业空间里的角色：需要跨聚合查询，与成员管理重叠。 |
-| 用户列表 | ACCESS_CONTROL-USERS-01, ACCESS_CONTROL-USERS-02, ACCESS_CONTROL-USERS-03, ACCESS_CONTROL-USERS-04, ACCESS_CONTROL-USERS-05 | 编辑用户信息（邮箱、描述）：写接口未验证，另立功能点。 |
+| 用户列表 | ACCESS_CONTROL-USERS-01, ACCESS_CONTROL-USERS-02, ACCESS_CONTROL-USERS-03, ACCESS_CONTROL-USERS-04, ACCESS_CONTROL-USERS-05, ACCESS_CONTROL-USERS-06 | 修改他人密码（老 console 在用户详情页提供）：属管理员重置流程，另立功能点。 |
 | 企业空间详情 | ACCESS_CONTROL-WORKSPACE_DETAIL-01 | 企业空间成员与角色：其 API 属于另一个聚合（且 `/workspaces/<name>/members` 在本集群返回 404），未迁移前不显示空表——空表会被读成「没有任何人有权限」。；企业空间编辑/删除：需要写接口与配额联动，另立功能点。 |
 | 企业空间列表 | ACCESS_CONTROL-WORKSPACES-01, ACCESS_CONTROL-WORKSPACES-02 | 企业空间的配额与成员分配（属于企业空间内部页面）。 |
 
@@ -143,6 +143,12 @@
 | --- | --- | --- |
 | 平台信息 | PLATFORM_SETTINGS-INFO-01 | 编辑平台信息。 |
 | 通知渠道 | PLATFORM_SETTINGS-NOTIFICATIONS-01 | 编辑渠道、发送测试消息、显示渠道参数。 |
+
+### user-settings（个人作用域，1 个弹窗）
+
+| 页面 | 验收场景 | 有意未迁移 |
+| --- | --- | --- |
+| 用户设置（账号菜单 → 弹窗） | USER_SETTINGS-01, USER_SETTINGS-PROFILE-01, USER_SETTINGS-PROFILE-02, USER_SETTINGS-PASSWORD-01, USER_SETTINGS-PASSWORD-02 | 语言选择（`spec.lang`）：新 UI 的语言开关在顶栏写 `localStorage`，两个入口各写一处会互相覆盖。；头像上传、两步验证：平台没有对应字段与接口。；登录历史：已在「访问控制 → 用户详情」。；把用户设置做成独立页面：两个低频小改动不值得一条路由。 |
 
 ## 重新生成
 

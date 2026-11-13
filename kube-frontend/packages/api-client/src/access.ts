@@ -73,7 +73,16 @@ export function toUserSummary(item: KubeAccess): UserSummary {
     status: status['state'] === undefined ? 'Active' : String(status['state']),
     platformRole: platformRoleOf(item),
     lastLogin: annotations['iam.kubesphere.io/last-login-time'] ?? '',
-    email: annotations['email'] ?? '',
+    /*
+     * `spec.email` first, the annotation as a fallback.
+     *
+     * Every write path in this console — create, admin edit, personal settings — sets
+     * `spec.email`, which is also what the old console's mapper read. Reading the annotation
+     * first meant the 邮箱 column stayed empty (or stale) no matter what the account's real
+     * address was, which reads as "this user has no email" rather than "we looked in the
+     * wrong place".
+     */
+    email: String(((item.spec ?? {}) as Record<string, unknown>)['email'] ?? annotations['email'] ?? ''),
   };
 }
 
@@ -713,13 +722,17 @@ export function userSettingsApi(client: Client) {
  * 422, whose body is the entire admission regex:
  * `spec.password in body should match '^(.*[a-z].*[A-Z].*[0-9].*)$|...'`.
  *
- * The rule is the platform's, not this console's: the User CRD requires 8+ characters and
- * **all three** of a lowercase letter, an uppercase letter and a digit. The uppercase
- * requirement was missing here until the personal-settings dialog needed the same rule —
- * without it the create-user form accepted `abcdefgh1`, which the server then rejected.
+ * The rule is the platform's, not this console's: the User CRD requires 8–64 **bytes** and
+ * **all three** of a lowercase letter, an uppercase letter and a digit. Two of those were
+ * missing here until the personal-settings dialog needed the same rule — without them the
+ * create-user form accepted `abcdefgh1` (no upper-case letter) and a long passphrase, both
+ * of which the server rejects with a 422.
  */
 export function passwordProblem(password: string): string | null {
   if (password.length < 8) return 'too-short';
+  // Measured in bytes, because that is what the CRD measures: a 30-character passphrase in
+  // Chinese is 90 bytes and is rejected with "may not be more than 64 bytes".
+  if (new TextEncoder().encode(password).length > 64) return 'too-long';
   if (!/[A-Za-z]/.test(password)) return 'no-letter';
   if (!/[a-z]/.test(password)) return 'no-lower';
   if (!/[A-Z]/.test(password)) return 'no-upper';

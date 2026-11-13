@@ -4,6 +4,7 @@ import { Modal, ResourceForm, type FormSchema } from '@kube-ai-hub/ui';
 import { ApiError, ASSIGNABLE_PLATFORM_ROLES, passwordProblem, usersWriteApi, type AssignablePlatformRole } from '@kube-ai-hub/api-client';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
+import { passwordProblemMessage } from '@/lib/password';
 
 /**
  * 创建用户.
@@ -77,14 +78,8 @@ export function UserCreateDialog({ open, onOpenChange }: UserCreateDialogProps):
               validate: (value) => {
                 const password = String(value ?? '');
                 if (!password) return null;
-                const problem = passwordProblem(password);
-                if (!problem) return null;
-                const messages: Record<string, string> = {
-                  'too-short': t('platform.users.field.passwordShort'),
-                  'no-letter': t('platform.users.field.passwordLetter'),
-                  'no-digit': t('platform.users.field.passwordDigit'),
-                };
-                return messages[problem] ?? t('platform.users.field.passwordShort');
+                // One rule, one wording: the personal-settings dialog asks the same question.
+                return passwordProblemMessage(t, passwordProblem(password));
               },
             },
           ],

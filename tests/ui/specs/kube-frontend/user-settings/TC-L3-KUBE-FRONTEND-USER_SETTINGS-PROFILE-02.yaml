@@ -1,0 +1,49 @@
+id: TC-L3-KUBE-FRONTEND-USER_SETTINGS-PROFILE-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: user-settings
+feature: profile
+title: 基本信息 · 邮箱非法时本地拒绝，合法时整对象 PUT 且注解不变
+entry_url: '{BASE_URL}/kube-frontend'
+prd: prd/kube-frontend/user-settings/profile.md
+design: design/kube-frontend/user-settings/profile.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-USER_SETTINGS-PROFILE-02
+
+story:
+- US1
+
+edge_cases:
+- 邮箱为空字符串
+- 邮箱缺 @ 与域名（not-an-email）
+
+product:
+- 基本信息页签保存邮箱：空值或格式非法时被本地校验挡下、不发写请求；合法时整对象 PUT 成功，回读 spec.email 为新值，平台角色与描述注解保持不变。
+
+preconditions:
+- 用管理员令牌通过 kapis 新建临时账号 tc-e2e-uset-<uuid>（platform-regular，带 kubesphere.io/description），用例结束在 finally 里删除
+- 在独立 browser context 里用登录页真登录该临时账号（弹窗只能改当前登录账号）
+
+steps:
+- 以临时账号登录，从账号菜单打开「用户设置」，确认邮箱初值等于接口值
+- 清空邮箱后点保存
+- 填入 not-an-email 后点保存
+- 填入合法邮箱后点保存
+- 回读账号对象，核对 spec.email 与两个注解
+- 统计每一步发出的写请求
+
+expected:
+- 空邮箱与非法邮箱都显示 user-settings:profile-error「请输入合法的邮箱地址。」
+- 这两步没有任何写请求
+- 合法邮箱显示 user-settings:profile-saved「已保存。」，且恰好发出一次 PUT users/<name>
+- 回读 spec.email 等于新邮箱
+- iam.kubesphere.io/platform-role 仍为 platform-regular，kubesphere.io/description 保持原值
+
+troubleshoot:
+- 保存后注解丢了：说明写路径用了 PATCH 或者构造 PUT 体时漏了 annotations
+- 非法邮箱仍有写请求：前端校验被绕过，直接打到了 admission webhook
+
+update_automation:
+- 文案变化时改 pages/user_settings.py 与用例里的常量

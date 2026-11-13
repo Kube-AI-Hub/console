@@ -1,0 +1,44 @@
+id: TC-L3-KUBE-FRONTEND-USER_SETTINGS-PROFILE-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: user-settings
+feature: profile
+title: 基本信息 · 用户名与平台角色只读，邮箱初值等于接口值
+entry_url: '{BASE_URL}/kube-frontend'
+prd: prd/kube-frontend/user-settings/profile.md
+design: design/kube-frontend/user-settings/profile.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-USER_SETTINGS-PROFILE-01
+
+story:
+- US1
+
+edge_cases:
+- 账号没有 platform-role 注解时退回 globalrole（admin 就是这种）
+
+product:
+- 基本信息页签把当前登录账号显示成三个字段：用户名与平台角色只读，邮箱可编辑且初值等于 GET users/<当前用户> 的 spec.email。
+
+preconditions:
+- 已登录（共享登录态，本用例只读）
+
+steps:
+- 用接口读当前登录账号对象，取出 spec.email 与平台角色注解
+- 打开 {BASE_URL}/kube-frontend，从账号菜单打开「用户设置」
+- 在「基本信息」页签读取用户名、平台角色与邮箱输入框的值
+- 尝试判断三个字段是否可编辑
+
+expected:
+- 用户名等于当前登录账号名
+- 平台角色等于账号注解（iam.kubesphere.io/platform-role 优先，缺省取 globalrole）
+- 邮箱输入框初值等于 spec.email
+- 用户名与平台角色是文本、不可编辑；邮箱是输入框、可编辑
+
+troubleshoot:
+- 邮箱初值为空但接口有值：看弹窗是不是拿会话 token 里的快照填表，而不是读接口
+- 平台角色显示为空：账号可能既没有 platform-role 也没有 globalrole 注解
+
+update_automation:
+- 字段增减时改 pages/user_settings.py

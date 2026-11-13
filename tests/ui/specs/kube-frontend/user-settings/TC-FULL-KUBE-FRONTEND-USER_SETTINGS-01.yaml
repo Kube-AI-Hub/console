@@ -1,0 +1,49 @@
+id: TC-FULL-KUBE-FRONTEND-USER_SETTINGS-01
+level: 2
+suite: full
+module: kube-frontend
+submodule: user-settings
+feature: page
+title: 用户设置 · 从账号菜单打开、两页签切换、关闭不提交
+entry_url: '{BASE_URL}/kube-frontend'
+prd: prd/kube-frontend/user-settings/_index.md
+design: design/kube-frontend/user-settings/_index.md
+
+covers:
+- AC-FULL-KUBE-FRONTEND-USER_SETTINGS-01
+
+story:
+- US1
+
+edge_cases:
+- 关闭弹窗后地址不变，整个过程没有任何写请求
+- 切换页签不会触发保存
+
+product:
+- 登录者从右上角账号菜单打开「用户设置」，弹窗默认落在「基本信息」，两个页签可切换；关闭后回到原页面，没有任何改动被提交。
+
+preconditions:
+- 已登录（任意账号，本用例不需要写账号，用共享登录态即可）
+
+steps:
+- 打开 {BASE_URL}/kube-frontend
+- 点右上角账号菜单，点「用户设置」
+- 核对默认页签与两个页签各自的内容
+- 切到「密码设置」再切回「基本信息」
+- 点弹窗底部的「关闭」
+- 统计弹窗打开期间页面发出的写请求
+
+expected:
+- 弹窗出现，data-ai-state 为 ready
+- 默认落在「基本信息」：邮箱输入框可见，密码三项未渲染
+- 切到「密码设置」：当前密码、新密码、确认密码可见，邮箱输入框消失
+- 切回「基本信息」：邮箱输入框再次可见
+- 关闭后弹窗消失，地址与打开前一致，账号菜单仍在
+- 打开期间没有发往 /kapis/iam.kubesphere.io/.../users 的写请求
+
+troubleshoot:
+- 弹窗没出现先看账号菜单里有没有「用户设置」项（shell:user-settings），它是菜单项的 label
+- 出现写请求说明切换页签或关闭动作触发了保存
+
+update_automation:
+- 文案或入口变化时改 pages/user_settings.py
