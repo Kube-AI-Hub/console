@@ -216,6 +216,8 @@ export {
   storageClassExpands,
   storageClassesApi,
   toStorageClassSummary,
+  mountsOf,
+  withMountState,
   toStorageDetail,
   toStorageSummary,
 } from './storage';

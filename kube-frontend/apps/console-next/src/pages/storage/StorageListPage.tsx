@@ -13,7 +13,17 @@ import { MutationAlert, ResourceErrorPanel } from '@/components/resource/Resourc
 import { YamlDialog } from '@/components/resource/YamlDialog';
 import { toYaml } from '@/components/resource/yaml';
 import { formatTimestamp } from '@/lib/time';
-import { useDeleteStorage, useExpandableClasses, useExpandStorage, useStorageList, useStorageOne, useUpdateStorage, STORAGE_DESCRIPTORS } from './queries';
+import {
+  STORAGE_DESCRIPTORS,
+  useDeleteStorage,
+  useExpandableClasses,
+  useExpandStorage,
+  useProjectPods,
+  useStorageList,
+  useStorageOne,
+  useUpdateStorage,
+} from './queries';
+import { mountsOf, withMountState } from '@kube-ai-hub/api-client';
 import { ExpandVolumeDialog } from './ExpandVolumeDialog';
 import { api as apiClient } from '@/api';
 import { storageApi } from '@kube-ai-hub/api-client';
@@ -52,6 +62,8 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
 
   const list = useResourceListState<SortKey>({ defaultSortBy: 'createTime', resetOn: [cluster, projectFilter] });
   const query = useStorageList(kind, toListParams(list, { cluster, namespace: projectFilter }, PAGE_SIZE));
+  // One pod list answers "is it mounted" for every row on the page.
+  const pods = useProjectPods(kind === 'persistentvolumeclaims' ? projectFilter : '');
   const remove = useDeleteStorage(kind, { cluster, namespace: projectFilter });
   const expand = useExpandStorage({ cluster, namespace: projectFilter });
   const expandableClasses = useExpandableClasses();
@@ -63,7 +75,10 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
   const detail = useStorageOne(kind, { cluster, namespace: projectFilter, name: editing ?? '' });
   const update = useUpdateStorage(kind, { cluster, namespace: projectFilter });
 
-  const rows = query.data?.items ?? [];
+  // The mount column stays `计算中` while this is undefined rather than claiming
+  // `未挂载` before the scan has run.
+  const mounted = pods.data ? mountsOf(pods.data) : undefined;
+  const rows = withMountState((query.data?.items ?? []) as StorageSummary[], mounted);
   const total = query.data?.total ?? 0;
   const projectFilterControl = useProjectFilter(cluster, t('storage.filter.projectLabel'), t('storage.filter.project'));
 
@@ -155,6 +170,23 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
           width: 170,
           hideBelow: 'xl',
           render: (row) => <span className="tabular-nums text-ai-fg-muted">{formatTimestamp(row.createdAt)}</span>,
+        },
+        {
+          key: 'mountStatus',
+          title: t('storage.column.mountStatus'),
+          width: 110,
+          hideBelow: 'lg',
+          render: (row: StorageSummary) => {
+            if (row.kind !== 'persistentvolumeclaims') return <span className="text-ai-fg-muted">-</span>;
+            // Three states, not two: "not known yet" is different from "not mounted",
+            // and the difference matters before deleting a claim.
+            if (row.inUse === undefined) return <span className="text-ai-fg-muted">{t('storage.mount.computing')}</span>;
+            return row.inUse ? (
+              <Badge tone="success">{t('storage.mount.mounted')}</Badge>
+            ) : (
+              <Badge tone="neutral">{t('storage.mount.notMounted')}</Badge>
+            );
+          },
         },
       ],
       // Same order as the old console: 编辑信息 before 编辑 YAML, delete last.

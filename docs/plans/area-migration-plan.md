@@ -1949,3 +1949,44 @@ pod detail state: ready
 ```
 
 用例 `PODS_BLOCK-01` 增加了"点击名称 → 跳到容器组详情并进入 ready"的断言。
+
+## 48. 第 55–56 轮：存储卷挂载状态 + 环境切换到 B200（2026-11-13）
+
+### 48.1 存储卷「挂载状态」列（按用户指示：先迁移，性能后优化）
+
+| 层 | 内容 |
+|---|---|
+| api-client | `mountsOf()`、`withMountState()`、`StorageSummary.inUse` |
+| 页面 | 存储卷列表「挂载状态」列：已挂载 / 未挂载 / 计算中 |
+| 文档 | PRD + 设计各 1 份；用例 1 条；单测 5 条 |
+
+**性能记录（已标注，待优化）**：该列需要列出项目内全部 Pod 才能判断。本集群实测：
+
+| 项目 | Pod 数 | 耗时 |
+| --- | --- | --- |
+| csghub | 28 | ~13s |
+| spaces | 81 | ~58s |
+
+耗时与**对象数**成正比，与响应体积无关（单对象 0.8s、35 个 Pod 11s、34 个 Pod 26s）。因此：
+
+- 每个项目只请求**一次** Pod 列表（不是每行一次），且缓存 60 秒；
+- 列在数据到达前显示「计算中」，而不是先显示「未挂载」——后者是一个数据不支持的断言；
+- 列表本身不被阻塞（实测列表 3.2 秒出现，挂载状态 13.2 秒补全）。
+
+### 48.2 环境切换：A100 → B200
+
+用户指出 A100 环境较慢，要求改在 B200（`环境/B200环境.md`）验证。
+
+已打通：`ssh sgb000` → 反向端口转发 → 本机 `127.0.0.1:18088`（console）与 `18092`（ks-apiserver）。
+实测 console 响应 **0.29s**，ks-apiserver **0.19s**——比 A100 快一个数量级。
+
+**登录受阻**：文档记录密码为 `Bat@2026`，但用老 console 的 `encrypt(salt, password)` 加密后，
+ks-apiserver 明确返回 `incorrect password`（`password.go:93` 有对应日志）。连续尝试触发了
+KubeSphere 的账号级限流（`auth rate limit exceeded`），因此停止尝试。
+
+已确认的实现细节（供后续使用）：
+- salt 取 `globals.config.encryptKey`，默认 `kubesphere`；`console/src/core/containers/Login/index.jsx:361` 调用 `encrypt(encryptKey, password)`；
+- 老前端只发送 `username` / `password` / `grant_type` 三个字段，**`client_id` 与 `client_secret` 由 ks-console 服务端中间件注入**（`stores/root.js:87` 的注释）；
+- 直连 ks-apiserver 时需自行带 `client_id=kubesphere`、`client_secret=kubesphere`（实测错误的 secret 返回 `invalid_client`，正确的 secret + 错误密码返回 `invalid_grant`）。
+
+**待办**：拿到正确的 B200 admin 密码后，把 `tests/ui` 的 `KA_APP_URL` 指向该隧道即可复跑全部用例。

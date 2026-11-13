@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { toAlertSummary, toAlertingRuleSummary } from '../src/alerting';
 import { toComponentSummary } from '../src/storage';
 import { toNetworkPolicySummary, toSelector } from '../src/iam';
-import { toStorageClassSummary, quantityToNumber, usagePercent } from '../src/storage';
+import { toStorageClassSummary, mountsOf, withMountState, quantityToNumber, usagePercent } from '../src/storage';
 import { toWorkloadPod, toWorkloadRevision, toWorkloadSummary, revisionTemplate } from '../src/workloads';
 
 /**
@@ -274,5 +274,40 @@ describe('workload pods', () => {
   it('marks a terminating pod, because it is still listed', async () => {
     const row = toWorkloadPod({ metadata: { name: 'p', deletionTimestamp: '2026-11-01T10:00:00Z' } as never });
     expect(row.terminating).toBe(true);
+  });
+});
+
+describe('mount state', () => {
+  const podWith = (claim: string, deleting = false) => ({
+    metadata: { name: `p-${claim}`, ...(deleting ? { deletionTimestamp: '2026-11-01T00:00:00Z' } : {}) },
+    spec: { volumes: [{ name: 'v', persistentVolumeClaim: { claimName: claim } }, { name: 'tmp', emptyDir: {} }] },
+  });
+
+  it('collects the claims pods mount', () => {
+    const mounted = mountsOf([podWith('data-a'), podWith('data-b')]);
+    expect([...mounted].sort()).toEqual(['data-a', 'data-b']);
+  });
+
+  it('ignores volumes that are not claims', () => {
+    expect(mountsOf([podWith('data-a')]).has('tmp')).toBe(false);
+  });
+
+  it('counts a terminating pod as still mounting the claim', () => {
+    // The volume is not free until the pod is gone; saying 未挂载 here is how a claim
+    // gets deleted out from under a running process.
+    expect(mountsOf([podWith('data-a', true)]).has('data-a')).toBe(true);
+  });
+
+  it('leaves rows untouched until the scan has run', () => {
+    const rows = [{ kind: 'persistentvolumeclaims' as const, name: 'data-a' }];
+    // `undefined` means "not computed", and the column says 计算中 rather than 未挂载.
+    expect(withMountState(rows, undefined)[0]).not.toHaveProperty('inUse');
+    expect(withMountState(rows, new Set(['data-a']))[0]).toMatchObject({ inUse: true });
+    expect(withMountState(rows, new Set(['other']))[0]).toMatchObject({ inUse: false });
+  });
+
+  it('does not attach a mount state to snapshots', () => {
+    const snapshots = [{ kind: 'volumesnapshots' as const, name: 'snap' }];
+    expect(withMountState(snapshots, new Set(['snap']))[0]).not.toHaveProperty('inUse');
   });
 });

@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-STORAGE-MOUNT-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: storage
+feature: mount
+title: 存储卷列表 · 挂载状态
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/csghub/persistentvolumeclaims'
+prd: prd/kube-frontend/storage/mount.md
+design: design/kube-frontend/storage/mount.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-STORAGE-MOUNT-01
+
+story:
+- US1
+
+product: 存储卷列表有「挂载状态」列：已被 Pod 挂载的显示「已挂载」，否则「未挂载」；扫描未完成时显示「计算中」。
+preconditions:
+- 已登录，且在 host 集群的项目空间（该项目同时有已挂载与未挂载的存储卷）
+steps:
+- 打开存储卷列表
+- 记录出现「计算中」的行（若有）
+- 等待挂载状态全部解析
+- 用 API 统计挂载了各存储卷的 Pod
+expected:
+- 表头含「挂载状态」
+- 解析完成后不再出现「计算中」
+- 每行的已挂载/未挂载与 API 统计一致
+performance:
+- 该列依赖列出项目内全部 Pod，本集群实测 13 秒左右才补全（见设计文档的性能记录）
+troubleshoot:
+- 一直停在「计算中」说明 Pod 列表请求失败或项目为空
+- 与 API 不符时检查 mountsOf 是否把非 PVC 卷算进来
+update_automation:
+- 列变化时改 pages/storage.py
