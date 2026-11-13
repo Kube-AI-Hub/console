@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ruleGroupsApi,
+  ruleGroupsWriteApi,
   type RuleGroupDetail,
   type RuleGroupSummary,
 } from '@kube-ai-hub/api-client';
@@ -12,6 +13,8 @@ import { api as apiClient } from '@/api';
 import { useProjectFilter } from '@/components/projects/useProjects';
 import { useResourceListState } from '@/components/resource/useResourceListState';
 import { MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
+import { DeleteDialog } from '@/components/resource/DeleteDialog';
+import { RuleGroupDialog } from './RuleGroupDialog';
 import { DefinitionRow } from '@/components/resource/DefinitionRow';
 import { formatTimestamp } from '@/lib/time';
 
@@ -61,6 +64,30 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
   });
 
   const [detail, setDetail] = React.useState<RuleGroupSummary | null>(null);
+  const [editing, setEditing] = React.useState<RuleGroupSummary | null>(null);
+  const [creating, setCreating] = React.useState(false);
+  const [deleting, setDeleting] = React.useState<RuleGroupSummary | null>(null);
+
+  const remove = useMutation({
+    mutationFn: (group: RuleGroupSummary) =>
+      ruleGroupsWriteApi(apiClient).remove({ namespace: projectFilter, name: group.name }),
+    onSuccess: () => {
+      setDeleting(null);
+      void queryClient.invalidateQueries({ queryKey: ['rule-groups', cluster] });
+    },
+  });
+
+  /**
+   * Whether a group's rules can be edited here.
+   *
+   * Only project-scoped, non-builtin groups with at most one rule: the editor writes a
+   * single rule and the API replaces `spec.rules` wholesale, so editing a multi-rule
+   * group would silently delete the rules it does not show.
+   */
+  const canEdit = React.useCallback(
+    (group: RuleGroupSummary): boolean => group.scope === 'project' && !group.builtin && group.ruleCount <= 1,
+    [],
+  );
   const detailQuery = useQuery({
     enabled: detail !== null,
     queryKey: ['rule-group', cluster, detail?.scope, detail?.name],
@@ -161,6 +188,15 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
           ),
         },
       ],
+      ...(projectFilter
+        ? {
+            primaryAction: {
+              key: 'create',
+              label: t('monitoring.ruleGroups.create'),
+              aiId: 'alertingrules:create',
+            },
+          }
+        : {}),
       rowActions: [
         { key: 'detail', label: t('monitoring.action.detail') },
         /*
@@ -170,6 +206,13 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
          */
         { key: 'disable', label: t('monitoring.action.disable'), visible: (row: RuleGroupSummary) => row.enabled },
         { key: 'enable', label: t('monitoring.action.enable'), visible: (row: RuleGroupSummary) => !row.enabled },
+        /*
+         * Edit and delete appear only where they can succeed. A builtin group, a
+         * cluster-scoped one, or a multi-rule one would either be reverted by the
+         * installer or lose rules, so those rows do not offer the action at all.
+         */
+        { key: 'edit', label: t('common.edit'), visible: (row: RuleGroupSummary) => canEdit(row) },
+        { key: 'delete', label: t('common.delete'), tone: 'danger' as const, visible: (row: RuleGroupSummary) => canEdit(row) },
       ],
       empty: {
         title: t('monitoring.ruleGroups.emptyTitle'),
@@ -185,7 +228,7 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
       },
       pagination: { page: list.page, pageSize: PAGE_SIZE, total },
     }),
-    [list, projectFilterControl, t, total],
+    [canEdit, list, projectFilterControl, t, total],
   );
 
   const state = groups.isPending ? 'loading' : groups.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
@@ -216,15 +259,50 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
           if (next) list.setSort(next);
         }}
         onAction={(action, row) => {
+          // The primary action arrives without a row: it belongs to the page, not to a
+          // record, so it is handled before the per-row guard.
+          if (action === 'create') {
+            setCreating(true);
+            return;
+          }
           if (!row) return;
           if (action === 'detail') setDetail(row);
+          if (action === 'edit') setEditing(row);
+          if (action === 'delete') setDeleting(row);
           if (action === 'enable' || action === 'disable') {
             toggle.mutate({ group: row, enabled: action === 'enable' });
           }
         }}
       />
 
-      <MutationAlert error={toggle.error} />
+      <MutationAlert error={toggle.error ?? remove.error} />
+
+      <RuleGroupDialog
+        open={creating || editing !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setCreating(false);
+            setEditing(null);
+          }
+        }}
+        cluster={cluster}
+        namespace={projectFilter}
+        {...(editing ? { group: editing } : {})}
+      />
+
+      {deleting ? (
+        <DeleteDialog
+          open
+          onOpenChange={(open) => !open && setDeleting(null)}
+          names={[deleting.name]}
+          resource="alertingrules"
+          noun={t('monitoring.ruleGroups.title')}
+          pending={remove.isPending}
+          onConfirm={async () => {
+            await remove.mutateAsync(deleting);
+          }}
+        />
+      ) : null}
 
       <Modal
         open={detail !== null}

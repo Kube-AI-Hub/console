@@ -456,6 +456,11 @@ MODULES = [
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-COMPONENTS-01"]},
                     },
                     {
+                        "id": "add-cluster",
+                        "title": "添加集群",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-01"]},
+                    },
+                    {
                         "id": "persistent-volumes",
                         "title": "持久卷",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-PERSISTENT_VOLUMES-01"]},
@@ -561,6 +566,7 @@ MODULES = [
                             "TC-L3-KUBE-FRONTEND-MONITORING-RULES-01",
                             "TC-L3-KUBE-FRONTEND-MONITORING-RULES-02",
                             "TC-L3-KUBE-FRONTEND-MONITORING-RULES-03",
+                            "TC-L3-KUBE-FRONTEND-MONITORING-RULES-04",
                         ]},
                     },
                 ],

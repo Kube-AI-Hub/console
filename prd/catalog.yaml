@@ -457,6 +457,13 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-COMPONENTS-01
+    - id: add-cluster
+      title: 添加集群
+      prd: prd/kube-frontend/cluster-management/add-cluster.md
+      design: design/kube-frontend/cluster-management/add-cluster.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-01
     - id: persistent-volumes
       title: 持久卷
       prd: prd/kube-frontend/cluster-management/persistent-volumes.md
@@ -595,6 +602,7 @@ modules:
         - TC-L3-KUBE-FRONTEND-MONITORING-RULES-01
         - TC-L3-KUBE-FRONTEND-MONITORING-RULES-02
         - TC-L3-KUBE-FRONTEND-MONITORING-RULES-03
+        - TC-L3-KUBE-FRONTEND-MONITORING-RULES-04
   - id: storage
     title: 存储
     prd: prd/kube-frontend/storage/_index.md

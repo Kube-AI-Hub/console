@@ -188,6 +188,7 @@ export {
   alertingModel,
   alertingRulesApi,
   ruleGroupsApi,
+  ruleGroupsWriteApi,
   severityLabel,
   toAlertingRuleSummary,
   toAlertSummary,
@@ -205,8 +206,10 @@ export type {
   RuleGroupDetail,
   RuleGroupRule,
   RuleGroupScope,
+  RuleGroupRuleInput,
   RuleGroupSummary,
   RuleGroupsApi,
+  RuleGroupsWriteApi,
 } from './alerting';
 export {
   componentsApi,
@@ -261,6 +264,7 @@ export {
   clusterApi,
   clusterMetricsApi,
   clusterWriteApi,
+  clusterImportApi,
   clustersApi,
   componentMetricsApi,
   customResourcesApi,

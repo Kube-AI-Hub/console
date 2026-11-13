@@ -419,3 +419,85 @@ export function ruleGroupsApi(client: Client) {
 }
 
 export type RuleGroupsApi = ReturnType<typeof ruleGroupsApi>;
+
+/* ------------------------------------------------------------------ *
+ * Writing project rule groups.
+ * ------------------------------------------------------------------ */
+
+/** One rule as the editor writes it. */
+export interface RuleGroupRuleInput {
+  /** Alert name, unique within the group. */
+  alert: string;
+  /** PromQL expression. */
+  expression: string;
+  /** How long the condition must hold before firing, e.g. `5m`. */
+  duration: string;
+  /** `critical` / `warning` / `info`. */
+  severity: string;
+  /** One-line summary. */
+  summary: string;
+}
+
+/**
+ * Create, edit and delete a **project-scoped** rule group.
+ *
+ * Only the namespaced `rulegroups` resource is writable here. The global and
+ * cluster-scoped groups are installer-owned (`builtin: true`) — the API accepts a
+ * write, but the next reconciliation puts them back, which is a worse outcome than
+ * refusing the edit.
+ *
+ * Rule bodies are sent whole: they are the object, and a merge patch on an array
+ * replaces it anyway.
+ */
+export function ruleGroupsWriteApi(client: Client) {
+  const collection = (namespace: string) =>
+    `/apis/alerting.kubesphere.io/v2beta1/namespaces/${encodeURIComponent(namespace)}/rulegroups`;
+  const item = (namespace: string, name: string) => `${collection(namespace)}/${encodeURIComponent(name)}`;
+
+  const toSpec = (rules: RuleGroupRuleInput[]) => ({
+    rules: rules.map((rule) => ({
+      alert: rule.alert,
+      expr: rule.expression,
+      for: rule.duration,
+      severity: rule.severity,
+      ...(rule.summary ? { annotations: { summary: rule.summary } } : {}),
+    })),
+  });
+
+  return {
+    async create(params: { namespace: string; name: string; rules: RuleGroupRuleInput[] }): Promise<void> {
+      await client.request(collection(params.namespace), {
+        method: 'POST',
+        body: {
+          apiVersion: 'alerting.kubesphere.io/v2beta1',
+          kind: 'RuleGroup',
+          metadata: { name: params.name, namespace: params.namespace },
+          spec: toSpec(params.rules),
+        },
+      });
+    },
+
+    /**
+     * Replace a group's rules.
+     *
+     * PUT with the full object: `spec.rules` is an array, and a merge patch would
+     * replace it wholesale while leaving `metadata` untouched — which is what we want,
+     * so the current object is read first to carry `resourceVersion` and annotation
+     * labels. Sending a bare body lets two editors overwrite each other silently.
+     */
+    async update(params: { namespace: string; name: string; rules: RuleGroupRuleInput[] }): Promise<void> {
+      const current = await client.request<KubeObject>(item(params.namespace, params.name));
+      await client.request(item(params.namespace, params.name), {
+        method: 'PUT',
+        body: { ...current, spec: { ...(current?.spec as object), ...toSpec(params.rules) } },
+      });
+    },
+
+    async remove(params: { namespace: string; name: string }): Promise<void> {
+      await client.request(item(params.namespace, params.name), { method: 'DELETE' });
+    },
+  };
+}
+
+export type RuleGroupsWriteApi = ReturnType<typeof ruleGroupsWriteApi>;
+

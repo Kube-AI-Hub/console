@@ -1,0 +1,39 @@
+id: TC-L3-KUBE-FRONTEND-MONITORING-RULES-04
+level: 3
+suite: point
+module: kube-frontend
+submodule: monitoring
+feature: rules
+title: 告警策略 · 创建、编辑与删除项目策略
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/alertingrules'
+prd: prd/kube-frontend/monitoring/rules.md
+design: design/kube-frontend/monitoring/rules.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-MONITORING-RULES-04
+
+story:
+- US5
+
+product: 选定项目后可创建单规则的告警策略，编辑其表达式，删除该策略；内置与集群级策略不提供编辑/删除入口。
+preconditions:
+- 已登录，且在 host 集群的 default 项目空间
+- 用例使用 tc-e2e- 前缀的策略名，finally 中删除
+steps:
+- 打开告警策略页（项目已选定），点创建
+- 填写策略名、告警名、表达式、持续时间、严重度与说明，提交
+- 用 API 回读该 rulegroup，核对 spec.rules 的告警名与表达式
+- 通过行操作编辑表达式并提交，再次回读
+- 通过行操作删除，确认后再次回读
+expected:
+- 创建后对象存在且 spec.rules 与填写一致
+- 编辑后表达式已更新
+- 删除后对象不存在（读取返回 404 或列表不再包含）
+- 内置/集群级行只有 详情、启用/停用，没有 编辑/删除
+troubleshoot:
+- 创建按钮不出现：没有选定项目（全部项目视图下不可写）
+- 提交后 422：表达式或告警名为空
+- 编辑后规则消失：写入应整体替换 spec.rules，但需保留编辑的那一条
+- 删除后仍能读到：确认删除的是项目级规则组
+update_automation:
+- 对话框字段变化时改 pages/monitoring.py 与本用例
