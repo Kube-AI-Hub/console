@@ -524,7 +524,11 @@ MODULES = [
                     {
                         "id": "rules",
                         "title": "告警策略列表",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-MONITORING-RULES-01"]},
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-MONITORING-RULES-01",
+                            "TC-L3-KUBE-FRONTEND-MONITORING-RULES-02",
+                            "TC-L3-KUBE-FRONTEND-MONITORING-RULES-03",
+                        ]},
                     },
                 ],
             },

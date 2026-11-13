@@ -1,4 +1,4 @@
-# TC-L3-KUBE-FRONTEND-MONITORING-RULES-01 告警策略 · 模块缺失时为空态
+# TC-L3-KUBE-FRONTEND-MONITORING-RULES-01 告警策略 · 规则组列表与规则数一致
 
 - **用例 ID**: `TC-L3-KUBE-FRONTEND-MONITORING-RULES-01`
 - **级别**: L3  **套件**: `point`
@@ -8,7 +8,7 @@
 
 ## 产品功能
 
-['告', '警', '策', '略', '页', '在', '没', '有', '数', '据', '时', '显', '示', '空', '态', '，', '不', '显', '示', '错', '误', '面', '板', '。']
+告警策略页列出集群的规则组，列含名称（副行作用域）、策略状态、规则数、类型、创建时间，规则数与接口 spec.rules 长度一致。
 
 ### 关联需求
 
@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/monitoring/rules.md`](../../../../prd/kube-frontend/monitoring/rules.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-MONITORING-RULES-01** — 已知告警模块未安装（或项目内没有策略），当打开告警策略页，则页面状态为 `empty` 并显示空态标题与说明，不出现错误面板。
+- **AC-L3-KUBE-FRONTEND-MONITORING-RULES-01** — 已知集群提供规则组资源，当打开告警策略页，则列出全部规则组，列含名称（副行为作用域）、策略状态、规则数、类型、创建时间；每行规则数等于该组 `spec.rules` 长度；页面状态为 `ready`；分页总数等于各来源合并后的条数。
 
 ### 关联设计
 
@@ -36,26 +36,29 @@
 
 ## 前置与配置
 
-- 已登录，且在 host 集群的 default 项目空间
-- 先通过 API 确认该页没有数据（模块未安装时接口返回空响应体）
+- 已登录，且在 host 集群
+- 集群的 alerting API 组提供 globalrulegroups 或 clusterrulegroups
 
 ## 测试步骤
 
-1. 打开该页
-2. 读取页面状态与空态文案
-3. 统计表头数量
+1. 探测 /apis/alerting.kubesphere.io/v2beta1 的资源清单，确认是规则组模型
+2. 用 API 读取 globalrulegroups 与 clusterrulegroups，记下条数与每个组的规则数
+3. 打开告警策略页，等待 surface 就绪
+4. 核对表头、行数、分页总数
+5. 逐行核对规则数与接口一致
 
 ## 期望结果
 
-- data-ai-state 为 empty
-- 显示空态标题与说明
-- thead 数量为 0
+- 页面状态为 ready，表头包含 名称、策略状态、规则数、类型、创建时间
+- 分页显示的总数等于两个来源条数之和
+- 每一行的规则数等于该组 spec.rules 长度
 
 ## 失败排查
 
-- 出现错误面板说明空响应体没有被当成空列表
-- 状态为 error 时看 kapis 前缀是否正确
+- 页面为空但接口有数据：确认告警策略页走了规则组分支（探测 API 组是否返回 globalrulegroups）
+- 规则数为 0 但接口有规则：确认读的是 spec.rules 而不是 spec.groups
+- 总数不一致：检查是否漏掉 clusterrulegroups
 
 ## 产品改版后如何更新自动化
 
-- 文案变化时改 packages/locales/src/index.ts
+- 接口或列变化时改 pages/monitoring.py 与 api-client 的 alerting.ts

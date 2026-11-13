@@ -212,3 +212,210 @@ export function alertingRulesApi(client: Client) {
 
 export type AlertingApi = ReturnType<typeof alertingApi>;
 export type AlertingRulesApi = ReturnType<typeof alertingRulesApi>;
+
+/* ------------------------------------------------------------------ *
+ * Rule groups (KubeSphere 3.4 / Whizard model).
+ * ------------------------------------------------------------------ */
+
+/**
+ * Alerting rules as this generation of KubeSphere stores them.
+ *
+ * 3.3 and earlier had an `alertingrules` resource; the current API group serves
+ * `globalrulegroups`, `clusterrulegroups` and namespaced `rulegroups`, each holding
+ * a list of Prometheus rules. Both models are supported because both are deployed:
+ * the page picks one by probing the API group, not by guessing a version string.
+ */
+export type RuleGroupScope = 'global' | 'cluster' | 'project';
+
+export interface RuleGroupSummary extends ResourceBase {
+  kind: 'rulegroups';
+  scope: RuleGroupScope;
+  /** How many rules the group contains. */
+  ruleCount: number;
+  /** Whether the platform evaluates this group, from its enable label. */
+  enabled: boolean;
+  /** Installed rules are platform-managed; editing them is not offered. */
+  builtin: boolean;
+}
+
+/** One Prometheus rule inside a group. */
+export interface RuleGroupRule {
+  /** `alert` name, e.g. `ksApiSlow`. */
+  name: string;
+  /** PromQL expression. */
+  expression: string;
+  /** How long the condition must hold before firing (`for`), e.g. `10m`. */
+  duration: string;
+  /** `critical` / `warning` / `info`, as the rule declares it. */
+  severity: string;
+  /** One-line summary from the rule's annotations. */
+  summary: string;
+  /** Longer description, when the rule carries one. */
+  description: string;
+}
+
+export interface RuleGroupDetail extends RuleGroupSummary {
+  rules: RuleGroupRule[];
+  labels: Record<string, string>;
+  annotations: Record<string, string>;
+  raw: KubeObject;
+}
+
+const BUILTIN_LABEL = 'alerting.kubesphere.io/builtin';
+
+/** Severity as the rule declares it; Whizard writes it as `severity` or a label. */
+function ruleSeverity(rule: Record<string, unknown>): string {
+  const direct = rule['severity'];
+  if (typeof direct === 'string' && direct) return direct;
+  const labels = (rule['labels'] ?? {}) as Record<string, unknown>;
+  return String(labels['severity'] ?? '');
+}
+
+function toRule(raw: unknown): RuleGroupRule {
+  const rule = (raw ?? {}) as Record<string, unknown>;
+  const annotations = (rule['annotations'] ?? {}) as Record<string, unknown>;
+  return {
+    name: String(rule['alert'] ?? rule['record'] ?? ''),
+    expression: String(rule['expr'] ?? ''),
+    duration: String(rule['for'] ?? ''),
+    severity: ruleSeverity(rule),
+    summary: String(annotations['summary'] ?? ''),
+    description: String(annotations['description'] ?? ''),
+  };
+}
+
+export function toRuleGroupSummary(raw: KubeObject, scope: RuleGroupScope): RuleGroupSummary {
+  const spec = (raw.spec ?? {}) as Record<string, unknown>;
+  const labels = (raw.metadata?.labels ?? {}) as Record<string, string>;
+  const rules = (spec['rules'] ?? []) as unknown[];
+  return {
+    ...baseOf(raw),
+    kind: 'rulegroups',
+    scope,
+    ruleCount: rules.length,
+    // An absent label means never disabled: the platform evaluates it.
+    enabled: String(labels[ALERTING_ENABLE_LABEL] ?? 'true') !== 'false',
+    builtin: String(labels[BUILTIN_LABEL] ?? 'false') === 'true',
+  };
+}
+
+export function toRuleGroupDetail(raw: KubeObject, scope: RuleGroupScope): RuleGroupDetail {
+  const spec = (raw.spec ?? {}) as Record<string, unknown>;
+  return {
+    ...toRuleGroupSummary(raw, scope),
+    rules: ((spec['rules'] ?? []) as unknown[]).map(toRule),
+    labels: raw.metadata?.labels ?? {},
+    annotations: raw.metadata?.annotations ?? {},
+    raw,
+  };
+}
+
+/** Scope → resource path segment. Project scope additionally needs a namespace segment. */
+const RULE_GROUP_PATHS: Record<RuleGroupScope, string> = {
+  global: 'globalrulegroups',
+  cluster: 'clusterrulegroups',
+  project: 'rulegroups',
+};
+
+const API = '/apis/alerting.kubesphere.io/v2beta1';
+
+/**
+ * Which alerting model this cluster serves.
+ *
+ * Probed from the API group's resource list: that is the authoritative answer to
+ * "does this resource exist", and it costs one request. A version string says
+ * nothing about which CRDs were actually installed.
+ */
+export async function alertingModel(
+  client: Client,
+  signal?: AbortSignal,
+): Promise<'rulegroups' | 'alertingrules'> {
+  try {
+    const group = await client.request<{ resources?: Array<{ name?: string }> }>(API, signal ? { signal } : {});
+    const names = (group?.resources ?? []).map((resource) => resource.name);
+    if (names.includes('globalrulegroups') || names.includes('clusterrulegroups')) return 'rulegroups';
+  } catch {
+    // No such group: the old model, or no alerting at all. Both read the same here.
+  }
+  return 'alertingrules';
+}
+
+export function ruleGroupsApi(client: Client) {
+  const collectionPath = (scope: RuleGroupScope, namespace: string): string =>
+    scope === 'project'
+      ? `${API}/namespaces/${encodeURIComponent(namespace)}/${RULE_GROUP_PATHS.project}`
+      : `${API}/${RULE_GROUP_PATHS[scope]}`;
+
+  const itemPath = (params: { name: string; scope: RuleGroupScope; namespace?: string }): string =>
+    `${collectionPath(params.scope, params.namespace ?? '')}/${encodeURIComponent(params.name)}`;
+
+  return {
+    /**
+     * Every group the caller can see, merged.
+     *
+     * Three sources but one list: the page is 告警策略, not "global strategies" and
+     * "project strategies" as separate pages. Pagination therefore happens after
+     * merging — the API only paginates per source, so a per-source page would show
+     * fewer rows than the page size claims.
+     */
+    async list(params: {
+      cluster: string;
+      namespace: string;
+      keyword?: string;
+      signal?: AbortSignal;
+    }): Promise<{ items: RuleGroupSummary[]; total: number }> {
+      /*
+       * A project filter adds that project's groups; "all projects" cannot list them
+       * (there is no cross-namespace collection for this resource), so it shows the
+       * cluster-wide ones. Say that in the empty state rather than pretending the
+       * project-scoped rules do not exist.
+       */
+      const scopes: RuleGroupScope[] = params.namespace ? ['global', 'cluster', 'project'] : ['global', 'cluster'];
+      const results = await Promise.all(
+        scopes.map(async (scope) => {
+          const body = await client.request<{ items?: KubeObject[] }>(collectionPath(scope, params.namespace), {
+            ...(params.signal ? { signal: params.signal } : {}),
+          });
+          return (body?.items ?? []).map((item) => toRuleGroupSummary(item, scope));
+        }),
+      );
+      let items = results.flat();
+      const keyword = (params.keyword ?? '').trim().toLowerCase();
+      if (keyword) items = items.filter((item) => item.name.toLowerCase().includes(keyword));
+      items.sort((a, b) => a.name.localeCompare(b.name));
+      return { items, total: items.length };
+    },
+
+    async get(params: {
+      name: string;
+      scope: RuleGroupScope;
+      namespace?: string;
+      signal?: AbortSignal;
+    }): Promise<RuleGroupDetail> {
+      const body = await client.request<KubeObject>(itemPath(params), params.signal ? { signal: params.signal } : {});
+      return toRuleGroupDetail(body ?? {}, params.scope);
+    },
+
+    /**
+     * Enable or disable one group.
+     *
+     * A merge patch on the enable label only, for the same reason the older model
+     * patches only that label: re-sending the rule bodies would overwrite a
+     * concurrent edit another administrator is making.
+     */
+    async setEnabled(params: {
+      name: string;
+      scope: RuleGroupScope;
+      namespace?: string;
+      enabled: boolean;
+    }): Promise<void> {
+      await client.request(itemPath(params), {
+        method: 'PATCH',
+        contentType: 'application/merge-patch+json',
+        body: { metadata: { labels: { [ALERTING_ENABLE_LABEL]: String(params.enabled) } } },
+      });
+    },
+  };
+}
+
+export type RuleGroupsApi = ReturnType<typeof ruleGroupsApi>;

@@ -1,5 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { alertingApi, alertingRulesApi, type AlertSummary, type AlertingRuleSummary, type ResourceListParams } from '@kube-ai-hub/api-client';
+import {
+  alertingApi,
+  alertingModel,
+  alertingRulesApi,
+  type AlertSummary,
+  type AlertingRuleSummary,
+  type ResourceListParams,
+} from '@kube-ai-hub/api-client';
 import type { LocaleKey } from '@kube-ai-hub/locales';
 import { api } from '@/api';
 
@@ -35,6 +42,22 @@ export function useMonitoringList(kind: MonitoringKind, params: Omit<ResourceLis
         total: number;
       }>;
     },
+  });
+}
+
+/**
+ * Which alerting model the cluster serves.
+ *
+ * Cached for the session: installing or removing an alerting CRD is not something
+ * that happens while a page is open, and the probe costs a request on every render
+ * otherwise.
+ */
+export function useAlertingModel() {
+  return useQuery({
+    queryKey: ['alerting-model'],
+    queryFn: ({ signal }) => alertingModel(api, signal),
+    staleTime: 10 * 60 * 1000,
+    retry: false,
   });
 }
 

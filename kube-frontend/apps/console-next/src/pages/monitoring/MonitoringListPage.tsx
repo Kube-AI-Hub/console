@@ -1,13 +1,14 @@
 import * as React from 'react';
 import { type AlertSummary, type AlertingRuleSummary } from '@kube-ai-hub/api-client';
-import { AiSurface, Badge, Modal, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
+import { AiSurface, Badge, Modal, ResourceList, Skeleton, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { useProjectFilter } from '@/components/projects/useProjects';
 import { useResourceListState, toListParams } from '@/components/resource/useResourceListState';
 import { DeleteDialog } from '@/components/resource/DeleteDialog';
 import { MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
-import { MONITORING_DESCRIPTORS, useDeleteAlert, useMonitoringList, useToggleRule, type MonitoringKind } from './queries';
+import { MONITORING_DESCRIPTORS, useAlertingModel, useDeleteAlert, useMonitoringList, useToggleRule, type MonitoringKind } from './queries';
+import { RuleGroupsPage } from './RuleGroupsPage';
 
 /**
  * The monitoring area's two lists: 告警消息 and 告警策略.
@@ -31,6 +32,25 @@ type Row = AlertSummary | AlertingRuleSummary;
 export function MonitoringListPage({ kind, cluster, namespace }: MonitoringListPageProps): React.ReactElement {
   const t = useT();
   const descriptor = MONITORING_DESCRIPTORS[kind];
+  /*
+   * Which alerting model this cluster serves.
+   *
+   * 3.3 stored policies as `alertingrules`; the current API group stores rule
+   * groups. Probing the API group is the only honest test — a version string says
+   * nothing about which CRDs were installed, and this cluster is 3.4 while the
+   * resource the page used to read does not exist at all.
+   */
+  const model = useAlertingModel();
+  if (kind === 'alertingrules' && model.data === 'rulegroups') {
+    return <RuleGroupsPage cluster={cluster} namespace={namespace} />;
+  }
+  if (kind === 'alertingrules' && model.isPending) {
+    return (
+      <AiSurface as="section" aiId="alertingrules:surface" state="loading" className="min-w-0">
+        <Skeleton className="h-40 w-full" />
+      </AiSurface>
+    );
+  }
   const [projectFilter, setProjectFilter] = React.useState(namespace);
   React.useEffect(() => setProjectFilter(namespace), [cluster, namespace]);
 

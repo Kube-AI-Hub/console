@@ -1,61 +1,77 @@
 from __future__ import annotations
 
 import pytest
+from playwright.sync_api import expect
 
 pytestmark = pytest.mark.ui
 
-ALERTING = "/kapis/alerting.kubesphere.io/v1alpha2/namespaces/default"
+API = "/apis/alerting.kubesphere.io/v2beta1"
 ENABLE_LABEL = "alerting.kubesphere.io/enable"
+
+
+def _group(api, name: str) -> dict | None:
+    status, body = api.request("GET", f"{API}/globalrulegroups/{name}")
+    return body if status == 200 and isinstance(body, dict) else None
+
+
+def _patch_label(api, name: str, value: str | None) -> int:
+    status, _ = api.request(
+        "PATCH",
+        f"{API}/globalrulegroups/{name}",
+        {"metadata": {"labels": {ENABLE_LABEL: value}}},
+        "application/merge-patch+json",
+    )
+    return status
 
 
 @pytest.mark.point
 def test_TC_L3_KUBE_FRONTEND_MONITORING_RULES_02(monitoring_page, screenshot):
-    """TC-L3-KUBE-FRONTEND-MONITORING-RULES-02 告警策略：启用停用写入标签。"""
+    """TC-L3-KUBE-FRONTEND-MONITORING-RULES-02 告警策略：启用停用只改标签。"""
 
     ui = monitoring_page
     assert ui.api is not None
 
-    # The page reads \`alertingrules\`. On this cluster that resource does not exist at all:
-    # the alerting module is installed, but KubeSphere 3.4 uses the Whizard model, where
-    # rules live in globalrulegroups / clusterrulegroups / rulegroups. So the empty result
-    # is a **resource-name mismatch in the product**, not a missing module — the skip says
-    # which, because "module not installed" sent the previous two rounds looking in the
-    # wrong direction.
-    status, existing = ui.api.request("GET", f"{ALERTING}/alertingrules?limit=1")
-    if status != 200 or not isinstance(existing, dict) or not existing.get("items"):
-        _, group = ui.api.request("GET", "/apis/alerting.kubesphere.io/v2beta1")
-        serves_rulegroups = isinstance(group, dict) and any(
-            resource.get("name") == "globalrulegroups" for resource in group.get("resources") or []
-        )
-        if serves_rulegroups:
-            pytest.skip(
-                "本集群告警用 RuleGroup 模型（globalrulegroups/clusterrulegroups），"
-                "页面读的 alertingrules 资源不存在——是产品侧资源名不匹配，不是模块未安装"
-            )
-        pytest.skip("告警模块未安装（接口返回空体），没有可切换的策略")
+    status, body = ui.api.request("GET", f"{API}/globalrulegroups?limit=1")
+    if status != 200 or not isinstance(body, dict) or not body.get("items"):
+        pytest.skip("集群没有可切换的规则组")
 
-    name = existing["items"][0]["metadata"]["name"]
-    before = ((existing["items"][0]["metadata"] or {}).get("labels") or {}).get(ENABLE_LABEL)
+    name = body["items"][0]["metadata"]["name"]
+    original = _group(ui.api, name)
+    assert original is not None
+    original_label = ((original["metadata"].get("labels") or {}).get(ENABLE_LABEL))
+    original_rules = ((original.get("spec") or {}).get("rules")) or []
+
+    if str(original_label) == "false":
+        # Start from "enabled" so the menu shows 停用; the finally restores either way.
+        assert _patch_label(ui.api, name, "true") == 200
+
     try:
         ui.open("alertingrules")
         ui.wait_ready("alertingrules")
         ui.page.locator('[data-ai-id="alertingrules:search"]').last.fill(name)
-        ui.page.wait_for_timeout(900)
+        ui.page.wait_for_timeout(1200)
         ui.wait_ready("alertingrules")
 
         row = ui.surface("alertingrules").locator(f'[data-ai-row="{name}"]')
-        row.locator('button[aria-label="更多操作"]').click()
-        ui.page.get_by_role("menuitem", name="启用/停用", exact=True).click()
+        expect(row).to_be_visible(timeout=20_000)
+        row.locator('button[aria-haspopup="menu"]').click()
+        ui.page.get_by_role("menuitem", name="停用", exact=True).click()
         ui.page.wait_for_timeout(2500)
 
-        status, after = ui.api.request("GET", f"{ALERTING}/alertingrules/{name}")
-        assert status == 200
-        now = ((after.get("metadata") or {}).get("labels") or {}).get(ENABLE_LABEL)
-        # The first toggle always writes a value; the invariant is that it flipped.
-        expected = "false" if str(before).lower() != "false" else "true"
-        assert str(now).lower() == expected, (before, now)
-        screenshot(ui.page, "monitoring-rules-toggle")
+        after = _group(ui.api, name)
+        assert after is not None
+        assert str((after["metadata"].get("labels") or {}).get(ENABLE_LABEL)) == "false", (
+            "停用后 enable 标签不是 false：写成了 annotation，或请求没有发出去"
+        )
+        # The switch must not carry the rule body with it.
+        assert ((after.get("spec") or {}).get("rules")) or [] == original_rules, "停用操作改动了规则体"
+
+        row.locator('button[aria-haspopup="menu"]').click()
+        ui.page.get_by_role("menuitem", name="启用", exact=True).click()
+        ui.page.wait_for_timeout(2500)
+        restored = _group(ui.api, name)
+        assert str((restored["metadata"].get("labels") or {}).get(ENABLE_LABEL)) == "true"
+
+        screenshot(ui.page, "alertingrules-toggle")
     finally:
-        # Restore whatever the policy had, so the cluster is left as found.
-        restore = "true" if str(before).lower() != "false" else "false"
-        ui.api.request("PATCH", f"{ALERTING}/alertingrules/{name}", {"metadata": {"labels": {ENABLE_LABEL: restore}}})
+        _patch_label(ui.api, name, original_label)

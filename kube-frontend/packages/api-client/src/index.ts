@@ -183,10 +183,14 @@ export {
   ALERTING_ENABLE_LABEL,
   alertStateLabel,
   alertingApi,
+  alertingModel,
   alertingRulesApi,
+  ruleGroupsApi,
   severityLabel,
   toAlertingRuleSummary,
   toAlertSummary,
+  toRuleGroupDetail,
+  toRuleGroupSummary,
 } from './alerting';
 export type {
   AlertDetail,
@@ -196,6 +200,11 @@ export type {
   AlertingRuleDetail,
   AlertingRuleSummary,
   AlertingRulesApi,
+  RuleGroupDetail,
+  RuleGroupRule,
+  RuleGroupScope,
+  RuleGroupSummary,
+  RuleGroupsApi,
 } from './alerting';
 export {
   componentsApi,

@@ -4,7 +4,7 @@ suite: point
 module: kube-frontend
 submodule: monitoring
 feature: rules
-title: 告警策略 · 启用停用写入标签
+title: 告警策略 · 启用停用只改标签
 entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/alertingrules'
 prd: prd/kube-frontend/monitoring/rules.md
 design: design/kube-frontend/monitoring/rules.md
@@ -13,22 +13,24 @@ covers:
 - AC-L3-KUBE-FRONTEND-MONITORING-RULES-02
 
 story:
-- US1
+- US3
 
-product: 点「启用/停用」会取反 alerting.kubesphere.io/enable 标签，列表状态随之变化。
+product: 点「停用」只把 alerting.kubesphere.io/enable 标签改成 false，规则体不变；再点「启用」还原。
 preconditions:
-- 由夹具通过 IAM/告警接口创建一个 tc-e2e- 前缀的告警策略，用例结束无条件删除
-- 已登录，且在 host 集群的 default 项目空间
+- 集群里有可写的规则组（globalrulegroups）
+- 用例开始前记录该组原标签与 spec，结束时无条件还原
 steps:
-- 打开告警策略页并定位该策略
-- 读取当前状态
-- 点「启用/停用」
-- 用 API 读取该策略的标签
+- 用 API 读取一个规则组，记录原 enable 标签与 spec.rules 的长度与首条规则名
+- 打开告警策略页，搜索该组，打开行菜单点「停用」
+- 用 API 回读标签与 spec
+- 再点「启用」，再次回读
 expected:
-- 标签 alerting.kubesphere.io/enable 被取反
-- 列表状态徽章与标签一致
+- 停用后标签为 false，spec.rules 长度与首条规则名不变
+- 启用后标签还原为原值
+- 列表状态徽章随之变化
 troubleshoot:
-- 标签未变化时确认写的是 label 而不是 annotation
-- 接口返回空体说明告警模块未安装，用例会自动跳过
+- 标签没变：确认写的是 label 而不是 annotation
+- spec 被改：说明用了 PUT 整对象而不是 merge patch
+- 找不到「停用」菜单项：确认该行当前是启用状态（两个互斥菜单项）
 update_automation:
 - 开关实现变化时改 api-client 的 alerting.ts

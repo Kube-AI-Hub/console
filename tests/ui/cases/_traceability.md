@@ -138,6 +138,7 @@
 | kube-frontend/monitoring/alerts | `AC-L3-KUBE-FRONTEND-MONITORING-ALERTS-01` | `TC-L3-KUBE-FRONTEND-MONITORING-ALERTS-01` | [`design/kube-frontend/monitoring/alerts.md`](../../../design/kube-frontend/monitoring/alerts.md) | [`tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_ALERTS_01.py`](../../../tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_ALERTS_01.py) |
 | kube-frontend/monitoring/rules | `AC-L3-KUBE-FRONTEND-MONITORING-RULES-01` | `TC-L3-KUBE-FRONTEND-MONITORING-RULES-01` | [`design/kube-frontend/monitoring/rules.md`](../../../design/kube-frontend/monitoring/rules.md) | [`tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_RULES_01.py`](../../../tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_RULES_01.py) |
 | kube-frontend/monitoring/rules | `AC-L3-KUBE-FRONTEND-MONITORING-RULES-02` | `TC-L3-KUBE-FRONTEND-MONITORING-RULES-02` | [`design/kube-frontend/monitoring/rules.md`](../../../design/kube-frontend/monitoring/rules.md) | [`tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_RULES_02.py`](../../../tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_RULES_02.py) |
+| kube-frontend/monitoring/rules | `AC-L3-KUBE-FRONTEND-MONITORING-RULES-03` | `TC-L3-KUBE-FRONTEND-MONITORING-RULES-03` | [`design/kube-frontend/monitoring/rules.md`](../../../design/kube-frontend/monitoring/rules.md) | [`tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_RULES_03.py`](../../../tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_RULES_03.py) |
 | kube-frontend/platform-settings/_index | `AC-FULL-KUBE-FRONTEND-PLATFORM_SETTINGS-01` | `TC-FULL-KUBE-FRONTEND-PLATFORM_SETTINGS-01` | [`design/kube-frontend/platform-settings/_index.md`](../../../design/kube-frontend/platform-settings/_index.md) | [`tests/ui/tests/kube-frontend/platform-settings/test_TC_FULL_KUBE_FRONTEND_PLATFORM_SETTINGS_01.py`](../../../tests/ui/tests/kube-frontend/platform-settings/test_TC_FULL_KUBE_FRONTEND_PLATFORM_SETTINGS_01.py) |
 | kube-frontend/platform-settings/info | `AC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-INFO-01` | `TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-INFO-01` | [`design/kube-frontend/platform-settings/info.md`](../../../design/kube-frontend/platform-settings/info.md) | [`tests/ui/tests/kube-frontend/platform-settings/test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_INFO_01.py`](../../../tests/ui/tests/kube-frontend/platform-settings/test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_INFO_01.py) |
 | kube-frontend/platform-settings/notifications | `AC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-NOTIFICATIONS-01` | `TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-NOTIFICATIONS-01` | [`design/kube-frontend/platform-settings/notifications.md`](../../../design/kube-frontend/platform-settings/notifications.md) | [`tests/ui/tests/kube-frontend/platform-settings/test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_NOTIFICATIONS_01.py`](../../../tests/ui/tests/kube-frontend/platform-settings/test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_NOTIFICATIONS_01.py) |
@@ -201,7 +202,7 @@
 
 ## 小结
 
-- 需求里的 AC：194 条，其中未覆盖 1 条、无技术方案承接 13 条、无用例规格实现 1 条。
+- 需求里的 AC：195 条，其中未覆盖 1 条、无技术方案承接 13 条、无用例规格实现 1 条。
 - 未覆盖：`AC-L2-KUBE-FRONTEND-LOGIN-07`
 - 无技术方案承接：`AC-L2-KUBE-FRONTEND-LOGIN-01`, `AC-L2-KUBE-FRONTEND-LOGIN-02`, `AC-L2-KUBE-FRONTEND-LOGIN-03`, `AC-L2-KUBE-FRONTEND-LOGIN-04`, `AC-L2-KUBE-FRONTEND-LOGIN-05`, `AC-L2-KUBE-FRONTEND-LOGIN-06`, `AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L2-KUBE-FRONTEND-THEME-01`, `AC-L2-KUBE-FRONTEND-THEME-02`, `AC-L2-KUBE-FRONTEND-THEME-03`, `AC-L2-KUBE-FRONTEND-THEME-04`, `AC-L2-KUBE-FRONTEND-THEME-05`, `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-01`
 - 无用例规格实现：`AC-L2-KUBE-FRONTEND-LOGIN-07`
@@ -319,7 +320,9 @@
 | kube-frontend/login | `US3` | `TC-L2-KUBE-FRONTEND-LOGIN-03` |
 | kube-frontend/monitoring/_index | `US1` | `TC-FULL-KUBE-FRONTEND-MONITORING-01` |
 | kube-frontend/monitoring/alerts | `US1` | `TC-L3-KUBE-FRONTEND-MONITORING-ALERTS-01` |
-| kube-frontend/monitoring/rules | `US1` | `TC-L3-KUBE-FRONTEND-MONITORING-RULES-01`, `TC-L3-KUBE-FRONTEND-MONITORING-RULES-02` |
+| kube-frontend/monitoring/rules | `US1` | `TC-L3-KUBE-FRONTEND-MONITORING-RULES-01` |
+| kube-frontend/monitoring/rules | `US2` | `TC-L3-KUBE-FRONTEND-MONITORING-RULES-03` |
+| kube-frontend/monitoring/rules | `US3` | `TC-L3-KUBE-FRONTEND-MONITORING-RULES-02` |
 | kube-frontend/platform-settings/_index | `US1` | `TC-FULL-KUBE-FRONTEND-PLATFORM_SETTINGS-01` |
 | kube-frontend/platform-settings/info | `US1` | `TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-INFO-01` |
 | kube-frontend/platform-settings/notifications | `US1` | `TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-NOTIFICATIONS-01` |
@@ -376,4 +379,4 @@
 | kube-frontend/theme | `US1` | `TC-L2-KUBE-FRONTEND-THEME-01` |
 | kube-frontend/theme | `US2` | `TC-L2-KUBE-FRONTEND-THEME-02` |
 
-- 用户故事：165 条，其中未覆盖 0 条。
+- 用户故事：167 条，其中未覆盖 0 条。

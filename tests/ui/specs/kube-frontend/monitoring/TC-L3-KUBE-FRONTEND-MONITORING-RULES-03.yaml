@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-MONITORING-RULES-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: monitoring
+feature: rules
+title: 告警策略 · 详情列出每条规则
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/alertingrules'
+prd: prd/kube-frontend/monitoring/rules.md
+design: design/kube-frontend/monitoring/rules.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-MONITORING-RULES-03
+
+story:
+- US2
+
+product: 打开某规则组的详情，逐条列出告警名称、严重度、持续时间与说明；规则数为 0 时说明而不是空表。
+preconditions:
+- 集群里至少有一个含规则的规则组
+steps:
+- 用 API 取一个有规则的规则组，记下 name 与 spec.rules
+- 打开告警策略页，搜索并打开该行详情
+- 核对规则行数与接口一致
+- 核对某条规则的名称、严重度、持续时间与说明出现在详情里
+expected:
+- 详情包含作用域、状态、类型、规则数
+- 规则表行数等于 spec.rules 长度
+- 至少一条规则显示了严重度与表达式
+troubleshoot:
+- 详情为空：确认弹窗用的是按 name+scope 的单对象读取
+- 行数不对：确认读的是 spec.rules 而不是 spec.groups
+- 严重度为空：部分规则把 severity 放在 labels 里，读取端需两处都看
+update_automation:
+- 详情结构变化时改 pages/monitoring.py 的 detail 选择器
