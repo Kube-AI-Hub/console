@@ -448,3 +448,82 @@ export function rangeMetricsApi(client: Client) {
 
 export type RangeMetricsApi = ReturnType<typeof rangeMetricsApi>;
 
+
+/* ------------------------------------------------------------------ *
+ * Node usage (ranking).
+ * ------------------------------------------------------------------ */
+
+/** One node's current utilisation, as the monitoring API reports it. */
+export interface NodeUsage {
+  name: string;
+  /** CPU busy fraction 0–1, as the API reports it. */
+  cpu: number;
+  memory: number;
+  disk: number;
+  /** Containers running on the node. */
+  pods: number;
+}
+
+/**
+ * Current utilisation per node.
+ *
+ * The API reports these as **fractions** (`0.061`), not percentages — a value shown
+ * as-is would read as "0.06%" on a node that is 6% busy. The multiplication to a
+ * percentage happens in the mapper so no page can forget it.
+ */
+export function nodeUsageApi(client: Client) {
+  const METRICS = [
+    'node_cpu_utilisation',
+    'node_memory_utilisation',
+    'node_disk_size_utilisation',
+    'node_pod_running_count',
+  ];
+
+  return {
+    async list(params: { cluster: string; signal?: AbortSignal }): Promise<NodeUsage[]> {
+      const body = await client.request<{
+        results?: Array<{
+          metric_name?: string;
+          data?: { result?: Array<{ metric?: Record<string, string>; value?: [number, string] }> };
+        }>;
+      }>('/kapis/monitoring.kubesphere.io/v1alpha3/nodes', {
+        query: {
+          metrics_filter: METRICS.map((metric) => `${metric}$`).join('|'),
+          cluster: params.cluster,
+          limit: -1,
+        },
+        ...(params.signal ? { signal: params.signal } : {}),
+      });
+
+      const byNode = new Map<string, NodeUsage>();
+      const entry = (node: string): NodeUsage => {
+        const existing = byNode.get(node);
+        if (existing) return existing;
+        const created: NodeUsage = { name: node, cpu: 0, memory: 0, disk: 0, pods: 0 };
+        byNode.set(node, created);
+        return created;
+      };
+
+      for (const result of body?.results ?? []) {
+        const metric = result.metric_name;
+        for (const sample of result.data?.result ?? []) {
+          const node = sample.metric?.['node'];
+          const raw = sample.value?.[1];
+          if (!node || raw === undefined) continue;
+          const value = Number.parseFloat(raw);
+          if (!Number.isFinite(value)) continue;
+          const row = entry(node);
+          if (metric === 'node_cpu_utilisation') row.cpu = value * 100;
+          if (metric === 'node_memory_utilisation') row.memory = value * 100;
+          if (metric === 'node_disk_size_utilisation') row.disk = value * 100;
+          if (metric === 'node_pod_running_count') row.pods = value;
+        }
+      }
+
+      return [...byNode.values()].sort((a, b) => a.name.localeCompare(b.name));
+    },
+  };
+}
+
+export type NodeUsageApi = ReturnType<typeof nodeUsageApi>;
+

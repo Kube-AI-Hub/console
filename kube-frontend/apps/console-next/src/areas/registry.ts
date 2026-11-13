@@ -182,6 +182,8 @@ export const AREAS: readonly Area[] = [
       // from the monitoring API's range query, which is a different read from the
       // current-value panel on the overview.
       { key: 'monitor', path: 'monitor', titleKey: 'cluster.monitor.title', status: 'ready' },
+      // The ranking under 集群监控: which node is hot, not every attribute of every node.
+      { key: 'nodeUsage', path: 'node-usage', titleKey: 'cluster.nodeUsage.title', status: 'ready' },
     ],
   },
   {

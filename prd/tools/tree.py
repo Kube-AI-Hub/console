@@ -438,7 +438,12 @@ MODULES = [
                 "id": "cluster-management",
                 "title": "集群管理",
                 "goal": "集群级视角：节点按就绪状态、角色与可分配资源展示；项目列出集群内全部项目空间及其所属企业空间。这些页面不属于任何项目，因此没有项目工作区栏。",
-                "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-CLUSTER_MANAGEMENT-01"]},
+                "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-CLUSTER_MANAGEMENT-01"]                {
+                    "id": "node-usage",
+                    "title": "节点用量",
+                    "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODE_USAGE-01"]},
+                },
+},
                 "features": [
                     {
                         "id": "overview",

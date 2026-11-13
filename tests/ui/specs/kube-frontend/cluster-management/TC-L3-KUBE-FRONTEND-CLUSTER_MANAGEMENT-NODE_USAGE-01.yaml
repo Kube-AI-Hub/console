@@ -1,0 +1,39 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODE_USAGE-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: node-usage
+title: 节点用量 · 默认按 CPU 降序与百分比换算
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/node-usage'
+prd: prd/kube-frontend/cluster-management/node-usage.md
+design: design/kube-frontend/cluster-management/node-usage.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODE_USAGE-01
+
+story:
+- US1
+- US3
+
+product: 节点用量页列出全部节点及其 CPU/内存/磁盘使用率与容器组数，默认 CPU 降序；使用率是 0-100 的整数百分比（接口给的是 0-1 的比例）。
+preconditions:
+- 已登录，且对集群 host 有读取权限
+- 监控后端返回节点指标
+steps:
+- 用 API 读取节点监控指标，记下节点数与各节点的 CPU 比例
+- 打开节点用量页，等待 surface 就绪
+- 核对行数与节点数一致
+- 读取每行的三个使用率，核对都是 0-100 的整数
+- 核对首行 CPU 使用率等于接口算出的最大值（乘 100 后取整）
+expected:
+- 行数与监控返回的节点数一致
+- 所有使用率为 0-100 的整数百分比（出现 0% 而接口为 0.6 说明没乘 100，出现 61% 而接口为 0.6 说明乘对了）
+- 首行是 CPU 最高的节点
+troubleshoot:
+- 全部显示 0%：比例没有乘 100
+- 出现大于 100：把容器组数也当比例乘了 100
+- 行数少于节点数：请求没带 limit=-1，只回了第一页
+- 排序不对：默认排序键应为 cpu + desc
+update_automation:
+- 列或标识变化时改 pages/cluster_management.py 与 NodeUsagePage.tsx

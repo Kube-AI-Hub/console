@@ -94,6 +94,7 @@
 | kube-frontend/cluster-management/components | `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-COMPONENTS-01` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-COMPONENTS-01` | [`design/kube-frontend/cluster-management/components.md`](../../../design/kube-frontend/cluster-management/components.md) | [`tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_COMPONENTS_01.py`](../../../tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_COMPONENTS_01.py) |
 | kube-frontend/cluster-management/monitor | `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01` | [`design/kube-frontend/cluster-management/monitor.md`](../../../design/kube-frontend/cluster-management/monitor.md) | [`tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_MONITOR_01.py`](../../../tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_MONITOR_01.py) |
 | kube-frontend/cluster-management/monitor | `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-02` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01` | [`design/kube-frontend/cluster-management/monitor.md`](../../../design/kube-frontend/cluster-management/monitor.md) | [`tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_MONITOR_01.py`](../../../tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_MONITOR_01.py) |
+| kube-frontend/cluster-management/node-usage | `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODE_USAGE-01` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODE_USAGE-01` | **（无）** | [`tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_NODE_USAGE_01.py`](../../../tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_NODE_USAGE_01.py) |
 | kube-frontend/cluster-management/nodes | `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-01` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-01` | [`design/kube-frontend/cluster-management/nodes.md`](../../../design/kube-frontend/cluster-management/nodes.md) | [`tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_NODES_01.py`](../../../tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_NODES_01.py) |
 | kube-frontend/cluster-management/nodes | `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-02` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-02` | [`design/kube-frontend/cluster-management/nodes.md`](../../../design/kube-frontend/cluster-management/nodes.md) | [`tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_NODES_02.py`](../../../tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_NODES_02.py) |
 | kube-frontend/cluster-management/overview | `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-01` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-01` | [`design/kube-frontend/cluster-management/overview.md`](../../../design/kube-frontend/cluster-management/overview.md) | [`tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_OVERVIEW_01.py`](../../../tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_OVERVIEW_01.py) |
@@ -204,9 +205,9 @@
 
 ## 小结
 
-- 需求里的 AC：197 条，其中未覆盖 1 条、无技术方案承接 13 条、无用例规格实现 1 条。
+- 需求里的 AC：198 条，其中未覆盖 1 条、无技术方案承接 14 条、无用例规格实现 1 条。
 - 未覆盖：`AC-L2-KUBE-FRONTEND-LOGIN-07`
-- 无技术方案承接：`AC-L2-KUBE-FRONTEND-LOGIN-01`, `AC-L2-KUBE-FRONTEND-LOGIN-02`, `AC-L2-KUBE-FRONTEND-LOGIN-03`, `AC-L2-KUBE-FRONTEND-LOGIN-04`, `AC-L2-KUBE-FRONTEND-LOGIN-05`, `AC-L2-KUBE-FRONTEND-LOGIN-06`, `AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L2-KUBE-FRONTEND-THEME-01`, `AC-L2-KUBE-FRONTEND-THEME-02`, `AC-L2-KUBE-FRONTEND-THEME-03`, `AC-L2-KUBE-FRONTEND-THEME-04`, `AC-L2-KUBE-FRONTEND-THEME-05`, `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-01`
+- 无技术方案承接：`AC-L2-KUBE-FRONTEND-LOGIN-01`, `AC-L2-KUBE-FRONTEND-LOGIN-02`, `AC-L2-KUBE-FRONTEND-LOGIN-03`, `AC-L2-KUBE-FRONTEND-LOGIN-04`, `AC-L2-KUBE-FRONTEND-LOGIN-05`, `AC-L2-KUBE-FRONTEND-LOGIN-06`, `AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L2-KUBE-FRONTEND-THEME-01`, `AC-L2-KUBE-FRONTEND-THEME-02`, `AC-L2-KUBE-FRONTEND-THEME-03`, `AC-L2-KUBE-FRONTEND-THEME-04`, `AC-L2-KUBE-FRONTEND-THEME-05`, `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODE_USAGE-01`, `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-01`
 - 无用例规格实现：`AC-L2-KUBE-FRONTEND-LOGIN-07`
 
 ## 用户故事覆盖
@@ -289,6 +290,9 @@
 | kube-frontend/cluster-management/monitor | `US1` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01` |
 | kube-frontend/cluster-management/monitor | `US2` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01` |
 | kube-frontend/cluster-management/monitor | `US3` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01` |
+| kube-frontend/cluster-management/node-usage | `US1` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODE_USAGE-01` |
+| kube-frontend/cluster-management/node-usage | `US2` | **（未覆盖）** |
+| kube-frontend/cluster-management/node-usage | `US3` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODE_USAGE-01` |
 | kube-frontend/cluster-management/nodes | `US1` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-01`, `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-02` |
 | kube-frontend/cluster-management/overview | `US1` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-01` |
 | kube-frontend/cluster-management/overview | `US2` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-01` |
@@ -384,4 +388,5 @@
 | kube-frontend/theme | `US1` | `TC-L2-KUBE-FRONTEND-THEME-01` |
 | kube-frontend/theme | `US2` | `TC-L2-KUBE-FRONTEND-THEME-02` |
 
-- 用户故事：170 条，其中未覆盖 0 条。
+- 用户故事：173 条，其中未覆盖 1 条。
+- 未覆盖：`prd/kube-frontend/cluster-management/node-usage.md#US2`

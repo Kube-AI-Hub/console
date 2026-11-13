@@ -211,6 +211,12 @@ Gateway 对象可创建（POST 201），但控制器缺 Helm chart：`spec` 被�
 9. **企业空间的正确写路径是 kapis**：`/kapis/tenant.kubesphere.io/v1alpha2/workspaces`（POST 200），
    `/apis/tenant...` 是 404；PATCH 返回 500，编辑用 PUT。
 10. **平台角色必须写原生 RBAC**：走 IAM 创建返回 200 但 `rules` 被丢弃；`apiGroups` 留空必须写成 `[""]`。
+11. **告警的资源名随版本变**：3.3 是 `alertingrules`，3.4 是 `rulegroups/globalrulegroups/clusterrulegroups`。
+    读不存在的资源会得到 200 空体，看起来像「模块未安装」——用 API 组的 `resources` 清单探测，不要用版本号猜。
+12. **百分比型指标必须除以总量**：`cluster_cpu_usage` 单位是核、`cluster_memory_usage_wo_cache` 是字节。
+    直接当百分比会得到荒谬值（实测 937053405184%）；CPU 更隐蔽——512 核集群里 34 核画成 34% 看起来完全正常。
+13. **上游错误正文经常是纯文本**：admission webhook 用纯文本说明原因，BFF 若只读 JSON 的 `message` 就会把它替换成
+    `Conflict`。非 JSON 且非 HTML 的正文必须保留。
 
 ### 6.3 呈现
 
@@ -235,25 +241,72 @@ Gateway 对象可创建（POST 201），但控制器缺 Helm chart：`spec` 被�
 23. **用例必须回读数据**：页面显示成功不等于保存成功（merge patch 类缺陷只看界面发现不了）。
 24. **慢不是跳过的理由**：慢查询要在用例里重试，而不是报「无数据」。
 25. **大批量同时失败先查端口**：静态服务进程退出与产品故障表现一致（根因已修，见 §8.2）。
+26. **对象名不要按时间取模**：`int(time.time()*1000) % 1_000_000` 每 1000 秒循环一次，
+    一次失败留下残留对象后，之后每次运行都 409，表现成「创建对话框不关闭」。用 uuid。
+27. **用例不要选别的用例创建的对象**：`tc-e2e-` 前缀的对象随时会被所属用例删除，
+    用它做断言目标会得到「行不见了」而不是「那不是我的对象」。
+28. **表单挂载晚于弹窗**：弹窗出现后立即填表会让字段留空、下一次点击落在动画中的遮罩上；
+    先等字段可见再填。
 
 ---
 
-## 7. 验证与门禁
+## 7. 验证与门禁：一条命令，三档节奏
+
+**不要再手敲五套检查**——漏跑的那一项正是下一轮返工的原因（改了共享组件没跑契约、改了一页没跑一致性核对）。统一入口：
 
 ```bash
-# 文档三向追溯
-cd console && python3 prd/tools/check_docs.py --strict
-# 用例文档与矩阵（生成物）
-cd tests/ui && python3 generate_case_docs.py
-# 结构与一致性（老页面 vs 新路由）
-cd console && python3 prd/tools/parity_check.py
-# 架构契约
-cd kube-frontend && npx vitest run --config config/vitest.config.ts
-# 单测
-cd kube-frontend/apps/console-next && npx vitest run
-cd kube-frontend/packages/api-client && npx vitest run
-# E2E（B200）
-cd tests/ui && KA_APP_URL=http://localhost:5178 python3 -m pytest tests/kube-frontend -m ui -q
+cd console
+
+# 加一个迁移页：先让脚本做完六处登记，人只写判断性的内容
+python3 prd/tools/add_feature.py --submodule cluster-management --feature node-usage \
+    --title 节点用量 --scope cluster
+
+# 静态与单测（约 1 分钟）：改完任何代码先跑这个
+python3 prd/tools/verify.py --no-e2e
+
+# 快速 E2E（约 4 分钟，4 个 worker）：一轮迁移收尾用
+python3 prd/tools/verify.py
+
+# 权威判定（串行 E2E，约 14 分钟）：提交前或怀疑并发干扰时用
+python3 prd/tools/verify.py --serial-e2e
+```
+
+### 7.1 三档节奏
+
+| 时机 | 命令 | 耗时 | 回答什么 |
+| --- | --- | --- | --- |
+| 写完一页 | `pytest tests/kube-frontend/<本模块> -n 4` | 20–45 秒 | 这个页面还能用吗 |
+| 一轮收尾 | `python3 prd/tools/verify.py` | ~4 分钟 | 没破坏别处吗 |
+| 提交前 | `python3 prd/tools/verify.py --serial-e2e` | ~14 分钟 | 并发抖动排除了吗 |
+
+**并发不改变判定标准，只加速反馈**：串行全绿才提交；并发红了的用例先单独复跑，多数是共享状态而非产品缺陷。
+
+### 7.2 静态检查优先：能在编译期发现的，不要留给浏览器
+
+`config/consistency-contracts.test.ts` 是这一条的执行者，四类检查，每一类都对应一个真实踩过的坑：
+
+| 检查 | 对应的真实缺陷 |
+| --- | --- |
+| 中英文键集合一致 | 英文界面直接显示语言键 |
+| 每个 `t('…')` 字面键都存在 | 同上，且只在使用时才炸 |
+| 每个 `*Api` 都从 barrel 导出 | 漏一行 → 编译错 → 补上又重名，两次往返 |
+| `Row`/`statusLabel`/`ErrorPanel` 只有一份 | 状态文案出现「已绑定」与 `Bound` 两种说法 |
+
+写页面前先想「这类错误能不能静态检出」：能就加一条契约，不能才写用例。
+
+### 7.3 环境与残留
+
+两个进程缺一不可：BFF（8092）与静态服务（5178）。
+
+```bash
+cd console/kube-frontend && node scripts/dev-static-server.mjs apps/console-next/dist 5178 http://127.0.0.1:8092
+```
+
+**测试残留会伪装成产品缺陷**：夹具在 `finally` 删除，但被中断/超时跳过的对象会留下来，让列表变长、出现分页、「第一行」不再是目标。用：
+
+```bash
+python3 prd/tools/cleanup_test_objects.py            # 只列出（dry-run）
+python3 prd/tools/cleanup_test_objects.py --apply    # 真删，只认窄前缀
 ```
 
 环境是**两个进程**：BFF（8092）与静态服务（5178）。缺一不可，重启：
