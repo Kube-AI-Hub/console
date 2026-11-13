@@ -3,6 +3,7 @@ from __future__ import annotations
 from urllib.parse import parse_qs, urlparse
 
 import pytest
+from playwright.sync_api import expect
 
 pytestmark = pytest.mark.ui
 
@@ -32,14 +33,17 @@ def test_TC_L3_KUBE_FRONTEND_SECRETS_LIST_02(secrets_page, e2e_objects):
 
     # Another column starts ascending.
     secrets_page.surface.locator('[data-ai-id="secrets:sort:name"]').click()
-    secrets_page.page.wait_for_timeout(600)
+    # `aria-sort` is the rendered result of the request; waiting on it means the request
+    # log below is guaranteed to hold the request this click produced.
+    expect(secrets_page.surface.locator("thead th", has_text="名称").first).to_have_attribute(
+        "aria-sort", "ascending", timeout=15_000
+    )
     assert "sortBy=name" in seen[-1] and backend_bool(seen[-1], "ascending") == "true", seen[-1]
     assert "page=1" in seen[-1]
     assert secrets_page.surface.locator("thead th", has_text="名称").first.get_attribute("aria-sort") == "ascending"
 
     # Clicking the active column again flips it: name was ascending, now descending.
     secrets_page.surface.locator('[data-ai-id="secrets:sort:name"]').click()
-    secrets_page.page.wait_for_timeout(600)
-    assert "sortBy=name" in seen[-1] and backend_bool(seen[-1], "ascending") == "false", seen[-1]
     column = secrets_page.surface.locator("thead th", has_text="名称").first
-    assert column.get_attribute("aria-sort") == "descending"
+    expect(column).to_have_attribute("aria-sort", "descending", timeout=15_000)
+    assert "sortBy=name" in seen[-1] and backend_bool(seen[-1], "ascending") == "false", seen[-1]

@@ -62,6 +62,10 @@ def main() -> int:
 
     total += run("文档门禁", [sys.executable, "prd/tools/check_docs.py", "--strict"], REPO)
     total += run("一致性核对", [sys.executable, "prd/tools/parity_check.py"], REPO)
+    # Advisory: prints suspicious assertions but does not fail the run. Retry loops are
+    # legitimate and would otherwise trip it.
+    print("\n=== 弱断言提示（不阻断） ===", flush=True)
+    subprocess.run([sys.executable, "prd/tools/check_weak_assertions.py"], cwd=REPO, check=False)
     total += run("架构契约", [npx(), "vitest", "run", "--config", "config/vitest.config.ts"], KF)
     total += run("api-client 单测", [npx(), "vitest", "run"], KF / "packages/api-client")
     # ai-kit lives at the repository root, not under kube-frontend/.

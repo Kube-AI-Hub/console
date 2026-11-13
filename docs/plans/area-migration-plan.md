@@ -916,3 +916,56 @@ assert "8 位" in dialog.inner_text()
 
 （该用例独立跑一直通过，串行全量里偶发失败，正是因为 `wait_for_timeout(500)` 后立刻断言，
 负载高时对话框还没渲染完。）
+
+### 48.23 第二轮优化：能力接线契约 + 弱断言扫描
+
+#### 新增契约：声明的能力必须接上 handler
+
+「声明了排序、却没有 `onSortChange`」这类问题在这轮迁移里出现四次（排序死、搜索死、分页死、
+搜索键死）。原来只靠人肉发现，现在静态检查：
+
+| 声明 | 必须接上 |
+| --- | --- |
+| `sortableKeys` | `onSortChange` |
+| `search` | `onSearchChange` |
+| `filters` | `onFiltersChange` |
+| `selection` | `onSelectionChange` |
+| 多页 `pagination` | `onPageChange` |
+
+「多页」的判定：`pagination` 里 `pageSize` 不是 `Math.max(...)`（那是把全量塞进一页的单页列表）。
+
+**契约本身也验证过会失败**：临时删掉 `ComponentsPage` 的 `onSearchChange`，契约立刻报出该文件；
+恢复后通过。一个不会失败的检查等于没有检查。
+
+顺带查出 4 个页面声明了 `pagination` 但无 `onPageChange`——核实后确认都是单页前端列表，
+无翻页控件，属于正确实现。
+
+#### 弱断言扫描：找出「永远不会失败」的断言
+
+迁移中至少四处断言永远为真，长期给绿灯：
+
+| 断言 | 为什么永远为真 |
+| --- | --- |
+| `"8 位" in dialog.inner_text()` | 是密码字段的静态提示，始终在屏上 |
+| `"小写字母" in dialog.inner_text()` | 是名称字段的提示 |
+| `"数量" in dialog.inner_text()` | 是字段标签 |
+
+统一改成「对话框仍开着 + 读回数据」。例如配额用例现在读回 `requests.cpu` 确认没被写成 `abc`；
+扩容用例读回存储容量确认仍是 `1Gi`。
+
+新增 `prd/tools/check_weak_assertions.py`，识别三类：固定 sleep 后紧接断言、断言文案在对话框里、
+只断言元素可见。已接入 `verify.py`（**只提示不阻断**——重试循环里的 sleep 是合理的）。
+
+#### 固定 sleep 改条件等待
+
+| 用例 | 原来 | 现在 |
+| --- | --- | --- |
+| 平台角色翻页 | `sleep(2500)` 后读行 | 等「出现不同的非空行集」 |
+| 存储卷排序 | `sleep(600)` 后读请求日志 | 等 `aria-sort` 到位再核对请求 |
+| 表单焦点 | `sleep(500)` 后读 `activeElement` | `expect(...).to_be_focused()` |
+| 批量删除 | `sleep(500)` 后断言按钮可用 | 直接 `to_be_enabled()`（本身会轮询） |
+
+「等待不同的非空行集」这个细节值得记：一开始写成「等旧的第一行消失」，但加载时表格显示骨架行，
+「消失」瞬间为真，断言随后读到空页——**等一个条件，要确保这个条件只在真正完成时才成立**。
+
+**验证**：契约 517 项全绿；静态与单测 57 秒；相关用例逐个通过。

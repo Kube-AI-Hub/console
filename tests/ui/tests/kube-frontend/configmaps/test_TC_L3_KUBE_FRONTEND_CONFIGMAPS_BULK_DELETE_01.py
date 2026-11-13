@@ -21,8 +21,8 @@ def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_BULK_DELETE_01(configmaps_page, seeded_c
     ui.wait_ready()
     for name in names:
         ui.select_row(name)
-    ui.page.wait_for_timeout(500)
 
+    # `to_be_enabled` polls, so no sleep is needed for the selection to take effect.
     expect(ui.bulk_delete).to_be_enabled()
     ui.bulk_delete.click()
 

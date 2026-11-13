@@ -33,9 +33,13 @@ def test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_QUOTA_01(project_settings_page, sc
         # A quantity the apiserver would reject must be stopped here.
         ui.page.locator("#ai-field-requests_cpu").fill("abc")
         dialog.get_by_role("button", name="确认").click()
-        ui.page.wait_for_timeout(600)
-        expect(dialog).to_be_visible()
-        assert "数量" in dialog.inner_text()
+        # "数量" is the field label and is always on screen; the useful fact is that the
+        # dialog stayed open and nothing was written.
+        expect(dialog).to_have_count(1, timeout=15_000)
+        status_after, body_after = ui.api.request("GET", f"{QUOTAS}/{created_name}")
+        if status_after == 200:
+            hard_after = ((body_after.get("spec") or {}).get("hard")) or {}
+            assert hard_after.get("requests.cpu") != "abc", hard_after
 
         ui.page.locator("#ai-field-requests_cpu").fill("2")
         ui.page.locator("#ai-field-requests_memory").fill("4Gi")

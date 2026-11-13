@@ -116,6 +116,50 @@ describe('one implementation per concept', () => {
   });
 });
 
+describe('declared list capabilities are wired', () => {
+  /**
+   * A list schema declares what the page can do; the handler props are what make it true.
+   *
+   * Every case below shipped: sortable columns whose clicks did nothing, a search box
+   * whose value never reached the query, pagination buttons with no target. The page
+   * rendered, typed and clicked — and nothing happened.
+   */
+  const pageFiles = appFiles.filter((file) => file.includes('/pages/'));
+
+  const cases = [
+    { declared: 'sortableKeys', handler: 'onSortChange', what: '排序' },
+    { declared: 'search', handler: 'onSearchChange', what: '搜索' },
+    { declared: 'filters', handler: 'onFiltersChange', what: '筛选' },
+    { declared: 'selection', handler: 'onSelectionChange', what: '多选' },
+  ] as const;
+
+  for (const probe of cases) {
+    it(`wires ${probe.handler} wherever ${probe.declared} is declared (${probe.what})`, () => {
+      const offenders: string[] = [];
+      for (const file of pageFiles) {
+        const text = read(file);
+        if (!new RegExp(`^\\s+${probe.declared}:`, 'm').test(text)) continue;
+        if (!text.includes(probe.handler)) offenders.push(relative(root, file));
+      }
+      expect(offenders).toEqual([]);
+    });
+  }
+
+  it('wires onPageChange wherever the list has more than one page', () => {
+    // A single-page schema sets `pageSize` from the row count (`Math.max(...)`); anything
+    // else is a real pager, and a pager whose page never changes is a dead control.
+    const offenders: string[] = [];
+    for (const file of pageFiles) {
+      const text = read(file);
+      const pagination = text.match(/pagination:\s*\{([^}]*)\}/);
+      if (!pagination) continue;
+      if (pagination[1].includes('Math.max(')) continue;
+      if (!text.includes('onPageChange')) offenders.push(relative(root, file));
+    }
+    expect(offenders).toEqual([]);
+  });
+});
+
 describe('page files', () => {
   it('do not hand-roll a delete confirmation', () => {
     // The shared dialog owns the typed-name friction and, after this migration, the

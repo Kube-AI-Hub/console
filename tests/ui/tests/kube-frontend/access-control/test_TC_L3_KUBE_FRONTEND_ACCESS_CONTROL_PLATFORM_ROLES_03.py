@@ -35,13 +35,28 @@ def test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_PLATFORM_ROLES_03(access_control_pag
 
     first = names()
     next_page.click()
-    ui.page.wait_for_timeout(2500)
-    expect(ui.surface("clusterroles")).not_to_have_attribute("data-ai-state", "loading", timeout=60_000)
+    # Wait for a *different, non-empty* row set. Waiting for the old first row to vanish is
+    # not enough: while the next page loads the table shows skeleton rows, so "gone" is
+    # momentarily true and the assertion then reads an empty page.
+    ui.page.wait_for_function(
+        """(previous) => {
+            const rows = [...document.querySelectorAll('[data-ai-id="clusterroles:surface"] [data-ai-row]')];
+            return rows.length > 0 && rows[0].getAttribute('data-ai-row') !== previous;
+        }""",
+        arg=first[0],
+        timeout=30_000,
+    )
     second = names()
     assert second and second != first, (first[:3], second[:3])
 
     prev_page.click()
-    ui.page.wait_for_timeout(2500)
-    expect(ui.surface("clusterroles")).not_to_have_attribute("data-ai-state", "loading", timeout=60_000)
+    ui.page.wait_for_function(
+        """(previous) => {
+            const rows = [...document.querySelectorAll('[data-ai-id="clusterroles:surface"] [data-ai-row]')];
+            return rows.length > 0 && rows[0].getAttribute('data-ai-row') === previous;
+        }""",
+        arg=first[0],
+        timeout=30_000,
+    )
     assert names() == first
     screenshot(ui.page, "access-roles-pagination")

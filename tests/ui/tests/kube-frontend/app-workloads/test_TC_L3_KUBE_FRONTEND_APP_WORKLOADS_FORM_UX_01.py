@@ -25,8 +25,9 @@ def test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_FORM_UX_01(app_workloads_page, screen
         # Submitting an empty form must land the caret on the first offending field: a
         # message rendered below the fold reads as "nothing happened".
         dialog.get_by_role("button", name="确认").click()
-        ui.page.wait_for_timeout(500)
-        assert ui.page.evaluate("() => document.activeElement?.id") == "ai-field-name"
+        # `to_be_focused` polls; the fixed sleep read `activeElement` before the form had
+        # finished re-rendering and then blamed the focus behaviour.
+        expect(ui.page.locator("#ai-field-name")).to_be_focused(timeout=10_000)
 
         ui.page.locator("#ai-field-name").fill(name)
         ui.page.locator("#ai-field-image").fill("nginx:1.27")

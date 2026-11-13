@@ -25,9 +25,11 @@ def test_TC_FULL_KUBE_FRONTEND_APP_WORKLOADS_03(app_workloads_page, screenshot):
         ui.page.locator("#ai-field-name").fill("Bad_Name")
         ui.page.locator("#ai-field-image").fill("nginx:1.27")
         dialog.get_by_role("button", name="确认").click()
-        ui.page.wait_for_timeout(600)
-        expect(dialog).to_be_visible()
-        assert "小写字母" in dialog.inner_text()
+        # "小写字母" is the name field's static hint, present before submitting — asserting
+        # on it proved nothing. What distinguishes a refusal is: the dialog stays open and
+        # no such Deployment exists afterwards.
+        expect(dialog).to_have_count(1, timeout=15_000)
+        assert ui.get_deployment("Bad_Name")[0] != 200, "非法名称竟然创建了 Deployment"
 
         ui.page.locator("#ai-field-name").fill(name)
         ui.page.locator("#ai-field-replicas").fill("2")

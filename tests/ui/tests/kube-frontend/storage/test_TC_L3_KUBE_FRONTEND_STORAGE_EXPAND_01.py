@@ -78,9 +78,14 @@ def test_TC_L3_KUBE_FRONTEND_STORAGE_EXPAND_01(storage_page, screenshot):
         # Shrinking is rejected by every driver; the form explains instead.
         ui.page.locator("#ai-field-storage").fill("0.5Gi")
         dialog.get_by_role("button", name="确认").click()
-        ui.page.wait_for_timeout(600)
+        # Wait for the message itself rather than sleeping first; and confirm the refusal
+        # by the object's size staying put, not by a sentence being somewhere on screen.
         expect(dialog).to_be_visible()
-        assert "不能小于" in dialog.inner_text()
+        expect(dialog).to_contain_text("不能小于", timeout=15_000)
+        unchanged_status, unchanged = ui.api.request("GET", f"{PVCS}/{name_expandable}")
+        assert unchanged_status == 200
+        before_size = (((unchanged.get("spec") or {}).get("resources") or {}).get("requests") or {}).get("storage")
+        assert before_size == "1Gi", before_size
 
         ui.page.locator("#ai-field-storage").fill("5Gi")
         dialog.get_by_role("button", name="确认").click()
