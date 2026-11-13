@@ -38,6 +38,18 @@
 
 **被否方案**：把多种 conditions 合成一个状态。会让「Ready 但磁盘压力大」的节点显示成非 Ready，与 `kubectl get nodes` 不一致。
 
+### DEC-L2-KUBE-FRONTEND-CLUSTER_MANAGEMENT-03 — 集群菜单分组，导航在 Shell 而非布局里
+
+**为什么**：集群有 11 个页面。平铺时读者要读完 11 行才能找到目标，老 console 因此按组折叠（资源 / 配置 / 存储 / 监控告警 / 集群设置）。
+导航本身放在 Shell 而不是布局里，因为切换器（当前集群）必须与菜单同处一个容器——「我在哪个集群」和「我能去哪」是同一个问题。
+
+**分组来自 registry 的 `AreaPage.groupKey`**，不是 Shell 里另写一张表：页面清单只有一个来源，新增页面时分组自动跟随。
+当前页所在的分组默认展开（ai-kit 的 Menu 按 activeKey 推导），刷新后不会丢失位置。
+
+**被否方案**：继续用页签条。集群页签与侧栏菜单会同时存在两份导航（旧实现确实这样），且页签条放不下 11 项。
+
+**何时重新考虑**：集群页面数量降到 5 项以内，或需要跨集群并列对比时。
+
 ## 系统现状
 
 老 console `pages/clusters/containers/{Nodes,Projects}`，通过平台切换器进入集群管理；节点列含状态、角色、GPU、CPU/内存使用率，本模块先做静态可分配量与角色。
@@ -77,7 +89,7 @@ GPU 列、使用率列（需要 metrics 接口）、集群概览与设置页。
 ## 页面与技术结构
 
 - 区域 `cluster-management`（`scope: 'cluster'`，两页）。
-- 布局 `routes/kube-frontend.clusters.$cluster/route.tsx`：只渲染区域页签与 `<Outlet/>`。
+- 布局 `routes/kube-frontend.clusters.$cluster/route.tsx`：只渲染 `<Outlet/>`；导航在 Shell 的左侧集群菜单里（见下）。
 - 组件 `ClusterListPage`，描述符在 `pages/cluster/queries.ts`。
 
 ## 状态与数据归属

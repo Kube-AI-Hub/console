@@ -39,6 +39,16 @@ export interface AreaPage {
    * "we have not migrated it" and "it does not exist".
    */
   status?: 'ready' | 'planned';
+  /**
+   * Heading this page is listed under in the sidebar, when the scope has a nested
+   * navigation.
+   *
+   * The cluster console does: eleven pages in one flat list is past the point where a
+   * reader can find what they want without reading all of them, and the old console
+   * groups them (节点/系统组件/项目、配置、存储、监控告警、集群设置). A page without one
+   * sits at the top level, which is where 概览 belongs.
+   */
+  groupKey?: LocaleKey;
 }
 
 /** A titled group of pages — the tabs of an area. */
@@ -166,26 +176,26 @@ export const AREAS: readonly Area[] = [
       // Overview is the landing page, as it is in the old console: the first question
       // about a cluster is "what is it and is anything wrong", not "list its nodes".
       { key: 'overview', path: 'overview', titleKey: 'cluster.overview.title', status: 'ready' },
-      { key: 'nodes', path: 'nodes', titleKey: 'cluster.nodes.title', status: 'ready' },
-      { key: 'namespaces', path: 'namespaces', titleKey: 'cluster.projects.title', status: 'ready' },
-      { key: 'components', path: 'components', titleKey: 'cluster.components.title', status: 'ready' },
+      { key: 'nodes', path: 'nodes', titleKey: 'cluster.nodes.title', status: 'ready', groupKey: 'cluster.nav.groupResource' },
+      { key: 'namespaces', path: 'namespaces', titleKey: 'cluster.projects.title', status: 'ready', groupKey: 'cluster.nav.groupResource' },
+      { key: 'components', path: 'components', titleKey: 'cluster.components.title', status: 'ready', groupKey: 'cluster.nav.groupResource' },
       // The cluster console's ConfigMap list spans every project; the project console
       // has its own page. It existed as a route but was missing here, so the sidebar
       // could not reach it.
-      { key: 'configmaps', path: 'configmaps', titleKey: 'clusterConfigMaps.title', status: 'ready' },
-      { key: 'storageclasses', path: 'storageclasses', titleKey: 'cluster.storageClasses.title', status: 'ready' },
-      { key: 'persistentvolumes', path: 'persistentvolumes', titleKey: 'cluster.persistentVolumes.title', status: 'ready' },
+      { key: 'configmaps', path: 'configmaps', titleKey: 'clusterConfigMaps.title', status: 'ready', groupKey: 'nav.groupConfig' },
+      { key: 'storageclasses', path: 'storageclasses', titleKey: 'cluster.storageClasses.title', status: 'ready', groupKey: 'nav.groupStorage' },
+      { key: 'persistentvolumes', path: 'persistentvolumes', titleKey: 'cluster.persistentVolumes.title', status: 'ready', groupKey: 'nav.groupStorage' },
       // Editable cluster attributes. Only the description is writable: the rest of the
       // object is owned by the installer, and a console that edited it would disagree
       // with the thing that actually configures the cluster.
-      { key: 'settings', path: 'settings', titleKey: 'cluster.settings.title', status: 'ready' },
+      { key: 'settings', path: 'settings', titleKey: 'cluster.settings.title', status: 'ready', groupKey: 'cluster.nav.groupSettings' },
       // Trends over time. The old console puts these under 集群监控; the numbers come
       // from the monitoring API's range query, which is a different read from the
       // current-value panel on the overview.
-      { key: 'monitor', path: 'monitor', titleKey: 'cluster.monitor.title', status: 'ready' },
+      { key: 'monitor', path: 'monitor', titleKey: 'cluster.monitor.title', status: 'ready', groupKey: 'nav.groupMonitoring' },
       // The ranking under 集群监控: which node is hot, not every attribute of every node.
-      { key: 'node-usage', path: 'node-usage', titleKey: 'cluster.nodeUsage.title', status: 'ready' },
-      { key: 'custom-resources', path: 'custom-resources', titleKey: 'cluster.customResources.title', status: 'ready' },
+      { key: 'node-usage', path: 'node-usage', titleKey: 'cluster.nodeUsage.title', status: 'ready', groupKey: 'nav.groupMonitoring' },
+      { key: 'custom-resources', path: 'custom-resources', titleKey: 'cluster.customResources.title', status: 'ready', groupKey: 'cluster.nav.groupExtensions' },
     ],
   },
   {

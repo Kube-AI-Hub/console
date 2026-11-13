@@ -542,15 +542,46 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
   const sidebarItems = React.useMemo<MenuNode[]>(() => {
     if (clusterPath) {
       const root = `/kube-frontend/clusters/${encodeURIComponent(clusterPath.cluster)}`;
-      return areasFor('cluster').flatMap((area) =>
-        areaPages(area).map((page) => ({
-          key: page.key,
-          label: t(page.titleKey),
-          icon: <Icon name={area.icon} size={14} />,
-          href: `${root}/${page.path}`,
-          onClick: () => setDrawerOpen(false),
-        })),
-      );
+      /*
+       * The cluster menu is grouped, as the old console's is: eleven flat entries is
+       * past the point where a reader can find one without reading all of them.
+       *
+       * A group is a collapsible node whose children are the pages (ai-kit's Menu opens
+       * the group that contains the active page, so a refresh does not lose your place).
+       * Pages without a `groupKey` stay at the top level — that is where 概览 belongs.
+       */
+      const nodes: MenuNode[] = [];
+      const groups = new Map<string, MenuNode>();
+      for (const area of areasFor('cluster')) {
+        for (const page of areaPages(area)) {
+          const leaf: MenuNode = {
+            key: page.key,
+            label: t(page.titleKey),
+            icon: <Icon name={area.icon} size={14} />,
+            href: `${root}/${page.path}`,
+            onClick: () => setDrawerOpen(false),
+          };
+          if (!page.groupKey) {
+            nodes.push(leaf);
+            continue;
+          }
+          const existing = groups.get(page.groupKey);
+          if (existing) {
+            existing.children?.push(leaf);
+            continue;
+          }
+          const group: MenuNode = {
+            // A distinct key: the page keys are leaves and the shell looks one of them up
+            // to highlight, so a group may not reuse one.
+            key: `cluster:group:${page.groupKey}`,
+            label: t(page.groupKey),
+            children: [leaf],
+          };
+          groups.set(page.groupKey, group);
+          nodes.push(group);
+        }
+      }
+      return nodes;
     }
     if (platformScope) {
       /*
