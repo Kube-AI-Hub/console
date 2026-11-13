@@ -11,6 +11,8 @@ import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
 import { AddClusterDialog } from './AddClusterDialog';
 import { ClusterEditDialog } from './ClusterEditDialog';
+import { RemoveClusterDialog } from './RemoveClusterDialog';
+import { UpdateKubeconfigDialog } from './UpdateKubeconfigDialog';
 
 /**
  * 集群列表（多集群）.
@@ -33,6 +35,8 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
   const list = useResourceListState<SortKey>({ defaultSortBy: 'name' });
   const [adding, setAdding] = React.useState(false);
   const [editing, setEditing] = React.useState<ClusterSummary | null>(null);
+  const [removing, setRemoving] = React.useState<ClusterSummary | null>(null);
+  const [updatingKubeconfig, setUpdatingKubeconfig] = React.useState<ClusterSummary | null>(null);
 
   const query = useQuery({
     queryKey: ['clusters'],
@@ -176,7 +180,29 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
         },
       ],
       primaryAction: { key: 'add', label: t('cluster.add.title'), aiId: 'clusters:add' },
-      rowActions: [{ key: 'edit', label: t('resource.action.editInfo'), aiId: 'clusters:edit' }],
+      rowActions: [
+        { key: 'edit', label: t('resource.action.editInfo'), aiId: 'clusters:edit' },
+        /*
+         * The two lifecycle actions follow the old console's rules:
+         *  - the host cluster can be neither removed nor re-pointed: every other page
+         *    depends on it;
+         *  - a proxy cluster has no kubeconfig to replace (its agent dials out), so the
+         *    action is absent instead of failing after a paste.
+         */
+        {
+          key: 'kubeconfig',
+          label: t('cluster.row.updateKubeconfig'),
+          aiId: 'clusters:update-kubeconfig',
+          visible: (row: ClusterSummary) => !row.isHost && row.connectionType !== 'proxy',
+        },
+        {
+          key: 'remove',
+          label: t('cluster.row.remove'),
+          tone: 'danger' as const,
+          aiId: 'clusters:remove',
+          visible: (row: ClusterSummary) => !row.isHost,
+        },
+      ],
       empty: { title: t('cluster.list.emptyTitle'), description: t('cluster.list.emptyDescription') },
       labels: {
         selectAll: t('table.selectAll'),
@@ -218,12 +244,30 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
           // type-checks and does nothing — the click comes back through here.)
           if (action === 'add') return setAdding(true);
           if (action === 'edit' && row) setEditing(row as ClusterSummary);
+          if (action === 'kubeconfig' && row) setUpdatingKubeconfig(row as ClusterSummary);
+          if (action === 'remove' && row) setRemoving(row as ClusterSummary);
         }}
       />
       <AddClusterDialog
         open={adding}
         onOpenChange={setAdding}
         onCreated={() => void queryClient.invalidateQueries({ queryKey: ['clusters'] })}
+      />
+      <RemoveClusterDialog
+        open={removing !== null}
+        onOpenChange={(next) => {
+          if (!next) setRemoving(null);
+        }}
+        cluster={removing}
+        onRemoved={() => void queryClient.invalidateQueries({ queryKey: ['clusters'] })}
+      />
+      <UpdateKubeconfigDialog
+        open={updatingKubeconfig !== null}
+        onOpenChange={(next) => {
+          if (!next) setUpdatingKubeconfig(null);
+        }}
+        cluster={updatingKubeconfig}
+        onUpdated={() => void queryClient.invalidateQueries({ queryKey: ['clusters'] })}
       />
       <ClusterEditDialog
         open={editing !== null}

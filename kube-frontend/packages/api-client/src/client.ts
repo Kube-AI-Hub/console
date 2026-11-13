@@ -84,8 +84,26 @@ async function toApiError(response: Response): Promise<ApiError> {
     code: codeForStatus(response.status),
     message: response.statusText || 'request failed',
   };
+  /*
+   * Read the body as text first.
+   *
+   * Some upstream errors are plain text with the only actionable sentence in them: the
+   * kubeconfig validator answers `400 invalid configuration: [context was not found…]`,
+   * and kapis proxy errors arrive the same way. `response.json()` throws on those, and
+   * falling back to `statusText` turned every one of them into "Bad Request" — a message
+   * that says nothing about what to fix.
+   */
+  const raw = await response.text().catch(() => '');
+  const trimmed = raw.trim();
+  if (!trimmed || !(trimmed.startsWith('{') || trimmed.startsWith('['))) {
+    const isHtml = trimmed.startsWith('<');
+    return new ApiError(
+      { ...fallback, message: trimmed && !isHtml ? trimmed.slice(0, 300) : fallback.message },
+      response.status,
+    );
+  }
   try {
-    const body = (await response.json()) as Partial<ApiErrorBody> & {
+    const body = JSON.parse(trimmed) as Partial<ApiErrorBody> & {
       /** kube-apiserver's `Status` object uses `reason` and a numeric `code`. */
       reason?: string;
       code?: string | number;
@@ -114,7 +132,7 @@ async function toApiError(response: Response): Promise<ApiError> {
       response.status,
     );
   } catch {
-    // Upstream returned HTML (a proxy error page) — keep the status-derived code.
+    // Malformed JSON: keep the status-derived code rather than guessing at a message.
     return new ApiError(fallback, response.status);
   }
 }

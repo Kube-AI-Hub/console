@@ -508,7 +508,11 @@ MODULES = [
                     {
                         "id": "cluster-list",
                         "title": "集群列表",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-01"]},
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-01",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-03",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-04",
+                        ]},
                     },
                     {
                         "id": "custom-resources",

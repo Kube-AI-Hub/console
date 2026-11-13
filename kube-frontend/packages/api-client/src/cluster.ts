@@ -422,6 +422,39 @@ export function clusterWriteApi(client: Client) {
         },
       );
     },
+
+    /**
+     * Remove a member cluster from the platform — the old console's 「移除集群」.
+     *
+     * Deletes the `Cluster` object only. The member cluster itself and the resources on
+     * it are untouched: the platform stops managing it, which is what "remove" means here
+     * and what the old console's warning says. The host cluster cannot be removed (every
+     * other page would lose its cluster), which the UI enforces before reaching this call.
+     */
+    async remove(params: { cluster: string }): Promise<void> {
+      await client.request(`/apis/cluster.kubesphere.io/v1alpha1/clusters/${encodeURIComponent(params.cluster)}`, {
+        method: 'DELETE',
+      });
+    },
+
+    /**
+     * Replace a direct-connected cluster's kubeconfig.
+     *
+     * `PUT /kapis/cluster.kubesphere.io/v1alpha1/clusters/<name>/kubeconfig`, base64 in the
+     * body — the same shape the old console sends (and the only write that kapis accepts;
+     * the collection itself takes writes through the native group).
+     *
+     * A proxy-connected cluster has no kubeconfig to replace: the agent dials out, so the
+     * UI hides this action rather than offering one that cannot succeed.
+     */
+    async updateKubeconfig(params: { cluster: string; kubeconfig: string }): Promise<void> {
+      const kubeconfig = params.kubeconfig.trim();
+      if (!kubeconfig) throw new Error('kubeconfig is required');
+      await client.request(`/kapis/cluster.kubesphere.io/v1alpha1/clusters/${encodeURIComponent(params.cluster)}/kubeconfig`, {
+        method: 'PUT',
+        body: { kubeconfig: btoa(unescape(encodeURIComponent(kubeconfig))) },
+      });
+    },
   };
 }
 

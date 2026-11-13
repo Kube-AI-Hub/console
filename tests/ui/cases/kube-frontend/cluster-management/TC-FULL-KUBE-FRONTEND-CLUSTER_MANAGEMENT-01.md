@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/cluster-management/_index.md`](../../../../prd/kube-frontend/cluster-management/_index.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-FULL-KUBE-FRONTEND-CLUSTER_MANAGEMENT-01** — 已知已登录且有集群权限，当在两个页签之间切换，则每次都显示对应列表（或空态），页签高亮跟随，切换不产生文档请求。
+- **AC-FULL-KUBE-FRONTEND-CLUSTER_MANAGEMENT-01** — 已知已登录且有集群权限，当在左侧集群菜单的页面之间切换，则每次都显示对应页面（或空态），菜单高亮跟随，切换不产生文档请求。
 - **AC-FULL-KUBE-FRONTEND-CLUSTER_MANAGEMENT-02** — 已知在集群级页面，当观察页面顶部，则**不出现**项目工作区栏（`data-ai-id="workspace-bar"`）。
 
 ### 关联设计
@@ -33,7 +33,7 @@
 
 作为 **集群管理员**，我希望 **在这两张表之间切换**，以便 **从节点看到项目而不必进任何一个项目**。
 
-**Independent Test**：从节点切到项目再切回，核对页签高亮变化且没有整页刷新。
+**Independent Test**：从节点切到项目再切回，核对左侧集群菜单的高亮变化且没有整页刷新。
 
 ### US2 - 明确知道自己在集群视角而不是某个项目里 (Priority: P2)
 

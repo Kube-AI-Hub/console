@@ -28,11 +28,25 @@
 
 **Independent Test**：点工具栏刷新，核对列表重新拉取了集群集合并回到就绪态。
 
+### US4 - 移除一个不再管理的集群 (Priority: P1)
+
+作为 **平台管理员**，我希望 **把成员集群从平台移除**，以便 **不再管理的集群不会继续出现在项目与工作负载视图里**。
+
+**Independent Test**：接入一个临时集群，从行操作移除并回读对象，确认 404；成员集群本身不被改动。
+
+### US5 - 换掉成员集群的 kubeconfig (Priority: P2)
+
+作为 **平台管理员**，我希望 **在成员集群换了访问凭据后更新 kubeconfig**，以便 **不必删除再重新接入**。
+
+**Independent Test**：对一个直接连接的临时集群点「更新 kubeconfig」，提交非法内容时界面给出服务端原因且对象未被改动。
+
 ## 验收场景
 
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-01** — 已知平台注册了若干集群，当打开 `/kube-frontend/clusters`，则列出全部集群；每行显示名称（别名优先、副行为对象名或供应者；有环境标签时一并显示）、状态徽标、**角色**（主集群/成员集群）、Kubernetes 版本、节点数与创建时间；主集群排在最前；行数等于 `clusters` 接口返回数；名称链接指向该集群的概览页；未就绪的集群显示条件消息。
 
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-02** — 已知列表处于就绪态，当点击工具栏的刷新，则重新拉取 `clusters` 接口且列表回到就绪态（用于集群刚接入、刚从代理连上等场景，避免只能整页刷新）。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-03** — 已知列表里有一个非主集群，当通过行操作「移除集群」并输入集群名确认，则该 `Cluster` 对象被删除（回读 404），列表不再包含它；主集群行没有「移除集群」；未输入正确名称时确认按钮不可用。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-04** — 已知列表里有一个非主集群且连接方式为直接连接，当通过行操作「更新 kubeconfig」提交一段不可用的 kubeconfig，则界面显示服务端给出的原因（而不是「Bad Request」之类通用文案），且集群对象的 `spec.connection.kubeconfig` 未被改动；代理连接的集群不提供该操作。
 
 ## 设计目标
 

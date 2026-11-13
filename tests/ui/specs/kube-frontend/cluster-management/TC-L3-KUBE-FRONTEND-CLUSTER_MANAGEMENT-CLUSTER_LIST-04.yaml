@@ -1,0 +1,38 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-04
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: cluster-list
+title: 集群列表 · 更新成员集群 kubeconfig
+entry_url: '{BASE_URL}/kube-frontend/clusters'
+prd: prd/kube-frontend/cluster-management/cluster-list.md
+design: design/kube-frontend/cluster-management/cluster-list.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-04
+
+story:
+- US5
+
+product: 直接连接的成员集群可「更新 kubeconfig」；提交不可用内容时显示服务端原因且对象不被改动；代理连接与主集群不提供该操作。
+preconditions:
+- 已登录平台管理
+- 用例先创建一个临时 direct 集群对象（tc-e2e- 前缀），finally 中删除
+steps:
+- 用 API 创建一个临时 direct 集群（kubeconfig 为任意 base64，仅占位）
+- 打开列表，打开该集群行操作，核对存在「更新 kubeconfig」
+- 提交一段不包含 apiVersion/clusters/server 的内容，核对本地校验提示
+- 提交一段结构合法但不可连接的内容，核对出现服务端原因（含 invalid configuration 等字样）
+- 回读该集群对象，核对 spec.connection.kubeconfig 未变化
+- 核对代理连接或主集群行没有「更新 kubeconfig」
+expected:
+- 本地先拦结构错误，不发请求
+- 服务端错误原文可见，不是「Bad Request」
+- 失败后对象未被改动
+- 代理连接与主集群不提供该操作
+troubleshoot:
+- 错误只显示 Bad Request：客户端把纯文本错误体丢掉了（见 DEC-...-08）
+- 提交后对象被改：服务端应拒绝不可用配置
+update_automation:
+- 选择器见 pages/cluster_fleet.py 与 UpdateKubeconfigDialog.tsx
