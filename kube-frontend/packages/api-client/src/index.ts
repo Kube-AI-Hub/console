@@ -151,6 +151,7 @@ export {
   limitRangesApi,
   logCollectionApi,
   isTemplateRole,
+  clusterLoggingApi,
   clusterMembersApi,
   membersApi,
   membersWriteApi,

@@ -565,6 +565,13 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_MEMBERS-01
+    - id: log-collections
+      title: 集群日志收集
+      prd: prd/kube-frontend/cluster-management/log-collections.md
+      design: design/kube-frontend/cluster-management/log-collections.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-LOG_COLLECTIONS-01
     - id: monitor
       title: 集群监控
       prd: prd/kube-frontend/cluster-management/monitor.md

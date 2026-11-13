@@ -534,6 +534,11 @@ MODULES = [
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_MEMBERS-01"]},
                     },
                     {
+                        "id": "log-collections",
+                        "title": "集群日志收集",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-LOG_COLLECTIONS-01"]},
+                    },
+                    {
                         "id": "monitor",
                         "title": "集群监控",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01"]},

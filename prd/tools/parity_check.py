@@ -63,12 +63,12 @@ CLUSTER_PAGES = {
     "servicecomponents": "components",
     "storage": "storageclasses",
     "persistentvolumes": "persistentvolumes",
+    "logcollections": "log-collections",
 }
 
 #: 集群作用域里明确不迁移的页面与原因。
 CLUSTER_UNMIGRATED = {
     "custommonitoring": "自定义监控：需要图表引擎",
-    "logcollections": "日志收集：需要日志组件配置",
     "gateway": "集群网关：本集群无网关控制器实例",
     "kubeconfig": "集群 kubeconfig 管理：需要生成与轮换逻辑",
 }

@@ -613,6 +613,116 @@ export interface LimitRangeSummary {
   limits: Array<{ type: string; resource: string; min: string; max: string; defaultLimit: string; defaultRequest: string }>;
 }
 
+/**
+ * Cluster log collection, read from the logging operator's own CRs.
+ *
+ * Four lists decide whether logs reach storage: the collector (FluentBit), its config, the
+ * inputs (which sources are tailed) and the outputs (where records go). The IAM aggregate has
+ * no summary for this, so the page reads the CRs directly — `/apis/logging.kubesphere.io`.
+ */
+export interface LoggingCollector {
+  name: string;
+  namespace: string;
+  image: string;
+  configName: string;
+  /** `status.conditions` reduced to a single word when the operator reports one. */
+  ready: string;
+}
+
+export interface LoggingInput {
+  name: string;
+  /** The plugin key in `spec` (systemd, tail, …). */
+  plugin: string;
+  tag: string;
+}
+
+export interface LoggingOutput {
+  name: string;
+  plugin: string;
+  /** Host/endpoint the plugin writes to, when it has one. */
+  host: string;
+  /** `match` / `matchRegex`: which records this output receives. */
+  match: string;
+}
+
+const LOGGING_API = '/apis/logging.kubesphere.io/v1alpha2';
+
+export function clusterLoggingApi(client: Client) {
+  const list = async <T,>(resource: string, signal: AbortSignal | undefined, toItem: (raw: Record<string, unknown>) => T): Promise<T[]> => {
+    const body = await client.request<{ items?: Array<Record<string, unknown>> }>(`${LOGGING_API}/${resource}`, {
+      ...(signal ? { signal } : {}),
+    });
+    return (body?.items ?? []).map(toItem);
+  };
+  return {
+    async collectors(params: { signal?: AbortSignal }): Promise<LoggingCollector[]> {
+      return list('fluentbits', params.signal, (item) => {
+        const metadata = (item['metadata'] ?? {}) as Record<string, unknown>;
+        const spec = (item['spec'] ?? {}) as Record<string, unknown>;
+        const status = (item['status'] ?? {}) as Record<string, unknown>;
+        const conditions = (status['conditions'] ?? []) as Array<Record<string, unknown>>;
+        const readyCondition = conditions.find((condition) => String(condition['type'] ?? '') === 'Ready') ?? conditions[0];
+        return {
+          name: String(metadata['name'] ?? ''),
+          namespace: String(metadata['namespace'] ?? ''),
+          image: String(spec['image'] ?? ''),
+          configName: String(spec['fluentBitConfigName'] ?? ''),
+          ready: readyCondition ? String(readyCondition['type'] ?? '') : '',
+        };
+      });
+    },
+
+    /**
+     * The collector's pods, by state.
+     *
+     * The FluentBit CR reports an empty `status` on this cluster (measured), so "is log
+     * collection actually running" has to be answered by the pods the collector owns — the
+     * same signal an operator would check with kubectl.
+     */
+    async podStats(params: { namespace: string; signal?: AbortSignal }): Promise<{ total: number; running: number }> {
+      const body = await client.request<{ items?: Array<Record<string, unknown>> }>(
+        `/api/v1/namespaces/${encodeURIComponent(params.namespace)}/pods`,
+        {
+          query: { labelSelector: 'app.kubernetes.io/name=fluent-bit' },
+          ...(params.signal ? { signal: params.signal } : {}),
+        },
+      );
+      const items = body?.items ?? [];
+      const running = items.filter((item) => String(((item['status'] ?? {}) as Record<string, unknown>)['phase'] ?? '') === 'Running').length;
+      return { total: items.length, running };
+    },
+
+    async inputs(params: { signal?: AbortSignal }): Promise<LoggingInput[]> {
+      return list('inputs', params.signal, (item) => {
+        const metadata = (item['metadata'] ?? {}) as Record<string, unknown>;
+        const spec = (item['spec'] ?? {}) as Record<string, unknown>;
+        const plugin = Object.keys(spec)[0] ?? '';
+        const pluginSpec = (spec[plugin] ?? {}) as Record<string, unknown>;
+        return {
+          name: String(metadata['name'] ?? ''),
+          plugin,
+          tag: String(pluginSpec['tag'] ?? ''),
+        };
+      });
+    },
+
+    async outputs(params: { signal?: AbortSignal }): Promise<LoggingOutput[]> {
+      return list('outputs', params.signal, (item) => {
+        const metadata = (item['metadata'] ?? {}) as Record<string, unknown>;
+        const spec = (item['spec'] ?? {}) as Record<string, unknown>;
+        const plugin = Object.keys(spec).find((key) => key !== 'match' && key !== 'matchRegex') ?? '';
+        const pluginSpec = (spec[plugin] ?? {}) as Record<string, unknown>;
+        return {
+          name: String(metadata['name'] ?? ''),
+          plugin,
+          host: String(pluginSpec['host'] ?? pluginSpec['endpoint'] ?? ''),
+          match: String(spec['match'] ?? spec['matchRegex'] ?? ''),
+        };
+      });
+    },
+  };
+}
+
 export function limitRangesApi(client: Client) {
   return {
     async list(params: { namespace: string; signal?: AbortSignal }): Promise<LimitRangeSummary[]> {

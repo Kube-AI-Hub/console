@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-LOG_COLLECTIONS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: log-collections
+title: 集群日志收集 · 收集器、输入与输出
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/log-collections'
+prd: prd/kube-frontend/cluster-management/log-collections.md
+design: design/kube-frontend/cluster-management/log-collections.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-LOG_COLLECTIONS-01
+
+story:
+- US1
+
+product: 集群日志收集只读页：收集器（含就绪 Pod 数）、输入清单、输出清单。
+preconditions:
+- 已登录，且对 host 集群有读取权限
+- 集群部署了日志收集（logging.kubesphere.io CR 存在）
+steps:
+- 用 API 读取 fluentbits / inputs / outputs 与收集器 Pod
+- 打开集群日志收集页
+- 核对三区条数
+- 核对收集器徽标显示就绪 Pod 数
+expected:
+- 页可达且 ready
+- 收集器、输入、输出条数分别等于 CR 条数
+- 就绪 Pod 数等于 Running 的收集器 Pod 数
+troubleshoot:
+- 整页 404 或空：读了 kapis（404），应读 /apis/logging.kubesphere.io
+- 徽标恒为「未知」：依赖了 CR status（本集群为空）
+- 输入插件列为空：spec 插件键取错（第一个键就是插件）
+update_automation:
+- 选择器见 pages/cluster_management.py 与 ClusterLogCollectionsPage.tsx
