@@ -51,7 +51,9 @@ export default class App extends Component {
     if (params.cluster) {
       await Promise.all([
         this.store.fetchDetail({ name: params.cluster }),
-        this.props.rootStore.getRules({ cluster: params.cluster }),
+        this.props.rootStore
+          .getRules({ cluster: params.cluster })
+          .catch(() => null),
       ])
 
       if (this.store.detail.isReady) {

@@ -19,7 +19,7 @@
 import React from 'react'
 import { get } from 'lodash'
 import { Column, Columns, Form } from '@kube-design/components'
-import { NumberInput } from 'components/Inputs'
+import { NumberInput, PropertiesInput } from 'components/Inputs'
 import { MODULE_KIND_MAP } from 'utils/constants'
 
 export default class JobSettings extends React.Component {
@@ -33,10 +33,10 @@ export default class JobSettings extends React.Component {
   }
 
   render() {
-    const { formRef } = this.props
+    const { formRef, formProps, withMetadata } = this.props
 
     return (
-      <Form data={this.formTemplate} ref={formRef}>
+      <Form data={this.formTemplate} ref={formRef} {...formProps}>
         <Columns>
           <Column>
             <Form.Item
@@ -75,6 +75,20 @@ export default class JobSettings extends React.Component {
             </Form.Item>
           </Column>
         </Columns>
+        {withMetadata && (
+          <>
+            <Form.Item label={t('LABEL_PL')}>
+              <PropertiesInput name="metadata.labels" addText={t('ADD')} />
+            </Form.Item>
+            <Form.Item label={t('ANNOTATION_PL')}>
+              <PropertiesInput
+                name="metadata.annotations"
+                addText={t('ADD')}
+                hiddenKeys={globals.config.preservedAnnotations}
+              />
+            </Form.Item>
+          </>
+        )}
       </Form>
     )
   }

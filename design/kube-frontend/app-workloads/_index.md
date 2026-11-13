@@ -133,6 +133,7 @@
 | 详情 | `prd/…/detail.md` | `design/…/detail.md` |
 | 重新部署 | `prd/…/redeploy.md` | `design/…/redeploy.md` |
 | 编辑 YAML | `prd/…/edit-yaml.md` | `design/…/edit-yaml.md` |
+| 编辑设置 | `prd/…/edit-settings.md` | `design/…/edit-settings.md` |
 | 删除 | `prd/…/delete.md` | `design/…/delete.md` |
 
 ### DEC-L2-KUBE-FRONTEND-APP_WORKLOADS-05 — 服务编辑只改端口，且整表提交

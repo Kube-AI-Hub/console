@@ -49,9 +49,17 @@ export default class AdvancedSettings extends React.Component {
   }
 
   render() {
-    const { formRef, store, module, cluster, prefix, isFederated } = this.props
+    const {
+      formRef,
+      store,
+      module,
+      cluster,
+      prefix,
+      isFederated,
+      formProps,
+    } = this.props
     return (
-      <Form data={this.fedFormTemplate} ref={formRef}>
+      <Form data={this.fedFormTemplate} ref={formRef} {...formProps}>
         {globals.app.hasClusterModule(cluster, 'network.ippool') &&
           !isFederated && (
             <PodIPRange

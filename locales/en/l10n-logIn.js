@@ -33,6 +33,8 @@ module.exports = {
   FAILED_TO_ACCESS_BACKEND: 'Failed to access the backend services.',
   FAILED_TO_ACCESS_API_SERVER: 'Failed to access the API server.',
   LOGIN_AGAIN_DESC: 'The session has timed out or the user has logged in elsewhere. Please log in again.',
+  MEMBER_CLUSTER_AUTH_FAILED: 'Unable to verify your sign-in for this cluster',
+  MEMBER_CLUSTER_AUTH_FAILED_DESC: 'You are still signed in to this console. This cluster cannot confirm your sign-in right now. Refresh later, or ask an administrator to check how the cluster is connected.',
   INCORRECT_USERNAME_OR_PASSWORD: 'Incorrect username or password.',
   INCORRECT_PASSWORD: 'Incorrect password.',
   USER_NOT_FOUND: 'User not found.',

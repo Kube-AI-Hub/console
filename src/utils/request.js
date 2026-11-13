@@ -21,7 +21,7 @@ import qs from 'qs'
 import { isObject, get, set, merge, isEmpty } from 'lodash'
 import { Notify } from '@kube-design/components'
 
-import { getClusterUrl, safeParseJSON } from './index'
+import { getClusterUrl, isMemberClusterPage, safeParseJSON } from './index'
 import { getToken, removeToken } from './token'
 import { isLoginRequestUrl, mapOAuthLoginMessage } from './loginError'
 
@@ -178,8 +178,15 @@ function handleResponse(response, reject, request = {}) {
       if (response.status === 401) {
         console.warn('Unauthorized', response, response.ok)
 
-        // Login 401 is a normal credential failure; everything else is session timeout.
-        if (!isLoginRequest) {
+        // 成员集群用自己的 token 缓存校验主集群签发的登录 token，缓存未命中时也是 401。
+        // 这不是本机会话失效，不能清掉 token。
+        const memberClusterTokenError = isMemberClusterPage(
+          window.location.pathname,
+          data.message || 'Please login again'
+        )
+
+        // 登录请求的 401 是正常的凭据错误；成员集群 token 校验失败也不是会话失效。
+        if (!isLoginRequest && !memberClusterTokenError) {
           removeToken()
           const pathname = window.location.pathname
           if (pathname !== '/login') {

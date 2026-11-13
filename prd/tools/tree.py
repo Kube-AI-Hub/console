@@ -702,6 +702,13 @@ MODULES = [
                         ]},
                     },
                     {
+                        "id": "edit-settings",
+                        "title": "编辑设置",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-01",
+                        ]},
+                    },
+                    {
                         "id": "delete",
                         "title": "删除负载",
                         "tests": {"L3": [

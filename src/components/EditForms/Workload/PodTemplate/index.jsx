@@ -20,6 +20,8 @@ import React from 'react'
 import { get, omit } from 'lodash'
 import { Form } from '@kube-design/components'
 import Base from 'components/Forms/Workload/ContainerSettings'
+import Metadata from 'components/Forms/Workload/ContainerSettings/Metadata'
+import PodSecurityContext from 'components/Forms/Workload/ContainerSettings/PodSecurityContext'
 import { resolveGpuCardTypeFromResourceKeys } from 'utils'
 
 export default class PodTemplate extends Base {
@@ -61,10 +63,7 @@ export default class PodTemplate extends Base {
       const limits = get(item, 'resources.limits', {})
       const reqGpu = omit(requests, ['cpu', 'memory'])
       const limGpu = omit(limits, ['cpu', 'memory'])
-      const keySet = new Set([
-        ...Object.keys(reqGpu),
-        ...Object.keys(limGpu),
-      ])
+      const keySet = new Set([...Object.keys(reqGpu), ...Object.keys(limGpu)])
       if (keySet.size === 0) {
         return
       }
@@ -81,6 +80,15 @@ export default class PodTemplate extends Base {
     return (
       <Form data={data} ref={formRef} {...formProps}>
         {this.renderContainerList()}
+        <PodSecurityContext prefix={`${this.prefix}spec.securityContext`} />
+        <Form.Group
+          label={t('ADD_METADATA')}
+          desc={t('POD_ADD_METADATA_DESC')}
+          keepDataWhenUnCheck
+          checkable
+        >
+          <Metadata name={`${this.prefix}metadata.annotations`} />
+        </Form.Group>
       </Form>
     )
   }

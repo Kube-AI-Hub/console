@@ -1,0 +1,40 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: edit-settings
+title: 编辑设置 · 部署可改节点，任务只改策略
+entry_url: "{BASE_URL}/clusters/host/projects/default/deployments"
+prd: prd/kube-frontend/app-workloads/edit-settings.md
+design: design/kube-frontend/app-workloads/edit-settings.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-01
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-02
+
+story:
+- US1
+- US2
+
+product: 老 console 的部署「编辑设置」含「选择节点」；任务「编辑设置」含「最大重试次数」且不含「选择节点」；容器组详情没有「编辑设置」。
+preconditions:
+- 已登录，且在 host 集群的 default 项目
+- 用例自行创建并在结束后删除一个部署、一个任务和一个容器组
+
+steps:
+- 打开该部署在老 console 的资源状态页，从「更多」进入「编辑设置」，再打开「高级设置」
+- 打开该任务在老 console 的详情，从「更多」进入「编辑设置」
+- 打开该容器组在老 console 的详情，打开「更多」
+
+expected:
+- 部署编辑弹窗可见「选择节点」
+- 任务编辑弹窗可见「最大重试次数」，且不可见「选择节点」
+- 容器组详情的操作菜单没有「编辑设置」
+
+troubleshoot:
+- 页签缺失时先确认打开的是老 console 路径 /clusters/...，不是 /kube-frontend/...
+- 线上镜像未包含本次构建时，部署编辑弹窗还没有「高级设置」
+
+update_automation:
+- 文案变化时改本用例的可见文本

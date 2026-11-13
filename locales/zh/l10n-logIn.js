@@ -32,6 +32,8 @@ module.exports = {
   FAILED_TO_ACCESS_BACKEND: '访问后端服务失败。',
   FAILED_TO_ACCESS_API_SERVER: '访问 API 服务失败。',
   LOGIN_AGAIN_DESC: '会话已超时或用户已从其他地方登录，请重新登录。',
+  MEMBER_CLUSTER_AUTH_FAILED: '无法验证该集群的登录状态',
+  MEMBER_CLUSTER_AUTH_FAILED_DESC: '你在当前控制台的登录仍然有效。该集群暂时无法确认登录信息，请稍后刷新；如果一直出现，请联系管理员检查集群接入。',
   INCORRECT_USERNAME_OR_PASSWORD: '用户名或密码错误。',
   INCORRECT_PASSWORD: '密码不正确。',
   USER_NOT_FOUND: '用户不存在。',

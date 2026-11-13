@@ -36,8 +36,23 @@ import i18n from './i18n'
 import { ensureSessionContext } from './session'
 import 'core-js/stable'
 
+let memberAuthNotifiedAt = 0
+
+function notifyMemberClusterAuthError() {
+  const now = Date.now()
+  if (now - memberAuthNotifiedAt < 6000) {
+    return
+  }
+  memberAuthNotifiedAt = now
+  Notify.error({
+    title: t('MEMBER_CLUSTER_AUTH_FAILED'),
+    content: t('MEMBER_CLUSTER_AUTH_FAILED_DESC'),
+    duration: 6000,
+  })
+}
+
 // request error handler
-window.onunhandledrejection = function (event) {
+window.onunhandledrejection = function(event) {
   const err = event?.reason || event
   if (!err || err.source === 'login') {
     // 忽略已经在登录表单中处理过的错误
@@ -54,17 +69,30 @@ window.onunhandledrejection = function (event) {
 
   if (err && (err.status === 'Failure' || err.status >= 400)) {
     if (err.status === 401 || err.reason === 'Unauthorized') {
-      // session timeout handler, except app store page.
-      removeToken()
-      if (!isAppsPage() && !isMemberClusterPage(location.pathname, err.message)) {
+      // 成员集群不认主集群 token 时也是 401。只给一句说明，不能清本机会话。
+      if (isMemberClusterPage(location.pathname, err.message)) {
+        notifyMemberClusterAuthError()
+      } else if (!isAppsPage()) {
+        removeToken()
         /* eslint-disable no-alert */
         location.href = `/login?referer=${location.pathname}`
         window.alert(t('LOGIN_AGAIN_DESC'))
       } else {
-        Notify.error({ title: err.reason, content: t(err.message), duration: 6000 })
+        Notify.error({
+          title: err.reason,
+          content: t(err.message),
+          duration: 6000,
+        })
       }
-    } else if (globals.config.enableErrorNotify && (err.reason || err.message)) {
-      Notify.error({ title: err.reason, content: t(err.message), duration: 6000 })
+    } else if (
+      globals.config.enableErrorNotify &&
+      (err.reason || err.message)
+    ) {
+      Notify.error({
+        title: err.reason,
+        content: t(err.message),
+        duration: 6000,
+      })
     }
   }
 }

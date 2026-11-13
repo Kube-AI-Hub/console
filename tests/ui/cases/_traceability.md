@@ -74,6 +74,8 @@
 | kube-frontend/app-workloads/detail | `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-PODS_BLOCK-01` | `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-PODS_BLOCK-01` | [`design/kube-frontend/app-workloads/detail.md`](../../../design/kube-frontend/app-workloads/detail.md) | [`tests/ui/tests/kube-frontend/app-workloads/test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_PODS_BLOCK_01.py`](../../../tests/ui/tests/kube-frontend/app-workloads/test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_PODS_BLOCK_01.py) |
 | kube-frontend/app-workloads/detail | `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-SERVICE_PODS-01` | `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-SERVICE_PODS-01` | [`design/kube-frontend/app-workloads/detail.md`](../../../design/kube-frontend/app-workloads/detail.md) | [`tests/ui/tests/kube-frontend/app-workloads/test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_SERVICE_PODS_01.py`](../../../tests/ui/tests/kube-frontend/app-workloads/test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_SERVICE_PODS_01.py) |
 | kube-frontend/app-workloads/detail | `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-STATEFUL_SERVICE-01` | `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-STATEFUL_SERVICE-01` | [`design/kube-frontend/app-workloads/detail.md`](../../../design/kube-frontend/app-workloads/detail.md) | [`tests/ui/tests/kube-frontend/app-workloads/test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_STATEFUL_SERVICE_01.py`](../../../tests/ui/tests/kube-frontend/app-workloads/test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_STATEFUL_SERVICE_01.py) |
+| kube-frontend/app-workloads/edit-settings | `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-01` | `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-01` | [`design/kube-frontend/app-workloads/edit-settings.md`](../../../design/kube-frontend/app-workloads/edit-settings.md) | [`tests/ui/tests/kube-frontend/app-workloads/test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_EDIT_SETTINGS_01.py`](../../../tests/ui/tests/kube-frontend/app-workloads/test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_EDIT_SETTINGS_01.py) |
+| kube-frontend/app-workloads/edit-settings | `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-02` | `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-01` | [`design/kube-frontend/app-workloads/edit-settings.md`](../../../design/kube-frontend/app-workloads/edit-settings.md) | [`tests/ui/tests/kube-frontend/app-workloads/test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_EDIT_SETTINGS_01.py`](../../../tests/ui/tests/kube-frontend/app-workloads/test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_EDIT_SETTINGS_01.py) |
 | kube-frontend/app-workloads/edit-yaml | `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_YAML-01` | `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_YAML-01` | [`design/kube-frontend/app-workloads/edit-yaml.md`](../../../design/kube-frontend/app-workloads/edit-yaml.md) | [`tests/ui/tests/kube-frontend/app-workloads/test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_EDIT_YAML_01.py`](../../../tests/ui/tests/kube-frontend/app-workloads/test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_EDIT_YAML_01.py) |
 | kube-frontend/app-workloads/list | `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-01` | `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-01` | [`design/kube-frontend/app-workloads/list.md`](../../../design/kube-frontend/app-workloads/list.md) | [`tests/ui/tests/kube-frontend/app-workloads/test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_LIST_01.py`](../../../tests/ui/tests/kube-frontend/app-workloads/test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_LIST_01.py) |
 | kube-frontend/app-workloads/list | `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-02` | `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-02` | [`design/kube-frontend/app-workloads/list.md`](../../../design/kube-frontend/app-workloads/list.md) | [`tests/ui/tests/kube-frontend/app-workloads/test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_LIST_02.py`](../../../tests/ui/tests/kube-frontend/app-workloads/test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_LIST_02.py) |
@@ -224,7 +226,7 @@
 
 ## 小结
 
-- 需求里的 AC：217 条，其中未覆盖 1 条、无技术方案承接 12 条、无用例规格实现 1 条。
+- 需求里的 AC：219 条，其中未覆盖 1 条、无技术方案承接 12 条、无用例规格实现 1 条。
 - 未覆盖：`AC-L2-KUBE-FRONTEND-LOGIN-07`
 - 无技术方案承接：`AC-L2-KUBE-FRONTEND-LOGIN-01`, `AC-L2-KUBE-FRONTEND-LOGIN-02`, `AC-L2-KUBE-FRONTEND-LOGIN-03`, `AC-L2-KUBE-FRONTEND-LOGIN-04`, `AC-L2-KUBE-FRONTEND-LOGIN-05`, `AC-L2-KUBE-FRONTEND-LOGIN-06`, `AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L2-KUBE-FRONTEND-THEME-01`, `AC-L2-KUBE-FRONTEND-THEME-02`, `AC-L2-KUBE-FRONTEND-THEME-03`, `AC-L2-KUBE-FRONTEND-THEME-04`, `AC-L2-KUBE-FRONTEND-THEME-05`
 - 无用例规格实现：`AC-L2-KUBE-FRONTEND-LOGIN-07`
@@ -291,6 +293,8 @@
 | kube-frontend/app-workloads/_index | `US3` | `TC-FULL-KUBE-FRONTEND-APP_WORKLOADS-01` |
 | kube-frontend/app-workloads/delete | `US1` | `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DELETE-01` |
 | kube-frontend/app-workloads/detail | `US1` | `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-01`, `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-02`, `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-03`, `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-04`, `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-05`, `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-JOB_RUNS-01`, `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-PODS_BLOCK-01`, `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-SERVICE_PODS-01`, `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-STATEFUL_SERVICE-01` |
+| kube-frontend/app-workloads/edit-settings | `US1` | `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-01` |
+| kube-frontend/app-workloads/edit-settings | `US2` | `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-01` |
 | kube-frontend/app-workloads/edit-yaml | `US1` | `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_YAML-01` |
 | kube-frontend/app-workloads/list | `US1` | `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-01`, `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-02`, `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-03` |
 | kube-frontend/app-workloads/redeploy | `US1` | `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-REDEPLOY-01` |
@@ -427,4 +431,4 @@
 | kube-frontend/workbench/context | `US1` | `TC-L3-KUBE-FRONTEND-WORKBENCH-CONTEXT-01` |
 | kube-frontend/workbench/entry | `US1` | `TC-L3-KUBE-FRONTEND-WORKBENCH-ENTRY-01` |
 
-- 用户故事：193 条，其中未覆盖 0 条。
+- 用户故事：195 条，其中未覆盖 0 条。
