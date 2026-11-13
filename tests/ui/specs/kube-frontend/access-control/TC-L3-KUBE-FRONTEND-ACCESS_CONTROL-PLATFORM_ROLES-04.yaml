@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-04
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: platform-roles
+title: 平台角色详情 · 授权规则
+entry_url: '{BASE_URL}/kube-frontend/access/clusterroles'
+prd: prd/kube-frontend/access-control/platform-roles.md
+design: design/kube-frontend/access-control/platform-roles.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-04
+
+story:
+- US2
+
+product: 从平台角色列表点名称进入详情：名称、别名、规则数、创建时间、描述，以及逐条授权规则（API 组/资源/动词）；模板角色带徽标。
+preconditions:
+- 已登录平台管理
+- 平台上有平台角色（clusterroles）
+steps:
+- 用 API 读取平台角色列表与其中第一个非模板角色的对象
+- 打开平台角色列表，点击该角色名称
+- 核对 URL 与基本信息（规则数等于 rules 长度）
+- 核对规则表行数等于 rules 长度
+expected:
+- 详情页可达且 ready
+- 规则数显示与对象 rules 长度一致
+- 规则逐条渲染（API 组/资源/动词）
+troubleshoot:
+- 规则为空：读的是列表接口而非单个对象
+- 名称不可点：列表名称未接详情链接
+- 显示原始 key：新增文案后未重新构建前端包
+update_automation:
+- 选择器见 pages/access_control.py 与 ClusterRoleDetailPage.tsx

@@ -114,6 +114,7 @@ export {
   configScalar,
   passwordProblem,
   userDetailApi,
+  clusterRoleDetailApi,
   usersWriteApi,
   NOTIFICATION_CHANNELS,
   platformInfoApi,
@@ -130,6 +131,7 @@ export {
 export type {
   AccessKind,
   AssignablePlatformRole,
+  ClusterRoleDetail,
   ClusterRoleSummary,
   EditableRule,
   RoleVerb,

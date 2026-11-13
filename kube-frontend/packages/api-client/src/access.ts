@@ -465,6 +465,39 @@ export type AssignablePlatformRole = (typeof ASSIGNABLE_PLATFORM_ROLES)[number];
  * user who can sign in but can do nothing, which reads as a console bug rather than a
  * permissions one.
  */
+/**
+ * One cluster role, with its rules.
+ *
+ * Read from the IAM aggregate (the same path the list uses); the rules are what the role
+ * actually grants, and the old console's detail page is essentially this table.
+ */
+export interface ClusterRoleDetail extends ClusterRoleSummary {
+  rules: Array<{ apiGroups: string; resources: string; verbs: string }>;
+  labels: Record<string, string>;
+  annotations: Record<string, string>;
+}
+
+export function clusterRoleDetailApi(client: Client) {
+  return {
+    async get(params: { name: string; signal?: AbortSignal }): Promise<ClusterRoleDetail> {
+      const item = await client.request<KubeAccess>(`${KAPIS_IAM}/clusterroles/${encodeURIComponent(params.name)}`, {
+        ...(params.signal ? { signal: params.signal } : {}),
+      });
+      const summary = toClusterRoleSummary(item);
+      return {
+        ...summary,
+        rules: ((item.rules ?? []) as Array<Record<string, unknown>>).map((rule) => ({
+          apiGroups: Array.isArray(rule['apiGroups']) ? (rule['apiGroups'] as string[]).join(', ') : '',
+          resources: Array.isArray(rule['resources']) ? (rule['resources'] as string[]).join(', ') : '',
+          verbs: Array.isArray(rule['verbs']) ? (rule['verbs'] as string[]).join(', ') : '',
+        })),
+        labels: (item.metadata?.labels ?? {}) as Record<string, string>,
+        annotations: (item.metadata?.annotations ?? {}) as Record<string, string>,
+      };
+    },
+  };
+}
+
 export function usersWriteApi(client: Client) {
   return {
     async create(params: {

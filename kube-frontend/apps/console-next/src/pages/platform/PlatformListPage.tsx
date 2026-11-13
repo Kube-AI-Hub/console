@@ -136,7 +136,13 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
                     return (
                       <span className="flex min-w-0 flex-col">
                         <span className="flex items-center gap-1.5">
-                          <span className="truncate font-medium text-ai-fg">{role.alias || role.name}</span>
+                          <Link
+                          to="/kube-frontend/access/clusterroles/$name"
+                          params={{ name: role.name }}
+                          className="truncate font-medium text-ai-accent hover:underline"
+                        >
+                          {role.alias || role.name}
+                        </Link>
                           {role.system ? <Badge tone="neutral">{t('platform.roles.templateBadge')}</Badge> : null}
                         </span>
                         <span className="truncate text-[11px] text-ai-fg-muted">{role.description || '-'}</span>

@@ -415,6 +415,7 @@ modules:
         L3:
         - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-01
         - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-02
+        - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-05
     - id: platform-roles
       title: 平台角色列表
       prd: prd/kube-frontend/access-control/platform-roles.md
@@ -422,6 +423,7 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-01
+        - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-02
     - id: workspaces
       title: 企业空间列表
       prd: prd/kube-frontend/access-control/workspaces.md

@@ -42,6 +42,7 @@
 | kube-frontend/access-control/platform-roles | `AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-01` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-01` | [`design/kube-frontend/access-control/platform-roles.md`](../../../design/kube-frontend/access-control/platform-roles.md) | [`tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_PLATFORM_ROLES_01.py`](../../../tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_PLATFORM_ROLES_01.py) |
 | kube-frontend/access-control/platform-roles | `AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-02` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-02` | [`design/kube-frontend/access-control/platform-roles.md`](../../../design/kube-frontend/access-control/platform-roles.md) | [`tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_PLATFORM_ROLES_02.py`](../../../tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_PLATFORM_ROLES_02.py) |
 | kube-frontend/access-control/platform-roles | `AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-03` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-03` | [`design/kube-frontend/access-control/platform-roles.md`](../../../design/kube-frontend/access-control/platform-roles.md) | [`tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_PLATFORM_ROLES_03.py`](../../../tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_PLATFORM_ROLES_03.py) |
+| kube-frontend/access-control/platform-roles | `AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-04` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-04` | [`design/kube-frontend/access-control/platform-roles.md`](../../../design/kube-frontend/access-control/platform-roles.md) | [`tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_PLATFORM_ROLES_04.py`](../../../tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_PLATFORM_ROLES_04.py) |
 | kube-frontend/access-control/user-detail | `AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USER_DETAIL-01` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USER_DETAIL-01` | [`design/kube-frontend/access-control/user-detail.md`](../../../design/kube-frontend/access-control/user-detail.md) | [`tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_USER_DETAIL_01.py`](../../../tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_USER_DETAIL_01.py) |
 | kube-frontend/access-control/users | `AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-01` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-01` | [`design/kube-frontend/access-control/users.md`](../../../design/kube-frontend/access-control/users.md) | [`tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_USERS_01.py`](../../../tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_USERS_01.py) |
 | kube-frontend/access-control/users | `AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-02` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-02` | [`design/kube-frontend/access-control/users.md`](../../../design/kube-frontend/access-control/users.md) | [`tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_USERS_02.py`](../../../tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_USERS_02.py) |
@@ -223,7 +224,7 @@
 
 ## 小结
 
-- 需求里的 AC：216 条，其中未覆盖 1 条、无技术方案承接 12 条、无用例规格实现 1 条。
+- 需求里的 AC：217 条，其中未覆盖 1 条、无技术方案承接 12 条、无用例规格实现 1 条。
 - 未覆盖：`AC-L2-KUBE-FRONTEND-LOGIN-07`
 - 无技术方案承接：`AC-L2-KUBE-FRONTEND-LOGIN-01`, `AC-L2-KUBE-FRONTEND-LOGIN-02`, `AC-L2-KUBE-FRONTEND-LOGIN-03`, `AC-L2-KUBE-FRONTEND-LOGIN-04`, `AC-L2-KUBE-FRONTEND-LOGIN-05`, `AC-L2-KUBE-FRONTEND-LOGIN-06`, `AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L2-KUBE-FRONTEND-THEME-01`, `AC-L2-KUBE-FRONTEND-THEME-02`, `AC-L2-KUBE-FRONTEND-THEME-03`, `AC-L2-KUBE-FRONTEND-THEME-04`, `AC-L2-KUBE-FRONTEND-THEME-05`
 - 无用例规格实现：`AC-L2-KUBE-FRONTEND-LOGIN-07`
@@ -279,6 +280,7 @@
 | kube-frontend/access-control/_index | `US1` | `TC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-01` |
 | kube-frontend/access-control/_index | `US2` | `TC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-01` |
 | kube-frontend/access-control/platform-roles | `US1` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-01`, `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-02`, `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-03` |
+| kube-frontend/access-control/platform-roles | `US2` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-04` |
 | kube-frontend/access-control/user-detail | `US1` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USER_DETAIL-01` |
 | kube-frontend/access-control/users | `US1` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-01`, `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-02`, `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-03`, `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-04` |
 | kube-frontend/access-control/users | `US2` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-05` |
@@ -425,4 +427,4 @@
 | kube-frontend/workbench/context | `US1` | `TC-L3-KUBE-FRONTEND-WORKBENCH-CONTEXT-01` |
 | kube-frontend/workbench/entry | `US1` | `TC-L3-KUBE-FRONTEND-WORKBENCH-ENTRY-01` |
 
-- 用户故事：192 条，其中未覆盖 0 条。
+- 用户故事：193 条，其中未覆盖 0 条。
