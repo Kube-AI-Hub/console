@@ -200,10 +200,6 @@
   },
   "name": "kubesphere-console",
   "private": true,
-  "resolutions": {
-    "@types/react": "17.0.2",
-    "@types/react-dom": "17.0.2"
-  },
   "scripts": {
     "build": "yarn build:client && yarn build:server && yarn build:docs",
     "build:client": "webpack --mode production --config scripts/webpack.prod.js --stats errors-only",
@@ -214,7 +210,7 @@
     "dev:docs": "cd kube-docs && rm -rf public/ resources/ && hugo --baseURL 'http://localhost:1313/kube-docs/' && npx pagefind --site public && cp -r public/pagefind static/ && hugo server -D",
     "dev:server": "cross-env NODE_ENV=development nodemon -w ./common -w ./server -e js,yaml server/server.js",
     "lint": "eslint src/**/*.jsx src/**/*.js",
-    "postinstall": "yarn workspaces run build --if-present && rimraf node_modules/.cache",
+    "postinstall": "for d in packages/*; do [ -f \"$d/package.json\" ] && yarn --cwd \"$d\" run --if-present build; done && rimraf node_modules/.cache",
     "prebuild": "(test -d node_modules || yarn install) && rimraf dist",
     "prestart": "test -d node_modules || yarn install",
     "release": "standard-version",
