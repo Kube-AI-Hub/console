@@ -140,6 +140,8 @@ export type {
 } from './access';
 export {
   KAPIS_IAM,
+  LOG_COLLECTION_LABEL,
+  logCollectionApi,
   isTemplateRole,
   membersApi,
   NETWORK_ISOLATE_ANNOTATION,

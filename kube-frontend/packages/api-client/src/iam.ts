@@ -568,3 +568,70 @@ function splitCsv(value: string): string[] {
     .map((entry) => entry.trim())
     .filter(Boolean);
 }
+
+/**
+ * Project log collection.
+ *
+ * KubeSphere stores this as a **label on the project's namespace**:
+ * `logging.kubesphere.io/logsidecar-injection` — `enabled` means a log sidecar is
+ * injected into the project's pods. The old console's page is nothing more than that
+ * switch, so the whole feature is one label read and one merge patch.
+ *
+ * A label, not an annotation, and not a CR: reading it from anywhere else would produce
+ * a page that disagrees with what the injector actually looks at.
+ */
+export const LOG_COLLECTION_LABEL = 'logging.kubesphere.io/logsidecar-injection';
+
+export interface LogCollectionState {
+  /** True only when the label is exactly `enabled`. */
+  enabled: boolean;
+  /** The raw label value, for the "never configured" case. */
+  raw: string;
+  /** Whether a log backend exists on this cluster, from the cluster's configz. */
+  supported: boolean;
+}
+
+export function logCollectionApi(client: Client) {
+  const nsPath = (namespace: string) => `/kapis/resources.kubesphere.io/v1alpha3/namespaces/${encodeURIComponent(namespace)}`;
+
+  return {
+    async get(params: { namespace: string; cluster: string; signal?: AbortSignal }): Promise<LogCollectionState> {
+      const signal = params.signal ? { signal: params.signal } : {};
+      const [namespace, cluster] = await Promise.all([
+        client.request<KubeIam>(nsPath(params.namespace), signal),
+        // A cluster without the logging module cannot honour the switch, and offering it
+        // would let a reader enable something that does nothing.
+        client
+          .request<{ status?: { configz?: Record<string, boolean> } }>(
+            `/kapis/cluster.kubesphere.io/v1alpha1/clusters/${encodeURIComponent(params.cluster)}`,
+            signal,
+          )
+          .catch(() => undefined),
+      ]);
+      const raw = String((namespace?.metadata?.labels ?? {})[LOG_COLLECTION_LABEL] ?? '');
+      return {
+        enabled: raw === 'enabled',
+        raw,
+        supported: cluster?.status?.configz?.['logging'] !== false,
+      };
+    },
+
+    /**
+     * Turn collection on or off.
+     *
+     * A merge patch on the one label: a PUT would replace the namespace and could drop
+     * the project's other labels — including the workspace label that says which
+     * enterprise space the project belongs to.
+     */
+    async setEnabled(params: { namespace: string; enabled: boolean }): Promise<void> {
+      await client.request(`/api/v1/namespaces/${encodeURIComponent(params.namespace)}`, {
+        method: 'PATCH',
+        contentType: 'application/merge-patch+json',
+        body: { metadata: { labels: { [LOG_COLLECTION_LABEL]: params.enabled ? 'enabled' : 'disabled' } } },
+      });
+    },
+  };
+}
+
+export type LogCollectionApi = ReturnType<typeof logCollectionApi>;
+

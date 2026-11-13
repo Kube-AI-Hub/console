@@ -148,6 +148,7 @@ export const AREAS: readonly Area[] = [
       { key: 'members', path: 'members', titleKey: 'settings.members.title', status: 'ready' },
       { key: 'networkpolicies', path: 'networkpolicies', titleKey: 'settings.network.title', status: 'ready' },
       { key: 'gateways', path: 'gateways', titleKey: 'settings.gateway.title', status: 'ready' },
+      { key: 'logging', path: 'logging', titleKey: 'logCollection.title', status: 'ready' },
     ],
   },
   {

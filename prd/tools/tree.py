@@ -526,6 +526,16 @@ MODULES = [
                         "title": "项目成员列表",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-01"]},
                     },
+                    {
+                        "id": "gateway",
+                        "title": "网关设置",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-01"]},
+                    },
+                    {
+                        "id": "logging",
+                        "title": "日志收集",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-LOGGING-01"]},
+                    },
                 ],
             },
             {

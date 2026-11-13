@@ -1,0 +1,43 @@
+id: TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-LOGGING-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: project-settings
+feature: logging
+title: 日志收集 · 三态与开关写入标签
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/logging'
+prd: prd/kube-frontend/project-settings/logging.md
+design: design/kube-frontend/project-settings/logging.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-LOGGING-01
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-LOGGING-02
+
+story:
+- US1
+- US2
+- US3
+
+product: 项目日志收集开关读写命名空间标签 logging.kubesphere.io/logsidecar-injection；缺失为未配置、disabled 为已关闭；关闭前有确认。
+preconditions:
+- 已登录，且对 default 项目有管理权限
+- 记录命名空间原标签值，用例结束无条件还原
+steps:
+- 读取命名空间，记下原标签值
+- 打开日志收集页，核对状态为未配置（或原值对应的状态）
+- 开启开关，回读命名空间，核对标签为 enabled
+- 再关闭开关，核对先出现确认区块
+- 点取消，核对标签仍为 enabled
+- 点确认，回读命名空间，核对标签为 disabled
+- 还原原标签
+expected:
+- 标签缺失显示「未配置」，disabled 显示「已关闭」——两者不合并
+- 开启后回读标签为 enabled（不是仅页面变化）
+- 关闭有确认；取消不改标签；确认后为 disabled
+- 写入的是 label 而不是 annotation
+troubleshoot:
+- 页面显示已开启但项目无日志：确认写的是 label（annotation 注入器不读）
+- 关闭后其它标签丢失：说明用了 PUT 而非 merge patch
+- 状态一直「未配置」：确认读的是命名空间对象而不是项目信息接口
+update_automation:
+- 选择器见 pages/project_settings.py；状态三态变化时同步更新
