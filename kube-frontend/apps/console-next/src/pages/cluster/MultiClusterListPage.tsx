@@ -62,10 +62,15 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
     ? all.filter((row) => row.name.toLowerCase().includes(keyword) || row.provider.toLowerCase().includes(keyword))
     : all;
   const rows = React.useMemo(() => {
-    const items = [...filtered];
+    // The host cluster first, whatever the sort: it is the cluster the platform runs
+    // on, and the one a reader looks for by default.
+    const items = [...filtered].sort((a, b) => Number(b.isHost) - Number(a.isHost));
     const direction = list.order === 'asc' ? 1 : -1;
     if (list.sortBy === 'createTime') return items.sort((a, b) => a.createdAt.localeCompare(b.createdAt) * direction);
     if (list.sortBy === 'nodeCount') return items.sort((a, b) => (a.nodeCount - b.nodeCount) * direction);
+    // The host cluster stays first only under the default sort; a reader who asked for
+    // another order (by age, by size) gets exactly that order.
+    if (list.sortBy !== 'name' || list.order !== 'asc') items.sort((a, b) => Number(b.isHost) - Number(a.isHost));
     return items.sort((a, b) => a.name.localeCompare(b.name) * direction);
   }, [filtered, list.sortBy, list.order]);
 
@@ -76,6 +81,7 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
       search: { placeholder: t('cluster.searchPlaceholder'), aiId: 'clusters:search' },
+      refresh: { label: t('cluster.list.refresh'), aiId: 'clusters:refresh', busy: query.isFetching },
       sortableKeys: ['name', 'createTime', 'nodeCount'],
       sortAiPrefix: 'clusters',
       sort: { key: list.sortBy, order: list.order },
@@ -99,8 +105,13 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
               >
                 {row.alias || row.name}
               </Link>
-              <span className="truncate text-[11px] text-ai-fg-muted">
-                {row.alias ? row.name : row.provider || '-'}
+              <span className="flex min-w-0 items-center gap-1">
+                <span className="truncate text-[11px] text-ai-fg-muted">{row.alias ? row.name : row.provider || '-'}</span>
+                {/* The environment tag is the label the platform groups clusters by;
+                    it is what tells two member clusters apart at a glance. */}
+                {row.group ? (
+                  <Badge tone="neutral">{t(`cluster.group.${row.group}` as 'cluster.group.production')}</Badge>
+                ) : null}
               </span>
             </span>
           ),
@@ -126,6 +137,18 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
                 </span>
               ) : null}
             </span>
+          ),
+        },
+        {
+          key: 'role',
+          title: t('cluster.list.role'),
+          width: 110,
+          // Rendered from the label the federation writes, so a member cluster called
+          // `host` is still a member.
+          render: (row: ClusterSummary) => (
+            <Badge tone={row.isHost ? 'info' : 'neutral'}>
+              {row.isHost ? t('cluster.list.host') : t('cluster.list.member')}
+            </Badge>
           ),
         },
         {
@@ -186,6 +209,7 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
         loading={state === 'loading'}
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}
+        onRefresh={() => void query.refetch()}
         onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
           if (next) list.setSort(next);
         }}

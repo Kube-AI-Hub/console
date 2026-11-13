@@ -95,6 +95,7 @@
 | kube-frontend/cluster-management/cluster-edit-info | `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EDIT_INFO-01` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EDIT_INFO-01` | [`design/kube-frontend/cluster-management/cluster-edit-info.md`](../../../design/kube-frontend/cluster-management/cluster-edit-info.md) | [`tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_EDIT_INFO_01.py`](../../../tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_EDIT_INFO_01.py) |
 | kube-frontend/cluster-management/cluster-edit-info | `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EDIT_INFO-02` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EDIT_INFO-01` | [`design/kube-frontend/cluster-management/cluster-edit-info.md`](../../../design/kube-frontend/cluster-management/cluster-edit-info.md) | [`tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_EDIT_INFO_01.py`](../../../tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_EDIT_INFO_01.py) |
 | kube-frontend/cluster-management/cluster-list | `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-01` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-01` | [`design/kube-frontend/cluster-management/cluster-list.md`](../../../design/kube-frontend/cluster-management/cluster-list.md) | [`tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_LIST_01.py`](../../../tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_LIST_01.py) |
+| kube-frontend/cluster-management/cluster-list | `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-02` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-01` | [`design/kube-frontend/cluster-management/cluster-list.md`](../../../design/kube-frontend/cluster-management/cluster-list.md) | [`tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_LIST_01.py`](../../../tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_LIST_01.py) |
 | kube-frontend/cluster-management/cluster-switch | `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_SWITCH-01` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_SWITCH-01` | [`design/kube-frontend/cluster-management/cluster-switch.md`](../../../design/kube-frontend/cluster-management/cluster-switch.md) | [`tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_SWITCH_01.py`](../../../tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_SWITCH_01.py) |
 | kube-frontend/cluster-management/cluster-switch | `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_SWITCH-02` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_SWITCH-02` | [`design/kube-frontend/cluster-management/cluster-switch.md`](../../../design/kube-frontend/cluster-management/cluster-switch.md) | [`tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_SWITCH_02.py`](../../../tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_SWITCH_02.py) |
 | kube-frontend/cluster-management/components | `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-COMPONENTS-01` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-COMPONENTS-01` | [`design/kube-frontend/cluster-management/components.md`](../../../design/kube-frontend/cluster-management/components.md) | [`tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_COMPONENTS_01.py`](../../../tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_COMPONENTS_01.py) |
@@ -216,7 +217,7 @@
 
 ## 小结
 
-- 需求里的 AC：209 条，其中未覆盖 1 条、无技术方案承接 12 条、无用例规格实现 1 条。
+- 需求里的 AC：210 条，其中未覆盖 1 条、无技术方案承接 12 条、无用例规格实现 1 条。
 - 未覆盖：`AC-L2-KUBE-FRONTEND-LOGIN-07`
 - 无技术方案承接：`AC-L2-KUBE-FRONTEND-LOGIN-01`, `AC-L2-KUBE-FRONTEND-LOGIN-02`, `AC-L2-KUBE-FRONTEND-LOGIN-03`, `AC-L2-KUBE-FRONTEND-LOGIN-04`, `AC-L2-KUBE-FRONTEND-LOGIN-05`, `AC-L2-KUBE-FRONTEND-LOGIN-06`, `AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L2-KUBE-FRONTEND-THEME-01`, `AC-L2-KUBE-FRONTEND-THEME-02`, `AC-L2-KUBE-FRONTEND-THEME-03`, `AC-L2-KUBE-FRONTEND-THEME-04`, `AC-L2-KUBE-FRONTEND-THEME-05`
 - 无用例规格实现：`AC-L2-KUBE-FRONTEND-LOGIN-07`
@@ -301,6 +302,7 @@
 | kube-frontend/cluster-management/cluster-edit-info | `US1` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EDIT_INFO-01` |
 | kube-frontend/cluster-management/cluster-list | `US1` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-01` |
 | kube-frontend/cluster-management/cluster-list | `US2` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-01` |
+| kube-frontend/cluster-management/cluster-list | `US3` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-01` |
 | kube-frontend/cluster-management/cluster-switch | `US1` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_SWITCH-01` |
 | kube-frontend/cluster-management/cluster-switch | `US2` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_SWITCH-02` |
 | kube-frontend/cluster-management/components | `US1` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-COMPONENTS-01` |
@@ -413,4 +415,4 @@
 | kube-frontend/theme | `US1` | `TC-L2-KUBE-FRONTEND-THEME-01` |
 | kube-frontend/theme | `US2` | `TC-L2-KUBE-FRONTEND-THEME-02` |
 
-- 用户故事：187 条，其中未覆盖 0 条。
+- 用户故事：188 条，其中未覆盖 0 条。

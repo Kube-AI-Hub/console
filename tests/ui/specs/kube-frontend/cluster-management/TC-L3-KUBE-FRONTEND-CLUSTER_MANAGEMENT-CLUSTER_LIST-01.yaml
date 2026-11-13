@@ -11,12 +11,14 @@ design: design/kube-frontend/cluster-management/cluster-list.md
 
 covers:
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-01
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-02
 
 story:
 - US1
 - US2
+- US3
 
-product: 平台级集群列表：名称（副行供应者）、状态徽标（未就绪时带原因）、Kubernetes 版本、节点数、创建时间；名称链接进入该集群概览。
+product: 平台级集群列表：名称（别名优先、副行对象名或供应者、环境标签）、状态徽标（未就绪时带原因）、角色（主集群/成员集群）、Kubernetes 版本、节点数、创建时间；主集群置顶；工具栏刷新；名称链接进入该集群概览。
 preconditions:
 - 已登录，且是平台管理员
 - 平台注册了至少一个集群
@@ -24,6 +26,8 @@ steps:
 - 用 API 读取 clusters 集合，记下集群数、其中一个集群的名称与 Ready 条件
 - 打开 /kube-frontend/clusters，等待 surface 就绪
 - 核对表头与行数
+- 核对角色列与集群对象的 host 标签一致，主集群置顶
+- 点工具栏刷新，核对列表重新就绪且行数不变
 - 核对首行名称链接指向 /kube-frontend/clusters/<name>/overview
 - 点进链接，核对进入该集群的概览页
 expected:
@@ -32,7 +36,9 @@ expected:
 - 集群名链接指向 /kube-frontend/clusters/<名称>/overview，点击后概览页就绪
 - 不存在的集群 id 显示「资源不存在」与「重试」，页签仍在
 - 行数等于接口返回的集群数
-- 表头包含 名称、状态、Kubernetes 版本、节点数、创建时间
+- 表头包含 名称、状态、角色、Kubernetes 版本、节点数、创建时间
+- 角色列与 cluster-role.kubesphere.io/host 标签一致；主集群在首行
+- 刷新后列表回到就绪态，行数仍等于接口返回数
 - 就绪徽标与 Ready 条件一致；未就绪时同一行显示条件消息
 - 名称链接可达概览页
 troubleshoot:

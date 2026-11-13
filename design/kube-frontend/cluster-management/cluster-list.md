@@ -9,6 +9,7 @@
 ## 关联需求
 
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-01
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-02
 
 ## 设计目标与非目标
 
@@ -46,6 +47,24 @@
 **被否方案**：`/kube-frontend/clusters/list`。多一段没有语义的路径，且与老 console 的书签不兼容。
 
 **何时重新考虑**：需要把列表放进某个功能区页签时。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-CLUSTER_LIST-04 — 角色来自标签，主集群置顶
+
+**为什么**：主集群由联邦写入的 `cluster-role.kubesphere.io/host` 标签标识，不是名字（成员集群完全可能也叫 `host`）。
+主集群是平台自身所在，读者默认先找它，因此默认排序下置顶；显式选择了其它排序（按时间、按节点数）时不再干预。
+
+**被否方案**：用名称判断主集群。名字是用户可给的，不可靠。
+
+**何时重新考虑**：平台支持多个主机群时（当前不支持）。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-CLUSTER_LIST-05 — 刷新放在工具栏，做成通用能力
+
+**为什么**：集群就绪状态会在读者不操作时改变（刚接入、刚掉线）。没有刷新入口时，唯一办法是重载整页，而人多半不会重载，只会以为「没变化」。
+实现放在 ai-kit 的 `ListSchema.refresh`（可选），任何需要「不自变的列表」都能用，而不是每个页面各写一个按钮。
+
+**被否方案**：定时轮询。对不常变的集合是浪费，且会让「看到的就是最新的」变成假设。
+
+**何时重新考虑**：有真实的实时推送通道时。
 
 ## 系统现状
 

@@ -760,6 +760,14 @@ export interface ClusterSummary {
   connectionType: string;
   /** The description annotation; editable from the list's 编辑信息. */
   description: string;
+  /**
+   * True for the cluster that hosts the platform itself.
+   *
+   * Read from the `cluster-role.kubesphere.io/host` label — the marker the federation
+   * writes and the old console filters on. Not inferred from the name: a member cluster
+   * may legitimately be called `host`.
+   */
+  isHost: boolean;
 }
 
 /** A cluster object flattened for the list. */
@@ -780,6 +788,7 @@ export function toClusterSummary(cluster: KubeCluster): ClusterSummary {
     group: detail.group,
     connectionType: detail.connectionType,
     description: detail.description,
+    isHost: cluster.metadata?.labels?.['cluster-role.kubesphere.io/host'] !== undefined,
   };
 }
 

@@ -1,6 +1,8 @@
 """页面对象：kube-frontend 的集群设置。
 
-集群设置是集群作用域页面，只有**描述**一个可写字段，写在集群对象的注解上。
+集群设置展示集群属性，其中可写的四项（别名、标签、供应商、描述）通过**与列表同一个**
+「编辑信息」弹窗修改；安装器写入的部分（连接方式、端点、版本、节点数）只读。
+
 用例的职责是把「保存成功」与「实际写进去了」分开验证：页面显示只能证明请求回来了，
 只有回读集群对象才能证明注解真的变了——这正是本项目反复出现的「保存成功但没保存」类
 缺陷的检查点。
@@ -52,14 +54,19 @@ class ClusterSettingsPage:
         expect(self.surface).not_to_have_attribute("data-ai-state", "loading", timeout=timeout_ms)
 
     def edit_description(self, value: str) -> None:
+        """改描述：开编辑信息弹窗（与列表共用），只动描述字段，其余保持原样。"""
         self.page.locator('[data-ai-id="cluster-settings:edit"]').click()
-        field = self.page.locator('[data-ai-id="cluster-settings:description-input"]')
+        field = self.page.locator('#ai-field-cluster-edit-description')
         expect(field).to_be_visible(timeout=20_000)
         field.fill(value)
-        self.page.locator('[data-ai-id="cluster-settings:save"]').click()
+        self.page.locator('[data-ai-id="clusters:edit-submit"]').click()
 
     def wait_saved(self, timeout_ms: int = 30_000) -> None:
-        expect(self.page.locator('[data-ai-id="cluster-settings:saved"]')).to_be_visible(timeout=timeout_ms)
+        """等弹窗关闭：保存成功后它自己关，关了就说明请求回来了。
+
+        写入是否生效由用例回读集群对象判定 —— 界面上的值只能证明组件重渲染了。
+        """
+        expect(self.page.locator('[data-ai-id="clusters:edit-submit"]')).to_have_count(0, timeout=timeout_ms)
 
     def description_text(self) -> str:
         return self.page.locator('[data-ai-id="cluster-settings:description"]').last.inner_text().strip()

@@ -129,6 +129,14 @@ export interface ListSchema<TRow> {
    * actions only appear once rows are selected.
    */
   primaryAction?: { key: string; label: React.ReactNode; aiId?: string };
+  /**
+   * A refresh affordance next to the search box.
+   *
+   * For lists whose rows change without the reader acting (a cluster that becomes ready,
+   * a job that finishes): without it the only way to see the new state is a reload, and
+   * people do not reload — they read stale rows and conclude nothing changed.
+   */
+  refresh?: { label: string; aiId?: string; busy?: boolean };
   selection?: 'none' | 'multiple';
   /**
    * Whether a row can be selected.
@@ -217,6 +225,8 @@ export interface ResourceListProps<TRow> {
   onFiltersChange?: (next: Record<string, string>) => void;
   searchValue?: string;
   onSearchChange?: (value: string) => void;
+  /** Paired with `schema.refresh`; the list renders the button only when both exist. */
+  onRefresh?: () => void;
   selectedKeys?: string[];
   onSelectionChange?: (keys: string[]) => void;
   onPageChange?: (page: number) => void;
@@ -292,6 +302,7 @@ export function ResourceList<TRow>({
   onFiltersChange,
   searchValue,
   onSearchChange,
+  onRefresh,
   selectedKeys = [],
   onSelectionChange,
   onPageChange,
@@ -476,6 +487,30 @@ export function ResourceList<TRow>({
                 </svg>
               }
             />
+          ) : null}
+
+          {/*
+           * Refresh sits after the search box, where the old console puts it: next to
+           * the controls that shape the current view, not among the actions that change
+           * the data.
+           */}
+          {schema.refresh && onRefresh ? (
+            <button
+              type="button"
+              onClick={onRefresh}
+              disabled={schema.refresh.busy}
+              aria-label={schema.refresh.label}
+              title={schema.refresh.label}
+              className={cn(
+                'inline-flex size-9 shrink-0 items-center justify-center rounded-ai-md border border-ai-line text-ai-fg-secondary transition-colors duration-ai-fast hover:bg-ai-surface-2 hover:text-ai-fg disabled:opacity-50',
+              )}
+              {...(schema.refresh.aiId ? { 'data-ai-id': schema.refresh.aiId } : {})}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true" className="size-4">
+                <path d="M20 11a8 8 0 1 0-2.3 5.7" />
+                <path d="M20 4v7h-7" />
+              </svg>
+            </button>
           ) : null}
 
           {/*

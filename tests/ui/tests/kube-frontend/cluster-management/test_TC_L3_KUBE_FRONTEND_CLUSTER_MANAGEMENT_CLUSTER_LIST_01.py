@@ -42,6 +42,24 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_LIST_01(cluster_manageme
     rows = surface.locator("[data-ai-row]")
     assert rows.count() == len(clusters), f"行数 {rows.count()} 与接口的 {len(clusters)} 不一致"
 
+    # ---- AC-01: role comes from the federation label, not from the name ----
+    labels = (target.get("metadata") or {}).get("labels") or {}
+    is_host = "cluster-role.kubesphere.io/host" in labels
+    row = surface.locator(f'[data-ai-row="{name}"]')
+    expected_role = "主集群" if is_host else "成员集群"
+    assert expected_role in row.inner_text(), f"角色列应为 {expected_role}: {row.inner_text()[:120]}"
+# The host cluster sorts first: it is the platform's own cluster.
+    if is_host and rows.count() > 1:
+        first = rows.first.get_attribute("data-ai-row")
+        assert first == name, f"主集群应置顶，实际首行是 {first}"
+
+    # ---- AC-02: refresh re-reads the collection ----
+    refresh = ui.page.locator('[data-ai-id="clusters:refresh"]')
+    expect(refresh).to_be_visible(timeout=20_000)
+    refresh.click()
+    expect(surface).not_to_have_attribute("data-ai-state", "loading", timeout=60_000)
+    assert surface.locator("[data-ai-row]").count() == len(clusters)
+
     # ---- US2: readiness matches the object, and a not-ready row explains itself ----
     row_text = surface.locator(f'[data-ai-row="{name}"]').inner_text()
     if ready_condition is not None and ready_condition.get("status") == "True":

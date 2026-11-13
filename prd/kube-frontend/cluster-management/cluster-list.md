@@ -22,9 +22,17 @@
 
 **Independent Test**：核对就绪徽标与集群对象 `Ready` 条件一致；未就绪时同一行显示条件消息。
 
+### US3 - 刚接入的集群不用整页刷新 (Priority: P2)
+
+作为 **平台管理员**，我希望 **点一下就能重新拉取集群列表**，以便 **在成员集群刚连上时不重载整个控制台就能看到它变成就绪**。
+
+**Independent Test**：点工具栏刷新，核对列表重新拉取了集群集合并回到就绪态。
+
 ## 验收场景
 
-- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-01** — 已知平台注册了若干集群，当打开 `/kube-frontend/clusters`，则列出全部集群；每行显示名称（副行为供应者）、状态徽标、Kubernetes 版本、节点数与创建时间；行数等于 `clusters` 接口返回数；名称链接指向该集群的概览页；未就绪的集群显示条件消息。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-01** — 已知平台注册了若干集群，当打开 `/kube-frontend/clusters`，则列出全部集群；每行显示名称（别名优先、副行为对象名或供应者；有环境标签时一并显示）、状态徽标、**角色**（主集群/成员集群）、Kubernetes 版本、节点数与创建时间；主集群排在最前；行数等于 `clusters` 接口返回数；名称链接指向该集群的概览页；未就绪的集群显示条件消息。
+
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-02** — 已知列表处于就绪态，当点击工具栏的刷新，则重新拉取 `clusters` 接口且列表回到就绪态（用于集群刚接入、刚从代理连上等场景，避免只能整页刷新）。
 
 ## 设计目标
 

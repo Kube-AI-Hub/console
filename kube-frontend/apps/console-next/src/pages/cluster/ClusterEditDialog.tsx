@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ApiError, CLUSTER_GROUPS, CLUSTER_PROVIDERS, clusterWriteApi, type ClusterSummary } from '@kube-ai-hub/api-client';
+import { ApiError, CLUSTER_GROUPS, CLUSTER_PROVIDERS, clusterWriteApi } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { Button, Modal } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
@@ -19,10 +19,26 @@ import { errorMessage } from '@/components/resource/ResourceErrorPanel';
  * modules, its addresses). Offering those would let a click silently disagree with the
  * thing that actually configured the cluster, so they are not here.
  */
+/**
+ * The four writable attributes.
+ *
+ * Narrow on purpose: the list row (`ClusterSummary`) and the settings page's detail
+ * object both satisfy it, so there is exactly **one** editor for these fields. A second
+ * editor that knew only some of them would let the two pages disagree about what a
+ * cluster's alias is.
+ */
+export interface ClusterEditable {
+  name: string;
+  alias: string;
+  group: string;
+  provider: string;
+  description: string;
+}
+
 export interface ClusterEditDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  cluster: ClusterSummary | null;
+  cluster: ClusterEditable | null;
   onSaved?: () => void;
 }
 

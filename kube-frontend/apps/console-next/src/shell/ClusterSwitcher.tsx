@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
 import { clustersApi } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { Badge, Button, Icon, Modal } from '@kube-ai-hub/ui';
@@ -30,6 +31,7 @@ export function ClusterSwitcher({ current, collapsed = false }: ClusterSwitcherP
   const t = useT();
   const { user } = useAuth();
   const { multicluster } = useMulticluster();
+  const navigate = useNavigate();
   const [open, setOpen] = React.useState(false);
   const [keyword, setKeyword] = React.useState('');
 
@@ -53,11 +55,16 @@ export function ClusterSwitcher({ current, collapsed = false }: ClusterSwitcherP
   const enter = React.useCallback(
     (target: string) => {
       rememberLastCluster(user?.name ?? '', target);
+      setOpen(false);
       // Overview, like the old console's `enterCluster`: not every cluster runs every
       // module, and the overview is the page that explains why one is missing.
-      window.location.assign(`/kube-frontend/clusters/${encodeURIComponent(target)}/overview`);
+      //
+      // A client-side transition, not `location.assign`: the shell, the sidebar and the
+      // cluster list are identical for every cluster, so a full document load would
+      // re-fetch ~1.5 MB to reach a page this app can render immediately.
+      void navigate({ href: `/kube-frontend/clusters/${encodeURIComponent(target)}/overview` });
     },
-    [user?.name],
+    [navigate, user?.name],
   );
 
   const currentCluster = clusters.find((cluster) => cluster.name === current);
@@ -79,7 +86,13 @@ export function ClusterSwitcher({ current, collapsed = false }: ClusterSwitcherP
             <span className="truncate text-sm font-medium text-ai-fg">
               {currentCluster?.alias || current}
             </span>
-            <span className="truncate text-[11px] text-ai-fg-muted">{t('cluster.switch.trigger')}</span>
+            {/* The object name sits under the alias, as in the cluster list: the alias is
+                what the reader recognises, the name is what every URL and every other page
+                calls the cluster. Showing only the alias made the console address the same
+                cluster by two different names. */}
+            <span className="truncate text-[11px] text-ai-fg-muted">
+              {currentCluster?.alias ? `${current} · ${t('cluster.switch.trigger')}` : t('cluster.switch.trigger')}
+            </span>
           </span>
         )}
         {multicluster && !collapsed ? <Icon name="chevron-down" size={12} /> : null}
@@ -107,6 +120,23 @@ export function ClusterSwitcher({ current, collapsed = false }: ClusterSwitcherP
             {...actionProps('clusters:switch-search')}
           />
 
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => void query.refetch()}
+              disabled={query.isFetching}
+              className="inline-flex size-8 shrink-0 items-center justify-center rounded-ai-md border border-ai-line text-ai-fg-secondary hover:bg-ai-surface-2 disabled:opacity-50"
+              aria-label={t('cluster.list.refresh')}
+              title={t('cluster.list.refresh')}
+              {...actionProps('clusters:switch-refresh')}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true" className="size-4">
+                <path d="M20 11a8 8 0 1 0-2.3 5.7" />
+                <path d="M20 4v7h-7" />
+              </svg>
+            </button>
+          </div>
+
           {query.isPending ? <p className="text-xs text-ai-fg-muted">{t('common.loading')}</p> : null}
 
           <ul className="flex max-h-80 flex-col gap-1 overflow-y-auto">
@@ -120,10 +150,16 @@ export function ClusterSwitcher({ current, collapsed = false }: ClusterSwitcherP
                       ? 'border-ai-accent bg-ai-surface-2'
                       : 'border-ai-line hover:bg-ai-surface-2'
                   }`}
+                  aria-current={cluster.name === current ? 'true' : undefined}
                   {...actionProps(`clusters:switch-to:${cluster.name}`)}
                 >
                   <span className="flex min-w-0 flex-1 flex-col">
-                    <span className="truncate text-sm text-ai-fg">{cluster.alias || cluster.name}</span>
+                    <span className="flex min-w-0 items-center gap-1.5">
+                      <span className="truncate text-sm text-ai-fg">{cluster.alias || cluster.name}</span>
+                      {/* Which one is the platform's own cluster: a member cluster can
+                          be called anything, including `host`. */}
+                      {cluster.isHost ? <Badge tone="info">{t('cluster.list.host')}</Badge> : null}
+                    </span>
                     <span className="truncate text-[11px] text-ai-fg-muted">
                       {[cluster.name, cluster.kubernetesVersion, `${cluster.nodeCount}`].filter(Boolean).join(' · ')}
                     </span>
