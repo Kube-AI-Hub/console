@@ -320,3 +320,44 @@ export function componentMetricsApi(client: Client) {
   };
 }
 
+
+/* ------------------------------------------------------------------ *
+ * Writing the cluster object.
+ * ------------------------------------------------------------------ */
+
+/**
+ * The editable half of a cluster object.
+ *
+ * Only the description for now. The old console's 集群设置 also edits group labels,
+ * region/zone and the provider, but those are platform-installation fields: the
+ * installer writes them, and offering them here would let a click silently disagree
+ * with what the installer believes.
+ *
+ * Writes go to `/apis/cluster.kubesphere.io/v1alpha1`, not kapis: the kapis endpoint
+ * answers 400 `wrong resource GroupVersionKind` to a patch (measured on B200), while the
+ * native group accepts it.
+ */
+export function clusterWriteApi(client: Client) {
+  return {
+    /**
+     * Set or clear the description annotation.
+     *
+     * A merge patch deletes a key when its value is `null` and **leaves it unchanged when
+     * the key is absent** (RFC 7386). Clearing a description therefore has to send
+     * `null` explicitly — sending an empty map does nothing, which is exactly how the
+     * "saved but nothing changed" class of bug looked in the ConfigMap editor.
+     */
+    async setDescription(params: { cluster: string; description: string }): Promise<void> {
+      const value = params.description.trim();
+      await client.request(
+        `/apis/cluster.kubesphere.io/v1alpha1/clusters/${encodeURIComponent(params.cluster)}`,
+        {
+          method: 'PATCH',
+          contentType: 'application/merge-patch+json',
+          body: { metadata: { annotations: { [DESCRIPTION_ANNOTATION]: value === '' ? null : value } } },
+        },
+      );
+    },
+  };
+}
+

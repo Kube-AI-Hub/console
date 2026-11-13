@@ -39,7 +39,8 @@
 ## 约束与边界
 
 - 读 `/kapis/resources.kubesphere.io/v1alpha3/nodes` 与 `/namespaces`（集群级，无 namespace 段）。
-- 只读：排空节点、编辑项目不在本模块范围。
+- 概览读集群对象与 KubeSphere 监控；集群设置写集群对象的描述注解。
+- 其余只读：排空节点、编辑项目、集群可见性不在本模块范围。
 
 ## UI 交互设计
 
@@ -52,6 +53,7 @@
 | 集群概览 | `/kube-frontend/clusters/<id>/overview` |
 | 节点 | `/kube-frontend/clusters/<id>/nodes` |
 | 项目 | `/kube-frontend/clusters/<id>/namespaces` |
+| 集群设置 | `/kube-frontend/clusters/<id>/settings` |
 
 ## 文案与校验
 
@@ -71,6 +73,7 @@
 | 集群概览 | [overview.md](./overview.md) |
 | 节点 | [nodes.md](./nodes.md) |
 | 项目 | [projects.md](./projects.md) |
+| 集群设置 | [settings.md](./settings.md) |
 
 ## 明确不做
 
@@ -87,6 +90,7 @@
 
 - `TC-FULL-KUBE-FRONTEND-CLUSTER_MANAGEMENT-01`
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-01`
+- `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-SETTINGS-01`
 
 ## 功能需求
 

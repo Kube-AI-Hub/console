@@ -470,6 +470,11 @@ MODULES = [
                         "title": "项目列表",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-PROJECTS-01"]},
                     },
+                    {
+                        "id": "settings",
+                        "title": "集群设置",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-SETTINGS-01"]},
+                    },
                 ],
             },
             {

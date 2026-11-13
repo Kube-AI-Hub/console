@@ -174,6 +174,10 @@ export const AREAS: readonly Area[] = [
       { key: 'configmaps', path: 'configmaps', titleKey: 'clusterConfigMaps.title', status: 'ready' },
       { key: 'storageclasses', path: 'storageclasses', titleKey: 'cluster.storageClasses.title', status: 'ready' },
       { key: 'persistentvolumes', path: 'persistentvolumes', titleKey: 'cluster.persistentVolumes.title', status: 'ready' },
+      // Editable cluster attributes. Only the description is writable: the rest of the
+      // object is owned by the installer, and a console that edited it would disagree
+      // with the thing that actually configures the cluster.
+      { key: 'settings', path: 'settings', titleKey: 'cluster.settings.title', status: 'ready' },
     ],
   },
   {
