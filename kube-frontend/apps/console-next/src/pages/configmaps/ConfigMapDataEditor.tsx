@@ -97,7 +97,9 @@ export function ConfigMapDataEditor({
       ) : (
         <ul className="flex flex-col divide-y divide-ai-line rounded-ai-md border border-ai-line">
           {pairs.map((pair, index) => (
-            <li key={pair.key} className="flex items-start gap-3 px-3 py-2">
+            // The row carries its key so a reader (or an agent) can address the entry
+            // itself, the way table rows elsewhere are addressed.
+            <li key={pair.key} data-ai-row={pair.key} className="flex items-start gap-3 px-3 py-2">
               <Icon name="meta-data" size={14} className="mt-0.5 shrink-0 text-ai-fg-muted" />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-xs font-medium text-ai-fg">{pair.key}</p>
