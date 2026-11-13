@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: storage-classes
+title: 存储类型详情 · 行为与驱动参数
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/storageclasses'
+prd: prd/kube-frontend/cluster-management/storage-classes.md
+design: design/kube-frontend/cluster-management/storage-classes.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-02
+
+story:
+- US2
+
+product: 从存储类型列表点名称进入详情：供应者、回收策略、绑定模式、创建时间、扩容/克隆/快照能力与已绑定声明数，以及驱动参数。
+preconditions:
+- 已登录，且对 host 集群有读取权限
+- 集群至少有一个存储类型
+steps:
+- 用 API 读取存储类型列表，取第一个的名称、供应者、回收策略与绑定模式
+- 打开存储类型列表，点击该名称
+- 核对 URL 与基本信息
+- 核对驱动参数区（有参数时列出，无参数时说明）
+expected:
+- 详情页可达且 ready
+- 供应者、回收策略、绑定模式与对象一致
+- 能力开关显示为「是/否」
+troubleshoot:
+- 显示原始 key：新增文案后未重新构建前端包
+- 参数区为空但对象有 parameters：读取的是列表行而非对象
+- 绑定模式显示空：字段在 spec 顶层而不是 parameters 里
+update_automation:
+- 选择器见 pages/cluster_management.py 与 StorageClassDetailPage.tsx

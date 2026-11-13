@@ -5,6 +5,7 @@
 ## 关联需求
 
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-01
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-02
 
 ## 概述
 
@@ -37,7 +38,15 @@
 
 **何时重新考虑**：改为实时统计 PVC 时（有成本）。
 
-## 系统现状
+### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-STORAGE_CLASSES-02 — 驱动参数按原样成对展示
+
+**为什么**：`parameters` 是驱动自定义的键值对，不同 CSI 驱动的键完全不同；把它们塞进固定列只会适配某一个驱动。
+
+**被否方案**：固定列展示常见参数（如 `type`/`csi.storage.k8s.io/*`）。换个驱动就成空列。
+
+**何时重新考虑**：平台为参数提供统一 schema 时。
+
+## 系统现状## 系统现状
 
 老 console `clusters/containers/Storage/StorageClasses`：名称、存储卷数、是否默认、克隆/快照/扩容能力、供应者。本模块把三项能力合成一列徽标集合。
 

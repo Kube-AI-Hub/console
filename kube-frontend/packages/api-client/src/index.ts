@@ -246,13 +246,14 @@ export {
   storageApi,
   storageClassExpands,
   storageClassesApi,
+  toStorageClassDetail,
   toStorageClassSummary,
   mountsOf,
   withMountState,
   toStorageDetail,
   toStorageSummary,
 } from './storage';
-export type { StorageApi, StorageClassSummary, StorageDetail, StorageKind, StorageSummary } from './storage';
+export type { StorageApi, StorageClassDetail, StorageClassSummary, StorageDetail, StorageKind, StorageSummary } from './storage';
 export type {
   LOGIN_ERROR_CODES,
   LoginErrorCode,

@@ -511,7 +511,7 @@ MODULES = [
                     {
                         "id": "storage-classes",
                         "title": "存储类型",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-01"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-01", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-02"]},
                     },
                     {
                         "id": "projects",

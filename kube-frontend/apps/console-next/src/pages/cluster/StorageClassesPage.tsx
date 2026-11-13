@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from '@tanstack/react-router';
 import { storageClassesApi, type StorageClassSummary } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
@@ -67,7 +68,13 @@ export function StorageClassesPage({ cluster }: StorageClassesPageProps): React.
           title: t('cluster.column.name'),
           render: (row) => (
             <span className="flex min-w-0 items-center gap-1.5" {...actionProps(`storageclasses:name:${row.name}`)}>
-              <span className="truncate font-medium text-ai-fg">{row.name}</span>
+              <Link
+                to="/kube-frontend/clusters/$cluster/storageclasses/$name"
+                params={{ cluster, name: row.name }}
+                className="truncate font-medium text-ai-accent hover:underline"
+              >
+                {row.name}
+              </Link>
               {row.isDefault ? <Badge tone="info">{t('cluster.storageClasses.default')}</Badge> : null}
             </span>
           ),

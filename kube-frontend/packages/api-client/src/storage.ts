@@ -492,12 +492,43 @@ export function toStorageClassSummary(item: KubeStorageClass): StorageClassSumma
   };
 }
 
+/** Everything the storage class detail page shows; the list row is a subset. */
+export interface StorageClassDetail extends StorageClassSummary {
+  /** `parameters` verbatim — each driver has its own keys, so they are shown as pairs. */
+  parameters: Array<{ key: string; value: string }>;
+  /** `allowedTopologies`, flattened for display. */
+  allowedTopologies: string[];
+  labels: Record<string, string>;
+  annotations: Record<string, string>;
+}
+
+export function toStorageClassDetail(item: KubeStorageClass): StorageClassDetail {
+  const spec = (item as unknown as { spec?: Record<string, unknown> }).spec ?? {};
+  const parameters = (spec['parameters'] ?? {}) as Record<string, unknown>;
+  const topologies = ((spec['allowedTopologies'] ?? []) as Array<Record<string, unknown>>).map((entry) => {
+    const match = (entry['matchLabelExpressions'] ?? []) as Array<Record<string, unknown>>;
+    return match
+      .map((expression) => {
+        const values = ((expression['values'] ?? []) as unknown[]).map(String).join('|');
+        return `${String(expression['key'] ?? '')}=${values}`;
+      })
+      .join(' ');
+  });
+  return {
+    ...toStorageClassSummary(item),
+    parameters: Object.entries(parameters).map(([key, value]) => ({ key, value: String(value ?? '') })),
+    allowedTopologies: topologies.filter(Boolean),
+    labels: (item.metadata?.labels ?? {}) as Record<string, string>,
+    annotations: (item.metadata?.annotations ?? {}) as Record<string, string>,
+  };
+}
+
 export function storageClassesApi(client: Client) {
   return {
-    ...resourceApi<KubeStorageClass, StorageClassSummary, StorageClassSummary>(client, {
+    ...resourceApi<KubeStorageClass, StorageClassSummary, StorageClassDetail>(client, {
       resource: 'storageclasses',
       toSummary: toStorageClassSummary,
-      toDetail: toStorageClassSummary,
+      toDetail: toStorageClassDetail,
     }),
     kind: 'storageclasses' as const,
   };

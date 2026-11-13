@@ -14,9 +14,16 @@
 
 **Independent Test**：打开存储类型页，核对默认类的徽标与各行的能力标记。
 
+### US2 - 判断一个存储类型的行为 (Priority: P1)
+
+作为 **集群管理员**，我希望 **看到存储类型的绑定模式、回收策略与能力开关**，以便 **判断在它上面申请卷会得到什么行为**。
+
+**Independent Test**：从列表点进存储类型详情，核对绑定模式与能力开关与该对象一致。
+
 ## 验收场景
 
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-01** — 已知集群有多个存储类型，当打开存储类型页，则显示名称、供应者、存储卷数、能力、回收策略、创建时间六列；标了默认的那一行带「默认」徽标；能力列只列出该类型实际支持的能力（不支持的不显示），且与 API 的 `allowVolumeExpansion` 等字段一致。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-02** — 已知集群中有存储类型，当点击名称进入详情，则显示供应者、回收策略、绑定模式、创建时间、是否允许扩容/克隆/快照与已绑定声明数，并列出该驱动声明的参数（无参数时明确说明）；这些值与该存储类型对象一致。
 
 ## 设计目标
 
@@ -54,6 +61,7 @@
 ## 验收用例
 
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-01`
+- `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-02`
 
 ## 功能需求
 
