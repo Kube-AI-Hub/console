@@ -31,6 +31,7 @@ OLD = REPO / "src/pages"
 #: 只列已经决定迁移的页面；老 console 的其余页面在 UNMIGRATED 里显式登记，
 #: 这样「没写」和「决定不做」不会混在一起。
 PROJECT_PAGES = {
+    "overview": "overview",
     "configmaps": "configmaps",
     "secrets": "secrets",
     "serviceaccounts": "serviceaccounts",
@@ -74,7 +75,6 @@ CLUSTER_UNMIGRATED = {
 
 #: 老 console 里有、本轮明确不迁移的页面，以及原因。
 UNMIGRATED = {
-    "overview": "项目概览：需要配额/用量接口，单独立项",
     "applications": "应用商店：依赖 openpitrix 模块",
     "applications_template": "应用模板：依赖 openpitrix 模块",
     "imagebuilder": "镜像构建器：依赖 devops 模块",
