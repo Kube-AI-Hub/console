@@ -1,0 +1,47 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: overview
+title: 集群概览 · 基本信息、用量、控制面与模块
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/overview'
+prd: prd/kube-frontend/cluster-management/overview.md
+design: design/kube-frontend/cluster-management/overview.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-01
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-02
+
+story:
+- US1
+- US2
+- US3
+- US4
+
+product: 集群落地页显示集群身份、资源用量、Kubernetes 状态与已启用模块；监控不可用时只有用量面板降级。
+preconditions:
+- 已登录，且对集群 host 有读取权限
+- 集群对象 /kapis/cluster.kubesphere.io/v1alpha1/clusters/host 可读
+- KubeSphere 监控 API 可用（不可用时该用例按监控缺失分支断言）
+steps:
+- 用 API 读取集群对象与集群指标，记下供应者、Kubernetes 版本、节点数、CPU 总量、GPU 总量、模块集合
+- 打开集群概览页，等待 data-ai-state 不再是 loading
+- 核对基本信息各字段与集群对象一致
+- 核对已启用模块数与 configz 中为真的项数一致
+- 核对资源用量：CPU/内存/容器组/节点均显示「已用 / 总量」；有 GPU 时显示 GPU 卡已分配/总数
+- 核对 Kubernetes 状态四个数字存在
+expected:
+- 供应者、Kubernetes 版本、节点数与接口一致
+- 状态徽标在 Ready 条件为 True 时显示「运行正常」
+- 已启用模块数与 configz 一致；未安装模块不与已启用混排
+- 用量行同时出现已用、总量与百分比三个要素
+- 监控不可用时用量面板显示「监控数据不可用」，且基本信息与模块区仍然渲染
+- 页面不出现 workspace-bar
+troubleshoot:
+- 页面空白：先确认 /kapis/cluster.kubesphere.io/v1alpha1/clusters/<id> 是否可读
+- 用量全为 0：检查 metrics_filter 的 $ 与 | 编码，以及 toMetricValues 是否读到 results[].data.result[0].value[1]
+- 无法调度恒为 0：scheduler_schedule_attempts 按 labels.result 分多条，需按 result 取值
+- 模块数与 configz 不一致：检查是否按白名单过滤了未知键
+update_automation:
+- 字段变化时改 pages/cluster_management.py 与 ClusterOverviewPage.tsx 的 cluster-overview:* 标识

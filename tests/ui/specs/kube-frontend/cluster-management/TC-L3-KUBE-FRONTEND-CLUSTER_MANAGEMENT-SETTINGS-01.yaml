@@ -1,0 +1,42 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-SETTINGS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: settings
+title: 集群设置 · 编辑与清空描述、只读字段
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/settings'
+prd: prd/kube-frontend/cluster-management/settings.md
+design: design/kube-frontend/cluster-management/settings.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-SETTINGS-01
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-SETTINGS-02
+
+story:
+- US1
+- US2
+- US3
+
+product: 集群设置可修改描述（写入注解），清空时删除注解；安装器字段只读展示。
+preconditions:
+- 已登录，且对集群 host 有写权限
+- 记录当前描述注解的原值，用例结束时还原
+steps:
+- 打开集群设置，等待 surface 就绪
+- 核对只读区包含供应者、Kubernetes 版本、KubeSphere 版本、连接方式、API 端点、节点数
+- 点「编辑描述」，填入唯一标记文案并保存，等待「已保存」
+- 用 API 读取集群对象，核对 kubesphere.io/description 等于该文案
+- 再次进入编辑，清空并保存
+- 用 API 读取集群对象，核对 kubesphere.io/description 键不存在
+- 还原原描述注解
+expected:
+- 只读区六个字段存在且无编辑控件
+- 保存后注解值等于输入值
+- 清空后注解被删除（键不存在），页面显示 -
+troubleshoot:
+- 保存成功但注解未变：检查是否发送了空 map 而不是 null
+- 保存返回 400 wrong resource GroupVersionKind：说明写到了 kapis 端点，应走 /apis
+- 概览页仍显示旧描述：检查保存后是否 invalidation 了 cluster-detail
+update_automation:
+- 选择器见 pages/cluster_settings.py；字段变化时同步更新
