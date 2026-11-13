@@ -144,6 +144,7 @@ export {
   logCollectionApi,
   isTemplateRole,
   membersApi,
+  membersWriteApi,
   NETWORK_ISOLATE_ANNOTATION,
   networkIsolationApi,
   networkPoliciesApi,

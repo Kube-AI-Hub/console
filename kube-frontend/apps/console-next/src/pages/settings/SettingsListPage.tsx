@@ -12,7 +12,8 @@ import { RolePermissionsDialog } from './RolePermissionsDialog';
 import { DeleteDialog } from '@/components/resource/DeleteDialog';
 import { EditInfoDialog } from '@/components/resource/EditInfoDialog';
 import { formatTimestamp } from '@/lib/time';
-import { SETTINGS_DESCRIPTORS, useDeleteRole, useSettingsList, useUpdateRole, type SettingsKind } from './queries';
+import { SETTINGS_DESCRIPTORS, useDeleteRole, useMemberWrites, useSettingsList, useUpdateRole, type SettingsKind } from './queries';
+import { MemberDialog } from './MemberDialog';
 
 /**
  * Project settings: 角色 and 成员.
@@ -55,6 +56,10 @@ export function SettingsListPage({ kind, cluster, namespace }: SettingsListPageP
   const [permissionsRole, setPermissionsRole] = React.useState<RoleSummary | null>(null);
   const [deleteRole, setDeleteRole] = React.useState<RoleSummary | null>(null);
   const updateRole = useUpdateRole({ cluster, namespace: projectFilter });
+  const memberWrites = useMemberWrites({ cluster, namespace: projectFilter });
+  const [inviting, setInviting] = React.useState(false);
+  const [editingMember, setEditingMember] = React.useState<MemberSummary | null>(null);
+  const [removingMember, setRemovingMember] = React.useState<MemberSummary | null>(null);
   const removeRole = useDeleteRole({ cluster, namespace: projectFilter });
   const roleDetail = useQuery({
     queryKey: ['settings', 'role', cluster, projectFilter, roleName],
@@ -148,12 +153,27 @@ export function SettingsListPage({ kind, cluster, namespace }: SettingsListPageP
               },
             ],
       /*
+       * Inviting is the members page's primary action, as it is in the old console; roles
+       * have no create action because a project role is made by copying a template.
+       */
+      ...(kind === 'members'
+        ? { primaryAction: { key: 'invite', label: t('settings.members.invite'), aiId: 'members:invite' } }
+        : {}),
+      /*
        * Templated roles are the platform's building blocks: the API rejects writes to
        * them, so the row offers only the detail view. Everything else gets the old
        * console's 编辑 / 删除 alongside it.
        */
       rowActions:
-        kind === 'roles'
+        kind === 'members'
+          ? [
+              /* Two entries, not one menu of verbs: the old console's 成员 list offers exactly
+               * these. Removing a member removes the role binding, not the user account — that
+               * is the fact the confirmation has to state. */
+              { key: 'modifyRole', label: t('settings.members.modifyRole') },
+              { key: 'removeMember', label: t('settings.members.remove'), tone: 'danger' as const },
+            ]
+          : kind === 'roles'
           ? [
               { key: 'detail', label: t('settings.action.detail') },
               /*
@@ -223,7 +243,14 @@ export function SettingsListPage({ kind, cluster, namespace }: SettingsListPageP
           if (next) list.setSort(next);
         }}
         onAction={(action, row) => {
+          // The primary action arrives without a row; handle it before the guard.
+          if (action == 'invite') {
+            setInviting(true);
+            return;
+          }
           if (!row) return;
+          if (action == 'modifyRole') setEditingMember(row as MemberSummary);
+          if (action == 'removeMember') setRemovingMember(row as MemberSummary);
           if (action === 'detail') setRoleName(row.name);
           if (action === 'permissions') {
             if ((row as RoleSummary).system) return;
@@ -242,7 +269,43 @@ export function SettingsListPage({ kind, cluster, namespace }: SettingsListPageP
         }}
       />
 
-      <MutationAlert error={updateRole.error ?? removeRole.error} />
+      <MutationAlert
+        error={updateRole.error ?? removeRole.error ?? memberWrites.invite.error ?? memberWrites.updateRole.error}
+      />
+
+      <MemberDialog
+        open={inviting || editingMember !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setInviting(false);
+            setEditingMember(null);
+          }
+        }}
+        cluster={cluster}
+        namespace={projectFilter}
+        {...(editingMember ? { member: editingMember } : {})}
+        onInvite={async (input) => {
+          await memberWrites.invite.mutateAsync(input);
+        }}
+        onUpdateRole={async (input) => {
+          await memberWrites.updateRole.mutateAsync(input);
+        }}
+      />
+
+      {removingMember ? (
+        <DeleteDialog
+          open
+          onOpenChange={(open) => !open && setRemovingMember(null)}
+          names={[removingMember.username]}
+          resource='members'
+          noun={t('settings.members.remove')}
+          pending={memberWrites.remove.isPending}
+          onConfirm={async () => {
+            await memberWrites.remove.mutateAsync(removingMember.username);
+            setRemovingMember(null);
+          }}
+        />
+      ) : null}
 
       {permissionsRole ? (
         <RolePermissionsDialog

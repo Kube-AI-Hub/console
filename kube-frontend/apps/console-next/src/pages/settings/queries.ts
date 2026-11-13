@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   membersApi,
+  membersWriteApi,
   rolesApi,
   type MemberSummary,
   type RoleSummary,
@@ -83,3 +84,36 @@ export const SETTINGS_DESCRIPTORS: Record<SettingsKind, SettingsDescriptor> = {
     emptyDescriptionKey: 'settings.members.emptyDescription',
   },
 };
+
+/* ---------------- Member writes ---------------- */
+
+/**
+ * Invite one user, re-role a member, or remove one.
+ *
+ * All three invalidate the members list rather than patching it locally: the row's role
+ * comes from the object's annotation, and the platform may normalise what was sent.
+ */
+export function useMemberWrites(params: { cluster: string; namespace: string }) {
+  const queryClient = useQueryClient();
+  const invalidate = () => void queryClient.invalidateQueries({ queryKey: ['settings', 'members'] });
+
+  const invite = useMutation({
+    mutationFn: (input: { username: string; roleRef: string }) =>
+      membersWriteApi(api).invite({ cluster: params.cluster, namespace: params.namespace, ...input }),
+    onSuccess: invalidate,
+  });
+
+  const updateRole = useMutation({
+    mutationFn: (input: { username: string; roleRef: string }) =>
+      membersWriteApi(api).updateRole({ cluster: params.cluster, namespace: params.namespace, ...input }),
+    onSuccess: invalidate,
+  });
+
+  const remove = useMutation({
+    mutationFn: (username: string) =>
+      membersWriteApi(api).remove({ cluster: params.cluster, namespace: params.namespace, username }),
+    onSuccess: invalidate,
+  });
+
+  return { invite, updateRole, remove };
+}

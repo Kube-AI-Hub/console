@@ -5,6 +5,7 @@
 ## 关联需求
 
 - AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-01
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-02
 
 ## 概述
 
@@ -28,7 +29,23 @@
 
 **何时重新考虑**：IAM 提供登录时间字段时。
 
-## 系统现状
+### DEC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-02 — 成员写入的请求形状与兄弟资源不同
+
+**为什么**：实测这三个动词都不是常规 kube 形状——`POST /members` 要求**数组**（传单个对象会返回 `cannot unmarshal object into Go value of type []v1alpha2.Member`），改角色是 `PUT /members/<username>`，移除是 `DELETE /members/<username>`。因此写在 `membersWriteApi` 里并注明原因，而不是复用通用资源 API。
+
+**被否方案**：照常走 `resourceApi`。POST 形状不匹配，会得到一句看不懂的 Go 类型错误。
+
+**何时重新考虑**：上游把成员写入统一为常规资源 API 时。
+
+### DEC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-03 — 邀请与改角色共用一个弹窗
+
+**为什么**：两者是同一个决定（谁、什么角色），只差用户名可否修改。分开做会产生两个几乎一样的表单。
+
+**被否方案**：两个弹窗。同一份校验写两遍。
+
+**何时重新考虑**：邀请需要批量选择用户时（那会是独立的批量弹窗）。
+
+## 系统现状## 系统现状
 
 老 console 的成员列包含「最近登录」；本模块用改密时间近似，文案改为「最近活动」。
 

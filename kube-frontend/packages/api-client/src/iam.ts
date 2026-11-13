@@ -176,6 +176,44 @@ export function iamPath(cluster: string, namespace: string, resource: string): s
   return `${KAPIS_IAM}/${clusterSegment}${namespaceSegment}${resource}`;
 }
 
+/**
+ * Invite, re-role and remove project members.
+ *
+ * The API shapes were probed on the live cluster and are not the usual kube ones:
+ *  - POST takes a **JSON array** of members (`[{username, roleRef}]`) — sending one object
+ *    answers `cannot unmarshal object into Go value of type []v1alpha2.Member`;
+ *  - PUT /members/<username> sets a member's role;
+ *  - DELETE /members/<username> removes it.
+ *
+ * The write lives here rather than in a generic resource API because all three verbs differ
+ * from those of the collection's siblings.
+ */
+export function membersWriteApi(client: Client) {
+  const collection = (cluster: string, namespace: string) => iamPath(cluster, namespace, 'members');
+  return {
+    /** One entry per invited user; a single invite is an array of one. */
+    async invite(params: { cluster: string; namespace: string; username: string; roleRef: string }): Promise<void> {
+      await client.request(collection(params.cluster, params.namespace), {
+        method: 'POST',
+        body: [{ username: params.username, roleRef: params.roleRef }],
+      });
+    },
+
+    async updateRole(params: { cluster: string; namespace: string; username: string; roleRef: string }): Promise<void> {
+      await client.request(`${collection(params.cluster, params.namespace)}/${encodeURIComponent(params.username)}`, {
+        method: 'PUT',
+        body: { username: params.username, roleRef: params.roleRef },
+      });
+    },
+
+    async remove(params: { cluster: string; namespace: string; username: string }): Promise<void> {
+      await client.request(`${collection(params.cluster, params.namespace)}/${encodeURIComponent(params.username)}`, {
+        method: 'DELETE',
+      });
+    },
+  };
+}
+
 export function membersApi(client: Client) {
   return {
     ...resourceApi<KubeIam, MemberSummary, MemberDetail>(client, {

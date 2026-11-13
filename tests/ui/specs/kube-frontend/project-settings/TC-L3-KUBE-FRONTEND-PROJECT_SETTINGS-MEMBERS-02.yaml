@@ -1,0 +1,39 @@
+id: TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: project-settings
+feature: members
+title: 项目成员 · 邀请、修改角色与移除
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/members'
+prd: prd/kube-frontend/project-settings/members.md
+design: design/kube-frontend/project-settings/members.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-02
+
+story:
+- US2
+
+product: 项目成员页可邀请平台用户、修改成员角色、移除成员；成员写入的请求形状与常规资源不同（POST 为数组、PUT/DELETE 按用户名）。
+preconditions:
+- 已登录，且对 default 项目有管理权限
+- 使用测试账号 ui-test（平台已存在）；finally 中确保该成员被移除
+steps:
+- 打开项目成员页，点「邀请成员」
+- 填 ui-test 并选择 viewer，提交
+- 用 API 回读成员列表与角色注解
+- 对 ui-test 执行「修改角色」，改为 operator
+- 回读角色注解
+- 执行「移除成员」并确认
+- 回读成员列表
+expected:
+- 邀请后成员出现在列表，角色为 viewer
+- 修改后角色为 operator
+- 移除后成员不存在（用户账号仍在）
+troubleshoot:
+- 邀请返回 400 且提示无法反序列化：POST 必须发送数组
+- 角色仍未变：PUT 的 body 需含 username 与 roleRef
+- 列表不刷新：失效键应为 ['settings','members']
+update_automation:
+- 选择器见 pages/project_settings.py 与 MemberDialog.tsx

@@ -558,7 +558,7 @@ MODULES = [
                     {
                         "id": "members",
                         "title": "项目成员列表",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-01"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-01", "TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-02"]},
                     },
                     {
                         "id": "gateway",
