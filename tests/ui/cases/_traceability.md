@@ -172,6 +172,7 @@
 | kube-frontend/project-settings/network-isolation | `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-01` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-01` | [`design/kube-frontend/project-settings/network-isolation.md`](../../../design/kube-frontend/project-settings/network-isolation.md) | [`tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_NETWORK_ISOLATION_01.py`](../../../tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_NETWORK_ISOLATION_01.py) |
 | kube-frontend/project-settings/network-isolation | `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-02` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-01` | [`design/kube-frontend/project-settings/network-isolation.md`](../../../design/kube-frontend/project-settings/network-isolation.md) | [`tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_NETWORK_ISOLATION_01.py`](../../../tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_NETWORK_ISOLATION_01.py) |
 | kube-frontend/project-settings/network-isolation | `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-03` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-02` | [`design/kube-frontend/project-settings/network-isolation.md`](../../../design/kube-frontend/project-settings/network-isolation.md) | [`tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_NETWORK_ISOLATION_02.py`](../../../tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_NETWORK_ISOLATION_02.py) |
+| kube-frontend/project-settings/overview | `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW-01` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW-01` | **（无）** | [`tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_OVERVIEW_01.py`](../../../tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_OVERVIEW_01.py) |
 | kube-frontend/project-settings/role-rules | `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLE_RULES-01` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLE_RULES-01` | [`design/kube-frontend/project-settings/role-rules.md`](../../../design/kube-frontend/project-settings/role-rules.md) | [`tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_ROLE_RULES_01.py`](../../../tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_ROLE_RULES_01.py) |
 | kube-frontend/project-settings/role-rules | `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLE_RULES-02` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLE_RULES-02` | [`design/kube-frontend/project-settings/role-rules.md`](../../../design/kube-frontend/project-settings/role-rules.md) | [`tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_ROLE_RULES_02.py`](../../../tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_ROLE_RULES_02.py) |
 | kube-frontend/project-settings/roles | `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-01` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-01` | [`design/kube-frontend/project-settings/roles.md`](../../../design/kube-frontend/project-settings/roles.md) | [`tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_ROLES_01.py`](../../../tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_ROLES_01.py) |
@@ -228,9 +229,9 @@
 
 ## 小结
 
-- 需求里的 AC：221 条，其中未覆盖 1 条、无技术方案承接 12 条、无用例规格实现 1 条。
+- 需求里的 AC：222 条，其中未覆盖 1 条、无技术方案承接 13 条、无用例规格实现 1 条。
 - 未覆盖：`AC-L2-KUBE-FRONTEND-LOGIN-07`
-- 无技术方案承接：`AC-L2-KUBE-FRONTEND-LOGIN-01`, `AC-L2-KUBE-FRONTEND-LOGIN-02`, `AC-L2-KUBE-FRONTEND-LOGIN-03`, `AC-L2-KUBE-FRONTEND-LOGIN-04`, `AC-L2-KUBE-FRONTEND-LOGIN-05`, `AC-L2-KUBE-FRONTEND-LOGIN-06`, `AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L2-KUBE-FRONTEND-THEME-01`, `AC-L2-KUBE-FRONTEND-THEME-02`, `AC-L2-KUBE-FRONTEND-THEME-03`, `AC-L2-KUBE-FRONTEND-THEME-04`, `AC-L2-KUBE-FRONTEND-THEME-05`
+- 无技术方案承接：`AC-L2-KUBE-FRONTEND-LOGIN-01`, `AC-L2-KUBE-FRONTEND-LOGIN-02`, `AC-L2-KUBE-FRONTEND-LOGIN-03`, `AC-L2-KUBE-FRONTEND-LOGIN-04`, `AC-L2-KUBE-FRONTEND-LOGIN-05`, `AC-L2-KUBE-FRONTEND-LOGIN-06`, `AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L2-KUBE-FRONTEND-THEME-01`, `AC-L2-KUBE-FRONTEND-THEME-02`, `AC-L2-KUBE-FRONTEND-THEME-03`, `AC-L2-KUBE-FRONTEND-THEME-04`, `AC-L2-KUBE-FRONTEND-THEME-05`, `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW-01`
 - 无用例规格实现：`AC-L2-KUBE-FRONTEND-LOGIN-07`
 
 ## 用户故事覆盖
@@ -383,6 +384,7 @@
 | kube-frontend/project-settings/members | `US1` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-01` |
 | kube-frontend/project-settings/members | `US2` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-02` |
 | kube-frontend/project-settings/network-isolation | `US1` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-01`, `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-02` |
+| kube-frontend/project-settings/overview | `US1` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW-01` |
 | kube-frontend/project-settings/role-rules | `US1` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLE_RULES-01`, `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLE_RULES-02` |
 | kube-frontend/project-settings/roles | `US1` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-01`, `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-02`, `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-03` |
 | kube-frontend/project-settings/roles | `US2` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-04` |
@@ -435,4 +437,4 @@
 | kube-frontend/workbench/context | `US1` | `TC-L3-KUBE-FRONTEND-WORKBENCH-CONTEXT-01` |
 | kube-frontend/workbench/entry | `US1` | `TC-L3-KUBE-FRONTEND-WORKBENCH-ENTRY-01` |
 
-- 用户故事：197 条，其中未覆盖 0 条。
+- 用户故事：198 条，其中未覆盖 0 条。

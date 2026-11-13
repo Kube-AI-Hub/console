@@ -86,6 +86,17 @@ export interface Area {
  */
 export const AREAS: readonly Area[] = [
   {
+    key: 'project-overview',
+    scope: 'project',
+    titleKey: 'project.overview.title',
+    icon: 'dashboard',
+    defaultPage: 'overview',
+    pages: [
+      // The landing page for a project: what it is, what quota it has, and where to go next.
+      { key: 'overview', path: 'overview', titleKey: 'project.overview.title', status: 'ready' },
+    ],
+  },
+  {
     key: 'config',
     scope: 'project',
     titleKey: 'nav.groupConfig',

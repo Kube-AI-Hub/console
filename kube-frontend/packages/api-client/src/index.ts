@@ -148,6 +148,7 @@ export type {
 export {
   KAPIS_IAM,
   LOG_COLLECTION_LABEL,
+  limitRangesApi,
   logCollectionApi,
   isTemplateRole,
   clusterMembersApi,

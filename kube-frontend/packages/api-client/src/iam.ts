@@ -601,6 +601,54 @@ export type MembersApi = ReturnType<typeof membersApi>;
  * counterparts the IAM layer drops `rules` on create, so the rules are written against
  * native RBAC. The project's own role objects live in the project namespace.
  */
+/**
+ * A LimitRange row: the defaults a project forces on pods that do not set their own.
+ *
+ * Read from the core API (`/api/v1`), which is where the object lives; the resources proxy
+ * does not serve it.
+ */
+export interface LimitRangeSummary {
+  name: string;
+  /** One entry per `spec.limits[]` item: type plus the resources it constrains. */
+  limits: Array<{ type: string; resource: string; min: string; max: string; defaultLimit: string; defaultRequest: string }>;
+}
+
+export function limitRangesApi(client: Client) {
+  return {
+    async list(params: { namespace: string; signal?: AbortSignal }): Promise<LimitRangeSummary[]> {
+      const body = await client.request<{ items?: Array<Record<string, unknown>> }>(
+        `/api/v1/namespaces/${encodeURIComponent(params.namespace)}/limitranges`,
+        { ...(params.signal ? { signal: params.signal } : {}) },
+      );
+      return (body?.items ?? []).map((item) => {
+        const metadata = (item['metadata'] ?? {}) as Record<string, unknown>;
+        const spec = (item['spec'] ?? {}) as Record<string, unknown>;
+        const limits = ((spec['limits'] ?? []) as Array<Record<string, unknown>>).flatMap((entry) => {
+          const type = String(entry['type'] ?? '');
+          const buckets: Array<[string, string]> = [
+            ['min', 'min'],
+            ['max', 'max'],
+            ['default', 'defaultLimit'],
+            ['defaultRequest', 'defaultRequest'],
+          ];
+          const out: Array<{ type: string; resource: string; min: string; max: string; defaultLimit: string; defaultRequest: string }> = [];
+          const seen = new Set<string>();
+          for (const [source] of buckets) {
+            const values = (entry[source] ?? {}) as Record<string, unknown>;
+            for (const resource of Object.keys(values)) seen.add(resource);
+          }
+          for (const resource of seen) {
+            const pick = (source: string) => String((((entry[source] ?? {}) as Record<string, unknown>)[resource]) ?? '');
+            out.push({ type, resource, min: pick('min'), max: pick('max'), defaultLimit: pick('default'), defaultRequest: pick('defaultRequest') });
+          }
+          return out;
+        });
+        return { name: String(metadata['name'] ?? ''), limits };
+      });
+    },
+  };
+}
+
 export function projectRolesWriteApi(client: Client) {
   const path = (namespace: string, name: string) =>
     `/apis/rbac.authorization.k8s.io/v1/namespaces/${encodeURIComponent(namespace)}/roles/${encodeURIComponent(name)}`;

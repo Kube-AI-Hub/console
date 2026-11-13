@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: project-settings
+feature: overview
+title: 项目概览 · 信息、配额与快捷入口
+entry_url: '{BASE_URL}/kube-frontend/public/clusters/host/projects/default/overview'
+prd: prd/kube-frontend/project-settings/overview.md
+design: design/kube-frontend/project-settings/overview.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW-01
+
+story:
+- US1
+
+product: 项目作用域的落地页：基本信息、配额使用（已用/硬限 + 占比）、限额范围与快捷入口。
+preconditions:
+- 已登录，且对 default 项目有读取权限
+steps:
+- 用 API 读取 default 项目的 namespace 对象与 resourcequotas
+- 打开项目概览页
+- 核对基本信息（名称等于 namespace 名）
+- 核对配额区块（有条目时行数等于 hard 键数，否则空态）
+- 核对限额范围区块与快捷入口链接
+expected:
+- 页可达且 ready
+- 配额行数与 hard 键数一致，或明确空态
+- 快捷入口包含容器组/部署/配置字典/存储卷/项目成员且链接可达
+troubleshoot:
+- 配额区块报 resource is not supported：走了 resources 代理而不是 /api/v1
+- 侧栏无「项目概览」：registry 未注册 project 区
+- 占比显示 NaN：数量解析没有兜底
+update_automation:
+- 选择器见 pages/project_settings.py 与 ProjectOverviewPage.tsx
