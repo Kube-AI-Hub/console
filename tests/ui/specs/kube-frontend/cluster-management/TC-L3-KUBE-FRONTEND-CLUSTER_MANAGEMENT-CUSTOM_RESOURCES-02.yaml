@@ -1,0 +1,37 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_RESOURCES-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: custom-resources
+title: 自定义资源 · 详情与实例列表
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/custom-resources'
+prd: prd/kube-frontend/cluster-management/custom-resources.md
+design: design/kube-frontend/cluster-management/custom-resources.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_RESOURCES-02
+
+story:
+- US4
+
+product: 从列表点进某个 CRD 的详情，显示该 CRD 的定义与该类型的实例表；实例行数等于按 group/版本/复数名读取的结果。
+preconditions:
+- 已登录，且对集群 host 有读取权限
+- 集群里至少有一个带实例的 CRD
+steps:
+- 选一个带实例的 CRD，记下 group、存储版本、复数名与实例条数
+- 打开自定义资源列表，搜索该 CRD 的 kind
+- 点击类型进入详情
+- 核对定义区字段与接口一致
+- 核对实例表行数与 /apis/<group>/<version>/<plural> 返回一致
+expected:
+- 详情页显示类型、所属组、版本、作用域、全名、创建时间
+- 实例行数等于接口返回条数（少于说明漏了 limit=-1 或版本读错）
+- 命名空间级 CRD 的实例行显示所属项目
+troubleshoot:
+- 实例为空但接口有条目：确认读的是存储版本而不是某个未提供版本
+- 详情打不开：确认 $name 路由与列表链接参数一致（CRD 全名含点，需要 URL 编码）
+- 行数偏少：请求漏了 limit=-1
+update_automation:
+- 详情结构变化时改 pages/cluster_management.py 与 CustomResourceDetailPage.tsx

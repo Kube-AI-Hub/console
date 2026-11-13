@@ -271,6 +271,8 @@ export type {
   ClusterDetail,
   ClusterModule,
   ClusterUsage,
+  CustomResourceDetail,
+  CustomResourceInstance,
   CustomResourceSummary,
   CustomResourcesApi,
   KubernetesStatus,

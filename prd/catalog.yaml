@@ -492,6 +492,21 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01
+    - id: node-usage
+      title: 节点用量
+      prd: prd/kube-frontend/cluster-management/node-usage.md
+      design: design/kube-frontend/cluster-management/node-usage.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODE_USAGE-01
+    - id: custom-resources
+      title: 自定义资源
+      prd: prd/kube-frontend/cluster-management/custom-resources.md
+      design: design/kube-frontend/cluster-management/custom-resources.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_RESOURCES-01
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_RESOURCES-02
   - id: project-settings
     title: 项目设置
     prd: prd/kube-frontend/project-settings/_index.md

@@ -9,6 +9,7 @@ CRD 列表：读 apiextensions 组，一次取全量，前端搜索与排序。
 ## 关联需求
 
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_RESOURCES-01
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_RESOURCES-02
 
 ## 设计目标与非目标
 
@@ -48,6 +49,22 @@ CRD 列表：读 apiextensions 组，一次取全量，前端搜索与排序。
 
 **何时重新考虑**：需要在列表上展示全部版本时（届时副行改为可展开）。
 
+### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-CUSTOM_RESOURCES-04 — 实例路径由定义拼出，读存储版本
+
+**为什么**：自定义资源没有固定端点，只能按 `/apis/<group>/<version>/<plural>` 读取。版本选存储版本（`storage: true`）——它是 API server 往返转换用的版本；没有存储版本时退回第一个 served 版本（升级中间态会出现这种情况）。
+
+**被否方案**：遍历所有版本取并集。同一对象在多个版本下是同一份数据，遍历只会重复行，还会在某个版本不可读时整体失败。
+
+**何时重新考虑**：需要按用户选择的版本查看实例时。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-CUSTOM_RESOURCES-05 — 列表的类型做成链接
+
+**为什么**：看到「某个 CRD 存在」之后的下一个问题一定是「有没有人在用」，答案在实例表里。做成纯文本等于要求读者自己拼路径。
+
+**被否方案**：整行可点。会与将来的行操作菜单冲突，小屏也容易误触。
+
+**何时重新考虑**：需要行级操作时。
+
 ## 系统现状
 
 老 console 的 CRD 页列为 类型（副行 `组/最新版本`）、名称、作用域、创建时间，并提供详情页列出该类型的实例。本次迁移实现列表；详情另立功能点，并在 PRD「明确不做」中写明原因。
@@ -62,7 +79,9 @@ CRD 列表：读 apiextensions 组，一次取全量，前端搜索与排序。
 
 ## 对外契约
 
-`GET /apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=-1`
+- `GET /apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=-1`
+- `GET /apis/apiextensions.k8s.io/v1/customresourcedefinitions/<name>`
+- `GET /apis/<group>/<storage version>/<plural>?limit=-1`（实例）
 
 ## 不变量
 
@@ -85,7 +104,7 @@ CRD 列表：读 apiextensions 组，一次取全量，前端搜索与排序。
 
 ## 后续改进
 
-- CRD 详情：列出该类型的实例（动态组/版本/复数路径）。
+- 实例的 YAML 编辑与删除（当前只读展示）。
 - 按组折叠展示。
 
 ## 验收用例

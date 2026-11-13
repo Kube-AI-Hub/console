@@ -543,7 +543,7 @@ export interface CustomResourceSummary {
   versions: string[];
   /** `Cluster` or `Namespaced`. */
   scope: string;
-  /** Whether users can create instances of it (deprecated CRDs cannot). */
+  /** Whether any version is still served (an unserved CRD cannot be created). */
   served: boolean;
   createdAt: string;
 }
@@ -564,9 +564,9 @@ export function toCustomResourceSummary(crd: KubeCrd): CustomResourceSummary {
     kind: crd.spec?.names?.kind ?? '',
     group: crd.spec?.group ?? '',
     /*
-     * Storage version first, then the rest in declaration order: the storage version
-     * is the one the API server round-trips through, so it is what a reader looking at
-     * a mismatch wants to see first.
+     * Storage version first, then the rest in declaration order: the storage version is
+     * the one the API server round-trips through, so it is what a reader looking at a
+     * version mismatch wants to see first.
      */
     versions: [...versions]
       .sort((a, b) => Number(b.storage === true) - Number(a.storage === true))
@@ -578,14 +578,42 @@ export function toCustomResourceSummary(crd: KubeCrd): CustomResourceSummary {
   };
 }
 
-/**
- * CRD list.
- *
- * Read through the real apiextensions group rather than the resources proxy: this is
- * the authoritative list of what the cluster can serve, and the proxy has been seen to
- * lag on other resources. `served` is derived from the versions, because a CRD whose
- * every version is unserved still exists and still appears in the list.
- */
+/** One instance (custom resource) of a CRD. */
+export interface CustomResourceInstance {
+  name: string;
+  namespace: string;
+  createdAt: string;
+}
+
+/** A CRD's definition, as the detail view needs it. */
+export interface CustomResourceDetail extends CustomResourceSummary {
+  /** Plural name used in the URL path. */
+  plural: string;
+  /** Version used for reads: the storage version, else the first served one. */
+  readVersion: string;
+}
+
+interface KubeCrdFull extends KubeCrd {
+  spec?: KubeCrd["spec"] & { names?: { kind?: string; plural?: string } };
+}
+
+function toCustomResourceDetail(crd: KubeCrdFull): CustomResourceDetail {
+  const summary = toCustomResourceSummary(crd);
+  const versions = crd.spec?.versions ?? [];
+  /*
+   * Reads go through one version. The storage version is the one the API server
+   * round-trips, so it is the safest choice; falling back to the first served version
+   * covers CRDs where nothing is marked storage (a transient state during an upgrade).
+   */
+  const storage = versions.find((version) => version.storage === true)?.name;
+  const served = versions.find((version) => version.served !== false)?.name;
+  return {
+    ...summary,
+    plural: crd.spec?.names?.plural ?? '',
+    readVersion: storage ?? served ?? '',
+  };
+}
+
 export function customResourcesApi(client: Client) {
   return {
     async list(params: { cluster: string; signal?: AbortSignal }): Promise<{
@@ -602,8 +630,45 @@ export function customResourcesApi(client: Client) {
       const items = (body?.items ?? []).map(toCustomResourceSummary);
       return { items, total: items.length };
     },
+
+    async get(params: { name: string; cluster: string; signal?: AbortSignal }): Promise<CustomResourceDetail> {
+      const body = await client.request<KubeCrdFull>(
+        `/apis/apiextensions.k8s.io/v1/customresourcedefinitions/${encodeURIComponent(params.name)}`,
+        params.signal ? { signal: params.signal } : {},
+      );
+      return toCustomResourceDetail(body ?? {});
+    },
+
+    /**
+     * Instances of one CRD.
+     *
+     * The path is built from the definition itself (`/apis/<group>/<version>/<plural>`):
+     * a custom resource has no fixed endpoint, so this is the only way to list them.
+     * A CRD whose group or plural is missing cannot be read at all — that is reported as
+     * an empty list rather than a malformed request.
+     */
+    async instances(params: {
+      crd: CustomResourceDetail;
+      cluster: string;
+      signal?: AbortSignal;
+    }): Promise<{ items: CustomResourceInstance[]; total: number }> {
+      const { group, readVersion, plural } = params.crd;
+      if (!group || !readVersion || !plural) return { items: [], total: 0 };
+      const body = await client.request<{ items?: Array<KubeObject> }>(
+        `/apis/${encodeURIComponent(group)}/${encodeURIComponent(readVersion)}/${encodeURIComponent(plural)}`,
+        {
+          query: { limit: -1 },
+          ...(params.signal ? { signal: params.signal } : {}),
+        },
+      );
+      const items = (body?.items ?? []).map((item) => ({
+        name: item.metadata?.name ?? '',
+        namespace: item.metadata?.namespace ?? '',
+        createdAt: item.metadata?.creationTimestamp ?? '',
+      }));
+      return { items, total: items.length };
+    },
   };
 }
 
 export type CustomResourcesApi = ReturnType<typeof customResourcesApi>;
-

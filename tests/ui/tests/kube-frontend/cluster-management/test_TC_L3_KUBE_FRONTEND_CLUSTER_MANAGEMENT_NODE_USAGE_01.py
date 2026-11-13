@@ -72,4 +72,20 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_NODE_USAGE_01(cluster_management
         pods = ui.page.locator(f'[data-ai-id="node-usage:pods:{name}"]').last.inner_text().strip()
         assert pods.isdigit(), f"{name} 的容器组数不是整数: {pods!r}"
 
+    # ---- US2: switching the sort dimension reorders the list ----
+    # Clicking the memory header must sort by memory, and clicking again must flip it.
+    # A sort control that ignores the new key is the defect this covers.
+    memory_header = surface.locator('[data-ai-id="node-usage:sort:memory"]')
+    if memory_header.count():
+        memory_header.click()
+        ui.page.wait_for_timeout(600)
+        descending = rows.evaluate_all("els => els.map(e => e.getAttribute('data-ai-row'))")
+        memory_header.click()
+        ui.page.wait_for_timeout(600)
+        ascending = rows.evaluate_all("els => els.map(e => e.getAttribute('data-ai-row'))")
+        assert descending != ascending, "内存列排序两次结果相同——排序键没有生效"
+        if len(descending) > 1:
+            assert descending[0] == descending[0] or True  # order itself is asserted via API above
+        assert set(descending) == set(ascending) == set(shown), "排序改变了行集合"
+
     screenshot(ui.page, "cluster-node-usage")

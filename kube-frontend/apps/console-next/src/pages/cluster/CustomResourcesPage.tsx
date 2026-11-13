@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from '@tanstack/react-router';
 import { customResourcesApi, type CustomResourceSummary } from '@kube-ai-hub/api-client';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
@@ -73,7 +74,17 @@ export function CustomResourcesPage({ cluster }: CustomResourcesPageProps): Reac
           title: t('cluster.customResources.kind'),
           render: (row: CustomResourceSummary) => (
             <span className="flex min-w-0 flex-col" data-ai-id={`custom-resources:kind:${row.name}`}>
-              <span className="truncate font-medium text-ai-fg">{row.kind || '-'}</span>
+              {/*
+                Linked because seeing "RuleGroup exists" raises the next question — "is
+                anything using it", which is answered on the detail page's instance list.
+              */}
+              <Link
+                to="/kube-frontend/clusters/$cluster/custom-resources/$name"
+                params={{ cluster, name: row.name }}
+                className="truncate font-medium text-ai-accent hover:underline"
+              >
+                {row.kind || '-'}
+              </Link>
               {/* The group and version are what a reader needs to write a manifest. */}
               <span className="truncate text-[11px] text-ai-fg-muted">
                 {row.group}
