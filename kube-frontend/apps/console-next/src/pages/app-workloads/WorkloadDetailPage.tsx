@@ -27,6 +27,7 @@ import { YamlDialog } from '@/components/resource/YamlDialog';
 import { toYaml } from '@/components/resource/yaml';
 import { formatTimestamp } from '@/lib/time';
 import { statusLabel } from '@/lib/status';
+import { DefinitionRow as Row } from '@/components/resource/DefinitionRow';
 
 /**
  * The detail view shared by every application workload.
@@ -555,11 +556,3 @@ function useBackTo(kind: WorkloadKind): string {
   return `${root}/${kind}`;
 }
 
-function Row({ label, value }: { label: string; value: string }): React.ReactElement {
-  return (
-    <>
-      <dt className="text-ai-fg-muted">{label}</dt>
-      <dd className="min-w-0 break-words text-ai-fg-secondary">{value}</dd>
-    </>
-  );
-}

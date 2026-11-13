@@ -17,6 +17,7 @@ import { DeleteDialog } from '@/components/resource/DeleteDialog';
 import { EditInfoDialog } from '@/components/resource/EditInfoDialog';
 import { MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { YamlDialog, toYaml } from '@/components/resource/YamlDialog';
+import { DefinitionRow as Row } from '@/components/resource/DefinitionRow';
 
 /**
  * ServiceAccount detail.
@@ -174,15 +175,5 @@ export function ServiceAccountDetailPage({ cluster, namespace, name, workspace }
   );
 }
 
-function Row({ label, value, aiId }: { label: string; value: string; aiId: string }): React.ReactElement {
-  return (
-    <>
-      <dt className="text-ai-fg-muted">{label}</dt>
-      <dd className="min-w-0 break-all text-ai-fg" data-ai-id={aiId}>
-        {value}
-      </dd>
-    </>
-  );
-}
 
 export default ServiceAccountDetailPage;

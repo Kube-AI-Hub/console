@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Link } from '@tanstack/react-router';
 import { ApiError, type ConfigMapDetail, type ConfigMapInput } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { AiButton, AiSurface, Badge, ResourceList, type ListSchema } from '@kube-ai-hub/ui';
+import { AiSurface, Badge, ResourceList, type ListSchema} from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient, configMapsApi } from '@/api';
 import { ensureConfigMapsRegistered, type ConfigMapSummary } from './queries';
@@ -16,6 +16,7 @@ import { toYaml } from './yaml';
 
 import { DialogSuspense } from '@/components/resource/DialogSuspense';
 import { LoadingDialog } from '@/components/resource/LoadingDialog';
+import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 
 /*
  * The YAML editor is 188 KB gzip of CodeMirror. A list page must not pay for it
@@ -267,7 +268,7 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
   if (state === 'error') {
     return (
       <AiSurface as="section" aiId="configmaps:surface" state="error" className="min-w-0">
-        <ErrorPanel error={query.error} onRetry={() => void query.refetch()} />
+        <ResourceErrorPanel error={query.error} onRetry={() => void query.refetch()} retryAiId="configmaps:retry" />
       </AiSurface>
     );
   }
@@ -425,29 +426,3 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
   );
 }
 
-function ErrorPanel({ error, onRetry }: { error: unknown; onRetry: () => void }): React.ReactElement {
-  const t = useT();
-  const apiError = error instanceof ApiError ? error : undefined;
-  const message = apiError
-    ? apiError.isPermission
-      ? t('error.unauthorized')
-      : apiError.isNotFound
-        ? t('error.notFound')
-        : apiError.retryable
-          ? t('error.network')
-          : apiError.message
-    : t('error.unknown');
-
-  return (
-    <div className="flex flex-col items-center gap-3 rounded-ai-md border border-ai-line p-8 text-center" role="alert">
-      <p className="text-sm font-medium text-ai-fg">{t('error.title')}</p>
-      <p className="text-xs text-ai-fg-muted">{message}</p>
-      {/* No retry for a permission error: pressing it again cannot succeed. */}
-      {apiError?.isPermission ? null : (
-        <AiButton aiId="configmaps:retry" size="sm" onClick={onRetry}>
-          {t('common.retry')}
-        </AiButton>
-      )}
-    </div>
-  );
-}

@@ -173,13 +173,41 @@ export function workspacesWriteApi(client: Client) {
   };
 }
 
+/**
+ * Read workspaces from the tenant API, the same endpoint they are written to.
+ *
+ * The resources proxy (`resources.kubesphere.io/.../workspaces`) is what this used to
+ * read, and on one cluster version it does not see a workspace created through the
+ * tenant API at all — measured against a live cluster: 2 entries from the proxy against
+ * 3 from tenant, with the newly created one missing only in the proxy. Reading and
+ * writing the same store avoids depending on how the proxy caches.
+ *
+ * KubeSphere's own list parameters (`page`, `limit`, `sortBy`, `ascending`, `name`) are
+ * served by this endpoint too, so pagination and search behave the same.
+ */
 export function workspacesApi(client: Client) {
   return {
-    ...resourceApi<KubeAccess, WorkspaceSummary, WorkspaceSummary>(client, {
-      resource: 'workspaces',
-      toSummary: toWorkspaceSummary,
-      toDetail: toWorkspaceSummary,
-    }),
+    async list(params: {
+      cluster: string;
+      namespace: string;
+      page: number;
+      pageSize: number;
+      sortBy?: string;
+      order?: string;
+      keyword?: string;
+      signal?: AbortSignal;
+    }): Promise<{ items: WorkspaceSummary[]; total: number }> {
+      const query = new URLSearchParams({ page: String(params.page), limit: String(params.pageSize) });
+      if (params.sortBy) query.set('sortBy', params.sortBy);
+      if (params.order) query.set('ascending', String(params.order === 'asc'));
+      if (params.keyword?.trim()) query.set('name', params.keyword.trim());
+      const body = await client.request<{ items?: KubeAccess[]; totalItems?: number }>(
+        `/kapis/tenant.kubesphere.io/v1alpha2/workspaces?${query.toString()}`,
+        params.signal ? { signal: params.signal } : {},
+      );
+      const items = (body?.items ?? []).map(toWorkspaceSummary);
+      return { items, total: body?.totalItems ?? items.length };
+    },
     kind: 'workspaces' as const,
   };
 }

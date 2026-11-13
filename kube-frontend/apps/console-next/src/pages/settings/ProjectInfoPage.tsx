@@ -8,6 +8,7 @@ import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { QuotaEditDialog } from './QuotaEditDialog';
 import { formatTimestamp } from '@/lib/time';
+import { DefinitionRow as Row } from '@/components/resource/DefinitionRow';
 
 /**
  * 项目基本信息.
@@ -111,13 +112,3 @@ export function ProjectInfoPage({ cluster, namespace }: ProjectInfoPageProps): R
   );
 }
 
-function Row({ label, value, aiId }: { label: string; value: string; aiId?: string }): React.ReactElement {
-  return (
-    <>
-      <dt className="text-ai-fg-muted">{label}</dt>
-      <dd className="min-w-0 break-words text-ai-fg-secondary" {...(aiId ? actionProps(aiId) : {})}>
-        {value}
-      </dd>
-    </>
-  );
-}

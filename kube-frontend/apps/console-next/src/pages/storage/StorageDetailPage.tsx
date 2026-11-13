@@ -11,6 +11,7 @@ import { YamlDialog } from '@/components/resource/YamlDialog';
 import { toYaml } from '@/components/resource/yaml';
 import { formatTimestamp } from '@/lib/time';
 import { statusLabel } from '@/lib/status';
+import { DefinitionRow as Row } from '@/components/resource/DefinitionRow';
 
 /**
  * The storage detail view.
@@ -161,14 +162,6 @@ export function StorageDetailPage({ kind, cluster, namespace, name }: StorageDet
   );
 }
 
-function Row({ label, value }: { label: string; value: string }): React.ReactElement {
-  return (
-    <>
-      <dt className="text-ai-fg-muted">{label}</dt>
-      <dd className="min-w-0 break-words text-ai-fg-secondary">{value}</dd>
-    </>
-  );
-}
 
 /** Status → locale key suffix, shared with the list so both name a state the same way. */
 

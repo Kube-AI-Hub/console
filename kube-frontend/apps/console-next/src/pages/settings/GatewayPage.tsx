@@ -2,11 +2,11 @@ import * as React from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { projectGatewayApi, type ProjectGateway } from '@kube-ai-hub/api-client';
 import { AiButton, AiSurface, Badge, Skeleton } from '@kube-ai-hub/ui';
-import { actionProps } from '@kube-ai-hub/ai-surface';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { DeleteDialog } from '@/components/resource/DeleteDialog';
 import { MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
+import { DefinitionRow as Row } from '@/components/resource/DefinitionRow';
 
 /**
  * 项目网关.
@@ -115,13 +115,3 @@ export function GatewayPage({ cluster, namespace }: GatewayPageProps): React.Rea
   );
 }
 
-function Row({ label, value, aiId }: { label: string; value: string; aiId?: string }): React.ReactElement {
-  return (
-    <>
-      <dt className="text-ai-fg-muted">{label}</dt>
-      <dd className="min-w-0 break-words text-ai-fg-secondary" {...(aiId ? actionProps(aiId) : {})}>
-        {value}
-      </dd>
-    </>
-  );
-}

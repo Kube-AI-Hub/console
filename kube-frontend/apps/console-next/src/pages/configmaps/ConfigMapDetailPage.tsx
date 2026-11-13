@@ -9,6 +9,7 @@ import { formatTimestamp } from '@/pages/configmaps/format';
 import { ConfigMapDeleteDialog } from '@/pages/configmaps/ConfigMapDeleteDialog';
 import { ConfigMapEditInfoDialog, ConfigMapEditSettingsDialog } from '@/pages/configmaps/ConfigMapEditDialogs';
 import { ConfigMapYamlDialog, toYaml } from '@/pages/configmaps/ConfigMapYamlDialog';
+import { DefinitionRow as Row } from '@/components/resource/DefinitionRow';
 
 /**
  * ConfigMap detail.
@@ -176,14 +177,6 @@ export function ConfigMapDetailPage({ cluster, namespace, name, workspace }: { c
   );
 }
 
-function Row({ label, value }: { label: string; value: string }): React.ReactElement {
-  return (
-    <>
-      <dt className="text-ai-fg-muted">{label}</dt>
-      <dd className="min-w-0 break-all text-ai-fg">{value}</dd>
-    </>
-  );
-}
 
 
 export default ConfigMapDetailPage;

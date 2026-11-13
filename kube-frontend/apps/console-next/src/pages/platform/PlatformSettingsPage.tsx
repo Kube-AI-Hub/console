@@ -6,6 +6,7 @@ import { AiSurface, Badge, Skeleton } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
+import { DefinitionRow as Row } from '@/components/resource/DefinitionRow';
 
 /**
  * 平台设置: 平台信息 and 通知渠道.
@@ -115,16 +116,6 @@ export function PlatformSettingsPage({ view }: PlatformSettingsPageProps): React
   );
 }
 
-function Row({ label, value, aiId }: { label: string; value: string; aiId?: string }): React.ReactElement {
-  return (
-    <>
-      <dt className="text-ai-fg-muted">{label}</dt>
-      <dd className="min-w-0 break-words text-ai-fg-secondary" {...(aiId ? actionProps(aiId) : {})}>
-        {value}
-      </dd>
-    </>
-  );
-}
 
 /** Channel keys the page renders; kept next to the page that uses them. */
 export const PLATFORM_CHANNELS = NOTIFICATION_CHANNELS;
