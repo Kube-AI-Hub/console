@@ -122,7 +122,7 @@ export function ServiceAccountsPage({ workspace, cluster, namespace }: ServiceAc
       description: t('serviceaccounts.description'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
-      search: { placeholder: t('serviceaccounts.searchPlaceholder'), keys: ['name'], aiId: 'serviceaccounts:search' },
+      search: { placeholder: t('serviceaccounts.searchPlaceholder'), aiId: 'serviceaccounts:search' },
       filters: [projectFilterControl],
       selection: 'multiple',
       sortableKeys: ['name', 'createTime'],

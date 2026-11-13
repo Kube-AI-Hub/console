@@ -74,7 +74,7 @@ export function NetworkIsolationPage({ cluster, namespace }: NetworkIsolationPag
       description: t('settings.network.description'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
-      search: { placeholder: t('settings.network.search'), keys: ['name'], aiId: 'networkpolicies:search' },
+      search: { placeholder: t('settings.network.search'), aiId: 'networkpolicies:search' },
       sortableKeys: ['name', 'createTime'],
       sortAiPrefix: 'networkpolicies',
       sort: { key: list.sortBy, order: list.order },

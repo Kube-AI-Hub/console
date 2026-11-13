@@ -53,7 +53,7 @@ export function ClusterListPage({ kind, cluster }: ClusterListPageProps): React.
       description: t(CLUSTER_DESCRIPTORS[kind].descriptionKey),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
-      search: { placeholder: t('cluster.searchPlaceholder'), keys: ['name'], aiId: `${kind}:search` },
+      search: { placeholder: t('cluster.searchPlaceholder'), aiId: `${kind}:search` },
       sortableKeys: ['name', 'createTime'],
       sortAiPrefix: kind,
       sort: { key: list.sortBy, order: list.order },

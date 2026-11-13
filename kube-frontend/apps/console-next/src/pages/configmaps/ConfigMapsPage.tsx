@@ -108,7 +108,7 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
       // `aiId` matches the `configmaps:search` action in the page manifest; the two
       // are one declaration of the same handle and must not drift apart.
-      search: { placeholder: t('configmaps.searchPlaceholder'), keys: ['name'], aiId: 'configmaps:search' },
+      search: { placeholder: t('configmaps.searchPlaceholder'), aiId: 'configmaps:search' },
       /*
        * The project picker comes from a shared hook so every resource page gets the
        * same behaviour — including the rule that it never blocks the table.

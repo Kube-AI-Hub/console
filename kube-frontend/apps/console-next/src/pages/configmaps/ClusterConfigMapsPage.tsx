@@ -87,7 +87,7 @@ export function ClusterConfigMapsPage({ cluster, namespace }: ClusterConfigMapsP
       description: t('clusterConfigmaps.description'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': `${row.namespace}/${row.name}` }),
-      search: { placeholder: t('configmaps.searchPlaceholder'), keys: ['name'], aiId: 'cluster-configmaps:search' },
+      search: { placeholder: t('configmaps.searchPlaceholder'), aiId: 'cluster-configmaps:search' },
       filters: [projectFilterControl],
       selection: 'multiple',
       /*

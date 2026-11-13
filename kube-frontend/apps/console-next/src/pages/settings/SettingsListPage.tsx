@@ -65,7 +65,7 @@ export function SettingsListPage({ kind, cluster, namespace }: SettingsListPageP
       description: t(descriptor.descriptionKey),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
-      search: { placeholder: t('settings.searchPlaceholder'), keys: ['name'], aiId: `${kind}:search` },
+      search: { placeholder: t('settings.searchPlaceholder'), aiId: `${kind}:search` },
       filters: [projectFilterControl],
       sortableKeys: ['name', 'createTime'],
       sortAiPrefix: kind,

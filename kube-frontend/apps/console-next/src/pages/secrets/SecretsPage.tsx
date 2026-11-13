@@ -134,7 +134,7 @@ export function SecretsPage({ workspace, cluster, namespace }: SecretsPageProps)
       description: t('secrets.description'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
-      search: { placeholder: t('secrets.searchPlaceholder'), keys: ['name'], aiId: 'secrets:search' },
+      search: { placeholder: t('secrets.searchPlaceholder'), aiId: 'secrets:search' },
       filters: [projectFilterControl],
       selection: 'multiple',
       sortableKeys: ['name', 'createTime'],

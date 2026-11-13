@@ -59,7 +59,7 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
       description: t(PLATFORM_DESCRIPTORS[kind].descriptionKey),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
-      search: { placeholder: t('platform.searchPlaceholder'), keys: ['name'], aiId: `${kind}:search` },
+      search: { placeholder: t('platform.searchPlaceholder'), aiId: `${kind}:search` },
       sortableKeys: ['name', 'createTime'],
       sortAiPrefix: kind,
       sort: { key: list.sortBy, order: list.order },

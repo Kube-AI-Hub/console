@@ -57,7 +57,7 @@ export function StorageClassesPage({ cluster }: StorageClassesPageProps): React.
       description: t('cluster.storageClasses.description'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
-      search: { placeholder: t('cluster.searchPlaceholder'), keys: ['name'], aiId: 'storageclasses:search' },
+      search: { placeholder: t('cluster.searchPlaceholder'), aiId: 'storageclasses:search' },
       sortableKeys: ['name', 'createTime'],
       sortAiPrefix: 'storageclasses',
       sort: { key: list.sortBy, order: list.order },

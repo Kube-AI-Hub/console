@@ -117,7 +117,7 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
       description: t(descriptor.descriptionKey),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
-      search: { placeholder: t('workloads.searchPlaceholder'), keys: ['name'], aiId: `${kind}:search` },
+      search: { placeholder: t('workloads.searchPlaceholder'), aiId: `${kind}:search` },
       filters: [projectFilterControl],
       selection: 'multiple',
       sortableKeys: ['name', 'createTime'],

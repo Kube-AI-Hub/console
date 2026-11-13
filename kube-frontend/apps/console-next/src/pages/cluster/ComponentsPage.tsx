@@ -63,7 +63,7 @@ export function ComponentsPage({ cluster: _cluster }: ComponentsPageProps): Reac
       description: t('cluster.components.description'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
-      search: { placeholder: t('cluster.searchPlaceholder'), keys: ['name'], aiId: 'components:search' },
+      search: { placeholder: t('cluster.searchPlaceholder'), aiId: 'components:search' },
       sortableKeys: ['name', 'health'],
       sortAiPrefix: 'components',
       sort: { key: list.sortBy, order: list.order },

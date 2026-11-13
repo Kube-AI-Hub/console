@@ -91,7 +91,14 @@ export interface ListSchema<TRow> {
   filters?: ListFilter[];
   search?: {
     placeholder?: string;
-    keys?: string[];
+    /**
+     * No `keys`: searching is a server-side keyword, not a client-side field match.
+     *
+     * The field existed and every caller filled it with `['name']`, which happened to
+     * describe what the server does — but nothing read it, so declaring `['name','app']`
+     * would have implied a multi-field search that does not exist. Filtering a
+     * server-paginated list client-side would only search the current page.
+     */
     /**
      * Stable handle for the search input, rendered as `data-ai-id`.
      *
