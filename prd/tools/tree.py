@@ -396,7 +396,7 @@ MODULES = [
             {
                 "id": "platform-settings",
                 "title": "平台设置",
-                "goal": "平台自身的配置：平台名称/描述/控制台地址，以及五种通知渠道是否已配置。两者都只读——渠道凭据是可读性受限的 Secret，编辑属于平台侧表单。",
+                "goal": "平台自身的配置：平台信息（名称/描述/控制台地址，只读）、邮件通知渠道的实际配置，以及登录者的外观偏好（深浅色与色调）。",
                 "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-PLATFORM_SETTINGS-01"]},
                 "features": [
                     {
@@ -405,9 +405,38 @@ MODULES = [
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-INFO-01"]},
                     },
                     {
-                        "id": "notifications",
-                        "title": "通知渠道",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-NOTIFICATIONS-01"]},
+                        "id": "appearance",
+                        "title": "外观（深浅色与色调）",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-APPEARANCE-01"]},
+                    },
+                    {
+                        "id": "mail",
+                        "title": "邮件通知渠道",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-MAIL-01"]},
+                    },
+                ],
+            },
+            {
+                "id": "user-settings",
+                "title": "用户设置",
+                "goal": "登录者管理自己的账号：看清自己是谁（用户名、平台角色），改自己的邮箱与密码。入口是右上角用户菜单，不需要平台管理权限，因此它不属于任何项目、集群或平台配置页面。",
+                "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-USER_SETTINGS-01"]},
+                "features": [
+                    {
+                        "id": "profile",
+                        "title": "基本信息",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-USER_SETTINGS-PROFILE-01",
+                            "TC-L3-KUBE-FRONTEND-USER_SETTINGS-PROFILE-02",
+                        ]},
+                    },
+                    {
+                        "id": "password",
+                        "title": "密码设置",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-01",
+                            "TC-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-02",
+                        ]},
                     },
                 ],
             },

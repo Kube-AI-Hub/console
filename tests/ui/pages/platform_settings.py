@@ -1,9 +1,9 @@
-"""页面对象：kube-frontend 的平台设置（平台信息、通知渠道）。
+"""页面对象：kube-frontend 的平台设置（平台信息、邮件通知渠道）。
 
 平台级页面：`/kube-frontend/settings/<page>`，没有集群、项目段，也不出现项目工作区栏。
 
-通知渠道只报「是否配置」，判定依据是 `kubesphere-monitoring-system` 中 `<channel>s`
-命名的 Secret 是否存在；凭据内容从不读取。
+两个页面的句柄前缀不同：平台信息是 `platform-settings:info:surface`，邮件渠道是
+`notification-mail:surface`——渠道页有自己的组件，`surface()` 负责把页面名映射过去。
 """
 
 from __future__ import annotations
@@ -29,8 +29,15 @@ class PlatformSettingsPage:
     def url(self, view: str = "info") -> str:
         return f"{self.base_url}/kube-frontend/settings/{view}"
 
+    #: Page name → its surface handle. The mail channel predates this object's naming.
+    SURFACES = {
+        "info": "platform-settings:info:surface",
+        "mail": "notification-mail:surface",
+    }
+
     def surface(self, view: str = "info") -> Locator:
-        return self.page.locator(f'[data-ai-id="platform-settings:{view}:surface"]').last
+        handle = self.SURFACES.get(view, f"platform-settings:{view}:surface")
+        return self.page.locator(f'[data-ai-id="{handle}"]').last
 
     def open(self, view: str = "info") -> None:
         url = self.url(view)

@@ -116,6 +116,7 @@ export {
   userDetailApi,
   clusterRoleDetailApi,
   usersWriteApi,
+  userSettingsApi,
   NOTIFICATION_CHANNELS,
   platformInfoApi,
   platformRoleOf,
@@ -318,3 +319,19 @@ export type {
   SeriesPoint,
 } from './cluster';
 
+export {
+  CHANNEL_SPEC_KEY,
+  channelEnabled,
+  NOTIFICATION_CHANNELS as NOTIFICATION_CHANNEL_KEYS,
+  notificationConfigApi,
+  notificationReceiverApi,
+  notificationSecretApi,
+  notificationVerifyApi,
+  readChannel,
+} from './notification';
+export type {
+  ChannelStatus,
+  NotificationChannelKey as NotificationChannelSpecKey,
+  NotificationObject,
+  VerifyResult,
+} from './notification';

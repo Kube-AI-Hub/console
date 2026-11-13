@@ -232,7 +232,8 @@ export const AREAS: readonly Area[] = [
     defaultPage: 'info',
     pages: [
       { key: 'info', path: 'info', titleKey: 'platform.settings.info', status: 'ready' },
-      { key: 'notifications', path: 'notifications', titleKey: 'platform.settings.channels', status: 'ready' },
+      // 通知渠道是一个页面一个渠道（老 console 也是），邮件先落地。
+      { key: 'mail', path: 'mail', titleKey: 'mail.title', status: 'ready' },
     ],
   },
 ] as const;

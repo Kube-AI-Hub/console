@@ -1,0 +1,38 @@
+id: TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-APPEARANCE-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: platform-settings
+feature: appearance
+title: 外观 · 深浅色与色调切换并保持
+entry_url: '{BASE_URL}/kube-frontend/settings/info'
+prd: prd/kube-frontend/platform-settings/appearance.md
+design: design/kube-frontend/platform-settings/appearance.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-APPEARANCE-01
+
+story:
+- US1
+
+product: 平台信息页的「外观」分区可切换主题模式与色调；切换立即作用在 <html> 上，刷新后保持。
+preconditions:
+- 已登录
+steps:
+- 打开平台信息页
+- 读取当前 data-theme / data-accent
+- 点击「品牌绿」，再点击「浅色」
+- 刷新页面
+- 切回紫罗兰与深色
+expected:
+- html[data-accent] 变为 green，按钮标记 aria-checked=true
+- html[data-theme] 变为 light
+- 刷新后仍为 green / light
+- 切回后恢复 violet / dark
+performance:
+- 无网络请求：外观只写 localStorage
+troubleshoot:
+- 切换无效：确认页面用的是 useTheme 而非本地 state
+- 刷新回默认：ThemeProvider 的首帧恢复脚本未生效
+update_automation:
+- 选择器变化时改外观按钮的 data-ai-id（appearance:accent:* / appearance:mode:*）

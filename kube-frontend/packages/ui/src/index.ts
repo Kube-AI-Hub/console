@@ -42,8 +42,10 @@ export {
   Skeleton,
   Table,
   Textarea,
+  AccentToggle,
   ThemeProvider,
   ThemeToggle,
+  useTheme,
   themeBootstrapScript,
   Tooltip,
   Modal,
@@ -60,6 +62,7 @@ export {
 } from '@kube-ai-hub/ai-kit';
 
 export type {
+  AccentPalette,
   ButtonProps,
   DropdownItem,
   DropdownProps,

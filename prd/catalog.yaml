@@ -392,13 +392,44 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-INFO-01
-    - id: notifications
-      title: 通知渠道
-      prd: prd/kube-frontend/platform-settings/notifications.md
-      design: design/kube-frontend/platform-settings/notifications.md
+    - id: appearance
+      title: 外观（深浅色与色调）
+      prd: prd/kube-frontend/platform-settings/appearance.md
+      design: design/kube-frontend/platform-settings/appearance.md
       tests:
         L3:
-        - TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-NOTIFICATIONS-01
+        - TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-APPEARANCE-01
+    - id: mail
+      title: 邮件通知渠道
+      prd: prd/kube-frontend/platform-settings/mail.md
+      design: design/kube-frontend/platform-settings/mail.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-MAIL-01
+  - id: user-settings
+    title: 用户设置
+    prd: prd/kube-frontend/user-settings/_index.md
+    design: design/kube-frontend/user-settings/_index.md
+    tests:
+      L2:
+      - TC-FULL-KUBE-FRONTEND-USER_SETTINGS-01
+    features:
+    - id: profile
+      title: 基本信息
+      prd: prd/kube-frontend/user-settings/profile.md
+      design: design/kube-frontend/user-settings/profile.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-USER_SETTINGS-PROFILE-01
+        - TC-L3-KUBE-FRONTEND-USER_SETTINGS-PROFILE-02
+    - id: password
+      title: 密码设置
+      prd: prd/kube-frontend/user-settings/password.md
+      design: design/kube-frontend/user-settings/password.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-01
+        - TC-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-02
   - id: access-control
     title: 访问控制
     prd: prd/kube-frontend/access-control/_index.md

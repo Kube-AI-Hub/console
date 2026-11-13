@@ -1,0 +1,42 @@
+id: TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-MAIL-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: platform-settings
+feature: mail
+title: 邮件通知渠道 · 校验、保存与测试
+entry_url: '{BASE_URL}/kube-frontend/settings/mail'
+prd: prd/kube-frontend/platform-settings/mail.md
+design: design/kube-frontend/platform-settings/mail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-MAIL-01
+- AC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-MAIL-02
+- AC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-MAIL-03
+
+story:
+- US1
+
+product: 邮件渠道页可读取/回显已保存配置（密码除外），校验非法输入，保存三个通知对象，并能发送测试邮件。
+preconditions:
+- 已登录平台管理
+- 平台已安装通知模块（configs/receivers/verification 可用）
+steps:
+- 打开 /settings/mail，确认字段齐全
+- 提交非法端口与非法收件人，确认在发请求前被拦下
+- 填写合法 SMTP 与收件人并保存
+- 读回 config/receiver/secret 核对与输入一致（secret 为 base64）
+- 删除三个对象恢复原状
+- /settings/notifications 应重定向到 /settings/mail
+expected:
+- 页面 6 个字段在位
+- 非法输入显示逐项提示且没有产生写入请求
+- 保存后 config.spec.email.smartHost 与页面一致、receiver.spec.email.to 为拆分的数组、secret.data.authPassword 是 base64
+- 重定向到 /settings/mail
+performance:
+- 保存为三次写入（config → secret → receiver）
+troubleshoot:
+- 保存返回 405：创建必须 POST 到集合端点 /configs，而不是对象路径
+- 保存返回 400 且提到 vconfig webhook：平台通知组件不可用，属环境问题
+update_automation:
+- 字段变化时改 MailChannelPage 的 ai-field-* id

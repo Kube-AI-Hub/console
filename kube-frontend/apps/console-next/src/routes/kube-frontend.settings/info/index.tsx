@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { createFileRoute } from '@tanstack/react-router';
-import { PlatformSettingsPage } from '@/pages/platform/PlatformSettingsPage';
+import { PlatformInfoPage } from '@/pages/platform/PlatformInfoPage';
 
-/** `/kube-frontend/settings/info` — 平台设置。 */
+/** `/kube-frontend/settings/info` — 平台设置 · 平台信息。 */
 export const Route = createFileRoute('/kube-frontend/settings/info/')({
-  component: settingsRoute,
+  component: infoRoute,
 });
 
-function settingsRoute(): React.ReactElement {
-  return <PlatformSettingsPage view="info" />;
+function infoRoute(): React.ReactElement {
+  return <PlatformInfoPage />;
 }
