@@ -180,7 +180,16 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
             if (row.kind !== 'persistentvolumeclaims') return <span className="text-ai-fg-muted">-</span>;
             // Three states, not two: "not known yet" is different from "not mounted",
             // and the difference matters before deleting a claim.
-            if (row.inUse === undefined) return <span className="text-ai-fg-muted">{t('storage.mount.computing')}</span>;
+            // PERFORMANCE: this depends on listing every pod in the project, which takes
+            // over a minute on a large project against this API. The title says so, so a
+            // long wait is explained rather than looking like a stuck page.
+            if (row.inUse === undefined) {
+              return (
+                <span className="text-ai-fg-muted" title={t('storage.mount.computingHint')}>
+                  {t('storage.mount.computing')}
+                </span>
+              );
+            }
             return row.inUse ? (
               <Badge tone="success">{t('storage.mount.mounted')}</Badge>
             ) : (

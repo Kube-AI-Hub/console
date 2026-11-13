@@ -99,3 +99,19 @@ E2E：`tests/kube-frontend/storage/`；单测：`storage.ts` 的状态与摘要�
 | 详情 | `prd/…/detail.md` | `design/…/detail.md` |
 | 编辑 YAML | `prd/…/edit-yaml.md` | `design/…/edit-yaml.md` |
 | 删除 | `prd/…/delete.md` | `design/…/delete.md` |
+
+
+### 性能记录（挂载状态列，2026-11-13 实测）
+
+挂载状态需要列出项目内全部 Pod，这一调用**与对象数成正比、与响应体积无关**：
+
+| 项目 | Pod 数 | 该接口耗时 |
+| --- | --- | --- |
+| csghub | 28 | 13–150s（随集群负载波动） |
+| spaces | 81 | 58s+ |
+
+因此该列在数据到达前显示「计算中」，并用 `title` 说明其原因，避免长时间等待被误读为页面卡死。
+列表本身不被阻塞（实测行数据 3.2s 出现）。
+
+**待优化**：改为按需投影（只读 `spec.volumes`）或后台定时汇总并缓存。当前优先级低于功能完整性——
+按约定"先迁移功能，再优化性能"。

@@ -15,9 +15,21 @@ def test_TC_L3_KUBE_FRONTEND_STORAGE_MOUNT_01(storage_page, screenshot):
     ui = storage_page
     assert ui.api is not None
 
-    status, body = ui.api.request("GET", PODS)
+    # PERFORMANCE: this cluster's pod list takes ~40-150s for a large project — it scales
+    # with object count, not payload size — and occasionally times out under load. Retry
+    # rather than skipping: a slow read is the condition this case exists to tolerate,
+    # not a reason to report "cannot verify".
+    status, body = 0, {}
+    for _ in range(3):
+        try:
+            status, body = ui.api.request("GET", PODS, timeout=240)
+        except Exception:
+            status, body = 0, {}
+            continue
+        if status == 200:
+            break
     if status != 200:
-        pytest.skip("无法读取项目内的容器组，挂载状态无法核对")
+        pytest.skip(f"无法读取项目内的容器组（{status}），挂载状态无法核对")
     mounted: set[str] = set()
     for pod in body.get("items") or []:
         for volume in ((pod.get("spec") or {}).get("volumes") or []):
@@ -38,10 +50,14 @@ def test_TC_L3_KUBE_FRONTEND_STORAGE_MOUNT_01(storage_page, screenshot):
     # The column starts at 计算中 and resolves once the pod list arrives. Listing every
     # pod in the project is the slow call here (see the design doc's performance note).
     column = headers.index("挂载状态")
-    for _ in range(60):
+    # Measured at ~100-150s for this project on the current cluster: the page lists
+    # every pod in the project to answer "is this claim mounted", and that list is slow.
+    # The timeout is generous on purpose — the point is to verify the column resolves,
+    # not to assert how fast the API is (see the design doc's performance note).
+    for _ in range(90):
         if "计算中" not in surface.locator("tbody").inner_text():
             break
-        ui.page.wait_for_timeout(2000)
+        ui.page.wait_for_timeout(3000)
     assert "计算中" not in surface.locator("tbody").inner_text(), "mount state never resolved"
 
     for row in surface.locator("tbody tr").all():

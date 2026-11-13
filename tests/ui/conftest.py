@@ -104,7 +104,21 @@ class ApiClient:
         self.base = base
         self.token = token
 
-    def request(self, method: str, path: str, body: dict | None = None, content_type: str = "application/json") -> tuple[int, dict]:
+    def request(
+        self,
+        method: str,
+        path: str,
+        body: dict | None = None,
+        content_type: str = "application/json",
+        timeout: float = 30,
+    ) -> tuple[int, dict]:
+        """One API call.
+
+        `timeout` is a parameter because this cluster's list endpoints scale with object
+        count rather than payload size: listing the pods of a large project takes ~60s,
+        which is longer than the default a normal call should wait. Pass a larger value
+        for those, and keep the default tight so a hung server still fails fast.
+        """
         import json
         import urllib.error
         import urllib.request
@@ -117,7 +131,7 @@ class ApiClient:
             headers={"Authorization": f"Bearer {self.token}", "Content-Type": content_type, "Accept": "application/json"},
         )
         try:
-            with urllib.request.urlopen(request, timeout=30) as response:
+            with urllib.request.urlopen(request, timeout=timeout) as response:
                 text = response.read().decode("utf-8")
                 return response.status, (json.loads(text) if text else {})
         except urllib.error.HTTPError as error:
