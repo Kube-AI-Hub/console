@@ -1,0 +1,38 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: nodes
+title: 节点列表 · 节点详情（条件、容量、标签与污点）
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/nodes'
+prd: prd/kube-frontend/cluster-management/nodes.md
+design: design/kube-frontend/cluster-management/nodes.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-03
+
+story:
+- US2
+
+product: 从节点列表点名称进入节点详情：状态、角色、版本、内网 IP、系统信息、可分配/总量（换算单位）、状态条件、标签与污点；数据来自该节点对象。
+preconditions:
+- 已登录，且对 host 集群有读取权限
+- 集群至少有一个节点
+steps:
+- 用 API 读取节点列表，取第一个节点的名称与 status.conditions 条数
+- 打开节点页，点击该节点名称
+- 核对 URL 与详情各区块
+- 核对「可分配 / 总量」为人类可读单位（不含 Ki/m 等原始后缀）
+- 核对条件条目数等于对象中的 conditions 数
+expected:
+- 详情页可达且状态为 ready
+- 基本信息与节点对象一致（状态、版本、内网 IP）
+- 容量显示为核 / GiB·TiB / 整数，而不是原始 quantity 字符串
+- 每个状态条件都有条目
+troubleshoot:
+- 显示 255600m 之类原始值：容量未换算
+- 条件为空：读取的不是 node.status.conditions
+- 点名称无跳转：列表名称未接详情链接
+update_automation:
+- 选择器见 pages/cluster_management.py 与 NodeDetailPage.tsx

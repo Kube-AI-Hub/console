@@ -279,6 +279,78 @@ function nodeAddress(item: KubeNode, type: string): string {
   return String(match?.['address'] ?? '');
 }
 
+/** One condition of a node, as the kubelet reports it. */
+export interface NodeCondition {
+  type: string;
+  /** 'True' | 'False' | 'Unknown'. */
+  status: string;
+  reason: string;
+  message: string;
+  lastTransitionTime: string;
+}
+
+export interface NodeTaint {
+  key: string;
+  value: string;
+  effect: string;
+}
+
+/** Everything the node detail page shows; the list row is a subset of this. */
+export interface NodeDetail extends NodeSummary {
+  conditions: NodeCondition[];
+  capacity: Record<string, string>;
+  allocatable: Record<string, string>;
+  labels: Record<string, string>;
+  taints: NodeTaint[];
+  nodeInfo: {
+    osImage: string;
+    kernelVersion: string;
+    containerRuntimeVersion: string;
+    architecture: string;
+    operatingSystem: string;
+    kubeletVersion: string;
+  };
+}
+
+export function toNodeDetail(item: KubeNode): NodeDetail {
+  const status = (item.status ?? {}) as Record<string, unknown>;
+  const asRecord = (value: unknown): Record<string, string> => {
+    const out: Record<string, string> = {};
+    for (const [key, entry] of Object.entries((value ?? {}) as Record<string, unknown>)) {
+      out[key] = String(entry ?? '');
+    }
+    return out;
+  };
+  const nodeInfo = (status['nodeInfo'] ?? {}) as Record<string, unknown>;
+  const conditions = ((status['conditions'] ?? []) as Array<Record<string, unknown>>).map((condition) => ({
+    type: String(condition['type'] ?? ''),
+    status: String(condition['status'] ?? ''),
+    reason: String(condition['reason'] ?? ''),
+    message: String(condition['message'] ?? ''),
+    lastTransitionTime: String(condition['lastTransitionTime'] ?? ''),
+  }));
+  return {
+    ...toNodeSummary(item),
+    conditions,
+    capacity: asRecord(status['capacity']),
+    allocatable: asRecord(status['allocatable']),
+    labels: (item.metadata?.labels ?? {}) as Record<string, string>,
+    taints: (((item.spec ?? {})['taints'] ?? []) as Array<Record<string, unknown>>).map((taint) => ({
+      key: String(taint['key'] ?? ''),
+      value: String(taint['value'] ?? ''),
+      effect: String(taint['effect'] ?? ''),
+    })),
+    nodeInfo: {
+      osImage: String(nodeInfo['osImage'] ?? ''),
+      kernelVersion: String(nodeInfo['kernelVersion'] ?? ''),
+      containerRuntimeVersion: String(nodeInfo['containerRuntimeVersion'] ?? ''),
+      architecture: String(nodeInfo['architecture'] ?? ''),
+      operatingSystem: String(nodeInfo['operatingSystem'] ?? ''),
+      kubeletVersion: String(nodeInfo['kubeletVersion'] ?? ''),
+    },
+  };
+}
+
 export function toNodeSummary(item: KubeNode): NodeSummary {
   const nodeInfo = (item.status?.['nodeInfo'] ?? {}) as Record<string, unknown>;
   const allocatable = (item.status?.['allocatable'] ?? {}) as Record<string, unknown>;
@@ -313,10 +385,10 @@ export function toNamespaceSummary(item: KubeObject): NamespaceSummary {
 /** Nodes: cluster-scoped, so no namespace segment. */
 export function nodesApi(client: Client) {
   return {
-    ...resourceApi<KubeNode, NodeSummary, NodeSummary>(client, {
+    ...resourceApi<KubeNode, NodeSummary, NodeDetail>(client, {
       resource: 'nodes',
       toSummary: toNodeSummary,
-      toDetail: toNodeSummary,
+      toDetail: toNodeDetail,
     }),
     kind: 'nodes' as const,
   };

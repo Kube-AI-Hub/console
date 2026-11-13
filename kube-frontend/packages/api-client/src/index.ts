@@ -222,12 +222,13 @@ export {
   nodesApi,
   toComponentSummary,
   toNamespaceSummary,
+  toNodeDetail,
   toNodeSummary,
   toPersistentVolumeSummary,
   persistentVolumesApi,
   toProjectGateway,
 } from './storage';
-export type { ComponentSummary, NamespaceSummary, NodeSummary, PersistentVolumeSummary, ProjectGateway } from './storage';
+export type { ComponentSummary, NamespaceSummary, NodeCondition, NodeDetail, NodeSummary, NodeTaint, PersistentVolumeSummary, ProjectGateway } from './storage';
 export {
   accessModeLabel,
   claimStatus,

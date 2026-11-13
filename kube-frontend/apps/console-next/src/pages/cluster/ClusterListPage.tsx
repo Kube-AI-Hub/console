@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { type NamespaceSummary, type NodeSummary } from '@kube-ai-hub/api-client';
+import { Link } from '@tanstack/react-router';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
@@ -67,7 +68,15 @@ export function ClusterListPage({ kind, cluster }: ClusterListPageProps): React.
                   const node = row as NodeSummary;
                   return (
                     <span className="flex min-w-0 flex-col" {...actionProps(`${kind}:name:${node.name}`)}>
-                      <span className="truncate font-medium text-ai-fg">{node.name}</span>
+                      {/* Linked to the node's detail: the row answers "is it healthy", the
+                          next question is "why not", which needs its conditions. */}
+                      <Link
+                        to="/kube-frontend/clusters/$cluster/nodes/$name"
+                        params={{ cluster, name: node.name }}
+                        className="truncate font-medium text-ai-accent hover:underline"
+                      >
+                        {node.name}
+                      </Link>
                       <span className="truncate text-[11px] text-ai-fg-muted">{node.internalIP || '-'}</span>
                     </span>
                   );
