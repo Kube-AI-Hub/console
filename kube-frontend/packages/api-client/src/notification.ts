@@ -141,9 +141,10 @@ export function notificationSecretApi(client: Client) {
       }
     },
     async save(name: string, data: Record<string, string>): Promise<void> {
+      const objectPath = `${NOTIFICATION_SECRETS}/${encodeURIComponent(name)}`;
       let current: NotificationObject | null = null;
       try {
-        current = await client.request<NotificationObject>(`${NOTIFICATION_SECRETS}/${encodeURIComponent(name)}`);
+        current = await client.request<NotificationObject>(objectPath);
       } catch {
         current = null;
       }
@@ -159,7 +160,9 @@ export function notificationSecretApi(client: Client) {
         type: 'Opaque',
         data,
       };
-      await client.request(`${NOTIFICATION_SECRETS}/${encodeURIComponent(name)}`, {
+      // Same split as the Config/Receiver: creation POSTs to the collection, a replace
+      // PUTs to the object. Posting to the object path answers 405.
+      await client.request(current ? objectPath : NOTIFICATION_SECRETS, {
         method: current ? 'PUT' : 'POST',
         body,
       });

@@ -75,10 +75,14 @@ describe('upsert semantics', () => {
 
 describe('secret handling', () => {
   it('writes base64 data against the notification secret endpoint', async () => {
-    const { client, calls } = recordingClient((_path, init) => (init.method === 'POST' ? {} : {}));
+    const { client, calls } = recordingClient((_path, init) => {
+      if ((init.method ?? 'GET') === 'GET') throw new Error('404');
+      return {};
+    });
     await notificationSecretApi(client).save('global-email-config-secret', { authPassword: 'cEBzcw==' });
     const post = calls.find((c) => c.method !== 'GET');
-    expect(post?.path).toBe('/kapis/notification.kubesphere.io/v2beta1/secrets/global-email-config-secret');
+    // Creation POSTs to the collection; the object path answers 405.
+    expect(post?.path).toBe('/kapis/notification.kubesphere.io/v2beta1/secrets');
     expect((post?.body as { data?: Record<string, string> }).data?.authPassword).toBe('cEBzcw==');
     expect((post?.body as { type?: string }).type).toBe('Opaque');
   });
