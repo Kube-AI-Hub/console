@@ -44,6 +44,22 @@ def main() -> int:
     args = parser.parse_args()
 
     total = 0.0
+    # Leftover test objects are reported before anything else runs, and nothing is
+    # deleted here: a stale fixture object makes later cases fail for no product reason,
+    # but an automatic cleanup mid-run would delete objects belonging to cases that are
+    # running in parallel against the same cluster.
+    leftovers = subprocess.run(
+        [sys.executable, "prd/tools/cleanup_test_objects.py"],
+        cwd=REPO,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if leftovers.returncode == 0 and "0 个" not in leftovers.stdout:
+        print("\n=== 测试残留（只报告，不删除）===", flush=True)
+        print(leftovers.stdout.strip())
+        print("确认无人并行使用时：python3 prd/tools/cleanup_test_objects.py --apply")
+
     total += run("文档门禁", [sys.executable, "prd/tools/check_docs.py", "--strict"], REPO)
     total += run("一致性核对", [sys.executable, "prd/tools/parity_check.py"], REPO)
     total += run("架构契约", [npx(), "vitest", "run", "--config", "config/vitest.config.ts"], KF)

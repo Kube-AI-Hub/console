@@ -115,7 +115,10 @@ def registry_pages() -> dict[str, dict]:
     out: dict[str, dict] = {}
     for match in re.finditer(r"scope: '(project|cluster)'([\s\S]*?)\n  \},", text):
         scope, body = match.group(1), match.group(2)
-        for page in re.finditer(r"\{ key: '([^']+)', path: '[^']+'([^}]*)\}", body):
+        # Keyed by `path`, not `key`: the route folder is named after the path, so
+        # comparing a camelCase key against a kebab-case folder reported a page as
+        # "not registered" while it was registered and reachable.
+        for page in re.finditer(r"\{ key: '[^']+', path: '([^']+)'([^}]*)\}", body):
             out[f"{scope}:{page.group(1)}"] = {
                 "status": "planned" if "planned" in page.group(2) else "ready",
             }

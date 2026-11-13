@@ -285,15 +285,26 @@ def {f"test_{tc.replace('-', '_')}"}(page, ui_config, screenshot):
 
     if args.scope == "cluster":
         text = REGISTRY.read_text(encoding="utf-8")
-        anchor = "'storageclasses', path: 'storageclasses'"
-        if anchor not in text:
+        # Append after the cluster area's last page, not before whichever page happens
+        # to be named in an anchor: the anchor approach put the new tab in the middle of
+        # the tab strip, so the generated order disagreed with the sidebar.
+        block_start = text.find("key: 'cluster-management'")
+        if block_start == -1:
             raise SystemExit("区域注册表里找不到集群管理块，手工登记")
+        block_end = text.find("    ],", block_start)
+        if block_end == -1:
+            raise SystemExit("区域注册表里找不到 pages 数组结束位置，手工登记")
+        # Insert before the closing bracket, keeping the file's own indentation.
+        pages_body = text[block_start:block_end]
+        last_newline = block_end
+        # `key` matches `path` in the registry: every existing page uses the kebab-case
+        # route name, and a camelCase key made the parity check call a registered page
+        # "unregistered" because it compares against the route folder.
         entry = (
-            f"      {{ key: '{camel(feature)}', path: '{route}', "
+            f"      {{ key: '{route}', path: '{route}', "
             f"titleKey: 'cluster.{camel(feature)}.title', status: 'planned' }},\n"
         )
-        line_start = text.rfind("\n", 0, text.find(anchor)) + 1
-        text = text[:line_start] + entry + text[line_start:]
+        text = text[:last_newline] + entry + text[last_newline:]
         REGISTRY.write_text(text, encoding="utf-8")
 
     print("已生成：")
