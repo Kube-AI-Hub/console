@@ -12,13 +12,18 @@ def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_BULK_DELETE_01(configmaps_page, seeded_c
 
     ui = configmaps_page
     seed = seeded_configmaps
+    # One shared prefix for both objects, so a single search makes exactly these two rows
+    # visible. Creating them and expecting them on page 1 is not safe under `-n`: the list
+    # is newest-first, and other workers create objects between ours.
+    token = __import__('uuid').uuid4().hex[:6]
     names = [
-        seed["create"](f"tc-e2e-bulk-{__import__('uuid').uuid4().hex[:6]}-a", {"k": "v"}),
-        seed["create"](f"tc-e2e-bulk-{__import__('uuid').uuid4().hex[:6]}-b", {"k": "v"}),
+        seed["create"](f"tc-e2e-bulk-{token}-a", {"k": "v"}),
+        seed["create"](f"tc-e2e-bulk-{token}-b", {"k": "v"}),
     ]
 
     ui.open()
     ui.wait_ready()
+    ui.search(f"tc-e2e-bulk-{token}")
     for name in names:
         ui.select_row(name)
 

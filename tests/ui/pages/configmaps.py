@@ -8,6 +8,8 @@
 
 from __future__ import annotations
 
+import time
+
 from playwright.sync_api import Locator, Page, TimeoutError as PlaywrightTimeoutError, expect
 
 
@@ -75,9 +77,29 @@ class ConfigMapsPage:
         return self.surface.locator('[data-ai-id="configmaps:search"]')
 
     def search(self, keyword: str) -> None:
-        self.search_box.fill(keyword)
-        # The page debounces for 250ms; waiting for the request is what matters.
-        self.page.wait_for_timeout(400)
+        """Type a keyword and wait until the list actually reflects it.
+
+        A fixed 400ms assumed the 250ms debounce had fired and the response was back.
+        Two things routinely beat that: a controlled input can be re-rendered with the
+        previous value mid-fill (leaving a truncated keyword behind), and the response
+        can take longer than the sleep. Both looked like "search is broken".
+        """
+        for _ in range(20):
+            self.search_box.fill(keyword)
+            self.page.wait_for_timeout(300)
+            if self.search_box.input_value() == keyword:
+                break
+        deadline = time.time() + 30
+        while time.time() < deadline:
+            names = self.row_names()
+            # `all([])` is True: an empty table (skeleton rows while the request is in
+            # flight) would satisfy "every visible name matches" immediately. Require
+            # rows to exist, or the surface to have settled on empty.
+            if names and all(keyword in name for name in names):
+                return
+            if not names and self.state == "empty":
+                return
+            self.page.wait_for_timeout(250)
         self.wait_ready()
 
     def sort_by(self, key: str) -> None:
