@@ -50,7 +50,7 @@ PROJECT_PAGES = {
     "roles": "roles",
     "members": "members",
     "baseinfo": "baseinfo",
-    "networkpolicies": "networkpolicies",
+    "network": "networkpolicies",
     "gateway": "gateways",
     "logcollection": "log-collections",
 }
@@ -58,20 +58,54 @@ PROJECT_PAGES = {
 #: 老 console 里**集群作用域**的一级页面目录 → 迁移后的路由段。
 #: 与 PROJECT_PAGES 分开，因为它们的作用域不同（集群级列表跨全部命名空间）。
 CLUSTER_PAGES = {
+    "overview": "overview",
     "nodes": "nodes",
     "projects": "namespaces",
     "servicecomponents": "components",
     "storage": "storageclasses",
     "persistentvolumes": "persistentvolumes",
     "logcollections": "log-collections",
+    "members": "members",
+    "monitor": "monitor",
+    "visibility": "visibility",
+    "customresources": "custom-resources",
 }
 
 #: 集群作用域里明确不迁移的页面与原因。
 CLUSTER_UNMIGRATED = {
-    "custommonitoring": "自定义监控：需要图表引擎",
-    "gateway": "集群网关：本集群无网关控制器实例",
-    "kubeconfig": "集群 kubeconfig 管理：需要生成与轮换逻辑",
+    "custommonitoring": "自定义监控：仪表板接口各路径均 404（见计划 §5.4）",
+    "gateway": "集群网关：本集群无网关控制器 chart，状态到不了真正就绪（见 §5.7）",
+    "kubeconfig": "集群 kubeconfig 读取：读接口 405（见 §5.5）；导入更新已迁移",
+    "edgenodes": "边缘节点：edge 模块未开启",
+    "network": "集群网络（IPPools/策略）：network 模块未开启",
+    "configmaps": "跨项目配置字典：作用域错误——项目资源只在项目作用域看（并行线已移除集群页）",
+    "secrets": "跨项目保密字典：同上，作用域错误",
+    "serviceaccounts": "跨项目服务账户：同上，作用域错误",
 }
+
+#: 老页面存在、但在另一个作用域迁移的页面（同一批对象，不重复造页面）。
+CLUSTER_MIGRATED_ELSEWHERE = {
+    "roles": "集群角色在「访问控制 › 平台角色」统一维护（同一批 clusterrole 对象）",
+}
+
+#: 平台作用域：老 console 页面目录 → 迁移后的路由（允许多个候选，任一存在即算迁移）。
+#: `settings` 与 `access` 两处容器目录都是平台页面。
+PLATFORM_PAGES = {
+    'access/Accounts': ['access/users'],
+    'access/Roles': ['access/clusterroles'],
+    'access/Workspaces': ['access/workspaces'],
+    'settings/BaseInfo': ['settings/info'],
+    # 平台设置的通知页正在被并行线改造成「邮件渠道」，两条路径都算已迁移。
+    'settings/Notification': ['settings/notifications', 'settings/mail'],
+}
+
+#: 平台作用域明确不迁移的页面。
+PLATFORM_UNMIGRATED = {
+    'settings/ThirdPartyLogin': '第三方登录：本 fork 的登录方式由服务端配置与中间件注入，控制台没有写入路径',
+}
+
+#: 结构性目录（不是页面，只是布局或包装）。
+STRUCTURAL_DIRS = {'Base', 'BaseInfo', 'Clusters', 'Workload', 'layout.jsx', 'layout.scss'}
 
 #: 老 console 里有、本轮明确不迁移的页面，以及原因。
 UNMIGRATED = {
@@ -130,6 +164,49 @@ def spec_features() -> dict[str, list[str]]:
     return out
 
 
+def _dirs(path: Path) -> set[str]:
+    """Immediate subdirectory names (legacy pages are one dir each)."""
+    if not path.is_dir():
+        return set()
+    return {entry.name for entry in path.iterdir() if entry.is_dir()}
+
+
+def untracked_legacy_pages() -> list[str]:
+    """Legacy pages that appear in neither the migrated map nor the not-migrated list.
+
+    The check exists because a page in neither place used to be silently ignored: the
+    report said 'gaps: 0' while an old page had simply never been considered. Anything
+    that is not a page (layout wrappers, the shared Base/BaseInfo directories) is excluded
+    by name rather than by guessing.
+    """
+    out: list[str] = []
+    structural = {name.lower() for name in STRUCTURAL_DIRS}
+
+    project_dirs = _dirs(OLD / 'projects/containers')
+    project_known = {key.split('/')[0].lower() for key in PROJECT_PAGES} | {name.lower() for name in UNMIGRATED}
+    for name in sorted({entry.lower() for entry in project_dirs} - project_known - structural):
+        out.append(f'project:{name}')
+
+    cluster_dirs = _dirs(OLD / 'clusters/containers')
+    cluster_known = (
+        {name.lower() for name in CLUSTER_PAGES}
+        | {name.lower() for name in CLUSTER_UNMIGRATED}
+        | {name.lower() for name in CLUSTER_MIGRATED_ELSEWHERE}
+    )
+    for name in sorted({entry.lower() for entry in cluster_dirs} - cluster_known - structural):
+        out.append(f'cluster:{name}')
+
+    for group in ('access', 'settings'):
+        dirs = _dirs(OLD / group / 'containers')
+        known = {key.split('/')[1].lower() for key in PLATFORM_PAGES if key.startswith(group + '/')} | {
+            key.split('/')[1].lower() for key in PLATFORM_UNMIGRATED if key.startswith(group + '/')
+        }
+        for name in sorted({entry.lower() for entry in dirs} - known - structural):
+            out.append(f'platform:{group}/{name}')
+
+    return out
+
+
 def main() -> int:
     segments = route_segments()
     project_dir = ROUTES / "kube-frontend.$workspace.clusters.$cluster.projects.$namespace"
@@ -137,7 +214,7 @@ def main() -> int:
     registry = registry_pages()
     specs = spec_features()
 
-    report: dict[str, object] = {"missing": [], "orphan": [], "unregistered": [], "no_spec": [], "details": {}}
+    report: dict[str, object] = {"missing": [], "orphan": [], "unregistered": [], "no_spec": [], "untracked": [], "details": {}}
 
     # 1. 老 console 的项目页面 → 是否已迁移
     for old, segment in PROJECT_PAGES.items():
@@ -178,6 +255,15 @@ def main() -> int:
         if key not in registry:
             report["unregistered"].append(key)
 
+    # 平台作用域：老页面 → 新路由（access 与 settings 两处目录）。路由以目录是否存在为准，
+    # 因为平台页面没有像项目/集群那样的统一父目录。
+    for old, candidates in PLATFORM_PAGES.items():
+        if not (OLD / old).exists():
+            continue
+        found = any((ROUTES / f'kube-frontend.{candidate.split("/")[0]}' / candidate.split('/')[1]).is_dir() for candidate in candidates)
+        if not found:
+            report['missing'].append(f'platform:{old} -> {candidates}（老页面存在，迁移后没有该路由）')
+
     # 4. 用例规格：页面能否被验证
     for submodule in ("configmaps", "secrets", "serviceaccounts", "app-workloads",
                       "storage", "monitoring", "project-settings", "cluster-management"):
@@ -189,8 +275,11 @@ def main() -> int:
         return 0
 
     print(f"迁移后的项目页面：{len(segments['project'])} 个；集群页面：{len(segments['cluster'])} 个")
+    report['untracked'] = untracked_legacy_pages()
+
     for label, key in (("缺口", "missing"), ("多余路由", "orphan"),
-                       ("未登记区域（侧栏到不了）", "unregistered"), ("无用例规格", "no_spec")):
+                       ("未登记区域（侧栏到不了）", "unregistered"), ("无用例规格", "no_spec"),
+                       ("既未迁移也未登记（老页面被忽略）", "untracked")):
         items = report[key]  # type: ignore[index]
         print(f"\n{label}：{len(items)}")
         for item in items:
@@ -202,12 +291,18 @@ def main() -> int:
     print("\n显式决定不迁移的页面（集群作用域）：")
     for name, why in CLUSTER_UNMIGRATED.items():
         print(f"  - {name}：{why}")
+    print("\n在其它作用域迁移的集群页面：")
+    for name, why in CLUSTER_MIGRATED_ELSEWHERE.items():
+        print(f"  - {name}：{why}")
+    print("\n显式决定不迁移的页面（平台作用域）：")
+    for name, why in PLATFORM_UNMIGRATED.items():
+        print(f"  - {name}：{why}")
 
     print("\n每页的文件：")
     for key, files in report["details"].items():  # type: ignore[union-attr]
         print(f"  {key}: {', '.join(files) if files else '（空）'}")
 
-    total_gaps = sum(len(report[key]) for key in ("missing", "orphan", "unregistered", "no_spec"))  # type: ignore[arg-type]
+    total_gaps = sum(len(report[key]) for key in ("missing", "orphan", "unregistered", "no_spec", "untracked"))  # type: ignore[arg-type]
     print(f"\n合计待处理：{total_gaps}")
     return 0
 
