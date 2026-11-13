@@ -80,12 +80,12 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
   /**
    * Whether a group's rules can be edited here.
    *
-   * Only project-scoped, non-builtin groups with at most one rule: the editor writes a
-   * single rule and the API replaces `spec.rules` wholesale, so editing a multi-rule
-   * group would silently delete the rules it does not show.
+   * Only project-scoped, non-builtin groups. The editor edits the whole rule list, so the
+   * rule count no longer matters; builtin and cluster-scoped groups are installer-owned
+   * and a write to them would be reverted at the next reconcile.
    */
   const canEdit = React.useCallback(
-    (group: RuleGroupSummary): boolean => group.scope === 'project' && !group.builtin && group.ruleCount <= 1,
+    (group: RuleGroupSummary): boolean => group.scope === 'project' && !group.builtin,
     [],
   );
   const detailQuery = useQuery({
