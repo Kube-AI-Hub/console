@@ -34,6 +34,11 @@ def test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_USERS_02(access_control_page, screen
         ui.page.locator('[data-ai-id="users:create"]').click()
         dialog = ui.page.get_by_role("dialog")
         expect(dialog).to_be_visible()
+        # The form mounts after the dialog frame. Filling before the inputs exist leaves
+        # the fields empty, and the next click then lands while the modal is still
+        # animating — the full run saw the dialog vanish here once, while the same case
+        # passed alone.
+        expect(ui.page.locator("#ai-field-name")).to_be_visible(timeout=20_000);
 
         # An illegal user name is refused before a request is made.
         #
