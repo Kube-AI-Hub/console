@@ -8,6 +8,7 @@ import { api as apiClient } from '@/api';
 import { useResourceListState } from '@/components/resource/useResourceListState';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
+import { statusLabel } from '@/lib/status';
 
 /**
  * 持久卷 (PersistentVolume).
@@ -74,7 +75,7 @@ export function PersistentVolumesPage({ cluster: _cluster }: PersistentVolumesPa
           width: 120,
           render: (row) => (
             <Badge tone={row.status === 'Bound' ? 'success' : row.status === 'Available' ? 'info' : 'warning'}>
-              {row.status || '-'}
+              {row.status ? statusLabel(t, row.status) : '-'}
             </Badge>
           ),
         },

@@ -26,6 +26,7 @@ import { ResourceErrorPanel, MutationAlert } from '@/components/resource/Resourc
 import { YamlDialog } from '@/components/resource/YamlDialog';
 import { toYaml } from '@/components/resource/yaml';
 import { formatTimestamp } from '@/lib/time';
+import { statusLabel } from '@/lib/status';
 
 /**
  * The detail view shared by every application workload.
@@ -74,7 +75,8 @@ export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, 
 
   const back = useBackTo(kind);
 
-  const statusLabel = (status: string): string => {
+  /** The workload's derived status (running/stopped/…), not a raw API phase. */
+  const workloadStatusLabel = (status: string): string => {
     const key = descriptor.statusKeys[status];
     return key ? t(key) : status;
   };
@@ -111,7 +113,7 @@ export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, 
                 <h1 className="truncate text-base font-semibold text-ai-fg">{detail.alias || detail.name}</h1>
                 {descriptor.showStatus && detail.status ? (
                   <Badge tone={detail.status === 'running' ? 'success' : detail.status === 'updating' ? 'warning' : 'neutral'}>
-                    {statusLabel(detail.status)}
+                    {workloadStatusLabel(detail.status)}
                   </Badge>
                 ) : null}
                 {detail.federated ? <Badge tone="info">{t('resource.federated')}</Badge> : null}
@@ -178,7 +180,13 @@ export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, 
                 <Row
                   key={attribute.key}
                   label={t(`workloads.field.${attribute.key}` as never)}
-                  value={attribute.value || '-'}
+                  // The pod's phase is a raw API enum; every other attribute is already
+                  // human-readable (an IP, a QoS class, a node name).
+                  value={
+                    attribute.key === 'podStatus' && attribute.value
+                      ? statusLabel(t, attribute.value)
+                      : attribute.value || '-'
+                  }
                 />
               ))}
             </dl>
@@ -282,7 +290,7 @@ export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, 
                         </td>
                         <td className="py-1.5 pr-4">
                           <Badge tone={run.phase === 'Succeeded' ? 'success' : run.phase === 'Failed' ? 'danger' : 'warning'}>
-                            {run.phase || '-'}
+                            {run.phase ? statusLabel(t, run.phase) : '-'}
                           </Badge>
                           {run.reason ? <span className="ml-1.5 text-[11px] text-ai-fg-muted">{run.reason}</span> : null}
                         </td>
@@ -361,7 +369,7 @@ export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, 
                         </td>
                         <td className="py-1.5 pr-4">
                           <Badge tone={pod.terminating ? 'neutral' : pod.phase === 'Running' ? 'success' : 'warning'}>
-                            {pod.terminating ? t('workloads.pod.terminating') : pod.phase || '-'}
+                            {pod.terminating ? t('workloads.pod.terminating') : pod.phase ? statusLabel(t, pod.phase) : '-'}
                           </Badge>
                         </td>
                         <td className="py-1.5 pr-4 text-ai-fg-secondary">{pod.node || '-'}</td>

@@ -10,6 +10,7 @@ import { MutationAlert, ResourceErrorPanel } from '@/components/resource/Resourc
 import { YamlDialog } from '@/components/resource/YamlDialog';
 import { toYaml } from '@/components/resource/yaml';
 import { formatTimestamp } from '@/lib/time';
+import { statusLabel } from '@/lib/status';
 
 /**
  * The storage detail view.
@@ -99,7 +100,7 @@ export function StorageDetailPage({ kind, cluster, namespace, name }: StorageDet
               <Row label={t('storage.field.project')} value={detail.namespace || namespace} />
               {/* 状态 was missing even though the list shows it: a detail page that
                   omits the one field people came to check is the wrong shape. */}
-              <Row label={t('storage.column.status')} value={detail.status ? t(`storage.status.${statusKey(detail.status)}` as never) : '-'} />
+              <Row label={t('storage.column.status')} value={detail.status ? statusLabel(t, detail.status) : '-'} />
               <Row label={t('storage.field.storageClass')} value={detail.storageClass || '-'} />
               <Row label={t('storage.field.capacity')} value={detail.capacity || '-'} />
               {kind === 'persistentvolumeclaims' ? (
@@ -170,14 +171,4 @@ function Row({ label, value }: { label: string; value: string }): React.ReactEle
 }
 
 /** Status → locale key suffix, shared with the list so both name a state the same way. */
-function statusKey(status: string): string {
-  const map: Record<string, string> = {
-    Bound: 'bound',
-    Pending: 'pending',
-    Lost: 'lost',
-    Ready: 'ready',
-    Resizing: 'resizing',
-    FileSystemResizePending: 'resizePending',
-  };
-  return map[status] ?? 'bound';
-}
+

@@ -13,6 +13,7 @@ import { MutationAlert, ResourceErrorPanel } from '@/components/resource/Resourc
 import { YamlDialog } from '@/components/resource/YamlDialog';
 import { toYaml } from '@/components/resource/yaml';
 import { formatTimestamp } from '@/lib/time';
+import { statusLabel } from '@/lib/status';
 import {
   STORAGE_DESCRIPTORS,
   useDeleteStorage,
@@ -141,7 +142,7 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
           title: t('storage.column.status'),
           width: 150,
           hideBelow: 'md',
-          render: (row) => <Badge tone={storageTone(row.status)}>{storageStatusLabel(t, row.status)}</Badge>,
+          render: (row) => <Badge tone={storageTone(row.status)}>{statusLabel(t, row.status)}</Badge>,
         },
         {
           key: 'capacity',
@@ -366,16 +367,5 @@ function storageTone(status: string): 'success' | 'warning' | 'danger' | 'neutra
 }
 
 /** Status → locale key, falling back to the raw value for the resize conditions. */
-function storageStatusLabel(t: (key: never) => string, status: string): string {
-  const labels: Record<string, string> = {
-    Bound: 'storage.status.bound',
-    Pending: 'storage.status.pending',
-    Lost: 'storage.status.lost',
-    Ready: 'storage.status.ready',
-    Resizing: 'storage.status.resizing',
-    FileSystemResizePending: 'storage.status.resizePending',
-  };
-  const key = labels[status];
-  return key ? t(key as never) : status;
-}
+
 

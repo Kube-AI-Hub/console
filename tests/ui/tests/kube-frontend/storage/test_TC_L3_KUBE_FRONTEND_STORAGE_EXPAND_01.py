@@ -58,9 +58,17 @@ def test_TC_L3_KUBE_FRONTEND_STORAGE_EXPAND_01(storage_page, screenshot):
         ui.page.keyboard.press("Escape")
         assert "扩容" not in actions_fixed, actions_fixed
 
-        ui.ensure_row("persistentvolumeclaims", name_expandable)
-        ui.row("persistentvolumeclaims", name_expandable).locator('button[aria-label="更多操作"]').click()
-        actions_expandable = [t.strip() for t in ui.page.get_by_role("menuitem").all_inner_texts()]
+        # The row action is gated on the storage-class list, a second request. Opening the
+        # menu before it lands shows no 扩容 and reads as a missing control, so retry.
+        actions_expandable: list[str] = []
+        for _ in range(15):
+            ui.ensure_row("persistentvolumeclaims", name_expandable)
+            ui.row("persistentvolumeclaims", name_expandable).locator('button[aria-label="更多操作"]').click()
+            actions_expandable = [t.strip() for t in ui.page.get_by_role("menuitem").all_inner_texts()]
+            if "扩容" in actions_expandable:
+                break
+            ui.page.keyboard.press("Escape")
+            ui.page.wait_for_timeout(2000)
         assert "扩容" in actions_expandable, actions_expandable
         ui.page.get_by_role("menuitem", name="扩容", exact=True).click()
 
