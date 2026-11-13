@@ -23,9 +23,11 @@ def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_04(configmaps_page, screenshot):
     # would ignore.
     requests.clear()
     picker.click()
+    # The popup renders after the click; counting immediately found zero options and
+    # skipped the case, which left "the project filter works" unverified on a cluster
+    # that has 30+ projects to choose from.
     option = configmaps_page.page.get_by_role("option").filter(has_not_text="全部项目").first
-    if option.count() == 0:
-        pytest.skip("项目列表为空，无法切换")
+    expect(option).to_be_visible(timeout=15_000)
     target = option.inner_text().strip()
     option.click()
     configmaps_page.wait_ready()
