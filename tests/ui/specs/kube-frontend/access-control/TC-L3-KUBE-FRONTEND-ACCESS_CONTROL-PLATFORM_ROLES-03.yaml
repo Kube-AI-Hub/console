@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: platform-roles
+title: 平台角色列表 · 分页可寻址且可前后翻页
+entry_url: '{BASE_URL}/kube-frontend/access/clusterroles'
+prd: prd/kube-frontend/access-control/platform-roles.md
+design: design/kube-frontend/access-control/platform-roles.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-03
+
+story:
+- US1
+
+product: 分页控件带稳定 data-ai-id（<列表>:page:prev / next），点击下一页换页、点上一页返回。
+preconditions:
+- 已登录，且有平台权限
+- 平台角色超过一页
+steps:
+- 打开平台角色列表，记录第一页
+- 点「下一页」，记录第二页
+- 点「上一页」，记录回到的顺序
+expected:
+- 存在 clusterroles:page:next 与 clusterroles:page:prev 两个标识
+- 第二页与第一页不同
+- 回到第一页后顺序与初始一致
+troubleshoot:
+- 只有 prev 没有 next 说明 next 分支未传 aiPrefix
+- 翻页无效说明 onPageChange 未接到查询
+update_automation:
+- 分页数据结构变化时改 ai-kit 的 Pagination

@@ -588,6 +588,8 @@ export function ResourceList<TRow>({
 
       {schema.pagination && onPageChange ? (
         <Pagination
+          // Same prefix as the rows and sort buttons, so the pager belongs to the list.
+          {...(schema.sortAiPrefix ? { aiPrefix: schema.sortAiPrefix } : {})}
           page={schema.pagination.page}
           pageSize={schema.pagination.pageSize}
           total={schema.pagination.total}

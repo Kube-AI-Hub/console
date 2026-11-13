@@ -274,6 +274,14 @@ export interface PaginationLabels {
 }
 
 export interface PaginationProps {
+  /**
+   * Prefix for the controls' `data-ai-id`s, e.g. `secrets`.
+   *
+   * A list's pagination is part of that list, so it carries the same prefix as the
+   * table's rows and sort buttons: without it the only way to address "next page" is by
+   * its translated label, which breaks the moment the language changes.
+   */
+  aiPrefix?: string;
   page: number;
   pageSize: number;
   total: number;
@@ -335,6 +343,7 @@ function pageWindow(page: number, pageCount: number): Array<number | 'gap'> {
 }
 
 export function Pagination({
+  aiPrefix,
   page,
   pageSize,
   total,
@@ -389,7 +398,13 @@ export function Pagination({
       </div>
 
       <div className="flex items-center gap-1">
-        <PageButton label={text.previous} disabled={page <= 1} onClick={() => onChange(page - 1)} direction="prev" />
+        <PageButton
+          label={text.previous}
+          disabled={page <= 1}
+          onClick={() => onChange(page - 1)}
+          direction="prev"
+          aiPrefix={aiPrefix}
+        />
 
         {/*
          * Explicit page buttons, not a "x / y" counter: with hundreds of pages the
@@ -447,7 +462,13 @@ export function Pagination({
           </span>
         ) : null}
 
-        <PageButton label={text.next} disabled={page >= pageCount} onClick={() => onChange(page + 1)} direction="next" />
+        <PageButton
+          label={text.next}
+          disabled={page >= pageCount}
+          onClick={() => onChange(page + 1)}
+          direction="next"
+          aiPrefix={aiPrefix}
+        />
       </div>
     </div>
   );
@@ -458,15 +479,18 @@ function PageButton({
   disabled,
   onClick,
   direction,
+  aiPrefix,
 }: {
   label: string;
   disabled: boolean;
   onClick: () => void;
   direction: 'prev' | 'next';
+  aiPrefix?: string;
 }): React.ReactElement {
   return (
     <button
       type="button"
+      {...(aiPrefix ? { 'data-ai-id': `${aiPrefix}:page:${direction}` } : {})}
       aria-label={label}
       disabled={disabled}
       onClick={onClick}
