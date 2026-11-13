@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-PODS_BLOCK-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: pods-block
+title: 负载详情 · 关联容器组
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/deployments'
+prd: prd/kube-frontend/app-workloads/detail.md
+design: design/kube-frontend/app-workloads/detail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-PODS_BLOCK-01
+
+story:
+- US1
+
+product: 部署详情列出其麾下容器组（名称、状态、节点、重启次数、创建时间），数量与按选择器查到的 Pod 数一致。
+preconditions:
+- 由夹具创建一个 2 副本的 tc-e2e- 部署并等待其 Pod 就绪，用例结束无条件删除
+- 已登录，且在 host 集群的 default 项目空间
+steps:
+- 打开该部署详情
+- 读取关联容器组表
+- 用 API 按选择器统计 Pod 数
+expected:
+- 表头为 容器组名称、状态、所在节点、重启次数、创建时间
+- 行数与 API 统计一致
+- 每行状态非空
+troubleshoot:
+- 区块不出现说明选择器为空或 Pod 尚未创建
+- 行数偏多说明未按 ownerReferences 过滤（当前按选择器统计，同名标签会重合）
+update_automation:
+- 区块字段变化时改 api-client 的 toWorkloadPod

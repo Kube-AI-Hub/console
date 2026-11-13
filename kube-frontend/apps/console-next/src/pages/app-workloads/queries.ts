@@ -73,6 +73,18 @@ export function useEditWorkloadInfo(kind: WorkloadKind, params: { cluster: strin
  * no reverse lookup. The read is cheap (a project has a handful) and only runs for the
  * three kinds an HPA can target.
  */
+/** Pods belonging to one workload, newest first. */
+export function useWorkloadPods(kind: WorkloadKind, params: { cluster: string; namespace: string; name: string }) {
+  return useQuery({
+    queryKey: ['workload-pods', params.cluster, params.namespace, kind, params.name],
+    // Only the kinds that name their pods through a selector have any to list.
+    enabled: ['deployments', 'statefulsets', 'daemonsets'].includes(kind),
+    queryFn: ({ signal }) => workloadsApi(api, kind).pods({ ...params, signal } as never),
+    // Pods come and go; a stale list would show a pod that has already been replaced.
+    refetchInterval: 15_000,
+  });
+}
+
 /** ReplicaSets owned by a deployment, one row per revision. */
 export function useWorkloadRevisions(kind: WorkloadKind, params: { cluster: string; namespace: string; name: string }) {
   return useQuery({

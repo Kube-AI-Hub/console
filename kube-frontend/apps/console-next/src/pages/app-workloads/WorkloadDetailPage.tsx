@@ -12,6 +12,7 @@ import {
   useUpdateWorkload,
   useWorkload,
   useWorkloadAutoscaling,
+  useWorkloadPods,
   useWorkloadRevisions,
   type WorkloadDescriptor,
 } from './queries';
@@ -57,6 +58,7 @@ export function WorkloadDetailPage({ descriptor, cluster, namespace, name }: Wor
   const scale = useScaleWorkload(kind, { cluster, namespace });
   const autoscaling = useWorkloadAutoscaling(kind, { cluster, namespace, name });
   const revisions = useWorkloadRevisions(kind, { cluster, namespace, name });
+  const pods = useWorkloadPods(kind, { cluster, namespace, name });
   const rollback = useRollbackWorkload(kind, { cluster, namespace });
   const [rollbackTarget, setRollbackTarget] = React.useState<WorkloadRevision | null>(null);
   const [dialog, setDialog] = React.useState<Dialog>('none');
@@ -229,6 +231,45 @@ export function WorkloadDetailPage({ descriptor, cluster, namespace, name }: Wor
                         <td className="py-1.5 pr-4 tabular-nums text-ai-fg">{port.port}</td>
                         <td className="py-1.5 pr-4 tabular-nums text-ai-fg-secondary">{port.targetPort || '-'}</td>
                         <td className="py-1.5 tabular-nums text-ai-fg-secondary">{port.nodePort ?? '-'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          ) : null}
+
+          {/*
+            * 关联容器组: the pods this workload actually runs. The old console calls this
+            * block 资源状态; it is the fastest answer to "is it up", because the status
+            * badge summarises and this shows the individual pods behind it.
+            */}
+          {(pods.data?.length ?? 0) > 0 ? (
+            <section className="rounded-ai-md border border-ai-line p-4" data-ai-id={`${kind}-detail:pods`}>
+              <h2 className="mb-3 text-sm font-medium text-ai-fg">{t('workloads.detail.pods')}</h2>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="text-ai-fg-muted">
+                      <th className="pb-2 pr-4 font-medium">{t('workloads.field.podName')}</th>
+                      <th className="pb-2 pr-4 font-medium">{t('workloads.field.podStatus')}</th>
+                      <th className="pb-2 pr-4 font-medium">{t('workloads.field.node')}</th>
+                      <th className="pb-2 pr-4 font-medium">{t('workloads.field.restarts')}</th>
+                      <th className="pb-2 font-medium">{t('workloads.field.createdAt')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(pods.data ?? []).map((pod) => (
+                      <tr key={pod.name} className="border-t border-ai-line" data-ai-row={pod.name}>
+                        <td className="py-1.5 pr-4 font-mono text-[11px] text-ai-fg-secondary">{pod.name}</td>
+                        <td className="py-1.5 pr-4">
+                          <Badge tone={pod.terminating ? 'neutral' : pod.phase === 'Running' ? 'success' : 'warning'}>
+                            {pod.terminating ? t('workloads.pod.terminating') : pod.phase || '-'}
+                          </Badge>
+                        </td>
+                        <td className="py-1.5 pr-4 text-ai-fg-secondary">{pod.node || '-'}</td>
+                        <td className="py-1.5 pr-4 tabular-nums text-ai-fg-secondary">{pod.restarts}</td>
+                        <td className="py-1.5 tabular-nums text-ai-fg-muted">{formatTimestamp(pod.createdAt)}</td>
                       </tr>
                     ))}
                   </tbody>

@@ -8,6 +8,8 @@
 
 ## 关联需求
 
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-PODS_BLOCK-01
+
 - AC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-05
 
 - AC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-04
@@ -97,3 +99,13 @@
 **被否方案**：所有资源类型都渲染端口区块，无端口时显示「暂无端口」。会让七个无关页面各多一块。
 
 **何时重新考虑**：需要按端口做连通性诊断时，另建诊断视图。
+
+### DEC-L3-KUBE-FRONTEND-APP-WORKLOADS-DETAIL-05 — 关联容器组按**选择器**取，不按名字前缀猜
+
+**为什么**：Deployment/StatefulSet/DaemonSet 用 `spec.selector.matchLabels` 声明"哪些 Pod 是我的"，这是 API 契约；而 `<workload>-<hash>-<suffix>` 只是命名约定，别人的 Pod 也可能叫这个名字。因此没有选择器的类型（Job、CronJob、裸 Pod）**不显示该区块**，而不是退化成猜名字。
+
+**被否方案**：按名字前缀匹配。会漏掉改名后的 Pod，也会误收同名前缀的其它对象。
+
+**何时重新考虑**：Job/CronJob 需要展示其 Pod 时，用 `job-name` 标签（那是它们的选择器）。
+
+**另一条**：列表每 15 秒刷新。Pod 会被替换，静态列表会显示已经不存在的 Pod——比没有列表更误导。

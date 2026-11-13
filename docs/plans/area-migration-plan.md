@@ -1899,3 +1899,34 @@ Ingress 的规则是三层嵌套（rule → path → backend），而编辑器�
 | api-client 单测 | 150 通过（新增 4 条） |
 | console-next 单测 | 95 通过 |
 | 文档门禁 | errors=0 warnings=0 |
+
+## 47. 第 54 轮：详情页的关联容器组（2026-11-13）
+
+### 47.1 交付
+
+| 层 | 内容 |
+|---|---|
+| api-client | `workloadsApi.pods()`、`toWorkloadPod()`、`WorkloadPod` |
+| 页面 | 部署 / 有状态副本集 / 守护进程集详情的「关联容器组」表 |
+| 文档 | PRD 增 1 条场景、设计增 1 条 DEC；用例 1 条；单测 2 条 |
+
+实测（`spaces` 项目的真实部署）：
+
+| 容器组名称 | 状态 | 所在节点 | 重启次数 |
+|---|---|---|---|
+| agent-asr-restored-20261105-8574d469cf-7gmrs | Running | sagesuite-demo | 0 |
+
+### 47.2 两个判断
+
+1. **按选择器取，不按名字前缀猜**：`spec.selector.matchLabels` 是 API 契约，`<workload>-<hash>-<suffix>` 只是命名约定。没有选择器的类型（Job / CronJob / 裸 Pod）**不显示该区块**，而不是退化成猜名字。
+2. **每 15 秒刷新**：Pod 会被替换。静态列表会显示已经不存在的 Pod，**比没有列表更误导**。
+
+### 47.3 验证
+
+| 项 | 结果 |
+|---|---|
+| app-workloads 套件 | **24 通过** |
+| 架构契约 | 454 通过 |
+| console-next 单测 | 95 通过 |
+| api-client 单测 | 152 通过 |
+| 文档门禁 | errors=0 warnings=0 |

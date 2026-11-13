@@ -522,6 +522,31 @@ export function workloadsApi(client: Client, kind: WorkloadKind) {
       });
     },
 
+    /**
+     * Pods belonging to one workload.
+     *
+     * Selected by the workload's own selector: a Deployment, StatefulSet and DaemonSet
+     * all name their pods through `spec.selector.matchLabels`, and jobs/cronjobs and
+     * standalone pods have no such selector (the list is then empty rather than
+     * guessed from a name prefix, which is a convention, not a contract).
+     */
+    async pods(params: { cluster: string; namespace: string; name: string }): Promise<WorkloadPod[]> {
+      const owner = await client.request<KubeWorkload>(workloadPath(params.cluster, kind, params.namespace, params.name));
+      const selector = (((owner?.spec ?? {})['selector'] as Record<string, unknown> | undefined)?.['matchLabels'] ?? {}) as Record<
+        string,
+        string
+      >;
+      const pairs = Object.entries(selector);
+      if (pairs.length === 0) return [];
+      const labelSelector = pairs.map(([key, value]) => `${key}=${value}`).join(',');
+      const body = await client.request<{ items?: KubeWorkload[] }>(
+        `${workloadPath(params.cluster, 'pods', params.namespace)}?labelSelector=${encodeURIComponent(labelSelector)}`,
+      );
+      return (body?.items ?? [])
+        .map(toWorkloadPod)
+        .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+    },
+
     /** ReplicaSets owned by a Deployment, newest revision first. */
     async revisions(params: { cluster: string; namespace: string; name: string }): Promise<WorkloadRevision[]> {
       // The raw objects are needed here (annotations, ownerReferences), so these two
@@ -722,4 +747,30 @@ function workloadPath(cluster: string, resource: string, namespace: string, name
   const namespaceSegment = namespace ? `namespaces/${encodeURIComponent(namespace)}/` : '';
   const suffix = name ? `/${encodeURIComponent(name)}` : '';
   return `${kubePrefix(resource)}/${clusterSegment}${namespaceSegment}${resource}${suffix}`;
+}
+
+/** A pod owned by the workload being viewed. */
+export interface WorkloadPod {
+  name: string;
+  phase: string;
+  node: string;
+  /** Container restart total; the first number an operator looks for. */
+  restarts: number;
+  createdAt: string;
+  /** True when the pod is terminating; deleting pods stay listed until gone. */
+  terminating: boolean;
+}
+
+export function toWorkloadPod(item: KubeWorkload): WorkloadPod {
+  const status = (item.status ?? {}) as Record<string, unknown>;
+  const containers = (status['containerStatuses'] ?? []) as Array<Record<string, unknown>>;
+  return {
+    name: item.metadata?.name ?? '',
+    phase: String(status['phase'] ?? ''),
+    node: String((item.spec ?? {})['nodeName'] ?? ''),
+    restarts: containers.reduce((sum, container) => sum + Number(container['restartCount'] ?? 0), 0),
+    createdAt: String(item.metadata?.creationTimestamp ?? ''),
+    // `deletionTimestamp` is not in the shared metadata type; it is read through a record.
+    terminating: Boolean((item.metadata as Record<string, unknown> | undefined)?.['deletionTimestamp']),
+  };
 }

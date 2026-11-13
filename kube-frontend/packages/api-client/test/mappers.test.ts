@@ -3,7 +3,7 @@ import { toAlertSummary, toAlertingRuleSummary } from '../src/alerting';
 import { toComponentSummary } from '../src/storage';
 import { toNetworkPolicySummary, toSelector } from '../src/iam';
 import { toStorageClassSummary, quantityToNumber, usagePercent } from '../src/storage';
-import { toWorkloadRevision, toWorkloadSummary, revisionTemplate } from '../src/workloads';
+import { toWorkloadPod, toWorkloadRevision, toWorkloadSummary, revisionTemplate } from '../src/workloads';
 
 /**
  * Row mappers that turn a Kubernetes object into a table row.
@@ -250,6 +250,29 @@ describe('deployment revisions', () => {
 
   it('exposes the template a rollback writes back', () => {
     const template = revisionTemplate(rs('d-abc', '1', 1, 'nginx:1.27'));
-    expect((template as { spec: { containers: Array<{ image: string }> } }).spec.containers[0].image).toBe('nginx:1.27');
+    const containers = (template as { spec?: { containers?: Array<{ image?: string }> } })?.spec?.containers ?? [];
+    expect(containers[0]?.image).toBe('nginx:1.27');
+  });
+});
+
+describe('workload pods', () => {
+  it('totals restarts across containers', () => {
+    const row = toWorkloadPod({
+      metadata: { name: 'p', creationTimestamp: '2026-11-01T10:00:00Z' },
+      spec: { nodeName: 'node-a' },
+      status: {
+        phase: 'Running',
+        containerStatuses: [{ restartCount: 2 }, { restartCount: 3 }],
+      },
+    });
+    expect(row.restarts).toBe(5);
+    expect(row.node).toBe('node-a');
+    expect(row.phase).toBe('Running');
+    expect(row.terminating).toBe(false);
+  });
+
+  it('marks a terminating pod, because it is still listed', async () => {
+    const row = toWorkloadPod({ metadata: { name: 'p', deletionTimestamp: '2026-11-01T10:00:00Z' } as never });
+    expect(row.terminating).toBe(true);
   });
 });

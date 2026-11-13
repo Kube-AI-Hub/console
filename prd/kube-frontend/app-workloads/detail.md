@@ -16,6 +16,8 @@
 
 ## 验收场景
 
+- **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-PODS_BLOCK-01** — 已知一个部署有就绪的容器组，当打开其详情，则显示「关联容器组」表（容器组名称、状态、所在节点、重启次数、创建时间），行数与该部署选择器匹配到的 Pod 数一致。
+
 - **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-05** — 已知一个 ClusterIP 服务有端口 80→8080，当打开其详情，则显示端口表，列为端口名、服务端口、容器端口、节点端口，且服务端口为 80、容器端口为 8080、节点端口为 `-`。
 
 - **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-04** — 已知一个部署配置了自动伸缩（1–3 副本、CPU 30%），当打开其详情，则显示自动伸缩区块含策略名、副本范围与触发指标；已知另一个部署没有自动伸缩，则其详情不显示该区块。
@@ -65,6 +67,7 @@
 - **FR-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-03** — 详情按资源类型补充专属属性，与老 console 的字段一致。
 - **FR-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-04** — 有自动伸缩的负载显示其策略，没有的不显示。
 - **FR-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-05** — 服务详情显示端口表，无节点端口的显示 `-`。
+- **FR-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-06** — 部署/有状态副本集/守护进程集详情列出关联容器组。
 
 - **FR-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-01** — 展示属性与容器镜像。
 - **FR-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-02** — 提供重新部署、编辑 YAML、删除。
