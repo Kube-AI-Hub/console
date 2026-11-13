@@ -736,6 +736,26 @@ export function toPersistentVolumeSummary(item: KubePersistentVolume): Persisten
   };
 }
 
+/** Everything the volume detail page shows; the list row is a subset. */
+export interface PersistentVolumeDetail extends PersistentVolumeSummary {
+  /** `Filesystem` / `Block`. */
+  volumeMode: string;
+  mountOptions: string[];
+  labels: Record<string, string>;
+  annotations: Record<string, string>;
+}
+
+export function toPersistentVolumeDetail(item: KubePersistentVolume): PersistentVolumeDetail {
+  const spec = (item.spec ?? {}) as Record<string, unknown>;
+  return {
+    ...toPersistentVolumeSummary(item),
+    volumeMode: String(spec['volumeMode'] ?? 'Filesystem'),
+    mountOptions: ((spec['mountOptions'] ?? []) as string[]).map(String),
+    labels: (item.metadata?.labels ?? {}) as Record<string, string>,
+    annotations: (item.metadata?.annotations ?? {}) as Record<string, string>,
+  };
+}
+
 /**
  * Persistent volumes are cluster-scoped and read from the core API.
  *
@@ -746,6 +766,13 @@ export function toPersistentVolumeSummary(item: KubePersistentVolume): Persisten
 export function persistentVolumesApi(client: Client) {
   return {
     kind: 'persistentvolumes' as const,
+    /** One volume by name — the detail page reads it from the same fast core endpoint. */
+    async get(params: { name: string; signal?: AbortSignal }): Promise<PersistentVolumeDetail> {
+      const item = await client.request<KubePersistentVolume>(`/api/v1/persistentvolumes/${encodeURIComponent(params.name)}`, {
+        ...(params.signal ? { signal: params.signal } : {}),
+      });
+      return toPersistentVolumeDetail(item);
+    },
     async list(params: { signal?: AbortSignal } = {}): Promise<{ items: PersistentVolumeSummary[]; total: number }> {
       const body = await client.request<{ items?: KubePersistentVolume[] }>(
         '/api/v1/persistentvolumes',

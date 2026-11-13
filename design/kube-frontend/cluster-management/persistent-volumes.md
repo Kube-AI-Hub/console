@@ -5,6 +5,7 @@
 ## 关联需求
 
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-PERSISTENT_VOLUMES-01
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-PERSISTENT_VOLUMES-02
 
 ## 概述
 
@@ -37,7 +38,15 @@
 
 **何时重新考虑**：需要按声明排序时。
 
-## 系统现状
+### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-PERSISTENT-VOLUMES-03 — 详情页只读
+
+**为什么**：老 console 的持久卷详情可以编辑与删除。但卷通常是数据的唯一副本，而「回收策略 Delete」意味着集群会销毁后端存储——这类操作值得单独设计确认流程，不适合顺手迁入。本页只读，并在页面里说明回收策略的含义。
+
+**被否方案**：照搬删除按钮。删除卷是不可逆的数据操作，应有独立的确认与影响说明。
+
+**何时重新考虑**：需要清理孤儿卷时（那时应有「未绑定」筛选 + 确认输入名称）。
+
+## 系统现状## 系统现状
 
 老 console 的集群存储页包含持久卷列表与存储类型。存储类型已迁移（见 `storage-classes.md`），
 本模块补上持久卷列表，列与老页面一致（名称、状态、容量、访问模式、绑定声明、回收策略、创建时间）。

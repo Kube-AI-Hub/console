@@ -478,7 +478,7 @@ MODULES = [
                     {
                         "id": "persistent-volumes",
                         "title": "持久卷",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-PERSISTENT_VOLUMES-01"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-PERSISTENT_VOLUMES-01", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-PERSISTENT_VOLUMES-02"]},
                     },
                     {
                         "id": "storage-classes",

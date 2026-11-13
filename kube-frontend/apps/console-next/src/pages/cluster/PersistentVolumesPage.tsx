@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from '@tanstack/react-router';
 import { persistentVolumesApi, type PersistentVolumeSummary } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
@@ -23,7 +24,7 @@ export interface PersistentVolumesPageProps {
   cluster: string;
 }
 
-export function PersistentVolumesPage({ cluster: _cluster }: PersistentVolumesPageProps): React.ReactElement {
+export function PersistentVolumesPage({ cluster }: PersistentVolumesPageProps): React.ReactElement {
   const t = useT();
   const list = useResourceListState<'name' | 'createTime'>({ defaultSortBy: 'name', defaultOrder: 'asc' });
 
@@ -64,7 +65,13 @@ export function PersistentVolumesPage({ cluster: _cluster }: PersistentVolumesPa
           title: t('cluster.column.name'),
           render: (row) => (
             <span className="flex min-w-0 flex-col" {...actionProps(`persistentvolumes:name:${row.name}`)}>
-              <span className="truncate font-medium text-ai-fg">{row.name}</span>
+              <Link
+                to="/kube-frontend/clusters/$cluster/persistentvolumes/$name"
+                params={{ cluster, name: row.name }}
+                className="truncate font-medium text-ai-accent hover:underline"
+              >
+                {row.name}
+              </Link>
               <span className="truncate text-[11px] text-ai-fg-muted">{row.storageClass || '-'}</span>
             </span>
           ),
