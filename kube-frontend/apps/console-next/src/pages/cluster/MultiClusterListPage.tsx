@@ -76,16 +76,21 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
     ? byType.filter((row) => row.name.toLowerCase().includes(keyword) || row.provider.toLowerCase().includes(keyword))
     : byType;
   const rows = React.useMemo(() => {
-    // The host cluster first, whatever the sort: it is the cluster the platform runs
-    // on, and the one a reader looks for by default.
-    const items = [...filtered].sort((a, b) => Number(b.isHost) - Number(a.isHost));
+    /*
+     * The host cluster is pinned first, whatever the sort: it is where the platform runs and
+     * the row a reader looks for without reading the list. Sorting the rest by the requested
+     * field keeps the control honest -- without the pin, a member cluster that sorts before
+     * "host" (a descending name sort does it) would push the host cluster off the top, which is
+     * exactly the ordering the old console never showed.
+     */
     const direction = list.order === 'asc' ? 1 : -1;
-    if (list.sortBy === 'createTime') return items.sort((a, b) => a.createdAt.localeCompare(b.createdAt) * direction);
-    if (list.sortBy === 'nodeCount') return items.sort((a, b) => (a.nodeCount - b.nodeCount) * direction);
-    // The host cluster stays first only under the default sort; a reader who asked for
-    // another order (by age, by size) gets exactly that order.
-    if (list.sortBy !== 'name' || list.order !== 'asc') items.sort((a, b) => Number(b.isHost) - Number(a.isHost));
-    return items.sort((a, b) => a.name.localeCompare(b.name) * direction);
+    const sorted = [...filtered];
+    if (list.sortBy === 'createTime') sorted.sort((a, b) => a.createdAt.localeCompare(b.createdAt) * direction);
+    else if (list.sortBy === 'nodeCount') sorted.sort((a, b) => (a.nodeCount - b.nodeCount) * direction);
+    else sorted.sort((a, b) => a.name.localeCompare(b.name) * direction);
+    const hosts = sorted.filter((row) => row.isHost);
+    const members = sorted.filter((row) => !row.isHost);
+    return [...hosts, ...members];
   }, [filtered, list.sortBy, list.order]);
 
   const schema = React.useMemo<ListSchema<ClusterSummary>>(

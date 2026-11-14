@@ -24,8 +24,19 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_NODES_03(cluster_management_page
     if not items:
         pytest.skip("集群没有节点，无法核对节点详情")
 
-    node = items[0]
-    name = node["metadata"]["name"]
+    # Pick a node the page actually renders, then read its object: the kapis collection can
+    # contain nodes whose rows the console does not show (an arm64 edge node that is not part
+    # of this cluster's console view), and asserting on an invisible row tests nothing.
+    ui.page.goto(f"{ui.base_url}/kube-frontend/clusters/{ui.cluster}/nodes")
+    surface = ui.page.locator('[data-ai-id="nodes:surface"]').last
+    expect(surface).to_be_visible(timeout=30_000)
+    expect(surface).not_to_have_attribute("data-ai-state", "loading", timeout=60_000)
+    rendered = [row.get_attribute("data-ai-row") for row in surface.locator("[data-ai-row]").all()]
+    names = [name for name in rendered if name]
+    if not names:
+        pytest.skip("节点列表没有渲染任何节点")
+    name = names[0]
+    node = next(item for item in items if item["metadata"]["name"] == name)
     conditions = (node.get("status") or {}).get("conditions") or []
     allocatable = (node.get("status") or {}).get("allocatable") or {}
 

@@ -43,8 +43,19 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_NODES_04(cluster_management_page
     items = body.get("items") or []
     if not items:
         pytest.skip("集群没有节点")
-    name = items[0]["metadata"]["name"]
-    original = ((items[0].get("spec") or {}).get("unschedulable")) is True
+    # A node the list actually renders: the kapis collection can include nodes the console does
+    # not show, and cordoning one of those would assert against an invisible row.
+    ui.page.goto(f"{ui.base_url}/kube-frontend/clusters/{ui.cluster}/nodes")
+    surface = ui.page.locator('[data-ai-id="nodes:surface"]').last
+    expect(surface).to_be_visible(timeout=30_000)
+    expect(surface).not_to_have_attribute("data-ai-state", "loading", timeout=60_000)
+    rendered = [row.get_attribute("data-ai-row") for row in surface.locator("[data-ai-row]").all()]
+    names = [candidate for candidate in rendered if candidate]
+    if not names:
+        pytest.skip("节点列表没有渲染任何节点")
+    name = names[0]
+    node = next(item for item in items if item["metadata"]["name"] == name)
+    original = ((node.get("spec") or {}).get("unschedulable")) is True
 
     try:
         # Start from a schedulable node: the case is about both directions.

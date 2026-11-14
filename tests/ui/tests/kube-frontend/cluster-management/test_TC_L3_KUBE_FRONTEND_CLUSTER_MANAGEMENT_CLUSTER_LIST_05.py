@@ -35,11 +35,13 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_LIST_05(cluster_manageme
     expect(rows).to_have_count(1, timeout=20_000)
     assert names() == [ui.cluster], names()
 
-    # Member: the host cluster is gone (the fleet here has member clusters only if
-    # the installation is multicluster; the assertion is about absence, not a count).
+    # Member: the host cluster is gone. The fleet may legitimately contain member clusters
+    # (a case that creates one and fails before cleanup leaves it behind), so the assertion is
+    # about absence, not about an empty list.
     picker.click()
     ui.page.get_by_role("option", name="成员集群", exact=True).click()
-    expect(rows).to_have_count(0, timeout=20_000)
+    expect(ui.page.locator(f'[data-ai-row="{ui.cluster}"]')).to_have_count(0, timeout=20_000)
+    assert ui.cluster not in names()
 
     # Clearing the filter restores the full list and the host cluster stays first.
     picker.click()

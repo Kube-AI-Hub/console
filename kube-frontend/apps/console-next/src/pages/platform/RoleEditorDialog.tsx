@@ -28,7 +28,7 @@ export interface RoleEditorDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const EMPTY_RULE: EditableRule = { apiGroups: '', resources: 'pods', verbs: ['get', 'list'] };
+const EMPTY_RULE: EditableRule = { apiGroups: '', resources: 'pods', verbs: ['get', 'list', 'watch'] };
 
 export function RoleEditorDialog({ open, role, onOpenChange }: RoleEditorDialogProps): React.ReactElement {
   const t = useT();
@@ -134,15 +134,15 @@ export function RoleEditorDialog({ open, role, onOpenChange }: RoleEditorDialogP
       <div className="flex flex-col gap-3">
         <label className="flex flex-col gap-1 text-sm">
           <span className="text-ai-fg-muted">{t('platform.column.name')}</span>
-          <Input data-ai-id="role-editor:name" value={name} disabled={editing} onChange={(event) => setName(event.target.value)} />
+          <Input id="ai-field-name" data-ai-id="role-editor:name" value={name} disabled={editing} onChange={(event) => setName(event.target.value)} />
         </label>
         <label className="flex flex-col gap-1 text-sm">
           <span className="text-ai-fg-muted">{t('platform.roles.alias')}</span>
-          <Input data-ai-id="role-editor:alias" value={alias} onChange={(event) => setAlias(event.target.value)} />
+          <Input id="ai-field-alias" data-ai-id="role-editor:alias" value={alias} onChange={(event) => setAlias(event.target.value)} />
         </label>
         <label className="flex flex-col gap-1 text-sm">
           <span className="text-ai-fg-muted">{t('projectInfo.field.description')}</span>
-          <Textarea data-ai-id="role-editor:description" value={description} onChange={(event) => setDescription(event.target.value)} />
+          <Textarea id="ai-field-description" data-ai-id="role-editor:description" value={description} onChange={(event) => setDescription(event.target.value)} />
         </label>
 
         <div className="flex items-center justify-between gap-2 pt-2">
@@ -165,12 +165,12 @@ export function RoleEditorDialog({ open, role, onOpenChange }: RoleEditorDialogP
             </div>
             <label className="flex flex-col gap-1 text-sm">
               <span className="text-ai-fg-muted">{t('platform.roles.apiGroups')}</span>
-              <Input data-ai-id={`role-editor:rule:${index}:groups`} value={rule.apiGroups}
+              <Input id={index === 0 ? 'ai-field-apiGroups' : undefined} data-ai-id={`role-editor:rule:${index}:groups`} value={rule.apiGroups}
                 placeholder={t('platform.roles.apiGroupsHint')} onChange={(event) => patchRule(index, { apiGroups: event.target.value })} />
             </label>
             <label className="flex flex-col gap-1 text-sm">
               <span className="text-ai-fg-muted">{t('platform.roles.resources')}</span>
-              <Input data-ai-id={`role-editor:rule:${index}:resources`} value={rule.resources}
+              <Input id={index === 0 ? 'ai-field-resources' : undefined} data-ai-id={`role-editor:rule:${index}:resources`} value={rule.resources}
                 placeholder={t('platform.roles.resourcesHint')} onChange={(event) => patchRule(index, { resources: event.target.value })} />
             </label>
             <div className="flex flex-wrap gap-2" data-ai-id={`role-editor:rule:${index}:verbs`}>
