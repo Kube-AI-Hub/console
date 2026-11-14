@@ -1,0 +1,42 @@
+id: TC-L3-KUBE-FRONTEND-STORAGE-DETAIL_SNAPSHOTS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: storage
+feature: detail-snapshots
+title: 存储卷详情 · 快照页签（只读）
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/persistentvolumeclaims'
+prd: prd/kube-frontend/storage/detail-snapshots.md
+design: design/kube-frontend/storage/detail-snapshots.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-STORAGE-DETAIL_SNAPSHOTS-01
+
+story:
+- US1
+
+product: 存储卷详情新增「快照」只读页签：列出从该卷创建的 VolumeSnapshot（名称/就绪状态/大小/创建时间）；没有快照时显示「还没有快照」空态。
+preconditions:
+- 已登录，且能读取目标项目的存储卷
+- 集群已安装 VolumeSnapshot CRD；对象数可以为 0（B200 现状）
+steps:
+- 用 API 读存储卷与命名空间，取一个存储卷及其 workspace
+- 读该命名空间的 volumesnapshots，并按 spec.source.persistentVolumeClaimName 过滤出该卷的快照
+- 打开存储卷详情，核对「属性 / 快照」两个页签可见
+- 切到快照页签，核对内容区可见
+- 有快照时核对行数、表头与行句柄；没有快照时核对空态文案
+- 核对页签内没有创建/删除按钮
+expected:
+- storage-detail:tab:snapshots 可见且可点击
+- storage-detail:snapshots 可见
+- 行数 = 按来源卷过滤后的快照数
+- 0 条时 storage-detail:snapshots-empty 可见，文案含「还没有快照」
+- 有数据时表头含 名称/状态/大小/创建时间；行句柄为 storage-detail:snapshot:<name>
+- 页签内没有创建/删除按钮（只读）
+troubleshoot:
+- 页签不出现：只有 PVC 详情应有页签，确认 kind 判断
+- 一直加载：快照接口失败或未处理 CRD 已装但 0 对象的情况
+- 行数含别的卷的快照：没有按 spec.source.persistentVolumeClaimName 过滤
+- 空态不显示：把 items.length === 0 当成了 loading
+update_automation:
+- 选择器见 pages/storage.py 与 @/pages/storage/StorageDetailPage.tsx；快照行句柄是 storage-detail:snapshot:<name>

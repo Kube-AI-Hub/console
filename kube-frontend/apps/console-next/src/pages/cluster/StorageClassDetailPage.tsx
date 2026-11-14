@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
-import { storageClassesApi, type KubeObject, type StorageClassDetail } from '@kube-ai-hub/api-client';
+import { storageApi, storageClassesApi, type KubeObject, type StorageClassDetail, type StorageSummary } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, Button, Skeleton } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
@@ -11,6 +11,8 @@ import { YamlDialog } from '@/components/resource/YamlDialog';
 import { toYaml } from '@/components/resource/yaml';
 import { DefinitionRow } from '@/components/resource/DefinitionRow';
 import { formatTimestamp } from '@/lib/time';
+import { statusLabel } from '@/lib/status';
+import { projectObjectUrl, useClusterProjectIndex } from './useClusterProjectIndex';
 
 /**
  * 存储类型详情.
@@ -48,6 +50,25 @@ export function StorageClassDetailPage(_props: StorageClassDetailPageProps): Rea
 
   const state = query.isPending ? 'loading' : query.isError ? 'error' : 'ready';
   const sc = query.data as StorageClassDetail | undefined;
+
+  /*
+   * The claims bound to this class.
+   *
+   * One cluster-wide PVC read, filtered here: the resources proxy ignores a
+   * fieldSelector (measured, see the migration plan §52), so asking it for
+   * `storageClassName=…` would quietly return every claim. The project index is
+   * the same one the cluster pages use, so each row can link into its project.
+   */
+  const claims = useQuery({
+    queryKey: ['storageclass-claims', cluster],
+    queryFn: ({ signal }) =>
+      storageApi(apiClient, 'persistentvolumeclaims').list({ cluster, namespace: '', page: 1, pageSize: 500, signal }),
+  });
+  const workspaceOf = useClusterProjectIndex(cluster);
+  const relatedClaims = React.useMemo<StorageSummary[]>(
+    () => (claims.data?.items ?? []).filter((claim) => claim.storageClass === name),
+    [claims.data, name],
+  );
 
   return (
     <AiSurface as="section" aiId="sc-detail:surface" state={state} className="flex min-w-0 flex-col gap-4">
@@ -109,6 +130,82 @@ export function StorageClassDetailPage(_props: StorageClassDetailPageProps): Rea
               <p className="mt-3 text-xs text-ai-fg-muted">
                 {t('sc.detail.topologies')}: {sc.allowedTopologies.join('; ')}
               </p>
+            ) : null}
+          </section>
+
+          <section className="rounded-lg border border-ai-border bg-ai-surface p-4" data-ai-id="sc-detail:pvcs">
+            <h2 className="mb-3 flex items-baseline gap-2 text-sm font-medium text-ai-fg">
+              {t('sc.detail.relatedClaims')}
+              <span className="text-xs font-normal text-ai-fg-muted">{relatedClaims.length}</span>
+            </h2>
+
+            {claims.isPending ? <Skeleton className="h-16 w-full" /> : null}
+
+            {!claims.isPending && claims.isError ? (
+              <div className="flex flex-col items-start gap-2">
+                <p className="text-xs text-ai-fg-muted">{t('sc.detail.relatedClaimsError')}</p>
+                <Button variant="secondary" size="sm" data-ai-id="sc-detail:pvcs-retry" onClick={() => void claims.refetch()}>
+                  {t('sc.detail.relatedClaimsRetry')}
+                </Button>
+              </div>
+            ) : null}
+
+            {!claims.isPending && !claims.isError && relatedClaims.length === 0 ? (
+              <p className="text-xs text-ai-fg-muted" data-ai-id="sc-detail:pvcs-empty">
+                {t('sc.detail.relatedClaimsEmpty')}
+              </p>
+            ) : null}
+
+            {!claims.isPending && !claims.isError && relatedClaims.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-ai-line text-left text-ai-fg-muted">
+                      <th className="py-2 pr-3 font-medium">{t('storage.column.name')}</th>
+                      <th className="py-2 pr-3 font-medium">{t('sc.detail.relatedClaimsNamespace')}</th>
+                      <th className="py-2 pr-3 font-medium">{t('storage.column.status')}</th>
+                      <th className="py-2 font-medium">{t('storage.column.capacity')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {relatedClaims.map((claim) => {
+                      const workspace = workspaceOf.get(claim.namespace) ?? 'public';
+                      const handle = claim.namespace + '/' + claim.name;
+                      return (
+                        <tr
+                          key={handle}
+                          data-ai-row={handle}
+                          data-ai-id={'sc-detail:pvc:' + handle}
+                          className="border-b border-ai-line last:border-b-0"
+                        >
+                          <td className="py-2 pr-3">
+                            <a
+                              href={projectObjectUrl({
+                                cluster,
+                                workspace,
+                                namespace: claim.namespace,
+                                page: 'persistentvolumeclaims',
+                                name: claim.name,
+                              })}
+                              className="font-medium text-ai-accent hover:underline"
+                              data-ai-id={'sc-detail:pvc:' + handle + ':open'}
+                            >
+                              {claim.name}
+                            </a>
+                          </td>
+                          <td className="py-2 pr-3 text-ai-fg-secondary">{claim.namespace || '-'}</td>
+                          <td className="py-2 pr-3">
+                            <Badge tone={claim.status === 'Bound' ? 'success' : 'warning'}>
+                              {claim.status ? statusLabel(t, claim.status) : '-'}
+                            </Badge>
+                          </td>
+                          <td className="py-2 tabular-nums text-ai-fg-secondary">{claim.capacity || '-'}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             ) : null}
           </section>
         </React.Fragment>

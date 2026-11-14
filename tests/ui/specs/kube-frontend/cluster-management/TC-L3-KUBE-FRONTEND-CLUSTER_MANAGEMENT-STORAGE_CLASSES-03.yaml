@@ -1,0 +1,40 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: storage-classes
+title: 存储类型详情 · 关联存储卷
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/storageclasses'
+prd: prd/kube-frontend/cluster-management/storage-classes.md
+design: design/kube-frontend/cluster-management/storage-classes.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-03
+
+story:
+- US2
+
+product: 存储类型详情的「关联存储卷」区块：列出 storageClassName 等于该类型的存储卷（名称/命名空间/状态/容量），名称为项目内存储卷详情链接；没有关联存储卷时给出空态。
+preconditions:
+- 已登录，且对 host 集群有读取权限
+- 集群至少有一个存储类型；该类型可能有或没有关联的存储卷
+steps:
+- 用 API 读存储类型与全部存储卷，统计每个 storageClassName 的 PVC 数
+- 选 PVC 数最多的存储类型打开详情
+- 核对关联存储卷区块可见
+- 核对表头、行数与该类型 PVC 数一致、行句柄为 项目/名称
+- 核对名称链接含项目段与 persistentvolumeclaims/<name>
+- 若所选类型没有 PVC，则核对空态
+expected:
+- sc-detail:pvcs 可见
+- 有 PVC 时行数 = 该 storageClassName 的 PVC 数；表头含 名称/命名空间/状态/容量
+- 名称链接形如 /kube-frontend/<workspace>/clusters/<cluster>/projects/<namespace>/persistentvolumeclaims/<name>
+- 无 PVC 时 sc-detail:pvcs-empty 可见并说明「该存储类型还没有关联的存储卷」
+troubleshoot:
+- 行数为 0 但有 PVC：过滤字段取错（应取 spec.storageClassName）
+- 行数比实际多：没有按 storageClassName 过滤，或读了别的集群
+- 名称链接 404：链接里漏了 workspace 段
+- 区块一直加载：PVC 列表请求失败，检查 /kapis/.../persistentvolumeclaims
+update_automation:
+- 选择器见 pages/cluster_management.py 与 @/pages/cluster/StorageClassDetailPage.tsx；行句柄 data-ai-row=<namespace>/<name>
