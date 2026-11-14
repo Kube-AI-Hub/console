@@ -18,13 +18,16 @@ HEADERS = ("名称", "项目", "CPU 用量", "内存用量")
 def _metrics_available(ui) -> bool:
     """Whether the monitoring backend answers a pod range query with any series."""
     now = int(time.time())
+    # Ask the same question the page asks (1h window at 60s): the monitoring backend can answer a
+    # coarse window from downsampled data while the raw series are missing, and then the probe
+    # would report data that the page is right to call unavailable.
     params = {
         "cluster": ui.cluster,
         "limit": -1,
         "metrics_filter": "pod_cpu_usage$|pod_memory_usage_wo_cache$",
         "start": now - 3600,
         "end": now,
-        "step": "5m",
+        "step": "60s",
     }
     status, body = ui.api.request("GET", PODS_RANGE + "?" + urllib.parse.urlencode(params))
     if status != 200 or not isinstance(body, dict):
