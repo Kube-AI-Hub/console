@@ -40,6 +40,53 @@ def run(label: str, cmd: list[str], cwd: Path, env: dict[str, str] | None = None
 E2E_REPORT = Path('/tmp/verify-e2e.xml')
 
 
+def preflight(app_url: str) -> None:
+    """Fail fast when the dev stack cannot sign in, with the command that fixes it.
+
+    The stack depends on an SSH tunnel to the cluster (`ssh -N -L 18088:...`). When it drops,
+    the BFF answers every login with 502 and pytest reports one error per case — 174 lines that
+    all say the same thing and none of which point at the tunnel. One probe here turns that
+    into a single diagnosis.
+    """
+    import json
+    import urllib.error
+    import urllib.request
+
+    env_file = REPO / 'tests/ui/.env'
+    credentials: dict[str, str] = {'username': 'ui-test', 'password': 'UiTest@2026'}
+    if env_file.exists():
+        for line in env_file.read_text(encoding='utf-8').splitlines():
+            key, _, value = line.partition('=')
+            # The suite signs in as KA_LOGIN_USERNAME/KA_LOGIN_PASSWORD; KA_USERNAME/
+            # KA_PASSWORD belong to the legacy login flow and are not what the BFF accepts.
+            if key.strip() == 'KA_LOGIN_USERNAME':
+                credentials['username'] = value.strip()
+            if key.strip() == 'KA_LOGIN_PASSWORD':
+                credentials['password'] = value.strip()
+
+    request = urllib.request.Request(
+        f'{app_url.rstrip("/")}/api/session/login',
+        data=json.dumps(credentials).encode('utf-8'),
+        headers={'Content-Type': 'application/json'},
+        method='POST',
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=20) as response:
+            session = json.loads(response.read().decode('utf-8'))
+    except (urllib.error.URLError, OSError, ValueError) as error:
+        print('\n环境不可用：无法通过 BFF 登录，E2E 未开始。', file=sys.stderr)
+        print(f'  登录端点：{app_url}/api/session/login', file=sys.stderr)
+        print(f'  错误：{error}', file=sys.stderr)
+        print('  排查顺序：', file=sys.stderr)
+        print('    1) 隧道是否在：ssh -N -L 18088:172.16.10.20:30880 sgb000', file=sys.stderr)
+        print('    2) BFF 是否在：BFF_PORT=8092 KS_API_URL=http://127.0.0.1:18088 tsx src/dev.ts', file=sys.stderr)
+        print('    3) 上游是否通：curl http://127.0.0.1:18088/kapis/version', file=sys.stderr)
+        raise SystemExit(3) from error
+    if not session.get('token'):
+        print('\n环境不可用：登录成功但没有返回 token，E2E 未开始。', file=sys.stderr)
+        raise SystemExit(3)
+
+
 def failing_node_ids(report: Path) -> list[str]:
     """The node ids of failed cases, from pytest's JUnit report."""
     import xml.etree.ElementTree as ET
@@ -72,6 +119,7 @@ def run_e2e(app_url: str, parallel: bool) -> float:
     its own. Anything that fails twice still fails the gate, and the retried cases are
     printed so a genuinely flaky test stays visible instead of being papered over.
     """
+    preflight(app_url)
     started = time.time()
     cmd = [
         sys.executable,
