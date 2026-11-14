@@ -1,0 +1,40 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING_WRITE-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: cluster-alerting-write
+title: 集群告警 · 内置策略恢复初始配置
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/alerting-policies'
+prd: prd/kube-frontend/cluster-management/cluster-alerting-write.md
+design: design/kube-frontend/cluster-management/cluster-alerting-write.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING_WRITE-02
+
+story:
+- US2
+
+product: 带 alerting.kubesphere.io/initial-configuration 注解的内置策略提供「恢复初始配置」：确认弹窗后把注解中的 spec 写回对象，回读与初始配置一致、启用状态不变；无注解的策略没有该入口。
+preconditions:
+- 已登录，且在 host 集群
+- globalrulegroups 中至少一条策略带 initial-configuration 注解，且其 spec 与注解里的 spec 一致
+- 探测结论：PATCH 注解 spec 的 merge-patch 在 dryRun 与真实写入下均 200，回读 spec 与注解 spec 一致，可用 PUT 复原
+steps:
+- 用 API 读取一条带注解的内置策略，快照其 spec 与 labels，并解析注解里的初始 spec
+- 打开集群告警策略页内置页签，打开该行行操作菜单，确认有「恢复初始配置」
+- 通过 API 修改规则描述，制造与初始配置的差异（便于证明 reset 生效）
+- 在页面点「恢复初始配置」，确认弹窗出现且说明会覆盖当前规则；点确认
+- 轮询 API 直到 spec 与注解初始 spec 完全一致，核对启用标签未变、页面出现成功提示
+- finally 中用 PUT 把快照 spec 与 labels 写回
+expected:
+- 有注解的内置行有且仅有一个「恢复初始配置」入口；确认弹窗描述覆盖行为
+- 确认后 spec 回到注解初始值（深比较相等），labels 不变，页面显示成功提示
+- 无注解的策略不显示该入口（由 resettable=false 决定）
+- 用例结束时对象已复原到快照
+troubleshoot:
+- 没有 reset 入口：确认该策略带 initial-configuration 注解（resettable）
+- reset 后 spec 不变：是否把注解当 PATCH body 直接发送（应只发 {spec: initial.spec}）
+- 复原失败：检查 finally 的 PUT 是否带最新 resourceVersion
+update_automation:
+- 页面 data-ai-id 或弹窗文案变化时同步本用例

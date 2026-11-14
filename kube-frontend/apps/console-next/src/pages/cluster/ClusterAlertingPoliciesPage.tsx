@@ -4,6 +4,7 @@ import { ruleGroupsApi, type RuleGroupSummary } from '@kube-ai-hub/api-client';
 import {
   AiSurface,
   Badge,
+  Button,
   Modal,
   ResourceList,
   Skeleton,
@@ -11,9 +12,10 @@ import {
   TabsContent,
   type ListSchema,
 } from '@kube-ai-hub/ui';
+import { actionProps } from '@kube-ai-hub/ai-surface';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
-import { MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
+import { MutationAlert, ResourceErrorPanel, errorMessage } from '@/components/resource/ResourceErrorPanel';
 import { RuleGroupBody } from '@/pages/monitoring/RuleGroupsPage';
 import { formatTimestamp } from '@/lib/time';
 
@@ -32,8 +34,11 @@ import { formatTimestamp } from '@/lib/time';
  * the same `alerting.kubesphere.io/enable` label the old console patches — a
  * merge-patch probe on globalrulegroups both dry-run and for real returned 200 and
  * the label read back, so the page offers the switch rather than pretending the
- * object is immutable. Creating, editing and deleting a cluster-scope policy is
- * still not migrated (project-scope writing is).
+ * object is immutable. Built-in groups whose installer annotation
+ * `alerting.kubesphere.io/initial-configuration` is present also offer
+ * "restore initial configuration": a merge-patch writes the annotation's `spec`
+ * back (probed dry-run and real, original spec restored afterwards). Creating,
+ * editing and deleting a cluster-scope policy is still not migrated.
  */
 export interface ClusterAlertingPoliciesPageProps {
   cluster: string;
@@ -54,6 +59,9 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
   const [tab, setTab] = React.useState<Tab>('custom');
   const [page, setPage] = React.useState(1);
   const [detail, setDetail] = React.useState<RuleGroupSummary | null>(null);
+  const [resetting, setResetting] = React.useState<RuleGroupSummary | null>(null);
+  const [resetError, setResetError] = React.useState('');
+  const [resetDone, setResetDone] = React.useState('');
 
   const custom = useQuery({
     queryKey: ['cluster-rule-groups', cluster, 'custom'],
@@ -87,6 +95,18 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
       void queryClient.invalidateQueries({ queryKey: ['cluster-rule-groups', cluster] });
       void queryClient.invalidateQueries({ queryKey: ['cluster-rule-group', cluster] });
     },
+  });
+
+  const reset = useMutation({
+    mutationFn: (group: RuleGroupSummary) =>
+      ruleGroupsApi(apiClient).resetToInitial({ name: group.name, scope: group.scope }),
+    onSuccess: (_data, group) => {
+      void queryClient.invalidateQueries({ queryKey: ['cluster-rule-groups', cluster] });
+      void queryClient.invalidateQueries({ queryKey: ['cluster-rule-group', cluster] });
+      setResetting(null);
+      setResetDone(group.name);
+    },
+    onError: (error) => setResetError(errorMessage(t, error)),
   });
 
   const schema = React.useMemo<ListSchema<RuleGroupSummary>>(
@@ -151,6 +171,17 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
          */
         { key: 'disable', label: t('monitoring.action.disable'), aiId: 'cluster-alerting-policies:disable', visible: (row: RuleGroupSummary) => row.enabled },
         { key: 'enable', label: t('monitoring.action.enable'), aiId: 'cluster-alerting-policies:enable', visible: (row: RuleGroupSummary) => !row.enabled },
+        /*
+         * Reset exists only where the installer left an initial configuration: the
+         * annotation is present on built-in global groups, and reading it is the
+         * authority (probed, see the api-client method).
+         */
+        {
+          key: 'reset',
+          label: t('cluster.alerting.policies.reset'),
+          aiId: 'cluster-alerting-policies:reset',
+          visible: (row: RuleGroupSummary) => row.builtin && row.resettable,
+        },
       ],
       empty: {
         title: t('cluster.alerting.policies.emptyTitle'),
@@ -205,11 +236,18 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
         <p className="text-xs text-ai-fg-muted">{t('cluster.alerting.policies.description')}</p>
       </header>
 
+      {resetDone ? (
+        <p role="status" className="text-xs text-ai-success" data-ai-id="cluster-alerting-policies:reset-success">
+          {t('cluster.alerting.policies.resetSuccess', { name: resetDone })}
+        </p>
+      ) : null}
+
       <Tabs
         value={tab}
         onValueChange={(next) => {
           setTab(next as Tab);
           setPage(1);
+          setResetDone('');
         }}
         items={tabs}
       >
@@ -227,6 +265,11 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
                 if (action === 'detail') setDetail(row);
                 if (action === 'enable' || action === 'disable') {
                   toggle.mutate({ group: row, enabled: action === 'enable' });
+                }
+                if (action === 'reset') {
+                  setResetDone('');
+                  setResetError('');
+                  setResetting(row);
                 }
               }}
             />
@@ -254,6 +297,11 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
                 if (action === 'enable' || action === 'disable') {
                   toggle.mutate({ group: row, enabled: action === 'enable' });
                 }
+                if (action === 'reset') {
+                  setResetDone('');
+                  setResetError('');
+                  setResetting(row);
+                }
               }}
             />
           )}
@@ -269,6 +317,56 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
         size="lg"
       >
         {detailQuery.data ? <RuleGroupBody detail={detailQuery.data} /> : <Skeleton className="h-40 w-full" />}
+      </Modal>
+
+      <Modal
+        open={resetting !== null}
+        onOpenChange={(open) => {
+          if (!open && !reset.isPending) {
+            setResetting(null);
+            setResetError('');
+          }
+        }}
+        title={t('cluster.alerting.policies.resetTitle')}
+        size="md"
+      >
+        {resetting ? (
+          <div className="flex flex-col gap-4 text-xs" data-ai-id="cluster-alerting-policies:reset-dialog">
+            <p className="text-ai-fg-secondary">
+              {t('cluster.alerting.policies.resetDesc', { name: resetting.name })}
+            </p>
+            {resetError ? (
+              <p role="alert" className="text-ai-danger" data-ai-id="cluster-alerting-policies:reset-error">
+                {resetError}
+              </p>
+            ) : null}
+            <div className="flex justify-end gap-2">
+              <Button
+                size="sm"
+                variant="secondary"
+                disabled={reset.isPending}
+                {...actionProps('cluster-alerting-policies:reset-cancel')}
+                onClick={() => {
+                  setResetting(null);
+                  setResetError('');
+                }}
+              >
+                {t('common.cancel')}
+              </Button>
+              <Button
+                size="sm"
+                disabled={reset.isPending}
+                {...actionProps('cluster-alerting-policies:reset-confirm')}
+                onClick={() => {
+                  setResetError('');
+                  reset.mutate(resetting);
+                }}
+              >
+                {t('cluster.alerting.policies.resetConfirm')}
+              </Button>
+            </div>
+          </div>
+        ) : null}
       </Modal>
     </AiSurface>
   );

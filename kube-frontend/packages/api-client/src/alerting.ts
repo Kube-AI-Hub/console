@@ -1,4 +1,5 @@
 import type { Client } from './client';
+import { ApiError } from './errors';
 import { KAPIS_ALERTING, baseOf, resourceApi, type KubeObject, type ResourceBase } from './resources';
 
 /**
@@ -236,6 +237,8 @@ export interface RuleGroupSummary extends ResourceBase {
   enabled: boolean;
   /** Installed rules are platform-managed; editing them is not offered. */
   builtin: boolean;
+  /** Whether the installer left an initial configuration this group can be reset to. */
+  resettable: boolean;
   /** Free-form description, from the `kubesphere.io/description` annotation. */
   description: string;
 }
@@ -266,6 +269,15 @@ export interface RuleGroupDetail extends RuleGroupSummary {
 }
 
 const BUILTIN_LABEL = 'alerting.kubesphere.io/builtin';
+
+/**
+ * Annotation holding the installer's initial object for a built-in group.
+ *
+ * The value is the full JSON object as installed (apiVersion/kind/metadata/spec), so
+ * the reset can restore `spec` without guessing the original rules. The old console's
+ * `alerting.rule.reset` parses this same annotation.
+ */
+const INITIAL_CONFIGURATION_ANNOTATION = 'alerting.kubesphere.io/initial-configuration';
 
 /**
  * Annotation the platform and the old console use for a policy's description.
@@ -311,6 +323,7 @@ export function toRuleGroupSummary(raw: KubeObject, scope: RuleGroupScope): Rule
     // An absent label means never disabled: the platform evaluates it.
     enabled: String(labels[ALERTING_ENABLE_LABEL] ?? 'true') !== 'false',
     builtin: String(labels[BUILTIN_LABEL] ?? 'false') === 'true',
+    resettable: String((raw.metadata?.annotations ?? {})[INITIAL_CONFIGURATION_ANNOTATION] ?? '') !== '',
     description: String((raw.metadata?.annotations ?? {})[DESCRIPTION_ANNOTATION] ?? ''),
   };
 }
@@ -450,6 +463,57 @@ export function ruleGroupsApi(client: Client) {
         method: 'PATCH',
         contentType: 'application/merge-patch+json',
         body: { metadata: { labels: { [ALERTING_ENABLE_LABEL]: String(params.enabled) } } },
+      });
+    },
+
+    /**
+     * Restore a built-in group's rules from the installer's initial configuration.
+     *
+     * The annotation holds the full object as installed; only its `spec` is written
+     * back. A merge-patch is used instead of PUT because `spec.rules` is an array
+     * (the patch replaces it wholesale, which is exactly a reset) and because PUT
+     * would need the current `resourceVersion` and a full object. The enable label is
+     * deliberately **not** restored: the operator can switch a policy separately, and
+     * a reset that silently re-enabled a disabled policy would be a surprise.
+     *
+     * Probe on host: dry-run and real merge-patches both return 200, and the spec
+     * reads back identical to the annotation's `spec`; the original rules were then
+     * restored with PUT.
+     */
+    async resetToInitial(params: {
+      name: string;
+      scope: RuleGroupScope;
+      namespace?: string;
+      signal?: AbortSignal;
+    }): Promise<void> {
+      const current = await client.request<KubeObject>(itemPath(params), params.signal ? { signal: params.signal } : {});
+      const encoded = (current.metadata?.annotations ?? {})[INITIAL_CONFIGURATION_ANNOTATION];
+      if (!encoded) {
+        throw new ApiError(
+          { code: 'invalid', message: 'this policy has no initial configuration to reset to' },
+          422,
+        );
+      }
+      let initial: { spec?: unknown };
+      try {
+        initial = JSON.parse(encoded) as { spec?: unknown };
+      } catch {
+        throw new ApiError(
+          { code: 'invalid', message: 'the stored initial configuration is not valid JSON' },
+          422,
+        );
+      }
+      if (!initial?.spec || typeof initial.spec !== 'object') {
+        throw new ApiError(
+          { code: 'invalid', message: 'the stored initial configuration has no spec to restore' },
+          422,
+        );
+      }
+      await client.request(itemPath(params), {
+        method: 'PATCH',
+        contentType: 'application/merge-patch+json',
+        body: { spec: initial.spec },
+        ...(params.signal ? { signal: params.signal } : {}),
       });
     },
   };
