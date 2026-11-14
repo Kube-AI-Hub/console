@@ -1,0 +1,28 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: overview
+title: 集群概览 · 六类资源与调度标签对账
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/overview'
+prd: prd/kube-frontend/cluster-management/overview.md
+design: design/kube-frontend/cluster-management/overview.md
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-04
+story:
+- US1
+- US2
+- US4
+product: 完整资源用量与 scheduler 三种结果分别展示，不因同名卡片而漏字段。
+preconditions:
+- B200 host 监控接口可读
+steps:
+- 捕获页面同次 cluster 和 scheduler 响应
+- 对账 GPU 显存、GPU 实际用量与分配、CPU、内存、容器组、磁盘
+- 逐项对账 scheduled、error 与 unschedulable
+- 三档视口截图并检查页面不横向溢出
+expected:
+- 六类资源有分子分母及正确单位，GPU 数量保留小数
+- 使用量不等于分配量，error 不等于 unschedulable
+- 缺值不显示为零，真实零仍可展示

@@ -1,0 +1,29 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-06
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: overview
+title: 集群概览 · 字段对齐、左列状态与主题边框
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/overview'
+prd: prd/kube-frontend/cluster-management/overview.md
+design: design/kube-frontend/cluster-management/overview.md
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-07
+story:
+- US1
+- US2
+- US3
+product: 区块层次和固定字段栅格提高扫读效率，不改变数据含义。
+preconditions:
+- 已登录 B200 host，概览和 gpu02 节点详情可读
+steps:
+- 核对 Kubernetes 状态紧随左列基本信息
+- 在 1024/1280/1600 核对资源字段相对位置并截图
+- 确认没有分配字段的卡片留空，GPU 没有额外利用率行
+- 比较概览各区块与节点属性区计算出的主题边框颜色
+- 核对共享图标和 Top5 进度图表存在
+expected:
+- 名称、已使用、总量、比例和分配区域整齐对齐，页面无横向溢出
+- 未上报不补零，删除冗余行不影响实际使用率和分配量
+- 区块边框和主题一致，图标不替代文字或引入新数据口径

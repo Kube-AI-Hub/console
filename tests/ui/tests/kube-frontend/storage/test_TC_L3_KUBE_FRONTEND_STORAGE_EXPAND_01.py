@@ -25,10 +25,10 @@ def _create(ui, name: str, storage_class: str | None) -> None:
 
 
 @pytest.mark.point
-def test_TC_L3_KUBE_FRONTEND_STORAGE_EXPAND_01(storage_page, screenshot):
+def test_TC_L3_KUBE_FRONTEND_STORAGE_EXPAND_01(kube_storage_page, screenshot):
     """TC-L3-KUBE-FRONTEND-STORAGE-EXPAND-01 存储卷：扩容与按存储类门控。"""
 
-    ui = storage_page
+    ui = kube_storage_page
     assert ui.api is not None
 
     # Pick one class that allows expansion and one that does not, from the cluster

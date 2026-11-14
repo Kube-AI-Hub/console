@@ -3,8 +3,9 @@
 > 方法：见 [legacy-ui-migration-guide.md](../legacy-ui-migration-guide.md)。
 > 验证基准：**B200**（BFF `127.0.0.1:8092` + 静态站 `127.0.0.1:5178`，集群 `host`）。A100 的旧结论已作废。
 > 本文是**执行用**文档：现状、约定、不变量、TODO。逐轮叙述已移除，需要考古时看 `git log -- docs/plans/area-migration-plan.md`。
-> 2026-11-15 功能级复核：**集群概览仍为部分迁移**，新增八项指标/工具/组件/排行等差异，见
-> [源码、截图与遗漏复盘](./cluster-overview-parity-review-20261115.md)。路由已迁与门禁全绿不代表旧能力完整。
+> 2026-11-15 功能级复核发现的八项概览差异已补齐并完成本地相关验收，见
+> [补齐记录](./cluster-overview-completion-20261115.md)。[原始复盘](./cluster-overview-parity-review-20261115.md)
+> 保留；新版生产部署、全站 E2E 和真实成员集群验收仍未完成。
 
 ---
 
@@ -283,28 +284,29 @@ python3 prd/tools/verify.py --serial-e2e
 
 ### 6.2 能力级缺口（页面在、功能不全）
 
-#### 集群概览补漏专项（2026-11-15，全部待实施）
+#### 集群概览补漏专项（2026-11-15，本地补齐与验收完成）
 
 旧版六个区块已按子组件、字段、动作重新清点。以下不纳入“页面已迁移”的完成数，
 也不因先前 PRD 的“节点页承接/工具不做”而关闭；旧理由保留并由本次证据纠正。
 
 | 缺口 ID | 待补能力 | 实施与验收顺序 |
 | --- | --- | --- |
-| OVR-01 | 集群 GPU 显存量、总量、比例 | A：补请求→模型→展示，bytes 与缺值/零测试 |
-| OVR-02 | 集群磁盘用量、容量、比例 | A：真实 GET 已可读，统一单位 |
-| OVR-03 | GPU 实际使用量独立于分配量 | A：请求中有 gpu_usage 但 mapper 丢弃，保留小数 |
-| OVR-04 | scheduler result=error 调度失败次数 | A：补回 error，不以 unschedulable 替代 |
-| OVR-05 | 当前用户/集群 kubeconfig 查看、下载和提示 | B：只读、安全、403/member 独立验收；kubectl 已有不重复实现 |
-| OVR-06 | 概览六类系统组件入口及分类过滤 | B：组件接口可读，configz 徽标不是等价替代 |
-| OVR-07 | 首页 Top5、九类指标与完整排行下钻 | C：全局排序、IP/控制面/详情链接，大于五节点样本另测 |
-| OVR-08 | 概览只读集群可见性 | B：已有模型未渲染 |
+| OVR-01 | 已补：集群 GPU 显存量、总量、比例 | OVERVIEW-03，同次响应及零/缺值单测 |
+| OVR-02 | 已补：集群磁盘用量、容量、比例 | OVERVIEW-03，GiB/TiB 对账 |
+| OVR-03 | 已补：GPU 实际使用量独立于分配量 | gpuUsed 映射与小数；OVERVIEW-03 + distinct 值单测 |
+| OVR-04 | 已补：scheduler error 调度失败次数 | OVERVIEW-03，三标签分别对账 |
+| OVR-05 | 已补：当前用户/集群 kubeconfig 查看、下载和提示 | OVERVIEW-04；真实读取/关闭，非敏感下载与403模拟 |
+| OVR-06 | 已补：概览六类系统组件入口及分类过滤 | OVERVIEW-04、COMPONENTS-01、COMPONENT_DETAIL-01 |
+| OVR-07 | 已补：首页 Top5、九类指标与完整排行下钻 | OVERVIEW-05、NODE_USAGE-01；真实九维度及12节点模拟分页 |
+| OVR-08 | 已补：概览只读集群可见性 | OVERVIEW-04，与集群对象一致 |
 
 - [x] 源码清点、新旧 1600×900 首屏与全页、旧排行菜单、只读指标与组件接口证据。
 - [x] 更新迁移指导 §3.4 的原子能力清单、等价承接证明与门禁边界。
-- [ ] 实施 A/B/C，同步 overview PRD/design 的 AC/DEC/CON、YAML 及镜像 Python，不以本次复盘替代代码交付。
-- [ ] 逐项关闭八项差异并在新版部署环境复核后，才能宣称“概览完整迁移”。
+- [x] 实施 A/B/C，同步 overview、node-usage、components 的规格、YAML 和镜像 Python，相关八条串行回归通过。
+- [x] 增加 overview-parity-contract，防止旧字段、排行和组件入口再次被遗漏。
+- [ ] 新版部署环境及真实成员集群复核；全量门禁的既有商店状态/API测试夹具问题不冒充通过。
 
-具体证据、被否判断与完成判据见 [概览专项复盘](./cluster-overview-parity-review-20261115.md)。
+具体证据、被否判断见 [概览专项复盘](./cluster-overview-parity-review-20261115.md)，当前验收见 [补齐记录](./cluster-overview-completion-20261115.md)。
 下面原表保留其他能力的历史登记，不作为本专项完整性证明。
 
 | 能力 | 现状 | 影响 |

@@ -95,6 +95,8 @@ E2E：`tests/kube-frontend/cluster-management/`。
 显卡列表与单卡详情的筛选、分页、指标单位和 UUID 关联契约见 [gpu.md](./gpu.md)。
 ai-kit TrendChart 由单卡监控与既有集群/节点监控共同使用；ResourceList.errorContent 在读取失败时保留条件编辑。
 节点详情使用身份侧栏、StatisticsGroup、TrendChart 与 Table；节点分配和硬件契约见 [nodes.md](./nodes.md)。集群概览继续独立读取 cluster 指标，缺失字段为 undefined；双栏和快捷入口契约见 [overview.md](./overview.md)。
+概览六类资源、scheduler error、组件分类、用户配置和 Top5 见 overview CON-04/05/06；
+nodeRankingApi/NodeRankingPanel 由首页预览与完整页共用，组件及敏感配置缓存含集群/用户身份。
 
 ## 后续改进
 

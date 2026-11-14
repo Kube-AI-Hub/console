@@ -659,9 +659,11 @@ export function toComponentSummary(item: KubeComponent): ComponentSummary {
 export function componentsApi(client: Client) {
   return {
     kind: 'components' as const,
-    async list(params: { signal?: AbortSignal } = {}): Promise<{ items: ComponentSummary[]; total: number }> {
+    async list(params: { cluster?: string; signal?: AbortSignal } = {}): Promise<{ items: ComponentSummary[]; total: number }> {
       const body = await client.request<KubeComponent[] | { items?: KubeComponent[] }>(
-        '/kapis/resources.kubesphere.io/v1alpha3/components',
+        params.cluster && params.cluster !== 'host' ?
+          `/kapis/clusters/${encodeURIComponent(params.cluster)}/resources.kubesphere.io/v1alpha3/components` :
+          '/kapis/resources.kubesphere.io/v1alpha3/components',
         params.signal ? { signal: params.signal } : {},
       );
       // Accept both shapes: the envelope may appear on other cluster versions, and

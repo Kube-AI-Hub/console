@@ -37,6 +37,8 @@ export interface DeleteDialogProps {
   title?: string;
   /** Override the confirm button label, for the same reason. */
   confirmLabel?: string;
+  /** Keep a failed destructive operation visible inside its confirmation. */
+  error?: string;
 }
 
 /**
@@ -61,6 +63,7 @@ export function DeleteDialog({
   noun,
   title,
   confirmLabel,
+  error,
 }: DeleteDialogProps): React.ReactElement {
   const t = useT();
   const [typed, setTyped] = React.useState('');
@@ -83,13 +86,14 @@ export function DeleteDialog({
       description={bulk ? t('delete.bulkHint', { names: expected }) : t('delete.singleHint', { name: expected })}
       footer={
         <div className="flex justify-end gap-2">
-          <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
+          <Button variant="ghost" size="sm" disabled={pending} onClick={() => onOpenChange(false)}>
             {t('common.cancel')}
           </Button>
           <Button
             variant="danger"
             size="sm"
             disabled={!confirmed || pending}
+            loading={pending}
             {...actionProps(`${resource}:delete-confirm`)}
             onClick={() => void onConfirm()}
           >
@@ -100,12 +104,14 @@ export function DeleteDialog({
     >
       <Input
         value={typed}
+        disabled={pending}
         autoFocus
         aria-label={t('delete.inputLabel')}
         placeholder={expected}
         {...actionProps(`${resource}:delete-input`)}
         onChange={(event) => setTyped(event.target.value)}
       />
+      {error ? <p role="alert" className="mt-2 text-sm text-ai-danger">{error}</p> : null}
     </Modal>
   );
 }

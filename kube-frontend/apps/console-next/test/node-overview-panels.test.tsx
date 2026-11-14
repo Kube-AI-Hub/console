@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, within, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { describe, expect, it, vi } from 'vitest';
 import { toNodeDetail } from '@kube-ai-hub/api-client';
@@ -9,6 +9,7 @@ import { ClusterOverviewPage } from '@/pages/cluster/ClusterOverviewPage';
 vi.mock('@tanstack/react-router', () => ({
   Link: ({ children, ...props }: { children: React.ReactNode }) => <a {...props}>{children}</a>,
 }));
+vi.mock('@/shell/AuthProvider', () => ({ useAuth: () => ({ user: { name: 'admin' } }) }));
 function mount(element: React.ReactNode) {
   return render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
     <I18nProvider locale="zh">{element}</I18nProvider></QueryClientProvider>);
@@ -41,11 +42,12 @@ describe('hardware and overview panels', () => {
       return Response.json({ metadata: { name: 'member' }, spec: { connection: { type: 'proxy' } }, status: {} });
     }));
     const view = mount(<ClusterOverviewPage cluster="member" />);
-    await screen.findByText('0 / 8.00');
+    await waitFor(() => expect(view.container.querySelector('[data-ai-id="overview:usage-cpu"] [data-ai-field="total"]')).toHaveTextContent('8'));
     const cpu = view.container.querySelector('[data-ai-id="overview:usage-cpu"]') as HTMLElement;
     const memory = view.container.querySelector('[data-ai-id="overview:usage-memory"]') as HTMLElement;
     expect(within(cpu).getByRole('progressbar')).toHaveAttribute('aria-valuenow', '0');
-    expect(memory).toHaveTextContent('- / -');
+    expect(memory.querySelector('[data-ai-field="used"]')).toHaveTextContent('-');
+    expect(memory.querySelector('[data-ai-field="total"]')).toHaveTextContent('-');
     expect(within(memory).queryByRole('progressbar')).toBeNull();
     expect(view.container.querySelector('[data-ai-id="overview:agent-panel"]')).toBeInTheDocument();
     expect(view.container.querySelector('[data-ai-id="overview:shortcut:kubectl"]')).toBeInTheDocument();

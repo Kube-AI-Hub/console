@@ -6,13 +6,17 @@
 验证页面为 `http://localhost:5178/kube-frontend/clusters/host/overview`，经真实 BFF 读取 B200。
 代码独立实现，未复制旧 AGPL 组件；未部署生产、未执行 GPU 模式或集群写入，未提交并行工作。
 
+本记录保留前轮功能验收结果；后续布局、统一资源字段及主题边框调整见
+[再次视觉复盘](./cluster-overview-layout-review-20261115.md)。用户批准删除 GPU 卡额外利用率文本行，
+实际用量、总数、使用/总量比例与分配量仍保留，API 与九维排行能力不变。
+
 ## 八项验收
 
 | 缺口 | 已补实现 | 对应验证 |
 | --- | --- | --- |
 | OVR-01 GPU 显存 | 使用量/总量/比例，bytes 换算 GiB/TiB | OVERVIEW-03 同次采样对账；真实零/缺值单测 |
 | OVR-02 磁盘 | 使用量/容量/比例，明确二进制单位 | OVERVIEW-03；原 TB 和现 TiB 的数值变化为单位转换，不是容量改变 |
-| OVR-03 GPU 实际用量 | gpuUsed 不再被 mapper 丢弃；实际用量、分配量、总量与利用率分别显示，小数保留 | API/面板单测 distinct 1.91 与 6；真实用量对账 |
+| OVR-03 GPU 实际用量 | gpuUsed 不再被 mapper 丢弃；实际用量、分配量、总量分别显示，小数保留；后续布局删除额外利用率文本，保留使用/总量比例 | API/面板单测 distinct 1.91 与 6；真实用量对账 |
 | OVR-04 调度 error | scheduled/error/unschedulable 三标签独立 | 同次 scheduler 响应对账；1 与 226 不混淆 |
 | OVR-05 kubeconfig | 当前用户/集群只读查看、安全提示、下载；主动打开才读，关闭取消并清除缓存 | 真实 GET 与关闭；非敏感模拟文本下载内容/文件名；403 无重试 |
 | OVR-06 系统组件 | 六类入口及对象数量；type 下钻、namespace 分类、清除筛选，详情与 Pods 缓存按集群隔离 | OVERVIEW-04、COMPONENTS-01、COMPONENT_DETAIL-01；member 路径单测 |
@@ -29,7 +33,7 @@ GPU/显存在资源区优先展示；新增节点就绪率、原双栏布局和�
 - 应用类型检查与构建通过。
 - 应用全量单测：175 条通过；API 全量单测：290 条通过。
 - 新增旧能力清单契约、12 条一致性契约及包边界检查通过；旧资源行引用的指标、九项排行、六类组件有防漏检查。
-- 严格 overview 规格追溯检查 errors=0、warnings=0；节点排行和组件规格同步更新。
+- 严格 overview/node-usage/components 规格及新增三条镜像用例检查 errors=0、warnings=0。
 - 5178 最终串行相关回归：OVERVIEW-01/02/03/04/05、NODE_USAGE-01、COMPONENTS-01、COMPONENT_DETAIL-01，八条通过。
 - 三档（1024/1280/1600）检查页面横向溢出为零，表格滚动在内部；全页截图确认六类资源、五个 Kubernetes 字段、Top5、组件及工具均存在。
 

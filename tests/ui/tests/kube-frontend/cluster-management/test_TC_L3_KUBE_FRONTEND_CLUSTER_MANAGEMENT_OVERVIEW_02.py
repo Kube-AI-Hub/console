@@ -33,7 +33,7 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_OVERVIEW_02(cluster_overview_pag
     requests.clear()
     with ui.page.expect_response(lambda response: "/monitoring.kubesphere.io/v1alpha3/cluster?" in response.url):
         ui.page.locator('[data-ai-id="overview:refresh"]').click()
-    assert not any("/monitoring.kubesphere.io/v1alpha3/nodes" in request.url for request in requests)
+    assert not any("/monitoring.kubesphere.io/v1alpha3/nodes" in request.url and "type=rank" not in request.url for request in requests)
 
     # These are explicitly simulated responses, separate from the real-layout checks.
     def partial(route):
@@ -49,7 +49,8 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_OVERVIEW_02(cluster_overview_pag
     ui.wait_ready()
     expect(ui.usage_row("cpu")).to_contain_text("0%")
     expect(ui.usage_row("cpu").get_by_role("progressbar")).to_have_attribute("aria-valuenow", "0")
-    expect(ui.usage_row("memory")).to_contain_text("- / -")
+    expect(ui.usage_field("memory", "used")).to_have_text("-")
+    expect(ui.usage_field("memory", "total")).to_have_text("-")
     expect(ui.usage_row("memory").get_by_role("progressbar")).to_have_count(0)
     expect(ui.usage_row("pods").get_by_role("progressbar")).to_have_count(0)
     assert "%" not in ui.usage_text("pods")

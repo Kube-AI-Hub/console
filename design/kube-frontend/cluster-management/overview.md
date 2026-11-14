@@ -14,6 +14,7 @@
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-04
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-05
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-06
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-07
 
 ## 设计目标与非目标
 
@@ -46,6 +47,9 @@
 **何时重新考虑**：未安装 KubeSphere 监控的集群上需要该页时，再补一条 metrics.k8s.io 的降级读取。
 
 ### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-OVERVIEW-03 — GPU 以「卡」计数，不以百分比计数
+
+**后续覆盖**：DEC-07 已纠正“旧版只显示利用率”的判断；DEC-09 按用户要求移除额外利用率文本行，
+当前保留实际使用卡数、总量、使用/总量比例及独立分配量。下述第二行方案仅作为历史决策保留。
 
 **为什么**：管理员申请的是整卡。6 / 15 直接回答「还能不能再起一个 GPU 任务」；40% 不能。利用率作为第二行，因为卡可能被占用却闲着，两者是不同的事实。
 
@@ -141,6 +145,7 @@ ClusterUsage 的数值字段由必有 number 调整为 number | undefined。未�
 - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-03
 - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-04
 - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-05
+- TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-06
 
 ### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-07 — 恢复原子能力，不以新概念替换旧事实
 
@@ -190,3 +195,23 @@ GPUallocated 排序为卡数、展示为 allocated/total 比例；load1 原数�
 
 新增单测覆盖 distinct used/allocated、error/unschedulable、乱序多指标身份、Top5 查询及敏感缓存清理；
 E2E 将真实采样、模拟超过5节点、403/member URL 与下载验证分开记录。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-09 — 固定字段栅格与主题化视觉
+
+**为什么**：上批功能已补齐，但 used/total 的合并文本、可选额外行和不同长度使卡片不整齐；
+本次按用户明确要求，将 Kubernetes 状态放在基本信息下方，资源卡保留统一名称、数量双列、
+使用率条和分配区域。没有分配字段时留空，不用伪造值补高度。GPU 额外利用率行移除，
+但实际使用/总量比例及独立分配量保留。
+
+**被否方案**：给每种指标单独写高度或补0占位，会重复展示和误导事实；硬编码白色边框在切换主题时失效。
+统一 Panel 使用节点详情的 rounded-ai-lg、border-ai-line、bg-ai-surface-1。
+图标复用 ai-kit Icon，资源/排行条复用 Progress，不为美化新增历史查询或私有图表。
+
+**何时重新考虑**：需要可配置仪表盘或历史趋势时，另行设计；本次只改展示，不改变 API 口径。
+
+### INV-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-07 — 视觉验收不降低数据验收
+
+新卡片发布 data-ai-field=name/used/total/ratio/allocated，原资源/动作 ai-id 保留。
+分配区域是空槽时不输出文字；支持字段未上报仍显示 -，真实0不隐藏。
+OVERVIEW-06 核对左列相邻区块、三档相对字段坐标、空分配区域和节点页面实际计算边框颜色；
+旧 OVERVIEW-01/02 从斜杠文本改为逐字段断言，原同次数据对账、工具、排行和权限回归保留。

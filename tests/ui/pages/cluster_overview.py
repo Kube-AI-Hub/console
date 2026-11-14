@@ -90,6 +90,9 @@ class ClusterOverviewPage:
     def usage_text(self, name: str) -> str:
         return self.usage_row(name).inner_text().strip()
 
+    def usage_field(self, name: str, field: str) -> Locator:
+        return self.usage_row(name).locator(f'[data-ai-field="{field}"]')
+
     @property
     def status_row(self) -> str:
         return self.field_text("status")
@@ -118,11 +121,33 @@ class ClusterOverviewPage:
         return self.page.locator('[data-ai-id="overview:no-metrics"]').count() > 0
 
     def kubernetes_status_fields(self) -> list[str]:
-        """The four control-plane numbers, as rendered text."""
+        """The five independently-labelled control-plane numbers."""
         return [
             self.page.locator(f'[data-ai-id="overview:{name}"]').last.inner_text().strip()
-            for name in ("request-rate", "request-latency", "scheduled", "unschedulable")
+            for name in ("request-rate", "request-latency", "scheduled", "schedule-error", "unschedulable")
         ]
+
+    def control(self, suffix: str) -> Locator:
+        return self.page.locator(f'[data-ai-id="overview:{suffix}"]').last
+
+    def ranking_rows(self) -> Locator:
+        return self.control("ranking").locator("[data-ai-row]")
+
+    def select_rank_metric(self, label: str) -> None:
+        self.control("rank-metric").click()
+        self.page.get_by_role("option", name=label, exact=True).click()
+
+    def components_rows(self) -> Locator:
+        return self.page.locator('[data-ai-id="components:surface"] [data-ai-row]')
+
+    def component_group(self) -> Locator:
+        return self.page.locator('[data-ai-id="components:group"]')
+
+    def full_rank(self, suffix: str) -> Locator:
+        return self.page.locator(f'[data-ai-id="node-usage:{suffix}"]')
+
+    def full_rank_rows(self) -> Locator:
+        return self.full_rank("surface").locator("[data-ai-row]")
 
     # ---------------- 数据 ----------------
 

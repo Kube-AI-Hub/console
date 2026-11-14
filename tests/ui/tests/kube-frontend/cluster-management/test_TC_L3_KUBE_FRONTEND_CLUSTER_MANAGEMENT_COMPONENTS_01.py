@@ -53,4 +53,10 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_COMPONENTS_01(cluster_management
             healthy = c.get("healthyBackends") or 0
             if total > 0 and healthy == total and c["name"] in first:
                 raise AssertionError(f"a healthy component sorted first while {len(unhealthy)} are unhealthy: {first}")
+    surface.get_by_role("combobox").click()
+    ui.page.get_by_role("option", name="监控", exact=True).click()
+    expect(surface.locator("[data-ai-row]")).to_have_count(sum(c.get("namespace") == "kubesphere-monitoring-system" for c in components))
+    surface.get_by_role("combobox").click()
+    ui.page.get_by_role("option", name="全部组件", exact=True).click()
+    expect(surface.locator("[data-ai-row]")).to_have_count(len(components))
     screenshot(ui.page, "cluster-components")

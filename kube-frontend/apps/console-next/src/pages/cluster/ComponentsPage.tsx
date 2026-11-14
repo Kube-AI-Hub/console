@@ -9,6 +9,7 @@ import { api as apiClient } from '@/api';
 import { useResourceListState } from '@/components/resource/useResourceListState';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
+import { COMPONENT_GROUPS } from './componentGroups';
 
 /**
  * 系统组件.
@@ -23,22 +24,27 @@ import { formatTimestamp } from '@/lib/time';
  */
 export interface ComponentsPageProps {
   cluster: string;
+  initialType?: string;
 }
 
-export function ComponentsPage({ cluster: _cluster }: ComponentsPageProps): React.ReactElement {
+export function ComponentsPage({ cluster: _cluster, initialType = '' }: ComponentsPageProps): React.ReactElement {
   const t = useT();
+  const [type, setType] = React.useState(initialType);
+  React.useEffect(() => setType(initialType), [initialType, _cluster]);
   // Default to health so a broken component is not buried among 49 rows; the sort
   // control then works like everywhere else.
   const list = useResourceListState<'name' | 'createTime' | 'health'>({ defaultSortBy: 'health', defaultOrder: 'asc' });
 
   const query = useQuery({
-    queryKey: ['components'],
-    queryFn: ({ signal }) => componentsApi(apiClient).list({ signal }),
+    queryKey: ['components', _cluster],
+    queryFn: ({ signal }) => componentsApi(apiClient).list({ cluster: _cluster, signal }),
   });
 
   const all = query.data?.items ?? [];
+  const group = COMPONENT_GROUPS.find((entry) => entry.key === type);
+  const grouped = group ? all.filter((row) => row.namespace === group.namespace) : all;
   const keyword = list.search.trim().toLowerCase();
-  const filtered = keyword ? all.filter((row) => row.name.toLowerCase().includes(keyword)) : all;
+  const filtered = keyword ? grouped.filter((row) => row.name.toLowerCase().includes(keyword)) : grouped;
   /*
    * Ordered by whatever the sort control says, and the control starts on health so the
    * one broken component is not buried among the rest.
@@ -65,6 +71,10 @@ export function ComponentsPage({ cluster: _cluster }: ComponentsPageProps): Reac
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
       search: { placeholder: t('cluster.searchPlaceholder'), aiId: 'components:search' },
+      filters: [{ key: 'type', title: t('cluster.overview.componentGroup'), aiId: 'components:group',
+        allLabel: t('cluster.overview.allComponents'), options: COMPONENT_GROUPS.map((entry) => ({
+          value: entry.key, label: entry.label.startsWith('cluster.') ? t(entry.label as 'cluster.overview.module.monitoring') : entry.label,
+        })) }],
       sortableKeys: ['name', 'health'],
       sortAiPrefix: 'components',
       sort: { key: list.sortBy, order: list.order },
@@ -132,6 +142,7 @@ export function ComponentsPage({ cluster: _cluster }: ComponentsPageProps): Reac
   return (
     <AiSurface as="section" aiId="components:surface" state={state} className="min-w-0">
       <ResourceList
+        filters={{ type: group?.key ?? '' }} onFiltersChange={(next) => setType(next.type ?? '')}
         schema={schema}
         rows={rows}
         loading={state === 'loading'}

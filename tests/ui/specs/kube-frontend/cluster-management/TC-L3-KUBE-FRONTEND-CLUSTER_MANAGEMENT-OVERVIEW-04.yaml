@@ -1,0 +1,27 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-04
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: overview
+title: 集群概览 · 组件分类、可见性与 kubeconfig 工具
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/overview'
+prd: prd/kube-frontend/cluster-management/overview.md
+design: design/kube-frontend/cluster-management/overview.md
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-05
+story:
+- US1
+- US3
+product: 概览组件入口和当前用户工具保留，配置缓存和权限隔离。
+preconditions:
+- 已登录 B200 host，组件接口及用户 kubeconfig 可读
+steps:
+- 对账可见性与六类组件数量，进入监控分类并清除过滤
+- 确认只有点击 kubeconfig 才读取当前用户配置，关闭不保留正文
+- 用非敏感模拟配置验证下载文件内容和再次打开重取
+- 拦截 403 验证没有重试或下载入口
+expected:
+- 分类链接属于当前集群，列表按 namespace 过滤并可恢复全量
+- 配置只读、提示明确；下载与 403 模拟和真实读取分别记录
+- 不记录或截图真实配置正文，不发送 PUT/PATCH

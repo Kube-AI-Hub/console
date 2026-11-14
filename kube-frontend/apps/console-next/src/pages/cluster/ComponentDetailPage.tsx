@@ -24,14 +24,14 @@ export function ComponentDetailPage(_props: ComponentDetailPageProps): React.Rea
   const { cluster, name } = useParams({ from: '/kube-frontend/clusters/$cluster/components/$name' });
 
   const components = useQuery({
-    queryKey: ['components'],
-    queryFn: ({ signal }) => componentsApi(apiClient).list({ signal }),
+    queryKey: ['components', cluster],
+    queryFn: ({ signal }) => componentsApi(apiClient).list({ cluster, signal }),
   });
   const component: ComponentSummary | undefined = (components.data?.items ?? []).find((row) => row.name === name);
   const namespace = component?.namespace ?? '';
 
   const pods = useQuery({
-    queryKey: ['component-pods', namespace, name],
+    queryKey: ['component-pods', cluster, namespace, name],
     enabled: namespace.length > 0,
     queryFn: ({ signal }) => workloadsApi(apiClient, 'pods').list({ cluster, namespace, page: 1, pageSize: 200, signal }),
   });

@@ -569,16 +569,6 @@ def monitoring_page(page, ui_config, session_token):
 
 
 @pytest.fixture
-def storage_page(page, ui_config, session_token):
-    """存储卷与存储卷快照的列表/详情。
-
-    与 `app_workloads_page` 同样拿到 `ApiClient`：存储卷的前置数据走核心组
-    `/api/v1`，页面读 kapis；两者共用一个会话令牌。
-    """
-    return StoragePage(page, app_base(ui_config), api=ApiClient(app_base(ui_config), session_token))
-
-
-@pytest.fixture
 def app_workloads_page(page, ui_config, session_token):
     """应用负载列表与详情。
 
@@ -587,6 +577,21 @@ def app_workloads_page(page, ui_config, session_token):
     同一个会话令牌，避免在用例里重新登录或复制 URL 拼装逻辑。
     """
     return AppWorkloadsPage(page, app_base(ui_config), api=ApiClient(app_base(ui_config), session_token))
+
+
+@pytest.fixture
+def kube_storage_page(page, ui_config, session_token):
+    """存储区（存储卷 / 存储卷快照）的列表与详情。
+
+    名字带 `kube_` 前缀，是因为 `storage_page` 已被旧的 JuiceFS 共享存储页面
+    占用（见上方 `SharedStoragePage`）；两个页面都叫「存储」，但一个在旧集群
+    控制台，一个在新项目控制台，夹具不能重名。
+
+    页面对象同时拿到一个 `ApiClient`：PVC 的前置数据必须走核心组 `/api/v1`
+    （kapis 的 resources 端点只注册了 GET），而页面读的是 kapis。两者共用同一个
+    会话令牌，避免在用例里重新登录或复制 URL 拼装逻辑。
+    """
+    return StoragePage(page, app_base(ui_config), api=ApiClient(app_base(ui_config), session_token))
 
 
 @pytest.fixture

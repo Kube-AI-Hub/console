@@ -9,10 +9,10 @@ PODS = "/api/v1/namespaces/csghub/pods"
 
 
 @pytest.mark.point
-def test_TC_L3_KUBE_FRONTEND_STORAGE_MOUNT_01(storage_page, screenshot):
+def test_TC_L3_KUBE_FRONTEND_STORAGE_MOUNT_01(kube_storage_page, screenshot):
     """TC-L3-KUBE-FRONTEND-STORAGE-MOUNT-01 存储卷列表：挂载状态。"""
 
-    ui = storage_page
+    ui = kube_storage_page
     assert ui.api is not None
 
     # PERFORMANCE: this cluster's pod list takes ~40-150s for a large project — it scales

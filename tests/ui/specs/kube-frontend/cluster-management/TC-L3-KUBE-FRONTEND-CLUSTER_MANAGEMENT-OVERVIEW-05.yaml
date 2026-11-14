@@ -1,0 +1,27 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-05
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: overview
+title: 集群概览 · Top5 九种排行与下钻分页
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/overview'
+prd: prd/kube-frontend/cluster-management/overview.md
+design: design/kube-frontend/cluster-management/overview.md
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-06
+story:
+- US1
+- US2
+product: 首页全局 Top5 与完整页同源，排序维度、单位和范围不丢失。
+preconditions:
+- B200 节点排行 type=rank 接口可读
+steps:
+- 捕获真实 Top5 响应核对顺序、IP与详情链接
+- 切换全部九种指标并确认请求和单位
+- 查看更多确认指标保留，完整页与服务端当前页一致
+- 用十二个模拟节点核对五项截断、全局总数、翻页和缺值
+expected:
+- 真实数据与模拟超过五节点分开，排序不是当前节点列表页的前五项
+- load1 不乘100，GPU 分配按卡数排序但展示分配率
+- 完整页分页/搜索/刷新可用；名称进入节点详情

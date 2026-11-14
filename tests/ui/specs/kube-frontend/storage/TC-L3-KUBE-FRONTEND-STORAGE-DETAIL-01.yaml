@@ -4,8 +4,8 @@ suite: point
 module: kube-frontend
 submodule: storage
 feature: detail
-title: 存储 · 详情八项属性
-entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/persistentvolumeclaims'
+title: 存储卷详情 · 八项属性顺序与取值
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/persistentvolumeclaims"
 prd: prd/kube-frontend/storage/detail.md
 design: design/kube-frontend/storage/detail.md
 
@@ -15,62 +15,24 @@ covers:
 story:
 - US1
 
-product:
-- 详
-- 情
-- 按
-- 顺
-- 序
-- 显
-- 示
-- 集
-- 群
-- 、
-- 项
-- 目
-- 、
-- 存
-- 储
-- 类
-- 型
-- 、
-- 容
-- 量
-- 、
-- 访
-- 问
-- 模
-- 式
-- 、
-- 持
-- 久
-- 卷
-- 、
-- 创
-- 建
-- 时
-- 间
-- 、
-- 创
-- 建
-- 者
-- 。
-
+product: 点击列表名称进入 PVC 详情，属性块按固定顺序展示集群、项目、存储类型、容量、访问模式、持久卷、创建时间与创建者。
 preconditions:
-- 由夹具创建一个 tc-e2e- 前缀的存储卷，用例结束无条件删除
+- 由用例的 fixture 创建一个 tc-e2e- 前缀、1Gi、ReadWriteOnce 的 PVC，用例结束后无条件删除
 - 已登录，且在 host 集群的 default 项目空间
-
 steps:
-- 从列表点击名称进入详情
-- 读取属性名序列
-- 核对集群与项目两行的值
-
+- 打开存储卷列表并点击目标 PVC 的名称
+- 等待详情主区就绪
+- 读取属性标签的顺序
+- 读取集群、项目、存储类型、容量与访问模式的值
 expected:
-- 属性名依次为 集群、项目、存储类型、容量、访问模式、持久卷、创建时间、创建者
-- 集群为 host，项目为 default
-
+- URL 以 /persistentvolumeclaims/<name> 结尾
+- 八个属性标签按此顺序出现：集群、项目、存储类型、容量、访问模式、持久卷、创建时间、创建者（详情另有 状态、供应者，由 DETAIL-02 覆盖）
+- 集群为 host，项目为 default，容量为 1Gi，访问模式为 RWO
+- 存储类型等于创建时使用的 StorageClass；未绑定的卷持久卷与创建者显示 -
 troubleshoot:
-- 属性缺失时看 StorageDetailPage 的 Row 列表
-
+- 详情显示成列表时先看路由文件夹是否同时提供 index 与 $name 路由
+- 属性缺项时看 StorageDetailPage 的 Row 是否仍渲染
+- 标签顺序变化时改 pages/storage.py 的断言顺序
 update_automation:
-- 属性变化时同步改 prd 与 design 的字段表
+- 文案变化时改 packages/locales/src/index.ts
+- 属性顺序变化时改 pages/storage.py

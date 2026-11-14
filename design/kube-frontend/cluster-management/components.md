@@ -38,7 +38,7 @@
 
 ## 系统现状
 
-老 console 按模块分组展示组件；本模块单一列表 + 异常优先。
+老 console 按模块分组展示组件；本模块单一列表 + 异常优先，现支持概览下钻的六类分类筛选。
 
 ## 仓库落点
 
@@ -71,3 +71,18 @@ E2E 见 `tests/kube-frontend/cluster-management/`。
 ## 验收用例
 
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-COMPONENTS-01`
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-COMPONENTS-03 — 分类与异常优先共存
+
+**为什么**：概览组件入口需要将用户带到目标模块；分类是查询结果的 namespace 筛选，不需要第二套列表，仍能保持异常优先。
+
+**被否方案**：把所有模块配置开关当作组件入口或取消分类，会丢失旧页面的排障路径。
+
+**何时重新考虑**：后端引入更可靠的组件类别标签时替换 namespace 映射。
+
+### CON-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-COMPONENTS-01 — 集群与分类
+
+host 保持 /kapis/resources.kubesphere.io/v1alpha3/components；member 读
+/kapis/clusters/<cluster>/resources.kubesphere.io/v1alpha3/components，不用 host 代替。
+列表 route 接受 type，组件/详情/关联 Pods queryKey 含 cluster；六类分类共用 componentGroups.ts，
+匹配 namespace，清除分类回全量。现有三列、健康口径及排序保留。

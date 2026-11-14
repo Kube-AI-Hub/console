@@ -1,28 +1,38 @@
 from __future__ import annotations
 
-import time
-
 import pytest
-from playwright.sync_api import expect
 
 pytestmark = pytest.mark.ui
 
 
 @pytest.mark.point
-def test_TC_L3_KUBE_FRONTEND_STORAGE_LIST_02(storage_page, screenshot):
-    """TC-L3-KUBE-FRONTEND-STORAGE-LIST-02 存储：空项目不渲染表头。"""
+def test_TC_L3_KUBE_FRONTEND_STORAGE_LIST_02(kube_storage_page, screenshot):
+    """TC-L3-KUBE-FRONTEND-STORAGE-LIST-02 存储卷列表：空态标题与说明且无表头。"""
 
-    ui = storage_page
-    # A namespace with no claims at all; if one appears, the case cannot say
-    # anything, so it says so instead of asserting on a page that should not be empty.
-    ui.open("persistentvolumeclaims", "kube-frontend-demo")
-    ui.wait_ready("persistentvolumeclaims")
+    ui = kube_storage_page
 
-    surface = ui.surface("persistentvolumeclaims")
-    if surface.get_attribute("data-ai-state") != "empty":
-        pytest.skip("kube-frontend-demo 已经有存储卷，无法验证空态")
+    # The criterion starts from "the project has no claim". Checking first is what
+    # keeps a populated project from reading as a product defect; the fix is to
+    # clean the leftovers, not to assert an empty page that should not be empty.
+    # `default` is shared with every other suite, so probe the demo project first
+    # and fall back only to projects that the API also reports as empty.
+    candidates = ["kube-frontend-demo", "kube-public", ui.namespace]
+    probe = None
+    for namespace in candidates:
+        candidate = ui.for_namespace(namespace)
+        if candidate.api_total("persistentvolumeclaims") == 0:
+            probe = candidate
+            break
+    if probe is None:
+        pytest.skip(f"precondition not met: none of {candidates} is free of PVCs")
 
-    assert surface.locator("thead").count() == 0, "empty list must not render a header row"
-    text = surface.inner_text()
+    probe.open("persistentvolumeclaims")
+    assert probe.state("persistentvolumeclaims") == "empty", probe.state("persistentvolumeclaims")
+
+    text = probe.surface("persistentvolumeclaims").inner_text()
     assert "暂无存储卷" in text, text
-    screenshot(ui.page, "storage-empty")
+    assert "创建存储卷后，这里会列出它们。" in text, text
+    # No header over an empty list: a head row above "no data" reads as a table
+    # whose rows failed to load. The old console shows an empty card instead.
+    assert probe.surface("persistentvolumeclaims").locator("thead").count() == 0
+    screenshot(probe.page, "empty")

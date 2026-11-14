@@ -21,7 +21,7 @@
 ## 关键约束
 
 - 不 import、不复制 `console/src` 的代码。
-- 不新增后端接口：复用 kapis。
+- 不新增业务接口：复用 kapis。BFF 增加 WebSocket `upgrade` 转发（见 `DEC-CORE-KUBE-FRONTEND-08`），端点集合不变。
 - 依赖版本只来自 `catalog:`。
 
 ## 方案决策
@@ -87,6 +87,19 @@
 **验证方式**：改动一次页面文件后，Vite 日志里应只出现该页面自身的 update 与所属区的 CSS，不再出现全局 `styles.css`。
 
 **被否方案**：不做拆分，靠"少改页面文件"约束开发习惯。靠人记住的约束不成立。
+
+### DEC-CORE-KUBE-FRONTEND-08 — 建立 WebSocket 通道，实时能力是一等需求
+
+**为什么**：老 console 的实时性（列表 watch、详情 watch、容器终端、日志 tail）全部走 `ws://`（`console/src/components/Terminal/index.jsx:35-39`）。这四项不是锦上添花：容器终端是排障的第一动作，日志 tail 是「它为什么起不来」的第一现场，列表 watch 决定了「改完之后看到的是不是真的」。把「暂时没有通道」写成「不做实时」，等于把最常用的运维动作判死。
+
+**被否方案（原决策，2026-11-14 推翻）**：不做 WebSocket，实时能力一律不承诺，只保留查询缓存 + 手动刷新。当时的两条依据是：①BFF（`kube-frontend/server/src/proxy.ts`）只有 HTTP 转发、没有 `upgrade` 处理；②`packages/api-client` 没有 exec/logs/stream 端点。**这两条描述的是「现在没有」，不是「不该有」**——BFF 是自研 Node 服务，加一个 `upgrade` 事件转发是几十行改动；拿「永久失去终端」当作它的代价，是把成本算反了。原决策里唯一站得住的一半是「不要用轮询假装实时」，这一条保留。
+
+**落地分三步**：
+1. **BFF 支持 `upgrade`**：把 WebSocket 握手透传到 ks-apiserver，沿用现有鉴权（token 从 query 或子协议取），断开时清理。
+2. **前端 watch 客户端**：列表与详情订阅对象变更，`ADDED/MODIFIED/DELETED` 触发定向失效；断线重连并显示连接状态，不静默假装实时。
+3. **终端**：xterm 组件 + `kapis/terminal.kubesphere.io/v1alpha2/klusters/{c}/namespaces/{ns}/pods/{pod}/exec`（容器）、`/nodes/{name}/exec`（节点）、kubectl 会话（先取 kubectl pod 再连 exec）。
+
+**不做**：轮询。原决策这一条保留——每 N 秒全量重取会打满 apiserver，且分页与选中态会被无提示重置。
 
 ## 系统现状
 

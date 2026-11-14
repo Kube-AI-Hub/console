@@ -165,6 +165,11 @@ export interface ClusterUsage {
   /** GPU cards reserved by workloads, and how many the cluster has in total. */
   gpuAllocated: number | undefined;
   gpuTotal: number | undefined;
+  gpuUsed: number | undefined;
+  gpuMemoryUsedBytes: number | undefined;
+  gpuMemoryTotalBytes: number | undefined;
+  diskUsedBytes: number | undefined;
+  diskTotalBytes: number | undefined;
   /** Fraction 0–1 of GPU compute in use right now, when the cluster reports it. */
   gpuUtilisation: number | undefined;
 }
@@ -193,6 +198,10 @@ export function clusterMetricsApi(client: Client) {
     'cluster_gpu_usage',
     'cluster_gpu_allocated',
     'cluster_gpu_total',
+    'cluster_gpu_memory_usage',
+    'cluster_gpu_memory_total',
+    'cluster_disk_size_usage',
+    'cluster_disk_size_capacity',
   ];
 
   return {
@@ -223,6 +232,11 @@ export function clusterMetricsApi(client: Client) {
         nodeTotal: values.get('cluster_node_total'),
         gpuAllocated: values.get('cluster_gpu_allocated'),
         gpuTotal: values.get('cluster_gpu_total'),
+        gpuUsed: values.get('cluster_gpu_usage'),
+        gpuMemoryUsedBytes: values.get('cluster_gpu_memory_usage'),
+        gpuMemoryTotalBytes: values.get('cluster_gpu_memory_total'),
+        diskUsedBytes: values.get('cluster_disk_size_usage'),
+        diskTotalBytes: values.get('cluster_disk_size_capacity'),
         gpuUtilisation: values.get('cluster_gpu_utilization'),
       };
     },
@@ -289,6 +303,7 @@ export interface KubernetesStatus {
   requestLatencySeconds: number | undefined;
   /** Scheduling attempts that produced a binding. */
   scheduled: number | undefined;
+  error: number | undefined;
   /** Scheduling attempts that found no node able to take the pod. */
   unschedulable: number | undefined;
 }
@@ -342,6 +357,7 @@ export function componentMetricsApi(client: Client) {
         requestRate: api.get('apiserver_request_rate')?.[0]?.value,
         requestLatencySeconds: api.get('apiserver_request_latencies')?.[0]?.value,
         scheduled: attempt('scheduled'),
+        error: attempt('error'),
         unschedulable: attempt('unschedulable'),
       };
     },

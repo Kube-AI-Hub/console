@@ -70,7 +70,9 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_OVERVIEW_01(cluster_overview_pag
         for row in ui.USAGE_ROWS:
             text = ui.usage_text(row)
             # used / total, and a percentage that comes from the same two numbers.
-            assert "/" in text, f"{row} 用量必须写成 已用 / 总量: {text}"
+            assert "已使用" in text and "总量" in text, f"{row} 用量必须明确已用和总量: {text}"
+            assert ui.usage_field(row, "used").inner_text().strip()
+            assert ui.usage_field(row, "total").inner_text().strip()
             assert "%" in text, f"{row} 用量必须给出百分比: {text}"
 
         cpu = ui.usage_text("cpu")
@@ -82,8 +84,8 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_OVERVIEW_01(cluster_overview_pag
         gpu_row_count = ui.page.locator('[data-ai-id="overview:usage-gpu"]').count()
         if gpu_total > 0:
             gpu = ui.usage_text("gpu")
-            assert "/" in gpu, f"GPU 卡必须写成 已分配 / 总数: {gpu}"
-            assert "GPU 利用率" in gpu, f"GPU 行缺少利用率: {gpu}"
+            assert "已使用" in gpu and "总量" in gpu, f"GPU 卡必须显示使用量和总数: {gpu}"
+            assert "GPU 利用率" not in gpu, f"GPU 卡不应重复显示额外利用率行: {gpu}"
             allocated = int(float(metrics.get("cluster_gpu_allocated", "0") or 0))
             assert str(allocated) in gpu and str(gpu_total) in gpu, f"GPU 数值与接口不一致: {gpu}"
         else:
@@ -91,7 +93,7 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_OVERVIEW_01(cluster_overview_pag
             assert gpu_row_count == 0, "无 GPU 的集群不应渲染 GPU 行"
 
         fields = ui.kubernetes_status_fields()
-        assert len(fields) == 4, fields
+        assert len(fields) == 5, fields
         assert all(value.strip() for value in fields), fields
         assert "次/秒" in fields[0], f"请求速率缺少单位: {fields[0]}"
         # Latency is rendered in ms or s depending on magnitude — but never unitless.

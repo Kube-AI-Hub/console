@@ -7,10 +7,10 @@ pytestmark = pytest.mark.ui
 
 
 @pytest.mark.point
-def test_TC_L3_KUBE_FRONTEND_STORAGE_DETAIL_02(storage_page, screenshot):
+def test_TC_L3_KUBE_FRONTEND_STORAGE_DETAIL_02(kube_storage_page, screenshot):
     """TC-L3-KUBE-FRONTEND-STORAGE-DETAIL-02 存储详情：状态与供应者。"""
 
-    ui = storage_page
+    ui = kube_storage_page
     name = ui.unique("sd")
     try:
         assert ui.create_pvc(name) in (200, 201), "could not create the test claim"

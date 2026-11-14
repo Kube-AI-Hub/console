@@ -10,6 +10,8 @@ export interface ClientOptions {
 
 export interface RequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  /** Explicit opt-in for endpoints such as user kubeconfig that return plain text. */
+  responseType?: 'json' | 'text';
   body?: unknown;
   signal?: AbortSignal;
   /** Query parameters; `undefined` values are dropped. */
@@ -94,7 +96,7 @@ export function createClient(options: ClientOptions = {}): ApiClient {
 
     const url = resolveUrl(path, init.query);
 
-    const headers: Record<string, string> = { Accept: 'application/json', ...authHeaders() };
+    const headers: Record<string, string> = { Accept: init.responseType === 'text' ? '*/*' : 'application/json', ...authHeaders() };
     if (init.body !== undefined) headers['Content-Type'] = init.contentType ?? 'application/json';
 
     let response: Response;
@@ -119,6 +121,7 @@ export function createClient(options: ClientOptions = {}): ApiClient {
     if (response.status === 204) return undefined as T;
     const text = await response.text();
     if (!text) return undefined as T;
+    if (init.responseType === 'text') return text as T;
     return JSON.parse(text) as T;
   }
 

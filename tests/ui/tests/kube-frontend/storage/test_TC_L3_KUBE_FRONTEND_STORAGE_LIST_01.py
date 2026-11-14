@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import time
-
 import pytest
 from playwright.sync_api import expect
 
@@ -9,27 +7,37 @@ pytestmark = pytest.mark.ui
 
 
 @pytest.mark.point
-def test_TC_L3_KUBE_FRONTEND_STORAGE_LIST_01(storage_page, screenshot):
-    """TC-L3-KUBE-FRONTEND-STORAGE-LIST-01 存储：列表五列与名称链接。"""
+def test_TC_L3_KUBE_FRONTEND_STORAGE_LIST_01(kube_storage_page, screenshot):
+    """TC-L3-KUBE-FRONTEND-STORAGE-LIST-01 存储卷列表：五列与可点击名称。"""
 
-    ui = storage_page
+    ui = kube_storage_page
     name = ui.unique("list")
     try:
-        assert ui.create_pvc(name) in (200, 201), "could not create the test claim"
-
+        ui.create_pvc(name)
         ui.open("persistentvolumeclaims")
-        ui.wait_ready("persistentvolumeclaims")
-        ui.ensure_row("persistentvolumeclaims", name)
+        assert ui.state("persistentvolumeclaims") == "ready", ui.state("persistentvolumeclaims")
 
         headers = ui.headers("persistentvolumeclaims")
-        required = ["名称", "状态", "容量", "访问模式", "创建时间"]
-        positions = [headers.index(label) for label in required if label in headers]
-        assert len(positions) == len(required), f"missing columns: {set(required) - set(headers)}"
-        assert positions == sorted(positions), f"columns out of order: {headers}"
+        # The five columns the criterion names, in order. The list may add a
+        # claim-only column after them (挂载状态); that does not change the set.
+        assert headers[:5] == ["名称", "状态", "容量", "访问模式", "创建时间"], headers
 
-        link = ui.page.locator(f'[data-ai-id="persistentvolumeclaims:open:{name}"]').first
+        ui.ensure_row("persistentvolumeclaims", name)
+        link = ui.name_link("persistentvolumeclaims", name)
         expect(link).to_be_visible()
         assert link.get_attribute("href").endswith(f"/persistentvolumeclaims/{name}")
-        screenshot(ui.page, "storage-list")
+
+        row = ui.row_text("persistentvolumeclaims", name)
+        # The capacity and access mode come from the object, so they hold whether
+        # the claim is still Pending or has already been bound by a provisioner.
+        assert "1Gi" in row, row
+        assert "RWO" in row, row
+
+        # The name is not decoration: clicking it is how the detail is reached.
+        ui.click_name("persistentvolumeclaims", name)
+        ui.page.wait_for_url(f"**/persistentvolumeclaims/{name}")
+        expect(ui.detail_surface("persistentvolumeclaims")).to_be_visible()
+        ui.wait_ready(ui.detail_surface("persistentvolumeclaims"))
+        screenshot(ui.page, "list")
     finally:
         ui.delete_pvc(name)
