@@ -1,0 +1,39 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: cluster-config
+title: 集群级配置 · 三个跨项目列表
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/secrets'
+prd: prd/kube-frontend/cluster-management/cluster-config.md
+design: design/kube-frontend/cluster-management/cluster-config.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-01
+
+story:
+- US1
+
+product: 保密字典、配置字典、服务账号三页的跨项目只读列表：名称（链接）、项目、资源专属列、创建时间；关键字搜索与每页 20 条分页。
+preconditions:
+- 已登录，且对 host 集群有读取权限
+- 集群里至少有一个保密字典、一个配置字典、一个服务账号
+steps:
+- 用 API 依次读 secrets/configmaps/serviceaccounts 的跨项目首页（page=1, limit=20）
+- 打开集群级保密字典页，核对表头、行数、项目列与名称链接
+- 打开集群级配置字典页，核对表头、行数、项目列与名称链接
+- 打开集群级服务账号页，核对表头、行数、项目列与名称链接
+- 核对集群侧栏「配置」分组可达
+expected:
+- 三页行数都等于 min(20,total)
+- 表头分别包含 名称/项目/类型/字段数/创建时间、名称/项目/字段/创建时间、名称/项目/保密字典/创建时间
+- 项目列等于对象命名空间
+- 名称链接含 /projects/<namespace>/<kind>/<name>，且带 workspace 段
+troubleshoot:
+- 行数为 0：请求带了 namespace 段
+- 表头缺列：页面把项目级 schema 直接复用而未替换专属列
+- 行数少于 min(20,total)：分页/每页条数没有传给服务端
+- 名称链接 404：链接里漏了 workspace 段
+update_automation:
+- 选择器见 pages/cluster_management.py 与 @/pages/cluster/Cluster*Page.tsx；行句柄是 namespace/name
