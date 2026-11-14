@@ -1,0 +1,39 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-PAGE_TIP-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: page-tip
+title: 列表页头提示 · 展示、关闭与按页持久化
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/deployments"
+prd: prd/kube-frontend/app-workloads/page-tip.md
+design: design/kube-frontend/app-workloads/page-tip.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-PAGE_TIP-01
+
+story:
+- US1
+
+product: 项目作用域列表页在表格上方显示一条可关闭的说明（资源是什么、常见误区、可选文档链接）；关闭状态按页面 key 存 localStorage，刷新后不再出现；配置字典、保密字典、服务账户、部署、容器组各有与本资源语义一致的文案。
+preconditions:
+- 已登录，且在 host 集群的 default 项目空间（部署列表可达）
+- 用例先清掉部署页的关闭记录，保证提示初始可见
+steps:
+- 打开部署列表，读取表格上方的 page-tip 说明条与文档链接
+- 点 page-tip:close 关闭，读取 localStorage 的关闭记录
+- 刷新页面，确认提示不再出现
+- 依次打开配置字典、保密字典、服务账户、容器组列表，读取各页 page-tip 文案
+expected:
+- 部署页出现 page-tip，文案含「部署」与「滚动更新」，文档链接指向 kubernetes.io
+- 关闭后 page-tip 消失，localStorage 键 kube-frontend.page-tip.dismissed.deployments 为 '1'
+- 刷新后 page-tip 仍不出现
+- 配置字典/保密字典/服务账户/容器组页都出现各自 page-tip，且保密字典文案含 base64、配置字典含明文、服务账户含令牌、容器组含重建
+- 关闭部署页提示不影响其它页面的提示（各页 pageKey 独立）
+troubleshoot:
+- 提示不出现：检查该页是否挂载 PageTip，以及 localStorage 是否残留关闭记录
+- 刷新后又出现：关闭时没有写入 localStorage，或组件每次 render 重新读取了存储
+- 关闭一个页面后其它页面也消失：pageKey 被写成同一个值
+update_automation:
+- 文案变化时改 locale 的 pageTip.* 键
+- 句柄变化时改 PageTip 的 data-ai-id 与用例里的定位

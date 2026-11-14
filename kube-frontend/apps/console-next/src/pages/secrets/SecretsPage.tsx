@@ -18,6 +18,7 @@ import { useResourceListState, toListParams } from '@/components/resource/useRes
 import { DeleteDialog } from '@/components/resource/DeleteDialog';
 import { EditInfoDialog } from '@/components/resource/EditInfoDialog';
 import { MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
+import { PageTip } from '@/components/resource/PageTip';
 import { DialogSuspense } from '@/components/resource/DialogSuspense';
 
 /*
@@ -246,6 +247,9 @@ export function SecretsPage({ workspace, cluster, namespace }: SecretsPageProps)
 
   return (
     <AiSurface as="section" aiId="secrets:surface" state={state} className="min-w-0">
+      <PageTip pageKey="secrets" docHref="https://kubernetes.io/docs/concepts/configuration/secret/">
+        {t('pageTip.secrets')}
+      </PageTip>
       <ResourceList
         schema={schema}
         rows={items}

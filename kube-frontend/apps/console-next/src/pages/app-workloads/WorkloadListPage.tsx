@@ -8,6 +8,7 @@ import { useProjectFilter } from '@/components/projects/useProjects';
 import { useResourceListState, toListParams } from '@/components/resource/useResourceListState';
 import { DeleteDialog } from '@/components/resource/DeleteDialog';
 import { ResourceErrorPanel, MutationAlert } from '@/components/resource/ResourceErrorPanel';
+import { PageTip } from '@/components/resource/PageTip';
 import { YamlDialog } from '@/components/resource/YamlDialog';
 import { LoadingDialog } from '@/components/resource/LoadingDialog';
 import { toYaml } from '@/components/resource/yaml';
@@ -344,6 +345,23 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
 
   return (
     <AiSurface as="section" aiId={`${kind}:surface`} state={state} className="min-w-0">
+      {/*
+        * The two kinds whose list hides a real trap get a tip: a Deployment rolls
+        * pods through ReplicaSets, and a pod is replaced rather than restarted in
+        * place. Other kinds do not need a paragraph to be read correctly.
+        */}
+      {kind === 'deployments' || kind === 'pods' ? (
+        <PageTip
+          pageKey={kind}
+          docHref={
+            kind === 'deployments'
+              ? 'https://kubernetes.io/docs/concepts/workloads/controllers/deployment/'
+              : 'https://kubernetes.io/docs/concepts/workloads/pods/'
+          }
+        >
+          {t(('pageTip.' + kind) as never)}
+        </PageTip>
+      ) : null}
       <ResourceList
         schema={schema}
         rows={rows}

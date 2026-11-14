@@ -19,6 +19,7 @@ import { useResourceListState, toListParams } from '@/components/resource/useRes
 import { DeleteDialog } from '@/components/resource/DeleteDialog';
 import { EditInfoDialog } from '@/components/resource/EditInfoDialog';
 import { MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
+import { PageTip } from '@/components/resource/PageTip';
 import { DialogSuspense } from '@/components/resource/DialogSuspense';
 
 /*
@@ -251,6 +252,9 @@ export function ServiceAccountsPage({ workspace, cluster, namespace }: ServiceAc
 
   return (
     <AiSurface as="section" aiId="serviceaccounts:surface" state={state} className="min-w-0">
+      <PageTip pageKey="serviceaccounts" docHref="https://kubernetes.io/docs/concepts/security/service-accounts/">
+        {t('pageTip.serviceaccounts')}
+      </PageTip>
       <ResourceList
         schema={schema}
         rows={items}

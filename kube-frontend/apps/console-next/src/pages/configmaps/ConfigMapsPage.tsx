@@ -17,6 +17,7 @@ import { toYaml } from './yaml';
 import { DialogSuspense } from '@/components/resource/DialogSuspense';
 import { LoadingDialog } from '@/components/resource/LoadingDialog';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
+import { PageTip } from '@/components/resource/PageTip';
 
 /*
  * The YAML editor is 188 KB gzip of CodeMirror. A list page must not pay for it
@@ -275,6 +276,9 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
 
   return (
     <AiSurface as="section" aiId="configmaps:surface" state={state} className="min-w-0">
+      <PageTip pageKey="configmaps" docHref="https://kubernetes.io/docs/concepts/configuration/configmap/">
+        {t('pageTip.configmaps')}
+      </PageTip>
       <ResourceList
         schema={schema}
         rows={items}
