@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQueries, useQuery } from '@tanstack/react-query';
 import { workspacesApi } from '@kube-ai-hub/api-client';
 import { api } from '@/api';
 
@@ -121,6 +121,43 @@ export function useWorkspaceAliases() {
 export interface FederatedResourceType {
   kind: string;
   plural: string;
+}
+
+/** One federated object inside a project's namespace. */
+export interface FederatedResourceObject {
+  name: string;
+  /** e.g. `FederatedDeployment`; the row's type column. */
+  kind: string;
+  createdAt: string;
+}
+
+/**
+ * The project's objects for a group of Federated resource types.
+ *
+ * One collection per type (the federation API has no per-kind union read), read in
+ * parallel by `useQueries`. Each tab owns its own loading/error/empty state, so a
+ * slow or unavailable type cannot blank the whole detail page.
+ */
+export function useFederatedResources(namespace: string, plurals: readonly string[]) {
+  return useQueries({
+    queries: plurals.map((plural) => ({
+      queryKey: ['federated-resources', namespace, plural],
+      enabled: Boolean(namespace),
+      staleTime: 30_000,
+      queryFn: async ({ signal }): Promise<FederatedResourceObject[]> => {
+        const body = await api.request<{
+          items?: Array<{ kind?: string; metadata?: { name?: string; creationTimestamp?: string } }>;
+        }>(FEDERATED_API + '/namespaces/' + encodeURIComponent(namespace) + '/' + plural, { signal });
+        return (body?.items ?? [])
+          .map((item) => ({
+            name: item.metadata?.name ?? '',
+            kind: item.kind ?? '',
+            createdAt: item.metadata?.creationTimestamp ?? '',
+          }))
+          .filter((item) => Boolean(item.name));
+      },
+    })),
+  });
 }
 
 /**

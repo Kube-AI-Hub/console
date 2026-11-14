@@ -4,11 +4,12 @@
 
 ## 概述
 
-企业空间作用域新增 `federatedprojects` 页（列表 + `$name` 详情骨架）。数据直接读联邦 API（types.kubefed.io/v1beta1）：列表来自 federatednamespaces 集合，详情来自同一集合按名称查找，已联邦资源类型来自该组的 API discovery。只读。
+企业空间作用域新增 `federatedprojects` 页（列表 + `$name` 详情）。数据直接读联邦 API（types.kubefed.io/v1beta1）：列表来自 federatednamespaces 集合，详情来自同一集合按名称查找，已联邦资源类型来自该组的 API discovery。详情再按「应用负载 / 配置 / 存储」分组列出项目命名空间内的 Federated 对象。只读。
 
 ## 关联需求
 
 - AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-01
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-02
 
 ## 设计目标与非目标
 
@@ -23,6 +24,7 @@
 - FederatedNamespace 是 namespaced 资源：按名称的集群级 GET 返回 404，详情改用集合查找（见本文件关于集合查找的决策）。
 - 只读：不提供写操作；写 webhook 在 2026-11-15 前后仍不稳定。
 - 页面必须有字面量 data-ai-id；不用裸 button。
+- 资源页签按「一类集合一次请求」读取（每个页签 4–7 个集合），每页签独立处理加载/空态/失败。
 
 ## 方案决策
 
@@ -56,7 +58,23 @@
 
 ### DEC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-05 — 空态、未找到、失败三分
 
-**为什么**：三种结果处置不同：空态是「这里还没有联邦项目」，未找到是链接失效/对象被删，失败是联邦 API 不可读。页面分别给空态文案（schema.empty）、`:not-found` 说明块、ResourceErrorPanel + 重试。
+**为什么**：三种结果处置不同：空态是「这里还没有联邦项目」，未找到是链接失效/对象被删，失败是联邦 API 不可读。页面分别给空态文案（schema.empty）、:not-found 说明块、ResourceErrorPanel + 重试。
+
+### DEC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-06 — 资源页签按老 console 的三组切分，集合按 discovery 子集读取
+
+**为什么**：老 console 的联邦项目详情按「应用负载 / 配置 / 存储」分组；这三个分组正好覆盖 API 的 12 个命名空间级 Federated 类型（13 个去掉 federatednamespaces 自身）。每个页签对组内每个类型发一次集合请求（应用负载 7 个、配置 4 个、存储 1 个），并行读取；一次 union 查询在联邦 API 上不存在。
+
+**被否方案**：一个「全部已联邦资源」页签 + 类型筛选。页签数量少一个，但读者要在 12 类混排里找东西，且失败时整块不可用。
+
+**何时重新考虑**：联邦 API 提供跨类型聚合查询时。
+
+### DEC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-07 — 每个资源页签独立：加载 / 空态 / 失败+重试
+
+**为什么**：一个页签的 4–7 个集合里任意一个慢或失败，不应该让概览或其它页签不可用。页签自己汇总本组状态：任一 pending 显示骨架、任一 error 显示失败说明与重试、全部成功且无对象才显示空态。空表只在「确实没有对象」时出现——失败态渲染空表会把「读不到」误报成「没有」。
+
+**被否方案**：页面级统一 loading/error。一个类型抖动会让整个详情白屏。
+
+**何时重新考虑**：需要逐类型展示错误细节时，在页签内按类型分组。
 
 ## 系统现状
 
@@ -64,7 +82,7 @@
 
 ## 仓库落点
 
-- pages/federated/FederatedProjectsPage.tsx、FederatedProjectDetailPage.tsx、queries.ts
+- pages/federated/FederatedProjectsPage.tsx、FederatedProjectDetailPage.tsx、FederatedResourceTable.tsx、queries.ts
 - routes/kube-frontend.workspaces.$workspace/federatedprojects/{route,index,$name}.tsx
 - registry：federated-projects 区域 federatedprojects 页 status 改 ready
 - 文案：packages/locales/src/index.ts 的 fedprojects.*
@@ -73,7 +91,8 @@
 
 - 读取：GET `/apis/types.kubefed.io/v1beta1/federatednamespaces`（列表/详情查找）、GET `/apis/types.kubefed.io/v1beta1`（discovery 的资源类型）、GET `/kapis/tenant.kubesphere.io/v1alpha2/workspaces?limit=-1`（企业空间显示名）。
 - 列表句柄：`federated-projects:surface`、行 `data-ai-row=<name>`、名称链接 `federated-projects:open:<name>`。
-- 详情句柄：`federated-project:surface/:basic/:types/:types:empty/:types:error/:not-found/:back`。
+- 详情句柄：`federated-project:surface/:basic/:types/:types:empty/:types:error/:not-found/:back`；页签面板 `federated-project:tab:<overview|workloads|config|storage>`，触发器加 `:trigger`；资源表 `federated-project:resources:<workloads|config|storage>`（`:empty` / `:error` / `:retry`）。
+- 资源读取：`GET /apis/types.kubefed.io/v1beta1/namespaces/<namespace>/<plural>`，plural 取 federatedapplications/deployments/statefulsets/replicasets/jobs/services/ingresses（应用负载）、federatedconfigmaps/secrets/serviceaccounts/limitranges（配置）、federatedpersistentvolumeclaims（存储）。
 - URL：`/kube-frontend/workspaces/<ws>/federatedprojects[/<name>]`。
 
 ## 不变量
@@ -82,6 +101,8 @@
 - 详情与列表读同一个集合，名称解析一致。
 - 只读：页面上没有任何写操作。
 - 资源类型列表只含 namespaced=true 的类型，按 kind 排序。
+- 资源页签只列项目命名空间内的对象，`federatednamespaces` 自身不列入任何页签。
+- 每个资源页签的加载/空态/失败互不影响，也不阻塞概览。
 
 ## 已知坑
 
@@ -92,11 +113,12 @@
 
 ## 测试与可观测
 
-E2E：TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-01。用例先读联邦集合算出某企业空间的期望行数与 discovery 的命名空间级类型数，再打开列表核对行数/表头，点击名称进入详情核对基本信息与类型行数；另找一个没有联邦项目的企业空间核对空态文案。
+E2E：TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-01（列表/概览）与 TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-02（资源页签）。用例先读联邦集合算出某企业空间的期望行数与 discovery 的命名空间级类型数，再打开列表核对行数/表头，点击名称进入详情核对基本信息与类型行数；另找一个没有联邦项目的企业空间核对空态文案。
 
 ## 后续改进
 
-- 联邦项目内的资源页（对齐老 console 22 条路由）。
+- 联邦对象详情页与写操作（对齐老 console 22 条路由的详情部分）。
+- 资源页签的搜索/过滤/分页。
 - 创建/编辑/删除与部署集群调整（写 webhook 稳定后）。
 - 列表分页/搜索。
 - 详情列出「已联邦对象」与多集群差异。
@@ -104,3 +126,4 @@ E2E：TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-01。用例先读联
 ## 验收用例
 
 - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-01
+- TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-02

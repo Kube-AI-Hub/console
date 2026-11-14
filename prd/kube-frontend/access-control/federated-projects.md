@@ -4,7 +4,7 @@
 
 ## 概述
 
-联邦项目是多集群作用域的「项目」：一个 FederatedNamespace 对象同时定义命名空间与它要部署到的集群。老 console 在 `/:workspace/federatedprojects` 有列表与 22 条详情路由；新 UI 此前只有普通项目。2026-11-15 联邦组件开启后本区域进入迁移范围，本轮先交付 P0：列表（名称/命名空间/集群数/创建时间）与详情概览骨架（基本信息 + 可联邦的命名空间级资源类型只读列表），写操作留到后续。
+联邦项目是多集群作用域的「项目」：一个 FederatedNamespace 对象同时定义命名空间与它要部署到的集群。老 console 在 `/:workspace/federatedprojects` 有列表与 22 条详情路由；新 UI 此前只有普通项目。2026-11-15 联邦组件开启后本区域进入迁移范围：第一批交付列表（名称/命名空间/集群数/创建时间）与详情概览骨架（基本信息 + 可联邦的命名空间级资源类型只读列表）；本批在详情上补只读的「已联邦资源」页签组（应用负载 / 配置 / 存储），按项目命名空间列出对应的 Federated 对象。写操作仍留到后续。
 
 ## 用户故事
 
@@ -17,6 +17,8 @@
 ## 验收场景
 
 - **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-01** — 已知企业空间内存在至少一个 FederatedNamespace，当打开 `/kube-frontend/workspaces/<ws>/federatedprojects`，则列表显示这些项目（名称、命名空间、部署集群、创建时间），行数与该企业空间的 FederatedNamespace 数一致；当点击名称，则进入详情骨架，显示名称、命名空间、企业空间、部署集群、传播状态、创建时间、创建者，以及一份「已联邦资源类型」只读列表（来自联邦 API discovery 的命名空间级 Federated 类型）；已知企业空间没有联邦项目，则列表显示「暂无联邦项目」空态说明；已知对象不存在或读取失败，则详情页分别显示明确的未找到/失败说明，而不是空白页。
+
+- **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-02** — 已知联邦项目详情可用，当打开它，则页签为「概览 / 应用负载 / 配置 / 存储」且默认在概览（保留基本信息与资源类型列表）；当分别打开「应用负载 / 配置 / 存储」，则每个页签列出该项目命名空间下对应 Federated 类型对象（名称、类型、创建时间），行数等于这些集合的 API 条数之和；已知某页签对应的集合都没有对象，则该页签显示明确的空态说明；已知某集合读取失败，则该页签显示失败说明与重试，不显示空表。
 
 ## 设计目标
 
@@ -37,10 +39,10 @@
 
 列表：标题/说明 + 四列表格；名称为链接进入详情；集群列以徽标列出。
 
-详情：返回链接 + 标题 + 「基本信息」定义列表 + 「已联邦资源类型」只读两列表（类型/资源名）。
+详情：返回链接 + 标题 + 页签栏（概览 / 应用负载 / 配置 / 存储）。概览保留「基本信息」定义列表与「已联邦资源类型」只读两列表；其余三个页签各自是一个只读表格（名称、类型、创建时间）或空态/失败说明。
 
 - 列表句柄：`federated-projects:surface`；行 `data-ai-row=<名称>`；名称链接 `federated-projects:open:<名称>`。
-- 详情句柄：`federated-project:surface`、`:basic`、`:types`、`:types:empty`、`:types:error`、`:not-found`、`:back`。
+- 详情句柄：`federated-project:surface`、`:basic`、`:types`、`:types:empty`、`:types:error`、`:not-found`、`:back`；页签面板 `federated-project:tab:{overview|workloads|config|storage}`（触发器 `…:trigger`）；资源表 `federated-project:resources:{workloads|config|storage}`（空态 `…:empty`、失败 `…:error`、重试 `…:retry`）。
 
 ## 文案与校验
 
@@ -62,6 +64,8 @@
 - **FR-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-01** — 企业空间级联邦项目列表：四列、按企业空间过滤、空态明确。
 - **FR-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-02** — 详情概览：基本信息 + 已联邦资源类型只读列表。
 - **FR-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-03** — 空态、未找到、读取失败三类结果都有明确说明。
+- **FR-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-04** — 详情提供 概览 / 应用负载 / 配置 / 存储 四个页签；后三者只读列出项目命名空间下对应 Federated 类型对象（名称/类型/创建时间）。
+- **FR-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-05** — 每个资源页签独立处理加载、空态与失败+重试。
 
 ## 成功标准
 
@@ -71,9 +75,10 @@
 ## 明确不做
 
 - 不做创建/编辑/删除联邦项目与调整部署集群（写路径待联邦 webhook 稳定）。
-- 不做联邦项目内的资源页（应用负载/配置/存储等 22 条老路由），详情本轮只到概览骨架。
+- 不做联邦对象的详情页与写操作：本批只读列出资源对象；对象详情、创建/编辑/删除仍是后续。
 - 不逐类型列出「已联邦对象」与多集群差异。
 - 不做企业空间切换器之外的联邦项目跨空间列表。
+- 不做资源页签内的搜索、过滤、分页（对象数量在本环境为 0；数量增长后按普通列表能力补齐）。
 
 ## 假设
 
@@ -83,3 +88,4 @@
 ## 验收用例
 
 - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-01
+- TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-02

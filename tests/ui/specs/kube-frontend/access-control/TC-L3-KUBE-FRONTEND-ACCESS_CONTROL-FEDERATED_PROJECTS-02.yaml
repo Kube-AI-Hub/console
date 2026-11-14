@@ -1,0 +1,41 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: federated-projects
+title: 联邦项目详情 · 已联邦资源页签
+entry_url: "{BASE_URL}/kube-frontend/workspaces/system-workspace/federatedprojects"
+prd: prd/kube-frontend/access-control/federated-projects.md
+design: design/kube-frontend/access-control/federated-projects.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-02
+
+story:
+- US1
+
+product: 联邦项目详情提供 概览 / 应用负载 / 配置 / 存储 四个只读页签，后三者按项目命名空间列出对应 Federated 类型对象（名称/类型/创建时间）；每个页签独立处理加载、空态与失败+重试，概览保留基本信息与资源类型列表。
+preconditions:
+- 已登录，且联邦 API（/apis/types.kubefed.io/v1beta1）可读，至少有一个 FederatedNamespace
+- 该项目命名空间下的 Federated 集合可读（可以为空）
+steps:
+- 读 federatednamespaces，选一个联邦项目（名称/命名空间/所属企业空间）
+- 分别读该项目命名空间下 应用负载 / 配置 / 存储 三组 Federated 集合，记录每组对象数
+- 打开该项目详情，等待就绪
+- 核对四个页签与默认概览面板（基本信息、资源类型列表）
+- 依次点开 应用负载 / 配置 / 存储 页签，读取该页签的空态或表格行数
+- 切回概览
+expected:
+- 页签为 概览 / 应用负载 / 配置 / 存储，默认选中概览
+- 概览显示基本信息与已联邦资源类型列表
+- 每个资源页签：行数等于该组集合 API 条数之和；集合都为空时显示「这个联邦项目下还没有此类已联邦资源。」空态，不显示空表
+- 资源页签表头为 名称/类型/创建时间（有对象时）
+- 切换回概览后基本信息仍可见
+troubleshoot:
+- 资源页签一直是骨架：组内某个集合请求未返回；检查 discovery 里的 plural 是否与集合名一致
+- 页签显示失败：检查该项目命名空间是否存在（联邦项目名 = 命名空间）
+- 概览丢内容：父级 detail 查询失败或 tab 默认值被改
+update_automation:
+- 选择器：federated-project:tab:<tab>[:trigger] / federated-project:resources:<tab>[:empty|:error|:retry]
+- 分组集合变化时同步改 FederatedProjectDetailPage 的 *_PLURALS 与用例的探测
