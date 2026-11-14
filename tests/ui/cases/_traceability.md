@@ -82,6 +82,7 @@
 | kube-frontend/app-workloads/_index | `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_ACTIONS-01` | `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_ACTIONS-01` | [`design/kube-frontend/app-workloads/_index.md`](../../../design/kube-frontend/app-workloads/_index.md) | [`tests/ui/tests/kube-frontend/app-workloads/test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_LIST_ACTIONS_01.py`](../../../tests/ui/tests/kube-frontend/app-workloads/test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_LIST_ACTIONS_01.py) |
 | kube-frontend/app-workloads/_index | `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-MOBILE-01` | `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-MOBILE-01` | [`design/kube-frontend/app-workloads/_index.md`](../../../design/kube-frontend/app-workloads/_index.md) | [`tests/ui/tests/kube-frontend/app-workloads/test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_MOBILE_01.py`](../../../tests/ui/tests/kube-frontend/app-workloads/test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_MOBILE_01.py) |
 | kube-frontend/app-workloads/_index | `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-SERVICES-01` | `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-SERVICES-01` | [`design/kube-frontend/app-workloads/_index.md`](../../../design/kube-frontend/app-workloads/_index.md) | [`tests/ui/tests/kube-frontend/app-workloads/test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_SERVICES_01.py`](../../../tests/ui/tests/kube-frontend/app-workloads/test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_SERVICES_01.py) |
+| kube-frontend/app-workloads/column-visibility | `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-COLUMN_VISIBILITY-01` | `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-COLUMN_VISIBILITY-01` | [`design/kube-frontend/app-workloads/column-visibility.md`](../../../design/kube-frontend/app-workloads/column-visibility.md) | [`tests/ui/tests/kube-frontend/app-workloads/test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_COLUMN_VISIBILITY_01.py`](../../../tests/ui/tests/kube-frontend/app-workloads/test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_COLUMN_VISIBILITY_01.py) |
 | kube-frontend/app-workloads/container-detail | `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-01` | `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-01` | [`design/kube-frontend/app-workloads/container-detail.md`](../../../design/kube-frontend/app-workloads/container-detail.md) | [`tests/ui/tests/kube-frontend/app-workloads/test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_CONTAINER_DETAIL_01.py`](../../../tests/ui/tests/kube-frontend/app-workloads/test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_CONTAINER_DETAIL_01.py) |
 | kube-frontend/app-workloads/container-detail | `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-02` | `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-02` | [`design/kube-frontend/app-workloads/container-detail.md`](../../../design/kube-frontend/app-workloads/container-detail.md) | [`tests/ui/tests/kube-frontend/app-workloads/test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_CONTAINER_DETAIL_02.py`](../../../tests/ui/tests/kube-frontend/app-workloads/test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_CONTAINER_DETAIL_02.py) |
 | kube-frontend/app-workloads/container-detail | `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-03` | `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-03` | [`design/kube-frontend/app-workloads/container-detail.md`](../../../design/kube-frontend/app-workloads/container-detail.md) | [`tests/ui/tests/kube-frontend/app-workloads/test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_CONTAINER_DETAIL_03.py`](../../../tests/ui/tests/kube-frontend/app-workloads/test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_CONTAINER_DETAIL_03.py) |
@@ -322,7 +323,7 @@
 
 ## 小结
 
-- 需求里的 AC：315 条，其中未覆盖 1 条、无技术方案承接 14 条、无用例规格实现 1 条。
+- 需求里的 AC：316 条，其中未覆盖 1 条、无技术方案承接 14 条、无用例规格实现 1 条。
 - 未覆盖：`AC-L2-KUBE-FRONTEND-LOGIN-07`
 - 无技术方案承接：`AC-L2-KUBE-FRONTEND-LOGIN-01`, `AC-L2-KUBE-FRONTEND-LOGIN-02`, `AC-L2-KUBE-FRONTEND-LOGIN-03`, `AC-L2-KUBE-FRONTEND-LOGIN-04`, `AC-L2-KUBE-FRONTEND-LOGIN-05`, `AC-L2-KUBE-FRONTEND-LOGIN-06`, `AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L2-KUBE-FRONTEND-THEME-01`, `AC-L2-KUBE-FRONTEND-THEME-02`, `AC-L2-KUBE-FRONTEND-THEME-03`, `AC-L2-KUBE-FRONTEND-THEME-04`, `AC-L2-KUBE-FRONTEND-THEME-05`, `AC-L3-KUBE-FRONTEND-MONITORING-PROJECT_CUSTOM_MONITORING-01`, `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW-01`
 - 无用例规格实现：`AC-L2-KUBE-FRONTEND-LOGIN-07`
@@ -401,6 +402,7 @@
 | kube-frontend/app-workloads/_index | `US1` | `TC-FULL-KUBE-FRONTEND-APP_WORKLOADS-01`, `TC-FULL-KUBE-FRONTEND-APP_WORKLOADS-02`, `TC-FULL-KUBE-FRONTEND-APP_WORKLOADS-03`, `TC-FULL-KUBE-FRONTEND-APP_WORKLOADS-04`, `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-BULK-01`, `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-FORM_UX-01`, `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-INGRESSES-01`, `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_ACTIONS-01`, `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-MOBILE-01`, `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-SERVICES-01` |
 | kube-frontend/app-workloads/_index | `US2` | `TC-FULL-KUBE-FRONTEND-APP_WORKLOADS-01` |
 | kube-frontend/app-workloads/_index | `US3` | `TC-FULL-KUBE-FRONTEND-APP_WORKLOADS-01` |
+| kube-frontend/app-workloads/column-visibility | `US1` | `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-COLUMN_VISIBILITY-01` |
 | kube-frontend/app-workloads/container-detail | `US1` | `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-01`, `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-02`, `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-03`, `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_TERMINAL-01` |
 | kube-frontend/app-workloads/container-detail | `US2` | `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_TERMINAL-01` |
 | kube-frontend/app-workloads/delete | `US1` | `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DELETE-01` |
@@ -593,4 +595,4 @@
 | kube-frontend/workbench/context | `US1` | `TC-L3-KUBE-FRONTEND-WORKBENCH-CONTEXT-01` |
 | kube-frontend/workbench/entry | `US1` | `TC-L3-KUBE-FRONTEND-WORKBENCH-ENTRY-01` |
 
-- 用户故事：261 条，其中未覆盖 0 条。
+- 用户故事：262 条，其中未覆盖 0 条。

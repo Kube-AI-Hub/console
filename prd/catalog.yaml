@@ -1038,6 +1038,13 @@ modules:
       L2:
       - TC-FULL-KUBE-FRONTEND-APP_WORKLOADS-01
     features:
+    - id: column-visibility
+      title: 列表列显隐
+      prd: prd/kube-frontend/app-workloads/column-visibility.md
+      design: design/kube-frontend/app-workloads/column-visibility.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-COLUMN_VISIBILITY-01
     - id: page-tip
       title: 列表页头提示
       prd: prd/kube-frontend/app-workloads/page-tip.md
