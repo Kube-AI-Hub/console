@@ -1,0 +1,40 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR_RESOURCE-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: monitor-resource
+title: 应用资源监控 · 工作负载与容器组两个页签
+entry_url: "{BASE_URL}/kube-frontend/clusters/host/monitor-resource"
+prd: prd/kube-frontend/cluster-management/monitor-resource.md
+design: design/kube-frontend/cluster-management/monitor-resource.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR_RESOURCE-01
+
+story:
+- US1
+
+product: 集群级「应用资源监控」用两个页签分别按工作负载、按容器组列出 CPU 与内存用量，默认 CPU 降序（首屏 Top 10），时间范围可选 1h/6h/24h/7d；监控不可用与没有数据时给出明确说明而不是空表。
+preconditions:
+- 已登录，且是 host 集群的集群管理员（集群级页面，无 workspace / 项目段）
+- 用例先用 BFF 探测 /kapis/monitoring.kubesphere.io/v1alpha3/pods 的 range query 是否有数据
+steps:
+- 探测监控 range query 是否返回容器组指标
+- 打开 /kube-frontend/clusters/<cluster>/monitor-resource，等待主区离开 loading
+- 读取默认「按工作负载」页签的表头、行数与时间范围按钮
+- 点「按容器组」页签，读取表头与行数
+- 点「最近 24 小时」，等待重新取数后再次核对行数
+expected:
+- 默认页签为「按工作负载」，另一个页签的容器在切换前不存在
+- 有监控数据时：两个页签表头都含 名称 / 项目 / CPU 用量 / 内存用量，行数大于 0；切换范围后行数仍大于 0
+- 时间范围按钮为 1h / 6h / 24h / 7d，当前范围带 aria-pressed
+- 监控不可用：页面显示「监控指标不可用」说明与重试，不渲染表格
+- 监控可用但没有容器组指标：页面显示「暂无资源用量数据」说明，不渲染表格
+troubleshoot:
+- 页面显示监控不可用：确认 KubeSphere 监控组件已安装，且 range query 的 step 是带单位的时长（如 5m）
+- 行数一直是 0：确认 metrics_filter 里的 $ 与 | 已正确编码，以及集群里确实有容器组
+- 按工作负载名称显示成带哈希后缀的 ReplicaSet：ReplicaSet 归属映射读取失败，检查 /apis/apps/v1/replicasets 可读
+update_automation:
+- 列变化时改页面 schema 与用例里的表头常量
+- 指标名或范围档位变化时同步改 resourceMonitorQueries.ts 与用例的探测参数
