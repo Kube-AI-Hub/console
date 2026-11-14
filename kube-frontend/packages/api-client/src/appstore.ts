@@ -34,6 +34,47 @@ export interface StoreApp {
   createdAt: string;
 }
 
+/** One published version of a store app. */
+export interface StoreAppVersion {
+  /** `version_id`; the identifier the file/readme endpoints take. */
+  id: string;
+  appId: string;
+  /** Human version label, e.g. `1.6.8 [5.7.31]`. */
+  name: string;
+  /** `active` today; the field is free-form, so the page shows it verbatim. */
+  status: string;
+  active: boolean;
+  createdAt: string;
+  statusTime: string;
+  packageName: string;
+  home: string;
+  icon: string;
+  /** Parsed from the JSON-encoded `maintainers` string. */
+  maintainers: string[];
+  /** Parsed from the JSON-encoded `sources` string. */
+  sources: string[];
+}
+
+/** One app plus the fields only the detail endpoint returns. */
+export interface StoreAppDetail extends StoreApp {
+  /** `latest_app_version.icon`; empty when the chart did not declare one. */
+  icon: string;
+  categories: Array<{ id: string; name: string }>;
+  home: string;
+  isv: string;
+  statusTime: string;
+  /** `app_version_types`, e.g. `helm`. Versions do not carry their own type. */
+  versionTypes: string;
+  clusterTotal: number;
+  latestVersion: StoreAppVersion | null;
+}
+
+/** The chart files of one version, as base64 by path. */
+export interface StoreAppFiles {
+  versionId: string;
+  files: Record<string, string>;
+}
+
 export interface StoreReview {
   id: string;
   appId: string;
@@ -61,6 +102,31 @@ interface RawApp {
   workspace?: string;
   status?: string;
   create_time?: string;
+}
+
+interface RawVersion {
+  version_id?: string;
+  app_id?: string;
+  name?: string;
+  status?: string;
+  active?: boolean;
+  create_time?: string;
+  status_time?: string;
+  package_name?: string;
+  home?: string;
+  icon?: string;
+  maintainers?: string;
+  sources?: string;
+}
+
+interface RawAppDetail extends RawApp {
+  category_set?: RawCategory[];
+  latest_app_version?: RawVersion;
+  home?: string;
+  isv?: string;
+  status_time?: string;
+  app_version_types?: string;
+  cluster_total?: number;
 }
 
 interface RawReview {
@@ -110,6 +176,89 @@ export function toStoreApp(item: RawApp): StoreApp {
     status: item.status ?? '',
     createdAt: item.create_time ?? '',
   };
+}
+
+/** Parse a JSON-encoded array field; openpitrix stores these as strings. */
+function parseStringArray(value: string | undefined): string[] {
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    return Array.isArray(parsed) ? parsed.map((entry) => String(entry)) : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Maintainers are objects ({name,email}); keep a readable "name <email>" label. */
+function parseMaintainers(value: string | undefined): string[] {
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .map((entry) => {
+        if (typeof entry === 'string') return entry;
+        const record = entry as { name?: string; email?: string };
+        return record.name ? (record.email ? `${record.name} <${record.email}>` : record.name) : '';
+      })
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+export function toStoreAppVersion(item: RawVersion): StoreAppVersion {
+  return {
+    id: item.version_id ?? '',
+    appId: item.app_id ?? '',
+    name: item.name ?? '',
+    status: item.status ?? '',
+    active: item.active === true,
+    createdAt: item.create_time ?? '',
+    statusTime: item.status_time ?? '',
+    packageName: item.package_name ?? '',
+    home: item.home ?? '',
+    icon: item.icon ?? '',
+    maintainers: parseMaintainers(item.maintainers),
+    sources: parseStringArray(item.sources),
+  };
+}
+
+export function toStoreAppDetail(item: RawAppDetail): StoreAppDetail {
+  const latestVersion = item.latest_app_version ? toStoreAppVersion(item.latest_app_version) : null;
+  const base = toStoreApp(item);
+  return {
+    ...base,
+    icon: latestVersion?.icon ?? '',
+    categories: (item.category_set ?? []).map((category) => ({
+      id: category.category_id ?? '',
+      name: category.name ?? '',
+    })),
+    home: item.home ?? '',
+    isv: item.isv ?? '',
+    statusTime: item.status_time ?? '',
+    versionTypes: item.app_version_types ?? '',
+    clusterTotal: Number(item.cluster_total ?? 0),
+    latestVersion,
+  };
+}
+
+/**
+ * Decode one base64 chart file.
+ *
+ * The files endpoint returns every chart file base64-encoded, including README.md. Only the
+ * text is needed here, and a malformed entry must not take the page down, so failures decode
+ * to an empty string rather than throwing.
+ */
+export function decodeStoreFile(content: string | undefined): string {
+  if (!content) return '';
+  try {
+    const binary = globalThis.atob(content);
+    const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+    return new TextDecoder().decode(bytes);
+  } catch {
+    return '';
+  }
 }
 
 export function toStoreReview(item: RawReview): StoreReview {
@@ -162,6 +311,44 @@ export function storeAppsApi(client: Client) {
     async list(query: ListQuery = {}): Promise<{ items: StoreApp[]; total: number }> {
       const { items, total } = await listRaw<RawApp>(client, `${OPENPITRIX}/apps`, query);
       return { items: items.map(toStoreApp), total };
+    },
+
+    /** One app; the detail endpoint adds categories, the latest version and the app icon. */
+    async get(params: { appId: string; signal?: AbortSignal }): Promise<StoreAppDetail> {
+      const body = await client.request<RawAppDetail>(`${OPENPITRIX}/apps/${encodeURIComponent(params.appId)}`, {
+        ...(params.signal ? { signal: params.signal } : {}),
+      });
+      return toStoreAppDetail(body ?? {});
+    },
+
+    /**
+     * Every version of one app, newest first.
+     *
+     * The store returns them in creation order; the page's table is a release history, so the
+     * newest release is shown first. The versions endpoint has the `total_count` envelope.
+     */
+    async versions(params: { appId: string; signal?: AbortSignal }): Promise<StoreAppVersion[]> {
+      const body = await client.request<{ items?: RawVersion[] }>(
+        `${OPENPITRIX}/apps/${encodeURIComponent(params.appId)}/versions`,
+        {
+          query: { page: 1, limit: 100 },
+          ...(params.signal ? { signal: params.signal } : {}),
+        },
+      );
+      return (body?.items ?? [])
+        .map(toStoreAppVersion)
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    },
+
+    /** One version's chart files, decoded lazily into README text. */
+    async readme(params: { appId: string; versionId: string; signal?: AbortSignal }): Promise<string> {
+      const body = await client.request<{ files?: Record<string, string> }>(
+        `${OPENPITRIX}/apps/${encodeURIComponent(params.appId)}/versions/${encodeURIComponent(params.versionId)}/files`,
+        {
+          ...(params.signal ? { signal: params.signal } : {}),
+        },
+      );
+      return decodeStoreFile(body?.files?.['README.md']);
     },
   };
 }

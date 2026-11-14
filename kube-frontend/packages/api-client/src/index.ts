@@ -402,8 +402,15 @@ export type { ExecOptions, ExecSession, ExecSocket, ExecSocketFactory, ExecTarge
 export { ipPoolsApi, toIpPoolDetail, toIpPoolSummary } from './network';
 export type { IpPoolDetail, IpPoolSummary } from './network';
 
-export { storeAppsApi, storeCategoriesApi, storeReviewsApi } from './appstore';
-export type { StoreApp, StoreCategory, StoreReview } from './appstore';
+export { decodeStoreFile, storeAppsApi, storeCategoriesApi, storeReviewsApi } from './appstore';
+export type {
+  StoreApp,
+  StoreAppDetail,
+  StoreAppFiles,
+  StoreAppVersion,
+  StoreCategory,
+  StoreReview,
+} from './appstore';
 
 export { clusterDashboardsApi, projectDashboardsApi } from './dashboards';
 export type { DashboardDetail, DashboardSummary } from './dashboards';

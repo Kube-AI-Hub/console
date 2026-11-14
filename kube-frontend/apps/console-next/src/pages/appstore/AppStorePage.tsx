@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from '@tanstack/react-router';
 import { storeAppsApi, storeCategoriesApi } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, Button, Skeleton } from '@kube-ai-hub/ui';
@@ -101,12 +102,19 @@ export function AppStorePage(): React.ReactElement {
             ) : (
               <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3" data-ai-id="app-store:apps">
                 {rows.map((app) => (
-                  <li key={app.id} className="flex flex-col gap-2 rounded-ai-md border border-ai-line p-4" data-ai-row={app.id}>
-                    <div className="flex items-start justify-between gap-2">
-                      <span className="truncate text-sm font-medium text-ai-fg">{app.name}</span>
-                      <Badge tone={app.status === 'active' ? 'success' : 'neutral'}>{app.status || '-'}</Badge>
-                    </div>
-                    <p className="line-clamp-2 min-h-8 text-xs text-ai-fg-muted">{app.description || '-'}</p>
+                  <li key={app.id} className="flex flex-col rounded-ai-md border border-ai-line hover:border-ai-accent" data-ai-row={app.id}>
+                    <Link
+                      to="/kube-frontend/apps/$appId"
+                      params={{ appId: app.id }}
+                      className="flex flex-col gap-2 p-4"
+                      {...actionProps(`app-store:card:${app.id}`)}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="truncate text-sm font-medium text-ai-fg">{app.name}</span>
+                        <Badge tone={app.status === 'active' ? 'success' : 'neutral'}>{app.status || '-'}</Badge>
+                      </div>
+                      <p className="line-clamp-2 min-h-8 text-xs text-ai-fg-muted">{app.description || '-'}</p>
+                    </Link>
                   </li>
                 ))}
               </ul>
