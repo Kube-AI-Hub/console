@@ -298,7 +298,21 @@ export function DevopsProjectDetailPage({ cluster, name }: DevopsProjectDetailPa
           renderRow={(item: PipelineSummary) => ({
             key: item.name,
             name: item.name,
-            cells: [item.alias || item.name, item.type || '-', item.syncStatus || '-', formatTimestamp(item.createdAt)],
+            cells: [
+              // The old console lets a reader drill into a pipeline; this row is the entry.
+              <Link
+                key={item.name}
+                to="/kube-frontend/clusters/$cluster/devops/$name/pipelines/$pipeline"
+                params={{ cluster, name, pipeline: item.name }}
+                className="font-medium text-ai-accent hover:underline"
+                data-ai-id={`devops-detail:pipeline:${item.name}`}
+              >
+                {item.alias || item.name}
+              </Link>,
+              item.type || '-',
+              item.syncStatus || '-',
+              formatTimestamp(item.createdAt),
+            ],
           })}
         />
       ) : null}
@@ -364,7 +378,7 @@ function CollectionPanel<T>({
     | 'devops.detail.codeReposEmpty';
   columns: string[];
   rows: T[];
-  renderRow: (item: T) => { key: string; name: string; cells: string[] };
+  renderRow: (item: T) => { key: string; name: string; cells: React.ReactNode[] };
 }): React.ReactElement {
   const t = useT();
   const rendered = rows.map(renderRow);

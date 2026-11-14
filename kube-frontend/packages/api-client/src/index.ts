@@ -306,14 +306,21 @@ export type { KubeStrategy, StrategyStatus, StrategySummary, StrategyType } from
 export {
   devopsCollectionsApi,
   devopsProjectNamespace,
+  isRunOfPipeline,
+  pipelineRunStatusOf,
   toCdApplicationSummary,
   toCodeRepositorySummary,
+  toPipelineDetail,
+  toPipelineRunSummary,
   toPipelineSummary,
 } from './devops';
 export type {
   CdApplicationSummary,
   CodeRepositorySummary,
   DevopsProjectDetail,
+  PipelineDetail,
+  PipelineRunStatus,
+  PipelineRunSummary,
   PipelineSummary,
 } from './devops';
 export { isTokenExpired, userFromToken } from './token';

@@ -3,8 +3,12 @@ import { createClient } from '../src/client';
 import {
   devopsCollectionsApi,
   devopsProjectNamespace,
+  isRunOfPipeline,
+  pipelineRunStatusOf,
   toCdApplicationSummary,
   toCodeRepositorySummary,
+  toPipelineDetail,
+  toPipelineRunSummary,
   toPipelineSummary,
 } from '../src/devops';
 
@@ -105,5 +109,105 @@ describe('devopsCollectionsApi', () => {
     expect(new URL(calls[0] ?? '').pathname).toBe(
       '/apis/devops.kubesphere.io/v1alpha3/clusters/member/namespaces/devops-beta/pipelines',
     );
+  });
+});
+
+
+describe('pipeline detail and runs', () => {
+  it('maps a pipeline detail from the same object the list reads', () => {
+    const detail = toPipelineDetail({
+      metadata: {
+        name: 'build',
+        creationTimestamp: '2026-11-15T00:00:00Z',
+        annotations: { 'pipeline.devops.kubesphere.io/syncstatus': 'successful', 'kubesphere.io/description': 'build the app' },
+      },
+      spec: { type: 'pipeline' },
+    });
+    expect(detail).toMatchObject({ name: 'build', type: 'pipeline', syncStatus: 'successful', description: 'build the app' });
+  });
+
+  it('derives run status from the Jenkins annotation and falls back to the object name', () => {
+    const run = toPipelineRunSummary({
+      metadata: {
+        name: 'build-run-1',
+        annotations: {
+          'devops.kubesphere.io/jenkins-pipelinerun-status': JSON.stringify({
+            id: '42',
+            state: 'FINISHED',
+            result: 'SUCCESS',
+            startTime: '2026-11-15T01:00:00Z',
+            durationInMillis: 125000,
+            commitId: 'abcdef1234',
+          }),
+        },
+      },
+      spec: { pipelineRef: { name: 'build' }, scm: { refName: 'main' } },
+    });
+    expect(run).toMatchObject({
+      runId: '42',
+      state: 'FINISHED',
+      result: 'SUCCESS',
+      status: 'success',
+      startTime: '2026-11-15T01:00:00Z',
+      durationMillis: 125000,
+      commitId: 'abcdef1234',
+      branch: 'main',
+    });
+    const bare = toPipelineRunSummary({ metadata: { name: 'build-run-2' } });
+    expect(bare.runId).toBe('build-run-2');
+    expect(bare.status).toBe('notRunning');
+  });
+
+  it('maps every Jenkins state/result pair to one badge state', () => {
+    expect(pipelineRunStatusOf('QUEUED', '')).toBe('queued');
+    expect(pipelineRunStatusOf('RUNNING', '')).toBe('running');
+    expect(pipelineRunStatusOf('FINISHED', 'FAILURE')).toBe('failure');
+    expect(pipelineRunStatusOf('FINISHED', 'ABORTED')).toBe('aborted');
+    expect(pipelineRunStatusOf('FINISHED', 'UNSTABLE')).toBe('unstable');
+    expect(pipelineRunStatusOf('PAUSED', '')).toBe('paused');
+    expect(pipelineRunStatusOf('', '')).toBe('notRunning');
+  });
+
+  it('matches a run by its label or by spec.pipelineRef', () => {
+    expect(isRunOfPipeline({ metadata: { labels: { 'devops.kubesphere.io/pipeline': 'build' } } } as never, 'build')).toBe(true);
+    expect(isRunOfPipeline({ metadata: { name: 'r' }, spec: { pipelineRef: { name: 'build' } } } as never, 'build')).toBe(true);
+    expect(isRunOfPipeline({ metadata: { name: 'r' }, spec: { pipelineRef: { name: 'other' } } } as never, 'build')).toBe(false);
+  });
+
+  it('reads one pipeline and filters runs, falling back when the label query is empty', async () => {
+    const responses: unknown[] = [
+      { metadata: { name: 'build' }, spec: { type: 'pipeline' } },
+      { items: [] },
+      {
+        items: [
+          { metadata: { name: 'run-a', labels: { 'devops.kubesphere.io/pipeline': 'build' } } },
+          { metadata: { name: 'run-b' }, spec: { pipelineRef: { name: 'build' } } },
+          { metadata: { name: 'run-c' }, spec: { pipelineRef: { name: 'other' } } },
+        ],
+      },
+    ];
+    const calls: string[] = [];
+    const client = createClient({
+      fetchImpl: (async (input: RequestInfo | URL) => {
+        calls.push(String(input));
+        return new Response(JSON.stringify(responses.shift() ?? {}), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        });
+      }) as typeof fetch,
+    });
+    const api = devopsCollectionsApi(client);
+    const detail = await api.pipeline({ cluster: 'host', namespace: 'devops-alpha', name: 'build' });
+    expect(detail.name).toBe('build');
+    expect(new URL(calls[0] ?? '').pathname).toBe(
+      '/apis/devops.kubesphere.io/v1alpha3/namespaces/devops-alpha/pipelines/build',
+    );
+
+    const runs = await api.pipelineRuns({ cluster: 'host', namespace: 'devops-alpha', pipeline: 'build' });
+    const firstRunUrl = new URL(calls[1] ?? '');
+    expect(firstRunUrl.searchParams.get('labelSelector')).toBe('devops.kubesphere.io/pipeline=build');
+    const fallbackUrl = new URL(calls[2] ?? '');
+    expect(fallbackUrl.searchParams.get('labelSelector')).toBeNull();
+    expect(runs.map((run) => run.name)).toEqual(['run-a', 'run-b']);
   });
 });

@@ -139,15 +139,118 @@ export function toCdApplicationSummary(item: KubeApplication): CdApplicationSumm
   };
 }
 
+/** Everything the pipeline detail page shows; the list row is a subset. */
+export interface PipelineDetail extends PipelineSummary {
+  description: string;
+  raw: KubeObject;
+}
+
+export function toPipelineDetail(item: KubePipeline): PipelineDetail {
+  const annotations = (item.metadata?.annotations ?? {}) as Record<string, string>;
+  return {
+    ...toPipelineSummary(item),
+    description: annotations['kubesphere.io/description'] ?? '',
+    raw: item,
+  };
+}
+
+/** The states a PipelineRun reports through the Jenkins status annotation. */
+export type PipelineRunStatus =
+  | 'queued'
+  | 'running'
+  | 'success'
+  | 'failure'
+  | 'aborted'
+  | 'paused'
+  | 'unstable'
+  | 'notRunning';
+
+/** One run row: 编号 / 状态 / 开始时间 / 耗时, plus the fields the table may grow. */
+export interface PipelineRunSummary extends ResourceBase {
+  /** Jenkins run id, falling back to the object name when the annotation has none. */
+  runId: string;
+  /** Jenkins `state`: QUEUED / RUNNING / FINISHED / PAUSED. */
+  state: string;
+  /** Jenkins `result`: SUCCESS / FAILURE / ABORTED / UNSTABLE, empty while running. */
+  result: string;
+  /** Derived from state+result, so the page does not repeat the mapping. */
+  status: PipelineRunStatus;
+  startTime: string;
+  durationMillis: number;
+  commitId: string;
+  /** Multi-branch runs carry the branch in `spec.scm.refName`. */
+  branch: string;
+}
+
+interface KubePipelineRun extends KubeObject {
+  spec?: { pipelineRef?: { name?: string }; scm?: { refName?: string } };
+}
+
 /**
- * Path for one namespaced devops/gitops collection.
+ * The run status lives in an annotation, not in `status`.
+ *
+ * The CRD's status is unused/pruned, and ks-devops mirrors Jenkins' state into
+ * `devops.kubesphere.io/jenkins-pipelinerun-status` as a JSON string. A non-JSON value
+ * is ignored rather than treated as a state.
+ */
+function jenkinsStatusOf(item: KubePipelineRun): Record<string, unknown> {
+  const annotations = (item.metadata?.annotations ?? {}) as Record<string, string>;
+  const raw = annotations['devops.kubesphere.io/jenkins-pipelinerun-status'];
+  if (!raw) return {};
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? (parsed as Record<string, unknown>) : {};
+  } catch {
+    return {};
+  }
+}
+
+export function pipelineRunStatusOf(state: string, result: string): PipelineRunStatus {
+  if (state === 'QUEUED') return 'queued';
+  if (state === 'RUNNING') return 'running';
+  if (state === 'PAUSED') return 'paused';
+  if (result === 'UNSTABLE') return 'unstable';
+  if (state === 'FINISHED' && result === 'SUCCESS') return 'success';
+  if (state === 'FINISHED' && result === 'FAILURE') return 'failure';
+  if (state === 'FINISHED' && result === 'ABORTED') return 'aborted';
+  return 'notRunning';
+}
+
+export function toPipelineRunSummary(item: KubePipelineRun): PipelineRunSummary {
+  const status = jenkinsStatusOf(item);
+  const annotations = (item.metadata?.annotations ?? {}) as Record<string, string>;
+  const state = String(status['state'] ?? '');
+  const result = String(status['result'] ?? '');
+  return {
+    ...baseOf(item),
+    runId: String(status['id'] ?? annotations['devops.kubesphere.io/jenkins-pipelinerun-id'] ?? item.metadata?.name ?? ''),
+    state,
+    result,
+    status: pipelineRunStatusOf(state, result),
+    startTime: String(status['startTime'] ?? item.metadata?.creationTimestamp ?? ''),
+    durationMillis: Number(status['durationInMillis'] ?? 0) || 0,
+    commitId: String(status['commitId'] ?? ''),
+    branch: String(item.spec?.scm?.refName ?? ''),
+  };
+}
+
+/** Whether a run belongs to one pipeline: label first, `spec.pipelineRef` as the fallback. */
+export function isRunOfPipeline(item: KubePipelineRun, pipeline: string): boolean {
+  const labels = (item.metadata?.labels ?? {}) as Record<string, string>;
+  if (labels['devops.kubesphere.io/pipeline'] === pipeline) return true;
+  return item.spec?.pipelineRef?.name === pipeline;
+}
+
+/**
+ * Path for one namespaced devops/gitops collection, optionally one object.
  *
  * The `clusters/<id>` segment matches the other native kube paths in this app; only
  * the host cluster is verified on this installation.
  */
-function collectionPath(groupVersion: string, cluster: string, namespace: string, resource: string): string {
+function collectionPath(groupVersion: string, cluster: string, namespace: string, resource: string, name?: string): string {
   const clusterSegment = cluster && cluster !== 'host' ? `clusters/${encodeURIComponent(cluster)}/` : '';
-  return `/apis/${groupVersion}/${clusterSegment}namespaces/${encodeURIComponent(namespace)}/${resource}`;
+  const base = `/apis/${groupVersion}/${clusterSegment}namespaces/${encodeURIComponent(namespace)}/${resource}`;
+  return name ? `${base}/${encodeURIComponent(name)}` : base;
 }
 
 export function devopsCollectionsApi(client: Client) {
@@ -174,6 +277,42 @@ export function devopsCollectionsApi(client: Client) {
         { ...(params.signal ? { signal: params.signal } : {}) },
       );
       return (body?.items ?? []).map(toCdApplicationSummary);
+    },
+
+    /** One pipeline, for the detail page. A missing pipeline is a 404 `Status`. */
+    async pipeline(params: { cluster: string; namespace: string; name: string; signal?: AbortSignal }): Promise<PipelineDetail> {
+      const item = await client.request<KubePipeline>(
+        collectionPath(DEVOPS_VERSION, params.cluster, params.namespace, 'pipelines', params.name),
+        { ...(params.signal ? { signal: params.signal } : {}) },
+      );
+      return toPipelineDetail(item);
+    },
+
+    /**
+     * Runs of one pipeline.
+     *
+     * The server-side filter is the label ks-devops writes
+     * (`devops.kubesphere.io/pipeline`). No run exists on this cluster to confirm the
+     * label from real controller output, so an empty label result triggers one
+     * unfiltered read matched by label **or** `spec.pipelineRef.name`: a controller
+     * that changes the label key must not make every pipeline look like it never ran.
+     */
+    async pipelineRuns(params: {
+      cluster: string;
+      namespace: string;
+      pipeline: string;
+      signal?: AbortSignal;
+    }): Promise<PipelineRunSummary[]> {
+      const path = collectionPath(DEVOPS_VERSION, params.cluster, params.namespace, 'pipelineruns');
+      const signal = params.signal ? { signal: params.signal } : {};
+      const filtered = await client.request<{ items?: KubePipelineRun[] }>(path, {
+        query: { labelSelector: `devops.kubesphere.io/pipeline=${params.pipeline}` },
+        ...signal,
+      });
+      const byLabel = (filtered?.items ?? []).filter((item) => isRunOfPipeline(item, params.pipeline));
+      if (byLabel.length > 0) return byLabel.map(toPipelineRunSummary);
+      const all = await client.request<{ items?: KubePipelineRun[] }>(path, signal);
+      return (all?.items ?? []).filter((item) => isRunOfPipeline(item, params.pipeline)).map(toPipelineRunSummary);
     },
   };
 }

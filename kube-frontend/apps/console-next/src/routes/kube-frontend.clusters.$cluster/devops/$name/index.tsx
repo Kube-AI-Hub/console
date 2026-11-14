@@ -3,7 +3,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { DevopsProjectDetailPage } from '@/pages/devops/DevopsProjectDetailPage';
 
 /** `…/clusters/$cluster/devops/$name` — DevOps 工程详情。 */
-export const Route = createFileRoute('/kube-frontend/clusters/$cluster/devops/$name')({
+export const Route = createFileRoute('/kube-frontend/clusters/$cluster/devops/$name/')({
   component: devopsProjectDetailRoute,
 });
 
