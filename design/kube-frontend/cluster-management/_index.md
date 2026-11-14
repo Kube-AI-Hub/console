@@ -124,3 +124,4 @@ GPU 列、使用率列（需要 metrics 接口）、集群概览与设置页。
 |---|---|---|
 | 节点 | `prd/…/nodes.md` | `design/…/nodes.md` |
 | 项目 | `prd/…/projects.md` | `design/…/projects.md` |
+| 编辑 YAML 覆盖 | `prd/…/yaml-edit.md` | `design/…/yaml-edit.md` |

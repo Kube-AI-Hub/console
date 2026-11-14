@@ -305,6 +305,8 @@ export interface NodeTaint {
 
 /** Everything the node detail page shows; the list row is a subset of this. */
 export interface NodeDetail extends NodeSummary {
+  /** The object as stored, for the YAML editor; the derived fields above are not YAML. */
+  raw: KubeNode;
   conditions: NodeCondition[];
   capacity: Record<string, string>;
   allocatable: Record<string, string>;
@@ -339,6 +341,7 @@ export function toNodeDetail(item: KubeNode): NodeDetail {
   }));
   return {
     ...toNodeSummary(item),
+    raw: item,
     conditions,
     capacity: asRecord(status['capacity']),
     allocatable: asRecord(status['allocatable']),
@@ -494,6 +497,8 @@ export function toStorageClassSummary(item: KubeStorageClass): StorageClassSumma
 
 /** Everything the storage class detail page shows; the list row is a subset. */
 export interface StorageClassDetail extends StorageClassSummary {
+  /** The object as stored, for the YAML editor. */
+  raw: KubeStorageClass;
   /** `parameters` verbatim — each driver has its own keys, so they are shown as pairs. */
   parameters: Array<{ key: string; value: string }>;
   /** `allowedTopologies`, flattened for display. */
@@ -516,6 +521,7 @@ export function toStorageClassDetail(item: KubeStorageClass): StorageClassDetail
   });
   return {
     ...toStorageClassSummary(item),
+    raw: item,
     parameters: Object.entries(parameters).map(([key, value]) => ({ key, value: String(value ?? '') })),
     allowedTopologies: topologies.filter(Boolean),
     labels: (item.metadata?.labels ?? {}) as Record<string, string>,
@@ -769,6 +775,8 @@ export function toPersistentVolumeSummary(item: KubePersistentVolume): Persisten
 
 /** Everything the volume detail page shows; the list row is a subset. */
 export interface PersistentVolumeDetail extends PersistentVolumeSummary {
+  /** The object as stored, for the YAML editor. */
+  raw: KubePersistentVolume;
   /** `Filesystem` / `Block`. */
   volumeMode: string;
   mountOptions: string[];
@@ -780,6 +788,7 @@ export function toPersistentVolumeDetail(item: KubePersistentVolume): Persistent
   const spec = (item.spec ?? {}) as Record<string, unknown>;
   return {
     ...toPersistentVolumeSummary(item),
+    raw: item,
     volumeMode: String(spec['volumeMode'] ?? 'Filesystem'),
     mountOptions: ((spec['mountOptions'] ?? []) as string[]).map(String),
     labels: (item.metadata?.labels ?? {}) as Record<string, string>,
@@ -811,6 +820,29 @@ export function persistentVolumesApi(client: Client) {
       );
       const items = (body?.items ?? []).map(toPersistentVolumeSummary);
       return { items, total: items.length };
+    },
+    /**
+     * Replace a volume from the YAML editor.
+     *
+     * A read followed by a PUT, the same shape as `resourceApi.update`: a PUT needs
+     * the current `resourceVersion`, and without it the apiserver answers 409 for
+     * every save. The caller's object wins for every field it sends, so clearing an
+     * annotation from the YAML editor still works.
+     */
+    async update(params: { name: string; body: KubeObject }): Promise<PersistentVolumeDetail> {
+      const path = `/api/v1/persistentvolumes/${encodeURIComponent(params.name)}`;
+      const current = await client.request<KubePersistentVolume>(path);
+      const body: KubeObject = {
+        ...(current as unknown as Record<string, unknown>),
+        ...params.body,
+        metadata: {
+          ...(current.metadata ?? {}),
+          ...params.body.metadata,
+          ...(current.metadata?.resourceVersion ? { resourceVersion: current.metadata.resourceVersion } : {}),
+        },
+      };
+      const item = await client.request<KubePersistentVolume>(path, { method: 'PUT', body });
+      return toPersistentVolumeDetail(item);
     },
   };
 }

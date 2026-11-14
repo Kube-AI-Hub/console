@@ -22,13 +22,14 @@ import { formatTimestamp } from '@/lib/time';
  * risk dropping labels set elsewhere.
  */
 export interface NetworkIsolationPageProps {
+  workspace: string;
   cluster: string;
   namespace: string;
 }
 
 const PAGE_SIZE = 10;
 
-export function NetworkIsolationPage({ cluster, namespace }: NetworkIsolationPageProps): React.ReactElement {
+export function NetworkIsolationPage({ workspace, cluster, namespace }: NetworkIsolationPageProps): React.ReactElement {
   const t = useT();
   const queryClient = useQueryClient();
   const list = useResourceListState<'name' | 'createTime'>({ defaultSortBy: 'name', resetOn: [cluster, namespace] });
@@ -84,7 +85,15 @@ export function NetworkIsolationPage({ cluster, namespace }: NetworkIsolationPag
           title: t('settings.column.name'),
           render: (row) => (
             <span className="flex min-w-0 flex-col">
-              <span className="truncate font-medium text-ai-fg">{row.alias || row.name}</span>
+              {/* The detail page owns 编辑 YAML; a rule that needs a change is reached
+                  from here, not by hunting for the object's YAML in kubectl. */}
+              <a
+                href={`/kube-frontend/${encodeURIComponent(workspace)}/clusters/${encodeURIComponent(cluster)}/projects/${encodeURIComponent(namespace)}/networkpolicies/${encodeURIComponent(row.name)}`}
+                className="truncate font-medium text-ai-accent hover:underline"
+                {...actionProps(`networkpolicies:open:${row.name}`)}
+              >
+                {row.alias || row.name}
+              </a>
               <span className="truncate font-mono text-[11px] text-ai-fg-muted">{row.podSelector}</span>
             </span>
           ),

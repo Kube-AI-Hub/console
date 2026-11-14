@@ -81,6 +81,7 @@
 | 节点用量 | [node-usage.md](./node-usage.md) |
 | 自定义资源 | [custom-resources.md](./custom-resources.md) |
 | 集群级配置 | [cluster-config.md](./cluster-config.md) |
+| 编辑 YAML 覆盖 | [yaml-edit.md](./yaml-edit.md) |
 
 ## 明确不做
 
@@ -103,6 +104,7 @@
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODE_USAGE-01`
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_RESOURCES-01`
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-01`
+- `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-YAML_EDIT-01`
 
 ## 功能需求
 

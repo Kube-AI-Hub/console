@@ -128,7 +128,7 @@ describe('network isolation', () => {
       return undefined;
     });
     renderPage('/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/networkpolicies', () => (
-      <NetworkIsolationPage cluster="host" namespace="default" />
+      <NetworkIsolationPage workspace="system-workspace" cluster="host" namespace="default" />
     ));
 
     await waitFor(() => expect(surface('networkpolicies:surface')).toHaveAttribute('data-ai-state', 'empty'));

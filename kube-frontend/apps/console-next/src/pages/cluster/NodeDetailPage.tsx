@@ -1,11 +1,14 @@
 import * as React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
-import { nodesApi, type NodeDetail } from '@kube-ai-hub/api-client';
-import { AiSurface, Badge, Skeleton } from '@kube-ai-hub/ui';
+import { nodesApi, type KubeObject, type NodeDetail } from '@kube-ai-hub/api-client';
+import { actionProps } from '@kube-ai-hub/ai-surface';
+import { AiSurface, Badge, Button, Skeleton } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
-import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
+import { MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
+import { YamlDialog } from '@/components/resource/YamlDialog';
+import { toYaml } from '@/components/resource/yaml';
 import { DefinitionRow } from '@/components/resource/DefinitionRow';
 import { formatTimestamp } from '@/lib/time';
 import { formatQuantity } from '@/lib/quantity';
@@ -34,6 +37,19 @@ export function NodeDetailPage({ cluster }: NodeDetailPageProps): React.ReactEle
     queryFn: ({ signal }) => nodesApi(apiClient).get({ name, cluster, namespace: '', signal }),
   });
 
+  const queryClient = useQueryClient();
+  const [editingYaml, setEditingYaml] = React.useState(false);
+  /**
+   * 编辑 YAML. The node object is written with a whole-object PUT carrying its
+   * `resourceVersion`, exactly like every other editor in the app. A node is owned by
+   * kubelet and the cloud controller, so a concurrent update answers 409; the dialog
+   * keeps the text and the page shows the error instead of pretending it saved.
+   */
+  const update = useMutation({
+    mutationFn: (body: KubeObject) => nodesApi(apiClient).update({ cluster, namespace: '', body }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['node-detail', cluster, name] }),
+  });
+
   const state = query.isPending ? 'loading' : query.isError ? 'error' : 'ready';
   const node = query.data as NodeDetail | undefined;
 
@@ -50,6 +66,15 @@ export function NodeDetailPage({ cluster }: NodeDetailPageProps): React.ReactEle
           {node ? (
             <Badge tone={node.status === 'Ready' ? 'success' : 'danger'}>{node.status}</Badge>
           ) : null}
+          <Button
+            variant="secondary"
+            size="sm"
+            className="ml-auto"
+            {...actionProps('node-detail:edit-yaml')}
+            onClick={() => setEditingYaml(true)}
+          >
+            {t('resource.action.editYaml')}
+          </Button>
         </div>
       </header>
 
@@ -127,6 +152,24 @@ export function NodeDetailPage({ cluster }: NodeDetailPageProps): React.ReactEle
             )}
           </section>
         </React.Fragment>
+      ) : null}
+
+      <MutationAlert error={update.error} />
+
+      {node ? (
+        <YamlDialog
+          open={editingYaml}
+          onOpenChange={setEditingYaml}
+          initialYaml={toYaml(node.raw)}
+          lockName={name}
+          title={t('resource.action.editYaml')}
+          submitLabel={t('common.confirm')}
+          pending={update.isPending}
+          onSubmit={async (object) => {
+            await update.mutateAsync(object);
+            setEditingYaml(false);
+          }}
+        />
       ) : null}
     </AiSurface>
   );

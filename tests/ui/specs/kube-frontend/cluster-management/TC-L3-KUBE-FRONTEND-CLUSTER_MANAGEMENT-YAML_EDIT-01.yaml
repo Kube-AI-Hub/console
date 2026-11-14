@@ -1,0 +1,37 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-YAML_EDIT-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: yaml-edit
+title: 编辑 YAML · 存储类型改注解，四类详情页都有入口
+entry_url: "{BASE_URL}/kube-frontend/clusters/host/storageclasses"
+prd: prd/kube-frontend/cluster-management/yaml-edit.md
+design: design/kube-frontend/cluster-management/yaml-edit.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-YAML_EDIT-01
+
+story:
+- US1
+
+product: 节点、持久卷、存储类型与网络策略的详情页各提供「编辑 YAML」；在存储类型详情里上传一份带新注解的 YAML 并保存后，回读对象确认注解存在、名称未变；非法 YAML 不能提交。
+preconditions:
+- 由用例的 fixture 创建一个 tc-e2e- 前缀的存储类型与网络策略，用例结束后无条件删除
+- 已登录，且在 host 集群
+steps:
+- 打开节点/持久卷/存储类型/网络策略的详情，确认各有「编辑 YAML」
+- 在存储类型详情打开编辑 YAML，确认初始文档包含对象名
+- 上传一份只改注解的 YAML，保存并回读对象
+- 重新打开编辑 YAML，上传非法 YAML，读取保存按钮状态
+expected:
+- 四类详情页的编辑 YAML 入口可见（持久卷列表为空时该项跳过并在断言中注明）
+- 初始文档包含 metadata.name
+- 保存后回读 metadata.annotations 含新注解，metadata.name 不变
+- 非法 YAML 时保存按钮禁用
+troubleshoot:
+- 保存 404 时检查写路径是否为 /apis/storage.k8s.io/v1/storageclasses
+- 列表为空时先确认该集群确实没有对应对象，不要伪造通过
+update_automation:
+- 文案变化时改 packages/locales/src/index.ts 的 resource.action.editYaml
+- 弹窗结构变化时改本用例的 data-ai-id 选择器

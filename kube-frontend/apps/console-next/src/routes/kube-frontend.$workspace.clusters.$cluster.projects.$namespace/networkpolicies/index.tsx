@@ -8,6 +8,6 @@ export const Route = createFileRoute('/kube-frontend/$workspace/clusters/$cluste
 });
 
 function NetworkPoliciesRoute(): React.ReactElement {
-  const { cluster, namespace } = Route.useParams();
-  return <NetworkIsolationPage cluster={cluster} namespace={namespace} />;
+  const { workspace, cluster, namespace } = Route.useParams();
+  return <NetworkIsolationPage workspace={workspace} cluster={cluster} namespace={namespace} />;
 }

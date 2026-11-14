@@ -1,11 +1,14 @@
 import * as React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
-import { storageClassesApi, type StorageClassDetail } from '@kube-ai-hub/api-client';
-import { AiSurface, Badge, Skeleton } from '@kube-ai-hub/ui';
+import { storageClassesApi, type KubeObject, type StorageClassDetail } from '@kube-ai-hub/api-client';
+import { actionProps } from '@kube-ai-hub/ai-surface';
+import { AiSurface, Badge, Button, Skeleton } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
-import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
+import { MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
+import { YamlDialog } from '@/components/resource/YamlDialog';
+import { toYaml } from '@/components/resource/yaml';
 import { DefinitionRow } from '@/components/resource/DefinitionRow';
 import { formatTimestamp } from '@/lib/time';
 
@@ -30,6 +33,19 @@ export function StorageClassDetailPage(_props: StorageClassDetailPageProps): Rea
     queryFn: ({ signal }) => storageClassesApi(apiClient).get({ name, namespace: '', cluster: '', signal }),
   });
 
+  const queryClient = useQueryClient();
+  const [editingYaml, setEditingYaml] = React.useState(false);
+  /**
+   * 编辑 YAML. The old console edits a StorageClass through this dialog; the write is
+   * a read-then-PUT to `storage.k8s.io/v1`, the group the object actually lives in.
+   * A class that existing claims still reference cannot change every field (the
+   * provisioner, for one), and the apiserver's rejection is shown in the dialog.
+   */
+  const update = useMutation({
+    mutationFn: (body: KubeObject) => storageClassesApi(apiClient).update({ cluster, namespace: '', body }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['storageclass-detail', name] }),
+  });
+
   const state = query.isPending ? 'loading' : query.isError ? 'error' : 'ready';
   const sc = query.data as StorageClassDetail | undefined;
 
@@ -42,6 +58,15 @@ export function StorageClassDetailPage(_props: StorageClassDetailPageProps): Rea
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="text-lg font-semibold text-ai-fg">{name}</h1>
           {sc?.isDefault ? <Badge tone="info">{t('cluster.storageClasses.default')}</Badge> : null}
+          <Button
+            variant="secondary"
+            size="sm"
+            className="ml-auto"
+            {...actionProps('sc-detail:edit-yaml')}
+            onClick={() => setEditingYaml(true)}
+          >
+            {t('resource.action.editYaml')}
+          </Button>
         </div>
       </header>
 
@@ -87,6 +112,24 @@ export function StorageClassDetailPage(_props: StorageClassDetailPageProps): Rea
             ) : null}
           </section>
         </React.Fragment>
+      ) : null}
+
+      <MutationAlert error={update.error} />
+
+      {sc ? (
+        <YamlDialog
+          open={editingYaml}
+          onOpenChange={setEditingYaml}
+          initialYaml={toYaml(sc.raw)}
+          lockName={name}
+          title={t('resource.action.editYaml')}
+          submitLabel={t('common.confirm')}
+          pending={update.isPending}
+          onSubmit={async (object) => {
+            await update.mutateAsync(object);
+            setEditingYaml(false);
+          }}
+        />
       ) : null}
     </AiSurface>
   );

@@ -103,6 +103,8 @@ const RESOURCE_GROUPS: Readonly<Record<string, string>> = {
   // networking.k8s.io/v1
   ingresses: 'networking.k8s.io/v1',
   networkpolicies: 'networking.k8s.io/v1',
+  // storage.k8s.io/v1 — cluster-scoped, edited from its detail page
+  storageclasses: 'storage.k8s.io/v1',
   // autoscaling
   horizontalpodautoscalers: 'autoscaling/v2',
   // policy

@@ -1,11 +1,14 @@
 import * as React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
-import { persistentVolumesApi, type PersistentVolumeDetail } from '@kube-ai-hub/api-client';
-import { AiSurface, Badge, Skeleton } from '@kube-ai-hub/ui';
+import { persistentVolumesApi, type KubeObject, type PersistentVolumeDetail } from '@kube-ai-hub/api-client';
+import { actionProps } from '@kube-ai-hub/ai-surface';
+import { AiSurface, Badge, Button, Skeleton } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
-import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
+import { MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
+import { YamlDialog } from '@/components/resource/YamlDialog';
+import { toYaml } from '@/components/resource/yaml';
 import { DefinitionRow } from '@/components/resource/DefinitionRow';
 import { formatQuantity } from '@/lib/quantity';
 import { formatTimestamp } from '@/lib/time';
@@ -17,10 +20,10 @@ import { formatTimestamp } from '@/lib/time';
  * what happens to its data when the claim goes away. Those three questions decide whether
  * deleting a claim is safe, and none of them fit the list row.
  *
- * Read-only on purpose: the old console's volume detail can edit and delete one, but a
- * volume is usually the only copy of its data and «reclaim policy: Delete» means the
- * cluster destroy it. Editing that from a console is an operation to design deliberately
- * rather than port in passing; the page says so instead of offering the buttons.
+ * 编辑 YAML mirrors the old console, but delete stays out on purpose: a volume is
+ * usually the only copy of its data, and `reclaimPolicy: Delete` means deleting the
+ * object also destroys the backing storage. That operation deserves its own design
+ * rather than a button added in passing.
  */
 export interface PersistentVolumeDetailPageProps {
   cluster: string;
@@ -33,6 +36,21 @@ export function PersistentVolumeDetailPage({ cluster }: PersistentVolumeDetailPa
   const query = useQuery({
     queryKey: ['persistent-volume-detail', name],
     queryFn: ({ signal }) => persistentVolumesApi(apiClient).get({ name, signal }),
+  });
+
+  const queryClient = useQueryClient();
+  const [editingYaml, setEditingYaml] = React.useState(false);
+  /**
+   * 编辑 YAML, added to close the parity gap with the old console.
+   *
+   * The write is a read-then-PUT with the current `resourceVersion`; the dialog keeps
+   * its text on failure. Delete stays out of the page: a volume is usually the only
+   * copy of its data, and `reclaimPolicy: Delete` means removing the object also
+   * removes the backing storage.
+   */
+  const update = useMutation({
+    mutationFn: (body: KubeObject) => persistentVolumesApi(apiClient).update({ name, body }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['persistent-volume-detail', name] }),
   });
 
   const state = query.isPending ? 'loading' : query.isError ? 'error' : 'ready';
@@ -48,6 +66,15 @@ export function PersistentVolumeDetailPage({ cluster }: PersistentVolumeDetailPa
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="text-lg font-semibold text-ai-fg">{name}</h1>
           {volume ? <Badge tone={volume.status === 'Bound' ? 'success' : 'neutral'}>{volume.status}</Badge> : null}
+          <Button
+            variant="secondary"
+            size="sm"
+            className="ml-auto"
+            {...actionProps('pv-detail:edit-yaml')}
+            onClick={() => setEditingYaml(true)}
+          >
+            {t('resource.action.editYaml')}
+          </Button>
         </div>
       </header>
 
@@ -102,6 +129,24 @@ export function PersistentVolumeDetailPage({ cluster }: PersistentVolumeDetailPa
             </section>
           ) : null}
         </React.Fragment>
+      ) : null}
+
+      <MutationAlert error={update.error} />
+
+      {volume ? (
+        <YamlDialog
+          open={editingYaml}
+          onOpenChange={setEditingYaml}
+          initialYaml={toYaml(volume.raw)}
+          lockName={name}
+          title={t('resource.action.editYaml')}
+          submitLabel={t('common.confirm')}
+          pending={update.isPending}
+          onSubmit={async (object) => {
+            await update.mutateAsync(object);
+            setEditingYaml(false);
+          }}
+        />
       ) : null}
     </AiSurface>
   );

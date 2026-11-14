@@ -453,6 +453,23 @@ export function toNetworkPolicySummary(item: KubePolicy): NetworkPolicySummary {
   };
 }
 
+/** Everything the policy detail page shows. */
+export interface NetworkPolicyDetail extends NetworkPolicySummary {
+  labels: Record<string, string>;
+  annotations: Record<string, string>;
+  /** The object as stored, for the YAML editor. */
+  raw: KubeObject;
+}
+
+export function toNetworkPolicyDetail(item: KubePolicy): NetworkPolicyDetail {
+  return {
+    ...toNetworkPolicySummary(item),
+    labels: item.metadata?.labels ?? {},
+    annotations: item.metadata?.annotations ?? {},
+    raw: item,
+  };
+}
+
 /** What a policy may allow or deny. */
 export const POLICY_DIRECTIONS = ['Ingress', 'Egress'] as const;
 
@@ -526,10 +543,10 @@ export function toSelector(text: string): Record<string, unknown> {
 
 export function networkPoliciesApi(client: Client) {
   return {
-    ...resourceApi<KubePolicy, NetworkPolicySummary, NetworkPolicySummary>(client, {
+    ...resourceApi<KubePolicy, NetworkPolicySummary, NetworkPolicyDetail>(client, {
       resource: 'networkpolicies',
       toSummary: toNetworkPolicySummary,
-      toDetail: toNetworkPolicySummary,
+      toDetail: toNetworkPolicyDetail,
     }),
     kind: 'networkpolicies' as const,
   };

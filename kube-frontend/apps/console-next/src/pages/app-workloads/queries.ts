@@ -228,6 +228,14 @@ export interface WorkloadDescriptor {
   allowEditInfo?: boolean;
   /** 停止/启动 by scaling to 0 — the three controllers only. */
   allowScale?: boolean;
+  /**
+   * 编辑设置: the custom template form (image, replicas, env, pull policy).
+   *
+   * True for the three controllers and CronJobs. A Job is excluded because
+   * `spec.template` is immutable once it exists — the dialog would offer a save the
+   * API rejects. Pods and Services have no pod template to edit.
+   */
+  allowEditSettings?: boolean;
   /** 暂停/启动 by `spec.suspend` — CronJobs only. */
   allowSuspend?: boolean;
   /** 创建: only the three controllers the create dialog can build. */
@@ -258,6 +266,7 @@ const POD_STATUS_KEYS = {
 export const WORKLOAD_DESCRIPTORS: Record<string, WorkloadDescriptor> = {
   deployments: {
     kind: 'deployments',
+    allowEditSettings: true,
     allowCreate: true,
     allowRedeploy: true,
     allowScale: true,
@@ -272,6 +281,7 @@ export const WORKLOAD_DESCRIPTORS: Record<string, WorkloadDescriptor> = {
   },
   statefulsets: {
     kind: 'statefulsets',
+    allowEditSettings: true,
     allowCreate: true,
     allowRedeploy: true,
     allowScale: true,
@@ -286,6 +296,7 @@ export const WORKLOAD_DESCRIPTORS: Record<string, WorkloadDescriptor> = {
   },
   daemonsets: {
     kind: 'daemonsets',
+    allowEditSettings: true,
     allowCreate: true,
     allowRedeploy: true,
     allowScale: true,
@@ -311,6 +322,7 @@ export const WORKLOAD_DESCRIPTORS: Record<string, WorkloadDescriptor> = {
   },
   cronjobs: {
     kind: 'cronjobs',
+    allowEditSettings: true,
     allowSuspend: true,
     titleKey: 'workloads.cronjobs.title',
     descriptionKey: 'workloads.cronjobs.description',

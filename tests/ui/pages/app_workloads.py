@@ -273,7 +273,81 @@ class AppWorkloadsPage:
         expect(editor).to_be_visible()
         return editor.inner_text()
 
+    # ---------------- 定制编辑表单 (编辑设置) ----------------
+
+    @property
+    def detail_edit_settings_button(self) -> Locator:
+        return self.page.locator('[data-ai-id="deployments-detail:edit-settings"]')
+
+    def open_edit_settings(self) -> Locator:
+        """Open 编辑设置 on the current deployment detail and return its dialog."""
+        self.detail_edit_settings_button.click()
+        expect(self.dialog).to_be_visible()
+        return self.dialog
+
+    def image_input(self) -> Locator:
+        """The image field of a single-container workload; multi-container adds `:name`."""
+        return self.page.locator('[data-ai-id="deployments-edit:image"]')
+
+    def set_container_image(self, image: str) -> None:
+        self.image_input().fill(image)
+
+    def change_diff_text(self) -> str:
+        """The list of fields the dialog says it will change."""
+        diff = self.page.locator('[data-ai-id="deployments-edit:diff"]')
+        expect(diff).to_be_visible()
+        return diff.inner_text()
+
+    def add_env(self, name: str, value: str) -> None:
+        """Append one environment variable row and fill it."""
+        self.page.locator('[data-ai-id="deployments-edit:env-add"]').click()
+        self.page.locator('[data-ai-id^="deployments-edit:env-key"]').last.fill(name)
+        self.page.locator('[data-ai-id^="deployments-edit:env-value"]').last.fill(value)
+
+    def remove_env(self, name: str) -> None:
+        """Remove the environment variable row whose name input holds the given name."""
+        entries = self.page.locator('[data-ai-id^="deployments-edit:env-key"]')
+        for index in range(entries.count()):
+            entry = entries.nth(index)
+            if entry.input_value() != name:
+                continue
+            ai_id = entry.get_attribute("data-ai-id") or ""
+            remove_id = ai_id.replace("env-key", "env-remove")
+            self.page.locator(f'[data-ai-id="{remove_id}"]').click()
+            return
+        raise AssertionError(f"environment variable row {name!r} not found")
+
     # ---------------- API helpers ----------------
+
+    def wait_deployment_image(self, name: str, image: str, timeout: float = 30) -> None:
+        """Wait until the deployment's first container reports the given image."""
+        deadline = time.time() + timeout
+        seen = None
+        while time.time() < deadline:
+            status, body = self.get_deployment(name)
+            containers = ((((body.get("spec") or {}).get("template") or {}).get("spec") or {}).get("containers") or [])
+            seen = containers[0].get("image") if containers else None
+            if status == 200 and seen == image:
+                return
+            time.sleep(0.25)
+        raise AssertionError(f"deployment {name} image is {seen!r}, expected {image!r}")
+
+    def wait_deployment_env(self, name: str, env_name: str, expected: str | None, timeout: float = 30) -> None:
+        """Wait until the named env var exists with the expected value (or is gone when expected is None)."""
+        deadline = time.time() + timeout
+        seen: dict[str, str] = {}
+        while time.time() < deadline:
+            status, body = self.get_deployment(name)
+            containers = ((((body.get("spec") or {}).get("template") or {}).get("spec") or {}).get("containers") or [])
+            env = (containers[0].get("env") or []) if containers else []
+            seen = {str(item.get("name")): str(item.get("value")) for item in env}
+            if status == 200:
+                if expected is None and env_name not in seen:
+                    return
+                if expected is not None and seen.get(env_name) == expected:
+                    return
+            time.sleep(0.25)
+        raise AssertionError(f"deployment {name} env {env_name!r} is {seen!r}, expected {expected!r}")
 
     def unique(self, suffix: str = "") -> str:
         name = f"tc-e2e-{int(time.time() * 1000) % 1_000_000}"

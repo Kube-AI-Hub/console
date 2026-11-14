@@ -28,6 +28,7 @@ import {
 } from './queries';
 import { EditInfoDialog } from '@/components/resource/EditInfoDialog';
 import { ReplicasDialog } from './ReplicasDialog';
+import { EditWorkloadDialog } from './EditWorkloadDialog';
 import { DeleteDialog } from '@/components/resource/DeleteDialog';
 import { LoadingDialog } from '@/components/resource/LoadingDialog';
 import { ResourceErrorPanel, MutationAlert } from '@/components/resource/ResourceErrorPanel';
@@ -49,9 +50,10 @@ import { DefinitionRow as Row } from '@/components/resource/DefinitionRow';
  * the list uses — one source, so the two screens cannot disagree about whether a
  * deployment is running.
  *
- * Actions: 编辑 YAML (all kinds), 重新部署 (the three controllers that run pods
- * directly), 删除. 扩缩容 and 编辑信息 need a form surface the workload kinds do not
- * share, so they are listed as remaining work rather than half-built here.
+ * Actions: 编辑 YAML (all kinds), 编辑设置 (the three controllers and CronJobs),
+ * 重新部署 (the three controllers that run pods directly), 删除. 扩缩容 and 编辑信息
+ * are separate dialogs because they need a form surface the workload kinds do not
+ * share; 编辑设置 is the narrow template form described in `edit-form.md`.
  */
 /** Container names a pod actually runs; an empty list for anything else. */
 function podContainers(detail: WorkloadDetail): string[] {
@@ -147,7 +149,7 @@ export interface WorkloadDetailPageProps {
   name: string;
 }
 
-type Dialog = 'none' | 'loading' | 'editYaml' | 'delete' | 'editInfo' | 'scale';
+type Dialog = 'none' | 'loading' | 'editYaml' | 'delete' | 'editInfo' | 'scale' | 'editSettings';
 
 export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, name }: WorkloadDetailPageProps): React.ReactElement {
   const { t } = useLocale();
@@ -237,6 +239,16 @@ export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, 
               <AiButton aiId={`${kind}-detail:edit-info`} size="sm" variant="secondary" onClick={() => setDialog('editInfo')}>
                 {t('resource.action.editInfo')}
               </AiButton>
+              {descriptor.allowEditSettings ? (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  {...actionProps(`${kind}-detail:edit-settings`)}
+                  onClick={() => setDialog('editSettings')}
+                >
+                  {t('resource.action.editSettings')}
+                </Button>
+              ) : null}
               {descriptor.allowScale ? (
                 <AiButton aiId={`${kind}-detail:scale`} size="sm" variant="secondary" onClick={() => setDialog('scale')}>
                   {t('workloads.action.scale')}
@@ -741,6 +753,22 @@ export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, 
             // `update()` derives the object name from `body.metadata.name`; a bare
             // annotation patch has no name and would be PUT to the collection URL.
             await update.mutateAsync({ ...detail.raw, metadata: { ...detail.raw.metadata, annotations } });
+            setDialog('none');
+          }}
+        />
+      ) : null}
+
+      {dialog === 'editSettings' && detail ? (
+        <EditWorkloadDialog
+          open
+          onOpenChange={(open) => !open && setDialog('none')}
+          kind={kind}
+          detail={detail}
+          pending={update.isPending}
+          onSubmit={async (body) => {
+            // The dialog keeps itself open on failure, so an error (409 included) is
+            // read where the fields are, not in a banner behind the modal.
+            await update.mutateAsync(body);
             setDialog('none');
           }}
         />

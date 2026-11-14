@@ -251,6 +251,10 @@ describe('api group routing', () => {
     expect(kubePrefix('jobs')).toBe('/apis/batch/v1');
     expect(kubePrefix('cronjobs')).toBe('/apis/batch/v1');
     expect(kubePrefix('ingresses')).toBe('/apis/networking.k8s.io/v1');
+    // NetworkPolicy and StorageClass are edited from their detail pages; a missing
+    // entry here would send the write to /api/v1 and answer 404 while the read works.
+    expect(kubePrefix('networkpolicies')).toBe('/apis/networking.k8s.io/v1');
+    expect(kubePrefix('storageclasses')).toBe('/apis/storage.k8s.io/v1');
   });
 
   it('falls back to core for an unlisted resource', () => {
