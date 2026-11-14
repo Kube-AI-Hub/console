@@ -201,6 +201,24 @@ npm run storybook                # 组件与 schema 的可视化验证
 npm run build                    # 输出 dist/（ESM + d.ts + styles.css）
 ```
 
+### Storybook 侧的约定
+
+侧栏由 `.storybook/preview.tsx` 的 `storySort` 排序：分类固定为 Foundation / Components /
+Schema / Primitives，**分类内部按字母排序**。新增组件时：
+
+1. 新建 `stories/<ComponentName>.stories.tsx`，`meta.title` 写成
+   `Components/<ComponentName>`（与组件同名，不加序号或前缀）；
+2. 不用改排序配置——`method: 'alphabetical'` 会把它放进正确的位置。
+
+**不要**在 `storySort.order` 里维护组件名单：名单不会随着新组件更新，新组件会掉到列表
+末尾（`DescriptionList` 与 `PasswordStrength` 就这样排到过 `Tree` 后面）。只有新增
+**分类**时才更新 `order`，并同步 `test/storybook-order.test.ts` 的 `SECTIONS`。
+
+`npm test` 里的 `storybook-order` 检查守住四件事：排序必须是 `method: 'alphabetical'`
+且 `order` 里不能有嵌套名单；每条 story 的标题必须落在已知分类下；标题不能重复；
+story 文件仍由 glob 自动发现。文件内 story 的先后顺序仍是手写顺序（同一组件的示例
+按叙述排列，不参与字母排序）。
+
 ## 消费方接入
 
 ```js

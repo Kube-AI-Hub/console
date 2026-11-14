@@ -137,53 +137,27 @@ const preview: Preview = {
     },
     options: {
       /**
-       * Sort entries by name, and pin the category bundles to the end.
+       * Sort alphabetically inside each section; pin only the sections.
        *
-       * Storybook's default is alphabetical on the raw title, which put the
-       * leftover bundles (`Components/Capabilities`, `Components/Forms`) among
-       * the real components. Listing the component names explicitly keeps the
-       * sidebar in a fixed, predictable order; anything not listed follows in
-       * alphabetical order.
+       * Storybook's default is *configure order* — the order story files are
+       * discovered. That looked alphabetical only for as long as files happened
+       * to be created in alphabetical order; the first components added later
+       * (`DescriptionList`, `PasswordStrength`) landed at the bottom of the
+       * sidebar instead of between `DatePicker` and `Drawer`.
+       *
+       * `order` therefore lists **sections only**, and `method: 'alphabetical'`
+       * orders the entries inside them. Adding a story titled
+       * `Components/<Name>` is enough for it to appear in the right place — do
+       * not add component names here. An explicit allow-list is exactly what
+       * made new components fall to the end, because it cannot know about
+       * components that do not exist yet.
+       *
+       * `test/storybook-order.test.ts` fails if this block stops being
+       * alphabetical, grows a nested allow-list, or a story title leaves the
+       * known sections.
        */
       storySort: {
-        order: [
-          'Foundation',
-          'Components',
-          [
-            'Alert',
-            'AutoComplete',
-            'Badge',
-            'Breadcrumb',
-            'Button',
-            'Card',
-            'Checkbox',
-            'Collapse',
-            'DatePicker',
-            'Drawer',
-            'Dropdown',
-            'Form',
-            'Input',
-            'Loading',
-            'Menu',
-            'Modal',
-            'Notify',
-            'Pagination',
-            'Popover',
-            'Progress',
-            'Radio',
-            'Select',
-            'Slider',
-            'Table',
-            'Tabs',
-            'Tag',
-            'TextArea',
-            'Toggle',
-            'Tooltip',
-            'Tree',
-            '*',
-          ],
-          'Schema',
-        ],
+        order: ['Foundation', 'Components', 'Schema', 'Primitives'],
         method: 'alphabetical',
       },
     },
