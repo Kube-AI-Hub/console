@@ -603,6 +603,7 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-KUBECTL-01
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-KUBECTL-02
     - id: overview
       title: 集群概览
       prd: prd/kube-frontend/cluster-management/overview.md
@@ -864,6 +865,20 @@ modules:
       L2:
       - TC-FULL-KUBE-FRONTEND-PROJECT_SETTINGS-01
     features:
+    - id: overview-usage
+      title: 项目概览资源用量
+      prd: prd/kube-frontend/project-settings/overview-usage.md
+      design: design/kube-frontend/project-settings/overview-usage.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW_USAGE-01
+    - id: baseinfo-stats
+      title: 项目基本信息统计
+      prd: prd/kube-frontend/project-settings/baseinfo-stats.md
+      design: design/kube-frontend/project-settings/baseinfo-stats.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-BASEINFO-02
     - id: base-info
       title: 项目基本信息
       prd: prd/kube-frontend/project-settings/base-info.md
@@ -893,6 +908,7 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-01
+        - TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_RULES-01
     - id: members
       title: 项目成员列表
       prd: prd/kube-frontend/project-settings/members.md

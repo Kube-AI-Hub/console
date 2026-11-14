@@ -86,7 +86,7 @@
 
 - 曲线与时间范围（复用集群监控页的折线组件）。
 - 用量排行与自动刷新。
-- 把监控命名空间读取收进 api-client（DEC-01）。
+- 把监控命名空间读取收进 api-client（DEC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW_USAGE-01）。
 
 ## 验收用例
 

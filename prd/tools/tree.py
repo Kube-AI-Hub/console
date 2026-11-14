@@ -564,7 +564,10 @@ MODULES = [
                     {
                         "id": "kubectl",
                         "title": "kubectl 终端",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-KUBECTL-01"]},
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-KUBECTL-01",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-KUBECTL-02",
+                        ]},
                     },
                     {
                         "id": "overview",
@@ -762,6 +765,16 @@ MODULES = [
                 "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-PROJECT_SETTINGS-01"]},
                 "features": [
                     {
+                        "id": "overview-usage",
+                        "title": "项目概览资源用量",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW_USAGE-01"]},
+                    },
+                    {
+                        "id": "baseinfo-stats",
+                        "title": "项目基本信息统计",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-BASEINFO-02"]},
+                    },
+                    {
                         "id": "base-info",
                         "title": "项目基本信息",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-BASE_INFO-01"]},
@@ -779,7 +792,7 @@ MODULES = [
                     {
                         "id": "network-isolation",
                         "title": "网络隔离",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-01"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-01", "TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_RULES-01"]},
                     },
                     {
                         "id": "members",
