@@ -94,7 +94,10 @@ function rowClassName(collapsed: boolean): string {
     'flex w-full items-center gap-2 rounded-ai-md py-1.5 text-[13px] leading-5',
     'transition-colors duration-ai-fast',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ai-ring focus-visible:ring-inset',
-    collapsed ? 'justify-center px-2' : 'px-2 text-left',
+    // text-left stays on in the rail: a row that falls back to its label must not
+    // center that label. An icon-only row is a single slot, so justify-center
+    // still puts the glyph in the middle.
+    collapsed ? 'justify-center px-2 text-left' : 'px-2 text-left',
   );
 }
 
@@ -108,6 +111,9 @@ function RowBody({
   reserveIcon: boolean;
 }): React.ReactElement {
   const showSlot = reserveIcon || (collapsed && node.icon != null);
+  // A collapsed rail hides the label only when an icon stands in for it. A row
+  // with neither would be an empty button — the collapsed story has no icons.
+  const showLabel = !collapsed || node.icon == null;
   return (
     <>
       {showSlot ? (
@@ -115,7 +121,7 @@ function RowBody({
           {node.icon ?? null}
         </span>
       ) : null}
-      {!collapsed ? <span className="min-w-0 flex-1 truncate">{node.label}</span> : null}
+      {showLabel ? <span className="min-w-0 flex-1 truncate">{node.label}</span> : null}
       {!collapsed && node.badge ? <span className="shrink-0">{node.badge}</span> : null}
     </>
   );
@@ -209,6 +215,7 @@ export function Menu({
       <button
         type="button"
         aria-current={active ? 'page' : undefined}
+        title={collapsed ? String(node.label) : undefined}
         className={classes}
         style={rowPadding(depth, collapsed, reserveIcon)}
         onClick={node.onClick}

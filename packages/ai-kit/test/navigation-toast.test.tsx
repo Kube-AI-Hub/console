@@ -101,9 +101,22 @@ describe('Menu', () => {
   });
 
   it('hides labels when collapsed but keeps an accessible title', () => {
-    render(<Menu items={[{ key: 'a', label: '概览', href: '/overview' }]} collapsed />);
+    render(<Menu items={[{ key: 'a', label: '概览', icon: <span>i</span>, href: '/overview' }]} collapsed />);
     const link = screen.getByTitle('概览');
     expect(link).toBeInTheDocument();
+    expect(screen.queryByText('概览')).not.toBeInTheDocument();
+  });
+
+  it('names a collapsed icon button that is not a link', () => {
+    render(<Menu items={[{ key: 'a', label: '监控告警', icon: <span>i</span> }]} collapsed />);
+    expect(screen.getByTitle('监控告警')).toBeInTheDocument();
+    expect(screen.queryByText('监控告警')).not.toBeInTheDocument();
+  });
+
+  it('keeps the label on a collapsed row that has no icon', () => {
+    render(<Menu items={[{ key: 'a', label: '监控告警' }, { key: 'b', label: '配置' }]} collapsed aria-label="主导航" />);
+    expect(screen.getByText('监控告警')).toBeInTheDocument();
+    expect(screen.getByText('配置')).toBeInTheDocument();
   });
 
   it('left-aligns every row, and indents a child by one text step when nothing has an icon', () => {
