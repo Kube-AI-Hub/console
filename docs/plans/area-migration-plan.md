@@ -187,7 +187,7 @@ generate_case_docs.py → check_docs.py --strict → parity_check.py
 | 5.1 | 应用商店 / 应用模板 | **已迁移**（2026-11-14 更正） | 旧结论错：`configz.openpitrix=true`，`/kapis/openpitrix.io/v1/{apps,categories,reviews}` 均 200。已交付商店浏览与商店管理三页签 |
 | 5.2 | 镜像构建器 | 不做 | devops 模块关闭（`devops=false`） |
 | 5.3 | 灰度发布 | 不做 | servicemesh 模块关闭（`servicemesh=false`） |
-| 5.4 | 自定义监控（项目/集群） | 不做 | 仪表板接口各路径均 404：`/kapis/monitoring.kubesphere.io/v1alpha3/clusters/host/dashboards`、`/apis/monitoring.kubesphere.io/v1alpha3/{dashboards,clusterdashboards}`（2026-11-14 复测仍 404） |
+| 5.4 | 自定义监控（项目/集群） | **集群级已迁**（2026-11-14 更正）；项目级待做 | 旧结论错在**版本号**：`v1alpha3` 全 404，对象实际在 **`v1alpha2`**——`/apis/monitoring.kubesphere.io/v1alpha2/clusterdashboards` 返回 200（本集群有 1 个）。已交付列表 + YAML 读写 + 删除；**面板编辑器与图表渲染未迁**（独立组件套件） |
 | 5.5 | 集群 kubeconfig 读取/轮换 | 不做 | 读接口 405：`/kapis/cluster.kubesphere.io/v1alpha1/clusters/host/kubeconfig`；`/kapis/{tenant,resources}.kubesphere.io/...kubeconfig` 均 404。更新 kubeconfig（导入）已迁移 |
 | 5.6 | 任务重跑 / 容器组重新调度 | 不做 | `operations.kubesphere.io` 的 kapis 与 apis 各版本路径全部 404（含 `/version`） |
 | 5.7 | 网关真正就绪 | 受限 | Gateway 对象可创建（POST 201），但控制器缺 Helm chart：`spec` 被重写为空、Service 未创建，状态只到 `Deployed=True` |
@@ -3150,3 +3150,24 @@ D-03 已在本轮修正（§4.2）。教训：**"明确不做"是代码状态的
 
 **下一步**：应用详情与应用安装（`/apps/:id`、`/apps/:id/deploy`）；商店写操作（建分类、审核）。
 两者都因商店当前为空而无法验证，已登记为缺口而不是猜实现。
+
+### 58.6 补记：自定义监控 —— 又一次「版本号写成结论」
+
+用户给出老页面地址后复查，发现 §5.4 的「仪表板接口全 404」是**探错版本**得出的：
+
+| 探测 | 结果 |
+| --- | --- |
+| `/kapis/monitoring.kubesphere.io/v1alpha3/{dashboards,clusterdashboards}` | 404（当时据此判「不做」） |
+| `/apis/monitoring.kubesphere.io/v1alpha3/clusterdashboards` | 404 |
+| **`/apis/monitoring.kubesphere.io/v1alpha2/clusterdashboards`** | **200，n=1** |
+| `/apis/monitoring.kubesphere.io/v1alpha2/dashboards` | 200 |
+
+老 console 的 `utils/constants.js` 写得很清楚：`clusterdashboards: 'apis/monitoring.kubesphere.io/v1alpha2'`。
+**教训**：判定「接口不存在」之前，要按**同组其它版本**再探一次；只试一个版本得到的 404，
+证明的是"那个版本没有"，不是"没有"。
+
+交付：`/clusters/:c/custom-monitoring` 列表（标题/面板数/可编辑/创建时间）+ 查看-编辑 YAML + 删除。
+**面板编辑器与图表渲染明确未迁**：老 console 是 Grafana 风格拖拽编辑器（`CustomMonitoringModal`），
+是可独立立项的组件套件；页面上有常驻说明，不假装能画图。
+
+**仍待做**：项目级自定义监控（`dashboards`，接口已确认可用，结构与集群级相同）。

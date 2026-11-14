@@ -694,6 +694,13 @@ modules:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-01
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-03
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-04
+    - id: custom-monitoring
+      title: 自定义监控仪表板
+      prd: prd/kube-frontend/cluster-management/custom-monitoring.md
+      design: design/kube-frontend/cluster-management/custom-monitoring.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_MONITORING-01
     - id: ip-pools
       title: IP 池
       prd: prd/kube-frontend/cluster-management/ip-pools.md

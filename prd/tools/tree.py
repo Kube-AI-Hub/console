@@ -636,6 +636,11 @@ MODULES = [
                         ]},
                     },
                     {
+                        "id": "custom-monitoring",
+                        "title": "自定义监控仪表板",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_MONITORING-01"]},
+                    },
+                    {
                         "id": "ip-pools",
                         "title": "IP 池",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-IP_POOLS-01"]},

@@ -1,0 +1,41 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_MONITORING-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: custom-monitoring
+title: 自定义监控 · 仪表板列表、YAML 与删除
+entry_url: '{BASE_URL}/kube-frontend/clusters/{cluster}/custom-monitoring'
+prd: prd/kube-frontend/cluster-management/custom-monitoring.md
+design: design/kube-frontend/cluster-management/custom-monitoring.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_MONITORING-01
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_MONITORING-02
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_MONITORING-03
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_MONITORING-04
+
+story:
+- US1
+
+product: 集群自定义监控页列出全部 clusterdashboards（标题/面板数/可编辑/创建时间），支持查看-编辑 YAML 与删除；无数据时空态说明仪表板随监控组件下发。
+preconditions:
+- 已登录平台管理
+- monitoring.kubesphere.io/v1alpha2 可读
+steps:
+- 打开集群自定义监控页
+- 核对列表列与「面板编辑器未迁移」说明
+- 若有仪表板：打开第一行 YAML 对话框，确认是合法 JSON/YAML 且含 spec.panels
+- 触发删除确认，确认对话框出现后取消（不实际删除）
+expected:
+- 页面进入 ready 或 empty
+- 说明文字常驻
+- YAML 对话框显示对象内容
+- 删除确认对话框出现且可取消
+performance:
+- 一次列表请求
+troubleshoot:
+- 进入 error：接口版本错（应为 v1alpha2，v1alpha3 全 404）
+- 行数与 apiserver 不一致：裸 List 无分页，刷新即可
+update_automation:
+- 列或行操作变化时同步页面与用例

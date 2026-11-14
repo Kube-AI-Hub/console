@@ -352,3 +352,6 @@ export type { IpPoolDetail, IpPoolSummary } from './network';
 
 export { storeAppsApi, storeCategoriesApi, storeReviewsApi } from './appstore';
 export type { StoreApp, StoreCategory, StoreReview } from './appstore';
+
+export { clusterDashboardsApi, projectDashboardsApi } from './dashboards';
+export type { DashboardDetail, DashboardSummary } from './dashboards';

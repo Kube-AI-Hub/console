@@ -88,8 +88,7 @@ RENAME: dict[str, dict[str, str]] = {
 
 #: 明确不迁移的段 → 原因。原因必须能追到计划 §5 的探测证据或已登记的技术约束。
 UNMIGRATED: dict[str, str] = {
-    "clusters/custom-monitoring": "自定义监控：仪表板接口各路径 404（计划 §5.4）",
-    "projects/custom-monitoring": "同上（计划 §5.4）",
+    "projects/custom-monitoring": "项目级自定义监控（dashboards）：接口可用，页面未做（集群级已迁，见计划 §58.6）",
     "clusters/edgenodes": "边缘节点：edge 模块未开启（§5.10）",
     "clusters/kubeconfig": "kubeconfig 读取 405（§5.5）；导入更新已迁移",
     "projects/applications": "应用商店：openpitrix 模块关闭（§5.1）",
