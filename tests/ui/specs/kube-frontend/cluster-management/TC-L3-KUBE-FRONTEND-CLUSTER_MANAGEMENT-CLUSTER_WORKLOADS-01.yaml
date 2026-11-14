@@ -1,0 +1,37 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_WORKLOADS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: cluster-workloads
+title: 集群级工作负载 · 跨项目列表
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/deployments'
+prd: prd/kube-frontend/cluster-management/cluster-workloads.md
+design: design/kube-frontend/cluster-management/cluster-workloads.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_WORKLOADS-01
+
+story:
+- US1
+
+product: 七类工作负载的集群级跨项目列表：名称（链接）、项目、状态、就绪、镜像、创建时间。
+preconditions:
+- 已登录，且对 host 集群有读取权限
+- 集群里至少有一个部署
+steps:
+- 用 API 读跨项目部署首页（page=1, limit=20）
+- 打开集群级部署页
+- 核对行数与表头
+- 核对项目列与名称链接
+- 核对侧栏「工作负载」分组可达
+expected:
+- 行数等于 min(20,total)
+- 表头包含 名称/项目/状态
+- 名称链接含 workspace 与项目段
+troubleshoot:
+- 行数为 0：带了 namespace 段
+- 侧栏缺失：registry path 含 /（契约会拒绝）
+- 英文界面报缺键：只加了中文词典
+update_automation:
+- 选择器见 pages/cluster_management.py 与 ClusterWorkloadsPage.tsx

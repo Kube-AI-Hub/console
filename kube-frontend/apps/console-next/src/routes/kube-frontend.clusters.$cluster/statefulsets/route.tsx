@@ -1,0 +1,11 @@
+import * as React from 'react';
+import { createFileRoute, Outlet } from '@tanstack/react-router';
+
+/** `…/clusters/$cluster/statefulsets` — cluster-wide statefulsets list. */
+export const Route = createFileRoute('/kube-frontend/clusters/$cluster/statefulsets')({
+  component: PageOutlet,
+});
+
+function PageOutlet(): React.ReactElement {
+  return <Outlet />;
+}
