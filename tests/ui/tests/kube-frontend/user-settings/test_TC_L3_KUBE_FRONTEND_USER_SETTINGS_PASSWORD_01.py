@@ -14,7 +14,7 @@ NO_SPECIAL = re.compile(r"^密码需包含特殊字符")
 
 @pytest.mark.point
 def test_TC_L3_KUBE_FRONTEND_USER_SETTINGS_PASSWORD_01(temp_user, settings_page_for, screenshot):
-    """TC-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-01 密码设置：必填、规则（含特殊字符）与一致性在本地拦下且不发请求。"""
+    """TC-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-01 密码设置：必填、规则（含特殊字符）与确认密码实时比对在本地拦下且不发请求。"""
 
     user = temp_user()
     ui = settings_page_for(user["name"], user["password"])
@@ -52,10 +52,33 @@ def test_TC_L3_KUBE_FRONTEND_USER_SETTINGS_PASSWORD_01(temp_user, settings_page_
     ui.save_password()
     expect(ui.password_error).to_have_text(NO_SPECIAL)
 
-    # 6) 两次输入不一致（两个值各自都合规，都带特殊字符）。
+    # 6) 两次输入不一致（两个值各自都合规，都带特殊字符）。这条错误已经实时显示在
+    #    确认框下方，点保存不再重复渲染同一条文案，也不提交。
     ui.fill_password(user["password"], "TcE2e@2026x", "TcE2e@2026y")
+    expect(ui.confirm_hint).to_have_attribute("data-match", "false")
+    expect(ui.confirm_hint).to_have_text("两次输入的密码必须一致。")
     ui.save_password()
-    expect(ui.password_error).to_have_text("两次输入的密码必须一致。")
+    expect(ui.password_error).to_be_hidden()
+
+    # 7) 实时比对：确认密码边输入边比对，全程不点保存。
+    ui.fill_password(user["password"], "Abcdefg1@", "")
+    expect(ui.confirm_hint).to_have_count(0)
+
+    ui.confirm_password.fill("Abcdefg1")
+    expect(ui.confirm_hint).to_have_attribute("data-match", "false")
+    expect(ui.confirm_hint).to_have_text("两次输入的密码必须一致。")
+
+    ui.confirm_password.fill("Abcdefg1@")
+    expect(ui.confirm_hint).to_have_attribute("data-match", "true")
+    expect(ui.confirm_hint).to_have_text("两次输入的密码一致。")
+
+    # 只改新密码、不动确认框，提示也要立刻重算（老 console 的错误会滞留在这里）。
+    ui.new_password.fill("Abcdefg2@")
+    expect(ui.confirm_hint).to_have_attribute("data-match", "false")
+
+    # 清空确认密码 → 提示消失。
+    ui.confirm_password.fill("")
+    expect(ui.confirm_hint).to_have_count(0)
 
     writes = ui.user_writes(user["name"])
     assert writes == [], f"本地校验没通过却发了写请求：{writes}"

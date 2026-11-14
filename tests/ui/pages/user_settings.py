@@ -178,6 +178,15 @@ class UserSettingsPage:
         self.new_password.fill(new)
         self.confirm_password.fill(confirm)
 
+    @property
+    def confirm_hint(self) -> Locator:
+        """确认密码框下方的实时比对提示。确认密码为空时这个节点不存在。"""
+        return self.page.locator('[data-ai-id="user-settings:confirm-hint"]').last
+
+    def confirm_match(self) -> str | None:
+        """比对结果的 `data-match`：true / false。"""
+        return self.confirm_hint.get_attribute("data-match")
+
     def save_password(self) -> None:
         self.page.locator('[data-ai-id="user-settings:password-save"]').click()
 

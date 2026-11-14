@@ -134,6 +134,20 @@ export function UserSettingsDialog({ open, onOpenChange, onSignedOut }: UserSett
 
   const dirty = profile.data !== undefined && email.trim() !== (profile.data.email ?? '').trim();
 
+  /*
+   * The confirmation is compared **as it is typed**, not when the form is submitted.
+   *
+   * That is what the old console did: its `rePassword` field carried a validator rule, and
+   * kube-design's `Form.Item` re-runs the field's rules on every (debounced) change. Waiting for
+   * the save button means a reader only learns they mistyped after pressing it.
+   *
+   * Derived rather than stored, so editing the new password re-checks the confirmation too. The
+   * old implementation only re-validated the field that changed, which left a stale "must match"
+   * error behind after the new password was corrected.
+   */
+  const confirmFilled = confirmPassword !== '';
+  const confirmMatches = confirmFilled && confirmPassword === newPassword;
+
   const submitProfile = (): void => {
     setEmailTouched(true);
     setSaved(false);
@@ -154,7 +168,9 @@ export function UserSettingsDialog({ open, onOpenChange, onSignedOut }: UserSett
       return;
     }
     if (newPassword !== confirmPassword) {
-      setFormError(t('userSettings.password.mismatch'));
+      // The hint under the confirmation field already says this, live; repeating it above the
+      // buttons would show the same sentence twice.
+      setFormError(null);
       return;
     }
     change.mutate({ currentPassword, password: newPassword });
@@ -311,6 +327,16 @@ export function UserSettingsDialog({ open, onOpenChange, onSignedOut }: UserSett
                 onChange={(event) => setConfirmPassword(event.target.value)}
                 {...actionProps('user-settings:confirm-password')}
               />
+              {confirmFilled ? (
+                <span
+                  className={confirmMatches ? 'text-[11px] text-ai-success' : 'text-[11px] text-ai-danger'}
+                  role={confirmMatches ? 'status' : 'alert'}
+                  data-match={confirmMatches ? 'true' : 'false'}
+                  {...actionProps('user-settings:confirm-hint')}
+                >
+                  {confirmMatches ? t('userSettings.password.match') : t('userSettings.password.mismatch')}
+                </span>
+              ) : null}
             </label>
             {passwordError ? (
               <p className="text-xs text-ai-danger" role="alert" {...actionProps('user-settings:password-error')}>

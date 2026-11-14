@@ -58,7 +58,7 @@ flowchart LR
 - 密码设置页签：三个密码框、新密码框上方常驻的规则说明、新密码框下方的强度面板（仅新密码非空时显示，含四条检查项与弱/中/强三档文字标签）、页内底部「修改密码」按钮；失败提示与成功提示都在按钮上方。
 - 页签切换不提交、不重置另一页的输入；关闭弹窗（右上角关闭、Esc、点遮罩、页脚关闭）即丢弃未保存的输入，不再二次确认——两页加起来最多四个字段，重填成本低于一次确认弹窗。
 - 弹窗根节点带 `data-ai-state`：基本信息页签读取中为 `loading`、可交互为 `ready`、读取失败为 `error`；密码设置页签没有读取请求，恒为 `ready`。
-- 交互元素带固定 `data-ai-id`，实现与用例共用：`shell:user-settings`、`user-settings:surface`、`user-settings:tab-profile`、`user-settings:tab-password`、`user-settings:username`、`user-settings:platform-role`、`user-settings:email`、`user-settings:profile-save`、`user-settings:profile-error`、`user-settings:current-password`、`user-settings:new-password`、`user-settings:confirm-password`、`user-settings:password-save`、`user-settings:password-error`、`user-settings:password-rule`（规则说明）、`user-settings:password-strength`（面板根，`data-strength`）、`user-settings:password-strength-bar`、`user-settings:password-check-case` / `-digit` / `-special` / `-length`（`data-met`）。另有四个辅助句柄：`user-settings:close`（页脚关闭）、`user-settings:retry`（读取失败重试）、`user-settings:profile-saved`、`user-settings:password-saved`。
+- 交互元素带固定 `data-ai-id`，实现与用例共用：`shell:user-settings`、`user-settings:surface`、`user-settings:tab-profile`、`user-settings:tab-password`、`user-settings:username`、`user-settings:platform-role`、`user-settings:email`、`user-settings:profile-save`、`user-settings:profile-error`、`user-settings:current-password`、`user-settings:new-password`、`user-settings:confirm-password`、`user-settings:password-save`、`user-settings:password-error`、`user-settings:password-rule`（规则说明）、`user-settings:password-strength`（面板根，`data-strength`）、`user-settings:password-strength-bar`、`user-settings:password-check-case` / `-digit` / `-special` / `-length`（`data-met`）、`user-settings:confirm-hint`（`data-match`，确认密码框下方的实时比对提示）。另有四个辅助句柄：`user-settings:close`（页脚关闭）、`user-settings:retry`（读取失败重试）、`user-settings:profile-saved`、`user-settings:password-saved`。
 - 错误与说明文字用 `text-ai-danger` / `text-ai-fg-muted` 语义 token（宪法 C3），不写字面色值。
 
 ## 页面结构
@@ -68,7 +68,7 @@ flowchart LR
 | 顶栏账号菜单 | 「用户设置」项（其余项：当前邮箱、退出登录） |
 | 弹窗标题区 | 标题、说明、两个页签 |
 | 基本信息页签 | 用户名（只读文本）、平台角色（只读文本）、邮箱（输入框）、保存按钮、已保存提示、错误行 |
-| 密码设置页签 | 当前密码、规则说明（新密码框上方）、新密码、强度面板（新密码框下方）、确认密码、修改密码按钮、错误行、成功提示 |
+| 密码设置页签 | 当前密码、规则说明（新密码框上方）、新密码、强度面板（新密码框下方）、确认密码、比对提示（确认密码框下方）、修改密码按钮、错误行、成功提示 |
 | 弹窗页脚 | 关闭 |
 
 弹窗不改变地址栏：打开前后路由相同，关闭后页面状态（滚动位置、已填的表单）不变。
@@ -82,7 +82,7 @@ flowchart LR
 | 邮箱为空或格式非法 | 邮箱下方「请输入合法的邮箱地址。」 | 弹窗内，不发出写请求 |
 | 当前密码错误 | 「当前密码不正确」，输入保留 | 密码页签，可改正后重试 |
 | 新密码不合规 | 按命中原因显示一条：「密码至少 8 位。」「密码不能超过 64 字节。」「密码需包含大写字母。」「密码需包含数字。」「密码需包含特殊字符（…）。」 | 密码页签，不发出写请求；强度面板同时显示「弱」 |
-| 两次输入不一致 | 「两次输入的密码必须一致。」 | 密码页签，不发出写请求 |
+| 两次输入不一致 | 确认密码框下方实时红字「两次输入的密码必须一致。」；点保存也不重复渲染 | 密码页签，不发出写请求 |
 | 写邮箱遇到 409（对象被并发改过） | 显示保存失败，弹窗保持打开 | 弹窗内，重新打开弹窗可读到最新对象 |
 | 会话已过期（401） | 读取失败提示；刷新页面后回到登录页 | 弹窗内 |
 
