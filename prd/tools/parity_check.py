@@ -30,6 +30,10 @@ OLD = REPO / "src/pages"
 #: 老 console 里**项目作用域**的一级页面目录 → 迁移后的路由段。
 #: 只列已经决定迁移的页面；老 console 的其余页面在 UNMIGRATED 里显式登记，
 #: 这样「没写」和「决定不做」不会混在一起。
+#: Route directories kept only as redirects for old bookmarks. They intentionally have no
+#: navigation entry, so "not in the registry" is not a finding for them.
+ALIAS_ROUTES = {"cluster": {"snapshots"}}
+
 PROJECT_PAGES = {
     "overview": "overview",
     "configmaps": "configmaps",
@@ -244,7 +248,7 @@ def main() -> int:
             report["missing"].append(f"{segment}：缺 route.tsx（列表会吞掉详情）")
         if "index.tsx" not in files:
             report["missing"].append(f"{segment}：缺 index.tsx")
-        if key not in registry:
+        if key not in registry and segment not in ALIAS_ROUTES.get("cluster", set()):
             report["unregistered"].append(key)
 
     # 集群级：老页面 → 是否已迁移。此前只查「多余」与「未登记」，一条**没迁移的**
@@ -259,7 +263,7 @@ def main() -> int:
         files = page_files(cluster_dir, segment)
         key = f"cluster:{segment}"
         report["details"][key] = files
-        if key not in registry:
+        if key not in registry and segment not in ALIAS_ROUTES.get("cluster", set()):
             report["unregistered"].append(key)
 
     # 平台作用域：老页面 → 新路由（access 与 settings 两处目录）。路由以目录是否存在为准，

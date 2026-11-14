@@ -107,11 +107,6 @@ ELSEWHERE: dict[str, str] = {
 #: 已登记缺口：承认还没做，并指向计划条目。**不是「明确不做」**——
 #: 登记在此是为了让它们持续可见，而不是消失。
 PLANNED: dict[str, str] = {
-    "clusters/snapshots": "快照别名路由（计划 §6.1）",
-    "clusters/volume-snapshot-content": "快照内容（计划 §6.1）",
-    "clusters/juicefs-storage": "JuiceFS 共享存储（计划 §6.1）",
-    "clusters/gpu-resource": "GPU 资源监控（计划 §6.1）",
-    "clusters/monitor-resource": "应用资源监控（计划 §6.1）",
 }
 
 #: 整个作用域级别的归宿。老 console 有 9 个作用域，其中四个整块不在迁移范围内——
