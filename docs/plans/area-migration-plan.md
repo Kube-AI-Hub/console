@@ -212,6 +212,12 @@ tree.py → build_prd.py → prd(AC) → design(DEC/不变量/坑) → spec(cove
 
 39. **落地做法**：`while true; do ssh -N ... ; sleep 3; done` 管隧道；BFF 用同样循环包一层并 append 日志；杀进程时按 **端口** 精确杀（`lsof -i :8092`），不要按 `ps | grep` 批量杀——静态服务器与 BFF 之间有连接，会被一起带走。
 
+### 4.11 B200 集群自身故障会让「写类用例」整片失败（2026-11-14 22:20 实测）
+
+41. **现象**：13 条 E2E 失败，全部是写类（建用户、改集群别名、平台设置、可见性、改密/资料），错误是 `failed calling webhook "users.iam.kubesphere.io": dial tcp 10.233.54.137:443: connect: connection refused`。**读类用例全过**，5178/BFF/隧道都健康。
+42. **根因在集群侧**，不在仓库：`kubesphere-system/ks-controller-manager` pod 处于 Running 但 Not Ready（8 次重启，exit 255），日志末尾是 `failed to get calico-node deployment in kube-system, err=daemonsets.apps "calico-node" not found` —— 控制器启动即 fatal，于是它提供的所有 KubeSphere webhook 全部不可用。节点 gpu01/gpu02 均 Ready。
+43. **判定方式**：失败信息里出现 `failed calling webhook` 且 `connection refused`、同时节点 Ready、读类用例正常，就可以直接判定为集群 webhook 故障，不要逐条查页面。恢复动作属于集群运维（让 ks-controller-manager 正常起来），不属于本仓库改动。
+
 ## 5. 验证与门禁
 
 ```bash
