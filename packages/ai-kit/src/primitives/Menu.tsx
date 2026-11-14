@@ -57,6 +57,87 @@ function containsKey(node: MenuNode, key: string): boolean {
   return (node.children ?? []).some((child) => containsKey(child, key));
 }
 
+/** True when any row carries an icon, so the whole tree shares one icon column. */
+function treeHasIcon(nodes: readonly MenuNode[]): boolean {
+  return nodes.some((node) => node.icon != null || treeHasIcon(node.children ?? []));
+}
+
+const ROW_PAD = 8;
+/** Indent of a text-only child: one step, no phantom icon column. */
+const TEXT_STEP = 16;
+/** Indent when an icon column exists: the 16px slot plus the 8px gap. */
+const ICON_STEP = 24;
+
+/**
+ * Extra left padding for a nested row.
+ *
+ * Depth 0 keeps the shared `px-2`. Deeper rows step right by a fixed amount so
+ * every label at the same depth starts on the same x, whether or not that row
+ * itself has an icon.
+ */
+function rowPadding(depth: number, collapsed: boolean, reserveIcon: boolean): React.CSSProperties | undefined {
+  if (collapsed || depth === 0) return undefined;
+  return { paddingLeft: ROW_PAD + depth * (reserveIcon ? ICON_STEP : TEXT_STEP) };
+}
+
+/**
+ * Shared row chrome for a group and a leaf.
+ *
+ * `text-left` is on the control itself: a `<button>` is centered by the browser,
+ * and a `flex-1` label then sits in the middle of the row. The icon rail is the
+ * only place a row is centered.
+ *
+ * 13px: 12px was too small for CJK, whose strokes need more vertical room.
+ */
+function rowClassName(collapsed: boolean): string {
+  return cn(
+    'flex w-full items-center gap-2 rounded-ai-md py-1.5 text-[13px] leading-5',
+    'transition-colors duration-ai-fast',
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ai-ring focus-visible:ring-inset',
+    collapsed ? 'justify-center px-2' : 'px-2 text-left',
+  );
+}
+
+function RowBody({
+  node,
+  collapsed,
+  reserveIcon,
+}: {
+  node: MenuNode;
+  collapsed: boolean;
+  reserveIcon: boolean;
+}): React.ReactElement {
+  const showSlot = reserveIcon || (collapsed && node.icon != null);
+  return (
+    <>
+      {showSlot ? (
+        <span className="grid size-4 shrink-0 place-items-center" data-ai-menu-icon="" aria-hidden="true">
+          {node.icon ?? null}
+        </span>
+      ) : null}
+      {!collapsed ? <span className="min-w-0 flex-1 truncate">{node.label}</span> : null}
+      {!collapsed && node.badge ? <span className="shrink-0">{node.badge}</span> : null}
+    </>
+  );
+}
+
+function Chevron({ open }: { open: boolean }): React.ReactElement {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={cn('size-3 shrink-0 text-ai-fg-faint transition-transform duration-ai-base ease-ai-out', open && 'rotate-90')}
+    >
+      <path d="m9 18 6-6-6-6" />
+    </svg>
+  );
+}
+
 export function Menu({
   items,
   activeKey,
@@ -83,32 +164,22 @@ export function Menu({
     setOpenKeys((current) => (current.includes(key) ? current.filter((item) => item !== key) : [...current, key]));
   };
 
+  // One icon anywhere means every row keeps a 16px slot, so a group without an
+  // icon still shares the label column with the pages that have one.
+  const reserveIcon = !collapsed && treeHasIcon(items);
+
   const renderLeaf = (node: MenuNode, depth: number): React.ReactElement => {
     const active = node.key === activeKey;
-    const content = (
-      <>
-        {node.icon ? <span className="grid size-4 shrink-0 place-items-center" aria-hidden="true">{node.icon}</span> : null}
-        {!collapsed ? <span className="min-w-0 flex-1 truncate">{node.label}</span> : null}
-        {!collapsed && node.badge ? <span className="shrink-0">{node.badge}</span> : null}
-      </>
-    );
     const classes = cn(
-      // 13px: 12px was too small for CJK, whose strokes need more vertical room
-      // to stay legible at this density.
-      'flex w-full items-center gap-2 rounded-ai-md py-1.5 text-[13px] leading-5 transition-colors duration-ai-fast',
-      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ai-ring focus-visible:ring-inset',
-      collapsed ? 'justify-center px-2' : 'pl-2 pr-2',
+      rowClassName(collapsed),
       active
         ? 'bg-ai-accent/12 font-medium text-ai-accent'
         : 'text-ai-fg-muted hover:bg-ai-surface-2 hover:text-ai-fg',
       node.disabled && 'pointer-events-none opacity-50',
     );
-
-    // Nested levels indent by the same 16px as the icon slot plus the 8px gap,
-    // so a child's text lines up under its parent's text rather than under the
-    // chevron. Previously `px-2` and an inline `paddingLeft` were both applied,
-    // which made every level drift 8px further right.
-    const indent = collapsed ? undefined : depth > 0 ? { paddingLeft: 8 + depth * 16 } : undefined;
+    const content = (
+      <RowBody node={node} collapsed={collapsed} reserveIcon={reserveIcon} />
+    );
 
     if (node.href) {
       return (
@@ -117,7 +188,7 @@ export function Menu({
           aria-current={active ? 'page' : undefined}
           title={collapsed ? String(node.label) : undefined}
           className={classes}
-          style={indent}
+          style={rowPadding(depth, collapsed, reserveIcon)}
           onClick={(event) => {
             /*
              * Router first: a full document load re-downloads every chunk and
@@ -135,7 +206,13 @@ export function Menu({
       );
     }
     return (
-      <button type="button" aria-current={active ? 'page' : undefined} className={classes} style={indent} onClick={node.onClick}>
+      <button
+        type="button"
+        aria-current={active ? 'page' : undefined}
+        className={classes}
+        style={rowPadding(depth, collapsed, reserveIcon)}
+        onClick={node.onClick}
+      >
         {content}
       </button>
     );
@@ -146,38 +223,16 @@ export function Menu({
     if (!hasChildren) return <li key={node.key}>{renderLeaf(node, depth)}</li>;
 
     const open = openKeys.includes(node.key);
-    // A group's icon keeps the children aligned with it: the trigger has the
-    // same 16px icon slot and the same gap as a leaf.
-    const groupIndent = collapsed ? undefined : depth > 0 ? { paddingLeft: 8 + depth * 16 } : undefined;
     return (
       <li key={node.key}>
         <CollapsiblePrimitive.Root open={open} onOpenChange={() => toggle(node.key)}>
           <CollapsiblePrimitive.Trigger
-            className={cn(
-              'group flex w-full items-center gap-2 rounded-ai-md py-1.5 text-[13px] font-medium leading-5 text-ai-fg-secondary',
-              'transition-colors duration-ai-fast hover:bg-ai-surface-2 hover:text-ai-fg',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ai-ring focus-visible:ring-inset',
-              collapsed ? 'justify-center px-2' : 'px-2',
-            )}
-            style={groupIndent}
+            className={cn(rowClassName(collapsed), 'group font-medium text-ai-fg-secondary hover:bg-ai-surface-2 hover:text-ai-fg')}
+            style={rowPadding(depth, collapsed, reserveIcon)}
             title={collapsed ? String(node.label) : undefined}
           >
-            {node.icon ? <span className="grid size-4 shrink-0 place-items-center" aria-hidden="true">{node.icon}</span> : null}
-            {!collapsed ? <span className="min-w-0 flex-1 truncate text-left">{node.label}</span> : null}
-            {!collapsed ? (
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-                className={cn('size-3 shrink-0 text-ai-fg-faint transition-transform duration-ai-base ease-ai-out', open && 'rotate-90')}
-              >
-                <path d="m9 18 6-6-6-6" />
-              </svg>
-            ) : null}
+            <RowBody node={node} collapsed={collapsed} reserveIcon={reserveIcon} />
+            {!collapsed ? <Chevron open={open} /> : null}
           </CollapsiblePrimitive.Trigger>
           {!collapsed ? (
             <CollapsiblePrimitive.Content>

@@ -106,6 +106,49 @@ describe('Menu', () => {
     expect(link).toBeInTheDocument();
   });
 
+  it('left-aligns every row, and indents a child by one text step when nothing has an icon', () => {
+    render(
+      <Menu
+        aria-label="主导航"
+        defaultOpenKeys={['group']}
+        items={[
+          { key: 'group', label: '工作负载', children: [{ key: 'pod', label: 'Pod' }] },
+          { key: 'monitor', label: '监控告警' },
+        ]}
+      />,
+    );
+    const group = screen.getByRole('button', { name: '工作负载' });
+    const leaf = screen.getByRole('button', { name: '监控告警' });
+    const child = screen.getByRole('button', { name: 'Pod' });
+    for (const row of [group, leaf, child]) {
+      expect(row.className).toContain('text-left');
+      expect(row.querySelector('[data-ai-menu-icon]')).toBeNull();
+    }
+    // 8px row pad + one 16px step. No icon column, so the child does not jump further.
+    expect(child).toHaveStyle({ paddingLeft: '24px' });
+  });
+
+  it('reserves an icon slot on a row that has none, once any row has an icon', () => {
+    render(
+      <Menu
+        aria-label="主导航"
+        defaultOpenKeys={['group']}
+        items={[
+          { key: 'group', label: '配置', children: [{ key: 'cm', label: '配置字典', icon: <span>i</span> }] },
+          { key: 'overview', label: '概览' },
+        ]}
+      />,
+    );
+    const group = screen.getByRole('button', { name: '配置' });
+    const overview = screen.getByRole('button', { name: '概览' });
+    const child = screen.getByRole('button', { name: '配置字典' });
+    expect(group.querySelector('[data-ai-menu-icon]')).not.toBeNull();
+    expect(overview.querySelector('[data-ai-menu-icon]')).not.toBeNull();
+    expect(child.querySelector('[data-ai-menu-icon]')).not.toBeNull();
+    // 8px row pad + one 24px step (slot + gap), so the child icon sits under the parent label.
+    expect(child).toHaveStyle({ paddingLeft: '32px' });
+  });
+
   it('toggles a group open and closed', async () => {
     render(<Menu items={items} />);
     const groupButton = screen.getByRole('button', { name: /集群/ });
