@@ -8,7 +8,7 @@ import { api as apiClient } from '@/api';
 import { useResourceListState } from '@/components/resource/useResourceListState';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
-import { clusterConfigRowId, projectObjectUrl, useClusterProjectIndex } from './useClusterProjectIndex';
+import { clusterProjectRowId, projectObjectUrl, useClusterProjectIndex } from './useClusterProjectIndex';
 
 /**
  * 集群级配置字典（跨项目）.
@@ -63,8 +63,8 @@ export function ClusterConfigMapsPage({ cluster }: ClusterConfigMapsPageProps): 
     () => ({
       title: t('cluster.config.configmaps.title'),
       description: t('cluster.config.description'),
-      rowKey: (row) => clusterConfigRowId(row),
-      rowAttributes: (row) => ({ 'data-ai-row': clusterConfigRowId(row) }),
+      rowKey: (row) => clusterProjectRowId(row),
+      rowAttributes: (row) => ({ 'data-ai-row': clusterProjectRowId(row) }),
       search: { placeholder: t('cluster.searchPlaceholder'), aiId: AI_ID + ':search' },
       sortableKeys: ['name', 'createTime'],
       sortAiPrefix: AI_ID,

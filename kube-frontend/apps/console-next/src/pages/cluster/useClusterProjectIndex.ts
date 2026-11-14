@@ -4,12 +4,12 @@ import { namespacesApi } from '@kube-ai-hub/api-client';
 import { api as apiClient } from '@/api';
 
 /**
- * 集群级配置页共用的「项目 → 企业空间」索引.
+ * 集群级跨项目页共用的「项目 → 企业空间」索引.
  *
  * A cluster-wide row carries the project it lives in, but not the workspace that
- * project belongs to — a Secret has no idea which enterprise space owns its
- * namespace. The project console's URL needs both segments, so every cluster page
- * reads the namespace list once and indexes it by name.
+ * project belongs to — a Secret or a PVC has no idea which enterprise space owns
+ * its namespace. The project console's URL needs both segments, so every cluster
+ * page reads the namespace list once and indexes it by name.
  *
  * The query key is shared with the other cluster pages (cluster-pods,
  * cluster-workloads): switching between them reuses the same cached read instead
@@ -35,7 +35,7 @@ export function projectObjectUrl(params: {
   cluster: string;
   workspace: string;
   namespace: string;
-  page: 'secrets' | 'configmaps' | 'serviceaccounts';
+  page: 'secrets' | 'configmaps' | 'serviceaccounts' | 'persistentvolumeclaims';
   name: string;
 }): string {
   return (
@@ -59,6 +59,6 @@ export function projectObjectUrl(params: {
  * namespace — so the row key includes the project. A name-only key collides in
  * React and makes an automation locator match several rows.
  */
-export function clusterConfigRowId(row: { namespace: string; name: string }): string {
+export function clusterProjectRowId(row: { namespace: string; name: string }): string {
   return row.namespace + '/' + row.name;
 }

@@ -9,7 +9,7 @@ import { useResourceListState } from '@/components/resource/useResourceListState
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
 import { SECRET_TYPE_LABEL } from '@/pages/secrets/secretTypes';
-import { clusterConfigRowId, projectObjectUrl, useClusterProjectIndex } from './useClusterProjectIndex';
+import { clusterProjectRowId, projectObjectUrl, useClusterProjectIndex } from './useClusterProjectIndex';
 
 /**
  * 集群级保密字典（跨项目）.
@@ -59,8 +59,8 @@ export function ClusterSecretsPage({ cluster }: ClusterSecretsPageProps): React.
     () => ({
       title: t('cluster.config.secrets.title'),
       description: t('cluster.config.description'),
-      rowKey: (row) => clusterConfigRowId(row),
-      rowAttributes: (row) => ({ 'data-ai-row': clusterConfigRowId(row) }),
+      rowKey: (row) => clusterProjectRowId(row),
+      rowAttributes: (row) => ({ 'data-ai-row': clusterProjectRowId(row) }),
       search: { placeholder: t('cluster.searchPlaceholder'), aiId: AI_ID + ':search' },
       sortableKeys: ['name', 'createTime'],
       sortAiPrefix: AI_ID,
