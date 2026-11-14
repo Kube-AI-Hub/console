@@ -67,6 +67,10 @@ class AppWorkloadsPage:
         """The dedicated create dialog's body: `services-create:dialog` / `ingresses-create:dialog`."""
         return self.page.locator(f'[data-ai-id="{kind}-create:dialog"]')
 
+    def network_create_field(self, key: str) -> Locator:
+        """Manifest-dialog inputs are rendered by ResourceForm with the `ai-field-` id prefix."""
+        return self.page.get_by_role("dialog").locator(f"#ai-field-{key}")
+
     def service_create_field(self, key: str) -> Locator:
         return self.page.locator(f'[data-ai-id="services-create:{key}"]')
 
