@@ -1,0 +1,40 @@
+id: TC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOTS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: storage
+feature: snapshots
+title: 卷快照与快照类型 · 集群级列表
+entry_url: "{BASE_URL}/kube-frontend/clusters/host/volume-snapshots"
+prd: prd/kube-frontend/storage/snapshots.md
+design: design/kube-frontend/storage/snapshots.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOTS-01
+
+story:
+- US1
+
+product: 集群级「存储卷快照」跨项目列出快照（名称/项目/状态/容量/快照类型/创建时间），「快照类型」列出 VolumeSnapshotClass（名称/驱动/删除策略/参数个数/创建时间）；未安装 CSI 快照 CRD 时两页给出明确说明而不是空表。
+preconditions:
+- 已登录，且是 host 集群的集群管理员（集群级页面，无 workspace / 项目段）
+- 用例用 BFF 探测 snapshot.storage.k8s.io/v1 是否存在；存在时临时创建一条 tc-e2e- VolumeSnapshotClass，用例结束无条件删除
+steps:
+- 用发现接口判断快照 CRD 是否存在，并读取两处 kapis 集合的总数
+- 打开 /kube-frontend/clusters/<cluster>/volume-snapshots，等待主区离开 loading
+- 读取表头与行数，核对行句柄 <项目>/<名称>、项目列与名称链接
+- 打开 /kube-frontend/clusters/<cluster>/volume-snapshot-classes，读取表头与行数
+- 核对临时创建的快照类型行含驱动与删除策略
+expected:
+- CRD 存在且集合非空时：两页 data-ai-state=ready，行数等于 min(20, total)，快照表头为 名称/项目/状态/容量/快照类型/创建时间，类型表头为 名称/驱动/删除策略/参数个数/创建时间
+- 快照行句柄为 <项目>/<名称>，项目列文本等于项目，名称链接指向 /projects/<项目>/volumesnapshots/<名称>
+- 临时快照类型出现在列表且参数个数为 1
+- CRD 存在但集合为空时：data-ai-state=empty 且显示「暂无存储卷快照」/「暂无快照类型」
+- CRD 不存在时：两页都显示「本集群未安装快照 CRD」的说明块（*-crd-missing），不渲染空表
+troubleshoot:
+- 页面进入 error：先确认 BFF 的 KS_API_MODE 是否为 kapis；kubectl-proxy harness 不提供跨项目 kapis 列表
+- CRD 已装但页面显示未安装：discovery 只把 404 当作未安装，403/5xx 会走错误面板
+- 行数少于 total：检查分页参数 limit=20 是否透传，以及是否被搜索关键字过滤
+update_automation:
+- 列变化时改页面 schema 与 setup 里的表头常量
+- 快照 CRD 安装情况变化时，用例的 installed 分支会自动切换，无需改断言
