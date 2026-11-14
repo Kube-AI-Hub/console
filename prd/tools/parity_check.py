@@ -47,6 +47,7 @@ PROJECT_PAGES = {
     "pods": "pods",
     "services": "services",
     "routes": "ingresses",
+    "grayrelease": "grayrelease",
     "volumes": "persistentvolumeclaims",
     "volumesnapshots": "volumesnapshots",
     "alerting/messages": "alerts",
