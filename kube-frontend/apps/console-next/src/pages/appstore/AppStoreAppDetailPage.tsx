@@ -77,7 +77,7 @@ export function AppStoreAppDetailPage({ appId }: AppStoreAppDetailPageProps): Re
 
   if (state === 'loading') {
     return (
-      <AiSurface as="section" aiId="app-detail:surface" state={state === 'loading' ? 'loading' : 'error'} className="flex min-w-0 flex-col gap-4">
+      <AiSurface as="section" aiId="app-detail:surface" state="loading" className="flex min-w-0 flex-col gap-4">
         {back}
         <Skeleton className="h-24 w-full" />
         <Skeleton className="h-40 w-full" />
@@ -87,7 +87,7 @@ export function AppStoreAppDetailPage({ appId }: AppStoreAppDetailPageProps): Re
 
   if (notFound) {
     return (
-      <AiSurface as="section" aiId="app-detail:surface" state={state === 'loading' ? 'loading' : 'error'} className="flex min-w-0 flex-col gap-4">
+      <AiSurface as="section" aiId="app-detail:surface" state="error" className="flex min-w-0 flex-col gap-4">
         {back}
         <div className="rounded-ai-md border border-ai-line p-8 text-center" data-ai-id="app-detail:not-found">
           <p className="text-sm font-medium text-ai-fg">{t('store.detail.notFoundTitle')}</p>
@@ -99,7 +99,7 @@ export function AppStoreAppDetailPage({ appId }: AppStoreAppDetailPageProps): Re
 
   if (state === 'error' || !detail) {
     return (
-      <AiSurface as="section" aiId="app-detail:surface" state={state === 'loading' ? 'loading' : 'error'} className="flex min-w-0 flex-col gap-4">
+      <AiSurface as="section" aiId="app-detail:surface" state="error" className="flex min-w-0 flex-col gap-4">
         {back}
         <ResourceErrorPanel error={query.error} onRetry={() => void query.refetch()} retryAiId="app-detail:retry" />
       </AiSurface>
