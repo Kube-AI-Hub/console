@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import re
 
 import pytest
@@ -9,6 +10,27 @@ pytestmark = pytest.mark.ui
 
 NODE_METRICS = "/kapis/monitoring.kubesphere.io/v1alpha3/nodes"
 PERCENT = re.compile(r"^(\d+)%$")
+
+
+def _rank_rows(body, metric):
+    series = body.get("results", [])
+    target = next(result for result in series if result["metric_name"] == metric)
+    names, values = [], {}
+    for result in [target, *series]:
+        key = result.get("metric_name")
+        for sample in result.get("data", {}).get("result", []):
+            name = sample.get("metric", {}).get("node")
+            if not name:
+                continue
+            if name not in names:
+                names.append(name)
+            raw = sample.get("value", [None, None])[1]
+            if raw is None or str(raw).strip() == "":
+                continue
+            value = float(raw)
+            if math.isfinite(value):
+                values.setdefault(name, {})[key] = value
+    return names, values
 
 
 def _node_usage(api) -> dict[str, float] | None:
@@ -42,9 +64,9 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_NODE_USAGE_01(cluster_management
     with ui.page.expect_response(lambda response: "type=rank" in response.url and "sort_metric=node_cpu_utilisation" in response.url) as captured:
         ui.page.goto(f"{ui.base_url}/kube-frontend/clusters/{ui.cluster}/node-usage")
     assert captured.value.status == 200
-    cpu = {sample["metric"]["node"]: float(sample["value"][1])
-           for result in captured.value.json().get("results", []) if result["metric_name"] == "node_cpu_utilisation"
-           for sample in result["data"]["result"]}
+    expected_names, values = _rank_rows(captured.value.json(), "node_cpu_utilisation")
+    cpu = {name: metrics["node_cpu_utilisation"] for name, metrics in values.items()
+           if "node_cpu_utilisation" in metrics}
     if not cpu:
         pytest.skip("本次排行没有返回节点 CPU 指标")
     surface = ui.page.locator('[data-ai-id="node-usage:surface"]').last
@@ -53,28 +75,32 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_NODE_USAGE_01(cluster_management
     assert surface.get_attribute("data-ai-state") == "ready", surface.get_attribute("data-ai-state")
 
     rows = surface.locator("[data-ai-row]")
-    assert rows.count() == len(cpu), f"行数 {rows.count()} 与节点数 {len(cpu)} 不一致（是否漏了 limit=-1）"
+    assert rows.count() == len(expected_names), f"行数 {rows.count()} 与有效节点数 {len(expected_names)} 不一致"
 
     shown = rows.evaluate_all("els => els.map(e => e.getAttribute('data-ai-row'))")
+    assert shown == expected_names
     assert shown[0] == max(cpu, key=cpu.get), f"首行应为 CPU 最高的节点 {max(cpu, key=cpu.get)}，实际 {shown[0]}"
 
     for name in shown:
         for cell in ("cpu", "memory", "disk"):
             metric = {"cpu": "node_cpu_utilisation", "memory": "node_memory_utilisation", "disk": "node_disk_size_utilisation"}[cell]
             text = ui.page.locator(f'[data-ai-id="node-usage:{metric}:{name}"]').last.inner_text().strip()
+            fraction = values.get(name, {}).get(metric)
+            if fraction is None:
+                assert text == "-", f"{name} 的未知 {cell} 不应填零: {text!r}"
+                continue
             match = PERCENT.search(text)
             assert match, f"{name} 的 {cell} 不是百分比: {text!r}"
             percent = int(match.group(1))
             assert 0 <= percent <= 100, f"{name} 的 {cell} 超出 0-100: {percent}"
-
-        # The conversion is the point: compare against the API's own fraction, so a page
-        # that prints 0.06% for a node at 6% fails here rather than looking plausible.
-        expected = round(cpu[name] * 100)
-        actual = int(PERCENT.search(ui.page.locator(f'[data-ai-id="node-usage:node_cpu_utilisation:{name}"]').last.inner_text().strip()).group(1))
-        assert abs(actual - expected) <= 2, f"{name} CPU 显示 {actual}%，接口比例 {cpu[name]} 换算应为 {expected}%"
+            # Compare the API fraction, not just a plausible percentage label.
+            assert abs(percent - round(fraction * 100)) <= 2
 
         pods = ui.page.locator(f'[data-ai-id="node-usage:pods:{name}"]').last.inner_text().strip()
-        assert pods.isdigit(), f"{name} 的容器组数不是整数: {pods!r}"
+        if "node_pod_running_count" in values.get(name, {}):
+            assert pods.isdigit(), f"{name} 的容器组数不是整数: {pods!r}"
+        else:
+            assert pods == "-", f"{name} 的未知容器组数不应填零"
 
     # ---- US2: switching the sort dimension reorders the list ----
     # Clicking the memory header must sort by memory, and clicking again must flip it.
@@ -83,8 +109,7 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_NODE_USAGE_01(cluster_management
     for _ in range(2):
         with ui.page.expect_response(lambda response: "type=rank" in response.url and "sort_metric=node_memory_utilisation" in response.url) as changed:
             memory_header.click()
-        target = next(result for result in changed.value.json()["results"] if result["metric_name"] == "node_memory_utilisation")
-        expected = [sample["metric"]["node"] for sample in target["data"]["result"]]
+        expected, _ = _rank_rows(changed.value.json(), "node_memory_utilisation")
         expect(surface).to_have_attribute("data-ai-state", "ready")
         assert rows.evaluate_all("els => els.map(e => e.getAttribute('data-ai-row'))") == expected
 
