@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { logSearchApi } from '@kube-ai-hub/api-client';
-import { AiSurface, Input, Skeleton } from '@kube-ai-hub/ui';
+import { AiSurface, Button, Input, Skeleton } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -167,25 +167,25 @@ export function ClusterLogsPage({ cluster: _cluster }: ClusterLogsPageProps): Re
       <div className="flex items-center justify-between text-xs text-ai-fg-muted">
         <span data-ai-id="cluster-logs:total">{t('search.total', { count: total })}</span>
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="rounded-ai-md border border-ai-line px-2 py-1 disabled:opacity-40"
+          <Button
+            variant="ghost"
+            size="sm"
             data-ai-id="cluster-logs:prev"
             disabled={page === 0}
             onClick={() => setPage((current) => Math.max(0, current - 1))}
           >
             {t('table.previous')}
-          </button>
+          </Button>
           <span data-ai-id="cluster-logs:page">{page + 1} / {pages}</span>
-          <button
-            type="button"
-            className="rounded-ai-md border border-ai-line px-2 py-1 disabled:opacity-40"
+          <Button
+            variant="ghost"
+            size="sm"
             data-ai-id="cluster-logs:next"
             disabled={page + 1 >= pages}
             onClick={() => setPage((current) => current + 1)}
           >
             {t('table.next')}
-          </button>
+          </Button>
         </div>
       </div>
     </AiSurface>

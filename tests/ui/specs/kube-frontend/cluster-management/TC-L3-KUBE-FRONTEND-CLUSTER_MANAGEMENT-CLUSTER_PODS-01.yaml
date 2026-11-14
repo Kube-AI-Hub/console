@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_PODS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: cluster-pods
+title: 集群级容器组 · 跨项目列表
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/pods'
+prd: prd/kube-frontend/cluster-management/cluster-pods.md
+design: design/kube-frontend/cluster-management/cluster-pods.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_PODS-01
+
+story:
+- US1
+
+product: 集群级容器组列表：名称（链接到项目内详情）、项目、状态、节点、Pod IP、创建时间。
+preconditions:
+- 已登录，且对 host 集群有读取权限
+- 集群里至少有一个容器组
+steps:
+- 用 API 读跨项目容器组首页（page=1, limit=20）
+- 打开集群级容器组页
+- 核对行数与表头
+- 核对项目列与名称链接
+expected:
+- 行数等于 min(20, total)
+- 表头包含 名称/项目/状态/所在节点/容器组 IP/创建时间
+- 名称链接包含 workspace 段与项目段
+troubleshoot:
+- 行数为 0：读了命名空间级集合（带了 namespace）
+- 侧栏没有入口：registry path 必须是单段（不能是 workloads/pods）
+- 链接落到 Not Found：workspace 段缺失或猜错
+update_automation:
+- 选择器见 pages/cluster_management.py 与 ClusterPodsPage.tsx

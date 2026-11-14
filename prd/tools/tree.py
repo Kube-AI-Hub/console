@@ -574,6 +574,11 @@ MODULES = [
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-LOG_COLLECTIONS-01"]},
                     },
                     {
+                        "id": "cluster-pods",
+                        "title": "集群级容器组",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_PODS-01"]},
+                    },
+                    {
                         "id": "cluster-events",
                         "title": "资源事件查询",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EVENTS-01"]},

@@ -189,6 +189,7 @@ export const AREAS: readonly Area[] = [
       { key: 'overview', path: 'overview', titleKey: 'cluster.overview.title', status: 'ready' },
       { key: 'nodes', path: 'nodes', titleKey: 'cluster.nodes.title', status: 'ready', groupKey: 'cluster.nav.groupResource' },
       { key: 'namespaces', path: 'namespaces', titleKey: 'cluster.projects.title', status: 'ready', groupKey: 'cluster.nav.groupResource' },
+      { key: 'pods', path: 'pods', titleKey: 'cluster.workloads.pods.title', status: 'ready', groupKey: 'cluster.nav.groupResource' },
       { key: 'components', path: 'components', titleKey: 'cluster.components.title', status: 'ready', groupKey: 'cluster.nav.groupResource' },
       { key: 'storageclasses', path: 'storageclasses', titleKey: 'cluster.storageClasses.title', status: 'ready', groupKey: 'nav.groupStorage' },
       { key: 'persistentvolumes', path: 'persistentvolumes', titleKey: 'cluster.persistentVolumes.title', status: 'ready', groupKey: 'nav.groupStorage' },
