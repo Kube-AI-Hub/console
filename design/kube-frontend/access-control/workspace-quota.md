@@ -79,7 +79,7 @@
 
 ## 后续改进
 
-- 把读取逻辑迁到 `packages/api-client`（DEC-05）。
+- 把读取逻辑迁到 `packages/api-client`（见本页 DEC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-05）。
 - 若有后端聚合接口（工作空间级配额列表），改为服务端分页。
 - 已用/上限的进度条与超配额高亮。
 

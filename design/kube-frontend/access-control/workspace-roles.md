@@ -37,7 +37,7 @@
 
 ### DEC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-08 — 页面直接调用 apiClient.request
 
-理由同配额页 DEC-05：本轮读接口只有本页使用、`api-client` 有并行改动；接口稳定后迁移。
+理由同配额页的接口决策（见 workspace-quota.md 的对应决策）：本轮读接口只有本页使用、`api-client` 有并行改动；接口稳定后迁移。
 
 ## 系统现状
 

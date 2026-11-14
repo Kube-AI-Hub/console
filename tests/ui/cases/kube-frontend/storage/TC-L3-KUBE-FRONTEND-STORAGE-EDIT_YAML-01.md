@@ -1,4 +1,4 @@
-# TC-L3-KUBE-FRONTEND-STORAGE-EDIT_YAML-01 存储 · 编辑 YAML 先弹加载框
+# TC-L3-KUBE-FRONTEND-STORAGE-EDIT_YAML-01 编辑 YAML · 先加载框再预填对象，取消不变
 
 - **用例 ID**: `TC-L3-KUBE-FRONTEND-STORAGE-EDIT_YAML-01`
 - **级别**: L3  **套件**: `point`
@@ -8,7 +8,7 @@
 
 ## 产品功能
 
-['点', '击', '编', '辑', None, 'Y', 'A', 'M', 'L', None, '后', '先', '出', '现', '加', '载', '对', '话', '框', '，', '再', '出', '现', '预', '填', '当', '前', '对', '象', '的', '编', '辑', '器', '；', '取', '消', '不', '修', '改', '对', '象', '。']
+行操作「编辑 YAML」先打开加载对话框，取到完整对象后换成预填该对象的编辑器；取消后对象不变。
 
 ### 关联需求
 
@@ -35,26 +35,32 @@
 
 ## 前置与配置
 
-- 由夹具创建一个 tc-e2e- 前缀的存储卷，用例结束无条件删除
+- 由用例的 fixture 创建一个 tc-e2e- 前缀的 PVC，用例结束后无条件删除
 - 已登录，且在 host 集群的 default 项目空间
 
 ## 测试步骤
 
-1. 在列表对该行点「编辑 YAML」
-2. 观察加载对话框
-3. 等待编辑器出现并读取内容
-4. 点取消
+1. 打开存储卷列表并定位目标行
+2. 记录打开前该 PVC 的 resourceVersion
+3. 打开行操作菜单，点「编辑 YAML」
+4. 观察加载对话框与编辑器的先后
+5. 读取编辑器内容中的 metadata.name 与 namespace
+6. 点取消，再读取该 PVC
 
 ## 期望结果
 
-- 点击后立即出现 data-ai-id=dialog:loading
-- 编辑器预填包含该对象名
-- 取消后对象仍存在且内容未变
+- 点「编辑 YAML」后先出现 [data-ai-id="dialog:loading"]，随后才出现编辑器
+- 编辑器预填对象 YAML，包含 metadata.name=<name> 与 namespace=default
+- 取消后对话框关闭
+- PVC 仍存在，resourceVersion 与打开前一致（没有写回）
 
 ## 失败排查
 
-- 没有加载框说明读取详情的顺序被改成了先取后弹
+- 编辑器为空时先看详情请求是否已返回；加载框一直不消失说明请求失败
+- 加载框没出现时看 onAction 是否在取详情前 setDialog({kind:'loading'})
+- 取消后对象被改时看 YamlDialog 是否在未提交时也调用了 update
 
 ## 产品改版后如何更新自动化
 
-- 弹窗结构变化时改 pages/storage.py
+- 文案变化时改 packages/locales/src/index.ts
+- 编辑器结构变化时改 pages/storage.py

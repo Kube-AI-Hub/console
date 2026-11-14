@@ -16,6 +16,13 @@ modules:
       - TC-FULL-CONSOLE-CORE-RESOURCE_DETAIL-01
       - TC-FULL-CONSOLE-CORE-RESOURCE_DETAIL-02
     features:
+    - id: not-found-page
+      title: 404 兜底页
+      prd: prd/console-core/resource-detail/not-found-page.md
+      design: design/console-core/resource-detail/not-found-page.md
+      tests:
+        L3:
+        - TC-L3-CONSOLE-CORE-RESOURCE_DETAIL-NOT_FOUND_PAGE-01
     - id: not-found
       title: 资源不存在
       prd: prd/console-core/resource-detail/not-found.md
@@ -468,6 +475,27 @@ modules:
       L2:
       - TC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-01
     features:
+    - id: workspace-quota
+      title: 企业空间配额
+      prd: prd/kube-frontend/access-control/workspace-quota.md
+      design: design/kube-frontend/access-control/workspace-quota.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-02
+    - id: workspace-roles
+      title: 企业空间角色
+      prd: prd/kube-frontend/access-control/workspace-roles.md
+      design: design/kube-frontend/access-control/workspace-roles.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-03
+    - id: workspace-user-groups
+      title: 企业空间用户组
+      prd: prd/kube-frontend/access-control/workspace-user-groups.md
+      design: design/kube-frontend/access-control/workspace-user-groups.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-04
     - id: workspace-console
       title: 企业空间控制台
       prd: prd/kube-frontend/access-control/workspace-console.md
@@ -643,6 +671,13 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-LOG_COLLECTIONS-01
+    - id: cluster-config
+      title: 集群级配置
+      prd: prd/kube-frontend/cluster-management/cluster-config.md
+      design: design/kube-frontend/cluster-management/cluster-config.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-01
     - id: cluster-workloads
       title: 集群级工作负载
       prd: prd/kube-frontend/cluster-management/cluster-workloads.md
@@ -859,6 +894,13 @@ modules:
       L2:
       - TC-FULL-KUBE-FRONTEND-APP_WORKLOADS-01
     features:
+    - id: detail-tabs
+      title: 详情页页签
+      prd: prd/kube-frontend/app-workloads/detail-tabs.md
+      design: design/kube-frontend/app-workloads/detail-tabs.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL_TABS-01
     - id: list
       title: 工作负载列表
       prd: prd/kube-frontend/app-workloads/list.md
@@ -897,6 +939,7 @@ modules:
         L3:
         - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-01
         - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-02
+        - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-03
     - id: pod-events
       title: 容器组事件
       prd: prd/kube-frontend/app-workloads/pod-events.md

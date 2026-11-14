@@ -89,7 +89,11 @@ export function WorkspaceMembersPage({ workspace }: WorkspaceMembersPageProps): 
 
   return (
     <AiSurface as="section" aiId="workspace-members:surface" state={state} className="min-w-0">
-      <ResourceList schema={schema} rows={rows} loading={state === 'loading'} />
+      {/* A literal data-ai-id on the table too: the action contract scans source text, and an
+          AiSurface alone would leave this page without a targetable surface element. */}
+      <div data-ai-id="workspace-members:table">
+        <ResourceList schema={schema} rows={rows} loading={state === 'loading'} />
+      </div>
     </AiSurface>
   );
 }

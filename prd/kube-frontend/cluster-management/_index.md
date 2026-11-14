@@ -80,6 +80,7 @@
 | 集群监控 | [monitor.md](./monitor.md) |
 | 节点用量 | [node-usage.md](./node-usage.md) |
 | 自定义资源 | [custom-resources.md](./custom-resources.md) |
+| 集群级配置 | [cluster-config.md](./cluster-config.md) |
 
 ## 明确不做
 
@@ -87,7 +88,6 @@
 - 集群可见性与可插拔组件开关：需要平台侧写接口，当前迁移范围外（集群描述/别名/标签/供应商已可在列表与集群设置页编辑）。
 - 集群概览的趋势曲线与历史：需要指标历史接口，概览只取当前值（见 [overview.md](./overview.md)）。
 - 节点详情的 Pod 列表（需要按节点过滤 Pod）。
-- 集群作用域的配置字典 / 保密字典 / 服务账户列表：与项目作用域是同一批对象，集群级视图只多一列「项目」；跨项目按名检索属低频操作，用 kubectl 或项目作用域完成。老 console 有这三页，本控制台不做。
 - 集群网关与网关详情（老 console 有 5 个页签）：本集群网关控制器缺 Helm chart，Gateway 对象能创建到 `Deployed=True` 但 `spec` 被重写为空、Service 不创建，状态永远到不了就绪；项目作用域的网关页已交付，集群级不做。
 
 ## 假设
@@ -102,6 +102,7 @@
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01`
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODE_USAGE-01`
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_RESOURCES-01`
+- `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-01`
 
 ## 功能需求
 

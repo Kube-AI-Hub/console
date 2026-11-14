@@ -476,9 +476,24 @@ MODULES = [
                 "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-01"]},
                 "features": [
                     {
+                        "id": "workspace-quota",
+                        "title": "企业空间配额",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-02"]},
+                    },
+                    {
+                        "id": "workspace-roles",
+                        "title": "企业空间角色",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-03"]},
+                    },
+                    {
+                        "id": "workspace-user-groups",
+                        "title": "企业空间用户组",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-04"]},
+                    },
+                    {
                         "id": "workspace-console",
                         "title": "企业空间控制台",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-01", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-02", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-03", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-04"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-01"]},
                     },
                     {
                         "id": "users",
@@ -817,6 +832,7 @@ MODULES = [
                         "tests": {"L3": [
                             "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-01",
                             "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-02",
+                            "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-03",
                         ]},
                     },
                     {
