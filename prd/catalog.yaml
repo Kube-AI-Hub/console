@@ -621,6 +621,8 @@ modules:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-01
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-03
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-04
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-05
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-06
     - id: components
       title: 系统组件
       prd: prd/kube-frontend/cluster-management/components.md

@@ -33,14 +33,15 @@ export function clusterKey(kind: ClusterKind, params: Omit<ResourceListParams, '
  * a percentage of the two. Metrics may be unavailable (no metrics-server) — the caller
  * then renders `-` rather than a zero, which would read as "idle" instead of "unknown".
  */
-export function useNodeUsage() {
+export function useNodeUsage(cluster = 'host', enabled = true) {
   return useQuery({
-    queryKey: ['node-metrics'],
+    queryKey: ['node-metrics', cluster],
+    enabled,
     staleTime: 30_000,
     retry: false,
     queryFn: async ({ signal }) => {
       const body = await api.request<{ items?: Array<{ metadata?: { name?: string }; usage?: Record<string, string> }> }>(
-        '/apis/metrics.k8s.io/v1beta1/nodes',
+        `/apis/metrics.k8s.io/v1beta1/${cluster && cluster !== 'host' ? `clusters/${encodeURIComponent(cluster)}/` : ''}nodes`,
         { signal },
       );
       const out: Record<string, { cpu?: string; memory?: string }> = {};
@@ -78,9 +79,10 @@ export interface ProjectUsage {
   podCount: number;
 }
 
-export function useProjectPods() {
+export function useProjectPods(cluster = 'host', enabled = true) {
   return useQuery({
-    queryKey: ['project-pods'],
+    queryKey: ['project-pods', cluster],
+    enabled,
     staleTime: 30_000,
     retry: false,
     queryFn: async ({ signal }) => {
@@ -92,7 +94,7 @@ export function useProjectPods() {
        */
       const body = await api.request<{
         items?: Array<{ metadata?: { namespace?: string }; containers?: Array<{ usage?: Record<string, string> }> }>;
-      }>('/apis/metrics.k8s.io/v1beta1/pods', { signal });
+      }>(`/apis/metrics.k8s.io/v1beta1/${cluster && cluster !== 'host' ? `clusters/${encodeURIComponent(cluster)}/` : ''}pods`, { signal });
       const out: Record<string, { cpuCores: number; memoryBytes: number; podCount: number }> = {};
       for (const item of body?.items ?? []) {
         const namespace = item.metadata?.namespace;

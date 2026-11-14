@@ -602,7 +602,8 @@ export function rangeMetricsApi(client: Client) {
         namespace?: string;
       },
     ): Promise<MetricSeries[]> {
-      return query(`/kapis/monitoring.kubesphere.io/v1alpha3/${params.scope ?? 'cluster'}`, params, {
+      const scope = params.scope === 'node' && params.node ? `nodes/${encodeURIComponent(params.node)}` : (params.scope ?? 'cluster');
+      return query(`/kapis/monitoring.kubesphere.io/v1alpha3/${scope}`, params, {
         ...(params.node ? { node: params.node } : {}),
         ...(params.namespace ? { namespace: params.namespace } : {}),
       });

@@ -408,3 +408,6 @@ export { clusterGatewaysApi, toClusterGateway } from './gateways';
 export type { ClusterGateway } from './gateways';
 export { kubectlApi } from './kubectl';
 export type { KubectlTarget } from './kubectl';
+export { nodeTerminalPath, openNodeTerminalSession } from './node-terminal';
+export type { NodeTerminalOptions, NodeTerminalTarget } from './node-terminal';
+export { nodeResourcesApi } from './node-resources';

@@ -49,8 +49,11 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_NODES_03(cluster_management_page
     # ---- capacity is human-readable: no raw Kubernetes suffixes ----
     capacity = ui.page.locator('[data-ai-id="node-detail:capacity"]').inner_text()
     assert "/" in capacity
+    # Resource names such as hugepages-2Mi legitimately contain a unit suffix.
+    values = " ".join(ui.page.locator('[data-ai-id="node-detail:capacity"] dd').all_inner_texts())
+    assert values, "节点容量没有可核对的值"
     for raw in ("m /", "Ki", "Mi"):
-        assert raw not in capacity, f"容量未换算成可读单位，仍出现 {raw}: {capacity[:200]}"
+        assert raw not in values, f"容量值未换算成可读单位，仍出现 {raw}: {values[:200]}"
     assert "GiB" in capacity or "TiB" in capacity or "cpu" in capacity
 
     # ---- every condition has a row: a missing one is the condition that explains a fault ----

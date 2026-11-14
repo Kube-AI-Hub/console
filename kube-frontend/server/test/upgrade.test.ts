@@ -161,6 +161,13 @@ describe('isExecUpgradePath', () => {
     expect(isExecUpgradePath('/api/v1/namespaces/demo/pods/web-0')).toBe(false);
     expect(isExecUpgradePath('/api/session/login')).toBe(false);
     expect(isExecUpgradePath('/kapis/terminal.kubesphere.io/v1alpha2/namespaces/demo/pods/web-0/exec')).toBe(false);
+    expect(isExecUpgradePath('/kapis/terminal.kubesphere.io/v1alpha2/nodes/gpu01/log')).toBe(false);
+    expect(isExecUpgradePath('/kapis/terminal.kubesphere.io/v1alpha2/nodes/gpu01/exec/extra')).toBe(false);
+  });
+
+  it('allows only the versioned node shell route, including member clusters', () => {
+    expect(isExecUpgradePath('/kapis/terminal.kubesphere.io/v1alpha2/nodes/gpu01/exec')).toBe(true);
+    expect(isExecUpgradePath('/kapis/terminal.kubesphere.io/v1alpha2/clusters/member/nodes/gpu02/exec')).toBe(true);
   });
 });
 
@@ -205,6 +212,18 @@ describe('upstreamProtocols', () => {
 });
 
 describe('upgrade forwarding', () => {
+  it('forwards node JSON protocol and authorization without the bearer carrier', async () => {
+    const upstream = await fakeWsUpstream();
+    const port = await startBff(upstream.baseUrl);
+    const path = '/kapis/terminal.kubesphere.io/v1alpha2/nodes/gpu01/exec';
+    const reply = await rawUpgrade(port, path, { 'sec-websocket-protocol': 'binary.k8s.io, bearer.node-token' });
+    expect(reply.status).toBe(101);
+    expect(reply.headers['sec-websocket-protocol']).toBe('binary.k8s.io');
+    expect(upstream.recorded[0]?.url).toBe(path);
+    expect(upstream.recorded[0]?.headers.authorization).toBe('Bearer node-token');
+    expect(upstream.recorded[0]?.headers['sec-websocket-protocol']).toBe('binary.k8s.io');
+    reply.socket?.destroy();
+  });
   it('relays the handshake and pipes bytes in both directions', async () => {
     const upstream = await fakeWsUpstream();
     const port = await startBff(upstream.baseUrl);

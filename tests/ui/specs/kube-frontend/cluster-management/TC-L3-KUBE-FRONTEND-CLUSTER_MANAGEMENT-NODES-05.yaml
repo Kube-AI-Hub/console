@@ -1,0 +1,28 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-05
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: nodes
+title: 节点列表与详情 · 打开交互终端
+entry_url: "{BASE_URL}/kube-frontend/clusters/{cluster}/nodes"
+prd: prd/kube-frontend/cluster-management/nodes.md
+design: design/kube-frontend/cluster-management/nodes.md
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-05
+story:
+- US4
+product: 从节点列表和详情连接真实节点 shell，近全屏使用并关闭会话。
+preconditions:
+- 当前账号有 nodes/exec 权限且集群有 Ready 节点
+- 节点有交互式 shell，支持路径补全与 stty
+steps:
+- 分别从列表行菜单和详情入口打开终端
+- 执行唯一标记与 hostname，核对远端输出
+- 使用 Tab 补全路径，按 Esc 核对弹窗不关闭
+- 在三档视口核对弹窗大小与远端 stty 行列
+- 关闭弹窗，核对 WebSocket 已关闭
+expected:
+- 输出来自目标节点而非其他工具容器
+- Tab 不移动焦点，PTY 尺寸同步，Esc 留给终端程序
+- 关闭后不保留浏览器节点会话

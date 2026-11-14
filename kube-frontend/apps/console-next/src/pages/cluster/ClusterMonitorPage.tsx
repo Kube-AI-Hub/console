@@ -25,6 +25,7 @@ import { formatTimestamp } from '@/lib/time';
  */
 export interface ClusterMonitorPageProps {
   cluster: string;
+  node?: string;
 }
 
 const WINDOWS = [
@@ -62,8 +63,14 @@ const METRICS = Array.from(
   new Set(CHARTS.flatMap((chart) => ('total' in chart && chart.total ? [chart.metric, chart.total] : [chart.metric]))),
 );
 
-export function ClusterMonitorPage({ cluster }: ClusterMonitorPageProps): React.ReactElement {
+export function ClusterMonitorPage({ cluster, node }: ClusterMonitorPageProps): React.ReactElement {
   const t = useT();
+  const charts = React.useMemo(() => node ? CHARTS.slice(0, 3).map((chart) => ({
+    ...chart, metric: chart.metric.replace(/^cluster_/, 'node_'),
+    ...('total' in chart ? { total: chart.total.replace(/^cluster_/, 'node_') } : {}),
+  })) : CHARTS, [node]);
+  const metrics = React.useMemo(() => node ? Array.from(new Set(charts.flatMap((chart) =>
+    'total' in chart && chart.total ? [chart.metric, chart.total] : [chart.metric]))) : METRICS, [charts, node]);
   const [windowKey, setWindowKey] = React.useState<WindowKey>('1h');
   const window = WINDOWS.find((entry) => entry.key === windowKey) ?? WINDOWS[0];
 
@@ -82,11 +89,12 @@ export function ClusterMonitorPage({ cluster }: ClusterMonitorPageProps): React.
   }, [window.ms, windowKey]);
 
   const trends = useQuery({
-    queryKey: ['cluster-monitor', cluster, windowKey, range.start, range.end],
+    queryKey: ['cluster-monitor', cluster, node, windowKey, range.start, range.end],
     queryFn: ({ signal }) =>
       rangeMetricsApi(apiClient).cluster({
         cluster,
-        metrics: METRICS,
+        metrics,
+        ...(node ? { scope: 'node' as const, node } : {}),
         start: range.start,
         end: range.end,
         step: window.step,
@@ -113,7 +121,7 @@ export function ClusterMonitorPage({ cluster }: ClusterMonitorPageProps): React.
    */
   const plotted = React.useMemo(() => {
     const out = new Map<string, MetricSeries>();
-    for (const chart of CHARTS) {
+    for (const chart of charts) {
       const used = seriesByName.get(chart.metric);
       if (!used) continue;
       if (!('total' in chart) || !chart.total) {
@@ -133,7 +141,7 @@ export function ClusterMonitorPage({ cluster }: ClusterMonitorPageProps): React.
       out.set(chart.key, { name: chart.metric, points });
     }
     return out;
-  }, [seriesByName]);
+  }, [seriesByName, charts]);
 
   const state = trends.isPending ? 'loading' : trends.isError ? 'error' : 'ready';
 
@@ -141,8 +149,8 @@ export function ClusterMonitorPage({ cluster }: ClusterMonitorPageProps): React.
     <AiSurface as="section" aiId="cluster-monitor:surface" state={state} className="flex min-w-0 flex-col gap-4">
       <header className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-col gap-1">
-          <h1 className="text-lg font-semibold text-ai-fg">{t('cluster.monitor.title')}</h1>
-          <p className="text-sm text-ai-fg-muted">{t('cluster.monitor.description')}</p>
+          <h1 className="text-lg font-semibold text-ai-fg">{node ? `${node} · ${t('node.detail.monitor')}` : t('cluster.monitor.title')}</h1>
+          {!node ? <p className="text-sm text-ai-fg-muted">{t('cluster.monitor.description')}</p> : null}
         </div>
         <div className="flex flex-wrap gap-1" {...actionProps('cluster-monitor:range')}>
           {WINDOWS.map((entry) => (
@@ -172,7 +180,7 @@ export function ClusterMonitorPage({ cluster }: ClusterMonitorPageProps): React.
 
       {state === 'ready' ? (
         <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
-          {CHARTS.map((chart) => (
+          {charts.map((chart) => (
             <TrendCard
               key={chart.key}
               title={t(`cluster.monitor.${chart.key}`)}

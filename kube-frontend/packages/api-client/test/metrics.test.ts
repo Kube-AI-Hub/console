@@ -127,7 +127,7 @@ describe('rangeMetricsApi.pod', () => {
 });
 
 describe('rangeMetricsApi.cluster', () => {
-  it('keeps the previous scope/node/namespace parameters', async () => {
+  it('uses the registered node endpoint while preserving node/namespace parameters', async () => {
     const calls: Call[] = [];
     const api = rangeMetricsApi(clientReturning([], calls) as never);
 
@@ -142,7 +142,7 @@ describe('rangeMetricsApi.cluster', () => {
       namespace: 'demo',
     });
 
-    expect(calls[0]!.path).toBe('/kapis/monitoring.kubesphere.io/v1alpha3/node');
+    expect(calls[0]!.path).toBe('/kapis/monitoring.kubesphere.io/v1alpha3/nodes/gpu01');
     expect(calls[0]!.query).toMatchObject({ node: 'gpu01', namespace: 'demo' });
   });
 });

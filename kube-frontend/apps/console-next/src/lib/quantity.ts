@@ -51,6 +51,6 @@ export function formatCount(quantity: string): string {
 export function formatQuantity(key: string, quantity: string): string {
   if (!quantity) return '-';
   if (key === 'cpu') return formatCpu(quantity);
-  if (key === 'pods') return formatCount(quantity);
-  return formatBytes(quantity);
+  if (key === 'memory' || key === 'ephemeral-storage' || key.startsWith('hugepages-')) return formatBytes(quantity);
+  return formatCount(quantity);
 }

@@ -226,6 +226,8 @@ export interface NodeSummary extends ResourceBase {
   /** `used / allocatable`, 0–100, rounded. Absent without metrics. */
   cpuPercent?: number;
   memoryPercent?: number;
+  xpu?: string;
+  gpuMode?: string;
 }
 
 /**
@@ -301,6 +303,7 @@ export interface NodeTaint {
   key: string;
   value: string;
   effect: string;
+  timeAdded?: string;
 }
 
 /** Everything the node detail page shows; the list row is a subset of this. */
@@ -319,6 +322,9 @@ export interface NodeDetail extends NodeSummary {
     architecture: string;
     operatingSystem: string;
     kubeletVersion: string;
+    kubeProxyVersion: string;
+    gpuDriverVersion: string;
+    gpuEngineVersion: string;
   };
 }
 
@@ -350,6 +356,7 @@ export function toNodeDetail(item: KubeNode): NodeDetail {
       key: String(taint['key'] ?? ''),
       value: String(taint['value'] ?? ''),
       effect: String(taint['effect'] ?? ''),
+      ...(taint['timeAdded'] ? { timeAdded: String(taint['timeAdded']) } : {}),
     })),
     nodeInfo: {
       osImage: String(nodeInfo['osImage'] ?? ''),
@@ -358,6 +365,9 @@ export function toNodeDetail(item: KubeNode): NodeDetail {
       architecture: String(nodeInfo['architecture'] ?? ''),
       operatingSystem: String(nodeInfo['operatingSystem'] ?? ''),
       kubeletVersion: String(nodeInfo['kubeletVersion'] ?? ''),
+      kubeProxyVersion: String(nodeInfo['kubeProxyVersion'] ?? ''),
+      gpuDriverVersion: String(nodeInfo['gpuDriverVersion'] ?? ''),
+      gpuEngineVersion: String(nodeInfo['gpuEngineVersion'] ?? ''),
     },
   };
 }
@@ -365,6 +375,7 @@ export function toNodeDetail(item: KubeNode): NodeDetail {
 export function toNodeSummary(item: KubeNode): NodeSummary {
   const nodeInfo = (item.status?.['nodeInfo'] ?? {}) as Record<string, unknown>;
   const allocatable = (item.status?.['allocatable'] ?? {}) as Record<string, unknown>;
+  const labels = (item.metadata?.labels ?? {}) as Record<string, string>;
   return {
     ...baseOf(item),
     status: nodeStatus(item),
@@ -374,6 +385,8 @@ export function toNodeSummary(item: KubeNode): NodeSummary {
     cpu: String(allocatable['cpu'] ?? ''),
     memory: String(allocatable['memory'] ?? ''),
     unschedulable: (item.spec ?? {})['unschedulable'] === true,
+    xpu: labels['xpu'] || (labels['xpu-vendor'] ? `${labels['xpu-vendor']}-${labels['xpu-model'] ?? ''}` : 'CPU'),
+    gpuMode: String(nodeInfo['virtualCardMode'] ?? ''),
   };
 }
 
@@ -414,12 +427,24 @@ export function nodesApi(client: Client) {
  * would race them for every other field.
  */
 export function nodesWriteApi(client: Client) {
+  const path = (cluster: string | undefined, name: string) =>
+    `/api/v1/${cluster && cluster !== 'host' ? `clusters/${encodeURIComponent(cluster)}/` : ''}nodes/${encodeURIComponent(name)}`;
   return {
-    async setUnschedulable(params: { name: string; unschedulable: boolean }): Promise<void> {
-      await client.request(`/api/v1/nodes/${encodeURIComponent(params.name)}`, {
+    async setUnschedulable(params: { cluster?: string; name: string; unschedulable: boolean }): Promise<void> {
+      await client.request(path(params.cluster, params.name), {
         method: 'PATCH',
         contentType: 'application/merge-patch+json',
         body: { spec: { unschedulable: params.unschedulable } },
+      });
+    },
+    async updateMetadata(params: { cluster: string; name: string; labels?: Record<string, string | null>; taints?: NodeTaint[]; resourceVersion: string }): Promise<void> {
+      await client.request(path(params.cluster, params.name), {
+        method: 'PATCH',
+        contentType: 'application/merge-patch+json',
+        body: {
+          metadata: { resourceVersion: params.resourceVersion, ...(params.labels ? { labels: params.labels } : {}) },
+          ...(params.taints ? { spec: { taints: params.taints } } : {}),
+        },
       });
     },
   };

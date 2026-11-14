@@ -7,7 +7,8 @@ import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from 
 import { api as apiClient } from '@/api';
 import { useT } from '@/i18n';
 import { useResourceListState, toListParams } from '@/components/resource/useResourceListState';
-import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
+import { MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
+import { ExecConsoleDialog } from '@/components/resource/ExecConsoleDialog';
 import { formatTimestamp } from '@/lib/time';
 import { CLUSTER_DESCRIPTORS, useClusterList, useNodeUsage, useProjectPods, withNodeUsage, withProjectUsage, type ClusterKind } from './queries';
 
@@ -34,8 +35,10 @@ export function ClusterListPage({ kind, cluster }: ClusterListPageProps): React.
   const t = useT();
   // Cluster-scoped: no project filter, and nothing to reset when the caller changes
   // project — the page has no project context by design.
-  const list = useResourceListState<SortKey>({ defaultSortBy: 'name', resetOn: [cluster] });
+  const list = useResourceListState<SortKey>({ defaultSortBy: 'name', defaultPageSize: PAGE_SIZE, resetOn: [cluster] });
   const queryClient = useQueryClient();
+  const [terminalNode, setTerminalNode] = React.useState<string | null>(null);
+  React.useEffect(() => { setTerminalNode(null); }, [cluster, kind]);
 
   /*
    * 停止调度 / 启动调度 — the old console's cordon and uncordon.
@@ -46,17 +49,20 @@ export function ClusterListPage({ kind, cluster }: ClusterListPageProps): React.
    */
   const cordon = useMutation({
     mutationFn: (input: { name: string; unschedulable: boolean }) =>
-      nodesWriteApi(apiClient).setUnschedulable(input),
+      nodesWriteApi(apiClient).setUnschedulable({ ...input, cluster }),
     // Invalidate the list's own key (see `clusterKey`): a cordon changes a node's
     // schedulability, which is what decides whether the row offers 停止 or 启动调度.
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['cluster', kind] }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['cluster', 'nodes', cluster] });
+      void queryClient.invalidateQueries({ queryKey: ['node-detail', cluster] });
+    },
   });
   // Empty namespace = cluster-wide collection; the API layer already treats it that way.
-  const query = useClusterList(kind, toListParams(list, { cluster, namespace: '' }, PAGE_SIZE));
+  const query = useClusterList(kind, toListParams(list, { cluster, namespace: '' }, list.pageSize));
   // Usage comes from the metrics API and is merged onto the node rows below.
-  const nodeUsage = useNodeUsage();
+  const nodeUsage = useNodeUsage(cluster, kind === 'nodes');
   // Project rows aggregate pod metrics by namespace; one call covers every project.
-  const projectPods = useProjectPods();
+  const projectPods = useProjectPods(cluster, kind === 'namespaces');
 
   const baseRows = (query.data?.items ?? []) as Row[];
   const rows = (kind === 'nodes'
@@ -81,13 +87,17 @@ export function ClusterListPage({ kind, cluster }: ClusterListPageProps): React.
                 label: t('node.action.cordon'),
                 aiId: 'nodes:cordon',
                 visible: (row: Row) => !(row as NodeSummary).unschedulable,
+                disabled: () => cordon.isPending,
               },
               {
                 key: 'uncordon',
                 label: t('node.action.uncordon'),
                 aiId: 'nodes:uncordon',
                 visible: (row: Row) => (row as NodeSummary).unschedulable,
+                disabled: () => cordon.isPending,
               },
+              { key: 'terminal', label: t('container.terminal.open'), aiId: 'nodes:terminal-open',
+                disabled: (row: Row) => (row as NodeSummary).status !== 'Ready' },
             ],
           }
         : {}),
@@ -144,6 +154,17 @@ export function ClusterListPage({ kind, cluster }: ClusterListPageProps): React.
                 width: 140,
                 hideBelow: 'lg',
                 render: (row: Row) => <span className="text-ai-fg-secondary">{(row as NodeSummary).role}</span>,
+              },
+              {
+                key: 'xpu',
+                title: t('node.detail.xpu'),
+                render: (row: Row) => <span className="text-ai-fg-secondary">{(row as NodeSummary).xpu || '-'}</span>,
+              },
+              {
+                key: 'version',
+                title: t('node.detail.kubeletVersion'),
+                hideBelow: 'xl',
+                render: (row: Row) => <span className="text-ai-fg-secondary">{(row as NodeSummary).version || '-'}</span>,
               },
               {
                 key: 'cpu',
@@ -253,10 +274,13 @@ export function ClusterListPage({ kind, cluster }: ClusterListPageProps): React.
         previous: t('table.previous'),
         next: t('table.next'),
         selected: (count) => t('table.selectedCount', { count }),
+        pageSize: t('table.pageSize'),
+        pageSizeSuffix: t('table.pageSizeSuffix'),
       },
-      pagination: { page: list.page, pageSize: PAGE_SIZE, total },
+      refresh: { aiId: `${kind}:refresh`, label: t('common.refresh'), busy: query.isFetching },
+      pagination: { page: list.page, pageSize: list.pageSize, total, pageSizeOptions: [10, 20, 50, 100] },
     }),
-    [kind, list, t, total],
+    [kind, list, t, total, cluster, query.isFetching, cordon.isPending],
   );
 
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
@@ -278,6 +302,8 @@ export function ClusterListPage({ kind, cluster }: ClusterListPageProps): React.
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}
         onPageChange={list.setPage}
+        onPageSizeChange={list.setPageSize}
+        onRefresh={() => { void query.refetch(); if (kind === 'nodes') void nodeUsage.refetch(); else void projectPods.refetch(); }}
         onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
           if (next) list.setSort(next);
         }}
@@ -285,8 +311,12 @@ export function ClusterListPage({ kind, cluster }: ClusterListPageProps): React.
           const node = row as NodeSummary;
           if (action === 'cordon') cordon.mutate({ name: node.name, unschedulable: true });
           if (action === 'uncordon') cordon.mutate({ name: node.name, unschedulable: false });
+          if (action === 'terminal' && node.status === 'Ready') setTerminalNode(node.name);
         }}
       />
+      <MutationAlert error={cordon.error} />
+      {terminalNode ? <ExecConsoleDialog target={{ cluster, node: terminalNode }}
+        title={`${t('container.terminal.title')} · ${terminalNode}`} aiPrefix="node" onClose={() => setTerminalNode(null)} /> : null}
     </AiSurface>
   );
 }

@@ -7,7 +7,7 @@ import type { UpstreamConfig } from './config';
 import { isProxiedPath } from './proxy';
 
 /**
- * WebSocket upgrade forwarding for container exec.
+ * WebSocket upgrade forwarding for container exec and the versioned node shell.
  *
  * The BFF's HTTP proxy answers everything the cluster serves as plain HTTP; exec
  * is the one endpoint that is a protocol upgrade. It cannot go through
@@ -16,11 +16,9 @@ import { isProxiedPath } from './proxy';
  * module keeps that hop separate so the HTTP proxy keeps its single, transparent
  * rule.
  *
- * The upstream protocol is kube's native exec WebSocket ('v5.channel.k8s.io'),
- * not KubeSphere's 'terminal.kubesphere.io' wrapper: the native one is what
- * '/api/v1/.../exec' speaks, it needs no KubeSphere-specific operation envelope,
- * and it is the protocol kube-apiserver documents. Evidence from the B200
- * cluster is in 'design/kube-frontend/app-workloads/container-detail.md'.
+ * Containers use kube's v5 channel protocol. Nodes use KubeSphere's JSON terminal
+ * protocol and nodes/exec authorization; only that exact kapis route is allowed.
+ * Frames remain transparent on this hop. See the container-detail and nodes designs.
  */
 
 /**
@@ -51,6 +49,8 @@ export const UPGRADE_TIMEOUT_MS = 15_000;
  */
 export function isExecUpgradePath(pathname: string): boolean {
   if (!isProxiedPath(pathname)) return false;
+  // Only the documented node endpoint, never a generic kapis upgrade proxy.
+  if (/^\/kapis\/terminal\.kubesphere\.io\/v1alpha2\/(?:clusters\/[^/]+\/)?nodes\/[^/]+\/exec$/.test(pathname)) return true;
   if (!pathname.startsWith('/api/v1/') && !pathname.startsWith('/apis/')) return false;
   return pathname.endsWith('/exec');
 }
@@ -90,7 +90,8 @@ export function upstreamProtocols(request: IncomingMessage): string[] {
   // A caller that offers nothing still gets the protocol kube needs; the upstream
   // rejects a handshake with no supported value, and defaulting here is more
   // useful than refusing.
-  return offered.length > 0 ? offered : [CHANNEL_PROTOCOL];
+  const nodePath = (request.url ?? '').split('?')[0] ?? '';
+  return offered.length > 0 ? offered : [nodePath.startsWith('/kapis/terminal.kubesphere.io/') ? 'binary.k8s.io' : CHANNEL_PROTOCOL];
 }
 
 /** 'Server.on(upgrade)' handler shape, so tests can attach it to a bare server. */
@@ -224,6 +225,7 @@ export function createUpgradeHandler(config: UpstreamConfig): UpgradeHandler {
       // in air-gapped installs.
       ...(config.insecure === true ? { rejectUnauthorized: false } : {}),
     });
+    client.on('close', () => upstreamRequest.destroy());
 
     const timer = setTimeout(() => {
       upstreamRequest.destroy(new Error('upstream exec handshake timed out'));

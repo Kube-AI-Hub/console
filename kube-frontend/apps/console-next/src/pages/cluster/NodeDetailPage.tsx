@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
-import { nodesApi, type KubeObject, type NodeDetail } from '@kube-ai-hub/api-client';
+import { nodesApi, nodesWriteApi, type KubeObject, type NodeDetail } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { AiSurface, Badge, Button, Skeleton } from '@kube-ai-hub/ui';
+import { AiSurface, Badge, Button, Skeleton, Tabs, TabsContent } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -12,6 +12,10 @@ import { toYaml } from '@/components/resource/yaml';
 import { DefinitionRow } from '@/components/resource/DefinitionRow';
 import { formatTimestamp } from '@/lib/time';
 import { formatQuantity } from '@/lib/quantity';
+import { ExecConsoleDialog } from '@/components/resource/ExecConsoleDialog';
+import { NodeMetadataDialog } from './NodeMetadataDialog';
+import { NodeResourcesPanel } from './NodeResourcesPanel';
+import { ClusterMonitorPage } from './ClusterMonitorPage';
 
 /**
  * 节点详情.
@@ -20,9 +24,9 @@ import { formatQuantity } from '@/lib/quantity';
  * conditions, what it can allocate, its labels and taints. Those are the four facts an
  * operator needs before cordoning or troubleshooting one, and none of them fit a row.
  *
- * The old console's node detail also has tabs for pods, per-node monitoring and events.
- * Those need a pod list filtered by node and per-node metric queries; they are recorded
- * as not migrated rather than shown as empty tabs.
+ * Pods, monitoring and events use independent node-scoped queries, loaded only
+ * when their tab opens. The terminal view is shared, but node access keeps its
+ * own backend protocol and authorization.
  */
 export interface NodeDetailPageProps {
   cluster: string;
@@ -39,6 +43,18 @@ export function NodeDetailPage({ cluster }: NodeDetailPageProps): React.ReactEle
 
   const queryClient = useQueryClient();
   const [editingYaml, setEditingYaml] = React.useState(false);
+  const [terminalOpen, setTerminalOpen] = React.useState(false);
+  const [metadataKind, setMetadataKind] = React.useState<'labels' | 'taints' | null>(null);
+  const [tab, setTab] = React.useState('status');
+  React.useEffect(() => { setTerminalOpen(false); setMetadataKind(null); setTab('status'); }, [cluster, name]);
+  const refreshNode = () => {
+    void queryClient.invalidateQueries({ queryKey: ['node-detail', cluster, name] });
+    void queryClient.invalidateQueries({ queryKey: ['cluster', 'nodes', cluster] });
+  };
+  const cordon = useMutation({
+    mutationFn: (unschedulable: boolean) => nodesWriteApi(apiClient).setUnschedulable({ cluster, name, unschedulable }),
+    onSuccess: refreshNode,
+  });
   /**
    * 编辑 YAML. The node object is written with a whole-object PUT carrying its
    * `resourceVersion`, exactly like every other editor in the app. A node is owned by
@@ -47,7 +63,7 @@ export function NodeDetailPage({ cluster }: NodeDetailPageProps): React.ReactEle
    */
   const update = useMutation({
     mutationFn: (body: KubeObject) => nodesApi(apiClient).update({ cluster, namespace: '', body }),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['node-detail', cluster, name] }),
+    onSuccess: refreshNode,
   });
 
   const state = query.isPending ? 'loading' : query.isError ? 'error' : 'ready';
@@ -66,15 +82,26 @@ export function NodeDetailPage({ cluster }: NodeDetailPageProps): React.ReactEle
           {node ? (
             <Badge tone={node.status === 'Ready' ? 'success' : 'danger'}>{node.status}</Badge>
           ) : null}
+          {node?.unschedulable ? <span className="text-xs text-ai-fg-muted">{t('node.status.cordoned')}</span> : null}
+          <Button variant="primary" size="sm" className="ml-auto" disabled={node?.status !== 'Ready'}
+            {...actionProps('node-detail:terminal-open')} onClick={() => setTerminalOpen(true)}>
+            {t('container.terminal.open')}
+          </Button>
+          {node ? <Button variant="secondary" size="sm" disabled={cordon.isPending}
+            {...actionProps('node-detail:cordon')} onClick={() => cordon.mutate(!node.unschedulable)}>
+            {t(node.unschedulable ? 'node.action.uncordon' : 'node.action.cordon')}
+          </Button> : null}
           <Button
             variant="secondary"
             size="sm"
-            className="ml-auto"
+            disabled={!node || query.isFetching}
             {...actionProps('node-detail:edit-yaml')}
             onClick={() => setEditingYaml(true)}
           >
             {t('resource.action.editYaml')}
           </Button>
+          <Button variant="ghost" size="sm" disabled={query.isFetching} {...actionProps('node-detail:refresh')}
+            onClick={() => void query.refetch()}>{t('common.refresh')}</Button>
         </div>
       </header>
 
@@ -84,7 +111,13 @@ export function NodeDetailPage({ cluster }: NodeDetailPageProps): React.ReactEle
       ) : null}
 
       {node ? (
-        <React.Fragment>
+        <Tabs value={tab} onValueChange={setTab} items={[
+          { value: 'status', label: t('node.detail.statusTab'), aiId: 'node-detail:tab:status' },
+          { value: 'pods', label: t('cluster.workloads.pods.title'), aiId: 'node-detail:tab:pods' },
+          { value: 'monitor', label: t('node.detail.monitor'), aiId: 'node-detail:tab:monitor' },
+          { value: 'events', label: t('node.detail.events'), aiId: 'node-detail:tab:events' },
+        ]}>
+        <TabsContent value="status" className="flex flex-col gap-4">
           <section className="rounded-lg border border-ai-border bg-ai-surface p-4" data-ai-id="node-detail:basic">
             <h2 className="mb-3 text-sm font-medium text-ai-fg">{t('node.detail.basic')}</h2>
             <dl className="grid grid-cols-1 gap-x-8 gap-y-2 text-sm sm:grid-cols-2">
@@ -95,6 +128,13 @@ export function NodeDetailPage({ cluster }: NodeDetailPageProps): React.ReactEle
               <DefinitionRow label={t('node.detail.osImage')} value={node.nodeInfo.osImage || '-'} />
               <DefinitionRow label={t('node.detail.kernel')} value={node.nodeInfo.kernelVersion || '-'} />
               <DefinitionRow label={t('node.detail.runtime')} value={node.nodeInfo.containerRuntimeVersion || '-'} />
+              <DefinitionRow label={t('node.detail.architecture')} value={node.nodeInfo.architecture || '-'} />
+              <DefinitionRow label={t('node.detail.operatingSystem')} value={node.nodeInfo.operatingSystem || '-'} />
+              <DefinitionRow label={t('node.detail.kubeProxyVersion')} value={node.nodeInfo.kubeProxyVersion || '-'} />
+              <DefinitionRow label={t('node.detail.xpu')} value={node.xpu || '-'} />
+              {node.gpuMode ? <DefinitionRow label={t('node.detail.gpuMode')} value={node.gpuMode} /> : null}
+              {node.nodeInfo.gpuDriverVersion ? <DefinitionRow label={t('node.detail.gpuDriver')} value={node.nodeInfo.gpuDriverVersion} /> : null}
+              {node.nodeInfo.gpuEngineVersion ? <DefinitionRow label={t('node.detail.gpuEngine')} value={node.nodeInfo.gpuEngineVersion} /> : null}
               <DefinitionRow label={t('node.detail.createdAt')} value={formatTimestamp(node.createdAt)} />
             </dl>
           </section>
@@ -102,7 +142,7 @@ export function NodeDetailPage({ cluster }: NodeDetailPageProps): React.ReactEle
           <section className="rounded-lg border border-ai-border bg-ai-surface p-4" data-ai-id="node-detail:capacity">
             <h2 className="mb-3 text-sm font-medium text-ai-fg">{t('node.detail.capacity')}</h2>
             <dl className="grid grid-cols-1 gap-x-8 gap-y-2 text-sm sm:grid-cols-2">
-              {['cpu', 'memory', 'pods', 'ephemeral-storage'].map((key) => (
+              {Array.from(new Set(['cpu', 'memory', 'pods', 'ephemeral-storage', ...Object.keys(node.capacity), ...Object.keys(node.allocatable)])).map((key) => (
                 <DefinitionRow
                   key={key}
                   label={key}
@@ -130,6 +170,10 @@ export function NodeDetailPage({ cluster }: NodeDetailPageProps): React.ReactEle
           </section>
 
           <section className="rounded-lg border border-ai-border bg-ai-surface p-4" data-ai-id="node-detail:labels">
+            <div className="mb-3 flex gap-2">
+              <Button variant="secondary" size="sm" {...actionProps('node-detail:edit-labels')} onClick={() => setMetadataKind('labels')}>{t('node.action.labels')}</Button>
+              <Button variant="secondary" size="sm" {...actionProps('node-detail:edit-taints')} onClick={() => setMetadataKind('taints')}>{t('node.action.taints')}</Button>
+            </div>
             <h2 className="mb-3 text-sm font-medium text-ai-fg">{t('node.detail.labels')}</h2>
             <ul className="flex flex-wrap gap-1">
               {Object.entries(node.labels).map(([key, value]) => (
@@ -151,10 +195,19 @@ export function NodeDetailPage({ cluster }: NodeDetailPageProps): React.ReactEle
               </ul>
             )}
           </section>
-        </React.Fragment>
+        </TabsContent>
+        <TabsContent value="pods">{tab === 'pods' ? <NodeResourcesPanel cluster={cluster} node={name} kind="pods" /> : null}</TabsContent>
+        <TabsContent value="monitor">{tab === 'monitor' ? <ClusterMonitorPage cluster={cluster} node={name} /> : null}</TabsContent>
+        <TabsContent value="events">{tab === 'events' ? <NodeResourcesPanel cluster={cluster} node={name} kind="events" /> : null}</TabsContent>
+        </Tabs>
       ) : null}
 
       <MutationAlert error={update.error} />
+      <MutationAlert error={cordon.error} />
+      {node && metadataKind ? <NodeMetadataDialog cluster={cluster} node={node} kind={metadataKind}
+        onClose={() => setMetadataKind(null)} onSaved={refreshNode} /> : null}
+      {terminalOpen && node ? <ExecConsoleDialog target={{ cluster, node: name }} title={`${t('container.terminal.title')} · ${name}`}
+        aiPrefix="node" onClose={() => setTerminalOpen(false)} /> : null}
 
       {node ? (
         <YamlDialog
