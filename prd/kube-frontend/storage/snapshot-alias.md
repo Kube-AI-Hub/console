@@ -18,6 +18,16 @@
 
 - **AC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOT_ALIAS-01** — 已知快照列表页可用，当访问 `/clusters/<c>/snapshots`（以及 `/clusters/<c>/snapshots/<namespace>`），则浏览器重定向到 `/clusters/<c>/volume-snapshots` 并显示列表，而不是 404。
 
+## 设计目标
+
+1. 把「快照是否真的存在于后端」的判定依据放在一屏内。
+2. 不存在/未安装等情况给出明确说明，而不是空白页。
+
+## 约束与边界
+
+- 只读；不编辑、不删除快照内容（由 CSI 控制器管理）。
+- 依赖 `snapshot.storage.k8s.io/v1` 已安装；未安装时按接口错误处理。
+
 ## UI 交互设计
 
 - 无界面：纯重定向。

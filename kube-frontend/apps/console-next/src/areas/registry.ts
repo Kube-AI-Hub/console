@@ -255,6 +255,7 @@ export const AREAS: readonly Area[] = [
       { key: 'audit-logs', path: 'audit-logs', titleKey: 'search.audit.title', status: 'ready', groupKey: 'nav.groupMonitoring' },
       { key: 'custom-resources', path: 'custom-resources', titleKey: 'cluster.customResources.title', status: 'ready', groupKey: 'cluster.nav.groupExtensions' },
       { key: 'volume-snapshot-content', path: 'volume-snapshot-content', titleKey: 'storage.snapshotContent.title', status: 'ready', groupKey: 'nav.groupStorage' },
+      { key: 'gateways', path: 'gateways', titleKey: 'cluster.clusterGateways.title', status: 'ready', groupKey: 'cluster.nav.groupSettings' },
     ],
   },
   {

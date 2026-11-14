@@ -79,8 +79,14 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_GPU_RESOURCE_01(cluster_manageme
         expect(chart).to_have_attribute("data-ai-window", "1h")
         assert int(chart.get_attribute("data-ai-points") or 0) > 0, "图表没有采样点"
         bars = chart.locator("[data-ai-bar]")
-        expect(bars.first).to_be_visible(timeout=20_000)
         assert bars.count() > 0, "有数据但趋势图没有柱子"
+        # A zero-value sample is a legitimately zero-height bar (an idle GPU), and Playwright
+        # reports those as not visible. What must hold is that at least one sample was drawn
+        # with height, i.e. the chart plotted something rather than only baseline points.
+        tallest = chart.evaluate(
+            "el => Math.max(...Array.from(el.querySelectorAll('[data-ai-bar]')).map(b => b.getBoundingClientRect().height))"
+        )
+        assert tallest and tallest > 0, "趋势图所有柱高为 0，疑似没有真实数值"
         for metric in ("utilization", "memory"):
             card = ui.page.locator(f'[data-ai-id="cluster-gpu-resource:{metric}"]')
             expect(card).to_be_visible()

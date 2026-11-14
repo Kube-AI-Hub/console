@@ -233,9 +233,9 @@ python3 prd/tools/verify.py --serial-e2e
 | 企业空间控制台（18 路由，已迁 3：概览/项目/成员） | 继续补 配额 / 角色 / 用户组 / 部门 | 邀请成员需企业空间角色列表，否则自由文本角色会静默授权为空；平台侧另有只读详情 |
 | ~~集群级全命名空间 PVC~~ | 已迁：`clusters/<c>/persistentvolumeclaims`（复用 storageApi + 项目索引，行键 ns/name） | 页面本体可复用这点被验证：约 100 行 |
 | ~~卷快照 / 快照类型~~（2）/ 快照内容、`snapshots` 别名（2） | 已迁集群级卷快照与快照类型；CRD 存在但 0 对象，空态与「未安装」两条分支都有 | 快照内容与别名路由仍待做 |
-| JuiceFS 共享存储 | 3 页签 | — |
+| ~~JuiceFS 共享存储~~ | 已迁：`/juicefs-storage` 三页签（卷/用量/性能），聚合 kapis 组 + PV join | 3 卷、11.2TB，性能走监控区间 |
 | ~~GPU 卡列表~~ / GPU 资源监控（1） | 已迁显卡列表 + 单卡详情（`/kapis/gpu.kubesphere.io/v1alpha1/gpus`，健康比例走 `/gpus/stats`） | 监控页签未做（需要 Prometheus gpu 指标） |
-| 应用资源监控 | 老 `Monitor/Resource` 2 页签 | — |
+| ~~应用资源监控~~ | 已迁：`/monitor-resource` 两页签（按工作负载 / 按容器组），Pod 指标聚合 + ReplicaSet 归属 | 无集群级 workloads 集合，工作负载由 Pod 指标聚合得出 |
 | ~~集群级告警消息 / 告警策略（2）~~ | 已迁：消息合并 clusteralerts+globalalerts（来源列）；策略两页签「自定义/内置」 | 剩余：集群自定义策略写、内置启停、消息下钻 |
 | 集群网关 | 只读展示 | 控制器缺 chart，状态到不了就绪 |
 | ~~飞书通知渠道~~ | 已迁：`/settings/feishu`，三种接入方式（用户 ID / 部门 ID / 群机器人），写 v2beta2 | 平台通知 webhook 当前 400，所有渠道写入用例 skip |

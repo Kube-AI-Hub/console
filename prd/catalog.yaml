@@ -685,6 +685,27 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-YAML_EDIT-01
+    - id: gpu-resource
+      title: GPU 资源监控
+      prd: prd/kube-frontend/cluster-management/gpu-resource.md
+      design: design/kube-frontend/cluster-management/gpu-resource.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU_RESOURCE-01
+    - id: juicefs
+      title: JuiceFS 共享存储
+      prd: prd/kube-frontend/cluster-management/juicefs.md
+      design: design/kube-frontend/cluster-management/juicefs.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-JUICEFS-01
+    - id: monitor-resource
+      title: 应用资源监控
+      prd: prd/kube-frontend/cluster-management/monitor-resource.md
+      design: design/kube-frontend/cluster-management/monitor-resource.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR_RESOURCE-01
     - id: gpu
       title: 集群显卡
       prd: prd/kube-frontend/cluster-management/gpu.md
@@ -800,6 +821,13 @@ modules:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_RESOURCES-01
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_RESOURCES-02
+    - id: cluster-gateways
+      title: 集群网关
+      prd: prd/kube-frontend/cluster-management/cluster-gateways.md
+      design: design/kube-frontend/cluster-management/cluster-gateways.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_GATEWAYS-01
   - id: project-settings
     title: 项目设置
     prd: prd/kube-frontend/project-settings/_index.md
@@ -899,6 +927,20 @@ modules:
       L2:
       - TC-FULL-KUBE-FRONTEND-STORAGE-01
     features:
+    - id: snapshot-alias
+      title: 快照别名路由
+      prd: prd/kube-frontend/storage/snapshot-alias.md
+      design: design/kube-frontend/storage/snapshot-alias.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOT_ALIAS-01
+    - id: snapshot-content
+      title: 快照内容视图
+      prd: prd/kube-frontend/storage/snapshot-content.md
+      design: design/kube-frontend/storage/snapshot-content.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOT_CONTENT-01
     - id: snapshots
       title: 卷快照与快照类型
       prd: prd/kube-frontend/storage/snapshots.md
@@ -1033,3 +1075,17 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DELETE-01
+    - id: network-create
+      title: 服务与应用路由创建
+      prd: prd/kube-frontend/app-workloads/network-create.md
+      design: design/kube-frontend/app-workloads/network-create.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-NETWORK_CREATE-01
+    - id: job-create
+      title: 任务与定时任务创建
+      prd: prd/kube-frontend/app-workloads/job-create.md
+      design: design/kube-frontend/app-workloads/job-create.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-JOB_CREATE-01

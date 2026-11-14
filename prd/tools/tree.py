@@ -627,6 +627,21 @@ MODULES = [
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-YAML_EDIT-01"]},
                     },
                     {
+                        "id": "gpu-resource",
+                        "title": "GPU 资源监控",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU_RESOURCE-01"]},
+                    },
+                    {
+                        "id": "juicefs",
+                        "title": "JuiceFS 共享存储",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-JUICEFS-01"]},
+                    },
+                    {
+                        "id": "monitor-resource",
+                        "title": "应用资源监控",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR_RESOURCE-01"]},
+                    },
+                    {
                         "id": "gpu",
                         "title": "集群显卡",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-01"]},
@@ -713,6 +728,11 @@ MODULES = [
                             "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_RESOURCES-02",
                         ]},
                     },
+                    {
+                        "id": "cluster-gateways",
+                        "title": "集群网关",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_GATEWAYS-01"]},
+                    },
                 ],
             },
             {
@@ -792,6 +812,16 @@ MODULES = [
                 "goal": "项目内的存储卷与存储卷快照能按老 console 的列展示：状态来自 PVC 的 phase 与扩容条件，容量与访问模式按原样呈现；详情给出持久卷/来源卷的对应关系。",
                 "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-STORAGE-01"]},
                 "features": [
+                    {
+                        "id": "snapshot-alias",
+                        "title": "快照别名路由",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOT_ALIAS-01"]},
+                    },
+                    {
+                        "id": "snapshot-content",
+                        "title": "快照内容视图",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOT_CONTENT-01"]},
+                    },
                     {
                         "id": "snapshots",
                         "title": "卷快照与快照类型",
@@ -911,6 +941,16 @@ MODULES = [
                         "tests": {"L3": [
                             "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DELETE-01",
                         ]},
+                    },
+                    {
+                        "id": "network-create",
+                        "title": "服务与应用路由创建",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_WORKLOADS-NETWORK_CREATE-01"]},
+                    },
+                    {
+                        "id": "job-create",
+                        "title": "任务与定时任务创建",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_WORKLOADS-JOB_CREATE-01"]},
                     },
                 ],
             },

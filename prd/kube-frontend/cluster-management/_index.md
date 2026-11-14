@@ -84,6 +84,9 @@
 | 显卡 | [gpu.md](./gpu.md) |
 | 集群级告警 | [cluster-alerting.md](./cluster-alerting.md) |
 | 集群级存储卷声明 | [cluster-pvc.md](./cluster-pvc.md) |
+| gpu-resource | [gpu-resource.md](./gpu-resource.md) |
+| juicefs | [juicefs.md](./juicefs.md) |
+| monitor-resource | [monitor-resource.md](./monitor-resource.md) |
 | 编辑 YAML 覆盖 | [yaml-edit.md](./yaml-edit.md) |
 
 ## 明确不做
@@ -99,6 +102,9 @@
 - 节点可分配资源在 `status.allocatable` 中以 Kubernetes 数量字符串给出。
 
 ## 验收用例
+- `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR_RESOURCE-01`
+- `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-JUICEFS-01`
+- `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU_RESOURCE-01`
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_PVC-01`
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING-01`
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-01`
