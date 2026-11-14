@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-06
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: platform-roles
+title: 平台角色编辑器支持多条规则
+entry_url: '{BASE_URL}/kube-frontend/access/clusterroles'
+prd: prd/kube-frontend/access-control/platform-roles.md
+design: design/kube-frontend/access-control/platform-roles.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-06
+
+story:
+- US1
+
+product: 平台角色编辑器可添加/删除多条规则；编辑既有角色时带回现有规则，不会把权限替换成默认一条。
+preconditions:
+- 已登录且可写 clusterrole（RBAC 组，不含 KubeSphere validating webhook）
+steps:
+- 打开平台角色页，点创建
+- 填写名称，第一条规则 pods + get/list
+- 添加第二条规则 apps/deployments,statefulsets + get/list/update
+- 提交并回读对象
+- 再次打开该角色编辑，观察规则行数
+expected:
+- 回读 rules 长度 2，字段与填写一致
+- 编辑弹窗回显两条规则行（role-editor:rule:0 / rule:1）
+troubleshoot:
+- 回读只有 1 条：表单未把多行转成多规则
+- 编辑弹窗只有 1 行：未读取既有规则（RBAC 是整对象替换，会静默降权）
+- 创建 422：apiGroups 为空时核心组必须写成 [""]，由 api-client 负责
+update_automation:
+- 选择器：role-editor:name / :rule-add / rule:<i>:groups|resources|verb:<verb> / :submit

@@ -518,7 +518,7 @@ MODULES = [
                     {
                         "id": "platform-roles",
                         "title": "平台角色列表",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-01", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-02", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-04"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-01", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-02", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-04", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-06"]},
                     },
                     {
                         "id": "workspaces",

@@ -34,6 +34,7 @@
 - **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-03** — 已知平台角色超过一页，当打开列表，则分页控件带稳定标识 `<list>:page:prev` / `<list>:page:next`；点「下一页」则内容变化，点「上一页」则回到与首页一致的顺序。
 - **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-04** — 已知平台角色列表中有角色，当点击角色名称进入详情，则显示名称、别名、规则数、创建时间与描述，并逐条列出该角色的授权规则（API 组、资源、动词）；规则条数等于角色对象 `rules` 的长度；`role-template-*` 角色带「模板」徽标并只读。
 - **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-05** — 已知某平台角色被授权给若干账号，当打开该角色详情，则「已授权用户」区块逐条列出被授权对象（类型 + 名称，服务账户附命名空间），条数等于 clusterrolebindings 中 roleRef 指向该角色的 subjects 总数；没有被授权时显示说明；授权信息读取失败时只该区块降级。
+- **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-06** — 已知打开平台角色编辑器，当添加两条规则（第一条 `pods` + get/list，第二条 `apps` 组 + `deployments,statefulsets` + get/list/update）并提交，则该角色对象 `rules` 恰有 2 条、字段与填写一致；再次打开该角色的编辑，两条规则都以可编辑行回显（不是被替换成默认一条）；只保留一条规则提交时对象只剩 1 条。
 
 ## 设计目标
 
@@ -59,6 +60,7 @@
 ## 明确不做
 
 - 规则的多条编辑（当前一次一条）。
+- 集群作用域单独的角色列表 / 详情页：集群角色与平台角色是同一批 `clusterrole` 对象，统一在「访问控制 › 平台角色」维护，避免同一对象出现两个编辑入口（见 `page-parity-report.md` 的「同一对象只有一处编辑入口」）。老 console 在 `/clusters/:cluster/roles` 另有一份列表，不迁移。
 
 ## 假设
 

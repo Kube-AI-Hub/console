@@ -9,6 +9,7 @@
 - AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-02
 - AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-04
 - AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-05
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-06
 
 - AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-01
 
@@ -41,6 +42,14 @@
 **被否方案**：跳进每个 binding 逐个读。请求数不可控，分页时容易漏。
 
 **何时重新考虑**：绑定数量增长到一次读不完时（届时按 labelSelector 过滤）。
+
+### DEC-L3-KUBE-FRONTEND-ACCESS-CONTROL-PLATFORM_ROLES-06 — 集群角色并入平台角色页
+
+**为什么**：`clusterrole` 是集群级对象，与平台角色是同一批；分成两页会让「这个角色授予了谁」出现两个答案，且集群页只能看 host 集群（`PlatformListPage.tsx` 里 `cluster: 'host'`），多集群下必然误导。
+
+**被否方案**：集群页保留只读列表 —— 只读列表无法回答「谁能改它」，价值不足以抵消两处维护。
+
+**已知限制**：平台角色页目前固定读 host 集群，多集群下应支持切换集群，属待补项。
 
 ## 系统现状
 
