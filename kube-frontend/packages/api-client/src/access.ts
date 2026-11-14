@@ -303,10 +303,30 @@ export interface WorkspaceMemberSummary {
 }
 
 export function workspaceMembersApi(client: Client) {
+  const path = (workspace: string, username?: string) =>
+    `${KAPIS_IAM}/workspaces/${encodeURIComponent(workspace)}/workspacemembers${username ? `/${encodeURIComponent(username)}` : ''}`;
   return {
+    async invite(params: { workspace: string; username: string; roleRef: string }): Promise<void> {
+      // The binding endpoint validates the role but not whether the account exists.
+      const user = await client.request<KubeAccess>(`${KAPIS_IAM}/users/${encodeURIComponent(params.username)}`);
+      if (user?.metadata?.name !== params.username) throw new Error('User account does not exist');
+      await client.request(path(params.workspace), {
+        method: 'POST',
+        body: [{ username: params.username, roleRef: params.roleRef }],
+      });
+    },
+    async updateRole(params: { workspace: string; username: string; roleRef: string }): Promise<void> {
+      await client.request(path(params.workspace, params.username), {
+        method: 'PUT',
+        body: { username: params.username, roleRef: params.roleRef },
+      });
+    },
+    async remove(params: { workspace: string; username: string }): Promise<void> {
+      await client.request(path(params.workspace, params.username), { method: 'DELETE' });
+    },
     async list(params: { workspace: string; signal?: AbortSignal }): Promise<WorkspaceMemberSummary[]> {
       const body = await client.request<{ items?: KubeAccess[] }>(
-        `${KAPIS_IAM}/workspaces/${encodeURIComponent(params.workspace)}/workspacemembers`,
+        path(params.workspace),
         { query: { limit: -1 }, ...(params.signal ? { signal: params.signal } : {}) },
       );
       return (body?.items ?? []).map((item) => {
@@ -319,6 +339,30 @@ export function workspaceMembersApi(client: Client) {
           lastLogin: String(status['lastLoginTime'] ?? annotations['iam.kubesphere.io/last-login-time'] ?? ''),
         };
       });
+    },
+  };
+}
+
+export interface WorkspaceRoleSummary {
+  name: string;
+  alias: string;
+  ruleCount: number;
+  createdAt: string;
+}
+
+export function workspaceRolesApi(client: Client) {
+  return {
+    async list(params: { workspace: string; signal?: AbortSignal }): Promise<WorkspaceRoleSummary[]> {
+      const body = await client.request<{ items?: KubeAccess[] }>(
+        `${KAPIS_IAM}/workspaces/${encodeURIComponent(params.workspace)}/workspaceroles`,
+        { query: { limit: -1 }, ...(params.signal ? { signal: params.signal } : {}) },
+      );
+      return (body?.items ?? []).map((item) => ({
+        name: item.metadata?.name ?? '',
+        alias: item.metadata?.annotations?.['kubesphere.io/alias-name'] ?? '',
+        ruleCount: (item.rules ?? []).length,
+        createdAt: item.metadata?.creationTimestamp ?? '',
+      }));
     },
   };
 }

@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_MEMBERS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: workspace-members
+title: 企业空间成员 · 邀请、改角色与移除
+entry_url: '{BASE_URL}/kube-frontend/workspaces/{workspace}/members'
+prd: prd/kube-frontend/access-control/workspace-members.md
+design: design/kube-frontend/access-control/workspace-members.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_MEMBERS-01
+
+story:
+- US1
+
+product: 企业空间成员的可写管理：邀请账号并授予空间角色、修改成员角色、移除成员；名字在每一步都由接口回读核对。
+preconditions:
+- 已登录且有账号、空间角色读取及成员写入权限
+- 空间至少有两个角色；仅操作唯一命名的一次性测试用户
+steps:
+- 创建一次性平台账号并打开空间成员页
+- 邀请账号并选择真实空间角色，回读成员角色
+- 修改为另一个空间角色，回读角色
+- 输入用户名确认移除，回读成员集合与平台账号
+expected:
+- 两次写入的角色与用户选择一致
+- 移除后空间成员不存在而平台账号仍在
+- finally 移除测试绑定并删除测试账号
+troubleshoot:
+- 邀请返回 4xx：确认空间角色存在且当前账号有 workspacemembers 写权限
+- 回读角色没变：检查写的是注解 iam.kubesphere.io/workspacerole 还是 rolebinding
+- 成员仍在：移除是解绑而不是删平台账号，别把两者混为一谈
+update_automation:
+- 选择器见 pages/access_control.py 的 workspace_member_* 辅助与 WorkspaceMemberDialog.tsx

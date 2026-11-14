@@ -64,6 +64,25 @@ class AccessControlPage:
     def active_tab(self) -> str | None:
         return self.page.locator('[data-ai-id^="area-tabs:"] a[aria-current="page"]').get_attribute("data-ai-id")
 
+    def workspace_member_row(self, username: str) -> Locator:
+        return self.page.locator(f'[data-ai-id="workspace-members:surface"] [data-ai-row="{username}"]')
+
+    def workspace_member_field(self, key: str) -> Locator:
+        return self.page.get_by_role("dialog").locator(f"#ai-field-{key}")
+
+    def workspace_member_submit(self) -> Locator:
+        return self.page.get_by_role("dialog").get_by_role("button", name="确认", exact=True)
+
+    def workspace_member_invite(self) -> Locator:
+        return self.page.locator('[data-ai-id="workspace-members:invite"]')
+
+    def workspace_member_action(self, username: str, action: str) -> None:
+        self.workspace_member_row(username).get_by_role("button", name="更多操作").click()
+        self.page.get_by_role("menuitem", name=action, exact=True).click()
+
+    def workspace_member_confirmation(self, kind: str) -> Locator:
+        return self.page.locator(f'[data-ai-id="workspace-members:delete-{kind}"]')
+
     @property
     def workspace_bar_count(self) -> int:
         return self.page.locator('[data-ai-id="workspace-bar"]').count()

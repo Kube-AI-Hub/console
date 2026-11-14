@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
+import { workspaceRolesApi, type WorkspaceRoleSummary } from '@kube-ai-hub/api-client';
 import { AiSurface, ResourceList, type ListSchema } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
@@ -25,24 +26,6 @@ export interface WorkspaceRolesPageProps {
   workspace: string;
 }
 
-interface KubeWorkspaceRole {
-  metadata?: {
-    name?: string;
-    creationTimestamp?: string;
-    annotations?: Record<string, string>;
-  };
-  rules?: unknown[];
-}
-
-interface WorkspaceRoleRow {
-  /** Object name — the identity a member's role annotation refers to. */
-  name: string;
-  /** `kubesphere.io/alias-name`, the label the old console showed first. */
-  alias: string;
-  ruleCount: number;
-  createdAt: string;
-}
-
 /** Client-side page size: the whole collection is read once (`limit=-1`), then paged here. */
 const PAGE_SIZE = 20;
 
@@ -52,18 +35,7 @@ export function WorkspaceRolesPage({ workspace }: WorkspaceRolesPageProps): Reac
 
   const query = useQuery({
     queryKey: ['workspace-roles', workspace],
-    queryFn: async ({ signal }): Promise<WorkspaceRoleRow[]> => {
-      const body = await apiClient.request<{ items?: KubeWorkspaceRole[] }>(
-        `/kapis/iam.kubesphere.io/v1alpha2/workspaces/${encodeURIComponent(workspace)}/workspaceroles`,
-        { query: { limit: -1 }, ...(signal ? { signal } : {}) },
-      );
-      return (body?.items ?? []).map((item) => ({
-        name: item.metadata?.name ?? '',
-        alias: item.metadata?.annotations?.['kubesphere.io/alias-name'] ?? '',
-        ruleCount: (item.rules ?? []).length,
-        createdAt: item.metadata?.creationTimestamp ?? '',
-      }));
-    },
+    queryFn: ({ signal }) => workspaceRolesApi(apiClient).list({ workspace, signal }),
   });
 
   // A new workspace is a new list: keep the pager from pointing past its end.
@@ -79,7 +51,7 @@ export function WorkspaceRolesPage({ workspace }: WorkspaceRolesPageProps): Reac
     [page, paged, rows],
   );
 
-  const schema = React.useMemo<ListSchema<WorkspaceRoleRow>>(
+  const schema = React.useMemo<ListSchema<WorkspaceRoleSummary>>(
     () => ({
       title: t('workspace.roles.title'),
       description: t('workspace.roles.description'),
