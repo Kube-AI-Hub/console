@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USER_DETAIL-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: user-detail
+title: 用户详情 · 登录历史分页与四列
+entry_url: '{BASE_URL}/kube-frontend/access/users'
+prd: prd/kube-frontend/access-control/user-detail.md
+design: design/kube-frontend/access-control/user-detail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USER_DETAIL-02
+
+story:
+- US2
+
+product: 登录历史按页展示时间、状态、来源 IP、原因；总数取 totalItems；翻页后行身份变化且总数不变；缺失 success 不显示为失败。
+preconditions:
+- 已登录平台管理
+- 选用 loginrecords.totalItems 大于 10 的用户（优先 admin）
+steps:
+- 用 API 读取 page=1 与 page=2 的 loginrecords
+- 打开该用户详情，核对本页行数、共 N 条、四列表头
+- 点下一页，核对其行与第一页不同且总数不变
+expected:
+- 标题旁总数等于接口 totalItems
+- 当前页行数等于该页 items
+- 表头含时间、状态、来源 IP、原因
+- 第二页首行与第一页不同
+troubleshoot:
+- 总数等于 10：读的仍是固定 limit 且丢掉了 totalItems
+- 两页相同：page 参数未下发
+- 失败列把无 success 的行标红：把缺失当成了 false
+update_automation:
+- 选择器见 LoginHistoryPanel.tsx 的 user-detail:logins / user-detail:login-list

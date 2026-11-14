@@ -110,7 +110,7 @@ export const ExpandableRows: Story = {
   ),
 };
 
-/** 选择列配合批量操作使用，禁用行的复选框不可点。 */
+/** 选择列配合批量操作使用；不可选的行不渲染复选框，只留空单元格对齐。 */
 export const WithSelection: Story = {
   name: 'with selection',
   render: () => {

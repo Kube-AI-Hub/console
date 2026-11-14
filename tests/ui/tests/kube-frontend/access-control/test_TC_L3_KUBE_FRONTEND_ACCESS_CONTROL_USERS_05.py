@@ -93,9 +93,11 @@ def test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_USERS_05(access_control_page, screen
         ui.page.locator('[data-ai-id="users:search"]').fill("admin")
         admin_row = surface.locator('[data-ai-row="admin"]')
         expect(admin_row).to_be_visible(timeout=20_000)
-        admin_row.locator('button[aria-haspopup="menu"]').click()
-        admin_labels = [item.strip() for item in ui.page.get_by_role("menuitem").all_inner_texts()]
-        assert "停用" not in admin_labels and "删除" not in admin_labels, admin_labels
-        ui.page.keyboard.press("Escape")
+        menu = admin_row.locator('button[aria-haspopup="menu"]')
+        if menu.count():
+            menu.click()
+            admin_labels = [item.strip() for item in ui.page.get_by_role("menuitem").all_inner_texts()]
+            assert "停用" not in admin_labels and "删除" not in admin_labels, admin_labels
+            ui.page.keyboard.press("Escape")
     finally:
         _cleanup(ui.api, name)

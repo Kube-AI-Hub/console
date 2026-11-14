@@ -14,6 +14,7 @@
 - AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-05
 
 - AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-01
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-08
 
 ## 概述
 
@@ -21,8 +22,8 @@
 
 ## 设计目标与非目标
 
-把状态与平台角色变成可读列；对账号的写操作（创建、改角色、停用/启用、删除、编辑邮箱与描述）都在本模块内完成。
-非目标：企业空间的创建与成员管理。
+把状态与平台角色变成可读列；对账号的写操作（创建、改角色、停用/启用、删除、编辑邮箱与描述、管理员重置密码）都在本模块内完成。创建必须写下 `uninitialized`，最近登录必须读 `status.lastLoginTime`。
+非目标：企业空间的创建与成员管理；列显隐开关；用户头像。
 
 ## 关键约束
 
@@ -74,11 +75,18 @@ E2E 见 `tests/kube-frontend/access-control/`。
 
 ## 后续改进
 
-管理员重置他人密码：老 console 在用户详情页提供，属独立的重置流程（需要确认与弱口令策略），另立功能点。
+企业空间用户组、配额与跨作用域授权不在本页。
 
 ## 验收用例
 
 - `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-01`
+- `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-02`
+- `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-03`
+- `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-04`
+- `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-05`
+- `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-06`
+- `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-07`
+- `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-08`
 
 ### DEC-L3-KUBE-FRONTEND-ACCESS-CONTROL-USERS-02 — 密码规则在客户端先校验
 
@@ -115,3 +123,35 @@ E2E 见 `tests/kube-frontend/access-control/`。
 **被否方案**：把 500 一律当可重试。会让「删除成功」看起来像失败。
 
 **何时重新考虑**：IAM 修正状态码，或平台提供专门的角色变更接口时。
+
+### DEC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-09 — 列表最近登录读 status，注解只作回退
+
+**为什么**：旧 mapper 读 `status.lastLoginTime`。新列表一度只读 `iam.kubesphere.io/last-login-time`，而该注解在改密时也会被刷新，于是从未登录的账号显示成「刚刚登录」。缺值显示「尚未登录」，与旧 `NOT_LOGIN_YET` 同义，不用 `-`（那是「字段不存在」而不是「没登录过」）。
+
+**被否方案**：继续只读注解。会把改密时间当成登录时间。
+
+**何时重新考虑**：平台把登录时间只保留在注解并废弃 status 字段时。
+
+### DEC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-10 — 创建时写下 uninitialized，描述可选
+
+**为什么**：旧 `user.create` 在提交前无条件写 `iam.kubesphere.io/uninitialized=true`，这样首次登录必须改密。漏掉这一笔，初始密码会一直有效。描述是旧创建表单就有的字段，仍走 `kubesphere.io/description`。
+
+**被否方案**：只发角色注解。账号能登录，但不会被要求改掉管理员设的初始密码。
+
+**何时重新考虑**：平台改为创建后自动发邀请邮件、不再用 uninitialized 时。
+
+### DEC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-11 — 用户列表默认按 createTime 降序
+
+**为什么**：旧 `UserStore`/`BaseStore` 在未指定 `sortBy` 时使用 `createTime`。新页与角色/企业空间共用 `PlatformListPage`，曾默认 `name` 降序，于是同一批用户的首屏顺序与旧站不同，而表上又没有创建时间列可点回去。用户页单独默认 `createTime`；名称排序仍由用户名列提供（AC-04）。
+
+**被否方案**：三种列表都默认按名称。角色与企业空间没有旧 createTime 首屏约定，用户列表有。
+
+**何时重新考虑**：产品要求用户列表首屏按字母序，并在表头提供创建时间列时。
+
+### DEC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-08 — 预置账号与当前用户整行不可写
+
+**为什么**：旧列表 `showAction` 排除 `globals.config.presetUsers`（`admin`、`sonarqube`）以及当前用户名。新列表曾经只排除 `admin`，预置的 `sonarqube` 和操作者自己可以被停用或删除。保护函数与配置清单对齐，复选框与行菜单共用，避免「勾得上但保存必失败」。
+
+**被否方案**：只保护 `admin`。会把配置里其余预置账号暴露给停用/删除。点了再根据 403 提示则是可点的陷阱。
+
+**何时重新考虑**：BFF 下发 `presetUsers` 而不再与 `config.yaml` 对齐时，改为读配置接口。

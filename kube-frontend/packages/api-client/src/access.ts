@@ -72,7 +72,10 @@ export function toUserSummary(item: KubeAccess): UserSummary {
     // would be a claim the platform never made.
     status: status['state'] === undefined ? 'Active' : String(status['state']),
     platformRole: platformRoleOf(item),
-    lastLogin: annotations['iam.kubesphere.io/last-login-time'] ?? '',
+    // The old mapper read `status.lastLoginTime`. The annotation is written on
+    // password changes too, so using it first made "never signed in" look like a
+    // recent login. Status is the sign-in clock; the annotation is only a fallback.
+    lastLogin: String(status['lastLoginTime'] ?? annotations['iam.kubesphere.io/last-login-time'] ?? ''),
     /*
      * `spec.email` first, the annotation as a fallback.
      *
@@ -167,6 +170,50 @@ export interface LoginRecord {
   time: string;
   provider: string;
   reason: string;
+  /** Client address the apiserver recorded; empty when the object has no `spec.sourceIP`. */
+  sourceIP: string;
+  /**
+   * `spec.success`. `undefined` means the object did not say; that is not the same as
+   * a failed sign-in, and the page must not paint it as one.
+   */
+  success?: boolean;
+}
+
+/** One page of `/users/<name>/loginrecords`. */
+export interface LoginRecordsPage {
+  items: LoginRecord[];
+  /** `totalItems` from the collection; a missing field falls back to this page's length. */
+  total: number;
+}
+
+/**
+ * Accounts the old console refused to edit, disable, delete or reset.
+ *
+ * Matches `presetUsers` in `console/server/config.yaml`. The signed-in account is
+ * protected separately via `isProtectedPlatformUser`'s second argument: operating on
+ * yourself is the same class of lock-out as operating on `admin`.
+ */
+export const PRESET_PLATFORM_USERS = ['admin', 'sonarqube'] as const;
+
+/** True when the row must not offer enable / disable / edit / delete / reset password. */
+export function isProtectedPlatformUser(name: string, currentUsername?: string): boolean {
+  if (!name) return true;
+  if ((PRESET_PLATFORM_USERS as readonly string[]).includes(name)) return true;
+  return Boolean(currentUsername) && name === currentUsername;
+}
+
+/** Map one LoginRecord object. Missing success stays undefined; missing IP stays empty. */
+export function toLoginRecord(item: KubeAccess): LoginRecord {
+  const spec = (item.spec ?? {}) as Record<string, unknown>;
+  const success = spec['success'];
+  return {
+    name: item.metadata?.name ?? '',
+    time: item.metadata?.creationTimestamp ?? '',
+    provider: String(spec['provider'] ?? ''),
+    reason: String(spec['reason'] ?? ''),
+    sourceIP: String(spec['sourceIP'] ?? ''),
+    ...(typeof success === 'boolean' ? { success } : {}),
+  };
 }
 
 export function userDetailApi(client: Client) {
@@ -193,21 +240,33 @@ export function userDetailApi(client: Client) {
       };
     },
 
-    /** The last few sign-ins; the endpoint pages, so a small limit keeps the page quick. */
-    async loginRecords(params: { name: string; limit?: number; signal?: AbortSignal }): Promise<LoginRecord[]> {
-      const body = await client.request<{ items?: KubeAccess[] }>(`${path(params.name)}/loginrecords`, {
-        query: { limit: params.limit ?? 10, sortBy: 'createTime', ascending: false },
-        ...(params.signal ? { signal: params.signal } : {}),
-      });
-      return (body?.items ?? []).map((item) => {
-        const spec = (item.spec ?? {}) as Record<string, unknown>;
-        return {
-          name: item.metadata?.name ?? '',
-          time: item.metadata?.creationTimestamp ?? '',
-          provider: String(spec['provider'] ?? ''),
-          reason: String(spec['reason'] ?? ''),
-        };
-      });
+    /**
+     * Sign-in history, server-paged.
+     *
+     * The old console's login-history tab sent `page` / `limit` / `sortBy=createTime` and
+     * rendered `totalItems`. A fixed `limit: 10` with no total hid every record past the
+     * first page and could not tell a short history from a truncated one.
+     */
+    async loginRecords(params: {
+      name: string;
+      page?: number;
+      limit?: number;
+      signal?: AbortSignal;
+    }): Promise<LoginRecordsPage> {
+      const limit = params.limit ?? 10;
+      const page = params.page ?? 1;
+      const body = await client.request<{ items?: KubeAccess[]; totalItems?: number }>(
+        `${path(params.name)}/loginrecords`,
+        {
+          query: { page, limit, sortBy: 'createTime', ascending: false },
+          ...(params.signal ? { signal: params.signal } : {}),
+        },
+      );
+      const items = (body?.items ?? []).map(toLoginRecord);
+      return {
+        items,
+        total: typeof body?.totalItems === 'number' ? body.totalItems : items.length,
+      };
     },
   };
 }
@@ -644,7 +703,15 @@ export function usersWriteApi(client: Client) {
       email: string;
       password: string;
       platformRole: AssignablePlatformRole;
+      description?: string;
     }): Promise<UserSummary> {
+      const annotations: Record<string, string> = {
+        'iam.kubesphere.io/platform-role': params.platformRole,
+        // First sign-in must set a password of their own. The old create action
+        // always wrote this; omitting it lets the initial password live forever.
+        'iam.kubesphere.io/uninitialized': 'true',
+      };
+      if (params.description) annotations['kubesphere.io/description'] = params.description;
       const item = await client.request<KubeAccess>(`${KAPIS_IAM}/users`, {
         method: 'POST',
         body: {
@@ -652,7 +719,7 @@ export function usersWriteApi(client: Client) {
           kind: 'User',
           metadata: {
             name: params.name,
-            annotations: { 'iam.kubesphere.io/platform-role': params.platformRole },
+            annotations,
           },
           spec: {
             email: params.email,
@@ -717,6 +784,22 @@ export function usersWriteApi(client: Client) {
         },
       });
       return toUserSummary(updated ?? {});
+    },
+
+    /**
+     * Administrator reset of another account's password.
+     *
+     * Same `/password` endpoint as personal settings, but the body is **only**
+     * `{ password }`. Sending `currentPassword` is the self-service shape; for another
+     * user the apiserver treats that field as *their* current password and answers
+     * 400 `incorrect old password`. Verified: `{ password }` returns 200, after which
+     * the new value signs in and the old one does not.
+     */
+    async resetPassword(params: { name: string; password: string }): Promise<void> {
+      await client.request<void>(`${KAPIS_IAM}/users/${encodeURIComponent(params.name)}/password`, {
+        method: 'PUT',
+        body: { password: params.password },
+      });
     },
 
     /**

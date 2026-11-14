@@ -13,9 +13,9 @@ covers:
 - AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-02
 
 story:
-- US1
+- US6
 
-product: 平台用户可由「创建」表单建立；密码框边输入边显示强度面板；弱密码与非法的用户名被拦下；创建后平台角色写在注解上。
+product: 平台用户可由「创建」表单建立；密码框边输入边显示强度面板；弱密码与非法的用户名被拦下；创建后平台角色与 uninitialized=true 写在注解上。
 preconditions:
 - 已登录，且有平台权限
 - 用例自行创建的用户在结束时无条件删除
@@ -34,7 +34,7 @@ expected:
 - 弹窗里没有 user-settings:* 前缀的句柄（两处面板 scope 不同）
 - 非法用户名时提交被拦下
 - 弱密码时提交被拦下并说明原因
-- 提交后用户存在，且 iam.kubesphere.io/platform-role 等于所选角色
+- 提交后用户存在，iam.kubesphere.io/platform-role 等于所选角色，iam.kubesphere.io/uninitialized 为 true
 troubleshoot:
 - 创建失败时确认写的是 iam.kubesphere.io 而不是核心组
 - 角色为空说明注解没写到 metadata.annotations

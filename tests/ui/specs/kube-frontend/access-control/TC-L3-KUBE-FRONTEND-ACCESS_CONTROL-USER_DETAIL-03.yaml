@@ -1,0 +1,37 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USER_DETAIL-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: user-detail
+title: 用户详情 · 管理员重置密码
+entry_url: '{BASE_URL}/kube-frontend/access/users'
+prd: prd/kube-frontend/access-control/user-detail.md
+design: design/kube-frontend/access-control/user-detail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USER_DETAIL-03
+
+story:
+- US3
+
+product: 非保护账号可在详情重置密码；请求体只有新密码；新密码可登录、旧密码不可；admin 无入口。
+preconditions:
+- 已登录平台管理
+- 用例自行创建临时用户（tc-e2e- 前缀），失败也删除
+steps:
+- 用 API 创建带 platform-regular 的临时用户，等到旧密码能登录
+- 打开其详情，点重置密码，填写符合规则且两次一致的新密码并保存
+- 等到新密码能登录 BFF，用旧密码登录应失败
+- 打开 admin 详情，确认没有重置按钮
+expected:
+- 保存后弹窗关闭
+- 新密码登录 200，旧密码登录非 2xx
+- admin 详情没有 user-detail:reset
+troubleshoot:
+- 400 incorrect old password：请求体带了 currentPassword
+- 创建后立刻登录 400：身份尚未就绪，应等待而不是判产品失败
+- admin 也有按钮：保护函数未把 preset 算进去
+update_automation:
+- 选择器见 UserDetailPage.tsx 与 UserResetPasswordDialog.tsx
+- 截图不要包含已填写的密码

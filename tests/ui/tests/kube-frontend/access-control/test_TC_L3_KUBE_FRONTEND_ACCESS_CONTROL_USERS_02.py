@@ -100,8 +100,9 @@ def test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_USERS_02(access_control_page, screen
         status, body = ui.api.request("GET", f"{USERS}/{name}")
         assert status == 200, (status, body)
         # The role is an annotation: a user without it can sign in but do nothing.
-        role = ((body.get("metadata") or {}).get("annotations") or {}).get("iam.kubesphere.io/platform-role")
-        assert role == "platform-regular", role
+        annotations = ((body.get("metadata") or {}).get("annotations") or {})
+        assert annotations.get("iam.kubesphere.io/platform-role") == "platform-regular", annotations
+        assert annotations.get("iam.kubesphere.io/uninitialized") == "true", annotations
         screenshot(ui.page, "access-users-create")
     finally:
         ui.api.request("DELETE", f"{USERS}/{name}")

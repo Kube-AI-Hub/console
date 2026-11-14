@@ -33,9 +33,8 @@ def test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_USERS_04(access_control_page, screen
     ui.page.wait_for_timeout(2500)
     second = names()
 
-    # The two clicks must land on different orders. This page defaults to descending,
-    # so a cycle that ends at "no sort" would make the very first click a no-op: the
-    # column looked permanently unsortable.
+    # The two clicks must land on different orders. Default list sort is createTime,
+    # so the first name-column click must actually switch the key (not be a no-op).
     assert first != second, (initial, first, second)
     assert first == sorted(first), first
     assert second == sorted(second, reverse=True), second

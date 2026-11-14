@@ -165,8 +165,8 @@ export interface ListSchema<TRow> {
    * Whether a row can be selected.
    *
    * Selection drives bulk actions, so a row that may not be acted on — a
-   * cluster-federated object, say — must not be checkable either. Returning false
-   * disables the checkbox and keeps it out of select-all.
+   * preset account, say — must not be checkable either. Returning false omits
+   * the checkbox and keeps the row out of select-all.
    */
   isRowSelectable?: (row: TRow) => boolean;
   empty?: { title?: React.ReactNode; description?: React.ReactNode };

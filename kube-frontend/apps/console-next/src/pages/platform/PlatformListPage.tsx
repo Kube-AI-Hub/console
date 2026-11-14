@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Link } from '@tanstack/react-router';
-import { type ClusterRoleSummary, type UserSummary, type WorkspaceSummary } from '@kube-ai-hub/api-client';
+import { isProtectedPlatformUser, type ClusterRoleSummary, type UserSummary, type WorkspaceSummary } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
@@ -11,8 +11,10 @@ import { PLATFORM_DESCRIPTORS, useCreateWorkspace, useDeleteClusterRole, useDele
 import { WorkspaceEditorDialog } from './WorkspaceEditorDialog';
 import { RoleEditorDialog } from './RoleEditorDialog';
 import { DeleteDialog } from '@/components/resource/DeleteDialog';
-import { useSetUserActive, useSetUsersActive, useUpdateUser } from './queries';
+import { useResetUserPassword, useSetUserActive, useSetUsersActive, useUpdateUser } from './queries';
 import { UserEditDialog } from './UserEditDialog';
+import { UserResetPasswordDialog } from './UserResetPasswordDialog';
+import { useAuth } from '@/shell/AuthProvider';
 import { MutationAlert } from '@/components/resource/ResourceErrorPanel';
 import { UserCreateDialog } from './UserCreateDialog';
 import { UserRoleDialog } from './UserRoleDialog';
@@ -37,7 +39,12 @@ type Row = UserSummary | ClusterRoleSummary | WorkspaceSummary;
 
 export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactElement {
   const t = useT();
-  const list = useResourceListState<SortKey>({ defaultSortBy: 'name', resetOn: [kind] });
+  const { user } = useAuth();
+  const currentUsername = user?.name;
+  const list = useResourceListState<SortKey>({
+    defaultSortBy: kind === 'users' ? 'createTime' : 'name',
+    resetOn: [kind],
+  });
   const query = usePlatformList(kind, toListParams(list, { cluster: 'host', namespace: '' }, PAGE_SIZE));
   const [creating, setCreating] = React.useState(false);
   const [roleTarget, setRoleTarget] = React.useState<UserSummary | null>(null);
@@ -47,7 +54,9 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
   const setUserActive = useSetUserActive();
   const setUsersActive = useSetUsersActive();
   const updateUser = useUpdateUser();
+  const resetPassword = useResetUserPassword();
   const [editTarget, setEditTarget] = React.useState<UserSummary | null>(null);
+  const [resetTarget, setResetTarget] = React.useState<UserSummary | null>(null);
   // Bulk enable/disable needs the selection; the list owns the checkbox state.
   const [selectedUsernames, setSelectedUsernames] = React.useState<string[]>([]);
   const [roleEditor, setRoleEditor] = React.useState<{ name: string; alias: string; description: string } | null | 'new'>(null);
@@ -128,7 +137,11 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
                 hideBelow: 'xl',
                 render: (row: Row) => {
                   const user = row as UserSummary;
-                  return <span className="tabular-nums text-ai-fg-muted">{user.lastLogin ? formatTimestamp(user.lastLogin) : '-'}</span>;
+                  return (
+                    <span className="tabular-nums text-ai-fg-muted">
+                      {user.lastLogin ? formatTimestamp(user.lastLogin) : t('platform.column.notLoginYet')}
+                    </span>
+                  );
                 },
               },
             ]
@@ -222,9 +235,9 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
       ...(kind === 'users'
         ? {
             selection: 'multiple' as const,
-            // The admin account cannot be disabled at all, so it is not selectable:
-            // a checkbox that leads to a refused action is a trap.
-            isRowSelectable: (row: Row) => (row as UserSummary).username !== 'admin',
+            // Preset accounts and the signed-in user cannot be mutated, so they are
+            // not selectable: a checkbox that leads to a refused action is a trap.
+            isRowSelectable: (row: Row) => !isProtectedPlatformUser((row as UserSummary).username, currentUsername),
             actions: [
               { key: 'enable-users', label: t('platform.users.enable'), aiId: 'users:bulk-enable' },
               { key: 'disable-users', label: t('platform.users.disable'), aiId: 'users:bulk-disable' },
@@ -236,26 +249,44 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
           ? [
               /*
                * Two mutually exclusive entries: a row action's label is static, so a single
-               * 'toggle' would claim the wrong state for half the rows. The admin account is
-               * never disabled or deleted here — that would lock the platform out of itself.
+               * 'toggle' would claim the wrong state for half the rows. Preset accounts and
+               * the signed-in user never get write actions — that would lock the operator
+               * out of the platform or out of their own session.
                */
               {
                 key: 'enableUser',
                 label: t('platform.users.enable'),
-                visible: (row: Row) => (row as UserSummary).status === 'Disabled',
+                visible: (row: Row) =>
+                  (row as UserSummary).status === 'Disabled' &&
+                  !isProtectedPlatformUser((row as UserSummary).username, currentUsername),
               },
               {
                 key: 'disableUser',
                 label: t('platform.users.disable'),
-                visible: (row: Row) => (row as UserSummary).status !== 'Disabled' && (row as UserSummary).username !== 'admin',
+                visible: (row: Row) =>
+                  (row as UserSummary).status !== 'Disabled' &&
+                  !isProtectedPlatformUser((row as UserSummary).username, currentUsername),
               },
-              { key: 'editUser', label: t('resource.action.editInfo') },
-              { key: 'changeRole', label: t('platform.users.changeRole') },
+              {
+                key: 'editUser',
+                label: t('resource.action.editInfo'),
+                visible: (row: Row) => !isProtectedPlatformUser((row as UserSummary).username, currentUsername),
+              },
+              {
+                key: 'changeRole',
+                label: t('platform.users.changeRole'),
+                visible: (row: Row) => !isProtectedPlatformUser((row as UserSummary).username, currentUsername),
+              },
+              {
+                key: 'resetPassword',
+                label: t('platform.users.resetPassword'),
+                visible: (row: Row) => !isProtectedPlatformUser((row as UserSummary).username, currentUsername),
+              },
               {
                 key: 'delete',
                 label: t('common.delete'),
                 tone: 'danger' as const,
-                visible: (row: Row) => (row as UserSummary).username !== 'admin',
+                visible: (row: Row) => !isProtectedPlatformUser((row as UserSummary).username, currentUsername),
               },
             ]
           : kind === 'clusterroles'
@@ -285,7 +316,7 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
       },
       pagination: { page: list.page, pageSize: PAGE_SIZE, total },
     }),
-    [kind, list, t, total],
+    [kind, list, t, total, currentUsername],
   );
 
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
@@ -313,7 +344,7 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
         {...(kind === 'users' ? { selectedKeys: selectedUsernames, onSelectionChange: setSelectedUsernames } : {})}
         onBulkAction={(action, keys) => {
           if (action !== 'enable-users' && action !== 'disable-users') return;
-          const targets = keys.filter((name) => name !== 'admin');
+          const targets = keys.filter((name) => !isProtectedPlatformUser(name, currentUsername));
           if (!targets.length) return;
           setUsersActive.mutate({ names: targets, active: action === 'enable-users' });
         }}
@@ -328,6 +359,7 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
           if (!row) return;
           if (action === 'changeRole') setRoleTarget(row as UserSummary);
           if (action === 'editUser') setEditTarget(row as UserSummary);
+          if (action === 'resetPassword') setResetTarget(row as UserSummary);
           if (action === 'enableUser') setUserActive.mutate({ name: (row as UserSummary).username, active: true });
           if (action === 'disableUser') setUserActive.mutate({ name: (row as UserSummary).username, active: false });
           if (action === 'edit' && kind === 'clusterroles') {
@@ -346,7 +378,7 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
         }}
       />
 
-      <MutationAlert error={setUsersActive.error ?? updateUser.error ?? setUserActive.error ?? setRole.error ?? removeUser.error ?? removeRole.error ?? createWorkspace.error ?? updateWorkspace.error ?? removeWorkspace.error} />
+      <MutationAlert error={setUsersActive.error ?? updateUser.error ?? resetPassword.error ?? setUserActive.error ?? setRole.error ?? removeUser.error ?? removeRole.error ?? createWorkspace.error ?? updateWorkspace.error ?? removeWorkspace.error} />
 
       <WorkspaceEditorDialog
         open={workspaceEditor !== null}
@@ -364,6 +396,22 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
           setWorkspaceEditor(null);
         }}
       />
+
+      {resetTarget ? (
+        <UserResetPasswordDialog
+          name={resetTarget.username}
+          pending={resetPassword.isPending}
+          {...(resetPassword.error ? { error: resetPassword.error } : {})}
+          onCancel={() => {
+            setResetTarget(null);
+            resetPassword.reset();
+          }}
+          onSubmit={async (password) => {
+            await resetPassword.mutateAsync({ name: resetTarget.username, password });
+            setResetTarget(null);
+          }}
+        />
+      ) : null}
 
       {editTarget ? (
         <UserEditDialog

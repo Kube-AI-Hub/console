@@ -30,8 +30,13 @@ export function UserCreateDialog({ open, onOpenChange }: UserCreateDialogProps):
   const t = useT();
   const queryClient = useQueryClient();
   const create = useMutation({
-    mutationFn: (input: { name: string; email: string; password: string; platformRole: AssignablePlatformRole }) =>
-      usersWriteApi(apiClient).create(input),
+    mutationFn: (input: {
+      name: string;
+      email: string;
+      password: string;
+      platformRole: AssignablePlatformRole;
+      description?: string;
+    }) => usersWriteApi(apiClient).create(input),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['platform', 'users'] }),
   });
 
@@ -95,6 +100,11 @@ export function UserCreateDialog({ open, onOpenChange }: UserCreateDialogProps):
           required: true,
           options: ASSIGNABLE_PLATFORM_ROLES.map((role) => ({ value: role, label: t(`platform.role.${role}` as never) })),
         },
+        {
+          key: 'description',
+          label: t('platform.user.description'),
+          type: 'textarea',
+        },
       ],
     }),
     [t],
@@ -128,11 +138,13 @@ export function UserCreateDialog({ open, onOpenChange }: UserCreateDialogProps):
         }}
         onSubmit={async (raw) => {
           const values = raw as Record<string, unknown>;
+          const description = String(values['description'] ?? '').trim();
           await create.mutateAsync({
             name: String(values['name'] ?? '').trim(),
             email: String(values['email'] ?? '').trim(),
             password: String(values['password'] ?? ''),
             platformRole: String(values['platformRole'] ?? 'platform-regular') as AssignablePlatformRole,
+            ...(description ? { description } : {}),
           });
           onOpenChange(false);
         }}

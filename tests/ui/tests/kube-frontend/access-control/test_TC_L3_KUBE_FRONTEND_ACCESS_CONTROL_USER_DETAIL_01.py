@@ -31,7 +31,7 @@ def test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_USER_DETAIL_01(access_control_page, 
     state = str((user.get("status") or {}).get("state") or "Active")
     last_login = str((user.get("status") or {}).get("lastLoginTime") or "")
 
-    status, records = ui.api.request("GET", f"{USERS}/{name}/loginrecords?limit=10")
+    status, records = ui.api.request("GET", f"{USERS}/{name}/loginrecords?limit=10&page=1&sortBy=createTime&ascending=false")
     record_items = (records.get("items") or []) if status == 200 and isinstance(records, dict) else []
 
     ui.page.goto(f"{ui.base_url}/kube-frontend/access/users")
@@ -55,6 +55,8 @@ def test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_USER_DETAIL_01(access_control_page, 
     if last_login:
         expected = datetime.fromisoformat(last_login.replace("Z", "+00:00")).astimezone().strftime("%Y-%m-%d %H:%M:%S")
         assert expected in basic, f"最近登录应为 {expected}: {basic[:240]}"
+    else:
+        assert "尚未登录" in basic, basic[:240]
 
     logins = ui.page.locator('[data-ai-id="user-detail:login-list"] [data-ai-row]')
     if record_items:

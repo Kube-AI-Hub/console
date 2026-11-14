@@ -1,5 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { passwordChecks, passwordProblem, platformRoleOf, toClusterRoleSummary, toUserSummary, toWorkspaceSummary } from '../src/access';
+import { createClient } from '../src/client';
+import {
+  isProtectedPlatformUser,
+  passwordChecks,
+  passwordProblem,
+  platformRoleOf,
+  toClusterRoleSummary,
+  toLoginRecord,
+  toUserSummary,
+  toWorkspaceSummary,
+  userDetailApi,
+  usersWriteApi,
+} from '../src/access';
 
 /**
  * Platform access mapping.
@@ -37,7 +49,18 @@ describe('user summary', () => {
     expect(toUserSummary({ metadata: { name: 'bob' }, status: { state: 'Disabled' } }).status).toBe('Disabled');
   });
 
-  it('reads the last sign-in from its annotation', () => {
+  it('prefers status.lastLoginTime over the annotation, which also changes on password reset', () => {
+    const user = toUserSummary({
+      metadata: {
+        name: 'carol',
+        annotations: { 'iam.kubesphere.io/last-login-time': '2026-01-01T00:00:00Z' },
+      },
+      status: { lastLoginTime: '2026-11-01T08:00:00Z' },
+    });
+    expect(user.lastLogin).toBe('2026-11-01T08:00:00Z');
+  });
+
+  it('falls back to the last-login annotation when status has none', () => {
     const user = toUserSummary({
       metadata: {
         name: 'carol',
@@ -45,6 +68,7 @@ describe('user summary', () => {
       },
     });
     expect(user.lastLogin).toBe('2026-11-01T08:00:00Z');
+    expect(toUserSummary({ metadata: { name: 'nobody' } }).lastLogin).toBe('');
   });
 
   /*
@@ -106,6 +130,148 @@ describe('workspace summary', () => {
  * cases pin the whole rule, because the difference between "the form refused" and "the server
  * refused with a 422 full of regex" is exactly this function.
  */
+describe('user detail', () => {
+  it('reads lastLoginTime from status and does not substitute the annotation', async () => {
+    const client = createClient({
+      fetchImpl: (async () =>
+        Response.json({
+          metadata: {
+            name: 'alice',
+            creationTimestamp: '2026-01-01T00:00:00Z',
+            annotations: {
+              'iam.kubesphere.io/last-login-time': '2026-01-02T00:00:00Z',
+              'kubesphere.io/description': 'ops',
+            },
+          },
+          spec: { email: 'a@example.com' },
+          status: { state: 'Active', lastLoginTime: '2026-11-01T08:00:00Z' },
+        })) as typeof fetch,
+    });
+    const detail = await userDetailApi(client).get({ name: 'alice' });
+    expect(detail.lastLoginTime).toBe('2026-11-01T08:00:00Z');
+    expect(detail.email).toBe('a@example.com');
+    expect(detail.description).toBe('ops');
+    expect(detail.state).toBe('Active');
+  });
+});
+
+describe('login records', () => {
+  it('keeps missing success undefined and empty IP empty', () => {
+    const mapped = toLoginRecord({
+      metadata: { name: 'admin-1', creationTimestamp: '2026-11-14T21:00:23Z' },
+      spec: { reason: 'authenticated successfully' },
+    });
+    expect(mapped.success).toBeUndefined();
+    expect(mapped.sourceIP).toBe('');
+    expect(mapped.reason).toBe('authenticated successfully');
+  });
+
+  it('maps a failed sign-in without turning a missing flag into false', () => {
+    const failed = toLoginRecord({
+      metadata: { name: 'admin-2' },
+      spec: { success: false, sourceIP: '10.0.0.1', reason: 'invalid password' },
+    });
+    expect(failed.success).toBe(false);
+    expect(failed.sourceIP).toBe('10.0.0.1');
+    expect(toLoginRecord({ metadata: { name: 'x' }, spec: { success: 'yes' } }).success).toBeUndefined();
+  });
+
+  it('pages with sortBy createTime and uses totalItems, not the page length', async () => {
+    const urls: URL[] = [];
+    const client = createClient({
+      fetchImpl: (async (input) => {
+        urls.push(new URL(String(input), 'http://localhost'));
+        return Response.json({
+          totalItems: 100,
+          items: Array.from({ length: 10 }, (_, index) => ({
+            metadata: { name: `admin-${index}`, creationTimestamp: '2026-11-14T21:00:23Z' },
+            spec: { success: true, sourceIP: '10.233.76.4', reason: 'authenticated successfully' },
+          })),
+        });
+      }) as typeof fetch,
+    });
+    const page = await userDetailApi(client).loginRecords({ name: 'admin', page: 2, limit: 10 });
+    expect(page.total).toBe(100);
+    expect(page.items).toHaveLength(10);
+    expect(page.items[0]?.success).toBe(true);
+    expect(Object.fromEntries(urls[0]!.searchParams)).toMatchObject({
+      page: '2',
+      limit: '10',
+      sortBy: 'createTime',
+      ascending: 'false',
+    });
+  });
+
+  it('does not invent a total when totalItems is missing', async () => {
+    const client = createClient({
+      fetchImpl: (async () => Response.json({ items: [{ metadata: { name: 'a' }, spec: {} }] })) as typeof fetch,
+    });
+    const page = await userDetailApi(client).loginRecords({ name: 'alice' });
+    expect(page.total).toBe(1);
+  });
+});
+
+describe('protected platform users', () => {
+  it('protects preset accounts and the signed-in user, not an ordinary name', () => {
+    expect(isProtectedPlatformUser('admin')).toBe(true);
+    expect(isProtectedPlatformUser('sonarqube')).toBe(true);
+    expect(isProtectedPlatformUser('alice', 'alice')).toBe(true);
+    expect(isProtectedPlatformUser('alice', 'admin')).toBe(false);
+    expect(isProtectedPlatformUser('ui-test')).toBe(false);
+    expect(isProtectedPlatformUser('')).toBe(true);
+  });
+});
+
+describe('user create', () => {
+  it('always marks the account uninitialized and only sends a description when given one', async () => {
+    const bodies: Array<Record<string, unknown>> = [];
+    const client = createClient({
+      fetchImpl: (async (_input, init) => {
+        bodies.push(JSON.parse(String(init?.body ?? '{}')) as Record<string, unknown>);
+        return Response.json({ metadata: { name: 'alice' } });
+      }) as typeof fetch,
+    });
+    await usersWriteApi(client).create({
+      name: 'alice',
+      email: 'a@example.com',
+      password: 'TcE2e@2026A',
+      platformRole: 'platform-regular',
+    });
+    await usersWriteApi(client).create({
+      name: 'bob',
+      email: 'b@example.com',
+      password: 'TcE2e@2026A',
+      platformRole: 'platform-admin',
+      description: 'temporary',
+    });
+    const first = (bodies[0]?.['metadata'] as { annotations: Record<string, string> }).annotations;
+    const second = (bodies[1]?.['metadata'] as { annotations: Record<string, string> }).annotations;
+    expect(first['iam.kubesphere.io/uninitialized']).toBe('true');
+    expect(first['iam.kubesphere.io/platform-role']).toBe('platform-regular');
+    expect(first).not.toHaveProperty('kubesphere.io/description');
+    expect(second['iam.kubesphere.io/uninitialized']).toBe('true');
+    expect(second['kubesphere.io/description']).toBe('temporary');
+  });
+});
+
+describe('administrator password reset', () => {
+  it('PUTs only the new password, never currentPassword', async () => {
+    let url = '';
+    let body: unknown;
+    const client = createClient({
+      fetchImpl: (async (input, init) => {
+        url = String(input);
+        body = JSON.parse(String(init?.body ?? '{}'));
+        return Response.json({ message: 'success' });
+      }) as typeof fetch,
+    });
+    await usersWriteApi(client).resetPassword({ name: 'alice', password: 'TcE2e@2026B' });
+    expect(url).toContain('/kapis/iam.kubesphere.io/v1alpha2/users/alice/password');
+    expect(body).toEqual({ password: 'TcE2e@2026B' });
+    expect(body).not.toHaveProperty('currentPassword');
+  });
+});
+
 describe('password problem', () => {
   it('accepts a password that satisfies every requirement', () => {
     expect(passwordProblem('Abcdefg1@')).toBeNull();

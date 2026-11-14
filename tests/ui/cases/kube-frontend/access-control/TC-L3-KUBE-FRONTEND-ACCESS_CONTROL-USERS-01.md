@@ -8,7 +8,7 @@
 
 ## 产品功能
 
-用户列表四列为用户名、状态、平台角色、最近登录；最近登录等于该行 status.lastLoginTime，从未登录显示「尚未登录」。
+用户列表四列为用户名、状态、平台角色、最近登录；首屏按 createTime 降序；最近登录等于该行 status.lastLoginTime，从未登录显示「尚未登录」。
 
 ### 关联需求
 
@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/access-control/users.md`](../../../../prd/kube-frontend/access-control/users.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-01** — 已知平台上有用户，当打开用户页，则显示用户名（副行邮箱）、状态、平台角色、最近登录四列，列顺序与此一致；「最近登录」等于该行用户对象的 `status.lastLoginTime`（缺失时回退 `iam.kubesphere.io/last-login-time` 注解）；两者都没有时显示「尚未登录」，不显示 `-`，也不把改密时间当成登录时间。
+- **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-01** — 已知平台上有用户，当打开用户页，则显示用户名（副行邮箱）、状态、平台角色、最近登录四列，列顺序与此一致；首屏列表请求 `sortBy=createTime` 且降序，行顺序与同次 `/users?sortBy=createTime&ascending=false` 响应对齐；「最近登录」等于该行用户对象的 `status.lastLoginTime`（缺失时回退 `iam.kubesphere.io/last-login-time` 注解）；两者都没有时显示「尚未登录」，不显示 `-`，也不把改密时间当成登录时间。
 
 ### 关联设计
 
@@ -43,13 +43,15 @@
 
 1. 打开用户页
 2. 核对表头顺序
-3. 搜索 admin（若存在）或第一行用户名
-4. 用 API 读取该用户，核对该行最近登录
+3. 用 API 拉 `/users?limit=10&sortBy=createTime&ascending=false`，核对该页行名顺序
+4. 搜索 admin（若存在）或第一行用户名
+5. 用 API 读取该用户，核对该行最近登录
 
 ## 期望结果
 
 - 表头依次为 ["用户名", "状态", "平台角色", "最近登录"]
 - 列表有行
+- 行顺序与 `/users?limit=10&sortBy=createTime&ascending=false` 的 items 名称一致
 - 最近登录等于 status.lastLoginTime 的本地时间；两者都空则显示尚未登录
 
 ## 失败排查

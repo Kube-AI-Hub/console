@@ -1,0 +1,33 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-08
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: users
+title: 用户列表 · 预置账号与当前用户保护
+entry_url: '{BASE_URL}/kube-frontend/access/users'
+prd: prd/kube-frontend/access-control/users.md
+design: design/kube-frontend/access-control/users.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-08
+
+story:
+- US5
+
+product: admin、sonarqube（若存在）和当前登录用户不能勾选，行菜单不含停用/删除/重置密码等写操作；临时用户有这些入口。
+preconditions:
+- 已登录平台管理
+- 用例自行创建临时用户（tc-e2e- 前缀），finally 中删除
+steps:
+- 用 API 创建临时用户
+- 打开用户列表，核对该行菜单含重置密码、停用、删除
+- 核 admin 行没有复选框，若有更多菜单则不含停用/删除/重置密码
+expected:
+- 临时用户可写
+- admin 不可选、无破坏性行操作
+troubleshoot:
+- admin 仍能勾选：isRowSelectable 只排除了字符串 admin 以外的预设
+- 临时用户没有重置密码：行操作未加 resetPassword
+update_automation:
+- 选择器见 PlatformListPage.tsx

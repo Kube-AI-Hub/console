@@ -77,6 +77,25 @@ describe('ResourceList', () => {
     expect(onSelectionChange).toHaveBeenCalledWith(['pod-a']);
   });
 
+  it('omits the checkbox for rows that isRowSelectable rejects, without shifting columns', () => {
+    render(
+      <ResourceList
+        schema={{
+          ...listSchema,
+          selection: 'multiple',
+          isRowSelectable: (row) => row.name !== 'pod-b',
+          rowAttributes: (row) => ({ 'data-ai-row': row.name }),
+        }}
+        rows={rows}
+        selectedKeys={[]}
+        onSelectionChange={() => undefined}
+      />,
+    );
+    expect(document.querySelector('[data-ai-row="pod-a"] input[type="checkbox"]')).not.toBeNull();
+    expect(document.querySelector('[data-ai-row="pod-b"] input[type="checkbox"]')).toBeNull();
+    expect(document.querySelector('[data-ai-row="pod-b"] td')).not.toBeNull();
+  });
+
   it('renders refresh without search and exposes its busy state', async () => {
     const onRefresh = vi.fn();
     const schema: ListSchema<Row> = {

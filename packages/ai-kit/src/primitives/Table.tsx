@@ -50,7 +50,13 @@ export interface TableProps<T> {
   selection?: {
     selectedKeys: string[];
     onChange: (keys: string[]) => void;
-    /** Disable selection for a specific row. */
+    /**
+     * Whether this row may be selected.
+     *
+     * Returning false omits the checkbox (an empty cell keeps the column) and
+     * keeps the row out of select-all. A disabled checkbox that cannot succeed
+     * is a trap.
+     */
     isRowSelectable?: (row: T) => boolean;
     /**
      * Accessible names for the checkboxes.
@@ -329,17 +335,18 @@ export function Table<T>({
                     ) : null}
                     {selection ? (
                       <td className="px-3 py-2.5" onClick={(event) => event.stopPropagation()}>
-                        <label className="grid size-11 cursor-pointer place-items-center sm:size-auto">
-                          <input
-                            type="checkbox"
-                            {...(selection.aiId ? { 'data-ai-id': `${selection.aiId}:${key}` } : {})}
-                            aria-label={selection.labels?.row?.(index + 1) ?? `选择第 ${index + 1} 行`}
-                            checked={isSelected}
-                            disabled={!(selection.isRowSelectable?.(row) ?? true)}
-                            onChange={() => toggleOne(key)}
-                            className="size-3.5 shrink-0 accent-[rgb(var(--ai-accent))]"
-                          />
-                        </label>
+                        {selection.isRowSelectable?.(row) ?? true ? (
+                          <label className="grid size-11 cursor-pointer place-items-center sm:size-auto">
+                            <input
+                              type="checkbox"
+                              {...(selection.aiId ? { 'data-ai-id': `${selection.aiId}:${key}` } : {})}
+                              aria-label={selection.labels?.row?.(index + 1) ?? `选择第 ${index + 1} 行`}
+                              checked={isSelected}
+                              onChange={() => toggleOne(key)}
+                              className="size-3.5 shrink-0 accent-[rgb(var(--ai-accent))]"
+                            />
+                          </label>
+                        ) : null}
                       </td>
                     ) : null}
                     {columns.map((column) => (

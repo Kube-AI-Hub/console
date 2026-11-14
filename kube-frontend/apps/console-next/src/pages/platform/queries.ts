@@ -136,6 +136,13 @@ export function useUpdateUser() {
   });
 }
 
+/** Administrator reset of another account's password; the list does not display it. */
+export function useResetUserPassword() {
+  return useMutation({
+    mutationFn: (input: { name: string; password: string }) => usersWriteApi(api).resetPassword(input),
+  });
+}
+
 /** Enable or disable several accounts at once. */
 export function useSetUsersActive() {
   const queryClient = useQueryClient();
