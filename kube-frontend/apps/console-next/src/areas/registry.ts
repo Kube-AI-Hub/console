@@ -20,7 +20,7 @@ import type { LocaleKey } from '@kube-ai-hub/locales';
  */
 
 /** Where a page lives; the shell derives it from the URL. */
-export type AreaScope = 'project' | 'cluster' | 'platform';
+export type AreaScope = 'project' | 'cluster' | 'platform' | 'workspace';
 
 /** One navigable page inside an area. */
 export interface AreaPage {
@@ -85,6 +85,24 @@ export interface Area {
  * pretending it is there. This list grows one area per migration iteration.
  */
 export const AREAS: readonly Area[] = [
+  {
+    key: 'workspace',
+    scope: 'workspace',
+    titleKey: 'workspace.nav.groupWorkspace',
+    icon: 'cluster',
+    defaultPage: 'overview',
+    /*
+     * The workspace console (`/kube-frontend/workspaces/<ws>/…`), its own scope in the old
+     * console: above projects, below the platform. Only the pages that answer "what is in this
+     * workspace" are here so far; roles, departments and quotas follow.
+     */
+    pages: [
+      { key: 'overview', path: 'overview', titleKey: 'workspace.overview.title', status: 'ready' },
+      { key: 'projects', path: 'projects', titleKey: 'workspace.projects.title', status: 'ready' },
+      { key: 'members', path: 'members', titleKey: 'workspace.members.title', status: 'ready' },
+    ],
+  },
+
   {
     key: 'project-overview',
     scope: 'project',

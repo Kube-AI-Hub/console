@@ -486,6 +486,19 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
   }, [location]);
 
   /**
+   * The workspace console (`/kube-frontend/workspaces/<ws>/<page>`), its own scope.
+   *
+   * It sits above projects and below the platform: the sidebar there is the workspace's
+   * menu (概览/项目/企业空间成员), not a project's. Without this branch the shell would fall
+   * through to the project menu and highlight nothing.
+   */
+  const workspacePath = React.useMemo(() => {
+    const match = /^\/kube-frontend\/workspaces\/([^/?#]+)(?:\/([^/?#]+))?/.exec(location);
+    if (!match?.[1]) return null;
+    return { workspace: decodeURIComponent(match[1]), segment: match[2] ? decodeURIComponent(match[2]) : '' };
+  }, [location]);
+
+  /**
    * The platform's own pages — the fleet list and the two platform areas.
    *
    * They are neither a project nor one cluster, so neither of those menus belongs there.
@@ -511,12 +524,18 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
     ? platformChildren.find((child) => childMatches(child, location, scope))
     : undefined;
 
-  const activeArea = clusterPath ? areaOfPage('cluster', clusterPath.segment) : areaOfPage('project', projectPageSegment(location));
+  const activeArea = clusterPath
+    ? areaOfPage('cluster', clusterPath.segment)
+    : workspacePath
+      ? areaOfPage('workspace', workspacePath.segment)
+      : areaOfPage('project', projectPageSegment(location));
   const activeKey = clusterPath
     ? (clusterPath.segment || activeArea?.defaultPage || '')
-    : platformScope
-      ? platformActiveChild?.key
-      : activeArea?.key;
+    : workspacePath
+      ? (workspacePath.segment || activeArea?.defaultPage || '')
+      : platformScope
+        ? platformActiveChild?.key
+        : activeArea?.key;
 
   /**
    * Sidebar rows: one per project area, with the drawer closing on navigation.
@@ -567,6 +586,22 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
         }
       }
       return nodes;
+    }
+    if (workspacePath) {
+      /*
+       * The workspace menu, built from the registry like the project and cluster menus.
+       * `/kube-frontend/workspaces/<ws>/<page>` is the old console's shape for this scope.
+       */
+      const root = `/kube-frontend/workspaces/${encodeURIComponent(workspacePath.workspace)}`;
+      return areasFor('workspace').flatMap((area) =>
+        areaPages(area).map((page) => ({
+          key: page.key,
+          label: t(page.titleKey),
+          icon: <Icon name={area.icon} size={14} />,
+          href: `${root}/${page.path}`,
+          onClick: () => setDrawerOpen(false),
+        })),
+      );
     }
     if (platformScope) {
       /*

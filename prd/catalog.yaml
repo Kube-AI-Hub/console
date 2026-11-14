@@ -468,6 +468,13 @@ modules:
       L2:
       - TC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-01
     features:
+    - id: workspace-console
+      title: 企业空间控制台
+      prd: prd/kube-frontend/access-control/workspace-console.md
+      design: design/kube-frontend/access-control/workspace-console.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-01
     - id: users
       title: 用户列表
       prd: prd/kube-frontend/access-control/users.md

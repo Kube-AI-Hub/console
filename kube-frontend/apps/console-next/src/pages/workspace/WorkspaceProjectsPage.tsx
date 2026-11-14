@@ -1,0 +1,113 @@
+import * as React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { workspaceDetailApi } from '@kube-ai-hub/api-client';
+import { actionProps } from '@kube-ai-hub/ai-surface';
+import { AiSurface, Badge, ResourceList, type ListSchema } from '@kube-ai-hub/ui';
+import { useT } from '@/i18n';
+import { api as apiClient } from '@/api';
+import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
+import { formatTimestamp } from '@/lib/time';
+
+/**
+ * 企业空间项目.
+ *
+ * The workspace's projects, one row each, linking into the project console. The link needs a
+ * cluster segment because a project console URL is project-scoped; the workspace's own placement
+ * names its clusters, so the first one is used (and `host` when the placement is empty — a
+ * federated workspace lists its clusters explicitly, the default one does not).
+ */
+export interface WorkspaceProjectsPageProps {
+  workspace: string;
+}
+
+export function WorkspaceProjectsPage({ workspace }: WorkspaceProjectsPageProps): React.ReactElement {
+  const t = useT();
+  const detail = useQuery({
+    queryKey: ['workspace-detail', workspace],
+    queryFn: ({ signal }) => workspaceDetailApi(apiClient).get({ name: workspace, signal }),
+  });
+  const query = useQuery({
+    queryKey: ['workspace-projects', workspace],
+    queryFn: ({ signal }) => workspaceDetailApi(apiClient).projects({ name: workspace, signal }),
+  });
+  const cluster = detail.data?.clusters[0] || 'host';
+  const rows = query.data ?? [];
+  const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
+
+  const schema = React.useMemo<ListSchema<(typeof rows)[number]>>(
+    () => ({
+      title: t('workspace.projects.title'),
+      description: t('workspace.projects.description'),
+      rowKey: 'name',
+      rowAttributes: (row) => ({ 'data-ai-row': row.name }),
+      columns: [
+        {
+          key: 'name',
+          title: t('workspace.field.project'),
+          render: (row) => (
+            <a
+              href={`/kube-frontend/${encodeURIComponent(workspace)}/clusters/${encodeURIComponent(cluster)}/projects/${encodeURIComponent(row.name)}/overview`}
+              className="truncate font-medium text-ai-accent hover:underline"
+              {...actionProps(`workspace-projects:name:${row.name}`)}
+            >
+              {row.alias || row.name}
+            </a>
+          ),
+        },
+        {
+          key: 'alias',
+          title: t('workspace.field.name'),
+          width: 180,
+          hideBelow: 'md',
+          render: (row) => <span className="truncate font-mono text-[11px] text-ai-fg-muted">{row.name}</span>,
+        },
+        {
+          key: 'status',
+          title: t('cluster.column.status'),
+          width: 120,
+          render: (row) => (
+            <Badge tone={row.status === 'Active' ? 'success' : 'warning'}>{row.status || '-'}</Badge>
+          ),
+        },
+        {
+          key: 'creator',
+          title: t('workspace.field.creator'),
+          width: 150,
+          hideBelow: 'lg',
+          render: (row) => <span className="truncate text-ai-fg-secondary">{row.creator || '-'}</span>,
+        },
+        {
+          key: 'createdAt',
+          title: t('workspace.field.createdAt'),
+          width: 170,
+          hideBelow: 'xl',
+          render: (row) => <span className="tabular-nums text-ai-fg-muted">{formatTimestamp(row.createdAt)}</span>,
+        },
+      ],
+      empty: { title: t('workspace.projects.empty'), description: t('workspace.projects.emptyDescription') },
+      labels: {
+        selectAll: t('table.selectAll'),
+        selectRow: (index) => t('table.selectRow', { index }),
+        moreActions: t('table.moreActions'),
+        previous: t('table.previous'),
+        next: t('table.next'),
+        selected: (count) => t('table.selectedCount', { count }),
+      },
+    }),
+    [cluster, t, workspace],
+  );
+
+  if (state === 'error') {
+    return (
+      <AiSurface as="section" aiId="workspace-projects:surface" state="error" className="min-w-0">
+        <ResourceErrorPanel error={query.error} onRetry={() => void query.refetch()} retryAiId="workspace-projects:retry" />
+      </AiSurface>
+    );
+  }
+
+  return (
+    <AiSurface as="section" aiId="workspace-projects:surface" state={state} className="min-w-0">
+      <ResourceList schema={schema} rows={rows} loading={state === 'loading'} />
+    </AiSurface>
+  );
+}

@@ -1,0 +1,37 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: workspace-console
+title: 企业空间控制台 · 概览、项目与成员
+entry_url: '{BASE_URL}/kube-frontend/workspaces/system-workspace/overview'
+prd: prd/kube-frontend/access-control/workspace-console.md
+design: design/kube-frontend/access-control/workspace-console.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-01
+
+story:
+- US1
+
+product: 企业空间独立作用域：概览（基本信息+计数）、项目列表、企业空间成员列表。
+preconditions:
+- 已登录，且能看到至少一个企业空间
+- 该企业空间至少有一个项目与一个成员
+steps:
+- 用 API 读空间详情、项目列表与成员列表
+- 打开该空间概览页
+- 核对标题、项目计数与成员计数
+- 核对侧栏三项
+- 打开项目页与成员页，核对行数
+expected:
+- 计数与接口一致
+- 侧栏含 概览/项目/企业空间成员
+- 项目行数与成员行数与接口一致
+troubleshoot:
+- 侧栏仍是项目菜单：AreaScope 分支没加或 workspacePath 未识别
+- 计数为 0：成员接口用了 tenant 路径（返回 404）
+- 项目链接 Not Found：cluster 段缺失（应为 placement 首个集群，缺省 host）
+update_automation:
+- 选择器见 pages/access_control.py 与 pages/workspace/*.tsx

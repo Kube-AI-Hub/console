@@ -471,6 +471,11 @@ MODULES = [
                 "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-01"]},
                 "features": [
                     {
+                        "id": "workspace-console",
+                        "title": "企业空间控制台",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-01"]},
+                    },
+                    {
                         "id": "users",
                         "title": "用户列表",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-01", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-02", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-05", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-06", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-07"]},
