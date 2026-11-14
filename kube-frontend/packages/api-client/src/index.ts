@@ -343,3 +343,6 @@ export type {
   NotificationObject,
   VerifyResult,
 } from './notification';
+
+export { logSearchApi, auditSearchApi } from './search';
+export type { AuditRecord, AuditSearchResult, LogRecord, LogSearchResult } from './search';

@@ -23,12 +23,13 @@
 | 项目上下文栏 | WORKBENCH-CONTEXT-01 | 在本栏内切换企业空间。；跨集群聚合视图。 |
 | 工作台入口 | WORKBENCH-ENTRY-01, WORKBENCH-ENTRY-02 | 在工作台创建项目（在项目控制台或平台管理里做）。；工作台仪表盘统计。 |
 
-### cluster-management（集群作用域，17 个页面）
+### cluster-management（集群作用域，18 个页面）
 
 | 页面 | 验收场景 | 有意未迁移 |
 | --- | --- | --- |
 | 添加集群 | CLUSTER_MANAGEMENT-ADD_CLUSTER-01, CLUSTER_MANAGEMENT-ADD_CLUSTER-02 | 用 KubeKey 新建集群（需要主机清单与 kubekey API）。；移除集群、更新 kubeconfig（老 console 有，另立功能点）。 |
 | 编辑集群信息 | CLUSTER_MANAGEMENT-CLUSTER_EDIT_INFO-01, CLUSTER_MANAGEMENT-CLUSTER_EDIT_INFO-02 | 修改集群名称、连接方式、kubeconfig（后者属「更新 kubeconfig」独立功能）。；移除集群。 |
+| 资源事件查询 | CLUSTER_MANAGEMENT-CLUSTER_EVENTS-01 | 事件全文检索后端（ES）：本页只过滤已加载窗口，不承诺历史检索。；日志检索、审计检索：另两个工具箱页面，属独立功能。 |
 | 集群列表 | CLUSTER_MANAGEMENT-CLUSTER_LIST-01, CLUSTER_MANAGEMENT-CLUSTER_LIST-02, CLUSTER_MANAGEMENT-CLUSTER_LIST-03, CLUSTER_MANAGEMENT-CLUSTER_LIST-04 | 集群注册 / 注销 / 上下线（需要平台侧注册接口与 kubeconfig 校验）。；跨集群的聚合指标（需要按集群分别取指标，属集群监控）。 |
 | 集群成员 | CLUSTER_MANAGEMENT-CLUSTER_MEMBERS-01 | 邀请/移除集群成员（写集群角色绑定）。；集群角色本身的规则（见平台角色详情）。 |
 | 集群切换与作用域侧栏 | CLUSTER_MANAGEMENT-CLUSTER_SWITCH-01, CLUSTER_MANAGEMENT-CLUSTER_SWITCH-02 | 在切换器里添加/编辑集群（那是列表页的职责）。；跨集群聚合视图。 |
@@ -85,15 +86,17 @@
 | 修改角色 | SERVICEACCOUNTS-ROLE-01 | 不做 RoleBinding 的增删（只改注解）。；不做集群角色（`cluster-role.kubesphere.io`）。 |
 | 服务账户 · 按名称搜索 | SERVICEACCOUNTS-SEARCH-01 | 不做按角色或令牌搜索。 |
 
-### app-workloads（项目作用域，8 个页面）
+### app-workloads（项目作用域，10 个页面）
 
 | 页面 | 验收场景 | 有意未迁移 |
 | --- | --- | --- |
+| 容器详情 | APP_WORKLOADS-CONTAINER_DETAIL-01 | 容器日志、容器终端、单容器监控：分别需要流式日志/exec 端点与监控区间查询，均未代理。；容器编辑：容器由所属工作负载的模板定义，改模板才是唯一入口。 |
 | 删除负载 | APP_WORKLOADS-DELETE-01 | 不做回收站与恢复。 |
 | 负载详情 | APP_WORKLOADS-DETAIL-01, APP_WORKLOADS-DETAIL-02, APP_WORKLOADS-DETAIL-03, APP_WORKLOADS-DETAIL-04, APP_WORKLOADS-DETAIL-05, APP_WORKLOADS-JOB_RUNS-01, APP_WORKLOADS-PODS_BLOCK-01, APP_WORKLOADS-SERVICE_PODS-01, APP_WORKLOADS-STATEFUL_SERVICE-01 | 不在详情做扩缩容（表单能力未迁移，记在待办）。 |
 | 编辑设置 | APP_WORKLOADS-EDIT_SETTINGS-01, APP_WORKLOADS-EDIT_SETTINGS-02 | 不给容器组做与创建相同的编辑表单。；不在任务编辑里提供节点选择、容器或存储。；不把名称、别名、描述或副本数扩缩容搬进「编辑设置」。；不改服务和应用路由已有的编辑入口。 |
 | 编辑 YAML | APP_WORKLOADS-EDIT_YAML-01 | 不做多文档 YAML。 |
 | 工作负载列表 | APP_WORKLOADS-LIST-01, APP_WORKLOADS-LIST-02, APP_WORKLOADS-LIST-03 | 不做列显隐与列宽拖拽。；不在列表创建负载。 |
+| 容器组事件 | APP_WORKLOADS-POD_EVENTS-01 | 事件全文检索（工具箱的独立功能）。；事件删除/归档。 |
 | 重新部署 | APP_WORKLOADS-REDEPLOY-01 | 不做暂停/恢复滚动。 |
 | 版本历史与回滚 | APP_WORKLOADS-REVISIONS-01 | 版本之间的差异对比（diff）。；指定副本数与镜像的"再次部署"。 |
 | 状态派生 | APP_WORKLOADS-STATUS-01, APP_WORKLOADS-STATUS-02 | 不为状态引入新的中间态或自定义颜色。 |
@@ -131,24 +134,20 @@
 
 | 页面 | 验收场景 | 有意未迁移 |
 | --- | --- | --- |
-| 平台角色列表 | ACCESS_CONTROL-PLATFORM_ROLES-01, ACCESS_CONTROL-PLATFORM_ROLES-02, ACCESS_CONTROL-PLATFORM_ROLES-03, ACCESS_CONTROL-PLATFORM_ROLES-04 | 规则的多条编辑（当前一次一条）。 |
+| 平台角色列表 | ACCESS_CONTROL-PLATFORM_ROLES-01, ACCESS_CONTROL-PLATFORM_ROLES-02, ACCESS_CONTROL-PLATFORM_ROLES-03, ACCESS_CONTROL-PLATFORM_ROLES-04, ACCESS_CONTROL-PLATFORM_ROLES-05 | 规则的多条编辑（当前一次一条）。 |
 | 用户详情 | ACCESS_CONTROL-USER_DETAIL-01 | 停用/启用与删除：在用户列表的行操作里完成，详情页只读。；该用户在项目/企业空间里的角色：需要跨聚合查询，与成员管理重叠。 |
-| 用户列表 | ACCESS_CONTROL-USERS-01, ACCESS_CONTROL-USERS-02, ACCESS_CONTROL-USERS-03, ACCESS_CONTROL-USERS-04, ACCESS_CONTROL-USERS-05, ACCESS_CONTROL-USERS-06 | 修改他人密码（老 console 在用户详情页提供）：属管理员重置流程，另立功能点。 |
-| 企业空间详情 | ACCESS_CONTROL-WORKSPACE_DETAIL-01 | 企业空间成员与角色：其 API 属于另一个聚合（且 `/workspaces/<name>/members` 在本集群返回 404），未迁移前不显示空表——空表会被读成「没有任何人有权限」。；企业空间编辑/删除：需要写接口与配额联动，另立功能点。 |
+| 用户列表 | ACCESS_CONTROL-USERS-01, ACCESS_CONTROL-USERS-02, ACCESS_CONTROL-USERS-03, ACCESS_CONTROL-USERS-04, ACCESS_CONTROL-USERS-05, ACCESS_CONTROL-USERS-06, ACCESS_CONTROL-USERS-07 | — |
+| 企业空间详情 | ACCESS_CONTROL-WORKSPACE_DETAIL-01, ACCESS_CONTROL-WORKSPACE_DETAIL-02 | 企业空间成员与角色：其 API 属于另一个聚合（且 `/workspaces/<name>/members` 在本集群返回 404），未迁移前不显示空表——空表会被读成「没有任何人有权限」。；企业空间编辑/删除：需要写接口与配额联动，另立功能点。 |
 | 企业空间列表 | ACCESS_CONTROL-WORKSPACES-01, ACCESS_CONTROL-WORKSPACES-02 | 企业空间的配额与成员分配（属于企业空间内部页面）。 |
 
-### platform-settings（平台作用域，2 个页面）
+### platform-settings（平台作用域，4 个页面）
 
 | 页面 | 验收场景 | 有意未迁移 |
 | --- | --- | --- |
+| 外观：深浅色与色调 | PLATFORM_SETTINGS-APPEARANCE-01 | 平台级强制主题（影响所有用户）。；自定义主色（任意取色）。 |
+| 钉钉 / 企业微信 / Slack / Webhook 渠道 | PLATFORM_SETTINGS-CHANNELS-01, PLATFORM_SETTINGS-CHANNELS-02, PLATFORM_SETTINGS-CHANNELS-03 | 通知条件（alertSelector）与告警规则绑定。；用户级订阅。 |
 | 平台信息 | PLATFORM_SETTINGS-INFO-01 | 编辑平台信息。 |
-| 通知渠道 | PLATFORM_SETTINGS-NOTIFICATIONS-01 | 编辑渠道、发送测试消息、显示渠道参数。 |
-
-### user-settings（个人作用域，1 个弹窗）
-
-| 页面 | 验收场景 | 有意未迁移 |
-| --- | --- | --- |
-| 用户设置（账号菜单 → 弹窗） | USER_SETTINGS-01, USER_SETTINGS-PROFILE-01, USER_SETTINGS-PROFILE-02, USER_SETTINGS-PASSWORD-01, USER_SETTINGS-PASSWORD-02, USER_SETTINGS-PASSWORD-03 | 语言选择（`spec.lang`）：新 UI 的语言开关在顶栏写 `localStorage`，两个入口各写一处会互相覆盖。；头像上传、两步验证：平台没有对应字段与接口。；登录历史：已在「访问控制 → 用户详情」。；把用户设置做成独立页面：两个低频小改动不值得一条路由。 |
+| 邮件通知渠道 | PLATFORM_SETTINGS-MAIL-01, PLATFORM_SETTINGS-MAIL-02, PLATFORM_SETTINGS-MAIL-03 | 其余四个渠道（钉钉/企业微信/Slack/Webhook）——下一轮，同一表单引擎。；用户级订阅（个人收件箱）。 |
 
 ## 重新生成
 

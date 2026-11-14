@@ -579,6 +579,16 @@ MODULES = [
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EVENTS-01"]},
                     },
                     {
+                        "id": "log-search",
+                        "title": "容器日志查询",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-LOG_SEARCH-01"]},
+                    },
+                    {
+                        "id": "audit-search",
+                        "title": "审计日志查询",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-AUDIT_SEARCH-01"]},
+                    },
+                    {
                         "id": "monitor",
                         "title": "集群监控",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01"]},
@@ -742,6 +752,7 @@ MODULES = [
                         "title": "容器详情",
                         "tests": {"L3": [
                             "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-01",
+                            "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-02",
                         ]},
                     },
                     {

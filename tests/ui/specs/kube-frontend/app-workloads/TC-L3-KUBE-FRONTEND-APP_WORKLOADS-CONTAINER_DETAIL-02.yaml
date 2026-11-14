@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: container-detail
+title: 容器详情 · 日志
+entry_url: '{BASE_URL}/kube-frontend/public/clusters/host/projects/kubesphere-system/pods'
+prd: prd/kube-frontend/app-workloads/container-detail.md
+design: design/kube-frontend/app-workloads/container-detail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-02
+
+story:
+- US1
+
+product: 容器详情的日志区块：最近 1 小时该容器组该容器的日志行，可按关键字收窄。
+preconditions:
+- 已登录
+- 集群日志组件在采集（ES 索引有数据），且有正在输出的容器
+steps:
+- 用 API 找一个「容器组存在且有日志」的对象
+- 打开该容器组该容器的详情页
+- 核对日志区块行数与接口首页条数
+- 输入关键字后结果收窄
+expected:
+- 日志区块存在并列出日志行（时间 + 内容）
+- 行数与接口一致（最多 200）
+troubleshoot:
+- 区块缺失：页面仍是旧包（改完要 vite build）
+- 空态但接口有数据：过滤键用了单数（pod/container），应为 pods/containers
+- 时间参数毫秒：接口要秒
+update_automation:
+- 选择器见 pages/app_workloads.py 与 ContainerDetailPage.tsx

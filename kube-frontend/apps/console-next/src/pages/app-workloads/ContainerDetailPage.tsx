@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { workloadsApi, type WorkloadDetail } from '@kube-ai-hub/api-client';
+import { logSearchApi, workloadsApi, type WorkloadDetail } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { AiSurface, Skeleton } from '@kube-ai-hub/ui';
+import { AiSurface, Input, Skeleton } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -54,6 +54,24 @@ export function ContainerDetailPage({ workspace, cluster, namespace, pod, contai
   });
 
   const state = query.isPending ? 'loading' : query.isError ? 'error' : 'ready';
+  const [logKeyword, setLogKeyword] = React.useState('');
+  const logs = useQuery({
+    queryKey: ['container-logs', pod, container, logKeyword],
+    queryFn: ({ signal }) => {
+      const endTime = Math.floor(Date.now() / 1000);
+      return logSearchApi(apiClient).search({
+        namespace,
+        pod,
+        container,
+        ...(logKeyword ? { keyword: logKeyword } : {}),
+        startTime: endTime - 3600,
+        endTime,
+        size: 200,
+        signal,
+      });
+    },
+  });
+
   const view = query.data ? containerView(query.data, container) : undefined;
   const podLinks = { workspace, cluster, namespace };
 
@@ -176,6 +194,37 @@ export function ContainerDetailPage({ workspace, cluster, namespace, pod, contai
               </ul>
             )}
           </section>
+          <section className="rounded-lg border border-ai-border bg-ai-surface p-4" data-ai-id="container-detail:logs">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-sm font-medium text-ai-fg">
+                {t('container.section.logs')}（{t('search.window.1h')}）
+              </h2>
+              <Input
+                id="container-detail:log-keyword"
+                value={logKeyword}
+                placeholder={t('search.field.keyword')}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => setLogKeyword(event.target.value)}
+              />
+            </div>
+            {logs.isPending ? <Skeleton className="h-24 w-full" /> : null}
+            {logs.isError ? (
+              <p className="text-xs text-ai-fg-muted">{t('container.logsUnavailable')}</p>
+            ) : null}
+            {logs.data && logs.data.records.length === 0 ? (
+              <p className="text-xs text-ai-fg-muted">{t('search.logs.empty')}</p>
+            ) : null}
+            {logs.data && logs.data.records.length > 0 ? (
+              <div className="flex max-h-80 flex-col gap-1 overflow-y-auto font-mono text-[11px]" data-ai-id="container-detail:log-list">
+                {logs.data.records.map((record, index) => (
+                  <div key={`${record.time}-${index}`} className="flex gap-2" data-ai-row={String(index)}>
+                    <span className="shrink-0 tabular-nums text-ai-fg-muted">{record.time}</span>
+                    <span className="min-w-0 flex-1 whitespace-pre-wrap break-all text-ai-fg-secondary">{record.log}</span>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </section>
+
         </React.Fragment>
       ) : null}
     </AiSurface>

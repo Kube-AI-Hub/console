@@ -14,7 +14,7 @@
 | 项 | 状态 |
 | --- | --- |
 | 功能区 | **9 个**：项目概览、配置、应用负载、存储、监控告警、项目设置、集群管理、访问控制、平台设置 |
-| 已迁移页面 | **40 个**（项目级 22、集群级 13、平台级 5） |
+| 已迁移页面 | **43 个**（项目级 22、集群级 16、平台级 5） |
 | 规格 ↔ 测试 | 一一对应，无孤儿文件（`parity_check.py` 待处理 0） |
 | 文档门禁 | `check_docs.py --strict`：errors=0、warnings=0 |
 | 用例执行 | 串行约 15 分钟；`-n 4` 约 4 分钟（见 §7） |
@@ -42,7 +42,7 @@
 | 存储 | 项目 | `.../{persistentvolumeclaims,volumesnapshots}` | 2 |
 | 监控告警 | 项目 | `.../{alerts,alertingrules}` | 2 |
 | 项目设置 | 项目 | `.../{baseinfo,roles,members,networkpolicies,gateways,log-collections}` | 6 |
-| 集群管理 | 集群 | `/kube-frontend/clusters/:c/{overview,nodes,namespaces,components,storageclasses,persistentvolumes,settings,visibility,members,log-collections,monitor,node-usage,custom-resources}` | 13 |
+| 集群管理 | 集群 | `/kube-frontend/clusters/:c/{overview,nodes,namespaces,components,storageclasses,persistentvolumes,settings,visibility,members,log-collections,monitor,node-usage,events,custom-resources}` | 14 |
 | 访问控制 | 平台 | `/kube-frontend/access/{users,clusterroles,workspaces}`（另有用户/企业空间/平台角色详情） | 3 + 3 详情 |
 | 平台设置 | 平台 | `/kube-frontend/settings/{info,notifications}` | 2 |
 
@@ -128,7 +128,7 @@ generate_case_docs.py → check_docs.py --strict → parity_check.py
 | 网关设置 | `.../gateways` | ✅（受限） | 创建、状态轮询、删除；控制器未装 Helm chart，无法验证真正就绪 |
 | 日志收集 | `.../log-collections` | ✅ | 开关（命名空间标签 enabled/disabled），关闭前确认 |
 
-### 4.2 集群级（13 页）
+### 4.2 集群级（16 页）
 
 | 页面 | 路由 | 状态 | 说明 |
 | --- | --- | --- | --- |
@@ -145,6 +145,9 @@ generate_case_docs.py → check_docs.py --strict → parity_check.py
 | 日志收集 | `.../log-collections` | ✅ | 收集器（含就绪 Pod 数）、输入、输出 |
 | 集群监控 | `.../monitor` | ✅ | 四条趋势（CPU/内存/容器组/节点），四个时间窗 |
 | 节点用量 | `.../node-usage` | ✅ | 按使用率排序的节点表（CPU/内存/磁盘/容器组） |
+| 资源事件 | `.../events` | ✅ | 最近 200 条事件窗口：类型过滤、关键字、倒序（§48） |
+| 容器日志查询 | `.../logs` | ✅ | ES 日志检索：项目/容器组/容器/关键字 + 时间窗口 + 分页（§50） |
+| 审计日志查询 | `.../audit-logs` | ✅ | ES 审计检索：动作/资源/用户/企业空间 + 窗口 + 分页（§50） |
 | 自定义资源 | `.../custom-resources` | ✅ | CRD 列表：类型/组/版本、作用域、是否已提供 |
 
 ### 4.3 平台级（5 页 + 3 个详情）
@@ -179,7 +182,7 @@ generate_case_docs.py → check_docs.py --strict → parity_check.py
 | 5.6 | 任务重跑 / 容器组重新调度 | 不做 | `operations.kubesphere.io` 的 kapis 与 apis 各版本路径全部 404（含 `/version`） |
 | 5.7 | 网关真正就绪 | 受限 | Gateway 对象可创建（POST 201），但控制器缺 Helm chart：`spec` 被重写为空、Service 未创建，状态只到 `Deployed=True` |
 | 5.8 | 告警规则 YAML 批量导入/导出 | 未做（非阻塞） | 当前表单已覆盖单条策略全部字段；批量导入需带 schema 校验的编辑器 |
-| 5.9 | 日志/审计检索 | 未做（独立立项） | 需要 ES 检索后端；**事件检索已迁**（§48，核心对象可直接读） |
+| 5.9 | ~~日志/审计检索~~ | **已迁移** | ES 后端可用：日志 `/kapis/tenant.kubesphere.io/v1alpha2/logs`、审计 `…/auditing/events`（§50） |
 | 5.10 | 边缘节点（EdgeNodes） | 不做 | edge 模块未开启 |
 | 5.11 | 集群网络（IPPools / 集群网络策略） | 不做 | network 模块未开启（`network=false`） |
 | 5.12 | 第三方登录（平台设置） | 不做 | 本 fork 的登录方式由服务端配置与中间件注入（`server/routes.js` 的 oauth 路由），控制台没有写入路径 |
@@ -2014,7 +2017,52 @@ design 里：「文案要求特殊字符，但 `PATTERN_PASSWORD` 与服务端 a
 | 用例 | **4.94 秒通过** |
 | 文档门禁 | errors=0 warnings=0 |
 
-## 50. 复盘：为什么验证和迁移慢，以及如何优化
+## 50. 第 116 轮：容器日志查询 + 审计日志查询 + 容器日志区块（2026-11-14，B200）
+
+### 50.1 探测：ES 后端确实存在
+
+用户指出 ES 检索后端存在。实测确认（全部 200）：
+
+| 端点 | 数据 | 返回形状 |
+| --- | --- | --- |
+| `/kapis/tenant.kubesphere.io/v1alpha2/logs` | 1 小时 **138k** 条日志 | `{query:{total, records:[{log,time,namespace,pod,container}]}}` |
+| `/kapis/tenant.kubesphere.io/v1alpha2/auditing/events` | 1 小时 **1.1k** 条审计 | `{query:{total, records:[{@timestamp,Level,Verb,User,ObjectRef,RequestURI,ResponseStatus,...}]}}` |
+
+过滤键的实测（同窗口对比 total）：
+
+- 日志：`namespaces=` / `pods=` / `containers=` / `log_query=` **生效**（9 万 → 2 千）；单数 `namespace=`/`pod=` **被忽略**（请求成功但不过滤）。
+- 审计：`operation=query` 必填；`verb_filter` / `objectref_resource_filter` / `user_search` / `workspace_search` 生效。
+
+### 50.2 交付
+
+| 层 | 内容 |
+| --- | --- |
+| api-client | `logSearchApi` / `auditSearchApi`（统一封装窗口、过滤、分页、记录归一化） |
+| 页面 | **容器日志查询**（集群）：项目/容器组/容器/关键字 + 1h/6h/24h/7d + 服务端分页 |
+| 页面 | **审计日志查询**（集群）：动作/资源/用户/企业空间 + 窗口 + 分页，展示状态码与请求 URI |
+| 页面 | **容器详情新增「日志」区块**：最近 1 小时该容器组该容器的日志（最多 200 行）+ 关键字过滤 |
+| 文档 | 2 份新 PRD + 2 份新设计；容器详情 PRD/设计补 AC-02 与日志决策 |
+| 用例 | LOG_SEARCH-01、AUDIT_SEARCH-01、CONTAINER_DETAIL-02 |
+
+### 50.3 三个判断
+
+1. **时间参数是秒**，不是毫秒；传毫秒得到空结果而不报错——最坏的一种失败。
+2. **过滤键用老 console 的复数形式**（`namespaces`/`pods`/`containers`/`log_query`），因为单数形式被静默忽略。
+3. **审计不展示请求/响应原文**：`RequestObject`/`ResponseObject` 可能含凭据，折叠不是脱敏。
+
+### 50.4 容器详情日志：为什么不走 `pods/log`
+
+`kubectl logs` 走 apiserver 的 `pods/log` 子资源，只能取原始尾部、无法按关键字筛选；日志索引支持关键字与时间过滤，正好是「为什么不正常」要看的东西。决策写进设计文档，并注明「需要 `--follow` 实时日志时再走流式代理」。
+
+### 50.5 验证
+
+| 项 | 结果 |
+| --- | --- |
+| 实测 | 日志页 50 行 / 共 138,823 条；审计页 50 行 / 共 1,116 条；容器详情日志 200 行（ks-console） |
+| 用例 | 三条 **全部通过**（7.79 秒，一起跑） |
+| 文档门禁 | errors=0 warnings=0 |
+
+## 51. 复盘：为什么验证和迁移慢，以及如何优化
 
 先取证据而不是凭感觉。关键测量：
 
@@ -2083,7 +2131,7 @@ A100 缺 `kube-frontend-demo`、指标接口 20 秒起、告警模块未装；�
 约定：**改完一页用 `-n 4` 快速反馈（20–45 秒），提交前跑一次串行全量作为判定基准**。
 写进 `tests/ui/README.md`。
 
-## 51. 历史执行索引（第 1–75 轮，仅标题）
+## 52. 历史执行索引（第 1–75 轮，仅标题）
 
 > 逐轮的完整叙述已从本文档移除：其中大量「未迁移 / 环境不可用」的结论已被后续轮次推翻，
 > 留在正文里会误导排期。当前有效结论见 §4 与 §5；如需历史细节，查 git 历史（删除前已提交）。
@@ -2135,7 +2183,7 @@ A100 缺 `kube-frontend-demo`、指标接口 20 秒起、告警模块未装；�
 
 ---
 
-## 52. 本轮整理说明：删掉了什么、为什么
+## 53. 本轮整理说明：删掉了什么、为什么
 
 ### 44.1 删除的三类内容
 

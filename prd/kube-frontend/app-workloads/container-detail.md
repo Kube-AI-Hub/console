@@ -19,6 +19,7 @@
 ## 验收场景
 
 - **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-01** — 已知容器组有容器，当从容器组详情点容器名进入容器详情，则显示名称、镜像、镜像拉取策略、状态、重启次数、启动时间、命令与参数，以及资源（请求/限制）、环境变量、挂载卷、端口与探针五个区块；镜像与拉取策略等于该容器组对象中该容器的字段；区块无内容时显示说明而非空表；容器组不存在该容器时显示「这个容器不存在」。
+- **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-02** - 已知容器有日志，当打开该容器详情页，则「日志」区块显示最近 1 小时内该容器组该容器的日志行（时间 + 内容，最多 200 行）；关键字输入通过 log_query 收窄结果；无日志时显示空态说明。
 
 ## 设计目标
 
@@ -57,6 +58,7 @@
 ## 验收用例
 
 - `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-01`
+- `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-02`
 
 ## 功能需求
 

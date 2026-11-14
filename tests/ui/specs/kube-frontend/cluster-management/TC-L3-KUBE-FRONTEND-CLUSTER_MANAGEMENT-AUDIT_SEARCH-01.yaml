@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-AUDIT_SEARCH-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: audit-search
+title: 审计日志查询 · 检索与过滤
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/audit-logs'
+prd: prd/kube-frontend/cluster-management/audit-search.md
+design: design/kube-frontend/cluster-management/audit-search.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-AUDIT_SEARCH-01
+
+story:
+- US1
+
+product: 集群审计检索：时间窗口 + 动作/资源/用户/企业空间过滤 + 服务端分页。
+preconditions:
+- 已登录，且对 host 集群有读取权限
+- 集群开启审计且索引有数据
+steps:
+- 用 API 读最近 1 小时审计 total 与首页条数
+- 打开审计日志查询页
+- 核对首页行数与总数显示
+- 按动作过滤后结果收窄
+expected:
+- 首页行数等于 min(50, total)
+- 行内显示动作、用户、资源、状态码与 URI
+troubleshoot:
+- 记录数为 0：缺 operation=query 参数
+- 状态码为空：读了顶层字段而不是 ResponseStatus.code
+- 过滤无效：过滤键写成 verb 而不是 verb_filter
+update_automation:
+- 选择器见 pages/cluster_management.py 与 ClusterAuditLogsPage.tsx
