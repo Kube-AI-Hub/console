@@ -1,0 +1,42 @@
+id: TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-store
+feature: workspace-repos
+title: 企业空间应用仓库 · 仓库列表与仓库应用
+entry_url: '{BASE_URL}/kube-frontend/workspaces/system-workspace/repos'
+prd: prd/kube-frontend/app-store/workspace-repos.md
+design: design/kube-frontend/app-store/workspace-repos.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-01
+
+story:
+- US1
+
+product: 企业空间作用域的应用仓库区域：仓库列表（名称/地址/类型/状态/创建时间）与仓库应用（名称/版本类型/状态/创建时间），空态/失败态明确，只读。
+preconditions:
+- 已登录，且能访问至少一个企业空间
+- openpitrix 已开启，工作空间级 repos/apps 集合可读（可能为空）
+- 只读用例，不依赖 webhook
+steps:
+- 用 API 读企业空间列表，优先选有仓库的空间
+- 读 /kapis/openpitrix.io/v1/workspaces/<ws>/repos 得到仓库数 N 与条目
+- 读 /kapis/openpitrix.io/v1/workspaces/<ws>/apps 得到应用数 M
+- 打开该空间仓库列表，核对行数 N、表头与状态徽标；N=0 核对空态
+- 打开仓库应用页，核对行数 M 与表头；M=0 核对空态
+- 核对侧栏包含 仓库列表 / 仓库应用
+expected:
+- workspace-repos:surface 可见且 data-ai-state 为 ready 或 empty
+- 仓库行数 = N；表头含 名称/地址/类型/状态/创建时间
+- workspace-apps:surface 可见；应用行数 = M；表头含 名称/版本类型/状态/创建时间
+- 空集合显示对应空态文案，不渲染空表头
+- 全程无写请求
+troubleshoot:
+- 行数为 0 但接口有数据：应用页漏了 /workspaces/<ws> 前缀（读到平台全量或 404）
+- 仓库类型列恒空：本部署 repo 对象没有 type 字段，属预期（design DEC-03），不得硬编码 helm
+- 应用页按 repo_id 过滤：接口忽略该参数（实测带与不带相同），不要据此声称已过滤（DEC-02）
+- 页面 404：workspace 作用域路由未建或 URL 少了 /workspaces/<ws> 段
+update_automation:
+- 选择器：workspace-repos:surface/retry、workspace-apps:surface/retry、tr[data-ai-row]；页面 pages/appstore/WorkspaceReposPage.tsx 与 WorkspaceAppsPage.tsx

@@ -328,8 +328,8 @@ export const AREAS: readonly Area[] = [
     icon: 'openpitrix',
     defaultPage: 'repos',
     pages: [
-      { key: 'repos', path: 'repos', titleKey: 'appRepos.repos.title', status: 'planned' },
-      { key: 'apps', path: 'apps', titleKey: 'appRepos.apps.title', status: 'planned' },
+      { key: 'repos', path: 'repos', titleKey: 'appRepos.repos.title', status: 'ready' },
+      { key: 'apps', path: 'apps', titleKey: 'appRepos.apps.title', status: 'ready' },
     ],
   },
   {
