@@ -222,6 +222,7 @@ export const AREAS: readonly Area[] = [
       { key: 'secrets', path: 'secrets', titleKey: 'cluster.config.secrets.title', status: 'ready', groupKey: 'cluster.nav.groupConfig' },
       { key: 'configmaps', path: 'configmaps', titleKey: 'cluster.config.configmaps.title', status: 'ready', groupKey: 'cluster.nav.groupConfig' },
       { key: 'serviceaccounts', path: 'serviceaccounts', titleKey: 'cluster.config.serviceaccounts.title', status: 'ready', groupKey: 'cluster.nav.groupConfig' },
+      { key: 'persistentvolumeclaims', path: 'persistentvolumeclaims', titleKey: 'cluster.pvc.title', status: 'ready', groupKey: 'nav.groupStorage' },
       { key: 'storageclasses', path: 'storageclasses', titleKey: 'cluster.storageClasses.title', status: 'ready', groupKey: 'nav.groupStorage' },
       { key: 'persistentvolumes', path: 'persistentvolumes', titleKey: 'cluster.persistentVolumes.title', status: 'ready', groupKey: 'nav.groupStorage' },
       { key: 'ippools', path: 'ippools', titleKey: 'cluster.network.ipPools.title', status: 'ready', groupKey: 'cluster.nav.groupNetwork' },
@@ -240,6 +241,9 @@ export const AREAS: readonly Area[] = [
       { key: 'custom-monitoring', path: 'custom-monitoring', titleKey: 'customMonitoring.title', status: 'ready', groupKey: 'nav.groupMonitoring' },
       // The ranking under 集群监控: which node is hot, not every attribute of every node.
       { key: 'node-usage', path: 'node-usage', titleKey: 'cluster.nodeUsage.title', status: 'ready', groupKey: 'nav.groupMonitoring' },
+      { key: 'gpus', path: 'gpus', titleKey: 'cluster.gpu.title', status: 'ready', groupKey: 'cluster.nav.groupResource' },
+      { key: 'alerting-messages', path: 'alerting-messages', titleKey: 'cluster.alerting.messages.title', status: 'ready', groupKey: 'nav.groupMonitoring' },
+      { key: 'alerting-policies', path: 'alerting-policies', titleKey: 'cluster.alerting.policies.title', status: 'ready', groupKey: 'nav.groupMonitoring' },
       { key: 'events', path: 'events', titleKey: 'cluster.events.title', status: 'ready', groupKey: 'nav.groupMonitoring' },
       { key: 'logs', path: 'logs', titleKey: 'search.logs.title', status: 'ready', groupKey: 'nav.groupMonitoring' },
       { key: 'audit-logs', path: 'audit-logs', titleKey: 'search.audit.title', status: 'ready', groupKey: 'nav.groupMonitoring' },

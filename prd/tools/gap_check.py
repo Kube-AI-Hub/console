@@ -105,9 +105,6 @@ ELSEWHERE: dict[str, str] = {
 #: 已登记缺口：承认还没做，并指向计划条目。**不是「明确不做」**——
 #: 登记在此是为了让它们持续可见，而不是消失。
 PLANNED: dict[str, str] = {
-    "clusters/configmaps": "集群域配置字典列表（2026-11-14 决策改为支持集群域与项目域，DEC-L2-…-CLUSTER_MANAGEMENT-04）",
-    "clusters/secrets": "集群域保密字典列表（同上）",
-    "clusters/serviceaccounts": "集群域服务账户列表（同上）",
     "clusters/volumes": "集群级全命名空间 PVC（计划 §6.1）",
     "clusters/snapshots": "快照别名路由（计划 §6.1）",
     "clusters/volume-snapshots": "卷快照（计划 §6.1）",

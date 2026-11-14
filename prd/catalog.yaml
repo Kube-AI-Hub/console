@@ -678,6 +678,27 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-YAML_EDIT-01
+    - id: gpu
+      title: 集群显卡
+      prd: prd/kube-frontend/cluster-management/gpu.md
+      design: design/kube-frontend/cluster-management/gpu.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-01
+    - id: cluster-alerting
+      title: 集群级告警
+      prd: prd/kube-frontend/cluster-management/cluster-alerting.md
+      design: design/kube-frontend/cluster-management/cluster-alerting.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING-01
+    - id: cluster-pvc
+      title: 集群级存储卷声明
+      prd: prd/kube-frontend/cluster-management/cluster-pvc.md
+      design: design/kube-frontend/cluster-management/cluster-pvc.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_PVC-01
     - id: cluster-config
       title: 集群级配置
       prd: prd/kube-frontend/cluster-management/cluster-config.md

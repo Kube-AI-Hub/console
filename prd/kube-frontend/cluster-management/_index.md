@@ -81,6 +81,9 @@
 | 节点用量 | [node-usage.md](./node-usage.md) |
 | 自定义资源 | [custom-resources.md](./custom-resources.md) |
 | 集群级配置 | [cluster-config.md](./cluster-config.md) |
+| 显卡 | [gpu.md](./gpu.md) |
+| 集群级告警 | [cluster-alerting.md](./cluster-alerting.md) |
+| 集群级存储卷声明 | [cluster-pvc.md](./cluster-pvc.md) |
 | 编辑 YAML 覆盖 | [yaml-edit.md](./yaml-edit.md) |
 
 ## 明确不做
@@ -96,6 +99,9 @@
 - 节点可分配资源在 `status.allocatable` 中以 Kubernetes 数量字符串给出。
 
 ## 验收用例
+- `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_PVC-01`
+- `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING-01`
+- `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-01`
 
 - `TC-FULL-KUBE-FRONTEND-CLUSTER_MANAGEMENT-01`
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-01`

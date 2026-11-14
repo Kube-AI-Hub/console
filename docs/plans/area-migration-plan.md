@@ -231,12 +231,12 @@ python3 prd/tools/verify.py --serial-e2e
 | 缺口 | 做法 | 备注 |
 | --- | --- | --- |
 | 企业空间控制台（18 路由，已迁 3：概览/项目/成员） | 继续补 配额 / 角色 / 用户组 / 部门 | 邀请成员需企业空间角色列表，否则自由文本角色会静默授权为空；平台侧另有只读详情 |
-| 集群级全命名空间 PVC | `WorkloadListPage` 模式（`namespace: ''`）+ PROJECT 列 | 页面本体可复用 |
+| ~~集群级全命名空间 PVC~~ | 已迁：`clusters/<c>/persistentvolumeclaims`（复用 storageApi + 项目索引，行键 ns/name） | 页面本体可复用这点被验证：约 100 行 |
 | 卷快照 / 快照类型 / 快照内容 / `snapshots` 别名（4） | 同存储页模式 | 接口待逐个探测 |
 | JuiceFS 共享存储 | 3 页签 | — |
-| GPU 卡列表 / GPU 资源监控（2） | GPU 资源读 `status.gpus`；监控走 metrics | 需先探测 |
+| ~~GPU 卡列表~~ / GPU 资源监控（1） | 已迁显卡列表 + 单卡详情（`/kapis/gpu.kubesphere.io/v1alpha1/gpus`，健康比例走 `/gpus/stats`） | 监控页签未做（需要 Prometheus gpu 指标） |
 | 应用资源监控 | 老 `Monitor/Resource` 2 页签 | — |
-| 集群级告警消息 / 告警策略（2） | 与项目级共用 RuleGroup 读取 | 集群作用域多两个页签 |
+| ~~集群级告警消息 / 告警策略（2）~~ | 已迁：消息合并 clusteralerts+globalalerts（来源列）；策略两页签「自定义/内置」 | 剩余：集群自定义策略写、内置启停、消息下钻 |
 | 集群网关 | 只读展示 | 控制器缺 chart，状态到不了就绪 |
 | 飞书通知渠道 | 复用 `channelDescriptors.ts` 加一条表项 | 其余五种已迁 |
 | 项目级自定义监控 | `projectDashboardsApi` 已写好（`v1alpha2`） | 结构与集群级相同 |

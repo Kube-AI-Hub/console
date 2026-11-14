@@ -622,6 +622,21 @@ MODULES = [
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-YAML_EDIT-01"]},
                     },
                     {
+                        "id": "gpu",
+                        "title": "集群显卡",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-01"]},
+                    },
+                    {
+                        "id": "cluster-alerting",
+                        "title": "集群级告警",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING-01"]},
+                    },
+                    {
+                        "id": "cluster-pvc",
+                        "title": "集群级存储卷声明",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_PVC-01"]},
+                    },
+                    {
                         "id": "cluster-config",
                         "title": "集群级配置",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-01"]},

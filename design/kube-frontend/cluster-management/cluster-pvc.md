@@ -71,7 +71,7 @@
 ## 已知坑
 
 - **代理忽略 fieldSelector**：不做筛选（§52）；前端过滤当前页只会筛 20 行。
-- **名称跨项目不唯一**：行键必须是项目/名称（DEC-02）。
+- **名称跨项目不唯一**：行键必须是项目/名称（DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_PVC-02）。
 - **默认 StorageClass 无类名**：使用默认类的 PVC `spec.storageClassName` 为空，列显示 `-`。
 - **locale 只有标题**：`cluster.pvc.title/description` 之外没有专属列键，列复用 `storage.column.*` 与 `storage.field.storageClass`；要改中文措辞需先加 locale 键。
 - **registry 条目不在本功能点**：共享文件由 Lead 维护；页面本身不依赖 registry 才能渲染（直接 URL 可达）。
