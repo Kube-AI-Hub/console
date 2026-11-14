@@ -223,9 +223,9 @@ function BasicInfoPanel({ detail }: { detail: ClusterDetail }): React.ReactEleme
           aiId="overview:kubernetes-version"
         />
         <DefinitionRow
-          label={t('cluster.overview.kubeSphereVersion')}
+          label={t('cluster.overview.productVersion')}
           value={detail.kubeSphereVersion || '-'}
-          aiId="overview:kubesphere-version"
+          aiId="overview:product-version"
         />
         <DefinitionRow label={t('cluster.overview.nodeCount')} value={String(detail.nodeCount)} aiId="overview:node-count" />
         <DefinitionRow label={t('cluster.visibility.title')} aiId="overview:visibility"

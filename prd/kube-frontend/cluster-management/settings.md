@@ -4,7 +4,7 @@
 
 ## 概述
 
-集群的可编辑属性。当前只有**描述**一个字段可写；供应者、Kubernetes / KubeSphere 版本、连接方式、API 端点与节点数由安装器写入，在本页只读展示。
+集群的可编辑属性。当前只有**描述**一个字段可写；供应者、Kubernetes / Kube AI Hub 版本、连接方式、API 端点与节点数由安装器写入，在本页只读展示。
 
 描述保存在集群对象的注解 `kubesphere.io/description` 上，同一个值也显示在集群概览页。
 
@@ -30,7 +30,7 @@
 
 ## 验收场景
 
-- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-SETTINGS-01** — 已知已登录且对集群有写权限，当在集群设置里把描述改为新值并保存，则页面显示新描述与「已保存」，且集群对象的 `kubesphere.io/description` 注解等于新值；只读区列出供应者、Kubernetes 版本、KubeSphere 版本、连接方式、API 端点与节点数。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-SETTINGS-01** — 已知已登录且对集群有写权限，当在集群设置里把描述改为新值并保存，则页面显示新描述与「已保存」，且集群对象的 `kubesphere.io/description` 注解等于新值；只读区列出供应者、Kubernetes 版本、Kube AI Hub 版本、连接方式、API 端点与节点数。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-SETTINGS-02** — 已知集群对象带有描述注解，当把描述清空并保存，则集群对象上该注解被**删除**（而不是留成空字符串），页面显示 `-`。
 
 ## 设计目标
@@ -54,6 +54,7 @@
 ## 文案与校验
 
 - 空白描述按「清空」处理（trim 后为空即删除注解）。
+- 只读区平台版本标签为「Kube AI Hub 版本」，locale key 为 `cluster.settings.productVersion`，数值仍读 `status.kubeSphereVersion`。
 - 保存中禁用保存/取消，避免重复提交。
 
 ## 边界情况

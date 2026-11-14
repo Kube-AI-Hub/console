@@ -59,7 +59,7 @@
 - 路由：apps/console-next/src/routes/kube-frontend.clusters.$cluster/settings/{route.tsx,index.tsx}
 - 区域注册：apps/console-next/src/areas/registry.ts（cluster-management 增加 settings）
 - 接口：packages/api-client/src/cluster.ts 的 clusterWriteApi.setDescription
-- 文案：packages/locales/src/index.ts（cluster.settings.*）
+- 文案：packages/locales/src/index.ts（cluster.settings.*；平台版本 key 为 `cluster.settings.productVersion`，标签为 Kube AI Hub 版本）
 
 ## 对外契约
 

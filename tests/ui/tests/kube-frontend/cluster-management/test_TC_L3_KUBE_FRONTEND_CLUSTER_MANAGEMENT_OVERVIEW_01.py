@@ -33,7 +33,10 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_OVERVIEW_01(cluster_overview_pag
     # node count move with the installation, and a test that hard-codes them fails on
     # the next upgrade while saying nothing about whether the page is right.
     assert ui.field_text("kubernetes-version") == (status.get("kubernetesVersion") or "-")
-    assert ui.field_text("kubesphere-version") == (status.get("kubeSphereVersion") or "-")
+    assert ui.field_text("product-version") == (status.get("kubeSphereVersion") or "-")
+    basic = ui.page.locator('[data-ai-id="overview:basic"]').last.inner_text()
+    assert "Kube AI Hub 版本" in basic, basic
+    assert "KubeSphere 版本" not in basic, basic
     assert ui.field_text("node-count") == str(status.get("nodeCount") or 0)
     assert ui.field_text("provider") == (spec.get("provider") or "-")
 

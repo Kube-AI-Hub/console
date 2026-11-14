@@ -47,6 +47,9 @@ describe('overview completion', () => {
     await waitFor(() => expect(view.container.querySelector('[data-ai-id="overview:schedule-error"]')).toHaveTextContent('1'));
     expect(view.container.querySelector('[data-ai-id="overview:unschedulable"]')).toHaveTextContent('226');
     expect(view.container.querySelector('[data-ai-id="overview:visibility"]')).toHaveTextContent('只有被授权');
+    const platformVersion = view.container.querySelector('[data-ai-id="overview:product-version"]');
+    expect(platformVersion?.closest('dd')?.previousElementSibling).toHaveTextContent('Kube AI Hub 版本');
+    expect(view.container.querySelector('[data-ai-id="overview:basic"]')).not.toHaveTextContent('KubeSphere 版本');
     const sidebar = view.container.querySelector('[data-ai-id="overview:identity-column"]')!;
     expect(sidebar.querySelector('[data-ai-id="overview:basic"]')?.nextElementSibling).toHaveAttribute('data-ai-id', 'overview:kubernetes-status');
     expect(view.container.querySelector('[data-ai-id="overview:usage-gpu"]')).not.toHaveTextContent('GPU 利用率');

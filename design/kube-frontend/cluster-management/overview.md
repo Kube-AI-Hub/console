@@ -215,3 +215,11 @@ E2E 将真实采样、模拟超过5节点、403/member URL 与下载验证分开
 分配区域是空槽时不输出文字；支持字段未上报仍显示 -，真实0不隐藏。
 OVERVIEW-06 核对左列相邻区块、三档相对字段坐标、空分配区域和节点页面实际计算边框颜色；
 旧 OVERVIEW-01/02 从斜杠文本改为逐字段断言，原同次数据对账、工具、排行和权限回归保留。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-10 — 平台版本标签写 Kube AI Hub
+
+**为什么**：概览「基本信息」里的版本号来自集群对象 `status.kubeSphereVersion`，那是安装器写入的平台版本。产品对外名称是 Kube AI Hub，标签写成 KubeSphere 会让人以为这是上游发行版而不是本产品。文案 key 用 `cluster.overview.productVersion`（设置页同义 key `cluster.settings.productVersion`），`data-ai-id="overview:product-version"` 对应同一字段；接口字段名仍是 `kubeSphereVersion`。用户可见文案里的产品名一律写 Kube AI Hub；`kubesphere.io` API 组、注解名与 CRD 字段保持原样。
+
+**被否方案**：把 CRD / 接口字段改名为 `kubeAiHubVersion`。已装集群和 ks-apiserver 仍写 `kubeSphereVersion`，改字段名会让概览读不到版本。
+
+**何时重新考虑**：平台 CRD 把该字段正式改名，且已装集群完成迁移之后。

@@ -34,7 +34,7 @@ class ClusterOverviewPage:
         "status",
         "provider",
         "kubernetes-version",
-        "kubesphere-version",
+        "product-version",
         "node-count",
         "connection",
         "api-endpoint",

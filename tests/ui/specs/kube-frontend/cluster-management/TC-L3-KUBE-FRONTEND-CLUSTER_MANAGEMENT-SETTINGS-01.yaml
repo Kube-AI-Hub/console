@@ -24,7 +24,7 @@ preconditions:
 - 记录当前描述注解的原值，用例结束时还原
 steps:
 - 打开集群设置，等待 surface 就绪
-- 核对只读区包含供应者、Kubernetes 版本、KubeSphere 版本、连接方式、API 端点、节点数
+- 核对只读区包含供应者、Kubernetes 版本、Kube AI Hub 版本、连接方式、API 端点、节点数
 - 点「编辑描述」，填入唯一标记文案并保存，等待「已保存」
 - 用 API 读取集群对象，核对 kubesphere.io/description 等于该文案
 - 再次进入编辑，清空并保存

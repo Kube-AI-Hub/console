@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/cluster-management/settings.md`](../../../../prd/kube-frontend/cluster-management/settings.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-SETTINGS-01** — 已知已登录且对集群有写权限，当在集群设置里把描述改为新值并保存，则页面显示新描述与「已保存」，且集群对象的 `kubesphere.io/description` 注解等于新值；只读区列出供应者、Kubernetes 版本、KubeSphere 版本、连接方式、API 端点与节点数。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-SETTINGS-01** — 已知已登录且对集群有写权限，当在集群设置里把描述改为新值并保存，则页面显示新描述与「已保存」，且集群对象的 `kubesphere.io/description` 注解等于新值；只读区列出供应者、Kubernetes 版本、Kube AI Hub 版本、连接方式、API 端点与节点数。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-SETTINGS-02** — 已知集群对象带有描述注解，当把描述清空并保存，则集群对象上该注解被**删除**（而不是留成空字符串），页面显示 `-`。
 
 ### 关联设计
@@ -55,7 +55,7 @@
 ## 测试步骤
 
 1. 打开集群设置，等待 surface 就绪
-2. 核对只读区包含供应者、Kubernetes 版本、KubeSphere 版本、连接方式、API 端点、节点数
+2. 核对只读区包含供应者、Kubernetes 版本、Kube AI Hub 版本、连接方式、API 端点、节点数
 3. 点「编辑描述」，填入唯一标记文案并保存，等待「已保存」
 4. 用 API 读取集群对象，核对 kubesphere.io/description 等于该文案
 5. 再次进入编辑，清空并保存

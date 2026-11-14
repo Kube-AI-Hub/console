@@ -92,7 +92,7 @@ export function ClusterSettingsPage({ cluster }: ClusterSettingsPageProps): Reac
             <DefinitionRow label={t('cluster.column.status')} value={data.ready ? t('cluster.list.ready') : t('cluster.list.notReady')} />
             <DefinitionRow label={t('cluster.edit.provider')} value={data.provider || '-'} />
             <DefinitionRow label={t('cluster.settings.kubernetesVersion')} value={data.kubernetesVersion || '-'} />
-            <DefinitionRow label={t('cluster.settings.kubeSphereVersion')} value={data.kubeSphereVersion || '-'} />
+            <DefinitionRow label={t('cluster.settings.productVersion')} value={data.kubeSphereVersion || '-'} />
             <DefinitionRow label={t('cluster.settings.connectionType')} value={data.connectionType || '-'} />
             <DefinitionRow label={t('cluster.settings.apiEndpoint')} value={data.kubernetesAPIEndpoint || '-'} />
             <DefinitionRow label={t('cluster.settings.nodeCount')} value={String(data.nodeCount)} />

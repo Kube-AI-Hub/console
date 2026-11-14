@@ -33,6 +33,7 @@ steps:
 - 核对 Kubernetes 状态五个独立标签数字存在
 expected:
 - 供应者、Kubernetes 版本、节点数与接口一致
+- 基本信息标签为「Kube AI Hub 版本」，不是「KubeSphere 版本」；数值与 status.kubeSphereVersion 一致
 - 状态徽标在 Ready 条件为 True 时显示「运行正常」
 - 已启用模块数与 configz 一致；未启用模块不与已启用混排，不推断 API 安装状态
 - 用量行同时出现已用、总量与百分比三个要素

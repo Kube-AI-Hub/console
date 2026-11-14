@@ -7,7 +7,7 @@ import type { KubeObject } from './resources';
  * Two sources, and they answer different questions:
  *
  * - The `cluster` object (`cluster.kubesphere.io/v1alpha1`) describes **what the
- *   cluster is**: its provider, its Kubernetes and KubeSphere versions, whether it is
+ *   cluster is**: its provider, its Kubernetes and Kube AI Hub versions, whether it is
  *   ready, and — in `status.configz` — which optional modules the installation has
  *   enabled. This is register-once information that changes only when someone
  *   reinstalls something.

@@ -25,7 +25,7 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_SETTINGS_01(cluster_settings_pag
 
         # ---- AC-01: installer-owned fields are shown read-only, not as editable controls ----
         readonly = ui.readonly_text()
-        for label in ("供应商", "Kubernetes 版本", "KubeSphere 版本", "连接方式", "API 端点", "节点数"):
+        for label in ("供应商", "Kubernetes 版本", "Kube AI Hub 版本", "连接方式", "API 端点", "节点数"):
             assert label in readonly, f"只读区缺少 {label}: {readonly}"
 
         # ---- AC-01: a saved description is really written ----

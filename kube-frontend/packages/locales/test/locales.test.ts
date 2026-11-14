@@ -23,6 +23,17 @@ describe('dictionaries', () => {
       }
     }
   });
+
+  it('does not name the product KubeSphere', () => {
+    // API groups and annotation names stay `kubesphere.io…`; those are identifiers,
+    // not the product. Strip them before looking for the old brand.
+    for (const [locale, dictionary] of Object.entries(dictionaries)) {
+      for (const [key, value] of Object.entries(dictionary)) {
+        const copy = value.replace(/kubesphere\.io\S*/gi, '');
+        expect(copy, `${locale}:${key}`).not.toMatch(/KubeSphere/i);
+      }
+    }
+  });
 });
 
 describe('createTranslator', () => {

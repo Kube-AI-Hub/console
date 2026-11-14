@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/cluster-management/overview.md`](../../../../prd/kube-frontend/cluster-management/overview.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-01** — 已知已登录且对集群有读取权限，当打开集群概览页，则「基本信息」显示状态徽标（就绪时「运行正常」并附条件消息）、供应者、Kubernetes 版本、KubeSphere 版本、节点数、连接方式、API 端点与描述；「已启用模块」列出 status.configz 中为真的模块、「未启用」列出为假或缺失的模块，不代表 API 未安装；页面不出现项目工作区栏。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-01** — 已知已登录且对集群有读取权限，当打开集群概览页，则「基本信息」显示状态徽标（就绪时「运行正常」并附条件消息）、供应者、Kubernetes 版本、Kube AI Hub 版本、节点数、连接方式、API 端点与描述；「已启用模块」列出 status.configz 中为真的模块、「未启用」列出为假或缺失的模块，不代表 API 未安装；页面不出现项目工作区栏。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-02** — 已知集群存在且监控后端可用，当查看「资源用量」，则 CPU、内存、容器组、节点各显示已使用、总量与使用率，CPU 与内存额外显示已分配；集群有 GPU 时显示 GPU 实际使用、总数和独立已分配量，不再附加 GPU 利用率文本行；当监控接口不可用时，用量面板显示监控不可用说明而不是 0 或空白，基本信息与模块区不受影响。Kubernetes 状态保留请求速率、延迟、scheduled/error/unschedulable 五字段。
 
 ### 关联设计
@@ -71,6 +71,7 @@
 ## 期望结果
 
 - 供应者、Kubernetes 版本、节点数与接口一致
+- 基本信息标签为「Kube AI Hub 版本」，不是「KubeSphere 版本」；数值与 status.kubeSphereVersion 一致
 - 状态徽标在 Ready 条件为 True 时显示「运行正常」
 - 已启用模块数与 configz 一致；未启用模块不与已启用混排，不推断 API 安装状态
 - 用量行同时出现已用、总量与百分比三个要素

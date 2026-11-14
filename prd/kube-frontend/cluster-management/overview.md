@@ -4,7 +4,7 @@
 
 ## 概述
 
-集群的落地页。用一屏回答三个问题：**这是什么集群**（供应者、Kubernetes 与 KubeSphere 版本、连接方式、API 端点、就绪状态）、**它有多忙**（CPU / 内存 / 容器组 / 节点 / GPU 卡的已用与总量，以及控制面的请求速率、延迟与调度结果）、**装了哪些模块**（告警、监控、日志、网关等）。
+集群的落地页。用一屏回答三个问题：**这是什么集群**（供应者、Kubernetes 与 Kube AI Hub 版本、连接方式、API 端点、就绪状态）、**它有多忙**（CPU / 内存 / 容器组 / 节点 / GPU 卡的已用与总量，以及控制面的请求速率、延迟与调度结果）、**装了哪些模块**（告警、监控、日志、网关等）。
 
 老 console 的集群首页同样是仪表盘而不是列表，本功能点是它的对位迁移。
 
@@ -36,7 +36,7 @@
 
 ## 验收场景
 
-- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-01** — 已知已登录且对集群有读取权限，当打开集群概览页，则「基本信息」显示状态徽标（就绪时「运行正常」并附条件消息）、供应者、Kubernetes 版本、KubeSphere 版本、节点数、连接方式、API 端点与描述；「已启用模块」列出 status.configz 中为真的模块、「未启用」列出为假或缺失的模块，不代表 API 未安装；页面不出现项目工作区栏。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-01** — 已知已登录且对集群有读取权限，当打开集群概览页，则「基本信息」显示状态徽标（就绪时「运行正常」并附条件消息）、供应者、Kubernetes 版本、Kube AI Hub 版本、节点数、连接方式、API 端点与描述；「已启用模块」列出 status.configz 中为真的模块、「未启用」列出为假或缺失的模块，不代表 API 未安装；页面不出现项目工作区栏。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-02** — 已知集群存在且监控后端可用，当查看「资源用量」，则 CPU、内存、容器组、节点各显示已使用、总量与使用率，CPU 与内存额外显示已分配；集群有 GPU 时显示 GPU 实际使用、总数和独立已分配量，不再附加 GPU 利用率文本行；当监控接口不可用时，用量面板显示监控不可用说明而不是 0 或空白，基本信息与模块区不受影响。Kubernetes 状态保留请求速率、延迟、scheduled/error/unschedulable 五字段。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-03** — 概览在 1024/1280/1600 视口采用身份与模块侧栏、资源和控制面主栏，不撑宽页面；提供节点、显卡、监控与 kubectl 的当前集群快捷入口和协调刷新，进入 kubectl 不自动连接。代理未就绪集群保留 agent 接入说明。部分指标缺失或分母为零显示 `-` 且不绘制 0% 进度条，真实零采样显示 0%；集群用量不引用单节点数据。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-04** — 资源用量保留 GPU 显存、GPU 实际使用、CPU、内存、容器组、磁盘六类及新增节点就绪率；每类有使用/总量和比例，GPU/CPU/内存分配量独立显示，GPU 数量允许小数。显存/磁盘为 bytes，按 GiB/TiB 显示；缺失不填零。Kubernetes 状态保留 scheduled 和 error，并额外保留 unschedulable，按 result 标签对账，不能互相替代。
@@ -68,6 +68,7 @@
 ## 文案与校验
 
 - 状态：就绪且启用 →「运行正常」；未就绪 →「未就绪」；spec.enable 为 false →「已停用」。
+- 平台版本字段标签为「Kube AI Hub 版本」（英文「Kube AI Hub version」），locale key 为 `cluster.overview.productVersion`，数值仍读 `status.kubeSphereVersion`。
 - 缺值统一 -。
 - 延迟在 1 秒以下按毫秒显示（14.85 ms），1 秒以上按秒。
 - 「无法调度」仅在非零时用警示色强调。
