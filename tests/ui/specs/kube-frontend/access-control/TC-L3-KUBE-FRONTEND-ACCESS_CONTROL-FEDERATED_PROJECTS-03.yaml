@@ -1,0 +1,46 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: federated-projects
+title: 联邦资源详情 · 模板与分发
+entry_url: "{BASE_URL}/kube-frontend/workspaces/system-workspace/federatedprojects"
+prd: prd/kube-frontend/access-control/federated-projects.md
+design: design/kube-frontend/access-control/federated-projects.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-03
+
+story:
+- US1
+
+product: 联邦项目资源页签的行名称链接到只读的联邦资源详情：名称/命名空间/类型徽标、spec.template 的只读 YAML、status.clusters 与 status.conditions 的分发信息；未找到、未知类型、无分发状态分别有明确说明。
+preconditions:
+- 已登录，且联邦 API（/apis/types.kubefed.io/v1beta1）可读写，至少有一个带 workspace 标签的 FederatedNamespace
+- 该联邦项目的命名空间存在，联邦控制器正在工作（用于写入临时 FederatedConfigMap）
+steps:
+- 读 federatednamespaces，选一个联邦项目（名称/命名空间/所属企业空间）
+- 创建一个唯一名称的 FederatedConfigMap（spec.template 含一个探针键），轮询到 status.clusters 回报
+- 打开该项目详情，切到「配置」页签，找到该对象行链接并核对 href
+- 点击行名称进入资源详情，核对标题、类型徽标、模板 YAML、分发集群与条件表
+- 点击返回链接回到项目详情
+- 打开 deployments 与 services 下不存在的对象，核对未找到说明；打开未知类型段，核对未知类型说明
+- finally 删除 FederatedConfigMap，并防御性删除已分发的本地 ConfigMap
+expected:
+- 配置页签出现对象行，名称是链接，href 为 /federatedprojects/<项目>/configmaps/<对象>
+- 资源详情标题为对象名，类型徽标为 FederatedConfigMap
+- 模板区块的 YAML 含探针键与值
+- 分发区块显示 host 集群徽标与至少一条 Propagation 条件（或控制面未回报时显示明确的无状态说明）
+- deployments/services 的不存在对象显示「该联邦资源不存在或已被删除」
+- 未知类型段显示「未知的联邦资源类型」
+- 用例结束后临时 FederatedConfigMap 与分发的本地 ConfigMap 都不存在
+troubleshoot:
+- 行不可点：FederatedResourceTable 的 segment 映射缺失，href 落到重复 plural
+- 详情一直加载：详情 GET 用了集群级路径（FederatedConfigMap 是 namespaced 资源，要带 namespace）
+- 模板为空：读的是 spec 而不是 spec.template
+- 分发为空但对象已分发：status 回报有延迟，等几秒再断言
+- 清理失败：删除联邦对象会级联删除本地副本；若级联未发生，finally 里按名称补删本地 ConfigMap
+update_automation:
+- 选择器：federated-project:resource:configmaps/<name> / federated-resource:surface / :title / :kind / :template / :distribution / :not-found
+- 分组或 URL 段映射变化时同步改 queries.ts 的 FEDERATED_RESOURCE_SEGMENTS 与本用例

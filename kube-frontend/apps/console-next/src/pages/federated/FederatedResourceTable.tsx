@@ -3,7 +3,7 @@ import { actionProps } from '@kube-ai-hub/ai-surface';
 import { Button, Skeleton } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { formatTimestamp } from '@/lib/time';
-import { useFederatedResources, type FederatedResourceObject } from './queries';
+import { segmentOf, useFederatedResources, type FederatedResourceObject } from './queries';
 
 /**
  * One read-only tab of a federated project: the project's objects across a group of
@@ -15,6 +15,10 @@ import { useFederatedResources, type FederatedResourceObject } from './queries';
  * failure — "nothing federated" and "could not read" need different reactions.
  */
 export interface FederatedResourceTableProps {
+  /** Workspace segment of the project route, for the object links. */
+  workspace: string;
+  /** The federated project's name (its detail route segment). */
+  projectName: string;
   /** The federated namespace (equal to the project name in practice). */
   namespace: string;
   /** Collection names from discovery, e.g. `federateddeployments`. */
@@ -27,7 +31,13 @@ function sortRows(rows: FederatedResourceObject[]): FederatedResourceObject[] {
   return [...rows].sort((a, b) => a.kind.localeCompare(b.kind) || a.name.localeCompare(b.name));
 }
 
-export function FederatedResourceTable({ namespace, plurals, aiId }: FederatedResourceTableProps): React.ReactElement {
+export function FederatedResourceTable({
+  workspace,
+  projectName,
+  namespace,
+  plurals,
+  aiId,
+}: FederatedResourceTableProps): React.ReactElement {
   const t = useT();
   const results = useFederatedResources(namespace, plurals);
   const pending = results.some((result) => result.isPending);
@@ -71,8 +81,25 @@ export function FederatedResourceTable({ namespace, plurals, aiId }: FederatedRe
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={row.kind + '/' + row.name} className="border-t border-ai-line" data-ai-row={row.kind + '/' + row.name}>
-              <td className="px-3 py-1.5 font-mono text-[11px] text-ai-fg">{row.name}</td>
+            <tr key={row.plural + '/' + row.name} className="border-t border-ai-line" data-ai-row={row.kind + '/' + row.name}>
+              <td className="px-3 py-1.5 font-mono text-[11px]">
+                <a
+                  href={
+                    '/kube-frontend/workspaces/' +
+                    encodeURIComponent(workspace) +
+                    '/federatedprojects/' +
+                    encodeURIComponent(projectName) +
+                    '/' +
+                    segmentOf(row.plural) +
+                    '/' +
+                    encodeURIComponent(row.name)
+                  }
+                  className="text-ai-accent hover:underline"
+                  {...actionProps('federated-project:resource:' + segmentOf(row.plural) + '/' + row.name)}
+                >
+                  {row.name}
+                </a>
+              </td>
               <td className="px-3 py-1.5 font-mono text-[11px] text-ai-fg-secondary">{row.kind || '-'}</td>
               <td className="px-3 py-1.5 tabular-nums text-ai-fg-muted">{formatTimestamp(row.createdAt)}</td>
             </tr>

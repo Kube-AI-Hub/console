@@ -4,12 +4,13 @@
 
 ## 概述
 
-企业空间作用域新增 `federatedprojects` 页（列表 + `$name` 详情）。数据直接读联邦 API（types.kubefed.io/v1beta1）：列表来自 federatednamespaces 集合，详情来自同一集合按名称查找，已联邦资源类型来自该组的 API discovery。详情再按「应用负载 / 配置 / 存储」分组列出项目命名空间内的 Federated 对象。只读。
+企业空间作用域新增 `federatedprojects` 页（列表 + `$name` 详情）。数据直接读联邦 API（types.kubefed.io/v1beta1）：列表来自 federatednamespaces 集合，详情来自同一集合按名称查找，已联邦资源类型来自该组的 API discovery。详情再按「应用负载 / 配置 / 存储」分组列出项目命名空间内的 Federated 对象；每个对象可下钻到只读详情（模板 YAML + 分发状态）。只读。
 
 ## 关联需求
 
 - AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-01
 - AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-02
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-03
 
 ## 设计目标与非目标
 
@@ -76,14 +77,30 @@
 
 **何时重新考虑**：需要逐类型展示错误细节时，在页签内按类型分组。
 
+### DEC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-08 — 资源详情沿用老 console 的 URL 段名，集合名双向映射
+
+**为什么**：老 console 的联邦对象详情是 `…/federatedprojects/:namespace/deployments/:name` 这种按资源类型分的路径。新路由因此是 `federatedprojects/$name/$resource/$object`，其中 `$resource` 是 deployments/services/configmaps 这类段名；联邦 API 需要 `federateddeployments` 这类集合名。两张名字由一张常量表 `FEDERATED_RESOURCE_SEGMENTS` 双向解析：页面拼链接和详情反解都用它，避免两份映射漂移。
+
+**被否方案**：统一用集合名当 URL 段（`federateddeployments`）。与老 console 的路径不兼容，书签与直觉都更差。
+
+**何时重新考虑**：老 console 的联邦对象详情路径不再需要兼容时，可简化为集合名。
+
+### DEC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-09 — 模板与分发只读投影，404 与失败、无状态分开
+
+**为什么**：详情要回答「分发的是什么」与「分发到哪了」。前者是 `spec.template`，以只读 YAML 原样展示（不做表单，避免暗示可编辑）；后者是 `status.clusters` 与 `status.conditions`。联邦控制面回报有延迟（实测创建后约 4 秒），所以 status 为空是正常的中间态，页面显示「对象还没有分发状态」而不是空表或错误。对象 404 是第三种情况（路由可能比对象长寿），显示「不存在或已被删除」；其余读取错误才走失败面板+重试。hook 把 404 转成 null，让三者各走各的文案。
+
+**被否方案**：把 status 为空也当失败，或把 404 也当失败面板。前者误报，后者让删除后的书签变成一次「故障」。
+
+**何时重新考虑**：控制面提供更明确的 progress 条件时，可把中间态换成进度说明。
+
 ## 系统现状
 
 老 console 有 `/:workspace/federatedprojects` 列表与 `/:workspace/federatedprojects/:namespace` 的 22 条详情路由（概览/应用负载/配置/存储/网关等）。新 UI 此前没有联邦作用域；2026-11-15 组件开启后 registry 登记了 federated-projects 区域（status 由 planned 改 ready），tree 登记 TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-01。本轮落列表 + 详情骨架。
 
 ## 仓库落点
 
-- pages/federated/FederatedProjectsPage.tsx、FederatedProjectDetailPage.tsx、FederatedResourceTable.tsx、queries.ts
-- routes/kube-frontend.workspaces.$workspace/federatedprojects/{route,index,$name}.tsx
+- pages/federated/FederatedProjectsPage.tsx、FederatedProjectDetailPage.tsx、FederatedResourceTable.tsx、FederatedResourceDetailPage.tsx、queries.ts
+- routes/kube-frontend.workspaces.$workspace/federatedprojects/{route,index}.tsx、$name/{route,index}.tsx、$name/$resource/$object.tsx
 - registry：federated-projects 区域 federatedprojects 页 status 改 ready
 - 文案：packages/locales/src/index.ts 的 fedprojects.*
 
@@ -93,6 +110,8 @@
 - 列表句柄：`federated-projects:surface`、行 `data-ai-row=<name>`、名称链接 `federated-projects:open:<name>`。
 - 详情句柄：`federated-project:surface/:basic/:types/:types:empty/:types:error/:not-found/:back`；页签面板 `federated-project:tab:<overview|workloads|config|storage>`，触发器加 `:trigger`；资源表 `federated-project:resources:<workloads|config|storage>`（`:empty` / `:error` / `:retry`）。
 - 资源读取：`GET /apis/types.kubefed.io/v1beta1/namespaces/<namespace>/<plural>`，plural 取 federatedapplications/deployments/statefulsets/replicasets/jobs/services/ingresses（应用负载）、federatedconfigmaps/secrets/serviceaccounts/limitranges（配置）、federatedpersistentvolumeclaims（存储）。
+- 资源详情：`GET /apis/types.kubefed.io/v1beta1/namespaces/<namespace>/<plural>/<名称>`；404 转为「未找到」，其它错误为读取失败。
+- 资源行链接 `federated-project:resource:<segment>/<名称>`；资源详情句柄 `federated-resource:surface/:title/:kind/:template/:template:empty/:distribution/:distribution:empty/:not-found/:back/:retry`。
 - URL：`/kube-frontend/workspaces/<ws>/federatedprojects[/<name>]`。
 
 ## 不变量
@@ -103,6 +122,8 @@
 - 资源类型列表只含 namespaced=true 的类型，按 kind 排序。
 - 资源页签只列项目命名空间内的对象，`federatednamespaces` 自身不列入任何页签。
 - 每个资源页签的加载/空态/失败互不影响，也不阻塞概览。
+- 资源详情的 URL 段用老 console 的段名（deployments/services/configmaps…），API 用 Federated 集合名；两者由 `FEDERATED_RESOURCE_SEGMENTS` 一张表双向映射。
+- 资源详情只读：模板 YAML 来自 `spec.template`，分发信息来自 `status.clusters` / `status.conditions`；控制面尚未回报时显示说明，不猜测。
 
 ## 已知坑
 
@@ -113,11 +134,11 @@
 
 ## 测试与可观测
 
-E2E：TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-01（列表/概览）与 TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-02（资源页签）。用例先读联邦集合算出某企业空间的期望行数与 discovery 的命名空间级类型数，再打开列表核对行数/表头，点击名称进入详情核对基本信息与类型行数；另找一个没有联邦项目的企业空间核对空态文案。
+E2E：TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-01（列表/概览）、-02（资源页签）与 -03（资源详情）。-03 需要真实对象：用例先创建一个 FederatedConfigMap（唯一名称），轮询到 status 回报后验证模板/分发/行链接，并在 finally 删除联邦对象与（防御性）已分发的本地 ConfigMap；未找到分支用 deployments/services 的虚构名称验证，不依赖对象存在。用例先读联邦集合算出某企业空间的期望行数与 discovery 的命名空间级类型数，再打开列表核对行数/表头，点击名称进入详情核对基本信息与类型行数；另找一个没有联邦项目的企业空间核对空态文案。
 
 ## 后续改进
 
-- 联邦对象详情页与写操作（对齐老 console 22 条路由的详情部分）。
+- 联邦资源详情的编辑/删除/事件/日志页签与写操作（对齐老 console 22 条路由的剩余部分）。
 - 资源页签的搜索/过滤/分页。
 - 创建/编辑/删除与部署集群调整（写 webhook 稳定后）。
 - 列表分页/搜索。
@@ -127,3 +148,4 @@ E2E：TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-01（列表/概览�
 
 - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-01
 - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-02
+- TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-03

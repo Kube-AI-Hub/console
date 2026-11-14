@@ -1,4 +1,5 @@
 import { useQueries, useQuery } from '@tanstack/react-query';
+import { ApiError } from '@kube-ai-hub/api-client';
 import { workspacesApi } from '@kube-ai-hub/api-client';
 import { api } from '@/api';
 
@@ -126,9 +127,41 @@ export interface FederatedResourceType {
 /** One federated object inside a project's namespace. */
 export interface FederatedResourceObject {
   name: string;
+  /** Collection name, e.g. `federateddeployments`; the link and detail need it. */
+  plural: string;
   /** e.g. `FederatedDeployment`; the row's type column. */
   kind: string;
   createdAt: string;
+}
+
+/**
+ * Federated collection name ↔ console URL segment.
+ *
+ * The detail route keeps the old console's shape (`…/federatedprojects/<project>/deployments/<name>`),
+ * so `federateddeployments` becomes `deployments`; the API still needs the Federated
+ * collection name. Keeping both directions in one table means the two cannot drift.
+ */
+export const FEDERATED_RESOURCE_SEGMENTS: Readonly<Record<string, string>> = {
+  federatedapplications: 'applications',
+  federateddeployments: 'deployments',
+  federatedstatefulsets: 'statefulsets',
+  federatedreplicasets: 'replicasets',
+  federatedjobs: 'jobs',
+  federatedservices: 'services',
+  federatedingresses: 'ingresses',
+  federatedconfigmaps: 'configmaps',
+  federatedsecrets: 'secrets',
+  federatedserviceaccounts: 'serviceaccounts',
+  federatedlimitranges: 'limitranges',
+  federatedpersistentvolumeclaims: 'persistentvolumeclaims',
+};
+
+export function segmentOf(plural: string): string {
+  return FEDERATED_RESOURCE_SEGMENTS[plural] ?? plural;
+}
+
+export function pluralOf(segment: string): string | undefined {
+  return Object.entries(FEDERATED_RESOURCE_SEGMENTS).find(([, value]) => value === segment)?.[0];
 }
 
 /**
@@ -151,12 +184,102 @@ export function useFederatedResources(namespace: string, plurals: readonly strin
         return (body?.items ?? [])
           .map((item) => ({
             name: item.metadata?.name ?? '',
+            plural,
             kind: item.kind ?? '',
             createdAt: item.metadata?.creationTimestamp ?? '',
           }))
           .filter((item) => Boolean(item.name));
       },
     })),
+  });
+}
+
+/** One federated object's detail: its template and distribution status. */
+export interface FederatedResourceDetail {
+  name: string;
+  namespace: string;
+  kind: string;
+  /** `spec.template` — the object the federation control plane spreads. */
+  template: unknown;
+  /** Clusters the control plane reports the object reached. */
+  clusters: string[];
+  /** Propagation conditions; empty when the control plane has not reported yet. */
+  conditions: Array<{
+    type: string;
+    status: string;
+    reason: string;
+    message: string;
+    lastTransitionTime: string;
+  }>;
+}
+
+interface RawFederatedResource {
+  kind?: string;
+  metadata?: { name?: string; namespace?: string };
+  spec?: { template?: unknown };
+  status?: {
+    clusters?: Array<{ name?: string }>;
+    conditions?: Array<{
+      type?: string;
+      status?: string;
+      reason?: string;
+      message?: string;
+      lastTransitionTime?: string;
+    }>;
+  };
+}
+
+export function toFederatedResourceDetail(
+  item: RawFederatedResource,
+  fallbackName: string,
+  fallbackNamespace: string,
+): FederatedResourceDetail {
+  return {
+    name: item.metadata?.name ?? fallbackName,
+    namespace: item.metadata?.namespace ?? fallbackNamespace,
+    kind: item.kind ?? '',
+    template: item.spec?.template,
+    clusters: (item.status?.clusters ?? []).map((entry) => String(entry.name ?? '')).filter(Boolean),
+    conditions: (item.status?.conditions ?? []).map((condition) => ({
+      type: condition.type ?? '',
+      status: condition.status ?? '',
+      reason: condition.reason ?? '',
+      message: condition.message ?? '',
+      lastTransitionTime: condition.lastTransitionTime ?? '',
+    })),
+  };
+}
+
+/**
+ * One federated object by collection and name.
+ *
+ * `null` means the object is gone (404): a missing object is a legitimate answer —
+ * the route can outlive the object — while a thrown error means the read failed.
+ * The hook turns the 404 into `null` so the page can tell those two apart.
+ */
+export function useFederatedResource(namespace: string, plural: string | undefined, name: string) {
+  return useQuery({
+    queryKey: ['federated-resource', namespace, plural, name],
+    enabled: Boolean(namespace && plural && name),
+    staleTime: 30_000,
+    queryFn: async ({ signal }): Promise<FederatedResourceDetail | null> => {
+      try {
+        const item = await api.request<RawFederatedResource>(
+          FEDERATED_API +
+            '/namespaces/' +
+            encodeURIComponent(namespace) +
+            '/' +
+            encodeURIComponent(plural as string) +
+            '/' +
+            encodeURIComponent(name),
+          { signal },
+        );
+        return toFederatedResourceDetail(item ?? {}, name, namespace);
+      } catch (error) {
+        if (error instanceof ApiError && error.isNotFound) return null;
+        throw error;
+      }
+    },
   });
 }
 

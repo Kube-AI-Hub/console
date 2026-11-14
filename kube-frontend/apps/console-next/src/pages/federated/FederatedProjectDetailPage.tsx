@@ -209,6 +209,8 @@ export function FederatedProjectDetailPage({ workspace, name }: FederatedProject
             <TabsContent value="workloads">
               <div data-ai-id="federated-project:tab:workloads" className="pt-2">
                 <FederatedResourceTable
+                  workspace={workspace}
+                  projectName={project.name}
                   namespace={project.namespace}
                   plurals={WORKLOAD_PLURALS}
                   aiId="federated-project:resources:workloads"
@@ -219,6 +221,8 @@ export function FederatedProjectDetailPage({ workspace, name }: FederatedProject
             <TabsContent value="config">
               <div data-ai-id="federated-project:tab:config" className="pt-2">
                 <FederatedResourceTable
+                  workspace={workspace}
+                  projectName={project.name}
                   namespace={project.namespace}
                   plurals={CONFIG_PLURALS}
                   aiId="federated-project:resources:config"
@@ -229,6 +233,8 @@ export function FederatedProjectDetailPage({ workspace, name }: FederatedProject
             <TabsContent value="storage">
               <div data-ai-id="federated-project:tab:storage" className="pt-2">
                 <FederatedResourceTable
+                  workspace={workspace}
+                  projectName={project.name}
                   namespace={project.namespace}
                   plurals={STORAGE_PLURALS}
                   aiId="federated-project:resources:storage"
