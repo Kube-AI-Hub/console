@@ -10,37 +10,17 @@
  *
  * Usage: dev-static-server.mjs <distDir> <port> <bffUrl>
  */
-import { createServer } from 'node:http';
+import { createServer, request as httpRequest } from 'node:http';
+import { request as httpsRequest } from 'node:https';
 import { connect as netConnect } from 'node:net';
 import { connect as tlsConnect } from 'node:tls';
-import { Agent, setGlobalDispatcher } from 'undici';
 
 /** Per-request ceiling for proxied API calls. */
 const UPSTREAM_TIMEOUT_MS = 60_000;
 
-/*
- * One kept-alive connection pool for upstream calls.
- *
- * The default dispatcher opens a connection per request; under a test run that is
- * thousands of connections to one process, and the resulting queueing looked like
- * upstream failure.
- */
-setGlobalDispatcher(new Agent({ keepAliveTimeout: 10_000, connections: 32 }));
-
-/*
- * Long-lived responses get their own pool.
- *
- * A watch or a log tail holds its socket open for as long as the reader wants it.
- * Sharing the 32-connection pool above means a handful of live streams starve every
- * later JSON call: the page then hangs on /api/session/me while the BFF is healthy.
- * Giving streams an unlimited dispatcher keeps the bounded pool for the calls that
- * actually finish.
- */
-const streamDispatcher = new Agent({ keepAliveTimeout: 10_000, connections: null });
 
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
-import { Readable } from 'node:stream';
 
 const [distDir, portArg, bffUrl] = process.argv.slice(2);
 if (!distDir || !portArg || !bffUrl) {
@@ -68,85 +48,68 @@ const server = createServer(async (request, response) => {
 
   if (API_PREFIXES.some((prefix) => url.pathname === prefix || url.pathname.startsWith(`${prefix}/`))) {
     try {
+      /*
+       * Proxy with node:http, not fetch.
+       *
+       * Node's built-in fetch uses its own bundled undici: a `dispatcher` passed from a
+       * separately installed copy is silently ignored, so the long-lived watch/log responses kept
+       * occupying the shared 32-connection pool and every later call queued behind them. Using
+       * http.request gives us the socket, the back-pressure and the cancellation directly.
+       */
+      const upstreamUrl = new URL(`${bffUrl}${request.url}`);
+      const isHttps = upstreamUrl.protocol === 'https:';
       const headers = { accept: request.headers['accept'] ?? 'application/json' };
-      // Forward only what the BFF needs; a blanket copy leaks hop-by-hop headers.
       for (const key of ['content-type', 'authorization']) {
         const value = request.headers[key];
         if (value) headers[key] = value;
       }
-
-      let body;
-      if (request.method !== 'GET' && request.method !== 'HEAD') {
-        const chunks = [];
-        for await (const chunk of request) chunks.push(chunk);
-        body = Buffer.concat(chunks);
-      }
-
-      /*
-       * A deadline and a kept-alive agent. Without them a handful of slow upstream
-       * calls (a cluster-wide list, a cold login) queued behind each other and
-       * later requests saw their own login time out — the suite then reported
-       * "502 Bad Gateway" for a stack that was healthy when probed by hand.
-       */
-      /*
-       * No `AbortSignal.timeout` on this fetch.
-       *
-       * A deadline is right for a list call and wrong for a stream: the
-       * container-log tail (`/api/v1/…/log?follow=true`) holds its response open
-       * for as long as the reader wants it, so a 60-second ceiling would kill a
-       * perfectly healthy stream mid-read. Connection-level failures still
-       * surface as fetch rejections and are answered with 502 below.
-       */
-      /* Watch and follow responses never finish on their own; see streamDispatcher. */
-      const streaming = url.searchParams.get('watch') === 'true' || url.searchParams.get('follow') === 'true';
-      /*
-       * Abort the upstream fetch when the reader goes away.
-       *
-       * Destroying the Node stream alone leaves the undici request open: each aborted watch
-       * kept its socket, and after enough page switches the process ran out of descriptors and
-       * stopped answering anything. The controller is what actually cancels upstream.
-       */
-      const streamAbort = new AbortController();
-
-      const upstream = await fetch(`${bffUrl}${request.url}`, {
+      const upstreamRequest = (isHttps ? httpsRequest : httpRequest)({
+        protocol: upstreamUrl.protocol,
+        hostname: upstreamUrl.hostname,
+        port: upstreamUrl.port || (isHttps ? 443 : 80),
+        path: upstreamUrl.pathname + upstreamUrl.search,
         method: request.method,
         headers,
-        ...(body && body.length ? { body } : {}),
-        ...(streaming ? { dispatcher: streamDispatcher, signal: streamAbort.signal } : {}),
       });
       /*
-       * Stream, do not buffer.
-       *
-       * This used to be `await upstream.arrayBuffer()` with a content-length.
-       * For every JSON call that was fine; for the log tail it means the browser
-       * only ever sees the response when the stream ends — that is, never, so
-       * the live log stayed on "connecting". Passing the body through and
-       * letting Node use chunked encoding is what makes the dev harness behave
-       * like the production entry point.
+       * A dead deadline, not a per-call one. A watch or a log tail legitimately holds its response
+       * open; the timer only fires when the upstream accepted the request but never answered.
        */
-      const responseHeaders = {
-        'content-type': upstream.headers.get('content-type') ?? 'application/json; charset=utf-8',
-        'cache-control': 'no-store',
-      };
-      const upstreamLength = upstream.headers.get('content-length');
-      if (upstreamLength) responseHeaders['content-length'] = upstreamLength;
-      response.writeHead(upstream.status, responseHeaders);
-      if (!upstream.body) {
-        response.end();
-        return;
-      }
-      const streamed = Readable.fromWeb(upstream.body);
-      // Closing the tab (or the live toggle) must cancel the upstream read too;
-      // a follow response would otherwise keep being read for this process's
-      // lifetime.
+      const timer = setTimeout(() => upstreamRequest.destroy(new Error('upstream timeout')), UPSTREAM_TIMEOUT_MS);
+      timer.unref();
       response.on('close', () => {
-        streamAbort.abort();
-        if (!response.writableEnded) streamed.destroy();
+        if (!response.writableEnded) {
+          clearTimeout(timer);
+          upstreamRequest.destroy();
+        }
       });
-      streamed.on('error', () => {
-        if (!response.writableEnded) response.destroy();
+      upstreamRequest.on('response', (upstream) => {
+        clearTimeout(timer);
+        const responseHeaders = {
+          'content-type': upstream.headers['content-type'] ?? 'application/json; charset=utf-8',
+          'cache-control': 'no-store',
+        };
+        if (upstream.headers['content-length']) responseHeaders['content-length'] = upstream.headers['content-length'];
+        response.writeHead(upstream.statusCode ?? 502, responseHeaders);
+        upstream.pipe(response);
+        upstream.on('error', () => response.destroy());
       });
-      streamed.pipe(response);
+      upstreamRequest.on('error', (cause) => {
+        clearTimeout(timer);
+        if (!response.headersSent) {
+          response
+            .writeHead(502, { 'content-type': 'application/json; charset=utf-8' })
+            .end(JSON.stringify({ code: 'bff_unreachable', message: String(cause) }));
+        } else {
+          response.destroy();
+        }
+      });
+      if (request.method === 'GET' || request.method === 'HEAD') {
+        upstreamRequest.end();
+      } else {
+        request.pipe(upstreamRequest);
+        request.on('error', () => upstreamRequest.destroy());
+      }
     } catch (cause) {
       response
         .writeHead(502, { 'content-type': 'application/json; charset=utf-8' })
