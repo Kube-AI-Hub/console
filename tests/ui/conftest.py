@@ -12,7 +12,6 @@ from pages.juicefs_storage import SharedStoragePage
 from pages.resource_detail import ResourceDetailPage
 from pages.login import LoginPage
 from pages.configmaps import ConfigMapsPage
-from pages.cluster_configmaps import ClusterConfigMapsPage
 from pages.cluster_fleet import ClusterFleetPage
 from pages.workbench import WorkbenchPage
 from pages.secrets import SecretsPage
@@ -290,12 +289,6 @@ def configmaps_page(page, ui_config):
 
 
 @pytest.fixture
-def cluster_configmaps_page(page, ui_config):
-    """The cluster console's ConfigMap list; same app, no workspace segment."""
-    return ClusterConfigMapsPage(page, app_base(ui_config))
-
-
-@pytest.fixture
 def seeded_configmaps(ui_config, session_token):
     """A project holding a known pair of ConfigMaps, deleted afterwards.
 
@@ -360,54 +353,6 @@ def seeded_configmaps(ui_config, session_token):
             api.delete("configmaps", name, ns)
 
 
-@pytest.fixture
-def cluster_configmaps_edit_fixture(seeded_configmaps, session_token, ui_config):
-    """The same ConfigMap name in two projects.
-
-    Edit and delete are addressed by `(project, name)`, and the failure they guard
-    against only shows up when the name also exists elsewhere: a write that
-    ignores the project either 404s or hits the wrong object. Two projects are
-    enough to tell those apart.
-
-    Three things this fixture must not assume:
-
-    1. **The created name is the name passed in.** `seeded_configmaps` prefixes every
-       object per instance so parallel workers cannot delete each other's objects, so
-       the real name is the one it returns; reusing the argument string looked for an
-       object that never existed.
-    2. **Which projects exist.** `kube-frontend-demo` was hard-coded and is absent from
-       this deployment, so the second object silently failed to create and the case then
-       asserted against one object instead of two.
-    3. **That create succeeds.** The old code ignored its result; a failure now raises.
-    """
-    api = ApiClient(app_base(ui_config), session_token)
-    name = f"tc-cluster-{uuid4().hex[:8]}"
-    created: dict[str, str] = {}
-
-    # The second project has to be a *project*, and one that exists here. Walking the
-    # namespaces is not enough: `kube-federation-system` is a namespace too, and a
-    # ConfigMap created there is propagation state rather than a second copy a user
-    # could edit. Projects are the namespaces KubeSphere labels with their workspace.
-    status, body = api.request("GET", "/kapis/resources.kubesphere.io/v1alpha3/namespaces?limit=-1")
-    items = (body.get("items") or []) if status == 200 and isinstance(body, dict) else []
-    projects = [
-        str(item.get("metadata", {}).get("name"))
-        for item in items
-        if isinstance(item, dict)
-        and "kubesphere.io/workspace" in ((item.get("metadata", {}) or {}).get("labels") or {})
-    ]
-    second = next((ns for ns in projects if ns != "default"), None)
-    if second is None:
-        pytest.skip("集群只有一个项目，无法验证跨项目同名对象")
-
-    for namespace in ("default", second):
-        real = seeded_configmaps["create"](name, {"k": "v1"}, None, namespace)
-        if not real:
-            raise AssertionError(f"could not create the fixture object in {namespace}")
-        created[namespace] = str(real)
-
-    # Both projects hold the same name; tests assert that only the targeted one changed.
-    return ("default", created["default"], second)
 
 
 @pytest.fixture
