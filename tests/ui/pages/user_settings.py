@@ -32,6 +32,12 @@ PLATFORM_ROLE_KEYS = ("iam.kubesphere.io/platform-role", "iam.kubesphere.io/glob
 #: 算「写请求」的方法。读请求不记：弹窗每次打开都要 GET 一次账号。
 WRITE_METHODS = ("POST", "PUT", "PATCH", "DELETE")
 
+#: 强度三档的取值（`data-strength`）与各自的文字标签。三档必须有文字，不能只靠颜色。
+STRENGTH_LABELS = {"weak": "弱", "medium": "中", "strong": "强"}
+
+#: 四条 checklist 的键，与 `data-ai-id="user-settings:password-check-<key>"` 对应。
+CHECK_KEYS = ("case", "digit", "special", "length")
+
 
 class ApiLike(Protocol):
     def request(self, method: str, path: str, body: dict | None = None) -> tuple[int, dict[str, Any]]: ...
@@ -182,6 +188,82 @@ class UserSettingsPage:
     @property
     def password_saved(self) -> Locator:
         return self.page.locator('[data-ai-id="user-settings:password-saved"]').last
+
+    @property
+    def password_rule(self) -> Locator:
+        """新密码框上方的常驻规则说明（老 console 的 PASSWORD_DESC 迁移）。"""
+        return self.page.locator('[data-ai-id="user-settings:password-rule"]').last
+
+    # ---------------- 密码强度面板 ----------------
+
+    @property
+    def strength_panel(self) -> Locator:
+        """新密码框下方的强度面板。新密码为空时它不渲染，所以这里不能用 .first/.last 兜底。"""
+        return self.page.locator('[data-ai-id="user-settings:password-strength"]').last
+
+    @property
+    def strength_bar(self) -> Locator:
+        return self.page.locator('[data-ai-id="user-settings:password-strength-bar"]').last
+
+    def strength(self) -> str | None:
+        """`data-strength`：weak / medium / strong。"""
+        return self.strength_panel.get_attribute("data-strength")
+
+    def strength_text(self) -> str:
+        """面板上的文字。用来证明三档各有文字标签（弱/中/强），而不是只有颜色。"""
+        return self.strength_panel.inner_text()
+
+    def strength_label(self) -> str | None:
+        """面板里出现的那个强度标签字（弱/中/强）。"""
+        text = self.strength_text()
+        for label in STRENGTH_LABELS.values():
+            if label in text:
+                return label
+        return None
+
+    def strength_bar_percent(self) -> float:
+        """进度条宽度百分比。
+
+        先读内联 `style.width`（33% / 66% / 100% 最自然的写法），没有就按像素量它占父元素
+        （轨道）的比例。两种实现都算「进度条宽度」，断言不去依赖类名或某一种写法。
+        """
+        return float(
+            self.strength_bar.evaluate(
+                """el => {
+                    const inline = (el.style && el.style.width) || '';
+                    if (inline.trim().endsWith('%')) return parseFloat(inline);
+                    const track = el.parentElement;
+                    const total = track ? track.getBoundingClientRect().width : 0;
+                    return total > 0 ? (el.getBoundingClientRect().width / total) * 100 : 0;
+                }"""
+            )
+        )
+
+    def wait_strength_bar(self, percent: float, tolerance: float = 2.0, timeout_ms: int = 5_000) -> float:
+        """等进度条稳定到某个宽度。
+
+        宽度带 CSS 过渡（`transition-all`）：填完立刻量会读到**上一档**的宽度——弱→中→强连测
+        时三档都会读到 33%。先给过渡一个落定窗口，再轮询到目标值，比加大容差诚实。
+        """
+        import time
+
+        self.page.wait_for_timeout(400)
+        deadline = time.monotonic() + timeout_ms / 1000
+        measured = self.strength_bar_percent()
+        while abs(measured - percent) > tolerance:
+            if time.monotonic() > deadline:
+                raise AssertionError(f"进度条宽度停在 {measured:.1f}%，期望 {percent:.0f}%")
+            self.page.wait_for_timeout(100)
+            measured = self.strength_bar_percent()
+        return measured
+
+    def checklist(self) -> dict[str, bool]:
+        """四条 checklist 的 `data-met`：case / digit / special / length。"""
+        out: dict[str, bool] = {}
+        for key in CHECK_KEYS:
+            locator = self.page.locator(f'[data-ai-id="user-settings:password-check-{key}"]').last
+            out[key] = (locator.get_attribute("data-met") or "").lower() == "true"
+        return out
 
     # ---------------- 可编辑性 ----------------
 

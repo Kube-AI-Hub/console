@@ -22,7 +22,7 @@
 - 对象只有一个：当前登录账号的 User。用户名一律取自会话（`/api/session/me`），不从地址栏或组件参数取，避免「能改谁」变成可传参的事。
 - 两条写的鉴权口径不同：邮箱写靠 RBAC（对自己对象，platform-regular 实测可行），密码写靠「知道当前密码」。因此密码写不能用管理员的重置接口兜底。
 - 邮箱写是整对象 PUT（端点对 PATCH 回 405），密码写是独立子资源（`PUT /users/<name>/password`）。
-- 密码规则由服务端 admission 强制；客户端规则只是提前告知，不承担最终判定。
+- 密码规则**前端比服务端严**：服务端 admission 只要求 8–64 字节 + 小写 + 大写 + 数字，特殊字符只有前端强制（迁移自老 console 的 `PASSWORD_DESC`）。因此密码页是这条规则唯一的执行点，直连 API 不受约束（GOT-L2-05）。
 
 ## 方案决策
 
@@ -65,7 +65,8 @@
 | `UserSettingsDialog` | `kube-frontend/apps/console-next/src/shell/UserSettingsDialog.tsx` | 弹窗壳层、两个页签、读取账号、两次写、改密成功后回调 | 不决定退出后的跳转（由 shell 的 `leave` 做） |
 | `UserMenu` | `kube-frontend/apps/console-next/src/shell/AppShell.tsx` | 账号菜单项 `shell:user-settings`、挂载弹窗、提供 `leave` | 不做表单校验 |
 | `userSettingsApi` | `kube-frontend/packages/api-client/src/access.ts` | `updateProfile` / `changePassword` | 不读账号（读用 `userDetailApi`） |
-| `passwordProblem` / `passwordProblemMessage` | `access.ts` / `kube-frontend/apps/console-next/src/lib/password.ts` | 规则判定与文案映射 | 不发请求 |
+| `passwordProblem` / `passwordChecks` / `passwordProblemMessage` | `access.ts` / `kube-frontend/apps/console-next/src/lib/password.ts` | 规则判定（第一条不满足 / 每条是否满足）与文案映射 | 不发请求 |
+| `PasswordStrength` | `kube-frontend/apps/console-next/src/components/password/PasswordStrength.tsx` | 密码页签下方的强度面板：四条检查项、进度条、弱/中/强文字标签 | 不写正则、不判提交 |
 | `signOut` | `kube-frontend/apps/console-next/src/shell/AuthProvider.tsx` | `POST /api/session/logout` + 清本地 token | 不做页面跳转（调用方跳） |
 | 文案 | `kube-frontend/packages/locales/src/index.ts` | `userSettings.*` | 不写规则逻辑 |
 
@@ -77,6 +78,7 @@
 | --- | --- | --- |
 | 当前页签 | 组件状态（默认 `profile`，每次打开重置） | 不在 |
 | 邮箱输入、三个密码框 | 组件状态（关闭即清空，不写 `localStorage`） | 不在 |
+| 强度档位与四条勾选 | 派生值（由新密码即时算出，不单独存） | 不在 |
 | 账号数据（用户名、平台角色、邮箱初值） | react-query `['user-settings','profile',name]` | 重新请求 |
 | 邮箱保存成功后的列表/详情缓存 | 失效 `['platform','users']`、`['user-detail',name]` | 重新请求 |
 | 会话 token | `localStorage`（`AuthProvider` 管） | 在（除非已 signOut） |
@@ -105,6 +107,7 @@
 | **GOT-L2-KUBE-FRONTEND-USER_SETTINGS-02** | 老 console 用「data 里有没有 `currentPassword`/`password`」区分改密与改邮箱，判据与页签无关。 | 照抄这个分支，字段一变动就会把改密请求发成整对象 PUT，或者反过来。 | `src/actions/user.js` 的 `'user.setting'`（老实现，仅作对照）；新实现按页签拆函数 |
 | **GOT-L2-KUBE-FRONTEND-USER_SETTINGS-03** | 老 console 的语言下拉写 `spec.lang` 并 `location.reload()`；新 UI 的语言在 `localStorage['kube-frontend-locale']`，切换不刷新。 | 两个入口各写一处，互相覆盖：在这里选中文，顶栏还是英文。 | `kube-frontend/apps/console-next/src/i18n.tsx` |
 | **GOT-L2-KUBE-FRONTEND-USER_SETTINGS-04** | 用户名与平台角色是只读**文本**，不是 disabled 输入框。 | 用例按 `input` 断言会失败；做成 disabled 输入框还会诱导用户去点一个永远点不动的控件。 | `UserSettingsDialog.tsx` 的 `ReadOnlyField` |
+| **GOT-L2-KUBE-FRONTEND-USER_SETTINGS-05** | 密码规则是前端规则，不是平台规则：服务端不要求特殊字符。 | 有人会以为服务端也拦特殊字符（于是直连 API 的弱口令被当成「不可能」），或者把前端这条要求写进平台文档当成集群级约束。 | `access.ts` 的 `passwordProblem`；服务端 `pkg/kapis/iam` 未改 |
 
 ## 测试与可观测
 

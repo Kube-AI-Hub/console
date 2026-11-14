@@ -6,6 +6,7 @@ import { AiSurface, Button, Input, InputPassword, Modal, Skeleton } from '@kube-
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { passwordProblemMessage } from '@/lib/password';
+import { PasswordStrength } from '@/components/password/PasswordStrength';
 import { useAuth } from '@/shell/AuthProvider';
 import { errorMessage } from '@/components/resource/ResourceErrorPanel';
 
@@ -279,6 +280,15 @@ export function UserSettingsDialog({ open, onOpenChange, onSignedOut }: UserSett
               />
               <span className="text-[11px] text-ai-fg-muted">{t('userSettings.password.currentHint')}</span>
             </label>
+            {/*
+             * The rule, stated before the field rather than after a rejection — this is the old
+             * console's PASSWORD_DESC, and unlike there it is now the rule the form actually
+             * enforces (a special character is required here even though the apiserver does not
+             * ask for one).
+             */}
+            <p className="rounded-ai-sm bg-ai-surface-2 px-3 py-2 text-[11px] leading-5 text-ai-fg-muted" {...actionProps('user-settings:password-rule')}>
+              {t('userSettings.password.rule')}
+            </p>
             <label className="flex flex-col gap-1" htmlFor="user-settings-new-password">
               <span className="text-xs text-ai-fg-muted">{t('userSettings.password.new')}</span>
               <InputPassword
@@ -290,6 +300,7 @@ export function UserSettingsDialog({ open, onOpenChange, onSignedOut }: UserSett
                 {...actionProps('user-settings:new-password')}
               />
             </label>
+            <PasswordStrength password={newPassword} />
             <label className="flex flex-col gap-1" htmlFor="user-settings-confirm-password">
               <span className="text-xs text-ai-fg-muted">{t('userSettings.password.confirm')}</span>
               <InputPassword
@@ -301,9 +312,6 @@ export function UserSettingsDialog({ open, onOpenChange, onSignedOut }: UserSett
                 {...actionProps('user-settings:confirm-password')}
               />
             </label>
-            {/* The rule is stated up front rather than after a rejection: it is the platform's
-                (8+, upper + lower + digit), and finding it out from a 422 is not a good way. */}
-            <p className="text-[11px] text-ai-fg-muted">{t('userSettings.password.rule')}</p>
             {passwordError ? (
               <p className="text-xs text-ai-danger" role="alert" {...actionProps('user-settings:password-error')}>
                 {passwordError}

@@ -1,14 +1,20 @@
 from __future__ import annotations
 
+import re
+
 import pytest
 from playwright.sync_api import expect
 
 pytestmark = pytest.mark.ui
 
+#: 缺特殊字符的提示。实现把特殊字符集合也写进了这句文案（「密码需包含特殊字符（~!@#…）。」），
+#: 所以只锚定开头，不锁死括号里的字符集——那句话改字符集时不该让用例变红。
+NO_SPECIAL = re.compile(r"^密码需包含特殊字符")
+
 
 @pytest.mark.point
 def test_TC_L3_KUBE_FRONTEND_USER_SETTINGS_PASSWORD_01(temp_user, settings_page_for, screenshot):
-    """TC-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-01 密码设置：必填、规则与一致性在本地拦下且不发请求。"""
+    """TC-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-01 密码设置：必填、规则（含特殊字符）与一致性在本地拦下且不发请求。"""
 
     user = temp_user()
     ui = settings_page_for(user["name"], user["password"])
@@ -41,8 +47,13 @@ def test_TC_L3_KUBE_FRONTEND_USER_SETTINGS_PASSWORD_01(temp_user, settings_page_
     ui.save_password()
     expect(ui.password_error).to_have_text("密码不能超过 64 字节。")
 
-    # 5) 两次输入不一致（两个值各自都合规）。
-    ui.fill_password(user["password"], "TcE2e2026x", "TcE2e2026y")
+    # 5) 缺特殊字符：'Abcdefg1' 8 位、大小写与数字齐全，但平台文案承诺的特殊字符一个没有。
+    ui.fill_password(user["password"], "Abcdefg1", "Abcdefg1")
+    ui.save_password()
+    expect(ui.password_error).to_have_text(NO_SPECIAL)
+
+    # 6) 两次输入不一致（两个值各自都合规，都带特殊字符）。
+    ui.fill_password(user["password"], "TcE2e@2026x", "TcE2e@2026y")
     ui.save_password()
     expect(ui.password_error).to_have_text("两次输入的密码必须一致。")
 

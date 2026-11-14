@@ -24,6 +24,8 @@ export function passwordProblemMessage(t: Translate, problem: string | null): st
       return t('platform.users.field.passwordUpper');
     case 'no-digit':
       return t('platform.users.field.passwordDigit');
+    case 'no-special':
+      return t('platform.users.field.passwordSpecial');
     default:
       return t('platform.users.field.passwordShort');
   }

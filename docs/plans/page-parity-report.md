@@ -148,7 +148,7 @@
 
 | 页面 | 验收场景 | 有意未迁移 |
 | --- | --- | --- |
-| 用户设置（账号菜单 → 弹窗） | USER_SETTINGS-01, USER_SETTINGS-PROFILE-01, USER_SETTINGS-PROFILE-02, USER_SETTINGS-PASSWORD-01, USER_SETTINGS-PASSWORD-02 | 语言选择（`spec.lang`）：新 UI 的语言开关在顶栏写 `localStorage`，两个入口各写一处会互相覆盖。；头像上传、两步验证：平台没有对应字段与接口。；登录历史：已在「访问控制 → 用户详情」。；把用户设置做成独立页面：两个低频小改动不值得一条路由。 |
+| 用户设置（账号菜单 → 弹窗） | USER_SETTINGS-01, USER_SETTINGS-PROFILE-01, USER_SETTINGS-PROFILE-02, USER_SETTINGS-PASSWORD-01, USER_SETTINGS-PASSWORD-02, USER_SETTINGS-PASSWORD-03 | 语言选择（`spec.lang`）：新 UI 的语言开关在顶栏写 `localStorage`，两个入口各写一处会互相覆盖。；头像上传、两步验证：平台没有对应字段与接口。；登录历史：已在「访问控制 → 用户详情」。；把用户设置做成独立页面：两个低频小改动不值得一条路由。 |
 
 ## 重新生成
 

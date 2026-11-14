@@ -50,7 +50,9 @@ def test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_USERS_02(access_control_page, screen
         # IAM enforces a unique email, not just a unique name: reusing one address made
         # the second run fail with 409, which read as "the dialog will not close".
         ui.page.locator("#ai-field-email").fill(f"{name}@example.com")
-        ui.page.locator("#ai-field-password").fill("Strong12345")
+        # The console requires a special character in a password (PASSWORD_DESC is the rule, not
+        # just a hint), so a valid password here has one.
+        ui.page.locator("#ai-field-password").fill("Strong@12345")
         dialog.get_by_role("button", name="确认").click()
         expect(dialog).to_be_visible()
         expect(dialog).to_have_count(1, timeout=15_000)
@@ -63,7 +65,14 @@ def test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_USERS_02(access_control_page, screen
         expect(dialog).to_have_count(1, timeout=15_000)
         assert _exists(ui, name) is False, "短密码竟然创建了用户"
 
+        # The console is stricter than the apiserver here: every character class except a special
+        # character is refused by the form even though the CRD alone would accept it.
         ui.page.locator("#ai-field-password").fill("Strong12345")
+        dialog.get_by_role("button", name="确认").click()
+        expect(dialog).to_have_count(1, timeout=15_000)
+        assert _exists(ui, name) is False, "缺特殊字符的密码竟然创建了用户"
+
+        ui.page.locator("#ai-field-password").fill("Strong@12345")
         dialog.get_by_role("button", name="确认").click()
         expect(dialog).to_have_count(0, timeout=30_000)
 

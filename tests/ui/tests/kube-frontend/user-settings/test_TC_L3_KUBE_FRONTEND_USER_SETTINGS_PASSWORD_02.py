@@ -16,7 +16,8 @@ def test_TC_L3_KUBE_FRONTEND_USER_SETTINGS_PASSWORD_02(temp_user, settings_page_
     """TC-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-02 密码设置：当前密码错误留在弹窗，改成功后自动退出且旧密码失效。"""
 
     user = temp_user()
-    new_password = f"TcE2e{uuid4().hex[:6].upper()}8"
+    # 带特殊字符：前端要求，否则还没发请求就会被「密码需包含特殊字符」拦下。
+    new_password = f"TcE2e@{uuid4().hex[:6].upper()}8"
 
     ui = settings_page_for(user["name"], user["password"])
     ui.open_from()

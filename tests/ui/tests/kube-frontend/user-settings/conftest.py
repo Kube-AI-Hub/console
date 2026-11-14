@@ -58,8 +58,9 @@ def temp_user(e2e_objects) -> Callable[..., dict[str, Any]]:
 
     def create(*, email: str | None = None, description: str | None = None) -> dict[str, Any]:
         name = f"tc-e2e-uset-{uuid4().hex[:8]}"
-        # 平台规则：8–64 位，且同时含小写字母、大写字母、数字。
-        password = f"TcE2e{uuid4().hex[:6].upper()}9"
+        # 前端规则：8–64 位，且同时含小写字母、大写字母、数字与特殊字符。
+        # 服务端不要求特殊字符，但前端要求；两边用同一个口令，免得「能登录却不能改密」。
+        password = f"TcE2e@{uuid4().hex[:6].upper()}9"
         annotations: dict[str, str] = {"iam.kubesphere.io/platform-role": "platform-regular"}
         if description is not None:
             annotations["kubesphere.io/description"] = description
@@ -81,8 +82,12 @@ def temp_user(e2e_objects) -> Callable[..., dict[str, Any]]:
         yield create
     finally:
         # 无条件删：断言失败不能把账号留在集群里，下次运行会以另一种方式失败。
+        # 删失败重试一次：清理请求撞上后端重启窗口时，一次 502 就够留下一个真账号。
         for name in created:
-            api.request("DELETE", f"{IAM}/users/{name}")
+            status, _ = api.request("DELETE", f"{IAM}/users/{name}")
+            if status not in (200, 202, 404):
+                time.sleep(1.0)
+                api.request("DELETE", f"{IAM}/users/{name}")
 
 
 @pytest.fixture
