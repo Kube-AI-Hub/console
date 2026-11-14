@@ -405,6 +405,11 @@ MODULES = [
                 "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-PLATFORM_SETTINGS-01"]},
                 "features": [
                     {
+                        "id": "feishu",
+                        "title": "飞书渠道",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-FEISHU-01"]},
+                    },
+                    {
                         "id": "info",
                         "title": "平台信息",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-INFO-01"]},
@@ -787,6 +792,11 @@ MODULES = [
                 "goal": "项目内的存储卷与存储卷快照能按老 console 的列展示：状态来自 PVC 的 phase 与扩容条件，容量与访问模式按原样呈现；详情给出持久卷/来源卷的对应关系。",
                 "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-STORAGE-01"]},
                 "features": [
+                    {
+                        "id": "snapshots",
+                        "title": "卷快照与快照类型",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOTS-01"]},
+                    },
                     {
                         "id": "list",
                         "title": "存储列表",

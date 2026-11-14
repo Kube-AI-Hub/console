@@ -75,6 +75,9 @@ RENAME: dict[str, dict[str, str]] = {
         "pv": "persistentvolumes",
         "volume-snapshots": "volumesnapshots",
         "roles": "clusterroles",
+        "volumes": "persistentvolumeclaims",
+        "alerts": "alerting-messages",
+        "alert-rules": "alerting-policies",
     },
     "projects": {
         "base-info": "baseinfo",
@@ -105,7 +108,6 @@ ELSEWHERE: dict[str, str] = {
 #: 已登记缺口：承认还没做，并指向计划条目。**不是「明确不做」**——
 #: 登记在此是为了让它们持续可见，而不是消失。
 PLANNED: dict[str, str] = {
-    "clusters/volumes": "集群级全命名空间 PVC（计划 §6.1）",
     "clusters/snapshots": "快照别名路由（计划 §6.1）",
     "clusters/volume-snapshots": "卷快照（计划 §6.1）",
     "clusters/volume-snapshot-classes": "快照类型（计划 §6.1）",
@@ -113,8 +115,6 @@ PLANNED: dict[str, str] = {
     "clusters/juicefs-storage": "JuiceFS 共享存储（计划 §6.1）",
     "clusters/gpu-resource": "GPU 资源监控（计划 §6.1）",
     "clusters/monitor-resource": "应用资源监控（计划 §6.1）",
-    "clusters/alerts": "集群级告警消息（2026-11-14 决策改为支持集群域，DEC-L2-…-MONITORING-03）",
-    "clusters/alert-rules": "集群级告警策略（同上）",
     "clusters/gateways": "集群网关（计划 §6.1；控制器缺 chart）",
     "settings/feishu": "飞书渠道（计划 §6.1；其余五种已迁）",
     "projects/custom-monitoring": "项目级自定义监控（dashboards 接口已确认 200，结构与集群级相同）",

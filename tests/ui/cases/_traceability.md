@@ -199,6 +199,7 @@
 | kube-frontend/monitoring/_index | `AC-FULL-KUBE-FRONTEND-MONITORING-01` | `TC-FULL-KUBE-FRONTEND-MONITORING-01` | [`design/kube-frontend/monitoring/_index.md`](../../../design/kube-frontend/monitoring/_index.md) | [`tests/ui/tests/kube-frontend/monitoring/test_TC_FULL_KUBE_FRONTEND_MONITORING_01.py`](../../../tests/ui/tests/kube-frontend/monitoring/test_TC_FULL_KUBE_FRONTEND_MONITORING_01.py) |
 | kube-frontend/monitoring/alerts-write | `AC-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-01` | `TC-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-01` | [`design/kube-frontend/monitoring/alerts-write.md`](../../../design/kube-frontend/monitoring/alerts-write.md) | [`tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_ALERTS_WRITE_01.py`](../../../tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_ALERTS_WRITE_01.py) |
 | kube-frontend/monitoring/alerts | `AC-L3-KUBE-FRONTEND-MONITORING-ALERTS-01` | `TC-L3-KUBE-FRONTEND-MONITORING-ALERTS-01` | [`design/kube-frontend/monitoring/alerts.md`](../../../design/kube-frontend/monitoring/alerts.md) | [`tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_ALERTS_01.py`](../../../tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_ALERTS_01.py) |
+| kube-frontend/monitoring/custom-monitoring | `AC-L3-KUBE-FRONTEND-MONITORING-PROJECT_CUSTOM_MONITORING-01` | `TC-L3-KUBE-FRONTEND-MONITORING-PROJECT_CUSTOM_MONITORING-01` | **（无）** | [`tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_PROJECT_CUSTOM_MONITORING_01.py`](../../../tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_PROJECT_CUSTOM_MONITORING_01.py) |
 | kube-frontend/monitoring/rules | `AC-L3-KUBE-FRONTEND-MONITORING-RULES-01` | `TC-L3-KUBE-FRONTEND-MONITORING-RULES-01` | [`design/kube-frontend/monitoring/rules.md`](../../../design/kube-frontend/monitoring/rules.md) | [`tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_RULES_01.py`](../../../tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_RULES_01.py) |
 | kube-frontend/monitoring/rules | `AC-L3-KUBE-FRONTEND-MONITORING-RULES-02` | `TC-L3-KUBE-FRONTEND-MONITORING-RULES-02` | [`design/kube-frontend/monitoring/rules.md`](../../../design/kube-frontend/monitoring/rules.md) | [`tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_RULES_02.py`](../../../tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_RULES_02.py) |
 | kube-frontend/monitoring/rules | `AC-L3-KUBE-FRONTEND-MONITORING-RULES-03` | `TC-L3-KUBE-FRONTEND-MONITORING-RULES-03` | [`design/kube-frontend/monitoring/rules.md`](../../../design/kube-frontend/monitoring/rules.md) | [`tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_RULES_03.py`](../../../tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_RULES_03.py) |
@@ -208,6 +209,7 @@
 | kube-frontend/platform-settings/channels | `AC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-CHANNELS-01` | `TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-CHANNELS-01` | [`design/kube-frontend/platform-settings/channels.md`](../../../design/kube-frontend/platform-settings/channels.md) | [`tests/ui/tests/kube-frontend/platform-settings/test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_CHANNELS_01.py`](../../../tests/ui/tests/kube-frontend/platform-settings/test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_CHANNELS_01.py) |
 | kube-frontend/platform-settings/channels | `AC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-CHANNELS-02` | `TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-CHANNELS-01` | [`design/kube-frontend/platform-settings/channels.md`](../../../design/kube-frontend/platform-settings/channels.md) | [`tests/ui/tests/kube-frontend/platform-settings/test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_CHANNELS_01.py`](../../../tests/ui/tests/kube-frontend/platform-settings/test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_CHANNELS_01.py) |
 | kube-frontend/platform-settings/channels | `AC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-CHANNELS-03` | `TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-CHANNELS-01` | [`design/kube-frontend/platform-settings/channels.md`](../../../design/kube-frontend/platform-settings/channels.md) | [`tests/ui/tests/kube-frontend/platform-settings/test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_CHANNELS_01.py`](../../../tests/ui/tests/kube-frontend/platform-settings/test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_CHANNELS_01.py) |
+| kube-frontend/platform-settings/feishu | `AC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-FEISHU-01` | `TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-FEISHU-01` | [`design/kube-frontend/platform-settings/feishu.md`](../../../design/kube-frontend/platform-settings/feishu.md) | [`tests/ui/tests/kube-frontend/platform-settings/test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_FEISHU_01.py`](../../../tests/ui/tests/kube-frontend/platform-settings/test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_FEISHU_01.py) |
 | kube-frontend/platform-settings/info | `AC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-INFO-01` | `TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-INFO-01` | [`design/kube-frontend/platform-settings/info.md`](../../../design/kube-frontend/platform-settings/info.md) | [`tests/ui/tests/kube-frontend/platform-settings/test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_INFO_01.py`](../../../tests/ui/tests/kube-frontend/platform-settings/test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_INFO_01.py) |
 | kube-frontend/platform-settings/mail | `AC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-MAIL-01` | `TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-MAIL-01` | [`design/kube-frontend/platform-settings/mail.md`](../../../design/kube-frontend/platform-settings/mail.md) | [`tests/ui/tests/kube-frontend/platform-settings/test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_MAIL_01.py`](../../../tests/ui/tests/kube-frontend/platform-settings/test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_MAIL_01.py) |
 | kube-frontend/platform-settings/mail | `AC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-MAIL-02` | `TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-MAIL-01` | [`design/kube-frontend/platform-settings/mail.md`](../../../design/kube-frontend/platform-settings/mail.md) | [`tests/ui/tests/kube-frontend/platform-settings/test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_MAIL_01.py`](../../../tests/ui/tests/kube-frontend/platform-settings/test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_MAIL_01.py) |
@@ -269,6 +271,7 @@
 | kube-frontend/storage/list | `AC-L3-KUBE-FRONTEND-STORAGE-LIST-02` | `TC-L3-KUBE-FRONTEND-STORAGE-LIST-02` | [`design/kube-frontend/storage/list.md`](../../../design/kube-frontend/storage/list.md) | [`tests/ui/tests/kube-frontend/storage/test_TC_L3_KUBE_FRONTEND_STORAGE_LIST_02.py`](../../../tests/ui/tests/kube-frontend/storage/test_TC_L3_KUBE_FRONTEND_STORAGE_LIST_02.py) |
 | kube-frontend/storage/list | `AC-L3-KUBE-FRONTEND-STORAGE-LIST-03` | `TC-L3-KUBE-FRONTEND-STORAGE-EDIT_INFO-01` | [`design/kube-frontend/storage/list.md`](../../../design/kube-frontend/storage/list.md) | [`tests/ui/tests/kube-frontend/storage/test_TC_L3_KUBE_FRONTEND_STORAGE_EDIT_INFO_01.py`](../../../tests/ui/tests/kube-frontend/storage/test_TC_L3_KUBE_FRONTEND_STORAGE_EDIT_INFO_01.py) |
 | kube-frontend/storage/list | `AC-L3-KUBE-FRONTEND-STORAGE-LIST-04` | `TC-L3-KUBE-FRONTEND-STORAGE-EXPAND-01` | [`design/kube-frontend/storage/list.md`](../../../design/kube-frontend/storage/list.md) | [`tests/ui/tests/kube-frontend/storage/test_TC_L3_KUBE_FRONTEND_STORAGE_EXPAND_01.py`](../../../tests/ui/tests/kube-frontend/storage/test_TC_L3_KUBE_FRONTEND_STORAGE_EXPAND_01.py) |
+| kube-frontend/storage/snapshots | `AC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOTS-01` | `TC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOTS-01` | [`design/kube-frontend/storage/snapshots.md`](../../../design/kube-frontend/storage/snapshots.md) | [`tests/ui/tests/kube-frontend/storage/test_TC_L3_KUBE_FRONTEND_STORAGE_SNAPSHOTS_01.py`](../../../tests/ui/tests/kube-frontend/storage/test_TC_L3_KUBE_FRONTEND_STORAGE_SNAPSHOTS_01.py) |
 | kube-frontend/theme | `AC-L2-KUBE-FRONTEND-THEME-01` | `TC-L2-KUBE-FRONTEND-THEME-01` | **（无）** | [`tests/ui/tests/kube-frontend/theme/test_TC_L2_KUBE_FRONTEND_THEME_01.py`](../../../tests/ui/tests/kube-frontend/theme/test_TC_L2_KUBE_FRONTEND_THEME_01.py) |
 | kube-frontend/theme | `AC-L2-KUBE-FRONTEND-THEME-02` | `TC-L2-KUBE-FRONTEND-THEME-01` | **（无）** | [`tests/ui/tests/kube-frontend/theme/test_TC_L2_KUBE_FRONTEND_THEME_01.py`](../../../tests/ui/tests/kube-frontend/theme/test_TC_L2_KUBE_FRONTEND_THEME_01.py) |
 | kube-frontend/theme | `AC-L2-KUBE-FRONTEND-THEME-03` | `TC-L2-KUBE-FRONTEND-THEME-01` | **（无）** | [`tests/ui/tests/kube-frontend/theme/test_TC_L2_KUBE_FRONTEND_THEME_01.py`](../../../tests/ui/tests/kube-frontend/theme/test_TC_L2_KUBE_FRONTEND_THEME_01.py) |
@@ -289,9 +292,9 @@
 
 ## 小结
 
-- 需求里的 AC：282 条，其中未覆盖 1 条、无技术方案承接 13 条、无用例规格实现 1 条。
+- 需求里的 AC：285 条，其中未覆盖 1 条、无技术方案承接 14 条、无用例规格实现 1 条。
 - 未覆盖：`AC-L2-KUBE-FRONTEND-LOGIN-07`
-- 无技术方案承接：`AC-L2-KUBE-FRONTEND-LOGIN-01`, `AC-L2-KUBE-FRONTEND-LOGIN-02`, `AC-L2-KUBE-FRONTEND-LOGIN-03`, `AC-L2-KUBE-FRONTEND-LOGIN-04`, `AC-L2-KUBE-FRONTEND-LOGIN-05`, `AC-L2-KUBE-FRONTEND-LOGIN-06`, `AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L2-KUBE-FRONTEND-THEME-01`, `AC-L2-KUBE-FRONTEND-THEME-02`, `AC-L2-KUBE-FRONTEND-THEME-03`, `AC-L2-KUBE-FRONTEND-THEME-04`, `AC-L2-KUBE-FRONTEND-THEME-05`, `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW-01`
+- 无技术方案承接：`AC-L2-KUBE-FRONTEND-LOGIN-01`, `AC-L2-KUBE-FRONTEND-LOGIN-02`, `AC-L2-KUBE-FRONTEND-LOGIN-03`, `AC-L2-KUBE-FRONTEND-LOGIN-04`, `AC-L2-KUBE-FRONTEND-LOGIN-05`, `AC-L2-KUBE-FRONTEND-LOGIN-06`, `AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L2-KUBE-FRONTEND-THEME-01`, `AC-L2-KUBE-FRONTEND-THEME-02`, `AC-L2-KUBE-FRONTEND-THEME-03`, `AC-L2-KUBE-FRONTEND-THEME-04`, `AC-L2-KUBE-FRONTEND-THEME-05`, `AC-L3-KUBE-FRONTEND-MONITORING-PROJECT_CUSTOM_MONITORING-01`, `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW-01`
 - 无用例规格实现：`AC-L2-KUBE-FRONTEND-LOGIN-07`
 
 ## 用户故事覆盖
@@ -462,6 +465,7 @@
 | kube-frontend/monitoring/_index | `US1` | `TC-FULL-KUBE-FRONTEND-MONITORING-01` |
 | kube-frontend/monitoring/alerts-write | `US1` | `TC-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-01` |
 | kube-frontend/monitoring/alerts | `US1` | `TC-L3-KUBE-FRONTEND-MONITORING-ALERTS-01` |
+| kube-frontend/monitoring/custom-monitoring | `US1` | `TC-L3-KUBE-FRONTEND-MONITORING-PROJECT_CUSTOM_MONITORING-01` |
 | kube-frontend/monitoring/rules | `US1` | `TC-L3-KUBE-FRONTEND-MONITORING-RULES-01` |
 | kube-frontend/monitoring/rules | `US2` | `TC-L3-KUBE-FRONTEND-MONITORING-RULES-03` |
 | kube-frontend/monitoring/rules | `US3` | `TC-L3-KUBE-FRONTEND-MONITORING-RULES-02` |
@@ -469,6 +473,7 @@
 | kube-frontend/platform-settings/_index | `US1` | `TC-FULL-KUBE-FRONTEND-PLATFORM_SETTINGS-01` |
 | kube-frontend/platform-settings/appearance | `US1` | `TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-APPEARANCE-01` |
 | kube-frontend/platform-settings/channels | `US1` | `TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-CHANNELS-01` |
+| kube-frontend/platform-settings/feishu | `US1` | `TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-FEISHU-01` |
 | kube-frontend/platform-settings/info | `US1` | `TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-INFO-01` |
 | kube-frontend/platform-settings/mail | `US1` | `TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-MAIL-01` |
 | kube-frontend/project-settings/_index | `US1` | `TC-FULL-KUBE-FRONTEND-PROJECT_SETTINGS-01` |
@@ -527,6 +532,7 @@
 | kube-frontend/storage/detail | `US1` | `TC-L3-KUBE-FRONTEND-STORAGE-DETAIL-01`, `TC-L3-KUBE-FRONTEND-STORAGE-DETAIL-02` |
 | kube-frontend/storage/edit-yaml | `US1` | `TC-L3-KUBE-FRONTEND-STORAGE-EDIT_YAML-01` |
 | kube-frontend/storage/list | `US1` | `TC-L3-KUBE-FRONTEND-STORAGE-EDIT_INFO-01`, `TC-L3-KUBE-FRONTEND-STORAGE-EXPAND-01`, `TC-L3-KUBE-FRONTEND-STORAGE-LIST-01`, `TC-L3-KUBE-FRONTEND-STORAGE-LIST-02` |
+| kube-frontend/storage/snapshots | `US1` | `TC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOTS-01` |
 | kube-frontend/theme | `US1` | `TC-L2-KUBE-FRONTEND-THEME-01` |
 | kube-frontend/theme | `US2` | `TC-L2-KUBE-FRONTEND-THEME-02` |
 | kube-frontend/user-settings/_index | `US1` | `TC-FULL-KUBE-FRONTEND-USER_SETTINGS-01` |
@@ -536,4 +542,4 @@
 | kube-frontend/workbench/context | `US1` | `TC-L3-KUBE-FRONTEND-WORKBENCH-CONTEXT-01` |
 | kube-frontend/workbench/entry | `US1` | `TC-L3-KUBE-FRONTEND-WORKBENCH-ENTRY-01` |
 
-- 用户故事：237 条，其中未覆盖 0 条。
+- 用户故事：240 条，其中未覆盖 0 条。

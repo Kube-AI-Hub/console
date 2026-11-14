@@ -392,6 +392,13 @@ modules:
       L2:
       - TC-FULL-KUBE-FRONTEND-PLATFORM_SETTINGS-01
     features:
+    - id: feishu
+      title: 飞书渠道
+      prd: prd/kube-frontend/platform-settings/feishu.md
+      design: design/kube-frontend/platform-settings/feishu.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-FEISHU-01
     - id: info
       title: 平台信息
       prd: prd/kube-frontend/platform-settings/info.md
@@ -892,6 +899,13 @@ modules:
       L2:
       - TC-FULL-KUBE-FRONTEND-STORAGE-01
     features:
+    - id: snapshots
+      title: 卷快照与快照类型
+      prd: prd/kube-frontend/storage/snapshots.md
+      design: design/kube-frontend/storage/snapshots.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOTS-01
     - id: list
       title: 存储列表
       prd: prd/kube-frontend/storage/list.md

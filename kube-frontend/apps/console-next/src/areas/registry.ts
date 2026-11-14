@@ -175,6 +175,7 @@ export const AREAS: readonly Area[] = [
     pages: [
       { key: 'alerts', path: 'alerts', titleKey: 'monitoring.alerts.title', status: 'ready' },
       { key: 'alertingrules', path: 'alertingrules', titleKey: 'monitoring.rules.title', status: 'ready' },
+      { key: 'custom-monitoring', path: 'custom-monitoring', titleKey: 'customMonitoring.title', status: 'ready' },
     ],
   },
   {
@@ -223,6 +224,8 @@ export const AREAS: readonly Area[] = [
       { key: 'configmaps', path: 'configmaps', titleKey: 'cluster.config.configmaps.title', status: 'ready', groupKey: 'cluster.nav.groupConfig' },
       { key: 'serviceaccounts', path: 'serviceaccounts', titleKey: 'cluster.config.serviceaccounts.title', status: 'ready', groupKey: 'cluster.nav.groupConfig' },
       { key: 'persistentvolumeclaims', path: 'persistentvolumeclaims', titleKey: 'cluster.pvc.title', status: 'ready', groupKey: 'nav.groupStorage' },
+      { key: 'volume-snapshots', path: 'volume-snapshots', titleKey: 'storage.snapshots.title', status: 'ready', groupKey: 'nav.groupStorage' },
+      { key: 'volume-snapshot-classes', path: 'volume-snapshot-classes', titleKey: 'storage.snapshotClasses.title', status: 'ready', groupKey: 'nav.groupStorage' },
       { key: 'storageclasses', path: 'storageclasses', titleKey: 'cluster.storageClasses.title', status: 'ready', groupKey: 'nav.groupStorage' },
       { key: 'persistentvolumes', path: 'persistentvolumes', titleKey: 'cluster.persistentVolumes.title', status: 'ready', groupKey: 'nav.groupStorage' },
       { key: 'ippools', path: 'ippools', titleKey: 'cluster.network.ipPools.title', status: 'ready', groupKey: 'cluster.nav.groupNetwork' },
@@ -292,6 +295,7 @@ export const AREAS: readonly Area[] = [
       { key: 'wecom', path: 'wecom', titleKey: 'channel.wecom.title', status: 'ready' },
       { key: 'slack', path: 'slack', titleKey: 'channel.slack.title', status: 'ready' },
       { key: 'webhook', path: 'webhook', titleKey: 'channel.webhook.title', status: 'ready' },
+      { key: 'feishu', path: 'feishu', titleKey: 'channel.feishu.title', status: 'ready' },
     ],
   },
 ] as const;
