@@ -143,6 +143,7 @@ export {
   usersApi,
   workspaceDetailApi,
   workspaceMembersApi,
+  workspaceRolesApi,
   workspacesApi,
   workspacesWriteApi,
 } from './access';
@@ -163,6 +164,7 @@ export type {
   UserSummary,
   WorkspaceDetail,
   WorkspaceMemberSummary,
+  WorkspaceRoleSummary,
   WorkspaceProject,
   WorkspaceSummary,
 } from './access';
@@ -308,6 +310,7 @@ export {
   clusterApi,
   clusterMetricsApi,
   clusterWriteApi,
+  METRIC_WORKLOAD_KINDS,
   clusterAgentApi,
   CLUSTER_GROUPS,
   CLUSTER_PROVIDERS,
@@ -338,6 +341,7 @@ export type {
   CustomResourcesApi,
   KubernetesStatus,
   MetricSeries,
+  MetricWorkloadKind,
   NodeUsage,
   NodeUsageApi,
   RangeMetricsApi,
@@ -402,3 +406,5 @@ export { clusterDashboardsApi, projectDashboardsApi } from './dashboards';
 export type { DashboardDetail, DashboardSummary } from './dashboards';
 export { clusterGatewaysApi, toClusterGateway } from './gateways';
 export type { ClusterGateway } from './gateways';
+export { kubectlApi } from './kubectl';
+export type { KubectlTarget } from './kubectl';

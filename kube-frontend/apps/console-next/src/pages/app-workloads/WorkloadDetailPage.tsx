@@ -28,6 +28,7 @@ import {
 } from './queries';
 import { EditInfoDialog } from '@/components/resource/EditInfoDialog';
 import { ReplicasDialog } from './ReplicasDialog';
+import { WorkloadMonitorPanel } from './WorkloadMonitorPanel';
 import { EditWorkloadDialog } from './EditWorkloadDialog';
 import { DeleteDialog } from '@/components/resource/DeleteDialog';
 import { LoadingDialog } from '@/components/resource/LoadingDialog';
@@ -62,10 +63,20 @@ function podContainers(detail: WorkloadDetail): string[] {
 }
 
 /** One tab of the detail page. Not every kind shows every tab. */
-type DetailTab = 'overview' | 'pods' | 'revisions' | 'containers' | 'events' | 'metadata';
+type DetailTab = 'overview' | 'monitor' | 'pods' | 'revisions' | 'containers' | 'events' | 'metadata';
 
 /** Kinds whose detail lists the pods they run, matching `useWorkloadPods`' enablement. */
 const POD_OWNING_KINDS: WorkloadKind[] = ['deployments', 'statefulsets', 'daemonsets', 'services'];
+
+/**
+ * Kinds whose detail page has a monitor tab.
+ *
+ * The monitoring API only has workload-level metrics for deployment / statefulset /
+ * daemonset (the path kind is mapped to a `workload=~"<Kind>:(...)"` selector); pods
+ * have their own pod-level series. Jobs and cronjobs have no workload-level metric,
+ * so they get no tab rather than a tab that would only ever say "unavailable".
+ */
+const MONITORED_WORKLOAD_KINDS: WorkloadKind[] = ['deployments', 'statefulsets', 'daemonsets'];
 
 /** The `involvedObject.kind` an event query filters on, per resource. */
 const EVENT_OBJECT_KINDS: Record<WorkloadKind, string> = {
@@ -88,8 +99,9 @@ const EVENT_OBJECT_KINDS: Record<WorkloadKind, string> = {
  * metadata everywhere.
  */
 function tabsFor(kind: WorkloadKind): DetailTab[] {
-  if (kind === 'pods') return ['overview', 'containers', 'events', 'metadata'];
+  if (kind === 'pods') return ['overview', 'monitor', 'containers', 'events', 'metadata'];
   const tabs: DetailTab[] = ['overview'];
+  if (MONITORED_WORKLOAD_KINDS.includes(kind)) tabs.push('monitor');
   if (POD_OWNING_KINDS.includes(kind)) tabs.push('pods');
   if (kind === 'deployments') tabs.push('revisions');
   tabs.push('events', 'metadata');
@@ -99,6 +111,7 @@ function tabsFor(kind: WorkloadKind): DetailTab[] {
 /** The locale key behind each tab's label, so the translation stays in the dictionary. */
 const TAB_LABEL_KEYS: Record<DetailTab, LocaleKey> = {
   overview: 'workloads.detail.tab.overview',
+  monitor: 'workloads.detail.tab.monitor',
   pods: 'workloads.detail.tab.pods',
   revisions: 'workloads.detail.tab.revisions',
   containers: 'workloads.detail.tab.containers',
@@ -516,6 +529,19 @@ export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, 
                   </ul>
                 </section>
               ) : null}
+            </div>
+          ) : null}
+
+          {/* 监控: CPU and memory over time, one panel shared by workloads and pods. */}
+          {active === 'monitor' ? (
+            <div
+              role="tabpanel"
+              id="workload-detail-panel-monitor"
+              aria-labelledby="workload-detail-tab-monitor"
+              data-ai-id="workload-detail:tab:monitor"
+              className="flex flex-col gap-4"
+            >
+              <WorkloadMonitorPanel cluster={cluster} namespace={namespace} kind={kind} name={name} />
             </div>
           ) : null}
 

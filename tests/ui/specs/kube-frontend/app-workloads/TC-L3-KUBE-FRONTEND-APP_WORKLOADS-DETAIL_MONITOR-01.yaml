@@ -1,0 +1,39 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL_MONITOR-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: detail-monitor
+title: 工作负载 / Pod 详情 · 监控页签
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/kubesphere-system/deployments'
+prd: prd/kube-frontend/app-workloads/detail-monitor.md
+design: design/kube-frontend/app-workloads/detail-monitor.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL_MONITOR-01
+
+story:
+- US1
+
+product: 详情页的「监控」页签：CPU 与内存用量随时间（1h/6h/24h），工作负载读服务端按关联容器组汇总的序列，Pod 读自身序列；监控不可用 / 窗口内无数据 / 值为 0 三种情况可区分。
+preconditions:
+- 已登录，且对 kubesphere-system 有读取权限
+- 集群启用监控后端，Deployment 的 workload_* 序列在采集；探测不到有序列的 Deployment 时用例 skip
+steps:
+- 用监控区间接口在 kubesphere-system 里挑一个「workload_cpu_usage 有采样点」的 Deployment，记录点数
+- 打开该 Deployment 详情页，等页面 ready，点「监控」页签
+- 核对监控面板可见，并等到图表/空态/不可用三者之一出现
+- 有采样点时：核对图表出现、data-ai-points > 0、data-ai-bar 柱数 > 0、data-ai-window 为 1h，CPU 与内存两张卡都在
+- 点「最近 6 小时」，核对按钮按下态转移且 data-ai-window 变为 6h；再点 24h；最后切回 1h 截图
+- 找到该 Deployment 的一个 Pod，打开 Pod 详情 → 监控页签，按 Pod 序列有无断言图表或空态
+expected:
+- 监控页签存在且可打开，面板对 Deployment 按关联容器组汇总、对 Pod 读自身序列
+- 有采样点时图表出现且柱数 > 0（0 值画零高度柱，不算缺失）；窗口切换后 data-ai-window 跟随
+- 无采样点时显示「该时间范围内没有监控数据」，监控接口报错时显示「监控不可用」，两者不混用
+troubleshoot:
+- 没有监控页签：该 kind 不在 deployments/statefulsets/daemonsets/pods 之内（Job/CronJob 故意没有）
+- 图表一直空：集群没有监控后端或 recording rule（页面应显示不可用/空态，不是空白）
+- 窗口切换无效：data-ai-window 没跟 windowKey 走，或 query key 漏了窗口
+- 柱子数 0 但页面有数据：断言方式错了——要数 [data-ai-bar] 的个数，不要看第一根柱是否可见
+update_automation:
+- 选择器见 WorkloadMonitorPanel.tsx：workload-detail:tab-trigger:monitor / tab:monitor / monitor / :range / :chart（data-ai-window、data-ai-points）/ :empty / :unavailable / :cpu / :memory / [data-ai-bar]

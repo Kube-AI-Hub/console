@@ -496,69 +496,141 @@ export interface MetricSeries {
   points: SeriesPoint[];
 }
 
+/** Arguments every range read shares. */
+interface RangeQuery {
+  cluster: string;
+  metrics: string[];
+  /** Epoch milliseconds. */
+  start: number;
+  end: number;
+  /** Prometheus duration, e.g. `60s`. */
+  step: string;
+  signal?: AbortSignal;
+}
+
 /**
- * Time-series reads from the same monitoring API as the current values.
+ * The workload kinds that have **workload-level** monitoring metrics.
  *
- * The difference is `start`/`end`/`step`: the API answers `matrix` instead of
- * `vector`, and each sample carries an array of [timestamp, value] pairs. A trend
- * view that asked for `last` would plot a single point and call it a chart.
+ * The API turns the path kind segment into a label selector
+ * workload=~"<Kind>:(<filter>)"; the documented values are the singular
+ * deployment / statefulset / daemonset, and anything else falls through to "every
+ * kind" (promql.go makeWorkloadMetricExpr). The app speaks the plural resource
+ * names, so that mapping lives here rather than being re-derived by each caller.
+ */
+export const METRIC_WORKLOAD_KINDS = ['deployments', 'statefulsets', 'daemonsets'] as const;
+export type MetricWorkloadKind = (typeof METRIC_WORKLOAD_KINDS)[number];
+
+const WORKLOAD_KIND_SEGMENT: Record<MetricWorkloadKind, string> = {
+  deployments: 'deployment',
+  statefulsets: 'statefulset',
+  daemonsets: 'daemonset',
+};
+
+/**
+ * Escape a workload name for the API's `resources_filter`.
+ *
+ * The server embeds the filter into workload=~"<Kind>:(<filter>)", so anchors in
+ * the filter can never match: they would have to sit after the server's own
+ * `<Kind>:` prefix. Escaping the name is enough to keep regex metacharacters in a
+ * resource name — a dot, say — from matching a different workload.
+ */
+function escapeResourceFilter(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Time-series reads from the monitoring API (range queries).
+ *
+ * Three scopes matter to the console so far: the cluster/node/namespace one used by
+ * the monitoring pages, one workload's series for the detail monitor tab, and one
+ * pod's series for the same tab. All three share the request and the matrix→points
+ * parsing; only the path and the extra selector differ.
  */
 export function rangeMetricsApi(client: Client) {
-  return {
-    async cluster(params: {
-      cluster: string;
-      metrics: string[];
-      /** Epoch milliseconds. */
-      start: number;
-      end: number;
-      /** Prometheus duration, e.g. `60s`. */
-      step: string;
-      scope?: 'cluster' | 'node' | 'namespace';
-      node?: string;
-      namespace?: string;
-      signal?: AbortSignal;
-    }): Promise<MetricSeries[]> {
-      const body = await client.request<{
-        results?: Array<{
-          metric_name?: string;
-          data?: {
-            resultType?: string;
-            result?: Array<{ metric?: Record<string, string>; values?: Array<[number, string]> }>;
-          };
-        }>;
-      }>(`/kapis/monitoring.kubesphere.io/v1alpha3/${params.scope ?? 'cluster'}`, {
-        query: {
-          metrics_filter: params.metrics.map((metric) => `${metric}$`).join('|'),
-          start: Math.round(params.start / 1000),
-          end: Math.round(params.end / 1000),
-          step: params.step,
-          cluster: params.cluster,
-          ...(params.node ? { node: params.node } : {}),
-          ...(params.namespace ? { namespace: params.namespace } : {}),
-        },
-        ...(params.signal ? { signal: params.signal } : {}),
-      });
+  async function query(
+    pathname: string,
+    params: RangeQuery,
+    extra: Record<string, string | number | undefined> = {},
+  ): Promise<MetricSeries[]> {
+    const body = await client.request<{
+      results?: Array<{
+        metric_name?: string;
+        data?: {
+          resultType?: string;
+          result?: Array<{ metric?: Record<string, string>; values?: Array<[number, string]> }>;
+        };
+      }>;
+    }>(pathname, {
+      query: {
+        metrics_filter: params.metrics.map((metric) => `${metric}$`).join('|'),
+        start: Math.round(params.start / 1000),
+        end: Math.round(params.end / 1000),
+        step: params.step,
+        cluster: params.cluster,
+        ...extra,
+      },
+      ...(params.signal ? { signal: params.signal } : {}),
+    });
 
-      const out: MetricSeries[] = [];
-      for (const result of body?.results ?? []) {
-        const name = result.metric_name;
-        // A range answer is `matrix`; a `vector` here means the backend ignored the
-        // range parameters, and plotting it as one point is more honest than
-        // pretending it is a trend.
-        const series = result.data?.result ?? [];
-        const points: SeriesPoint[] = [];
-        for (const sample of series) {
-          for (const [at, value] of sample.values ?? []) {
-            const parsed = Number.parseFloat(value);
-            if (!Number.isFinite(parsed)) continue;
-            points.push({ at: at * 1000, value: parsed });
-          }
+    const out: MetricSeries[] = [];
+    for (const result of body?.results ?? []) {
+      const name = result.metric_name;
+      // A range answer is `matrix`; a `vector` here means the backend ignored the
+      // range parameters, and plotting it as one point is more honest than
+      // pretending it is a trend.
+      const series = result.data?.result ?? [];
+      const points: SeriesPoint[] = [];
+      for (const sample of series) {
+        for (const [at, value] of sample.values ?? []) {
+          const parsed = Number.parseFloat(value);
+          if (!Number.isFinite(parsed)) continue;
+          points.push({ at: at * 1000, value: parsed });
         }
-        if (!name || points.length === 0) continue;
-        points.sort((a, b) => a.at - b.at);
-        out.push({ name, points });
       }
-      return out;
+      if (!name || points.length === 0) continue;
+      points.sort((a, b) => a.at - b.at);
+      out.push({ name, points });
+    }
+    return out;
+  }
+
+  return {
+    async cluster(
+      params: RangeQuery & {
+        scope?: 'cluster' | 'node' | 'namespace';
+        node?: string;
+        namespace?: string;
+      },
+    ): Promise<MetricSeries[]> {
+      return query(`/kapis/monitoring.kubesphere.io/v1alpha3/${params.scope ?? 'cluster'}`, params, {
+        ...(params.node ? { node: params.node } : {}),
+        ...(params.namespace ? { namespace: params.namespace } : {}),
+      });
+    },
+
+    /**
+     * One workload's CPU/memory series.
+     *
+     * The numbers are the `namespace:workload_*_usage:sum` recording rules, i.e. the
+     * server has already summed the workload's pods — which is what the detail page
+     * means by "aggregated over its pods". Summing pod series here would download a
+     * series per pod only to add them up again.
+     */
+    async workload(
+      params: RangeQuery & { namespace: string; kind: MetricWorkloadKind; workload: string },
+    ): Promise<MetricSeries[]> {
+      const pathname = `/kapis/monitoring.kubesphere.io/v1alpha3/namespaces/${encodeURIComponent(
+        params.namespace,
+      )}/workloads/${WORKLOAD_KIND_SEGMENT[params.kind]}`;
+      return query(pathname, params, { resources_filter: escapeResourceFilter(params.workload) });
+    },
+
+    /** One pod's CPU/memory series. */
+    async pod(params: RangeQuery & { namespace: string; pod: string }): Promise<MetricSeries[]> {
+      const pathname = `/kapis/monitoring.kubesphere.io/v1alpha3/namespaces/${encodeURIComponent(
+        params.namespace,
+      )}/pods/${encodeURIComponent(params.pod)}`;
+      return query(pathname, params);
     },
   };
 }
