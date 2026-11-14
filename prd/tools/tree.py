@@ -481,6 +481,11 @@ MODULES = [
                 "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-01"]},
                 "features": [
                     {
+                        "id": "workspace-members",
+                        "title": "企业空间成员授权",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_MEMBERS-01"]},
+                    },
+                    {
                         "id": "workspace-quota",
                         "title": "企业空间配额",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-02"]},
@@ -494,6 +499,11 @@ MODULES = [
                         "id": "workspace-user-groups",
                         "title": "企业空间用户组",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-04"]},
+                    },
+                    {
+                        "id": "workspace-role-detail",
+                        "title": "企业空间角色详情",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_ROLE_DETAIL-01"]},
                     },
                     {
                         "id": "workspace-console",
@@ -551,6 +561,11 @@ MODULES = [
                 "goal": "集群级视角：节点按就绪状态、角色与可分配资源展示；项目列出集群内全部项目空间及其所属企业空间。这些页面不属于任何项目，因此没有项目工作区栏。",
                 "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-CLUSTER_MANAGEMENT-01"]},
                 "features": [
+                    {
+                        "id": "kubectl",
+                        "title": "kubectl 终端",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-KUBECTL-01"]},
+                    },
                     {
                         "id": "overview",
                         "title": "集群概览",
@@ -645,6 +660,11 @@ MODULES = [
                         "id": "gpu",
                         "title": "集群显卡",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-01"]},
+                    },
+                    {
+                        "id": "cluster-alerting-write",
+                        "title": "集群告警策略写入与消息下钻",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING_WRITE-01"]},
                     },
                     {
                         "id": "cluster-alerting",
@@ -858,6 +878,11 @@ MODULES = [
                 "goal": "项目内的八种应用负载（部署、有状态副本集、守护进程集、任务、定时任务、容器组、服务、应用路由）用一套列表与详情呈现：状态按老 console 的规则派生，重新部署只打 Pod 模板注解，写操作走正确的 API 组。",
                 "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-APP_WORKLOADS-01"]},
                 "features": [
+                    {
+                        "id": "detail-monitor",
+                        "title": "详情页监控页签",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL_MONITOR-01"]},
+                    },
                     {
                         "id": "edit-form",
                         "title": "定制编辑表单",

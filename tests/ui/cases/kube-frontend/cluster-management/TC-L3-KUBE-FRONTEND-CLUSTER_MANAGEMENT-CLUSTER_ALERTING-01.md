@@ -8,7 +8,7 @@
 
 ## 产品功能
 
-集群告警消息页合并 clusteralerts 与 globalalerts，首屏行数等于 min(20,total)；告警策略页「自定义策略/内置策略」两个页签的行数分别等于 clusterrulegroups / globalrulegroups 的 API 计数，内置页签无写操作。
+集群告警消息页合并 clusteralerts 与 globalalerts，首屏行数等于 min(20,total)；告警策略页「自定义策略/内置策略」两个页签的行数分别等于 clusterrulegroups / globalrulegroups 的 API 计数，内置页签行操作含详情与启用/停用（启停细节由另一条用例核对）。
 
 ### 关联需求
 
@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/cluster-management/cluster-alerting.md`](../../../../prd/kube-frontend/cluster-management/cluster-alerting.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING-01** — 已知在 host 集群（`globalrulegroups` 有 18 个内置策略、`clusterrulegroups` 当前为空），当打开集群告警策略页，则默认「自定义策略」页签，行数等于 `clusterrulegroups` 的 API 条数；切到「内置策略」页签后行数等于 `globalrulegroups` 的 API 条数（页大小为 50，覆盖当前计数），且内置页签不提供启用/停用或编辑入口；当打开集群告警消息页，则列出 `clusteralerts` 与 `globalalerts` 合并后的消息，首屏行数等于 `min(20, clusteralerts.totalItems + globalalerts.totalItems)`，并显示消息、状态、级别、所属策略、来源与触发时间。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING-01** — 已知在 host 集群（`globalrulegroups` 有 18 个内置策略、`clusterrulegroups` 当前为空），当打开集群告警策略页，则默认「自定义策略」页签，行数等于 `clusterrulegroups` 的 API 条数；切到「内置策略」页签后行数等于 `globalrulegroups` 的 API 条数（页大小为 50，覆盖当前计数）；当打开集群告警消息页，则列出 `clusteralerts` 与 `globalalerts` 合并后的消息，首屏行数等于 `min(20, clusteralerts.totalItems + globalalerts.totalItems)`，并显示消息、状态、级别、所属策略、来源与触发时间。
 
 ### 关联设计
 
@@ -43,14 +43,14 @@
 
 1. 用 API 读取 clusterrulegroups 与 globalrulegroups 条数
 2. 打开 /kube-frontend/clusters/host/alerting-policies，核对默认「自定义策略」页签行数
-3. 切到「内置策略」页签，核对行数与 globalrulegroups 条数，并打开行操作菜单确认没有启用/停用
+3. 切到「内置策略」页签，核对行数与 globalrulegroups 条数，并打开行操作菜单确认有「详情」
 4. 用 API 读取 clusteralerts 与 globalalerts 的 totalItems，计算 min(20, 两者之和)
 5. 打开 /kube-frontend/clusters/host/alerting-messages，核对首屏行数与表头含「来源」
 
 ## 期望结果
 
 - 自定义页签行数 = clusterrulegroups 条数；内置页签行数 = globalrulegroups 条数（页大小 50 内）
-- 内置页签行操作只有「详情」，没有启用/停用
+- 内置页签行操作含「详情」
 - 消息页首屏行数 = min(20, clusteralerts.totalItems + globalalerts.totalItems)
 - 消息表含来源列，页面状态不是 loading
 
@@ -58,7 +58,7 @@
 
 - 页面消息为空：是否走了 v1alpha2（200 空体）而不是 v2beta1 的 clusteralerts/globalalerts
 - 页签行数对不上：确认页大小是否覆盖计数，切换页签后是否等待 active query 完成
-- 内置页签出现写操作：检查 rowActions 是否按 tab 过滤
+- 内置页签缺少启停：检查 rowActions 是否误按 tab 过滤
 
 ## 产品改版后如何更新自动化
 

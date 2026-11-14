@@ -74,7 +74,7 @@
 - **`rules` 可能为空数组**：预设/聚合角色在规则尚未生效时是空数组，必须显示说明而不是「加载中」。
 - **`aggregation-roles` 不是授权结果**：从注解二次展开会与 `rules` 不一致，本页只显示 `rules`。
 - **成员角色是注解而非字段**：从 `spec`/`status` 读取会永远为空。
-- 成员读取可能 403：`workspacemembers` 的读权限与角色读权限不同，已在 DEC-03 处理。
+- 成员读取可能 403：`workspacemembers` 的读权限与角色读权限不同，已在 DEC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_ROLE_DETAIL-03 处理。
 
 ## 测试与可观测
 
@@ -83,7 +83,7 @@
 
 ## 后续改进
 
-- 并行改动落定后，把两个读取迁入 `packages/api-client`（DEC-01）。
+- 并行改动落定后，把两个读取迁入 `packages/api-client`（DEC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_ROLE_DETAIL-01）。
 - 规则编辑（RBAC 编辑器）与角色删除。
 - 已授权用户按组/服务账号展开（需要 rolebindings）。
 

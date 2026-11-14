@@ -230,7 +230,7 @@ python3 prd/tools/verify.py --serial-e2e
 
 | 缺口 | 做法 | 备注 |
 | --- | --- | --- |
-| 企业空间控制台（18 路由，已迁 3：概览/项目/成员） | 继续补 配额 / 角色 / 用户组 / 部门 | 邀请成员需企业空间角色列表，否则自由文本角色会静默授权为空；平台侧另有只读详情 |
+| ~~企业空间控制台~~ | 已按段对齐：概览（含 base-info 重定向）/ 项目 / 成员（含角色授权）/ 配额 / 角色 / 用户组；devops、federatedprojects、apps、repos 因模块关闭明确不做 | gap_check 已把 workspaces 作用域按段枚举，10 段中 6 迁 4 不做 |
 | ~~集群级全命名空间 PVC~~ | 已迁：`clusters/<c>/persistentvolumeclaims`（复用 storageApi + 项目索引，行键 ns/name） | 页面本体可复用这点被验证：约 100 行 |
 | ~~卷快照 / 快照类型~~（2）/ 快照内容、`snapshots` 别名（2） | 已迁集群级卷快照与快照类型；CRD 存在但 0 对象，空态与「未安装」两条分支都有 | 快照内容与别名路由仍待做 |
 | ~~JuiceFS 共享存储~~ | 已迁：`/juicefs-storage` 三页签（卷/用量/性能），聚合 kapis 组 + PV join | 3 卷、11.2TB，性能走监控区间 |
@@ -248,8 +248,8 @@ python3 prd/tools/verify.py --serial-e2e
 | --- | --- | --- |
 | **容器日志 tail** | 已迁：`client.stream()` + `pods/log?follow=true`（HTTP chunked，无需 WebSocket），容器详情页「实时」开关 | 排障第一条通道打通；顺手修了 BFF 泄漏上游流与 dev 静态服务器缓冲两个真问题 |
 | **容器终端** | 已迁：BFF `upgrade` 透传 + 原生 WebSocket + `v5.channel.k8s.io` 帧协议，容器详情页可开终端 | 流式通道第一条完整闭环；无 `/bin/sh` 的容器显示错误原因 |
-| **kubectl 代理 / 节点 shell** | 无。可复用同一 upgrade 通道，但需要独立的会话与权限设计 | 待立项 |
-| 详情页签体系 | 已迁：概览/关联容器组/修订版本/事件/元数据（Pod 为 概览/容器/事件/元数据） | 监控页签仍未做（需要监控区间查询） |
+| **kubectl 代理 / 节点 shell** | 容器终端已通；kubectl 与节点 shell 需要独立的会话与权限设计 | 并行线在试探 kubectl 页面 |
+| 详情页签体系 | 已迁：概览/监控/关联容器组/修订版本/事件/元数据（Pod 为 概览/监控/容器/事件/元数据）；监控页签只在有工作负载级指标的类型上出现 | Job/CronJob 无工作负载级指标，不给空页签 |
 | 编辑 YAML 覆盖 | 21 类 → 17 类（本轮补 Node/PV/StorageClass/NetworkPolicy） | 仍缺集群/平台级若干资源 |
 | 定制编辑表单 | 21 种 → 13 种（本轮补 Deployment/StatefulSet/DaemonSet/CronJob 的镜像、环境变量、拉取策略、副本数） | 仍缺多数资源的专属表单 |
 | 列表通用能力 | 固定 10 条、无刷新/实时/列显隐、空态无出口 | 缺口分析 F-41~F-46 |
@@ -263,7 +263,7 @@ python3 prd/tools/verify.py --serial-e2e
 - [ ] 面板编辑器与图表渲染（自定义监控，Grafana 风格组件套件）
 - [ ] 字段包装收敛：仍有 16 个文件手写 `label + 输入 + 说明/错误`，逐页改用 `FormField`（用户设置页已改；清单见 `./user-settings-component-analysis.md` §7）
 - [ ] 工作负载详情页的手写页签改用 `Tabs`（第二个 hand-rolled `role="tablist"`；等该文件当前并行改动稳定后接）
-- [ ] 4 个整块作用域评估：DevOps / 联邦项目 / 应用商店模板 / 企业空间（前三个依赖已关闭模块）
+- [x] 4 个整块作用域评估：企业空间**已迁完**（概览/base-info/项目/成员/配额/角色/用户组 + 角色详情；devops、federatedprojects、apps、repos 因模块关闭明确不做）；DevOps / 联邦项目 / 应用商店模板登记为明确不做
 
 ---
 

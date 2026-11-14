@@ -51,6 +51,7 @@
 | 用户 | `/kube-frontend/access/users` |
 | 平台角色 | `/kube-frontend/access/clusterroles` |
 | 企业空间 | `/kube-frontend/access/workspaces` |
+| 企业空间角色详情 | [workspace-role-detail.md](./workspace-role-detail.md) |
 
 ## 文案与校验
 
@@ -83,6 +84,7 @@
 - 用户与平台角色由 IAM 聚合 API 服务；企业空间由 resources 代理服务。
 
 ## 验收用例
+- `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_ROLE_DETAIL-01`
 
 - `TC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-01`
 
