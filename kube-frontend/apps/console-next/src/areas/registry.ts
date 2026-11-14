@@ -205,6 +205,7 @@ export const AREAS: readonly Area[] = [
       { key: 'monitor', path: 'monitor', titleKey: 'cluster.monitor.title', status: 'ready', groupKey: 'nav.groupMonitoring' },
       // The ranking under 集群监控: which node is hot, not every attribute of every node.
       { key: 'node-usage', path: 'node-usage', titleKey: 'cluster.nodeUsage.title', status: 'ready', groupKey: 'nav.groupMonitoring' },
+      { key: 'events', path: 'events', titleKey: 'cluster.events.title', status: 'ready', groupKey: 'nav.groupMonitoring' },
       { key: 'custom-resources', path: 'custom-resources', titleKey: 'cluster.customResources.title', status: 'ready', groupKey: 'cluster.nav.groupExtensions' },
     ],
   },

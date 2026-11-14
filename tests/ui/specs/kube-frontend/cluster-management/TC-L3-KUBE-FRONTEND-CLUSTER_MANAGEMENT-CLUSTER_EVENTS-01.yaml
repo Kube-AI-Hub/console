@@ -1,0 +1,37 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EVENTS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: cluster-events
+title: 资源事件查询 · 最近事件与类型过滤
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/events'
+prd: prd/kube-frontend/cluster-management/cluster-events.md
+design: design/kube-frontend/cluster-management/cluster-events.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EVENTS-01
+
+story:
+- US1
+
+product: 集群级事件浏览：倒序、类型过滤、窗口内关键字过滤，并明说窗口边界。
+preconditions:
+- 已登录，且对 host 集群有读取权限
+- 集群内有事件
+steps:
+- 用 API 读 /api/v1/events?limit=200 与 fieldSelector=type=Warning
+- 打开资源事件页
+- 核对行数与接口一致、首行为最新事件
+- 切换类型过滤为警告，核对所有行均为 Warning
+expected:
+- 行数等于接口返回条数
+- 首行对应接口最新事件
+- 过滤后只剩所选类型
+- 窗口满时显示「显示最近 200 条」
+troubleshoot:
+- 行数为 0：读了命名空间级接口（/api/v1/namespaces/<ns>/events）
+- 过滤无效：只给了 filters 没给 filterValues/onFilterChange
+- 首行不是最新：没有按 lastSeen 倒序
+update_automation:
+- 选择器见 pages/cluster_management.py 与 ClusterEventsPage.tsx

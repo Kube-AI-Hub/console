@@ -953,3 +953,60 @@ export function podEventsApi(client: Client) {
     },
   };
 }
+
+export interface ClusterEvent {
+  type: string;
+  reason: string;
+  message: string;
+  namespace: string;
+  /** Kind and name of the object the event is about. */
+  objectKind: string;
+  objectName: string;
+  /** `lastSeen` normalised across the three timestamp fields events use. */
+  lastSeen: string;
+  count: number;
+  source: string;
+}
+
+/**
+ * Cluster-wide events, for the resource event view.
+ *
+ * Read from the core API without a namespace segment: it is the same collection a
+ * `kubectl get events -A` walks. The list is a recent window, not the whole history —
+ * the API pages it and the oldest events age out of the apiserver's retention anyway.
+ */
+export function clusterEventsApi(client: Client) {
+  return {
+    async list(params: {
+      type?: 'Normal' | 'Warning' | '';
+      limit?: number;
+      signal?: AbortSignal;
+    }): Promise<ClusterEvent[]> {
+      const query: Record<string, string | number> = { limit: params.limit ?? 200, sortBy: 'lastTimestamp' };
+      if (params.type) query['fieldSelector'] = `type=${params.type}`;
+      const body = await client.request<{ items?: Array<Record<string, unknown>> }>('/api/v1/events', {
+        query,
+        ...(params.signal ? { signal: params.signal } : {}),
+      });
+      return (body?.items ?? [])
+        .map((item) => {
+          const metadata = (item['metadata'] ?? {}) as Record<string, unknown>;
+          const involved = (item['involvedObject'] ?? {}) as Record<string, unknown>;
+          const source = (item['source'] ?? {}) as Record<string, unknown>;
+          const lastSeen = String(item['lastTimestamp'] ?? item['eventTime'] ?? item['firstTimestamp'] ?? '');
+          return {
+            type: String(item['type'] ?? ''),
+            reason: String(item['reason'] ?? ''),
+            message: String(item['message'] ?? ''),
+            namespace: String(metadata['namespace'] ?? ''),
+            objectKind: String(involved['kind'] ?? ''),
+            objectName: String(involved['name'] ?? ''),
+            lastSeen,
+            count: Number(item['count'] ?? 1),
+            source: String(source['component'] ?? source['host'] ?? ''),
+          };
+        })
+        .sort((a, b) => b.lastSeen.localeCompare(a.lastSeen));
+    },
+  };
+}
