@@ -15,6 +15,9 @@ import { useT } from '@/i18n';
  * Deliberately not a modal or a card: it is one row, it does not block the table,
  * and it stays dismissed. The dismissal is stored per `pageKey` because a reader
  * who has internalised the ConfigMap note should still see the one on Secrets.
+ *
+ * Both controls keep a 24px box: the mobile case enforces WCAG 2.5.8 on every button
+ * and linked handle, and an icon-only close at 20px fails it for the whole page.
  */
 export interface PageTipProps {
   /** Stable per-page key; the dismissal is stored under it. */
@@ -58,7 +61,7 @@ export function PageTip({ pageKey, children, docHref }: PageTipProps): React.Rea
             href={docHref}
             target="_blank"
             rel="noreferrer"
-            className="ml-1 inline-flex items-center gap-0.5 text-ai-accent hover:underline"
+            className="ml-1 inline-flex min-h-6 items-center gap-0.5 py-0.5 text-ai-accent hover:underline"
             data-ai-id="page-tip:link"
           >
             {t('pageTip.docs')}
@@ -69,7 +72,7 @@ export function PageTip({ pageKey, children, docHref }: PageTipProps): React.Rea
       <Button
         variant="ghost"
         size="sm"
-        className="h-6 min-h-0 shrink-0 px-1"
+        className="size-6 min-h-0 shrink-0 px-0"
         aria-label={t('pageTip.close')}
         {...actionProps('page-tip:close')}
         onClick={() => {
