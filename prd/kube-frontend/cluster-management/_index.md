@@ -80,6 +80,7 @@
 |---|---|
 | 集群概览 | [overview.md](./overview.md) |
 | 节点 | [nodes.md](./nodes.md) |
+| 边缘节点终端 | [edge-nodes.md](./edge-nodes.md) |
 | 项目 | [projects.md](./projects.md) |
 | 集群设置 | [settings.md](./settings.md) |
 | 集群监控 | [monitor.md](./monitor.md) |

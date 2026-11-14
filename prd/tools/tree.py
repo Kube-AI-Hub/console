@@ -617,6 +617,11 @@ MODULES = [
                         ]},
                     },
                     {
+                        "id": "edge-nodes",
+                        "title": "边缘节点终端",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-EDGE_NODES-01"]},
+                    },
+                    {
                         "id": "components",
                         "title": "系统组件",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-COMPONENTS-01"]},

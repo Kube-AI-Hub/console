@@ -1,0 +1,30 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-EDGE_NODES-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: edge-nodes
+title: 边缘节点详情 · 更多里打开终端
+entry_url: "{BASE_URL}/clusters/{cluster}/edgenodes/{node}/status"
+prd: prd/kube-frontend/cluster-management/edge-nodes.md
+design: design/kube-frontend/cluster-management/edge-nodes.md
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-EDGE_NODES-01
+story:
+- US1
+product: 边缘节点运行状态页的「更多」里有「打开终端」，点开后是节点终端弹窗。
+preconditions:
+- 当前账号对节点有 edit 权限
+- 集群里有一个 Ready 且带 node-role.kubernetes.io/edge 的节点
+steps:
+- 打开该节点的 /clusters/{cluster}/edgenodes/{node}/status
+- 点侧栏「更多」
+- 点「打开终端」
+expected:
+- 「打开终端」出现在「更多」菜单里，不是侧栏主按钮
+- 弹出的终端容器可见，请求的是该节点的 nodes/exec
+troubleshoot:
+- 菜单没有这一项时，先看侧栏操作是否被权限滤掉
+- 弹窗停在连接错误时，看边缘节点 edgeStream 是否已打开
+update_automation:
+- 菜单项的 data-test 仍是 detail-terminal；改键名时同步本用例

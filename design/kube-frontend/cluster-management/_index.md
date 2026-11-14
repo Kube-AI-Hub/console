@@ -131,5 +131,6 @@ nodeRankingApi/NodeRankingPanel 由首页预览与完整页共用，组件及敏
 | 功能点 | 需求 | 技术方案 |
 |---|---|---|
 | 节点 | `prd/…/nodes.md` | `design/…/nodes.md` |
+| 边缘节点终端 | `prd/…/edge-nodes.md` | `design/…/edge-nodes.md` |
 | 项目 | `prd/…/projects.md` | `design/…/projects.md` |
 | 编辑 YAML 覆盖 | `prd/…/yaml-edit.md` | `design/…/yaml-edit.md` |

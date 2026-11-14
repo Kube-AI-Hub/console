@@ -657,6 +657,13 @@ modules:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-08
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-09
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-10
+    - id: edge-nodes
+      title: 边缘节点终端
+      prd: prd/kube-frontend/cluster-management/edge-nodes.md
+      design: design/kube-frontend/cluster-management/edge-nodes.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-EDGE_NODES-01
     - id: components
       title: 系统组件
       prd: prd/kube-frontend/cluster-management/components.md
