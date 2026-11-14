@@ -112,7 +112,6 @@ PLANNED: dict[str, str] = {
     "clusters/juicefs-storage": "JuiceFS 共享存储（计划 §6.1）",
     "clusters/gpu-resource": "GPU 资源监控（计划 §6.1）",
     "clusters/monitor-resource": "应用资源监控（计划 §6.1）",
-    "clusters/gateways": "集群网关（计划 §6.1；控制器缺 chart）",
 }
 
 #: 整个作用域级别的归宿。老 console 有 9 个作用域，其中四个整块不在迁移范围内——

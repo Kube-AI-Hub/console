@@ -238,7 +238,7 @@ export interface WorkloadDescriptor {
   allowEditSettings?: boolean;
   /** 暂停/启动 by `spec.suspend` — CronJobs only. */
   allowSuspend?: boolean;
-  /** 创建: only the three controllers the create dialog can build. */
+  /** 创建: resource-specific form and manifest builders determine supported kinds. */
   allowCreate?: boolean;
   /**
    * Whether 重新部署 applies. True only for the three controllers that own pods
@@ -311,6 +311,7 @@ export const WORKLOAD_DESCRIPTORS: Record<string, WorkloadDescriptor> = {
   },
   jobs: {
     kind: 'jobs',
+    allowCreate: true,
     titleKey: 'workloads.jobs.title',
     descriptionKey: 'workloads.jobs.description',
     emptyTitleKey: 'workloads.jobs.emptyTitle',
@@ -322,6 +323,7 @@ export const WORKLOAD_DESCRIPTORS: Record<string, WorkloadDescriptor> = {
   },
   cronjobs: {
     kind: 'cronjobs',
+    allowCreate: true,
     allowEditSettings: true,
     allowSuspend: true,
     titleKey: 'workloads.cronjobs.title',
@@ -346,6 +348,7 @@ export const WORKLOAD_DESCRIPTORS: Record<string, WorkloadDescriptor> = {
   },
   services: {
     kind: 'services',
+    allowCreate: true,
     titleKey: 'workloads.services.title',
     descriptionKey: 'workloads.services.description',
     emptyTitleKey: 'workloads.services.emptyTitle',
@@ -357,6 +360,7 @@ export const WORKLOAD_DESCRIPTORS: Record<string, WorkloadDescriptor> = {
   },
   ingresses: {
     kind: 'ingresses',
+    allowCreate: true,
     titleKey: 'workloads.ingresses.title',
     descriptionKey: 'workloads.ingresses.description',
     emptyTitleKey: 'workloads.ingresses.emptyTitle',

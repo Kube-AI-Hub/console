@@ -431,10 +431,22 @@ export function workloadsApi(client: Client, kind: WorkloadKind) {
     /**
      * Create a controller.
      *
-     * The pod template carries one container (the form's single image) and the `app`
-     * label on both the selector and the template — a selector that does not match its
-     * own template is the classic way a new workload never gets pods.
+     * Create a network resource or job manifest without discarding advanced YAML fields.
      */
+    createManifest(params: { cluster: string; namespace: string; body: KubeObject }): Promise<WorkloadDetail> {
+      const expectedKind = kind === 'services' ? 'Service' : kind === 'ingresses' ? 'Ingress'
+        : kind === 'jobs' ? 'Job' : kind === 'cronjobs' ? 'CronJob' : '';
+      const expectedVersion = kind === 'services' ? 'v1' : kind === 'ingresses' ? 'networking.k8s.io/v1' : 'batch/v1';
+      if (!expectedKind || params.body.kind !== expectedKind || params.body.apiVersion !== expectedVersion) {
+        return Promise.reject(new Error('Manifest kind or apiVersion does not match this resource'));
+      }
+      if (!params.body.metadata?.name || params.body.metadata.namespace !== params.namespace) {
+        return Promise.reject(new Error('Manifest name and target namespace are required'));
+      }
+      return api.create(params.body, { cluster: params.cluster, namespace: params.namespace });
+    },
+
+    /** Create a controller with a matching selector and single-container template. */
     create(params: {
       cluster: string;
       namespace: string;

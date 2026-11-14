@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-NETWORK_CREATE-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: network-create
+title: 服务与应用路由创建 · 表单与回读
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/services'
+prd: prd/kube-frontend/app-workloads/network-create.md
+design: design/kube-frontend/app-workloads/network-create.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-NETWORK_CREATE-01
+
+story:
+- US1
+
+product: 用表单创建服务与应用路由，回读端口、选择器及后端配置。
+preconditions:
+- 已登录并有 default 项目的创建权限
+- 对象使用 uuid 唯一命名，finally 清理
+steps:
+- 打开服务创建，填写名称、选择器与端口并提交
+- 回读服务的端口和选择器
+- 创建指向该服务的应用路由并回读规则
+expected:
+- Service 与 Ingress 在原生 API 中存在且字段与输入一致
+- 成功后弹窗关闭，失败时不丢失输入
+performance:
+- 无特殊要求
+troubleshoot:
+- 创建返回 405 时检查是否误写 kapis，创建应该 POST 原生集合
+update_automation:
+- 选择器见 pages/app_workloads.py

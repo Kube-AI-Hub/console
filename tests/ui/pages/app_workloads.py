@@ -60,6 +60,24 @@ class AppWorkloadsPage:
     def url(self, kind: str = "deployments") -> str:
         return f"{self.base}/{kind}"
 
+    def network_create_button(self, kind: str) -> Locator:
+        return self.page.locator(f'[data-ai-id="{kind}:create"]')
+
+    def network_create_field(self, key: str) -> Locator:
+        return self.page.get_by_role("dialog").locator(f"#ai-field-{key}")
+
+    def network_create_submit(self) -> Locator:
+        return self.page.get_by_role("dialog").get_by_role("button", name="确认", exact=True)
+
+    def network_yaml_switch(self, kind: str) -> Locator:
+        return self.page.locator(f'[data-ai-id="{kind}:create-yaml"]')
+
+    def network_yaml_submit(self, kind: str) -> Locator:
+        return self.page.locator(f'[data-ai-id="{kind}:create-yaml-submit"]')
+
+    def network_yaml_editor(self) -> Locator:
+        return self.page.get_by_role("dialog").locator(".cm-content")
+
     def detail_url(self, kind: str, name: str) -> str:
         return f"{self.url(kind)}/{name}"
 

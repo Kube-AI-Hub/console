@@ -400,3 +400,5 @@ export type { StoreApp, StoreCategory, StoreReview } from './appstore';
 
 export { clusterDashboardsApi, projectDashboardsApi } from './dashboards';
 export type { DashboardDetail, DashboardSummary } from './dashboards';
+export { clusterGatewaysApi, toClusterGateway } from './gateways';
+export type { ClusterGateway } from './gateways';

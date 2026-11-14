@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-JOB_CREATE-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: job-create
+title: 任务与定时任务创建 · 策略和 YAML 回读
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/jobs'
+prd: prd/kube-frontend/app-workloads/job-create.md
+design: design/kube-frontend/app-workloads/job-create.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-JOB_CREATE-01
+
+story:
+- US1
+
+product: 表单创建 Job、YAML 创建暂停的 CronJob，回读配置不启动测试负载。
+preconditions:
+- 已登录并有项目创建权限
+- 对象使用 uuid 唯一命名，finally 清理；Job parallelism=0，CronJob suspend=true
+steps:
+- 创建 Job，填镜像、并行数 0、重试次数 2，提交后回读
+- 打开定时任务创建并切换 YAML，提交包含 suspend=true 和调度模板的文档
+- 回读执行计划、暂停、并发策略和模板镜像
+expected:
+- Job 策略数字与镜像匹配表单
+- CronJob 配置和嵌套 Pod 模板与 YAML 一致
+performance:
+- 无特殊要求
+troubleshoot:
+- 405 检查是否写错集合，模板位置错误检查 jobTemplate
+update_automation:
+- 选择器见 pages/app_workloads.py

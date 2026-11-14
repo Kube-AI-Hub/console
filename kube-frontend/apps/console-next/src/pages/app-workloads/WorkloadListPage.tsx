@@ -24,6 +24,8 @@ import {
   type WorkloadDescriptor,
 } from './queries';
 import { WorkloadCreateDialog } from './WorkloadCreateDialog';
+import { NetworkResourceCreateDialog } from './NetworkResourceCreateDialog';
+import { JobCreateDialog } from './JobCreateDialog';
 import { ServicePortsDialog } from './ServicePortsDialog';
 import { ReplicasDialog } from './ReplicasDialog';
 import { IngressRulesDialog } from './IngressRulesDialog';
@@ -421,7 +423,17 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
       ) : null}
 
       {dialog.kind === 'create' ? (
-        <WorkloadCreateDialog
+        kind === 'services' || kind === 'ingresses' ? <NetworkResourceCreateDialog
+          kind={kind}
+          cluster={cluster}
+          namespace={projectFilter}
+          onOpenChange={(open) => !open && setDialog({ kind: 'none' })}
+        /> : kind === 'jobs' || kind === 'cronjobs' ? <JobCreateDialog
+          kind={kind}
+          cluster={cluster}
+          namespace={projectFilter}
+          onOpenChange={(open) => !open && setDialog({ kind: 'none' })}
+        /> : <WorkloadCreateDialog
           kind={kind}
           cluster={cluster}
           namespace={projectFilter}

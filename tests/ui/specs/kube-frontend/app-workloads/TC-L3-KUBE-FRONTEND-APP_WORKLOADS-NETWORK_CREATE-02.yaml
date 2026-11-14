@@ -1,0 +1,27 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-NETWORK_CREATE-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: network-create
+title: 服务创建 · YAML 多端口
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/services'
+prd: prd/kube-frontend/app-workloads/network-create.md
+design: design/kube-frontend/app-workloads/network-create.md
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-NETWORK_CREATE-02
+story:
+- US1
+product: YAML 创建保留多端口和注解，并使用原生资源集合。
+preconditions:
+- 已登录且有项目创建权限
+- 唯一命名，finally 删除用例对象
+steps:
+- 从服务创建表单切换 YAML
+- 填写包含两个端口和注解的文档，提交后回读
+expected:
+- API 对象的端口数组与注解未丢失
+troubleshoot:
+- 字段丢失时检查是否错误地由表单重新构造了 YAML
+update_automation:
+- 选择器见 pages/app_workloads.py

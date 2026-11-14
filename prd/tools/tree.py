@@ -945,7 +945,10 @@ MODULES = [
                     {
                         "id": "network-create",
                         "title": "服务与应用路由创建",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_WORKLOADS-NETWORK_CREATE-01"]},
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-NETWORK_CREATE-01",
+                            "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-NETWORK_CREATE-02",
+                        ]},
                     },
                     {
                         "id": "job-create",

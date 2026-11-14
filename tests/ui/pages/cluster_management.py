@@ -96,6 +96,9 @@ class ClusterManagementPage:
     def workload_current_page(self, kind: str) -> Locator:
         return self.workload_surface(kind).locator('button[aria-current="page"]')
 
+    def gateway_tab(self, component: str) -> Locator:
+        return self.page.locator(f'[data-ai-id="cluster-gateways:tab:{component}"]')
+
     def row_names(self, kind: str = "nodes") -> list[str]:
         values = self.surface(kind).locator("[data-ai-row]").evaluate_all(
             "els => els.map(e => e.getAttribute('data-ai-row'))"

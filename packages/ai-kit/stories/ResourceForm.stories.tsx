@@ -118,3 +118,20 @@ export const AllFieldTypes: StoryObj = {
     );
   },
 };
+
+export const JobPolicies: StoryObj = {
+  render: () => <ResourceForm
+    schema={{
+      fields: [
+        { key: 'name', label: '任务名称', type: 'text', required: true },
+        { key: 'image', label: '容器镜像', type: 'text', required: true },
+        { key: 'parallelism', label: '并行数', type: 'number', min: 0 },
+        { key: 'schedule', label: '执行计划', type: 'text', hint: '例如 0 * * * *' },
+        { key: 'suspend', label: '暂停调度', type: 'switch' },
+      ],
+      submit: { label: '创建任务' },
+    }}
+    defaultValues={{ name: '', image: '', parallelism: 1, schedule: '0 * * * *', suspend: false }}
+    onSubmit={async () => { throw new Error('演示提交失败：表单保留输入并显示错误'); }}
+  />,
+};
