@@ -18,7 +18,7 @@
 
 ## 0. 一句话
 
-**31 条疑似回归，现在全部有了归宿：14 条已补、4 条部分已补、3 条不迁移、10 条仍待补（2026-11-14 17:20 复核）。**
+**31 条疑似回归，现在全部有了归宿：24 条已补、4 条部分已补、3 条不迁移、R-10 受限、R-18 仍待补（2026-11-15 02:15 复核）。**
 > 2026-11-14 决策反转：原先 6 条「不迁移」里有 3 条改为「要做」——配置类对象支持集群域、告警支持集群域、建立 WebSocket 通道。见 §1 对应条目与 design 里各自 DEC 的「被否方案」段。
 没有一条再停留在「谁都不知道算不算问题」的状态——这正是登记要解决的问题。
 
@@ -27,7 +27,7 @@
 | **已补** | 14 | R-02、R-04、R-05、R-06、R-07、R-13、R-17、R-19（图表）、R-21（规则视图）、R-23、R-31 等 | 本节 + commit |
 | **部分已补** | 4 | R-14（节点列部分）、R-24（批量启停已补）、R-26（8 页已接刷新）、R-29（日志页图表已补） | 本节 + commit |
 | **不迁移** | 3 | R-12、R-19b、R-21b、R-25b 中的卡片视图部分 | PRD「明确不做」+ design DEC + `page-parity-report.md` |
-| **待补** | 10 | R-08、R-09、R-11、R-16、R-18、R-20、R-22、R-25（分组）、R-27（watch）、R-28、R-30 中的剩余项 | 本文件 §2 + 缺口分析 §7 优先级 |
+| **待补** | 2 | R-10（网关详情受 Helm chart 限制）、R-18（平台角色规则编辑器仍只支持单行规则） | 本文件 §2 |
 
 ---
 
@@ -42,29 +42,29 @@
 | R-05 | GPU 卡列表 / GPU 卡详情 / GPU 资源监控 | **已补** | `5e3296584`（列表 + 单卡详情；无 `/gpus/<uuid>` 路由，详情用 `?uuid=` 过滤）、`1d6a9d7a7`（`/gpu-resource` 趋势，命名指标 `cluster_gpu_*`） |
 | R-06 | 集群级全命名空间 PVC 列表 | **已补** | `e0a0a2c64`：跨项目 PVC 21 条、行键 `ns/name`、名称链回项目详情 |
 | R-07 | 卷快照 / 快照类型 / 快照内容 / JuiceFS 共享存储 | **已补** | `a6673e591`（卷快照、快照类型；CRD 存在但 0 对象，空态与未安装两分支）、`a91366bf8`（快照内容详情 + `/snapshots` 别名重定向）、`728b94a35`（JuiceFS 三页签：3 卷/11.2TB，性能走监控区间） |
-| R-08 | 系统组件详情页（副本数 + Pod 列表） | **待补** | `components/` 只有 `index.tsx`，无 `$name.tsx`。小改动，可直接复用组件列表的行数据 |
-| R-09 | 集群下的项目详情（4 页签 + 配额/LimitRange 编辑） | **待补** | `namespaces/` 只有 `index.tsx`，无 `$name.tsx`——**列表行点了没有落点**，这是「比缺页面更糟」的一类 |
+| R-08 | 系统组件详情页（副本数 + Pod 列表） | **已补** | `8f8afd4e2`：`components/$name` 详情显示健康徽标/后端数/启动时间 + 后端容器组（按名称前缀推导，标签各模块不统一）；`component-detail.md` |
+| R-09 | 集群下的项目详情（配额/LimitRange） | **已补（只读）** | `189a3f165`：基本信息/标签、ResourceQuota used/hard、LimitRange 默认值、空态；编辑仍登记为不做 |
 | R-10 | 集群网关设置 + 网关详情 5 页签 | **待补（受限）** | `PLANNED`（`clusters/gateways`）。阻塞点见 §5.7：网关控制器缺 Helm chart，Gateway 对象只能到 `Deployed=True` |
-| R-11 | 集群日志收集的 3 类页签 + 收集器详情 | **待补** | `ClusterLogCollectionsPage.tsx` 是单页只读三段，无 logging/events/auditing 分类页签 |
+| R-11 | 集群日志收集的 3 类页签 + 收集器详情 | **已补（只读）** | `93bb78e75`：三页签取 operator 写的 `logging.kubesphere.io/component` 标签分类；收集项详情 + 只读 YAML |
 | R-12 | 集群角色在集群作用域的入口 | **不迁移** | 与平台角色是同一批 `clusterrole` 对象，统一在「访问控制 › 平台角色」维护。登记于 `ELSEWHERE`；PRD/design 见 `access-control/platform-roles.md` 的 DEC-06。**已知限制**：该页固定读 host 集群，多集群下需支持切换（另登记为待补） |
 | R-13 | 容器 exec / kubectl / 节点 shell / 容器日志 tail | **已补（节点终端受环境限制）** | 日志：`82e76d57f`、`cd3254439`；容器终端：`432fc81d6`（BFF 首个 WebSocket upgrade + `v5.channel.k8s.io`）；kubectl：`e40bd6498`（xterm 全屏共享控制台）；节点 shell：`bf85b1923`。**B200 上节点 shell 后端不起 node access pod**（握手 101 但无数据帧），用例按环境跳过并记证 |
-| R-14 | 节点列表 6 列 + 节点总览面板 + 列筛选 | **待补** | `ClusterListPage.tsx` 的 nodes 列仍只有 name/status/role/cpu/memory；缺 GPU 使用率、GPU 显存、Pod 用量、XPU 类型、GPU 虚拟化模式、时间同步 |
-| R-15 | 节点详情 5 页签 + 4 个操作 | **待补** | `NodeDetailPage.tsx` 无页签（注释自述「recorded as not migrated」）；缺运行状态/容器组/监控/事件页签与编辑标签、编辑污点、vGPU 模式 |
-| R-16 | 存储类型详情的关联 PVC 列表 | **待补** | `StorageClassDetailPage.tsx` 只有基本属性 + 驱动参数 |
+| R-14 | 节点列表 6 列 + 节点总览面板 + 列筛选 | **部分已补** | `67be3c456` 补齐 XPU/版本/终端等列；GPU 使用率、GPU 显存、Pod 用量、时间同步仍缺（本轮复核） |
+| R-15 | 节点详情 5 页签 + 4 个操作 | **部分已补** | `bf85b1923`：运行状态/容器组/监控三页签、编辑标签/污点、节点终端；事件页签与 vGPU 模式仍缺（且节点 shell 在 B200 缺 node access pod，按环境跳过） |
+| R-16 | 存储类型详情的关联 PVC 列表 | **已补** | `4c00e048e`：关联存储卷表（一次集群级 PVC 读 + 页面侧过滤，kapis 忽略 fieldSelector）；openebs-hostpath 13 行与 API 一致 |
 | R-17 | 平台角色详情的「已授权用户」页签 | **已补** | `20632575f` |
 | R-18 | 平台角色的规则编辑器 | **待补** | `RoleEditorDialog.tsx` 只有一行规则（注释自述）。**后果**：建出来的角色没有权限，等于空壳 |
 | R-19 | 项目概览的资源用量图表 / 引导提示卡 | **图表已补 + 引导卡不迁移** | `d325d5464`（CPU/内存/存储/容器组，已用/上限，三态区分；存储回落配额 `status.used`）；引导卡不迁移，理由见 `project-settings/overview.md` 的 DEC-03 |
-| R-20 | 项目角色详情的「已授权用户」页签 | **待补** | 与 R-17 同构，可复用平台角色的实现 |
+| R-20 | 项目角色详情的「已授权用户」页签 | **已补** | `d435c6f3b`：按 RoleBinding subjects 展开（default/viewer 53 个 SA；老 console 的 users?role= 会显示 0 人） |
 | R-21 | 网络隔离的规则聚合视图 / 白名单新建向导 | **规则视图已补（无损投影）** | `815ed84ea`：ingress/egress 展开为规则行（matchLabels/matchExpressions、podSelector/namespaceSelector/ipBlock 含 except、endPort）；**不做有损白名单抽象**（`network-isolation.md` DEC-05）；白名单新建向导待补 |
-| R-22 | 存储卷详情的快照页签 | **待补** | `StorageDetailPage.tsx` 只有 `snapshotClass` 字段；与 R-07 同批 |
+| R-22 | 存储卷详情的快照页签 | **已补（空态路径）** | `4c00e048e`：PVC 详情「属性/快照」页签，按 `source.persistentVolumeClaimName` 过滤；B200 CRD 已装对象 0，空态即交付路径 |
 | R-23 | 项目基本信息的角色/成员/服务统计 | **已补** | `d325d5464`：三卡取各列表 `totalItems`，失败显示 `-` 而非 0 |
 | R-24 | 用户登录历史分页 / 管理员重置密码 / 批量启停 / 预置账号保护 | **部分已补** | 批量启停已交付（`48cad6d66`）；改密、登录历史分页、`presetUsers` 全员保护**待补**（改密已在 `page-parity-report.md` 登记为不迁移，需复核该判定） |
-| R-25 | 集群列表 host/成员分组 / 卡片视图 | **待补 + 不迁移** | 分组待补（可用列/筛选实现）；**卡片视图不迁移**，见 `cluster-management/cluster-list.md` 的 DEC-06 |
+| R-25 | 集群列表 host/成员分组 / 卡片视图 | **已补（筛选）+ 卡片不迁移** | `1a444af7a`：「集群类型」筛选（主集群/成员集群），清除后 host 仍置顶；卡片视图不迁移，见 `cluster-list.md` DEC-06 |
 | R-26 | 列表刷新按钮 | **部分已补** | 8 个页面已接 `schema.refresh` + `onRefresh`（集群负载 8 页 / 容器组 / 工作负载列表等）；其余列表页仍无刷新出口 |
-| R-27 | 列表实时刷新（WebSocket watch） | **待补**（2026-11-14 决策反转） | 原登记为「不做 WebSocket」，现改为**建立通道、实时能力是一等需求**；落地第 2 步（watch 客户端）。见 `design/kube-frontend/_index.md` 的 DEC-CORE-KUBE-FRONTEND-08 |
-| R-28 | 空态的「刷新 / 清除筛选」出口 | **待补** | 空态只有 title + description |
+| R-27 | 列表实时刷新（watch） | **已补** | `f8bf8a441`：容器组列表「实时」开关，走 `?watch=true` 分块 HTTP（不是 WebSocket），变更即失效重取；顺带修了 dev 代理连接池与中止泄漏（`52bc55b1d`） |
+| R-28 | 空态的「刷新 / 清除筛选」出口 | **已补** | `3d7029996`：ai-kit 空态渲染「清空搜索与筛选」「刷新」两个出口，仅在有对应回调时出现 |
 | R-29 | 图表能力整体（14 类指标 → 4 条线） | **部分改善 + 待补** | 日志/审计页已有计数条与分布图（`cd3254439`）；集群物理资源 14 类指标仍缺 |
-| R-30 | Service / Ingress 无法创建 | **待补** | 能建 Deployment 但建不出对外入口。`IngressRulesDialog` 是编辑不是创建 |
+| R-30 | Service / Ingress 无法创建 | **已补** | `0f0f0ffdd`：专用创建弹窗（NodePort 条件字段、选择器预填、Ingress 同 host 合并）+ SSAR 权限前置检查 + 可切 YAML |
 | R-31 | 密码强度指示器 | **已补** | `c1e824e8f`、`8e3922c7e`；改密页（并行线）把强度条从浮层改为常驻面板 |
 
 ---
