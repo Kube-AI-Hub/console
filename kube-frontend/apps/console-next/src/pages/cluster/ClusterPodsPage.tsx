@@ -2,8 +2,9 @@ import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api as apiClient, workloadsApi } from '@/api';
 import { namespacesApi, type ResourceListResult, type WorkloadSummary } from '@kube-ai-hub/api-client';
+import { useCollectionWatch } from '@/components/resource/useCollectionWatch';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
+import { AiSurface, Badge, Button, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { useResourceListState } from '@/components/resource/useResourceListState';
 import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
@@ -57,6 +58,18 @@ export function ClusterPodsPage({ cluster }: ClusterPodsPageProps): React.ReactE
     }
     return map;
   }, [namespaces.data]);
+
+  /*
+   * Live: watch the cluster-wide pod collection and invalidate the list on change.
+   * Off by default - a live view holds a connection open, so it is the reader's choice.
+   */
+  const [live, setLive] = React.useState(false);
+  const watchState = useCollectionWatch({
+    enabled: live,
+    path: '/api/v1/pods',
+    queryKey: ['cluster-pods'],
+    client: apiClient,
+  });
 
   const rows = query.data?.items ?? [];
   const total = query.data?.total ?? 0;
@@ -167,6 +180,21 @@ export function ClusterPodsPage({ cluster }: ClusterPodsPageProps): React.ReactE
 
   return (
     <AiSurface as="section" aiId="cluster-pods:surface" state={state} aria-busy={query.isFetching} className="min-w-0">
+      <div className="mb-3 flex items-center gap-2 text-xs text-ai-fg-muted">
+        <Button
+          variant={live ? 'secondary' : 'ghost'}
+          size="sm"
+          aria-pressed={live}
+          data-ai-id="cluster-pods:live"
+          onClick={() => setLive((current) => !current)}
+        >
+          {t('workloads.live.toggle')}
+        </Button>
+        {live ? (
+          <span data-ai-id="cluster-pods:live-state">{t(`workloads.live.state.${watchState}`)}</span>
+        ) : null}
+      </div>
+
       <ResourceList
         schema={schema}
         rows={rows}

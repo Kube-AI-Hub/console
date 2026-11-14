@@ -414,3 +414,5 @@ export type { NodeTerminalOptions, NodeTerminalTarget } from './node-terminal';
 export { nodeResourcesApi } from './node-resources';
 export { nodeListApi, toNodeMetrics, NODE_LIST_METRICS } from './node-list';
 export type { NodeListParams, NodeListStats, NodeMetricValues } from './node-list';
+export { watchCollection } from './watch';
+export type { WatchEvent, WatchOptions } from './watch';

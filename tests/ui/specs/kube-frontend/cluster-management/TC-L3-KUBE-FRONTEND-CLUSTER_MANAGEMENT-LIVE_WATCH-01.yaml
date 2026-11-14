@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-LIVE_WATCH-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: live-watch
+title: 容器组列表实时刷新
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/pods'
+prd: prd/kube-frontend/cluster-management/live-watch.md
+design: design/kube-frontend/cluster-management/live-watch.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-LIVE_WATCH-01
+
+story:
+- US1
+
+product: 容器组列表的「实时」开关：通过 kube watch 流感知变更并让列表查询失效重取。
+preconditions:
+- 已登录且对集群容器组有读取权限
+- BFF 与 dev 静态代理均可透传并取消长连接
+steps:
+- 打开集群级容器组列表
+- 点击「实时」开关
+- 观察状态文本，并在开启期间改一次分页档位
+- 再次点击关闭
+expected:
+- 开关 aria-pressed 为 true，状态文本变为「实时更新中」
+- 分页档位仍可用（长连接不饿死短请求）
+- 关闭后开关回到 false、状态文本消失
+troubleshoot:
+- 一直是「正在连接…」：连接建立后没有标记 live（应在 onOpen 标记，而不是等第一条事件）
+- 状态为失败：watch 接口 403/不可用（环境问题）
+- 页面卡住且 /api 全部超时：dev 静态代理的长连接与普通请求共用连接池，或中止时未 abort 上游
+update_automation:
+- 选择器：cluster-pods:live / cluster-pods:live-state

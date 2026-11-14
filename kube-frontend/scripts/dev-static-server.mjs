@@ -99,11 +99,20 @@ const server = createServer(async (request, response) => {
        */
       /* Watch and follow responses never finish on their own; see streamDispatcher. */
       const streaming = url.searchParams.get('watch') === 'true' || url.searchParams.get('follow') === 'true';
+      /*
+       * Abort the upstream fetch when the reader goes away.
+       *
+       * Destroying the Node stream alone leaves the undici request open: each aborted watch
+       * kept its socket, and after enough page switches the process ran out of descriptors and
+       * stopped answering anything. The controller is what actually cancels upstream.
+       */
+      const streamAbort = new AbortController();
+
       const upstream = await fetch(`${bffUrl}${request.url}`, {
         method: request.method,
         headers,
         ...(body && body.length ? { body } : {}),
-        ...(streaming ? { dispatcher: streamDispatcher } : {}),
+        ...(streaming ? { dispatcher: streamDispatcher, signal: streamAbort.signal } : {}),
       });
       /*
        * Stream, do not buffer.
@@ -131,6 +140,7 @@ const server = createServer(async (request, response) => {
       // a follow response would otherwise keep being read for this process's
       // lifetime.
       response.on('close', () => {
+        streamAbort.abort();
         if (!response.writableEnded) streamed.destroy();
       });
       streamed.on('error', () => {

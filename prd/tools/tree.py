@@ -681,6 +681,11 @@ MODULES = [
                         ]},
                     },
                     {
+                        "id": "live-watch",
+                        "title": "列表实时刷新",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-LIVE_WATCH-01"]},
+                    },
+                    {
                         "id": "cluster-alerting-write",
                         "title": "集群告警策略写入与消息下钻",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING_WRITE-01", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING_WRITE-02"]},
