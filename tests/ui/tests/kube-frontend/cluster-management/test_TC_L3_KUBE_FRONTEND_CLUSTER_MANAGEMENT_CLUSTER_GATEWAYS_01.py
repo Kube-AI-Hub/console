@@ -14,11 +14,11 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_GATEWAYS_01(cluster_mana
     status, body = ui.api.request("GET", "/apis/gateway.kubesphere.io/v1alpha1/gateways")
     assert status == 200, body
     items = body.get("items") or []
-    cluster_count = sum(
-        item.get("metadata", {}).get("name") == "kubesphere-router-kubesphere-system"
-        and item.get("metadata", {}).get("namespace") == "kubesphere-system"
-        for item in items
-    )
+    # The cluster gateway now lives in kubesphere-controls-system (the operator
+    # installs the nginx release there); older operators used kubesphere-system.
+    # Both namespaces are cluster-owned; a project gateway sits in its project.
+    cluster_namespaces = {"kubesphere-system", "kubesphere-controls-system"}
+    cluster_count = sum((item.get("metadata", {}) or {}).get("namespace") in cluster_namespaces for item in items)
     ui.page.goto(ui.url("gateways"))
     surface = ui.surface("cluster-gateways")
     expect(surface).not_to_have_attribute("data-ai-state", "loading", timeout=60_000)

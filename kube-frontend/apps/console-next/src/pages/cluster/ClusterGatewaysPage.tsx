@@ -29,7 +29,24 @@ export function ClusterGatewaysPage({ cluster, component = 'cluster' }: {
     search: { placeholder: t('cluster.searchPlaceholder'), aiId: 'cluster-gateways:search' },
     refresh: { label: t('cluster.list.refresh'), aiId: 'cluster-gateways:refresh', busy: query.isFetching },
     columns: [
-      { key: 'name', title: t('settings.gateway.name') },
+      {
+        key: 'name',
+        title: t('settings.gateway.name'),
+        // The cluster gateway has a detail page; project gateways stay on the
+        // project's own gateway page, which is where they are managed.
+        render: (row) =>
+          row.scope === 'cluster' ? (
+            <a
+              className="font-medium text-ai-accent hover:underline"
+              href={'/kube-frontend/clusters/' + encodeURIComponent(cluster) + '/gateways/' + encodeURIComponent(row.name)}
+              data-ai-id={'cluster-gateways:name:' + row.name}
+            >
+              {row.name}
+            </a>
+          ) : (
+            <span className="text-ai-fg">{row.name}</span>
+          ),
+      },
       { key: 'namespace', title: t('cluster.workloads.column.project'), render: (row) => row.scope === 'project' ?
         <a className="text-ai-accent hover:underline" href={`/kube-frontend/${encodeURIComponent(workspaceOf.get(row.namespace) ?? 'public')}/clusters/${encodeURIComponent(cluster)}/projects/${encodeURIComponent(row.namespace)}/gateways`}>{row.namespace}</a> : '-' },
       { key: 'ready', title: t('cluster.column.status'), render: (row) =>
@@ -49,7 +66,7 @@ export function ClusterGatewaysPage({ cluster, component = 'cluster' }: {
       { value: 'project', label: t('cluster.clusterGateways.project'), aiId: 'cluster-gateways:tab:project' },
     ]} onValueChange={(value) => {
       setSearch('');
-      void navigate({ to: '/kube-frontend/clusters/$cluster/gateways/$component', params: { cluster, component: value } });
+      void navigate({ to: '/kube-frontend/clusters/$cluster/gateways/$name', params: { cluster, name: value } });
     }} />
     {state === 'error' ? <ResourceErrorPanel error={query.error} onRetry={() => void query.refetch()} retryAiId="cluster-gateways:retry" />
       : <ResourceList schema={schema} rows={rows} loading={query.isPending} searchValue={search}

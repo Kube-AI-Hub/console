@@ -1,0 +1,40 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GATEWAY_DETAIL-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: gateway-detail
+title: 集群网关详情 · 地址、端口与承载的应用路由
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/gateways/cluster'
+prd: prd/kube-frontend/cluster-management/gateway-detail.md
+design: design/kube-frontend/cluster-management/gateway-detail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GATEWAY_DETAIL-01
+
+story:
+- US1
+
+product: 从集群网关列表点名称进入详情：属性含访问方式、IngressClass、访问地址、端口、集群 IP、TLS、副本数、镜像与控制器条件；应用路由按 ingressClassName 过滤，无路由时空态明确。
+preconditions:
+- 已登录，且对 host 集群有读取权限
+- 集群安装了集群网关（kubesphere-controls-system 下有 Nginx CR）；Ingress 数可以为 0
+steps:
+- 用 API 读 gateways 与 nginxes，定位集群网关与它的 IngressClass
+- 用 API 读集群级 ingresses，按 ingressClassName 过滤出该网关承载的路由
+- 打开集群网关列表，点击该网关名称
+- 核对 URL 与详情属性
+- 核对应用路由行数（或空态）与只读
+expected:
+- URL 以 /gateways/<name> 结尾
+- 属性区含 访问地址、端口、IngressClass、TLS、副本数、镜像
+- 应用路由行数 = 该 IngressClass 的 Ingress 数；为 0 时显示「该网关还没有关联的应用路由」空态
+- 有路由时名称链接含 /projects/<namespace>/ingresses/<name>
+- 详情只读：没有安装/编辑/删除按钮
+troubleshoot:
+- 列表看不到网关：集群网关所在命名空间变了（kubesphere-controls-system），分类规则需要认
+- 地址为空：Service 没有 loadBalancer 入口且节点不可读时按设计显示「暂无访问地址」
+- 路由行数不一致：没有按 ingressClassName 过滤，或读了别处的 Ingress
+- 详情 404：路由动态段与 cluster/project 视图名冲突
+update_automation:
+- 选择器见 pages/cluster_management.py 与 @/pages/cluster/GatewayDetailPage.tsx；列表入口是 cluster-gateways:name:<name>

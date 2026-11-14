@@ -35,7 +35,7 @@ export function projectObjectUrl(params: {
   cluster: string;
   workspace: string;
   namespace: string;
-  page: 'secrets' | 'configmaps' | 'serviceaccounts' | 'persistentvolumeclaims';
+  page: 'secrets' | 'configmaps' | 'serviceaccounts' | 'persistentvolumeclaims' | 'ingresses';
   name: string;
 }): string {
   return (
