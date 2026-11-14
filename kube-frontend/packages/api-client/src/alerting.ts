@@ -413,6 +413,27 @@ export function ruleGroupsApi(client: Client) {
     },
 
     /**
+     * One scope's groups, for the cluster-scope pages.
+     *
+     * `list` intentionally merges scopes because the project page is one list. The
+     * cluster pages are separate by ownership — custom cluster groups vs the
+     * installer's global ones — so they read a single collection and count its
+     * items. The API list has no `totalItems`; the array length is the count.
+     */
+    async listScope(params: {
+      scope: 'cluster' | 'global';
+      signal?: AbortSignal;
+    }): Promise<{ items: RuleGroupSummary[]; total: number }> {
+      const body = await client.request<{ items?: KubeObject[] }>(`${API}/${RULE_GROUP_PATHS[params.scope]}`, {
+        ...(params.signal ? { signal: params.signal } : {}),
+      });
+      const items = (body?.items ?? [])
+        .map((item) => toRuleGroupSummary(item, params.scope))
+        .sort((a, b) => a.name.localeCompare(b.name));
+      return { items, total: items.length };
+    },
+
+    /**
      * Enable or disable one group.
      *
      * A merge patch on the enable label only, for the same reason the older model
@@ -556,4 +577,147 @@ export function ruleGroupsWriteApi(client: Client) {
 }
 
 export type RuleGroupsWriteApi = ReturnType<typeof ruleGroupsWriteApi>;
+
+
+/* ------------------------------------------------------------------ *
+ * Cluster-scope alert messages (v2beta1 aggregated API).
+ * ------------------------------------------------------------------ */
+
+/**
+ * Which policy set produced a cluster alert.
+ *
+ * `custom` are alerts from cluster rule groups (clusterrulegroups), `builtin`
+ * from the installer's global groups. The old console exposed them as two tabs;
+ * the API keeps them in two collections.
+ */
+export type ClusterAlertSource = 'custom' | 'builtin';
+
+/** One alert message at cluster scope. */
+export interface ClusterAlertSummary {
+  /** Stable row key: the API has no object name and alert names repeat per rule. */
+  id: string;
+  name: string;
+  source: ClusterAlertSource;
+  /** `annotations.summary` — the one-line message title. */
+  summary: string;
+  /** `annotations.message`, falling back to `annotations.description`. */
+  message: string;
+  /** `firing` / `pending`, as the aggregated API reports it. */
+  state: string;
+  /** `critical` / `warning` / `info`; the old console's high/medium/low map onto these. */
+  severity: string;
+  /** The rule group that fired it (`labels.rule_group`). */
+  ruleGroup: string;
+  /** `activeAt` — when it started firing. */
+  triggeredAt: string;
+  /** The monitored object, when the rule was a template rule; empty otherwise. */
+  target: string;
+}
+
+/** Paths of the two aggregated message collections. */
+const CLUSTER_ALERT_KAPIS = '/kapis/alerting.kubesphere.io/v2beta1';
+const CLUSTER_ALERT_PATHS: Record<ClusterAlertSource, string> = {
+  custom: 'clusteralerts',
+  builtin: 'globalalerts',
+};
+
+interface ClusterAlertItem {
+  activeAt?: string;
+  annotations?: Record<string, string>;
+  labels?: Record<string, string>;
+  state?: string;
+}
+
+/** Template rules name the object they watch; metric-only rules have no target. */
+function clusterAlertTarget(labels: Record<string, string>): string {
+  if (labels['rule_type'] !== 'template') return '';
+  return [
+    labels['node'] ? `Node: ${labels['node']}` : '',
+    labels['workload'] ? `Workload: ${labels['workload']}` : '',
+    labels['pod'] ? `Pod: ${labels['pod']}` : '',
+  ]
+    .filter(Boolean)
+    .join(' · ');
+}
+
+export function toClusterAlertSummary(
+  item: ClusterAlertItem,
+  source: ClusterAlertSource,
+  index: number,
+): ClusterAlertSummary {
+  const annotations = item.annotations ?? {};
+  const labels = item.labels ?? {};
+  const name = String(labels['alertname'] ?? '');
+  return {
+    id: `${source}:${index}:${name}`,
+    name,
+    source,
+    summary: String(annotations['summary'] ?? ''),
+    message: String(annotations['message'] ?? annotations['description'] ?? ''),
+    state: String(item.state ?? ''),
+    severity: String(labels['severity'] ?? ''),
+    ruleGroup: String(labels['rule_group'] ?? ''),
+    triggeredAt: String(item.activeAt ?? ''),
+    target: clusterAlertTarget(labels),
+  };
+}
+
+/**
+ * Cluster-scope alert messages, merged from the custom and builtin collections.
+ *
+ * Both collections are **aggregated v2beta1 endpoints** (`/kapis`, not `/apis`):
+ * the CRD-backed v2beta1 group has rule groups only, and `/apis/.../alerts`
+ * answers 404. The v1alpha2 paths the project monitoring page still uses answer
+ * 200 with an empty body here — empty is not "no alerts", it is the wrong group.
+ *
+ * The merge is client-side: each source pages on its own, so a page of "all
+ * cluster alerts" cannot be one request. The page fetches enough of each source
+ * to fill the requested page (`page * pageSize`, capped), sorts by `activeAt`
+ * descending and slices. The cap is documented because beyond it the total stops
+ * being reachable through pagination.
+ */
+export function clusterAlertMessagesApi(client: Client) {
+  /** Newest-first window of one collection, large enough for the requested page. */
+  async function fetchSource(
+    source: ClusterAlertSource,
+    limit: number,
+    signal?: AbortSignal,
+  ): Promise<{ source: ClusterAlertSource; items: ClusterAlertItem[]; total: number }> {
+    const body = await client.request<{ items?: ClusterAlertItem[]; totalItems?: number }>(
+      `${CLUSTER_ALERT_KAPIS}/${CLUSTER_ALERT_PATHS[source]}`,
+      {
+        query: { limit, page: 1, sortBy: 'activeAt', ascending: 'false' },
+        ...(signal ? { signal } : {}),
+      },
+    );
+    return { source, items: body?.items ?? [], total: Number(body?.totalItems ?? 0) };
+  }
+
+  /** Largest window fetched from either collection; see the comment above. */
+  const MAX_WINDOW = 500;
+
+  return {
+    async list(params: {
+      page: number;
+      pageSize: number;
+      signal?: AbortSignal;
+    }): Promise<{ items: ClusterAlertSummary[]; total: number }> {
+      const limit = Math.min(params.page * params.pageSize, MAX_WINDOW);
+      const [custom, builtin] = await Promise.all([
+        fetchSource('custom', limit, params.signal),
+        fetchSource('builtin', limit, params.signal),
+      ]);
+      const items = [
+        ...custom.items.map((item, index) => toClusterAlertSummary(item, 'custom', index)),
+        ...builtin.items.map((item, index) => toClusterAlertSummary(item, 'builtin', index)),
+      ].sort((a, b) => b.triggeredAt.localeCompare(a.triggeredAt));
+      return {
+        items: items.slice((params.page - 1) * params.pageSize, params.page * params.pageSize),
+        total: custom.total + builtin.total,
+      };
+    },
+  };
+}
+
+export type ClusterAlertMessagesApi = ReturnType<typeof clusterAlertMessagesApi>;
 

@@ -350,7 +350,7 @@ function scopeLabel(t: ReturnType<typeof useT>, scope: RuleGroupSummary['scope']
  * opens this panel to read, and a PromQL expression cut at 80 characters usually
  * loses exactly the condition that matters.
  */
-function RuleGroupBody({ detail }: { detail: RuleGroupDetail }): React.ReactElement {
+export function RuleGroupBody({ detail }: { detail: RuleGroupDetail }): React.ReactElement {
   const t = useT();
   return (
     <div className="flex flex-col gap-4" data-ai-id="alertingrules:detail">
