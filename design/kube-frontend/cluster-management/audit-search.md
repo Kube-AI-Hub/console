@@ -59,6 +59,7 @@
 - **`operation=query` 必填**：缺省时返回统计模式或空记录。
 - **时间字段**：`@timestamp` 为 UTC，展示用统一时间格式化。
 - **响应状态是对象**：`ResponseStatus.code`，不是顶层字段。
+- **直方图的桶在 `histogram.buckets`**（日志是 `histograms`）：两个端点的字段名不同，实测确认。
 
 ## 测试与可观测
 

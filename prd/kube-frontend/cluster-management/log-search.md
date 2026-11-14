@@ -50,6 +50,7 @@
 
 - **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-LOG_SEARCH-01** - 按时间窗口与过滤条件检索日志并分页。
 - **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-LOG_SEARCH-02** - 无结果时给出说明而非空白。
+- **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-LOG_SEARCH-03** - 顶部显示计数条与时间分布直方图（`operation=histogram`，间隔随时间窗口缩放）。
 
 ## 成功标准
 
@@ -58,7 +59,8 @@
 ## 明确不做
 
 - 日志导出（老 console 有下载，需要服务端导出接口，另立）。
-- 实时跟随（轮询）与直方图：需要额外的时间序列接口。
+- 实时跟随（轮询）：需要定时轮询与追加合并，另立。
+- 导出：`/logs/export` 实测 404，没有可用接口。
 
 ## 假设
 

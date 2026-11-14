@@ -6,6 +6,11 @@
  * audits /kapis/tenant.kubesphere.io/v1alpha2/auditing/events, and the filter keys are the plural
  * ones the old console's search box produces (`namespaces`, `containers`, `log_query`;
  * `workspace_search`, `verb_filter`, `objectref_resource_filter`, `user_search`, ...).
+ *
+ * The same two endpoints also answer `operation=statistics` and `operation=histogram`, which is how
+ * the old console draws the count strip and the bar chart above its result list. The two differ in
+ * one detail worth naming: logs return their buckets under `histogram.histograms`, audits under
+ * `histogram.buckets`.
  */
 import type { Client } from './client';
 
@@ -23,6 +28,22 @@ export interface LogSearchResult {
   records: LogRecord[];
 }
 
+export interface HistogramBucket {
+  /** Bucket start in milliseconds, as Elasticsearch returns it. */
+  time: number;
+  count: number;
+}
+
+export interface HistogramResult {
+  total: number;
+  buckets: HistogramBucket[];
+}
+
+export interface LogStatistics {
+  containers: number;
+  logs: number;
+}
+
 export interface LogSearchParams {
   namespace?: string;
   pod?: string;
@@ -37,24 +58,32 @@ export interface LogSearchParams {
   signal?: AbortSignal;
 }
 
+function logFilters(params: LogSearchParams): Record<string, string | number> {
+  const query: Record<string, string | number> = {};
+  if (params.namespace) query['namespaces'] = params.namespace;
+  if (params.pod) query['pods'] = params.pod;
+  if (params.container) query['containers'] = params.container;
+  if (params.keyword) query['log_query'] = params.keyword;
+  return query;
+}
+
 export function logSearchApi(client: Client) {
   return {
     async search(params: LogSearchParams): Promise<LogSearchResult> {
-      const query: Record<string, string | number> = {
-        start_time: params.startTime,
-        end_time: params.endTime,
-        from: params.from ?? 0,
-        size: params.size ?? 50,
-        sort: 'time',
-        ascending: 'false',
-      };
-      if (params.namespace) query['namespaces'] = params.namespace;
-      if (params.pod) query['pods'] = params.pod;
-      if (params.container) query['containers'] = params.container;
-      if (params.keyword) query['log_query'] = params.keyword;
       const body = await client.request<{ query?: { total?: number; records?: Array<Record<string, unknown>> } }>(
         '/kapis/tenant.kubesphere.io/v1alpha2/logs',
-        { query, ...(params.signal ? { signal: params.signal } : {}) },
+        {
+          query: {
+            start_time: params.startTime,
+            end_time: params.endTime,
+            from: params.from ?? 0,
+            size: params.size ?? 50,
+            sort: 'time',
+            ascending: 'false',
+            ...logFilters(params),
+          },
+          ...(params.signal ? { signal: params.signal } : {}),
+        },
       );
       const envelope = body?.query ?? {};
       return {
@@ -68,6 +97,41 @@ export function logSearchApi(client: Client) {
         })),
       };
     },
+
+    async histogram(params: LogSearchParams & { interval: string }): Promise<HistogramResult> {
+      const body = await client.request<{
+        histogram?: { total?: number; histograms?: Array<Record<string, unknown>> };
+      }>('/kapis/tenant.kubesphere.io/v1alpha2/logs', {
+        query: {
+          operation: 'histogram',
+          interval: params.interval,
+          start_time: params.startTime,
+          end_time: params.endTime,
+          ...logFilters(params),
+        },
+        ...(params.signal ? { signal: params.signal } : {}),
+      });
+      const envelope = body?.histogram ?? {};
+      return {
+        total: Number(envelope.total ?? 0),
+        buckets: (envelope.histograms ?? []).map((bucket) => ({
+          time: Number(bucket['time'] ?? 0),
+          count: Number(bucket['count'] ?? 0),
+        })),
+      };
+    },
+
+    async statistics(params: { startTime: number; endTime: number; signal?: AbortSignal }): Promise<LogStatistics> {
+      const body = await client.request<{ statistics?: Record<string, unknown> }>(
+        '/kapis/tenant.kubesphere.io/v1alpha2/logs',
+        {
+          query: { operation: 'statistics', start_time: params.startTime, end_time: params.endTime },
+          ...(params.signal ? { signal: params.signal } : {}),
+        },
+      );
+      const stats = body?.statistics ?? {};
+      return { containers: Number(stats['containers'] ?? 0), logs: Number(stats['logs'] ?? 0) };
+    },
   };
 }
 
@@ -76,7 +140,7 @@ export interface AuditRecord {
   level: string;
   verb: string;
   user: string;
-  /** `resource.namespace/name`, as the audit object ref reads. */
+  /** `resource/name`, as the audit object ref reads. */
   resource: string;
   namespace: string;
   uri: string;
@@ -104,25 +168,33 @@ export interface AuditSearchParams {
   signal?: AbortSignal;
 }
 
+function auditFilters(params: AuditSearchParams): Record<string, string | number> {
+  const query: Record<string, string | number> = {};
+  if (params.workspace) query['workspace_search'] = params.workspace;
+  if (params.namespace) query['objectref_namespace_search'] = params.namespace;
+  if (params.resource) query['objectref_resource_filter'] = params.resource;
+  if (params.verb) query['verb_filter'] = params.verb;
+  if (params.user) query['user_search'] = params.user;
+  if (params.responseCode) query['response_code_filter'] = params.responseCode;
+  return query;
+}
+
 export function auditSearchApi(client: Client) {
   return {
     async search(params: AuditSearchParams): Promise<AuditSearchResult> {
-      const query: Record<string, string | number> = {
-        operation: 'query',
-        start_time: params.startTime,
-        end_time: params.endTime,
-        from: params.from ?? 0,
-        size: params.size ?? 50,
-      };
-      if (params.workspace) query['workspace_search'] = params.workspace;
-      if (params.namespace) query['objectref_namespace_search'] = params.namespace;
-      if (params.resource) query['objectref_resource_filter'] = params.resource;
-      if (params.verb) query['verb_filter'] = params.verb;
-      if (params.user) query['user_search'] = params.user;
-      if (params.responseCode) query['response_code_filter'] = params.responseCode;
       const body = await client.request<{ query?: { total?: number; records?: Array<Record<string, unknown>> } }>(
         '/kapis/tenant.kubesphere.io/v1alpha2/auditing/events',
-        { query, ...(params.signal ? { signal: params.signal } : {}) },
+        {
+          query: {
+            operation: 'query',
+            start_time: params.startTime,
+            end_time: params.endTime,
+            from: params.from ?? 0,
+            size: params.size ?? 50,
+            ...auditFilters(params),
+          },
+          ...(params.signal ? { signal: params.signal } : {}),
+        },
       );
       const envelope = body?.query ?? {};
       return {
@@ -145,6 +217,41 @@ export function auditSearchApi(client: Client) {
           };
         }),
       };
+    },
+
+    async histogram(params: AuditSearchParams & { interval: string }): Promise<HistogramResult> {
+      const body = await client.request<{
+        histogram?: { total?: number; buckets?: Array<Record<string, unknown>> };
+      }>('/kapis/tenant.kubesphere.io/v1alpha2/auditing/events', {
+        query: {
+          operation: 'histogram',
+          interval: params.interval,
+          start_time: params.startTime,
+          end_time: params.endTime,
+          ...auditFilters(params),
+        },
+        ...(params.signal ? { signal: params.signal } : {}),
+      });
+      const envelope = body?.histogram ?? {};
+      return {
+        total: Number(envelope.total ?? 0),
+        buckets: (envelope.buckets ?? []).map((bucket) => ({
+          time: Number(bucket['time'] ?? 0),
+          count: Number(bucket['count'] ?? 0),
+        })),
+      };
+    },
+
+    async statistics(params: { startTime: number; endTime: number; signal?: AbortSignal }): Promise<{ resources: number; events: number }> {
+      const body = await client.request<{ statistics?: Record<string, unknown> }>(
+        '/kapis/tenant.kubesphere.io/v1alpha2/auditing/events',
+        {
+          query: { operation: 'statistics', start_time: params.startTime, end_time: params.endTime },
+          ...(params.signal ? { signal: params.signal } : {}),
+        },
+      );
+      const stats = body?.statistics ?? {};
+      return { resources: Number(stats['resources'] ?? 0), events: Number(stats['events'] ?? 0) };
     },
   };
 }

@@ -1977,6 +1977,27 @@ design 里：「文案要求特殊字符，但 `PATTERN_PASSWORD` 与服务端 a
 | api-client + 架构契约 | **872 通过 / 0 失败** |
 | 文档门禁 | `--strict` 全量 **0 错 0 告警** |
 
+### 48.8 追加：确认密码的实时比对
+
+用户追加要求：「参考老 console，输入确认密码的过程中，比对与新密码输入是否一致。」
+
+核源码后先纠正一个认知：老 console **本来就是边输入边校验**——`PasswordSetting` 把 validator 挂在「确认密码」的
+Form.Item 上，而 `packages/kube-design/src/components/Form/Item.jsx` 的 `handleValueChange` 每次（200ms debounce）
+输入都会重跑该字段的规则。所以这不是新功能，是我上一版把它做成了「提交时校验」，漏掉了既有交互。
+
+现在的做法：确认密码框下方实时提示，三态——确认为空不渲染、不一致红字「两次输入的密码必须一致。」、
+一致绿字「两次输入的密码一致。」，并用 `data-match` 暴露给用例。两处比老实现更好：
+
+| | 老 console | 现在 |
+| --- | --- | --- |
+| 重算时机 | 只绑在确认框自己的 change 上：改新密码后红字/绿字**滞留** | 派生自两个 state：改新密码时提示立刻重算 |
+| 呈现 | 表单错误体系里的字段错误，无法单独断言当前是红还是绿 | 框下方的显式状态节点（`user-settings:confirm-hint` + `data-match`） |
+
+提交时仍然拦截，但不再重复渲染同一条文案（提示已经在框下方了）。用例改在 PASSWORD-01 里断言，
+新增 AC-05；原来那条「点保存后 password-error 显示不一致」的断言会假失败，已改成「点保存后 password-error 不出现」。
+
+**验证**：用例 **6 通过**（21.96 秒）；文档门禁全量 0 错 0 告警。
+
 ### 48.7 剩余
 
 - 创建用户弹窗有同样的校验但**没有强度面板**：`ResourceForm` 的 `password` 字段不支持自定义控件，要做需要
@@ -2062,7 +2083,44 @@ design 里：「文案要求特殊字符，但 `PATTERN_PASSWORD` 与服务端 a
 | 用例 | 三条 **全部通过**（7.79 秒，一起跑） |
 | 文档门禁 | errors=0 warnings=0 |
 
-## 51. 复盘：为什么验证和迁移慢，以及如何优化
+## 51. 第 117 轮：日志/审计页的计数条与直方图（2026-11-14，B200）
+
+### 51.1 继续把工具箱做完整
+
+上一轮交付了日志与审计的**检索**，但老 console 的弹窗还有两件东西：顶部的计数条与时间分布直方图。本轮补上。
+
+探测（同一端点换了 `operation`）：
+
+| 请求 | 返回 |
+| --- | --- |
+| `/logs?operation=statistics` | `{statistics:{containers:86, logs:110899}}` |
+| `/logs?operation=histogram&interval=5m` | `{histogram:{total, histograms:[{time(ms), count}]}}` |
+| `/auditing/events?operation=statistics` | `{statistics:{resources:998, events:998}}` |
+| `/auditing/events?operation=histogram&interval=5m` | `{histogram:{total, buckets:[{time(ms), count}]}}`
+
+### 51.2 一个必须实测才知道的差异
+
+两个端点的直方图**桶字段名不同**：日志是 `histograms`，审计是 `buckets`。凭直觉写同一个字段名，其中一页会永远没有柱子——而且不报错。
+
+### 51.3 交付
+
+| 层 | 内容 |
+| --- | --- |
+| api-client | `logSearchApi.histogram/statistics`、`auditSearchApi.histogram/statistics` |
+| 页面 | 两页顶部新增计数条 + 时间分布柱状图（间隔随窗口缩放：5m/30m/1h/6h） |
+| 文档 | PRD 增 FR-03；设计补「同端点不同 operation」与桶字段差异的坑 |
+| 用例 | 两个既有用例加断言：直方图与计数条必须可见 |
+| 导出 | 实测 `/logs/export`、`/auditing/events/export` 均 **404** → 明确不做，写进文档 |
+
+### 51.4 验证
+
+| 项 | 结果 |
+| --- | --- |
+| 实测 | 日志页 13 根柱 + 「容器 86 个 · 日志 107,012 行」；审计页 13 根柱 + 「涉及资源 833 个 · 审计事件 833 条」 |
+| 用例 | 两条 **通过**（5.42 秒） |
+| 文档门禁 | errors=0 warnings=0 |
+
+## 52. 复盘：为什么验证和迁移慢，以及如何优化
 
 先取证据而不是凭感觉。关键测量：
 
@@ -2131,7 +2189,7 @@ A100 缺 `kube-frontend-demo`、指标接口 20 秒起、告警模块未装；�
 约定：**改完一页用 `-n 4` 快速反馈（20–45 秒），提交前跑一次串行全量作为判定基准**。
 写进 `tests/ui/README.md`。
 
-## 52. 历史执行索引（第 1–75 轮，仅标题）
+## 53. 历史执行索引（第 1–75 轮，仅标题）
 
 > 逐轮的完整叙述已从本文档移除：其中大量「未迁移 / 环境不可用」的结论已被后续轮次推翻，
 > 留在正文里会误导排期。当前有效结论见 §4 与 §5；如需历史细节，查 git 历史（删除前已提交）。
@@ -2183,7 +2241,7 @@ A100 缺 `kube-frontend-demo`、指标接口 20 秒起、告警模块未装；�
 
 ---
 
-## 53. 本轮整理说明：删掉了什么、为什么
+## 54. 本轮整理说明：删掉了什么、为什么
 
 ### 44.1 删除的三类内容
 

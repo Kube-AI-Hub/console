@@ -345,4 +345,4 @@ export type {
 } from './notification';
 
 export { logSearchApi, auditSearchApi } from './search';
-export type { AuditRecord, AuditSearchResult, LogRecord, LogSearchResult } from './search';
+export type { AuditRecord, AuditSearchResult, HistogramBucket, HistogramResult, LogRecord, LogSearchResult, LogStatistics } from './search';

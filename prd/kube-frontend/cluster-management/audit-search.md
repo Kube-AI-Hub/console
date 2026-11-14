@@ -50,6 +50,7 @@
 
 - **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-AUDIT_SEARCH-01** - 按时间窗口与过滤条件检索审计记录并分页。
 - **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-AUDIT_SEARCH-02** - 展示状态码与请求 URI 以便定位操作。
+- **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-AUDIT_SEARCH-03** - 顶部显示计数条与时间分布直方图（`operation=histogram`）。
 
 ## 成功标准
 
@@ -57,7 +58,7 @@
 
 ## 明确不做
 
-- 审计导出、直方图。
+- 审计导出：`/auditing/events/export` 实测 404。
 - 审计详情抽屉（请求/响应原文）：涉及敏感内容，需要单独的权限与脱敏设计。
 
 ## 假设

@@ -36,4 +36,9 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_LOG_SEARCH_01(cluster_management
     expect(rows).to_have_count(min(50, total), timeout=60_000)
     expect(ui.page.locator('[data-ai-id="cluster-logs:page"]')).to_be_visible(timeout=20_000)
 
+    # The count strip and the distribution chart come from the same endpoint's other
+    # operations; both must be present or the page silently loses half of the old toolbox.
+    expect(ui.page.locator('[data-ai-id="cluster-logs:histogram"]')).to_be_visible(timeout=60_000)
+    expect(ui.page.locator('[data-ai-id="cluster-logs:statistics"]')).to_be_visible(timeout=60_000)
+
     screenshot(ui.page, "cluster-logs")

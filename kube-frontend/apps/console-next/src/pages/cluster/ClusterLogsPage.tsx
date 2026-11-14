@@ -55,6 +55,32 @@ export function ClusterLogsPage({ cluster: _cluster }: ClusterLogsPageProps): Re
     },
   });
 
+  const interval = windowSeconds <= 3600 ? '5m' : windowSeconds <= 6 * 3600 ? '30m' : windowSeconds <= 24 * 3600 ? '1h' : '6h';
+  const histogram = useQuery({
+    queryKey: ['cluster-logs-histogram', namespace, pod, container, keyword, windowKey],
+    queryFn: ({ signal }) => {
+      const endTime = Math.floor(Date.now() / 1000);
+      return logSearchApi(apiClient).histogram({
+        ...(namespace ? { namespace } : {}),
+        ...(pod ? { pod } : {}),
+        ...(container ? { container } : {}),
+        ...(keyword ? { keyword } : {}),
+        startTime: endTime - windowSeconds,
+        endTime,
+        interval,
+        signal,
+      });
+    },
+  });
+  const statistics = useQuery({
+    queryKey: ['cluster-logs-statistics', windowKey],
+    queryFn: ({ signal }) => {
+      const endTime = Math.floor(Date.now() / 1000);
+      return logSearchApi(apiClient).statistics({ startTime: endTime - windowSeconds, endTime, signal });
+    },
+  });
+  const peak = Math.max(1, ...(histogram.data?.buckets ?? []).map((bucket) => bucket.count));
+
   const state = query.isPending ? 'loading' : query.isError ? 'error' : 'ready';
   const total = query.data?.total ?? 0;
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -97,6 +123,25 @@ export function ClusterLogsPage({ cluster: _cluster }: ClusterLogsPageProps): Re
             ))}
           </select>
         </label>
+      </div>
+
+      <div className="flex flex-col gap-1" data-ai-id="cluster-logs:histogram">
+        <div className="flex items-end gap-[2px]" style={{ height: 48 }}>
+          {(histogram.data?.buckets ?? []).map((bucket) => (
+            <div
+              key={bucket.time}
+              title={`${new Date(bucket.time).toLocaleString()} · ${bucket.count}`}
+              className="flex-1 rounded-sm bg-ai-accent/60"
+              style={{ height: `${Math.max(2, Math.round((bucket.count / peak) * 46))}px` }}
+            />
+          ))}
+        </div>
+        {statistics.data ? (
+          <p className="text-[11px] text-ai-fg-muted" data-ai-id="cluster-logs:statistics">
+            {t('search.stat.containers', { count: statistics.data.containers })} ·{' '}
+            {t('search.stat.logs', { count: statistics.data.logs })}
+          </p>
+        ) : null}
       </div>
 
       {state === 'loading' ? <Skeleton className="h-40 w-full" /> : null}
