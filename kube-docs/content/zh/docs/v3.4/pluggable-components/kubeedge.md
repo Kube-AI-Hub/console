@@ -10,7 +10,7 @@ weight: 6930
 
 KubeEdge 的组件在两个单独的位置运行——云上和边缘节点上。在云上运行的组件统称为 CloudCore，包括 Controller 和 Cloud Hub。Cloud Hub 作为接收边缘节点发送请求的网关，Controller 则作为编排器。在边缘节点上运行的组件统称为 EdgeCore，包括 EdgeHub，EdgeMesh，MetadataManager 和 DeviceTwin。有关更多信息，请参见 [KubeEdge 网站](https://kubeedge.io/zh/)。
 
-启用 KubeEdge 后，您可以[为集群添加边缘节点](../../installing-on-linux/cluster-operation/add-edge-nodes/)并在这些节点上部署工作负载。状态页上的 CPU、内存和磁盘曲线需要按该文档启用边缘 node-exporter 和 EdgeMesh。
+启用 KubeEdge 后，您可以[为集群添加边缘节点](../../installing-on-linux/cluster-operation/add-edge-nodes/)并在这些节点上部署工作负载。安装器会同时部署 EdgeMesh 和边缘 node-exporter，状态页上的 CPU、内存和磁盘曲线用的就是这两部分。边缘节点访问不到云上地址时，转发方式见该文档。
 
 ![kubeedge_arch](/images/docs/v3.x/installing-on-linux/add-and-delete-nodes/add-edge-nodes/kubeedge-architecture-zh.svg)
 

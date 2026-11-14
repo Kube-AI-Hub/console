@@ -10,7 +10,7 @@ weight: 6930
 
 KubeEdge has components running in two separate places - cloud and edge nodes. The components running on the cloud, collectively known as CloudCore, include Controllers and Cloud Hub. Cloud Hub serves as the gateway for the requests sent by edge nodes while Controllers function as orchestrators. The components running on edge nodes, collectively known as EdgeCore, include EdgeHub, EdgeMesh, MetadataManager, and DeviceTwin. For more information, see [the KubeEdge website](https://kubeedge.io/en/).
 
-After you enable KubeEdge, you can [add edge nodes to your cluster](../../installing-on-linux/cluster-operation/add-edge-nodes/) and deploy workloads on them. The CPU, memory, and disk charts on the status page also require the edge node-exporter and EdgeMesh setup in that document.
+After you enable KubeEdge, you can [add edge nodes to your cluster](../../installing-on-linux/cluster-operation/add-edge-nodes/) and deploy workloads on them. The installer also deploys EdgeMesh and the edge node-exporter, which are what fill the CPU, memory, and disk charts on the status page. When an edge node cannot reach the cloud addresses, that document describes the forwarding.
 
 ![KubeEdge architecture](/images/docs/v3.x/installing-on-linux/add-and-delete-nodes/add-edge-nodes/kubeedge-architecture.svg)
 

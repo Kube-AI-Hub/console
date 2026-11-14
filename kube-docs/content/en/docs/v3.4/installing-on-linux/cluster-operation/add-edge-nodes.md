@@ -29,7 +29,7 @@ This tutorial demonstrates how to add an edge node to your cluster.
 
 An edge node carries the taint `node-role.kubernetes.io/edge:NoSchedule`. DaemonSets such as Calico, the JuiceFS CSI node plugin, and Weave Scope tolerate every taint. They need the cluster network and the private image registry, so on an edge node they stay in `CrashLoopBackOff` or `ImagePullBackOff`.
 
-The installer already keeps the JuiceFS CSI node plugin and Weave Scope off nodes labeled `node-role.kubernetes.io/edge`. Calico is managed by the Tigera Installation. Set the same required node affinity on the `calico-node` DaemonSet and the `calico-typha` Deployment: the node must not have the label `node-role.kubernetes.io/edge`. The main `node-exporter` DaemonSet uses the same rule. Host metrics for edge nodes come from `node-exporter-edge`, described below.
+The installer keeps the JuiceFS CSI node plugin and Weave Scope off nodes labeled `node-role.kubernetes.io/edge`, and writes the same required node affinity onto the Tigera Installation for `calico-node` and `calico-typha`: the node must not have that label. The main `node-exporter` DaemonSet uses the same rule. Host metrics for edge nodes come from `node-exporter-edge`, described below.
 
 ## Create Firewall Rules and Port Forwarding Rules
 
@@ -192,7 +192,9 @@ Container output means the tunnel is up. If the image has no shell (`prom/node-e
 
 ### 2. Install EdgeMesh
 
-Install the EdgeMesh release that matches CloudCore. KubeEdge 1.13 uses `kubeedge/edgemesh-agent:v1.13.5`. The agent uses `hostNetwork` and must tolerate every taint so it can run on edge nodes.
+With KubeEdge enabled, the installer installs the matching EdgeMesh release from `edgeruntime.kubeedge.edgemesh`. KubeEdge 1.13 uses `kubeedge/edgemesh-agent:v1.13.5`. The agent uses `hostNetwork` and must tolerate every taint so it can run on edge nodes. The PSK is not stored in git. An existing ConfigMap `edgemesh-agent-psk` is reused; otherwise one is generated at install time.
+
+When an edge node cannot reach the cloud node addresses, set `edgeruntime.kubeedge.access`. `bridgeRelay: true` installs a systemd unit on the relay node that forwards port `20006` on the node address to `127.0.0.1:20006`, where the agent listens. Each entry under `tunnels` is a reverse SSH tunnel on the relay node: the edge node's CloudCore ports forward to the `cloudcore` Service ClusterIP, and `20006` forwards to the relay node's localhost. Once the edge node is reachable, the installer writes that node's `edgeStream` and `metaServer` to `edgeStreamServer` and `metaServer`. It does not restart `edgecore` when those values already match.
 
 Proxy only Services that carry the EdgeMesh label. Otherwise EdgeMesh takes over every other ClusterIP:
 
@@ -223,7 +225,7 @@ After the edge node has joined, the agent log contains `success bootstrapped`.
 
 ### 3. Deploy the edge node-exporter
 
-Apply `ks-installer/roles/ks-monitor/files/prometheus/node-exporter/node-exporter-edge.yaml`. It schedules only onto nodes labeled `node-role.kubernetes.io/edge`, uses the multi-arch image `docker.io/prom/node-exporter:v1.12.1`, and serves metrics over HTTP on port `9100`.
+The installer applies `ks-installer/roles/ks-monitor/files/prometheus/node-exporter/node-exporter-edge.yaml` together with the other node-exporter manifests. It schedules only onto nodes labeled `node-role.kubernetes.io/edge`, uses the multi-arch image `docker.io/prom/node-exporter:v1.12.1`, and serves metrics over HTTP on port `9100`.
 
 The Service must have a ClusterIP. EdgeMesh does not proxy headless Services. Keep both labels:
 
@@ -236,7 +238,7 @@ From a cloud node, `GET /metrics` on that ClusterIP returns `200`. A timeout mea
 
 The existing node-exporter ServiceMonitor scrapes Endpoint addresses. Those addresses are not reachable for an edge node. Scrape the ClusterIP that EdgeMesh proxies, keep the `namespace`, `pod`, and `node` labels, and set `job` to `node-exporter` so the recording rules can attach the series to the node.
 
-Append this job to Prometheus `additionalScrapeConfigs`:
+When KubeEdge is enabled, the installer writes the job below into the JuiceFS scrape Secret (`juicefs-metrics-scrape`). A later JuiceFS upgrade keeps the job instead of leaving only `juicefs-mount`:
 
 ```yaml
 - job_name: node-exporter-edge

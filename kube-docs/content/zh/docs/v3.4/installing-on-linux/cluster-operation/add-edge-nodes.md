@@ -29,7 +29,7 @@ Kube AI Hub 利用 [KubeEdge](https://kubeedge.io/zh/) 将原生容器化应用�
 
 边缘节点带有污点 `node-role.kubernetes.io/edge:NoSchedule`，但 Calico、JuiceFS CSI、Weave Scope 等 DaemonSet 带有「容忍全部污点」。它们依赖集群内网和私有镜像仓库，调度到边缘节点后会一直处于 `CrashLoopBackOff` 或 `ImagePullBackOff`。
 
-安装器已经让 JuiceFS CSI 与 Weave Scope 跳过带 `node-role.kubernetes.io/edge` 标签的节点。Calico 由 Tigera Installation 管理，需要在 `calico-node` DaemonSet 和 `calico-typha` Deployment 上设置同样的节点亲和性：节点不存在标签 `node-role.kubernetes.io/edge`。`node-exporter` 的主 DaemonSet 也使用这条规则；边缘节点的主机指标由下文的 `node-exporter-edge` 单独采集。
+安装器已经让 JuiceFS CSI 与 Weave Scope 跳过带 `node-role.kubernetes.io/edge` 标签的节点，并给 Tigera Installation 的 `calico-node` 和 `calico-typha` 写上同样的节点亲和性：节点不存在这个标签。`node-exporter` 的主 DaemonSet 也使用这条规则；边缘节点的主机指标由下文的 `node-exporter-edge` 单独采集。
 
 ## 创建防火墙规则和端口转发规则
 
@@ -193,7 +193,9 @@ kubectl -n <namespace> logs <pod> --tail=20
 
 ### 2. 安装 EdgeMesh
 
-在云上安装与 CloudCore 相同大版本的 EdgeMesh（KubeEdge 1.13 使用 `kubeedge/edgemesh-agent:v1.13.5`）。Agent 使用 `hostNetwork`，并容忍全部污点，这样边缘节点也能跑。
+开启 KubeEdge 后，安装器按 `edgeruntime.kubeedge.edgemesh` 安装与 CloudCore 相同大版本的 EdgeMesh（KubeEdge 1.13 使用 `kubeedge/edgemesh-agent:v1.13.5`）。Agent 使用 `hostNetwork`，并容忍全部污点，这样边缘节点也能跑。PSK 不写入仓库：集群里已有 ConfigMap `edgemesh-agent-psk` 时沿用，否则安装时生成。
+
+边缘节点访问不到云节点地址时，在 `edgeruntime.kubeedge.access` 里写上中继和隧道。`bridgeRelay: true` 会在中继节点安装 systemd 单元，把节点地址的 `20006` 转到 Agent 实际监听的 `127.0.0.1:20006`。`tunnels` 的每一项是一条跑在中继节点上的 SSH 反向隧道，把边缘节点本机的 CloudCore 端口转到 `cloudcore` Service 的 ClusterIP，并把 `20006` 转到中继节点本机。边缘节点能连上之后，安装器把该节点的 `edgeStream` 和 `metaServer` 写成 `edgeStreamServer`、`metaServer`；内容已经一致时不会重启 `edgecore`。
 
 只代理打了标签的 Service，避免 EdgeMesh 接管集群里其他 ClusterIP：
 
@@ -224,7 +226,7 @@ EdgeMesh 不会在名称以 `br`、`docker`、`tunl`、`flannel`、`cni` 开头�
 
 ### 3. 部署边缘 node-exporter
 
-应用安装器清单 `ks-installer/roles/ks-monitor/files/prometheus/node-exporter/node-exporter-edge.yaml`。它只调度到带 `node-role.kubernetes.io/edge` 标签的节点，使用多架构镜像 `docker.io/prom/node-exporter:v1.12.1`，在 `9100` 上提供 HTTP 指标。
+安装器在部署 node-exporter 时一并应用 `ks-installer/roles/ks-monitor/files/prometheus/node-exporter/node-exporter-edge.yaml`。它只调度到带 `node-role.kubernetes.io/edge` 标签的节点，使用多架构镜像 `docker.io/prom/node-exporter:v1.12.1`，在 `9100` 上提供 HTTP 指标。
 
 对应的 Service 必须是普通 ClusterIP，不能是 headless。EdgeMesh 不代理 headless Service。Service 上的两个标签都要保留：
 
@@ -237,7 +239,7 @@ EdgeMesh 不会在名称以 `br`、`docker`、`tunl`、`flannel`、`cni` 开头�
 
 现有的 node-exporter ServiceMonitor 按 Endpoints 地址抓取。边缘节点的 Endpoints 地址从云上不可达，必须改抓 EdgeMesh 代理的 ClusterIP，同时保留 `namespace`、`pod`、`node` 标签，并把 `job` 写成 `node-exporter`，记录规则才能关联到节点。
 
-把下面的作业追加到 Prometheus 的 `additionalScrapeConfigs`：
+KubeEdge 开启时，安装器把下面的作业写进 JuiceFS 的抓取 Secret（`juicefs-metrics-scrape`）。之后升级 JuiceFS 会保留这段作业，不会只剩 `juicefs-mount`：
 
 ```yaml
 - job_name: node-exporter-edge
