@@ -138,6 +138,24 @@ DevOps、联邦项目和商城的骨架/只读列表只是有限范围，有入�
 
 ---
 
+### 3.5 组件开启后的新增范围（2026-11-15）
+
+用户确认「所有组件已开启」后，原先因模块关闭而不迁移的条目进入范围。探测依据：应用商店 30 应用/8 分类、`nginxes` 1 个、`federatednamespaces` 1 个、`servicemesh strategies` 200、边缘节点 `sg`（label `node-role.kubernetes.io/edge`，Ready）。
+
+| 区域 | 新 UI 落点 | 状态 |
+| --- | --- | --- |
+| DevOps 工程 | 集群区域 `devops`（列表 + 成员/角色/凭证/流水线/CD/代码仓库页签） | 已交付（`0f4612302`、`7a13c0b59`） |
+| 联邦项目 | 工作空间区域 `federated-projects`（列表 + 概览/应用负载/配置/存储页签） | 已交付首批（`daf3f6ace`、`b0cb1f36f`） |
+| 企业空间应用仓库 | 工作空间区域 `app-repos`（仓库/应用） | 已交付（`751bdb084`） |
+| 镜像构建器 | 项目区域 `devops-project`（v1alpha1 s2ibuilders） | 已交付（`89ed2b4cf`） |
+| 灰度发布 | app-workloads `grayrelease` 列表 | 已交付（`2fce6985f`） |
+| 集群网关详情 | `clusters/$cluster/gateways/$name` | 已交付（`449be408c`） |
+| 应用商店应用详情 | `apps/$appId`（版本表 + Readme） | 已交付（`f19dcd169`） |
+| 边缘节点 | 集群区域 `edgenodes`（列表复用节点详情） | 已交付（`f002ec7a8`） |
+
+仍登记为缺口：联邦 22 条详情路由的剩余部分、DevOps 流水线详情页；第三方登录（服务端注入，无控制台写路径）与边缘节点接入属明确不做/后续批次。
+
+
 ## 4. 不变量与已知坑
 
 跨页面的结论，改动前先看这一节。**每条都来自一次真实故障。**
