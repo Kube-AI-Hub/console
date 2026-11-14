@@ -40,6 +40,8 @@ def test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_POD_EVENTS_01(app_workloads_page, scr
     expect(surface).to_be_visible(timeout=30_000)
     expect(surface).not_to_have_attribute("data-ai-state", "loading", timeout=60_000)
 
+    # Events live on their own tab since the detail page got a tab system.
+    ui.page.locator('[data-ai-id="workload-detail:tab-trigger:events"]').click()
     block = ui.page.locator('[data-ai-id="pods-detail:events"]')
     expect(block).to_be_visible(timeout=20_000)
     expect(block).to_contain_text(f"({len(expected_events)})", timeout=20_000)

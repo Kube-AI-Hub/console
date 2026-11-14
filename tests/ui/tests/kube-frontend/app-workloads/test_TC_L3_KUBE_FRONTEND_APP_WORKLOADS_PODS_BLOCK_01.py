@@ -32,6 +32,8 @@ def test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_PODS_BLOCK_01(app_workloads_page, scr
         expect(surface).to_be_visible(timeout=30_000)
         expect(surface).not_to_have_attribute("data-ai-state", "loading", timeout=90_000)
 
+        # The pod list is its own tab since the detail page got a tab system.
+        ui.page.locator('[data-ai-id="workload-detail:tab-trigger:pods"]').click()
         block = ui.page.locator('[data-ai-id="deployments-detail:pods"]')
         expect(block).to_be_visible(timeout=30_000)
         headers = [text.strip() for text in block.locator("th").all_inner_texts()]

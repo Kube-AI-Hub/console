@@ -93,6 +93,7 @@ export {
   toWorkloadSummary,
   workloadProgress,
   clusterEventsApi,
+  objectEventsApi,
   podEventsApi,
   workloadsApi,
   workloadStatus,

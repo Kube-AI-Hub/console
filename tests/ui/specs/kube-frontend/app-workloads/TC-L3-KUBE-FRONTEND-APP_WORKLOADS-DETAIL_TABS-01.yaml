@@ -1,0 +1,40 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL_TABS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: detail-tabs
+title: 负载详情 · 页签体系
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/deployments"
+prd: prd/kube-frontend/app-workloads/detail-tabs.md
+design: design/kube-frontend/app-workloads/detail-tabs.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL_TABS-01
+
+story:
+- US1
+
+product: 详情页把概览、关联容器组、修订版本、事件与元数据拆成页签；容器组详情把容器单独成一页签并可进入容器详情；切换页签只换面板，不重新拉数据。
+preconditions:
+- 由用例的 fixture 创建一个带注解 tc-e2e/owner=tabs 的 tc-e2e- 部署（2 副本、nginx:1.27），用例结束后无条件删除
+- 已登录，且在 host 集群的 default 项目空间
+steps:
+- 打开部署详情，等待主区就绪
+- 读取页签触发器的 data-ai-id 与「概览」面板
+- 点「事件」页签，读取事件区块
+- 点「元数据」页签，读取标签与注解区块
+- 进入该部署启动的一个容器组详情，读取页签集合并点「容器」页签
+- 点击容器行，进入容器详情
+expected:
+- 部署详情的页签为 概览、关联容器组、修订版本、事件、元数据，默认选中「概览」
+- 切换前事件区块不存在，点「事件」后出现且标题含「事件」
+- 点「元数据」后出现标签与注解区块，标签含 app=<部署名>，注解含 tc-e2e/owner=tabs
+- 容器组详情的页签为 概览、容器、事件、元数据，没有「关联容器组」与「修订版本」
+- 容器组详情的「容器」页签里有容器行，点击后进入 /containers/<容器名> 且容器详情主区就绪
+troubleshoot:
+- 页签不出现时先看 WorkloadDetailPage 的 tabsFor 是否覆盖该 kind
+- 数据在切页签后重新请求时检查查询是否被挪进了页签面板而不是页面顶层
+update_automation:
+- 页签文案变化时改 WorkloadDetailPage 的 TAB_COPY（locale 键补齐后改为 t()）
+- 页签 id 变化时同步用例里的 workload-detail:tab:* 与 workload-detail:tab-trigger:*

@@ -923,10 +923,10 @@ export function toJobRun(item: KubePod, index: number): JobRun {
 }
 
 /**
- * One event about a pod, as the pod detail page shows it.
+ * One event about an object, as the detail pages show it.
  *
  * Events are core objects (`/api/v1/.../events`), filtered by their involved object:
- * a fieldSelector keeps the response small, and the pod name is the only key needed.
+ * a fieldSelector keeps the response small, and the object's name is the only key needed.
  */
 export interface PodEvent {
   /** `Normal` / `Warning`. */
@@ -939,32 +939,56 @@ export interface PodEvent {
   source: string;
 }
 
-export function podEventsApi(client: Client) {
+function toPodEvent(item: Record<string, unknown>): PodEvent {
+  const source = (item['source'] ?? {}) as Record<string, unknown>;
+  const lastSeen = String(item['lastTimestamp'] ?? item['eventTime'] ?? item['firstTimestamp'] ?? '');
   return {
-    async list(params: { namespace: string; pod: string; signal?: AbortSignal }): Promise<PodEvent[]> {
+    type: String(item['type'] ?? ''),
+    reason: String(item['reason'] ?? ''),
+    message: String(item['message'] ?? ''),
+    count: Number(item['count'] ?? 1),
+    lastSeen,
+    source: String(source['component'] ?? source['host'] ?? ''),
+  };
+}
+
+/**
+ * Events about one object, whatever its kind.
+ *
+ * A pod's events answer "why is this container restarting"; a Deployment's answer
+ * "why did the rollout stall". Kubernetes has no per-object events endpoint, so both
+ * read the namespace collection with a fieldSelector on `involvedObject`.
+ */
+export function objectEventsApi(client: Client) {
+  return {
+    async list(params: { namespace: string; name: string; kind: string; signal?: AbortSignal }): Promise<PodEvent[]> {
       const body = await client.request<{ items?: Array<Record<string, unknown>> }>(
         `/api/v1/namespaces/${encodeURIComponent(params.namespace)}/events`,
         {
           query: {
-            fieldSelector: `involvedObject.name=${params.pod},involvedObject.kind=Pod`,
+            fieldSelector: `involvedObject.name=${params.name},involvedObject.kind=${params.kind}`,
           },
           ...(params.signal ? { signal: params.signal } : {}),
         },
       );
       return (body?.items ?? [])
-        .map((item) => {
-          const source = (item['source'] ?? {}) as Record<string, unknown>;
-          const lastSeen = String(item['lastTimestamp'] ?? item['eventTime'] ?? item['firstTimestamp'] ?? '');
-          return {
-            type: String(item['type'] ?? ''),
-            reason: String(item['reason'] ?? ''),
-            message: String(item['message'] ?? ''),
-            count: Number(item['count'] ?? 1),
-            lastSeen,
-            source: String(source['component'] ?? source['host'] ?? ''),
-          };
-        })
+        .map(toPodEvent)
         .sort((a, b) => b.lastSeen.localeCompare(a.lastSeen));
+    },
+  };
+}
+
+/** Events about one pod; the pod detail page's narrower name for `objectEventsApi`. */
+export function podEventsApi(client: Client) {
+  const events = objectEventsApi(client);
+  return {
+    async list(params: { namespace: string; pod: string; signal?: AbortSignal }): Promise<PodEvent[]> {
+      return events.list({
+        namespace: params.namespace,
+        name: params.pod,
+        kind: 'Pod',
+        ...(params.signal ? { signal: params.signal } : {}),
+      });
     },
   };
 }

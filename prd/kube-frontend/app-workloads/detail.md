@@ -68,6 +68,12 @@
 - `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-01`
 - `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-02`
 
+## 页签体系
+
+详情页已按页签组织：概览 / 关联容器组 / 修订版本（仅部署）/ 事件 / 元数据，容器组详情为 概览 / 容器 / 事件 / 元数据。页签只做视觉分层，数据在页面顶层取一次，切换页签不重新加载。
+
+页签清单、默认页签、隐藏规则与验收场景见 [详情页页签](./detail-tabs.md)，本节只做概述。
+
 ## 功能需求
 
 - **FR-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-03** — 详情按资源类型补充专属属性，与老 console 的字段一致。

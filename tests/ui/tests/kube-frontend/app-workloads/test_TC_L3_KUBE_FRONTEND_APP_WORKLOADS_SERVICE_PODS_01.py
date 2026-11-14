@@ -46,6 +46,8 @@ def test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_SERVICE_PODS_01(app_workloads_page, s
 
         # Both blocks belong on a service's page: how traffic comes in, and who serves it.
         expect(ui.page.locator('[data-ai-id="services-detail:ports"]')).to_be_visible()
+        # Ports stay on the overview tab; the pod list has its own tab.
+        ui.page.locator('[data-ai-id="workload-detail:tab-trigger:pods"]').click()
         block = ui.page.locator('[data-ai-id="services-detail:pods"]')
         expect(block).to_be_visible(timeout=30_000)
         expect(block.locator("tbody tr")).to_have_count(expected)
