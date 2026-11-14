@@ -1,0 +1,41 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: federated-projects
+title: 联邦项目列表与详情骨架
+entry_url: "{BASE_URL}/kube-frontend/workspaces/system-workspace/federatedprojects"
+prd: prd/kube-frontend/access-control/federated-projects.md
+design: design/kube-frontend/access-control/federated-projects.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-01
+
+story:
+- US1
+
+product: 企业空间作用域的联邦项目列表（名称/命名空间/部署集群/创建时间）与详情概览骨架（基本信息 + 已联邦资源类型只读列表）；数据直接读联邦 API；空态、未找到与读取失败都有明确说明。
+preconditions:
+- 已登录，且能看到至少一个企业空间
+- 联邦 API（/apis/types.kubefed.io/v1beta1）可读，且至少有一个 FederatedNamespace
+steps:
+- 读联邦 API 的 federatednamespaces，按 template 的 kubesphere.io/workspace 标签分组，选一个有联邦项目的企业空间与其期望行数
+- 读联邦 API discovery，统计命名空间级 Federated 资源类型数
+- 打开 /kube-frontend/workspaces/<ws>/federatedprojects，等待就绪
+- 核对表头、行数与行名称集合
+- 点击一个名称进入详情，核对基本信息与资源类型列表行数
+- 若存在没有联邦项目的企业空间，打开其列表页核对空态文案
+expected:
+- 表头为 名称/命名空间/部署集群/创建时间
+- 行数等于该企业空间的 FederatedNamespace 数，行句柄与名称一致
+- 详情显示名称、命名空间、企业空间、部署集群、传播状态、创建时间、创建者
+- 详情「已联邦资源类型」行数等于 discovery 中 namespaced 的资源类型数，表头 类型/资源
+- 没有联邦项目的企业空间显示「暂无联邦项目」空态说明
+troubleshoot:
+- 列表为空但联邦 API 有对象：workspace 过滤读了对象 metadata 标签而不是 spec.template 标签
+- 详情 404：用了按名称的集群级 GET；FederatedNamespace 是 namespaced 资源，应走集合查找
+- 类型列表为空：discovery 没读到或把 cluster-scoped 类型也算了进来
+update_automation:
+- 选择器：federated-projects:surface / federated-projects:open:<name> / federated-project:surface / :basic / :types
+- 数据源或过滤规则变化时同步改 pages/federated/queries.ts 与用例的探测
