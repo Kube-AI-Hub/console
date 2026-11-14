@@ -743,6 +743,8 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-01
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-02
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-03
     - id: cluster-alerting-write
       title: 集群告警策略写入与消息下钻
       prd: prd/kube-frontend/cluster-management/cluster-alerting-write.md

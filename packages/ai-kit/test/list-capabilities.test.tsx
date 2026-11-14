@@ -77,4 +77,18 @@ describe('shared list capabilities', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Close' }));
     expect(changed).toHaveBeenCalledWith(false);
   });
+  it('keeps editable filters on failure without showing stale rows or pagination', async () => {
+    const changed = vi.fn();
+    render(<ResourceList rows={[{ name: 'stale' }]} errorContent={<p role="alert">Invalid selector</p>}
+      searchValue="draft" onSearchChange={changed} onPageChange={vi.fn()} schema={{
+        rowKey: 'name', columns: [{ key: 'name', title: 'Name' }], search: { placeholder: 'Search' },
+        pagination: { page: 1, pageSize: 10, total: 20 },
+      }} />);
+    expect(screen.getByRole('alert')).toHaveTextContent('Invalid selector');
+    expect(screen.getByRole('searchbox')).toHaveValue('draft');
+    expect(screen.queryByRole('table')).toBeNull();
+    expect(screen.queryByRole('button', { name: '下一页' })).toBeNull();
+    await userEvent.type(screen.getByRole('searchbox'), 'x');
+    expect(changed).toHaveBeenCalled();
+  });
 });

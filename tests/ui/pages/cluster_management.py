@@ -148,6 +148,23 @@ class ClusterManagementPage:
     def node_time(self, name: str) -> Locator:
         return self.node_control(f"ntp:{name}")
 
+    def gpu_control(self, name: str) -> Locator:
+        return self.page.locator(f'[data-ai-id="cluster-gpus:{name}"]')
+
+    def gpu_detail_control(self, name: str) -> Locator:
+        return self.page.locator(f'[data-ai-id="gpu-detail:{name}"]')
+
+    def gpu_rows(self) -> Locator:
+        return self.gpu_control("surface").locator("[data-ai-row]")
+
+    def select_gpu_filter(self, name: str, label: str) -> None:
+        self.gpu_control(f"filter:{name}").click()
+        self.page.get_by_role("option", name=label, exact=True).click()
+
+    def select_gpu_page_size(self, size: int) -> None:
+        self.gpu_control("page-size").click()
+        self.page.get_by_role("option", name=str(size), exact=True).click()
+
     def row_names(self, kind: str = "nodes") -> list[str]:
         values = self.surface(kind).locator("[data-ai-row]").evaluate_all(
             "els => els.map(e => e.getAttribute('data-ai-row'))"

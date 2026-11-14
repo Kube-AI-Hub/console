@@ -1,0 +1,28 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: gpu
+title: 单卡详情 · 监控和关联资源
+entry_url: "{BASE_URL}/kube-frontend/clusters/host/gpus"
+prd: prd/kube-frontend/cluster-management/gpu.md
+design: design/kube-frontend/cluster-management/gpu.md
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-03
+story:
+- US2
+- US3
+product: 单卡指标与关联任务具有准确的身份和单位。
+preconditions:
+- B200 的单卡监控存在历史采样
+steps:
+- 打开单卡监控，捕获同次响应核对利用率、显存、分配率、功率和温度
+- 切换时间范围，核对请求仍携带目标 GPU UUID
+- 打开容器组，核对 gpuUuid/nodeName 过滤与 API 结果
+- 打开事件页签，核对 Node 类型和所属节点范围
+- 在三档视口截图，并模拟监控失败后重试
+expected:
+- 监控显存 bytes 正确换算 GiB，零值与缺失值不混淆
+- 容器组仅属于目标卡，事件明确为所属节点范围
+- 页签按需读取，失败可恢复，无设备写入

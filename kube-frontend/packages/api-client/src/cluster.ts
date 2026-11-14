@@ -551,6 +551,7 @@ export function rangeMetricsApi(client: Client) {
     pathname: string,
     params: RangeQuery,
     extra: Record<string, string | number | undefined> = {},
+    expectedLabels: Record<string, string> = {},
   ): Promise<MetricSeries[]> {
     const body = await client.request<{
       results?: Array<{
@@ -581,6 +582,7 @@ export function rangeMetricsApi(client: Client) {
       const series = result.data?.result ?? [];
       const points: SeriesPoint[] = [];
       for (const sample of series) {
+        if (!Object.entries(expectedLabels).every(([key, value]) => sample.metric?.[key] === value)) continue;
         for (const [at, value] of sample.values ?? []) {
           const parsed = Number.parseFloat(value);
           if (!Number.isFinite(parsed)) continue;
@@ -595,6 +597,10 @@ export function rangeMetricsApi(client: Client) {
   }
 
   return {
+    async gpuCard(params: RangeQuery & { node: string; uuid: string }): Promise<MetricSeries[]> {
+      const pathname = `/kapis/monitoring.kubesphere.io/v1alpha3/nodes/${encodeURIComponent(params.node)}`;
+      return query(pathname, params, { gpu_uuid: params.uuid }, { node: params.node, uuid: params.uuid });
+    },
     async cluster(
       params: RangeQuery & {
         scope?: 'cluster' | 'node' | 'namespace';

@@ -165,6 +165,7 @@ export const InputSearch = React.forwardRef<HTMLInputElement, InputSearchProps>(
   return (
     <div className={cn('flex w-full items-center gap-2', className)}>
       <Input
+        className="min-w-0 flex-1"
         ref={(element) => {
           inputRef.current = element;
           if (typeof ref === 'function') ref(element);

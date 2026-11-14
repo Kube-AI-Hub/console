@@ -74,3 +74,14 @@ export const FiltersAndColumns: StoryObj = {
       visibleColumnKeys={columns} onVisibleColumnsChange={setColumns} />;
   },
 };
+
+export const RecoverableFilterError: StoryObj = {
+  render: () => {
+    const [search, setSearch] = React.useState('invalid selector');
+    return <ResourceList schema={{
+      rowKey: 'name', columns: [{ key: 'name', title: 'Name' }],
+      search: { placeholder: 'Search', aiId: 'error-demo:search' }, labels: { clearSearch: 'Clear search' },
+    }} rows={[]} searchValue={search} onSearchChange={setSearch}
+      errorContent={<p role="alert">The request failed. Search stays editable so the condition can be corrected.</p>} />;
+  },
+};

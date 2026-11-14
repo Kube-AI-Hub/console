@@ -4,11 +4,13 @@
 
 ## 概述
 
-集群显卡列表与单卡详情读同一组只读接口：`GET /kapis/gpu.kubesphere.io/v1alpha1/gpus` 与 `/gpus/stats`。列表取全量（`limit=-1`）后直接渲染；单卡详情用 UUID 过滤同一个集合取一条；顶部健康比例用 stats 的服务端汇总。页面不做健康判定、不做前端求和。
+设备与统计读取 GPU v1alpha1。列表服务端分页，单卡详情用 UUID 过滤同一个集合取一条；顶部统计只读不带用户条件的 stats。详情新增按需单卡监控、UUID 关联容器组和所属节点事件，不重新判定健康。
 
 ## 关联需求
 
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-01
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-02
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-03
 
 ## 设计目标与非目标
 
@@ -18,9 +20,9 @@
 
 ## 关键约束
 
-- 数据只来自 `gpu.kubesphere.io/v1alpha1`；页面与 api-client 都不读节点注解，也不解析 `hami.io/node-nvidia-register`。
+- 设备来自 GPU v1alpha1，监控来自 monitoring v1alpha3；容器组由 resources v1alpha3 按设备分配注解筛选，页面不解析厂商 register 注解。
 - HTTP 只在 api-client：`packages/api-client/src/gpu.ts` 的 `gpusApi` 是唯一入口。
-- 列表一次取全（`limit=-1`）：行数必须等于接口 items 数；分页只会让「行数」变成「当前页行数」。
+- 列表行数等于当前分页接口 items 数，总量取 totalItems；全量统计独立，不从当前页计算。
 - 单卡详情用 `$name = uuid`，数据是 `GET /gpus?uuid=<u>` 的 `items[0]`。
 - 显存源单位 MiB，展示换算 GiB 并带单位。
 
@@ -70,7 +72,7 @@
 
 | 用途 | 路径 | 说明 |
 | --- | --- | --- |
-| 列表 | `/kapis/gpu.kubesphere.io/v1alpha1/gpus?limit=-1&sortBy=nodeName&ascending=true` | `items[]` + `totalItems`；每项含 `nodeName`/`nodeIP` |
+| 列表 | `/kapis/gpu.kubesphere.io/v1alpha1/gpus?page=1&limit=20&sortBy=nodeName&ascending=true` | `items[]` + `totalItems`；每项含 `nodeName`/`nodeIP` |
 | 单卡 | `/kapis/gpu.kubesphere.io/v1alpha1/gpus?uuid=<uuid>` | 没有 `/gpus/<uuid>`；取 `items[0]`，空即不存在 |
 | 汇总 | `/kapis/gpu.kubesphere.io/v1alpha1/gpus/stats` | `{ total, healthy, "<vendor>-<model>": n }` |
 
@@ -91,23 +93,58 @@
 - **`health` 的来源有 `omitempty` 历史**：register 注解里 `health:false` 会以字段缺失的形式出现，解析时「缺失 = false」。本接口输出的是 bool，但 `toGpuDevice` 仍按 `=== true` 判定，避免同一条语义在两层被写成两种。
 - **被摘的卡不会从列表消失**：device plugin 只把 `health` 改成 false，不删条目；所以「少一行」永远不会发生，症状是「行在、状态黄」。
 - **`limit=-1` 才是全量**：接口默认分页（10 条），不传 `limit=-1` 时 15 张卡只回 10 张，行数验收会变成「第一页行数」。
-- **GPU 接口没有 member-cluster 段**：`gpu.kubesphere.io` 注册在集群自己的 apiserver 上；旧 console 也把 `cluster` 从参数里剔除。本页的 `cluster` 只进 query key，不进 URL；目前只在 `host` 验证过，member cluster 是否需要前缀未验证（与 vGPU 模式页共用同一结论）。
+- **GPU 接口没有已确认的 member-cluster 路由**：读取只验证 host，api-client 拒绝 member 请求；不能把 host 数据显示在 member 页面。后续确认路由后再开放。
 - **MiB vs GiB**：接口 `gpuMemoryTotal=183359` 是 MiB（≈179 GiB），原样打印会被读成 MB/GB。
 - **gpu-agent 挂掉时注解冻结**：接口只剩最后一次汇总，页面显示的是「最后一次已知状态」而不是实时状态；这是「单一汇总者」的代价，页面不提供「重新采集」按钮。
 
 ## 测试与可观测
 
+- 2026-11-14：GPU-01/02/03 在 localhost:5178 连接 B200 串行通过；MONITOR-01 与 NODES-08/09 回归通过。多页卡和错误恢复使用拦截响应，没有设备写入。
+- console-next 163 条、ai-kit 193 条、GPU API 14 条及 config 12 条通过，Storybook、应用构建与本批严格门禁通过；verify.py --no-e2e 通过。API 包全量测试类型检查仍有两处既有测试错误，详情见 [执行记录](../../../docs/plans/gpu-parity-execution-20261114.md)。
 - 用例：`tests/ui/specs/kube-frontend/cluster-management/TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-01.yaml`（spec 一文件一测试：`test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_GPU_01.py`）。
 - 可观测点：`cluster-gpus:surface`、`cluster-gpus:health`（`data-ai-total` / `data-ai-healthy` 暴露统计口径）、`cluster-gpus:row:<uuid>`（每行一个 `data-ai-row` 与 `data-ai-id`）、`gpu-detail:surface`、`gpu-detail:uuid`、`gpu-detail:health`、`gpu-detail:node`、`gpu-detail:memory`、`gpu-detail:core`、`gpu-detail:back`、`gpu-detail:missing`。
 - 接口侧：`GET /gpus?limit=-1` 的 `totalItems` 与 `/gpus/stats` 的 `total` 应一致（同一 cache）。
 
 ## 后续改进
 
-- 型号分组 / 健康环图（旧 console 概览里有；本版只保留比例与计数）。
-- 按 `deviceVendor` / `status` 过滤：接口已支持（`status=healthy|unhealthy`、`deviceVendor`），页面暂不加，避免与「先看全量」冲突。
-- 单卡监控：属于 `cluster-gpu/gpu-monitor` 模块（Prometheus 指标），不在本页。
-- 若集群卡数增长到需要分页，概览继续用 stats、列表改分页即可（不变量 4 已经为此留好边界）。
+- GPU 拓扑仍需独立迁移和硬件信息契约；不以节点事件冒充显卡专属事件。
+- 监控高级缩放、多序列与轴交互尚未实现；当前共享 TrendChart 提供按时间绘图、缺样本断线与文本指标。
 
 ## 验收用例
 
 - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-01
+- TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-02
+- TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-03
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-04 — 从全量表升级为服务端筛选分页
+
+**为什么**：旧的“先看全量所以不筛选”取舍限制了设备多时的定位能力。过滤与分页由服务端执行，stats 保持全局；UUID 为精确匹配，空字符串不发送。共享 ResourceList.errorContent 保留失败时的条件编辑，同时隐藏陈旧表格与分页。
+
+**被否方案**：在当前页前端过滤，会遗漏其他页设备；把统计随过滤变化会破坏集群总览口径。
+
+**何时重新考虑**：后端明确提供筛选范围统计时新增独立摘要，不改变全局总览。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-05 — 详情按身份延迟加载，共享趋势图
+
+**为什么**：GPU_UUID 必须同时进入查询键与监控筛选，不能拿节点全部指标绘制单卡图。容器组按 gpuUuid/nodeName 过滤；事件沿用旧页的节点范围并明确文案。TrendChart 上收 ai-kit，由 GPU 和既有 ClusterMonitorPage 共用；只负责有限采样、时间坐标与缺样本断线，单位在应用层换算。
+
+**被否方案**：按节点显示全部 Pod 会误认为任务占用此卡；复制第三份 SVG 会让零值、缺失值与可访问语义漂移。
+
+**何时重新考虑**：后端提供显卡专属事件或 requestId，可新增准确范围。
+
+### CON-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-02 — 筛选契约
+
+列表支持 page/limit/sortBy/ascending，以及 nodeName 包含、uuid 精确、deviceVendor/type 不区分大小写包含、status=healthy|unhealthy 和节点 labelSelector。厂商为单选，不将逗号当作未经支持的 OR。stats 不传用户条件。member 读取在 API 层拒绝，不静默回退 host。
+
+### CON-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-03 — 详情资源与指标
+
+GET /kapis/resources.kubesphere.io/v1alpha3/pods?gpuUuid=<uuid>&nodeName=<node>&page=<p>&limit=<n>，返回 items/totalItems，name 支持搜索。
+GET /kapis/monitoring.kubesphere.io/v1alpha3/nodes/<node>?cluster=<c>&gpu_uuid=<uuid>&start=<seconds>&end=<seconds>&step=<duration>。
+指标为 gpu_card_utilisation、gpu_card_memory_usage、gpu_card_allocation_rate、gpu_card_power、gpu_card_temperature。
+利用率与分配率为百分数，不再乘100；显存 bytes/1024^3=GiB，GPU 设备列表另为 MiB/1024=GiB；功率 W，温度摄氏度。
+rangeMetricsApi.gpuCard 校验返回样本 node/uuid，忽略其他卡和非有限值；零采样仍绘图，不补零。
+事件复用 nodeResourcesApi.events 的 involvedObject.kind=Node/name 过滤。关闭页签卸载 observer，消费 AbortSignal 取消未完成读取。
+
+### INV-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-03 — 无设备写入
+
+本批只读，不调用模式 PUT、摘卡、重置或创建 GPU 任务；真实 B200 读取与模拟分页、失败响应分别报告。

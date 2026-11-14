@@ -92,6 +92,8 @@
 ## 测试与可观测
 
 E2E：`tests/kube-frontend/cluster-management/`。
+显卡列表与单卡详情的筛选、分页、指标单位和 UUID 关联契约见 [gpu.md](./gpu.md)。
+ai-kit TrendChart 由单卡监控与既有集群/节点监控共同使用；ResourceList.errorContent 在读取失败时保留条件编辑。
 
 ## 后续改进
 

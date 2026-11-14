@@ -242,6 +242,8 @@ export interface ResourceListProps<TRow> {
   schema: ListSchema<TRow>;
   rows: TRow[];
   loading?: boolean;
+  /** Replace data/pager on failure while retaining the editable search and filters. */
+  errorContent?: React.ReactNode;
   /** Controlled filter values keyed by `ListFilter.key`. */
   filters?: Record<string, string>;
   onFiltersChange?: (next: Record<string, string>) => void;
@@ -322,6 +324,7 @@ export function ResourceList<TRow>({
   schema,
   rows,
   loading = false,
+  errorContent,
   filters,
   onFiltersChange,
   searchValue,
@@ -680,7 +683,7 @@ export function ResourceList<TRow>({
         </div>
       ) : null}
 
-      <Table
+      {errorContent != null ? errorContent : <Table
         columns={columns}
         rows={rows}
         rowKey={keyOf}
@@ -712,9 +715,9 @@ export function ResourceList<TRow>({
             description={schema.empty?.description}
           />
         }
-      />
+      />}
 
-      {schema.pagination && onPageChange ? (
+      {errorContent == null && schema.pagination && onPageChange ? (
         <Pagination
           // Same prefix as the rows and sort buttons, so the pager belongs to the list.
           {...(schema.sortAiPrefix ? { aiPrefix: schema.sortAiPrefix } : {})}

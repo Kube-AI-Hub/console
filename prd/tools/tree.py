@@ -674,7 +674,11 @@ MODULES = [
                     {
                         "id": "gpu",
                         "title": "集群显卡",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-01"]},
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-01",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-02",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-03",
+                        ]},
                     },
                     {
                         "id": "cluster-alerting-write",

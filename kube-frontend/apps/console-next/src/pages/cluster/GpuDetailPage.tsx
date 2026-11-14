@@ -3,12 +3,17 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
 import { gpusApi } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { AiSurface, Badge, Skeleton } from '@kube-ai-hub/ui';
+import { AiSurface, Badge, Button, Skeleton, Tabs, TabsContent } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { DefinitionRow } from '@/components/resource/DefinitionRow';
 import { formatGpuMemory, gpuHealthTone } from './gpuFormat';
+import { GPU_VENDOR_LABEL_KEYS, vendorKey } from './gpuVendors';
+import { GPU_MODES } from './gpuModeConfig';
+import { GpuMonitorPanel } from './GpuMonitorPanel';
+import { GpuPodsPanel } from './GpuPodsPanel';
+import { NodeResourcesPanel } from './NodeResourcesPanel';
 
 /**
  * 单卡详情.
@@ -29,6 +34,8 @@ export interface GpuDetailPageProps {
 export function GpuDetailPage({ cluster }: GpuDetailPageProps): React.ReactElement {
   const t = useT();
   const { name } = useParams({ from: '/kube-frontend/clusters/$cluster/gpus/$name' });
+  const [tab, setTab] = React.useState('overview');
+  React.useEffect(() => setTab('overview'), [cluster, name]);
 
   const query = useQuery({
     queryKey: ['gpu-detail', cluster, name],
@@ -38,6 +45,8 @@ export function GpuDetailPage({ cluster }: GpuDetailPageProps): React.ReactEleme
   const state = query.isPending ? 'loading' : query.isError ? 'error' : 'ready';
   // `null` is the API's "this UUID is not reported any more" answer, not a failure.
   const gpu = query.data ?? null;
+  const vendor = vendorKey(gpu?.vendor ?? '');
+  const mode = GPU_MODES[gpu?.vendor.toLowerCase() ?? '']?.find((entry) => entry.value === gpu?.mode);
 
   return (
     <AiSurface as="section" aiId="gpu-detail:surface" state={state} className="flex min-w-0 flex-col gap-4">
@@ -61,6 +70,8 @@ export function GpuDetailPage({ cluster }: GpuDetailPageProps): React.ReactEleme
               </Badge>
             </span>
           ) : null}
+          <Button size="sm" variant="secondary" data-ai-id="gpu-detail:refresh" disabled={query.isFetching}
+            onClick={() => void query.refetch()}>{t('common.refresh')}</Button>
         </div>
       </header>
 
@@ -75,7 +86,13 @@ export function GpuDetailPage({ cluster }: GpuDetailPageProps): React.ReactEleme
       ) : null}
 
       {gpu ? (
-        <React.Fragment>
+        <Tabs value={tab} onValueChange={setTab} items={[
+          { value: 'overview', label: t('node.detail.statusTab'), aiId: 'gpu-detail:tab:overview' },
+          { value: 'pods', label: t('cluster.workloads.pods.title'), aiId: 'gpu-detail:tab:pods' },
+          { value: 'monitor', label: t('node.detail.monitor'), aiId: 'gpu-detail:tab:monitor' },
+          { value: 'events', label: t('node.detail.events'), aiId: 'gpu-detail:tab:events' },
+        ]}>
+          <TabsContent value="overview" className="flex flex-col gap-4">
           <section className="rounded-lg border border-ai-border bg-ai-surface p-4" data-ai-id="gpu-detail:basic">
             <h2 className="mb-3 text-sm font-medium text-ai-fg">{t('cluster.gpu.detail.basic')}</h2>
             <dl className="grid grid-cols-1 gap-x-8 gap-y-2 text-sm sm:grid-cols-2">
@@ -108,12 +125,12 @@ export function GpuDetailPage({ cluster }: GpuDetailPageProps): React.ReactEleme
               <DefinitionRow label={t('cluster.gpu.detail.uuid')} value={gpu.uuid || '-'} />
               <DefinitionRow label={t('cluster.gpu.detail.index')} value={String(gpu.index)} />
               <DefinitionRow label={t('cluster.gpu.detail.model')} value={gpu.model || '-'} />
-              <DefinitionRow label={t('cluster.gpu.detail.vendor')} value={gpu.vendor || '-'} />
+              <DefinitionRow label={t('cluster.gpu.detail.vendor')} value={vendor ? t(GPU_VENDOR_LABEL_KEYS[vendor]) : gpu.vendor || '-'} />
               <DefinitionRow
                 label={t('cluster.gpu.detail.numa')}
                 value={gpu.numa === undefined ? '-' : String(gpu.numa)}
               />
-              <DefinitionRow label={t('cluster.gpu.detail.mode')} value={gpu.mode || '-'} />
+              <DefinitionRow label={t('cluster.gpu.detail.mode')} value={mode ? t(mode.labelKey) : gpu.mode || '-'} />
             </dl>
           </section>
 
@@ -125,7 +142,7 @@ export function GpuDetailPage({ cluster }: GpuDetailPageProps): React.ReactEleme
                 aiId="gpu-detail:memory"
                 value={
                   <span className="tabular-nums">
-                    {formatGpuMemory(gpu.memoryUsedMiB)} / {formatGpuMemory(gpu.memoryTotalMiB)}
+                    {gpu.memoryTotalMiB > 0 ? `${formatGpuMemory(gpu.memoryUsedMiB)} / ${formatGpuMemory(gpu.memoryTotalMiB)}` : '-'}
                   </span>
                 }
                 hint={gpu.memoryTotalMiB > 0 ? `${Math.round((gpu.memoryUsedMiB / gpu.memoryTotalMiB) * 100)}%` : undefined}
@@ -135,15 +152,22 @@ export function GpuDetailPage({ cluster }: GpuDetailPageProps): React.ReactEleme
                 aiId="gpu-detail:core"
                 value={
                   <span className="tabular-nums">
-                    {gpu.coreUsed} / {gpu.coreTotal}
+                    {gpu.coreTotal > 0 ? `${gpu.coreUsed} / ${gpu.coreTotal}` : '-'}
                   </span>
                 }
                 hint={gpu.coreTotal > 0 ? `${Math.round((gpu.coreUsed / gpu.coreTotal) * 100)}%` : undefined}
               />
-              <DefinitionRow label={t('cluster.gpu.detail.vgpu')} value={`${gpu.vgpuUsed} / ${gpu.vgpuTotal}`} />
+              <DefinitionRow label={t('cluster.gpu.detail.vgpu')} value={gpu.vgpuTotal > 0 ? `${gpu.vgpuUsed} / ${gpu.vgpuTotal}` : '-'} />
             </dl>
           </section>
-        </React.Fragment>
+          </TabsContent>
+          <TabsContent value="pods">{tab === 'pods' ? <GpuPodsPanel cluster={cluster} node={gpu.node} uuid={gpu.uuid} /> : null}</TabsContent>
+          <TabsContent value="monitor">{tab === 'monitor' ? <GpuMonitorPanel cluster={cluster} node={gpu.node} uuid={gpu.uuid} /> : null}</TabsContent>
+          <TabsContent value="events">{tab === 'events' ? <div className="flex flex-col gap-3">
+            <p className="text-xs text-ai-fg-muted">{t('gpu.detail.eventsHint')}</p>
+            <NodeResourcesPanel cluster={cluster} node={gpu.node} kind="events" />
+          </div> : null}</TabsContent>
+        </Tabs>
       ) : null}
     </AiSurface>
   );

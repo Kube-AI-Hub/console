@@ -1,0 +1,28 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: gpu
+title: 集群显卡 · 服务端筛选与共享分页
+entry_url: "{BASE_URL}/kube-frontend/clusters/host/gpus"
+prd: prd/kube-frontend/cluster-management/gpu.md
+design: design/kube-frontend/cluster-management/gpu.md
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-02
+story:
+- US1
+- US3
+product: 显卡筛选和分页不改变集群统计，并允许恢复列与条件。
+preconditions:
+- B200 有可读取的 GPU 设备和统计
+steps:
+- 按节点、厂商、型号和 UUID 组合过滤，核对请求与行数
+- 清除条件，核对集群统计保持不变
+- 拦截返回 125 张模拟卡，验证翻页、换每页条数、精确 UUID 搜索
+- 隐藏显存列并恢复，在三档桌面视口截图
+- 模拟读取错误，修正条件后恢复；不执行设备写入
+expected:
+- 条件与分页由服务端执行，总量来自 totalItems
+- UUID 列保留，列恢复可用，失败时条件仍可编辑
+- 统计独立于当前页和筛选，无生产 GPU 状态变更

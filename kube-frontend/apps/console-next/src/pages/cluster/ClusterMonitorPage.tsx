@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { rangeMetricsApi, type MetricSeries } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { AiSurface, Button, Skeleton } from '@kube-ai-hub/ui';
+import { AiSurface, Button, Skeleton, TrendChart } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -13,11 +13,9 @@ import { formatTimestamp } from '@/lib/time';
  *
  * Four trends over a chosen window: CPU, memory, running pods, nodes online.
  *
- * The charts are drawn with inline SVG rather than a charting library. ai-kit has
- * none, and adding one to plot four lines would cost more than the whole monitoring
- * page bundle — these are 60-point polylines, which is a path element and a scale
- * function. When a chart needs axes interaction, zooming or stacked series, that
- * trade flips and a library should be reconsidered.
+ * Rendering is shared with per-card monitoring through ai-kit TrendChart. Unit
+ * conversion and timestamp-based ratios remain here. A full charting library can
+ * be reconsidered when axes interaction, zooming or stacked series are needed.
  *
  * The window drives the step, because the API returns raw samples: asking for seven
  * days at 60-second resolution is 10,080 points per metric over the wire and rendered
@@ -286,34 +284,8 @@ function Sparkline({
   end: number;
   kind: 'percent' | 'count';
 }): React.ReactElement {
-  const width = 100;
-  const height = 30;
-  const span = Math.max(1, end - start);
-  const values = points.map((point) => point.value);
-  const peak = Math.max(...values, kind === 'percent' ? 2 : 1);
-  const scaleMax = peak * 1.15;
-  const path = points
-    .map((point, index) => {
-      const x = ((point.at - start) / span) * width;
-      const y = height - (point.value / scaleMax) * height;
-      return `${index === 0 ? 'M' : 'L'}${x.toFixed(2)},${y.toFixed(2)}`;
-    })
-    .join(' ');
-
-  return (
-    <svg
-      viewBox={`0 0 ${width} ${height}`}
-      preserveAspectRatio="none"
-      className="h-24 w-full text-ai-accent"
-      role="img"
-      aria-label={t_count(points.length)}
-      data-ai-id="cluster-monitor:chart"
-    >
-      <path d={path} fill="none" stroke="currentColor" strokeWidth="0.6" vectorEffect="non-scaling-stroke" />
-      {/* Baseline, so a flat line at zero is visibly at zero rather than mid-card. */}
-      <line x1="0" y1={height} x2={width} y2={height} stroke="currentColor" strokeWidth="0.3" opacity="0.25" vectorEffect="non-scaling-stroke" />
-    </svg>
-  );
+  return <TrendChart points={points} start={start} end={end}
+    label={`${t_count(points.length)} ${kind}`} emptyText="-" data-ai-id="cluster-monitor:chart" />;
 }
 
 /** Stable aria label; kept out of the JSX so the SVG has no template noise. */

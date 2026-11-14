@@ -52,7 +52,6 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_GPU_01(cluster_management_page, 
         pytest.skip("集群没有 GPU 设备（或 gpu.kubesphere.io 接口不可用）")
 
     by_uuid = {str(item.get("uuid")): item for item in devices if item.get("uuid")}
-    healthy_count = sum(1 for item in devices if item.get("health") is True)
 
     status, stats = ui.api.request("GET", f"{GPU_API}/stats")
     if status != 200 or not isinstance(stats, dict):
@@ -66,9 +65,11 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_GPU_01(cluster_management_page, 
     assert surface.get_attribute("data-ai-state") == "ready", surface.get_attribute("data-ai-state")
 
     rows = surface.locator("[data-ai-row]")
-    assert rows.count() == len(devices), f"行数 {rows.count()} 与接口 items {len(devices)} 不一致（limit=-1 漏了？）"
+    expected = devices[:20]
+    assert rows.count() == len(expected), f"当前页行数 {rows.count()} 与接口分页 items {len(expected)} 不一致"
     shown = [str(value) for value in rows.evaluate_all("els => els.map(e => e.getAttribute('data-ai-row'))")]
-    assert set(shown) == set(by_uuid), "列表 UUID 集合与接口不一致"
+    assert set(shown) == {item["uuid"] for item in expected}, "当前页 UUID 集合与接口不一致"
+    healthy_count = sum(1 for uuid in shown if by_uuid[uuid].get("health") is True)
 
     # Each row's verdict must be the interface's verdict for that UUID, and the number
     # of healthy rows must match the interface's health:true count exactly.
@@ -101,7 +102,8 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_GPU_01(cluster_management_page, 
     expect(heading).to_have_text(first_uuid, timeout=20_000)
 
     basic = ui.page.locator('[data-ai-id="gpu-detail:basic"]').inner_text()
-    for expected in (str(first.get("nodeName") or ""), str(first.get("type") or ""), str(first.get("deviceVendor") or "")):
+    vendor = {"nvidia": "英伟达", "cambricon": "寒武纪"}.get(first.get("deviceVendor"), first.get("deviceVendor", ""))
+    for expected in (str(first.get("nodeName") or ""), str(first.get("type") or ""), str(vendor)):
         if expected:
             assert expected in basic, f"详情基本信息缺少 {expected!r}: {basic[:300]}"
     assert str(first.get("index")) in basic, f"详情缺少序号 {first.get('index')}: {basic[:300]}"

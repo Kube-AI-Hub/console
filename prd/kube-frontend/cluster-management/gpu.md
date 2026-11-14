@@ -14,7 +14,7 @@
 
 作为 **集群运维**，我希望 **在集群显卡列表里按节点核对每张卡的状态**，以便 **判断某台机器是否还能继续接收 GPU 任务**。
 
-**Independent Test**：打开 `/clusters/host/gpus`，表格行数等于 `GET /kapis/gpu.kubesphere.io/v1alpha1/gpus` 的 items 数，健康行数等于 `health:true` 的条数，顶部健康比例与 `/gpus/stats` 一致。
+**Independent Test**：打开 `/clusters/host/gpus`，表格行数等于当前分页 GPU 请求的 items 数，健康行数等于该页 `health:true` 的条数，顶部健康比例与全局 `/gpus/stats` 一致。
 
 ### US2 - 点进单卡看到它的详细属性
 
@@ -22,9 +22,17 @@
 
 **Independent Test**：从列表点某个显卡 ID 进入 `/clusters/host/gpus/<uuid>`，详情页的显卡 ID 与被点行一致，节点、序号、型号、厂商、显存与状态可读。
 
+### US3 - 快速定位显卡并继续排障
+
+作为 **集群运维**，我希望 **按 UUID、节点、节点标签、厂商、型号及健康状态定位卡，再查看监控和关联容器组**，以便 **不用在全量设备里逐行查找，也不把同节点的其他任务误作此卡任务**。
+
+**Independent Test**：组合筛选和分页不改变顶部总览；从卡详情进入监控、容器组及事件页签，核对 UUID 过滤、指标单位与节点事件范围。
+
 ## 验收场景
 
-- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-01** — 已知集群有 GPU 节点，当打开集群显卡列表，则每张物理卡一行（节点 / 序号 / 显卡 ID / 状态 / 型号 / 显存（已用 / 总量）/ 厂商），行数等于接口 items 数、健康行数等于 `health:true` 的计数，顶部显示服务端汇总的健康比例；点某一行的显卡 ID 进入单卡详情，详情页的显卡 ID 与该行一致，节点 / 序号 / 型号 / 厂商 / 显存 / 健康状态可读；该 UUID 已不存在时显示明确提示而不是空白页。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-01** — 已知集群有 GPU 节点，当打开集群显卡列表，则每张物理卡一行（节点 / 序号 / 显卡 ID / 状态 / 型号 / 显存（已用 / 总量）/ 厂商），当前页行数等于分页接口 items 数、健康行数等于其中 `health:true` 的计数，顶部显示服务端全局汇总的健康比例；点某一行的显卡 ID 进入单卡详情，详情页的显卡 ID 与该行一致，节点 / 序号 / 型号 / 厂商 / 显存 / 健康状态可读；该 UUID 已不存在时显示明确提示而不是空白页。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-02** — 列表以服务端 page/limit 分页，每页 10/20/50/100；UUID 精确匹配，节点和型号包含匹配，节点标签、厂商和健康筛选可组合并清除。筛选或每页条数改变回第一页，顶部 stats 始终保持集群总览。显示 NUMA、vGPU 模式、vGPU 与核心分配量；厂商和已知模式本地化。复用 ai-kit 工具栏、表格与分页，UUID 列不可隐藏，其余列可隐藏并恢复。无匹配、读取失败和无权限明确区分，失败保留可编辑条件，统计缺失不显示零。空 UUID 不发送过滤。未确认 member GPU 路由时拒绝读取，不静默显示 host 数据。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-03** — 单卡详情使用共享页签，概览、容器组、监控与所属节点事件按需加载。容器组由服务端同时按 gpuUuid 与 nodeName 过滤，支持搜索和分页；节点事件标明不是显卡专属事件。监控以节点及 GPU UUID 请求 1h/6h/24h 的利用率、显存、分配率、功率和温度，显存 bytes 换算 GiB，百分比保持后端百分数，功率 W、温度 C。零值仍绘图，缺采样为未知，不补零；失败提供重试。列表显存仍为 MiB 换算 GiB，零总量显示 `-`。1024/1280/1600 下内容不撑宽页面。
 
 ## 设计目标
 
@@ -34,15 +42,15 @@
 
 ## 约束与边界
 
-- 数据只来自 `gpu.kubesphere.io/v1alpha1` 的 `gpus` 与 `gpus/stats`；不读节点注解、不连 kube-apiserver（宪法 C1）。
+- 设备与统计来自 `gpu.kubesphere.io/v1alpha1`；趋势来自监控 v1alpha3，容器组来自 resources v1alpha3，事件复用节点原生事件 API。请求全部集中于 api-client。
 - 列表以**物理卡**为粒度，不以 allocatable 计数为粒度：allocatable 回答「还能分几张」，列表回答「机箱里有几张、各自什么状态」。
 - 只读：不提供摘卡、重置、切换模式等写操作。
 
 ## UI 交互设计
 
 - 顶部：标题 + 说明 + 健康比例条（健康百分比、`健康 / 总数`、按厂商-型号的计数）。
-- 表格：节点（含节点 IP，节点名链接节点详情）、序号、显卡 ID（链接单卡详情）、状态、型号、显存（已用 / 总量）、厂商；窄屏隐藏显存与厂商列。
-- 单卡详情：返回链接、显卡 ID 标题 + 健康徽标、基本信息区块、用量区块。
+- 表格包含旧页全部只读属性，支持共享列显隐；窄屏在表格内部横向滚动，不静默隐藏核心指标。
+- 单卡详情：返回链接、显卡 ID、健康徽标与刷新，概览/容器组/监控/事件页签。
 - 状态颜色：健康绿、亚健康黄；颜色只是对接口 `health` 布尔值的映射。
 
 ## 文案与校验
@@ -69,7 +77,7 @@
 
 ## 成功标准
 
-- **SC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-01** — 列表行数 = 接口 items 数，健康行数 = `health:true` 条数；点行进入详情后 UUID 一致。
+- **SC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-01** — 当前页行数 = 分页 items 数，健康行数 = 该页 `health:true` 条数；点行进入详情后 UUID 一致。
 
 ## 明确不做
 
@@ -85,3 +93,5 @@
 ## 验收用例
 
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-01`
+- `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-02`
+- `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-03`

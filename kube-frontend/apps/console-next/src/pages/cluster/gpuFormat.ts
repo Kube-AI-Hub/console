@@ -8,13 +8,14 @@ import type { GpuDevice } from '@kube-ai-hub/api-client';
  * the reader, while the card is 179 GiB. The unit is part of the string.
  */
 export function formatGpuMemory(mib: number): string {
-  if (!Number.isFinite(mib) || mib <= 0) return '0 GiB';
+  if (!Number.isFinite(mib) || mib < 0) return '-';
+  if (mib === 0) return '0 GiB';
   return `${(mib / 1024).toFixed(2)} GiB`;
 }
 
 /** "used / total (percent)" for one capacity pair. */
 export function formatGpuUsage(used: number, total: number, unit: string): string {
-  if (!Number.isFinite(total) || total <= 0) return '-';
+  if (!Number.isFinite(used) || !Number.isFinite(total) || total <= 0) return '-';
   const percent = Math.round((used / total) * 100);
   return `${used} / ${total}${unit}（${percent}%）`;
 }

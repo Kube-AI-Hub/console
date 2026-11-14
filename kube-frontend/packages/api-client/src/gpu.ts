@@ -1,4 +1,7 @@
 import type { Client } from './client';
+import { ApiError } from './errors';
+import type { KubeObject } from './resources';
+import { toWorkloadSummary } from './workloads';
 
 /**
  * The GPU extension, as served by ks-apiserver's `gpu.kubesphere.io` API group.
@@ -80,6 +83,7 @@ export interface GpuListParams {
   cluster: string;
   /** Prefix match, server-side. */
   nodeName?: string;
+  labelSelector?: string;
   uuid?: string;
   deviceVendor?: string;
   type?: string;
@@ -169,9 +173,17 @@ export function toGpuStats(body: Record<string, unknown> | undefined): GpuStats 
 }
 
 export function gpusApi(client: Client) {
+  const checkCluster = (cluster: string) => {
+    if (cluster && cluster !== 'host') throw new ApiError({
+      code: 'unsupported_cluster',
+      message: 'GPU reads are only verified for the host cluster; no member routing is available',
+    }, 400);
+  };
   async function list(params: GpuListParams): Promise<GpuListResult> {
+    checkCluster(params.cluster);
     const query: Record<string, string | number | boolean | undefined> = {
       nodeName: params.nodeName,
+      labelSelector: params.labelSelector,
       uuid: params.uuid,
       deviceVendor: params.deviceVendor,
       type: params.type,
@@ -181,12 +193,15 @@ export function gpusApi(client: Client) {
       sortBy: params.sortBy,
       ascending: params.ascending,
     };
+    // An empty UUID is an exact filter for no card, not the absence of a filter.
+    for (const key of Object.keys(query)) if (query[key] === '') delete query[key];
     const body = await client.request<{ items?: RawGpuDevice[]; totalItems?: number }>(gpuPath(), {
       query,
       ...(params.signal ? { signal: params.signal } : {}),
     });
+    if (!Number.isFinite(body?.totalItems)) throw new Error('GPU list total is not available');
     const items = (body?.items ?? []).map(toGpuDevice);
-    return { items, total: Number(body?.totalItems ?? items.length) };
+    return { items, total: body.totalItems! };
   }
 
   return {
@@ -218,10 +233,25 @@ export function gpusApi(client: Client) {
       return result.items[0] ?? null;
     },
     async stats(params: { cluster: string; signal?: AbortSignal }): Promise<GpuStats> {
+      checkCluster(params.cluster);
       const body = await client.request<Record<string, unknown>>(`${gpuPath()}/stats`, {
         ...(params.signal ? { signal: params.signal } : {}),
       });
+      if (!Number.isFinite(Number(body?.total)) || !Number.isFinite(Number(body?.healthy))) {
+        throw new Error('GPU statistics are not available');
+      }
       return toGpuStats(body);
+    },
+    async pods(params: { cluster: string; node: string; uuid: string; page: number; pageSize: number; keyword?: string; signal?: AbortSignal }) {
+      checkCluster(params.cluster);
+      const body = await client.request<{ items?: KubeObject[]; totalItems?: number }>(
+        '/kapis/resources.kubesphere.io/v1alpha3/pods', {
+          query: { nodeName: params.node, gpuUuid: params.uuid, page: params.page, limit: params.pageSize,
+            ...(params.keyword ? { name: params.keyword } : {}) },
+          ...(params.signal ? { signal: params.signal } : {}),
+        });
+      if (!Number.isFinite(body.totalItems)) throw new Error('GPU pod total is not available');
+      return { items: (body.items ?? []).map((pod) => toWorkloadSummary('pods', pod)), total: body.totalItems! };
     },
   };
 }
