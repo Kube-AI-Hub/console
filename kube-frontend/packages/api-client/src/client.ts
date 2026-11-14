@@ -26,14 +26,65 @@ export interface RequestOptions {
 }
 
 /**
+ * Options for a streaming GET.
+ *
+ * A stream is a GET whose body is consumed as it arrives rather than parsed:
+ * container-log `follow` holds the response open for as long as the reader
+ * keeps it, so there is no whole body to parse.
+ */
+export interface StreamOptions {
+  /** Query parameters; `undefined` values are dropped. */
+  query?: Record<string, string | number | boolean | undefined>;
+  signal?: AbortSignal;
+}
+
+/** The request surface every data-access module needs. */
+export interface HttpApi {
+  request<T>(path: string, init?: RequestOptions): Promise<T>;
+}
+
+/**
+ * The streaming surface.
+ *
+ * Kept apart from `HttpApi` because test doubles for the JSON endpoints are
+ * "an object with `request`" on purpose: adding a required `stream` to their
+ * type would make every one of them construct a method no test exercises.
+ * `openPodLogStream` asks for this shape, and the app's real client has both.
+ */
+export interface StreamApi {
+  stream(path: string, init?: StreamOptions): Promise<Response>;
+}
+
+/** What `createClient` returns: JSON requests plus raw streams. */
+export type ApiClient = HttpApi & StreamApi;
+
+/**
  * The single HTTP entry point.
  *
  * Everything the app does over the network goes through here so that auth
  * headers, error normalisation and JSON parsing exist once. A page calling
  * `fetch` directly is what lets an error surface as `[object Object]`.
  */
-export function createClient(options: ClientOptions = {}) {
+export function createClient(options: ClientOptions = {}): ApiClient {
   const baseUrl = options.baseUrl ?? '';
+
+  /** Resolve a request URL against the BFF. */
+  function resolveUrl(
+    path: string,
+    query?: Record<string, string | number | boolean | undefined>,
+  ): URL {
+    const url = new URL(`${baseUrl}${path}`, globalThis.location?.origin ?? 'http://localhost');
+    for (const [key, value] of Object.entries(query ?? {})) {
+      if (value !== undefined) url.searchParams.set(key, String(value));
+    }
+    return url;
+  }
+
+  /** The bearer header, resolved per call so a re-login takes effect immediately. */
+  function authHeaders(): Record<string, string> {
+    const token = options.getToken?.();
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }
 
   async function request<T>(path: string, init: RequestOptions = {}): Promise<T> {
     // Resolved per call, not captured at construction: a stub installed after the
@@ -41,15 +92,10 @@ export function createClient(options: ClientOptions = {}) {
     // and `globalThis.fetch` is the live reference anyway.
     const doFetch = options.fetchImpl ?? globalThis.fetch;
 
-    const url = new URL(`${baseUrl}${path}`, globalThis.location?.origin ?? 'http://localhost');
-    for (const [key, value] of Object.entries(init.query ?? {})) {
-      if (value !== undefined) url.searchParams.set(key, String(value));
-    }
+    const url = resolveUrl(path, init.query);
 
-    const headers: Record<string, string> = { Accept: 'application/json' };
+    const headers: Record<string, string> = { Accept: 'application/json', ...authHeaders() };
     if (init.body !== undefined) headers['Content-Type'] = init.contentType ?? 'application/json';
-    const token = options.getToken?.();
-    if (token) headers.Authorization = `Bearer ${token}`;
 
     let response: Response;
     try {
@@ -76,7 +122,44 @@ export function createClient(options: ClientOptions = {}) {
     return JSON.parse(text) as T;
   }
 
-  return { request };
+  /**
+   * A GET whose body is handed back unparsed, for incremental consumption.
+   *
+   * Returned as the `Response` rather than an iterator so the caller decides
+   * how to decode it — the container-log stream is line-delimited text, while a
+   * future event stream would be SSE. Two rules are kept from `request`:
+   * the bearer header comes from the same place, and a non-2xx answer is turned
+   * into the same `ApiError` instead of being handed to a decoder that would
+   * read an HTML error page as log lines.
+   *
+   * `EventSource` is deliberately not used for this: it cannot carry the
+   * `Authorization` header, and the BFF has no cookie session to fall back on.
+   */
+  async function stream(path: string, init: StreamOptions = {}): Promise<Response> {
+    const doFetch = options.fetchImpl ?? globalThis.fetch;
+    const url = resolveUrl(path, init.query);
+
+    let response: Response;
+    try {
+      response = await doFetch(url.toString(), {
+        method: 'GET',
+        // `*/*` rather than `application/json`: the kube log subresource
+        // negotiates its own media type and answers 406 to `text/plain`, while
+        // `*/*` is served as-is. The body is read as text either way.
+        headers: { Accept: '*/*', ...authHeaders() },
+        ...(init.signal ? { signal: init.signal } : {}),
+      });
+    } catch (cause) {
+      throw new ApiError({ code: 'network_error', message: 'network request failed' }, 0);
+    }
+
+    if (!response.ok) {
+      throw await toApiError(response);
+    }
+    return response;
+  }
+
+  return { request, stream };
 }
 
 async function toApiError(response: Response): Promise<ApiError> {
@@ -169,4 +252,5 @@ function codeForReason(reason: string): string {
   }
 }
 
-export type Client = ReturnType<typeof createClient>;
+/** Read-only view of the client: what a data-access module may call. */
+export type Client = HttpApi;

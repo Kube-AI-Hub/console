@@ -26,6 +26,7 @@ const UPSTREAM_TIMEOUT_MS = 60_000;
 setGlobalDispatcher(new Agent({ keepAliveTimeout: 10_000, connections: 32 }));
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
+import { Readable } from 'node:stream';
 
 const [distDir, portArg, bffUrl] = process.argv.slice(2);
 if (!distDir || !portArg || !bffUrl) {
@@ -73,19 +74,52 @@ createServer(async (request, response) => {
        * later requests saw their own login time out — the suite then reported
        * "502 Bad Gateway" for a stack that was healthy when probed by hand.
        */
+      /*
+       * No `AbortSignal.timeout` on this fetch.
+       *
+       * A deadline is right for a list call and wrong for a stream: the
+       * container-log tail (`/api/v1/…/log?follow=true`) holds its response open
+       * for as long as the reader wants it, so a 60-second ceiling would kill a
+       * perfectly healthy stream mid-read. Connection-level failures still
+       * surface as fetch rejections and are answered with 502 below.
+       */
       const upstream = await fetch(`${bffUrl}${request.url}`, {
         method: request.method,
         headers,
-        signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
         ...(body && body.length ? { body } : {}),
       });
-      const payload = Buffer.from(await upstream.arrayBuffer());
-      response.writeHead(upstream.status, {
+      /*
+       * Stream, do not buffer.
+       *
+       * This used to be `await upstream.arrayBuffer()` with a content-length.
+       * For every JSON call that was fine; for the log tail it means the browser
+       * only ever sees the response when the stream ends — that is, never, so
+       * the live log stayed on "connecting". Passing the body through and
+       * letting Node use chunked encoding is what makes the dev harness behave
+       * like the production entry point.
+       */
+      const responseHeaders = {
         'content-type': upstream.headers.get('content-type') ?? 'application/json; charset=utf-8',
-        'content-length': String(payload.length),
         'cache-control': 'no-store',
+      };
+      const upstreamLength = upstream.headers.get('content-length');
+      if (upstreamLength) responseHeaders['content-length'] = upstreamLength;
+      response.writeHead(upstream.status, responseHeaders);
+      if (!upstream.body) {
+        response.end();
+        return;
+      }
+      const streamed = Readable.fromWeb(upstream.body);
+      // Closing the tab (or the live toggle) must cancel the upstream read too;
+      // a follow response would otherwise keep being read for this process's
+      // lifetime.
+      response.on('close', () => {
+        if (!response.writableEnded) streamed.destroy();
       });
-      response.end(payload);
+      streamed.on('error', () => {
+        if (!response.writableEnded) response.destroy();
+      });
+      streamed.pipe(response);
     } catch (cause) {
       response
         .writeHead(502, { 'content-type': 'application/json; charset=utf-8' })

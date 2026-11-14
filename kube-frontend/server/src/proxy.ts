@@ -163,6 +163,20 @@ export async function proxyRequest(
     upstreamRequest.on('error', reject);
     request.pipe(upstreamRequest);
     request.on('error', reject);
+
+    /*
+     * A reader that walks away must take the upstream request with it.
+     *
+     * Most proxied responses end by themselves, so this did not matter until the
+     * container-log tail arrived: `follow=true` never ends, and toggling "live"
+     * off or navigating away aborts the browser's fetch. Without this the BFF
+     * would keep one follow stream open against ks-apiserver for the life of the
+     * process, per toggle. `close` also fires after a normal end, hence the
+     * `writableEnded` guard so a finished response is not destroyed twice.
+     */
+    response.on('close', () => {
+      if (!response.writableEnded) upstreamRequest.destroy();
+    });
   });
 }
 

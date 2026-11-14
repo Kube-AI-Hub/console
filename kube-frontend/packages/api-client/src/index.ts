@@ -1,4 +1,13 @@
-export { createClient, type Client, type ClientOptions, type RequestOptions } from './client';
+export {
+  createClient,
+  type ApiClient,
+  type Client,
+  type ClientOptions,
+  type HttpApi,
+  type RequestOptions,
+  type StreamApi,
+  type StreamOptions,
+} from './client';
 export { ApiError, type ApiErrorBody } from './errors';
 export {
   projectLabel,
@@ -347,6 +356,9 @@ export type {
 
 export { logSearchApi, auditSearchApi } from './search';
 export type { AuditRecord, AuditSearchResult, HistogramBucket, HistogramResult, LogRecord, LogSearchResult, LogStatistics } from './search';
+
+export { DEFAULT_TAIL_LINES, openPodLogStream, podLogPath, streamPodLogs } from './logs';
+export type { PodLogOptions, PodLogStream, PodLogTarget } from './logs';
 
 export { ipPoolsApi, toIpPoolDetail, toIpPoolSummary } from './network';
 export type { IpPoolDetail, IpPoolSummary } from './network';

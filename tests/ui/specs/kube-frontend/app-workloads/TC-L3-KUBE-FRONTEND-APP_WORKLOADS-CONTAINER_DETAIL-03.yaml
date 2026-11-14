@@ -1,0 +1,38 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: container-detail
+title: 容器详情 · 实时日志 tail
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/kubesphere-system/pods'
+prd: prd/kube-frontend/app-workloads/container-detail.md
+design: design/kube-frontend/app-workloads/container-detail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-03
+
+story:
+- US1
+
+product: 容器详情「日志」区块的「实时」开关：打开后从最近 1 小时的搜索结果切换为 kube log 子资源的流式读取（HTTP chunked），新行追加在底部、最多 1000 行；停止后不再追加，断开可重连。
+preconditions:
+- 已登录
+- kubesphere-system 下存在「当前日志足够大、upstream 会立即开始 tail」的容器（用例先用 API 探到并跳过不满足的环境）
+steps:
+- 用 API 选一个当前日志量足够、follow 请求会立即返回响应头的容器组与容器
+- 打开该容器详情页，确认实时流列表还不存在、开关为关
+- 点「实时」开关
+- 等待流列表出现且 data-ai-state 变为 ready，行数 >= 1 且 <= 1000
+- 点「停止实时」，确认开关回到关、流列表消失、关键字输入框回到搜索视图
+- 再点一次「实时」，确认能重新建立流且再次出现日志行
+expected:
+- 实时流列表出现且至少 1 行，超过 1000 行时只保留最新 1000 行
+- 停止后开关 aria-checked=false，流列表从页面移除，不再追加
+- 关闭时日志搜索区块与关键字输入框恢复；再次打开能重连
+troubleshoot:
+- 一直停在「正在连接日志流…」：该容器日志不足 4 KB，upstream 不 flush 响应头（见技术方案已知坑）；这不是页面缺陷，换日志量大的容器
+- 开关点了没反应：radix Switch 的点击目标是 [role="switch"]，不是外层的 data-ai-id 容器
+- 流列表空但开关已开：先看 network 里 /log?follow=true 是否 200 且 Transfer-Encoding: chunked
+update_automation:
+- 选择器见 ContainerDetailPage.tsx：container-detail:log-follow / log-stream / log-stream-list / log-stream-stop / log-stream-retry

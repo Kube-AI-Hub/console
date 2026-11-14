@@ -106,6 +106,47 @@ describe('proxy', () => {
     expect(call.headers.authorization).toBe('Bearer token-abc');
   });
 
+  it('closes the upstream stream when the reader aborts it', async () => {
+    /*
+     * The container-log tail is a response that never ends. When the reader
+     * aborts it (the "live" toggle switched off, or a navigation) the BFF has to
+     * destroy the upstream request too: otherwise every toggle leaves one follow
+     * stream open against ks-apiserver until the BFF process restarts.
+     */
+    let markClosed: () => void = () => undefined;
+    const upstreamClosed = new Promise<void>((resolve) => {
+      markClosed = resolve;
+    });
+    const upstream = createServer((request, response) => {
+      response.writeHead(200, { 'content-type': 'text/plain' });
+      response.write('first line\n');
+      // The fake stream stays open, like a follow=true log response.
+      request.on('close', () => markClosed());
+      void response;
+    });
+    await new Promise<void>((resolve) => upstream.listen(0, '127.0.0.1', resolve));
+    servers.push(upstream);
+    const address = upstream.address();
+    if (address === null || typeof address === 'string') throw new Error('no port');
+
+    const bff = await startBff(`http://127.0.0.1:${address.port}`);
+    const controller = new AbortController();
+    const response = await fetch(`${bff}/api/v1/namespaces/demo/pods/demo/log?follow=true`, {
+      signal: controller.signal,
+    });
+    expect(response.status).toBe(200);
+    const reader = response.body?.getReader();
+    expect(reader).toBeDefined();
+    // Read one chunk so the proxy is definitely piping before the abort.
+    await reader!.read();
+
+    controller.abort();
+    const timeout = new Promise<never>((_resolve, reject) => {
+      setTimeout(() => reject(new Error('upstream follow stream was left open')), 2000);
+    });
+    await Promise.race([upstreamClosed, timeout]);
+  });
+
   it.each(['POST', 'PUT', 'PATCH', 'DELETE'])('forwards %s with the body intact', async (method) => {
     const upstream = await fakeUpstream(() => ({ status: 201, body: '{"ok":true}' }));
     const bff = await startBff(upstream.baseUrl);
