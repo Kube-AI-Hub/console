@@ -11,6 +11,10 @@
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-04
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-05
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-06
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-07
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-08
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-09
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-10
 
 ## 概述
 
@@ -18,7 +22,7 @@
 
 ## 设计目标与非目标
 
-落实「状态等于 Ready 条件」，提供节点终端、局部元数据写入和关联资源。非目标：节点排空、导入与 GPU 模式切换。
+Ready、调度与负载独立展示，提供节点终端、局部元数据写入和 vGPU 模式配置。非目标：排空、导入、GPU 拓扑及生产模式切换验证。
 
 ## 关键约束
 
@@ -26,13 +30,13 @@
 
 ## 方案决策
 
-### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-01 — 显示可分配量而不是使用率
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-01 — 容量与监控用量独立读取
 
-**为什么**：可分配量来自 Node 对象本身，任何时候都能读到；使用率需要 metrics-server，共享集群上未必可用，且瞬时值不适合做「还剩多少」的判断依据。
+**为什么**：Node 容量用于详情，列表使用监控比率与绝对量；指标不可用不能让节点本身消失。
 
-**被否方案**：显示 CPU/内存使用率。需要额外接口与降级路径，首期不做。
+**被否方案**：把可分配容量当作当前负载，或者缺少监控时显示零，会误导调度判断。
 
-**何时重新考虑**：metrics 接口稳定可用时，再增加使用率列并在不可用时优雅降级。
+**何时重新考虑**：后端提供统一负载快照时，可减少读取次数。
 
 ### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-02 — 关联资源独立读取，按页签延迟加载
 
@@ -82,11 +86,13 @@ CPU 换算成核（1 位小数），内存与存储换算成 GiB/TiB，pods 显�
 
 ## 系统现状
 
-老 console 节点列含状态、角色、GPU、CPU/内存使用率、版本等；本模块取状态、角色、可分配 CPU/内存。
+老页统计、搜索筛选、GPU/显存、容器组、厂商型号、vGPU 与 NTP 已按接口语义迁移，不复制旧 AGPL 实现。
 
 ## 仓库落点
 
-- `pages/cluster/ClusterListPage.tsx`（nodes 分支）
+- `pages/cluster/NodesPage.tsx`、`nodeListQueries.ts`、`GpuModeDialog.tsx`、`gpuModeConfig.ts`
+- `api-client/src/node-list.ts`、`gpu.ts`
+- ai-kit `ResourceList`、`MultiSelect`、`InputSearch`、`StatisticsGroup`、`MetricCell`；共享 Pagination 不另造节点版本。
 - `packages/api-client/src/storage.ts` 的 `toNodeSummary` / `nodeStatus` / `nodeRole`
 - `NodeDetailPage.tsx`、`NodeMetadataDialog.tsx`、`NodeResourcesPanel.tsx` 与共享 `ClusterMonitorPage.tsx`
 - `api-client/src/node-terminal.ts`、`node-resources.ts`、`cluster.ts`
@@ -120,10 +126,14 @@ Pod GET 原生集合，fieldSelector=spec.nodeName；事件 GET /events，fieldS
 ## 测试与可观测
 
 E2E 见 `tests/kube-frontend/cluster-management/`；单测覆盖 `nodeStatus` / `nodeRole`。
+2026-11-14 在 localhost:5178 构建产物验证 NODES-07 至 10：真实读取统计和监控，模拟分页与模式写入，三档截图。
+前端全量 160 条单测、节点 API 8 条、config 契约 12 条以及 ai-kit/Storybook 构建通过。
+既有 NODES-01/02/03/06 通过；NODES-05 因上游节点终端没有输出帧而跳过，不计作通过。
+API 包全量类型检查仍报 test/network-create.test.ts 与 test/workspace-members.test.ts 的 exactOptionalPropertyTypes 错误，未降低检查规则。
 
 ## 后续改进
 
-GPU 模式切换、节点导入、RDMA 端口与 GPU 拓扑仍未在本批交付。
+节点导入、RDMA 端口与 GPU 拓扑仍未交付；member 模式写入需后端提供明确集群路由后开放。
 
 ## 验收用例
 
@@ -131,12 +141,56 @@ GPU 模式切换、节点导入、RDMA 端口与 GPU 拓扑仍未在本批交付
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-05`
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-06`
 
-### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-NODES-02 — 用量列显示**百分比**，容量放在 title 里
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-07 — 总览与过滤列表分别缓存
 
-**为什么**：老 console 的节点列表显示使用率，而第一版迁移只显示了可分配量（`127600m`）——那是容量，不是"现在多忙"。改为 `metrics.k8s.io` 的当前用量 ÷ 可分配量，绝对数值放进 `title`，需要时悬停可见。
+**为什么**：用户要求总览不随筛选变化。stats 与 control-plane 的 queryKey 只有 cluster，列表 key 包含全部条件和分页；基础范围排除 edge。worker 排除 master/control-plane 标签而不是要求 worker 标签。
 
-**单位换算必须显式做**：指标返回 `9983741666n`（纳核），容量是 `127600m`（毫核）。直接相除会得到几百万倍的数字。`quantityToNumber` 统一换算，并有单测覆盖 `n`/`m`/`Ki`/`Gi`。
+**被否方案**：从当前页计算健康率或厂商数量，会把分页结果误作整个集群。
 
-**被否方案**：显示原始字符串。读者要自己换算，且两个数字的单位不同时根本无法比较。
+**何时重新考虑**：产品明确新增筛选结果统计时，只新增独立标签，不改总览口径。
 
-**何时重新考虑**：需要历史趋势时（改为图表，需要监控接口的时间序列）。
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-09 — 批量采样与共享展示组件
+
+**为什么**：当前页按 node 合并监控采样，转义并锚定 resources_filter；NTP 单独读取全部基础范围节点，以全局中位数计算偏移。ai-kit 只负责纯展示和可选通用属性，不承担指标换算或 API。
+
+**被否方案**：逐节点请求导致 N+1；当前页中位数会随分页改变偏移；复制独立列表破坏统一分页交互。
+
+**何时重新考虑**：后端提供完整节点指标快照时替换批量请求。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-10 — 信号提交不等于模式切换完成
+
+**为什么**：GPU PUT 写入 desired 注解后由 agent 异步执行。保存前记录 baseline 时间戳，回读必须匹配新 desired 的模式、参数和 status 时间，不能把旧 completed 当作本次结果。独立五分钟计时停止等待，人工刷新仍可确认晚到结果。
+
+**被否方案**：HTTP 200 立即展示完成；自动重试模式写入可能重复重启设备插件。
+
+**何时重新考虑**：后端提供 requestId 和事务状态接口后，改按 requestId 追踪。
+
+### CON-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-08 — 节点列表和统计
+
+GET resources.kubesphere.io/v1alpha3/[clusters/<cluster>/]nodes，基础 labelSelector=!node-role.kubernetes.io/edge。
+page/limit/sortBy/ascending 控制分页；name 匹配名称或地址；status 为 running/warning/unschedulable；
+role=master 覆盖控制面标签；deviceVendor 逗号分隔 OR；xpuModel 不区分大小写包含。
+GET 同路径 /stats 返回 total/healthy/厂商数量；控制面数量取 role=master&limit=1 的 totalItems。
+
+### CON-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-09 — 指标与单位
+
+GET monitoring.kubesphere.io/v1alpha3/nodes，cluster/last=true/limit=-1，metrics_filter 为白名单。
+GPU 使用率、用量、总量、分配量：node_gpu_utilisation/usage/total/allocated；
+显存：node_gpu_memory_utilisation/usage/total；CPU：node_cpu_utilisation/usage/total；
+内存：node_memory_utilisation/usage_wo_cache/total；容器组：node_pod_running_count/quota；
+时间：node_time_seconds/node_timex_sync_status。实际请求使用完整 node_ 指标名。
+比率乘100；内存和显存为 bytes 换算 GiB；GPU 卡数允许小数。CPU/内存 requests 来自 node.kubesphere.io/*-requests 注解。
+非有限采样忽略，真实零保留；缺失或零分母显示 -；NTP 同步1/0/其他分别为真/假/未知。
+
+### CON-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-10 — host 模式配置
+
+PUT /kapis/gpu.kubesphere.io/v1alpha1/device-plugins/gpu/mode?nodeName=<node>，
+body 为 {mode,params:Record<string,string>}。success=false 作为失败，success=true 仅代表信号提交。
+hami.io/gpu-mode-desired={mode,params,timestamp}；status 注解或 nodeInfo.gpuModeStatus={status,mode,message,timestamp}。
+NVIDIA 的 mig 参数 devicesplitcount；hami-core 加 devicememoryscaling/devicecorescaling；
+寒武纪 dynamic-smlu 参数 min-dsmlu-unit，env-share 参数 virtualization-num。
+API 层禁止 member 写入，页面同步禁用；不静默写 host。
+
+### INV-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-10 — 生产验证只读
+
+B200 模式测试先拦截全部 GPU endpoint，再打开表单；所有 PUT 仅模拟返回，并在结束后核对 desired/status 注解未变。

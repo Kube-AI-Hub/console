@@ -11,6 +11,7 @@ import { MutationAlert, ResourceErrorPanel } from '@/components/resource/Resourc
 import { ExecConsoleDialog } from '@/components/resource/ExecConsoleDialog';
 import { formatTimestamp } from '@/lib/time';
 import { CLUSTER_DESCRIPTORS, useClusterList, useNodeUsage, useProjectPods, withNodeUsage, withProjectUsage, type ClusterKind } from './queries';
+import { NodesPage } from './NodesPage';
 
 /**
  * The cluster console's lists: 节点 and 项目.
@@ -31,7 +32,11 @@ type SortKey = 'name' | 'createTime';
 
 type Row = NodeSummary | NamespaceSummary;
 
-export function ClusterListPage({ kind, cluster }: ClusterListPageProps): React.ReactElement {
+export function ClusterListPage(props: ClusterListPageProps): React.ReactElement {
+  return props.kind === 'nodes' ? <NodesPage cluster={props.cluster} /> : <NamespaceListPage {...props} />;
+}
+
+function NamespaceListPage({ kind, cluster }: ClusterListPageProps): React.ReactElement {
   const t = useT();
   // Cluster-scoped: no project filter, and nothing to reset when the caller changes
   // project — the page has no project context by design.

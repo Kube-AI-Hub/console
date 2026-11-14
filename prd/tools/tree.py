@@ -578,7 +578,18 @@ MODULES = [
                     {
                         "id": "nodes",
                         "title": "节点列表",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-01", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-03", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-04", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-05", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-06"]},
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-01",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-02",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-03",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-04",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-05",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-06",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-07",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-08",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-09",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-10",
+                        ]},
                     },
                     {
                         "id": "components",

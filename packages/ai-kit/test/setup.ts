@@ -28,6 +28,22 @@ if (typeof Element !== 'undefined' && !Element.prototype.scrollIntoView) {
 }
 
 /**
+ * Radix Select calls these on the trigger. jsdom never implemented them, so
+ * opening a Select in a test throws before the list can mount.
+ */
+if (typeof HTMLElement !== 'undefined') {
+  if (!HTMLElement.prototype.hasPointerCapture) {
+    HTMLElement.prototype.hasPointerCapture = () => false;
+  }
+  if (!HTMLElement.prototype.setPointerCapture) {
+    HTMLElement.prototype.setPointerCapture = () => {};
+  }
+  if (!HTMLElement.prototype.releasePointerCapture) {
+    HTMLElement.prototype.releasePointerCapture = () => {};
+  }
+}
+
+/**
  * jsdom has no layout engine, so every `getBoundingClientRect` returns zeros.
  * Radix's popper uses that to decide visibility and skips rendering content it
  * believes has no size. Reporting a plausible box keeps the components

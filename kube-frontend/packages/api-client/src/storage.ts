@@ -228,6 +228,13 @@ export interface NodeSummary extends ResourceBase {
   memoryPercent?: number;
   xpu?: string;
   gpuMode?: string;
+  gpuVendor?: string;
+  gpuModel?: string;
+  gpuModeParams?: Record<string, string>;
+  gpuModeStatus?: { status: string; mode: string; message?: string; timestamp: string };
+  gpuModeDesired?: { mode: string; params?: Record<string, string>; timestamp: string };
+  cpuRequested?: string;
+  memoryRequested?: string;
 }
 
 /**
@@ -376,6 +383,18 @@ export function toNodeSummary(item: KubeNode): NodeSummary {
   const nodeInfo = (item.status?.['nodeInfo'] ?? {}) as Record<string, unknown>;
   const allocatable = (item.status?.['allocatable'] ?? {}) as Record<string, unknown>;
   const labels = (item.metadata?.labels ?? {}) as Record<string, string>;
+  const annotations = (item.metadata?.annotations ?? {}) as Record<string, string>;
+  const annotationObject = (key: string): Record<string, unknown> => {
+    try { const value: unknown = JSON.parse(annotations[key] ?? '{}'); return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {}; }
+    catch { return {}; }
+  };
+  const gpuInfo = { ...annotationObject('hami.io/node-gpu-info'), ...nodeInfo };
+  const xpu = labels['xpu'] ?? '';
+  const dash = xpu.indexOf('-');
+  const gpuVendor = String(labels['xpu-vendor'] || (dash > 0 ? xpu.slice(0, dash) : '') || gpuInfo['gpuVendor'] || (xpu === 'CPU' ? 'CPU' : ''));
+  const gpuModel = String(labels['xpu-model'] || (dash > 0 ? xpu.slice(dash + 1) : '') || gpuInfo['gpuModel'] || '');
+  const modeStatus = (nodeInfo['gpuModeStatus'] ?? annotationObject('hami.io/gpu-mode-status')) as NonNullable<NodeSummary['gpuModeStatus']>;
+  const desired = annotationObject('hami.io/gpu-mode-desired') as NonNullable<NodeSummary['gpuModeDesired']>;
   return {
     ...baseOf(item),
     status: nodeStatus(item),
@@ -386,7 +405,14 @@ export function toNodeSummary(item: KubeNode): NodeSummary {
     memory: String(allocatable['memory'] ?? ''),
     unschedulable: (item.spec ?? {})['unschedulable'] === true,
     xpu: labels['xpu'] || (labels['xpu-vendor'] ? `${labels['xpu-vendor']}-${labels['xpu-model'] ?? ''}` : 'CPU'),
-    gpuMode: String(nodeInfo['virtualCardMode'] ?? ''),
+    gpuMode: String(gpuInfo['virtualCardMode'] ?? ''),
+    gpuVendor,
+    gpuModel,
+    gpuModeParams: (gpuInfo['gpuModeParams'] ?? {}) as Record<string, string>,
+    ...(modeStatus.status && modeStatus.timestamp ? { gpuModeStatus: modeStatus } : {}),
+    ...(desired.mode && desired.timestamp ? { gpuModeDesired: desired } : {}),
+    ...(annotations['node.kubesphere.io/cpu-requests'] !== undefined ? { cpuRequested: annotations['node.kubesphere.io/cpu-requests'] } : {}),
+    ...(annotations['node.kubesphere.io/memory-requests'] !== undefined ? { memoryRequested: annotations['node.kubesphere.io/memory-requests'] } : {}),
   };
 }
 

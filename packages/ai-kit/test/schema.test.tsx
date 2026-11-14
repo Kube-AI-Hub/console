@@ -114,7 +114,8 @@ describe('ResourceList', () => {
     const picker = screen.getByRole('combobox', { name: 'Rows per page' });
     expect(picker).toHaveAttribute('data-ai-id', 'demo:page-size');
     expect(screen.getByText('/ page')).toBeInTheDocument();
-    await userEvent.selectOptions(picker, '50');
+    await userEvent.click(picker);
+    await userEvent.click(await screen.findByRole('option', { name: '50' }));
     expect(onPageSizeChange).toHaveBeenCalledWith(50);
   });
 

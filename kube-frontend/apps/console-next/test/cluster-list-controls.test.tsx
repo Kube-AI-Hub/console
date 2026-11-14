@@ -47,7 +47,8 @@ describe('cluster list controls', () => {
     const user = userEvent.setup();
     await user.click(screen.getByRole('button', { name: '下一页' }));
     await waitFor(() => expect(requests.at(-1)!.searchParams.get('page')).toBe('2'));
-    await user.selectOptions(screen.getByRole('combobox', { name: '每页条数' }), '50');
+    await user.click(screen.getByRole('combobox', { name: '每页条数' }));
+    await user.click(await screen.findByRole('option', { name: /^50$/ }));
     await waitFor(() => {
       expect(requests.at(-1)!.searchParams.get('limit')).toBe('50');
       expect(requests.at(-1)!.searchParams.get('page')).toBe('1');
@@ -62,7 +63,7 @@ describe('cluster list controls', () => {
     expect(requests.length).toBeGreaterThan(count);
     expect(requests.at(-1)!.searchParams.get('limit')).toBe('50');
     expect(requests.at(-1)!.searchParams.get('name')).toBe('sample');
-    expect(document.querySelector(`[data-ai-id="cluster-${kind}:page-size"]`)).toHaveValue('50');
+    expect(document.querySelector(`[data-ai-id="cluster-${kind}:page-size"]`)).toHaveTextContent('50');
   });
 
   it('keeps rows and marks busy during paging, but not after a resource or cluster switch', async () => {

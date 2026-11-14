@@ -1,0 +1,24 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-08
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: nodes
+title: 节点列表 · 搜索筛选和共享分页
+entry_url: "{BASE_URL}/kube-frontend/clusters/host/nodes"
+prd: prd/kube-frontend/cluster-management/nodes.md
+design: design/kube-frontend/cluster-management/nodes.md
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-08
+story:
+- US6
+product: 服务端组合过滤与分页可清除和恢复。
+preconditions:
+- B200 包含 NVIDIA B200 节点及控制面节点
+steps:
+- 按控制面、厂商及型号组合筛选，核对请求条件
+- 清除条件，拦截返回 105 个模拟节点，不创建真实 Node
+- 翻页、改变每页条数、搜索末页节点再清除
+expected:
+- 组合条件传给服务端，改变条件回第一页
+- 分页和条数通过共享组件执行，清除条件恢复完整列表

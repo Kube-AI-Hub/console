@@ -191,6 +191,16 @@ export function gpusApi(client: Client) {
 
   return {
     list,
+    async setMode(params: { cluster: string; node: string; mode: string; params: Record<string, string> }): Promise<{ success: boolean; prevMode: string; newMode: string; message: string }> {
+      if (params.cluster !== 'host' && params.cluster !== '') throw new Error('GPU mode writes are only verified for the host cluster');
+      if (!params.node || !params.mode) throw new Error('A node and mode are required');
+      const body = await client.request<{ success: boolean; prevMode: string; newMode: string; message: string }>(
+        `${KAPIS_GPU}/device-plugins/gpu/mode`, {
+          method: 'PUT', query: { nodeName: params.node }, body: { mode: params.mode, params: params.params },
+        });
+      if (body?.success !== true) throw new Error(body?.message || 'GPU mode signal was not accepted');
+      return body;
+    },
     /**
      * One card, or `null` when the UUID is no longer reported (the card was removed).
      *

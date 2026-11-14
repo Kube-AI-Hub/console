@@ -1,0 +1,23 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-07
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: nodes
+title: 节点列表 · 集群总览
+entry_url: "{BASE_URL}/kube-frontend/clusters/host/nodes"
+prd: prd/kube-frontend/cluster-management/nodes.md
+design: design/kube-frontend/cluster-management/nodes.md
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-07
+story:
+- US6
+product: 列表条件不改变顶部集群统计。
+preconditions:
+- B200 host 集群至少有一个节点
+steps:
+- 读取全局 stats 和控制面 totalItems，与页面逐项对账
+- 搜索无匹配名称，再清除搜索
+expected:
+- 总数、控制面、健康率和厂商数量与接口一致
+- 无匹配时列表为空但总览不变，清除后恢复

@@ -1,0 +1,27 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-10
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: nodes
+title: 节点列表 · vGPU 模式配置状态机
+entry_url: "{BASE_URL}/kube-frontend/clusters/host/nodes"
+prd: prd/kube-frontend/cluster-management/nodes.md
+design: design/kube-frontend/cluster-management/nodes.md
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-10
+story:
+- US7
+product: 模式写入信号与 agent 完成状态明确区分。
+preconditions:
+- 所有 GPU endpoint 在打开表单之前已被测试拦截
+- B200 仅执行真实读取和取消，不提交模式写入
+steps:
+- 打开真实节点模式表单，核对当前值后取消
+- 模拟模式写入，核对风险确认和字符串参数 payload
+- 模拟完成、失败、外部请求、403、业务失败、旧结果和五分钟超时
+- 回读真实节点注解，与开始前比较
+expected:
+- success=true 不立即显示完成，旧结果不能冒充新结果
+- 失败保留输入，超时不重发写入
+- 所有 PUT 被拦截，生产 desired/status 注解不变

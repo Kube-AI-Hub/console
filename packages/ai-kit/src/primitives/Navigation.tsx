@@ -3,6 +3,7 @@ import * as TabsPrimitive from '@radix-ui/react-tabs';
 import * as AccordionPrimitive from '@radix-ui/react-accordion';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { cn } from '../utils/cn';
+import { Select } from './Select';
 
 /* ---------------- Tabs ---------------- */
 
@@ -169,6 +170,7 @@ export interface DropdownItem {
   onSelect?: () => void;
   danger?: boolean;
   disabled?: boolean;
+  aiId?: string;
   /**
    * Marks a choice as current.
    *
@@ -213,6 +215,7 @@ export function Dropdown({
               {item.dividerBefore ? <DropdownMenuPrimitive.Separator className="my-1 h-px bg-ai-line" /> : null}
               <DropdownMenuPrimitive.Item
                 disabled={item.disabled}
+                data-ai-id={item.aiId}
                 onSelect={(event) => {
                   // Radix closes on select by default; keep the menu open when
                   // the host wants to run a multi-step action from one visit.
@@ -427,22 +430,26 @@ export function Pagination({
       <div className="flex items-center gap-3">
         <span>{text.range?.(from, to, total)}</span>
         {onPageSizeChange ? (
-          <label className="flex items-center gap-1">
-            <select
-              className="h-7 rounded-ai-sm border border-ai-line bg-ai-surface-1 px-1.5 text-xs text-ai-fg-secondary"
-              value={pageSize}
+          <div className="flex items-center gap-1">
+            {/*
+             * Same Select as the rest of the kit, not a native `<select>`.
+             * The native popup is the OS list: light, unthemed, and a different
+             * shape from every other dropdown on the page.
+             *
+             * Not wrapped in `<label>`: a label click re-fires the trigger and
+             * Radix toggles the list closed on the same gesture.
+             */}
+            <Select
+              className="w-[5.5rem]"
+              contentClassName="min-w-[12rem]"
+              value={String(pageSize)}
               aria-label={text.pageSize}
               {...(aiPrefix ? { 'data-ai-id': `${aiPrefix}:page-size` } : {})}
-              onChange={(event) => onPageSizeChange(Number(event.target.value))}
-            >
-              {pageSizeOptions.map((size) => (
-                <option key={size} value={size}>
-                  {size}
-                </option>
-              ))}
-            </select>
+              options={pageSizeOptions.map((size) => ({ value: String(size), label: String(size) }))}
+              onValueChange={(next) => onPageSizeChange(Number(next))}
+            />
             <span>{text.pageSizeSuffix}</span>
-          </label>
+          </div>
         ) : null}
       </div>
 

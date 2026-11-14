@@ -102,6 +102,52 @@ class ClusterManagementPage:
     def kubectl_control(self, name: str) -> Locator:
         return self.page.locator(f'[data-ai-id="kubectl:{name}"]')
 
+    def node_control(self, name: str) -> Locator:
+        return self.page.locator(f'[data-ai-id="nodes:{name}"]')
+
+    def node_stat(self, key: str) -> Locator:
+        return self.node_control("stats").locator(f'[data-stat-key="{key}"]')
+
+    def node_metric(self, kind: str, name: str) -> Locator:
+        return self.node_control(f"metric:{kind}:{name}")
+
+    def node_metric_value(self, kind: str, name: str) -> Locator:
+        return self.node_metric(kind, name).locator("span").first
+
+    def node_table(self) -> Locator:
+        return self.surface().locator("table")
+
+    def select_node_filter(self, key: str, label: str) -> None:
+        self.node_control(f"filter:{key}").click()
+        self.page.get_by_role("option", name=label, exact=True).click()
+
+    def select_node_page_size(self, size: int) -> None:
+        picker = self.node_control("page-size")
+        if picker.evaluate("element => element.tagName") == "SELECT":
+            picker.select_option(str(size))
+        else:
+            picker.click()
+            self.page.get_by_role("option", name=str(size), exact=True).click()
+
+    def open_node_action(self, name: str, action: str) -> None:
+        row = self.rows().filter(has=self.page.get_by_role("link", name=name, exact=True))
+        button = row.get_by_role("button", name="更多操作", exact=True)
+        button.scroll_into_view_if_needed()
+        button.click()
+        self.node_control(action).click()
+
+    def node_mode_control(self, name: str) -> Locator:
+        return self.page.locator(f'[data-ai-id="node-mode:{name}"]')
+
+    def node_vendor(self, name: str) -> Locator:
+        return self.node_control(f"vendor:{name}")
+
+    def node_mode(self, name: str) -> Locator:
+        return self.node_control(f"mode:{name}")
+
+    def node_time(self, name: str) -> Locator:
+        return self.node_control(f"ntp:{name}")
+
     def row_names(self, kind: str = "nodes") -> list[str]:
         values = self.surface(kind).locator("[data-ai-row]").evaluate_all(
             "els => els.map(e => e.getAttribute('data-ai-row'))"

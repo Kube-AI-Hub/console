@@ -143,6 +143,9 @@ export interface InputSearchProps extends Omit<InputProps, 'leading' | 'trailing
   /** Hide the submit button and rely on Enter. */
   hideButton?: boolean;
   buttonLabel?: string;
+  clearLabel?: string;
+  clearAiId?: string;
+  onClear?: () => void;
 }
 
 /**
@@ -153,14 +156,20 @@ export interface InputSearchProps extends Omit<InputProps, 'leading' | 'trailing
  * also needs `type="search"` semantics for the native clear affordance.
  */
 export const InputSearch = React.forwardRef<HTMLInputElement, InputSearchProps>(function InputSearch(
-  { className, value, onSearch, onChange, hideButton = false, buttonLabel = '搜索', onKeyDown, ...props },
+  { className, value, onSearch, onChange, hideButton = false, buttonLabel = '搜索', onKeyDown,
+    clearLabel, clearAiId, onClear, ...props },
   ref,
 ) {
+  const inputRef = React.useRef<HTMLInputElement | null>(null);
   const submit = () => onSearch?.(value ?? '');
   return (
     <div className={cn('flex w-full items-center gap-2', className)}>
       <Input
-        ref={ref}
+        ref={(element) => {
+          inputRef.current = element;
+          if (typeof ref === 'function') ref(element);
+          else if (ref) ref.current = element;
+        }}
         type="search"
         value={value}
         onChange={(event) => onChange?.(event.target.value)}
@@ -172,6 +181,11 @@ export const InputSearch = React.forwardRef<HTMLInputElement, InputSearchProps>(
           onKeyDown?.(event);
         }}
         leading={<SearchIcon className="size-3.5" />}
+        trailing={clearLabel && value ? <button type="button" aria-label={clearLabel} data-ai-id={clearAiId}
+          disabled={props.disabled} className="grid size-6 place-items-center rounded-ai-sm text-ai-fg-muted hover:text-ai-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ai-ring"
+          onClick={() => { onChange?.(''); onClear?.(); inputRef.current?.focus(); }}>
+          <svg viewBox="0 0 24 24" className="size-3.5" stroke="currentColor" fill="none" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6" /></svg>
+        </button> : null}
         {...props}
       />
       {hideButton ? null : (

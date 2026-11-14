@@ -3,11 +3,63 @@ import * as SelectPrimitive from '@radix-ui/react-select';
 import * as Popover from '@radix-ui/react-popover';
 import { cn } from '../utils/cn';
 import { inputClassName } from './Input';
+import { Input } from './Input';
+import { Button } from './Button';
+import { Checkbox } from './Toggles';
 
 export interface SelectOption {
   value: string;
   label: string;
   disabled?: boolean;
+}
+
+export interface MultiSelectProps {
+  value: string[];
+  options: SelectOption[];
+  onValueChange: (value: string[]) => void;
+  placeholder: string;
+  clearLabel: string;
+  searchLabel?: string;
+  emptyText?: string;
+  disabled?: boolean;
+  className?: string;
+  'data-ai-id'?: string;
+}
+
+/** Multi-selection is a separate contract; a single Select still owns one string. */
+export function MultiSelect({ value, options, onValueChange, placeholder, clearLabel, searchLabel,
+  emptyText, disabled, className, ...attributes }: MultiSelectProps): React.ReactElement {
+  const [query, setQuery] = React.useState('');
+  const selected = new Set(value);
+  const matches = options.filter((option) => option.label.toLowerCase().includes(query.toLowerCase()));
+  return <Popover.Root>
+    <Popover.Trigger asChild>
+      <Button variant="secondary" disabled={disabled} aria-label={placeholder} className={cn('min-w-40 justify-start', className)} {...attributes}>
+        <span className="max-w-48 truncate">{value.length ? options.filter((option) => selected.has(option.value)).map((option) => option.label).join(', ') : placeholder}</span>
+      </Button>
+    </Popover.Trigger>
+    <Popover.Portal><Popover.Content align="start" sideOffset={6}
+      className="z-50 w-64 rounded-ai-md border border-ai-line bg-ai-bg-overlay p-2 shadow-ai-pop">
+      {searchLabel ? <Input value={query} aria-label={searchLabel} placeholder={searchLabel} onChange={(event) => setQuery(event.target.value)} /> : null}
+      <div className="my-2 flex max-h-60 flex-col gap-1 overflow-y-auto" role="group" aria-label={placeholder}
+        onKeyDown={(event) => {
+          if (!['ArrowDown', 'ArrowUp'].includes(event.key)) return;
+          const buttons = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="checkbox"]:not(:disabled)'));
+          const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
+          const next = (index + (event.key === 'ArrowDown' ? 1 : -1) + buttons.length) % buttons.length;
+          buttons[next]?.focus();
+          event.preventDefault();
+        }}>
+        {matches.map((option) => <label key={option.value} className="flex min-h-9 cursor-pointer items-center gap-2 rounded-ai-sm px-2 text-sm text-ai-fg hover:bg-ai-surface-2">
+          <Checkbox checked={selected.has(option.value)} disabled={option.disabled} aria-label={option.label}
+            onCheckedChange={(checked) => onValueChange(checked ? [...value, option.value] : value.filter((entry) => entry !== option.value))} />
+          {option.label}
+        </label>)}
+        {matches.length === 0 ? <p className="p-2 text-xs text-ai-fg-muted">{emptyText}</p> : null}
+      </div>
+      <Button size="sm" variant="ghost" disabled={value.length === 0} onClick={() => onValueChange([])}>{clearLabel}</Button>
+    </Popover.Content></Popover.Portal>
+  </Popover.Root>;
 }
 
 export interface SelectProps {
@@ -19,6 +71,8 @@ export interface SelectProps {
   disabled?: boolean;
   id?: string;
   className?: string;
+  /** Extra classes for the popup; the trigger already has `className`. */
+  contentClassName?: string;
   /**
    * Let the user filter the list by typing.
    *
@@ -60,6 +114,7 @@ export function Select({
   disabled,
   id,
   className,
+  contentClassName,
   searchable = false,
   emptyText = '无匹配项',
   onOpenChange,
@@ -229,7 +284,10 @@ export function Select({
             sideOffset={4}
             onOpenAutoFocus={(event) => event.preventDefault()}
             onCloseAutoFocus={(event) => event.preventDefault()}
-            className="z-50 max-h-64 w-[var(--radix-popper-anchor-width)] overflow-y-auto rounded-ai-md border border-ai-line bg-ai-bg-overlay p-1 shadow-ai-pop animate-ai-scale-in"
+            className={cn(
+              'z-50 max-h-64 w-[var(--radix-popper-anchor-width)] overflow-y-auto rounded-ai-md border border-ai-line bg-ai-bg-overlay p-1 shadow-ai-pop animate-ai-scale-in',
+              contentClassName,
+            )}
           >
             <ul id={listId} role="listbox" aria-label={aria['aria-label']} data-ai-select-list className="flex flex-col gap-0.5">
               {filtered.length ? (
@@ -302,6 +360,7 @@ export function Select({
             'z-50 max-h-64 min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded-ai-md',
             'border border-ai-line bg-ai-bg-overlay shadow-ai-pop',
             'animate-ai-scale-in',
+            contentClassName,
           )}
         >
           <SelectPrimitive.Viewport className="p-1">
@@ -312,7 +371,8 @@ export function Select({
                 disabled={option.disabled}
                 className={cn(
                   'relative flex cursor-pointer select-none items-center rounded-ai-sm px-2 py-1.5 text-sm text-ai-fg-secondary',
-                  'outline-none data-[highlighted]:bg-ai-surface-2 data-[highlighted]:text-ai-fg',
+                  'outline-none data-[state=checked]:bg-ai-accent/10 data-[state=checked]:text-ai-accent',
+                  'data-[highlighted]:bg-ai-surface-2 data-[highlighted]:text-ai-fg',
                   'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
                 )}
               >

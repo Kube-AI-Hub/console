@@ -1,0 +1,25 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-09
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: nodes
+title: 节点列表 · 指标和列显隐
+entry_url: "{BASE_URL}/kube-frontend/clusters/host/nodes"
+prd: prd/kube-frontend/cluster-management/nodes.md
+design: design/kube-frontend/cluster-management/nodes.md
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-09
+story:
+- US1
+- US6
+product: 节点指标使用正确单位和全局 NTP 口径。
+preconditions:
+- B200 节点监控接口具有 GPU、显存、CPU、内存和容器组采样
+steps:
+- 捕获同次监控响应，逐行核对比率、绝对量、分配量和 GiB
+- 核对厂商、型号、模式及全局时间中位数偏移
+- 在 1024/1280/1600 视口截图，隐藏显存列并恢复
+expected:
+- 数值与采样一致，显存不误用 MiB 口径
+- 表格横向滚动不撑宽页面，列显隐可恢复

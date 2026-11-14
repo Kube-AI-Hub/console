@@ -56,13 +56,13 @@ export function toNodeMetrics(body: { results?: Array<{
 
 export function nodeListApi(client: Client) {
   async function metrics(cluster: string, names: string[], time: boolean, signal?: AbortSignal) {
-    if (!time && names.length === 0) return {};
+    if (names.length === 0) return {};
     const escaped = names.map((name) => name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
     const body = await client.request<Parameters<typeof toNodeMetrics>[0]>('/kapis/monitoring.kubesphere.io/v1alpha3/nodes', {
       query: {
         cluster, limit: -1, last: true,
         metrics_filter: (time ? ['node_time_seconds', 'node_timex_sync_status'] : NODE_LIST_METRICS).map((metric) => `${metric}$`).join('|'),
-        ...(!time ? { resources_filter: `^(?:${escaped.join('|')})$` } : {}),
+        resources_filter: `^(?:${escaped.join('|')})$`,
       },
       ...(signal ? { signal } : {}),
     });
@@ -110,6 +110,12 @@ export function nodeListApi(client: Client) {
       return body.totalItems!;
     },
     metrics: (params: { cluster: string; names: string[]; signal?: AbortSignal }) => metrics(params.cluster, params.names, false, params.signal),
-    timeMetrics: (params: { cluster: string; signal?: AbortSignal }) => metrics(params.cluster, [], true, params.signal),
+    async timeMetrics(params: { cluster: string; signal?: AbortSignal }) {
+      const body = await client.request<{ items?: KubeObject[] }>(base(params.cluster), {
+        query: { limit: -1, labelSelector: NODE_SELECTOR }, ...(params.signal ? { signal: params.signal } : {}),
+      });
+      const names = (body.items ?? []).map((item) => String(item.metadata?.name ?? '')).filter(Boolean);
+      return metrics(params.cluster, names, true, params.signal);
+    },
   };
 }

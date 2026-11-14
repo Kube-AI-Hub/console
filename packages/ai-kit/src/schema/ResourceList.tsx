@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { cn } from '../utils/cn';
 import { Button } from '../primitives/Button';
-import { Input } from '../primitives/Input';
-import { Select } from '../primitives/Select';
+import { InputSearch } from '../primitives/Input';
+import { Select, MultiSelect } from '../primitives/Select';
 import { Table, type SortOrder, type TableColumn, type TableSortState } from '../primitives/Table';
 import { Pagination } from '../primitives/Navigation';
 import { Badge, Empty } from '../primitives/Display';
@@ -32,6 +32,8 @@ export interface ListColumn<TRow> {
    * trades row height for being able to read the cell.
    */
   wrap?: boolean;
+  /** Opt in to the host-controlled column chooser. Key columns remain visible. */
+  hideable?: boolean;
 }
 
 /**
@@ -46,7 +48,9 @@ export interface ListFilter {
   title: string;
   /** Label for the "no filter" option; defaults to `全部{title}`. */
   allLabel?: string;
-  options: Array<{ value: string; label: string }>;
+  options?: Array<{ value: string; label: string }>;
+  type?: 'select' | 'text';
+  multiple?: boolean;
   /**
    * Let the reader type to narrow the options.
    *
@@ -105,6 +109,7 @@ export interface ListSchema<TRow> {
   rowKey: keyof TRow | ((row: TRow) => string);
   columns: Array<ListColumn<TRow>>;
   filters?: ListFilter[];
+  columnVisibility?: { label: string; resetLabel: string; aiId?: string };
   search?: {
     placeholder?: string;
     /**
@@ -201,6 +206,9 @@ export interface ListSchema<TRow> {
     confirmCancel?: string;
     /** Proceed from the confirmation dialog. */
     confirmOk?: string;
+    clearSearch?: string;
+    clearFilters?: string;
+    clearFilter?: (title: string) => string;
   };
   /**
    * Extra attributes for each row element.
@@ -252,6 +260,8 @@ export interface ResourceListProps<TRow> {
   /** Called with the primary action key and the current selection. */
   onBulkAction?: (action: string, keys: string[]) => void;
   className?: string;
+  visibleColumnKeys?: string[];
+  onVisibleColumnsChange?: (keys: string[]) => void;
 }
 
 /* ---------------- Built-in column renderers ---------------- */
@@ -324,6 +334,8 @@ export function ResourceList<TRow>({
   onSortChange,
   onAction,
   onBulkAction,
+  visibleColumnKeys,
+  onVisibleColumnsChange,
   className,
 }: ResourceListProps<TRow>): React.ReactElement {
   const keyOf = React.useCallback(
@@ -353,7 +365,9 @@ export function ResourceList<TRow>({
 
   const columns: Array<TableColumn<TRow>> = React.useMemo(() => {
     const sortableKeys = new Set(schema.sortableKeys ?? []);
-    const mapped: Array<TableColumn<TRow>> = schema.columns.map((column) => ({
+    const mapped: Array<TableColumn<TRow>> = schema.columns
+      .filter((column) => !column.hideable || !visibleColumnKeys || visibleColumnKeys.includes(column.key))
+      .map((column) => ({
       key: column.key,
       title: column.title,
       width: column.width,
@@ -425,6 +439,7 @@ export function ResourceList<TRow>({
                 label: action.label,
                 danger: action.tone === 'danger',
                 disabled: action.disabled?.(row) ?? false,
+                aiId: action.aiId,
                 onSelect: () => {
                   askConfirm(action, () => onAction?.(action.key, row));
                 },
@@ -436,7 +451,7 @@ export function ResourceList<TRow>({
     }
 
     return mapped;
-  }, [schema.columns, schema.sortableKeys, schema.rowActions, schema.labels, onAction, askConfirm]);
+  }, [schema.columns, schema.sortableKeys, schema.rowActions, schema.labels, onAction, askConfirm, visibleColumnKeys]);
 
   const hasToolbar = Boolean(schema.search || schema.filters?.length || (schema.refresh && onRefresh));
 
@@ -484,6 +499,18 @@ export function ResourceList<TRow>({
            * number of filters.
            */}
           {schema.filters?.map((filter) => (
+            <div key={filter.key} className="flex items-center gap-1">
+            {filter.type === 'text' ? <InputSearch hideButton type="text" className={filter.widthClass ?? 'w-40'} value={filters?.[filter.key] ?? ''}
+              aria-label={filter.title} placeholder={filter.title} data-ai-id={filter.aiId}
+              clearLabel={schema.labels?.clearFilter?.(filter.title)}
+              clearAiId={filter.aiId ? `${filter.aiId}:clear` : undefined}
+              onChange={(value) => onFiltersChange?.({ ...filters, [filter.key]: value })} /> :
+            filter.multiple ? <MultiSelect options={filter.options ?? []}
+              value={(filters?.[filter.key] ?? '').split(',').filter(Boolean)}
+              onValueChange={(values) => onFiltersChange?.({ ...filters, [filter.key]: values.join(',') })}
+              placeholder={filter.title} clearLabel={schema.labels?.clearFilter?.(filter.title) ?? filter.title}
+              searchLabel={filter.searchable ? filter.title : undefined} emptyText={filter.emptyText}
+              data-ai-id={filter.aiId} className={filter.widthClass ?? 'w-40'} /> :
             <Select
               key={filter.key}
               className={cn('shrink-0', filter.widthClass ?? 'w-40')}
@@ -494,14 +521,23 @@ export function ResourceList<TRow>({
                 onFiltersChange?.({ ...filters, [filter.key]: value === ALL_OPTION ? '' : value })
               }
               {...(filter.aiId ? { 'data-ai-id': filter.aiId } : {})}
-              options={[{ value: ALL_OPTION, label: filter.allLabel ?? `全部${filter.title}` }, ...filter.options]}
+              options={[{ value: ALL_OPTION, label: filter.allLabel ?? `全部${filter.title}` }, ...(filter.options ?? [])]}
               {...(filter.searchable ? { searchable: true } : {})}
               {...(filter.emptyText ? { emptyText: filter.emptyText } : {})}
-            />
+            />}
+            {filter.type !== 'text' && filters?.[filter.key] && schema.labels?.clearFilter ? <Button size="icon" variant="ghost"
+              aria-label={schema.labels.clearFilter(filter.title)} data-ai-id={filter.aiId ? `${filter.aiId}:clear` : undefined}
+              onClick={() => onFiltersChange?.({ ...filters, [filter.key]: '' })}>
+              <span aria-hidden="true">x</span>
+            </Button> : null}
+            </div>
           ))}
+          {schema.labels?.clearFilters && (searchValue || Object.values(filters ?? {}).some(Boolean)) ?
+            <Button size="sm" variant="ghost" data-ai-id={schema.sortAiPrefix ? `${schema.sortAiPrefix}:filters-clear` : undefined}
+              onClick={() => { onSearchChange?.(''); onFiltersChange?.({}); }}>{schema.labels.clearFilters}</Button> : null}
 
           {schema.search ? (
-            <Input
+            <InputSearch hideButton
               // Full width on a phone so the search field is reachable; a fixed
               // 224px box pushed the action buttons onto a second line.
               className="w-full sm:w-64"
@@ -509,15 +545,25 @@ export function ResourceList<TRow>({
               placeholder={schema.search.placeholder ?? '搜索'}
               aria-label={schema.search.placeholder ?? '搜索'}
               {...(schema.search.aiId ? { 'data-ai-id': schema.search.aiId } : {})}
-              onChange={(event) => onSearchChange?.(event.target.value)}
-              leading={
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true" className="size-3.5">
-                  <circle cx="11" cy="11" r="7" />
-                  <path d="m20 20-3.5-3.5" />
-                </svg>
-              }
+              onChange={(value) => onSearchChange?.(value)}
+              clearLabel={schema.labels?.clearSearch}
+              clearAiId={schema.search.aiId ? `${schema.search.aiId}:clear` : undefined}
             />
           ) : null}
+          {schema.columnVisibility && onVisibleColumnsChange ? <Dropdown closeOnSelect={false}
+            trigger={<Button size="sm" variant="secondary" data-ai-id={schema.columnVisibility.aiId}>{schema.columnVisibility.label}</Button>}
+            items={[
+              ...schema.columns.filter((column) => column.hideable).map((column) => ({
+                key: column.key, label: column.title, aiId: `${schema.columnVisibility?.aiId}:${column.key}`,
+                checked: !visibleColumnKeys || visibleColumnKeys.includes(column.key),
+                onSelect: () => {
+                  const keys = visibleColumnKeys ?? schema.columns.map((entry) => entry.key);
+                  onVisibleColumnsChange(keys.includes(column.key) ? keys.filter((key) => key !== column.key) : [...keys, column.key]);
+                },
+              })),
+              { key: '__reset', label: schema.columnVisibility.resetLabel, dividerBefore: true,
+                aiId: `${schema.columnVisibility.aiId}:reset`, onSelect: () => onVisibleColumnsChange(schema.columns.map((column) => column.key)) },
+            ]} /> : null}
 
           {/*
            * Refresh sits after the search box, where the old console puts it: next to

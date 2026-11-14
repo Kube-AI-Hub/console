@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
-import { Select } from '../src/primitives/Select';
+import { Select, MultiSelect } from '../src/primitives/Select';
 import { ComponentDocs } from './_docs-layout';
 
 const meta: Meta<typeof Select> = {
@@ -107,5 +107,14 @@ export const SearchableLongList: Story = {
         <Select searchable options={options} value={value} onValueChange={setValue} placeholder="搜索节点" aria-label="节点" />
       </div>
     );
+  },
+};
+
+export const MultipleChoices: StoryObj = {
+  render: () => {
+    const [value, setValue] = React.useState<string[]>([]);
+    return <MultiSelect value={value} onValueChange={setValue} placeholder="选择厂商" clearLabel="清除厂商"
+      searchLabel="搜索厂商" emptyText="没有匹配的厂商"
+      options={[{ value: 'nvidia', label: '英伟达' }, { value: 'cambricon', label: '寒武纪' }, { value: 'CPU', label: 'CPU 节点' }]} />;
   },
 };

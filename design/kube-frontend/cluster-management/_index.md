@@ -11,11 +11,11 @@
 
 ## 概述
 
-集群作用域的两张只读表：节点与项目。
+集群作用域的节点与项目列表；节点支持调度、元数据、终端及 host vGPU 模式配置。
 
 ## 设计目标与非目标
 
-目标：集群作用域有自己的布局，不借用项目布局。非目标：集群写操作。
+目标：集群作用域有自己的布局，不借用项目布局。节点写操作的授权、并发与异步边界由 [nodes.md](./nodes.md) 定义；非目标为节点排空和项目写操作。
 
 ## 关键约束
 
@@ -64,7 +64,7 @@
 
 ## 系统现状
 
-老 console `pages/clusters/containers/{Nodes,Projects}`，通过平台切换器进入集群管理；节点列含状态、角色、GPU、CPU/内存使用率，本模块先做静态可分配量与角色。
+节点页已独立为 NodesPage，统计、筛选、GPU/显存、容器组、厂商型号、模式及 NTP 使用后端契约；项目列表保留既有实现。
 
 ## 仓库落点
 
@@ -76,6 +76,8 @@
 
 读集群级 kapis 集合。节点调度、元数据与终端的版本化契约见 [nodes.md](./nodes.md)；
 节点终端复用共享 ExecConsoleDialog 与 TerminalView，独立 JSON 传输在 api-client，授权和访问 Pod 生命周期仍在后端。
+节点列表复用 ResourceList/Table/Pagination；MultiSelect、StatisticsGroup、MetricCell 为 ai-kit 的通用展示能力。
+全局统计与筛选列表使用独立缓存，模式 success=true 仅表示提交，member GPU 写路由禁止回退 host。
 
 ## 不变量
 
@@ -93,7 +95,7 @@ E2E：`tests/kube-frontend/cluster-management/`。
 
 ## 后续改进
 
-GPU 列、使用率列（需要 metrics 接口）、集群概览与设置页。
+节点导入、RDMA 端口、GPU 拓扑，以及 member GPU 模式写路由。
 
 ## 验收用例
 

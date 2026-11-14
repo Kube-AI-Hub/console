@@ -37,7 +37,8 @@ export {
   type InputPasswordProps,
   type InputSearchProps,
 } from './primitives/Input';
-export { Select, type SelectProps, type SelectOption } from './primitives/Select';
+export { Select, MultiSelect, type SelectProps, type SelectOption, type MultiSelectProps } from './primitives/Select';
+export { StatisticsGroup, MetricCell, type StatisticItem, type StatisticsGroupProps, type MetricCellProps } from './primitives/Statistics';
 export {
   Checkbox,
   CheckboxGroup,

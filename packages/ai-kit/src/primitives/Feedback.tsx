@@ -72,18 +72,19 @@ export interface ModalProps {
   dismissOnOutside?: boolean;
   closeAiId?: string;
   closeLabel?: string;
+  closeDisabled?: boolean;
 }
 
 const modalSizes = { sm: 'max-w-sm', md: 'max-w-lg', lg: 'max-w-2xl', xl: 'max-w-4xl', console: 'max-w-none h-[calc(100dvh-1rem)]' } as const;
 
-export function Modal({ open, onOpenChange, title, description, children, footer, size = 'md', dismissOnEscape = true, dismissOnOutside = true, closeAiId, closeLabel = '关闭' }: ModalProps): React.ReactElement {
+export function Modal({ open, onOpenChange, title, description, children, footer, size = 'md', dismissOnEscape = true, dismissOnOutside = true, closeAiId, closeLabel = '关闭', closeDisabled = false }: ModalProps): React.ReactElement {
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-[2px] animate-ai-fade-in" />
         <DialogPrimitive.Content
-          onEscapeKeyDown={(event) => { if (!dismissOnEscape) event.preventDefault(); }}
-          onPointerDownOutside={(event) => { if (!dismissOnOutside) event.preventDefault(); }}
+          onEscapeKeyDown={(event) => { if (!dismissOnEscape || closeDisabled) event.preventDefault(); }}
+          onPointerDownOutside={(event) => { if (!dismissOnOutside || closeDisabled) event.preventDefault(); }}
           // Confirm dialogs have a title and no extra copy; without this Radix
           // warns that the dialog is missing a description, then would point
           // `aria-describedby` at nothing.
@@ -121,7 +122,7 @@ export function Modal({ open, onOpenChange, title, description, children, footer
               ) : null}
             </div>
             <DialogPrimitive.Close asChild>
-              <Button variant="ghost" size="icon" aria-label={closeLabel} data-ai-id={closeAiId}>
+              <Button variant="ghost" size="icon" disabled={closeDisabled} aria-label={closeLabel} data-ai-id={closeAiId}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                   <path d="M18 6 6 18M6 6l12 12" />
                 </svg>

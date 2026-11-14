@@ -65,7 +65,8 @@ describe('node page controls', () => {
     }));
     mount(<ClusterListPage cluster="host" kind="nodes" />);
     await screen.findByText('gpu01');
-    await userEvent.selectOptions(screen.getByRole('combobox', { name: '每页条数' }), '20');
+    await userEvent.click(screen.getByRole('combobox', { name: '每页条数' }));
+    await userEvent.click(screen.getByRole('option', { name: /^20$/ }));
     await waitFor(() => expect(calls.at(-1)?.searchParams.get('limit')).toBe('20'));
     const before = calls.length;
     await userEvent.click(screen.getByRole('button', { name: '刷新' }));

@@ -209,4 +209,25 @@ describe('Pagination', () => {
     expect(current.className).not.toContain('bg-ai-accent-soft');
     expect(current.className).not.toContain('text-ai-accent ');
   });
+
+  it('opens the page-size list with the same popup as Select', async () => {
+    render(
+      <Pagination
+        page={1}
+        pageSize={20}
+        total={95}
+        pageSizeOptions={[10, 20, 50, 100]}
+        onChange={() => undefined}
+        onPageSizeChange={() => undefined}
+      />,
+    );
+    await userEvent.click(screen.getByRole('combobox', { name: '每页条数' }));
+    const list = await screen.findByRole('listbox');
+    const popup = list.closest('[class*="bg-ai-bg-overlay"]');
+    expect(popup).not.toBeNull();
+    expect(popup?.className).toMatch(/shadow-ai-pop/);
+    expect(popup?.className).toMatch(/min-w-\[12rem\]/);
+    expect(screen.getByRole('option', { name: '10' }).className).toMatch(/text-sm/);
+    expect(document.querySelector('select')).toBeNull();
+  });
 });
