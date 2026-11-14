@@ -4,7 +4,7 @@ suite: point
 module: kube-frontend
 submodule: cluster-management
 feature: cluster-list
-title: 集群列表 · 移除成员集群
+title: 集群列表按 host/成员筛选
 entry_url: '{BASE_URL}/kube-frontend/clusters'
 prd: prd/kube-frontend/cluster-management/cluster-list.md
 design: design/kube-frontend/cluster-management/cluster-list.md
@@ -13,27 +13,24 @@ covers:
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-03
 
 story:
-- US4
+- US1
 
-product: 非主集群可从行操作「移除集群」，需输入集群名确认；移除后 Cluster 对象不存在，列表不再包含它；主集群行没有该操作。
+product: 集群列表用「集群类型」筛选区分 host 与成员集群。
 preconditions:
-- 已登录平台管理
-- 用例先创建一个临时 proxy 集群对象（tc-e2e- 前缀），finally 中确保删除
+- 已登录且 multicluster 开启（列表不被单集群重定向吃掉）
 steps:
-- 用 API 创建一个临时 proxy 集群
-- 打开集群列表，定位该集群行
-- 打开行操作菜单，点「移除集群」
-- 核对确认按钮在输入名称前不可用
-- 输入集群名并确认
-- 用 API 回读该集群对象
-- 核对主集群行没有「移除集群」
+- 打开集群列表
+- 把「集群类型」筛选设为「主集群」
+- 设为成员
+- 清除筛选
+steps_expected:
+- Host 时只剩 host 集群行
+- 成员时 host 行不出现
+- 清除后恢复全部行，host 仍在前
 expected:
-- 确认按钮只有在输入名称后才可用
-- 移除后回读该对象为 404，列表不再包含它
-- 主集群行没有「移除集群」入口
+- 三次断言都以行 attribute 判定，无需写操作
 troubleshoot:
-- 移除后仍能读到：确认删的是集群对象而不是其它资源
-- 出现「移除集群」在主集群上：角色判定应来自 cluster-role.kubesphere.io/host 标签
-- 对话框无法确认：输入必须与对象名完全一致
+- 列表跳到单集群 overview：multicluster 未开启
+- 筛选后仍显示全部：filter 未接到 rows 计算
 update_automation:
-- 选择器见 pages/cluster_fleet.py 与 MultiClusterListPage.tsx
+- 选择器：clusters:filter:type / data-ai-row

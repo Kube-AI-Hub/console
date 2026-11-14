@@ -62,9 +62,19 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
     if (only) window.location.replace(`/kube-frontend/clusters/${encodeURIComponent(only)}/overview`);
   }, [all, configLoading, multicluster]);
   const keyword = list.search.trim().toLowerCase();
+  /*
+   * Host vs member is the fleet's only real grouping. A column already says which is which;
+   * a filter is what makes it operational ("show me the member clusters that may be lagging").
+   */
+  const [typeFilter, setTypeFilter] = React.useState<string>('');
+  const byType = typeFilter === 'host'
+    ? all.filter((row) => row.isHost)
+    : typeFilter === 'member'
+      ? all.filter((row) => !row.isHost)
+      : all;
   const filtered = keyword
-    ? all.filter((row) => row.name.toLowerCase().includes(keyword) || row.provider.toLowerCase().includes(keyword))
-    : all;
+    ? byType.filter((row) => row.name.toLowerCase().includes(keyword) || row.provider.toLowerCase().includes(keyword))
+    : byType;
   const rows = React.useMemo(() => {
     // The host cluster first, whatever the sort: it is the cluster the platform runs
     // on, and the one a reader looks for by default.
@@ -85,6 +95,17 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
       search: { placeholder: t('cluster.searchPlaceholder'), aiId: 'clusters:search' },
+      filters: [
+        {
+          key: 'type',
+          title: t('cluster.list.type'),
+          aiId: 'clusters:filter:type',
+          options: [
+            { value: 'host', label: t('cluster.list.host') },
+            { value: 'member', label: t('cluster.list.member') },
+          ],
+        },
+      ],
       refresh: { label: t('cluster.list.refresh'), aiId: 'clusters:refresh', busy: query.isFetching },
       sortableKeys: ['name', 'createTime', 'nodeCount'],
       sortAiPrefix: 'clusters',
@@ -235,6 +256,8 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
         loading={state === 'loading'}
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}
+        filters={{ type: typeFilter }}
+        onFiltersChange={(next) => setTypeFilter(next.type ?? '')}
         onRefresh={() => void query.refetch()}
         onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
           if (next) list.setSort(next);

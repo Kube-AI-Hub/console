@@ -629,12 +629,17 @@ MODULES = [
                     {
                         "id": "storage-classes",
                         "title": "存储类型",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-01", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-02"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-01", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-02", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-03"]},
                     },
                     {
                         "id": "projects",
                         "title": "项目列表",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-PROJECTS-01"]},
+                    },
+                    {
+                        "id": "namespace-detail",
+                        "title": "集群下的项目详情",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NAMESPACE_DETAIL-01"]},
                     },
                     {
                         "id": "settings",
@@ -885,6 +890,11 @@ MODULES = [
                         "id": "snapshot-content",
                         "title": "快照内容视图",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOT_CONTENT-01"]},
+                    },
+                    {
+                        "id": "detail-snapshots",
+                        "title": "存储详情的快照页签",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-STORAGE-DETAIL_SNAPSHOTS-01"]},
                     },
                     {
                         "id": "snapshots",
