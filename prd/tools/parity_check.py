@@ -51,6 +51,7 @@ PROJECT_PAGES = {
     "members": "members",
     "baseinfo": "baseinfo",
     "network": "networkpolicies",
+    "custommonitoring": "custom-monitoring",
     "gateway": "gateways",
     "logcollection": "log-collections",
 }
@@ -69,6 +70,15 @@ CLUSTER_PAGES = {
     "monitor": "monitor",
     "visibility": "visibility",
     "customresources": "custom-resources",
+    "volumes": "persistentvolumeclaims",
+    "volume-snapshots": "volume-snapshots",
+    "volume-snapshot-classes": "volume-snapshot-classes",
+    "alerts": "alerting-messages",
+    "alert-rules": "alerting-policies",
+    "configmaps": "configmaps",
+    "secrets": "secrets",
+    "serviceaccounts": "serviceaccounts",
+    "gpus": "gpus",
 }
 
 #: 集群作用域里明确不迁移的页面与原因。
@@ -78,9 +88,6 @@ CLUSTER_UNMIGRATED = {
     "kubeconfig": "集群 kubeconfig 读取：读接口 405（见 §5.5）；导入更新已迁移",
     "edgenodes": "边缘节点：edge 模块未开启",
     "network": "集群网络（IPPools/策略）：network 模块未开启",
-    "configmaps": "跨项目配置字典：作用域错误——项目资源只在项目作用域看（并行线已移除集群页）",
-    "secrets": "跨项目保密字典：同上，作用域错误",
-    "serviceaccounts": "跨项目服务账户：同上，作用域错误",
 }
 
 #: 老页面存在、但在另一个作用域迁移的页面（同一批对象，不重复造页面）。
