@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/project-settings/members.md`](../../../../prd/kube-frontend/project-settings/members.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-02** — 已知项目内没有某成员，当点「邀请成员」并提交存在的用户名与项目角色，则该用户出现在成员列表中且 `iam.kubesphere.io/role` 为所选角色；对该成员执行「修改角色」并提交新角色后，回读角色已更新；执行「移除成员」确认后，该成员从列表与接口中消失（用户账号本身不受影响）。
+- **AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-02** — 已知项目内没有某成员，当点「邀请成员」并提交存在的用户名与项目角色，则该用户出现在成员列表中且 `iam.kubesphere.io/role` 为所选角色；对该成员执行「修改角色」并提交新角色后，回读角色已更新；执行「移除成员」确认后，该成员从列表与接口中消失（用户账号本身不受影响）。POST 体为数组成员；PUT/DELETE 按用户名。
 
 ### 关联设计
 
@@ -32,7 +32,7 @@
 
 作为 **项目管理员**，我希望 **把平台用户加入项目、改他们的角色、或把他们移出项目**，以便 **不用去平台级用户管理里绕一圈**。
 
-**Independent Test**：邀请 ui-test 为 viewer → 回读成员存在且角色为 viewer → 改为 operator → 回读角色更新 → 移除 → 回读成员不存在。
+**Independent Test**：邀请一次性账号为 viewer → 回读成员存在且角色为 viewer → 改为 operator → 回读角色更新 → 移除 → 回读成员不存在，平台账号仍在。
 
 ## 前置与配置
 

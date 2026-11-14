@@ -1023,6 +1023,7 @@ modules:
         L3:
         - TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-01
         - TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-02
+        - TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-03
     - id: gateway
       title: 网关设置
       prd: prd/kube-frontend/project-settings/gateway.md

@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/app-store/workspace-repos.md`](../../../../prd/kube-frontend/app-store/workspace-repos.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-02** — （需求里找不到这条 AC，请先补需求或改 `covers`）
+- **AC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-02** — 已知企业空间有一个可访问的 Helm 仓库地址，当在仓库列表点「添加仓库」填写名称与该地址并提交，则列表新增该仓库（名称/地址可见、接口回读一致）；地址不可达时提交显示服务端返回的具体原因且不新增行；对新增仓库执行「移除」后接口与列表都不再包含它。
 
 ### 关联设计
 

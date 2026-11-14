@@ -1,4 +1,4 @@
-# TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-01 项目成员 · 列表四列
+# TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-01 项目成员 · 列表四列与最近登录
 
 - **用例 ID**: `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-01`
 - **级别**: L3  **套件**: `point`
@@ -8,7 +8,7 @@
 
 ## 产品功能
 
-['成', '员', '列', '表', '显', '示', '名', '称', '、', '状', '态', '、', '角', '色', '、', '最', '近', '活', '动', '，', '角', '色', '与', '注', '解', '一', '致', '。']
+项目成员列表显示名称（副行邮箱）、状态、角色、最近登录，角色与注解一致。
 
 ### 关联需求
 
@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/project-settings/members.md`](../../../../prd/kube-frontend/project-settings/members.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-01** — 已知项目内有成员，当打开成员列表，则显示名称、状态、角色、最近活动四列。
+- **AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-01** — 已知项目内有成员，当打开成员列表，则显示名称（副行邮箱）、状态、角色、最近登录四列；角色列等于 `iam.kubesphere.io/role`；状态显示「活跃 / 已停用」；从未登录显示「尚未登录」。
 
 ### 关联设计
 
@@ -30,9 +30,9 @@
 
 ### US1 - 看清谁在这个项目里、是什么角色 (Priority: P1)
 
-作为 **项目管理员**，我希望 **在列表上看到每个成员的角色与状态**，以便 **确认访问范围**。
+作为 **项目管理员**，我希望 **在列表上看到每个成员的角色、状态、邮箱与最近登录**，以便 **确认访问范围**。
 
-**Independent Test**：打开成员列表，核对列与某个成员的 `iam.kubesphere.io/role` 注解一致。
+**Independent Test**：打开成员列表，核对列与某个成员的 `iam.kubesphere.io/role` 注解一致；状态为「活跃 / 已停用」；未登录显示「尚未登录」。
 
 ## 前置与配置
 
@@ -47,9 +47,9 @@
 
 ## 期望结果
 
-- 表头依次为 名称、状态、角色、最近活动
+- 表头依次为 名称、状态、角色、最近登录
 - 角色列等于注解值
-- 状态为 活跃 或 未激活
+- 状态为 活跃 或 已停用
 
 ## 失败排查
 
