@@ -119,8 +119,8 @@ PLANNED: dict[str, str] = {
 #: 它们必须在这里出现，否则「不迁移」和「忘了枚举」看起来一模一样。
 SCOPE_DECISIONS: dict[str, tuple[str, str]] = {
     # 2026-11-15：两个整块作用域随组件开启进入迁移范围，按区域分批交付。
-    "devops": ("planned", "DevOps 工程：模块已开启，待迁移（计划 §3.0）"),
-    "fedprojects": ("planned", "联邦项目：模块已开启，待迁移（计划 §3.0）"),
+    "devops": ("migrated", "DevOps 工程：列表/详情/页签/流水线详情已迁移"),
+    "fedprojects": ("migrated", "联邦项目：列表/详情/资源详情已迁移"),
 }
 
 #: 老段 → 新 UI 的页面位置。用于**不在某个作用域目录下**的页面
