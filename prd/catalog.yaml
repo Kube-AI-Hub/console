@@ -1040,6 +1040,20 @@ modules:
       L2:
       - TC-FULL-KUBE-FRONTEND-APP_WORKLOADS-01
     features:
+    - id: empty-state-exit
+      title: 列表空态出口
+      prd: prd/kube-frontend/app-workloads/empty-state-exit.md
+      design: design/kube-frontend/app-workloads/empty-state-exit.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EMPTY_EXIT-01
+    - id: resource-create
+      title: 服务与应用路由创建
+      prd: prd/kube-frontend/app-workloads/resource-create.md
+      design: design/kube-frontend/app-workloads/resource-create.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CREATE_SERVICE_INGRESS-01
     - id: column-visibility
       title: 列表列显隐
       prd: prd/kube-frontend/app-workloads/column-visibility.md

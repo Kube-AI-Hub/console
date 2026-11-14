@@ -908,6 +908,16 @@ MODULES = [
                 "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-APP_WORKLOADS-01"]},
                 "features": [
                     {
+                        "id": "empty-state-exit",
+                        "title": "列表空态出口",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EMPTY_EXIT-01"]},
+                    },
+                    {
+                        "id": "resource-create",
+                        "title": "服务与应用路由创建",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CREATE_SERVICE_INGRESS-01"]},
+                    },
+                    {
                         "id": "column-visibility",
                         "title": "列表列显隐",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_WORKLOADS-COLUMN_VISIBILITY-01"]},
