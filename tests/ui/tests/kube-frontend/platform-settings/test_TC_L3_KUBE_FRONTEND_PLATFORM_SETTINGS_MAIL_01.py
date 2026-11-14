@@ -17,10 +17,13 @@ OBJECTS = {
 
 
 @pytest.mark.point
-def test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_MAIL_01(page, ui_config, screenshot):
+def test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_MAIL_01(platform_settings_page, ui_config, screenshot):
     """TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-MAIL-01 邮件渠道：校验、保存与回显。"""
 
     app = ui_config.app
+    # The page object carries the authenticated API client used to read back and to clean up.
+    page = platform_settings_page.page
+    api = platform_settings_page.api
 
     # ---- 页面结构与重定向（不依赖任何写入） ----
     page.goto(f"{app}/kube-frontend/settings/notifications")
@@ -103,9 +106,10 @@ def test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_MAIL_01(page, ui_config, screensh
         screenshot(page, "mail-channel")
     finally:
         # Leave the platform with no mail channel, as it was found.
-        token = page.evaluate("() => localStorage.getItem('kubesphere-token')")
+        #
+        # Deleted through the API client, not the page's fetch: a stale token in
+        # localStorage makes the browser call a 401 that nobody notices, and the objects
+        # then survive into the next run (which reads them back as the saved values).
         for path in OBJECTS.values():
-            page.evaluate(
-                """async ({path, token}) => fetch(path, {method: 'DELETE', headers: {Authorization: 'Bearer ' + token}})""",
-                {"path": path, "token": token},
-            )
+            status, _ = api.request("DELETE", path)
+            assert status in (200, 404), f"cleanup failed for {path}: {status}"

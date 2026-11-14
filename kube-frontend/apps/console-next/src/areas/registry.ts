@@ -232,8 +232,12 @@ export const AREAS: readonly Area[] = [
     defaultPage: 'info',
     pages: [
       { key: 'info', path: 'info', titleKey: 'platform.settings.info', status: 'ready' },
-      // 通知渠道是一个页面一个渠道（老 console 也是），邮件先落地。
+      // 通知渠道是一个页面一个渠道，与老 console 一致（notification-configuration 的五个页签）。
       { key: 'mail', path: 'mail', titleKey: 'mail.title', status: 'ready' },
+      { key: 'dingtalk', path: 'dingtalk', titleKey: 'channel.dingtalk.title', status: 'ready' },
+      { key: 'wecom', path: 'wecom', titleKey: 'channel.wecom.title', status: 'ready' },
+      { key: 'slack', path: 'slack', titleKey: 'channel.slack.title', status: 'ready' },
+      { key: 'webhook', path: 'webhook', titleKey: 'channel.webhook.title', status: 'ready' },
     ],
   },
 ] as const;

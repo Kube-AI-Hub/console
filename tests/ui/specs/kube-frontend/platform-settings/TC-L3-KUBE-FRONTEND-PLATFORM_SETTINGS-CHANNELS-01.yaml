@@ -1,0 +1,41 @@
+id: TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-CHANNELS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: platform-settings
+feature: channels
+title: 钉钉 / 企业微信 / Slack / Webhook：字段、校验与保存
+entry_url: '{BASE_URL}/kube-frontend/settings/{channel}'
+prd: prd/kube-frontend/platform-settings/channels.md
+design: design/kube-frontend/platform-settings/channels.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-CHANNELS-01
+- AC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-CHANNELS-02
+- AC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-CHANNELS-03
+
+story:
+- US1
+
+product: 四个通知渠道各有一页，按渠道声明的字段渲染；必填为空不发请求；保存写入该渠道的 Config/Receiver/Secret（Webhook 无 Config）。
+preconditions:
+- 已登录平台管理
+- 平台已安装通知模块
+steps:
+- 打开渠道页，确认声明的字段都在
+- 清空一个必填项后保存，确认被拦下且无写入请求
+- 填写并保存
+- 通过接口读回 receiver 与 secret，核对渠道键与凭据
+- 删除写入的对象恢复原状
+expected:
+- 字段在位
+- 校验拦截有效
+- receiver 的 spec 含该渠道键（dingtalk/wechat/slack/webhook）
+- secret 在渠道对应的名称下（Slack 为 -token）
+performance:
+- 保存为最多三次写入
+troubleshoot:
+- 400 且提到 vconfig/vreceiver webhook：平台通知组件不可用，环境问题
+- 企业微信 400 缺 wechatApiSecret：Config 需要 secretKeyRef
+update_automation:
+- 字段变化时同步 channelDescriptors.ts 与用例里的 field 列表
