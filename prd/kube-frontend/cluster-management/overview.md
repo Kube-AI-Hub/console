@@ -24,9 +24,9 @@
 
 ### US3 - 知道这个集群装了哪些可选模块 (Priority: P2)
 
-作为 **集群管理员或支持人员**，我希望 **概览列出已启用与未安装的模块**，以便 **在排查「告警页为什么是空的」这类问题时直接排除未安装的可能**。
+作为 **集群管理员或支持人员**，我希望 **概览列出已启用与未启用的模块**，以便 **在排查页面不可用时确认配置开关，而不把开关误当成 API 安装证明**。
 
-**Independent Test**：核对模块区分为「已启用」与「未安装（N）」两组，条目与集群对象 status.configz 一致。
+**Independent Test**：核对模块区分为「已启用」与「未启用（N）」两组，条目与集群对象 status.configz 一致。
 
 ### US4 - 没有监控后端时页面仍然可用 (Priority: P2)
 
@@ -36,8 +36,9 @@
 
 ## 验收场景
 
-- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-01** — 已知已登录且对集群有读取权限，当打开集群概览页，则「基本信息」显示状态徽标（就绪时「运行正常」并附条件消息）、供应者、Kubernetes 版本、KubeSphere 版本、节点数、连接方式、API 端点与描述；「已启用模块」列出 status.configz 中为真的模块、「未安装」列出为假或缺失的模块；页面不出现项目工作区栏。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-01** — 已知已登录且对集群有读取权限，当打开集群概览页，则「基本信息」显示状态徽标（就绪时「运行正常」并附条件消息）、供应者、Kubernetes 版本、KubeSphere 版本、节点数、连接方式、API 端点与描述；「已启用模块」列出 status.configz 中为真的模块、「未启用」列出为假或缺失的模块，不代表 API 未安装；页面不出现项目工作区栏。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-02** — 已知集群存在且监控后端可用，当查看「资源用量」，则 CPU、内存、容器组、节点各显示「已用 / 总量」与百分比，CPU 与内存额外显示「已分配」；集群有 GPU 时显示「GPU 卡」的已分配 / 总数并附利用率；「Kubernetes 状态」显示请求速率、请求延迟、已调度与无法调度；当监控接口不可用时，用量面板显示「监控数据不可用」的说明而不是 0 或空白，且基本信息与模块区不受影响。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-03** — 概览在 1024/1280/1600 视口采用身份与模块侧栏、资源和控制面主栏，不撑宽页面；提供节点、显卡、监控与 kubectl 的当前集群快捷入口和协调刷新，进入 kubectl 不自动连接。代理未就绪集群保留 agent 接入说明。部分指标缺失或分母为零显示 `-` 且不绘制 0% 进度条，真实零采样显示 0%；集群用量不引用单节点数据。
 
 ## 设计目标
 
@@ -54,10 +55,10 @@
 
 ## UI 交互设计
 
-- 顶部标题与一句话说明；下面依次为「基本信息」「资源用量」「Kubernetes 状态」「已启用模块」四个面板。
+- 顶部包含集群名、标题和刷新；宽屏左侧为基本信息和模块，右侧优先资源用量、控制面状态与运维入口。窄屏纵向排列；代理接入提示保留。
 - 量化行统一为：标签、已用 / 总量、进度条 + 百分比、可选第二行（已分配 / 利用率）。
 - 进度条宽度与百分比同源；颜色不是唯一信息通道（同时给数字）。
-- 模块以徽标（已启用）与弱化文字（未安装）两种形态出现；原始键名放 title，悬停可见。
+- 模块以徽标（已启用）与弱化文字（未启用）两种形态出现；原始键名放 title，悬停可见。
 
 ## 文案与校验
 
@@ -79,7 +80,7 @@
 - **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-01** — 基本信息来自集群对象，就绪状态只认 Ready 条件的 True。
 - **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-02** — 用量与 Kubernetes 状态来自 KubeSphere 监控 API，一次请求取多个指标。
 - **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-03** — 监控不可用时页面降级而非整体失败。
-- **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-04** — 模块列表区分已启用与未安装，未知键原样显示。
+- **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-04** — 模块列表区分已启用与未启用，未知键原样显示。
 
 ## 成功标准
 
@@ -89,14 +90,15 @@
 
 - 集群设置（编辑描述、可见性、可插拔组件开关）：需平台侧写接口，当前迁移范围外。
 - 用量趋势曲线与历史：需要指标历史接口，本页只取当前值。
-- kubectl / kubeconfig 快捷工具：老 console 用新窗口打开独立页面，新 UI 无对应页面。
+- kubeconfig 下载：仍不在本页提供。此前缺少 kubectl 页面而未提供快捷入口，现在复用已完成的近全屏终端页面。
 - 节点 Top5 与节点卡片：已由「节点」页承担，本页不再重复。
 
 ## 假设
 
-- 集群对象的 status.configz 以「模块名 → 布尔」的形式给出已安装状态。
+- 集群对象的 status.configz 以「模块名 → 布尔」的形式给出配置启用状态，不证明 API 安装状态。
 - 监控 API 在未安装监控时返回错误而非空结果；两种情形都按「不可用」处理。
 
 ## 验收用例
 
 - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-01
+- TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-02

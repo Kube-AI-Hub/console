@@ -150,21 +150,21 @@ interface MonitoringResponse {
 /** The cluster-level numbers the overview shows. */
 export interface ClusterUsage {
   /** Cores in use, sum across nodes. */
-  cpuUsedCores: number;
+  cpuUsedCores: number | undefined;
   /** Cores available. */
-  cpuTotalCores: number;
+  cpuTotalCores: number | undefined;
   /** Requested (allocated) cores, which is what scheduling acts on. */
-  cpuAllocatedCores: number;
-  memoryUsedBytes: number;
-  memoryTotalBytes: number;
-  memoryAllocatedBytes: number;
-  podRunning: number;
-  podCapacity: number;
-  nodeReady: number;
-  nodeTotal: number;
+  cpuAllocatedCores: number | undefined;
+  memoryUsedBytes: number | undefined;
+  memoryTotalBytes: number | undefined;
+  memoryAllocatedBytes: number | undefined;
+  podRunning: number | undefined;
+  podCapacity: number | undefined;
+  nodeReady: number | undefined;
+  nodeTotal: number | undefined;
   /** GPU cards reserved by workloads, and how many the cluster has in total. */
-  gpuAllocated: number;
-  gpuTotal: number;
+  gpuAllocated: number | undefined;
+  gpuTotal: number | undefined;
   /** Fraction 0–1 of GPU compute in use right now, when the cluster reports it. */
   gpuUtilisation: number | undefined;
 }
@@ -211,18 +211,18 @@ export function clusterMetricsApi(client: Client) {
       );
       const values = toMetricValues(body);
       return {
-        cpuUsedCores: values.get('cluster_cpu_usage') ?? 0,
-        cpuTotalCores: values.get('cluster_cpu_total') ?? 0,
-        cpuAllocatedCores: values.get('cluster_cpu_allocated') ?? 0,
-        memoryUsedBytes: values.get('cluster_memory_usage_wo_cache') ?? 0,
-        memoryTotalBytes: values.get('cluster_memory_total') ?? 0,
-        memoryAllocatedBytes: values.get('cluster_memory_allocated') ?? 0,
-        podRunning: values.get('cluster_pod_running_count') ?? 0,
-        podCapacity: values.get('cluster_pod_quota') ?? 0,
-        nodeReady: values.get('cluster_node_online') ?? 0,
-        nodeTotal: values.get('cluster_node_total') ?? 0,
-        gpuAllocated: values.get('cluster_gpu_allocated') ?? 0,
-        gpuTotal: values.get('cluster_gpu_total') ?? 0,
+        cpuUsedCores: values.get('cluster_cpu_usage'),
+        cpuTotalCores: values.get('cluster_cpu_total'),
+        cpuAllocatedCores: values.get('cluster_cpu_allocated'),
+        memoryUsedBytes: values.get('cluster_memory_usage_wo_cache'),
+        memoryTotalBytes: values.get('cluster_memory_total'),
+        memoryAllocatedBytes: values.get('cluster_memory_allocated'),
+        podRunning: values.get('cluster_pod_running_count'),
+        podCapacity: values.get('cluster_pod_quota'),
+        nodeReady: values.get('cluster_node_online'),
+        nodeTotal: values.get('cluster_node_total'),
+        gpuAllocated: values.get('cluster_gpu_allocated'),
+        gpuTotal: values.get('cluster_gpu_total'),
         gpuUtilisation: values.get('cluster_gpu_utilization'),
       };
     },

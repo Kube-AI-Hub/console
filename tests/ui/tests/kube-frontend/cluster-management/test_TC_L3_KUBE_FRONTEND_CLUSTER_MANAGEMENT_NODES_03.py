@@ -48,9 +48,8 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_NODES_03(cluster_management_page
     assert (node.get("status") or {}).get("nodeInfo", {}).get("kubeletVersion", "") in basic or "v1." in basic
     # ---- capacity is human-readable: no raw Kubernetes suffixes ----
     capacity = ui.page.locator('[data-ai-id="node-detail:capacity"]').inner_text()
-    assert "/" in capacity
     # Resource names such as hugepages-2Mi legitimately contain a unit suffix.
-    values = " ".join(ui.page.locator('[data-ai-id="node-detail:capacity"] dd').all_inner_texts())
+    values = " ".join(ui.page.locator('[data-ai-id="node-detail:capacity"] td:not(:first-child)').all_inner_texts())
     assert values, "节点容量没有可核对的值"
     for raw in ("m /", "Ki", "Mi"):
         assert raw not in values, f"容量值未换算成可读单位，仍出现 {raw}: {values[:200]}"
@@ -61,6 +60,7 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_NODES_03(cluster_management_page
     if conditions:
         assert rows.count() == len(conditions), f"条件条目 {rows.count()} 与对象中的 {len(conditions)} 不一致"
 
+    ui.page.locator('[data-ai-id="node-detail:tab:metadata"]').click()
     labels = ui.page.locator('[data-ai-id="node-detail:labels"]').inner_text()
     assert "kubernetes.io/hostname" in labels, labels[:200]
 

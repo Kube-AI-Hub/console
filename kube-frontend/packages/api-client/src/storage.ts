@@ -304,6 +304,7 @@ export interface NodeCondition {
   reason: string;
   message: string;
   lastTransitionTime: string;
+  lastHeartbeatTime: string;
 }
 
 export interface NodeTaint {
@@ -320,6 +321,9 @@ export interface NodeDetail extends NodeSummary {
   conditions: NodeCondition[];
   capacity: Record<string, string>;
   allocatable: Record<string, string>;
+  allocated: Record<string, string>;
+  allocatedLimits: Record<string, string>;
+  gpuTopology: Array<Record<string, string>>;
   labels: Record<string, string>;
   taints: NodeTaint[];
   nodeInfo: {
@@ -332,6 +336,9 @@ export interface NodeDetail extends NodeSummary {
     kubeProxyVersion: string;
     gpuDriverVersion: string;
     gpuEngineVersion: string;
+    cardCount?: number;
+    gpuMemoryTotalMiB?: number;
+    deviceSplitCount?: string;
   };
 }
 
@@ -351,6 +358,7 @@ export function toNodeDetail(item: KubeNode): NodeDetail {
     reason: String(condition['reason'] ?? ''),
     message: String(condition['message'] ?? ''),
     lastTransitionTime: String(condition['lastTransitionTime'] ?? ''),
+    lastHeartbeatTime: String(condition['lastHeartbeatTime'] ?? ''),
   }));
   return {
     ...toNodeSummary(item),
@@ -358,6 +366,10 @@ export function toNodeDetail(item: KubeNode): NodeDetail {
     conditions,
     capacity: asRecord(status['capacity']),
     allocatable: asRecord(status['allocatable']),
+    allocated: asRecord(status['allocated']),
+    allocatedLimits: asRecord(status['allocatedLimits']),
+    gpuTopology: Array.isArray(nodeInfo['gpuTopology']) ? nodeInfo['gpuTopology'].filter((row) =>
+      row && typeof row === 'object' && !Array.isArray(row)).map(asRecord) : [],
     labels: (item.metadata?.labels ?? {}) as Record<string, string>,
     taints: (((item.spec ?? {})['taints'] ?? []) as Array<Record<string, unknown>>).map((taint) => ({
       key: String(taint['key'] ?? ''),
@@ -375,6 +387,9 @@ export function toNodeDetail(item: KubeNode): NodeDetail {
       kubeProxyVersion: String(nodeInfo['kubeProxyVersion'] ?? ''),
       gpuDriverVersion: String(nodeInfo['gpuDriverVersion'] ?? ''),
       gpuEngineVersion: String(nodeInfo['gpuEngineVersion'] ?? ''),
+      ...(nodeInfo['cardCount'] !== undefined && Number.isFinite(Number(nodeInfo['cardCount'])) ? { cardCount: Number(nodeInfo['cardCount']) } : {}),
+      ...(nodeInfo['gpuMemoryTotal'] !== undefined && Number.isFinite(Number(nodeInfo['gpuMemoryTotal'])) ? { gpuMemoryTotalMiB: Number(nodeInfo['gpuMemoryTotal']) } : {}),
+      ...(nodeInfo['deviceSplitCount'] !== undefined ? { deviceSplitCount: String(nodeInfo['deviceSplitCount']) } : {}),
     },
   };
 }

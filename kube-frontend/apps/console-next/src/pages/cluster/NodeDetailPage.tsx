@@ -9,13 +9,15 @@ import { api as apiClient } from '@/api';
 import { MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { YamlDialog } from '@/components/resource/YamlDialog';
 import { toYaml } from '@/components/resource/yaml';
-import { DefinitionRow } from '@/components/resource/DefinitionRow';
-import { formatTimestamp } from '@/lib/time';
-import { formatQuantity } from '@/lib/quantity';
 import { ExecConsoleDialog } from '@/components/resource/ExecConsoleDialog';
 import { NodeMetadataDialog } from './NodeMetadataDialog';
 import { NodeResourcesPanel } from './NodeResourcesPanel';
-import { ClusterMonitorPage } from './ClusterMonitorPage';
+import { NodeInfoSidebar } from './NodeInfoSidebar';
+import { NodeResourceOverview } from './NodeResourceOverview';
+import { NodeHardwarePanel } from './NodeHardwarePanel';
+import { NodeTrendPanel } from './NodeTrendPanel';
+import { GpuModeDialog } from './GpuModeDialog';
+import { hasPendingMode } from './nodeListQueries';
 
 /**
  * 节点详情.
@@ -39,6 +41,7 @@ export function NodeDetailPage({ cluster }: NodeDetailPageProps): React.ReactEle
   const query = useQuery({
     queryKey: ['node-detail', cluster, name],
     queryFn: ({ signal }) => nodesApi(apiClient).get({ name, cluster, namespace: '', signal }),
+    refetchInterval: (entry) => entry.state.data && hasPendingMode(entry.state.data) ? 3000 : false,
   });
 
   const queryClient = useQueryClient();
@@ -46,10 +49,14 @@ export function NodeDetailPage({ cluster }: NodeDetailPageProps): React.ReactEle
   const [terminalOpen, setTerminalOpen] = React.useState(false);
   const [metadataKind, setMetadataKind] = React.useState<'labels' | 'taints' | null>(null);
   const [tab, setTab] = React.useState('status');
-  React.useEffect(() => { setTerminalOpen(false); setMetadataKind(null); setTab('status'); }, [cluster, name]);
+  const [modeOpen, setModeOpen] = React.useState(false);
+  React.useEffect(() => { setTerminalOpen(false); setMetadataKind(null); setTab('status'); setModeOpen(false); setEditingYaml(false); }, [cluster, name]);
   const refreshNode = () => {
     void queryClient.invalidateQueries({ queryKey: ['node-detail', cluster, name] });
     void queryClient.invalidateQueries({ queryKey: ['cluster', 'nodes', cluster] });
+    for (const key of ['node-list', 'node-insights', 'node-cards', 'node-ports', 'node-trend', 'node-list-time']) {
+      void queryClient.invalidateQueries({ queryKey: [key, cluster] });
+    }
   };
   const cordon = useMutation({
     mutationFn: (unschedulable: boolean) => nodesWriteApi(apiClient).setUnschedulable({ cluster, name, unschedulable }),
@@ -78,7 +85,7 @@ export function NodeDetailPage({ cluster }: NodeDetailPageProps): React.ReactEle
           </Link>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-lg font-semibold text-ai-fg">{name}</h1>
+          <h1 className="text-2xl font-semibold text-ai-fg">{name}</h1>
           {node ? (
             <Badge tone={node.status === 'Ready' ? 'success' : 'danger'}>{node.status}</Badge>
           ) : null}
@@ -101,7 +108,7 @@ export function NodeDetailPage({ cluster }: NodeDetailPageProps): React.ReactEle
             {t('resource.action.editYaml')}
           </Button>
           <Button variant="ghost" size="sm" disabled={query.isFetching} {...actionProps('node-detail:refresh')}
-            onClick={() => void query.refetch()}>{t('common.refresh')}</Button>
+            onClick={refreshNode}>{t('common.refresh')}</Button>
         </div>
       </header>
 
@@ -111,64 +118,20 @@ export function NodeDetailPage({ cluster }: NodeDetailPageProps): React.ReactEle
       ) : null}
 
       {node ? (
-        <Tabs value={tab} onValueChange={setTab} items={[
+        <div key={`${cluster}/${name}`} className="grid min-w-0 gap-5 lg:grid-cols-[240px_minmax(0,1fr)] xl:grid-cols-[270px_minmax(0,1fr)]">
+        <NodeInfoSidebar node={node} cluster={cluster} onMode={() => setModeOpen(true)} />
+        <Tabs className="min-w-0" value={tab} onValueChange={setTab} items={[
           { value: 'status', label: t('node.detail.statusTab'), aiId: 'node-detail:tab:status' },
+          { value: 'hardware', label: t('node.hardware.title'), aiId: 'node-detail:tab:hardware' },
           { value: 'pods', label: t('cluster.workloads.pods.title'), aiId: 'node-detail:tab:pods' },
           { value: 'monitor', label: t('node.detail.monitor'), aiId: 'node-detail:tab:monitor' },
           { value: 'events', label: t('node.detail.events'), aiId: 'node-detail:tab:events' },
+          { value: 'metadata', label: t('node.detail.metadata'), aiId: 'node-detail:tab:metadata' },
         ]}>
         <TabsContent value="status" className="flex flex-col gap-4">
-          <section className="rounded-lg border border-ai-border bg-ai-surface p-4" data-ai-id="node-detail:basic">
-            <h2 className="mb-3 text-sm font-medium text-ai-fg">{t('node.detail.basic')}</h2>
-            <dl className="grid grid-cols-1 gap-x-8 gap-y-2 text-sm sm:grid-cols-2">
-              <DefinitionRow label={t('cluster.column.status')} value={node.status} />
-              <DefinitionRow label={t('cluster.column.role')} value={node.role} />
-              <DefinitionRow label={t('node.detail.kubeletVersion')} value={node.nodeInfo.kubeletVersion || '-'} />
-              <DefinitionRow label={t('node.detail.internalIP')} value={node.internalIP || '-'} />
-              <DefinitionRow label={t('node.detail.osImage')} value={node.nodeInfo.osImage || '-'} />
-              <DefinitionRow label={t('node.detail.kernel')} value={node.nodeInfo.kernelVersion || '-'} />
-              <DefinitionRow label={t('node.detail.runtime')} value={node.nodeInfo.containerRuntimeVersion || '-'} />
-              <DefinitionRow label={t('node.detail.architecture')} value={node.nodeInfo.architecture || '-'} />
-              <DefinitionRow label={t('node.detail.operatingSystem')} value={node.nodeInfo.operatingSystem || '-'} />
-              <DefinitionRow label={t('node.detail.kubeProxyVersion')} value={node.nodeInfo.kubeProxyVersion || '-'} />
-              <DefinitionRow label={t('node.detail.xpu')} value={node.xpu || '-'} />
-              {node.gpuMode ? <DefinitionRow label={t('node.detail.gpuMode')} value={node.gpuMode} /> : null}
-              {node.nodeInfo.gpuDriverVersion ? <DefinitionRow label={t('node.detail.gpuDriver')} value={node.nodeInfo.gpuDriverVersion} /> : null}
-              {node.nodeInfo.gpuEngineVersion ? <DefinitionRow label={t('node.detail.gpuEngine')} value={node.nodeInfo.gpuEngineVersion} /> : null}
-              <DefinitionRow label={t('node.detail.createdAt')} value={formatTimestamp(node.createdAt)} />
-            </dl>
-          </section>
-
-          <section className="rounded-lg border border-ai-border bg-ai-surface p-4" data-ai-id="node-detail:capacity">
-            <h2 className="mb-3 text-sm font-medium text-ai-fg">{t('node.detail.capacity')}</h2>
-            <dl className="grid grid-cols-1 gap-x-8 gap-y-2 text-sm sm:grid-cols-2">
-              {Array.from(new Set(['cpu', 'memory', 'pods', 'ephemeral-storage', ...Object.keys(node.capacity), ...Object.keys(node.allocatable)])).map((key) => (
-                <DefinitionRow
-                  key={key}
-                  label={key}
-                  value={`${formatQuantity(key, node.allocatable[key] ?? '')} / ${formatQuantity(key, node.capacity[key] ?? '')}`}
-                />
-              ))}
-            </dl>
-            <p className="mt-2 text-[11px] text-ai-fg-muted">{t('node.detail.capacityHint')}</p>
-          </section>
-
-          <section className="rounded-lg border border-ai-border bg-ai-surface p-4" data-ai-id="node-detail:conditions">
-            <h2 className="mb-3 text-sm font-medium text-ai-fg">{t('node.detail.conditions')}</h2>
-            <ul className="flex flex-col gap-2 text-sm">
-              {node.conditions.map((condition) => (
-                <li key={condition.type} className="flex flex-wrap items-baseline gap-2" data-ai-id={`node-detail:condition:${condition.type}`}>
-                  <Badge tone={condition.status === 'True' ? 'success' : 'neutral'}>{condition.status}</Badge>
-                  <span className="font-medium text-ai-fg">{condition.type}</span>
-                  {condition.message ? <span className="text-xs text-ai-fg-muted">{condition.message}</span> : null}
-                  {condition.lastTransitionTime ? (
-                    <span className="text-[11px] text-ai-fg-faint">{formatTimestamp(condition.lastTransitionTime)}</span>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-          </section>
-
+          <NodeResourceOverview node={node} cluster={cluster} />
+        </TabsContent>
+        <TabsContent value="metadata">
           <section className="rounded-lg border border-ai-border bg-ai-surface p-4" data-ai-id="node-detail:labels">
             <div className="mb-3 flex gap-2">
               <Button variant="secondary" size="sm" {...actionProps('node-detail:edit-labels')} onClick={() => setMetadataKind('labels')}>{t('node.action.labels')}</Button>
@@ -196,16 +159,19 @@ export function NodeDetailPage({ cluster }: NodeDetailPageProps): React.ReactEle
             )}
           </section>
         </TabsContent>
+        <TabsContent value="hardware">{tab === 'hardware' ? <NodeHardwarePanel node={node} cluster={cluster} /> : null}</TabsContent>
         <TabsContent value="pods">{tab === 'pods' ? <NodeResourcesPanel cluster={cluster} node={name} kind="pods" /> : null}</TabsContent>
-        <TabsContent value="monitor">{tab === 'monitor' ? <ClusterMonitorPage cluster={cluster} node={name} /> : null}</TabsContent>
+        <TabsContent value="monitor">{tab === 'monitor' ? <NodeTrendPanel cluster={cluster} node={name} gpu={Boolean(node.gpuVendor && node.gpuVendor.toLowerCase() !== 'cpu')} all /> : null}</TabsContent>
         <TabsContent value="events">{tab === 'events' ? <NodeResourcesPanel cluster={cluster} node={name} kind="events" /> : null}</TabsContent>
         </Tabs>
+        </div>
       ) : null}
 
       <MutationAlert error={update.error} />
       <MutationAlert error={cordon.error} />
       {node && metadataKind ? <NodeMetadataDialog cluster={cluster} node={node} kind={metadataKind}
         onClose={() => setMetadataKind(null)} onSaved={refreshNode} /> : null}
+      {modeOpen ? <GpuModeDialog cluster={cluster} name={name} onClose={() => setModeOpen(false)} onUpdated={refreshNode} /> : null}
       {terminalOpen && node ? <ExecConsoleDialog target={{ cluster, node: name }} title={`${t('container.terminal.title')} · ${name}`}
         aiPrefix="node" onClose={() => setTerminalOpen(false)} /> : null}
 

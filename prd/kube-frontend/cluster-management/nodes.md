@@ -63,6 +63,7 @@
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-08** — 名称/IP 搜索、状态、角色、厂商多选 OR、型号包含筛选由服务端执行。条件变化回第一页，可单独清除和清除全部；工作节点包括无 worker 标签节点。复用 ai-kit ResourceList 与 Pagination，每页 10/20/50/100、翻页和跳页对齐其他列表。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-09** — 列表批量读取 GPU/显存、CPU/内存和容器组的比率及绝对量，GPU/CPU/内存分配量独立显示；显存 bytes 换算 GiB。显示厂商、型号、当前模式及相对整个基础范围时间中位数的 NTP 偏移；30 秒警告、120 秒危险。缺失或零分母显示 `-`，指标失败不阻断操作。名称和行操作不可隐藏，其余列可隐藏并恢复；1024/1280/1600 下横向滚动限于表格。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-10** — host GPU 节点提供设置 vGPU 模式及参数，NVIDIA 支持独占/MIG/HAMi-core、寒武纪支持独占/dynamic-smlu/env-share。数量为正整数，比例为有限正数，仅提交当前模式参数；未变化不重复提交。风险确认后提交，提交时禁用关闭；success=true 仅表示信号提交。三秒轮询最多五分钟，以新 desired/status 时间戳和参数判断结果，区分等待、处理中、完成、失败、外部请求和超时。403 或业务失败保留输入；member 禁用并由 API 拒绝写入。B200 仅只读与取消，所有模式写测试拦截模拟。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-11** — 节点详情为紧凑身份侧栏与资源主栏；首屏展示节点 GPU/显存、CPU、内存、容器组与磁盘当前负载及可切换趋势，监控页展示全部趋势。Ready True 和压力类 False 为正常，Unknown 不误判健康；NTP 使用全局时间中位数。容量表展示全部资源的 Capacity、Allocatable、Requests、Limits，优先 status.allocated/allocatedLimits，仅 CPU/内存缺失时回退对应注解，分配率以 Allocatable 为分母并保留超过 100% 的事实。硬件页精确过滤当前节点的显卡与 RDMA 端口，展示传输类型、链路速率、后端健康和资源可用性；速率 bytes/s 转 Gb/s。拓扑分离 GPU/NIC 连接与 CPU/NUMA 亲和信息，用唯一 X 对角项识别设备，保留未知连接代码，点击高亮行列，无拓扑明确空态。详情复用已有 vGPU 配置弹窗，取消不写入；终端、调度、YAML、元数据及关联资源保留。1024/1280/1600 视口表格内部滚动，不撑宽页面。
 
 ## 设计目标
 
@@ -84,7 +85,7 @@ flowchart LR
 
 ## UI 交互设计
 
-状态徽章：Ready 成功色，其余危险色；CPU/内存用量保留既有百分比。详情按运行状态、容器组、监控、事件分区。
+状态徽章：Ready 成功色，其余危险色；CPU/内存用量保留既有百分比。详情按运行状态、硬件、容器组、监控、事件、元数据分区；身份信息保持侧栏，资源、趋势和健康为主栏重点。
 节点终端只在用户点击时连接；终端模拟器与容器终端共用，不提供多余命令表单。
 
 ## 文案与校验
@@ -99,7 +100,7 @@ flowchart LR
 
 ## 明确不做
 
-- 节点排空、导入/删除、批量污点、详情 RDMA 端口与 GPU 拓扑图；不在生产环境验证 GPU 模式切换。
+- 节点排空、导入/删除、批量污点；不在生产环境验证 GPU 模式切换。RDMA 端口和已上报拓扑此前缺少确认契约，本批确认 B200 只读接口后迁移；不探测未上报设备或推断连接。
 
 ## 假设
 
@@ -116,6 +117,7 @@ flowchart LR
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-08`
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-09`
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-10`
+- `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-11`
 
 ## 功能需求
 

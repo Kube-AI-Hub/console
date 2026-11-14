@@ -10,6 +10,7 @@
 
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-01
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-02
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-03
 
 ## 设计目标与非目标
 
@@ -51,7 +52,7 @@
 
 ### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-OVERVIEW-04 — 模块列表来自 configz，未知键原样显示
 
-**为什么**：status.configz 是安装器报告的模块开关，是「装了什么」的唯一事实源。它开放增长（本集群就有 dongba、platformModel 等非标准键），按白名单过滤会低报已装模块；按黑名单过滤则会在升级后漏掉新模块。
+**为什么**：status.configz 报告模块配置开关，不证明 API 安装。它开放增长（本集群就有 dongba、platformModel 等非标准键），按白名单过滤会遗漏配置事实；为 false 只显示「未启用」，不宣称未安装。
 
 **被否方案**：照搬老 console 的六个固定图标。老 console 为 DevOps、服务网格等画了图，但本产品线没有这些模块，灰色图标只会招来「为什么不可用」的提问。
 
@@ -67,7 +68,7 @@
 
 ## 系统现状
 
-老 console 的集群首页为 Dashboard：ClusterInfo、ServiceComponents、ResourcesUsage、KubernetesStatus、ClusterNodes、Tools 六块。本次迁移实现前四块的信息（节点 Top5 与工具页有意不做，见 PRD「明确不做」）。
+老 console 的集群首页为 Dashboard：ClusterInfo、ServiceComponents、ResourcesUsage、KubernetesStatus、ClusterNodes、Tools 六块。本次保留前四块并补已有运维页面的快捷入口；节点 Top5 不重复节点列表。
 
 ## 仓库落点
 
@@ -78,6 +79,10 @@
 - 文案：packages/locales/src/index.ts（cluster.overview.*）
 
 ## 对外契约
+
+### CON-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-03 — 缺失指标不填零
+
+ClusterUsage 的数值字段由必有 number 调整为 number | undefined。未返回、空结果或非有限采样保留 undefined；真实零仍为 0。页面分母缺失或不大于零时隐藏进度条并显示 `-`，不再用 `?? 0` 补数据。所有用量仍来自 cluster endpoint，不求和当前页节点。
 
 | 用途 | 路径 |
 | --- | --- |
@@ -117,6 +122,15 @@
 - 集群设置写入（描述、可见性、可插拔组件）。
 - 多集群列表页（B200 已启用多集群，但只有 host 一个集群对象）。
 
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-06 — 身份侧栏与负载主栏
+
+**为什么**：版本和模块用于识别环境，资源用量与控制面是日常主任务。双栏提高首屏负载可见性；使用已有 Progress、Skeleton 和 Link，不新增进度组件。刷新协调四类集群查询，代理接入面板仍独立读取。
+
+**被否方案**：继续纵向堆叠全部面板，负载容易落在首屏以下；或用 gpu02 数值填集群卡片，会混淆范围。
+
+**何时重新考虑**：需要历史总览或个性化面板时再设计仪表盘布局。
+
 ## 验收用例
 
 - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-01
+- TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-02

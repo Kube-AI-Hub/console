@@ -30,10 +30,12 @@ function mount(element: React.ReactNode) {
 describe('node page controls', () => {
   it('opens a node terminal from detail only after clicking', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => Response.json(raw)));
-    mount(<NodeDetailPage cluster="host" />);
+    const view = mount(<NodeDetailPage cluster="host" />);
     await screen.findByText('amd64');
     expect(screen.queryByRole('dialog')).toBeNull();
-    expect(screen.getByText('8 / 8')).toBeInTheDocument();
+    const resource = view.container.querySelector('[data-ai-resource="nvidia.com/gpu"]')!;
+    expect(resource.querySelectorAll('td')[1]).toHaveTextContent('8');
+    expect(resource.querySelectorAll('td')[2]).toHaveTextContent('8');
     await userEvent.click(screen.getByRole('button', { name: '打开终端' }));
     expect(screen.getByRole('dialog')).toHaveTextContent('gpu01');
     await userEvent.click(screen.getByRole('button', { name: '关闭测试终端' }));

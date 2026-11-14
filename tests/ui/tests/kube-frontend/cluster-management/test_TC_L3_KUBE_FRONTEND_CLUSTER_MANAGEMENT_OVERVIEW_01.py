@@ -58,7 +58,7 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_OVERVIEW_01(cluster_overview_pag
     )
     # Unknown keys are rendered verbatim rather than dropped: configz is an open set,
     # so filtering it would under-report what is installed.
-    assert ui.missing_section().count("未安装") == 1
+    assert ui.missing_section().count("未启用") == 1
 
     # ---- AC-02: 用量与控制面 ----
     metrics = ui.cluster_metrics()

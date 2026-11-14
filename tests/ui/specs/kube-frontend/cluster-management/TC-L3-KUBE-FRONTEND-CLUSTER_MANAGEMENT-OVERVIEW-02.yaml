@@ -1,0 +1,29 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: overview
+title: 集群概览 · 双栏、快捷入口与部分缺值
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/overview'
+prd: prd/kube-frontend/cluster-management/overview.md
+design: design/kube-frontend/cluster-management/overview.md
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-03
+story:
+- US1
+- US2
+- US4
+product: 集群负载突出、入口属于当前集群，缺失监控不伪造零。
+preconditions:
+- 已登录且可读取 B200 host 集群
+steps:
+- 三档视口打开真实概览并截图，核对不横向溢出
+- 核对节点、GPU、监控和 kubectl 快捷链接
+- 捕获协调刷新请求，确认使用 cluster 指标而非 nodes 接口
+- 拦截集群监控，模拟真实零、缺失总量、零分母与缺失内存
+expected:
+- 1024/1280/1600 身份侧栏和资源主栏可读且不撑宽页面
+- 各快捷入口指向当前集群，未点击终端连接按钮不建立会话
+- 真实零且分母有效显示 0%，缺值或零分母显示 - 且没有进度条
+- 基本信息和模块保持可用，测试不发写请求

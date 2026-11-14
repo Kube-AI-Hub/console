@@ -48,6 +48,7 @@ export {
   StatisticsGroup,
   MetricCell,
   TrendChart,
+  Progress,
   Skeleton,
   Table,
   Tabs,

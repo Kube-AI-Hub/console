@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Link } from '@tanstack/react-router';
 import {
   clusterAgentApi,
   clusterApi,
@@ -8,7 +9,7 @@ import {
   type ClusterDetail,
 } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { AiSurface, Badge, Button } from '@kube-ai-hub/ui';
+import { AiSurface, Badge, Button, Progress, Skeleton } from '@kube-ai-hub/ui';
 import type { LocaleKey } from '@kube-ai-hub/locales';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
@@ -37,6 +38,7 @@ export interface ClusterOverviewPageProps {
 
 export function ClusterOverviewPage({ cluster }: ClusterOverviewPageProps): React.ReactElement {
   const t = useT();
+  const client = useQueryClient();
   const detail = useQuery({
     queryKey: ['cluster-detail', cluster],
     queryFn: ({ signal }) => clusterApi(apiClient).get({ cluster, signal }),
@@ -52,23 +54,43 @@ export function ClusterOverviewPage({ cluster }: ClusterOverviewPageProps): Reac
     <AiSurface
       aiId="overview:surface"
       state={detail.data ? state : 'loading'}
-      className="flex flex-col gap-4"
+      className="flex min-w-0 flex-col gap-5"
       {...actionProps('overview:surface')}
     >
-      <header className="flex flex-col gap-1">
-        <h1 className="text-lg font-semibold text-ai-fg">{t('cluster.overview.title')}</h1>
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <div><h1 className="text-2xl font-semibold text-ai-fg">{cluster} · {t('cluster.overview.title')}</h1>
         <p className="text-sm text-ai-fg-muted">{t('cluster.overview.description')}</p>
+        </div>
+        <Button variant="secondary" disabled={detail.isFetching} data-ai-id="overview:refresh" onClick={() => {
+          for (const key of ['cluster-detail', 'cluster-usage', 'kubernetes-status', 'cluster-agent']) {
+            void client.invalidateQueries({ queryKey: [key, cluster] });
+          }
+        }}>{t('common.refresh')}</Button>
       </header>
+      {!detail.data ? <Skeleton className="h-64" /> : null}
       {detail.data ? (
-        <React.Fragment>
+        <div className="grid min-w-0 gap-5 lg:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)]">
+          <aside className="min-w-0 space-y-4">
           <BasicInfoPanel detail={detail.data} />
+          <ModulesPanel detail={detail.data} />
+          </aside>
+          <div className="min-w-0 space-y-4">
           {/* A proxy cluster stays not-ready until its agent is installed, so the
               instructions are part of the page, not a separate document. */}
           <ProxyAgentPanel cluster={cluster} detail={detail.data} />
           <UsagePanel cluster={cluster} />
           <KubernetesStatusPanel cluster={cluster} />
-          <ModulesPanel detail={detail.data} />
-        </React.Fragment>
+          <Panel title={t('cluster.overview.shortcuts')}>
+            <nav className="grid grid-cols-2 gap-2" aria-label={t('cluster.overview.shortcuts')}>
+              {(['nodes', 'gpus', 'monitor', 'kubectl'] as const).map((page) => <Link key={page}
+                to={`/kube-frontend/clusters/$cluster/${page}`} params={{ cluster }}
+                data-ai-id={`overview:shortcut:${page}`} className="rounded-ai-md border border-ai-line bg-ai-surface-2 px-4 py-3 text-sm text-ai-fg hover:bg-ai-surface-3">
+                {t(`cluster.overview.shortcut.${page}`)}
+              </Link>)}
+            </nav>
+          </Panel>
+          </div>
+        </div>
       ) : null}
     </AiSurface>
   );
@@ -164,13 +186,13 @@ function BasicInfoPanel({ detail }: { detail: ClusterDetail }): React.ReactEleme
       : t('cluster.overview.notReady');
   return (
     <Panel title={t('cluster.overview.basicInfo')}>
-      <dl className="grid grid-cols-1 gap-x-8 gap-y-2 text-sm sm:grid-cols-2">
+      <dl className="grid grid-cols-1 gap-y-3 text-sm">
         {/*
           * Readiness first: it is the one line that decides whether anything else on
           * this page is actionable. Its message sits beside it because "not ready" alone
           * does not tell an administrator what to do.
           */}
-        <div className="flex flex-col gap-1 sm:col-span-2">
+        <div className="flex flex-col gap-1">
           <dt className="text-ai-fg-muted">{t('cluster.column.status')}</dt>
           <dd className="flex flex-wrap items-center gap-2" {...actionProps('overview:status')}>
             <Badge tone={detail.ready && detail.enabled ? 'success' : 'warning'}>{status}</Badge>
@@ -200,7 +222,7 @@ function BasicInfoPanel({ detail }: { detail: ClusterDetail }): React.ReactEleme
           aiId="overview:api-endpoint"
         />
         {detail.description ? (
-          <div className="flex flex-col gap-1 sm:col-span-2">
+          <div className="flex flex-col gap-1">
             <dt className="text-ai-fg-muted">{t('cluster.overview.description_')}</dt>
             <dd className="min-w-0 break-words text-ai-fg-secondary">{detail.description}</dd>
           </div>
@@ -240,9 +262,9 @@ function UsagePanel({ cluster }: { cluster: string }): React.ReactElement {
           <span className="text-xs text-ai-fg-muted">{t('cluster.overview.noMetricsHint')}</span>
         </div>
       ) : usage.isLoading || !usage.data ? (
-        <p className="text-sm text-ai-fg-muted">-</p>
+        <Skeleton className="h-40" />
       ) : (
-        <dl className="grid grid-cols-1 gap-x-8 gap-y-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
+        <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2 xl:grid-cols-3">
           <UsageRow
             label={t('cluster.overview.cpu')}
             used={formatCores(usage.data.cpuUsedCores)}
@@ -261,16 +283,17 @@ function UsagePanel({ cluster }: { cluster: string }): React.ReactElement {
           />
           <UsageRow
             label={t('cluster.overview.pods')}
-            used={String(usage.data.podRunning)}
-            total={String(usage.data.podCapacity)}
+            used={usage.data.podRunning === undefined ? '-' : String(usage.data.podRunning)}
+            total={usage.data.podCapacity === undefined ? '-' : String(usage.data.podCapacity)}
             ratioValue={ratio(usage.data.podRunning, usage.data.podCapacity)}
             aiId="overview:usage-pods"
           />
           <UsageRow
             label={t('cluster.overview.nodes')}
-            used={String(usage.data.nodeReady)}
-            total={String(usage.data.nodeTotal)}
+            used={usage.data.nodeReady === undefined ? '-' : String(usage.data.nodeReady)}
+            total={usage.data.nodeTotal === undefined ? '-' : String(usage.data.nodeTotal)}
             ratioValue={ratio(usage.data.nodeReady, usage.data.nodeTotal)}
+            health
             aiId="overview:usage-nodes"
           />
           {/*
@@ -284,10 +307,10 @@ function UsagePanel({ cluster }: { cluster: string }): React.ReactElement {
             * does not. Compute utilisation is the extra line, because a card can be
             * reserved and idle.
             */}
-          {usage.data.gpuTotal > 0 ? (
+          {(usage.data.gpuTotal ?? 0) > 0 ? (
             <UsageRow
               label={t('cluster.overview.gpuCards')}
-              used={String(usage.data.gpuAllocated)}
+              used={usage.data.gpuAllocated === undefined ? '-' : String(usage.data.gpuAllocated)}
               total={String(usage.data.gpuTotal)}
               ratioValue={ratio(usage.data.gpuAllocated, usage.data.gpuTotal)}
               extra={
@@ -311,6 +334,7 @@ function UsageRow({
   allocated,
   extra,
   ratioValue,
+  health = false,
   aiId,
 }: {
   label: string;
@@ -319,24 +343,24 @@ function UsageRow({
   allocated?: string | undefined;
   /** A second measurement of the same resource, e.g. GPU compute utilisation. */
   extra?: string | undefined;
-  ratioValue: number;
+  ratioValue: number | undefined;
+  health?: boolean;
   aiId: string;
 }): React.ReactElement {
   const t = useT();
-  const clamped = Math.max(0, Math.min(1, ratioValue));
+  const clamped = ratioValue === undefined ? undefined : Math.max(0, Math.min(1, ratioValue));
   return (
-    <div className="flex flex-col gap-1" {...actionProps(aiId)}>
+    <div className="flex min-w-0 flex-col gap-2 rounded-ai-md bg-ai-surface-2 p-3" {...actionProps(aiId)}>
       <dt className="text-ai-fg-muted">{label}</dt>
       <dd className="flex flex-col gap-1">
-        <span className="font-medium tabular-nums text-ai-fg">
+        <span className="text-lg font-semibold tabular-nums text-ai-fg">
           {used} / {total}
         </span>
         {/* Bar and number, not colour alone: colour is not readable for everyone. */}
         <span className="flex items-center gap-2">
-          <span className="h-1.5 w-24 overflow-hidden rounded-full bg-ai-border">
-            <span className="block h-full rounded-full bg-ai-accent" style={{ width: barWidth(clamped) }} />
-          </span>
-          <span className="text-xs tabular-nums text-ai-fg-muted">{Math.round(clamped * 100)}%</span>
+          {clamped === undefined ? <span>-</span> : <><Progress value={clamped * 100}
+            tone={health ? clamped === 1 ? 'success' : 'warning' : 'auto'} aria-label={label} className="w-24" />
+          <span className="text-xs tabular-nums text-ai-fg-muted">{Math.round(clamped * 100)}%</span></>}
         </span>
         {allocated ? (
           <span className="text-xs text-ai-fg-muted">
@@ -521,8 +545,8 @@ function moduleLabel(t: ReturnType<typeof useT>, key: string): string {
   return localeKey ? t(localeKey) : key;
 }
 
-function ratio(used: number, total: number): number {
-  if (!Number.isFinite(total) || total <= 0) return 0;
+function ratio(used: number | undefined, total: number | undefined): number | undefined {
+  if (used === undefined || total === undefined || !Number.isFinite(used) || !Number.isFinite(total) || total <= 0) return undefined;
   return used / total;
 }
 
@@ -531,16 +555,14 @@ function percent(value: number | undefined): string {
   return Math.round(value * 100) + '%';
 }
 
-function barWidth(fraction: number): string {
-  return Math.round(fraction * 100) + '%';
-}
-
-function formatCores(cores: number): string {
+function formatCores(cores: number | undefined): string {
+  if (cores === undefined) return '-';
   if (cores <= 0) return '0';
   return cores < 10 ? cores.toFixed(2) : cores.toFixed(0);
 }
 
-function formatBytes(bytes: number): string {
+function formatBytes(bytes: number | undefined): string {
+  if (bytes === undefined) return '-';
   if (bytes <= 0) return '0';
   const units = ['B', 'Ki', 'Mi', 'Gi', 'Ti'];
   let value = bytes;

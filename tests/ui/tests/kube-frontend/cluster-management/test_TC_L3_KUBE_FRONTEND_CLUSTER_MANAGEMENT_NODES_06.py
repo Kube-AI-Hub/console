@@ -23,6 +23,7 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_NODES_06(cluster_management_page
     ui.page.goto(f"{ui.base_url}/kube-frontend/clusters/{ui.cluster}/nodes/{name}")
     expect(ui.page.locator('[data-ai-id="node-detail:basic"]')).to_be_visible()
     try:
+        ui.page.locator('[data-ai-id="node-detail:tab:metadata"]').click()
         ui.page.locator('[data-ai-id="node-detail:edit-labels"]').click()
         dialog = ui.page.get_by_role("dialog")
         dialog.get_by_placeholder("键", exact=True).fill(label)
@@ -49,8 +50,8 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_NODES_06(cluster_management_page
         ui.page.locator('[data-ai-id="node-detail:tab:events"]').click()
         expect(ui.page.locator('[data-ai-id="node-detail:events"]')).to_be_visible()
         ui.page.locator('[data-ai-id="node-detail:tab:monitor"]').click()
-        expect(ui.page.locator('[data-ai-id="cluster-monitor:surface"]')).to_have_attribute("data-ai-state", "ready", timeout=30_000)
-        chart = ui.page.locator('[data-ai-id="cluster-monitor:cpu"] svg')
+        expect(ui.page.locator('[data-ai-id="node-detail:monitor"]')).to_have_attribute("data-ai-state", "ready", timeout=30_000)
+        chart = ui.page.locator('[data-ai-id="node-detail:chart:cpu"] svg')
         expect(chart).to_be_visible(timeout=30_000)
         assert "L" in chart.locator("path").get_attribute("d"), "Node CPU chart has no trend samples"
         screenshot(ui.page, "node-monitor")

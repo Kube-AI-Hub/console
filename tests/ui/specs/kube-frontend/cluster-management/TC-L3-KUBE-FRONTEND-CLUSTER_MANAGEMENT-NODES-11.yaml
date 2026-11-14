@@ -1,0 +1,30 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-11
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: nodes
+title: 节点详情 · 资源分配、健康与硬件拓扑
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/nodes/gpu02'
+prd: prd/kube-frontend/cluster-management/nodes.md
+design: design/kube-frontend/cluster-management/nodes.md
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-11
+story:
+- US2
+- US5
+- US7
+product: 节点身份、负载、分配与硬件事实独立展示，保留已有排障入口。
+preconditions:
+- B200 gpu02 的节点详情、GPU 与 RDMA 只读接口可访问
+steps:
+- 读取目标节点，核对 Requests/Limits 与压力类健康条件
+- 三档视口核对资源主栏、趋势和侧栏并截图
+- 打开 vGPU 配置后取消，捕获请求确认未产生写入
+- 打开硬件页，对账显卡和 RDMA 数量、速率与健康
+- 对照上报矩阵核对唯一 X 设备、亲和信息及选中高亮
+expected:
+- 数据精确属于目标节点，数量与接口一致
+- 容量单位与分配率正确，压力 False 显示正常
+- 1024/1280/1600 页面不横向溢出，拓扑表内部可滚动
+- 取消模式配置无 PUT，原终端和元数据入口保留

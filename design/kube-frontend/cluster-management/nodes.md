@@ -15,6 +15,7 @@
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-08
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-09
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-10
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-11
 
 ## 概述
 
@@ -22,7 +23,7 @@
 
 ## 设计目标与非目标
 
-Ready、调度与负载独立展示，提供节点终端、局部元数据写入和 vGPU 模式配置。非目标：排空、导入、GPU 拓扑及生产模式切换验证。
+Ready、调度与负载独立展示，提供节点终端、局部元数据写入、已上报硬件拓扑和 vGPU 模式配置。非目标：排空、导入、设备发现及生产模式切换验证。
 
 ## 关键约束
 
@@ -133,7 +134,7 @@ API 包全量类型检查仍报 test/network-create.test.ts 与 test/workspace-m
 
 ## 后续改进
 
-节点导入、RDMA 端口与 GPU 拓扑仍未交付；member 模式写入需后端提供明确集群路由后开放。
+节点导入仍未交付；member 硬件读取及模式写入需后端提供明确集群路由后开放。
 
 ## 验收用例
 
@@ -194,3 +195,27 @@ API 层禁止 member 写入，页面同步禁用；不静默写 host。
 ### INV-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-10 — 生产验证只读
 
 B200 模式测试先拦截全部 GPU endpoint，再打开表单；所有 PUT 仅模拟返回，并在结束后核对 desired/status 注解未变。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-11 — 身份侧栏与独立节点洞察
+
+**为什么**：系统信息变化少，负载、分配和健康用于排障。NodeInfoSidebar 保留身份与模式入口，NodeResourceOverview 组合 StatisticsGroup、TrendChart、健康和共享容量 Table；硬件页延迟请求 GPU/RDMA，任一失败不隐藏节点。此前未确认 RDMA 契约而不做硬件，本批实际读取确认后独立实现。
+
+**被否方案**：复制旧 AGPL 组件，或把每种故障合并成整页失败；前者违反迁移边界，后者会丢失仍可用的节点事实。拓扑按数组位置排序会将亲和信息误当设备，故采用唯一 X 识别。
+
+**何时重新考虑**：后端提供带设备 ID 的拓扑模型时替换对角身份识别；未识别行仍保留 row-N。
+
+### CON-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-11 — 节点洞察字段与单位
+
+NodeDetail 增加 allocated、allocatedLimits 字符串 map、gpuTopology 行数组，以及 nodeInfo 的可选 cardCount、gpuMemoryTotalMiB（上游 gpuMemoryTotal 为 MiB）、deviceSplitCount。缺失 map 为 {}，heartbeat 缺失为空串；raw 保持原对象供 YAML。Requests/Limits 优先对应 status map，CPU/内存缺失才回退对应注解，不把 Requests 冒作 Limits。比率分母为 Allocatable，允许超配。
+
+GET monitoring v1alpha3 `/nodes/<node>?cluster=<cluster>&last=true` 批量当前指标，趋势同路径按 start/end/step；节点比率乘100，显存/内存/磁盘 bytes 转 GiB，GPUallocated 为卡数。缺失/非有限样本不补零。
+
+GET gpu v1alpha1 `/gpus?nodeName=<node>&limit=-1` 与 rdma v1alpha1 `/ports?nodeName=<node>&limit=-1` 返回集合后再按节点精确过滤。RDMA linkSpeed 为 bytes/s，展示乘8/1e9 Gb/s；healthy 和 rdmaAllocated 为不同后端结论，logical state 不单独代表健康。member 在 API 层拒绝硬件库存路由，不回退 host。
+
+拓扑 CPU Affinity、NUMA Affinity、GPU NUMA ID 独立列；GPU/NIC/MLU 设备列自然排序，未知连接代码保留。唯一 X 识别设备；无唯一 X 显示 row-N，不按数组位置伪造设备。
+
+### INV-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-11 — 范围与健康
+
+gpu02 的测量和分配不能用于 host 集群汇总。Ready True 正常；MemoryPressure/DiskPressure/PIDPressure/NetworkUnavailable False 正常，未知条件为 neutral。NTP 继续使用全部基础范围节点的时间中位数。
+
+新增自动化：TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-11；既有 03/06 随表格和元数据页签调整选择器，保留容量、标签回读、清理与趋势采样断言。单测覆盖反向压力条件、超配、缺值、未知拓扑连接和 RDMA 精确身份。
