@@ -111,7 +111,6 @@ PLANNED: dict[str, str] = {
     "clusters/volume-snapshot-classes": "快照类型（计划 §6.1）",
     "clusters/volume-snapshot-content": "快照内容（计划 §6.1）",
     "clusters/juicefs-storage": "JuiceFS 共享存储（计划 §6.1）",
-    "clusters/gpus": "GPU 卡列表（计划 §6.1）",
     "clusters/gpu-resource": "GPU 资源监控（计划 §6.1）",
     "clusters/monitor-resource": "应用资源监控（计划 §6.1）",
     "clusters/alerts": "集群级告警消息（2026-11-14 决策改为支持集群域，DEC-L2-…-MONITORING-03）",
