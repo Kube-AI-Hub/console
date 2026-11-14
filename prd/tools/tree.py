@@ -904,6 +904,11 @@ MODULES = [
                 "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-APP_WORKLOADS-01"]},
                 "features": [
                     {
+                        "id": "column-visibility",
+                        "title": "列表列显隐",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_WORKLOADS-COLUMN_VISIBILITY-01"]},
+                    },
+                    {
                         "id": "page-tip",
                         "title": "列表页头提示",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_WORKLOADS-PAGE_TIP-01"]},
