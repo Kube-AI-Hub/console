@@ -6,9 +6,9 @@
 
 ## 规模
 
-- 页面（catalog 功能点）：129
-- 验收场景（AC）：261
-- 登记用例（L2/L3）：194
+- 页面（catalog 功能点）：130
+- 验收场景（AC）：263
+- 登记用例（L2/L3）：196
 
 > 页面级缺口与 URL 段归宿看 `gap_check.py`，覆盖完整性看 `check_docs.py --strict`（每个 AC 必须被 spec 覆盖）。
 
@@ -161,8 +161,8 @@
 | JuiceFS 共享存储 | AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-JUICEFS-01 | TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-JUICEFS-01 | 修改卷配额（老 console 的 `PUT /volumes/{name}`，会创建一次性 job 并在失败时回滚 PV）：写操作，需要作业状态与回滚的可观测，另立；benchmark（吞吐压测）面板：同属写操作，且需要作业轮询；卷的生命周期管理（创建/删除卷）、跨集群视图；页面直连 Prometheus 或解析 JuiceFS CRD |
 | 应用资源监控 | AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR_RESOURCE-01 | TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR_RESOURCE-01 | 不做下钻曲线（工作负载/容器组的详细趋势回到项目监控页与容器监控页看）；不做按项目过滤、导出 CSV（列表页的过滤/导出能力不在本功能点范围）；不改动监控 API 的指标白名单，也不新增后端指标；不把静态镜像 Pod 合并进工作负载排行（见约束） |
 | 集群显卡 | AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-01 | TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-01 | 批量摘卡 / 批量重置：摘卡是 device plugin 的行为，控制台不提供会与调度器打架的按钮；跨集群聚合：一个集群一个列表，聚合会掩盖「哪台机器」这个问题；前端重新判定健康：判定属于 HAMi，页面只读汇总结论；编辑卡属性、切换 vGPU 模式：模式切换属于「设置 vGPU 模式」页，不在本页 |
-| 集群告警策略写入与消息下钻 | AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING_WRITE-01 | TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING_WRITE-01 | **内置策略的编辑 / 删除 / 恢复默认**：编辑/删除仍属安装器；**详情展示原始对象 / 审计字段 / YAML**：只渲染白名单摘要，不提供 YAML、事件或审计日志视图；**告警消息删除 / 静默 / 通知配置**：消息生命周期归告警控制器；**集群级自定义策略的创建 / 编辑 / 删除**：项目级已具备，集群级写通道未迁移 |
-| 集群级告警 | AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING-01 | TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING-01 | **集群级自定义策略的创建、编辑、删除**：写通道在项目级已实现；**内置策略的编辑 / 删除与「恢复默认」**：编辑/删除仍属安装器；**详情展示原始对象 / 审计字段**：详情只渲染白名单 labels 与 annotations；**告警消息删除 / 静默 / 通知配置**：消息生命周期归告警控制器，控制台删掉也会被重新评估出来；**告警消息按策略下钻到详情页**：详情已有弹窗；**告警消息的 X 轴过滤之外的高级检索**：本期只有分页回看，不做服务端关键字检索（v2beta1 聚合接口的检索参数未探测到可靠语义） |
+| 集群告警策略写入与消息下钻 | AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING_WRITE-01, AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING_WRITE-02 | TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING_WRITE-01, TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING_WRITE-02 | **内置策略的编辑 / 删除**：编辑/删除仍属安装器；**reset 恢复 metadata.labels**：reset 只写 `spec`；**详情展示原始对象 / 审计字段 / YAML**：只渲染白名单摘要，不提供 YAML、事件或审计日志视图；**告警消息删除 / 静默 / 通知配置**：消息生命周期归告警控制器；**集群级自定义策略的创建 / 编辑 / 删除**：项目级已具备，集群级写通道未迁移 |
+| 集群级告警 | AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING-01 | TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING-01 | **集群级自定义策略的创建、编辑、删除**：写通道在项目级已实现；**内置策略的编辑 / 删除**：编辑/删除仍属安装器；**详情展示原始对象 / 审计字段**：详情只渲染白名单 labels 与 annotations；**告警消息删除 / 静默 / 通知配置**：消息生命周期归告警控制器，控制台删掉也会被重新评估出来；**告警消息按策略下钻到详情页**：详情已有弹窗；**告警消息的 X 轴过滤之外的高级检索**：本期只有分页回看，不做服务端关键字检索（v2beta1 聚合接口的检索参数未探测到可靠语义） |
 | 集群级存储卷声明 | AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_PVC-01 | TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_PVC-01 | 集群级创建 / 删除 / 扩容 / 编辑：写操作回项目作用域；挂载状态列：需要列出全集群的 Pod 才能判断，集群级首屏成本过高；存储卷快照：集群级快照列表不在本功能点 |
 | 集群级配置 | AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-01 | TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-01 | 集群级创建 / 编辑 / 删除 / 改角色：写操作回项目作用域，避免同一对象两个编辑入口；按项目、按类型的筛选下拉：kapis 代理不支持 `fieldSelector`，放一个不生效的控件比不放更差；列出自定义资源类型的配置对象 |
 | 集群级工作负载 | AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_WORKLOADS-01, AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_WORKLOADS-02 | TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_WORKLOADS-01 | 按项目/状态筛选：kapis 代理不支持 `fieldSelector`（§52 实测），不放死控件；在集群级页面直接创建：老 console 创建需先选项目，属另一交互，另立 |
@@ -217,6 +217,7 @@
 
 | 页面 | 验收场景 | 用例 | 明确不做 |
 | --- | --- | --- | --- |
+| 列表页头提示 | AC-L3-KUBE-FRONTEND-APP_WORKLOADS-PAGE_TIP-01 | TC-L3-KUBE-FRONTEND-APP_WORKLOADS-PAGE_TIP-01 | 不做多步引导、tour 或帮助中心；不做按用户/后端持久化的已读状态（只用浏览器 localStorage）；不在提示里内嵌文档正文；不覆盖集群作用域列表页与详情页（本轮只做项目作用域列表） |
 | 详情页监控页签 | AC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL_MONITOR-01 | TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL_MONITOR-01 | Job / CronJob 的监控页签：监控 API 没有这两类的工作负载级指标；容器级监控（`pod_cpu_usage` 已按 Pod 聚合）：容器粒度属于单容器页面或集群监控；GPU 指标：已有「GPU 资源监控」页；告警规则、导出、图表缩放：需要图表库或另一套模块 |
 | 定制编辑表单 | AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_FORM-01 | TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_FORM-01 | 不复刻老 console 的六页签（更新策略、存储、亲和性、优雅终止、高级设置）；不给任务（Job）提供该入口：`spec.template` 创建后不可变，保存必然被 API 拒绝；不在表单里改容器名或对象名；不做实时 diff 预览之外的保存预览/干跑；不改服务的端口与路由规则编辑入口（各自已有弹窗） |
 | 详情页页签 | AC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL_TABS-01 | TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL_TABS-01 | 不把页签选择写入 URL，不提供页签深链；不为每个页签单独发请求或单独轮询；不新增「日志 / 终端」页签（能力未迁移） |
