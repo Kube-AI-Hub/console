@@ -73,7 +73,7 @@
 
 | 模块 / 文件 | 职责 | 不做什么 |
 | --- | --- | --- |
-| `kube-frontend/apps/console-next/src/shell/UserSettingsDialog.tsx` | 表单状态、邮箱校验、调用 `updateProfile`、失效相关 query | 不拼 HTTP、不读 `resourceVersion` |
+| `kube-frontend/apps/console-next/src/shell/UserSettingsDialog.tsx` | 表单状态、邮箱校验、调用 `updateProfile`、失效相关 query；只读两行用 ai-kit `DescriptionList` 渲染，字段包装用 `FormField` | 不拼 HTTP、不读 `resourceVersion`、不自写 label/hint/error 结构 |
 | `kube-frontend/packages/api-client/src/access.ts` 的 `userSettingsApi.updateProfile` | 先读后写：整对象 PUT，只替换 `spec.email` | 不校验邮箱、不决定提示文案 |
 | `kube-frontend/packages/api-client/src/access.ts` 的 `userDetailApi.get` | 读对象；邮箱优先 `spec.email`，回退注解 | 不写 |
 | `kube-frontend/apps/console-next/src/components/resource/ResourceErrorPanel.tsx` 的 `errorMessage` | 把 `ApiError` 变成一句话 | 不区分 400 的具体原因 |
@@ -82,7 +82,7 @@
 
 | 层 | 仓库 | 路径 | 改动 |
 | --- | --- | --- | --- |
-| 组件 | `console` | `kube-frontend/apps/console-next/src/shell/UserSettingsDialog.tsx` | 基本信息页签：三行字段、邮箱校验、保存与「已保存。」 |
+| 组件 | `console` | `kube-frontend/apps/console-next/src/shell/UserSettingsDialog.tsx` | 基本信息页签：三行字段（只读行来自 ai-kit `DescriptionList`，邮箱走 `FormField`）、邮箱校验、保存与「已保存。」 |
 | 状态 | `console` | 同文件，react-query key `['user-settings','profile',name]` | 读取账号；成功后失效 `['platform','users']` 与 `['user-detail',name]` |
 | 接口 | `console` | `kube-frontend/packages/api-client/src/access.ts` 的 `userSettingsApi.updateProfile` | 先 GET 取 `resourceVersion`，再整对象 PUT 只换 `spec.email` |
 | 文案 | `console` | `kube-frontend/packages/locales/src/index.ts` 的 `userSettings.*` | 字段名、说明、错误与成功提示（中英各一份） |

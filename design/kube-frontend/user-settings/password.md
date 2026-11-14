@@ -6,7 +6,7 @@
 
 ## 概述
 
-三个密码框在客户端判完规则后，走 `PUT users/<name>/password`；成功后弹窗回调 `onSignedOut`，由 shell 结束会话并跳登录页。判定分两层但只有一份来源：`passwordProblem` 给出「第一条不满足的规则」，`passwordChecks` 给出「每一条是否满足」（强度面板用），两者共用同一个特殊字符正则与同一套长度口径。文案映射在 `lib/password.ts`，创建用户弹窗与本弹窗共用；强度面板是独立组件 `PasswordStrength`，只消费 `passwordChecks` 的结果。
+三个密码框在客户端判完规则后，走 `PUT users/<name>/password`；成功后弹窗回调 `onSignedOut`，由 shell 结束会话并跳登录页。判定分两层但只有一份来源：`passwordProblem` 给出「第一条不满足的规则」，`passwordChecks` 给出「每一条是否满足」（强度面板用），两者共用同一个特殊字符正则与同一套长度口径。文案映射在 `lib/password.ts`，创建用户弹窗与本弹窗共用；强度面板拆成两层——应用侧 `PasswordStrength` 只做「`passwordChecks` 结果 + `t()` 文案 → props」的换算，面板的渲染、进度条与无障碍语义在 ai-kit 的 `PasswordStrengthMeter`。
 
 ## 关联需求
 
@@ -70,7 +70,7 @@
 
 - **备选**：① 只照抄服务端规则（8–64 字节 + 小写 + 大写 + 数字，不要求特殊字符）；② 保留 `PASSWORD_DESC` 文案但不校验特殊字符（老 console 的做法）；③ 前端强制特殊字符，让文案即规则。
 - **选定**：③
-- **原因**：老 console 的 `PASSWORD_DESC` 写着「必须包含…一个特殊字符」，校验却用 `PATTERN_PASSWORD`（`/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,64}$/`）——特殊字符只存在于文案里，从未被检查。文案与规则不一致比规则宽松更糟：用户按文案打了特殊字符，却在别处发现不打也行；或者反过来，以为自己漏了什么。③让界面写下的每一条都真的会拦，代价是前端比服务端严（见 GOT-06）。
+- **原因**：老 console 的 `PASSWORD_DESC` 写着「必须包含…一个特殊字符」，校验却用 `PATTERN_PASSWORD`（`/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,64}$/`）——特殊字符只存在于文案里，从未被检查。文案与规则不一致比规则宽松更糟：用户按文案打了特殊字符，却在别处发现不打也行；或者反过来，以为自己漏了什么。③让界面写下的每一条都真的会拦，代价是前端比服务端严（见 GOT-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-06）。
 - **被否方案**：①（继续让文案说谎，且等于把已经写进产品的要求撤掉）；②（本轮用户明确要求「前端要校验」）；把文案改成与服务端一致、删掉特殊字符要求（会降低口令复杂度，与用户诉求相反）。
 - **何时重新考虑**：平台 admission 自己加上特殊字符要求（那时前端可以退回跟随服务端，前后端规则重新合一）；或安全口径要求引入更强的规则（那时统一改 `passwordProblem` 一处）。
 
@@ -80,7 +80,8 @@
 - **选定**：②
 - **原因**：①的浮层会盖住正在输入的框，且失焦就消失——用户点「修改密码」时它已经收起，看不到自己差在哪；它的分数算法（大小写齐 +4、数字 +2、长度 6–12 +2、≥12 +4，不满足旧正则直接归零）与现在的五条规则也不同源，会出现「条满了但提交被拒」。②把面板固定在输入框下方，勾选状态直接来自 `passwordChecks`，与提交判定同一份来源。三档必须带文字标签（弱/中/强）：只靠红黄绿对色觉障碍不可用，而这一屏恰好是安全性最敏感的一屏；进度条本身标了 `aria-hidden`，档位由文字标签与 `data-strength` 承载。
 - **被否方案**：①（浮层遮挡与收起时机都与提交按钮冲突；分数算法与规则不同源）；只用颜色分档（不可访问）；把 checklist 做成提交后的错误列表（等于把「还缺什么」推到失败之后）。
-- **何时重新考虑**：规则条目增加到面板放不下（那时考虑分组或折叠），或设计系统提供带无障碍语义的强度组件。
+- **何时重新考虑**：规则条目增加到面板放不下（那时考虑分组或折叠）。
+- **已收口（2026-11）**：面板的渲染与无障碍语义已上收到 ai-kit 的 `PasswordStrengthMeter`（纯展示，规则仍由本页判定），「设计系统提供带无障碍语义的强度组件」这一条已满足；下次改动只改应用侧档位换算或库内展示，两侧不再各自实现。
 
 ### DEC-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-07：强度档位的口径——「弱」表示过不了校验，不是「短」
 
@@ -100,9 +101,9 @@
 
 ## 系统现状
 
-老 console 的密码页（`src/components/Modals/UserSetting/PasswordSetting/index.jsx`）三个 `InputPassword`：当前密码（必填 + 说明 `ENTER_CURRENT_PASSWORD_DESC`）、新密码（必填 + `PATTERN_PASSWORD` + `withStrength` 强度条）、确认密码（必填 + 与 `state.password` 比较）；中间一条 `Alert type=warning` 显示 `PASSWORD_DESC`。强度条实现在 `src/components/Inputs/InputPassword/index.jsx`：输入时弹出浮层，含 `PASSWORD_MUST`「您的密码必须：」三条 checklist、`PASSWORD_STRENGTH`「密码强度」进度条（<6 分红 33%、6–8 分黄 66%、≥8 分绿 100%）、`PASSWORD_STRENGTH_DESC`「避免使用弱密码其他账户的密码。」；分数算法见 DEC-06。保存由 `src/actions/user.js` 的 `'user.setting'` 处理：`if (currentPassword && password)` → `store.modifyPassword` → `PUT <detail>/password` → `setTimeout(1000)` → `location.href = '/login'`，**没有调用 logout 接口**。确认密码的 validator 挂在该 `Form.Item` 的 rules 上，而 `packages/kube-design/src/components/Form/Item.jsx` 的 `handleValueChange` 在每次输入后调用 `this.validate({ [name]: value })`（`validate` 是 200ms 的 debounce，`firstFields: true`）——所以老 console 本来就是边输入边校验，只是重校验只发生在**该字段自己**的 change 上（DEC-08）。
+老 console 的密码页（`src/components/Modals/UserSetting/PasswordSetting/index.jsx`）三个 `InputPassword`：当前密码（必填 + 说明 `ENTER_CURRENT_PASSWORD_DESC`）、新密码（必填 + `PATTERN_PASSWORD` + `withStrength` 强度条）、确认密码（必填 + 与 `state.password` 比较）；中间一条 `Alert type=warning` 显示 `PASSWORD_DESC`。强度条实现在 `src/components/Inputs/InputPassword/index.jsx`：输入时弹出浮层，含 `PASSWORD_MUST`「您的密码必须：」三条 checklist、`PASSWORD_STRENGTH`「密码强度」进度条（<6 分红 33%、6–8 分黄 66%、≥8 分绿 100%）、`PASSWORD_STRENGTH_DESC`「避免使用弱密码其他账户的密码。」；分数算法见 DEC-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-06。保存由 `src/actions/user.js` 的 `'user.setting'` 处理：`if (currentPassword && password)` → `store.modifyPassword` → `PUT <detail>/password` → `setTimeout(1000)` → `location.href = '/login'`，**没有调用 logout 接口**。确认密码的 validator 挂在该 `Form.Item` 的 rules 上，而 `packages/kube-design/src/components/Form/Item.jsx` 的 `handleValueChange` 在每次输入后调用 `this.validate({ [name]: value })`（`validate` 是 200ms 的 debounce，`firstFields: true`）——所以老 console 本来就是边输入边校验，只是重校验只发生在**该字段自己**的 change 上（DEC-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-08）。
 
-上一轮的新实现去掉了强度条与那条 warning 文案；本轮把两者都迁回来，并改变它们的性质：`PASSWORD_DESC` 从「只是一句提示」变成「会被执行的规则」，且长度口径从「8 到 64 个字符」补成「8 到 64 个字符，且不超过 64 字节」（老文案只写字数，中文口令会撞服务端的字节上限）；强度条从浮层变成常驻内联面板（DEC-05、DEC-06、DEC-07）。
+上一轮的新实现去掉了强度条与那条 warning 文案；本轮把两者都迁回来，并改变它们的性质：`PASSWORD_DESC` 从「只是一句提示」变成「会被执行的规则」，且长度口径从「8 到 64 个字符」补成「8 到 64 个字符，且不超过 64 字节」（老文案只写字数，中文口令会撞服务端的字节上限）；强度条从浮层变成常驻内联面板（DEC-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-05、-06、-07）。
 
 ### 数据流
 
@@ -117,7 +118,8 @@
 | 同文件的 `passwordChecks` | 返回四条布尔（`length/letterCase/digit/special`），供强度面板逐条勾选 | 不决定档位、不判提交 |
 | 同文件的 `PASSWORD_SPECIAL` | 特殊字符集合，唯一来源 | 不单独对外暴露 |
 | `kube-frontend/apps/console-next/src/lib/password.ts` 的 `passwordProblemMessage` | 把规则码映射成 i18n 句子（含 `no-special`） | 不判定规则 |
-| `kube-frontend/apps/console-next/src/components/password/PasswordStrength.tsx` | 面板：四条检查项、进度条、文字标签、档位判定（`!complete → weak`，`length ≥ 12 → strong`） | 不写正则、不判提交、不发请求 |
+| `kube-frontend/apps/console-next/src/components/password/PasswordStrength.tsx` | 包装层：档位判定（`!complete → weak`，`length ≥ 12 → strong`）、四条检查项的 label 与 `data-ai-id` 前缀换算，然后渲染 ai-kit `PasswordStrengthMeter` | 不写正则、不判提交、不发请求、不自己渲染面板 |
+| `packages/ai-kit/src/primitives/PasswordStrength.tsx` | `PasswordStrengthMeter`：纯展示的进度条、三档文字标签、四条检查项与 `data-strength` / `data-met` / `data-ai-id` 句柄 | 不判规则、不内置文案 |
 | `kube-frontend/apps/console-next/src/shell/UserSettingsDialog.tsx` | 三个输入框、规则说明块、校验顺序、确认密码的实时比对提示（`user-settings:confirm-hint`）、400 的文案映射、成功后回调 | 不拼 HTTP、不自己做 logout、不自己算规则 |
 | `kube-frontend/apps/console-next/src/shell/AuthProvider.tsx` 的 `signOut` | `POST /api/session/logout` + 清 `localStorage` 里的 token | 不跳转（调用方跳） |
 | `access.ts` 的 `userSettingsApi.changePassword` | `PUT users/<name>/password` | 不映射错误 |
@@ -127,7 +129,8 @@
 | 层 | 仓库 | 路径 | 改动 |
 | --- | --- | --- | --- |
 | 组件 | `console` | `kube-frontend/apps/console-next/src/shell/UserSettingsDialog.tsx` | 密码页签：三个输入框、新密码框上方的规则说明（`user-settings:password-rule`）、确认密码框下方的实时比对提示（`user-settings:confirm-hint`）、校验顺序、400 映射、成功后 `onSignedOut` |
-| 组件 | `console` | `kube-frontend/apps/console-next/src/components/password/PasswordStrength.tsx` | 强度面板：`user-settings:password-strength`（`data-strength`）、`-strength-bar`、四个 `-check-*`（`data-met`）、三档文字标签 |
+| 组件 | `console` | `kube-frontend/apps/console-next/src/components/password/PasswordStrength.tsx` | 包装层：档位判定与句柄前缀换算 |
+| 组件 | `console` | `packages/ai-kit/src/primitives/PasswordStrength.tsx` | 面板本体：`user-settings:password-strength`（`data-strength`）、`-strength-bar`、四个 `-check-*`（`data-met`）、三档文字标签 |
 | 工具 | `console` | `kube-frontend/apps/console-next/src/lib/password.ts` | `passwordProblemMessage`：规则码 → 句子，补 `no-special` |
 | 接口 | `console` | `kube-frontend/packages/api-client/src/access.ts` | `passwordProblem` 加 `no-special`；新增 `passwordChecks` 与 `PASSWORD_SPECIAL`；`userSettingsApi.changePassword` 不变 |
 | 会话 | `console` | `kube-frontend/apps/console-next/src/shell/AuthProvider.tsx` | `signOut`：logout + 清 token（不变） |
@@ -168,7 +171,7 @@
 | **GOT-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-02** | 400 的正文是纯文本 `incorrect old password`，而 `codeForStatus(400)` 不在映射表里，`code` 落到 `http_error`。 | 想按 `code` 区分「当前密码错」与「邮箱非法」永远命中不了（两者都是 400/`http_error`）；只能按 `status === 400` + 接口上下文判。 | `UserSettingsDialog.tsx` 的 `serverError`；`client.ts` 的 `codeForStatus` |
 | **GOT-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-03** | 422 的正文是整条 admission 正则，且 `code` 是 `invalid`；当前实现只改写了 400，422 会落到 `errorMessage` 并原样显示正文。 | 撞上 422（规则变更、或客户端判定漏了某条）时，界面上会出现一整条正则。 | `UserSettingsDialog.tsx` 的 `serverError`（需要补 422 分支） |
 | **GOT-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-04** | 长度是两个单位：下限按字符、上限按字节。4 个汉字 = 4 字符 / 12 字节（过不了下限），30 个汉字 = 30 字符 / 90 字节（过不了上限）。 | 只用字符数判上限会放行 64 个汉字（192 字节），服务端回 422 正则；只用字节判下限会让「至少 8 位」变成 2–3 个汉字。 | `access.ts` 的 `passwordProblem` 与 `passwordChecks`（`TextEncoder` 计字节） |
-| **GOT-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-05** | 老 console 的 `PASSWORD_DESC` 要求特殊字符，`PATTERN_PASSWORD` 却不要求——文案与规则不一致，而且这句文案当时只是提示、从不参与校验。 | 把「文案已经写了」当成「规则已经生效」，于是以为特殊字符被强制过；或反过来把这条要求当成历史遗留随手删掉，回到文案说谎的状态。 | 老实现 `PasswordSetting/index.jsx`（仅作对照）；本轮由 `passwordProblem` 的 `no-special` 真正执行（DEC-05） |
+| **GOT-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-05** | 老 console 的 `PASSWORD_DESC` 要求特殊字符，`PATTERN_PASSWORD` 却不要求——文案与规则不一致，而且这句文案当时只是提示、从不参与校验。 | 把「文案已经写了」当成「规则已经生效」，于是以为特殊字符被强制过；或反过来把这条要求当成历史遗留随手删掉，回到文案说谎的状态。 | 老实现 `PasswordSetting/index.jsx`（仅作对照）；本轮由 `passwordProblem` 的 `no-special` 真正执行（DEC-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-05） |
 | **GOT-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-06** | 平台 admission 不要求特殊字符：直连 `PUT users/<name>/password`（或直接改 User 对象）设置不含特殊字符的密码会成功。 | 以为「前端拦住了」等于「集群里没有弱口令」。前端是这条规则唯一的执行点，任何绕过 UI 的路径都不受约束。 | `access.ts` 的 `passwordProblem` 只在客户端生效；服务端 `pkg/kapis/iam` 未改 |
 | **GOT-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-07** | 特殊字符是封闭列表：emoji 与中文标点（，。！）不在 `PASSWORD_SPECIAL` 里，不能用来满足第 5 条；空格在集合里。 | 用户以为「加个表情」就够了，提交被拒却看不出原因；反过来若放宽成正则，文案里列的集合就与判定再次分叉。 | `access.ts` 的 `PASSWORD_SPECIAL`；文案 `platform.users.field.passwordSpecial` 与 `userSettings.password.rule` 必须同步 |
 | **GOT-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-08** | 老 console 的确认密码校验只在该字段自己的 change 上重跑（`Form.Item` 的 `handleValueChange` → `validate`），不是随新密码重算。 | 回头改新密码后，框下方的「不一致」会滞留到下一次提交——用户看到红字却不知道它已经过期，或看到绿字而提交仍被拒。 | `UserSettingsDialog.tsx` 的 `confirm-hint`（派生状态，不是字段级 validator） |
@@ -181,7 +184,7 @@
 
 ## 后续改进
 
-- 平台 admission 加上特殊字符要求后，前端规则可退回跟随服务端，`no-special` 仍保留但不再由前端独有（DEC-05 的重新考虑条件）。
+- 平台 admission 加上特殊字符要求后，前端规则可退回跟随服务端，`no-special` 仍保留但不再由前端独有（见 DEC-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-05 的重新考虑条件）。
 - 服务端在改密时吊销会话后，前端的 `signOut` 可退化为只清本地状态。
 - BFF 为 400/422 定义稳定 `code` 后，错误映射从「看状态码 + 接口上下文」改为「看 code」。
 - 规则若再变化（新增条目、改长度口径、改特殊字符集合），只改 `passwordProblem` / `passwordChecks` / `PASSWORD_SPECIAL` 三处同文件常量与对应文案，两个弹窗与强度面板同时生效。

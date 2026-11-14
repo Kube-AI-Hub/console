@@ -58,15 +58,25 @@
 - **被否方案**：①。老 console 也没有确认框，只在页签上打点；加确认框会让「关闭」这个动作在有无改动时表现不同，用例也多一条分支。
 - **何时重新考虑**：出现长表单（例如以后加了多行配置）时。
 
+### DEC-L2-KUBE-FRONTEND-USER_SETTINGS-05：结构复用设计系统，不在页内手写
+
+- **备选**：① 页内自写页签条、字段 label/hint/error 包装、只读信息行与强度面板（迁移第一版即如此）；② 组合 ai-kit 的 `Tabs` / `FormField` / `DescriptionList` / `PasswordStrengthMeter`，页内只保留状态与校验。
+- **选定**：②
+- **原因**：第一版把四种结构各写了一遍——页签是原生 `<button role="tab">`，没有方向键导航；四个字段各写一次 label + 输入 + 说明；只读两行写成一个私有 `ReadOnlyField`；强度面板把展示与规则换算混在同一个应用组件里。这些结构在其它页面也要用（字段包装已有 17 个文件各写一遍，只读信息行有 24 个文件依赖应用内 `DefinitionRow`），留在页内等于把「用户设置长什么样」复制到下一处。上收之后：页签拿到 Radix 的键盘与 aria 语义；字段的说明/错误行由一处渲染；只读信息行与 24 个详情页共用同一实现；强度面板的展示可被创建用户弹窗复用。
+- **被否方案**：①。它让「页面正确」与「组件可复用」变成两件事：页签的无障碍缺陷、只读行的颜色漂移都只能逐页修，而每页的修法还会不一样。
+- **何时重新考虑**：设计系统需要为「设置类页面」提供更强的容器抽象（例如分组导航、设置页布局）时；本轮只上收结构，不把页面布局固化进库。
+
 ## 页面与技术结构
 
 | 组件 / 模块 | 路径 | 职责 | 不做什么 |
 | --- | --- | --- | --- |
-| `UserSettingsDialog` | `kube-frontend/apps/console-next/src/shell/UserSettingsDialog.tsx` | 弹窗壳层、两个页签、读取账号、两次写、改密成功后回调 | 不决定退出后的跳转（由 shell 的 `leave` 做） |
+| `UserSettingsDialog` | `kube-frontend/apps/console-next/src/shell/UserSettingsDialog.tsx` | 弹窗壳层、两个页签、读取账号、两次写、改密成功后回调；页签/字段/只读行分别是 ai-kit 的 `Tabs` / `FormField` / `DescriptionList` | 不决定退出后的跳转（由 shell 的 `leave` 做）；不自己实现页签与字段结构 |
 | `UserMenu` | `kube-frontend/apps/console-next/src/shell/AppShell.tsx` | 账号菜单项 `shell:user-settings`、挂载弹窗、提供 `leave` | 不做表单校验 |
 | `userSettingsApi` | `kube-frontend/packages/api-client/src/access.ts` | `updateProfile` / `changePassword` | 不读账号（读用 `userDetailApi`） |
 | `passwordProblem` / `passwordChecks` / `passwordProblemMessage` | `access.ts` / `kube-frontend/apps/console-next/src/lib/password.ts` | 规则判定（第一条不满足 / 每条是否满足）与文案映射 | 不发请求 |
-| `PasswordStrength` | `kube-frontend/apps/console-next/src/components/password/PasswordStrength.tsx` | 密码页签下方的强度面板：四条检查项、进度条、弱/中/强文字标签 | 不写正则、不判提交 |
+| `PasswordStrength` | `kube-frontend/apps/console-next/src/components/password/PasswordStrength.tsx` | 包装层：把 `passwordChecks` 的结果与 `t()` 文案换算成 ai-kit `PasswordStrengthMeter` 的 props | 不写正则、不判提交、不自己渲染面板 |
+| `PasswordStrengthMeter` | `packages/ai-kit/src/primitives/PasswordStrength.tsx` | 纯展示：进度条、弱/中/强文字标签、四条检查项、`data-strength` / `data-met` / `data-ai-id` | 不判规则、不内置文案（库不内置 i18n） |
+| `DescriptionList` / `DescriptionItem` | `packages/ai-kit/src/primitives/DescriptionList.tsx` | 只读 label/value(/hint) 行：`<dl>/<dt>/<dd>`、空值 `-`、`aiId` 句柄 | 不管布局（调用方给 `<dl>` 网格或直接用 `DescriptionList`） |
 | `signOut` | `kube-frontend/apps/console-next/src/shell/AuthProvider.tsx` | `POST /api/session/logout` + 清本地 token | 不做页面跳转（调用方跳） |
 | 文案 | `kube-frontend/packages/locales/src/index.ts` | `userSettings.*` | 不写规则逻辑 |
 
@@ -106,7 +116,7 @@
 | **GOT-L2-KUBE-FRONTEND-USER_SETTINGS-01** | 改密不吊销旧 token：实测改密后同一 token 请求 `/api/session/me` 仍 200。 | 只跳 `/login` 等于没退出，旧会话继续可用——「我改了密码」反而给人虚假的安全感。 | `UserSettingsDialog.tsx` 的 `change.onSuccess` → `onSignedOut`；`AuthProvider.tsx` 的 `signOut` |
 | **GOT-L2-KUBE-FRONTEND-USER_SETTINGS-02** | 老 console 用「data 里有没有 `currentPassword`/`password`」区分改密与改邮箱，判据与页签无关。 | 照抄这个分支，字段一变动就会把改密请求发成整对象 PUT，或者反过来。 | `src/actions/user.js` 的 `'user.setting'`（老实现，仅作对照）；新实现按页签拆函数 |
 | **GOT-L2-KUBE-FRONTEND-USER_SETTINGS-03** | 老 console 的语言下拉写 `spec.lang` 并 `location.reload()`；新 UI 的语言在 `localStorage['kube-frontend-locale']`，切换不刷新。 | 两个入口各写一处，互相覆盖：在这里选中文，顶栏还是英文。 | `kube-frontend/apps/console-next/src/i18n.tsx` |
-| **GOT-L2-KUBE-FRONTEND-USER_SETTINGS-04** | 用户名与平台角色是只读**文本**，不是 disabled 输入框。 | 用例按 `input` 断言会失败；做成 disabled 输入框还会诱导用户去点一个永远点不动的控件。 | `UserSettingsDialog.tsx` 的 `ReadOnlyField` |
+| **GOT-L2-KUBE-FRONTEND-USER_SETTINGS-04** | 用户名与平台角色是只读**文本**，不是 disabled 输入框。 | 用例按 `input` 断言会失败；做成 disabled 输入框还会诱导用户去点一个永远点不动的控件。 | `UserSettingsDialog.tsx` 用 `DescriptionList` 渲染这两行；`data-ai-id` 落在**值节点**上而不是 `<dd>` 上——`<dd>` 里还有说明文字，用例的 `to_have_text` 会比整段文本 |
 | **GOT-L2-KUBE-FRONTEND-USER_SETTINGS-05** | 密码规则是前端规则，不是平台规则：服务端不要求特殊字符。 | 有人会以为服务端也拦特殊字符（于是直连 API 的弱口令被当成「不可能」），或者把前端这条要求写进平台文档当成集群级约束。 | `access.ts` 的 `passwordProblem`；服务端 `pkg/kapis/iam` 未改 |
 
 ## 测试与可观测
@@ -120,13 +130,14 @@
 - **独立页面路由**：低频小改动，代价是一条路由、一个菜单项和一次离开当前页面。
 - **未保存的二次确认**：四个字段的重填成本低于一次打断；提示点已经够早。
 - **页签级「取消」按钮**：关闭即丢弃，不需要第二套放弃语义。
-- **把语言开关搬进弹窗**：会让语言有两个写入口（见 GOT-03）。
+- **把语言开关搬进弹窗**：会让语言有两个写入口（见 GOT-L2-KUBE-FRONTEND-USER_SETTINGS-03）。
 
 ## 后续改进
 
 - 端点支持 merge patch 后，改邮箱可以退化为单字段写，省一次 GET。
 - 服务端在改密时吊销会话后，前端的 signOut 可以只清本地状态。
-- 若设置项增加到弹窗装不下，再按 DEC-L2-01 的触发条件改成页面。
+- 若设置项增加到弹窗装不下，再按 DEC-L2-KUBE-FRONTEND-USER_SETTINGS-01 的触发条件改成页面。
+- 其余仍手写字段包装的 16 个页面逐步改用 `FormField`，清单与优先级见 `docs/plans/user-settings-component-analysis.md` §7。
 
 ## 功能点
 
