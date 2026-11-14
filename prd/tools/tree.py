@@ -523,7 +523,16 @@ MODULES = [
                     {
                         "id": "users",
                         "title": "用户列表",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-01", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-02", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-05", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-06", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-07"]},
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-01",
+                            "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-02",
+                            "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-03",
+                            "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-04",
+                            "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-05",
+                            "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-06",
+                            "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-07",
+                            "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-08",
+                        ]},
                     },
                     {
                         "id": "platform-roles",
@@ -548,7 +557,11 @@ MODULES = [
                     {
                         "id": "user-detail",
                         "title": "用户详情",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USER_DETAIL-01"]},
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USER_DETAIL-01",
+                            "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USER_DETAIL-02",
+                            "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USER_DETAIL-03",
+                        ]},
                     },
                 ],
             },

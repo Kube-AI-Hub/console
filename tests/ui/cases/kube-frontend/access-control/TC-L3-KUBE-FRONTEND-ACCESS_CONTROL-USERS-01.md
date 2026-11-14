@@ -1,4 +1,4 @@
-# TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-01 用户 · 列表四列
+# TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-01 用户 · 列表四列与最近登录
 
 - **用例 ID**: `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-01`
 - **级别**: L3  **套件**: `point`
@@ -8,7 +8,7 @@
 
 ## 产品功能
 
-['用', '户', None, '·', None, '列', '表', '四', '列', '：', '列', '集', '合', '与', '老', None, 'c', 'o', 'n', 's', 'o', 'l', 'e', None, '一', '致', '。']
+用户列表四列为用户名、状态、平台角色、最近登录；最近登录等于该行 status.lastLoginTime，从未登录显示「尚未登录」。
 
 ### 关联需求
 
@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/access-control/users.md`](../../../../prd/kube-frontend/access-control/users.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-01** — 已知平台上有用户，当打开用户页，则显示用户名、状态、平台角色、最近登录四列。
+- **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-01** — 已知平台上有用户，当打开用户页，则显示用户名（副行邮箱）、状态、平台角色、最近登录四列，列顺序与此一致；「最近登录」等于该行用户对象的 `status.lastLoginTime`（缺失时回退 `iam.kubesphere.io/last-login-time` 注解）；两者都没有时显示「尚未登录」，不显示 `-`，也不把改密时间当成登录时间。
 
 ### 关联设计
 
@@ -41,18 +41,21 @@
 
 ## 测试步骤
 
-1. 打开该页
-2. 核对表头
-3. 读取第一行
+1. 打开用户页
+2. 核对表头顺序
+3. 搜索 admin（若存在）或第一行用户名
+4. 用 API 读取该用户，核对该行最近登录
 
 ## 期望结果
 
 - 表头依次为 ["用户名", "状态", "平台角色", "最近登录"]
-- 第一行有内容
+- 列表有行
+- 最近登录等于 status.lastLoginTime 的本地时间；两者都空则显示尚未登录
 
 ## 失败排查
 
 - 缺列时看 PlatformListPage 的 columns
+- 显示改密时间：toUserSummary 仍在读 last-login-time 注解
 - 空列表时用例 skip 而不是失败
 
 ## 产品改版后如何更新自动化

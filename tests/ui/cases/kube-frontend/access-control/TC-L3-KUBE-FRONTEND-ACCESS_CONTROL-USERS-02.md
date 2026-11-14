@@ -8,7 +8,7 @@
 
 ## 产品功能
 
-平台用户可由「创建」表单建立；密码框边输入边显示强度面板；弱密码与非法的用户名被拦下；创建后平台角色写在注解上。
+平台用户可由「创建」表单建立；密码框边输入边显示强度面板；弱密码与非法的用户名被拦下；创建后平台角色与 uninitialized=true 写在注解上。
 
 ### 关联需求
 
@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/access-control/users.md`](../../../../prd/kube-frontend/access-control/users.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-02** — 已知在用户页，当点「创建」填写用户名、邮箱、密码与平台角色并确认，则用户被创建且 `iam.kubesphere.io/platform-role` 注解等于所选角色；用户名非法或密码弱于规则时提交被拦下并给出提示；密码输入过程中，字段下方显示强度面板（四条检查项与弱/中/强三档），随输入实时变化。
+- **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-02** — 已知在用户页，当点「创建」填写用户名、邮箱、密码、平台角色与可选描述并确认，则用户被创建且 `iam.kubesphere.io/platform-role` 等于所选角色、`iam.kubesphere.io/uninitialized` 为 `true`；填写了描述时 `kubesphere.io/description` 等于所填文本；用户名非法或密码弱于规则时提交被拦下并给出提示；密码输入过程中，字段下方显示强度面板（四条检查项与弱/中/强三档），随输入实时变化。
 
 ### 关联设计
 
@@ -28,11 +28,11 @@
 
 文案来自需求 [`prd/kube-frontend/access-control/users.md`](../../../../prd/kube-frontend/access-control/users.md)，与用例的 `story` 对应；改需求即改这里。
 
-### US1 - 看清谁在平台上、是什么角色 (Priority: P1)
+### US6 - 创建一个能首次登录的平台账号 (Priority: P1)
 
-作为 **平台管理员**，我希望 **在列表上看到状态与平台角色**，以便 **确认访问范围**。
+作为 **平台管理员**，我希望 **填写用户名、邮箱、初始密码、平台角色和可选描述后创建账号**，以便 **对方第一次登录时被要求改密，而不是一直使用我设的初始密码**。
 
-**Independent Test**：打开用户页，核对四列与某个用户的平台角色注解一致。
+**Independent Test**：创建临时用户后回读 `iam.kubesphere.io/uninitialized=true` 与所选平台角色；弱密码或非法用户名不发请求。
 
 ## 前置与配置
 
@@ -57,7 +57,7 @@
 - 弹窗里没有 user-settings:* 前缀的句柄（两处面板 scope 不同）
 - 非法用户名时提交被拦下
 - 弱密码时提交被拦下并说明原因
-- 提交后用户存在，且 iam.kubesphere.io/platform-role 等于所选角色
+- 提交后用户存在，iam.kubesphere.io/platform-role 等于所选角色，iam.kubesphere.io/uninitialized 为 true
 
 ## 失败排查
 
