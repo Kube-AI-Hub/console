@@ -1,0 +1,32 @@
+id: TC-L3-CONSOLE-CORE-RESOURCE_DETAIL-NOT_FOUND_PAGE-01
+level: 3
+suite: point
+module: console-core
+submodule: resource-detail
+feature: not-found-page
+title: 404 兜底页
+entry_url: '{BASE_URL}/kube-frontend/this-page-does-not-exist'
+prd: prd/console-core/resource-detail/not-found-page.md
+design: design/console-core/resource-detail/not-found-page.md
+
+covers:
+- AC-L3-CONSOLE-CORE-RESOURCE_DETAIL-NOT_FOUND_PAGE-01
+
+story:
+- US1
+
+product: 未知前端路径显示「页面不存在」并保留外壳，附带返回工作台入口。
+preconditions:
+- 已登录
+steps:
+- 访问一个不存在的 /kube-frontend 地址
+- 核对标题、说明与返回链接
+expected:
+- 出现 not-found:surface，标题为「页面不存在」
+- 返回链接指向 /kube-frontend
+troubleshoot:
+- 空白主区域：catch-all 路由未注册（routes/$.tsx）
+- 落到登录页：登录态丢失（先登录再访问）
+- build 后仍空白：静态产物未重建
+update_automation:
+- 选择器见 pages/ 与 NotFoundPage.tsx

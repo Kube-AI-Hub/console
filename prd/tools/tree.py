@@ -30,6 +30,11 @@ MODULES = [
                 ]},
                 "features": [
                     {
+                        "id": "not-found-page",
+                        "title": "404 兜底页",
+                        "tests": {"L3": ["TC-L3-CONSOLE-CORE-RESOURCE_DETAIL-NOT_FOUND_PAGE-01"]},
+                    },
+                    {
                         "id": "not-found",
                         "title": "资源不存在",
                         "tests": {"L3": [
@@ -473,7 +478,7 @@ MODULES = [
                     {
                         "id": "workspace-console",
                         "title": "企业空间控制台",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-01"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-01", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-02", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-03", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-04"]},
                     },
                     {
                         "id": "users",
@@ -595,6 +600,11 @@ MODULES = [
                         "id": "log-collections",
                         "title": "集群日志收集",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-LOG_COLLECTIONS-01"]},
+                    },
+                    {
+                        "id": "cluster-config",
+                        "title": "集群级配置",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-01"]},
                     },
                     {
                         "id": "cluster-workloads",
@@ -768,6 +778,11 @@ MODULES = [
                 "goal": "项目内的八种应用负载（部署、有状态副本集、守护进程集、任务、定时任务、容器组、服务、应用路由）用一套列表与详情呈现：状态按老 console 的规则派生，重新部署只打 Pod 模板注解，写操作走正确的 API 组。",
                 "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-APP_WORKLOADS-01"]},
                 "features": [
+                    {
+                        "id": "detail-tabs",
+                        "title": "详情页页签",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL_TABS-01"]},
+                    },
                     {
                         "id": "list",
                         "title": "工作负载列表",
