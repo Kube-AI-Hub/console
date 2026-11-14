@@ -153,7 +153,7 @@ export const AREAS: readonly Area[] = [
       { key: 'pods', path: 'pods', titleKey: 'workloads.pods.title', status: 'ready' },
       { key: 'services', path: 'services', titleKey: 'workloads.services.title', status: 'ready' },
       { key: 'ingresses', path: 'ingresses', titleKey: 'workloads.ingresses.title', status: 'ready' },
-      { key: 'grayrelease', path: 'grayrelease', titleKey: 'grayRelease.title', status: 'planned' },
+      { key: 'grayrelease', path: 'grayrelease', titleKey: 'grayRelease.title', status: 'ready' },
     ],
   },
   {

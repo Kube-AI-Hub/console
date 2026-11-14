@@ -297,6 +297,8 @@ export type {
   SessionUser,
 } from './session';
 export { isLoginErrorCode, sessionApi } from './session';
+export { strategiesApi, strategyStatusOf, targetServiceOf, toStrategySummary } from './servicemesh';
+export type { KubeStrategy, StrategyStatus, StrategySummary, StrategyType } from './servicemesh';
 export { isTokenExpired, userFromToken } from './token';
 
 /**
