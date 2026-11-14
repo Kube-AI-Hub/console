@@ -361,3 +361,124 @@ export function storeReviewsApi(client: Client) {
     },
   };
 }
+
+/** A release installed from the store, as a project's applications list reports it. */
+export interface StoreApplication {
+  /** The Helm release name — what the install dialog asked the user for. */
+  releaseName: string;
+  /** Release object id; the delete endpoint takes this, not the release name. */
+  id: string;
+  appId: string;
+  versionId: string;
+  status: string;
+  description: string;
+  workspace: string;
+  namespace: string;
+}
+
+interface RawApplication {
+  name?: string;
+  cluster?: {
+    name?: string;
+    cluster_id?: string;
+    app_id?: string;
+    version_id?: string;
+    status?: string;
+    description?: string;
+    zone?: string;
+  };
+}
+
+function toStoreApplication(item: RawApplication): StoreApplication {
+  const cluster = item.cluster ?? {};
+  return {
+    releaseName: cluster.name ?? '',
+    id: cluster.cluster_id ?? '',
+    appId: cluster.app_id ?? '',
+    versionId: cluster.version_id ?? '',
+    status: cluster.status ?? '',
+    description: cluster.description ?? '',
+    workspace: '',
+    namespace: cluster.zone ?? '',
+  };
+}
+
+/**
+ * 商店应用到项目里的安装（写）.
+ *
+ * Installing is a project-scoped operation: the openpitrix handler creates a HelmRelease in
+ * the namespace and there is no workspace-level create route (the workspace applications
+ * collection is read-only). The request body is the old console's deploy body — app, version,
+ * release name — and the release becomes listable through the project's applications.
+ *
+ * Deleting takes the release object id (`cluster.cluster_id` in the list), NOT the release
+ * name; deleting by name answers 200 without removing anything.
+ */
+export function workspaceApplicationsApi(client: Client) {
+  const base = (workspace: string, namespace: string) =>
+    `${OPENPITRIX}/workspaces/${encodeURIComponent(workspace)}/namespaces/${encodeURIComponent(namespace)}/applications`;
+  return {
+    async list(params: { workspace: string; namespace: string; signal?: AbortSignal }): Promise<StoreApplication[]> {
+      const body = await client.request<{ items?: RawApplication[] }>(base(params.workspace, params.namespace), {
+        query: { limit: -1 },
+        ...(params.signal ? { signal: params.signal } : {}),
+      });
+      return (body?.items ?? []).map(toStoreApplication);
+    },
+    async create(params: {
+      workspace: string;
+      namespace: string;
+      appId: string;
+      versionId: string;
+      name: string;
+      description?: string | undefined;
+    }): Promise<void> {
+      await client.request<void>(base(params.workspace, params.namespace), {
+        method: 'POST',
+        body: {
+          app_id: params.appId,
+          version_id: params.versionId,
+          name: params.name,
+          ...(params.description ? { description: params.description } : {}),
+        },
+      });
+    },
+    async remove(params: { workspace: string; namespace: string; id: string }): Promise<void> {
+      await client.request<void>(`${base(params.workspace, params.namespace)}/${encodeURIComponent(params.id)}`, {
+        method: 'DELETE',
+      });
+    },
+  };
+}
+
+/** A tenant workspace; the install target's workspace step. */
+export function storeWorkspacesApi(client: Client) {
+  return {
+    async list(params: { signal?: AbortSignal } = {}): Promise<{ name: string; alias: string }[]> {
+      const body = await client.request<{ items?: { metadata?: { name?: string; annotations?: Record<string, string> } }[] }>(
+        '/kapis/tenant.kubesphere.io/v1alpha2/workspaces',
+        { query: { limit: -1 }, ...(params.signal ? { signal: params.signal } : {}) },
+      );
+      return (body?.items ?? []).map((item) => ({
+        name: item.metadata?.name ?? '',
+        alias: item.metadata?.annotations?.['kubesphere.io/alias-name'] ?? '',
+      })).filter((item) => item.name);
+    },
+  };
+}
+
+/** The projects (namespaces) of one workspace; the install target's project step. */
+export function storeWorkspaceProjectsApi(client: Client) {
+  return {
+    async list(params: { workspace: string; signal?: AbortSignal }): Promise<{ name: string; alias: string }[]> {
+      const body = await client.request<{ items?: { metadata?: { name?: string; annotations?: Record<string, string> } }[] }>(
+        `/kapis/tenant.kubesphere.io/v1alpha2/workspaces/${encodeURIComponent(params.workspace)}/namespaces`,
+        { query: { limit: -1 }, ...(params.signal ? { signal: params.signal } : {}) },
+      );
+      return (body?.items ?? []).map((item) => ({
+        name: item.metadata?.name ?? '',
+        alias: item.metadata?.annotations?.['kubesphere.io/alias-name'] ?? '',
+      })).filter((item) => item.name);
+    },
+  };
+}

@@ -419,11 +419,20 @@ export type { ExecOptions, ExecSession, ExecSocket, ExecSocketFactory, ExecTarge
 export { ipPoolsApi, toIpPoolDetail, toIpPoolSummary } from './network';
 export type { IpPoolDetail, IpPoolSummary } from './network';
 
-export { decodeStoreFile, storeAppsApi, storeCategoriesApi, storeReviewsApi } from './appstore';
+export {
+  decodeStoreFile,
+  storeAppsApi,
+  storeCategoriesApi,
+  storeReviewsApi,
+  workspaceApplicationsApi,
+  storeWorkspacesApi,
+  storeWorkspaceProjectsApi,
+} from './appstore';
 export type {
   StoreApp,
   StoreAppDetail,
   StoreAppFiles,
+  StoreApplication,
   StoreAppVersion,
   StoreCategory,
   StoreReview,

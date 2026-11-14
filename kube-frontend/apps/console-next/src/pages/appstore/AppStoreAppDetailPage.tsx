@@ -9,15 +9,15 @@ import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { DefinitionRow } from '@/components/resource/DefinitionRow';
 import { formatTimestamp } from '@/lib/time';
+import { AppInstallDialog } from './AppInstallDialog';
 
 /**
  * 应用详情（商店浏览 → 应用）.
  *
  * The list only answers "which apps exist". This page answers "should I install this one":
- * what it is, which versions are published, and what the chart's README says. It is
- * deliberately **read-only**: installing and deploying are openpitrix write operations with
- * their own agreement/version flow, deferred to the next round, so the install entry is shown
- * disabled with the reason rather than a button that leads nowhere.
+ * what it is, which versions are published, and what the chart's README says. Installing opens
+ * the dialog that asks for the target workspace/project and creates the openpitrix release;
+ * everything before that dialog is a read.
  *
  * The version row's "type" comes from the app's `app_version_types`: openpitrix versions do
  * not carry their own type field (probed), and inventing one per row would be a lie.
@@ -35,6 +35,7 @@ export function AppStoreAppDetailPage({ appId }: AppStoreAppDetailPageProps): Re
   const t = useT();
   const [readmeOpen, setReadmeOpen] = React.useState(false);
   const [iconFailed, setIconFailed] = React.useState(false);
+  const [installOpen, setInstallOpen] = React.useState(false);
 
   const query = useQuery<DetailData>({
     queryKey: ['store-app-detail', appId],
@@ -153,10 +154,16 @@ export function AppStoreAppDetailPage({ appId }: AppStoreAppDetailPageProps): Re
           </div>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
-          <Button size="sm" disabled {...actionProps('app-detail:install-disabled')}>
-            {t('store.detail.installDisabled')}
+          <Button
+            size="sm"
+            variant="primary"
+            disabled={versions.length === 0}
+            data-ai-id="app-detail:install"
+            onClick={() => setInstallOpen(true)}
+          >
+            {t('store.detail.install')}
           </Button>
-          <span className="max-w-56 text-right text-[11px] text-ai-fg-muted">{t('store.detail.installDisabledHint')}</span>
+          <span className="max-w-56 text-right text-[11px] text-ai-fg-muted">{t('store.detail.installHint')}</span>
         </div>
       </header>
 
@@ -246,6 +253,15 @@ export function AppStoreAppDetailPage({ appId }: AppStoreAppDetailPageProps): Re
           )
         ) : null}
       </section>
+
+      <AppInstallDialog
+        open={installOpen}
+        onOpenChange={setInstallOpen}
+        appId={appId}
+        appName={detail.name || appId}
+        versions={versions}
+        defaultVersionId={readmeVersion?.id}
+      />
     </AiSurface>
   );
 }

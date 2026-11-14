@@ -79,11 +79,17 @@ def test_TC_L3_KUBE_FRONTEND_APP_STORE_DETAIL_01(page, ui_config, session_token,
     if first_version_name:
         assert first_version_name in table.inner_text(), table.inner_text()[:300]
 
-    # ---- install entry is disabled with an explanation, and does not write ----
-    install = page.locator('[data-ai-id="app-detail:install-disabled"]')
+    # ---- the install entry opens the dialog; opening and cancelling do not write ----
+    install = page.locator('[data-ai-id="app-detail:install"]')
     expect(install).to_be_visible(timeout=20_000)
-    expect(install).to_be_disabled()
-    assert "下一轮" in page.locator('[data-ai-id="app-detail:surface"]').inner_text()
+    expect(install).to_be_enabled()
+    install.click()
+    dialog = page.locator('[data-ai-id="app-detail:install-dialog"]')
+    expect(dialog).to_be_visible(timeout=20_000)
+    expect(page.locator('[data-ai-id="app-detail:install-submit"]')).to_be_visible(timeout=20_000)
+    expect(page.locator('[data-ai-id="app-detail:install-name"]')).to_have_value(re.compile(r"^[a-z0-9-]+$"))
+    page.locator('[data-ai-id="app-detail:install-cancel"]').click()
+    expect(dialog).to_be_hidden(timeout=20_000)
 
     # ---- readme is collapsed by default, then decodes to non-empty text ----
     readme = page.locator('[data-ai-id="app-detail:readme"]')

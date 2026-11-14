@@ -4,7 +4,7 @@ suite: point
 module: kube-frontend
 submodule: app-store
 feature: detail
-title: 应用详情 · 从卡片进入、版本表与 Readme、只读安装入口
+title: 应用详情 · 从卡片进入、版本表与 Readme、安装入口（打开不写）
 entry_url: '{BASE_URL}/kube-frontend/apps'
 prd: prd/kube-frontend/app-store/detail.md
 design: design/kube-frontend/app-store/detail.md
@@ -15,7 +15,7 @@ covers:
 story:
 - US1
 
-product: 商店卡片进入详情；应用名/图标或占位/分类/简介来自详情接口；版本表行数等于版本接口 items 数、类型取自应用 app_version_types；Readme 折叠，展开后显示 README.md 解码文本；安装/部署按钮禁用且不发起写请求；未知 appId 显示 not-found。
+product: 商店卡片进入详情；应用名/图标或占位/分类/简介来自详情接口；版本表行数等于版本接口 items 数、类型取自应用 app_version_types；Readme 折叠，展开后显示 README.md 解码文本；安装入口打开安装弹窗，打开与取消都不发起写请求；未知 appId 显示 not-found。
 preconditions:
 - 已登录，openpitrix 模块开启，商店至少有 1 个应用
 - 选中的应用至少有 1 个版本
@@ -24,7 +24,7 @@ steps:
 - 打开 /kube-frontend/apps，点击该应用的卡片（app-store:card:<appId>）
 - 核对 URL、app-detail:surface、应用名
 - 核对版本表行数等于版本接口 items 数，首行版本号在表中
-- 核对安装/部署按钮 disabled，点击不发请求
+- 核对安装按钮可点，点击打开安装弹窗（字段可见），取消关闭弹窗
 - 展开 Readme，核对出现非空纯文本
 - 打开 /kube-frontend/apps/app-does-not-exist，核对 app-detail:not-found 且没有重试按钮
 - 汇总页面产生的 openpitrix 写请求，断言为空
@@ -32,12 +32,12 @@ expected:
 - 卡片进入 /kube-frontend/apps/<appId>，详情 ready，应用名与接口一致
 - 版本表行数 = 版本接口 items 数；版本类型列显示应用级类型（helm）
 - Readme 展开后文本非空且不是 base64
-- 安装按钮 disabled；详情页不产生 POST/PUT/PATCH/DELETE 到 openpitrix
+- 安装按钮可点并打开弹窗；打开/取消不产生 POST/PUT/PATCH/DELETE 到 openpitrix
 - 未知 appId → 应用不存在空状态（无重试按钮）
 troubleshoot:
 - 卡片点不动：确认卡片链接带 app-store:card:<id> 且 href 正确
 - 版本表行数不符：检查版本接口信封是 {items,total_count}
 - Readme 为空：确认读的是 files["README.md"] 并做 base64 解码
-- 安装按钮可点：本轮必须 disabled 且不发请求
+- 安装按钮不可点：检查 versions 是否为空（空版本时按钮禁用）
 update_automation:
 - 页面句柄或数据字段变化时同步本用例
