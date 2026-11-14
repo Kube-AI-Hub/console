@@ -414,6 +414,11 @@ MODULES = [
                         "title": "邮件通知渠道",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-MAIL-01"]},
                     },
+                    {
+                        "id": "channels",
+                        "title": "钉钉/企业微信/Slack/Webhook 渠道",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-CHANNELS-01"]},
+                    },
                 ],
             },
             {
@@ -724,6 +729,13 @@ MODULES = [
                         "title": "负载详情",
                         "tests": {"L3": [
                             "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-01",
+                        ]},
+                    },
+                    {
+                        "id": "container-detail",
+                        "title": "容器详情",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-01",
                         ]},
                     },
                     {

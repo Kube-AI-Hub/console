@@ -10,7 +10,7 @@ import { WORKLOAD_DESCRIPTORS, ensureWorkloadPageRegistered } from '@/pages/app-
  * `route.tsx` renders whichever of the two matches, so the detail is never hidden
  * behind the list.
  */
-export const Route = createFileRoute('/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/pods/$name')({
+export const Route = createFileRoute('/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/pods/$name/')({
   component: podsDetailRoute,
 });
 

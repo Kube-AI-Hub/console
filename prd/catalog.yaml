@@ -406,6 +406,13 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-MAIL-01
+    - id: channels
+      title: 钉钉/企业微信/Slack/Webhook 渠道
+      prd: prd/kube-frontend/platform-settings/channels.md
+      design: design/kube-frontend/platform-settings/channels.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-CHANNELS-01
   - id: user-settings
     title: 用户设置
     prd: prd/kube-frontend/user-settings/_index.md
@@ -794,6 +801,13 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-01
+    - id: container-detail
+      title: 容器详情
+      prd: prd/kube-frontend/app-workloads/container-detail.md
+      design: design/kube-frontend/app-workloads/container-detail.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-01
     - id: redeploy
       title: 重新部署
       prd: prd/kube-frontend/app-workloads/redeploy.md

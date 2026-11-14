@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: container-detail
+title: 容器详情 · 单个容器的配置与状态
+entry_url: '{BASE_URL}/kube-frontend/public/clusters/host/projects/default/pods'
+prd: prd/kube-frontend/app-workloads/container-detail.md
+design: design/kube-frontend/app-workloads/container-detail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-01
+
+story:
+- US1
+
+product: 从容器组详情点容器名进入容器详情：镜像/拉取策略/状态/重启/启动时间/命令，以及资源、环境变量、挂载卷、端口、探针五个区块；无内容显示说明。
+preconditions:
+- 已登录，且对 default 项目有读取权限
+- 项目中至少有一个带容器的容器组
+steps:
+- 用 API 读一个容器组对象，取其第一个容器名与镜像
+- 打开容器组详情，点该容器名
+- 核对容器详情的基本信息与容器组对象一致
+- 核对五个区块均存在（有内容或空态说明）
+expected:
+- 容器详情可达且 ready
+- 镜像与拉取策略等于容器组对象中的字段
+- 容器不存在时显示明确提示
+troubleshoot:
+- 容器链接点不动：容器组详情的容器区块只在 pods 下提供链接
+- 页面 404：路由没重新生成（改完 $name.tsx 后要 vite build）
+- 环境变量空白：valueFrom 只读 value，需要显示引用来源
+update_automation:
+- 选择器见 pages/app_workloads.py 与 ContainerDetailPage.tsx

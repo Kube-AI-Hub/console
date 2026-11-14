@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiButton, AiSurface, Badge, Button, Icon, Skeleton } from '@kube-ai-hub/ui';
-import type { WorkloadKind, WorkloadRevision } from '@kube-ai-hub/api-client';
+import type { WorkloadDetail, WorkloadKind, WorkloadRevision } from '@kube-ai-hub/api-client';
 import { useT } from '@/i18n';
 import {
   useDeleteWorkload,
@@ -42,6 +42,12 @@ import { DefinitionRow as Row } from '@/components/resource/DefinitionRow';
  * directly), 删除. 扩缩容 and 编辑信息 need a form surface the workload kinds do not
  * share, so they are listed as remaining work rather than half-built here.
  */
+/** Container names a pod actually runs; an empty list for anything else. */
+function podContainers(detail: WorkloadDetail): string[] {
+  const raw = detail.raw as unknown as { spec?: { containers?: Array<{ name?: string }> } };
+  return (raw.spec?.containers ?? []).map((container) => String(container.name ?? '')).filter(Boolean);
+}
+
 export interface WorkloadDetailPageProps {
   descriptor: WorkloadDescriptor;
   /** Needed to build links to other pages; the route always carries it. */
@@ -442,6 +448,26 @@ export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, 
           {detail.images.length > 0 ? (
             <section className="rounded-ai-md border border-ai-line p-4" data-ai-id={`${kind}-detail:containers`}>
               <h2 className="mb-3 text-sm font-medium text-ai-fg">{t('workloads.detail.containers')}</h2>
+              {/*
+                * For a pod, each container has its own page (image, resources, env, mounts,
+                * probes); for a controller the template's containers have no page of their
+                * own, so those stay as a plain list of images.
+                */}
+              {kind === 'pods' ? (
+                <ul className="flex flex-col gap-2">
+                  {podContainers(detail).map((containerName) => (
+                    <li key={containerName} data-ai-row={containerName}>
+                      <a
+                        href={`/kube-frontend/${workspace}/clusters/${cluster}/projects/${namespace}/pods/${name}/containers/${containerName}`}
+                        className="inline-flex min-h-6 items-center font-mono text-[11px] text-ai-accent hover:underline"
+                        data-ai-id={`${kind}-detail:container:${containerName}`}
+                      >
+                        {containerName}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
               <ul className="flex flex-col gap-2">
                 {detail.images.map((image) => (
                   <li
@@ -453,6 +479,7 @@ export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, 
                   </li>
                 ))}
               </ul>
+              )}
             </section>
           ) : null}
         </>
