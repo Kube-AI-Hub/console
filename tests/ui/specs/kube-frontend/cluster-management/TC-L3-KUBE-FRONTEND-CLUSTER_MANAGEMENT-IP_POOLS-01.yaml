@@ -1,0 +1,39 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-IP_POOLS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: ip-pools
+title: IP 池 · 列表用量与详情的工作空间分配
+entry_url: '{BASE_URL}/kube-frontend/clusters/{cluster}/ippools'
+prd: prd/kube-frontend/cluster-management/ip-pools.md
+design: design/kube-frontend/cluster-management/ip-pools.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-IP_POOLS-01
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-IP_POOLS-02
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-IP_POOLS-03
+
+story:
+- US1
+
+product: 集群 IP 池列表显示网段与已用 IP；没有池时给出空态说明；详情显示网段、可用范围与按工作空间汇总的分配数。
+preconditions:
+- 已登录平台管理
+- 集群已安装网络插件（ippools 接口可读）
+steps:
+- 打开集群 IP 池页，确认标题、描述与列
+- 若集群有池：核对每行网段与已用 IP
+- 若无池：确认空态说明指向「容器组直接从节点网络取地址」
+- 打开第一个池的详情，核对基本信息与工作空间用量区
+expected:
+- 列表渲染（有数据或空态），不出现 0/0
+- 空态文案说明原因
+- 详情显示网段与工作空间分配数；pod 区显示列表或空态
+performance:
+- 一次列表 + 一次详情；pod 区一次 fieldSelector 查询
+troubleshoot:
+- 接口 404：集群未装网络插件，页面应显示错误与重试而不是空态
+- 容量缺失显示 0/0：status.capacity 未同步，应退回只显示已用
+update_automation:
+- 列变化时同步 IpPoolsPage 的 schema 与用例断言

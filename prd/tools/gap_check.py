@@ -59,6 +59,8 @@ SCOPE_DIRS = {
     "projects": "kube-frontend.$workspace.clusters.$cluster.projects.$namespace",
     "access": "kube-frontend.access",
     "settings": "kube-frontend.settings",
+    # 应用商店的页面落在两个顶层目录下，段级归宿见 MAPPED。
+    "apps": "kube-frontend.apps-manage",
 }
 
 #: 老段名 → 新段名（改名、合并、复数统一）。**按作用域分别登记**：
@@ -89,8 +91,6 @@ UNMIGRATED: dict[str, str] = {
     "clusters/custom-monitoring": "自定义监控：仪表板接口各路径 404（计划 §5.4）",
     "projects/custom-monitoring": "同上（计划 §5.4）",
     "clusters/edgenodes": "边缘节点：edge 模块未开启（§5.10）",
-    "clusters/ippools": "集群网络 IP 池：network 模块未开启（§5.11）",
-    "clusters/networkpolicies": "集群网络策略：network 模块未开启（§5.11）",
     "clusters/kubeconfig": "kubeconfig 读取 405（§5.5）；导入更新已迁移",
     "projects/applications": "应用商店：openpitrix 模块关闭（§5.1）",
     "projects/grayrelease": "灰度发布：servicemesh 模块关闭（§5.3）",
@@ -131,7 +131,16 @@ SCOPE_DECISIONS: dict[str, tuple[str, str]] = {
     "workspaces": ("planned", "企业空间控制台：整块待迁，Phase 2（计划 §57.3）；平台侧只有只读详情"),
     "devops": ("unmigrated", "DevOps 工程：devops 模块关闭（§5.2），整块不做"),
     "fedprojects": ("unmigrated", "联邦项目：联邦模块未开启，整块不做"),
-    "apps": ("unmigrated", "应用商店：openpitrix 模块关闭（§5.1），整块不做"),
+}
+
+#: 老段 → 新 UI 的页面位置。用于**不在某个作用域目录下**的页面
+#: （应用商店是顶栏一级入口，路径是 `/kube-frontend/apps` 与 `/apps-manage`）。
+MAPPED: dict[str, str] = {
+    "apps/apps": "kube-frontend/apps（应用商店浏览）",
+    "apps/apps-manage": "kube-frontend/apps-manage（商店管理）",
+    "apps/store": "kube-frontend/apps-manage/store（商店里的应用）",
+    "apps/categories": "kube-frontend/apps-manage/categories",
+    "apps/reviews": "kube-frontend/apps-manage/reviews",
 }
 
 #: 只做重定向、没有自己页面的段：它们是入口别名，不是页面。
@@ -193,6 +202,8 @@ def classify(scope: str, segment: str, new: set[str]) -> tuple[str, str]:
         return "unmigrated", UNMIGRATED[key]
     if key in ELSEWHERE:
         return "elsewhere", ELSEWHERE[key]
+    if key in MAPPED:
+        return "migrated", MAPPED[key]
     if key in PLANNED:
         return "planned", PLANNED[key]
     return "untracked", "既未迁移也未登记"

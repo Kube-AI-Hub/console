@@ -1,0 +1,38 @@
+id: TC-L3-KUBE-FRONTEND-APP_STORE-BROWSE-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-store
+feature: browse
+title: 商店浏览 · 分类栏、空态与商店管理入口
+entry_url: '{BASE_URL}/kube-frontend/apps'
+prd: prd/kube-frontend/app-store/browse.md
+design: design/kube-frontend/app-store/browse.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_STORE-BROWSE-01
+- AC-L3-KUBE-FRONTEND-APP_STORE-BROWSE-02
+- AC-L3-KUBE-FRONTEND-APP_STORE-BROWSE-03
+
+story:
+- US1
+
+product: 应用商店首页：左侧分类栏（含应用数）与右侧应用区；商店为空时说明应用来自应用仓库；页头有「商店管理」入口。
+preconditions:
+- 已登录
+steps:
+- 打开 /kube-frontend/apps
+- 确认分类栏含「全部分类」
+- 若商店为空：确认空态说明来源是应用仓库
+- 点击「商店管理」
+expected:
+- 页面进入 ready 或 empty 状态（不是 error）
+- 空态文案包含「应用仓库」
+- 跳转到 /kube-frontend/apps-manage
+performance:
+- 两次接口：分类（全量）+ 应用（一页）
+troubleshoot:
+- 仍为空白：/kube-frontend/apps 路由缺失（曾长期如此）
+- 状态 error：openpitrix 接口不可用
+update_automation:
+- 空态文案变化时同步用例断言

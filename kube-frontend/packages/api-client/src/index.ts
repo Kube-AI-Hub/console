@@ -346,3 +346,9 @@ export type {
 
 export { logSearchApi, auditSearchApi } from './search';
 export type { AuditRecord, AuditSearchResult, HistogramBucket, HistogramResult, LogRecord, LogSearchResult, LogStatistics } from './search';
+
+export { ipPoolsApi, toIpPoolDetail, toIpPoolSummary } from './network';
+export type { IpPoolDetail, IpPoolSummary } from './network';
+
+export { storeAppsApi, storeCategoriesApi, storeReviewsApi } from './appstore';
+export type { StoreApp, StoreCategory, StoreReview } from './appstore';

@@ -422,6 +422,24 @@ MODULES = [
                 ],
             },
             {
+                "id": "app-store",
+                "title": "应用商店",
+                "goal": "顶栏一级入口：浏览商店里的应用模板（按分类筛选），以及商店管理（应用、分类、审核）。依赖 openpitrix 模块，本集群该模块开启且接口可用。",
+                "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-APP_STORE-01"]},
+                "features": [
+                    {
+                        "id": "browse",
+                        "title": "商店浏览",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_STORE-BROWSE-01"]},
+                    },
+                    {
+                        "id": "manage",
+                        "title": "商店管理（应用/分类/审核）",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-01"]},
+                    },
+                ],
+            },
+            {
                 "id": "user-settings",
                 "title": "用户设置",
                 "goal": "登录者管理自己的账号：看清自己是谁（用户名、平台角色），改自己的邮箱与密码。入口是右上角用户菜单，不需要平台管理权限，因此它不属于任何项目、集群或平台配置页面。",
@@ -616,6 +634,16 @@ MODULES = [
                             "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-03",
                             "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-04",
                         ]},
+                    },
+                    {
+                        "id": "ip-pools",
+                        "title": "IP 池",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-IP_POOLS-01"]},
+                    },
+                    {
+                        "id": "network-policies",
+                        "title": "集群级网络策略",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NETWORK_POLICIES-01"]},
                     },
                     {
                         "id": "custom-resources",

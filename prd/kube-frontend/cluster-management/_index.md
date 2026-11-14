@@ -6,7 +6,7 @@
 
 ## 概述
 
-- **路由**：`/kube-frontend/clusters/:cluster/{overview,nodes,namespaces,components,storageclasses,persistentvolumes,configmaps}`
+- **路由**：`/kube-frontend/clusters/:cluster/{overview,nodes,namespaces,pods,deployments,statefulsets,daemonsets,jobs,cronjobs,services,ingresses,components,custom-resources,networkpolicies,ippools,storageclasses,persistentvolumes,log-collections,logs,events,audit-logs,monitor,node-usage,members,visibility,settings}`
 - **谁用**：集群管理员，判断节点是否健康、集群里有哪些项目。
 - **做哪几步**：先看概览（集群身份、用量、模块） → 切到节点看就绪状态与 CPU/内存使用率；切到项目 → 看项目、所属企业空间与用量。
 - **看到什么**：概览分四块——基本信息（版本、就绪、连接方式）、资源用量（已用/总量 + 已分配）、Kubernetes 状态（请求速率/延迟/调度）、已启用模块；节点两行（名称 + 内网 IP）、状态徽章、角色、CPU 与内存使用率；项目两行（名称 + 描述）、状态、企业空间、CPU/内存/容器组用量。
@@ -87,6 +87,8 @@
 - 集群可见性与可插拔组件开关：需要平台侧写接口，当前迁移范围外（集群描述/别名/标签/供应商已可在列表与集群设置页编辑）。
 - 集群概览的趋势曲线与历史：需要指标历史接口，概览只取当前值（见 [overview.md](./overview.md)）。
 - 节点详情的 Pod 列表（需要按节点过滤 Pod）。
+- 集群作用域的配置字典 / 保密字典 / 服务账户列表：与项目作用域是同一批对象，集群级视图只多一列「项目」；跨项目按名检索属低频操作，用 kubectl 或项目作用域完成。老 console 有这三页，本控制台不做。
+- 集群网关与网关详情（老 console 有 5 个页签）：本集群网关控制器缺 Helm chart，Gateway 对象能创建到 `Deployed=True` 但 `spec` 被重写为空、Service 不创建，状态永远到不了就绪；项目作用域的网关页已交付，集群级不做。
 
 ## 假设
 

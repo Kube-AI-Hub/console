@@ -200,6 +200,8 @@ export const AREAS: readonly Area[] = [
       { key: 'components', path: 'components', titleKey: 'cluster.components.title', status: 'ready', groupKey: 'cluster.nav.groupResource' },
       { key: 'storageclasses', path: 'storageclasses', titleKey: 'cluster.storageClasses.title', status: 'ready', groupKey: 'nav.groupStorage' },
       { key: 'persistentvolumes', path: 'persistentvolumes', titleKey: 'cluster.persistentVolumes.title', status: 'ready', groupKey: 'nav.groupStorage' },
+      { key: 'ippools', path: 'ippools', titleKey: 'cluster.network.ipPools.title', status: 'ready', groupKey: 'cluster.nav.groupNetwork' },
+      { key: 'networkpolicies', path: 'networkpolicies', titleKey: 'cluster.network.policies.title', status: 'ready', groupKey: 'cluster.nav.groupNetwork' },
       // Editable cluster attributes. Only the description is writable: the rest of the
       // object is owned by the installer, and a console that edited it would disagree
       // with the thing that actually configures the cluster.
@@ -233,6 +235,18 @@ export const AREAS: readonly Area[] = [
       { key: 'users', path: 'users', titleKey: 'platform.users.title', status: 'ready' },
       { key: 'clusterroles', path: 'clusterroles', titleKey: 'platform.roles.title', status: 'ready' },
       { key: 'workspaces', path: 'workspaces', titleKey: 'platform.workspaces.title', status: 'ready' },
+    ],
+  },
+  {
+    key: 'app-store',
+    scope: 'platform',
+    titleKey: 'admin.appsManage',
+    icon: 'openpitrix',
+    defaultPage: 'store',
+    pages: [
+      { key: 'store', path: 'store', titleKey: 'store.manage.apps', status: 'ready' },
+      { key: 'categories', path: 'categories', titleKey: 'store.manage.categories', status: 'ready' },
+      { key: 'reviews', path: 'reviews', titleKey: 'store.manage.reviews', status: 'ready' },
     ],
   },
   {

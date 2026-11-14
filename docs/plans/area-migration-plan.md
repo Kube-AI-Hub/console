@@ -184,17 +184,17 @@ generate_case_docs.py → check_docs.py --strict → parity_check.py
 
 | # | 项 | 结论 | 证据 |
 | --- | --- | --- | --- |
-| 5.1 | 应用商店 / 应用模板 | 不做 | openpitrix 模块关闭（`configz` 里 `openpitrix.appstore=false`） |
+| 5.1 | 应用商店 / 应用模板 | **已迁移**（2026-11-14 更正） | 旧结论错：`configz.openpitrix=true`，`/kapis/openpitrix.io/v1/{apps,categories,reviews}` 均 200。已交付商店浏览与商店管理三页签 |
 | 5.2 | 镜像构建器 | 不做 | devops 模块关闭（`devops=false`） |
 | 5.3 | 灰度发布 | 不做 | servicemesh 模块关闭（`servicemesh=false`） |
-| 5.4 | 自定义监控（项目/集群） | 不做 | 仪表板接口各路径均 404：`/kapis/monitoring.kubesphere.io/v1alpha3/clusters/host/dashboards`、`/apis/monitoring.kubesphere.io/v1alpha3/{dashboards,clusterdashboards}` |
+| 5.4 | 自定义监控（项目/集群） | 不做 | 仪表板接口各路径均 404：`/kapis/monitoring.kubesphere.io/v1alpha3/clusters/host/dashboards`、`/apis/monitoring.kubesphere.io/v1alpha3/{dashboards,clusterdashboards}`（2026-11-14 复测仍 404） |
 | 5.5 | 集群 kubeconfig 读取/轮换 | 不做 | 读接口 405：`/kapis/cluster.kubesphere.io/v1alpha1/clusters/host/kubeconfig`；`/kapis/{tenant,resources}.kubesphere.io/...kubeconfig` 均 404。更新 kubeconfig（导入）已迁移 |
 | 5.6 | 任务重跑 / 容器组重新调度 | 不做 | `operations.kubesphere.io` 的 kapis 与 apis 各版本路径全部 404（含 `/version`） |
 | 5.7 | 网关真正就绪 | 受限 | Gateway 对象可创建（POST 201），但控制器缺 Helm chart：`spec` 被重写为空、Service 未创建，状态只到 `Deployed=True` |
 | 5.8 | 告警规则 YAML 批量导入/导出 | 未做（非阻塞） | 当前表单已覆盖单条策略全部字段；批量导入需带 schema 校验的编辑器 |
 | 5.9 | ~~日志/审计检索~~ | **已迁移** | ES 后端可用：日志 `/kapis/tenant.kubesphere.io/v1alpha2/logs`、审计 `…/auditing/events`（§50） |
 | 5.10 | 边缘节点（EdgeNodes） | 不做 | edge 模块未开启 |
-| 5.11 | 集群网络（IPPools / 集群网络策略） | 不做 | network 模块未开启（`network=false`） |
+| 5.11 | 集群网络（IPPools / 集群网络策略） | **已迁移**（2026-11-14 更正） | 旧结论错：`configz.network=false` 只关菜单；`network.kubesphere.io/v1alpha1/ippools` 与 `networking.k8s.io/v1/networkpolicies` 均 200。已交付两页 |
 | 5.12 | 第三方登录（平台设置） | 不做 | 本 fork 的登录方式由服务端配置与中间件注入（`server/routes.js` 的 oauth 路由），控制台没有写入路径 |
 
 **已在后续轮次推翻的旧结论**（保留记录，避免重犯）：
@@ -221,6 +221,9 @@ generate_case_docs.py → check_docs.py --strict → parity_check.py
 4. **指标缺失 ≠ 指标为 0**：不返回该指标与返回空 result 都要渲染成「不可用」，不显示 0。
 5. **Pod 指标结构与节点不同**：节点是 `{metadata, usage}`，Pod 是 `{metadata, containers:[{usage}]}`。
    「计数正确、测量值为 0」是这个错的特征。
+5a. **`configz` 的模块开关是菜单开关，不是接口开关**：`network=false` 时 `ippools`、`networkpolicies`
+   照常可读；`openpitrix=true` 说明商店可用。判页面能不能做，**探测接口**，不要用模块开关推。
+   这条是本项目第三个「文档结论比事实旧」的例子（前两个见 §40、§48）。
 
 ### 6.2 写入语义
 
@@ -3032,6 +3035,10 @@ D-03 已在本轮修正（§4.2）。教训：**"明确不做"是代码状态的
 **任何一列写"部分"的，必须在 `page-parity-report.md` 里有对应理由**，否则算未登记缺口。
 §4.4 的"21 项写能力"从此按矩阵统计，不再用总数（总数掩盖了 21 类 → 13 类的退化）。
 
+矩阵本体在 [`capability-matrix.md`](./capability-matrix.md)：缺口分析 §5 的 31 条「疑似回归」逐条有归宿
+（已补 / 部分已补 / 不迁移 / 待补），四列按本节定义填写，写「部分」的行都能查到理由。
+**页面级看 `gap_check.py`，能力级看这份矩阵——两者不要合并。**
+
 #### M4 「明确不做」与代码同源，且可反向核对
 
 `page-parity-report.md` 从 PRD 的「明确不做」生成 → PRD 必须与代码同步。落地方式：
@@ -3080,3 +3087,66 @@ D-03 已在本轮修正（§4.2）。教训：**"明确不做"是代码状态的
 **另一个自我检查**：本节写下的每条根因都带代码位置。如果哪天有人把
 `gap_check.py` 删了或绕过它，§57.4 M2 的"未归类必须为 0"就立刻失效——
 所以它接在 `verify.py` 里，是门禁的一部分，不是文档里的一句建议。
+
+---
+
+## 58. 第 120 轮：逐条复核「不迁移」，并推翻其中三条（2026-11-14，B200）
+
+**起因**：要求把「不迁移」清单逐条复核，凡是没弃用、也没有更优替代的都要迁。
+
+**方法**：不看文档怎么记，只看接口怎么答。对 §5 的 12 条逐条发探测请求，并把 `configz`
+的模块开关与 API 组的服务状态分开看——这一条是整轮的关键。
+
+### 58.1 推翻的三条（旧结论错在「把菜单开关当成接口开关」）
+
+| 旧结论 | 实测 | 结果 |
+| --- | --- | --- |
+| 5.1 应用商店：openpitrix 模块关闭 | `configz.openpitrix=true`；`/kapis/openpitrix.io/v1/{apps,categories,reviews}` 全 200 | **已迁**（浏览 + 管理三页签） |
+| 5.11 集群网络：network 模块未开启 | `configz.network=false` 只关菜单；`network.kubesphere.io/v1alpha1/ippools` 200、`networking.k8s.io/v1/networkpolicies` 200 | **已迁**（IP 池 + 集群级网络策略） |
+| 集群级网络策略「依赖 network 模块」 | NetworkPolicy 是**核心 Kubernetes 对象**，与 KubeSphere 模块无关 | 同上，已迁 |
+
+**教训（写进 §6.1 不变量）**：`configz` 的模块开关是**前端菜单开关**，不是接口可用性开关。
+判定一个页面能不能做，探测接口；不要用模块开关推。
+
+### 58.2 复核后确认仍然无法迁移的（附这次实测的返回）
+
+| 项 | 复测返回 | 结论 |
+| --- | --- | --- |
+| 自定义监控 | `…/v1alpha3/{dashboards,clusterdashboards}`、kapis dashboards 均 **404** | 不做（接口确实不存在） |
+| 计量账单 metering | `/kapis/metering.kubesphere.io/v1alpha1/{meter,resources,prices}` 均 **404**（集群段与非集群段都试过） | 不做：configz 说 `metering=true`，但 ks-apiserver 没有注册这些路由 |
+| 任务重跑 / 容器组重新调度 | `/apis` 里**没有 operations 组** | 不做 |
+| 边缘节点 | `/apis` 里**没有 edge 组** | 不做 |
+| kubeconfig 读取 | `kubesphere-system` 下无 `<cluster>-kubeconfig` Secret；kapis kubeconfig 405 | 不做（导入更新已迁） |
+| 第三方登录 | `identityproviders` 在 iam 两个版本都 **404** | 不做（登录方式由服务端注入） |
+| DevOps / 联邦项目 / 灰度发布 / 镜像构建器 | `devops=false`、`servicemesh=false`；无对应 API 组 | 不做（模块确实关闭） |
+
+### 58.3 交付
+
+| 页面 | 路由 | 说明 |
+| --- | --- | --- |
+| 集群 IP 池 | `…/clusters/:c/ippools` + 详情 | 网段、已用/总量、归属工作空间、默认标记；详情含工作空间用量与按池筛选的容器组 |
+| 集群级网络策略 | `…/clusters/:c/networkpolicies` | 跨项目列表 + 项目列 + 跳转到该项目的网络隔离页 |
+| 应用商店 | `/kube-frontend/apps` | 分类栏 + 应用卡片；空态说明应用来自仓库 |
+| 商店管理 | `/kube-frontend/apps-manage/{store,categories,reviews}` | 三个页签 + 刷新 |
+
+**顺带修掉**：顶栏「应用商店」与「平台管理 › 应用商店管理」两个**死链**（它们从壳层建好起就指向不存在的路由）。
+
+### 58.4 两个实现坑（都是实测）
+
+1. **创建类请求要 POST 到集合端点**（本轮无涉及，但 IP 池的 kapis 只读同理）：`ippools` 通过
+   `resources` 代理只读，写会 405——所以这两个页面只读，且设计文档写明了原因。
+2. **`status.workspaces` 是映射不是数组**，值可能是数字也可能是 `{allocations}`，两种都要读；
+   容量缺失时**不能渲染 `0 / 0`**（会被读成"满了"）。
+
+### 58.5 验证
+
+| 项 | 结果 |
+| --- | --- |
+| 文档门禁 | errors=0 warnings=0 |
+| 一致性核对 / 缺口清单 | 0 / 未归类 0（已迁移 58、明确不做 10、别处承接 5、已登记缺口 14） |
+| 架构契约 | 813 通过 |
+| 新页面渲染 | 六个页面均 render，无 pageerror |
+| 新用例 | 已写入；**执行待补**——B200 登录被限流（429），等待窗口后补跑 |
+
+**下一步**：应用详情与应用安装（`/apps/:id`、`/apps/:id/deploy`）；商店写操作（建分类、审核）。
+两者都因商店当前为空而无法验证，已登记为缺口而不是猜实现。
