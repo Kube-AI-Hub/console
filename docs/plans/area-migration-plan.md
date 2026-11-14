@@ -2361,3 +2361,35 @@ Secret 与 Receiver，失败时不会留下「有收件人但没有传输配置�
 webhook 也间歇不可达。用例对 webhook 不可用会**带原因跳过**，不把环境故障记成产品失败。
 
 **下一轮**：钉钉、企业微信、Slack、Webhook 四个渠道（字段已确认，复用同一表单引擎）。
+
+### 48.30 其余四个通知渠道（声明表 + 通用页）
+
+邮件的页面是手写的；其余四个渠道如果照抄，就是四份几乎一样的代码。它们的差别只在
+**值放在哪个对象**，不在页面怎么工作，所以差别收进 `channelDescriptors.ts`，由
+`ChannelConfigPage` 渲染全部五个渠道。新增第六个渠道 = 加一条表项。
+
+| 渠道 | Config | Receiver spec | Secret |
+| --- | --- | --- | --- |
+| 钉钉 | `default-dingtalk-config` | `dingtalk.{conversation,chatbot}` | `-config-secret` |
+| 企业微信 | `default-wechat-config` | `wechat.{toUser,toParty,toTag}` | `-config-secret` |
+| Slack | `default-slack-config` | `slack.channels` | `-config-token` |
+| Webhook | **无** | `webhook.url`，认证在注解 | `-config-secret` |
+
+#### 三条「表格必须保证」的规则（每条都是看着真实请求失败换来的）
+
+1. **字段路径以 `spec` 为根，绝对书写**。再拼一次渠道键会得到 `spec.email.email.to`，
+   平台报 `to: Required value`。
+2. **只写当前接入方式那一组**。钉钉的会话凭据、企业微信的接收人键都属于当前方式；把另一组也发出去，
+   会留下第二套半配置的传输。
+3. **企业微信的 Config 必须引用 Secret**（`spec.wechat.wechatApiSecret`），否则平台直接拒绝创建 Config。
+
+另外修掉两个渲染缺陷：布尔字段（TLS、跳过校验）曾被过滤掉，`enabled` 的读取路径也少了一层 `spec`。
+
+#### 验证
+
+| 渠道 | 结果 |
+| --- | --- |
+| 邮件 / 钉钉 / 企业微信 / Slack | **端到端通过**（填写 → 保存 → 读回 Receiver 与 Secret → 删除） |
+| Webhook | 页面渲染与对象形状有单测；**保存未能验证**——`vreceiver` 校验 webhook 中途不可达，Receiver 写入一律 400 |
+
+`channel-descriptors.test.ts` 用 12 条断言钉住五个渠道的对象形状，路径写错会在单测里失败，而不是等到浏览器里。
