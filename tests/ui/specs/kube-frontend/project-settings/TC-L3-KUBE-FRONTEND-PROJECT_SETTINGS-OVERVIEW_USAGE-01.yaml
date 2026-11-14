@@ -1,0 +1,39 @@
+id: TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW_USAGE-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: project-settings
+feature: overview-usage
+title: 项目概览 · 资源用量卡（有数据/无采样/不可用）
+entry_url: '{BASE_URL}/kube-frontend/public/clusters/host/projects/default/overview'
+prd: prd/kube-frontend/project-settings/overview-usage.md
+design: design/kube-frontend/project-settings/overview-usage.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW_USAGE-01
+
+story:
+- US1
+
+product: 项目概览的资源用量卡：CPU/内存/存储/容器组已用与配额上限；监控不可用或无采样时给出对应说明而不是 0。
+preconditions:
+- 已登录，且能看到 default 项目
+- 监控接口可探测（可能不可用或没有采样）
+steps:
+- 用 API 读项目配额（/api/v1/namespaces/default/resourcequotas）得到上限键
+- 用 API 读项目命名空间监控（/kapis/monitoring.kubesphere.io/v1alpha3/namespaces/default?...）判断分支
+- 打开 default 项目概览，等待 surface 离开 loading
+- 核对资源用量卡存在
+- 按监控结果断言：有采样时四项数值（缺失项为 -），无采样时 :empty，监控失败时 :unavailable
+expected:
+- project-overview:usage 卡片始终存在
+- 有采样：project-overview:usage:cpu/memory/pods 显示数字（允许真实 0），缺失指标显示 -
+- 监控 200 且无序列：project-overview:usage:empty 可见
+- 监控非 200：project-overview:usage:unavailable 与 :retry 可见，且不出现 usage:cpu 的假 0
+- 配额卡不受用量卡状态影响
+troubleshoot:
+- 卡片不出现：用量查询在渲染前抛错，检查路径单复数（应为 namespaces/<ns>）
+- 显示 0 但监控无数据：缺失值被按 0 渲染，违反「不显示假 0」
+- 一直 loading：窗口时间放在 query key 里导致无限重取
+update_automation:
+- 选择器：project-overview:usage / :usage:cpu|memory|storage|pods / :usage:empty / :usage:unavailable / :usage:retry

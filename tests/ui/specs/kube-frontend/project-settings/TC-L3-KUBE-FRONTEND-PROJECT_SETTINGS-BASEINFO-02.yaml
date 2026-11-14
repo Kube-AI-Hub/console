@@ -1,0 +1,37 @@
+id: TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-BASEINFO-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: project-settings
+feature: baseinfo
+title: 项目基本信息 · 成员/角色/服务账号统计
+entry_url: '{BASE_URL}/kube-frontend/public/clusters/host/projects/default/baseinfo'
+prd: prd/kube-frontend/project-settings/baseinfo-stats.md
+design: design/kube-frontend/project-settings/baseinfo-stats.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-BASEINFO-02
+
+story:
+- US1
+
+product: 项目基本信息页新增统计区：成员数/角色数/服务账号数三张卡，数字来自对应列表接口的 totalItems。
+preconditions:
+- 已登录，且能看到 default 项目
+- 项目成员/角色/服务账号列表接口可读
+steps:
+- 用 API 读 /kapis/iam.kubesphere.io/v1alpha2/namespaces/default/members?limit=1 的 totalItems
+- 用 API 读同前缀 roles?limit=1 的 totalItems
+- 用 API 读 /kapis/resources.kubesphere.io/v1alpha3/namespaces/default/serviceaccounts?limit=1 的 totalItems
+- 打开 default 项目基本信息页，等待 surface 离开 loading
+- 核对统计区三张卡的数字
+expected:
+- settings-baseinfo:stats 区块可见
+- settings-baseinfo:stat:members/roles/serviceaccounts 三卡分别显示接口 totalItems
+- 失败时该卡显示 -（正常环境不触发，作为契约记录）
+troubleshoot:
+- 卡片数字恒 0：用了 items.length（pageSize=1）而不是 totalItems
+- 页面 dt 列表变化：统计卡误用了 <dt>，会破坏既有 base-info 属性断言
+- 服务账号卡读不到：该资源走资源代理而不是 IAM
+update_automation:
+- 选择器：settings-baseinfo:stats / :stat:members|roles|serviceaccounts
