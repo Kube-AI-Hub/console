@@ -11,6 +11,7 @@
 - `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-01`
 - `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-02`
 - `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-03`
+- `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-04`
 - `prd/kube-frontend/app-workloads/list.md`
 
 ## 设计目标与非目标
@@ -37,6 +38,14 @@
 **为什么**：页面详情与列表在同一个路由文件夹内，列表没有独立的路由 ID 可供类型化跳转；而 `<a href>` 保留了中键与 ⌘ 点击的行为，普通点击由布局的 `onNavigate` 转成客户端跳转。
 
 **被否方案**：给详情建独立路由 ID 再用 `<Link>`。会让「同一页面的列表与详情」重新分裂成两个路由文件。
+
+### DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-04 - 容器组的节点与 IP 列取自对象本身
+
+**为什么**：老 console 的容器组列表有「所在节点」「容器组 IP」两列，这正是排查「Pod 起来了但调度到哪」的第一个问题。两列都来自 Pod 对象（`spec.nodeName` / `status.podIP`），不需要额外请求。
+
+**被否方案**：从关联工作负载推断节点。工作负载没有节点概念，Pod 才有。
+
+**状态筛选为何不做**：kapis 资源代理忽略 `fieldSelector=status.phase=…`（实测返回 0 条），而列表统一走代理；放一个「选了就空」的控件比没有更糟。
 
 ## 系统现状
 

@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-04
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: list
+title: 容器组列表 · 节点与 Pod IP 列
+entry_url: '{BASE_URL}/kube-frontend/public/clusters/host/projects/default/pods'
+prd: prd/kube-frontend/app-workloads/list.md
+design: design/kube-frontend/app-workloads/list.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-04
+
+story:
+- US1
+
+product: 容器组列表显示「所在节点」与「容器组 IP」两列，值来自 Pod 对象的 spec.nodeName / status.podIP。
+preconditions:
+- 已登录，且对 default 项目有读取权限
+- 项目里至少有一个容器组
+steps:
+- 用 API 取容器组对象，记录 nodeName 与 podIP
+- 打开容器组列表
+- 核对表头包含「所在节点」「容器组 IP」
+- 核对这两个值与该对象一致（未调度时显示 -）
+expected:
+- 两列表头存在
+- 已调度容器组的节点与 IP 与对象一致
+troubleshoot:
+- 列为空：summary 映射没读 spec.nodeName/status.podIP
+- 全部显示 -：读的是工作负载模板而不是 Pod 对象
+- 想加状态筛选：kapis 代理忽略 status.phase fieldSelector（实测 0 条），不要放该控件
+update_automation:
+- 选择器见 pages/app_workloads.py 与 WorkloadListPage.tsx

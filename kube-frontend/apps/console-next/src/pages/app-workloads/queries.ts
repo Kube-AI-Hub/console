@@ -14,7 +14,7 @@ import { api } from '@/api';
  */
 
 export function workloadsKey(kind: WorkloadKind, params: Omit<ResourceListParams, 'signal'>) {
-  return [kind, params.cluster, params.namespace, params.page, params.pageSize, params.sortBy, params.order, params.keyword] as const;
+  return [kind, params.cluster, params.namespace, params.page, params.pageSize, params.sortBy, params.order, params.keyword, params.fieldSelector] as const;
 }
 
 export function useWorkloads(kind: WorkloadKind, params: Omit<ResourceListParams, 'signal'>) {

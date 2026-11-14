@@ -29,6 +29,11 @@ export interface ResourceListParams {
   sortBy?: string;
   order?: 'asc' | 'desc';
   keyword?: string;
+  /**
+   * Passed through to the API as a `fieldSelector` — the pods list filters by phase this way.
+   * Only lists whose backing collection supports field selection should set it.
+   */
+  fieldSelector?: string;
   signal?: AbortSignal;
 }
 
@@ -173,6 +178,7 @@ export function resourceApi<TItem extends KubeObject, TSummary, TDetail>(client:
           ...(params.sortBy ? { sortBy: params.sortBy } : {}),
           ...(params.order ? { ascending: params.order === 'asc' } : {}),
           ...(params.keyword?.trim() ? { name: params.keyword.trim() } : {}),
+          ...(params.fieldSelector ? { fieldSelector: params.fieldSelector } : {}),
         },
         ...(params.signal ? { signal: params.signal } : {}),
       });

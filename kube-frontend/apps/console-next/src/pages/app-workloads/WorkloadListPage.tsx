@@ -230,6 +230,28 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
               },
             ]
           : []),
+        ...(kind === 'pods'
+          ? [
+              {
+                key: 'node',
+                title: t('workloads.field.node'),
+                width: 160,
+                hideBelow: 'lg' as const,
+                render: (row: WorkloadSummary) => (
+                  <span className="truncate text-ai-fg-secondary">{row.node || '-'}</span>
+                ),
+              },
+              {
+                key: 'podIP',
+                title: t('workloads.field.podIP'),
+                width: 140,
+                hideBelow: 'xl' as const,
+                render: (row: WorkloadSummary) => (
+                  <span className="truncate font-mono text-[11px] text-ai-fg-muted">{row.podIP || '-'}</span>
+                ),
+              },
+            ]
+          : []),
         {
           key: 'createTime',
           title: t('workloads.column.createdAt'),

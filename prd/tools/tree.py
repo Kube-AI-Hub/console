@@ -726,6 +726,7 @@ MODULES = [
                         "tests": {"L3": [
                             "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-01",
                             "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-02",
+                            "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-04",
                         ]},
                     },
                     {

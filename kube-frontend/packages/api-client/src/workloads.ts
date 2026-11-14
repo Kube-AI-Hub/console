@@ -164,6 +164,10 @@ export interface WorkloadSummary extends ResourceBase {
   /** `status.readyReplicas`-style counter, when the kind has one. */
   ready?: number;
   total?: number;
+  /** Pod only: the node it runs on (`spec.nodeName`). */
+  node?: string;
+  /** Pod only: its IP (`status.podIP`). */
+  podIP?: string;
   /** Container images, for the pods and workloads that have them. */
   images: string[];
   /**
@@ -194,6 +198,16 @@ export interface WorkloadSummary extends ResourceBase {
 }
 
 /** The `app` / `app.kubernetes.io/name` label, matching what the old console reads. */
+/** Pod only: the node it runs on and its IP, both absent until it is scheduled. */
+function podPlacement(kind: WorkloadKind, item: KubeWorkload): { node?: string; podIP?: string } {
+  if (kind !== 'pods') return {};
+  const spec = (item.spec ?? {}) as Record<string, unknown>;
+  const status = (item.status ?? {}) as Record<string, unknown>;
+  const node = String(spec['nodeName'] ?? '');
+  const podIP = String(status['podIP'] ?? '');
+  return { ...(node ? { node } : {}), ...(podIP ? { podIP } : {}) };
+}
+
 function appOf(item: KubeWorkload): string {
   const labels = (item.metadata?.labels ?? {}) as Record<string, string>;
   return labels['app'] ?? labels['app.kubernetes.io/name'] ?? '';
@@ -304,6 +318,7 @@ export function toWorkloadSummary(kind: WorkloadKind, item: KubeWorkload): Workl
   const progress = workloadProgress(kind, item);
   return {
     ...baseOf(item),
+    ...podPlacement(kind, item),
     kind,
     status: workloadStatus(kind, item),
     app: appOf(item),

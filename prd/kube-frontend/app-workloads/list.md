@@ -19,6 +19,7 @@
 - **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-01** — 已知项目内至少有一个部署，当打开部署列表，则出现表格且每行有可点击的名称。
 - **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-02** — 已知列表有数据，当在搜索框输入对象名的一部分，则只剩匹配行。
 - **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-03** — 已知项目内没有任何该类型对象，当打开该页，则显示空态标题与说明。
+- **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-04** - 已知容器组列表有数据，当打开容器组页，则除名称/状态/创建时间外还显示「所在节点」与「容器组 IP」两列，其值分别等于该容器组对象的 `spec.nodeName` 与 `status.podIP`（未调度时显示 -）。
 
 ## 设计目标
 
@@ -47,6 +48,7 @@
 - 无副本概念的资源不显示就绪列。
 
 ## 明确不做
+- 容器组的状态筛选：kapis 资源代理忽略 status.phase 的 fieldSelector（实测返回 0 条），核心 API 支持但列表统一走代理，因此不做该控件。
 
 - 不做列显隐与列宽拖拽。
 - 不在列表创建负载。
@@ -58,6 +60,7 @@
 ## 验收用例
 
 - `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-01`
+- `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-04`
 - `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-02`
 - `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST-03`
 
