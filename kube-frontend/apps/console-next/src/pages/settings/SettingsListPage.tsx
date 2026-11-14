@@ -8,11 +8,12 @@ import { rolesApi } from '@kube-ai-hub/api-client';
 import { useQuery } from '@tanstack/react-query';
 import { useProjectFilter } from '@/components/projects/useProjects';
 import { useResourceListState, toListParams } from '@/components/resource/useResourceListState';
-import { MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
+import { errorMessage, MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { RolePermissionsDialog } from './RolePermissionsDialog';
 import { DeleteDialog } from '@/components/resource/DeleteDialog';
 import { EditInfoDialog } from '@/components/resource/EditInfoDialog';
 import { formatTimestamp } from '@/lib/time';
+import { useAuth } from '@/shell/AuthProvider';
 import { SETTINGS_DESCRIPTORS, useDeleteRole, useMemberWrites, useSettingsList, useUpdateRole, type SettingsKind } from './queries';
 import { MemberDialog } from './MemberDialog';
 import { RoleCreateDialog } from './RoleCreateDialog';
@@ -21,9 +22,9 @@ import { RoleCreateDialog } from './RoleCreateDialog';
  * Project settings: 角色 and 成员.
  *
  * Both are IAM lists (`iam.kubesphere.io/v1alpha2`). Roles are read with their rule
- * count and a detail view that lists the rules; members show the role they hold and
- * whether the account is still active. Editing roles and inviting members are forms
- * the platform already owns elsewhere and are not migrated here.
+ * count and a detail view that lists the rules. Members keep the old console's
+ * invite / change-role / remove loop, plus search, email, last sign-in, and the
+ * rule that you cannot unbind yourself.
  */
 export interface SettingsListPageProps {
   kind: SettingsKind;
@@ -41,9 +42,18 @@ type Row = RoleSummary | MemberSummary;
 
 export function SettingsListPage({ kind, workspace, cluster, namespace }: SettingsListPageProps): React.ReactElement {
   const t = useT();
+  const { user } = useAuth();
+  const currentUsername = user?.name ?? '';
+  const isSelf = React.useCallback((name: string) => Boolean(name) && name === currentUsername, [currentUsername]);
   const descriptor = SETTINGS_DESCRIPTORS[kind];
   const [projectFilter, setProjectFilter] = React.useState(namespace);
-  React.useEffect(() => setProjectFilter(namespace), [cluster, namespace]);
+  const [selected, setSelected] = React.useState<string[]>([]);
+  const [removingNames, setRemovingNames] = React.useState<string[] | null>(null);
+  React.useEffect(() => {
+    setProjectFilter(namespace);
+    setSelected([]);
+    setRemovingNames(null);
+  }, [cluster, namespace]);
 
   const list = useResourceListState<SortKey>({ defaultSortBy: 'createTime', resetOn: [cluster, projectFilter] });
   const query = useSettingsList(kind, toListParams(list, { cluster, namespace: projectFilter }, PAGE_SIZE));
@@ -64,7 +74,6 @@ export function SettingsListPage({ kind, workspace, cluster, namespace }: Settin
   const [inviting, setInviting] = React.useState(false);
   const [creatingRole, setCreatingRole] = React.useState(false);
   const [editingMember, setEditingMember] = React.useState<MemberSummary | null>(null);
-  const [removingMember, setRemovingMember] = React.useState<MemberSummary | null>(null);
   const removeRole = useDeleteRole({ cluster, namespace: projectFilter });
   const roleDetail = useQuery({
     queryKey: ['settings', 'role', cluster, projectFilter, roleName],
@@ -143,7 +152,12 @@ export function SettingsListPage({ kind, workspace, cluster, namespace }: Settin
                 title: t('settings.column.name'),
                 render: (row: Row) => {
                   const member = row as MemberSummary;
-                  return <span className="truncate font-medium text-ai-fg">{member.alias || member.username}</span>;
+                  return (
+                    <span className="flex min-w-0 flex-col">
+                      <span className="truncate font-medium text-ai-fg">{member.username}</span>
+                      <span className="truncate text-[11px] text-ai-fg-muted">{member.email || '-'}</span>
+                    </span>
+                  );
                 },
               },
               {
@@ -153,7 +167,11 @@ export function SettingsListPage({ kind, workspace, cluster, namespace }: Settin
                 hideBelow: 'md',
                 render: (row: Row) => {
                   const member = row as MemberSummary;
-                  return <Badge tone={member.active ? 'success' : 'neutral'}>{member.active ? t('settings.status.active') : t('settings.status.inactive')}</Badge>;
+                  return (
+                    <Badge tone={member.active ? 'success' : 'warning'}>
+                      {member.active ? t('platform.status.active') : t('platform.status.disabled')}
+                    </Badge>
+                  );
                 },
               },
               {
@@ -164,13 +182,17 @@ export function SettingsListPage({ kind, workspace, cluster, namespace }: Settin
                 render: (row: Row) => <span className="text-ai-fg-secondary">{(row as MemberSummary).role || '-'}</span>,
               },
               {
-                key: 'lastActive',
-                title: t('settings.column.lastActive'),
+                key: 'lastLogin',
+                title: t('settings.column.lastLogin'),
                 width: 170,
                 hideBelow: 'xl',
                 render: (row: Row) => {
                   const member = row as MemberSummary;
-                  return <span className="tabular-nums text-ai-fg-muted">{member.lastActive ? formatTimestamp(member.lastActive) : '-'}</span>;
+                  return (
+                    <span className="tabular-nums text-ai-fg-muted">
+                      {member.lastLogin ? formatTimestamp(member.lastLogin) : t('platform.column.notLoginYet')}
+                    </span>
+                  );
                 },
               },
             ],
@@ -182,7 +204,13 @@ export function SettingsListPage({ kind, workspace, cluster, namespace }: Settin
         ? { primaryAction: { key: 'createRole', label: t('settings.roles.create'), aiId: 'roles:create' } }
         : {}),
       ...(kind === 'members'
-        ? { primaryAction: { key: 'invite', label: t('settings.members.invite'), aiId: 'members:invite' } }
+        ? {
+            primaryAction: { key: 'invite', label: t('settings.members.invite'), aiId: 'members:invite' },
+            selection: 'multiple' as const,
+            isRowSelectable: (row: Row) => !isSelf((row as MemberSummary).username),
+            selectAiId: 'members:select',
+            actions: [{ key: 'bulk-remove', label: t('settings.members.bulkRemove'), tone: 'danger' as const, aiId: 'members:bulk-remove' }],
+          }
         : {}),
       /*
        * Templated roles are the platform's building blocks: the API rejects writes to
@@ -195,8 +223,17 @@ export function SettingsListPage({ kind, workspace, cluster, namespace }: Settin
               /* Two entries, not one menu of verbs: the old console's 成员 list offers exactly
                * these. Removing a member removes the role binding, not the user account — that
                * is the fact the confirmation has to state. */
-              { key: 'modifyRole', label: t('settings.members.modifyRole') },
-              { key: 'removeMember', label: t('settings.members.remove'), tone: 'danger' as const },
+              {
+                key: 'modifyRole',
+                label: t('settings.members.modifyRole'),
+                visible: (row: Row) => !isSelf((row as MemberSummary).username),
+              },
+              {
+                key: 'removeMember',
+                label: t('settings.members.remove'),
+                tone: 'danger' as const,
+                visible: (row: Row) => !isSelf((row as MemberSummary).username),
+              },
             ]
           : kind === 'roles'
           ? [
@@ -237,7 +274,7 @@ export function SettingsListPage({ kind, workspace, cluster, namespace }: Settin
       },
       pagination: { page: list.page, pageSize: PAGE_SIZE, total },
     }),
-    [cluster, descriptor, kind, list, projectFilter, projectFilterControl, t, total, workspace],
+    [cluster, descriptor, isSelf, kind, list, projectFilter, projectFilterControl, t, total, workspace],
   );
 
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
@@ -263,6 +300,7 @@ export function SettingsListPage({ kind, workspace, cluster, namespace }: Settin
           setProjectFilter(next['project'] ?? '');
           list.setPage(1);
         }}
+        {...(kind === 'members' ? { selectedKeys: selected, onSelectionChange: setSelected } : {})}
         onPageChange={list.setPage}
         onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
           if (next) list.setSort(next);
@@ -279,7 +317,11 @@ export function SettingsListPage({ kind, workspace, cluster, namespace }: Settin
           }
           if (!row) return;
           if (action == 'modifyRole') setEditingMember(row as MemberSummary);
-          if (action == 'removeMember') setRemovingMember(row as MemberSummary);
+          if (action == 'removeMember') {
+            memberWrites.remove.reset();
+            memberWrites.removeMany.reset();
+            setRemovingNames([(row as MemberSummary).username]);
+          }
           if (action === 'detail') setRoleName(row.name);
           if (action === 'permissions') {
             if ((row as RoleSummary).system) return;
@@ -295,6 +337,14 @@ export function SettingsListPage({ kind, workspace, cluster, namespace }: Settin
             if ((row as RoleSummary).system) return;
             setDeleteRole(row as RoleSummary);
           }
+        }}
+        onBulkAction={(action, keys) => {
+          if (action !== 'bulk-remove') return;
+          const names = keys.filter((name) => !isSelf(name));
+          if (!names.length) return;
+          memberWrites.remove.reset();
+          memberWrites.removeMany.reset();
+          setRemovingNames(names);
         }}
       />
 
@@ -328,17 +378,30 @@ export function SettingsListPage({ kind, workspace, cluster, namespace }: Settin
         }}
       />
 
-      {removingMember ? (
+      {removingNames ? (
         <DeleteDialog
           open
-          onOpenChange={(open) => !open && setRemovingMember(null)}
-          names={[removingMember.username]}
-          resource='members'
+          onOpenChange={(open) => {
+            if (!open && !memberWrites.remove.isPending && !memberWrites.removeMany.isPending) setRemovingNames(null);
+          }}
+          names={removingNames}
+          resource="members"
           noun={t('settings.members.remove')}
-          pending={memberWrites.remove.isPending}
+          title={t('settings.members.remove')}
+          confirmLabel={t('settings.members.remove')}
+          pending={memberWrites.remove.isPending || memberWrites.removeMany.isPending}
+          {...(memberWrites.remove.error || memberWrites.removeMany.error
+            ? { error: errorMessage(t, memberWrites.remove.error ?? memberWrites.removeMany.error) }
+            : {})}
           onConfirm={async () => {
-            await memberWrites.remove.mutateAsync(removingMember.username);
-            setRemovingMember(null);
+            try {
+              if (removingNames.length === 1) await memberWrites.remove.mutateAsync(removingNames[0] ?? '');
+              else await memberWrites.removeMany.mutateAsync(removingNames);
+              setRemovingNames(null);
+              setSelected([]);
+            } catch {
+              /* Error stays in the confirmation. */
+            }
           }}
         />
       ) : null}

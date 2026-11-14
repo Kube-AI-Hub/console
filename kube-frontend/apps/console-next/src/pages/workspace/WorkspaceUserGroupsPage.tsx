@@ -1,183 +1,434 @@
 import * as React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { AiSurface, ResourceList, type ListSchema } from '@kube-ai-hub/ui';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  workspaceGroupForest,
+  workspaceGroupsApi,
+  type WorkspaceGroupMember,
+  type WorkspaceGroupNode,
+  type WorkspaceGroupSummary,
+} from '@kube-ai-hub/api-client';
+import {
+  AiButton,
+  AiSurface,
+  Empty,
+  Modal,
+  ResourceForm,
+  ResourceList,
+  cn,
+  type FormSchema,
+  type ListSchema,
+} from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
-import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
+import { errorMessage, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
+import { DeleteDialog } from '@/components/resource/DeleteDialog';
+import { GROUP_PARENT_ROOT, WorkspaceUserGroupDialog } from './WorkspaceUserGroupDialog';
 
 /**
- * 企业空间用户组.
+ * 租户(企业空间)用户组.
  *
- * A KubeSphere Group is a cluster-scoped IAM object carrying a workspace label; whoever
- * belongs to it is not on the group but in a `GroupBinding` (`groupRef.name` + `users`).
- * The page therefore reads two collections and joins them: members are counted from the
- * bindings, which is the only place the relation exists.
+ * Old console's department page is a tree plus the members of the selected node.
+ * Groups are IAM objects labelled by workspace; parent is `iam.kubesphere.io/group-parent`;
+ * membership lives on GroupBinding, not on the Group. The page therefore reads two
+ * collections, builds the tree client-side, and writes groups / bindings / the group's
+ * workspace-role binding through workspaceGroupsApi.
  *
- * Both reads are workspace-scoped. The tenant API has no groups at all, and the global
- * `/groups` path would need the label filter the workspace path already applies.
- *
- * The IAM Group type itself has no description field — only `metadata.generateName` (the
- * display name the old console shows) and the `kubesphere.io/alias-name` annotation — so
- * the description column reads the platform's usual `kubesphere.io/description` annotation
- * and stays `-` when an object does not carry one. Reporting a field the API never returns
- * as if it were set would be a lie the page cannot back up.
+ * Project and DevOps role arrays from the old SET_DEPARTMENTS modal stay out: those
+ * are cross-scope grants, not group membership.
  */
 export interface WorkspaceUserGroupsPageProps {
   workspace: string;
 }
 
-interface KubeGroup {
-  metadata?: {
-    name?: string;
-    generateName?: string;
-    creationTimestamp?: string;
-    annotations?: Record<string, string>;
+type Dialog =
+  | { kind: 'create' }
+  | { kind: 'edit'; group: WorkspaceGroupSummary }
+  | { kind: 'delete'; group: WorkspaceGroupSummary }
+  | { kind: 'add-member'; group: WorkspaceGroupSummary }
+  | { kind: 'remove-member'; group: WorkspaceGroupSummary; username: string };
+
+function listLabels(t: ReturnType<typeof useT>) {
+  return {
+    selectAll: t('table.selectAll'),
+    selectRow: (index: number) => t('table.selectRow', { index }),
+    moreActions: t('table.moreActions'),
+    previous: t('table.previous'),
+    next: t('table.next'),
+    selected: (count: number) => t('table.selectedCount', { count }),
   };
 }
 
-interface KubeGroupBinding {
-  groupRef?: { name?: string };
-  users?: string[];
-}
+function GroupTree({
+  workspace,
+  nodes,
+  selected,
+  onSelect,
+}: {
+  workspace: string;
+  nodes: WorkspaceGroupNode[];
+  selected: string;
+  onSelect: (name: string) => void;
+}): React.ReactElement {
+  const render = (items: WorkspaceGroupNode[], depth: number): React.ReactNode =>
+    items.map((node) => (
+      <div key={node.group.name}>
+        <button
+          type="button"
+          data-ai-id={`workspace-user-groups:tree-node:${node.group.name}`}
+          data-ai-row={node.group.name}
+          data-ai-generate-name={node.group.generateName || node.group.displayName}
+          data-ai-depth={String(depth)}
+          style={{ paddingLeft: 8 + depth * 16 }}
+          className={cn(
+            'flex w-full min-w-0 items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm',
+            selected === node.group.name ? 'bg-ai-accent/10 text-ai-fg' : 'text-ai-fg-secondary hover:bg-ai-fill',
+          )}
+          onClick={() => onSelect(node.group.name)}
+        >
+          <span className="min-w-0 truncate font-medium">{node.group.displayName}</span>
+          <span className="ml-auto tabular-nums text-[11px] text-ai-fg-muted">{node.group.memberCount}</span>
+        </button>
+        {render(node.children, depth + 1)}
+      </div>
+    ));
 
-interface WorkspaceUserGroupRow {
-  /** Object name. */
-  name: string;
-  /** Human name: alias, else the group's `generateName`, which KubeSphere uses as display name. */
-  displayName: string;
-  /** Number of users bound to this group in the workspace. */
-  memberCount: number;
-  description: string;
+  return (
+    <nav data-ai-id="workspace-user-groups:tree" aria-label={workspace} className="min-h-[16rem] min-w-0">
+      <div className="truncate px-2 py-1 text-xs text-ai-fg-muted">{workspace}</div>
+      {render(nodes, 0)}
+    </nav>
+  );
 }
-
-/** Client-side page size: both collections are read once (`limit=-1`), then paged here. */
-const PAGE_SIZE = 20;
 
 export function WorkspaceUserGroupsPage({ workspace }: WorkspaceUserGroupsPageProps): React.ReactElement {
   const t = useT();
-  const [page, setPage] = React.useState(1);
+  const queryClient = useQueryClient();
+  const groupsApi = workspaceGroupsApi(apiClient);
+  const [selected, setSelected] = React.useState('');
+  const [keyword, setKeyword] = React.useState('');
+  const [dialog, setDialog] = React.useState<Dialog | null>(null);
 
-  const query = useQuery({
+  React.useEffect(() => {
+    setSelected('');
+    setKeyword('');
+    setDialog(null);
+  }, [workspace]);
+
+  const groupsQuery = useQuery({
     queryKey: ['workspace-user-groups', workspace],
-    queryFn: async ({ signal }): Promise<WorkspaceUserGroupRow[]> => {
-      const base = `/kapis/iam.kubesphere.io/v1alpha2/workspaces/${encodeURIComponent(workspace)}`;
-      const [groupsBody, bindingsBody] = await Promise.all([
-        apiClient.request<{ items?: KubeGroup[] }>(`${base}/groups`, {
-          query: { limit: -1 },
-          ...(signal ? { signal } : {}),
-        }),
-        apiClient.request<{ items?: KubeGroupBinding[] }>(`${base}/groupbindings`, {
-          query: { limit: -1 },
-          ...(signal ? { signal } : {}),
-        }),
-      ]);
+    queryFn: ({ signal }) => groupsApi.list({ workspace, signal }),
+  });
+  const groups = groupsQuery.data ?? [];
+  const forest = React.useMemo(() => workspaceGroupForest(groups), [groups]);
+  const selectedGroup = groups.find((group) => group.name === selected);
 
-      // One group may have several bindings (one per grant); sum every binding that names it.
-      const members = new Map<string, number>();
-      for (const binding of bindingsBody?.items ?? []) {
-        const group = binding.groupRef?.name ?? '';
-        if (!group) continue;
-        members.set(group, (members.get(group) ?? 0) + (binding.users ?? []).length);
+  React.useEffect(() => {
+    if (selected && groups.some((group) => group.name === selected)) return;
+    setSelected(groups[0]?.name ?? '');
+  }, [groups, selected]);
+
+  const membersQuery = useQuery({
+    queryKey: ['workspace-user-groups', workspace, 'members', selected],
+    queryFn: ({ signal }) => groupsApi.members({ workspace, group: selected, signal }),
+    enabled: Boolean(selected),
+  });
+  const memberRows = React.useMemo(() => {
+    const rows = membersQuery.data ?? [];
+    const needle = keyword.trim().toLowerCase();
+    if (!needle) return rows;
+    return rows.filter((row) => row.username.toLowerCase().includes(needle));
+  }, [keyword, membersQuery.data]);
+  const showMemberSearch = Boolean(keyword.trim()) || (membersQuery.data?.length ?? 0) > 0;
+
+  const invalidate = async (): Promise<void> => {
+    await queryClient.invalidateQueries({ queryKey: ['workspace-user-groups', workspace] });
+  };
+
+  const writeGroup = useMutation({
+    mutationFn: async (input: { generateName: string; alias: string; parent: string; workspaceRole: string }) => {
+      if (dialog?.kind === 'edit') {
+        await groupsApi.update({ workspace, name: dialog.group.name, ...input });
+        return dialog.group;
       }
-
-      return (groupsBody?.items ?? []).map((group) => {
-        const name = group.metadata?.name ?? '';
-        const annotations = group.metadata?.annotations ?? {};
-        const generateName = group.metadata?.generateName ?? '';
-        return {
-          name,
-          displayName: annotations['kubesphere.io/alias-name'] || generateName || name,
-          memberCount: members.get(name) ?? 0,
-          description: annotations['kubesphere.io/description'] ?? '',
-        };
-      });
+      return groupsApi.create({ workspace, ...input });
+    },
+    onSuccess: async (created) => {
+      await invalidate();
+      setSelected(created.name);
+      setDialog(null);
+    },
+  });
+  const removeGroup = useMutation({
+    mutationFn: (name: string) => groupsApi.remove({ workspace, name }),
+    onSuccess: async (_result, name) => {
+      queryClient.setQueryData<WorkspaceGroupSummary[]>(['workspace-user-groups', workspace], (prev) =>
+        (prev ?? []).filter((group) => group.name !== name),
+      );
+      await invalidate();
+      setDialog(null);
+    },
+  });
+  const addMembers = useMutation({
+    mutationFn: (input: { group: string; username: string }) =>
+      groupsApi.addMembers({ workspace, group: input.group, usernames: [input.username] }),
+    onSuccess: async () => {
+      await invalidate();
+      setDialog(null);
+    },
+  });
+  const removeMember = useMutation({
+    mutationFn: (input: { group: string; username: string }) => groupsApi.removeMember({ workspace, ...input }),
+    onSuccess: async () => {
+      await invalidate();
+      setDialog(null);
     },
   });
 
-  // A new workspace is a new list: keep the pager from pointing past its end.
-  React.useEffect(() => {
-    setPage(1);
-  }, [workspace]);
-
-  const rows = query.data ?? [];
-  const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
-  const paged = rows.length > PAGE_SIZE;
-  const visibleRows = React.useMemo(
-    () => (paged ? rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE) : rows),
-    [page, paged, rows],
+  const state = groupsQuery.isPending ? 'loading' : groupsQuery.isError ? 'error' : groups.length === 0 ? 'empty' : 'ready';
+  const hasChildren = React.useCallback(
+    (name: string) => groups.some((group) => group.parent === name),
+    [groups],
   );
 
-  const schema = React.useMemo<ListSchema<WorkspaceUserGroupRow>>(
+  const memberSchema = React.useMemo<ListSchema<WorkspaceGroupMember>>(
     () => ({
-      title: t('workspace.userGroups.title'),
-      description: t('workspace.userGroups.description'),
-      rowKey: 'name',
-      rowAttributes: (row) => ({ 'data-ai-row': row.name }),
+      ...(showMemberSearch
+        ? { search: { placeholder: t('workspace.userGroups.search'), aiId: 'workspace-user-groups:search' } }
+        : {}),
+      rowActions: [{ key: 'remove-member', label: t('workspace.userGroups.removeMember'), tone: 'danger' }],
+      rowKey: 'username',
+      rowAttributes: (row) => ({ 'data-ai-row': row.username }),
       columns: [
         {
-          key: 'displayName',
-          title: t('workspace.field.name'),
-          render: (row) => (
-            <span className="flex min-w-0 flex-col">
-              <span className="truncate font-medium text-ai-fg">{row.displayName}</span>
-              {row.displayName !== row.name ? (
-                <span className="truncate font-mono text-[11px] text-ai-fg-muted">{row.name}</span>
-              ) : null}
-            </span>
-          ),
-        },
-        {
-          key: 'memberCount',
-          title: t('workspace.overview.members'),
-          width: 120,
-          align: 'right',
-          render: (row) => <span className="tabular-nums text-ai-fg-secondary">{row.memberCount}</span>,
-        },
-        {
-          key: 'description',
-          title: t('common.description'),
-          hideBelow: 'lg',
-          render: (row) => (
-            <span className="truncate text-ai-fg-muted" title={row.description}>
-              {row.description || '-'}
-            </span>
-          ),
+          key: 'username',
+          title: t('workspace.field.member'),
+          render: (row) => <span className="truncate font-medium text-ai-fg">{row.username}</span>,
         },
       ],
-      empty: { title: t('common.empty') },
-      labels: {
-        selectAll: t('table.selectAll'),
-        selectRow: (index) => t('table.selectRow', { index }),
-        moreActions: t('table.moreActions'),
-        previous: t('table.previous'),
-        next: t('table.next'),
-        selected: (count) => t('table.selectedCount', { count }),
-      },
-      ...(paged ? { pagination: { page, pageSize: PAGE_SIZE, total: rows.length } } : {}),
+      empty: { title: t('workspace.userGroups.membersEmpty') },
+      labels: listLabels(t),
     }),
-    [page, paged, rows.length, t],
+    [showMemberSearch, t],
+  );
+
+  const addMemberSchema = React.useMemo<FormSchema>(
+    () => ({
+      fields: [
+        {
+          key: 'username',
+          label: t('settings.members.user'),
+          type: 'text',
+          required: true,
+          hint: t('settings.members.userHint'),
+          rules: [{ validate: (value) => (String(value ?? '').trim() ? null : t('workspace.userGroups.error.user')) }],
+        },
+      ],
+      submit: { label: t('common.confirm') },
+    }),
+    [t],
   );
 
   if (state === 'error') {
     return (
       <AiSurface as="section" aiId="workspace-user-groups:surface" state="error" className="min-w-0">
-        <ResourceErrorPanel error={query.error} onRetry={() => void query.refetch()} retryAiId="workspace-user-groups:retry" />
+        <ResourceErrorPanel error={groupsQuery.error} onRetry={() => void groupsQuery.refetch()} retryAiId="workspace-user-groups:retry" />
       </AiSurface>
     );
   }
 
   return (
     <AiSurface as="section" aiId="workspace-user-groups:surface" state={state} className="min-w-0">
-      {/* Literal `data-ai-id` on the table wrapper: the contract test reads page source,
-          and `AiSurface`'s `aiId` prop alone is not a literal attribute in this file. */}
-      <div data-ai-id="workspace-user-groups:table" className="min-w-0">
-        <ResourceList
-          schema={schema}
-          rows={visibleRows}
-          loading={state === 'loading'}
-          {...(paged ? { onPageChange: setPage } : {})}
-        />
+      <div data-ai-id="workspace-user-groups:table" className="flex min-w-0 flex-col gap-4">
+        <header className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="text-base font-semibold text-ai-fg">{t('workspace.userGroups.title')}</h2>
+            <p className="text-xs text-ai-fg-muted">{t('workspace.userGroups.description')}</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <AiButton aiId="workspace-user-groups:refresh" size="sm" variant="secondary" onClick={() => void groupsQuery.refetch()}>
+              {t('common.refresh')}
+            </AiButton>
+            <AiButton aiId="workspace-user-groups:create" size="sm" variant="primary" onClick={() => setDialog({ kind: 'create' })}>
+              {t('workspace.userGroups.create')}
+            </AiButton>
+          </div>
+        </header>
+
+        {state === 'empty' || state === 'loading' ? (
+          <Empty
+            title={state === 'loading' ? t('common.loading') : t('workspace.userGroups.empty')}
+            description={state === 'loading' ? undefined : t('workspace.userGroups.emptyDescription')}
+          />
+        ) : (
+          <div className="grid min-h-[24rem] grid-cols-1 gap-4 lg:grid-cols-[minmax(16rem,22rem)_minmax(0,1fr)]">
+            <div className="rounded-lg border border-ai-border bg-ai-surface p-2">
+              <GroupTree workspace={workspace} nodes={forest} selected={selected} onSelect={setSelected} />
+            </div>
+            <div className="min-w-0">
+              {selectedGroup ? (
+                <div className="flex min-w-0 flex-col gap-3">
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <h3 className="truncate text-sm font-medium text-ai-fg">{selectedGroup.displayName}</h3>
+                      {selectedGroup.displayName !== selectedGroup.name ? (
+                        <p className="truncate font-mono text-[11px] text-ai-fg-muted">{selectedGroup.name}</p>
+                      ) : null}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <AiButton
+                        aiId="workspace-user-groups:add-member"
+                        size="sm"
+                        variant="primary"
+                        onClick={() => {
+                          addMembers.reset();
+                          setDialog({ kind: 'add-member', group: selectedGroup });
+                        }}
+                      >
+                        {t('workspace.userGroups.addMember')}
+                      </AiButton>
+                      <AiButton
+                        aiId="workspace-user-groups:edit"
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => setDialog({ kind: 'edit', group: selectedGroup })}
+                      >
+                        {t('workspace.userGroups.edit')}
+                      </AiButton>
+                      <AiButton
+                        aiId="workspace-user-groups:delete"
+                        size="sm"
+                        variant="danger"
+                        onClick={() => {
+                          removeGroup.reset();
+                          setDialog({ kind: 'delete', group: selectedGroup });
+                        }}
+                      >
+                        {t('workspace.userGroups.delete')}
+                      </AiButton>
+                    </div>
+                  </div>
+                  {membersQuery.isError ? (
+                    <ResourceErrorPanel
+                      error={membersQuery.error}
+                      onRetry={() => void membersQuery.refetch()}
+                      retryAiId="workspace-user-groups:members-retry"
+                    />
+                  ) : (
+                    <ResourceList
+                      schema={memberSchema}
+                      rows={memberRows}
+                      loading={membersQuery.isPending}
+                      {...(showMemberSearch ? { searchValue: keyword, onSearchChange: setKeyword } : {})}
+                      onAction={(key, row) => {
+                        if (key === 'remove-member' && row) {
+                          removeMember.reset();
+                          setDialog({ kind: 'remove-member', group: selectedGroup, username: row.username });
+                        }
+                      }}
+                    />
+                  )}
+                </div>
+              ) : (
+                <Empty title={t('workspace.userGroups.selectGroup')} />
+              )}
+            </div>
+          </div>
+        )}
       </div>
+
+      {dialog?.kind === 'create' || dialog?.kind === 'edit' ? (
+        <WorkspaceUserGroupDialog
+          key={`${workspace}:${dialog.kind === 'edit' ? dialog.group.name : 'create'}`}
+          workspace={workspace}
+          groups={groups}
+          defaultParent={dialog.kind === 'create' ? selected || GROUP_PARENT_ROOT : GROUP_PARENT_ROOT}
+          pending={writeGroup.isPending}
+          {...(dialog.kind === 'edit' ? { group: dialog.group } : {})}
+          onOpenChange={(open) => {
+            if (!open) setDialog(null);
+          }}
+          onSubmit={(input) => writeGroup.mutateAsync(input)}
+        />
+      ) : null}
+
+      {dialog?.kind === 'add-member' ? (
+        <Modal
+          open
+          onOpenChange={(open) => {
+            if (!addMembers.isPending) setDialog(open ? dialog : null);
+          }}
+          title={t('workspace.userGroups.addMember')}
+          description={t('workspace.userGroups.addMemberDescription')}
+        >
+          <div data-ai-id="workspace-user-groups:member-dialog">
+            <ResourceForm
+              schema={addMemberSchema}
+              defaultValues={{ username: '' }}
+              submitting={addMembers.isPending}
+              onCancel={() => setDialog(null)}
+              onSubmit={async (values) => {
+                await addMembers.mutateAsync({
+                  group: dialog.group.name,
+                  username: String(values['username'] ?? '').trim(),
+                });
+              }}
+            />
+          </div>
+        </Modal>
+      ) : null}
+
+      {dialog?.kind === 'delete' ? (
+        <DeleteDialog
+          open
+          names={[dialog.group.generateName || dialog.group.displayName]}
+          resource="workspace-user-groups"
+          noun={t('workspace.userGroups.title')}
+          title={t('workspace.userGroups.delete')}
+          confirmLabel={t('workspace.userGroups.delete')}
+          pending={removeGroup.isPending}
+          {...(removeGroup.error || hasChildren(dialog.group.name)
+            ? {
+                error: hasChildren(dialog.group.name)
+                  ? t('workspace.userGroups.error.hasChildren')
+                  : errorMessage(t, removeGroup.error),
+              }
+            : {})}
+          onOpenChange={(open) => {
+            if (!open && !removeGroup.isPending) setDialog(null);
+          }}
+          onConfirm={async () => {
+            if (hasChildren(dialog.group.name)) return;
+            try {
+              await removeGroup.mutateAsync(dialog.group.name);
+            } catch {
+              /* Error stays in the confirmation. */
+            }
+          }}
+        />
+      ) : null}
+
+      {dialog?.kind === 'remove-member' ? (
+        <DeleteDialog
+          open
+          names={[dialog.username]}
+          resource="workspace-user-groups"
+          noun={t('workspace.field.member')}
+          title={t('workspace.userGroups.removeMember')}
+          confirmLabel={t('workspace.userGroups.removeMember')}
+          pending={removeMember.isPending}
+          {...(removeMember.error ? { error: errorMessage(t, removeMember.error) } : {})}
+          onOpenChange={(open) => {
+            if (!open && !removeMember.isPending) setDialog(null);
+          }}
+          onConfirm={async () => {
+            try {
+              await removeMember.mutateAsync({ group: dialog.group.name, username: dialog.username });
+            } catch {
+              /* Error stays in the confirmation. */
+            }
+          }}
+        />
+      ) : null}
     </AiSurface>
   );
 }

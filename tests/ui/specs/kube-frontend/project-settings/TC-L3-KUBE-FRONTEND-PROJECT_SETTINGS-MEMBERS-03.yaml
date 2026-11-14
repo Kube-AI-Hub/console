@@ -1,0 +1,38 @@
+id: TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: project-settings
+feature: members
+title: 项目成员 · 搜索、自我保护与批量移除
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/members'
+prd: prd/kube-frontend/project-settings/members.md
+design: design/kube-frontend/project-settings/members.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-03
+
+story:
+- US3
+
+product: 成员列表按名称过滤、展示邮箱，当前用户不可勾选或改绑，批量移除用人数确认。
+preconditions:
+- 已登录且对 default 项目有管理权限
+- 项目至少有一个可分配角色
+- 仅操作唯一命名的一次性测试用户
+steps:
+- 创建两个一次性平台账号并写入项目成员
+- 打开成员页，用前缀搜索，两行均含邮箱
+- 清空搜索后核当前用户行没有复选框
+- 再搜前缀，勾选两行，点批量移除并输入人数 2
+- 回读项目成员集合与平台账号
+expected:
+- 搜索后只剩测试前缀的两行
+- 当前登录用户不可勾选
+- 批量确认后两名测试成员解绑，平台账号仍在
+- finally 删除测试账号
+troubleshoot:
+- 当前用户仍能勾选：isRowSelectable 未排除当前用户
+- 批量按钮要输入拼接用户名：DeleteDialog 批量确认词应是人数
+update_automation:
+- 选择器见 SettingsListPage.tsx 的 members:search / members:bulk-remove

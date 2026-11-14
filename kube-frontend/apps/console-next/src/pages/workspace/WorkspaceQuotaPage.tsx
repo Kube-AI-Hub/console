@@ -7,7 +7,7 @@ import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 
 /**
- * 企业空间配额.
+ * 租户(企业空间)配额.
  *
  * The locale description is the contract: "each project's quota and usage in this workspace".
  * A **workspace-level** quota object exists in KubeSphere (`quota.kubesphere.io/resourcequotas`),
@@ -128,7 +128,7 @@ export function WorkspaceQuotaPage({ workspace }: WorkspaceQuotaPageProps): Reac
       // Two different "nothing here" cases: no projects at all, or projects with no quota set.
       empty: {
         title: t('common.empty'),
-        description: projectCount > 0 ? t('projectInfo.quota.empty') : t('workspace.projects.emptyDescription'),
+        description: projectCount > 0 ? t('workspace.quota.empty') : t('workspace.projects.emptyDescription'),
       },
       labels: {
         selectAll: t('table.selectAll'),

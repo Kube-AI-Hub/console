@@ -514,8 +514,12 @@ MODULES = [
                     },
                     {
                         "id": "workspace-user-groups",
-                        "title": "企业空间用户组",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-04"]},
+                        "title": "租户(企业空间)用户组",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-04",
+                            "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-05",
+                            "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-06",
+                        ]},
                     },
                     {
                         "id": "workspace-role-detail",
@@ -889,7 +893,7 @@ MODULES = [
                     {
                         "id": "members",
                         "title": "项目成员列表",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-01", "TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-02"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-01", "TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-02", "TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-03"]},
                     },
                     {
                         "id": "gateway",

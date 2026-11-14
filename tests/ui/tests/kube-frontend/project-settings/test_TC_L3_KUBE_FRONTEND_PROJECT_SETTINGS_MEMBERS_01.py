@@ -21,7 +21,7 @@ def test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_MEMBERS_01(project_settings_page, 
     ui.wait_ready("members")
 
     headers = ui.headers("members")
-    required = ["名称", "状态", "角色", "最近活动"]
+    required = ["名称", "状态", "角色", "最近登录"]
     positions = [headers.index(label) for label in required if label in headers]
     assert len(positions) == len(required), f"missing columns: {set(required) - set(headers)}"
     assert positions == sorted(positions), f"columns out of order: {headers}"
@@ -34,5 +34,5 @@ def test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_MEMBERS_01(project_settings_page, 
     expect(row).to_be_visible()
     text = row.inner_text()
     assert expected_role in text, (expected_role, text)
-    assert "活跃" in text or "未激活" in text, text
+    assert "活跃" in text or "已停用" in text, text
     screenshot(ui.page, "project-settings-members")

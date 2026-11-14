@@ -1,0 +1,39 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-05
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: workspace-console
+title: 租户(企业空间)控制台 · 用户组创建、层级与删除
+entry_url: '{BASE_URL}/kube-frontend/workspaces/{workspace}/user-groups'
+prd: prd/kube-frontend/access-control/workspace-user-groups.md
+design: design/kube-frontend/access-control/workspace-user-groups.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-05
+
+story:
+- US2
+
+product: 创建用户组并指定上级与租户(企业空间)角色，下级缩进一级；有下级时不能删除；无下级时输入显示名确认删除。
+preconditions:
+- 已登录且有 groups 写权限
+- 空间至少有一个可分配的租户(企业空间)角色
+- 仅操作 unique 前缀的一次性用户组
+steps:
+- 读空间列表与 workspaceroles
+- 打开用户组页，创建父组（名称、角色）
+- 再创建下级组，核对其 data-ai-depth 为 1
+- 编辑父组别名并核对树文案
+- 尝试删除仍有下级的父组，对象仍在
+- 删除下级，再删除父组，回读 groups 集合
+expected:
+- 两棵测试组出现在树中，下级 depth=1
+- 有下级时父组删除被拒绝
+- finally 后测试组从接口消失
+troubleshoot:
+- 创建 4xx：检查 POST 用 generateName 而不是 metadata.name
+- 下级未缩进：parent 标签未写成父组对象名
+- 删除父组成功：客户端未拦截 hasChildren
+update_automation:
+- 选择器：workspace-user-groups:create / :tree-node / :delete / delete-input / delete-confirm

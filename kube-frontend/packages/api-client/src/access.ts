@@ -510,6 +510,320 @@ export function workspaceRolesApi(client: Client) {
   };
 }
 
+const GROUP_PARENT_LABEL = 'iam.kubesphere.io/group-parent';
+const GROUP_REF_LABEL = 'iam.kubesphere.io/group-ref';
+const USER_REF_LABEL = 'iam.kubesphere.io/user-ref';
+const WORKSPACE_LABEL = 'kubesphere.io/workspace';
+const ALIAS_ANN = 'kubesphere.io/alias-name';
+const DESC_ANN = 'kubesphere.io/description';
+const WORKSPACE_ROLE_ANN = 'kubesphere.io/workspace-role';
+
+export interface WorkspaceGroupSummary {
+  /** Object name; generated from `generateName` and used in bindings. */
+  name: string;
+  /** Display name the old department form stored as `metadata.generateName`. */
+  generateName: string;
+  /** Alias, else generateName, else object name. */
+  displayName: string;
+  alias: string;
+  description: string;
+  /** Parent group's object name; empty means the workspace root. */
+  parent: string;
+  workspaceRole: string;
+  memberCount: number;
+  createdAt: string;
+}
+
+export interface WorkspaceGroupNode {
+  group: WorkspaceGroupSummary;
+  children: WorkspaceGroupNode[];
+}
+
+export interface WorkspaceGroupMember {
+  username: string;
+}
+
+interface KubeGroupBinding {
+  metadata?: { name?: string };
+  groupRef?: { name?: string };
+  users?: string[];
+}
+
+interface KubeRoleBinding {
+  metadata?: { name?: string; labels?: Record<string, string> };
+  subjects?: Array<{ kind?: string; name?: string }>;
+}
+
+function generateNameOf(item: KubeAccess): string {
+  return String((item.metadata as { generateName?: string } | undefined)?.generateName ?? '');
+}
+
+export function toWorkspaceGroupSummary(item: KubeAccess, memberCount = 0): WorkspaceGroupSummary {
+  const annotations = (item.metadata?.annotations ?? {}) as Record<string, string>;
+  const labels = (item.metadata?.labels ?? {}) as Record<string, string>;
+  const name = item.metadata?.name ?? '';
+  const generateName = generateNameOf(item);
+  const alias = annotations[ALIAS_ANN] ?? '';
+  return {
+    name,
+    generateName,
+    displayName: alias || generateName || name,
+    alias,
+    description: annotations[DESC_ANN] ?? '',
+    parent: labels[GROUP_PARENT_LABEL] ?? '',
+    workspaceRole: annotations[WORKSPACE_ROLE_ANN] ?? '',
+    memberCount,
+    createdAt: item.metadata?.creationTimestamp ?? '',
+  };
+}
+
+/**
+ * Build the department tree from the parent label.
+ *
+ * A missing, self, or unknown parent becomes a root. Cycles are broken by
+ * attaching the leftover nodes as extra roots rather than dropping them: a
+ * corrupt label should still leave the group visible.
+ */
+export function workspaceGroupForest(groups: WorkspaceGroupSummary[]): WorkspaceGroupNode[] {
+  const byName = new Map(groups.map((group) => [group.name, group]));
+  const children = new Map<string, WorkspaceGroupSummary[]>();
+  const roots: WorkspaceGroupSummary[] = [];
+  for (const group of groups) {
+    const parent = group.parent && byName.has(group.parent) && group.parent !== group.name ? group.parent : '';
+    if (!parent) {
+      roots.push(group);
+      continue;
+    }
+    const list = children.get(parent) ?? [];
+    list.push(group);
+    children.set(parent, list);
+  }
+  const assigned = new Set<string>();
+  const walk = (group: WorkspaceGroupSummary, ancestors: Set<string>): WorkspaceGroupNode => {
+    assigned.add(group.name);
+    const next = new Set(ancestors);
+    next.add(group.name);
+    return {
+      group,
+      children: (children.get(group.name) ?? [])
+        .filter((child) => !ancestors.has(child.name))
+        .map((child) => walk(child, next)),
+    };
+  };
+  const forest = roots.map((group) => walk(group, new Set()));
+  for (const group of groups) {
+    if (!assigned.has(group.name)) forest.push(walk(group, new Set()));
+  }
+  return forest;
+}
+
+function memberCounts(bindings: KubeGroupBinding[]): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const binding of bindings) {
+    const group = binding.groupRef?.name ?? '';
+    if (!group) continue;
+    counts.set(group, (counts.get(group) ?? 0) + (binding.users ?? []).length);
+  }
+  return counts;
+}
+
+function workspaceRoleBindingBody(groupName: string, role: string): Record<string, unknown> {
+  return {
+    kind: 'WorkspaceRoleBinding',
+    apiVersion: 'iam.kubesphere.io/v1alpha2',
+    subjects: [{ kind: 'Group', apiGroup: 'rbac.authorization.k8s.io', name: groupName }],
+    roleRef: { apiGroup: 'iam.kubesphere.io/v1alpha2', kind: 'WorkspaceRole', name: role },
+  };
+}
+
+export function workspaceGroupsApi(client: Client) {
+  const groupsPath = (workspace: string, name?: string) =>
+    `${KAPIS_IAM}/workspaces/${encodeURIComponent(workspace)}/groups${name ? `/${encodeURIComponent(name)}` : ''}`;
+  const bindingsPath = (workspace: string, name?: string) =>
+    `${KAPIS_IAM}/workspaces/${encodeURIComponent(workspace)}/groupbindings${name ? `/${encodeURIComponent(name)}` : ''}`;
+  const roleBindingsPath = (workspace: string, name?: string) =>
+    `${KAPIS_IAM}/workspaces/${encodeURIComponent(workspace)}/workspacerolebindings${name ? `/${encodeURIComponent(name)}` : ''}`;
+
+  async function ignore(kind: 'notfound' | 'conflict', run: () => Promise<unknown>): Promise<void> {
+    try {
+      await run();
+    } catch (error) {
+      if (error instanceof ApiError && (kind === 'notfound' ? error.isNotFound : error.isConflict)) return;
+      throw error;
+    }
+  }
+
+  async function listBindings(workspace: string, signal?: AbortSignal): Promise<KubeGroupBinding[]> {
+    const body = await client.request<{ items?: KubeGroupBinding[] }>(bindingsPath(workspace), {
+      query: { limit: -1 },
+      ...(signal ? { signal } : {}),
+    });
+    return body?.items ?? [];
+  }
+
+  async function roleBindingsForGroup(workspace: string, group: string): Promise<KubeRoleBinding[]> {
+    const labelled = await client.request<{ items?: KubeRoleBinding[] }>(roleBindingsPath(workspace), {
+      query: { limit: -1, labelSelector: `${GROUP_REF_LABEL}=${group}` },
+    }).catch(() => ({ items: [] as KubeRoleBinding[] }));
+    if (labelled?.items?.length) return labelled.items;
+    const body = await client.request<{ items?: KubeRoleBinding[] }>(roleBindingsPath(workspace), {
+      query: { limit: -1 },
+    });
+    return (body?.items ?? []).filter((item) =>
+      (item.subjects ?? []).some((subject) => subject.kind === 'Group' && subject.name === group),
+    );
+  }
+
+  return {
+    async list(params: { workspace: string; signal?: AbortSignal }): Promise<WorkspaceGroupSummary[]> {
+      const [groupsBody, bindings] = await Promise.all([
+        client.request<{ items?: KubeAccess[] }>(groupsPath(params.workspace), {
+          query: { limit: -1 },
+          ...(params.signal ? { signal: params.signal } : {}),
+        }),
+        listBindings(params.workspace, params.signal),
+      ]);
+      const counts = memberCounts(bindings);
+      return (groupsBody?.items ?? []).map((item) =>
+        toWorkspaceGroupSummary(item, counts.get(item.metadata?.name ?? '') ?? 0),
+      );
+    },
+
+    async members(params: { workspace: string; group: string; signal?: AbortSignal }): Promise<WorkspaceGroupMember[]> {
+      const users = new Set<string>();
+      for (const binding of await listBindings(params.workspace, params.signal)) {
+        if ((binding.groupRef?.name ?? '') !== params.group) continue;
+        for (const user of binding.users ?? []) {
+          if (user) users.add(user);
+        }
+      }
+      return [...users].sort().map((username) => ({ username }));
+    },
+
+    async create(params: {
+      workspace: string;
+      generateName: string;
+      alias: string;
+      parent: string;
+      workspaceRole: string;
+    }): Promise<WorkspaceGroupSummary> {
+      const generateName = params.generateName.trim();
+      const alias = params.alias.trim();
+      const parent = params.parent.trim();
+      const workspaceRole = params.workspaceRole.trim();
+      const annotations: Record<string, string> = {};
+      if (alias) annotations[ALIAS_ANN] = alias;
+      if (workspaceRole) annotations[WORKSPACE_ROLE_ANN] = workspaceRole;
+      const labels: Record<string, string> = { [WORKSPACE_LABEL]: params.workspace };
+      if (parent) labels[GROUP_PARENT_LABEL] = parent;
+      const created = await client.request<KubeAccess>(groupsPath(params.workspace), {
+        method: 'POST',
+        body: {
+          apiVersion: 'iam.kubesphere.io/v1alpha2',
+          kind: 'Group',
+          metadata: { generateName, labels, ...(Object.keys(annotations).length ? { annotations } : {}) },
+        },
+      });
+      const name = created?.metadata?.name ?? '';
+      if (!name) throw new Error('Group create returned no object name');
+      if (workspaceRole) {
+        await ignore('conflict', () =>
+          client.request(roleBindingsPath(params.workspace), {
+            method: 'POST',
+            body: [workspaceRoleBindingBody(name, workspaceRole)],
+          }),
+        );
+      }
+      return toWorkspaceGroupSummary(created, 0);
+    },
+
+    async update(params: {
+      workspace: string;
+      name: string;
+      alias: string;
+      parent: string;
+      workspaceRole: string;
+    }): Promise<void> {
+      const current = await client.request<KubeAccess>(groupsPath(params.workspace, params.name));
+      const previousRole = toWorkspaceGroupSummary(current).workspaceRole;
+      const alias = params.alias.trim();
+      const parent = params.parent.trim();
+      const workspaceRole = params.workspaceRole.trim();
+      const annotations = { ...((current.metadata?.annotations ?? {}) as Record<string, string>) };
+      annotations[ALIAS_ANN] = alias;
+      annotations[WORKSPACE_ROLE_ANN] = workspaceRole;
+      const labels = { ...((current.metadata?.labels ?? {}) as Record<string, string>) };
+      if (parent) labels[GROUP_PARENT_LABEL] = parent;
+      else delete labels[GROUP_PARENT_LABEL];
+      await client.request(groupsPath(params.workspace, params.name), {
+        method: 'PATCH',
+        contentType: 'application/merge-patch+json',
+        body: {
+          metadata: {
+            labels: parent ? labels : { ...labels, [GROUP_PARENT_LABEL]: null },
+            annotations,
+          },
+        },
+      });
+      if (workspaceRole === previousRole) return;
+      for (const binding of await roleBindingsForGroup(params.workspace, params.name)) {
+        const bindingName = binding.metadata?.name ?? '';
+        if (bindingName) await ignore('notfound', () => client.request(roleBindingsPath(params.workspace, bindingName), { method: 'DELETE' }));
+      }
+      if (workspaceRole) {
+        await ignore('conflict', () =>
+          client.request(roleBindingsPath(params.workspace), {
+            method: 'POST',
+            body: [workspaceRoleBindingBody(params.name, workspaceRole)],
+          }),
+        );
+      }
+    },
+
+    async remove(params: { workspace: string; name: string }): Promise<void> {
+      for (const binding of await listBindings(params.workspace)) {
+        if ((binding.groupRef?.name ?? '') !== params.name) continue;
+        const bindingName = binding.metadata?.name ?? '';
+        if (bindingName) await ignore('notfound', () => client.request(bindingsPath(params.workspace, bindingName), { method: 'DELETE' }));
+      }
+      for (const binding of await roleBindingsForGroup(params.workspace, params.name)) {
+        const bindingName = binding.metadata?.name ?? '';
+        if (bindingName) await ignore('notfound', () => client.request(roleBindingsPath(params.workspace, bindingName), { method: 'DELETE' }));
+      }
+      await ignore('notfound', () => client.request(groupsPath(params.workspace, params.name), { method: 'DELETE' }));
+    },
+
+    async addMembers(params: { workspace: string; group: string; usernames: string[] }): Promise<void> {
+      for (const username of params.usernames) {
+        const user = await client.request<KubeAccess>(`${KAPIS_IAM}/users/${encodeURIComponent(username)}`);
+        if (user?.metadata?.name !== username) throw new Error('User account does not exist');
+      }
+      await client.request(bindingsPath(params.workspace), {
+        method: 'POST',
+        body: params.usernames.map((userName) => ({ userName, groupName: params.group })),
+      });
+    },
+
+    async removeMember(params: { workspace: string; group: string; username: string }): Promise<void> {
+      const labelled = await client.request<{ items?: KubeGroupBinding[] }>(bindingsPath(params.workspace), {
+        query: {
+          limit: -1,
+          labelSelector: `${GROUP_REF_LABEL}=${params.group},${USER_REF_LABEL}=${params.username}`,
+        },
+      });
+      const found = labelled?.items?.length
+        ? labelled.items
+        : (await listBindings(params.workspace)).filter(
+            (binding) => (binding.groupRef?.name ?? '') === params.group && (binding.users ?? []).includes(params.username),
+          );
+      for (const binding of found) {
+        const bindingName = binding.metadata?.name ?? '';
+        if (bindingName) await ignore('notfound', () => client.request(bindingsPath(params.workspace, bindingName), { method: 'DELETE' }));
+      }
+    },
+  };
+}
+
 export function workspaceDetailApi(client: Client) {
   const path = (name: string) => `${KAPIS_TENANT}/workspaces/${encodeURIComponent(name)}`;
   return {

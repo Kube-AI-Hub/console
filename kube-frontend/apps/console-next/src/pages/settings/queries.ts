@@ -115,5 +115,11 @@ export function useMemberWrites(params: { cluster: string; namespace: string }) 
     onSuccess: invalidate,
   });
 
-  return { invite, updateRole, remove };
+  const removeMany = useMutation({
+    mutationFn: (usernames: string[]) =>
+      membersWriteApi(api).removeMany({ cluster: params.cluster, namespace: params.namespace, usernames }),
+    onSuccess: invalidate,
+  });
+
+  return { invite, updateRole, remove, removeMany };
 }

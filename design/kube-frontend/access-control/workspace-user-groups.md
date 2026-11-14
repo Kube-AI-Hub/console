@@ -1,86 +1,114 @@
-# 企业空间用户组 · 技术方案（L3）
+# 租户(企业空间)用户组 · 技术方案（L3）
 
 [子模块需求](../../../prd/kube-frontend/access-control/workspace-user-groups.md)
 
+**技术方案 ID**：`DES-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE`
+
 ## 概述
 
-`/kube-frontend/workspaces/<ws>/user-groups`：列出该企业空间的 IAM Group，合并 GroupBinding 计算成员数，显示组名、成员数、描述。
+用户组页读 `groups` + `groupbindings`，在客户端拼部门树并统计成员；写路径封装在 `workspaceGroupsApi`：创建 Group 后补 WorkspaceRoleBinding，成员走 GroupBinding 数组 POST，移除先查 binding 再 DELETE。
 
 ## 关联需求
 
-- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-04
+- `AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-04`
+- `AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-05`
+- `AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-06`
 
 ## 设计目标与非目标
 
-目标：组列表 + 成员数一次答完；作用域正确；不伪造 Group 没有的字段。
-非目标：部门树、组的增删改、成员增删、组权限绑定展示。
+- **目标**：把旧部门页的树、组 CRUD、组成员增删和空间角色绑定收进同一 API 与同一页，页面不再直接拼 IAM URL。
+- **非目标**：项目/DevOps 角色数组、未分配用户双栏、watch。
 
 ## 关键约束
 
-- 组在 IAM 聚合的工作空间作用域：`GET /kapis/iam.kubesphere.io/v1alpha2/workspaces/<ws>/groups?limit=-1`（实测 200，本部署 `totalItems: 0`）。
-- 成员在 `GroupBinding`：`GET /kapis/iam.kubesphere.io/v1alpha2/workspaces/<ws>/groupbindings?limit=-1`（实测 200，本部署空集）。CRD：`GroupBinding{groupRef: {name}, users: []}`。
-- Group CRD 无 description 字段（只有 `metadata.generateName` 与 `kubesphere.io/alias-name` 注解），描述列读 `kubesphere.io/description` 注解。
-- 页面在 workspace 作用域，URL 不带 cluster 段。
+- 组：`GET/POST /kapis/iam.kubesphere.io/v1alpha2/workspaces/<ws>/groups`，PATCH/DELETE 对象路径。
+- 绑定：同前缀 `groupbindings`；POST 体是 `[{userName, groupName}]`，不是 Kubernetes Binding 对象。
+- 空间角色：POST `workspacerolebindings` 的体是 **数组**，与旧 `addWorksapceRoleBinding` 一致。
+- 显示名是 `metadata.generateName`；对象名才是 binding 的 `groupRef.name`。
+- 中文产品名「租户(企业空间)」，键名不改。
 
 ## 方案决策
 
-### DEC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE-CONSOLE-09 — 成员数在客户端由 groupbindings 合并，不给每个组发请求
+### DEC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-09 — 成员数在客户端由 groupbindings 合并
 
-**为什么**：成员关系只存在于绑定对象里，而绑定集合可以一次读完；逐组查询既没有接口也没有必要。一次 join 得到全表成员数，和为 0 时仍是空集而不是错误。
-**被否方案**：读用户列表 `/users?group=<g>`（老 console 的 GroupUser 用过类似筛选）。那需要用户读权限，且每组一次请求。
+**为什么**：成员关系只存在于绑定对象，绑定集合可以一次读完；逐组查用户既没有稳定接口也没有必要。
+**被否方案**：`/users?ingroup=` 每组一次。那需要用户列表权限，而且把「人数」和「加人」绑死在同一接口。
 **何时重新考虑**：组数量很大、需要服务端分页与成员过滤时。
 
-### DEC-L3-KUBE-FRONTEND-ACCESS-CONTROL-WORKSPACE-CONSOLE-10 — 描述列不把别名当描述
+### DEC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-10 — 树用 parent 标签在客户端拼，不复刻设置部门弹窗
 
-**为什么**：IAM Group 的字段只有名称与别名。把 `alias-name` 塞进「描述」列会让同一字段在两个列出现不同含义；别名放名称列、描述读 `kubesphere.io/description`（没有就 `-`）是唯一诚实的呈现。
-**被否方案**：描述列显示别名。字段语义错位，且测试与产品会各自理解错。
-**何时重新考虑**：后端给 Group 增加真正的 description 字段。
+**为什么**：旧页把树和表单拆在 SET_DEPARTMENTS 大弹窗里，主页面只读。新页把树放在主区，创建/编辑用小表单，少一层模态，仍写同一个 `iam.kubesphere.io/group-parent`。
+**被否方案**：继续做平铺列表。旧能力的层级会丢。复刻整个 EditGroup 弹窗（含项目/DevOps ArrayInput）会把跨作用域授权混进本组。
+**何时重新考虑**：产品要求回到「先设部门、再管成员」两步向导时。
 
-### DEC-L3-KUBE-FRONTEND-ACCESS-CONTROL-WORKSPACE-CONSOLE-11 — 页面直接调用 apiClient.request
+### DEC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-11 — 写路径进 api-client，不再页面直打 request
 
-理由同配额页的接口决策（见 workspace-quota.md 的对应决策）：本轮读接口只有本页使用、`api-client` 有并行改动；接口稳定后迁移。
+**为什么**：创建组要连续写 Group、WorkspaceRoleBinding、之后还要写 GroupBinding；这些路径和数组 POST 形状一旦写错，页面和测试会对不上。读也走同一模块，避免列表 join 与写入用两套 URL。
+**被否方案**：本页继续 `apiClient.request`（上一轮只读列表的决定）。写路径一出现，页面就会复制 store/group.js。
+**何时重新考虑**：IAM 提供聚合「创建组并加人」的单接口。
+
+### DEC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-12 — 加人按用户名，不拉未分配用户全表
+
+**为什么**：旧未分配页是全量平台用户 + `notingroup`。新控制台的邀请已经统一成「输入已有用户名并先验账号」；组成员沿用同一摩擦，避免在用户组页加载数千平台账号。
+**被否方案**：双栏点选。会把用户列表权限和分页重新引入本页。
+**何时重新考虑**：产品明确要求从空间成员里勾选加人。
+
+### DEC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-13 — 有下级的组拒绝删除，不递归删
+
+**为什么**：旧页对父组有单独提示。递归删除会在一次确认里拆掉整棵部门树，DeleteDialog 的确认词也无法覆盖所有子孙名。
+**被否方案**：级联删除。误点代价不可逆。
+**何时重新考虑**：产品要「删除部门及全部下级」并改成输入组数确认。
 
 ## 系统现状
 
-老 console `src/pages/workspaces/containers/Groups`：树形部门视图（GroupTree + GroupUser），读 `stores/group.js` 的 `workspaces/<ws>/groups`，并用 websocket watch；成员通过 `users?group=<g>` 与 `groupbindings` 双读。新 UI 本轮做平铺只读列表。
+旧 `pages/workspaces/containers/Groups`：GroupTree + GroupUser（ingroup/notingroup）+ EditGroup 弹窗（generateName、别名、空间角色、项目/DevOps ArrayInput）。store `stores/group.js` 创建后补 workspacerolebinding 与 rolebindings。新页此前是平铺只读列表，无主操作。
 
 ## 仓库落点
 
-- 页面：`apps/console-next/src/pages/workspace/WorkspaceUserGroupsPage.tsx`
-- 路由：`apps/console-next/src/routes/kube-frontend.workspaces.$workspace/user-groups/{route,index}.tsx`
-- 侧栏/区域：`areas/registry.ts` workspace 区域（已有条目）
+- 页面：`apps/console-next/src/pages/workspace/{WorkspaceUserGroupsPage,WorkspaceUserGroupDialog}.tsx`
+- 接口：`packages/api-client/src/access.ts` 的 `workspaceGroupsApi` / `workspaceGroupForest`
+- 文案：`packages/locales/src/index.ts`（`workspace.userGroups.*`）
+- 后端：不改
 
 ## 对外契约
 
 | 用途 | 路径 | 字段 |
 | --- | --- | --- |
-| 空间用户组 | `/kapis/iam.kubesphere.io/v1alpha2/workspaces/<ws>/groups?limit=-1` | `metadata.name`、`metadata.generateName`、`metadata.annotations` |
-| 组绑定 | `/kapis/iam.kubesphere.io/v1alpha2/workspaces/<ws>/groupbindings?limit=-1` | `groupRef.name`、`users[]` |
+| 列组 | GET `.../workspaces/<ws>/groups?limit=-1` | `metadata.name`、`generateName`、alias、parent 标签 |
+| 列绑定 | GET `.../groupbindings?limit=-1` | `groupRef.name`、`users[]` |
+| 创建组 | POST `.../groups` | `metadata.generateName` + workspace / parent 标签 + 角色注解 |
+| 空间角色 | POST `.../workspacerolebindings` | **数组**，subject 为 Group 对象名 |
+| 改组 | PATCH merge-patch `.../groups/<name>` | 别名、parent、角色注解 |
+| 删组 | DELETE `.../groups/<name>`；先清该组 binding 与 rolebinding | |
+| 加人 | POST `.../groupbindings` | `[{userName, groupName}]` |
+| 移除 | GET binding（`group-ref`+`user-ref`）后 DELETE 对象 | |
 
 ## 不变量
 
-1. 行集合 = groups 接口返回的 items，不多不少。
-2. 成员数 = 所有 groupbindings 中 `groupRef.name` 等于该组对象名的 `users` 长度之和；无绑定为 0。
-3. 组名优先别名，其次 `generateName`，最后对象名。
+1. 树节点集合 = groups 接口 items，脏绑定不产生节点。
+2. 成员数 = 指向该组的 bindings 的 `users` 长度之和。
+3. 创建提交的是 generateName，绑定与删除用对象名。
+4. 删除有 `group-parent` 指向自己的组时，客户端拒绝，不发 DELETE。
+5. 加人先 GET `/users/<name>`，账号不存在则不写 binding。
 
 ## 已知坑
 
-- `metadata.generateName` 是 KubeSphere 的显示名（创建时必填），不是 K8s 的「随机后缀前缀」；对象名是生成的随机名。不要用对象名当主显示值。
-- 绑定可能引用一个已不存在的组：页面的行以 groups 为准，脏绑定不产生行。
-- 两个请求必须都成功才算 ready；任一失败显示错误面板（否则会显示「0 个组」的假空态）。
-- 本部署无数据，测试对空态是通过路径；若未来有数据，测试按接口计数仍成立。
+- `generateName` 不是 K8s「随机后缀前缀」的常规用法，这里是 KubeSphere 显示名。不要把对象名当主显示值。
+- workspacerolebinding 与 groupbinding 的 POST 都是数组；发单对象会 4xx。
+- 父标签缺对象时当根，避免树把组吞掉。
+- 两个读请求必须都成功才算 ready；只成功一个会显示假空树。
+- 有下级时 DeleteDialog 仍可输入确认词，`onConfirm` 必须再次拦住。
 
 ## 测试与可观测
 
-用例：`tests/ui/specs/kube-frontend/access-control/TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-04.yaml`
-可观测点：`workspace-user-groups:surface`、`workspace-user-groups:retry`、`tr[data-ai-row]`（值为组对象名）。
+用例：`WORKSPACE_CONSOLE-04/05/06`。API 单测覆盖 join、forest、POST 数组、账号校验、binding DELETE。句柄：`workspace-user-groups:surface/tree/tree-node/create/edit/delete/add-member/search/dialog/delete-input/delete-confirm`。树节点另有 `data-ai-generate-name`、`data-ai-depth`。
 
 ## 后续改进
 
-- 部门树与父子组（`iam.kubesphere.io/group-parent`）。
-- 组成员增删（GroupBinding 写路径）。
-- 迁移到 `packages/api-client`。
+跨作用域的项目/DevOps 角色数组；未分配用户勾选；websocket watch。
 
 ## 验收用例
 
-- TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE-CONSOLE-04
+- `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-04`
+- `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-05`
+- `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-06`

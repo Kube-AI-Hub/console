@@ -18,7 +18,7 @@ def _read(ui, path: str) -> dict:
 
 @pytest.mark.point
 def test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_WORKSPACE_CONSOLE_02(access_control_page, screenshot):
-    """TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-02 企业空间控制台 · 配额（项目 × 资源）。"""
+    """TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-02 租户(企业空间)控制台 · 配额（项目 × 资源）。"""
 
     ui = access_control_page
     assert ui.api is not None
@@ -29,7 +29,7 @@ def test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_WORKSPACE_CONSOLE_02(access_control_
     ]
     candidates = [name for name in workspaces if name]
     if not candidates:
-        pytest.skip("没有可用的企业空间")
+        pytest.skip("没有可用的租户(企业空间)")
     workspace = candidates[0]
 
     # Expected rows: every `spec.hard` key of every project's ResourceQuota, the same
@@ -57,6 +57,8 @@ def test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_WORKSPACE_CONSOLE_02(access_control_
     if expected_rows == 0:
         assert state == "empty", f"expected empty state, got {state}"
         expect(rows).to_have_count(0)
+        text = surface.inner_text()
+        assert "这些项目还没有设置资源配额" in text or "还没有项目" in text, text
     else:
         assert state == "ready", f"expected ready state, got {state}"
         headers = [text.strip() for text in surface.locator("thead th:visible").all_inner_texts() if text.strip()]

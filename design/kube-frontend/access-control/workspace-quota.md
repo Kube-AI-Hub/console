@@ -1,10 +1,10 @@
-# 企业空间配额 · 技术方案（L3）
+# 租户(企业空间)配额 · 技术方案（L3）
 
 [子模块需求](../../../prd/kube-frontend/access-control/workspace-quota.md)
 
 ## 概述
 
-`/kube-frontend/workspaces/<ws>/quota`：把企业空间下各项目的 ResourceQuota 展开成「项目 × 资源」的只读表。
+`/kube-frontend/workspaces/<ws>/quota`：把租户(企业空间)下各项目的 ResourceQuota 展开成「项目 × 资源」的只读表。
 
 ## 关联需求
 
@@ -13,7 +13,7 @@
 ## 设计目标与非目标
 
 目标：一个请求组合拿到项目与配额，行与接口一一对应；空态能区分「没有项目」与「项目没有配额」。
-非目标：企业空间级 quota 对象、配额编辑、用量趋势图。
+非目标：租户(企业空间)级 quota 对象、配额编辑、用量趋势图。
 
 ## 关键约束
 
@@ -26,14 +26,14 @@
 ### DEC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-03 — 行粒度取「项目 × 资源」，数据取项目级 ResourceQuota
 
 **为什么**：老 console 的配额页是空间级对象，但本部署既没有对象也没有枚举接口（探测见 PRD「明确不做」）。项目级 ResourceQuota 是同一读者真正会调整的东西，且 `spec.hard` / `status.used` 正好是「配额/已用」。
-**被否方案**：展示一个永远空的「企业空间配额」面板；或在页面里按对象名逐个猜（唯一可读的形态是 `<ws>` 名字的详情，实测 404）。
+**被否方案**：展示一个永远空的「租户(企业空间)配额」面板；或在页面里按对象名逐个猜（唯一可读的形态是 `<ws>` 名字的详情，实测 404）。
 **何时重新考虑**：部署里重新出现 `quota.kubesphere.io` 对象并补了集合 GET 接口时，可加空间级汇总区块，但不替换本表。
 
 ### DEC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-04 — 按项目并发读取，而不是集群级一次性 list
 
-**为什么**：`GET /api/v1/resourcequotas?limit=-1` 是平台管理员权限；企业空间成员被授权在空间内的项目里，按项目读是页面的真实权限模型。项目数在本部署为 1 与 10，并发成本可接受。
+**为什么**：`GET /api/v1/resourcequotas?limit=-1` 是平台管理员权限；租户(企业空间)成员被授权在空间内的项目里，按项目读是页面的真实权限模型。项目数在本部署为 1 与 10，并发成本可接受。
 **被否方案**：集群级 list + 客户端按项目名过滤。它要求一个本页不该要求的权限，且在不允许时整页报错。
-**何时重新考虑**：出现数百项目的企业空间时，改为工作空间级聚合接口（需要后端提供）。
+**何时重新考虑**：出现数百项目的租户(企业空间)时，改为工作空间级聚合接口（需要后端提供）。
 
 ### DEC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-05 — 页面直接调用 apiClient.request，不扩展 api-client
 

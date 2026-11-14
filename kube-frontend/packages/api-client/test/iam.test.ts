@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { isTemplateRole, toMemberSummary, toRoleSummary, toRoleRule } from '../src/iam';
+import { createClient } from '../src/client';
+import { isTemplateRole, membersWriteApi, toMemberSummary, toRoleSummary, toRoleRule } from '../src/iam';
 
 /**
  * Project access mapping.
@@ -63,6 +64,26 @@ describe('members', () => {
 
   it('reports the last password change as the closest activity marker', () => {
     expect(toMemberSummary(member).lastActive).toBe('2026-03-31T08:43:25Z');
+    expect(toMemberSummary(member).lastLogin).toBe('');
+  });
+
+  it('prefers status.lastLoginTime and spec.email over password-change annotations', () => {
+    expect(toMemberSummary({
+      metadata: {
+        name: 'alice',
+        annotations: {
+          'iam.kubesphere.io/role': 'viewer',
+          'iam.kubesphere.io/last-password-change-time': '2020-01-01T00:00:00Z',
+          'iam.kubesphere.io/last-login-time': '2020-02-02T00:00:00Z',
+          email: 'old@x',
+        },
+      },
+      spec: { email: 'alice@example.test' },
+      status: { state: 'Active', lastLoginTime: '2026-01-02T03:04:05Z' },
+    })).toMatchObject({
+      lastLogin: '2026-01-02T03:04:05Z',
+      email: 'alice@example.test',
+    });
   });
 
   it('treats a projection without status as active', () => {
@@ -73,5 +94,18 @@ describe('members', () => {
 
   it('reports a disabled account as inactive', () => {
     expect(toMemberSummary({ metadata: { name: 'bob' }, status: { state: 'Disabled' } }).active).toBe(false);
+  });
+
+  it('removes several members with sequential DELETE', async () => {
+    const calls: string[] = [];
+    const client = createClient({ fetchImpl: (async (input, init) => {
+      calls.push(`${init?.method ?? 'GET'} ${String(input)}`);
+      return new Response('{}', { headers: { 'content-type': 'application/json' } });
+    }) as typeof fetch });
+    await membersWriteApi(client).removeMany({ cluster: 'host', namespace: 'default', usernames: ['a', 'b'] });
+    expect(calls.map((call) => call.replace('http://localhost', ''))).toEqual([
+      'DELETE /kapis/iam.kubesphere.io/v1alpha2/namespaces/default/members/a',
+      'DELETE /kapis/iam.kubesphere.io/v1alpha2/namespaces/default/members/b',
+    ]);
   });
 });

@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-06
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: workspace-console
+title: 租户(企业空间)控制台 · 用户组成员增删
+entry_url: '{BASE_URL}/kube-frontend/workspaces/{workspace}/user-groups'
+prd: prd/kube-frontend/access-control/workspace-user-groups.md
+design: design/kube-frontend/access-control/workspace-user-groups.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-06
+
+story:
+- US3
+
+product: 选定用户组后添加已有平台用户，移除时只删 GroupBinding，不删平台账号。
+preconditions:
+- 已登录且有 groupbindings 写权限
+- 仅操作 unique 前缀的一次性用户与用户组
+steps:
+- 创建一次性平台账号与一次性用户组
+- 打开用户组页，选中该组，添加该账号
+- 回读 groupbindings 含该用户
+- 移除成员并输入用户名确认
+- 回读绑定与平台账号
+expected:
+- 添加后成员表与绑定含该用户
+- 移除后绑定不再含该用户，账号 GET 仍 200
+- finally 删除测试组与测试账号
+troubleshoot:
+- 添加 4xx：POST 体必须是 [{userName, groupName}]，groupName 是对象名
+- 移除后账号 404：误走了 users DELETE
+update_automation:
+- 选择器：workspace-user-groups:add-member / :search / 成员行 data-ai-row

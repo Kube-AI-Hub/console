@@ -1,79 +1,111 @@
-# 企业空间用户组（L3）
+# 租户(企业空间)用户组（L3）
 
 [子模块需求](./_index.md)
 
 ## 概述
 
-企业空间控制台的 **用户组** 页：`/kube-frontend/workspaces/<ws>/user-groups`。它列出该企业空间的 IAM Group 及其成员数、描述，回答「这个空间里有哪些用户组、每个组有多少人」。
+租户(企业空间)控制台的 **用户组** 页：`/kube-frontend/workspaces/<ws>/user-groups`。管理员在这里维护该空间的部门树（IAM Group），并把平台用户加进或移出选定的组。成员关系写在 `GroupBinding` 上，组对象本身不含成员列表。
 
-KubeSphere 的 Group 是**集群级** IAM 对象，靠 `kubesphere.io/workspace` label 归属企业空间；成员关系不在 Group 上，而在 `GroupBinding`（`groupRef.name` + `users`）。所以页面读两个集合再合并：组列表 + 该空间的全部绑定。
+旧页是左侧部门树 + 右侧已分配/未分配用户；创建部门时还可绑定租户(企业空间)角色。新页承接这三项：树、组的增删改、组成员增删，以及创建/编辑时的空间角色。
 
 ## 用户故事
 
-### US1 - 企业空间管理员看用户组规模 (Priority: P1)
+### US1 - 看清该空间的用户组层级与规模 (Priority: P1)
 
-作为 **企业空间管理员**，我希望 **看到该空间全部用户组及每个组的成员数**，以便 **判断哪些组该维护、哪些组没人**。
+作为 **租户(企业空间)管理员**，我希望 **以树看到全部用户组及每个组的成员数**，以便 **判断哪些组该维护、哪些组没人**。
 
-**Independent Test**：打开 `/workspaces/<ws>/user-groups`，核对行数等于该空间 `groups` 接口的 `totalItems`；某一组行的成员数等于全部 `groupbindings` 中 `groupRef.name` 指向它的 `users` 长度之和。
+**Independent Test**：打开 `/workspaces/<ws>/user-groups`。无组时看到空态与「创建用户组」。有组时树节点数等于该空间 `groups` 集合；节点上的成员数等于 `groupbindings` 中指向该组的 `users` 长度之和。
+
+### US2 - 创建、改层级并删除用户组 (Priority: P1)
+
+作为 **租户(企业空间)管理员**，我希望 **创建用户组、指定上级与租户(企业空间)角色、改别名、再删掉它**，以便 **按部门结构授权，而不用去平台用户里逐个绑角色**。
+
+**Independent Test**：创建一次性用户组（名称、角色，可选上级）→ 树出现该节点；编辑别名后树显示新别名；有下级时删除被拒绝；删掉下级后再删除本组，接口中对象消失。
+
+### US3 - 把人加进或移出当前用户组 (Priority: P1)
+
+作为 **租户(企业空间)管理员**，我希望 **把已有平台用户加入当前组、或从组里移除**，以便 **一批人共享该组的租户(企业空间)角色**。
+
+**Independent Test**：选定测试组，添加一次性账号 → 成员表与 `groupbindings` 含该用户；输入用户名确认移除 → 绑定消失，平台账号仍在。
 
 ## 验收场景
 
-- **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-04** — 已知企业空间内有 G 个用户组（G 可能为 0），当打开该空间用户组页，则列出 G 行，每行显示组名（别名优先，否则 `generateName`）、成员数与描述；成员数等于绑定中该组的用户数之和；G 为 0 时显示空态；接口失败时显示错误面板与重试。
+- **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-04** — 已知租户(企业空间)内有 G 个用户组（G 可能为 0），当打开该空间用户组页，则 G 为 0 时显示空态「还没有用户组」且「创建用户组」可见；G > 0 时左侧树有 G 个节点，节点主文案为别名（否则 `generateName`），节点上的成员数等于绑定中该组的用户数之和；接口失败时显示错误面板与重试。
+- **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-05** — 已知该空间可写用户组，当点「创建用户组」并提交合法名称、上级与租户(企业空间)角色，则树出现该组；再创建下级组时节点缩进一级；编辑别名后树显示新别名；有下级时删除提示先删下级且对象仍在；删除无下级组需输入显示名确认，确认后组与绑定从接口消失。
+- **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-06** — 已知已选中一个用户组，当点「添加成员」并提交存在的平台用户名，则成员表出现该用户，且 `groupbindings` 含该组与该用户；对该成员执行「移除成员」并输入用户名确认后，成员表与绑定中不再含该用户，平台账号仍在。
 
 ## 设计目标
 
-1. 成员数在列表上直接可见，不用逐组点进去数人。
-2. 作用域正确：只显示该企业空间 label 下的组，不混入其他空间。
-3. 不伪造字段：Group 类型没有 description，描述列读平台约定的 `kubesphere.io/description` 注解，没有就显示 `-`。
+1. 部门层级在一页上可见，不必先打开旧的「设置部门」弹窗。
+2. 写路径与旧 store 相同：Group POST/PATCH/DELETE，成员走 GroupBinding 数组 POST 与按 binding 名 DELETE，空间角色走 workspacerolebinding。
+3. 不伪造字段：组名优先别名，其次 `generateName`；成员数只来自绑定。
 
 ## 约束与边界
 
-- 只读：用户组的创建/编辑/删除、成员的加入/移出是写路径，不在本页。
-- 两个集合都一次取全（`limit=-1`），前端分页，页大小 20；成员数在客户端 join。
-- 一次绑定可能含多个用户，多个绑定可能指向同一组，成员数按并集求和（本实现按绑定累加；KubeSphere 的绑定模型一组一绑定）。
+- 组在 IAM 工作空间作用域：`/kapis/iam.kubesphere.io/v1alpha2/workspaces/<ws>/groups`。
+- 成员在 `/workspaces/<ws>/groupbindings`；POST 体为 `[{ userName, groupName }]`。
+- 上级为标签 `iam.kubesphere.io/group-parent`（值为父组对象名）；根节点是租户(企业空间)本身，不是一个 Group 对象。
+- 创建时名称写入 `metadata.generateName`（KubeSphere 显示名），对象名由服务端生成。
+- 当前登录用户可以加入或移出用户组（旧页未保护自己）；这与空间成员页的自我保护不同，因为组绑定不是把人踢出空间。
 
 ## UI 交互设计
 
-- 页面头：标题「用户组」、描述「该企业空间的用户组与成员。」
-- 表：组名 / 成员 / 描述；成员数右对齐等宽数字。
-- 组名单元格：主行是别名（有则用），次行是对象名（与主行不同才显示）。
-- 超过 20 行时出现分页器。
-- `data-ai-id`：`workspace-user-groups:surface`（列表容器）、`workspace-user-groups:retry`（错误重试）。
+- 页面头：标题「用户组」、描述「该租户(企业空间)的用户组与成员。」、主操作「创建用户组」。
+- 空态：「还没有用户组」+「先创建一个用户组，再把成员加进去。」
+- 有数据：左树右成员。树节点显示显示名与成员数；右侧是选定组的成员表，主操作「添加成员」，行操作「移除成员」，以及「编辑用户组 / 删除用户组」。
+- 创建/编辑弹窗：名称（创建必填、编辑锁定）、别名、上级用户组、租户(企业空间)角色（必填）。
+- 删除组、移除成员均走 DeleteDialog：确认词是显示名或用户名。
+- `data-ai-id`：`workspace-user-groups:surface` / `:table` / `:tree` / `:tree-node:<name>` / `:create` / `:edit` / `:delete` / `:add-member` / `:search` / `:retry`。
 
 ## 文案与校验
 
-- 列名：名称 → `workspace.field.name`；成员 → `workspace.overview.members`；描述 → `common.description`。
-- 空态：标题「暂无数据」（`common.empty`）。
-- 缺少别名/描述时回落到对象名/ `-`。
+| key | 中文 | 英文 | 用途 |
+| --- | --- | --- | --- |
+| `workspace.userGroups.title` | 用户组 | User groups | 页标题 |
+| `workspace.userGroups.create` | 创建用户组 | Create user group | 主操作 |
+| `workspace.userGroups.empty` | 还没有用户组 | No user groups | 空态 |
+| `workspace.userGroups.parentRoot` | 租户(企业空间) | Tenant (workspace) | 上级根 |
+| `workspace.userGroups.error.hasChildren` | 先删除下级用户组，再删除这一级。 | Delete child groups before deleting this one. | 删父组 |
+
+- 名称：`^[a-z0-9]([-a-z0-9]*[a-z0-9])?$`，且 `generateName` 在该空间唯一。
+- 角色必须属于当前空间的 workspaceroles。
+- 添加成员时用户名必须对应已有平台账号。
 
 ## 边界情况
 
-- 组没有绑定：成员数 0，行仍然显示——没有成员是这个组的状态，不代表它不存在。
-- 绑定存在但组不在列表（脏数据）：绑定不产生行，页面的行集合以组列表为准。
-- 别名与对象名不同：两行都显示，避免在绑定里找不到可复制的对象名。
-- 本部署实测：两个企业空间的 groups 与 groupbindings 都是 `totalItems: 0`，因此页面在当前环境显示空态；代码路径由接口契约与单元级别约定保证。
-
-## 明确不做
-
-- 用户组的新建/编辑/删除、成员增删：写路径需要 Group/GroupBinding 的表单与角色绑定联动（老 console 的 EditGroup 弹窗），本轮不做，因此页面没有写按钮。
-- 部门树：老 console 的 `/workspaces/:ws/groups` 是树形部门视图（父组 `iam.kubesphere.io/group-parent`）。本页只做平铺列表，层级留给后续。
-- 不按「接口不可用」处理本页：`/kapis/iam.kubesphere.io/v1alpha2/workspaces/<ws>/groups` 与 `/workspaces/<ws>/groupbindings` 均返回 200（本部署为空集）。
-  作为对照，错误候选路径已探测：`GET /kapis/iam.kubesphere.io/v1alpha2/workspacegroups?limit=-1` → **404**（无此集合）；`GET /kapis/iam.kubesphere.io/v1alpha2/groups` → 200 但返回空集（全局路径需要 label 过滤）。页面因此采用工作空间作用域路径。
-
-## 假设
-
-- GroupBinding 的 `users` 是成员关系的唯一来源；Group 对象本身不含成员列表（CRD 已确认：`GroupBinding{groupRef, users}`）。
-- 用户组数量与绑定数量都在 500 以内。
+- 组没有绑定：成员数为 0，节点仍显示。
+- 绑定指向已删除的组：不产生树节点。
+- 父组标签指向不存在的组：该组按根节点显示。
+- 名称与对象名不同：树主文案用显示名，对象名在右侧副行。
+- 写失败：弹窗保留输入与错误；成功后刷新树与成员。
 
 ## 功能需求
 
-- **FR-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-06** — 用户组页按工作空间作用域列出组、成员数与描述。
-- **FR-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-07** — 成员数由 groupbindings 合并计算，空态/错误态可区分。
+- **FR-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-04** — 系统必须按工作空间作用域展示用户组树与成员数，空态与错误态可区分。
+- **FR-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-05** — 系统必须支持用户组的创建、编辑（别名/上级/空间角色）与删除，删除有下级的组必须被拒绝。
+- **FR-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-06** — 系统必须能把已有平台用户加入选定组，或从该组移除，且不删除平台账号。
 
 ## 成功标准
 
-- **SC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-04** — 行数与组接口一致；成员数与绑定合并结果一致。
+- **SC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-04** — 树节点数与组接口一致；节点成员数与绑定合并结果一致。
+- **SC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-05** — 创建后接口可回读；下级缩进一级；删除无下级组后对象消失。
+- **SC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-06** — 添加后绑定含该用户；移除后绑定不含该用户，账号 GET 仍 200。
+
+## 明确不做
+
+- 项目角色 / DevOps 角色的 ArrayInput：旧 SET_DEPARTMENTS 弹窗里的跨项目授权，归 CHECK-05 的跨作用域授权，本页不写 `rolebindings`。
+- 未分配用户双栏点选：新页按空间成员邀请的方式输入用户名，不拉全量平台用户。
+- 部门树的 websocket watch。
+- 多集群下为每个集群挑选项目角色。
+
+## 假设
+
+- GroupBinding 的 `users` 是成员关系的唯一来源。
+- 创建 Group 时 `generateName` 由 apiserver 生成对象名；显示仍用 `generateName`。
+- 用户组与绑定数量都在 500 以内，一次 `limit=-1` 可读完。
 
 ## 验收用例
 
 - `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-04`
+- `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-05`
+- `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-06`

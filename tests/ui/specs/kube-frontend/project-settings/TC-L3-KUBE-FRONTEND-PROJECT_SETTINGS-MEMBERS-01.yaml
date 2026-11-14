@@ -4,7 +4,7 @@ suite: point
 module: kube-frontend
 submodule: project-settings
 feature: members
-title: 项目成员 · 列表四列
+title: 项目成员 · 列表四列与最近登录
 entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/spaces/members'
 prd: prd/kube-frontend/project-settings/members.md
 design: design/kube-frontend/project-settings/members.md
@@ -15,35 +15,7 @@ covers:
 story:
 - US1
 
-product:
-- 成
-- 员
-- 列
-- 表
-- 显
-- 示
-- 名
-- 称
-- 、
-- 状
-- 态
-- 、
-- 角
-- 色
-- 、
-- 最
-- 近
-- 活
-- 动
-- ，
-- 角
-- 色
-- 与
-- 注
-- 解
-- 一
-- 致
-- 。
+product: 项目成员列表显示名称（副行邮箱）、状态、角色、最近登录，角色与注解一致。
 
 preconditions:
 - 已登录，且在 host 集群的 spaces 项目空间（该项目有一个成员）
@@ -55,9 +27,9 @@ steps:
 - 核对第一行的角色与 API 的 iam.kubesphere.io/role 注解一致
 
 expected:
-- 表头依次为 名称、状态、角色、最近活动
+- 表头依次为 名称、状态、角色、最近登录
 - 角色列等于注解值
-- 状态为 活跃 或 未激活
+- 状态为 活跃 或 已停用
 
 troubleshoot:
 - 没有成员时用例按 skip 处理而不是失败

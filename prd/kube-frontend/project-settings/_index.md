@@ -10,9 +10,9 @@
 - **谁用**：项目管理员，回答三个问题：谁在这个项目里、他能做什么、这个项目的网络与日志怎么配置。
 - **做哪几步**：看基本信息与配额 → 查角色规则 → 核对成员 → 配网络隔离 / 网关 / 日志收集。
 - **看到什么**：
-  - 基本信息：名称、别名、企业空间、描述、创建者、创建时间 + 资源配额（资源、上限、已使用）。
+  - 基本信息：名称、别名、租户(企业空间)、描述、创建者、创建时间 + 资源配额（资源、上限、已使用）。
   - 角色：名称（副行描述）、规则数、创建时间；模板角色带「模板」徽标且无写操作。
-  - 成员：用户名、状态、角色、最近活动；详情列出角色与状态。
+  - 成员：用户名（副行邮箱）、状态、角色、最近登录；邀请 / 改角色 / 移除 / 批量移除。
   - 网络隔离：项目级开关 + NetworkPolicy 列表（创建 / 删除）。
   - 网关设置：未创建时为空态 + 创建；已创建时显示类型、地址、端口与状态（未就绪时轮询）。
   - 日志收集：三态开关（未配置 / 已开启 / 已关闭），关闭前确认。
@@ -39,7 +39,7 @@
 
 - 读：`/kapis/iam.kubesphere.io/v1alpha2/...`（角色、成员）、`/kapis/resources.kubesphere.io/v1alpha3/namespaces/<ns>`（命名空间对象）。
 - 写：角色规则走原生 RBAC；网络隔离写命名空间注解；日志收集写命名空间标签；网关走 `gateway.kubesphere.io`。
-- 成员的「角色」来自 `iam.kubesphere.io/role` 注解，「最近活动」来自 `iam.kubesphere.io/last-password-change-time`（该接口没有登录时间字段）。
+- 成员的「角色」来自 `iam.kubesphere.io/role` 注解，「最近登录」来自 `status.lastLoginTime`。
 - 网关真正就绪需要控制器 Helm chart，本集群缺失：页面验证到「创建 → 状态上报 → 删除」。
 
 ## UI 交互设计
@@ -64,7 +64,7 @@
 ## 文案与校验
 
 - 角色列：名称、规则数、创建时间；模板角色徽标「模板」。
-- 成员列：名称、状态、角色、最近活动；状态「活跃 / 未激活」。
+- 成员列：名称、状态、角色、最近登录；状态「活跃 / 已停用」。
 - 日志收集三态：未配置 / 已开启 / 已关闭 —— 前两者不可合并。
 - 空值统一 `-`。
 
@@ -76,7 +76,7 @@
 
 ## 明确不做
 
-- 成员邀请与改角色：需要用户选择器与写接口，属访问控制模块的下一阶段。
+- 项目成员详情页：旧页名称无链接。
 - 网关真正就绪的验证：需要安装网关控制器 Helm chart（对象可创建、状态可上报，Service 不会创建）。
 - 项目删除：属危险操作，需单独的确认流程。
 - 项目概览（用量与配额趋势）：需要指标历史接口，已有「集群监控」承担趋势展示。
@@ -100,6 +100,8 @@
 - `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-01`
 - `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLE_RULES-01`
 - `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-01`
+- `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-02`
+- `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-03`
 - `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-01`
 - `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-01`
 - `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-LOGGING-01`

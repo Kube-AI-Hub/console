@@ -523,12 +523,14 @@ modules:
         L3:
         - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-03
     - id: workspace-user-groups
-      title: 企业空间用户组
+      title: 租户(企业空间)用户组
       prd: prd/kube-frontend/access-control/workspace-user-groups.md
       design: design/kube-frontend/access-control/workspace-user-groups.md
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-04
+        - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-05
+        - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-06
     - id: workspace-role-detail
       title: 企业空间角色详情
       prd: prd/kube-frontend/access-control/workspace-role-detail.md

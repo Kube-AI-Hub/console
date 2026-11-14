@@ -22,6 +22,8 @@ const KAPIS_RBAC = '/apis/rbac.authorization.k8s.io/v1';
 
 interface KubeIam extends KubeObject {
   rules?: Array<Record<string, unknown>>;
+  spec?: Record<string, unknown>;
+  status?: Record<string, unknown>;
 }
 
 export interface RoleSummary extends ResourceBase {
@@ -64,8 +66,15 @@ export interface MemberSummary extends ResourceBase {
   role: string;
   /** Whether the projected user is still active (`status.state === 'Active'`). */
   active: boolean;
-  /** `iam.kubesphere.io/last-password-change-time`, the closest thing to a login. */
+  /**
+   * Last sign-in. The old mapper read `status.lastLoginTime`; the password-change
+   * annotation is only a fallback so a never-signed-in account is not labelled
+   * with a password event.
+   */
+  lastLogin: string;
+  /** Same clock as `lastLogin`, kept for callers that still read `lastActive`. */
   lastActive: string;
+  email: string;
 }
 
 export interface MemberDetail extends MemberSummary {
@@ -115,14 +124,18 @@ export function toRoleDetail(item: KubeIam): RoleDetail {
 
 export function toMemberSummary(item: KubeIam): MemberSummary {
   const annotations = (item.metadata?.annotations ?? {}) as Record<string, string>;
-  const status = (item.status ?? {}) as Record<string, unknown>;
+  const status = ((item.status ?? item['status'] ?? {}) as Record<string, unknown>);
+  const spec = ((item.spec ?? item['spec'] ?? {}) as Record<string, unknown>);
+  const lastLogin = String(status['lastLoginTime'] ?? annotations['iam.kubesphere.io/last-login-time'] ?? '');
   return {
     ...baseOf(item),
     kind: 'members',
     username: item.metadata?.name ?? '',
     role: annotations['iam.kubesphere.io/role'] ?? '',
     active: status['state'] === undefined ? true : String(status['state']) === 'Active',
-    lastActive: annotations['iam.kubesphere.io/last-password-change-time'] ?? '',
+    lastLogin,
+    lastActive: lastLogin || (annotations['iam.kubesphere.io/last-password-change-time'] ?? ''),
+    email: String(spec['email'] ?? annotations['email'] ?? ''),
   };
 }
 
@@ -213,6 +226,14 @@ export function membersWriteApi(client: Client) {
       await client.request(`${collection(params.cluster, params.namespace)}/${encodeURIComponent(params.username)}`, {
         method: 'DELETE',
       });
+    },
+
+    async removeMany(params: { cluster: string; namespace: string; usernames: string[] }): Promise<void> {
+      for (const username of params.usernames) {
+        await client.request(`${collection(params.cluster, params.namespace)}/${encodeURIComponent(username)}`, {
+          method: 'DELETE',
+        });
+      }
     },
   };
 }

@@ -93,6 +93,30 @@ class AccessControlPage:
     def workspace_member_confirmation(self, kind: str) -> Locator:
         return self.page.locator(f'[data-ai-id="workspace-members:delete-{kind}"]')
 
+    def user_groups_surface(self) -> Locator:
+        return self.page.locator('[data-ai-id="workspace-user-groups:surface"]').last
+
+    def user_groups_open(self, workspace: str) -> None:
+        origin = self.base_url.split("/kube-frontend/")[0]
+        self.page.goto(f"{origin}/kube-frontend/workspaces/{workspace}/user-groups")
+        expect(self.user_groups_surface()).to_be_visible(timeout=30_000)
+        expect(self.user_groups_surface()).not_to_have_attribute("data-ai-state", "loading", timeout=120_000)
+
+    def user_groups_create(self) -> Locator:
+        return self.page.locator('[data-ai-id="workspace-user-groups:create"]')
+
+    def user_groups_node(self, generate_name: str) -> Locator:
+        return self.page.locator(f'[data-ai-generate-name="{generate_name}"]')
+
+    def user_groups_field(self, key: str) -> Locator:
+        return self.page.get_by_role("dialog").locator(f"#ai-field-{key}")
+
+    def user_groups_submit(self) -> Locator:
+        return self.page.get_by_role("dialog").get_by_role("button", name="确认", exact=True)
+
+    def user_groups_confirmation(self, kind: str) -> Locator:
+        return self.page.locator(f'[data-ai-id="workspace-user-groups:delete-{kind}"]')
+
     @property
     def workspace_bar_count(self) -> int:
         return self.page.locator('[data-ai-id="workspace-bar"]').count()
