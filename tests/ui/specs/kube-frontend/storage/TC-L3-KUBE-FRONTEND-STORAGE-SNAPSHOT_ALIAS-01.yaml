@@ -1,0 +1,30 @@
+id: TC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOT_ALIAS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: storage
+feature: snapshot-alias
+title: 快照别名路由重定向
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/snapshots'
+prd: prd/kube-frontend/storage/snapshot-alias.md
+design: design/kube-frontend/storage/snapshot-alias.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOT_ALIAS-01
+
+story:
+- US1
+
+product: 旧地址 /snapshots 与 /snapshots/<ns> 重定向到 /volume-snapshots。
+preconditions:
+- 已登录
+steps:
+- 访问 /clusters/<c>/snapshots
+- 访问 /clusters/<c>/snapshots/default
+expected:
+- 两次都最终落在 /volume-snapshots，且列表 surface 可见
+troubleshoot:
+- 停在 404：redirect 未生效或路由未生成（build 后重试）
+- URL 对了但空白：列表页自身接口问题（分开排查）
+update_automation:
+- 断言最终 URL 与 cluster-volume-snapshots:surface

@@ -226,6 +226,7 @@ export const AREAS: readonly Area[] = [
       { key: 'persistentvolumeclaims', path: 'persistentvolumeclaims', titleKey: 'cluster.pvc.title', status: 'ready', groupKey: 'nav.groupStorage' },
       { key: 'volume-snapshots', path: 'volume-snapshots', titleKey: 'storage.snapshots.title', status: 'ready', groupKey: 'nav.groupStorage' },
       { key: 'volume-snapshot-classes', path: 'volume-snapshot-classes', titleKey: 'storage.snapshotClasses.title', status: 'ready', groupKey: 'nav.groupStorage' },
+      { key: 'juicefs-storage', path: 'juicefs-storage', titleKey: 'cluster.juicefs.title', status: 'ready', groupKey: 'nav.groupStorage' },
       { key: 'storageclasses', path: 'storageclasses', titleKey: 'cluster.storageClasses.title', status: 'ready', groupKey: 'nav.groupStorage' },
       { key: 'persistentvolumes', path: 'persistentvolumes', titleKey: 'cluster.persistentVolumes.title', status: 'ready', groupKey: 'nav.groupStorage' },
       { key: 'ippools', path: 'ippools', titleKey: 'cluster.network.ipPools.title', status: 'ready', groupKey: 'cluster.nav.groupNetwork' },
@@ -240,6 +241,8 @@ export const AREAS: readonly Area[] = [
       // Trends over time. The old console puts these under 集群监控; the numbers come
       // from the monitoring API's range query, which is a different read from the
       // current-value panel on the overview.
+      { key: 'gpu-resource', path: 'gpu-resource', titleKey: 'cluster.gpuResource.title', status: 'ready', groupKey: 'nav.groupMonitoring' },
+      { key: 'monitor-resource', path: 'monitor-resource', titleKey: 'cluster.resourceMonitor.title', status: 'ready', groupKey: 'nav.groupMonitoring' },
       { key: 'monitor', path: 'monitor', titleKey: 'cluster.monitor.title', status: 'ready', groupKey: 'nav.groupMonitoring' },
       { key: 'custom-monitoring', path: 'custom-monitoring', titleKey: 'customMonitoring.title', status: 'ready', groupKey: 'nav.groupMonitoring' },
       // The ranking under 集群监控: which node is hot, not every attribute of every node.
@@ -251,6 +254,7 @@ export const AREAS: readonly Area[] = [
       { key: 'logs', path: 'logs', titleKey: 'search.logs.title', status: 'ready', groupKey: 'nav.groupMonitoring' },
       { key: 'audit-logs', path: 'audit-logs', titleKey: 'search.audit.title', status: 'ready', groupKey: 'nav.groupMonitoring' },
       { key: 'custom-resources', path: 'custom-resources', titleKey: 'cluster.customResources.title', status: 'ready', groupKey: 'cluster.nav.groupExtensions' },
+      { key: 'volume-snapshot-content', path: 'volume-snapshot-content', titleKey: 'storage.snapshotContent.title', status: 'ready', groupKey: 'nav.groupStorage' },
     ],
   },
   {

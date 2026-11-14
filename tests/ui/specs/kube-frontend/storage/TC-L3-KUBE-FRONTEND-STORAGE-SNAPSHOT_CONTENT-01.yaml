@@ -1,0 +1,33 @@
+id: TC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOT_CONTENT-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: storage
+feature: snapshot-content
+title: 快照内容只读详情
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/volume-snapshot-content/<name>'
+prd: prd/kube-frontend/storage/snapshot-content.md
+design: design/kube-frontend/storage/snapshot-content.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOT_CONTENT-01
+
+story:
+- US1
+
+product: 一条 VolumeSnapshotContent 的只读详情：驱动、快照句柄、所属快照、恢复大小、可恢复、删除策略、创建时间。
+preconditions:
+- 已登录，且对 host 集群有读取权限
+- snapshot.storage.k8s.io/v1 已安装
+steps:
+- 用 API 读 volumesnapshotcontents 列表（可能为空）
+- 有对象时打开第一条详情，核对其字段
+- 打开一个不存在的名字，核对提示
+expected:
+- 存在时字段与对象一致
+- 不存在时出现错误面板且含「不存在」提示
+troubleshoot:
+- 页面空白：路由未生成（build 后重试）
+- 404 文案不可定制：ResourceErrorPanel 无 notFoundText（已知坑）
+update_automation:
+- 选择器见 snapshot-content:surface / snapshot-content:basic
