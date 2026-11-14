@@ -455,7 +455,7 @@ MODULES = [
                     {
                         "id": "detail",
                         "title": "应用详情",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_STORE-DETAIL-01"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_STORE-DETAIL-01", "TC-L3-KUBE-FRONTEND-APP_STORE-INSTALL-01"]},
                     },
                 ],
             },
@@ -495,8 +495,12 @@ MODULES = [
                 "features": [
                     {
                         "id": "workspace-members",
-                        "title": "企业空间成员授权",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_MEMBERS-01"]},
+                        "title": "租户(企业空间)成员授权",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_MEMBERS-01",
+                            "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_MEMBERS-02",
+                            "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_MEMBERS-03",
+                        ]},
                     },
                     {
                         "id": "workspace-quota",
@@ -545,7 +549,7 @@ MODULES = [
                     {
                         "id": "federated-projects",
                         "title": "联邦项目列表",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-01", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-02"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-01", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-02", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-03"]},
                     },
                     {
                         "id": "workspaces",
@@ -595,7 +599,7 @@ MODULES = [
                     {
                         "id": "devops-projects",
                         "title": "DevOps 工程列表",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-01", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-02"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-01", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-02", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-03"]},
                     },
                     {
                         "id": "gateway-detail",
@@ -1002,7 +1006,7 @@ MODULES = [
                     {
                         "id": "gray-release",
                         "title": "灰度发布列表",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-01"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-01", "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-02"]},
                     },
                     {
                         "id": "s2ibuilder",
