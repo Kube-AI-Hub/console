@@ -745,6 +745,7 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING_WRITE-01
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING_WRITE-02
     - id: cluster-alerting
       title: 集群级告警
       prd: prd/kube-frontend/cluster-management/cluster-alerting.md
@@ -1032,6 +1033,13 @@ modules:
       L2:
       - TC-FULL-KUBE-FRONTEND-APP_WORKLOADS-01
     features:
+    - id: page-tip
+      title: 列表页头提示
+      prd: prd/kube-frontend/app-workloads/page-tip.md
+      design: design/kube-frontend/app-workloads/page-tip.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-PAGE_TIP-01
     - id: detail-monitor
       title: 详情页监控页签
       prd: prd/kube-frontend/app-workloads/detail-monitor.md

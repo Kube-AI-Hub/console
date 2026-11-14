@@ -668,7 +668,7 @@ MODULES = [
                     {
                         "id": "cluster-alerting-write",
                         "title": "集群告警策略写入与消息下钻",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING_WRITE-01"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING_WRITE-01", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING_WRITE-02"]},
                     },
                     {
                         "id": "cluster-alerting",
@@ -892,6 +892,11 @@ MODULES = [
                 "goal": "项目内的八种应用负载（部署、有状态副本集、守护进程集、任务、定时任务、容器组、服务、应用路由）用一套列表与详情呈现：状态按老 console 的规则派生，重新部署只打 Pod 模板注解，写操作走正确的 API 组。",
                 "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-APP_WORKLOADS-01"]},
                 "features": [
+                    {
+                        "id": "page-tip",
+                        "title": "列表页头提示",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_WORKLOADS-PAGE_TIP-01"]},
+                    },
                     {
                         "id": "detail-monitor",
                         "title": "详情页监控页签",
