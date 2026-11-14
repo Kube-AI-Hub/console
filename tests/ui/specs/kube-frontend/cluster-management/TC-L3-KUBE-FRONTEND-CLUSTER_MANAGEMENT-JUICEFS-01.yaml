@@ -1,0 +1,42 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-JUICEFS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: juicefs
+title: JuiceFS 共享存储 · 三个页签
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/juicefs-storage'
+prd: prd/kube-frontend/cluster-management/juicefs.md
+design: design/kube-frontend/cluster-management/juicefs.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-JUICEFS-01
+
+story:
+- US1
+
+product: 集群级 JuiceFS 共享存储页：卷列表、用量汇总与各卷用量、客户端性能趋势，共三个页签。
+preconditions:
+- 已登录，且对 host 集群有读取权限
+- 集群安装了 juicefs-csi；没有共享卷时卷页签显示空态（用例仍通过）
+steps:
+- 用 API 读 JuiceFS 卷清单（/kapis/juicefs.kubesphere.io/v1alpha1/volumes）
+- 打开集群级 JuiceFS 共享存储页，核对三个页签可见
+- 核对卷页签：行数等于接口条数（0 条则空态）、表头六列
+- 切到用量页签，核对汇总卡与各卷用量条
+- 切到性能页签：有指标时核对指标表头与指标行；无指标时核对说明文案
+- 切回卷页签，核对内容仍在
+expected:
+- 三个页签 tab 均可见且点击后内容切换
+- 卷页签行数 = 接口返回条数；0 条时显示「暂无共享卷」
+- 卷表头包含 名称/状态/容量/已用/挂载点数/创建时间
+- 用量页签包含 卷数量/总容量/已用容量/最高使用率/各卷用量
+- 性能页签在 ready 时包含 指标/最新/平均/最大/趋势 与至少一行指标
+- 侧栏「存储」分组含 JuiceFS 共享存储入口
+troubleshoot:
+- 页签不可见：页面没有注册到 registry 或 route 目录缺 index.tsx
+- 卷页签 0 行但有数据：读接口时带了错误的集群前缀
+- 性能页签一直 loading：summary.metricsEnabled 为 false 时仍去查询
+- 状态/创建时间为空：PV join 未命中（卷名与 PV 名不一致）
+update_automation:
+- 选择器见 pages/cluster_management.py 与 @/pages/cluster/JuiceFSStoragePage.tsx；卷行句柄是卷名，指标行是 cluster-juicefs:metric:<指标名>
