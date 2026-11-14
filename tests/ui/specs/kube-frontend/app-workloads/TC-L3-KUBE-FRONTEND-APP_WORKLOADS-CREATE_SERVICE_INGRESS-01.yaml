@@ -1,0 +1,41 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CREATE_SERVICE_INGRESS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: create-service-ingress
+title: 创建服务与应用路由 · NodePort、选择器、多规则与同名报错
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/services"
+prd: prd/kube-frontend/app-workloads/resource-create.md
+design: design/kube-frontend/app-workloads/resource-create.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-CREATE_SERVICE_INGRESS-01
+
+story:
+- US1
+- US2
+
+product: 列表页的「创建」打开服务/应用路由的定制表单：服务可选 NodePort 并在该类型下显示节点端口字段、选择器可从工作负载 app 标签选取；应用路由可增删规则，同一域名的多条路径合并为一条规则。同名再建时弹窗保持打开并显示冲突。
+preconditions:
+- 由用例的 fixture 创建一个 tc-e2e- 前缀的部署（带唯一 app 标签）作为选择器来源，用例结束后无条件删除
+- 已登录，且在 host 集群的 default 项目空间，账号有创建服务与应用路由的权限
+steps:
+- 打开服务列表，点「创建」，填名称、选 NodePort、端口 8080→80，选择器选 fixture 的 app 标签，提交
+- 回读 Service 的 spec
+- 再次创建同名服务并提交
+- 打开应用路由列表，点「创建」，填名称与第一条规则（host、/api、后端服务:8080）
+- 新增第二条规则后删除，再新增并按同一 host、路径 /static、命名端口填写，提交
+- 回读 Ingress 的 rules
+expected:
+- NodePort 类型下节点端口字段可见；提交后 spec.type 为 NodePort，ports[0] 为 8080→80 且 nodePort 由集群分配
+- spec.selector 为 {app: fixture 的标签}
+- 同名再建时弹窗不关闭，错误提示包含「已存在」
+- 规则增删可用；回读 rules 只有一条 host 规则，两条 path 为 /api 与 /static，端口分别为数字 8080 与命名端口
+- 成功后弹窗关闭，列表出现新对象
+troubleshoot:
+- 创建返回 405 时检查是否误写 kapis，创建应 POST 原生集合（/api/v1 或 /apis/networking.k8s.io/v1）
+- 选择器下拉没有 fixture 标签时先确认部署已创建且列表查询已返回
+- NodePort 分配失败时看集群 nodePort 范围配置
+update_automation:
+- 选择器见 pages/app_workloads.py 的 service_create_field / ingress_rule_field / choose_select

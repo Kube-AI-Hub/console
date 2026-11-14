@@ -135,6 +135,7 @@
 | 编辑 YAML | `prd/…/edit-yaml.md` | `design/…/edit-yaml.md` |
 | 编辑设置 | `prd/…/edit-settings.md` | `design/…/edit-settings.md` |
 | 定制编辑表单 | `prd/…/edit-form.md` | `design/…/edit-form.md` |
+| 服务与应用路由创建 | `prd/…/resource-create.md` | `design/…/resource-create.md` |
 | 删除 | `prd/…/delete.md` | `design/…/delete.md` |
 
 ### DEC-L2-KUBE-FRONTEND-APP_WORKLOADS-05 — 服务编辑只改端口，且整表提交

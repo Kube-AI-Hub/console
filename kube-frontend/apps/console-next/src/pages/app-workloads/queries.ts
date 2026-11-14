@@ -24,6 +24,40 @@ export function useWorkloads(kind: WorkloadKind, params: Omit<ResourceListParams
   });
 }
 
+/**
+ * Distinct `app` labels the project's controllers select on.
+ *
+ * The Service create dialog prefills its selector from this list: a service that
+ * selects a label no workload carries routes to nothing, and typing the label by
+ * hand is where that typo comes from. One project has a handful of controllers, so
+ * three reads are cheap; failures leave the list empty and the dialog falls back to
+ * manual entry rather than blocking creation.
+ */
+export function useWorkloadAppLabels(cluster: string, namespace: string): string[] {
+  const query = useQuery({
+    queryKey: ['workload-app-labels', cluster, namespace],
+    enabled: Boolean(cluster) && Boolean(namespace),
+    queryFn: async ({ signal }) => {
+      const kinds: WorkloadKind[] = ['deployments', 'statefulsets', 'daemonsets'];
+      const pages = await Promise.all(
+        kinds.map((kind) =>
+          workloadsApi(api, kind).list({ cluster, namespace, page: 1, pageSize: 100, signal }),
+        ),
+      );
+      const labels = new Set<string>();
+      for (const page of pages) {
+        for (const item of page.items) {
+          if (item.app) labels.add(item.app);
+        }
+      }
+      return [...labels].sort();
+    },
+    staleTime: 30_000,
+    retry: false,
+  });
+  return query.data ?? [];
+}
+
 export function useWorkload(kind: WorkloadKind, params: { cluster: string; namespace: string; name: string }) {
   return useQuery({
     queryKey: ['workload', kind, params.cluster, params.namespace, params.name],

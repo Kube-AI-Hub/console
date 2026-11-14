@@ -63,8 +63,27 @@ class AppWorkloadsPage:
     def network_create_button(self, kind: str) -> Locator:
         return self.page.locator(f'[data-ai-id="{kind}:create"]')
 
-    def network_create_field(self, key: str) -> Locator:
-        return self.page.get_by_role("dialog").locator(f"#ai-field-{key}")
+    def network_create_dialog(self, kind: str) -> Locator:
+        """The dedicated create dialog's body: `services-create:dialog` / `ingresses-create:dialog`."""
+        return self.page.locator(f'[data-ai-id="{kind}-create:dialog"]')
+
+    def service_create_field(self, key: str) -> Locator:
+        return self.page.locator(f'[data-ai-id="services-create:{key}"]')
+
+    def ingress_create_field(self, key: str) -> Locator:
+        return self.page.locator(f'[data-ai-id="ingresses-create:{key}"]')
+
+    def ingress_rule_field(self, key: str, index: int = 0) -> Locator:
+        """Rule inputs are keyed by a stable row id; find the nth row by attribute prefix."""
+        return self.page.locator(f'[data-ai-id^="ingresses-create:{key}:"]').nth(index)
+
+    def ingress_rule_remove(self, index: int = 0) -> Locator:
+        return self.page.locator('[data-ai-id^="ingresses-create:rule-remove:"]').nth(index)
+
+    def choose_select(self, ai_id: str, option: str) -> None:
+        """Open a Radix select by its handle and pick one option by its visible label."""
+        self.page.locator(f'[data-ai-id="{ai_id}"]').click()
+        self.page.get_by_role("option", name=option, exact=True).click()
 
     def network_create_submit(self) -> Locator:
         return self.page.get_by_role("dialog").get_by_role("button", name="确认", exact=True)

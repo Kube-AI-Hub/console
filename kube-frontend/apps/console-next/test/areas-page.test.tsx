@@ -8,6 +8,8 @@ import { StorageClassesPage } from '@/pages/cluster/StorageClassesPage';
 import { ComponentsPage } from '@/pages/cluster/ComponentsPage';
 import { ProjectInfoPage } from '@/pages/settings/ProjectInfoPage';
 import { NetworkIsolationPage } from '@/pages/settings/NetworkIsolationPage';
+import { WorkloadListPage } from '@/pages/app-workloads/WorkloadListPage';
+import { WORKLOAD_DESCRIPTORS } from '@/pages/app-workloads/queries';
 
 /**
  * Pages of the six areas migrated after the first three.
@@ -136,5 +138,31 @@ describe('network isolation', () => {
     // The project-level switch stays available even with no policies: it is how a
     // project starts being isolated.
     expect(surface('networkpolicies:isolation')).toBeTruthy();
+  });
+});
+
+describe('service create permission', () => {
+  it('disables the create entry and says why when the review denies it', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = String(input);
+        if (url.includes('/selfsubjectaccessreviews')) return json({ status: { allowed: false } });
+        if (init?.method === 'POST') return json({}, 201);
+        return json({ items: [], totalItems: 0 });
+      }),
+    );
+    const descriptor = WORKLOAD_DESCRIPTORS['services'];
+    if (!descriptor) throw new Error('services descriptor missing');
+    renderPage('/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/services', () => (
+      <WorkloadListPage descriptor={descriptor} workspace="system-workspace" cluster="host" namespace="default" />
+    ));
+
+    await waitFor(() => expect(surface('services:surface')).toHaveAttribute('data-ai-state', 'empty'));
+    // The control stays mounted and disabled: removing it would read as a missing
+    // feature, and a bare disabled button would not say whether it is a permission.
+    const create = surface('services:create') as HTMLButtonElement;
+    await waitFor(() => expect(create.disabled).toBe(true));
+    expect(surface('services:create:disabled-hint').textContent).toContain('创建服务');
   });
 });

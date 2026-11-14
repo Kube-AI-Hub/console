@@ -26,8 +26,10 @@ import {
   type WorkloadDescriptor,
 } from './queries';
 import { WorkloadCreateDialog } from './WorkloadCreateDialog';
-import { NetworkResourceCreateDialog } from './NetworkResourceCreateDialog';
+import { CreateServiceDialog } from './CreateServiceDialog';
+import { CreateIngressDialog } from './CreateIngressDialog';
 import { JobCreateDialog } from './JobCreateDialog';
+import { useCreatePermission } from './useCreatePermission';
 import { ServicePortsDialog } from './ServicePortsDialog';
 import { ReplicasDialog } from './ReplicasDialog';
 import { IngressRulesDialog } from './IngressRulesDialog';
@@ -86,6 +88,8 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
   const servicePorts = useSetServicePorts(kind, { cluster, namespace: projectFilter });
   const ingressRules = useSetIngressRules(kind, { cluster, namespace: projectFilter });
   const redeploy = useRestartWorkload(kind, { cluster, namespace: projectFilter });
+  // Only Service and Ingress lists ask; the other kinds keep their single create entry.
+  const createPermission = useCreatePermission(kind, cluster, projectFilter);
   const [dialog, setDialog] = React.useState<Dialog>({ kind: 'none' });
 
   const rows = query.data?.items ?? [];
@@ -137,7 +141,17 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
        * selected, which is why a create entry there rendered disabled on an empty list.
        */
       ...(descriptor.allowCreate
-        ? { primaryAction: { key: 'create', label: t('workloads.action.create'), aiId: `${kind}:create` } }
+        ? {
+            primaryAction: {
+              key: 'create',
+              label: t('workloads.action.create'),
+              aiId: `${kind}:create`,
+              // A create the reader has no permission for is shown disabled with the
+              // reason beside it, instead of opening a form that ends in a 403.
+              ...(createPermission.disabled ? { disabled: true } : {}),
+              ...(createPermission.hint ? { disabledHint: createPermission.hint } : {}),
+            },
+          }
         : {}),
       actions: [
         /*
@@ -461,8 +475,11 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
       ) : null}
 
       {dialog.kind === 'create' ? (
-        kind === 'services' || kind === 'ingresses' ? <NetworkResourceCreateDialog
-          kind={kind}
+        kind === 'services' ? <CreateServiceDialog
+          cluster={cluster}
+          namespace={projectFilter}
+          onOpenChange={(open) => !open && setDialog({ kind: 'none' })}
+        /> : kind === 'ingresses' ? <CreateIngressDialog
           cluster={cluster}
           namespace={projectFilter}
           onOpenChange={(open) => !open && setDialog({ kind: 'none' })}

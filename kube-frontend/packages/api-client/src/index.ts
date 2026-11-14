@@ -54,6 +54,7 @@ export {
   type ResourceListResult,
   type ResourceRef,
 } from './resources';
+export { accessReviewApi, type AccessQuery } from './permissions';
 export {
   DEFAULT_REGISTRY_ANNOTATION,
   FORCE_INSECURE_ANNOTATION,

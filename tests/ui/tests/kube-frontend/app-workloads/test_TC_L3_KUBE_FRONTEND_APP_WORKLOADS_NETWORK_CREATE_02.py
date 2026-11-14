@@ -25,7 +25,7 @@ def test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_NETWORK_CREATE_02(app_workloads_page)
     try:
         ui.open("services")
         ui.network_create_button("services").click()
-        ui.network_create_field("name").fill(name)
+        ui.service_create_field("name").fill(name)
         ui.network_yaml_switch("services").click()
         editor = ui.network_yaml_editor()
         expect(editor).to_be_visible()

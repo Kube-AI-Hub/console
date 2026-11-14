@@ -139,8 +139,19 @@ export interface ListSchema<TRow> {
    * Kept separate from `actions` (which are bulk operations on a selection):
    * a create button is always visible and sits opposite the title, while bulk
    * actions only appear once rows are selected.
+   *
+   * `disabled` keeps the control mounted (an absent button reads as a missing
+   * feature) and `disabledHint` is rendered as visible text beside it: a disabled
+   * control with no explanation leaves the reader guessing whether it is a permission
+   * problem or a bug.
    */
-  primaryAction?: { key: string; label: React.ReactNode; aiId?: string };
+  primaryAction?: {
+    key: string;
+    label: React.ReactNode;
+    aiId?: string;
+    disabled?: boolean;
+    disabledHint?: React.ReactNode;
+  };
   /**
    * A refresh affordance next to the search box.
    *
@@ -680,15 +691,30 @@ export function ResourceList<TRow>({
               </>
             ) : null}
             {primaryAction ? (
-              <Button
-                size="md"
-                variant="primary"
-                className="px-3 sm:min-h-0"
-                onClick={() => onAction?.(primaryAction.key, undefined as unknown as TRow)}
-                {...(primaryAction.aiId ? { 'data-ai-id': primaryAction.aiId } : {})}
-              >
-                {primaryAction.label}
-              </Button>
+              <>
+                {primaryAction.disabled && primaryAction.disabledHint ? (
+                  <span
+                    className="max-w-[22rem] text-right text-xs text-ai-fg-muted"
+                    {...(primaryAction.aiId ? { 'data-ai-id': `${primaryAction.aiId}:disabled-hint` } : {})}
+                  >
+                    {primaryAction.disabledHint}
+                  </span>
+                ) : null}
+                <Button
+                  size="md"
+                  variant="primary"
+                  className="px-3 sm:min-h-0"
+                  disabled={primaryAction.disabled === true}
+                  title={typeof primaryAction.disabledHint === 'string' ? primaryAction.disabledHint : undefined}
+                  onClick={() => {
+                    if (primaryAction.disabled) return;
+                    onAction?.(primaryAction.key, undefined as unknown as TRow);
+                  }}
+                  {...(primaryAction.aiId ? { 'data-ai-id': primaryAction.aiId } : {})}
+                >
+                  {primaryAction.label}
+                </Button>
+              </>
             ) : null}
           </div>
         </div>
