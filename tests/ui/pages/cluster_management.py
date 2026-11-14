@@ -72,6 +72,30 @@ class ClusterManagementPage:
     def rows(self, kind: str = "nodes") -> Locator:
         return self.surface(kind).locator("[data-ai-row]")
 
+    def pod_search(self) -> Locator:
+        return self.page.locator('[data-ai-id="cluster-pods:search"]')
+
+    def pod_refresh(self) -> Locator:
+        return self.page.locator('[data-ai-id="cluster-pods:refresh"]')
+
+    def workload_surface(self, kind: str) -> Locator:
+        return self.surface(f"cluster-{kind}")
+
+    def workload_search(self, kind: str) -> Locator:
+        return self.page.locator(f'[data-ai-id="cluster-{kind}:search"]')
+
+    def workload_refresh(self, kind: str) -> Locator:
+        return self.page.locator(f'[data-ai-id="cluster-{kind}:refresh"]')
+
+    def workload_page_size(self, kind: str) -> Locator:
+        return self.page.locator(f'[data-ai-id="cluster-{kind}:page-size"]')
+
+    def workload_next(self, kind: str) -> Locator:
+        return self.page.locator(f'[data-ai-id="cluster-{kind}:page:next"]')
+
+    def workload_current_page(self, kind: str) -> Locator:
+        return self.workload_surface(kind).locator('button[aria-current="page"]')
+
     def row_names(self, kind: str = "nodes") -> list[str]:
         values = self.surface(kind).locator("[data-ai-row]").evaluate_all(
             "els => els.map(e => e.getAttribute('data-ai-row'))"

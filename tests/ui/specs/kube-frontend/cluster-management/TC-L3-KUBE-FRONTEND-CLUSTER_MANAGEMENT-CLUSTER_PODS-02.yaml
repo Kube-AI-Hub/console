@@ -1,0 +1,30 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_PODS-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: cluster-pods
+title: 集群级容器组 · 保留搜索条件刷新
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/pods'
+prd: prd/kube-frontend/cluster-management/cluster-pods.md
+design: design/kube-frontend/cluster-management/cluster-pods.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_PODS-02
+story:
+- US1
+product: 在集群级容器组列表刷新当前搜索结果，不重置搜索条件。
+preconditions:
+- 已登录，且对 host 集群有读取权限
+steps:
+- 打开容器组列表并输入一个唯一的不存在的名称
+- 等待列表进入空态
+- 点击刷新并等待容器组请求完成
+expected:
+- 发出新的容器组列表请求并成功返回
+- 搜索条件保持不变，列表仍显示空态
+troubleshoot:
+- 没有请求：检查刷新按钮是否接到当前查询的 refetch
+- 搜索条件丢失：检查刷新是否重置了列表状态
+update_automation:
+- 选择器见 pages/cluster_management.py 与 ClusterPodsPage.tsx

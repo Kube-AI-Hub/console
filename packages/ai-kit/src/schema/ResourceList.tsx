@@ -187,6 +187,9 @@ export interface ListSchema<TRow> {
     goToPage?: string;
     /** Label for the page-jump field. */
     jumpTo?: string;
+    /** Accessible name for the rows-per-page picker. */
+    pageSize?: string;
+    pageSizeSuffix?: string;
   };
   /**
    * Extra attributes for each row element.
@@ -408,7 +411,7 @@ export function ResourceList<TRow>({
     return mapped;
   }, [schema.columns, schema.sortableKeys, schema.rowActions, onAction]);
 
-  const hasToolbar = Boolean(schema.search || schema.filters?.length);
+  const hasToolbar = Boolean(schema.search || schema.filters?.length || (schema.refresh && onRefresh));
 
   /**
    * The one action the page is for.
@@ -499,6 +502,7 @@ export function ResourceList<TRow>({
               type="button"
               onClick={onRefresh}
               disabled={schema.refresh.busy}
+              aria-busy={schema.refresh.busy ?? false}
               aria-label={schema.refresh.label}
               title={schema.refresh.label}
               className={cn(
@@ -506,7 +510,7 @@ export function ResourceList<TRow>({
               )}
               {...(schema.refresh.aiId ? { 'data-ai-id': schema.refresh.aiId } : {})}
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true" className="size-4">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true" className={cn('size-4', schema.refresh.busy && 'animate-spin motion-reduce:animate-none')}>
                 <path d="M20 11a8 8 0 1 0-2.3 5.7" />
                 <path d="M20 4v7h-7" />
               </svg>
@@ -662,6 +666,8 @@ export function ResourceList<TRow>({
                   ...(schema.labels.range ? { range: schema.labels.range } : {}),
                   ...(schema.labels.goToPage ? { goToPage: schema.labels.goToPage } : {}),
                   ...(schema.labels.jumpTo ? { jumpTo: schema.labels.jumpTo } : {}),
+                  ...(schema.labels.pageSize ? { pageSize: schema.labels.pageSize } : {}),
+                  ...(schema.labels.pageSizeSuffix ? { pageSizeSuffix: schema.labels.pageSizeSuffix } : {}),
                 },
               }
             : {})}

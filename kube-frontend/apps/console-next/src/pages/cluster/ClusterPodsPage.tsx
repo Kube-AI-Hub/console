@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api as apiClient, workloadsApi } from '@/api';
-import { namespacesApi } from '@kube-ai-hub/api-client';
+import { namespacesApi, type ResourceListResult, type WorkloadSummary } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
@@ -23,20 +23,20 @@ export interface ClusterPodsPageProps {
   cluster: string;
 }
 
-const PAGE_SIZE = 20;
-
 export function ClusterPodsPage({ cluster }: ClusterPodsPageProps): React.ReactElement {
   const t = useT();
   const list = useResourceListState<'name' | 'createTime'>({ defaultSortBy: 'createTime', defaultOrder: 'desc', resetOn: [cluster] });
 
-  const query = useQuery({
-    queryKey: ['cluster-pods', cluster, list.page, list.sortBy, list.order, list.search],
+  const query = useQuery<ResourceListResult<WorkloadSummary>>({
+    queryKey: ['cluster-pods', cluster, list.page, list.pageSize, list.sortBy, list.order, list.search],
+    // Retain rows while changing list conditions, never across clusters.
+    placeholderData: (previous, previousQuery) => previousQuery?.queryKey[1] === cluster ? previous : undefined,
     queryFn: ({ signal }) =>
       workloadsApi(apiClient, 'pods').list({
         cluster,
         namespace: '',
         page: list.page,
-        pageSize: PAGE_SIZE,
+        pageSize: list.pageSize,
         sortBy: list.sortBy,
         order: list.order,
         keyword: list.search,
@@ -65,9 +65,10 @@ export function ClusterPodsPage({ cluster }: ClusterPodsPageProps): React.ReactE
     () => ({
       title: t('cluster.workloads.pods.title'),
       description: t('cluster.workloads.pods.description'),
-      rowKey: 'name',
+      rowKey: (row) => `${row.namespace}/${row.name}`,
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
       search: { placeholder: t('cluster.searchPlaceholder'), aiId: 'cluster-pods:search' },
+      refresh: { label: t('cluster.list.refresh'), aiId: 'cluster-pods:refresh', busy: query.isFetching },
       sortableKeys: ['name', 'createTime'],
       sortAiPrefix: 'cluster-pods',
       sort: { key: list.sortBy, order: list.order },
@@ -135,10 +136,12 @@ export function ClusterPodsPage({ cluster }: ClusterPodsPageProps): React.ReactE
         previous: t('table.previous'),
         next: t('table.next'),
         selected: (count) => t('table.selectedCount', { count }),
+        pageSize: t('table.pageSize'),
+        pageSizeSuffix: t('table.pageSizeSuffix'),
       },
-      pagination: { page: list.page, pageSize: PAGE_SIZE, total },
+      pagination: { page: list.page, pageSize: list.pageSize, pageSizeOptions: [10, 20, 50, 100], total },
     }),
-    [cluster, list, t, total, workspaceOf],
+    [cluster, list, query.isFetching, t, total, workspaceOf],
   );
 
   if (state === 'error') {
@@ -150,14 +153,16 @@ export function ClusterPodsPage({ cluster }: ClusterPodsPageProps): React.ReactE
   }
 
   return (
-    <AiSurface as="section" aiId="cluster-pods:surface" state={state} className="min-w-0">
+    <AiSurface as="section" aiId="cluster-pods:surface" state={state} aria-busy={query.isFetching} className="min-w-0">
       <ResourceList
         schema={schema}
         rows={rows}
         loading={state === 'loading'}
-        searchValue={list.search}
+        searchValue={list.keyword}
         onSearchChange={list.setKeyword}
+        onRefresh={() => void query.refetch()}
         onPageChange={list.setPage}
+        onPageSizeChange={list.setPageSize}
         onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
           if (next) list.setSort(next);
         }}

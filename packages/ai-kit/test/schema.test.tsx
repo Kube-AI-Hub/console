@@ -76,6 +76,47 @@ describe('ResourceList', () => {
     await userEvent.click(screen.getByLabelText('选择第 1 行'));
     expect(onSelectionChange).toHaveBeenCalledWith(['pod-a']);
   });
+
+  it('renders refresh without search and exposes its busy state', async () => {
+    const onRefresh = vi.fn();
+    const schema: ListSchema<Row> = {
+      rowKey: 'name',
+      columns: listSchema.columns,
+      refresh: { label: 'Refresh', aiId: 'demo:refresh' },
+    };
+    const { rerender } = render(<ResourceList schema={schema} rows={rows} onRefresh={onRefresh} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+    expect(onRefresh).toHaveBeenCalledOnce();
+    rerender(<ResourceList schema={{ ...schema, refresh: { ...schema.refresh!, busy: true } }} rows={rows} onRefresh={onRefresh} />);
+    const button = screen.getByRole('button', { name: 'Refresh' });
+    expect(button).toBeDisabled();
+    expect(button).toHaveAttribute('aria-busy', 'true');
+    expect(button).toHaveAttribute('data-ai-id', 'demo:refresh');
+    expect(button.querySelector('svg')).toHaveClass('animate-spin');
+    expect(screen.getByText('pod-a')).toBeInTheDocument();
+  });
+
+  it('forwards page-size labels, handles and selection to the pager', async () => {
+    const onPageSizeChange = vi.fn();
+    render(
+      <ResourceList
+        schema={{
+          ...listSchema,
+          sortAiPrefix: 'demo',
+          pagination: { page: 1, pageSize: 20, total: 135, pageSizeOptions: [10, 20, 50, 100] },
+          labels: { pageSize: 'Rows per page', pageSizeSuffix: '/ page' },
+        }}
+        rows={rows}
+        onPageChange={() => undefined}
+        onPageSizeChange={onPageSizeChange}
+      />,
+    );
+    const picker = screen.getByRole('combobox', { name: 'Rows per page' });
+    expect(picker).toHaveAttribute('data-ai-id', 'demo:page-size');
+    expect(screen.getByText('/ page')).toBeInTheDocument();
+    await userEvent.selectOptions(picker, '50');
+    expect(onPageSizeChange).toHaveBeenCalledWith(50);
+  });
 });
 
 describe('ResourceForm', () => {

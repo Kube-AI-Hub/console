@@ -19,6 +19,7 @@
 ## 验收场景
 
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_WORKLOADS-01** — 已知集群里有部署、服务等工作负载，当打开对应集群级页面，则列出名称、项目、状态、就绪数（有副本概念的类型）、镜像与创建时间；每页行数等于 `min(20, total)`；名称链接指向该对象所属项目内的详情页（URL 含 workspace 段与项目段）；七类页面（deployments/statefulsets/daemonsets/jobs/cronjobs/services/ingresses）都从侧栏「工作负载」分组可达。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_WORKLOADS-02** — 七类列表均可切换 10/20/50/100 每页条数，默认 20；切换档位回到第一页并保留搜索、排序；刷新重新读取当前档位与条件，进行中有忙碌反馈，失败显示错误。翻页保留已有内容，但不同资源类型或集群之间不复用旧数据占位。
 
 ## 设计目标
 
@@ -34,6 +35,7 @@
 
 - 侧栏新增「工作负载」分组，其下七项 + 容器组。
 - 列为：名称（链接）、项目、状态、就绪、镜像、创建时间；窄屏折叠后三列。
+- 搜索框即时响应输入，防抖后查询；搜索旁统一刷新，分页器提供每页档位。
 
 ## 文案与校验
 
@@ -58,6 +60,7 @@
 
 - **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_WORKLOADS-01** — 七类工作负载的跨项目列表。
 - **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_WORKLOADS-02** — 项目列与写回项目详情的链接。
+- **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_WORKLOADS-03** — 七类列表共用分页档位和当前条件刷新。
 
 ## 成功标准
 
@@ -66,3 +69,4 @@
 ## 验收用例
 
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_WORKLOADS-01`
+- `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_WORKLOADS-02`

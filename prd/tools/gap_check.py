@@ -73,7 +73,6 @@ RENAME: dict[str, dict[str, str]] = {
         "monitor-cluster": "monitor",
         "projects": "namespaces",
         "pv": "persistentvolumes",
-        "volume-snapshots": "volumesnapshots",
         "roles": "clusterroles",
         "volumes": "persistentvolumeclaims",
         "alerts": "alerting-messages",
@@ -109,21 +108,17 @@ ELSEWHERE: dict[str, str] = {
 #: 登记在此是为了让它们持续可见，而不是消失。
 PLANNED: dict[str, str] = {
     "clusters/snapshots": "快照别名路由（计划 §6.1）",
-    "clusters/volume-snapshots": "卷快照（计划 §6.1）",
-    "clusters/volume-snapshot-classes": "快照类型（计划 §6.1）",
     "clusters/volume-snapshot-content": "快照内容（计划 §6.1）",
     "clusters/juicefs-storage": "JuiceFS 共享存储（计划 §6.1）",
     "clusters/gpu-resource": "GPU 资源监控（计划 §6.1）",
     "clusters/monitor-resource": "应用资源监控（计划 §6.1）",
     "clusters/gateways": "集群网关（计划 §6.1；控制器缺 chart）",
-    "settings/feishu": "飞书渠道（计划 §6.1；其余五种已迁）",
-    "projects/custom-monitoring": "项目级自定义监控（dashboards 接口已确认 200，结构与集群级相同）",
 }
 
 #: 整个作用域级别的归宿。老 console 有 9 个作用域，其中四个整块不在迁移范围内——
 #: 它们必须在这里出现，否则「不迁移」和「忘了枚举」看起来一模一样。
 SCOPE_DECISIONS: dict[str, tuple[str, str]] = {
-    "workspaces": ("planned", "企业空间控制台：整块待迁，Phase 2（计划 §6.1）；平台侧只有只读详情"),
+    "workspaces": ("planned", "企业空间控制台部分已迁；部门、成员授权等仍待核实和迁移（计划 §6.1）"),
     "devops": ("unmigrated", "DevOps 工程：devops 模块关闭（计划 §7.3），整块不做"),
     "fedprojects": ("unmigrated", "联邦项目：联邦模块未开启，整块不做"),
 }

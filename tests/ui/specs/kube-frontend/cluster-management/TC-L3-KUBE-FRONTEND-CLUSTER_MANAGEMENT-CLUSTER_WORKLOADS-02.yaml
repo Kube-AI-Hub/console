@@ -1,0 +1,31 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_WORKLOADS-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: cluster-workloads
+title: 集群级工作负载 · 七类分页与空态刷新
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/deployments'
+prd: prd/kube-frontend/cluster-management/cluster-workloads.md
+design: design/kube-frontend/cluster-management/cluster-workloads.md
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_WORKLOADS-02
+story:
+- US1
+product: 七类资源的每页档位与刷新均使用当前列表条件，空态仍可刷新。
+preconditions:
+- 已登录且有集群读取权限
+- 用例只读，不创建或删除资源
+steps:
+- 依次打开 deployments/statefulsets/daemonsets/jobs/cronjobs/services/ingresses
+- 将每页条数改为 10，核对真实请求 limit=10、page=1
+- 输入唯一的不存在的名称并等待空态
+- 点击刷新，等待包含当前搜索和档位的真实响应
+expected:
+- 七类页面都发出包含新 limit 与 page 的列表请求
+- 刷新请求保留搜索和档位，结束后为空态且输入不丢失
+troubleshoot:
+- 个别类型缺控件：检查是否使用共用 ClusterWorkloadsPage
+- 空态无法刷新：检查工具栏是否依赖 rows 长度
+update_automation:
+- 选择器见 pages/cluster_management.py

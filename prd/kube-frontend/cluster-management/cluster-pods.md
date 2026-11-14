@@ -19,6 +19,8 @@
 ## 验收场景
 
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_PODS-01** — 已知集群有容器组，当打开集群级容器组页，则列出名称、项目、状态、所在节点、容器组 IP 与创建时间；每页行数等于 `min(20, total)`；名称链接指向该容器组所属项目内的 Pod 详情（URL 含 workspace 段）；按名称搜索时结果收窄。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_PODS-02** — 在容器组列表或空态点击刷新时，重新读取当前搜索、排序和分页对应的容器组；请求期间显示刷新中，结束后展示最新结果，失败时显示错误与重试入口。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_PODS-03** — 默认每页 20 条，可切换 10/20/50/100 条；从非首页切换档位时回到第一页，保留搜索和排序，请求携带新 limit；刷新保留该档位。翻页和搜索期间保留已有内容并标明忙碌，不以旧集群数据占位。
 
 ## 设计目标
 
@@ -34,6 +36,8 @@
 
 - 列表六列；窄屏隐藏节点/IP/创建时间。
 - 名称列是链接，指向 `/<workspace>/clusters/<cluster>/projects/<ns>/pods/<name>`。
+- 搜索栏旁提供刷新入口，刷新时保留当前条件并反馈进行中。
+- 分页档位沿用旧版选择，默认保持当前新 UI 的 20 条；搜索输入即时反馈，请求仍防抖。
 
 ## 文案与校验
 
@@ -54,6 +58,8 @@
 
 - **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_PODS-01** - 跨项目列出容器组，带项目列与详情链接。
 - **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_PODS-02** - 名称搜索走服务端关键字。
+- **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_PODS-03** - 按当前条件手动刷新容器组列表。
+- **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_PODS-04** - 支持每页档位，切换时回到第一页。
 
 ## 成功标准
 
@@ -66,3 +72,5 @@
 ## 验收用例
 
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_PODS-01`
+- `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_PODS-02`
+- `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_PODS-03`

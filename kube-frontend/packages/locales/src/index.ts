@@ -1351,6 +1351,8 @@ export const zh = {
   'table.previous': '上一页',
   'table.next': '下一页',
   'table.selectedCount': '已选 {count} 项',
+  'table.pageSize': '每页条数',
+  'table.pageSizeSuffix': '/ 页',
   'locale.zh': '简体中文',
   'locale.en': 'English',
 
@@ -2975,6 +2977,8 @@ export const en: Record<LocaleKey, string> = {
   'table.previous': 'Previous page',
   'table.next': 'Next page',
   'table.selectedCount': '{count} selected',
+  'table.pageSize': 'Rows per page',
+  'table.pageSizeSuffix': '/ page',
   'locale.zh': '简体中文',
   'locale.en': 'English',
 

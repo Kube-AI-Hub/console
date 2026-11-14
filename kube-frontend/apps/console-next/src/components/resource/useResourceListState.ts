@@ -14,6 +14,8 @@ import type { ResourceListParams } from '@kube-ai-hub/api-client';
 export interface ResourceListState<TSortKey extends string> {
   page: number;
   setPage: (page: number) => void;
+  pageSize: number;
+  setPageSize: (pageSize: number) => void;
   /** Raw text in the search box, bound to the input. */
   keyword: string;
   setKeyword: (value: string) => void;
@@ -29,6 +31,7 @@ export interface ResourceListState<TSortKey extends string> {
 export interface ResourceListStateOptions<TSortKey extends string> {
   defaultSortBy: TSortKey;
   defaultOrder?: SortOrder;
+  defaultPageSize?: number;
   /** Fields a search or sort resets the selection over. */
   resetOn?: readonly unknown[];
 }
@@ -36,9 +39,11 @@ export interface ResourceListStateOptions<TSortKey extends string> {
 export function useResourceListState<TSortKey extends string>({
   defaultSortBy,
   defaultOrder = 'desc',
+  defaultPageSize = 20,
   resetOn = [],
 }: ResourceListStateOptions<TSortKey>): ResourceListState<TSortKey> {
   const [page, setPage] = React.useState(1);
+  const [pageSize, updatePageSize] = React.useState(defaultPageSize);
   const [keyword, setKeyword] = React.useState('');
   const [search, setSearch] = React.useState('');
   const [sortBy, setSortBy] = React.useState<TSortKey>(defaultSortBy);
@@ -58,7 +63,7 @@ export function useResourceListState<TSortKey extends string>({
   // Selection is cleared whenever what the reader can see changes: acting on
   // rows that are no longer visible is the main way a bulk delete removes the
   // wrong thing.
-  const resetKey = JSON.stringify([...resetOn, page, search, sortBy, order]);
+  const resetKey = JSON.stringify([...resetOn, page, pageSize, search, sortBy, order]);
   React.useEffect(() => {
     setSelected([]);
   }, [resetKey]);
@@ -69,7 +74,14 @@ export function useResourceListState<TSortKey extends string>({
     setPage(1);
   }, []);
 
-  return { page, setPage, keyword, setKeyword, search, sortBy, order, setSort, selected, setSelected };
+  const setPageSize = React.useCallback((next: number) => {
+    if (!Number.isSafeInteger(next) || next < 1) return;
+    updatePageSize(next);
+    setPage(1);
+    setSelected([]);
+  }, []);
+
+  return { page, setPage, pageSize, setPageSize, keyword, setKeyword, search, sortBy, order, setSort, selected, setSelected };
 }
 
 /** The query parameters a page's list request needs, derived from the state. */

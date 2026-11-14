@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { namespacesApi, workloadsApi, type WorkloadKind, type WorkloadSummary } from '@kube-ai-hub/api-client';
+import { namespacesApi, workloadsApi, type ResourceListResult, type WorkloadKind, type WorkloadSummary } from '@kube-ai-hub/api-client';
 import { api as apiClient } from '@/api';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
@@ -26,21 +26,22 @@ export interface ClusterWorkloadsPageProps {
   kind: WorkloadKind;
 }
 
-const PAGE_SIZE = 20;
-
 export function ClusterWorkloadsPage({ cluster, kind }: ClusterWorkloadsPageProps): React.ReactElement {
   const t = useT();
   const list = useResourceListState<'name' | 'createTime'>({ defaultSortBy: 'createTime', defaultOrder: 'desc', resetOn: [cluster, kind] });
   const aiId = `cluster-${kind}`;
 
-  const query = useQuery({
-    queryKey: [aiId, cluster, list.page, list.sortBy, list.order, list.search],
+  const query = useQuery<ResourceListResult<WorkloadSummary>>({
+    queryKey: [aiId, cluster, list.page, list.pageSize, list.sortBy, list.order, list.search],
+    // List transitions retain rows, but switching resource or cluster must not.
+    placeholderData: (previous, previousQuery) =>
+      previousQuery?.queryKey[0] === aiId && previousQuery.queryKey[1] === cluster ? previous : undefined,
     queryFn: ({ signal }) =>
       workloadsApi(apiClient, kind).list({
         cluster,
         namespace: '',
         page: list.page,
-        pageSize: PAGE_SIZE,
+        pageSize: list.pageSize,
         sortBy: list.sortBy,
         order: list.order,
         keyword: list.search,
@@ -69,9 +70,10 @@ export function ClusterWorkloadsPage({ cluster, kind }: ClusterWorkloadsPageProp
     () => ({
       title: t(`cluster.workloads.${kind}.title` as 'cluster.workloads.deployments.title'),
       description: t('cluster.workloads.description'),
-      rowKey: 'name',
+      rowKey: (row) => `${row.namespace}/${row.name}`,
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
       search: { placeholder: t('cluster.searchPlaceholder'), aiId: `${aiId}:search` },
+      refresh: { label: t('cluster.list.refresh'), aiId: `${aiId}:refresh`, busy: query.isFetching },
       sortableKeys: ['name', 'createTime'],
       sortAiPrefix: aiId,
       sort: { key: list.sortBy, order: list.order },
@@ -144,10 +146,12 @@ export function ClusterWorkloadsPage({ cluster, kind }: ClusterWorkloadsPageProp
         previous: t('table.previous'),
         next: t('table.next'),
         selected: (count) => t('table.selectedCount', { count }),
+        pageSize: t('table.pageSize'),
+        pageSizeSuffix: t('table.pageSizeSuffix'),
       },
-      pagination: { page: list.page, pageSize: PAGE_SIZE, total },
+      pagination: { page: list.page, pageSize: list.pageSize, pageSizeOptions: [10, 20, 50, 100], total },
     }),
-    [aiId, cluster, kind, list, t, total, workspaceOf],
+    [aiId, cluster, kind, list, query.isFetching, t, total, workspaceOf],
   );
 
   if (state === 'error') {
@@ -159,14 +163,16 @@ export function ClusterWorkloadsPage({ cluster, kind }: ClusterWorkloadsPageProp
   }
 
   return (
-    <AiSurface as="section" aiId={`${aiId}:surface`} state={state} className="min-w-0">
+    <AiSurface as="section" aiId={`${aiId}:surface`} state={state} aria-busy={query.isFetching} className="min-w-0">
       <ResourceList
         schema={schema}
         rows={rows}
         loading={state === 'loading'}
-        searchValue={list.search}
+        searchValue={list.keyword}
         onSearchChange={list.setKeyword}
+        onRefresh={() => void query.refetch()}
         onPageChange={list.setPage}
+        onPageSizeChange={list.setPageSize}
         onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
           if (next) list.setSort(next);
         }}

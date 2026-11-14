@@ -214,6 +214,7 @@ def main() -> int:
     total += run("一致性核对", [sys.executable, "prd/tools/parity_check.py"], REPO)
     # 缺口清单：老 console 的每个 URL 段都必须有归宿（已迁移/明确不做/别处承接/已登记缺口）。
     # 一致性核对按一级目录名匹配，分组目录下的兄弟页面会整块隐身——见计划 §7.1。
+    total += run("缺口清单单测", [sys.executable, "prd/tools/test_gap_check.py"], REPO)
     total += run("缺口清单", [sys.executable, "prd/tools/gap_check.py", "--strict"], REPO)
     # Advisory: prints suspicious assertions but does not fail the run. Retry loops are
     # legitimate and would otherwise trip it.

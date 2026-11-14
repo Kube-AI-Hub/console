@@ -42,3 +42,25 @@ export const BasicPagination: PaginationStory = {
     );
   },
 };
+
+export const PageSizeOptions: PaginationStory = {
+  name: 'page size options',
+  render: () => {
+    const [page, setPage] = React.useState(3);
+    const [pageSize, setPageSize] = React.useState(20);
+    return (
+      <Pagination
+        aiPrefix="pagination-demo"
+        page={page}
+        pageSize={pageSize}
+        pageSizeOptions={[10, 20, 50, 100]}
+        total={235}
+        onChange={setPage}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1);
+        }}
+      />
+    );
+  },
+};

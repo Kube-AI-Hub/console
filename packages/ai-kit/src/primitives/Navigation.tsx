@@ -314,6 +314,9 @@ export interface PaginationLabels {
   goToPage?: string;
   /** Label for the "jump to page" input. */
   jumpTo?: string;
+  /** Accessible name for the rows-per-page picker. */
+  pageSize?: string;
+  pageSizeSuffix?: string;
 }
 
 export interface PaginationProps {
@@ -356,6 +359,8 @@ const DEFAULT_PAGINATION_LABELS: PaginationLabels = {
   range: (from, to, total) => `第 ${from}-${to} 条，共 ${total} 条`,
   goToPage: '选择页码',
   jumpTo: '跳至',
+  pageSize: '每页条数',
+  pageSizeSuffix: '/ 页',
 };
 
 const DEFAULT_PAGE_SIZES = [10, 20, 50, 100];
@@ -426,7 +431,8 @@ export function Pagination({
             <select
               className="h-7 rounded-ai-sm border border-ai-line bg-ai-surface-1 px-1.5 text-xs text-ai-fg-secondary"
               value={pageSize}
-              aria-label={text.jumpTo}
+              aria-label={text.pageSize}
+              {...(aiPrefix ? { 'data-ai-id': `${aiPrefix}:page-size` } : {})}
               onChange={(event) => onPageSizeChange(Number(event.target.value))}
             >
               {pageSizeOptions.map((size) => (
@@ -435,7 +441,7 @@ export function Pagination({
                 </option>
               ))}
             </select>
-            <span>/ 页</span>
+            <span>{text.pageSizeSuffix}</span>
           </label>
         ) : null}
       </div>

@@ -1,0 +1,32 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_PODS-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: cluster-pods
+title: 集群级容器组 · 每页档位与分页重置
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/pods'
+prd: prd/kube-frontend/cluster-management/cluster-pods.md
+design: design/kube-frontend/cluster-management/cluster-pods.md
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_PODS-03
+story:
+- US1
+product: 从第二页切换每页档位，回到第一页并按新 limit 请求；刷新不重置档位。
+preconditions:
+- 已登录且有集群读取权限
+- 集群容器组超过 20 条，测试只读不修改对象
+steps:
+- 打开容器组列表，核对默认每页 20 条和四个可选档位
+- 进入第二页，再切换为每页 50 条
+- 等待真实列表响应并核对请求 limit 与 page、显示行数
+- 刷新并确认仍使用 limit=50 与 page=1
+expected:
+- 档位为 10/20/50/100，默认 20
+- 切换后的请求为 limit=50、page=1，行数等于响应 items 数
+- 刷新请求保留档位，分页当前页为 1
+troubleshoot:
+- 分页器变化但请求未变化：检查 pageSize 是否进入查询键与请求
+- 保持第二页：检查共享列表状态是否同步重置页码
+update_automation:
+- 选择器见 pages/cluster_management.py
