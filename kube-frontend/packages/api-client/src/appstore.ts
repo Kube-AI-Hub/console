@@ -362,6 +362,33 @@ export function storeReviewsApi(client: Client) {
   };
 }
 
+/**
+ * 企业空间应用仓库（写）.
+ *
+ * Creating a repository is a server-side fetch of its `index.yaml`: an unreachable URL is
+ * answered with 400 and the reason, which is the only honest way to tell a typo from a network
+ * problem. Deleting takes the `repo_id` the list returns.
+ */
+export function workspaceReposApi(client: Client) {
+  const base = (workspace: string) => `${OPENPITRIX}/workspaces/${encodeURIComponent(workspace)}/repos`;
+  return {
+    async create(params: { workspace: string; name: string; url: string; description?: string | undefined; credentialId?: string | undefined }): Promise<{ repoId: string }> {
+      const body = await client.request<{ repo_id?: string }>(base(params.workspace), {
+        method: 'POST',
+        body: {
+          name: params.name,
+          url: params.url,
+          ...(params.description ? { description: params.description } : {}),
+          ...(params.credentialId ? { credential_id: params.credentialId } : {}),
+        },
+      });
+      return { repoId: body?.repo_id ?? '' };
+    },
+    async remove(params: { workspace: string; repoId: string }): Promise<void> {
+      await client.request<void>(`${base(params.workspace)}/${encodeURIComponent(params.repoId)}`, { method: 'DELETE' });
+    },
+  };
+}
 /** A release installed from the store, as a project's applications list reports it. */
 export interface StoreApplication {
   /** The Helm release name — what the install dialog asked the user for. */

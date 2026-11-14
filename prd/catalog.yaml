@@ -449,6 +449,7 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-01
+        - TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-02
     - id: manage
       title: 商店管理（应用/分类/审核）
       prd: prd/kube-frontend/app-store/manage.md
@@ -463,6 +464,7 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-APP_STORE-DETAIL-01
+        - TC-L3-KUBE-FRONTEND-APP_STORE-INSTALL-01
   - id: user-settings
     title: 用户设置
     prd: prd/kube-frontend/user-settings/_index.md
@@ -498,12 +500,14 @@ modules:
       - TC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-02
     features:
     - id: workspace-members
-      title: 企业空间成员授权
+      title: 租户(企业空间)成员授权
       prd: prd/kube-frontend/access-control/workspace-members.md
       design: design/kube-frontend/access-control/workspace-members.md
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_MEMBERS-01
+        - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_MEMBERS-02
+        - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_MEMBERS-03
     - id: workspace-quota
       title: 企业空间配额
       prd: prd/kube-frontend/access-control/workspace-quota.md
@@ -571,6 +575,7 @@ modules:
         L3:
         - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-01
         - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-02
+        - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-03
     - id: workspaces
       title: 企业空间列表
       prd: prd/kube-frontend/access-control/workspaces.md
@@ -633,6 +638,7 @@ modules:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-01
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-02
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-03
     - id: gateway-detail
       title: 集群网关详情
       prd: prd/kube-frontend/cluster-management/gateway-detail.md
@@ -1164,6 +1170,7 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-01
+        - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-02
     - id: s2ibuilder
       title: 镜像构建器
       prd: prd/kube-frontend/app-workloads/s2ibuilder.md

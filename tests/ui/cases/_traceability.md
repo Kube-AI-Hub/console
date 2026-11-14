@@ -64,6 +64,8 @@
 | kube-frontend/access-control/workspace-detail | `AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_DETAIL-01` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_DETAIL-01` | [`design/kube-frontend/access-control/workspace-detail.md`](../../../design/kube-frontend/access-control/workspace-detail.md) | [`tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_WORKSPACE_DETAIL_01.py`](../../../tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_WORKSPACE_DETAIL_01.py) |
 | kube-frontend/access-control/workspace-detail | `AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_DETAIL-02` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_DETAIL-02` | [`design/kube-frontend/access-control/workspace-detail.md`](../../../design/kube-frontend/access-control/workspace-detail.md) | [`tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_WORKSPACE_DETAIL_02.py`](../../../tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_WORKSPACE_DETAIL_02.py) |
 | kube-frontend/access-control/workspace-members | `AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_MEMBERS-01` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_MEMBERS-01` | [`design/kube-frontend/access-control/workspace-members.md`](../../../design/kube-frontend/access-control/workspace-members.md) | [`tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_WORKSPACE_MEMBERS_01.py`](../../../tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_WORKSPACE_MEMBERS_01.py) |
+| kube-frontend/access-control/workspace-members | `AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_MEMBERS-02` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_MEMBERS-02` | [`design/kube-frontend/access-control/workspace-members.md`](../../../design/kube-frontend/access-control/workspace-members.md) | [`tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_WORKSPACE_MEMBERS_02.py`](../../../tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_WORKSPACE_MEMBERS_02.py) |
+| kube-frontend/access-control/workspace-members | `AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_MEMBERS-03` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_MEMBERS-03` | [`design/kube-frontend/access-control/workspace-members.md`](../../../design/kube-frontend/access-control/workspace-members.md) | [`tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_WORKSPACE_MEMBERS_03.py`](../../../tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_WORKSPACE_MEMBERS_03.py) |
 | kube-frontend/access-control/workspace-quota | `AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-02` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-02` | [`design/kube-frontend/access-control/workspace-quota.md`](../../../design/kube-frontend/access-control/workspace-quota.md) | [`tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_WORKSPACE_CONSOLE_02.py`](../../../tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_WORKSPACE_CONSOLE_02.py) |
 | kube-frontend/access-control/workspace-role-detail | `AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_ROLE_DETAIL-01` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_ROLE_DETAIL-01` | [`design/kube-frontend/access-control/workspace-role-detail.md`](../../../design/kube-frontend/access-control/workspace-role-detail.md) | [`tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_WORKSPACE_ROLE_DETAIL_01.py`](../../../tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_WORKSPACE_ROLE_DETAIL_01.py) |
 | kube-frontend/access-control/workspace-roles | `AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-03` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-03` | [`design/kube-frontend/access-control/workspace-roles.md`](../../../design/kube-frontend/access-control/workspace-roles.md) | [`tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_WORKSPACE_CONSOLE_03.py`](../../../tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_WORKSPACE_CONSOLE_03.py) |
@@ -357,7 +359,7 @@
 
 ## 小结
 
-- 需求里的 AC：350 条，其中未覆盖 1 条、无技术方案承接 14 条、无用例规格实现 1 条。
+- 需求里的 AC：352 条，其中未覆盖 1 条、无技术方案承接 14 条、无用例规格实现 1 条。
 - 未覆盖：`AC-L2-KUBE-FRONTEND-LOGIN-07`
 - 无技术方案承接：`AC-L2-KUBE-FRONTEND-LOGIN-01`, `AC-L2-KUBE-FRONTEND-LOGIN-02`, `AC-L2-KUBE-FRONTEND-LOGIN-03`, `AC-L2-KUBE-FRONTEND-LOGIN-04`, `AC-L2-KUBE-FRONTEND-LOGIN-05`, `AC-L2-KUBE-FRONTEND-LOGIN-06`, `AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L2-KUBE-FRONTEND-THEME-01`, `AC-L2-KUBE-FRONTEND-THEME-02`, `AC-L2-KUBE-FRONTEND-THEME-03`, `AC-L2-KUBE-FRONTEND-THEME-04`, `AC-L2-KUBE-FRONTEND-THEME-05`, `AC-L3-KUBE-FRONTEND-MONITORING-PROJECT_CUSTOM_MONITORING-01`, `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW-01`
 - 无用例规格实现：`AC-L2-KUBE-FRONTEND-LOGIN-07`
@@ -431,6 +433,8 @@
 | kube-frontend/access-control/workspace-detail | `US1` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_DETAIL-01` |
 | kube-frontend/access-control/workspace-detail | `US2` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_DETAIL-02` |
 | kube-frontend/access-control/workspace-members | `US1` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_MEMBERS-01` |
+| kube-frontend/access-control/workspace-members | `US2` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_MEMBERS-02` |
+| kube-frontend/access-control/workspace-members | `US3` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_MEMBERS-03` |
 | kube-frontend/access-control/workspace-quota | `US1` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-02` |
 | kube-frontend/access-control/workspace-role-detail | `US1` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_ROLE_DETAIL-01` |
 | kube-frontend/access-control/workspace-roles | `US1` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-03` |
@@ -440,7 +444,7 @@
 | kube-frontend/app-store/browse | `US1` | `TC-L3-KUBE-FRONTEND-APP_STORE-BROWSE-01` |
 | kube-frontend/app-store/detail | `US1` | `TC-L3-KUBE-FRONTEND-APP_STORE-DETAIL-01` |
 | kube-frontend/app-store/manage | `US1` | `TC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-01` |
-| kube-frontend/app-store/workspace-repos | `US1` | `TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-01` |
+| kube-frontend/app-store/workspace-repos | `US1` | `TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-01`, `TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-02` |
 | kube-frontend/app-workloads/_index | `US1` | `TC-FULL-KUBE-FRONTEND-APP_WORKLOADS-01`, `TC-FULL-KUBE-FRONTEND-APP_WORKLOADS-02`, `TC-FULL-KUBE-FRONTEND-APP_WORKLOADS-03`, `TC-FULL-KUBE-FRONTEND-APP_WORKLOADS-04`, `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-BULK-01`, `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-FORM_UX-01`, `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-INGRESSES-01`, `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_ACTIONS-01`, `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-MOBILE-01`, `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-SERVICES-01` |
 | kube-frontend/app-workloads/_index | `US2` | `TC-FULL-KUBE-FRONTEND-APP_WORKLOADS-01` |
 | kube-frontend/app-workloads/_index | `US3` | `TC-FULL-KUBE-FRONTEND-APP_WORKLOADS-01` |
@@ -654,4 +658,4 @@
 | kube-frontend/workbench/context | `US1` | `TC-L3-KUBE-FRONTEND-WORKBENCH-CONTEXT-01` |
 | kube-frontend/workbench/entry | `US1` | `TC-L3-KUBE-FRONTEND-WORKBENCH-ENTRY-01` |
 
-- 用户故事：287 条，其中未覆盖 0 条。
+- 用户故事：289 条，其中未覆盖 0 条。

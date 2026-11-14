@@ -445,7 +445,7 @@ MODULES = [
                     {
                         "id": "workspace-repos",
                         "title": "企业空间应用仓库",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-01"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-01", "TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-02"]},
                     },
                     {
                         "id": "manage",

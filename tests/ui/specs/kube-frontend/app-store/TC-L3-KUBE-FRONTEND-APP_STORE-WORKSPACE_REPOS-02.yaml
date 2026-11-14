@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-store
+feature: workspace-repos
+title: 企业空间应用仓库：添加与移除
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/repos'
+prd: prd/kube-frontend/app-store/workspace-repos.md
+design: design/kube-frontend/app-store/workspace-repos.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-02
+
+story:
+- US1
+
+product: 企业空间仓库可添加（服务端拉取 index.yaml 校验）与移除。
+preconditions:
+- admin 可写企业空间仓库；集群可访问 charts.kubesphere.io
+steps:
+- 打开企业空间仓库列表
+- 点击添加仓库，填写唯一名称与可达地址并提交
+- 回读接口并刷新列表
+- 行操作移除该仓库
+steps_expected:
+- 新仓库出现在列表且回读一致
+- 移除后接口与列表都不再包含它
+expected:
+- 失败的地址不被接受并显示服务端原因
+troubleshoot:
+- 400：地址不可达（DNS/网络），属预期校验，不是页面错误
+update_automation:
+- 选择器：workspace-repos:create / :create:name / :create:url / :create:submit / :delete

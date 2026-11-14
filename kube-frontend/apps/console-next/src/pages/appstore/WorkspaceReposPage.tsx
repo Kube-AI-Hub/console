@@ -1,18 +1,23 @@
 import * as React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { AiSurface, Badge, ResourceList, type ListSchema } from '@kube-ai-hub/ui';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { AiSurface, Badge, Button, Input, Modal, ResourceList, Textarea, type ListSchema } from '@kube-ai-hub/ui';
+import { actionProps } from '@kube-ai-hub/ai-surface';
+import { workspaceReposApi } from '@kube-ai-hub/api-client';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
-import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
+import { MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
 
 /**
  * 企业空间应用仓库.
  *
  * The workspace's Helm repositories, read from openpitrix's workspace-scoped collection
- * (/kapis/openpitrix.io/v1/workspaces/<ws>/repos). The workspace console owns this because a
- * repository belongs to a workspace; the platform store management pages only see the store's
- * own apps/categories. Read-only for now — creating a repository is the next delivery.
+ * (/kapis/openpitrix.io/v1/workspaces/<ws>/repos). A repository belongs to a workspace, which is
+ * why this page lives in the workspace console and the platform store pages only manage the
+ * store's own apps and categories.
+ *
+ * Creating one is a server-side fetch of its `index.yaml`: an unreachable URL comes back as 400
+ * with the reason, so the dialog shows that reason instead of pretending the form was invalid.
  */
 export interface WorkspaceReposPageProps {
   workspace: string;
@@ -40,6 +45,7 @@ interface RepoRow {
 
 export function WorkspaceReposPage({ workspace }: WorkspaceReposPageProps): React.ReactElement {
   const t = useT();
+  const queryClient = useQueryClient();
   const query = useQuery({
     queryKey: ['workspace-repos', workspace],
     queryFn: async ({ signal }): Promise<RepoRow[]> => {
@@ -58,6 +64,29 @@ export function WorkspaceReposPage({ workspace }: WorkspaceReposPageProps): Reac
     },
   });
 
+  const [creating, setCreating] = React.useState(false);
+  const [removing, setRemoving] = React.useState<RepoRow | null>(null);
+  const [name, setName] = React.useState('');
+  const [url, setUrl] = React.useState('');
+  const [description, setDescription] = React.useState('');
+  const [formError, setFormError] = React.useState('');
+
+  const create = useMutation({
+    mutationFn: () => workspaceReposApi(apiClient).create({ workspace, name: name.trim(), url: url.trim(), description: description.trim() || undefined }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['workspace-repos', workspace] });
+      setCreating(false);
+      setName(''); setUrl(''); setDescription(''); setFormError('');
+    },
+  });
+  const remove = useMutation({
+    mutationFn: (repoId: string) => workspaceReposApi(apiClient).remove({ workspace, repoId }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['workspace-repos', workspace] });
+      setRemoving(null);
+    },
+  });
+
   const rows = query.data ?? [];
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
 
@@ -67,6 +96,10 @@ export function WorkspaceReposPage({ workspace }: WorkspaceReposPageProps): Reac
       description: t('appRepos.repos.description'),
       rowKey: 'id',
       rowAttributes: (row) => ({ 'data-ai-row': row.id }),
+      primaryAction: { key: 'create', label: t('appRepos.repos.create'), aiId: 'workspace-repos:create' },
+      rowActions: [
+        { key: 'remove', label: t('common.delete'), aiId: 'workspace-repos:delete', tone: 'danger' as const },
+      ],
       columns: [
         {
           key: 'name',
@@ -117,6 +150,19 @@ export function WorkspaceReposPage({ workspace }: WorkspaceReposPageProps): Reac
     [t],
   );
 
+  const submitCreate = async () => {
+    setFormError('');
+    if (!name.trim() || !url.trim()) {
+      setFormError(t('appRepos.repos.createRequired'));
+      return;
+    }
+    try {
+      await create.mutateAsync();
+    } catch (cause) {
+      setFormError(cause instanceof Error ? cause.message : String(cause));
+    }
+  };
+
   if (state === 'error') {
     return (
       <AiSurface as="section" aiId="workspace-repos:surface" state="error" className="min-w-0">
@@ -127,11 +173,71 @@ export function WorkspaceReposPage({ workspace }: WorkspaceReposPageProps): Reac
 
   return (
     <AiSurface as="section" aiId="workspace-repos:surface" state={state} className="min-w-0">
-      {/* Literal data-ai-id on the table wrapper: the action contract scans page source, and
-          AiSurface's aiId prop is not a literal attribute in this file. */}
+      {/* Literal data-ai-id on the table wrapper: the action contract scans page source. */}
       <div data-ai-id="workspace-repos:table">
-        <ResourceList schema={schema} rows={rows} loading={state === 'loading'} />
+        <ResourceList
+          schema={schema}
+          rows={rows}
+          loading={query.isPending}
+          onRefresh={() => void query.refetch()}
+          onAction={(action, row) => {
+            if (action === 'create') setCreating(true);
+            if (action === 'remove' && row) setRemoving(row as RepoRow);
+          }}
+        />
       </div>
+
+      <Modal
+        open={creating}
+        onOpenChange={(open) => { if (!create.isPending) setCreating(open); }}
+        title={t('appRepos.repos.createTitle')}
+        description={t('appRepos.repos.createDescription')}
+        footer={
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" disabled={create.isPending} onClick={() => setCreating(false)}>{t('common.cancel')}</Button>
+            <Button {...actionProps('workspace-repos:create:submit')} disabled={create.isPending} onClick={() => void submitCreate()}>
+              {t('common.confirm')}
+            </Button>
+          </div>
+        }
+      >
+        <div className="flex flex-col gap-3">
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="text-ai-fg-muted">{t('cluster.column.name')}</span>
+            <Input data-ai-id="workspace-repos:create:name" value={name} disabled={create.isPending} onChange={(event) => setName(event.target.value)} />
+          </label>
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="text-ai-fg-muted">{t('appRepos.repos.column.url')}</span>
+            <Input data-ai-id="workspace-repos:create:url" value={url} disabled={create.isPending}
+              placeholder="https://charts.example.com/stable" onChange={(event) => setUrl(event.target.value)} />
+          </label>
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="text-ai-fg-muted">{t('projectInfo.field.description')}</span>
+            <Textarea data-ai-id="workspace-repos:create:description" value={description} disabled={create.isPending} onChange={(event) => setDescription(event.target.value)} />
+          </label>
+          <MutationAlert error={create.error} />
+          {formError ? <p role="alert" data-ai-id="workspace-repos:create:error" className="text-sm text-ai-danger">{formError}</p> : null}
+        </div>
+      </Modal>
+
+      <Modal
+        open={Boolean(removing)}
+        onOpenChange={(open) => { if (!remove.isPending && !open) setRemoving(null); }}
+        title={t('appRepos.repos.removeTitle')}
+        description={removing ? t('appRepos.repos.removeDescription', { name: removing.name }) : undefined}
+        footer={
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" disabled={remove.isPending} onClick={() => setRemoving(null)}>{t('common.cancel')}</Button>
+            <Button variant="danger" {...actionProps('workspace-repos:delete:confirm')} disabled={remove.isPending}
+              onClick={() => { if (removing) void remove.mutateAsync(removing.id).catch(() => undefined); }}>
+              {t('common.delete')}
+            </Button>
+          </div>
+        }
+      >
+        <MutationAlert error={remove.error} />
+        {remove.error ? <p role="alert" data-ai-id="workspace-repos:delete:error" className="text-sm text-ai-danger">{t('appRepos.repos.removeFailed')}</p> : null}
+      </Modal>
     </AiSurface>
   );
 }

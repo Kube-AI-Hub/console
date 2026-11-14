@@ -168,6 +168,7 @@ export type {
   UserDetail,
   UserSummary,
   WorkspaceDetail,
+  WorkspaceMemberResource,
   WorkspaceMemberSummary,
   WorkspaceRoleSummary,
   WorkspaceProject,
@@ -429,6 +430,7 @@ export type { IpPoolDetail, IpPoolSummary } from './network';
 export {
   decodeStoreFile,
   storeAppsApi,
+  workspaceReposApi,
   storeCategoriesApi,
   storeReviewsApi,
   workspaceApplicationsApi,
