@@ -427,5 +427,7 @@ export { nodeInsightsApi, NODE_INSIGHT_METRICS } from './node-insights';
 export type { NodeInsightValues, RdmaPort } from './node-insights';
 export { nodeRankingApi, NODE_RANK_METRICS } from './node-ranking';
 export type { NodeRankMetric, NodeRankRow } from './node-ranking';
+export { imageBuildersApi, toImageBuilderSummary } from './s2ibuilder';
+export type { ImageBuilderKind, ImageBuilderSummary, ImageBuildersApi } from './s2ibuilder';
 export { watchCollection } from './watch';
 export type { WatchEvent, WatchOptions } from './watch';

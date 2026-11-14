@@ -1,0 +1,39 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-S2IBUILDER-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: s2ibuilder
+title: 镜像构建器 · 项目级只读列表与空态
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/s2ibuilder'
+prd: prd/kube-frontend/app-workloads/s2ibuilder.md
+design: design/kube-frontend/app-workloads/s2ibuilder.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-S2IBUILDER-01
+
+story:
+- US1
+
+product: 项目级镜像构建器页从 devops v1alpha1 命名空间端点读取 S2iBuilder：无实例时显示空态并说明来源；有实例时每行显示名称/基础镜像/最近构建状态/创建时间；请求失败显示错误面板与重试；页面不提供写入口。
+preconditions:
+- 已登录，且在 host 集群的 default 项目
+- devops 模块已安装，v1alpha1 的 s2ibuilders CRD 可读（当前项目 0 条）
+steps:
+- 用 API 读取 /apis/devops.kubesphere.io/v1alpha1/namespaces/default/s2ibuilders 的 items 数
+- 打开 /kube-frontend/system-workspace/clusters/host/projects/default/s2ibuilder
+- 等待页面状态离开 loading，核对状态与 items 数一致（0 → empty，>0 → ready）
+- 若为空：核对空态文案说明构建器由 S2I/B2I 流程创建、本页只读
+- 若有数据：核对表头含 名称/基础镜像/状态/创建时间，行数等于 items
+- 收集页面产生的写请求与 v1alpha3 s2ibuilders 请求，断言为空
+expected:
+- 页面读取 v1alpha1 命名空间端点，不请求 v1alpha3
+- 0 条时显示「暂无镜像构建器」空态并解释来源，不显示错误面板
+- ">0 时行数等于 items 数且四列存在"
+- 页面无创建/编辑/删除入口，无 POST/PUT/PATCH/DELETE
+troubleshoot:
+- 页面显示错误：是否请求了 v1alpha3（404），或项目/集群参数不对
+- 空态看起来像故障：检查空态文案是否说明构建器来源与只读现状
+- 状态与 API 不符：检查 v1alpha1 列表信封 items
+update_automation:
+- 页面句柄变化时同步本用例

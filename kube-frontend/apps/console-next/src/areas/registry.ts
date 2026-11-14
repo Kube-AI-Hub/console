@@ -166,7 +166,7 @@ export const AREAS: readonly Area[] = [
     icon: 'terminal',
     defaultPage: 's2ibuilder',
     pages: [
-      { key: 's2ibuilder', path: 's2ibuilder', titleKey: 'devopsProject.s2ibuilder.title', status: 'planned' },
+      { key: 's2ibuilder', path: 's2ibuilder', titleKey: 'devopsProject.s2ibuilder.title', status: 'ready' },
     ],
   },
   {
