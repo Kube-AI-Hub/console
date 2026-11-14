@@ -6,6 +6,7 @@ import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { useResourceListState } from '@/components/resource/useResourceListState';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
 
@@ -72,6 +73,8 @@ export function ClusterPodsPage({ cluster }: ClusterPodsPageProps): React.ReactE
       sortableKeys: ['name', 'createTime'],
       sortAiPrefix: 'cluster-pods',
       sort: { key: list.sortBy, order: list.order },
+      // Only the identity column is permanent; every other column can be hidden.
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'cluster-pods:columns' },
       columns: [
         {
           key: 'name',
@@ -91,6 +94,7 @@ export function ClusterPodsPage({ cluster }: ClusterPodsPageProps): React.ReactE
         },
         {
           key: 'namespace',
+          hideable: true,
           title: t('cluster.workloads.column.project'),
           width: 180,
           hideBelow: 'md',
@@ -98,6 +102,7 @@ export function ClusterPodsPage({ cluster }: ClusterPodsPageProps): React.ReactE
         },
         {
           key: 'status',
+          hideable: true,
           title: t('cluster.column.status'),
           width: 120,
           render: (row) => (
@@ -108,6 +113,7 @@ export function ClusterPodsPage({ cluster }: ClusterPodsPageProps): React.ReactE
         },
         {
           key: 'node',
+          hideable: true,
           title: t('workloads.field.node'),
           width: 160,
           hideBelow: 'lg',
@@ -115,6 +121,7 @@ export function ClusterPodsPage({ cluster }: ClusterPodsPageProps): React.ReactE
         },
         {
           key: 'podIP',
+          hideable: true,
           title: t('workloads.field.podIP'),
           width: 140,
           hideBelow: 'xl',
@@ -122,6 +129,7 @@ export function ClusterPodsPage({ cluster }: ClusterPodsPageProps): React.ReactE
         },
         {
           key: 'createTime',
+          hideable: true,
           title: t('cluster.column.createdAt'),
           width: 170,
           hideBelow: 'xl',
@@ -144,6 +152,9 @@ export function ClusterPodsPage({ cluster }: ClusterPodsPageProps): React.ReactE
     [cluster, list, query.isFetching, t, total, workspaceOf],
   );
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('cluster-pods', columnKeys);
+
   if (state === 'error') {
     return (
       <AiSurface as="section" aiId="cluster-pods:surface" state="error" className="min-w-0">
@@ -157,6 +168,8 @@ export function ClusterPodsPage({ cluster }: ClusterPodsPageProps): React.ReactE
       <ResourceList
         schema={schema}
         rows={rows}
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
         loading={state === 'loading'}
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}

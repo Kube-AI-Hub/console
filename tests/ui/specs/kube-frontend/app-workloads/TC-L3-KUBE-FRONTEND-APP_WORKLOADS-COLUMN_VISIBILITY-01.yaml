@@ -1,0 +1,40 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-COLUMN_VISIBILITY-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: column-visibility
+title: 列表列显隐 · 隐藏、持久化与恢复
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/pods"
+prd: prd/kube-frontend/app-workloads/column-visibility.md
+design: design/kube-frontend/app-workloads/column-visibility.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-COLUMN_VISIBILITY-01
+
+story:
+- US1
+
+product: 项目工作负载列表与集群级列表提供「显示列」菜单：读者可隐藏不关心的列，选择按页面存 localStorage，刷新后仍生效；重新勾选全部列恢复默认。默认（没有存储选择）时列表渲染与接线前一致。
+preconditions:
+- 已登录，且在 host 集群的 default 项目空间（容器组列表可达）
+- 用例先清掉容器组页的列选择记录（kube-frontend.columns.workloads:pods）
+steps:
+- 打开容器组列表，等待主区就绪，读取表头与 pods:columns 触发器
+- 点开「显示列」菜单，取消勾选「所在节点」
+- 读取表头与 localStorage 记录
+- 刷新页面，再次读取表头
+- 重新打开菜单，勾选「所在节点」，读取表头与 localStorage 记录
+expected:
+- 初始表头含 名称、状态、所在节点、创建时间；pods:columns 触发器可见
+- 取消勾选后表头不再含「所在节点」，其余列保留（名称仍在）
+- localStorage 键 kube-frontend.columns.workloads:pods 的 JSON 数组不含 node，且含 name
+- 刷新后「所在节点」仍不出现
+- 重新勾选后「所在节点」立即恢复，且 localStorage 记录被清除（恢复默认）
+troubleshoot:
+- 菜单不出现：页面未传 schema.columnVisibility 或未接 onVisibleColumnsChange
+- 勾选后表头没变：列缺少 hideable 标记，或 visibleColumnKeys 没有传给 ResourceList
+- 刷新后列表变空/丢列：多 kind 页面共用了同一个 storage key，或存储了未知列 key 未过滤
+update_automation:
+- 句柄由 ai-kit 按 schema.columnVisibility.aiId 生成：<pagePrefix>:columns[:<columnKey>|:reset]
+- 列 key 变化时改用例里的 pods:columns:node 与存储断言

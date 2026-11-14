@@ -6,6 +6,7 @@ import { useT } from '@/i18n';
 import { api as apiClient, workloadsApi } from '@/api';
 import { useProjectFilter } from '@/components/projects/useProjects';
 import { useResourceListState, toListParams } from '@/components/resource/useResourceListState';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { DeleteDialog } from '@/components/resource/DeleteDialog';
 import { ResourceErrorPanel, MutationAlert } from '@/components/resource/ResourceErrorPanel';
 import { PageTip } from '@/components/resource/PageTip';
@@ -127,6 +128,8 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
       sortAiPrefix: kind,
       selectAiId: `${kind}:select`,
       sort: { key: list.sortBy, order: list.order },
+      // The identity column stays non-hideable, so the table can never become empty.
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: `${kind}:columns` },
       /*
        * 创建 is a *primary* action, not a bulk one: it belongs in the header and is
        * available regardless of selection. Bulk actions only exist once rows are
@@ -188,6 +191,7 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
           ? [
               {
                 key: 'status',
+                hideable: true,
                 title: t('workloads.column.status'),
                 width: 140,
                 hideBelow: 'md' as const,
@@ -202,6 +206,7 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
           ? [
               {
                 key: 'ready',
+                hideable: true,
                 title: t('workloads.column.ready'),
                 width: 110,
                 hideBelow: 'lg' as const,
@@ -222,6 +227,7 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
           ? [
               {
                 key: 'ports',
+                hideable: true,
                 title: t('workloads.column.ports'),
                 width: 200,
                 hideBelow: 'md' as const,
@@ -237,6 +243,7 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
           ? [
               {
                 key: 'node',
+                hideable: true,
                 title: t('workloads.field.node'),
                 width: 160,
                 hideBelow: 'lg' as const,
@@ -246,6 +253,7 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
               },
               {
                 key: 'podIP',
+                hideable: true,
                 title: t('workloads.field.podIP'),
                 width: 140,
                 hideBelow: 'xl' as const,
@@ -257,6 +265,7 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
           : []),
         {
           key: 'createTime',
+          hideable: true,
           title: t('workloads.column.createdAt'),
           width: 170,
           hideBelow: 'xl',
@@ -333,6 +342,11 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
     ],
   );
 
+  // One stored choice per workload kind: hiding "node" on Pods must not also hide the
+  // columns of Deployments, even though both render through this page.
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('workloads:' + kind, columnKeys);
+
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
 
   if (state === 'error') {
@@ -365,6 +379,8 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
       <ResourceList
         schema={schema}
         rows={rows}
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
         loading={state === 'loading'}
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}

@@ -6,6 +6,7 @@ import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { useResourceListState } from '@/components/resource/useResourceListState';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
 
@@ -77,6 +78,8 @@ export function ClusterWorkloadsPage({ cluster, kind }: ClusterWorkloadsPageProp
       sortableKeys: ['name', 'createTime'],
       sortAiPrefix: aiId,
       sort: { key: list.sortBy, order: list.order },
+      // Only the identity column is permanent; every other column can be hidden.
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: `${aiId}:columns` },
       columns: [
         {
           key: 'name',
@@ -96,6 +99,7 @@ export function ClusterWorkloadsPage({ cluster, kind }: ClusterWorkloadsPageProp
         },
         {
           key: 'namespace',
+          hideable: true,
           title: t('cluster.workloads.column.project'),
           width: 180,
           hideBelow: 'md',
@@ -103,6 +107,7 @@ export function ClusterWorkloadsPage({ cluster, kind }: ClusterWorkloadsPageProp
         },
         {
           key: 'status',
+          hideable: true,
           title: t('cluster.column.status'),
           width: 130,
           render: (row) => (
@@ -113,6 +118,7 @@ export function ClusterWorkloadsPage({ cluster, kind }: ClusterWorkloadsPageProp
         },
         {
           key: 'ready',
+          hideable: true,
           title: t('cluster.workloads.column.ready'),
           width: 110,
           hideBelow: 'lg',
@@ -124,6 +130,7 @@ export function ClusterWorkloadsPage({ cluster, kind }: ClusterWorkloadsPageProp
         },
         {
           key: 'images',
+          hideable: true,
           title: t('cluster.workloads.column.images'),
           hideBelow: 'xl',
           render: (row) => (
@@ -132,6 +139,7 @@ export function ClusterWorkloadsPage({ cluster, kind }: ClusterWorkloadsPageProp
         },
         {
           key: 'createTime',
+          hideable: true,
           title: t('cluster.column.createdAt'),
           width: 170,
           hideBelow: 'xl',
@@ -154,6 +162,11 @@ export function ClusterWorkloadsPage({ cluster, kind }: ClusterWorkloadsPageProp
     [aiId, cluster, kind, list, query.isFetching, t, total, workspaceOf],
   );
 
+  // One stored choice per resource kind: hiding a column on Deployments must not hide
+  // the same key on Services, which has different columns behind the same page.
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('cluster-workloads:' + kind, columnKeys);
+
   if (state === 'error') {
     return (
       <AiSurface as="section" aiId={`${aiId}:surface`} state="error" className="min-w-0">
@@ -167,6 +180,8 @@ export function ClusterWorkloadsPage({ cluster, kind }: ClusterWorkloadsPageProp
       <ResourceList
         schema={schema}
         rows={rows}
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
         loading={state === 'loading'}
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}
