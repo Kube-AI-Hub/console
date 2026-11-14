@@ -157,6 +157,19 @@ export const AREAS: readonly Area[] = [
     ],
   },
   {
+    /*
+     * 项目级 DevOps 工具页：老 console 的 /:namespace/s2ibuilders（镜像构建器）。
+     */
+    key: 'devops-project',
+    scope: 'project',
+    titleKey: 'devopsProject.title',
+    icon: 'terminal',
+    defaultPage: 's2ibuilder',
+    pages: [
+      { key: 's2ibuilder', path: 's2ibuilder', titleKey: 'devopsProject.s2ibuilder.title', status: 'planned' },
+    ],
+  },
+  {
     key: 'storage',
     scope: 'project',
     titleKey: 'nav.groupStorage',
@@ -302,6 +315,21 @@ export const AREAS: readonly Area[] = [
     defaultPage: 'devops',
     pages: [
       { key: 'devops', path: 'devops', titleKey: 'devops.list.title', status: 'ready' },
+    ],
+  },
+  {
+    /*
+     * 企业空间应用仓库：老 console 的 /:workspace/apps 与 /:workspace/repos。openpitrix 已开启，
+     * 仓库接口 /kapis/openpitrix.io/v1/workspaces/<ws>/repos 返回真实数据。
+     */
+    key: 'app-repos',
+    scope: 'workspace',
+    titleKey: 'appRepos.title',
+    icon: 'openpitrix',
+    defaultPage: 'repos',
+    pages: [
+      { key: 'repos', path: 'repos', titleKey: 'appRepos.repos.title', status: 'planned' },
+      { key: 'apps', path: 'apps', titleKey: 'appRepos.apps.title', status: 'planned' },
     ],
   },
   {

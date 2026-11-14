@@ -443,6 +443,11 @@ MODULES = [
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_STORE-BROWSE-01"]},
                     },
                     {
+                        "id": "workspace-repos",
+                        "title": "企业空间应用仓库",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-01"]},
+                    },
+                    {
                         "id": "manage",
                         "title": "商店管理（应用/分类/审核）",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-01"]},
@@ -528,7 +533,7 @@ MODULES = [
                     {
                         "id": "federated-projects",
                         "title": "联邦项目列表",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-01"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-01", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-02"]},
                     },
                     {
                         "id": "workspaces",
@@ -574,7 +579,7 @@ MODULES = [
                     {
                         "id": "devops-projects",
                         "title": "DevOps 工程列表",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-01"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-01", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-02"]},
                     },
                     {
                         "id": "gateway-detail",
@@ -972,6 +977,11 @@ MODULES = [
                         "id": "gray-release",
                         "title": "灰度发布列表",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-01"]},
+                    },
+                    {
+                        "id": "s2ibuilder",
+                        "title": "镜像构建器",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_WORKLOADS-S2IBUILDER-01"]},
                     },
                     {
                         "id": "page-tip",
