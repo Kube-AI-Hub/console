@@ -24,7 +24,7 @@ clusters/containers/Workload/{Deployments, StatefulSets, DaemonSets, Jobs, CronJ
 | 归宿 | 含义 | 要求 |
 | --- | --- | --- |
 | `✓ 已迁移` | 新 UI 有对应段 | 自动比对，改名登记在 `RENAME` |
-| `⊘ 明确不做` | 决定不做 | **必须写原因**，且能追到计划 §5 的探测证据 |
+| `⊘ 明确不做` | 决定不做 | **必须写原因**，且能追到接口探测结果（见计划 §6.1） |
 | `⇄ 别处承接` | 在另一个作用域/页面承接 | 写清在哪 |
 | `… 已登记缺口` | 承认没做，有计划 | 指向计划条目，持续可见、不阻断 CI |
 
@@ -86,49 +86,49 @@ RENAME: dict[str, dict[str, str]] = {
     "settings": {"base-info": "info"},
 }
 
-#: 明确不迁移的段 → 原因。原因必须能追到计划 §5 的探测证据或已登记的技术约束。
+#: 明确不迁移的段 → 原因。原因必须能追到接口探测结果（见计划 §6.1）或已登记的技术约束。
 UNMIGRATED: dict[str, str] = {
-    "projects/custom-monitoring": "项目级自定义监控（dashboards）：接口可用，页面未做（集群级已迁，见计划 §58.6）",
-    "clusters/edgenodes": "边缘节点：edge 模块未开启（§5.10）",
-    "clusters/kubeconfig": "kubeconfig 读取 405（§5.5）；导入更新已迁移",
-    "projects/applications": "应用商店：openpitrix 模块关闭（§5.1）",
-    "projects/grayrelease": "灰度发布：servicemesh 模块关闭（§5.3）",
-    "projects/s2ibuilders": "镜像构建器：devops 模块关闭（§5.2）",
-    "settings/third-login": "第三方登录：登录方式由服务端注入，控制台无写入路径（§5.12）",
+    "clusters/edgenodes": "边缘节点：edge 模块未开启（计划 §7.3）",
+    "clusters/kubeconfig": "kubeconfig 读取 405（计划 §7.3）；导入更新已迁移",
+    "projects/applications": "自制应用（CRD Application）：application.kubesphere.io/v1alpha1 只提供 helm* 资源，applications 资源 404；模板应用已由应用商店承接",
+    "projects/grayrelease": "灰度发布：servicemesh 模块关闭（计划 §7.3）",
+    "projects/s2ibuilders": "镜像构建器：devops 模块关闭（计划 §7.3）",
+    "settings/third-login": "第三方登录：登录方式由服务端注入，控制台无写入路径（计划 §7.3）",
 }
 
 #: 在别处承接的段 → 说明。
 ELSEWHERE: dict[str, str] = {
     "clusters/roles": "集群角色统一在「访问控制 › 平台角色」维护（同一批 clusterrole 对象）",
-    "clusters/configmaps": "配置字典是项目资源，只在项目作用域看；集群页已移除",
-    "clusters/secrets": "同上",
-    "clusters/serviceaccounts": "同上",
     "settings/notification-configuration": "重定向到 settings/mail（通知渠道是每渠道一页）",
 }
 
 #: 已登记缺口：承认还没做，并指向计划条目。**不是「明确不做」**——
 #: 登记在此是为了让它们持续可见，而不是消失。
 PLANNED: dict[str, str] = {
-    "clusters/volumes": "集群级全命名空间 PVC（计划 §57.3）",
-    "clusters/snapshots": "快照别名路由（计划 §57.3）",
-    "clusters/volume-snapshots": "卷快照（计划 §57.3）",
-    "clusters/volume-snapshot-classes": "快照类型（计划 §57.3）",
-    "clusters/volume-snapshot-content": "快照内容（计划 §57.3）",
-    "clusters/juicefs-storage": "JuiceFS 共享存储（计划 §57.3）",
-    "clusters/gpus": "GPU 卡列表（计划 §57.3）",
-    "clusters/gpu-resource": "GPU 资源监控（计划 §57.3）",
-    "clusters/monitor-resource": "应用资源监控（计划 §57.3）",
-    "clusters/alerts": "集群级告警消息（计划 §57.3）",
-    "clusters/alert-rules": "集群级告警策略（计划 §57.3）",
-    "clusters/gateways": "集群网关（§5.7 受限：控制器缺 chart）",
-    "settings/feishu": "飞书渠道（计划 §57.3；其余五种已迁）",
+    "clusters/configmaps": "集群域配置字典列表（2026-11-14 决策改为支持集群域与项目域，DEC-L2-…-CLUSTER_MANAGEMENT-04）",
+    "clusters/secrets": "集群域保密字典列表（同上）",
+    "clusters/serviceaccounts": "集群域服务账户列表（同上）",
+    "clusters/volumes": "集群级全命名空间 PVC（计划 §6.1）",
+    "clusters/snapshots": "快照别名路由（计划 §6.1）",
+    "clusters/volume-snapshots": "卷快照（计划 §6.1）",
+    "clusters/volume-snapshot-classes": "快照类型（计划 §6.1）",
+    "clusters/volume-snapshot-content": "快照内容（计划 §6.1）",
+    "clusters/juicefs-storage": "JuiceFS 共享存储（计划 §6.1）",
+    "clusters/gpus": "GPU 卡列表（计划 §6.1）",
+    "clusters/gpu-resource": "GPU 资源监控（计划 §6.1）",
+    "clusters/monitor-resource": "应用资源监控（计划 §6.1）",
+    "clusters/alerts": "集群级告警消息（2026-11-14 决策改为支持集群域，DEC-L2-…-MONITORING-03）",
+    "clusters/alert-rules": "集群级告警策略（同上）",
+    "clusters/gateways": "集群网关（计划 §6.1；控制器缺 chart）",
+    "settings/feishu": "飞书渠道（计划 §6.1；其余五种已迁）",
+    "projects/custom-monitoring": "项目级自定义监控（dashboards 接口已确认 200，结构与集群级相同）",
 }
 
 #: 整个作用域级别的归宿。老 console 有 9 个作用域，其中四个整块不在迁移范围内——
 #: 它们必须在这里出现，否则「不迁移」和「忘了枚举」看起来一模一样。
 SCOPE_DECISIONS: dict[str, tuple[str, str]] = {
-    "workspaces": ("planned", "企业空间控制台：整块待迁，Phase 2（计划 §57.3）；平台侧只有只读详情"),
-    "devops": ("unmigrated", "DevOps 工程：devops 模块关闭（§5.2），整块不做"),
+    "workspaces": ("planned", "企业空间控制台：整块待迁，Phase 2（计划 §6.1）；平台侧只有只读详情"),
+    "devops": ("unmigrated", "DevOps 工程：devops 模块关闭（计划 §7.3），整块不做"),
     "fedprojects": ("unmigrated", "联邦项目：联邦模块未开启，整块不做"),
 }
 
