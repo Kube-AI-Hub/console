@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from '@tanstack/react-router';
 import { AiSurface, ResourceList, type ListSchema } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
@@ -89,10 +90,18 @@ export function WorkspaceRolesPage({ workspace }: WorkspaceRolesPageProps): Reac
           key: 'name',
           title: t('workspace.field.name'),
           render: (row) => (
-            <span className="flex min-w-0 flex-col">
-              <span className="truncate font-medium text-ai-fg">{row.alias || row.name}</span>
+            // The list's job is to get the reader to one role. The link lives on the name
+            // because that is what they are looking for; the detail page carries the rules
+            // and the members holding the role.
+            <Link
+              to="/kube-frontend/workspaces/$workspace/roles/$name"
+              params={{ workspace, name: row.name }}
+              className="flex min-w-0 flex-col hover:underline"
+              data-ai-id={`workspace-roles:name:${row.name}`}
+            >
+              <span className="truncate font-medium text-ai-accent">{row.alias || row.name}</span>
               {row.alias ? <span className="truncate font-mono text-[11px] text-ai-fg-muted">{row.name}</span> : null}
-            </span>
+            </Link>
           ),
         },
         {
@@ -123,7 +132,7 @@ export function WorkspaceRolesPage({ workspace }: WorkspaceRolesPageProps): Reac
       },
       ...(paged ? { pagination: { page, pageSize: PAGE_SIZE, total: rows.length } } : {}),
     }),
-    [page, paged, rows.length, t],
+    [page, paged, rows.length, t, workspace],
   );
 
   if (state === 'error') {

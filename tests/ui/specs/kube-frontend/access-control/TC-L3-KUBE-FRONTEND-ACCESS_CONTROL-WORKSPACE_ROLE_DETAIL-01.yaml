@@ -1,0 +1,40 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_ROLE_DETAIL-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: workspace-role-detail
+title: 企业空间角色详情 · 规则明细与绑定成员数
+entry_url: '{BASE_URL}/kube-frontend/workspaces/public/roles/public-admin'
+prd: prd/kube-frontend/access-control/workspace-role-detail.md
+design: design/kube-frontend/access-control/workspace-role-detail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_ROLE_DETAIL-01
+
+story:
+- US1
+
+product: 企业空间作用的只读角色详情：从角色列表进入，展示基本信息、规则表（API 组/资源/动作）与绑定成员数。
+preconditions:
+- 已登录，且至少有一个企业空间带可读的 workspaceroles
+- 该空间 workspacemembers 可读（可能没有任何成员）
+steps:
+- 用 API 读企业空间列表，选一个有角色的空间
+- 读该空间 workspaceroles?limit=-1，取第一页内第一个有规则的角色（没有则取第一个）
+- 读该角色详情得到 rules 数组，读 workspacemembers 按 iam.kubesphere.io/workspacerole 注解过滤得到期望成员数 M
+- 打开该空间的 /roles 列表页，点击角色名链接进入详情
+- 等待 workspace-role-detail:surface 离开 loading
+- 核对名称、规则数、规则表行数/空态、成员计数与成员列表
+expected:
+- surface 可见且 data-ai-state 为 ready
+- 标题/名称等于角色别名或对象名
+- 规则数文本等于 rules 长度；rules 非空时表格行数等于长度，为空时显示 workspace-role-detail:empty-rules
+- 成员计数文本等于 M；M 大于 0 时成员列表行数等于 M
+troubleshoot:
+- 详情 404：路径必须带 workspaces/<ws>/workspaceroles/<name>，name 要 encodeURIComponent
+- 规则数与列表页不一致：详情读的是 role 对象 rules，不是 aggregation-roles 注解展开
+- 成员计数恒 0：角色注解键写错（应为 iam.kubesphere.io/workspacerole），或读了 rolebindings
+- 列表点击无跳转：roles 列表名称列没有 Link 到 /workspaces/$workspace/roles/$name
+update_automation:
+- 选择器：workspace-roles:name:<name>、workspace-role-detail:surface/rule-count/rule-table/member-count/member-list
