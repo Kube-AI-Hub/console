@@ -3,6 +3,8 @@
 > 方法：见 [legacy-ui-migration-guide.md](../legacy-ui-migration-guide.md)。
 > 验证基准：**B200**（BFF `127.0.0.1:8092` + 静态站 `127.0.0.1:5178`，集群 `host`）。A100 的旧结论已作废。
 > 本文是**执行用**文档：现状、约定、不变量、TODO。逐轮叙述已移除，需要考古时看 `git log -- docs/plans/area-migration-plan.md`。
+> 2026-11-15 功能级复核：**集群概览仍为部分迁移**，新增八项指标/工具/组件/排行等差异，见
+> [源码、截图与遗漏复盘](./cluster-overview-parity-review-20261115.md)。路由已迁与门禁全绿不代表旧能力完整。
 
 ---
 
@@ -68,6 +70,21 @@ tree.py → build_prd.py → prd(AC) → design(DEC/不变量/坑) → spec(cove
 ---
 
 ## 3. 页面清单
+
+### 3.0 组件开启后的新增范围（2026-11-15）
+
+用户确认「所有组件已开启」后，以下区域从「明确不做」改为「待迁移」，并已登记到 gap_check.py 的 PLANNED（合计 8 段）：
+
+| 区域 | 老 console 位置 | 新 UI 落点 | 状态 |
+| --- | --- | --- | --- |
+| DevOps 工程 | /:ws/clusters/:c/devops[/:devops] | registry 区域 devops（cluster-scope，/…/devops） | 列表 + 详情骨架在建 |
+| 联邦项目 | /:ws/federatedprojects | registry 区域 federated-projects（workspace-scope） | 列表 + 详情骨架在建 |
+| 灰度发布 | /:ns/grayrelease | app-workloads 的 grayrelease 页 | 列表在建 |
+| 企业空间应用仓库 | /:ws/apps、/:ws/repos | 应用商店承接（kube-frontend/apps、apps-manage） | 复核映射 |
+| 镜像构建器 | /:ns/s2ibuilders | DevOps 承接 | 随 DevOps 区域 |
+| 集群网关详情 | clusters/gateways | kube-frontend.clusters.$cluster.gateways.$name | 在建（Nginx 已可用） |
+
+探测依据（2026-11-15 02:30）：应用商店 /kapis/openpitrix.io/v1/apps 30 个、8 个分类；nginxes 1 个；federatednamespaces 1 个；servicemesh strategies 200；ks-controller-manager 已 Ready。边缘节点仍 404（模块未装），保留为明确不做。
 
 ### 3.0 企业空间级（6）
 
@@ -266,6 +283,30 @@ python3 prd/tools/verify.py --serial-e2e
 
 ### 6.2 能力级缺口（页面在、功能不全）
 
+#### 集群概览补漏专项（2026-11-15，全部待实施）
+
+旧版六个区块已按子组件、字段、动作重新清点。以下不纳入“页面已迁移”的完成数，
+也不因先前 PRD 的“节点页承接/工具不做”而关闭；旧理由保留并由本次证据纠正。
+
+| 缺口 ID | 待补能力 | 实施与验收顺序 |
+| --- | --- | --- |
+| OVR-01 | 集群 GPU 显存量、总量、比例 | A：补请求→模型→展示，bytes 与缺值/零测试 |
+| OVR-02 | 集群磁盘用量、容量、比例 | A：真实 GET 已可读，统一单位 |
+| OVR-03 | GPU 实际使用量独立于分配量 | A：请求中有 gpu_usage 但 mapper 丢弃，保留小数 |
+| OVR-04 | scheduler result=error 调度失败次数 | A：补回 error，不以 unschedulable 替代 |
+| OVR-05 | 当前用户/集群 kubeconfig 查看、下载和提示 | B：只读、安全、403/member 独立验收；kubectl 已有不重复实现 |
+| OVR-06 | 概览六类系统组件入口及分类过滤 | B：组件接口可读，configz 徽标不是等价替代 |
+| OVR-07 | 首页 Top5、九类指标与完整排行下钻 | C：全局排序、IP/控制面/详情链接，大于五节点样本另测 |
+| OVR-08 | 概览只读集群可见性 | B：已有模型未渲染 |
+
+- [x] 源码清点、新旧 1600×900 首屏与全页、旧排行菜单、只读指标与组件接口证据。
+- [x] 更新迁移指导 §3.4 的原子能力清单、等价承接证明与门禁边界。
+- [ ] 实施 A/B/C，同步 overview PRD/design 的 AC/DEC/CON、YAML 及镜像 Python，不以本次复盘替代代码交付。
+- [ ] 逐项关闭八项差异并在新版部署环境复核后，才能宣称“概览完整迁移”。
+
+具体证据、被否判断与完成判据见 [概览专项复盘](./cluster-overview-parity-review-20261115.md)。
+下面原表保留其他能力的历史登记，不作为本专项完整性证明。
+
 | 能力 | 现状 | 影响 |
 | --- | --- | --- |
 | **容器日志 tail** | 已迁：`client.stream()` + `pods/log?follow=true`（HTTP chunked，无需 WebSocket），容器详情页「实时」开关 | 排障第一条通道打通；顺手修了 BFF 泄漏上游流与 dev 静态服务器缓冲两个真问题 |
@@ -313,6 +354,8 @@ python3 prd/tools/verify.py --serial-e2e
 4. **「明确不做」与代码同源**：PRD 更新 → 重生成报告 → diff 里出现增删要人工确认。
 5. **每轮先回答"这一轮没做什么"**：贴 `gap_check.py` 的汇总行，数字比上轮大就当场解释。
 
+> 2026-11-15：所有组件已开启，原「模块关闭故不迁移」的条目（DevOps / 联邦项目 / 灰度发布 / 应用仓库 / 镜像构建器）已移入 §3.0 的新增范围；仅保留边缘节点（404）与第三方登录（服务端注入）为明确不做。
+
 ### 7.3 已推翻的旧结论（保留，避免再犯）
 
 | 旧结论 | 实际 |
@@ -324,6 +367,21 @@ python3 prd/tools/verify.py --serial-e2e
 | 应用商店 openpitrix 模块关闭 | `configz.openpitrix=true`，接口全 200，**已迁** |
 | 集群网络 network 模块未开启 | 只关菜单；`ippools`/`networkpolicies` 200，**已迁** |
 | 自定义监控接口全 404 | 探错版本，对象在 `v1alpha2`，**集群级已迁** |
+
+### 7.4 已有概览路由仍会漏功能
+
+2026-11-15 的 [概览复盘](./cluster-overview-parity-review-20261115.md) 确认：
+ResourcesUsage 同名但漏显存/磁盘，gpu_usage 已请求却丢弃，Kubernetes 四数字中 error 被
+unschedulable 替换，组件开关徽标替代了分类入口，Top5 没有等价承接。
+
+**为什么前一轮没发现**：迁移清单停在区块标题；PRD 缩小范围后测试按新 AC 编写；
+路由/文档门禁只能证明存在与自洽；新布局截图没有逐项对照旧概览全页。
+“避免重复实现”被误用于删除首页摘要，早先“产品没有某模块”的判断没有实际接口证据。
+
+**纠正**：页面级 M2、功能级 M3 之外，对概览/详情补“区块内原子能力清单”：
+组件/条件、字段与动作、指标标签与单位、请求→mapper→展示、承接证据、AC/spec/测试。
+未经任务等价验证的“别处承接”仍算缺口；未经明确批准的范围缩减不能通过改写“不做”关闭。
+最终汇报分开说路由完成、功能覆盖、相关测试、全量 E2E、部署复核，不用一个“已完成”代替全部。
 
 ---
 

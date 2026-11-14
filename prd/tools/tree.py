@@ -521,6 +521,11 @@ MODULES = [
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-01", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-02", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-04", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-06"]},
                     },
                     {
+                        "id": "federated-projects",
+                        "title": "联邦项目列表",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-01"]},
+                    },
+                    {
                         "id": "workspaces",
                         "title": "企业空间列表",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACES-01"]},
@@ -561,6 +566,16 @@ MODULES = [
                 "goal": "集群级视角：节点按就绪状态、角色与可分配资源展示；项目列出集群内全部项目空间及其所属企业空间。这些页面不属于任何项目，因此没有项目工作区栏。",
                 "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-CLUSTER_MANAGEMENT-01"]},
                 "features": [
+                    {
+                        "id": "devops-projects",
+                        "title": "DevOps 工程列表",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-01"]},
+                    },
+                    {
+                        "id": "gateway-detail",
+                        "title": "集群网关详情",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GATEWAY_DETAIL-01"]},
+                    },
                     {
                         "id": "kubectl",
                         "title": "kubectl 终端",
@@ -947,6 +962,11 @@ MODULES = [
                         "id": "column-visibility",
                         "title": "列表列显隐",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_WORKLOADS-COLUMN_VISIBILITY-01"]},
+                    },
+                    {
+                        "id": "gray-release",
+                        "title": "灰度发布列表",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-01"]},
                     },
                     {
                         "id": "page-tip",

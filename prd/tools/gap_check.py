@@ -97,13 +97,7 @@ RENAME: dict[str, dict[str, str]] = {
 UNMIGRATED: dict[str, str] = {
     "clusters/edgenodes": "边缘节点：edge 模块未开启（计划 §7.3）",
     "clusters/kubeconfig": "kubeconfig 读取 405（计划 §7.3）；导入更新已迁移",
-    "workspaces/devops": "DevOps 工程：devops 模块关闭（计划 §7.3）",
-    "workspaces/federatedprojects": "联邦项目：联邦模块未开启",
-    "workspaces/apps": "企业空间应用仓库：依赖 openpitrix，模块未开启",
-    "workspaces/repos": "企业空间应用仓库：依赖 openpitrix，模块未开启",
     "projects/applications": "自制应用（CRD Application）：application.kubesphere.io/v1alpha1 只提供 helm* 资源，applications 资源 404；模板应用已由应用商店承接",
-    "projects/grayrelease": "灰度发布：servicemesh 模块关闭（计划 §7.3）",
-    "projects/s2ibuilders": "镜像构建器：devops 模块关闭（计划 §7.3）",
     "settings/third-login": "第三方登录：登录方式由服务端注入，控制台无写入路径（计划 §7.3）",
 }
 
@@ -116,13 +110,22 @@ ELSEWHERE: dict[str, str] = {
 #: 已登记缺口：承认还没做，并指向计划条目。**不是「明确不做」**——
 #: 登记在此是为了让它们持续可见，而不是消失。
 PLANNED: dict[str, str] = {
+    # 2026-11-15：用户确认所有组件已开启（应用商店/DevOps/集群网关/联邦/服务网格）。
+    # 这些段原登记为「模块未开启」，现改为待迁移，按区域分批交付。
+    "workspaces/devops": "DevOps 工程：模块已开启，待迁移（计划 §3.0）",
+    "projects/s2ibuilders": "镜像构建器：DevOps 模块已开启，待迁移",
+    "workspaces/federatedprojects": "联邦项目：联邦模块已开启，待迁移（计划 §3.0）",
+    "workspaces/apps": "企业空间应用仓库：openpitrix 已开启，待迁移",
+    "workspaces/repos": "企业空间应用仓库：openpitrix 已开启，待迁移",
+    "projects/grayrelease": "灰度发布：servicemesh 已开启，待迁移",
 }
 
 #: 整个作用域级别的归宿。老 console 有 9 个作用域，其中四个整块不在迁移范围内——
 #: 它们必须在这里出现，否则「不迁移」和「忘了枚举」看起来一模一样。
 SCOPE_DECISIONS: dict[str, tuple[str, str]] = {
-    "devops": ("unmigrated", "DevOps 工程：devops 模块关闭（计划 §7.3），整块不做"),
-    "fedprojects": ("unmigrated", "联邦项目：联邦模块未开启，整块不做"),
+    # 2026-11-15：两个整块作用域随组件开启进入迁移范围，按区域分批交付。
+    "devops": ("planned", "DevOps 工程：模块已开启，待迁移（计划 §3.0）"),
+    "fedprojects": ("planned", "联邦项目：模块已开启，待迁移（计划 §3.0）"),
 }
 
 #: 老段 → 新 UI 的页面位置。用于**不在某个作用域目录下**的页面

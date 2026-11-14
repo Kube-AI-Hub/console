@@ -153,6 +153,7 @@ export const AREAS: readonly Area[] = [
       { key: 'pods', path: 'pods', titleKey: 'workloads.pods.title', status: 'ready' },
       { key: 'services', path: 'services', titleKey: 'workloads.services.title', status: 'ready' },
       { key: 'ingresses', path: 'ingresses', titleKey: 'workloads.ingresses.title', status: 'ready' },
+      { key: 'grayrelease', path: 'grayrelease', titleKey: 'grayRelease.title', status: 'planned' },
     ],
   },
   {
@@ -273,6 +274,34 @@ export const AREAS: readonly Area[] = [
       { key: 'users', path: 'users', titleKey: 'platform.users.title', status: 'ready' },
       { key: 'clusterroles', path: 'clusterroles', titleKey: 'platform.roles.title', status: 'ready' },
       { key: 'workspaces', path: 'workspaces', titleKey: 'platform.workspaces.title', status: 'ready' },
+    ],
+  },
+  {
+    /*
+     * 联邦项目：多集群联邦作用域。2026-11-15 组件开启后进入迁移范围；先登记入口，
+     * 页面按区域分批交付（见计划 §3.0）。
+     */
+    key: 'federated-projects',
+    scope: 'workspace',
+    titleKey: 'fedprojects.title',
+    icon: 'cluster',
+    defaultPage: 'federatedprojects',
+    pages: [
+      { key: 'federatedprojects', path: 'federatedprojects', titleKey: 'fedprojects.list.title', status: 'ready' },
+    ],
+  },
+  {
+    /*
+     * DevOps 工程：老 console 的 /clusters/:cluster/devops/:devops。组件开启后进入迁移
+     * 范围，先登记列表入口，详情页签分批交付（计划 §3.0）。
+     */
+    key: 'devops',
+    scope: 'cluster',
+    titleKey: 'devops.title',
+    icon: 'terminal',
+    defaultPage: 'devops',
+    pages: [
+      { key: 'devops', path: 'devops', titleKey: 'devops.list.title', status: 'ready' },
     ],
   },
   {
