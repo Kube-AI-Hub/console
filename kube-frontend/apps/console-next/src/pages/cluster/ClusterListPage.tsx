@@ -214,7 +214,16 @@ function NamespaceListPage({ kind, cluster }: ClusterListPageProps): React.React
                   const project = row as NamespaceSummary;
                   return (
                     <span className="flex min-w-0 flex-col" {...actionProps(`${kind}:name:${project.name}`)}>
-                      <span className="truncate font-medium text-ai-fg">{project.name}</span>
+                      {/* The row used to be a dead end. The name opens the read-only project
+                          detail (quota/limits); the project console stays one click further. */}
+                      <Link
+                        to="/kube-frontend/clusters/$cluster/namespaces/$name"
+                        params={{ cluster, name: project.name }}
+                        className="truncate font-medium text-ai-accent hover:underline"
+                        data-ai-id={`projects:link:${project.name}`}
+                      >
+                        {project.name}
+                      </Link>
                       <span className="truncate text-[11px] text-ai-fg-muted">{project.description || '-'}</span>
                     </span>
                   );

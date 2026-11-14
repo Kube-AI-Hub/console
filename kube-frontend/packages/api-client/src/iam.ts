@@ -280,6 +280,8 @@ export interface ProjectInfo extends ResourceBase {
   quotaName: string;
   /** `spec.hard` as stored, keyed by resource. */
   quotaHard: Record<string, string>;
+  /** Namespace labels as Kubernetes stores them (the project's metadata). */
+  labels: Record<string, string>;
 }
 
 /**
@@ -305,6 +307,9 @@ export function toProjectInfo(item: KubeIam, quotas: KubeIam[] = []): ProjectInf
     quota,
     quotaName: quotas[0]?.metadata?.name ?? '',
     quotaHard: ((quotas[0] as unknown as { spec?: { hard?: Record<string, string> } })?.spec?.hard) ?? {},
+    // Labels are needed by the cluster-scope detail (the project console reads the same
+    // object but only for its workspace); keeping them on the summary costs nothing.
+    labels,
   };
 }
 

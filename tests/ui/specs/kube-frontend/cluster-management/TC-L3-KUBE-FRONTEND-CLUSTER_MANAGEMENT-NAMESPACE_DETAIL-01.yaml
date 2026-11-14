@@ -1,0 +1,42 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NAMESPACE_DETAIL-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: namespace-detail
+title: 集群项目详情 · 基本信息、配额与限额
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/namespaces/default'
+prd: prd/kube-frontend/cluster-management/namespace-detail.md
+design: design/kube-frontend/cluster-management/namespace-detail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NAMESPACE_DETAIL-01
+
+story:
+- US1
+
+product: 集群项目列表行下钻的只读项目详情：基本信息（名称/状态/创建时间/标签）+ ResourceQuota used/hard + LimitRange 默认 request/limit；缺失项目有 :not-found 说明。
+preconditions:
+- 已登录，且集群里至少有一个可读项目（带 kubesphere.io/workspace 标签的命名空间）
+- 集群级 projects/namespaces 列表与详情接口可读（只读，不依赖 webhook）
+steps:
+- 用 API 读集群命名空间列表，选一个项目（优先 default）
+- 用 API 读该项目 ResourceQuota（期望配额行数 = 各对象 spec.hard 键数之和）与 LimitRange（期望行数 = 条目按 type/resource 展开数）
+- 打开 /kube-frontend/clusters/<cluster>/namespaces 列表，点击项目名链接
+- 核对基本信息、配额区块（表格或空态）、限额区块（表格或空态）
+- 点击返回，确认回到列表
+- 再打开一个不存在的项目名，核对 not-found 句柄
+expected:
+- 详情 surface 可见且 data-ai-state 为 ready
+- 名称等于项目名；状态、标签、创建时间句柄可见
+- 有配额时配额表行数等于 hard 键数，否则显示「该项目没有设置资源配额。」
+- 有 LimitRange 时限额表行数等于展开数，否则显示「该项目没有限额范围。」
+- 返回链接回到 /namespaces 列表
+- 不存在的项目显示 namespace-detail:not-found（resources 代理对缺失命名空间返回 500，页面按消息识别），不显示重试
+troubleshoot:
+- 详情整页错误：命名空间路径写错（应为 /kube-frontend/clusters/<c>/namespaces/<name>）
+- 缺失项目显示错误面板而非 not-found：只判断了 ApiError.isNotFound，未匹配 500 + not found 消息
+- 列表点击无跳转：ClusterListPage namespaces 名称列没有 Link 到 namespace-detail 路由
+- 配额/限额空态缺失：B200 两集合都为空，空态是主路径
+update_automation:
+- 选择器：projects:link:<name>、namespace-detail:surface/name/status/labels/quota/quota-empty/quota-table/limits/limits-empty/limits-table/not-found/back
