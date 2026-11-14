@@ -126,14 +126,14 @@ export function ImageBuilderPage({ cluster, namespace }: ImageBuilderPageProps):
 
   if (state === 'error') {
     return (
-      <AiSurface as="section" aiId="image-builder:surface" state="error" className="min-w-0">
+      <AiSurface as="section" aiId="image-builder:surface" data-ai-id="image-builder:surface" state="error" className="min-w-0">
         <ResourceErrorPanel error={query.error} onRetry={() => void query.refetch()} retryAiId="image-builder:retry" />
       </AiSurface>
     );
   }
 
   return (
-    <AiSurface as="section" aiId="image-builder:surface" state={state} className="min-w-0">
+    <AiSurface as="section" aiId="image-builder:surface" data-ai-id="image-builder:surface" state={state} className="min-w-0">
       <ResourceList schema={schema} rows={pageRows} loading={state === 'loading'} onPageChange={setPage} />
     </AiSurface>
   );
