@@ -27,36 +27,20 @@ Kube AI Hub 利用 [KubeEdge](https://kubeedge.io/zh/) 将原生容器化应用�
 
 ## 防止非边缘工作负载调度到边缘节点
 
-由于部分守护进程集（例如，Calico）有强容忍度，为了避免影响边缘节点的正常工作，您需要手动 Patch Pod 以防止非边缘工作负载调度至边缘节点。
+边缘节点带有污点 `node-role.kubernetes.io/edge:NoSchedule`，但 Calico、JuiceFS CSI、Weave Scope 等 DaemonSet 带有「容忍全部污点」。它们依赖集群内网和私有镜像仓库，调度到边缘节点后会一直处于 `CrashLoopBackOff` 或 `ImagePullBackOff`。
 
-```bash
-#!/bin/bash
-   
-   
-NoShedulePatchJson='{"spec":{"template":{"spec":{"affinity":{"nodeAffinity":{"requiredDuringSchedulingIgnoredDuringExecution":{"nodeSelectorTerms":[{"matchExpressions":[{"key":"node-role.kubernetes.io/edge","operator":"DoesNotExist"}]}]}}}}}}}'
-   
-ns="kube-system"
-
-
-DaemonSets=("nodelocaldns" "kube-proxy" "calico-node")
-
-length=${#DaemonSets[@]}
-   
-for((i=0;i<length;i++));  
-do
-         ds=${DaemonSets[$i]}
-        echo "Patching resources:DaemonSet/${ds}" in ns:"$ns",
-        kubectl -n $ns patch DaemonSet/${ds} --type merge --patch "$NoShedulePatchJson"
-        sleep 1
-done
-```
+安装器已经让 JuiceFS CSI 与 Weave Scope 跳过带 `node-role.kubernetes.io/edge` 标签的节点。Calico 由 Tigera Installation 管理，需要在 `calico-node` DaemonSet 和 `calico-typha` Deployment 上设置同样的节点亲和性：节点不存在标签 `node-role.kubernetes.io/edge`。`node-exporter` 的主 DaemonSet 也使用这条规则；边缘节点的主机指标由下文的 `node-exporter-edge` 单独采集。
 
 ## 创建防火墙规则和端口转发规则
 
-若要确保边缘节点可以成功地与集群通信，您必须转发端口，以便外部流量进入您的网络。您可以根据下表将外网端口映射到相应的内网 IP 地址（主节点）和端口。此外，您还需要创建防火墙规则以允许流量进入这些端口（`10000` 至 `10004`）。
+边缘节点上的 `keadm join` 会连接 `advertiseAddress` 上的 CloudHub 端口，而不是 NodePort。默认对应关系如下。`ClusterConfiguration` 里如果改过 `cloudhubNodePort` 等字段，内网端口以配置为准，加入命令里的 `--cloudcore-ipport`、`--certport`、`--tunnelport` 必须指向边缘节点实际能连上的地址和端口。
+
+边缘节点与主集群不在同一网络时，把下表的内网 NodePort 转发到边缘节点能访问的地址，并让加入命令使用转发后的地址。EdgeMesh 的中继端口 `20006` 也要能从边缘节点连到中继节点，否则只能注册节点，采集不到 CPU、内存和磁盘。
+
+若要确保边缘节点可以成功地与集群通信，您必须转发端口，以便外部流量进入您的网络。您可以根据下表将外网端口映射到相应的内网 IP 地址（主节点）和端口。此外，您还需要创建防火墙规则以允许流量进入这些端口（`10000` 至 `10004`，以及 EdgeMesh 的 `20006`）。
 
    {{< notice note >}}
-   在 ks-installer 的 `ClusterConfiguration`中，如果您设置的是局域网地址，那么需要配置转发规则。如果您未配置转发规则，直接连接 30000 – 30004 端口即可。
+   `advertiseAddress` 上的 `10000`–`10004` 已经能从边缘节点访问时，不必再做转发。只开放了 NodePort 时，把 NodePort 转到 `10000`–`10004`，或把加入命令里的端口改成实际开放的 NodePort。
    {{</ notice >}} 
 
 | 字段                | 外网端口 | 字段                    | 内网端口 |
@@ -66,6 +50,7 @@ done
 | `cloudhubHttpsPort` | `10002`  | `cloudhubHttpsNodePort` | `30002`  |
 | `cloudstreamPort`   | `10003`  | `cloudstreamNodePort`   | `30003`  |
 | `tunnelPort`        | `10004`  | `tunnelNodePort`        | `30004`  |
+| EdgeMesh 中继       | `20006`  | 中继节点本机监听        | `20006`  |
 
 ## 配置边缘节点
 
@@ -77,7 +62,7 @@ done
 
 {{< notice note >}}
 
-如果您的边缘节点使用 Docker 作为容器运行时，为确保 Kube AI Hub 可以获取 Pod 指标，请务必在边缘节点上安装 Docker v19.3.0 或更高版本。
+KubeEdge 1.13 的 `keadm join` 默认通过 CRI v1alpha2 连接 containerd。containerd 2.x 不再提供该接口，加入会报 `unknown service runtime.v1alpha2.ImageService`。这种节点请安装 Docker，并在控制台生成的命令末尾加上 `--runtimetype=docker --cgroupdriver=systemd`。
 
 {{</ notice >}}
 
@@ -152,65 +137,141 @@ done
 
    {{< notice note >}}
 
-   添加边缘节点后，如果在**边缘节点**页面查看不到 CPU 和内存资源使用情况，请确保您的集群中已安装 [Metrics Server](../../../pluggable-components/metrics-server/) 0.4.1 或以上版本。
+   列表和状态页上的 CPU、内存、磁盘曲线来自 Prometheus 中的 node-exporter，不是 Metrics Server。只安装 Metrics Server 时，这些曲线仍为空。容器组占用率来自 kube-state-metrics，节点 Ready 后就能显示。
 
    {{</ notice >}}
 
 
-## 收集边缘节点监控信息
+## 启用边缘节点资源监控
 
-如果需要收集边缘节点的监控信息，请先在`ClusterConfiguration` 中开启 `metrics_server`，以及在 KubeEdge 中开启 `edgeStream`。
+状态页路径为 `/clusters/<cluster>/edgenodes/<node>/status`。页面查询 `node_cpu_utilisation`、`node_memory_utilisation` 和 `node_disk_size_utilisation`。这三条记录规则读取 `job="node-exporter"` 的序列，再按 Pod 关联出节点名。
 
-1. 在 Kube AI Hub 控制台上，点击**平台管理 > 集群管理**。
+主集群的 `node-exporter` DaemonSet 明确跳过边缘节点，Prometheus 也拨不到边缘节点的内网地址。要让状态页出现这三条曲线，需要在边缘节点上跑一份 node-exporter，并用 EdgeMesh 把云上的抓取转发过去。
 
-2. 在左侧导航栏。点击**定制资源定义**。
+### 1. 打开 edgecore 的 metaServer
 
-3. 在右侧的搜索框中，输入 `clusterconfiguration`，并点击结果查看其详细页面。
+EdgeMesh 在边缘节点上以 EdgeMode 运行，通过本机 metaServer 读取 Service，而不是直接访问云上的 API。`keadm join` 生成的配置里 metaServer 默认关闭。
 
-4. 点击 `ks-installer` 右侧的 <img src="/images/docs/v3.x/common-icons/three-dots.png" width="15" alt="icon" />，选择**编辑 YAML**。
+编辑 `/etc/kubeedge/config/edgecore.yaml`：
 
-5. 找到 **metrics_server**，将 `enabled` 的 `false` 更改为 `true`。
+```yaml
+metaManager:
+  enable: true
+  metaServer:
+    enable: true
+    server: 127.0.0.1:10550
+```
 
-    ```yaml
-      metrics_server:
-      enabled: true # 将“false”更改为“true”。
-    ```
+然后重启并确认端口：
 
-6. 点击右下角的**确定**，保存配置。
+```bash
+systemctl restart edgecore
+ss -lnt | grep 10550
+```
 
-7. 进入 `/etc/kubeedge/config` 文件，搜索 `edgeStream`，将 `false` 更改为 `true` 并保存文件。
-    ```bash
-    cd /etc/kubeedge/config
-    vi edgecore.yaml
-    ```
+同时确认 `edgeStream` 已按下一节打开。没有这条隧道时，容器日志和终端都会一直转圈。
 
-    ```bash
-    edgeStream:
-    enable: true #将“false”更改为“true”。
-    handshakeTimeout: 30
-    readDeadline: 15
-    server: xx.xxx.xxx.xxx:10004 #如果没有添加端口转发，将端口修改为30004。
-    tlsTunnelCAFile: /etc/kubeedge/ca/rootCA.crt
-    tlsTunnelCertFile: /etc/kubeedge/certs/server.crt
-    tlsTunnelPrivateKeyFile: /etc/kubeedge/certs/server.key
-    writeDeadline: 15
-    ```
+### 查看容器日志和打开终端
 
-8. 重启 `edgecore.service`。
-    ```bash
-    systemctl restart edgecore.service
-    ```
+控制台查看边缘 Pod 日志、打开容器终端，走的是 KubeEdge 的 CloudStream / edgeStream，不是节点 IP 上的 kubelet `10250`。云上在 `ClusterConfiguration` 里打开 `edgeruntime.kubeedge.cloudCore.cloudStream.enable`（默认即为 `true`）。每个边缘节点还要在 `/etc/kubeedge/config/edgecore.yaml` 里打开边端：
 
-9. 如果仍然无法显示监控数据，执行以下命令：
-    ```bash
-    journalctl -u edgecore.service -b -r
-    ```
-    
-    {{< notice note >}}
-     
-   如果提示 `failed to check the running environment: kube-proxy should not running on edge node when running edgecore`，需要参考步骤 8 再次重启 `edgecore.service`。
-     
-   {{</ notice >}} 
+```yaml
+edgeStream:
+  enable: true
+  server: <边缘节点能访问的地址>:10004
+```
+
+`server` 默认是 `advertiseAddress:10004`。只发布了 NodePort 时，改成对应的 `tunnelNodePort`，或把该 NodePort 转发到边缘节点用来连接的 `10004`。改完后执行 `systemctl restart edgecore`。
+
+验证：
+
+```bash
+kubectl -n <namespace> logs <pod> --tail=20
+```
+
+命令能返回容器输出，即隧道已通。镜像里没有 shell（例如 `prom/node-exporter`）时，终端会报找不到可执行文件，这是镜像本身的限制，不是隧道失败。
+
+### 2. 安装 EdgeMesh
+
+在云上安装与 CloudCore 相同大版本的 EdgeMesh（KubeEdge 1.13 使用 `kubeedge/edgemesh-agent:v1.13.5`）。Agent 使用 `hostNetwork`，并容忍全部污点，这样边缘节点也能跑。
+
+只代理打了标签的 Service，避免 EdgeMesh 接管集群里其他 ClusterIP：
+
+```yaml
+agent:
+  image: kubeedge/edgemesh-agent:v1.13.5
+  tolerations:
+    - operator: Exists
+  psk: <openssl rand -base64 32 的结果>
+  relayNodes:
+    - nodeName: <云上中继节点名>
+      advertiseAddress:
+        - <边缘节点能访问的中继地址>
+  modules:
+    edgeProxy:
+      enable: true
+      serviceFilterMode: FilterIfLabelDoesNotExists
+    edgeTunnel:
+      enable: true
+      listenPort: 20006
+```
+
+`serviceFilterMode` 的取值是 `FilterIfLabelDoesNotExists`，不要写成带 `Mode` 后缀的形式，否则 Agent 会启动失败。
+
+EdgeMesh 不会在名称以 `br`、`docker`、`tunl`、`flannel`、`cni` 开头的网卡上监听。节点地址如果落在 `br0` 这类网桥上，需要把该地址的 `20006` 转发到 Agent 实际监听的 `127.0.0.1:20006`，并把转发后的地址写进 `advertiseAddress`。
+
+边缘节点加入成功后，Agent 日志里应出现 `success bootstrapped`。
+
+### 3. 部署边缘 node-exporter
+
+应用安装器清单 `ks-installer/roles/ks-monitor/files/prometheus/node-exporter/node-exporter-edge.yaml`。它只调度到带 `node-role.kubernetes.io/edge` 标签的节点，使用多架构镜像 `docker.io/prom/node-exporter:v1.12.1`，在 `9100` 上提供 HTTP 指标。
+
+对应的 Service 必须是普通 ClusterIP，不能是 headless。EdgeMesh 不代理 headless Service。Service 上的两个标签都要保留：
+
+- `service.edgemesh.kubeedge.io/service-proxy-name`：让 EdgeMesh 代理这个 Service。
+- `service.kubernetes.io/service-proxy-name: edgemesh`：让 kube-proxy 不要再把 ClusterIP 转到边缘节点的内网地址。
+
+部署后，在云节点上访问该 ClusterIP 的 `/metrics` 应返回 `200`。如果超时，先看 EdgeMesh 是否已与中继建立连接，再看 kube-proxy 是否仍占用这个 Service。
+
+### 4. 让 Prometheus 抓取 ClusterIP
+
+现有的 node-exporter ServiceMonitor 按 Endpoints 地址抓取。边缘节点的 Endpoints 地址从云上不可达，必须改抓 EdgeMesh 代理的 ClusterIP，同时保留 `namespace`、`pod`、`node` 标签，并把 `job` 写成 `node-exporter`，记录规则才能关联到节点。
+
+把下面的作业追加到 Prometheus 的 `additionalScrapeConfigs`：
+
+```yaml
+- job_name: node-exporter-edge
+  scrape_interval: 30s
+  scrape_timeout: 10s
+  metrics_path: /metrics
+  scheme: http
+  kubernetes_sd_configs:
+    - role: pod
+  relabel_configs:
+    - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+      regex: node-exporter-edge
+      action: keep
+    - source_labels: [__meta_kubernetes_namespace]
+      target_label: namespace
+    - source_labels: [__meta_kubernetes_pod_name]
+      target_label: pod
+    - source_labels: [__meta_kubernetes_pod_node_name]
+      target_label: node
+    - target_label: __address__
+      replacement: node-exporter-edge.kubesphere-monitoring-system.svc.cluster.local:9100
+    - target_label: job
+      replacement: node-exporter
+```
+
+Prometheus 重新加载配置后，目标 `node-exporter-edge` 应为 `up`。再用监控接口确认状态页用到的三条指标：
+
+```bash
+# resources_filter 换成边缘节点名
+curl -H "Authorization: Bearer $TOKEN" \
+  "$APISERVER/kapis/monitoring.kubesphere.io/v1alpha3/nodes?resources_filter=<edgenode>$&metrics_filter=node_cpu_utilisation|node_memory_utilisation|node_disk_size_utilisation$"
+```
+
+三条结果都有序列后，打开 `/clusters/<cluster>/edgenodes/<node>/status` 即可看到 CPU、内存和磁盘曲线。记录规则约每分钟计算一次，刚接入时曲线只有最近几个点。 
 ## 移除边缘节点
 
 移除边缘节点之前，请删除在该节点上运行的全部工作负载。

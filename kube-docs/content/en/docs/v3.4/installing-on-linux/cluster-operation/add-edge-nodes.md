@@ -25,38 +25,22 @@ This tutorial demonstrates how to add an edge node to your cluster.
 - You have an available node to serve as an edge node. The node can run either Ubuntu (recommended) or CentOS. This tutorial uses Ubuntu 18.04 as an example.
 - Edge nodes, unlike Kubernetes cluster nodes, should work in a separate network.
 
-## Prevent non-edge workloads from being scheduled to edge nodes
+## Keep non-edge workloads off edge nodes
 
-Due to the tolerations some daemonsets (for example, Calico) have, to ensure that the newly added edge nodes work properly, you need to run the following command to manually patch the pods so that non-edge workloads will not be scheduled to the edge nodes.
+An edge node carries the taint `node-role.kubernetes.io/edge:NoSchedule`. DaemonSets such as Calico, the JuiceFS CSI node plugin, and Weave Scope tolerate every taint. They need the cluster network and the private image registry, so on an edge node they stay in `CrashLoopBackOff` or `ImagePullBackOff`.
 
-```bash
-#!/bin/bash
-   
-   
-NoShedulePatchJson='{"spec":{"template":{"spec":{"affinity":{"nodeAffinity":{"requiredDuringSchedulingIgnoredDuringExecution":{"nodeSelectorTerms":[{"matchExpressions":[{"key":"node-role.kubernetes.io/edge","operator":"DoesNotExist"}]}]}}}}}}}'
-   
-ns="kube-system"
-
-
-DaemonSets=("nodelocaldns" "kube-proxy" "calico-node")
-
-length=${#DaemonSets[@]}
-   
-for((i=0;i<length;i++));  
-do
-         ds=${DaemonSets[$i]}
-        echo "Patching resources:DaemonSet/${ds}" in ns:"$ns",
-        kubectl -n $ns patch DaemonSet/${ds} --type merge --patch "$NoShedulePatchJson"
-        sleep 1
-done
-```
+The installer already keeps the JuiceFS CSI node plugin and Weave Scope off nodes labeled `node-role.kubernetes.io/edge`. Calico is managed by the Tigera Installation. Set the same required node affinity on the `calico-node` DaemonSet and the `calico-typha` Deployment: the node must not have the label `node-role.kubernetes.io/edge`. The main `node-exporter` DaemonSet uses the same rule. Host metrics for edge nodes come from `node-exporter-edge`, described below.
 
 ## Create Firewall Rules and Port Forwarding Rules
 
-To make sure edge nodes can successfully talk to your cluster, you must forward ports for outside traffic to get into your network. Specifically, map an external port to the corresponding internal IP address (control plane node) and port based on the table below. Besides, you also need to create firewall rules to allow traffic to these ports (`10000` to `10004`).
+`keadm join` dials the CloudHub ports on `advertiseAddress`. It does not dial the NodePorts. The default mapping is below. If `cloudhubNodePort` or the related fields were changed in `ClusterConfiguration`, use those NodePorts, and point `--cloudcore-ipport`, `--certport`, and `--tunnelport` at the address and ports the edge node can actually reach.
+
+When the edge node is not on the cluster network, forward the NodePorts in the table to an address the edge node can dial, and use that address in the join command. The EdgeMesh relay port `20006` must also be reachable from the edge node. Otherwise the node can register, but CPU, memory, and disk metrics stay empty.
+
+To make sure edge nodes can successfully talk to your cluster, you must forward ports for outside traffic to get into your network. Specifically, map an external port to the corresponding internal IP address (control plane node) and port based on the table below. Besides, you also need to create firewall rules to allow traffic to these ports (`10000` to `10004`, plus EdgeMesh `20006`).
 
    {{< notice note >}}
-   In `ClusterConfiguration` of the ks-installer, if you set an internal IP address, you need to set the forwarding rule. If you have not set the forwarding rule, you can directly connect to ports 30000 to 30004.
+   No extra forward is required when the edge node can already reach ports `10000`–`10004` on `advertiseAddress`. When only the NodePorts are open, forward them onto `10000`–`10004`, or change the ports in the join command to the published NodePorts.
    {{</ notice >}} 
 
 | Fields              | External Ports | Fields                  | Internal Ports |
@@ -66,6 +50,7 @@ To make sure edge nodes can successfully talk to your cluster, you must forward 
 | `cloudhubHttpsPort` | `10002`        | `cloudhubHttpsNodePort` | `30002`        |
 | `cloudstreamPort`   | `10003`        | `cloudstreamNodePort`   | `30003`        |
 | `tunnelPort`        | `10004`        | `tunnelNodePort`        | `30004`        |
+| EdgeMesh relay      | `20006`        | relay node listen port  | `20006`        |
 
 ## Configure an Edge Node
 
@@ -77,7 +62,7 @@ You need to configure the edge node as follows.
 
 {{< notice note >}}
 
-If you use Docker as the container runtime for your edge node, Docker v19.3.0 or later must be installed so that Kube AI Hub can get Pod metrics of it.
+`keadm join` from KubeEdge 1.13 talks to containerd through CRI v1alpha2. containerd 2.x no longer serves that API, and the join fails with `unknown service runtime.v1alpha2.ImageService`. On those nodes, install Docker and append `--runtimetype=docker --cgroupdriver=systemd` to the command generated by the console.
 
 {{</ notice >}}
 
@@ -152,65 +137,140 @@ Perform the following steps to configure [EdgeMesh](https://kubeedge.io/en/docs/
 
    {{< notice note >}}
 
-   After an edge node is added, if you cannot see CPU and memory resource usage on the **Edge Nodes** page, make sure [Metrics Server](../../../pluggable-components/metrics-server/) 0.4.1 or later is installed in your cluster.
+   The CPU, memory, and disk charts on the list and the status page come from node-exporter in Prometheus. Metrics Server does not fill those charts. Pod utilization comes from kube-state-metrics and appears once the node is Ready.
 
    {{</ notice >}}
 
-## Collect Monitoring Information on Edge Nodes
+## Enable resource monitoring on an edge node
 
-To collect monitoring information on edge node, you need to enable `metrics_server` in `ClusterConfiguration` and `edgeStream` in KubeEdge.
+The status page is `/clusters/<cluster>/edgenodes/<node>/status`. It queries `node_cpu_utilisation`, `node_memory_utilisation`, and `node_disk_size_utilisation`. Those recording rules read series with `job="node-exporter"` and join them to a node name through the exporter Pod.
 
-1. On the Kube AI Hub web console, choose **Platform > Cluster Management**.
+The main `node-exporter` DaemonSet skips edge nodes, and Prometheus cannot dial an edge node's private address. To fill the three charts, run node-exporter on the edge node and let EdgeMesh carry the scrape from the cloud.
 
-2. On the navigation pane on the left, click **CRDs**.
+### 1. Turn on the edgecore metaServer
 
-3. In the search bar on the right pane, enter `clusterconfiguration`, and click the result to go to its details page.
+The EdgeMesh agent on an edge node runs in EdgeMode. It reads Services from the local metaServer instead of calling the cloud API. `keadm join` leaves the metaServer disabled.
 
-4. Click <img src="/images/docs/v3.x/common-icons/three-dots.png" width="15" alt="icon" /> on the right of ks-installer, and click **Edit YAML**.
+Edit `/etc/kubeedge/config/edgecore.yaml`:
 
-5. Search for **metrics_server**, and change the value of `enabled` from `false` to `true`.
+```yaml
+metaManager:
+  enable: true
+  metaServer:
+    enable: true
+    server: 127.0.0.1:10550
+```
 
-    ```yaml
-      metrics_server:
-      enabled: true # Change "false" to "true".
-    ```
+Restart edgecore and check the port:
 
-6. Click **OK** in the lower right corner to save the change.
+```bash
+systemctl restart edgecore
+ss -lnt | grep 10550
+```
 
-7. Open the `/etc/kubeedge/config` file, search for `edgeStream`, change `false` to `true`, and save the change.
-    ```bash
-    cd /etc/kubeedge/config
-    vi edgecore.yaml
-    ```
+Also turn on `edgeStream` as described in the next section. Without that tunnel, container logs and the terminal keep spinning.
 
-    ```bash
-    edgeStream:
-    enable: true #Change "false" to "true".。
-    handshakeTimeout: 30
-    readDeadline: 15
-    server: xx.xxx.xxx.xxx:10004 #If port forwarding is not configured, change the port ID to 30004 here.
-    tlsTunnelCAFile: /etc/kubeedge/ca/rootCA.crt
-    tlsTunnelCertFile: /etc/kubeedge/certs/server.crt
-    tlsTunnelPrivateKeyFile: /etc/kubeedge/certs/server.key
-    writeDeadline: 15
-    ```
+### Container logs and terminal
 
-8. Run the following command to restart `edgecore.service`.
-    ```bash
-    systemctl restart edgecore.service
-    ```
+The console reads edge Pod logs and opens a container terminal through KubeEdge CloudStream / edgeStream. It does not dial kubelet port `10250` on the node IP. On the cloud, set `edgeruntime.kubeedge.cloudCore.cloudStream.enable` in `ClusterConfiguration` (this defaults to `true`). On each edge node, also enable the edge side in `/etc/kubeedge/config/edgecore.yaml`:
 
-9. If you still cannot see the monitoring data, run the following command:
+```yaml
+edgeStream:
+  enable: true
+  server: <address the edge node can reach>:10004
+```
 
-    ```bash
-    journalctl -u edgecore.service -b -r
-    ```
-    
-    {{< notice note >}}
-     
-   If `failed to check the running environment: kube-proxy should not running on edge node when running edgecore` is displayed, refer to Step 8 to restart `edgecore.service` again.
-     
-   {{</ notice >}} 
+`server` defaults to `advertiseAddress:10004`. When only the NodePort is published, use `tunnelNodePort`, or forward that NodePort to the `10004` the edge node dials. Then run `systemctl restart edgecore`.
+
+Check the tunnel:
+
+```bash
+kubectl -n <namespace> logs <pod> --tail=20
+```
+
+Container output means the tunnel is up. If the image has no shell (`prom/node-exporter` is one of these), the terminal reports that the executable was not found. That is the image, not a failed tunnel.
+
+### 2. Install EdgeMesh
+
+Install the EdgeMesh release that matches CloudCore. KubeEdge 1.13 uses `kubeedge/edgemesh-agent:v1.13.5`. The agent uses `hostNetwork` and must tolerate every taint so it can run on edge nodes.
+
+Proxy only Services that carry the EdgeMesh label. Otherwise EdgeMesh takes over every other ClusterIP:
+
+```yaml
+agent:
+  image: kubeedge/edgemesh-agent:v1.13.5
+  tolerations:
+    - operator: Exists
+  psk: <output of openssl rand -base64 32>
+  relayNodes:
+    - nodeName: <cloud relay node>
+      advertiseAddress:
+        - <relay address the edge node can dial>
+  modules:
+    edgeProxy:
+      enable: true
+      serviceFilterMode: FilterIfLabelDoesNotExists
+    edgeTunnel:
+      enable: true
+      listenPort: 20006
+```
+
+The value of `serviceFilterMode` is `FilterIfLabelDoesNotExists`. The `Mode` suffix is not accepted and the agent exits on startup.
+
+EdgeMesh does not listen on interfaces whose names start with `br`, `docker`, `tunl`, `flannel`, or `cni`. If the node address is on a bridge such as `br0`, forward that address's port `20006` to `127.0.0.1:20006`, where the agent actually listens, and put the forwarded address in `advertiseAddress`.
+
+After the edge node has joined, the agent log contains `success bootstrapped`.
+
+### 3. Deploy the edge node-exporter
+
+Apply `ks-installer/roles/ks-monitor/files/prometheus/node-exporter/node-exporter-edge.yaml`. It schedules only onto nodes labeled `node-role.kubernetes.io/edge`, uses the multi-arch image `docker.io/prom/node-exporter:v1.12.1`, and serves metrics over HTTP on port `9100`.
+
+The Service must have a ClusterIP. EdgeMesh does not proxy headless Services. Keep both labels:
+
+- `service.edgemesh.kubeedge.io/service-proxy-name` selects the Service for EdgeMesh.
+- `service.kubernetes.io/service-proxy-name: edgemesh` stops kube-proxy from sending the ClusterIP to the edge node's private address.
+
+From a cloud node, `GET /metrics` on that ClusterIP returns `200`. A timeout means EdgeMesh is not connected to the relay, or kube-proxy still owns the Service.
+
+### 4. Scrape the ClusterIP from Prometheus
+
+The existing node-exporter ServiceMonitor scrapes Endpoint addresses. Those addresses are not reachable for an edge node. Scrape the ClusterIP that EdgeMesh proxies, keep the `namespace`, `pod`, and `node` labels, and set `job` to `node-exporter` so the recording rules can attach the series to the node.
+
+Append this job to Prometheus `additionalScrapeConfigs`:
+
+```yaml
+- job_name: node-exporter-edge
+  scrape_interval: 30s
+  scrape_timeout: 10s
+  metrics_path: /metrics
+  scheme: http
+  kubernetes_sd_configs:
+    - role: pod
+  relabel_configs:
+    - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+      regex: node-exporter-edge
+      action: keep
+    - source_labels: [__meta_kubernetes_namespace]
+      target_label: namespace
+    - source_labels: [__meta_kubernetes_pod_name]
+      target_label: pod
+    - source_labels: [__meta_kubernetes_pod_node_name]
+      target_label: node
+    - target_label: __address__
+      replacement: node-exporter-edge.kubesphere-monitoring-system.svc.cluster.local:9100
+    - target_label: job
+      replacement: node-exporter
+```
+
+After Prometheus reloads, the `node-exporter-edge` target is `up`. Confirm the three metrics the status page reads:
+
+```bash
+# Replace resources_filter with the edge node name.
+curl -H "Authorization: Bearer $TOKEN" \
+  "$APISERVER/kapis/monitoring.kubesphere.io/v1alpha3/nodes?resources_filter=<edgenode>$&metrics_filter=node_cpu_utilisation|node_memory_utilisation|node_disk_size_utilisation$"
+```
+
+When each result has a series, open `/clusters/<cluster>/edgenodes/<node>/status`. The CPU, memory, and disk charts show data. Recording rules run about once a minute, so a newly connected node only has the latest few points. 
 
 ## Remove an Edge Node
 
