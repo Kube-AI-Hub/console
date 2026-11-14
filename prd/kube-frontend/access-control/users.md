@@ -26,6 +26,12 @@
 
 **Independent Test**：创建临时用户 → 编辑邮箱与描述 → 回读两个字段 → 删除。
 
+### US4 - 批量停用/启用账号 (Priority: P2)
+
+作为 **平台管理员**，我希望 **一次停用多个离职账号**，以便 **不必逐个打开行菜单**。
+
+**Independent Test**：创建两个临时用户 → 勾选两者 → 停用 → 回读均为 Disabled → 启用 → 均 Active。
+
 ## 验收场景
 
 - **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-03** — 已知用户列表有数据，当行操作「修改平台角色」并选择平台管理员，则 `iam.kubesphere.io/platform-role` 变为 `platform-admin`；当「删除」并确认，则该用户不再出现在列表结果中。
@@ -36,6 +42,7 @@
 - **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-04** — 已知用户列表有数据，当点击名称列排序，则顺序变为升序；再次点击，则变为降序（两次结果不同）。
 - **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-05** — 已知平台上有非 admin 用户，当对其执行「停用」，则该用户 `status.state` 变为 `Disabled`，行操作变为「启用」；执行「启用」后回到 `Active`；执行「删除」并确认后该用户从列表中消失；admin 账号不提供「停用」与「删除」。
 - **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-06** — 已知平台上有用户，当对某人执行「编辑信息」并填写新的邮箱与描述后保存，则该用户的 `spec.email` 变为新邮箱、`kubesphere.io/description` 注解变为新描述；邮箱非法时提交被拦下并提示。
+- **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-07** — 已知用户列表有多个非 admin 用户，当勾选其中两个并点「停用」，则这两个账号的 `status.state` 均变为 `Disabled`；再勾选并点「启用」，两者均回到 `Active`；admin 行没有复选框（不可被选中）。
 
 ## 设计目标
 

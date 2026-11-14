@@ -135,3 +135,16 @@ export function useUpdateUser() {
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['platform', 'users'] }),
   });
 }
+
+/** Enable or disable several accounts at once. */
+export function useSetUsersActive() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { names: string[]; active: boolean }) => {
+      for (const name of input.names) {
+        await usersWriteApi(api).setActive({ name, active: input.active });
+      }
+    },
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['platform', 'users'] }),
+  });
+}

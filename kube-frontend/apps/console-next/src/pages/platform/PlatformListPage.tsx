@@ -11,7 +11,7 @@ import { PLATFORM_DESCRIPTORS, useCreateWorkspace, useDeleteClusterRole, useDele
 import { WorkspaceEditorDialog } from './WorkspaceEditorDialog';
 import { RoleEditorDialog } from './RoleEditorDialog';
 import { DeleteDialog } from '@/components/resource/DeleteDialog';
-import { useSetUserActive, useUpdateUser } from './queries';
+import { useSetUserActive, useSetUsersActive, useUpdateUser } from './queries';
 import { UserEditDialog } from './UserEditDialog';
 import { MutationAlert } from '@/components/resource/ResourceErrorPanel';
 import { UserCreateDialog } from './UserCreateDialog';
@@ -45,8 +45,11 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
   const setRole = useSetUserRole();
   const removeUser = useDeleteUser();
   const setUserActive = useSetUserActive();
+  const setUsersActive = useSetUsersActive();
   const updateUser = useUpdateUser();
   const [editTarget, setEditTarget] = React.useState<UserSummary | null>(null);
+  // Bulk enable/disable needs the selection; the list owns the checkbox state.
+  const [selectedUsernames, setSelectedUsernames] = React.useState<string[]>([]);
   const [roleEditor, setRoleEditor] = React.useState<{ name: string; alias: string; description: string } | null | 'new'>(null);
   const [deleteRole, setDeleteRole] = React.useState<ClusterRoleSummary | null>(null);
   const removeRole = useDeleteClusterRole();
@@ -214,6 +217,20 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
                 },
               ],
       // Users are the only writable kind here: roles and workspaces stay read-only.
+      // Bulk enable/disable, as the old console offers on a selection: disabling ten
+      // departed accounts one menu at a time is the chore that gets skipped.
+      ...(kind === 'users'
+        ? {
+            selection: 'multiple' as const,
+            // The admin account cannot be disabled at all, so it is not selectable:
+            // a checkbox that leads to a refused action is a trap.
+            isRowSelectable: (row: Row) => (row as UserSummary).username !== 'admin',
+            actions: [
+              { key: 'enable-users', label: t('platform.users.enable'), aiId: 'users:bulk-enable' },
+              { key: 'disable-users', label: t('platform.users.disable'), aiId: 'users:bulk-disable' },
+            ],
+          }
+        : {}),
       rowActions:
         kind === 'users'
           ? [
@@ -293,6 +310,13 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
         onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
           if (next) list.setSort(next);
         }}
+        {...(kind === 'users' ? { selectedKeys: selectedUsernames, onSelectionChange: setSelectedUsernames } : {})}
+        onBulkAction={(action, keys) => {
+          if (action !== 'enable-users' && action !== 'disable-users') return;
+          const targets = keys.filter((name) => name !== 'admin');
+          if (!targets.length) return;
+          setUsersActive.mutate({ names: targets, active: action === 'enable-users' });
+        }}
         onAction={(action, row) => {
           // `primaryAction` dispatches with no row, so the create branch is reached
           // before any row-shape assumption.
@@ -322,7 +346,7 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
         }}
       />
 
-      <MutationAlert error={updateUser.error ?? setUserActive.error ?? setRole.error ?? removeUser.error ?? removeRole.error ?? createWorkspace.error ?? updateWorkspace.error ?? removeWorkspace.error} />
+      <MutationAlert error={setUsersActive.error ?? updateUser.error ?? setUserActive.error ?? setRole.error ?? removeUser.error ?? removeRole.error ?? createWorkspace.error ?? updateWorkspace.error ?? removeWorkspace.error} />
 
       <WorkspaceEditorDialog
         open={workspaceEditor !== null}

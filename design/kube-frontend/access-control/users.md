@@ -10,6 +10,7 @@
 
 - AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-02
 - AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-06
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-07
 - AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-05
 
 - AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-01
@@ -35,6 +36,14 @@
 **被否方案**：读 `roleRef`。用户对象上没有这个字段，角色是注解承载的。
 
 **何时重新考虑**：平台统一为单一键时。
+
+### DEC-L3-KUBE-FRONTEND-ACCESS-CONTROL-USERS-05 — 批量停用/启用，admin 不可勾选
+
+**为什么**：老 console 在用户页提供批量启用/停用；逐个菜单操作十个离职账号是会被跳过的活儿。admin 账号既不能停用，就不该出现在选择里——可勾选却必然被拒绝的复选框是陷阱。
+
+**被否方案**：不做批量，只保留行操作。多账号场景下操作成本与账号数线性增长。
+
+**何时重新考虑**：需要跨页选择时（当前选择只在当前页保持）。
 
 ## 系统现状
 

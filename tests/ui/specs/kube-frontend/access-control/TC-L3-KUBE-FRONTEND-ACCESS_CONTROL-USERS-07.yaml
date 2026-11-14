@@ -1,0 +1,37 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-07
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: users
+title: 用户列表 · 批量停用与启用
+entry_url: '{BASE_URL}/kube-frontend/access/users'
+prd: prd/kube-frontend/access-control/users.md
+design: design/kube-frontend/access-control/users.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-07
+
+story:
+- US4
+
+product: 用户列表支持多选后批量停用/启用；admin 不可被勾选。
+preconditions:
+- 已登录平台管理
+- 用例自行创建两个临时用户（tc-e2e- 前缀），finally 中删除
+steps:
+- 用 API 创建两个临时用户
+- 在用户列表勾选两者，点「停用」
+- 用 API 回读两个账号的 status.state
+- 点「启用」，再回读
+- 核对 admin 行没有复选框
+expected:
+- 批量停用后两者均为 Disabled
+- 批量启用后两者均为 Active
+- admin 行不可选中
+troubleshoot:
+- 勾选框点不动：schema 未声明 selection: multiple
+- 点击后无反应：onBulkAction 未接上（ResourceList 用 onBulkAction 而不是 onAction）
+- 第二次状态没变：PUT 前未重新 GET（resourceVersion 过期 → 409）
+update_automation:
+- 选择器见 pages/access_control.py 与 PlatformListPage.tsx
