@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/cluster-management/components.md`](../../../../prd/kube-frontend/cluster-management/components.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-COMPONENTS-01** — 已知平台有多个组件，当打开系统组件页，则显示名称、健康后端、启动时间三列；健康后端显示为 `健康/总数`，无后端的组件显示「无后端」；不健康的组件排在健康的组件之前。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-COMPONENTS-01** — 已知平台有多个组件，当打开系统组件页，则显示名称、健康后端、启动时间三列；健康后端显示为 `健康/总数`，无后端的组件显示「无后端」；不健康的组件排在健康的组件之前。概览 type 分类链接按六类 namespace 过滤，组件分类可清除；读取和详情缓存含当前 cluster，成员集群不回退 host。
 
 ### 关联设计
 
@@ -44,12 +44,14 @@
 1. 用 API 读取组件数量
 2. 打开系统组件页，核对表头与行数
 3. 读取第一行的健康列
+4. 选择监控分类再清除，核对 namespace 过滤及全部组件恢复
 
 ## 期望结果
 
 - 表头依次为 名称、健康后端、启动时间
 - 行数与 API 一致
 - 若存在不健康组件，第一行是不健康的那一个
+- 分类不改变集群范围，清除恢复全量
 
 ## 失败排查
 

@@ -20,7 +20,7 @@
 
 - 作用域：workspace（`/kube-frontend/workspaces/<ws>/federatedprojects`），由 registry 的 federated-projects 区域提供侧栏入口。
 - 联邦 API 路径：`/apis/types.kubefed.io/v1beta1/federatednamespaces`（cluster-wide 集合可读）、`.../v1beta1`（discovery）。
-- FederatedNamespace 是 namespaced 资源：按名称的集群级 GET 返回 404，详情改用集合查找（见 DEC-04）。
+- FederatedNamespace 是 namespaced 资源：按名称的集群级 GET 返回 404，详情改用集合查找（见本文件关于集合查找的决策）。
 - 只读：不提供写操作；写 webhook 在 2026-11-15 前后仍不稳定。
 - 页面必须有字面量 data-ai-id；不用裸 button。
 
@@ -60,7 +60,7 @@
 
 ## 系统现状
 
-老 console 有 `/:workspace/federatedprojects` 列表与 `/:workspace/federatedprojects/:namespace` 的 22 条详情路由（概览/应用负载/配置/存储/网关等）。新 UI 此前没有联邦作用域；2026-11-15 组件开启后 registry 登记了 federated-projects 区域（status 由 planned 改 ready），tree 登记 TC-L3-...-FEDERATED_PROJECTS-01。本轮落列表 + 详情骨架。
+老 console 有 `/:workspace/federatedprojects` 列表与 `/:workspace/federatedprojects/:namespace` 的 22 条详情路由（概览/应用负载/配置/存储/网关等）。新 UI 此前没有联邦作用域；2026-11-15 组件开启后 registry 登记了 federated-projects 区域（status 由 planned 改 ready），tree 登记 TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-01。本轮落列表 + 详情骨架。
 
 ## 仓库落点
 

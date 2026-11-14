@@ -75,7 +75,7 @@
 | 路由 | `routes/kube-frontend.$workspace.clusters.$cluster.projects.$namespace/grayrelease/{route.tsx,index.tsx}` | 新增列表路由与 Outlet 布局 |
 | 注册表 | `kube-frontend/apps/console-next/src/areas/registry.ts` | grayrelease 页面 status: planned → ready |
 | 文案 | `kube-frontend/packages/locales/src/index.ts` | `grayRelease.*` 追加中英成对键 |
-| 用例 | `tests/ui/specs|tests/kube-frontend/app-workloads/TC-L3-...-GRAY_RELEASE-01*` | 新增 spec 与 pytest |
+| 用例 | `tests/ui/specs|tests/kube-frontend/app-workloads/TC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-01*` | 新增 spec 与 pytest |
 
 ## 对外契约
 

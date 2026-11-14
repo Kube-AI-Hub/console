@@ -4,7 +4,7 @@
 
 ## 概述
 
-节点使用率排行：一次监控请求取四个指标，按节点合并，前端排序。
+节点九类指标排行：服务端排序/搜索/分页，按 node 身份合并；与概览 Top5 共享 NodeRankingPanel。
 
 ## 关联需求
 
@@ -87,6 +87,23 @@
 
 - 与「节点」页合并（同一资源的两种视角）。
 - 点击节点跳到节点详情。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODE_USAGE-04 — 复盘后恢复九种维度及下钻
+
+**为什么**：原四项实现不足以承接旧概览 Top5；旧接口有 type=rank、sort_metric/sort_type，并非旧决策中推测的 sortBy。
+本批保留直接进入 CPU 降序，概览链接携带 metric；共享 nodeRankingApi/NodeRankingPanel 完成九种指标和节点详情入口。
+
+**被否方案**：保留原全量前端排序作为 Top5 等价替代；原决策的理由保留，但由本条覆盖。
+
+**何时重新考虑**：接口提供新的聚合排序契约时。
+
+### CON-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODE_USAGE-01 — 当前排行契约覆盖旧四指标契约
+
+type=rank，sort_metric 为九项白名单，sort_type 为 asc/desc，page/limit 控制分页，total_item 为总数。
+resources_filter 对搜索转义；按 node 合并并遵循目标指标序列顺序；load1 原值、其他比率乘100、
+GPUallocated 按数量排序而以 allocated/total 展示。元数据独立请求当前集群，名称链接详情。
+关键实现：node-ranking.ts、NodeRankingPanel.tsx；旧 nodeUsageApi 保留兼容既有调用但不再用于该页面。
+原文四项、全量前端排序及不下钻描述为历史决策，当前以本契约和 overview CON-06 为准。
 
 ## 验收用例
 

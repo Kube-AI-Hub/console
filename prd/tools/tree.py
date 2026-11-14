@@ -447,6 +447,11 @@ MODULES = [
                         "title": "商店管理（应用/分类/审核）",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-01"]},
                     },
+                    {
+                        "id": "detail",
+                        "title": "应用详情",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_STORE-DETAIL-01"]},
+                    },
                 ],
             },
             {

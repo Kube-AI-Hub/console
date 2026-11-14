@@ -19,7 +19,7 @@
 文案来自需求 [`prd/kube-frontend/cluster-management/overview.md`](../../../../prd/kube-frontend/cluster-management/overview.md)，与用例的 `covers` 对应；改需求即改这里。
 
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-01** — 已知已登录且对集群有读取权限，当打开集群概览页，则「基本信息」显示状态徽标（就绪时「运行正常」并附条件消息）、供应者、Kubernetes 版本、KubeSphere 版本、节点数、连接方式、API 端点与描述；「已启用模块」列出 status.configz 中为真的模块、「未启用」列出为假或缺失的模块，不代表 API 未安装；页面不出现项目工作区栏。
-- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-02** — 已知集群存在且监控后端可用，当查看「资源用量」，则 CPU、内存、容器组、节点各显示「已用 / 总量」与百分比，CPU 与内存额外显示「已分配」；集群有 GPU 时显示「GPU 卡」的已分配 / 总数并附利用率；「Kubernetes 状态」显示请求速率、请求延迟、已调度与无法调度；当监控接口不可用时，用量面板显示「监控数据不可用」的说明而不是 0 或空白，且基本信息与模块区不受影响。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-02** — 已知集群存在且监控后端可用，当查看「资源用量」，则 CPU、内存、容器组、节点各显示「已用 / 总量」与百分比，CPU 与内存额外显示「已分配」；集群有 GPU 时显示「GPU 卡」的实际使用 / 总数、独立已分配量并附利用率；「Kubernetes 状态」显示请求速率、请求延迟、已调度与无法调度，另补调度 error；当监控接口不可用时，用量面板显示「监控数据不可用」的说明而不是 0 或空白，且基本信息与模块区不受影响。
 
 ### 关联设计
 
@@ -65,8 +65,8 @@
 2. 打开集群概览页，等待 data-ai-state 不再是 loading
 3. 核对基本信息各字段与集群对象一致
 4. 核对已启用模块数与 configz 中为真的项数一致
-5. 核对资源用量：CPU/内存/容器组/节点均显示「已用 / 总量」；有 GPU 时显示 GPU 卡已分配/总数
-6. 核对 Kubernetes 状态四个数字存在
+5. 核对资源用量：CPU/内存/容器组/节点均显示「已用 / 总量」；有 GPU 时显示实际使用/总数及独立已分配量
+6. 核对 Kubernetes 状态五个独立标签数字存在
 
 ## 期望结果
 

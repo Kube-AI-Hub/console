@@ -74,7 +74,7 @@
 
 - **代理忽略 fieldSelector**：筛选不做（迁移计划 §52）。别把「按项目筛选」做成前端过滤当前页，那只会筛 20 行。
 - **名称跨项目不唯一**：行键必须是项目/名称（DEC-02）。
-- **configmaps 的 scope 语义**：`scope: 'cluster'` 丢集群段（DEC-03）。
+- **configmaps 的 scope 语义**：`scope: 'cluster'` 丢集群段（见本文件关于 scope 语义的历史决策）。
 - **locale 键是项目级复用的**：`secrets.column.fieldCount`（en 为 Keys）、`configmaps.column.keys`、`serviceaccounts.column.secrets` 来自项目页词典；没有专门的 `cluster.config.column.*`。要改中文措辞（键数/密钥数）需要先加 locale 键。
 - **集群级列表慢**：首屏可达数秒，测试与页面都要用大于默认 20 秒的等待。
 

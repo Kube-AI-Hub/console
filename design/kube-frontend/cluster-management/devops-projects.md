@@ -90,7 +90,7 @@
 
 - 流水线 / 持续部署 / 代码仓库页签（ks-devops 专属 API 与编辑器）。
 - 工程的创建/删除与成员/角色/凭证写操作。
-- 若 DevOps 改为按企业空间授权，按 DEC-01 的「何时重新考虑」调整为 workspace scope。
+- 若 DevOps 改为按企业空间授权，按 DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-01 的「何时重新考虑」调整为 workspace scope。
 
 ## 验收用例
 

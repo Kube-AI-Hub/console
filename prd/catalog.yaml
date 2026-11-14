@@ -449,6 +449,13 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-01
+    - id: detail
+      title: 应用详情
+      prd: prd/kube-frontend/app-store/detail.md
+      design: design/kube-frontend/app-store/detail.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-APP_STORE-DETAIL-01
   - id: user-settings
     title: 用户设置
     prd: prd/kube-frontend/user-settings/_index.md
@@ -545,6 +552,13 @@ modules:
         - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-02
         - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-04
         - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-06
+    - id: federated-projects
+      title: 联邦项目列表
+      prd: prd/kube-frontend/access-control/federated-projects.md
+      design: design/kube-frontend/access-control/federated-projects.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-01
     - id: workspaces
       title: 企业空间列表
       prd: prd/kube-frontend/access-control/workspaces.md
@@ -597,6 +611,20 @@ modules:
       L2:
       - TC-FULL-KUBE-FRONTEND-CLUSTER_MANAGEMENT-01
     features:
+    - id: devops-projects
+      title: DevOps 工程列表
+      prd: prd/kube-frontend/cluster-management/devops-projects.md
+      design: design/kube-frontend/cluster-management/devops-projects.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-01
+    - id: gateway-detail
+      title: 集群网关详情
+      prd: prd/kube-frontend/cluster-management/gateway-detail.md
+      design: design/kube-frontend/cluster-management/gateway-detail.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GATEWAY_DETAIL-01
     - id: kubectl
       title: kubectl 终端
       prd: prd/kube-frontend/cluster-management/kubectl.md
@@ -1100,6 +1128,13 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-COLUMN_VISIBILITY-01
+    - id: gray-release
+      title: 灰度发布列表
+      prd: prd/kube-frontend/app-workloads/gray-release.md
+      design: design/kube-frontend/app-workloads/gray-release.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-01
     - id: page-tip
       title: 列表页头提示
       prd: prd/kube-frontend/app-workloads/page-tip.md
