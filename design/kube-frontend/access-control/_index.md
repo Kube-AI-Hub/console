@@ -4,20 +4,21 @@
 
 ## 关联需求
 
-- AC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-01
+- `AC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-01`
+- `AC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-02`
 
 ## 概述
 
-平台级三张只读表：用户、平台角色、企业空间。
+平台级三张表：用户、平台角色、企业空间。区域根路径 `/kube-frontend/access` 默认进入用户表。
 
 ## 设计目标与非目标
 
-目标：平台作用域有独立布局；三种数据源各自正确。非目标：任何写操作。
+目标：平台作用域有独立布局；三种数据源各自正确；区域根路径落到 registry 的 `defaultPage`。非目标：在根路径做独立落地页。
 
 ## 关键约束
 
 - 用户/平台角色走 IAM 组；企业空间走 resources 代理。
-- 路径 `/kube-frontend/access/<page>`。
+- 路径 `/kube-frontend/access/<page>`；无页签段时必须落到 `users`。
 
 ## 方案决策
 
@@ -34,6 +35,14 @@
 **为什么**：用户/平台角色在 IAM 组，企业空间在 resources 代理。走错来源的报错很不直观（一个 404、一个 "resource is not supported"），把来源写在一处比散落在页面里可靠。
 
 **被否方案**：在页面里按 kind 拼 URL。页面会同时知道 URL 形状与视图模型，职责混乱。
+
+### DEC-L2-KUBE-FRONTEND-ACCESS_CONTROL-03 — 根路径用 index redirect 进用户表
+
+**为什么**：老 console 的 access 布局用 `getIndexRoute` 把 `/access` 指到侧栏第一项（`accounts`）。新 UI 把该项登记为 `users`，侧栏仍指向区域根 `/kube-frontend/access`。布局用 `areaOfPage('platform', segment)` 找页签，空 segment 找不到区域，于是根路径只剩空白 chrome。应用商店已经用 `beforeLoad` redirect 解决同一问题。
+
+**被否方案**：在 `/access` 直接渲染用户表、不改 URL。页签高亮依赖 segment，根路径会永远对不上「用户」；书签与 `/users` 分裂成两个地址。
+
+**何时重新考虑**：若产品要在根路径做三张表的卡片落地页，再拆独立 index 组件，redirect 收回。
 
 ## 系统现状
 
@@ -53,6 +62,7 @@
 
 1. 平台页不出现项目工作区栏。
 2. 用户与平台角色只经 IAM 组读取，企业空间只经 resources 代理。
+3. `/kube-frontend/access` 不渲染无页签的空白布局。
 
 ## 已知坑
 
@@ -70,10 +80,12 @@ E2E：`tests/kube-frontend/access-control/`。
 ## 验收用例
 
 - `TC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-01`
+- `TC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-02`
 
 ## 页面与技术结构
 
-- 区域 `access`（`scope: 'platform'`，三页），布局 `kube-frontend.access/route.tsx`。
+- 区域 `access`（`scope: 'platform'`，三页，`defaultPage: 'users'`），布局 `kube-frontend.access/route.tsx`。
+- 根路径 `kube-frontend.access/index.tsx`：`beforeLoad` redirect 到 `/kube-frontend/access/users`。
 - 组件 `PlatformListPage`，描述符在 `pages/platform/queries.ts`。
 
 ## 状态与数据归属

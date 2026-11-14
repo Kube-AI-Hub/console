@@ -488,7 +488,10 @@ MODULES = [
                 "id": "access-control",
                 "title": "访问控制",
                 "goal": "平台级的三张表：用户（状态、平台角色、最近登录）、平台角色（规则数、是否模板）、企业空间（状态、集群关联）。这些记录不属于任何项目，页面不出现项目工作区栏。",
-                "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-01"]},
+                "tests": {"L2": [
+                    "TC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-01",
+                    "TC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-02",
+                ]},
                 "features": [
                     {
                         "id": "workspace-members",

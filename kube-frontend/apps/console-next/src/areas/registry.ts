@@ -283,6 +283,8 @@ export const AREAS: readonly Area[] = [
     /*
      * Platform scope: no workspace, no cluster, no project. These are the platform's
      * own records, so the area renders under `/kube-frontend/access/…`.
+     * `defaultPage` is what `/kube-frontend/access` redirects to (see the access
+     * index route); keep it in sync with that `beforeLoad` target.
      */
     pages: [
       { key: 'users', path: 'users', titleKey: 'platform.users.title', status: 'ready' },

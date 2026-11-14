@@ -8,7 +8,9 @@ import { AreaTabs } from '@/shell/AreaTabs';
  *
  * The platform-level layout: same two things as the cluster console (area tabs, no
  * project workspace bar), but with neither a cluster nor a project in the URL —
- * these records belong to the platform itself.
+ * these records belong to the platform itself. The index route redirects the bare
+ * path to `users` (the area's `defaultPage`); this layout then has a segment to
+ * hang the tabs on.
  */
 export const Route = createFileRoute('/kube-frontend/access')({
   component: AccessWorkspace,

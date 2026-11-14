@@ -45,6 +45,16 @@ class AccessControlPage:
             self.page.goto(url)
             expect(self.surface(kind)).to_be_visible(timeout=60_000)
 
+    def open_landing(self) -> None:
+        """Open the access area root. The app must land on the users list."""
+        url = f"{self.base_url}/kube-frontend/access"
+        self.page.goto(url)
+        try:
+            expect(self.surface("users")).to_be_visible(timeout=30_000)
+        except AssertionError:
+            self.page.goto(url)
+            expect(self.surface("users")).to_be_visible(timeout=60_000)
+
     def wait_ready(self, kind: str = "users", timeout_ms: int = 180_000) -> None:
         """Platform lists are the slowest reads here (thousands of users)."""
         expect(self.surface(kind)).not_to_have_attribute("data-ai-state", "loading", timeout=timeout_ms)

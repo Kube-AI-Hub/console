@@ -6,10 +6,10 @@
 
 ## 概述
 
-- **路由**：`/kube-frontend/access/{users,clusterroles,workspaces}`
+- **路由**：`/kube-frontend/access` 进入用户表；页签为 `/kube-frontend/access/{users,clusterroles,workspaces}`
 - **谁用**：平台管理员，确认「谁能登录、拥有什么平台角色、平台上有哪些企业空间」。
-- **做哪几步**：打开用户 → 看状态与平台角色；切到平台角色 → 看规则数；切到企业空间 → 看状态与集群关联。
-- **看到什么**：三张列表，各自四列；用户页含创建与行操作。
+- **做哪几步**：从侧栏「访问控制」或根路径打开 → 看到用户表 → 切到平台角色看规则数 → 切到企业空间看状态与集群关联。
+- **看到什么**：三张列表，各自四列；用户页含创建与行操作。根路径不是空白页。
 
 ## 用户故事
 
@@ -25,14 +25,22 @@
 
 **Independent Test**：打开任一平台页，核对没有项目工作区栏。
 
+### US3 - 从访问控制根路径进入用户表 (Priority: P1)
+
+作为 **平台管理员**，我希望 **打开 `/kube-frontend/access` 或点侧栏「访问控制」就能看到用户表**，以便 **不必记住子路径、也不面对空白页**。
+
+**Independent Test**：打开 `/kube-frontend/access`，核对 URL 落到 `/kube-frontend/access/users`，用户页签高亮，列表或空态可见。
+
 ## 验收场景
 
 - **AC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-01** — 已知已登录且有平台权限，当在三个页签之间切换，则每次都显示对应列表（或空态），页签高亮跟随，切换不产生文档请求，且页面不出现项目工作区栏。
+- **AC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-02** — 已知已登录且有平台权限，当打开 `/kube-frontend/access`（无页签段），则客户端重定向到 `/kube-frontend/access/users`，显示用户列表（或空态）与三页签，且「用户」页签高亮。
 
 ## 设计目标
 
 1. 三张表共用一套列表组件，差异由描述符表达。
 2. 平台作用域有独立布局，不复用项目或集群布局。
+3. 区域根路径有默认页，与侧栏入口一致。
 
 ## 约束与边界
 
@@ -42,12 +50,13 @@
 
 ## UI 交互设计
 
-区域页签（用户、平台角色、企业空间）在最上方；无项目切换器；列按窄屏依次折叠。
+区域页签（用户、平台角色、企业空间）在最上方；无项目切换器；列按窄屏依次折叠。侧栏「访问控制」与 `/kube-frontend/access` 都落到用户页，不停留在空白布局。
 
 ## 页面结构
 
 | 页签 | 路由 |
 |---|---|
+| 访问控制根路径 | `/kube-frontend/access` → `/kube-frontend/access/users` |
 | 用户 | `/kube-frontend/access/users` |
 | 平台角色 | `/kube-frontend/access/clusterroles` |
 | 企业空间 | `/kube-frontend/access/workspaces` |
@@ -87,12 +96,15 @@
 - `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_ROLE_DETAIL-01`
 
 - `TC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-01`
+- `TC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-02`
 
 ## 功能需求
 
 - **FR-FULL-KUBE-FRONTEND-ACCESS_CONTROL-01** — 三张表共用列表组件。
 - **FR-FULL-KUBE-FRONTEND-ACCESS_CONTROL-02** — 平台级页面不渲染项目工作区栏。
+- **FR-FULL-KUBE-FRONTEND-ACCESS_CONTROL-03** — `/kube-frontend/access` 必须进入用户表，不得停留在无页签的空白布局。
 
 ## 成功标准
 
 - **SC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-01** — 企业空间名称集合与 `kubectl get workspaces` 一致。
+- **SC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-02** — 打开 `/kube-frontend/access` 后地址以 `/kube-frontend/access/users` 结尾，且用户表面板可见。

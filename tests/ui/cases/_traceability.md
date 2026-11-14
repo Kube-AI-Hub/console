@@ -40,6 +40,7 @@
 | console-core/resource-detail/not-found | `AC-L3-CONSOLE-CORE-RESOURCE_DETAIL-NOT_FOUND-02` | `TC-L3-CONSOLE-CORE-RESOURCE_DETAIL-NOT_FOUND-02` | [`design/console-core/resource-detail/not-found.md`](../../../design/console-core/resource-detail/not-found.md) | [`tests/ui/tests/console-core/resource-detail/test_TC_L3_CONSOLE_CORE_RESOURCE_DETAIL_NOT_FOUND_02.py`](../../../tests/ui/tests/console-core/resource-detail/test_TC_L3_CONSOLE_CORE_RESOURCE_DETAIL_NOT_FOUND_02.py) |
 | kube-frontend/_index | `AC-CORE-KUBE-FRONTEND-01` | `TC-CORE-KUBE-FRONTEND-01` | [`design/kube-frontend/_index.md`](../../../design/kube-frontend/_index.md) | [`tests/ui/tests/kube-frontend/core/test_TC_CORE_KUBE_FRONTEND_01.py`](../../../tests/ui/tests/kube-frontend/core/test_TC_CORE_KUBE_FRONTEND_01.py) |
 | kube-frontend/access-control/_index | `AC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-01` | `TC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-01` | [`design/kube-frontend/access-control/_index.md`](../../../design/kube-frontend/access-control/_index.md) | [`tests/ui/tests/kube-frontend/access-control/test_TC_FULL_KUBE_FRONTEND_ACCESS_CONTROL_01.py`](../../../tests/ui/tests/kube-frontend/access-control/test_TC_FULL_KUBE_FRONTEND_ACCESS_CONTROL_01.py) |
+| kube-frontend/access-control/_index | `AC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-02` | `TC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-02` | [`design/kube-frontend/access-control/_index.md`](../../../design/kube-frontend/access-control/_index.md) | [`tests/ui/tests/kube-frontend/access-control/test_TC_FULL_KUBE_FRONTEND_ACCESS_CONTROL_02.py`](../../../tests/ui/tests/kube-frontend/access-control/test_TC_FULL_KUBE_FRONTEND_ACCESS_CONTROL_02.py) |
 | kube-frontend/access-control/federated-projects | `AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-01` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-01` | [`design/kube-frontend/access-control/federated-projects.md`](../../../design/kube-frontend/access-control/federated-projects.md) | [`tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_FEDERATED_PROJECTS_01.py`](../../../tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_FEDERATED_PROJECTS_01.py) |
 | kube-frontend/access-control/federated-projects | `AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-02` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-02` | [`design/kube-frontend/access-control/federated-projects.md`](../../../design/kube-frontend/access-control/federated-projects.md) | [`tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_FEDERATED_PROJECTS_02.py`](../../../tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_FEDERATED_PROJECTS_02.py) |
 | kube-frontend/access-control/platform-roles | `AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-01` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-01` | [`design/kube-frontend/access-control/platform-roles.md`](../../../design/kube-frontend/access-control/platform-roles.md) | [`tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_PLATFORM_ROLES_01.py`](../../../tests/ui/tests/kube-frontend/access-control/test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_PLATFORM_ROLES_01.py) |
@@ -356,7 +357,7 @@
 
 ## 小结
 
-- 需求里的 AC：349 条，其中未覆盖 1 条、无技术方案承接 14 条、无用例规格实现 1 条。
+- 需求里的 AC：350 条，其中未覆盖 1 条、无技术方案承接 14 条、无用例规格实现 1 条。
 - 未覆盖：`AC-L2-KUBE-FRONTEND-LOGIN-07`
 - 无技术方案承接：`AC-L2-KUBE-FRONTEND-LOGIN-01`, `AC-L2-KUBE-FRONTEND-LOGIN-02`, `AC-L2-KUBE-FRONTEND-LOGIN-03`, `AC-L2-KUBE-FRONTEND-LOGIN-04`, `AC-L2-KUBE-FRONTEND-LOGIN-05`, `AC-L2-KUBE-FRONTEND-LOGIN-06`, `AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L2-KUBE-FRONTEND-THEME-01`, `AC-L2-KUBE-FRONTEND-THEME-02`, `AC-L2-KUBE-FRONTEND-THEME-03`, `AC-L2-KUBE-FRONTEND-THEME-04`, `AC-L2-KUBE-FRONTEND-THEME-05`, `AC-L3-KUBE-FRONTEND-MONITORING-PROJECT_CUSTOM_MONITORING-01`, `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW-01`
 - 无用例规格实现：`AC-L2-KUBE-FRONTEND-LOGIN-07`
@@ -412,6 +413,7 @@
 | kube-frontend/_index | `US3` | `TC-CORE-KUBE-FRONTEND-01` |
 | kube-frontend/access-control/_index | `US1` | `TC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-01` |
 | kube-frontend/access-control/_index | `US2` | `TC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-01` |
+| kube-frontend/access-control/_index | `US3` | `TC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-02` |
 | kube-frontend/access-control/federated-projects | `US1` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-01`, `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-02` |
 | kube-frontend/access-control/platform-roles | `US1` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-01`, `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-02`, `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-03`, `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-06` |
 | kube-frontend/access-control/platform-roles | `US2` | `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-04` |
@@ -652,4 +654,4 @@
 | kube-frontend/workbench/context | `US1` | `TC-L3-KUBE-FRONTEND-WORKBENCH-CONTEXT-01` |
 | kube-frontend/workbench/entry | `US1` | `TC-L3-KUBE-FRONTEND-WORKBENCH-ENTRY-01` |
 
-- 用户故事：286 条，其中未覆盖 0 条。
+- 用户故事：287 条，其中未覆盖 0 条。
