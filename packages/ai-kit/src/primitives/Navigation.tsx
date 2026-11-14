@@ -440,7 +440,7 @@ export function Pagination({
              * Radix toggles the list closed on the same gesture.
              */}
             <Select
-              className="w-[5.5rem]"
+              className="h-11 w-auto min-w-0 shrink-0 gap-1 rounded-ai-sm bg-transparent px-2 text-xs text-ai-fg-secondary hover:bg-ai-surface-2 hover:text-ai-fg sm:h-7 sm:min-h-0 [&_svg]:size-3.5 [&_svg]:text-current"
               contentClassName="min-w-[12rem]"
               value={String(pageSize)}
               aria-label={text.pageSize}

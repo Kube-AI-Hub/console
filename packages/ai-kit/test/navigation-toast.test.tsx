@@ -221,7 +221,14 @@ describe('Pagination', () => {
         onPageSizeChange={() => undefined}
       />,
     );
-    await userEvent.click(screen.getByRole('combobox', { name: '每页条数' }));
+    const trigger = screen.getByRole('combobox', { name: '每页条数' });
+    expect(trigger.className).toMatch(/\bh-11\b/);
+    expect(trigger.className).toMatch(/sm:h-7/);
+    expect(trigger.className).toMatch(/rounded-ai-sm/);
+    expect(trigger.className).toMatch(/bg-transparent/);
+    expect(trigger.className).toMatch(/text-ai-fg-secondary/);
+    expect(trigger.className).not.toMatch(/bg-ai-surface-1/);
+    await userEvent.click(trigger);
     const list = await screen.findByRole('listbox');
     const popup = list.closest('[class*="bg-ai-bg-overlay"]');
     expect(popup).not.toBeNull();
