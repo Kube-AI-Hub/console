@@ -21,14 +21,16 @@ preconditions:
 - 已登录，且在 host 集群的 default 项目空间
 steps:
 - 打开该服务详情
-- 读取关联容器组表
+- 在「概览」页签读取端口表
+- 点「关联容器组」页签，读取容器组表
 - 用 API 按服务选择器统计 Pod
 expected:
 - 服务详情出现「关联容器组」区块
 - 行数等于服务选择器匹配到的 Pod 数
 - 同时存在「端口」区块
 troubleshoot:
-- 区块不出现说明按 workload 的 matchLabels 形状读了服务选择器（服务是扁平 map）
+- 区块不出现：详情页改用页签后，容器组表只在「关联容器组」页签内渲染，需先点页签
+- 点开页签仍为空说明按 workload 的 matchLabels 形状读了服务选择器（服务是扁平 map）
 - 行数为 0 而 API 有匹配，多为选择器解析错误
 update_automation:
 - 选择器形状变化时改 api-client 的 pods()

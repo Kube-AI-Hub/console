@@ -22,6 +22,7 @@ preconditions:
 steps:
 - 用 API 取一个有事件的容器组，并按 involvedObject 过滤读其事件
 - 打开该容器组详情
+- 点「事件」页签
 - 核对事件区块条数与接口一致
 - 核对首条原因出现在页面上
 expected:
@@ -31,6 +32,6 @@ expected:
 troubleshoot:
 - 事件区块为空但接口有条目：fieldSelector 少了一层（involvedObject.kind 必须一起给）
 - 时间为空：只读了 lastTimestamp，事件可能只有 eventTime
-- 区块不出现：只有 pods 详情渲染该区块
+- 区块不出现：详情页改用页签后，区块只在「事件」页签内渲染，需先点页签
 update_automation:
 - 选择器见 pages/app_workloads.py 与 WorkloadDetailPage.tsx

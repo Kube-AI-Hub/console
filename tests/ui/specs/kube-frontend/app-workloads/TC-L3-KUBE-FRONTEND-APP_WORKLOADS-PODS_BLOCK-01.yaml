@@ -21,6 +21,7 @@ preconditions:
 - 已登录，且在 host 集群的 default 项目空间
 steps:
 - 打开该部署详情
+- 点「关联容器组」页签
 - 读取关联容器组表
 - 用 API 按选择器统计 Pod 数
 expected:
@@ -28,7 +29,8 @@ expected:
 - 行数与 API 统计一致
 - 每行状态非空
 troubleshoot:
-- 区块不出现说明选择器为空或 Pod 尚未创建
+- 区块不出现：详情页改用页签后，区块只在「关联容器组」页签内渲染，需先点页签
+- 点开页签仍为空说明选择器为空或 Pod 尚未创建
 - 行数偏多说明未按 ownerReferences 过滤（当前按选择器统计，同名标签会重合）
 update_automation:
 - 区块字段变化时改 api-client 的 toWorkloadPod
