@@ -1,0 +1,41 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-LOG_COLLECTIONS-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: log-collections
+title: 集群日志收集 · 三页签与收集项详情（只读）
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/log-collections'
+prd: prd/kube-frontend/cluster-management/log-collections.md
+design: design/kube-frontend/cluster-management/log-collections.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-LOG_COLLECTIONS-02
+
+story:
+- US2
+
+product: 日志收集页的容器日志 / 事件 / 审计三个分类页签，页签内展示该分类的收集项与采集输入；收集项名称打开只读详情（属性、匹配与过滤摘要、原始 YAML）。
+preconditions:
+- 已登录，且对 host 集群有读取权限
+- 日志组件 CR 可读（某分类没有输出时该页签显示空态，用例仍通过）
+steps:
+- 用 API 读 outputs，并按 logging.kubesphere.io/component 标签分组统计每类条数
+- 打开集群日志收集页，核对三个页签都可见
+- 依次切到三个页签，核对每类渲染收集项表头（或该分类空态）
+- 有收集项时核对可见行数等于该分类 CR 条数
+- 点首个可见收集项的名称，核对详情与只读 YAML，并核对没有写操作
+- 关闭详情，切回页签
+expected:
+- cluster-log-collections:tab:{logging,events,auditing} 三个句柄都可见且可切换
+- 每个页签的内容区可见，且包含收集项表头与该分类的采集输入区
+- 该分类没有输出时显示「该分类没有收集项」空态
+- 详情里 YAML 以只读 pre 呈现（无 textarea/contenteditable），内容含 apiVersion 与 kind: Output
+- 详情内没有保存/创建/删除等写操作
+troubleshoot:
+- 页签缺失：页面没有用 Tabs 或句柄没写到 trigger 上
+- 切换后内容为空：面板被卸载或 hidden 判断写反
+- 行数不等于分类条数：component 标签没参与过滤（把所有输出都塞进每个页签）
+- YAML 不可见：详情用了异步请求但对象没取回；本页详情复用列表已读到的对象
+update_automation:
+- 选择器见 pages/cluster_management.py 与 @/pages/cluster/ClusterLogCollectionsPage.tsx；行句柄 data-ai-row=<输出名>，详情 YAML 句柄 cluster-log-collections:yaml
