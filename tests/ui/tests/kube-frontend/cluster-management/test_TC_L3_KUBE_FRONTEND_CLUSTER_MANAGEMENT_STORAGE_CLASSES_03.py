@@ -46,6 +46,16 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_STORAGE_CLASSES_03(cluster_manag
 
     section = ui.page.locator('[data-ai-id="sc-detail:pvcs"]')
     expect(section).to_be_visible(timeout=30_000)
+    # The section wrapper exists before its query resolves; wait for the table or the empty state
+    # inside it, otherwise the headers are read from a placeholder.
+    expect(section.locator("table").or_(section.locator('[data-ai-id="sc-detail:pvcs-empty"]')).first).to_be_visible(timeout=60_000)
+
+    if expected_claims and section.locator("table").count() == 0:
+        # PVCs are created and deleted by other cases while this one runs. Re-read the collection:
+        # if the class really has no claims now, the empty state is the correct rendering.
+        status, fresh = ui.api.request("GET", f"{KAPIS}/persistentvolumeclaims?limit=-1", timeout=60)
+        fresh_items = (fresh.get("items") or []) if status == 200 and isinstance(fresh, dict) else []
+        expected_claims = [claim for claim in fresh_items if _storage_class(claim) == target]
 
     if expected_claims:
         headers = [header.strip() for header in section.locator("thead th").all_inner_texts() if header.strip()]
