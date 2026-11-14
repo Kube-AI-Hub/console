@@ -1,0 +1,38 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: workspace-console
+title: 企业空间控制台 · 配额（项目 × 资源）
+entry_url: '{BASE_URL}/kube-frontend/workspaces/system-workspace/quota'
+prd: prd/kube-frontend/access-control/workspace-quota.md
+design: design/kube-frontend/access-control/workspace-quota.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-02
+
+story:
+- US1
+
+product: 企业空间独立作用域：配额页把空间内各项目的 ResourceQuota 展开为「项目 / 资源 / 上限 / 已使用」。
+preconditions:
+- 已登录，且能看到至少一个企业空间
+- 该企业空间的项目与项目级 ResourceQuota 可读（可能为 0 条配额）
+steps:
+- 用 API 读企业空间列表，选一个有数据的空间
+- 读该空间的项目，再读每个项目的 ResourceQuota，按 spec.hard 的键展开得到期望行数 N
+- 打开该空间的 /quota 页
+- 等待 surface 离开 loading
+- 核对表头四列与行数；N 为 0 时核对空态
+expected:
+- surface 可见且 data-ai-state 从 loading 变为 ready 或 empty
+- 表头含 项目 / 资源 / 上限 / 已使用
+- 行数等于 N（超过 20 行时为第一页 20 行）
+- N 为 0 时表格为空态，页面不报错
+troubleshoot:
+- 行数为 0 但接口有配额：页面读的是 /api/v1/namespaces/<ns>/resourcequotas，检查 selector 与命名空间
+- 整页错误：企业空间成员对某个项目无权读 ResourceQuota，检查请求是否并发抛出
+- 表头是「把配额 CR 当空间级」的旧口径：检查是否误用了 tenant 的 405 集合接口
+update_automation:
+- 选择器：pages/access_control.py（origin 拼接）、WorkspaceQuotaPage.tsx 的 workspace-quota:surface

@@ -1,0 +1,38 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: workspace-console
+title: 企业空间控制台 · 角色列表
+entry_url: '{BASE_URL}/kube-frontend/workspaces/system-workspace/roles'
+prd: prd/kube-frontend/access-control/workspace-roles.md
+design: design/kube-frontend/access-control/workspace-roles.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-03
+
+story:
+- US1
+
+product: 企业空间独立作用域：角色页列出工作空间作用域的 WorkspaceRole，含规则数与创建时间。
+preconditions:
+- 已登录，且能看到至少一个企业空间
+- 该企业空间的 workspaceroles 集合可读（可能为 0 个角色）
+steps:
+- 用 API 读企业空间列表，优先选有角色的空间
+- 读 /kapis/iam.kubesphere.io/v1alpha2/workspaces/<ws>/workspaceroles?limit=-1 得到期望行数 R
+- 打开该空间的 /roles 页
+- 等待 surface 离开 loading
+- 核对表头三列与行数；R 为 0 时核对空态
+expected:
+- surface 可见且 data-ai-state 从 loading 变为 ready 或 empty
+- 表头含 名称 / 规则数 / 创建时间
+- 行数等于 R（超过 20 行时为第一页 20 行）
+- R 为 0 时表格为空态，页面不报错
+troubleshoot:
+- 行数比预期多：读了平台级 /workspaceroles 且没按 label 过滤，必须用工作空间作用域路径
+- 规则数全是 0：rules 来自对象顶层字段，不是 metadata
+- created 列显示带 T/Z 的原始串：忘了 formatTimestamp
+update_automation:
+- 选择器：pages/access_control.py（origin 拼接）、WorkspaceRolesPage.tsx 的 workspace-roles:surface
