@@ -299,6 +299,19 @@ export type {
 export { isLoginErrorCode, sessionApi } from './session';
 export { strategiesApi, strategyStatusOf, targetServiceOf, toStrategySummary } from './servicemesh';
 export type { KubeStrategy, StrategyStatus, StrategySummary, StrategyType } from './servicemesh';
+export {
+  devopsCollectionsApi,
+  devopsProjectNamespace,
+  toCdApplicationSummary,
+  toCodeRepositorySummary,
+  toPipelineSummary,
+} from './devops';
+export type {
+  CdApplicationSummary,
+  CodeRepositorySummary,
+  DevopsProjectDetail,
+  PipelineSummary,
+} from './devops';
 export { isTokenExpired, userFromToken } from './token';
 
 /**

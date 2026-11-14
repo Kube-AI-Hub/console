@@ -1,7 +1,15 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { ApiError } from '@kube-ai-hub/api-client';
+import {
+  ApiError,
+  devopsCollectionsApi,
+  devopsProjectNamespace,
+  type CdApplicationSummary,
+  type CodeRepositorySummary,
+  type DevopsProjectDetail,
+  type PipelineSummary,
+} from '@kube-ai-hub/api-client';
 import { AiButton, AiSurface, Button, Skeleton, cn } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
@@ -10,12 +18,18 @@ import { DefinitionRow } from '@/components/resource/DefinitionRow';
 import { formatTimestamp } from '@/lib/time';
 
 /**
- * DevOps 工程详情（骨架）.
+ * DevOps 工程详情.
  *
- * Basic information plus the three project-scoped collections the old console put on tabs.
- * The devops project is a cluster-scoped CRD, so the basic read needs no workspace; the
- * member/role/credential endpoints resolve the project by name under their own API groups
- * (IAM for the first two, the devops group for credentials).
+ * Basic information plus the six project-scoped collections the old console put on tabs:
+ * members / roles / credentials, and — now that the servicemesh-era devops plugins are on —
+ * pipelines, continuous deployment (GitOps applications) and code repositories
+ * (GitRepositories).
+ *
+ * The devops project is a cluster-scoped CRD, so the basic read needs no workspace. The
+ * three attribute collections resolve the project by name under their own API groups (IAM
+ * for the first two, the devops group for credentials); the three pipeline collections are
+ * namespaced and read the project's `status.adminNamespace`, falling back to the project
+ * name when the object is missing or half-created.
  *
  * Every tab is an independent read on purpose: this cluster currently has no devops project,
  * and even when one exists an unreadable collection must not hide the others. A tab that
@@ -27,12 +41,26 @@ export interface DevopsProjectDetailPageProps {
   name: string;
 }
 
-type DevopsTab = 'members' | 'roles' | 'credentials';
+type DevopsTab = 'members' | 'roles' | 'credentials' | 'pipelines' | 'cd' | 'coderepos';
 
-const TAB_LABEL_KEYS: Record<DevopsTab, 'devops.detail.members' | 'devops.detail.roles' | 'devops.detail.credentials'> = {
+/** Tab order follows the old console: attributes first, then the pipeline collections. */
+const DEV_TABS: readonly DevopsTab[] = ['members', 'roles', 'credentials', 'pipelines', 'cd', 'coderepos'];
+
+const TAB_LABEL_KEYS: Record<
+  DevopsTab,
+  | 'devops.detail.members'
+  | 'devops.detail.roles'
+  | 'devops.detail.credentials'
+  | 'devops.detail.pipelines'
+  | 'devops.detail.cd'
+  | 'devops.detail.codeRepos'
+> = {
   members: 'devops.detail.members',
   roles: 'devops.detail.roles',
   credentials: 'devops.detail.credentials',
+  pipelines: 'devops.detail.pipelines',
+  cd: 'devops.detail.cd',
+  coderepos: 'devops.detail.codeRepos',
 };
 
 const MEMBERS_PATH = (name: string) => `/kapis/iam.kubesphere.io/v1alpha2/devops/${encodeURIComponent(name)}/members`;
@@ -48,6 +76,8 @@ interface KubeMeta {
 
 interface KubeDevopsProject {
   metadata?: KubeMeta;
+  /** Written by the devops controller; the namespace of pipelines/CD/code repos. */
+  status?: { adminNamespace?: string };
 }
 
 interface KubeCollectionItem {
@@ -76,6 +106,33 @@ export function DevopsProjectDetailPage({ cluster, name }: DevopsProjectDetailPa
         ...(signal ? { signal } : {}),
       });
     },
+  });
+
+  /**
+   * Namespace of the project's pipeline collections.
+   *
+   * `status.adminNamespace` is the CRD's only status field and the namespace the devops
+   * controller creates; the project name is the fallback when the object is missing or
+   * the controller has not written it yet. The fallback keeps the tabs observable for a
+   * non-existent project (its name is a valid, empty namespace for the list endpoints),
+   * which is the only way to verify this page on a cluster with zero projects.
+   */
+  const projectNamespace = devopsProjectNamespace(project.data as DevopsProjectDetail | undefined, name);
+
+  const pipelines = useQuery({
+    queryKey: ['devops-pipelines', projectNamespace],
+    queryFn: ({ signal }) => devopsCollectionsApi(apiClient).pipelines({ cluster, namespace: projectNamespace, signal }),
+    retry: false,
+  });
+  const cdApplications = useQuery({
+    queryKey: ['devops-cd', projectNamespace],
+    queryFn: ({ signal }) => devopsCollectionsApi(apiClient).cdApplications({ cluster, namespace: projectNamespace, signal }),
+    retry: false,
+  });
+  const codeRepositories = useQuery({
+    queryKey: ['devops-code-repos', projectNamespace],
+    queryFn: ({ signal }) => devopsCollectionsApi(apiClient).codeRepositories({ cluster, namespace: projectNamespace, signal }),
+    retry: false,
   });
   const members = useQuery({
     queryKey: ['devops-members', name],
@@ -136,6 +193,9 @@ export function DevopsProjectDetailPage({ cluster, name }: DevopsProjectDetailPa
               value={meta.labels?.['kubesphere.io/workspace'] ?? ''}
               aiId="devops-detail:workspace"
             />
+            {/* status.adminNamespace is the namespace the three pipeline tabs read;
+                showing it makes a fallback (project name) visible instead of guessing. */}
+            <DefinitionRow label={t('devops.detail.namespace')} value={projectNamespace} aiId="devops-detail:namespace" />
             <DefinitionRow label={t('workspace.detail.creator')} value={annotations['kubesphere.io/creator'] ?? ''} aiId="devops-detail:creator" />
             <DefinitionRow
               label={t('cluster.column.createdAt')}
@@ -154,7 +214,7 @@ export function DevopsProjectDetailPage({ cluster, name }: DevopsProjectDetailPa
       ) : null}
 
       <div role="tablist" aria-label={t('devops.list.title')} className="flex flex-wrap gap-1 border-b border-ai-line">
-        {(['members', 'roles', 'credentials'] as const).map((tab) => {
+        {DEV_TABS.map((tab) => {
           const selected = tab === activeTab;
           return (
             <Button
@@ -228,6 +288,53 @@ export function DevopsProjectDetailPage({ cluster, name }: DevopsProjectDetailPa
           })}
         />
       ) : null}
+      {activeTab === 'pipelines' ? (
+        <CollectionPanel
+          tab="pipelines"
+          query={pipelines}
+          emptyKey="devops.detail.pipelinesEmpty"
+          columns={[t('cluster.column.name'), t('devops.detail.pipelineType'), t('devops.detail.pipelineStatus'), t('cluster.column.createdAt')]}
+          rows={pipelines.data ?? []}
+          renderRow={(item: PipelineSummary) => ({
+            key: item.name,
+            name: item.name,
+            cells: [item.alias || item.name, item.type || '-', item.syncStatus || '-', formatTimestamp(item.createdAt)],
+          })}
+        />
+      ) : null}
+      {activeTab === 'cd' ? (
+        <CollectionPanel
+          tab="cd"
+          query={cdApplications}
+          emptyKey="devops.detail.cdEmpty"
+          columns={[
+            t('cluster.column.name'),
+            t('devops.detail.syncStatus'),
+            t('devops.detail.healthStatus'),
+            t('devops.detail.cdDestination'),
+          ]}
+          rows={cdApplications.data ?? []}
+          renderRow={(item: CdApplicationSummary) => ({
+            key: item.name,
+            name: item.name,
+            cells: [item.alias || item.name, item.syncStatus || '-', item.healthStatus || '-', item.destination || '-'],
+          })}
+        />
+      ) : null}
+      {activeTab === 'coderepos' ? (
+        <CollectionPanel
+          tab="coderepos"
+          query={codeRepositories}
+          emptyKey="devops.detail.codeReposEmpty"
+          columns={[t('cluster.column.name'), t('devops.detail.repoProvider'), t('devops.detail.repoURL')]}
+          rows={codeRepositories.data ?? []}
+          renderRow={(item: CodeRepositorySummary) => ({
+            key: item.name,
+            name: item.name,
+            cells: [item.alias || item.name, item.provider || '-', item.url || '-'],
+          })}
+        />
+      ) : null}
     </AiSurface>
   );
 }
@@ -238,7 +345,7 @@ export function DevopsProjectDetailPage({ cluster, name }: DevopsProjectDetailPa
  * The failure state is its own branch (not the list's empty state) because a 403/404 on
  * members must not read as "this project has no members".
  */
-function CollectionPanel({
+function CollectionPanel<T>({
   tab,
   query,
   emptyKey,
@@ -248,13 +355,19 @@ function CollectionPanel({
 }: {
   tab: DevopsTab;
   query: { isPending: boolean; isError: boolean; error: unknown; refetch: () => void };
-  emptyKey: 'devops.detail.membersEmpty' | 'devops.detail.rolesEmpty' | 'devops.detail.credentialsEmpty';
+  emptyKey:
+    | 'devops.detail.membersEmpty'
+    | 'devops.detail.rolesEmpty'
+    | 'devops.detail.credentialsEmpty'
+    | 'devops.detail.pipelinesEmpty'
+    | 'devops.detail.cdEmpty'
+    | 'devops.detail.codeReposEmpty';
   columns: string[];
-  rows: unknown[];
-  renderRow: (item: KubeCollectionItem) => { key: string; name: string; cells: string[] };
+  rows: T[];
+  renderRow: (item: T) => { key: string; name: string; cells: string[] };
 }): React.ReactElement {
   const t = useT();
-  const rendered = (rows as KubeCollectionItem[]).map(renderRow);
+  const rendered = rows.map(renderRow);
   return (
     <section className="rounded-lg border border-ai-border bg-ai-surface p-4" data-ai-id={`devops-detail:${tab}`}>
       {query.isPending ? <Skeleton className="h-16 w-full" /> : null}

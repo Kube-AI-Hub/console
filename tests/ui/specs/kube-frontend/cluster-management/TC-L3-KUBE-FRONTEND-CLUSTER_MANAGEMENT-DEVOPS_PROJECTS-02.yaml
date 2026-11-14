@@ -1,0 +1,40 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: devops-projects
+title: DevOps 工程详情 · 流水线 / 持续部署 / 代码仓库页签
+entry_url: "{BASE_URL}/kube-frontend/clusters/host/devops"
+prd: prd/kube-frontend/cluster-management/devops-projects.md
+design: design/kube-frontend/cluster-management/devops-projects.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-02
+
+story:
+- US2
+
+product: DevOps 工程详情的流水线 / 持续部署 / 代码仓库三个只读页签：命名空间取工程的 status.adminNamespace（对象不存在时回退工程名），每个页签独立显示表格/空态/失败原因+重试；工程不存在时基本信息显示 not-found 而页签仍可切换。
+preconditions:
+- 已登录，且 devopsprojects、pipelines、gitrepositories、gitops applications 可读（当前集群 0 个工程，空态/回退命名空间为主路径）
+- 只读用例，不依赖 webhook；错误态通过拦截 pipelines 请求构造
+steps:
+- 用 API 读 /apis/devops.kubesphere.io/v1alpha3/devopsprojects 得到工程数 N；N>0 用第一个工程名与它的 status.adminNamespace，N=0 用 tc-e2e-missing-devops 工程名
+- 拦截 pipelines 列表请求返回 500，打开详情
+- 切到流水线页签，读取失败原因与重试按钮
+- 解除拦截并点击重试，读取流水线页签的空态/表格
+- 依次切到持续部署、代码仓库页签
+- N>0 时读取基本信息里的工程命名空间
+expected:
+- 三个页签（devops-detail:tab:pipelines|cd|coderepos）可见且可切换，点击后 aria-selected=true、对应面板可见
+- 流水线页签先显示 devops-detail:pipelines-error 与 pipelines-retry；解除拦截并重试后显示 pipelines-empty 或 pipelines-table，不再显示 error
+- 持续部署与代码仓库各显示 cd-empty/cd-table 与 coderepos-empty/coderepos-table 之一，不出现空表冒充空态
+- N>0 时 devops-detail:namespace 等于工程的 status.adminNamespace（缺失则工程名）；N=0 时 devops-detail:not-found 可见且页签仍可切换
+troubleshoot:
+- 流水线请求 404：应使用 /apis/devops.kubesphere.io/v1alpha3/namespaces/<adminNamespace>/pipelines，不是 kapis
+- 代码仓库 404：资源名是 gitrepositories，不是 coderepositories
+- 持续部署 404：读 /apis/gitops.kubesphere.io/v1alpha1/namespaces/<adminNamespace>/applications，devops 组没有 cd
+- 命名空间读错：DevOpsProject 的命名空间在 status.adminNamespace，不是 metadata.name
+update_automation:
+- 选择器：devops-detail:surface/not-found/namespace/tab:pipelines|cd|coderepos 与各面板 -table/-empty/-error/-retry
