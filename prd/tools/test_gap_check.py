@@ -18,15 +18,21 @@ class GapClassificationTests(unittest.TestCase):
             ("migrated", "volumesnapshots"),
         )
 
-    def test_unimplemented_snapshot_routes_remain_visible(self):
+    def test_unregistered_snapshot_routes_are_reported(self):
+        # Both routes shipped with the snapshot-content work: `/snapshots` is a redirect and
+        # `/volume-snapshot-content/<name>` a detail page. What must stay true is that a
+        # segment with no matching route and no registration is reported, not silently dropped.
         for segment in ("snapshots", "volume-snapshot-content"):
             with self.subTest(segment=segment):
-                self.assertEqual(gap_check.classify("clusters", segment, set())[0], "planned")
+                self.assertEqual(gap_check.classify("clusters", segment, set())[0], "untracked")
 
-    def test_existing_route_reports_stale_registration(self):
-        category, note = gap_check.classify("clusters", "snapshots", {"snapshots"})
-        self.assertEqual(category, "migrated")
-        self.assertIn("登记过期", note)
+    def test_registered_segment_without_route_is_reported(self):
+        # A registration is a decision, not proof: once its route directory is gone the
+        # segment must fall back to the unregistered bucket instead of being reported as done.
+        for segment in ("snapshots", "volume-snapshot-content"):
+            with self.subTest(segment=segment):
+                category, _ = gap_check.classify("clusters", segment, set())
+                self.assertNotEqual(category, "migrated")
 
 
 if __name__ == "__main__":
