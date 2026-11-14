@@ -127,19 +127,14 @@ const aiKitPreset: Partial<Config> = {
           to: { opacity: '1', transform: 'none' },
         },
         /**
-         * Entrance for elements that are centred with `translate`.
+         * Entrance for a centred panel (the modal on `sm+`).
          *
-         * Only `scale` and `opacity` are animated here. The centring offset lives
-         * on the element's own `translate` property (`-translate-x-1/2`), which is
-         * a separate property from `transform` — so this animation cannot fight
-         * it and needs no compose trick.
-         *
-         * The previous version animated `transform: translate(-50%,-50%) scale(..)`
-         * on top of a static `translate: -50% -50%`. During the animation the
-         * element was offset twice, and `fill-mode: none` dropped the `to` frame
-         * the moment it ended, so the dialog slid from up-left down-right into
-         * place instead of appearing centred. `both` keeps the end state applied,
-         * matching `ai-sheet-in`.
+         * Only `scale` and `opacity` are animated here. The panel is centred with
+         * `margin: auto`, not a translate on `transform`, so this animation cannot
+         * fight the placement. `both` keeps the end state applied, matching
+         * `ai-sheet-in`. Ending at `transform: none` would drop the scale but is
+         * also the pattern that used to snap a translate-centred dialog off-centre
+         * the moment the animation finished.
          */
         'ai-pop-in': {
           from: { opacity: '0', transform: 'scale(var(--ai-pop-scale))' },

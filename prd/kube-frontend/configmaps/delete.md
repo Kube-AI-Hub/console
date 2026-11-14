@@ -33,6 +33,7 @@
 ## UI 交互设计
 
 - 行内删除为次要操作（ghost），批量删除为危险操作（danger）。
+- 删除确认走 ai-kit `Modal`（与 overlays 同一套弹窗），不是浏览器原生 `window.confirm`。
 - 未选中时批量按钮禁用，并带 `data-ai-needs`，让智能体知道缺哪一步。
 - 失败时在列表下方显示 `role="alert"` 的一行错误。
 

@@ -159,23 +159,18 @@ describe('Layout columns', () => {
 describe('Modal on a phone', () => {
   beforeEach(() => mockViewport(true));
 
-  it('uses a bottom sheet layout below the breakpoint', () => {
+  it('stays centred below the sm breakpoint', () => {
+    // A bottom sheet below `sm` looked uncentred in Storybook and in any
+    // console chrome that leaves the canvas under 640px. The dialog is a
+    // centred box at every width; padding on `w-[calc(100%-2rem)]` keeps it
+    // off the screen edges on a phone.
     render(<Modal open onOpenChange={() => undefined} title="t">body</Modal>);
     const dialog = screen.getByRole('dialog');
-    expect(dialog.className).toMatch(/bottom-0/);
-    expect(dialog.className).toMatch(/rounded-t-ai-xl/);
-    // The centred desktop placement is restored at `sm`.
-    expect(dialog.className).toMatch(/sm:left-1\/2/);
-  });
-
-  it('keeps the sheet settled after the entrance animation ends', () => {
-    // Regression: the animation shorthand omitted `both`, so the browser
-    // discarded the final keyframe and the sheet fell back to the element's
-    // pre-animation transform, settling a full height below the viewport.
-    render(<Modal open onOpenChange={() => undefined} title="t">body</Modal>);
-    const dialog = screen.getByRole('dialog');
-    expect(dialog.className).toMatch(/animate-ai-sheet-in/);
-    expect(aiKitPreset.theme.extend.animation['ai-sheet-in']).toMatch(/\bboth$/);
+    expect(dialog.className).toMatch(/left-1\/2/);
+    expect(dialog.className).toMatch(/top-1\/2/);
+    expect(dialog.className).toContain('[translate:-50%_-50%]');
+    expect(dialog.className).toMatch(/animate-ai-pop-in/);
+    expect(aiKitPreset.theme.extend.animation['ai-pop-in']).toMatch(/\bboth$/);
   });
 });
 

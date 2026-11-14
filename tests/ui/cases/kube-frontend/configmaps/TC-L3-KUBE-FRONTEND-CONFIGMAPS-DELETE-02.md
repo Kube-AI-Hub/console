@@ -47,11 +47,11 @@
 
 1. 打开 {BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps
 2. 点击该行「删除」
-3. 在确认框点确定
+3. 在居中的确认弹窗点确定
 
 ## 期望结果
 
-- 确认框出现
+- 确认弹窗出现（ai-kit Modal，不是浏览器原生对话框）
 - 删除请求返回 204
 - 列表重新拉取且该行消失
 - 已选项清空

@@ -117,6 +117,54 @@ describe('ResourceList', () => {
     await userEvent.selectOptions(picker, '50');
     expect(onPageSizeChange).toHaveBeenCalledWith(50);
   });
+
+  it('asks for confirmation in a modal before a destructive row action', async () => {
+    const onAction = vi.fn();
+    render(
+      <ResourceList
+        schema={{
+          ...listSchema,
+          rowActions: [{ key: 'delete', label: '删除', tone: 'danger', confirm: '确认删除该配置字典？' }],
+        }}
+        rows={rows}
+        onAction={onAction}
+      />,
+    );
+    await userEvent.click(screen.getAllByRole('button', { name: '更多操作' })[0]!);
+    await userEvent.click(screen.getByRole('menuitem', { name: '删除' }));
+    expect(onAction).not.toHaveBeenCalled();
+    expect(screen.getByRole('dialog')).toHaveTextContent('确认删除该配置字典？');
+    await userEvent.click(screen.getByRole('button', { name: '取消' }));
+    expect(onAction).not.toHaveBeenCalled();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getAllByRole('button', { name: '更多操作' })[0]!);
+    await userEvent.click(screen.getByRole('menuitem', { name: '删除' }));
+    await userEvent.click(screen.getByRole('button', { name: '确认' }));
+    expect(onAction).toHaveBeenCalledWith('delete', rows[0]);
+  });
+
+  it('asks for confirmation in a modal before a bulk action', async () => {
+    const onBulkAction = vi.fn();
+    render(
+      <ResourceList
+        schema={{
+          ...listSchema,
+          selection: 'multiple',
+          actions: [{ key: 'bulk-delete', label: '批量删除', tone: 'danger', confirm: '确认删除所选配置字典？' }],
+        }}
+        rows={rows}
+        selectedKeys={['pod-a']}
+        onSelectionChange={() => undefined}
+        onBulkAction={onBulkAction}
+      />,
+    );
+    await userEvent.click(screen.getByRole('button', { name: '批量删除' }));
+    expect(onBulkAction).not.toHaveBeenCalled();
+    expect(screen.getByRole('dialog')).toHaveTextContent('确认删除所选配置字典？');
+    await userEvent.click(screen.getByRole('button', { name: '确认' }));
+    expect(onBulkAction).toHaveBeenCalledWith('bulk-delete', ['pod-a']);
+  });
 });
 
 describe('ResourceForm', () => {

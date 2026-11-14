@@ -7,6 +7,7 @@ import { Table, type SortOrder, type TableColumn, type TableSortState } from '..
 import { Pagination } from '../primitives/Navigation';
 import { Badge, Empty } from '../primitives/Display';
 import { Dropdown } from '../primitives/Navigation';
+import { Modal } from '../primitives/Feedback';
 import { getByPath, getColumnRenderer } from './registry';
 
 /* ---------------- Types ---------------- */
@@ -85,7 +86,13 @@ export interface ListAction<TRow> {
    * from the DOM rather than infer it from a disabled attribute.
    */
   aiNeeds?: string[];
-  /** Ask for confirmation before invoking `onAction`. */
+  /**
+   * Ask for confirmation in a modal before invoking `onAction`.
+   *
+   * The string is the dialog title. Cancel leaves the row untouched; confirm
+   * runs the action. A native `window.confirm` would look like a browser
+   * prompt and cannot match the rest of the overlays.
+   */
   confirm?: string;
   /** Only show for matching rows. */
   visible?: (row: TRow) => boolean;
@@ -190,6 +197,10 @@ export interface ListSchema<TRow> {
     /** Accessible name for the rows-per-page picker. */
     pageSize?: string;
     pageSizeSuffix?: string;
+    /** Dismiss the confirmation dialog. */
+    confirmCancel?: string;
+    /** Proceed from the confirmation dialog. */
+    confirmOk?: string;
   };
   /**
    * Extra attributes for each row element.
@@ -323,6 +334,23 @@ export function ResourceList<TRow>({
     [schema.rowKey],
   );
 
+  const [pendingConfirm, setPendingConfirm] = React.useState<{
+    title: string;
+    tone?: ListAction<TRow>['tone'];
+    run: () => void;
+  } | null>(null);
+
+  const askConfirm = React.useCallback(
+    (action: Pick<ListAction<TRow>, 'confirm' | 'tone'>, run: () => void) => {
+      if (!action.confirm) {
+        run();
+        return;
+      }
+      setPendingConfirm({ title: action.confirm, tone: action.tone, run });
+    },
+    [],
+  );
+
   const columns: Array<TableColumn<TRow>> = React.useMemo(() => {
     const sortableKeys = new Set(schema.sortableKeys ?? []);
     const mapped: Array<TableColumn<TRow>> = schema.columns.map((column) => ({
@@ -398,8 +426,7 @@ export function ResourceList<TRow>({
                 danger: action.tone === 'danger',
                 disabled: action.disabled?.(row) ?? false,
                 onSelect: () => {
-                  if (action.confirm && !window.confirm(action.confirm)) return;
-                  onAction?.(action.key, row);
+                  askConfirm(action, () => onAction?.(action.key, row));
                 },
               }))}
             />
@@ -409,7 +436,7 @@ export function ResourceList<TRow>({
     }
 
     return mapped;
-  }, [schema.columns, schema.sortableKeys, schema.rowActions, onAction]);
+  }, [schema.columns, schema.sortableKeys, schema.rowActions, schema.labels, onAction, askConfirm]);
 
   const hasToolbar = Boolean(schema.search || schema.filters?.length || (schema.refresh && onRefresh));
 
@@ -582,8 +609,7 @@ export function ResourceList<TRow>({
                     disabled={!hasSelection}
                     onClick={() => {
                       if (!hasSelection) return;
-                      if (action.confirm && !window.confirm(action.confirm)) return;
-                      onBulkAction?.(action.key, selectedKeys);
+                      askConfirm(action, () => onBulkAction?.(action.key, selectedKeys));
                     }}
                     {...(action.aiId ? { 'data-ai-id': action.aiId } : {})}
                     {...(action.aiNeeds?.length ? { 'data-ai-needs': action.aiNeeds.join(' ') } : {})}
@@ -673,6 +699,32 @@ export function ResourceList<TRow>({
             : {})}
         />
       ) : null}
+
+      <Modal
+        open={pendingConfirm != null}
+        onOpenChange={(open) => {
+          if (!open) setPendingConfirm(null);
+        }}
+        title={pendingConfirm?.title ?? ''}
+        size="sm"
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setPendingConfirm(null)}>
+              {schema.labels?.confirmCancel ?? '取消'}
+            </Button>
+            <Button
+              variant={pendingConfirm?.tone === 'danger' ? 'danger' : 'primary'}
+              onClick={() => {
+                const run = pendingConfirm?.run;
+                setPendingConfirm(null);
+                run?.();
+              }}
+            >
+              {schema.labels?.confirmOk ?? '确认'}
+            </Button>
+          </>
+        }
+      />
     </div>
   );
 }

@@ -6,10 +6,9 @@ import path from 'node:path';
  * Guards the modal's centring contract.
  *
  * The bug these assert against: the modal was centred with `-translate-x-1/2
- * -translate-y-1/2` while animating with `ai-scale-in`, whose keyframes animate
- * `transform` down to `none`. The animation won, the centring translate was
- * erased, and the dialog sat half its width/height down-right of centre before
- * snapping into place when the animation ended.
+ * -translate-y-1/2` while animating `transform`. Tailwind 3 puts those
+ * translate utilities on `transform` too, so the scale keyframes erase the
+ * offset and the dialog sits down-right of centre.
  *
  * A DOM assertion cannot catch this without running a real animation timeline,
  * so these read the source of truth: the preset's keyframes and the classes the
@@ -29,11 +28,8 @@ describe('Modal centring', () => {
 
     expect(keyframes).toBeTruthy();
     /*
-     * The centring offset lives on the element's `translate` property, which the
-     * modal sets with `-translate-x-1/2 -translate-y-1/2`. The keyframes must not
-     * repeat it in `transform`: doing so offset the dialog twice while animating
-     * and, with no fill-mode, made it slide in from the top-left as the animation
-     * released. Only scale and opacity belong in the keyframes.
+     * Placement is `margin: auto`, so the keyframes must not introduce a
+     * translate of their own. Only scale and opacity belong here.
      */
     expect(keyframes).not.toContain('translate');
     expect(keyframes).toContain('scale');
@@ -55,12 +51,16 @@ describe('Modal centring', () => {
     expect(modal).not.toContain('animate-ai-scale-in');
   });
 
-  it('keeps a static centring fallback for when the animation does not run', () => {
+  it('centres with the CSS translate property, not a transform offset', () => {
     const feedback = read('src/primitives/Feedback.tsx');
     const modal = feedback.slice(feedback.indexOf('export function Modal'), feedback.indexOf('/* ---------------- Drawer'));
 
-    expect(modal).toContain('-translate-x-1/2');
-    expect(modal).toContain('-translate-y-1/2');
+    // `left: 50%; top: 50%` plus the CSS `translate` property. Tailwind's
+    // `-translate-x-1/2` writes `transform`, which `ai-pop-in` also animates.
+    expect(modal).toContain("'fixed left-1/2 top-1/2");
+    expect(modal).toContain("'[translate:-50%_-50%]'");
+    expect(modal).not.toMatch(/-translate-x-1\/2/);
+    expect(modal).not.toMatch(/-translate-y-1\/2/);
   });
 
   it('registers the animation so the utility class exists', () => {

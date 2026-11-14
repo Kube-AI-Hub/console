@@ -77,33 +77,28 @@ export function Modal({ open, onOpenChange, title, description, children, footer
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-[2px] animate-ai-fade-in" />
         <DialogPrimitive.Content
+          // Confirm dialogs have a title and no extra copy; without this Radix
+          // warns that the dialog is missing a description, then would point
+          // `aria-describedby` at nothing.
+          {...(description ? {} : { 'aria-describedby': undefined })}
           className={cn(
-            'fixed z-50',
             /*
-             * Phone: a bottom sheet anchored to the safe edge.
-             * Desktop: centred.
+             * Always a centred box, including below Tailwind's `sm` (640px).
              *
-             * A centred box on a phone wastes the reachable area and fights the
-             * on-screen keyboard; the sheet pattern keeps actions under the
-             * thumb. Both branches share the same panel styling below.
+             * The overlays story — and any console page with a sidebar — often
+             * renders in a canvas narrower than 640px. A bottom-sheet branch at
+             * that width sat on the bottom-left (max-width capped, `left: 0`)
+             * and read as "the dialog is not centred".
+             *
+             * Offset uses the CSS `translate` *property* (`[translate:-50%_-50%]`),
+             * not Tailwind's transform-based translate utilities. Those write
+             * `transform`, which `ai-pop-in` also animates, so the scale
+             * keyframes erased the offset and the dialog sat down-right of centre.
              */
-            /*
-             * `tailwind-merge` treats `inset-x-0` as owning `left`/`right`, so it
-             * stripped the `sm:left-1/2` that restores horizontal centring. The
-             * longhands keep both branches intact; this was caught by the
-             * mobile test, not by eye.
-             */
-            'left-0 right-0 bottom-0 w-full max-h-[90dvh] overflow-y-auto rounded-t-ai-xl',
-            'sm:left-1/2 sm:right-auto sm:top-1/2 sm:bottom-auto sm:w-[calc(100%-2rem)] sm:-translate-x-1/2 sm:-translate-y-1/2',
-            // Static centring for the moment before the animation starts and for
-            // environments where the animation never runs. The keyframes then
-            // restate it alongside the scale so the two never fight.
-            //
-            // The sheet has no `sm:` counterpart on purpose: above the breakpoint
-            // the pop-in keyframes own `transform`, and a competing animation
-            // would overwrite the centring translate.
-            'animate-ai-sheet-in sm:animate-ai-pop-in [--ai-pop-scale:0.96]',
+            'fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-h-[90dvh] overflow-y-auto',
+            '[translate:-50%_-50%]',
             'rounded-ai-xl border border-ai-line bg-ai-bg-elevated shadow-ai-pop',
+            'animate-ai-pop-in [--ai-pop-scale:0.96]',
             'focus:outline-none',
             modalSizes[size],
           )}
@@ -125,7 +120,7 @@ export function Modal({ open, onOpenChange, title, description, children, footer
               </Button>
             </DialogPrimitive.Close>
           </header>
-          <div className="max-h-[70vh] overflow-y-auto px-5 py-4">{children}</div>
+          {children ? <div className="max-h-[70vh] overflow-y-auto px-5 py-4">{children}</div> : null}
           {footer ? <footer className="flex justify-end gap-2 border-t border-ai-line px-5 py-3">{footer}</footer> : null}
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>

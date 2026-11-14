@@ -33,13 +33,13 @@
 **何时重新考虑**：上游支持真正的批量接口时
 
 
-### DEC-L3-KUBE-FRONTEND-CONFIGMAPS-DELETE-02 — 确认框用 `window.confirm`
+### DEC-L3-KUBE-FRONTEND-CONFIGMAPS-DELETE-02 — 确认框用 ai-kit `Modal`
 
-**为什么**：首期没有确认弹窗组件，`window.confirm` 是唯一既阻止误操作、又天然阻塞自动化脚本的方式。自动化无法在确认前绕过它，这是刻意的。
+**为什么**：删除必须打断当前操作，且外观要和 overlays 的确认弹窗一致。`ResourceList` 的 `confirm` 字段打开同一套 `Modal`（标题为确认文案，页脚取消/确认）；生产页的 `DeleteDialog` 也建立在这个 `Modal` 上。浏览器原生 `window.confirm` 无法套主题、无法居中，看起来像系统提示。
 
-**被否方案**：自己画一个 Modal：需要处理焦点陷阱与 Esc，属于 ai-kit 已有的 Modal，但本期未接入。
+**被否方案**：`window.confirm`：阻塞脚本是优点，但样式和焦点都不属于控制台。
 
-**何时重新考虑**：确认需要展示更多上下文（键数量、关联工作负载）时
+**何时重新考虑**：确认需要展示键数量、关联工作负载等更多上下文时，往 `Modal` 的 body 加内容即可。
 
 
 ## 系统现状
@@ -61,8 +61,8 @@
 
 ## 已知坑
 
-- **GOT-L3-KUBE-FRONTEND-CONFIGMAPS-DELETE-01** — `window.confirm` 在 jsdom 中未实现，测试需要 stub 返回值；否则 `mutateAsync` 永远不触发。
-  处置：测试内 `vi.spyOn(window, 'confirm')`。
+- **GOT-L3-KUBE-FRONTEND-CONFIGMAPS-DELETE-01** — 确认 `Modal` 用 CSS `translate` 属性居中，不能用 Tailwind 的 `-translate-x-1/2`：后者写在 `transform` 上，会和入场动画抢同一个属性，弹窗会落在中心的右下方。
+  处置：`[translate:-50%_-50%]`，单测 `modal-centering.test.ts` 锁住。
 - **GOT-L3-KUBE-FRONTEND-CONFIGMAPS-DELETE-02** — 删除后必须 `invalidateQueries`，只 `setQueryData` 移除行会让总数与分页错位。
   处置：统一失效 `['configmaps']` 前缀。
 
