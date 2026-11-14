@@ -130,6 +130,7 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
       sort: { key: list.sortBy, order: list.order },
       // The identity column stays non-hideable, so the table can never become empty.
       columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: `${kind}:columns` },
+      refresh: { label: t('common.refresh'), aiId: `${kind}:refresh`, busy: query.isFetching },
       /*
        * 创建 is a *primary* action, not a bulk one: it belongs in the header and is
        * available regardless of selection. Bulk actions only exist once rows are
@@ -325,6 +326,8 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
         previous: t('table.previous'),
         next: t('table.next'),
         selected: (count) => t('table.selectedCount', { count }),
+        emptyClear: t('table.clearSearchAndFilters'),
+        emptyRefresh: t('common.refresh'),
       },
       pagination: { page: list.page, pageSize: PAGE_SIZE, total },
     }),
@@ -384,6 +387,7 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
         loading={state === 'loading'}
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}
+        onRefresh={() => void query.refetch()}
         filters={{ project: projectFilter }}
         onFiltersChange={(next) => {
           setProjectFilter(next['project'] ?? '');

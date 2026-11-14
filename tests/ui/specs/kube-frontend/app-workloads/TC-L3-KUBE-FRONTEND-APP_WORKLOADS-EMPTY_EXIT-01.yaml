@@ -1,0 +1,38 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EMPTY_EXIT-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: empty-exit
+title: 列表空态出口 · 清空搜索与筛选、刷新
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/pods"
+prd: prd/kube-frontend/app-workloads/empty-state-exit.md
+design: design/kube-frontend/app-workloads/empty-state-exit.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EMPTY_EXIT-01
+
+story:
+- US1
+
+product: 列表因搜索/筛选变空时，空态给出「清空搜索与筛选」与「刷新」两个动作：清空同时清搜索与筛选并恢复列表，刷新重新发起一次列表请求；能力缺失时按钮不出现。
+preconditions:
+- 已登录，且在 host 集群的 default 项目空间（容器组列表可达）
+- 列表至少有一条数据（空态由搜索触发，而不是项目本来为空）
+steps:
+- 打开容器组列表并等待就绪
+- 在搜索框输入不存在的关键字，等待空态
+- 读取空态里的两个动作按钮并断言句柄
+- 点「清空搜索与筛选」，读取搜索框与列表状态
+- 再次输入不存在的关键字，等待空态；点「刷新」并捕获列表请求
+expected:
+- 空态出现 data-ai-id=empty-state:clear 与 empty-state:refresh
+- 清空后搜索框为空且列表回到 ready（有数据）
+- 刷新触发一次 GET 列表请求（网络层可捕获，状态 200）
+troubleshoot:
+- 空态没有按钮：页面没传 onRefresh/onSearchChange/onFiltersChange，或 ResourceList 版本不是最新 dist
+- 点清空没反应：页面只传了一个回调且另一个状态仍生效（例如项目筛选）
+- 刷新没发请求：页面 onRefresh 未接线
+update_automation:
+- 句柄固定为 empty-state:clear / empty-state:refresh，不随页面变化
+- 按钮文案变化时改页面 labels 与 locale

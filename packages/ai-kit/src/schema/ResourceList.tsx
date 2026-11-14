@@ -208,6 +208,17 @@ export interface ListSchema<TRow> {
     confirmOk?: string;
     clearSearch?: string;
     clearFilters?: string;
+    /**
+     * Label for the empty state's "clear search and filters" escape hatch.
+     *
+     * It is separate from `clearFilters` (the toolbar button, shown only while a
+     * filter is active) because the empty state also appears for a list that simply
+     * has no rows yet; the escape hatch is about getting unstuck, not about the
+     * current filter state.
+     */
+    emptyClear?: string;
+    /** Label for the empty state's refresh action; defaults to the refresh label. */
+    emptyRefresh?: string;
     clearFilter?: (title: string) => string;
   };
   /**
@@ -713,6 +724,35 @@ export function ResourceList<TRow>({
           <Empty
             title={schema.empty?.title ?? '暂无数据'}
             description={schema.empty?.description}
+            action={
+              onSearchChange || onFiltersChange || onRefresh ? (
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  {onSearchChange || onFiltersChange ? (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      data-ai-id="empty-state:clear"
+                      onClick={() => {
+                        onSearchChange?.('');
+                        onFiltersChange?.({});
+                      }}
+                    >
+                      {schema.labels?.emptyClear ?? '清空搜索与筛选'}
+                    </Button>
+                  ) : null}
+                  {onRefresh ? (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      data-ai-id="empty-state:refresh"
+                      onClick={onRefresh}
+                    >
+                      {schema.refresh?.label ?? schema.labels?.emptyRefresh ?? '刷新'}
+                    </Button>
+                  ) : null}
+                </div>
+              ) : undefined
+            }
           />
         }
       />}

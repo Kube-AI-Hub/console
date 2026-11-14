@@ -156,6 +156,8 @@ export function ClusterWorkloadsPage({ cluster, kind }: ClusterWorkloadsPageProp
         selected: (count) => t('table.selectedCount', { count }),
         pageSize: t('table.pageSize'),
         pageSizeSuffix: t('table.pageSizeSuffix'),
+        emptyClear: t('table.clearSearchAndFilters'),
+        emptyRefresh: t('common.refresh'),
       },
       pagination: { page: list.page, pageSize: list.pageSize, pageSizeOptions: [10, 20, 50, 100], total },
     }),
