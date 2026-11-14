@@ -13,6 +13,9 @@
 | 同一对象只有一处编辑入口 | 集群信息、项目角色 | 两个编辑入口在冲突时无法判断以谁为准 |
 | 接口不可用时显示「不可用」而不是空表 | 企业空间成员、节点 Pod 页签 | 空表会被读成「没有」，这是比缺功能更糟的误导 |
 | 部分功能登记为明确不做而非放死按钮 | 全局 | 死按钮承诺了做不到的事 |
+| 配置类对象在集群域与项目域都提供列表 | 配置字典 / 保密字典 / 服务账户 | 2026-11-14 决策反转：跨项目定位配置是集群管理员的日常第一步；集群级列表**只读 + 项目列 + 跳转所属项目页**，写操作回项目作用域，避免同一对象两个编辑入口（DEC-L2-…-CLUSTER_MANAGEMENT-04） |
+| 告警在集群域与项目域都提供列表 | 告警消息 / 告警策略 | 2026-11-14 决策反转：规则的 `namespace` 是归属不是可见范围；原「只能逐项目拉」是未探测的假设，list 不传 `namespace` 即全命名空间（DEC-L2-…-MONITORING-03） |
+| 建立 WebSocket 通道，实时能力是一等需求 | 全部 | 2026-11-14 决策反转：容器终端与日志 tail 是排障主路径，「暂时没有通道」不等于「不做实时」；分三步落地——BFF `upgrade` → watch 客户端 → xterm 终端。**唯一保留的旧结论**：不做轮询假实时（DEC-CORE-KUBE-FRONTEND-08） |
 
 ## 逐页对照
 
@@ -30,7 +33,7 @@
 | 添加集群 | CLUSTER_MANAGEMENT-ADD_CLUSTER-01, CLUSTER_MANAGEMENT-ADD_CLUSTER-02 | 用 KubeKey 新建集群（需要主机清单与 kubekey API）。；移除集群、更新 kubeconfig（老 console 有，另立功能点）。 |
 | 编辑集群信息 | CLUSTER_MANAGEMENT-CLUSTER_EDIT_INFO-01, CLUSTER_MANAGEMENT-CLUSTER_EDIT_INFO-02 | 修改集群名称、连接方式、kubeconfig（后者属「更新 kubeconfig」独立功能）。；移除集群。 |
 | 资源事件查询 | CLUSTER_MANAGEMENT-CLUSTER_EVENTS-01 | 事件全文检索后端（ES）：本页只过滤已加载窗口，不承诺历史检索。；日志检索、审计检索：另两个工具箱页面，属独立功能。 |
-| 集群列表 | CLUSTER_MANAGEMENT-CLUSTER_LIST-01, CLUSTER_MANAGEMENT-CLUSTER_LIST-02, CLUSTER_MANAGEMENT-CLUSTER_LIST-03, CLUSTER_MANAGEMENT-CLUSTER_LIST-04 | 集群注册 / 注销 / 上下线（需要平台侧注册接口与 kubeconfig 校验）。；跨集群的聚合指标（需要按集群分别取指标，属集群监控）。 |
+| 集群列表 | CLUSTER_MANAGEMENT-CLUSTER_LIST-01, CLUSTER_MANAGEMENT-CLUSTER_LIST-02, CLUSTER_MANAGEMENT-CLUSTER_LIST-03, CLUSTER_MANAGEMENT-CLUSTER_LIST-04 | 集群注册 / 注销 / 上下线（需要平台侧注册接口与 kubeconfig 校验）。；跨集群的聚合指标（需要按集群分别取指标，属集群监控）。；卡片视图：10 条/页的表格已能一屏看完，卡片把状态与版本挤进图标（DEC-L3-…-CLUSTER_LIST-06）。 |
 | 集群成员 | CLUSTER_MANAGEMENT-CLUSTER_MEMBERS-01 | 邀请/移除集群成员（写集群角色绑定）。；集群角色本身的规则（见平台角色详情）。 |
 | 集群切换与作用域侧栏 | CLUSTER_MANAGEMENT-CLUSTER_SWITCH-01, CLUSTER_MANAGEMENT-CLUSTER_SWITCH-02 | 在切换器里添加/编辑集群（那是列表页的职责）。；跨集群聚合视图。 |
 | 系统组件 | CLUSTER_MANAGEMENT-COMPONENTS-01 | 组件重启、日志查看（属运维操作）。；按模块（KubeSphere / 应用治理 / 监控 / 日志）分组显示。 |
@@ -125,8 +128,8 @@
 | 网关设置 | PROJECT_SETTINGS-GATEWAY-01 | 修改网关类型、端口与副本数（属基础设施配置）。；网关的日志与监控。 |
 | 日志收集 | PROJECT_SETTINGS-LOGGING-01, PROJECT_SETTINGS-LOGGING-02 | 日志查询与检索（属集群日志查询页面）。；日志后端（Elasticsearch/Kafka 等）配置（属集群级日志配置）。；按工作负载选择收集范围（老 console 也未提供）。 |
 | 项目成员列表 | PROJECT_SETTINGS-MEMBERS-01, PROJECT_SETTINGS-MEMBERS-02 | 邀请成员、修改角色、移出项目。 |
-| 网络隔离 | PROJECT_SETTINGS-NETWORK_ISOLATION-01, PROJECT_SETTINGS-NETWORK_ISOLATION-02, PROJECT_SETTINGS-NETWORK_ISOLATION-03 | 策略的**编辑**（创建与删除已迁移；修改仍用 YAML）。；多规则策略与 IP 段（`ipBlock`）规则。；策略的启用/停用（NetworkPolicy 没有这个字段）。 |
-| 项目概览 | PROJECT_SETTINGS-OVERVIEW-01 | 用量排行（需要监控区间查询）。；应用列表（依赖 openpitrix 模块，本集群关闭）。；配额编辑：已有项目设置的配额编辑入口。 |
+| 网络隔离 | PROJECT_SETTINGS-NETWORK_ISOLATION-01, PROJECT_SETTINGS-NETWORK_ISOLATION-02, PROJECT_SETTINGS-NETWORK_ISOLATION-03 | 策略的**编辑**（创建与删除已迁移；修改仍用 YAML）。；多规则策略与 IP 段（`ipBlock`）规则。；策略的启用/停用（NetworkPolicy 没有这个字段）。；老的「内部/外部白名单」聚合视图：有损映射，直接展示 NetworkPolicy 对象（DEC-L3-…-NETWORK_ISOLATION-05）。 |
+| 项目概览 | PROJECT_SETTINGS-OVERVIEW-01 | 用量排行（需要监控区间查询）。；应用列表（依赖 openpitrix 模块，本集群关闭）。；配额编辑：已有项目设置的配额编辑入口。；引导提示卡片（一次性内容占据常驻位置，DEC-L3-…-OVERVIEW-03）。 |
 | 角色权限规则 | PROJECT_SETTINGS-ROLE_RULES-01, PROJECT_SETTINGS-ROLE_RULES-02 | 规则的编辑。 |
 | 项目角色列表 | PROJECT_SETTINGS-ROLES-01, PROJECT_SETTINGS-ROLES-02, PROJECT_SETTINGS-ROLES-03, PROJECT_SETTINGS-ROLES-04 | 角色的**创建**（需要规则编辑器）。；对模板角色的任何写操作：平台会拒绝，界面只给「详情」。 |
 
@@ -134,7 +137,7 @@
 
 | 页面 | 验收场景 | 有意未迁移 |
 | --- | --- | --- |
-| 平台角色列表 | ACCESS_CONTROL-PLATFORM_ROLES-01, ACCESS_CONTROL-PLATFORM_ROLES-02, ACCESS_CONTROL-PLATFORM_ROLES-03, ACCESS_CONTROL-PLATFORM_ROLES-04, ACCESS_CONTROL-PLATFORM_ROLES-05 | 规则的多条编辑（当前一次一条）。 |
+| 平台角色列表 | ACCESS_CONTROL-PLATFORM_ROLES-01, ACCESS_CONTROL-PLATFORM_ROLES-02, ACCESS_CONTROL-PLATFORM_ROLES-03, ACCESS_CONTROL-PLATFORM_ROLES-04, ACCESS_CONTROL-PLATFORM_ROLES-05 | 规则的多条编辑（当前一次一条）。；集群作用域单独的集群角色页：同一批 clusterrole 对象，统一在平台角色维护（DEC-L3-…-PLATFORM_ROLES-06）。 |
 | 用户详情 | ACCESS_CONTROL-USER_DETAIL-01 | 停用/启用与删除：在用户列表的行操作里完成，详情页只读。；该用户在项目/企业空间里的角色：需要跨聚合查询，与成员管理重叠。 |
 | 用户列表 | ACCESS_CONTROL-USERS-01, ACCESS_CONTROL-USERS-02, ACCESS_CONTROL-USERS-03, ACCESS_CONTROL-USERS-04, ACCESS_CONTROL-USERS-05, ACCESS_CONTROL-USERS-06, ACCESS_CONTROL-USERS-07 | — |
 | 企业空间详情 | ACCESS_CONTROL-WORKSPACE_DETAIL-01, ACCESS_CONTROL-WORKSPACE_DETAIL-02 | 企业空间成员与角色：其 API 属于另一个聚合（且 `/workspaces/<name>/members` 在本集群返回 404），未迁移前不显示空表——空表会被读成「没有任何人有权限」。；企业空间编辑/删除：需要写接口与配额联动，另立功能点。 |

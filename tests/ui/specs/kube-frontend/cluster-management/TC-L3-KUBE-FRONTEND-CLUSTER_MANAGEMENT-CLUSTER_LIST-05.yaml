@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-05
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: cluster-list
+title: 集群列表按 host/成员筛选
+entry_url: '{BASE_URL}/kube-frontend/clusters'
+prd: prd/kube-frontend/cluster-management/cluster-list.md
+design: design/kube-frontend/cluster-management/cluster-list.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-05
+
+story:
+- US1
+
+product: 集群列表用「集群类型」筛选区分 host 与成员集群。
+preconditions:
+- 已登录且 multicluster 开启（列表不被单集群重定向吃掉）
+steps:
+- 打开集群列表
+- 把「集群类型」筛选设为「主集群」
+- 设为成员
+- 清除筛选
+steps_expected:
+- Host 时只剩 host 集群行
+- 成员时 host 行不出现
+- 清除后恢复全部行，host 仍在前
+expected:
+- 三次断言都以行 attribute 判定，无需写操作
+troubleshoot:
+- 列表跳到单集群 overview：multicluster 未开启
+- 筛选后仍显示全部：filter 未接到 rows 计算
+update_automation:
+- 选择器：clusters:filter:type / data-ai-row

@@ -12,6 +12,7 @@
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-02
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-03
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-04
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-05
 
 ## 设计目标与非目标
 
@@ -117,3 +118,12 @@
 ## 验收用例
 
 - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-01
+
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-CLUSTER_LIST-07 — 用筛选表达 host/成员，不做分区渲染
+
+**为什么**：分区渲染（section header + 行）会破排序、分页与选中模型；host/成员是二元属性，筛选 + 已有的「角色」列足以表达，并让「只看成员集群」成为可执行动作。
+
+**被否方案**：列表分区。行选中跨区语义不清，且与既有排序参数冲突。
+
+**何时重新考虑**：集群数到几十个、需要按 provider/区域多级分组时。

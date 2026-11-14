@@ -680,6 +680,7 @@ modules:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-01
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-02
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-03
     - id: projects
       title: 项目列表
       prd: prd/kube-frontend/cluster-management/projects.md
@@ -687,6 +688,13 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-PROJECTS-01
+    - id: namespace-detail
+      title: 集群下的项目详情
+      prd: prd/kube-frontend/cluster-management/namespace-detail.md
+      design: design/kube-frontend/cluster-management/namespace-detail.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NAMESPACE_DETAIL-01
     - id: settings
       title: 集群设置
       prd: prd/kube-frontend/cluster-management/settings.md
@@ -847,6 +855,7 @@ modules:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-01
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-03
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-04
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-05
     - id: custom-monitoring
       title: 自定义监控仪表板
       prd: prd/kube-frontend/cluster-management/custom-monitoring.md
@@ -1018,6 +1027,13 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOT_CONTENT-01
+    - id: detail-snapshots
+      title: 存储详情的快照页签
+      prd: prd/kube-frontend/storage/detail-snapshots.md
+      design: design/kube-frontend/storage/detail-snapshots.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-STORAGE-DETAIL_SNAPSHOTS-01
     - id: snapshots
       title: 卷快照与快照类型
       prd: prd/kube-frontend/storage/snapshots.md

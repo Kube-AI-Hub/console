@@ -47,6 +47,7 @@
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-02** — 已知列表处于就绪态，当点击工具栏的刷新，则重新拉取 `clusters` 接口且列表回到就绪态（用于集群刚接入、刚从代理连上等场景，避免只能整页刷新）。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-03** — 已知列表里有一个非主集群，当通过行操作「移除集群」并输入集群名确认，则该 `Cluster` 对象被删除（回读 404），列表不再包含它；主集群行没有「移除集群」；未输入正确名称时确认按钮不可用。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-04** — 已知列表里有一个非主集群且连接方式为直接连接，当通过行操作「更新 kubeconfig」提交一段不可用的 kubeconfig，则界面显示服务端给出的原因（而不是「Bad Request」之类通用文案），且集群对象的 `spec.connection.kubeconfig` 未被改动；代理连接的集群不提供该操作。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_LIST-05** — 已知集群至少包含主集群，当在集群列表把「集群类型」筛选设为「主集群」，则只显示主集群行；设为「成员集群」则只显示成员集群行（主集群行不出现）；清除筛选后恢复全部行，且主集群仍排在列表前面。
 
 ## 设计目标
 
