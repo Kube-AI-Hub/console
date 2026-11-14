@@ -153,5 +153,28 @@ export function strategiesApi(client: Client) {
       });
       return { items: (body?.items ?? []).map(toStrategySummary) };
     },
+
+    /**
+     * Create one strategy.
+     *
+     * The caller supplies the whole manifest: the minimal viable object needs a type, a
+     * selector matching the workload, and a VirtualService template whose host is the
+     * service the release routes. The wizard builds exactly that and nothing else —
+     * traffic weights and match rules stay at the controller's defaults until the
+     * follow-up round.
+     */
+    async create(params: { cluster: string; namespace: string; body: KubeStrategy }): Promise<KubeStrategy> {
+      return client.request<KubeStrategy>(strategiesPath(params.cluster, params.namespace), {
+        method: 'POST',
+        body: params.body,
+      });
+    },
+
+    /** Delete one strategy (used by tests and, later, the row action). */
+    async remove(params: { cluster: string; namespace: string; name: string }): Promise<void> {
+      await client.request(`${strategiesPath(params.cluster, params.namespace)}/${encodeURIComponent(params.name)}`, {
+        method: 'DELETE',
+      });
+    },
   };
 }

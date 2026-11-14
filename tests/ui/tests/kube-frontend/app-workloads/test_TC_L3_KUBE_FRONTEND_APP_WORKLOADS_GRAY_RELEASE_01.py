@@ -92,8 +92,8 @@ def test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_GRAY_RELEASE_01(app_workloads_page, s
         assert any(label in text for label in ("已完成", "进行中", "失败", "未知")), text
         assert "spec.type" not in text
 
-        # Read-only this round: the page owns no create/edit/delete entry.
-        assert ui.page.locator('[data-ai-id="grayrelease:create"]').count() == 0
+        # Creation now has its own case; the list only has to expose the entry.
+        expect(ui.page.locator('[data-ai-id="grayrelease:create"]')).to_be_visible(timeout=20_000)
         screenshot(ui.page, "gray-release")
     finally:
         if created:

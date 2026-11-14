@@ -7,15 +7,17 @@ import { api as apiClient } from '@/api';
 import { useResourceListState } from '@/components/resource/useResourceListState';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
+import { CreateGrayReleaseDialog } from './CreateGrayReleaseDialog';
 
 /**
  * 灰度发布 (canary releases).
  *
  * The old console's project console lists servicemesh `Strategy` objects as cards; this
  * page lists them as rows with the four facts an operator scans first: name, type,
- * target service and the controller's verdict. It is read-only: creating a release is a
- * multi-step wizard (versions, traffic split, match rules) and the rest of this round is
- * read work; the API and the empty state are the deliverable here.
+ * target service and the controller's verdict. Creation is a deliberately small wizard:
+ * name + target deployment + type produce a minimal strategy the controller accepts;
+ * versions, traffic weights and match rules remain controller defaults until the release
+ * detail work lands.
  *
  * The object has no `phase`: progress lives in `status.conditions` (`Complete`,
  * `Failed`), so the status column is derived — see `strategyStatusOf` in the api-client
@@ -51,6 +53,8 @@ const TYPE_KEYS: Record<string, 'grayRelease.type.canary' | 'grayRelease.type.bl
 export function CanaryReleasesPage({ cluster, namespace }: CanaryReleasesPageProps): React.ReactElement {
   const t = useT();
   const list = useResourceListState<'name' | 'createTime'>({ defaultSortBy: 'name', defaultOrder: 'asc', resetOn: [cluster, namespace] });
+  const [creating, setCreating] = React.useState(false);
+  const [created, setCreated] = React.useState('');
 
   const query = useQuery({
     queryKey: ['strategies', cluster, namespace],
@@ -134,6 +138,7 @@ export function CanaryReleasesPage({ cluster, namespace }: CanaryReleasesPagePro
           ),
         },
       ],
+      primaryAction: { key: 'create', label: t('grayRelease.create.action'), aiId: 'grayrelease:create' },
       rowActions: [],
       empty: { title: t('grayRelease.emptyTitle'), description: t('grayRelease.emptyDescription') },
       labels: {
@@ -174,8 +179,29 @@ export function CanaryReleasesPage({ cluster, namespace }: CanaryReleasesPagePro
           onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
             if (next) list.setSort(next);
           }}
+          onAction={(action) => {
+            // The primary action arrives without a row: it belongs to the page.
+            if (action === 'create') {
+              setCreated('');
+              setCreating(true);
+            }
+          }}
         />
       </div>
+
+      {created ? (
+        <p role="status" className="text-xs text-ai-success" data-ai-id="grayrelease:created">
+          {t('grayRelease.create.created', { name: created })}
+        </p>
+      ) : null}
+
+      <CreateGrayReleaseDialog
+        open={creating}
+        onOpenChange={setCreating}
+        cluster={cluster}
+        namespace={namespace}
+        onCreated={(name) => setCreated(name)}
+      />
     </AiSurface>
   );
 }

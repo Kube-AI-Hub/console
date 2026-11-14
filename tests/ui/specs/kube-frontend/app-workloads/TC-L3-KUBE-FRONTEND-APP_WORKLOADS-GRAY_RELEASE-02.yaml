@@ -1,0 +1,43 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: gray-release
+title: 灰度发布 · 最小创建向导（确认后写入、列表可见、finally 清理）
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/grayrelease'
+prd: prd/kube-frontend/app-workloads/gray-release.md
+design: design/kube-frontend/app-workloads/gray-release.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-02
+
+story:
+- US2
+
+product: 灰度发布列表提供「创建灰度发布」主操作；向导采集名称、目标 Deployment 与类型，下一步只做本地校验并展示确认摘要，点确认后才 POST Strategy；成功后关闭弹窗、列表出现该行；失败在确认弹窗内显示原因；用例 finally 删除并核对计数回创建前。
+preconditions:
+- 已登录，host 集群 default 项目，servicemesh 已启用
+- 项目内至少一个 Deployment；strategies 集合可读可写
+- 用例对象使用 tc-e2e-gray-create- 前缀，finally 无条件删除
+steps:
+- 用 API 读取 default 项目的 Deployment 列表与 strategies 当前条数
+- 打开灰度发布页，点「创建灰度发布」
+- 填写唯一名称，选择第一个 Deployment 与类型 Canary，点「下一步」
+- 此时用 API 回读该名称应为 404，且页面尚未发出 POST
+- 在确认面板点「确认创建」，轮询 API 直到对象出现
+- 核对 spec.type/selector.matchLabels.app/template.spec.hosts 与所选 Deployment 一致
+- 核对页面成功提示与列表行（类型显示金丝雀发布）
+- finally 删除对象，轮询到 404，并核对 strategies 计数回到创建前、无本前缀残留
+expected:
+- 点「下一步」不产生写请求；对象在确认前不存在
+- 确认后对象存在且字段与选择一致，列表行可见
+- 删除后回读 404，计数回创建前；无残留
+troubleshoot:
+- 创建按钮不可见：列表是否处于 error/loading，或 registry 未 ready
+- 确认后 409：名称已被占用（换唯一后缀）
+- 回读 selector/hosts 为空：检查 Deployment 是否有 app 标签及向导 manifest
+- 列表不出现新行：确认成功后是否 invalidate ['strategies',cluster,namespace]
+- 计数未回零：finally 的 DELETE 是否执行/对象名是否一致
+update_automation:
+- 向导句柄与字段变化时同步本用例
