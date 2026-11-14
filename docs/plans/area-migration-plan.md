@@ -69,13 +69,13 @@ tree.py → build_prd.py → prd(AC) → design(DEC/不变量/坑) → spec(cove
 
 ## 3. 页面清单
 
-### 3.0 企业空间级（3）
+### 3.0 企业空间级（6）
 
 `/kube-frontend/workspaces/:ws/…`
 
 | 区域 | 页面 |
 | --- | --- |
-| 企业空间 | overview（基本信息 + 项目/成员计数）、projects（列表 + 链到项目控制台）、members（成员/角色/状态/最近登录） |
+| 企业空间 | overview（基本信息 + 项目/成员计数）、projects（列表 + 链到项目控制台）、members（成员/角色/状态/最近登录）、quota（项目 × 资源配额）、roles（企业空间角色）、user-groups（用户组与成员数） |
 
 企业空间是独立作用域（侧栏、面包屑与项目作用域分开）。邀请成员、配额、部门、用户组尚未迁：
 分别缺企业空间角色列表与配额/组织模型，见 §6.1。
@@ -93,9 +93,9 @@ tree.py → build_prd.py → prd(AC) → design(DEC/不变量/坑) → spec(cove
 | 监控告警 | alerts、alertingrules |
 | 项目设置 | baseinfo、roles、members、networkpolicies、gateways、log-collections |
 
-> **容器详情**（`pods/$name/containers/$container`）已迁；**详情页签体系**未迁（见 §6.2）。
+> **容器详情**（`pods/$name/containers/$container`）已迁；**详情页签体系**已迁（Deployment 5 页签 / Pod 4 页签，见 `app-workloads/detail-tabs.md`）。
 
-### 3.2 集群级（27）
+### 3.2 集群级（30）
 
 `/kube-frontend/clusters/:c/…`
 
@@ -103,6 +103,7 @@ tree.py → build_prd.py → prd(AC) → design(DEC/不变量/坑) → spec(cove
 | --- | --- |
 | 概览 | overview、nodes、node-usage、components |
 | 资源 | namespaces、custom-resources |
+| 配置 | secrets、configmaps、serviceaccounts（只读、带项目列、跳回项目页） |
 | 工作负载 | pods、deployments、statefulsets、daemonsets、jobs、cronjobs、services、ingresses |
 | 网络 | ippools、networkpolicies |
 | 存储 | storageclasses、persistentvolumes |
@@ -189,6 +190,10 @@ tree.py → build_prd.py → prd(AC) → design(DEC/不变量/坑) → spec(cove
     只试一个版本得到的 404 证明的是"那个版本没有"。
 33. **导航不是页面全集**：下钻页、详情页签、模块门控菜单都不在 `config.yaml` 里。
 
+### 4.7 组件复用
+
+34. **结构不手写**：字段的 label/hint/error 用 `FormField`，页签用 `Tabs`，只读信息行用 `DescriptionItem`，密码强度面板用 `PasswordStrengthMeter`。页内复刻一份，下一个页面就会以另一种方式复刻（实测：字段包装已有 17 个文件各写一遍、只读信息行 24 处依赖应用内私有组件）。用户设置页是第一处被上收的页面，分析与组件清单见 `./user-settings-component-analysis.md`。
+
 ---
 
 ## 5. 验证与门禁
@@ -241,8 +246,9 @@ python3 prd/tools/verify.py --serial-e2e
 
 | 能力 | 现状 | 影响 |
 | --- | --- | --- |
-| **终端 / kubectl / 节点 shell / 容器日志 tail** | 无。BFF 无 `upgrade`，api-client 无 exec/logs 端点 | 排障不可用。**需独立立项**：BFF WebSocket + 终端组件 |
-| 详情页签体系 | 单页纵向分区，所有负载共用一个组件 | 监控/环境变量/事件/元数据页签全无 |
+| **容器日志 tail** | 已迁：`client.stream()` + `pods/log?follow=true`（HTTP chunked，无需 WebSocket），容器详情页「实时」开关 | 排障第一条通道打通；顺手修了 BFF 泄漏上游流与 dev 静态服务器缓冲两个真问题 |
+| **终端 / kubectl / 节点 shell** | 无。需要 BFF WebSocket `upgrade` 透传 + 终端组件 | 需独立立项：升级转发 + xterm 组件 |
+| 详情页签体系 | 已迁：概览/关联容器组/修订版本/事件/元数据（Pod 为 概览/容器/事件/元数据） | 监控页签仍未做（需要监控区间查询） |
 | 编辑 YAML 覆盖 | 21 类 → 13 类 | Node/PV/StorageClass/NetworkPolicy 等无法改 YAML |
 | 定制编辑表单 | 21 种 → 9 种 | Deployment 只能改副本数，改镜像要编辑 YAML |
 | 列表通用能力 | 固定 10 条、无刷新/实时/列显隐、空态无出口 | 缺口分析 F-41~F-46 |
@@ -254,6 +260,8 @@ python3 prd/tools/verify.py --serial-e2e
 - [ ] 商城写操作：建分类、审核通过/驳回（当前商店为空，无法验证）
 - [ ] 应用详情与安装：`/apps/:id`、`/apps/:id/deploy`（同上）
 - [ ] 面板编辑器与图表渲染（自定义监控，Grafana 风格组件套件）
+- [ ] 字段包装收敛：仍有 16 个文件手写 `label + 输入 + 说明/错误`，逐页改用 `FormField`（用户设置页已改；清单见 `./user-settings-component-analysis.md` §7）
+- [ ] 工作负载详情页的手写页签改用 `Tabs`（第二个 hand-rolled `role="tablist"`；等该文件当前并行改动稳定后接）
 - [ ] 4 个整块作用域评估：DevOps / 联邦项目 / 应用商店模板 / 企业空间（前三个依赖已关闭模块）
 
 ---

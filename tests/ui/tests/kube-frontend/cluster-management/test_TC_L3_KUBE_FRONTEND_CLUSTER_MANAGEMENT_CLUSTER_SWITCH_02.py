@@ -54,12 +54,11 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_SWITCH_02(cluster_fleet_
     group_labels = [
         text.strip() for text in ui.page.locator("aside button").all_inner_texts() if text.strip()
     ]
-    for label in ("资源", "存储", "监控告警", "集群设置", "扩展"):
+    for label in ("资源", "工作负载", "配置", "存储", "监控告警", "集群设置", "扩展"):
         assert label in group_labels, f"集群菜单缺少分组 {label}: {group_labels}"
-    # 配置字典是**项目**资源（跨项目查看已由项目页的「全部项目」筛选提供），
-    # 集群控制台不该再列它，因此也不该留下一个空的「配置」分组。
-    assert "配置" not in group_labels, group_labels
-    assert "配置字典" not in cluster_nav, cluster_nav
+    # 集群级配置三页（保密字典/配置字典/服务账号）只读、带「项目」列并跳回项目页：
+    # 决策在 design/kube-frontend/cluster-management/_index.md 的 DEC-04，此处按现状断言。
+    assert "配置字典" not in cluster_nav, "未展开的分组却渲染了子项"
     # 概览是入口，不归入任何分组，始终可见。
     assert "集群概览" in cluster_nav, cluster_nav
     # 当前页在「资源」组里，所以该组默认展开、同组兄弟可见。
@@ -70,5 +69,11 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_SWITCH_02(cluster_fleet_
     ui.page.locator("aside button", has_text="存储").first.click()
     ui.page.wait_for_timeout(500)
     assert "存储类型" in ui.side_nav(), ui.side_nav()
+
+    # 配置组同样可展开，且三个集群级配置页都在（DEC-04 推翻了「集群不做配置页」的旧决策）。
+    ui.page.locator("aside button", has_text="配置").first.click()
+    ui.page.wait_for_timeout(500)
+    for page_label in ("保密字典", "配置字典", "服务账号"):
+        assert page_label in ui.side_nav(), f"配置组缺少 {page_label}: {ui.side_nav()}"
 
     screenshot(ui.page, "cluster-sidebar-scope")
