@@ -4,7 +4,7 @@ suite: point
 module: kube-frontend
 submodule: access-control
 feature: workspace-members
-title: 企业空间成员 · 邀请、改角色与移除
+title: 租户(企业空间)成员 · 邀请、改角色与移除
 entry_url: '{BASE_URL}/kube-frontend/workspaces/{workspace}/members'
 prd: prd/kube-frontend/access-control/workspace-members.md
 design: design/kube-frontend/access-control/workspace-members.md
@@ -15,7 +15,7 @@ covers:
 story:
 - US1
 
-product: 企业空间成员的可写管理：邀请账号并授予空间角色、修改成员角色、移除成员；名字在每一步都由接口回读核对。
+product: 租户(企业空间)成员的可写管理：邀请账号并授予空间角色、修改成员角色、移除成员；名字在每一步都由接口回读核对。
 preconditions:
 - 已登录且有账号、空间角色读取及成员写入权限
 - 空间至少有两个角色；仅操作唯一命名的一次性测试用户

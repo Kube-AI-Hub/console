@@ -65,7 +65,7 @@ def test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_WORKSPACE_CONSOLE_02(access_control_
         expect(rows).to_have_count(min(expected_rows, PAGE_SIZE), timeout=30_000)
 
     sidebar = ui.page.locator("aside").first.inner_text()
-    for entry in ("配额", "企业空间角色", "用户组"):
+    for entry in ("配额", "租户(企业空间)角色", "用户组"):
         assert entry in sidebar, sidebar[:300]
 
     screenshot(ui.page, "workspace-quota")

@@ -28,7 +28,7 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_OVERVIEW_04(cluster_overview_pag
         expect(ui.control(f"component-count:{group}")).to_have_text(str(count))
     cluster = ui.cluster_object()
     public = cluster["metadata"].get("labels", {}).get("cluster.kubesphere.io/visibility") == "public"
-    expect(ui.control("visibility")).to_contain_text("所有企业空间" if public else "只有被授权")
+    expect(ui.control("visibility")).to_contain_text("所有租户(企业空间)" if public else "只有被授权")
     ui.control("component:monitoring").click()
     expect(ui.component_group()).to_contain_text("监控")
     expect(ui.components_rows()).to_have_count(sum(item.get("namespace") == groups["monitoring"] for item in components))

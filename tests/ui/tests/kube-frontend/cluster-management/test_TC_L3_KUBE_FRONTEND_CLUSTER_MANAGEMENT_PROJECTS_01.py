@@ -21,7 +21,7 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_PROJECTS_01(cluster_management_p
     headers = ui.headers("namespaces")
     # The required columns, in order. Written as a subsequence so that adding a column
     # (CPU/内存/容器组数 were added later) does not break a case about these four.
-    required = ["名称", "状态", "企业空间", "创建时间"]
+    required = ["名称", "状态", "租户(企业空间)", "创建时间"]
     positions = [headers.index(label) for label in required if label in headers]
     assert len(positions) == len(required), f"missing columns: {set(required) - set(headers)}"
     assert positions == sorted(positions), f"columns out of order: {headers}"

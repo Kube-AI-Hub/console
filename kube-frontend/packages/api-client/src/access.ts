@@ -1,4 +1,5 @@
 import type { Client } from './client';
+import { ApiError } from './errors';
 import { baseOf, resourceApi, type KubeObject, type ResourceBase } from './resources';
 import { KAPIS_IAM } from './iam';
 
@@ -359,11 +360,76 @@ export interface WorkspaceMemberSummary {
   role: string;
   status: string;
   lastLogin: string;
+  email: string;
+}
+
+/** A project or DevOps project this workspace member can reach. */
+export interface WorkspaceMemberResource {
+  name: string;
+  alias: string;
+  createdAt: string;
+  cluster: string;
+}
+
+export function toWorkspaceMemberSummary(item: KubeAccess): WorkspaceMemberSummary {
+  const annotations = (item.metadata?.annotations ?? {}) as Record<string, string>;
+  const status = (item.status ?? {}) as Record<string, unknown>;
+  const spec = (item.spec ?? {}) as Record<string, unknown>;
+  return {
+    username: item.metadata?.name ?? '',
+    role: annotations['iam.kubesphere.io/workspacerole'] ?? '',
+    status: status['state'] === undefined ? 'Active' : String(status['state']),
+    lastLogin: String(status['lastLoginTime'] ?? annotations['iam.kubesphere.io/last-login-time'] ?? ''),
+    email: String(spec['email'] ?? annotations['email'] ?? ''),
+  };
+}
+
+function tenantMemberCollection(
+  workspace: string,
+  username: string,
+  kind: 'namespaces' | 'devops',
+  cluster?: string,
+): string {
+  const clusterSeg = cluster ? `/klusters/${encodeURIComponent(cluster)}` : '';
+  return `${KAPIS_TENANT}/workspaces/${encodeURIComponent(workspace)}${clusterSeg}/workspacemembers/${encodeURIComponent(username)}/${kind}`;
+}
+
+function toMemberResources(body: { items?: KubeAccess[] } | undefined, cluster: string): WorkspaceMemberResource[] {
+  return (body?.items ?? []).map((item) => {
+    const annotations = (item.metadata?.annotations ?? {}) as Record<string, string>;
+    return {
+      name: item.metadata?.name ?? '',
+      alias: annotations['kubesphere.io/alias-name'] ?? '',
+      createdAt: item.metadata?.creationTimestamp ?? '',
+      cluster,
+    };
+  });
 }
 
 export function workspaceMembersApi(client: Client) {
   const path = (workspace: string, username?: string) =>
     `${KAPIS_IAM}/workspaces/${encodeURIComponent(workspace)}/workspacemembers${username ? `/${encodeURIComponent(username)}` : ''}`;
+
+  async function readCollection(
+    params: { workspace: string; username: string; kind: 'namespaces' | 'devops'; cluster?: string; signal?: AbortSignal },
+  ): Promise<WorkspaceMemberResource[]> {
+    try {
+      const body = await client.request<{ items?: KubeAccess[] }>(
+        tenantMemberCollection(params.workspace, params.username, params.kind, params.cluster),
+        {
+          query: { limit: -1, sortBy: 'createTime' },
+          ...(params.signal ? { signal: params.signal } : {}),
+        },
+      );
+      return toMemberResources(body, params.cluster ?? '');
+    } catch (error) {
+      // DevOps is gated in the old console (`ksModule: devops`). A missing CRD or
+      // tenant path answers 404; that is "not enabled", not a page-level failure.
+      if (error instanceof ApiError && error.isNotFound) return [];
+      throw error;
+    }
+  }
+
   return {
     async invite(params: { workspace: string; username: string; roleRef: string }): Promise<void> {
       // The binding endpoint validates the role but not whether the account exists.
@@ -383,21 +449,39 @@ export function workspaceMembersApi(client: Client) {
     async remove(params: { workspace: string; username: string }): Promise<void> {
       await client.request(path(params.workspace, params.username), { method: 'DELETE' });
     },
+    async removeMany(params: { workspace: string; usernames: string[] }): Promise<void> {
+      for (const username of params.usernames) {
+        await client.request(path(params.workspace, username), { method: 'DELETE' });
+      }
+    },
+    async get(params: { workspace: string; username: string; signal?: AbortSignal }): Promise<WorkspaceMemberSummary> {
+      const item = await client.request<KubeAccess>(path(params.workspace, params.username), {
+        ...(params.signal ? { signal: params.signal } : {}),
+      });
+      return toWorkspaceMemberSummary(item ?? {});
+    },
     async list(params: { workspace: string; signal?: AbortSignal }): Promise<WorkspaceMemberSummary[]> {
       const body = await client.request<{ items?: KubeAccess[] }>(
         path(params.workspace),
         { query: { limit: -1 }, ...(params.signal ? { signal: params.signal } : {}) },
       );
-      return (body?.items ?? []).map((item) => {
-        const annotations = (item.metadata?.annotations ?? {}) as Record<string, string>;
-        const status = (item.status ?? {}) as Record<string, unknown>;
-        return {
-          username: item.metadata?.name ?? '',
-          role: annotations['iam.kubesphere.io/workspacerole'] ?? '',
-          status: status['state'] === undefined ? 'Active' : String(status['state']),
-          lastLogin: String(status['lastLoginTime'] ?? annotations['iam.kubesphere.io/last-login-time'] ?? ''),
-        };
-      });
+      return (body?.items ?? []).map(toWorkspaceMemberSummary);
+    },
+    async memberProjects(params: {
+      workspace: string;
+      username: string;
+      cluster?: string;
+      signal?: AbortSignal;
+    }): Promise<WorkspaceMemberResource[]> {
+      return readCollection({ ...params, kind: 'namespaces' });
+    },
+    async memberDevops(params: {
+      workspace: string;
+      username: string;
+      cluster?: string;
+      signal?: AbortSignal;
+    }): Promise<WorkspaceMemberResource[]> {
+      return readCollection({ ...params, kind: 'devops' });
     },
   };
 }

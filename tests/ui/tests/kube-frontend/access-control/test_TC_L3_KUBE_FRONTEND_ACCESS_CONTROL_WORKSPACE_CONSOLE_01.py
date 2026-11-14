@@ -41,7 +41,7 @@ def test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_WORKSPACE_CONSOLE_01(access_control_
     expect(ui.page.locator('[data-ai-id="workspace-overview:member-count"]')).to_have_text(str(len(members)), timeout=30_000)
 
     sidebar = ui.page.locator("aside").first.inner_text()
-    for entry in ("概览", "项目", "企业空间成员"):
+    for entry in ("概览", "项目", "租户(企业空间)成员"):
         assert entry in sidebar, sidebar[:300]
 
     ui.page.goto(f"{origin}/kube-frontend/workspaces/{workspace}/projects")

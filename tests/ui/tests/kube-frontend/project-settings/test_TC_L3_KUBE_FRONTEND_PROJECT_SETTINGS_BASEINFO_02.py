@@ -41,6 +41,6 @@ def test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_BASEINFO_02(project_settings_page,
 
     # The attribute list above is a <dl>; the stats must not have changed its labels.
     labels = [text.strip() for text in surface.locator("dt").all_inner_texts()]
-    assert labels == ["名称", "别名", "企业空间", "描述", "创建者", "创建时间"], labels
+    assert labels == ["名称", "别名", "租户(企业空间)", "描述", "创建者", "创建时间"], labels
 
     screenshot(ui.page, "project-baseinfo-stats")

@@ -39,7 +39,7 @@ def test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_WORKSPACES_02(access_control_page, s
         ui.page.locator('[data-ai-id="workspaces:search"]').last.fill(name)
         ui.page.wait_for_timeout(1000)
         ui.page.locator(f'[data-ai-row="{name}"] button[aria-label="更多操作"]').click()
-        ui.page.get_by_role("menuitem", name="编辑企业空间", exact=True).click()
+        ui.page.get_by_role("menuitem", name="编辑租户(企业空间)", exact=True).click()
         edit = ui.page.get_by_role("dialog")
         expect(edit).to_be_visible()
         expect(edit.locator("#ai-field-name")).to_be_disabled()

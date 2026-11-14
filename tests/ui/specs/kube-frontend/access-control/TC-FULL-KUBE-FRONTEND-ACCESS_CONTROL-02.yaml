@@ -28,7 +28,7 @@ expected:
 - URL 以 /kube-frontend/access/users 结尾
 - 用户表面板可见
 - 用户页签 aria-current=page
-- 页面出现「用户」「平台角色」「企业空间」三个页签
+- 页面出现「用户」「平台角色」「租户(企业空间)」三个页签
 - 页面不出现 workspace-bar
 
 troubleshoot:

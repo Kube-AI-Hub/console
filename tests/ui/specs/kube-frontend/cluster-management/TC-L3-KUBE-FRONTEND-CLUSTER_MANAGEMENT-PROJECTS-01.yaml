@@ -49,7 +49,7 @@ steps:
 - 核对第一行的企业空间与 API 的 kubesphere.io/workspace 标签一致
 
 expected:
-- 表头依次为 名称、状态、企业空间、创建时间
+- 表头依次为 名称、状态、租户(企业空间)、创建时间
 - 企业空间等于标签值
 - 状态为 Active 或 Terminating
 

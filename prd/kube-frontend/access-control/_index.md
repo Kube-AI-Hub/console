@@ -59,14 +59,14 @@
 | 访问控制根路径 | `/kube-frontend/access` → `/kube-frontend/access/users` |
 | 用户 | `/kube-frontend/access/users` |
 | 平台角色 | `/kube-frontend/access/clusterroles` |
-| 企业空间 | `/kube-frontend/access/workspaces` |
-| 企业空间角色详情 | [workspace-role-detail.md](./workspace-role-detail.md) |
+| 租户(企业空间) | `/kube-frontend/access/workspaces` |
+| 租户(企业空间)角色详情 | [workspace-role-detail.md](./workspace-role-detail.md) |
 
 ## 文案与校验
 
 - 用户列：用户名、状态、平台角色、最近登录。
 - 平台角色列：名称、规则数、创建时间；模板角色带「模板」徽标。
-- 企业空间列：名称、状态、集群、创建时间。
+- 租户(企业空间)列：名称、状态、集群、创建时间。
 
 ## 异常态
 

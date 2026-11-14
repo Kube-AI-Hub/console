@@ -77,7 +77,7 @@ def test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_WORKSPACE_CONSOLE_04(access_control_
             assert row["cells"][1] == str(expected_members.get(row["name"], 0)), row
 
     sidebar = ui.page.locator("aside").first.inner_text()
-    for entry in ("配额", "企业空间角色", "用户组"):
+    for entry in ("配额", "租户(企业空间)角色", "用户组"):
         assert entry in sidebar, sidebar[:300]
 
     screenshot(ui.page, "workspace-user-groups")

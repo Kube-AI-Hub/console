@@ -27,7 +27,7 @@ def test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_BASE_INFO_01(project_settings_page
     expect(surface).not_to_have_attribute("data-ai-state", "loading", timeout=60_000)
 
     labels = [t.strip() for t in surface.locator("dt").all_inner_texts()]
-    assert labels == ["名称", "别名", "企业空间", "描述", "创建者", "创建时间"], labels
+    assert labels == ["名称", "别名", "租户(企业空间)", "描述", "创建者", "创建时间"], labels
 
     # The workspace must come from `kubesphere.io/workspace`; the namespace also
     # carries `kubesphere.io/namespace`, and reading that would show the project name.

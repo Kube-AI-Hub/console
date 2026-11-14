@@ -489,7 +489,7 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
    * The workspace console (`/kube-frontend/workspaces/<ws>/<page>`), its own scope.
    *
    * It sits above projects and below the platform: the sidebar there is the workspace's
-   * menu (概览/项目/企业空间成员), not a project's. Without this branch the shell would fall
+   * menu (概览/项目/租户(企业空间)成员), not a project's. Without this branch the shell would fall
    * through to the project menu and highlight nothing.
    */
   const workspacePath = React.useMemo(() => {
