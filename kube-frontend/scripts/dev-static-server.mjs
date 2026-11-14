@@ -26,6 +26,18 @@ const UPSTREAM_TIMEOUT_MS = 60_000;
  * upstream failure.
  */
 setGlobalDispatcher(new Agent({ keepAliveTimeout: 10_000, connections: 32 }));
+
+/*
+ * Long-lived responses get their own pool.
+ *
+ * A watch or a log tail holds its socket open for as long as the reader wants it.
+ * Sharing the 32-connection pool above means a handful of live streams starve every
+ * later JSON call: the page then hangs on /api/session/me while the BFF is healthy.
+ * Giving streams an unlimited dispatcher keeps the bounded pool for the calls that
+ * actually finish.
+ */
+const streamDispatcher = new Agent({ keepAliveTimeout: 10_000, connections: null });
+
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
 import { Readable } from 'node:stream';
@@ -85,10 +97,13 @@ const server = createServer(async (request, response) => {
        * perfectly healthy stream mid-read. Connection-level failures still
        * surface as fetch rejections and are answered with 502 below.
        */
+      /* Watch and follow responses never finish on their own; see streamDispatcher. */
+      const streaming = url.searchParams.get('watch') === 'true' || url.searchParams.get('follow') === 'true';
       const upstream = await fetch(`${bffUrl}${request.url}`, {
         method: request.method,
         headers,
         ...(body && body.length ? { body } : {}),
+        ...(streaming ? { dispatcher: streamDispatcher } : {}),
       });
       /*
        * Stream, do not buffer.
