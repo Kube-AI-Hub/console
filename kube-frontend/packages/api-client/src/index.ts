@@ -344,6 +344,17 @@ export type {
   SeriesPoint,
 } from './cluster';
 
+export { gpusApi, gpuPath, toGpuDevice, toGpuStats, KAPIS_GPU } from './gpu';
+export type {
+  GpuDevice,
+  GpusApi,
+  GpuListParams,
+  GpuListResult,
+  GpuModelCount,
+  GpuSortKey,
+  GpuStats,
+} from './gpu';
+
 export {
   CHANNEL_SPEC_KEY,
   channelEnabled,

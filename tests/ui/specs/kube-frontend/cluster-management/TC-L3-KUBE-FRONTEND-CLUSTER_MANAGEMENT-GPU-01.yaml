@@ -1,0 +1,42 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: gpu
+title: 集群显卡 · 列表健康比例与单卡详情
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/gpus'
+prd: prd/kube-frontend/cluster-management/gpu.md
+design: design/kube-frontend/cluster-management/gpu.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GPU-01
+
+story:
+- US1
+- US2
+
+product: 集群显卡列表（节点/序号/显卡 ID/状态/型号/显存/厂商 + 服务端汇总的健康比例）与单卡详情（节点/序号/型号/厂商/显存/健康）。
+preconditions:
+- 已登录，且对 host 集群有读取权限
+- 集群至少有一个 GPU 节点（HAMi device plugin 在跑），否则用例 skip
+steps:
+- 用 API 读 GET /kapis/gpu.kubesphere.io/v1alpha1/gpus?limit=-1，记下 items 数、health:true 条数与每张卡的 UUID
+- 读 GET /gpus/stats，记下 total / healthy
+- 打开 /kube-frontend/clusters/<cluster>/gpus，等页面 ready
+- 核对行数 = items 数，且每行状态与对应 UUID 的 health 一致，健康行数 = health:true 条数
+- 核对顶部健康比例的 data-ai-total / data-ai-healthy 与 stats 一致
+- 点第一行的显卡 ID 进入详情，核对详情 UUID 与所点行一致，节点/序号/型号/厂商/显存在页面上可读
+- 打开一个不存在的 UUID，核对显示「这张显卡不存在」
+expected:
+- 列表行数等于接口 items 数，健康行数等于 health:true 计数
+- 顶部比例来自 /gpus/stats（data-ai-total / data-ai-healthy 与接口一致）
+- 详情页 UUID 与所点行一致，字段与接口 item 一致
+- 不存在的 UUID 显示明确提示而不是空白页
+troubleshoot:
+- 行数少：列表请求漏了 limit=-1，接口默认分页只回 10 条
+- 一直 loading：GPU 接口 404/500（扩展未注册）或页面仍是旧包（改完要 vite build）
+- 状态全绿但机器实际摘了卡：gpu-agent 的汇总问题（见 design 已知坑），不是页面
+- 详情 404：路由未重新生成（新增 routes 后要 vite build）
+update_automation:
+- 选择器见 GpusPage.tsx / GpuDetailPage.tsx：cluster-gpus:surface / cluster-gpus:health / cluster-gpus:row:<uuid> / gpu-detail:surface / gpu-detail:uuid
