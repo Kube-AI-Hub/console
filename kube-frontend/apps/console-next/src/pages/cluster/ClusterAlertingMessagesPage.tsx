@@ -44,7 +44,6 @@ export function ClusterAlertingMessagesPage({ cluster }: ClusterAlertingMessages
       description: t('cluster.alerting.messages.description'),
       rowKey: 'id',
       rowAttributes: (row) => ({ 'data-ai-row': row.id }),
-      sortableKeys: [],
       columns: [
         {
           key: 'summary',

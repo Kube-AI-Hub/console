@@ -90,7 +90,6 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
     () => ({
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
-      sortableKeys: [],
       columns: [
         {
           key: 'name',
@@ -197,7 +196,7 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
   }
 
   return (
-    <AiSurface as="section" aiId="cluster-alerting-policies:surface" state={state} className="flex min-w-0 flex-col gap-4">
+    <AiSurface as="section" aiId="cluster-alerting-policies:surface" state={state} className="flex min-w-0 flex-col gap-4" data-ai-id="cluster-alerting-policies:body">
       <header className="flex flex-col gap-1">
         <h1 className="text-lg font-semibold text-ai-fg">{t('cluster.alerting.policies.title')}</h1>
         <p className="text-xs text-ai-fg-muted">{t('cluster.alerting.policies.description')}</p>
