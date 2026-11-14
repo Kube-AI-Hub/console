@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../src/errors';
 import {
   EXEC_PROTOCOL,
@@ -133,6 +133,40 @@ describe('execWebSocketUrl', () => {
 });
 
 describe('openExecSession', () => {
+  it('preserves UTF-8 characters split between output frames', () => {
+    const chunks: string[] = [];
+    const session = openExecSession({ cluster: 'host', namespace: 'demo', pod: 'web-0',
+      getToken: () => 'token', webSocketImpl: FakeSocket, onData: (data) => chunks.push(data) });
+    lastSocket().open();
+    const bytes = new TextEncoder().encode('终端');
+    lastSocket().onmessage?.({ data: new Uint8Array([1, ...bytes.slice(0, 2)]).buffer });
+    lastSocket().onmessage?.({ data: new Uint8Array([1, ...bytes.slice(2)]).buffer });
+    expect(chunks.join('')).toBe('终端');
+    session.close();
+  });
+
+  it('sends legacy terminal mouse bytes without UTF-8 rewriting', () => {
+    const session = openExecSession({ cluster: 'host', namespace: 'demo', pod: 'web-0',
+      getToken: () => 'token', webSocketImpl: FakeSocket });
+    lastSocket().open();
+    session.writeBinary?.('\u001b[M\u00ff');
+    expect([...lastSocket().sent[0]!]).toEqual([0, 27, 91, 77, 255]);
+    session.close();
+  });
+
+  it('times out a stalled handshake and closes its socket', () => {
+    vi.useFakeTimers();
+    try {
+      const errors: ApiError[] = [];
+      openExecSession({ cluster: 'host', namespace: 'demo', pod: 'web-0', getToken: () => 'token-abc',
+        webSocketImpl: FakeSocket, connectTimeoutMs: 1000, onError: (error) => errors.push(error) });
+      vi.advanceTimersByTime(1000);
+      expect(errors).toHaveLength(1);
+      expect(errors[0]!.message).toContain('timed out');
+      expect(lastSocket().readyState).toBe(3);
+    } finally { vi.useRealTimers(); }
+  });
+
   it('sends the channel protocol and the bearer token as subprotocols', () => {
     openExecSession({
       cluster: 'host',

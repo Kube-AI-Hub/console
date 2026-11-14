@@ -567,6 +567,7 @@ MODULES = [
                         "tests": {"L3": [
                             "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-KUBECTL-01",
                             "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-KUBECTL-02",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-KUBECTL-03",
                         ]},
                     },
                     {

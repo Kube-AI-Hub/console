@@ -1,0 +1,29 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-KUBECTL-01
+title: kubectl · 当前账号连接与只读命令
+module: kube-frontend
+submodule: cluster-management
+feature: kubectl
+level: 3
+suite: point
+priority: P1
+entry_url: "{BASE_URL}/kube-frontend/clusters/{cluster}/kubectl"
+prd: prd/kube-frontend/cluster-management/kubectl.md
+design: design/kube-frontend/cluster-management/kubectl.md
+covers:
+  - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-KUBECTL-01
+story:
+  - US1
+product: 当前账号连接已有工具容器，执行只读命令并关闭会话。
+preconditions:
+  - 已登录的集群管理员账号有就绪 kubectl 工具 Pod 和 exec 权限
+steps:
+  - 打开工具页并核对未点击前不出现会话
+  - 点击连接等待就绪
+  - 执行唯一标记与 kubectl 只读版本命令，核对输出
+  - 关闭并离开页面，再返回核对未自动连接
+expected:
+  - 输出包含唯一标记与客户端版本信息
+  - 关闭后会话不存在，再返回页面仍需主动连接
+  - 测试不创建或删除工具 Pod，不执行资源写入命令
+automation:
+  page_object: tests/ui/pages/cluster_management.py

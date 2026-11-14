@@ -1,0 +1,29 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-KUBECTL-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: kubectl
+title: kubectl · Tab 补全与 shell 编辑快捷键
+entry_url: "{BASE_URL}/kube-frontend/clusters/{cluster}/kubectl"
+prd: prd/kube-frontend/cluster-management/kubectl.md
+design: design/kube-frontend/cluster-management/kubectl.md
+covers:
+  - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-KUBECTL-03
+story:
+  - US1
+product: 原样传递终端按键，由交互式 shell 提供补全、历史和行内编辑。
+preconditions:
+  - 当前账号有就绪工具容器及 exec 权限
+  - 目标 shell 支持命令与路径补全，容器有 kubectl 和 /bin 目录
+steps:
+  - 输入 kubect 并按 Tab，确认焦点仍在终端，再执行客户端版本查询
+  - 输入路径前缀 /bi 并按 Tab，执行 printf，核对实际输出为 /bin/
+  - 按上箭头及回车，核对同一命令再次执行
+  - 使用 Ctrl+U 清空输入，Ctrl+A/E 在行首插入 printf，核对输出
+expected:
+  - 补全由远端生成，Tab 不跳到弹窗按钮
+  - 补全后命令可运行，路径结果与历史执行次数正确
+  - 控制键不移走 DOM 焦点，行内编辑位置正确
+update_automation:
+  - 键盘输入目标为终端输出区的 xterm-helper-textarea

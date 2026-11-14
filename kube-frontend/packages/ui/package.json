@@ -15,6 +15,10 @@
       "import": "./src/editor.ts"
     },
     "./styles.css": "./src/styles.css",
+    "./terminal": {
+      "types": "./src/terminal.ts",
+      "import": "./src/terminal.ts"
+    },
     "./tailwind.preset": {
       "types": "./src/preset.ts",
       "import": "./src/preset.ts"

@@ -1,0 +1,29 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-KUBECTL-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: kubectl
+title: kubectl · ANSI 与 vim 光标交互
+entry_url: "{BASE_URL}/kube-frontend/clusters/{cluster}/kubectl"
+prd: prd/kube-frontend/cluster-management/kubectl.md
+design: design/kube-frontend/cluster-management/kubectl.md
+covers:
+  - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-KUBECTL-02
+story:
+  - US1
+product: 近全屏终端保留格式、光标与备用屏幕，并将键盘直接送入远端程序。
+preconditions:
+  - 当前账号有就绪工具容器及 exec 权限
+  - 工具容器已安装 vim 或 vi，不在测试中安装软件
+steps:
+  - 连接工具终端，输出红色标记，核对渲染颜色
+  - 探测 vim 或 vi，打开无文件编辑器，插入文本
+  - 用方向键移动光标并插入字符，按 Esc，确认弹窗仍在
+  - 不保存退出编辑器，核对 shell 屏幕恢复且可继续输入命令
+expected:
+  - ANSI 色彩与普通文字不同
+  - 光标移动后字符插入位置正确，Esc 不关闭弹窗
+  - 编辑器退出后恢复主屏幕，无测试文件写入
+update_automation:
+  - 输入目标使用 xterm-helper-textarea，状态句柄见 cluster_management.py

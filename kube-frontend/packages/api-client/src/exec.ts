@@ -61,6 +61,8 @@ export interface ExecTarget {
 export interface ExecSession {
   /** Send stdin. No-op until the socket is open. */
   write(data: string): void;
+  /** Raw input bytes for legacy mouse reports emitted by a terminal emulator. */
+  writeBinary?(data: string): void;
   /** Tell the remote pty how big the page's output area is. */
   resize(columns: number, rows: number): void;
   /** Close the session. Idempotent; a deliberate close reports no error. */
@@ -103,6 +105,8 @@ export interface ExecOptions extends ExecTarget {
   origin?: string;
   /** Test seam: defaults to the browser's 'WebSocket'. */
   webSocketImpl?: ExecSocketFactory;
+  /** Bound a stalled handshake so the page never remains connecting indefinitely. */
+  connectTimeoutMs?: number;
 }
 
 /** 'WebSocket.OPEN', spelled out so the client does not depend on the constant. */
@@ -177,10 +181,12 @@ export function openExecSession(options: ExecOptions): ExecSession {
   let rawError = false;
   let opened = false;
   let deliberate = false;
+  let connectTimer: ReturnType<typeof setTimeout> | undefined;
 
   const finish = (error?: ApiError): void => {
     if (finished) return;
     finished = true;
+    clearTimeout(connectTimer);
     if (error) options.onError?.(error);
     options.onClose?.();
   };
@@ -206,7 +212,13 @@ export function openExecSession(options: ExecOptions): ExecSession {
   }
 
   socket.binaryType = 'arraybuffer';
+  connectTimer = setTimeout(() => {
+    finish(new ApiError({ code: 'connection_failed', message: 'the terminal connection timed out' }, 0));
+    socket?.close();
+  }, options.connectTimeoutMs ?? 20_000);
   socket.onopen = () => {
+    clearTimeout(connectTimer);
+    if (finished) { socket?.close(); return; }
     opened = true;
     options.onOpen?.();
   };
@@ -234,12 +246,13 @@ export function openExecSession(options: ExecOptions): ExecSession {
     finish();
   };
 
+  const outputDecoders = { 1: new TextDecoder(), 2: new TextDecoder() };
   const handleFrame = (bytes: Uint8Array): void => {
     if (bytes.length === 0) return;
     const channel = bytes[0];
     const payload = bytes.subarray(1);
     if (channel === EXEC_CHANNELS.stdout || channel === EXEC_CHANNELS.stderr) {
-      options.onData?.(new TextDecoder().decode(payload));
+      options.onData?.(outputDecoders[channel].decode(payload, { stream: true }));
       return;
     }
     if (channel !== EXEC_CHANNELS.error) return;
@@ -250,6 +263,7 @@ export function openExecSession(options: ExecOptions): ExecSession {
       return;
     }
     finish(failure);
+    socket?.close();
   };
 
   socket.onmessage = (event) => {
@@ -287,12 +301,16 @@ export function openExecSession(options: ExecOptions): ExecSession {
     write(data: string) {
       sendFrame(EXEC_CHANNELS.stdin, new TextEncoder().encode(data));
     },
+    writeBinary(data: string) {
+      sendFrame(EXEC_CHANNELS.stdin, Uint8Array.from(data, (character) => character.charCodeAt(0)));
+    },
     resize(columns: number, rows: number) {
       sendFrame(EXEC_CHANNELS.resize, new TextEncoder().encode(JSON.stringify({ Width: columns, Height: rows })));
     },
     close() {
       if (deliberate) return;
       deliberate = true;
+      clearTimeout(connectTimer);
       try {
         socket?.close(1000, 'closed by client');
       } catch {

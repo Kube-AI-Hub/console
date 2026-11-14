@@ -29,6 +29,7 @@ export default defineConfig({
        */
       entry: {
         index: resolve(__dirname, 'src/index.ts'),
+        terminal: resolve(__dirname, 'src/terminal.ts'),
         'tailwind.preset': resolve(__dirname, 'src/tailwind.preset.ts'),
       },
       formats: ['es'],

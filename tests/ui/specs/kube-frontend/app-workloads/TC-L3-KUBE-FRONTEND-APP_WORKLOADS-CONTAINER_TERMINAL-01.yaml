@@ -16,7 +16,7 @@ story:
 - US1
 - US2
 
-product: 容器详情页的「终端」区块通过 BFF 的 WebSocket 升级转发，在容器内打开一个 /bin/sh；输入命令后输出出现在输出区，关闭后连接释放、面板收起。容器里没有 /bin/sh 时显示明确的错误与上游原因，而不是空白或一直转圈。
+product: 容器详情页在近全屏独立弹窗打开真实交互终端，保留格式与光标，关闭后释放 exec 连接。
 preconditions:
 - 已登录
 - kubesphere-system 下存在「容器里有 /bin/sh、exec 可以启动」的容器组（用例先按容器镜像优先级探测，探不到可执行 shell 的容器时跳过并说明原因）
@@ -24,7 +24,7 @@ steps:
 - 用 API 列出 kubesphere-system 的运行中容器组，按 ks-console / ks-apiserver / tower 优先排序，取每个容器组的容器
 - 依次打开候选容器的详情页并点「打开终端」
 - 等终端面板进入「已连接」（data-ai-state=ready）；若错误文本是上游的 no such file / stat /bin/sh，说明该容器没有 shell，记录下来换下一个候选；若是连接被拒绝则判定通道故障，直接失败
-- 在终端输入框输入 echo tc-terminal-ok 并回车
+- 在模拟器的键盘输入目标直接键入 echo tc-terminal-ok 并回车
 - 等输出区出现一行内容恰为 tc-terminal-ok
 - 点「关闭终端」，确认终端面板从页面移除、入口按钮重新出现
 - 若探测阶段发现过没有 shell 的容器，再打开它并断言终端面板进入 error 且错误区有非空的上游原因
@@ -38,4 +38,4 @@ troubleshoot:
 - 面板进入 error 且错误文本含 connection refused：浏览器到 BFF 的 WebSocket 被拒绝（鉴权子协议 bearer.<token> 是否带上、BFF 是否 401）
 - 输出区没有 tc-terminal-ok：确认容器有 /bin/sh；没有 shell 的容器会走 error 分支而不是输出
 update_automation:
-- 选择器见 ContainerTerminal.tsx：container-detail:terminal-open / terminal / terminal-output / terminal-input / terminal-send / terminal-close / terminal-retry / terminal-error
+- 选择器见 ExecConsoleDialog.tsx，键盘输入目标为 xterm-helper-textarea，输出读取 xterm-rows

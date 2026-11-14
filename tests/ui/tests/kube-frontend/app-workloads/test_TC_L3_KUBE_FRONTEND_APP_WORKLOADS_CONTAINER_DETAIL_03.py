@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import urllib.error
 import urllib.request
+import re
 
 import pytest
 from playwright.sync_api import expect
@@ -98,6 +99,7 @@ def test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_CONTAINER_DETAIL_03(app_workloads_pag
 
     logs = ui.page.locator('[data-ai-id="container-detail:logs"]')
     expect(logs).to_be_visible(timeout=30_000)
+    ui.page.locator('[data-ai-id="container-detail:logs-open"]').click()
     # Search is the default view: the live list does not exist until asked for.
     expect(ui.page.locator('[data-ai-id="container-detail:log-stream"]')).to_have_count(0)
     expect(ui.page.locator('[data-ai-id="container-detail:log-keyword"]')).to_be_visible(timeout=20_000)
@@ -107,30 +109,33 @@ def test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_CONTAINER_DETAIL_03(app_workloads_pag
     expect(switch).to_have_attribute("aria-checked", "false")
     switch.click()
 
-    stream = ui.page.locator('[data-ai-id="container-detail:log-stream"]')
+    stream = ui.page.locator('[data-ai-id="container-detail:log-console"]')
     expect(stream).to_be_visible(timeout=20_000)
     expect(stream).to_have_attribute("data-ai-state", "ready", timeout=90_000)
 
-    rows = ui.page.locator('[data-ai-id="container-detail:log-stream"] [data-ai-row]')
-    expect(rows.first).to_be_visible(timeout=90_000)
-    assert rows.count() >= 1, "实时流没有渲染出任何日志行"
-    # The page keeps the newest 1000 lines; more than that is a retention bug.
-    assert rows.count() <= 1000, f"实时流保留了 {rows.count()} 行，超过 1000 行上限"
+    rows = ui.page.locator('[data-ai-id="container-detail:log-stream"] .xterm-rows')
+    expect(rows).to_have_text(re.compile(r"\S"), timeout=90_000)
 
     stop = ui.page.locator('[data-ai-id="container-detail:log-stream-stop"]')
     expect(stop).to_be_visible(timeout=10_000)
     stop.click()
 
-    expect(switch).to_have_attribute("aria-checked", "false", timeout=10_000)
+    expect(ui.page.get_by_role("dialog")).to_have_count(0, timeout=10_000)
     expect(ui.page.locator('[data-ai-id="container-detail:log-stream"]')).to_have_count(0, timeout=10_000)
-    # Search mode comes back, including its keyword box: the pre-live contract.
-    expect(ui.page.locator('[data-ai-id="container-detail:log-keyword"]')).to_be_visible(timeout=20_000)
 
     # Stopping must not wedge the channel: a second session starts again.
+    ui.page.locator('[data-ai-id="container-detail:logs-open"]').click()
+    expect(switch).to_have_attribute("aria-checked", "false", timeout=10_000)
+    expect(ui.page.locator('[data-ai-id="container-detail:log-keyword"]')).to_be_visible(timeout=20_000)
     switch.click()
     expect(ui.page.locator('[data-ai-id="container-detail:log-stream"]')).to_be_visible(timeout=20_000)
     expect(
-        ui.page.locator('[data-ai-id="container-detail:log-stream"] [data-ai-row]').first
-    ).to_be_visible(timeout=90_000)
+        ui.page.locator('[data-ai-id="container-detail:log-stream"] .xterm-rows')
+    ).to_have_text(re.compile(r"\S"), timeout=90_000)
 
-    screenshot(ui.page, "container-log-follow")
+    for width in (1024, 1280, 1600):
+        ui.page.set_viewport_size({"width": width, "height": 900})
+        bounds = ui.page.get_by_role("dialog").bounding_box()
+        assert bounds and bounds["width"] >= width - 20 and bounds["height"] >= 880, bounds
+        path = screenshot(ui.page, f"container-log-follow-{width}")
+        ui.page.screenshot(path=str(path), full_page=False)

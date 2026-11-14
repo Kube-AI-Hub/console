@@ -124,7 +124,7 @@ def _wait_for_exact_line(output, expected: str, timeout: float = 20.0) -> bool:
     """
     deadline = time.time() + timeout
     while time.time() < deadline:
-        rows = [text.strip() for text in output.locator("[data-ai-row]").all_inner_texts()]
+        rows = [text.strip() for text in output.locator(".xterm-rows > div").all_inner_texts()]
         if expected in rows:
             return True
         time.sleep(0.2)
@@ -184,15 +184,15 @@ def test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_CONTAINER_TERMINAL_01(app_workloads_p
     output = ui.page.locator('[data-ai-id="container-detail:terminal-output"]')
     expect(output).to_be_visible(timeout=10_000)
 
-    field = ui.page.locator('[data-ai-id="container-detail:terminal-input"]')
+    field = output.locator(".xterm-helper-textarea")
     expect(field).to_be_enabled(timeout=15_000)
-    field.fill("echo tc-terminal-ok")
+    field.press_sequentially("echo tc-terminal-ok")
     field.press("Enter")
 
     expect(output).to_contain_text("tc-terminal-ok", timeout=20_000)
     assert _wait_for_exact_line(output, "tc-terminal-ok"), (
         "终端输出里没有一行恰好是 tc-terminal-ok（输入回显不算）；"
-        f"当前行：{[text.strip() for text in output.locator('[data-ai-row]').all_inner_texts()][-5:]}"
+        f"当前行：{[text.strip() for text in output.locator('.xterm-rows > div').all_inner_texts()][-5:]}"
     )
     screenshot(ui.page, "container-terminal")
 

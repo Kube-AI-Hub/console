@@ -1,14 +1,15 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { ApiError, logSearchApi, openPodLogStream, workloadsApi, type WorkloadDetail } from '@kube-ai-hub/api-client';
+import { workloadsApi, type WorkloadDetail } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { AiSurface, Button, Input, Skeleton, Switch } from '@kube-ai-hub/ui';
+import { AiSurface, Button, Skeleton } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { DefinitionRow } from '@/components/resource/DefinitionRow';
 import { ContainerTerminal } from './ContainerTerminal';
+import { ContainerLogsDialog } from './ContainerLogsDialog';
 
 /**
  * 容器详情.
@@ -55,9 +56,6 @@ interface ContainerView {
 /** Lines kept in the live view. A tail is read from the bottom; history above this is dropped. */
 export const MAX_LIVE_LOG_LINES = 1000;
 
-/** How often accumulated lines are flushed into React state, in milliseconds. */
-const LIVE_FLUSH_MS = 100;
-
 /**
  * Split kube's `timestamps=true` prefix off a log line.
  *
@@ -72,135 +70,15 @@ export function splitLogLine(line: string): { at: string; text: string } {
   return { at: match[1] ?? '', text: match[2] ?? line };
 }
 
-type LiveState = 'idle' | 'connecting' | 'streaming' | 'error';
-
 export function ContainerDetailPage({ workspace, cluster, namespace, pod, container }: ContainerDetailPageProps): React.ReactElement {
   const t = useT();
   const query = useQuery({
-    queryKey: ['workload-detail', 'pods', pod, namespace],
+    queryKey: ['workload-detail', 'pods', cluster, pod, namespace],
     queryFn: ({ signal }) => workloadsApi(apiClient, 'pods').get({ name: pod, namespace, cluster, signal }),
   });
 
   const state = query.isPending ? 'loading' : query.isError ? 'error' : 'ready';
-  const [logKeyword, setLogKeyword] = React.useState('');
-  /*
-   * Live tail is opt-in: the search block is the default because it answers
-   * "what does the log say" without holding a connection open. Checking it
-   * aborts the search request instead of leaving an unread query in flight.
-   */
-  const [live, setLive] = React.useState(false);
-  const [liveAttempt, setLiveAttempt] = React.useState(0);
-  const [liveLines, setLiveLines] = React.useState<string[]>([]);
-  const [liveState, setLiveState] = React.useState<LiveState>('idle');
-  const [liveError, setLiveError] = React.useState('');
-  const liveListRef = React.useRef<HTMLDivElement | null>(null);
-
-  const logs = useQuery({
-    queryKey: ['container-logs', pod, container, logKeyword],
-    queryFn: ({ signal }) => {
-      const endTime = Math.floor(Date.now() / 1000);
-      return logSearchApi(apiClient).search({
-        namespace,
-        pod,
-        container,
-        ...(logKeyword ? { keyword: logKeyword } : {}),
-        startTime: endTime - 3600,
-        endTime,
-        size: 200,
-        signal,
-      });
-    },
-    // The block shows one source at a time; while the live stream owns it the
-    // search result would be fetched and never rendered.
-    enabled: !live,
-  });
-
-  /*
-   * One streaming read per session. `liveAttempt` is what the reconnect button
-   * bumps: the effect is the only place that owns the connection, so a retry is
-   * a re-run rather than a second code path.
-   *
-   * Lines are batched into state every LIVE_FLUSH_MS: a follow stream replays
-   * the container's whole log file first (see `openPodLogStream`), and one
-   * setState per line on a 20k-line history is a re-render storm.
-   */
-  React.useEffect(() => {
-    if (!live) return;
-    let disposed = false;
-    const stream = openPodLogStream(apiClient, {
-      cluster,
-      namespace,
-      pod,
-      ...(container ? { container } : {}),
-      follow: true,
-      timestamps: true,
-    });
-    let pending: string[] = [];
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    const flush = (): void => {
-      timer = undefined;
-      if (disposed || pending.length === 0) return;
-      const batch = pending;
-      pending = [];
-      setLiveLines((previous) => {
-        const next = previous.concat(batch);
-        return next.length > MAX_LIVE_LOG_LINES ? next.slice(-MAX_LIVE_LOG_LINES) : next;
-      });
-    };
-
-    setLiveLines([]);
-    setLiveError('');
-    setLiveState('connecting');
-
-    void (async () => {
-      try {
-        for await (const line of stream) {
-          if (disposed) return;
-          setLiveState('streaming');
-          pending.push(line);
-          if (!timer) timer = setTimeout(flush, LIVE_FLUSH_MS);
-        }
-        // The response ended without an error: the container restarted, the
-        // stream was cut, or the log was rotated. That is a disconnect the
-        // reader has to see, not a silent stop.
-        if (disposed) return;
-        flush();
-        setLiveState('error');
-      } catch (cause) {
-        if (disposed) return;
-        flush();
-        setLiveError(cause instanceof ApiError ? cause.message : '');
-        setLiveState('error');
-      }
-    })();
-
-    return () => {
-      disposed = true;
-      // Closing the reader aborts the fetch, which closes the connection this
-      // BFF hop is streaming through. Without it the upstream follow would
-      // outlive the toggle.
-      stream.close();
-      if (timer) clearTimeout(timer);
-    };
-  }, [live, liveAttempt, cluster, namespace, pod, container]);
-
-  // Leaving live mode drops the buffer: stale lines behind the search block
-  // would be shown again the next time the toggle is switched on.
-  React.useEffect(() => {
-    if (live) return;
-    setLiveLines([]);
-    setLiveError('');
-    setLiveState('idle');
-  }, [live]);
-
-  // A tail is read from the bottom, so keep the newest line in view.
-  React.useEffect(() => {
-    const list = liveListRef.current;
-    if (list) list.scrollTop = list.scrollHeight;
-  }, [liveLines]);
-
-  const stopLive = React.useCallback(() => setLive(false), []);
-  const retryLive = React.useCallback(() => setLiveAttempt((attempt) => attempt + 1), []);
+  const [logsOpen, setLogsOpen] = React.useState(false);
 
   const view = query.data ? containerView(query.data, container) : undefined;
   const podLinks = { workspace, cluster, namespace };
@@ -325,106 +203,10 @@ export function ContainerDetailPage({ workspace, cluster, namespace, pod, contai
             )}
           </section>
           <section className="rounded-lg border border-ai-border bg-ai-surface p-4" data-ai-id="container-detail:logs">
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <h2 className="text-sm font-medium text-ai-fg">
-                {t('container.section.logs')}（{live ? t('container.logs.follow') : t('search.window.1h')}）
-              </h2>
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="flex items-center gap-2 text-xs text-ai-fg-muted">
-                  <span
-                    className="flex min-h-11 items-center sm:min-h-0"
-                    {...actionProps('container-detail:log-follow')}
-                  >
-                    <Switch
-                      className="h-6 w-11 sm:h-5 sm:w-9"
-                      checked={live}
-                      aria-label={t('container.logs.follow')}
-                      onCheckedChange={setLive}
-                    />
-                  </span>
-                  {t('container.logs.follow')}
-                </span>
-                {live ? (
-                  <Button
-                    variant="secondary"
-                    {...actionProps('container-detail:log-stream-stop')}
-                    onClick={stopLive}
-                  >
-                    {t('container.logs.followStop')}
-                  </Button>
-                ) : null}
-                <Input
-                  id="container-detail:log-keyword"
-                  value={logKeyword}
-                  placeholder={t('search.field.keyword')}
-                  disabled={live}
-                  {...actionProps('container-detail:log-keyword')}
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => setLogKeyword(event.target.value)}
-                />
-              </div>
-            </div>
-            {live ? (
-              <div
-                className="flex flex-col gap-2"
-                data-ai-id="container-detail:log-stream"
-                data-ai-state={liveState === 'error' ? 'error' : liveState === 'streaming' ? 'ready' : 'loading'}
-              >
-                {liveState === 'connecting' || (liveState === 'streaming' && liveLines.length === 0) ? (
-                  <p className="text-xs text-ai-fg-muted">
-                    {liveState === 'streaming' ? t('container.logs.followWaiting') : t('container.logs.followConnecting')}
-                  </p>
-                ) : null}
-                {liveState === 'error' ? (
-                  <div className="flex flex-wrap items-center gap-2" data-ai-id="container-detail:log-stream-error">
-                    <p className="text-xs text-ai-fg-muted">
-                      {t('container.logs.followError')}
-                      {liveError ? ` ${liveError}` : ''}
-                    </p>
-                    <Button variant="secondary" {...actionProps('container-detail:log-stream-retry')} onClick={retryLive}>
-                      {t('container.logs.followRetry')}
-                    </Button>
-                  </div>
-                ) : null}
-                {liveLines.length > 0 ? (
-                  <div
-                    ref={liveListRef}
-                    className="flex max-h-80 flex-col gap-1 overflow-y-auto font-mono text-[11px]"
-                    data-ai-id="container-detail:log-stream-list"
-                  >
-                    {liveLines.map((line, index) => {
-                      const parsed = splitLogLine(line);
-                      return (
-                        <div key={`${index}-${parsed.at}`} className="flex gap-2" data-ai-row={String(index)}>
-                          {parsed.at ? <span className="shrink-0 tabular-nums text-ai-fg-muted">{parsed.at}</span> : null}
-                          <span className="min-w-0 flex-1 whitespace-pre-wrap break-all text-ai-fg-secondary">{parsed.text}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : null}
-                <p className="text-[11px] text-ai-fg-muted">{t('container.logs.followHint')}</p>
-              </div>
-            ) : (
-              <React.Fragment>
-                {logs.isPending ? <Skeleton className="h-24 w-full" /> : null}
-                {logs.isError ? (
-                  <p className="text-xs text-ai-fg-muted">{t('container.logsUnavailable')}</p>
-                ) : null}
-                {logs.data && logs.data.records.length === 0 ? (
-                  <p className="text-xs text-ai-fg-muted">{t('search.logs.empty')}</p>
-                ) : null}
-                {logs.data && logs.data.records.length > 0 ? (
-                  <div className="flex max-h-80 flex-col gap-1 overflow-y-auto font-mono text-[11px]" data-ai-id="container-detail:log-list">
-                    {logs.data.records.map((record, index) => (
-                      <div key={`${record.time}-${index}`} className="flex gap-2" data-ai-row={String(index)}>
-                        <span className="shrink-0 tabular-nums text-ai-fg-muted">{record.time}</span>
-                        <span className="min-w-0 flex-1 whitespace-pre-wrap break-all text-ai-fg-secondary">{record.log}</span>
-                      </div>
-                    ))}
-                  </div>
-                ) : null}
-              </React.Fragment>
-            )}
+            <Button variant="secondary" {...actionProps('container-detail:logs-open')} onClick={() => setLogsOpen(true)}>
+              {t('console.logs.open')}
+            </Button>
+            {logsOpen ? <ContainerLogsDialog target={{ cluster, namespace, pod, container }} onClose={() => setLogsOpen(false)} /> : null}
           </section>
 
           <ContainerTerminal cluster={cluster} namespace={namespace} pod={pod} container={container} />

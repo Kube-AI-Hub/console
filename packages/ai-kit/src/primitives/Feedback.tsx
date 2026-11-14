@@ -66,17 +66,24 @@ export interface ModalProps {
    * form and the YAML editor both need the room, and `lg` forces the data editor
    * to scroll horizontally.
    */
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'console';
+  /** Interactive consoles need Escape and outside clicks to reach the session. */
+  dismissOnEscape?: boolean;
+  dismissOnOutside?: boolean;
+  closeAiId?: string;
+  closeLabel?: string;
 }
 
-const modalSizes = { sm: 'max-w-sm', md: 'max-w-lg', lg: 'max-w-2xl', xl: 'max-w-4xl' } as const;
+const modalSizes = { sm: 'max-w-sm', md: 'max-w-lg', lg: 'max-w-2xl', xl: 'max-w-4xl', console: 'max-w-none h-[calc(100dvh-1rem)]' } as const;
 
-export function Modal({ open, onOpenChange, title, description, children, footer, size = 'md' }: ModalProps): React.ReactElement {
+export function Modal({ open, onOpenChange, title, description, children, footer, size = 'md', dismissOnEscape = true, dismissOnOutside = true, closeAiId, closeLabel = '关闭' }: ModalProps): React.ReactElement {
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-[2px] animate-ai-fade-in" />
         <DialogPrimitive.Content
+          onEscapeKeyDown={(event) => { if (!dismissOnEscape) event.preventDefault(); }}
+          onPointerDownOutside={(event) => { if (!dismissOnOutside) event.preventDefault(); }}
           // Confirm dialogs have a title and no extra copy; without this Radix
           // warns that the dialog is missing a description, then would point
           // `aria-describedby` at nothing.
@@ -101,9 +108,10 @@ export function Modal({ open, onOpenChange, title, description, children, footer
             'animate-ai-pop-in [--ai-pop-scale:0.96]',
             'focus:outline-none',
             modalSizes[size],
+            size === 'console' && 'flex w-[calc(100%-1rem)] max-h-none flex-col overflow-hidden animate-none',
           )}
         >
-          <header className="flex items-start gap-3 border-b border-ai-line px-5 py-4">
+          <header className={cn('flex shrink-0 items-start gap-3 border-b border-ai-line px-5', size === 'console' ? 'py-2' : 'py-4')}>
             <div className="min-w-0 flex-1">
               <DialogPrimitive.Title className="text-sm font-semibold text-ai-fg">{title}</DialogPrimitive.Title>
               {description ? (
@@ -113,14 +121,14 @@ export function Modal({ open, onOpenChange, title, description, children, footer
               ) : null}
             </div>
             <DialogPrimitive.Close asChild>
-              <Button variant="ghost" size="icon" aria-label="关闭">
+              <Button variant="ghost" size="icon" aria-label={closeLabel} data-ai-id={closeAiId}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                   <path d="M18 6 6 18M6 6l12 12" />
                 </svg>
               </Button>
             </DialogPrimitive.Close>
           </header>
-          {children ? <div className="max-h-[70vh] overflow-y-auto px-5 py-4">{children}</div> : null}
+          {children ? <div className={size === 'console' ? 'flex min-h-0 flex-1 flex-col overflow-hidden p-2' : 'max-h-[70vh] overflow-y-auto px-5 py-4'}>{children}</div> : null}
           {footer ? <footer className="flex justify-end gap-2 border-t border-ai-line px-5 py-3">{footer}</footer> : null}
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>

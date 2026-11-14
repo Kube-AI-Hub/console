@@ -24,7 +24,7 @@
 - 日志搜索读租户日志接口；实时 tail 读 kube 的 `log` 子资源，走 BFF 已有的 HTTP 流式代理，不新建 WebSocket。
 - 路由：`…/pods/$name/containers/$container`，挂在容器组详情之下。
 - 终端走 kube 原生 exec WebSocket（`v5.channel.k8s.io`）：BFF 只透传升级请求，入口（开发期是 `scripts/dev-static-server.mjs`）必须同样转发 `Upgrade`，否则浏览器连不到 BFF。
-- 终端不是完整终端模拟器：只做命令输入 + 输出文本，pty 转义序列在展示前去掉。
+- 终端使用 xterm.js + FitAddon，保留 ANSI、光标寻址和备用屏幕；键盘直接送入 PTY，不使用命令表单。
 
 ## 方案决策
 
@@ -134,7 +134,7 @@ openExecSession({ cluster, namespace, pod, container, command, getToken, onData,
 - 帧格式即上表的通道号；`write` 发 0 通道，`resize` 发 4 通道。
 - 收到通道 3 的 `Status`：`Success` 视为 shell 正常退出；其余解析出 message 作为 `ApiError`（折叠 kubelet 重复的 `Internal error occurred:` 前缀）。
 - 握手在打开前失败时浏览器只知道「失败」，客户端报 `connection_failed`；已连接后异常断开报 `network_error`。
-- 输出保留原始文本，`stripAnsi()` 去掉 pty 的转义序列；页面按行保留最近 500 行。
+- 输出保留原始转义序列，由 xterm 渲染；UTF-8 解码跨帧保留状态，终端维护 5000 行滚动历史及备用屏幕。
 
 **页面状态机**：`connecting → connected → closed | error`。进入 `connected` 前输入框禁用；`error` 显示通用提示 + 上游原因，并提供「重新连接」；关闭面板或卸载页面必须 `close()`，BFF 随客户端断开销毁上游 exec。
 
@@ -143,7 +143,7 @@ openExecSession({ cluster, namespace, pod, container, command, getToken, onData,
 - 页面：`apps/console-next/src/pages/app-workloads/ContainerDetailPage.tsx`
 - 流式读取：`packages/api-client/src/logs.ts`（`openPodLogStream` / `streamPodLogs`），底层是 `client.stream()`（`packages/api-client/src/client.ts`）
 - BFF：`kube-frontend/server/src/proxy.ts` 已是流式转发，唯一改动是「读者放弃时销毁上游请求」，否则每次关闭实时都会在 ks-apiserver 上留一条永不结束的 follow
-- 终端：`packages/api-client/src/exec.ts`（`openExecSession` / `execPath` / `stripAnsi`）、`apps/console-next/src/pages/app-workloads/ContainerTerminal.tsx`（区块与状态机）、BFF 的 `server/src/upgrade.ts`（upgrade 透传，挂载在 `server/src/index.ts` 的 `startServer`）
+- 终端：`packages/api-client/src/exec.ts`（原始流与 UTF-8 解码）、`ContainerTerminal.tsx`（入口）、共享 `components/resource/ExecConsoleDialog.tsx`（会话）、ai-kit 的 `terminal/TerminalView.tsx`（模拟器）及 BFF upgrade 透传。
 - 开发入口：`kube-frontend/scripts/dev-static-server.mjs` 增加 `on('upgrade')` 原样转发，否则浏览器到 BFF 的 WebSocket 在入口就被丢弃
 - 路由：`routes/…/pods/$name/containers/$container.tsx`（容器组详情由 `$name.tsx` 改造为 `$name/` 目录，index 即原详情）
 - 容器组详情的容器区块：`WorkloadDetailPage.tsx`（仅 pods 提供容器链接）
@@ -164,9 +164,9 @@ openExecSession({ cluster, namespace, pod, container, command, getToken, onData,
 3. 容器名不在对象里时显示明确提示，而不是空白页。
 4. 实时开关是日志区块唯一的模式入口：同一时刻只显示搜索或流中的一个，关闭开关必须 abort 连接。
 5. 实时列表最多 1000 行，且始终保留最新的行（旧行从头丢弃）。
-6. 实时开关默认关闭；关闭时原有日志搜索的 `data-ai-id`（`container-detail:logs` / `:log-list` / `:log-keyword`）与行为不变。
+6. 日志在独立近全屏弹窗显示，实时开关默认关闭；历史与实时只显示一个来源，关闭弹窗取消流。
 7. 终端只有一个连接：关闭面板、重新连接、离开路由都必须先关掉上一条 WebSocket。
-8. 终端输出最多 500 行，且始终保留最新的行。
+8. 终端滚动历史最多 5000 行，日志历史最多 1000 行；备用屏幕不追加为日志历史。
 9. 没有 token 时不发起 WebSocket：客户端在本地就报未登录，而不是让浏览器报一个无法诊断的握手失败。
 10. BFF 不得把非 `exec` 路径的 upgrade 转发到集群。
 
@@ -196,12 +196,28 @@ openExecSession({ cluster, namespace, pod, container, command, getToken, onData,
 
 可观测点：`container-detail:surface`、`:basic`、`:resources`、`:env`、`:mounts`、`:ports`、`:probes`、`:logs`、`:log-list`、`:log-keyword`；
 实时：`:log-follow`（开关，`aria-checked` 表示状态）、`:log-stream`（流容器，`data-ai-state` 为 loading/ready/error）、`:log-stream-list`（行列表，每行一个 `data-ai-row`）、`:log-stream-stop`、`:log-stream-retry`；
-终端：`:terminal-open`、`:terminal`（面板，`data-ai-state` 为 loading/ready/error/empty）、`:terminal-output`（每行一个 `data-ai-row`）、`:terminal-input`、`:terminal-send`、`:terminal-close`、`:terminal-retry`、`:terminal-error`。
+终端：`:terminal-open`、`:terminal`（弹窗内部状态）、`:terminal-output`（xterm 渲染器）、`:terminal-close`、`:terminal-retry`、`:terminal-error`；键盘输入使用 xterm-helper-textarea，不再使用旧命令框与执行按钮。
+
+### DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-05 — 日志与终端使用近全屏独立控制台
+
+**为什么**：命令表单无法承接 vim 的光标寻址、Esc、备用屏幕及格式输出。
+ai-kit TerminalView 只负责 VT 渲染、键盘与 ResizeObserver；应用层负责鉴权与连接。
+Modal 的 console 尺寸距视口边缘 8px，终端禁用 Escape/遮罩退出，将 Esc 留给程序。
+
+**被否方案**：继续剥离 ANSI，或把 xterm 绑定页面小区域；均无法提供用户要求的控制台交互。
+将日志改为 WebSocket 没有必要，现有 HTTP 流式协议继续使用。
+
+**何时重新考虑**：需要多会话管理或独立窗口时增加会话容器，不改变模拟器与传输分层。
+
+**实现约束**：xterm 按需加载，不进入普通列表的初始包；PTY 设置 TERM=xterm-256color，
+输入直接发送，resize 使用通道 4，UTF-8 解码跨帧保留状态；日志按浏览器帧批量写入。
+Tab 保留 `\t` 原样送入 stdin，交互式 shell 优先 bash、缺失回退 sh；补全候选和历史由远端生成。
+关闭、重连、切换日志模式和卸载均清理连接；不记录命令或持久化输出。
 
 ## 后续改进
 
 - 单容器监控（依赖监控区间查询）。
-- 完整终端模拟器（xterm + `FitAddon`）：光标寻址、颜色、全屏程序（`vi`、`top`）。当前只做命令输入 + 文本输出，`resize` 帧已经按输出区尺寸发送，接 xterm 时只需替换视图。
+- xterm + FitAddon 已落地近全屏弹窗，支持光标、颜色与备用屏幕；远端必须安装 vim/vi 等程序，本功能不在生产容器内安装软件。
 - 节点 shell 与 kubectl 会话：复用 `server/src/upgrade.ts`，把路径规则扩成一份表。
 - 上游修好 flush 后，follow 请求可以加回 `tailLines`，避免回放整个日志文件。
 

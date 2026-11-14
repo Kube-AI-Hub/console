@@ -99,6 +99,9 @@ class ClusterManagementPage:
     def gateway_tab(self, component: str) -> Locator:
         return self.page.locator(f'[data-ai-id="cluster-gateways:tab:{component}"]')
 
+    def kubectl_control(self, name: str) -> Locator:
+        return self.page.locator(f'[data-ai-id="kubectl:{name}"]')
+
     def row_names(self, kind: str = "nodes") -> list[str]:
         values = self.surface(kind).locator("[data-ai-row]").evaluate_all(
             "els => els.map(e => e.getAttribute('data-ai-row'))"

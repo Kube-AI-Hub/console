@@ -52,6 +52,14 @@ export default defineConfig({
        * their lazily-loaded chunk.
        */
       {
+        find: /^@kube-ai-hub\/ui\/terminal$/,
+        replacement: fileURLToPath(new URL('../../packages/ui/src/terminal.ts', import.meta.url)),
+      },
+      {
+        find: /^@kube-ai-hub\/ai-kit\/terminal$/,
+        replacement: fileURLToPath(new URL('../../../packages/ai-kit/src/terminal.ts', import.meta.url)),
+      },
+      {
         find: /^@kube-ai-hub\/ui\/editor$/,
         replacement: fileURLToPath(new URL('../../packages/ui/src/editor.ts', import.meta.url)),
       },
@@ -123,9 +131,9 @@ export default defineConfig({
        * forwards `/api/`, `/kapis/` and `/apis/`, and `scripts/dev-static-server.mjs`
        * proxies the same three.
        */
-      '/api': { target: process.env['BFF_URL'] ?? 'http://127.0.0.1:8091', changeOrigin: true },
-      '/kapis': { target: process.env['BFF_URL'] ?? 'http://127.0.0.1:8091', changeOrigin: true },
-      '/apis': { target: process.env['BFF_URL'] ?? 'http://127.0.0.1:8091', changeOrigin: true },
+      '/api': { target: process.env['BFF_URL'] ?? 'http://127.0.0.1:8091', changeOrigin: true, ws: true },
+      '/kapis': { target: process.env['BFF_URL'] ?? 'http://127.0.0.1:8091', changeOrigin: true, ws: true },
+      '/apis': { target: process.env['BFF_URL'] ?? 'http://127.0.0.1:8091', changeOrigin: true, ws: true },
     },
   },
   build: {
@@ -163,6 +171,10 @@ export default defineConfig({
              * serializer made that page chunk statically depend on this one.
              * Left ungrouped, Rollup keeps the serializer with its importer.
              */
+            [
+              /(node_modules[\\/]@xterm[\\/]|packages[\\/]ai-kit[\\/]src[\\/]terminal)/,
+              'vendor-terminal',
+            ],
             [
               /node_modules[\\/](@codemirror|@lezer|codemirror|@uiw)[\\/]/,
               'vendor-yaml-editor',

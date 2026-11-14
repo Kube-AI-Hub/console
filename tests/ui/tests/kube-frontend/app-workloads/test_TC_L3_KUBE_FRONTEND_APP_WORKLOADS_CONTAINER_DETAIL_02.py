@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import time
+import re
+from uuid import uuid4
 
 import pytest
 from playwright.sync_api import expect
@@ -70,8 +72,16 @@ def test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_CONTAINER_DETAIL_02(app_workloads_pag
 
     block = ui.page.locator('[data-ai-id="container-detail:logs"]')
     expect(block).to_be_visible(timeout=30_000)
-    rows = ui.page.locator('[data-ai-id="container-detail:log-list"] [data-ai-row]')
-    expect(rows.first).to_be_visible(timeout=90_000)
-    assert rows.count() > 0
+    ui.page.locator('[data-ai-id="container-detail:logs-open"]').click()
+    expect(ui.page.get_by_role("dialog")).to_be_visible()
+    output = ui.page.locator('[data-ai-id="container-detail:log-list"] .xterm-rows')
+    expect(output).to_have_text(re.compile(r"\S"), timeout=90_000)
+    keyword = ui.page.locator('[data-ai-id="container-detail:log-keyword"]')
+    keyword.fill(f"no-log-match-{uuid4().hex}")
+    ui.page.get_by_role("dialog").get_by_role("button", name="搜索", exact=True).click()
+    expect(ui.page.get_by_role("dialog")).to_contain_text("当前条件下没有日志。", timeout=30_000)
+    keyword.fill("")
+    ui.page.get_by_role("dialog").get_by_role("button", name="搜索", exact=True).click()
+    expect(output).to_have_text(re.compile(r"\S"), timeout=30_000)
 
     screenshot(ui.page, "container-logs")
