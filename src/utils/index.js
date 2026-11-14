@@ -566,7 +566,7 @@ export const isAppsPage = (path = location.pathname) =>
 
 export const isMemberClusterPage = (path = location.pathname, message) => {
   const clusterName = get(
-    /\/clusters\/?([-0-9a-z]*)\/?/.exec(path),
+    /\/(?:klusters|clusters)\/?([-0-9a-z]*)\/?/.exec(path),
     '1',
     'host'
   )

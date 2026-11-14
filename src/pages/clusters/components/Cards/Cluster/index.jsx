@@ -77,7 +77,7 @@ export default class ClusterCard extends React.Component {
   }
 
   render() {
-    const { data } = this.props
+    const { data, jwtSecretMismatch } = this.props
     const expiredDay = data.expiredDay
     const isExpired = expiredDay && expiredDay < 0
     const willExpired = expiredDay && expiredDay <= 10 && expiredDay >= 0
@@ -132,6 +132,11 @@ export default class ClusterCard extends React.Component {
             {this.renderMore(data)}
           </Column>
         </Columns>
+        {jwtSecretMismatch ? (
+          <div className={styles.jwtMismatch}>
+            {t('JWT_SECRET_MISMATCH_CARD')}
+          </div>
+        ) : null}
       </li>
     )
   }

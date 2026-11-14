@@ -56,6 +56,12 @@ module.exports = {
   KUBE_CONFIG_IS_EXPIRED: 'kubeconfig 已过期',
   EXPIRE_DATE: '过期时间',
   LAST_KUBE_CONFIG_EXPIRED: 'kubeconfig 将在 <span class="kubeConfig_expired">{count}</span> 天后过期',
+  JWT_SECRET_MISMATCH_TITLE: '{name} 的 jwtSecret 与主集群不一致',
+  JWT_SECRET_MISMATCH_DESC: '当前登录无法在该集群上使用。请在主集群取出 jwtSecret，再写入成员集群的集群配置。',
+  JWT_SECRET_MISMATCH_HOST_STEP: '在主集群执行：',
+  JWT_SECRET_MISMATCH_MEMBER_STEP: '在成员集群执行：',
+  JWT_SECRET_MISMATCH_APPLY: '把取到的值写入 authentication.jwtSecret，并将 multicluster.clusterRole 设为 member，保存后等待生效。',
+  JWT_SECRET_MISMATCH_CARD: 'jwtSecret 与主集群不一致',
   VALIDATION_FAILED: '校验失败。',
   NO_CLUSTER_TIP_DESC: '集群是运行 KubeSphone 的一组节点（物理或虚拟机）。',
   // List > Remove Cluster

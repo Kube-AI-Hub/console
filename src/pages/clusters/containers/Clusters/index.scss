@@ -70,3 +70,33 @@
   left: 50%;
   transform: translate(-50%, -50%);
 }
+
+.jwtHint {
+  margin: 0 0 16px;
+  padding: 16px;
+  border-radius: 4px;
+  background-color: variables.$dark-color08;
+  color: variables.$light-color01;
+
+  p {
+    margin: 8px 0 0;
+    color: variables.$light-color01;
+  }
+}
+
+.jwtHintTitle {
+  font-weight: 600;
+  color: variables.$light-color01;
+}
+
+.jwtCommand {
+  margin: 8px 0 0;
+  padding: 8px 12px;
+  border-radius: 4px;
+  background-color: variables.$light-color01;
+  color: variables.$dark-color08;
+  font-family: monospace;
+  font-weight: 600;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
