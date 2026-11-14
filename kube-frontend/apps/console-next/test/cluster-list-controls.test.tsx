@@ -52,8 +52,8 @@ describe('cluster list controls', () => {
       expect(requests.at(-1)!.searchParams.get('limit')).toBe('50');
       expect(requests.at(-1)!.searchParams.get('page')).toBe('1');
     });
-    await user.type(screen.getByRole('textbox', { name: '按名称搜索' }), 'sample');
-    expect(screen.getByRole('textbox', { name: '按名称搜索' })).toHaveValue('sample');
+    await user.type(screen.getByRole('searchbox', { name: '按名称搜索' }), 'sample');
+    expect(screen.getByRole('searchbox', { name: '按名称搜索' })).toHaveValue('sample');
     await waitFor(() => expect(requests.at(-1)!.searchParams.get('name')).toBe('sample'));
     revision = 1;
     const count = requests.length;
