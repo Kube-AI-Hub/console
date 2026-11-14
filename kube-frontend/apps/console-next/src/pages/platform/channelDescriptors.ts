@@ -1,5 +1,7 @@
 import type { LocaleKey } from '@kube-ai-hub/locales';
-import type { NotificationChannelKey } from '@kube-ai-hub/api-client';
+// The channel domain's own union (notification.ts), not the read-only overview list in
+// access.ts: the pages here render every channel the notification API supports.
+import type { NotificationChannelSpecKey as NotificationChannelKey } from '@kube-ai-hub/api-client';
 
 /**
  * What each notification channel needs, declared once.
@@ -21,6 +23,12 @@ export type FieldTarget = 'config' | 'receiver' | 'secret' | 'annotation';
 /** A path segment: a literal key, or the value of another field (a mode selector). */
 export type PathSegment = string | { from: string };
 
+/** A condition on another field's value; an array means "any of these values". */
+export interface VisibleWhen {
+  key: string;
+  equals: string | string[];
+}
+
 export interface ChannelField {
   key: string;
   target: FieldTarget;
@@ -33,10 +41,26 @@ export interface ChannelField {
   hintKey?: LocaleKey;
   placeholder?: string;
   /** Only rendered (and only written) when another field has this value. */
-  visibleWhen?: { key: string; equals: string };
+  visibleWhen?: VisibleWhen;
   options?: { value: string; labelKey: LocaleKey }[];
   /** Default shown for a channel that was never configured. */
   defaultValue?: string;
+}
+
+/**
+ * A `valueFrom.secretKeyRef` written into the Config or the Receiver.
+ *
+ * More than one is needed: Feishu references App ID / App Secret from the Config and the
+ * bot webhook / signing secret from the Receiver, and each reference names a different key
+ * of the same Secret.
+ */
+export interface SecretRef {
+  target: 'config' | 'receiver';
+  path: PathSegment[];
+  /** Key inside the channel's Secret. */
+  secretKey: string;
+  /** Write the reference only while this mode/field is selected. */
+  visibleWhen?: VisibleWhen;
 }
 
 export interface ChannelDescriptor {
@@ -65,6 +89,8 @@ export interface ChannelDescriptor {
    * Config write has to carry that reference.
    */
   secretRef?: { path: PathSegment[]; secretKey: string };
+  /** Several references, possibly on both the Config and the Receiver (see `SecretRef`). */
+  secretRefs?: SecretRef[];
 }
 
 const ENABLED: ChannelField = {
@@ -225,15 +251,154 @@ export const CHANNELS: Record<NotificationChannelKey, ChannelDescriptor> = {
       ENABLED,
     ],
   },
+  feishu: {
+    key: 'feishu',
+    specKey: 'feishu',
+    titleKey: 'channel.feishu.title',
+    descriptionKey: 'channel.feishu.description',
+    configName: 'default-feishu-config',
+    receiverName: 'global-feishu-receiver',
+    secretName: 'global-feishu-config-secret',
+    /*
+     * Feishu is the one channel with two transport shapes under one name:
+     * an application (App ID/Secret + user or department ids) and a group robot
+     * (webhook + signing secret + keywords). The application credentials are read
+     * out of the Secret by the Config, and the robot credentials are read out of the
+     * same Secret by the Receiver, so both objects carry references.
+     */
+    secretRefs: [
+      {
+        target: 'config',
+        path: ['feishu', 'appID'],
+        secretKey: 'appkey',
+        visibleWhen: { key: 'mode', equals: ['user', 'department'] },
+      },
+      {
+        target: 'config',
+        path: ['feishu', 'appSecret'],
+        secretKey: 'appsecret',
+        visibleWhen: { key: 'mode', equals: ['user', 'department'] },
+      },
+      {
+        target: 'receiver',
+        path: ['feishu', 'chatbot', 'webhook'],
+        secretKey: 'webhook',
+        visibleWhen: { key: 'mode', equals: 'chatbot' },
+      },
+      {
+        target: 'receiver',
+        path: ['feishu', 'chatbot', 'secret'],
+        secretKey: 'chatbotsecret',
+        visibleWhen: { key: 'mode', equals: 'chatbot' },
+      },
+    ],
+    inferMode: (receiver) => {
+      // The saved receiver names the mode by which key it holds: spec.feishu.chatbot,
+      // spec.feishu.department or spec.feishu.user.
+      const feishu = read(receiver, ['spec', 'feishu']) as Record<string, unknown> | undefined;
+      if (feishu && 'chatbot' in feishu) return 'chatbot';
+      if (feishu && 'department' in feishu) return 'department';
+      return 'user';
+    },
+    fields: [
+      {
+        key: 'mode',
+        target: 'receiver',
+        path: ['mode'],
+        kind: 'select',
+        labelKey: 'channel.feishu.mode',
+        defaultValue: 'user',
+        options: [
+          { value: 'user', labelKey: 'channel.feishu.modeUser' },
+          { value: 'department', labelKey: 'channel.feishu.modeDepartment' },
+          { value: 'chatbot', labelKey: 'channel.feishu.modeChatbot' },
+        ],
+      },
+      // Application (conversation) mode: App ID/Secret plus one recipient kind.
+      {
+        key: 'appkey',
+        target: 'secret',
+        path: ['appkey'],
+        kind: 'text',
+        labelKey: 'channel.feishu.appId',
+        required: true,
+        visibleWhen: { key: 'mode', equals: ['user', 'department'] },
+      },
+      {
+        key: 'appsecret',
+        target: 'secret',
+        path: ['appsecret'],
+        kind: 'password',
+        labelKey: 'channel.feishu.appSecret',
+        required: true,
+        visibleWhen: { key: 'mode', equals: ['user', 'department'] },
+      },
+      {
+        key: 'users',
+        target: 'receiver',
+        path: ['feishu', 'user'],
+        kind: 'list',
+        labelKey: 'channel.feishu.user',
+        required: true,
+        visibleWhen: { key: 'mode', equals: 'user' },
+        hintKey: 'channel.feishu.userHint',
+      },
+      {
+        key: 'departments',
+        target: 'receiver',
+        path: ['feishu', 'department'],
+        kind: 'list',
+        labelKey: 'channel.feishu.department',
+        required: true,
+        visibleWhen: { key: 'mode', equals: 'department' },
+        hintKey: 'channel.feishu.departmentHint',
+      },
+      // Group robot: webhook + signing secret + keywords.
+      {
+        key: 'webhook',
+        target: 'secret',
+        path: ['webhook'],
+        kind: 'text',
+        labelKey: 'channel.feishu.webhook',
+        rule: 'url',
+        required: true,
+        visibleWhen: { key: 'mode', equals: 'chatbot' },
+      },
+      {
+        key: 'chatbotsecret',
+        target: 'secret',
+        path: ['chatbotsecret'],
+        kind: 'password',
+        labelKey: 'channel.feishu.secret',
+        visibleWhen: { key: 'mode', equals: 'chatbot' },
+      },
+      {
+        key: 'keywords',
+        target: 'receiver',
+        path: ['feishu', 'chatbot', 'keywords'],
+        kind: 'list',
+        labelKey: 'channel.feishu.keywords',
+        visibleWhen: { key: 'mode', equals: 'chatbot' },
+        hintKey: 'channel.feishu.keywordsHint',
+      },
+      ENABLED,
+    ],
+  },
 };
 
 /** Channels in the order the tabs show them; mail first, as the old console does. */
-export const CHANNEL_ORDER: NotificationChannelKey[] = ['mail', 'dingtalk', 'wecom', 'slack', 'webhook'];
+export const CHANNEL_ORDER: NotificationChannelKey[] = ['mail', 'dingtalk', 'wecom', 'slack', 'webhook', 'feishu'];
+
+/** Whether a value satisfies a `visibleWhen` condition. */
+function matches(when: VisibleWhen, values: Record<string, string>): boolean {
+  const actual = values[when.key];
+  return Array.isArray(when.equals) ? when.equals.includes(actual ?? '') : actual === when.equals;
+}
 
 /** Whether a field applies to the current form state. */
 export function fieldVisible(field: ChannelField, values: Record<string, string>): boolean {
   if (!field.visibleWhen) return true;
-  return values[field.visibleWhen.key] === field.visibleWhen.equals;
+  return matches(field.visibleWhen, values);
 }
 
 /** Resolve a path segment list against the current form state. */
@@ -372,6 +537,16 @@ export function toBodies(
   if (descriptor.secretRef) {
     write(configSpec, resolve(descriptor.secretRef.path, values), {
       valueFrom: { secretKeyRef: { name: descriptor.secretName, key: descriptor.secretRef.secretKey } },
+    });
+  }
+
+  for (const ref of descriptor.secretRefs ?? []) {
+    // A reference to a mode that is not in use would make the platform require a
+    // credential the form cannot fill (Feishu's Config requires appID/appSecret only
+    // when the application mode is selected).
+    if (ref.visibleWhen && !matches(ref.visibleWhen, values)) continue;
+    write(ref.target === 'config' ? configSpec : receiverSpec, resolve(ref.path, values), {
+      valueFrom: { secretKeyRef: { name: descriptor.secretName, key: ref.secretKey } },
     });
   }
 

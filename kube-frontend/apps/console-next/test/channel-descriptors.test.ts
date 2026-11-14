@@ -180,3 +180,116 @@ describe('slack', () => {
     expect(bodies.secretData).toEqual({ token: 'xoxb-1' });
   });
 });
+
+describe('feishu', () => {
+  it('names the objects the platform uses for this channel', () => {
+    expect(CHANNELS.feishu.configName).toBe('default-feishu-config');
+    expect(CHANNELS.feishu.receiverName).toBe('global-feishu-receiver');
+    expect(CHANNELS.feishu.secretName).toBe('global-feishu-config-secret');
+    expect(CHANNELS.feishu.specKey).toBe('feishu');
+  });
+
+  it('writes application mode: both credential references on the Config, users on the Receiver', () => {
+    const bodies = toBodies(CHANNELS.feishu, {
+      mode: 'user',
+      appkey: 'cli_xxx',
+      appsecret: 'app-secret',
+      users: 'ou_a, ou_b',
+      enabled: 'true',
+    });
+    expect(bodies.configSpec).toEqual({
+      feishu: {
+        // The Config CRD requires both refs whenever spec.feishu is present.
+        appID: { valueFrom: { secretKeyRef: { name: 'global-feishu-config-secret', key: 'appkey' } } },
+        appSecret: { valueFrom: { secretKeyRef: { name: 'global-feishu-config-secret', key: 'appsecret' } } },
+      },
+    });
+    expect(bodies.receiverSpec).toEqual({ feishu: { user: ['ou_a', 'ou_b'], enabled: true } });
+    expect(bodies.secretData).toEqual({ appkey: 'cli_xxx', appsecret: 'app-secret' });
+  });
+
+  it('writes department mode under spec.feishu.department, keeping the app credentials', () => {
+    const bodies = toBodies(CHANNELS.feishu, {
+      mode: 'department',
+      appkey: 'cli_xxx',
+      appsecret: 'app-secret',
+      departments: 'od-1, od-2',
+      enabled: 'false',
+    });
+    expect(bodies.receiverSpec).toEqual({ feishu: { department: ['od-1', 'od-2'], enabled: false } });
+    expect(bodies.configSpec).toHaveProperty('feishu.appID');
+    // The user list of the previous mode is not part of this request.
+    expect(bodies.receiverSpec).not.toHaveProperty('feishu.user');
+  });
+
+  it('writes bot mode with references on the Receiver and no Config spec', () => {
+    const bodies = toBodies(CHANNELS.feishu, {
+      mode: 'chatbot',
+      webhook: 'https://open.feishu.cn/open-apis/bot/v2/hook/x',
+      chatbotsecret: 'signing-secret',
+      keywords: 'alert, deploy',
+      enabled: 'true',
+    });
+    // Bot mode needs no transport Config; the page deletes an empty one instead of
+    // writing a Config the platform cannot use.
+    expect(bodies.configSpec).toEqual({});
+    expect(bodies.receiverSpec).toEqual({
+      feishu: {
+        chatbot: {
+          webhook: {
+            valueFrom: { secretKeyRef: { name: 'global-feishu-config-secret', key: 'webhook' } },
+          },
+          secret: {
+            valueFrom: { secretKeyRef: { name: 'global-feishu-config-secret', key: 'chatbotsecret' } },
+          },
+          keywords: ['alert', 'deploy'],
+        },
+        enabled: true,
+      },
+    });
+    expect(bodies.secretData).toEqual({
+      webhook: 'https://open.feishu.cn/open-apis/bot/v2/hook/x',
+      chatbotsecret: 'signing-secret',
+    });
+  });
+
+  it('infers the saved mode from which receiver key exists', () => {
+    const infer = (spec: Record<string, unknown>): string =>
+      toFormValues(CHANNELS.feishu, { config: null, receiver: { spec: { feishu: spec } } }).mode ?? '';
+    expect(infer({ user: ['ou_1'] })).toBe('user');
+    expect(infer({ department: ['od-1'] })).toBe('department');
+    expect(infer({ chatbot: { keywords: ['x'] } })).toBe('chatbot');
+  });
+
+  it('validates only the fields of the selected mode', () => {
+    // User mode: the app credentials and the user list are required; the bot fields are
+    // not rendered, so they cannot block the save.
+    expect(
+      validate(CHANNELS.feishu, {
+        mode: 'user',
+        appkey: '',
+        appsecret: '',
+        users: '',
+        webhook: '',
+        chatbotsecret: '',
+        keywords: '',
+        enabled: 'false',
+      }),
+    ).toMatchObject({ appkey: 'required', users: 'required' });
+
+    // Bot mode: the webhook must look like a URL; the application fields are not checked.
+    expect(
+      validate(CHANNELS.feishu, {
+        mode: 'chatbot',
+        appkey: '',
+        appsecret: '',
+        users: '',
+        webhook: 'not-a-url',
+        chatbotsecret: '',
+        keywords: '',
+        enabled: 'false',
+      }),
+    ).toMatchObject({ webhook: 'url' });
+  });
+});
+

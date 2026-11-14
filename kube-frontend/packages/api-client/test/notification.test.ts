@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import type { RequestOptions } from '../src/client';
 import {
+  CHANNEL_SPEC_KEY,
+  NOTIFICATION_CHANNELS,
   channelEnabled,
   notificationConfigApi,
   notificationSecretApi,
@@ -130,7 +132,13 @@ describe('channel state', () => {
     expect(channelEnabled(null, 'mail')).toBe(false);
   });
 
-  it('reports a channel as configured only when its config exists', async () => {
+  it('includes feishu, whose objects use the same word as the menu', () => {
+    expect(NOTIFICATION_CHANNELS).toContain('feishu');
+    expect(CHANNEL_SPEC_KEY.feishu).toBe('feishu');
+    expect(channelEnabled({ spec: { feishu: { enabled: true } } }, 'feishu')).toBe(true);
+  });
+
+  it('reports a channel as configured when its config exists', async () => {
     const { client } = recordingClient((path) => {
       if (path.includes('/configs/')) return { spec: { email: {} } };
       if (path.includes('/receivers/')) return { spec: { email: { enabled: true } } };
@@ -146,5 +154,21 @@ describe('channel state', () => {
     expect(status.enabled).toBe(true);
     // No secret exists, so it is not claimed.
     expect(status.secretName).toBe('');
+  });
+
+  it('counts a receiver without a config as configured (feishu bot mode)', async () => {
+    const { client } = recordingClient((path) => {
+      if (path.includes('/configs/')) throw new Error('404');
+      if (path.includes('/receivers/')) return { spec: { feishu: { chatbot: { keywords: ['x'] } } } };
+      throw new Error('404');
+    });
+    const status = await readChannel(client, {
+      key: 'feishu',
+      configName: 'default-feishu-config',
+      receiverName: 'global-feishu-receiver',
+      secretName: 'global-feishu-config-secret',
+    });
+    expect(status.configured).toBe(true);
+    expect(status.config).toBeNull();
   });
 });

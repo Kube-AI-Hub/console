@@ -6,7 +6,7 @@ import {
   notificationSecretApi,
   notificationVerifyApi,
   readChannel,
-  type NotificationChannelKey,
+  type NotificationChannelSpecKey as NotificationChannelKey,
   type NotificationObject,
 } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
@@ -82,12 +82,22 @@ export function ChannelConfigPage({ channel }: ChannelConfigPageProps): React.Re
       if (descriptor.configName) {
         const configApi = notificationConfigApi(apiClient).forName(descriptor.configName);
         const current = await configApi.get();
-        await configApi.save({
-          apiVersion: 'notification.kubesphere.io/v2beta2',
-          kind: 'Config',
-          metadata: { ...(current?.metadata ?? {}), name: descriptor.configName },
-          spec: bodies.configSpec,
-        });
+        if (Object.keys(bodies.configSpec).length > 0) {
+          await configApi.save({
+            apiVersion: 'notification.kubesphere.io/v2beta2',
+            kind: 'Config',
+            metadata: { ...(current?.metadata ?? {}), name: descriptor.configName },
+            spec: bodies.configSpec,
+          });
+        } else if (current) {
+          /*
+           * The selected mode needs no transport Config (Feishu's group robot keeps
+           * everything in the Receiver). The old console deletes the Config in the same
+           * situation; keeping an empty one would leave an object the platform cannot use
+           * and make the "configured" badge claim more than is there.
+           */
+          await configApi.remove();
+        }
       }
 
       // Credentials: the page cannot read them back, so blank means "keep the stored one"
@@ -127,9 +137,10 @@ export function ChannelConfigPage({ channel }: ChannelConfigPageProps): React.Re
   const verify = useMutation({
     mutationFn: async () => {
       const bodies = toBodies(descriptor, values);
-      if (!descriptor.configName) {
+      if (!descriptor.configName || Object.keys(bodies.configSpec).length === 0) {
         // Channels without a Config verify with the receiver alone; the endpoint accepts a
-        // missing `config` key (the old console omits it in that case).
+        // missing `config` key (the old console omits it in that case). Feishu's group
+        // robot mode is the same shape: no Config, everything in the Receiver.
         return notificationVerifyApi(apiClient).verify({ receiver: bodies.receiverSpec });
       }
       return notificationVerifyApi(apiClient).verify({

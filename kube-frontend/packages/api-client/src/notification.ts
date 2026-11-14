@@ -20,7 +20,7 @@ const NOTIFICATION_V2 = '/kapis/notification.kubesphere.io/v2beta2';
 const NOTIFICATION_SECRETS = '/kapis/notification.kubesphere.io/v2beta1/secrets';
 
 /** The channels the platform supports, in the old console's order. */
-export const NOTIFICATION_CHANNELS = ['mail', 'dingtalk', 'wecom', 'slack', 'webhook'] as const;
+export const NOTIFICATION_CHANNELS = ['mail', 'dingtalk', 'wecom', 'slack', 'webhook', 'feishu'] as const;
 export type NotificationChannelKey = (typeof NOTIFICATION_CHANNELS)[number];
 
 /** One notification object, as far as this app reads it. */
@@ -240,6 +240,7 @@ export const CHANNEL_SPEC_KEY: Record<NotificationChannelKey, string> = {
   wecom: 'wechat',
   slack: 'slack',
   webhook: 'webhook',
+  feishu: 'feishu',
 };
 
 /** Whether a channel can send, from its receiver's `enabled` flag. */
@@ -253,8 +254,10 @@ export function channelEnabled(receiver: NotificationObject | null, key: Notific
  * Read one channel's three objects.
  *
  * Absent objects are a valid state (nothing configured yet), so this reports presence
- * rather than failing: `configured` is true only when the Config exists, which is what
- * makes the channel usable.
+ * rather than failing. A channel counts as configured when either its Config or its
+ * Receiver exists: Feishu's bot mode deliberately has no Config (see the
+ * `channelDescriptors.ts` entry), and reporting it "not configured" after a successful
+ * save would be wrong.
  */
 export async function readChannel(
   client: Client,
@@ -269,7 +272,7 @@ export async function readChannel(
     config,
     receiver,
     secretName: secret ? params.secretName : '',
-    configured: config !== null,
+    configured: config !== null || receiver !== null,
     enabled: channelEnabled(receiver, params.key),
   };
 }
