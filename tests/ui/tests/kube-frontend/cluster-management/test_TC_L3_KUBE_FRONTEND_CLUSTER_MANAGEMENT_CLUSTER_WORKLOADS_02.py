@@ -26,7 +26,8 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_WORKLOADS_02(cluster_man
             return parsed.path.endswith(f"/{kind}") and params.get("limit") == ["10"] and params.get("page") == ["1"]
 
         with ui.page.expect_response(matches, timeout=60_000) as changed:
-            ui.workload_page_size(kind).select_option("10")
+            ui.workload_page_size(kind).click()
+            ui.page.get_by_role("option", name="10", exact=True).click()
         assert changed.value.ok
         search = ui.workload_search(kind)
         search.fill(keyword)
@@ -40,6 +41,6 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_WORKLOADS_02(cluster_man
         assert refreshed.value.ok
         expect(surface).to_have_attribute("aria-busy", "false", timeout=60_000)
         expect(search).to_have_value(keyword)
-        expect(ui.workload_page_size(kind)).to_have_value("10")
+        expect(ui.workload_page_size(kind)).to_contain_text("10")
         expect(surface).to_have_attribute("data-ai-state", "empty")
     screenshot(ui.page, "cluster-workloads-empty-refresh")

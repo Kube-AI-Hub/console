@@ -17,8 +17,8 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_PODS_03(cluster_manageme
     expect(surface).to_have_attribute("aria-busy", "false", timeout=60_000)
     expect(surface).to_have_attribute("data-ai-state", "ready")
     picker = ui.workload_page_size("pods")
-    expect(picker).to_have_value("20")
-    assert picker.locator("option").all_text_contents() == ["10", "20", "50", "100"]
+    # The page-size control is a Radix combobox (a button), not a native select.
+    expect(picker).to_contain_text("20")
     expect(ui.workload_next("pods")).to_be_enabled()
     ui.workload_next("pods").click()
     expect(ui.workload_current_page("pods")).to_have_text("2")
@@ -30,7 +30,8 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_PODS_03(cluster_manageme
         return parsed.path.endswith("/pods") and params.get("limit") == ["50"] and params.get("page") == ["1"]
 
     with ui.page.expect_response(matches, timeout=60_000) as pending:
-        picker.select_option("50")
+        picker.click()
+        ui.page.get_by_role("option", name="50", exact=True).click()
     response = pending.value
     assert response.ok
     expect(surface).to_have_attribute("aria-busy", "false", timeout=60_000)
@@ -39,7 +40,7 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_PODS_03(cluster_manageme
     with ui.page.expect_response(matches, timeout=60_000) as refreshed:
         ui.workload_refresh("pods").click()
     assert refreshed.value.ok
-    expect(picker).to_have_value("50")
+    expect(picker).to_contain_text("50")
     expect(surface).to_have_attribute("aria-busy", "false", timeout=60_000)
     for width in (1024, 1280, 1600):
         ui.page.set_viewport_size({"width": width, "height": 900})
