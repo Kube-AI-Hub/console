@@ -48,6 +48,7 @@ PROJECT_PAGES = {
     "services": "services",
     "routes": "ingresses",
     "grayrelease": "grayrelease",
+    "s2ibuilders": "s2ibuilder",
     "volumes": "persistentvolumeclaims",
     "volumesnapshots": "volumesnapshots",
     "alerting/messages": "alerts",

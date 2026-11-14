@@ -80,6 +80,7 @@ RENAME: dict[str, dict[str, str]] = {
         "alert-rules": "alerting-policies",
     },
     "projects": {
+        "s2ibuilders": "s2ibuilder",
         "base-info": "baseinfo",
         "volume-snapshots": "volumesnapshots",
         "volumes": "persistentvolumeclaims",
@@ -113,9 +114,6 @@ ELSEWHERE: dict[str, str] = {
 PLANNED: dict[str, str] = {
     # 2026-11-15：用户确认所有组件已开启（应用商店/DevOps/集群网关/联邦/服务网格）。
     # 这些段原登记为「模块未开启」，现改为待迁移，按区域分批交付。
-    "projects/s2ibuilders": "镜像构建器：DevOps 区域已落地列表与详情骨架，构建器页待建",
-    "workspaces/apps": "企业空间应用仓库：openpitrix 已开启；商店管理已迁移，企业空间内仓库页待建",
-    "workspaces/repos": "企业空间应用仓库：openpitrix 已开启；仓库管理页待建",
 }
 
 #: 整个作用域级别的归宿。老 console 有 9 个作用域，其中四个整块不在迁移范围内——
