@@ -92,6 +92,18 @@ export {
   type EmptyProps,
 } from './primitives/Display';
 export {
+  DescriptionList,
+  DescriptionItem,
+  type DescriptionListProps,
+  type DescriptionItemProps,
+} from './primitives/DescriptionList';
+export {
+  PasswordStrengthMeter,
+  type PasswordStrengthMeterProps,
+  type PasswordStrengthLevel,
+  type PasswordStrengthCheck,
+} from './primitives/PasswordStrength';
+export {
   Alert,
   Loading,
   Modal,

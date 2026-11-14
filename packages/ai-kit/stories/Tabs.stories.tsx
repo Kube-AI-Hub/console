@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
-import { Tabs } from '../src/primitives/Navigation';
+import { Tabs, TabsContent } from '../src/primitives/Navigation';
 import { ComponentDocs } from './_docs-layout';
 
 const meta: Meta<typeof Tabs> = {
@@ -18,6 +18,11 @@ const meta: Meta<typeof Tabs> = {
             <>
               Tabs 是<strong>同一个对象的几个视角</strong>（概览 / 监控 / 事件），不是导航；
               需要在不同页面之间跳转时用左侧菜单。默认选中第一项，切换保持页面其他部分不重建。
+              <br />
+              需要被自动化精确定位的页签传 <code>aiId</code>（落在触发器上）；
+              未保存提示点用 <code>badge</code> 画点、<code>badgeLabel</code> 提供读屏文案；
+              面板作为 <code>children</code> 传入、与触发器同属 Radix root（触发器的
+              <code>aria-controls</code> 才指向真实节点），由 <code>TabsContent</code> 渲染。
             </>
           }
         />
@@ -82,4 +87,63 @@ export const Controlled: Story = {
       </div>
     );
   },
+};
+
+/**
+ * 未保存提示：点由调用方传入（这里 6px 的 warning 圆点），badgeLabel 是读屏文案。
+ *
+ * 点本身 aria-hidden，无障碍名称由 label + badgeLabel 组成；这样「有未保存修改」
+ * 不只靠颜色传达。
+ */
+export const WithDirtyBadge: Story = {
+  name: 'with dirty badge',
+  render: () => (
+    <div className="max-w-xl">
+      <Tabs
+        defaultValue="profile"
+        items={[
+          {
+            value: 'profile',
+            label: '基本信息',
+            aiId: 'demo:tab-profile',
+            badge: <span className="size-1.5 rounded-full bg-ai-warning" />,
+            badgeLabel: '未保存的修改',
+          },
+          { value: 'password', label: '密码设置', aiId: 'demo:tab-password' },
+        ]}
+      />
+    </div>
+  ),
+};
+
+/**
+ * 面板用法：把 TabsContent 作为 children 传进 Tabs。
+ *
+ * 触发器与面板在同一个 Radix root 下，aria-controls / aria-labelledby 才成对；
+ * 切换页签只切换面板内容，外层页面不重建。
+ */
+export const WithContent: Story = {
+  name: 'with content',
+  render: () => (
+    <div className="max-w-xl">
+      <Tabs
+        defaultValue="profile"
+        items={[
+          { value: 'profile', label: '基本信息' },
+          { value: 'password', label: '密码设置' },
+        ]}
+      >
+        <TabsContent value="profile" className="pt-3">
+          <p className="text-xs leading-5 text-ai-fg-secondary">
+            基本信息面板：用户名与平台角色只读，邮箱可以修改。
+          </p>
+        </TabsContent>
+        <TabsContent value="password" className="pt-3">
+          <p className="text-xs leading-5 text-ai-fg-secondary">
+            密码设置面板：修改成功后需要重新登录。
+          </p>
+        </TabsContent>
+      </Tabs>
+    </div>
+  ),
 };

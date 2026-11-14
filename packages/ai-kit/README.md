@@ -96,7 +96,7 @@ src/
 ├── styles/        tokens.css（双层 token）、motion.css（动效类）
 ├── theme/         ThemeProvider（mode + accent）、ThemeToggle / AccentToggle
 ├── motion/        useSpotlight、Reveal、ParticleField、StreamText
-├── primitives/    33 个基础组件
+├── primitives/    35 个基础组件
 ├── schema/        ResourceList / ResourceDetail / ResourceForm + 注册表
 └── utils/         cn()
 ```
@@ -105,11 +105,11 @@ src/
 
 | 类别 | 组件 |
 |---|---|
-| 表单 | Button / Input / Textarea / Select / Checkbox / RadioGroup（及别名 Radio）/ Switch / Slider / InputNumber / DatePicker / FormField / Label / AutoComplete |
+| 表单 | Button / Input / Textarea / Select / Checkbox / RadioGroup（及别名 Radio）/ Switch / Slider / InputNumber / DatePicker / FormField / Label / AutoComplete / PasswordStrengthMeter（密码强度面板） |
 | 表单容器 | Form / Form.Item / Form.Group（声明式，兼容 `async-validator` 规则） |
-| 展示 | Badge / Tag / Avatar / Card（+Header/Title/Description/Content）/ Panel / Text / Divider / Skeleton / Progress / Empty / Icon（366 个） |
+| 展示 | Badge / Tag / Avatar / Card（+Header/Title/Description/Content）/ Panel / Text / Divider / Skeleton / Progress / Empty / DescriptionList（+DescriptionItem）/ Icon（366 个） |
 | 反馈 | Alert / Loading / Modal / Drawer / Tooltip / Popover / Toast（Provider + useToast）/ Notify（命令式） |
-| 导航 | Tabs / Menu（支持折叠态）/ Breadcrumb / Dropdown / Pagination / Accordion / Collapse |
+| 导航 | Tabs（`aiId` / 徽标 / 内容面板）/ Menu（支持折叠态）/ Breadcrumb / Dropdown / Pagination / Accordion / Collapse |
 | 布局 | Columns / Column / Level / LevelLeft / LevelRight / LevelItem |
 | 数据 | Table / Tree |
 
@@ -127,6 +127,13 @@ src/
 | Popper | Popover | 底层能力，语义化重命名 |
 | AutoComplete | AutoComplete | 完整重写，含键盘导航与 `aria-activedescendant` |
 | LocaleProvider | — | 刻意不做：库不内置 i18n，文案走 props |
+
+kube-design 里没有、迁移中从应用层上收的两个组件：
+
+| 组件 | 来源 | 为什么上收 |
+| --- | --- | --- |
+| `DescriptionList` / `DescriptionItem` | 用户设置与全部详情页的只读信息行（应用内 `DefinitionRow`，24 处调用） | 同一结构在多个页面出现颜色/换行漂移；语义应是 `<dl>/<dt>/<dd>` 而不是自定 div |
+| `PasswordStrengthMeter` | 用户设置弹窗与创建用户弹窗共用的密码强度面板 | 面板是纯展示，规则判定与文案在应用层；展示与无障碍语义应只有一份 |
 
 Storybook 侧补齐 kube-design 的 `Foundation`（Colors / Icons）与 `Components` 分类，并额外提供 `Schema` 分类（列表 / 详情 / 表单 / ConfigMaps 移植）。
 

@@ -12,6 +12,23 @@ export interface TabItem {
   /** Optional count shown after the label. */
   count?: number;
   disabled?: boolean;
+  /**
+   * Stable automation handle, rendered as data-ai-id on the trigger.
+   *
+   * A tab is a control like any button, so it belongs to the same handle scheme:
+   * without one an E2E test can only find a tab by its translated label, which
+   * breaks the moment the language changes.
+   */
+  aiId?: string;
+  /** Decorative badge after the label (e.g. the unsaved-changes dot). */
+  badge?: React.ReactNode;
+  /**
+   * Accessible text for the badge, rendered visually hidden after the label.
+   *
+   * A dot alone is not a label: the colour means "unsaved" to a sighted reader,
+   * and a screen reader needs the words.
+   */
+  badgeLabel?: string;
 }
 
 export interface TabsProps {
@@ -19,10 +36,26 @@ export interface TabsProps {
   value?: string;
   defaultValue?: string;
   onValueChange?: (value: string) => void;
+  /**
+   * Panels belonging to the tabs, e.g. one TabsContent per value.
+   *
+   * Rendered inside the Radix root after the list: the trigger's aria-controls
+   * points at the panel, so the panels must live under the same root. Before
+   * this existed the attribute pointed at nothing and the tabs were only a row
+   * of buttons.
+   */
+  children?: React.ReactNode;
   className?: string;
 }
 
-export function Tabs({ items, value, defaultValue, onValueChange, className }: TabsProps): React.ReactElement {
+export function Tabs({
+  items,
+  value,
+  defaultValue,
+  onValueChange,
+  children,
+  className,
+}: TabsProps): React.ReactElement {
   return (
     <TabsPrimitive.Root value={value} defaultValue={defaultValue} onValueChange={onValueChange} className={className}>
       <TabsPrimitive.List className="flex gap-1 border-b border-ai-line">
@@ -31,6 +64,7 @@ export function Tabs({ items, value, defaultValue, onValueChange, className }: T
             key={item.value}
             value={item.value}
             disabled={item.disabled}
+            {...(item.aiId ? { 'data-ai-id': item.aiId } : {})}
             className={cn(
               'relative flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-ai-fg-muted',
               'transition-colors duration-ai-fast hover:text-ai-fg',
@@ -41,6 +75,14 @@ export function Tabs({ items, value, defaultValue, onValueChange, className }: T
             )}
           >
             {item.label}
+            {item.badge !== undefined && item.badge !== null ? (
+              // The dot is decoration; badgeLabel carries the meaning for
+              // assistive tech, so the visual badge is hidden from it.
+              <span aria-hidden="true" className="inline-flex items-center">
+                {item.badge}
+              </span>
+            ) : null}
+            {item.badgeLabel ? <span className="sr-only">{item.badgeLabel}</span> : null}
             {typeof item.count === 'number' ? (
               <span className="rounded-ai-pill bg-ai-surface-3 px-1.5 text-[10px] leading-4 text-ai-fg-muted">
                 {item.count}
@@ -49,6 +91,7 @@ export function Tabs({ items, value, defaultValue, onValueChange, className }: T
           </TabsPrimitive.Trigger>
         ))}
       </TabsPrimitive.List>
+      {children}
     </TabsPrimitive.Root>
   );
 }

@@ -34,7 +34,7 @@ const schema: ListSchema<ConfigMapRow> = {
   title: '配置字典',
   description: '管理项目内的 ConfigMap 资源。',
   rowKey: 'name',
-  search: { placeholder: '按名称搜索', keys: ['name'] },
+  search: { placeholder: '按名称搜索' },
   columns: [
     {
       key: 'name',

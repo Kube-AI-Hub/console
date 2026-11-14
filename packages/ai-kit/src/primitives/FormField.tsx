@@ -10,6 +10,16 @@ export interface FormFieldProps {
   hint?: React.ReactNode;
   /** Shown under the control in the danger colour; also marks the control invalid. */
   error?: string;
+  /**
+   * Stable automation handle, rendered as data-ai-id on the error paragraph.
+   *
+   * A script or E2E test needs to read the message a field is currently showing.
+   * Matching the translated copy is fragile and "the alert under the field" is
+   * structural; the handle belongs on the element that carries the message, and
+   * stable handles are part of the design-system contract (Pagination already
+   * supports aiPrefix for the same reason).
+   */
+  errorAiId?: string;
   required?: boolean;
   className?: string;
   children: React.ReactNode;
@@ -27,6 +37,7 @@ export function FormField({
   label,
   hint,
   error,
+  errorAiId,
   required = false,
   className,
   children,
@@ -44,7 +55,7 @@ export function FormField({
       ) : null}
       {children}
       {error ? (
-        <p role="alert" className="text-xs text-ai-danger">{error}</p>
+        <p role="alert" className="text-xs text-ai-danger" data-ai-id={errorAiId}>{error}</p>
       ) : hint ? (
         <p className="text-xs text-ai-fg-muted">{hint}</p>
       ) : null}

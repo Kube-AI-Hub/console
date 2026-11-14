@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
 import { Form, FormItem, FormGroup } from '../src/primitives/Form';
+import { FormField } from '../src/primitives/FormField';
 import { Input, Textarea } from '../src/primitives/Input';
 import { InputNumber } from '../src/primitives/InputNumber';
 import { Select } from '../src/primitives/Select';
@@ -26,6 +27,10 @@ const meta: Meta<typeof Form> = {
               错误展示与必填标记。校验规则支持 <code>required</code>、<code>pattern</code>、
               <code>min</code> / <code>max</code> 与自定义 <code>validator</code>。
               需要由 schema 驱动的表单（字段动态生成、与列表/详情共用定义）时，用 <code>ResourceForm</code>。
+              <br />
+              不需要 Form 的状态管理时，字段的 label / hint / error 排布可以用
+              <code>FormField</code>；它的 <code>errorAiId</code> 会把稳定的
+              <code>data-ai-id</code> 放在错误段落上，供 E2E 与自动化定位。
             </>
           }
         />
@@ -158,6 +163,35 @@ export const ValidateOnBlur: Story = {
       <Text size="xs" tone="muted" className="mt-3">
         留空或输入非法邮箱后失焦即可看到校验提示。
       </Text>
+    </div>
+  ),
+};
+
+/**
+ * FormField 的 hint / error 状态，以及错误行上的稳定句柄。
+ *
+ * errorAiId 把 data-ai-id 放在 <p role="alert"> 上：自动化先定位句柄再读当前文案，
+ * 不用匹配翻译后的文字（用户设置页的 user-settings:profile-error 就是这种用法）。
+ */
+export const FormFieldStates: Story = {
+  name: 'form field states',
+  render: () => (
+    <div className="flex max-w-md flex-col gap-4">
+      <FormField label="名称" htmlFor="demo-name" hint="小写字母、数字与连字符">
+        <Input id="demo-name" placeholder="my-workload" />
+      </FormField>
+      <FormField
+        label="邮箱"
+        htmlFor="demo-email"
+        error="请输入合法的邮箱地址。"
+        errorAiId="demo:profile-error"
+      >
+        <Input id="demo-email" defaultValue="not-an-email" aria-invalid />
+      </FormField>
+      <p className="text-[11px] leading-5 text-ai-fg-muted">
+        第二个字段的错误行带 data-ai-id=&quot;demo:profile-error&quot;：
+        测试与自动化用它定位错误，而不是匹配文案。
+      </p>
     </div>
   ),
 };
