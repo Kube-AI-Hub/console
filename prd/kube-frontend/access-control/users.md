@@ -36,7 +36,7 @@
 
 - **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-03** — 已知用户列表有数据，当行操作「修改平台角色」并选择平台管理员，则 `iam.kubesphere.io/platform-role` 变为 `platform-admin`；当「删除」并确认，则该用户不再出现在列表结果中。
 
-- **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-02** — 已知在用户页，当点「创建」填写用户名、邮箱、密码与平台角色并确认，则用户被创建且 `iam.kubesphere.io/platform-role` 注解等于所选角色；用户名非法或密码弱于规则时提交被拦下并给出提示。
+- **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-02** — 已知在用户页，当点「创建」填写用户名、邮箱、密码与平台角色并确认，则用户被创建且 `iam.kubesphere.io/platform-role` 注解等于所选角色；用户名非法或密码弱于规则时提交被拦下并给出提示；密码输入过程中，字段下方显示强度面板（四条检查项与弱/中/强三档），随输入实时变化。
 
 - **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-01** — 已知平台上有用户，当打开用户页，则显示用户名、状态、平台角色、最近登录四列。
 - **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-04** — 已知用户列表有数据，当点击名称列排序，则顺序变为升序；再次点击，则变为降序（两次结果不同）。
@@ -55,6 +55,12 @@
 ## UI 交互设计
 
 状态徽章：活跃为成功色。
+
+创建用户弹窗的密码字段带强度面板（与个人设置同一个组件）：密码为空时不渲染；输入后显示四条检查项
+（大写与小写字母 / 数字 / 特殊字符 / 8–64 位）与弱/中/强三档。句柄：`users:password-strength`（带
+`data-strength`）、`users:password-strength-bar`、`users:password-check-{case,digit,special,length}`（带
+`data-met`）；输入框仍是 `#ai-field-password`。面板的 `scope` 是 `users`，个人设置是 `user-settings`，
+两处句柄不串台。
 
 ## 文案与校验
 

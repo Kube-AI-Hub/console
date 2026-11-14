@@ -1,4 +1,4 @@
-# TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-02 用户 · 创建与密码校验
+# TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-02 用户 · 创建、密码校验与密码强度面板
 
 - **用例 ID**: `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-02`
 - **级别**: L3  **套件**: `point`
@@ -8,7 +8,7 @@
 
 ## 产品功能
 
-平台用户可由「创建」表单建立；弱密码与非法的用户名被拦下；创建后平台角色写在注解上。
+平台用户可由「创建」表单建立；密码框边输入边显示强度面板；弱密码与非法的用户名被拦下；创建后平台角色写在注解上。
 
 ### 关联需求
 
@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/access-control/users.md`](../../../../prd/kube-frontend/access-control/users.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-02** — 已知在用户页，当点「创建」填写用户名、邮箱、密码与平台角色并确认，则用户被创建且 `iam.kubesphere.io/platform-role` 注解等于所选角色；用户名非法或密码弱于规则时提交被拦下并给出提示。
+- **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-02** — 已知在用户页，当点「创建」填写用户名、邮箱、密码与平台角色并确认，则用户被创建且 `iam.kubesphere.io/platform-role` 注解等于所选角色；用户名非法或密码弱于规则时提交被拦下并给出提示；密码输入过程中，字段下方显示强度面板（四条检查项与弱/中/强三档），随输入实时变化。
 
 ### 关联设计
 
@@ -42,13 +42,19 @@
 ## 测试步骤
 
 1. 打开用户页并点「创建」
-2. 填写非法用户名，点确认
-3. 改为合法用户名、邮箱与弱密码，点确认
-4. 改为强密码并选择平台角色，点确认
-5. 用 IAM 接口读取该用户
+2. 密码框为空时看强度面板是否存在
+3. 密码依次输入 abc、Abcdefg1@、Abcdefgh1234@，每一步读面板的 data-strength
+4. 检查弹窗里有没有 user-settings:* 句柄
+5. 填写非法用户名，点确认
+6. 改为合法用户名、邮箱与弱密码，点确认
+7. 改为强密码并选择平台角色，点确认
+8. 用 IAM 接口读取该用户
 
 ## 期望结果
 
+- 密码为空时弹窗里没有 users:password-strength 节点，输入框仍是
+- abc 时 data-strength=weak；Abcdefg1@ 时 medium；Abcdefgh1234@ 时 strong
+- 弹窗里没有 user-settings:* 前缀的句柄（两处面板 scope 不同）
 - 非法用户名时提交被拦下
 - 弱密码时提交被拦下并说明原因
 - 提交后用户存在，且 iam.kubesphere.io/platform-role 等于所选角色
@@ -61,3 +67,4 @@
 ## 产品改版后如何更新自动化
 
 - 密码规则变化时改 api-client 的 passwordProblem
+- 强度面板句柄变化时改用例里的 users:password-strength

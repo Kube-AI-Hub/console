@@ -9,6 +9,10 @@ pytestmark = pytest.mark.ui
 
 USERS = "/kapis/iam.kubesphere.io/v1alpha2/users"
 
+#: 创建弹窗里的密码强度面板。与个人设置共用同一个组件，但句柄前缀是 `users`：
+#: 两处 scope 不同，一个弹窗里不该出现另一个的句柄。
+STRENGTH = '[data-ai-id="users:password-strength"]'
+
 
 def _exists(ui, username: str) -> bool:
     """Whether the user exists, answered from the list.
@@ -23,7 +27,7 @@ def _exists(ui, username: str) -> bool:
 
 @pytest.mark.point
 def test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_USERS_02(access_control_page, screenshot):
-    """TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-02 用户：创建与密码校验。"""
+    """TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USERS-02 用户：创建、密码校验与密码强度面板。"""
 
     ui = access_control_page
     assert ui.api is not None
@@ -39,6 +43,23 @@ def test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_USERS_02(access_control_page, screen
         # animating — the full run saw the dialog vanish here once, while the same case
         # passed alone.
         expect(ui.page.locator("#ai-field-name")).to_be_visible(timeout=20_000);
+
+        # 密码强度面板：边输入边报强度，密码为空时面板不存在。
+        # 这里只观察、不提交，下面那串创建/拒绝流程保持原样。
+        password = ui.page.locator("#ai-field-password")
+        strength = ui.page.locator(STRENGTH)
+        # 输入框 id 没变（面板接的是同一个字段的自定义渲染器，不是换了个控件）。
+        expect(password).to_be_visible()
+        assert strength.count() == 0, "密码为空时不应渲染强度面板"
+
+        password.fill("abc")
+        expect(strength).to_have_attribute("data-strength", "weak")
+        password.fill("Abcdefg1@")
+        expect(strength).to_have_attribute("data-strength", "medium")
+        password.fill("Abcdefgh1234@")
+        expect(strength).to_have_attribute("data-strength", "strong")
+        # 面板属于这个弹窗：个人设置的 user-settings:* 句柄一个都不该出现。
+        assert dialog.locator('[data-ai-id^="user-settings:"]').count() == 0, "创建用户弹窗里混进了个人设置的句柄"
 
         # An illegal user name is refused before a request is made.
         #

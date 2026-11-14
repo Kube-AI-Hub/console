@@ -57,6 +57,8 @@ export {
    * `@kube-ai-hub/ai-kit` inside the dialog chunk that actually renders it.
    */
   cn,
+  /** Lets a console page teach the schema layer a field type it does not ship. */
+  registerFieldType,
   useIsMobile,
   useMediaQuery,
 } from '@kube-ai-hub/ai-kit';
@@ -65,6 +67,8 @@ export type {
   AccentPalette,
   ButtonProps,
   DropdownItem,
+  FieldRenderer,
+  FieldRendererContext,
   DropdownProps,
   IconName,
   ListAction,

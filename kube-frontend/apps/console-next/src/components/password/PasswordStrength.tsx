@@ -32,9 +32,17 @@ const LABEL: Record<PasswordStrengthLevel, string> = {
 
 export interface PasswordStrengthProps {
   password: string;
+  /**
+   * Namespace for the `data-ai-id` handles.
+   *
+   * Two forms render this panel — personal settings and the create-user dialog — and an agent
+   * (or a test) has to be able to say which one it is looking at. Ids stay stable per scope, so
+   * a default of `user-settings` keeps the existing handles unchanged.
+   */
+  scope?: string;
 }
 
-export function PasswordStrength({ password }: PasswordStrengthProps): React.ReactElement | null {
+export function PasswordStrength({ password, scope = 'user-settings' }: PasswordStrengthProps): React.ReactElement | null {
   const t = useT();
 
   // Nothing typed, nothing to report: an empty meter reads as "your password is weak" when the
@@ -53,10 +61,10 @@ export function PasswordStrength({ password }: PasswordStrengthProps): React.Rea
   const label = t(`userSettings.password.strength${level === 'weak' ? 'Weak' : level === 'medium' ? 'Medium' : 'Strong'}`);
 
   const items = [
-    { aiId: 'user-settings:password-check-case', met: checks.letterCase, text: t('userSettings.password.check.case') },
-    { aiId: 'user-settings:password-check-digit', met: checks.digit, text: t('userSettings.password.check.digit') },
-    { aiId: 'user-settings:password-check-special', met: checks.special, text: t('userSettings.password.check.special') },
-    { aiId: 'user-settings:password-check-length', met: checks.length, text: t('userSettings.password.check.length') },
+    { key: 'case', met: checks.letterCase, text: t('userSettings.password.check.case') },
+    { key: 'digit', met: checks.digit, text: t('userSettings.password.check.digit') },
+    { key: 'special', met: checks.special, text: t('userSettings.password.check.special') },
+    { key: 'length', met: checks.length, text: t('userSettings.password.check.length') },
   ];
 
   return (
@@ -64,7 +72,7 @@ export function PasswordStrength({ password }: PasswordStrengthProps): React.Rea
       className="flex flex-col gap-2 rounded-ai-md border border-ai-line bg-ai-surface-1 px-3 py-2"
       data-strength={level}
       aria-label={`${t('userSettings.password.strength')}: ${label}`}
-      {...actionProps('user-settings:password-strength')}
+      {...actionProps(`${scope}:password-strength`)}
     >
       <div className="flex items-center gap-2">
         <span className="text-[11px] text-ai-fg-muted">{t('userSettings.password.strength')}</span>
@@ -73,7 +81,7 @@ export function PasswordStrength({ password }: PasswordStrengthProps): React.Rea
         <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-ai-surface-2" aria-hidden="true">
           <div
             className={cn('h-full rounded-full transition-all duration-ai-fast', BAR[level])}
-            {...actionProps('user-settings:password-strength-bar')}
+            {...actionProps(`${scope}:password-strength-bar`)}
           />
         </div>
         <span className={cn('text-[11px] font-medium', LABEL[level])}>{label}</span>
@@ -81,7 +89,12 @@ export function PasswordStrength({ password }: PasswordStrengthProps): React.Rea
       <p className="text-[11px] text-ai-fg-muted">{t('userSettings.password.must')}</p>
       <ul className="grid grid-cols-1 gap-1 text-[11px] sm:grid-cols-2">
         {items.map((item) => (
-          <li key={item.aiId} className={cn('flex items-center gap-1.5', item.met ? 'text-ai-fg-secondary' : 'text-ai-fg-muted')} data-met={item.met ? 'true' : 'false'} {...actionProps(item.aiId)}>
+          <li
+            key={item.key}
+            className={cn('flex items-center gap-1.5', item.met ? 'text-ai-fg-secondary' : 'text-ai-fg-muted')}
+            data-met={item.met ? 'true' : 'false'}
+            {...actionProps(`${scope}:password-check-${item.key}`)}
+          >
             <span aria-hidden="true" className={cn('inline-block size-1.5 rounded-full', item.met ? 'bg-ai-success' : 'bg-ai-line-strong')} />
             {item.text}
           </li>

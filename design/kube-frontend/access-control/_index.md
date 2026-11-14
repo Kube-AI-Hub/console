@@ -37,7 +37,7 @@
 
 ## 系统现状
 
-老 console `pages/access/containers/{Accounts,Roles,Workspaces}`，支持创建与编辑；本模块只读。
+老 console `pages/access/containers/{Accounts,Roles,Workspaces}`。用户与平台角色的写操作（创建、改角色、停用/启用/删除、编辑信息）已迁移；企业空间的写操作与成员管理未迁移。
 
 ## 仓库落点
 
@@ -47,7 +47,7 @@
 
 ## 对外契约
 
-只读；分页参数随请求下发。
+读走 IAM 与 resources 代理；写走 IAM 的整对象 PUT（PATCH 返回 405）；分页参数随请求下发。
 
 ## 不变量
 

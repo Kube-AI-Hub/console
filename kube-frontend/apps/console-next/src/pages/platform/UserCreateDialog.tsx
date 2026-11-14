@@ -5,6 +5,10 @@ import { ApiError, ASSIGNABLE_PLATFORM_ROLES, passwordProblem, usersWriteApi, ty
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { passwordProblemMessage } from '@/lib/password';
+import { PASSWORD_FIELD_TYPE, registerPasswordField } from '@/components/password/registerPasswordField';
+
+// Teach the form schema the password field type before this dialog renders it.
+registerPasswordField();
 
 /**
  * 创建用户.
@@ -70,7 +74,7 @@ export function UserCreateDialog({ open, onOpenChange }: UserCreateDialogProps):
         {
           key: 'password',
           label: t('platform.users.field.password'),
-          type: 'password',
+          type: PASSWORD_FIELD_TYPE,
           required: true,
           hint: t('platform.users.field.passwordHint'),
           rules: [

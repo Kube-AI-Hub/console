@@ -4,7 +4,7 @@ suite: point
 module: kube-frontend
 submodule: access-control
 feature: users
-title: 用户 · 创建与密码校验
+title: 用户 · 创建、密码校验与密码强度面板
 entry_url: '{BASE_URL}/kube-frontend/access/users'
 prd: prd/kube-frontend/access-control/users.md
 design: design/kube-frontend/access-control/users.md
@@ -15,17 +15,23 @@ covers:
 story:
 - US1
 
-product: 平台用户可由「创建」表单建立；弱密码与非法的用户名被拦下；创建后平台角色写在注解上。
+product: 平台用户可由「创建」表单建立；密码框边输入边显示强度面板；弱密码与非法的用户名被拦下；创建后平台角色写在注解上。
 preconditions:
 - 已登录，且有平台权限
 - 用例自行创建的用户在结束时无条件删除
 steps:
 - 打开用户页并点「创建」
+- 密码框为空时看强度面板是否存在
+- 密码依次输入 abc、Abcdefg1@、Abcdefgh1234@，每一步读面板的 data-strength
+- 检查弹窗里有没有 user-settings:* 句柄
 - 填写非法用户名，点确认
 - 改为合法用户名、邮箱与弱密码，点确认
 - 改为强密码并选择平台角色，点确认
 - 用 IAM 接口读取该用户
 expected:
+- 密码为空时弹窗里没有 users:password-strength 节点，输入框仍是 #ai-field-password
+- abc 时 data-strength=weak；Abcdefg1@ 时 medium；Abcdefgh1234@ 时 strong
+- 弹窗里没有 user-settings:* 前缀的句柄（两处面板 scope 不同）
 - 非法用户名时提交被拦下
 - 弱密码时提交被拦下并说明原因
 - 提交后用户存在，且 iam.kubesphere.io/platform-role 等于所选角色
@@ -34,3 +40,4 @@ troubleshoot:
 - 角色为空说明注解没写到 metadata.annotations
 update_automation:
 - 密码规则变化时改 api-client 的 passwordProblem
+- 强度面板句柄变化时改用例里的 users:password-strength
