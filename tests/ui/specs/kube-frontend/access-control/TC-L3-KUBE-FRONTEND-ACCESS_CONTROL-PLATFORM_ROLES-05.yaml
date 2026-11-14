@@ -1,0 +1,33 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-05
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: platform-roles
+title: 平台角色详情 · 已授权用户
+entry_url: '{BASE_URL}/kube-frontend/access/clusterroles'
+prd: prd/kube-frontend/access-control/platform-roles.md
+design: design/kube-frontend/access-control/platform-roles.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-05
+
+story:
+- US3
+
+product: 平台角色详情展示被授权对象（类型+名称），条数等于 roleRef 指向该角色的 clusterrolebindings 的 subjects 总数。
+preconditions:
+- 已登录平台管理
+- 平台上存在被授权的平台角色（cluster-admin 通常有）
+steps:
+- 用 API 读取 clusterrolebindings，按 roleRef 过滤出 cluster-admin 的 subjects
+- 打开 cluster-admin 详情
+- 核对「已授权用户」条数与对象
+expected:
+- 区块存在且条数等于 subjects 总数
+- 每个被授权对象显示类型与名称
+troubleshoot:
+- 区块为空但角色确实被授权：绑定列表分页没取全（limit 要够大）
+- 只有用户没有服务账户：subjects 里有 ServiceAccount 类型，别只过滤 User
+update_automation:
+- 选择器见 pages/access_control.py 与 ClusterRoleDetailPage.tsx

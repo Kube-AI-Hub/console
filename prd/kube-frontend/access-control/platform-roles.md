@@ -20,6 +20,12 @@
 
 **Independent Test**：从列表点进一个非模板角色，核对其规则条数等于对象 `rules` 长度。
 
+### US3 - 谁被授予了这个角色 (Priority: P1)
+
+作为 **平台管理员**，我希望 **在角色详情看到被授权对象**，以便 **回答「收掉这个角色会影响谁」**。
+
+**Independent Test**：打开 cluster-admin 详情，核对「已授权用户」条数等于 roleRef 指向它的绑定里 subjects 总数。
+
 ## 验收场景
 
 - **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-02** — 已知在平台角色页，当点「创建」填写名称、资源与动作并确认，则该角色的 `rules` 写入且 `apiGroups` 为核心组的 `[""]`；当删除，则角色不存在；当查看 `role-template-*` 角色，则其行没有操作菜单。
@@ -27,6 +33,7 @@
 - **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-01** — 已知平台上有角色，当打开平台角色页，则显示名称、规则数、创建时间三列，且 `role-template-*` 行带「模板」徽标。
 - **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-03** — 已知平台角色超过一页，当打开列表，则分页控件带稳定标识 `<list>:page:prev` / `<list>:page:next`；点「下一页」则内容变化，点「上一页」则回到与首页一致的顺序。
 - **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-04** — 已知平台角色列表中有角色，当点击角色名称进入详情，则显示名称、别名、规则数、创建时间与描述，并逐条列出该角色的授权规则（API 组、资源、动词）；规则条数等于角色对象 `rules` 的长度；`role-template-*` 角色带「模板」徽标并只读。
+- **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-05** — 已知某平台角色被授权给若干账号，当打开该角色详情，则「已授权用户」区块逐条列出被授权对象（类型 + 名称，服务账户附命名空间），条数等于 clusterrolebindings 中 roleRef 指向该角色的 subjects 总数；没有被授权时显示说明；授权信息读取失败时只该区块降级。
 
 ## 设计目标
 

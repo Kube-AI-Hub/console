@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
-import { clusterRoleDetailApi } from '@kube-ai-hub/api-client';
+import { clusterRoleDetailApi, roleBindingsApi, type RoleSubject } from '@kube-ai-hub/api-client';
 import { AiSurface, Badge, Skeleton } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
@@ -29,6 +29,11 @@ export function ClusterRoleDetailPage(_props: ClusterRoleDetailPageProps): React
   const query = useQuery({
     queryKey: ['clusterrole-detail', name],
     queryFn: ({ signal }) => clusterRoleDetailApi(apiClient).get({ name, signal }),
+  });
+
+  const subjects = useQuery({
+    queryKey: ['clusterrole-subjects', name],
+    queryFn: ({ signal }) => roleBindingsApi(apiClient).subjectsOf({ role: name, signal }),
   });
 
   const state = query.isPending ? 'loading' : query.isError ? 'error' : 'ready';
@@ -64,6 +69,32 @@ export function ClusterRoleDetailPage(_props: ClusterRoleDetailPageProps): React
             <dl className="mt-2 grid grid-cols-1 gap-y-2 text-sm">
               <DefinitionRow label={t('platform.user.description')} value={role.description || '-'} />
             </dl>
+          </section>
+
+          <section className="rounded-lg border border-ai-border bg-ai-surface p-4" data-ai-id="clusterrole-detail:subjects">
+            <h2 className="mb-3 text-sm font-medium text-ai-fg">
+              {t('platform.roles.subjects')} ({subjects.data?.length ?? 0})
+            </h2>
+            {subjects.isPending ? <Skeleton className="h-16 w-full" /> : null}
+            {subjects.isError ? (
+              <p className="text-xs text-ai-fg-muted">{t('platform.roles.subjectsUnavailable')}</p>
+            ) : null}
+            {subjects.data && subjects.data.length === 0 ? (
+              <p className="text-xs text-ai-fg-muted">{t('platform.roles.noSubjects')}</p>
+            ) : null}
+            {subjects.data && subjects.data.length > 0 ? (
+              <ul className="flex flex-col divide-y divide-ai-line text-xs" data-ai-id="clusterrole-detail:subject-list">
+                {subjects.data.map((subject: RoleSubject) => (
+                  <li key={`${subject.binding}/${subject.kind}/${subject.name}`} className="flex items-center justify-between gap-3 py-1.5" data-ai-row={`${subject.kind}/${subject.name}`}>
+                    <span className="font-mono text-ai-fg-secondary">{subject.name}</span>
+                    <span className="text-ai-fg-muted">
+                      {subject.kind}
+                      {subject.namespace ? ` · ${subject.namespace}` : ''}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
           </section>
 
           <section className="rounded-lg border border-ai-border bg-ai-surface p-4" data-ai-id="clusterrole-detail:rules">

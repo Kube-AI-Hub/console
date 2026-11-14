@@ -8,6 +8,7 @@
 
 - AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-02
 - AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-04
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-05
 
 - AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-PLATFORM_ROLES-01
 
@@ -32,6 +33,14 @@
 **被否方案**：过滤掉模板角色。会让角色与规则的对应关系出现无法解释的空洞。
 
 **何时重新考虑**：模板角色占绝大多数且影响检索时。
+
+### DEC-L3-KUBE-FRONTEND-ACCESS-CONTROL-PLATFORM_ROLES-05 — 授权对象从绑定列表筛选，不做逐角色接口
+
+**为什么**：没有「某角色的授权对象」接口；绑定列表在 B200 上是 142 条，一次取回按 roleRef 过滤比逐角色查更可靠，也不会因分页漏掉后几页。
+
+**被否方案**：跳进每个 binding 逐个读。请求数不可控，分页时容易漏。
+
+**何时重新考虑**：绑定数量增长到一次读不完时（届时按 labelSelector 过滤）。
 
 ## 系统现状
 

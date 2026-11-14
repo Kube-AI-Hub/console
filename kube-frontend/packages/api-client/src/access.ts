@@ -527,6 +527,51 @@ export interface ClusterRoleDetail extends ClusterRoleSummary {
   annotations: Record<string, string>;
 }
 
+/** Who a platform role is granted to: one subject per role binding. */
+export interface RoleSubject {
+  /** `User` / `Group` / `ServiceAccount`. */
+  kind: string;
+  name: string;
+  /** Only meaningful for a ServiceAccount subject. */
+  namespace: string;
+  /** The binding that grants it, so two bindings for one subject stay distinguishable. */
+  binding: string;
+}
+
+export function roleBindingsApi(client: Client) {
+  return {
+    /**
+     * Subjects of every cluster role binding that points at `role`.
+     *
+     * There is no per-role subjects endpoint: the binding list is small (142 on B200) and
+     * filtering it client-side is what the old console does too. Reading it as one request also
+     * means the page cannot show a role as unused because a second page of bindings was missed.
+     */
+    async subjectsOf(params: { role: string; signal?: AbortSignal }): Promise<RoleSubject[]> {
+      const body = await client.request<{ items?: Array<Record<string, unknown>> }>(
+        '/apis/rbac.authorization.k8s.io/v1/clusterrolebindings',
+        { query: { limit: 500 }, ...(params.signal ? { signal: params.signal } : {}) },
+      );
+      const out: RoleSubject[] = [];
+      for (const item of body?.items ?? []) {
+        const roleRef = (item['roleRef'] ?? {}) as Record<string, unknown>;
+        if (String(roleRef['name'] ?? '') !== params.role) continue;
+        const metadata = (item['metadata'] ?? {}) as Record<string, unknown>;
+        const binding = String(metadata['name'] ?? '');
+        for (const subject of ((item['subjects'] ?? []) as Array<Record<string, unknown>>)) {
+          out.push({
+            kind: String(subject['kind'] ?? ''),
+            name: String(subject['name'] ?? ''),
+            namespace: String(subject['namespace'] ?? ''),
+            binding,
+          });
+        }
+      }
+      return out;
+    },
+  };
+}
+
 export function clusterRoleDetailApi(client: Client) {
   return {
     async get(params: { name: string; signal?: AbortSignal }): Promise<ClusterRoleDetail> {
@@ -728,6 +773,54 @@ export function userSettingsApi(client: Client) {
  * create-user form accepted `abcdefgh1` (no upper-case letter) and a long passphrase, both
  * of which the server rejects with a 422.
  */
+/**
+ * The special characters the platform's own PASSWORD_DESC names, plus space.
+ *
+ * Kept as a character class rather than `[^A-Za-z0-9]` so the rule matches the sentence the
+ * reader is shown: a password whose only "special" character is an emoji satisfies the looser
+ * test and not the copy, and a rule that disagrees with its own explanation is how the old
+ * console ended up promising a special character it never checked for.
+ */
+const PASSWORD_SPECIAL = /[~!@#$%^&*()\-_=+\\|[\]{};:'",<.>/? ]/;
+
+/** Which of the platform's password requirements a value meets. */
+export interface PasswordChecks {
+  /** 8 characters or more, and no more than 64 bytes. */
+  length: boolean;
+  /** Has both an upper-case and a lower-case letter. */
+  letterCase: boolean;
+  digit: boolean;
+  special: boolean;
+}
+
+/**
+ * The requirements, item by item, for the strength panel.
+ *
+ * Separate from `passwordProblem` so the panel can tick each item as it is met instead of
+ * waiting for the whole password to be judged: "which one am I still missing" is the question
+ * a reader has while typing.
+ */
+export function passwordChecks(password: string): PasswordChecks {
+  return {
+    length: password.length >= 8 && new TextEncoder().encode(password).length <= 64,
+    letterCase: /[a-z]/.test(password) && /[A-Z]/.test(password),
+    digit: /[0-9]/.test(password),
+    special: PASSWORD_SPECIAL.test(password),
+  };
+}
+
+/**
+ * The first unmet requirement, as a code the caller turns into a sentence.
+ *
+ * The console is **stricter than the apiserver** on purpose. The User CRD requires 8–64 bytes
+ * plus lower case, upper case and a digit; the platform's own `PASSWORD_DESC` promises a
+ * special character as well, and the old console printed that promise while validating against
+ * a pattern that did not include it — the copy was lying. Here the copy is the rule.
+ *
+ * That means an account can still be created through the API with a password this form would
+ * refuse. The console is the only place the rule is enforced, which is the trade this makes:
+ * a stronger default for everyone who uses the UI, not a guarantee about the cluster.
+ */
 export function passwordProblem(password: string): string | null {
   if (password.length < 8) return 'too-short';
   // Measured in bytes, because that is what the CRD measures: a 30-character passphrase in
@@ -737,6 +830,7 @@ export function passwordProblem(password: string): string | null {
   if (!/[a-z]/.test(password)) return 'no-lower';
   if (!/[A-Z]/.test(password)) return 'no-upper';
   if (!/[0-9]/.test(password)) return 'no-digit';
+  if (!PASSWORD_SPECIAL.test(password)) return 'no-special';
   return null;
 }
 
