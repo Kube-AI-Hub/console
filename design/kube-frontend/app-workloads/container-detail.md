@@ -4,24 +4,27 @@
 
 ## 概述
 
-从容器组对象派生单个容器的视图并分区展示，只读。
+从容器组对象派生单个容器的视图并分区展示，只读；日志（搜索 + 实时 tail）与终端（exec WebSocket）是本页的两条流式通道。
 
 ## 关联需求
 
 - AC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-01
 - AC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-02
 - AC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-03
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_TERMINAL-01
 
 ## 设计目标与非目标
 
-目标：一屏回答「这个容器配置成什么样」，并能直接看它的日志——搜索历史（最近 1 小时）与实时 tail 两种读法。
-非目标：容器编辑（改模板才是唯一入口）；容器终端与单容器监控仍登记为待补，见 `DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-02`，日志 tail 不算在内，它不依赖 WebSocket（见 `DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-03`）。
+目标：一屏回答「这个容器配置成什么样」，并能直接看它的日志——搜索历史（最近 1 小时）与实时 tail 两种读法；还能直接在容器里执行命令。
+非目标：容器编辑（改模板才是唯一入口）；单容器监控仍登记为待补，见 `DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-02`。日志 tail 不依赖 WebSocket（见 `DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-03`），终端依赖它，见 `DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-04`。
 
 ## 关键约束
 
 - 数据源只有容器组对象：`spec.containers[]`、`spec.volumes[]`、`status.containerStatuses[]`。
 - 日志搜索读租户日志接口；实时 tail 读 kube 的 `log` 子资源，走 BFF 已有的 HTTP 流式代理，不新建 WebSocket。
 - 路由：`…/pods/$name/containers/$container`，挂在容器组详情之下。
+- 终端走 kube 原生 exec WebSocket（`v5.channel.k8s.io`）：BFF 只透传升级请求，入口（开发期是 `scripts/dev-static-server.mjs`）必须同样转发 `Upgrade`，否则浏览器连不到 BFF。
+- 终端不是完整终端模拟器：只做命令输入 + 输出文本，pty 转义序列在展示前去掉。
 
 ## 方案决策
 
@@ -51,9 +54,23 @@
 
 **何时重新考虑**：上游修好 flush 后可把 `tailLines` 加回 follow 请求；exec 落地后终端与日志共享同一套流生命周期封装。
 
+### DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-04 — 终端走 kube 原生 exec WebSocket，BFF 做 upgrade 转发
+
+**为什么**：容器终端必须是一条全双工通道，HTTP 的请求/响应模型表达不了，日志那条 chunked HTTP 的做法不适用于 stdin。B200 实测（k8s v1.37.0 / ks-apiserver v3.4.1，2026-11-14）：`GET /api/v1/namespaces/<ns>/pods/<pod>/exec?container=…&stdin=true&stdout=true&stderr=true&tty=true&command=/bin/sh` 带 `Upgrade: websocket` 与 `Sec-WebSocket-Protocol: v5.channel.k8s.io` 返回 101，帧格式是「1 字节通道号 + 载荷」：0 stdin / 1 stdout / 2 stderr / 3 error（kube `Status` JSON）/ 4 resize（`{Width,Height}`）。k8s 1.37 已移除 SPDY，WebSocket 是唯一可行传输。BFF 用 `server.on('upgrade')` 把原始 socket 透传给上游，HTTP 代理路径一行不改。
+
+**被否方案**：老 console 的 `kapis/terminal.kubesphere.io/v1alpha2/…/exec`（子协议 `binary.k8s.io`，消息是 `{Op:'stdin'}` 这类 KubeSphere 自定义封装）。它要求上游是 KubeSphere 的 terminal 服务，且多一层与 kube 原生协议无关的编解码；`/api/v1` 的 exec 端点在同一台 ks-apiserver 上，原生协议少一层、可直接用标准帧验证。
+
+**被否方案**：改成 SSE/长轮询自造双向协议。stdin 是持续写入，没有双向通道就要自己定义帧与背压，比透传一次 upgrade 复杂，也失去原生协议的可诊断性。
+
+**被否方案（鉴权）**：token 放 query。会进访问日志与代理 trace；浏览器 WebSocket 唯一能自定义的握手字段是子协议，因此用 `bearer.<token>`，BFF 剥离后转成上游的 `Authorization` 头（核心设计里「token 从 query 或子协议取」的两种取法之一）。非浏览器客户端仍可直接用 `Authorization` 头。
+
+**代价**：入口处的每一层都必须转发 `Upgrade`（仓库里是 `scripts/dev-static-server.mjs`，生产入口同理，否则浏览器根本连不到 BFF）；BFF 只放行 `/api/v1|/apis/…/exec` 一条升级路径，不做通用 socket 代理；浏览器读不到失败握手的 HTTP 状态，页面只能给通用错误，具体原因留在 BFF/上游响应体里。
+
+**何时重新考虑**：出现节点 shell、kubectl 会话等第二个 exec 入口时，把 `server/src/upgrade.ts` 的路径规则扩展成一份表，而不是复制一份转发。
+
 ## 系统现状
 
-老 console：`/pods/:podName/containers/:containerName`，四个页签（资源状态/监控/环境变量/日志）。本页迁出「资源状态 + 环境变量」并补齐挂载、端口、探针；日志已补齐两段（搜索 + 实时 tail）；监控与终端按 `DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-02` 登记为待补。
+老 console：`/pods/:podName/containers/:containerName`，四个页签（资源状态/监控/环境变量/日志）。本页迁出「资源状态 + 环境变量」并补齐挂载、端口、探针；日志已补齐两段（搜索 + 实时 tail）；终端已补齐（exec WebSocket）；监控按 `DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-02` 仍登记为待补。
 
 ## 流式通道
 
@@ -86,11 +103,48 @@ streamPodLogs(client, { … })   // 同样的读法，无可关闭句柄时用 s
 
 **为什么 follow 不带 `tailLines`**：见「已知坑」第一条。结论是 follow 请求只发 `follow=true&timestamps=true`，把整段当前日志回放出来，再由 UI 只保留最后 1000 行。这是对上游 flush 缺陷的绕过，不是设计偏好。
 
+### 终端（exec）
+
+终端是本控制台的第一条**双向**流式通道，链路比日志多两次协议切换：
+
+```
+ContainerTerminal（页面区块）
+  └─ openExecSession()                api-client：原生 WebSocket + 通道帧编解码
+       └─ ws://<console>/api/v1/…/pods/<pod>/exec?container=…&tty=true&command=/bin/sh
+            └─ 入口（dev-static-server）  server.on('upgrade') 原样转发 Upgrade 握手
+                 └─ BFF                     server.on('upgrade') → 上游 101，socket 双向 pipe
+                      └─ ks-apiserver       Authorization: Bearer <token>（由 bearer.<token> 子协议转换）
+                           └─ kube-apiserver → kubelet → 容器内 /bin/sh
+```
+
+**鉴权**：浏览器 `WebSocket` 构造器不能设置请求头，而本控制台的身份就是 bearer token（没有 cookie 会话）。客户端把 token 放进子协议 `bearer.<jwt>` 作为握手的一部分；BFF 在转发前剥离该子协议并设置 `Authorization` 头，上游只看到 kube 认识的 `v5.channel.k8s.io`。脚本/测试可直接用 `Authorization` 头，BFF 同样接受。
+
+**BFF 的边界**（`server/src/upgrade.ts`）：
+- 只转发 `/api/v1/…/exec` 与 `/apis/…/exec`，其他路径的 upgrade 一律 404；不把它做成通用 socket 代理。
+- 无 token → 401；上游连不上或 15s 内不完成握手 → 502（错误体仍是 `BffError` 形状）；上游拒绝升级（RBAC 403、pod 不存在）→ 原样回传上游状态与响应体。
+- 101 之后双向 `pipe`，任一方向断开即销毁另一侧；客户端断开时上游 exec 会话随之结束。
+
+**客户端契约**（`@kube-ai-hub/api-client` 的 `exec.ts`）：
+
+```ts
+openExecSession({ cluster, namespace, pod, container, command, getToken, onData, onOpen, onError, onClose })
+  → ExecSession（write(data) / resize(cols, rows) / close()）
+```
+
+- 帧格式即上表的通道号；`write` 发 0 通道，`resize` 发 4 通道。
+- 收到通道 3 的 `Status`：`Success` 视为 shell 正常退出；其余解析出 message 作为 `ApiError`（折叠 kubelet 重复的 `Internal error occurred:` 前缀）。
+- 握手在打开前失败时浏览器只知道「失败」，客户端报 `connection_failed`；已连接后异常断开报 `network_error`。
+- 输出保留原始文本，`stripAnsi()` 去掉 pty 的转义序列；页面按行保留最近 500 行。
+
+**页面状态机**：`connecting → connected → closed | error`。进入 `connected` 前输入框禁用；`error` 显示通用提示 + 上游原因，并提供「重新连接」；关闭面板或卸载页面必须 `close()`，BFF 随客户端断开销毁上游 exec。
+
 ## 仓库落点
 
 - 页面：`apps/console-next/src/pages/app-workloads/ContainerDetailPage.tsx`
 - 流式读取：`packages/api-client/src/logs.ts`（`openPodLogStream` / `streamPodLogs`），底层是 `client.stream()`（`packages/api-client/src/client.ts`）
 - BFF：`kube-frontend/server/src/proxy.ts` 已是流式转发，唯一改动是「读者放弃时销毁上游请求」，否则每次关闭实时都会在 ks-apiserver 上留一条永不结束的 follow
+- 终端：`packages/api-client/src/exec.ts`（`openExecSession` / `execPath` / `stripAnsi`）、`apps/console-next/src/pages/app-workloads/ContainerTerminal.tsx`（区块与状态机）、BFF 的 `server/src/upgrade.ts`（upgrade 透传，挂载在 `server/src/index.ts` 的 `startServer`）
+- 开发入口：`kube-frontend/scripts/dev-static-server.mjs` 增加 `on('upgrade')` 原样转发，否则浏览器到 BFF 的 WebSocket 在入口就被丢弃
 - 路由：`routes/…/pods/$name/containers/$container.tsx`（容器组详情由 `$name.tsx` 改造为 `$name/` 目录，index 即原详情）
 - 容器组详情的容器区块：`WorkloadDetailPage.tsx`（仅 pods 提供容器链接）
 
@@ -101,6 +155,7 @@ streamPodLogs(client, { … })   // 同样的读法，无可关闭句柄时用 s
 | 容器组 | /kapis/resources.kubesphere.io/v1alpha3/namespaces/&lt;ns&gt;/pods/&lt;name&gt;（含 spec/status） |
 | 历史日志（搜索） | /kapis/tenant.kubesphere.io/v1alpha2/logs（最近 1 小时，最多 200 行） |
 | 实时日志 tail | /api/v1/namespaces/&lt;ns&gt;/pods/&lt;pod&gt;/log?container=&lt;c&gt;&amp;follow=true&amp;timestamps=true（HTTP chunked，无 content-length） |
+| 容器终端 | ws(s)://&lt;console&gt;/api/v1/namespaces/&lt;ns&gt;/pods/&lt;pod&gt;/exec?container=&lt;c&gt;&amp;stdin=true&amp;stdout=true&amp;stderr=true&amp;tty=true&amp;command=/bin/sh（子协议 v5.channel.k8s.io；BFF 要求 bearer.&lt;token&gt; 或 Authorization 头，上游只收 Authorization） |
 
 ## 不变量
 
@@ -110,6 +165,10 @@ streamPodLogs(client, { … })   // 同样的读法，无可关闭句柄时用 s
 4. 实时开关是日志区块唯一的模式入口：同一时刻只显示搜索或流中的一个，关闭开关必须 abort 连接。
 5. 实时列表最多 1000 行，且始终保留最新的行（旧行从头丢弃）。
 6. 实时开关默认关闭；关闭时原有日志搜索的 `data-ai-id`（`container-detail:logs` / `:log-list` / `:log-keyword`）与行为不变。
+7. 终端只有一个连接：关闭面板、重新连接、离开路由都必须先关掉上一条 WebSocket。
+8. 终端输出最多 500 行，且始终保留最新的行。
+9. 没有 token 时不发起 WebSocket：客户端在本地就报未登录，而不是让浏览器报一个无法诊断的握手失败。
+10. BFF 不得把非 `exec` 路径的 upgrade 转发到集群。
 
 ## 已知坑
 
@@ -119,6 +178,12 @@ streamPodLogs(client, { … })   // 同样的读法，无可关闭句柄时用 s
 - **安静容器也受影响**：日志不足 4 KB 且暂无新输出的容器（如 juicefs 的 liveness-probe）纯 `follow=true` 同样收不到响应头。页面此时停在「正在连接日志流…」——这是上游行为，前端无法区分「连接中」与「上游不发头」，不要用超时把它误报成失败。
 - **`Accept: text/plain` 会被上游回 406**：kube 的 log 子资源只接受 `*/*`。`api-client` 的 `stream()` 用 `Accept: */*`，不要照抄 JSON 路径的 `application/json`。
 - **关闭必须 abort**：页面切回搜索、离开路由、组件卸载都要 `close()`；BFF 侧再由 `response.on('close')` 销毁上游请求，否则每次开关都在 ks-apiserver 上留一条不会结束的 follow 流。
+- **入口不转发 Upgrade，终端一定连不上**：浏览器很可能把升级请求当普通 HTTP 处理，页面表现为一直「正在连接终端…」或通用错误。本仓库的入口是 `scripts/dev-static-server.mjs`，已加 `on('upgrade')`；改静态服务后必须重启它才生效（进程加载的是旧脚本）。
+- **浏览器读不到失败握手的 HTTP 状态**：`WebSocket` 的 error/close 事件不携带 101 之外的响应。BFF 的 401/404/502 只能作为通用错误展示；要把具体原因带出来，用非浏览器客户端（测试里用 `Authorization` 头）看 BFF 的响应体。
+- **token 不能放 query**：会进访问日志与代理 trace；用 `bearer.<token>` 子协议。JWT 的字符集（base64url + 点）在子协议 token 的合法范围内。
+- **没有 `/bin/sh` 的容器不是「连接失败」**：握手会成功，kubelet 用通道 3 返回 `Status`（`stat /bin/sh: no such file or directory`）。页面必须把这条展示出来，而不是停在「已连接」的空白输出区。
+- **pty 会回显输入**：输出区里出现两遍命令属正常（一遍来自回显、一遍来自命令本身）。自动化断言要认「单独成行」的输出，不能只做子串匹配。
+- **k8s 1.37 没有 SPDY**：exec 只能走 WebSocket（`v5.channel.k8s.io`）；不要照老 console 的 `binary.k8s.io` + `{Op:…}` 封装去接 `/api/v1`。
 
 ## 测试与可观测
 
@@ -127,13 +192,17 @@ streamPodLogs(client, { … })   // 同样的读法，无可关闭句柄时用 s
 - `tests/ui/specs/kube-frontend/app-workloads/TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-02.yaml`（日志搜索）
 - `tests/ui/specs/kube-frontend/app-workloads/TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-03.yaml`（实时 tail：开 → 有行 → 停）
 
+- `tests/ui/specs/kube-frontend/app-workloads/TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_TERMINAL-01.yaml`（终端：开 → echo → 输出 → 关；无 shell 的错误态）
+
 可观测点：`container-detail:surface`、`:basic`、`:resources`、`:env`、`:mounts`、`:ports`、`:probes`、`:logs`、`:log-list`、`:log-keyword`；
-实时：`:log-follow`（开关，`aria-checked` 表示状态）、`:log-stream`（流容器，`data-ai-state` 为 loading/ready/error）、`:log-stream-list`（行列表，每行一个 `data-ai-row`）、`:log-stream-stop`、`:log-stream-retry`。
+实时：`:log-follow`（开关，`aria-checked` 表示状态）、`:log-stream`（流容器，`data-ai-state` 为 loading/ready/error）、`:log-stream-list`（行列表，每行一个 `data-ai-row`）、`:log-stream-stop`、`:log-stream-retry`；
+终端：`:terminal-open`、`:terminal`（面板，`data-ai-state` 为 loading/ready/error/empty）、`:terminal-output`（每行一个 `data-ai-row`）、`:terminal-input`、`:terminal-send`、`:terminal-close`、`:terminal-retry`、`:terminal-error`。
 
 ## 后续改进
 
-- 容器终端（依赖 WebSocket exec；与日志共享同一套流生命周期封装）。
 - 单容器监控（依赖监控区间查询）。
+- 完整终端模拟器（xterm + `FitAddon`）：光标寻址、颜色、全屏程序（`vi`、`top`）。当前只做命令输入 + 文本输出，`resize` 帧已经按输出区尺寸发送，接 xterm 时只需替换视图。
+- 节点 shell 与 kubectl 会话：复用 `server/src/upgrade.ts`，把路径规则扩成一份表。
 - 上游修好 flush 后，follow 请求可以加回 `tailLines`，避免回放整个日志文件。
 
 ## 验收用例
@@ -141,3 +210,4 @@ streamPodLogs(client, { … })   // 同样的读法，无可关闭句柄时用 s
 - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-01
 - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-02
 - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-03
+- TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_TERMINAL-01

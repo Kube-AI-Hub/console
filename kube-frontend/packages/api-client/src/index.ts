@@ -184,6 +184,7 @@ export {
   toSelector,
   projectInfoApi,
   projectRolesWriteApi,
+  toNetworkPolicyDetail,
   toNetworkPolicySummary,
   projectQuotaApi,
   QUOTA_RESOURCES,
@@ -200,6 +201,7 @@ export type {
   ClusterMemberSummary,
   MemberSummary,
   MembersApi,
+  NetworkPolicyDetail,
   NetworkPolicySummary,
   PolicyDirection,
   ProjectInfo,
@@ -359,6 +361,20 @@ export type { AuditRecord, AuditSearchResult, HistogramBucket, HistogramResult, 
 
 export { DEFAULT_TAIL_LINES, openPodLogStream, podLogPath, streamPodLogs } from './logs';
 export type { PodLogOptions, PodLogStream, PodLogTarget } from './logs';
+
+export {
+  DEFAULT_EXEC_COLUMNS,
+  DEFAULT_EXEC_COMMAND,
+  DEFAULT_EXEC_ROWS,
+  EXEC_CHANNELS,
+  EXEC_PROTOCOL,
+  TOKEN_PROTOCOL_PREFIX,
+  execPath,
+  execWebSocketUrl,
+  openExecSession,
+  stripAnsi,
+} from './exec';
+export type { ExecOptions, ExecSession, ExecSocket, ExecSocketFactory, ExecTarget } from './exec';
 
 export { ipPoolsApi, toIpPoolDetail, toIpPoolSummary } from './network';
 export type { IpPoolDetail, IpPoolSummary } from './network';

@@ -8,6 +8,7 @@ import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { DefinitionRow } from '@/components/resource/DefinitionRow';
+import { ContainerTerminal } from './ContainerTerminal';
 
 /**
  * 容器详情.
@@ -18,10 +19,12 @@ import { DefinitionRow } from '@/components/resource/DefinitionRow';
  *
  * Logs are here twice over: the search-backed history block (the tenant log API, one hour
  * window) and a live tail switched on from the same block. The tail is a plain HTTP chunked
- * read of the pod's `log` subresource — `follow=true` through the BFF proxy, no WebSocket —
- * so it works with the proxy this console already has. Terminal and per-container monitoring
- * are still absent: the first needs a WebSocket exec channel, the second the monitoring range
- * query.
+ * read of the pod's `log` subresource — `follow=true` through the BFF proxy.
+ *
+ * The terminal is the second streaming channel and goes through the one WebSocket the BFF
+ * forwards: `/api/v1/.../exec?container=…&tty=true&command=/bin/sh`, protocol
+ * `v5.channel.k8s.io`. Per-container monitoring is still absent — it needs the monitoring
+ * range query, not a channel.
  */
 export interface ContainerDetailPageProps {
   workspace: string;
@@ -424,6 +427,7 @@ export function ContainerDetailPage({ workspace, cluster, namespace, pod, contai
             )}
           </section>
 
+          <ContainerTerminal cluster={cluster} namespace={namespace} pod={pod} container={container} />
         </React.Fragment>
       ) : null}
     </AiSurface>

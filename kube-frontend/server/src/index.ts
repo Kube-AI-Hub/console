@@ -2,6 +2,7 @@ import { createServer, type IncomingMessage, type ServerResponse } from 'node:ht
 import { loadConfig, type UpstreamConfig } from './config';
 import type { BffError } from './errors';
 import { isProxiedPath, proxyRequest } from './proxy';
+import { createUpgradeHandler } from './upgrade';
 import { bearerToken, login, logout, resolveCurrentUser, type OAuthClientConfig } from './auth/session';
 import { badRequest } from './errors';
 
@@ -183,11 +184,19 @@ export async function startServer(port: number, deps: HandlerDeps): Promise<Retu
       }
     });
   });
+  /*
+   * Container exec is a WebSocket, so it arrives as an `upgrade` event that the
+   * normal request handler never sees. Attached here — not inside `createHandler` —
+   * because the two protocols have different lifetimes: an upgrade hands the raw
+   * socket to the handler, and the server must keep listening for both.
+   */
+  server.on('upgrade', createUpgradeHandler(deps.config));
   await new Promise<void>((resolve) => server.listen(port, '0.0.0.0', resolve));
   return server;
 }
 
-export { loadConfig };
+export { loadConfig, createUpgradeHandler };
+export { isExecUpgradePath, upgradeBearerToken, upstreamProtocols } from './upgrade';
 
 /**
  * The AI surface manifest.

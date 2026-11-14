@@ -9,17 +9,24 @@ import { createClient, configMapsApi, secretsApi, serviceAccountsApi, storageApi
  */
 const TOKEN_KEY = 'kubesphere-token';
 
-export const api = createClient({
-  getToken: () => {
-    try {
-      return window.localStorage.getItem(TOKEN_KEY);
-    } catch {
-      // Private browsing can throw on access; treat it as "no token" and let the
-      // BFF answer 401, which the page renders as a permission notice.
-      return null;
-    }
-  },
-});
+/**
+ * The current bearer token, or null when signed out.
+ *
+ * Exported for the WebSocket channels, which cannot go through the client's
+ * header path: a browser `WebSocket` cannot set headers, so the exec session sends
+ * the token as a subprotocol instead (see `openExecSession`).
+ */
+export function currentToken(): string | null {
+  try {
+    return window.localStorage.getItem(TOKEN_KEY);
+  } catch {
+    // Private browsing can throw on access; treat it as "no token" and let the
+    // BFF answer 401, which the page renders as a permission notice.
+    return null;
+  }
+}
+
+export const api = createClient({ getToken: currentToken });
 
 export const TOKEN_STORAGE_KEY = TOKEN_KEY;
 

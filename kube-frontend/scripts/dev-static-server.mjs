@@ -11,6 +11,8 @@
  * Usage: dev-static-server.mjs <distDir> <port> <bffUrl>
  */
 import { createServer } from 'node:http';
+import { connect as netConnect } from 'node:net';
+import { connect as tlsConnect } from 'node:tls';
 import { Agent, setGlobalDispatcher } from 'undici';
 
 /** Per-request ceiling for proxied API calls. */
@@ -49,7 +51,7 @@ const contentTypes = {
 /** Every prefix the BFF owns; anything else is an asset or an SPA route. */
 const API_PREFIXES = ['/api', '/kapis', '/apis'];
 
-createServer(async (request, response) => {
+const server = createServer(async (request, response) => {
   const url = new URL(request.url ?? '/', 'http://localhost');
 
   if (API_PREFIXES.some((prefix) => url.pathname === prefix || url.pathname.startsWith(`${prefix}/`))) {
@@ -152,6 +154,59 @@ createServer(async (request, response) => {
         .end('build in progress: dist/index.html is not available yet');
     }
   }
-}).listen(port, '127.0.0.1', () => {
+});
+
+/**
+ * WebSocket upgrades — the container terminal.
+ *
+ * An HTTP proxy cannot carry the exec channel: the request starts with
+ * `Upgrade: websocket` and becomes a raw duplex socket after the 101. This dev
+ * server is the browser's origin, so it has to relay that handshake to the BFF
+ * byte for byte; the BFF adds the Authorization header and forwards to
+ * ks-apiserver. Raw TCP is deliberate — no WebSocket library, and the token
+ * subprotocol, key and accept headers pass through untouched.
+ */
+server.on('upgrade', (request, clientSocket, head) => {
+  const url = new URL(request.url ?? '/', 'http://localhost');
+  if (!API_PREFIXES.some((prefix) => url.pathname === prefix || url.pathname.startsWith(`${prefix}/`))) {
+    clientSocket.destroy();
+    return;
+  }
+
+  const target = new URL(bffUrl);
+  const targetPort = target.port ? Number(target.port) : target.protocol === 'https:' ? 443 : 80;
+  const upstream =
+    target.protocol === 'https:'
+      ? tlsConnect({ host: target.hostname, port: targetPort, servername: target.hostname })
+      : netConnect({ host: target.hostname, port: targetPort });
+
+  upstream.on('connect', () => {
+    // Rebuild the request line and headers; only `host` changes (the BFF is this
+    // hop's origin). Key, version and subprotocols stay exactly as the browser
+    // sent them, because the handshake has to be accepted end to end.
+    const lines = [`${request.method} ${request.url} HTTP/1.1`];
+    for (let index = 0; index < request.rawHeaders.length; index += 2) {
+      const name = request.rawHeaders[index];
+      if (name.toLowerCase() === 'host') continue;
+      lines.push(`${name}: ${request.rawHeaders[index + 1]}`);
+    }
+    lines.push(`host: ${target.host}`, '', '');
+    upstream.write(lines.join('\r\n'));
+    if (head.length > 0) upstream.write(head);
+  });
+
+  const destroy = () => {
+    upstream.destroy();
+    clientSocket.destroy();
+  };
+  upstream.on('error', destroy);
+  clientSocket.on('error', destroy);
+  upstream.on('close', () => clientSocket.destroy());
+  clientSocket.on('close', () => upstream.destroy());
+  upstream.pipe(clientSocket);
+  clientSocket.pipe(upstream);
+});
+
+server.listen(port, '127.0.0.1', () => {
   console.log(`[dev-static] ${distDir} on http://127.0.0.1:${port} -> ${bffUrl}`);
 });

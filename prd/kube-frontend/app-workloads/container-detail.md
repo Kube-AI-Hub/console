@@ -6,7 +6,7 @@
 
 容器组里单个容器的详情：镜像与拉取策略、状态与重启次数、命令与参数、资源请求/限制、环境变量、挂载卷、端口与探针。
 
-日志已落地两段：最近 1 小时的搜索（租户日志接口）与**实时 tail**（kube 的 `log` 子资源，HTTP chunked，不需要 WebSocket）。容器终端与单容器监控仍依赖 WebSocket exec 与监控区间查询（见 `design/kube-frontend/_index.md` 的 DEC-CORE-KUBE-FRONTEND-08），在通道就绪后补齐，当前**不放会报错的页签**。
+日志已落地两段：最近 1 小时的搜索（租户日志接口）与**实时 tail**（kube 的 `log` 子资源，HTTP chunked，不需要 WebSocket）。容器终端走 BFF 新增的 WebSocket upgrade 转发，协议为 kube 原生的 `v5.channel.k8s.io`（k8s 1.37 已移除 SPDY）；单容器监控仍依赖监控区间查询，尚未落地。
 
 ## 用户故事
 
@@ -16,34 +16,46 @@
 
 **Independent Test**：从容器组详情点容器名进入容器详情，核对其镜像、拉取策略、状态与该容器组对象一致。
 
+### US2 - 在容器里执行命令 (Priority: P1)
+
+作为 **项目成员**，我希望 **直接在容器里执行命令并看到输出**，以便 **排查配置与状态都解释不了的运行期问题（进程、文件、网络）**。
+
+**Independent Test**：打开一个容器内有 `/bin/sh` 的容器详情，点「打开终端」，输入 `echo tc-terminal-ok` 并回车，输出区出现 `tc-terminal-ok`，关闭后连接释放。
+
 ## 验收场景
 
 - **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-01** — 已知容器组有容器，当从容器组详情点容器名进入容器详情，则显示名称、镜像、镜像拉取策略、状态、重启次数、启动时间、命令与参数，以及资源（请求/限制）、环境变量、挂载卷、端口与探针五个区块；镜像与拉取策略等于该容器组对象中该容器的字段；区块无内容时显示说明而非空表；容器组不存在该容器时显示「这个容器不存在」。
 - **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-02** - 已知容器有日志，当打开该容器详情页，则「日志」区块显示最近 1 小时内该容器组该容器的日志行（时间 + 内容，最多 200 行）；关键字输入通过 log_query 收窄结果；无日志时显示空态说明。
 - **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-03** — 已知容器有日志，当打开该容器详情页并打开「日志」区块的「实时」开关，则日志区块从最近 1 小时的搜索结果切换为实时流，新行追加在底部（最多保留 1000 行），连接中与已断开各有明确提示；关闭开关或点「停止实时」后不再追加新行，断开时可点「重新连接」重建流；开关关闭时原有日志搜索行为不变。
+- **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_TERMINAL-01** — 已知容器内有 `/bin/sh`，当在该容器详情页点「打开终端」并输入 `echo tc-terminal-ok` 回车，则终端面板从「正在连接终端…」进入「已连接」，输出区出现一行内容恰为 `tc-terminal-ok`，点「关闭终端」后面板移除、入口按钮恢复；容器内没有 `/bin/sh` 时面板进入错误态并显示上游原因（含 `no such file`），不空白、不一直转圈；exec 通道不可用时显示明确错误并可「重新连接」。
 
 ## 设计目标
 
 1. 一屏回答「这个容器配置成什么样」。
 2. 与容器组详情同一套字段命名与徽标。
+3. 终端能连上、能输入、能看见输出；连不上时给出原因而不是空白或一直转圈。
 
 ## 约束与边界
 
 - 数据来自容器组对象本身（`spec.containers[]` 与 `status.containerStatuses[]`），不额外请求。
 - 日志搜索走租户日志接口；实时 tail 走 kube 的 `log` 子资源（HTTP chunked），不依赖 WebSocket；两者不同时展示，实时开关是唯一入口。
-- 只读。
+- 容器终端走 WebSocket（`GET /api/v1/namespaces/<ns>/pods/<pod>/exec`，子协议 `v5.channel.k8s.io`），必须经 BFF 的 upgrade 转发；浏览器原生 WebSocket 不能带 `Authorization` 头，token 经 `bearer.<token>` 子协议传给 BFF，由 BFF 转成上游的 `Authorization` 头。
+- 终端只做「命令输入 + 输出」，不是完整终端模拟器（不做光标寻址、全屏程序）；pty 的转义序列在展示前去掉。
+- 只读：终端里的命令由容器自身执行，控制台不代理、不记录、不持久化其输出。
 
 ## UI 交互设计
 
 - 顶部返回容器组详情的链接。
 - 基本信息两列；资源、环境变量、挂载卷、端口、探针各一块。
 - 「日志」区块标题右侧是「实时」开关（默认关）与停止/重连按钮；开关打开时区块内容切换为实时流并按行追加，关闭时切回搜索结果的最近 1 小时视图。
+- 「终端」区块标题右侧是「打开终端」；打开后依次是状态行、输出区（等宽字体，最多保留最近 500 行）、命令输入框（回车或点「执行」发送）与「关闭终端」。连接中、已连接、已断开、错误各有文案；错误与断开可点「重新连接」。
 
 ## 文案与校验
 
 - 空态：没有环境变量 / 没有挂载卷 / 没有声明端口 / 没有探针。
 - 缺失容器：这个容器不存在（可能已被重建）。
 - 实时日志：开关「实时」；连接中「正在连接日志流…」；已连接等待新行「已连接，等待新日志…」；断开「日志流已断开。」；按钮「停止实时」「重新连接」；提示「打开后从日志搜索结果切换到实时流，最多保留 1000 行。」
+- 终端：入口「打开终端」；连接中「正在连接终端…」；已连接「已连接。输入命令后回车执行。」；会话结束「终端会话已结束。」；断开「终端已断开。」；错误提示「无法连接终端：容器可能没有 shell，或当前账号没有 exec 权限。」；按钮「执行」「关闭终端」「重新连接」；说明「输出保留最近 500 行，等宽字体显示。」
 
 ## 边界情况
 
@@ -52,30 +64,40 @@
 - 实时日志超过 1000 行：只保留最后 1000 行，旧行滚出。
 - 实时流断开（容器重启、日志轮转、网络中断）：显示「日志流已断开。」并提供「重新连接」，不静默停止。
 - 容器当前没有日志输出：上游在日志量很小时不会及时返回响应头（见技术方案「已知坑」），页面停留在「正在连接日志流…」，不假装成功、不报错。
+- 容器内没有 `/bin/sh`：exec 在升级成功后才失败，上游用错误通道返回原因；面板进入错误态并显示该原因（如 `stat /bin/sh: no such file or directory`），不是空白。
+- 终端失败握手（BFF 401/404/502）在浏览器里读不到 HTTP 状态：页面显示通用错误与「重新连接」，具体原因看 BFF 的响应体。
+- 终端输出超过 500 行：只保留最近 500 行，旧行滚出。
+- 关闭面板或离开页面：关闭 WebSocket，BFF 随之销毁到上游的连接，不留后台会话。
 
 ## 明确不做
 
 - 容器实时日志已实现（本页日志区块的「实时」开关），不属于「不做」。
-- 容器终端、单容器监控：分别依赖 WebSocket exec 与监控区间查询，登记为待补（DEC-CORE-KUBE-FRONTEND-08 的落地第 2、3 步），通道就绪前不放页签。
+- 容器终端已实现（本页「终端」区块），不属于「不做」。
+- 单容器监控：依赖监控区间查询，尚未落地，不放页签。
+- 完整终端模拟器（xterm：光标寻址、颜色、全屏程序）、节点 shell 与 kubectl 会话：不在本页范围，见技术方案「后续改进」。
 - 容器编辑：容器由所属工作负载的模板定义，改模板才是唯一入口。
 
 ## 假设
 
 - 容器组对象的 `spec.containers` 与 `status.containerStatuses` 按名称一一对应。
+- 容器镜像里有 `/bin/sh`；其他 shell 不作为默认，没有 `/bin/sh` 时按错误态处理。
 
 ## 验收用例
 
 - `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-01`
 - `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-02`
 - `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-03`
+- `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_TERMINAL-01`
 
 ## 功能需求
 
 - **FR-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-01** — 从容器组对象派生容器视图并分区展示。
 - **FR-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-02** — 容器不存在时给出明确提示。
 - **FR-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-03** — 「实时」开关把日志区块切换到 kube `log` 子资源的流式读取，按行追加、最多 1000 行，可停止与重连。
+- **FR-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_TERMINAL-01** — 「终端」入口通过 BFF 的 WebSocket upgrade 打开容器 exec 会话，支持命令输入、输出展示（最多 500 行）、关闭与重连，失败时显示原因。
 
 ## 成功标准
 
 - **SC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-01** — 镜像/拉取策略与对象一致；五个区块各自能区分「空」与「有内容」。
 - **SC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-02** — 实时开关打开后流列表出现且行数 ≥ 1；停止后不再追加；断开有提示并可重连；开关关闭时搜索区块的对外标识与行为不变。
+- **SC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_TERMINAL-01** — 带 shell 的容器能进入「已连接」并看到命令输出；无 shell 的容器进入错误态并显示上游原因；关闭后面板移除且连接释放。
