@@ -44,20 +44,20 @@ def test_TC_L3_KUBE_FRONTEND_MONITORING_RULES_04(monitoring_page, screenshot):
         ui.wait_ready("alertingrules")
 
         # ---- create a policy with two rules ----
-        create = ui.page.locator('[data-ai-id="alertingrules:create"]')
+        create = ui.page.locator('[data-ai-id="monitoring-alerts:create"]')
         expect(create).to_be_visible(timeout=20_000)
         create.click()
-        dialog = ui.page.locator('[data-ai-id="rule-group-dialog"]')
+        dialog = ui.page.locator('[data-ai-id="monitoring-alerts:dialog"]')
         expect(dialog).to_be_visible(timeout=20_000)
 
-        ui.page.locator('[data-ai-id="rule-group:name"]').fill(name)
-        ui.page.locator('[data-ai-id="rule-group:rule:0:alert"]').fill("TcRuleOne")
-        ui.page.locator('[data-ai-id="rule-group:rule:0:expression"]').fill("up == 0")
-        ui.page.locator('[data-ai-id="rule-group:add-rule"]').click()
-        expect(ui.page.locator('[data-ai-id="rule-group:rule:1:alert"]')).to_be_visible(timeout=10_000)
-        ui.page.locator('[data-ai-id="rule-group:rule:1:alert"]').fill("TcRuleTwo")
-        ui.page.locator('[data-ai-id="rule-group:rule:1:expression"]').fill("up == 1")
-        ui.page.locator('[data-ai-id="rule-group:save"]').click()
+        ui.page.locator('[data-ai-id="monitoring-alerts:name"]').fill(name)
+        ui.page.locator('[data-ai-id="monitoring-alerts:rule:0:alert"]').fill("TcRuleOne")
+        ui.page.locator('[data-ai-id="monitoring-alerts:rule:0:expression"]').fill("up == 0")
+        ui.page.locator('[data-ai-id="monitoring-alerts:rule-add"]').click()
+        expect(ui.page.locator('[data-ai-id="monitoring-alerts:rule:1:alert"]')).to_be_visible(timeout=10_000)
+        ui.page.locator('[data-ai-id="monitoring-alerts:rule:1:alert"]').fill("TcRuleTwo")
+        ui.page.locator('[data-ai-id="monitoring-alerts:rule:1:expression"]').fill("up == 1")
+        ui.page.locator('[data-ai-id="monitoring-alerts:save"]').click()
 
         created = _wait_for(ui.api, name, lambda group: len(_rules(group)) == 2)
         assert created is not None, "创建后回读不到该规则组"
@@ -80,11 +80,11 @@ def test_TC_L3_KUBE_FRONTEND_MONITORING_RULES_04(monitoring_page, screenshot):
         expect(dialog).to_be_visible(timeout=20_000)
         # The editor must show every rule the group has, or the next save deletes the
         # ones it did not show.
-        expect(ui.page.locator('[data-ai-id="rule-group:rule:1:alert"]')).to_be_visible(timeout=20_000)
-        expect(ui.page.locator('[data-ai-id="rule-group:name"]')).to_be_disabled()
-        ui.page.locator('[data-ai-id="rule-group:rule:0:expression"]').fill("up == 2")
-        ui.page.locator('[data-ai-id="rule-group:remove-rule:1"]').click()
-        ui.page.locator('[data-ai-id="rule-group:save"]').click()
+        expect(ui.page.locator('[data-ai-id="monitoring-alerts:rule:1:alert"]')).to_be_visible(timeout=20_000)
+        expect(ui.page.locator('[data-ai-id="monitoring-alerts:name"]')).to_be_disabled()
+        ui.page.locator('[data-ai-id="monitoring-alerts:rule:0:expression"]').fill("up == 2")
+        ui.page.locator('[data-ai-id="monitoring-alerts:rule-remove:1"]').click()
+        ui.page.locator('[data-ai-id="monitoring-alerts:save"]').click()
 
         edited = _wait_for(ui.api, name, lambda group: len(_rules(group)) == 1)
         rules = _rules(edited)

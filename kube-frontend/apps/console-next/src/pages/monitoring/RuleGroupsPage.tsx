@@ -26,10 +26,11 @@ import { formatTimestamp } from '@/lib/time';
  * reader wants is "which alerting policies exist and are any turned off" — so the
  * model is chosen by probing the API group and only the body differs.
  *
- * The rows are read-mostly on purpose: every group on this cluster is installed by
- * the platform (`alerting.kubesphere.io/builtin: true`), and offering an editor for
- * them would let a click silently disagree with the installer. Enable/disable is
- * offered because it is a label the platform itself documents as the switch.
+ * Reading is one page for both models; writing is deliberately narrower. The
+ * platform-installed groups (`alerting.kubesphere.io/builtin: true`) are not
+ * editable because a click would silently disagree with the installer at its next
+ * reconcile. Project-scoped, non-builtin groups are the user's own policies, so the
+ * page creates, edits (description, rule list, severity) and deletes them.
  */
 export interface RuleGroupsPageProps {
   cluster: string;
@@ -193,26 +194,43 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
             primaryAction: {
               key: 'create',
               label: t('monitoring.ruleGroups.create'),
-              aiId: 'alertingrules:create',
+              aiId: 'monitoring-alerts:create',
             },
           }
         : {}),
       rowActions: [
-        { key: 'detail', label: t('monitoring.action.detail') },
+        { key: 'detail', label: t('monitoring.action.detail'), aiId: 'monitoring-alerts:detail' },
         /*
          * Mutually exclusive entries, not one label that changes: a row action's
          * label is static, so a single entry would claim the wrong state for half
          * the rows.
          */
-        { key: 'disable', label: t('monitoring.action.disable'), visible: (row: RuleGroupSummary) => row.enabled },
-        { key: 'enable', label: t('monitoring.action.enable'), visible: (row: RuleGroupSummary) => !row.enabled },
+        {
+          key: 'disable',
+          label: t('monitoring.action.disable'),
+          aiId: 'monitoring-alerts:disable',
+          visible: (row: RuleGroupSummary) => row.enabled,
+        },
+        {
+          key: 'enable',
+          label: t('monitoring.action.enable'),
+          aiId: 'monitoring-alerts:enable',
+          visible: (row: RuleGroupSummary) => !row.enabled,
+        },
         /*
-         * Edit and delete appear only where they can succeed. A builtin group, a
-         * cluster-scoped one, or a multi-rule one would either be reverted by the
-         * installer or lose rules, so those rows do not offer the action at all.
+         * Edit and delete appear only where they can succeed. Builtin and
+         * cluster-scoped groups are installer-owned, so those rows do not offer the
+         * actions at all; the editor itself edits the whole rule list, so rule count
+         * is no longer a gate.
          */
-        { key: 'edit', label: t('common.edit'), visible: (row: RuleGroupSummary) => canEdit(row) },
-        { key: 'delete', label: t('common.delete'), tone: 'danger' as const, visible: (row: RuleGroupSummary) => canEdit(row) },
+        { key: 'edit', label: t('common.edit'), aiId: 'monitoring-alerts:edit', visible: (row: RuleGroupSummary) => canEdit(row) },
+        {
+          key: 'delete',
+          label: t('common.delete'),
+          aiId: 'monitoring-alerts:delete',
+          tone: 'danger' as const,
+          visible: (row: RuleGroupSummary) => canEdit(row),
+        },
       ],
       empty: {
         title: t('monitoring.ruleGroups.emptyTitle'),
@@ -339,6 +357,10 @@ function RuleGroupBody({ detail }: { detail: RuleGroupDetail }): React.ReactElem
       <dl className="grid grid-cols-1 gap-3 text-xs sm:grid-cols-[minmax(6rem,auto)_1fr]">
         <DefinitionRow label={t('monitoring.field.name')} value={detail.name} />
         <DefinitionRow
+          label={t('monitoring.ruleGroups.field.description')}
+          value={detail.description || t('monitoring.ruleGroups.noDescription')}
+        />
+        <DefinitionRow
           label={t('monitoring.column.ruleStatus')}
           value={detail.enabled ? t('monitoring.status.enabled') : t('monitoring.status.disabled')}
         />
@@ -372,6 +394,7 @@ function RuleGroupBody({ detail }: { detail: RuleGroupDetail }): React.ReactElem
                   <td className="px-2 py-2 tabular-nums text-ai-fg-secondary">{rule.duration || '-'}</td>
                   <td className="min-w-0 px-2 py-2 text-ai-fg-secondary">
                     <span className="block break-words">{rule.summary || rule.description || '-'}</span>
+                    {rule.message ? <span className="mt-1 block break-words text-ai-fg-muted">{rule.message}</span> : null}
                     {rule.expression ? (
                       <code className="mt-1 block break-words font-mono text-[11px] text-ai-fg-muted">{rule.expression}</code>
                     ) : null}

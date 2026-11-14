@@ -15,12 +15,12 @@
 
 ## 设计目标与非目标
 
-目标：告警数据走正确的 kapis 组；模块缺失时退化为空态。非目标：策略编辑、消息静默。
+目标：告警数据走正确的 kapis 组；模块缺失时退化为空态；项目级自定义策略可写。非目标：消息静默、通知渠道配置。
 
 ## 关键约束
 
 - kapis 前缀为 `/kapis/alerting.kubesphere.io/v1alpha2`，与通用资源代理不同。
-- 告警消息可删除；策略只读。
+- 告警消息可删除；项目级、非内置策略可创建/编辑/删除（见 `alerts-write.md`），内置与集群级策略只读。
 
 ## 方案决策
 
@@ -68,7 +68,7 @@ E2E：`tests/kube-frontend/monitoring/`。
 
 ## 后续改进
 
-策略启用/停用与编辑；消息静默。
+消息静默；告警模板与 YAML 编辑。
 
 ## 验收用例
 
@@ -89,7 +89,7 @@ E2E：`tests/kube-frontend/monitoring/`。
 
 ## 明确不做
 
-- 策略编辑、消息静默、通知渠道配置。
+- 集群级与内置策略的编辑；消息静默、通知渠道配置。
 
 ## 功能点
 
@@ -97,3 +97,4 @@ E2E：`tests/kube-frontend/monitoring/`。
 |---|---|---|
 | 告警消息 | `prd/…/alerts.md` | `design/…/alerts.md` |
 | 告警策略 | `prd/…/rules.md` | `design/…/rules.md` |
+| 告警策略的创建与编辑 | `prd/…/alerts-write.md` | `design/…/alerts-write.md` |

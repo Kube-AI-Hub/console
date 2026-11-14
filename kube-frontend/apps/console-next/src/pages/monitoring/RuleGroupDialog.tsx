@@ -7,9 +7,11 @@ import {
   type RuleGroupRuleInput,
 } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { AiButton, Button, Input, Modal, Select, Skeleton } from '@kube-ai-hub/ui';
+import { AiButton, Button, Input, Modal, Select, Skeleton, Textarea } from '@kube-ai-hub/ui';
+import type { LocaleKey } from '@kube-ai-hub/locales';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
+import { errorMessage } from '@/components/resource/ResourceErrorPanel';
 
 /**
  * Create or edit one project alerting policy, including its rule list.
@@ -22,6 +24,11 @@ import { api as apiClient } from '@/api';
  * Validation happens before submit because the API accepts an empty rule list: a policy
  * with no rules is accepted and evaluates nothing, which is the quietest possible
  * failure.
+ *
+ * The description lives in the `kubesphere.io/description` annotation, the same key the
+ * old console writes; the rule's long text lives in `annotations.message`, matching its
+ * `MESSAGE_SUMMARY` / `MESSAGE_DETAILS` pair. Both are annotations because the resource
+ * has no spec fields for them.
  */
 export interface RuleGroupDialogProps {
   open: boolean;
@@ -47,6 +54,7 @@ function newDraft(): DraftRule {
     duration: '5m',
     severity: 'warning',
     summary: '',
+    message: '',
   };
 }
 
@@ -63,6 +71,7 @@ export function RuleGroupDialog({ open, onOpenChange, cluster, namespace, group 
   });
 
   const [name, setName] = React.useState('');
+  const [description, setDescription] = React.useState('');
   const [draft, setDraft] = React.useState<DraftRule[]>([]);
   const [error, setError] = React.useState('');
 
@@ -74,6 +83,7 @@ export function RuleGroupDialog({ open, onOpenChange, cluster, namespace, group 
   React.useEffect(() => {
     if (!open) return;
     setName(group?.name ?? '');
+    setDescription(detail.data?.description ?? group?.description ?? '');
     setError('');
     if (!editing) {
       setDraft([newDraft()]);
@@ -90,9 +100,10 @@ export function RuleGroupDialog({ open, onOpenChange, cluster, namespace, group 
             duration: rule.duration || '5m',
             severity: SEVERITIES.includes(rule.severity as (typeof SEVERITIES)[number]) ? rule.severity : 'warning',
             summary: rule.summary,
+            message: rule.message,
           })),
     );
-  }, [open, editing, group?.name, detail.data]);
+  }, [open, editing, group?.name, group?.description, detail.data]);
 
   const save = useMutation({
     mutationFn: async () => {
@@ -102,9 +113,13 @@ export function RuleGroupDialog({ open, onOpenChange, cluster, namespace, group 
         duration: rule.duration.trim() || '5m',
         severity: rule.severity,
         summary: rule.summary.trim(),
+        message: rule.message.trim(),
       }));
-      if (editing) await ruleGroupsWriteApi(apiClient).update({ namespace, name: group?.name ?? '', rules });
-      else await ruleGroupsWriteApi(apiClient).create({ namespace, name: name.trim(), rules });
+      if (editing) {
+        await ruleGroupsWriteApi(apiClient).update({ namespace, name: group?.name ?? '', rules, description });
+      } else {
+        await ruleGroupsWriteApi(apiClient).create({ namespace, name: name.trim(), rules, description });
+      }
     },
     onSuccess: () => {
       onOpenChange(false);
@@ -140,20 +155,33 @@ export function RuleGroupDialog({ open, onOpenChange, cluster, namespace, group 
       {editing && detail.isPending ? (
         <Skeleton className="h-64 w-full" />
       ) : (
-        <div className="flex flex-col gap-4" data-ai-id="rule-group-dialog">
+        <div className="flex flex-col gap-4" data-ai-id="monitoring-alerts:dialog">
           <label className="flex flex-col gap-1 text-xs">
             <span className="text-ai-fg-muted">{t('monitoring.ruleGroups.field.name')}</span>
             <Input
               value={name}
               disabled={editing}
               aria-label={t('monitoring.ruleGroups.field.name')}
-              {...actionProps('rule-group:name')}
+              {...actionProps('monitoring-alerts:name')}
               onChange={(event) => setName(event.target.value)}
             />
             <span className="text-ai-fg-muted">{t('monitoring.ruleGroups.field.nameHint')}</span>
           </label>
 
-          <div className="flex flex-col gap-2" {...actionProps('rule-group:rules')}>
+          <label className="flex flex-col gap-1 text-xs">
+            <span className="text-ai-fg-muted">{t('monitoring.ruleGroups.field.description')}</span>
+            <Textarea
+              value={description}
+              rows={2}
+              maxLength={256}
+              aria-label={t('monitoring.ruleGroups.field.description')}
+              {...actionProps('monitoring-alerts:description')}
+              onChange={(event) => setDescription(event.target.value)}
+            />
+            <span className="text-ai-fg-muted">{t('monitoring.ruleGroups.field.descriptionHint')}</span>
+          </label>
+
+          <div className="flex flex-col gap-2" {...actionProps('monitoring-alerts:rules')}>
             <span className="text-xs text-ai-fg-muted">
               {t('monitoring.ruleGroups.rules')} ({draft.length})
             </span>
@@ -161,7 +189,7 @@ export function RuleGroupDialog({ open, onOpenChange, cluster, namespace, group 
               <div
                 key={rule.id}
                 className="flex flex-col gap-2 rounded-ai-md border border-ai-line p-3"
-                data-ai-id={'rule-group:rule:' + String(index)}
+                data-ai-id={'monitoring-alerts:rule:' + String(index)}
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-medium text-ai-fg">
@@ -173,7 +201,7 @@ export function RuleGroupDialog({ open, onOpenChange, cluster, namespace, group 
                     // A policy with zero rules is accepted by the API and evaluates
                     // nothing, so the last rule cannot be removed here.
                     disabled={draft.length === 1}
-                    {...actionProps('rule-group:remove-rule:' + String(index))}
+                    {...actionProps('monitoring-alerts:rule-remove:' + String(index))}
                     onClick={() => setDraft((current) => current.filter((entry) => entry.id !== rule.id))}
                   >
                     {t('common.delete')}
@@ -184,70 +212,79 @@ export function RuleGroupDialog({ open, onOpenChange, cluster, namespace, group 
                     value={rule.alert}
                     placeholder={t('monitoring.ruleGroups.field.alert')}
                     aria-label={t('monitoring.ruleGroups.field.alert')}
-                    {...actionProps('rule-group:rule:' + String(index) + ':alert')}
+                    {...actionProps('monitoring-alerts:rule:' + String(index) + ':alert')}
                     onChange={(event) => update(rule.id, { alert: event.target.value })}
                   />
                   <Input
                     value={rule.expression}
                     placeholder={t('monitoring.ruleGroups.field.expression')}
                     aria-label={t('monitoring.ruleGroups.field.expression')}
-                    {...actionProps('rule-group:rule:' + String(index) + ':expression')}
+                    {...actionProps('monitoring-alerts:rule:' + String(index) + ':expression')}
                     onChange={(event) => update(rule.id, { expression: event.target.value })}
                   />
                   <Input
                     value={rule.duration}
                     placeholder={t('monitoring.ruleGroups.field.duration')}
                     aria-label={t('monitoring.ruleGroups.field.duration')}
-                    {...actionProps('rule-group:rule:' + String(index) + ':duration')}
+                    {...actionProps('monitoring-alerts:rule:' + String(index) + ':duration')}
                     onChange={(event) => update(rule.id, { duration: event.target.value })}
                   />
                   <Select
                     value={rule.severity}
                     aria-label={t('monitoring.ruleGroups.field.severity')}
-                    {...actionProps('rule-group:rule:' + String(index) + ':severity')}
+                    {...actionProps('monitoring-alerts:rule:' + String(index) + ':severity')}
                     onValueChange={(value) => update(rule.id, { severity: value })}
-                    options={SEVERITIES.map((severity) => ({ value: severity, label: severity }))}
+                    options={SEVERITIES.map((severity) => ({ value: severity, label: t(SEVERITY_LABELS[severity]) }))}
                   />
                   <Input
-                    className="sm:col-span-2"
                     value={rule.summary}
+                    maxLength={63}
                     placeholder={t('monitoring.ruleGroups.field.summary')}
                     aria-label={t('monitoring.ruleGroups.field.summary')}
-                    {...actionProps('rule-group:rule:' + String(index) + ':summary')}
+                    {...actionProps('monitoring-alerts:rule:' + String(index) + ':summary')}
                     onChange={(event) => update(rule.id, { summary: event.target.value })}
+                  />
+                  <Input
+                    value={rule.message}
+                    maxLength={256}
+                    placeholder={t('monitoring.ruleGroups.field.message')}
+                    aria-label={t('monitoring.ruleGroups.field.message')}
+                    {...actionProps('monitoring-alerts:rule:' + String(index) + ':message')}
+                    onChange={(event) => update(rule.id, { message: event.target.value })}
                   />
                 </div>
               </div>
             ))}
-            <AiButton
-              aiId="rule-group:add-rule"
-              size="sm"
-              variant="secondary"
-              onClick={() => setDraft((current) => [...current, newDraft()])}
-            >
+            <AiButton aiId="monitoring-alerts:rule-add" size="sm" variant="secondary" onClick={() => setDraft((current) => [...current, newDraft()])}>
               {t('monitoring.ruleGroups.addRule')}
             </AiButton>
           </div>
 
           {error ? (
-            <p className="text-xs text-ai-danger" role="alert" data-ai-id="rule-group:error">
+            <p className="text-xs text-ai-danger" role="alert" data-ai-id="monitoring-alerts:error">
               {error}
             </p>
           ) : null}
           {save.isError ? (
-            <p className="text-xs text-ai-danger" role="alert">
-              {save.error instanceof Error ? save.error.message : String(save.error)}
+            <p className="text-xs text-ai-danger" role="alert" data-ai-id="monitoring-alerts:submit-error">
+              {errorMessage(t, save.error)}
             </p>
           ) : null}
 
           <div className="flex justify-end gap-2">
-            <Button size="sm" variant="secondary" onClick={() => onOpenChange(false)} disabled={save.isPending}>
+            <Button
+              size="sm"
+              variant="secondary"
+              disabled={save.isPending}
+              {...actionProps('monitoring-alerts:cancel')}
+              onClick={() => onOpenChange(false)}
+            >
               {t('common.cancel')}
             </Button>
             <Button
               size="sm"
               disabled={save.isPending}
-              {...actionProps('rule-group:save')}
+              {...actionProps('monitoring-alerts:save')}
               onClick={() => {
                 const problem = validate();
                 setError(problem);
@@ -262,3 +299,10 @@ export function RuleGroupDialog({ open, onOpenChange, cluster, namespace, group 
     </Modal>
   );
 }
+
+/** Severity value → the label key the old console used. */
+const SEVERITY_LABELS: Record<(typeof SEVERITIES)[number], LocaleKey> = {
+  critical: 'monitoring.severity.critical',
+  warning: 'monitoring.severity.warning',
+  info: 'monitoring.severity.info',
+};

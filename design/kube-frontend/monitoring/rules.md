@@ -17,7 +17,7 @@
 
 目标：读者不必知道集群是 3.3 还是 3.4；开关只动一个标签；规则内容完整可读。
 
-非目标：策略创建、规则体编辑、跨命名空间聚合。
+非目标：跨命名空间聚合。项目级自定义策略的创建、编辑与删除已实现，字段契约与决策见 `alerts-write.md`；本文保留与本页读模型直接耦合的三条写决策（DEC-05/06/07）。
 
 ## 关键约束
 
@@ -107,6 +107,7 @@
 | 单个规则组 | 同上 + /<name> | GET |
 | 启用/停用 | 同上 + /<name>，body 只含 metadata.labels | PATCH (merge-patch+json) |
 | 模型探测 | /apis/alerting.kubesphere.io/v2beta1 | GET |
+| 创建 / 编辑 / 删除项目级策略 | /apis/alerting.kubesphere.io/v2beta1/namespaces/<ns>/rulegroups[/<name>] | POST / PUT / DELETE（详见 `alerts-write.md`） |
 
 ## 不变量
 
@@ -130,7 +131,7 @@
 
 ## 后续改进
 
-- 自定义规则组的创建与编辑（等出现可验证的数据）。
+- 编辑 YAML / 导入导出策略（见 `alerts-write.md` 的后续改进）。
 - 规则组详情里跳转到告警消息（按规则名过滤）。
 
 ## 验收用例
@@ -138,3 +139,4 @@
 - TC-L3-KUBE-FRONTEND-MONITORING-RULES-01
 - TC-L3-KUBE-FRONTEND-MONITORING-RULES-02
 - TC-L3-KUBE-FRONTEND-MONITORING-RULES-03
+- TC-L3-KUBE-FRONTEND-MONITORING-RULES-04

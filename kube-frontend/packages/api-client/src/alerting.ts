@@ -236,6 +236,8 @@ export interface RuleGroupSummary extends ResourceBase {
   enabled: boolean;
   /** Installed rules are platform-managed; editing them is not offered. */
   builtin: boolean;
+  /** Free-form description, from the `kubesphere.io/description` annotation. */
+  description: string;
 }
 
 /** One Prometheus rule inside a group. */
@@ -252,6 +254,8 @@ export interface RuleGroupRule {
   summary: string;
   /** Longer description, when the rule carries one. */
   description: string;
+  /** Longer message shown with the alert, from `annotations.message`. */
+  message: string;
 }
 
 export interface RuleGroupDetail extends RuleGroupSummary {
@@ -262,6 +266,16 @@ export interface RuleGroupDetail extends RuleGroupSummary {
 }
 
 const BUILTIN_LABEL = 'alerting.kubesphere.io/builtin';
+
+/**
+ * Annotation the platform and the old console use for a policy's description.
+ *
+ * An annotation, not a label or a spec field: Kubernetes caps annotation values at
+ * 256 KiB and labels at 63 characters, and the old console's `BaseInfo` form wrote
+ * exactly this key. Writing a different one would save successfully and then show
+ * nothing on re-read.
+ */
+const DESCRIPTION_ANNOTATION = 'kubesphere.io/description';
 
 /** Severity as the rule declares it; Whizard writes it as `severity` or a label. */
 function ruleSeverity(rule: Record<string, unknown>): string {
@@ -281,6 +295,7 @@ function toRule(raw: unknown): RuleGroupRule {
     severity: ruleSeverity(rule),
     summary: String(annotations['summary'] ?? ''),
     description: String(annotations['description'] ?? ''),
+    message: String(annotations['message'] ?? ''),
   };
 }
 
@@ -296,6 +311,7 @@ export function toRuleGroupSummary(raw: KubeObject, scope: RuleGroupScope): Rule
     // An absent label means never disabled: the platform evaluates it.
     enabled: String(labels[ALERTING_ENABLE_LABEL] ?? 'true') !== 'false',
     builtin: String(labels[BUILTIN_LABEL] ?? 'false') === 'true',
+    description: String((raw.metadata?.annotations ?? {})[DESCRIPTION_ANNOTATION] ?? ''),
   };
 }
 
@@ -434,8 +450,10 @@ export interface RuleGroupRuleInput {
   duration: string;
   /** `critical` / `warning` / `info`. */
   severity: string;
-  /** One-line summary. */
+  /** One-line summary, written to `annotations.summary`. */
   summary: string;
+  /** Longer message, written to `annotations.message`. */
+  message: string;
 }
 
 /**
@@ -455,41 +473,79 @@ export function ruleGroupsWriteApi(client: Client) {
   const item = (namespace: string, name: string) => `${collection(namespace)}/${encodeURIComponent(name)}`;
 
   const toSpec = (rules: RuleGroupRuleInput[]) => ({
-    rules: rules.map((rule) => ({
-      alert: rule.alert,
-      expr: rule.expression,
-      for: rule.duration,
-      severity: rule.severity,
-      ...(rule.summary ? { annotations: { summary: rule.summary } } : {}),
-    })),
+    rules: rules.map((rule) => {
+      const annotations: Record<string, string> = {};
+      if (rule.summary) annotations.summary = rule.summary;
+      if (rule.message) annotations.message = rule.message;
+      return {
+        alert: rule.alert,
+        expr: rule.expression,
+        for: rule.duration,
+        severity: rule.severity,
+        ...(Object.keys(annotations).length > 0 ? { annotations } : {}),
+      };
+    }),
   });
 
   return {
-    async create(params: { namespace: string; name: string; rules: RuleGroupRuleInput[] }): Promise<void> {
+    async create(params: {
+      namespace: string;
+      name: string;
+      rules: RuleGroupRuleInput[];
+      description?: string;
+    }): Promise<void> {
+      const description = (params.description ?? '').trim();
       await client.request(collection(params.namespace), {
         method: 'POST',
         body: {
           apiVersion: 'alerting.kubesphere.io/v2beta1',
           kind: 'RuleGroup',
-          metadata: { name: params.name, namespace: params.namespace },
+          metadata: {
+            name: params.name,
+            namespace: params.namespace,
+            ...(description ? { annotations: { [DESCRIPTION_ANNOTATION]: description } } : {}),
+          },
           spec: toSpec(params.rules),
         },
       });
     },
 
     /**
-     * Replace a group's rules.
+     * Replace a group's rules and its description.
      *
      * PUT with the full object: `spec.rules` is an array, and a merge patch would
      * replace it wholesale while leaving `metadata` untouched — which is what we want,
-     * so the current object is read first to carry `resourceVersion` and annotation
-     * labels. Sending a bare body lets two editors overwrite each other silently.
+     * so the current object is read first to carry `resourceVersion` and the
+     * annotations this editor does not own. Sending a bare body lets two editors
+     * overwrite each other silently.
+     *
+     * The description is merged into the existing annotations rather than replacing
+     * them: the alerting controller and the installer write their own annotations on
+     * the group, and a save that dropped them would break the object for a field the
+     * form did not even show.
      */
-    async update(params: { namespace: string; name: string; rules: RuleGroupRuleInput[] }): Promise<void> {
+    async update(params: {
+      namespace: string;
+      name: string;
+      rules: RuleGroupRuleInput[];
+      description?: string;
+    }): Promise<void> {
       const current = await client.request<KubeObject>(item(params.namespace, params.name));
+      const metadata = { ...(current.metadata ?? {}) };
+      if (params.description !== undefined) {
+        const annotations = { ...(metadata.annotations ?? {}) };
+        const description = params.description.trim();
+        if (description) annotations[DESCRIPTION_ANNOTATION] = description;
+        else delete annotations[DESCRIPTION_ANNOTATION];
+        metadata.annotations = annotations;
+      }
       await client.request(item(params.namespace, params.name), {
         method: 'PUT',
-        body: { ...current, spec: { ...(current?.spec as object), ...toSpec(params.rules) } },
+        body: {
+          ...current,
+          metadata,
+          spec: { ...(current?.spec as object), ...toSpec(params.rules) },
+        },
       });
     },
 

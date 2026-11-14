@@ -1,0 +1,39 @@
+id: TC-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: monitoring
+feature: alerts-write
+title: 告警策略 · 创建（描述与规则）、编辑描述与级别、删除
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/alertingrules'
+prd: prd/kube-frontend/monitoring/alerts-write.md
+design: design/kube-frontend/monitoring/alerts-write.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-01
+
+story:
+- US1
+
+product: 项目级自定义策略可在页面上创建（名称 + 描述 + 一条规则）、编辑描述与规则级别、删除；API 回读逐字段验证，内置与集群级策略不提供写入口。
+preconditions:
+- 已登录，且在 host 集群的 default 项目空间
+- 用例使用 tc-e2e- 前缀的策略名，finally 中按名删除
+steps:
+- 打开告警策略页（项目已选定），点「创建策略」
+- 填写策略名、描述与一条规则（告警名、表达式、持续时间、说明、消息），提交
+- 用 API 回读该 rulegroup，核对描述注解与 spec.rules
+- 搜索该策略使其出现在列表；通过行操作「编辑」修改描述与规则级别并提交，再次回读
+- 通过行操作「删除」并确认，再次回读
+expected:
+- 创建后对象存在，描述注解等于填写值，spec.rules 的告警名、表达式、持续时间、级别、说明、消息与填写一致
+- 列表出现该策略行
+- 编辑后描述与级别已更新，规则仍在
+- 删除后对象不存在（读取返回 404）
+troubleshoot:
+- 创建按钮不出现：没有选定项目（全部项目视图下不可写）
+- 描述回读为空：是否写到了 metadata.annotations 的 kubesphere.io/description
+- 编辑后级别未变：Select 选项是否提交，PUT 是否携带 resourceVersion
+- 删除后仍能读到：确认删除的是项目级规则组
+update_automation:
+- 对话框字段或 data-ai-id 变化时同步 pages/monitoring.py 与本用例

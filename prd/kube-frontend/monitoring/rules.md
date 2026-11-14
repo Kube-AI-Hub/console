@@ -8,6 +8,8 @@
 
 **两种资源模型**：KubeSphere 3.3 及更早用 `alertingrules`；当前 API 组用**规则组**（`globalrulegroups` / `clusterrulegroups` / 命名空间级 `rulegroups`），每组含若干 Prometheus 规则。页面同一张，模型由探测 API 组决定。
 
+项目级自定义策略的创建、编辑与删除是本页的行操作，字段与请求体见 [alerts-write.md](./alerts-write.md)。
+
 ## 用户故事
 
 ### US1 - 看清哪些策略启用、各有多少规则 (Priority: P1)
@@ -53,6 +55,7 @@
 - 写 `alerting.kubesphere.io/enable` 标签（merge patch）。
 - 不支持跨命名空间列出规则组：API 没有该集合，「全部项目」只列集群级规则组。
 - 内置规则组（`alerting.kubesphere.io/builtin: true`）只读，不提供编辑入口。
+- 写项目级自定义策略时走 `POST/PUT/DELETE /apis/alerting.kubesphere.io/v2beta1/namespaces/<ns>/rulegroups`；PUT 携带读到的 `resourceVersion` 并合并既有注解。
 
 ## UI 交互设计
 
@@ -88,6 +91,7 @@
 - `TC-L3-KUBE-FRONTEND-MONITORING-RULES-01`
 - `TC-L3-KUBE-FRONTEND-MONITORING-RULES-02`
 - `TC-L3-KUBE-FRONTEND-MONITORING-RULES-03`
+- `TC-L3-KUBE-FRONTEND-MONITORING-RULES-04`
 
 ## 功能需求
 
@@ -95,9 +99,10 @@
 - **FR-L3-KUBE-FRONTEND-MONITORING-RULES-02** — 规则组列表合并多个来源并在前端分页。
 - **FR-L3-KUBE-FRONTEND-MONITORING-RULES-03** — 启用/停用只写 enable 标签。
 - **FR-L3-KUBE-FRONTEND-MONITORING-RULES-04** — 详情展示每条规则的名称、严重度、持续时间与表达式。
-- **FR-L3-KUBE-FRONTEND-MONITORING-RULES-05** — 项目级、非内置、单规则的策略可创建、编辑与删除；其余只读。
+- **FR-L3-KUBE-FRONTEND-MONITORING-RULES-05** — 项目级、非内置的策略可创建、编辑（描述与规则列表）与删除；其余只读。
 - **FR-L3-KUBE-FRONTEND-MONITORING-RULES-06** — 编辑器编辑整条规则列表：可增删规则、逐条校验（告警名与表达式必填、同一策略内告警名唯一）。
 
 ## 成功标准
 
 - **SC-L3-KUBE-FRONTEND-MONITORING-RULES-01** — 列表规则数与接口一致；开关后回读标签一致且规则体未变。
+- **SC-L3-KUBE-FRONTEND-MONITORING-RULES-02** — 创建、编辑、删除项目级自定义策略后，API 回读分别证明对象存在且字段一致、规则列表更新、对象不存在。
