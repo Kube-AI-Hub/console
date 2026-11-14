@@ -1,5 +1,8 @@
 # 项目作用域缺口分析（老 `/:workspace/clusters/:cluster/projects/:namespace` → 新 UI）
 
+> **历史证据，2026-11-14 基线。** 下文“无页签/无终端/固定分页/模块关闭”等并非当前状态。
+> 现行方法见[迁移指南](../../legacy-ui-migration-guide.md)，待复核项见[能力矩阵](../capability-matrix.md)。
+
 > 作用域：老 console 项目作用域下全部页面与功能。
 > 老源码：`console/src/pages/projects/routes/{index,detail,grayrelease}.js`、`console/src/pages/projects/containers/**`、`console/src/core/containers/Base/Detail/**`。
 > 新源码：`console/kube-frontend/apps/console-next/src/routes/kube-frontend.$workspace.clusters.$cluster.projects.$namespace/`、`src/pages/{app-workloads,configmaps,secrets,serviceaccounts,storage,monitoring,project,settings}/**`、`console/packages/ai-kit/src/schema/ResourceList.tsx`。

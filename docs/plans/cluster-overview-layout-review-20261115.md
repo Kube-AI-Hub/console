@@ -1,5 +1,9 @@
 # 集群概览布局优化与再次复盘
 
+> **历史视觉交付证据。** 本文保留四项调整、三档截图和当时验证边界，不作为实时错误或待办清单。
+> 同批完整交付的方法已整合至[迁移指南](../legacy-ui-migration-guide.md)与[单页模板](page-migration-template.md)，
+> 当前复核任务只维护[能力矩阵](capability-matrix.md)；不再依靠迁移后重复复盘补漏。
+
 ## 范围与结论
 
 承接[功能补齐记录](./cluster-overview-completion-20261115.md)，本轮按用户四项要求优化布局，

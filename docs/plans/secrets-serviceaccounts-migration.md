@@ -1,5 +1,10 @@
 # 迁移计划：保密字典（Secrets）与 服务账户（ServiceAccounts）
 
+> **历史批次记录，2026-11-11。** 保留当时设计与验证证据，不再作为当前迁移计划；
+> A100、端口、故障和测试数量均限于该次执行，不能据此操作当前B200或重复搭建已交付页面。
+> 当前方法见[迁移指南](../legacy-ui-migration-guide.md)，后续复核见[能力矩阵](capability-matrix.md)；
+> 长期需求/决策分别以 `prd/kube-frontend/{secrets,serviceaccounts}` 与 `design/` 对应目录为准。
+
 > 目标仓库：`console/kube-frontend`（Apache-2.0）。参照对象：已迁移的配置字典（ConfigMaps）。
 > 依据：`console/docs/legacy-ui-migration-guide.md`（迁移方法）、`console/docs/SDD.md`（文档闭环）、`环境/a100环境.md`（目标环境）。
 
@@ -8,7 +13,7 @@
 | 项 | 状态 |
 |---|---|
 | A100 `ks-apiserver` | **本会话中发现其处于 `CrashLoopBackOff`**（与迁移无关）：`kubesphere-config` 被 `kubectl-patch` 改成 `authenticateRateLimiterMaxTries: 1000`，大于 `loginHistoryMaximumEntries` 默认值，新版 `ks-apiserver` 启动校验失败；最后一次 controller 自愈回滚把旧 RS `65fd5d4cdb` 重新启用，于是全部版本都在同一配置上崩溃。已把两项恢复为 `10m0s` / `10` 并重启，现 `Running 1/1`；证据保存在 a100 `/root/ks-apiserver-incident-20261111.txt`，原 ConfigMap 备份 `/tmp/kubesphere.yaml.bak`。 |
-| 本地 BFF | `http://127.0.0.1:8091`，登录 `admin` / `P@88w0rd`，已验证可用 |
+| 本地 BFF | 历史地址 `http://127.0.0.1:8091`；明文登录凭据已从文档移除，使用授权环境配置，不提交凭据 |
 | 前端 | `http://localhost:5174`（vite dev，已运行） |
 
 后续所有真实环境验证都走 BFF，避免再次因误输密码触发认证限流。
@@ -97,7 +102,7 @@ kube-frontend/apps/console-next/src/shell/AppShell.tsx   # 侧栏新增「保密
 11. **真实环境全链路验证**：逐页截图（1600×900），创建→查询→编辑→删除，失败自清理。
 12. 清理测试数据并核对环境回到基线。
 
-## 5. 验收（对照迁移指南第 9 节）
+## 5. 历史验收清单（当时规格，不再执行）
 
 - [ ] 列表列、值格式、行操作顺序与旧版逐项对照
 - [ ] 每个子页面单独截图核对

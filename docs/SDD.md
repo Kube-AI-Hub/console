@@ -4,6 +4,10 @@
 > 章节顺序、ID 语法、字段规则**不在本文重复**，都链到各自的正文，避免两处漂移。
 >
 > 平台由两个仓库组成：前端 [`console`](https://codeup.aliyun.com/5ff9e1c4168c689c9272ccdb/kube-ai-hub/console)（KubeSphere Console 3.4.2，React 18），后端 `kube-server`（ks-apiserver，Go）。**本目录的 prd/design/tests 是产品级的**，同时覆盖两边；design 里的「仓库落点」一节说明每个功能点改哪个仓库的哪些文件。
+>
+> 旧 UI 迁移还需先读[迁移指南](legacy-ui-migration-guide.md)并填写[单页交付模板](plans/page-migration-template.md)。
+> 本文件的门禁只检查已登记规格，不能发现一开始未写入 AC 的旧字段和交互。
+> 当前文档分工与历史资料入口见 [docs/README.md](README.md)。
 
 ---
 
@@ -87,6 +91,10 @@ tests/ui/cases/cluster-storage/shared-storage/TC-L3-CLUSTER-STORAGE-SHARED_STORA
 tree.py → build_prd.py → prd(AC) → design(承接 AC) → tests(covers) → 测试文件（路径镜像 spec） → check_docs → generate_case_docs
 ```
 
+**迁移准入**：先独立建立旧入口/子组件/字段/动作/条件/选项清单、请求→映射→展示链路及
+视觉/复用基线，再写新 AC。功能、数据、权限、状态与视觉同批实现和验收，不默认另开“美化收尾”批次。
+只有上述旧能力表与新 AC 的关联核对完成，才进入实现；API/环境未核实项保持待核实，不用“不做”缩减范围。
+
 1. **改功能树**（结构变了才做）：编辑 [`../prd/tools/tree.py`](../prd/tools/tree.py)。
 2. **补缺失文件**：
    ```bash
@@ -122,6 +130,12 @@ tree.py → build_prd.py → prd(AC) → design(承接 AC) → tests(covers) →
 | 这段机械登记能否交给脚本？ | `prd/tools/add_feature.py` |
 | 这次改动该跑哪些检查？ | `prd/tools/verify.py` |
 
+再核对两项不能仅靠静态门禁完成的证据：
+旧能力全集是否独立于新 PRD，是否覆盖条件入口、全部选项与下钻；
+视觉目标是否在 AC 中写明区块所在列、字段对齐、可选行留空、主题及三档截图。
+概览两次复盘已经证明，源码/PRD/测试自洽和构建通过都不能代替这两项。
+现有独立能力契约只有部分页面已接入，其他页面仍需人工清单，不声称已有通用自动覆盖门禁。
+
 已有护栏（`config/consistency-contracts.test.ts`）：中英文键集合一致、字面 `t()` 键都存在、
 每个 `*Api` 都从 barrel 导出、`Row`/`statusLabel`/`ErrorPanel` 只有一份实现、页面不手写确认框。
 **第一次运行就抓出 3 个未被引用的详情页组件（700+ 行）和 4 处样式漂移。**
@@ -147,6 +161,9 @@ python3 prd/tools/cleanup_test_objects.py          # 看有什么
 python3 prd/tools/cleanup_test_objects.py --apply  # 真的删
 ```
 
+`--apply` 仅在确认对象属于本次测试、获得相应清理授权后执行；
+不得删除并行用例或用户对象，不把“清理到没有数据”当成恢复基线。
+
 ### 验证节奏：快反馈用并发，判定用串行
 
 迁移一页就跑一次全量是不现实的：145 个用例串行要 14 分钟，而绝大多数时间花在「每个用例重新
@@ -156,7 +173,8 @@ python3 prd/tools/cleanup_test_objects.py --apply  # 真的删
 | --- | --- | --- |
 | 改完一页自检 | `pytest tests/kube-frontend/<本页模块> -n 4` | 20–45 秒 |
 | 一轮迁移收尾 | `pytest tests/kube-frontend -n 4` | ~4 分钟 |
-| 提交前判定 | `pytest tests/kube-frontend`（串行） | ~15 分钟 |
+| 本批提交判定 | 本批相关 + 共享组件影响用例，显式 `-n 0` | 以本次记录为准 |
+| 全站发布判定 | `pytest tests/kube-frontend -n 0` | 以本次记录为准 |
 
 并发的前提是**用例之间不共享可变对象**，写测试时守三条：
 
@@ -165,7 +183,9 @@ python3 prd/tools/cleanup_test_objects.py --apply  # 真的删
 3. 要操作某一行时，**自己创建再按名搜索**，不要取「第一行的名字」——并发时那一行随时会消失。
 
 串行仍是判定基准：少数依赖集群整体状态的用例（列表总量、首页排序）在并发下会偶发失败，
-那是共享状态，不是功能坏了。
+可能来自共享状态，也可能是真实产品缺陷，需要实际证据区分。
+并发失败须保留证据并串行确认，不能在未复现/未分析前直接宣称都是环境抖动。
+通过、失败、重跑通过、skip 与未执行分别统计；模拟、B200 读取、本地全栈及新版生产部署分别结论。
 
 ### 用户故事怎么钉到用例
 
@@ -216,11 +236,15 @@ def test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_02(storage_page, screenshot)
 |------|----------|
 | 架构铁律 C1–C5 与「UI 与交互设计原则」 | [`constitution.md`](constitution.md) |
 | 接口契约与错误码 | `kube-server/pkg/kapis/<group>` 的 `register.go` + design 的 `CON-*` |
-| 主题色与间距 | `console/src/scss/variables.scss`（design 只引用 token 名） |
+| 主题色与间距 | 旧 console：`src/scss/variables.scss`；新 UI：`packages/ai-kit/src/styles/tokens.css` 与 `tailwind.preset.ts`（design 只引用语义 token） |
 | 指标名与单位 | `kube-server/pkg/models/monitoring/named_metrics.go` + `prometheus/promql.go` |
 | **能力级 durable 技术方案** | **[`../design/`](../design/)** |
 
 写新文档前先确认：这个事实是不是已经有家了？有就**链接**，不要复制。
+迁移方法正文在指南；当前能力复核任务在[能力矩阵](plans/capability-matrix.md)；
+独立清单和实测证据在该页记录。历史 GAP 和批次计划不是第二套实时状态。
+生成审计 `docs/plans/page-parity-audit.md` 由 `parity_report.py` 更新，
+旧 `page-parity-report.md` 不再维护逐页状态；生成物也可能忠实汇出过期 PRD，仍要核对源码与证据。
 
 ---
 
@@ -232,7 +256,9 @@ def test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_02(storage_page, screenshot)
 | `python3 prd/tools/check_docs.py [--strict] [--what prd\|design\|tests\|structure] [范围]` | **唯一门禁** |
 | `cd tests/ui && python3 generate_case_docs.py` | 生成 `cases/**` 与三向 `_traceability.md` |
 | `cd tests/ui && pytest -m core\|full\|point\|ui` | UI 集成测试 |
-| `yarn build:client` / `yarn lint` | 前端构建与静态检查 |
+| `yarn build:client` / `yarn lint` | 旧 console 构建与静态检查，不代替新 UI 检查 |
+| `cd kube-frontend && pnpm --filter @kube-ai-hub/console-next typecheck` | 新 UI 显式类型检查 |
+| `cd kube-frontend && pnpm --filter @kube-ai-hub/console-next build` | 新 UI 构建；API/ai-kit 等受影响包另按各包 scripts 检查 |
 | `cd ../kube-server && go test ./pkg/kapis/... ./pkg/models/monitoring/...` | 后端单测 |
 
 ---
@@ -241,6 +267,7 @@ def test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_02(storage_page, screenshot)
 
 - `check_docs.py` 对**尚未迁移**的模块只报 `待迁移` **告警**；`--strict` 下才失败。
 - 判定依据：需求带 `## 用户故事` 即视为已迁移；技术方案带「待迁移」标记行即视为未迁移。
+- 上述为脚本的规格状态识别，不是功能交付完成判据；“页面有路由/规格有 AC”不证明旧能力、视觉或部署已验收。
 - 新增或修改的内容一律**不许留** `[NEEDS CLARIFICATION]`。
 
 ---
@@ -252,3 +279,7 @@ def test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_02(storage_page, screenshot)
 3. **不许绕门禁**：不要为了过门禁去删章节、删 AC，或把 `covers` 指向不存在的 AC。
 4. **UI 改动先过原则再截图**：按 [`constitution.md`](constitution.md) 的「UI 与交互设计原则」核对——一个主任务、一个入口、一套共享组件、点击即反馈、等待可见；再在真实环境截图记录改动前后，对比度、单位、空态逐项核对（见 `.cursor/rules/ui-screenshot-verify.mdc`）。
 5. **改了产品代码要跑测试**：前端 `pytest -m point`（相关用例）；后端 `go test`。
+6. **同批闭环，不削减验收**：对照独立旧能力表检查 AC/实现/断言，保留原数据及安全回归；
+   修改视觉时同步三档、主题计算色和人工复核，不以截图存在代替可读性。
+7. **验证逐项报告**：显式类型检查、构建、Storybook、相关/全站 E2E、部署不包含在
+   `verify.py --no-e2e` 的通过结论里。基线错误和并行范围如实记录，不能豁免规则或冒称全仓通过。

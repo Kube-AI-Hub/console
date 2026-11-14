@@ -1,5 +1,7 @@
 # Development with Docker
 
+> Legacy console workflow only. For the Apache new UI migration, start with [the documentation index](README.md).
+
 KubeSphere Console can be developed in a docker enviroment by following the steps as below.
 
 Required:
@@ -25,13 +27,13 @@ make install
 
 ## Start KubeSphere Console for development
 
-Before start development, please follow [the guide](/docs/access-backend.md) to configure the backend services of KubeSphere.
+Before start development, please follow [the guide](access-backend.md) to configure the backend services of KubeSphere.
 
 ```bash
 make dev
 ```
 
-Now you can access http://localhost:8000 to view the console using the default account admin / P@88w0rd.
+Now you can access http://localhost:8000 to view the console. Use the account configured for your authorized environment; do not store login credentials in documentation.
 
 ## Run tests
 

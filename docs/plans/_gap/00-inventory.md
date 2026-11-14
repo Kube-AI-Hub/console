@@ -1,5 +1,8 @@
 # 老 console 页面清单 vs 新 UI 路由清单（事实底稿）
 
+> **历史证据，2026-11-14 基线。** 不作为当前路由/能力清单；底稿正文保持历史用途。
+> 现行方法见[迁移指南](../../legacy-ui-migration-guide.md)，待复核项见[能力矩阵](../capability-matrix.md)。
+
 > 这份文件是缺口分析的事实底稿，由 Lead 直接从源码抽取，**不要改它**。
 > 老 console 事实源：`console/src/pages/**/routes/*.js`、`console/src/core/routes.js`
 > 新 UI 事实源：`console/kube-frontend/apps/console-next/src/routes/`（文件系统即路由）、`src/areas/registry.ts`

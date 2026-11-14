@@ -1,5 +1,9 @@
 # 缺口分析：集群作用域（/clusters/:cluster 下全部页面与功能）
 
+> **历史证据，2026-11-14 基线。** 下文缺口、模块和旧计划行号已过期，不作当前任务或批准不做的依据。
+> 现行方法见[迁移指南](../../legacy-ui-migration-guide.md)，待复核项见[能力矩阵](../capability-matrix.md)；
+> 概览后续功能与视觉证据见[补齐](../cluster-overview-completion-20261115.md)、[布局复盘](../cluster-overview-layout-review-20261115.md)。
+
 > 事实源：**老 console 源码**（`console/src/pages/clusters/**`、`console/src/pages/projects/containers/Alerting/**`、`console/server/config.yaml`）。
 > 新 UI：`console/kube-frontend/apps/console-next/src/routes/kube-frontend.clusters.$cluster/**`、`src/pages/cluster/**`、`src/areas/registry.ts`。
 > 已登记的有意不迁移：`console/docs/plans/page-parity-report.md`（cluster-management 一节，L26–L46）、`console/docs/plans/area-migration-plan.md` §5（L164–L189）。

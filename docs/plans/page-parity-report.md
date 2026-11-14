@@ -1,10 +1,17 @@
-# 迁移页面对照报告
+# 旧迁移对照报告（兼容入口与历史快照）
 
-每个已迁移页面一行：**验收场景**列出该页字段与交互的逐条断言（AC），**有意未迁移**是从「明确不做」小节汇出、并在 design 文档里给出理由的部分。
+> 2026-11-15 原地整合。本文的旧表已过期，**停止维护且不得用于判定当前缺口、产品不做或迁移完成**。
+> 保留原路径及历史叙述，避免旧引用失效；新进度不要再补进本文件。
 
-判定标准：页面存在且 AC 全部有用例覆盖（check_docs.py --strict）；老 console 对应页面要么在映射里（parity_check.py 缺口 0），要么登记在明确不做清单里并写明原因。
+当前方法和完成判据看[迁移指南](../legacy-ui-migration-guide.md)，旧原子清单与实测证据用
+[交付模板](page-migration-template.md)，当前复核任务看[能力矩阵](capability-matrix.md)。
+最新登记的 AC/用例/不做项看[生成审计](page-parity-audit.md)，由 `parity_report.py` 更新；
+它也不能单独证明旧能力完整。原“路由存在且AC覆盖就完整”的判定已被两次概览复盘否定。
 
-## 有意保留的差异（跨页面）
+<details>
+<summary>查看旧对照表（过期，不用于判定当前迁移状态）</summary>
+
+## 历史跨页面差异（不是现行决策）
 
 | 差异 | 范围 | 原因 |
 | --- | --- | --- |
@@ -17,7 +24,7 @@
 | 告警在集群域与项目域都提供列表 | 告警消息 / 告警策略 | 2026-11-14 决策反转：规则的 `namespace` 是归属不是可见范围；原「只能逐项目拉」是未探测的假设，list 不传 `namespace` 即全命名空间（DEC-L2-…-MONITORING-03） |
 | 建立 WebSocket 通道，实时能力是一等需求 | 全部 | 2026-11-14 决策反转：容器终端与日志 tail 是排障主路径，「暂时没有通道」不等于「不做实时」；分三步落地——BFF `upgrade` → watch 客户端 → xterm 终端。**唯一保留的旧结论**：不做轮询假实时（DEC-CORE-KUBE-FRONTEND-08） |
 
-## 逐页对照
+## 历史逐页对照（不是当前状态）
 
 ### workbench（平台/项目入口作用域，2 个页面）
 
@@ -152,10 +159,14 @@
 | 平台信息 | PLATFORM_SETTINGS-INFO-01 | 编辑平台信息。 |
 | 邮件通知渠道 | PLATFORM_SETTINGS-MAIL-01, PLATFORM_SETTINGS-MAIL-02, PLATFORM_SETTINGS-MAIL-03 | 其余四个渠道（钉钉/企业微信/Slack/Webhook）——下一轮，同一表单引擎。；用户级订阅（个人收件箱）。 |
 
-## 重新生成
+</details>
 
+## 当前报告如何更新
+
+```bash
+python3 prd/tools/build_prd.py        # 结构改变时才同步 catalog，勿使用 force 覆盖手写稿
+python3 prd/tools/parity_report.py    # 生成 page-parity-audit.md，不生成本文件
 ```
-python3 prd/tools/build_prd.py           # catalog 与树保持一致
-python3 prd/tools/check_docs.py --strict  # AC → 用例的覆盖门禁
-python3 prd/tools/parity_check.py         # 老页面 → 新路由的映射缺口
-```
+
+先更新对应 PRD/design/spec 和原子能力证据，再生成审计。范围缩减须批准，承接须证明任务等价；
+不能按本文旧表继续省略 Top5、kubeconfig、组件分类、日志或已交付的详情页签。

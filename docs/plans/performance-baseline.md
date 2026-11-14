@@ -1,5 +1,9 @@
 # 体积与首屏基线（迁移收尾后）
 
+> **历史构建快照，不代表全部迁移收尾或当前性能。** 下文体积/预算/预热行为必须用当前构建重新采集；
+> JS懒加载不证明首屏响应快，实际网络请求、共享包和运行时耗时仍需测量。
+> 当前迁移验收看[指南](../legacy-ui-migration-guide.md)，后续性能复核并入[能力矩阵](capability-matrix.md) CHECK-02/08。
+
 > 生成方式：`node kube-frontend/scripts/perf-report.mjs`（只读 `apps/console-next/dist/assets`，不改产物）。
 > 数字取自本次 `npx vite build` 的输出；换构建或改依赖后重跑即可对比。
 
@@ -36,7 +40,7 @@
 
 预算沿用自迁移收尾的实测水位线，不是行业标准；一旦超了，先判断是「新增依赖」还是「页面把共享件拖进了自己」。
 
-## 5. 可做的优化（按性价比排序，均未实施）
+## 5. 当时的优化建议（实施与否需重查）
 
 1. **给预热加省流开关**：`navigator.connection?.saveData` 为真时跳过 133 KiB gzip 的编辑器预热。改动只有 `scheduleWarmup` 一处，等待 YAML 编辑时才加载。
 2. **`vendor-misc` 223 KiB 拆分**：里面混了多个小依赖，按「进入路由时才可能用到」与「所有页面都用」再分一次，可让首屏少拉几十 KiB。需要先看清组成（`vite --debug` 或 rollup 插件分析），属独立小任务。

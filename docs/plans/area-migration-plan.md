@@ -1,26 +1,25 @@
-# 老 console 全量迁移方案（kube-frontend / console-next）
+# 新 UI 区域接入方案（kube-frontend / console-next）
 
 > 方法：见 [legacy-ui-migration-guide.md](../legacy-ui-migration-guide.md)。
 > 验证基准：**B200**（BFF `127.0.0.1:8092` + 静态站 `127.0.0.1:5178`，集群 `host`）。A100 的旧结论已作废。
-> 本文是**执行用**文档：现状、约定、不变量、TODO。逐轮叙述已移除，需要考古时看 `git log -- docs/plans/area-migration-plan.md`。
-> 2026-11-15 功能级复核发现的八项概览差异已补齐并完成本地相关验收，见
-> [补齐记录](./cluster-overview-completion-20261115.md)。[原始复盘](./cluster-overview-parity-review-20261115.md)
-> 保留；新版生产部署、全站 E2E 和真实成员集群验收仍未完成。
+> 当前区域接入约定，2026-11-15 整合。本文不再复制页面数量、实时 TODO、逐轮进度或瞬时环境故障。
+> 当前能力复核任务见[能力矩阵](capability-matrix.md)，排期见[执行路线](migration-execution-roadmap.md)，
+> 每页验收使用[交付模板](page-migration-template.md)。旧正文保留在 git 历史，不能沿用旧章节/行号。
 
 ---
 
-## 0. 现状速览
+## 0. 执行依据
 
-| 项 | 值 | 怎么核对 |
+| 问题 | 正文 | 边界 |
 | --- | --- | --- |
-| 已注册页面 | **61**（项目 22 / 集群 27 / 平台 12） | `areas/registry.ts` |
-| 老 URL 段归宿 | 已迁移 **59** / 明确不做 **8** / 别处承接 **5** / 已登记缺口 **15** / **未归类 0** | `python3 prd/tools/gap_check.py` |
-| 规格 ↔ 测试 | 一一对应，无孤儿 | `python3 prd/tools/parity_check.py` |
-| 文档门禁 | errors=0 warnings=0 | `python3 prd/tools/check_docs.py --strict` |
-| 逐页能力对照 | 见 [page-parity-report.md](./page-parity-report.md) | — |
-| 仍缺什么 | 见 §6 TODO | — |
+| 页面入口 | `areas/registry.ts` 与文件路由 | 注册和可达不证明能力完整 |
+| 老 URL 段归宿 | `python3 prd/tools/gap_check.py` | 覆盖有限，动态子页与区块字段还须人工清点 |
+| 规格追溯 | [SDD](../SDD.md) 与 `check_docs.py --strict` | 只核已登记内容，不发现漏写的旧能力 |
+| 逐页 AC 索引 | [生成审计](page-parity-audit.md) | `parity_report.py` 生成，不手改，不是验收报告 |
+| 当前待办 | [能力矩阵](capability-matrix.md) | 只更新一处；不复制历史 GAP 数量 |
+| 完整交付方法 | [迁移指南](../legacy-ui-migration-guide.md) | 功能/语义/交互/视觉/验证范围同批验收 |
 
-一条命令全过：`python3 prd/tools/verify.py --no-e2e`（约 80 秒）。
+本次文档整合未重验全站；任何测试总数、环境状态和完成比例都须附本次采集证据，不能从旧计划继承。
 
 ---
 
@@ -56,38 +55,28 @@ routes/<scope>/<page>/
 ## 2. 每个功能点的闭环（SDD）
 
 ```text
-tree.py → build_prd.py → prd(AC) → design(DEC/不变量/坑) → spec(covers/story)
+旧原子能力清单 + 数据链路 + 视觉/复用基线
+        → tree.py（结构改变时）→ build_prd.py → prd(AC) → design(DEC/不变量/坑) → spec(covers/story)
         → 测试文件（路径镜像 spec）→ generate_case_docs.py
-        → check_docs.py --strict → parity_check.py → gap_check.py
+        → check_docs.py --strict + 单测/类型/构建 + 相关串行 E2E + 同次数据/三档视觉复核
 ```
 
 硬要求：
 
 1. 一 spec 一测试文件，路径镜像 `specs/`；一个文件一个测试函数，docstring 首行是字面 TC ID。
 2. AC 只在**功能点文件**里声明一次；L2 索引重复声明会被判编号重复。
-3. 「明确不做」必须与实现同步——`page-parity-report.md` 由 PRD 生成，PRD 不更新报告就两头错。
+3. 「明确不做」必须与实现和批准范围同步；逐页 AC 汇总由 `parity_report.py` 生成，
+   旧 `page-parity-report.md` 已退出实时状态维护。不能通过改写“不做”消除待补项。
 4. 新增 `DEC` 追加到文件末尾按最大号续编。**引用时必须写完整编号**（`DEC-L3-<模块>-<功能点>-05`），不要写 `DEC-05` 这类短引用：文档门禁的跨文件唯一检查会把短引用当成 ID，与另一个模块的短引用撞号后整棵树变红（2026-11 用户设置组件轮实测，修法是把本模块短引用全部改成完整编号）。
 
 ---
 
-## 3. 页面清单
+## 3. 作用域与接入
 
-### 3.0 组件开启后的新增范围（2026-11-15）
+以下是接入位置与约定，不是全量页面清单。具体叶子页、详情及条件入口以路由、注册表和单页清单为准；
+模块开启后的状态不在这里重复，见能力矩阵。读到旧“模块关闭不做”时必须重新核实实际请求和产品范围。
 
-用户确认「所有组件已开启」后，以下区域从「明确不做」改为「待迁移」，并已登记到 gap_check.py 的 PLANNED（合计 8 段）：
-
-| 区域 | 老 console 位置 | 新 UI 落点 | 状态 |
-| --- | --- | --- | --- |
-| DevOps 工程 | /:ws/clusters/:c/devops[/:devops] | registry 区域 devops（cluster-scope，/…/devops） | 列表 + 详情骨架在建 |
-| 联邦项目 | /:ws/federatedprojects | registry 区域 federated-projects（workspace-scope） | 列表 + 详情骨架在建 |
-| 灰度发布 | /:ns/grayrelease | app-workloads 的 grayrelease 页 | 列表在建 |
-| 企业空间应用仓库 | /:ws/apps、/:ws/repos | 应用商店承接（kube-frontend/apps、apps-manage） | 复核映射 |
-| 镜像构建器 | /:ns/s2ibuilders | DevOps 承接 | 随 DevOps 区域 |
-| 集群网关详情 | clusters/gateways | kube-frontend.clusters.$cluster.gateways.$name | 在建（Nginx 已可用） |
-
-探测依据（2026-11-15 02:30）：应用商店 /kapis/openpitrix.io/v1/apps 30 个、8 个分类；nginxes 1 个；federatednamespaces 1 个；servicemesh strategies 200；ks-controller-manager 已 Ready。边缘节点仍 404（模块未装），保留为明确不做。
-
-### 3.0 企业空间级（6）
+### 3.0 企业空间级
 
 `/kube-frontend/workspaces/:ws/…`
 
@@ -95,10 +84,9 @@ tree.py → build_prd.py → prd(AC) → design(DEC/不变量/坑) → spec(cove
 | --- | --- |
 | 企业空间 | overview（基本信息 + 项目/成员计数）、projects（列表 + 链到项目控制台）、members（成员/角色/状态/最近登录）、quota（项目 × 资源配额）、roles（企业空间角色）、user-groups（用户组与成员数） |
 
-企业空间是独立作用域（侧栏、面包屑与项目作用域分开）。邀请成员、配额、部门、用户组尚未迁：
-分别缺企业空间角色列表与配额/组织模型，见 §6.1。
+企业空间是独立作用域（侧栏、面包屑与项目作用域分开），不能用平台企业空间详情替代其完整任务。
 
-### 3.1 项目级（22）
+### 3.1 项目级
 
 `/kube-frontend/:ws/clusters/:c/projects/:ns/…`
 
@@ -111,9 +99,10 @@ tree.py → build_prd.py → prd(AC) → design(DEC/不变量/坑) → spec(cove
 | 监控告警 | alerts、alertingrules |
 | 项目设置 | baseinfo、roles、members、networkpolicies（含策略详情与 YAML 编辑）、gateways、log-collections |
 
-> **容器详情**（`pods/$name/containers/$container`）已迁：ES 日志检索、实时日志 tail、容器终端（BFF WebSocket upgrade）。**详情页签体系**已迁（Deployment 5 页签 / Pod 4 页签，见 `app-workloads/detail-tabs.md`）。**定制编辑**见 `app-workloads/edit-form.md`；Node/PV/StorageClass/NetworkPolicy 的 YAML 编辑见 `cluster-management/yaml-edit.md`。
+容器详情、详情页签、定制表单和 YAML 编辑各有独立能力范围，以对应 PRD/design 为准；
+有 YAML 编辑不等于已迁定制表单，有详情页面不等于其全部页签完成。
 
-### 3.2 集群级（30）
+### 3.2 集群级
 
 `/kube-frontend/clusters/:c/…`
 
@@ -130,7 +119,7 @@ tree.py → build_prd.py → prd(AC) → design(DEC/不变量/坑) → spec(cove
 
 集群列表（`/kube-frontend/clusters`）owns 添加/编辑/移除；切换集群走侧栏顶部的切换器。
 
-### 3.3 平台级（12）
+### 3.3 平台级
 
 | 区域 | 页面 |
 | --- | --- |
@@ -140,12 +129,12 @@ tree.py → build_prd.py → prd(AC) → design(DEC/不变量/坑) → spec(cove
 | 应用商店管理 | `/kube-frontend/apps-manage`（store/categories/reviews 三页签） |
 | 工作台 | `/kube-frontend/`（企业空间 → 项目入口） |
 
-### 3.4 写能力
+### 3.4 跨作用域与写能力
 
-编辑信息、编辑 YAML、扩缩容、重新部署、停止/启动、批量停止、批量删除、服务端口、路由规则、
-存储扩容、项目配额、创建用户、用户改角色/删除、启停、编辑邮箱描述、平台角色规则与创建、
-企业空间增改删、项目角色规则与创建（模板复制）、网络策略创建/删除、网关创建/删除、集群描述编辑、
-通知渠道配置（5 种）、文件编辑。
+创建、编辑信息、专用表单、YAML、启停、批量、授权和删除分开验收，记录角色条件和写后回读。
+同名对象、项目角色与集群角色、用户 kubeconfig 与成员连接配置不可混用；
+请求路径和查询缓存同时包含正确作用域，member 不可静默回退 host。
+DevOps、联邦项目和商城的骨架/只读列表只是有限范围，有入口不等于完整区域已迁移。
 
 ---
 
@@ -155,11 +144,12 @@ tree.py → build_prd.py → prd(AC) → design(DEC/不变量/坑) → spec(cove
 
 ### 4.1 读取
 
-1. **写走原生组、读走 kapis**：kapis 的 `resources` 端点只注册 GET，写返回 405；个别对象写会 400
-   `wrong resource GroupVersionKind`。
+1. **按接口契约选择读写路径**：resources 聚合通常只支持 GET，写走原生组；
+   企业空间等例外须以实际注册/请求为准，不能把经验当成所有 API 的规则。
 2. **`metrics.k8s.io` ≠ KubeSphere 监控**：前者只给当前用量，后者才有总容量/已分配/配额/GPU。
 3. **接口形状不统一**：`components` 返回裸数组，其余返回 `{items}`；两种都接受。
-4. **指标缺失 ≠ 0**：不返回与空 result 都渲染成「不可用」，不显示 0。
+4. **指标缺失 ≠ 0**：单字段不返回或空 result 显示 `-`/未上报；请求失败给不可用说明与恢复出口，
+   整个面板加载中给骨架；不混为0或空表。
 5. **Pod 指标结构与节点不同**：节点 `{metadata, usage}`，Pod `{metadata, containers:[{usage}]}`。
 
 ### 4.2 写入
@@ -191,63 +181,60 @@ tree.py → build_prd.py → prd(AC) → design(DEC/不变量/坑) → spec(cove
 
 ### 4.5 测试
 
-23. **断言不要写死实现细节**：精确集合断言被新增列打破过 4 次，改子序列。
+23. **断言区分完整清单与可扩展 UI**：旧能力/选项/必需字段须精确覆盖；
+    可新增的展示列可用子序列，不能靠放宽集合断言隐藏遗漏。
 24. **「按钮可用」不算验证功能**：批量删除曾因此长期不可用。
 25. **用例必须回读数据**：页面显示成功不等于保存成功。
-26. **慢不是跳过的理由**：慢查询在用例里重试，不报「无数据」。
+26. **慢不是跳过或报无数据的理由**：等待有界且可观察，不睡眠循环重试；
+    超时/失败/真实空分开，先确认环境与查询范围。
 27. **对象名用 uuid**，不要按时间取模（1000 秒循环一次，残留对象后每次都 409）。
 28. **不要选别的用例创建的对象**：`tc-e2e-`前缀对象随时被所属用例删除。
 29. **表单挂载晚于弹窗**：等字段可见再填。
-30. **并发下先复跑再判定**：串行全绿才是提交依据；并发红了先单独复跑。
+30. **并发下保留失败再串行复核**：用例不共享可变对象；相关及共享影响回归是本批判据，
+    全站串行是发布判据，不因局部通过冒称全站通过。
 
 ### 4.6 判定口径
 
-31. **`configz` 的模块开关是菜单开关，不是接口开关**：`network=false` 时 IP 池照常可读；
-    `openpitrix=true` 说明商店可用。判页面能不能做，**探测接口**。
-32. **404 要按同组其它版本再探一次**：`monitoring…/v1alpha3` 全 404，对象在 **v1alpha2**。
-    只试一个版本得到的 404 证明的是"那个版本没有"。
+31. **`configz` 是配置事实，不是可用性证明**：历史上 `network=false` 时 IP 池仍可读；
+    开关为 true 也要探测接口，组件配置、对象、运行健康和分类入口不能互相替代。
+32. **404 按实际服务版本、路径和角色核对**：历史上某组对象仅在 v1alpha2 可读，
+    不能由此降级全部监控指标；一次404只证明该请求未成功。
 33. **导航不是页面全集**：下钻页、详情页签、模块门控菜单都不在 `config.yaml` 里。
 
 ### 4.7 组件复用
 
-34. **结构不手写**：字段的 label/hint/error 用 `FormField`，页签用 `Tabs`，只读信息行用 `DescriptionItem`，密码强度面板用 `PasswordStrengthMeter`。页内复刻一份，下一个页面就会以另一种方式复刻（实测：字段包装已有 17 个文件各写一遍、只读信息行 24 处依赖应用内私有组件）。用户设置页是第一处被上收的页面，分析与组件清单见 `./user-settings-component-analysis.md`。
+34. **结构不手写**：字段用 `FormField`，页签用 `Tabs`，只读行用 `DescriptionItem`，
+    强度展示用 `PasswordStrengthMeter`，图标和图表用共享实现。先确认现有 API；
+    新增/扩展能力补 Storybook 与既有消费者回归。[用户设置案例](user-settings-component-analysis.md)仅为历史证据，
+    其中调用点数量和接口签名不得直接作为当前修改清单。
 
 ---
 
-### 4.8 环境陈旧会让「代码已修好」看起来像坏的（2026-11-14 实测）
+### 4.8 构建与环境证据
 
-35. **改完 BFF 必须重启它，再跑 UI 用例**。节点终端（NODES_05）连续两轮全量验证失败，页面报「节点终端连接失败」。诊断结论：8092 上跑的是 11:34 启动的旧进程，而 `isExecUpgradePath` 的节点终端分支是 15:25 才加的代码——BFF 用 raw HTTP upgrade，路径白名单是**进程内代码**，热更新不会生效。重启后同一用例 11.6s 通过。
-36. **推论**：碰到「某功能在浏览器里稳定失败、接口探测 404」时，先比对**进程启动时间与代码修改时间**，再怀疑实现。同类问题还包括 dist 未重建（静态服务器读 `apps/console-next/dist`）。
-
-### 4.9 逐页对照审计是生成物
-
-37. **「逐页对比」不靠人写**：`python3 prd/tools/parity_report.py` 从 catalog 与各 PRD 生成 `docs/plans/page-parity-audit.md`——129 个页面、261 个 AC、194 条用例，每页一行列出「验收场景 / 用例 / 明确不做」。手写的对照表会在下一个页面落地时立刻过期（本轮实测：旧表缺了 12 个新页面）。
-
-### 4.10 长跑验证需要「自愈」的隧道与 BFF
-
-38. **隧道与 BFF 都要按自愈方式跑**。本轮三次全量验证挂起：一次 BFF 端口在听但进程已死（升级测试把它打崩），一次 ssh 隧道 socket 在、转发已断（HTTP 请求永远等到超时），一次被杀进程误杀了 5178。现象都一样——**pytest 以 0% CPU 挂着**，因为用例在等一个永远不来的响应。
-40. **dev 静态代理的长连接会饿死整个 `/api`，根因是共享连接池**（2026-11-14 实测）：代理把 `undici` 全局池设为 `connections: 32`，而 watch / 日志 tail 这类响应永不结束；几个长连接占满池后，后续 `/api/session/me` 等短请求全部排队，表现为「5178 整片 502/超时、直连 BFF 正常」。已修：长连接（`watch=true` / `follow=true`）走独立的无上限 dispatcher，短请求仍走有界池（`kube-frontend/scripts/dev-static-server.mjs`）。压测证据：6 路并发 watch 下，普通列表与登录仍 0.3–0.4s。**仍存在的限制**：浏览器页面在测试结束/切页时中止 watch，dev 代理偶尔仍会卡住，所以实时刷新（R-27）继续登记为环境阻塞、代码不留半成品。
-
-39. **落地做法**：`while true; do ssh -N ... ; sleep 3; done` 管隧道；BFF 用同样循环包一层并 append 日志；杀进程时按 **端口** 精确杀（`lsof -i :8092`），不要按 `ps | grep` 批量杀——静态服务器与 BFF 之间有连接，会被一起带走。
-
-### 4.11 B200 集群自身故障会让「写类用例」整片失败（2026-11-14 22:20 实测）
-
-41. **现象**：13 条 E2E 失败，全部是写类（建用户、改集群别名、平台设置、可见性、改密/资料），错误是 `failed calling webhook "users.iam.kubesphere.io": dial tcp 10.233.54.137:443: connect: connection refused`。**读类用例全过**，5178/BFF/隧道都健康。
-42. **根因在集群侧**，不在仓库：`kubesphere-system/ks-controller-manager` pod 处于 Running 但 Not Ready（8 次重启，exit 255），日志末尾是 `failed to get calico-node deployment in kube-system, err=daemonsets.apps "calico-node" not found` —— 控制器启动即 fatal，于是它提供的所有 KubeSphere webhook 全部不可用。节点 gpu01/gpu02 均 Ready。
-43. **判定方式**：失败信息里出现 `failed calling webhook` 且 `connection refused`、同时节点 Ready、读类用例正常，就可以直接判定为集群 webhook 故障，不要逐条查页面。恢复动作属于集群运维（让 ks-controller-manager 正常起来），不属于本仓库改动。
+35. 改 BFF/代理后重启对应进程，改共享包或静态页面后重新构建；验收记录实际运行版本，
+    不能只比 HEAD。固定本批构建，避免并行任务替换 dist 后沿用旧截图结论。
+36. 隧道、BFF、静态站端口在听不等于请求可用；登录、短请求和长连接各自确认。
+    超时保留证据，按具体进程与端口操作，不误杀并行服务，不以无限重启循环隐藏失败。
+37. watch/日志/终端有独立生命周期，切页和关闭需释放；长连接不能占满短请求连接池。
+    握手101不代表终端可用，以真实 stdout/PTY/交互和释放连接为判据。
+38. 写类失败而读类正常时核对上游 webhook/控制器与实际请求，不仅凭一段错误直接归因。
+    环境故障只能阻塞相关验证，不把旧事故的原因当作本次诊断结论。
+39. 逐页审计是登记内容的生成索引，不是旧能力全集。以独立能力清单和截图发现漏写项，
+    不能让生成器输出决定产品删减。历史故障与数量可从本文 git 历史查阅。
 
 ## 5. 验证与门禁
 
 ```bash
 cd console
 
-# 静态与单测（约 80 秒）：改完任何代码先跑这个
+# 聚合静态与单测；不包含显式类型/构建/Storybook/视觉验收
 python3 prd/tools/verify.py --no-e2e
 
-# 快速 E2E（约 4 分钟，4 worker）：一轮迁移收尾
+# 全站快速反馈（4 worker）；用例须隔离可变对象
 python3 prd/tools/verify.py
 
-# 权威判定（串行 E2E，约 15 分钟）：提交前
+# 全站发布判定；单页交付另跑本批相关及共享影响用例 -n 0
 python3 prd/tools/verify.py --serial-e2e
 ```
 
@@ -257,86 +244,29 @@ python3 prd/tools/verify.py --serial-e2e
 | --- | --- |
 | `check_docs.py` | 文档/规格/测试是否自洽 |
 | `parity_check.py` | 已登记页面是否都有规格 |
-| **`gap_check.py`** | **老 console 每个 URL 段是否有归宿**（唯一能发现"整页没做"的检查） |
+| **`gap_check.py`** | 纳入脚本范围的 URL 段是否有归宿；不覆盖全部动态路由/字段 |
 | `consistency-contracts` | 中英文键、`t()` 字面键、barrel 导出、状态文案唯一 |
 
-**串行跑必须独占机器**：并发跑构建/单测会造出假失败（实测 2 次，单独复跑均通过）。
+聚合门禁不能证明旧能力全集，显式类型检查、生产构建、Storybook 和视觉复核按本批范围补跑。
+串行验收使用稳定构建和可观察环境，不在测试中途替换 dist/BFF；
+基线错误、并发失败、skip 和未执行分别报告，不把失败直接归为环境问题。
 
 ---
 
-## 6. TODO
+## 6. 当前待办入口
 
-### 6.1 页面级缺口（15 项，`gap_check.py` 的输出即清单）
+旧 TODO 混有已完成项目、旧环境阻塞和新增范围，已退出本文的当前状态正文。
+有效复核任务整合到[能力矩阵的当前台账](capability-matrix.md#0-当前复核台账)，
+对应旧 R 编号和批次证据保留，不能因整合丢掉尚未验收的能力。
+选定某页后用[交付模板](page-migration-template.md)建立原子清单；本页完成更新矩阵一行，不回到多个旧计划追加。
 
-| 缺口 | 做法 | 备注 |
-| --- | --- | --- |
-| ~~企业空间控制台~~ | 已按段对齐：概览（含 base-info 重定向）/ 项目 / 成员（含角色授权）/ 配额 / 角色 / 用户组；devops、federatedprojects、apps、repos 因模块关闭明确不做 | gap_check 已把 workspaces 作用域按段枚举，10 段中 6 迁 4 不做 |
-| ~~集群级全命名空间 PVC~~ | 已迁：`clusters/<c>/persistentvolumeclaims`（复用 storageApi + 项目索引，行键 ns/name） | 页面本体可复用这点被验证：约 100 行 |
-| ~~卷快照 / 快照类型~~（2）/ 快照内容、`snapshots` 别名（2） | 已迁集群级卷快照与快照类型；CRD 存在但 0 对象，空态与「未安装」两条分支都有 | 快照内容与别名路由仍待做 |
-| ~~JuiceFS 共享存储~~ | 已迁：`/juicefs-storage` 三页签（卷/用量/性能），聚合 kapis 组 + PV join | 3 卷、11.2TB，性能走监控区间 |
-| ~~GPU 卡列表~~ / GPU 资源监控（1） | 已迁显卡列表 + 单卡详情（`/kapis/gpu.kubesphere.io/v1alpha1/gpus`，健康比例走 `/gpus/stats`） | 监控页签未做（需要 Prometheus gpu 指标） |
-| ~~应用资源监控~~ | 已迁：`/monitor-resource` 两页签（按工作负载 / 按容器组），Pod 指标聚合 + ReplicaSet 归属 | 无集群级 workloads 集合，工作负载由 Pod 指标聚合得出 |
-| ~~集群级告警消息 / 告警策略（2）~~ | 已迁：消息合并 clusteralerts+globalalerts（来源列）；策略两页签「自定义/内置」 | 剩余：集群自定义策略写、内置启停、消息下钻 |
-| 集群网关 | 只读展示 | 控制器缺 chart，状态到不了就绪 |
-| ~~飞书通知渠道~~ | 已迁：`/settings/feishu`，三种接入方式（用户 ID / 部门 ID / 群机器人），写 v2beta2 | 平台通知 webhook 当前 400，所有渠道写入用例 skip |
-| ~~项目级自定义监控~~ | 已迁：`/projects/<ns>/custom-monitoring`（`/apis/monitoring.kubesphere.io/v1alpha2/namespaces/<ns>/dashboards`） | 本部署 19 个命名空间均无仪表板 → 页面为空态 |
-| 项目级自制应用 | 待核实 `application.kubesphere.io` 是否提供 `applications` 资源 | 该组当前只服务 `helm*` |
-
-### 6.2 能力级缺口（页面在、功能不全）
-
-#### 集群概览补漏专项（2026-11-15，本地补齐与验收完成）
-
-旧版六个区块已按子组件、字段、动作重新清点。以下不纳入“页面已迁移”的完成数，
-也不因先前 PRD 的“节点页承接/工具不做”而关闭；旧理由保留并由本次证据纠正。
-
-| 缺口 ID | 待补能力 | 实施与验收顺序 |
-| --- | --- | --- |
-| OVR-01 | 已补：集群 GPU 显存量、总量、比例 | OVERVIEW-03，同次响应及零/缺值单测 |
-| OVR-02 | 已补：集群磁盘用量、容量、比例 | OVERVIEW-03，GiB/TiB 对账 |
-| OVR-03 | 已补：GPU 实际使用量独立于分配量 | gpuUsed 映射与小数；OVERVIEW-03 + distinct 值单测 |
-| OVR-04 | 已补：scheduler error 调度失败次数 | OVERVIEW-03，三标签分别对账 |
-| OVR-05 | 已补：当前用户/集群 kubeconfig 查看、下载和提示 | OVERVIEW-04；真实读取/关闭，非敏感下载与403模拟 |
-| OVR-06 | 已补：概览六类系统组件入口及分类过滤 | OVERVIEW-04、COMPONENTS-01、COMPONENT_DETAIL-01 |
-| OVR-07 | 已补：首页 Top5、九类指标与完整排行下钻 | OVERVIEW-05、NODE_USAGE-01；真实九维度及12节点模拟分页 |
-| OVR-08 | 已补：概览只读集群可见性 | OVERVIEW-04，与集群对象一致 |
-
-- [x] 源码清点、新旧 1600×900 首屏与全页、旧排行菜单、只读指标与组件接口证据。
-- [x] 更新迁移指导 §3.4 的原子能力清单、等价承接证明与门禁边界。
-- [x] 实施 A/B/C，同步 overview、node-usage、components 的规格、YAML 和镜像 Python，相关八条串行回归通过。
-- [x] 增加 overview-parity-contract，防止旧字段、排行和组件入口再次被遗漏。
-- [ ] 新版部署环境及真实成员集群复核；全量门禁的既有商店状态/API测试夹具问题不冒充通过。
-
-具体证据、被否判断见 [概览专项复盘](./cluster-overview-parity-review-20261115.md)，当前验收见 [补齐记录](./cluster-overview-completion-20261115.md)。
-下面原表保留其他能力的历史登记，不作为本专项完整性证明。
-
-| 能力 | 现状 | 影响 |
-| --- | --- | --- |
-| **容器日志 tail** | 已迁：`client.stream()` + `pods/log?follow=true`（HTTP chunked，无需 WebSocket），容器详情页「实时」开关 | 排障第一条通道打通；顺手修了 BFF 泄漏上游流与 dev 静态服务器缓冲两个真问题 |
-| **容器终端** | 已迁：BFF `upgrade` 透传 + 原生 WebSocket + `v5.channel.k8s.io` 帧协议，容器详情页可开终端 | 流式通道第一条完整闭环；无 `/bin/sh` 的容器显示错误原因 |
-| **kubectl 代理 / 节点 shell** | 容器终端已通；kubectl 与节点 shell 需要独立的会话与权限设计 | 并行线在试探 kubectl 页面 |
-| 详情页签体系 | 已迁：概览/监控/关联容器组/修订版本/事件/元数据（Pod 为 概览/监控/容器/事件/元数据）；监控页签只在有工作负载级指标的类型上出现 | Job/CronJob 无工作负载级指标，不给空页签 |
-| 编辑 YAML 覆盖 | 21 类 → 17 类（本轮补 Node/PV/StorageClass/NetworkPolicy） | 仍缺集群/平台级若干资源 |
-| 定制编辑表单 | 21 种 → 13 种（本轮补 Deployment/StatefulSet/DaemonSet/CronJob 的镜像、环境变量、拉取策略、副本数） | 仍缺多数资源的专属表单 |
-| 列表通用能力 | 已补：分页档位（combobox）+ 刷新 + 列显隐 + 排序/搜索/筛选 + **空态出口（清空筛选/刷新）**；**实时 watch 仍缺** | F-41~F-46 关闭；只剩 R-27 |
-| kubectl / 节点 shell | kubectl 页已随并行线落地；节点 shell 后端在本环境不起 node access pod（握手 101 后无数据帧），用例按环境跳过 | R-13 关闭；节点 shell 待环境支持 |
-| ~~服务 / 应用路由的创建~~ | 已补：专用创建弹窗（NodePort 条件字段、选择器预填、Ingress 同 host 合并）+ 权限前置检查（SSAR，禁用时说明原因） | R-30 关闭 |
-| 应用商店写操作 | 商店在本环境为空，无法验证；登记为不可验证而非不做 | 商城收口时再评估 |
-| 仪表板面板编辑器 | 未做（自定义监控只读列表 + 查看 YAML） | 体验项，优先级最低 |
-| 帮助/关于、24 项配置入口 | 无 | 体验项 |
-
-### 6.3 流程与环境
-
-- [ ] 补齐能力矩阵：每个页面的「列表/写/详情/通用」四列结论（迁移指南 §3.3 的「能力维度」要求）
-- [ ] 商城写操作：建分类、审核通过/驳回（当前商店为空，无法验证）
-- [ ] 应用详情与安装：`/apps/:id`、`/apps/:id/deploy`（同上）
-- [ ] 面板编辑器与图表渲染（自定义监控，Grafana 风格组件套件）
-- [ ] 字段包装收敛：仍有 16 个文件手写 `label + 输入 + 说明/错误`，逐页改用 `FormField`（用户设置页已改；清单见 `./user-settings-component-analysis.md` §7）
-- [ ] 工作负载详情页的手写页签改用 `Tabs`（第二个 hand-rolled `role="tablist"`；等该文件当前并行改动稳定后接）
-- [x] 4 个整块作用域评估：企业空间**已迁完**（概览/base-info/项目/成员/配额/角色/用户组 + 角色详情；devops、federatedprojects、apps、repos 因模块关闭明确不做）；DevOps / 联邦项目 / 应用商店模板登记为明确不做
+概览功能与视觉验收分别见[补齐记录](cluster-overview-completion-20261115.md)和
+[布局复盘](cluster-overview-layout-review-20261115.md)，这里只链接，不再复制八项清单或测试总量。
+本地通过不代表生产/member/全站通过，历史错误恢复与否须重跑检查后更新对应台账。
 
 ---
 
-## 7. 复盘：为什么漏过 115 个页面，以及如何避免
+## 7. 历史漏页经验（不是当前进度）
 
 ### 7.1 五条根因
 
@@ -350,25 +280,24 @@ python3 prd/tools/verify.py --serial-e2e
 
 ### 7.2 五条防缺规则
 
-1. **清单只由脚本从源码枚举**（`gap_check.py`），不来自导航。
+1. **路由脚本加人工原子清单**，不从导航或新 PRD 反推旧能力；独立终端与动态子页补充核对。
 2. **每个段必须落在四类之一**，各要有证据；未归类 = 门禁失败。
 3. **「已迁移」必须同时登记能力覆盖度**，只标 ✅ 不算。
 4. **「明确不做」与代码同源**：PRD 更新 → 重生成报告 → diff 里出现增删要人工确认。
-5. **每轮先回答"这一轮没做什么"**：贴 `gap_check.py` 的汇总行，数字比上轮大就当场解释。
+5. **每轮先回答范围与未验收项**：路由归宿只作辅助，旧能力、数据、交互、视觉与部署分别结论。
 
 > 2026-11-15：所有组件已开启，原「模块关闭故不迁移」的条目（DevOps / 联邦项目 / 灰度发布 / 应用仓库 / 镜像构建器）已移入 §3.0 的新增范围；仅保留边缘节点（404）与第三方登录（服务端注入）为明确不做。
 
 ### 7.3 已推翻的旧结论（保留，避免再犯）
 
-| 旧结论 | 实际 |
+以下只记录历史纠正，不是当前页面清单或模块健康结论。
+
+| 旧结论 | 纠正依据 |
 | --- | --- |
-| 集群级配置字典/保密字典/服务账户是待迁页面 | 作用域错误：项目资源，集群页已移除 |
-| 集群角色需要单独集群页 | 与平台角色统一维护 |
-| 企业空间成员不可用 | 可用：`/kapis/iam…/workspaces/<ws>/workspacemembers` |
-| 集群日志收集需要日志组件配置 | 可用：`/apis/logging.kubesphere.io/v1alpha2/*` |
-| 应用商店 openpitrix 模块关闭 | `configz.openpitrix=true`，接口全 200，**已迁** |
-| 集群网络 network 模块未开启 | 只关菜单；`ippools`/`networkpolicies` 200，**已迁** |
-| 自定义监控接口全 404 | 探错版本，对象在 `v1alpha2`，**集群级已迁** |
+| 项目页存在就不需要集群配置入口 | 集群有跨项目定位任务；只读列表、项目列与所属项目下钻有独立价值 |
+| 模块开关可决定产品不迁移 | 配置事实不能代替实际 API/角色/版本探测和产品批准 |
+| 一个版本404就是整个能力不可用 | 要按实际路径、服务版本和身份区分请求失败与能力缺失 |
+| 首页 Top5 可直接被完整节点列表替代 | 默认选项、全局 TopN、标记与下钻是摘要任务，必须证明等价承接 |
 
 ### 7.4 已有概览路由仍会漏功能
 
@@ -380,10 +309,9 @@ unschedulable 替换，组件开关徽标替代了分类入口，Top5 没有等�
 路由/文档门禁只能证明存在与自洽；新布局截图没有逐项对照旧概览全页。
 “避免重复实现”被误用于删除首页摘要，早先“产品没有某模块”的判断没有实际接口证据。
 
-**纠正**：页面级 M2、功能级 M3 之外，对概览/详情补“区块内原子能力清单”：
-组件/条件、字段与动作、指标标签与单位、请求→mapper→展示、承接证据、AC/spec/测试。
-未经任务等价验证的“别处承接”仍算缺口；未经明确批准的范围缩减不能通过改写“不做”关闭。
-最终汇报分开说路由完成、功能覆盖、相关测试、全量 E2E、部署复核，不用一个“已完成”代替全部。
+随后[视觉复盘](cluster-overview-layout-review-20261115.md)发现，补功能仍不足以保证区块列顺序、
+资源字段对齐及主题边框一致。纠正规则已整合到[指南 §1](../legacy-ui-migration-guide.md#1-一次完整交付的原则)
+和[交付模板](page-migration-template.md)，同批定义并验收五项维度，不再追加另一套检查表。
 
 ---
 
@@ -396,7 +324,7 @@ git log --oneline -- docs/plans/area-migration-plan.md   # 每次整理的提交
 git show <commit>^:docs/plans/area-migration-plan.md     # 整理前的完整正文
 ```
 
-**当前有效的结论都已在上文**：不变量见 §4，缺口见 §6，防缺规则见 §7。
+当前区域接入注意项见 §4，当前待办唯一入口见 §6，历史经验见 §7。
 
 > 注意：旧分析文档里引用的 `area-migration-plan.md:行号` 与 `§5.x` 已随本次整理失效，
-> 结论请以 §4/§6/§7 为准。`gap_check.py` 与 `verify.py` 的注释已同步更新。
+> 引用历史原因请查对应提交，当前状态请查能力矩阵。本次未改脚本，脚本注释中的旧数量/章节不是当前完成证据。

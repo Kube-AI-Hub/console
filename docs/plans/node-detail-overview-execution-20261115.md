@@ -1,5 +1,9 @@
 # 节点详情与集群概览迁移记录
 
+> **历史批次证据。** 节点验证保留，首版概览的“待补”已由后续[补齐记录](cluster-overview-completion-20261115.md)
+> 和[布局复盘](cluster-overview-layout-review-20261115.md)推进；下文旧“八项待补”不是当前 TODO。
+> 当前方法见[迁移指南](../legacy-ui-migration-guide.md)，当前复核入口见[能力矩阵](capability-matrix.md)。
+
 > **同日复核补充**：下面记录的是 `38d5eb47d` 当批新增能力与测试，不代表旧概览功能完整。
 > 源码和新旧全页截图确认概览仍缺八项能力；具体证据与待补清单见
 > [集群概览功能对照与遗漏复盘](./cluster-overview-parity-review-20261115.md)。

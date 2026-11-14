@@ -1,5 +1,9 @@
 # 集群概览补齐与逐项验收
 
+> **历史交付证据，非实时状态。** 本文测试结果、当时错误和B200节点数量不代表当前基线；
+> 后续布局与关联回归见[视觉复盘](cluster-overview-layout-review-20261115.md)。
+> 有效经验已整合至[迁移指南](../legacy-ui-migration-guide.md)，后续验收只更新[能力矩阵](capability-matrix.md)对应项。
+
 ## 范围
 
 承接 [源码与截图复盘](./cluster-overview-parity-review-20261115.md)，补齐 OVR-01 至 OVR-08。

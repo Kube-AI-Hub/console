@@ -1,5 +1,8 @@
 # 10 · 平台与全局作用域缺口分析
 
+> **历史证据，2026-11-14 基线。** 下文“当前工作树/未迁移/模块关闭”均只代表分析当时，不能用于当前排期。
+> 现行方法见[迁移指南](../../legacy-ui-migration-guide.md)，待复核项见[能力矩阵](../capability-matrix.md)。
+
 > 作用域：老 console 里**不隶属于某个集群/项目**的全部页面 + 老顶栏的全局能力。
 > 事实源：`console/src`（KubeSphere 3.1 fork）。新 UI：`console/kube-frontend/apps/console-next/src`。
 > 本文所有结论都带 `路径:行号`。没读到的写「未核实」，不猜。

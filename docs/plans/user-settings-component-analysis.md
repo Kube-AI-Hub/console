@@ -1,5 +1,9 @@
 # 用户设置页面迁移与 ai-kit 组件复用分析
 
+> **历史复用案例，基线为下文 `d82d53fa9` 的批次。** 组件数量、接口签名、缺口及待替换调用点只代表当时，
+> 不作当前 API 或任务清单。长期契约看 ai-kit 源码/Storybook 和对应 PRD/design，
+> 现行复用方法已整合至[迁移指南](../legacy-ui-migration-guide.md)，后续复核只维护[能力矩阵](capability-matrix.md)。
+
 > 范围：老 console 的**用户设置**（个人账号设置）页面与子页面 → 新 UI（console-next）的迁移结果。
 > 回答三个问题：迁移后哪些通用组件可以统一 UI 与交互、ai-kit 还缺什么、本轮补了什么。
 > 关联：[迁移指导](../legacy-ui-migration-guide.md)、[全量迁移方案](./area-migration-plan.md)、
@@ -269,7 +273,7 @@ Storybook 的价值在这里不是「展示组件好看」，而是**在深/浅�
 与其它模块新增文档的短引用撞号。已把本模块 design 文档的短引用全部改成完整编号
 （`DEC-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-05`），门禁恢复 0 错；这也是后续新增 DEC 时应遵守的写法。
 
-## 7. 仍然缺什么 / 下一轮
+## 7. 当时后续建议（停止更新）
 
 | 项 | 现状 | 建议 |
 | --- | --- | --- |

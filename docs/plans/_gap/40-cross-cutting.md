@@ -1,5 +1,8 @@
 # 跨页面功能层缺口分析（40-cross-cutting）
 
+> **历史证据，2026-11-14 基线。** 本文的接口/通道/表单数量和“不做”理由不作实时状态；不重复迁移已交付能力。
+> 现行方法见[迁移指南](../../legacy-ui-migration-guide.md)，待复核项见[能力矩阵](../capability-matrix.md)。
+
 > 作用域：**不按页面、按能力**。老 console 的这些能力散落在很多页面里，逐页对照时最容易被漏掉，所以单独成文。
 > 事实源：老 `console/src`（KubeSphere 3.1 fork），新 `console/kube-frontend/apps/console-next`。
 > 判定口径见 `console/docs/legacy-ui-migration-guide.md` §2.1（以源码为准）、§3（照搬/改进/不迁移）、§5（子页面也要对照）。
