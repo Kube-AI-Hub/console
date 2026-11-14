@@ -1,0 +1,37 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-EDGE_NODE_PAGES-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: edge-node-pages
+title: 边缘节点列表与详情
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/edgenodes'
+prd: prd/kube-frontend/cluster-management/edge-node-pages.md
+design: design/kube-frontend/cluster-management/edge-node-pages.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-EDGE_NODE_PAGES-01
+
+story:
+- US1
+
+product: 边缘节点独立列表（反向标签选择器），详情复用节点详情，返回链接回到边缘列表。
+preconditions:
+- 已登录且集群至少有一个 edge 标签节点
+steps:
+- 打开集群边缘节点列表
+- 核对行数与标签选择器结果
+- 点击第一个边缘节点名称
+- 检查 URL 与运行状态页签
+- 点击返回
+steps_expected:
+- 行数一致，列含名称/状态/内网 IP/创建时间
+- URL 含 /edgenodes/<name>，运行状态页签可见
+- 返回后回到 /edgenodes
+expected:
+- 只读断言
+troubleshoot:
+- 行数为 0：集群确实没有边缘节点（跳过）
+- 详情 404：路由未注册
+update_automation:
+- 选择器：edgenodes:surface / edgenodes:link:<name>

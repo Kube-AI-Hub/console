@@ -32,11 +32,19 @@ import { hasPendingMode } from './nodeListQueries';
  */
 export interface NodeDetailPageProps {
   cluster: string;
+  /**
+   * Present when another route renders this page (edge nodes share it). Without it the
+   * name comes from the node route, which is the common case.
+   */
+  name?: string;
+  /** Where the breadcrumb goes back to; defaults to the cluster node list. */
+  backTo?: '/kube-frontend/clusters/$cluster/nodes' | '/kube-frontend/clusters/$cluster/edgenodes';
 }
 
-export function NodeDetailPage({ cluster }: NodeDetailPageProps): React.ReactElement {
+export function NodeDetailPage({ cluster, name: nameProp, backTo = '/kube-frontend/clusters/$cluster/nodes' }: NodeDetailPageProps): React.ReactElement {
   const t = useT();
-  const { name } = useParams({ from: '/kube-frontend/clusters/$cluster/nodes/$name' });
+  const params = useParams({ strict: false }) as { name?: string };
+  const name = nameProp ?? params.name ?? '';
 
   const query = useQuery({
     queryKey: ['node-detail', cluster, name],
@@ -80,7 +88,7 @@ export function NodeDetailPage({ cluster }: NodeDetailPageProps): React.ReactEle
     <AiSurface as="section" aiId="node-detail:surface" state={state} className="flex min-w-0 flex-col gap-4">
       <header className="flex flex-col gap-1">
         <div className="flex items-center gap-2">
-          <Link to="/kube-frontend/clusters/$cluster/nodes" params={{ cluster }} className="text-sm text-ai-accent hover:underline">
+          <Link to={backTo} params={{ cluster }} className="text-sm text-ai-accent hover:underline">
             ← {t('cluster.nodes.title')}
           </Link>
         </div>

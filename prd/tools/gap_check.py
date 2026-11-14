@@ -96,7 +96,6 @@ RENAME: dict[str, dict[str, str]] = {
 
 #: 明确不迁移的段 → 原因。原因必须能追到接口探测结果（见计划 §6.1）或已登记的技术约束。
 UNMIGRATED: dict[str, str] = {
-    "clusters/edgenodes": "边缘节点：edge 模块未开启（计划 §7.3）",
     "clusters/kubeconfig": "kubeconfig 读取 405（计划 §7.3）；导入更新已迁移",
     "projects/applications": "自制应用（CRD Application）：application.kubesphere.io/v1alpha1 只提供 helm* 资源，applications 资源 404；模板应用已由应用商店承接",
     "settings/third-login": "第三方登录：登录方式由服务端注入，控制台无写入路径（计划 §7.3）",
