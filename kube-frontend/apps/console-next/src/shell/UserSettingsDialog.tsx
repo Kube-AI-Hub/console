@@ -2,7 +2,18 @@ import * as React from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ApiError, passwordProblem, userDetailApi, userSettingsApi } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { AiSurface, Button, Input, InputPassword, Modal, Skeleton } from '@kube-ai-hub/ui';
+import {
+  AiSurface,
+  Button,
+  DescriptionList,
+  FormField,
+  Input,
+  InputPassword,
+  Modal,
+  Skeleton,
+  Tabs,
+  TabsContent,
+} from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { passwordProblemMessage } from '@/lib/password';
@@ -135,6 +146,17 @@ export function UserSettingsDialog({ open, onOpenChange, onSignedOut }: UserSett
   const dirty = profile.data !== undefined && email.trim() !== (profile.data.email ?? '').trim();
 
   /*
+   * The one message the email field can show, or `undefined` for none.
+   *
+   * Computed once because two things need the same answer: the `FormField` error paragraph
+   * (which carries the `user-settings:profile-error` handle) and `aria-invalid` on the input.
+   * A locally caught format problem wins over a rejected save — the local rule is what stops
+   * the request in the first place.
+   */
+  const emailError: string | undefined =
+    emailTouched && emailProblem ? emailProblem : saveProfile.error ? errorMessage(t, saveProfile.error) : undefined;
+
+  /*
    * The confirmation is compared **as it is typed**, not when the form is submitted.
    *
    * That is what the old console did: its `rePassword` field carried a validator rule, and
@@ -209,210 +231,169 @@ export function UserSettingsDialog({ open, onOpenChange, onSignedOut }: UserSett
       }
     >
       <AiSurface aiId="user-settings:surface" state={state} className="flex min-w-0 flex-col gap-4">
-        <div className="flex items-center gap-1 border-b border-ai-line" role="tablist">
-          <TabButton
-            active={tab === 'profile'}
-            aiId="user-settings:tab-profile"
-            label={t('userSettings.tab.profile')}
-            dirty={dirty}
-            dirtyLabel={t('userSettings.tab.dirty')}
-            onSelect={() => setTab('profile')}
-          />
-          <TabButton
-            active={tab === 'password'}
-            aiId="user-settings:tab-password"
-            label={t('userSettings.tab.password')}
-            onSelect={() => setTab('password')}
-          />
-        </div>
-
-        {tab === 'profile' ? (
-          profile.isPending ? (
-            <Skeleton className="h-32 w-full" />
-          ) : profile.isError ? (
-            <div className="flex flex-col items-start gap-2 rounded-ai-md border border-ai-line p-4" role="alert">
-              <p className="text-xs text-ai-fg-muted">{t('userSettings.profile.loadFailed')}</p>
-              <p className="text-xs text-ai-danger">{errorMessage(t, profile.error)}</p>
-              <Button size="sm" onClick={() => void profile.refetch()} {...actionProps('user-settings:retry')}>
-                {t('common.retry')}
-              </Button>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-3 text-sm">
-              <ReadOnlyField aiId="user-settings:username" label={t('userSettings.username')} hint={t('userSettings.usernameHint')} value={profile.data?.username ?? name} />
-              <ReadOnlyField
-                aiId="user-settings:platform-role"
-                label={t('userSettings.platformRole')}
-                hint={t('userSettings.platformRoleHint')}
-                value={profile.data?.platformRole ?? '-'}
-              />
-              <label className="flex flex-col gap-1" htmlFor="user-settings-email">
-                <span className="text-xs text-ai-fg-muted">{t('userSettings.email')}</span>
-                <Input
-                  id="user-settings-email"
-                  value={email}
-                  placeholder="user@example.com"
-                  onChange={(event) => {
-                    setEmail(event.target.value);
-                    setSaved(false);
-                  }}
-                  {...actionProps('user-settings:email')}
+        <Tabs
+          value={tab}
+          onValueChange={(next) => setTab(next as Tab)}
+          className="flex flex-col gap-4"
+          items={[
+            {
+              value: 'profile',
+              label: t('userSettings.tab.profile'),
+              aiId: 'user-settings:tab-profile',
+              // The dot marks unsaved edits, as the old console did with a tooltip on the tab:
+              // a reader who typed an email and switched to 密码设置 must be able to see that
+              // the address is still unsaved. A dot alone is not a label, so the accessible
+              // wording travels with it.
+              ...(dirty
+                ? {
+                    badge: <span title={t('userSettings.tab.dirty')} className="size-1.5 rounded-full bg-ai-warning" />,
+                    badgeLabel: t('userSettings.tab.dirty'),
+                  }
+                : {}),
+            },
+            {
+              value: 'password',
+              label: t('userSettings.tab.password'),
+              aiId: 'user-settings:tab-password',
+            },
+          ]}
+        >
+          <TabsContent value="profile">
+            {profile.isPending ? (
+              <Skeleton className="h-32 w-full" />
+            ) : profile.isError ? (
+              <div className="flex flex-col items-start gap-2 rounded-ai-md border border-ai-line p-4" role="alert">
+                <p className="text-xs text-ai-fg-muted">{t('userSettings.profile.loadFailed')}</p>
+                <p className="text-xs text-ai-danger">{errorMessage(t, profile.error)}</p>
+                <Button size="sm" onClick={() => void profile.refetch()} {...actionProps('user-settings:retry')}>
+                  {t('common.retry')}
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3 text-sm">
+                <DescriptionList
+                  items={[
+                    {
+                      label: t('userSettings.username'),
+                      value: profile.data?.username ?? name,
+                      hint: t('userSettings.usernameHint'),
+                      aiId: 'user-settings:username',
+                    },
+                    {
+                      label: t('userSettings.platformRole'),
+                      value: profile.data?.platformRole ?? '-',
+                      hint: t('userSettings.platformRoleHint'),
+                      aiId: 'user-settings:platform-role',
+                    },
+                  ]}
                 />
-                <span className="text-[11px] text-ai-fg-muted">{t('userSettings.emailHint')}</span>
-              </label>
-              {emailTouched && emailProblem ? (
-                <p className="text-xs text-ai-danger" role="alert" {...actionProps('user-settings:profile-error')}>
-                  {emailProblem}
+                <FormField
+                  htmlFor="user-settings-email"
+                  label={t('userSettings.email')}
+                  hint={t('userSettings.emailHint')}
+                  {...(emailError === undefined ? {} : { error: emailError })}
+                  errorAiId="user-settings:profile-error"
+                >
+                  <Input
+                    id="user-settings-email"
+                    value={email}
+                    placeholder="user@example.com"
+                    aria-invalid={emailError === undefined ? undefined : true}
+                    onChange={(event) => {
+                      setEmail(event.target.value);
+                      setSaved(false);
+                    }}
+                    {...actionProps('user-settings:email')}
+                  />
+                </FormField>
+                <div className="flex items-center gap-2">
+                  <Button variant="primary" loading={saveProfile.isPending} onClick={submitProfile} {...actionProps('user-settings:profile-save')}>
+                    {t('common.save')}
+                  </Button>
+                  {saved ? (
+                    <span className="text-xs text-ai-success" role="status" {...actionProps('user-settings:profile-saved')}>
+                      {t('userSettings.profile.saved')}
+                    </span>
+                  ) : null}
+                </div>
+              </div>
+            )}
+          </TabsContent>
+          <TabsContent value="password">
+            <div className="flex flex-col gap-3 text-sm">
+              <FormField
+                htmlFor="user-settings-current-password"
+                label={t('userSettings.password.current')}
+                hint={t('userSettings.password.currentHint')}
+              >
+                <InputPassword
+                  id="user-settings-current-password"
+                  autoComplete="current-password"
+                  value={currentPassword}
+                  disabled={passwordDone}
+                  onChange={(event) => setCurrentPassword(event.target.value)}
+                  {...actionProps('user-settings:current-password')}
+                />
+              </FormField>
+              {/*
+               * The rule, stated before the field rather than after a rejection — this is the old
+               * console's PASSWORD_DESC, and unlike there it is now the rule the form actually
+               * enforces (a special character is required here even though the apiserver does not
+               * ask for one).
+               */}
+              <p className="rounded-ai-sm bg-ai-surface-2 px-3 py-2 text-[11px] leading-5 text-ai-fg-muted" {...actionProps('user-settings:password-rule')}>
+                {t('userSettings.password.rule')}
+              </p>
+              <FormField htmlFor="user-settings-new-password" label={t('userSettings.password.new')}>
+                <InputPassword
+                  id="user-settings-new-password"
+                  autoComplete="new-password"
+                  value={newPassword}
+                  disabled={passwordDone}
+                  onChange={(event) => setNewPassword(event.target.value)}
+                  {...actionProps('user-settings:new-password')}
+                />
+              </FormField>
+              <PasswordStrength password={newPassword} />
+              <FormField htmlFor="user-settings-confirm-password" label={t('userSettings.password.confirm')}>
+                <InputPassword
+                  id="user-settings-confirm-password"
+                  autoComplete="new-password"
+                  value={confirmPassword}
+                  disabled={passwordDone}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  {...actionProps('user-settings:confirm-password')}
+                />
+                {confirmFilled ? (
+                  <span
+                    className={confirmMatches ? 'text-[11px] text-ai-success' : 'text-[11px] text-ai-danger'}
+                    role={confirmMatches ? 'status' : 'alert'}
+                    data-match={confirmMatches ? 'true' : 'false'}
+                    {...actionProps('user-settings:confirm-hint')}
+                  >
+                    {confirmMatches ? t('userSettings.password.match') : t('userSettings.password.mismatch')}
+                  </span>
+                ) : null}
+              </FormField>
+              {passwordError ? (
+                <p className="text-xs text-ai-danger" role="alert" {...actionProps('user-settings:password-error')}>
+                  {passwordError}
                 </p>
               ) : null}
-              {saveProfile.error ? (
-                <p className="text-xs text-ai-danger" role="alert" {...actionProps('user-settings:profile-error')}>
-                  {errorMessage(t, saveProfile.error)}
+              {passwordDone ? (
+                <p className="text-xs text-ai-success" role="status" {...actionProps('user-settings:password-saved')}>
+                  {t('userSettings.password.success')}
                 </p>
               ) : null}
               <div className="flex items-center gap-2">
-                <Button variant="primary" loading={saveProfile.isPending} onClick={submitProfile} {...actionProps('user-settings:profile-save')}>
-                  {t('common.save')}
+                <Button variant="primary" loading={change.isPending} disabled={passwordDone} onClick={submitPassword} {...actionProps('user-settings:password-save')}>
+                  {t('userSettings.password.save')}
                 </Button>
-                {saved ? (
-                  <span className="text-xs text-ai-success" role="status" {...actionProps('user-settings:profile-saved')}>
-                    {t('userSettings.profile.saved')}
-                  </span>
-                ) : null}
               </div>
             </div>
-          )
-        ) : (
-          <div className="flex flex-col gap-3 text-sm">
-            <label className="flex flex-col gap-1" htmlFor="user-settings-current-password">
-              <span className="text-xs text-ai-fg-muted">{t('userSettings.password.current')}</span>
-              <InputPassword
-                id="user-settings-current-password"
-                autoComplete="current-password"
-                value={currentPassword}
-                disabled={passwordDone}
-                onChange={(event) => setCurrentPassword(event.target.value)}
-                {...actionProps('user-settings:current-password')}
-              />
-              <span className="text-[11px] text-ai-fg-muted">{t('userSettings.password.currentHint')}</span>
-            </label>
-            {/*
-             * The rule, stated before the field rather than after a rejection — this is the old
-             * console's PASSWORD_DESC, and unlike there it is now the rule the form actually
-             * enforces (a special character is required here even though the apiserver does not
-             * ask for one).
-             */}
-            <p className="rounded-ai-sm bg-ai-surface-2 px-3 py-2 text-[11px] leading-5 text-ai-fg-muted" {...actionProps('user-settings:password-rule')}>
-              {t('userSettings.password.rule')}
-            </p>
-            <label className="flex flex-col gap-1" htmlFor="user-settings-new-password">
-              <span className="text-xs text-ai-fg-muted">{t('userSettings.password.new')}</span>
-              <InputPassword
-                id="user-settings-new-password"
-                autoComplete="new-password"
-                value={newPassword}
-                disabled={passwordDone}
-                onChange={(event) => setNewPassword(event.target.value)}
-                {...actionProps('user-settings:new-password')}
-              />
-            </label>
-            <PasswordStrength password={newPassword} />
-            <label className="flex flex-col gap-1" htmlFor="user-settings-confirm-password">
-              <span className="text-xs text-ai-fg-muted">{t('userSettings.password.confirm')}</span>
-              <InputPassword
-                id="user-settings-confirm-password"
-                autoComplete="new-password"
-                value={confirmPassword}
-                disabled={passwordDone}
-                onChange={(event) => setConfirmPassword(event.target.value)}
-                {...actionProps('user-settings:confirm-password')}
-              />
-              {confirmFilled ? (
-                <span
-                  className={confirmMatches ? 'text-[11px] text-ai-success' : 'text-[11px] text-ai-danger'}
-                  role={confirmMatches ? 'status' : 'alert'}
-                  data-match={confirmMatches ? 'true' : 'false'}
-                  {...actionProps('user-settings:confirm-hint')}
-                >
-                  {confirmMatches ? t('userSettings.password.match') : t('userSettings.password.mismatch')}
-                </span>
-              ) : null}
-            </label>
-            {passwordError ? (
-              <p className="text-xs text-ai-danger" role="alert" {...actionProps('user-settings:password-error')}>
-                {passwordError}
-              </p>
-            ) : null}
-            {passwordDone ? (
-              <p className="text-xs text-ai-success" role="status" {...actionProps('user-settings:password-saved')}>
-                {t('userSettings.password.success')}
-              </p>
-            ) : null}
-            <div className="flex items-center gap-2">
-              <Button variant="primary" loading={change.isPending} disabled={passwordDone} onClick={submitPassword} {...actionProps('user-settings:password-save')}>
-                {t('userSettings.password.save')}
-              </Button>
-            </div>
-          </div>
-        )}
+          </TabsContent>
+        </Tabs>
       </AiSurface>
     </Modal>
-  );
-}
-
-/**
- * One read-only value, shown as text rather than a disabled input.
- *
- * A disabled input invites a click that can never work; plain text with a hint says the same
- * thing without promising an interaction.
- */
-function ReadOnlyField({ aiId, label, hint, value }: { aiId: string; label: string; hint: string; value: string }): React.ReactElement {
-  return (
-    <div className="flex flex-col gap-0.5">
-      <span className="text-xs text-ai-fg-muted">{label}</span>
-      <span className="text-sm text-ai-fg" {...actionProps(aiId)}>
-        {value}
-      </span>
-      <span className="text-[11px] text-ai-fg-muted">{hint}</span>
-    </div>
-  );
-}
-
-/**
- * One tab.
- *
- * The dot marks unsaved edits, as the old console did with a tooltip on the tab: a reader who
- * typed an email and switched to 密码设置 must be able to see that the address is still unsaved.
- */
-function TabButton({
-  active,
-  aiId,
-  label,
-  dirty = false,
-  dirtyLabel,
-  onSelect,
-}: {
-  active: boolean;
-  aiId: string;
-  label: string;
-  dirty?: boolean;
-  dirtyLabel?: string;
-  onSelect: () => void;
-}): React.ReactElement {
-  return (
-    <button
-      type="button"
-      role="tab"
-      aria-selected={active}
-      className={[
-        'relative inline-flex items-center gap-1.5 rounded-t-ai-sm px-3 py-2 text-xs transition-colors duration-ai-fast',
-        active ? 'border-b-2 border-ai-accent text-ai-fg' : 'border-b-2 border-transparent text-ai-fg-muted hover:text-ai-fg',
-      ].join(' ')}
-      onClick={onSelect}
-      {...actionProps(aiId)}
-    >
-      {label}
-      {dirty ? <span className="size-1.5 rounded-full bg-ai-warning" title={dirtyLabel} aria-label={dirtyLabel} /> : null}
-    </button>
   );
 }
