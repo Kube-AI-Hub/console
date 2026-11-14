@@ -1,0 +1,42 @@
+id: TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_RULES-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: project-settings
+feature: network-rules
+title: 网络隔离 · 规则视图
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/networkpolicies"
+prd: prd/kube-frontend/project-settings/network-isolation.md
+design: design/kube-frontend/project-settings/network-isolation.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_RULES-01
+
+story:
+- US2
+
+product: 网络隔离页在策略列表下方提供只读的规则视图，把每条 NetworkPolicy 的 spec.ingress/egress 展开为 策略/方向/作用对象/允许来源去向/端口 五行，selector、ipBlock（含 except）与端口（含协议与 endPort）原样可读；没有策略时给空态说明。
+preconditions:
+- 已登录，且在 host 集群的 system-workspace 下有一个当前没有网络策略的项目（用例优先选 default，否则选 spaces）
+- 用例通过 kube API 临时创建一条含 namespaceSelector、ipBlock、端口与 endPort 的 tc-e2e- 网络策略，用例结束无条件删除
+steps:
+- 用 API 确认候选项目里没有网络策略，打开该项目网络隔离页并等待主区就绪
+- 断言规则视图的空态说明
+- 用 API 创建策略：podSelector app=web；入站 from namespaceSelector + ipBlock(10.0.0.0/8 except 10.0.1.0/24)、ports TCP/80 与 UDP/53；出站 to podSelector role=db、ports TCP/5432 endPort 5433
+- 重新打开页面，等待规则视图就绪
+- 读取该策略的两条规则行，核对作用对象、方向、对端与端口
+- 删除策略后重新打开页面，核对规则视图回到空态
+expected:
+- 无策略时 [data-ai-id="settings-network:rules:empty"] 可见且说明文案为「这个项目还没有网络策略。」
+- 表头为 策略、限制方向、作用对象、允许来源/去向、端口
+- 该策略恰好两行，行 id 为 settings-network:rule:<策略名>/0 与 /1
+- 第 0 行为入站流量：作用对象 app=web；对端含 namespaceSelector 的 <项目> 标签与 ipBlock 10.0.0.0/8 except 10.0.1.0/24；端口 TCP/80, UDP/53
+- 第 1 行为出站流量：对端 podSelector: role=db；端口 TCP/5432-5433
+- 删除后空态说明重新出现
+troubleshoot:
+- 规则视图不出现：检查 NetworkIsolationPage 是否挂载 NetworkRulesPanel，以及页面 ai surface 是否先进入 error
+- 行数为 0 但策略存在：详情接口返回的是摘要（无 spec），规则视图必须读 /apis/networking.k8s.io/v1 的原生对象集合
+- 对端或端口显示成 *：规则里确实没有 from/to 或 ports；检查创建策略的 body
+update_automation:
+- 规则行 id 变化时改 NetworkRulesPanel 的 data-ai-id 拼装
+- 方向/端口文案变化时改 locale 的 settings.network.* 键

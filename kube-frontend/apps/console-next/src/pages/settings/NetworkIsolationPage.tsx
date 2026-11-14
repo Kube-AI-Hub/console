@@ -9,6 +9,7 @@ import { useResourceListState, toListParams } from '@/components/resource/useRes
 import { MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { DeleteDialog } from '@/components/resource/DeleteDialog';
 import { NetworkPolicyDialog } from './NetworkPolicyDialog';
+import { NetworkRulesPanel } from './NetworkRulesPanel';
 import { formatTimestamp } from '@/lib/time';
 
 /**
@@ -193,6 +194,13 @@ export function NetworkIsolationPage({ workspace, cluster, namespace }: NetworkI
           if (action === 'delete' && row) setDeleting(row);
         }}
       />
+
+      {/*
+        * The rule view is a projection of the same objects, not a second model: the
+        * table above is where a policy is opened/deleted, and this panel answers what
+        * its rules allow. It reads the whole collection, not the current page.
+        */}
+      <NetworkRulesPanel workspace={workspace} cluster={cluster} namespace={namespace} />
 
       <MutationAlert error={create.error ?? remove.error} />
 

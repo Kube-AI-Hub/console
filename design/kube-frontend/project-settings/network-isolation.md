@@ -8,10 +8,11 @@
 
 - AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-01
 - AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-02
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_RULES-01
 
 ## 概述
 
-项目级隔离开关与 NetworkPolicy 列表同屏。
+项目级隔离开关与 NetworkPolicy 列表同屏，列表下方是只读的规则视图（每条 ingress/egress 规则一行）。规则视图由独立组件 `NetworkRulesPanel` 渲染，页面只负责挂载。
 
 ## 设计目标与非目标
 
@@ -46,7 +47,8 @@
 
 ## 仓库落点
 
-- `apps/console-next/src/pages/settings/NetworkIsolationPage.tsx`
+- `apps/console-next/src/pages/settings/NetworkIsolationPage.tsx`（挂载规则视图）
+- `apps/console-next/src/pages/settings/NetworkRulesPanel.tsx`（规则展开与只读表格）
 - `packages/api-client/src/iam.ts` 的 `networkIsolationApi` / `networkPoliciesApi`
 - `src/routes/.../networkpolicies/`
 
@@ -54,19 +56,29 @@
 
 读 `resources.kubesphere.io/v1alpha3/namespaces/<ns>` 与 `networking.k8s.io/v1`；写 `PATCH /api/v1/namespaces/<ns>`。
 
+规则视图的句柄与读取：
+
+- 容器 `data-ai-id="settings-network:rules"`；规则行 `data-ai-id="settings-network:rule:<policy>/<index>"`（`index` 为该策略内 ingress 在前、egress 在后的 0 起序号）；空态 `data-ai-id="settings-network:rules:empty"`。
+- 读取 `GET /apis/networking.k8s.io/v1/namespaces/<ns>/networkpolicies`（一次取全量对象，含 `spec`）。
+
 ## 不变量
 
 1. 开关只改一个注解。
 2. 注解缺失等同于关闭。
+3. 规则视图只读且无损：一行 = 一条策略的一条 ingress/egress 规则，策略名 + 序号可追溯；不合并不同策略的规则。
+4. 规则视图覆盖全量策略，不受列表页当前页/搜索影响。
 
 ## 已知坑
 
 - 命名空间的注解与标签同处 `metadata`，写错层级会 422。
 - 策略的 `policyTypes` 为空数组时按 `-` 显示，不猜测。
+- 规则里没有 `from`/`to` 表示允许全部对端、没有 `ports` 表示允许全部端口，都要显示 `*`；显示 0 会被读成"拒绝全部"。
+- `ipBlock.except` 与 `endPort` 容易被漏掉：漏掉 except 会把"允许 10.0.0.0/8"显示得比实际更宽，漏掉 endPort 会把端口区间显示成单端口。
+- 规则视图不能复用列表接口：`networkPoliciesApi.list` 返回的是摘要（无 `spec`），要规则必须读一次原生对象集合。
 
 ## 测试与可观测
 
-E2E 见 `tests/kube-frontend/project-settings/`。
+E2E 见 `tests/kube-frontend/project-settings/`；规则视图为 `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_RULES-01`。用例临时创建一条含 namespaceSelector/ipBlock/端口区间的策略，断言规则行内容与对象 `spec` 一致，并在空态下断言说明文案。
 
 ## 后续改进
 
@@ -75,6 +87,7 @@ E2E 见 `tests/kube-frontend/project-settings/`。
 ## 验收用例
 
 - `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-01`
+- `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_RULES-01`
 
 ### DEC-L3-KUBE-FRONTEND-PROJECT-SETTINGS-NETWORK-ISOLATION-03 — peer 必须包一层 `podSelector`
 
@@ -91,3 +104,19 @@ E2E 见 `tests/kube-frontend/project-settings/`。
 **被否方案**：完整的规则编辑器（多条 + 端口 + 命名空间选择器）。工作量数倍，而使用频率低。
 
 **何时重新考虑**：出现"策略全靠界面配置"的需求时。
+
+### DEC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-05 — 直接展示 NetworkPolicy 对象，不重建白名单抽象
+
+**为什么**：老实现的聚合视图是**有损映射**——它把多条策略合并成「项目→项目」「IP 段 + 端口」两栏，删掉一条白名单时无法判断会改动哪个对象的哪条规则；直接展示对象则「改一条规则 = 改一个对象」，语义与 kubectl 一致。代价是读起来比两栏视图慢，用规则数 / 方向列缓解。
+
+**被否方案**：两栏视图 + 「查看来源对象」链接。需要维护两套数据模型，且合并后的条目与对象不是一对一，回写仍有歧义。
+
+### DEC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_RULES-01 — 规则视图是对象的无损投影，不是白名单抽象
+
+**为什么**：上一节拒绝的是**有损**聚合（多条策略合并成「项目→项目」「IP 段+端口」两栏）；本功能点的规则视图是**无损**投影：每条 ingress/egress 规则一行，保留策略名与序号，selector / ipBlock / 端口 / 协议原样展开。这样读起来仍比 YAML 快，但任何一行都能追回到唯一对象与规则，不会重蹈"删一行不知道改哪个对象"的覆辙。
+
+**被否方案**：只保留列表、让读者点进策略看 YAML。YAML 能回答问题，但"这条流量为什么通"需要在多个对象间来回读；规则视图把同一项目的全部规则放在一屏。
+
+**另一条**：规则视图只读。写路径仍只有创建/删除与编辑 YAML，避免出现第二套可写模型。
+
+**何时重新考虑**：需要按流量方向/对端做筛选或搜索时，给规则视图加过滤；需要编辑规则时，先迁移一个真正的规则编辑器，再让规则视图可写。
