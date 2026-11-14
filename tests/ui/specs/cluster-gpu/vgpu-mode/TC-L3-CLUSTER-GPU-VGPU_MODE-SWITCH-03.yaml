@@ -1,0 +1,30 @@
+id: TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-03
+level: 3
+suite: point
+module: cluster-gpu
+submodule: vgpu-mode
+feature: switch
+title: 设置 vGPU 模式 · 昆仑芯独占不带切分参数
+entry_url: "{BASE_URL}/clusters/default/nodes"
+prd: prd/cluster-gpu/vgpu-mode/switch.md
+design: design/cluster-gpu/vgpu-mode/switch.md
+
+covers:
+- AC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-03
+
+story:
+- US3
+
+product: 昆仑芯节点切到独占时，请求体只有 mode=default，params 为空对象。
+preconditions:
+- 已登录
+- 存在厂商为 kunlunxin 的节点
+steps:
+- 打开节点的设置 vGPU 模式对话框
+- 选择独占
+- 确认请求体
+expected:
+- 没有切分数、显存倍率、算力倍率输入
+- 请求体为 mode=default 且 params 为 {}
+update_automation:
+- 模式表增加参数时同步改本用例

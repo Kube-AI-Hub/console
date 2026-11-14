@@ -35,7 +35,7 @@ NVIDIA GPU 节点有三种虚拟化方式：`default`（整卡，走上游 nvidi
 ## 约束与边界
 
 - 模式切换的**唯一写入点**是 `PUT /kapis/gpu.kubesphere.io/v1alpha1/device-plugins/gpu/mode?nodeName=<node>`，请求体 `{mode, params}`；页面不直接 patch Node。
-- 模式与参数落在两处，各有唯一写者：Node label `vgpu=on|off`（gpu-agent 写，决定用哪个 device plugin）、`hami-device-plugin` ConfigMap 的 `nodeconfig` 里该节点的 `operatingmode` 与 `devicesplitcount`（gpu-agent 写，决定 HAMi 插件的行为）。
+- 模式与参数落在两处，各有唯一写者：Node label `vgpu=on|off`（gpu-agent 写，决定用哪个 device plugin）、`hami-device-plugin` ConfigMap 的 `nodeconfig` 里该节点的 `operatingmode` 与 `devicesplitcount`（gpu-agent 写，决定 HAMi 插件的行为）。`xpu-vendor=nvidia` 事先打在节点上，模式切换不改它。独占插件同时匹配 `vgpu=off` 与 `xpu-vendor=nvidia`；HAMi 插件只匹配 `vgpu=on`（`hami-core` 与 `mig` 相同）。
 - 只有 `nvidia` 厂商有这三种模式；寒武纪是 `default`/`dynamic-smlu`/`env-share`，昇腾是硬切分 / `hami-vnpu-core`。本子模块只覆盖 NVIDIA；其它厂商的模式配置在「设置vGPU模式」对话框里按厂商配置表展示，语义见 `../gpu-card/_index.md` 的边界说明。
 - 与监控的边界：模式切换本身不产生指标；但三种模式下卡级/POD 级指标来源不同，见 `../gpu-monitor/_index.md`。
 - 与 HAMi 的边界：模式的**语义**（哪种资源名、切分数怎么用）由 HAMi 定义，页面只呈现。契约见 `HAMi` 仓库 `docs/SDD.md` 与 `design/gpu-agent/collector/`。

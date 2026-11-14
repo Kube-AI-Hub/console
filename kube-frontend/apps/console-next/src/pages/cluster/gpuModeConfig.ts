@@ -7,7 +7,7 @@ export interface GpuModeParameter {
   integer: boolean;
 }
 const split: GpuModeParameter = { key: 'devicesplitcount', labelKey: 'node.mode.splitCount', defaultValue: 10, integer: true };
-export const GPU_MODES: Record<string, Array<{ value: string; labelKey: 'node.mode.default' | 'node.mode.mig' | 'node.mode.hami' | 'node.mode.dynamic' | 'node.mode.env'; parameters: GpuModeParameter[] }>> = {
+export const GPU_MODES: Record<string, Array<{ value: string; labelKey: 'node.mode.default' | 'node.mode.mig' | 'node.mode.hami' | 'node.mode.dynamic' | 'node.mode.env'; descriptionKey?: 'node.mode.kunlunExclusive' | 'node.mode.kunlunHami'; parameters: GpuModeParameter[] }>> = {
   nvidia: [
     { value: 'default', labelKey: 'node.mode.default', parameters: [] },
     { value: 'mig', labelKey: 'node.mode.mig', parameters: [split] },
@@ -20,6 +20,10 @@ export const GPU_MODES: Record<string, Array<{ value: string; labelKey: 'node.mo
     { value: 'default', labelKey: 'node.mode.default', parameters: [] },
     { value: 'dynamic-smlu', labelKey: 'node.mode.dynamic', parameters: [{ key: 'min-dsmlu-unit', labelKey: 'node.mode.minUnit', defaultValue: 256, integer: true }] },
     { value: 'env-share', labelKey: 'node.mode.env', parameters: [{ key: 'virtualization-num', labelKey: 'node.mode.virtualCount', defaultValue: 5, integer: true }] },
+  ],
+  kunlunxin: [
+    { value: 'default', labelKey: 'node.mode.default', descriptionKey: 'node.mode.kunlunExclusive', parameters: [] },
+    { value: 'hami-core', labelKey: 'node.mode.hami', descriptionKey: 'node.mode.kunlunHami', parameters: [] },
   ],
 };
 

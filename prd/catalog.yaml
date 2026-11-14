@@ -71,6 +71,8 @@ modules:
         L3:
         - TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-01
         - TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-02
+        - TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-03
+        - TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-04
     - id: capacity
       title: vGPU 资源就绪
       prd: prd/cluster-gpu/vgpu-mode/capacity.md

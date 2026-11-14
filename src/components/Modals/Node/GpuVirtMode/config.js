@@ -109,6 +109,22 @@ export const GPU_VENDOR_MODE_CONFIG = {
       },
     ],
   },
+  kunlunxin: {
+    modeOptions: [
+      {
+        labelKey: 'GPU_MODE_DEFAULT',
+        value: 'default',
+        descKey: 'GPU_MODE_KUNLUN_DEFAULT_DESC',
+        params: [],
+      },
+      {
+        labelKey: 'GPU_MODE_HAMI_CORE',
+        value: 'hami-core',
+        descKey: 'GPU_MODE_KUNLUN_HAMI_CORE_DESC',
+        params: [],
+      },
+    ],
+  },
 }
 
 export function getVendorModeConfig(gpuVendor) {

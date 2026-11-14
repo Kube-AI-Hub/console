@@ -16,10 +16,20 @@
 
 **Independent Test**：选 `mig` 后对话框出现「会销毁该节点上现有的 MIG 实例」的警告文字。
 
+### US3 - 作为集群运维，把昆仑芯节点切到独占
+
+**Independent Test**：厂商为 `kunlunxin` 时可选 `default`，没有切分数输入。提交体是 `mode=default` 且 `params` 为 `{}`。
+
+### US4 - 作为集群运维，把昆仑芯节点切到 hami-core
+
+**Independent Test**：选 `hami-core` 后仍没有切分数、显存倍率、算力倍率。提交体是 `mode=hami-core` 且 `params` 为 `{}`。说明文字包含 `kunlunxin.com/vxpu`。
+
 ## 验收场景
 
 - **AC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-01** — Given 节点当前是 `default`，When 在对话框选 `hami-core` 并把切分数填成 10 后确定，Then 请求体里 `mode=hami-core`、`params.devicesplitcount=10`，成功后列表模式列先变「切换中」再变 `hami-core`。
 - **AC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-02** — Given 节点当前是 `hami-core`，When 选 `default` 后确定，Then 请求体里 `mode=default` 且 `params` 为空对象，切换完成后 `vgpu` 标签为 `off`。
+- **AC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-03** — Given 节点厂商是 `kunlunxin` 且当前为 `hami-core`，When 选 `default` 后确定，Then 请求体是 `{mode: default, params: {}}`，对话框没有切分数输入。
+- **AC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-04** — Given 节点厂商是 `kunlunxin` 且当前为 `default`，When 选 `hami-core` 后确定，Then 请求体是 `{mode: hami-core, params: {}}`，说明文字写明资源名 `kunlunxin.com/vxpu` 与 `kunlunxin.com/vxpu-memory`。
 
 ## 设计目标
 
@@ -30,7 +40,7 @@
 
 - 请求走 `PUT /kapis/gpu.kubesphere.io/v1alpha1/device-plugins/gpu/mode?nodeName=<node>`，body `{"mode": "...", "params": {"devicesplitcount": "10"}}`。`params` 的值必须是**字符串**（后端按字符串存进 `gpu-mode-desired` 注解）。
 - 参数键固定为 `devicesplitcount` / `devicememoryscaling` / `devicecorescaling`，与 `hami-device-plugin` ConfigMap 的 `nodeconfig` 字段同名——中间不做改名，否则 gpu-agent 要维护映射表。
-- 只有 `nvidia` 有 `modeOptions`；其它厂商（寒武纪 `default`/`dynamic-smlu`/`env-share`）走各自的配置，未配置时对话框只显示「不支持」。
+- `nvidia` 与 `cambricon`、`kunlunxin` 都有 `modeOptions`。昆仑芯只有 `default` 与 `hami-core`，参数为空。未配置的厂商对话框只显示「不支持」。
 - 提交后不等待结果就关闭对话框；结果通过节点列表的模式列观察。
 
 ## UI 交互设计
@@ -91,4 +101,4 @@
 
 ## 验收用例
 
-- L3：`TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-01`、`TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-02`
+- L3：`TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-01`、`TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-02`、`TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-03`、`TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-04`

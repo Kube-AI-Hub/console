@@ -51,6 +51,8 @@ module.exports = {
   GPU_MODE_HAMI_VGPU_DESC: 'HAMi vGPU 虚拟化模式，通过驱动与 Device Plugin 提供虚拟 GPU 能力。',
   GPU_MODE_HAMI_CORE: 'hami-core',
   GPU_MODE_HAMI_CORE_DESC: 'HAMi hami-core 虚拟化模式，通过驱动与 Device Plugin 提供虚拟 GPU 能力，支持显存与算力超分配置。',
+  GPU_MODE_KUNLUN_DEFAULT_DESC: '独占整卡，使用 kunlunxin.com/xpu。数量只能是 1、2、4 或 8。',
+  GPU_MODE_KUNLUN_HAMI_CORE_DESC: '共享卡使用 kunlunxin.com/vxpu 与 kunlunxin.com/vxpu-memory。例如 vxpu 为 1、显存为 24576 MiB。',
   GPU_PARAM_DEVICE_SPLIT_COUNT: '设备分片数量 (devicesplitcount)',
   GPU_PARAM_DEVICE_SPLIT_COUNT_DESC: '单个设备允许共享的最大任务数量。',
   GPU_PARAM_DEVICE_MEMORY_SCALING: '显存超分比 (devicememoryscaling)',

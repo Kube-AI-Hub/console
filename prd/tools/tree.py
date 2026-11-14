@@ -80,6 +80,8 @@ MODULES = [
                         "tests": {"L3": [
                             "TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-01",
                             "TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-02",
+                            "TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-03",
+                            "TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-04",
                         ]},
                     },
                     {

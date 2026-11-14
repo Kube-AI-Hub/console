@@ -47,7 +47,7 @@ HAMi（gpu-agent）
 | 期望模式 | kube-server | Node 注解 `hami.io/gpu-mode-desired` | gpu-agent |
 | 落地结果 | gpu-agent | Node 注解 `hami.io/gpu-mode-status` | kube-server → 页面 |
 | 当前模式（汇总） | gpu-agent | Node 注解 `hami.io/node-gpu-info` 的 `virtualCardMode` | kube-server → 页面 |
-| 用哪个 device plugin | gpu-agent | Node label `vgpu=on\|off` | device plugin DaemonSet 的 nodeSelector |
+| 用哪个 device plugin | gpu-agent | Node label `vgpu=on\|off`。`xpu-vendor=nvidia` 不由 gpu-agent 写 | 独占插件匹配 `vgpu=off` 且 `xpu-vendor=nvidia`；HAMi 插件只匹配 `vgpu=on` |
 | 插件行为 | gpu-agent | `hami-device-plugin` ConfigMap 的 `nodeconfig[]` | device plugin |
 
 ## 关键契约与依赖
@@ -64,7 +64,7 @@ HAMi（gpu-agent）
 
 ## 不变量
 
-- **INV-FULL-CLUSTER-GPU-VGPU_MODE-01** — 同一时刻，节点上只有一个 device plugin 在注册计数资源：`vgpu=off` 时是上游 `nvidia-device-plugin`，`vgpu=on` 时是 HAMi 的 `hami-device-plugin`。
+- **INV-FULL-CLUSTER-GPU-VGPU_MODE-01** — 同一时刻，节点上只有一个 device plugin 在注册计数资源：`vgpu=off` 且 `xpu-vendor=nvidia` 时是上游 `nvidia-device-plugin`，`vgpu=on` 时是 HAMi 的 `hami-device-plugin`（`hami-core` 与 `mig` 共用该选择器）。
 - **INV-FULL-CLUSTER-GPU-VGPU_MODE-02** — `nvidia.com/vgpu` 非零当且仅当节点 `vgpu=on` 且 `devices.nvidia.resourceCountName=nvidia.com/vgpu`。
 - **INV-FULL-CLUSTER-GPU-VGPU_MODE-03** — `hami.io/node-gpu-info` 的 `virtualCardMode` 与 `hami-device-plugin` ConfigMap 里该节点的 `operatingmode` 一致（gpu-agent 一轮采集后）。
 

@@ -12,6 +12,8 @@
 
 - `AC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-01`
 - `AC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-02`
+- `AC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-03`
+- `AC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-04`
 
 ## 设计目标与非目标
 
@@ -96,7 +98,7 @@
 ## 测试与可观测
 
 - 单测：`kube-server` 的 `changeMode` 无单测（依赖 k8s client）；用 UI 用例覆盖。
-- UI 用例：`TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-01/02`。
+- UI 用例：`TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-01` 到 `04`。
 - 现场核对：提交后 `kubectl get node <n> -o jsonpath='{.metadata.annotations.hami\.io/gpu-mode-desired}'`。
 
 ## 后续改进
@@ -108,3 +110,5 @@
 
 - `TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-01`
 - `TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-02`
+- `TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-03`
+- `TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-04`

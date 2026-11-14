@@ -18,6 +18,8 @@
 | cluster-gpu/vgpu-mode/capacity | `AC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-02` | `TC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-02` | [`design/cluster-gpu/vgpu-mode/capacity.md`](../../../design/cluster-gpu/vgpu-mode/capacity.md) | [`tests/ui/tests/cluster-gpu/vgpu-mode/test_TC_L3_CLUSTER_GPU_VGPU_MODE_CAPACITY_02.py`](../../../tests/ui/tests/cluster-gpu/vgpu-mode/test_TC_L3_CLUSTER_GPU_VGPU_MODE_CAPACITY_02.py) |
 | cluster-gpu/vgpu-mode/switch | `AC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-01` | `TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-01` | [`design/cluster-gpu/vgpu-mode/switch.md`](../../../design/cluster-gpu/vgpu-mode/switch.md) | [`tests/ui/tests/cluster-gpu/vgpu-mode/test_TC_L3_CLUSTER_GPU_VGPU_MODE_SWITCH_01.py`](../../../tests/ui/tests/cluster-gpu/vgpu-mode/test_TC_L3_CLUSTER_GPU_VGPU_MODE_SWITCH_01.py) |
 | cluster-gpu/vgpu-mode/switch | `AC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-02` | `TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-02` | [`design/cluster-gpu/vgpu-mode/switch.md`](../../../design/cluster-gpu/vgpu-mode/switch.md) | [`tests/ui/tests/cluster-gpu/vgpu-mode/test_TC_L3_CLUSTER_GPU_VGPU_MODE_SWITCH_02.py`](../../../tests/ui/tests/cluster-gpu/vgpu-mode/test_TC_L3_CLUSTER_GPU_VGPU_MODE_SWITCH_02.py) |
+| cluster-gpu/vgpu-mode/switch | `AC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-03` | `TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-03` | [`design/cluster-gpu/vgpu-mode/switch.md`](../../../design/cluster-gpu/vgpu-mode/switch.md) | [`tests/ui/tests/cluster-gpu/vgpu-mode/test_TC_L3_CLUSTER_GPU_VGPU_MODE_SWITCH_03.py`](../../../tests/ui/tests/cluster-gpu/vgpu-mode/test_TC_L3_CLUSTER_GPU_VGPU_MODE_SWITCH_03.py) |
+| cluster-gpu/vgpu-mode/switch | `AC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-04` | `TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-04` | [`design/cluster-gpu/vgpu-mode/switch.md`](../../../design/cluster-gpu/vgpu-mode/switch.md) | [`tests/ui/tests/cluster-gpu/vgpu-mode/test_TC_L3_CLUSTER_GPU_VGPU_MODE_SWITCH_04.py`](../../../tests/ui/tests/cluster-gpu/vgpu-mode/test_TC_L3_CLUSTER_GPU_VGPU_MODE_SWITCH_04.py) |
 | cluster-storage/_index | `AC-CORE-CLUSTER-STORAGE-01` | `TC-CORE-CLUSTER-STORAGE-01` | [`design/cluster-storage/_index.md`](../../../design/cluster-storage/_index.md) | [`tests/ui/tests/cluster-storage/core/test_TC_CORE_CLUSTER_STORAGE_01.py`](../../../tests/ui/tests/cluster-storage/core/test_TC_CORE_CLUSTER_STORAGE_01.py) |
 | cluster-storage/shared-storage/_index | `AC-FULL-CLUSTER-STORAGE-SHARED_STORAGE-01` | `TC-FLOW-SHARED_STORAGE`, `TC-FULL-CLUSTER-STORAGE-SHARED_STORAGE-01` | [`design/cluster-storage/shared-storage/_index.md`](../../../design/cluster-storage/shared-storage/_index.md) | [`tests/ui/tests/cluster-storage/flow/test_TC_FLOW_SHARED_STORAGE.py`](../../../tests/ui/tests/cluster-storage/flow/test_TC_FLOW_SHARED_STORAGE.py), [`tests/ui/tests/cluster-storage/shared-storage/test_TC_FULL_CLUSTER_STORAGE_SHARED_STORAGE_01.py`](../../../tests/ui/tests/cluster-storage/shared-storage/test_TC_FULL_CLUSTER_STORAGE_SHARED_STORAGE_01.py) |
 | cluster-storage/shared-storage/_index | `AC-FULL-CLUSTER-STORAGE-SHARED_STORAGE-02` | `TC-FLOW-SHARED_STORAGE`, `TC-FULL-CLUSTER-STORAGE-SHARED_STORAGE-01` | [`design/cluster-storage/shared-storage/_index.md`](../../../design/cluster-storage/shared-storage/_index.md) | [`tests/ui/tests/cluster-storage/flow/test_TC_FLOW_SHARED_STORAGE.py`](../../../tests/ui/tests/cluster-storage/flow/test_TC_FLOW_SHARED_STORAGE.py), [`tests/ui/tests/cluster-storage/shared-storage/test_TC_FULL_CLUSTER_STORAGE_SHARED_STORAGE_01.py`](../../../tests/ui/tests/cluster-storage/shared-storage/test_TC_FULL_CLUSTER_STORAGE_SHARED_STORAGE_01.py) |
@@ -367,7 +369,7 @@
 
 ## 小结
 
-- 需求里的 AC：360 条，其中未覆盖 1 条、无技术方案承接 14 条、无用例规格实现 1 条。
+- 需求里的 AC：362 条，其中未覆盖 1 条、无技术方案承接 14 条、无用例规格实现 1 条。
 - 未覆盖：`AC-L2-KUBE-FRONTEND-LOGIN-07`
 - 无技术方案承接：`AC-L2-KUBE-FRONTEND-LOGIN-01`, `AC-L2-KUBE-FRONTEND-LOGIN-02`, `AC-L2-KUBE-FRONTEND-LOGIN-03`, `AC-L2-KUBE-FRONTEND-LOGIN-04`, `AC-L2-KUBE-FRONTEND-LOGIN-05`, `AC-L2-KUBE-FRONTEND-LOGIN-06`, `AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L2-KUBE-FRONTEND-THEME-01`, `AC-L2-KUBE-FRONTEND-THEME-02`, `AC-L2-KUBE-FRONTEND-THEME-03`, `AC-L2-KUBE-FRONTEND-THEME-04`, `AC-L2-KUBE-FRONTEND-THEME-05`, `AC-L3-KUBE-FRONTEND-MONITORING-PROJECT_CUSTOM_MONITORING-01`, `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW-01`
 - 无用例规格实现：`AC-L2-KUBE-FRONTEND-LOGIN-07`
@@ -400,6 +402,8 @@
 | cluster-gpu/vgpu-mode/capacity | `US2` | `TC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-02` |
 | cluster-gpu/vgpu-mode/switch | `US1` | `TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-01`, `TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-02` |
 | cluster-gpu/vgpu-mode/switch | `US2` | `TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-02` |
+| cluster-gpu/vgpu-mode/switch | `US3` | `TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-03` |
+| cluster-gpu/vgpu-mode/switch | `US4` | `TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-04` |
 | cluster-storage/_index | `US1` | `TC-CORE-CLUSTER-STORAGE-01` |
 | cluster-storage/shared-storage/_index | `US1` | `TC-FULL-CLUSTER-STORAGE-SHARED_STORAGE-01` |
 | cluster-storage/shared-storage/_index | `US2` | `TC-FLOW-SHARED_STORAGE`, `TC-FULL-CLUSTER-STORAGE-SHARED_STORAGE-01` |
@@ -672,4 +676,4 @@
 | kube-frontend/workbench/context | `US1` | `TC-L3-KUBE-FRONTEND-WORKBENCH-CONTEXT-01` |
 | kube-frontend/workbench/entry | `US1` | `TC-L3-KUBE-FRONTEND-WORKBENCH-ENTRY-01` |
 
-- 用户故事：295 条，其中未覆盖 0 条。
+- 用户故事：297 条，其中未覆盖 0 条。

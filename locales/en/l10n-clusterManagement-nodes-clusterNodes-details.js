@@ -52,6 +52,8 @@ module.exports = {
   GPU_MODE_HAMI_VGPU_DESC: 'HAMi vGPU virtualization mode: virtual GPU capability is provided by the driver and Device Plugin.',
   GPU_MODE_HAMI_CORE: 'hami-core',
   GPU_MODE_HAMI_CORE_DESC: 'HAMi hami-core virtualization mode: virtual GPU capability is provided by the driver and Device Plugin, with support for memory and core overcommit.',
+  GPU_MODE_KUNLUN_DEFAULT_DESC: 'Exclusive whole cards via kunlunxin.com/xpu. Counts must be 1, 2, 4, or 8.',
+  GPU_MODE_KUNLUN_HAMI_CORE_DESC: 'Shared cards use kunlunxin.com/vxpu and kunlunxin.com/vxpu-memory. Example: one VXPU with 24576 MiB.',
   GPU_PARAM_DEVICE_SPLIT_COUNT: 'Device split count (devicesplitcount)',
   GPU_PARAM_DEVICE_SPLIT_COUNT_DESC: 'Allowed number of tasks sharing a device.',
   GPU_PARAM_DEVICE_MEMORY_SCALING: 'Device memory scaling (devicememoryscaling)',

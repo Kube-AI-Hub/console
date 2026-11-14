@@ -49,6 +49,8 @@ describe('node list and mode behavior', () => {
     })).toEqual({ a: { offset: -8, synced: true }, b: { offset: 8, synced: false }, unknown: { offset: undefined, synced: undefined } });
   });
   it('validates parameters and does not transmit inactive mode parameters', () => {
+    expect(buildModeParams('kunlunxin', 'default', {})).toEqual({});
+    expect(buildModeParams('kunlunxin', 'hami-core', { devicesplitcount: 10 })).toEqual({});
     expect(buildModeParams('nvidia', 'default', { devicesplitcount: 20 })).toEqual({});
     expect(buildModeParams('nvidia', 'hami-core', { devicesplitcount: 10, devicememoryscaling: 1, devicecorescaling: 2, 'virtualization-num': 5 }))
       .toEqual({ devicesplitcount: '10', devicememoryscaling: '1', devicecorescaling: '2' });

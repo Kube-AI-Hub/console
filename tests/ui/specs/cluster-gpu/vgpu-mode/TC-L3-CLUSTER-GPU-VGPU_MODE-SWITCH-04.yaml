@@ -1,0 +1,30 @@
+id: TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-04
+level: 3
+suite: point
+module: cluster-gpu
+submodule: vgpu-mode
+feature: switch
+title: 设置 vGPU 模式 · 昆仑芯 hami-core 说明资源名
+entry_url: "{BASE_URL}/clusters/default/nodes"
+prd: prd/cluster-gpu/vgpu-mode/switch.md
+design: design/cluster-gpu/vgpu-mode/switch.md
+
+covers:
+- AC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-04
+
+story:
+- US4
+
+product: 昆仑芯节点切到 hami-core 时，请求体 params 为空，说明文字包含 kunlunxin.com/vxpu。
+preconditions:
+- 已登录
+- 存在厂商为 kunlunxin 的节点
+steps:
+- 打开节点的设置 vGPU 模式对话框
+- 选择 hami-core
+- 确认说明文字与请求体
+expected:
+- 说明文字包含 kunlunxin.com/vxpu 与 kunlunxin.com/vxpu-memory
+- 请求体为 mode=hami-core 且 params 为 {}
+update_automation:
+- 资源名变化时同步改本用例与文案
