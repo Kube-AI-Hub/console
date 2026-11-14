@@ -5,7 +5,7 @@ import uuid
 import pytest
 from playwright.sync_api import expect
 
-from conftest import ApiClient
+from helpers.api import ApiClient
 from helpers.auth import api_headers
 
 pytestmark = pytest.mark.ui
