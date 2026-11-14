@@ -608,10 +608,18 @@ export interface ClusterAlertSummary {
   severity: string;
   /** The rule group that fired it (`labels.rule_group`). */
   ruleGroup: string;
+  /** `labels.rule_type` — `custom` (`metric`) or `template`; empty when unset. */
+  ruleType: string;
   /** `activeAt` — when it started firing. */
   triggeredAt: string;
   /** The monitored object, when the rule was a template rule; empty otherwise. */
   target: string;
+  /** The value the expression evaluated to, when the alert reports it. */
+  value: string;
+  /** The alert's labels, verbatim; the detail view shows an allowlisted summary. */
+  labels: Record<string, string>;
+  /** The alert's annotations, verbatim; the detail view shows an allowlisted summary. */
+  annotations: Record<string, string>;
 }
 
 /** Paths of the two aggregated message collections. */
@@ -626,6 +634,7 @@ interface ClusterAlertItem {
   annotations?: Record<string, string>;
   labels?: Record<string, string>;
   state?: string;
+  value?: string | number;
 }
 
 /** Template rules name the object they watch; metric-only rules have no target. */
@@ -657,8 +666,12 @@ export function toClusterAlertSummary(
     state: String(item.state ?? ''),
     severity: String(labels['severity'] ?? ''),
     ruleGroup: String(labels['rule_group'] ?? ''),
+    ruleType: String(labels['rule_type'] ?? ''),
     triggeredAt: String(item.activeAt ?? ''),
     target: clusterAlertTarget(labels),
+    value: item.value === undefined || item.value === null ? '' : String(item.value),
+    labels: { ...labels },
+    annotations: { ...annotations },
   };
 }
 

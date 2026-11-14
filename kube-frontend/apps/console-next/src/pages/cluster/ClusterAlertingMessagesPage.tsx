@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { clusterAlertMessagesApi, type ClusterAlertSummary } from '@kube-ai-hub/api-client';
-import { AiSurface, Badge, Modal, ResourceList, type ListSchema } from '@kube-ai-hub/ui';
+import { AiSurface, Badge, Button, Modal, ResourceList, type ListSchema } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -49,12 +49,24 @@ export function ClusterAlertingMessagesPage({ cluster }: ClusterAlertingMessages
           key: 'summary',
           title: t('monitoring.column.message'),
           render: (row) => (
-            <span className="flex min-w-0 flex-col">
-              <span className="truncate font-medium text-ai-fg" title={row.summary || row.name}>
-                {row.summary || row.name || '-'}
+            /*
+             * The message title is the row's primary content. Clicking it opens the
+             * drill-down, as the old console did; the three-dot menu keeps the same
+             * action so keyboard users and automation have a second path.
+             */
+            <Button
+              variant="ghost"
+              className="h-auto min-w-0 justify-start p-0 text-left font-normal"
+              data-ai-id="cluster-alerting-messages:open"
+              onClick={() => setDetail(row)}
+            >
+              <span className="flex min-w-0 flex-col items-start">
+                <span className="truncate font-medium text-ai-fg" title={row.summary || row.name}>
+                  {row.summary || row.name || '-'}
+                </span>
+                <span className="truncate text-[11px] text-ai-fg-muted">{row.message || '-'}</span>
               </span>
-              <span className="truncate text-[11px] text-ai-fg-muted">{row.message || '-'}</span>
-            </span>
+            </Button>
           ),
         },
         {
@@ -155,28 +167,106 @@ export function ClusterAlertingMessagesPage({ cluster }: ClusterAlertingMessages
   );
 }
 
-/** One message's fields, all already present on the list row. */
+/** Label keys shown in the drill-down, in display order. */
+const DETAIL_LABELS = [
+  'alertname',
+  'severity',
+  'rule_group',
+  'rule_type',
+  'rule_level',
+  'namespace',
+  'pod',
+  'container',
+  'node',
+  'workload',
+  'instance',
+  'resource',
+  'group',
+  'version',
+  'verb',
+] as const;
+
+/** Annotation keys shown in the drill-down; anything else stays unrendered. */
+const DETAIL_ANNOTATIONS = ['summary', 'message', 'description', 'runbook_url'] as const;
+
+/**
+ * Allowlisted key/value summary.
+ *
+ * The aggregated alert item is a controller record, not an audit document: the
+ * drill-down renders the operational labels and annotations it needs and nothing
+ * else. A raw-object dump would expose unrelated metadata and grow with every
+ * label the platform adds, so keys are listed explicitly rather than filtered out.
+ */
+function summarize(record: Record<string, string>, keys: readonly string[]): Array<[string, string]> {
+  return keys
+    .map((key): [string, string] => [key, record[key] ?? ''])
+    .filter(([, value]) => value !== '');
+}
+
+/** One message's drill-down: identifying fields, then label and annotation summaries. */
 function MessageDetail({ row }: { row: ClusterAlertSummary }): React.ReactElement {
   const t = useT();
   const entries: Array<[string, string]> = [
     [t('monitoring.field.name'), row.name || '-'],
-    [t('monitoring.column.message'), row.summary || '-'],
+    [t('cluster.alerting.field.summary'), row.summary || '-'],
     [t('monitoring.field.message'), row.message || '-'],
     [t('monitoring.field.state'), alertStateLabel(t, row.state)],
     [t('monitoring.field.severity'), alertSeverityLabel(t, row.severity)],
     [t('monitoring.field.rule'), row.ruleGroup || '-'],
+    [t('cluster.alerting.field.ruleType'), row.ruleType || '-'],
     [t('cluster.alerting.column.source'), alertSourceLabel(t, row.source)],
     [t('monitoring.field.target'), row.target || '-'],
     [t('monitoring.field.triggeredAt'), formatTimestamp(row.triggeredAt)],
+    [t('cluster.alerting.field.value'), row.value || '-'],
   ];
   return (
-    <dl className="grid grid-cols-1 gap-3 text-xs sm:grid-cols-[minmax(6rem,auto)_1fr]" data-ai-id="cluster-alerting-messages:detail">
-      {entries.map(([label, value], index) => (
-        <React.Fragment key={`${label}-${index}`}>
-          <dt className="text-ai-fg-muted">{label}</dt>
-          <dd className="min-w-0 break-words text-ai-fg-secondary">{value}</dd>
-        </React.Fragment>
-      ))}
-    </dl>
+    <div className="flex flex-col gap-5 text-xs" data-ai-id="cluster-alerting-messages:detail">
+      <dl className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(6rem,auto)_1fr]">
+        {entries.map(([label, value], index) => (
+          <React.Fragment key={`${label}-${index}`}>
+            <dt className="text-ai-fg-muted">{label}</dt>
+            <dd className="min-w-0 break-words text-ai-fg-secondary">{value}</dd>
+          </React.Fragment>
+        ))}
+      </dl>
+      <SummarySection
+        aiId="cluster-alerting-messages:detail:labels"
+        title={t('cluster.alerting.detail.labels')}
+        entries={summarize(row.labels, DETAIL_LABELS)}
+      />
+      <SummarySection
+        aiId="cluster-alerting-messages:detail:annotations"
+        title={t('cluster.alerting.detail.annotations')}
+        entries={summarize(row.annotations, DETAIL_ANNOTATIONS)}
+      />
+    </div>
+  );
+}
+
+function SummarySection({
+  aiId,
+  title,
+  entries,
+}: {
+  aiId: string;
+  title: string;
+  entries: Array<[string, string]>;
+}): React.ReactElement {
+  return (
+    <section className="flex flex-col gap-2" data-ai-id={aiId}>
+      <h3 className="text-sm font-medium text-ai-fg">{title}</h3>
+      {entries.length === 0 ? (
+        <p className="text-ai-fg-muted">-</p>
+      ) : (
+        <dl className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(6rem,auto)_1fr]">
+          {entries.map(([key, value]) => (
+            <React.Fragment key={key}>
+              <dt className="font-mono text-[11px] text-ai-fg-muted">{key}</dt>
+              <dd className="min-w-0 break-words text-ai-fg-secondary">{value}</dd>
+            </React.Fragment>
+          ))}
+        </dl>
+      )}
+    </section>
   );
 }

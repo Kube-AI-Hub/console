@@ -15,24 +15,24 @@ covers:
 story:
 - US1
 
-product: 集群告警消息页合并 clusteralerts 与 globalalerts，首屏行数等于 min(20,total)；告警策略页「自定义策略/内置策略」两个页签的行数分别等于 clusterrulegroups / globalrulegroups 的 API 计数，内置页签无写操作。
+product: 集群告警消息页合并 clusteralerts 与 globalalerts，首屏行数等于 min(20,total)；告警策略页「自定义策略/内置策略」两个页签的行数分别等于 clusterrulegroups / globalrulegroups 的 API 计数，内置页签行操作含详情与启用/停用（启停细节由另一条用例核对）。
 preconditions:
 - 已登录，且在 host 集群
 - 告警模块已安装，v2beta1 的 clusteralerts / globalalerts / clusterrulegroups / globalrulegroups 可读
 steps:
 - 用 API 读取 clusterrulegroups 与 globalrulegroups 条数
 - 打开 /kube-frontend/clusters/host/alerting-policies，核对默认「自定义策略」页签行数
-- 切到「内置策略」页签，核对行数与 globalrulegroups 条数，并打开行操作菜单确认没有启用/停用
+- 切到「内置策略」页签，核对行数与 globalrulegroups 条数，并打开行操作菜单确认有「详情」
 - 用 API 读取 clusteralerts 与 globalalerts 的 totalItems，计算 min(20, 两者之和)
 - 打开 /kube-frontend/clusters/host/alerting-messages，核对首屏行数与表头含「来源」
 expected:
 - 自定义页签行数 = clusterrulegroups 条数；内置页签行数 = globalrulegroups 条数（页大小 50 内）
-- 内置页签行操作只有「详情」，没有启用/停用
+- 内置页签行操作含「详情」
 - 消息页首屏行数 = min(20, clusteralerts.totalItems + globalalerts.totalItems)
 - 消息表含来源列，页面状态不是 loading
 troubleshoot:
 - 页面消息为空：是否走了 v1alpha2（200 空体）而不是 v2beta1 的 clusteralerts/globalalerts
 - 页签行数对不上：确认页大小是否覆盖计数，切换页签后是否等待 active query 完成
-- 内置页签出现写操作：检查 rowActions 是否按 tab 过滤
+- 内置页签缺少启停：检查 rowActions 是否误按 tab 过滤
 update_automation:
 - 页面列或 data-ai-id 变化时同步本用例；集群策略计数以 API 为准，不写死 18

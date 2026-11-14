@@ -50,12 +50,11 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_ALERTING_01(cluster_mana
     expect(surface).not_to_have_attribute("data-ai-state", "loading", timeout=60_000)
     expect(rows).to_have_count(min(builtin_count, POLICIES_PAGE_SIZE), timeout=60_000)
 
-    # Built-in groups are installer-owned: the row menu must not offer a switch.
+    # The row menu opens on a built-in row; what it offers is covered by the
+    # ALERTING_WRITE-01 case (the enable label is writable, edit/delete are not).
     if builtin_count:
         rows.first.locator('button[aria-haspopup="menu"]').click()
         expect(ui.page.get_by_role("menuitem", name="详情", exact=True)).to_be_visible(timeout=20_000)
-        assert ui.page.get_by_role("menuitem", name="停用", exact=True).count() == 0
-        assert ui.page.get_by_role("menuitem", name="启用", exact=True).count() == 0
         ui.page.keyboard.press("Escape")
 
     screenshot(ui.page, "cluster-alerting-policies")

@@ -27,10 +27,13 @@ import { formatTimestamp } from '@/lib/time';
  * question here — "can I change this policy" — while the project page's merged
  * list answers "what policies does this project have".
  *
- * The built-in tab is read-only: those groups carry
- * `alerting.kubesphere.io/builtin: true` and the installer owns them. The custom
- * tab offers detail and enable/disable; creating and editing a cluster-scope
- * policy is not migrated yet (project-scope writing is).
+ * Both tabs offer detail and enable/disable. Built-in groups carry
+ * `alerting.kubesphere.io/builtin: true`, but the platform exposes their switch as
+ * the same `alerting.kubesphere.io/enable` label the old console patches — a
+ * merge-patch probe on globalrulegroups both dry-run and for real returned 200 and
+ * the label read back, so the page offers the switch rather than pretending the
+ * object is immutable. Creating, editing and deleting a cluster-scope policy is
+ * still not migrated (project-scope writing is).
  */
 export interface ClusterAlertingPoliciesPageProps {
   cluster: string;
@@ -140,14 +143,14 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
       ],
       rowActions: [
         { key: 'detail', label: t('monitoring.action.detail'), aiId: 'cluster-alerting-policies:detail' },
-        // Built-in groups are installer-owned; offering a switch would create a
-        // second source of truth that the next reconcile overwrites.
-        ...(tab === 'custom'
-          ? [
-              { key: 'disable', label: t('monitoring.action.disable'), aiId: 'cluster-alerting-policies:disable', visible: (row: RuleGroupSummary) => row.enabled },
-              { key: 'enable', label: t('monitoring.action.enable'), aiId: 'cluster-alerting-policies:enable', visible: (row: RuleGroupSummary) => !row.enabled },
-            ]
-          : []),
+        /*
+         * The switch is offered on both tabs. A probe against globalrulegroups
+         * showed the enable label is writable (dry-run and real merge-patch both
+         * 200, label read back as false and restored true), which is exactly what
+         * the old console patches. Only edit/delete remain installer-only.
+         */
+        { key: 'disable', label: t('monitoring.action.disable'), aiId: 'cluster-alerting-policies:disable', visible: (row: RuleGroupSummary) => row.enabled },
+        { key: 'enable', label: t('monitoring.action.enable'), aiId: 'cluster-alerting-policies:enable', visible: (row: RuleGroupSummary) => !row.enabled },
       ],
       empty: {
         title: t('cluster.alerting.policies.emptyTitle'),
@@ -163,7 +166,7 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
       },
       pagination: { page, pageSize: PAGE_SIZE, total },
     }),
-    [page, t, tab, total],
+    [page, t, total],
   );
 
   const state = active.isPending ? 'loading' : active.isError ? 'error' : pageRows.length === 0 ? 'empty' : 'ready';
@@ -230,6 +233,13 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
           )}
         </TabsContent>
         <TabsContent value="builtin">
+          {/*
+           * The hint is the probe result in one sentence: the switch is writable,
+           * but the object is still owned by the installer for everything else.
+           */}
+          <p className="mb-2 text-xs text-ai-fg-muted" data-ai-id="cluster-alerting-policies:builtin-hint">
+            {t('cluster.alerting.policies.builtinHint')}
+          </p>
           {builtin.isPending ? (
             <Skeleton className="h-40 w-full" />
           ) : (
@@ -241,6 +251,9 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
               onAction={(action, row) => {
                 if (!row) return;
                 if (action === 'detail') setDetail(row);
+                if (action === 'enable' || action === 'disable') {
+                  toggle.mutate({ group: row, enabled: action === 'enable' });
+                }
               }}
             />
           )}

@@ -1,0 +1,37 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING_WRITE-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: cluster-alerting-write
+title: 集群告警 · 内置策略启停入口与消息下钻
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/alerting-policies'
+prd: prd/kube-frontend/cluster-management/cluster-alerting-write.md
+design: design/kube-frontend/cluster-management/cluster-alerting-write.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING_WRITE-01
+
+story:
+- US2
+
+product: 内置策略行提供详情与启用/停用（写 alerting.kubesphere.io/enable 标签，探测确认可写），不提供编辑/删除；消息页点击首行标题打开详情，字段与 labels/annotations 白名单摘要非空。
+preconditions:
+- 已登录，且在 host 集群
+- globalrulegroups 至少 1 条；globalalerts 至少 1 条
+- 探测结论：PATCH globalrulegroups/<name> 的 merge-patch（dryRun 与真实）返回 200，enable 标签写入后回读一致
+steps:
+- 打开 /kube-frontend/clusters/host/alerting-policies，切到「内置策略」页签
+- 打开首行的行操作菜单，核对有「详情」和「启用/停用」之一，没有「编辑」「删除」
+- 打开 /kube-frontend/clusters/host/alerting-messages，点击首行消息标题
+- 核对详情弹窗出现，且规则类型/当前值/标签摘要/注解摘要都有内容
+expected:
+- 内置行行操作含「详情」+「启用」或「停用」，不含编辑/删除；页面有内置策略提示
+- 消息详情出现且字段非空：summary/message、state、severity、rule_group、rule_type、activeAt、value、labels、annotations
+- 详情不出现 rule_id 等原始内部字段
+troubleshoot:
+- 菜单没有启停：确认当前页签是 builtin，且 rowActions 未按 tab 过滤
+- 详情为空：确认消息行来自 v2beta1 globalalerts，api-client 已映射 labels/annotations
+- 详情出现 rule_id：检查白名单是否被绕过或整对象被渲染
+update_automation:
+- 页面 data-ai-id 变化时同步本用例

@@ -12,9 +12,9 @@
 
 ## 设计目标与非目标
 
-目标：一个集群页看全在响的告警；两个页签把「我能改的」与「安装器的」分开；字段与项目级告警一致。
+目标：一个集群页看全在响的告警；两个页签把「我能改的」与「安装器的」分开；消息按时间合并且能下钻。
 
-非目标：集群级策略的创建/编辑/删除、内置策略启停、消息删除/静默、策略详情下钻告警消息。
+非目标：集群级策略的创建/编辑/删除、内置策略的编辑/删除/恢复默认、消息删除/静默、策略详情页的告警消息页签；内置启停与消息详情字段的契约见 write 文档。
 
 ## 关键约束
 
@@ -22,6 +22,7 @@
 - 策略在 `/apis/alerting.kubesphere.io/v2beta1/{clusterrulegroups,globalrulegroups}`；K8s list 没有 `totalItems`，条数即数组长度。
 - `/apis/.../v2beta1/alerts` 404；v1alpha2 的 `/kapis/.../alerts` 返回 200 空体，不能当作空数据来源。
 - 两个消息集合各自分页；合并后的「下一页」需要从两边各取更多数据，因此按 `page × pageSize` 扩大窗口，单来源上限 500。
+- 写入（内置启停）与详情白名单的约束、探测结果见 [cluster-alerting-write.md](./cluster-alerting-write.md)；本文只描述读列表、计数与去向下钻。
 
 ## 方案决策
 
@@ -33,9 +34,9 @@
 
 **何时重新考虑**：某个来源的条数增长到需要独立检索或独立权限时。
 
-### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING-02 — 策略按所有权分页签，内置只读
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING-02 — 策略按所有权分页签
 
-**为什么**：`globalrulegroups` 是安装器写入的（本集群 18 个全部 `alerting.kubesphere.io/builtin: true`），`clusterrulegroups` 是管理员自己的集群级策略。两者的问题不同：前者只读确认「平台在监控什么」，后者要能启停。页签把所有权摆在界面上，比在一列里标注更直接，也避免在 18 条内置策略中混入可编辑行。
+**为什么**：`globalrulegroups` 是安装器写入的（本集群 18 个全部 `alerting.kubesphere.io/builtin: true`），`clusterrulegroups` 是管理员自己的集群级策略。两者的问题不同：前者主要是「平台在监控什么」，后者是「我加了什么」；页签把所有权摆在界面上，比在一列里标注更直接，也避免在 18 条内置策略中混入可编辑行。
 
 **被否方案**：合并两集合，按 builtin 标签禁用行操作。行操作可见性会随数据变化，读者仍要逐行判断；页签先给出分类，再给出操作。
 
@@ -67,7 +68,7 @@
 
 ## 系统现状
 
-老 console 的集群告警直接复用项目容器：`projects/containers/Alerting/{Messages,Policies}`，用 `klusters/<cluster>` 前缀与「有无 namespace」切换作用域。消息页与策略页各有两个页签；策略页列名称、策略状态、规则状态、耗时与最近检测时间，内置页签可启停与恢复默认。本实现保留消息字段与策略字段语义，改为：消息合并 + 来源列；策略两页签；不迁移内置启停与 reset。
+老 console 的集群告警直接复用项目容器：`projects/containers/Alerting/{Messages,Policies}`，用 `klusters/<cluster>` 前缀与「有无 namespace」切换作用域。消息页与策略页各有两个页签；策略页列名称、策略状态、规则状态、耗时与最近检测时间，内置页签可启停与恢复默认。本实现保留消息字段与策略字段语义，改为：消息合并 + 来源列；策略两页签。内置启停与消息下钻的实测与决策见 write 文档；reset 不迁移。
 
 ## 仓库落点
 
@@ -86,7 +87,6 @@
 | 自定义策略 | /apis/alerting.kubesphere.io/v2beta1/clusterrulegroups | GET | 200，`{items}`；host 当前 0 条 |
 | 内置策略 | /apis/alerting.kubesphere.io/v2beta1/globalrulegroups | GET | 200，`{items}`；host 18 条，均 builtin |
 | 策略详情 | 同上 + /<name> | GET | 200 |
-| 自定义策略启停 | /apis/.../clusterrulegroups/<name> | PATCH（merge-patch+json） | 200，只改 enable 标签 |
 | 告警消息（错误来源） | /apis/alerting.kubesphere.io/v2beta1/alerts | GET | 404 |
 | 告警消息（旧组） | /kapis/alerting.kubesphere.io/v1alpha2/alerts | GET | 200 空体 `{}`，不可用 |
 
@@ -101,15 +101,15 @@
 | 所属策略 | labels.rule_group |
 | 来源 | 所读集合（clusteralerts → custom，globalalerts → builtin） |
 | 触发时间 | activeAt |
-| 监控目标 | labels.rule_type=template 时由 node/workload/pod 组装 |
+
+列表只渲染这些列；下钻详情的字段与 labels/annotations 白名单见 write 文档。
 
 ## 不变量
 
 1. 策略页签计数 = 对应集合的数组长度；两页签各自独立，一个为空不影响另一个。
 2. 消息首屏行数 = `min(20, clusteralerts.totalItems + globalalerts.totalItems)`。
-3. 内置页签没有写操作；自定义页签只有启用/停用。
-4. 页面句柄固定：`cluster-alerting-messages:surface`、`cluster-alerting-policies:surface`、`cluster-alerting-policies:tab:{custom,builtin}`。
-5. 来源取自所读集合，不取 `labels.rule_type`。
+3. 页面句柄固定：`cluster-alerting-messages:surface`、`cluster-alerting-policies:surface`、`cluster-alerting-policies:tab:{custom,builtin}`。
+4. 来源取自所读集合，不取 `labels.rule_type`。
 
 ## 已知坑
 
@@ -122,14 +122,14 @@
 
 ## 测试与可观测
 
-- E2E：`tests/ui/specs/kube-frontend/cluster-management/TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING-01.yaml`；先读 API 计数，再打开两页比对行数；消息页按 `min(20,total)` 比对。
+- E2E：`tests/ui/specs/kube-frontend/cluster-management/TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING-01.yaml` 覆盖两页与计数；消息页按 `min(20,total)` 比对。启停与下钻的用例见 write 文档。
 - 可观测点：两个 surface、两个页签句柄、`data-ai-row`、错误面板重试句柄。
 - 失败时先看：是否走了 v1alpha2 路径（空体）、页大小是否覆盖计数、页签切换后是否等待了 active query。
 
 ## 后续改进
 
 - 集群级自定义策略的创建/编辑/删除（复用项目级写通道，需要集群作用域对话框）。
-- 内置策略的启用/停用与恢复默认（需确认安装器协调语义）。
+- 内置策略的编辑/删除与恢复默认（reset 依赖 `alerting.kubesphere.io/initial-configuration` 注解；需要先确认协调语义）。
 - 告警消息按策略名过滤、按级别过滤（服务端检索参数待探测）。
 - 策略详情下钻到该策略触发的告警消息。
 
