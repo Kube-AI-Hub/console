@@ -441,6 +441,7 @@ MODULES = [
                         "tests": {"L3": [
                             "TC-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-01",
                             "TC-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-02",
+                            "TC-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-03",
                         ]},
                     },
                 ],
@@ -736,6 +737,13 @@ MODULES = [
                         "title": "容器详情",
                         "tests": {"L3": [
                             "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-01",
+                        ]},
+                    },
+                    {
+                        "id": "pod-events",
+                        "title": "容器组事件",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-POD_EVENTS-01",
                         ]},
                     },
                     {

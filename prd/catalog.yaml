@@ -437,6 +437,7 @@ modules:
         L3:
         - TC-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-01
         - TC-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-02
+        - TC-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-03
   - id: access-control
     title: 访问控制
     prd: prd/kube-frontend/access-control/_index.md
@@ -809,6 +810,13 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-01
+    - id: pod-events
+      title: 容器组事件
+      prd: prd/kube-frontend/app-workloads/pod-events.md
+      design: design/kube-frontend/app-workloads/pod-events.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-POD_EVENTS-01
     - id: redeploy
       title: 重新部署
       prd: prd/kube-frontend/app-workloads/redeploy.md

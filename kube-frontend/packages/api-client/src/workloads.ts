@@ -906,3 +906,50 @@ export function toJobRun(item: KubePod, index: number): JobRun {
     exitCode: exitCodes.length === 0 ? 0 : Math.max(...exitCodes),
   };
 }
+
+/**
+ * One event about a pod, as the pod detail page shows it.
+ *
+ * Events are core objects (`/api/v1/.../events`), filtered by their involved object:
+ * a fieldSelector keeps the response small, and the pod name is the only key needed.
+ */
+export interface PodEvent {
+  /** `Normal` / `Warning`. */
+  type: string;
+  reason: string;
+  message: string;
+  count: number;
+  /** Newest of lastTimestamp / eventTime / firstTimestamp; empty when all are absent. */
+  lastSeen: string;
+  source: string;
+}
+
+export function podEventsApi(client: Client) {
+  return {
+    async list(params: { namespace: string; pod: string; signal?: AbortSignal }): Promise<PodEvent[]> {
+      const body = await client.request<{ items?: Array<Record<string, unknown>> }>(
+        `/api/v1/namespaces/${encodeURIComponent(params.namespace)}/events`,
+        {
+          query: {
+            fieldSelector: `involvedObject.name=${params.pod},involvedObject.kind=Pod`,
+          },
+          ...(params.signal ? { signal: params.signal } : {}),
+        },
+      );
+      return (body?.items ?? [])
+        .map((item) => {
+          const source = (item['source'] ?? {}) as Record<string, unknown>;
+          const lastSeen = String(item['lastTimestamp'] ?? item['eventTime'] ?? item['firstTimestamp'] ?? '');
+          return {
+            type: String(item['type'] ?? ''),
+            reason: String(item['reason'] ?? ''),
+            message: String(item['message'] ?? ''),
+            count: Number(item['count'] ?? 1),
+            lastSeen,
+            source: String(source['component'] ?? source['host'] ?? ''),
+          };
+        })
+        .sort((a, b) => b.lastSeen.localeCompare(a.lastSeen));
+    },
+  };
+}

@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-POD_EVENTS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: pod-events
+title: 容器组详情 · 事件
+entry_url: '{BASE_URL}/kube-frontend/public/clusters/host/projects/default/pods'
+prd: prd/kube-frontend/app-workloads/pod-events.md
+design: design/kube-frontend/app-workloads/pod-events.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-POD_EVENTS-01
+
+story:
+- US1
+
+product: 容器组详情展示该 Pod 的事件（类型/原因/消息/来源/次数/时间），倒序，条数等于接口过滤结果。
+preconditions:
+- 已登录，且对 default 项目有读取权限
+- 项目里至少有一个容器组
+steps:
+- 用 API 取一个有事件的容器组，并按 involvedObject 过滤读其事件
+- 打开该容器组详情
+- 核对事件区块条数与接口一致
+- 核对首条原因出现在页面上
+expected:
+- 事件区块存在
+- 条数等于过滤后的接口条数
+- 没有事件时显示说明
+troubleshoot:
+- 事件区块为空但接口有条目：fieldSelector 少了一层（involvedObject.kind 必须一起给）
+- 时间为空：只读了 lastTimestamp，事件可能只有 eventTime
+- 区块不出现：只有 pods 详情渲染该区块
+update_automation:
+- 选择器见 pages/app_workloads.py 与 WorkloadDetailPage.tsx

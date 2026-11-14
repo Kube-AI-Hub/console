@@ -1,9 +1,11 @@
 import * as React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiButton, AiSurface, Badge, Button, Icon, Skeleton } from '@kube-ai-hub/ui';
-import type { WorkloadDetail, WorkloadKind, WorkloadRevision } from '@kube-ai-hub/api-client';
+import { podEventsApi, type PodEvent, type WorkloadDetail, type WorkloadKind, type WorkloadRevision } from '@kube-ai-hub/api-client';
 import { useT } from '@/i18n';
+import { api as apiClient } from '@/api';
 import {
   useDeleteWorkload,
   useRestartWorkload,
@@ -78,6 +80,13 @@ export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, 
   const [dialog, setDialog] = React.useState<Dialog>('none');
 
   const detail = query.data;
+
+  const events = useQuery({
+    queryKey: ['pod-events', namespace, name],
+    queryFn: ({ signal }) => podEventsApi(apiClient).list({ namespace, pod: name, signal }),
+    enabled: kind === 'pods',
+  });
+
   const state = query.isPending ? 'loading' : query.isError ? 'error' : 'ready';
 
   const back = useBackTo(kind);
@@ -342,6 +351,39 @@ export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, 
             * block 资源状态; it is the fastest answer to "is it up", because the status
             * badge summarises and this shows the individual pods behind it.
             */}
+          {kind === 'pods' ? (
+            <section className="rounded-ai-md border border-ai-line p-4" data-ai-id="pods-detail:events">
+              <h2 className="mb-3 text-sm font-medium text-ai-fg">
+                {t('workloads.detail.events')} ({events.data?.length ?? 0})
+              </h2>
+              {events.isPending ? <Skeleton className="h-16 w-full" /> : null}
+              {events.isError ? (
+                <p className="text-xs text-ai-fg-muted">{t('workloads.detail.eventsUnavailable')}</p>
+              ) : null}
+              {events.data && events.data.length === 0 ? (
+                <p className="text-xs text-ai-fg-muted">{t('workloads.detail.noEvents')}</p>
+              ) : null}
+              {events.data && events.data.length > 0 ? (
+                <ul className="flex flex-col divide-y divide-ai-line text-xs" data-ai-id="pods-detail:event-list">
+                  {events.data.map((event: PodEvent, index: number) => (
+                    <li key={`${event.reason}-${index}`} className="flex flex-col gap-1 py-1.5" data-ai-row={`${event.reason}-${index}`}>
+                      <span className="flex flex-wrap items-center gap-2">
+                        <Badge tone={event.type === 'Warning' ? 'warning' : 'neutral'}>{event.type || '-'}</Badge>
+                        <span className="font-medium text-ai-fg">{event.reason}</span>
+                      </span>
+                      <span className="text-ai-fg-muted">{event.message}</span>
+                      <span className="text-ai-fg-muted">
+                        {[event.source, event.count > 1 ? `x${event.count}` : '', formatTimestamp(event.lastSeen)]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </section>
+          ) : null}
+
           {(pods.data?.length ?? 0) > 0 ? (
             <section className="rounded-ai-md border border-ai-line p-4" data-ai-id={`${kind}-detail:pods`}>
               <h2 className="mb-3 text-sm font-medium text-ai-fg">{t('workloads.detail.pods')}</h2>
