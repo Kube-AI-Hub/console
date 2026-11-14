@@ -205,6 +205,11 @@ tree.py → build_prd.py → prd(AC) → design(DEC/不变量/坑) → spec(cove
 
 37. **「逐页对比」不靠人写**：`python3 prd/tools/parity_report.py` 从 catalog 与各 PRD 生成 `docs/plans/page-parity-audit.md`——129 个页面、261 个 AC、194 条用例，每页一行列出「验收场景 / 用例 / 明确不做」。手写的对照表会在下一个页面落地时立刻过期（本轮实测：旧表缺了 12 个新页面）。
 
+### 4.10 长跑验证需要「自愈」的隧道与 BFF
+
+38. **隧道与 BFF 都要按自愈方式跑**。本轮三次全量验证挂起：一次 BFF 端口在听但进程已死（升级测试把它打崩），一次 ssh 隧道 socket 在、转发已断（HTTP 请求永远等到超时），一次被杀进程误杀了 5178。现象都一样——**pytest 以 0% CPU 挂着**，因为用例在等一个永远不来的响应。
+39. **落地做法**：`while true; do ssh -N ... ; sleep 3; done` 管隧道；BFF 用同样循环包一层并 append 日志；杀进程时按 **端口** 精确杀（`lsof -i :8092`），不要按 `ps | grep` 批量杀——静态服务器与 BFF 之间有连接，会被一起带走。
+
 ## 5. 验证与门禁
 
 ```bash
