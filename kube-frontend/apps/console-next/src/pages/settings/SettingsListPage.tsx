@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Link } from '@tanstack/react-router';
 import { type MemberSummary, type RoleDetail, type RoleSummary } from '@kube-ai-hub/api-client';
 import { AiSurface, Badge, Modal, ResourceList, Skeleton, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
@@ -26,6 +27,8 @@ import { RoleCreateDialog } from './RoleCreateDialog';
  */
 export interface SettingsListPageProps {
   kind: SettingsKind;
+  /** Route parameter, needed to build the role-detail link; members never use it. */
+  workspace?: string;
   cluster: string;
   namespace: string;
 }
@@ -36,7 +39,7 @@ type SortKey = 'name' | 'createTime';
 
 type Row = RoleSummary | MemberSummary;
 
-export function SettingsListPage({ kind, cluster, namespace }: SettingsListPageProps): React.ReactElement {
+export function SettingsListPage({ kind, workspace, cluster, namespace }: SettingsListPageProps): React.ReactElement {
   const t = useT();
   const descriptor = SETTINGS_DESCRIPTORS[kind];
   const [projectFilter, setProjectFilter] = React.useState(namespace);
@@ -91,12 +94,29 @@ export function SettingsListPage({ kind, cluster, namespace }: SettingsListPageP
                 title: t('settings.column.name'),
                 render: (row: Row) => {
                   const role = row as RoleSummary;
+                  const label = (
+                    <span className="flex items-center gap-1.5">
+                      <span className="truncate font-medium text-ai-fg">{role.alias || role.name}</span>
+                      {role.system ? <Badge tone="neutral">{t('settings.roles.templateBadge')}</Badge> : null}
+                    </span>
+                  );
                   return (
                     <span className="flex min-w-0 flex-col">
-                      <span className="flex items-center gap-1.5">
-                        <span className="truncate font-medium text-ai-fg">{role.alias || role.name}</span>
-                        {role.system ? <Badge tone="neutral">{t('settings.roles.templateBadge')}</Badge> : null}
-                      </span>
+                      {workspace ? (
+                        // The role's name is how a reader reaches its detail page; the old
+                        // console linked it the same way. Members come from a route without a
+                        // workspace parameter, which is why this is conditional.
+                        <Link
+                          to="/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/roles/$name"
+                          params={{ workspace, cluster, namespace: projectFilter, name: role.name }}
+                          className="flex hover:underline"
+                          data-ai-id={`project-role-detail:link:${role.name}`}
+                        >
+                          {label}
+                        </Link>
+                      ) : (
+                        label
+                      )}
                       <span className="truncate text-[11px] text-ai-fg-muted">{role.description || '-'}</span>
                     </span>
                   );
@@ -217,7 +237,7 @@ export function SettingsListPage({ kind, cluster, namespace }: SettingsListPageP
       },
       pagination: { page: list.page, pageSize: PAGE_SIZE, total },
     }),
-    [descriptor, kind, list, projectFilterControl, t, total],
+    [cluster, descriptor, kind, list, projectFilter, projectFilterControl, t, total, workspace],
   );
 
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';

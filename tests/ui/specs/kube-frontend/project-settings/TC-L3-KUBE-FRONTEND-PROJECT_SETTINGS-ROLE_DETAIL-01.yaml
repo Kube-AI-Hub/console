@@ -1,0 +1,42 @@
+id: TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLE_DETAIL-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: project-settings
+feature: role-detail
+title: 项目角色详情 · 权限规则与已授权用户页签
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/roles/viewer'
+prd: prd/kube-frontend/project-settings/role-detail.md
+design: design/kube-frontend/project-settings/role-detail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLE_DETAIL-01
+
+story:
+- US1
+
+product: 项目角色详情的只读两个页签：权限规则（默认）与已授权用户（该角色 RoleBinding 的 subjects）。
+preconditions:
+- 已登录，且 default 项目存在可读的角色
+- 该项目的 rolebindings 可读（可能没有绑定）
+steps:
+- 用 API 读 default 项目角色列表，选一个有 RoleBinding 的角色（没有则取第一个角色）
+- 用 API 读 /apis/rbac.authorization.k8s.io/v1/namespaces/default/rolebindings，按 roleRef.name 过滤并展开 subjects 得到期望行数 S
+- 用 API 读角色详情得到 rules 数组（期望规则行数 R）
+- 打开项目角色列表，点击角色名链接进入详情
+- 核对默认「权限规则」页签的规则表行数
+- 点击「已授权用户」页签，核对表头与行数；无绑定时核对空态
+expected:
+- 详情 surface 可见且 data-ai-state 为 ready
+- 规则行数等于 R（R 为 0 时显示无规则说明）
+- 已授权用户页签表头为 类型 / 名称 / 命名空间
+- 有绑定：行数等于 S，首行出现 project-role-detail:user:<name> 句柄
+- 无绑定：显示 project-role-detail:users-empty
+- 全程不发出写请求
+troubleshoot:
+- 已授权用户恒空：读了 users?role= 而不是 namespaced rolebindings（会漏 ServiceAccount 主体）
+- 行数大于接口：没按 roleRef.name 过滤
+- 页面 404：roles/$name.tsx 路由未建或缺 workspace/cluster/project 段
+- 用户链接 404：只对 kind=User 的主体生成 /kube-frontend/access/users/<name> 链接
+update_automation:
+- 选择器：project-role-detail:link:<name> / tab:rules / tab:users / rule-table / user-table / users-empty / user:<name>

@@ -8,6 +8,6 @@ export const Route = createFileRoute('/kube-frontend/$workspace/clusters/$cluste
 });
 
 function rolesRoute(): React.ReactElement {
-  const { cluster, namespace } = Route.useParams();
-  return <SettingsListPage kind="roles" cluster={cluster} namespace={namespace} />;
+  const { workspace, cluster, namespace } = Route.useParams();
+  return <SettingsListPage kind="roles" workspace={workspace} cluster={cluster} namespace={namespace} />;
 }
