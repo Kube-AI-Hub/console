@@ -22,7 +22,7 @@
 - `spec.rules` 是数组；JSON merge patch 整体替换数组，因此 PUT 整对象而不是逐字段 patch。
 - PUT 必须带 `metadata.resourceVersion`；否则两个编辑者会静默覆盖对方。
 - 描述写 `metadata.annotations['kubesphere.io/description']`；规则说明/消息写 `spec.rules[].annotations.summary` / `annotations.message`。
-- 启用 / 停用只 patch `alerting.kubesphere.io/enable` 标签，不动 `spec`（与 `rules.md` 的 DEC-03 一致）。
+- 启用 / 停用只 patch `alerting.kubesphere.io/enable` 标签，不动 `spec`（与 `rules.md` 的 DEC-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-03 一致）。
 
 ## 方案决策
 

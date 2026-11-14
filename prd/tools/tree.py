@@ -617,6 +617,11 @@ MODULES = [
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-LOG_COLLECTIONS-01"]},
                     },
                     {
+                        "id": "yaml-edit",
+                        "title": "编辑 YAML 覆盖",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-YAML_EDIT-01"]},
+                    },
+                    {
                         "id": "cluster-config",
                         "title": "集群级配置",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-01"]},
@@ -740,6 +745,11 @@ MODULES = [
                 "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-MONITORING-01"]},
                 "features": [
                     {
+                        "id": "alerts-write",
+                        "title": "告警策略的创建与编辑",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-01"]},
+                    },
+                    {
                         "id": "alerts",
                         "title": "告警消息列表",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-MONITORING-ALERTS-01"]},
@@ -794,6 +804,11 @@ MODULES = [
                 "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-APP_WORKLOADS-01"]},
                 "features": [
                     {
+                        "id": "edit-form",
+                        "title": "定制编辑表单",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_FORM-01"]},
+                    },
+                    {
                         "id": "detail-tabs",
                         "title": "详情页页签",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL_TABS-01"]},
@@ -833,6 +848,8 @@ MODULES = [
                             "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-01",
                             "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-02",
                             "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-03",
+                            "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_TERMINAL-01",
+                            "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_TERMINAL-01",
                         ]},
                     },
                     {

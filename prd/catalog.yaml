@@ -671,6 +671,13 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-LOG_COLLECTIONS-01
+    - id: yaml-edit
+      title: 编辑 YAML 覆盖
+      prd: prd/kube-frontend/cluster-management/yaml-edit.md
+      design: design/kube-frontend/cluster-management/yaml-edit.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-YAML_EDIT-01
     - id: cluster-config
       title: 集群级配置
       prd: prd/kube-frontend/cluster-management/cluster-config.md
@@ -832,6 +839,13 @@ modules:
       L2:
       - TC-FULL-KUBE-FRONTEND-MONITORING-01
     features:
+    - id: alerts-write
+      title: 告警策略的创建与编辑
+      prd: prd/kube-frontend/monitoring/alerts-write.md
+      design: design/kube-frontend/monitoring/alerts-write.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-01
     - id: alerts
       title: 告警消息列表
       prd: prd/kube-frontend/monitoring/alerts.md
@@ -894,6 +908,13 @@ modules:
       L2:
       - TC-FULL-KUBE-FRONTEND-APP_WORKLOADS-01
     features:
+    - id: edit-form
+      title: 定制编辑表单
+      prd: prd/kube-frontend/app-workloads/edit-form.md
+      design: design/kube-frontend/app-workloads/edit-form.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_FORM-01
     - id: detail-tabs
       title: 详情页页签
       prd: prd/kube-frontend/app-workloads/detail-tabs.md
@@ -940,6 +961,8 @@ modules:
         - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-01
         - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-02
         - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-03
+        - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_TERMINAL-01
+        - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_TERMINAL-01
     - id: pod-events
       title: 容器组事件
       prd: prd/kube-frontend/app-workloads/pod-events.md

@@ -91,9 +91,9 @@ tree.py → build_prd.py → prd(AC) → design(DEC/不变量/坑) → spec(cove
 | 应用负载 | deployments、statefulsets、daemonsets、jobs、cronjobs、pods、services、ingresses |
 | 存储 | persistentvolumeclaims、volumesnapshots |
 | 监控告警 | alerts、alertingrules |
-| 项目设置 | baseinfo、roles、members、networkpolicies、gateways、log-collections |
+| 项目设置 | baseinfo、roles、members、networkpolicies（含策略详情与 YAML 编辑）、gateways、log-collections |
 
-> **容器详情**（`pods/$name/containers/$container`）已迁；**详情页签体系**已迁（Deployment 5 页签 / Pod 4 页签，见 `app-workloads/detail-tabs.md`）。
+> **容器详情**（`pods/$name/containers/$container`）已迁：ES 日志检索、实时日志 tail、容器终端（BFF WebSocket upgrade）。**详情页签体系**已迁（Deployment 5 页签 / Pod 4 页签，见 `app-workloads/detail-tabs.md`）。**定制编辑**见 `app-workloads/edit-form.md`；Node/PV/StorageClass/NetworkPolicy 的 YAML 编辑见 `cluster-management/yaml-edit.md`。
 
 ### 3.2 集群级（30）
 
@@ -247,10 +247,11 @@ python3 prd/tools/verify.py --serial-e2e
 | 能力 | 现状 | 影响 |
 | --- | --- | --- |
 | **容器日志 tail** | 已迁：`client.stream()` + `pods/log?follow=true`（HTTP chunked，无需 WebSocket），容器详情页「实时」开关 | 排障第一条通道打通；顺手修了 BFF 泄漏上游流与 dev 静态服务器缓冲两个真问题 |
-| **终端 / kubectl / 节点 shell** | 无。需要 BFF WebSocket `upgrade` 透传 + 终端组件 | 需独立立项：升级转发 + xterm 组件 |
+| **容器终端** | 已迁：BFF `upgrade` 透传 + 原生 WebSocket + `v5.channel.k8s.io` 帧协议，容器详情页可开终端 | 流式通道第一条完整闭环；无 `/bin/sh` 的容器显示错误原因 |
+| **kubectl 代理 / 节点 shell** | 无。可复用同一 upgrade 通道，但需要独立的会话与权限设计 | 待立项 |
 | 详情页签体系 | 已迁：概览/关联容器组/修订版本/事件/元数据（Pod 为 概览/容器/事件/元数据） | 监控页签仍未做（需要监控区间查询） |
-| 编辑 YAML 覆盖 | 21 类 → 13 类 | Node/PV/StorageClass/NetworkPolicy 等无法改 YAML |
-| 定制编辑表单 | 21 种 → 9 种 | Deployment 只能改副本数，改镜像要编辑 YAML |
+| 编辑 YAML 覆盖 | 21 类 → 17 类（本轮补 Node/PV/StorageClass/NetworkPolicy） | 仍缺集群/平台级若干资源 |
+| 定制编辑表单 | 21 种 → 13 种（本轮补 Deployment/StatefulSet/DaemonSet/CronJob 的镜像、环境变量、拉取策略、副本数） | 仍缺多数资源的专属表单 |
 | 列表通用能力 | 固定 10 条、无刷新/实时/列显隐、空态无出口 | 缺口分析 F-41~F-46 |
 | 帮助/关于、24 项配置入口 | 无 | 体验项 |
 

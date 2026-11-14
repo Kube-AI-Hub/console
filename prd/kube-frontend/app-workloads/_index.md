@@ -58,7 +58,7 @@
 - **写**：`PATCH`（merge patch）与 `DELETE` 走 Kubernetes 原生端点；`PATCH` 必须带 `application/merge-patch+json`。
 - **作用域**：一切以路由参数为准（workspace / cluster / namespace），页面内不另存副本。
 - **分页**：服务端分页，每页 10 条；排序与搜索参数随请求下发。
-- **不做**：创建负载（老 console 走镜像/模板的复杂表单，属于独立页面）、日志与终端（需要 WebSocket 通道），二者不在本模块范围。
+- **不做**：创建负载（老 console 走镜像/模板的复杂表单，属于独立页面）。日志与终端已落地：日志读 ES 索引 + 实时 tail（HTTP chunked），终端走 BFF 的 WebSocket upgrade（见 `container-detail.md` 的对应验收场景）。
 
 ## UI 交互设计
 
@@ -103,7 +103,7 @@
 
 ## 明确不做
 
-- 日志与终端：需要 WebSocket 通道，见仓库的后续计划。
+- 日志与终端：已交付（`container-detail.md`）。仍需 WebSocket 的只剩 kubectl 代理与节点 shell。
 - 列显隐与列宽拖拽：八页共用一张表，先保证列一致。
 - 服务与路由的**创建**、路由规则编辑（需要各自的规则编辑器）。
 - 任务重跑、容器组重新调度：目标集群没有 operations 模块（实测该组全部 404）。
