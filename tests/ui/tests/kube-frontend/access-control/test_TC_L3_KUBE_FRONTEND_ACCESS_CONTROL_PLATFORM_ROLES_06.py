@@ -31,6 +31,9 @@ def test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_PLATFORM_ROLES_06(access_control_pag
         # Rule 0 is the seeded one; make it "read pods".
         ui.page.locator('[data-ai-id="role-editor:rule:0:groups"]').fill("")
         ui.page.locator('[data-ai-id="role-editor:rule:0:resources"]').fill("pods")
+        # The seeded rule starts as the read preset (get/list/watch); uncheck watch so the
+        # assertion below checks what this case actually chose.
+        ui.page.locator('[data-ai-id="role-editor:rule:0:verb:watch"]').uncheck()
         for verb in ("get", "list"):
             ui.page.locator(f'[data-ai-id="role-editor:rule:0:verb:{verb}"]').check()
 
