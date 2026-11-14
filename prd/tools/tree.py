@@ -597,6 +597,11 @@ MODULES = [
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-COMPONENTS-01"]},
                     },
                     {
+                        "id": "component-detail",
+                        "title": "系统组件详情",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-COMPONENT_DETAIL-01"]},
+                    },
+                    {
                         "id": "cluster-edit-info",
                         "title": "编辑集群信息",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EDIT_INFO-01"]},
@@ -649,7 +654,7 @@ MODULES = [
                     {
                         "id": "log-collections",
                         "title": "集群日志收集",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-LOG_COLLECTIONS-01"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-LOG_COLLECTIONS-01", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-LOG_COLLECTIONS-02"]},
                     },
                     {
                         "id": "yaml-edit",
@@ -804,6 +809,11 @@ MODULES = [
                         "id": "roles",
                         "title": "项目角色列表",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-01", "TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-04"]},
+                    },
+                    {
+                        "id": "role-detail",
+                        "title": "项目角色详情与已授权用户",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLE_DETAIL-01"]},
                     },
                     {
                         "id": "role-rules",

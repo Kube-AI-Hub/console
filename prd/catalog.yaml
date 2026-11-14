@@ -635,6 +635,13 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-COMPONENTS-01
+    - id: component-detail
+      title: 系统组件详情
+      prd: prd/kube-frontend/cluster-management/component-detail.md
+      design: design/kube-frontend/cluster-management/component-detail.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-COMPONENT_DETAIL-01
     - id: cluster-edit-info
       title: 编辑集群信息
       prd: prd/kube-frontend/cluster-management/cluster-edit-info.md
@@ -708,6 +715,7 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-LOG_COLLECTIONS-01
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-LOG_COLLECTIONS-02
     - id: yaml-edit
       title: 编辑 YAML 覆盖
       prd: prd/kube-frontend/cluster-management/yaml-edit.md
@@ -912,6 +920,13 @@ modules:
         L3:
         - TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-01
         - TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-04
+    - id: role-detail
+      title: 项目角色详情与已授权用户
+      prd: prd/kube-frontend/project-settings/role-detail.md
+      design: design/kube-frontend/project-settings/role-detail.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLE_DETAIL-01
     - id: role-rules
       title: 角色权限规则
       prd: prd/kube-frontend/project-settings/role-rules.md

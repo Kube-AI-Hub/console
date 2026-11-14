@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from '@tanstack/react-router';
 import { componentsApi, type ComponentSummary } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
@@ -73,7 +74,14 @@ export function ComponentsPage({ cluster: _cluster }: ComponentsPageProps): Reac
           title: t('cluster.column.name'),
           render: (row) => (
             <span className="flex min-w-0 flex-col" {...actionProps(`components:name:${row.name}`)}>
-              <span className="truncate font-medium text-ai-fg">{row.name}</span>
+              <Link
+                to="/kube-frontend/clusters/$cluster/components/$name"
+                params={{ cluster: _cluster, name: row.name }}
+                className="truncate font-medium text-ai-accent hover:underline"
+                data-ai-id={`components:link:${row.name}`}
+              >
+                {row.name}
+              </Link>
               <span className="truncate text-[11px] text-ai-fg-muted">{row.namespace || '-'}</span>
             </span>
           ),
