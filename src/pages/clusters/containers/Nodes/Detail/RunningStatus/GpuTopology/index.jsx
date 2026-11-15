@@ -52,6 +52,24 @@ const GPU_TOPOLOGY_LEGEND = {
     { code: 'PIX', desc: 'Connection traversing at most a single PCIe bridge' },
     { code: 'NV#', desc: 'Connection traversing a bonded set of # NVLinks' },
   ],
+  kunlunxin: [
+    { code: 'X', descKey: 'GPU_TOPOLOGY_SELF' },
+    { code: 'XL', desc: 'Connection traversing XPULink' },
+    {
+      code: 'PIX',
+      desc: 'Connection traversing at most a single PCIe bridge',
+    },
+    {
+      code: 'NODE',
+      desc:
+        'Connection traversing PCIe as well as the interconnect between PCIe Host Bridges within a NUMA node',
+    },
+    {
+      code: 'SYS',
+      desc:
+        'Connection traversing PCIe as well as the SMP interconnect between NUMA nodes (e.g., QPI/UPI)',
+    },
+  ],
 }
 
 function getConnectivityTier(value) {
@@ -59,7 +77,7 @@ function getConnectivityTier(value) {
   const s = String(value).trim()
   if (s === '-' || s === '') return 'System'
   if (s.toUpperCase() === 'X') return 'Self'
-  if (/^NV\d+$/i.test(s) || s === 'NV#') return 'HighSpeed'
+  if (/^NV\d+$/i.test(s) || s === 'NV#' || s === 'XL') return 'HighSpeed'
   if (/^MLK/i.test(s)) return 'HighSpeed'
   if (s === 'H_B' || s === 'SGL' || s === 'MUL') return 'HighSpeed'
   return 'System'

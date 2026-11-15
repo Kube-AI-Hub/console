@@ -55,6 +55,7 @@
 | `pkg/gpu-agent/collector/nvidia_metrics.go` | NVIDIA 三种模式分派 | 不做输出 |
 | `pkg/gpu-agent/collector/cambricon_metrics.go` | MLU 四种模式 | 同上 |
 | `pkg/gpu-agent/collector/ascend_metrics.go` | NPU | 同上 |
+| `pkg/gpu-agent/collector/kunlun_metrics.go` | 昆仑芯独占：刮节点 IP:9507 的 `node_xpu_*`，丢掉 VF，只输出 `gpu_card_*` | 不把 `node_xpu_*` 交给页面 |
 | `pkg/gpu-agent/exporter/prometheus.go` | 统一输出 | 不分厂商 |
 
 ## 仓库落点

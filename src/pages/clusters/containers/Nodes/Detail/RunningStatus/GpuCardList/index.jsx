@@ -88,7 +88,7 @@ const GpuCardList = ({ dataSource = [], isLoading = false, match }) => {
       key: 'numa',
       isHideable: true,
       render: record =>
-        record.numa !== undefined && record.numa !== null ? record.numa : '-',
+        record.numa !== undefined && record.numa !== null ? record.numa : 0,
     },
     {
       title: t('GPU_CARD_VENDOR'),

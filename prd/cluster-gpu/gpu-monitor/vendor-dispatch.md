@@ -51,6 +51,7 @@
 | 寒武纪 | `default` / `env-share` / `dynamic-smlu` / `mim` | `mlu-exporter` | `mlu_container` 标签映射 | 按 `smlu_instance_info` 的 `vcore` 占比加权 |
 | 昇腾 | 硬切分 / `hami-vnpu-core` | `npu-exporter`（`npu_chip_info_*`） | `npu_container_info` | 按 vNPU 模板的算力占比近似 |
 | 海光 DCU | `default` | gpu-agent 自采 | 无容器级指标 | 卡指标全量计入该 Pod |
+| 昆仑芯 | `default`（独占） | xpu-exporter 的 `node_xpu_*`，gpu-agent 收成 `gpu_card_*`，丢掉 type 含 `VF` 的序列 | 无容器级指标 | 页面只读 `node_gpu_*`（由 `gpu_card_*` 聚合），不读 `node_xpu_*` |
 
 ## 边界情况
 

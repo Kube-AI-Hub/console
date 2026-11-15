@@ -23,6 +23,15 @@ import { Modal } from 'components/Base'
 import request from 'utils/request'
 import { getVendorModeConfig, getParamsForMode, getModeOption } from './config'
 
+function nodeGpuVendor(detail, nodeInfo) {
+  return (
+    nodeInfo.gpuVendor ||
+    get(detail, 'labels["xpu-vendor"]') ||
+    get(detail, 'metadata.labels["xpu-vendor"]') ||
+    ''
+  ).toLowerCase()
+}
+
 function buildFormData(nodeInfo, vendorConfig) {
   const mode = nodeInfo.virtualCardMode || 'default'
   const existingParams = nodeInfo.gpuModeParams || {}
@@ -79,7 +88,7 @@ export default class GpuVirtModeModal extends React.Component {
       get(props.detail, 'status.nodeInfo') ||
       get(props.detail, 'nodeInfo') ||
       {}
-    const gpuVendor = (nodeInfo.gpuVendor || '').toLowerCase()
+    const gpuVendor = nodeGpuVendor(props.detail, nodeInfo)
     const vendorConfig = getVendorModeConfig(gpuVendor)
     this.state = {
       formData: buildFormData(nodeInfo, vendorConfig),
@@ -92,7 +101,7 @@ export default class GpuVirtModeModal extends React.Component {
     if (visible && visible !== prevProps.visible && detail) {
       const nodeInfo =
         get(detail, 'status.nodeInfo') || get(detail, 'nodeInfo') || {}
-      const gpuVendor = (nodeInfo.gpuVendor || '').toLowerCase()
+      const gpuVendor = nodeGpuVendor(detail, nodeInfo)
       const vendorConfig = getVendorModeConfig(gpuVendor)
       this.setState({
         formData: buildFormData(nodeInfo, vendorConfig),
@@ -105,9 +114,7 @@ export default class GpuVirtModeModal extends React.Component {
     const nodeName = detail.name
     const nodeInfo =
       get(detail, 'status.nodeInfo') || get(detail, 'nodeInfo') || {}
-    const vendorConfig = getVendorModeConfig(
-      (nodeInfo.gpuVendor || '').toLowerCase()
-    )
+    const vendorConfig = getVendorModeConfig(nodeGpuVendor(detail, nodeInfo))
     this.setState({ isSubmitting: true })
     try {
       const params = buildParamsFromFormData(data, vendorConfig)
@@ -130,9 +137,7 @@ export default class GpuVirtModeModal extends React.Component {
     const { detail } = this.props
     const nodeInfo =
       get(detail, 'status.nodeInfo') || get(detail, 'nodeInfo') || {}
-    const vendorConfig = getVendorModeConfig(
-      (nodeInfo.gpuVendor || '').toLowerCase()
-    )
+    const vendorConfig = getVendorModeConfig(nodeGpuVendor(detail, nodeInfo))
     if (!vendorConfig || !vendorConfig.modeOptions) return
     const modeOpt = vendorConfig.modeOptions.find(o => o.value === mode)
     const newParams = {}
@@ -151,7 +156,7 @@ export default class GpuVirtModeModal extends React.Component {
     const { formData, isSubmitting } = this.state
     const nodeInfo =
       get(detail, 'status.nodeInfo') || get(detail, 'nodeInfo') || {}
-    const gpuVendor = (nodeInfo.gpuVendor || '').toLowerCase()
+    const gpuVendor = nodeGpuVendor(detail, nodeInfo)
     const vendorConfig = getVendorModeConfig(gpuVendor)
     const supported =
       vendorConfig &&
