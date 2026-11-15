@@ -457,27 +457,9 @@ MODULES = [
                         "tests": {"L3": [
                             "TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-01",
                             "TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-02",
-                            "TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-03",
-                            "TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-04",
                         ]},
                     },
-                    {
-                        "id": "workspace-apps",
-                        "title": "企业空间应用模板",
-                        "tests": {"L3": [
-                            "TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_APPS-01",
-                            "TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_APPS-02",
-                        ]},
-                    },
-                    {
-                        "id": "installed-apps",
-                        "title": "已安装应用",
-                        "tests": {"L3": [
-                            "TC-L3-KUBE-FRONTEND-APP_STORE-INSTALLED_APPS-01",
-                            "TC-L3-KUBE-FRONTEND-APP_STORE-INSTALLED_APPS-02",
-                        ]},
-                    },
-                    {
+                                                            {
                         "id": "manage",
                         "title": "商店管理（应用/分类/审核）",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-01"]},
