@@ -11,8 +11,8 @@ STORE_APPS = "/kapis/openpitrix.io/v1/apps"
 
 
 @pytest.mark.point
-def test_TC_L3_KUBE_FRONTEND_APP_STORE_INSTALL_02(ui_config, page, session_token, screenshot):
-    """TC-L3-KUBE-FRONTEND-APP_STORE-INSTALL-02 应用详情 · 安装弹窗的 values 配置。"""
+def test_TC_L3_KUBE_FRONTEND_APP_STORE_DETAIL_02(ui_config, page, session_token, screenshot):
+    """TC-L3-KUBE-FRONTEND-APP_STORE-DETAIL-02 应用详情 · 安装弹窗的 values 配置。"""
 
     from conftest import ApiClient
 
@@ -21,13 +21,21 @@ def test_TC_L3_KUBE_FRONTEND_APP_STORE_INSTALL_02(ui_config, page, session_token
 
     status, apps = api.request("GET", f"{STORE_APPS}?limit=-1")
     assert status == 200, f"store apps -> {status}"
-    app = next((item for item in (apps or {}).get("items") or [] if item.get("app_id")), None)
-    assert app is not None, "商店里没有应用"
-    app_id = app["app_id"]
-
-    status, versions = api.request("GET", f"{STORE_APPS}/{app_id}/versions")
-    version_id = ((versions or {}).get("items") or [{}])[0].get("version_id") or ""
-    assert version_id, versions
+    # Pick an app with exactly one version: the dialog pre-fills from the newest version, so a
+    # single-version app makes "the version the API returns" and "the version the dialog shows"
+    # the same one. A multi-version app would make this assertion depend on sort order.
+    app_id = ""
+    version_id = ""
+    for item in (apps or {}).get("items") or []:
+        candidate = item.get("app_id") or ""
+        if not candidate:
+            continue
+        status, versions = api.request("GET", f"{STORE_APPS}/{candidate}/versions")
+        items = (versions or {}).get("items") or []
+        if len(items) == 1 and items[0].get("version_id"):
+            app_id, version_id = candidate, items[0]["version_id"]
+            break
+    assert app_id and version_id, "商店里没有单版本应用，用例前提不成立"
 
     status, files = api.request("GET", f"{STORE_APPS}/{app_id}/versions/{version_id}/files")
     assert status == 200, f"files -> {status}"

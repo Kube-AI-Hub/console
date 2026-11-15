@@ -51,7 +51,7 @@
 
 **为什么**：写入与映射需要单测（`toWorkspaceRepo`/`toRepoEvent`/`toAppTemplate`），而页面内请求既不能单测也无法复用；
 仓库详情、模板详情、安装弹窗都要读同一批集合，复制三份必然漂移。
-**被否方案**：继续页面内直连（DEC-01 的原方案）。否决理由见上。
+**被否方案**：继续页面内直连（DEC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-01 的原方案）。否决理由见上。
 **何时重新考虑**：不再考虑；契约变化只改 api-client 一处。
 
 ### DEC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-02 — 应用页不按仓库过滤

@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/app-store/workspace-repos.md`](../../../../prd/kube-frontend/app-store/workspace-repos.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-01** — 已知企业空间 `<ws>` 有 N 个应用仓库、M 个仓库应用（N/M 可能为 0），当打开该空间的仓库列表，则列出 N 行（名称 / 地址 / 类型 / 状态 / 创建时间），N 为 0 时显示「该企业空间还没有应用仓库」；打开仓库应用页则列出 M 行（名称 / 版本类型 / 状态 / 创建时间），M 为 0 时显示「该企业空间还没有应用」；接口失败时显示错误面板与重试；两页的读路径只读（写入口见 AC-02 起）。
+- **AC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-01** — 已知企业空间 `<ws>` 有 N 个应用仓库、M 个仓库应用（N/M 可能为 0），当打开该空间的仓库列表，则列出 N 行（名称 / 地址 / 类型 / 状态 / 创建时间），N 为 0 时显示「该企业空间还没有应用仓库」；打开仓库应用页则列出 M 行（名称 / 版本类型 / 状态 / 创建时间），M 为 0 时显示「该企业空间还没有应用」；接口失败时显示错误面板与重试；两页的读路径只读（写入口见 AC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-02 起）。
 
 ### 关联设计
 

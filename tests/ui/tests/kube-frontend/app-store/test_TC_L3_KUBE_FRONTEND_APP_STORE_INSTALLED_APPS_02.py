@@ -38,6 +38,20 @@ def test_TC_L3_KUBE_FRONTEND_APP_STORE_INSTALLED_APPS_02(app_workloads_page, scr
                 return cluster
         return {}
 
+    def wait_gone(timeout: float = 90.0) -> bool:
+        """Poll until the release disappears from both the aggregate and the CRD collection.
+
+        Uninstalling is asynchronous: the DELETE answers 200 immediately, then the controller
+        removes the HelmRelease and the aggregate row. Asserting straight after the click fails
+        on a healthy system (measured: gone within a couple of minutes), so the test waits.
+        """
+        deadline = time.time() + timeout
+        while time.time() < deadline:
+            if not mine() and release_id not in release_ids():
+                return True
+            time.sleep(3)
+        return not mine() and release_id not in release_ids()
+
     def release_ids() -> set[str]:
         status, body = ui.api.request("GET", RELEASES)
         if status != 200 or not isinstance(body, dict):
@@ -131,10 +145,10 @@ def test_TC_L3_KUBE_FRONTEND_APP_STORE_INSTALLED_APPS_02(app_workloads_page, scr
         ui.page.locator('[data-ai-id="installed-app:uninstall:confirm"]').click()
         ui.page.wait_for_timeout(4000)
         assert any(url.rstrip("/").endswith(release_id) for url in deletes), deletes
-        assert mine() == {}, "卸载后汇总集合仍返回该 release"
-        assert release_id not in release_ids(), "卸载后 helmrelease 仍存在"
+        assert wait_gone(), f"卸载后仍残留 release：{mine()}"
     finally:
         current = mine()
         if current.get("cluster_id"):
             ui.api.request("DELETE", f"{PROJECT}/{current['cluster_id']}")
-        assert mine() == {}, "清理后仍残留 release"
+        # The delete is asynchronous, so the cleanup waits for the same condition the test does.
+        assert wait_gone(), f"清理后仍残留 release：{mine()}"

@@ -470,7 +470,7 @@ MODULES = [
                         "tests": {"L3": [
                             "TC-L3-KUBE-FRONTEND-APP_STORE-DETAIL-01",
                             "TC-L3-KUBE-FRONTEND-APP_STORE-INSTALL-01",
-                            "TC-L3-KUBE-FRONTEND-APP_STORE-INSTALL-02",
+                            "TC-L3-KUBE-FRONTEND-APP_STORE-DETAIL-02",
                         ]},
                     },
                                                         ],
