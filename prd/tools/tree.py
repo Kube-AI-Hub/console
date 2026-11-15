@@ -910,6 +910,11 @@ MODULES = [
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLE_RULES-01"]},
                     },
                     {
+                        "id": "settings-lists-refresh",
+                        "title": "项目设置列表刷新",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-SETTINGS_LISTS_REFRESH-01"]},
+                    },
+                    {
                         "id": "network-isolation",
                         "title": "网络隔离",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-01", "TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-04", "TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_RULES-01"]},

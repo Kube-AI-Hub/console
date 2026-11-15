@@ -17,6 +17,7 @@ import { useAuth } from '@/shell/AuthProvider';
 import { SETTINGS_DESCRIPTORS, useDeleteRole, useMemberWrites, useSettingsList, useUpdateRole, type SettingsKind } from './queries';
 import { MemberDialog } from './MemberDialog';
 import { RoleCreateDialog } from './RoleCreateDialog';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * Project settings: 角色 and 成员.
@@ -83,10 +84,12 @@ export function SettingsListPage({ kind, workspace, cluster, namespace }: Settin
 
   const rows = (query.data?.items ?? []) as Row[];
   const total = query.data?.total ?? 0;
+  const listRefresh = useListRefresh(`${kind}`, query);
 
   const schema = React.useMemo<ListSchema<Row>>(
     () => ({
       title: t(descriptor.titleKey),
+      refresh: listRefresh.refresh,
       description: t(descriptor.descriptionKey),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
@@ -265,6 +268,7 @@ export function SettingsListPage({ kind, workspace, cluster, namespace }: Settin
           : [],
       empty: { title: t(descriptor.emptyTitleKey), description: t(descriptor.emptyDescriptionKey) },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -274,7 +278,7 @@ export function SettingsListPage({ kind, workspace, cluster, namespace }: Settin
       },
       pagination: { page: list.page, pageSize: PAGE_SIZE, total },
     }),
-    [cluster, descriptor, isSelf, kind, list, projectFilter, projectFilterControl, t, total, workspace],
+    [cluster, descriptor, isSelf, kind, list, projectFilter, projectFilterControl, query.isFetching, t, total, workspace],
   );
 
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
@@ -290,6 +294,7 @@ export function SettingsListPage({ kind, workspace, cluster, namespace }: Settin
   return (
     <AiSurface as="section" aiId={`${kind}:surface`} state={state} className="min-w-0">
       <ResourceList
+        onRefresh={listRefresh.onRefresh}
         schema={schema}
         rows={rows}
         loading={state === 'loading'}

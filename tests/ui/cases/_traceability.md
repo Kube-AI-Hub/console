@@ -322,6 +322,7 @@
 | kube-frontend/project-settings/roles | `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-02` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-02` | [`design/kube-frontend/project-settings/roles.md`](../../../design/kube-frontend/project-settings/roles.md) | [`tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_ROLES_02.py`](../../../tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_ROLES_02.py) |
 | kube-frontend/project-settings/roles | `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-03` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-03` | [`design/kube-frontend/project-settings/roles.md`](../../../design/kube-frontend/project-settings/roles.md) | [`tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_ROLES_03.py`](../../../tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_ROLES_03.py) |
 | kube-frontend/project-settings/roles | `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-04` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-04` | [`design/kube-frontend/project-settings/roles.md`](../../../design/kube-frontend/project-settings/roles.md) | [`tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_ROLES_04.py`](../../../tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_ROLES_04.py) |
+| kube-frontend/project-settings/settings-lists-refresh | `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-SETTINGS_LISTS_REFRESH-01` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-SETTINGS_LISTS_REFRESH-01` | [`design/kube-frontend/project-settings/settings-lists-refresh.md`](../../../design/kube-frontend/project-settings/settings-lists-refresh.md) | [`tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_SETTINGS_LISTS_REFRESH_01.py`](../../../tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_SETTINGS_LISTS_REFRESH_01.py) |
 | kube-frontend/secrets/_index | `AC-FULL-KUBE-FRONTEND-SECRETS-01` | `TC-FULL-KUBE-FRONTEND-SECRETS-01` | [`design/kube-frontend/secrets/_index.md`](../../../design/kube-frontend/secrets/_index.md) | [`tests/ui/tests/kube-frontend/secrets/test_TC_FULL_KUBE_FRONTEND_SECRETS_01.py`](../../../tests/ui/tests/kube-frontend/secrets/test_TC_FULL_KUBE_FRONTEND_SECRETS_01.py) |
 | kube-frontend/secrets/ai-surface | `AC-L3-KUBE-FRONTEND-SECRETS-AI_SURFACE-01` | `TC-L3-KUBE-FRONTEND-SECRETS-AI_SURFACE-01` | [`design/kube-frontend/secrets/ai-surface.md`](../../../design/kube-frontend/secrets/ai-surface.md) | [`tests/ui/tests/kube-frontend/secrets/test_TC_L3_KUBE_FRONTEND_SECRETS_AI_SURFACE_01.py`](../../../tests/ui/tests/kube-frontend/secrets/test_TC_L3_KUBE_FRONTEND_SECRETS_AI_SURFACE_01.py) |
 | kube-frontend/secrets/create | `AC-L3-KUBE-FRONTEND-SECRETS-CREATE-01` | `TC-L3-KUBE-FRONTEND-SECRETS-CREATE-01` | [`design/kube-frontend/secrets/create.md`](../../../design/kube-frontend/secrets/create.md) | [`tests/ui/tests/kube-frontend/secrets/test_TC_L3_KUBE_FRONTEND_SECRETS_CREATE_01.py`](../../../tests/ui/tests/kube-frontend/secrets/test_TC_L3_KUBE_FRONTEND_SECRETS_CREATE_01.py) |
@@ -391,7 +392,7 @@
 
 ## 小结
 
-- 需求里的 AC：384 条，其中未覆盖 1 条、无技术方案承接 17 条、无用例规格实现 1 条。
+- 需求里的 AC：385 条，其中未覆盖 1 条、无技术方案承接 17 条、无用例规格实现 1 条。
 - 未覆盖：`AC-L2-KUBE-FRONTEND-LOGIN-07`
 - 无技术方案承接：`AC-L2-KUBE-FRONTEND-LOGIN-01`, `AC-L2-KUBE-FRONTEND-LOGIN-02`, `AC-L2-KUBE-FRONTEND-LOGIN-03`, `AC-L2-KUBE-FRONTEND-LOGIN-04`, `AC-L2-KUBE-FRONTEND-LOGIN-05`, `AC-L2-KUBE-FRONTEND-LOGIN-06`, `AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L2-KUBE-FRONTEND-THEME-01`, `AC-L2-KUBE-FRONTEND-THEME-02`, `AC-L2-KUBE-FRONTEND-THEME-03`, `AC-L2-KUBE-FRONTEND-THEME-04`, `AC-L2-KUBE-FRONTEND-THEME-05`, `AC-L3-KUBE-FRONTEND-MONITORING-PROJECT_CUSTOM_MONITORING-01`, `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-02`, `AC-L3-KUBE-FRONTEND-STORAGE-DETAIL_TABS-01`
 - 无用例规格实现：`AC-L2-KUBE-FRONTEND-LOGIN-07`
@@ -649,6 +650,7 @@
 | kube-frontend/project-settings/role-rules | `US1` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLE_RULES-01`, `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLE_RULES-02` |
 | kube-frontend/project-settings/roles | `US1` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-01`, `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-02`, `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-03` |
 | kube-frontend/project-settings/roles | `US2` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLES-04` |
+| kube-frontend/project-settings/settings-lists-refresh | `US1` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-SETTINGS_LISTS_REFRESH-01` |
 | kube-frontend/secrets/_index | `US1` | `TC-FULL-KUBE-FRONTEND-SECRETS-01` |
 | kube-frontend/secrets/_index | `US2` | `TC-FULL-KUBE-FRONTEND-SECRETS-01` |
 | kube-frontend/secrets/_index | `US3` | `TC-FULL-KUBE-FRONTEND-SECRETS-01` |
@@ -709,4 +711,4 @@
 | kube-frontend/workbench/context | `US1` | `TC-L3-KUBE-FRONTEND-WORKBENCH-CONTEXT-01` |
 | kube-frontend/workbench/entry | `US1` | `TC-L3-KUBE-FRONTEND-WORKBENCH-ENTRY-01` |
 
-- 用户故事：308 条，其中未覆盖 0 条。
+- 用户故事：309 条，其中未覆盖 0 条。

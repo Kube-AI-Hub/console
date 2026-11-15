@@ -1041,6 +1041,13 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-ROLE_RULES-01
+    - id: settings-lists-refresh
+      title: 项目设置列表刷新
+      prd: prd/kube-frontend/project-settings/settings-lists-refresh.md
+      design: design/kube-frontend/project-settings/settings-lists-refresh.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-SETTINGS_LISTS_REFRESH-01
     - id: network-isolation
       title: 网络隔离
       prd: prd/kube-frontend/project-settings/network-isolation.md

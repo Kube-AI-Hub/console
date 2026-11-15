@@ -18,6 +18,7 @@ import { DeleteDialog } from '@/components/resource/DeleteDialog';
 import { NetworkPolicyDialog } from './NetworkPolicyDialog';
 import { NetworkRulesPanel } from './NetworkRulesPanel';
 import { formatTimestamp } from '@/lib/time';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * 项目网络隔离.
@@ -78,10 +79,12 @@ export function NetworkIsolationPage({ workspace, cluster, namespace }: NetworkI
 
   const rows = (policies.data?.items ?? []) as NetworkPolicySummary[];
   const total = policies.data?.total ?? 0;
+  const listRefresh = useListRefresh('networkpolicies', policies);
 
   const schema = React.useMemo<ListSchema<NetworkPolicySummary>>(
     () => ({
       title: t('settings.network.title'),
+      refresh: listRefresh.refresh,
       description: t('settings.network.description'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
@@ -142,6 +145,7 @@ export function NetworkIsolationPage({ workspace, cluster, namespace }: NetworkI
       ...{ primaryAction: { key: 'create', label: t('settings.network.create'), aiId: 'networkpolicies:create' } },
       empty: { title: t('settings.network.emptyTitle'), description: t('settings.network.emptyDescription') },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -151,7 +155,7 @@ export function NetworkIsolationPage({ workspace, cluster, namespace }: NetworkI
       },
       pagination: { page: list.page, pageSize: PAGE_SIZE, total },
     }),
-    [list, t, total],
+    [list, policies.isFetching, t, total],
   );
 
   const state = policies.isPending ? 'loading' : policies.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
@@ -188,6 +192,7 @@ export function NetworkIsolationPage({ workspace, cluster, namespace }: NetworkI
       <MutationAlert error={toggle.error} />
 
       <ResourceList
+        onRefresh={listRefresh.onRefresh}
         schema={schema}
         rows={rows}
         loading={state === 'loading'}
