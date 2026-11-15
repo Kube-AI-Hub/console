@@ -1,0 +1,50 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-04
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: devops-projects
+title: DevOps 工程 · 创建、编辑信息、删除与 CD 白名单
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/devops'
+prd: prd/kube-frontend/cluster-management/devops-projects.md
+design: design/kube-frontend/cluster-management/devops-projects.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-04
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-05
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-06
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_CD-02
+
+story:
+- US4
+- US14
+
+product: 工程生命周期闭环：创建对话框的名称校验与 generateName 提交、跳转生成名详情、编辑信息回读、CD 白名单编辑回读、输入名称确认删除后回列表；测试自建工程并在 finally 清理。
+preconditions:
+- 已登录且存在可写企业空间（system-workspace / public）
+- 工程名称每次运行唯一（pwspec-proj- 前缀），用例在 finally 删除自建工程
+- 不操作并行用例或用户已有的工程
+steps:
+- 用接口读 devopsprojects 确认列表可读
+- 打开 DevOps 列表，点 devops:create，对话框可见
+- 名称留空直接提交，核对名称必填提示
+- 填唯一名称、选择企业空间、填别名与描述后提交
+- 等待跳转到新工程详情 URL，用接口按前缀找到生成名并核对 workspace 标签与两个注解
+- 点 devops-detail:edit，修改别名与描述后确认，核对标题/描述与接口注解
+- 点 devops-detail:allowlist-edit，仓库填两行、部署位置填两行后保存，核对白名单回显与 spec.argo
+- 点 devops-detail:delete，在删除框输入生成名并确认，核对回到列表且行消失
+expected:
+- 创建请求 URL 为 /kapis/devops.kubesphere.io/v1alpha3/workspaces/<ws>/devops，响应名以输入名前缀开头
+- 名称为空提交时对话框不关闭并显示「请输入名称。」
+- 创建成功后 URL 为新工程详情，列表出现该行，基本信息工程命名空间回退为工程名
+- 编辑后 devops-detail:title 显示别名、devops-detail:description 显示描述，接口注解 kubesphere.io/alias-name/description 等于提交值
+- 白名单保存后 devops-detail:allowlist-repos 含提交的仓库行、allowlist-destinations 含 集群/项目，接口 spec.argo.sourceRepos/destinations 回读一致
+- 删除确认框未输入完整名称时 delete-confirm 禁用；确认后回到列表且该行消失，接口 GET 404
+troubleshoot:
+- 创建 400 metadata.generateName Required value：body 必须带 generateName
+- 创建后控制器未同步属正常：不要断言 status.adminNamespace 已写入
+- 白名单保存丢失 annotations/spec.argo 其他字段：核对整对象 PUT 前的回读对象
+- 删除卡住：核对是否仍有 finalizer（本环境新建工程可即时删除）
+update_automation:
+- 选择器：devops:create/create-name/-workspace/-alias/-description/-submit；devops-detail:edit/edit-alias/edit-description/edit-info-submit、delete/delete-input/delete-confirm、allowlist-edit/allowlist-repos/allowlist-destinations；devops:cd-allowlist-repos/-destinations/-submit
+- 接口：工程写路径变化时同步 pages/devops_page.py 的 create_project/delete_project 与断言

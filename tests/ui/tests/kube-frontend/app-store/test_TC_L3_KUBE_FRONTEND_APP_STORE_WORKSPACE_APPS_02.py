@@ -76,16 +76,19 @@ def test_TC_L3_KUBE_FRONTEND_APP_STORE_WORKSPACE_APPS_02(ui_config, page, sessio
         rows = page.locator('[data-ai-id="workspace-app:versions"] tbody tr[data-ai-row]')
         expect(rows).to_have_count(len(versions(new_app_id)), timeout=60_000)
 
-        row = rows.first
-        row.get_by_role("button", name="更多操作").click()
-        page.get_by_role("menuitem", name="提交审核").click()
-        page.wait_for_timeout(3000)
+        # 状态机动作是行内按钮（老 console 同样是按状态给一个具名按钮），句柄带 version id。
+        version_id = versions(new_app_id)[0]["version_id"]
+        transition = page.locator(f'[data-ai-id="workspace-app-version:transition:{version_id}"]')
+        expect(transition).to_be_visible(timeout=60_000)
+        expect(transition).to_have_text("提交审核")
+        transition.click()
+        page.wait_for_timeout(4000)
         assert [v.get("status") for v in versions(new_app_id)] == ["submitted"], versions(new_app_id)
 
-        rows = page.locator('[data-ai-id="workspace-app:versions"] tbody tr[data-ai-row]')
-        rows.first.get_by_role("button", name="更多操作").click()
-        page.get_by_role("menuitem", name="撤销提交").click()
-        page.wait_for_timeout(3000)
+        transition = page.locator(f'[data-ai-id="workspace-app-version:transition:{version_id}"]')
+        expect(transition).to_have_text("撤销提交", timeout=60_000)
+        transition.click()
+        page.wait_for_timeout(4000)
         assert [v.get("status") for v in versions(new_app_id)] == ["draft"], versions(new_app_id)
 
         # --- 应用实例页签与接口一致 ---
@@ -110,9 +113,7 @@ def test_TC_L3_KUBE_FRONTEND_APP_STORE_WORKSPACE_APPS_02(ui_config, page, sessio
 
         # --- 删除版本 → 删除模板 ---
         page.locator('[data-ai-id="workspace-app:tab:versions"]').click()
-        rows = page.locator('[data-ai-id="workspace-app:versions"] tbody tr[data-ai-row]')
-        rows.first.get_by_role("button", name="更多操作").click()
-        page.get_by_role("menuitem", name="删除版本").click()
+        page.locator(f'[data-ai-id="workspace-app-version:delete:{version_id}"]').click()
         confirm = page.get_by_role("dialog")
         expect(confirm).to_be_visible(timeout=20_000)
         page.locator('[data-ai-id="workspace-app-version:delete:confirm"]').click()

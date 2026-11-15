@@ -1084,13 +1084,21 @@ export function toAppTemplateVersion(item: RawVersion): AppTemplateVersion {
  * the state machine; the transitions were verified against the live API
  * (draft→submit→submitted, submitted→cancel→draft).
  */
+/**
+ * The one review transition each version status allows.
+ *
+ * `labelKey` points at the locale keys the page already ships (`appRepos.apps.action.*`);
+ * an earlier revision pointed at an `appTemplates.action.*` namespace that does not exist,
+ * so the button rendered its raw key instead of 提交审核 / 撤销提交 (caught by
+ * TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_APPS-02).
+ */
 export const VERSION_STATUS_ACTION: Readonly<Record<string, { action: string; labelKey: string } | undefined>> = {
-  draft: { action: 'submit', labelKey: 'appTemplates.action.submit' },
-  rejected: { action: 'submit', labelKey: 'appTemplates.action.resubmit' },
-  submitted: { action: 'cancel', labelKey: 'appTemplates.action.cancel' },
-  passed: { action: 'release', labelKey: 'appTemplates.action.release' },
-  active: { action: 'suspend', labelKey: 'appTemplates.action.suspend' },
-  suspended: { action: 'recover', labelKey: 'appTemplates.action.recover' },
+  draft: { action: 'submit', labelKey: 'appRepos.apps.action.submit' },
+  rejected: { action: 'submit', labelKey: 'appRepos.apps.action.resubmit' },
+  submitted: { action: 'cancel', labelKey: 'appRepos.apps.action.cancel' },
+  passed: { action: 'release', labelKey: 'appRepos.apps.action.release' },
+  active: { action: 'suspend', labelKey: 'appRepos.apps.action.suspend' },
+  suspended: { action: 'recover', labelKey: 'appRepos.apps.action.recover' },
 };
 
 /** Versions that may be deleted (`CAN_DELETE_STATUS` in the old console). */

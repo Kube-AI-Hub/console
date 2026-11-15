@@ -130,10 +130,7 @@ export function WorkspaceAppDetailPage({ workspace, appId }: WorkspaceAppDetailP
       refresh: versionsRefresh.refresh,
       rowKey: 'id',
       rowAttributes: (row) => ({ 'data-ai-row': row.id }),
-      rowActions: [
-        { key: 'transition', label: t('appRepos.apps.actionDone'), aiId: 'workspace-app-version:transition', visible: (row) => Boolean(VERSION_STATUS_ACTION[row.status]) },
-        { key: 'delete', label: t('appRepos.apps.versionDelete'), aiId: 'workspace-app-version:delete', tone: 'danger' as const, visible: (row) => VERSION_DELETABLE.includes(row.status) },
-      ],
+
       columns: [
         { key: 'name', title: t('store.detail.versionNumber'), render: (row) => <span className="truncate font-medium text-ai-fg">{row.name || row.id}</span> },
         {
@@ -144,6 +141,48 @@ export function WorkspaceAppDetailPage({ workspace, appId }: WorkspaceAppDetailP
         },
         { key: 'owner', title: t('appRepos.repos.column.creator'), width: 140, hideBelow: 'md', render: (row) => <span className="truncate text-ai-fg-secondary">{row.owner || '-'}</span> },
         { key: 'updatedAt', title: t('appRepos.apps.column.updateTime'), width: 170, hideBelow: 'lg', render: (row) => <span className="tabular-nums text-ai-fg-muted">{row.updatedAt ? formatTimestamp(row.updatedAt) : '-'}</span> },
+        {
+          /*
+           * The review transition is a named button, not a generic menu entry: the old console
+           * rendered 提交审核 / 撤销提交 / 发布 / 下架 per status, and a row menu whose only item
+           * says "操作已提交" tells the reader nothing about what it will do.
+           */
+          key: 'actions',
+          title: t('appRepos.apps.tabVersions'),
+          width: 200,
+          render: (row) => {
+            const next = VERSION_STATUS_ACTION[row.status];
+            const deletable = VERSION_DELETABLE.includes(row.status);
+            return (
+              <span className="flex items-center gap-1">
+                {next ? (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    data-ai-id={`workspace-app-version:transition:${row.id}`}
+                    disabled={versionAction.isPending}
+                    onClick={() => versionAction.mutate({ versionId: row.id, action: next.action })}
+                  >
+                    {t(next.labelKey as 'appRepos.apps.action.submit')}
+                  </Button>
+                ) : null}
+                {deletable ? (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    data-ai-id={`workspace-app-version:delete:${row.id}`}
+                    onClick={() => {
+                      deleteVersion.reset();
+                      setRemovingVersion(row);
+                    }}
+                  >
+                    {t('appRepos.apps.versionDelete')}
+                  </Button>
+                ) : null}
+              </span>
+            );
+          },
+        },
       ],
       empty: { title: t('appRepos.apps.versionsEmpty') },
       labels: {
@@ -156,7 +195,8 @@ export function WorkspaceAppDetailPage({ workspace, appId }: WorkspaceAppDetailP
         selected: (count) => t('table.selectedCount', { count }),
       },
     }),
-    [versions.isFetching, t, versionsRefresh],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [versions.isFetching, t, versionsRefresh, versionAction.isPending],
   );
 
   const instanceSchema = React.useMemo<ListSchema<{ id: string; name: string; status: string; project: string; versionName: string; createdAt: string }>>(
@@ -289,17 +329,7 @@ export function WorkspaceAppDetailPage({ workspace, appId }: WorkspaceAppDetailP
                 rows={versionRows}
                 loading={versions.isPending}
                 onRefresh={versionsRefresh.onRefresh}
-                onAction={(action, row) => {
-                  const version = row as AppTemplateVersion;
-                  if (action === 'transition') {
-                    const next = VERSION_STATUS_ACTION[version.status];
-                    if (next) versionAction.mutate({ versionId: version.id, action: next.action });
-                  }
-                  if (action === 'delete') {
-                    deleteVersion.reset();
-                    setRemovingVersion(version);
-                  }
-                }}
+
               />
             </div>
           )}

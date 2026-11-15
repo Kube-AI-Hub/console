@@ -437,10 +437,10 @@ export function DevopsProjectDetailPage({ cluster, name }: DevopsProjectDetailPa
                     }}
                   />
                   <Select
-                    value={typeFilter}
-                    options={[{ value: '', label: t('devops.pipeline.allTypes') }, ...typeOptions]}
+                    value={typeFilter || 'all'}
+                    options={[{ value: 'all', label: t('devops.pipeline.allTypes') }, ...typeOptions]}
                     onValueChange={(value) => {
-                      setTypeFilter(value);
+                      setTypeFilter(value === 'all' ? '' : value);
                       setPage(1);
                     }}
                     placeholder={t('devops.pipeline.type')}

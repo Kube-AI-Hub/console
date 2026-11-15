@@ -1,0 +1,42 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PIPELINES-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: devops-pipelines
+title: 流水线详情 · 基本信息、同步状态与 Jenkinsfile 保存
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/devops'
+prd: prd/kube-frontend/cluster-management/devops-projects.md
+design: design/kube-frontend/cluster-management/devops-projects.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PIPELINES-05
+
+story:
+- US8
+
+product: 流水线详情基本信息字段与缺值语义（health 无状态、sync/validate 为 -），配置页签单分支 Jenkinsfile 编辑/保存后回读、取消恢复，多分支只读脚本路径说明。测试对象用接口创建并在 finally 删除。
+preconditions:
+- 已登录且存在含命名空间的 DevOps 工程；不存在时 skip
+- 用例通过接口创建一条单分支与一条多分支流水线（唯一前缀），finally 删除
+- 不修改非本用例创建的流水线
+steps:
+- 接口创建单分支流水线（带 description 注解与 Jenkinsfile JF1）
+- 打开其详情 URL，核对基本信息字段
+- 切到配置页签，核对 Jenkinsfile 文本域值等于 JF1、保存按钮初始禁用
+- 修改为 JF2，核对保存可用；点取消核对恢复 JF1
+- 再次改为 JF2 保存，重新打开页面与接口回读核对 spec.pipeline.jenkinsfile=JF2
+- 接口创建多分支流水线并打开配置页签，核对只读说明且无文本域
+expected:
+- 基本信息显示名称/类型/同步状态/健康状态/脚本校验/创建者/创建时间/工程命名空间/描述；同步状态与脚本校验缺注解显示 -，健康缺值显示「无状态」
+- 配置页签单分支显示 devops:pipeline-detail:config-editor，值为 spec.pipeline.jenkinsfile
+- 保存按钮在未修改时 disabled=true，修改后可点；点取消后值恢复服务端值
+- 保存后接口回读 jenkinsfile 等于提交内容（PUT …/jenkinsfile?mode=raw 语义）
+- 多分支显示 devops:pipeline-detail:config-multibranch，无编辑器
+troubleshoot:
+- 保存后回读仍旧值：确认走的是 …/jenkinsfile?mode=raw 而不是整对象 PUT
+- 多分支出现编辑器：类型必须是 multi-branch-pipeline
+- 同步状态/校验显示成功：缺注解时应为 -，不要伪造
+update_automation:
+- 选择器：pipeline-detail:surface/basic/name/type/sync-status/health/validate/creator/created-at/namespace/description、tab:config/config/config-editor/config-save/config-reset/config-multibranch/config-error
+- 保存接口变化时同步 pages/devops_page.py 与 api-client 单元测试

@@ -455,9 +455,9 @@ export function PipelineFormDialog({
           )}
           <FormField htmlFor="devops-pipeline-credential" label={t('devops.pipeline.credential')}>
             <Select
-              value={credentialId}
-              options={[{ value: '', label: t('devops.pipeline.noCredential') }, ...credentialOptions]}
-              onValueChange={setCredentialId}
+              value={credentialId || 'none'}
+              options={[{ value: 'none', label: t('devops.pipeline.noCredential') }, ...credentialOptions]}
+              onValueChange={(value) => setCredentialId(value === 'none' ? '' : value)}
               data-ai-id="devops:pipeline-form-credential"
             />
           </FormField>

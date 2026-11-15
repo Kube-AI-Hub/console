@@ -1,0 +1,39 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_CODE_REPOS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: devops-code-repos
+title: DevOps 代码仓库 · 导入、列表与删除
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/devops'
+prd: prd/kube-frontend/cluster-management/devops-projects.md
+design: design/kube-frontend/cluster-management/devops-projects.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_CODE_REPOS-01
+
+story:
+- US13
+
+product: 代码仓库页签的列与空态、导入对话框名称校验、导入 GitRepository 后行出现、删除需输入名称确认；对象唯一前缀并在 finally 删除。
+preconditions:
+- 已登录且存在含命名空间的 DevOps 工程；不存在时 skip
+- 用例创建 1 条 GitRepository（pwspec-repo- 前缀），finally 删除
+- 不删除非本用例创建的仓库
+steps:
+- 打开代码仓库页签，核对表头与空态
+- 点导入，空名称提交核对校验提示
+- 填唯一名称、提供方 GitHub、仓库地址提交，核对行与接口对象
+- 点删除，输入名称确认，核对行消失与接口 404
+expected:
+- 表头为 名称/提供方/仓库地址/访问凭证/更多操作；空集合显示「该工程还没有代码仓库。」
+- 空名称提交显示「请输入名称。」且不发请求
+- 导入后行出现，提供方显示 GitHub、仓库地址等于提交值，未填访问凭证显示 -
+- 删除需输入完整名称才可确认；删除后行消失且接口 GET 404
+troubleshoot:
+- 列表为空：读 /apis/devops.kubesphere.io/v1alpha3/namespaces/<ns>/gitrepositories，不是 coderepositories
+- 创建 404：命名空间必须取工程 status.adminNamespace（缺失回退工程名）
+- 删除后行不消失：写后需 invalidate code-repos 查询
+update_automation:
+- 选择器：devops-detail:tab:code-repo、coderepo-create、devops:coderepo-form-name/-provider/-url/-secret/-description/-submit、coderepo-delete:<name>、delete-input/delete-confirm
+- 提供方选项变化时同步 pages/devops_page.py

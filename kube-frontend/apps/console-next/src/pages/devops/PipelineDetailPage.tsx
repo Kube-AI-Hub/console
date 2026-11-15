@@ -46,8 +46,9 @@ import { PipelineFormDialog } from './components/DevopsDialogs';
  *    kept (状态 / 编号 / 提交 / 分支 / 最近消息 / 耗时 / 更新时间 / 操作). The branch column is
  *    hidden for a single-branch pipeline and for a branch-scoped view, exactly like the old
  *    table.
- * 3. **流水线配置** — the Jenkinsfile, read from `spec.pipeline.jenkinsfile` and saved with a
- *    whole-object PUT (the kapis route is a PUT-only `…/pipelines/<p>/jenkinsfile`).
+ * 3. **流水线配置** — the Jenkinsfile, read from `spec.pipeline.jenkinsfile` and saved through
+ *    the dedicated PUT `…/pipelines/<p>/jenkinsfile?mode=raw` (a whole-object PUT silently
+ *    leaves the field unchanged on this installation).
  *
  * The run detail is a view of this page selected by `?run=<objectName>` rather than a
  * child route: the run list and the run detail share every query, and a separate route
@@ -136,12 +137,7 @@ export function PipelineDetailPage({ cluster, devops, pipeline }: PipelineDetail
 
   const saveJenkinsfile = useMutation({
     mutationFn: (jenkinsfile: string) =>
-      devopsApi(apiClient).updatePipeline({
-        project: devops,
-        name: pipeline,
-        jenkinsfile,
-        current: detail.data?.raw ?? {},
-      }),
+      devopsApi(apiClient).saveJenkinsfile({ project: devops, name: pipeline, jenkinsfile }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['devops-pipeline', devops, pipeline] });
       setJenkinsfileDraft(null);

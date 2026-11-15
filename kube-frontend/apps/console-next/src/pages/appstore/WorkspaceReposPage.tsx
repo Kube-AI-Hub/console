@@ -132,7 +132,16 @@ export function WorkspaceReposPage({ workspace }: WorkspaceReposPageProps): Reac
 
   const save = useMutation({
     mutationFn: async (payload: { repo: WorkspaceRepo | null; values: RepoForm }) => {
-      const url = `${payload.values.protocol}://${payload.values.url.trim()}`;
+      /*
+       * Accept both "charts.example.com/stable" and a full "https://charts.example.com/stable".
+       *
+       * The protocol select only exists to save typing; prepending it to a value that already
+       * carries a scheme produced "https://https://…" and the server answered 400 with the
+       * index.yaml fetch error, which read like a broken repository instead of a form quirk.
+       */
+      const raw = payload.values.url.trim();
+      const hasScheme = /^[a-z0-9]+:\/\//i.test(raw);
+      const url = hasScheme ? raw : `${payload.values.protocol}://${raw}`;
       const credential =
         payload.values.protocol === 's3'
           ? JSON.stringify({ accessKeyID: payload.values.accessKeyId, secretAccessKey: payload.values.secretAccessKey })

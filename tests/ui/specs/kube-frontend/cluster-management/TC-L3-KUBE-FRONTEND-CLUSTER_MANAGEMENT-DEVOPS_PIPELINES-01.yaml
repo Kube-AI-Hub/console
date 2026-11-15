@@ -1,0 +1,45 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PIPELINES-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: devops-pipelines
+title: DevOps 流水线列表 · 列、健康、服务端分页、搜索与类型筛选
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/devops'
+prd: prd/kube-frontend/cluster-management/devops-projects.md
+design: design/kube-frontend/cluster-management/devops-projects.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PIPELINES-01
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PIPELINES-02
+
+story:
+- US6
+
+product: 流水线页签的表格列、健康缺值不伪造、类型/分支数/合并请求数展示、服务端分页（page/limit/totalItems）、名称搜索、类型筛选、行操作入口与名称链接；测试用唯一前缀创建 12 条流水线并在 finally 删除。
+preconditions:
+- 已登录且存在含命名空间的 DevOps 工程；不存在时 skip
+- 用例用唯一前缀（pwspec-list-）创建 11 条单分支 + 1 条多分支流水线，finally 全部删除
+- 不删除非本用例创建的流水线
+steps:
+- 接口读目标工程的 pipelines?page=1&limit=10 取得 totalItems
+- 打开工程详情的流水线页签，等待表格或空态
+- 核对表头、每行健康/类型/分支数/合并请求数、行操作按钮与名称链接 href
+- 核对「共 N 条」与接口 totalItems 一致、每页条数默认 10、页码 1/2 与上一页/下一页禁用态
+- 选择每页 20、50 后核对请求 limit 与行数
+- 输入唯一前缀搜索，核对请求 name 与结果集；选择多分支类型，核对请求 type 与结果集；清空恢复
+- 点下一页核对 page=2 与剩余行数
+expected:
+- 表头为 名称/健康状态/类型/分支数/合并请求数/更多操作
+- 无 jenkins-metadata 注解的流水线健康显示「无状态」，不得显示「健康」
+- 多分支行类型显示「多分支流水线」，单分支显示「单分支流水线」；不可用分支数/合并请求数显示 -
+- 「共 N 条」等于接口 totalItems；默认每页 10 条；total 大于 10 时 1 页有 10 行且下一页可用，第 2 页剩余 total-10 行
+- 搜索请求带 name=<前缀> 且结果均为该前缀对象；类型筛选请求带 type=multi-branch-pipeline；类型「全部」请求不带 type
+- 每行提供 运行/编辑/复制/删除 四个 data-ai-id，名称链接指向 .../devops/<工程>/pipelines/<流水线>
+troubleshoot:
+- 页签整页错误：见 Select 空字符串 value 的历史坑
+- 总数对不上：可能并行用例创建了流水线，用接口 total 与页面同时刻对账而不是写死数字
+- 搜索不生效：请求可能没带 name 或页码未重置为 1
+update_automation:
+- 选择器：devops-detail:tab:pipelines、pipelines/pipelines-search/pipelines-type/pipelines-table/pipelines-total/pipelines-page-size/pipelines-page/pipelines-prev/pipelines-next/pipelines-empty/pipelines-error/pipelines-retry、行 data-ai-row、pipeline:<name>、pipeline-health:<name>、pipeline-run|edit|copy|delete:<name>
+- 分页/筛选参数变化时同步 pages/devops_page.py 的 pipeline_list

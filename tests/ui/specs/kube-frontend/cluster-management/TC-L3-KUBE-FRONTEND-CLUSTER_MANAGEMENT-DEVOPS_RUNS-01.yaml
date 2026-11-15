@@ -1,0 +1,45 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_RUNS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: devops-runs
+title: 流水线运行 · 请求链路、运行记录、运行详情与日志错误
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/devops'
+prd: prd/kube-frontend/cluster-management/devops-projects.md
+design: design/kube-frontend/cluster-management/devops-projects.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_RUNS-01
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_RUNS-02
+
+story:
+- US9
+
+product: 触发运行后 PipelineRun 对象创建（label/pipelineRef/generateName）、页面提示与刷新、运行记录列与「未运行」如实展示、运行详情字段、日志 404 的错误+重试、重放与失败注入；运行成功与日志正文受 Jenkins 通道阻塞不在本用例通过范围。
+preconditions:
+- 已登录且存在含命名空间的 DevOps 工程；不存在时 skip
+- 用接口创建一条流水线（唯一前缀），finally 删除本用例创建的运行与流水线
+- 不删除非本用例创建的运行；不修改他人工件
+steps:
+- 接口创建流水线 pwspec-run-<sfx>
+- 打开其详情，点 pipeline-detail:run 打开运行表单，再点 run-submit
+- 核对页面提示「已提交运行请求」并刷新运行记录
+- 用接口按 label 读取本流水线的运行并核对 label/pipelineRef/generateName
+- 核对运行表格的列、该运行的状态「未运行」、编号回退对象名、耗时 -
+- 点编号链接打开运行详情，核对编号/状态/阶段/开始/耗时/提交字段与日志失败原因+重试
+- 点重放，核对第二次提示与新运行对象；最后注入 POST pipelineruns 422 核对失败提示
+expected:
+- POST /apis/devops.kubesphere.io/v1alpha3/namespaces/<ns>/pipelineruns 返回 201，对象 metadata.generateName 以流水线名 + - 开头、label devops.kubesphere.io/pipeline 与 spec.pipelineRef.name 均为流水线名
+- 成功后 pipeline-detail:notice 含「已提交运行请求」且包含新运行对象名
+- 运行表头为 状态/编号/提交/最近消息/耗时/开始时间/更多操作（多分支才有 分支 列）
+- 无 jenkins-pipelinerun-status 注解的运行显示「未运行」，编号列显示对象名，耗时 -
+- 运行详情显示编号/状态/控制器阶段/开始时间/耗时/提交；日志 404 时 run-log-error 可见并可重试
+- 重放创建新运行对象；注入 422 后 notice 显示拦截消息，页面不显示运行成功
+troubleshoot:
+- 运行记录为空但对象存在：确认 labelSelector 过滤与 spec.pipelineRef.name 兜底匹配
+- 日志 404 被当成空日志：必须显示 run-log-error
+- 状态注入失败：确认注解键为 devops.kubesphere.io/jenkins-pipelinerun-status
+update_automation:
+- 选择器：pipeline-detail:run/run-form/run-branch/run-param:<name>/run-submit/notice/runs/runs-table/runs-empty/runs-error/runs-retry、run-link/run-status/run-replay:<name>、run-detail/run-id/run-status/run-phase/run-start/run-duration/run-commit/run-message/run-log/run-log-error/run-log-retry
+- 运行状态映射变化时同步 format.ts 断言与 pages/devops_page.py

@@ -1031,6 +1031,26 @@ export function devopsApi(client: Client) {
       return toPipelineRow(body);
     },
 
+    /**
+     * Save only the Jenkinsfile.
+     *
+     * A whole-object PUT leaves `spec.pipeline.jenkinsfile` untouched (probed against the
+     * live devops-apiserver on 2026-11-15: the PUT answers 200 but the field keeps its old
+     * value). The supported channel is its own route, which requires an explicit edit mode;
+     * without `mode` it answers 400 `invalid edit mode`. After the write the pipeline is
+     * re-read so the page shows what the server actually stored, not the draft.
+     */
+    async saveJenkinsfile(input: { project: string; name: string; jenkinsfile: string }): Promise<PipelineRow> {
+      await client.request<unknown>(
+        projectKapis(input.project) + '/pipelines/' + q(input.name) + '/jenkinsfile',
+        { method: 'PUT', query: { mode: 'raw' }, body: { data: input.jenkinsfile } },
+      );
+      const body = await client.request<KubePipeline>(
+        projectKapis(input.project) + '/pipelines/' + q(input.name),
+      );
+      return toPipelineRow(body);
+    },
+
     async deletePipeline(project: string, name: string): Promise<void> {
       await client.request<void>(projectKapis(project) + '/pipelines/' + q(name), { method: 'DELETE' });
     },
