@@ -108,8 +108,9 @@ export function useJuiceFSVolumes(cluster: string) {
   return useQuery({
     queryKey: ['juicefs-volumes', cluster],
     queryFn: async ({ signal }) => {
+      const query = juicefsQuery(cluster);
       const body = await apiClient.request<{ items?: Array<Record<string, unknown>> }>(juicefsApiPath(cluster, '/volumes'), {
-        query: juicefsQuery(cluster),
+        ...(query ? { query } : {}),
         signal,
       });
       return (body?.items ?? []).map(toVolume);
@@ -121,8 +122,9 @@ export function useJuiceFSSummary(cluster: string) {
   return useQuery({
     queryKey: ['juicefs-summary', cluster],
     queryFn: async ({ signal }) => {
+      const query = juicefsQuery(cluster);
       const body = await apiClient.request<Record<string, unknown>>(juicefsApiPath(cluster, '/summary'), {
-        query: juicefsQuery(cluster),
+        ...(query ? { query } : {}),
         signal,
       });
       const value = body ?? {};
