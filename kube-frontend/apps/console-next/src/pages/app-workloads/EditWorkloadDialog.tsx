@@ -93,6 +93,7 @@ interface ContainerDraft {
   image: string;
   resources: ResourceDraft;
   probes: Record<ProbeKind, ProbeDraft>;
+  mounts: MountDraft[];
   /** Empty means "leave the stored value alone"; Kubernetes defaults it when absent. */
   pullPolicy: string;
   env: EnvDraft[];
@@ -278,6 +279,83 @@ function probeManifest(draft: ProbeDraft): JsonObject | undefined {
 /** Grace period and probe timings are whole seconds; an empty field means "server default". */
 const NON_NEGATIVE_INT = /^[0-9]+$/;
 
+/** One pod volume: where the data comes from. */
+type VolumeType = 'emptyDir' | 'hostPath' | 'pvc' | 'configMap' | 'secret';
+
+interface VolumeDraft {
+  id: number;
+  name: string;
+  type: VolumeType;
+  /** Claim name, ConfigMap/Secret name, or the host path, depending on `type`. */
+  source: string;
+}
+
+/** One container's mount of a pod volume. */
+interface MountDraft {
+  id: number;
+  volumeName: string;
+  mountPath: string;
+  readOnly: boolean;
+}
+
+const VOLUME_TYPES: VolumeType[] = ['emptyDir', 'hostPath', 'pvc', 'configMap', 'secret'];
+
+function volumeTypeOf(volume: JsonObject): VolumeType {
+  if (volume['hostPath']) return 'hostPath';
+  if (volume['persistentVolumeClaim']) return 'pvc';
+  if (volume['configMap']) return 'configMap';
+  if (volume['secret']) return 'secret';
+  return 'emptyDir';
+}
+
+function volumeSourceOf(volume: JsonObject): string {
+  const type = volumeTypeOf(volume);
+  if (type === 'hostPath') return String((asObject(volume['hostPath']) ?? {})['path'] ?? '');
+  if (type === 'pvc') return String((asObject(volume['persistentVolumeClaim']) ?? {})['claimName'] ?? '');
+  if (type === 'configMap') return String((asObject(volume['configMap']) ?? {})['name'] ?? '');
+  if (type === 'secret') return String((asObject(volume['secret']) ?? {})['secretName'] ?? '');
+  return '';
+}
+
+function volumesOf(podSpec: JsonObject | undefined): VolumeDraft[] {
+  const list = podSpec?.['volumes'];
+  if (!Array.isArray(list)) return [];
+  return list.map((entry) => {
+    const volume = asObject(entry) ?? {};
+    return { id: nextPairId(), name: String(volume['name'] ?? ''), type: volumeTypeOf(volume), source: volumeSourceOf(volume) };
+  });
+}
+
+function mountsOf(container: JsonObject): MountDraft[] {
+  const list = container['volumeMounts'];
+  if (!Array.isArray(list)) return [];
+  return list.map((entry) => {
+    const mount = asObject(entry) ?? {};
+    return {
+      id: nextPairId(),
+      volumeName: String(mount['name'] ?? ''),
+      mountPath: String(mount['mountPath'] ?? ''),
+      readOnly: mount['readOnly'] === true,
+    };
+  });
+}
+
+/** Build one pod volume from the draft; an empty source means the row is incomplete. */
+function volumeManifest(draft: VolumeDraft): JsonObject | undefined {
+  const name = draft.name.trim();
+  if (!name) return undefined;
+  if (draft.type === 'emptyDir') return { name, emptyDir: {} };
+  const source = draft.source.trim();
+  if (!source) return undefined;
+  if (draft.type === 'hostPath') return { name, hostPath: { path: source } };
+  if (draft.type === 'pvc') return { name, persistentVolumeClaim: { claimName: source } };
+  if (draft.type === 'configMap') return { name, configMap: { name: source } };
+  return { name, secret: { secretName: source } };
+}
+
+/** Volume names and mount paths: DNS-1123 for the former, absolute for the latter. */
+const VOLUME_NAME = /^[a-z0-9]([-a-z0-9]*[a-z0-9])?$/;
+
 /** Kubernetes quantity syntax: a number with an optional unit (`500m`, `1Gi`, `2`). */
 const QUANTITY = /^[0-9]+(\.[0-9]+)?(m|k|M|G|T|Ki|Mi|Gi|Ti)?$/;
 
@@ -292,6 +370,7 @@ function toDrafts(kind: WorkloadKind, raw: JsonObject): ContainerDraft[] {
       image: String(container['image'] ?? ''),
       resources: resourcesOf(container),
       probes: probesOf(container),
+      mounts: mountsOf(container),
       pullPolicy: String(container['imagePullPolicy'] ?? ''),
       env: storedEnv.map((entry) => {
         const record = asObject(entry) ?? {};
@@ -426,6 +505,7 @@ export function EditWorkloadDialog({
   const [podLabels, setPodLabels] = React.useState<PairDraft[]>([]);
   const [podAnnotations, setPodAnnotations] = React.useState<PairDraft[]>([]);
   const [gracePeriod, setGracePeriod] = React.useState('');
+  const [volumes, setVolumes] = React.useState<VolumeDraft[]>([]);
   const [error, setError] = React.useState<string | null>(null);
 
   // Re-seed on open: the same dialog instance edits different objects over time.
@@ -437,6 +517,7 @@ export function EditWorkloadDialog({
     const seedTemplate = templateOf(kind, raw);
     const seedPodSpec = seedTemplate ? asObject(seedTemplate['spec']) : undefined;
     setNodeSelector(pairsOf(seedPodSpec?.['nodeSelector']));
+    setVolumes(volumesOf(seedPodSpec));
     setGracePeriod(
       seedPodSpec?.['terminationGracePeriodSeconds'] === undefined ? '' : String(seedPodSpec['terminationGracePeriodSeconds']),
     );
@@ -668,6 +749,41 @@ export function EditWorkloadDialog({
         }
       }
     });
+    const storedVolumes = volumesOf(storedPodSpec);
+    const storedByName = new Map(storedVolumes.map((volume) => [volume.name, volume]));
+    for (const volume of volumes) {
+      const before = storedByName.get(volume.name.trim());
+      const after = volumeManifest(volume);
+      if (!before) {
+        rows.push({ path: `spec.template.spec.volumes.${volume.name}`, before: '-', after: after ? JSON.stringify(after) : '-' });
+      } else if (JSON.stringify({ name: before.name, type: before.type, source: before.source }) !== JSON.stringify({ name: volume.name.trim(), type: volume.type, source: volume.source.trim() })) {
+        rows.push({
+          path: `spec.template.spec.volumes.${volume.name}`,
+          before: `${before.type}:${before.source || '-'}`,
+          after: `${volume.type}:${volume.source || '-'}`,
+        });
+      }
+    }
+    const nextVolumeNames = new Set(volumes.map((volume) => volume.name.trim()));
+    for (const before of storedVolumes) {
+      if (!nextVolumeNames.has(before.name)) {
+        rows.push({ path: `spec.template.spec.volumes.${before.name}`, before: `${before.type}:${before.source || '-'}`, after: t('workloads.editSettings.removed') });
+      }
+    }
+    drafts.forEach((container, index) => {
+      const stored = initialContainers[index];
+      if (!stored) return;
+      const before = mountsOf(stored);
+      const beforeKey = JSON.stringify(before.map((mount) => [mount.volumeName, mount.mountPath, mount.readOnly]));
+      const afterKey = JSON.stringify(container.mounts.map((mount) => [mount.volumeName.trim(), mount.mountPath.trim(), mount.readOnly]));
+      if (beforeKey !== afterKey) {
+        rows.push({
+          path: `spec.template.spec.containers.${container.name}.volumeMounts`,
+          before: beforeKey,
+          after: afterKey,
+        });
+      }
+    });
     const storedGrace = storedPodSpec?.['terminationGracePeriodSeconds'];
     const nextGrace = gracePeriod.trim();
     if ((storedGrace === undefined ? '' : String(storedGrace)) !== nextGrace) {
@@ -678,7 +794,7 @@ export function EditWorkloadDialog({
       });
     }
     return rows;
-  }, [drafts, gracePeriod, initialContainers, kind, nodeSelector, podAnnotations, podLabels, raw, replicas, strategy, supportsReplicas, t]);
+  }, [drafts, gracePeriod, initialContainers, kind, nodeSelector, podAnnotations, podLabels, raw, replicas, strategy, supportsReplicas, t, volumes]);
 
   /** Build the object the API will store: a clone with only the edited fields replaced. */
   const buildBody = (): KubeObject => {
@@ -733,10 +849,22 @@ export function EditWorkloadDialog({
         if (probe) target[probeKey(kind)] = probe;
         else delete target[probeKey(kind)];
       }
+      const mountList = container.mounts
+        .filter((mount) => mount.volumeName.trim() && mount.mountPath.trim())
+        .map((mount) => ({
+          name: mount.volumeName.trim(),
+          mountPath: mount.mountPath.trim(),
+          ...(mount.readOnly ? { readOnly: true } : {}),
+        }));
+      if (mountList.length > 0) target['volumeMounts'] = mountList;
+      else delete target['volumeMounts'];
     });
     const nextTemplate = templateOf(kind, next);
     const nextPodSpec = nextTemplate ? asObject(nextTemplate['spec']) : undefined;
     if (nextPodSpec) {
+      const volumeList = volumes.map((volume) => volumeManifest(volume)).filter((entry): entry is JsonObject => Boolean(entry));
+      if (volumeList.length > 0) nextPodSpec['volumes'] = volumeList;
+      else delete nextPodSpec['volumes'];
       if (gracePeriod.trim()) nextPodSpec['terminationGracePeriodSeconds'] = Number(gracePeriod.trim());
       else delete nextPodSpec['terminationGracePeriodSeconds'];
       const selector = mapOf(nodeSelector);
@@ -839,6 +967,45 @@ export function EditWorkloadDialog({
     return values.some((value) => value.trim() !== '' && !INT_OR_PERCENT.test(value.trim()));
   }, [kind, strategy]);
 
+  /** Volumes and mounts: names, sources, absolute and unique mount paths. */
+  const volumeIssues = React.useMemo(() => {
+    const issues = new Map<string, string>();
+    const seen = new Set<string>();
+    for (const volume of volumes) {
+      const name = volume.name.trim();
+      if (!name) {
+        issues.set(`volume:${volume.id}`, t('workloads.editSettings.volumeNameRequired'));
+        continue;
+      }
+      if (!VOLUME_NAME.test(name)) {
+        issues.set(`volume:${volume.id}`, t('workloads.editSettings.volumeNameInvalid'));
+        continue;
+      }
+      if (seen.has(name)) issues.set(`volume:${volume.id}`, t('workloads.editSettings.volumeNameDuplicate'));
+      seen.add(name);
+      if (volume.type !== 'emptyDir' && !volume.source.trim()) {
+        issues.set(`volume:${volume.id}`, t('workloads.editSettings.volumeSourceRequired'));
+      }
+    }
+    for (const container of drafts) {
+      const paths = new Set<string>();
+      for (const mount of container.mounts) {
+        const path = mount.mountPath.trim();
+        if (!mount.volumeName.trim()) {
+          issues.set(`mount:${mount.id}`, t('workloads.editSettings.mountVolumeRequired'));
+          continue;
+        }
+        if (!path.startsWith('/')) {
+          issues.set(`mount:${mount.id}`, t('workloads.editSettings.mountPathInvalid'));
+          continue;
+        }
+        if (paths.has(path)) issues.set(`mount:${mount.id}`, t('workloads.editSettings.mountPathDuplicate'));
+        paths.add(path);
+      }
+    }
+    return issues;
+  }, [drafts, t, volumes]);
+
   /** Probe fields: a handler that can actually run, and whole-second timings. */
   const probeIssues = React.useMemo(() => {
     const issues = new Map<string, string>();
@@ -923,6 +1090,7 @@ export function EditWorkloadDialog({
     selectorBroken ||
     probeIssues.size > 0 ||
     gracePeriodInvalid ||
+    volumeIssues.size > 0 ||
     changes.length === 0;
 
   return (
@@ -1070,6 +1238,71 @@ export function EditWorkloadDialog({
             issues={pairIssues}
             disabled={pending}
           />
+        </section>
+
+        <section className="flex flex-col gap-3 rounded-ai-md border border-ai-line p-3" data-ai-id={`${kind}-edit:volumes`}>
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="text-xs font-medium text-ai-fg">{t('workloads.editSettings.volumes')}</h3>
+            <Button
+              size="sm"
+              variant="secondary"
+              disabled={pending}
+              {...actionProps(`${kind}-edit:volume-add`)}
+              onClick={() => setVolumes((previous) => [...previous, { id: nextPairId(), name: '', type: 'emptyDir', source: '' }])}
+            >
+              <Icon name="add" size={12} />
+              {t('workloads.editSettings.volumeAdd')}
+            </Button>
+          </div>
+          <span className="text-[11px] text-ai-fg-muted">{t('workloads.editSettings.volumesHint')}</span>
+          {volumes.length === 0 ? <p className="text-[11px] text-ai-fg-muted">{t('workloads.editSettings.volumeEmpty')}</p> : null}
+          {volumes.map((volume) => {
+            const issue = volumeIssues.get(`volume:${volume.id}`);
+            return (
+              <div key={volume.id} className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)_minmax(0,1fr)_auto]" data-ai-row={`volume-${volume.id}`}>
+                <Input
+                  value={volume.name}
+                  placeholder={t('workloads.editSettings.volumeName')}
+                  aria-label={t('workloads.editSettings.volumeName')}
+                  disabled={pending}
+                  {...actionProps(`${kind}-edit:volume-name:${volume.id}`)}
+                  onChange={(event) => setVolumes((previous) => previous.map((entry) => (entry.id === volume.id ? { ...entry, name: event.target.value } : entry)))}
+                />
+                <Select
+                  value={volume.type}
+                  options={VOLUME_TYPES.map((value) => ({ value, label: t(`workloads.editSettings.volumeType.${value}` as 'workloads.editSettings.volumeType.emptyDir') }))}
+                  data-ai-id={`${kind}-edit:volume-type:${volume.id}`}
+                  aria-label={t('workloads.editSettings.volumeType')}
+                  onValueChange={(value: string) =>
+                    setVolumes((previous) => previous.map((entry) => (entry.id === volume.id ? { ...entry, type: value as VolumeType } : entry)))
+                  }
+                />
+                {volume.type === 'emptyDir' ? (
+                  <span className="self-center text-[11px] text-ai-fg-muted">{t('workloads.editSettings.volumeEmptyDirHint')}</span>
+                ) : (
+                  <Input
+                    value={volume.source}
+                    placeholder={t(`workloads.editSettings.volumeSource.${volume.type}` as 'workloads.editSettings.volumeSource.pvc')}
+                    aria-label={t('workloads.editSettings.volumeSource')}
+                    disabled={pending}
+                    {...actionProps(`${kind}-edit:volume-source:${volume.id}`)}
+                    onChange={(event) => setVolumes((previous) => previous.map((entry) => (entry.id === volume.id ? { ...entry, source: event.target.value } : entry)))}
+                  />
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={t('workloads.editSettings.volumeRemove')}
+                  disabled={pending}
+                  {...actionProps(`${kind}-edit:volume-remove:${volume.id}`)}
+                  onClick={() => setVolumes((previous) => previous.filter((entry) => entry.id !== volume.id))}
+                >
+                  <Icon name="trash" size={14} />
+                </Button>
+                {issue ? <span role="alert" className="text-[11px] text-ai-danger sm:col-span-4">{issue}</span> : null}
+              </div>
+            );
+          })}
         </section>
 
         {drafts.length === 0 ? <p className="text-xs text-ai-fg-muted">{t('workloads.editSettings.noContainers')}</p> : null}
@@ -1238,6 +1471,85 @@ export function EditWorkloadDialog({
                       {resourceIssues.get(container.name)}
                     </span>
                   ) : null}
+                </div>
+
+                <div className="flex flex-col gap-2" data-ai-id={`${kind}-edit:mounts${suffix}`}>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs text-ai-fg-secondary">{t('workloads.editSettings.mounts')}</span>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      disabled={pending || volumes.length === 0}
+                      {...actionProps(`${kind}-edit:mount-add${suffix}`)}
+                      onClick={() =>
+                        setContainer(containerIndex, {
+                          mounts: [...container.mounts, { id: nextPairId(), volumeName: volumes[0]?.name ?? '', mountPath: '', readOnly: false }],
+                        })
+                      }
+                    >
+                      <Icon name="add" size={12} />
+                      {t('workloads.editSettings.mountAdd')}
+                    </Button>
+                  </div>
+                  <span className="text-[11px] text-ai-fg-muted">
+                    {volumes.length === 0 ? t('workloads.editSettings.mountNeedsVolume') : t('workloads.editSettings.mountsHint')}
+                  </span>
+                  {container.mounts.map((mount) => {
+                    const issue = volumeIssues.get(`mount:${mount.id}`);
+                    return (
+                      <div key={mount.id} className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto]" data-ai-row={`mount-${mount.id}`}>
+                        <Select
+                          value={mount.volumeName}
+                          options={volumes.map((volume) => ({ value: volume.name, label: volume.name }))}
+                          data-ai-id={`${kind}-edit:mount-volume:${mount.id}${suffix}`}
+                          aria-label={t('workloads.editSettings.mountVolume')}
+                          onValueChange={(value: string) =>
+                            setContainer(containerIndex, {
+                              mounts: container.mounts.map((entry) => (entry.id === mount.id ? { ...entry, volumeName: value } : entry)),
+                            })
+                          }
+                        />
+                        <Input
+                          value={mount.mountPath}
+                          placeholder="/data"
+                          aria-label={t('workloads.editSettings.mountPath')}
+                          disabled={pending}
+                          {...actionProps(`${kind}-edit:mount-path:${mount.id}${suffix}`)}
+                          onChange={(event) =>
+                            setContainer(containerIndex, {
+                              mounts: container.mounts.map((entry) => (entry.id === mount.id ? { ...entry, mountPath: event.target.value } : entry)),
+                            })
+                          }
+                        />
+                        <label className="inline-flex min-h-6 items-center gap-1 text-[11px] text-ai-fg-muted">
+                          <input
+                            type="checkbox"
+                            checked={mount.readOnly}
+                            {...actionProps(`${kind}-edit:mount-readonly:${mount.id}${suffix}`)}
+                            onChange={(event) =>
+                              setContainer(containerIndex, {
+                                mounts: container.mounts.map((entry) => (entry.id === mount.id ? { ...entry, readOnly: event.target.checked } : entry)),
+                              })
+                            }
+                          />
+                          {t('workloads.editSettings.mountReadOnly')}
+                        </label>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label={t('workloads.editSettings.mountRemove')}
+                          disabled={pending}
+                          {...actionProps(`${kind}-edit:mount-remove:${mount.id}${suffix}`)}
+                          onClick={() =>
+                            setContainer(containerIndex, { mounts: container.mounts.filter((entry) => entry.id !== mount.id) })
+                          }
+                        >
+                          <Icon name="trash" size={14} />
+                        </Button>
+                        {issue ? <span role="alert" className="text-[11px] text-ai-danger sm:col-span-4">{issue}</span> : null}
+                      </div>
+                    );
+                  })}
                 </div>
 
                 <div className="flex flex-col gap-2" data-ai-id={`${kind}-edit:probes${suffix}`}>

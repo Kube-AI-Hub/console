@@ -17,9 +17,12 @@
 | ES-03 | 更新策略（部署 RollingUpdate/Recreate；有状态副本集与守护进程集 RollingUpdate/OnDelete，含 maxUnavailable/maxSurge/partition） | 弹窗「更新策略」分组 | EDIT_SETTINGS-04 / `…-04` | 本批补齐 |
 | **ES-04** | 选择节点（nodeSelector）、容器组标签、容器组注解 | 弹窗「高级设置」分组（三组共用键值编辑器） | EDIT_SETTINGS-05 / `…-05` | **本批补齐** |
 | **ES-05** | 健康检查（存活/就绪/启动，HTTP/TCP/命令）与优雅终止（terminationGracePeriodSeconds） | 弹窗「健康检查」与「优雅终止」 | EDIT_SETTINGS-06 / `…-06` | **本批补齐** |
-| ES-06 | 存储挂载、容器组安全上下文、IP 池 | — | — | **待补**（仍走编辑 YAML，见 §7） |
+| **ES-06** | 存储挂载（临时卷/节点路径/持久卷声明/配置字典/保密字典 + 容器挂载点） | 弹窗「存储挂载」与每容器「挂载」两层 | EDIT_SETTINGS-07 / `…-07` | **本批补齐** |
+| ES-07 | 容器组安全上下文、IP 池 | — | — | **待补**（仍走编辑 YAML，见 §7） |
 
 ## 3. 数据语义
+
+- 存储挂载分两层：容器组上的 `spec.template.spec.volumes`（卷定义）与容器上的 `volumeMounts`（挂载点）。五种来源：临时卷 `emptyDir:{}`、节点路径 `hostPath.path`、持久卷声明 `persistentVolumeClaim.claimName`、配置字典 `configMap.name`、保密字典 `secret.secretName`。挂载只能选已定义的卷；卷名 DNS-1123 且唯一，挂载路径须绝对且同容器内不重复。删除卷时其挂载一并消失（读者需自行删除容器上的挂载行，页面在校验里提示）。
 
 - 健康检查：三种探针（`livenessProbe`/`readinessProbe`/`startupProbe`）各自可启用；方式为 HTTP（`httpGet.scheme/path/port`）、TCP（`tcpSocket.port`）或命令（`exec.command`）。未启用即删除该键——写一个空探针会让容器多出一个永远成功的检查。只写表单填过的阈值，其余交给服务端默认（实测回读会补 `timeoutSeconds:1`/`periodSeconds:10`/`failureThreshold:3`）。
 - 优雅终止：`spec.template.spec.terminationGracePeriodSeconds`；留空即删除该字段（用集群/镜像默认），非整数在本地拒绝。
@@ -52,7 +55,7 @@
 | 显式类型检查 | `console-next: tsc --noEmit` | 0 error |
 | 构建 | `console-next: vite build` | ✓ built |
 | 严格规格门禁 | `check_docs.py --strict` | errors=0 warnings=0 |
-| 本批 E2E（`-n 0`） | EDIT_SETTINGS-03、-04、-05、-06 + DETAIL-01 | 5 passed |
+| 本批 E2E（`-n 0`） | EDIT_SETTINGS-03…07 + DETAIL-01 + EDIT_YAML-01 | 7 passed |
 | 共享影响 | APP_WORKLOADS-DETAIL-01、EDIT_YAML-01、FULL-04、MOBILE-01 | 4 passed |
 | 契约套件 | `npx vitest run --config config/vitest.config.ts` | 1331 passed / 1 failed（见下） |
 
@@ -62,5 +65,5 @@
 
 ## 7. 遗留（本单元内仍可实施）
 
-- 存储挂载、容器组安全上下文、IP 池：老 console 的编辑设置包含这些分组，新弹窗尚未提供，目前只能编辑 YAML。已登记为待补原子项（ES-06）；存储挂载需要独立的卷列表子编辑器，单列一个单元。
+- 容器组安全上下文（securityContext）与容器组 IP 池（ippool，仅集群启用时）：老 console 的编辑设置包含这两项，新弹窗尚未提供，目前只能编辑 YAML。已登记为待补原子项（ES-07）。
 - 任务（Job/CronJob）的编辑设置目前只有既有字段，未纳入资源限额与策略；本批未改动，保留原能力。

@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-07
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: edit-settings
+title: 编辑设置：存储挂载
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/deployments'
+prd: prd/kube-frontend/app-workloads/edit-settings.md
+design: design/kube-frontend/app-workloads/edit-settings.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-07
+
+story:
+- US1
+
+product: 编辑设置里的卷定义（临时卷/节点路径/持久卷声明/配置字典/保密字典）与容器挂载点。
+preconditions:
+- 已登录且项目内可创建部署
+steps:
+- 创建部署并打开「编辑设置」
+- 新增临时卷 data，并在容器上挂载到 /data，保存后回读
+- 把卷类型改为持久卷声明、填写声明名后保存并回读
+- 删除卷后保存并回读
+steps_expected:
+- volumes 含 {name:data, emptyDir:{}}，volumeMounts 含 {name:data, mountPath:/data}
+- 改为持久卷声明后来源为 persistentVolumeClaim.claimName
+- 删除卷后卷与挂载一起消失
+expected:
+- 卷名非法/重复、缺来源、挂载路径非绝对或重复时本地拒绝
+troubleshoot:
+- 422：emptyDir 写成空字符串或卷名含大写
+- 挂载未生效：volumeMounts 的 name 与 volumes 的 name 不一致
+update_automation:
+- 选择器：deployments-edit:volumes / volume-add / volume-name:<id> / volume-type:<id> / volume-source:<id> / mounts / mount-add / mount-path:<id>

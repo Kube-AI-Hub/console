@@ -28,6 +28,7 @@
 - **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-04** — 已知一个部署（有状态副本集/守护进程集同理），当在「编辑设置」里把更新策略改为「同时更新」（有状态副本集/守护进程集为「手动更新」）并保存，则回读 `spec.strategy.type`（有状态副本集与守护进程集为 `spec.updateStrategy.type`）为该值且 `rollingUpdate` 字段被移除；改回「滚动更新」并填写最大不可用/最大超出（有状态副本集为分区）后保存，则回读 `rollingUpdate` 与填写一致；百分比或整数以外的值在本地拒绝。
 - **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-05** — 已知一个部署已存在且其选择器为 `app=<name>`，当在「编辑设置」的高级设置里新增节点选择（`kubernetes.io/os=linux`）与容器组注解（`prometheus.io/scrape=true`）并保存，则回读 `spec.template.spec.nodeSelector` 与 `spec.template.metadata.annotations` 与填写一致；当移除容器组标签中「选择器依赖的标签」时，页面给出说明并禁用保存且不发请求；把选择器依赖的标签保留、另加一条新标签后保存，则回读的容器组标签同时包含两者；节点选择留空时该字段被移除。
 - **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-06** — 已知一个部署的容器没有健康检查，当在「编辑设置」里启用存活检查（HTTP，端口 80，路径 `/healthz`，初始延迟 5 秒）并把优雅终止设为 45 秒后保存，则回读该容器的 `livenessProbe.httpGet` 为 `{path:/healthz, port:80}` 且 `initialDelaySeconds=5`，`spec.template.spec.terminationGracePeriodSeconds=45`；取消启用后保存，则 `livenessProbe` 被移除；检查方式切到「命令」并留空命令时本地拒绝，端口填 70000 时本地拒绝；优雅终止填非整数时本地拒绝。
+- **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-07** — 已知一个部署没有存储卷，当在「编辑设置」的存储挂载里新增一个临时卷（名称 `data`）并在容器上挂载到 `/data`，则回读 `spec.template.spec.volumes` 含 `{name:data, emptyDir:{}}`、该容器的 `volumeMounts` 含 `{name:data, mountPath:/data}`；把卷类型改为持久卷声明并填写声明名后保存，则卷来源变为 `persistentVolumeClaim.claimName`；卷名非法（含大写或下划线）、卷名重复、持久卷声明类型缺来源、挂载路径非绝对路径或同一容器内重复时本地拒绝；删除卷后保存，则该卷与其挂载一起消失。
 
 ## 设计目标
 

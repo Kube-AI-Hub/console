@@ -14,6 +14,7 @@
 - `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-04`
 - `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-05`
 - `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-06`
+- `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-07`
 
 ## 设计目标与非目标
 
@@ -131,3 +132,16 @@ kube-frontend 的负载详情接管「编辑设置」时，复用这里的页签
 ### DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-10 — 优雅终止留空即删除该字段
 
 **为什么**：留空表示「用集群/镜像默认的 30 秒」，写死 30 会掩盖未来的默认值变化；只有读者真的填了数字才写入。
+
+
+### DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-11 — 卷与挂载分两层编辑
+
+**为什么**：Kubernetes 里卷定义在容器组上、挂载点定义在容器上，一个卷可以被多个容器挂载。把两者合成一行会让「一个卷挂到两个容器」无法表达，也解释不了为什么删掉一个容器的挂载后卷还在。页面因此分成「存储挂载（卷）」与每个容器下的「挂载」两层，挂载只能从已定义的卷里选。
+
+**被否方案**：每行一个「卷 + 路径」的复合条目——只能表达一对一，且与对象的形状不符。
+
+### DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-12 — 五种来源，来源字段按类型解释
+
+**为什么**：临时卷（emptyDir）没有来源；节点路径（hostPath）、持久卷声明（pvc）、配置字典（configMap）、保密字典（secret）各有一个名称或路径字段。表单用同一列并按类型切换提示，避免为每种来源做一套子表单。
+
+**已知坑**：`emptyDir` 必须写成 `{}`（不能省略），否则 apiserver 拒绝；持久卷声明写 `persistentVolumeClaim.claimName`，保密字典写 `secret.secretName`，两者字段名不同。
