@@ -8,6 +8,7 @@ import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { DeleteDialog } from '@/components/resource/DeleteDialog';
 import { YamlDialog } from '@/components/resource/YamlDialog';
+import { DashboardInfoDialog, type DashboardInfoValues } from './DashboardInfoDialog';
 import { formatTimestamp } from '@/lib/time';
 import { useListRefresh } from '@/components/resource/useListRefresh';
 
@@ -45,6 +46,8 @@ export function ClusterCustomMonitoringPage({ cluster }: ClusterCustomMonitoring
   });
 
   const [deleting, setDeleting] = React.useState<DashboardSummary | null>(null);
+  const [infoOpen, setInfoOpen] = React.useState(false);
+  const [infoFor, setInfoFor] = React.useState<DashboardSummary | null>(null);
   const [yamlFor, setYamlFor] = React.useState<DashboardSummary | null>(null);
   const [yaml, setYaml] = React.useState<string>('');
 
@@ -53,6 +56,34 @@ export function ClusterCustomMonitoringPage({ cluster }: ClusterCustomMonitoring
       clusterDashboardsApi(apiClient).save(params),
     onSuccess: () => {
       setYamlFor(null);
+      void queryClient.invalidateQueries({ queryKey: ['cluster-dashboards', cluster] });
+    },
+  });
+
+  const create = useMutation({
+    mutationFn: (values: DashboardInfoValues) =>
+      clusterDashboardsApi(apiClient).create({
+        name: values.name,
+        title: values.title,
+        description: values.description,
+        editable: values.editable,
+      }),
+    onSuccess: () => {
+      setInfoOpen(false);
+      void queryClient.invalidateQueries({ queryKey: ['cluster-dashboards', cluster] });
+    },
+  });
+
+  const updateInfo = useMutation({
+    mutationFn: (values: DashboardInfoValues) =>
+      clusterDashboardsApi(apiClient).updateInfo({
+        name: values.name,
+        title: values.title,
+        description: values.description,
+        editable: values.editable,
+      }),
+    onSuccess: () => {
+      setInfoOpen(false);
       void queryClient.invalidateQueries({ queryKey: ['cluster-dashboards', cluster] });
     },
   });
@@ -82,6 +113,7 @@ export function ClusterCustomMonitoringPage({ cluster }: ClusterCustomMonitoring
     () => ({
       title: t('customMonitoring.title'),
       refresh: listRefresh.refresh,
+      primaryAction: { key: 'create', label: t('customMonitoring.createAction'), aiId: 'custom-monitoring:create' },
       description: t('customMonitoring.description'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
@@ -133,6 +165,7 @@ export function ClusterCustomMonitoringPage({ cluster }: ClusterCustomMonitoring
       },
       // 行操作只声明；点击通过 ResourceList 的 onAction 到达。
       rowActions: [
+        { key: 'edit', label: t('resource.action.editInfo'), aiId: 'custom-monitoring:edit' },
         { key: 'yaml', label: t('customMonitoring.viewYaml'), aiId: 'custom-monitoring:yaml' },
         { key: 'delete', label: t('common.delete'), tone: 'danger', aiId: 'custom-monitoring:delete' },
       ],
@@ -158,11 +191,34 @@ export function ClusterCustomMonitoringPage({ cluster }: ClusterCustomMonitoring
           rows={rows}
           loading={false}
           onAction={(action, row) => {
-            if (action === 'delete') setDeleting(row);
+            if (action === 'create') {
+              setInfoFor(null);
+              setInfoOpen(true);
+            } else if (action === 'edit') {
+              setInfoFor(row ?? null);
+              setInfoOpen(true);
+            } else if (action === 'delete') setDeleting(row);
             else if (action === 'yaml') void openYaml(row);
           }}
         />
       ) : null}
+
+      <DashboardInfoDialog
+        open={infoOpen}
+        onOpenChange={(open) => {
+          setInfoOpen(open);
+          if (!open) setInfoFor(null);
+        }}
+        mode={infoFor ? 'edit' : 'create'}
+        {...(infoFor
+          ? { initial: { name: infoFor.name, title: infoFor.title, description: infoFor.summary, editable: infoFor.editable } }
+          : {})}
+        pending={create.isPending || updateInfo.isPending}
+        onSubmit={(values) => {
+          if (infoFor) updateInfo.mutate(values);
+          else create.mutate(values);
+        }}
+      />
 
       <DeleteDialog
         open={deleting !== null}

@@ -57,6 +57,63 @@ function dashboardsApi(client: Client, resource: 'clusterdashboards' | 'dashboar
       return (response?.items ?? []).map(toDashboard);
     },
 
+    /**
+     * Create an empty dashboard.
+     *
+     * The old console creates one from the same base-info form and then opens the panel
+     * editor; panels are not part of creation here either, so a new dashboard starts with
+     * `panels: []` and is filled through the YAML editor. `editable` mirrors the checkbox
+     * the old form offers, which decides whether other editors may change the panels.
+     */
+    async create(params: {
+      name: string;
+      title: string;
+      description?: string;
+      editable?: boolean;
+      namespace?: string;
+    }): Promise<void> {
+      await client.request(collection(params.namespace ?? ''), {
+        method: 'POST',
+        body: {
+          apiVersion: 'monitoring.kubesphere.io/v1alpha2',
+          kind: namespaced ? 'Dashboard' : 'ClusterDashboard',
+          metadata: { name: params.name },
+          spec: {
+            title: params.title,
+            ...(params.description ? { description: params.description } : {}),
+            editable: params.editable !== false,
+            panels: [],
+          },
+        },
+      });
+    },
+
+    /**
+     * Change title / description / editable without touching the panels.
+     *
+     * A merge patch on `spec` keeps `panels` exactly as they are — the panel editor is not
+     * migrated, so a save that dropped them would silently destroy the dashboard.
+     */
+    async updateInfo(params: {
+      name: string;
+      title: string;
+      description?: string;
+      editable?: boolean;
+      namespace?: string;
+    }): Promise<void> {
+      await client.request(`${collection(params.namespace ?? '')}/${encodeURIComponent(params.name)}`, {
+        method: 'PATCH',
+        contentType: 'application/merge-patch+json',
+        body: {
+          spec: {
+            title: params.title,
+            ...(params.description === undefined ? {} : { description: params.description }),
+            ...(params.editable === undefined ? {} : { editable: params.editable }),
+          },
+        },
+      });
+    },
+
     async get(params: { name: string; namespace?: string; signal?: AbortSignal }): Promise<KubeObject | null> {
       try {
         return await client.request<KubeObject>(`${collection(params.namespace ?? '')}/${encodeURIComponent(params.name)}`, {

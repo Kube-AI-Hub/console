@@ -5,6 +5,7 @@
 ## 关联需求
 
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_MONITORING-01
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_MONITORING-05
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_MONITORING-02
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_MONITORING-03
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_MONITORING-04
@@ -87,3 +88,13 @@
 ## 验收用例
 
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_MONITORING-01`
+
+
+## 创建与编辑信息（2026-11-16）
+
+老 console 在集群自定义监控页有「创建」与行内「编辑信息」，两者都只写 `spec.title` / `spec.description`（以及 `editable`），面板交给独立的面板编辑器。本单元补齐这两个入口，面板编辑器仍不在范围内。
+
+- **创建**：`POST` 集合，`spec.panels` 显式写空数组——不写的话对象里没有这个键，后续 YAML 编辑时读者会以为字段丢了。
+- **编辑**：用 **merge patch** 只提交 `spec.title/description/editable`。整对象 PUT 会把面板一起回写，而面板编辑器没迁移，任何一次「改个名字」都可能把别人的面板覆盖掉。
+- **对象名**：来自显示名称的 slug（小写/数字/连字符）；显示名称全是中文时 slug 为空，提交会提示「对象名必填」，由读者自己填——比随机生成一个名字更好，因为名字之后要出现在 YAML 与 CLI 里。
+- **与共享 `EditInfoDialog` 的区别**：那个改的是别名注解，仪表板的标题在 `spec` 里，语义不同，因此单独一个对话框。

@@ -1,0 +1,38 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_MONITORING-05
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: custom-monitoring
+title: 自定义监控：创建仪表板与编辑信息
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/custom-monitoring'
+prd: prd/kube-frontend/cluster-management/custom-monitoring.md
+design: design/kube-frontend/cluster-management/custom-monitoring.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_MONITORING-05
+
+story:
+- US1
+
+product: 集群自定义监控页可创建空仪表板，并可编辑标题/描述/可编辑性而不触碰面板。
+preconditions:
+- 已登录且有集群监控写权限
+- monitoring.kubesphere.io/v1alpha2 的 clusterdashboards 可写
+steps:
+- 点「创建仪表板」，填显示名称后提交
+- 确认新行出现，且对象 spec.panels 为空数组
+- 对该行执行「编辑信息」，确认对象名锁定，改标题后提交
+- 回读对象，确认 spec.title 已更新且 spec.panels 未被改动
+- 清理创建的对象
+steps_expected:
+- 创建发出 POST 并返回 2xx，列表出现新行
+- 编辑只改 spec.title/description/editable
+- 名称为空或非法时本地拒绝且不发请求
+expected:
+- 面板编辑器不在迁移范围，创建出的仪表板从空面板开始
+troubleshoot:
+- 编辑后面板消失：用了整对象 PUT 而不是 merge patch
+- 中文标题下对象名为空却提交成功：缺少本地校验
+update_automation:
+- 选择器：custom-monitoring:create / dashboard-info:surface / :title / :name / :description / :editable / :submit / custom-monitoring:edit

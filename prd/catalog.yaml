@@ -1023,6 +1023,7 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_MONITORING-01
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_MONITORING-05
     - id: cluster-config-lists-refresh
       title: 集群配置与资源列表刷新
       prd: prd/kube-frontend/cluster-management/cluster-config-lists-refresh.md

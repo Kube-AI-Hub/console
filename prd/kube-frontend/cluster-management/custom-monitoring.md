@@ -20,6 +20,7 @@
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_MONITORING-02** — 当集群没有仪表板，则显示空态说明仪表板随监控组件下发、本控制台不提供面板编辑器。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_MONITORING-03** — 当选择行操作「删除」并确认，则该对象被删除且列表刷新。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_MONITORING-04** — 当选择行操作「查看 YAML」，则显示对象完整 YAML，可保存回集群。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_MONITORING-05** — 已知集群自定义监控页，当点主操作「创建仪表板」，则弹窗要求显示名称（必填）、对象名（可留空，由显示名称生成；只允许小写字母/数字/连字符）、描述与「允许其他编辑者修改面板」勾选；提交后发出 `POST /apis/monitoring.kubesphere.io/v1alpha2/clusterdashboards`（`spec.panels` 为空数组），成功后列表出现该行；当选择行操作「编辑信息」，则对象名锁定、其余字段可改，提交以 merge patch 只写 `spec.title/description/editable`（**不动 `spec.panels`**），成功后列表标题更新；名称为空或格式非法时在本地拒绝且不发请求。
 
 ## 设计目标
 

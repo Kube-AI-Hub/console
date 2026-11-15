@@ -917,7 +917,7 @@ MODULES = [
                     {
                         "id": "custom-monitoring",
                         "title": "自定义监控仪表板",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_MONITORING-01"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_MONITORING-01", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_MONITORING-05"]},
                     },
                     {
                         "id": "cluster-config-lists-refresh",
