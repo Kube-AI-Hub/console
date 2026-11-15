@@ -17,6 +17,7 @@ const ALERT_STATE_KEYS: Record<string, LocaleKey> = {
 
 const ALERT_SEVERITY_KEYS: Record<string, LocaleKey> = {
   critical: 'monitoring.severity.critical',
+  error: 'monitoring.severity.error',
   warning: 'monitoring.severity.warning',
   info: 'monitoring.severity.info',
 };

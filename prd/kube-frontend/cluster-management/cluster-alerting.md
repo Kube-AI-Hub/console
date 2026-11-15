@@ -24,6 +24,7 @@
 ## 验收场景
 
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING-01** — 已知在 host 集群（`globalrulegroups` 有 18 个内置策略、`clusterrulegroups` 当前为空），当打开集群告警策略页，则默认「自定义策略」页签，行数等于 `clusterrulegroups` 的 API 条数；切到「内置策略」页签后行数等于 `globalrulegroups` 的 API 条数（页大小为 50，覆盖当前计数）；当打开集群告警消息页，则列出 `clusteralerts` 与 `globalalerts` 合并后的消息，首屏行数等于 `min(20, clusteralerts.totalItems + globalalerts.totalItems)`，并显示消息、状态、级别、所属策略、来源与触发时间。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING-02** — 已知集群告警消息页有消息，当在「状态」筛选里选「告警中」或「待触发」，则两个集合的请求都带上 `state` 参数，列表只显示该状态的消息、首屏行数等于该状态下的条数；当在「级别」筛选里选「严重/错误/提示」，则请求带上 `label_filters=severity=<值>`，列表只剩该级别；两个筛选可叠加，切换筛选时回到第 1 页；点「全部状态/全部级别」回到未过滤。筛选在**服务端**执行——集合是分页的，只在前端过滤等于只过滤碰巧取到的那一页。
 
 ## 设计目标
 

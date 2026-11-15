@@ -873,12 +873,29 @@ export function clusterAlertMessagesApi(client: Client) {
   async function fetchSource(
     source: ClusterAlertSource,
     limit: number,
+    filters: { state?: string | undefined; severity?: string | undefined; ruleGroup?: string | undefined },
     signal?: AbortSignal,
   ): Promise<{ source: ClusterAlertSource; items: AggregatedAlertItem[]; total: number }> {
+    /*
+     * `state` and the label filters are applied by the server: the collection pages, so
+     * filtering after the fact would only filter the page that happened to be fetched.
+     * Severity and rule group share one `label_filters` value (a label selector), which is
+     * why they are assembled here instead of being set as separate parameters.
+     */
+    const labelFilters: string[] = [];
+    if (filters.severity) labelFilters.push(`severity=${filters.severity}`);
+    if (filters.ruleGroup) labelFilters.push(`rule_group=${filters.ruleGroup}`);
     const body = await client.request<{ items?: AggregatedAlertItem[]; totalItems?: number }>(
       `${CLUSTER_ALERT_KAPIS}/${CLUSTER_ALERT_PATHS[source]}`,
       {
-        query: { limit, page: 1, sortBy: 'activeAt', ascending: 'false' },
+        query: {
+          limit,
+          page: 1,
+          sortBy: 'activeAt',
+          ascending: 'false',
+          ...(filters.state ? { state: filters.state } : {}),
+          ...(labelFilters.length > 0 ? { label_filters: labelFilters.join(',') } : {}),
+        },
         ...(signal ? { signal } : {}),
       },
     );
@@ -892,12 +909,19 @@ export function clusterAlertMessagesApi(client: Client) {
     async list(params: {
       page: number;
       pageSize: number;
+      /** `firing` / `pending`; server-side. */
+      state?: string;
+      /** `critical` / `error` / `warning`; server-side label filter. */
+      severity?: string;
+      /** One alerting policy (label `rule_group`); server-side label filter. */
+      ruleGroup?: string;
       signal?: AbortSignal;
     }): Promise<{ items: ClusterAlertSummary[]; total: number }> {
       const limit = Math.min(params.page * params.pageSize, MAX_WINDOW);
+      const filters = { state: params.state, severity: params.severity, ruleGroup: params.ruleGroup };
       const [custom, builtin] = await Promise.all([
-        fetchSource('custom', limit, params.signal),
-        fetchSource('builtin', limit, params.signal),
+        fetchSource('custom', limit, filters, params.signal),
+        fetchSource('builtin', limit, filters, params.signal),
       ]);
       const items = [
         ...custom.items.map((item, index) => toClusterAlertSummary(item, 'custom', index)),

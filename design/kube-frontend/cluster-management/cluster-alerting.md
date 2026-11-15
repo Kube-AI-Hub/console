@@ -9,6 +9,7 @@
 ## 关联需求
 
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING-01
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING-02
 
 ## 设计目标与非目标
 
@@ -136,3 +137,12 @@
 ## 验收用例
 
 - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING-01
+
+
+## 告警消息筛选（2026-11-16）
+
+老 console 的告警消息页有 状态 / 级别 / 策略 / 监控对象 四组筛选。本单元交付前两组，策略与监控对象由「所属策略」列与详情下钻承担。
+
+- `state` 与 `label_filters` 都发给**两个集合**（`clusteralerts` 与 `globalalerts`），实测有效：全量 71 → `state=pending` 10 → `severity=warning` 55。
+- `label_filters` 是一个标签选择器，`severity=` 与 `rule_group=` 必须拼在同一次请求里；分开设置会互相覆盖。
+- 切换筛选回到第 1 页，否则会停在一个已不存在的页码上。

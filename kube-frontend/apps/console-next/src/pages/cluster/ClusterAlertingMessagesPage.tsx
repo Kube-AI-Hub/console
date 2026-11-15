@@ -31,10 +31,26 @@ const PAGE_SIZE = 20;
 export function ClusterAlertingMessagesPage({ cluster }: ClusterAlertingMessagesPageProps): React.ReactElement {
   const t = useT();
   const [page, setPage] = React.useState(1);
+  /*
+   * Server-side filters, as the old console offers: state (pending/firing), severity and the
+   * alerting policy. They are sent to both collections, because a page that filtered after the
+   * fact would only narrow the page it happened to fetch.
+   */
+  const [state, setState] = React.useState('');
+  const [severity, setSeverity] = React.useState('');
+  const [ruleGroup, setRuleGroup] = React.useState('');
 
   const query = useQuery({
-    queryKey: ['cluster-alert-messages', cluster, page],
-    queryFn: ({ signal }) => clusterAlertMessagesApi(apiClient).list({ page, pageSize: PAGE_SIZE, signal }),
+    queryKey: ['cluster-alert-messages', cluster, page, state, severity, ruleGroup],
+    queryFn: ({ signal }) =>
+      clusterAlertMessagesApi(apiClient).list({
+        page,
+        pageSize: PAGE_SIZE,
+        ...(state ? { state } : {}),
+        ...(severity ? { severity } : {}),
+        ...(ruleGroup ? { ruleGroup } : {}),
+        signal,
+      }),
   });
 
   const rows = query.data?.items ?? [];
@@ -46,6 +62,29 @@ export function ClusterAlertingMessagesPage({ cluster }: ClusterAlertingMessages
       title: t('cluster.alerting.messages.title'),
       refresh: listRefresh.refresh,
       description: t('cluster.alerting.messages.description'),
+      filters: [
+        {
+          key: 'state',
+          title: t('monitoring.column.state'),
+          aiId: 'cluster-alerting-messages:filter:state',
+          allLabel: t('monitoring.filter.allStates'),
+          options: [
+            { value: 'firing', label: alertStateLabel(t, 'firing') },
+            { value: 'pending', label: alertStateLabel(t, 'pending') },
+          ],
+        },
+        {
+          key: 'severity',
+          title: t('monitoring.column.severity'),
+          aiId: 'cluster-alerting-messages:filter:severity',
+          allLabel: t('monitoring.filter.allSeverities'),
+          options: [
+            { value: 'critical', label: alertSeverityLabel(t, 'critical') },
+            { value: 'error', label: alertSeverityLabel(t, 'error') },
+            { value: 'warning', label: alertSeverityLabel(t, 'warning') },
+          ],
+        },
+      ],
       rowKey: 'id',
       rowAttributes: (row) => ({ 'data-ai-row': row.id }),
       columns: [
@@ -129,13 +168,13 @@ export function ClusterAlertingMessagesPage({ cluster }: ClusterAlertingMessages
       },
       pagination: { page, pageSize: PAGE_SIZE, total },
     }),
-    [page, query.isFetching, t, total],
+    [page, query.isFetching, ruleGroup, severity, state, t, total],
   );
 
   const [detail, setDetail] = React.useState<ClusterAlertSummary | null>(null);
-  const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
+  const pageState = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
 
-  if (state === 'error') {
+  if (pageState === 'error') {
     return (
       <AiSurface as="section" aiId="cluster-alerting-messages:surface" state="error" className="min-w-0">
         <ResourceErrorPanel
@@ -148,12 +187,24 @@ export function ClusterAlertingMessagesPage({ cluster }: ClusterAlertingMessages
   }
 
   return (
-    <AiSurface as="section" aiId="cluster-alerting-messages:surface" state={state} className="min-w-0">
+    <AiSurface as="section" aiId="cluster-alerting-messages:surface" state={pageState} className="min-w-0">
       <ResourceList
+        /*
+         * The filter values are passed back in as controlled state. Without this the list keeps
+         * its own copy and every change reports only the key that was just touched, so setting
+         * severity would silently drop the state condition that was already active.
+         */
+        filters={{ state, severity }}
+        onFiltersChange={(next) => {
+          setState(next['state'] ?? '');
+          setSeverity(next['severity'] ?? '');
+          setRuleGroup(next['ruleGroup'] ?? '');
+          setPage(1);
+        }}
         schema={schema}
         onRefresh={listRefresh.onRefresh}
         rows={rows}
-        loading={state === 'loading'}
+        loading={pageState === 'loading'}
         onPageChange={setPage}
         onAction={(action, row) => {
           if (!row) return;

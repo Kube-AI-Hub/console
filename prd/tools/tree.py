@@ -857,7 +857,7 @@ MODULES = [
                     {
                         "id": "cluster-alerting",
                         "title": "集群级告警",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING-01"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING-01", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING-02"]},
                     },
                     {
                         "id": "cluster-pvc",

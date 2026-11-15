@@ -1,0 +1,33 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: cluster-alerting
+title: 告警消息筛选（状态 / 级别）
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/alerting-messages'
+prd: prd/kube-frontend/cluster-management/cluster-alerting.md
+design: design/kube-frontend/cluster-management/cluster-alerting.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING-02
+
+story:
+- US1
+
+product: 集群告警消息页可按状态与级别筛选，筛选在服务端执行。
+preconditions:
+- 已登录且有集群告警读权限
+- globalalerts 或 clusteralerts 至少有一个集合有消息
+steps:
+- 打开告警消息页，记录首屏行数
+- 在「状态」筛选里选「待触发」，观察请求参数与行数
+- 再在「级别」筛选里选「提示」，确认两个条件叠加
+- 切回「全部状态」，确认行数恢复
+expected:
+- 请求带上 state 与 label_filters，行数按筛选变化
+troubleshoot:
+- 请求无 state 参数：筛选只在前端生效，分页集合下会漏数据
+- 切换筛选后停在不存在的页码：没有回到第 1 页
+update_automation:
+- 选择器：cluster-alerting-messages:filter:state / :filter:severity

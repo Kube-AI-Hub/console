@@ -938,6 +938,7 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING-01
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING-02
     - id: cluster-pvc
       title: 集群级存储卷声明
       prd: prd/kube-frontend/cluster-management/cluster-pvc.md
