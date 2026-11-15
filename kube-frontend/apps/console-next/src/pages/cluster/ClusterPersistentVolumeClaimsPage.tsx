@@ -10,6 +10,7 @@ import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { statusLabel } from '@/lib/status';
 import { formatTimestamp } from '@/lib/time';
 import { clusterProjectRowId, projectObjectUrl, useClusterProjectIndex } from './useClusterProjectIndex';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * 集群级存储卷声明（跨项目）.
@@ -57,10 +58,12 @@ export function ClusterPersistentVolumeClaimsPage({ cluster }: ClusterPersistent
   const rows = (query.data?.items ?? []) as StorageSummary[];
   const total = query.data?.total ?? 0;
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
+  const listRefresh = useListRefresh('cluster-persistentvolumeclaims', query);
 
   const schema = React.useMemo<ListSchema<StorageSummary>>(
     () => ({
       title: t('cluster.pvc.title'),
+      refresh: listRefresh.refresh,
       description: t('cluster.pvc.description'),
       rowKey: (row) => clusterProjectRowId(row),
       rowAttributes: (row) => ({ 'data-ai-row': clusterProjectRowId(row) }),
@@ -132,6 +135,7 @@ export function ClusterPersistentVolumeClaimsPage({ cluster }: ClusterPersistent
       ],
       empty: { title: t('cluster.workloads.emptyTitle'), description: t('cluster.workloads.emptyDescription') },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -141,7 +145,7 @@ export function ClusterPersistentVolumeClaimsPage({ cluster }: ClusterPersistent
       },
       pagination: { page: list.page, pageSize: PAGE_SIZE, total },
     }),
-    [cluster, list, t, total, workspaceOf],
+    [cluster, list, query.isFetching, t, total, workspaceOf],
   );
 
   if (state === 'error') {
@@ -156,6 +160,7 @@ export function ClusterPersistentVolumeClaimsPage({ cluster }: ClusterPersistent
     <AiSurface as="section" aiId={AI_ID + ':surface'} state={state} className="min-w-0">
       <ResourceList
         schema={schema}
+        onRefresh={listRefresh.onRefresh}
         rows={rows}
         loading={state === 'loading'}
         searchValue={list.search}

@@ -9,6 +9,7 @@ import { api as apiClient } from '@/api';
 import { useResourceListState, toListParams } from '@/components/resource/useResourceListState';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * 存储类型 (StorageClass).
@@ -51,10 +52,12 @@ export function StorageClassesPage({ cluster }: StorageClassesPageProps): React.
     });
   }, [query.data, list.sortBy, list.order]);
   const total = query.data?.total ?? 0;
+  const listRefresh = useListRefresh('storageclasses', query);
 
   const schema = React.useMemo<ListSchema<StorageClassSummary>>(
     () => ({
       title: t('cluster.storageClasses.title'),
+      refresh: listRefresh.refresh,
       description: t('cluster.storageClasses.description'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
@@ -141,6 +144,7 @@ export function StorageClassesPage({ cluster }: StorageClassesPageProps): React.
       rowActions: [],
       empty: { title: t('cluster.storageClasses.emptyTitle'), description: t('cluster.storageClasses.emptyDescription') },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -150,7 +154,7 @@ export function StorageClassesPage({ cluster }: StorageClassesPageProps): React.
       },
       pagination: { page: list.page, pageSize: PAGE_SIZE, total },
     }),
-    [list, t, total],
+    [list, query.isFetching, t, total],
   );
 
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
@@ -167,6 +171,7 @@ export function StorageClassesPage({ cluster }: StorageClassesPageProps): React.
     <AiSurface as="section" aiId="storageclasses:surface" state={state} className="min-w-0">
       <ResourceList
         schema={schema}
+        onRefresh={listRefresh.onRefresh}
         rows={rows}
         loading={state === 'loading'}
         searchValue={list.keyword}

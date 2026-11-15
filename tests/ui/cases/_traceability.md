@@ -240,6 +240,7 @@
 | kube-frontend/cluster-management/storage-classes | `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-01` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-01` | [`design/kube-frontend/cluster-management/storage-classes.md`](../../../design/kube-frontend/cluster-management/storage-classes.md) | [`tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_STORAGE_CLASSES_01.py`](../../../tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_STORAGE_CLASSES_01.py) |
 | kube-frontend/cluster-management/storage-classes | `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-02` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-02` | [`design/kube-frontend/cluster-management/storage-classes.md`](../../../design/kube-frontend/cluster-management/storage-classes.md) | [`tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_STORAGE_CLASSES_02.py`](../../../tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_STORAGE_CLASSES_02.py) |
 | kube-frontend/cluster-management/storage-classes | `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-03` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-03` | [`design/kube-frontend/cluster-management/storage-classes.md`](../../../design/kube-frontend/cluster-management/storage-classes.md) | [`tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_STORAGE_CLASSES_03.py`](../../../tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_STORAGE_CLASSES_03.py) |
+| kube-frontend/cluster-management/storage-lists-refresh | `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_LISTS_REFRESH-01` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_LISTS_REFRESH-01` | [`design/kube-frontend/cluster-management/storage-lists-refresh.md`](../../../design/kube-frontend/cluster-management/storage-lists-refresh.md) | [`tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_STORAGE_LISTS_REFRESH_01.py`](../../../tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_STORAGE_LISTS_REFRESH_01.py) |
 | kube-frontend/cluster-management/visibility | `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-VISIBILITY-01` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-VISIBILITY-01` | [`design/kube-frontend/cluster-management/visibility.md`](../../../design/kube-frontend/cluster-management/visibility.md) | [`tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_VISIBILITY_01.py`](../../../tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_VISIBILITY_01.py) |
 | kube-frontend/cluster-management/yaml-edit | `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-YAML_EDIT-01` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-YAML_EDIT-01` | [`design/kube-frontend/cluster-management/yaml-edit.md`](../../../design/kube-frontend/cluster-management/yaml-edit.md) | [`tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_YAML_EDIT_01.py`](../../../tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_YAML_EDIT_01.py) |
 | kube-frontend/configmaps/_index | `AC-FULL-KUBE-FRONTEND-CONFIGMAPS-01` | `TC-FULL-KUBE-FRONTEND-CONFIGMAPS-01` | [`design/kube-frontend/configmaps/_index.md`](../../../design/kube-frontend/configmaps/_index.md) | [`tests/ui/tests/kube-frontend/configmaps/test_TC_FULL_KUBE_FRONTEND_CONFIGMAPS_01.py`](../../../tests/ui/tests/kube-frontend/configmaps/test_TC_FULL_KUBE_FRONTEND_CONFIGMAPS_01.py) |
@@ -388,7 +389,7 @@
 
 ## 小结
 
-- 需求里的 AC：381 条，其中未覆盖 1 条、无技术方案承接 17 条、无用例规格实现 1 条。
+- 需求里的 AC：382 条，其中未覆盖 1 条、无技术方案承接 17 条、无用例规格实现 1 条。
 - 未覆盖：`AC-L2-KUBE-FRONTEND-LOGIN-07`
 - 无技术方案承接：`AC-L2-KUBE-FRONTEND-LOGIN-01`, `AC-L2-KUBE-FRONTEND-LOGIN-02`, `AC-L2-KUBE-FRONTEND-LOGIN-03`, `AC-L2-KUBE-FRONTEND-LOGIN-04`, `AC-L2-KUBE-FRONTEND-LOGIN-05`, `AC-L2-KUBE-FRONTEND-LOGIN-06`, `AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L2-KUBE-FRONTEND-THEME-01`, `AC-L2-KUBE-FRONTEND-THEME-02`, `AC-L2-KUBE-FRONTEND-THEME-03`, `AC-L2-KUBE-FRONTEND-THEME-04`, `AC-L2-KUBE-FRONTEND-THEME-05`, `AC-L3-KUBE-FRONTEND-MONITORING-PROJECT_CUSTOM_MONITORING-01`, `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-02`, `AC-L3-KUBE-FRONTEND-STORAGE-DETAIL_TABS-01`
 - 无用例规格实现：`AC-L2-KUBE-FRONTEND-LOGIN-07`
@@ -585,6 +586,7 @@
 | kube-frontend/cluster-management/settings | `US3` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-SETTINGS-01` |
 | kube-frontend/cluster-management/storage-classes | `US1` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-01` |
 | kube-frontend/cluster-management/storage-classes | `US2` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-02`, `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-03` |
+| kube-frontend/cluster-management/storage-lists-refresh | `US1` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_LISTS_REFRESH-01` |
 | kube-frontend/cluster-management/visibility | `US1` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-VISIBILITY-01` |
 | kube-frontend/cluster-management/yaml-edit | `US1` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-YAML_EDIT-01` |
 | kube-frontend/configmaps/_index | `US1` | `TC-FULL-KUBE-FRONTEND-CONFIGMAPS-01`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-BULK_DELETE-01` |
@@ -703,4 +705,4 @@
 | kube-frontend/workbench/context | `US1` | `TC-L3-KUBE-FRONTEND-WORKBENCH-CONTEXT-01` |
 | kube-frontend/workbench/entry | `US1` | `TC-L3-KUBE-FRONTEND-WORKBENCH-ENTRY-01` |
 
-- 用户故事：305 条，其中未覆盖 0 条。
+- 用户故事：306 条，其中未覆盖 0 条。

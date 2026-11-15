@@ -10,6 +10,7 @@ import { useResourceListState } from '@/components/resource/useResourceListState
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
 import { statusLabel } from '@/lib/status';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * 持久卷 (PersistentVolume).
@@ -48,10 +49,12 @@ export function PersistentVolumesPage({ cluster }: PersistentVolumesPageProps): 
         : a.name.localeCompare(b.name) * direction,
     );
   }, [filtered, list.sortBy, list.order]);
+  const listRefresh = useListRefresh('persistentvolumes', query);
 
   const schema = React.useMemo<ListSchema<PersistentVolumeSummary>>(
     () => ({
       title: t('cluster.persistentVolumes.title'),
+      refresh: listRefresh.refresh,
       description: t('cluster.persistentVolumes.description'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
@@ -124,6 +127,7 @@ export function PersistentVolumesPage({ cluster }: PersistentVolumesPageProps): 
       rowActions: [],
       empty: { title: t('cluster.persistentVolumes.emptyTitle'), description: t('cluster.persistentVolumes.emptyDescription') },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -133,7 +137,7 @@ export function PersistentVolumesPage({ cluster }: PersistentVolumesPageProps): 
       },
       pagination: { page: 1, pageSize: Math.max(rows.length, 1), total: rows.length },
     }),
-    [list.sortBy, list.order, rows.length, t],
+    [list.sortBy, list.order, query.isFetching, rows.length, t],
   );
 
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
@@ -150,6 +154,7 @@ export function PersistentVolumesPage({ cluster }: PersistentVolumesPageProps): 
     <AiSurface as="section" aiId="persistentvolumes:surface" state={state} className="min-w-0">
       <ResourceList
         schema={schema}
+        onRefresh={listRefresh.onRefresh}
         rows={rows}
         // The list takes ~24s on this cluster; showing the skeleton while a refetch is
         // in flight is what tells the reader the page is working.

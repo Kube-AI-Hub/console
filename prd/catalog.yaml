@@ -758,6 +758,13 @@ modules:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-01
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-02
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-03
+    - id: storage-lists-refresh
+      title: 集群存储列表刷新
+      prd: prd/kube-frontend/cluster-management/storage-lists-refresh.md
+      design: design/kube-frontend/cluster-management/storage-lists-refresh.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_LISTS_REFRESH-01
     - id: projects
       title: 项目列表
       prd: prd/kube-frontend/cluster-management/projects.md

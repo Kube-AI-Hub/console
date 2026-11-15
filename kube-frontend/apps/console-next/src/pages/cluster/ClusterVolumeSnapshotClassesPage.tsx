@@ -5,6 +5,7 @@ import { formatTimestamp } from '@/lib/time';
 import { useResourceListState } from '@/components/resource/useResourceListState';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { useSnapshotCrd, useVolumeSnapshotClasses, type VolumeSnapshotClassRow } from './snapshotQueries';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * 集群级快照类型（VolumeSnapshotClass）.
@@ -63,10 +64,12 @@ export function ClusterVolumeSnapshotClassesPage({
     void crd.refetch();
     if (installed) void query.refetch();
   };
+  const listRefresh = useListRefresh('cluster-snapshot-classes', query);
 
   const schema = React.useMemo<ListSchema<VolumeSnapshotClassRow>>(
     () => ({
       title: t('storage.snapshotClasses.title'),
+      refresh: listRefresh.refresh,
       description: t('storage.snapshotClasses.description'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
@@ -112,6 +115,7 @@ export function ClusterVolumeSnapshotClassesPage({
         description: t('storage.snapshotClasses.emptyDescription'),
       },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -121,7 +125,7 @@ export function ClusterVolumeSnapshotClassesPage({
       },
       pagination: { page: list.page, pageSize: PAGE_SIZE, total },
     }),
-    [list, t, total],
+    [list, query.isFetching, t, total],
   );
 
   if (state === 'error') {
@@ -148,6 +152,7 @@ export function ClusterVolumeSnapshotClassesPage({
     <AiSurface as="section" aiId="cluster-snapshot-classes:surface" state={state} className="min-w-0">
       <ResourceList
         schema={schema}
+        onRefresh={listRefresh.onRefresh}
         rows={rows}
         loading={state === 'loading'}
         searchValue={list.keyword}

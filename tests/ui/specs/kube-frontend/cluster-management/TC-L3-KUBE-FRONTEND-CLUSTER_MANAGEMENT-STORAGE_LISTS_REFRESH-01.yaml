@@ -1,0 +1,33 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_LISTS_REFRESH-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: storage-lists-refresh
+title: 集群存储列表刷新
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/persistentvolumes'
+prd: prd/kube-frontend/cluster-management/storage-lists-refresh.md
+design: design/kube-frontend/cluster-management/storage-lists-refresh.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_LISTS_REFRESH-01
+
+story:
+- US1
+
+product: 集群作用域的存储类型、持久卷、存储卷声明、卷快照、快照类五个列表提供刷新入口。
+preconditions:
+- 已登录且有集群管理员权限
+steps:
+- 依次打开存储类型、持久卷、存储卷声明、卷快照、快照类页面，确认各自的刷新入口存在且可用
+- 点击持久卷列表的刷新，观察是否重新发起请求
+steps_expected:
+- 五个页面的刷新入口存在且空闲时可用
+- 点击后重新发起对应查询
+expected:
+- 刷新期间按钮忙碌；返回后恢复
+troubleshoot:
+- 按钮永久禁用：schema 依赖数组缺少 isFetching
+- 快照页没有刷新：空态分支丢失了列表
+update_automation:
+- 选择器：storageclasses:refresh / persistentvolumes:refresh / cluster-persistentvolumeclaims:refresh / cluster-volume-snapshots:refresh / cluster-snapshot-classes:refresh

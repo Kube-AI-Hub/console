@@ -8,6 +8,7 @@ import { useResourceListState } from '@/components/resource/useResourceListState
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { useClusterProjectIndex } from './useClusterProjectIndex';
 import { useClusterVolumeSnapshots, useSnapshotCrd, type VolumeSnapshotRow } from './snapshotQueries';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * 集群级存储卷快照（跨项目）.
@@ -84,10 +85,12 @@ export function ClusterVolumeSnapshotsPage({ cluster }: ClusterVolumeSnapshotsPa
     void crd.refetch();
     if (installed) void query.refetch();
   };
+  const listRefresh = useListRefresh('cluster-volume-snapshots', query);
 
   const schema = React.useMemo<ListSchema<VolumeSnapshotRow>>(
     () => ({
       title: t('storage.snapshots.title'),
+      refresh: listRefresh.refresh,
       description: t('storage.snapshots.clusterDescription'),
       rowKey: (row) => row.namespace + '/' + row.name,
       rowAttributes: (row) => ({ 'data-ai-row': row.namespace + '/' + row.name }),
@@ -161,6 +164,7 @@ export function ClusterVolumeSnapshotsPage({ cluster }: ClusterVolumeSnapshotsPa
       ],
       empty: { title: t('storage.snapshots.emptyTitle'), description: t('storage.snapshots.emptyDescription') },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -170,7 +174,7 @@ export function ClusterVolumeSnapshotsPage({ cluster }: ClusterVolumeSnapshotsPa
       },
       pagination: { page: list.page, pageSize: PAGE_SIZE, total },
     }),
-    [cluster, list, t, total, workspaceOf],
+    [cluster, list, query.isFetching, t, total, workspaceOf],
   );
 
   if (state === 'error') {
@@ -203,6 +207,7 @@ export function ClusterVolumeSnapshotsPage({ cluster }: ClusterVolumeSnapshotsPa
     <AiSurface as="section" aiId="cluster-volume-snapshots:surface" state={state} className="min-w-0">
       <ResourceList
         schema={schema}
+        onRefresh={listRefresh.onRefresh}
         rows={rows}
         loading={state === 'loading'}
         searchValue={list.keyword}
