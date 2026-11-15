@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-store
+feature: project-apps
+title: 项目内应用 · 详情与卸载
+entry_url: '{BASE_URL}/kube-frontend/{WORKSPACE}/clusters/{CLUSTER}/projects/default/applications'
+prd: prd/kube-frontend/app-store/project-apps.md
+design: design/kube-frontend/app-store/project-apps.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-03
+
+story:
+- US3
+
+product: 项目内应用详情五页签；卸载按 rls 对象 id 删除，行消失且回读不再存在。
+preconditions:
+- 项目内有 1 个由本用例创建的 release
+steps:
+- API 创建唯一 release 后打开项目应用页
+- 点 release 名称进入详情，核对五页签
+- 返回列表，行操作卸载并确认
+- 轮询项目集合直到该 release 消失
+expected:
+- 详情页 installed-app:surface 出现，含 基本信息/资源/事件/配置/YAML 五个页签
+- DELETE 用 cluster_id（rls-…）而不是 release 名
+- 行消失；回读该 release 不再存在
+troubleshoot:
+- 删除 200 但行还在：用名字删的，应该用 cluster_id
+- 即时断言卸载：删除是异步的，必须轮询
+update_automation:
+- 句柄：installed-apps:name:<id> / :uninstall / :uninstall:confirm / installed-app:surface

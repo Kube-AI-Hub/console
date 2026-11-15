@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/cluster-management/cluster-events.md`](../../../../prd/kube-frontend/cluster-management/cluster-events.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EVENTS-01** — 已知集群有事件，当打开资源事件页，则按最近发生时间倒序列出类型、原因、对象、消息与「最近发生 · 次数」；行数等于接口在 `limit=200` 下的返回条数；切换类型过滤为「警告」后所有行类型均为 Warning；关键字过滤按原因/消息/命名空间/对象名匹配当前窗口；窗口满 200 条时显示「显示最近 200 条」的说明。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EVENTS-01** — 已知集群有事件，当打开资源事件页，则以表格列出六列：时间、类别、项目、资源名称与类型、原因、消息（消息出现多次时追加 `xN`）；表格按最近发生时间倒序，每页 20 条，页脚显示总数与「第 N / M 页」，可上一页/下一页，首尾页时对应按钮禁用。
 
 ### 关联设计
 

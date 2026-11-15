@@ -5,47 +5,51 @@ from playwright.sync_api import expect
 
 pytestmark = pytest.mark.ui
 
-EVENTS = "/api/v1/events"
+EVENTS = "/kapis/tenant.kubesphere.io/v1alpha2/events?operation=query&from=0&size=20"
 
 
 @pytest.mark.point
 def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_EVENTS_01(cluster_management_page, screenshot):
-    """TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EVENTS-01 资源事件查询。"""
+    """TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EVENTS-01 资源事件查询：列表与分页。"""
 
     ui = cluster_management_page
     assert ui.api is not None
 
-    status, body = ui.api.request("GET", f"{EVENTS}?limit=200")
+    status, body = ui.api.request("GET", EVENTS)
     if status != 200 or not isinstance(body, dict):
-        pytest.skip("无法读取集群事件")
-    items = body.get("items") or []
-    if not items:
+        pytest.skip("租户事件接口不可用")
+    query = body.get("query") or {}
+    records = query.get("records") or []
+    total = int(query.get("total") or 0)
+    if not records:
         pytest.skip("集群没有事件")
-
-    def last_seen(item: dict) -> str:
-        return str(item.get("lastTimestamp") or item.get("eventTime") or item.get("firstTimestamp") or "")
-
-    newest = max(items, key=last_seen)
 
     ui.page.goto(f"{ui.base_url}/kube-frontend/clusters/{ui.cluster}/events")
     surface = ui.page.locator('[data-ai-id="cluster-events:surface"]').last
     expect(surface).to_be_visible(timeout=30_000)
     expect(surface).not_to_have_attribute("data-ai-state", "loading", timeout=60_000)
 
-    rows = ui.page.locator('[data-ai-id="cluster-events:list"] [data-ai-row]')
-    expect(rows).to_have_count(len(items), timeout=30_000)
-    first_row = rows.first.inner_text()
-    assert str(newest.get("reason") or "") in first_row, first_row
+    # Six columns, as the old console's event search renders them.
+    headers = ui.page.locator('[data-ai-id="cluster-events:list"] thead th').all_inner_texts()
+    assert [text.strip() for text in headers] == [
+        "时间",
+        "类别",
+        "项目",
+        "资源名称与类型",
+        "原因",
+        "消息",
+    ], headers
 
-    if len(items) >= 200:
-        expect(ui.page.locator('[data-ai-id="cluster-events:window"]')).to_be_visible(timeout=20_000)
+    rows = ui.page.locator('[data-ai-id="cluster-events:list"] tbody tr')
+    expect(rows).to_have_count(len(records), timeout=30_000)
 
-    # The type filter goes to the API with a fieldSelector, so every visible badge must be
-    # Warning afterwards.
-    ui.page.locator('[data-ai-id="cluster-events:filter:type"]').select_option("Warning")
-    expect(surface).not_to_have_attribute("data-ai-state", "loading", timeout=60_000)
-    expect(rows.first).to_be_visible(timeout=30_000)
-    sample = [rows.nth(index).inner_text() for index in range(min(5, rows.count()))]
-    assert all("Warning" in text for text in sample), sample
+    # The total is the API's, not a client-side window.
+    total_note = ui.page.locator('[data-ai-id="cluster-events:total"]').inner_text()
+    assert str(total) in total_note, (total, total_note)
 
-    screenshot(ui.page, "cluster-events")
+    # Pagination is present and the first page cannot go back.
+    page_note = ui.page.locator('[data-ai-id="cluster-events:page"]').inner_text()
+    assert page_note.strip().startswith("1 /"), page_note
+    expect(ui.page.locator('[data-ai-id="cluster-events:previous"]')).to_be_disabled()
+
+    screenshot(ui.page, "cluster-events-search")

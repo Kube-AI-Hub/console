@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/app-workloads/s2ibuilder.md`](../../../../prd/kube-frontend/app-workloads/s2ibuilder.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-S2IBUILDER-01** — 列表：通过 `/kapis/resources.kubesphere.io/v1alpha3/namespaces/<namespace>/s2ibuilders` 读取，请求带 `page`/`limit`（服务端分页）与 `sortBy=createTime&ascending=false`；行数等于当页 items、总数取 `totalItems`；搜索按名称服务端过滤并回到第 1 页；刷新保留搜索值并重新读取；列含名称（displayName/name 与类型/所属服务副行）、类型、所属服务、构建器镜像、状态（lastRunState：Running→构建中、Successful→构建成功、Failed→构建失败、空/未知→尚未构建）、最近构建时间（lastRunStartTime，缺失显示 -）与创建时间；空列表显示「暂无镜像构建器」空态并说明来源；读取失败显示错误面板与重试；列表行名称链到详情。
+- **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-S2IBUILDER-01** — 列表：通过 `/kapis/resources.kubesphere.io/v1alpha3/namespaces/<namespace>/s2ibuilders` 读取，请求带 `page`/`limit`（服务端分页）与 `sortBy=createTime&ascending=false`；行数等于当页 items、总数取 `totalItems`；搜索按名称服务端过滤并回到第 1 页；刷新保留搜索值并重新读取；列顺序为名称（displayName/name 与类型/所属服务副行）、状态（lastRunState：Running→构建中、Successful→构建成功、Failed→构建失败、空/未知→尚未构建）、类型、所属服务、构建器镜像、最近构建时间（lastRunStartTime，缺失显示 -）、创建时间；窄屏依次隐藏类型/所属服务与最近构建、创建时间，名称与状态始终可见；空列表显示「暂无镜像构建器」空态并说明来源；读取失败显示错误面板与重试；列表行名称链到详情。
 
 ### 关联设计
 

@@ -1,0 +1,43 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-07
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: federated-projects
+title: 联邦项目详情 · 传播条件、元数据与事件
+entry_url: "{BASE_URL}/kube-frontend/workspaces/system-workspace/federatedprojects"
+prd: prd/kube-frontend/access-control/federated-projects.md
+design: design/kube-frontend/access-control/federated-projects.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-07
+
+story:
+- US3
+
+product: 详情概览显示基本信息与传播条件表；元数据页签显示对象标签、对象注解与模板标签；事件页签显示该 FederatedNamespace 的事件；三者各自处理空、失败与无回报。
+preconditions:
+- 已登录，联邦 API 可读写，至少一个就绪集群
+- 预置一个唯一名称的联邦项目（宿主编 managed=true，放置 host）
+steps:
+- 用 API 预置联邦项目并等待控制面回报 Propagation
+- 打开详情概览，核对基本信息字段与传播条件表
+- 打开「元数据」页签，核对对象标签、对象注解与模板标签三块
+- 打开「事件」页签，核对事件表或空态说明
+- 打开一个不存在名称的详情 URL，核对未找到说明
+- 清理：删除宿主命名空间并轮询到 404
+expected:
+- 概览显示名称、别名、描述、命名空间、企业空间、部署集群、传播状态、创建时间、创建者
+- 传播条件表至少一行 Propagation，状态为 True（或控制面未回报时显示「联邦控制面还没有回报传播条件。」）
+- 元数据页签三块都存在；对象标签含 kubesphere.io/workspace，模板标签含 kubesphere.io/workspace
+- 事件页签：有事件时表头为 级别/原因/消息/次数/最近发生/来源；无事件时显示「暂无事件。」而非空表
+- 详情头部存在「编辑信息」「调整部署集群」「删除」三个入口
+- 不存在的名称显示「该联邦项目不存在或已被删除。」
+- 清理后对象与命名空间都不存在
+troubleshoot:
+- 事件页签空白：事件接口按 involvedObject.kind=FederatedNamespace 过滤；检查 kind 拼写
+- 条件表为空：控制面还没回报；等几秒重试，或记录为中间态
+- 元数据为空：对象标签只写在 template 上；模板标签块应仍有 workspace
+update_automation:
+- 选择器：federated-project:basic / :conditions / :tab:metadata / :metadata:{labels|annotations|template-labels} / :tab:events / :events[:empty|:error]
+- 事件列变化时同步 FederatedEventsPanel

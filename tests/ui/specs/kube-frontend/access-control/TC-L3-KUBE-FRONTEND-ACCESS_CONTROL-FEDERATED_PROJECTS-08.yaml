@@ -1,0 +1,45 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-08
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: federated-projects
+title: 联邦资源详情 · 完整对象 YAML 与事件
+entry_url: "{BASE_URL}/kube-frontend/workspaces/system-workspace/federatedprojects"
+prd: prd/kube-frontend/access-control/federated-projects.md
+design: design/kube-frontend/access-control/federated-projects.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-08
+
+story:
+- US3
+
+product: 联邦资源详情显示模板 YAML、完整对象 YAML、分发状态与事件；对象不存在或类型段未知时只显示未找到/未知类型说明，不显示 YAML 或事件表。
+preconditions:
+- 已登录，联邦 API 可读写，至少一个就绪集群
+- 预置一个唯一名称的联邦项目（宿主编 managed=true，放置 host）
+- 该项目的命名空间可写 FederatedConfigMap
+steps:
+- 用 API 在项目命名空间创建一个唯一名称的 FederatedConfigMap（模板含探针键），轮询到 status.clusters 回报
+- 打开该项目详情，切到「配置」页签，点击该对象行进入资源详情
+- 核对模板 YAML、完整对象 YAML、分发集群与条件表
+- 打开「事件」页签，核对事件表或空态说明
+- 打开 deployments 下不存在的对象，核对未找到说明且没有 YAML 区块
+- 打开 widgets 未知类型段，核对未知类型说明
+- 清理：删除 FederatedConfigMap、防御性删除已分发的本地 ConfigMap、删除宿主命名空间
+expected:
+- 资源详情标题为对象名，类型徽标为 FederatedConfigMap
+- 模板 YAML 含探针键与值；完整对象 YAML 含 kind: FederatedConfigMap 与 spec
+- 分发区块显示 host 集群徽标与至少一条条件；控制面未回报时显示明确的无状态说明
+- 事件页签有事件时表头为 级别/原因/消息/次数/最近发生/来源，无事件时显示「暂无事件。」并可重试
+- 不存在的对象显示「该联邦资源不存在或已被删除。」且模板/分发/事件区块都不出现
+- 未知类型段显示「未知的联邦资源类型。」
+- 清理后 FederatedConfigMap、本地副本与宿主命名空间都不存在
+troubleshoot:
+- 完整对象 YAML 为空：读的是 spec.template 而不是完整对象
+- 事件为空：控制面事件可能延迟；等待后重试，或断言空态说明
+- 行链接 404：URL 段与 API 集合名映射错误；检查 FEDERATED_RESOURCE_SEGMENTS
+update_automation:
+- 选择器：federated-project:resource:configmaps/<name> / federated-resource:surface / :title / :kind / :template / :object:yaml / :distribution / :not-found / :tab:events
+- 详情结构变化时同步 FederatedResourceDetailPage

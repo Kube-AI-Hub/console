@@ -42,6 +42,15 @@ export interface AppInstallDialogProps {
   appName: string;
   versions: StoreAppVersion[];
   defaultVersionId?: string | undefined;
+  /**
+   * Opening from a project page settles the target before the dialog appears; the two
+   * selects are then read-only. Without this the project page would ask the reader to
+   * pick the project they are already standing in.
+   */
+  lockedWorkspace?: string | undefined;
+  lockedProject?: string | undefined;
+  /** Called after a release is created, so the caller's list can refetch. */
+  onInstalled?: (() => void) | undefined;
 }
 
 const NAME_PATTERN = /^[a-z0-9]([-a-z0-9]*[a-z0-9])?$/;
@@ -63,11 +72,14 @@ export function AppInstallDialog({
   appName,
   versions,
   defaultVersionId,
+  lockedWorkspace,
+  lockedProject,
+  onInstalled,
 }: AppInstallDialogProps): React.ReactElement {
   const t = useT();
   const queryClient = useQueryClient();
-  const [workspace, setWorkspace] = React.useState('');
-  const [project, setProject] = React.useState('');
+  const [workspace, setWorkspace] = React.useState(lockedWorkspace ?? '');
+  const [project, setProject] = React.useState(lockedProject ?? '');
   const [versionId, setVersionId] = React.useState('');
   const [name, setName] = React.useState('');
   const [values, setValues] = React.useState('');
@@ -103,8 +115,8 @@ export function AppInstallDialog({
 
   React.useEffect(() => {
     if (!open) return;
-    setWorkspace('');
-    setProject('');
+    setWorkspace(lockedWorkspace ?? '');
+    setProject(lockedProject ?? '');
     setVersionId(defaultVersionId ?? versions[0]?.id ?? '');
     setName(defaultName(appName));
     setValues('');
@@ -128,18 +140,20 @@ export function AppInstallDialog({
   }, [files.data, valuesTouched]);
 
   React.useEffect(() => {
+    if (lockedWorkspace) return;
     if (!workspace) {
       const first = workspaces.data?.[0]?.name;
       if (first) setWorkspace(first);
     }
-  }, [workspaces.data, workspace]);
+  }, [workspaces.data, workspace, lockedWorkspace]);
 
   React.useEffect(() => {
+    if (lockedProject) return;
     if (!project) {
       const first = projects.data?.[0]?.name;
       if (first) setProject(first);
     }
-  }, [projects.data, project]);
+  }, [projects.data, project, lockedProject]);
 
   const create = useMutation({
     mutationFn: () =>
@@ -155,6 +169,7 @@ export function AppInstallDialog({
       await queryClient.invalidateQueries({ queryKey: ['store-install-applications', workspace, project] });
       await queryClient.invalidateQueries({ queryKey: ['installed-apps', workspace] });
       setInstalled({ name: name.trim(), workspace });
+      onInstalled?.();
     },
   });
 
@@ -249,6 +264,7 @@ export function AppInstallDialog({
                 value={workspace}
                 options={workspaceOptions}
                 placeholder={t('store.detail.install.workspace')}
+                disabled={Boolean(lockedWorkspace)}
                 data-ai-id="app-detail:install-workspace"
                 onValueChange={(value) => {
                   setWorkspace(value);
@@ -269,7 +285,7 @@ export function AppInstallDialog({
                       ? t('store.detail.install.noProjects')
                       : t('store.detail.install.project')
                 }
-                disabled={projectOptions.length === 0}
+                disabled={Boolean(lockedProject) || projectOptions.length === 0}
                 data-ai-id="app-detail:install-project"
                 onValueChange={setProject}
               />

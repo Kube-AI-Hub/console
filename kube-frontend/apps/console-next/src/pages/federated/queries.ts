@@ -1,106 +1,47 @@
-import { useQueries, useQuery } from '@tanstack/react-query';
-import { ApiError } from '@kube-ai-hub/api-client';
-import { workspacesApi } from '@kube-ai-hub/api-client';
+import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  accessReviewApi,
+  clustersApi,
+  federatedApi,
+  objectEventsApi,
+  pluralOf,
+  segmentOf,
+  workspacesApi,
+  type CreateFederatedProjectInput,
+  type FederatedProjectDetail,
+  type FederatedProjectSummary,
+  type FederatedResourceObject,
+  type FederatedResourceType,
+} from '@kube-ai-hub/api-client';
 import { api } from '@/api';
 
 /**
- * Federated project reads.
+ * Federated project data.
  *
- * A federated project is a FederatedNamespace: one object carries both the namespace
- * and the placement (which clusters receive it). The tenant proxy's
- * /workspaces/<ws>/federatednamespaces collection answers 0 for it on this cluster —
- * the tenant list looks for the workspace label on the object while this object
- * carries it on the template — so the page reads the federated API directly and joins
- * it with the tenant workspace list for the workspace's display name.
+ * The reads and writes live in `@kube-ai-hub/api-client`; this module is the React
+ * Query layer the pages consume: cache keys, mutations that invalidate them, and the
+ * permission probes that decide whether a write control may appear.
  */
-const FEDERATED_API = '/apis/types.kubefed.io/v1beta1';
 
-interface RawFederatedNamespace {
-  metadata?: {
-    name?: string;
-    namespace?: string;
-    creationTimestamp?: string;
-    labels?: Record<string, string>;
-  };
-  spec?: {
-    placement?: { clusters?: Array<{ name?: string }> };
-    template?: { metadata?: { labels?: Record<string, string>; annotations?: Record<string, string> } };
-  };
-  status?: {
-    clusters?: Array<{ name?: string }>;
-    conditions?: Array<{ type?: string; status?: string }>;
-  };
-}
-
-/** One row / the detail of a federated project. */
-export interface FederatedProject {
-  name: string;
-  namespace: string;
-  /** Workspace label from the federated template; empty when the object carries none. */
-  workspace: string;
-  clusters: string[];
-  createdAt: string;
-  creator: string;
-  /** `Propagation` condition: `true` when the federation control plane reports True. */
-  propagated: boolean | undefined;
-  raw: RawFederatedNamespace;
-}
-
-function workspaceOf(item: RawFederatedNamespace): string {
-  // The workspace label lives on the federated template (that is the metadata the
-  // control plane propagates); older objects may carry it on the object itself.
-  const template = item.spec?.template?.metadata?.labels ?? {};
-  return template['kubesphere.io/workspace'] ?? item.metadata?.labels?.['kubesphere.io/workspace'] ?? '';
-}
-
-export function toFederatedProject(item: RawFederatedNamespace): FederatedProject {
-  const clusters = (item.status?.clusters ?? item.spec?.placement?.clusters ?? [])
-    .map((entry) => String(entry.name ?? ''))
-    .filter(Boolean);
-  const propagation = (item.status?.conditions ?? []).find((condition) => condition.type === 'Propagation');
-  return {
-    name: item.metadata?.name ?? '',
-    namespace: item.metadata?.namespace ?? item.metadata?.name ?? '',
-    workspace: workspaceOf(item),
-    clusters,
-    createdAt: item.metadata?.creationTimestamp ?? '',
-    creator: item.spec?.template?.metadata?.annotations?.['kubesphere.io/creator'] ?? '',
-    propagated: propagation ? String(propagation.status) === 'True' : undefined,
-    raw: item,
-  };
+/** The list key; the detail keys below are separate so an edit refreshes both. */
+export function federatedProjectsKey(workspace: string) {
+  return ['federated-projects', workspace] as const;
 }
 
 /** The workspace's federated projects, name-sorted. */
 export function useFederatedProjects(workspace: string) {
   return useQuery({
-    queryKey: ['federated-projects', workspace],
-    queryFn: async ({ signal }): Promise<FederatedProject[]> => {
-      const body = await api.request<{ items?: RawFederatedNamespace[] }>(FEDERATED_API + '/federatednamespaces', { signal });
-      return (body?.items ?? [])
-        .map(toFederatedProject)
-        .filter((project) => project.workspace === workspace)
-        .sort((a, b) => a.name.localeCompare(b.name));
-    },
+    queryKey: federatedProjectsKey(workspace),
+    queryFn: ({ signal }) => federatedApi(api).listProjects({ workspace, signal }),
   });
 }
 
-/**
- * One federated project by name.
- *
- * FederatedNamespace is a namespaced resource, and the object's namespace equals its
- * name, but the route only carries the name. Reading the (cluster-wide) collection and
- * picking the name avoids a second namespace lookup and a stale namespaced GET: the
- * cluster-wide list is the same read the list page already proves works.
- */
+/** One federated project by name; `null` means it does not exist. */
 export function useFederatedProject(workspace: string, name: string) {
   return useQuery({
     queryKey: ['federated-project', workspace, name],
     enabled: Boolean(name),
-    queryFn: async ({ signal }): Promise<FederatedProject | null> => {
-      const body = await api.request<{ items?: RawFederatedNamespace[] }>(FEDERATED_API + '/federatednamespaces', { signal });
-      const item = (body?.items ?? []).find((entry) => entry.metadata?.name === name);
-      return item ? toFederatedProject(item) : null;
-    },
+    queryFn: ({ signal }) => federatedApi(api).getProject({ name, signal }),
   });
 }
 
@@ -118,58 +59,26 @@ export function useWorkspaceAliases() {
   });
 }
 
-/** One federated resource type the federation API serves for a namespace. */
-export interface FederatedResourceType {
-  kind: string;
-  plural: string;
-}
-
-/** One federated object inside a project's namespace. */
-export interface FederatedResourceObject {
-  name: string;
-  /** Collection name, e.g. `federateddeployments`; the link and detail need it. */
-  plural: string;
-  /** e.g. `FederatedDeployment`; the row's type column. */
-  kind: string;
-  createdAt: string;
-}
-
 /**
- * Federated collection name ↔ console URL segment.
+ * The namespaced Federated resource types from API discovery.
  *
- * The detail route keeps the old console's shape (`…/federatedprojects/<project>/deployments/<name>`),
- * so `federateddeployments` becomes `deployments`; the API still needs the Federated
- * collection name. Keeping both directions in one table means the two cannot drift.
+ * Read-only by design: this view answers "what can be federated inside a project",
+ * not "what has this project federated".
  */
-export const FEDERATED_RESOURCE_SEGMENTS: Readonly<Record<string, string>> = {
-  federatedapplications: 'applications',
-  federateddeployments: 'deployments',
-  federatedstatefulsets: 'statefulsets',
-  federatedreplicasets: 'replicasets',
-  federatedjobs: 'jobs',
-  federatedservices: 'services',
-  federatedingresses: 'ingresses',
-  federatedconfigmaps: 'configmaps',
-  federatedsecrets: 'secrets',
-  federatedserviceaccounts: 'serviceaccounts',
-  federatedlimitranges: 'limitranges',
-  federatedpersistentvolumeclaims: 'persistentvolumeclaims',
-};
-
-export function segmentOf(plural: string): string {
-  return FEDERATED_RESOURCE_SEGMENTS[plural] ?? plural;
-}
-
-export function pluralOf(segment: string): string | undefined {
-  return Object.entries(FEDERATED_RESOURCE_SEGMENTS).find(([, value]) => value === segment)?.[0];
+export function useFederatedResourceTypes() {
+  return useQuery({
+    queryKey: ['federated-resource-types'],
+    staleTime: 5 * 60_000,
+    queryFn: ({ signal }): Promise<FederatedResourceType[]> => federatedApi(api).listResourceTypes({ signal }),
+  });
 }
 
 /**
  * The project's objects for a group of Federated resource types.
  *
  * One collection per type (the federation API has no per-kind union read), read in
- * parallel by `useQueries`. Each tab owns its own loading/error/empty state, so a
- * slow or unavailable type cannot blank the whole detail page.
+ * parallel by `useQueries`. Each tab owns its own loading/error/empty state, so a slow
+ * or unavailable type cannot blank the whole detail page.
  */
 export function useFederatedResources(namespace: string, plurals: readonly string[]) {
   return useQueries({
@@ -177,132 +86,153 @@ export function useFederatedResources(namespace: string, plurals: readonly strin
       queryKey: ['federated-resources', namespace, plural],
       enabled: Boolean(namespace),
       staleTime: 30_000,
-      queryFn: async ({ signal }): Promise<FederatedResourceObject[]> => {
-        const body = await api.request<{
-          items?: Array<{ kind?: string; metadata?: { name?: string; creationTimestamp?: string } }>;
-        }>(FEDERATED_API + '/namespaces/' + encodeURIComponent(namespace) + '/' + plural, { signal });
-        return (body?.items ?? [])
-          .map((item) => ({
-            name: item.metadata?.name ?? '',
-            plural,
-            kind: item.kind ?? '',
-            createdAt: item.metadata?.creationTimestamp ?? '',
-          }))
-          .filter((item) => Boolean(item.name));
-      },
+      queryFn: ({ signal }): Promise<FederatedResourceObject[]> =>
+        federatedApi(api).listResources({ namespace, plural, signal }),
     })),
   });
 }
 
-/** One federated object's detail: its template and distribution status. */
-export interface FederatedResourceDetail {
-  name: string;
-  namespace: string;
-  kind: string;
-  /** `spec.template` — the object the federation control plane spreads. */
-  template: unknown;
-  /** Clusters the control plane reports the object reached. */
-  clusters: string[];
-  /** Propagation conditions; empty when the control plane has not reported yet. */
-  conditions: Array<{
-    type: string;
-    status: string;
-    reason: string;
-    message: string;
-    lastTransitionTime: string;
-  }>;
-}
-
-interface RawFederatedResource {
-  kind?: string;
-  metadata?: { name?: string; namespace?: string };
-  spec?: { template?: unknown };
-  status?: {
-    clusters?: Array<{ name?: string }>;
-    conditions?: Array<{
-      type?: string;
-      status?: string;
-      reason?: string;
-      message?: string;
-      lastTransitionTime?: string;
-    }>;
-  };
-}
-
-export function toFederatedResourceDetail(
-  item: RawFederatedResource,
-  fallbackName: string,
-  fallbackNamespace: string,
-): FederatedResourceDetail {
-  return {
-    name: item.metadata?.name ?? fallbackName,
-    namespace: item.metadata?.namespace ?? fallbackNamespace,
-    kind: item.kind ?? '',
-    template: item.spec?.template,
-    clusters: (item.status?.clusters ?? []).map((entry) => String(entry.name ?? '')).filter(Boolean),
-    conditions: (item.status?.conditions ?? []).map((condition) => ({
-      type: condition.type ?? '',
-      status: condition.status ?? '',
-      reason: condition.reason ?? '',
-      message: condition.message ?? '',
-      lastTransitionTime: condition.lastTransitionTime ?? '',
-    })),
-  };
-}
-
-/**
- * One federated object by collection and name.
- *
- * `null` means the object is gone (404): a missing object is a legitimate answer —
- * the route can outlive the object — while a thrown error means the read failed.
- * The hook turns the 404 into `null` so the page can tell those two apart.
- */
+/** One federated object's detail; `null` is the 404 case (route outliving the object). */
 export function useFederatedResource(namespace: string, plural: string | undefined, name: string) {
   return useQuery({
     queryKey: ['federated-resource', namespace, plural, name],
     enabled: Boolean(namespace && plural && name),
     staleTime: 30_000,
-    queryFn: async ({ signal }): Promise<FederatedResourceDetail | null> => {
-      try {
-        const item = await api.request<RawFederatedResource>(
-          FEDERATED_API +
-            '/namespaces/' +
-            encodeURIComponent(namespace) +
-            '/' +
-            encodeURIComponent(plural as string) +
-            '/' +
-            encodeURIComponent(name),
-          { signal },
-        );
-        return toFederatedResourceDetail(item ?? {}, name, namespace);
-      } catch (error) {
-        if (error instanceof ApiError && error.isNotFound) return null;
-        throw error;
-      }
-    },
+    queryFn: ({ signal }) => federatedApi(api).getResource({ namespace, plural: plural as string, name, signal }),
   });
 }
 
 /**
- * The namespaced Federated* resource types from API discovery.
+ * Events about one federated object.
  *
- * Read-only by design: this view answers "what can be federated inside a project",
- * not "what has this project federated" — the latter needs one request per type and
- * belongs to the federated console itself, which is a follow-up.
+ * Core events, filtered by involved object: the control plane reports the propagation
+ * work it does on each object here, which is where "why is this not propagated" is
+ * answered when the status conditions are not enough.
  */
-export function useFederatedResourceTypes() {
+export function useFederatedObjectEvents(params: { namespace: string; name: string; kind: string; enabled: boolean }) {
   return useQuery({
-    queryKey: ['federated-resource-types'],
+    queryKey: ['federated-events', params.namespace, params.kind, params.name],
+    enabled: params.enabled && Boolean(params.namespace && params.name && params.kind),
+    staleTime: 15_000,
+    queryFn: ({ signal }) =>
+      objectEventsApi(api).list({ namespace: params.namespace, name: params.name, kind: params.kind, signal }),
+  });
+}
+
+/* ---------------- Writes ---------------- */
+
+/** Invalidate one project everywhere it is cached. */
+function invalidateProject(queryClient: ReturnType<typeof useQueryClient>, workspace: string, name: string): void {
+  void queryClient.invalidateQueries({ queryKey: federatedProjectsKey(workspace) });
+  void queryClient.invalidateQueries({ queryKey: ['federated-project', workspace, name] });
+}
+
+export function useCreateFederatedProject(workspace: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: Omit<CreateFederatedProjectInput, 'workspace'> & { creator?: string }) =>
+      federatedApi(api).createProject({ ...input, workspace }),
+    onSuccess: (project) => invalidateProject(queryClient, workspace, project.name),
+  });
+}
+
+export function useUpdateFederatedProjectInfo(workspace: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { name: string; alias: string; description: string }): Promise<FederatedProjectDetail> =>
+      federatedApi(api).updateProjectInfo(input),
+    onSuccess: (project) => invalidateProject(queryClient, workspace, project.name),
+  });
+}
+
+export function useUpdateFederatedProjectPlacement(workspace: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { name: string; clusters: string[] }): Promise<FederatedProjectDetail> =>
+      federatedApi(api).updateProjectPlacement(input),
+    onSuccess: (project) => invalidateProject(queryClient, workspace, project.name),
+  });
+}
+
+export function useDeleteFederatedProjects(workspace: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (names: string[]) => federatedApi(api).deleteProjects({ names }),
+    // Refresh whatever survived: a partially failed batch must not look empty.
+    onSettled: () => void queryClient.invalidateQueries({ queryKey: federatedProjectsKey(workspace) }),
+  });
+}
+
+/* ---------------- Permissions ---------------- */
+
+export type FederatedVerb = 'create' | 'update' | 'delete';
+
+/**
+ * Whether the reader may write federated projects.
+ *
+ * The question is asked with the same verb/resource the request will use. It fails
+ * **open**: only an explicit `allowed: false` disables a control, because a broken
+ * authorization probe must not take a permitted write away from its reader.
+ *
+ * `create` asks both halves of the two-object create (namespace + FederatedNamespace);
+ * any explicit denial means the create would fail, so the action is disabled with the
+ * reason shown.
+ */
+export function useFederatedPermission(params: { verb: FederatedVerb; workspace: string; name?: string }) {
+  const review = accessReviewApi(api);
+  const namespace = params.verb === 'create' ? undefined : params.name;
+  const query = useQuery({
+    queryKey: ['federated-permission', params.verb, params.workspace, params.name ?? ''],
+    staleTime: 60_000,
+    retry: false,
+    queryFn: async ({ signal }): Promise<boolean> => {
+      if (params.verb === 'create') {
+        const [mayCreateNamespaces, mayCreateFederated] = await Promise.all([
+          review.allowed({ verb: 'create', resource: 'namespaces', signal }),
+          review.allowed({ verb: 'create', resource: 'federatednamespaces', group: 'types.kubefed.io', signal }),
+        ]);
+        return mayCreateNamespaces && mayCreateFederated;
+      }
+      if (params.verb === 'update') {
+        return review.allowed({
+          verb: 'update',
+          resource: 'federatednamespaces',
+          group: 'types.kubefed.io',
+          ...(namespace ? { namespace } : {}),
+          ...(params.name ? { name: params.name } : {}),
+          signal,
+        });
+      }
+      // Which the delete actually is: the project's namespace.
+      return review.allowed({ verb: 'delete', resource: 'namespaces', ...(namespace ? { namespace } : {}), signal });
+    },
+  });
+  return { denied: query.data === false, pending: query.isPending };
+}
+
+/**
+ * Clusters a project can be placed on.
+ *
+ * A name is the API's identity; the alias is what the reader recognises. Not-ready
+ * clusters are still listed so placement that already includes one can be read back,
+ * but the picker disables selecting them.
+ */
+export function useFederatedClusters() {
+  return useQuery({
+    queryKey: ['federated-clusters'],
     staleTime: 5 * 60_000,
-    queryFn: async ({ signal }): Promise<FederatedResourceType[]> => {
-      const body = await api.request<{
-        resources?: Array<{ name?: string; kind?: string; namespaced?: boolean }>;
-      }>(FEDERATED_API, { signal });
-      return (body?.resources ?? [])
-        .filter((resource) => resource.namespaced === true && !String(resource.name ?? '').includes('/'))
-        .map((resource) => ({ kind: String(resource.kind ?? ''), plural: String(resource.name ?? '') }))
-        .filter((resource) => resource.kind && resource.plural)
-        .sort((a, b) => a.kind.localeCompare(b.kind));
+    queryFn: async ({ signal }) => {
+      const body = await clustersApi(api).list({ signal });
+      return body.items.map((cluster) => ({
+        name: cluster.name,
+        label: cluster.alias || cluster.name,
+        ready: cluster.ready,
+        isHost: cluster.isHost,
+      }));
     },
   });
 }
+
+export type FederatedProject = FederatedProjectSummary;
+export type { FederatedResourceObject };
+export { pluralOf, segmentOf };

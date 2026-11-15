@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-store
+feature: project-apps
+title: 项目内应用 · 列表、行数与空态
+entry_url: '{BASE_URL}/kube-frontend/{WORKSPACE}/clusters/{CLUSTER}/projects/default/applications'
+prd: prd/kube-frontend/app-store/project-apps.md
+design: design/kube-frontend/app-store/project-apps.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-01
+
+story:
+- US1
+
+product: 项目内应用列表来自项目集合，行数与接口一致，失败可重试，不渲染服务端无法兑现的分页器。
+preconditions:
+- 已登录；GET /workspaces/<ws>/namespaces/<ns>/applications 可读
+steps:
+- 读项目集合得到 N 与条目
+- 打开 /kube-frontend/<ws>/clusters/<cluster>/projects/<ns>/applications，等 installed-apps:surface 离开 loading
+- 核对行数与表头；N>0 时核对首行 release 名
+- 核对 installed-apps:source-note 与是否出现分页器
+expected:
+- 行数 = N；N=0 显示空态标题
+- 表头含 名称/状态/应用/版本/创建时间（项目列在项目作用域隐藏）
+- 页面有 installed-apps:source-note，且不渲染分页器
+troubleshoot:
+- 行数与接口不一致：读错了集合（用了工作空间汇总）
+- 出现分页器：项目集合一次返回全量，不应有分页
+update_automation:
+- 句柄：installed-apps:surface / :table / :source-note / :refresh

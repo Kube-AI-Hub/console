@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-store
+feature: project-apps
+title: 项目内应用 · 安装（目标锁定 + values）
+entry_url: '{BASE_URL}/kube-frontend/{WORKSPACE}/clusters/{CLUSTER}/projects/default/applications'
+prd: prd/kube-frontend/app-store/project-apps.md
+design: design/kube-frontend/app-store/project-apps.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-02
+
+story:
+- US2
+
+product: 项目页安装：选择应用 → 目标锁定的安装弹窗 → 提交后行出现且接口回读一致。
+preconditions:
+- 商店 /kapis/openpitrix.io/v1/apps 至少有一个带版本的 app
+steps:
+- 打开项目应用页，点 installed-apps:install
+- 在 installed-apps:pick 里搜索并选一个应用
+- 核对安装弹窗的工作空间/项目下拉预填且 disabled
+- 填唯一 release 名并提交；等待行出现；读项目集合核对
+expected:
+- 安装请求 POST 到项目集合且 body 含 app_id/version_id/name/conf(YAML 字符串)
+- 成功后列表出现该行；接口回读同名的 release 且 project=<ns>
+- 工作空间/项目下拉为 disabled
+troubleshoot:
+- 弹窗要求再选项目：lockedProject 没生效
+- conf 传对象：服务端 unmarshal 报错
+update_automation:
+- 句柄：installed-apps:install / :pick / :pick-search / :pick-app:<id> / app-detail:install-dialog / :install-workspace / :install-project / :install-submit

@@ -207,7 +207,7 @@ export default class GlobalValue {
     if (!this._cache_['globalNavs']) {
       const navs = []
 
-      cloneDeep(globals.config.globalNavs).forEach(nav => {
+      cloneDeep(get(globals, 'config.globalNavs', [])).forEach(nav => {
         if (this.checkNavItem(nav, params => this.hasPermission(params))) {
           navs.push(nav)
         }
@@ -409,7 +409,7 @@ export default class GlobalValue {
   }
 
   get isMultiCluster() {
-    return globals.ksConfig.multicluster
+    return !!get(globals, 'ksConfig.multicluster')
   }
 
   hasKSModule(module) {

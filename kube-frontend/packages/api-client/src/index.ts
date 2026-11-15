@@ -238,6 +238,7 @@ export {
 } from './resources';
 export {
   ALERTING_ENABLE_LABEL,
+  alertMessagesApi,
   alertStateLabel,
   alertingApi,
   clusterAlertMessagesApi,
@@ -254,6 +255,9 @@ export {
 } from './alerting';
 export type {
   AlertDetail,
+  AlertMessage,
+  AlertMessageScope,
+  AlertMessagesApi,
   AlertSummary,
   AlertingApi,
   AlertingKind,
@@ -413,12 +417,18 @@ export {
   nodeUsageApi,
   rangeMetricsApi,
   versionApi,
+  eventSearchApi,
   toClusterDetail,
   toClusterSummary,
   toCustomResourceSummary,
   toMetricValues,
 } from './cluster';
 export type {
+  EventHistogram,
+  EventHistogramBucket,
+  EventQueryFilters,
+  EventQueryPage,
+  EventRecord,
   ClusterConnectionMode,
   ClusterDetail,
   ClusterGroup,
@@ -581,3 +591,30 @@ export type {
 } from './s2ibuilder';
 export { watchCollection } from './watch';
 export type { WatchEvent, WatchOptions } from './watch';
+export {
+  clustersOf,
+  federatedApi,
+  FEDERATED_API,
+  FEDERATED_RESOURCE_SEGMENTS,
+  MANAGED_LABEL,
+  pluralOf,
+  projectNameProblem,
+  propagatedOf,
+  segmentOf,
+  toFederatedProject,
+  toFederatedProjectDetail,
+  toFederatedResourceDetail,
+  WORKSPACE_LABEL,
+  workspaceOf,
+} from './federated';
+export type {
+  CreateFederatedProjectInput,
+  FederatedApi,
+  FederatedCondition,
+  FederatedProjectDetail,
+  FederatedProjectSummary,
+  FederatedResourceDetail,
+  FederatedResourceObject,
+  FederatedResourceType,
+  KubeFederatedObject,
+} from './federated';

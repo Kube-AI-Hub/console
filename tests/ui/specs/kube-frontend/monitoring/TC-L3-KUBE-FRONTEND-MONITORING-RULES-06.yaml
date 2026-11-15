@@ -1,0 +1,39 @@
+id: TC-L3-KUBE-FRONTEND-MONITORING-RULES-06
+level: 3
+suite: point
+module: kube-frontend
+submodule: monitoring
+feature: rules
+title: 告警策略 · 详情页的告警消息历史（时间线、空态、失败重试）
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/alertingrules'
+prd: prd/kube-frontend/monitoring/rules.md
+design: design/kube-frontend/monitoring/rules.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-MONITORING-RULES-06
+
+story:
+- US7
+
+product: 打开一条策略的详情，按时间倒序读到它当前触发的告警消息（时间、状态、级别、摘要、目标、当前值、总数、分页）；没有消息时给出明确空态而不是错误；消息接口失败时给出可重试的错误。
+preconditions:
+- 集群里有至少一条产生过告警的全局规则组，也存在一条没有告警的规则组
+- 已登录
+steps:
+- 用 API 取 globalalerts，按 labels.rule_group 找出至少 3 条告警的规则组与一条 0 条告警的规则组
+- 打开有告警规则组的详情（scope=global），等消息区 ready
+- 读消息行、总数与排序
+- 打开 0 条告警规则组的详情，等消息区 empty
+- 用 route 让 globalalerts 返回 500，重开有告警规则组的详情，核对错误与重试入口；恢复后点重试
+expected:
+- 消息区 ready 时首行是接口返回的最新一条（activeAt 最大）
+- 行数不超过 10 且等于 min(total, 10)，总数文案等于接口 totalItems
+- 每条消息显示触发时间、状态、级别、摘要与当前值/监控目标（接口提供时）
+- 0 条告警时显示「该策略当前没有告警消息」，不出现错误面板
+- 接口失败时消息区显示错误与重试，重试后恢复 ready
+troubleshoot:
+- 消息区一直 loading：确认请求路径是 /kapis/alerting.kubesphere.io/v2beta1/globalalerts 且带 label_filters=rule_group
+- 行数小于预期：过滤发生在服务端，不要在已分页的结果上再过滤
+- 空态与错误混淆：先确认接口状态码，200+空数组才是空态
+update_automation:
+- 消息区结构变化时改 pages/monitoring.py 的 messages_* 方法

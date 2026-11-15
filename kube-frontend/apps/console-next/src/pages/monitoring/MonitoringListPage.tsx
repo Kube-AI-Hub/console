@@ -1,22 +1,28 @@
 import * as React from 'react';
-import { type AlertSummary, type AlertingRuleSummary } from '@kube-ai-hub/api-client';
+import { type AlertMessage, type AlertingRuleSummary } from '@kube-ai-hub/api-client';
 import { AiSurface, Badge, Modal, ResourceList, Skeleton, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { useProjectFilter } from '@/components/projects/useProjects';
 import { useResourceListState, toListParams } from '@/components/resource/useResourceListState';
-import { DeleteDialog } from '@/components/resource/DeleteDialog';
 import { MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
-import { MONITORING_DESCRIPTORS, useAlertingModel, useDeleteAlert, useMonitoringList, useToggleRule, type MonitoringKind } from './queries';
+import { MONITORING_DESCRIPTORS, useAlertingModel, useMonitoringList, useToggleRule, type MonitoringKind } from './queries';
 import { RuleGroupsPage } from './RuleGroupsPage';
 import { useListRefresh } from '@/components/resource/useListRefresh';
+import { alertSeverityLabel, alertStateLabel } from './alertLabels';
 
 /**
  * The monitoring area's two lists: 告警消息 and 告警策略.
  *
- * Both are read-only surfaces over their own kapis group. Alerts are history — a
- * row opens a detail drawer and can be deleted; rules are configuration and are
- * toggled in place. That difference lives in the descriptor, not in two pages.
+ * Alert messages are **history**: they are read from the aggregated v2beta1 API and
+ * open a drill-down. Rules are configuration and are toggled in place. That
+ * difference lives in the descriptor, not in two pages.
+ *
+ * Deleting an alert message is deliberately not offered. The aggregated API exposes
+ * no item route — `DELETE /kapis/alerting.kubesphere.io/v2beta1/namespaces/<ns>/alerts/<name>`
+ * answers `404 Page Not Found` (probed 2026-11-15), and the old console's message
+ * page had no delete action either. A delete entry here would be a button that
+ * cannot succeed.
  */
 export interface MonitoringListPageProps {
   kind: MonitoringKind;
@@ -26,9 +32,9 @@ export interface MonitoringListPageProps {
 
 const PAGE_SIZE = 10;
 
-type SortKey = 'name' | 'createTime';
+type SortKey = 'name' | 'createTime' | 'triggeredAt';
 
-type Row = AlertSummary | AlertingRuleSummary;
+type Row = AlertMessage | AlertingRuleSummary;
 
 export function MonitoringListPage({ kind, cluster, namespace }: MonitoringListPageProps): React.ReactElement {
   const t = useT();
@@ -55,11 +61,20 @@ export function MonitoringListPage({ kind, cluster, namespace }: MonitoringListP
   const [projectFilter, setProjectFilter] = React.useState(namespace);
   React.useEffect(() => setProjectFilter(namespace), [cluster, namespace]);
 
-  const list = useResourceListState<SortKey>({ defaultSortBy: 'createTime', resetOn: [cluster, projectFilter] });
-  const query = useMonitoringList(kind, toListParams(list, { cluster, namespace: projectFilter }, PAGE_SIZE));
-  const remove = useDeleteAlert({ cluster, namespace: projectFilter });
-  const toggle = useToggleRule({ cluster, namespace: projectFilter });
-  const [toDelete, setToDelete] = React.useState<string[] | null>(null);
+  /*
+   * Alert messages always read the URL's project: the aggregated collection is
+   * namespaced, and the old project message page had no project picker either
+   * (cross-project messages live on the cluster page). The legacy `alertingrules`
+   * list keeps the picker because it merges scopes.
+   */
+  const effectiveNamespace = kind === 'alerts' ? namespace : projectFilter;
+
+  const list = useResourceListState<SortKey>({
+    defaultSortBy: kind === 'alerts' ? 'triggeredAt' : 'createTime',
+    resetOn: [cluster, effectiveNamespace],
+  });
+  const query = useMonitoringList(kind, toListParams(list, { cluster, namespace: effectiveNamespace }, PAGE_SIZE));
+  const toggle = useToggleRule({ cluster, namespace: effectiveNamespace });
   const [detail, setDetail] = React.useState<Row | null>(null);
   const projectFilterControl = useProjectFilter(cluster, t('monitoring.filter.projectLabel'), t('monitoring.filter.project'), undefined, 'monitoring:filter:project');
 
@@ -72,27 +87,27 @@ export function MonitoringListPage({ kind, cluster, namespace }: MonitoringListP
       title: t(descriptor.titleKey),
       refresh: listRefresh.refresh,
       description: t(descriptor.descriptionKey),
-      rowKey: 'name',
-      rowAttributes: (row) => ({ 'data-ai-row': row.name }),
+      rowKey: (row: Row) => (kind === 'alerts' ? (row as AlertMessage).id : row.name),
+      rowAttributes: (row) => ({ 'data-ai-row': kind === 'alerts' ? (row as AlertMessage).id : row.name }),
       search: { placeholder: t('monitoring.searchPlaceholder'), aiId: `${kind}:search` },
-      filters: [projectFilterControl],
-      sortableKeys: ['name', 'createTime'],
+      ...(kind === 'alerts' ? {} : { filters: [projectFilterControl] }),
+      sortableKeys: kind === 'alerts' ? ['triggeredAt'] : ['name', 'createTime'],
       sortAiPrefix: kind,
       sort: { key: list.sortBy, order: list.order },
       columns:
         kind === 'alerts'
           ? [
               {
-                key: 'name',
+                key: 'message',
                 title: t('monitoring.column.message'),
                 render: (row: Row) => {
-                  const alert = row as AlertSummary;
+                  const alert = row as AlertMessage;
                   return (
                     <span className="flex min-w-0 flex-col">
-                      <span className="truncate font-medium text-ai-fg" title={alert.message}>
-                        {alert.message || alert.name}
+                      <span className="truncate font-medium text-ai-fg" title={alert.summary || alert.name}>
+                        {alert.summary || alert.name || '-'}
                       </span>
-                      <span className="truncate text-[11px] text-ai-fg-muted">{alert.target || '-'}</span>
+                      <span className="truncate text-[11px] text-ai-fg-muted">{alert.message || '-'}</span>
                     </span>
                   );
                 },
@@ -100,32 +115,40 @@ export function MonitoringListPage({ kind, cluster, namespace }: MonitoringListP
               {
                 key: 'state',
                 title: t('monitoring.column.state'),
-                width: 120,
+                width: 110,
                 hideBelow: 'md',
                 render: (row: Row) => {
-                  const alert = row as AlertSummary;
+                  const alert = row as AlertMessage;
                   return <Badge tone={alert.state === 'firing' ? 'danger' : alert.state === 'pending' ? 'warning' : 'success'}>{alertStateLabel(t, alert.state)}</Badge>;
                 },
               },
               {
                 key: 'severity',
                 title: t('monitoring.column.severity'),
-                width: 110,
+                width: 100,
                 hideBelow: 'lg',
-                render: (row: Row) => {
-                  const alert = row as AlertSummary;
-                  return <span className="text-ai-fg-secondary">{severityLabel(t, alert.severity)}</span>;
-                },
+                render: (row: Row) => <span className="text-ai-fg-secondary">{alertSeverityLabel(t, (row as AlertMessage).severity)}</span>,
+              },
+              {
+                key: 'ruleGroup',
+                title: t('monitoring.column.policy'),
+                width: 160,
+                hideBelow: 'lg',
+                render: (row: Row) => <span className="truncate text-ai-fg-secondary">{(row as AlertMessage).ruleGroup || '-'}</span>,
+              },
+              {
+                key: 'target',
+                title: t('monitoring.column.target'),
+                width: 170,
+                hideBelow: 'xl',
+                render: (row: Row) => <span className="truncate text-ai-fg-muted">{(row as AlertMessage).target || '-'}</span>,
               },
               {
                 key: 'triggeredAt',
                 title: t('monitoring.column.triggeredAt'),
                 width: 170,
-                hideBelow: 'xl',
-                render: (row: Row) => {
-                  const alert = row as AlertSummary;
-                  return <span className="tabular-nums text-ai-fg-muted">{formatTimestamp(alert.triggeredAt)}</span>;
-                },
+                hideBelow: 'md',
+                render: (row: Row) => <span className="tabular-nums text-ai-fg-muted">{formatTimestamp((row as AlertMessage).triggeredAt)}</span>,
               },
             ]
           : [
@@ -171,7 +194,7 @@ export function MonitoringListPage({ kind, cluster, namespace }: MonitoringListP
               },
             ],
       rowActions: [
-        { key: 'detail', label: t('monitoring.action.detail') },
+        { key: 'detail', label: t('monitoring.action.detail'), aiId: `${kind}:detail` },
         /*
          * 启用/停用 are two entries whose `visible` predicates are mutually exclusive:
          * a row action's label is static, so one entry cannot rename itself per row.
@@ -180,11 +203,10 @@ export function MonitoringListPage({ kind, cluster, namespace }: MonitoringListP
          */
         ...(descriptor.allowToggle
           ? [
-              { key: 'disable', label: t('monitoring.action.disable'), visible: (row: Row) => (row as AlertingRuleSummary).enabled },
-              { key: 'enable', label: t('monitoring.action.enable'), visible: (row: Row) => !(row as AlertingRuleSummary).enabled },
+              { key: 'disable', label: t('monitoring.action.disable'), aiId: `${kind}:disable`, visible: (row: Row) => (row as AlertingRuleSummary).enabled },
+              { key: 'enable', label: t('monitoring.action.enable'), aiId: `${kind}:enable`, visible: (row: Row) => !(row as AlertingRuleSummary).enabled },
             ]
           : []),
-        ...(descriptor.allowDelete ? [{ key: 'delete', label: t('common.delete'), tone: 'danger' as const }] : []),
       ],
       empty: { title: t(descriptor.emptyTitleKey), description: t(descriptor.emptyDescriptionKey) },
       labels: {
@@ -198,7 +220,7 @@ export function MonitoringListPage({ kind, cluster, namespace }: MonitoringListP
       },
       pagination: { page: list.page, pageSize: PAGE_SIZE, total },
     }),
-    // `busy` comes from the query, so the schema must rebuild when the fetch state changes.
+    // `isFetching` comes from the query, so the schema must rebuild when the fetch state changes.
     [descriptor, kind, list, projectFilterControl, query.isFetching, t, total],
   );
 
@@ -221,18 +243,21 @@ export function MonitoringListPage({ kind, cluster, namespace }: MonitoringListP
         loading={state === 'loading'}
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}
-        filters={{ project: projectFilter }}
-        onFiltersChange={(next) => {
-          setProjectFilter(next['project'] ?? '');
-          list.setPage(1);
-        }}
+        {...(kind === 'alerts' ? {} : { filters: { project: projectFilter } })}
+        {...(kind === 'alerts'
+          ? {}
+          : {
+              onFiltersChange: (next: Record<string, string | undefined>) => {
+                setProjectFilter(next['project'] ?? '');
+                list.setPage(1);
+              },
+            })}
         onPageChange={list.setPage}
         onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
           if (next) list.setSort(next);
         }}
         onAction={(action, row) => {
           if (!row) return;
-          if (action === 'delete') setToDelete([row.name]);
           if (action === 'detail') setDetail(row);
           if (action === 'enable' || action === 'disable') {
             // The label the platform evaluates on flips; the list refetches so the
@@ -242,84 +267,90 @@ export function MonitoringListPage({ kind, cluster, namespace }: MonitoringListP
         }}
       />
 
-      <MutationAlert error={remove.error ?? toggle.error} />
+      <MutationAlert error={toggle.error} />
 
-      <Modal
-        open={detail !== null}
-        onOpenChange={(open) => !open && setDetail(null)}
-        title={kind === 'alerts' ? t('monitoring.action.detail') : t('monitoring.action.detail')}
-        size="md"
-      >
-        {detail ? <DetailFields kind={kind} row={detail} /> : null}
+      <Modal open={detail !== null} onOpenChange={(open) => !open && setDetail(null)} title={t('monitoring.action.detail')} size="md">
+        {detail ? (
+          kind === 'alerts' ? (
+            <AlertMessageDetail message={detail as AlertMessage} />
+          ) : (
+            <DetailFields row={detail} />
+          )
+        ) : null}
       </Modal>
-
-      {toDelete ? (
-        <DeleteDialog
-          open
-          onOpenChange={(open) => !open && setToDelete(null)}
-          names={toDelete}
-          resource={kind}
-          noun={t(descriptor.titleKey)}
-          pending={remove.isPending}
-          onConfirm={async () => {
-            await remove.mutateAsync(toDelete);
-            setToDelete(null);
-          }}
-        />
-      ) : null}
     </AiSurface>
   );
 }
 
-/** Alert state → locale key, falling back to the raw value. */
-function alertStateLabel(t: (key: never) => string, state: string): string {
-  const map: Record<string, string> = {
-    firing: 'monitoring.state.firing',
-    pending: 'monitoring.state.pending',
-    resolved: 'monitoring.state.resolved',
-  };
-  const key = map[state.toLowerCase()];
-  return key ? t(key as never) : state;
-}
-
-/** Severity → locale key, falling back to the raw value. */
-function severityLabel(t: (key: never) => string, severity: string): string {
-  const map: Record<string, string> = {
-    critical: 'monitoring.severity.critical',
-    warning: 'monitoring.severity.warning',
-    info: 'monitoring.severity.info',
-  };
-  const key = map[severity.toLowerCase()];
-  return key ? t(key as never) : severity || '-';
-}
-
 /**
- * Detail body for one message or rule.
+ * Drill-down for one alert message.
  *
- * Rendered from the row the list already holds: these objects are small and the
- * list request carries them whole, so opening the drawer must not cost another
- * round trip — and on this cluster the alerting API is slow enough that it would.
+ * Decoded from the row the list already holds: the aggregated record carries the
+ * whole message, so opening it must not cost another round trip. Labels and
+ * annotations are rendered as an allowlisted summary — the alert record is a
+ * controller artefact and a raw dump would grow with every label the platform adds.
  */
-function DetailFields({ kind, row }: { kind: MonitoringKind; row: Row }): React.ReactElement {
+function AlertMessageDetail({ message }: { message: AlertMessage }): React.ReactElement {
   const t = useT();
-  const entries: Array<[string, string]> =
-    kind === 'alerts'
-      ? [
-          [t('monitoring.field.message'), (row as AlertSummary).message || '-'],
-          [t('monitoring.field.state'), (row as AlertSummary).state || '-'],
-          [t('monitoring.field.severity'), (row as AlertSummary).severity || '-'],
-          [t('monitoring.field.rule'), (row as AlertSummary).ruleName || '-'],
-          [t('monitoring.field.target'), (row as AlertSummary).target || '-'],
-          [t('monitoring.field.triggeredAt'), formatTimestamp((row as AlertSummary).triggeredAt)],
-        ]
-      : [
-          [t('monitoring.field.name'), (row as AlertingRuleSummary).name],
-          [t('monitoring.field.ruleCount'), String((row as AlertingRuleSummary).ruleCount)],
-          [t('monitoring.field.lastEvaluation'), (row as AlertingRuleSummary).lastEvaluation ? formatTimestamp((row as AlertingRuleSummary).lastEvaluation) : '-'],
-          [t('monitoring.field.createdAt'), formatTimestamp(row.createdAt)],
-        ];
+  const entries: Array<[string, string]> = [
+    [t('monitoring.field.name'), message.name || '-'],
+    [t('monitoring.field.summary'), message.summary || '-'],
+    [t('monitoring.field.message'), message.message || '-'],
+    [t('monitoring.field.state'), alertStateLabel(t, message.state)],
+    [t('monitoring.field.severity'), alertSeverityLabel(t, message.severity)],
+    [t('monitoring.field.rule'), message.ruleGroup || '-'],
+    [t('monitoring.field.target'), message.target || '-'],
+    [t('monitoring.field.value'), message.value || '-'],
+    [t('monitoring.field.triggeredAt'), formatTimestamp(message.triggeredAt)],
+  ];
   return (
-    <dl className="grid grid-cols-1 gap-3 text-xs sm:grid-cols-[minmax(6rem,auto)_1fr]" data-ai-id={`${kind}-detail:fields`}>
+    <div className="flex flex-col gap-4 text-xs" data-ai-id="alerts:detail">
+      <dl className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(6rem,auto)_1fr]">
+        {entries.map(([label, value], index) => (
+          <React.Fragment key={`${label}-${index}`}>
+            <dt className="text-ai-fg-muted">{label}</dt>
+            <dd className="min-w-0 break-words text-ai-fg-secondary">{value}</dd>
+          </React.Fragment>
+        ))}
+      </dl>
+      <SummaryList aiId="alerts:detail:labels" title={t('monitoring.alerts.labels')} entries={Object.entries(message.labels)} />
+      <SummaryList aiId="alerts:detail:annotations" title={t('monitoring.alerts.annotations')} entries={Object.entries(message.annotations)} />
+    </div>
+  );
+}
+
+function SummaryList({ aiId, title, entries }: { aiId: string; title: string; entries: Array<[string, string]> }): React.ReactElement {
+  return (
+    <section className="flex flex-col gap-2" data-ai-id={aiId}>
+      <h3 className="text-sm font-medium text-ai-fg">{title}</h3>
+      {entries.length === 0 ? (
+        <p className="text-ai-fg-muted">-</p>
+      ) : (
+        <dl className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(6rem,auto)_1fr]">
+          {entries.map(([key, value]) => (
+            <React.Fragment key={key}>
+              <dt className="font-mono text-[11px] text-ai-fg-muted">{key}</dt>
+              <dd className="min-w-0 break-words text-ai-fg-secondary">{value}</dd>
+            </React.Fragment>
+          ))}
+        </dl>
+      )}
+    </section>
+  );
+}
+
+/** Detail body for one legacy alertingrule row (3.3 model). */
+function DetailFields({ row }: { row: Row }): React.ReactElement {
+  const t = useT();
+  const rule = row as AlertingRuleSummary;
+  const entries: Array<[string, string]> = [
+    [t('monitoring.field.name'), rule.name],
+    [t('monitoring.field.ruleCount'), String(rule.ruleCount)],
+    [t('monitoring.field.lastEvaluation'), rule.lastEvaluation ? formatTimestamp(rule.lastEvaluation) : '-'],
+    [t('monitoring.field.createdAt'), formatTimestamp(rule.createdAt)],
+  ];
+  return (
+    <dl className="grid grid-cols-1 gap-3 text-xs sm:grid-cols-[minmax(6rem,auto)_1fr]" data-ai-id="alertingrules-detail:fields">
       {entries.map(([label, value]) => (
         <React.Fragment key={label}>
           <dt className="text-ai-fg-muted">{label}</dt>

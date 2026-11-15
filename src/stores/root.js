@@ -29,7 +29,7 @@ import request from 'utils/request'
 
 export default class RootStore {
   @observable
-  navs = globals.config.navs
+  navs = get(globals, 'config.navs', get(globals, 'config.globalNavs', []))
 
   @observable
   showGlobalNav = false
@@ -75,7 +75,20 @@ export default class RootStore {
 
   @action
   registerActions = actions => {
-    extendObservable(this.actions, actions)
+    if (!actions) {
+      return
+    }
+    const additions = {}
+    Object.keys(actions).forEach(key => {
+      if (Object.prototype.hasOwnProperty.call(this.actions, key)) {
+        this.actions[key] = actions[key]
+      } else {
+        additions[key] = actions[key]
+      }
+    })
+    if (Object.keys(additions).length > 0) {
+      extendObservable(this.actions, additions)
+    }
   }
 
   @action

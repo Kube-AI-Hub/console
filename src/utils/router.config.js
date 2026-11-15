@@ -28,7 +28,10 @@ export const renderRoutes = (routes, extraProps = {}, switchProps = {}) =>
         const key = route.key || i
 
         if (route.redirect) {
-          const { redirect } = route
+          const redirect =
+            typeof route.redirect === 'function'
+              ? route.redirect()
+              : route.redirect
 
           if (isString(redirect)) return <Redirect key={key} to={redirect} />
 

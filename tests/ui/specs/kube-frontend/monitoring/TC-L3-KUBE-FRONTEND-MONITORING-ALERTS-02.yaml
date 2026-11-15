@@ -1,0 +1,37 @@
+id: TC-L3-KUBE-FRONTEND-MONITORING-ALERTS-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: monitoring
+feature: alerts
+title: 告警消息 · 项目消息列表读聚合 v2beta1 集合与旧列表列
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/alerts'
+prd: prd/kube-frontend/monitoring/alerts.md
+design: design/kube-frontend/monitoring/alerts.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-MONITORING-ALERTS-02
+
+story:
+- US2
+
+product: 项目告警消息页从聚合 v2beta1 的 namespaced 集合读取数据，按消息/状态/级别/告警策略/监控目标/触发时间展示，服务端分页与总数，且不提供聚合 API 不支持的删除入口。
+preconditions:
+- 已登录且有 default 项目读取权限
+- 记录浏览器发出的告警请求路径
+steps:
+- 挂上 request 监听，打开 /projects/default/alerts，等页面离开 loading
+- 对照 API 的 namespaced alerts total 判断 empty/ready
+- 若 ready，核对列顺序与分页总数；打开行菜单核对只有「详情」
+expected:
+- 至少一次请求命中 /kapis/alerting.kubesphere.io/v2beta1/namespaces/default/alerts
+- 没有任何请求命中 /kapis/alerting.kubesphere.io/v1alpha2
+- 0 条时页面为 empty、无表头、空态文案可读
+- 有数据时列依次为 消息/状态/级别/告警策略/监控目标/触发时间，且总数与接口 totalItems 一致
+- 行菜单没有删除项（聚合 API 无 item DELETE 路由，旧 console 也无删除入口）
+troubleshoot:
+- 页面一直 empty：确认读的是 v2beta1 聚合集合，不是 v1alpha2（后者 200 空体）
+- 列缺失：确认 AlertMessage 映射包含 ruleGroup 与 target
+- 删除入口出现：确认 MonitoringListPage 不再为 alerts 渲染删除动作
+update_automation:
+- 列或数据源变化时改 pages/monitoring.py 的 has_data 与 headers

@@ -938,6 +938,27 @@ export function installedReleasesApi(client: Client) {
       return { items, total: body?.total_count ?? items.length };
     },
 
+    /**
+     * The releases installed in **one project**.
+     *
+     * The project-scoped collection answers the same row shape as the workspace aggregate but
+     * only for that namespace — the old console's project 应用 list used exactly this endpoint.
+     * Keep it separate from `list`: the aggregate is the workspace view (no namespace segment),
+     * and filtering the aggregate client-side would show a different total than the server.
+     */
+    async listProject(params: {
+      workspace: string;
+      namespace: string;
+      signal?: AbortSignal | undefined;
+    }): Promise<{ items: InstalledRelease[]; total: number }> {
+      const body = await client.request<{ items?: RawApplication[]; total_count?: number }>(
+        projectBase(params.workspace, params.namespace),
+        { query: { limit: -1 }, ...(params.signal ? { signal: params.signal } : {}) },
+      );
+      const items = (body?.items ?? []).map((item) => toInstalledRelease(item, params.workspace));
+      return { items, total: body?.total_count ?? items.length };
+    },
+
     /** One release: the aggregate row (project/version/app) plus its HelmRelease resource. */
     async get(params: { workspace: string; releaseId: string; signal?: AbortSignal | undefined }): Promise<{ release: InstalledRelease | null; helmRelease: HelmRelease | null }> {
       const { items } = await this.list({ workspace: params.workspace, ...(params.signal ? { signal: params.signal } : {}) });

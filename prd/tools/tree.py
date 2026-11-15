@@ -477,6 +477,15 @@ MODULES = [
                             "TC-L3-KUBE-FRONTEND-APP_STORE-INSTALLED_APPS-02",
                         ]},
                     },
+                    {
+                        "id": "project-apps",
+                        "title": "项目内应用",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-01",
+                            "TC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-02",
+                            "TC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-03",
+                        ]},
+                    },
                                                             {
                         "id": "manage",
                         "title": "商店管理（应用/分类/审核）",
@@ -601,8 +610,17 @@ MODULES = [
                     },
                     {
                         "id": "federated-projects",
-                        "title": "联邦项目列表",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-01", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-02", "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-03"]},
+                        "title": "联邦项目页族（列表、写入与详情深化）",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-01",
+                            "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-02",
+                            "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-03",
+                            "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-04",
+                            "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-05",
+                            "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-06",
+                            "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-07",
+                            "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-08",
+                        ]},
                     },
                     {
                         "id": "workspaces",
@@ -864,7 +882,7 @@ MODULES = [
                     {
                         "id": "cluster-events",
                         "title": "资源事件查询",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EVENTS-01"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EVENTS-01", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EVENTS-02"]},
                     },
                     {
                         "id": "log-search",

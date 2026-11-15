@@ -1,0 +1,42 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-06
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: federated-projects
+title: 联邦项目 · 单条与批量删除
+entry_url: "{BASE_URL}/kube-frontend/workspaces/system-workspace/federatedprojects"
+prd: prd/kube-frontend/access-control/federated-projects.md
+design: design/kube-frontend/access-control/federated-projects.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-06
+
+story:
+- US2
+
+product: 行操作「删除」输入项目名称确认后删除项目（命名空间）；勾选多行后「批量删除」输入数量确认；成功后列表刷新为实际剩余集合，失败原因保留在确认框。
+preconditions:
+- 已登录，联邦 API 可读写，至少一个就绪集群
+- 预置三个唯一名称的联邦项目（宿主编 managed=true，放置 host）
+steps:
+- 用 API 预置三个联邦项目
+- 打开列表，搜索第一个项目的唯一前缀并点行操作的「删除」
+- 在确认框输入项目名称并确认，轮询联邦 API 直到项目不存在
+- 搜索第二个项目的唯一前缀，勾选第二个与第三个项目（同一唯一前缀），点「批量删除」
+- 在确认框输入数量 2 并确认，轮询两个项目都不存在
+- 刷新列表，核对预置对象不再出现
+- 清理：删除所有遗留的、本次唯一前缀的宿主命名空间
+expected:
+- 单条删除：确认框要求输入完整项目名称；确认后 DELETE /api/v1/namespaces/<name> 发出，项目在 2 分钟内从联邦 API 消失
+- 批量删除：确认框要求输入数量；确认后两个项目都从联邦 API 消失
+- 删除后列表刷新，不残留已删除对象；其它对象不受影响
+- 确认框标题为「删除联邦项目」或「批量删除联邦项目」
+- 清理后没有本次前缀的命名空间与联邦对象残留
+troubleshoot:
+- 行没消失：命名空间仍在 Terminating；继续轮询，勿重复点击删除
+- 批量删除按钮禁用：列表未勾选或行被判定为 deleting；先搜索到目标行再勾选
+- 删除 403：当前账号无删除命名空间权限；用例记录为权限分支而非产品缺陷
+update_automation:
+- 选择器：federated-projects:delete / :bulk-delete / :select / :delete-input / :delete-confirm
+- 删除语义变化（改为删 FederatedNamespace）时同步 federated.ts 与 design DEC-14

@@ -561,8 +561,10 @@ export const withDryRun = async requests => {
  * Check if the page is apps page.
  * @param {String} path
  */
-export const isAppsPage = (path = location.pathname) =>
-  path === '/apps' || path.startsWith('/apps/app-')
+export const isAppsPage = (path = location.pathname) => {
+  const value = path || (typeof location !== 'undefined' && location.pathname) || ''
+  return value === '/apps' || value.startsWith('/apps/app-')
+}
 
 export const isMemberClusterPage = (path = location.pathname, message) => {
   const clusterName = get(

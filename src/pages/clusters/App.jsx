@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with KubeSphere Console.  If not, see <https://www.gnu.org/licenses/>.
  */
+import React, { useEffect } from 'react'
 import { inject } from 'mobx-react'
 import { renderRoutes } from 'utils/router.config'
 
@@ -22,7 +23,9 @@ import actions from './actions'
 import routes from './routes'
 
 const App = ({ rootStore }) => {
-  rootStore.registerActions(actions)
+  useEffect(() => {
+    rootStore.registerActions(actions)
+  }, [rootStore])
   return renderRoutes(routes)
 }
 

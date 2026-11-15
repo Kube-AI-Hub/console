@@ -70,13 +70,14 @@ export default [
   {
     path: '/clusters',
     component: Clusters,
-    redirect: globals.app.isMultiCluster
-      ? null
-      : {
-          from: '/clusters',
-          to: '/clusters/default/overview',
-          exact: true,
-        },
+    redirect: () =>
+      globals.app.isMultiCluster
+        ? null
+        : {
+            from: '/clusters',
+            to: '/clusters/default/overview',
+            exact: true,
+          },
     exact: true,
   },
   {

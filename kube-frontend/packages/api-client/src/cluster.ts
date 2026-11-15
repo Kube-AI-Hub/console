@@ -1140,3 +1140,148 @@ export function versionApi(client: Client) {
     },
   };
 }
+
+/**
+ * 事件查询 (event search).
+ *
+ * The core events collection cannot answer the two questions this page asks: how many
+ * events happened in a window (a total), and which ones match a filter (server-side).
+ * `tenant.kubesphere.io/v1alpha2/events` does both: `operation=histogram` returns bucketed
+ * counts with a total, `operation=query` returns records with a total and `from`/`size`.
+ *
+ * Both calls accept the same filter keys, so the histogram and the list always describe the
+ * same selection — a histogram of everything next to a filtered list would be a lie.
+ */
+export interface EventHistogramBucket {
+  /** Bucket start, epoch milliseconds. */
+  time: number;
+  count: number;
+}
+
+export interface EventHistogram {
+  total: number;
+  buckets: EventHistogramBucket[];
+}
+
+/** The filters the API understands; empty strings are dropped before the call. */
+export interface EventQueryFilters {
+  message?: string;
+  workspace?: string;
+  namespace?: string;
+  kind?: string;
+  name?: string;
+  reason?: string;
+  type?: string;
+}
+
+export interface EventRecord {
+  /** `@timestamp` of the record, ISO 8601. */
+  timestamp: string;
+  type: string;
+  reason: string;
+  message: string;
+  count: number;
+  objectKind: string;
+  objectName: string;
+  namespace: string;
+  /** `lastTimestamp`, falling back to `eventTime`/`firstTimestamp`. */
+  lastTimestamp: string;
+}
+
+export interface EventQueryPage {
+  total: number;
+  records: EventRecord[];
+}
+
+/** The API's filter keys, which are not the field names a form would use. */
+const EVENT_FILTER_KEYS: Record<keyof EventQueryFilters, string> = {
+  message: 'message_search',
+  workspace: 'workspace_filter',
+  namespace: 'involved_object_namespace_filter',
+  kind: 'involved_object_kind_filter',
+  name: 'involved_object_name_filter',
+  reason: 'reason_filter',
+  type: 'type_filter',
+};
+
+export function eventSearchApi(client: Client) {
+  function filterQuery(filters: EventQueryFilters): Record<string, string> {
+    const out: Record<string, string> = {};
+    for (const [key, value] of Object.entries(filters)) {
+      const trimmed = String(value ?? '').trim();
+      if (trimmed) out[EVENT_FILTER_KEYS[key as keyof EventQueryFilters]] = trimmed;
+    }
+    return out;
+  }
+
+  return {
+    /** Bucketed event counts for `[start, end)`, plus the total in that window. */
+    async histogram(
+      params: { start: number; end: number; interval?: string; filters?: EventQueryFilters; signal?: AbortSignal },
+    ): Promise<EventHistogram> {
+      const body = await client.request<{ histogram?: { total?: number; buckets?: Array<{ time?: number; count?: number }> } }>(
+        '/kapis/tenant.kubesphere.io/v1alpha2/events',
+        {
+          query: {
+            operation: 'histogram',
+            start_time: Math.round(params.start / 1000),
+            end_time: Math.round(params.end / 1000),
+            interval: params.interval ?? '30m',
+            ...filterQuery(params.filters ?? {}),
+          },
+          ...(params.signal ? { signal: params.signal } : {}),
+        },
+      );
+      const histogram = body?.histogram ?? {};
+      return {
+        total: Number(histogram.total ?? 0),
+        buckets: (histogram.buckets ?? [])
+          .map((bucket) => ({ time: Number(bucket.time ?? 0), count: Number(bucket.count ?? 0) }))
+          .filter((bucket) => bucket.time > 0),
+      };
+    },
+
+    /** One page of records for the same filters. */
+    async query(
+      params: { from: number; size: number; filters?: EventQueryFilters; signal?: AbortSignal },
+    ): Promise<EventQueryPage> {
+      const body = await client.request<{
+        query?: {
+          total?: number;
+          records?: Array<{
+            '@timestamp'?: string;
+            type?: string;
+            reason?: string;
+            message?: string;
+            count?: number;
+            lastTimestamp?: string;
+            eventTime?: string;
+            firstTimestamp?: string;
+            involvedObject?: { kind?: string; name?: string; namespace?: string };
+          }>;
+        };
+      }>('/kapis/tenant.kubesphere.io/v1alpha2/events', {
+        query: { operation: 'query', from: params.from, size: params.size, ...filterQuery(params.filters ?? {}) },
+        ...(params.signal ? { signal: params.signal } : {}),
+      });
+      const page = body?.query ?? {};
+      return {
+        total: Number(page.total ?? 0),
+        records: (page.records ?? []).map((record) => {
+          const object = record.involvedObject ?? {};
+          return {
+            timestamp: String(record['@timestamp'] ?? ''),
+            type: String(record.type ?? ''),
+            reason: String(record.reason ?? ''),
+            message: String(record.message ?? ''),
+            count: Number(record.count ?? 0),
+            objectKind: String(object.kind ?? ''),
+            objectName: String(object.name ?? ''),
+            namespace: String(object.namespace ?? ''),
+            lastTimestamp: String(record.lastTimestamp ?? record.eventTime ?? record.firstTimestamp ?? ''),
+          };
+        }),
+      };
+    },
+  };
+}

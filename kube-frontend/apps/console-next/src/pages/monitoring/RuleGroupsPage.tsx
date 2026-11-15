@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useNavigate, useParams } from '@tanstack/react-router';
 import {
   ruleGroupsApi,
   ruleGroupsWriteApi,
@@ -7,7 +8,7 @@ import {
   type RuleGroupSummary,
 } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { AiSurface, Badge, Modal, ResourceList, Skeleton, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
+import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { useProjectFilter } from '@/components/projects/useProjects';
@@ -18,6 +19,9 @@ import { RuleGroupDialog } from './RuleGroupDialog';
 import { DefinitionRow } from '@/components/resource/DefinitionRow';
 import { formatTimestamp } from '@/lib/time';
 import { useListRefresh } from '@/components/resource/useListRefresh';
+import { AlertMessagesTimeline } from './AlertMessagesTimeline';
+import { scopeLabel } from './alertLabels';
+import { useRuleGroupPermissions } from './permissions';
 
 /**
  * 告警策略 (rule-group model).
@@ -32,6 +36,10 @@ import { useListRefresh } from '@/components/resource/useListRefresh';
  * editable because a click would silently disagree with the installer at its next
  * reconcile. Project-scoped, non-builtin groups are the user's own policies, so the
  * page creates, edits (description, rule list, severity) and deletes them.
+ *
+ * The row's 详情 opens a **page**, not a modal: the detail answers two questions
+ * (the rules, and which of them are firing), and each has its own loading/empty/
+ * error state. See `RuleGroupDetailPage`.
  */
 export interface RuleGroupsPageProps {
   cluster: string;
@@ -40,14 +48,21 @@ export interface RuleGroupsPageProps {
 
 const PAGE_SIZE = 10;
 
+/** Detail route: `scope` selects which of the three collections to read. */
+const DETAIL_ROUTE = '/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/alertingrules/$name';
+
 type SortKey = 'name' | 'ruleCount' | 'createTime';
 
 export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): React.ReactElement {
   const t = useT();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const routeParams = useParams({ strict: false }) as { workspace?: string };
+  const workspace = routeParams.workspace ?? 'system-workspace';
   const list = useResourceListState<SortKey>({ defaultSortBy: 'name', resetOn: [cluster, namespace] });
   const [projectFilter, setProjectFilter] = React.useState(namespace);
   React.useEffect(() => setProjectFilter(namespace), [cluster, namespace]);
+  const permissions = useRuleGroupPermissions({ cluster, namespace: projectFilter });
 
   const groups = useQuery({
     queryKey: ['rule-groups', cluster, projectFilter],
@@ -65,7 +80,6 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['rule-groups', cluster] }),
   });
 
-  const [detail, setDetail] = React.useState<RuleGroupSummary | null>(null);
   const [editing, setEditing] = React.useState<RuleGroupSummary | null>(null);
   const [creating, setCreating] = React.useState(false);
   const [deleting, setDeleting] = React.useState<RuleGroupSummary | null>(null);
@@ -90,17 +104,6 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
     (group: RuleGroupSummary): boolean => group.scope === 'project' && !group.builtin,
     [],
   );
-  const detailQuery = useQuery({
-    enabled: detail !== null,
-    queryKey: ['rule-group', cluster, detail?.scope, detail?.name],
-    queryFn: ({ signal }) =>
-      ruleGroupsApi(apiClient).get({
-        name: detail?.name ?? '',
-        scope: detail?.scope ?? 'global',
-        ...(detail?.scope === 'project' ? { namespace: projectFilter } : {}),
-        signal,
-      }),
-  });
 
   const projectFilterControl = useProjectFilter(
     cluster,
@@ -192,7 +195,10 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
           ),
         },
       ],
-      ...(projectFilter
+      // The create entry is a namespaced write. Two gates: a project must be selected
+      // (there is no namespace to write to in "all projects") and the reader must be
+      // allowed to create rule groups in it.
+      ...(projectFilter && permissions.create
         ? {
             primaryAction: {
               key: 'create',
@@ -212,27 +218,32 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
           key: 'disable',
           label: t('monitoring.action.disable'),
           aiId: 'monitoring-alerts:disable',
-          visible: (row: RuleGroupSummary) => row.enabled,
+          visible: (row: RuleGroupSummary) => row.enabled && permissions.update[row.scope],
         },
         {
           key: 'enable',
           label: t('monitoring.action.enable'),
           aiId: 'monitoring-alerts:enable',
-          visible: (row: RuleGroupSummary) => !row.enabled,
+          visible: (row: RuleGroupSummary) => !row.enabled && permissions.update[row.scope],
         },
         /*
          * Edit and delete appear only where they can succeed. Builtin and
          * cluster-scoped groups are installer-owned, so those rows do not offer the
          * actions at all; the editor itself edits the whole rule list, so rule count
-         * is no longer a gate.
+         * is no longer a gate. The SSAR reviews add the permission dimension.
          */
-        { key: 'edit', label: t('common.edit'), aiId: 'monitoring-alerts:edit', visible: (row: RuleGroupSummary) => canEdit(row) },
+        {
+          key: 'edit',
+          label: t('common.edit'),
+          aiId: 'monitoring-alerts:edit',
+          visible: (row: RuleGroupSummary) => canEdit(row) && permissions.update.project,
+        },
         {
           key: 'delete',
           label: t('common.delete'),
           aiId: 'monitoring-alerts:delete',
           tone: 'danger' as const,
-          visible: (row: RuleGroupSummary) => canEdit(row),
+          visible: (row: RuleGroupSummary) => canEdit(row) && permissions.deleteProject,
         },
       ],
       empty: {
@@ -250,7 +261,7 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
       },
       pagination: { page: list.page, pageSize: PAGE_SIZE, total },
     }),
-    [canEdit, groups.isFetching, list, projectFilterControl, t, total],
+    [canEdit, groups.isFetching, list, permissions, projectFilter, projectFilterControl, t, total],
   );
 
   const state = groups.isPending ? 'loading' : groups.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
@@ -265,6 +276,11 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
 
   return (
     <AiSurface as="section" aiId="alertingrules:surface" state={state} className="min-w-0">
+      {projectFilter && !permissions.create ? (
+        <p className="mb-2 text-xs text-ai-fg-muted" data-ai-id="alertingrules:no-create-permission">
+          {t('monitoring.ruleGroups.permission.createDenied')}
+        </p>
+      ) : null}
       <ResourceList
         schema={schema}
         onRefresh={listRefresh.onRefresh}
@@ -289,7 +305,19 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
             return;
           }
           if (!row) return;
-          if (action === 'detail') setDetail(row);
+          if (action === 'detail') {
+            /*
+             * The detail route needs a namespace even for a global group (the URL is
+             * project-scoped). "All projects" shows only global/cluster groups, and the
+             * filter is cleared, so fall back to the project the URL already names.
+             */
+            void navigate({
+              to: DETAIL_ROUTE,
+              params: { workspace, cluster, namespace: projectFilter || namespace, name: row.name },
+              search: { scope: row.scope },
+            });
+            return;
+          }
           if (action === 'edit') setEditing(row);
           if (action === 'delete') setDeleting(row);
           if (action === 'enable' || action === 'disable') {
@@ -326,36 +354,23 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
           }}
         />
       ) : null}
-
-      <Modal
-        open={detail !== null}
-        onOpenChange={(open) => !open && setDetail(null)}
-        title={detail?.name ?? t('monitoring.action.detail')}
-        size="lg"
-      >
-        {detailQuery.data ? <RuleGroupBody detail={detailQuery.data} /> : <Skeleton className="h-40 w-full" />}
-      </Modal>
     </AiSurface>
   );
 }
 
-function scopeLabel(t: ReturnType<typeof useT>, scope: RuleGroupSummary['scope']): string {
-  const map = {
-    global: 'monitoring.ruleGroups.scope.global',
-    cluster: 'monitoring.ruleGroups.scope.cluster',
-    project: 'monitoring.ruleGroups.scope.project',
-  } as const;
-  return t(map[scope]);
-}
-
 /**
- * One group's rules.
+ * One group's rules and its alert messages.
+ *
+ * Shared with the cluster-scope pages: they open a modal and pass the detail they
+ * already fetched, and the same alert filter applies there (a global group's alerts
+ * are in `globalalerts`, a cluster group's in `clusteralerts`). `namespace` is only
+ * needed for project groups; the cluster pages omit it.
  *
  * The expression is shown in full rather than truncated: it is the thing a reader
  * opens this panel to read, and a PromQL expression cut at 80 characters usually
  * loses exactly the condition that matters.
  */
-export function RuleGroupBody({ detail }: { detail: RuleGroupDetail }): React.ReactElement {
+export function RuleGroupBody({ detail, namespace }: { detail: RuleGroupDetail; namespace?: string }): React.ReactElement {
   const t = useT();
   return (
     <div className="flex flex-col gap-4" data-ai-id="alertingrules:detail">
@@ -410,6 +425,12 @@ export function RuleGroupBody({ detail }: { detail: RuleGroupDetail }): React.Re
           </table>
         </div>
       )}
+
+      <AlertMessagesTimeline
+        scope={detail.scope}
+        {...(detail.scope === 'project' && namespace ? { namespace } : {})}
+        ruleGroup={detail.name}
+      />
     </div>
   );
 }

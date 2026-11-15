@@ -31,6 +31,7 @@ import {
 } from 'utils/notFound'
 
 import App from './App'
+import ErrorBoundary from './ErrorBoundary'
 import GlobalValue from './global'
 import i18n from './i18n'
 import { ensureSessionContext } from './session'
@@ -130,11 +131,13 @@ const ensureLocales = () => {
 const render = async component => {
   const locales = await ensureLocales()
   root.render(
-    <Suspense fallback={<Loading className="ks-page-loading" />}>
-      <LocaleProvider locales={locales} localeKey="lang" ignoreWarnings>
-        {component}
-      </LocaleProvider>
-    </Suspense>
+    <ErrorBoundary>
+      <Suspense fallback={<Loading className="ks-page-loading" />}>
+        <LocaleProvider locales={locales} localeKey="lang" ignoreWarnings>
+          {component}
+        </LocaleProvider>
+      </Suspense>
+    </ErrorBoundary>
   )
 }
 

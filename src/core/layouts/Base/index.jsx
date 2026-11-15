@@ -29,6 +29,7 @@ import { isAppsPage } from 'utils'
 import { getScrollTop } from 'utils/dom'
 import { initAlias, initEvents } from 'utils/events'
 import { renderRoutes } from 'utils/router.config'
+import ErrorBoundary from 'core/ErrorBoundary'
 
 import * as styles from './index.scss'
 
@@ -60,6 +61,7 @@ class BaseLayout extends Component {
     document.addEventListener('scroll', this.handleScroll)
     // this.props.initWebsocketData?.()
     this.subscribe = initEvents(...initAlias)
+    this.redirectToLoginIfNeeded()
   }
 
   componentDidUpdate(prevProps) {
@@ -69,9 +71,18 @@ class BaseLayout extends Component {
       document.addEventListener('click', this.handleClick)
     }
 
+    this.redirectToLoginIfNeeded()
+  }
+
+  redirectToLoginIfNeeded() {
     const sessionLoading = window.__SESSION_LOADING__
-    if (!globals.user && !sessionLoading && !isAppsPage(this.props.location.path)) {
-      location.href = '/login'
+    const pathname =
+      (this.props.location && this.props.location.pathname) ||
+      location.pathname ||
+      ''
+    if (!globals.user && !sessionLoading && !isAppsPage(pathname)) {
+      const search = (this.props.location && this.props.location.search) || ''
+      location.href = `/login?referer=${encodeURIComponent(pathname + search)}`
     }
   }
 
@@ -119,6 +130,14 @@ class BaseLayout extends Component {
 
   render() {
     const { location, rootStore } = this.props
+    if (!globals.user) {
+      return (
+        <div>
+          <GlobalSVG />
+          <Loading className="ks-page-loading" />
+        </div>
+      )
+    }
     return (
       <div>
         <GlobalSVG />
@@ -129,7 +148,7 @@ class BaseLayout extends Component {
           onToggleNav={rootStore.toggleGlobalNav}
           jumpTo={this.handleJumpTo}
         />
-        {globals.user && globals.app.enableGlobalNav && (
+        {globals.app.enableGlobalNav && (
           <GlobalNav
             visible={rootStore.showGlobalNav}
             navs={globals.app.getGlobalNavs()}
@@ -137,11 +156,15 @@ class BaseLayout extends Component {
           />
         )}
         <div className={styles.main}>
-          <Suspense fallback={<Loading className="ks-page-loading" />}>
-            {renderRoutes(this.routes)}
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<Loading className="ks-page-loading" />}>
+              {renderRoutes(this.routes)}
+            </Suspense>
+          </ErrorBoundary>
         </div>
-        {globals.user && <Tools />}
+        <ErrorBoundary fallback={null}>
+          <Tools />
+        </ErrorBoundary>
       </div>
     )
   }

@@ -1,0 +1,44 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-05
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: federated-projects
+title: 联邦项目 · 编辑信息与调整部署集群
+entry_url: "{BASE_URL}/kube-frontend/workspaces/system-workspace/federatedprojects"
+prd: prd/kube-frontend/access-control/federated-projects.md
+design: design/kube-frontend/access-control/federated-projects.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-05
+
+story:
+- US2
+
+product: 详情头部的「编辑信息」改别名与描述（对象注解与每个放置集群的 override 同步），「调整部署集群」回显并替换 placement 集合；保存后回读一致，未修改的字段保持不变。
+preconditions:
+- 已登录，联邦 API 可读写，至少一个就绪集群
+- 预置一个唯一名称的联邦项目（宿主编 managed=true，放置 host）
+steps:
+- 用 API 预置联邦项目（别名 old/描述 old）
+- 打开详情，点「编辑信息」，修改别名与描述后保存
+- 用联邦 API 回读对象：核对 metadata.annotations、spec.overrides、spec.template、spec.placement
+- 打开「调整部署集群」，核对对话框回显当前集群，未出现移除警告，直接保存
+- 回读 placement 与 overrides，核对未变化
+- 清理：删除宿主命名空间并轮询到 404
+expected:
+- 编辑信息保存后对话框关闭，详情别名更新
+- metadata.annotations 的 kubesphere.io/alias-name / kubesphere.io/description 为新值，其余注解保留
+- 每个放置集群的 /metadata/annotations override 值同步为新注解集合
+- spec.template.metadata 不含 annotations；spec.placement.clusters 保持 host
+- 放置对话框回显 host；单集群环境下无移除警告；保存后 placement 仍为 host
+- 未修改的字段（resourceVersion 变化除外）保持一致
+- 清理后对象与命名空间都不存在
+troubleshoot:
+- 保存后别名没变：PUT 丢了对象注解或 override；检查是否用读取到的完整对象做 PUT
+- 保存报 409：PUT 未携带 resourceVersion
+- 放置保存后多出集群：override 列表未去重或 placement 未整体替换
+- 单集群环境无法验证增删集群：记录为环境限制，不在本用例伪造第二集群
+update_automation:
+- 选择器：federated-project:edit-info / :edit-alias / :edit-description / :edit-info-submit / :edit-placement / federated-projects:placement-submit
+- 注解键变化时同步 EditInfoDialog 与 federated.ts

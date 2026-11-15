@@ -644,24 +644,25 @@ export type RuleGroupsWriteApi = ReturnType<typeof ruleGroupsWriteApi>;
 
 
 /* ------------------------------------------------------------------ *
- * Cluster-scope alert messages (v2beta1 aggregated API).
+ * Aggregated alert messages (v2beta1 kapis API, every scope).
  * ------------------------------------------------------------------ */
 
-/**
- * Which policy set produced a cluster alert.
- *
- * `custom` are alerts from cluster rule groups (clusterrulegroups), `builtin`
- * from the installer's global groups. The old console exposed them as two tabs;
- * the API keeps them in two collections.
- */
-export type ClusterAlertSource = 'custom' | 'builtin';
+/** Which aggregated collection an alert message comes from. */
+export type AlertMessageScope = 'global' | 'cluster' | 'project';
 
-/** One alert message at cluster scope. */
-export interface ClusterAlertSummary {
+/**
+ * One active alert message from the aggregated v2beta1 API.
+ *
+ * This is the shape the API returns **directly** — `{activeAt, annotations, labels,
+ * state, value}` — not a Kubernetes object. That is why it does not extend the
+ * resource base type the list pages use elsewhere: there is no `metadata.name`,
+ * no namespace and no resourceVersion, and the row key has to be synthesised.
+ */
+export interface AlertMessage {
   /** Stable row key: the API has no object name and alert names repeat per rule. */
   id: string;
+  /** `labels.alertname` — the rule that fired. */
   name: string;
-  source: ClusterAlertSource;
   /** `annotations.summary` — the one-line message title. */
   summary: string;
   /** `annotations.message`, falling back to `annotations.description`. */
@@ -676,7 +677,7 @@ export interface ClusterAlertSummary {
   ruleType: string;
   /** `activeAt` — when it started firing. */
   triggeredAt: string;
-  /** The monitored object, when the rule was a template rule; empty otherwise. */
+  /** The monitored object, derived from the alert's own labels; empty when it has none. */
   target: string;
   /** The value the expression evaluated to, when the alert reports it. */
   value: string;
@@ -686,14 +687,29 @@ export interface ClusterAlertSummary {
   annotations: Record<string, string>;
 }
 
-/** Paths of the two aggregated message collections. */
+/**
+ * Which policy set produced a cluster alert.
+ *
+ * `custom` are alerts from cluster rule groups (clusterrulegroups), `builtin`
+ * from the installer's global groups. The old console exposed them as two tabs;
+ * the API keeps them in two collections.
+ */
+export type ClusterAlertSource = 'custom' | 'builtin';
+
+/** One alert message at cluster scope; same record plus the collection it came from. */
+export interface ClusterAlertSummary extends AlertMessage {
+  source: ClusterAlertSource;
+}
+
+/** Paths of the two cluster-scoped aggregated collections. */
 const CLUSTER_ALERT_KAPIS = '/kapis/alerting.kubesphere.io/v2beta1';
 const CLUSTER_ALERT_PATHS: Record<ClusterAlertSource, string> = {
   custom: 'clusteralerts',
   builtin: 'globalalerts',
 };
 
-interface ClusterAlertItem {
+/** The raw item the aggregated API returns, before any display mapping. */
+interface AggregatedAlertItem {
   activeAt?: string;
   annotations?: Record<string, string>;
   labels?: Record<string, string>;
@@ -701,44 +717,130 @@ interface ClusterAlertItem {
   value?: string | number;
 }
 
-/** Template rules name the object they watch; metric-only rules have no target. */
-function clusterAlertTarget(labels: Record<string, string>): string {
-  if (labels['rule_type'] !== 'template') return '';
-  return [
-    labels['node'] ? `Node: ${labels['node']}` : '',
-    labels['workload'] ? `Workload: ${labels['workload']}` : '',
-    labels['pod'] ? `Pod: ${labels['pod']}` : '',
-  ]
-    .filter(Boolean)
-    .join(' · ');
+/**
+ * Collection path for one scope.
+ *
+ * The project collection is namespaced (`namespaces/<ns>/alerts`); the cluster and
+ * global ones are cluster-wide and split by ownership. All three live under the
+ * **aggregated kapis** prefix — `/apis/alerting.kubesphere.io/v2beta1` serves rule
+ * groups only, and `/apis/.../alerts` answers 404 (probed 2026-11-15).
+ */
+function alertCollectionPath(scope: AlertMessageScope, namespace: string): string {
+  if (scope === 'project') {
+    return `${CLUSTER_ALERT_KAPIS}/namespaces/${encodeURIComponent(namespace)}/alerts`;
+  }
+  return `${CLUSTER_ALERT_KAPIS}/${CLUSTER_ALERT_PATHS[scope === 'global' ? 'builtin' : 'custom']}`;
 }
 
-export function toClusterAlertSummary(
-  item: ClusterAlertItem,
-  source: ClusterAlertSource,
-  index: number,
-): ClusterAlertSummary {
+/**
+ * The monitored object, from the alert's own labels.
+ *
+ * The old console only rendered a target for `rule_type=template` and `-` for
+ * everything else. On this deployment **all 33 active alerts are `rule_type=custom`**
+ * yet carry `namespace`/`pod`/`container` labels, so that gate hid the target of
+ * every alert. The labels are the evidence; the object is whatever they name.
+ */
+function alertTarget(labels: Record<string, string>): string {
+  const resource = labels['workload'] || labels['pod'] || labels['node'] || '';
+  const namespace = labels['namespace'] || '';
+  return [namespace, resource].filter(Boolean).join('/');
+}
+
+/** Raw item → display model. Severity is normalised here so every reader agrees. */
+function toAlertMessage(item: AggregatedAlertItem, scope: AlertMessageScope, index: number): AlertMessage {
   const annotations = item.annotations ?? {};
   const labels = item.labels ?? {};
   const name = String(labels['alertname'] ?? '');
   return {
-    id: `${source}:${index}:${name}`,
+    id: `${scope}:${index}:${name}`,
     name,
-    source,
     summary: String(annotations['summary'] ?? ''),
     message: String(annotations['message'] ?? annotations['description'] ?? ''),
     state: String(item.state ?? ''),
-    severity: String(labels['severity'] ?? ''),
+    severity: severityLabel(String(labels['severity'] ?? '')),
     ruleGroup: String(labels['rule_group'] ?? ''),
     ruleType: String(labels['rule_type'] ?? ''),
     triggeredAt: String(item.activeAt ?? ''),
-    target: clusterAlertTarget(labels),
+    target: alertTarget(labels),
     value: item.value === undefined || item.value === null ? '' : String(item.value),
     labels: { ...labels },
     annotations: { ...annotations },
   };
 }
 
+export function toClusterAlertSummary(
+  item: AggregatedAlertItem,
+  source: ClusterAlertSource,
+  index: number,
+): ClusterAlertSummary {
+  return { ...toAlertMessage(item, source === 'builtin' ? 'global' : 'cluster', index), source };
+}
+
+/**
+ * Active alert messages, queried per scope and (optionally) per rule group.
+ *
+ * Why one API for three collections: the three paths differ only by prefix and the
+ * item shape is identical, and the policy detail page needs the same query for a
+ * global group opened from the project page as the cluster page needs for the same
+ * group. Splitting this into three clients would duplicate the mapping and let the
+ * severity/target rules drift apart.
+ *
+ * `ruleGroup` is sent as `label_filters=rule_group=<name>`, the parameter the old
+ * console used for the policy detail's message tab. Probed 2026-11-15:
+ * `globalalerts?label_filters=rule_group=kubernetes-resources` returns 14 of the 33
+ * records, so the filter is applied server-side rather than after pagination.
+ */
+export function alertMessagesApi(client: Client) {
+  return {
+    async list(params: {
+      scope: AlertMessageScope;
+      /** Required for project scope: the collection is namespaced. */
+      namespace?: string;
+      /** Restrict to one policy's alerts. */
+      ruleGroup?: string;
+      page: number;
+      pageSize: number;
+      keyword?: string;
+      /** Server-side sort key, e.g. `activeAt`. */
+      sortBy?: string;
+      order?: 'asc' | 'desc';
+      signal?: AbortSignal;
+    }): Promise<{ items: AlertMessage[]; total: number }> {
+      const query: Record<string, string | number | boolean | undefined> = {
+        page: params.page,
+        limit: params.pageSize,
+        ...(params.keyword ? { keyword: params.keyword } : {}),
+        ...(params.sortBy ? { sortBy: params.sortBy } : {}),
+        ...(params.order ? { ascending: params.order === 'asc' ? 'true' : 'false' } : {}),
+        ...(params.ruleGroup ? { label_filters: `rule_group=${params.ruleGroup}` } : {}),
+      };
+      const body = await client.request<{ items?: AggregatedAlertItem[]; totalItems?: number }>(
+        alertCollectionPath(params.scope, params.namespace ?? ''),
+        { query, ...(params.signal ? { signal: params.signal } : {}) },
+      );
+      return {
+        items: (body?.items ?? []).map((item, index) => toAlertMessage(item, params.scope, index)),
+        total: Number(body?.totalItems ?? 0),
+      };
+    },
+  };
+}
+
+export type AlertMessagesApi = ReturnType<typeof alertMessagesApi>;
+
+/**
+ * Cluster-scope alert messages, merged from the custom and builtin collections.
+ *
+ * Both collections are **aggregated v2beta1 endpoints** (`/kapis`, not `/apis`):
+ * the CRD-backed v2beta1 group has rule groups only, and `/apis/.../alerts`
+ * answers 404.
+ *
+ * The merge is client-side: each source pages on its own, so a page of "all
+ * cluster alerts" cannot be one request. The page fetches enough of each source
+ * to fill the requested page (`page * pageSize`, capped), sorts by `activeAt`
+ * descending and slices. The cap is documented because beyond it the total stops
+ * being reachable through pagination.
+ */
 /**
  * Cluster-scope alert messages, merged from the custom and builtin collections.
  *
@@ -759,8 +861,8 @@ export function clusterAlertMessagesApi(client: Client) {
     source: ClusterAlertSource,
     limit: number,
     signal?: AbortSignal,
-  ): Promise<{ source: ClusterAlertSource; items: ClusterAlertItem[]; total: number }> {
-    const body = await client.request<{ items?: ClusterAlertItem[]; totalItems?: number }>(
+  ): Promise<{ source: ClusterAlertSource; items: AggregatedAlertItem[]; total: number }> {
+    const body = await client.request<{ items?: AggregatedAlertItem[]; totalItems?: number }>(
       `${CLUSTER_ALERT_KAPIS}/${CLUSTER_ALERT_PATHS[source]}`,
       {
         query: { limit, page: 1, sortBy: 'activeAt', ascending: 'false' },

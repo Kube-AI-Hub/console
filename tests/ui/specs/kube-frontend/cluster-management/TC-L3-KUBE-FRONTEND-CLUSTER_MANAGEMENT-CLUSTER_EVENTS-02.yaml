@@ -1,0 +1,37 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EVENTS-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: cluster-events
+title: 资源事件查询：柱状图与过滤条件
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/events'
+prd: prd/kube-frontend/cluster-management/cluster-events.md
+design: design/kube-frontend/cluster-management/cluster-events.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EVENTS-02
+
+story:
+- US1
+
+product: 资源事件页上方显示最近 12 小时的事件柱状图与总数，过滤条件对柱状图和列表同时生效。
+preconditions:
+- 已登录且有集群权限
+- 租户事件接口可用
+steps:
+- 打开资源事件页，确认柱状图卡片与总数存在
+- 在「原因」中输入一个不可能匹配的值并点「查询」
+- 观察请求是否带 reason_filter，列表是否为空、总数是否变为 0
+- 点「重置」，观察请求不再带 reason_filter、总数恢复
+steps_expected:
+- 柱状图要么有柱子，要么显示明确的空态/不可用说明，并始终显示总数
+- 过滤后列表为空且总数为 0
+- 重置后总数回到过滤前的值
+expected:
+- 柱状图与列表使用同一组过滤条件，否则柱高会描述另一批记录
+troubleshoot:
+- 柱状图不随过滤变化：两次请求没有共用 filters
+- 柱状图接口失败时整页报错：没有把统计降级为单卡片
+update_automation:
+- 选择器：cluster-events:histogram / :histogram:bars / :histogram:total / :histogram:empty / :histogram:error / :filter:reason / :search / :reset / :total / :empty

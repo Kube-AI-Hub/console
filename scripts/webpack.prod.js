@@ -20,7 +20,6 @@ const { resolve } = require('path')
 const merge = require('lodash/merge')
 const webpack = require('webpack')
 const CopyPlugin = require('copy-webpack-plugin')
-const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
@@ -31,9 +30,7 @@ const root = path => resolve(__dirname, `../${path}`)
 const baseConfig = require('./webpack.base')
 const localeConfig = require('./webpack.locale')
 
-const smp = new SpeedMeasurePlugin()
-
-const config = smp.wrap({
+const config = {
   mode: 'production',
   entry: baseConfig.entry,
   output: {
@@ -41,6 +38,7 @@ const config = smp.wrap({
     path: root('dist/'),
     publicPath: '/dist/',
     chunkFilename: '[id].[chunkhash].js',
+    hashSalt: 'blank-fix-20261115-v2',
   },
   module: {
     rules: [
@@ -99,9 +97,8 @@ const config = smp.wrap({
     }),
     new BundleAnalyzerPlugin({ analyzerMode: 'static' }),
   ],
-})
+}
 
-// 修复 SpeedMeasurePlugin 与 MiniCssExtractPlugin 同时使用时 css 文件没有被压缩的问题
 config.plugins.push(
   new MiniCssExtractPlugin({
     filename: '[name].[chunkhash].css',

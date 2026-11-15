@@ -1,0 +1,48 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-04
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: federated-projects
+title: 联邦项目 · 创建（校验、两步写入、回读与清理）
+entry_url: "{BASE_URL}/kube-frontend/workspaces/system-workspace/federatedprojects"
+prd: prd/kube-frontend/access-control/federated-projects.md
+design: design/kube-frontend/access-control/federated-projects.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-04
+
+story:
+- US2
+
+product: 列表页的「创建联邦项目」打开名称/别名/描述/企业空间/部署集群表单；校验在提交前生效，合法提交先创建带 kubefed.io/managed=true 的宿主命名空间再创建 FederatedNamespace，成功后列表出现新行且详情回读放置与传播状态；失败保留输入。
+preconditions:
+- 已登录，联邦 API 可读写，至少一个就绪集群（host）
+- 当前账号有创建命名空间与 FederatedNamespace 的权限
+steps:
+- 打开企业空间联邦项目列表，记录列表行数
+- 点「创建联邦项目」，不填任何内容直接提交，核对名称必填错误
+- 填非法名称（大写/下划线）提交，核对格式错误；填超过 63 字符的名称，核对长度错误
+- 填合法唯一名称，清空已选集群后提交，核对放置集群必填错误
+- 重新选择 host 集群，填写别名与描述后提交
+- 等待对话框关闭与列表出现该行；用联邦 API 回读对象
+- 打开详情，核对部署集群、别名与传播状态
+- 清理：删除宿主命名空间并轮询到 404
+expected:
+- 空名称、非法名称、超长名称分别显示对应错误且不发出创建请求
+- 未选集群时显示「请至少选择一个部署集群。」
+- 创建成功后列表出现该行，详情标题为别名或名称
+- FederatedNamespace 的 metadata.labels 含 kubesphere.io/workspace；spec.template.metadata 只有标签、没有 annotations
+- spec.placement.clusters 为所选集群；spec.overrides 每个集群带 /metadata/annotations 且值为对象注解（creator/alias/description）
+- 宿主命名空间 labels 含 kubefed.io/managed=true，控制面回报 Propagation=True（允许先 False 再转 True）
+- 详情「部署集群」含 host，「传播状态」为已传播或控制面未回报时显示 -
+- 创建按钮存在且未被禁用（有权限时）
+- 清理后联邦 API 与命名空间都不存在
+troubleshoot:
+- 列表没有新行：列表按 template 的 workspace 标签过滤，检查创建体是否写入该标签
+- Propagation 恒为 False：宿主命名空间标签写成了 kubefed.io/managed=false；见 design DEC-10
+- 详情无别名：别名写进了 spec.template.metadata.annotations（控制面拒绝）而不是对象注解 + overrides
+- 创建报 409：名称与既有命名空间冲突；用例必须用唯一前缀
+update_automation:
+- 选择器：federated-projects:create / :create-name / :create-alias / :create-description / :create-clusters / :create-submit
+- 创建体字段变化时同步改 packages/api-client/src/federated.ts 与本用例的回读断言

@@ -1,0 +1,39 @@
+id: TC-L3-KUBE-FRONTEND-MONITORING-RULES-05
+level: 3
+suite: point
+module: kube-frontend
+submodule: monitoring
+feature: rules
+title: 告警策略 · 详情页列出身份信息、每条规则与当前状态
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/alertingrules'
+prd: prd/kube-frontend/monitoring/rules.md
+design: design/kube-frontend/monitoring/rules.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-MONITORING-RULES-05
+
+story:
+- US6
+
+product: 从列表打开一条策略的详情页，读到策略身份、规则逐条（名称/严重度/持续/说明/完整表达式）和每条规则当前的告警状态；没有规则时说明而不是空表。
+preconditions:
+- 集群里有至少一条含规则的规则组（项目页合并了 global/cluster/project 三个来源）
+- 已登录且有该项目的读取权限
+steps:
+- 用 API 取 globalrulegroups 里第一条带规则的规则组，记下 name 与 spec.rules
+- 打开告警策略页，搜索该名称，从行菜单点「详情」
+- 等待详情页 ready，读属性区与规则表
+- 点详情页的返回入口，确认回到列表
+expected:
+- URL 落在 /alertingrules/<name> 且带 scope 参数
+- 详情包含名称、作用域、策略状态、类型、规则数
+- 规则表行数等于 spec.rules 长度
+- 至少一条规则显示严重度、持续与完整表达式
+- 规则状态列显示告警中/待触发/正常之一，不显示 0 或伪造状态
+- 返回入口回到告警策略列表
+troubleshoot:
+- 详情页空白：确认 scope 搜索参数与集合路径（global→globalrulegroups）一致
+- 行数不对：确认读 spec.rules，不是 spec.groups
+- 表达式被截断：确认详情页没有对 expr 做 truncate
+update_automation:
+- 详情结构或选择器变化时改 pages/monitoring.py 的 detail_* 方法

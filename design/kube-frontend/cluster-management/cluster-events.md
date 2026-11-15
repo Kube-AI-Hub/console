@@ -9,6 +9,7 @@
 ## 关联需求
 
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EVENTS-01
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EVENTS-02
 
 ## 设计目标与非目标
 
@@ -75,3 +76,21 @@
 ## 验收用例
 
 - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EVENTS-01
+
+## 事件检索的数据源（2026-11-15 修订）
+
+原实现读核心组 `/api/v1/events` 并只取最近 200 条，页面自己声明「不是全部历史」。这个限制**不是产品选择，而是选错了接口**：
+
+| 能力 | `/api/v1/events` | `/kapis/tenant.kubesphere.io/v1alpha2/events` |
+| --- | --- | --- |
+| 总数 | 无 | `query.total` / `histogram.total` |
+| 服务端过滤 | 无 | `message_search` 等 6 个参数 |
+| 时间分布 | 无 | `operation=histogram` 返回桶 |
+| 分页 | 只能 `limit` 截断 | `from` / `size` |
+
+因此改为租户接口。要点：
+
+1. **柱状图与列表共用 `filters`**：两次请求带同一组过滤键，否则柱高描述的是另一批记录。
+2. **窗口只算一次**：`start/end` 放在 `useState` 里而不是查询键里，避免每次重渲染都刷新区间并无限重取。
+3. **翻页保留上一页数据**（`keepPreviousData`），否则每次翻页整表闪成骨架。
+4. **柱状图失败只降级该卡片**：统计接口挂掉时列表仍可用——查事件的人多半正在处理故障，不能让一个装饰性图表挡住事实。
