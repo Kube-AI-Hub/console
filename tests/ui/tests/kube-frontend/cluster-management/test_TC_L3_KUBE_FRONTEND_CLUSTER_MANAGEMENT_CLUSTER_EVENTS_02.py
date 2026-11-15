@@ -23,12 +23,23 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_EVENTS_02(cluster_manage
     # The histogram renders either bars or an explicit empty/unavailable note.
     histogram = ui.page.locator('[data-ai-id="cluster-events:histogram"]')
     expect(histogram).to_be_visible(timeout=30_000)
-    has_bars = ui.page.locator('[data-ai-id="cluster-events:histogram:bars"] li').count() > 0
-    has_note = (
-        ui.page.locator('[data-ai-id="cluster-events:histogram:empty"]').count()
-        + ui.page.locator('[data-ai-id="cluster-events:histogram:error"]').count()
-    ) > 0
-    assert has_bars or has_note, "柱状图既没有柱子也没有说明"
+    # The histogram has its own query, so it can still be loading while the table is ready.
+    # Wait for it to settle instead of sampling once: bars, an empty note, or an error note.
+    def histogram_settled() -> bool:
+        bars = ui.page.locator('[data-ai-id="cluster-events:histogram:bars"] li').count() > 0
+        note = (
+            ui.page.locator('[data-ai-id="cluster-events:histogram:empty"]').count()
+            + ui.page.locator('[data-ai-id="cluster-events:histogram:error"]').count()
+        ) > 0
+        return bars or note
+
+    ui.page.wait_for_function(
+        """() => document.querySelectorAll('[data-ai-id="cluster-events:histogram:bars"] li').length > 0
+            || !!document.querySelector('[data-ai-id="cluster-events:histogram:empty"]')
+            || !!document.querySelector('[data-ai-id="cluster-events:histogram:error"]')""",
+        timeout=30_000,
+    )
+    assert histogram_settled(), "柱状图既没有柱子也没有说明"
     expect(ui.page.locator('[data-ai-id="cluster-events:histogram:total"]')).to_be_visible()
 
     before = ui.page.locator('[data-ai-id="cluster-events:total"]').inner_text()
