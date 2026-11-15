@@ -23,12 +23,14 @@ export interface StorageClassesPageProps {
   cluster: string;
 }
 
+/** Page sizes the old console offered (`PAGESIZE_OPTION`): 10/20/50/100. */
+const PAGE_SIZES = [10, 20, 50, 100] as const;
 const PAGE_SIZE = 10;
 
 export function StorageClassesPage({ cluster }: StorageClassesPageProps): React.ReactElement {
   const t = useT();
   // Cluster-scoped: `namespace` empty means the cluster-wide collection.
-  const list = useResourceListState<'name' | 'createTime'>({ defaultSortBy: 'name', resetOn: [cluster] });
+  const list = useResourceListState<'name' | 'createTime'>({ defaultSortBy: 'name', defaultPageSize: PAGE_SIZE, resetOn: [cluster] });
   const query = useQuery({
     queryKey: ['storageclasses', cluster],
     queryFn: ({ signal }) => storageClassesApi(apiClient).list({ ...toListParams(list, { cluster, namespace: '' }, 200), signal }),
@@ -43,14 +45,24 @@ export function StorageClassesPage({ cluster }: StorageClassesPageProps): React.
    * fetched anyway (a cluster has a handful), so ordering it locally is both correct
    * and cheap.
    */
+  /*
+   * Sorted **and sliced** here.
+   *
+   * The whole collection is fetched (a cluster has a handful of classes) and the pager is
+   * client-side, so the table must show only the current page: rendering every row while the
+   * pager claims several pages makes the page buttons do nothing, which reads as a broken list
+   * rather than as a wrong page size.
+   */
   const rows = React.useMemo(() => {
     const items = [...((query.data?.items ?? []) as StorageClassSummary[])];
-    return items.sort((a, b) => {
+    const sorted = items.sort((a, b) => {
       const direction = list.order === 'asc' ? 1 : -1;
       if (list.sortBy === 'createTime') return a.createdAt.localeCompare(b.createdAt) * direction;
       return a.name.localeCompare(b.name) * direction;
     });
-  }, [query.data, list.sortBy, list.order]);
+    const start = (list.page - 1) * list.pageSize;
+    return sorted.slice(start, start + list.pageSize);
+  }, [query.data, list.page, list.pageSize, list.sortBy, list.order]);
   const total = query.data?.total ?? 0;
   const listRefresh = useListRefresh('storageclasses', query);
 
@@ -152,7 +164,7 @@ export function StorageClassesPage({ cluster }: StorageClassesPageProps): React.
         next: t('table.next'),
         selected: (count) => t('table.selectedCount', { count }),
       },
-      pagination: { page: list.page, pageSize: PAGE_SIZE, total },
+      pagination: { page: list.page, pageSize: list.pageSize, pageSizeOptions: [...PAGE_SIZES], total },
     }),
     [list, query.isFetching, t, total],
   );
@@ -177,6 +189,7 @@ export function StorageClassesPage({ cluster }: StorageClassesPageProps): React.
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}
         onPageChange={list.setPage}
+        onPageSizeChange={list.setPageSize}
         onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
           if (next) list.setSort(next);
         }}

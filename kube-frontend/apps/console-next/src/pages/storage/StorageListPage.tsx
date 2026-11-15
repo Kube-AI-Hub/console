@@ -49,6 +49,8 @@ export interface StorageListPageProps {
   namespace: string;
 }
 
+/** Page sizes the old console offered (`PAGESIZE_OPTION`): 10/20/50/100. */
+const PAGE_SIZES = [10, 20, 50, 100] as const;
 const PAGE_SIZE = 10;
 
 type SortKey = 'name' | 'createTime';
@@ -68,8 +70,8 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
   const [projectFilter, setProjectFilter] = React.useState(namespace);
   React.useEffect(() => setProjectFilter(namespace), [cluster, namespace]);
 
-  const list = useResourceListState<SortKey>({ defaultSortBy: 'createTime', resetOn: [cluster, projectFilter] });
-  const query = useStorageList(kind, toListParams(list, { cluster, namespace: projectFilter }, PAGE_SIZE));
+  const list = useResourceListState<SortKey>({ defaultSortBy: 'createTime', defaultPageSize: PAGE_SIZE, resetOn: [cluster, projectFilter] });
+  const query = useStorageList(kind, toListParams(list, { cluster, namespace: projectFilter }));
   // One pod list answers "is it mounted" for every row on the page.
   const pods = useProjectPods(kind === 'persistentvolumeclaims' ? projectFilter : '');
   const remove = useDeleteStorage(kind, { cluster, namespace: projectFilter });
@@ -280,7 +282,7 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
         next: t('table.next'),
         selected: (count) => t('table.selectedCount', { count }),
       },
-      pagination: { page: list.page, pageSize: PAGE_SIZE, total },
+      pagination: { page: list.page, pageSize: list.pageSize, pageSizeOptions: [...PAGE_SIZES], total },
     }),
     [cluster, descriptor, kind, list, projectFilter, projectFilterControl, t, total, workspace],
   );
@@ -312,6 +314,7 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
         selectedKeys={list.selected}
         onSelectionChange={list.setSelected}
         onPageChange={list.setPage}
+        onPageSizeChange={list.setPageSize}
         onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
           if (next) list.setSort(next);
         }}

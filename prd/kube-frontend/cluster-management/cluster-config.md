@@ -18,6 +18,7 @@
 
 ## 验收场景
 
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-02** — 已知集群侧「配置」三页（保密字典/配置字典/服务账号）默认每页 20 条，当点分页处的每页条数选择器并选择 50，则请求以 `page=1&limit=50` 重新发起（查询键含页大小，切换必须触发新请求而不是复用缓存）、表格行数等于该次响应条数、选择器显示 50；档位为 10/20/50/100；同一能力适用于集群存储页族（持久卷声明、卷快照、存储类）与 IP 池、网络策略列表；集群存储类列表是客户端分页（一次取全量），切换档位后表格只显示当前页的行。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-01** — 已知集群里有保密字典、配置字典与服务账号，当从集群侧栏「配置」分组依次打开三页，则每页都显示名称（链接到该对象所属项目内的详情页）、项目、资源专属列（保密字典的类型与字段数、配置字典的字段数、服务账号的保密字典数）与创建时间；每页行数等于 `min(20, total)`；项目列等于对象命名空间；名称链接形如 `/kube-frontend/<workspace>/clusters/<cluster>/projects/<namespace>/{secrets,configmaps,serviceaccounts}/<name>`；按名称的服务端搜索与每页 20 条的分页可用。
 
 ## 设计目标
@@ -76,4 +77,5 @@
 
 ## 验收用例
 
+- `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-02`
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-01`

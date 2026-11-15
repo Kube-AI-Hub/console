@@ -8,6 +8,7 @@
 
 ## 关联需求
 
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-02
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-01
 
 ## 设计目标与非目标
@@ -42,6 +43,23 @@
 **被否方案**：三页统一显式传 `scope: 'cluster'`。只在 host 上验证过，成员集群会静默读错集群。
 **何时重新考虑**：api-client 为 cluster scope 正确带上集群段之后。
 
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-02 — 页大小必须进查询键
+
+六个集群列表（配置字典/保密字典/服务账号/网络策略/IP 池/持久卷声明）原本的 `queryKey` 只有
+`page/sortBy/order/search`，没有页大小。把选择器接上以后，`pageSize` 变了但键没变，react-query
+直接返回缓存——表现为「选择器显示 50、表格还是 20 行、也没有新请求」。页大小与页码一样是查询的一部分，
+必须进键。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-03 — 客户端分页的列表要自己切片
+
+集群存储类列表一次取全量（`limit=200`）再本地排序，分页器也是客户端的。接上档位后如果只改分页器、
+不按页切片，表格会把所有行都画出来而页码按钮点了没反应。该页现在按 `page/pageSize` 切片，
+并在 `useMemo` 依赖里带上两者。
+
+### GOT-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-02 — 用例要等新请求落地
+
+切换档位后列表会经历一次 loading；过早读行数会拿到上一页的 20 行（本批第一轮探测就踩到）。
+用例断言 `limit=50` 的请求出现且 surface 离开 loading 之后再数行。
 ## 系统现状
 
 老 console 在集群管理的「配置」分组下有这三页，列含 PROJECT，行内可跳项目。项目作用域的三页（可编辑）已在 `pages/{secrets,configmaps,serviceaccounts}` 交付；本方案只补集群作用域只读视图，编辑仍在项目页。registry 条目与 `cluster.config.*` 标题键已存在，路由目录与页面需新建。

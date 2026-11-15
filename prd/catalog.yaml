@@ -965,6 +965,7 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-01
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-02
     - id: cluster-workloads
       title: 集群级工作负载
       prd: prd/kube-frontend/cluster-management/cluster-workloads.md

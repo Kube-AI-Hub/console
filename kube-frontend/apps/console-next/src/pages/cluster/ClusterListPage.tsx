@@ -26,6 +26,7 @@ export interface ClusterListPageProps {
   cluster: string;
 }
 
+/** Page sizes the old console offered (`PAGESIZE_OPTION`): 10/20/50/100. */
 const PAGE_SIZE = 10;
 
 type SortKey = 'name' | 'createTime';

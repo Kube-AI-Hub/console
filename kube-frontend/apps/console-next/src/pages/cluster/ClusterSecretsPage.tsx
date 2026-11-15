@@ -28,23 +28,25 @@ export interface ClusterSecretsPageProps {
   cluster: string;
 }
 
+/** Page sizes the old console offered (`PAGESIZE_OPTION`): 10/20/50/100. */
+const PAGE_SIZES = [10, 20, 50, 100] as const;
 const PAGE_SIZE = 20;
 const AI_ID = 'cluster-secrets';
 
 export function ClusterSecretsPage({ cluster }: ClusterSecretsPageProps): React.ReactElement {
   const t = useT();
-  const list = useResourceListState<'name' | 'createTime'>({ defaultSortBy: 'createTime', defaultOrder: 'desc', resetOn: [cluster] });
+  const list = useResourceListState<'name' | 'createTime'>({ defaultSortBy: 'createTime', defaultOrder: 'desc', defaultPageSize: PAGE_SIZE, resetOn: [cluster] });
   const workspaceOf = useClusterProjectIndex(cluster);
 
   const query = useQuery({
-    queryKey: [AI_ID, cluster, list.page, list.sortBy, list.order, list.search],
+    queryKey: [AI_ID, cluster, list.page, list.pageSize, list.sortBy, list.order, list.search],
     queryFn: ({ signal }) =>
       secretsApi(apiClient).list({
         cluster,
         // Empty namespace asks the resources proxy for the cluster-wide collection.
         namespace: '',
         page: list.page,
-        pageSize: PAGE_SIZE,
+        pageSize: list.pageSize,
         sortBy: list.sortBy,
         order: list.order,
         keyword: list.search,
@@ -126,7 +128,7 @@ export function ClusterSecretsPage({ cluster }: ClusterSecretsPageProps): React.
         next: t('table.next'),
         selected: (count) => t('table.selectedCount', { count }),
       },
-      pagination: { page: list.page, pageSize: PAGE_SIZE, total },
+      pagination: { page: list.page, pageSize: list.pageSize, pageSizeOptions: [...PAGE_SIZES], total },
     }),
     [cluster, list, t, total, workspaceOf],
   );
@@ -149,6 +151,7 @@ export function ClusterSecretsPage({ cluster }: ClusterSecretsPageProps): React.
         searchValue={list.search}
         onSearchChange={list.setKeyword}
         onPageChange={list.setPage}
+        onPageSizeChange={list.setPageSize}
         onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
           if (next) list.setSort(next);
         }}

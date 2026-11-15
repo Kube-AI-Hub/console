@@ -27,6 +27,8 @@ export interface ClusterVolumeSnapshotsPageProps {
   cluster: string;
 }
 
+/** Page sizes the old console offered (`PAGESIZE_OPTION`): 10/20/50/100. */
+const PAGE_SIZES = [10, 20, 50, 100] as const;
 const PAGE_SIZE = 20;
 const AI_ID = 'cluster-volume-snapshots';
 
@@ -53,7 +55,7 @@ function projectSnapshotUrl(params: {
 
 export function ClusterVolumeSnapshotsPage({ cluster }: ClusterVolumeSnapshotsPageProps): React.ReactElement {
   const t = useT();
-  const list = useResourceListState<SortKey>({ defaultSortBy: 'createTime', defaultOrder: 'desc', resetOn: [cluster] });
+  const list = useResourceListState<SortKey>({ defaultSortBy: 'createTime', defaultOrder: 'desc', defaultPageSize: PAGE_SIZE, resetOn: [cluster] });
   const workspaceOf = useClusterProjectIndex(cluster);
   const crd = useSnapshotCrd(cluster);
   const installed = crd.data === true;
@@ -62,7 +64,7 @@ export function ClusterVolumeSnapshotsPage({ cluster }: ClusterVolumeSnapshotsPa
       cluster,
       namespace: '',
       page: list.page,
-      pageSize: PAGE_SIZE,
+      pageSize: list.pageSize,
       sortBy: list.sortBy,
       order: list.order,
       keyword: list.search,
@@ -172,7 +174,7 @@ export function ClusterVolumeSnapshotsPage({ cluster }: ClusterVolumeSnapshotsPa
         next: t('table.next'),
         selected: (count) => t('table.selectedCount', { count }),
       },
-      pagination: { page: list.page, pageSize: PAGE_SIZE, total },
+      pagination: { page: list.page, pageSize: list.pageSize, pageSizeOptions: [...PAGE_SIZES], total },
     }),
     [cluster, list, query.isFetching, t, total, workspaceOf],
   );
@@ -213,6 +215,7 @@ export function ClusterVolumeSnapshotsPage({ cluster }: ClusterVolumeSnapshotsPa
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}
         onPageChange={list.setPage}
+        onPageSizeChange={list.setPageSize}
         onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
           if (next) list.setSort(next);
         }}

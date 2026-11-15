@@ -26,20 +26,22 @@ export interface IpPoolsPageProps {
   cluster: string;
 }
 
+/** Page sizes the old console offered (`PAGESIZE_OPTION`): 10/20/50/100. */
+const PAGE_SIZES = [10, 20, 50, 100] as const;
 const PAGE_SIZE = 10;
 
 export function IpPoolsPage({ cluster }: IpPoolsPageProps): React.ReactElement {
   const t = useT();
-  const list = useResourceListState<'name' | 'createTime'>({ defaultSortBy: 'createTime', defaultOrder: 'desc', resetOn: [cluster] });
+  const list = useResourceListState<'name' | 'createTime'>({ defaultSortBy: 'createTime', defaultOrder: 'desc', defaultPageSize: PAGE_SIZE, resetOn: [cluster] });
 
   const query = useQuery({
-    queryKey: ['ip-pools', cluster, list.page, list.sortBy, list.order, list.search],
+    queryKey: ['ip-pools', cluster, list.page, list.pageSize, list.sortBy, list.order, list.search],
     queryFn: ({ signal }) =>
       ipPoolsApi(apiClient).list({
         cluster,
         namespace: '',
         page: list.page,
-        pageSize: PAGE_SIZE,
+        pageSize: list.pageSize,
         sortBy: list.sortBy,
         order: list.order,
         keyword: list.search,
@@ -124,7 +126,7 @@ export function IpPoolsPage({ cluster }: IpPoolsPageProps): React.ReactElement {
         next: t('table.next'),
         selected: (count) => t('table.selectedCount', { count }),
       },
-      pagination: { page: list.page, pageSize: PAGE_SIZE, total },
+      pagination: { page: list.page, pageSize: list.pageSize, pageSizeOptions: [...PAGE_SIZES], total },
     }),
     [cluster, list, query.isFetching, t, total],
   );
@@ -147,6 +149,7 @@ export function IpPoolsPage({ cluster }: IpPoolsPageProps): React.ReactElement {
         searchValue={list.search}
         onSearchChange={list.setKeyword}
         onPageChange={list.setPage}
+        onPageSizeChange={list.setPageSize}
         onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
           if (next) list.setSort(next);
         }}

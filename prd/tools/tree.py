@@ -880,7 +880,8 @@ MODULES = [
                     {
                         "id": "cluster-config",
                         "title": "集群级配置",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-01"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-01",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-02"]},
                     },
                     {
                         "id": "cluster-workloads",
