@@ -8,6 +8,7 @@ import { api as apiClient } from '@/api';
 import { useResourceListState } from '@/components/resource/useResourceListState';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * 集群 Pod IP 池.
@@ -49,10 +50,12 @@ export function IpPoolsPage({ cluster }: IpPoolsPageProps): React.ReactElement {
   const rows = (query.data?.items ?? []) as IpPoolSummary[];
   const total = query.data?.total ?? 0;
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
+  const listRefresh = useListRefresh('ip-pools', query);
 
   const schema = React.useMemo<ListSchema<IpPoolSummary>>(
     () => ({
       title: t('cluster.network.ipPools.title'),
+      refresh: listRefresh.refresh,
       description: t('cluster.network.ipPools.description'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
@@ -113,6 +116,7 @@ export function IpPoolsPage({ cluster }: IpPoolsPageProps): React.ReactElement {
       ],
       empty: { title: t('cluster.network.ipPools.empty'), description: t('cluster.network.ipPools.emptyDescription') },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -122,7 +126,7 @@ export function IpPoolsPage({ cluster }: IpPoolsPageProps): React.ReactElement {
       },
       pagination: { page: list.page, pageSize: PAGE_SIZE, total },
     }),
-    [cluster, list, t, total],
+    [cluster, list, query.isFetching, t, total],
   );
 
   if (state === 'error') {
@@ -136,6 +140,7 @@ export function IpPoolsPage({ cluster }: IpPoolsPageProps): React.ReactElement {
   return (
     <AiSurface as="section" aiId="ip-pools:surface" state={state} className="min-w-0">
       <ResourceList
+        onRefresh={listRefresh.onRefresh}
         schema={schema}
         rows={rows}
         loading={state === 'loading'}

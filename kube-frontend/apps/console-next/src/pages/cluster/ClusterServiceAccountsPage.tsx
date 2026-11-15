@@ -9,6 +9,7 @@ import { useResourceListState } from '@/components/resource/useResourceListState
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
 import { clusterProjectRowId, projectObjectUrl, useClusterProjectIndex } from './useClusterProjectIndex';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * 集群级服务账号（跨项目）.
@@ -52,10 +53,12 @@ export function ClusterServiceAccountsPage({ cluster }: ClusterServiceAccountsPa
   const rows = query.data?.items ?? [];
   const total = query.data?.total ?? 0;
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
+  const listRefresh = useListRefresh('cluster-serviceaccounts', query);
 
   const schema = React.useMemo<ListSchema<ServiceAccountSummary>>(
     () => ({
       title: t('cluster.config.serviceaccounts.title'),
+      refresh: listRefresh.refresh,
       description: t('cluster.config.description'),
       rowKey: (row) => clusterProjectRowId(row),
       rowAttributes: (row) => ({ 'data-ai-row': clusterProjectRowId(row) }),
@@ -107,6 +110,7 @@ export function ClusterServiceAccountsPage({ cluster }: ClusterServiceAccountsPa
       ],
       empty: { title: t('cluster.workloads.emptyTitle'), description: t('cluster.workloads.emptyDescription') },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -116,7 +120,7 @@ export function ClusterServiceAccountsPage({ cluster }: ClusterServiceAccountsPa
       },
       pagination: { page: list.page, pageSize: PAGE_SIZE, total },
     }),
-    [cluster, list, t, total, workspaceOf],
+    [cluster, list, query.isFetching, t, total, workspaceOf],
   );
 
   if (state === 'error') {
@@ -131,6 +135,7 @@ export function ClusterServiceAccountsPage({ cluster }: ClusterServiceAccountsPa
     <AiSurface as="section" aiId={AI_ID + ':surface'} state={state} className="min-w-0">
       <ResourceList
         schema={schema}
+        onRefresh={listRefresh.onRefresh}
         rows={rows}
         loading={state === 'loading'}
         searchValue={list.search}

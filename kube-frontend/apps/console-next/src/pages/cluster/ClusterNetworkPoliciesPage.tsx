@@ -8,6 +8,7 @@ import { api as apiClient } from '@/api';
 import { useResourceListState } from '@/components/resource/useResourceListState';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * 集群级网络策略.
@@ -65,10 +66,12 @@ export function ClusterNetworkPoliciesPage({ cluster }: ClusterNetworkPoliciesPa
   const rows = (query.data?.items ?? []) as NetworkPolicySummary[];
   const total = query.data?.total ?? 0;
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
+  const listRefresh = useListRefresh('cluster-networkpolicies', query);
 
   const schema = React.useMemo<ListSchema<NetworkPolicySummary>>(
     () => ({
       title: t('cluster.network.policies.title'),
+      refresh: listRefresh.refresh,
       description: t('cluster.network.policies.description'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': `${row.namespace}/${row.name}` }),
@@ -141,6 +144,7 @@ export function ClusterNetworkPoliciesPage({ cluster }: ClusterNetworkPoliciesPa
       ],
       empty: { title: t('cluster.network.policies.empty'), description: t('cluster.network.policies.emptyDescription') },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -150,7 +154,7 @@ export function ClusterNetworkPoliciesPage({ cluster }: ClusterNetworkPoliciesPa
       },
       pagination: { page: list.page, pageSize: PAGE_SIZE, total },
     }),
-    [cluster, list, t, total, workspaceOf],
+    [cluster, list, query.isFetching, t, total, workspaceOf],
   );
 
   if (state === 'error') {
@@ -165,6 +169,7 @@ export function ClusterNetworkPoliciesPage({ cluster }: ClusterNetworkPoliciesPa
     <AiSurface as="section" aiId="cluster-networkpolicies:surface" state={state} className="min-w-0">
       <ResourceList
         schema={schema}
+        onRefresh={listRefresh.onRefresh}
         rows={rows}
         loading={state === 'loading'}
         searchValue={list.search}

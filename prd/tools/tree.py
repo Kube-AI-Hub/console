@@ -839,6 +839,11 @@ MODULES = [
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_MONITORING-01"]},
                     },
                     {
+                        "id": "cluster-config-lists-refresh",
+                        "title": "集群配置与资源列表刷新",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG_LISTS_REFRESH-01"]},
+                    },
+                    {
                         "id": "ip-pools",
                         "title": "IP 池",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-IP_POOLS-01"]},

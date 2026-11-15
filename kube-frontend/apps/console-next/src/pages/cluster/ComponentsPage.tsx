@@ -10,6 +10,7 @@ import { useResourceListState } from '@/components/resource/useResourceListState
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
 import { COMPONENT_GROUPS } from './componentGroups';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * 系统组件.
@@ -63,10 +64,12 @@ export function ComponentsPage({ cluster: _cluster, initialType = '' }: Componen
     });
   }, [filtered, list.sortBy, list.order]);
   const total = rows.length;
+  const listRefresh = useListRefresh('components', query);
 
   const schema = React.useMemo<ListSchema<ComponentSummary>>(
     () => ({
       title: t('cluster.components.title'),
+      refresh: listRefresh.refresh,
       description: t('cluster.components.description'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
@@ -117,6 +120,7 @@ export function ComponentsPage({ cluster: _cluster, initialType = '' }: Componen
       rowActions: [],
       empty: { title: t('cluster.components.emptyTitle'), description: t('cluster.components.emptyDescription') },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -126,7 +130,7 @@ export function ComponentsPage({ cluster: _cluster, initialType = '' }: Componen
       },
       pagination: { page: 1, pageSize: Math.max(total, 1), total },
     }),
-    [list.sortBy, list.order, t, total],
+    [list.sortBy, list.order, query.isFetching, t, total],
   );
 
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
@@ -142,6 +146,7 @@ export function ComponentsPage({ cluster: _cluster, initialType = '' }: Componen
   return (
     <AiSurface as="section" aiId="components:surface" state={state} className="min-w-0">
       <ResourceList
+        onRefresh={listRefresh.onRefresh}
         filters={{ type: group?.key ?? '' }} onFiltersChange={(next) => setType(next.type ?? '')}
         schema={schema}
         rows={rows}

@@ -947,6 +947,13 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_MONITORING-01
+    - id: cluster-config-lists-refresh
+      title: 集群配置与资源列表刷新
+      prd: prd/kube-frontend/cluster-management/cluster-config-lists-refresh.md
+      design: design/kube-frontend/cluster-management/cluster-config-lists-refresh.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG_LISTS_REFRESH-01
     - id: ip-pools
       title: IP 池
       prd: prd/kube-frontend/cluster-management/ip-pools.md
