@@ -38,7 +38,7 @@ const config = {
     path: root('dist/'),
     publicPath: '/dist/',
     chunkFilename: '[id].[chunkhash].js',
-    hashSalt: 'gpu-member-list-20261116',
+    hashSalt: 'juicefs-perf-empty-20261116',
   },
   module: {
     rules: [

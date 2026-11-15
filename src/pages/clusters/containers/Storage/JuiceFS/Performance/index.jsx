@@ -77,8 +77,10 @@ export default class SharedPerformance extends React.Component {
     // The metrics switch is a property of the cluster (it comes from the driver
     // config via the volume list), so that has to be loaded here too: opening the
     // performance tab directly would otherwise report "metrics off".
+    // Charts are fetched by MonitoringController once metrics are known to be on;
+    // fetching them here as well used to toggle isLoading while the empty-list
+    // spinner unmounted the controller, then remounted it, forever.
     this.store.fetchVolumes()
-    this.store.fetchPerformance()
   }
 
   componentWillUnmount() {
@@ -324,7 +326,7 @@ export default class SharedPerformance extends React.Component {
             keep it available even when the charts have nothing to draw. */}
         <BenchPanel />
         <Card title={t('SHARED_STORAGE_PERFORMANCE')}>
-          <div className={styles.empty}>
+          <div className={styles.empty} data-test="shared-storage-metrics-off">
             {t('SHARED_STORAGE_METRICS_OFF_HINT')}
           </div>
         </Card>
@@ -333,9 +335,10 @@ export default class SharedPerformance extends React.Component {
   }
 
   render() {
-    const { volumes, volumesLoading } = this.store
-    // While the list is loading, do not claim the metrics are off.
-    if (volumesLoading && !volumes.length) {
+    const { volumes, volumesFetched } = this.store
+    // Wait for the first list only. Reloading an empty list must not unmount
+    // BenchPanel — that remount listed volumes again and spun forever.
+    if (!volumesFetched) {
       return <Loading spinning />
     }
     const metricsEnabled = volumes.some(volume => volume.metricsEnabled)
@@ -345,7 +348,7 @@ export default class SharedPerformance extends React.Component {
     }
 
     return (
-      <Loading spinning={this.store.isLoading}>
+      <div>
         <BenchPanel onFinished={this.handleBenchFinished} />
         {this.benchWithoutMetrics ? (
           <div className={styles.benchHint} data-bench-hint="no-metrics">
@@ -362,7 +365,7 @@ export default class SharedPerformance extends React.Component {
         >
           <div className={styles.charts}>{this.charts.map(this.renderChart)}</div>
         </MonitoringController>
-      </Loading>
+      </div>
     )
   }
 }

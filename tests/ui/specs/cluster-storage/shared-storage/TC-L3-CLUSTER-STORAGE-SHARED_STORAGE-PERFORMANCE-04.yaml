@@ -1,0 +1,35 @@
+id: TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-04
+level: 3
+suite: point
+module: cluster-storage
+submodule: shared-storage
+feature: performance
+title: 性能 · 无指标时页面停住
+entry_url: "{BASE_URL}/clusters/default/juicefs-storage/performance"
+prd: prd/cluster-storage/shared-storage/performance.md
+design: design/cluster-storage/shared-storage/performance.md
+
+covers:
+- AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-04
+
+story:
+- US4
+
+product: 没有共享卷或客户端指标未开启时，性能页给出配置提示并停止刷新，而不是整页转圈。
+preconditions:
+- 已登录
+- 用 page.route 让 volumes 返回空列表，不依赖某个集群恰好没有 JuiceFS PV
+steps:
+- 拦截 GET /kapis/juicefs.kubesphere.io/v1alpha1/volumes，返回空列表
+- 打开 /clusters/default/juicefs-storage/performance
+- 等待「JuiceFS 客户端指标未开启」提示
+- 再等 3 秒，统计 volumes 与 bench 的 GET 次数
+expected:
+- 提示出现，且没有六张空图
+- volumes 请求不超过 2 次（页面与 BenchPanel 首轮），之后不再增加
+- 没有卷时不请求 bench
+- 页面不再整页 Loading
+troubleshoot:
+- 请求还在涨说明 Loading 仍在卸 BenchPanel；看 Performance 是否用 volumesFetched 而不是 volumesLoading && !volumes.length
+update_automation:
+- 提示选择器变化时改 pages/juicefs_storage.py

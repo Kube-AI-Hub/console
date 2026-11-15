@@ -20,7 +20,6 @@
 
 - **AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-01** — Given 客户端指标已开启且有流量，When 打开性能页并选择最近 1 小时，Then 六张图都画出至少一条曲线，标题显示当前值与区间合计，读写的单位是 B/s 系。
 - **AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-03** — Given 性能页已渲染，When 检查六张图的标题与单位，Then 不出现未翻译 key，延迟为 s/ms、命中率为 %、错误为次/秒。
-- **AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-04** — Given 客户端指标未开启，When 打开性能页，Then 显示配置提示与开启步骤，而不是六张空图。
 
 ### 关联设计
 

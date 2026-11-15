@@ -59,6 +59,14 @@ export default class JuiceFSStore extends BaseMonitoringStore {
   @observable
   volumesLoading = false
 
+  // First successful (or failed) list. Performance used to treat "loading +
+  // empty" as a full-page spinner, which unmounted BenchPanel, which listed
+  // volumes again — a loop on clusters with no JuiceFS PVs.
+  @observable
+  volumesFetched = false
+
+  volumesPromise = null
+
   @observable
   summary = {}
 
@@ -78,16 +86,30 @@ export default class JuiceFSStore extends BaseMonitoringStore {
   resourceName = 'instance'
 
   @action
-  async fetchVolumes() {
-    this.volumesLoading = true
-    const result = await to(
-      request.get(`${this.apiPath}/volumes`, this.clusterQuery())
-    )
-    const items = get(result, 'items', [])
+  async fetchVolumes({ force = false } = {}) {
+    if (!force && this.volumesFetched) {
+      return this.volumes
+    }
+    if (this.volumesPromise) {
+      return this.volumesPromise
+    }
 
-    this.volumes = Array.isArray(items) ? items : []
-    this.volumesLoading = false
-    return this.volumes
+    this.volumesLoading = true
+    this.volumesPromise = (async () => {
+      try {
+        const result = await to(
+          request.get(`${this.apiPath}/volumes`, this.clusterQuery())
+        )
+        const items = get(result, 'items', [])
+        this.volumes = Array.isArray(items) ? items : []
+        return this.volumes
+      } finally {
+        this.volumesFetched = true
+        this.volumesLoading = false
+        this.volumesPromise = null
+      }
+    })()
+    return this.volumesPromise
   }
 
   @action
@@ -117,14 +139,24 @@ export default class JuiceFSStore extends BaseMonitoringStore {
     if (get(result, 'error')) {
       throw new Error(get(result, 'error'))
     }
-    await this.fetchVolumes()
+    await this.fetchVolumes({ force: true })
     await this.fetchSummary()
     return result
   }
 
   fetchPerformance = (params = {}) =>
     this.fetchMetrics({
-      metrics: Object.values(PerformanceMetrics),
+      // Only the six charts. The extra client metrics (fuse ops, meta latency,
+      // object uploading, cpu) are not drawn and used to inflate the PromQL
+      // round-trip on every refresh.
+      metrics: [
+        PerformanceMetrics.readBytes,
+        PerformanceMetrics.writtenBytes,
+        PerformanceMetrics.cacheHitRatio,
+        PerformanceMetrics.cacheReadLatency,
+        PerformanceMetrics.fuseLatency,
+        PerformanceMetrics.objectErrors,
+      ],
       step: '5m',
       times: 100,
       ...params,

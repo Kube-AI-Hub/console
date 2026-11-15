@@ -30,8 +30,21 @@ class SharedStoragePage:
 
     def wait_ready(self) -> None:
         self.page.wait_for_selector("text=共享存储", timeout=30_000)
+        if "/performance" in self.page.url:
+            # Do not wait for networkidle here. The old remount loop kept
+            # volumes/bench in flight forever; even after the fix, waiting on
+            # idle is slower than waiting for the tab's own content.
+            self.wait_performance_ready()
+            return
         # Cards/tables render after the first API round-trip.
         self.page.wait_for_load_state("networkidle", timeout=30_000)
+
+    def wait_performance_ready(self) -> None:
+        """Charts, or the metrics-off hint. Either means the first volumes list finished."""
+        self.page.wait_for_selector(
+            "[data-test=shared-storage-metrics-off], [class*=chartName]",
+            timeout=30_000,
+        )
 
     @property
     def content_selector(self) -> str:
@@ -65,8 +78,7 @@ class SharedStoragePage:
         self.page.wait_for_url(f"**/juicefs-storage/{expected}", timeout=15_000)
 
         if expected == "performance":
-            # Charts render after the first monitoring response.
-            self.page.wait_for_selector("[class*=chartName]", timeout=30_000)
+            self.wait_performance_ready()
         elif expected == "volumes":
             self.page.wait_for_selector("thead th", timeout=30_000)
         else:
@@ -320,6 +332,10 @@ class SharedStoragePage:
     @property
     def body_text(self) -> str:
         return self.page.evaluate("() => document.body.innerText")
+
+    @property
+    def metrics_off(self) -> bool:
+        return self.page.locator("[data-test=shared-storage-metrics-off]").count() > 0
 
     # ---- benchmark -------------------------------------------------------
     @property

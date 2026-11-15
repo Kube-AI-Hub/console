@@ -83,6 +83,9 @@ export default class BenchPanel extends React.Component {
 
   /** Bring back the last run so a page reload does not lose the numbers. */
   restoreLastRun = async () => {
+    if (!this.volumes.length) {
+      return
+    }
     try {
       const result = await this.store.fetchBenches()
       const latest = get(result, 'items[0]')

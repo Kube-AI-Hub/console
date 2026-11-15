@@ -240,7 +240,7 @@ export default class SharedVolumes extends React.Component {
               </span>
             </LevelLeft>
             <LevelRight>
-              <Button onClick={() => this.store.fetchVolumes()}>
+              <Button onClick={() => this.store.fetchVolumes({ force: true })}>
                 {t('REFRESH')}
               </Button>
             </LevelRight>

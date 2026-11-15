@@ -14,7 +14,7 @@
 
 ## 设计目标与非目标
 
-**目标**：六张图能解释「为什么慢」；单位与语义一致；空闲时给空态而不是零线；指标未开启时给出配置提示；需要时能主动测一次吞吐，把「慢」和「闲」分开。
+**目标**：六张图能解释「为什么慢」；单位与语义一致；空闲时给空态而不是零线；指标未开启时给出配置提示且页面停住；需要时能主动测一次吞吐，把「慢」和「闲」分开。
 
 **非目标**：不做告警、不做按模型归因、不做定时压测与长期历史。
 
@@ -56,6 +56,13 @@
 - **被否方案**：暴露块大小、small-file-count 等全部参数。配置项越多，越容易选出一组互相矛盾的值，而结果也没有可解释性。
 - **何时重新考虑**：要做元数据专项压测时，单独一个入口。
 
+### DEC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-06 — 首轮卷列表用 `volumesFetched` 收口，空列表不再卸页面
+
+- **为什么**：没有共享卷时 `metricsEnabled` 为假。旧实现把「`volumesLoading && !volumes.length`」画成没有子节点的整页 `Loading`，会卸掉 `BenchPanel`；`BenchPanel.componentDidMount` 再 `fetchVolumes()`，loading 再次变 true，页面永远转圈，`volumes` / `bench` 每百毫秒打一轮。
+- **被否方案**：给 `fetchVolumes` 加 1s debounce。请求还是会发，只是慢一点，空集群上 hint 仍会闪。
+- **被否方案**：指标未开启时不挂 `BenchPanel`。主动测试不依赖 Prometheus，空集群上仍要能看见「没有可测的卷」。
+- **何时重新考虑**：卷列表改成 React Query 一类带 `staleTime` 的缓存后，这面旗可以去掉，但「空结果不是 loading」这条不能退。
+
 ## 系统现状
 
 - 页面：`console/src/pages/clusters/containers/Storage/JuiceFS/Performance/index.jsx`
@@ -86,6 +93,7 @@
 - **INV-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-02** — 页面文本里不出现未翻译 key（`*_PL`、`*_DESC`）。
 - **INV-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-03** — 主动测试的写入量不超过 1024 MiB × 线程数，且 `activeDeadlineSeconds` 保证它不会一直跑；Job 完成后自己删除测试目录。
 - **INV-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-04** — 同一卷同一时刻最多一个测试 Job。
+- **INV-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-05** — 第一次 `volumes` 返回之后，性能页不得因空列表再次整页卸载；同一次打开最多一次列表请求，没有卷时不请求 `bench`。
 
 ## 已知坑
 
@@ -95,11 +103,12 @@
 - **GOT-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-04** — mount pod 里的 `/jfs/<volume-id>` 是只读挂载（客户端 `.config` 的 `ReadOnly: true`），在那里跑 bench 会立刻 `Read-only file system`。测试必须挂在业务 PVC 上。
 - **GOT-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-05** — `juicefs bench` 默认先 drop 内核页缓存（需要 root 写 `/proc/sys/vm/drop_caches`），Job 里做不到，会打一行看起来像失败的警告。必须显式 `SKIP_DROP_CACHES=true`，并在结果旁注明读是热缓存。
 - **GOT-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-06** — bench 的表格是给人看的，客户端认为 stdout 是终端时会带 ANSI 颜色，直接按数字解析会得到 0。解析前要剥掉转义序列。
+- **GOT-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-07** — `@kube-design/components` 的 `Loading` 有 children 时不会卸子树；没有 children 的 `<Loading spinning />` 会整页替换。性能页曾经用后者包「空列表 + loading」，等于把 `BenchPanel` 的挂载变成了 `fetchVolumes` 的触发器。
 
 ## 测试与可观测
 
 - L3 用例：有流量时六图有曲线且单位正确（`TC-...-PERFORMANCE-01`）、空闲时空态与未翻译 key（`TC-...-PERFORMANCE-02`）。
-- 指标未开启的场景由 `metricsEnabled` 驱动，页面显示提示而非空图。
+- 指标未开启或没有卷：`TC-...-PERFORMANCE-04` 断言 hint 出现后 `volumes` / `bench` 停止周期性请求，页面不再整页 Loading。
 - 主动测试：`TC-...-PERFORMANCE-03` 发起一次 256 MiB / 1 线程的测试，断言结果里有写、读两个吞吐（`MiB/s`）与每文件耗时；后端单测覆盖日志解析（含 ANSI 颜色、失败无表格）与并发 409。
 
 ## 后续改进
@@ -113,3 +122,4 @@
 - `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-01`
 - `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-02`
 - `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-03`
+- `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-04`

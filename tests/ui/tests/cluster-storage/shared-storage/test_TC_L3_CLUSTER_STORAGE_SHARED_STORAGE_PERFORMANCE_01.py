@@ -19,7 +19,8 @@ def test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_PERFORMANCE_01(
     screenshot(storage_page.page, "performance")
 
     if "指标未开启" in text:
-        # AC-PERFORMANCE-04: explain how to enable it, do not show empty charts.
+        # Default cluster with metrics off: charts are hidden. The remount-loop
+        # case is TC-...-PERFORMANCE-04.
         assert "metricsAddr" in text or "9567" in text, "指标未开启时缺少开启方法"
         return
 

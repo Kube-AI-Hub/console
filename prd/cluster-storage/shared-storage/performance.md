@@ -18,12 +18,16 @@
 
 **Independent Test**：在性能页选一个卷、文件大小 256 MiB、1 个线程，点「开始测试」：按钮进入「测试中」，十几秒后出现写吞吐与读吞吐两个数字（单位 `MiB/s`），并有每文件耗时；期间切到别的页签再回来，结果仍在。
 
+### US4 - 作为集群运维，打开没有共享卷或没有客户端指标的性能页时，页面停住而不是转圈
+
+**Independent Test**：打开 `/clusters/xc/juicefs-storage/performance`（或任意没有 JuiceFS PV 的集群）：2 秒内出现「JuiceFS 客户端指标未开启」提示；之后 3 秒内 `volumes` / `bench` 接口不再周期性发出；页面不再整页 Loading。
+
 ## 验收场景
 
 - **AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-01** — Given 客户端指标已开启且有流量，When 打开性能页并选择最近 1 小时，Then 六张图都画出至少一条曲线，标题显示当前值与区间合计，读写的单位是 B/s 系。
 - **AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-02** — Given 所选区间内没有读写（全部为 0），When 查看读/写吞吐图，Then 显示「该时间范围内无读写」而不是一条零线；其余图照常显示。
 - **AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-03** — Given 性能页已渲染，When 检查六张图的标题与单位，Then 不出现未翻译 key，延迟为 s/ms、命中率为 %、错误为次/秒。
-- **AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-04** — Given 客户端指标未开启，When 打开性能页，Then 显示配置提示与开启步骤，而不是六张空图。
+- **AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-04** — Given 客户端指标未开启或该集群没有共享卷，When 打开性能页，Then 显示配置提示与开启步骤，而不是六张空图；首次 `volumes` 返回后页面停止整页刷新，不再周期性请求 `volumes` / `bench`。
 - **AC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-05** — Given 至少一个共享卷可写，When 选卷并点「开始测试」，Then 后端创建一次性 Job 并返回 Pending/Running；轮询到 Succeeded 后页面显示写吞吐、读吞吐（`MiB/s`）与每文件耗时；测试期间同一卷再次发起返回 409；失败时显示日志尾部。
 
 ## 设计目标
@@ -68,7 +72,7 @@
 ## 边界情况
 
 - 区间内只有部分节点有流量：有流量的节点画线，没有的节点不画，但标题仍显示区间合计。
-- 查询失败或指标为空：显示「暂无监控数据」，不显示 `_PL`。
+- 查询失败或指标为空：显示「暂无监控数据」，不显示 `_PL`；页面停住，不因空结果反复刷新。
 - 时间范围很短（10 分钟）且采样间隔大：仍要显示至少一个点或空态。
 - 同一卷已有测试在跑：再次点「开始测试」返回 409，页面提示已在运行，不新建 Job。
 - 指标未开启：主动测试仍然可用（它靠真实读写测量，不依赖 Prometheus），只隐藏图表。
@@ -79,13 +83,13 @@
 - **FR-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-01** — 系统 MUST 用 `throughput` 渲染字节速率、`second` 渲染延迟、`%` 渲染命中率。
 - **FR-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-02** — 系统 MUST 在区间内无流量时显示「该时间范围内无读写」。
 - **FR-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-03** — 系统 MUST 在标题里同时给出当前值与区间合计。
-- **FR-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-04** — 系统 MUST 在指标未开启时给出配置提示。
+- **FR-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-04** — 系统 MUST 在指标未开启或没有共享卷时给出配置提示，且 MUST NOT 因空列表反复卸载页面导致 `volumes` / `bench` 死循环。
 - **FR-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-05** — 系统 MUST 允许对一个共享卷发起一次性读写测试，并返回写吞吐、读吞吐与每文件耗时。
 - **FR-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-06** — 系统 MUST 拒绝同一卷上的并发测试（409），并在测试失败时返回日志尾部。
 
 ## 成功标准
 
-- **SC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-01** — 性能页六张图在 5 秒内完成首次渲染。
+- **SC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-01** — 性能页六张图在 5 秒内完成首次渲染；没有卷时 2 秒内出现指标未开启提示且随后不再整页转圈。
 - **SC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-02** — 页面文本中未翻译 key 数为 0。
 - **SC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-03** — 256 MiB / 1 线程的主动测试在 60 秒内完成并显示结果。
 
@@ -107,3 +111,4 @@
 - `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-01`
 - `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-02`
 - `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-03`
+- `TC-L3-CLUSTER-STORAGE-SHARED_STORAGE-PERFORMANCE-04`
