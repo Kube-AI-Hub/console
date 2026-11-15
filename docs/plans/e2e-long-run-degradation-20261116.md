@@ -151,3 +151,26 @@
 **15 / 16 个区完全通过**；只有用例最多的 `app-workloads` 仍会掉 1~3 条，且掉的是哪几条每次都不同、单独跑均全绿。
 
 附带确认：把两个区（app-store + access-control）合到一个会话里跑，也会出现 3 条失败——**变量是会话长度，不是区本身**。
+
+## 第 4 次全站长跑（2026-11-16 06:02–07:06，64 分 37 秒）
+
+| 指标 | 值 |
+| --- | --- |
+| 结果 | **151 failed / 218 passed / 19 skipped**（3877s） |
+| 失败分布 | cluster-management 56、project-settings 19、storage 16、configmaps 16、secrets 13、monitoring 11、serviceaccounts 8、其余 12 |
+| 前 18% | 基本全绿（2 条失败） |
+| 18% 之后 | 成片失败，与第 2、3 次同形态 |
+
+**对照**：同一天在「新会话」里按区单跑同一批用例，全部通过——
+
+| 区 | 单跑结果 |
+| --- | --- |
+| configmaps | 27 passed / 2 skipped |
+| monitoring | 16 passed |
+| app-store（含商店管理） | 通过 |
+| access-control | 44 passed |
+| project-settings | 27 passed / 1 skipped |
+
+结论与本文档前三次一致：**长跑退化是环境现象，不是产品回归**；本轮的 151 条失败不能作为判定，
+也不能从分母里删掉——它们只说明「全站一次性长跑」这条路在当前环境下仍然不可用。
+唯一可用的判据仍是按区串行 + 失败单条复跑。
