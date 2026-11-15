@@ -468,6 +468,7 @@
 | kube-frontend/theme | `AC-L2-KUBE-FRONTEND-THEME-03` | `TC-L2-KUBE-FRONTEND-THEME-01` | **（无）** | [`tests/ui/tests/kube-frontend/theme/test_TC_L2_KUBE_FRONTEND_THEME_01.py`](../../../tests/ui/tests/kube-frontend/theme/test_TC_L2_KUBE_FRONTEND_THEME_01.py) |
 | kube-frontend/theme | `AC-L2-KUBE-FRONTEND-THEME-04` | `TC-L2-KUBE-FRONTEND-THEME-02` | **（无）** | [`tests/ui/tests/kube-frontend/theme/test_TC_L2_KUBE_FRONTEND_THEME_02.py`](../../../tests/ui/tests/kube-frontend/theme/test_TC_L2_KUBE_FRONTEND_THEME_02.py) |
 | kube-frontend/theme | `AC-L2-KUBE-FRONTEND-THEME-05` | `TC-L2-KUBE-FRONTEND-THEME-02` | **（无）** | [`tests/ui/tests/kube-frontend/theme/test_TC_L2_KUBE_FRONTEND_THEME_02.py`](../../../tests/ui/tests/kube-frontend/theme/test_TC_L2_KUBE_FRONTEND_THEME_02.py) |
+| kube-frontend/theme | `AC-L2-KUBE-FRONTEND-THEME-06` | `TC-L2-KUBE-FRONTEND-THEME-06` | **（无）** | [`tests/ui/tests/kube-frontend/theme/test_TC_L2_KUBE_FRONTEND_THEME_06.py`](../../../tests/ui/tests/kube-frontend/theme/test_TC_L2_KUBE_FRONTEND_THEME_06.py) |
 | kube-frontend/user-settings/_index | `AC-FULL-KUBE-FRONTEND-USER_SETTINGS-01` | `TC-FULL-KUBE-FRONTEND-USER_SETTINGS-01` | [`design/kube-frontend/user-settings/_index.md`](../../../design/kube-frontend/user-settings/_index.md) | [`tests/ui/tests/kube-frontend/user-settings/test_TC_FULL_KUBE_FRONTEND_USER_SETTINGS_01.py`](../../../tests/ui/tests/kube-frontend/user-settings/test_TC_FULL_KUBE_FRONTEND_USER_SETTINGS_01.py) |
 | kube-frontend/user-settings/about | `AC-L3-KUBE-FRONTEND-USER_SETTINGS-ABOUT-01` | `TC-L3-KUBE-FRONTEND-USER_SETTINGS-ABOUT-01` | [`design/kube-frontend/user-settings/about.md`](../../../design/kube-frontend/user-settings/about.md) | [`tests/ui/tests/kube-frontend/user-settings/test_TC_L3_KUBE_FRONTEND_USER_SETTINGS_ABOUT_01.py`](../../../tests/ui/tests/kube-frontend/user-settings/test_TC_L3_KUBE_FRONTEND_USER_SETTINGS_ABOUT_01.py) |
 | kube-frontend/user-settings/password | `AC-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-01` | `TC-L3-KUBE-FRONTEND-USER_SETTINGS-PASSWORD-01` | [`design/kube-frontend/user-settings/password.md`](../../../design/kube-frontend/user-settings/password.md) | [`tests/ui/tests/kube-frontend/user-settings/test_TC_L3_KUBE_FRONTEND_USER_SETTINGS_PASSWORD_01.py`](../../../tests/ui/tests/kube-frontend/user-settings/test_TC_L3_KUBE_FRONTEND_USER_SETTINGS_PASSWORD_01.py) |
@@ -484,9 +485,9 @@
 
 ## 小结
 
-- 需求里的 AC：477 条，其中未覆盖 1 条、无技术方案承接 17 条、无用例规格实现 1 条。
+- 需求里的 AC：478 条，其中未覆盖 1 条、无技术方案承接 18 条、无用例规格实现 1 条。
 - 未覆盖：`AC-L2-KUBE-FRONTEND-LOGIN-07`
-- 无技术方案承接：`AC-L2-KUBE-FRONTEND-LOGIN-01`, `AC-L2-KUBE-FRONTEND-LOGIN-02`, `AC-L2-KUBE-FRONTEND-LOGIN-03`, `AC-L2-KUBE-FRONTEND-LOGIN-04`, `AC-L2-KUBE-FRONTEND-LOGIN-05`, `AC-L2-KUBE-FRONTEND-LOGIN-06`, `AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L2-KUBE-FRONTEND-THEME-01`, `AC-L2-KUBE-FRONTEND-THEME-02`, `AC-L2-KUBE-FRONTEND-THEME-03`, `AC-L2-KUBE-FRONTEND-THEME-04`, `AC-L2-KUBE-FRONTEND-THEME-05`, `AC-L3-KUBE-FRONTEND-MONITORING-PROJECT_CUSTOM_MONITORING-01`, `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-02`, `AC-L3-KUBE-FRONTEND-STORAGE-DETAIL_TABS-01`
+- 无技术方案承接：`AC-L2-KUBE-FRONTEND-LOGIN-01`, `AC-L2-KUBE-FRONTEND-LOGIN-02`, `AC-L2-KUBE-FRONTEND-LOGIN-03`, `AC-L2-KUBE-FRONTEND-LOGIN-04`, `AC-L2-KUBE-FRONTEND-LOGIN-05`, `AC-L2-KUBE-FRONTEND-LOGIN-06`, `AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L2-KUBE-FRONTEND-THEME-01`, `AC-L2-KUBE-FRONTEND-THEME-02`, `AC-L2-KUBE-FRONTEND-THEME-03`, `AC-L2-KUBE-FRONTEND-THEME-04`, `AC-L2-KUBE-FRONTEND-THEME-05`, `AC-L2-KUBE-FRONTEND-THEME-06`, `AC-L3-KUBE-FRONTEND-MONITORING-PROJECT_CUSTOM_MONITORING-01`, `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-02`, `AC-L3-KUBE-FRONTEND-STORAGE-DETAIL_TABS-01`
 - 无用例规格实现：`AC-L2-KUBE-FRONTEND-LOGIN-07`
 
 ## 用户故事覆盖
@@ -847,7 +848,7 @@
 | kube-frontend/storage/snapshot-alias | `US1` | `TC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOT_ALIAS-01` |
 | kube-frontend/storage/snapshot-content | `US1` | `TC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOT_CONTENT-01` |
 | kube-frontend/storage/snapshots | `US1` | `TC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOTS-01` |
-| kube-frontend/theme | `US1` | `TC-L2-KUBE-FRONTEND-THEME-01` |
+| kube-frontend/theme | `US1` | `TC-L2-KUBE-FRONTEND-THEME-01`, `TC-L2-KUBE-FRONTEND-THEME-06` |
 | kube-frontend/theme | `US2` | `TC-L2-KUBE-FRONTEND-THEME-02` |
 | kube-frontend/user-settings/_index | `US1` | `TC-FULL-KUBE-FRONTEND-USER_SETTINGS-01` |
 | kube-frontend/user-settings/about | `US1` | `TC-L3-KUBE-FRONTEND-USER_SETTINGS-ABOUT-01` |

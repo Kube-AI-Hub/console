@@ -15,7 +15,17 @@ const buttonVariants = cva(
     // now moves the button, and a colour-only transition would snap.
     'transition-[background-color,border-color,color,box-shadow,transform] duration-ai-base ease-ai-out',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ai-ring focus-visible:ring-offset-2 focus-visible:ring-offset-ai-bg',
-    'disabled:pointer-events-none disabled:opacity-50',
+    'disabled:pointer-events-none',
+    //
+    // Disabled is a *state*, not a faded copy.
+    //
+    // Halving the opacity of a filled button leaves white text on a washed-out red
+    // (`#ab2f29` at 50% over a light page ≈ 2:1 contrast) — unreadable, and it still looks
+    // clickable. A disabled control should read as inert: neutral surface, muted text, no
+    // glow. This applies to every filled variant, so the rule lives on the base class.
+    'disabled:bg-ai-surface-2 disabled:text-ai-fg-muted disabled:shadow-none',
+    // The two outline-ish variants need their border muted too, or the frame stays loud.
+    'disabled:border-ai-line disabled:brightness-100',
     '[&_svg]:size-4 [&_svg]:shrink-0',
   ],
   {

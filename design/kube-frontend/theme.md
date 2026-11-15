@@ -42,6 +42,16 @@
 
 **为什么**：`ThemeToggle` 内置 `size-9`（36px），而这一行其他按钮是 `h-11 sm:h-9`（触控下 44px）。共享组件不该为某个宿主的排版改动，因此在调用处传 `className="size-11 sm:size-9"`，与邻居对齐且满足触控最小尺寸。
 
+### DEC-L2-KUBE-FRONTEND-THEME-06 — 禁用态是中性表面，不是半透明的实心按钮
+
+实心按钮（primary/danger）在 `disabled:opacity-50` 下会变成「白字 + 半透明实心色」：浅色页面上实测
+`#ab2f29` 50% 叠白底，对比度约 2:1，既读不清又仍像可点。改为禁用时使用 `bg-ai-surface-2` +
+`text-ai-fg-muted`、去掉阴影与边框强调、`opacity` 保持 1，规则放在 Button 的基础类上，所有变体继承。
+
+### GOT-L2-KUBE-FRONTEND-THEME-06 — 断言要读计算样式，不能只看类名
+
+禁用态的问题只在浏览器里可见（半透明叠色后的对比度），类名断言抓不到。验收用例读取按钮的
+`getComputedStyle` 背景/前景与 `opacity`，并断言背景不再是 danger 的实心色。
 ## 模块边界
 
 | 位置 | 内容 |

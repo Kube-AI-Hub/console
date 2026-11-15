@@ -1,0 +1,35 @@
+id: TC-L2-KUBE-FRONTEND-THEME-06
+level: 2
+suite: point
+module: kube-frontend
+submodule: theme
+feature: theme
+title: 浅色主题与第二色调 · 禁用态可读性
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/configmaps'
+prd: prd/kube-frontend/theme.md
+design: design/kube-frontend/theme.md
+
+covers:
+- AC-L2-KUBE-FRONTEND-THEME-06
+
+story:
+- US1
+
+product: 浅色主题（violet 与 green 两种色调）下关键页面可读；禁用态实心按钮呈中性表面与弱化文字、无透明度衰减，不再是半透明的实心色。
+preconditions:
+- 已登录；可访问项目配置字典页
+steps:
+- 设置 ai-kit-theme=light、ai-kit-accent=violet，打开配置字典页，核对根元素属性与 body 背景
+- 读取未选中行时「批量删除」按钮的计算样式（背景/前景/opacity）
+- 切到 ai-kit-accent=green，核对根元素属性、body 背景变化且无横向溢出
+- 切回 dark，核对同一按钮同样是中性表面
+expected:
+- data-theme=light 且 data-accent 跟随所选色调；body 背景为浅色（亮度 > 0.9）
+- 禁用按钮 opacity=1，背景不等于 danger 实心色（不是 rgb(171,47,41) 一类），前景为弱化文字色
+- 深色下同一按钮也不带 danger 实心填充
+- 三档视口无横向溢出
+troubleshoot:
+- 禁用按钮仍是实心红：Button 基础类又退回 disabled:opacity-50
+- 浅色下文字看不清：组件里用了硬编码颜色而不是 --ai-* token
+update_automation:
+- 存储键：ai-kit-theme / ai-kit-accent；根属性：data-theme / data-accent；按钮句柄：configmaps:bulk-delete
