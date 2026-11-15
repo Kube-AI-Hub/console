@@ -32,6 +32,7 @@ import { formatTimestamp } from '@/lib/time';
 import { ServiceAccountCreateDialog } from './ServiceAccountCreateDialog';
 import { ServiceAccountRoleDialog } from './ServiceAccountRoleDialog';
 import { LoadingDialog } from '@/components/resource/LoadingDialog';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 export interface ServiceAccountsPageProps {
   workspace: string;
@@ -118,10 +119,12 @@ export function ServiceAccountsPage({ workspace, cluster, namespace }: ServiceAc
    */
   const secretsLink = (row: ServiceAccountSummary, secret: string): string =>
     `/kube-frontend/${workspace}/clusters/${cluster}/projects/${row.namespace || projectFilter}/secrets/${secret}`;
+  const listRefresh = useListRefresh('serviceaccounts', query);
 
   const schema = React.useMemo<ListSchema<ServiceAccountSummary>>(
     () => ({
       title: t('serviceaccounts.title'),
+      refresh: listRefresh.refresh,
       description: t('serviceaccounts.description'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
@@ -228,6 +231,7 @@ export function ServiceAccountsPage({ workspace, cluster, namespace }: ServiceAc
       ],
       empty: { title: t('serviceaccounts.empty.title'), description: t('serviceaccounts.empty.description') },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -237,7 +241,7 @@ export function ServiceAccountsPage({ workspace, cluster, namespace }: ServiceAc
       },
       pagination: { page: list.page, pageSize: PAGE_SIZE, total },
     }),
-    [t, list, total, cluster, projectFilter, workspace, projectFilterControl],
+    [cluster, list, projectFilter, projectFilterControl, query.isFetching, t, total, workspace],
   );
 
   const state = query.isPending ? 'loading' : query.isError ? 'error' : items.length === 0 ? 'empty' : 'ready';
@@ -257,6 +261,7 @@ export function ServiceAccountsPage({ workspace, cluster, namespace }: ServiceAc
       </PageTip>
       <ResourceList
         schema={schema}
+        onRefresh={listRefresh.onRefresh}
         rows={items}
         loading={state === 'loading'}
         searchValue={list.keyword}

@@ -9,6 +9,7 @@ import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { DeleteDialog } from '@/components/resource/DeleteDialog';
 import { YamlDialog } from '@/components/resource/YamlDialog';
 import { formatTimestamp } from '@/lib/time';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * 自定义监控（集群级）.
@@ -75,10 +76,12 @@ export function ClusterCustomMonitoringPage({ cluster }: ClusterCustomMonitoring
     },
     [],
   );
+  const listRefresh = useListRefresh('custom-monitoring', query);
 
   const schema = React.useMemo<ListSchema<DashboardSummary>>(
     () => ({
       title: t('customMonitoring.title'),
+      refresh: listRefresh.refresh,
       description: t('customMonitoring.description'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
@@ -120,6 +123,7 @@ export function ClusterCustomMonitoringPage({ cluster }: ClusterCustomMonitoring
       ],
       empty: { title: t('customMonitoring.empty'), description: t('customMonitoring.emptyDescription') },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -133,7 +137,7 @@ export function ClusterCustomMonitoringPage({ cluster }: ClusterCustomMonitoring
         { key: 'delete', label: t('common.delete'), tone: 'danger', aiId: 'custom-monitoring:delete' },
       ],
     }),
-    [openYaml, t],
+    [openYaml, query.isFetching, t],
   );
 
   return (
@@ -150,6 +154,7 @@ export function ClusterCustomMonitoringPage({ cluster }: ClusterCustomMonitoring
       {state !== 'loading' && state !== 'error' ? (
         <ResourceList
           schema={schema}
+          onRefresh={listRefresh.onRefresh}
           rows={rows}
           loading={false}
           onAction={(action, row) => {

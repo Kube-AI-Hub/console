@@ -6,6 +6,7 @@ import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * DevOps 工程（集群作用域）.
@@ -67,10 +68,12 @@ export function DevopsProjectsPage({ cluster }: DevopsProjectsPageProps): React.
 
   const rows = query.data ?? [];
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
+  const listRefresh = useListRefresh('devops', query);
 
   const schema = React.useMemo<ListSchema<DevopsProjectRow>>(
     () => ({
       title: t('devops.list.title'),
+      refresh: listRefresh.refresh,
       description: t('devops.list.description'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
@@ -112,6 +115,7 @@ export function DevopsProjectsPage({ cluster }: DevopsProjectsPageProps): React.
       ],
       empty: { title: t('devops.list.emptyTitle'), description: t('devops.list.emptyDescription') },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -120,7 +124,7 @@ export function DevopsProjectsPage({ cluster }: DevopsProjectsPageProps): React.
         selected: (count) => t('table.selectedCount', { count }),
       },
     }),
-    [cluster, t],
+    [cluster, query.isFetching, t],
   );
 
   if (state === 'error') {
@@ -133,7 +137,7 @@ export function DevopsProjectsPage({ cluster }: DevopsProjectsPageProps): React.
 
   return (
     <AiSurface as="section" aiId="devops:surface" state={state} className="min-w-0">
-      <ResourceList schema={schema} rows={rows} loading={state === 'loading'} />
+      <ResourceList schema={schema} onRefresh={listRefresh.onRefresh} rows={rows} loading={state === 'loading'} />
     </AiSurface>
   );
 }

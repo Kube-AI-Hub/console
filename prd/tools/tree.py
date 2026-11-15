@@ -710,6 +710,11 @@ MODULES = [
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-01", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-02", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-03"]},
                     },
                     {
+                        "id": "remaining-lists-refresh",
+                        "title": "其余列表页刷新",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-REMAINING_LISTS_REFRESH-01"]},
+                    },
+                    {
                         "id": "storage-lists-refresh",
                         "title": "集群存储列表刷新",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_LISTS_REFRESH-01"]},

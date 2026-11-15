@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-REMAINING_LISTS_REFRESH-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: remaining-lists-refresh
+title: 其余独立列表页刷新
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/s2ibuilder'
+prd: prd/kube-frontend/cluster-management/remaining-lists-refresh.md
+design: design/kube-frontend/cluster-management/remaining-lists-refresh.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-REMAINING_LISTS_REFRESH-01
+
+story:
+- US1
+
+product: 集群 DevOps、JuiceFS 存储、集群自定义监控、灰度发布、镜像构建器、项目服务账号六页提供刷新入口。
+preconditions:
+- 已登录且有集群/项目权限
+steps:
+- 依次打开六页，确认各自的刷新入口存在且可用
+- 点击镜像构建器的刷新，观察请求是否重新发起
+- 打开 JuiceFS 页，确认刷新出现在「卷」页签内
+steps_expected:
+- 六页刷新入口存在且空闲时可用
+- 点击后重新发起对应查询
+expected:
+- JuiceFS 的刷新只在持有列表的页签出现
+troubleshoot:
+- JuiceFS 没有按钮：refresh 落进了列定义而不是 schema 根
+- 按钮永久禁用：schema 依赖数组缺少 isFetching
+update_automation:
+- 选择器：devops:refresh / cluster-juicefs:refresh / custom-monitoring:refresh / grayrelease:refresh / image-builder:refresh / serviceaccounts:refresh

@@ -7,6 +7,7 @@ import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * 镜像构建器（项目级）.
@@ -57,10 +58,12 @@ export function ImageBuilderPage({ cluster, namespace }: ImageBuilderPageProps):
   const rows = query.data?.items ?? [];
   const total = query.data?.total ?? 0;
   const pageRows = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const listRefresh = useListRefresh('image-builder', query);
 
   const schema = React.useMemo<ListSchema<ImageBuilderSummary>>(
     () => ({
       title: t('devopsProject.s2ibuilder.title'),
+      refresh: listRefresh.refresh,
       description: t('devopsProject.s2ibuilder.description'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
@@ -110,6 +113,7 @@ export function ImageBuilderPage({ cluster, namespace }: ImageBuilderPageProps):
         description: t('devopsProject.s2ibuilder.emptyDescription'),
       },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -119,7 +123,7 @@ export function ImageBuilderPage({ cluster, namespace }: ImageBuilderPageProps):
       },
       pagination: { page, pageSize: PAGE_SIZE, total },
     }),
-    [page, t, total],
+    [page, query.isFetching, t, total],
   );
 
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
@@ -134,7 +138,7 @@ export function ImageBuilderPage({ cluster, namespace }: ImageBuilderPageProps):
 
   return (
     <AiSurface as="section" aiId="image-builder:surface" data-ai-id="image-builder:surface" state={state} className="min-w-0">
-      <ResourceList schema={schema} rows={pageRows} loading={state === 'loading'} onPageChange={setPage} />
+      <ResourceList schema={schema} onRefresh={listRefresh.onRefresh} rows={pageRows} loading={state === 'loading'} onPageChange={setPage} />
     </AiSurface>
   );
 }

@@ -8,6 +8,7 @@ import { useResourceListState } from '@/components/resource/useResourceListState
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
 import { CreateGrayReleaseDialog } from './CreateGrayReleaseDialog';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * 灰度发布 (canary releases).
@@ -82,10 +83,12 @@ export function CanaryReleasesPage({ cluster, namespace }: CanaryReleasesPagePro
       list.sortBy === 'createTime' ? a.createdAt.localeCompare(b.createdAt) * direction : a.name.localeCompare(b.name) * direction,
     );
   }, [filtered, list.sortBy, list.order]);
+  const listRefresh = useListRefresh('grayrelease', query);
 
   const schema = React.useMemo<ListSchema<StrategySummary>>(
     () => ({
       title: t('grayRelease.title'),
+      refresh: listRefresh.refresh,
       description: t('grayRelease.description'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
@@ -142,6 +145,7 @@ export function CanaryReleasesPage({ cluster, namespace }: CanaryReleasesPagePro
       rowActions: [],
       empty: { title: t('grayRelease.emptyTitle'), description: t('grayRelease.emptyDescription') },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -151,7 +155,7 @@ export function CanaryReleasesPage({ cluster, namespace }: CanaryReleasesPagePro
       },
       pagination: { page: 1, pageSize: Math.max(rows.length, 1), total: rows.length },
     }),
-    [list.sortBy, list.order, rows.length, t],
+    [list.sortBy, list.order, query.isFetching, rows.length, t],
   );
 
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
@@ -172,6 +176,7 @@ export function CanaryReleasesPage({ cluster, namespace }: CanaryReleasesPagePro
       <div data-ai-id="grayrelease:list" className="min-w-0">
         <ResourceList
           schema={schema}
+          onRefresh={listRefresh.onRefresh}
           rows={rows}
           loading={query.isFetching}
           searchValue={list.keyword}

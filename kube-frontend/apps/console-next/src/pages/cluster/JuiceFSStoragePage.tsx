@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { type MetricSeries } from '@kube-ai-hub/api-client';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import {
   AiSurface,
@@ -125,10 +126,12 @@ export function JuiceFSStoragePage({ cluster }: JuiceFSStoragePageProps): React.
     { value: 'usage', label: t('cluster.juicefs.tab.usage'), aiId: 'cluster-juicefs:tab:usage' },
     { value: 'performance', label: t('cluster.juicefs.tab.performance'), aiId: 'cluster-juicefs:tab:performance' },
   ];
+  const listRefresh = useListRefresh('cluster-juicefs', volumes);
 
   const schema = React.useMemo<ListSchema<JuiceFSVolumeRow>>(
     () => ({
       rowKey: 'name',
+      refresh: listRefresh.refresh,
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
       columns: [
         {
@@ -203,6 +206,7 @@ export function JuiceFSStoragePage({ cluster }: JuiceFSStoragePageProps): React.
       ],
       empty: { title: t('cluster.juicefs.volumesEmpty.title'), description: t('cluster.juicefs.volumesEmpty.description') },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -211,7 +215,7 @@ export function JuiceFSStoragePage({ cluster }: JuiceFSStoragePageProps): React.
         selected: (count) => t('table.selectedCount', { count }),
       },
     }),
-    [t],
+    [t, volumes.isFetching],
   );
 
   if (state === 'error') {
@@ -241,7 +245,7 @@ export function JuiceFSStoragePage({ cluster }: JuiceFSStoragePageProps): React.
             {state === 'loading' ? (
               <Skeleton className="h-40 w-full" />
             ) : (
-              <ResourceList schema={schema} rows={rows} loading={false} />
+              <ResourceList schema={schema} onRefresh={listRefresh.onRefresh} rows={rows} loading={false} />
             )}
           </div>
         </TabsContent>
