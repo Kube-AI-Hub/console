@@ -8,6 +8,20 @@
 - 环境：B200（host 集群），本地 BFF :8092 + 前端 :5178；真实接口、admin 角色。
 - 选择依据：能力矩阵 CHECK-04「日常资源完整表单、详情、创建与写闭环」；存储卷是老 console 的日常写任务，新 UI 此前只有列表与详情，创建/克隆/创建快照三个动作缺失。
 
+
+## 快照就绪态的集群结论（2026-11-15 复核）
+
+此前记录「VolumeSnapshot 无法端到端验证（集群 0 个 VolumeSnapshotClass）」。本轮把这条查到底，结论更精确：
+
+1. **创建流程可用且已验证**：`STORAGE-CREATE_SNAPSHOT-01` 通过（自建 PVC → 通过界面创建快照 → 对象创建成功）。
+2. **就绪态（readyToUse）在本集群不可达**，原因是驱动侧而非页面：
+   - 集群只有三个 StorageClass：`juicefs-shared`（`csi.juicefs.com`）、`local-static`、`openebs-hostpath`；
+   - 手工创建 `VolumeSnapshotClass juicefs-snapshot`（driver `csi.juicefs.com`）后，对 1Gi 的 juicefs PVC 建快照：**对象与 VolumeSnapshotContent 均创建成功并绑定**（`boundVolumeSnapshotContentName` 有值），但 60 秒后 `readyToUse` 仍为 false、`status.error` 为空、content 的 `snapshotHandle` 始终为空——即没有 snapshotter 真正执行快照；
+   - 结论：juicefs CSI 的 snapshotter 未部署/未启用，属集群能力，不是控制台缺陷。
+3. 探针资源已清理（PVC、VolumeSnapshot、VolumeSnapshotClass 均已删除），集群恢复原状。
+
+因此页面侧的正确行为是：**允许创建、如实显示「未就绪」**，而不是假装成功。用例对就绪态不作断言，断言的是「对象被创建」。
+
 ## 2. 旧能力清单（原子 ID）与归宿
 
 | ID | 旧能力 | 新落点 | AC/TC | 结论 |
