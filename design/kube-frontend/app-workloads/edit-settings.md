@@ -13,6 +13,7 @@
 - `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-03`
 - `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-04`
 - `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-05`
+- `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-06`
 
 ## 设计目标与非目标
 
@@ -113,3 +114,20 @@ kube-frontend 的负载详情接管「编辑设置」时，复用这里的页签
 
 - 部署的 `spec.strategy` 与有状态副本集/守护进程集的 `spec.updateStrategy` 是两个不同字段，共用一套表单时必须按 kind 取路径。
 - 新建对象时服务端会补 `strategy.rollingUpdate.maxUnavailable: 25%`，所以「没改策略」时 diff 不应出现策略行；只有读者真的改了才提交。
+
+
+### DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-08 — 健康检查按「启用 + 方式」建模，未启用即删除
+
+**为什么**：Kubernetes 的三种探针是容器上的三个独立键，未设置与设置为空对象是两件事；表单用「启用」勾选表达「这个键存在」，保存时未启用就 `delete`，避免留下一个永远成功的空探针。
+
+**被否方案**：始终写三个探针对象——apiserver 会给未填的阈值补默认值，等于给容器加上了原本没有的检查。
+
+### DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-09 — 只写表单填写的阈值，其余交给服务端默认
+
+**为什么**：探针的 `timeoutSeconds`/`periodSeconds`/`failureThreshold` 有服务端默认值（1/10/3）；把表单留空的字段写成 0 会让探针立刻失败。留空即不写。
+
+**已知坑**：实测回读会带上服务端补的默认值（如 `timeoutSeconds: 1`），因此断言只针对填写过的字段与 handler。
+
+### DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-10 — 优雅终止留空即删除该字段
+
+**为什么**：留空表示「用集群/镜像默认的 30 秒」，写死 30 会掩盖未来的默认值变化；只有读者真的填了数字才写入。

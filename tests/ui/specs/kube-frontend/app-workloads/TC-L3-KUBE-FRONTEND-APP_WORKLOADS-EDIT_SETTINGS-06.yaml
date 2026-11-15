@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-06
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: edit-settings
+title: 编辑设置：健康检查与优雅终止
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/deployments'
+prd: prd/kube-frontend/app-workloads/edit-settings.md
+design: design/kube-frontend/app-workloads/edit-settings.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-06
+
+story:
+- US1
+
+product: 编辑设置里的三种健康检查（HTTP/TCP/命令）与优雅终止秒数。
+preconditions:
+- 已登录且项目内可创建部署
+steps:
+- 创建部署并打开「编辑设置」
+- 启用存活检查（HTTP、端口 80、路径 /healthz、初始延迟 5），填写优雅终止 45
+- 保存并回读 spec.template
+- 再次打开，取消启用存活检查并保存，回读
+steps_expected:
+- livenessProbe.httpGet 与 initialDelaySeconds 与填写一致，terminationGracePeriodSeconds=45
+- 取消启用后 livenessProbe 被移除
+expected:
+- 命令方式留空、端口 70000、优雅终止非整数时本地拒绝
+troubleshoot:
+- 回读多出 timeoutSeconds/periodSeconds：服务端默认值，属正常
+- 探针被写成空对象：未启用时应删除该键
+update_automation:
+- 选择器：deployments-edit:probes / probe-enable:<kind> / probe-type:<kind> / probe-port:<kind> / probe-path:<kind> / grace-period-input

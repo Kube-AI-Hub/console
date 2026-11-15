@@ -16,9 +16,13 @@
 | ES-02 | 容器 CPU/内存请求与上限 | 弹窗「资源限额」分组 | EDIT_SETTINGS-03 / `…-03` | 本批补齐 |
 | ES-03 | 更新策略（部署 RollingUpdate/Recreate；有状态副本集与守护进程集 RollingUpdate/OnDelete，含 maxUnavailable/maxSurge/partition） | 弹窗「更新策略」分组 | EDIT_SETTINGS-04 / `…-04` | 本批补齐 |
 | **ES-04** | 选择节点（nodeSelector）、容器组标签、容器组注解 | 弹窗「高级设置」分组（三组共用键值编辑器） | EDIT_SETTINGS-05 / `…-05` | **本批补齐** |
-| ES-05 | 存储挂载、健康检查、优雅终止、安全上下文、IP 池 | — | — | **待补**（仍走编辑 YAML，见 §7） |
+| **ES-05** | 健康检查（存活/就绪/启动，HTTP/TCP/命令）与优雅终止（terminationGracePeriodSeconds） | 弹窗「健康检查」与「优雅终止」 | EDIT_SETTINGS-06 / `…-06` | **本批补齐** |
+| ES-06 | 存储挂载、容器组安全上下文、IP 池 | — | — | **待补**（仍走编辑 YAML，见 §7） |
 
 ## 3. 数据语义
+
+- 健康检查：三种探针（`livenessProbe`/`readinessProbe`/`startupProbe`）各自可启用；方式为 HTTP（`httpGet.scheme/path/port`）、TCP（`tcpSocket.port`）或命令（`exec.command`）。未启用即删除该键——写一个空探针会让容器多出一个永远成功的检查。只写表单填过的阈值，其余交给服务端默认（实测回读会补 `timeoutSeconds:1`/`periodSeconds:10`/`failureThreshold:3`）。
+- 优雅终止：`spec.template.spec.terminationGracePeriodSeconds`；留空即删除该字段（用集群/镜像默认），非整数在本地拒绝。
 
 - 高级设置：`spec.template.spec.nodeSelector`（键值映射）、`spec.template.metadata.labels`、`spec.template.metadata.annotations`（容器组模板上的标签与注解）；三者留空时删除对应字段。容器组标签必须保留 `spec.selector.matchLabels` 的每一个键值——选择器创建后不可变，本地比较后缺一个就禁用保存并说明（实测：移除后错误提示出现且保存按钮禁用）。
 
@@ -48,7 +52,7 @@
 | 显式类型检查 | `console-next: tsc --noEmit` | 0 error |
 | 构建 | `console-next: vite build` | ✓ built |
 | 严格规格门禁 | `check_docs.py --strict` | errors=0 warnings=0 |
-| 本批 E2E（`-n 0`） | EDIT_SETTINGS-03、-04、-05 | 3 passed |
+| 本批 E2E（`-n 0`） | EDIT_SETTINGS-03、-04、-05、-06 + DETAIL-01 | 5 passed |
 | 共享影响 | APP_WORKLOADS-DETAIL-01、EDIT_YAML-01、FULL-04、MOBILE-01 | 4 passed |
 | 契约套件 | `npx vitest run --config config/vitest.config.ts` | 1331 passed / 1 failed（见下） |
 
@@ -58,5 +62,5 @@
 
 ## 7. 遗留（本单元内仍可实施）
 
-- 存储挂载、健康检查、优雅终止、容器组安全上下文、IP 池：老 console 的编辑设置包含这些分组，新弹窗尚未提供，目前只能编辑 YAML。已登记为待补原子项（ES-05），下一步在本弹窗内补分组（存储挂载与健康检查需要子编辑器，单列一个单元）。
+- 存储挂载、容器组安全上下文、IP 池：老 console 的编辑设置包含这些分组，新弹窗尚未提供，目前只能编辑 YAML。已登记为待补原子项（ES-06）；存储挂载需要独立的卷列表子编辑器，单列一个单元。
 - 任务（Job/CronJob）的编辑设置目前只有既有字段，未纳入资源限额与策略；本批未改动，保留原能力。

@@ -92,6 +92,7 @@ interface ContainerDraft {
   name: string;
   image: string;
   resources: ResourceDraft;
+  probes: Record<ProbeKind, ProbeDraft>;
   /** Empty means "leave the stored value alone"; Kubernetes defaults it when absent. */
   pullPolicy: string;
   env: EnvDraft[];
@@ -182,6 +183,101 @@ function mapOf(pairs: PairDraft[]): JsonObject {
 /** Label/annotation keys: optional DNS prefix, then a name; no whitespace. */
 const PAIR_KEY = /^([A-Za-z0-9][-A-Za-z0-9.]*\/)?[A-Za-z0-9]([-A-Za-z0-9._]*[A-Za-z0-9])?$/;
 
+/** One health probe, as the form edits it. `enabled` false means the key is absent. */
+interface ProbeDraft {
+  enabled: boolean;
+  /** Which handler the probe uses; the other handlers' fields are dropped on save. */
+  type: 'http' | 'tcp' | 'command';
+  scheme: string;
+  path: string;
+  port: string;
+  command: string;
+  initialDelaySeconds: string;
+  timeoutSeconds: string;
+  periodSeconds: string;
+  successThreshold: string;
+  failureThreshold: string;
+}
+
+type ProbeKind = 'liveness' | 'readiness' | 'startup';
+
+const PROBE_KINDS: ProbeKind[] = ['liveness', 'readiness', 'startup'];
+
+const EMPTY_PROBE: ProbeDraft = {
+  enabled: false,
+  type: 'http',
+  scheme: 'HTTP',
+  path: '/',
+  port: '',
+  command: '',
+  initialDelaySeconds: '',
+  timeoutSeconds: '',
+  periodSeconds: '',
+  successThreshold: '',
+  failureThreshold: '',
+};
+
+function probeKey(kind: ProbeKind): string {
+  return `${kind}Probe`;
+}
+
+function probeOf(container: JsonObject, kind: ProbeKind): ProbeDraft {
+  const probe = asObject(container[probeKey(kind)]);
+  if (!probe) return { ...EMPTY_PROBE };
+  const httpGet = asObject(probe['httpGet']);
+  const tcpSocket = asObject(probe['tcpSocket']);
+  const exec = asObject(probe['exec']);
+  const command = Array.isArray(exec?.['command']) ? (exec?.['command'] as unknown[]).map(String).join(' ') : '';
+  return {
+    enabled: true,
+    type: exec ? 'command' : tcpSocket ? 'tcp' : 'http',
+    scheme: String(httpGet?.['scheme'] ?? 'HTTP'),
+    path: String(httpGet?.['path'] ?? '/'),
+    port: String(httpGet?.['port'] ?? tcpSocket?.['port'] ?? ''),
+    command,
+    initialDelaySeconds: probe['initialDelaySeconds'] === undefined ? '' : String(probe['initialDelaySeconds']),
+    timeoutSeconds: probe['timeoutSeconds'] === undefined ? '' : String(probe['timeoutSeconds']),
+    periodSeconds: probe['periodSeconds'] === undefined ? '' : String(probe['periodSeconds']),
+    successThreshold: probe['successThreshold'] === undefined ? '' : String(probe['successThreshold']),
+    failureThreshold: probe['failureThreshold'] === undefined ? '' : String(probe['failureThreshold']),
+  };
+}
+
+function probesOf(container: JsonObject): Record<ProbeKind, ProbeDraft> {
+  return {
+    liveness: probeOf(container, 'liveness'),
+    readiness: probeOf(container, 'readiness'),
+    startup: probeOf(container, 'startup'),
+  };
+}
+
+/** Build the probe object Kubernetes expects, dropping the handlers that do not apply. */
+function probeManifest(draft: ProbeDraft): JsonObject | undefined {
+  if (!draft.enabled) return undefined;
+  const probe: JsonObject = {};
+  if (draft.type === 'http') {
+    probe['httpGet'] = {
+      path: draft.path.trim() || '/',
+      port: draft.port.trim() ? (/^[0-9]+$/.test(draft.port.trim()) ? Number(draft.port.trim()) : draft.port.trim()) : 80,
+      scheme: draft.scheme || 'HTTP',
+    };
+  } else if (draft.type === 'tcp') {
+    probe['tcpSocket'] = {
+      port: draft.port.trim() ? (/^[0-9]+$/.test(draft.port.trim()) ? Number(draft.port.trim()) : draft.port.trim()) : 80,
+    };
+  } else {
+    probe['exec'] = { command: ['/bin/sh', '-c', draft.command.trim()] };
+  }
+  for (const field of ['initialDelaySeconds', 'timeoutSeconds', 'periodSeconds', 'successThreshold', 'failureThreshold'] as const) {
+    const value = draft[field].trim();
+    if (value) probe[field] = Number(value);
+  }
+  return probe;
+}
+
+/** Grace period and probe timings are whole seconds; an empty field means "server default". */
+const NON_NEGATIVE_INT = /^[0-9]+$/;
+
 /** Kubernetes quantity syntax: a number with an optional unit (`500m`, `1Gi`, `2`). */
 const QUANTITY = /^[0-9]+(\.[0-9]+)?(m|k|M|G|T|Ki|Mi|Gi|Ti)?$/;
 
@@ -195,6 +291,7 @@ function toDrafts(kind: WorkloadKind, raw: JsonObject): ContainerDraft[] {
       name: String(container['name'] ?? ''),
       image: String(container['image'] ?? ''),
       resources: resourcesOf(container),
+      probes: probesOf(container),
       pullPolicy: String(container['imagePullPolicy'] ?? ''),
       env: storedEnv.map((entry) => {
         const record = asObject(entry) ?? {};
@@ -328,6 +425,7 @@ export function EditWorkloadDialog({
   const [nodeSelector, setNodeSelector] = React.useState<PairDraft[]>([]);
   const [podLabels, setPodLabels] = React.useState<PairDraft[]>([]);
   const [podAnnotations, setPodAnnotations] = React.useState<PairDraft[]>([]);
+  const [gracePeriod, setGracePeriod] = React.useState('');
   const [error, setError] = React.useState<string | null>(null);
 
   // Re-seed on open: the same dialog instance edits different objects over time.
@@ -339,6 +437,9 @@ export function EditWorkloadDialog({
     const seedTemplate = templateOf(kind, raw);
     const seedPodSpec = seedTemplate ? asObject(seedTemplate['spec']) : undefined;
     setNodeSelector(pairsOf(seedPodSpec?.['nodeSelector']));
+    setGracePeriod(
+      seedPodSpec?.['terminationGracePeriodSeconds'] === undefined ? '' : String(seedPodSpec['terminationGracePeriodSeconds']),
+    );
     setPodLabels(pairsOf(seedTemplate?.['metadata'] ? asObject(seedTemplate['metadata'])?.['labels'] : undefined));
     setPodAnnotations(pairsOf(seedTemplate?.['metadata'] ? asObject(seedTemplate['metadata'])?.['annotations'] : undefined));
     setError(null);
@@ -541,8 +642,43 @@ export function EditWorkloadDialog({
     diffPairs('spec.template.spec.nodeSelector', storedPodSpec?.['nodeSelector'], nodeSelector);
     diffPairs('spec.template.metadata.labels', storedMetadata?.['labels'], podLabels);
     diffPairs('spec.template.metadata.annotations', storedMetadata?.['annotations'], podAnnotations);
+    drafts.forEach((container, index) => {
+      const stored = initialContainers[index];
+      if (!stored) return;
+      const before = probesOf(stored);
+      for (const kind of PROBE_KINDS) {
+        const previous = before[kind];
+        const next = container.probes[kind];
+        if (previous.enabled !== next.enabled) {
+          rows.push({
+            path: `spec.template.spec.containers.${container.name}.${probeKey(kind)}`,
+            before: previous.enabled ? t('workloads.editSettings.probeOn') : '-',
+            after: next.enabled ? t('workloads.editSettings.probeOn') : t('workloads.editSettings.removed'),
+          });
+        } else if (next.enabled) {
+          const beforeJson = JSON.stringify(probeManifest(previous));
+          const afterJson = JSON.stringify(probeManifest(next));
+          if (beforeJson !== afterJson) {
+            rows.push({
+              path: `spec.template.spec.containers.${container.name}.${probeKey(kind)}`,
+              before: beforeJson,
+              after: afterJson,
+            });
+          }
+        }
+      }
+    });
+    const storedGrace = storedPodSpec?.['terminationGracePeriodSeconds'];
+    const nextGrace = gracePeriod.trim();
+    if ((storedGrace === undefined ? '' : String(storedGrace)) !== nextGrace) {
+      rows.push({
+        path: 'spec.template.spec.terminationGracePeriodSeconds',
+        before: storedGrace === undefined ? t('workloads.editSettings.graceDefault') : String(storedGrace),
+        after: nextGrace || t('workloads.editSettings.graceDefault'),
+      });
+    }
     return rows;
-  }, [drafts, initialContainers, kind, nodeSelector, podAnnotations, podLabels, raw, replicas, strategy, supportsReplicas, t]);
+  }, [drafts, gracePeriod, initialContainers, kind, nodeSelector, podAnnotations, podLabels, raw, replicas, strategy, supportsReplicas, t]);
 
   /** Build the object the API will store: a clone with only the edited fields replaced. */
   const buildBody = (): KubeObject => {
@@ -592,10 +728,17 @@ export function EditWorkloadDialog({
       else delete resources['limits'];
       if (Object.keys(resources).length > 0) target['resources'] = resources;
       else delete target['resources'];
+      for (const kind of PROBE_KINDS) {
+        const probe = probeManifest(container.probes[kind]);
+        if (probe) target[probeKey(kind)] = probe;
+        else delete target[probeKey(kind)];
+      }
     });
     const nextTemplate = templateOf(kind, next);
     const nextPodSpec = nextTemplate ? asObject(nextTemplate['spec']) : undefined;
     if (nextPodSpec) {
+      if (gracePeriod.trim()) nextPodSpec['terminationGracePeriodSeconds'] = Number(gracePeriod.trim());
+      else delete nextPodSpec['terminationGracePeriodSeconds'];
       const selector = mapOf(nodeSelector);
       if (Object.keys(selector).length > 0) nextPodSpec['nodeSelector'] = selector;
       else delete nextPodSpec['nodeSelector'];
@@ -696,6 +839,37 @@ export function EditWorkloadDialog({
     return values.some((value) => value.trim() !== '' && !INT_OR_PERCENT.test(value.trim()));
   }, [kind, strategy]);
 
+  /** Probe fields: a handler that can actually run, and whole-second timings. */
+  const probeIssues = React.useMemo(() => {
+    const issues = new Map<string, string>();
+    for (const container of drafts) {
+      for (const kind of PROBE_KINDS) {
+        const probe = container.probes[kind];
+        if (!probe.enabled) continue;
+        if (probe.type === 'command' && !probe.command.trim()) {
+          issues.set(`${container.name}:${kind}`, t('workloads.editSettings.probeCommandRequired'));
+          continue;
+        }
+        if (probe.type !== 'command') {
+          const port = probe.port.trim();
+          if (port && !/^[0-9]+$/.test(port)) {
+            // A named port is legal in Kubernetes; only a numeric value can be range-checked.
+          } else if (port && (Number(port) < 1 || Number(port) > 65535)) {
+            issues.set(`${container.name}:${kind}`, t('workloads.editSettings.probePortInvalid'));
+            continue;
+          }
+        }
+        const timings = [probe.initialDelaySeconds, probe.timeoutSeconds, probe.periodSeconds, probe.successThreshold, probe.failureThreshold];
+        if (timings.some((value) => value.trim() && !NON_NEGATIVE_INT.test(value.trim()))) {
+          issues.set(`${container.name}:${kind}`, t('workloads.editSettings.probeTimingInvalid'));
+        }
+      }
+    }
+    return issues;
+  }, [drafts, t]);
+
+  const gracePeriodInvalid = gracePeriod.trim() !== '' && !NON_NEGATIVE_INT.test(gracePeriod.trim());
+
   /** Key/value rows: unique, well-formed keys; and the workload selector must survive. */
   const pairIssues = React.useMemo(() => {
     const issues = new Map<string, string>();
@@ -747,6 +921,8 @@ export function EditWorkloadDialog({
     strategyInvalid ||
     pairIssues.size > 0 ||
     selectorBroken ||
+    probeIssues.size > 0 ||
+    gracePeriodInvalid ||
     changes.length === 0;
 
   return (
@@ -855,6 +1031,22 @@ export function EditWorkloadDialog({
             issues={pairIssues}
             disabled={pending}
           />
+          <label className="flex flex-col gap-1" data-ai-id={`${kind}-edit:grace-period`}>
+            <span className="text-xs text-ai-fg-secondary">{t('workloads.editSettings.gracePeriod')}</span>
+            <Input
+              value={gracePeriod}
+              inputMode="numeric"
+              placeholder={t('workloads.editSettings.graceDefault')}
+              {...actionProps(`${kind}-edit:grace-period-input`)}
+              onChange={(event) => setGracePeriod(event.target.value)}
+            />
+            <span className="text-[11px] text-ai-fg-muted">{t('workloads.editSettings.gracePeriodHint')}</span>
+            {gracePeriodInvalid ? (
+              <span role="alert" className="text-[11px] text-ai-danger" data-ai-id={`${kind}-edit:grace-error`}>
+                {t('workloads.editSettings.graceInvalid')}
+              </span>
+            ) : null}
+          </label>
           <PairEditor
             group="pod-labels"
             label={t('workloads.editSettings.podLabels')}
@@ -1046,6 +1238,133 @@ export function EditWorkloadDialog({
                       {resourceIssues.get(container.name)}
                     </span>
                   ) : null}
+                </div>
+
+                <div className="flex flex-col gap-2" data-ai-id={`${kind}-edit:probes${suffix}`}>
+                  <span className="text-xs text-ai-fg-secondary">{t('workloads.editSettings.probes')}</span>
+                  <span className="text-[11px] text-ai-fg-muted">{t('workloads.editSettings.probesHint')}</span>
+                  {PROBE_KINDS.map((probeKind) => {
+                    const probe = container.probes[probeKind];
+                    const issue = probeIssues.get(`${container.name}:${probeKind}`);
+                    const label = t(
+                      probeKind === 'liveness'
+                        ? 'workloads.editSettings.probeLiveness'
+                        : probeKind === 'readiness'
+                          ? 'workloads.editSettings.probeReadiness'
+                          : 'workloads.editSettings.probeStartup',
+                    );
+                    return (
+                      <div key={probeKind} className="flex flex-col gap-2 rounded-ai-md border border-ai-line p-2" data-ai-id={`${kind}-edit:probe:${probeKind}${suffix}`}>
+                        <label className="inline-flex min-h-6 items-center gap-2 text-xs text-ai-fg">
+                          <input
+                            type="checkbox"
+                            checked={probe.enabled}
+                            {...actionProps(`${kind}-edit:probe-enable:${probeKind}${suffix}`)}
+                            onChange={(event) =>
+                              setContainer(containerIndex, {
+                                probes: { ...container.probes, [probeKind]: { ...probe, enabled: event.target.checked } },
+                              })
+                            }
+                          />
+                          {label}
+                        </label>
+                        {probe.enabled ? (
+                          <>
+                            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                              <label className="flex flex-col gap-1">
+                                <span className="text-[11px] text-ai-fg-muted">{t('workloads.editSettings.probeType')}</span>
+                                <Select
+                                  value={probe.type}
+                                  options={[
+                                    { value: 'http', label: 'HTTP' },
+                                    { value: 'tcp', label: 'TCP' },
+                                    { value: 'command', label: t('workloads.editSettings.probeCommand') },
+                                  ]}
+                                  data-ai-id={`${kind}-edit:probe-type:${probeKind}${suffix}`}
+                                  aria-label={t('workloads.editSettings.probeType')}
+                                  onValueChange={(value: string) =>
+                                    setContainer(containerIndex, {
+                                      probes: { ...container.probes, [probeKind]: { ...probe, type: value as ProbeDraft['type'] } },
+                                    })
+                                  }
+                                />
+                              </label>
+                              {probe.type === 'command' ? (
+                                <label className="flex flex-col gap-1">
+                                  <span className="text-[11px] text-ai-fg-muted">{t('workloads.editSettings.probeCommandLabel')}</span>
+                                  <Input
+                                    value={probe.command}
+                                    placeholder="curl -f http://localhost/ || exit 1"
+                                    {...actionProps(`${kind}-edit:probe-command:${probeKind}${suffix}`)}
+                                    onChange={(event) =>
+                                      setContainer(containerIndex, {
+                                        probes: { ...container.probes, [probeKind]: { ...probe, command: event.target.value } },
+                                      })
+                                    }
+                                  />
+                                </label>
+                              ) : (
+                                <label className="flex flex-col gap-1">
+                                  <span className="text-[11px] text-ai-fg-muted">{t('workloads.editSettings.probePort')}</span>
+                                  <Input
+                                    value={probe.port}
+                                    placeholder="80"
+                                    {...actionProps(`${kind}-edit:probe-port:${probeKind}${suffix}`)}
+                                    onChange={(event) =>
+                                      setContainer(containerIndex, {
+                                        probes: { ...container.probes, [probeKind]: { ...probe, port: event.target.value } },
+                                      })
+                                    }
+                                  />
+                                </label>
+                              )}
+                              {probe.type === 'http' ? (
+                                <label className="flex flex-col gap-1 sm:col-span-2">
+                                  <span className="text-[11px] text-ai-fg-muted">{t('workloads.editSettings.probePath')}</span>
+                                  <Input
+                                    value={probe.path}
+                                    placeholder="/healthz"
+                                    {...actionProps(`${kind}-edit:probe-path:${probeKind}${suffix}`)}
+                                    onChange={(event) =>
+                                      setContainer(containerIndex, {
+                                        probes: { ...container.probes, [probeKind]: { ...probe, path: event.target.value } },
+                                      })
+                                    }
+                                  />
+                                </label>
+                              ) : null}
+                            </div>
+                            <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+                              {([
+                                ['initialDelaySeconds', 'workloads.editSettings.probeInitialDelay'],
+                                ['periodSeconds', 'workloads.editSettings.probePeriod'],
+                                ['timeoutSeconds', 'workloads.editSettings.probeTimeout'],
+                                ['successThreshold', 'workloads.editSettings.probeSuccess'],
+                                ['failureThreshold', 'workloads.editSettings.probeFailure'],
+                              ] as const).map(([field, key]) => (
+                                <label key={field} className="flex flex-col gap-1">
+                                  <span className="text-[11px] text-ai-fg-muted">{t(key)}</span>
+                                  <Input
+                                    value={probe[field]}
+                                    inputMode="numeric"
+                                    {...actionProps(`${kind}-edit:probe-${field}:${probeKind}${suffix}`)}
+                                    onChange={(event) =>
+                                      setContainer(containerIndex, {
+                                        probes: { ...container.probes, [probeKind]: { ...probe, [field]: event.target.value } },
+                                      })
+                                    }
+                                  />
+                                </label>
+                              ))}
+                            </div>
+                            {issue ? (
+                              <span role="alert" className="text-[11px] text-ai-danger">{issue}</span>
+                            ) : null}
+                          </>
+                        ) : null}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </section>

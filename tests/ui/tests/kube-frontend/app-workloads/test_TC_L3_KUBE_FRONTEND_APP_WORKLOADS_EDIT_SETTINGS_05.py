@@ -114,6 +114,12 @@ def test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_EDIT_SETTINGS_05(app_workloads_page, 
         assert node_selector.get("kubernetes.io/os") == "linux", node_selector
 
         # Clearing the node selector removes the field instead of leaving an empty map.
+        # Reload first: the dialog submits the whole object with the resourceVersion it was seeded
+        # with, and a save landing while the detail query is still refetching answers 409.
+        ui.page.reload(wait_until="domcontentloaded")
+        expect(ui.page.locator('[data-ai-id="deployments-detail:surface"]').last).not_to_have_attribute(
+            "data-ai-state", "loading", timeout=60_000
+        )
         ui.page.locator('[data-ai-id="deployments-detail:edit-settings"]').click()
         expect(ui.page.get_by_role("dialog")).to_be_visible(timeout=20_000)
         row = ui.page.locator('[data-ai-id="edit-settings:node-selector"] [data-ai-row]').first
