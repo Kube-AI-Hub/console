@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 from pathlib import Path
 from uuid import uuid4
 
@@ -130,6 +131,7 @@ class ApiClient:
         body: dict | None = None,
         content_type: str = "application/json",
         timeout: float = 30,
+        attempts: int = 2,
     ) -> tuple[int, dict]:
         """One API call.
 
@@ -137,18 +139,51 @@ class ApiClient:
         count rather than payload size: listing the pods of a large project takes ~60s,
         which is longer than the default a normal call should wait. Pass a larger value
         for those, and keep the default tight so a hung server still fails fast.
+
+        `attempts` covers the other failure mode measured on this deployment: a single
+        request occasionally stalls for minutes while the median stays around 400ms (see
+        `docs/plans/e2e-long-run-degradation-20261116.md`). A stalled fixture read makes
+        every case in the session fail, which reads as a regression. Idempotent methods are
+        therefore retried once; POST is not, because a retried create can leave two objects.
         """
         import json
         import urllib.error
         import urllib.request
 
         data = json.dumps(body).encode("utf-8") if body is not None else None
+        # HTTP-idempotent methods only; a retried POST could create a second object.
+        retryable = method in {"GET", "PUT", "PATCH", "DELETE", "HEAD"}
+        tries = max(1, attempts) if retryable else 1
+        for attempt in range(1, tries + 1):
+            try:
+                return self._once(method, path, data, content_type, timeout, json)
+            except (TimeoutError, OSError) as stall:
+                # A stall, not an answer: retry the idempotent call, then let it surface.
+                if attempt >= tries:
+                    raise
+                time.sleep(1.0 * attempt)
+        raise AssertionError("unreachable")
+
+    def _once(
+        self,
+        method: str,
+        path: str,
+        data: bytes | None,
+        content_type: str,
+        timeout: float,
+        json_module,
+    ) -> tuple[int, dict]:
+        """One attempt, split out so `request` can retry a stall without duplicating this."""
+        import urllib.error
+        import urllib.request
+
         request = urllib.request.Request(
             f"{self.base}{path}",
             data=data,
             method=method,
             headers={"Authorization": f"Bearer {self.token}", "Content-Type": content_type, "Accept": "application/json"},
         )
+        json = json_module
         try:
             with urllib.request.urlopen(request, timeout=timeout) as response:
                 text = response.read().decode("utf-8")
