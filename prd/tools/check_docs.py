@@ -42,6 +42,18 @@ UI_TESTS = UI / "tests"
 ID_TOKEN = re.compile(
     r"(?<![A-Za-z0-9_-])((?:AC|DES|DEC|CON|INV|GOT|TC)-[A-Z0-9][A-Z0-9_-]*[A-Z0-9])"
 )
+
+# Whether `token` is declared in `text`, as opposed to merely mentioned.
+#
+# Declarations in this repo are headings (`### DEC-...：...`) or bold definition lines
+# (`- **DEC-...** — ...`). Anything else — an inline code span in prose, a sentence that
+# points at another file's decision — is a reference and must not count as a home.
+def is_declaration(text: str, token: str) -> bool:
+    heading = re.compile(r"^#{2,4}\s*" + re.escape(token) + r"(?![A-Za-z0-9_-])", re.MULTILINE)
+    if heading.search(text):
+        return True
+    bold = re.compile(r"^\s*-\s*\*\*" + re.escape(token) + r"\*\*", re.MULTILINE)
+    return bool(bold.search(text))
 AC_TOKEN = re.compile(r"(?<![A-Za-z0-9_-])(AC-[A-Z0-9][A-Z0-9_-]*[A-Z0-9])")
 AC_DEF = re.compile(r"^\s*-\s*\*\*(AC-[A-Z0-9_-]+)\*\*\s*[—\-–]\s*(.+?)\s*$")
 US_LINE = re.compile(r"^###\s+(US\d+)\s*[-—]")
@@ -431,10 +443,22 @@ def main() -> int:
             path = REPO / rel
             if not path.is_file() or (kind == "design" and is_stub(path)):
                 continue
-            for token in set(ID_TOKEN.findall(path.read_text(encoding="utf-8"))):
+            text = path.read_text(encoding="utf-8")
+            for token in set(ID_TOKEN.findall(text)):
                 if kind == "prd" and not token.startswith("AC-"):
                     continue
                 if kind == "design" and token.startswith("AC-"):
+                    continue
+                #
+                # Only *declarations* are counted, not mentions.
+                #
+                # A design doc may legitimately point at a decision that lives in another
+                # file ("与 DEC-...-04 同一条路"); counting that as a second home reported a
+                # duplicate for a correct cross-reference and pushed people to reword the
+                # sentence instead of fixing a real duplicate. A declaration is a heading
+                # (`### DEC-…`) or a bold definition line (`- **DEC-…** — …`), which is how
+                # every file in design/ actually defines its ids.
+                if not is_declaration(text, token):
                     continue
                 if token in seen:
                     dup.setdefault(token, [seen[token]]).append(rel)
