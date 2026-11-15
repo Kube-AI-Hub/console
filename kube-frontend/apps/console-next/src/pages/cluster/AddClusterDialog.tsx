@@ -94,12 +94,15 @@ export function AddClusterDialog({ open, onOpenChange, onCreated }: AddClusterDi
       Notify.error({
         title: copy.title,
         content: copy.body,
-        duration: 10_000,
+        // Stay until dismissed: a 10s toast on a tall dialog is gone before
+        // the reader finishes reading the kubeconfig they just pasted.
+        duration: 0,
         key: 'clusters:add-error',
       });
     },
   });
 
+  const resetMutation = mutation.reset;
   React.useEffect(() => {
     if (open) return;
     // Reopening starts clean: a half-typed kubeconfig from the previous attempt is not
@@ -112,8 +115,8 @@ export function AddClusterDialog({ open, onOpenChange, onCreated }: AddClusterDi
     setDescription('');
     setNameError(null);
     setKubeconfigError(null);
-    mutation.reset();
-  }, [open, mutation]);
+    resetMutation();
+  }, [open, resetMutation]);
 
   const submit = React.useCallback(() => {
     const trimmedName = name.trim();
@@ -138,6 +141,11 @@ export function AddClusterDialog({ open, onOpenChange, onCreated }: AddClusterDi
   }, [alias, description, kubeconfig, mode, mutation, name, provider, t]);
 
   const requestError = mutation.error ? formatClusterImportError(t, mutation.error) : null;
+  const errorRef = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    if (!requestError) return;
+    errorRef.current?.scrollIntoView({ block: 'nearest' });
+  }, [requestError]);
 
   return (
     <Modal
@@ -157,6 +165,15 @@ export function AddClusterDialog({ open, onOpenChange, onCreated }: AddClusterDi
       }
     >
       <div className="flex flex-col gap-3">
+        {requestError ? (
+          <div ref={errorRef}>
+            <Alert tone="danger" title={requestError.title} data-ai-id="clusters:add-error">
+              <p>{requestError.body}</p>
+              {requestError.raw ? <p className="mt-1 break-all opacity-80">{requestError.raw}</p> : null}
+            </Alert>
+          </div>
+        ) : null}
+
         <fieldset className="flex flex-col gap-1 text-xs text-ai-fg-secondary">
           <legend className="mb-1">{t('cluster.add.mode')}</legend>
           <div className="flex gap-2" role="radiogroup" aria-label={t('cluster.add.mode')}>
@@ -274,13 +291,6 @@ export function AddClusterDialog({ open, onOpenChange, onCreated }: AddClusterDi
 
         {mode === 'direct' ? (
           <p className="text-[11px] text-ai-fg-muted">{t('cluster.add.directTip')}</p>
-        ) : null}
-
-        {requestError ? (
-          <Alert tone="danger" title={requestError.title} data-ai-id="clusters:add-error">
-            <p>{requestError.body}</p>
-            {requestError.raw ? <p className="mt-1 break-all opacity-80">{requestError.raw}</p> : null}
-          </Alert>
         ) : null}
       </div>
     </Modal>

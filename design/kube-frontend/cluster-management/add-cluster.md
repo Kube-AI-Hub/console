@@ -85,7 +85,7 @@ spec:
 
 ### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-06 — 失败时在对话框内展示服务端原因，并弹出通知
 
-**为什么**：`/clusters/validation` 用 `http.Error` 返回 **text/plain**。新 UI 若把 5xx 一律显示成「网络异常」，jwtSecret / clusterRole 这类配置错误看起来像超时。老 console 的 `validate()` 还把 reject 回调参数顺序写反了一半路径，`err.message` 经常是空的，全局 `onunhandledrejection` 又包了一层 `t(message)`，页面上只剩「校验失败。」。读者需要的是对话框里留得住的说明，外加一条通知以免全屏向导把提示条卷出视野。
+**为什么**：`/clusters/validation` 用 `http.Error` 返回 **text/plain**。新 UI 若把 5xx 一律显示成「网络异常」，jwtSecret / clusterRole 这类配置错误看起来像超时。老 console 的 `validate()` 还把 reject 回调参数顺序写反了一半路径，`err.message` 经常是空的，全局 `onunhandledrejection` 又包了一层 `t(message)`，页面上只剩「校验失败。」。读者需要的是对话框**顶部**留得住的说明（表单字段多时底部提示条会卷到 `max-h-[70vh]` 下面、被确认按钮挡住），外加一条**不自动关闭**的失败通知。
 
 **被否方案**：只弹 toast、不写进表单。全屏添加向导和 Modal 都会挡住或盖住短时 toast，用户关掉通知后原因就没了。只改后端错误码、不改前端：部署周期更长，且已发出的 400 原文仍然可以被映射。
 

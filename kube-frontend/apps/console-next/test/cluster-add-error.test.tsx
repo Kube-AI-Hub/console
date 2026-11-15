@@ -96,8 +96,8 @@ describe('AddClusterDialog', () => {
 
     mount();
     const user = userEvent.setup();
-    await user.type(screen.getByLabelText(/集群名称/), 'modehub-xc');
-    await user.type(screen.getByLabelText(/^kubeconfig$/i), KUBECONFIG);
+    await user.type(document.querySelector('#ai-field-cluster-name') as HTMLInputElement, 'modehub-xc');
+    await user.type(document.querySelector('#ai-field-cluster-kubeconfig') as HTMLTextAreaElement, KUBECONFIG);
     await user.click(screen.getByRole('button', { name: '确认' }));
 
     await waitFor(() => {

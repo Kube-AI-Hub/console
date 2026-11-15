@@ -51,7 +51,7 @@ export function formatClusterImportError(t: Translate, error: unknown): ClusterI
   for (const rule of RULES) {
     if (rule.match.test(raw)) {
       const body = t(rule.key);
-      return { title, body, raw: raw && raw !== body ? raw : undefined };
+      return raw && raw !== body ? { title, body, raw } : { title, body };
     }
   }
 
@@ -60,7 +60,7 @@ export function formatClusterImportError(t: Translate, error: unknown): ClusterI
   }
 
   if (error instanceof ApiError && error.status >= 500) {
-    return { title, body: t('cluster.add.errorInternal'), raw: raw || undefined };
+    return raw ? { title, body: t('cluster.add.errorInternal'), raw } : { title, body: t('cluster.add.errorInternal') };
   }
   if (error instanceof ApiError && error.retryable) {
     return { title, body: t('cluster.add.errorUnreachable') };
