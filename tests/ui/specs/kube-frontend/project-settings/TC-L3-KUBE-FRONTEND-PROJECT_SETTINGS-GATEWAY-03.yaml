@@ -1,0 +1,40 @@
+id: TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: project-settings
+feature: gateway
+title: 网关设置 · 集群侧项目网关列表、行编辑/删除与无权限说明
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/gateways/project'
+prd: prd/kube-frontend/project-settings/gateway.md
+design: design/kube-frontend/project-settings/gateway.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-03
+
+story:
+- US3
+
+product: 集群网关页的项目页签列出项目网关的访问方式/IP/NodePort/副本数/追踪，行操作复用项目页的编辑弹窗与删除确认；无 update 权限时行编辑入口隐藏并说明。
+preconditions:
+- 已登录，host 集群，admin；用唯一前缀的临时命名空间创建项目网关（用例结束删除）
+- 网关 Service 已创建并分配 NodePort
+steps:
+- 用 API 创建临时项目网关并等待 Service
+- 打开 /clusters/host/gateways/project，等 cluster-gateways:surface 离开 loading
+- 核对表头与目标行的访问方式/IP/NodePort/副本数/追踪单元格
+- 打开该行操作菜单，点「编辑」，改副本数为 3 并保存，回读列表与接口
+- 拦截 SSAR 返回 allowed=false，刷新页面，核对行编辑入口隐藏且出现无权限说明；同时核对项目网关页编辑入口隐藏并说明
+- 移除拦截，回到列表，用行操作「删除」+ 输入名称确认，核对对象删除
+- 若列表已无项目网关，核对空态文案；清理命名空间
+expected:
+- 项目页签表头含 名称/所属项目/访问方式/IP/NodePort/副本数/追踪；目标行单元格与 Service/Gateway 一致
+- 行编辑打开与项目页相同的弹窗；保存后列表副本数变为 3 且接口回读一致
+- SSAR 拒绝时行编辑入口隐藏，页面显示无权限说明；列表仍显示对象（不变成空态）
+- 行删除后对象消失；无项目网关时显示「该集群还没有项目网关」
+troubleshoot:
+- 行操作菜单里没有编辑：检查 SSAR 是否被误判为拒绝（fail-open 只对错误生效，明确 false 才隐藏）
+- IP 为空：NodePort 网关没有 LoadBalancer ingress，属正常，显示 -
+- 列表与接口不一致：确认列表 join 的是项目 Service 的端口而不是 Gateway status
+update_automation:
+- 句柄：cluster-gateways:surface、:tab:project、[data-ai-row]、:cell:{type|ip|node-ports|replicas|tracing}、:edit、:delete、:project-edit-denied；删除确认 cluster-gateways:project:delete-input/delete-confirm

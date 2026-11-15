@@ -1,0 +1,40 @@
+id: TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: project-settings
+feature: gateway
+title: 网关设置 · 编辑访问方式/副本数/追踪/注解/NodePort 与本地校验
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/gateways'
+prd: prd/kube-frontend/project-settings/gateway.md
+design: design/kube-frontend/project-settings/gateway.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-02
+
+story:
+- US2
+
+product: 已有项目网关可编辑访问方式、副本数、链路追踪、服务注解与 NodePort；保存后接口回读一致；非法副本数/NodePort 与重复端口在本地被阻止。
+preconditions:
+- 已登录，host 集群，admin；用唯一前缀的临时命名空间创建项目网关（用例结束删除网关与命名空间）
+- 网关 Service 已由控制器创建并分配 NodePort（用例等待）
+steps:
+- 用 API 在临时命名空间创建 NodePort 项目网关，等待 kube-router-&lt;ns&gt; Service 分配端口
+- 打开项目网关设置页，等 gateway:surface 离开 loading，核对信息区访问方式/副本数/追踪/NodePort
+- 点「编辑设置」，核对弹窗默认值等于当前 spec
+- 依次输入负数副本数、小数副本数、越界 NodePort、重复 NodePort，核对保存禁用并显示对应错误
+- 修正为副本数 2、NodePort 31000/31001，打开追踪，保存
+- 用 Gateway 接口与 Service 回读，再刷新页面核对信息区
+- 再次编辑切换访问方式为 LoadBalancer，添加服务注解，保存并回读
+expected:
+- 弹窗默认值与接口当前 spec 一致（访问方式/副本数/追踪/NodePort）
+- 非法输入时保存禁用并显示中文错误；期间没有发出网关写请求
+- 保存后 spec.deployment.replicas=2、追踪注解=true、Service 的 NodePort=31000/31001，页面刷新显示一致
+- 切换 LoadBalancer 后 spec.service.type=LoadBalancer 且 spec.service.annotations 回读为所填键值，页面访问方式显示 LoadBalancer
+troubleshoot:
+- 保存后弹窗不关闭：看 gateway:edit:error 文案；Service 未创建时 NodePort 写入返回 not ready
+- 副本数没变：确认写的是 spec.deployment.replicas（不是 controller.replicas）
+- NodePort 写入 405：kapis resources 端点只支持 GET，写需走 /api/v1
+update_automation:
+- 句柄：gateway:*、gateway:edit:*（type/replicas/tracing/node-port:<name>/annotation:*/save/cancel/error）

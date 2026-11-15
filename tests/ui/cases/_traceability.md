@@ -387,6 +387,8 @@
 | kube-frontend/project-settings/base-info | `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-BASE_INFO-03` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-QUOTA-01` | [`design/kube-frontend/project-settings/base-info.md`](../../../design/kube-frontend/project-settings/base-info.md) | [`tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_QUOTA_01.py`](../../../tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_QUOTA_01.py) |
 | kube-frontend/project-settings/baseinfo-stats | `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-BASEINFO-02` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-BASEINFO-02` | [`design/kube-frontend/project-settings/baseinfo-stats.md`](../../../design/kube-frontend/project-settings/baseinfo-stats.md) | [`tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_BASEINFO_02.py`](../../../tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_BASEINFO_02.py) |
 | kube-frontend/project-settings/gateway | `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-01` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-01` | [`design/kube-frontend/project-settings/gateway.md`](../../../design/kube-frontend/project-settings/gateway.md) | [`tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_GATEWAY_01.py`](../../../tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_GATEWAY_01.py) |
+| kube-frontend/project-settings/gateway | `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-02` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-02` | [`design/kube-frontend/project-settings/gateway.md`](../../../design/kube-frontend/project-settings/gateway.md) | [`tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_GATEWAY_02.py`](../../../tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_GATEWAY_02.py) |
+| kube-frontend/project-settings/gateway | `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-03` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-03` | [`design/kube-frontend/project-settings/gateway.md`](../../../design/kube-frontend/project-settings/gateway.md) | [`tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_GATEWAY_03.py`](../../../tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_GATEWAY_03.py) |
 | kube-frontend/project-settings/logging | `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-LOGGING-01` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-LOGGING-01` | [`design/kube-frontend/project-settings/logging.md`](../../../design/kube-frontend/project-settings/logging.md) | [`tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_LOGGING_01.py`](../../../tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_LOGGING_01.py) |
 | kube-frontend/project-settings/logging | `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-LOGGING-02` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-LOGGING-01` | [`design/kube-frontend/project-settings/logging.md`](../../../design/kube-frontend/project-settings/logging.md) | [`tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_LOGGING_01.py`](../../../tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_LOGGING_01.py) |
 | kube-frontend/project-settings/members | `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-01` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-MEMBERS-01` | [`design/kube-frontend/project-settings/members.md`](../../../design/kube-frontend/project-settings/members.md) | [`tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_MEMBERS_01.py`](../../../tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_MEMBERS_01.py) |
@@ -477,7 +479,7 @@
 
 ## 小结
 
-- 需求里的 AC：470 条，其中未覆盖 1 条、无技术方案承接 17 条、无用例规格实现 1 条。
+- 需求里的 AC：472 条，其中未覆盖 1 条、无技术方案承接 17 条、无用例规格实现 1 条。
 - 未覆盖：`AC-L2-KUBE-FRONTEND-LOGIN-07`
 - 无技术方案承接：`AC-L2-KUBE-FRONTEND-LOGIN-01`, `AC-L2-KUBE-FRONTEND-LOGIN-02`, `AC-L2-KUBE-FRONTEND-LOGIN-03`, `AC-L2-KUBE-FRONTEND-LOGIN-04`, `AC-L2-KUBE-FRONTEND-LOGIN-05`, `AC-L2-KUBE-FRONTEND-LOGIN-06`, `AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L2-KUBE-FRONTEND-THEME-01`, `AC-L2-KUBE-FRONTEND-THEME-02`, `AC-L2-KUBE-FRONTEND-THEME-03`, `AC-L2-KUBE-FRONTEND-THEME-04`, `AC-L2-KUBE-FRONTEND-THEME-05`, `AC-L3-KUBE-FRONTEND-MONITORING-PROJECT_CUSTOM_MONITORING-01`, `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-02`, `AC-L3-KUBE-FRONTEND-STORAGE-DETAIL_TABS-01`
 - 无用例规格实现：`AC-L2-KUBE-FRONTEND-LOGIN-07`
@@ -771,6 +773,8 @@
 | kube-frontend/project-settings/base-info | `US1` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-BASE_INFO-01`, `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-QUOTA-01` |
 | kube-frontend/project-settings/baseinfo-stats | `US1` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-BASEINFO-02` |
 | kube-frontend/project-settings/gateway | `US1` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-01` |
+| kube-frontend/project-settings/gateway | `US2` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-02` |
+| kube-frontend/project-settings/gateway | `US3` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-03` |
 | kube-frontend/project-settings/logging | `US1` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-LOGGING-01` |
 | kube-frontend/project-settings/logging | `US2` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-LOGGING-01` |
 | kube-frontend/project-settings/logging | `US3` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-LOGGING-01` |
@@ -847,4 +851,4 @@
 | kube-frontend/workbench/context | `US1` | `TC-L3-KUBE-FRONTEND-WORKBENCH-CONTEXT-01` |
 | kube-frontend/workbench/entry | `US1` | `TC-L3-KUBE-FRONTEND-WORKBENCH-ENTRY-01` |
 
-- 用户故事：360 条，其中未覆盖 0 条。
+- 用户故事：362 条，其中未覆盖 0 条。

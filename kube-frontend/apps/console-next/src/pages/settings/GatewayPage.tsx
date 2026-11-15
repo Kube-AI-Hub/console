@@ -1,52 +1,103 @@
 import * as React from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { projectGatewayApi, type ProjectGateway } from '@kube-ai-hub/api-client';
+import { accessReviewApi, projectGatewaysApi, type GatewayDetail, type GatewayServicePort } from '@kube-ai-hub/api-client';
 import { AiButton, AiSurface, Badge, Skeleton } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { DeleteDialog } from '@/components/resource/DeleteDialog';
 import { MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { DefinitionRow as Row } from '@/components/resource/DefinitionRow';
+import { formatTimestamp } from '@/lib/time';
+import { GatewayEditDialog } from './GatewayEditDialog';
 
 /**
  * 项目网关.
  *
  * Two states: the project has a gateway, or it does not. When it does not, the page
- * offers to create one — that is the whole interaction the old console offers here
- * (a NodePort gateway, which works on any cluster). When it does, it reports what the
- * controller achieved rather than what was requested: the `Deployed` condition is the
- * only thing that says the gateway is actually serving.
+ * offers to create one (a NodePort gateway, which works on any cluster). When it does,
+ * it reports what the controller achieved rather than what was requested: the
+ * `Deployed` condition is the only thing that says the gateway is actually serving.
+ *
+ * The editable spec lives on the Gateway CR; the address and NodePorts live on the
+ * Service the release creates (the CR has neither), so the details join both reads.
+ * Edit/delete are permission-gated: a reader without `update` on gateways sees no edit
+ * entry and a sentence saying why, instead of a dialog that can only 403.
  */
 export interface GatewayPageProps {
   cluster: string;
   namespace: string;
 }
 
+/** NodePort display in the old console's shape: `HTTP: 3xxxx/HTTPS: 3xxxx`. */
+function formatNodePorts(ports: GatewayServicePort[]): string {
+  const pinned = ports.filter((port) => port.nodePort !== undefined);
+  if (pinned.length === 0) return '-';
+  return pinned.map((port) => port.name.toUpperCase() + ': ' + port.nodePort).join('/ ');
+}
+
 export function GatewayPage({ cluster, namespace }: GatewayPageProps): React.ReactElement {
   const t = useT();
   const queryClient = useQueryClient();
   const [confirmDelete, setConfirmDelete] = React.useState(false);
+  const [editing, setEditing] = React.useState(false);
 
   const gateway = useQuery({
     queryKey: ['project-gateway', cluster, namespace],
-    queryFn: ({ signal }) => projectGatewayApi(apiClient).get({ namespace, signal }),
+    queryFn: ({ signal }) => projectGatewaysApi(apiClient).get({ cluster, namespace, signal }),
     // The controller needs a moment to deploy; polling keeps the page honest without
     // making the reader reload it themselves.
     refetchInterval: (state) => (state.state.data?.exists && !state.state.data.ready ? 5000 : false),
   });
 
+  /*
+   * Same verb/resource/namespace the write will use. It fails **open**: only an explicit
+   * `allowed: false` hides a control, so an older BFF or a network blip cannot take the
+   * edit entry away from a permitted reader.
+   */
+  const canUpdate = useQuery({
+    queryKey: ['gateway-can-update', cluster, namespace],
+    queryFn: ({ signal }) =>
+      accessReviewApi(apiClient).allowed({
+        verb: 'update',
+        resource: 'gateways',
+        group: 'gateway.kubesphere.io',
+        namespace,
+        signal,
+      }),
+    staleTime: 60_000,
+    retry: false,
+  });
+  const canDelete = useQuery({
+    queryKey: ['gateway-can-delete', cluster, namespace],
+    queryFn: ({ signal }) =>
+      accessReviewApi(apiClient).allowed({
+        verb: 'delete',
+        resource: 'gateways',
+        group: 'gateway.kubesphere.io',
+        namespace,
+        signal,
+      }),
+    staleTime: 60_000,
+    retry: false,
+  });
+  const editable = canUpdate.data !== false;
+  const deletable = canDelete.data !== false;
+
   const create = useMutation({
-    mutationFn: () => projectGatewayApi(apiClient).create({ namespace }),
+    mutationFn: () => projectGatewaysApi(apiClient).create({ cluster, namespace }),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['project-gateway', cluster, namespace] }),
   });
 
   const remove = useMutation({
-    mutationFn: (name: string) => projectGatewayApi(apiClient).remove({ namespace, name }),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['project-gateway', cluster, namespace] }),
+    mutationFn: (name: string) => projectGatewaysApi(apiClient).remove({ cluster, namespace, name }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['project-gateway', cluster, namespace] });
+      void queryClient.invalidateQueries({ queryKey: ['cluster-gateways'] });
+    },
   });
 
   const state = gateway.isPending ? 'loading' : gateway.isError ? 'error' : 'ready';
-  const data: ProjectGateway | undefined = gateway.data;
+  const data: GatewayDetail | undefined = gateway.data;
 
   if (state === 'error') {
     return (
@@ -71,14 +122,42 @@ export function GatewayPage({ cluster, namespace }: GatewayPageProps): React.Rea
             </div>
             <dl className="grid grid-cols-1 gap-3 text-xs sm:grid-cols-[minmax(6rem,auto)_1fr]">
               <Row label={t('settings.gateway.name')} value={data.name} aiId="gateway:name" />
-              <Row label={t('settings.gateway.type')} value={data.type || '-'} />
-              <Row label={t('settings.gateway.address')} value={data.address || '-'} />
-              <Row label={t('settings.gateway.message')} value={data.message || '-'} />
+              <Row label={t('settings.gateway.type')} value={data.type || data.serviceType || '-'} aiId="gateway:type" />
+              <Row label={t('settings.gateway.address')} value={data.address || '-'} aiId="gateway:address" />
+              <Row label={t('settings.gateway.nodePorts')} value={formatNodePorts(data.ports)} aiId="gateway:node-ports" />
+              <Row
+                label={t('settings.gateway.replicas')}
+                value={data.replicas === undefined ? '-' : String(data.replicas)}
+                aiId="gateway:replicas"
+              />
+              <Row
+                label={t('settings.gateway.tracing')}
+                value={data.tracing ? t('settings.gateway.on') : t('settings.gateway.off')}
+                aiId="gateway:tracing"
+              />
+              <Row label={t('settings.gateway.creator')} value={data.creator || '-'} aiId="gateway:creator" />
+              <Row label={t('cluster.column.createdAt')} value={data.createdAt ? formatTimestamp(data.createdAt) : '-'} aiId="gateway:created-at" />
+              {data.provider ? (
+                <Row label={t('settings.gateway.provider')} value={data.provider} aiId="gateway:provider" />
+              ) : null}
+              <Row label={t('settings.gateway.message')} value={data.message || '-'} aiId="gateway:message" />
             </dl>
-            <div className="mt-4 flex justify-end">
-              <AiButton aiId="gateway:delete" size="sm" variant="danger" onClick={() => setConfirmDelete(true)}>
-                {t('settings.gateway.delete')}
-              </AiButton>
+            {!editable ? (
+              <p className="mt-3 text-xs text-ai-fg-muted" data-ai-id="gateway:edit-denied">
+                {t('settings.gateway.editDenied')}
+              </p>
+            ) : null}
+            <div className="mt-4 flex justify-end gap-2">
+              {editable ? (
+                <AiButton aiId="gateway:edit" size="sm" variant="secondary" onClick={() => setEditing(true)}>
+                  {t('settings.gateway.edit')}
+                </AiButton>
+              ) : null}
+              {deletable ? (
+                <AiButton aiId="gateway:delete" size="sm" variant="danger" onClick={() => setConfirmDelete(true)}>
+                  {t('settings.gateway.delete')}
+                </AiButton>
+              ) : null}
             </div>
           </section>
         ) : (
@@ -97,6 +176,17 @@ export function GatewayPage({ cluster, namespace }: GatewayPageProps): React.Rea
 
       <MutationAlert error={create.error ?? remove.error} />
 
+      <GatewayEditDialog
+        open={editing}
+        onOpenChange={setEditing}
+        cluster={cluster}
+        namespace={namespace}
+        gateway={data}
+        onSaved={() => {
+          void queryClient.invalidateQueries({ queryKey: ['cluster-gateways'] });
+        }}
+      />
+
       {confirmDelete && data ? (
         <DeleteDialog
           open
@@ -114,4 +204,3 @@ export function GatewayPage({ cluster, namespace }: GatewayPageProps): React.Rea
     </AiSurface>
   );
 }
-

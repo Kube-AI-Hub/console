@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/cluster-management/gateway-detail.md`](../../../../prd/kube-frontend/cluster-management/gateway-detail.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GATEWAY_DETAIL-01** — 已知集群安装了集群网关（Nginx CR 存在），当从集群网关列表点击名称进入详情，则显示名称、状态、访问方式、IngressClass、访问地址、端口、集群 IP、TLS、副本数、镜像、创建时间与控制器条件；并列出 `ingressClassName` 等于该网关 IngressClass 的应用路由（名称/命名空间/主机/TLS/创建时间），没有时显示「该网关还没有关联的应用路由」空态；详情只读，不提供安装、编辑或删除网关的入口。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GATEWAY_DETAIL-01** — 已知集群安装了集群网关（Nginx CR 存在），当从集群网关列表点击名称进入详情，则显示名称、状态、访问方式、IngressClass、访问地址、端口、集群 IP、TLS、副本数、镜像、创建时间、创建者、链路追踪开关与控制器条件；创建者取 metadata.annotations 里的 kubesphere.io/creator，链路追踪取 spec.deployment.annotations 里的 servicemesh.kubesphere.io/enabled（只认字符串 true），两者都是老 console 网关卡片上的字段；并列出 `ingressClassName` 等于该网关 IngressClass 的应用路由（名称/命名空间/主机/TLS/创建时间），没有时显示「该网关还没有关联的应用路由」空态；详情只读，不提供安装、编辑或删除网关的入口。
 
 ### 关联设计
 

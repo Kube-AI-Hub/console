@@ -1177,6 +1177,8 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-01
+        - TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-02
+        - TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-03
     - id: logging
       title: 日志收集
       prd: prd/kube-frontend/project-settings/logging.md
