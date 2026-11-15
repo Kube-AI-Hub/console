@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/cluster-management/monitor.md`](../../../../prd/kube-frontend/cluster-management/monitor.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-03** — （需求里找不到这条 AC，请先补需求或改 `covers`）
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-03** — 已知监控后端可用，当打开集群监控，则除 CPU/内存/容器组/节点外，还显示异常容器组数、已完成容器组数、1/5/15 分钟平均负载、磁盘使用率、inode 使用率、网络发送与接收速率，共 13 张卡片；磁盘使用率由「已用容量 / 总容量」算出（0–100 的百分比），inode 使用率把 API 返回的 0–1 比值换算为百分比，网络速率以 B/KiB/MiB/GiB 每秒显示，平均负载保留两位小数；任一指标在窗口内没有数据时该卡片显示空态说明而不是 0。
 
 ### 关联设计
 

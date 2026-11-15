@@ -108,6 +108,22 @@ export function ClusterMonitorPage({ cluster, node }: ClusterMonitorPageProps): 
     setRange({ start: end - window.ms, end });
   }, [window.ms, windowKey]);
 
+  /*
+   * Auto refresh, matching the old console's monitoring controller: a play/pause control that
+   * re-reads the last N minutes every five seconds. Each tick moves the window forward rather
+   * than re-querying the frozen range, which is the whole point of watching a live cluster.
+   */
+  const [autoRefresh, setAutoRefresh] = React.useState(false);
+  React.useEffect(() => {
+    if (!autoRefresh) return;
+    // `window` here is the selected time window, not the global: use globalThis explicitly.
+    const timer = globalThis.setInterval(() => {
+      const end = Math.floor(Date.now() / 1000) * 1000;
+      setRange({ start: end - window.ms, end });
+    }, 5_000);
+    return () => globalThis.clearInterval(timer);
+  }, [autoRefresh, window.ms]);
+
   const trends = useQuery({
     queryKey: ['cluster-monitor', cluster, node, windowKey, range.start, range.end],
     queryFn: ({ signal }) =>
@@ -196,6 +212,15 @@ export function ClusterMonitorPage({ cluster, node }: ClusterMonitorPageProps): 
               {t(`cluster.monitor.range.${entry.key}`)}
             </Button>
           ))}
+          <Button
+            size="sm"
+            variant={autoRefresh ? 'primary' : 'secondary'}
+            aria-pressed={autoRefresh}
+            {...actionProps('cluster-monitor:auto-refresh')}
+            onClick={() => setAutoRefresh((previous) => !previous)}
+          >
+            {autoRefresh ? t('cluster.monitor.autoRefreshOn') : t('cluster.monitor.autoRefreshOff')}
+          </Button>
         </div>
       </header>
 

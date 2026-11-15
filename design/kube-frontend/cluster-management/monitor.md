@@ -9,6 +9,7 @@
 ## 关联需求
 
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-04
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-03
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-02
 
@@ -103,3 +104,15 @@
 ## 验收用例
 
 - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01
+
+
+## 自动刷新（R-27 的对应实现）
+
+老 console 的监控卡片有一个「播放/暂停」控制：打开后每 **5 秒**用「最近 N 分钟」重取一次（`utils/monitoring.js` 的 `startAutoRefresh`，`interval: 5000`，且 `autoRefresh` 时把参数设为 `last: true`）。新 UI 此前只有手动刷新（R-26），没有这个开关。
+
+实现：
+
+- 开关状态在页面内，`aria-pressed` 与按钮文案同步（开/关）。
+- 每次 tick **把时间窗向前滚动**（`end = now`），而不是重复查询冻结的区间——否则「实时」看不到新采样。
+- 定时器在关闭、切窗或卸载时清理；注意该组件里 `window` 是一个局部变量（时间窗对象），必须用 `globalThis.setInterval`。
+- 与 R-27 的关系：这是老 console 的真实行为（轮询），已按 parity 交付；WebSocket/watch 推送属后续改进，不阻塞 parity。

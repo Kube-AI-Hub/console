@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-04
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: monitor
+title: 集群监控：自动刷新开关
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/monitor'
+prd: prd/kube-frontend/cluster-management/monitor.md
+design: design/kube-frontend/cluster-management/monitor.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-04
+
+story:
+- US1
+
+product: 集群监控页提供「自动刷新」开关，打开后每 5 秒按当前时间窗重取，关闭后停止。
+preconditions:
+- 已登录且监控后端可用
+steps:
+- 打开集群监控页，记录初始请求数
+- 点击「自动刷新：关」按钮
+- 等待 12 秒，统计新增请求数
+- 再次点击关闭，等待 8 秒，统计新增请求数
+steps_expected:
+- 按钮按下后文案变为「自动刷新：开」
+- 12 秒内至少新增 2 次监控请求
+- 关闭后 8 秒内不再新增请求
+expected:
+- 离开页面时定时器停止（不泄漏）
+troubleshoot:
+- 无请求：定时器未启动或时间窗未滚动
+- 关闭后仍有请求：定时器未清理
+update_automation:
+- 选择器：cluster-monitor:auto-refresh（aria-pressed 表示开关状态）
