@@ -32,7 +32,7 @@ expected:
 - 详情默认 tab:base-info aria-selected=true；存在工程时基本信息卡可见
 - 每个属性页签点击后 aria-selected=true，面板 devops-detail:<tab>-panel 可见
 - 每个面板恰好显示 devops-detail:<tab>-table / :<tab>-empty / :<tab>-error 之一，不出现空表冒充空态
-- 工程不存在时 devops-detail:not-found 可见，且页签仍可点击切换
+- 工程不存在时 devops-detail:not-found 可见；页签区不渲染（不向不存在的工程发起集合请求）
 troubleshoot:
 - 列表整页错误：误用了 /kapis/devops.kubesphere.io/v1alpha3/devopsprojects（该路径 404），应读 /apis/... CRD
 - 页签面板空白：只渲染了表格，未处理 pending/empty/error 三态

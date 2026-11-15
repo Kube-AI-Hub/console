@@ -78,9 +78,11 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_DEVOPS_PIPELINES_02(cluster_mana
         multi_spec = created_multi["spec"]["multi_branch_pipeline"]
         assert created_multi["spec"]["type"] == "multi-branch-pipeline"
         assert multi_spec["source_type"] == "github"
-        assert multi_spec["repo"] if "repo" in multi_spec else multi_spec["github_source"]["repo"]
-        assert multi_spec["github_source"]["repo"] == f"https://github.com/kube-ai-hub/{suffix}.git"
-        assert multi_spec["github_source"]["credential_id"] == ""
+        source = multi_spec["github_source"]
+        assert source["repo"] == f"https://github.com/kube-ai-hub/{suffix}.git"
+        # An unselected credential is dropped (or empty) by the apiserver; it must never
+        # become a real credential name.
+        assert source.get("credential_id", "") == ""
         assert multi_spec["script_path"] == "Jenkinsfile"
 
         # ---- edit: name and type are read-only, alias/description persist ----

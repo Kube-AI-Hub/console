@@ -15,7 +15,7 @@ covers:
 story:
 - US3
 
-product: DevOps 工程详情的流水线行可进入流水线详情：基本信息（名称/类型/同步状态/健康/校验/创建者/创建时间/工程命名空间/描述）+ 运行记录区（状态/编号/提交/最近消息/耗时/开始时间），运行记录独立显示表格/空态/失败+重试；流水线不存在时显示 not-found 且运行记录区仍可读；页面提供运行与重跑（不提供停止）。
+product: DevOps 工程详情的流水线行可进入流水线详情：基本信息（名称/类型/同步状态/健康/校验/创建者/创建时间/工程命名空间/描述）+ 运行记录区（状态/编号/提交/最近消息/耗时/开始时间），运行记录独立显示表格/空态/失败+重试；流水线不存在时显示 not-found，运行记录区随详情不渲染；页面提供运行与重跑（不提供停止）。
 preconditions:
 - 已登录，且 devopsprojects/kapis pipelines/pipelineruns 可读（当前集群存在探针工程与流水线）
 - 错误态通过拦截 pipelineruns 请求构造；只读（本用例不点运行）
@@ -28,7 +28,7 @@ steps:
 - 工程与流水线都存在时，从工程详情流水线页签点击行链接进入详情
 expected:
 - 页面外壳 pipeline-detail:surface 可达，data-ai-state 离开 loading
-- 流水线存在时 pipeline-detail:basic 显示名称/类型/同步状态/健康/校验/创建者/创建时间/命名空间/描述；不存在时 pipeline-detail:not-found 可见
+- 流水线存在时 pipeline-detail:basic 显示名称/类型/同步状态/健康/校验/创建者/创建时间/命名空间/描述；不存在时 pipeline-detail:not-found 可见且运行记录区不渲染
 - 运行记录区先显示 pipeline-detail:runs-error 与 runs-retry（含拦截消息）；解除拦截重试后显示 runs-empty 或 runs-table 之一，错误消失
 - 表格存在时表头包含 状态/编号/提交/耗时/开始时间；空态文案为「该流水线还没有运行记录。」
 - 流水线行链接的 href 指向 …/devops/<工程>/pipelines/<流水线>；详情存在 pipeline-detail:run 与重放入口，不存在停止入口

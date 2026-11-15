@@ -33,7 +33,7 @@ expected:
 - POST /apis/devops.kubesphere.io/v1alpha3/namespaces/<ns>/pipelineruns 返回 201，对象 metadata.generateName 以流水线名 + - 开头、label devops.kubesphere.io/pipeline 与 spec.pipelineRef.name 均为流水线名
 - 成功后 pipeline-detail:notice 含「已提交运行请求」且包含新运行对象名
 - 运行表头为 状态/编号/提交/最近消息/耗时/开始时间/更多操作（多分支才有 分支 列）
-- 无 jenkins-pipelinerun-status 注解的运行显示「未运行」，编号列显示对象名，耗时 -
+- 无 jenkins-pipelinerun-status 注解的运行显示「未运行」，编号列显示对象名，耗时按对象缺省显示 0s（mapper 缺省 0）
 - 运行详情显示编号/状态/控制器阶段/开始时间/耗时/提交；日志 404 时 run-log-error 可见并可重试
 - 重放创建新运行对象；注入 422 后 notice 显示拦截消息，页面不显示运行成功
 troubleshoot:

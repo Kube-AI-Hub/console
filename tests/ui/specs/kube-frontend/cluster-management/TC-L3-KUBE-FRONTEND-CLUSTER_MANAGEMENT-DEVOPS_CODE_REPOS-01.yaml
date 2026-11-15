@@ -28,7 +28,7 @@ steps:
 expected:
 - 表头为 名称/提供方/仓库地址/访问凭证/更多操作；空集合显示「该工程还没有代码仓库。」
 - 空名称提交显示「请输入名称。」且不发请求
-- 导入后行出现，提供方显示 GitHub、仓库地址等于提交值，未填访问凭证显示 -
+- 导入后行出现，提供方显示 spec.provider 原值（本环境为 github）、仓库地址等于提交值，未填访问凭证显示 -
 - 删除需输入完整名称才可确认；删除后行消失且接口 GET 404
 troubleshoot:
 - 列表为空：读 /apis/devops.kubesphere.io/v1alpha3/namespaces/<ns>/gitrepositories，不是 coderepositories

@@ -62,7 +62,9 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_DEVOPS_RUNS_01(cluster_managemen
         expect(devops.surface("pipeline-detail:run-detail")).to_be_visible(timeout=30_000)
         expect(devops.surface("pipeline-detail:run-id")).to_have_text(run_name)
         expect(devops.surface("pipeline-detail:run-status")).to_have_text("未运行")
-        expect(devops.surface("pipeline-detail:run-duration")).to_have_text("-")
+        # The mapper folds a missing durationInMillis to 0, so an un-annotated run
+        # reports 0s rather than an invented finished time.
+        expect(devops.surface("pipeline-detail:run-duration")).to_have_text("0s")
         expect(devops.surface("pipeline-detail:run-log-error")).to_be_visible(timeout=60_000)
         expect(devops.surface("pipeline-detail:run-log-retry")).to_be_visible()
         assert ui.page.locator('[data-ai-id="pipeline-detail:run-log"]').count() == 0

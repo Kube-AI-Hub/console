@@ -47,7 +47,7 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_DEVOPS_PIPELINES_03(cluster_mana
         expect(devops.surface("pipeline-detail:validate")).to_have_text("-")
 
         # ---- config tab: dirty-only save, cancel restores, save persists and reads back ----
-        devops.open_tab("config")
+        devops.open_pipeline_tab("config")
         editor = devops.surface("pipeline-detail:config-editor")
         expect(editor).to_be_visible(timeout=30_000)
         assert editor.input_value().strip() == JENKINSFILE_ONE.strip()
@@ -67,13 +67,13 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_DEVOPS_PIPELINES_03(cluster_mana
         assert persisted["spec"]["pipeline"]["jenkinsfile"].strip() == JENKINSFILE_TWO.strip()
         ui.page.reload(wait_until="domcontentloaded")
         expect(devops.surface("pipeline-detail:surface")).to_be_visible(timeout=60_000)
-        devops.open_tab("config")
+        devops.open_pipeline_tab("config")
         expect(devops.surface("pipeline-detail:config-editor")).to_have_value(JENKINSFILE_TWO.strip(), timeout=30_000)
 
         # ---- multi-branch: script path is read-only, no editor ----
         devops.open_pipeline(project, multi)
         expect(devops.surface("pipeline-detail:type")).to_have_text("多分支流水线")
-        devops.open_tab("config")
+        devops.open_pipeline_tab("config")
         expect(devops.surface("pipeline-detail:config-multibranch")).to_be_visible(timeout=30_000)
         assert ui.page.locator('[data-ai-id="pipeline-detail:config-editor"]').count() == 0
 

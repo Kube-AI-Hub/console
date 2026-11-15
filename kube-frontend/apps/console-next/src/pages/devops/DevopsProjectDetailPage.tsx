@@ -32,6 +32,7 @@ import {
 } from '@kube-ai-hub/ui';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { useT } from '@/i18n';
+import { useAuth } from '@/shell/AuthProvider';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel, errorMessage } from '@/components/resource/ResourceErrorPanel';
 import { DefinitionRow } from '@/components/resource/DefinitionRow';
@@ -118,6 +119,11 @@ export function DevopsProjectDetailPage({ cluster, name }: DevopsProjectDetailPa
   );
   const [deletingPipeline, setDeletingPipeline] = React.useState<PipelineRow | null>(null);
   const [runNotice, setRunNotice] = React.useState('');
+
+  /* The signed-in user: the server refuses role/removal changes on yourself, so the row
+   * shows that rule instead of an action that can only fail (old console: 不能操作自己). */
+  const { user } = useAuth();
+  const currentUsername = user?.name ?? '';
 
   /* ---- credential / member / code-repo dialog state ---- */
   const [credentialForm, setCredentialForm] = React.useState<{ editing: CredentialRow | null } | null>(null);
@@ -676,24 +682,30 @@ export function DevopsProjectDetailPage({ cluster, name }: DevopsProjectDetailPa
                     item.role || '-',
                     item.state || '-',
                     item.lastLoginTime ? formatTimestamp(item.lastLoginTime) : t('devops.member.neverLoggedIn'),
-                    <div key={item.name} className="flex justify-end gap-1">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        {...actionProps('devops-detail:member-role:' + item.name)}
-                        onClick={() => setChangingRole(item)}
-                      >
-                        {t('devops.member.changeRole')}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        {...actionProps('devops-detail:member-remove:' + item.name)}
-                        onClick={() => setRemovingMember(item)}
-                      >
-                        {t('devops.member.remove')}
-                      </Button>
-                    </div>,
+                    item.name === currentUsername ? (
+                      <span key={item.name} className="flex justify-end text-xs text-ai-fg-muted" data-ai-id="devops-detail:member-self">
+                        {t('devops.member.selfProtected')}
+                      </span>
+                    ) : (
+                      <div key={item.name} className="flex justify-end gap-1">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          {...actionProps('devops-detail:member-role:' + item.name)}
+                          onClick={() => setChangingRole(item)}
+                        >
+                          {t('devops.member.changeRole')}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          {...actionProps('devops-detail:member-remove:' + item.name)}
+                          onClick={() => setRemovingMember(item)}
+                        >
+                          {t('devops.member.remove')}
+                        </Button>
+                      </div>
+                    ),
                   ],
                 })}
               />

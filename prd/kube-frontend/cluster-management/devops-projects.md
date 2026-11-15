@@ -6,7 +6,7 @@
 
 集群控制台的 **DevOps 工程** 区域：列表页 `/kube-frontend/clusters/<cluster>/devops`（名称 / 描述 / 创建时间 / 所属企业空间）与详情页 `/kube-frontend/clusters/<cluster>/devops/<name>`（基本信息 + 流水线 / 持续部署 / 代码仓库 / 成员 / 角色 / 凭证七个页签，默认基本信息；可编辑工程信息与删除工程）。列表提供工程创建入口。
 
-流水线、持续部署、代码仓库三个页签读取工程命名空间（`status.adminNamespace`）下的三类资源；三者都是 namespaced，各自独立成败。工程不存在时页签仍可切换，用工程名作为命名空间回退并显示空态；这既是「不伪造」也是当前 0 个工程环境下唯一可验证的路径。
+流水线、持续部署、代码仓库三个页签读取工程命名空间（`status.adminNamespace`）下的三类资源；三者都是 namespaced，各自独立成败。工程存在但控制器尚未写入 `status.adminNamespace` 时用工程名回退并在基本信息显示实际取值；工程不存在时详情只显示 `:not-found`，不渲染页签，也不向不存在的工程发起集合请求。
 
 流水线行可点进流水线详情页 `/kube-frontend/clusters/<cluster>/devops/<name>/pipelines/<pipeline>`：基本信息（名称/类型/状态/创建时间/工程命名空间）+ 运行记录（PipelineRun 列表：编号/状态/开始时间/耗时），运行记录同样有加载/空态/失败+重试。
 
@@ -20,7 +20,7 @@ DevOps 组件在 2026-11-15 随「所有组件已开启」进入迁移范围；�
 
 作为 **集群管理员**，我希望 **在集群控制台里看到全部 DevOps 工程并能打开其中一个**，以便 **不切换旧控制台就能确认工程是否存在、归属哪个企业空间、有哪些成员/角色/凭证**。
 
-**Independent Test**：打开 `/clusters/<cluster>/devops`，核对行数与 `devopsprojects` CRD 列表一致（当前为 0 时显示空态）；打开任一工程（或一个不存在的工程名），核对基本信息区与三个属性页签可切换，且每个页签显示表格、空态或失败原因之一。
+**Independent Test**：打开 `/clusters/<cluster>/devops`，核对行数与 `devopsprojects` CRD 列表一致（当前为 0 时显示空态）；打开任一存在的工程，核对基本信息区与三个属性页签可切换，且每个页签显示表格、空态或失败原因之一；工程不存在时只显示 not-found。
 
 ### US2 - 在工程详情里看到流水线、持续部署与代码仓库 (Priority: P2)
 
@@ -104,27 +104,27 @@ DevOps 组件在 2026-11-15 随「所有组件已开启」进入迁移范围；�
 
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-01** — 已知集群的 `devopsprojects` 列表有 N 个工程（N 可能为 0），当打开集群 DevOps 列表，则列出 N 行（名称/描述/所属企业空间/创建时间），名称为进入详情的链接；N 为 0 时显示明确空态。打开详情 `/devops/<name>` 时，显示基本信息（名称/企业空间/创建者/创建时间/描述）；成员 / 角色 / 凭证三个页签可切换，各自独立读取：能读则显示表格，集合为空显示空态，读取失败显示失败原因与重试（不显示空表冒充「没有」）；工程不存在时显示 `:not-found`。列表提供创建入口，详情提供编辑信息与删除入口。
 
-- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-02** — 已知打开一个 DevOps 工程详情（工程存在或使用不存在工程名），当页签区出现流水线 / 持续部署 / 代码仓库，则三个页签都可切换且各自独立显示表格、空态或失败原因+重试之一；读取的三类资源都使用工程的命名空间（`status.adminNamespace`，对象不存在/未写入时回退为工程名，并在基本信息里显示实际取值）；工程不存在时基本信息显示 `:not-found` 而页签仍可切换、空态可达。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-02** — 已知打开一个 DevOps 工程详情（工程存在或使用不存在工程名），当页签区出现流水线 / 持续部署 / 代码仓库，则三个页签都可切换且各自独立显示表格、空态或失败原因+重试之一；读取的三类资源都使用工程的命名空间（`status.adminNamespace`，对象不存在/未写入时回退为工程名，并在基本信息里显示实际取值）；工程不存在时基本信息显示 `:not-found`，页签区不渲染。
 
-- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-03** — 已知工程详情的流水线页签有行数据，当点击行名称，则进入流水线详情 URL（`…/devops/<name>/pipelines/<pipeline>`）；流水线详情显示基本信息（名称/类型/状态/创建时间）与运行记录区，运行记录区显示表格、空态或失败原因+重试之一（列头为编号/状态/开始时间/耗时）；流水线不存在时显示 `:not-found`，而运行记录区仍可读（空态或失败态）；页面提供运行 / 重跑入口（不提供停止），运行请求与结果见运行记录。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-03** — 已知工程详情的流水线页签有行数据，当点击行名称，则进入流水线详情 URL（`…/devops/<name>/pipelines/<pipeline>`）；流水线详情显示基本信息（名称/类型/状态/创建时间）与运行记录区，运行记录区显示表格、空态或失败原因+重试之一（列头为编号/状态/开始时间/耗时）；流水线不存在时显示 `:not-found`（运行记录区随详情一起不渲染）；页面提供运行 / 重跑入口（不提供停止），运行请求与结果见运行记录。
 
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-04** — Given 已登录且存在可写企业空间，When 在 DevOps 列表点「创建 DevOps 工程」并填合法唯一名称、企业空间、别名与描述后提交，Then 发出 POST `/kapis/devops.kubesphere.io/v1alpha3/workspaces/<ws>/devops`，body 的 `metadata.generateName` 等于输入名并带 `kubesphere.io/workspace` 标签与两个注解；成功后跳转到响应返回的生成名详情且列表出现该行；名称为空或含非法字符时提交被拦下并显示对应提示；取消不发请求；服务端失败时对话框保持打开、保留输入并显示服务端消息。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-05** — Given 打开一个存在的工程详情，When 点「编辑工程信息」修改别名与描述并确认，Then 名称只读不可改；保存发出整对象 PUT `/apis/devops.kubesphere.io/v1alpha3/devopsprojects/<name>` 且保留 `spec.argo` 与 workspace 标签；成功后标题、描述与基本信息回显新值；取消不改变对象；清空别名的保存会移除 `kubesphere.io/alias-name` 注解。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-06** — Given 打开一个存在的工程详情，When 点删除、按提示输入完整工程名并确认，Then 发出 DELETE `/apis/devops.kubesphere.io/v1alpha3/devopsprojects/<name>`；成功后回到 DevOps 列表且该行消失；输入不匹配时删除按钮禁用；失败时确认框保留并显示服务端消息。
-- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-07** — Given 打开一个存在的工程详情，Then 页签顺序为 基本信息 / 流水线 / 持续部署 / 代码仓库 / 成员 / 角色 / 凭证，默认选中基本信息且 `aria-selected=true`；基本信息显示名称 / 别名 / 企业空间 / 创建者 / 创建时间 / 描述 / 工程命名空间（`status.adminNamespace`，缺失时回退工程名） / 同步状态 / 部署集群 / 成员数 / 角色数（读不到时显示 `-`）；逐个点击其余页签，其 `aria-selected=true` 且出现该页签的表格、空态或失败原因之一，不出现整页错误；工程不存在时 `:not-found` 可见且页签仍可切换。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-07** — Given 打开一个存在的工程详情，Then 页签顺序为 基本信息 / 流水线 / 持续部署 / 代码仓库 / 成员 / 角色 / 凭证，默认选中基本信息且 `aria-selected=true`；基本信息显示名称 / 别名 / 企业空间 / 创建者 / 创建时间 / 描述 / 工程命名空间（`status.adminNamespace`，缺失时回退工程名） / 同步状态 / 部署集群 / 成员数 / 角色数（读不到时显示 `-`）；逐个点击其余页签，其 `aria-selected=true` 且出现该页签的表格、空态或失败原因之一，不出现整页错误；工程不存在时 `:not-found` 可见，页签区不渲染。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PIPELINES-01** — Given 打开工程详情的流水线页签，When 列表加载完成，Then 表格列为 名称 / 健康状态 / 类型 / 分支数 / 合并请求数 / 操作，名称为进入流水线详情的链接，行操作依次为 运行 / 编辑 / 复制 / 删除；「共 N 条」等于接口 `totalItems`；每页条数可选 10 / 20 / 50（默认 10），上一页 / 下一页按页码禁用；名称搜索与类型筛选（全部 / 单分支 / 多分支）发出 `page/limit/name/type` 参数并把页码重置为 1，类型选「全部」时请求不带 type；无匹配显示「没有匹配的流水线。」，集合为空显示「该工程还没有流水线。」；读取失败显示失败原因与重试。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PIPELINES-02** — Given 流水线列表有行，Then 健康列按 Jenkins weatherScore 分档：大于 80 显示「健康」、30 到 80 显示「亚健康」、小于等于 30 显示「异常」、缺值或非数字显示「无状态」，不得把缺值当成 100 显示「健康」；类型列单分支显示「单分支流水线」、多分支显示「多分支流水线」；分支数与合并请求数缺失或单分支分支数为 0 时显示 `-`；同步状态取注解 `pipeline.devops.kubesphere.io/syncstatus`，缺失显示 `-`。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PIPELINES-03** — Given 打开流水线页签，When 点创建并填名称、类型、别名、描述后提交，Then 单分支提交 `spec.type=pipeline` 且 `spec.pipeline.jenkinsfile` 为编辑器内容（默认预填 starter Jenkinsfile），多分支提交 `spec.type=multi-branch-pipeline` 且 `spec.multi_branch_pipeline` 含 source_type、仓库地址、属主、凭证与脚本路径（默认 Jenkinsfile，未选凭证时 `credential_id` 为空串）；名称为空或非法时提示且不提交；成功后按名称搜索可见新行；失败时对话框保持打开、保留输入并显示服务端消息。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PIPELINES-04** — Given 流水线列表有行，When 点编辑 / 复制 / 删除，Then 编辑对话框的名称与类型只读、别名 / 描述 / Jenkinsfile 可改，保存走整对象 PUT 且保留 spec 其他字段；复制对话框名称留空、类型与 Jenkinsfile 沿用源；删除需在对话框输入流水线名确认，成功后行消失；取消不写；失败时显示服务端消息。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PIPELINES-05** — Given 从列表进入流水线详情，Then 基本信息显示名称 / 类型 / 同步状态 / 健康状态 / 脚本校验 / 创建者 / 创建时间 / 工程命名空间 / 描述，健康缺失显示「无状态」、同步状态与脚本校验缺失显示 `-`；配置页签单分支显示可编辑 Jenkinsfile，保存按钮在未修改时禁用、修改后可用，取消恢复服务端值，保存后重新读取 `spec.pipeline.jenkinsfile` 等于提交内容（走 `PUT …/pipelines/<p>/jenkinsfile?mode=raw`，见 design GOT）；多分支显示脚本来自代码仓库的只读说明；保存失败显示服务端消息。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_RUNS-01** — Given 流水线列表有行或已打开流水线详情，When 点运行（多分支先选分支、带参数先填参数）提交，Then 发出 POST `/apis/devops.kubesphere.io/v1alpha3/namespaces/<ns>/pipelineruns`，body 含 `metadata.generateName=<pipeline>-`、label `devops.kubesphere.io/pipeline=<pipeline>`、`spec.pipelineRef.name=<pipeline>`，有分支时含 `spec.scm.refName`；成功后显示「已提交运行请求：<name>」并刷新运行记录；失败显示服务端消息；页面不承诺运行成功。
-- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_RUNS-02** — Given 打开流水线详情的运行记录，Then 表格列为 状态 / 编号 / 提交 / 分支（仅多分支）/ 最近消息 / 耗时 / 开始时间 / 操作，按开始时间（缺失时创建时间）倒序；状态按注解 `devops.kubesphere.io/jenkins-pipelinerun-status` 的 state / result 映射为 排队中 / 运行中 / 成功 / 失败 / 已中止 / 已暂停 / 不稳定 / 未运行；无注解的运行仍出现在表格（编号回退对象名、状态「未运行」、开始时间回退创建时间、耗时 `-`），不得消失；空集合显示「该流水线还没有运行记录。」；点编号打开运行详情，显示编号 / 状态 / 控制器阶段 / 开始时间 / 耗时 / 提交与状态消息；日志接口失败显示失败原因与重试；重放按钮再次提交同一运行；运行记录读取失败显示失败原因与重试。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_RUNS-02** — Given 打开流水线详情的运行记录，Then 表格列为 状态 / 编号 / 提交 / 分支（仅多分支）/ 最近消息 / 耗时 / 开始时间 / 操作，按开始时间（缺失时创建时间）倒序；状态按注解 `devops.kubesphere.io/jenkins-pipelinerun-status` 的 state / result 映射为 排队中 / 运行中 / 成功 / 失败 / 已中止 / 已暂停 / 不稳定 / 未运行；无注解的运行仍出现在表格（编号回退对象名、状态「未运行」、开始时间回退创建时间、耗时按对象缺省显示 `0s`），不得消失；空集合显示「该流水线还没有运行记录。」；点编号打开运行详情，显示编号 / 状态 / 控制器阶段 / 开始时间 / 耗时 / 提交与状态消息；日志接口失败显示失败原因与重试；重放按钮再次提交同一运行；运行记录读取失败显示失败原因与重试。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_CREDENTIALS-01** — Given 打开凭证页签，Then 表格列为 名称 / 类型 / 用户名 / 同步状态 / 描述 / 操作；创建对话框可在用户名密码、SSH 密钥、密钥文本、kubeconfig 四种类型间切换并显示各自字段，提交 POST `/kapis/devops.kubesphere.io/v1alpha3/devops/<name>/credentials`；列表读取 `/api/v1/namespaces/<ns>/secrets` 且只展示四种 `credential.devops.kubesphere.io/*` 类型的 Secret；创建后行出现，类型列显示对应文案，用户名密码 / SSH 回显用户名，同步状态取注解；名称为空或非法时提示；失败保留输入并显示服务端消息。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_CREDENTIALS-02** — Given 凭证列表有行，When 点编辑改描述与敏感字段并保存，Then 名称与类型只读；保存 PUT `/kapis/devops.kubesphere.io/v1alpha3/devops/<name>/credentials/<credential>?content=1` 且 data 重新 base64；成功后列表描述更新、密码与私钥不回显；删除需在对话框输入凭证名确认，成功后行消失；取消不写；失败显示服务端消息。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_MEMBERS-01** — Given 打开成员页签，Then 表格列为 用户名 / 角色 / 状态 / 最近登录 / 操作，无成员显示「该工程还没有成员。」，最近登录为空显示「尚未登录」；点邀请打开对话框，用户名为空提交被校验拦下并提示，角色下拉只列预置角色 viewer / operator / admin；成员读取失败显示失败原因与重试。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_MEMBERS-02** — Given 邀请对话框，When 填平台已有用户名并选 viewer 提交，Then 发出 POST `/kapis/iam.kubesphere.io/v1alpha2/devops/<name>/members`（数组 body），成功后行出现且角色为 viewer；点修改角色选 operator 保存，发出 PUT `…/members/<username>` 且行角色更新；点移除并在确认框确认，发出 DELETE `…/members/<username>` 且行消失；失败显示服务端消息。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_ROLES-01** — Given 打开角色页签，Then 表格列为 名称 / 别名 / 权限模块 / 角色类型 / 创建时间；viewer / operator / admin 显示「预置角色」，带标签 `iam.kubesphere.io/role-template=true` 的角色显示「权限模板」，其他显示「自定义角色」；页签徽标数量等于接口 roles 条数；读取失败显示失败原因与重试。
-- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_CODE_REPOS-01** — Given 打开代码仓库页签，Then 表格列为 名称 / 提供方 / 仓库地址 / 访问凭证 / 操作，空集合显示「该工程还没有代码仓库。」；点导入填名称 / 提供方 / 仓库地址 / 访问凭证 / 描述提交 POST `/apis/devops.kubesphere.io/v1alpha3/namespaces/<ns>/gitrepositories`，成功后行出现（未填访问凭证显示 `-`）；名称为空或非法时提示；删除需输入名称确认，成功后行消失；失败显示服务端消息。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_CODE_REPOS-01** — Given 打开代码仓库页签，Then 表格列为 名称 / 提供方 / 仓库地址 / 访问凭证 / 操作，空集合显示「该工程还没有代码仓库。」；点导入填名称 / 提供方 / 仓库地址 / 访问凭证 / 描述提交 POST `/apis/devops.kubesphere.io/v1alpha3/namespaces/<ns>/gitrepositories`，成功后行出现（提供方显示 `spec.provider` 原值如 `github`，未填访问凭证显示 `-`）；名称为空或非法时提示；删除需输入名称确认，成功后行消失；失败显示服务端消息。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_CD-01** — Given 打开持续部署页签，Then 表格列为 名称 / 健康状态 / 同步状态 / 目标命名空间；同步与健康状态取 `status.argoApp` 的 `sync.status` / `health.status`，目标命名空间取 `spec.argoApp.spec.destination.namespace`，缺失显示 `-` 且行不消失；空集合显示「该工程还没有持续部署。」；读取失败显示失败原因与重试。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_CD-02** — Given 工程详情基本信息，Then 持续部署白名单区显示代码仓库（`spec.argo.sourceRepos`）与部署位置（`spec.argo.destinations` 的名称 / 命名空间），未配置显示「未选择」；点编辑白名单，按行编辑仓库（每行一个，`*` 表示全部）与部署位置（每行 `集群/项目`）后保存，发出整对象 PUT 且保留对象其他 spec 与 annotations，成功后基本信息回显新值；取消不写；失败显示服务端消息。
 
@@ -186,12 +186,12 @@ DevOps 组件在 2026-11-15 随「所有组件已开启」进入迁移范围；�
 - `devopsprojects` 为 0（当前 B200）：列表空态；详情仅当手动输入名称时可达，显示 not-found，但页签仍可切换并各自展示空态/失败原因（便于验证骨架）。
 - 工程存在但成员/角色/凭证/流水线/CD/代码仓库为空：对应页签显示空态。
 - 某个集合 403/404：该页签显示失败原因 + 重试，其他页签不受影响。
-- 工程刚被删除：基本信息 404 → `:not-found`；三个属性页签各自失败；流水线类页签以工程名回退命名空间，列表接口对不存在的命名空间返回 200 空列表，因此显示空态（实测）。
+- 工程刚被删除：基本信息 404 → `:not-found`，页签区不渲染，不再向已删除工程发起集合请求。
 - 基本信息读取失败但不是 404：错误面板 + 重试。
 - 对象已存在但控制器尚未写 `status.adminNamespace`：回退工程名，基本信息 `:namespace` 显示回退值，避免猜测。
 - 持续部署对象没有可用状态：`status.argoApp` 可能是 JSON 字符串、普通字符串或缺失，同步/健康状态分别显示 `-`，不整行消失。
-- 流水线不存在：详情显示 `:not-found`；运行记录区仍独立读取（命名空间回退为工程名，列表对不存在命名空间返回 200 空列表），显示空态而不是整页只有错误。
-- 流水线运行记录没有 Jenkins 注解：编号回退对象名，状态显示「未运行」，开始时间回退创建时间，耗时为 `-`，整行不消失。
+- 流水线不存在：详情显示 `:not-found`，运行记录区随详情一起不渲染，不显示伪造的空表。
+- 流水线运行记录没有 Jenkins 注解：编号回退对象名，状态显示「未运行」，开始时间回退创建时间，耗时按对象缺省显示 `0s`（mapper 对缺失 durationInMillis 取 0），整行不消失。
 - 运行记录标签键与预期不一致：标签过滤为空时回退全量并同时按 `spec.pipelineRef.name` 匹配，避免把已有运行记录显示成空。
 - 新建工程尚未被控制器同步（`status.adminNamespace` 为空）：详情基本信息回退工程名并如实显示；该工程的成员/角色/流水线等 kapis 集合可能返回平台级回退数据或空集合，页面不做二次编造，验收以「接口返回什么就显示什么」核对（见 design GOT）。
 - 工程名与 Jinja/k8s 名称限制：创建对话框按 `[a-z0-9-]` 校验并把长度限制在 58（为接口追加 5 位后缀留空间）；服务端报错原样显示。
@@ -255,7 +255,7 @@ DevOps 组件在 2026-11-15 随「所有组件已开启」进入迁移范围；�
 - **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-01** — 集群 DevOps 列表展示工程并提供详情入口，空态明确。
 - **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-02** — 详情提供基本信息与成员/角色/凭证/流水线/持续部署/代码仓库页签，各集合独立显示表格/空态/失败原因。
 - **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-03** — 流水线/持续部署/代码仓库从工程对象的 `status.adminNamespace` 取命名空间（缺失时回退工程名），并在基本信息展示实际取值。
-- **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-04** — 流水线行提供进入详情页的链接；流水线详情展示基本信息与运行记录（编号/状态/开始时间/耗时），运行记录独立显示表格/空态/失败原因；流水线不存在时显示 not-found 且运行记录区仍可读。
+- **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-04** — 流水线行提供进入详情页的链接；流水线详情展示基本信息与运行记录（编号/状态/开始时间/耗时），运行记录独立显示表格/空态/失败原因；流水线不存在时显示 not-found，运行记录区不渲染。
 - **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-05** — 列表可创建工程（名称/企业空间/别名/描述，名称校验），详情可编辑别名与描述、可删除工程，成功后回读列表或详情。
 - **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-06** — 详情提供基本信息与六个集合页签共七个页签，默认基本信息，各集合独立显示表格/空态/失败原因。
 - **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PIPELINES-01** — 流水线列表使用服务端分页（page/limit/totalItems）、名称搜索与类型筛选，展示健康/类型/分支数/合并请求数与运行/编辑/复制/删除入口。

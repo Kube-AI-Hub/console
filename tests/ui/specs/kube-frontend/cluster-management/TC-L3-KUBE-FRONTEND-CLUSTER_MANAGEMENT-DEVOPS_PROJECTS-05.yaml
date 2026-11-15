@@ -37,7 +37,7 @@ expected:
 - 每个集合页签出现 -table/-empty/-error 中恰好一个，无整页错误
 - 角色表头为 名称/别名/权限模块/角色类型/创建时间；viewer/operator/admin 行含「预置角色」，role-template-* 行含「权限模板」；页签徽标数字等于 roles 条数
 - 持续部署表头为 名称/健康状态/同步状态/目标命名空间；空集合显示「该工程还没有持续部署。」
-- 不存在工程时 devops-detail:not-found 可见，七个页签仍可点击切换
+- 不存在工程时 devops-detail:not-found 可见，七个页签不渲染
 troubleshoot:
 - 整页 Something went wrong：先看浏览器 pageerror（历史上是 Select 空字符串 value）
 - 角色页签空白：roles kapis 404 时应显示 -error 而不是空表

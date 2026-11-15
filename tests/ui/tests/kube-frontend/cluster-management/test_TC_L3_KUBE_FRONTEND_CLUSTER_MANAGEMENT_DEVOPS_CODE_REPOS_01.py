@@ -47,7 +47,8 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_DEVOPS_CODE_REPOS_01(cluster_man
         devops.expect_dialog_closed()
         expect(row()).to_be_visible(timeout=60_000)
         text = row().inner_text()
-        assert "GitHub" in text, text
+        # The provider cell renders spec.provider verbatim (the legacy table title-cased it).
+        assert "github" in text, text
         assert url in text, text
 
         repositories = devops.code_repositories(namespace)

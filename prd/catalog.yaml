@@ -461,6 +461,24 @@ modules:
         L3:
         - TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-01
         - TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-02
+        - TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-03
+        - TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-04
+    - id: workspace-apps
+      title: 企业空间应用模板
+      prd: prd/kube-frontend/app-store/workspace-apps.md
+      design: design/kube-frontend/app-store/workspace-apps.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_APPS-01
+        - TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_APPS-02
+    - id: installed-apps
+      title: 已安装应用
+      prd: prd/kube-frontend/app-store/installed-apps.md
+      design: design/kube-frontend/app-store/installed-apps.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-APP_STORE-INSTALLED_APPS-01
+        - TC-L3-KUBE-FRONTEND-APP_STORE-INSTALLED_APPS-02
     - id: manage
       title: 商店管理（应用/分类/审核）
       prd: prd/kube-frontend/app-store/manage.md
@@ -674,6 +692,15 @@ modules:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-01
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-02
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-03
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-04
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-05
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PIPELINES-01
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PIPELINES-02
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PIPELINES-03
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_RUNS-01
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_CREDENTIALS-01
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_MEMBERS-01
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_CODE_REPOS-01
     - id: gateway-detail
       title: 集群网关详情
       prd: prd/kube-frontend/cluster-management/gateway-detail.md

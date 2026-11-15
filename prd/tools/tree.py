@@ -457,6 +457,24 @@ MODULES = [
                         "tests": {"L3": [
                             "TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-01",
                             "TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-02",
+                            "TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-03",
+                            "TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-04",
+                        ]},
+                    },
+                    {
+                        "id": "workspace-apps",
+                        "title": "企业空间应用模板",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_APPS-01",
+                            "TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_APPS-02",
+                        ]},
+                    },
+                    {
+                        "id": "installed-apps",
+                        "title": "已安装应用",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-APP_STORE-INSTALLED_APPS-01",
+                            "TC-L3-KUBE-FRONTEND-APP_STORE-INSTALLED_APPS-02",
                         ]},
                     },
                                                             {
@@ -634,7 +652,20 @@ MODULES = [
                     {
                         "id": "devops-projects",
                         "title": "DevOps 工程列表",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-01", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-02", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-03"]},
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-01",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-02",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-03",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-04",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-05",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PIPELINES-01",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PIPELINES-02",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PIPELINES-03",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_RUNS-01",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_CREDENTIALS-01",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_MEMBERS-01",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_CODE_REPOS-01",
+                        ]},
                     },
                     {
                         "id": "gateway-detail",

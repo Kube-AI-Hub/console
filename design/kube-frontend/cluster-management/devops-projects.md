@@ -68,7 +68,8 @@
 
 **为什么**：当前集群 `devopsprojects` 为 0，详情页只能通过手输名称到达。若 not-found 时隐藏页签，「页签可切换」将无法验收，读者也无法判断是「没有工程」还是「页面缺块」。保留页签并让每个页签显示失败原因+重试，既诚实又可观测。
 **被否方案**：404 时整页只有 not-found。骨架的价值在于证明每个集合的真实读取结果。
-**何时重新考虑**：有真实工程且产品要求 404 即返回列表时。
+**2026-11-15 复查**：写能力落地后实现改为 not-found 时不渲染页签（避免对不存在的工程发成员/角色/集合请求），原决策的「页签可切换」不再适用；本段保留历史原因，当前行为见 PRD AC-…-DEVOPS_PROJECTS-07。
+**何时重新考虑**：产品要求 not-found 时仍展示页签骨架，或需要在一个不存在工程上诊断集合接口时。
 
 ### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-04 — 工程命名空间取 `status.adminNamespace`，缺失时回退工程名
 
@@ -291,7 +292,7 @@
 - **`coderepositories` 是 404**：代码仓库的真实资源是 `gitrepositories`（GitRepository）；老 console 的 `codeRepos` 模块同样读它。
 - **devops 组没有 `cd`**：`…/cd` 与 `…/applications` 均 404；持续部署读 gitops 组的 `applications`（`apiVersion: gitops.kubesphere.io/v1alpha1`），对象用 `spec.argoApp` / `status.argoApp` 包着 Argo CD 的结构。
 - **`status.argoApp` 是字符串**：CRD 把 Argo 状态声明为 string，控制器写 JSON。按 JSON 解析取 `sync.status`/`health.status`，解析失败时把原字符串当同步状态，避免整列空白。
-- **不存在的命名空间返回 200 空列表**：三个列表接口对不存在的命名空间不报错（已实测 `tc-e2e-missing-devops-probe`），所以不存在工程时页签显示空态而非错误；这也是本轮验证三个页签的路径。
+- **不存在的命名空间返回 200 空列表**：三个列表接口对不存在的命名空间不报错（已实测 `tc-e2e-missing-devops-probe`）；该行为只在「工程存在但 status.adminNamespace 缺失/尚未同步」时可见，因为工程不存在时页面不渲染页签、不发集合请求。
 - **工程命名空间无实例可核对**：B200 当前 0 个工程，`status.adminNamespace` 只从 CRD schema 确认存在；用 `devopsProjectNamespace` 的单元测试固定「有值用值、无值回退工程名」。
 - **PipelineRun 的状态不在 status**：CRD 的 `status` 未使用，Jenkins 状态在注解 `devops.kubesphere.io/jenkins-pipelinerun-status`（JSON 字符串），且可能缺失；缺失时按「未运行」展示，不能当错误。
 - **运行记录标签键未在真实对象上核对**：当前 0 条运行记录；标签过滤为空时读全量、按标签或 `spec.pipelineRef.name` 匹配，避免把「标签键不一致」显示成空。
@@ -304,7 +305,7 @@
 - **GOT-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-01** — 新建工程在控制器恢复前没有 `status.adminNamespace`，其 kapis 集合会回退到平台级数据（实测 members 返回平台用户、roles 返回 533 条模板、pipelines 返回其他工程），而页面按回退命名空间渲染，看起来像“这个工程有数据”。工程创建用例只验收创建/编辑/删除与命名空间回退，不把回退数据当该工程内容。
 - **GOT-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-02** — 工程创建必须 `metadata.generateName`（只给 name 报 `metadata.generateName: Required value`），接口追加 5 位后缀；页面用响应名跳转。测试断言「列表出现返回名」而不是「出现输入名」。
 - **GOT-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-03** — 编辑信息清空别名时 API 层会删除 `kubesphere.io/alias-name` 注解（而不是写空字符串）；否则列表与详情会显示空白别名而不是回退名称。
-- **GOT-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_RUNS-01** — 运行状态在注解 `devops.kubesphere.io/jenkins-pipelinerun-status`（JSON state/result/id/startTime/durationInMillis），CRD 的 `status` 未使用；无注解时按「未运行」展示，编号回退对象名、开始时间回退创建时间。
+- **GOT-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_RUNS-01** — 运行状态在注解 `devops.kubesphere.io/jenkins-pipelinerun-status`（JSON state/result/id/startTime/durationInMillis），CRD 的 `status` 未使用；无注解时按「未运行」展示，编号回退对象名、开始时间回退创建时间，耗时因 mapper 把缺失 durationInMillis 归 0 而显示 `0s`（不是 `-`，见 INV-…-DEVOPS_RUNS-01 的缺值语义）。
 - **GOT-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_RUNS-02** — 运行日志只有 kapis 的 `…/pipelines/<p>/runs/<id>/log/` 形状，实测 404；原生 `pipelines/<p>/pipelineruns` 子资源不存在。页面把 404 显示为失败原因+重试，不显示空日志冒充「没有日志」。
 - **GOT-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_RUNS-03** — 环境阻塞：`devops-controller` CrashLoopBackOff（日志逐字 `Error: the token of the Jenkins needs to update`，restartCount 27），`kubesphere-config` 中 `devops.host=http://devops-jenkins.kubesphere-devops-system.svc/`、`devops.username=admin`。表现为 PipelineRun 创建 201 后无状态注解、日志 404、health/validate 缺值。复查条件：controller 就绪且不再重启、Jenkins whoami/crumb 200、新运行 60 秒内出现状态注解、日志 200 且非空；四项满足后才把运行成功/日志内容标为通过。
 - **GOT-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_CREDENTIALS-01** — kapis 的 credentials 列表恒为空（连自己创建的都不返回），必须读 Secret 集合再按 `type` 过滤；但写仍走 kapis，因为只有它会写 `credential.devops.kubesphere.io/syncstatus` 注解。

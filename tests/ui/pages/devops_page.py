@@ -95,6 +95,16 @@ class DevopsPage:
         trigger.click()
         expect(trigger).to_have_attribute("aria-selected", "true", timeout=20_000)
 
+    def pipeline_tab(self, tab: str) -> Locator:
+        return self.locator(f"pipeline-detail:tab:{tab}")
+
+    def open_pipeline_tab(self, tab: str) -> None:
+        """流水线详情页签（基本信息 / 流水线配置 / 运行历史）。"""
+        trigger = self.pipeline_tab(tab)
+        expect(trigger).to_be_visible(timeout=30_000)
+        trigger.click()
+        expect(trigger).to_have_attribute("aria-selected", "true", timeout=20_000)
+
     def tab_text(self, tab: str) -> str:
         return self.tab(tab).inner_text()
 
