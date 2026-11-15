@@ -512,6 +512,11 @@ MODULES = [
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-02"]},
                     },
                     {
+                        "id": "workspace-lists",
+                        "title": "企业空间控制台列表刷新",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_LISTS-01"]},
+                    },
+                    {
                         "id": "workspace-roles",
                         "title": "企业空间角色",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-03"]},

@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_LISTS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: workspace-lists
+title: 企业空间控制台列表刷新与空态出口
+entry_url: '{BASE_URL}/kube-frontend/workspaces/system-workspace/projects'
+prd: prd/kube-frontend/access-control/workspace-lists.md
+design: design/kube-frontend/access-control/workspace-lists.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_LISTS-01
+
+story:
+- US1
+
+product: 企业空间控制台的角色、项目、配额三个列表都提供刷新按钮与空态出口。
+preconditions:
+- 已登录且有企业空间管理员权限
+steps:
+- 打开企业空间的项目列表，确认「刷新」按钮
+- 在别处（API）新建一个项目，点击刷新
+- 观察刷新期间按钮的忙碌状态
+- 依次打开角色与配额列表，确认各自的刷新句柄
+steps_expected:
+- 刷新后新项目行出现
+- 刷新期间按钮忙碌，返回后恢复可用（列表无搜索框，空态只有「刷新」出口）
+- 三个列表句柄为 workspace-roles/projects/quota:refresh
+expected:
+- 刷新只重发当前查询，保留搜索与页码
+troubleshoot:
+- 按钮不出现：schema.refresh 或 onRefresh 缺一
+- 刷新后仍看不到：dist 未重新构建
+update_automation:
+- 选择器：workspace-roles:refresh / workspace-projects:refresh / workspace-quota:refresh

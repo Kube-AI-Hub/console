@@ -11,6 +11,7 @@ import {
   AiButton,
   AiSurface,
   Empty,
+  Button,
   Modal,
   ResourceForm,
   ResourceList,
@@ -72,8 +73,8 @@ function GroupTree({
   const render = (items: WorkspaceGroupNode[], depth: number): React.ReactNode =>
     items.map((node) => (
       <div key={node.group.name}>
-        <button
-          type="button"
+        <Button
+          variant="ghost"
           data-ai-id={`workspace-user-groups:tree-node:${node.group.name}`}
           data-ai-row={node.group.name}
           data-ai-generate-name={node.group.generateName || node.group.displayName}
@@ -87,7 +88,7 @@ function GroupTree({
         >
           <span className="min-w-0 truncate font-medium">{node.group.displayName}</span>
           <span className="ml-auto tabular-nums text-[11px] text-ai-fg-muted">{node.group.memberCount}</span>
-        </button>
+        </Button>
         {render(node.children, depth + 1)}
       </div>
     ));

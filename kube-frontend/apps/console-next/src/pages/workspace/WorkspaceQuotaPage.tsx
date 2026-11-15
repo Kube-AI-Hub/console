@@ -5,6 +5,7 @@ import { AiSurface, ResourceList, type ListSchema } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * 租户(企业空间)配额.
@@ -90,10 +91,12 @@ export function WorkspaceQuotaPage({ workspace }: WorkspaceQuotaPageProps): Reac
     () => (paged ? rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE) : rows),
     [page, paged, rows],
   );
+  const listRefresh = useListRefresh('workspace-quota', query);
 
   const schema = React.useMemo<ListSchema<WorkspaceQuotaRow>>(
     () => ({
       title: t('workspace.quota.title'),
+      refresh: listRefresh.refresh,
       description: t('workspace.quota.description'),
       // A project may own more than one ResourceQuota (Kubernetes applies the intersection),
       // so the object name belongs in the key even though the row reads the same resource twice.
@@ -131,6 +134,7 @@ export function WorkspaceQuotaPage({ workspace }: WorkspaceQuotaPageProps): Reac
         description: projectCount > 0 ? t('workspace.quota.empty') : t('workspace.projects.emptyDescription'),
       },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -140,7 +144,8 @@ export function WorkspaceQuotaPage({ workspace }: WorkspaceQuotaPageProps): Reac
       },
       ...(paged ? { pagination: { page, pageSize: PAGE_SIZE, total: rows.length } } : {}),
     }),
-    [page, paged, projectCount, rows.length, t],
+    // `busy` comes from the query, so the schema must rebuild when the fetch state changes.
+    [page, paged, projectCount, query.isFetching, rows.length, t],
   );
 
   if (state === 'error') {
@@ -158,6 +163,7 @@ export function WorkspaceQuotaPage({ workspace }: WorkspaceQuotaPageProps): Reac
       <div data-ai-id="workspace-quota:table" className="min-w-0">
         <ResourceList
           schema={schema}
+          onRefresh={listRefresh.onRefresh}
           rows={visibleRows}
           loading={state === 'loading'}
           {...(paged ? { onPageChange: setPage } : {})}

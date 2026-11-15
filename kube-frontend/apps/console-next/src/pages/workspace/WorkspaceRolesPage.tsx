@@ -7,6 +7,7 @@ import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * 企业空间角色.
@@ -50,10 +51,12 @@ export function WorkspaceRolesPage({ workspace }: WorkspaceRolesPageProps): Reac
     () => (paged ? rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE) : rows),
     [page, paged, rows],
   );
+  const listRefresh = useListRefresh('workspace-roles', query);
 
   const schema = React.useMemo<ListSchema<WorkspaceRoleSummary>>(
     () => ({
       title: t('workspace.roles.title'),
+      refresh: listRefresh.refresh,
       description: t('workspace.roles.description'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
@@ -95,6 +98,7 @@ export function WorkspaceRolesPage({ workspace }: WorkspaceRolesPageProps): Reac
       ],
       empty: { title: t('common.empty'), description: t('settings.roles.emptyDescription') },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -104,7 +108,8 @@ export function WorkspaceRolesPage({ workspace }: WorkspaceRolesPageProps): Reac
       },
       ...(paged ? { pagination: { page, pageSize: PAGE_SIZE, total: rows.length } } : {}),
     }),
-    [page, paged, rows.length, t, workspace],
+    // `busy` comes from the query, so the schema must rebuild when the fetch state changes.
+    [page, paged, query.isFetching, rows.length, t, workspace],
   );
 
   if (state === 'error') {
@@ -122,6 +127,7 @@ export function WorkspaceRolesPage({ workspace }: WorkspaceRolesPageProps): Reac
       <div data-ai-id="workspace-roles:table" className="min-w-0">
         <ResourceList
           schema={schema}
+          onRefresh={listRefresh.onRefresh}
           rows={visibleRows}
           loading={state === 'loading'}
           {...(paged ? { onPageChange: setPage } : {})}

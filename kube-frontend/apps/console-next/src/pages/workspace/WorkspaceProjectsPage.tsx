@@ -7,6 +7,7 @@ import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * 企业空间项目.
@@ -33,10 +34,12 @@ export function WorkspaceProjectsPage({ workspace }: WorkspaceProjectsPageProps)
   const cluster = detail.data?.clusters[0] || 'host';
   const rows = query.data ?? [];
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
+  const listRefresh = useListRefresh('workspace-projects', query);
 
   const schema = React.useMemo<ListSchema<(typeof rows)[number]>>(
     () => ({
       title: t('workspace.projects.title'),
+      refresh: listRefresh.refresh,
       description: t('workspace.projects.description'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
@@ -86,6 +89,7 @@ export function WorkspaceProjectsPage({ workspace }: WorkspaceProjectsPageProps)
       ],
       empty: { title: t('workspace.projects.empty'), description: t('workspace.projects.emptyDescription') },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -94,7 +98,8 @@ export function WorkspaceProjectsPage({ workspace }: WorkspaceProjectsPageProps)
         selected: (count) => t('table.selectedCount', { count }),
       },
     }),
-    [cluster, t, workspace],
+    // `busy` comes from the query, so the schema must rebuild when the fetch state changes.
+    [cluster, query.isFetching, t, workspace],
   );
 
   if (state === 'error') {
@@ -107,7 +112,7 @@ export function WorkspaceProjectsPage({ workspace }: WorkspaceProjectsPageProps)
 
   return (
     <AiSurface as="section" aiId="workspace-projects:surface" state={state} className="min-w-0">
-      <ResourceList schema={schema} rows={rows} loading={state === 'loading'} />
+      <ResourceList schema={schema} onRefresh={listRefresh.onRefresh} rows={rows} loading={state === 'loading'} />
     </AiSurface>
   );
 }

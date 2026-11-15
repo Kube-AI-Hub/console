@@ -519,6 +519,13 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-02
+    - id: workspace-lists
+      title: 企业空间控制台列表刷新
+      prd: prd/kube-frontend/access-control/workspace-lists.md
+      design: design/kube-frontend/access-control/workspace-lists.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_LISTS-01
     - id: workspace-roles
       title: 企业空间角色
       prd: prd/kube-frontend/access-control/workspace-roles.md
