@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { clusterAlertMessagesApi, type ClusterAlertSummary } from '@kube-ai-hub/api-client';
 import { AiSurface, Badge, Button, Modal, ResourceList, type ListSchema } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
+import { AlertDrillDown } from '@/pages/monitoring/AlertDrillDown';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
@@ -166,7 +167,7 @@ export function ClusterAlertingMessagesPage({ cluster }: ClusterAlertingMessages
         title={t('monitoring.action.detail')}
         size="md"
       >
-        {detail ? <MessageDetail row={detail} /> : null}
+        {detail ? <MessageDetail row={detail} cluster={cluster} /> : null}
       </Modal>
     </AiSurface>
   );
@@ -209,7 +210,7 @@ function summarize(record: Record<string, string>, keys: readonly string[]): Arr
 }
 
 /** One message's drill-down: identifying fields, then label and annotation summaries. */
-function MessageDetail({ row }: { row: ClusterAlertSummary }): React.ReactElement {
+function MessageDetail({ row, cluster }: { row: ClusterAlertSummary; cluster: string }): React.ReactElement {
   const t = useT();
   const entries: Array<[string, string]> = [
     [t('monitoring.field.name'), row.name || '-'],
@@ -234,6 +235,9 @@ function MessageDetail({ row }: { row: ClusterAlertSummary }): React.ReactElemen
           </React.Fragment>
         ))}
       </dl>
+      {/* Cluster-scope messages name no workspace: the component resolves it from the alert's
+          namespace, which is what makes the policy and object links reachable from here. */}
+      <AlertDrillDown message={row} cluster={cluster} fallbackNamespace="" />
       <SummarySection
         aiId="cluster-alerting-messages:detail:labels"
         title={t('cluster.alerting.detail.labels')}

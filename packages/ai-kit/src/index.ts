@@ -39,7 +39,7 @@ export {
 } from './primitives/Input';
 export { Select, MultiSelect, type SelectProps, type SelectOption, type MultiSelectProps } from './primitives/Select';
 export { StatisticsGroup, MetricCell, type StatisticItem, type StatisticsGroupProps, type MetricCellProps } from './primitives/Statistics';
-export { TrendChart, type TrendChartProps, type TrendPoint } from './primitives/TrendChart';
+export { TrendChart, TREND_SERIES_COLORS, type TrendChartProps, type TrendPoint, type TrendSeries } from './primitives/TrendChart';
 export {
   Checkbox,
   CheckboxGroup,

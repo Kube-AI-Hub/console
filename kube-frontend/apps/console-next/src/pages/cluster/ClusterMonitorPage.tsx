@@ -1,12 +1,14 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { rangeMetricsApi, type MetricSeries } from '@kube-ai-hub/api-client';
+import { rangeMetricsApi, type ComponentMetricName, type MetricSeries } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { AiSurface, Button, Skeleton, TrendChart } from '@kube-ai-hub/ui';
+import { AiSurface, Button, Skeleton, TREND_SERIES_COLORS, TrendChart, type TrendSeries } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
+import { COMPONENT_TITLES, toComponentCharts, useComponentMetrics, type ComponentChart } from './componentMonitorQueries';
+import { formatBytesPerSecond, formatComponentValue, type ComponentUnits } from './monitorFormat';
 
 /**
  * 集群监控.
@@ -302,6 +304,15 @@ export function ClusterMonitorPage({ cluster, node }: ClusterMonitorPageProps): 
             );
           })
         : null}
+
+      {/*
+        The component section is independent of the physical-resource query: a failure to
+        read GPU/disk/RDMA trends must not hide whether the control plane is being
+        monitored, and one component failing must not blank the other two.
+      */}
+      {/* The component metrics are cluster-level: the node detail reuses this page for its three
+          node-scoped trends and must not show a cluster-wide control-plane section. */}
+      {node ? null : <ComponentSection cluster={cluster} rangeKey={windowKey} start={range.start} end={range.end} step={window.step} />}
     </AiSurface>
   );
 }
@@ -315,19 +326,6 @@ export function ClusterMonitorPage({ cluster, node }: ClusterMonitorPageProps): 
  * 1e9 and labelled Gb/s.
  */
 type ChartKind = 'percent' | 'count' | 'decimal' | 'rate' | 'linkRate';
-
-/** Bytes per second in the units a reader recognises (KiB/s, MiB/s, ...). */
-function formatBytesPerSecond(value: number): string {
-  const units = ['B', 'KiB', 'MiB', 'GiB', 'TiB'];
-  let scaled = Math.abs(value);
-  let unit = 0;
-  while (scaled >= 1024 && unit < units.length - 1) {
-    scaled /= 1024;
-    unit += 1;
-  }
-  const text = scaled >= 100 || unit === 0 ? scaled.toFixed(0) : scaled.toFixed(1);
-  return `${value < 0 ? '-' : ''}${text} ${units[unit]}`;
-}
 
 /**
  * One trend.
@@ -433,4 +431,210 @@ function formatValue(value: number, kind: ChartKind): string {
   if (kind === 'rate') return `${formatBytesPerSecond(value)}/s`;
   if (kind === 'linkRate') return `${(value / 1e9).toFixed(1)} Gb/s`;
   return String(Math.round(value));
+}
+/* ------------------------------------------------------------------ *
+ * System components: APIServer / Scheduler / etcd.
+ * ------------------------------------------------------------------ */
+
+/**
+ * The「系统组件」region.
+ *
+ * One request per component, not one per card: a component's metrics answer together,
+ * and a request per chart would multiply the load while letting the cards disagree about
+ * the same instant. The three queries are independent so a failure, or a component that
+ * reports nothing (etcd's case on this cluster), stays local to its sub-group.
+ */
+function ComponentSection({
+  cluster,
+  rangeKey,
+  start,
+  end,
+  step,
+}: {
+  cluster: string;
+  rangeKey: string;
+  start: number;
+  end: number;
+  step: string;
+}): React.ReactElement {
+  const t = useT();
+  const units = React.useMemo<ComponentUnits>(() => ({ perSecond: t('cluster.monitor.unit.perSecond') }), [t]);
+  const apiserver = useComponentMetrics({ cluster, component: 'apiserver', rangeKey, start, end, step });
+  const scheduler = useComponentMetrics({ cluster, component: 'scheduler', rangeKey, start, end, step });
+  const etcd = useComponentMetrics({ cluster, component: 'etcd', rangeKey, start, end, step });
+  const state =
+    apiserver.isPending || scheduler.isPending || etcd.isPending
+      ? 'loading'
+      : apiserver.isError && scheduler.isError && etcd.isError
+        ? 'error'
+        : 'ready';
+  return (
+    <section className="flex flex-col gap-2" data-ai-id="cluster-monitor:components" data-ai-state={state}>
+      <h2 className="text-sm font-semibold text-ai-fg-secondary">{t('cluster.monitor.components.title')}</h2>
+      <ComponentGroup component="apiserver" query={apiserver} start={start} end={end} units={units} />
+      <ComponentGroup component="scheduler" query={scheduler} start={start} end={end} units={units} />
+      <ComponentGroup component="etcd" query={etcd} start={start} end={end} units={units} />
+    </section>
+  );
+}
+
+/**
+ * One component sub-group.
+ *
+ * Four states, and they are different answers: loading, cards, "not reported" (the request
+ * succeeded but every metric came back without series), and failed (with retry, except for
+ * a 403 where retrying cannot help). Collapsing "not reported" into an error would send a
+ * reader to retry a query that will never change; collapsing it into cards would print
+ * zeros for a component nobody is monitoring.
+ */
+function ComponentGroup({
+  component,
+  query,
+  start,
+  end,
+  units,
+}: {
+  component: ComponentMetricName;
+  query: ReturnType<typeof useComponentMetrics>;
+  start: number;
+  end: number;
+  units: ComponentUnits;
+}): React.ReactElement {
+  const t = useT();
+  const charts = React.useMemo(
+    () => (query.data ? toComponentCharts(component, query.data, t) : []),
+    [component, query.data, t],
+  );
+  const state = query.isPending
+    ? 'loading'
+    : query.isError
+      ? 'error'
+      : charts.length > 0 && charts.every((chart) => !chart.hasData)
+        ? 'empty'
+        : 'ready';
+  return (
+    <section
+      className="flex flex-col gap-2 rounded-ai-md border border-ai-line/60 bg-ai-surface-1/40 p-3"
+      data-ai-id={'cluster-monitor:group:' + component}
+      data-ai-state={state}
+    >
+      <h3 className="text-sm font-medium text-ai-fg">{t(COMPONENT_TITLES[component])}</h3>
+      {state === 'loading' ? <Skeleton className="h-40 w-full" /> : null}
+      {state === 'error' ? (
+        <ResourceErrorPanel
+          error={query.error}
+          onRetry={() => void query.refetch()}
+          retryAiId={'cluster-monitor:components:retry:' + component}
+        />
+      ) : null}
+      {state === 'empty' ? (
+        <div
+          className="flex flex-col gap-1 py-4"
+          data-ai-id={'cluster-monitor:components:not-reported:' + component}
+        >
+          <p className="text-sm text-ai-fg-secondary">
+            {t(COMPONENT_TITLES[component])} · {t('cluster.monitor.components.notReported')}
+          </p>
+          <p className="text-xs text-ai-fg-muted">{t('cluster.monitor.components.notReportedHint')}</p>
+        </div>
+      ) : null}
+      {state === 'ready' ? (
+        <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
+          {charts.map((chart) => (
+            <ComponentCard
+              key={chart.key}
+              component={component}
+              chart={chart}
+              start={start}
+              end={end}
+              units={units}
+            />
+          ))}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+/**
+ * One component card: one metric family on one scale.
+ *
+ * Multi-series cards list their legend explicitly with the latest value per identity: a
+ * line answers "which one is moving" and the numbers answer "by how much", and the two
+ * have to sit next to the same coloured dot or the reader has to guess which line is which.
+ * A configured identity that the backend did not return keeps its legend row with an
+ * em dash, so "not reported" never looks like zero.
+ */
+function ComponentCard({
+  component,
+  chart,
+  start,
+  end,
+  units,
+}: {
+  component: ComponentMetricName;
+  chart: ComponentChart;
+  start: number;
+  end: number;
+  units: ComponentUnits;
+}): React.ReactElement {
+  const t = useT();
+  const aiId = 'cluster-monitor:' + component + ':' + chart.key;
+  const series: TrendSeries[] = chart.lines.map((line, index) => ({
+    key: line.key,
+    label: line.label,
+    points: line.points,
+    color: TREND_SERIES_COLORS[index % TREND_SERIES_COLORS.length],
+  }));
+  const single = chart.lines.length === 1 ? chart.lines[0] : undefined;
+  const latest = single && single.points.length > 0 ? single.points[single.points.length - 1]!.value : undefined;
+  return (
+    <section className="rounded-lg border border-ai-border bg-ai-surface p-4" data-ai-id={aiId}>
+      <div className="mb-2 flex items-baseline justify-between gap-2">
+        <h2 className="text-sm font-medium text-ai-fg">{t(chart.title)}</h2>
+        {single ? (
+          <span className="text-xs tabular-nums text-ai-fg-muted" data-ai-id={aiId + ':latest'}>
+            {latest === undefined ? '-' : formatComponentValue(latest, chart.kind, units)}
+          </span>
+        ) : null}
+      </div>
+      {chart.hasData ? (
+        <React.Fragment>
+          <TrendChart
+            series={series}
+            start={start}
+            end={end}
+            label={t(chart.title)}
+            emptyText={t('cluster.monitor.empty')}
+            data-ai-id={aiId + ':chart'}
+          />
+          {chart.lines.length > 1 ? (
+            <dl className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
+              {chart.lines.map((line, index) => {
+                const last = line.points.length > 0 ? line.points[line.points.length - 1]!.value : undefined;
+                return (
+                  <div key={line.key} className="flex items-center gap-1.5" data-ai-id={aiId + ':series:' + line.key}>
+                    <span
+                      aria-hidden
+                      className="inline-block size-2 shrink-0 rounded-full"
+                      style={{ backgroundColor: TREND_SERIES_COLORS[index % TREND_SERIES_COLORS.length] }}
+                    />
+                    <dt className="text-ai-fg-secondary">{line.label}</dt>
+                    <dd className="tabular-nums text-ai-fg-muted" data-ai-id={aiId + ':series:' + line.key + ':value'}>
+                      {last === undefined ? '—' : formatComponentValue(last, chart.kind, units)}
+                    </dd>
+                  </div>
+                );
+              })}
+            </dl>
+          ) : null}
+        </React.Fragment>
+      ) : (
+        <div className="flex flex-col gap-1 py-6" data-ai-id={aiId + ':no-data'}>
+          <span className="text-sm text-ai-fg-secondary">{t('cluster.monitor.empty')}</span>
+          <span className="text-xs text-ai-fg-muted">{t('cluster.monitor.emptyHint')}</span>
+        </div>
+      )}
+    </section>
+  );
 }

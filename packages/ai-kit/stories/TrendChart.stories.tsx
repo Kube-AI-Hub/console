@@ -7,8 +7,24 @@ const meta: Meta<typeof TrendChart> = {
 };
 export default meta;
 type Story = StoryObj<typeof TrendChart>;
+
 export const Samples: Story = { args: { points: [{ at: 0, value: 10 }, { at: 20, value: 25 }, { at: 50, value: 0 }, { at: 100, value: 40 }] } };
 export const Idle: Story = { args: { points: [{ at: 0, value: 0 }, { at: 100, value: 0 }] } };
 export const MissingSamples: Story = { args: { maxGap: 30, points: [{ at: 0, value: 10 }, { at: 20, value: 20 }, { at: 90, value: 15 }, { at: 100, value: 30 }] } };
 export const Empty: Story = { args: { points: [] } };
 export const OneSample: Story = { args: { points: [{ at: 50, value: 0 }] } };
+
+/**
+ * Several identities on one scale — the component panels' case (one line per verb /
+ * result / quantile). A series with no finite sample stays in the legend but draws no
+ * line, which is how "not reported" stays distinct from a value of zero.
+ */
+export const MultipleSeries: Story = {
+  args: {
+    series: [
+      { key: 'GET', label: 'GET', points: [{ at: 0, value: 3 }, { at: 20, value: 5 }, { at: 50, value: 4 }, { at: 100, value: 6 }] },
+      { key: 'POST', label: 'POST', points: [{ at: 0, value: 1 }, { at: 50, value: 2 }, { at: 100, value: 1 }] },
+      { key: 'APPLY', label: 'APPLY', points: [] },
+    ],
+  },
+};

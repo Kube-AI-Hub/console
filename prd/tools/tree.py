@@ -897,7 +897,7 @@ MODULES = [
                     {
                         "id": "monitor",
                         "title": "集群监控",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-03", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-04", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-05"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-03", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-04", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-05", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-06", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-07"]},
                     },
                     {
                         "id": "node-usage",
@@ -1042,6 +1042,7 @@ MODULES = [
                         "tests": {"L3": [
                             "TC-L3-KUBE-FRONTEND-MONITORING-ALERTS-01",
                             "TC-L3-KUBE-FRONTEND-MONITORING-ALERTS-02",
+                            "TC-L3-KUBE-FRONTEND-MONITORING-ALERTS-03",
                         ]},
                     },
                     {
@@ -1059,6 +1060,7 @@ MODULES = [
                             "TC-L3-KUBE-FRONTEND-MONITORING-RULES-04",
                             "TC-L3-KUBE-FRONTEND-MONITORING-RULES-05",
                             "TC-L3-KUBE-FRONTEND-MONITORING-RULES-06",
+                            "TC-L3-KUBE-FRONTEND-MONITORING-RULES-07",
                         ]},
                     },
                 ],

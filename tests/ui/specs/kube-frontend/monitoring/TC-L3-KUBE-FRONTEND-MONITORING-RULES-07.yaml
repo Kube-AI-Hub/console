@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-MONITORING-RULES-07
+level: 3
+suite: point
+module: kube-frontend
+submodule: monitoring
+feature: rules
+title: 告警策略 · 批量启用与停用
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/alertingrules'
+prd: prd/kube-frontend/monitoring/rules.md
+design: design/kube-frontend/monitoring/rules.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-MONITORING-RULES-07
+
+story:
+- US8
+
+product: 告警策略列表支持多选后批量启用/停用，逐条写 enable 标签并回读一致；不可写的行不给复选框；部分失败如实报告。
+preconditions:
+- 已登录；当前项目可创建 rulegroup（admin）
+steps:
+- 通过 API 在当前项目创建两个唯一命名的 rulegroup
+- 打开告警策略列表，勾选两个策略行
+- 点批量「停用」，等请求完成；回读两个对象的 enable 标签
+- 再批量「启用」，回读标签；核对结果提示
+expected:
+- 勾选后出现批量动作（alertingrules:bulk-enable / bulk-disable）
+- 停用后两个对象 enable 标签均为 false，启用后均为 true
+- 结果提示显示处理条数（alertingrules:bulk-result）
+- 无 update 权限的行不出现复选框
+troubleshoot:
+- 批量动作不出现：schema.actions 未声明或 selection 不是 multiple
+- 只有第一行被改：批量处理里错用了单条 mutation
+update_automation:
+- 句柄：alertingrules:surface / [data-ai-row] input[type=checkbox] / alertingrules:bulk-enable / alertingrules:bulk-disable / alertingrules:bulk-result

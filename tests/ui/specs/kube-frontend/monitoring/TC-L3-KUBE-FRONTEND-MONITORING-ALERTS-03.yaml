@@ -1,0 +1,33 @@
+id: TC-L3-KUBE-FRONTEND-MONITORING-ALERTS-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: monitoring
+feature: alerts
+title: 告警消息 · 详情下钻（策略与监控对象）
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/alerting-messages'
+prd: prd/kube-frontend/monitoring/alerts.md
+design: design/kube-frontend/monitoring/alerts.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-MONITORING-ALERTS-03
+
+story:
+- US3
+
+product: 告警消息详情按告警自身标签给出「告警策略」与「监控对象」两个下钻入口；标签不可解析时不伪造链接。
+preconditions:
+- 集群聚合告警集合（globalalerts）有至少一条消息
+steps:
+- 打开集群告警消息页，点任一消息的详情
+- 核对 alerts:detail:links 与 alerts:detail:rule-link
+- 点策略链接，核对跳到告警策略详情且带 scope=global|cluster|project
+expected:
+- 详情出现「相关入口」区，策略链接存在且 href 指向 …/alertingrules/<rule_group>?scope=<rule_level>
+- 告警标签含 pod/deployment 等键时出现对象链接（不含时不为该行造链接）
+- 点击后 URL 进入策略详情页
+troubleshoot:
+- 链接为空：scope 推断错了（global 被当 project）
+- 跳到 404：workspace/namespace 用了当前项目的而不是告警标签里的
+update_automation:
+- 句柄：cluster-alerting-messages:detail / alerts:detail:links / alerts:detail:rule-link / alerts:detail:target-link

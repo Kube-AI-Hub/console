@@ -178,9 +178,9 @@ export function ClusterEventsPage({ cluster: _cluster }: ClusterEventsPageProps)
             <ol className="mt-2 flex items-end gap-0.5" data-ai-id="cluster-events:histogram:bars">
               {(histogram.data?.buckets ?? []).map((bucket) => (
                 <li key={bucket.time} className="flex h-16 min-w-0 flex-1 items-end">
-                  <button
-                    type="button"
-                    className={`block h-16 w-full rounded-t transition-colors ${
+                  <Button
+                    variant="ghost"
+                    className={`block h-16 w-full rounded-t p-0 transition-colors ${
                       selected?.start === bucket.time ? 'bg-ai-accent' : 'bg-ai-accent/60 hover:bg-ai-accent/80'
                     }`}
                     style={{ height: `${Math.max(6, Math.round((bucket.count / peak) * 100))}%` }}

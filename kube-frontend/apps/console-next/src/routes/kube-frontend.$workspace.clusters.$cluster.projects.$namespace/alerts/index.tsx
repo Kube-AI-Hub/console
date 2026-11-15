@@ -8,6 +8,6 @@ export const Route = createFileRoute('/kube-frontend/$workspace/clusters/$cluste
 });
 
 function alertsRoute(): React.ReactElement {
-  const { cluster, namespace } = Route.useParams();
-  return <MonitoringListPage kind="alerts" cluster={cluster} namespace={namespace} />;
+  const { workspace, cluster, namespace } = Route.useParams();
+  return <MonitoringListPage kind="alerts" workspace={workspace} cluster={cluster} namespace={namespace} />;
 }

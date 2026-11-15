@@ -655,7 +655,80 @@ export function rangeMetricsApi(client: Client) {
       )}/pods/${encodeURIComponent(params.pod)}`;
       return query(pathname, params);
     },
+
+    /**
+     * One system component's series (apiserver / scheduler / etcd).
+     *
+     * The cluster range query returns one line per metric, but a component metric is a
+     * **family**: `apiserver_request_by_verb_latencies` answers one series per verb,
+     * `scheduler_schedule_attempts` one per result, `..._quantile` one per quantile. The
+     * identity lives in `metric.verb` / `metric.result` / `metric.quantile`, so it is kept
+     * on each series rather than flattened: matching by array position (what the old
+     * console did) pairs the wrong label with the wrong line as soon as the backend returns
+     * a different set of identities.
+     *
+     * Non-finite samples are dropped here, not plotted. This deployment returns a verb
+     * whose entire series is `"NaN"`; `parseFloat` yields NaN, and a NaN point in an SVG
+     * path is an empty `d` (the line vanishes) or a fake zero if coerced.
+     */
+    async component(params: RangeQuery & { component: ComponentMetricName }): Promise<ComponentMetricSeries[]> {
+      const pathname = `/kapis/monitoring.kubesphere.io/v1alpha3/components/${encodeURIComponent(params.component)}`;
+      const body = await client.request<{
+        results?: Array<{
+          metric_name?: string;
+          data?: {
+            resultType?: string;
+            result?: Array<{ metric?: Record<string, string>; values?: Array<[number, string]> }>;
+          };
+        }>;
+      }>(pathname, {
+        query: {
+          metrics_filter: params.metrics.map((metric) => `${metric}$`).join('|'),
+          start: Math.round(params.start / 1000),
+          end: Math.round(params.end / 1000),
+          step: params.step,
+          cluster: params.cluster,
+        },
+        ...(params.signal ? { signal: params.signal } : {}),
+      });
+
+      const out: ComponentMetricSeries[] = [];
+      for (const result of body?.results ?? []) {
+        const metric = result.metric_name;
+        if (!metric) continue;
+        for (const sample of result.data?.result ?? []) {
+          const points: SeriesPoint[] = [];
+          for (const [at, value] of sample.values ?? []) {
+            const parsed = Number.parseFloat(value);
+            if (!Number.isFinite(parsed)) continue;
+            points.push({ at: at * 1000, value: parsed });
+          }
+          // A series with no finite sample is "not reported", not a row of zeros.
+          if (points.length === 0) continue;
+          points.sort((a, b) => a.at - b.at);
+          out.push({ metric, labels: sample.metric ?? {}, points });
+        }
+      }
+      return out;
+    },
   };
+}
+
+/** The system components the monitoring API serves under `/components`. */
+export type ComponentMetricName = 'apiserver' | 'scheduler' | 'etcd';
+
+/**
+ * One component-metric series, identity preserved.
+ *
+ * `metric` is the requested metric name; `labels` carries the identity (`verb`,
+ * `result`, `quantile`, …) that distinguishes it from the other series of the same
+ * metric. Two series with the same metric and the same identity labels are the same
+ * line; two with different labels are different lines, never merged.
+ */
+export interface ComponentMetricSeries {
+  metric: string;
+  labels: Record<string, string>;
+  points: SeriesPoint[];
 }
 
 export type RangeMetricsApi = ReturnType<typeof rangeMetricsApi>;

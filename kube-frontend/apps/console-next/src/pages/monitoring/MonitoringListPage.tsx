@@ -8,6 +8,7 @@ import { MutationAlert, ResourceErrorPanel } from '@/components/resource/Resourc
 import { formatTimestamp } from '@/lib/time';
 import { MONITORING_DESCRIPTORS, useAlertingModel, useMonitoringList, useToggleRule, type MonitoringKind } from './queries';
 import { RuleGroupsPage } from './RuleGroupsPage';
+import { AlertDrillDown } from './AlertDrillDown';
 import { useListRefresh } from '@/components/resource/useListRefresh';
 import { alertSeverityLabel, alertStateLabel } from './alertLabels';
 
@@ -26,6 +27,8 @@ import { alertSeverityLabel, alertStateLabel } from './alertLabels';
  */
 export interface MonitoringListPageProps {
   kind: MonitoringKind;
+  /** Needed by the message drill-down links (policy + monitored resource live in a workspace). */
+  workspace: string;
   cluster: string;
   namespace: string;
 }
@@ -36,7 +39,7 @@ type SortKey = 'name' | 'createTime' | 'triggeredAt';
 
 type Row = AlertMessage | AlertingRuleSummary;
 
-export function MonitoringListPage({ kind, cluster, namespace }: MonitoringListPageProps): React.ReactElement {
+export function MonitoringListPage({ kind, workspace, cluster, namespace }: MonitoringListPageProps): React.ReactElement {
   const t = useT();
   const descriptor = MONITORING_DESCRIPTORS[kind];
   /*
@@ -310,7 +313,7 @@ export function MonitoringListPage({ kind, cluster, namespace }: MonitoringListP
       <Modal open={detail !== null} onOpenChange={(open) => !open && setDetail(null)} title={t('monitoring.action.detail')} size="md">
         {detail ? (
           kind === 'alerts' ? (
-            <AlertMessageDetail message={detail as AlertMessage} />
+            <AlertMessageDetail message={detail as AlertMessage} workspace={workspace} cluster={cluster} namespace={namespace} />
           ) : (
             <DetailFields row={detail} />
           )
@@ -328,7 +331,17 @@ export function MonitoringListPage({ kind, cluster, namespace }: MonitoringListP
  * annotations are rendered as an allowlisted summary — the alert record is a
  * controller artefact and a raw dump would grow with every label the platform adds.
  */
-function AlertMessageDetail({ message }: { message: AlertMessage }): React.ReactElement {
+function AlertMessageDetail({
+  message,
+  workspace,
+  cluster,
+  namespace,
+}: {
+  message: AlertMessage;
+  workspace: string;
+  cluster: string;
+  namespace: string;
+}): React.ReactElement {
   const t = useT();
   const entries: Array<[string, string]> = [
     [t('monitoring.field.name'), message.name || '-'],
@@ -351,12 +364,22 @@ function AlertMessageDetail({ message }: { message: AlertMessage }): React.React
           </React.Fragment>
         ))}
       </dl>
+      <AlertDrillDown message={message} workspace={workspace} cluster={cluster} fallbackNamespace={namespace} />
       <SummaryList aiId="alerts:detail:labels" title={t('monitoring.alerts.labels')} entries={Object.entries(message.labels)} />
       <SummaryList aiId="alerts:detail:annotations" title={t('monitoring.alerts.annotations')} entries={Object.entries(message.annotations)} />
     </div>
   );
 }
 
+
+/**
+ * Where an alert message came from, as links.
+ *
+ * The old console's message page let a reader jump to the policy that fired and to the
+ * object the alert is about; without those two links the message is a dead end. Both
+ * facts live in the alert's own labels (`rule_group`/`rule_level`, and `namespace` plus
+ * one object key), which is why this needs no extra request.
+ */
 function SummaryList({ aiId, title, entries }: { aiId: string; title: string; entries: Array<[string, string]> }): React.ReactElement {
   return (
     <section className="flex flex-col gap-2" data-ai-id={aiId}>

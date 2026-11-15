@@ -87,6 +87,40 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['rule-groups', cluster] }),
   });
 
+  /* Bulk enable/disable: the old console offered it on the policy list, and toggling
+   * twenty rows one by one is the kind of chore that makes people skip the action. */
+  const [selectedKeys, setSelectedKeys] = React.useState<string[]>([]);
+  React.useEffect(() => setSelectedKeys([]), [cluster, projectFilter, enabledFilter]);
+  const [bulkResult, setBulkResult] = React.useState<{ ok: number; failed: string[] } | null>(null);
+  const bulkToggle = useMutation({
+    mutationFn: async (enabled: boolean) => {
+      const targets = rows.filter(
+        (row) => selectedKeys.includes(row.name) && row.enabled !== enabled && permissions.update[row.scope],
+      );
+      const failed: string[] = [];
+      let ok = 0;
+      for (const group of targets) {
+        try {
+          await ruleGroupsApi(apiClient).setEnabled({
+            name: group.name,
+            scope: group.scope,
+            ...(group.scope === 'project' ? { namespace: projectFilter } : {}),
+            enabled,
+          });
+          ok += 1;
+        } catch {
+          failed.push(group.name);
+        }
+      }
+      return { ok, failed };
+    },
+    onSuccess: (result) => {
+      setBulkResult(result);
+      setSelectedKeys([]);
+      void queryClient.invalidateQueries({ queryKey: ['rule-groups', cluster] });
+    },
+  });
+
   const [editing, setEditing] = React.useState<RuleGroupSummary | null>(null);
   const [creating, setCreating] = React.useState(false);
   const [deleting, setDeleting] = React.useState<RuleGroupSummary | null>(null);
@@ -237,6 +271,13 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
             },
           }
         : {}),
+      selection: 'multiple' as const,
+      /* A row nobody may write to must not be checkable: selection drives a write. */
+      isRowSelectable: (row: RuleGroupSummary) => Boolean(permissions.update[row.scope]),
+      actions: [
+        { key: 'enable', label: t('monitoring.action.enable'), aiId: 'alertingrules:bulk-enable' },
+        { key: 'disable', label: t('monitoring.action.disable'), aiId: 'alertingrules:bulk-disable' },
+      ],
       rowActions: [
         { key: 'detail', label: t('monitoring.action.detail'), aiId: 'monitoring-alerts:detail' },
         /*
@@ -306,6 +347,16 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
 
   return (
     <AiSurface as="section" aiId="alertingrules:surface" state={state} className="min-w-0">
+      {bulkResult ? (
+        <p
+          className={bulkResult.failed.length ? 'mb-2 text-xs text-ai-danger' : 'mb-2 text-xs text-ai-fg-secondary'}
+          data-ai-id="alertingrules:bulk-result"
+        >
+          {bulkResult.failed.length
+            ? t('monitoring.ruleGroups.bulkPartial', { ok: bulkResult.ok, failed: bulkResult.failed.join(', ') })
+            : t('monitoring.ruleGroups.bulkDone', { ok: bulkResult.ok })}
+        </p>
+      ) : null}
       {projectFilter && !permissions.create ? (
         <p className="mb-2 text-xs text-ai-fg-muted" data-ai-id="alertingrules:no-create-permission">
           {t('monitoring.ruleGroups.permission.createDenied')}
@@ -314,6 +365,14 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
       <ResourceList
         schema={schema}
         onRefresh={listRefresh.onRefresh}
+        selectedKeys={selectedKeys}
+        onSelectionChange={setSelectedKeys}
+        onBulkAction={(action) => {
+          if (action === 'enable' || action === 'disable') {
+            setBulkResult(null);
+            bulkToggle.mutate(action === 'enable');
+          }
+        }}
         rows={rows}
         loading={state === 'loading'}
         searchValue={list.keyword}
@@ -357,7 +416,7 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
         }}
       />
 
-      <MutationAlert error={toggle.error ?? remove.error} />
+      <MutationAlert error={toggle.error ?? remove.error ?? bulkToggle.error} />
 
       <RuleGroupDialog
         open={creating || editing !== null}

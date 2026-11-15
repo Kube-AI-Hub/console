@@ -95,6 +95,11 @@ export function GatewayDetailPage({ cluster, name }: GatewayDetailPageProps): Re
               <DefinitionRow label={t('cluster.clusterGateways.detail.replicas')} value={detail.replicas || '-'} />
               <DefinitionRow label={t('cluster.clusterGateways.detail.image')} value={detail.image || '-'} />
               <DefinitionRow label={t('cluster.column.createdAt')} value={formatTimestamp(detail.createdAt)} />
+              <DefinitionRow label={t('cluster.clusterGateways.detail.creator')} value={detail.creator || '-'} />
+              <DefinitionRow
+                label={t('cluster.clusterGateways.detail.tracing')}
+                value={t(detail.tracing ? 'cluster.clusterGateways.detail.tracingOn' : 'cluster.clusterGateways.detail.tracingOff')}
+              />
               {detail.conditions.length > 0 ? (
                 <DefinitionRow
                   label={t('cluster.clusterGateways.detail.conditions')}

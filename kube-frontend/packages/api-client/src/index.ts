@@ -440,6 +440,8 @@ export type {
   CustomResourceInstance,
   CustomResourceSummary,
   CustomResourcesApi,
+  ComponentMetricName,
+  ComponentMetricSeries,
   KubernetesStatus,
   MetricSeries,
   MetricWorkloadKind,

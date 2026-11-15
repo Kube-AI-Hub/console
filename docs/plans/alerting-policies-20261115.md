@@ -130,3 +130,26 @@ python3 prd/tools/check_docs.py --strict prd/kube-frontend/monitoring design/kub
 
 生成物：`prd/tools/build_prd.py`（catalog 同步，0 新文件）→ `tests/ui/generate_case_docs.py`（398 份用例文档 + traceability）。新用例文档：`tests/ui/cases/kube-frontend/monitoring/TC-L3-KUBE-FRONTEND-MONITORING-{RULES-05,RULES-06,ALERTS-02,ALERTS_WRITE-02}.md`。
 
+
+## 7. 追加（2026-11-16 第 5 轮）：批量启停与告警消息下钻
+
+本单元交付时登记了 3 项「待补」；本批关闭其中 2 项，第 3 项（详情规则搜索/分页）仍待补。
+
+| 待补项 | 本批结论 | 证据 |
+| --- | --- | --- |
+| 批量启停（LEG-POL-17） | **关闭**：列表多选 + 批量启用/停用，逐条 PATCH enable 标签并汇总结果；不可写的行不出现复选框 | AC-RULES-07；TC-RULES-07（E2E 通过）；DEC/CON-RULES-07 |
+| 消息 → 策略/资源下钻（LEG-MSG-02） | **关闭**：详情新增「相关入口」——策略链接（scope 由 rule_level 推断）+ 对象链接（pod/deployment/…，工作空间由命名空间标签解析） | AC-ALERTS-03；TC-ALERTS-03（E2E 通过）；DEC/ALERTS-03/04 + GOT-ALERTS-03 |
+| 详情规则搜索/分页（LEG-POL-25） | 仍待补（本批未做，保留在分母） | — |
+
+实现要点：
+- 批量启停没有批量端点：按选中集合**串行**调用既有 `setEnabled`，客户端汇总成功/失败；并发会把 API server 连接打满且无法说清哪条失败。
+- 下钻全部基于告警自身标签：`rule_group`+`rule_level` 决定策略与作用域（缺省 project），`namespace`+对象键决定监控对象；标签缺失时不渲染链接，不猜对象。
+- 集群「告警消息」页没有工作空间段：按告警里的 namespace 读一次命名空间对象取 `kubesphere.io/workspace` 标签（react-query 缓存 5 分钟），项目页则直接使用路由上下文。
+
+验证（同批实跑，2026-11-16）：
+- 门禁：`python3 prd/tools/check_docs.py --strict prd/kube-frontend/monitoring design/kube-frontend/monitoring tests/ui/specs/kube-frontend/monitoring` → errors=0 warnings=0；
+- 监控目录串行 E2E `-n 0`：**15 passed / 0 failed / 0 skipped**（93.84s，含新增 RULES-07、ALERTS-03）；
+- 批量启停回读：两个自建 rulegroup 的 `alerting.kubesphere.io/enable` 由 true→false→true；不可写行无复选框；
+- 下钻回读：告警消息链接 href = `/kube-frontend/system-workspace/clusters/host/projects/<ns>/alertingrules/<rule_group>?scope=global`，按 scope 回读 `globalrulegroups/<name>` 200，点击进入策略详情页。
+
+未验收：受限账号 403 分支、member 集群、浅色/第二色调、生产前端与全站串行 E2E。

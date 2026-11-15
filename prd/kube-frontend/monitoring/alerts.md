@@ -20,9 +20,13 @@
 
 **Independent Test**：打开项目告警消息页，抓取请求路径必须命中 `/kapis/alerting.kubesphere.io/v2beta1/namespaces/<ns>/alerts`，不得再请求 `v1alpha2`；用 API 的 `totalItems` 判断页面应为 empty 还是 ready；ready 时列顺序与总数可核对。
 
+### US3 - 从一条告警跳到它的策略与被监控对象 (Priority: P1)
+
+作为排障者，我打开一条告警后要能直接跳到触发它的策略，以及跳到告警描述的那个工作负载/容器组，而不是自己去列表里按名字找。
 ## 验收场景
 
 - **AC-L3-KUBE-FRONTEND-MONITORING-ALERTS-01** — 已知项目内没有活动告警（模块未安装时也是同一读路径返回 0 条），当打开告警消息页，则页面状态为 `empty` 并显示空态标题与说明，不出现错误面板。
+- **AC-L3-KUBE-FRONTEND-MONITORING-ALERTS-03** — 已知告警消息带有 `rule_group`/`rule_level` 以及 `namespace` 与一个对象键（pod/deployment/statefulset/daemonset/job/cronjob/service/ingress），当打开该消息详情，则出现「相关入口」：策略链接指向 `…/alertingrules/<rule_group>?scope=<global|cluster|project>`（scope 由 `rule_level` 推断，缺省为 project），对象链接指向该对象所在项目的作用域页面（工作空间由对象命名空间的 `kubesphere.io/workspace` 标签解析）；点击策略链接能进入策略详情页；告警没有这些标签时不渲染对应链接（不伪造入口）。
 - **AC-L3-KUBE-FRONTEND-MONITORING-ALERTS-02** — 已知项目内有 M 条活动告警（M 可能为 0），当打开告警消息页，则列表请求命中聚合 v2beta1 的 namespaced `alerts` 集合、不请求 v1alpha2；M 为 0 时页面为 `empty` 且不渲染表头；M 大于 0 时页面为 `ready`，列依次为消息、状态、级别、告警策略、监控目标、触发时间，分页总数等于接口 `totalItems`；提供按状态（`state` 参数）与级别（`label_filters=severity`）的服务端筛选，筛选后总数/空态随响应更新；行操作只有「详情」，不提供删除（聚合 API 没有 item DELETE 路由，旧 console 的项目消息页也没有删除入口）。
 
 ## 设计目标

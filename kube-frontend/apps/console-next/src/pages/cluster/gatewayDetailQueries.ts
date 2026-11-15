@@ -55,6 +55,10 @@ export interface GatewayDetail {
   address: string;
   /** The service exposes an HTTPS port, so Ingress TLS can be terminated here. */
   tls: boolean;
+  /** `metadata.annotations['kubesphere.io/creator']` — the old console shows it on the card. */
+  creator: string;
+  /** `spec.deployment.annotations['servicemesh.kubesphere.io/enabled']` — 链路追踪 in the old card. */
+  tracing: boolean;
 }
 
 export interface GatewayIngress {
@@ -224,6 +228,10 @@ export function useGatewayDetail(cluster: string, name: string) {
         ports,
         address,
         tls: ports.some((port) => port.name === 'https' || port.port === 443),
+        creator: text(asRecord(asRecord(gateway['metadata'])['annotations'])['kubesphere.io/creator']),
+        tracing:
+          text(asRecord(asRecord(gatewaySpec['deployment'])['annotations'])['servicemesh.kubesphere.io/enabled']) ===
+          'true',
       };
       return { detail, ingresses };
     },

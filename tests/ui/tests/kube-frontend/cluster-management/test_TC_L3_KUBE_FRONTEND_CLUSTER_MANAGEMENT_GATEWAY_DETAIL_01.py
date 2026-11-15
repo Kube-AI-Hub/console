@@ -74,7 +74,8 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_GATEWAY_DETAIL_01(cluster_manage
     attributes = ui.page.locator('[data-ai-id="gateway-detail:attributes"]')
     expect(attributes).to_be_visible(timeout=20_000)
     attributes_text = attributes.inner_text()
-    for label in ("访问地址", "端口", "IngressClass", "TLS", "副本数", "镜像"):
+    # 创建者 and 链路追踪 are on the old console card; both come from the same Gateway CR.
+    for label in ("访问地址", "端口", "IngressClass", "TLS", "副本数", "镜像", "创建者", "链路追踪"):
         assert label in attributes_text, f"属性缺「{label}」: {attributes_text[:300]}"
 
     ingress_section = ui.page.locator('[data-ai-id="gateway-detail:ingresses"]')

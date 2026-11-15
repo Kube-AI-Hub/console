@@ -159,6 +159,21 @@
   --ai-sub: var(--ai-raw-cyan-300); /* $sub */
 
   /*
+   * Multi-series chart palette.
+   *
+   * Identities on one chart (a verb, a result, a quantile) need hues that stay
+   * distinguishable on the navy surface. These are channel triples like every other
+   * token: consumers must write `rgb(var(--ai-chart-1))`; a bare `var()` as an SVG
+   * stroke silently renders nothing.
+   */
+  --ai-chart-1: var(--ai-raw-violet-300);
+  --ai-chart-2: var(--ai-raw-cyan-300);
+  --ai-chart-3: var(--ai-raw-amber-300);
+  --ai-chart-4: var(--ai-raw-mint-400);
+  --ai-chart-5: var(--ai-raw-red-400);
+  --ai-chart-6: var(--ai-raw-ice-100);
+
+  /*
    * Code editor highlighting.
    *
    * CodeMirror's built-in palette assumes a white page: property names come out
@@ -248,6 +263,15 @@
   --ai-danger: var(--ai-raw-red-200);
   --ai-danger-fg: var(--ai-raw-white);
   --ai-sub: var(--ai-raw-cyan-100);
+
+  /* Chart palette, light: the dark steps wash out on white, so each hue walks one
+     ramp step deeper while keeping its hue. */
+  --ai-chart-1: var(--ai-raw-violet-100);
+  --ai-chart-2: var(--ai-raw-cyan-100);
+  --ai-chart-3: var(--ai-raw-amber-100);
+  --ai-chart-4: var(--ai-raw-mint-600);
+  --ai-chart-5: var(--ai-raw-red-200);
+  --ai-chart-6: var(--ai-raw-navy-300);
 
   /* Code editor, light: the dark set is tuned for the navy panel and washes out
      on white, so each name maps to a darker ramp step. */

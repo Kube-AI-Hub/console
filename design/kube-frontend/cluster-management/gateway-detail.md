@@ -97,3 +97,14 @@
 ## 验收用例
 
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GATEWAY_DETAIL-01`
+
+## 创建者与链路追踪（2026-11-16）
+
+老 console 的网关卡片上还有两个字段，详情页此前没有：
+
+| 字段 | 来源 | 说明 |
+| --- | --- | --- |
+| 创建者 | metadata.annotations 的 kubesphere.io/creator | 与其它资源同一套注解；缺失时显示 - |
+| 链路追踪 | spec.deployment.annotations 的 servicemesh.kubesphere.io/enabled | 值只认字符串 'true'，其它一律视为未开启——注解写成 True 或 1 时把「不知道」当成「已开启」会让读者误判 |
+
+两者都来自详情页已经在读的那个 Gateway CR，不需要额外请求。

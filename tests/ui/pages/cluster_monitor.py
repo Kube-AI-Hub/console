@@ -83,17 +83,93 @@ class ClusterMonitorPage:
     def empty_cards(self) -> int:
         return self.page.locator('[data-ai-id$=":empty"]').count()
 
-    def groups(self) -> list[str]:
-        """Group ids in render order, e.g. ['gpu', 'host', ...]."""
+    def _group_ids(self) -> list[str]:
         return [
             (element.get_attribute('data-ai-id') or '').split(':')[-1]
             for element in self.page.locator('[data-ai-id^="cluster-monitor:group:"]').all()
         ]
 
+    def groups(self) -> list[str]:
+        """Physical-resource group ids in render order, e.g. ['gpu', 'host', ...]."""
+        return [group for group in self._group_ids() if group in self.GROUPS]
+
     def group_titles(self) -> list[str]:
+        titles: list[str] = []
+        for element in self.page.locator('[data-ai-id^="cluster-monitor:group:"]').all():
+            if (element.get_attribute('data-ai-id') or '').split(':')[-1] not in self.GROUPS:
+                continue
+            titles.append(element.locator(':scope > h2').first.inner_text().strip())
+        return titles
+
+    # ---------------- 系统组件 ----------------
+
+    #: Component sub-groups, in render order.
+    COMPONENTS = ("apiserver", "scheduler", "etcd")
+
+    #: Cards per component, in render order.
+    COMPONENT_CARDS = {
+        "apiserver": ("requestRate", "requestRateByVerb", "requestLatency"),
+        "scheduler": ("scheduleAttempts", "scheduleAttemptRate", "scheduleLatency"),
+        "etcd": (
+            "dbSize",
+            "walFsync",
+            "backendCommit",
+            "proposals",
+            "proposalsPending",
+            "clientTraffic",
+            "grpcMessages",
+        ),
+    }
+
+    def component_groups(self) -> list[str]:
+        """Component sub-group ids in render order: apiserver, scheduler, etcd."""
+        return [group for group in self._group_ids() if group in self.COMPONENTS]
+
+    def component_group(self, component: str) -> Locator:
+        return self.page.locator(f'section[data-ai-id="cluster-monitor:group:{component}"]')
+
+    def component_state(self, component: str) -> str | None:
+        return self.component_group(component).get_attribute("data-ai-state")
+
+    def wait_component_state(self, component: str, expected: str, timeout_ms: int = 120_000) -> None:
+        expect(self.component_group(component)).to_have_attribute("data-ai-state", expected, timeout=timeout_ms)
+
+    def component_not_reported(self, component: str) -> Locator:
+        return self.page.locator(f'[data-ai-id="cluster-monitor:components:not-reported:{component}"]').last
+
+    def component_retry(self, component: str) -> Locator:
+        return self.page.locator(f'[data-ai-id="cluster-monitor:components:retry:{component}"]')
+
+    def component_card_keys(self, component: str) -> list[str]:
+        prefix = f"cluster-monitor:{component}:"
         return [
-            element.inner_text().strip()
-            for element in self.page.locator('[data-ai-id^="cluster-monitor:group:"] > h2').all()
+            (element.get_attribute('data-ai-id') or '')[len(prefix):]
+            for element in self.page.locator(f'section[data-ai-id^="{prefix}"]').all()
+        ]
+
+    def component_card(self, component: str, card: str) -> Locator:
+        return self.page.locator(f'section[data-ai-id="cluster-monitor:{component}:{card}"]').last
+
+    def component_card_latest(self, component: str, card: str) -> str:
+        return self.page.locator(f'[data-ai-id="cluster-monitor:{component}:{card}:latest"]').last.inner_text().strip()
+
+    def component_card_is_empty(self, component: str, card: str) -> bool:
+        return self.page.locator(f'[data-ai-id="cluster-monitor:{component}:{card}:no-data"]').count() > 0
+
+    def component_card_series(self, component: str, card: str) -> dict[str, str]:
+        """Identity → printed value for one card's legend, e.g. {'result:scheduled': '4841'}."""
+        base = f'cluster-monitor:{component}:{card}:series:'
+        out: dict[str, str] = {}
+        for element in self.page.locator(f'[data-ai-id^="{base}"][data-ai-id$=":value"]').all():
+            ai_id = element.get_attribute('data-ai-id') or ''
+            out[ai_id[len(base):-len(':value')]] = element.inner_text().strip()
+        return out
+
+    def component_card_chart_series(self, component: str, card: str) -> list[str]:
+        """The identities that actually drew a line (a NaN-only identity draws none)."""
+        return [
+            element.get_attribute('data-ai-series') or ''
+            for element in self.page.locator(f'[data-ai-id="cluster-monitor:{component}:{card}:chart"] path').all()
         ]
 
     def select_range(self, key: str) -> None:
@@ -127,3 +203,43 @@ class ClusterMonitorPage:
             if name and points:
                 out[str(name)] = points
         return out or None
+    def component_series(
+        self,
+        component: str,
+        metrics: list[str],
+        window_seconds: int = 3600,
+        step: str = "60s",
+    ) -> dict[str, list[tuple[dict[str, str], list[float]]]]:
+        """One component's series for the same window shape the page uses.
+
+        Returns metric → [(identity labels, finite values)]. Empty list means the metric
+        was returned with no series at all — the「未上报」case, which is distinct from a
+        series whose values are zero.
+        """
+        assert self.api is not None, "api client required"
+        end = int(time.time())
+        start = end - window_seconds
+        metrics_filter = "|".join(f"{metric}$" for metric in metrics)
+        status, body = self.api.request(
+            "GET",
+            f"/kapis/monitoring.kubesphere.io/v1alpha3/components/{component}"
+            f"?cluster={self.cluster}&metrics_filter={metrics_filter}&start={start}&end={end}&step={step}",
+        )
+        assert status == 200, f"components/{component} -> {status}: {str(body)[:200]}"
+        out: dict[str, list[tuple[dict[str, str], list[float]]]] = {}
+        for result in (body or {}).get("results") or []:
+            name = result.get("metric_name") or ""
+            series: list[tuple[dict[str, str], list[float]]] = []
+            for sample in (result.get("data") or {}).get("result") or []:
+                values: list[float] = []
+                for _at, value in sample.get("values") or []:
+                    try:
+                        parsed = float(value)
+                    except (TypeError, ValueError):
+                        continue
+                    if parsed != parsed or parsed in (float("inf"), float("-inf")):
+                        continue
+                    values.append(parsed)
+                series.append((sample.get("metric") or {}, values))
+            out[str(name)] = series
+        return out

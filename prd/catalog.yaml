@@ -999,6 +999,8 @@ modules:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-03
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-04
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-05
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-06
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-07
     - id: node-usage
       title: 节点用量
       prd: prd/kube-frontend/cluster-management/node-usage.md
@@ -1188,6 +1190,7 @@ modules:
         L3:
         - TC-L3-KUBE-FRONTEND-MONITORING-ALERTS-01
         - TC-L3-KUBE-FRONTEND-MONITORING-ALERTS-02
+        - TC-L3-KUBE-FRONTEND-MONITORING-ALERTS-03
     - id: list-refresh
       title: 监控告警列表刷新
       prd: prd/kube-frontend/monitoring/list-refresh.md
@@ -1207,6 +1210,7 @@ modules:
         - TC-L3-KUBE-FRONTEND-MONITORING-RULES-04
         - TC-L3-KUBE-FRONTEND-MONITORING-RULES-05
         - TC-L3-KUBE-FRONTEND-MONITORING-RULES-06
+        - TC-L3-KUBE-FRONTEND-MONITORING-RULES-07
   - id: storage
     title: 存储
     prd: prd/kube-frontend/storage/_index.md
