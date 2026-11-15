@@ -37,6 +37,8 @@ export interface ImageBuilderPageProps {
   namespace: string;
 }
 
+/** Page sizes the old console offered (`PAGESIZE_OPTION`): 10/20/50/100. */
+const PAGE_SIZES = [10, 20, 50, 100] as const;
 const PAGE_SIZE = 10;
 
 type Dialog =
@@ -216,7 +218,8 @@ export function ImageBuilderPage({ workspace, cluster, namespace }: ImageBuilder
         pageSize: t('table.pageSize'),
         pageSizeSuffix: t('table.pageSizeSuffix'),
       },
-      pagination: { page: list.page, pageSize: list.pageSize, total },
+      sortAiPrefix: 'image-builder',
+      pagination: { page: list.page, pageSize: list.pageSize, pageSizeOptions: [...PAGE_SIZES], total },
     }),
     // `listRefresh.refresh.busy` reads `query.isFetching`; the schema has to rebuild when the
     // fetch state changes, otherwise the button is frozen in the state it had on first render.
@@ -252,6 +255,7 @@ export function ImageBuilderPage({ workspace, cluster, namespace }: ImageBuilder
         selectedKeys={list.selected}
         onSelectionChange={list.setSelected}
         onPageChange={list.setPage}
+        onPageSizeChange={list.setPageSize}
         onAction={(action, row) => {
           if (action === 'create') return setDialog({ kind: 'create' });
           if (!row) return;

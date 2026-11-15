@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/cluster-management/cluster-config.md`](../../../../prd/kube-frontend/cluster-management/cluster-config.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-02** — （需求里找不到这条 AC，请先补需求或改 `covers`）
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-02** — 已知集群侧「配置」三页（保密字典/配置字典/服务账号）默认每页 20 条，当点分页处的每页条数选择器并选择 50，则请求以 `page=1&limit=50` 重新发起（查询键含页大小，切换必须触发新请求而不是复用缓存）、表格行数等于该次响应条数、选择器显示 50；档位为 10/20/50/100；同一能力适用于集群存储页族（持久卷声明、卷快照、存储类）与 IP 池、网络策略列表；集群存储类列表是客户端分页（一次取全量），切换档位后表格只显示当前页的行。
 
 ### 关联设计
 

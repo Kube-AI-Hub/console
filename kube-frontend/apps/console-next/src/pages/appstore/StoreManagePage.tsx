@@ -24,6 +24,8 @@ export interface StoreManagePageProps {
   view: 'store' | 'categories' | 'reviews';
 }
 
+/** Page sizes the old console offered (`PAGESIZE_OPTION`): 10/20/50/100. */
+const PAGE_SIZES = [10, 20, 50, 100] as const;
 const PAGE_SIZE = 10;
 
 export function StoreManagePage({ view }: StoreManagePageProps): React.ReactElement {
@@ -54,6 +56,7 @@ function CategoriesTable(): React.ReactElement {
 
   const schema: ListSchema<(typeof rows)[number]> = {
     title: t('store.manage.categories'),
+    sortAiPrefix: 'store-manage:categories',
     description: t('store.manage.categoriesDescription'),
     rowKey: 'id',
     rowAttributes: (row) => ({ 'data-ai-row': row.id }),
@@ -90,10 +93,10 @@ function CategoriesTable(): React.ReactElement {
  */
 function StoreAppsTable(): React.ReactElement {
   const t = useT();
-  const list = useResourceListState<'name' | 'createTime'>({ defaultSortBy: 'createTime', defaultOrder: 'desc' });
+  const list = useResourceListState<'name' | 'createTime'>({ defaultSortBy: 'createTime', defaultOrder: 'desc', defaultPageSize: PAGE_SIZE });
   const apps = useQuery({
-    queryKey: ['store-manage-apps', list.page],
-    queryFn: ({ signal }) => storeAppsApi(apiClient).list({ page: list.page, pageSize: PAGE_SIZE, signal }),
+    queryKey: ['store-manage-apps', list.page, list.pageSize],
+    queryFn: ({ signal }) => storeAppsApi(apiClient).list({ page: list.page, pageSize: list.pageSize, signal }),
   });
 
   const rows = apps.data?.items ?? [];
@@ -102,6 +105,7 @@ function StoreAppsTable(): React.ReactElement {
 
   const schema: ListSchema<(typeof rows)[number]> = {
     title: t('store.manage.apps'),
+    sortAiPrefix: 'store-manage:apps',
     description: t('store.manage.appsDescription'),
     rowKey: 'id',
     rowAttributes: (row) => ({ 'data-ai-row': row.name }),
@@ -144,21 +148,21 @@ function StoreAppsTable(): React.ReactElement {
       next: t('table.next'),
       selected: (count) => t('table.selectedCount', { count }),
     },
-    pagination: { page: list.page, pageSize: PAGE_SIZE, total },
+    pagination: { page: list.page, pageSize: list.pageSize, pageSizeOptions: [...PAGE_SIZES], total },
   };
 
   if (state === 'error') {
     return <ResourceErrorPanel error={apps.error} onRetry={() => void apps.refetch()} retryAiId="store-manage:apps:retry" />;
   }
   if (state === 'loading') return <Skeleton className="h-40 w-full" />;
-  return <ResourceList schema={schema} rows={rows} loading={false} onPageChange={list.setPage} />;
+  return <ResourceList schema={schema} rows={rows} loading={false} onPageChange={list.setPage} onPageSizeChange={list.setPageSize} />;
 }
 
 function ReviewsTable(): React.ReactElement {
   const t = useT();
-  const list = useResourceListState<'appName' | 'createTime'>({ defaultSortBy: 'createTime' });
+  const list = useResourceListState<'appName' | 'createTime'>({ defaultSortBy: 'createTime', defaultPageSize: PAGE_SIZE });
   const reviews = useQuery({
-    queryKey: ['store-reviews', list.page],
+    queryKey: ['store-reviews', list.page, list.pageSize],
     queryFn: ({ signal }) => storeReviewsApi(apiClient).list({ page: list.page, pageSize: PAGE_SIZE, signal }),
   });
 
@@ -186,12 +190,12 @@ function ReviewsTable(): React.ReactElement {
       next: t('table.next'),
       selected: (count) => t('table.selectedCount', { count }),
     },
-    pagination: { page: list.page, pageSize: PAGE_SIZE, total },
+    pagination: { page: list.page, pageSize: list.pageSize, pageSizeOptions: [...PAGE_SIZES], total },
   };
 
   if (state === 'error') {
     return <ResourceErrorPanel error={reviews.error} onRetry={() => void reviews.refetch()} retryAiId="store-manage:reviews:retry" />;
   }
   if (state === 'loading') return <Skeleton className="h-40 w-full" />;
-  return <ResourceList schema={schema} rows={rows} loading={false} onPageChange={list.setPage} />;
+  return <ResourceList schema={schema} rows={rows} loading={false} onPageChange={list.setPage} onPageSizeChange={list.setPageSize} />;
 }

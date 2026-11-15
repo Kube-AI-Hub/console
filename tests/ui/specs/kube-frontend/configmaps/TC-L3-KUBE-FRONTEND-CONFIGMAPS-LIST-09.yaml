@@ -1,0 +1,33 @@
+id: TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-09
+level: 3
+suite: point
+module: kube-frontend
+submodule: configmaps
+feature: list
+title: 每页条数选择器覆盖监控告警、平台用户、项目设置、联邦与商店管理
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/alerts'
+prd: prd/kube-frontend/configmaps/list.md
+design: design/kube-frontend/configmaps/list.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-09
+
+story:
+- US1
+
+product: 监控告警、平台用户、项目设置（成员/角色/网络策略）、联邦项目、商店管理、镜像构建器都提供每页条数选择器；服务端分页切换后请求带新 limit，客户端分页切换后只渲染当前页。
+preconditions:
+- 已登录；集群 host 可读
+steps:
+- 依次打开项目告警消息、告警策略、平台用户、项目成员、项目网络策略、联邦项目、商店管理、镜像构建器
+- 每页找到 <前缀>:page-size 选择器并选 50
+- 服务端分页的页面核对出现 limit=50 请求；客户端分页的页面核对行数不超过 50
+expected:
+- 八处都有选择器且显示默认 10
+- 服务端分页：limit=50 且 page=1 的请求出现（alerts / users / members / image-builder / store-manage:apps）
+- 客户端分页：行数 ≤ 50 且等于当前页切片（alertingrules / federated-projects）
+troubleshoot:
+- 选择器变了但请求没变：页大小没进 queryKey 或请求参数仍是常量
+- 客户端分页行数超过 50：切片仍用常量 PAGE_SIZE
+update_automation:
+- 句柄：alerts:page-size / alertingrules:page-size / users:page-size / members:page-size / networkpolicies:page-size / federated-projects:page-size / store-manage:apps:page-size / image-builder:page-size

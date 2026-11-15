@@ -33,6 +33,8 @@ export interface MonitoringListPageProps {
   namespace: string;
 }
 
+/** Page sizes the old console offered (`PAGESIZE_OPTION`): 10/20/50/100. */
+const PAGE_SIZES = [10, 20, 50, 100] as const;
 const PAGE_SIZE = 10;
 
 type SortKey = 'name' | 'createTime' | 'triggeredAt';
@@ -81,10 +83,11 @@ export function MonitoringListPage({ kind, workspace, cluster, namespace }: Moni
 
   const list = useResourceListState<SortKey>({
     defaultSortBy: kind === 'alerts' ? 'triggeredAt' : 'createTime',
+    defaultPageSize: PAGE_SIZE,
     resetOn: [cluster, effectiveNamespace],
   });
   const query = useMonitoringList(kind, {
-    ...toListParams(list, { cluster, namespace: effectiveNamespace }, PAGE_SIZE),
+    ...toListParams(list, { cluster, namespace: effectiveNamespace }),
     ...(kind === 'alerts' ? alertFilters : {}),
   });
   const toggle = useToggleRule({ cluster, namespace: effectiveNamespace });
@@ -256,7 +259,7 @@ export function MonitoringListPage({ kind, workspace, cluster, namespace }: Moni
         next: t('table.next'),
         selected: (count) => t('table.selectedCount', { count }),
       },
-      pagination: { page: list.page, pageSize: PAGE_SIZE, total },
+      pagination: { page: list.page, pageSize: list.pageSize, pageSizeOptions: [...PAGE_SIZES], total },
     }),
     // `isFetching` comes from the query, so the schema must rebuild when the fetch state changes.
     [alertFilters, descriptor, kind, list, projectFilterControl, query.isFetching, t, total],
@@ -294,6 +297,7 @@ export function MonitoringListPage({ kind, workspace, cluster, namespace }: Moni
           list.setPage(1);
         }}
         onPageChange={list.setPage}
+        onPageSizeChange={list.setPageSize}
         onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
           if (next) list.setSort(next);
         }}

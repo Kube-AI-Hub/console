@@ -46,6 +46,8 @@ export interface RuleGroupsPageProps {
   namespace: string;
 }
 
+/** Page sizes the old console offered (`PAGESIZE_OPTION`): 10/20/50/100. */
+const PAGE_SIZES = [10, 20, 50, 100] as const;
 const PAGE_SIZE = 10;
 
 /** Detail route: `scope` selects which of the three collections to read. */
@@ -59,7 +61,7 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
   const navigate = useNavigate();
   const routeParams = useParams({ strict: false }) as { workspace?: string };
   const workspace = routeParams.workspace ?? 'system-workspace';
-  const list = useResourceListState<SortKey>({ defaultSortBy: 'name', resetOn: [cluster, namespace] });
+  const list = useResourceListState<SortKey>({ defaultSortBy: 'name', resetOn: [cluster, namespace], defaultPageSize: PAGE_SIZE });
   const [projectFilter, setProjectFilter] = React.useState(namespace);
   React.useEffect(() => setProjectFilter(namespace), [cluster, namespace]);
   /*
@@ -176,7 +178,7 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
    * than its own page size claims.
    */
   const total = sorted.length;
-  const rows = sorted.slice((list.page - 1) * PAGE_SIZE, list.page * PAGE_SIZE);
+  const rows = sorted.slice((list.page - 1) * list.pageSize, list.page * list.pageSize);
   const listRefresh = useListRefresh('alertingrules', groups);
 
   const enableFilter = React.useMemo(
@@ -330,7 +332,7 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
         next: t('table.next'),
         selected: (count) => t('table.selectedCount', { count }),
       },
-      pagination: { page: list.page, pageSize: PAGE_SIZE, total },
+      pagination: { page: list.page, pageSize: list.pageSize, pageSizeOptions: [...PAGE_SIZES], total },
     }),
     [canEdit, enableFilter, enabledFilter, groups.isFetching, list, permissions, projectFilter, projectFilterControl, t, total],
   );
@@ -384,6 +386,7 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
           list.setPage(1);
         }}
         onPageChange={list.setPage}
+        onPageSizeChange={list.setPageSize}
         onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
           if (next) list.setSort(next);
         }}

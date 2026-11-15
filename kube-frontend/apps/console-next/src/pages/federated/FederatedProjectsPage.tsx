@@ -53,6 +53,8 @@ export interface FederatedProjectsPageProps {
   workspace: string;
 }
 
+/** Page sizes the old console offered (`PAGESIZE_OPTION`): 10/20/50/100. */
+const PAGE_SIZES = [10, 20, 50, 100] as const;
 const PAGE_SIZE = 10;
 
 type SortKey = 'name' | 'createdAt';
@@ -275,7 +277,7 @@ export function FederatedProjectsPage({ workspace }: FederatedProjectsPageProps)
         page: list.page,
         pageSize: list.pageSize,
         total,
-        pageSizeOptions: [10, 20, 50],
+        pageSizeOptions: [...PAGE_SIZES],
       },
     }),
     [

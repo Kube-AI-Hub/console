@@ -207,6 +207,7 @@ MODULES = [
                             "TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-04",
                             "TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-07",
                             "TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-08",
+                            "TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-09",
                         ]},
                     },
                     {

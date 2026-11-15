@@ -9,6 +9,7 @@
 ## 关联需求
 
 - `AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-01`
+- AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-09
 - AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-08
 - AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-07
 - `AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-02`
@@ -67,6 +68,17 @@
 
 `ResourceList` 要求两个 prop 同时在位；只声明 `pageSizeOptions` 时选择器不渲染、页面看起来「没接上」，
 而类型检查不会报错。用 `data-ai-id="<前缀>:page-size"` 断言控件存在并可用，而不是只看请求。
+### DEC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-09 — 客户端分页列表的切片与页大小同源
+
+合并多来源或一次取全量的列表（告警策略、联邦项目、存储类）在本地分页。给它们接档位时，
+「分页器显示的 pageSize」与「切片用的 pageSize」必须是同一个值：告警策略此前切片用常量 `PAGE_SIZE`，
+选择器改成 50 后分页器说 50、表格仍只切 10 行。切片一律用 `list.pageSize`。
+
+### GOT-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-09 — 服务端分页列表的三处必须同时改
+
+一个服务端分页列表要真正支持档位，需要三处一致：请求参数 `pageSize: list.pageSize`、查询键含 `list.pageSize`、
+分页器 `pageSize: list.pageSize` 且带 `pageSizeOptions` 与 `onPageSizeChange`。少任何一处都会出现
+「选择器变了但列表不变」或「列表变了但页码算错」。本批在应用商店管理上就漏了请求参数这一处。
 ## 系统现状
 
 首个资源模块，无可继承的历史实现；行为以需求为准。

@@ -32,6 +32,8 @@ export interface PlatformListPageProps {
   kind: PlatformKind;
 }
 
+/** Page sizes the old console offered (`PAGESIZE_OPTION`): 10/20/50/100. */
+const PAGE_SIZES = [10, 20, 50, 100] as const;
 const PAGE_SIZE = 10;
 
 type SortKey = 'name' | 'createTime';
@@ -44,9 +46,10 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
   const currentUsername = user?.name;
   const list = useResourceListState<SortKey>({
     defaultSortBy: kind === 'users' ? 'createTime' : 'name',
+    defaultPageSize: PAGE_SIZE,
     resetOn: [kind],
   });
-  const query = usePlatformList(kind, toListParams(list, { cluster: 'host', namespace: '' }, PAGE_SIZE));
+  const query = usePlatformList(kind, toListParams(list, { cluster: 'host', namespace: '' }));
   const [creating, setCreating] = React.useState(false);
   const [roleTarget, setRoleTarget] = React.useState<UserSummary | null>(null);
   const [deleteTarget, setDeleteTarget] = React.useState<UserSummary | null>(null);
@@ -318,7 +321,7 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
         next: t('table.next'),
         selected: (count) => t('table.selectedCount', { count }),
       },
-      pagination: { page: list.page, pageSize: PAGE_SIZE, total },
+      pagination: { page: list.page, pageSize: list.pageSize, pageSizeOptions: [...PAGE_SIZES], total },
     }),
     [kind, list, query.isFetching, t, total, currentUsername],
   );
@@ -343,6 +346,7 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}
         onPageChange={list.setPage}
+        onPageSizeChange={list.setPageSize}
         onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
           if (next) list.setSort(next);
         }}
