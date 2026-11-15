@@ -26,11 +26,14 @@ export interface ClusterAlertingMessagesPageProps {
   cluster: string;
 }
 
+/** Page sizes the old console offered (`PAGESIZE_OPTION`): 10/20/50/100. */
+const PAGE_SIZES = [10, 20, 50, 100] as const;
 const PAGE_SIZE = 20;
 
 export function ClusterAlertingMessagesPage({ cluster }: ClusterAlertingMessagesPageProps): React.ReactElement {
   const t = useT();
   const [page, setPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState<number>(PAGE_SIZE);
   /*
    * Server-side filters, as the old console offers: state (pending/firing), severity and the
    * alerting policy. They are sent to both collections, because a page that filtered after the
@@ -41,11 +44,11 @@ export function ClusterAlertingMessagesPage({ cluster }: ClusterAlertingMessages
   const [ruleGroup, setRuleGroup] = React.useState('');
 
   const query = useQuery({
-    queryKey: ['cluster-alert-messages', cluster, page, state, severity, ruleGroup],
+    queryKey: ['cluster-alert-messages', cluster, page, pageSize, state, severity, ruleGroup],
     queryFn: ({ signal }) =>
       clusterAlertMessagesApi(apiClient).list({
         page,
-        pageSize: PAGE_SIZE,
+        pageSize,
         ...(state ? { state } : {}),
         ...(severity ? { severity } : {}),
         ...(ruleGroup ? { ruleGroup } : {}),
@@ -60,6 +63,7 @@ export function ClusterAlertingMessagesPage({ cluster }: ClusterAlertingMessages
   const schema = React.useMemo<ListSchema<ClusterAlertSummary>>(
     () => ({
       title: t('cluster.alerting.messages.title'),
+      sortAiPrefix: 'cluster-alerting-messages',
       refresh: listRefresh.refresh,
       description: t('cluster.alerting.messages.description'),
       filters: [
@@ -166,9 +170,9 @@ export function ClusterAlertingMessagesPage({ cluster }: ClusterAlertingMessages
         next: t('table.next'),
         selected: (count) => t('table.selectedCount', { count }),
       },
-      pagination: { page, pageSize: PAGE_SIZE, total },
+      pagination: { page, pageSize, pageSizeOptions: [...PAGE_SIZES], total },
     }),
-    [page, query.isFetching, ruleGroup, severity, state, t, total],
+    [page, pageSize, query.isFetching, ruleGroup, severity, state, t, total],
   );
 
   const [detail, setDetail] = React.useState<ClusterAlertSummary | null>(null);
@@ -205,7 +209,8 @@ export function ClusterAlertingMessagesPage({ cluster }: ClusterAlertingMessages
         onRefresh={listRefresh.onRefresh}
         rows={rows}
         loading={pageState === 'loading'}
-        onPageChange={setPage}
+        onPageChange={(next) => { setPage(next); }}
+        onPageSizeChange={(next) => { setPageSize(next); setPage(1); }}
         onAction={(action, row) => {
           if (!row) return;
           if (action === 'detail') setDetail(row as ClusterAlertSummary);

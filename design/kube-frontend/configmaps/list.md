@@ -9,6 +9,7 @@
 ## 关联需求
 
 - `AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-01`
+- AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-10
 - AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-09
 - AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-08
 - AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-07
@@ -79,6 +80,16 @@
 一个服务端分页列表要真正支持档位，需要三处一致：请求参数 `pageSize: list.pageSize`、查询键含 `list.pageSize`、
 分页器 `pageSize: list.pageSize` 且带 `pageSizeOptions` 与 `onPageSizeChange`。少任何一处都会出现
 「选择器变了但列表不变」或「列表变了但页码算错」。本批在应用商店管理上就漏了请求参数这一处。
+### DEC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-10 — 不足一页不渲染分页器，因此也没有档位
+
+工作空间配额、工作空间角色这类列表的数据量常常不足一页。旧 console 在这种情况下同样不显示分页器。
+把选择器强行常驻会造出一个「选 50 条但只有 4 条数据」的死控件；因此这些页面保留 `paged = rows.length > pageSize`
+的判断，只在真的分页时才出现分页器与档位。验收时「选择器不存在」是正常结果，用例对此显式跳过而不是判失败。
+
+### GOT-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-10 — 分页器的 ai 句柄来自 sortAiPrefix
+
+分页器（含档位选择器）的 `data-ai-id` 由 `schema.sortAiPrefix` 派生。给列表接档位时如果没设这个前缀，
+选择器在页面上是有的，但自动化找不到它（`<前缀>:page-size` 不存在）。本批的集群告警消息页就是这样漏掉的。
 ## 系统现状
 
 首个资源模块，无可继承的历史实现；行为以需求为准。

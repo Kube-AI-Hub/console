@@ -45,11 +45,14 @@ interface WorkspaceQuotaRow {
 }
 
 /** Client-side page size: the whole list is read once (`limit=-1`), then paged here. */
+/** Page sizes the old console offered (`PAGESIZE_OPTION`): 10/20/50/100. */
+const PAGE_SIZES = [10, 20, 50, 100] as const;
 const PAGE_SIZE = 20;
 
 export function WorkspaceQuotaPage({ workspace }: WorkspaceQuotaPageProps): React.ReactElement {
   const t = useT();
   const [page, setPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState<number>(PAGE_SIZE);
 
   const query = useQuery({
     queryKey: ['workspace-quotas', workspace],
@@ -86,16 +89,17 @@ export function WorkspaceQuotaPage({ workspace }: WorkspaceQuotaPageProps): Reac
   const rows = query.data?.rows ?? [];
   const projectCount = query.data?.projects.length ?? 0;
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
-  const paged = rows.length > PAGE_SIZE;
+  const paged = rows.length > pageSize;
   const visibleRows = React.useMemo(
-    () => (paged ? rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE) : rows),
-    [page, paged, rows],
+    () => (paged ? rows.slice((page - 1) * pageSize, page * pageSize) : rows),
+    [page, pageSize, paged, rows],
   );
   const listRefresh = useListRefresh('workspace-quota', query);
 
   const schema = React.useMemo<ListSchema<WorkspaceQuotaRow>>(
     () => ({
       title: t('workspace.quota.title'),
+      sortAiPrefix: 'workspace-quota',
       refresh: listRefresh.refresh,
       description: t('workspace.quota.description'),
       // A project may own more than one ResourceQuota (Kubernetes applies the intersection),
@@ -142,10 +146,10 @@ export function WorkspaceQuotaPage({ workspace }: WorkspaceQuotaPageProps): Reac
         next: t('table.next'),
         selected: (count) => t('table.selectedCount', { count }),
       },
-      ...(paged ? { pagination: { page, pageSize: PAGE_SIZE, total: rows.length } } : {}),
+      ...(paged ? { pagination: { page, pageSize, pageSizeOptions: [...PAGE_SIZES], total: rows.length } } : {}),
     }),
     // `busy` comes from the query, so the schema must rebuild when the fetch state changes.
-    [page, paged, projectCount, query.isFetching, rows.length, t],
+    [page, pageSize, paged, projectCount, query.isFetching, rows.length, t],
   );
 
   if (state === 'error') {
@@ -166,7 +170,7 @@ export function WorkspaceQuotaPage({ workspace }: WorkspaceQuotaPageProps): Reac
           onRefresh={listRefresh.onRefresh}
           rows={visibleRows}
           loading={state === 'loading'}
-          {...(paged ? { onPageChange: setPage } : {})}
+          {...(paged ? { onPageChange: setPage, onPageSizeChange: (next: number) => { setPageSize(next); setPage(1); } } : {})}
         />
       </div>
     </AiSurface>

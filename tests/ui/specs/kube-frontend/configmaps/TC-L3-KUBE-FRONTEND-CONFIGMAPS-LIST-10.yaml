@@ -1,0 +1,33 @@
+id: TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-10
+level: 3
+suite: point
+module: kube-frontend
+submodule: configmaps
+feature: list
+title: 每页条数选择器收尾（集群告警消息、快照类、资源监控排行）
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/alerting-messages'
+prd: prd/kube-frontend/configmaps/list.md
+design: design/kube-frontend/configmaps/list.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-10
+
+story:
+- US1
+
+product: 集群告警消息、集群快照类、集群资源监控排行也提供每页条数选择器；切换后服务端分页列表发出新 limit，客户端排行列表只渲染当前页；列表本身不足一页时不渲染分页器（与旧 console 一致）。
+preconditions:
+- 已登录；集群 host 可读
+steps:
+- 打开集群告警消息，核对选择器默认 20，选 50 后出现 limit=50 请求
+- 打开集群快照类，核对选择器存在且可切换
+- 打开集群资源监控，核对选择器存在；切换后行数不超过 50
+expected:
+- 三页都有 <前缀>:page-size 选择器
+- 服务端分页（告警消息、快照类）切换后出现 limit=50 请求
+- 客户端排行（资源监控）切换后行数 ≤ 50 且不超过服务端返回条数
+troubleshoot:
+- 选择器不存在且列表不足一页：属正常（分页器不渲染）
+- 选择器存在但请求没变：页大小没进 queryKey
+update_automation:
+- 句柄：cluster-alerting-messages:page-size / cluster-snapshot-classes:page-size / cluster-resource-monitor:page-size

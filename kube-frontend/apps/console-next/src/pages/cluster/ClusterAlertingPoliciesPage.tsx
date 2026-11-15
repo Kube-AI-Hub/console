@@ -52,6 +52,8 @@ type Tab = 'custom' | 'builtin';
  * count is meant to equal its collection's count, and the built-in collection has
  * 18 entries today. A page size of 10 would make the two disagree on screen.
  */
+/** Page sizes the old console offered (`PAGESIZE_OPTION`): 10/20/50/100. */
+const PAGE_SIZES = [10, 20, 50, 100] as const;
 const PAGE_SIZE = 50;
 
 export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPoliciesPageProps): React.ReactElement {
@@ -59,6 +61,7 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
   const queryClient = useQueryClient();
   const [tab, setTab] = React.useState<Tab>('custom');
   const [page, setPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState<number>(PAGE_SIZE);
   const [detail, setDetail] = React.useState<RuleGroupSummary | null>(null);
   const [resetting, setResetting] = React.useState<RuleGroupSummary | null>(null);
   const [resetError, setResetError] = React.useState('');
@@ -205,9 +208,9 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
         next: t('table.next'),
         selected: (count) => t('table.selectedCount', { count }),
       },
-      pagination: { page, pageSize: PAGE_SIZE, total },
+      pagination: { page, pageSize, pageSizeOptions: [...PAGE_SIZES], total },
     }),
-    [page, refreshing, t, total],
+    [page, pageSize, refreshing, t, total],
   );
 
   const state = active.isPending ? 'loading' : active.isError ? 'error' : pageRows.length === 0 ? 'empty' : 'ready';
@@ -270,7 +273,8 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
               onRefresh={listRefresh.onRefresh}
               rows={pageRows}
               loading={false}
-              onPageChange={setPage}
+              onPageChange={(next) => { setPage(next); }}
+              onPageSizeChange={(next) => { setPageSize(next); setPage(1); }}
               onAction={(action, row) => {
                 if (!row) return;
                 if (action === 'detail') setDetail(row);

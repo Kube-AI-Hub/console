@@ -44,6 +44,8 @@ export interface ResourceMonitorPageProps {
 }
 
 const AI_ID = 'cluster-resource-monitor';
+/** Page sizes the old console offered (`PAGESIZE_OPTION`): 10/20/50/100. */
+const PAGE_SIZES = [10, 20, 50, 100] as const;
 const PAGE_SIZE = 10;
 
 type Tab = 'workloads' | 'pods';
@@ -110,6 +112,7 @@ export function ResourceMonitorPage({ cluster }: ResourceMonitorPageProps): Reac
   const list = useResourceListState<SortKey>({
     defaultSortBy: 'cpu',
     defaultOrder: 'desc',
+    defaultPageSize: PAGE_SIZE,
     resetOn: [cluster, tab, rangeKey],
   });
   const workspaceOf = useClusterProjectIndex(cluster);
@@ -226,7 +229,7 @@ export function ResourceMonitorPage({ cluster }: ResourceMonitorPageProps): Reac
       next: t('table.next'),
       selected: (count) => t('table.selectedCount', { count }),
     },
-    pagination: { page: list.page, pageSize: PAGE_SIZE, total: sorted.length },
+    pagination: { page: list.page, pageSize: list.pageSize, pageSizeOptions: [...PAGE_SIZES], total: sorted.length },
   };
 
   if (usage.isError) {
@@ -314,6 +317,7 @@ export function ResourceMonitorPage({ cluster }: ResourceMonitorPageProps): Reac
               searchValue={list.keyword}
               onSearchChange={list.setKeyword}
               onPageChange={list.setPage}
+              onPageSizeChange={list.setPageSize}
               onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
                 if (next) list.setSort(next);
               }}
@@ -330,6 +334,7 @@ export function ResourceMonitorPage({ cluster }: ResourceMonitorPageProps): Reac
               searchValue={list.keyword}
               onSearchChange={list.setKeyword}
               onPageChange={list.setPage}
+              onPageSizeChange={list.setPageSize}
               onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
                 if (next) list.setSort(next);
               }}

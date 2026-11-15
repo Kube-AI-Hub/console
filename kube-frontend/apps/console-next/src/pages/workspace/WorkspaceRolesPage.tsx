@@ -28,11 +28,14 @@ export interface WorkspaceRolesPageProps {
 }
 
 /** Client-side page size: the whole collection is read once (`limit=-1`), then paged here. */
+/** Page sizes the old console offered (`PAGESIZE_OPTION`): 10/20/50/100. */
+const PAGE_SIZES = [10, 20, 50, 100] as const;
 const PAGE_SIZE = 20;
 
 export function WorkspaceRolesPage({ workspace }: WorkspaceRolesPageProps): React.ReactElement {
   const t = useT();
   const [page, setPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState<number>(PAGE_SIZE);
 
   const query = useQuery({
     queryKey: ['workspace-roles', workspace],
@@ -46,16 +49,17 @@ export function WorkspaceRolesPage({ workspace }: WorkspaceRolesPageProps): Reac
 
   const rows = query.data ?? [];
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
-  const paged = rows.length > PAGE_SIZE;
+  const paged = rows.length > pageSize;
   const visibleRows = React.useMemo(
-    () => (paged ? rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE) : rows),
-    [page, paged, rows],
+    () => (paged ? rows.slice((page - 1) * pageSize, page * pageSize) : rows),
+    [page, pageSize, paged, rows],
   );
   const listRefresh = useListRefresh('workspace-roles', query);
 
   const schema = React.useMemo<ListSchema<WorkspaceRoleSummary>>(
     () => ({
       title: t('workspace.roles.title'),
+      sortAiPrefix: 'workspace-roles',
       refresh: listRefresh.refresh,
       description: t('workspace.roles.description'),
       rowKey: 'name',
@@ -106,10 +110,10 @@ export function WorkspaceRolesPage({ workspace }: WorkspaceRolesPageProps): Reac
         next: t('table.next'),
         selected: (count) => t('table.selectedCount', { count }),
       },
-      ...(paged ? { pagination: { page, pageSize: PAGE_SIZE, total: rows.length } } : {}),
+      ...(paged ? { pagination: { page, pageSize, pageSizeOptions: [...PAGE_SIZES], total: rows.length } } : {}),
     }),
     // `busy` comes from the query, so the schema must rebuild when the fetch state changes.
-    [page, paged, query.isFetching, rows.length, t, workspace],
+    [page, pageSize, paged, query.isFetching, rows.length, t, workspace],
   );
 
   if (state === 'error') {
@@ -130,7 +134,7 @@ export function WorkspaceRolesPage({ workspace }: WorkspaceRolesPageProps): Reac
           onRefresh={listRefresh.onRefresh}
           rows={visibleRows}
           loading={state === 'loading'}
-          {...(paged ? { onPageChange: setPage } : {})}
+          {...(paged ? { onPageChange: setPage, onPageSizeChange: (next: number) => { setPageSize(next); setPage(1); } } : {})}
         />
       </div>
     </AiSurface>
