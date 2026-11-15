@@ -135,12 +135,13 @@ class FederatedProjectsPageObject:
             trigger.click()
             # Clear the default selection through the picker's own control.
             clear = self.page.get_by_role("button", name="清空已选集群").last
-            if clear.is_visible():
+            if clear.is_visible() and clear.is_enabled():
                 clear.click()
             for label in cluster_labels:
                 self.page.get_by_role("checkbox", name=label).last.click()
-            # Close the popover before pressing submit.
-            self.page.keyboard.press("Escape")
+            # Close the popover by clicking the dialog's heading: Escape would reach the
+            # dialog underneath and close the whole form.
+            self.create_dialog().get_by_role("heading").first.click()
 
     def submit_create(self) -> None:
         self.create_dialog().locator('[data-ai-id="federated-projects:create-submit"]').click()

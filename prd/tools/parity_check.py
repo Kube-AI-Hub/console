@@ -60,6 +60,9 @@ PROJECT_PAGES = {
     "custommonitoring": "custom-monitoring",
     "gateway": "gateways",
     "logcollection": "log-collections",
+    # 旧 console 的项目「应用」页（applications/template）：模板应用实例列表/安装/详情/卸载。
+    # CRD 组装应用（applications/composing）仍不在新 UI，见 PRD 的「明确不做」。
+    "applications": "applications",
 }
 
 #: 老 console 里**集群作用域**的一级页面目录 → 迁移后的路由段。

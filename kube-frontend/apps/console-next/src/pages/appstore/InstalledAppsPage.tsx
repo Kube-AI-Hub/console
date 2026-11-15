@@ -192,13 +192,20 @@ export function InstalledAppsPage({ workspace, project, cluster = 'host' }: Inst
           hideBelow: 'lg',
           render: (row) => <span className="truncate text-ai-fg-secondary">{row.versionName || '-'}</span>,
         },
-        {
-          key: 'project',
-          title: t('installedApps.column.project'),
-          width: 140,
-          hideBelow: 'lg',
-          render: (row) => <span className="truncate text-ai-fg-secondary">{row.project || '-'}</span>,
-        },
+        /* Project scope: every row is the same project, so the column repeats a constant. */
+        ...(project
+          ? []
+          : [
+              {
+                key: 'project',
+                title: t('installedApps.column.project'),
+                width: 140,
+                hideBelow: 'lg' as const,
+                render: (row: InstalledRelease) => (
+                  <span className="truncate text-ai-fg-secondary">{row.project || '-'}</span>
+                ),
+              },
+            ]),
         {
           key: 'createdAt',
           title: t('installedApps.column.createdAt'),
@@ -254,7 +261,9 @@ export function InstalledAppsPage({ workspace, project, cluster = 'host' }: Inst
       </div>
       {/* The aggregate cannot page or search server-side; say so instead of drawing a dead pager. */}
       <p className="mt-2 text-[11px] text-ai-fg-muted" data-ai-id="installed-apps:source-note">
-        {t('installedApps.clientFilterHint', { total: query.data?.total ?? rows.length })}
+        {project
+          ? t('installedApps.projectFilterHint', { total: query.data?.total ?? rows.length })
+          : t('installedApps.clientFilterHint', { total: query.data?.total ?? rows.length })}
       </p>
 
       <Modal

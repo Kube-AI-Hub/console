@@ -23,7 +23,7 @@
 ## 验收场景
 
 - **AC-L3-KUBE-FRONTEND-MONITORING-ALERTS-01** — 已知项目内没有活动告警（模块未安装时也是同一读路径返回 0 条），当打开告警消息页，则页面状态为 `empty` 并显示空态标题与说明，不出现错误面板。
-- **AC-L3-KUBE-FRONTEND-MONITORING-ALERTS-02** — 已知项目内有 M 条活动告警（M 可能为 0），当打开告警消息页，则列表请求命中聚合 v2beta1 的 namespaced `alerts` 集合、不请求 v1alpha2；M 为 0 时页面为 `empty` 且不渲染表头；M 大于 0 时页面为 `ready`，列依次为消息、状态、级别、告警策略、监控目标、触发时间，分页总数等于接口 `totalItems`；行操作只有「详情」，不提供删除（聚合 API 没有 item DELETE 路由，旧 console 的项目消息页也没有删除入口）。
+- **AC-L3-KUBE-FRONTEND-MONITORING-ALERTS-02** — 已知项目内有 M 条活动告警（M 可能为 0），当打开告警消息页，则列表请求命中聚合 v2beta1 的 namespaced `alerts` 集合、不请求 v1alpha2；M 为 0 时页面为 `empty` 且不渲染表头；M 大于 0 时页面为 `ready`，列依次为消息、状态、级别、告警策略、监控目标、触发时间，分页总数等于接口 `totalItems`；提供按状态（`state` 参数）与级别（`label_filters=severity`）的服务端筛选，筛选后总数/空态随响应更新；行操作只有「详情」，不提供删除（聚合 API 没有 item DELETE 路由，旧 console 的项目消息页也没有删除入口）。
 
 ## 设计目标
 
@@ -37,6 +37,7 @@
 
 ## UI 交互设计
 
+- 工具栏筛选：状态（全部/告警中/待触发，`state` 参数）与级别（全部/严重/警告/提示，`label_filters=severity`），都下发到服务端；筛选变化时页码回到 1。
 行操作：详情（抽屉，字段来自行数据：名称、摘要、正文、状态、级别、策略、监控目标、当前值、触发时间，以及标签/注解摘要）。不提供删除。
 
 ## 文案与校验
@@ -70,7 +71,8 @@
 
 - **FR-L3-KUBE-FRONTEND-MONITORING-ALERTS-01** — 列表在有数据时按六列展示，无数据时为 `empty`。
 - **FR-L3-KUBE-FRONTEND-MONITORING-ALERTS-02** — 数据源为聚合 v2beta1 的 namespaced `alerts`，服务端分页与总数；行详情展示标签/注解摘要。
-- **FR-L3-KUBE-FRONTEND-MONITORING-ALERTS-03** — 不提供删除入口（API 无此路由）。
+- **FR-L3-KUBE-FRONTEND-MONITORING-ALERTS-03** — 状态与级别筛选下发到服务端（`state` / `label_filters=severity`），筛选后的总数与空态来自同一次响应。
+- **FR-L3-KUBE-FRONTEND-MONITORING-ALERTS-04** — 不提供删除入口（API 无此路由）。
 
 ## 成功标准
 

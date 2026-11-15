@@ -51,9 +51,10 @@ def test_TC_L3_KUBE_FRONTEND_ACCESS_CONTROL_FEDERATED_PROJECTS_04(access_control
         fed.submit_create()
         expect(fed.create_error().filter(has_text="小写字母")).to_be_visible(timeout=10_000)
 
+        # The name field caps at 63 characters: the rule is enforced by the input itself.
         fed.fill_create(name="a" * 64)
-        fed.submit_create()
-        expect(fed.create_error().filter(has_text="63")).to_be_visible(timeout=10_000)
+        typed = fed.create_dialog().locator('[data-ai-id="federated-projects:create-name"]').input_value()
+        assert len(typed) == 63, len(typed)
 
         # A project needs a placement; clearing the picker must be caught.
         fed.fill_create(name=name, cluster_labels=[])

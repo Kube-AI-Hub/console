@@ -1,7 +1,13 @@
 # 项目内应用（应用实例）
 
 > 模块：应用商店（app-store）· 功能点：project-apps。作用域：项目（命名空间）。
-> 迁移自旧 console 项目控制台的 `/projects/<ns>/applications/template`（列表 + 安装 + 编辑 + 删除 + 详情）。
+> 迁移自旧 console 项目控制台的 `/projects/<ns>/applications/template`（列表 + 安装 + 详情 + 卸载）。
+
+## 概述
+
+项目控制台的「应用」页回答一个具体问题：**这个项目里装了哪些应用，它们现在什么状态，新应用怎么装进来**。
+对象是 openpitrix 的 release（helmrelease）：一个应用版本在本项目命名空间里的一次安装实例。
+它与「企业空间 › 已安装应用」是同一批 release 的两个视图——前者写（安装/卸载）、后者只读汇总。
 
 ## 用户故事
 
@@ -21,7 +27,7 @@
 
 - **AC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-01** — 已知项目 `<ns>` 内有 N 个 release（N 可能为 0），当打开 `/kube-frontend/<ws>/clusters/<cluster>/projects/<ns>/applications`，则表格行数等于 `GET /kapis/openpitrix.io/v1/workspaces/<ws>/namespaces/<ns>/applications?limit=-1` 的 `items` 数；每行显示 release 名称（次行为描述）、状态徽标、应用名、版本、创建时间；N=0 时显示空态标题与说明；接口失败显示错误面板与重试；页面不渲染分页器（该集合一次返回全量），搜索在本页内完成并在说明里写明。
 - **AC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-02** — 当点主操作「安装应用」，则弹出应用选择列表（可按名称搜索，数据来自 `/kapis/openpitrix.io/v1/apps`）；选中一个应用后进入安装弹窗，工作空间与项目两栏预填为当前上下文且**不可修改**，可选择版本、编辑 values、填 release 名称；提交发出 `POST /kapis/openpitrix.io/v1/workspaces/<ws>/namespaces/<ns>/applications`（`conf` 为 YAML 字符串），成功后弹窗显示 release 名并提供回本页的链接，列表重新读取后出现该行；名称为空/非法、版本缺失、release 重名时在本地拒绝且不发请求。
-- **AC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-03** — 当在列表点 release 名称，则进入项目内应用详情（基本信息/资源/事件/配置/YAML 五页签，取值与 `helmreleases` 对象一致）；当在行操作点「卸载」并确认，则发出 `DELETE /kapis/openpitrix.io/v1/workspaces/<ws>/namespaces/<ns>/applications/<cluster_id>`（用 `rls-…` 对象 id 而不是 release 名），成功后该行消失且回读不再存在；失败显示服务端原因、保留确认框；取消不发请求。
+- **AC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-03** — 当在列表点 release 名称，则进入项目内应用详情（基本信息/资源/事件/配置/YAML 五页签，取值与 `helmreleases` 对象一致）；当在详情页点「卸载」并确认，则发出 `DELETE /kapis/openpitrix.io/v1/workspaces/<ws>/namespaces/<ns>/applications/<cluster_id>`（用 `rls-…` 对象 id 而不是 release 名），成功后该 release 从项目集合消失且回读不再存在；失败显示服务端原因、保留确认框；取消不发请求。
 
 ## 设计目标
 
@@ -32,25 +38,43 @@
 
 - 项目集合返回的行结构与工作空间汇总一致（`cluster.cluster_id`、`app`、`version`、`status`）；分页与搜索由页面承担，因为该集合忽略 `keyword`。
 - 卸载按对象 id 删除：按名称删除会返回 200 但不生效（实测）。删除是异步的，回读可能在数秒内仍返回该 release。
+- 安装目标必须是项目：openpitrix 没有工作空间级创建路由。
 
 ## UI 交互设计
 
 - 信息层次：标题「应用」+ 说明（项目名）；右上主操作「安装应用」；工具条为 搜索 + 刷新；表格列 名称（含描述）/ 状态 / 应用 / 版本 / 创建时间；名称可点进详情。
+- 项目作用域隐藏「项目」列：每一行都是同一个项目，列值只会重复表头里的信息。
 - 空态说明「从应用商店安装后 release 会出现在这里」，并提供「清空搜索与筛选」「刷新」两个出口。
 - 安装流程两步：选择应用（搜索列表）→ 目标锁定的安装弹窗（版本/values/release 名称）。
+
+## 文案与校验
+
+- release 名称：小写字母数字与连字符（`^[a-z0-9]([-a-z0-9]*[a-z0-9])?$`）、不超过 32 字符；为空或不合法时在本地拒绝并提示，不发请求。
+- 版本必选；release 名与项目内已有 release 重名时在本地拒绝。
+- values 为 YAML 文本，可清空（清空即使用 chart 默认值）。
+- 中英文文案成对：`installedApps.projectTitle/projectDescription/projectFilterHint/installAction/pickTitle/pickDescription/pickSearch/pickEmpty/pickNoVersions/pickLoadError`。
+
+## 边界情况
+
+- 项目内 0 个 release：显示空态，不画空表；主操作仍可用（安装）。
+- 接口失败：错误面板 + 重试，保留搜索词。
+- release 处于 `creating`：状态徽标如实显示 creating，不当成失败。
+- 卸载异步：确认后行可能短暂仍在；页面在请求成功后重读集合，最终消失。
+- 商店读取失败（选择应用弹窗）：显示错误文案，不发安装请求。
+- 应用没有可安装版本：提示「应用没有可安装的版本」，不进入安装弹窗。
 
 ## 功能需求
 
 - FR-1 读取项目集合，一次 `limit=-1` 取全，失败可重试。
 - FR-2 行操作：卸载（危险色，二次确认）；名称链到项目内详情。
-- FR-3 主操作：安装应用（两步）。
+- FR-3 主操作：安装应用（两步：选应用 → 目标锁定的安装弹窗）。
 - FR-4 中英文文案成对；所有控件带 `data-ai-id`。
 
 ## 成功标准
 
 - SC-1 列表行数与接口一致（含 0 与 N>0 两种），空态/错误可恢复。
 - SC-2 安装后本页可见且接口回读一致；非法输入不发请求。
-- SC-3 卸载后行消失、接口回读 404；失败不伪造成功。
+- SC-3 卸载后 release 从集合消失、接口回读 404；失败不伪造成功。
 
 ## 明确不做
 
@@ -61,3 +85,9 @@
 
 - openpitrix 模块开启：`/kapis/openpitrix.io/v1/workspaces/<ws>/namespaces/<ns>/applications`、`/apps`、版本 `files` 均 200（实测）。
 - 安装目标必须是项目；没有工作空间级创建路由。
+
+## 验收用例
+
+- `TC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-01`（列表、行数与空态）
+- `TC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-02`（安装：目标锁定 + values）
+- `TC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-03`（详情与卸载）

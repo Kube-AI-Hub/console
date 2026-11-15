@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/monitoring/rules.md`](../../../../prd/kube-frontend/monitoring/rules.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-MONITORING-RULES-01** — 已知集群提供规则组资源，当打开告警策略页，则列出全部规则组，列含名称（副行为作用域）、策略状态、规则数、类型、创建时间；每行规则数等于该组 `spec.rules` 长度；页面状态为 `ready`；分页总数等于各来源合并后的条数。
+- **AC-L3-KUBE-FRONTEND-MONITORING-RULES-01** — 已知集群提供规则组资源，当打开告警策略页，则列出全部规则组，列含名称（副行为作用域）、策略状态、规则数、类型、创建时间；每行规则数等于该组 `spec.rules` 长度；页面状态为 `ready`；分页总数等于各来源合并后的条数；可用「策略状态」筛选（已启用/已停用）把合并后的列表收窄，筛选后总数与分页跟随过滤集合。
 
 ### 关联设计
 

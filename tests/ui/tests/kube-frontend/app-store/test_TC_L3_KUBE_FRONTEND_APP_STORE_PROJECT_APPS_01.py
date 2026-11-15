@@ -33,7 +33,9 @@ def test_TC_L3_KUBE_FRONTEND_APP_STORE_PROJECT_APPS_01(app_workloads_page, scree
         # Create one release through the API, then the table must show exactly it.
         create_release(ui.api, name)
         created = True
-        expect(surface.locator(f'tbody tr[data-ai-row]')).to_have_count(before + 1, timeout=120_000)
+        # The page reads on demand; an object created outside the browser appears after refresh.
+        ui.page.locator('[data-ai-id="installed-apps:refresh"]').last.click()
+        expect(surface.locator('tbody tr[data-ai-row]')).to_have_count(before + 1, timeout=120_000)
         headers = [value.strip() for value in surface.locator('thead th:visible').all_inner_texts() if value.strip()]
         for expected in ('名称', '状态', '应用', '版本', '创建时间'):
             assert expected in headers, headers

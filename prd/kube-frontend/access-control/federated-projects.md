@@ -32,7 +32,7 @@
 
 - **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-01** — 已知企业空间内存在至少一个 FederatedNamespace，当打开 `/kube-frontend/workspaces/<ws>/federatedprojects`，则列表显示这些项目（名称、命名空间、部署集群、创建时间），行数与该企业空间的 FederatedNamespace 数一致；当点击名称，则进入详情骨架，显示名称、命名空间、企业空间、部署集群、传播状态、创建时间、创建者，以及一份「已联邦资源类型」只读列表（来自联邦 API discovery 的命名空间级 Federated 类型）；已知企业空间没有联邦项目，则列表显示「暂无联邦项目」空态说明；已知对象不存在或读取失败，则详情页分别显示明确的未找到/失败说明，而不是空白页。
 
-- **AC-L3-KUBE-FRONTEND-ACCESS-CONTROL-FEDERATED_PROJECTS-03** — 已知联邦项目的资源页签里存在至少一个已联邦对象（或直接访问该对象的详情 URL），当点击资源行名称，则进入该对象的只读详情：显示对象名称、命名空间与类型徽标，「模板」区块以 YAML 展示 `spec.template`，「分发」区块以集群徽标与条件表展示 `status.clusters` / `status.conditions`；已知对象不存在（404），则显示明确的未找到说明；已知对象还没有分发状态，则「分发」区块显示明确说明而不是空表；已知资源类型段未知，则显示未知类型说明。
+- **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-03** — 已知联邦项目的资源页签里存在至少一个已联邦对象（或直接访问该对象的详情 URL），当点击资源行名称，则进入该对象的只读详情：显示对象名称、命名空间与类型徽标，「模板」区块以 YAML 展示 `spec.template`，「分发」区块以集群徽标与条件表展示 `status.clusters` / `status.conditions`；已知对象不存在（404），则显示明确的未找到说明；已知对象还没有分发状态，则「分发」区块显示明确说明而不是空表；已知资源类型段未知，则显示未知类型说明。
 
 - **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-FEDERATED_PROJECTS-02** — 已知联邦项目详情可用，当打开它，则页签为「概览 / 应用负载 / 配置 / 存储」且默认在概览（保留基本信息与资源类型列表）；当分别打开「应用负载 / 配置 / 存储」，则每个页签列出该项目命名空间下对应 Federated 类型对象（名称、类型、创建时间），行数等于这些集合的 API 条数之和；已知某页签对应的集合都没有对象，则该页签显示明确的空态说明；已知某集合读取失败，则该页签显示失败说明与重试，不显示空表。
 

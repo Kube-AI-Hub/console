@@ -1176,6 +1176,7 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-01
+        - TC-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-02
     - id: alerts
       title: 告警消息列表
       prd: prd/kube-frontend/monitoring/alerts.md
@@ -1183,6 +1184,7 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-MONITORING-ALERTS-01
+        - TC-L3-KUBE-FRONTEND-MONITORING-ALERTS-02
     - id: list-refresh
       title: 监控告警列表刷新
       prd: prd/kube-frontend/monitoring/list-refresh.md
@@ -1200,6 +1202,8 @@ modules:
         - TC-L3-KUBE-FRONTEND-MONITORING-RULES-02
         - TC-L3-KUBE-FRONTEND-MONITORING-RULES-03
         - TC-L3-KUBE-FRONTEND-MONITORING-RULES-04
+        - TC-L3-KUBE-FRONTEND-MONITORING-RULES-05
+        - TC-L3-KUBE-FRONTEND-MONITORING-RULES-06
   - id: storage
     title: 存储
     prd: prd/kube-frontend/storage/_index.md

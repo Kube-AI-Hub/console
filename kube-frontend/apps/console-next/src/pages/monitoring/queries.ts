@@ -15,13 +15,25 @@ import { api } from '@/api';
 export type MonitoringKind = 'alerts' | 'alertingrules';
 
 /**
+ * List parameters, plus the two alert filters the old console offered.
+ *
+ * They are separate from the generic resource-list parameters because they are
+ * alert-specific query fields: `state` is a top-level parameter and `severity` is a
+ * label filter, while a rule list has neither.
+ */
+export interface MonitoringListParams extends Omit<ResourceListParams, 'signal'> {
+  state?: string;
+  severity?: string;
+}
+
+/**
  * Cache key for the two monitoring lists.
  *
  * The project scope is part of the key because alert messages are read from a
  * namespaced collection: a page that filtered by project but reused another
  * project's cached page would show the wrong history.
  */
-export function monitoringKey(kind: MonitoringKind, params: Omit<ResourceListParams, 'signal'>) {
+export function monitoringKey(kind: MonitoringKind, params: MonitoringListParams) {
   return [
     'monitoring',
     kind,
@@ -32,6 +44,8 @@ export function monitoringKey(kind: MonitoringKind, params: Omit<ResourceListPar
     params.sortBy,
     params.order,
     params.keyword,
+    params.state,
+    params.severity,
   ] as const;
 }
 
@@ -46,7 +60,7 @@ export function monitoringKey(kind: MonitoringKind, params: Omit<ResourceListPar
  * the CRD-backed group; the legacy `alertingrules` model keeps its own client for
  * clusters that still serve it.
  */
-export function useMonitoringList(kind: MonitoringKind, params: Omit<ResourceListParams, 'signal'>) {
+export function useMonitoringList(kind: MonitoringKind, params: MonitoringListParams) {
   return useQuery({
     queryKey: monitoringKey(kind, params),
     queryFn: async ({ signal }) => {
@@ -61,6 +75,8 @@ export function useMonitoringList(kind: MonitoringKind, params: Omit<ResourceLis
           // the list exposes exactly that, so the mapping is total.
           sortBy: 'activeAt',
           ...(params.order ? { order: params.order } : {}),
+          ...(params.state ? { state: params.state } : {}),
+          ...(params.severity ? { severity: params.severity } : {}),
           signal,
         }) as Promise<{ items: Array<AlertMessage | AlertingRuleSummary>; total: number }>;
       }

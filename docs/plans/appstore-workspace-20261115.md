@@ -81,3 +81,22 @@
 | 新版部署/member/全站 | 未验收 | — | 生产前端与 member 集群未执行 |
 
 截图：/tmp/appstore-repos-1024.png、appstore-repos-1280.png、appstore-repos-1600.png、appstore-repos-detail-1280.png、appstore-ws-apps-1280.png、appstore-installed-1280.png、appstore-installed-1600.png、appstore-store-detail-1280.png、appstore-repos-en-1280.png、appstore-installed-en-1280.png。
+
+## 7. 追加：项目作用域「应用」页（2026-11-15 第 3 轮）
+
+旧 console 的 `/projects/<ns>/applications/template` 是同一批 release 的写视图（列表 + 安装 + 详情 + 卸载），
+本批把它补进新 UI：同一组件按作用域切换数据源与动作，而不是另写一份列表。
+
+| 项 | 结果 |
+| --- | --- |
+| 数据源 | `GET /kapis/openpitrix.io/v1/workspaces/<ws>/namespaces/<ns>/applications?limit=-1`（项目集合；此前只读工作空间汇总） |
+| 安装 | 项目页内先选应用（商店列表，可按名搜索），再进安装弹窗；工作空间/项目预填且禁用（`lockedWorkspace`/`lockedProject`）；`onInstalled` 刷新列表 |
+| 列表 | 项目作用域隐藏「项目」列（每行同值）；项目集合一次返回全量，因此不渲染分页器、搜索在页内并写明 |
+| 详情/卸载 | 复用已安装应用详情五页签；卸载走 `DELETE …/applications/<cluster_id>` |
+| 规格 | `prd|design/kube-frontend/app-store/project-apps.md`；AC-PROJECT_APPS-01..03；TC 三条一一镜像 |
+| 验证 | `check_docs --strict` 本批 0/0；console-next tsc 0；`vite build` ✓；E2E 串行 -n 0：**3 passed / 29.24s**（列表、安装、详情+卸载，写用例回读并清理） |
+| 截图 | `/tmp/project-apps-{1024,1280,1600}.png`、`/tmp/project-apps-en-1280.png`（人工核对列序、中英、无横向溢出） |
+| 明确不做 | CRD 组装应用（`applications/composing`，另立单元）；release 改名/升级（无接口，见 installed-apps 明确不做） |
+
+说明：本页与「企业空间 › 已安装应用」共用 `InstalledAppsPage`；项目作用域的三个差异（数据源、动作、项目列）都在同一个组件内，
+避免两份列表在列与状态映射上漂移（见 design DEC-01..04）。

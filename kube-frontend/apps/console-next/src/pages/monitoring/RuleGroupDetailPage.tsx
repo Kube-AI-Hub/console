@@ -18,7 +18,7 @@ import { DeleteDialog } from '@/components/resource/DeleteDialog';
 import { MutationAlert, ResourceErrorPanel, errorMessage } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
 import { AlertMessagesTimeline } from './AlertMessagesTimeline';
-import { alertStateLabel, scopeLabel } from './alertLabels';
+import { alertSeverityLabel, alertStateLabel, scopeLabel } from './alertLabels';
 import { useRuleGroupPermissions } from './permissions';
 import { useAlertMessages } from './queries';
 import { RuleGroupDialog } from './RuleGroupDialog';
@@ -201,7 +201,9 @@ export function RuleGroupDetailPage({ cluster, namespace, name, scope }: RuleGro
           <DefinitionRow label={t('monitoring.column.ruleStatus')} value={detail.enabled ? t('monitoring.status.enabled') : t('monitoring.status.disabled')} />
           <DefinitionRow label={t('monitoring.ruleGroups.type')} value={detail.builtin ? t('monitoring.ruleGroups.builtin') : t('monitoring.ruleGroups.custom')} />
           <DefinitionRow label={t('monitoring.ruleGroups.ruleCount')} value={String(detail.ruleCount)} />
+          <DefinitionRow label={t('monitoring.ruleGroups.checkInterval')} value={detail.interval || '-'} />
           <DefinitionRow label={t('monitoring.field.createdAt')} value={formatTimestamp(detail.createdAt)} />
+          <DefinitionRow label={t('monitoring.ruleGroups.creator')} value={detail.creator || '-'} />
         </dl>
       </section>
 
@@ -285,7 +287,21 @@ function RuleSection({
         </p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-xs" data-ai-id="alertingrules:detail:rule-table">
+          {/*
+           * Fixed layout: a PromQL expression is long and has no spaces a browser
+           * will break on, so an auto-layout table grows past its container and the
+           * expression is clipped at narrow widths. Percent widths keep every column
+           * inside the card and let the expression wrap onto its own lines.
+           */}
+          <table className="w-full table-fixed border-collapse text-xs" data-ai-id="alertingrules:detail:rule-table">
+            <colgroup>
+              <col className="w-[10%]" />
+              <col className="w-[20%]" />
+              <col className="w-[9%]" />
+              <col className="w-[9%]" />
+              <col className="w-[24%]" />
+              <col className="w-[28%]" />
+            </colgroup>
             <thead>
               <tr className="border-b border-ai-line text-ai-fg-muted">
                 <th scope="col" className="px-2 py-2 text-left font-medium">{t('monitoring.ruleGroups.rule.state')}</th>
@@ -308,15 +324,15 @@ function RuleSection({
                         <span className="text-ai-fg-secondary">{t('monitoring.ruleGroups.rule.stateNormal')}</span>
                       )}
                     </td>
-                    <td className="px-2 py-2 font-medium text-ai-fg">{rule.name}</td>
-                    <td className="px-2 py-2 text-ai-fg-secondary">{rule.severity || '-'}</td>
+                    <td className="break-all px-2 py-2 font-medium text-ai-fg">{rule.name}</td>
+                    <td className="px-2 py-2 text-ai-fg-secondary">{rule.severity ? alertSeverityLabel(t, rule.severity) : '-'}</td>
                     <td className="px-2 py-2 tabular-nums text-ai-fg-secondary">{rule.duration || '-'}</td>
                     <td className="min-w-0 px-2 py-2 text-ai-fg-secondary">
                       <span className="block break-words">{rule.summary || rule.description || '-'}</span>
                       {rule.message ? <span className="mt-1 block break-words text-ai-fg-muted">{rule.message}</span> : null}
                     </td>
                     <td className="min-w-0 px-2 py-2">
-                      <code className="block break-words font-mono text-[11px] text-ai-fg-muted">{rule.expression || '-'}</code>
+                      <code className="block whitespace-pre-wrap break-all font-mono text-[11px] text-ai-fg-muted">{rule.expression || '-'}</code>
                     </td>
                   </tr>
                 );

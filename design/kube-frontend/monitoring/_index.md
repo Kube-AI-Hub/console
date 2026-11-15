@@ -15,7 +15,7 @@
 
 ## 设计目标与非目标
 
-目标：告警数据走正确的 kapis 组；模块缺失时退化为空态；项目级自定义策略可写。非目标：消息静默、通知渠道配置。
+目标：告警数据走正确的 kapis 组（聚合 v2beta1）；0 条时退化为空态；项目级自定义策略可写；策略详情可读到逐条规则与告警消息历史。非目标：消息静默、通知渠道配置（通知在平台「通知管理」的独立对象里）。
 
 ## 关键约束
 
@@ -51,27 +51,31 @@
 
 ## 系统现状
 
-老 console `pages/projects/containers/Alerting/{Messages,Policies}`；列表列与本模块一致，策略支持启用/停用与编辑。
+老 console `pages/projects/containers/Alerting/{Messages,Policies}`：消息页六列、只读；策略列表四列 + 启用/停用/编辑/删除/恢复初始配置；策略详情是独立路由（左栏属性 + 规则/告警消息两页签）。新实现保留这些任务：列表、详情（规则 + 消息时间线）、创建/编辑/删除、启停、SSAR 门控；集群级两页签复用 `RuleGroupBody`。
 
 ## 仓库落点
 
-- `apps/console-next/src/pages/monitoring/`
-- `src/routes/.../{alerts,alertingrules}/`
+- `apps/console-next/src/pages/monitoring/`（`MonitoringListPage` / `RuleGroupsPage` / `RuleGroupDetailPage` / `AlertMessagesTimeline` / `permissions.ts`）
+- `src/routes/.../{alerts,alertingrules}/`（含 `alertingrules/$name.tsx` 详情路由）
 - `packages/api-client/src/alerting.ts`
 
 ## 对外契约
 
-读 `alerting.kubesphere.io/v1alpha2`；删除同样走该组（未在页面暴露策略删除）。
+读聚合告警 `/kapis/alerting.kubesphere.io/v2beta1/{clusteralerts,globalalerts,namespaces/<ns>/alerts}`；规则组读 `/apis/alerting.kubesphere.io/v2beta1/{globalrulegroups,clusterrulegroups,namespaces/<ns>/rulegroups}`，写走 `/apis` 的 POST/PUT/DELETE。告警消息只读（聚合 API 无 item 删除路由）。
 
 ## 不变量
 
-1. 告警数据只经告警组读取。
-2. 空响应体等价于空列表。
+1. 告警数据只经告警 kapis 组读取；规则组只经 `/apis/alerting.kubesphere.io/v2beta1` 读写。
+2. 0 条（200 + 空数组）等价于空态；非 2xx 才是错误。
+3. 消息区的「共 N 条」来自服务端 `totalItems`；按策略过滤用 `label_filters=rule_group`，不在分页后的行上过滤。
+4. 写入口 = 所有权 × SSAR；检查失败 fail-open。
 
 ## 已知坑
 
 - 把告警路径写成通用资源代理（`resources.kubesphere.io`）会得到 404。
 - 空响应体不是 `{}`，任何 `.items` 访问前必须先兜底。
+- 本部署的 v1alpha2 告警组对不存在的集合返回 200 空体；读它会把「有告警」显示成「没有告警」。当前实现读 v2beta1 聚合集合。
+- 项目列表合并三种规则组作用域，详情的 `scope` 必须随行数据传递；同名对象可能跨集合存在。
 
 ## 测试与可观测
 
@@ -88,7 +92,7 @@ E2E：`tests/kube-frontend/monitoring/`。
 ## 页面与技术结构
 
 - 区域 `monitoring`（两页），路由每页一个文件夹。
-- 组件 `MonitoringListPage`，描述符在 `pages/monitoring/queries.ts`。
+- 组件：`MonitoringListPage`（两张列表 + 告警详情抽屉）、`RuleGroupsPage`（策略列表/行操作/共享 `RuleGroupBody`）、`RuleGroupDetailPage`（详情路由页）、`AlertMessagesTimeline`（消息时间线）、`RuleGroupDialog`（创建/编辑）、`permissions.ts`（SSAR）。描述符在 `pages/monitoring/queries.ts`。
 
 ## 状态与数据归属
 
@@ -96,11 +100,11 @@ E2E：`tests/kube-frontend/monitoring/`。
 
 ## 关键契约与依赖
 
-- `alertingApi` / `alertingRulesApi`（`kapisPrefix: KAPIS_ALERTING`）。
+- `alertMessagesApi`（聚合 v2beta1，scope+ruleGroup）、`ruleGroupsApi` / `ruleGroupsWriteApi`（`/apis` CRD）、`alertingRulesApi`（3.3 旧模型）、`accessReviewApi`（SSAR）。
 
 ## 明确不做
 
-- 集群级与内置策略的编辑；消息静默、通知渠道配置。
+- 集群级与内置策略的编辑；消息静默、通知渠道配置（平台通知管理另有独立页）；告警消息删除（聚合 API 无此路由）。
 
 ## 功能点
 

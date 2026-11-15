@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/monitoring/alerts.md`](../../../../prd/kube-frontend/monitoring/alerts.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-MONITORING-ALERTS-01** — 已知告警模块未安装（或项目内没有告警），当打开告警消息页，则页面状态为 `empty` 并显示空态标题与说明，不出现错误面板。
+- **AC-L3-KUBE-FRONTEND-MONITORING-ALERTS-01** — 已知项目内没有活动告警（模块未安装时也是同一读路径返回 0 条），当打开告警消息页，则页面状态为 `empty` 并显示空态标题与说明，不出现错误面板。
 
 ### 关联设计
 

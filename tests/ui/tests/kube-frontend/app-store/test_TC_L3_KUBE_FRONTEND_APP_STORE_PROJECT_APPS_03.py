@@ -41,12 +41,12 @@ def test_TC_L3_KUBE_FRONTEND_APP_STORE_PROJECT_APPS_03(app_workloads_page, scree
             assert any(expected in text for text in tab_texts), tab_texts
         screenshot(ui.page, 'project-apps-detail')
 
-        ui.page.go_back()
-        expect(surface).to_be_visible(timeout=60_000)
-        row = surface.locator(f'tbody tr[data-ai-row="{release_id}"]')
-        expect(row).to_have_count(1, timeout=60_000)
-        ui.page.locator('[data-ai-id="installed-apps:uninstall"]').last.click()
-        ui.page.locator('[data-ai-id="installed-apps:uninstall:confirm"]').click()
+        # Uninstall from the detail page: it carries the release id, and the list row menu is a
+        # second entry point for the same action (the old console had both as well).
+        ui.page.locator('[data-ai-id="installed-app:uninstall"]').click()
+        confirm = ui.page.get_by_role('dialog')
+        expect(confirm).to_be_visible(timeout=20_000)
+        ui.page.locator('[data-ai-id="installed-app:uninstall:confirm"]').click()
 
         deadline = time.time() + 120
         while time.time() < deadline:

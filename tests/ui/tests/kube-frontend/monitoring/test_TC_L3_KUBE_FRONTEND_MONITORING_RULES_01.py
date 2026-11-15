@@ -70,4 +70,34 @@ def test_TC_L3_KUBE_FRONTEND_MONITORING_RULES_01(monitoring_page, screenshot):
         assert count is not None, f"row {name} is not a rule group from the API"
         row_text = rows.locator(f'[data-ai-row="{name}"]').inner_text() if False else None
 
+    # The old console's 已启用/已停用 filter. The merged list is paged on the client, so
+    # the filter must narrow the whole set and the pager must follow it — not filter page 1.
+    expected_disabled = sum(
+        1
+        for group in groups
+        if str(((group.get("metadata") or {}).get("labels") or {}).get("enable")) == "false"
+    )
+    filter_trigger = ui.page.locator('[data-ai-id="alertingrules:filter:enable"]')
+    expect(filter_trigger).to_be_visible(timeout=20_000)
+    filter_trigger.click()
+    ui.page.get_by_role("option", name="已停用", exact=True).click()
+    ui.page.wait_for_timeout(800)
+    ui.wait_ready("alertingrules")
+    if expected_disabled:
+        assert ui.state("alertingrules") == "ready", ui.state("alertingrules")
+        filtered_rows = surface.locator("[data-ai-row]")
+        assert filtered_rows.count() == expected_disabled, (
+            f"已停用过滤后行数 {filtered_rows.count()} 与接口的 {expected_disabled} 不一致"
+        )
+    else:
+        # No disabled group exists on this cluster; an empty filtered set is the
+        # correct result and must not be shown as a failure panel.
+        assert ui.state("alertingrules") == "empty", ui.state("alertingrules")
+
+    filter_trigger.click()
+    ui.page.get_by_role("option", name="全部状态", exact=True).click()
+    ui.page.wait_for_timeout(800)
+    ui.wait_ready("alertingrules")
+    assert ui.state("alertingrules") in ("ready", "empty"), ui.state("alertingrules")
+
     screenshot(ui.page, "alertingrules-list")

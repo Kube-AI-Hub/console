@@ -233,6 +233,8 @@ export interface RuleGroupSummary extends ResourceBase {
   scope: RuleGroupScope;
   /** How many rules the group contains. */
   ruleCount: number;
+  /** Evaluation interval from `spec.interval`, e.g. `1m`; empty when unset. */
+  interval: string;
   /** Whether the platform evaluates this group, from its enable label. */
   enabled: boolean;
   /** Installed rules are platform-managed; editing them is not offered. */
@@ -320,6 +322,7 @@ export function toRuleGroupSummary(raw: KubeObject, scope: RuleGroupScope): Rule
     kind: 'rulegroups',
     scope,
     ruleCount: rules.length,
+    interval: String(spec['interval'] ?? spec['evaluationInterval'] ?? ''),
     // An absent label means never disabled: the platform evaluates it.
     enabled: String(labels[ALERTING_ENABLE_LABEL] ?? 'true') !== 'false',
     builtin: String(labels[BUILTIN_LABEL] ?? 'false') === 'true',
@@ -798,6 +801,10 @@ export function alertMessagesApi(client: Client) {
       namespace?: string;
       /** Restrict to one policy's alerts. */
       ruleGroup?: string;
+      /** Restrict to one alert state (`firing` / `pending`); server-side. */
+      state?: string;
+      /** Restrict to one severity; sent as the `severity` label filter. */
+      severity?: string;
       page: number;
       pageSize: number;
       keyword?: string;
@@ -806,13 +813,19 @@ export function alertMessagesApi(client: Client) {
       order?: 'asc' | 'desc';
       signal?: AbortSignal;
     }): Promise<{ items: AlertMessage[]; total: number }> {
+      // Both filters live in the same `label_filters` value (a label selector), so they
+      // are assembled once instead of overwriting each other.
+      const labelFilters: string[] = [];
+      if (params.severity) labelFilters.push(`severity=${params.severity}`);
+      if (params.ruleGroup) labelFilters.push(`rule_group=${params.ruleGroup}`);
       const query: Record<string, string | number | boolean | undefined> = {
         page: params.page,
         limit: params.pageSize,
         ...(params.keyword ? { keyword: params.keyword } : {}),
         ...(params.sortBy ? { sortBy: params.sortBy } : {}),
         ...(params.order ? { ascending: params.order === 'asc' ? 'true' : 'false' } : {}),
-        ...(params.ruleGroup ? { label_filters: `rule_group=${params.ruleGroup}` } : {}),
+        ...(params.state ? { state: params.state } : {}),
+        ...(labelFilters.length > 0 ? { label_filters: labelFilters.join(',') } : {}),
       };
       const body = await client.request<{ items?: AggregatedAlertItem[]; totalItems?: number }>(
         alertCollectionPath(params.scope, params.namespace ?? ''),

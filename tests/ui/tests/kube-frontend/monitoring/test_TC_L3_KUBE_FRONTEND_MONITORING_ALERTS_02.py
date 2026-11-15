@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from urllib.parse import unquote
+
 import pytest
 from playwright.sync_api import expect
 
@@ -53,5 +55,27 @@ def test_TC_L3_KUBE_FRONTEND_MONITORING_ALERTS_02(monitoring_page, screenshot):
         assert "详情" in names, names
         assert "删除" not in names, f"聚合告警 API 没有 item DELETE 路由，不应提供删除: {names}"
         ui.page.keyboard.press("Escape")
+
+    # Both legacy filters are server-side: `state` is a top-level query field and
+    # `severity` is a label filter. Asserting the request keeps this from silently
+    # becoming a filter over the current page only.
+    severity_trigger = ui.page.locator('[data-ai-id="alerts:filter:severity"]')
+    expect(severity_trigger).to_be_visible(timeout=20_000)
+    severity_trigger.click()
+    ui.page.get_by_role("option", name="严重", exact=True).click()
+    ui.page.wait_for_timeout(1200)
+    ui.wait_ready("alerts")
+    assert any("label_filters=severity=critical" in unquote(url) for url in requests), (
+        "级别筛选没有走服务端 label_filters: " + "\n".join(requests[-3:])
+    )
+
+    state_trigger = ui.page.locator('[data-ai-id="alerts:filter:state"]')
+    state_trigger.click()
+    ui.page.get_by_role("option", name="告警中", exact=True).click()
+    ui.page.wait_for_timeout(1200)
+    ui.wait_ready("alerts")
+    assert any("state=firing" in unquote(url) for url in requests), (
+        "状态筛选没有走服务端 state 参数: " + "\n".join(requests[-3:])
+    )
 
     screenshot(ui.page, "monitoring-alerts-aggregated")

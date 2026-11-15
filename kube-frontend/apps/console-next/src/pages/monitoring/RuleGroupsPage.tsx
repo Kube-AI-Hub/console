@@ -20,7 +20,7 @@ import { DefinitionRow } from '@/components/resource/DefinitionRow';
 import { formatTimestamp } from '@/lib/time';
 import { useListRefresh } from '@/components/resource/useListRefresh';
 import { AlertMessagesTimeline } from './AlertMessagesTimeline';
-import { scopeLabel } from './alertLabels';
+import { alertSeverityLabel, scopeLabel } from './alertLabels';
 import { useRuleGroupPermissions } from './permissions';
 
 /**
@@ -62,6 +62,13 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
   const list = useResourceListState<SortKey>({ defaultSortBy: 'name', resetOn: [cluster, namespace] });
   const [projectFilter, setProjectFilter] = React.useState(namespace);
   React.useEffect(() => setProjectFilter(namespace), [cluster, namespace]);
+  /*
+   * The old console offered a 已启用/已停用 filter on this list. The merged list is
+   * already fully in memory (three sources, client-side paging), so the filter runs
+   * here and the pager/total follow the filtered set — it is not a per-page filter.
+   */
+  const [enabledFilter, setEnabledFilter] = React.useState<'' | 'true' | 'false'>('');
+  React.useEffect(() => setEnabledFilter(''), [cluster, namespace]);
   const permissions = useRuleGroupPermissions({ cluster, namespace: projectFilter });
 
   const groups = useQuery({
@@ -115,7 +122,12 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
 
   const all = groups.data?.items ?? [];
   const keyword = list.search.trim().toLowerCase();
-  const filtered = keyword ? all.filter((group) => group.name.toLowerCase().includes(keyword)) : all;
+  const filtered = all.filter((group) => {
+    if (keyword && !group.name.toLowerCase().includes(keyword)) return false;
+    if (enabledFilter === 'true') return group.enabled;
+    if (enabledFilter === 'false') return !group.enabled;
+    return true;
+  });
   const sorted = React.useMemo(() => {
     const rows = [...filtered];
     const direction = list.order === 'asc' ? 1 : -1;
@@ -133,6 +145,20 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
   const rows = sorted.slice((list.page - 1) * PAGE_SIZE, list.page * PAGE_SIZE);
   const listRefresh = useListRefresh('alertingrules', groups);
 
+  const enableFilter = React.useMemo(
+    () => ({
+      key: 'enable',
+      title: t('monitoring.column.ruleStatus'),
+      allLabel: t('monitoring.filter.allStates'),
+      options: [
+        { value: 'true', label: t('monitoring.status.enabled') },
+        { value: 'false', label: t('monitoring.status.disabled') },
+      ],
+      aiId: 'alertingrules:filter:enable',
+    }),
+    [t],
+  );
+
   const schema = React.useMemo<ListSchema<RuleGroupSummary>>(
     () => ({
       title: t('monitoring.ruleGroups.title'),
@@ -141,7 +167,7 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
       search: { placeholder: t('monitoring.searchPlaceholder'), aiId: 'alertingrules:search' },
-      filters: [projectFilterControl],
+      filters: [projectFilterControl, enableFilter],
       sortableKeys: ['name', 'ruleCount', 'createTime'],
       sortAiPrefix: 'alertingrules',
       sort: { key: list.sortBy, order: list.order },
@@ -152,7 +178,11 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
           render: (row: RuleGroupSummary) => (
             <span className="flex min-w-0 flex-col">
               <span className="truncate font-medium text-ai-fg">{row.name}</span>
-              <span className="truncate text-[11px] text-ai-fg-muted">{scopeLabel(t, row.scope)}</span>
+              {/* Old console showed the description under the name; the scope is new
+                  information, so both fit on the secondary line. */}
+              <span className="truncate text-[11px] text-ai-fg-muted">
+                {[scopeLabel(t, row.scope), row.description].filter(Boolean).join(' · ')}
+              </span>
             </span>
           ),
         },
@@ -261,7 +291,7 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
       },
       pagination: { page: list.page, pageSize: PAGE_SIZE, total },
     }),
-    [canEdit, groups.isFetching, list, permissions, projectFilter, projectFilterControl, t, total],
+    [canEdit, enableFilter, enabledFilter, groups.isFetching, list, permissions, projectFilter, projectFilterControl, t, total],
   );
 
   const state = groups.isPending ? 'loading' : groups.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
@@ -288,9 +318,10 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
         loading={state === 'loading'}
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}
-        filters={{ project: projectFilter }}
+        filters={{ project: projectFilter, enable: enabledFilter }}
         onFiltersChange={(next) => {
           setProjectFilter(next['project'] ?? '');
+          setEnabledFilter(next['enable'] === 'true' || next['enable'] === 'false' ? next['enable'] : '');
           list.setPage(1);
         }}
         onPageChange={list.setPage}
@@ -397,7 +428,15 @@ export function RuleGroupBody({ detail, namespace }: { detail: RuleGroupDetail; 
           <h3 className="text-sm font-medium text-ai-fg">
             {t('monitoring.ruleGroups.rules')} ({detail.rules.length})
           </h3>
-          <table className="w-full border-collapse text-xs" data-ai-id="alertingrules:detail:rule-table">
+          {/* Same fixed layout as the project detail page: the expression must wrap, not
+              push the modal content past its own edge. */}
+          <table className="w-full table-fixed border-collapse text-xs" data-ai-id="alertingrules:detail:rule-table">
+            <colgroup>
+              <col className="w-[22%]" />
+              <col className="w-[12%]" />
+              <col className="w-[10%]" />
+              <col className="w-[56%]" />
+            </colgroup>
             <thead>
               <tr className="border-b border-ai-line text-ai-fg-muted">
                 <th scope="col" className="px-2 py-2 text-left font-medium">{t('monitoring.ruleGroups.rule.name')}</th>
@@ -409,14 +448,14 @@ export function RuleGroupBody({ detail, namespace }: { detail: RuleGroupDetail; 
             <tbody>
               {detail.rules.map((rule) => (
                 <tr key={rule.name} className="border-b border-ai-line align-top" data-ai-row={rule.name}>
-                  <td className="px-2 py-2 font-medium text-ai-fg">{rule.name}</td>
-                  <td className="px-2 py-2 text-ai-fg-secondary">{rule.severity || '-'}</td>
+                  <td className="break-all px-2 py-2 font-medium text-ai-fg">{rule.name}</td>
+                  <td className="px-2 py-2 text-ai-fg-secondary">{rule.severity ? alertSeverityLabel(t, rule.severity) : '-'}</td>
                   <td className="px-2 py-2 tabular-nums text-ai-fg-secondary">{rule.duration || '-'}</td>
                   <td className="min-w-0 px-2 py-2 text-ai-fg-secondary">
                     <span className="block break-words">{rule.summary || rule.description || '-'}</span>
                     {rule.message ? <span className="mt-1 block break-words text-ai-fg-muted">{rule.message}</span> : null}
                     {rule.expression ? (
-                      <code className="mt-1 block break-words font-mono text-[11px] text-ai-fg-muted">{rule.expression}</code>
+                      <code className="mt-1 block whitespace-pre-wrap break-all font-mono text-[11px] text-ai-fg-muted">{rule.expression}</code>
                     ) : null}
                   </td>
                 </tr>

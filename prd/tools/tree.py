@@ -1031,12 +1031,18 @@ MODULES = [
                     {
                         "id": "alerts-write",
                         "title": "告警策略的创建与编辑",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-01"]},
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-01",
+                            "TC-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-02",
+                        ]},
                     },
                     {
                         "id": "alerts",
                         "title": "告警消息列表",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-MONITORING-ALERTS-01"]},
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-MONITORING-ALERTS-01",
+                            "TC-L3-KUBE-FRONTEND-MONITORING-ALERTS-02",
+                        ]},
                     },
                     {
                         "id": "list-refresh",
@@ -1051,6 +1057,8 @@ MODULES = [
                             "TC-L3-KUBE-FRONTEND-MONITORING-RULES-02",
                             "TC-L3-KUBE-FRONTEND-MONITORING-RULES-03",
                             "TC-L3-KUBE-FRONTEND-MONITORING-RULES-04",
+                            "TC-L3-KUBE-FRONTEND-MONITORING-RULES-05",
+                            "TC-L3-KUBE-FRONTEND-MONITORING-RULES-06",
                         ]},
                     },
                 ],

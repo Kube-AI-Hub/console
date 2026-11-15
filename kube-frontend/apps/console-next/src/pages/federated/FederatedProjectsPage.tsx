@@ -263,6 +263,13 @@ export function FederatedProjectsPage({ workspace }: FederatedProjectsPageProps)
         previous: t('table.previous'),
         next: t('table.next'),
         selected: (count) => t('table.selectedCount', { count }),
+        // The library's own defaults are Chinese; a page that pages on the server
+        // must supply every sentence or the pager stays Chinese in an English UI.
+        range: (from, to, total) => t('table.range', { from, to, total }),
+        goToPage: t('table.goToPage'),
+        jumpTo: t('table.jumpTo'),
+        pageSize: t('table.pageSize'),
+        pageSizeSuffix: t('table.pageSizeSuffix'),
       },
       pagination: {
         page: list.page,

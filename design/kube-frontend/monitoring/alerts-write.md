@@ -9,6 +9,7 @@
 ## 关联需求
 
 - AC-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-01
+- AC-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-02
 
 ## 设计目标与非目标
 
@@ -23,6 +24,7 @@
 - PUT 必须带 `metadata.resourceVersion`；否则两个编辑者会静默覆盖对方。
 - 描述写 `metadata.annotations['kubesphere.io/description']`；规则说明/消息写 `spec.rules[].annotations.summary` / `annotations.message`。
 - 启用 / 停用只 patch `alerting.kubesphere.io/enable` 标签，不动 `spec`（与 `rules.md` 的 DEC-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-03 一致）。
+- 写入口先问 `SelfSubjectAccessReview`：资源 `rulegroups`（项目级，带 namespace）/ `clusterrulegroups` / `globalrulegroups`（集群级，不带 namespace），动词 create/update/delete。只有明确的 `allowed: false` 才隐藏入口。
 
 ## 方案决策
 
@@ -74,16 +76,31 @@
 
 **何时重新考虑**：平台为集群级自定义策略提供独立所有权（例如用户可创建的非 builtin 集群规则组）时。
 
-## 系统现状
+### DEC-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-07 — 写入口先过 SSAR，再决定渲染
 
+**为什么**：角色绑定是权限的唯一事实，前端没有第二套权限模型。`SelfSubjectAccessReview` 用与真实写入相同的 verb/resource/namespace 提问，结论与 403 一致；这样只读成员看不到「创建策略」，不会填完表单才被拒绝。创建是项目级写（必须选定项目），编辑/删除只在项目级非内置策略上出现，启停按行所属 scope 分别检查。
+
+**被否方案**：先渲染入口，403 时再提示。把一次确定的拒绝变成一次填表实验；旧 console 的 `authKey` 只控制菜单可见性，不判断具体资源动词，不能直接照搬。
+
+**何时重新考虑**：平台提供批量权限查询端点（一次返回多个 verb）时，可减少请求数而不改变判定语义。
+
+### DEC-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-08 — 权限检查失败 fail-open
+
+**为什么**：检查请求失败（BFF 旧版本、网络抖动、上游 5xx）不代表用户没有权限。此时隐藏入口会拿走一个本来可用的操作，而真正的写入仍会被服务端 403 拒绝——错误会在对话框里如实显示。因此只有 `status.allowed === false` 才隐藏；`undefined`/抛错一律按允许渲染。
+
+**被否方案**：检查失败也隐藏（fail-closed）。对只读用户更安全，但对有权限的用户是功能丢失，且与「服务端仍是最终裁决」的事实矛盾。
+
+**何时重新考虑**：产品要求严格 fail-closed（例如高风险生产环境）时，改为显示禁用 + 明确「权限未知」，而不是静默隐藏。
+
+## 系统现状
 老 console 的告警策略是独立表单页：`Alerting/Policies` 列表 + 创建页 + 编辑基本信息 / 编辑告警规则两个弹窗，字段来自 3.3 的 `alertingrules`。本集群没有该资源（页面探测结果见 `rules.md`），实际模型是 KubeSphere 3.4 的 rule groups。新的写实现只覆盖当前模型，字段沿用老 console 自定义规则的语义（告警名、PromQL、持续、级别、说明、消息），但不照搬它的模板化 `exprBuilder` 与多步表单。
 
 ## 仓库落点
 
-- 页面：`apps/console-next/src/pages/monitoring/RuleGroupsPage.tsx`（行操作与创建入口）、`RuleGroupDialog.tsx`（创建 / 编辑模态框）
-- 接口：`packages/api-client/src/alerting.ts` 的 `ruleGroupsWriteApi`（create / update / remove）与 `toRuleGroupSummary` / `toRuleGroupDetail` / `toRule`（读取描述与消息）
-- 文案：`packages/locales/src/index.ts` 的 `monitoring.ruleGroups.*`
-- 用例：`tests/ui/specs/kube-frontend/monitoring/TC-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-01.yaml` 与对应测试
+- 页面：`apps/console-next/src/pages/monitoring/RuleGroupsPage.tsx`（行操作与创建入口）、`RuleGroupDialog.tsx`（创建 / 编辑模态框）、`RuleGroupDetailPage.tsx`（详情页的编辑 / 删除 / 启停）、`permissions.ts`（SSAR 门控 hook）
+- 接口：`packages/api-client/src/alerting.ts` 的 `ruleGroupsWriteApi`（create / update / remove）与 `toRuleGroupSummary` / `toRuleGroupDetail` / `toRule`（读取描述与消息）；`accessReviewApi`（SSAR）
+- 文案：`packages/locales/src/index.ts` 的 `monitoring.ruleGroups.*`、`monitoring.ruleGroups.permission.createDenied`
+- 用例：`tests/ui/specs/kube-frontend/monitoring/TC-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-01.yaml`、`…-ALERTS_WRITE-02.yaml` 与对应测试
 
 ## 对外契约
 
@@ -129,6 +146,12 @@
 3. 只有项目级、非 `builtin` 的策略有编辑 / 删除入口。
 4. 写请求失败时对话框保留草稿，列表不刷新成「已保存」。
 5. 启用 / 停用不重写 `spec`。
+6. 入口可见性 = 所有权（项目级非内置）× 权限（SSAR allowed），两者都为真才渲染；检查失败按 allowed 处理。
+7. 无 create 权限时列表给出固定说明，不出现创建按钮。
+
+### CON-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-03 — 写权限检查契约
+
+`POST /apis/authorization.k8s.io/v1/selfsubjectaccessreviews`，body 的 `spec.resourceAttributes` 为 `{group: alerting.kubesphere.io, resource, verb, namespace?}`：项目级 `resource=rulegroups` 且带 namespace；`clusterrulegroups`/`globalrulegroups` 不带 namespace。响应 `status.allowed` 为 `true`/`false`；缺失或请求失败按允许处理（DEC-08）。
 
 ## 已知坑
 
@@ -138,12 +161,16 @@
 - **空规则列表被接受**：接口不会拒绝 0 条规则，客户端必须拦住，否则创建出「看起来正常、什么也不评估」的策略。
 - **数组替换语义**：merge patch 对 `spec.rules` 是替换而非合并；这也是编辑器必须持有整条列表的原因。
 - **名称不可改**：编辑时名称输入禁用；改名需要新建再删除，中间存在双对象的窗口，本期不做。
+- **SSAR 资源名是复数且分作用域**：用 `rulegroup` 或漏掉 namespace 会得到错误的 allowed 结论；三种规则组资源在 API 里是三个独立资源。
+- **SSAR 结果会被缓存一分钟**：刚授予的角色可能一分钟后才出现入口；刷新页面可立即重查。
+- **fail-open 不是 fail-silent**：检查失败时入口出现，但真正写入若 403，错误必须在对话框/详情内可见，不能吞掉。
 
 ## 测试与可观测
 
 - E2E：创建（1 条规则 + 描述）→ API 回读逐字段断言 → 列表搜索出现该行 → 行操作编辑描述与级别 → 回读 → 删除 → 回读 404；`finally` 中按名称兜底删除。
 - 可观测的 `data-ai-id`：`monitoring-alerts:create` / `:edit` / `:delete` / `:enable` / `:disable` / `:dialog` / `:name` / `:description` / `:rules` / `:rule:<i>:*` / `:rule-add` / `:rule-remove:<i>` / `:save` / `:error`。列表与详情的读取句柄保持 `alertingrules:*` 不变（既有用例依赖）。
 - 失败时先看：对话框是否已加载完现有规则、`resourceVersion` 是否冲突、描述注解是否写到了 `metadata.annotations`。
+- 权限门控：可观测 `alertingrules:no-create-permission`（列表说明）、行菜单条目集合、`alertingrules:detail:edit` / `:detail:delete` / `:detail:toggle` 是否存在；权限用例用 route 拦截 `**/selfsubjectaccessreviews` 控制 allowed/失败两种结论。
 
 ## 后续改进
 
@@ -155,3 +182,4 @@
 ## 验收用例
 
 - TC-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-01
+- TC-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-02

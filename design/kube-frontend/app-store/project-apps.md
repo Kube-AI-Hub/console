@@ -1,6 +1,9 @@
 # 项目内应用（应用实例）· 技术方案
 
-> 关联需求：prd/kube-frontend/app-store/project-apps.md。
+## 概述
+
+项目控制台的「应用」页是 openpitrix release 的写视图：列表读项目集合，安装走商店的安装弹窗（目标锁定），
+详情复用已安装应用详情，卸载按 `rls-…` 对象 id 删除。它与企业空间的只读汇总共用同一套列表实现。
 
 ## 关联需求
 
@@ -8,7 +11,19 @@
 - `AC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-02`
 - `AC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-03`
 
-## 设计
+## 设计目标与非目标
+
+- 目标：一个组件同时服务「企业空间只读汇总」与「项目内可写列表」，避免列/状态/卸载语义各写一份后漂移。
+- 目标：安装只保留一套弹窗（版本/values/名称校验都在里面），项目页只提供目标与「挑哪个应用」。
+- 非目标：CRD 组装应用（`applications/composing`，另立单元）；release 改名/升级（无可用接口，已登记不做）。
+
+## 关键约束
+
+- 项目集合 `GET …/namespaces/<ns>/applications?limit=-1` 返回全量、忽略 `keyword`，因此页面负责搜索且不渲染分页器。
+- 安装 `conf` 必须是 YAML **字符串**；传对象会被服务端以 unmarshal 错误拒绝。
+- 卸载必须用 `cluster_id`（`rls-…`）：按 release 名 DELETE 返回 200 但不生效；删除是异步的。
+
+## 方案决策
 
 ### DEC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-01 — 与工作空间「已安装应用」共用一个列表组件
 
@@ -31,11 +46,32 @@
 因此项目页内先弹一个可按名称搜索的商店应用列表（`/kapis/openpitrix.io/v1/apps`），选中后再把 appId/名称/版本交给
 锁定了目标的安装弹窗。选择器只承担「挑哪一个」，版本与 values 仍在安装弹窗里完成，避免第二个配置界面。
 
-## 契约与不变量
+### DEC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-04 — 项目作用域隐藏「项目」列
 
-- **CON-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-01** — 项目集合：`GET /kapis/openpitrix.io/v1/workspaces/<ws>/namespaces/<ns>/applications?limit=-1`，
-  返回 `{items, total_count}`，每项形状与工作空间汇总一致（`cluster.cluster_id`、`app{name,app_id}`、`version{name,version_id}`、`status`、`create_time`）。
-- **CON-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-02** — 安装：`POST` 同一集合，body `{app_id, version_id, name, description?, conf}`；`conf` 必须是 **YAML 字符串**（对象会被服务端以 unmarshal 错误拒绝）。
+同一列在项目视图里只会重复表头信息（每一行都是本项目），按「一个事实只出现一次」隐藏；企业空间视图保留该列，
+因为那里的行来自不同项目。被否方案：保留列以复用同一列定义——可见的冗余比一次条件判断更伤阅读。
+
+## 系统现状
+
+- `pages/appstore/InstalledAppsPage.tsx` 原本只接收 `workspace`，读工作空间汇总并只提供卸载。
+- `pages/appstore/AppInstallDialog.tsx` 原本从商店详情打开：工作空间/项目两个下拉都要手动选。
+- 项目作用域原本没有 `applications` 路由；旧 console 的 `/projects/<ns>/applications/template` 无对应页面。
+
+## 仓库落点
+
+| 仓库 | 文件 | 变更 |
+| --- | --- | --- |
+| console | `kube-frontend/packages/api-client/src/appstore.ts` | `installedReleasesApi.listProject`（项目集合） |
+| console | `kube-frontend/apps/console-next/src/pages/appstore/InstalledAppsPage.tsx` | `project`/`cluster` 作用域、安装入口与选择器、按作用域切换标题/列/说明 |
+| console | `kube-frontend/apps/console-next/src/pages/appstore/AppInstallDialog.tsx` | `lockedWorkspace`/`lockedProject`/`onInstalled` |
+| console | `kube-frontend/apps/console-next/src/routes/…/projects.$namespace/applications/{route,index,$releaseId}.tsx` | 新路由 |
+| console | `kube-frontend/apps/console-next/src/areas/registry.ts` | 工作负载区域新增「应用」页 |
+| console | `kube-frontend/packages/locales/src/index.ts` | `installedApps.project*` 等键（zh/en 成对） |
+
+## 对外契约
+
+- **CON-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-01** — 项目集合：`GET /kapis/openpitrix.io/v1/workspaces/<ws>/namespaces/<ns>/applications?limit=-1`，返回 `{items, total_count}`，每项形状与工作空间汇总一致（`cluster.cluster_id`、`app{name,app_id}`、`version{name,version_id}`、`status`、`create_time`）。
+- **CON-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-02** — 安装：`POST` 同一集合，body `{app_id, version_id, name, description?, conf}`；`conf` 必须是 YAML 字符串（对象会被服务端以 unmarshal 错误拒绝）。
 - **CON-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-03** — 卸载：`DELETE …/namespaces/<ns>/applications/<cluster_id>`，必须是 `rls-…` 对象 id；按 release 名删除返回 200 但不生效。
 
 ## 不变量
@@ -46,11 +82,23 @@
 
 ## 已知坑
 
-- **GOT-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-01** — 卸载是异步的：DELETE 返回 200 后汇总/项目集合可能仍在数秒内返回该 release。用例必须轮询到消失（≤90s），不能即时断言；finally 清理同样要「仍在则按 cluster_id 再删并轮询」。
+- **GOT-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-01** — 卸载是异步的：DELETE 返回 200 后集合可能仍在数秒内返回该 release。用例必须轮询到消失（≤90s），不能即时断言；finally 清理同样要「仍在则按 cluster_id 再删并轮询」。
 - **GOT-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-02** — `InputSearch` 的 `onChange/onSearch` 回调参数是字符串（不是事件）；写成 `event.target.value` 会在 tsc 报错、运行时静默拿到 undefined。
 - **GOT-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-03** — 项目集合的 `items` 可能含刚创建、`status=creating` 的 release；状态列必须如实显示 creating 而不是当成失败。
+- **GOT-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-04** — 页面不会因为外部 API 创建了对象而自动刷新；用例从 API 造数后必须先点刷新再断言行数。
 
 ## 测试与可观测
 
-- 列表/安装/卸载三条用例（`TC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-01..03`）在 B200 本地全栈串行跑，写用例自建唯一 release 并在 finally 清理。
-- 句柄：`installed-apps:surface`、`installed-apps:table`、`installed-apps:install`、`installed-apps:pick`、`installed-apps:pick-search`、`installed-apps:pick-app:<appId>`、`installed-apps:uninstall`、`installed-apps:uninstall:confirm`。
+- 列表/安装/详情+卸载三条用例（`TC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-01..03`）在 B200 本地全栈串行跑，写用例自建唯一 release 并在 finally 清理。
+- 句柄：`installed-apps:surface`、`installed-apps:table`、`installed-apps:install`、`installed-apps:pick`、`installed-apps:pick-search`、`installed-apps:pick-app:<appId>`、`installed-apps:source-note`、`installed-app:uninstall`、`installed-app:uninstall:confirm`。
+
+## 后续改进
+
+- CRD 组装应用（`applications/composing`）单独立单元。
+- release 改名/升级若后端提供路由，可在行操作里补「编辑信息/升级」，无需改列表结构。
+
+## 验收用例
+
+- `TC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-01`
+- `TC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-02`
+- `TC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-03`

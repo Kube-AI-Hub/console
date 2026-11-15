@@ -60,6 +60,13 @@ export function MonitoringListPage({ kind, cluster, namespace }: MonitoringListP
   }
   const [projectFilter, setProjectFilter] = React.useState(namespace);
   React.useEffect(() => setProjectFilter(namespace), [cluster, namespace]);
+  /*
+   * The old console's two alert filters. Both are server-side: `state` is a top-level
+   * query field and `severity` becomes a label filter. Filtering the rows of the
+   * current page instead would silently change the meaning of the total.
+   */
+  const [alertFilters, setAlertFilters] = React.useState<{ state?: string; severity?: string }>({});
+  React.useEffect(() => setAlertFilters({}), [namespace, cluster]);
 
   /*
    * Alert messages always read the URL's project: the aggregated collection is
@@ -73,7 +80,10 @@ export function MonitoringListPage({ kind, cluster, namespace }: MonitoringListP
     defaultSortBy: kind === 'alerts' ? 'triggeredAt' : 'createTime',
     resetOn: [cluster, effectiveNamespace],
   });
-  const query = useMonitoringList(kind, toListParams(list, { cluster, namespace: effectiveNamespace }, PAGE_SIZE));
+  const query = useMonitoringList(kind, {
+    ...toListParams(list, { cluster, namespace: effectiveNamespace }, PAGE_SIZE),
+    ...(kind === 'alerts' ? alertFilters : {}),
+  });
   const toggle = useToggleRule({ cluster, namespace: effectiveNamespace });
   const [detail, setDetail] = React.useState<Row | null>(null);
   const projectFilterControl = useProjectFilter(cluster, t('monitoring.filter.projectLabel'), t('monitoring.filter.project'), undefined, 'monitoring:filter:project');
@@ -90,7 +100,32 @@ export function MonitoringListPage({ kind, cluster, namespace }: MonitoringListP
       rowKey: (row: Row) => (kind === 'alerts' ? (row as AlertMessage).id : row.name),
       rowAttributes: (row) => ({ 'data-ai-row': kind === 'alerts' ? (row as AlertMessage).id : row.name }),
       search: { placeholder: t('monitoring.searchPlaceholder'), aiId: `${kind}:search` },
-      ...(kind === 'alerts' ? {} : { filters: [projectFilterControl] }),
+      filters:
+        kind === 'alerts'
+          ? [
+              {
+                key: 'state',
+                title: t('monitoring.column.state'),
+                allLabel: t('monitoring.filter.allStates'),
+                options: [
+                  { value: 'firing', label: t('monitoring.state.firing') },
+                  { value: 'pending', label: t('monitoring.state.pending') },
+                ],
+                aiId: 'alerts:filter:state',
+              },
+              {
+                key: 'severity',
+                title: t('monitoring.column.severity'),
+                allLabel: t('monitoring.filter.allSeverities'),
+                options: [
+                  { value: 'critical', label: t('monitoring.severity.critical') },
+                  { value: 'warning', label: t('monitoring.severity.warning') },
+                  { value: 'info', label: t('monitoring.severity.info') },
+                ],
+                aiId: 'alerts:filter:severity',
+              },
+            ]
+          : [projectFilterControl],
       sortableKeys: kind === 'alerts' ? ['triggeredAt'] : ['name', 'createTime'],
       sortAiPrefix: kind,
       sort: { key: list.sortBy, order: list.order },
@@ -221,7 +256,7 @@ export function MonitoringListPage({ kind, cluster, namespace }: MonitoringListP
       pagination: { page: list.page, pageSize: PAGE_SIZE, total },
     }),
     // `isFetching` comes from the query, so the schema must rebuild when the fetch state changes.
-    [descriptor, kind, list, projectFilterControl, query.isFetching, t, total],
+    [alertFilters, descriptor, kind, list, projectFilterControl, query.isFetching, t, total],
   );
 
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
@@ -243,15 +278,18 @@ export function MonitoringListPage({ kind, cluster, namespace }: MonitoringListP
         loading={state === 'loading'}
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}
-        {...(kind === 'alerts' ? {} : { filters: { project: projectFilter } })}
-        {...(kind === 'alerts'
-          ? {}
-          : {
-              onFiltersChange: (next: Record<string, string | undefined>) => {
-                setProjectFilter(next['project'] ?? '');
-                list.setPage(1);
-              },
-            })}
+        filters={kind === 'alerts' ? { state: alertFilters.state ?? '', severity: alertFilters.severity ?? '' } : { project: projectFilter }}
+        onFiltersChange={(next: Record<string, string | undefined>) => {
+          if (kind === 'alerts') {
+            setAlertFilters({
+              ...(next['state'] ? { state: next['state'] } : {}),
+              ...(next['severity'] ? { severity: next['severity'] } : {}),
+            });
+          } else {
+            setProjectFilter(next['project'] ?? '');
+          }
+          list.setPage(1);
+        }}
         onPageChange={list.setPage}
         onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
           if (next) list.setSort(next);

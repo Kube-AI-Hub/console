@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/app-store/project-apps.md`](../../../../prd/kube-frontend/app-store/project-apps.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-03** — 当在列表点 release 名称，则进入项目内应用详情（基本信息/资源/事件/配置/YAML 五页签，取值与 `helmreleases` 对象一致）；当在行操作点「卸载」并确认，则发出 `DELETE /kapis/openpitrix.io/v1/workspaces/<ws>/namespaces/<ns>/applications/<cluster_id>`（用 `rls-…` 对象 id 而不是 release 名），成功后该行消失且回读不再存在；失败显示服务端原因、保留确认框；取消不发请求。
+- **AC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-03** — 当在列表点 release 名称，则进入项目内应用详情（基本信息/资源/事件/配置/YAML 五页签，取值与 `helmreleases` 对象一致）；当在详情页点「卸载」并确认，则发出 `DELETE /kapis/openpitrix.io/v1/workspaces/<ws>/namespaces/<ns>/applications/<cluster_id>`（用 `rls-…` 对象 id 而不是 release 名），成功后该 release 从项目集合消失且回读不再存在；失败显示服务端原因、保留确认框；取消不发请求。
 
 ### 关联设计
 
