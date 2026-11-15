@@ -1,6 +1,13 @@
 import * as React from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { networkIsolationApi, networkPoliciesApi, networkPoliciesWriteApi, type NetworkPolicySummary } from '@kube-ai-hub/api-client';
+import {
+  networkIsolationApi,
+  networkPoliciesApi,
+  networkPoliciesWriteApi,
+  networkPolicyManifest,
+  type NetworkPolicySummary,
+  type PolicyCreateInput,
+} from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, ResourceList, Switch, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
@@ -52,8 +59,10 @@ export function NetworkIsolationPage({ workspace, cluster, namespace }: NetworkI
   const [deleting, setDeleting] = React.useState<NetworkPolicySummary | null>(null);
 
   const create = useMutation({
-    mutationFn: (input: { name: string; podSelector: string; direction: 'Ingress' | 'Egress'; peerSelector: string }) =>
-      networkPoliciesWriteApi(apiClient).create({ namespace, ...input }),
+    // The dialog collects rules; the manifest is built by a pure function so the shape can be
+    // asserted without a cluster (the peer wrapper and policyTypes are easy to get wrong).
+    mutationFn: (input: Omit<PolicyCreateInput, 'namespace'>) =>
+      networkPoliciesWriteApi(apiClient).create(networkPolicyManifest({ namespace, ...input })),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['networkpolicies', cluster, namespace] }),
   });
 

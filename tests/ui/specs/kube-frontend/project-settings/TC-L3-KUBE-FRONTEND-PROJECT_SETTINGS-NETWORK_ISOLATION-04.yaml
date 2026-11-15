@@ -1,0 +1,37 @@
+id: TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-04
+level: 3
+suite: point
+module: kube-frontend
+submodule: project-settings
+feature: network-isolation
+title: 网络隔离：白名单向导（多规则、对端与端口）
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/networkpolicies'
+prd: prd/kube-frontend/project-settings/network-isolation.md
+design: design/kube-frontend/project-settings/network-isolation.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-04
+
+story:
+- US1
+
+product: 白名单向导支持多条入站/出站规则，对端可为容器组标签、项目（命名空间）或 IP 段，并可指定协议与端口。
+preconditions:
+- 已登录且可写项目网络策略
+steps:
+- 打开网络隔离页并点「创建网络策略」
+- 填写名称、描述、作用于 app=backend
+- 添加入站规则：tier=frontend + TCP/8080；再添加一条 IP 段 10.0.0.0/8
+- 添加出站规则：项目 default
+- 确认并回读 spec 与注解
+steps_expected:
+- ingress 两条规则、egress 一条规则，policyTypes 为 [Ingress,Egress]
+- 对端分别为 podSelector / ipBlock / namespaceSelector，端口写在 ports
+- 描述写入 kubesphere.io/description
+expected:
+- 没有规则时确认按钮不可用；对端为空时也不可用
+troubleshoot:
+- 422 must specify a peer：对端没有包一层
+- policyTypes 多出一个方向：该方向规则列表非空但被写成了空规则
+update_automation:
+- 选择器：networkpolicies:create / networkpolicies-create:name / :pod-selector / :ingress-add / :ingress-value:<id> / :ingress-port:<id> / :ingress-kind:<id> / :egress-add / :submit

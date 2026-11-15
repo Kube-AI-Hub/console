@@ -5,6 +5,7 @@
 ## 关联需求
 
 - AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-03
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-04
 
 - AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-01
 - AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-02
@@ -120,3 +121,18 @@ E2E 见 `tests/kube-frontend/project-settings/`；规则视图为 `TC-L3-KUBE-FR
 **另一条**：规则视图只读。写路径仍只有创建/删除与编辑 YAML，避免出现第二套可写模型。
 
 **何时重新考虑**：需要按流量方向/对端做筛选或搜索时，给规则视图加过滤；需要编辑规则时，先迁移一个真正的规则编辑器，再让规则视图可写。
+
+
+### DEC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-04 — 白名单向导按「规则」而不是按「一个对端」建模
+
+**为什么**：老 console 的向导只问方向与一个对端（项目或服务），而 NetworkPolicy 的对象形状是一组规则、每条规则一组对端与端口。按对象形状建模，同一份表单既能表达老 console 的场景（一个命名空间对端），也能表达它做不到的（多规则、端口、地址段），且不需要为「再加一条规则」发明第二套界面。
+
+**被否方案**：保留单对端表单再加一个「继续添加」按钮——两次提交之间对象已生效，中间态可能放通不该放通的流量。
+
+### DEC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-05 — `policyTypes` 由实际规则推导
+
+**为什么**：声明一个方向却没有对应规则，等于在该方向拒绝全部流量——与「白名单」的意图相反。清单生成器只为非空的规则列表写类型，因此不存在「声明了 Egress 却没有 egress 规则」的对象。
+
+### DEC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-06 — 对端一律包一层
+
+**为什么**：`from: [{ podSelector: … }]` 是对端的形状，`from: [{ matchLabels: … }]` 会被 apiserver 以「must specify a peer」拒绝（已实测）。清单生成器统一包装三种对端，表单因此不需要知道这个细节。

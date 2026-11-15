@@ -516,7 +516,15 @@ export function networkPoliciesWriteApi(client: Client) {
   const path = (namespace: string, name?: string) =>
     `/apis/networking.k8s.io/v1/namespaces/${encodeURIComponent(namespace)}/networkpolicies${name ? `/${encodeURIComponent(name)}` : ''}`;
   return {
-    async create(params: {
+    /** Accepts a built manifest: the wizard's rule editor owns the shape. */
+    async create(body: KubeObject): Promise<NetworkPolicySummary> {
+      const namespace = String((body.metadata?.namespace ?? ''));
+      const item = await client.request<KubePolicy>(path(namespace), { method: 'POST', body });
+      return toNetworkPolicySummary(item ?? {});
+    },
+
+    /** Kept for callers that only need one peer; it builds the same manifest. */
+    async createSimple(params: {
       namespace: string;
       name: string;
       podSelector: string;
@@ -539,16 +547,12 @@ export function networkPoliciesWriteApi(client: Client) {
         if (params.direction === 'Ingress') spec['ingress'] = [{ from: [peer] }];
         else spec['egress'] = [{ to: [peer] }];
       }
-      const item = await client.request<KubePolicy>(path(params.namespace), {
-        method: 'POST',
-        body: {
-          apiVersion: 'networking.k8s.io/v1',
-          kind: 'NetworkPolicy',
-          metadata: { name: params.name, namespace: params.namespace },
-          spec,
-        },
-      });
-      return toNetworkPolicySummary(item ?? {});
+      return this.create({
+        apiVersion: 'networking.k8s.io/v1',
+        kind: 'NetworkPolicy',
+        metadata: { name: params.name, namespace: params.namespace },
+        spec,
+      } as KubeObject);
     },
 
     async remove(params: { namespace: string; name: string }): Promise<void> {
@@ -565,6 +569,91 @@ export function toSelector(text: string): Record<string, unknown> {
     if (key && value) labels[key] = value;
   }
   return Object.keys(labels).length > 0 ? { matchLabels: labels } : {};
+}
+
+/** One peer of a rule: pods by label, a namespace, or an address range. */
+export type PolicyPeerKind = 'pod' | 'namespace' | 'ipBlock';
+
+export interface PolicyPeerInput {
+  kind: PolicyPeerKind;
+  /** `k=v, k2=v2` for pods, the namespace name, or a CIDR for ipBlock. */
+  value: string;
+}
+
+export interface PolicyPortInput {
+  protocol: 'TCP' | 'UDP' | 'SCTP';
+  /** A number, a range (`80-90`), or empty for every port. */
+  port: string;
+}
+
+export interface PolicyRuleInput {
+  peer: PolicyPeerInput;
+  port?: PolicyPortInput;
+}
+
+export interface PolicyCreateInput {
+  namespace: string;
+  name: string;
+  description?: string;
+  /** `k=v, k2=v2`; empty selects every pod in the namespace. */
+  podSelector?: string;
+  ingress: PolicyRuleInput[];
+  egress: PolicyRuleInput[];
+}
+
+/**
+ * Build the NetworkPolicy a rule set describes.
+ *
+ * A peer is always an object wrapping a selector: `from: [{ podSelector: … }]`. A namespace
+ * peer wraps `namespaceSelector` with the project's `kubernetes.io/metadata.name` label — that
+ * label is set by Kubernetes itself, so the rule survives a rename of anything else.
+ * `policyTypes` is derived from which rule lists are non-empty: a policy that names a type with no
+ * rules for it would deny all traffic in that direction, which is the opposite of a whitelist.
+ */
+export function networkPolicyManifest(input: PolicyCreateInput): KubeObject {
+  const toPeer = (peer: PolicyPeerInput): Record<string, unknown> => {
+    const value = peer.value.trim();
+    if (peer.kind === 'namespace') return { namespaceSelector: { matchLabels: { 'kubernetes.io/metadata.name': value } } };
+    if (peer.kind === 'ipBlock') return { ipBlock: { cidr: value } };
+    return { podSelector: toSelector(value) };
+  };
+  const toPorts = (port: PolicyPortInput | undefined): Record<string, unknown>[] | undefined => {
+    const value = (port?.port ?? '').trim();
+    if (!value) return undefined;
+    const [from, to] = value.split('-').map((piece) => piece.trim());
+    const body: Record<string, unknown> = { protocol: port?.protocol ?? 'TCP' };
+    if (from) body['port'] = /^[0-9]+$/.test(from) ? Number(from) : from;
+    if (to) body['endPort'] = Number(to);
+    return [body];
+  };
+  const spec: Record<string, unknown> = { podSelector: toSelector(input.podSelector ?? '') };
+  const policyTypes: string[] = [];
+  if (input.ingress.length > 0) {
+    policyTypes.push('Ingress');
+    spec['ingress'] = input.ingress.map((rule) => {
+      const ports = toPorts(rule.port);
+      return { from: [toPeer(rule.peer)], ...(ports ? { ports } : {}) };
+    });
+  }
+  if (input.egress.length > 0) {
+    policyTypes.push('Egress');
+    spec['egress'] = input.egress.map((rule) => {
+      const ports = toPorts(rule.port);
+      return { to: [toPeer(rule.peer)], ...(ports ? { ports } : {}) };
+    });
+  }
+  spec['policyTypes'] = policyTypes;
+  const description = (input.description ?? '').trim();
+  return {
+    apiVersion: 'networking.k8s.io/v1',
+    kind: 'NetworkPolicy',
+    metadata: {
+      name: input.name,
+      namespace: input.namespace,
+      ...(description ? { annotations: { 'kubesphere.io/description': description } } : {}),
+    },
+    spec,
+  } as KubeObject;
 }
 
 export function networkPoliciesApi(client: Client) {

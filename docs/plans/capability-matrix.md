@@ -78,7 +78,7 @@
 | R-18 | 平台角色的规则编辑器 | **已补** | `b868a8967`：规则可增删、动词逐项勾选；编辑既有角色时先读回现有规则（写路径是整对象替换，否则保存别名会静默清空权限）；用例验证 2 条规则创建/回读/回显 |
 | R-19 | 项目概览的资源用量图表 / 引导提示卡 | **图表已补 + 引导卡不迁移** | `d325d5464`（CPU/内存/存储/容器组，已用/上限，三态区分；存储回落配额 `status.used`）；引导卡不迁移，理由见 `project-settings/overview.md` 的 DEC-03 |
 | R-20 | 项目角色详情的「已授权用户」页签 | **已补** | `d435c6f3b`：按 RoleBinding subjects 展开（default/viewer 53 个 SA；老 console 的 users?role= 会显示 0 人） |
-| R-21 | 网络隔离的规则聚合视图 / 白名单新建向导 | **规则视图已补（无损投影）** | `815ed84ea`：ingress/egress 展开为规则行（matchLabels/matchExpressions、podSelector/namespaceSelector/ipBlock 含 except、endPort）；**不做有损白名单抽象**（`network-isolation.md` DEC-05）；白名单新建向导待补 |
+| R-21 | 网络隔离的规则聚合视图 / 白名单新建向导 | **规则视图与白名单向导均已补** | `815ed84ea`：ingress/egress 展开为规则行（matchLabels/matchExpressions、podSelector/namespaceSelector/ipBlock 含 except、endPort）；**不做有损白名单抽象**（`network-isolation.md` DEC-05）；白名单向导见[向导记录](network-whitelist-wizard-20261115.md)（多规则/三类对端/端口） |
 | R-22 | 存储卷详情的快照页签 | **已补（空态路径）** | `4c00e048e`：PVC 详情「属性/快照」页签，按 `source.persistentVolumeClaimName` 过滤；B200 CRD 已装对象 0，空态即交付路径 |
 | R-23 | 项目基本信息的角色/成员/服务统计 | **已补** | `d325d5464`：三卡取各列表 `totalItems`，失败显示 `-` 而非 0 |
 | R-24 | 用户登录历史分页 / 管理员重置密码 / 批量启停 / 预置账号保护 | **部分已补** | 批量启停已交付（`48cad6d66`）；改密、登录历史分页、`presetUsers` 全员保护**待补**（改密已在 `page-parity-report.md` 登记为不迁移，需复核该判定） |

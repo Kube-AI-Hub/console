@@ -26,6 +26,7 @@
 - **AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-03** — 已知在网络隔离页，当「创建网络策略」填写名称、作用于 `app=web`、方向入站、允许对方 `role=frontend` 并确认，则生成的 NetworkPolicy 之 `spec.podSelector.matchLabels` 为 `{app: web}`、`spec.ingress[0].from[0].podSelector.matchLabels` 为 `{role: frontend}`；当删除，则该对象不存在。
 
 - **AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-02** — 已知开关处于关闭状态，当打开开关，则命名空间的 `kubesphere.io/network-isolate` 注解变为 `true`；当再次关闭，则变回 `false`。
+- **AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-04** — 已知在网络隔离页，当「创建网络策略」填写名称与描述、作用于 `app=backend`，并添加两条入站规则（一条对端为容器组标签 `tier=frontend` 且端口 TCP/8080，另一条对端为 IP 段 `10.0.0.0/8`）与一条出站规则（对端为项目 `default`）后确认，则生成的 NetworkPolicy 的 `spec.ingress` 含两条规则（前者带 `ports:[{protocol:TCP,port:8080}]`，后者带 `from:[{ipBlock:{cidr:10.0.0.0/8}}]`）、`spec.egress` 含 `to:[{namespaceSelector:{matchLabels:{kubernetes.io/metadata.name:default}}}]`、`spec.policyTypes` 为 `[Ingress,Egress]`、描述写入 `kubesphere.io/description` 注解；只添加入站规则时 `policyTypes` 只含 `Ingress`；没有添加任何规则时确认按钮不可用。
 - **AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_RULES-01** — 已知项目里有一条含入站规则（`namespaceSelector`、`ipBlock`、TCP/80、UDP/53）和一条出站规则（`podSelector`、TCP/5432 endPort 5433）的网络策略，当打开网络隔离页的规则视图，则每条规则一行，逐行显示策略名、方向、作用对象（`app=web`）、允许来源/去向（对应的 selector / ipBlock 及其 except）与端口（`TCP/80`、`UDP/53`、`TCP/5432-5433`）；已知项目里没有网络策略，则规则视图显示「这个项目还没有网络策略。」的空态说明。
 
 ## 设计目标

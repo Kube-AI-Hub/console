@@ -28,9 +28,14 @@ def test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_NETWORK_ISOLATION_02(project_setti
         ui.page.locator('[data-ai-id="networkpolicies:create"]').click()
         dialog = ui.page.get_by_role("dialog")
         expect(dialog).to_be_visible()
-        ui.page.locator("#ai-field-name").fill(name)
-        ui.page.locator("#ai-field-podSelector").fill("app=web")
-        ui.page.locator("#ai-field-peerSelector").fill("role=frontend")
+        ui.page.locator('[data-ai-id="networkpolicies-create:name"]').fill(name)
+        ui.page.locator('[data-ai-id="networkpolicies-create:pod-selector"]').fill("app=web")
+        # One ingress rule whose peer is a pod selector.
+        ui.page.locator('[data-ai-id="networkpolicies-create:ingress-add"]').click()
+        rule = ui.page.locator('[data-ai-id="networkpolicies-create:ingress"] [data-ai-row^="ingress-"]').last
+        expect(rule).to_be_visible(timeout=10_000)
+        rule_id = (rule.get_attribute("data-ai-row") or "").split("-")[-1]
+        ui.page.locator(f'[data-ai-id="networkpolicies-create:ingress-value:{rule_id}"]').fill("role=frontend")
         dialog.get_by_role("button", name="确认").click()
         expect(dialog).to_have_count(0, timeout=30_000)
 
