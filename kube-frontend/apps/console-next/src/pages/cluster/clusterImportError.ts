@@ -5,8 +5,8 @@ import type { useT } from '@/i18n';
 /**
  * Copy the add-cluster dialog shows when validation or create fails.
  *
- * The platform answers `/clusters/validation` with plain text (not a kube
- * Status). Mapping the known sentences is the difference between "网络异常"
+ * The platform answers `/clusters/validation` with a kube Status JSON body.
+ * Mapping the known sentences is the difference between "网络异常"
  * and an instruction the reader can act on. Unknown text is shown as-is —
  * swallowing it as a generic network error was how a jwt/clusterRole mismatch
  * looked like a timeout.

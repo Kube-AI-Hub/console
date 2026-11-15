@@ -86,8 +86,16 @@ describe('AddClusterDialog', () => {
         const url = String(input);
         if (url.includes('/clusters/validation')) {
           return new Response(
-            'failed to validate member cluster configuration, err: hostcluster Jwt is not equal to member cluster jwt',
-            { status: 400, headers: { 'content-type': 'text/plain; charset=utf-8' } },
+            JSON.stringify({
+              kind: 'Status',
+              apiVersion: 'v1',
+              status: 'Failure',
+              message:
+                'failed to validate member cluster configuration, err: hostcluster Jwt is not equal to member cluster jwt',
+              reason: 'BadRequest',
+              code: 400,
+            }),
+            { status: 400, headers: { 'content-type': 'application/json' } },
           );
         }
         return new Response('{}', { status: 200, headers: { 'content-type': 'application/json' } });

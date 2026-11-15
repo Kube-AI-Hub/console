@@ -17,8 +17,8 @@
 /**
  * Turn a cluster validation / create failure into a sentence the wizard can show.
  *
- * ks-apiserver answers `/clusters/validation` with `text/plain` (`http.Error`),
- * while kube-apiserver create failures are JSON `Status`. The request helper
+ * ks-apiserver answers `/clusters/validation` with a JSON `Status`
+ * (`message` plus `reason`). The request helper
  * also calls the reject callback with opposite argument order for those two
  * paths, so callers pass every candidate and this picks the first usable text.
  */
