@@ -279,6 +279,7 @@
 | kube-frontend/monitoring/alerts-write | `AC-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-01` | `TC-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-01` | [`design/kube-frontend/monitoring/alerts-write.md`](../../../design/kube-frontend/monitoring/alerts-write.md) | [`tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_ALERTS_WRITE_01.py`](../../../tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_ALERTS_WRITE_01.py) |
 | kube-frontend/monitoring/alerts | `AC-L3-KUBE-FRONTEND-MONITORING-ALERTS-01` | `TC-L3-KUBE-FRONTEND-MONITORING-ALERTS-01` | [`design/kube-frontend/monitoring/alerts.md`](../../../design/kube-frontend/monitoring/alerts.md) | [`tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_ALERTS_01.py`](../../../tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_ALERTS_01.py) |
 | kube-frontend/monitoring/custom-monitoring | `AC-L3-KUBE-FRONTEND-MONITORING-PROJECT_CUSTOM_MONITORING-01` | `TC-L3-KUBE-FRONTEND-MONITORING-PROJECT_CUSTOM_MONITORING-01` | **（无）** | [`tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_PROJECT_CUSTOM_MONITORING_01.py`](../../../tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_PROJECT_CUSTOM_MONITORING_01.py) |
+| kube-frontend/monitoring/list-refresh | `AC-L3-KUBE-FRONTEND-MONITORING-LIST_REFRESH-01` | `TC-L3-KUBE-FRONTEND-MONITORING-LIST_REFRESH-01` | [`design/kube-frontend/monitoring/list-refresh.md`](../../../design/kube-frontend/monitoring/list-refresh.md) | [`tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_LIST_REFRESH_01.py`](../../../tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_LIST_REFRESH_01.py) |
 | kube-frontend/monitoring/rules | `AC-L3-KUBE-FRONTEND-MONITORING-RULES-01` | `TC-L3-KUBE-FRONTEND-MONITORING-RULES-01` | [`design/kube-frontend/monitoring/rules.md`](../../../design/kube-frontend/monitoring/rules.md) | [`tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_RULES_01.py`](../../../tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_RULES_01.py) |
 | kube-frontend/monitoring/rules | `AC-L3-KUBE-FRONTEND-MONITORING-RULES-02` | `TC-L3-KUBE-FRONTEND-MONITORING-RULES-02` | [`design/kube-frontend/monitoring/rules.md`](../../../design/kube-frontend/monitoring/rules.md) | [`tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_RULES_02.py`](../../../tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_RULES_02.py) |
 | kube-frontend/monitoring/rules | `AC-L3-KUBE-FRONTEND-MONITORING-RULES-03` | `TC-L3-KUBE-FRONTEND-MONITORING-RULES-03` | [`design/kube-frontend/monitoring/rules.md`](../../../design/kube-frontend/monitoring/rules.md) | [`tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_RULES_03.py`](../../../tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_RULES_03.py) |
@@ -387,7 +388,7 @@
 
 ## 小结
 
-- 需求里的 AC：380 条，其中未覆盖 1 条、无技术方案承接 17 条、无用例规格实现 1 条。
+- 需求里的 AC：381 条，其中未覆盖 1 条、无技术方案承接 17 条、无用例规格实现 1 条。
 - 未覆盖：`AC-L2-KUBE-FRONTEND-LOGIN-07`
 - 无技术方案承接：`AC-L2-KUBE-FRONTEND-LOGIN-01`, `AC-L2-KUBE-FRONTEND-LOGIN-02`, `AC-L2-KUBE-FRONTEND-LOGIN-03`, `AC-L2-KUBE-FRONTEND-LOGIN-04`, `AC-L2-KUBE-FRONTEND-LOGIN-05`, `AC-L2-KUBE-FRONTEND-LOGIN-06`, `AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L2-KUBE-FRONTEND-THEME-01`, `AC-L2-KUBE-FRONTEND-THEME-02`, `AC-L2-KUBE-FRONTEND-THEME-03`, `AC-L2-KUBE-FRONTEND-THEME-04`, `AC-L2-KUBE-FRONTEND-THEME-05`, `AC-L3-KUBE-FRONTEND-MONITORING-PROJECT_CUSTOM_MONITORING-01`, `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-02`, `AC-L3-KUBE-FRONTEND-STORAGE-DETAIL_TABS-01`
 - 无用例规格实现：`AC-L2-KUBE-FRONTEND-LOGIN-07`
@@ -613,6 +614,7 @@
 | kube-frontend/monitoring/alerts-write | `US1` | `TC-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-01` |
 | kube-frontend/monitoring/alerts | `US1` | `TC-L3-KUBE-FRONTEND-MONITORING-ALERTS-01` |
 | kube-frontend/monitoring/custom-monitoring | `US1` | `TC-L3-KUBE-FRONTEND-MONITORING-PROJECT_CUSTOM_MONITORING-01` |
+| kube-frontend/monitoring/list-refresh | `US1` | `TC-L3-KUBE-FRONTEND-MONITORING-LIST_REFRESH-01` |
 | kube-frontend/monitoring/rules | `US1` | `TC-L3-KUBE-FRONTEND-MONITORING-RULES-01` |
 | kube-frontend/monitoring/rules | `US2` | `TC-L3-KUBE-FRONTEND-MONITORING-RULES-03` |
 | kube-frontend/monitoring/rules | `US3` | `TC-L3-KUBE-FRONTEND-MONITORING-RULES-02` |
@@ -701,4 +703,4 @@
 | kube-frontend/workbench/context | `US1` | `TC-L3-KUBE-FRONTEND-WORKBENCH-CONTEXT-01` |
 | kube-frontend/workbench/entry | `US1` | `TC-L3-KUBE-FRONTEND-WORKBENCH-ENTRY-01` |
 
-- 用户故事：304 条，其中未覆盖 0 条。
+- 用户故事：305 条，其中未覆盖 0 条。

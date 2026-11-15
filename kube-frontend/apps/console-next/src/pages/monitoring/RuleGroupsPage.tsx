@@ -17,6 +17,7 @@ import { DeleteDialog } from '@/components/resource/DeleteDialog';
 import { RuleGroupDialog } from './RuleGroupDialog';
 import { DefinitionRow } from '@/components/resource/DefinitionRow';
 import { formatTimestamp } from '@/lib/time';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * 告警策略 (rule-group model).
@@ -127,10 +128,12 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
    */
   const total = sorted.length;
   const rows = sorted.slice((list.page - 1) * PAGE_SIZE, list.page * PAGE_SIZE);
+  const listRefresh = useListRefresh('alertingrules', groups);
 
   const schema = React.useMemo<ListSchema<RuleGroupSummary>>(
     () => ({
       title: t('monitoring.ruleGroups.title'),
+      refresh: listRefresh.refresh,
       description: t('monitoring.ruleGroups.description'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
@@ -237,6 +240,7 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
         description: t('monitoring.ruleGroups.emptyDescription'),
       },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -246,7 +250,7 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
       },
       pagination: { page: list.page, pageSize: PAGE_SIZE, total },
     }),
-    [canEdit, list, projectFilterControl, t, total],
+    [canEdit, groups.isFetching, list, projectFilterControl, t, total],
   );
 
   const state = groups.isPending ? 'loading' : groups.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
@@ -263,6 +267,7 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
     <AiSurface as="section" aiId="alertingrules:surface" state={state} className="min-w-0">
       <ResourceList
         schema={schema}
+        onRefresh={listRefresh.onRefresh}
         rows={rows}
         loading={state === 'loading'}
         searchValue={list.keyword}

@@ -7,6 +7,7 @@ import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
 import { alertSeverityLabel, alertSourceLabel, alertStateLabel } from './alertingHelpers';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * 告警消息（集群作用域）.
@@ -37,10 +38,12 @@ export function ClusterAlertingMessagesPage({ cluster }: ClusterAlertingMessages
 
   const rows = query.data?.items ?? [];
   const total = query.data?.total ?? 0;
+  const listRefresh = useListRefresh('cluster-alerting-messages', query);
 
   const schema = React.useMemo<ListSchema<ClusterAlertSummary>>(
     () => ({
       title: t('cluster.alerting.messages.title'),
+      refresh: listRefresh.refresh,
       description: t('cluster.alerting.messages.description'),
       rowKey: 'id',
       rowAttributes: (row) => ({ 'data-ai-row': row.id }),
@@ -115,6 +118,7 @@ export function ClusterAlertingMessagesPage({ cluster }: ClusterAlertingMessages
         description: t('cluster.alerting.messages.emptyDescription'),
       },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -124,7 +128,7 @@ export function ClusterAlertingMessagesPage({ cluster }: ClusterAlertingMessages
       },
       pagination: { page, pageSize: PAGE_SIZE, total },
     }),
-    [page, t, total],
+    [page, query.isFetching, t, total],
   );
 
   const [detail, setDetail] = React.useState<ClusterAlertSummary | null>(null);
@@ -146,6 +150,7 @@ export function ClusterAlertingMessagesPage({ cluster }: ClusterAlertingMessages
     <AiSurface as="section" aiId="cluster-alerting-messages:surface" state={state} className="min-w-0">
       <ResourceList
         schema={schema}
+        onRefresh={listRefresh.onRefresh}
         rows={rows}
         loading={state === 'loading'}
         onPageChange={setPage}

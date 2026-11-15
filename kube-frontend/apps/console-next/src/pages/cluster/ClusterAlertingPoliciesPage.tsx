@@ -18,6 +18,7 @@ import { api as apiClient } from '@/api';
 import { MutationAlert, ResourceErrorPanel, errorMessage } from '@/components/resource/ResourceErrorPanel';
 import { RuleGroupBody } from '@/pages/monitoring/RuleGroupsPage';
 import { formatTimestamp } from '@/lib/time';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * 告警策略（集群作用域）.
@@ -108,10 +109,18 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
     },
     onError: (error) => setResetError(errorMessage(t, error)),
   });
+  // Both tabs read their own query; one control refreshes whichever lists exist.
+  const refreshing = custom.isFetching || builtin.isFetching;
+  const refetchAll = React.useCallback(() => {
+    void custom.refetch();
+    void builtin.refetch();
+  }, [builtin, custom]);
+  const listRefresh = useListRefresh('cluster-alerting-policies', { isFetching: refreshing, refetch: refetchAll });
 
   const schema = React.useMemo<ListSchema<RuleGroupSummary>>(
     () => ({
       rowKey: 'name',
+      refresh: listRefresh.refresh,
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
       columns: [
         {
@@ -188,6 +197,7 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
         description: t('cluster.alerting.policies.emptyDescription'),
       },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -197,7 +207,7 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
       },
       pagination: { page, pageSize: PAGE_SIZE, total },
     }),
-    [page, t, total],
+    [page, refreshing, t, total],
   );
 
   const state = active.isPending ? 'loading' : active.isError ? 'error' : pageRows.length === 0 ? 'empty' : 'ready';
@@ -257,6 +267,7 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
           ) : (
             <ResourceList
               schema={schema}
+              onRefresh={listRefresh.onRefresh}
               rows={pageRows}
               loading={false}
               onPageChange={setPage}
@@ -288,6 +299,7 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
           ) : (
             <ResourceList
               schema={schema}
+              onRefresh={listRefresh.onRefresh}
               rows={pageRows}
               loading={false}
               onPageChange={setPage}

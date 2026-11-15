@@ -9,6 +9,7 @@ import { MutationAlert, ResourceErrorPanel } from '@/components/resource/Resourc
 import { formatTimestamp } from '@/lib/time';
 import { MONITORING_DESCRIPTORS, useAlertingModel, useDeleteAlert, useMonitoringList, useToggleRule, type MonitoringKind } from './queries';
 import { RuleGroupsPage } from './RuleGroupsPage';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * The monitoring area's two lists: 告警消息 and 告警策略.
@@ -64,10 +65,12 @@ export function MonitoringListPage({ kind, cluster, namespace }: MonitoringListP
 
   const rows = (query.data?.items ?? []) as Row[];
   const total = query.data?.total ?? 0;
+  const listRefresh = useListRefresh(`${kind}`, query);
 
   const schema = React.useMemo<ListSchema<Row>>(
     () => ({
       title: t(descriptor.titleKey),
+      refresh: listRefresh.refresh,
       description: t(descriptor.descriptionKey),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
@@ -185,6 +188,7 @@ export function MonitoringListPage({ kind, cluster, namespace }: MonitoringListP
       ],
       empty: { title: t(descriptor.emptyTitleKey), description: t(descriptor.emptyDescriptionKey) },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -194,7 +198,8 @@ export function MonitoringListPage({ kind, cluster, namespace }: MonitoringListP
       },
       pagination: { page: list.page, pageSize: PAGE_SIZE, total },
     }),
-    [descriptor, kind, list, projectFilterControl, t, total],
+    // `busy` comes from the query, so the schema must rebuild when the fetch state changes.
+    [descriptor, kind, list, projectFilterControl, query.isFetching, t, total],
   );
 
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
@@ -211,6 +216,7 @@ export function MonitoringListPage({ kind, cluster, namespace }: MonitoringListP
     <AiSurface as="section" aiId={`${kind}:surface`} state={state} className="min-w-0">
       <ResourceList
         schema={schema}
+        onRefresh={listRefresh.onRefresh}
         rows={rows}
         loading={state === 'loading'}
         searchValue={list.keyword}

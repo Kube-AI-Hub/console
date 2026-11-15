@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-MONITORING-LIST_REFRESH-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: monitoring
+feature: list-refresh
+title: 监控告警页族的列表刷新
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/alerts'
+prd: prd/kube-frontend/monitoring/list-refresh.md
+design: design/kube-frontend/monitoring/list-refresh.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-MONITORING-LIST_REFRESH-01
+
+story:
+- US1
+
+product: 项目与集群的告警消息、告警策略、自定义监控页面都提供刷新入口，刷新会重新发起查询。
+preconditions:
+- 已登录且可读监控告警数据
+steps:
+- 依次打开项目告警消息、项目告警策略、集群告警消息、集群告警策略页面，确认各自的刷新入口可用
+- 点击项目告警消息的刷新，观察请求计数
+- 打开项目自定义监控页，确认空态块自带刷新句柄
+steps_expected:
+- 每页的刷新入口存在且空闲时可用
+- 点击后重新发起请求
+- 集群告警策略页两个页签共用一个刷新按钮
+expected:
+- 刷新期间按钮忙碌；返回后恢复
+troubleshoot:
+- 按钮永久禁用：schema 依赖数组缺少 isFetching
+- 空态没有刷新：自定义监控的空态块未自带按钮
+update_automation:
+- 选择器：alerts:refresh / alertingrules:refresh / cluster-alerting-messages:refresh / cluster-alerting-policies:refresh / project-custom-monitoring:empty:refresh

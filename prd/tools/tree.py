@@ -933,6 +933,11 @@ MODULES = [
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-MONITORING-ALERTS-01"]},
                     },
                     {
+                        "id": "list-refresh",
+                        "title": "监控告警列表刷新",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-MONITORING-LIST_REFRESH-01"]},
+                    },
+                    {
                         "id": "rules",
                         "title": "告警策略列表",
                         "tests": {"L3": [

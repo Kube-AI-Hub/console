@@ -1,4 +1,3 @@
-import type { UseQueryResult } from '@tanstack/react-query';
 import { useT } from '@/i18n';
 
 /**
@@ -19,7 +18,18 @@ export interface ListRefresh {
   emptyLabels: { emptyClear: string; emptyRefresh: string };
 }
 
-export function useListRefresh(aiPrefix: string, query: Pick<UseQueryResult, 'isFetching' | 'refetch'>): ListRefresh {
+/**
+ * What a list needs to know about its reader: whether a fetch is in flight, and how to start one.
+ *
+ * Deliberately narrower than `UseQueryResult`: a page that refreshes several lists at once supplies
+ * its own aggregate, and demanding a full query result would only force a cast.
+ */
+export interface ListRefreshSource {
+  isFetching?: boolean;
+  refetch: () => unknown;
+}
+
+export function useListRefresh(aiPrefix: string, query: ListRefreshSource): ListRefresh {
   const t = useT();
   return {
     refresh: { label: t('common.refresh'), aiId: `${aiPrefix}:refresh`, busy: Boolean(query.isFetching) },

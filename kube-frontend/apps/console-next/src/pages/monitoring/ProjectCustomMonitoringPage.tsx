@@ -1,12 +1,14 @@
 import * as React from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { projectDashboardsApi, type DashboardSummary } from '@kube-ai-hub/api-client';
-import { AiSurface, Badge, ResourceList, Skeleton, type ListSchema } from '@kube-ai-hub/ui';
+import { AiSurface, Badge, Button, ResourceList, Skeleton, type ListSchema } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { YamlDialog } from '@/components/resource/YamlDialog';
 import { formatTimestamp } from '@/lib/time';
+import { actionProps } from '@kube-ai-hub/ai-surface';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * 自定义监控（项目级）.
@@ -68,10 +70,12 @@ export function ProjectCustomMonitoringPage({ namespace }: ProjectCustomMonitori
     },
     [namespace],
   );
+  const listRefresh = useListRefresh('project-custom-monitoring', query);
 
   const schema = React.useMemo<ListSchema<DashboardSummary>>(
     () => ({
       title: t('customMonitoring.title'),
+      refresh: listRefresh.refresh,
       description: t('customMonitoring.projectDescription'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
@@ -112,6 +116,7 @@ export function ProjectCustomMonitoringPage({ namespace }: ProjectCustomMonitori
         },
       ],
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -124,7 +129,7 @@ export function ProjectCustomMonitoringPage({ namespace }: ProjectCustomMonitori
       // than a create dialog that cannot lay out a panel.
       rowActions: [{ key: 'yaml', label: t('customMonitoring.viewYaml'), aiId: 'project-custom-monitoring:yaml' }],
     }),
-    [openYaml, t],
+    [openYaml, query.isFetching, t],
   );
 
   return (
@@ -138,6 +143,7 @@ export function ProjectCustomMonitoringPage({ namespace }: ProjectCustomMonitori
         <div data-ai-id="project-custom-monitoring:table" className="min-w-0">
           <ResourceList
             schema={schema}
+            onRefresh={listRefresh.onRefresh}
             rows={rows}
             loading={false}
             onAction={(action, row) => {
@@ -161,6 +167,17 @@ export function ProjectCustomMonitoringPage({ namespace }: ProjectCustomMonitori
           <p className="text-xs text-ai-fg-muted">{t('customMonitoring.projectDescription')}</p>
           <p className="mt-3 text-sm text-ai-fg-secondary">{t('customMonitoring.empty')}</p>
           <p className="text-xs text-ai-fg-muted">{t('customMonitoring.emptyDescription')}</p>
+          {/* The explicit empty block replaces the list, so it must carry the escape too. */}
+          <div className="mt-3 flex justify-center">
+            <Button
+              size="sm"
+              variant="secondary"
+              {...actionProps('project-custom-monitoring:empty:refresh')}
+              onClick={listRefresh.onRefresh}
+            >
+              {t('common.refresh')}
+            </Button>
+          </div>
         </div>
       ) : null}
 
