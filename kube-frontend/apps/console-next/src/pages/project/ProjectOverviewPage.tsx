@@ -8,7 +8,7 @@ import {
   type ProjectInfo,
   type WorkloadRankMetric,
 } from '@kube-ai-hub/api-client';
-import { AiButton, AiSurface, Skeleton, Tabs, TabsContent } from '@kube-ai-hub/ui';
+import { AiButton, AiSurface, Skeleton, Tabs, TabsContent, TrendChart, type TrendPoint } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -232,6 +232,8 @@ export function ProjectOverviewPage({ workspace, cluster, namespace }: ProjectOv
             ) : null}
           </section>
 
+          <UsageTrendSection cluster={cluster} namespace={namespace} />
+
           <UsageRankingSection cluster={cluster} namespace={namespace} workspace={workspace} />
 
           <section className="rounded-lg border border-ai-border bg-ai-surface p-4" data-ai-id="project-overview:links">
@@ -257,6 +259,142 @@ export function ProjectOverviewPage({ workspace, cluster, namespace }: ProjectOv
   );
 }
 
+
+
+/**
+ * 资源用量曲线（最近 1 / 6 / 24 小时）.
+ *
+ * The old console puts a chart under the usage card; the new overview only had the current
+ * number. "0.54 cores" does not say whether the project is climbing toward its quota, and that
+ * is the question the chart answers.
+ *
+ * Two charts rather than one: cores and bytes do not share a scale, and drawing them on one
+ * axis would make the smaller series a flat line at the bottom. A gap in the scrape is a break
+ * in the line, never a zero.
+ */
+const TREND_WINDOWS = [
+  { key: '1h', labelKey: 'project.overview.trend.1h', hours: 1 },
+  { key: '6h', labelKey: 'project.overview.trend.6h', hours: 6 },
+  { key: '24h', labelKey: 'project.overview.trend.24h', hours: 24 },
+] as const;
+
+type TrendWindowKey = (typeof TREND_WINDOWS)[number]['key'];
+
+const TREND_CPU_METRIC = 'namespace_cpu_usage';
+const TREND_MEMORY_METRIC = 'namespace_memory_usage_wo_cache';
+
+/** CPU and memory series for one window, parsed from the range response. */
+function useProjectUsageTrend(cluster: string, namespace: string, windowKey: TrendWindowKey) {
+  const hours = TREND_WINDOWS.find((item) => item.key === windowKey)?.hours ?? 1;
+  /*
+   * The range is resolved when the window changes, not on every render: a range recomputed per
+   * render changes the query key and refetches forever.
+   */
+  const range = React.useMemo(() => {
+    const end = Math.floor(Date.now() / 1000) * 1000;
+    return { start: end - hours * 3600 * 1000, end };
+  }, [hours, windowKey]);
+  const query = useQuery({
+    queryKey: ['project-usage-trend', cluster, namespace, windowKey, range.start],
+    queryFn: async ({ signal }): Promise<{ cpu: TrendPoint[]; memory: TrendPoint[] }> => {
+      const body = await apiClient.request<{
+        results?: Array<{
+          metric_name?: string;
+          data?: { result?: Array<{ values?: Array<[number, string]> }> };
+        }>;
+      }>(`/kapis/monitoring.kubesphere.io/v1alpha3/namespaces/${encodeURIComponent(namespace)}`, {
+        query: {
+          metrics_filter: [TREND_CPU_METRIC, TREND_MEMORY_METRIC].map((metric) => `${metric}$`).join('|'),
+          start: Math.round(range.start / 1000),
+          end: Math.round(range.end / 1000),
+          step: hours > 6 ? '300s' : '60s',
+          cluster,
+        },
+        ...(signal ? { signal } : {}),
+      });
+      const series: { cpu: TrendPoint[]; memory: TrendPoint[] } = { cpu: [], memory: [] };
+      for (const result of body?.results ?? []) {
+        const target =
+          result.metric_name === TREND_CPU_METRIC ? series.cpu : result.metric_name === TREND_MEMORY_METRIC ? series.memory : null;
+        if (!target) continue;
+        for (const sample of result.data?.result ?? []) {
+          for (const [at, raw] of sample.values ?? []) {
+            const value = Number.parseFloat(raw);
+            // A NaN/Inf scrape is a hole in the line, not a zero.
+            if (Number.isFinite(value)) target.push({ at: at * 1000, value });
+          }
+        }
+        target.sort((a, b) => a.at - b.at);
+      }
+      return series;
+    },
+  });
+  return { query, range };
+}
+
+function UsageTrendSection({ cluster, namespace }: { cluster: string; namespace: string }): React.ReactElement {
+  const t = useT();
+  const [windowKey, setWindowKey] = React.useState<TrendWindowKey>('1h');
+  const { query, range } = useProjectUsageTrend(cluster, namespace, windowKey);
+  const cpu = query.data?.cpu ?? [];
+  const memory = query.data?.memory ?? [];
+  const hasData = cpu.length > 0 || memory.length > 0;
+
+  return (
+    <section className="rounded-lg border border-ai-border bg-ai-surface p-4" data-ai-id="project-overview:trend">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-sm font-medium text-ai-fg">{t('project.overview.trend.title')}</h2>
+        <Tabs
+          value={windowKey}
+          onValueChange={(next) => setWindowKey(next as TrendWindowKey)}
+          items={TREND_WINDOWS.map((item) => ({
+            value: item.key,
+            label: t(item.labelKey),
+            aiId: `project-overview:trend:window:${item.key}`,
+          }))}
+        />
+      </div>
+      {query.isPending ? <Skeleton className="h-32 w-full" /> : null}
+      {query.isError ? (
+        <div className="flex flex-col items-start gap-2" data-ai-id="project-overview:trend:error">
+          <p className="text-xs text-ai-fg-muted">{t('project.overview.trend.unavailable')}</p>
+          <AiButton aiId="project-overview:trend:retry" size="sm" variant="secondary" onClick={() => void query.refetch()}>
+            {t('common.retry')}
+          </AiButton>
+        </div>
+      ) : null}
+      {query.isSuccess && !hasData ? (
+        <p className="text-xs text-ai-fg-muted" data-ai-id="project-overview:trend:empty">
+          {t('project.overview.trend.empty')}
+        </p>
+      ) : null}
+      {hasData ? (
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2" data-ai-id="project-overview:trend:charts">
+          <div data-ai-id="project-overview:trend:cpu">
+            <p className="mb-1 text-xs text-ai-fg-muted">{t('project.overview.trend.cpu')}</p>
+            <TrendChart
+              start={range.start}
+              end={range.end}
+              label={t('project.overview.trend.cpu')}
+              emptyText={t('project.overview.trend.empty')}
+              points={cpu}
+            />
+          </div>
+          <div data-ai-id="project-overview:trend:memory">
+            <p className="mb-1 text-xs text-ai-fg-muted">{t('project.overview.trend.memory')}</p>
+            <TrendChart
+              start={range.start}
+              end={range.end}
+              label={t('project.overview.trend.memory')}
+              emptyText={t('project.overview.trend.empty')}
+              points={memory}
+            />
+          </div>
+        </div>
+      ) : null}
+    </section>
+  );
+}
 
 /**
  * 资源使用排行（项目内 Top 5）.

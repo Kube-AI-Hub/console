@@ -18,6 +18,7 @@
 
 ## 验收场景
 
+- **AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW_USAGE-04** — 已知项目 `<ns>` 的监控在所选时间窗内有采样，当打开项目概览，则「资源用量趋势」区块按 CPU 与内存两张独立曲线呈现（核与字节不共用纵轴），并可在「最近 1 小时 / 6 小时 / 24 小时」之间切换；切换后重新按新窗口取数（`step` 在 6 小时以上放大到 300s）；窗口内无采样时显示空态说明，请求失败时显示可重试的说明；缺失的采样点在曲线上表现为断点而不是 0。
 - **AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW_USAGE-03** — 已知项目 `<ns>` 的工作负载上报了用量指标，当打开项目概览，则「资源使用排行（Top 5）」区块按 CPU 与内存两个页签分别列出该项目用量最高的 5 个工作负载（序号、名称、类型、数值），CPU 以核、内存以 GiB/MiB 呈现；数值取自监控 `namespaces/<ns>/workloads` 的排序结果，名称与类型来自样本的 `metric.workload`（`Kind:name`）；Deployment/StatefulSet/DaemonSet 三类的名称链接到对应的项目列表页；排序结果为空时显示空态说明；请求失败时显示可重试的说明，不显示假 0。
 - **AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW_USAGE-01** — 已知项目 `<ns>` 的监控接口有/无用量采样、项目有/无 ResourceQuota，当打开项目概览，则始终出现「资源用量」卡：监控可用且有采样时显示 CPU/内存/容器组（以及监控提供的存储）用量，有配额时同时显示上限；监控返回成功但没有任何采样时显示 `:empty` 说明；监控请求失败时显示 `:unavailable` 说明与重试按钮；任何情况下缺失的数值显示 `-`，不显示假 0。
 
@@ -79,5 +80,6 @@
 
 ## 验收用例
 
+- `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW_USAGE-04`
 - `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW_USAGE-03`
 - `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW_USAGE-01`
