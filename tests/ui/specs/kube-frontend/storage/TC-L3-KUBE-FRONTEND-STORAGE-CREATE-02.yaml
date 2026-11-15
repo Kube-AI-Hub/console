@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-STORAGE-CREATE-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: storage
+feature: create
+title: 从快照创建存储卷
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/persistentvolumeclaims'
+prd: prd/kube-frontend/storage/create.md
+design: design/kube-frontend/storage/create.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-STORAGE-CREATE-02
+
+story:
+- US1
+
+product: 创建存储卷弹窗的「从快照创建」分支：隐藏存储类型、显示快照选择，无就绪快照时说明原因。
+preconditions:
+- 已登录且可读项目快照
+steps:
+- 打开创建存储卷弹窗
+- 把创建方式切到「从快照创建」
+- 观察存储类型字段与快照字段
+steps_expected:
+- 存储类型字段消失，出现快照字段
+- 项目没有就绪快照时显示「该项目还没有就绪的快照」
+expected:
+- 该分支不发送 storageClassName
+troubleshoot:
+- 仍显示存储类型：创建方式未切换
+- 空下拉：应显示说明而不是空列表
+update_automation:
+- 选择器：storage-create:method / storage-create:no-snapshot / storage-create:snapshot

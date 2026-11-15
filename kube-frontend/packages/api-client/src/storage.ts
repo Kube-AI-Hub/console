@@ -29,6 +29,14 @@ export interface StorageSummary extends ResourceBase {
   /** Access modes in the old console's short form (`RWO`, `ROX`, `RWX`, `RWOP`). */
   accessModes: string[];
   /**
+   * The same modes in their full Kubernetes spelling (`ReadWriteMany`).
+   *
+   * Writes need these: a clone copies `spec.accessModes` verbatim and the apiserver rejects the
+   * abbreviated labels the column shows. Keeping both means the display and the write path each
+   * get the form they need instead of one being derived by string surgery.
+   */
+  accessModeNames: string[];
+  /**
    * Whether a pod currently mounts this claim (`已挂载` / `未挂载`).
    *
    * `undefined` means "not computed yet": the answer requires listing every pod in the
@@ -39,6 +47,13 @@ export interface StorageSummary extends ResourceBase {
   inUse?: boolean;
   /** Annotations: 编辑信息 edits them in place. */
   annotations: Record<string, string>;
+  /**
+   * `spec.volumeName` for a claim: the persistent volume that backs it.
+   *
+   * On the summary rather than the detail because the list shows it as a column — the binding is
+   * how a reader gets from a claim to the volume's own fields.
+   */
+  volumeName: string;
   /**
    * Whether the claim's StorageClass allows expansion.
    *
@@ -99,14 +114,14 @@ export function toStorageSummary(kind: StorageKind, item: KubeStorage): StorageS
         ? String(requested['storage'] ?? '')
         : String(item.status?.['restoreSize'] ?? ''),
     accessModes: modes.map(accessModeLabel),
+    accessModeNames: modes.map(String),
     annotations: item.metadata?.annotations ?? {},
+    volumeName: String(spec['volumeName'] ?? ''),
   };
 }
 
 /** Storage detail adds the fields the list deliberately leaves out. */
 export interface StorageDetail extends StorageSummary {
-  /** `spec.volumeName` for a claim: which PV backs it. */
-  volumeName: string;
   /** Snapshot only: the claim it was taken from. */
   sourceClaim: string;
   /**
@@ -184,10 +199,127 @@ export function storageApi(client: Client, kind: StorageKind) {
         body: { spec: { resources: { requests: { storage: params.storage } } } },
       });
     },
+    /** PVC only: create a claim whose dataSource is the given source claim. */
+    clone(params: { cluster: string; namespace: string; source: StorageDetail; name: string }): Promise<StorageDetail> {
+      return api.create(claimCloneManifest({ ...params.source, accessModes: params.source.accessModeNames }, params.name), {
+        cluster: params.cluster,
+        namespace: params.namespace,
+      });
+    },
   };
 }
 
+/**
+ * A new claim, as the create form describes it.
+ *
+ * Kept as a pure function so the manifest can be asserted without a network round trip: the
+ * interesting part of "create a volume" is exactly which fields the form produces.
+ */
+export interface ClaimCreateInput {
+  name: string;
+  namespace: string;
+  /** Empty when the cluster's default class should decide. */
+  storageClass: string;
+  accessModes: string[];
+  /** Kubernetes quantity, e.g. `10Gi`. */
+  storage: string;
+  alias?: string;
+  description?: string;
+  /** When set, the claim is restored from this snapshot instead of being provisioned empty. */
+  fromSnapshot?: { name: string; snapshotClass?: string } | undefined;
+}
+
+/** Build the PersistentVolumeClaim body for `POST …/persistentvolumeclaims`. */
+export function claimManifest(input: ClaimCreateInput): KubeObject {
+  const annotations: Record<string, string> = {};
+  if (input.alias?.trim()) annotations['kubesphere.io/alias-name'] = input.alias.trim();
+  if (input.description?.trim()) annotations['kubesphere.io/description'] = input.description.trim();
+  return {
+    apiVersion: 'v1',
+    kind: 'PersistentVolumeClaim',
+    metadata: {
+      name: input.name,
+      namespace: input.namespace,
+      ...(Object.keys(annotations).length > 0 ? { annotations } : {}),
+    },
+    spec: {
+      accessModes: input.accessModes,
+      resources: { requests: { storage: input.storage } },
+      /*
+       * A restored claim inherits its class from the snapshot: sending one here would either be
+       * ignored or conflict with the restored volume, and the old console omits it for the same
+       * reason. An empty string means "let the default class decide", which is also an omission.
+       */
+      ...(input.fromSnapshot
+        ? { dataSource: { kind: 'VolumeSnapshot', name: input.fromSnapshot.name, apiGroup: 'snapshot.storage.k8s.io' } }
+        : input.storageClass
+          ? { storageClassName: input.storageClass }
+          : {}),
+    },
+  } as KubeObject;
+}
+
+/**
+ * A clone of an existing claim.
+ *
+ * Kubernetes expresses a clone as a claim whose `dataSource` points at the source claim; the class,
+ * access modes and size are inherited from it. Only the name is the administrator's choice, which
+ * is why the dialog asks for nothing else.
+ */
+export function claimCloneManifest(source: {
+  name: string;
+  namespace: string;
+  storageClass: string;
+  accessModes: string[];
+  capacity: string;
+}, name: string): KubeObject {
+  return {
+    apiVersion: 'v1',
+    kind: 'PersistentVolumeClaim',
+    metadata: { name, namespace: source.namespace },
+    spec: {
+      accessModes: source.accessModes,
+      resources: { requests: { storage: source.capacity } },
+      dataSource: { kind: 'PersistentVolumeClaim', name: source.name },
+      ...(source.storageClass ? { storageClassName: source.storageClass } : {}),
+    },
+  } as KubeObject;
+}
+
+/** Build the VolumeSnapshot body for `POST …/volumesnapshots`. */
+export function snapshotManifest(input: {
+  name: string;
+  namespace: string;
+  claim: string;
+  /** Empty leaves the class to the driver's default. */
+  snapshotClass: string;
+}): KubeObject {
+  return {
+    apiVersion: 'snapshot.storage.k8s.io/v1',
+    kind: 'VolumeSnapshot',
+    metadata: { name: input.name, namespace: input.namespace },
+    spec: {
+      ...(input.snapshotClass ? { volumeSnapshotClassName: input.snapshotClass } : {}),
+      source: { kind: 'PersistentVolumeClaim', persistentVolumeClaimName: input.claim },
+    },
+  } as KubeObject;
+}
+
 export type StorageApi = ReturnType<typeof storageApi>;
+
+/** VolumeSnapshot writes: one action, creating a snapshot of a claim. */
+export function volumeSnapshotsWriteApi(client: Client) {
+  const api = storageApi(client, 'volumesnapshots');
+  return {
+    create(params: { cluster: string; namespace: string; name: string; claim: string; snapshotClass: string }): Promise<StorageDetail> {
+      return api.create(
+        snapshotManifest({ name: params.name, namespace: params.namespace, claim: params.claim, snapshotClass: params.snapshotClass }),
+        { cluster: params.cluster, namespace: params.namespace },
+      );
+    },
+  };
+}
+
 
 /* ------------------------------------------------------------------ *
  * Cluster-scoped reads: nodes and namespaces (projects).
@@ -506,10 +638,30 @@ export function namespacesApi(client: Client) {
  * Cluster-scoped: storage classes.
  * ------------------------------------------------------------------ */
 
+/** Size bounds a class declares for new claims, from its `parameters`. */
+export interface StorageClassSizeConfig {
+  /** Minimum claim size in GiB. */
+  min: number;
+  /** Maximum claim size in GiB. */
+  max: number;
+  /** Step the slider/input should follow, in GiB. */
+  step: number;
+}
+
 /** One StorageClass row, as the cluster console shows it. */
 export interface StorageClassSummary extends ResourceBase {
   /** The CSI or in-tree driver that creates volumes. */
   provisioner: string;
+  /**
+   * Access modes the driver actually supports, from the class annotation
+   * `storageclass.kubesphere.io/supported-access-modes`.
+   *
+   * Empty means "the class does not say", which the create form reads as "offer all four";
+   * an empty *list* rendered as "no modes available" would make a claim impossible to create.
+   */
+  supportedAccessModes: string[];
+  /** Size bounds for new claims; defaults are the old console's 0/2048/1 GiB. */
+  sizeConfig: StorageClassSizeConfig;
   /** `Delete` / `Retain`. */
   reclaimPolicy: string;
   /** `Immediate` / `WaitForFirstConsumer`. */
@@ -540,22 +692,63 @@ const DEFAULT_CLASS_ANNOTATIONS = [
   'storageclass.kubernetes.io/is-default-class',
   // Older clusters wrote the beta spelling; both still appear in the wild.
   'storageclass.beta.kubernetes.io/is-default-class',
+  // KubeSphere's own marker, which is what this platform actually sets.
+  'storageclass.kubesphere.io/is-default-class',
 ];
+
+/**
+ * Parse the driver's declared access modes.
+ *
+ * The annotation holds a JSON array of mode names. A malformed value is treated as "the class
+ * does not say" rather than as an empty capability list: refusing to offer any mode would block
+ * claim creation over a typo in an annotation.
+ */
+function supportedAccessModesOf(value: string | undefined): string[] {
+  if (!value) return [];
+  try {
+    const parsed: unknown = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed.map(String).filter(Boolean) : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Size bounds from the class parameters, in GiB; unparseable values fall back to the defaults. */
+function sizeConfigOf(parameters: Record<string, unknown>): StorageClassSizeConfig {
+  const num = (key: string, fallback: number): number => {
+    const raw = parameters[key];
+    if (raw === undefined || raw === null || raw === '') return fallback;
+    const parsed = Number(raw);
+    return Number.isFinite(parsed) ? parsed : fallback;
+  };
+  return { min: num('minSize', 0), max: num('maxSize', 2048), step: num('stepSize', 1) };
+}
 
 export function toStorageClassSummary(item: KubeStorageClass): StorageClassSummary {
   const annotations = (item.metadata?.annotations ?? {}) as Record<string, string>;
   const rawCount = annotations['kubesphere.io/pvc-count'] ?? annotations['kubesphere.io/persistentvolumeclaims'];
   const parsed = rawCount === undefined ? Number.NaN : Number(rawCount);
+  const parameters = ((item as unknown as { parameters?: Record<string, unknown> }).parameters ?? {}) as Record<string, unknown>;
   return {
     ...baseOf(item),
     provisioner: String(item.provisioner ?? ''),
+    supportedAccessModes: supportedAccessModesOf(annotations['storageclass.kubesphere.io/supported-access-modes']),
+    sizeConfig: sizeConfigOf(parameters),
     // Kubernetes defaults these when unset; showing the empty string would read as
     // "unknown" for a value that is perfectly well defined.
     reclaimPolicy: String(item.reclaimPolicy ?? 'Delete'),
     volumeBindingMode: String(item.volumeBindingMode ?? 'Immediate'),
     isDefault: DEFAULT_CLASS_ANNOTATIONS.some((key) => annotations[key] === 'true'),
     allowExpansion: item.allowVolumeExpansion === true,
-    allowCloning: item.allowVolumeCloning === true || annotations['storageclass.kubesphere.io/allow-cloning'] === 'true',
+    /*
+     * Cloning and snapshots are declared by KubeSphere on the class. Three spellings exist in the
+     * wild and the live cluster uses the shortest one (allow-clone), which the first version of
+     * this mapper missed — the clone control was hidden on a class that allows it.
+     */
+    allowCloning:
+      item.allowVolumeCloning === true ||
+      annotations['storageclass.kubesphere.io/allow-clone'] === 'true' ||
+      annotations['storageclass.kubesphere.io/allow-cloning'] === 'true',
     allowSnapshot: item.allowVolumeSnapshot === true || annotations['storageclass.kubesphere.io/allow-snapshot'] === 'true',
     pvcCount: Number.isFinite(parsed) ? parsed : undefined,
   };

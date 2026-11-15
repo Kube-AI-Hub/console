@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-STORAGE-CREATE_SNAPSHOT-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: storage
+feature: create-snapshot
+title: 创建快照
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/persistentvolumeclaims'
+prd: prd/kube-frontend/storage/create-snapshot.md
+design: design/kube-frontend/storage/create-snapshot.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-STORAGE-CREATE_SNAPSHOT-01
+
+story:
+- US1
+
+product: 存储卷详情的「创建快照」：按 allow-snapshot 门控，快照类按驱动过滤，无匹配类时说明原因。
+preconditions:
+- 已登录；存在存储类型声明 allow-snapshot
+steps:
+- 创建一个该存储类型的存储卷并等待绑定
+- 打开详情，核对「创建快照」按钮存在
+- 点开弹窗，观察快照类字段
+steps_expected:
+- 有匹配类时显示下拉并可提交
+- 无匹配类时显示「没有与存储驱动 X 匹配的快照类」且确认不可用
+expected:
+- 存储类型不允许快照时按钮不出现
+troubleshoot:
+- 下拉为空：应显示说明
+- 提交 422：快照类驱动与卷不匹配
+update_automation:
+- 选择器：persistentvolumeclaims-detail:snapshot / storage-snapshot:name / storage-snapshot:class / storage-snapshot:no-class

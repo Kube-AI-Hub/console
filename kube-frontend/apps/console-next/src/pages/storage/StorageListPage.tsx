@@ -6,6 +6,7 @@ import { useT } from '@/i18n';
 
 import { useProjectFilter } from '@/components/projects/useProjects';
 import { useResourceListState, toListParams } from '@/components/resource/useResourceListState';
+import { Link } from '@tanstack/react-router';
 import { DeleteDialog } from '@/components/resource/DeleteDialog';
 import { EditInfoDialog } from '@/components/resource/EditInfoDialog';
 import { LoadingDialog } from '@/components/resource/LoadingDialog';
@@ -20,12 +21,16 @@ import {
   useExpandableClasses,
   useExpandStorage,
   useProjectPods,
+  useStorageClasses,
+  useProjectSnapshots,
+  useCreateStorage,
   useStorageList,
   useStorageOne,
   useUpdateStorage,
 } from './queries';
 import { mountsOf, withMountState } from '@kube-ai-hub/api-client';
 import { ExpandVolumeDialog } from './ExpandVolumeDialog';
+import { CreateVolumeDialog } from './CreateVolumeDialog';
 import { api as apiClient } from '@/api';
 import { storageApi } from '@kube-ai-hub/api-client';
 
@@ -53,7 +58,8 @@ type Dialog =
   | { kind: 'loading'; subject: string }
   | { kind: 'editYaml'; detail?: StorageDetail; subject?: string }
   | { kind: 'editInfo'; row: StorageSummary }
-  | { kind: 'expand'; row: StorageSummary };
+  | { kind: 'expand'; row: StorageSummary }
+  | { kind: 'create' };
 
 export function StorageListPage({ kind, workspace, cluster, namespace }: StorageListPageProps): React.ReactElement {
   const t = useT();
@@ -68,6 +74,9 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
   const remove = useDeleteStorage(kind, { cluster, namespace: projectFilter });
   const expand = useExpandStorage({ cluster, namespace: projectFilter });
   const expandableClasses = useExpandableClasses();
+  const storageClasses = useStorageClasses();
+  const projectSnapshots = useProjectSnapshots({ cluster, namespace: projectFilter });
+  const create = useCreateStorage(kind, { cluster, namespace: projectFilter });
   const [dialog, setDialog] = React.useState<Dialog>({ kind: 'none' });
   const [editing, setEditing] = React.useState<string | null>(null);
   const api = storageApi(apiClient, kind);
@@ -102,6 +111,13 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
       search: { placeholder: t('storage.searchPlaceholder'), aiId: `${kind}:search` },
       filters: [projectFilterControl],
+      /*
+       * 创建存储卷 is a claim action: a snapshot is taken from a claim (its detail page), not
+       * conjured from the snapshot list. Offering it here would open a form with no source.
+       */
+      ...(kind === 'persistentvolumeclaims'
+        ? { primaryAction: { key: 'create', label: t('storage.create.title'), aiId: 'persistentvolumeclaims:create' } }
+        : {}),
       selection: 'multiple',
       sortableKeys: ['name', 'createTime'],
       sortAiPrefix: kind,
@@ -162,6 +178,33 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
                 render: (row: StorageSummary) => (
                   <span className="truncate text-ai-fg-secondary">{row.accessModes.join(', ') || '-'}</span>
                 ),
+              },
+            ]
+          : []),
+        ...(kind === 'persistentvolumeclaims'
+          ? [
+              {
+                /*
+                 * 持久卷 is the binding a claim ends up with. The old console shows it as a
+                 * link into the cluster's PV detail, which is where the backing volume's own
+                 * fields (reclaim policy, node affinity) live.
+                 */
+                key: 'volume',
+                title: t('storage.column.volume'),
+                hideBelow: 'lg' as const,
+                render: (row: StorageSummary) =>
+                  row.volumeName ? (
+                    <Link
+                      to="/kube-frontend/clusters/$cluster/persistentvolumes/$name"
+                      params={{ cluster, name: row.volumeName }}
+                      className="inline-flex min-h-6 items-center text-ai-accent hover:underline"
+                      data-ai-id={`persistentvolumeclaims:volume:${row.volumeName}`}
+                    >
+                      {row.volumeName}
+                    </Link>
+                  ) : (
+                    <span className="text-ai-fg-muted">-</span>
+                  ),
               },
             ]
           : []),
@@ -267,6 +310,7 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
           if (next) list.setSort(next);
         }}
         onAction={(action, row) => {
+          if (action === 'create') return setDialog({ kind: 'create' });
           if (!row) return;
           if (action === 'delete') return setDialog({ kind: 'delete', rows: [row] });
           if (action === 'editInfo') return setDialog({ kind: 'editInfo', row });
@@ -283,7 +327,22 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
         }}
       />
 
-      <MutationAlert error={remove.error ?? update.error ?? expand.error} />
+      <MutationAlert error={remove.error ?? update.error ?? expand.error ?? create.error} />
+
+      {dialog.kind === 'create' ? (
+        <CreateVolumeDialog
+          open
+          namespace={projectFilter}
+          classes={storageClasses.data ?? []}
+          snapshots={(projectSnapshots.data?.items ?? []).filter((row) => row.status === 'ready')}
+          pending={create.isPending}
+          onOpenChange={(open) => !open && setDialog({ kind: 'none' })}
+          onSubmit={async (body) => {
+            await create.mutateAsync(body);
+            setDialog({ kind: 'none' });
+          }}
+        />
+      ) : null}
 
       {dialog.kind === 'delete' ? (
         <DeleteDialog

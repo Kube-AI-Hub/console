@@ -1,5 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { storageApi, type KubeObject, type ResourceListParams, type StorageKind } from '@kube-ai-hub/api-client';
+import {
+  objectEventsApi,
+  storageApi,
+  toStorageClassSummary,
+  volumeSnapshotsWriteApi,
+  type KubeObject,
+  type ResourceListParams,
+  type StorageClassSummary,
+  type StorageDetail,
+  type StorageKind,
+} from '@kube-ai-hub/api-client';
 import type { LocaleKey } from '@kube-ai-hub/locales';
 import { api } from '@/api';
 
@@ -94,6 +104,129 @@ export function useExpandStorage(params: { cluster: string; namespace: string })
       void queryClient.invalidateQueries({ queryKey: ['persistentvolumeclaims'] });
       void queryClient.invalidateQueries({ queryKey: ['storage-one', 'persistentvolumeclaims'] });
     },
+  });
+}
+
+/**
+ * Every storage class with the fields the create form needs.
+ *
+ * One cluster-wide read, cached: the form offers the classes, their supported access modes and
+ * the size bounds their driver declares. A class that cannot be read at all is left out rather
+ * than offered and failed on submit.
+ */
+export function useStorageClasses() {
+  return useQuery({
+    queryKey: ['storage-classes-detail'],
+    staleTime: 5 * 60_000,
+    queryFn: async ({ signal }): Promise<StorageClassSummary[]> => {
+      const body = await api.request<{ items?: Array<Record<string, unknown>> }>(
+        '/apis/storage.k8s.io/v1/storageclasses',
+        { signal },
+      );
+      return (body?.items ?? []).map((item) => toStorageClassSummary(item as never));
+    },
+  });
+}
+
+/** VolumeSnapshotClasses: only their name and driver matter to the snapshot dialog. */
+export interface SnapshotClassRow {
+  name: string;
+  driver: string;
+}
+
+export function useSnapshotClasses() {
+  return useQuery({
+    queryKey: ['volume-snapshot-classes'],
+    staleTime: 5 * 60_000,
+    queryFn: async ({ signal }): Promise<SnapshotClassRow[]> => {
+      const body = await api.request<{ items?: Array<{ metadata?: { name?: string }; driver?: string }> }>(
+        '/apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses',
+        { signal },
+      );
+      return (body?.items ?? [])
+        .map((item) => ({ name: item.metadata?.name ?? '', driver: String(item.driver ?? '') }))
+        .filter((row) => row.name);
+    },
+    // A cluster without the snapshot API answers 404; an empty list is the honest answer there.
+    retry: false,
+  });
+}
+
+/**
+ * Snapshots in one project, for the "restore from snapshot" branch of the create form.
+ *
+ * Only ready snapshots can be restored from, and the form filters on that; this reads the
+ * collection once so the dialog does not have to.
+ */
+export function useProjectSnapshots(params: { cluster: string; namespace: string }) {
+  return useQuery({
+    queryKey: ['project-snapshots', params.cluster, params.namespace],
+    enabled: Boolean(params.namespace),
+    queryFn: ({ signal }) =>
+      storageApi(api, 'volumesnapshots').list({
+        cluster: params.cluster,
+        namespace: params.namespace,
+        page: 1,
+        pageSize: 200,
+        signal,
+      }),
+  });
+}
+
+/** Create a claim or a snapshot from the list's primary action. */
+export function useCreateStorage(kind: StorageKind, params: { cluster: string; namespace: string }) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: KubeObject) => storageApi(api, kind).create(body, { cluster: params.cluster, namespace: params.namespace }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: [kind] });
+    },
+  });
+}
+
+/** Clone a claim: the only field the administrator chooses is the new name. */
+export function useCloneStorage(params: { cluster: string; namespace: string }) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { source: StorageDetail; name: string }) =>
+      storageApi(api, 'persistentvolumeclaims').clone({
+        cluster: params.cluster,
+        namespace: params.namespace,
+        source: input.source,
+        name: input.name,
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['persistentvolumeclaims'] });
+    },
+  });
+}
+
+/** Take a snapshot of one claim. */
+export function useCreateClaimSnapshot(params: { cluster: string; namespace: string; claim: string }) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { name: string; snapshotClass: string }) =>
+      volumeSnapshotsWriteApi(api).create({
+        cluster: params.cluster,
+        namespace: params.namespace,
+        name: input.name,
+        claim: params.claim,
+        snapshotClass: input.snapshotClass,
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['claim-snapshots', params.cluster, params.namespace, params.claim] });
+      void queryClient.invalidateQueries({ queryKey: ['volumesnapshots'] });
+    },
+  });
+}
+
+/** Events about one object, for the detail page's 事件 tab. */
+export function useObjectEvents(params: { namespace: string; name: string; kind: string }) {
+  return useQuery({
+    queryKey: ['object-events', params.namespace, params.kind, params.name],
+    enabled: Boolean(params.namespace && params.name),
+    queryFn: ({ signal }) =>
+      objectEventsApi(api).list({ namespace: params.namespace, name: params.name, kind: params.kind, signal }),
   });
 }
 

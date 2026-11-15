@@ -1,0 +1,32 @@
+id: TC-L3-KUBE-FRONTEND-STORAGE-LIST-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: storage
+feature: list
+title: 存储卷列表的持久卷列
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/persistentvolumeclaims'
+prd: prd/kube-frontend/storage/list.md
+design: design/kube-frontend/storage/list.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-STORAGE-LIST-03
+
+story:
+- US1
+
+product: 存储卷列表显示「持久卷」列并链接到该 PV 的详情页。
+preconditions:
+- 已登录；项目内至少有一个已绑定的存储卷
+steps:
+- 打开存储卷列表
+- 找到已绑定的行，核对持久卷列与其链接
+steps_expected:
+- 列值为 spec.volumeName，链接指向 /clusters/<cluster>/persistentvolumes/<pv>
+- 未绑定的行显示 `-`
+expected:
+- 快照列表不显示该列
+troubleshoot:
+- 列为空：summary 未映射 volumeName
+update_automation:
+- 选择器：persistentvolumeclaims:volume:<pv>

@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-STORAGE-CREATE-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: storage
+feature: create
+title: 创建存储卷（新建）
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/persistentvolumeclaims'
+prd: prd/kube-frontend/storage/create.md
+design: design/kube-frontend/storage/create.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-STORAGE-CREATE-01
+
+story:
+- US1
+
+product: 存储卷列表的主操作「创建存储卷」按存储类型创建 PVC。
+preconditions:
+- 已登录且项目内至少有一个存储类型
+steps:
+- 打开项目存储卷列表
+- 点「创建存储卷」，核对默认存储类型与访问模式选项
+- 填写唯一名称与容量并提交
+- 回读该 PVC 的 spec 并核对列表
+steps_expected:
+- 回读 spec 的存储类型/访问模式/容量与表单一致
+- 列表出现该行
+expected:
+- 超出范围的容量在本地被拒绝
+troubleshoot:
+- 提交后对象 Pending：WaitForFirstConsumer 类型属正常
+- 422：访问模式与存储类型不匹配
+update_automation:
+- 选择器：persistentvolumeclaims:create / storage-create:name / storage-create:storage-class / storage-create:size / storage-create:submit

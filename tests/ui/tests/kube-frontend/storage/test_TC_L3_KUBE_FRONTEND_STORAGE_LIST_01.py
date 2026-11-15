@@ -18,9 +18,10 @@ def test_TC_L3_KUBE_FRONTEND_STORAGE_LIST_01(kube_storage_page, screenshot):
         assert ui.state("persistentvolumeclaims") == "ready", ui.state("persistentvolumeclaims")
 
         headers = ui.headers("persistentvolumeclaims")
-        # The five columns the criterion names, in order. The list may add a
-        # claim-only column after them (挂载状态); that does not change the set.
-        assert headers[:5] == ["名称", "状态", "容量", "访问模式", "创建时间"], headers
+        # The five columns the criterion names, in order, with 持久卷 where the old console puts it
+        # (after the access modes). The list also carries 挂载状态, which does not change the set.
+        assert headers[:5] == ["名称", "状态", "容量", "访问模式", "持久卷"], headers
+        assert "创建时间" in headers and "挂载状态" in headers, headers
 
         ui.ensure_row("persistentvolumeclaims", name)
         link = ui.name_link("persistentvolumeclaims", name)

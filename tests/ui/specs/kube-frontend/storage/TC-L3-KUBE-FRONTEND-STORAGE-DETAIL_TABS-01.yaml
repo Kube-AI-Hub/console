@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-STORAGE-DETAIL_TABS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: storage
+feature: detail-tabs
+title: 存储详情的元数据与事件页签
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/persistentvolumeclaims'
+prd: prd/kube-frontend/storage/detail-tabs.md
+design: design/kube-frontend/storage/detail-tabs.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-STORAGE-DETAIL_TABS-01
+
+story:
+- US1
+
+product: 存储卷详情的四个页签：属性/元数据/事件/快照；元数据只读、事件独立三态。
+preconditions:
+- 已登录；存在带标签与注解的存储卷
+steps:
+- 打开该存储卷详情
+- 核对四个页签
+- 切到元数据，核对标签/注解行数
+- 切到事件，核对事件表或空态
+steps_expected:
+- 标签/注解行数等于对象对应条数
+- 事件表显示类型/原因/消息/次数/最近发生，或显示「这个对象还没有事件」
+expected:
+- 元数据页签只读（无编辑控件）
+troubleshoot:
+- 事件一直为空：该对象确实没有事件
+- 注解很多时被截断：应原样换行显示
+update_automation:
+- 选择器：storage-detail:tab:metadata / storage-detail:tab:events / storage-detail:labels / storage-detail:annotations / storage-detail:events

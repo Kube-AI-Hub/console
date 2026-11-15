@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-STORAGE-CLONE-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: storage
+feature: clone
+title: 克隆存储卷
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/persistentvolumeclaims'
+prd: prd/kube-frontend/storage/clone.md
+design: design/kube-frontend/storage/clone.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-STORAGE-CLONE-01
+
+story:
+- US1
+
+product: 存储卷详情的「克隆」：按存储类型 allow-clone 门控，克隆出 dataSource 指向源卷的新 PVC。
+preconditions:
+- 已登录；存在存储类型声明 allow-clone 且源卷已绑定
+steps:
+- 创建一个该存储类型的存储卷并等待绑定
+- 打开其详情，核对「克隆」按钮存在
+- 点克隆，提交默认名称
+- 回读克隆对象的 spec
+steps_expected:
+- 新 PVC 的 dataSource.kind=PersistentVolumeClaim、name=源卷
+- 容量/访问模式/存储类型与源一致
+- 成功后回到列表
+expected:
+- 存储类型不允许克隆时按钮不出现
+troubleshoot:
+- 422：访问模式用了缩写（应为完整拼写）
+- 按钮缺失：类未声明 allow-clone 或源卷未绑定
+update_automation:
+- 选择器：persistentvolumeclaims-detail:clone / storage-clone:name / storage-clone:submit
