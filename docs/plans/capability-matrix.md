@@ -70,7 +70,7 @@
 | R-09 | 集群下的项目详情（配额/LimitRange） | **已补（只读）** | `189a3f165`：基本信息/标签、ResourceQuota used/hard、LimitRange 默认值、空态；编辑仍登记为不做 |
 | R-10 | 集群网关设置 + 网关详情 | **已补** | `449be408c`：`nginxes` 现返回 1 个对象（NodePort 31193/32066，Service clusterIP 10.233.49.117），详情页属性 + 关联应用路由（当前 0 条，空态即路径），只读；同时修正 `toClusterGateway` 只认旧命名空间的分类 bug |
 | R-11 | 集群日志收集的 3 类页签 + 收集器详情 | **已补（只读）** | `93bb78e75`：三页签取 operator 写的 `logging.kubesphere.io/component` 标签分类；收集项详情 + 只读 YAML |
-| R-12 | 集群角色在集群作用域的入口 | **不迁移** | 与平台角色是同一批 `clusterrole` 对象，统一在「访问控制 › 平台角色」维护。登记于 `ELSEWHERE`；PRD/design 见 `access-control/platform-roles.md` 的 DEC-06。**已知限制**：该页固定读 host 集群，多集群下需支持切换（另登记为待补） |
+| R-12 | 集群角色在集群作用域的入口 | **不迁移** | 与平台角色是同一批 `clusterrole` 对象，统一在「访问控制 › 平台角色」维护。登记于 `ELSEWHERE`；PRD/design 见 `access-control/platform-roles.md` 的 DEC-06。**已知限制（受阻，非页面问题）**：该页读核心组 `/apis/rbac.authorization.k8s.io/v1/clusterroles`，BFF 代理到单一上游；实测集群感知路径 `/kapis/.../clusters/host/clusterroles` 返回 404，切换集群需 BFF 侧按集群路由（证据见[台账复核](capability-ledger-reconciliation-20261115.md)） |
 | R-13 | 容器 exec / kubectl / 节点 shell / 容器日志 tail | **已补（节点终端受环境限制）** | 日志：`82e76d57f`、`cd3254439`；容器终端：`432fc81d6`（BFF 首个 WebSocket upgrade + `v5.channel.k8s.io`）；kubectl：`e40bd6498`（xterm 全屏共享控制台）；节点 shell：`bf85b1923`。**B200 上节点 shell 后端不起 node access pod**（握手 101 但无数据帧），用例按环境跳过并记证 |
 | R-14 | 节点列表 6 列 + 节点总览面板 + 列筛选 | **部分已补** | `67be3c456` 补齐 XPU/版本/终端等列；GPU 使用率、GPU 显存、Pod 用量、时间同步仍缺（本轮复核） |
 | R-15 | 节点详情 5 页签 + 4 个操作 | **部分已补** | `bf85b1923`：运行状态/容器组/监控三页签、编辑标签/污点、节点终端；事件页签与 vGPU 模式仍缺（且节点 shell 在 B200 缺 node access pod，按环境跳过） |
@@ -82,7 +82,7 @@
 | R-21 | 网络隔离的规则聚合视图 / 白名单新建向导 | **规则视图与白名单向导均已补** | `815ed84ea`：ingress/egress 展开为规则行（matchLabels/matchExpressions、podSelector/namespaceSelector/ipBlock 含 except、endPort）；**不做有损白名单抽象**（`network-isolation.md` DEC-05）；白名单向导见[向导记录](network-whitelist-wizard-20261115.md)（多规则/三类对端/端口） |
 | R-22 | 存储卷详情的快照页签 | **已补（空态路径）** | `4c00e048e`：PVC 详情「属性/快照」页签，按 `source.persistentVolumeClaimName` 过滤；B200 CRD 已装对象 0，空态即交付路径 |
 | R-23 | 项目基本信息的角色/成员/服务统计 | **已补** | `d325d5464`：三卡取各列表 `totalItems`，失败显示 `-` 而非 0 |
-| R-24 | 用户登录历史分页 / 管理员重置密码 / 批量启停 / 预置账号保护 | **部分已补** | 批量启停已交付（`48cad6d66`）；改密、登录历史分页、`presetUsers` 全员保护**待补**（改密已在 `page-parity-report.md` 登记为不迁移，需复核该判定） |
+| R-24 | 用户登录历史分页 / 管理员重置密码 / 批量启停 / 预置账号保护 | **已交付** | 批量启停 `48cad6d66`；改密（列表行操作 + 详情）、登录历史分页、`presetUsers` 保护均已实现（`PlatformListPage`/`UserDetailPage`/`LoginHistoryPanel` + `isProtectedPlatformUser`），用例 `ACCESS_CONTROL-USERS-*` 8 passed；复核记录见[台账复核](capability-ledger-reconciliation-20261115.md) |
 | R-25 | 集群列表 host/成员分组 / 卡片视图 | **已补（筛选）+ 卡片不迁移** | `1a444af7a`：「集群类型」筛选（主集群/成员集群），清除后 host 仍置顶；卡片视图不迁移，见 `cluster-list.md` DEC-06 |
 | R-26 | 列表刷新按钮 | **部分已补** | 8 个页面已接 `schema.refresh` + `onRefresh`（集群负载 8 页 / 容器组 / 工作负载列表等）；其余列表页仍无刷新出口 |
 | R-27 | 列表实时刷新（watch） | **已补** | `f8bf8a441`：容器组列表「实时」开关，走 `?watch=true` 分块 HTTP（不是 WebSocket），变更即失效重取；顺带修了 dev 代理连接池与中止泄漏（`52bc55b1d`） |
