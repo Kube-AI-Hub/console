@@ -1,14 +1,14 @@
 ---
 title: "GPU Card Management"
-keywords: "Kube AI Hub, GPU, NPU, GPU card, GPU management, vGPU, monitoring, Ascend, 910C, 310P"
-description: "View and manage GPU and Ascend NPU card resources in Kube AI Hub clusters."
+keywords: "Kube AI Hub, GPU, NPU, XPU, GPU card, GPU management, vGPU, monitoring, Ascend, Kunlunxin, 910C, 310P"
+description: "View and manage GPU, Ascend NPU, and Kunlunxin XPU card resources in Kube AI Hub clusters."
 linkTitle: "GPU Card Management"
 weight: 8110
 ---
 
 ## Overview
 
-The GPU Card Management page provides a unified view of all physical GPU / NPU cards in the cluster. You can filter and inspect allocation and usage by node, vendor, model, and status. How to request an Ascend NPU is in [Ascend NPU Usage](../npu-usage/).
+The GPU Card Management page provides a unified view of all physical GPU / NPU / XPU cards in the cluster. You can filter and inspect allocation and usage by node, vendor, model, and status. How to request an Ascend NPU is in [Ascend NPU Usage](../npu-usage/). Kunlunxin Exclusive vs HAMi-Core is in [GPU Virtualization Mode](../gpu-virt-mode/).
 
 ## Viewing the GPU Card List
 
@@ -32,10 +32,10 @@ The table displays detailed information for each GPU card:
 | **Card Index** | GPU index number within the node |
 | **Card UUID** | Globally unique GPU identifier; click to navigate to GPU card details |
 | **Status** | Healthy or Sub-healthy |
-| **Model** | GPU / NPU model, for example A100, V100, 910C, 910B3, 310P, 310P48 |
+| **Model** | GPU / NPU / XPU model, for example A100, V100, 910C, 910B3, 310P, 310P48, P800 |
 | **NUMA** | NUMA node number the GPU belongs to |
-| **Vendor** | GPU vendor: NVIDIA, Huawei Ascend, Cambricon, etc. |
-| **Virtualization Mode** | Current virtualization mode. Ascend cards show whole-card or a hard template, not NVIDIA HAMi-Core |
+| **Vendor** | GPU vendor: NVIDIA, Huawei Ascend, Cambricon, Kunlunxin, etc. |
+| **Virtualization Mode** | Current virtualization mode. Ascend cards show whole-card or a hard template; Kunlunxin cards show Exclusive or HAMi-Core |
 | **vGPU** | vGPU used / total |
 | **Compute** | GPU compute used / total |
 | **Memory** | VRAM used / total (GiB) |
@@ -47,7 +47,7 @@ The following filters are supported:
 - **Filter by Node**: Select a specific node from the dropdown
 - **Search by UUID**: Enter a GPU UUID for exact matching
 - **Label Selector**: Filter using Kubernetes labels
-- **Filter by Vendor**: Select NVIDIA, Huawei Ascend, Cambricon, etc.
+- **Filter by Vendor**: Select NVIDIA, Huawei Ascend, Cambricon, Kunlunxin, etc.
 - **Filter by Model**: Enter GPU model keywords
 - **Filter by Status**: Healthy / Sub-healthy
 
@@ -66,7 +66,7 @@ Click a GPU card's UUID in the list to navigate to its detail page.
 | **Model** | GPU model |
 | **Vendor** | GPU vendor |
 | **NUMA** | NUMA node number |
-| **Virtualization Mode** | Virtualization mode inherited from the node. Ascend shows whole-card or a hard template, not NVIDIA HAMi-Core |
+| **Virtualization Mode** | Virtualization mode inherited from the node. Ascend shows whole-card or a hard template; Kunlunxin shows Exclusive or HAMi-Core |
 | **Total Memory** | Physical VRAM size (GiB) |
 | **Driver Version** | GPU driver version (if available) |
 | **Max Device Split Count** | Maximum concurrent tasks after vGPU slicing (if configured) |
@@ -105,3 +105,4 @@ For Pods using GPU resources, the Pod detail page shows **Scheduled to GPU** inf
 - Allocated vendor type
 - Allocated memory size
 - Allocated compute percentage (NVIDIA and similar). An Ascend hard slice shows the template name and memory, not a core percentage. 910C training cards typically show `vir12_3c_32g`; inference cards typically show `vir10_3c_32g`. A template that does not match the card type fails at slice creation. See [Ascend NPU Usage](../npu-usage/).
+- Kunlunxin Exclusive shows whole-card `kunlunxin.com/xpu`. HAMi-Core shows `kunlunxin.com/vxpu` shares and `kunlunxin.com/vxpu-memory`. The list keeps one row per physical card and does not list SR-IOV virtual functions (VFs) as extra cards.

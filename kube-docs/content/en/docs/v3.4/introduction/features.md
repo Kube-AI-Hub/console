@@ -24,7 +24,7 @@ Monitor and manage compute node status. Supports enabling or disabling schedulin
 
 #### Sharing/Slicing Policies
 
-Configure GPU sharing and slicing policies at the node level, setting vGPU count, compute power, and VRAM sharing/overcommit ratios for all GPU cards on a node.
+Configure GPU sharing and slicing policies at the node level, setting vGPU count, compute power, and VRAM sharing/overcommit ratios for all GPU cards on a node. NVIDIA, Cambricon, and Kunlunxin use that node-level switch; Ascend does not. See [GPU Virtualization Mode](../cluster-administration/gpu-virt-mode/).
 
 #### GPU Card Management
 

@@ -13,6 +13,7 @@ weight: 16320
 - [与现有的 Prometheus Operator 相冲突](../../observability/monitoring/#与现有的-prometheus-operator-相冲突)
 - [GPU 监控与 ClusterConfiguration](#gpu-监控与-clusterconfiguration)
 - [NPU 监控](#npu-监控)
+- [昆仑芯 XPU 监控](#昆仑芯-xpu-监控)
 - [如何更改监控数据保留期限](../../observability/monitoring/#如何更改监控数据保留期限)
 - [kube-scheduler 和 kube-controller-manager 没有监控数据](../../observability/monitoring/#kube-scheduler-和-kube-controller-manager-没有监控数据)
 - [近几分钟没有监控数据](../../observability/monitoring/#近几分钟没有监控数据)
@@ -95,6 +96,16 @@ kubectl edit svc -n kubesphere-monitoring-system prometheus-k8s
 310P 硬切分上，`container_npu_*` 与 `gpu_agent_pod_*` 可能不稳定。请以卡级 `npu_chip_info_*` 指标和调度分配（Pod「调度至显卡」）为准。申请方式见 [昇腾 NPU 使用](../../cluster-administration/npu-usage/)。
 
 {{</ notice >}}
+
+## 昆仑芯 XPU 监控
+
+昆仑芯监控同样由 **`spec.monitoring.gpu.enabled`** 打开。采集链路为：
+
+`xpu-exporter`（`:9507`）→ `gpu-agent`（`:9101`）→ Prometheus → 控制台 [显卡管理](../../cluster-administration/gpu-management/) 与节点运行状态页。
+
+gpu-agent 把 `node_xpu_*` 收成 `gpu_card_*`，**丢掉 type 含 VF 的序列**，所以页面按物理卡分类，不会把 HAMi-Core 留下的虚拟功能算成多出来的卡。页面读的是 `node_gpu_*`（由 `gpu_card_*` 聚合），不要直接用 `node_xpu_*` 对曲线。
+
+独占模式下，申请了 `kunlunxin.com/xpu` 的工作负载会出现 `gpu_agent_pod_utilisation` 与 `gpu_agent_pod_memory_used_bytes`，`vendor` 为 `kunlunxin`。HAMi-Core 下工作负载申请 `kunlunxin.com/vxpu` 与 `kunlunxin.com/vxpu-memory`。模式切换见 [GPU 虚拟化模式](../../cluster-administration/gpu-virt-mode/)。
 
 ## 如何更改监控数据保留期限
 

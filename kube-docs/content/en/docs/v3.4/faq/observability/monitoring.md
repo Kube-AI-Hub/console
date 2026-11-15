@@ -13,6 +13,7 @@ This page contains some of the frequently asked questions about monitoring.
 - [Conflicts with the preexisting prometheus operator](#conflicts-with-the-preexisting-prometheus-operator)
 - [GPU monitoring and ClusterConfiguration](#gpu-monitoring-and-clusterconfiguration)
 - [NPU monitoring](#npu-monitoring)
+- [Kunlunxin XPU monitoring](#kunlunxin-xpu-monitoring)
 - [How to change the monitoring data retention period](#how-to-change-the-monitoring-data-retention-period)
 - [No monitoring data for kube-scheduler and kube-controller-manager](#no-monitoring-data-for-kube-scheduler-and-kube-controller-manager)
 - [No monitoring data for the last few minutes](#no-monitoring-data-for-the-last-few-minutes)
@@ -95,6 +96,16 @@ Card-level metrics include utilization, HBM (910 series) or DDR (310P), temperat
 On 310P hard slices, `container_npu_*` and `gpu_agent_pod_*` may be missing or unstable. Use card-level `npu_chip_info_*` metrics and the scheduler allocation (Pod **Scheduled to GPU**) instead. How to request an NPU is in [Ascend NPU Usage](../../cluster-administration/npu-usage/).
 
 {{</ notice >}}
+
+## Kunlunxin XPU monitoring
+
+Kunlunxin monitoring uses the same **`spec.monitoring.gpu.enabled`** flag. When it is on, the scrape path is:
+
+`xpu-exporter` (`:9507`) → `gpu-agent` (`:9101`) → Prometheus → the Running Status / Monitoring tabs on [GPU Card Management](../../cluster-administration/gpu-management/) and the node status page.
+
+gpu-agent rewrites `node_xpu_*` into `gpu_card_*` and **drops series whose type contains VF**, so the console classifies physical cards only and does not count leftover HAMi-Core virtual functions as extra GPUs. The pages read `node_gpu_*` (aggregated from `gpu_card_*`); do not chart `node_xpu_*` directly.
+
+In Exclusive mode, a workload that requests `kunlunxin.com/xpu` appears as `gpu_agent_pod_utilisation` and `gpu_agent_pod_memory_used_bytes` with `vendor=kunlunxin`. In HAMi-Core the workload requests `kunlunxin.com/vxpu` and `kunlunxin.com/vxpu-memory`. Mode switching is in [GPU Virtualization Mode](../../cluster-administration/gpu-virt-mode/).
 
 ## How to change the monitoring data retention period
 
