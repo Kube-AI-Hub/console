@@ -1136,6 +1136,7 @@ modules:
         - TC-L3-KUBE-FRONTEND-STORAGE-LIST-01
         - TC-L3-KUBE-FRONTEND-STORAGE-LIST-02
         - TC-L3-KUBE-FRONTEND-STORAGE-LIST-03
+        - TC-L3-KUBE-FRONTEND-STORAGE-LIST-05
     - id: detail
       title: 存储详情
       prd: prd/kube-frontend/storage/detail.md

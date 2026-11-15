@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-STORAGE-LIST-05
+level: 3
+suite: point
+module: kube-frontend
+submodule: storage
+feature: list
+title: 存储卷与快照列表的刷新与空态出口
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/persistentvolumeclaims'
+prd: prd/kube-frontend/storage/list.md
+design: design/kube-frontend/storage/list.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-STORAGE-LIST-05
+
+story:
+- US1
+
+product: 存储卷与存储卷快照列表提供刷新按钮与空态出口。
+preconditions:
+- 已登录且项目内可创建存储卷
+steps:
+- 打开存储卷列表，确认「刷新」按钮
+- 在页面之外（API）新建一条存储卷，点击刷新
+- 搜索不存在的名称进入空态，点击「清空搜索与筛选」
+- 切到存储卷快照列表，确认同样的刷新与空态出口
+steps_expected:
+- 刷新后新行出现；空态出口可用，清空后回到有数据的列表
+- 快照列表的刷新句柄为 volumesnapshots:refresh
+expected:
+- 刷新期间按钮显示忙碌状态
+troubleshoot:
+- 快照列表没有刷新：aiId 前缀未随 kind 变化
+- 空态没有出口：schema.labels 未注入 emptyLabels
+update_automation:
+- 选择器：persistentvolumeclaims:refresh / volumesnapshots:refresh / :search

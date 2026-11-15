@@ -362,6 +362,7 @@
 | kube-frontend/storage/list | `AC-L3-KUBE-FRONTEND-STORAGE-LIST-02` | `TC-L3-KUBE-FRONTEND-STORAGE-LIST-02` | [`design/kube-frontend/storage/list.md`](../../../design/kube-frontend/storage/list.md) | [`tests/ui/tests/kube-frontend/storage/test_TC_L3_KUBE_FRONTEND_STORAGE_LIST_02.py`](../../../tests/ui/tests/kube-frontend/storage/test_TC_L3_KUBE_FRONTEND_STORAGE_LIST_02.py) |
 | kube-frontend/storage/list | `AC-L3-KUBE-FRONTEND-STORAGE-LIST-03` | `TC-L3-KUBE-FRONTEND-STORAGE-EDIT_INFO-01`, `TC-L3-KUBE-FRONTEND-STORAGE-LIST-03` | [`design/kube-frontend/storage/list.md`](../../../design/kube-frontend/storage/list.md) | [`tests/ui/tests/kube-frontend/storage/test_TC_L3_KUBE_FRONTEND_STORAGE_EDIT_INFO_01.py`](../../../tests/ui/tests/kube-frontend/storage/test_TC_L3_KUBE_FRONTEND_STORAGE_EDIT_INFO_01.py), [`tests/ui/tests/kube-frontend/storage/test_TC_L3_KUBE_FRONTEND_STORAGE_LIST_03.py`](../../../tests/ui/tests/kube-frontend/storage/test_TC_L3_KUBE_FRONTEND_STORAGE_LIST_03.py) |
 | kube-frontend/storage/list | `AC-L3-KUBE-FRONTEND-STORAGE-LIST-04` | `TC-L3-KUBE-FRONTEND-STORAGE-EXPAND-01` | [`design/kube-frontend/storage/list.md`](../../../design/kube-frontend/storage/list.md) | [`tests/ui/tests/kube-frontend/storage/test_TC_L3_KUBE_FRONTEND_STORAGE_EXPAND_01.py`](../../../tests/ui/tests/kube-frontend/storage/test_TC_L3_KUBE_FRONTEND_STORAGE_EXPAND_01.py) |
+| kube-frontend/storage/list | `AC-L3-KUBE-FRONTEND-STORAGE-LIST-05` | `TC-L3-KUBE-FRONTEND-STORAGE-LIST-05` | **（无）** | [`tests/ui/tests/kube-frontend/storage/test_TC_L3_KUBE_FRONTEND_STORAGE_LIST_05.py`](../../../tests/ui/tests/kube-frontend/storage/test_TC_L3_KUBE_FRONTEND_STORAGE_LIST_05.py) |
 | kube-frontend/storage/snapshot-alias | `AC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOT_ALIAS-01` | `TC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOT_ALIAS-01` | [`design/kube-frontend/storage/snapshot-alias.md`](../../../design/kube-frontend/storage/snapshot-alias.md) | [`tests/ui/tests/kube-frontend/storage/test_TC_L3_KUBE_FRONTEND_STORAGE_SNAPSHOT_ALIAS_01.py`](../../../tests/ui/tests/kube-frontend/storage/test_TC_L3_KUBE_FRONTEND_STORAGE_SNAPSHOT_ALIAS_01.py) |
 | kube-frontend/storage/snapshot-content | `AC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOT_CONTENT-01` | `TC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOT_CONTENT-01` | [`design/kube-frontend/storage/snapshot-content.md`](../../../design/kube-frontend/storage/snapshot-content.md) | [`tests/ui/tests/kube-frontend/storage/test_TC_L3_KUBE_FRONTEND_STORAGE_SNAPSHOT_CONTENT_01.py`](../../../tests/ui/tests/kube-frontend/storage/test_TC_L3_KUBE_FRONTEND_STORAGE_SNAPSHOT_CONTENT_01.py) |
 | kube-frontend/storage/snapshots | `AC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOTS-01` | `TC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOTS-01` | [`design/kube-frontend/storage/snapshots.md`](../../../design/kube-frontend/storage/snapshots.md) | [`tests/ui/tests/kube-frontend/storage/test_TC_L3_KUBE_FRONTEND_STORAGE_SNAPSHOTS_01.py`](../../../tests/ui/tests/kube-frontend/storage/test_TC_L3_KUBE_FRONTEND_STORAGE_SNAPSHOTS_01.py) |
@@ -385,9 +386,9 @@
 
 ## 小结
 
-- 需求里的 AC：378 条，其中未覆盖 1 条、无技术方案承接 17 条、无用例规格实现 1 条。
+- 需求里的 AC：379 条，其中未覆盖 1 条、无技术方案承接 18 条、无用例规格实现 1 条。
 - 未覆盖：`AC-L2-KUBE-FRONTEND-LOGIN-07`
-- 无技术方案承接：`AC-L2-KUBE-FRONTEND-LOGIN-01`, `AC-L2-KUBE-FRONTEND-LOGIN-02`, `AC-L2-KUBE-FRONTEND-LOGIN-03`, `AC-L2-KUBE-FRONTEND-LOGIN-04`, `AC-L2-KUBE-FRONTEND-LOGIN-05`, `AC-L2-KUBE-FRONTEND-LOGIN-06`, `AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L2-KUBE-FRONTEND-THEME-01`, `AC-L2-KUBE-FRONTEND-THEME-02`, `AC-L2-KUBE-FRONTEND-THEME-03`, `AC-L2-KUBE-FRONTEND-THEME-04`, `AC-L2-KUBE-FRONTEND-THEME-05`, `AC-L3-KUBE-FRONTEND-MONITORING-PROJECT_CUSTOM_MONITORING-01`, `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-02`, `AC-L3-KUBE-FRONTEND-STORAGE-DETAIL_TABS-01`
+- 无技术方案承接：`AC-L2-KUBE-FRONTEND-LOGIN-01`, `AC-L2-KUBE-FRONTEND-LOGIN-02`, `AC-L2-KUBE-FRONTEND-LOGIN-03`, `AC-L2-KUBE-FRONTEND-LOGIN-04`, `AC-L2-KUBE-FRONTEND-LOGIN-05`, `AC-L2-KUBE-FRONTEND-LOGIN-06`, `AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L2-KUBE-FRONTEND-THEME-01`, `AC-L2-KUBE-FRONTEND-THEME-02`, `AC-L2-KUBE-FRONTEND-THEME-03`, `AC-L2-KUBE-FRONTEND-THEME-04`, `AC-L2-KUBE-FRONTEND-THEME-05`, `AC-L3-KUBE-FRONTEND-MONITORING-PROJECT_CUSTOM_MONITORING-01`, `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-02`, `AC-L3-KUBE-FRONTEND-STORAGE-DETAIL_TABS-01`, `AC-L3-KUBE-FRONTEND-STORAGE-LIST-05`
 - 无用例规格实现：`AC-L2-KUBE-FRONTEND-LOGIN-07`
 
 ## 用户故事覆盖
@@ -685,7 +686,7 @@
 | kube-frontend/storage/detail-tabs | `US1` | `TC-L3-KUBE-FRONTEND-STORAGE-DETAIL_TABS-01` |
 | kube-frontend/storage/detail | `US1` | `TC-L3-KUBE-FRONTEND-STORAGE-DETAIL-01`, `TC-L3-KUBE-FRONTEND-STORAGE-DETAIL-02` |
 | kube-frontend/storage/edit-yaml | `US1` | `TC-L3-KUBE-FRONTEND-STORAGE-EDIT_YAML-01` |
-| kube-frontend/storage/list | `US1` | `TC-L3-KUBE-FRONTEND-STORAGE-EDIT_INFO-01`, `TC-L3-KUBE-FRONTEND-STORAGE-EXPAND-01`, `TC-L3-KUBE-FRONTEND-STORAGE-LIST-01`, `TC-L3-KUBE-FRONTEND-STORAGE-LIST-02`, `TC-L3-KUBE-FRONTEND-STORAGE-LIST-03` |
+| kube-frontend/storage/list | `US1` | `TC-L3-KUBE-FRONTEND-STORAGE-EDIT_INFO-01`, `TC-L3-KUBE-FRONTEND-STORAGE-EXPAND-01`, `TC-L3-KUBE-FRONTEND-STORAGE-LIST-01`, `TC-L3-KUBE-FRONTEND-STORAGE-LIST-02`, `TC-L3-KUBE-FRONTEND-STORAGE-LIST-03`, `TC-L3-KUBE-FRONTEND-STORAGE-LIST-05` |
 | kube-frontend/storage/snapshot-alias | `US1` | `TC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOT_ALIAS-01` |
 | kube-frontend/storage/snapshot-content | `US1` | `TC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOT_CONTENT-01` |
 | kube-frontend/storage/snapshots | `US1` | `TC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOTS-01` |

@@ -33,6 +33,7 @@ import { ExpandVolumeDialog } from './ExpandVolumeDialog';
 import { CreateVolumeDialog } from './CreateVolumeDialog';
 import { api as apiClient } from '@/api';
 import { storageApi } from '@kube-ai-hub/api-client';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * The storage list, shared by 存储卷 and 存储卷快照.
@@ -102,10 +103,13 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
       setEditing(null);
     }
   }, [dialog.kind, detail.isError]);
+  // The list owns its query, so the refresh control belongs here.
+  const listRefresh = useListRefresh(`${kind}`, query);
 
   const schema = React.useMemo<ListSchema<StorageSummary>>(
     () => ({
       title: t(descriptor.titleKey),
+      refresh: listRefresh.refresh,
       description: t(descriptor.descriptionKey),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
@@ -268,6 +272,7 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
       ],
       empty: { title: t(descriptor.emptyTitleKey), description: t(descriptor.emptyDescriptionKey) },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -294,6 +299,7 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
     <AiSurface as="section" aiId={`${kind}:surface`} state={state} className="min-w-0">
       <ResourceList
         schema={schema}
+        onRefresh={listRefresh.onRefresh}
         rows={rows}
         loading={state === 'loading'}
         searchValue={list.keyword}

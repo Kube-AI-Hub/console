@@ -269,8 +269,8 @@ MODULES = [
                         "tests": {"L3": [
                             "TC-L3-KUBE-FRONTEND-SECRETS-LIST-01",
                             "TC-L3-KUBE-FRONTEND-SECRETS-LIST-02",
-                        
-                            "TC-L3-KUBE-FRONTEND-SECRETS-LIST-03",]},
+                            "TC-L3-KUBE-FRONTEND-SECRETS-LIST-03",
+                        ]},
                     },
                     {
                         "id": "search",
@@ -982,6 +982,7 @@ MODULES = [
                             "TC-L3-KUBE-FRONTEND-STORAGE-LIST-01",
                             "TC-L3-KUBE-FRONTEND-STORAGE-LIST-02",
                             "TC-L3-KUBE-FRONTEND-STORAGE-LIST-03",
+                            "TC-L3-KUBE-FRONTEND-STORAGE-LIST-05",
                         ]},
                     },
                     {
