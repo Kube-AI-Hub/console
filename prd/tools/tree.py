@@ -1120,6 +1120,7 @@ MODULES = [
                             "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-05",
                             "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-06",
                             "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-07",
+                            "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-08",
                         ]},
                     },
                     {

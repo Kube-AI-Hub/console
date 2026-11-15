@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { hpaFor, toWorkloadAutoscaling, workloadsApi, type KubeObject, type ResourceListParams, type WorkloadKind } from '@kube-ai-hub/api-client';
+import { hpaFor, ipPoolsApi, toWorkloadAutoscaling, workloadsApi, type KubeObject, type ResourceListParams, type WorkloadKind } from '@kube-ai-hub/api-client';
 import { registerPage, type AiPage } from '@kube-ai-hub/ai-surface';
 import type { LocaleKey } from '@kube-ai-hub/locales';
 import { api } from '@/api';
@@ -80,6 +80,22 @@ export function useUpdateWorkload(kind: WorkloadKind, params: { cluster: string;
   return useMutation({
     mutationFn: (body: KubeObject) => workloadsApi(api, kind).update({ ...params, body }),
     onSuccess: () => invalidate(queryClient, kind),
+  });
+}
+
+/**
+ * The cluster's IP pools, for the pod IP pool selector.
+ *
+ * A cluster without the network group answers 404 for this resource; that is not an error to
+ * retry, it just means the pod IP pool control has nothing to offer.
+ */
+export function useIPPools(cluster: string) {
+  return useQuery({
+    queryKey: ['ip-pools', cluster, 'available'],
+    queryFn: ({ signal }) =>
+      ipPoolsApi(api).list({ cluster, namespace: '', page: 1, pageSize: 200, sortBy: 'name', order: 'asc', signal }),
+    retry: false,
+    staleTime: 60_000,
   });
 }
 

@@ -1300,6 +1300,7 @@ modules:
         - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-05
         - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-06
         - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-07
+        - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-08
     - id: delete
       title: 删除负载
       prd: prd/kube-frontend/app-workloads/delete.md

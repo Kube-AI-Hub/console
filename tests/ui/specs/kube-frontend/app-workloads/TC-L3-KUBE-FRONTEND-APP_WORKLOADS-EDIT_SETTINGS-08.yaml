@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-08
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: edit-settings
+title: 编辑设置：容器组安全上下文与 IP 池
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/deployments'
+prd: prd/kube-frontend/app-workloads/edit-settings.md
+design: design/kube-frontend/app-workloads/edit-settings.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-08
+
+story:
+- US1
+
+product: 编辑设置里的容器组安全上下文（运行用户/用户组/SELinux）与容器组 IP 池选择。
+preconditions:
+- 已登录；项目内可创建部署；集群存在可用 IP 池时验证选择器
+steps:
+- 创建部署并打开「编辑设置」
+- 启用容器组安全上下文（禁止 root、用户 1000、用户组 2000），选择 IP 池后保存
+- 回读 spec.template 的 securityContext 与注解
+- 取消启用安全上下文后保存并回读
+steps_expected:
+- securityContext 为 {runAsNonRoot:true, runAsUser:1000, runAsGroup:2000}
+- 容器组注解 cni.projectcalico.org/ipv4pools 为所选池名的 JSON 数组
+- 取消启用后 securityContext 被移除
+expected:
+- 用户 ID 非整数时本地拒绝；集群无 IP 池时不显示选择器
+troubleshoot:
+- 安全上下文里的 fsGroup 丢失：整块替换而非合并
+- 注解被写成池名字符串而非数组：应写 JSON 数组
+update_automation:
+- 选择器：deployments-edit:security-context / security-context-enable / security-context-nonroot / security-context-user / security-context-group / ip-pool-select

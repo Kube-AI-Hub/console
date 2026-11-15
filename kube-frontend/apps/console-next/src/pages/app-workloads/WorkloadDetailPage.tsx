@@ -788,6 +788,7 @@ export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, 
         <EditWorkloadDialog
           open
           onOpenChange={(open) => !open && setDialog('none')}
+          cluster={cluster}
           kind={kind}
           detail={detail}
           pending={update.isPending}

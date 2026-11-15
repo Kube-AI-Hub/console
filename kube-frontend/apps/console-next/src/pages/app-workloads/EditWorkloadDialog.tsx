@@ -3,6 +3,7 @@ import { Button, Icon, Input, Modal, Select } from '@kube-ai-hub/ui';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { quantityToNumber, ApiError, type KubeObject, type WorkloadDetail, type WorkloadKind } from '@kube-ai-hub/api-client';
 import { useT } from '@/i18n';
+import { useIPPools } from './queries';
 
 /**
  * 编辑设置: the custom form the old console opens from a workload's detail.
@@ -356,6 +357,93 @@ function volumeManifest(draft: VolumeDraft): JsonObject | undefined {
 /** Volume names and mount paths: DNS-1123 for the former, absolute for the latter. */
 const VOLUME_NAME = /^[a-z0-9]([-a-z0-9]*[a-z0-9])?$/;
 
+/** Pod-level security context, as the old console offers it (user/group + SELinux). */
+interface SecurityContextDraft {
+  enabled: boolean;
+  runAsNonRoot: boolean;
+  runAsUser: string;
+  runAsGroup: string;
+  seLinuxLevel: string;
+  seLinuxRole: string;
+  seLinuxType: string;
+  seLinuxUser: string;
+}
+
+const EMPTY_SECURITY_CONTEXT: SecurityContextDraft = {
+  enabled: false,
+  runAsNonRoot: false,
+  runAsUser: '',
+  runAsGroup: '',
+  seLinuxLevel: '',
+  seLinuxRole: '',
+  seLinuxType: '',
+  seLinuxUser: '',
+};
+
+function securityContextOf(podSpec: JsonObject | undefined): SecurityContextDraft {
+  const context = podSpec ? asObject(podSpec['securityContext']) : undefined;
+  /*
+   * The apiserver defaults a pod's `securityContext` to `{}`, so an existing key is not evidence
+   * that anything is set. Only a non-empty block counts as "enabled".
+   */
+  if (!context || Object.keys(context).length === 0) return { ...EMPTY_SECURITY_CONTEXT };
+  const seLinux = asObject(context['seLinuxOptions']) ?? {};
+  return {
+    enabled: true,
+    runAsNonRoot: context['runAsNonRoot'] === true,
+    runAsUser: context['runAsUser'] === undefined ? '' : String(context['runAsUser']),
+    runAsGroup: context['runAsGroup'] === undefined ? '' : String(context['runAsGroup']),
+    seLinuxLevel: String(seLinux['level'] ?? ''),
+    seLinuxRole: String(seLinux['role'] ?? ''),
+    seLinuxType: String(seLinux['type'] ?? ''),
+    seLinuxUser: String(seLinux['user'] ?? ''),
+  };
+}
+
+/** Build the pod securityContext; undefined when the reader did not enable it. */
+function securityContextManifest(draft: SecurityContextDraft, stored: JsonObject | undefined): JsonObject | undefined {
+  if (!draft.enabled) return undefined;
+  // Keep the keys this form does not edit (fsGroup, seccompProfile, ...).
+  const context: JsonObject = { ...(stored ?? {}) };
+  if (draft.runAsNonRoot) context['runAsNonRoot'] = true;
+  else delete context['runAsNonRoot'];
+  if (draft.runAsUser.trim()) context['runAsUser'] = Number(draft.runAsUser.trim());
+  else delete context['runAsUser'];
+  if (draft.runAsGroup.trim()) context['runAsGroup'] = Number(draft.runAsGroup.trim());
+  else delete context['runAsGroup'];
+  const seLinux: JsonObject = { ...(asObject(context['seLinuxOptions']) ?? {}) };
+  for (const [field, value] of [
+    ['level', draft.seLinuxLevel],
+    ['role', draft.seLinuxRole],
+    ['type', draft.seLinuxType],
+    ['user', draft.seLinuxUser],
+  ] as const) {
+    if (value.trim()) seLinux[field] = value.trim();
+    else delete seLinux[field];
+  }
+  if (Object.keys(seLinux).length > 0) context['seLinuxOptions'] = seLinux;
+  else delete context['seLinuxOptions'];
+  return context;
+}
+
+/** The Calico annotation that pins a pod to one IP pool. */
+const IP_POOL_ANNOTATION = 'cni.projectcalico.org/ipv4pools';
+
+/** Radix Select rejects an empty value, so the no-pool choice needs a sentinel. */
+const NO_POOL = '__none__';
+
+function poolFromAnnotations(rows: PairDraft[]): string {
+  const row = rows.find((entry) => entry.key.trim() === IP_POOL_ANNOTATION);
+  if (!row) return '';
+  try {
+    const parsed: unknown = JSON.parse(row.value);
+    if (Array.isArray(parsed) && typeof parsed[0] === 'string') return parsed[0];
+  } catch {
+    // A hand-written value that is not JSON is left exactly as the reader typed it.
+  }
+  return '';
+}
+
 /** Kubernetes quantity syntax: a number with an optional unit (`500m`, `1Gi`, `2`). */
 const QUANTITY = /^[0-9]+(\.[0-9]+)?(m|k|M|G|T|Ki|Mi|Gi|Ti)?$/;
 
@@ -471,6 +559,8 @@ function PairEditor({
 
 export interface EditWorkloadDialogProps {
   open: boolean;
+  /** The cluster the workload lives in; the pod IP pool list is per cluster. */
+  cluster?: string;
   onOpenChange: (open: boolean) => void;
   kind: WorkloadKind;
   detail: WorkloadDetail;
@@ -489,6 +579,7 @@ interface ChangeRow {
 export function EditWorkloadDialog({
   open,
   onOpenChange,
+  cluster = '',
   kind,
   detail,
   pending = false,
@@ -506,6 +597,14 @@ export function EditWorkloadDialog({
   const [podAnnotations, setPodAnnotations] = React.useState<PairDraft[]>([]);
   const [gracePeriod, setGracePeriod] = React.useState('');
   const [volumes, setVolumes] = React.useState<VolumeDraft[]>([]);
+  const [securityContext, setSecurityContext] = React.useState<SecurityContextDraft>({ ...EMPTY_SECURITY_CONTEXT });
+  const pools = useIPPools(cluster);
+  const availablePools = React.useMemo(() => {
+    const items = (pools.data?.items ?? []) as Array<{ name: string; cidr: string; disabled?: boolean; used?: number; capacity?: number }>;
+    // A disabled pool hands out nothing new, so offering it would only produce a rejected pod.
+    return items.filter((pool) => !pool.disabled);
+  }, [pools.data]);
+  const selectedPool = React.useMemo(() => poolFromAnnotations(podAnnotations), [podAnnotations]);
   const [error, setError] = React.useState<string | null>(null);
 
   // Re-seed on open: the same dialog instance edits different objects over time.
@@ -518,6 +617,7 @@ export function EditWorkloadDialog({
     const seedPodSpec = seedTemplate ? asObject(seedTemplate['spec']) : undefined;
     setNodeSelector(pairsOf(seedPodSpec?.['nodeSelector']));
     setVolumes(volumesOf(seedPodSpec));
+    setSecurityContext(securityContextOf(seedPodSpec));
     setGracePeriod(
       seedPodSpec?.['terminationGracePeriodSeconds'] === undefined ? '' : String(seedPodSpec['terminationGracePeriodSeconds']),
     );
@@ -784,6 +884,15 @@ export function EditWorkloadDialog({
         });
       }
     });
+    const storedSecurityContext = storedPodSpec ? asObject(storedPodSpec['securityContext']) : undefined;
+    const nextSecurityContext = securityContextManifest(securityContext, storedSecurityContext);
+    if (JSON.stringify(storedSecurityContext ?? null) !== JSON.stringify(nextSecurityContext ?? null)) {
+      rows.push({
+        path: 'spec.template.spec.securityContext',
+        before: storedSecurityContext ? JSON.stringify(storedSecurityContext) : '-',
+        after: nextSecurityContext ? JSON.stringify(nextSecurityContext) : t('workloads.editSettings.removed'),
+      });
+    }
     const storedGrace = storedPodSpec?.['terminationGracePeriodSeconds'];
     const nextGrace = gracePeriod.trim();
     if ((storedGrace === undefined ? '' : String(storedGrace)) !== nextGrace) {
@@ -794,7 +903,7 @@ export function EditWorkloadDialog({
       });
     }
     return rows;
-  }, [drafts, gracePeriod, initialContainers, kind, nodeSelector, podAnnotations, podLabels, raw, replicas, strategy, supportsReplicas, t, volumes]);
+  }, [drafts, gracePeriod, initialContainers, kind, nodeSelector, podAnnotations, podLabels, raw, replicas, securityContext, strategy, supportsReplicas, t, volumes]);
 
   /** Build the object the API will store: a clone with only the edited fields replaced. */
   const buildBody = (): KubeObject => {
@@ -862,6 +971,10 @@ export function EditWorkloadDialog({
     const nextTemplate = templateOf(kind, next);
     const nextPodSpec = nextTemplate ? asObject(nextTemplate['spec']) : undefined;
     if (nextPodSpec) {
+      const storedContext = asObject(nextPodSpec['securityContext']);
+      const nextContext = securityContextManifest(securityContext, storedContext);
+      if (nextContext) nextPodSpec['securityContext'] = nextContext;
+      else delete nextPodSpec['securityContext'];
       const volumeList = volumes.map((volume) => volumeManifest(volume)).filter((entry): entry is JsonObject => Boolean(entry));
       if (volumeList.length > 0) nextPodSpec['volumes'] = volumeList;
       else delete nextPodSpec['volumes'];
@@ -966,6 +1079,12 @@ export function EditWorkloadDialog({
         : [strategy.maxUnavailable];
     return values.some((value) => value.trim() !== '' && !INT_OR_PERCENT.test(value.trim()));
   }, [kind, strategy]);
+
+  const securityContextInvalid = React.useMemo(() => {
+    if (!securityContext.enabled) return false;
+    const ids = [securityContext.runAsUser, securityContext.runAsGroup];
+    return ids.some((value) => value.trim() !== '' && !NON_NEGATIVE_INT.test(value.trim()));
+  }, [securityContext]);
 
   /** Volumes and mounts: names, sources, absolute and unique mount paths. */
   const volumeIssues = React.useMemo(() => {
@@ -1091,6 +1210,7 @@ export function EditWorkloadDialog({
     probeIssues.size > 0 ||
     gracePeriodInvalid ||
     volumeIssues.size > 0 ||
+    securityContextInvalid ||
     changes.length === 0;
 
   return (
@@ -1215,6 +1335,110 @@ export function EditWorkloadDialog({
               </span>
             ) : null}
           </label>
+          <div className="flex flex-col gap-2 rounded-ai-md border border-ai-line p-2" data-ai-id={`${kind}-edit:security-context`}>
+            <label className="inline-flex min-h-6 items-center gap-2 text-xs text-ai-fg">
+              <input
+                type="checkbox"
+                checked={securityContext.enabled}
+                {...actionProps(`${kind}-edit:security-context-enable`)}
+                onChange={(event) =>
+                  setSecurityContext((previous) => ({ ...previous, enabled: event.target.checked }))
+                }
+              />
+              {t('workloads.editSettings.securityContext')}
+            </label>
+            <span className="text-[11px] text-ai-fg-muted">{t('workloads.editSettings.securityContextHint')}</span>
+            {securityContext.enabled ? (
+              <>
+                <label className="inline-flex min-h-6 items-center gap-2 text-[11px] text-ai-fg-muted">
+                  <input
+                    type="checkbox"
+                    checked={securityContext.runAsNonRoot}
+                    {...actionProps(`${kind}-edit:security-context-nonroot`)}
+                    onChange={(event) =>
+                      setSecurityContext((previous) => ({ ...previous, runAsNonRoot: event.target.checked }))
+                    }
+                  />
+                  {t('workloads.editSettings.runAsNonRoot')}
+                </label>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <label className="flex flex-col gap-1">
+                    <span className="text-[11px] text-ai-fg-muted">{t('workloads.editSettings.runAsUser')}</span>
+                    <Input
+                      value={securityContext.runAsUser}
+                      inputMode="numeric"
+                      placeholder="1000"
+                      {...actionProps(`${kind}-edit:security-context-user`)}
+                      onChange={(event) =>
+                        setSecurityContext((previous) => ({ ...previous, runAsUser: event.target.value }))
+                      }
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1">
+                    <span className="text-[11px] text-ai-fg-muted">{t('workloads.editSettings.runAsGroup')}</span>
+                    <Input
+                      value={securityContext.runAsGroup}
+                      inputMode="numeric"
+                      placeholder="1000"
+                      {...actionProps(`${kind}-edit:security-context-group`)}
+                      onChange={(event) =>
+                        setSecurityContext((previous) => ({ ...previous, runAsGroup: event.target.value }))
+                      }
+                    />
+                  </label>
+                </div>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {([
+                    ['seLinuxLevel', 'workloads.editSettings.seLinuxLevel'],
+                    ['seLinuxRole', 'workloads.editSettings.seLinuxRole'],
+                    ['seLinuxType', 'workloads.editSettings.seLinuxType'],
+                    ['seLinuxUser', 'workloads.editSettings.seLinuxUser'],
+                  ] as const).map(([field, key]) => (
+                    <label key={field} className="flex flex-col gap-1">
+                      <span className="text-[11px] text-ai-fg-muted">{t(key)}</span>
+                      <Input
+                        value={securityContext[field]}
+                        {...actionProps(`${kind}-edit:security-context-${field}`)}
+                        onChange={(event) =>
+                          setSecurityContext((previous) => ({ ...previous, [field]: event.target.value }))
+                        }
+                      />
+                    </label>
+                  ))}
+                </div>
+                {securityContextInvalid ? (
+                  <span role="alert" className="text-[11px] text-ai-danger" data-ai-id={`${kind}-edit:security-context-error`}>
+                    {t('workloads.editSettings.securityContextInvalid')}
+                  </span>
+                ) : null}
+              </>
+            ) : null}
+          </div>
+
+          {availablePools.length > 0 ? (
+            <label className="flex flex-col gap-1" data-ai-id={`${kind}-edit:ip-pool`}>
+              <span className="text-xs text-ai-fg-secondary">{t('workloads.editSettings.ipPool')}</span>
+              <Select
+                value={selectedPool || NO_POOL}
+                options={[
+                  { value: NO_POOL, label: t('workloads.editSettings.ipPoolNone') },
+                  ...availablePools.map((pool) => ({ value: pool.name, label: `${pool.name}（${pool.cidr}）` })),
+                ]}
+                data-ai-id={`${kind}-edit:ip-pool-select`}
+                aria-label={t('workloads.editSettings.ipPool')}
+                onValueChange={(value: string) => {
+                  const name = value === NO_POOL ? '' : value;
+                  setPodAnnotations((previous) => {
+                    const others = previous.filter((row) => row.key.trim() !== IP_POOL_ANNOTATION);
+                    if (!name) return others;
+                    return [...others, { id: nextPairId(), key: IP_POOL_ANNOTATION, value: JSON.stringify([name]) }];
+                  });
+                }}
+              />
+              <span className="text-[11px] text-ai-fg-muted">{t('workloads.editSettings.ipPoolHint')}</span>
+            </label>
+          ) : null}
+
           <PairEditor
             group="pod-labels"
             label={t('workloads.editSettings.podLabels')}
