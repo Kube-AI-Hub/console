@@ -11,6 +11,7 @@ import { DefinitionRow } from '@/components/resource/DefinitionRow';
 import { DeleteDialog } from '@/components/resource/DeleteDialog';
 import { formatTimestamp } from '@/lib/time';
 import { useAuth } from '@/shell/AuthProvider';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * 租户(企业空间)成员详情.
@@ -50,9 +51,20 @@ function MemberResourceTable({
   emptyTitle: string;
 }): React.ReactElement {
   const t = useT();
+  // The rows come from four queries that live in the page, so the table cannot refetch them
+  // directly; it invalidates every query instead, which is what a reader means by "refresh".
+  const queryClient = useQueryClient();
+  const listRefresh = useListRefresh(`workspace-member-${kind}`, {
+    // No busy state: the schema is memoised without the loading flag, so a busy value captured on
+    // the first render would freeze the button in the disabled state (a trap hit twice already).
+    // The table keeps its own row-level loading feedback instead.
+    isFetching: false,
+    refetch: () => queryClient.invalidateQueries(),
+  });
   const schema = React.useMemo<ListSchema<WorkspaceMemberResource>>(
     () => ({
       description,
+      refresh: listRefresh.refresh,
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
       columns: [
@@ -96,7 +108,7 @@ function MemberResourceTable({
   );
   return (
     <div data-ai-id={`workspace-member-detail:${kind}`}>
-      <ResourceList schema={schema} rows={rows} loading={loading} />
+      <ResourceList schema={schema} rows={rows} loading={loading} onRefresh={listRefresh.onRefresh} />
     </div>
   );
 }

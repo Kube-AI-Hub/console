@@ -930,6 +930,11 @@ MODULES = [
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-SETTINGS_LISTS_REFRESH-01"]},
                     },
                     {
+                        "id": "aggregate-lists-refresh",
+                        "title": "聚合型列表刷新",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-AGGREGATE_LISTS_REFRESH-01"]},
+                    },
+                    {
                         "id": "network-isolation",
                         "title": "网络隔离",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-01", "TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-04", "TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_RULES-01"]},

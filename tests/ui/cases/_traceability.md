@@ -301,6 +301,7 @@
 | kube-frontend/platform-settings/mail | `AC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-MAIL-02` | `TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-MAIL-01` | [`design/kube-frontend/platform-settings/mail.md`](../../../design/kube-frontend/platform-settings/mail.md) | [`tests/ui/tests/kube-frontend/platform-settings/test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_MAIL_01.py`](../../../tests/ui/tests/kube-frontend/platform-settings/test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_MAIL_01.py) |
 | kube-frontend/platform-settings/mail | `AC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-MAIL-03` | `TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-MAIL-01` | [`design/kube-frontend/platform-settings/mail.md`](../../../design/kube-frontend/platform-settings/mail.md) | [`tests/ui/tests/kube-frontend/platform-settings/test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_MAIL_01.py`](../../../tests/ui/tests/kube-frontend/platform-settings/test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_MAIL_01.py) |
 | kube-frontend/project-settings/_index | `AC-FULL-KUBE-FRONTEND-PROJECT_SETTINGS-01` | `TC-FULL-KUBE-FRONTEND-PROJECT_SETTINGS-01` | [`design/kube-frontend/project-settings/_index.md`](../../../design/kube-frontend/project-settings/_index.md) | [`tests/ui/tests/kube-frontend/project-settings/test_TC_FULL_KUBE_FRONTEND_PROJECT_SETTINGS_01.py`](../../../tests/ui/tests/kube-frontend/project-settings/test_TC_FULL_KUBE_FRONTEND_PROJECT_SETTINGS_01.py) |
+| kube-frontend/project-settings/aggregate-lists-refresh | `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-AGGREGATE_LISTS_REFRESH-01` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-AGGREGATE_LISTS_REFRESH-01` | [`design/kube-frontend/project-settings/aggregate-lists-refresh.md`](../../../design/kube-frontend/project-settings/aggregate-lists-refresh.md) | [`tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_AGGREGATE_LISTS_REFRESH_01.py`](../../../tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_AGGREGATE_LISTS_REFRESH_01.py) |
 | kube-frontend/project-settings/base-info | `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-BASE_INFO-01` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-BASE_INFO-01` | [`design/kube-frontend/project-settings/base-info.md`](../../../design/kube-frontend/project-settings/base-info.md) | [`tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_BASE_INFO_01.py`](../../../tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_BASE_INFO_01.py) |
 | kube-frontend/project-settings/base-info | `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-BASE_INFO-02` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-BASE_INFO-01` | [`design/kube-frontend/project-settings/base-info.md`](../../../design/kube-frontend/project-settings/base-info.md) | [`tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_BASE_INFO_01.py`](../../../tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_BASE_INFO_01.py) |
 | kube-frontend/project-settings/base-info | `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-BASE_INFO-03` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-QUOTA-01` | [`design/kube-frontend/project-settings/base-info.md`](../../../design/kube-frontend/project-settings/base-info.md) | [`tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_QUOTA_01.py`](../../../tests/ui/tests/kube-frontend/project-settings/test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_QUOTA_01.py) |
@@ -395,7 +396,7 @@
 
 ## 小结
 
-- 需求里的 AC：388 条，其中未覆盖 1 条、无技术方案承接 17 条、无用例规格实现 1 条。
+- 需求里的 AC：389 条，其中未覆盖 1 条、无技术方案承接 17 条、无用例规格实现 1 条。
 - 未覆盖：`AC-L2-KUBE-FRONTEND-LOGIN-07`
 - 无技术方案承接：`AC-L2-KUBE-FRONTEND-LOGIN-01`, `AC-L2-KUBE-FRONTEND-LOGIN-02`, `AC-L2-KUBE-FRONTEND-LOGIN-03`, `AC-L2-KUBE-FRONTEND-LOGIN-04`, `AC-L2-KUBE-FRONTEND-LOGIN-05`, `AC-L2-KUBE-FRONTEND-LOGIN-06`, `AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L2-KUBE-FRONTEND-THEME-01`, `AC-L2-KUBE-FRONTEND-THEME-02`, `AC-L2-KUBE-FRONTEND-THEME-03`, `AC-L2-KUBE-FRONTEND-THEME-04`, `AC-L2-KUBE-FRONTEND-THEME-05`, `AC-L3-KUBE-FRONTEND-MONITORING-PROJECT_CUSTOM_MONITORING-01`, `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-02`, `AC-L3-KUBE-FRONTEND-STORAGE-DETAIL_TABS-01`
 - 无用例规格实现：`AC-L2-KUBE-FRONTEND-LOGIN-07`
@@ -639,6 +640,7 @@
 | kube-frontend/platform-settings/info | `US1` | `TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-INFO-01` |
 | kube-frontend/platform-settings/mail | `US1` | `TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-MAIL-01` |
 | kube-frontend/project-settings/_index | `US1` | `TC-FULL-KUBE-FRONTEND-PROJECT_SETTINGS-01` |
+| kube-frontend/project-settings/aggregate-lists-refresh | `US1` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-AGGREGATE_LISTS_REFRESH-01` |
 | kube-frontend/project-settings/base-info | `US1` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-BASE_INFO-01`, `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-QUOTA-01` |
 | kube-frontend/project-settings/baseinfo-stats | `US1` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-BASEINFO-02` |
 | kube-frontend/project-settings/gateway | `US1` | `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-01` |
@@ -717,4 +719,4 @@
 | kube-frontend/workbench/context | `US1` | `TC-L3-KUBE-FRONTEND-WORKBENCH-CONTEXT-01` |
 | kube-frontend/workbench/entry | `US1` | `TC-L3-KUBE-FRONTEND-WORKBENCH-ENTRY-01` |
 
-- 用户故事：312 条，其中未覆盖 0 条。
+- 用户故事：313 条，其中未覆盖 0 条。

@@ -12,6 +12,7 @@ import {
 import { useT } from '@/i18n';
 import { useResourceListState } from '@/components/resource/useResourceListState';
 import { useClusterProjectIndex } from './useClusterProjectIndex';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 import {
   RESOURCE_RANGES,
   toPodRows,
@@ -117,6 +118,15 @@ export function ResourceMonitorPage({ cluster }: ResourceMonitorPageProps): Reac
   // metrics as they arrive.
   const owners = useReplicaSetOwners(cluster, tab === 'workloads');
 
+  // One control for the page: the workload tab needs the ReplicaSet hop as well, so the source
+  // is the union of both reads.
+  const listRefresh = useListRefresh('cluster-resource-monitor', {
+    isFetching: usage.isFetching || owners.isFetching,
+    refetch: () => {
+      void usage.refetch();
+      void owners.refetch();
+    },
+  });
   const allRows = React.useMemo(() => {
     const pods = usage.data ?? [];
     return tab === 'workloads' ? toWorkloadRows(pods, owners.data ?? new Map()) : toPodRows(pods);
@@ -165,6 +175,7 @@ export function ResourceMonitorPage({ cluster }: ResourceMonitorPageProps): Reac
   const schema: ListSchema<ResourceUsageRow> = {
     title: tab === 'workloads' ? t('cluster.resourceMonitor.workloadsTitle') : t('cluster.resourceMonitor.podsTitle'),
     description: '',
+    refresh: listRefresh.refresh,
     rowKey: (row) => row.key,
     rowAttributes: (row) => ({ 'data-ai-row': row.key }),
     search: { placeholder: t('cluster.searchPlaceholder'), aiId: AI_ID + ':search' },
@@ -207,6 +218,7 @@ export function ResourceMonitorPage({ cluster }: ResourceMonitorPageProps): Reac
     ],
     empty: { title: t('common.empty'), description: t('cluster.resourceMonitor.emptyHint') },
     labels: {
+      ...listRefresh.emptyLabels,
       selectAll: t('table.selectAll'),
       selectRow: (index) => t('table.selectRow', { index }),
       moreActions: t('table.moreActions'),
@@ -296,6 +308,7 @@ export function ResourceMonitorPage({ cluster }: ResourceMonitorPageProps): Reac
           <div data-ai-id="cluster-resource-monitor:tab:workloads" className="pt-2">
             <ResourceList
               schema={schema}
+              onRefresh={listRefresh.onRefresh}
               rows={pageRows}
               loading={loading}
               searchValue={list.keyword}
@@ -311,6 +324,7 @@ export function ResourceMonitorPage({ cluster }: ResourceMonitorPageProps): Reac
           <div data-ai-id="cluster-resource-monitor:tab:pods" className="pt-2">
             <ResourceList
               schema={schema}
+              onRefresh={listRefresh.onRefresh}
               rows={pageRows}
               loading={loading}
               searchValue={list.keyword}
