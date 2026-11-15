@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-04
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-store
+feature: workspace-repos
+title: 企业空间应用仓库 · 权限门控与中英文文案
+entry_url: '{BASE_URL}/kube-frontend/workspaces/system-workspace/repos'
+prd: prd/kube-frontend/app-store/workspace-repos.md
+design: design/kube-frontend/app-store/workspace-repos.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-06
+- AC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-07
+
+story:
+- US2
+
+product: 无写权限时写入入口不可用并说明；中英文文案双向齐全，不出现语言串台。
+preconditions:
+- admin 登录（有权限分支）；无权限分支用 SSAR 拦截模拟（route 返回 allowed:false）
+steps:
+- 打开仓库列表，读取主按钮与行操作文案（zh）
+- 切到英文（localStorage kube-frontend-locale=en 或 URL 参数），重新打开并读取同一批文案
+- 用 route 拦截 POST /apis/authorization.k8s.io/v1/selfsubjectaccessreviews 返回 allowed:false，重载页面
+- 核对主按钮状态与行操作可见性
+expected:
+- zh：主按钮文案为「添加仓库」，不含 "Add repository"；弹窗标题「添加应用仓库」
+- en：主按钮文案为 "Add repository"，不含「添加仓库」；弹窗标题 "Add app repository"
+- SSAR 明确拒绝时：主按钮 disabled 且页面出现「当前身份没有在该企业空间管理应用仓库的权限，写入入口已隐藏」；行操作里不再出现「编辑/同步索引」
+- SSAR 请求失败（非 allowed:false）时按钮仍可用（fail-open）
+troubleshoot:
+- 出现英文串在中文界面：locale 键反串（zh 字典写英文），见 design GOT
+- 按钮始终禁用：检查 useMemo 依赖是否漏了查询状态
+update_automation:
+- 句柄：workspace-repos:create / :edit / :index / :delete；页面 pages/appstore/WorkspaceReposPage.tsx

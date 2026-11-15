@@ -1,6 +1,10 @@
 @use '~scss/variables';
 @use '~scss/mixins';
 
+.error {
+  margin-bottom: 12px;
+}
+
 .editorWrapper {
   margin-top: 12px;
   padding: 12px;

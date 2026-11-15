@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_APPS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-store
+feature: workspace-apps
+title: 企业空间应用模板 · 列表、表头与刷新
+entry_url: '{BASE_URL}/kube-frontend/workspaces/system-workspace/apps'
+prd: prd/kube-frontend/app-store/workspace-apps.md
+design: design/kube-frontend/app-store/workspace-apps.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_APPS-01
+
+story:
+- US1
+
+product: 应用模板列表行数与工作空间 apps 集合一致，列含名称/状态/最新版本/版本类型/更新时间/创建时间，刷新可用。
+preconditions:
+- 已登录；openpitrix 开启；工作空间 apps 集合可读（可能为空）
+steps:
+- 读 GET /kapis/openpitrix.io/v1/workspaces/<ws>/apps?limit=-1 得到 N 与条目
+- 打开应用列表，等 workspace-apps:surface 离开 loading
+- 核对表头、行数与首行名称
+- 点刷新按钮，确认重新发出 GET /apps 请求
+expected:
+- 表头包含 名称/状态/最新版本/版本类型/更新时间/创建时间
+- 行数 = N（N=0 时显示空态「还没有应用」）
+- workspace-apps:refresh 可见且 enabled，点击触发一次 GET 请求
+troubleshoot:
+- 行数比接口多：漏了 /workspaces/<ws> 前缀（读到平台全量 30 条）
+- 刷新按钮禁用：schema 的 useMemo 依赖漏了 query.isFetching
+update_automation:
+- 句柄：workspace-apps:surface / :table / :refresh / :name:<id>

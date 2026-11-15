@@ -333,6 +333,8 @@ export const AREAS: readonly Area[] = [
     pages: [
       { key: 'repos', path: 'repos', titleKey: 'appRepos.repos.title', status: 'ready' },
       { key: 'apps', path: 'apps', titleKey: 'appRepos.apps.title', status: 'ready' },
+      // 已安装应用：跨项目汇总的 release 列表（/workspaces/<ws>/applications），是安装结果的回读入口。
+      { key: 'apps/instances', path: 'apps/instances', titleKey: 'installedApps.title', status: 'ready' },
     ],
   },
   {

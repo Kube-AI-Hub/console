@@ -11,6 +11,7 @@ design: design/kube-frontend/app-store/detail.md
 
 covers:
 - AC-L3-KUBE-FRONTEND-APP_STORE-DETAIL-01
+- AC-L3-KUBE-FRONTEND-APP_STORE-DETAIL-02
 
 story:
 - US1
@@ -26,12 +27,16 @@ steps:
 - 核对版本表行数等于版本接口 items 数，首行版本号在表中
 - 核对安装按钮可点，点击打开安装弹窗（字段可见），取消关闭弹窗
 - 展开 Readme，核对出现非空纯文本
+- 若该应用有多个版本，用 Readme 区的版本选择器切换版本，核对 Readme 文本随版本变化
+- 核对关键词行：应用对象没有 keywords 字段时不渲染该行
 - 打开 /kube-frontend/apps/app-does-not-exist，核对 app-detail:not-found 且没有重试按钮
 - 汇总页面产生的 openpitrix 写请求，断言为空
 expected:
 - 卡片进入 /kube-frontend/apps/<appId>，详情 ready，应用名与接口一致
 - 版本表行数 = 版本接口 items 数；版本类型列显示应用级类型（helm）
 - Readme 展开后文本非空且不是 base64
+- 多版本应用切换版本后 Readme 文本与所选版本的 files["README.md"] 一致；单版本应用不显示版本选择器
+- 无 keywords 字段时页面不出现空的关键词行
 - 安装按钮可点并打开弹窗；打开/取消不产生 POST/PUT/PATCH/DELETE 到 openpitrix
 - 未知 appId → 应用不存在空状态（无重试按钮）
 troubleshoot:

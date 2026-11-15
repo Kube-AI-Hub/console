@@ -1,0 +1,41 @@
+id: TC-L3-KUBE-FRONTEND-APP_STORE-INSTALLED_APPS-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-store
+feature: installed-apps
+title: 已安装应用 · 详情五页签与卸载
+entry_url: '{BASE_URL}/kube-frontend/workspaces/public/apps/instances'
+prd: prd/kube-frontend/app-store/installed-apps.md
+design: design/kube-frontend/app-store/installed-apps.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_STORE-INSTALLED_APPS-02
+- AC-L3-KUBE-FRONTEND-APP_STORE-INSTALLED_APPS-03
+
+story:
+- US2
+
+product: 真实安装一个 release 后，详情页五页签取到真实数据；卸载用 release 对象 id 且回读为 0。
+preconditions:
+- admin 可写 public/csghub；用例自建唯一 release 名并在 finally 卸载
+- 安装来源：商店应用（app_id 来自 GET /kapis/openpitrix.io/v1/apps）
+steps:
+- 用 API 安装一个最小 chart（POST /workspaces/public/namespaces/csghub/applications，conf 为 YAML 字符串）
+- 轮询 GET /workspaces/public/applications 直到出现该 release，取 cluster_id（rls-…）
+- 打开详情页 /kube-frontend/workspaces/public/apps/instances/<rls-id>
+- 核对基本信息（名称/状态/应用/版本/项目/修订版本）
+- 切到资源页签，核对按 app.kubesphere.io/instance=<release> 查询的结果
+- 切到事件页签、配置页签（values 与提交内容一致）、YAML 页签
+- 点卸载并确认；回读 GET /workspaces/public/applications 与 helmreleases
+expected:
+- 基本信息字段与汇总行/helmrelease 对象一致；升级说明可见且无升级控件
+- 资源页签列出 chart 创建的工作负载/服务，无资源时显示空态
+- 配置页签显示提交的 values（含自定义键）；YAML 页签显示 helmrelease 原文
+- 卸载请求路径最后一段为 rls-…；卸载后汇总集合与 helmreleases 都不再包含它
+troubleshoot:
+- 卸载返回 200 但对象还在：按 release 名删了，必须用 cluster_id
+- helmrelease 404：helmreleases 是集群级对象，不要拼 /namespaces/<ns>/
+- values 显示乱码：spec.values 是 base64，需解码
+update_automation:
+- 句柄：installed-app:surface / :name / :tab:{info,resources,events,config,yaml} / :uninstall / :uninstall:confirm / :not-found

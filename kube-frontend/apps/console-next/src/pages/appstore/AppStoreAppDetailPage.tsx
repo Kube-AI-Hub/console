@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { ApiError, storeAppsApi, type StoreAppDetail, type StoreAppVersion } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { AiSurface, Badge, Button, Skeleton } from '@kube-ai-hub/ui';
+import { AiSurface, Badge, Button, Select, Skeleton } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -36,6 +36,8 @@ export function AppStoreAppDetailPage({ appId }: AppStoreAppDetailPageProps): Re
   const [readmeOpen, setReadmeOpen] = React.useState(false);
   const [iconFailed, setIconFailed] = React.useState(false);
   const [installOpen, setInstallOpen] = React.useState(false);
+  /** Which version the README and the install dialog start from; the newest by default. */
+  const [selectedVersionId, setSelectedVersionId] = React.useState('');
 
   const query = useQuery<DetailData>({
     queryKey: ['store-app-detail', appId],
@@ -53,7 +55,8 @@ export function AppStoreAppDetailPage({ appId }: AppStoreAppDetailPageProps): Re
 
   const detail = query.data?.detail;
   const versions = query.data?.versions ?? [];
-  const readmeVersion = versions[0] ?? detail?.latestVersion ?? null;
+  // The reader's pick wins; otherwise the newest published version (the list is newest-first).
+  const readmeVersion = versions.find((version) => version.id === selectedVersionId) ?? versions[0] ?? detail?.latestVersion ?? null;
 
   const readme = useQuery({
     enabled: Boolean(readmeVersion?.id),
@@ -65,6 +68,7 @@ export function AppStoreAppDetailPage({ appId }: AppStoreAppDetailPageProps): Re
   React.useEffect(() => {
     setReadmeOpen(false);
     setIconFailed(false);
+    setSelectedVersionId('');
   }, [appId]);
 
   const notFound = query.error instanceof ApiError && query.error.isNotFound;
@@ -181,6 +185,10 @@ export function AppStoreAppDetailPage({ appId }: AppStoreAppDetailPageProps): Re
           {detail.latestVersion?.sources.length ? (
             <DefinitionRow label={t('store.detail.sources')} value={detail.latestVersion.sources.join('  ')} />
           ) : null}
+          {/* Keywords come from the app object; this deployment returns none, so no empty row. */}
+          {detail.keywords.length ? (
+            <DefinitionRow label={t('store.detail.keywords')} value={detail.keywords.join(' / ')} />
+          ) : null}
         </dl>
       </section>
 
@@ -227,16 +235,29 @@ export function AppStoreAppDetailPage({ appId }: AppStoreAppDetailPageProps): Re
       </section>
 
       <section className="flex flex-col gap-2" data-ai-id="app-detail:readme">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-sm font-medium text-ai-fg">{t('store.detail.readme')}</h2>
-          <Button
-            size="sm"
-            variant="secondary"
-            {...actionProps('app-detail:readme-toggle')}
-            onClick={() => setReadmeOpen((open) => !open)}
-          >
-            {readmeOpen ? t('store.detail.readmeCollapse') : t('store.detail.readmeExpand')}
-          </Button>
+          <div className="flex items-center gap-2">
+            {versions.length > 1 ? (
+              <Select
+                value={readmeVersion?.id ?? ''}
+                options={versions.map((version) => ({ value: version.id, label: version.name || version.id }))}
+                data-ai-id="app-detail:readme-version"
+                onValueChange={(value) => {
+                  setSelectedVersionId(value);
+                  setReadmeOpen(true);
+                }}
+              />
+            ) : null}
+            <Button
+              size="sm"
+              variant="secondary"
+              {...actionProps('app-detail:readme-toggle')}
+              onClick={() => setReadmeOpen((open) => !open)}
+            >
+              {readmeOpen ? t('store.detail.readmeCollapse') : t('store.detail.readmeExpand')}
+            </Button>
+          </div>
         </div>
         <p className="text-[11px] text-ai-fg-muted">{t('store.detail.readmeHint', { version: readmeVersion?.name ?? '-' })}</p>
         {readmeOpen ? (

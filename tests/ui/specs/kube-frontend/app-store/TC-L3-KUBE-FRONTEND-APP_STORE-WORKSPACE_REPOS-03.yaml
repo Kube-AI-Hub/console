@@ -1,0 +1,45 @@
+id: TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-store
+feature: workspace-repos
+title: 企业空间应用仓库 · 编辑、同步索引、事件与详情
+entry_url: '{BASE_URL}/kube-frontend/workspaces/system-workspace/repos'
+prd: prd/kube-frontend/app-store/workspace-repos.md
+design: design/kube-frontend/app-store/workspace-repos.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-03
+- AC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-04
+- AC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-05
+
+story:
+- US2
+- US3
+
+product: 仓库可编辑（PATCH 子集、同步周期校验）、可手动同步索引、详情页可看基本信息与索引事件。
+preconditions:
+- admin 可写企业空间仓库；集群可访问 charts.kubesphere.io
+- 用例自建唯一名称仓库并在 finally 删除
+steps:
+- 用 API 创建唯一名称仓库（url=https://charts.kubesphere.io/stable）
+- 打开企业空间仓库列表，等 surface 离开 loading
+- 行操作「编辑」，修改描述与同步周期后保存
+- 回读 GET /workspaces/<ws>/repos/<repoId> 核对描述与 sync_period
+- 打开编辑弹窗，把同步周期改成 10s 并保存（应被客户端拦截）
+- 行操作「同步索引」，等待请求完成
+- 打开仓库详情，核对基本信息与事件页签
+- 删除该仓库并回读确认 0 条
+expected:
+- 编辑保存后接口回读 description 与 sync_period 与提交一致
+- 非法同步周期不发 PATCH 请求，弹窗显示同步周期校验文案
+- 同步索引发出 POST …/repos/<repoId>/action（body.action=index），页面不报错
+- 详情「基本信息」显示名称/地址/状态/创建者/同步周期；「事件」页签行数等于 GET …/events 的 items 数
+- 删除后 GET …/repos 不再包含该 repo_id
+troubleshoot:
+- 400 且报文含 index.yaml：地址不可达，属服务端校验，不是页面缺陷
+- 详情 status_time 为 0001-01-01：首次索引前，页面应显示 -
+- 事件 0 条：控制器尚未写事件，核对 /repos/<id>/events 的 total_count
+update_automation:
+- 句柄：workspace-repos:edit / :index / :name:<id>；workspace-repo-detail:surface / :tab:info / :tab:events / :events

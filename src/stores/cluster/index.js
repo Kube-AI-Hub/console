@@ -25,6 +25,8 @@ import List from 'stores/base.list'
 import { DEFAULT_CLUSTER, LIST_DEFAULT_ORDER } from 'utils/constants'
 import { eventBus } from 'utils/EventBus'
 import { eventKeys } from 'utils/events'
+import { clusterImportErrorText } from 'utils/clusterImportError'
+import { Notify } from '@kube-design/components'
 
 export default class ClusterStore extends Base {
   @observable
@@ -38,6 +40,9 @@ export default class ClusterStore extends Base {
 
   @observable
   isValidating = false
+
+  @observable
+  validationError = ''
 
   @observable
   isSubmitting = false
@@ -238,23 +243,35 @@ export default class ClusterStore extends Base {
   }
 
   @action
+  setValidationError(message) {
+    this.validationError = message || ''
+  }
+
+  @action
   async validate(data) {
     this.isValidating = true
-    await request.post(
-      'kapis/cluster.kubesphere.io/v1alpha1/clusters/validation',
-      data,
-      {},
-      (res, err) => {
-        this.isValidating = false
-        window.onunhandledrejection({
-          status: 400,
-          reason: t('VALIDATION_FAILED'),
-          message: err.message,
-        })
-        return Promise.reject()
-      }
-    )
-    this.isValidating = false
+    this.validationError = ''
+    try {
+      await request.post(
+        'kapis/cluster.kubesphere.io/v1alpha1/clusters/validation',
+        data,
+        {},
+        (first, second) => {
+          // JSON errors: (formattedError, response). text/plain: (response, formattedError).
+          const message = clusterImportErrorText(first, second)
+          this.isValidating = false
+          this.validationError = message
+          Notify.error({
+            title: t('VALIDATION_FAILED'),
+            content: message,
+            duration: 10000,
+          })
+          return Promise.reject(new Error(message))
+        }
+      )
+    } finally {
+      this.isValidating = false
+    }
   }
 
   @action

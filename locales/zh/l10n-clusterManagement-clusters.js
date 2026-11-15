@@ -63,6 +63,18 @@ module.exports = {
   JWT_SECRET_MISMATCH_APPLY: '把取到的值写入 authentication.jwtSecret，并将 multicluster.clusterRole 设为 member，保存后等待生效。',
   JWT_SECRET_MISMATCH_CARD: 'jwtSecret 与主集群不一致',
   VALIDATION_FAILED: '校验失败。',
+  CLUSTER_IMPORT_JWT_MISMATCH:
+    '主集群与成员集群的 jwtSecret 不一致。请把成员集群平台配置里的 authentication.jwtSecret 改成与主集群相同，并把 clusterRole 设为 member。',
+  CLUSTER_IMPORT_CLUSTER_ROLE:
+    '成员集群的 clusterRole 必须是 host 或 member。当前缺失或为 none 时无法接入，请在成员集群平台配置中写入 clusterRole: member。',
+  CLUSTER_IMPORT_MEMBER_APISERVER:
+    '无法访问成员集群的平台 API 服务。请确认成员集群系统组件中该服务已运行。',
+  CLUSTER_IMPORT_ALREADY_EXISTS: '该集群已经接入，不能重复导入。',
+  CLUSTER_IMPORT_UNREACHABLE:
+    '主集群无法连通 kubeconfig 中的 API 地址。请改用代理连接，或先打通到该 server 的网络。',
+  CLUSTER_IMPORT_CONFLICT: '集群名称已被占用，请换一个名称。',
+  CLUSTER_IMPORT_INTERNAL:
+    '校验接口返回内部错误。常见原因是成员集群未配置多集群（缺 clusterRole，或 jwtSecret 与主集群不一致）。',
   NO_CLUSTER_TIP_DESC: '集群是运行 KubeSphone 的一组节点（物理或虚拟机）。',
   // List > Remove Cluster
   RISK_WARNING: '风险警告',

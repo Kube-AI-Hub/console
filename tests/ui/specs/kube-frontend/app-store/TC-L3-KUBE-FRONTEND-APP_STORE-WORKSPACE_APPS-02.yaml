@@ -1,0 +1,43 @@
+id: TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_APPS-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-store
+feature: workspace-apps
+title: 企业空间应用模板 · 上传、版本状态机与删除
+entry_url: '{BASE_URL}/kube-frontend/workspaces/public/apps'
+prd: prd/kube-frontend/app-store/workspace-apps.md
+design: design/kube-frontend/app-store/workspace-apps.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_APPS-02
+- AC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_APPS-03
+- AC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_APPS-04
+
+story:
+- US1
+- US2
+
+product: 上传 Helm chart 建立模板、推进版本状态机（draft→submitted→draft）、删除版本与模板。
+preconditions:
+- admin 可写工作空间模板；用例自建唯一名称模板并在 finally 清理（先删版本再删模板）
+- chart 包来源：从 GET …/apps/<appId>/versions/<versionId>/package 取现成 base64 包
+steps:
+- 打开应用列表，点「上传模板」
+- 填写唯一模板名，选择一个 .tgz chart 包，提交
+- 回读 GET /workspaces/<ws>/apps 确认出现该模板
+- 打开模板详情，核对版本页签行数与 GET …/versions 一致
+- 点「提交审核」，回读版本状态为 submitted；再点「撤销提交」，回读为 draft
+- 打开「应用实例」页签，核对与 /workspaces/<ws>/applications 按 app 过滤后一致
+- 删除版本，回读 versions 为 0；再删除模板，回读 apps 不再包含它
+expected:
+- 上传前先发 POST …/apps?validate=true，再发 POST …/apps；成功后列表出现该模板
+- 版本状态从 draft 变 submitted 再回 draft（POST …/versions/<id>/action）
+- 有版本时删除模板的确认按钮 disabled，并显示「该模板还有版本，请先删除版本」
+- 删除版本后 versions total=0；删除模板后 apps 回读 0 条
+troubleshoot:
+- 创建 400：包字段名写错（创建用 version_package，新增版本用 package）
+- 删除模板 500 app … has some versions not deleted：先删版本
+- 上传后列表未更新：靠 invalidateQueries 重取，不靠本地插入
+update_automation:
+- 句柄：workspace-apps:create / :create:name / :create:file / :create:submit；workspace-app:tab:{versions,instances,info}；workspace-app-version:transition / :delete / :delete:confirm；workspace-app:delete:confirm

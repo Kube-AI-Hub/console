@@ -17,7 +17,8 @@
  */
 
 import React from 'react'
-import { Form, Icon, Select } from '@kube-design/components'
+import { observer } from 'mobx-react'
+import { Alert, Form, Icon, Select } from '@kube-design/components'
 import { Text } from 'components/Base'
 import { getDocsUrl } from 'utils'
 import EditMode from 'components/EditMode'
@@ -25,6 +26,7 @@ import EditMode from 'components/EditMode'
 import { get } from 'lodash'
 import * as styles from './index.scss'
 
+@observer
 export default class Confiuguration extends React.Component {
   constructor(props) {
     super(props)
@@ -59,10 +61,20 @@ export default class Confiuguration extends React.Component {
   }
 
   render() {
-    const { formRef, formTemplate } = this.props
+    const { formRef, formTemplate, store } = this.props
     const { connectType } = this.state
+    const validationError = store?.validationError
     return (
       <div>
+        {validationError ? (
+          <div
+            className={styles.error}
+            role="alert"
+            data-test="cluster-import-error"
+          >
+            <Alert type="error" message={validationError} />
+          </div>
+        ) : null}
         <Form data={formTemplate} ref={formRef}>
           <Form.Item
             label={t('CONNECTION_MODE')}

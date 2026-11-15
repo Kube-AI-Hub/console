@@ -27,6 +27,7 @@ import { safeParseJSON } from 'utils'
 import UnbindCluster from 'pages/clusters/components/Modals/UnbindCluster'
 import KubeConfigModal from 'components/Forms/Cluster/KubeConfig'
 import { safeBtoa } from 'utils/base64'
+import { clusterImportErrorText } from 'utils/clusterImportError'
 
 export default {
   'cluster.add': {
@@ -45,10 +46,15 @@ export default {
           )
           const name = get(newObject, 'metadata.name')
 
-          if (type === 'new') {
-            await handleCreate(store.kubekey, newObject)
-          } else {
-            await handleImport(store, newObject)
+          try {
+            if (type === 'new') {
+              await handleCreate(store.kubekey, newObject)
+            } else {
+              await handleImport(store, newObject)
+            }
+          } catch {
+            // Keep the wizard open so the connection-settings step can show why.
+            return
           }
 
           Modal.close(modal)
@@ -112,16 +118,34 @@ export default {
 
 const handleImport = async (store, data) => {
   const postData = cloneDeep(data)
-
-  if (get(postData, 'spec.connection.type') === 'proxy') {
-    unset(postData, 'spec.connection.kubeconfig')
-  } else {
-    const config = get(postData, 'spec.connection.kubeconfig', '')
-    set(postData, 'spec.connection.kubeconfig', safeBtoa(config))
-    await store.validate(postData)
+  if (typeof store.setValidationError === 'function') {
+    store.setValidationError('')
   }
 
-  await store.create(postData)
+  try {
+    if (get(postData, 'spec.connection.type') === 'proxy') {
+      unset(postData, 'spec.connection.kubeconfig')
+    } else {
+      const config = get(postData, 'spec.connection.kubeconfig', '')
+      set(postData, 'spec.connection.kubeconfig', safeBtoa(config))
+      await store.validate(postData)
+    }
+
+    await store.create(postData)
+  } catch (error) {
+    if (!store.validationError) {
+      const message = clusterImportErrorText(error)
+      if (typeof store.setValidationError === 'function') {
+        store.setValidationError(message)
+      }
+      Notify.error({
+        title: t('VALIDATION_FAILED'),
+        content: message,
+        duration: 10000,
+      })
+    }
+    throw error
+  }
 }
 
 const handleCreate = (store, data) => {

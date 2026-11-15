@@ -2,19 +2,20 @@ import * as React from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import {
+  storeAppsApi,
   storeWorkspacesApi,
   storeWorkspaceProjectsApi,
   workspaceApplicationsApi,
   type StoreAppVersion,
 } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { Button, Input, Modal, Select } from '@kube-ai-hub/ui';
+import { Button, Input, Modal, Select, Textarea } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { errorMessage } from '@/components/resource/ResourceErrorPanel';
 
 /**
- * 从商店安装应用 — workspace → project → version → release name.
+ * 从商店安装应用 — workspace → project → version → values → release name.
  *
  * Installing is a project operation, not a workspace one: the openpitrix handler creates a
  * HelmRelease in a namespace and has no workspace-level create route. The dialog therefore
@@ -22,8 +23,17 @@ import { errorMessage } from '@/components/resource/ResourceErrorPanel';
  * into. The release name is checked against the project's existing releases before the write,
  * because the server's own duplicate answer arrives as an opaque 500.
  *
+ * **Values.** The old console's install wizard had a second step that started from the chart's
+ * own `values.yaml` and submitted it as `conf`. That field is a Go **string**, so the request
+ * must carry YAML text — an object is rejected with `json: cannot unmarshal object into Go struct
+ * field CreateClusterRequest.conf of type string` (measured). The editor here is therefore a YAML
+ * textarea pre-filled from `GET …/versions/<id>/files`, with a reset back to the chart defaults;
+ * an empty value installs the chart's defaults, and a YAML the server cannot parse comes back as
+ * its own error message rather than a fabricated success.
+ *
  * The request is asynchronous beyond creation: a 200 means the release object exists, not that
- * the chart is healthy. The success panel says 'submitted' for that reason.
+ * the chart is healthy. The success panel says 'submitted' for that reason and links to the
+ * workspace's installed apps, which is where the real state is read.
  */
 export interface AppInstallDialogProps {
   open: boolean;
@@ -60,6 +70,8 @@ export function AppInstallDialog({
   const [project, setProject] = React.useState('');
   const [versionId, setVersionId] = React.useState('');
   const [name, setName] = React.useState('');
+  const [values, setValues] = React.useState('');
+  const [valuesTouched, setValuesTouched] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [installed, setInstalled] = React.useState<{ name: string; workspace: string } | null>(null);
 
@@ -81,17 +93,39 @@ export function AppInstallDialog({
     queryFn: ({ signal }) => workspaceApplicationsApi(apiClient).list({ workspace, namespace: project, signal }),
   });
 
+  /* The chart's own defaults; the editor starts here so nobody installs blind. */
+  const files = useQuery({
+    enabled: open && Boolean(versionId),
+    queryKey: ['store-install-values', appId, versionId],
+    retry: false,
+    queryFn: ({ signal }) => storeAppsApi(apiClient).files({ appId, versionId, signal }),
+  });
+
   React.useEffect(() => {
     if (!open) return;
     setWorkspace('');
     setProject('');
     setVersionId(defaultVersionId ?? versions[0]?.id ?? '');
     setName(defaultName(appName));
+    setValues('');
+    setValuesTouched(false);
     setError(null);
     setInstalled(null);
     // Reset once per open; appName/versions are stable while the dialog is mounted.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
+
+  /*
+   * Fill the editor from values.yaml until the reader types.
+   *
+   * `valuesTouched` guards the refetch that a version switch triggers: replacing text the
+   * reader already edited would silently discard their work.
+   */
+  React.useEffect(() => {
+    if (valuesTouched) return;
+    const defaults = files.data?.['values.yaml'];
+    setValues(defaults ?? '');
+  }, [files.data, valuesTouched]);
 
   React.useEffect(() => {
     if (!workspace) {
@@ -115,9 +149,11 @@ export function AppInstallDialog({
         appId,
         versionId,
         name: name.trim(),
+        ...(values.trim() ? { values } : {}),
       }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['store-install-applications', workspace, project] });
+      await queryClient.invalidateQueries({ queryKey: ['installed-apps', workspace] });
       setInstalled({ name: name.trim(), workspace });
     },
   });
@@ -195,7 +231,7 @@ export function AppInstallDialog({
             <p className="text-sm text-ai-fg">{t('store.detail.install.success', { name: installed.name })}</p>
             <p className="text-[11px] text-ai-fg-muted">{t('store.detail.install.successHint')}</p>
             <Link
-              to="/kube-frontend/workspaces/$workspace/apps"
+              to="/kube-frontend/workspaces/$workspace/apps/instances"
               params={{ workspace: installed.workspace }}
               className="text-sm text-ai-accent hover:underline"
               data-ai-id="app-detail:install-success-link"
@@ -247,7 +283,11 @@ export function AppInstallDialog({
                 placeholder={versionOptions.length === 0 ? t('store.detail.install.noVersions') : t('store.detail.install.version')}
                 disabled={versionOptions.length === 0}
                 data-ai-id="app-detail:install-version"
-                onValueChange={setVersionId}
+                onValueChange={(value) => {
+                  setVersionId(value);
+                  // A new version has its own defaults; drop the edits from the previous one.
+                  setValuesTouched(false);
+                }}
               />
             </label>
             <label className="flex flex-col gap-1 text-xs text-ai-fg-secondary" htmlFor="ai-field-install-name">
@@ -261,6 +301,38 @@ export function AppInstallDialog({
               />
               <span className="text-[11px] text-ai-fg-muted">{t('store.detail.install.nameHint')}</span>
             </label>
+            <div className="flex flex-col gap-1 text-xs text-ai-fg-secondary">
+              <div className="flex items-center justify-between gap-2">
+                <span>{t('store.detail.install.values')}</span>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  {...actionProps('app-detail:install-values-reset')}
+                  onClick={() => {
+                    setValuesTouched(false);
+                    setValues(files.data?.['values.yaml'] ?? '');
+                  }}
+                >
+                  {t('store.detail.valuesReset')}
+                </Button>
+              </div>
+              <Textarea
+                className="min-h-40 font-mono text-[11px]"
+                value={values}
+                data-ai-id="app-detail:install-values"
+                onChange={(event) => {
+                  setValuesTouched(true);
+                  setValues(event.target.value);
+                }}
+              />
+              <span className="text-[11px] text-ai-fg-muted">
+                {files.isError
+                  ? t('store.detail.valuesLoadFailed')
+                  : files.data && !files.data['values.yaml']
+                    ? t('store.detail.valuesEmpty')
+                    : t('store.detail.install.valuesHint')}
+              </span>
+            </div>
             {error ?? serverError ? (
               <p className="text-xs text-ai-danger" data-ai-id="app-detail:install-error">
                 {error ?? serverError}

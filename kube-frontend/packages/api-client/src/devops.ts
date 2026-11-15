@@ -635,7 +635,7 @@ export interface PipelineDraft {
   /** Single-branch: the Jenkinsfile text. */
   jenkinsfile?: string;
   /** Multi-branch: which SCM the repository lives in. */
-  sourceType?: 'github' | 'gitlab' | 'bitbucket' | 'gitee' | 'svn' | 'single_svn';
+  sourceType?: 'github' | 'gitlab' | 'bitbucket' | 'gitee' | 'svn' | 'single_svn' | undefined;
   repoUrl?: string;
   owner?: string;
   credentialId?: string;
@@ -944,13 +944,37 @@ export function devopsApi(client: Client) {
       await client.request<void>(PROJECT_API + '/' + q(name), { method: 'DELETE' });
     },
 
-    /** Pipelines of one project, through the kapis list the devops-apiserver serves. */
-    async pipelines(params: { project: string; signal?: AbortSignal }): Promise<PipelineRow[]> {
-      const body = await client.request<{ items?: KubePipeline[] }>(projectKapis(params.project) + '/pipelines', {
-        query: { limit: -1 },
-        ...(params.signal ? { signal: params.signal } : {}),
-      });
-      return (body?.items ?? []).map(toPipelineRow);
+    /**
+     * Pipelines of one project, through the kapis list the devops-apiserver serves.
+     *
+     * The list is **paged and filtered by the server**, like the old console: the kapis
+     * endpoint accepts `page`, `limit`, `name` (substring search), `type` and
+     * `ascending`, and answers `totalItems` for the whole collection. Sorting and paging
+     * here instead would make the row count and the page count disagree with the API, which
+     * is exactly the drift the migration guide warns about.
+     */
+    async pipelines(params: {
+      project: string;
+      page?: number;
+      limit?: number;
+      name?: string;
+      type?: string;
+      ascending?: string;
+      signal?: AbortSignal;
+    }): Promise<{ items: PipelineRow[]; total: number }> {
+      const query: Record<string, string | number> = {
+        page: params.page ?? 1,
+        limit: params.limit ?? 10,
+      };
+      if (params.name?.trim()) query.name = params.name.trim();
+      if (params.type?.trim()) query.type = params.type.trim();
+      if (params.ascending?.trim()) query.ascending = params.ascending.trim();
+      const body = await client.request<{ items?: KubePipeline[]; totalItems?: number }>(
+        projectKapis(params.project) + '/pipelines',
+        { query, ...(params.signal ? { signal: params.signal } : {}) },
+      );
+      const items = (body?.items ?? []).map(toPipelineRow);
+      return { items, total: typeof body?.totalItems === 'number' ? body.totalItems : items.length };
     },
 
     /** One pipeline. */
@@ -981,9 +1005,9 @@ export function devopsApi(client: Client) {
     async updatePipeline(input: {
       project: string;
       name: string;
-      alias?: string;
-      description?: string;
-      jenkinsfile?: string;
+      alias?: string | undefined;
+      description?: string | undefined;
+      jenkinsfile?: string | undefined;
       current: KubeObject;
     }): Promise<PipelineRow> {
       const next = JSON.parse(JSON.stringify(input.current)) as KubeObject;

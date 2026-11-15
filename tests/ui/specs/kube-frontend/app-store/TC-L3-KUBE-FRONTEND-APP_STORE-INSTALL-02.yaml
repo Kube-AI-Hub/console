@@ -1,0 +1,37 @@
+id: TC-L3-KUBE-FRONTEND-APP_STORE-INSTALL-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-store
+feature: detail
+title: 应用详情 · 安装弹窗的 values 配置
+entry_url: '{BASE_URL}/kube-frontend/apps'
+prd: prd/kube-frontend/app-store/detail.md
+design: design/kube-frontend/app-store/detail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_STORE-INSTALL-02
+
+story:
+- US3
+
+product: 安装弹窗按所选版本的 values.yaml 预填配置，conf 以 YAML 文本提交，可恢复默认、可留空用 chart 默认值。
+preconditions:
+- 已登录；商店有带版本的应用（GET /kapis/openpitrix.io/v1/apps）
+- 只读用例：打开与取消不产生写请求（真实安装见 INSTALLED_APPS-02）
+steps:
+- 打开一个应用详情，点安装
+- 读取配置框内容，与 GET …/versions/<versionId>/files 的 values.yaml 解码结果比对
+- 修改配置框中的一个键，点「恢复默认」，核对内容回到 values.yaml
+- 清空配置框，核对提示与确认按钮仍可用（不提交）
+- 关闭弹窗
+expected:
+- 配置框预填该版本 values.yaml（含 chart 注释与键）
+- 「恢复默认」把编辑框还原为 values.yaml
+- 清空后提示使用 chart 默认值；弹窗不因配置为空而禁用确认
+- 打开/取消全程无 POST 写请求
+troubleshoot:
+- 配置框为空：files 端点失败或版本 id 为空；核对 GET …/versions/<id>/files
+- conf 提交成对象会 400：conf 必须是 YAML 字符串
+update_automation:
+- 句柄：app-detail:install / :install-values / :install-values-reset / :install-version

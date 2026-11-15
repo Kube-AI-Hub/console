@@ -24,10 +24,19 @@
 
 **Independent Test**：打开任一应用详情，点安装，选择企业空间与项目、版本，填写名称并提交；确认接口返回成功、弹窗显示安装已提交与查看入口；再次提交同名会得到「同名」提示；失败（如版本不存在/权限不足）时弹窗显示服务端原因。
 
+### US3 - 安装时按 chart 默认值调整配置 (Priority: P1)
+
+作为 **平台用户**，我希望 **在安装弹窗里看到并修改该版本的 values.yaml 再提交**，以便 **不必先装一遍再用别的方式改配置**。
+
+**Independent Test**：打开任一应用详情的安装弹窗，配置框已预填该版本 chart 的 values.yaml；修改一个键后提交，
+release 的 `spec.values` 解码后与提交内容一致；点「恢复默认」回到 chart 原值；留空提交则 `spec.values` 为空（使用 chart 默认值）。
+
 ## 验收场景
 
 - **AC-L3-KUBE-FRONTEND-APP_STORE-DETAIL-01** — 已知商店里有应用，当在 /kube-frontend/apps 点击一张应用卡片，则进入 /kube-frontend/apps/<appId>，页面显示应用名、图标或首字母占位、分类、简介；版本表逐行显示版本号、类型（取自应用的 app_version_types，因为版本对象没有 type 字段）、创建时间与状态，行数等于版本接口的 items 数；Readme 默认折叠，展开后显示该版本 README.md 解码后的纯文本（没有 README 时回退到应用描述）；安装按钮可点并打开安装弹窗（打开与取消都不发写请求）；当 appId 不存在或应用已下架，则显示「应用不存在」的空状态与返回入口，而不是空白或重试按钮。
-- **AC-L3-KUBE-FRONTEND-APP_STORE-INSTALL-01** — 已知商店里有带版本的应用、且目标企业空间有项目，当在详情点安装，则弹窗提供企业空间（tenant workspaces）、项目（该空间的命名空间）、版本（该应用的版本）与安装名称；提交合法值时向 `/kapis/openpitrix.io/v1/workspaces/<ws>/namespaces/<ns>/applications` 发送 `{app_id, version_id, name}`，成功后弹窗显示「已提交安装：<name>」与跳转该企业空间应用列表的入口；提交同名（项目内已有该 release 名）时不发请求并提示「该项目内已有同名安装」；服务端失败时弹窗显示服务端原因（错误文案，不伪造成功）；名称为空/非法、项目或版本缺失时不发请求并提示对应字段。
+- **AC-L3-KUBE-FRONTEND-APP_STORE-INSTALL-01** — 已知商店里有带版本的应用、且目标企业空间有项目，当在详情点安装，则弹窗提供企业空间（tenant workspaces）、项目（该空间的命名空间）、版本（该应用的版本）、安装名称与 values 配置；提交合法值时向 `/kapis/openpitrix.io/v1/workspaces/<ws>/namespaces/<ns>/applications` 发送 `{app_id, version_id, name, conf}`（`conf` 为 **YAML 字符串**），成功后弹窗显示「已提交安装：<name>」与跳转该企业空间已安装应用列表的入口；提交同名（项目内已有该 release 名）时不发请求并提示「该项目内已有同名安装」；服务端失败时弹窗显示服务端原因（错误文案，不伪造成功）；名称为空/非法、项目或版本缺失时不发请求并提示对应字段。
+- **AC-L3-KUBE-FRONTEND-APP_STORE-INSTALL-02** — 已知某版本 chart 带 values.yaml，当打开安装弹窗，则 values 编辑框预填该文件内容（`GET …/versions/<versionId>/files` 的 `values.yaml` 解码）；点「恢复默认」把编辑框还原为该文件内容；清空编辑框后提交，请求体不含 `conf`（使用 chart 默认值）；修改后提交，请求体的 `conf` 是编辑框里的 YAML 文本（不是对象）；读取 values.yaml 失败时提示「读取 values.yaml 失败，可手工填写或留空使用默认值」但仍可提交；切换版本后编辑框回到新版本的 values.yaml（不保留上一个版本的编辑）。
+- **AC-L3-KUBE-FRONTEND-APP_STORE-DETAIL-02** — 已知应用有多个已发布版本，当在 Readme 区切换版本，则 Readme 文本随之切换为该版本的 README.md（`GET …/versions/<versionId>/files`），提示文案里的版本号同步更新；只有 1 个版本时不显示版本选择器；应用对象没有 `keywords` 字段时（本部署实测）不渲染关键词行，有该字段时按 `/` 连接展示。
 
 ## 设计目标
 
@@ -81,11 +90,14 @@
 
 ## 明确不做
 
-- **安装 values/协议/高级参数**：弹窗按 chart 默认 values 安装；编辑 values、接受协议、选择高级参数属于下一批。
+- **安装 values 的结构化表单（values.schema.json 驱动的表单视图）**：老 console 在 chart 带 `values.schema.json` 时提供「表单 / YAML」切换。
+  本商店 30 个应用的版本里**没有任何一个带 values.schema.json**（实测：逐版本 files 只有 Chart.yaml/values.yaml/templates/README.md 等），
+  表单视图没有可验证的真实样本，本单元只交付 YAML 编辑（老 console 在无 schema 时也是 YAML 编辑）。样本出现后重开。
+- **安装协议确认（AppAgreement）与高级参数（Placement/调度）**：老 console 对 `isv=system-workspace` 的应用先弹协议确认；
+  本单元未实现协议弹窗（无协议文本数据源），安装直接进配置；调度与集群选择沿用「项目所在集群」的默认。
 - **应用实例列表**：老 console 项目里有「应用实例」页签；新 UI 暂无该页面，release 列表以接口为准（用例直接查接口）。
 - **审核/上架/编辑应用**：商店管理页的职责，不在详情。
 - **Markdown 渲染与截图轮播**：README 以纯文本展示；截图字段本轮没有可靠数据源，不伪造。
-- **版本切换 Readme**：默认展示最新版本 README；按版本切换随安装向导一起做。
 - **工作空间级安装**：openpitrix 没有 workspace 级创建路由，安装目标必须是项目；弹窗因此包含项目选择。
 - **卸载/升级入口**：本任务只创建 release；卸载是测试的清理手段，不是页面功能。
 
@@ -116,3 +128,4 @@
 
 - `TC-L3-KUBE-FRONTEND-APP_STORE-DETAIL-01`
 - `TC-L3-KUBE-FRONTEND-APP_STORE-INSTALL-01`
+- `TC-L3-KUBE-FRONTEND-APP_STORE-INSTALL-02`

@@ -2,10 +2,10 @@ import * as React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ApiError, clusterImportApi, type ClusterConnectionMode } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { Button, Modal, Textarea } from '@kube-ai-hub/ui';
+import { Alert, Button, Modal, Notify, Textarea } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
-import { errorMessage } from '@/components/resource/ResourceErrorPanel';
+import { formatClusterImportError } from './clusterImportError';
 
 /**
  * 添加集群 — import an existing cluster, directly or through an agent.
@@ -53,20 +53,6 @@ export function AddClusterDialog({ open, onOpenChange, onCreated }: AddClusterDi
   const [nameError, setNameError] = React.useState<string | null>(null);
   const [kubeconfigError, setKubeconfigError] = React.useState<string | null>(null);
 
-  React.useEffect(() => {
-    if (open) return;
-    // Reopening starts clean: a half-typed kubeconfig from the previous attempt is not
-    // something the reader wants to be handed back.
-    setMode('direct');
-    setName('');
-    setKubeconfig('');
-    setProvider('');
-    setAlias('');
-    setDescription('');
-    setNameError(null);
-    setKubeconfigError(null);
-  }, [open]);
-
   const mutation = useMutation({
     mutationFn: async (input: {
       name: string;
@@ -103,7 +89,31 @@ export function AddClusterDialog({ open, onOpenChange, onCreated }: AddClusterDi
       onCreated?.();
       onOpenChange(false);
     },
+    onError: (error) => {
+      const copy = formatClusterImportError(t, error);
+      Notify.error({
+        title: copy.title,
+        content: copy.body,
+        duration: 10_000,
+        key: 'clusters:add-error',
+      });
+    },
   });
+
+  React.useEffect(() => {
+    if (open) return;
+    // Reopening starts clean: a half-typed kubeconfig from the previous attempt is not
+    // something the reader wants to be handed back.
+    setMode('direct');
+    setName('');
+    setKubeconfig('');
+    setProvider('');
+    setAlias('');
+    setDescription('');
+    setNameError(null);
+    setKubeconfigError(null);
+    mutation.reset();
+  }, [open, mutation]);
 
   const submit = React.useCallback(() => {
     const trimmedName = name.trim();
@@ -116,6 +126,7 @@ export function AddClusterDialog({ open, onOpenChange, onCreated }: AddClusterDi
     setKubeconfigError(configIsValid ? null : t('cluster.add.kubeconfigInvalid'));
 
     if (invalidName || !configIsValid) return;
+    mutation.reset();
     mutation.mutate({
       name: trimmedName,
       mode,
@@ -126,11 +137,7 @@ export function AddClusterDialog({ open, onOpenChange, onCreated }: AddClusterDi
     });
   }, [alias, description, kubeconfig, mode, mutation, name, provider, t]);
 
-  const requestError = mutation.error
-    ? mutation.error instanceof ApiError && mutation.error.isPermission
-      ? t('error.unauthorized')
-      : errorMessage(t, mutation.error)
-    : null;
+  const requestError = mutation.error ? formatClusterImportError(t, mutation.error) : null;
 
   return (
     <Modal
@@ -270,9 +277,10 @@ export function AddClusterDialog({ open, onOpenChange, onCreated }: AddClusterDi
         ) : null}
 
         {requestError ? (
-          <p className="text-xs text-ai-danger" role="alert" data-ai-id="clusters:add-error">
-            {requestError}
-          </p>
+          <Alert tone="danger" title={requestError.title} data-ai-id="clusters:add-error">
+            <p>{requestError.body}</p>
+            {requestError.raw ? <p className="mt-1 break-all opacity-80">{requestError.raw}</p> : null}
+          </Alert>
         ) : null}
       </div>
     </Modal>

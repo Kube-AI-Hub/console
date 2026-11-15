@@ -67,6 +67,14 @@ export interface StoreAppDetail extends StoreApp {
   versionTypes: string;
   clusterTotal: number;
   latestVersion: StoreAppVersion | null;
+  /**
+   * Comma-separated `keywords`, split.
+   *
+   * The old console showed them as tags. This deployment's detail response has no
+   * `keywords` field at all (probed), so the array is usually empty and the page renders
+   * no tag row rather than an empty one.
+   */
+  keywords: string[];
 }
 
 /** The chart files of one version, as base64 by path. */
@@ -127,6 +135,7 @@ interface RawAppDetail extends RawApp {
   status_time?: string;
   app_version_types?: string;
   cluster_total?: number;
+  keywords?: string;
 }
 
 interface RawReview {
@@ -240,6 +249,10 @@ export function toStoreAppDetail(item: RawAppDetail): StoreAppDetail {
     versionTypes: item.app_version_types ?? '',
     clusterTotal: Number(item.cluster_total ?? 0),
     latestVersion,
+    keywords: (item.keywords ?? '')
+      .split(',')
+      .map((keyword) => keyword.trim())
+      .filter(Boolean),
   };
 }
 

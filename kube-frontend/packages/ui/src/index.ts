@@ -39,6 +39,7 @@ export {
   InputPassword,
   Label,
   Alert,
+  Notify,
   Menu,
   Pagination,
   PasswordStrengthMeter,
@@ -105,4 +106,7 @@ export type {
   SortOrder,
   TabItem,
   TableColumn,
+  NotifyOptions,
+  NotifyTone,
+  NotifyPlacement,
 } from '@kube-ai-hub/ai-kit';

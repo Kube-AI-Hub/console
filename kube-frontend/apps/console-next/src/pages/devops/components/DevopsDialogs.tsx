@@ -247,6 +247,13 @@ export interface PipelineFormDialogProps {
   onOpenChange: (open: boolean) => void;
   /** null creates a pipeline; a row edits it. */
   editing: PipelineRow | null;
+  /**
+   * Seed a *create* form from an existing pipeline (the old console's 复制 action).
+   *
+   * Copy keeps the source's Jenkinsfile, type and description but never its name: the
+   * name is the object identity and the API would reject a second object with it.
+   */
+  copyFrom?: PipelineRow | null;
   pending: boolean;
   error?: string;
   /** Credentials the multi-branch form can bind a repository to. */
@@ -280,6 +287,7 @@ export function PipelineFormDialog({
   open,
   onOpenChange,
   editing,
+  copyFrom = null,
   pending,
   error,
   credentialOptions,
@@ -300,18 +308,19 @@ export function PipelineFormDialog({
 
   React.useEffect(() => {
     if (!open) return;
+    const source = editing ?? copyFrom;
     setName(editing?.name ?? '');
     setAlias(editing?.alias ?? '');
-    setDescription(editing?.description ?? '');
-    setType(editing?.type === 'multi-branch-pipeline' ? 'multi-branch-pipeline' : 'pipeline');
-    setJenkinsfile(editing?.jenkinsfile || STARTER_JENKINSFILE);
+    setDescription(source?.description ?? '');
+    setType(source?.type === 'multi-branch-pipeline' ? 'multi-branch-pipeline' : 'pipeline');
+    setJenkinsfile(source?.jenkinsfile || STARTER_JENKINSFILE);
     setSourceType('github');
     setRepoUrl('');
     setOwner('');
     setCredentialId('');
     setScriptPath('Jenkinsfile');
     setNameError('');
-  }, [open, editing]);
+  }, [open, editing, copyFrom]);
 
   const submit = (): void => {
     if (!editing) {
@@ -350,7 +359,7 @@ export function PipelineFormDialog({
       open={open}
       onOpenChange={onOpenChange}
       size="lg"
-      title={editing ? t('devops.pipeline.editTitle') : t('devops.pipeline.createTitle')}
+      title={editing ? t('devops.pipeline.editTitle') : copyFrom ? t('devops.pipeline.copyTitle') : t('devops.pipeline.createTitle')}
       description={t('devops.pipeline.formDescription')}
       pending={pending}
       {...(error ? { error } : {})}

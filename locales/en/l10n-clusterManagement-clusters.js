@@ -65,6 +65,18 @@ module.exports = {
   JWT_SECRET_MISMATCH_APPLY: 'Set authentication.jwtSecret to the value from the host cluster, set multicluster.clusterRole to member, save, and wait for the change to take effect.',
   JWT_SECRET_MISMATCH_CARD: 'jwtSecret does not match the host cluster',
   VALIDATION_FAILED: 'Validation failed.',
+  CLUSTER_IMPORT_JWT_MISMATCH:
+    'The host and member jwtSecret values do not match. Copy authentication.jwtSecret from the host cluster config into the member cluster, and set clusterRole to member.',
+  CLUSTER_IMPORT_CLUSTER_ROLE:
+    "The member cluster's clusterRole must be host or member. A missing or none value cannot be imported; set clusterRole: member in the member cluster config.",
+  CLUSTER_IMPORT_MEMBER_APISERVER:
+    'The member cluster platform API is unreachable. Check that the platform API service is running on the member cluster.',
+  CLUSTER_IMPORT_ALREADY_EXISTS: 'This cluster is already imported and cannot be added again.',
+  CLUSTER_IMPORT_UNREACHABLE:
+    'The host cluster cannot reach the API address in the kubeconfig. Use an agent connection, or make that server reachable from here.',
+  CLUSTER_IMPORT_CONFLICT: 'That cluster name is already taken. Choose another name.',
+  CLUSTER_IMPORT_INTERNAL:
+    'Cluster validation failed internally. The usual cause is a member cluster that is not configured for federation (missing clusterRole, or a jwtSecret that does not match the host).',
   NO_CLUSTER_TIP_DESC: 'A cluster is a group of nodes (physical or virtual machines) running Kube AI Hub.',
   // List > Remove Cluster
   RISK_WARNING: 'Risk Warning',

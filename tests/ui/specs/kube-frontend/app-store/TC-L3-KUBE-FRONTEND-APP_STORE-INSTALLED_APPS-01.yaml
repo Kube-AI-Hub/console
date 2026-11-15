@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-APP_STORE-INSTALLED_APPS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-store
+feature: installed-apps
+title: 已安装应用 · 列表行数、页内搜索与无分页器
+entry_url: '{BASE_URL}/kube-frontend/workspaces/system-workspace/apps/instances'
+prd: prd/kube-frontend/app-store/installed-apps.md
+design: design/kube-frontend/app-store/installed-apps.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_STORE-INSTALLED_APPS-01
+
+story:
+- US1
+
+product: 已安装应用列表来自跨项目汇总集合，行数一致、页内搜索生效、不渲染服务端无法兑现的分页器。
+preconditions:
+- 已登录；GET /workspaces/<ws>/applications 可读（可能为空）
+steps:
+- 读 GET /kapis/openpitrix.io/v1/workspaces/<ws>/applications 得到 N 与条目
+- 打开已安装应用列表，等 installed-apps:surface 离开 loading
+- 核对行数、表头与首行字段
+- 在搜索框输入首行应用名，核对只剩匹配行；清空后恢复
+- 核对页面是否出现分页器与数据源说明
+expected:
+- 行数 = N（N=0 显示「还没有已安装的应用」）
+- 表头含 名称/状态/应用/版本/项目/创建时间
+- 搜索后行数减少且都匹配；清空后回到 N
+- 页面有 installed-apps:source-note 说明「跨项目汇总接口只返回全量列表，没有服务端分页与搜索」，且不渲染分页器
+troubleshoot:
+- 行数为 0 但接口有数据：漏了 /workspaces/<ws> 前缀
+- 搜索后行数不变：过滤字段未包含 release 名/应用名/项目
+update_automation:
+- 句柄：installed-apps:surface / :table / :refresh / :search / :source-note / :name:<id>

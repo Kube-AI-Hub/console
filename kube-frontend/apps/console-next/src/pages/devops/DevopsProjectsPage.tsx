@@ -1,12 +1,15 @@
 import * as React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Link } from '@tanstack/react-router';
-import { AiSurface, ResourceList, type ListSchema } from '@kube-ai-hub/ui';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Link, useNavigate } from '@tanstack/react-router';
+import { AiSurface, Button, ResourceList, type ListSchema } from '@kube-ai-hub/ui';
+import { actionProps } from '@kube-ai-hub/ai-surface';
+import { devopsApi } from '@kube-ai-hub/api-client';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
 import { useListRefresh } from '@/components/resource/useListRefresh';
+import { DevopsProjectCreateDialog } from './components/DevopsDialogs';
 
 /**
  * DevOps 工程（集群作用域）.
@@ -18,10 +21,10 @@ import { useListRefresh } from '@/components/resource/useListRefresh';
  * workspace as a label. The kapis paths that do exist
  * (/kapis/devops.../workspaces/<ws>/devops) need a workspace the URL does not have.
  *
- * Read-only for now: creating a DevOps project (and the pipeline editor) belongs to the
- * ks-devops write side, which is a separate delivery. The page's job is to make the area
- * reachable and to be honest when there is nothing to show (this cluster currently has zero
- * projects).
+ * Creating a project needs a workspace: the devops API rejects a project that carries no
+ * `kubesphere.io/workspace` label, and the name it stores is `generateName` plus a
+ * 5-character suffix. The create dialog therefore asks for the workspace, and the page
+ * navigates to the **generated** name the API returns rather than to what was typed.
  */
 export interface DevopsProjectsPageProps {
   cluster: string;
@@ -69,6 +72,44 @@ export function DevopsProjectsPage({ cluster }: DevopsProjectsPageProps): React.
   const rows = query.data ?? [];
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
   const listRefresh = useListRefresh('devops', query);
+
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [creating, setCreating] = React.useState(false);
+
+  // The workspaces a project can be created in. Failing to read them must not hide the
+  // list; the dialog simply has no workspace to offer and says so through its disabled
+  // select.
+  const workspaces = useQuery({
+    queryKey: ['devops-project-workspaces'],
+    staleTime: 60_000,
+    retry: false,
+    queryFn: async ({ signal }): Promise<string[]> => {
+      const body = await apiClient.request<{ items?: { metadata?: { name?: string } }[] }>(
+        '/kapis/tenant.kubesphere.io/v1alpha2/workspaces',
+        { query: { limit: -1 }, ...(signal ? { signal } : {}) },
+      );
+      return (body?.items ?? []).map((item) => item.metadata?.name ?? '').filter(Boolean);
+    },
+  });
+
+  const create = useMutation({
+    mutationFn: (draft: { generateName: string; workspace: string; alias: string; description: string }) =>
+      devopsApi(apiClient).createProject({
+        generateName: draft.generateName,
+        workspace: draft.workspace,
+        alias: draft.alias,
+        description: draft.description,
+      }),
+    onSuccess: async (created) => {
+      await queryClient.invalidateQueries({ queryKey: ['devops-projects'] });
+      setCreating(false);
+      void navigate({
+        to: '/kube-frontend/clusters/$cluster/devops/$name',
+        params: { cluster, name: created.name },
+      });
+    },
+  });
 
   const schema = React.useMemo<ListSchema<DevopsProjectRow>>(
     () => ({
@@ -136,8 +177,24 @@ export function DevopsProjectsPage({ cluster }: DevopsProjectsPageProps): React.
   }
 
   return (
-    <AiSurface as="section" aiId="devops:surface" state={state} className="min-w-0">
+    <AiSurface as="section" aiId="devops:surface" state={state} className="flex min-w-0 flex-col gap-3">
+      <div className="flex justify-end">
+        <Button size="sm" {...actionProps('devops:create')} onClick={() => setCreating(true)}>
+          {t('devops.create.title')}
+        </Button>
+      </div>
       <ResourceList schema={schema} onRefresh={listRefresh.onRefresh} rows={rows} loading={state === 'loading'} />
+      <DevopsProjectCreateDialog
+        open={creating}
+        onOpenChange={(open) => {
+          setCreating(open);
+          if (!open) create.reset();
+        }}
+        workspaces={workspaces.data ?? []}
+        pending={create.isPending}
+        {...(create.error ? { error: create.error instanceof Error ? create.error.message : String(create.error) } : {})}
+        onSubmit={(draft) => create.mutate(draft)}
+      />
     </AiSurface>
   );
 }

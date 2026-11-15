@@ -9,19 +9,23 @@
 ## 关联需求
 
 - AC-L3-KUBE-FRONTEND-APP_STORE-DETAIL-01
+- AC-L3-KUBE-FRONTEND-APP_STORE-DETAIL-02
 - AC-L3-KUBE-FRONTEND-APP_STORE-INSTALL-01
+- AC-L3-KUBE-FRONTEND-APP_STORE-INSTALL-02
 
 ## 设计目标与非目标
 
 目标：让读者在安装前独立判断「这是什么、有哪些版本、怎么用」；安装走一个显式的四步弹窗，成功/失败都如实呈现。
 
-非目标：values/协议/高级参数编辑、应用实例列表、审核/编辑应用、Markdown 渲染、截图轮播、按版本切换 README、卸载/升级入口。
+非目标：values 的结构化表单（schema 驱动）、协议确认弹窗、调度/集群选择、应用实例列表、审核/编辑应用、Markdown 渲染、截图轮播、卸载/升级入口（卸载在 `installed-apps.md`）。
 
 ## 关键约束
 
 - 只读端点：GET /kapis/openpitrix.io/v1/apps/<appId>；GET .../apps/<appId>/versions；GET .../apps/<appId>/versions/<versionId>/files。
 - 安装选项端点：GET /kapis/tenant.kubesphere.io/v1alpha2/workspaces（2 个）；GET .../workspaces/<ws>/namespaces（如 public 下 spaces/csghub）。
-- 安装写端点：POST /kapis/openpitrix.io/v1/workspaces/<ws>/namespaces/<ns>/applications，body {app_id, version_id, name, description?}，返回 {message:"success"}。
+- 安装写端点：POST /kapis/openpitrix.io/v1/workspaces/<ws>/namespaces/<ns>/applications，body {app_id, version_id, name, description?, conf?}，返回 {message:"success"}。
+  **`conf` 必须是 YAML 字符串**：传对象时实测报 `json: cannot unmarshal object into Go struct field CreateClusterRequest.conf of type string`。
+- 版本文件端点 `…/versions/<versionId>/files` 同时提供 values.yaml（安装弹窗的默认值）与 values.schema.json（本部署 30 个应用都没有）。
 - **没有 workspace 级创建路由**：GET /workspaces/<ws>/applications 只读（0 条），项目级 POST 空 body 返回 `helmapplicationversion.application.kubesphere.io "" not found`（校验先于创建，证明路由存在且需要 version_id）。
 - 删除：DELETE /workspaces/<ws>/namespaces/<ns>/applications/<cluster_id>；按 release 名删除返回 200 但不生效（实测）。
 - 实测字段：应用详情含 app_id/name/description/category_set/home/isv/status/status_time/app_version_types/cluster_total/latest_app_version；图标只在 latest_app_version.icon（30 个应用中 8 个没有）。
@@ -87,6 +91,27 @@
 
 **何时重新考虑**：服务端返回结构化 duplicate 错误，或新增 release 状态查询页时。
 
+### DEC-L3-KUBE-FRONTEND-APP_STORE-DETAIL-06 — 安装弹窗内置 values 编辑，conf 以 YAML 文本提交
+
+**为什么**：老 console 的安装是两步向导，第二步从 chart 的 values.yaml 起编辑（无 schema 时用 YAML 编辑，有 schema 时用表单+YAML 切换）。
+本单元把这一步并进弹窗：打开时按所选版本拉 `files`，预填 `values.yaml`，提交时把文本作为 `conf` 发送。空值不发送 `conf`，即使用 chart 默认值。
+**被否方案**：新建 `/apps/<appId>/deploy` 两步向导页（老 console 结构）。否决理由：安装目标是项目、参数与弹窗完全相同，新增页面只是把同一表单搬到另一个路由，且会与「一个动作一个入口」冲突。
+**何时重新考虑**：需要按版本预设 values 模板、或需要 schema 驱动的分步表单时（那时把弹窗扩展为向导，仍是同一个创建端点）。
+
+### DEC-L3-KUBE-FRONTEND-APP_STORE-DETAIL-07 — 不实现 values.schema.json 表单视图（无真实样本）
+
+**为什么**：老 console 在 chart 带 `values.schema.json` 时提供表单视图。本商店 30 个应用的版本里没有任何一个带该文件（逐版本 files 实测），
+表单视图没有可验证的真实样本；按不可验证路径实现等于交付一个没人能验收的控件。
+**被否方案**：照老 console 实现 SchemaForm 再说。否决理由：没有样本就无法断言渲染、必填、类型校验与提交格式，属于未验收交付。
+**何时重新考虑**：商店里出现带 values.schema.json 的 chart（复查条件：`GET …/versions/<id>/files` 的 keys 含 `values.schema.json`）。
+
+### DEC-L3-KUBE-FRONTEND-APP_STORE-DETAIL-08 — README 支持按版本切换，关键词按字段有无渲染
+
+**为什么**：版本表已有多个版本，README 却固定取最新版本，读者无法判断旧版本差异；版本切换是纯读操作，成本低。
+关键词（`keywords`）在本部署的应用详情里不存在（实测 keys 无该字段），因此按「有则显示、无则不渲染空行」处理，而不是渲染一行「无」。
+**被否方案**：Readme 固定最新版本（上一轮结论）。否决理由：多版本应用里会给出与实际安装版本不一致的使用说明。
+**何时重新考虑**：关键词成为搜索维度、需要筛选时，改为独立标签区。
+
 ## 系统现状
 
 老 console 的 /apps/:appId 页面有 Banner（返回/图标/名称/简介）与三个页签：应用信息（简介/截图/版本表）、应用详情（README/版本选择/关键词）、应用实例（部署后的实例列表），右上角是安装按钮；安装跳 /apps/:appId/deploy 两步向导（基本信息 + 应用配置）。本实现迁移 Banner、基本信息与版本表、README，并把安装做成单弹窗：企业空间/项目/版本/名称 + 默认 values 提交；values 编辑、实例列表仍未迁移。
@@ -101,6 +126,18 @@
 - 测试：tests/ui/{specs,tests}/kube-frontend/app-store/...APP_STORE-DETAIL-01、...APP_STORE-INSTALL-01
 
 ## 对外契约
+
+### CON-L3-KUBE-FRONTEND-APP_STORE-DETAIL-01 — 安装请求体
+
+`POST /kapis/openpitrix.io/v1/workspaces/<ws>/namespaces/<ns>/applications`
+body `{app_id, version_id, name, description?, conf?}`，其中 `conf` 是**YAML 文本**（不是对象）；
+响应 `{message:"success"}`。成功后 release 出现在 `GET /workspaces/<ws>/applications` 与 `helmreleases` 集合里，
+状态从 `creating` 变为 `active`（实测约 15 秒）。
+
+### CON-L3-KUBE-FRONTEND-APP_STORE-DETAIL-02 — 版本文件
+
+`GET /kapis/openpitrix.io/v1/apps/<appId>/versions/<versionId>/files` → `{files:{路径: base64}}`；
+`README.md` 与 `values.yaml` 是其中两项（本部署无 `values.schema.json`）。
 
 | 用途 | 路径 | 方法 | 实测 |
 | --- | --- | --- | --- |
