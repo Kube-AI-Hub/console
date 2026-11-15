@@ -12,6 +12,8 @@
 
 - `AC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-01`
 - `AC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-02`
+- `AC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-03`
+- `AC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-04`
 
 ## 设计目标与非目标
 
@@ -80,6 +82,7 @@
 
 - **CON-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-01** — `GET /kapis/gpu.kubesphere.io/v1alpha1/gpus?conditions=nodeName=<n>` 的 `nodeInfo.virtualCardCount` 等于该节点 `nvidia.com/vgpu` 的 capacity（`hami-core` 下），`default`/`mig` 下为 0。
 - **CON-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-02** — `devices[].count` 等于该卡的切分数；`mig` 模式下等于该卡可用 profile 的最大实例数。
+- **CON-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-03** — 昆仑芯 `hami-core` 的状态页资源总量来自 Node capacity 的 `kunlunxin.com/vxpu` 与 `kunlunxin.com/vxpu-memory`。虚拟卡数来自 `node-gpu-info.virtualCardCount`，8 张卡且 `count` 为 4 时是 32。显卡列表仍是 8 行。切回独占后这两个资源不再以非零总量出现。
 
 ## 不变量
 
@@ -106,3 +109,5 @@
 
 - `TC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-01`
 - `TC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-02`
+- `TC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-03`
+- `TC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-04`

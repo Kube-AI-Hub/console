@@ -1,0 +1,35 @@
+id: TC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-03
+level: 3
+suite: point
+module: cluster-gpu
+submodule: vgpu-mode
+feature: capacity
+title: vGPU 资源就绪 · 昆仑芯 hami-core 容量
+entry_url: "{BASE_URL}/clusters/default/nodes/node201-xpu/status"
+prd: prd/cluster-gpu/vgpu-mode/capacity.md
+design: design/cluster-gpu/vgpu-mode/capacity.md
+
+covers:
+- AC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-03
+
+story:
+- US3
+
+product: 昆仑芯 hami-core 状态页显示 vxpu 与 vxpu-memory，8 行显卡，虚拟卡数 32。
+preconditions:
+- 已登录，且在 default 集群
+- node201-xpu 已切成 hami-core，kunlunxin.com/vxpu 非零
+steps:
+- 打开 {BASE_URL}/clusters/default/nodes/node201-xpu/status
+- 读取资源总量里的 kunlunxin.com/vxpu 与 kunlunxin.com/vxpu-memory
+- 读取虚拟卡数与显卡列表行数
+expected:
+- 两个共享资源总量非零，且与 kubectl capacity 一致
+- 显卡列表 8 行
+- 虚拟卡数为 32
+- 不出现未翻译的 key
+troubleshoot:
+- 总量为 0 时确认 vxpu=on 且 vxpu-device-plugin 已在该节点注册
+- 虚拟卡数不是 32 时看 node-gpu-info 的 virtualCardCount
+update_automation:
+- 资源名变化时改本用例

@@ -1,0 +1,31 @@
+id: TC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-04
+level: 3
+suite: point
+module: cluster-gpu
+submodule: vgpu-mode
+feature: capacity
+title: vGPU 资源就绪 · 昆仑芯切回独占后共享资源归零
+entry_url: "{BASE_URL}/clusters/default/nodes/node201-xpu/status"
+prd: prd/cluster-gpu/vgpu-mode/capacity.md
+design: design/cluster-gpu/vgpu-mode/capacity.md
+
+covers:
+- AC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-04
+
+story:
+- US4
+
+product: 昆仑芯切回独占后，状态页不再把 vxpu 与 vxpu-memory 显示为非零总量。
+preconditions:
+- 已登录，且在 default 集群
+- node201-xpu 已从 hami-core 切回独占，vxpu=off
+steps:
+- 打开 {BASE_URL}/clusters/default/nodes/node201-xpu/status
+- 读取资源总量
+expected:
+- kunlunxin.com/vxpu 与 kunlunxin.com/vxpu-memory 不以非零总量出现
+- 不出现未翻译的 key
+troubleshoot:
+- 仍显示非零时确认独占插件已重新注册，且 vxpu-device-plugin 已离开节点
+update_automation:
+- 资源名变化时改本用例

@@ -16,10 +16,20 @@
 
 **Independent Test**：切回 `default` 后，节点运行状态页不再显示 `nvidia.com/vgpu`（或显示 0），`nvidia.com/gpu` 回到 7。
 
+### US3 - 作为集群运维，在昆仑芯状态页核对 hami-core 容量
+
+**Independent Test**：`node201-xpu` 切成 `hami-core` 后，状态页资源总量出现 `kunlunxin.com/vxpu` 与 `kunlunxin.com/vxpu-memory`，显卡列表 8 行，虚拟卡数 32。
+
+### US4 - 作为集群运维，把昆仑芯切回独占后确认共享资源归零
+
+**Independent Test**：切回独占后，状态页上 `kunlunxin.com/vxpu` 与 `kunlunxin.com/vxpu-memory` 不再以非零总量出现。
+
 ## 验收场景
 
 - **AC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-01** — Given 节点已切成 `hami-core` 且切分数为 10、卡数为 7，When 打开节点运行状态页，Then 资源总量里 `nvidia.com/vgpu` 显示 70，显卡列表每行的 vGPU 列为 `0/10`。
 - **AC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-02** — Given 节点已切回 `default`，When 打开节点运行状态页，Then `nvidia.com/gpu` 显示 7，且页面上不出现 `nvidia.com/vgpu` 的非零总量。
+- **AC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-03** — Given 昆仑芯节点已切成 `hami-core`，8 张卡且每张份额为 4，When 打开 `/clusters/default/nodes/node201-xpu/status`，Then 资源总量出现非零的 `kunlunxin.com/vxpu` 与 `kunlunxin.com/vxpu-memory`，显卡列表 8 行，虚拟卡数为 32。
+- **AC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-04** — Given 该昆仑芯节点已切回独占，When 打开同一状态页，Then `kunlunxin.com/vxpu` 与 `kunlunxin.com/vxpu-memory` 不以非零总量出现。
 
 ## 设计目标
 
@@ -66,10 +76,14 @@
 
 - **FR-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-01**：系统必须按 `gpu.kinds` 展示非零 GPU 资源及其单位。
 - **FR-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-02**：系统必须在显卡列表按 `node-gpu-info` 的 `devices[]` 展示每卡的 vGPU 已分配/总量与模式。
+- **FR-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-03**：系统必须在昆仑芯 `hami-core` 的状态页展示 `kunlunxin.com/vxpu`、`kunlunxin.com/vxpu-memory`、8 行显卡和虚拟卡数 32。
+- **FR-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-04**：系统必须在昆仑芯切回独占后不再把这两个共享资源显示为非零总量。
 
 ## 成功标准
 
 - **SC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-01**：页面显示的资源总量与 `kubectl get node <node> -o jsonpath='{.status.capacity}'` 中同名键一致。
+- **SC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-03**：`node201-xpu` 的 hami-core 状态页同时看到共享资源、8 行显卡和虚拟卡数 32。
+- **SC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-04**：切回独占后共享资源总量不再非零。
 
 ## 明确不做
 
@@ -84,4 +98,4 @@
 
 ## 验收用例
 
-- L3：`TC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-01`、`TC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-02`
+- L3：`TC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-01`、`TC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-02`、`TC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-03`、`TC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-04`
