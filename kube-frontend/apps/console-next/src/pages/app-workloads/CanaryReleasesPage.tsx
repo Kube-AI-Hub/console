@@ -167,7 +167,10 @@ export function CanaryReleasesPage({ workspace, cluster, namespace }: CanaryRele
       },
       pagination: { page: 1, pageSize: Math.max(rows.length, 1), total: rows.length },
     }),
-    [cluster, createPermission.denied, list.sortBy, list.order, namespace, rows.length, t, workspace],
+    // `listRefresh.refresh.busy` reads `query.isFetching`; without it in the deps the schema keeps
+    // the busy value from the first render, when the query was still fetching, and the refresh
+    // button stays disabled forever.
+    [cluster, createPermission.denied, list.sortBy, list.order, namespace, query.isFetching, rows.length, t, workspace],
   );
 
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';

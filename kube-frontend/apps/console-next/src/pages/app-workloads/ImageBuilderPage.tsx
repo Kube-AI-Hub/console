@@ -218,7 +218,9 @@ export function ImageBuilderPage({ workspace, cluster, namespace }: ImageBuilder
       },
       pagination: { page: list.page, pageSize: list.pageSize, total },
     }),
-    [cluster, list, listRefresh, namespace, t, total, workspace],
+    // `listRefresh.refresh.busy` reads `query.isFetching`; the schema has to rebuild when the
+    // fetch state changes, otherwise the button is frozen in the state it had on first render.
+    [cluster, list, listRefresh, namespace, query.isFetching, t, total, workspace],
   );
 
   const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
