@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-USER_SETTINGS-ABOUT-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: user-settings
+feature: about
+title: 关于与版本
+entry_url: '{BASE_URL}/kube-frontend/access/users'
+prd: prd/kube-frontend/user-settings/about.md
+design: design/kube-frontend/user-settings/about.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-USER_SETTINGS-ABOUT-01
+
+story:
+- US1
+
+product: 右上角用户菜单里的「关于」显示平台名称、描述、控制台版本与 Kubernetes 版本。
+preconditions:
+- 已登录
+steps:
+- 打开用户菜单，确认有「关于」
+- 点击「关于」，读取弹窗内容
+- 与服务端 /kapis/version 的返回值对照
+steps_expected:
+- 弹窗显示平台名称（来自平台配置，未配置时回退默认名）
+- 控制台版本与 Kubernetes 版本与 /kapis/version 一致
+expected:
+- 版本接口不可用时弹窗仍打开并显示「版本信息不可用」
+troubleshoot:
+- 弹窗空白：版本查询异常时没有降级分支
+- 名称写死：未读平台配置
+troubleshoot_note: 无
+update_automation:
+- 选择器：shell:user-menu / shell:about / shell-about:title / :console-version / :kubernetes-version

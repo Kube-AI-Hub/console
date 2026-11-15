@@ -9,6 +9,7 @@ import { areasFor, areaPages, areaOfPage, type Area } from '@/areas/registry';
 import { projectPageSegment } from '@/areas/scope';
 import { ClusterSwitcher } from '@/shell/ClusterSwitcher';
 import { UserSettingsDialog } from '@/shell/UserSettingsDialog';
+import { AboutDialog } from '@/shell/AboutDialog';
 import { readLastCluster } from '@/lib/lastCluster';
 
 /**
@@ -917,6 +918,7 @@ function UserMenu(): React.ReactElement | null {
   const t = useT();
   const { user, signOut } = useAuth();
   const [settingsOpen, setSettingsOpen] = React.useState(false);
+  const [aboutOpen, setAboutOpen] = React.useState(false);
 
   if (!user) return null;
   const label = user.displayName ?? user.name;
@@ -948,6 +950,11 @@ function UserMenu(): React.ReactElement | null {
             label: <span {...actionProps('shell:user-settings')}>{t('userSettings.title')}</span>,
             onSelect: () => setSettingsOpen(true),
           },
+          {
+            key: 'about',
+            label: <span {...actionProps('shell:about')}>{t('shell.about')}</span>,
+            onSelect: () => setAboutOpen(true),
+          },
           { key: 'signout', label: t('login.signOut'), onSelect: leave },
         ]}
       />
@@ -961,6 +968,7 @@ function UserMenu(): React.ReactElement | null {
          */
         onSignedOut={leave}
       />
+      <AboutDialog open={aboutOpen} onOpenChange={setAboutOpen} />
     </React.Fragment>
   );
 }

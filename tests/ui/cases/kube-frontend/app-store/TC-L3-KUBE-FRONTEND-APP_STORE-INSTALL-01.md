@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/app-store/detail.md`](../../../../prd/kube-frontend/app-store/detail.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-APP_STORE-INSTALL-01** — 已知商店里有带版本的应用、且目标企业空间有项目，当在详情点安装，则弹窗提供企业空间（tenant workspaces）、项目（该空间的命名空间）、版本（该应用的版本）与安装名称；提交合法值时向 `/kapis/openpitrix.io/v1/workspaces/<ws>/namespaces/<ns>/applications` 发送 `{app_id, version_id, name}`，成功后弹窗显示「已提交安装：<name>」与跳转该企业空间应用列表的入口；提交同名（项目内已有该 release 名）时不发请求并提示「该项目内已有同名安装」；服务端失败时弹窗显示服务端原因（错误文案，不伪造成功）；名称为空/非法、项目或版本缺失时不发请求并提示对应字段。
+- **AC-L3-KUBE-FRONTEND-APP_STORE-INSTALL-01** — 已知商店里有带版本的应用、且目标企业空间有项目，当在详情点安装，则弹窗提供企业空间（tenant workspaces）、项目（该空间的命名空间）、版本（该应用的版本）、安装名称与 values 配置；提交合法值时向 `/kapis/openpitrix.io/v1/workspaces/<ws>/namespaces/<ns>/applications` 发送 `{app_id, version_id, name, conf}`（`conf` 为 **YAML 字符串**），成功后弹窗显示「已提交安装：<name>」与跳转该企业空间已安装应用列表的入口；提交同名（项目内已有该 release 名）时不发请求并提示「该项目内已有同名安装」；服务端失败时弹窗显示服务端原因（错误文案，不伪造成功）；名称为空/非法、项目或版本缺失时不发请求并提示对应字段。
 
 ### 关联设计
 

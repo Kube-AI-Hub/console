@@ -454,7 +454,28 @@ MODULES = [
                     {
                         "id": "workspace-repos",
                         "title": "企业空间应用仓库",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-01", "TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-02"]},
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-01",
+                            "TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-02",
+                            "TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-03",
+                            "TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-04",
+                        ]},
+                    },
+                    {
+                        "id": "workspace-apps",
+                        "title": "企业空间应用模板",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_APPS-01",
+                            "TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_APPS-02",
+                        ]},
+                    },
+                    {
+                        "id": "installed-apps",
+                        "title": "已安装应用",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-APP_STORE-INSTALLED_APPS-01",
+                            "TC-L3-KUBE-FRONTEND-APP_STORE-INSTALLED_APPS-02",
+                        ]},
                     },
                     {
                         "id": "manage",
@@ -464,7 +485,11 @@ MODULES = [
                     {
                         "id": "detail",
                         "title": "应用详情",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_STORE-DETAIL-01", "TC-L3-KUBE-FRONTEND-APP_STORE-INSTALL-01"]},
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-APP_STORE-DETAIL-01",
+                            "TC-L3-KUBE-FRONTEND-APP_STORE-INSTALL-01",
+                            "TC-L3-KUBE-FRONTEND-APP_STORE-INSTALL-02",
+                        ]},
                     },
                                                         ],
             },
@@ -481,6 +506,11 @@ MODULES = [
                             "TC-L3-KUBE-FRONTEND-USER_SETTINGS-PROFILE-01",
                             "TC-L3-KUBE-FRONTEND-USER_SETTINGS-PROFILE-02",
                         ]},
+                    },
+                    {
+                        "id": "about",
+                        "title": "关于与版本",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-USER_SETTINGS-ABOUT-01"]},
                     },
                     {
                         "id": "password",

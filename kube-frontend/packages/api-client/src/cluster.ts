@@ -1111,3 +1111,32 @@ export function clustersApi(client: Client) {
 }
 
 export type ClustersApi = ReturnType<typeof clustersApi>;
+
+/**
+ * The platform and Kubernetes versions.
+ *
+ * `/kapis/version` is the only endpoint that answers this on both a real KubeSphere
+ * install and the local BFF harness; the fields are strings worth showing verbatim
+ * (`v0.0.0` on the harness is the harness stating it, not a bug to hide).
+ */
+export interface PlatformVersion {
+  /** The console product version, e.g. `v3.4.1`; may be `v0.0.0` on a local harness. */
+  consoleVersion: string;
+  /** The Kubernetes server version, e.g. `v1.37.0`. */
+  kubernetesVersion: string;
+}
+
+export function versionApi(client: Client) {
+  return {
+    async get(params: { signal?: AbortSignal } = {}): Promise<PlatformVersion> {
+      const body = await client.request<{
+        gitVersion?: string;
+        kubernetes?: { gitVersion?: string };
+      }>('/kapis/version', params.signal ? { signal: params.signal } : {});
+      return {
+        consoleVersion: String(body?.gitVersion ?? ''),
+        kubernetesVersion: String(body?.kubernetes?.gitVersion ?? ''),
+      };
+    },
+  };
+}

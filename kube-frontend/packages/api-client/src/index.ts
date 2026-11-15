@@ -387,6 +387,7 @@ export {
   customResourcesApi,
   nodeUsageApi,
   rangeMetricsApi,
+  versionApi,
   toClusterDetail,
   toClusterSummary,
   toCustomResourceSummary,

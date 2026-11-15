@@ -461,6 +461,24 @@ modules:
         L3:
         - TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-01
         - TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-02
+        - TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-03
+        - TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-04
+    - id: workspace-apps
+      title: 企业空间应用模板
+      prd: prd/kube-frontend/app-store/workspace-apps.md
+      design: design/kube-frontend/app-store/workspace-apps.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_APPS-01
+        - TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_APPS-02
+    - id: installed-apps
+      title: 已安装应用
+      prd: prd/kube-frontend/app-store/installed-apps.md
+      design: design/kube-frontend/app-store/installed-apps.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-APP_STORE-INSTALLED_APPS-01
+        - TC-L3-KUBE-FRONTEND-APP_STORE-INSTALLED_APPS-02
     - id: manage
       title: 商店管理（应用/分类/审核）
       prd: prd/kube-frontend/app-store/manage.md
@@ -476,6 +494,7 @@ modules:
         L3:
         - TC-L3-KUBE-FRONTEND-APP_STORE-DETAIL-01
         - TC-L3-KUBE-FRONTEND-APP_STORE-INSTALL-01
+        - TC-L3-KUBE-FRONTEND-APP_STORE-INSTALL-02
   - id: user-settings
     title: 用户设置
     prd: prd/kube-frontend/user-settings/_index.md
@@ -492,6 +511,13 @@ modules:
         L3:
         - TC-L3-KUBE-FRONTEND-USER_SETTINGS-PROFILE-01
         - TC-L3-KUBE-FRONTEND-USER_SETTINGS-PROFILE-02
+    - id: about
+      title: 关于与版本
+      prd: prd/kube-frontend/user-settings/about.md
+      design: design/kube-frontend/user-settings/about.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-USER_SETTINGS-ABOUT-01
     - id: password
       title: 密码设置
       prd: prd/kube-frontend/user-settings/password.md
