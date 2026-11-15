@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: add-cluster
+title: 添加集群 · 校验失败时在对话框展示原因
+entry_url: '{BASE_URL}/kube-frontend/clusters'
+prd: prd/kube-frontend/cluster-management/add-cluster.md
+design: design/kube-frontend/cluster-management/add-cluster.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-03
+
+story:
+- US3
+
+product: 添加集群的校验或创建失败时，对话框留下可操作原因并弹出通知，不创建 Cluster 对象。
+preconditions:
+- 已登录，且有平台管理权限
+steps:
+- 打开集群列表，点「添加集群」
+- 拦截 POST /kapis/cluster.kubesphere.io/v1alpha1/clusters/validation 为 400，正文含 Jwt is not equal
+- 填入合法名称与结构完整的 kubeconfig 并确认
+expected:
+- 对话框保持打开
+- clusters:add-error 出现含 jwtSecret 的说明
+- 列表与 API 中都不存在该名称的 Cluster 对象
+performance:
+- 无特殊要求；失败为单次 POST
+troubleshoot:
+- 提示条不出现：确认校验请求被拦截且前端未把 400 当成网络异常
+- 对象被创建：校验失败后仍调用了 POST /apis/.../clusters
+update_automation:
+- 映射文案变化时改 tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_ADD_CLUSTER_03.py

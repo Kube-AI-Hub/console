@@ -94,6 +94,7 @@
 | juicefs | [juicefs.md](./juicefs.md) |
 | monitor-resource | [monitor-resource.md](./monitor-resource.md) |
 | 编辑 YAML 覆盖 | [yaml-edit.md](./yaml-edit.md) |
+| 添加集群 | [add-cluster.md](./add-cluster.md) |
 
 ## 明确不做
 
