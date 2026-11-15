@@ -124,3 +124,30 @@
 把 `app-workloads` 拆成两半再跑（各 35/36 个文件）仍各有 1 条与 3 条失败，且**失败的用例会换**（这次多了 `COLUMN_VISIBILITY-01`）——进一步印证与用例无关，与「哪条正好撞上卡死」有关。
 
 结论：**加重试是有效且应当保留的**（三个长区从红转绿）；`app-workloads` 的残余失败属于同一条链路的偶发卡死，用「新区复跑」判定即可。
+
+## 最终逐区核查（2026-11-16 06:20）
+
+每个区各自一个会话，逐区单独跑完：
+
+| 区 | 结果 |
+| --- | --- |
+| access-control | **44 passed** |
+| app-store | **18 passed** |
+| app-workloads | 66 passed / **3 failed**（掉队用例单独跑 9.54s 全绿） |
+| cluster-management | **94 passed / 12 skipped** |
+| configmaps | **27 passed / 2 skipped** |
+| core | **1 passed** |
+| login | **3 passed** |
+| monitoring | **16 passed** |
+| platform-settings | **3 passed / 6 skipped** |
+| project-settings | **27 passed / 1 skipped** |
+| secrets | **16 passed** |
+| serviceaccounts | **13 passed** |
+| storage | **21 passed** |
+| theme | **3 passed** |
+| user-settings | **7 passed** |
+| workbench | **3 passed** |
+
+**15 / 16 个区完全通过**；只有用例最多的 `app-workloads` 仍会掉 1~3 条，且掉的是哪几条每次都不同、单独跑均全绿。
+
+附带确认：把两个区（app-store + access-control）合到一个会话里跑，也会出现 3 条失败——**变量是会话长度，不是区本身**。
