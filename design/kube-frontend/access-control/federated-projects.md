@@ -113,7 +113,7 @@
 - 路由：`routes/kube-frontend.workspaces.$workspace/federatedprojects/{route,index}.tsx`、`$name/{route,index}.tsx`、`$name/$resource/$object.tsx`
 - 接口：`console/kube-frontend/packages/api-client/src/federated.ts`（新），并在 `src/index.ts` 导出
 - 文案：`console/kube-frontend/packages/locales/src/index.ts` 的 `fedprojects.*`
-- 用例：`console/tests/ui/specs/kube-frontend/access-control/TC-L3-...-FEDERATED_PROJECTS-{01..08}.yaml` 与镜像 Python 测试；页面对象 `tests/ui/pages/federated_page.py`
+- 用例：`tests/ui/specs/kube-frontend/access-control/` 下的 FEDERATED_PROJECTS 系列（01..08）与镜像 Python 测试；页面对象 `tests/ui/pages/federated_page.py`
 
 ## 对外契约
 

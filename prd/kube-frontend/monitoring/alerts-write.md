@@ -24,7 +24,7 @@
 
 ## 验收场景
 
-- **AC-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-02** — 已知当前身份对 `alerting.kubesphere.io` 的 `rulegroups`（项目级）无 create/update/delete 权限，当打开告警策略列表与某条项目策略详情，则创建入口不出现并在列表上说明原因、行菜单只有「详情」、详情页没有编辑/删除/启停；当身份被允许，则上述入口出现且写路径与 AC-01 一致；当权限检查请求本身失败（非 2xx），则按「允许」处理（fail-open），不因检查故障隐藏本来可用的操作；启停按策略所属作用域分别检查 `rulegroups` / `clusterrulegroups` / `globalrulegroups` 的 update 权限。
+- **AC-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-02** — 已知当前身份对 `alerting.kubesphere.io` 的 `rulegroups`（项目级）无 create/update/delete 权限，当打开告警策略列表与某条项目策略详情，则创建入口不出现并在列表上说明原因、行菜单只有「详情」、详情页没有编辑/删除/启停；当身份被允许，则上述入口出现且写路径与 AC-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-01 一致；当权限检查请求本身失败（非 2xx），则按「允许」处理（fail-open），不因检查故障隐藏本来可用的操作；启停按策略所属作用域分别检查 `rulegroups` / `clusterrulegroups` / `globalrulegroups` 的 update 权限。
 - **AC-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-01** — 已知选定了某个项目，当在告警策略页创建一条策略（策略名 + 描述 + 一条规则：告警名称、表达式、持续时间、严重度、说明与消息）并提交，则该项目命名空间下出现对应的 `rulegroups` 对象，其 `metadata.annotations['kubesphere.io/description']` 等于填写的描述、`spec.rules` 与填写内容逐条一致（告警名、表达式、持续时间、严重度、`annotations.summary`、`annotations.message`），且列表中出现该策略；当通过行操作「编辑」修改描述与规则级别并提交，则回读对象的描述与规则级别均已更新且其余规则未被删除；当通过行操作「删除」并确认，则该对象不再存在（回读 404、列表不再包含）；内置与集群级策略不提供编辑/删除入口。
 
 ## 设计目标
