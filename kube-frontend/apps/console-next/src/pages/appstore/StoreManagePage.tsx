@@ -163,7 +163,7 @@ function ReviewsTable(): React.ReactElement {
   const list = useResourceListState<'appName' | 'createTime'>({ defaultSortBy: 'createTime', defaultPageSize: PAGE_SIZE });
   const reviews = useQuery({
     queryKey: ['store-reviews', list.page, list.pageSize],
-    queryFn: ({ signal }) => storeReviewsApi(apiClient).list({ page: list.page, pageSize: PAGE_SIZE, signal }),
+    queryFn: ({ signal }) => storeReviewsApi(apiClient).list({ page: list.page, pageSize: list.pageSize, signal }),
   });
 
   const rows = reviews.data?.items ?? [];

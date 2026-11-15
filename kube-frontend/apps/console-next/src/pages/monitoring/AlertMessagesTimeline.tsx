@@ -42,7 +42,9 @@ export function AlertMessagesTimeline({ scope, namespace, ruleGroup }: AlertMess
     ...(namespace ? { namespace } : {}),
     ruleGroup,
     page,
-    pageSize: PAGE_SIZE,
+    // No pager on this timeline: it shows the most recent page of one rule's alerts and the
+    // detail page above it carries the paged list. A size picker here would have nothing to act on.
+    pageSize: PAGE_SIZE, // pager-less on purpose
   });
   const items = query.data?.items ?? [];
   const total = query.data?.total ?? 0;
