@@ -30,8 +30,12 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_MONITOR_01(cluster_monitor_page,
 
     assert ui.state() == "ready", ui.state()
 
-    # ---- AC-01: four cards, each with a drawn line ----
-    assert ui.charts() == 4, f"expected four charts, found {ui.charts()}"
+    # ---- AC-01 + AC-03: the four core cards exist, and the physical-resource set fills the page ----
+    # AC-01 named the original four; AC-03 added the rest of the old console's physical metrics, so
+    # the page now draws thirteen cards. Asserting the core four are among them keeps this case about
+    # AC-01 without freezing the total at a number AC-03 owns.
+    assert ui.charts() >= 4, f"expected at least the four core charts, found {ui.charts()}"
+    assert ui.charts() == 13, f"expected the thirteen physical-resource charts, found {ui.charts()}"
     assert ui.empty_cards() == 0, "监控有数据时不应出现无数据卡片"
 
     for card in ui.CARDS:
@@ -80,7 +84,7 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_MONITOR_01(cluster_monitor_page,
     ui.select_range("24h")
     ui.page.wait_for_timeout(4000)
     ui.wait_ready()
-    assert ui.charts() == 4
+    assert ui.charts() == 13
     after = ui.latest("cpu")
     # The value may legitimately match (an idle cluster is idle at both scales), so
     # the assertion is that the page still renders a valid percentage for the new
