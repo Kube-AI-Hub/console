@@ -27,6 +27,10 @@ export type ConfigMapOrder = 'asc' | 'desc';
 
 export function useConfigMapListController({ cluster, namespace, pageSize = 10 }: ConfigMapListScope & { pageSize?: number }) {
   const [page, setPage] = React.useState(1);
+  /* Page size is state, not a constant: the old console offered 10/20/50/100 and a list
+   * that cannot change it makes the reader page through 10 rows at a time forever. */
+  const [size, setSize] = React.useState(pageSize);
+  React.useEffect(() => setSize(pageSize), [pageSize]);
   const [keyword, setKeyword] = React.useState('');
   const [debouncedKeyword, setDebouncedKeyword] = React.useState('');
   const [sortBy, setSortBy] = React.useState<ConfigMapSortKey>('createTime');
@@ -66,7 +70,7 @@ export function useConfigMapListController({ cluster, namespace, pageSize = 10 }
     cluster,
     namespace: activeNamespace,
     page,
-    pageSize,
+    pageSize: size,
     sortBy,
     order,
     keyword: debouncedKeyword,
@@ -127,7 +131,11 @@ export function useConfigMapListController({ cluster, namespace, pageSize = 10 }
     projectFilter,
     setProjectFilter,
     activeNamespace,
-    pageSize,
+    pageSize: size,
+    setPageSize: (next: number) => {
+      setSize(next);
+      setPage(1);
+    },
     query,
     items: query.data?.items ?? [],
     total: query.data?.total ?? 0,

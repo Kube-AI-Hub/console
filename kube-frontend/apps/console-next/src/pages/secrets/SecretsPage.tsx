@@ -40,7 +40,8 @@ export interface SecretsPageProps {
   namespace: string;
 }
 
-const PAGE_SIZE = 10;
+/** Page sizes the old console offered (`PAGESIZE_OPTION`): 10/20/50/100. */
+const PAGE_SIZES = [10, 20, 50, 100] as const;
 
 /**
  * Type label for a stored type.
@@ -97,8 +98,12 @@ export function SecretsPage({ workspace, cluster, namespace }: SecretsPageProps)
     setProjectFilter(namespace);
   }, [cluster, namespace]);
 
-  const list = useResourceListState<SortKey>({ defaultSortBy: 'createTime', resetOn: [cluster, projectFilter] });
-  const query = useSecrets(toListParams(list, { cluster, namespace: projectFilter }, PAGE_SIZE));
+  const list = useResourceListState<SortKey>({
+    defaultSortBy: 'createTime',
+    defaultPageSize: 10,
+    resetOn: [cluster, projectFilter],
+  });
+  const query = useSecrets(toListParams(list, { cluster, namespace: projectFilter }));
 
   const remove = useDeleteSecrets({ cluster, namespace: projectFilter });
   const create = useCreateSecret({ cluster });
@@ -234,7 +239,7 @@ export function SecretsPage({ workspace, cluster, namespace }: SecretsPageProps)
         next: t('table.next'),
         selected: (count) => t('table.selectedCount', { count }),
       },
-      pagination: { page: list.page, pageSize: PAGE_SIZE, total },
+      pagination: { page: list.page, pageSize: list.pageSize, pageSizeOptions: [...PAGE_SIZES], total },
     }),
     [t, list, total, cluster, projectFilter, workspace, projectFilterControl],
   );
@@ -269,6 +274,7 @@ export function SecretsPage({ workspace, cluster, namespace }: SecretsPageProps)
         selectedKeys={list.selected}
         onSelectionChange={list.setSelected}
         onPageChange={list.setPage}
+        onPageSizeChange={list.setPageSize}
         onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
           if (!next) return;
           list.setSort(next);

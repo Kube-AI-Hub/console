@@ -9,6 +9,7 @@
 ## 关联需求
 
 - `AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-01`
+- AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-08
 - AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-07
 - `AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-02`
 - `AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-03`
@@ -47,6 +48,25 @@
 **何时重新考虑**：第二个资源模块出现、且列结构重复时
 
 
+### DEC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-08 — 每页条数是状态，不是常量
+
+旧 console 的分页组件带 `PAGESIZE_OPTION = [10, 20, 50, 100]`；新 UI 第一版把每页条数写成 `const PAGE_SIZE = 10`，
+读者只能 10 条一页地翻。本批把它接回列表状态：`useResourceListState` 本来就有 `pageSize/setPageSize`，
+缺的是页面把它传给请求与分页器。
+
+`toListParams(state, base)` 的第三个参数改为可选：省略时跟随 `state.pageSize`。保留这个重载是为了不改动
+那些「故意固定页大小」的页面（例如面板里的 TopN 表格），同时让带选择器的页面不必再传常量——传常量正是
+「表格说 50 条、请求只要 10 条」这个 bug 的来源。
+
+### CON-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-08 — 分页请求参数
+
+`GET …/configmaps?page=<n>&limit=<pageSize>&sortBy=<key>&ascending=<bool>`；切换每页条数时 `page` 回到 1。
+共享 ResourceList 只有在同时给出 `pagination.pageSizeOptions` 与 `onPageSizeChange` 时才渲染选择器。
+
+### GOT-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-08 — 只加 pageSizeOptions 不会出现选择器
+
+`ResourceList` 要求两个 prop 同时在位；只声明 `pageSizeOptions` 时选择器不渲染、页面看起来「没接上」，
+而类型检查不会报错。用 `data-ai-id="<前缀>:page-size"` 断言控件存在并可用，而不是只看请求。
 ## 系统现状
 
 首个资源模块，无可继承的历史实现；行为以需求为准。

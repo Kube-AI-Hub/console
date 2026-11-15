@@ -54,7 +54,8 @@ export interface WorkloadListPageProps {
   namespace: string;
 }
 
-const PAGE_SIZE = 10;
+/** Page sizes the old console offered (`PAGESIZE_OPTION`): 10/20/50/100. */
+const PAGE_SIZES = [10, 20, 50, 100] as const;
 
 type SortKey = 'name' | 'createTime';
 
@@ -79,8 +80,12 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
   const [projectFilter, setProjectFilter] = React.useState(namespace);
   React.useEffect(() => setProjectFilter(namespace), [cluster, namespace]);
 
-  const list = useResourceListState<SortKey>({ defaultSortBy: 'createTime', resetOn: [cluster, projectFilter] });
-  const query = useWorkloads(kind, toListParams(list, { cluster, namespace: projectFilter }, PAGE_SIZE));
+  const list = useResourceListState<SortKey>({
+    defaultSortBy: 'createTime',
+    defaultPageSize: 10,
+    resetOn: [cluster, projectFilter],
+  });
+  const query = useWorkloads(kind, toListParams(list, { cluster, namespace: projectFilter }));
   const remove = useDeleteWorkload(kind, { cluster, namespace: projectFilter });
   const update = useUpdateWorkload(kind, { cluster, namespace: projectFilter });
   const scale = useScaleWorkload(kind, { cluster, namespace: projectFilter });
@@ -343,7 +348,7 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
         emptyClear: t('table.clearSearchAndFilters'),
         emptyRefresh: t('common.refresh'),
       },
-      pagination: { page: list.page, pageSize: PAGE_SIZE, total },
+      pagination: { page: list.page, pageSize: list.pageSize, pageSizeOptions: [...PAGE_SIZES], total },
     }),
     [
       descriptor,
@@ -410,6 +415,7 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
         selectedKeys={list.selected}
         onSelectionChange={list.setSelected}
         onPageChange={list.setPage}
+        onPageSizeChange={list.setPageSize}
         onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
           if (next) list.setSort(next);
         }}

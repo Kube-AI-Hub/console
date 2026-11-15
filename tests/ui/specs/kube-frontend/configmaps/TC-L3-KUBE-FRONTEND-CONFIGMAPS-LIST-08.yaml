@@ -1,0 +1,33 @@
+id: TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-08
+level: 3
+suite: point
+module: kube-frontend
+submodule: configmaps
+feature: list
+title: 列表每页条数选择器（10/20/50/100）
+entry_url: '{BASE_URL}/kube-frontend/{WORKSPACE}/clusters/{CLUSTER}/projects/default/configmaps'
+prd: prd/kube-frontend/configmaps/list.md
+design: design/kube-frontend/configmaps/list.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-08
+
+story:
+- US1
+
+product: 列表分页处的每页条数选择器可改 10/20/50/100，切换后请求以新的 limit 与 page=1 重发，表格行数与服务端返回一致；保密字典、服务账号、项目工作负载同一套状态。
+preconditions:
+- 已登录；项目 default 有若干 ConfigMap
+steps:
+- 打开配置字典列表，核对每页条数选择器显示 10
+- 选择 50，记录请求与行数
+- 切到保密字典与服务账号列表，核对选择器存在且可选 50
+expected:
+- 选择器句柄 configmaps:page-size 存在且显示 10
+- 选择 50 后出现 limit=50 且 page=1 的请求，行数等于该次响应条数（≤50）
+- 保密字典（secrets:page-size）与服务账号（serviceaccounts:page-size）同样存在并可切换
+troubleshoot:
+- 选择器不存在：只给了 pageSizeOptions，没给 onPageSizeChange
+- 请求仍是 limit=10：toListParams 被传了常量而不是 state.pageSize
+update_automation:
+- 句柄：configmaps:page-size / secrets:page-size / serviceaccounts:page-size / deployments:page-size

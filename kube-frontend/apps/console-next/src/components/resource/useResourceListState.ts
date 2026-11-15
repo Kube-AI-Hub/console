@@ -88,13 +88,18 @@ export function useResourceListState<TSortKey extends string>({
 export function toListParams<TSortKey extends string>(
   state: ResourceListState<TSortKey>,
   base: { cluster: string; namespace: string },
-  pageSize: number,
+  /**
+   * Page size override. Omit it and the request follows `state.pageSize`, which is what a
+   * page with a page-size picker needs: passing a constant here silently ignored the picker
+   * and asked the server for 10 rows while the table claimed to show 50.
+   */
+  pageSize?: number,
 ): Omit<ResourceListParams, 'signal'> {
   return {
     cluster: base.cluster,
     namespace: base.namespace,
     page: state.page,
-    pageSize,
+    pageSize: pageSize ?? state.pageSize,
     sortBy: state.sortBy,
     order: state.order,
     keyword: state.search,

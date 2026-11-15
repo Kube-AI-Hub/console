@@ -344,6 +344,7 @@
 | kube-frontend/configmaps/list | `AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-05` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-05` | [`design/kube-frontend/configmaps/list.md`](../../../design/kube-frontend/configmaps/list.md) | [`tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_05.py`](../../../tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_05.py) |
 | kube-frontend/configmaps/list | `AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-06` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-06` | [`design/kube-frontend/configmaps/list.md`](../../../design/kube-frontend/configmaps/list.md) | [`tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_06.py`](../../../tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_06.py) |
 | kube-frontend/configmaps/list | `AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-07` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-07` | [`design/kube-frontend/configmaps/list.md`](../../../design/kube-frontend/configmaps/list.md) | [`tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_07.py`](../../../tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_07.py) |
+| kube-frontend/configmaps/list | `AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-08` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-08` | [`design/kube-frontend/configmaps/list.md`](../../../design/kube-frontend/configmaps/list.md) | [`tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_08.py`](../../../tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_08.py) |
 | kube-frontend/configmaps/mobile | `AC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-01` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-01` | [`design/kube-frontend/configmaps/mobile.md`](../../../design/kube-frontend/configmaps/mobile.md) | [`tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_MOBILE_01.py`](../../../tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_MOBILE_01.py) |
 | kube-frontend/configmaps/mobile | `AC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-02` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-02` | [`design/kube-frontend/configmaps/mobile.md`](../../../design/kube-frontend/configmaps/mobile.md) | [`tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_MOBILE_02.py`](../../../tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_MOBILE_02.py) |
 | kube-frontend/configmaps/search | `AC-L3-KUBE-FRONTEND-CONFIGMAPS-SEARCH-01` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-SEARCH-01` | [`design/kube-frontend/configmaps/search.md`](../../../design/kube-frontend/configmaps/search.md) | [`tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_SEARCH_01.py`](../../../tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_SEARCH_01.py) |
@@ -479,7 +480,7 @@
 
 ## 小结
 
-- 需求里的 AC：472 条，其中未覆盖 1 条、无技术方案承接 17 条、无用例规格实现 1 条。
+- 需求里的 AC：473 条，其中未覆盖 1 条、无技术方案承接 17 条、无用例规格实现 1 条。
 - 未覆盖：`AC-L2-KUBE-FRONTEND-LOGIN-07`
 - 无技术方案承接：`AC-L2-KUBE-FRONTEND-LOGIN-01`, `AC-L2-KUBE-FRONTEND-LOGIN-02`, `AC-L2-KUBE-FRONTEND-LOGIN-03`, `AC-L2-KUBE-FRONTEND-LOGIN-04`, `AC-L2-KUBE-FRONTEND-LOGIN-05`, `AC-L2-KUBE-FRONTEND-LOGIN-06`, `AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L2-KUBE-FRONTEND-THEME-01`, `AC-L2-KUBE-FRONTEND-THEME-02`, `AC-L2-KUBE-FRONTEND-THEME-03`, `AC-L2-KUBE-FRONTEND-THEME-04`, `AC-L2-KUBE-FRONTEND-THEME-05`, `AC-L3-KUBE-FRONTEND-MONITORING-PROJECT_CUSTOM_MONITORING-01`, `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-02`, `AC-L3-KUBE-FRONTEND-STORAGE-DETAIL_TABS-01`
 - 无用例规格实现：`AC-L2-KUBE-FRONTEND-LOGIN-07`
@@ -738,7 +739,7 @@
 | kube-frontend/configmaps/edit | `US1` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-EDIT-01` |
 | kube-frontend/configmaps/edit | `US2` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-EDIT-02` |
 | kube-frontend/configmaps/edit | `US3` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-EDIT-03` |
-| kube-frontend/configmaps/list | `US1` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-01`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-02`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-03`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-06`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-07` |
+| kube-frontend/configmaps/list | `US1` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-01`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-02`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-03`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-06`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-07`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-08` |
 | kube-frontend/configmaps/list | `US2` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-01`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-02`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-03`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-05` |
 | kube-frontend/configmaps/list | `US3` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-04` |
 | kube-frontend/configmaps/mobile | `US1` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-01`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-02` |

@@ -33,7 +33,8 @@ export interface ConfigMapsPageProps {
   namespace: string;
 }
 
-const PAGE_SIZE = 10;
+/** Page sizes the old console offered (`PAGESIZE_OPTION`): 10/20/50/100. */
+const PAGE_SIZES = [10, 20, 50, 100] as const;
 
 /**
  * Characters of the `keys` column shown before an ellipsis.
@@ -73,7 +74,7 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
   const t = useT();
   ensureConfigMapsRegistered();
 
-  const list = useConfigMapListController({ cluster, namespace, pageSize: PAGE_SIZE });
+  const list = useConfigMapListController({ cluster, namespace, pageSize: 10 });
   const { page, setPage, keyword, setKeyword, sortBy, order, sortByKey, selected, setSelected } = list;
   const { projectFilter, setProjectFilter, query, items, total, remove, create, update, patch, loadDetail } = list;
   const [dialog, setDialog] = React.useState<Dialog>({ kind: 'none' });
@@ -258,7 +259,7 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
         selected: (count) => t('table.selectedCount', { count }),
       },
       // Numbered: kapis slices by `page`, so any page is reachable directly.
-      pagination: { page, pageSize: PAGE_SIZE, total },
+      pagination: { page, pageSize: list.pageSize, pageSizeOptions: [...PAGE_SIZES], total },
     }),
     [t, sortBy, order, page, total, cluster, namespace, workspace, projectFilterControl],
   );
@@ -298,6 +299,7 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
         selectedKeys={selected}
         onSelectionChange={setSelected}
         onPageChange={setPage}
+        onPageSizeChange={list.setPageSize}
         onSortChange={(next) => {
           if (!next) return;
           sortByKey(next.key, next.order);
