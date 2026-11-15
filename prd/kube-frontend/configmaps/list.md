@@ -30,6 +30,7 @@
 - **AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-02** — Given 列表已加载，When 点击「名称」列头，Then 请求以 `sortBy=name&order=asc` 重新发起，列头显示升序标记，且当前页回到第 1 页。
 
 - **AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-03** — Given 列表已加载，When 点击分页切换到第 2 页，Then 请求带 `page=2`，已选项被清空，列表显示第 2 页数据。
+- **AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-07** — 已知配置字典列表已加载，当在别处新建一条 ConfigMap 后点击列表的「刷新」，则请求重新发起并在列表中出现该行，刷新期间按钮显示忙碌状态；当搜索一个不存在的名称使列表进入空态，则空态给出「清空搜索与筛选」与「刷新」两个出口，点击前者清空关键字并回到有数据的列表。集群级配置字典页提供同样的刷新与空态出口。
 
 ## 设计目标
 

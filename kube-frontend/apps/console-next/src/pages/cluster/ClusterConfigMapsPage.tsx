@@ -4,6 +4,7 @@ import { configMapsApi, type ConfigMapSummary } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 import { api as apiClient } from '@/api';
 import { useResourceListState } from '@/components/resource/useResourceListState';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -58,10 +59,12 @@ export function ClusterConfigMapsPage({ cluster }: ClusterConfigMapsPageProps): 
   const rows = query.data?.items ?? [];
   const total = query.data?.total ?? 0;
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
+  const listRefresh = useListRefresh(AI_ID, query);
 
   const schema = React.useMemo<ListSchema<ConfigMapSummary>>(
     () => ({
       title: t('cluster.config.configmaps.title'),
+      refresh: listRefresh.refresh,
       description: t('cluster.config.description'),
       rowKey: (row) => clusterProjectRowId(row),
       rowAttributes: (row) => ({ 'data-ai-row': clusterProjectRowId(row) }),
@@ -113,6 +116,7 @@ export function ClusterConfigMapsPage({ cluster }: ClusterConfigMapsPageProps): 
       ],
       empty: { title: t('cluster.workloads.emptyTitle'), description: t('cluster.workloads.emptyDescription') },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -137,6 +141,7 @@ export function ClusterConfigMapsPage({ cluster }: ClusterConfigMapsPageProps): 
     <AiSurface as="section" aiId={AI_ID + ':surface'} state={state} className="min-w-0">
       <ResourceList
         schema={schema}
+        onRefresh={listRefresh.onRefresh}
         rows={rows}
         loading={state === 'loading'}
         searchValue={list.search}

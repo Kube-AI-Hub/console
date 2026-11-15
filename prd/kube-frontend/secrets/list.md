@@ -20,6 +20,7 @@
 
 - **AC-L3-KUBE-FRONTEND-SECRETS-LIST-01** — Given 项目内有多条 Secret，When 打开列表，Then 每行显示名称（别名替换名称，第二行为描述或 `-`）、项目、类型、字段数、创建时间；`Opaque` 显示「默认」，`kubernetes.io/tls` 显示「TLS 信息」，`kubernetes.io/dockerconfigjson` 显示「镜像仓库信息」，`kubernetes.io/basic-auth` 显示「用户名和密码」，其他类型原样显示。
 - **AC-L3-KUBE-FRONTEND-SECRETS-LIST-02** — Given 列表已加载，When 点击「创建时间」列头，Then 请求带上 `sortBy=createTime` 与取反的 `ascending`，页码回到第 1 页；当点击分页切到第 2 页时，已选项被清空。
+- **AC-L3-KUBE-FRONTEND-SECRETS-LIST-03** — 已知保密字典列表已加载，当在别处新建一条 Secret 后点击列表的「刷新」，则请求重新发起并在列表中出现该行，刷新期间按钮显示忙碌状态；当搜索一个不存在的名称使列表进入空态，则空态给出「清空搜索与筛选」与「刷新」两个出口，点击后者重新发起请求。集群级保密字典页提供同样的刷新与空态出口。
 
 ## 设计目标
 

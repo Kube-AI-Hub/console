@@ -16,6 +16,7 @@ import {
 import { useProjectFilter, useProjectOptions } from '@/components/projects/useProjects';
 import { useResourceListState, toListParams } from '@/components/resource/useResourceListState';
 import { DeleteDialog } from '@/components/resource/DeleteDialog';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 import { EditInfoDialog } from '@/components/resource/EditInfoDialog';
 import { MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { PageTip } from '@/components/resource/PageTip';
@@ -128,10 +129,12 @@ export function SecretsPage({ workspace, cluster, namespace }: SecretsPageProps)
     },
     [api, cluster, projectFilter],
   );
+  const listRefresh = useListRefresh('secrets', query);
 
   const schema = React.useMemo<ListSchema<SecretSummary>>(
     () => ({
       title: t('secrets.title'),
+      refresh: listRefresh.refresh,
       description: t('secrets.description'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
@@ -223,6 +226,7 @@ export function SecretsPage({ workspace, cluster, namespace }: SecretsPageProps)
       ],
       empty: { title: t('secrets.empty.title'), description: t('secrets.empty.description') },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -252,6 +256,7 @@ export function SecretsPage({ workspace, cluster, namespace }: SecretsPageProps)
       </PageTip>
       <ResourceList
         schema={schema}
+        onRefresh={listRefresh.onRefresh}
         rows={items}
         loading={state === 'loading'}
         searchValue={list.keyword}

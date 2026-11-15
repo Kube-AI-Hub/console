@@ -9,6 +9,7 @@
 ## 关联需求
 
 - `AC-L3-KUBE-FRONTEND-SECRETS-LIST-01`
+- AC-L3-KUBE-FRONTEND-SECRETS-LIST-03
 - `AC-L3-KUBE-FRONTEND-SECRETS-LIST-02`
 
 ## 设计目标与非目标
@@ -97,3 +98,12 @@
 
 - `TC-L3-KUBE-FRONTEND-SECRETS-LIST-01`
 - `TC-L3-KUBE-FRONTEND-SECRETS-LIST-02`
+
+
+## 刷新与空态出口
+
+列表的刷新由 `@/components/resource/useListRefresh` 提供：它同时给出 schema 的 `refresh` 条目与 `onRefresh` 回调，页面无法只接一半（`ResourceList` 只在两者都在时渲染按钮）。忙碌状态取查询自身的 `isFetching`，因此后台重取（窗口聚焦、翻页）也会反映在按钮上。空态的出口同样由该 hook 的 `emptyLabels` 注入（`emptyClear` / `emptyRefresh`），与刷新共用同一份文案，避免两个页面写成两种说法。
+
+### DEC — 刷新按钮不替代轮询或 watch
+
+**为什么**：本轮只补「读者主动重读」的能力。实时刷新（watch/轮询）会改变请求量与页面状态机，是另一件事，登记在能力矩阵 R-27；把刷新做成定时轮询会让每个列表在没有读者时也持续打服务端。

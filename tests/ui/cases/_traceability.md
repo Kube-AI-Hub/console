@@ -16,6 +16,8 @@
 | cluster-gpu/vgpu-mode/_index | `AC-FULL-CLUSTER-GPU-VGPU_MODE-01` | `TC-FULL-CLUSTER-GPU-VGPU_MODE-01` | [`design/cluster-gpu/vgpu-mode/_index.md`](../../../design/cluster-gpu/vgpu-mode/_index.md) | [`tests/ui/tests/cluster-gpu/vgpu-mode/test_TC_FULL_CLUSTER_GPU_VGPU_MODE_01.py`](../../../tests/ui/tests/cluster-gpu/vgpu-mode/test_TC_FULL_CLUSTER_GPU_VGPU_MODE_01.py) |
 | cluster-gpu/vgpu-mode/capacity | `AC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-01` | `TC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-01` | [`design/cluster-gpu/vgpu-mode/capacity.md`](../../../design/cluster-gpu/vgpu-mode/capacity.md) | [`tests/ui/tests/cluster-gpu/vgpu-mode/test_TC_L3_CLUSTER_GPU_VGPU_MODE_CAPACITY_01.py`](../../../tests/ui/tests/cluster-gpu/vgpu-mode/test_TC_L3_CLUSTER_GPU_VGPU_MODE_CAPACITY_01.py) |
 | cluster-gpu/vgpu-mode/capacity | `AC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-02` | `TC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-02` | [`design/cluster-gpu/vgpu-mode/capacity.md`](../../../design/cluster-gpu/vgpu-mode/capacity.md) | [`tests/ui/tests/cluster-gpu/vgpu-mode/test_TC_L3_CLUSTER_GPU_VGPU_MODE_CAPACITY_02.py`](../../../tests/ui/tests/cluster-gpu/vgpu-mode/test_TC_L3_CLUSTER_GPU_VGPU_MODE_CAPACITY_02.py) |
+| cluster-gpu/vgpu-mode/capacity | `AC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-03` | `TC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-03` | [`design/cluster-gpu/vgpu-mode/capacity.md`](../../../design/cluster-gpu/vgpu-mode/capacity.md) | [`tests/ui/tests/cluster-gpu/vgpu-mode/test_TC_L3_CLUSTER_GPU_VGPU_MODE_CAPACITY_03.py`](../../../tests/ui/tests/cluster-gpu/vgpu-mode/test_TC_L3_CLUSTER_GPU_VGPU_MODE_CAPACITY_03.py) |
+| cluster-gpu/vgpu-mode/capacity | `AC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-04` | `TC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-04` | [`design/cluster-gpu/vgpu-mode/capacity.md`](../../../design/cluster-gpu/vgpu-mode/capacity.md) | [`tests/ui/tests/cluster-gpu/vgpu-mode/test_TC_L3_CLUSTER_GPU_VGPU_MODE_CAPACITY_04.py`](../../../tests/ui/tests/cluster-gpu/vgpu-mode/test_TC_L3_CLUSTER_GPU_VGPU_MODE_CAPACITY_04.py) |
 | cluster-gpu/vgpu-mode/switch | `AC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-01` | `TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-01` | [`design/cluster-gpu/vgpu-mode/switch.md`](../../../design/cluster-gpu/vgpu-mode/switch.md) | [`tests/ui/tests/cluster-gpu/vgpu-mode/test_TC_L3_CLUSTER_GPU_VGPU_MODE_SWITCH_01.py`](../../../tests/ui/tests/cluster-gpu/vgpu-mode/test_TC_L3_CLUSTER_GPU_VGPU_MODE_SWITCH_01.py) |
 | cluster-gpu/vgpu-mode/switch | `AC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-02` | `TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-02` | [`design/cluster-gpu/vgpu-mode/switch.md`](../../../design/cluster-gpu/vgpu-mode/switch.md) | [`tests/ui/tests/cluster-gpu/vgpu-mode/test_TC_L3_CLUSTER_GPU_VGPU_MODE_SWITCH_02.py`](../../../tests/ui/tests/cluster-gpu/vgpu-mode/test_TC_L3_CLUSTER_GPU_VGPU_MODE_SWITCH_02.py) |
 | cluster-gpu/vgpu-mode/switch | `AC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-03` | `TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-03` | [`design/cluster-gpu/vgpu-mode/switch.md`](../../../design/cluster-gpu/vgpu-mode/switch.md) | [`tests/ui/tests/cluster-gpu/vgpu-mode/test_TC_L3_CLUSTER_GPU_VGPU_MODE_SWITCH_03.py`](../../../tests/ui/tests/cluster-gpu/vgpu-mode/test_TC_L3_CLUSTER_GPU_VGPU_MODE_SWITCH_03.py) |
@@ -260,6 +262,7 @@
 | kube-frontend/configmaps/list | `AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-04` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-04` | [`design/kube-frontend/configmaps/list.md`](../../../design/kube-frontend/configmaps/list.md) | [`tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_04.py`](../../../tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_04.py) |
 | kube-frontend/configmaps/list | `AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-05` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-05` | [`design/kube-frontend/configmaps/list.md`](../../../design/kube-frontend/configmaps/list.md) | [`tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_05.py`](../../../tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_05.py) |
 | kube-frontend/configmaps/list | `AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-06` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-06` | [`design/kube-frontend/configmaps/list.md`](../../../design/kube-frontend/configmaps/list.md) | [`tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_06.py`](../../../tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_06.py) |
+| kube-frontend/configmaps/list | `AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-07` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-07` | [`design/kube-frontend/configmaps/list.md`](../../../design/kube-frontend/configmaps/list.md) | [`tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_07.py`](../../../tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_07.py) |
 | kube-frontend/configmaps/mobile | `AC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-01` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-01` | [`design/kube-frontend/configmaps/mobile.md`](../../../design/kube-frontend/configmaps/mobile.md) | [`tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_MOBILE_01.py`](../../../tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_MOBILE_01.py) |
 | kube-frontend/configmaps/mobile | `AC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-02` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-02` | [`design/kube-frontend/configmaps/mobile.md`](../../../design/kube-frontend/configmaps/mobile.md) | [`tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_MOBILE_02.py`](../../../tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_MOBILE_02.py) |
 | kube-frontend/configmaps/search | `AC-L3-KUBE-FRONTEND-CONFIGMAPS-SEARCH-01` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-SEARCH-01` | [`design/kube-frontend/configmaps/search.md`](../../../design/kube-frontend/configmaps/search.md) | [`tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_SEARCH_01.py`](../../../tests/ui/tests/kube-frontend/configmaps/test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_SEARCH_01.py) |
@@ -327,6 +330,7 @@
 | kube-frontend/secrets/edit | `AC-L3-KUBE-FRONTEND-SECRETS-EDIT-03` | `TC-L3-KUBE-FRONTEND-SECRETS-EDIT-03` | [`design/kube-frontend/secrets/edit.md`](../../../design/kube-frontend/secrets/edit.md) | [`tests/ui/tests/kube-frontend/secrets/test_TC_L3_KUBE_FRONTEND_SECRETS_EDIT_03.py`](../../../tests/ui/tests/kube-frontend/secrets/test_TC_L3_KUBE_FRONTEND_SECRETS_EDIT_03.py) |
 | kube-frontend/secrets/list | `AC-L3-KUBE-FRONTEND-SECRETS-LIST-01` | `TC-L3-KUBE-FRONTEND-SECRETS-LIST-01` | [`design/kube-frontend/secrets/list.md`](../../../design/kube-frontend/secrets/list.md) | [`tests/ui/tests/kube-frontend/secrets/test_TC_L3_KUBE_FRONTEND_SECRETS_LIST_01.py`](../../../tests/ui/tests/kube-frontend/secrets/test_TC_L3_KUBE_FRONTEND_SECRETS_LIST_01.py) |
 | kube-frontend/secrets/list | `AC-L3-KUBE-FRONTEND-SECRETS-LIST-02` | `TC-L3-KUBE-FRONTEND-SECRETS-LIST-02` | [`design/kube-frontend/secrets/list.md`](../../../design/kube-frontend/secrets/list.md) | [`tests/ui/tests/kube-frontend/secrets/test_TC_L3_KUBE_FRONTEND_SECRETS_LIST_02.py`](../../../tests/ui/tests/kube-frontend/secrets/test_TC_L3_KUBE_FRONTEND_SECRETS_LIST_02.py) |
+| kube-frontend/secrets/list | `AC-L3-KUBE-FRONTEND-SECRETS-LIST-03` | `TC-L3-KUBE-FRONTEND-SECRETS-LIST-03` | [`design/kube-frontend/secrets/list.md`](../../../design/kube-frontend/secrets/list.md) | [`tests/ui/tests/kube-frontend/secrets/test_TC_L3_KUBE_FRONTEND_SECRETS_LIST_03.py`](../../../tests/ui/tests/kube-frontend/secrets/test_TC_L3_KUBE_FRONTEND_SECRETS_LIST_03.py) |
 | kube-frontend/secrets/mobile | `AC-L3-KUBE-FRONTEND-SECRETS-MOBILE-01` | `TC-L3-KUBE-FRONTEND-SECRETS-MOBILE-01` | [`design/kube-frontend/secrets/mobile.md`](../../../design/kube-frontend/secrets/mobile.md) | [`tests/ui/tests/kube-frontend/secrets/test_TC_L3_KUBE_FRONTEND_SECRETS_MOBILE_01.py`](../../../tests/ui/tests/kube-frontend/secrets/test_TC_L3_KUBE_FRONTEND_SECRETS_MOBILE_01.py) |
 | kube-frontend/secrets/search | `AC-L3-KUBE-FRONTEND-SECRETS-SEARCH-01` | `TC-L3-KUBE-FRONTEND-SECRETS-SEARCH-01` | [`design/kube-frontend/secrets/search.md`](../../../design/kube-frontend/secrets/search.md) | [`tests/ui/tests/kube-frontend/secrets/test_TC_L3_KUBE_FRONTEND_SECRETS_SEARCH_01.py`](../../../tests/ui/tests/kube-frontend/secrets/test_TC_L3_KUBE_FRONTEND_SECRETS_SEARCH_01.py) |
 | kube-frontend/serviceaccounts/_index | `AC-FULL-KUBE-FRONTEND-SERVICEACCOUNTS-01` | `TC-FULL-KUBE-FRONTEND-SERVICEACCOUNTS-01` | [`design/kube-frontend/serviceaccounts/_index.md`](../../../design/kube-frontend/serviceaccounts/_index.md) | [`tests/ui/tests/kube-frontend/serviceaccounts/test_TC_FULL_KUBE_FRONTEND_SERVICEACCOUNTS_01.py`](../../../tests/ui/tests/kube-frontend/serviceaccounts/test_TC_FULL_KUBE_FRONTEND_SERVICEACCOUNTS_01.py) |
@@ -381,7 +385,7 @@
 
 ## 小结
 
-- 需求里的 AC：374 条，其中未覆盖 1 条、无技术方案承接 17 条、无用例规格实现 1 条。
+- 需求里的 AC：378 条，其中未覆盖 1 条、无技术方案承接 17 条、无用例规格实现 1 条。
 - 未覆盖：`AC-L2-KUBE-FRONTEND-LOGIN-07`
 - 无技术方案承接：`AC-L2-KUBE-FRONTEND-LOGIN-01`, `AC-L2-KUBE-FRONTEND-LOGIN-02`, `AC-L2-KUBE-FRONTEND-LOGIN-03`, `AC-L2-KUBE-FRONTEND-LOGIN-04`, `AC-L2-KUBE-FRONTEND-LOGIN-05`, `AC-L2-KUBE-FRONTEND-LOGIN-06`, `AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L2-KUBE-FRONTEND-THEME-01`, `AC-L2-KUBE-FRONTEND-THEME-02`, `AC-L2-KUBE-FRONTEND-THEME-03`, `AC-L2-KUBE-FRONTEND-THEME-04`, `AC-L2-KUBE-FRONTEND-THEME-05`, `AC-L3-KUBE-FRONTEND-MONITORING-PROJECT_CUSTOM_MONITORING-01`, `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-02`, `AC-L3-KUBE-FRONTEND-STORAGE-DETAIL_TABS-01`
 - 无用例规格实现：`AC-L2-KUBE-FRONTEND-LOGIN-07`
@@ -412,6 +416,8 @@
 | cluster-gpu/vgpu-mode/_index | `US3` | `TC-FULL-CLUSTER-GPU-VGPU_MODE-01` |
 | cluster-gpu/vgpu-mode/capacity | `US1` | `TC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-01` |
 | cluster-gpu/vgpu-mode/capacity | `US2` | `TC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-02` |
+| cluster-gpu/vgpu-mode/capacity | `US3` | `TC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-03` |
+| cluster-gpu/vgpu-mode/capacity | `US4` | `TC-L3-CLUSTER-GPU-VGPU_MODE-CAPACITY-04` |
 | cluster-gpu/vgpu-mode/switch | `US1` | `TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-01`, `TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-02` |
 | cluster-gpu/vgpu-mode/switch | `US2` | `TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-02` |
 | cluster-gpu/vgpu-mode/switch | `US3` | `TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-03` |
@@ -590,7 +596,7 @@
 | kube-frontend/configmaps/edit | `US1` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-EDIT-01` |
 | kube-frontend/configmaps/edit | `US2` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-EDIT-02` |
 | kube-frontend/configmaps/edit | `US3` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-EDIT-03` |
-| kube-frontend/configmaps/list | `US1` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-01`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-02`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-03`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-06` |
+| kube-frontend/configmaps/list | `US1` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-01`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-02`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-03`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-06`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-07` |
 | kube-frontend/configmaps/list | `US2` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-01`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-02`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-03`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-05` |
 | kube-frontend/configmaps/list | `US3` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-04` |
 | kube-frontend/configmaps/mobile | `US1` | `TC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-01`, `TC-L3-KUBE-FRONTEND-CONFIGMAPS-MOBILE-02` |
@@ -647,7 +653,7 @@
 | kube-frontend/secrets/edit | `US1` | `TC-L3-KUBE-FRONTEND-SECRETS-EDIT-01` |
 | kube-frontend/secrets/edit | `US2` | `TC-L3-KUBE-FRONTEND-SECRETS-EDIT-02` |
 | kube-frontend/secrets/edit | `US3` | `TC-L3-KUBE-FRONTEND-SECRETS-EDIT-03` |
-| kube-frontend/secrets/list | `US1` | `TC-L3-KUBE-FRONTEND-SECRETS-LIST-01` |
+| kube-frontend/secrets/list | `US1` | `TC-L3-KUBE-FRONTEND-SECRETS-LIST-01`, `TC-L3-KUBE-FRONTEND-SECRETS-LIST-03` |
 | kube-frontend/secrets/list | `US2` | `TC-L3-KUBE-FRONTEND-SECRETS-LIST-02` |
 | kube-frontend/secrets/mobile | `US1` | `TC-L3-KUBE-FRONTEND-SECRETS-MOBILE-01` |
 | kube-frontend/secrets/search | `US1` | `TC-L3-KUBE-FRONTEND-SECRETS-SEARCH-01` |
@@ -692,4 +698,4 @@
 | kube-frontend/workbench/context | `US1` | `TC-L3-KUBE-FRONTEND-WORKBENCH-CONTEXT-01` |
 | kube-frontend/workbench/entry | `US1` | `TC-L3-KUBE-FRONTEND-WORKBENCH-ENTRY-01` |
 
-- 用户故事：301 条，其中未覆盖 0 条。
+- 用户故事：303 条，其中未覆盖 0 条。

@@ -18,6 +18,7 @@ import { DialogSuspense } from '@/components/resource/DialogSuspense';
 import { LoadingDialog } from '@/components/resource/LoadingDialog';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { PageTip } from '@/components/resource/PageTip';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /*
  * The YAML editor is 188 KB gzip of CodeMirror. A list page must not pay for it
@@ -100,10 +101,12 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
     },
     [loadDetail, list.activeNamespace, namespace],
   );
+  const listRefresh = useListRefresh('configmaps', query);
 
   const schema = React.useMemo<ListSchema<ConfigMapSummary>>(
     () => ({
       title: t('configmaps.title'),
+      refresh: listRefresh.refresh,
       description: t('configmaps.description'),
       rowKey: 'name',
       // Stable per-record handle for automation; the row key is the resource name.
@@ -246,6 +249,7 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
       // Screen-reader text for the built-in controls; without these an English
       // page still announces 全选 / 上一页.
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -281,6 +285,7 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
       </PageTip>
       <ResourceList
         schema={schema}
+        onRefresh={listRefresh.onRefresh}
         rows={items}
         loading={state === 'loading'}
         searchValue={keyword}

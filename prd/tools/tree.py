@@ -194,6 +194,7 @@ MODULES = [
                             "TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-02",
                             "TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-03",
                             "TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-04",
+                            "TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-07",
                         ]},
                     },
                     {
@@ -268,7 +269,8 @@ MODULES = [
                         "tests": {"L3": [
                             "TC-L3-KUBE-FRONTEND-SECRETS-LIST-01",
                             "TC-L3-KUBE-FRONTEND-SECRETS-LIST-02",
-                        ]},
+                        
+                            "TC-L3-KUBE-FRONTEND-SECRETS-LIST-03",]},
                     },
                     {
                         "id": "search",
