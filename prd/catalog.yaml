@@ -1096,6 +1096,20 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOT_CONTENT-01
+    - id: clone
+      title: 克隆存储卷
+      prd: prd/kube-frontend/storage/clone.md
+      design: design/kube-frontend/storage/clone.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-STORAGE-CLONE-01
+    - id: create-snapshot
+      title: 创建快照
+      prd: prd/kube-frontend/storage/create-snapshot.md
+      design: design/kube-frontend/storage/create-snapshot.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-STORAGE-CREATE_SNAPSHOT-01
     - id: detail-snapshots
       title: 存储详情的快照页签
       prd: prd/kube-frontend/storage/detail-snapshots.md
@@ -1118,6 +1132,7 @@ modules:
         L3:
         - TC-L3-KUBE-FRONTEND-STORAGE-LIST-01
         - TC-L3-KUBE-FRONTEND-STORAGE-LIST-02
+        - TC-L3-KUBE-FRONTEND-STORAGE-LIST-03
     - id: detail
       title: 存储详情
       prd: prd/kube-frontend/storage/detail.md
@@ -1280,6 +1295,9 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-01
+        - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-03
+        - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-04
+        - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-05
     - id: delete
       title: 删除负载
       prd: prd/kube-frontend/app-workloads/delete.md

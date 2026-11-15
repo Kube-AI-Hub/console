@@ -954,6 +954,16 @@ MODULES = [
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-STORAGE-SNAPSHOT_CONTENT-01"]},
                     },
                     {
+                        "id": "clone",
+                        "title": "克隆存储卷",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-STORAGE-CLONE-01"]},
+                    },
+                    {
+                        "id": "create-snapshot",
+                        "title": "创建快照",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-STORAGE-CREATE_SNAPSHOT-01"]},
+                    },
+                    {
                         "id": "detail-snapshots",
                         "title": "存储详情的快照页签",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-STORAGE-DETAIL_SNAPSHOTS-01"]},
@@ -969,6 +979,7 @@ MODULES = [
                         "tests": {"L3": [
                             "TC-L3-KUBE-FRONTEND-STORAGE-LIST-01",
                             "TC-L3-KUBE-FRONTEND-STORAGE-LIST-02",
+                            "TC-L3-KUBE-FRONTEND-STORAGE-LIST-03",
                         ]},
                     },
                     {
@@ -1104,6 +1115,9 @@ MODULES = [
                         "title": "编辑设置",
                         "tests": {"L3": [
                             "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-01",
+                            "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-03",
+                            "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-04",
+                            "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-05",
                         ]},
                     },
                     {

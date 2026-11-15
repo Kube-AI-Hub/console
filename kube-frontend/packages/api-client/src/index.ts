@@ -290,6 +290,10 @@ export {
   claimStatus,
   snapshotStatus,
   storageApi,
+  claimManifest,
+  claimCloneManifest,
+  snapshotManifest,
+  volumeSnapshotsWriteApi,
   storageClassExpands,
   storageClassesApi,
   toStorageClassDetail,
@@ -299,7 +303,7 @@ export {
   toStorageDetail,
   toStorageSummary,
 } from './storage';
-export type { StorageApi, StorageClassDetail, StorageClassSummary, StorageDetail, StorageKind, StorageSummary } from './storage';
+export type { ClaimCreateInput, StorageApi, StorageClassDetail, StorageClassSizeConfig, StorageClassSummary, StorageDetail, StorageKind, StorageSummary } from './storage';
 export type {
   LOGIN_ERROR_CODES,
   LoginErrorCode,
