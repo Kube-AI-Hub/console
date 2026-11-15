@@ -59,16 +59,16 @@ export const JUICEFS_GROUP = 'juicefs.kubesphere.io/v1alpha1';
 /**
  * One JuiceFS API path.
  *
- * The group is served as an aggregated API, and a member cluster is addressed
- * with the cluster segment *before* the group (the old console does the same).
- * The host cluster has no segment.
+ * The group is served only on host ks-apiserver. A member cluster is addressed
+ * with `?cluster=`, not `/kapis/clusters/<id>/`, which would proxy to a member
+ * ks-apiserver that does not serve juicefs.kubesphere.io.
  */
-export function juicefsApiPath(cluster: string, suffix: string): string {
-  const prefix =
-    cluster && cluster !== 'host'
-      ? '/kapis/clusters/' + encodeURIComponent(cluster) + '/' + JUICEFS_GROUP
-      : '/kapis/' + JUICEFS_GROUP;
-  return prefix + suffix;
+export function juicefsApiPath(_cluster: string, suffix: string): string {
+  return '/kapis/' + JUICEFS_GROUP + suffix;
+}
+
+export function juicefsQuery(cluster: string): Record<string, string> | undefined {
+  return cluster ? { cluster } : undefined;
 }
 
 function number(value: unknown): number {
@@ -109,6 +109,7 @@ export function useJuiceFSVolumes(cluster: string) {
     queryKey: ['juicefs-volumes', cluster],
     queryFn: async ({ signal }) => {
       const body = await apiClient.request<{ items?: Array<Record<string, unknown>> }>(juicefsApiPath(cluster, '/volumes'), {
+        query: juicefsQuery(cluster),
         signal,
       });
       return (body?.items ?? []).map(toVolume);
@@ -120,7 +121,10 @@ export function useJuiceFSSummary(cluster: string) {
   return useQuery({
     queryKey: ['juicefs-summary', cluster],
     queryFn: async ({ signal }) => {
-      const body = await apiClient.request<Record<string, unknown>>(juicefsApiPath(cluster, '/summary'), { signal });
+      const body = await apiClient.request<Record<string, unknown>>(juicefsApiPath(cluster, '/summary'), {
+        query: juicefsQuery(cluster),
+        signal,
+      });
       const value = body ?? {};
       return {
         volumeCount: number(value['volumeCount']),

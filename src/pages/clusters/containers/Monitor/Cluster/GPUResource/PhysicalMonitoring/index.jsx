@@ -45,9 +45,7 @@ class GPUPhysicalMonitoring extends React.Component {
   }
 
   get apiPath() {
-    return globals.app.isMultiCluster
-      ? `/kapis/clusters/${this.cluster}/gpu.kubesphere.io/v1alpha1`
-      : '/kapis/gpu.kubesphere.io/v1alpha1'
+    return '/kapis/gpu.kubesphere.io/v1alpha1'
   }
 
   componentDidMount() {
@@ -56,7 +54,10 @@ class GPUPhysicalMonitoring extends React.Component {
 
   loadStatsOptions = async () => {
     try {
-      const result = await request.get(`${this.apiPath}/gpus/stats`)
+      const result = await request.get(
+        `${this.apiPath}/gpus/stats`,
+        this.cluster ? { cluster: this.cluster } : {}
+      )
       const stats = typeof result === 'object' && result !== null ? result : {}
       const vendorSet = new Set()
       const modelSet = new Set()
@@ -154,6 +155,9 @@ class GPUPhysicalMonitoring extends React.Component {
       if (selectedModel) {
         const [, model] = selectedModel.split('|')
         params.set('model', model)
+      }
+      if (this.cluster) {
+        params.set('cluster', this.cluster)
       }
       const result = await request.get(
         `${this.apiPath}/gpus/metrics?${params.toString()}`

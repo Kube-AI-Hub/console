@@ -46,8 +46,12 @@ describe('node insights and overview contracts', () => {
     expect(await api.ports({ cluster: 'host', node: 'gpu02' })).toMatchObject([
       { device: 'mlx5_0', speedBytes: 50_000_000_000, healthy: false, resourceReady: true },
     ]);
-    await expect(api.ports({ cluster: 'member', node: 'gpu02' })).rejects.toThrow('host');
-    expect(calls).toHaveLength(1);
+    expect(await api.ports({ cluster: 'member', node: 'gpu02' })).toMatchObject([
+      { device: 'mlx5_0', speedBytes: 50_000_000_000, healthy: false, resourceReady: true },
+    ]);
+    expect(calls).toHaveLength(2);
+    expect(calls[1]?.searchParams.get('cluster')).toBe('member');
+    expect(calls[1]?.pathname).toBe('/kapis/rdma.kubesphere.io/v1alpha1/ports');
   });
   it('does not turn missing cluster metrics into zeros', async () => {
     const { client } = harness({ results: [{ metric_name: 'cluster_cpu_usage', data: {

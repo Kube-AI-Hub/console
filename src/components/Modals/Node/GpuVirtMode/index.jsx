@@ -68,9 +68,28 @@ function buildParamsFromFormData(data, vendorConfig) {
   return params
 }
 
+export function gpuModeRequestPath(cluster, nodeName) {
+  let url = `/kapis/gpu.kubesphere.io/v1alpha1/device-plugins/gpu/mode?nodeName=${encodeURIComponent(
+    nodeName
+  )}`
+  if (cluster) {
+    url += `&cluster=${encodeURIComponent(cluster)}`
+  }
+  return url
+}
+
+export function gpuModeErrorText(err) {
+  if (!err) return ''
+  const message = err.message
+  if (message && message !== 'undefined') return String(message)
+  if (err.reason) return String(err.reason)
+  return ''
+}
+
 export default class GpuVirtModeModal extends React.Component {
   static propTypes = {
     detail: PropTypes.object,
+    cluster: PropTypes.string,
     visible: PropTypes.bool,
     onOk: PropTypes.func,
     onCancel: PropTypes.func,
@@ -110,7 +129,7 @@ export default class GpuVirtModeModal extends React.Component {
   }
 
   handleSubmit = async data => {
-    const { detail, onOk } = this.props
+    const { detail, cluster, onOk } = this.props
     const nodeName = detail.name
     const nodeInfo =
       get(detail, 'status.nodeInfo') || get(detail, 'nodeInfo') || {}
@@ -118,15 +137,18 @@ export default class GpuVirtModeModal extends React.Component {
     this.setState({ isSubmitting: true })
     try {
       const params = buildParamsFromFormData(data, vendorConfig)
-      await request.put(
-        `/kapis/gpu.kubesphere.io/v1alpha1/device-plugins/gpu/mode?nodeName=${nodeName}`,
-        { mode: data.mode || 'default', params }
-      )
+      await request.put(gpuModeRequestPath(cluster, nodeName), {
+        mode: data.mode || 'default',
+        params,
+      })
       Notify.success({ content: t('UPDATE_SUCCESSFUL') })
       onOk()
     } catch (err) {
+      const detailText = gpuModeErrorText(err)
       Notify.error({
-        content: err.message || t('UPDATE_FAILED'),
+        content: detailText
+          ? `${t('UPDATE_FAILED')}: ${detailText}`
+          : t('UPDATE_FAILED'),
       })
     } finally {
       this.setState({ isSubmitting: false })

@@ -66,6 +66,15 @@ MODULES = [
                             "TC-L3-CLUSTER-GPU-GPU_CARD-HEALTH-02",
                         ]},
                     },
+                    {
+                        "id": "list",
+                        "title": "子集群显卡与 RDMA 列表",
+                        "tests": {"L3": [
+                            "TC-L3-CLUSTER-GPU-GPU_CARD-LIST-01",
+                            "TC-L3-CLUSTER-GPU-GPU_CARD-LIST-02",
+                            "TC-L3-CLUSTER-GPU-GPU_CARD-LIST-03",
+                        ]},
+                    },
                 ],
             },
             {

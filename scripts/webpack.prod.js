@@ -38,7 +38,7 @@ const config = {
     path: root('dist/'),
     publicPath: '/dist/',
     chunkFilename: '[id].[chunkhash].js',
-    hashSalt: 'blank-fix-20261115-v2',
+    hashSalt: 'gpu-member-list-20261116',
   },
   module: {
     rules: [

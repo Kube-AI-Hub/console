@@ -68,6 +68,7 @@ console
 ## 功能点
 
 - `health.md` — 健康状态
+- `list.md` — 子集群显卡与 RDMA 列表
 
 ## 验收用例
 

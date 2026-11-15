@@ -30,6 +30,7 @@ module.exports = {
   SCHEDULABLE: '可調度',
   YES: '是',
   GPU_VIRT_MODE: 'vGPU模式',
+  UPDATE_FAILED: '更新失敗',
   GPU_DRIVER_VERSION: 'GPU 驅動版本',
   GPU_ENGINE_VERSION: 'GPU 引擎版本',
   GPU_DEVICE_SPLIT_COUNT: 'GPU 設備最大共享/切分數',

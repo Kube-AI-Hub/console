@@ -25,7 +25,7 @@
 
 ## 约束与边界
 
-- 列表数据来自 `GET /kapis/gpu.kubesphere.io/v1alpha1/gpus`；集群页不带 `conditions`，节点页带 `conditions=nodeName=<node>`。
+- 列表数据来自 `GET /kapis/gpu.kubesphere.io/v1alpha1/gpus`；集群页不带 `conditions`，节点页带 `conditions=nodeName=<node>`。子集群必须带 `cluster=<name>` query，不要走 `/kapis/clusters/<name>/gpu.kubesphere.io/...`。
 - 排序与筛选在后端完成（`sortBy`、`page`、`limit`、`labelSelector`、`status`），前端不做二次排序。
 
 ## UI 交互设计
@@ -78,6 +78,7 @@
 ## 功能点
 
 - `health.md` — 健康状态
+- `list.md` — 子集群显卡与 RDMA 列表
 
 ## 验收用例
 

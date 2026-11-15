@@ -20,11 +20,16 @@ describe('GPU parity contracts', () => {
       page: '2', limit: '20', labelSelector: 'rack=one', uuid: 'GPU/a+', type: 'B200', status: 'healthy', ascending: 'false',
     });
   });
-  it('does not silently read host GPU data for member clusters', async () => {
-    const { gpu, calls } = harness({});
-    await expect(gpu.list({ cluster: 'member' })).rejects.toThrow('host');
-    await expect(gpu.stats({ cluster: 'member' })).rejects.toThrow('host');
-    expect(calls).toHaveLength(0);
+  it('sends cluster as a query param for member GPU reads, never a path segment', async () => {
+    const { gpu, calls } = harness({ items: [], totalItems: 0, total: 0, healthy: 0 });
+    await gpu.list({ cluster: 'member' });
+    await gpu.stats({ cluster: 'member' });
+    expect(calls).toHaveLength(2);
+    expect(calls[0]!.pathname).toBe('/kapis/gpu.kubesphere.io/v1alpha1/gpus');
+    expect(calls[0]!.searchParams.get('cluster')).toBe('member');
+    expect(calls[1]!.pathname).toBe('/kapis/gpu.kubesphere.io/v1alpha1/gpus/stats');
+    expect(calls[1]!.searchParams.get('cluster')).toBe('member');
+    expect(calls.every((url) => !url.pathname.includes('/clusters/member/'))).toBe(true);
   });
   it('queries associated pods by node and GPU UUID and requires the real total', async () => {
     const { gpu, calls } = harness({ items: [], totalItems: 3 });

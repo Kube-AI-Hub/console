@@ -1,0 +1,32 @@
+id: TC-L3-CLUSTER-GPU-GPU_CARD-LIST-01
+level: 3
+suite: point
+module: cluster-gpu
+submodule: gpu-card
+feature: list
+title: 子集群节点运行状态 · 显卡列表请求带 cluster
+entry_url: "{BASE_URL}/clusters/xc/nodes/node201-xpu/status"
+prd: prd/cluster-gpu/gpu-card/list.md
+design: design/cluster-gpu/gpu-card/list.md
+
+covers:
+- AC-L3-CLUSTER-GPU-GPU_CARD-LIST-01
+
+story:
+- US1
+
+edge_cases:
+- 漏传 cluster 时会打到 host informer，本用例必须看到 cluster=xc
+
+product: 子集群节点运行状态页的显卡列表请求带 cluster=xc，路径不含 /kapis/clusters/xc/。
+preconditions:
+- 已登录
+- 成员集群 xc 的节点页 /clusters/xc/nodes/node201-xpu/status 可打开
+steps:
+- 拦截 GET /kapis/gpu.kubesphere.io/v1alpha1/gpus，记录 URL，返回含一张卡的列表
+- 打开 {BASE_URL}/clusters/xc/nodes/node201-xpu/status
+expected:
+- 拦截到的 URL query 含 cluster=xc 与 nodeName=node201-xpu
+- URL 不含 /kapis/clusters/xc/
+update_automation:
+- 接口改走 /kapis/clusters/<id>/ 路径时代理会丢掉 host handler，本用例必须失败

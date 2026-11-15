@@ -67,6 +67,7 @@ export default class GpuDetail extends React.Component {
 
   fetchData = () => {
     this.gpuStore.fetchDetail({
+      cluster: this.cluster,
       nodeName: this.nodeName,
       gpuUuid: this.gpuUuid,
     })

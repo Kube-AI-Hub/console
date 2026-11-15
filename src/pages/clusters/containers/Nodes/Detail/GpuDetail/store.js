@@ -9,17 +9,19 @@ export default class GpuDetailStore {
   isLoading = false
 
   @action
-  async fetchDetail({ nodeName, gpuUuid }) {
+  async fetchDetail({ cluster, nodeName, gpuUuid }) {
     this.isLoading = true
     try {
       const decodedUuid = decodeURIComponent(gpuUuid || '')
+      const params = {
+        conditions: `nodeName=${nodeName}${
+          decodedUuid ? `,uuid=${decodedUuid}` : ''
+        }`,
+      }
+      if (cluster) params.cluster = cluster
       const result = await request.get(
         '/kapis/gpu.kubesphere.io/v1alpha1/gpus',
-        {
-          conditions: `nodeName=${nodeName}${
-            decodedUuid ? `,uuid=${decodedUuid}` : ''
-          }`,
-        }
+        params
       )
       const items = get(result, 'items', [])
       const target = items.find(item => item.uuid === decodedUuid)

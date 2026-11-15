@@ -18,9 +18,10 @@
 import { action, observable } from 'mobx'
 import { get } from 'lodash'
 
+import { GPU_KAPIS_BASE, withClusterQuery } from 'utils/clusterKapis'
 import Base from './base'
 
-const GPU_API = '/kapis/gpu.kubesphere.io/v1alpha1/gpus'
+const GPU_API = `${GPU_KAPIS_BASE}/gpus`
 
 export default class GpuStore extends Base {
   module = 'gpus'
@@ -31,8 +32,8 @@ export default class GpuStore extends Base {
   getListUrl = () => GPU_API
 
   @action
-  async fetchModelStats({ labelSelector, nodeName } = {}) {
-    const params = {}
+  async fetchModelStats({ labelSelector, nodeName, cluster } = {}) {
+    const params = withClusterQuery({}, cluster)
     if (labelSelector) params.labelSelector = labelSelector
     if (nodeName) params.nodeName = nodeName
     try {
@@ -78,6 +79,7 @@ export default class GpuStore extends Base {
     if (deviceVendor) params.deviceVendor = deviceVendor
     if (type) params.type = type
     if (status) params.status = status
+    if (cluster) params.cluster = cluster
 
     Object.keys(rest).forEach(key => {
       if (

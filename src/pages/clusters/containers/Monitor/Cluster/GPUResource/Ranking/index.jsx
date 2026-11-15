@@ -65,9 +65,7 @@ class GPURanking extends React.Component {
   }
 
   get apiPath() {
-    return globals.app.isMultiCluster
-      ? `/kapis/clusters/${this.cluster}/gpu.kubesphere.io/v1alpha1`
-      : '/kapis/gpu.kubesphere.io/v1alpha1'
+    return '/kapis/gpu.kubesphere.io/v1alpha1'
   }
 
   componentDidMount() {
@@ -84,6 +82,9 @@ class GPURanking extends React.Component {
         sort_metric: sortMetric,
         sort_type: sortType,
       })
+      if (this.cluster) {
+        params.set('cluster', this.cluster)
+      }
       const result = await request.get(
         `${this.apiPath}/gpus/ranking?${params.toString()}`
       )

@@ -86,7 +86,7 @@ export function GpuModeDialog({ cluster, name, onClose, onUpdated }: {
       {selected?.descriptionKey ? <p className="mb-3 text-sm">{t(selected.descriptionKey)}</p> : null}
       {loading ? <Skeleton className="h-40" /> : node.isError ?
         <ResourceErrorPanel error={node.error} onRetry={() => void node.refetch()} retryAiId="node-mode:retry" /> :
-        cluster !== 'host' ? <p>{t('node.mode.hostOnly')}</p> : modes.length === 0 ? <p>{t('node.mode.unsupported')}</p> :
+        modes.length === 0 ? <p>{t('node.mode.unsupported')}</p> :
         values ? <ResourceForm schema={schema} values={values} submitting={save.isPending || monitoring}
           onChange={(next) => {
             setLocalError('');

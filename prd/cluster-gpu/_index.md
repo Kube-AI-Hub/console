@@ -49,7 +49,7 @@ flowchart LR
 ## 入口与子模块
 
 - 菜单：集群 → 算力 → 显卡（`clusterNavs` 下的 `gpus`，`authKey: nodes`）。
-- 子模块：`gpu-card`（显卡列表），下辖健康状态功能点。
+- 子模块：`gpu-card`（显卡列表），下辖健康状态、子集群显卡与 RDMA 列表功能点。
 
 ## 状态
 

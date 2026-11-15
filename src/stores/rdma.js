@@ -18,9 +18,10 @@
 import { action } from 'mobx'
 import { get } from 'lodash'
 
+import { RDMA_KAPIS_BASE } from 'utils/clusterKapis'
 import Base from './base'
 
-const RDMA_API = '/kapis/rdma.kubesphere.io/v1alpha1/ports'
+const RDMA_API = `${RDMA_KAPIS_BASE}/ports`
 
 export default class RdmaStore extends Base {
   module = 'rdmaPorts'
@@ -45,6 +46,7 @@ export default class RdmaStore extends Base {
     if (device) params.device = device
     if (state) params.state = state
     if (health) params.health = health
+    if (cluster) params.cluster = cluster
 
     Object.keys(rest).forEach(key => {
       if (

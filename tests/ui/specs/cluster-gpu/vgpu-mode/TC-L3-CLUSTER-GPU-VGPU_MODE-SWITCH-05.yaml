@@ -1,0 +1,35 @@
+id: TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-05
+level: 3
+suite: point
+module: cluster-gpu
+submodule: vgpu-mode
+feature: switch
+title: 设置 vGPU 模式 · 子集群请求带 cluster 且失败展示详情
+entry_url: "{BASE_URL}/clusters/xc/nodes"
+prd: prd/cluster-gpu/vgpu-mode/switch.md
+design: design/cluster-gpu/vgpu-mode/switch.md
+
+covers:
+- AC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-05
+
+story:
+- US5
+
+edge_cases:
+- 接口只返回 error 字段时 toast 仍能带上详情
+- 未翻译的 UPDATE_FAILED 不得出现在页面上
+
+product: 子集群节点页提交 vGPU 模式时请求带 cluster=xc；失败提示为已翻译的「更新失败」加上接口 message。
+preconditions:
+- 已登录
+- 存在成员集群 xc，且页面 /clusters/xc/nodes 能列出 GPU 节点
+steps:
+- 打开 {BASE_URL}/clusters/xc/nodes
+- 拦截 PUT /kapis/gpu.kubesphere.io/v1alpha1/device-plugins/gpu/mode，记录 URL，返回 404 且 body 含 error 与 message
+- 对 GPU 节点打开设置 vGPU 模式并确定
+expected:
+- 拦截到的 URL query 含 cluster=xc 与 nodeName
+- URL 不含 /kapis/clusters/xc/
+- toast 含「更新失败」以及接口 message，不含字面量 UPDATE_FAILED
+update_automation:
+- 接口改走 /kapis/clusters/<id>/ 路径时代理会丢掉 host handler，本用例必须失败

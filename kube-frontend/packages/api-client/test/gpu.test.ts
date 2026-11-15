@@ -101,7 +101,7 @@ describe('gpusApi', () => {
     const result = await api.list({ cluster: 'host', limit: -1, nodeName: 'gpu01', status: 'healthy' });
 
     expect(calls[0]!.path).toBe('/kapis/gpu.kubesphere.io/v1alpha1/gpus');
-    expect(calls[0]!.query).toMatchObject({ limit: -1, nodeName: 'gpu01', status: 'healthy' });
+    expect(calls[0]!.query).toMatchObject({ cluster: 'host', limit: -1, nodeName: 'gpu01', status: 'healthy' });
     expect(result.total).toBe(1);
     expect(result.items[0]!.uuid).toBe('GPU-abc');
   });
@@ -131,6 +131,38 @@ describe('gpusApi', () => {
     const stats = await api.stats({ cluster: 'host' });
 
     expect(calls[0]!.path).toBe('/kapis/gpu.kubesphere.io/v1alpha1/gpus/stats');
+    expect(calls[0]!.query).toMatchObject({ cluster: 'host' });
     expect(stats.healthy).toBe(15);
+  });
+
+  it('lists member cluster GPUs with cluster as a query param, not a path segment', async () => {
+    const calls: Call[] = [];
+    const api = gpusApi(recordingClient({ items: [raw], totalItems: 1 }, calls) as never);
+
+    await api.list({ cluster: 'xc', nodeName: 'node201-xpu', limit: -1 });
+
+    expect(calls[0]!.path).toBe('/kapis/gpu.kubesphere.io/v1alpha1/gpus');
+    expect(calls[0]!.query).toMatchObject({ cluster: 'xc', nodeName: 'node201-xpu' });
+  });
+
+  it('writes mode with cluster as a query param, not a path segment', async () => {
+    const calls: Call[] = [];
+    const api = gpusApi(
+      recordingClient(
+        { success: true, prevMode: 'default', newMode: 'hami-core', message: 'ok' },
+        calls,
+      ) as never,
+    );
+
+    const body = await api.setMode({
+      cluster: 'xc',
+      node: 'node201-xpu',
+      mode: 'hami-core',
+      params: {},
+    });
+
+    expect(calls[0]!.path).toBe('/kapis/gpu.kubesphere.io/v1alpha1/device-plugins/gpu/mode');
+    expect(calls[0]!.query).toMatchObject({ nodeName: 'node201-xpu', cluster: 'xc' });
+    expect(body.newMode).toBe('hami-core');
   });
 });

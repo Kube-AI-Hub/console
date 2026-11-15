@@ -8,6 +8,9 @@
 | cluster-gpu/gpu-card/_index | `AC-FULL-CLUSTER-GPU-GPU_CARD-01` | `TC-FULL-CLUSTER-GPU-GPU_CARD-01` | [`design/cluster-gpu/gpu-card/_index.md`](../../../design/cluster-gpu/gpu-card/_index.md) | [`tests/ui/tests/cluster-gpu/gpu-card/test_TC_FULL_CLUSTER_GPU_GPU_CARD_01.py`](../../../tests/ui/tests/cluster-gpu/gpu-card/test_TC_FULL_CLUSTER_GPU_GPU_CARD_01.py) |
 | cluster-gpu/gpu-card/health | `AC-L3-CLUSTER-GPU-GPU_CARD-HEALTH-01` | `TC-L3-CLUSTER-GPU-GPU_CARD-HEALTH-01` | [`design/cluster-gpu/gpu-card/health.md`](../../../design/cluster-gpu/gpu-card/health.md) | [`tests/ui/tests/cluster-gpu/gpu-card/test_TC_L3_CLUSTER_GPU_GPU_CARD_HEALTH_01.py`](../../../tests/ui/tests/cluster-gpu/gpu-card/test_TC_L3_CLUSTER_GPU_GPU_CARD_HEALTH_01.py) |
 | cluster-gpu/gpu-card/health | `AC-L3-CLUSTER-GPU-GPU_CARD-HEALTH-02` | `TC-L3-CLUSTER-GPU-GPU_CARD-HEALTH-02` | [`design/cluster-gpu/gpu-card/health.md`](../../../design/cluster-gpu/gpu-card/health.md) | [`tests/ui/tests/cluster-gpu/gpu-card/test_TC_L3_CLUSTER_GPU_GPU_CARD_HEALTH_02.py`](../../../tests/ui/tests/cluster-gpu/gpu-card/test_TC_L3_CLUSTER_GPU_GPU_CARD_HEALTH_02.py) |
+| cluster-gpu/gpu-card/list | `AC-L3-CLUSTER-GPU-GPU_CARD-LIST-01` | `TC-L3-CLUSTER-GPU-GPU_CARD-LIST-01` | [`design/cluster-gpu/gpu-card/list.md`](../../../design/cluster-gpu/gpu-card/list.md) | [`tests/ui/tests/cluster-gpu/gpu-card/test_TC_L3_CLUSTER_GPU_GPU_CARD_LIST_01.py`](../../../tests/ui/tests/cluster-gpu/gpu-card/test_TC_L3_CLUSTER_GPU_GPU_CARD_LIST_01.py) |
+| cluster-gpu/gpu-card/list | `AC-L3-CLUSTER-GPU-GPU_CARD-LIST-02` | `TC-L3-CLUSTER-GPU-GPU_CARD-LIST-02` | [`design/cluster-gpu/gpu-card/list.md`](../../../design/cluster-gpu/gpu-card/list.md) | [`tests/ui/tests/cluster-gpu/gpu-card/test_TC_L3_CLUSTER_GPU_GPU_CARD_LIST_02.py`](../../../tests/ui/tests/cluster-gpu/gpu-card/test_TC_L3_CLUSTER_GPU_GPU_CARD_LIST_02.py) |
+| cluster-gpu/gpu-card/list | `AC-L3-CLUSTER-GPU-GPU_CARD-LIST-03` | `TC-L3-CLUSTER-GPU-GPU_CARD-LIST-03` | [`design/cluster-gpu/gpu-card/list.md`](../../../design/cluster-gpu/gpu-card/list.md) | [`tests/ui/tests/cluster-gpu/gpu-card/test_TC_L3_CLUSTER_GPU_GPU_CARD_LIST_03.py`](../../../tests/ui/tests/cluster-gpu/gpu-card/test_TC_L3_CLUSTER_GPU_GPU_CARD_LIST_03.py) |
 | cluster-gpu/gpu-monitor/_index | `AC-FULL-CLUSTER-GPU-GPU_MONITOR-01` | `TC-FULL-CLUSTER-GPU-GPU_MONITOR-01` | [`design/cluster-gpu/gpu-monitor/_index.md`](../../../design/cluster-gpu/gpu-monitor/_index.md) | [`tests/ui/tests/cluster-gpu/gpu-monitor/test_TC_FULL_CLUSTER_GPU_GPU_MONITOR_01.py`](../../../tests/ui/tests/cluster-gpu/gpu-monitor/test_TC_FULL_CLUSTER_GPU_GPU_MONITOR_01.py) |
 | cluster-gpu/gpu-monitor/card-metrics | `AC-L3-CLUSTER-GPU-GPU_MONITOR-CARD_METRICS-01` | `TC-L3-CLUSTER-GPU-GPU_MONITOR-CARD_METRICS-01` | [`design/cluster-gpu/gpu-monitor/card-metrics.md`](../../../design/cluster-gpu/gpu-monitor/card-metrics.md) | [`tests/ui/tests/cluster-gpu/gpu-monitor/test_TC_L3_CLUSTER_GPU_GPU_MONITOR_CARD_METRICS_01.py`](../../../tests/ui/tests/cluster-gpu/gpu-monitor/test_TC_L3_CLUSTER_GPU_GPU_MONITOR_CARD_METRICS_01.py) |
 | cluster-gpu/gpu-monitor/node-metrics | `AC-L3-CLUSTER-GPU-GPU_MONITOR-NODE_METRICS-01` | `TC-L3-CLUSTER-GPU-GPU_MONITOR-NODE_METRICS-01` | [`design/cluster-gpu/gpu-monitor/node-metrics.md`](../../../design/cluster-gpu/gpu-monitor/node-metrics.md) | [`tests/ui/tests/cluster-gpu/gpu-monitor/test_TC_L3_CLUSTER_GPU_GPU_MONITOR_NODE_METRICS_01.py`](../../../tests/ui/tests/cluster-gpu/gpu-monitor/test_TC_L3_CLUSTER_GPU_GPU_MONITOR_NODE_METRICS_01.py) |
@@ -474,7 +477,7 @@
 
 ## 小结
 
-- 需求里的 AC：467 条，其中未覆盖 1 条、无技术方案承接 17 条、无用例规格实现 1 条。
+- 需求里的 AC：470 条，其中未覆盖 1 条、无技术方案承接 17 条、无用例规格实现 1 条。
 - 未覆盖：`AC-L2-KUBE-FRONTEND-LOGIN-07`
 - 无技术方案承接：`AC-L2-KUBE-FRONTEND-LOGIN-01`, `AC-L2-KUBE-FRONTEND-LOGIN-02`, `AC-L2-KUBE-FRONTEND-LOGIN-03`, `AC-L2-KUBE-FRONTEND-LOGIN-04`, `AC-L2-KUBE-FRONTEND-LOGIN-05`, `AC-L2-KUBE-FRONTEND-LOGIN-06`, `AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L2-KUBE-FRONTEND-THEME-01`, `AC-L2-KUBE-FRONTEND-THEME-02`, `AC-L2-KUBE-FRONTEND-THEME-03`, `AC-L2-KUBE-FRONTEND-THEME-04`, `AC-L2-KUBE-FRONTEND-THEME-05`, `AC-L3-KUBE-FRONTEND-MONITORING-PROJECT_CUSTOM_MONITORING-01`, `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-02`, `AC-L3-KUBE-FRONTEND-STORAGE-DETAIL_TABS-01`
 - 无用例规格实现：`AC-L2-KUBE-FRONTEND-LOGIN-07`
@@ -488,6 +491,9 @@
 | cluster-gpu/gpu-card/_index | `US2` | `TC-FULL-CLUSTER-GPU-GPU_CARD-01` |
 | cluster-gpu/gpu-card/health | `US1` | `TC-L3-CLUSTER-GPU-GPU_CARD-HEALTH-01` |
 | cluster-gpu/gpu-card/health | `US2` | `TC-L3-CLUSTER-GPU-GPU_CARD-HEALTH-02` |
+| cluster-gpu/gpu-card/list | `US1` | `TC-L3-CLUSTER-GPU-GPU_CARD-LIST-01` |
+| cluster-gpu/gpu-card/list | `US2` | `TC-L3-CLUSTER-GPU-GPU_CARD-LIST-02` |
+| cluster-gpu/gpu-card/list | `US3` | `TC-L3-CLUSTER-GPU-GPU_CARD-LIST-03` |
 | cluster-gpu/gpu-monitor/_index | `US1` | `TC-FULL-CLUSTER-GPU-GPU_MONITOR-01` |
 | cluster-gpu/gpu-monitor/_index | `US2` | `TC-FULL-CLUSTER-GPU-GPU_MONITOR-01` |
 | cluster-gpu/gpu-monitor/_index | `US3` | `TC-FULL-CLUSTER-GPU-GPU_MONITOR-01` |
@@ -841,4 +847,4 @@
 | kube-frontend/workbench/context | `US1` | `TC-L3-KUBE-FRONTEND-WORKBENCH-CONTEXT-01` |
 | kube-frontend/workbench/entry | `US1` | `TC-L3-KUBE-FRONTEND-WORKBENCH-ENTRY-01` |
 
-- 用户故事：357 条，其中未覆盖 0 条。
+- 用户故事：360 条，其中未覆盖 0 条。

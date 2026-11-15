@@ -1,5 +1,4 @@
 import type { Client } from './client';
-import { ApiError } from './errors';
 import type { KubeObject } from './resources';
 import { toWorkloadSummary } from './workloads';
 
@@ -73,12 +72,11 @@ export type GpuSortKey = 'nodeName' | 'index' | 'uuid' | 'deviceVendor' | 'type'
 
 export interface GpuListParams {
   /**
-   * Member cluster id.
+   * Cluster id from `/clusters/:cluster`.
    *
-   * Kept for symmetry with the other cluster APIs but deliberately not turned into a
-   * path segment: the GPU extension is registered on the cluster's own ks-apiserver,
-   * and the old console also strips `cluster` from this request. Only `host` has been
-   * verified; see the design doc's known pitfalls.
+   * Reads and mode writes send this as a query parameter so host ks-apiserver can
+   * reach the member-cluster Node. Do not put it in the path: `/kapis/clusters/<id>/...`
+   * is proxied to the member ks-apiserver, which may not serve gpu.kubesphere.io.
    */
   cluster: string;
   /** Prefix match, server-side. */
@@ -173,15 +171,9 @@ export function toGpuStats(body: Record<string, unknown> | undefined): GpuStats 
 }
 
 export function gpusApi(client: Client) {
-  const checkCluster = (cluster: string) => {
-    if (cluster && cluster !== 'host') throw new ApiError({
-      code: 'unsupported_cluster',
-      message: 'GPU reads are only verified for the host cluster; no member routing is available',
-    }, 400);
-  };
   async function list(params: GpuListParams): Promise<GpuListResult> {
-    checkCluster(params.cluster);
     const query: Record<string, string | number | boolean | undefined> = {
+      cluster: params.cluster,
       nodeName: params.nodeName,
       labelSelector: params.labelSelector,
       uuid: params.uuid,
@@ -207,13 +199,14 @@ export function gpusApi(client: Client) {
   return {
     list,
     async setMode(params: { cluster: string; node: string; mode: string; params: Record<string, string> }): Promise<{ success: boolean; prevMode: string; newMode: string; message: string }> {
-      if (params.cluster !== 'host' && params.cluster !== '') throw new Error('GPU mode writes are only verified for the host cluster');
       if (!params.node || !params.mode) throw new Error('A node and mode are required');
-      const body = await client.request<{ success: boolean; prevMode: string; newMode: string; message: string }>(
+      const query: Record<string, string> = { nodeName: params.node };
+      if (params.cluster) query.cluster = params.cluster;
+      const body = await client.request<{ success: boolean; prevMode: string; newMode: string; message: string; error?: string }>(
         `${KAPIS_GPU}/device-plugins/gpu/mode`, {
-          method: 'PUT', query: { nodeName: params.node }, body: { mode: params.mode, params: params.params },
+          method: 'PUT', query, body: { mode: params.mode, params: params.params },
         });
-      if (body?.success !== true) throw new Error(body?.message || 'GPU mode signal was not accepted');
+      if (body?.success !== true) throw new Error(body?.message || body?.error || 'GPU mode signal was not accepted');
       return body;
     },
     /**
@@ -233,8 +226,8 @@ export function gpusApi(client: Client) {
       return result.items[0] ?? null;
     },
     async stats(params: { cluster: string; signal?: AbortSignal }): Promise<GpuStats> {
-      checkCluster(params.cluster);
       const body = await client.request<Record<string, unknown>>(`${gpuPath()}/stats`, {
+        query: params.cluster ? { cluster: params.cluster } : {},
         ...(params.signal ? { signal: params.signal } : {}),
       });
       if (!Number.isFinite(Number(body?.total)) || !Number.isFinite(Number(body?.healthy))) {
@@ -243,9 +236,12 @@ export function gpusApi(client: Client) {
       return toGpuStats(body);
     },
     async pods(params: { cluster: string; node: string; uuid: string; page: number; pageSize: number; keyword?: string; signal?: AbortSignal }) {
-      checkCluster(params.cluster);
+      const podsPath =
+        params.cluster && params.cluster !== 'host' && params.cluster !== 'default'
+          ? `/kapis/resources.kubesphere.io/v1alpha3/clusters/${encodeURIComponent(params.cluster)}/pods`
+          : '/kapis/resources.kubesphere.io/v1alpha3/pods';
       const body = await client.request<{ items?: KubeObject[]; totalItems?: number }>(
-        '/kapis/resources.kubesphere.io/v1alpha3/pods', {
+        podsPath, {
           query: { nodeName: params.node, gpuUuid: params.uuid, page: params.page, limit: params.pageSize,
             ...(params.keyword ? { name: params.keyword } : {}) },
           ...(params.signal ? { signal: params.signal } : {}),

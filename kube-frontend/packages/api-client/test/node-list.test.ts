@@ -67,10 +67,11 @@ describe('node list API contracts', () => {
     expect(calls[0]?.init?.method).toBe('PUT');
     expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({ mode: 'hami-core', params: { devicesplitcount: '10' } });
   });
-  it('rejects member-cluster writes and application-level refusal', async () => {
+  it('sends member cluster as a query param and surfaces application-level refusal', async () => {
     const { gpu, calls } = harness({ success: false, message: 'mode denied' });
-    await expect(gpu.setMode({ cluster: 'member', node: 'gpu01', mode: 'default', params: {} })).rejects.toThrow('host');
-    expect(calls).toHaveLength(0);
+    await gpu.setMode({ cluster: 'xc', node: 'gpu01', mode: 'default', params: {} }).catch(() => undefined);
+    expect(calls[0]?.url.searchParams.get('cluster')).toBe('xc');
+    expect(calls[0]?.url.pathname).toBe('/kapis/gpu.kubesphere.io/v1alpha1/device-plugins/gpu/mode');
     await expect(gpu.setMode({ cluster: 'host', node: 'gpu01', mode: 'default', params: {} })).rejects.toThrow('mode denied');
   });
 });

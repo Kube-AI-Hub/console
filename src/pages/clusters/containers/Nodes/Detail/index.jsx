@@ -188,6 +188,7 @@ export default class NodeDetail extends React.Component {
     const modal = Modal.open({
       modal: GpuVirtModeModal,
       detail: toJS(this.store.detail),
+      cluster: this.props.match.params.cluster,
       onOk: () => {
         Modal.close(modal)
         this.fetchData()

@@ -55,6 +55,15 @@ modules:
         L3:
         - TC-L3-CLUSTER-GPU-GPU_CARD-HEALTH-01
         - TC-L3-CLUSTER-GPU-GPU_CARD-HEALTH-02
+    - id: list
+      title: 子集群显卡与 RDMA 列表
+      prd: prd/cluster-gpu/gpu-card/list.md
+      design: design/cluster-gpu/gpu-card/list.md
+      tests:
+        L3:
+        - TC-L3-CLUSTER-GPU-GPU_CARD-LIST-01
+        - TC-L3-CLUSTER-GPU-GPU_CARD-LIST-02
+        - TC-L3-CLUSTER-GPU-GPU_CARD-LIST-03
   - id: vgpu-mode
     title: vGPU 模式
     prd: prd/cluster-gpu/vgpu-mode/_index.md

@@ -104,7 +104,10 @@ class RdmaResource extends React.Component {
   fetchPorts = async () => {
     // fetchList already swallows its own errors and returns [], but guard the
     // shape anyway: the ports list must never be able to break the overview.
-    const ports = await this.rdmaStore.fetchList({ limit: -1 })
+    const ports = await this.rdmaStore.fetchList({
+      limit: -1,
+      cluster: this.props.cluster,
+    })
     this.setState({ ports: Array.isArray(ports) ? ports : [] })
   }
 

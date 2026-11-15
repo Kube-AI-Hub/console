@@ -33,6 +33,7 @@ module.exports = {
   SET_VGPU_MODE: '设置vGPU模式',
   SET: '设置',
   GPU_MODE: 'GPU 模式',
+  UPDATE_FAILED: '更新失败',
   SET_VGPU_MODE_DESC: '设置节点的 vGPU模式，将驱动与 Device Plugin 切换到所选模式。',
   GPU_VIRT_MODE_SWITCHING: '切换中 (目标: {mode})',
   GPU_VIRT_MODE_SWITCH_FAILED: '切换失败',

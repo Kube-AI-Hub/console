@@ -175,15 +175,18 @@ class GPUResourceOverview extends React.Component {
     this.fetchMetrics()
   }
 
-  getGpuApiPath = () =>
-    globals.app.isMultiCluster
-      ? `/kapis/clusters/${this.cluster}/gpu.kubesphere.io/v1alpha1`
-      : '/kapis/gpu.kubesphere.io/v1alpha1'
+  getGpuApiPath = () => '/kapis/gpu.kubesphere.io/v1alpha1'
+
+  gpuQuery = (params = {}) =>
+    this.cluster ? { ...params, cluster: this.cluster } : params
 
   fetchStats = async () => {
     this.setState({ statsLoading: true })
     try {
-      const result = await request.get(`${this.getGpuApiPath()}/gpus/stats`)
+      const result = await request.get(
+        `${this.getGpuApiPath()}/gpus/stats`,
+        this.gpuQuery()
+      )
       this.setState({
         stats: typeof result === 'object' && result !== null ? result : {},
         statsLoading: false,
@@ -197,7 +200,8 @@ class GPUResourceOverview extends React.Component {
     this.setState({ modelUsageLoading: true })
     try {
       const result = await request.get(
-        `${this.getGpuApiPath()}/gpus/model-usage`
+        `${this.getGpuApiPath()}/gpus/model-usage`,
+        this.gpuQuery()
       )
       this.setState({
         modelUsage: Array.isArray(result) ? result : [],

@@ -144,6 +144,7 @@ class Nodes extends React.Component {
           const modal = Modal.open({
             modal: GpuVirtModeModal,
             detail: toJS(item),
+            cluster: this.cluster,
             onOk: () => {
               Modal.close(modal)
               routing.query()

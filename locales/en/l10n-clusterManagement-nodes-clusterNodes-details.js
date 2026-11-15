@@ -34,6 +34,7 @@ module.exports = {
   SET_VGPU_MODE: 'Set vGPU Mode',
   SET: 'Set',
   GPU_MODE: 'GPU Mode',
+  UPDATE_FAILED: 'Update failed',
   SET_VGPU_MODE_DESC: 'Set the node vGPU mode; driver and Device Plugin will be switched to the selected mode.',
   GPU_VIRT_MODE_SWITCHING: 'Switching (target: {mode})',
   GPU_VIRT_MODE_SWITCH_FAILED: 'Switch failed',

@@ -19,10 +19,9 @@ import { action, observable } from 'mobx'
 import { get } from 'lodash'
 
 import { to } from 'utils'
+import { JUICEFS_KAPIS_BASE, withClusterPath, withClusterQuery } from 'utils/clusterKapis'
 
 import BaseMonitoringStore from './monitoring/base'
-
-const GROUP = 'juicefs.kubesphere.io/v1alpha1'
 
 // Metric names as registered in the apiserver's PromQL template map. They are
 // shared storage specific: the client metrics come from the mount pod, the volume
@@ -67,9 +66,11 @@ export default class JuiceFSStore extends BaseMonitoringStore {
   summaryLoading = false
 
   get apiPath() {
-    return globals.app.isMultiCluster && this.cluster
-      ? `/kapis/clusters/${this.cluster}/${GROUP}`
-      : `/kapis/${GROUP}`
+    return JUICEFS_KAPIS_BASE
+  }
+
+  clusterQuery() {
+    return withClusterQuery({}, this.cluster)
   }
 
   // The monitoring API is cluster scoped, so the base store's cluster handling
@@ -79,7 +80,9 @@ export default class JuiceFSStore extends BaseMonitoringStore {
   @action
   async fetchVolumes() {
     this.volumesLoading = true
-    const result = await to(request.get(`${this.apiPath}/volumes`))
+    const result = await to(
+      request.get(`${this.apiPath}/volumes`, this.clusterQuery())
+    )
     const items = get(result, 'items', [])
 
     this.volumes = Array.isArray(items) ? items : []
@@ -90,7 +93,9 @@ export default class JuiceFSStore extends BaseMonitoringStore {
   @action
   async fetchSummary() {
     this.summaryLoading = true
-    const result = await to(request.get(`${this.apiPath}/summary`))
+    const result = await to(
+      request.get(`${this.apiPath}/summary`, this.clusterQuery())
+    )
 
     this.summary = result || {}
     this.summaryLoading = false
@@ -105,7 +110,9 @@ export default class JuiceFSStore extends BaseMonitoringStore {
   @action
   async setQuota(name, capacity) {
     const result = await to(
-      request.put(`${this.apiPath}/volumes/${name}`, { capacity })
+      request.put(withClusterPath(`${this.apiPath}/volumes/${name}`, this.cluster), {
+        capacity,
+      })
     )
     if (get(result, 'error')) {
       throw new Error(get(result, 'error'))
@@ -133,7 +140,10 @@ export default class JuiceFSStore extends BaseMonitoringStore {
   @action
   async startBench(name, params = {}) {
     const result = await to(
-      request.post(`${this.apiPath}/volumes/${name}/bench`, params)
+      request.post(
+        withClusterPath(`${this.apiPath}/volumes/${name}/bench`, this.cluster),
+        params
+      )
     )
     if (get(result, 'error')) {
       throw new Error(get(result, 'error'))
@@ -144,7 +154,7 @@ export default class JuiceFSStore extends BaseMonitoringStore {
   fetchBench = (jobName, namespace) =>
     request.get(
       `${this.apiPath}/bench/${jobName}`,
-      namespace ? { namespace } : undefined
+      withClusterQuery(namespace ? { namespace } : {}, this.cluster)
     )
 
   /**
@@ -154,5 +164,8 @@ export default class JuiceFSStore extends BaseMonitoringStore {
    * operator just watched.
    */
   fetchBenches = namespace =>
-    request.get(`${this.apiPath}/bench`, namespace ? { namespace } : undefined)
+    request.get(
+      `${this.apiPath}/bench`,
+      withClusterQuery(namespace ? { namespace } : {}, this.cluster)
+    )
 }

@@ -1,0 +1,29 @@
+id: TC-L3-CLUSTER-GPU-GPU_CARD-LIST-02
+level: 3
+suite: point
+module: cluster-gpu
+submodule: gpu-card
+feature: list
+title: 子集群显卡页 · 列表与 stats 请求带 cluster
+entry_url: "{BASE_URL}/clusters/xc/gpus"
+prd: prd/cluster-gpu/gpu-card/list.md
+design: design/cluster-gpu/gpu-card/list.md
+
+covers:
+- AC-L3-CLUSTER-GPU-GPU_CARD-LIST-02
+
+story:
+- US2
+
+product: 子集群显卡页的 gpus 与 gpus/stats 请求带 cluster=xc，路径不含 /kapis/clusters/xc/。
+preconditions:
+- 已登录
+- 成员集群 xc 的显卡页可打开
+steps:
+- 拦截 GET /kapis/gpu.kubesphere.io/v1alpha1/gpus 与 /gpus/stats，记录 URL
+- 打开 {BASE_URL}/clusters/xc/gpus
+expected:
+- gpus 与 gpus/stats 的 URL query 都含 cluster=xc
+- URL 不含 /kapis/clusters/xc/
+update_automation:
+- 接口改走 /kapis/clusters/<id>/ 路径时代理会丢掉 host handler，本用例必须失败

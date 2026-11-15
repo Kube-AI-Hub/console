@@ -14,6 +14,7 @@
 - `AC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-02`
 - `AC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-03`
 - `AC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-04`
+- `AC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-05`
 
 ## 设计目标与非目标
 
@@ -44,6 +45,14 @@
 - **被否方案**：① 长轮询。用户离开页面就丢上下文，且 `gpu-mode-status` 的粒度不足以显示进度百分比。
 - **何时重新考虑**：`gpu-mode-status` 能给出分阶段进度且切换能压到 30 秒内时。
 
+### DEC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-04：子集群模式切换留在 host ks-apiserver，用 `cluster` query
+
+- **备选**：① 前端走 `/kapis/clusters/<cluster>/gpu.kubesphere.io/...`，让 WithMulticluster 代理到成员集群 ks-apiserver；② host GPU 接口增加 `cluster` query，用 Cluster CR 的 kubeconfig 对成员 Node 做 Get/Patch。
+- **选定**：②
+- **原因**：成员集群（如 `xc`）是 `connection.type=direct` 且 `kubeSphereAPIEndpoint` 为空，① 会把请求代理到成员自己的 ks-apiserver。成员跑的是库存 KubeSphere 3.4.1，没有 `gpu.kubesphere.io` 的 `changeMode`。模式切换只需要 Node Get/Patch，host 用集群 kubeconfig 就能写，gpu-agent 仍在成员集群里消费注解。
+- **被否方案**：① 路径里的 `/clusters/<id>/` 触发代理，host GPU handler 根本收不到请求；成员没有 GPU API 时返回 404，看起来像「节点不存在」。
+- **何时重新考虑**：成员集群也部署了带 GPU / RDMA / JuiceFS API 的 ks-apiserver 时，可以再改成路径代理。当前 GPU 列表、RDMA 端口、共享存储同样走 host + `cluster` query，不要改回路径代理。
+
 ### DEC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-03：参数用配置表驱动，不用 if-else
 
 - **备选**：① 在组件里按 mode 写 if-else 渲染参数；② 用 `GPU_VENDOR_MODE_CONFIG` 配置表描述每种模式的参数。
@@ -56,7 +65,7 @@
 
 ### 数据流
 
-`对话框 → PUT /device-plugins/gpu/mode → handler.changeMode → patch Node 注解 hami.io/gpu-mode-desired → gpu-agent watch → EnableVirtualCardMode → label + ConfigMap + 重启 → 资源就绪`
+`对话框 → PUT /device-plugins/gpu/mode?nodeName=&cluster= → host handler.changeMode（成员集群用 Cluster kubeconfig） → patch 目标集群 Node 注解 hami.io/gpu-mode-desired → gpu-agent watch → EnableVirtualCardMode → label + ConfigMap + 重启 → 资源就绪`
 
 ### 关键模块职责
 
@@ -74,8 +83,9 @@
 | --- | --- | --- |
 | 对话框 | `console` | `src/components/Modals/Node/GpuVirtMode/{index.jsx,config.js}` |
 | 行操作 | `console` | `src/pages/clusters/containers/Nodes/index.jsx` |
-| 接口 | `kube-server` | `pkg/kapis/gpu/v1alpha1/handler.go` 的 `changeMode` |
+| 接口 | `kube-server` | `pkg/kapis/gpu/v1alpha1/handler.go` 的 `changeMode`（`cluster` query → 成员 kubeconfig） |
 | 注册 | `kube-server` | `pkg/kapis/gpu/v1alpha1/register.go` |
+| 单测 | `kube-server` | `pkg/kapis/gpu/v1alpha1/handler_mode_test.go` |
 | 落地 | `HAMi` | `pkg/gpu-agent/collector/nvidia.go` 的 `EnableVirtualCardMode` |
 | 消费 | `HAMi` | `cmd/gpu-agent/main.go` 的 `watchModeSignal` |
 
@@ -83,6 +93,7 @@
 
 - **CON-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-01** — 请求体 `{"mode":"hami-core","params":{"devicesplitcount":"10","devicememoryscaling":"1","devicecorescaling":"1"}}`；`params` 省略某键表示不覆盖。
 - **CON-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-02** — `default` 模式的 `params` 是 `{}`（空对象），不是 `null`。
+- **CON-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-05** — 子集群请求是 `PUT /kapis/gpu.kubesphere.io/v1alpha1/device-plugins/gpu/mode?nodeName=<node>&cluster=<cluster>`；失败体同时有 `error` 与 `message`，前端 toast 为 `UPDATE_FAILED` 的译文加 `message`。
 
 ## 不变量
 
@@ -94,12 +105,14 @@
 - **GOT-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-01** — 后端 `changeMode` 把 desired 结构**二次编码**：先 `json.Marshal(map)` 得到字节，再 `json.Marshal(string(bytes))` 存进注解。所以注解值是带引号的 JSON 字符串。前端不感知，但排查时要先 `json.Unmarshal` 一次。
 - **GOT-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-02** — 参数传 number 会静默失效：`buildParamsFromFormData` 里 `String(v)` 保证了字符串，如果绕过它直接传 number，gpu-agent 的 `map[string]string` 解析会失败并把整个注解丢掉。
 - **GOT-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-03** — 切换进行中再次提交会被 gpu-agent 的去抖逻辑合并，表现为「第二次提交无效」。页面应禁止在 `in_progress` 时提交。
+- **GOT-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-05** — 旧对话框把 PUT 打到 host，host informer 没有子集群节点，返回 `{error:"node … not found"}`。`formatError` 以前只读 `data.message`，toast 退化成未翻译的 `UPDATE_FAILED`。接口必须带 `cluster` query，错误体必须有 `message`。
+- **GOT-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-04** — 不要把 GPU 写接口放进 `/kapis/clusters/<id>/`：WithMulticluster 会改路径并代理走，host 的 `changeMode` 收不到。
 
 ## 测试与可观测
 
-- 单测：`kube-server` 的 `changeMode` 无单测（依赖 k8s client）；用 UI 用例覆盖。
-- UI 用例：`TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-01` 到 `04`。
-- 现场核对：提交后 `kubectl get node <n> -o jsonpath='{.metadata.annotations.hami\.io/gpu-mode-desired}'`。
+- 单测：`kube-server/pkg/kapis/gpu/v1alpha1/handler_mode_test.go` 覆盖 host / 成员集群写与 404 `message`。
+- UI 用例：`TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-01` 到 `05`。
+- 现场核对：提交后在**目标集群**上 `kubectl get node <n> -o jsonpath='{.metadata.annotations.hami\.io/gpu-mode-desired}'`。
 
 ## 后续改进
 
@@ -112,3 +125,4 @@
 - `TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-02`
 - `TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-03`
 - `TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-04`
+- `TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-05`

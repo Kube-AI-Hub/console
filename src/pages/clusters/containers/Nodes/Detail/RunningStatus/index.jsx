@@ -442,7 +442,7 @@ class RunningStatus extends React.Component {
     try {
       const result = await request.get(
         '/kapis/rdma.kubesphere.io/v1alpha1/ports',
-        { nodeName: this.store.detail.name }
+        { nodeName: this.store.detail.name, cluster: this.cluster }
       )
       this.setState({
         rdmaPorts: get(result, 'items', []),
@@ -455,6 +455,7 @@ class RunningStatus extends React.Component {
   fetchGpuData = async () => {
     const params = {
       conditions: `nodeName=${this.store.detail.name}`,
+      cluster: this.cluster,
     }
     try {
       const result = await request.get(
