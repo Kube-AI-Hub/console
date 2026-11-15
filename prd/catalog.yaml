@@ -974,6 +974,7 @@ modules:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EVENTS-01
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EVENTS-02
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EVENTS-03
     - id: log-search
       title: 容器日志查询
       prd: prd/kube-frontend/cluster-management/log-search.md

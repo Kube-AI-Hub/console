@@ -1243,7 +1243,15 @@ export function eventSearchApi(client: Client) {
 
     /** One page of records for the same filters. */
     async query(
-      params: { from: number; size: number; filters?: EventQueryFilters; signal?: AbortSignal },
+      params: {
+        from: number;
+        size: number;
+        filters?: EventQueryFilters;
+        /** Optional `[start, end)` in epoch milliseconds; omit for the whole retained history. */
+        start?: number;
+        end?: number;
+        signal?: AbortSignal;
+      },
     ): Promise<EventQueryPage> {
       const body = await client.request<{
         query?: {
@@ -1261,7 +1269,14 @@ export function eventSearchApi(client: Client) {
           }>;
         };
       }>('/kapis/tenant.kubesphere.io/v1alpha2/events', {
-        query: { operation: 'query', from: params.from, size: params.size, ...filterQuery(params.filters ?? {}) },
+        query: {
+          operation: 'query',
+          from: params.from,
+          size: params.size,
+          ...(params.start === undefined ? {} : { start_time: Math.round(params.start / 1000) }),
+          ...(params.end === undefined ? {} : { end_time: Math.round(params.end / 1000) }),
+          ...filterQuery(params.filters ?? {}),
+        },
         ...(params.signal ? { signal: params.signal } : {}),
       });
       const page = body?.query ?? {};

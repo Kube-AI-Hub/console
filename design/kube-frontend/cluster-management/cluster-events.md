@@ -9,6 +9,7 @@
 ## 关联需求
 
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EVENTS-01
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EVENTS-03
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EVENTS-02
 
 ## 设计目标与非目标
@@ -94,3 +95,14 @@
 2. **窗口只算一次**：`start/end` 放在 `useState` 里而不是查询键里，避免每次重渲染都刷新区间并无限重取。
 3. **翻页保留上一页数据**（`keepPreviousData`），否则每次翻页整表闪成骨架。
 4. **柱状图失败只降级该卡片**：统计接口挂掉时列表仍可用——查事件的人多半正在处理故障，不能让一个装饰性图表挡住事实。
+
+
+## 时间段选择与实时刷新
+
+老 console 的事件检索有两个此前的实现没有的交互：点直方图的柱可以「钻进」该时间段，以及一个「开始实时事件」的控制。
+
+**时间段选择**：点柱 → `selected = { start: bucketTime, end: bucketTime + 30m }`，列表请求带上 `start_time`/`end_time`（实测该参数生效：全量 228379 条 → 选中桶后 30 条）。再次点同一柱或「清除」取消。
+
+**与老 console 的差异（有意）**：老 console 会把直方图本身也钻进选中区间；30 分钟的区间再按更细步长画出来只有一两个柱，读起来像渲染错误而不是缩放。这里直方图固定 12 小时、只高亮选中的柱，列表按区间收窄——信息量一样，视觉上不会自相矛盾。
+
+**实时刷新**：开关打开后每 5 秒同时推进直方图窗口与列表（回到第 1 页），两个查询共用一个 `revision` 计数进 key，避免「柱状图冻结、列表前进」的错位。定时器在关闭与卸载时清理；该组件里 `window` 是局部变量（时间窗对象），因此用 `globalThis.setInterval`。

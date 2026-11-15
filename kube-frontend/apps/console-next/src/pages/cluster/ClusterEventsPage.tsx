@@ -28,6 +28,7 @@ export interface ClusterEventsPageProps {
 const PAGE_SIZE = 20;
 const HISTOGRAM_HOURS = 12;
 const HISTOGRAM_INTERVAL = '30m';
+const BUCKET_MS = 30 * 60 * 1000;
 
 type FilterKey = 'message' | 'namespace' | 'kind' | 'name' | 'reason' | 'type';
 
@@ -52,6 +53,20 @@ export function ClusterEventsPage({ cluster: _cluster }: ClusterEventsPageProps)
     type: '',
   });
   const [page, setPage] = React.useState(1);
+  /*
+   * A histogram bucket the reader clicked. Selecting one narrows the **list** to that bucket's
+   * window; the histogram stays at twelve hours with the bar highlighted, because drilling the
+   * histogram into a thirty-minute slice yields a chart of one or two bars — the old console does
+   * that, and it reads as a rendering bug rather than as a zoom.
+   */
+  const [selected, setSelected] = React.useState<{ start: number; end: number } | null>(null);
+  /*
+   * Real-time mode: the old console has a start/stop control that re-reads continuously. Each tick
+   * bumps a revision, which is part of both query keys, so both the bars and the rows move forward
+   * together instead of the bars freezing while the list advances.
+   */
+  const [realTime, setRealTime] = React.useState(false);
+  const [revision, setRevision] = React.useState(0);
 
   /*
    * The window is resolved once per render of this page, not inside the query key: a
@@ -62,8 +77,19 @@ export function ClusterEventsPage({ cluster: _cluster }: ClusterEventsPageProps)
     return { start: end - HISTOGRAM_HOURS * 60 * 60 * 1000, end };
   });
 
+  React.useEffect(() => {
+    if (!realTime) return;
+    const timer = globalThis.setInterval(() => {
+      const end = Math.floor(Date.now() / 1000) * 1000;
+      setWindow({ start: end - HISTOGRAM_HOURS * 60 * 60 * 1000, end });
+      setPage(1);
+      setRevision((previous) => previous + 1);
+    }, 5_000);
+    return () => globalThis.clearInterval(timer);
+  }, [realTime]);
+
   const histogram = useQuery({
-    queryKey: ['cluster-events-histogram', window.start, window.end, filters],
+    queryKey: ['cluster-events-histogram', window.start, window.end, filters, revision],
     queryFn: ({ signal }) =>
       eventSearchApi(apiClient).histogram({
         start: window.start,
@@ -77,9 +103,15 @@ export function ClusterEventsPage({ cluster: _cluster }: ClusterEventsPageProps)
   });
 
   const records = useQuery({
-    queryKey: ['cluster-events-records', filters, page],
+    queryKey: ['cluster-events-records', filters, page, selected?.start ?? 0, selected?.end ?? 0, revision],
     queryFn: ({ signal }) =>
-      eventSearchApi(apiClient).query({ from: (page - 1) * PAGE_SIZE, size: PAGE_SIZE, filters, signal }),
+      eventSearchApi(apiClient).query({
+        from: (page - 1) * PAGE_SIZE,
+        size: PAGE_SIZE,
+        filters,
+        ...(selected ? { start: selected.start, end: selected.end } : {}),
+        signal,
+      }),
     placeholderData: keepPreviousData,
     retry: false,
   });
@@ -100,6 +132,12 @@ export function ClusterEventsPage({ cluster: _cluster }: ClusterEventsPageProps)
     setPage(1);
     const end = Math.floor(Date.now() / 1000) * 1000;
     setWindow({ start: end - HISTOGRAM_HOURS * 60 * 60 * 1000, end });
+  };
+
+  const selectBucket = (time: number): void => {
+    // Clicking the selected bar again clears the selection, so the control has an inverse.
+    setSelected((previous) => (previous?.start === time ? null : { start: time, end: time + BUCKET_MS }));
+    setPage(1);
   };
 
   const resetFilters = (): void => {
@@ -137,16 +175,23 @@ export function ClusterEventsPage({ cluster: _cluster }: ClusterEventsPageProps)
               {t('cluster.events.histogramEmpty')}
             </p>
           ) : (
-            <ol className="mt-2 flex h-16 items-end gap-0.5" data-ai-id="cluster-events:histogram:bars">
+            <ol className="mt-2 flex items-end gap-0.5" data-ai-id="cluster-events:histogram:bars">
               {(histogram.data?.buckets ?? []).map((bucket) => (
-                <li
-                  key={bucket.time}
-                  className="min-w-0 flex-1 rounded-t bg-ai-accent/60"
-                  style={{ height: `${Math.max(2, Math.round((bucket.count / peak) * 100))}%` }}
-                  title={`${formatTimestamp(new Date(bucket.time).toISOString())} · ${bucket.count}`}
-                  data-ai-bucket={bucket.time}
-                  data-ai-count={bucket.count}
-                />
+                <li key={bucket.time} className="flex h-16 min-w-0 flex-1 items-end">
+                  <button
+                    type="button"
+                    className={`block h-16 w-full rounded-t transition-colors ${
+                      selected?.start === bucket.time ? 'bg-ai-accent' : 'bg-ai-accent/60 hover:bg-ai-accent/80'
+                    }`}
+                    style={{ height: `${Math.max(6, Math.round((bucket.count / peak) * 100))}%` }}
+                    title={`${formatTimestamp(new Date(bucket.time).toISOString())} · ${bucket.count}`}
+                    aria-pressed={selected?.start === bucket.time}
+                    {...actionProps(`cluster-events:bucket:${bucket.time}`)}
+                    data-ai-bucket={bucket.time}
+                    data-ai-count={bucket.count}
+                    onClick={() => selectBucket(bucket.time)}
+                  />
+                </li>
               ))}
             </ol>
           )
@@ -185,7 +230,28 @@ export function ClusterEventsPage({ cluster: _cluster }: ClusterEventsPageProps)
         <Button size="sm" variant="secondary" {...actionProps('cluster-events:reset')} onClick={resetFilters}>
           {t('cluster.events.resetAction')}
         </Button>
+        <Button
+          size="sm"
+          variant={realTime ? 'primary' : 'secondary'}
+          aria-pressed={realTime}
+          {...actionProps('cluster-events:real-time')}
+          onClick={() => setRealTime((previous) => !previous)}
+        >
+          {realTime ? t('cluster.events.realTimeOn') : t('cluster.events.realTimeOff')}
+        </Button>
       </div>
+
+      {selected ? (
+        <div className="flex flex-wrap items-center gap-2 text-xs" data-ai-id="cluster-events:selected-range">
+          <span className="text-ai-fg-muted">{t('cluster.events.selectedRange')}</span>
+          <span className="tabular-nums text-ai-fg">
+            {formatTimestamp(new Date(selected.start).toISOString())} – {formatTimestamp(new Date(selected.end).toISOString())}
+          </span>
+          <Button size="sm" variant="secondary" {...actionProps('cluster-events:selected-clear')} onClick={() => setSelected(null)}>
+            {t('cluster.events.selectedClear')}
+          </Button>
+        </div>
+      ) : null}
 
       {state === 'loading' ? <Skeleton className="h-40 w-full" /> : null}
       {state === 'error' ? (

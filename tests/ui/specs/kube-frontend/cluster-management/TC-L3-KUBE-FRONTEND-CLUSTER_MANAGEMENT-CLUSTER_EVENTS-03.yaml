@@ -1,0 +1,37 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EVENTS-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: cluster-events
+title: 资源事件查询：时间段选择与实时刷新
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/events'
+prd: prd/kube-frontend/cluster-management/cluster-events.md
+design: design/kube-frontend/cluster-management/cluster-events.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EVENTS-03
+
+story:
+- US1
+
+product: 资源事件页支持点击柱状图柱选择时间段，以及 5 秒实时刷新开关。
+preconditions:
+- 已登录且有集群权限
+- 租户事件接口可用且有事件
+steps:
+- 打开资源事件页，等待柱状图与列表加载
+- 点击最后一根柱，读取「已选时间段」与总数
+- 再次点击同一柱，确认选择被清除
+- 打开「实时：关」，等待 12 秒观察请求次数，再关闭并等待 8 秒
+steps_expected:
+- 点柱后出现时间段说明，列表总数下降（按该 30 分钟区间过滤）
+- 再点同一柱后时间段说明消失、总数恢复
+- 实时开启后 12 秒内至少 2 次请求，关闭后不再新增
+expected:
+- 直方图固定 12 小时、只高亮选中柱（不钻进子区间）
+troubleshoot:
+- 点柱无效果：柱不是按钮或没有 onClick
+- 实时关闭后仍有请求：定时器未清理
+update_automation:
+- 选择器：cluster-events:bucket:<epoch> / :selected-range / :selected-clear / :real-time / :total
