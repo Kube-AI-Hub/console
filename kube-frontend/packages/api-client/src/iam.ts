@@ -254,8 +254,84 @@ export interface ClusterMemberSummary extends ResourceBase {
   lastLogin: string;
 }
 
+/**
+ * Cluster members — the cluster-scope counterpart of the project member list.
+ *
+ * The write shape is the platform's, not Kubernetes': `clustermembers` is a KubeSphere
+ * aggregate whose collection takes an **array** of `{username, roleRef}` on POST (one
+ * call can add several members), while a single member is updated by PUT on its own path.
+ * All four verbs were probed against the live iam API (2026-11-16) and are recorded in
+ * design/kube-frontend/cluster-management/cluster-members.md.
+ */
+export interface ClusterMemberInvite {
+  username: string;
+  /** A cluster role name, e.g. `cluster-viewer` / `cluster-admin`. */
+  roleRef: string;
+}
+
+/** One assignable cluster role. */
+export interface ClusterRoleOption {
+  name: string;
+  /** `kubesphere.io/alias-name`, falling back to the object name. */
+  alias: string;
+  description: string;
+}
+
 export function clusterMembersApi(client: Client) {
   return {
+    /**
+     * Cluster roles a member may be given.
+     *
+     * Only KubeSphere's own cluster-scope roles are offered: the collection also returns
+     * ~200 add-on roles (`istiod-*`, `kiali-*`, `edgemesh-agent`, …) that exist to bind
+     * controllers, not people. On this deployment the preset roles carry no `role` label,
+     * so the filter is the naming convention KubeSphere uses for them (`cluster-*`), and
+     * the annotation `iam.kubesphere.io/aggregation-roles` is used as a second signal.
+     */
+    async roles(params: { signal?: AbortSignal } = {}): Promise<ClusterRoleOption[]> {
+      const body = await client.request<{ items?: KubeIam[] }>(`${KAPIS_IAM}/clusterroles`, {
+        query: { limit: -1 },
+        ...(params.signal ? { signal: params.signal } : {}),
+      });
+      return (body?.items ?? [])
+        .map((item) => {
+          const metadata = item.metadata ?? {};
+          const annotations = (metadata.annotations ?? {}) as Record<string, string>;
+          const name = metadata.name ?? '';
+          return {
+            name,
+            alias: annotations['kubesphere.io/alias-name'] ?? name,
+            description: annotations['kubesphere.io/description'] ?? '',
+            preset: name.startsWith('cluster-') || Boolean(annotations['iam.kubesphere.io/aggregation-roles']),
+          };
+        })
+        .filter((role) => role.preset && role.name)
+        .map(({ name, alias, description }) => ({ name, alias, description }));
+    },
+
+    /** Add one or more members in a single call (the collection takes an array). */
+    async invite(params: { members: ClusterMemberInvite[] }): Promise<void> {
+      await client.request(`${KAPIS_IAM}/clustermembers`, {
+        method: 'POST',
+        body: params.members,
+      });
+    },
+
+    /** Change one member's cluster role. */
+    async changeRole(params: ClusterMemberInvite): Promise<void> {
+      await client.request(`${KAPIS_IAM}/clustermembers/${encodeURIComponent(params.username)}`, {
+        method: 'PUT',
+        body: { username: params.username, roleRef: params.roleRef },
+      });
+    },
+
+    /** Remove one member's cluster role binding. */
+    async remove(params: { username: string }): Promise<void> {
+      await client.request(`${KAPIS_IAM}/clustermembers/${encodeURIComponent(params.username)}`, {
+        method: 'DELETE',
+      });
+    },
+
     async list(params: { cluster: string; signal?: AbortSignal }): Promise<{ items: ClusterMemberSummary[] }> {
       const body = await client.request<{ items?: KubeIam[] }>(`${KAPIS_IAM}/clustermembers`, {
         query: { limit: -1 },

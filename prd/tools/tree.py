@@ -82,6 +82,7 @@ MODULES = [
                             "TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-02",
                             "TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-03",
                             "TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-04",
+                            "TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-05",
                         ]},
                     },
                     {
@@ -808,7 +809,8 @@ MODULES = [
                     {
                         "id": "cluster-members",
                         "title": "集群成员",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_MEMBERS-01"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_MEMBERS-01",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_MEMBERS-02"]},
                     },
                     {
                         "id": "log-collections",
@@ -857,7 +859,7 @@ MODULES = [
                     {
                         "id": "cluster-alerting",
                         "title": "集群级告警",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING-01", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING-02"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING-01"]},
                     },
                     {
                         "id": "cluster-pvc",

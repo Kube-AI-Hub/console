@@ -1,0 +1,38 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_MEMBERS-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: cluster-members
+title: 集群成员 · 邀请、改角色与移除
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/members'
+prd: prd/kube-frontend/cluster-management/cluster-members.md
+design: design/kube-frontend/cluster-management/cluster-members.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_MEMBERS-02
+
+story:
+- US2
+
+product: 集群成员页可邀请平台用户并授予集群角色、修改角色、移除成员（单条与批量）；当前登录账号不可操作自己，且不可勾选。
+preconditions:
+- 已登录为 admin；集群存在至少一个可分配集群角色（cluster-viewer/cluster-admin）
+steps:
+- 用 API 创建一个唯一命名的平台用户（前缀 tc-e2e-cm-）
+- 打开集群成员页，点「邀请成员」，填用户名并选择集群角色后提交
+- 核对新行出现、角色列与回读的 iam.kubesphere.io/clusterrole 一致
+- 行操作「修改角色」改成另一个角色并保存，回读一致
+- 行操作「移除」，输入用户名确认，核对行消失且 clustermembers 回读 404
+- 核对当前登录账号那一行没有复选框、没有改角色/移除入口
+expected:
+- 邀请发出 POST /kapis/iam.kubesphere.io/v1alpha2/clustermembers（数组 body）并成功
+- 改角色发出 PUT …/clustermembers/<username>，回读注解为所选角色
+- 移除发出 DELETE …/clustermembers/<username>，集合不再包含该用户
+- 自己的行显示「当前账号」说明，且 input[type=checkbox] 与改角色/移除按钮都不存在
+- 用户名为空或非法时本地拒绝，不发请求
+troubleshoot:
+- 邀请 404：端点用了 /clusters/<c>/members 或 /apis 路径；正确是 kapis 的 clustermembers 集合
+- 改角色无效：用了 PATCH 或 POST，正确是 PUT 对象路径
+update_automation:
+- 句柄：cluster-members:surface / :invite / :invite-dialog / :invite-username / :invite-role / :invite-submit / :change-role / :role-dialog / :role-select / :role-submit / :remove / :remove-dialog / :remove-confirm-input / :remove-confirm / :self

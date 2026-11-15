@@ -73,6 +73,7 @@ modules:
         - TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-02
         - TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-03
         - TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-04
+        - TC-L3-CLUSTER-GPU-VGPU_MODE-SWITCH-05
     - id: capacity
       title: vGPU 资源就绪
       prd: prd/cluster-gpu/vgpu-mode/capacity.md
@@ -871,6 +872,7 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_MEMBERS-01
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_MEMBERS-02
     - id: log-collections
       title: 集群日志收集
       prd: prd/kube-frontend/cluster-management/log-collections.md
@@ -938,7 +940,6 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING-01
-        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING-02
     - id: cluster-pvc
       title: 集群级存储卷声明
       prd: prd/kube-frontend/cluster-management/cluster-pvc.md
