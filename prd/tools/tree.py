@@ -727,7 +727,12 @@ MODULES = [
                     {
                         "id": "add-cluster",
                         "title": "添加集群",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-01"]},
+                        "tests": {
+                            "L3": [
+                                "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-01",
+                                "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-03",
+                            ]
+                        },
                     },
                     {
                         "id": "persistent-volumes",
