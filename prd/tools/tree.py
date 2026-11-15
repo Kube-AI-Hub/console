@@ -864,6 +864,11 @@ MODULES = [
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NETWORK_POLICIES-01"]},
                     },
                     {
+                        "id": "custom-resources-refresh",
+                        "title": "扩展资源列表刷新",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_RESOURCES_REFRESH-01"]},
+                    },
+                    {
                         "id": "custom-resources",
                         "title": "自定义资源",
                         "tests": {"L3": [

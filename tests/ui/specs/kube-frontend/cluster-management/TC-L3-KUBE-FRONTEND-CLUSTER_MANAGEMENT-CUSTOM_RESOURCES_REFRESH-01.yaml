@@ -1,0 +1,33 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_RESOURCES_REFRESH-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: custom-resources-refresh
+title: 扩展资源列表刷新
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/custom-resources'
+prd: prd/kube-frontend/cluster-management/custom-resources-refresh.md
+design: design/kube-frontend/cluster-management/custom-resources-refresh.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_RESOURCES_REFRESH-01
+
+story:
+- US1
+
+product: CRD 列表与某个 CRD 的实例列表都提供刷新入口，点击后只重发当前查询。
+preconditions:
+- 已登录且有集群管理员权限；集群至少有一个 CRD
+steps:
+- 打开自定义资源列表，确认刷新入口可用并点击，观察请求
+- 打开任一 CRD 的实例列表，确认刷新入口存在且可用
+steps_expected:
+- 两层列表的刷新入口存在且空闲时可用
+- 点击后重新发起对应查询
+expected:
+- 实例页刷新只针对当前 CRD
+troubleshoot:
+- 实例页没有按钮：onRefresh 插到了空态块而不是列表
+- 按钮永久禁用：schema 依赖数组缺少 isFetching
+update_automation:
+- 选择器：custom-resources:refresh / custom-resource:refresh

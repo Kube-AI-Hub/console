@@ -8,6 +8,7 @@ import { api as apiClient } from '@/api';
 import { useResourceListState } from '@/components/resource/useResourceListState';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * 自定义资源（CRD）.
@@ -57,10 +58,12 @@ export function CustomResourcesPage({ cluster }: CustomResourcesPageProps): Reac
       return a.kind.localeCompare(b.kind) * direction || a.name.localeCompare(b.name);
     });
   }, [filtered, list.sortBy, list.order]);
+  const listRefresh = useListRefresh('custom-resources', query);
 
   const schema = React.useMemo<ListSchema<CustomResourceSummary>>(
     () => ({
       title: t('cluster.customResources.title'),
+      refresh: listRefresh.refresh,
       description: t('cluster.customResources.description'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
@@ -140,6 +143,7 @@ export function CustomResourcesPage({ cluster }: CustomResourcesPageProps): Reac
         description: t('cluster.customResources.emptyDescription'),
       },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -149,7 +153,7 @@ export function CustomResourcesPage({ cluster }: CustomResourcesPageProps): Reac
       },
       pagination: { page: 1, pageSize: Math.max(rows.length, 10), total: rows.length },
     }),
-    [list.sortBy, list.order, rows.length, t],
+    [list.sortBy, list.order, query.isFetching, rows.length, t],
   );
 
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
@@ -166,6 +170,7 @@ export function CustomResourcesPage({ cluster }: CustomResourcesPageProps): Reac
     <AiSurface as="section" aiId="custom-resources:surface" state={state} className="min-w-0">
       <ResourceList
         schema={schema}
+        onRefresh={listRefresh.onRefresh}
         rows={rows}
         loading={state === 'loading'}
         searchValue={list.keyword}

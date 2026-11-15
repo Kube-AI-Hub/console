@@ -10,6 +10,7 @@ import { useResourceListState } from '@/components/resource/useResourceListState
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { DefinitionRow } from '@/components/resource/DefinitionRow';
 import { formatTimestamp } from '@/lib/time';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * 自定义资源详情.
@@ -63,10 +64,12 @@ export function CustomResourceDetailPage({ cluster, name }: CustomResourceDetail
   const namespaced = crd.data?.scope === 'Namespaced';
   /** The exact collection path this page reads; shown so it can be reproduced. */
   const apiPath = crd.data ? `/apis/${crd.data.group}/${crd.data.readVersion}/${crd.data.plural}` : '';
+  const listRefresh = useListRefresh('custom-resource', instances);
 
   const schema = React.useMemo<ListSchema<CustomResourceInstance>>(
     () => ({
       title: t('cluster.customResources.instances'),
+      refresh: listRefresh.refresh,
       description: t('cluster.customResources.instancesDescription'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.namespace ? `${row.namespace}/${row.name}` : row.name }),
@@ -112,6 +115,7 @@ export function CustomResourceDetailPage({ cluster, name }: CustomResourceDetail
         description: t('cluster.customResources.instancesEmptyDescription'),
       },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -121,7 +125,7 @@ export function CustomResourceDetailPage({ cluster, name }: CustomResourceDetail
       },
       pagination: { page: 1, pageSize: Math.max(rows.length, 10), total: rows.length },
     }),
-    [list.sortBy, list.order, namespaced, rows.length, t, apiPath],
+    [apiPath, instances.isFetching, list.sortBy, list.order, namespaced, rows.length, t],
   );
 
   /*
@@ -182,6 +186,7 @@ export function CustomResourceDetailPage({ cluster, name }: CustomResourceDetail
         ) : (
           <ResourceList
             schema={schema}
+            onRefresh={listRefresh.onRefresh}
             rows={rows}
             loading={false}
             searchValue={list.keyword}

@@ -982,6 +982,13 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NETWORK_POLICIES-01
+    - id: custom-resources-refresh
+      title: 扩展资源列表刷新
+      prd: prd/kube-frontend/cluster-management/custom-resources-refresh.md
+      design: design/kube-frontend/cluster-management/custom-resources-refresh.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_RESOURCES_REFRESH-01
     - id: custom-resources
       title: 自定义资源
       prd: prd/kube-frontend/cluster-management/custom-resources.md
