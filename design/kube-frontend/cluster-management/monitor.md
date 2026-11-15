@@ -8,6 +8,7 @@
 
 ## 关联需求
 
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-05
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-04
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-03
@@ -50,6 +51,99 @@
 **被否方案**：信任指标名里的语义。指标名不承诺单位。
 
 **何时重新考虑**：监控 API 提供已归一化的比率指标时（例如 `cluster_cpu_utilisation` 这类）。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-05 — 物理资源面板按旧 console 的分组补全，指标名照抄记录规则
+
+旧 console 的「物理资源监控」在一列里画约三十张图：GPU 三项、主机十余项、磁盘吞吐与 IOPS、网络两项、RDMA 十项。
+新 UI 第一版只画了其中十三张。补齐时不改指标来源：全部沿用 KubeSphere 的 `cluster_*` 记录规则名（实测
+`/kapis/monitoring.kubesphere.io/v1alpha3/cluster?metrics_filter=<name># 集群监控 · 技术方案（L3）
+
+[子模块需求](../../../prd/kube-frontend/cluster-management/monitor.md)
+
+## 概述
+
+四个趋势卡片，数据来自 KubeSphere 监控的 range query；百分比由两条序列相除得到。
+
+## 关联需求
+
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-05
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-04
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-03
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-02
+
+## 设计目标与非目标
+
+目标：形状与数值同时可读；步长随窗口放大；缺数据要说出来。
+
+非目标：下钻、排行、组件专用面板、阈值线。
+
+## 关键约束
+
+- `GET /kapis/monitoring.kubesphere.io/v1alpha3/cluster?metrics_filter=…&start=…&end=…&step=…&cluster=…`
+- range 返回 `matrix`：`results[].data.result[].values = [[ts, "value"], …]`
+- 百分比需要成对的用量/总量序列：`cluster_cpu_usage`/`cluster_cpu_total`、`cluster_memory_usage_wo_cache`/`cluster_memory_total`
+
+## 方案决策
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-01 — 内联 SVG，不引入图表库
+
+**为什么**：ai-kit 没有图表库；为了四条折线引入一个库（通常 50KB+ gzip 并带自己的主题体系）比整个监控页 chunk 还大。这里需要的只是「把 N 个点连成线」，即一个 `viewBox` 加一条 `path`。
+
+**被否方案**：引 ECharts/Recharts。它们解决的是坐标轴、缩放、堆叠、tooltip——当前四个指标都不需要。
+
+**何时重新考虑**：需要交互式缩放、多序列叠加或 tooltip 时。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-02 — 窗口决定步长
+
+**为什么**：API 返回原始采样点。7 天按 60s 采样是每条序列 10,080 点——传输、解析与绘制都是浪费，画出来还是一团。每个窗口配一个步长，使点数稳定在 60 左右：1h→60s、6h→5m、24h→15m、7d→2h。
+
+**被否方案**：固定 60s 步长。见上。
+
+**何时重新考虑**：需要秒级放大某个时间点时，再加独立的时间范围选择器。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-03 — 百分比必须相除，不能直接画指标
+
+**为什么**：`cluster_cpu_usage` 单位是**核**，`cluster_memory_usage_wo_cache` 单位是**字节**。第一版直接把内存指标当百分比画，页面显示了 `937053405184%`——这个数字荒谬到一眼能看出，但如果集群只有 8 核，CPU 的「34」会被误读成 34% 而不是 34 核。两处都必须读总量再相除。
+
+**被否方案**：信任指标名里的语义。指标名不承诺单位。
+
+**何时重新考虑**：监控 API 提供已归一化的比率指标时（例如 `cluster_cpu_utilisation` 这类）。
+
+ 对每条返回一条序列），因为换名字会让
+「页面有卡片」和「后端真有这条指标」脱钩。被否方案：用 PromQL 自行聚合原始指标——记录规则已经是服务器算好的
+总量，客户端再算一遍只会把单位与分母的错误引入页面。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-06 — 加分组标题，而不是继续平铺三十张卡片
+
+一列三十张无标题卡片读不出「哪些数字属于同一件事」。页面按 GPU / 主机资源 / 磁盘 I/O / 网络 / RDMA 五组渲染，
+组标题只做分区不折叠；组内仍是两列网格。被否方案：做页签——切换页签会把「同时看 GPU 与主机」的对比场景拆散，
+而监控页的首要任务正是横向比较。
+
+### CON-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-01 — 指标名与单位
+
+| 卡片 | 指标 | 呈现 |
+| --- | --- | --- |
+| GPU 显存使用率 | `cluster_gpu_memory_utilisation` | API 为 0–1 比值，×100 显示为百分比 |
+| GPU 使用率 | `cluster_gpu_utilization` | 同上 |
+| 已分配 GPU 卡数 | `cluster_gpu_allocated` | 整数 |
+| 磁盘读/写吞吐 | `cluster_disk_read_throughput` / `cluster_disk_write_throughput` | 字节/秒，按 B/KiB/MiB/GiB 缩放 |
+| 磁盘读/写 IOPS | `cluster_disk_read_iops` / `cluster_disk_write_iops` | 两位小数（次/秒） |
+| RDMA 健康度 | `cluster_ib_health` | 0–1 比值 ×100 |
+| RDMA 端口可用率 | `cluster_ib_port_up` ÷ `cluster_ib_port_total` | 百分比（同一时间戳相除） |
+| RDMA 发送/接收速率 | `cluster_ib_tx_bytes` / `cluster_ib_rx_bytes` | 字节/秒 |
+| RDMA 链路速率 | `cluster_ib_link_speed` | **bit/s**，÷1e9 显示为 Gb/s |
+| RDMA 错误/重传/丢弃/链路中断 | `cluster_ib_rx_errors` / `cluster_ib_retrans` / `cluster_ib_discards` / `cluster_ib_link_downed` | 整数计数 |
+
+### GOT-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-01 — 链路速率是 bit/s，不是字节
+
+`cluster_ib_link_speed` 返回 907500000000（907.5 Gb/s 的 fabric）。当成字节/秒格式化会显示成 825 GiB/s
+——差 8 倍且单位错。页面因此单独用 linkRate 格式（÷1e9 + Gb/s），并在卡片上保留一位小数。
+
+### GOT-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-02 — GPU 指标是比值，不是百分比
+
+`cluster_gpu_memory_utilisation` / `cluster_gpu_utilization` 与 inode 一样是 0–1 比值：直接画会在 0–1 区间
+显示成一条平线（1% 的卡看起来是满的）。页面用 scale=100 换算，而不是把 0–1 当成 0–100。
 
 ### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-04 — 曲线按卡片自身峰值缩放
 

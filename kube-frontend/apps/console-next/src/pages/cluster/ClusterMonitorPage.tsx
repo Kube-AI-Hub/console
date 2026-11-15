@@ -50,33 +50,76 @@ type WindowKey = (typeof WINDOWS)[number]['key'];
  * reports as 0..1 into a percentage. Disk and inode usage are ratios of two series,
  * so they carry a `total` like CPU and memory do.
  */
+/**
+ * Every trend on the page, grouped the way the old console grouped its physical-resource
+ * panel: GPU, host resources, disk I/O, network, RDMA.
+ *
+ * The old console rendered about thirty separate cards in one column. The same facts are kept
+ * here but split into titled groups: a flat wall of sparklines does not say which numbers
+ * belong together. The nodeScoped flag marks the three charts the node detail reuses (they
+ * read the node_* series instead of cluster_*).
+ */
 const CHARTS = [
-  { key: 'cpu', metric: 'cluster_cpu_usage', total: 'cluster_cpu_total', kind: 'percent', aiId: 'cluster-monitor:cpu' },
+  // --- GPU ---------------------------------------------------------------
+  { key: 'gpuMemory', group: 'gpu', metric: 'cluster_gpu_memory_utilisation', kind: 'percent', scale: 100, aiId: 'cluster-monitor:gpu-memory' },
+  { key: 'gpuUtilization', group: 'gpu', metric: 'cluster_gpu_utilization', kind: 'percent', scale: 100, aiId: 'cluster-monitor:gpu-utilization' },
+  { key: 'gpuAllocated', group: 'gpu', metric: 'cluster_gpu_allocated', kind: 'count', aiId: 'cluster-monitor:gpu-allocated' },
+  // --- Host resources -----------------------------------------------------
+  { key: 'cpu', group: 'host', nodeScoped: true, metric: 'cluster_cpu_usage', total: 'cluster_cpu_total', kind: 'percent', aiId: 'cluster-monitor:cpu' },
   {
     key: 'memory',
+    group: 'host',
+    nodeScoped: true,
     metric: 'cluster_memory_usage_wo_cache',
     total: 'cluster_memory_total',
     kind: 'percent',
     aiId: 'cluster-monitor:memory',
   },
-  { key: 'pods', metric: 'cluster_pod_running_count', kind: 'count', aiId: 'cluster-monitor:pods' },
-  { key: 'podsAbnormal', metric: 'cluster_pod_abnormal_count', kind: 'count', aiId: 'cluster-monitor:pods-abnormal' },
-  { key: 'podsSucceeded', metric: 'cluster_pod_succeeded_count', kind: 'count', aiId: 'cluster-monitor:pods-succeeded' },
-  { key: 'nodes', metric: 'cluster_node_online', kind: 'count', aiId: 'cluster-monitor:nodes' },
-  { key: 'load1', metric: 'cluster_load1', kind: 'decimal', aiId: 'cluster-monitor:load1' },
-  { key: 'load5', metric: 'cluster_load5', kind: 'decimal', aiId: 'cluster-monitor:load5' },
-  { key: 'load15', metric: 'cluster_load15', kind: 'decimal', aiId: 'cluster-monitor:load15' },
+  { key: 'pods', group: 'host', nodeScoped: true, metric: 'cluster_pod_running_count', kind: 'count', aiId: 'cluster-monitor:pods' },
+  { key: 'podsAbnormal', group: 'host', metric: 'cluster_pod_abnormal_count', kind: 'count', aiId: 'cluster-monitor:pods-abnormal' },
+  { key: 'podsSucceeded', group: 'host', metric: 'cluster_pod_succeeded_count', kind: 'count', aiId: 'cluster-monitor:pods-succeeded' },
+  { key: 'nodes', group: 'host', metric: 'cluster_node_online', kind: 'count', aiId: 'cluster-monitor:nodes' },
+  { key: 'load1', group: 'host', metric: 'cluster_load1', kind: 'decimal', aiId: 'cluster-monitor:load1' },
+  { key: 'load5', group: 'host', metric: 'cluster_load5', kind: 'decimal', aiId: 'cluster-monitor:load5' },
+  { key: 'load15', group: 'host', metric: 'cluster_load15', kind: 'decimal', aiId: 'cluster-monitor:load15' },
   {
     key: 'disk',
+    group: 'host',
     metric: 'cluster_disk_size_usage',
     total: 'cluster_disk_size_capacity',
     kind: 'percent',
     aiId: 'cluster-monitor:disk',
   },
-  { key: 'inode', metric: 'cluster_disk_inode_utilisation', kind: 'percent', scale: 100, aiId: 'cluster-monitor:inode' },
-  { key: 'netTx', metric: 'cluster_net_bytes_transmitted', kind: 'rate', aiId: 'cluster-monitor:net-tx' },
-  { key: 'netRx', metric: 'cluster_net_bytes_received', kind: 'rate', aiId: 'cluster-monitor:net-rx' },
+  { key: 'inode', group: 'host', metric: 'cluster_disk_inode_utilisation', kind: 'percent', scale: 100, aiId: 'cluster-monitor:inode' },
+  // --- Disk I/O -----------------------------------------------------------
+  { key: 'diskReadThroughput', group: 'disk', metric: 'cluster_disk_read_throughput', kind: 'rate', aiId: 'cluster-monitor:disk-read-throughput' },
+  { key: 'diskWriteThroughput', group: 'disk', metric: 'cluster_disk_write_throughput', kind: 'rate', aiId: 'cluster-monitor:disk-write-throughput' },
+  { key: 'diskReadIops', group: 'disk', metric: 'cluster_disk_read_iops', kind: 'decimal', aiId: 'cluster-monitor:disk-read-iops' },
+  { key: 'diskWriteIops', group: 'disk', metric: 'cluster_disk_write_iops', kind: 'decimal', aiId: 'cluster-monitor:disk-write-iops' },
+  // --- Network ------------------------------------------------------------
+  { key: 'netTx', group: 'network', metric: 'cluster_net_bytes_transmitted', kind: 'rate', aiId: 'cluster-monitor:net-tx' },
+  { key: 'netRx', group: 'network', metric: 'cluster_net_bytes_received', kind: 'rate', aiId: 'cluster-monitor:net-rx' },
+  // --- RDMA / InfiniBand ---------------------------------------------------
+  { key: 'rdmaHealth', group: 'rdma', metric: 'cluster_ib_health', kind: 'percent', scale: 100, aiId: 'cluster-monitor:rdma-health' },
+  {
+    key: 'rdmaPorts',
+    group: 'rdma',
+    metric: 'cluster_ib_port_up',
+    total: 'cluster_ib_port_total',
+    kind: 'percent',
+    aiId: 'cluster-monitor:rdma-ports',
+  },
+  { key: 'rdmaTx', group: 'rdma', metric: 'cluster_ib_tx_bytes', kind: 'rate', aiId: 'cluster-monitor:rdma-tx' },
+  { key: 'rdmaRx', group: 'rdma', metric: 'cluster_ib_rx_bytes', kind: 'rate', aiId: 'cluster-monitor:rdma-rx' },
+  { key: 'rdmaLinkSpeed', group: 'rdma', metric: 'cluster_ib_link_speed', kind: 'linkRate', aiId: 'cluster-monitor:rdma-link-speed' },
+  { key: 'rdmaRxErrors', group: 'rdma', metric: 'cluster_ib_rx_errors', kind: 'count', aiId: 'cluster-monitor:rdma-rx-errors' },
+  { key: 'rdmaRetrans', group: 'rdma', metric: 'cluster_ib_retrans', kind: 'count', aiId: 'cluster-monitor:rdma-retrans' },
+  { key: 'rdmaDiscards', group: 'rdma', metric: 'cluster_ib_discards', kind: 'count', aiId: 'cluster-monitor:rdma-discards' },
+  { key: 'rdmaLinkDowned', group: 'rdma', metric: 'cluster_ib_link_downed', kind: 'count', aiId: 'cluster-monitor:rdma-link-downed' },
 ] as const;
+
+/** Section order on the page; charts keep array order inside each group. */
+const GROUPS = ['gpu', 'host', 'disk', 'network', 'rdma'] as const;
 
 /** Every metric a chart needs, including the totals the ratios divide by. */
 const METRICS = Array.from(
@@ -85,10 +128,17 @@ const METRICS = Array.from(
 
 export function ClusterMonitorPage({ cluster, node }: ClusterMonitorPageProps): React.ReactElement {
   const t = useT();
-  const charts = React.useMemo(() => node ? CHARTS.slice(0, 3).map((chart) => ({
-    ...chart, metric: chart.metric.replace(/^cluster_/, 'node_'),
-    ...('total' in chart ? { total: chart.total.replace(/^cluster_/, 'node_') } : {}),
-  })) : CHARTS, [node]);
+  const charts = React.useMemo(
+    () =>
+      node
+        ? CHARTS.filter((chart) => 'nodeScoped' in chart && chart.nodeScoped).map((chart) => ({
+            ...chart,
+            metric: chart.metric.replace(/^cluster_/, 'node_'),
+            ...('total' in chart ? { total: chart.total.replace(/^cluster_/, 'node_') } : {}),
+          }))
+        : CHARTS,
+    [node],
+  );
   const metrics = React.useMemo(() => node ? Array.from(new Set(charts.flatMap((chart) =>
     'total' in chart && chart.total ? [chart.metric, chart.total] : [chart.metric]))) : METRICS, [charts, node]);
   const [windowKey, setWindowKey] = React.useState<WindowKey>('1h');
@@ -229,27 +279,42 @@ export function ClusterMonitorPage({ cluster, node }: ClusterMonitorPageProps): 
         <ResourceErrorPanel error={trends.error} onRetry={() => void trends.refetch()} retryAiId="cluster-monitor:retry" />
       ) : null}
 
-      {state === 'ready' ? (
-        <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
-          {charts.map((chart) => (
-            <TrendCard
-              key={chart.key}
-              title={t(`cluster.monitor.${chart.key}`)}
-              aiId={chart.aiId}
-              series={plotted.get(chart.key)}
-              kind={chart.kind}
-              start={range.start}
-              end={range.end}
-            />
-          ))}
-        </div>
-      ) : null}
+      {state === 'ready'
+        ? GROUPS.filter((group) => charts.some((chart) => chart.group === group)).map((group) => {
+            const inGroup = charts.filter((chart) => chart.group === group);
+            return (
+              <section key={group} className="flex flex-col gap-2" data-ai-id={`cluster-monitor:group:${group}`}>
+                <h2 className="text-sm font-semibold text-ai-fg-secondary">{t(`cluster.monitor.group.${group}`)}</h2>
+                <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
+                  {inGroup.map((chart) => (
+                    <TrendCard
+                      key={chart.key}
+                      title={t(`cluster.monitor.${chart.key}`)}
+                      aiId={chart.aiId}
+                      series={plotted.get(chart.key)}
+                      kind={chart.kind}
+                      start={range.start}
+                      end={range.end}
+                    />
+                  ))}
+                </div>
+              </section>
+            );
+          })
+        : null}
     </AiSurface>
   );
 }
 
 /** How a chart prints its numbers. */
-type ChartKind = 'percent' | 'count' | 'decimal' | 'rate';
+/**
+ * How a chart prints its numbers.
+ *
+ * linkRate is the RDMA case: the API reports bits per second (907,500,000,000 for a
+ * 907.5 Gb/s fabric), and printing that raw number is unreadable, so it is divided by
+ * 1e9 and labelled Gb/s.
+ */
+type ChartKind = 'percent' | 'count' | 'decimal' | 'rate' | 'linkRate';
 
 /** Bytes per second in the units a reader recognises (KiB/s, MiB/s, ...). */
 function formatBytesPerSecond(value: number): string {
@@ -366,5 +431,6 @@ function formatValue(value: number, kind: ChartKind): string {
   if (kind === 'percent') return `${Math.round(value)}%`;
   if (kind === 'decimal') return value.toFixed(2);
   if (kind === 'rate') return `${formatBytesPerSecond(value)}/s`;
+  if (kind === 'linkRate') return `${(value / 1e9).toFixed(1)} Gb/s`;
   return String(Math.round(value));
 }

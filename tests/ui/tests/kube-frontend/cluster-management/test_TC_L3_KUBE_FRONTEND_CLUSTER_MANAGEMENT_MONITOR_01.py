@@ -35,7 +35,10 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_MONITOR_01(cluster_monitor_page,
     # the page now draws thirteen cards. Asserting the core four are among them keeps this case about
     # AC-01 without freezing the total at a number AC-03 owns.
     assert ui.charts() >= 4, f"expected at least the four core charts, found {ui.charts()}"
-    assert ui.charts() == 13, f"expected the thirteen physical-resource charts, found {ui.charts()}"
+    # The page now also carries the GPU / disk-IO / RDMA cards (AC-05): count every card,
+    # whether it drew a sparkline or the explicit no-data state.
+    total_cards = ui.charts() + ui.empty_cards()
+    assert total_cards == 29, f"expected the twenty-nine physical-resource charts, found {total_cards}"
     assert ui.empty_cards() == 0, "监控有数据时不应出现无数据卡片"
 
     for card in ui.CARDS:
@@ -84,7 +87,7 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_MONITOR_01(cluster_monitor_page,
     ui.select_range("24h")
     ui.page.wait_for_timeout(4000)
     ui.wait_ready()
-    assert ui.charts() == 13
+    assert ui.charts() + ui.empty_cards() == 29
     after = ui.latest("cpu")
     # The value may legitimately match (an idle cluster is idle at both scales), so
     # the assertion is that the page still renders a valid percentage for the new

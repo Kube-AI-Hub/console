@@ -897,7 +897,7 @@ MODULES = [
                     {
                         "id": "monitor",
                         "title": "集群监控",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-03", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-04"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-03", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-04", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-05"]},
                     },
                     {
                         "id": "node-usage",

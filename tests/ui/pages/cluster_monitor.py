@@ -24,6 +24,29 @@ class ClusterMonitorPage:
 
     CARDS = ("cpu", "memory", "pods", "nodes")
 
+    #: Group order the page renders (GPU → host → disk I/O → network → RDMA).
+    GROUPS = ("gpu", "host", "disk", "network", "rdma")
+
+    #: Physical-resource cards added on top of the original thirteen.
+    EXTRA_CARDS = (
+        "gpu-memory",
+        "gpu-utilization",
+        "gpu-allocated",
+        "disk-read-throughput",
+        "disk-write-throughput",
+        "disk-read-iops",
+        "disk-write-iops",
+        "rdma-health",
+        "rdma-ports",
+        "rdma-tx",
+        "rdma-rx",
+        "rdma-link-speed",
+        "rdma-rx-errors",
+        "rdma-retrans",
+        "rdma-discards",
+        "rdma-link-downed",
+    )
+
     def __init__(self, page: Page, base_url: str, cluster: str = "host", api: ApiLike | None = None) -> None:
         self.page = page
         self.base_url = base_url.rstrip("/")
@@ -59,6 +82,19 @@ class ClusterMonitorPage:
 
     def empty_cards(self) -> int:
         return self.page.locator('[data-ai-id$=":empty"]').count()
+
+    def groups(self) -> list[str]:
+        """Group ids in render order, e.g. ['gpu', 'host', ...]."""
+        return [
+            (element.get_attribute('data-ai-id') or '').split(':')[-1]
+            for element in self.page.locator('[data-ai-id^="cluster-monitor:group:"]').all()
+        ]
+
+    def group_titles(self) -> list[str]:
+        return [
+            element.inner_text().strip()
+            for element in self.page.locator('[data-ai-id^="cluster-monitor:group:"] > h2').all()
+        ]
 
     def select_range(self, key: str) -> None:
         self.page.locator(f'[data-ai-id="cluster-monitor:range:{key}"]').click()

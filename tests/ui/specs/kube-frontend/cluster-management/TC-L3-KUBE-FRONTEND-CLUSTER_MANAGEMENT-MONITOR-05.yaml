@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-05
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: monitor
+title: 集群监控 · GPU / 磁盘 I/O / RDMA 面板与单位
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/monitor'
+prd: prd/kube-frontend/cluster-management/monitor.md
+design: design/kube-frontend/cluster-management/monitor.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-05
+
+story:
+- US1
+
+product: 物理资源面板按 GPU / 主机资源 / 磁盘 I/O / 网络 / RDMA 五组显示，补齐旧 console 的 GPU、磁盘吞吐/IOPS 与 RDMA 卡片，单位正确。
+preconditions:
+- 监控后端可用（/kapis/monitoring.kubesphere.io/v1alpha3/cluster 返回指标）
+steps:
+- 打开集群监控，等 cluster-monitor:surface 进入 ready
+- 核对五个分组标题存在且顺序为 GPU → 主机资源 → 磁盘 I/O → 网络 → RDMA
+- 核对 GPU/磁盘/RDMA 卡片存在且每个有当前值
+- 用接口同一窗口的序列核对：GPU 显存使用率的当前值 = 比值×100；RDMA 端口可用率 = 端口up/端口total×100；链路速率显示为 Gb/s
+expected:
+- 五个分组标题与顺序正确；卡片总数 = 29（GPU 3 + 主机资源 11 + 磁盘 I/O 4 + 网络 2 + RDMA 9）
+- GPU 使用率/显存为 0–100 百分比；已分配卡数为整数；磁盘吞吐带 /s 单位；IOPS 两位小数
+- 链路速率形如 '907.5 Gb/s'（不是原始大整数）
+- 任一卡片无数据时显示空态说明而不是 0
+troubleshoot:
+- 数值显示成 0–1：忘了 scale=100（GPU/健康度是比值）
+- 链路速率显示 907500000000.00：把 bit/s 当成普通小数，未用 Gb/s 格式
+update_automation:
+- 句柄：cluster-monitor:surface / :group:<gpu|host|disk|network|rdma> / :<card> / :<card>:latest
