@@ -555,6 +555,8 @@ export type { NodeListParams, NodeListStats, NodeMetricValues } from './node-lis
 export { nodeInsightsApi, NODE_INSIGHT_METRICS } from './node-insights';
 export type { NodeInsightValues, RdmaPort } from './node-insights';
 export { nodeRankingApi, NODE_RANK_METRICS } from './node-ranking';
+export { workloadRankingApi, WORKLOAD_RANK_METRICS } from './workload-ranking';
+export type { WorkloadRankMetric, WorkloadRankRow } from './workload-ranking';
 export type { NodeRankMetric, NodeRankRow } from './node-ranking';
 export {
   decodeEnvValue,

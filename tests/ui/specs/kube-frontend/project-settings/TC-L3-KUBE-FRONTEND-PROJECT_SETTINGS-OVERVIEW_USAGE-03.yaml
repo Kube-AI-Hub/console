@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW_USAGE-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: project-settings
+feature: overview-usage
+title: 项目概览 · 资源使用排行（Top 5）
+entry_url: '{BASE_URL}/kube-frontend/{WORKSPACE}/clusters/{CLUSTER}/projects/default/overview'
+prd: prd/kube-frontend/project-settings/overview-usage.md
+design: design/kube-frontend/project-settings/overview-usage.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW_USAGE-03
+
+story:
+- US1
+
+product: 项目概览提供「资源使用排行（Top 5）」，CPU 与内存两个页签分别列出用量最高的 5 个工作负载；数值来自监控聚合的排序结果，空与失败都有独立呈现。
+preconditions:
+- 已登录；项目 default 有工作负载且监控已上报用量
+steps:
+- 通过 API 读 `namespaces/default/workloads?sort_metric=workload_cpu_usage` 拿到期望的前几名
+- 打开项目概览，核对排行区块存在且默认 CPU 页签列出 ≤5 行
+- 核对每行序号连续、名称与 API 的 metric.workload 名称部分一致、数值为正
+- 切到内存页签，核对同样 ≤5 行且数值带单位
+expected:
+- 区块 project-overview:ranking 存在；页签句柄 :ranking:tab:cpu / :ranking:tab:memory
+- CPU 页签行数与 API 返回的样本数一致（≤5），名称来自 metric.workload
+- 内存页签行数 ≤5，数值格式为 GiB/MiB
+- 两页签都不显示假 0：无样本的工作负载不出现在排行里
+troubleshoot:
+- 整页报错 `TabsContent must be used within Tabs`：面板没作为 Tabs 的子节点
+- 排行按 pod 名而不是工作负载名：读错了接口（应为 namespaces/<ns>/workloads 聚合）
+update_automation:
+- 句柄：project-overview:ranking / :ranking:tab:cpu / :ranking:tab:memory / :ranking:list / :ranking:empty / :ranking:error / :ranking:retry

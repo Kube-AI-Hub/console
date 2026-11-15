@@ -1,8 +1,14 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { limitRangesApi, projectInfoApi, type ProjectInfo } from '@kube-ai-hub/api-client';
-import { AiButton, AiSurface, Skeleton } from '@kube-ai-hub/ui';
+import {
+  limitRangesApi,
+  projectInfoApi,
+  workloadRankingApi,
+  type ProjectInfo,
+  type WorkloadRankMetric,
+} from '@kube-ai-hub/api-client';
+import { AiButton, AiSurface, Skeleton, Tabs, TabsContent } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -226,6 +232,8 @@ export function ProjectOverviewPage({ workspace, cluster, namespace }: ProjectOv
             ) : null}
           </section>
 
+          <UsageRankingSection cluster={cluster} namespace={namespace} workspace={workspace} />
+
           <section className="rounded-lg border border-ai-border bg-ai-surface p-4" data-ai-id="project-overview:links">
             <h2 className="mb-3 text-sm font-medium text-ai-fg">{t('project.overview.shortcuts')}</h2>
             <div className="flex flex-wrap gap-2 text-sm">
@@ -249,6 +257,146 @@ export function ProjectOverviewPage({ workspace, cluster, namespace }: ProjectOv
   );
 }
 
+
+/**
+ * 资源使用排行（项目内 Top 5）.
+ *
+ * The old console puts this at the bottom of the project overview: which workloads are
+ * actually consuming the project's CPU and memory. It answers a different question from the
+ * usage card above — that one is "how much is used", this one is "by whom".
+ *
+ * Two metrics, switched by tabs rather than two stacked tables: they rank the same set of
+ * workloads, so showing both at once doubles the height for one extra click saved.
+ *
+ * A workload the monitoring backend cannot name is not listed — inventing a row for it would
+ * put a name the reader cannot act on into a ranking of names.
+ */
+const RANK_METRICS: ReadonlyArray<{ key: WorkloadRankMetric; labelKey: 'project.overview.ranking.cpu' | 'project.overview.ranking.memory' }> = [
+  { key: 'workload_cpu_usage', labelKey: 'project.overview.ranking.cpu' },
+  { key: 'workload_memory_usage_wo_cache', labelKey: 'project.overview.ranking.memory' },
+];
+
+/**
+ * The list route for a workload kind, as a literal.
+ *
+ * The router's `to` is a typed union of every declared path, so it cannot be built from a
+ * template string at runtime; the three kinds that have a list page are spelled out here.
+ */
+function workloadListRoute(segment: 'deployments' | 'statefulsets' | 'daemonsets') {
+  switch (segment) {
+    case 'deployments':
+      return '/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/deployments' as const;
+    case 'statefulsets':
+      return '/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/statefulsets' as const;
+    default:
+      return '/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/daemonsets' as const;
+  }
+}
+
+/** Route segment for a workload kind, or null when the kind has no list page of its own. */
+function workloadRoute(kind: string): 'deployments' | 'statefulsets' | 'daemonsets' | null {
+  switch (kind.toLowerCase()) {
+    case 'deployment':
+      return 'deployments';
+    case 'statefulset':
+      return 'statefulsets';
+    case 'daemonset':
+      return 'daemonsets';
+    default:
+      return null;
+  }
+}
+
+function UsageRankingSection({
+  workspace,
+  cluster,
+  namespace,
+}: {
+  workspace: string;
+  cluster: string;
+  namespace: string;
+}): React.ReactElement {
+  const t = useT();
+  const [metric, setMetric] = React.useState<WorkloadRankMetric>(RANK_METRICS[0]!.key);
+  const ranking = useQuery({
+    queryKey: ['project-workload-ranking', cluster, namespace, metric],
+    queryFn: ({ signal }) => workloadRankingApi(apiClient).list({ cluster, namespace, metric, limit: 5, signal }),
+  });
+  const rows = ranking.data?.items ?? [];
+  const format = (value: number): string =>
+    metric === 'workload_cpu_usage' ? formatCpu(String(value)) : formatBytes(String(value));
+
+  return (
+    <section className="rounded-lg border border-ai-border bg-ai-surface p-4" data-ai-id="project-overview:ranking">
+      <h2 className="mb-3 text-sm font-medium text-ai-fg">{t('project.overview.ranking.title')}</h2>
+      <Tabs
+        value={metric}
+        onValueChange={(next) => setMetric(next as WorkloadRankMetric)}
+        items={RANK_METRICS.map((item) => ({
+          value: item.key,
+          label: t(item.labelKey),
+          aiId: `project-overview:ranking:tab:${item.key === 'workload_cpu_usage' ? 'cpu' : 'memory'}`,
+        }))}
+      >
+      {RANK_METRICS.map((item) => (
+        <TabsContent key={item.key} value={item.key}>
+          {ranking.isPending ? <Skeleton className="mt-3 h-20 w-full" /> : null}
+          {ranking.isError ? (
+            <div className="mt-3 flex flex-col items-start gap-2" data-ai-id="project-overview:ranking:error">
+              <p className="text-xs text-ai-fg-muted">{t('project.overview.ranking.unavailable')}</p>
+              <AiButton
+                aiId="project-overview:ranking:retry"
+                size="sm"
+                variant="secondary"
+                onClick={() => void ranking.refetch()}
+              >
+                {t('common.retry')}
+              </AiButton>
+            </div>
+          ) : null}
+          {ranking.isSuccess && rows.length === 0 ? (
+            <p className="mt-3 text-xs text-ai-fg-muted" data-ai-id="project-overview:ranking:empty">
+              {t('project.overview.ranking.empty')}
+            </p>
+          ) : null}
+          {rows.length > 0 ? (
+            <ol className="mt-3 flex flex-col gap-2 text-xs" data-ai-id="project-overview:ranking:list">
+              {rows.map((row, index) => {
+                const segment = workloadRoute(row.kind);
+                const label = (
+                  <span className="flex min-w-0 items-baseline gap-2">
+                    <span className="tabular-nums text-ai-fg-muted">{index + 1}</span>
+                    <span className="truncate font-medium text-ai-fg" data-ai-id={`project-overview:ranking:name:${row.name}`}>
+                      {row.name}
+                    </span>
+                    {row.kind ? <span className="text-[11px] text-ai-fg-muted">{row.kind}</span> : null}
+                  </span>
+                );
+                return (
+                  <li key={row.workload} className="flex items-center justify-between gap-3" data-ai-row={row.workload}>
+                    {segment ? (
+                      <Link
+                        to={workloadListRoute(segment)}
+                        params={{ workspace, cluster, namespace }}
+                        className="min-w-0 hover:text-ai-accent"
+                      >
+                        {label}
+                      </Link>
+                    ) : (
+                      label
+                    )}
+                    <span className="shrink-0 tabular-nums text-ai-fg-secondary">{format(row.value)}</span>
+                  </li>
+                );
+              })}
+            </ol>
+          ) : null}
+          </TabsContent>
+        ))}
+      </Tabs>
+    </section>
+  );
+}
 /**
  * The four usage items the card shows, each with the metrics that can answer it and the
  * quota keys that cap it.

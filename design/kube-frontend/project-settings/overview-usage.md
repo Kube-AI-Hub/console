@@ -8,6 +8,7 @@
 
 ## 关联需求
 
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW_USAGE-03
 - AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW_USAGE-01
 
 ## 设计目标与非目标
@@ -43,6 +44,22 @@
 **被否方案**：自动刷新（老 console 10s 刷新）。会为一个辅助卡片持续打监控接口，且与「进入页面看一次」的定位不符。
 **何时重新考虑**：概览改为运维常驻大屏时。
 
+### DEC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW_USAGE-03 — 排行读 workload rank，不自己算
+
+排行来自监控聚合 `kapis/monitoring.kubesphere.io/v1alpha3/namespaces/<ns>/workloads?sort_metric=…`，
+与旧 console 的 `stores/rank/workload` 同一条路径。自己按 pod 指标求和会得到「按 pod 名字」的排行，
+而读者要的是「按工作负载」——聚合层已经把 pod 归到 owner，取它即可。
+
+### DEC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW_USAGE-04 — 只列排序指标里有样本的工作负载
+
+响应对每个 `metrics_filter` 里的指标各返回一组样本。排名只取 `sort_metric` 那一组：先按它排出顺序，
+再逐条挑出有名字（`metric.workload`）与有效数值的样本。这样「没有内存样本」的工作负载不会因为恰好出现在
+内存序列里而混进 CPU 排行。
+
+### GOT-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW_USAGE-03 — TabsContent 必须在 Tabs 的 children 里
+
+ai-kit 的 `Tabs` 用 `items` 渲染触发条，但 `TabsContent` 走 Radix 的上下文；写成兄弟节点会抛
+`TabsContent must be used within Tabs`，整页变成错误边界。面板必须作为 `<Tabs>` 的子节点传入。
 ## 系统现状
 
 老 console `pages/projects/containers/Overview/ResourceUsage`：应用资源与物理资源两组，10s 自动刷新与多时间范围曲线。新 UI 概览此前无用量区块，PRD 曾把「用量排行」列为不做；本轮只补「当前用量」卡。

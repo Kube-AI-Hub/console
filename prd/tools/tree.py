@@ -984,7 +984,8 @@ MODULES = [
                     {
                         "id": "overview-usage",
                         "title": "项目概览资源用量",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW_USAGE-01"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW_USAGE-01",
+                            "TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW_USAGE-03"]},
                     },
                     {
                         "id": "baseinfo-stats",
