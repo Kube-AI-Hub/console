@@ -23,7 +23,7 @@
 目标：两个入口可达、行数与 openpitrix 工作空间集合一致、空态/失败态明确；仓库的增改删与索引同步可用且失败原因来自服务端；
 仓库详情能区分「还没同步/同步成功/同步失败」。
 
-非目标：应用部署（见 `installed-apps.md`）、按仓库过滤应用（接口不支持，DEC-02）、凭证加密（PRD「明确不做」）。
+非目标：应用部署（见 `installed-apps.md`）、按仓库过滤应用（接口不支持，见 DEC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-02）、凭证加密（PRD「明确不做」）。
 
 ## 关键约束
 
@@ -135,7 +135,7 @@
 
 ## 已知坑
 
-- **repo_id 过滤是空操作**：带与不带参数返回同样结果（DEC-02）。
+- **repo_id 过滤是空操作**：带与不带参数返回同样结果（见 DEC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-02）。
 - **repo 对象没有 type**：不要按 URL 猜类型（DEC-03）。
 - **`total_count` 而非 `totalItems`**：openpitrix 的分页字段名不同。
 - **apps 的工作空间前缀**：`/kapis/openpitrix.io/v1/apps` 是平台商店全量（30），工作空间页必须带 `/workspaces/<ws>`（15）。
@@ -154,7 +154,7 @@
 ## 后续改进
 
 - 仓库凭证加密存储（当前明文 JSON）。
-- 若 openpitrix 补上 repo↔app 关联，增加按仓库过滤的应用视图（DEC-02）。
+- 若 openpitrix 补上 repo↔app 关联，增加按仓库过滤的应用视图（见 DEC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-02）。
 
 ## 验收用例
 
