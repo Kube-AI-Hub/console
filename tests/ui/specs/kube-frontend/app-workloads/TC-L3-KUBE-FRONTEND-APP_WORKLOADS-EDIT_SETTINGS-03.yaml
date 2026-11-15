@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: edit-settings
+title: 编辑设置：容器资源限额
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/deployments'
+prd: prd/kube-frontend/app-workloads/edit-settings.md
+design: design/kube-frontend/app-workloads/edit-settings.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-03
+
+story:
+- US1
+
+product: 部署详情「编辑设置」里的容器 CPU/内存请求与上限，写入 resources.requests/limits 并可清空。
+preconditions:
+- 已登录且项目内可创建部署
+steps:
+- 创建一个无资源限额的部署并打开详情
+- 打开「编辑设置」，填写 CPU/内存请求与上限并保存
+- 回读 spec.template.spec.containers[0].resources
+- 再打开编辑设置，把四个字段清空后保存并回读
+steps_expected:
+- 回读的 requests/limits 与填写一致
+- 全部清空后 resources 字段被移除
+expected:
+- 请求大于上限时本地拒绝且不发请求
+troubleshoot:
+- 422：数量写法非法或请求大于上限
+- resources 仍存在但为空对象：清空逻辑未删除字段
+update_automation:
+- 选择器：deployments-detail:edit-settings / deployments-edit:cpu-request / :cpu-limit / :memory-request / :memory-limit / :submit

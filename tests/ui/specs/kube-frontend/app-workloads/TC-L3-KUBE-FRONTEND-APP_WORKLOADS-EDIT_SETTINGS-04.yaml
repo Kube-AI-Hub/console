@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-04
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: edit-settings
+title: 编辑设置：更新策略
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/deployments'
+prd: prd/kube-frontend/app-workloads/edit-settings.md
+design: design/kube-frontend/app-workloads/edit-settings.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-04
+
+story:
+- US1
+
+product: 部署/有状态副本集/守护进程集的更新策略（滚动/同时更新/手动更新）与滚动参数。
+preconditions:
+- 已登录且项目内可创建部署与有状态副本集
+steps:
+- 打开部署的「编辑设置」，把策略改为「同时更新（重建）」并保存，回读 spec.strategy
+- 再改回「滚动更新」，填写最大超出后保存并回读 rollingUpdate
+- 对创建的有状态副本集改策略为「手动更新」并回读 spec.updateStrategy
+steps_expected:
+- Recreate 时 rollingUpdate 被移除
+- RollingUpdate 时 rollingUpdate 与填写一致（其余键保留）
+- 有状态副本集用 updateStrategy 字段
+expected:
+- 非百分比/非整数在本地拒绝
+troubleshoot:
+- 策略没变：服务端默认 RollingUpdate，diff 不出现策略行属正常
+- 字段写到 strategy 而非 updateStrategy：kind 映射错误
+update_automation:
+- 选择器：deployments-edit:strategy / :strategy-type / :strategy-max-surge / :strategy-max-unavailable / :strategy-partition

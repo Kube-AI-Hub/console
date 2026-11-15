@@ -24,6 +24,9 @@
 
 - **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-01** — 已知一个部署已存在，当打开其详情并进入「编辑设置」的「高级设置」，则出现「选择节点」。
 - **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-02** — 已知一个任务已存在，当打开其「编辑设置」，则出现「最大重试次数」，且不出现「选择节点」。已知打开一个容器组详情，则操作里没有「编辑设置」。
+- **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-03** — 已知一个部署的容器没有设置资源限额，当在「编辑设置」里为容器填写 CPU/内存的请求与上限并保存，则回读该部署的 `spec.template.spec.containers[].resources` 中 requests/limits 与填写一致；只填请求不填上限时只写 requests；全部留空时 `resources` 字段被移除；请求大于上限或数量写法不合法（例如 `abc`）时在本地拒绝并说明原因，不发请求。
+- **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-04** — 已知一个部署（有状态副本集/守护进程集同理），当在「编辑设置」里把更新策略改为「同时更新」（有状态副本集/守护进程集为「手动更新」）并保存，则回读 `spec.strategy.type`（有状态副本集与守护进程集为 `spec.updateStrategy.type`）为该值且 `rollingUpdate` 字段被移除；改回「滚动更新」并填写最大不可用/最大超出（有状态副本集为分区）后保存，则回读 `rollingUpdate` 与填写一致；百分比或整数以外的值在本地拒绝。
+- **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-05** — 已知一个部署已存在且其选择器为 `app=<name>`，当在「编辑设置」的高级设置里新增节点选择（`kubernetes.io/os=linux`）与容器组注解（`prometheus.io/scrape=true`）并保存，则回读 `spec.template.spec.nodeSelector` 与 `spec.template.metadata.annotations` 与填写一致；当移除容器组标签中「选择器依赖的标签」时，页面给出说明并禁用保存且不发请求；把选择器依赖的标签保留、另加一条新标签后保存，则回读的容器组标签同时包含两者；节点选择留空时该字段被移除。
 
 ## 设计目标
 

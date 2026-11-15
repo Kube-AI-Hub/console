@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-05
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: edit-settings
+title: 编辑设置：选择节点与容器组标签注解
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/deployments'
+prd: prd/kube-frontend/app-workloads/edit-settings.md
+design: design/kube-frontend/app-workloads/edit-settings.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-05
+
+story:
+- US1
+
+product: 编辑设置的高级设置：节点选择、容器组标签与注解；容器组标签必须保留选择器依赖的标签。
+preconditions:
+- 已登录且项目内可创建部署
+steps:
+- 创建部署并打开「编辑设置」
+- 移除容器组标签中选择器依赖的标签，观察保存状态
+- 恢复该标签、新增一条标签与一条注解、添加节点选择后保存
+- 回读 spec.template 的 labels/annotations 与 spec.template.spec.nodeSelector
+steps_expected:
+- 移除选择器标签时给出说明且保存禁用、不发请求
+- 回读的三处字段与填写一致
+- 节点选择留空时字段被移除
+expected:
+- 键重复或格式非法时本地拒绝
+troubleshoot:
+- 422 immutable：选择器依赖的标签被改动
+- 字段未写入：路径按 kind 取错（cronjobs 在 jobTemplate 下）
+update_automation:
+- 选择器：deployments-edit:advanced / edit-settings:node-selector-* / edit-settings:pod-labels-* / edit-settings:pod-annotations-* / deployments-edit:selector-error

@@ -10,6 +10,9 @@
 
 - `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-01`
 - `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-02`
+- `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-03`
+- `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-04`
+- `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-05`
 
 ## 设计目标与非目标
 
@@ -88,3 +91,25 @@ kube-frontend 的负载详情接管「编辑设置」时，复用这里的页签
 ## 验收用例
 
 - `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-01`
+
+
+## 资源限额与更新策略的实现决策
+
+### DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-03 — 资源与策略在存储对象上就地改写，不重建
+
+**为什么**：提交是整对象 PUT，重建 `resources`/`strategy` 会抹掉表单不展示的键（hugepages、GPU 资源、驱动写入的默认 rollingUpdate 参数）。实现读出现有映射、只覆盖 cpu/memory 与本次涉及的 rollingUpdate 字段，其余原样写回。
+
+**被否方案**：用表单值整体替换 `resources` / `rollingUpdate`。实测会把 `maxUnavailable: 25%` 这类服务端默认值清掉。
+
+### DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-04 — 非滚动策略下删除 rollingUpdate
+
+**为什么**：Recreate/OnDelete 不接受滚动参数；留着是死数据，下一次有人改回滚动时又会悄悄生效。
+
+### DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-EDIT_SETTINGS-05 — 数量与顺序在本地校验
+
+**为什么**：`requests > limits` 会被 apiserver 拒绝，数量拼错同样；本地拒绝能把「哪一项错了」说清楚，而不是把 422 原文抛给读者。
+
+## 已知坑
+
+- 部署的 `spec.strategy` 与有状态副本集/守护进程集的 `spec.updateStrategy` 是两个不同字段，共用一套表单时必须按 kind 取路径。
+- 新建对象时服务端会补 `strategy.rollingUpdate.maxUnavailable: 25%`，所以「没改策略」时 diff 不应出现策略行；只有读者真的改了才提交。
