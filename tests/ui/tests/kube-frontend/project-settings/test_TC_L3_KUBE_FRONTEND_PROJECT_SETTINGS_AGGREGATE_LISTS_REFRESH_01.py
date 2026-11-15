@@ -24,6 +24,13 @@ def test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_AGGREGATE_LISTS_REFRESH_01(project
     with ui.page.expect_request(lambda request: "/pods" in request.url and request.method == "GET", timeout=30_000):
         monitor.click()
 
+    # Workspace user groups: the member table and the tree are separate queries; one button re-reads
+    # both, and it stays usable whether or not a group exists yet.
+    ui.page.goto(f"{origin}/kube-frontend/workspaces/{WS}/user-groups")
+    groups = ui.page.locator('[data-ai-id="workspace-user-groups:refresh"]')
+    expect(groups).to_be_visible(timeout=60_000)
+    expect(groups).to_be_enabled(timeout=60_000)
+
     # Workspace member detail: the table receives its rows, so the handle carries the tab name.
     ui.page.goto(f"{origin}/kube-frontend/workspaces/{WS}/members/admin")
     detail = ui.page.locator('[data-ai-id^="workspace-member-"][data-ai-id$=":refresh"]')

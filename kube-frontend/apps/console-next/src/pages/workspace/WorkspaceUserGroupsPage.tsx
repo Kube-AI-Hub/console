@@ -24,6 +24,7 @@ import { api as apiClient } from '@/api';
 import { errorMessage, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { DeleteDialog } from '@/components/resource/DeleteDialog';
 import { GROUP_PARENT_ROOT, WorkspaceUserGroupDialog } from './WorkspaceUserGroupDialog';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * 租户(企业空间)用户组.
@@ -191,8 +192,19 @@ export function WorkspaceUserGroupsPage({ workspace }: WorkspaceUserGroupsPagePr
     [groups],
   );
 
+  // The member table and the tree read separate queries; the table's refresh re-reads both so the
+  // two halves of the page cannot disagree.
+  const listRefresh = useListRefresh('workspace-user-groups', {
+    isFetching: membersQuery.isFetching,
+    refetch: () => {
+      void membersQuery.refetch();
+      void groupsQuery.refetch();
+    },
+  });
+
   const memberSchema = React.useMemo<ListSchema<WorkspaceGroupMember>>(
     () => ({
+      refresh: listRefresh.refresh,
       ...(showMemberSearch
         ? { search: { placeholder: t('workspace.userGroups.search'), aiId: 'workspace-user-groups:search' } }
         : {}),
@@ -209,7 +221,8 @@ export function WorkspaceUserGroupsPage({ workspace }: WorkspaceUserGroupsPagePr
       empty: { title: t('workspace.userGroups.membersEmpty') },
       labels: listLabels(t),
     }),
-    [showMemberSearch, t],
+    // `busy` comes from the query, so the schema must rebuild when the fetch state changes.
+    [membersQuery.isFetching, showMemberSearch, t],
   );
 
   const addMemberSchema = React.useMemo<FormSchema>(
@@ -316,6 +329,7 @@ export function WorkspaceUserGroupsPage({ workspace }: WorkspaceUserGroupsPagePr
                     />
                   ) : (
                     <ResourceList
+                      onRefresh={listRefresh.onRefresh}
                       schema={memberSchema}
                       rows={memberRows}
                       loading={membersQuery.isPending}

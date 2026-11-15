@@ -25,7 +25,7 @@
 | PS-01 | 项目成员、项目角色、网络策略列表刷新 | 成员/角色共用 `SettingsListPage`，句柄随 kind；网络策略页只刷新策略列表 | PROJECT_SETTINGS-SETTINGS_LISTS_REFRESH-01 | 第八批补齐 |
 | AS-01 | 企业空间应用与仓库列表刷新 | 仓库页补齐 schema 的 refresh 条目（原本只有 onRefresh，按钮因此不渲染）；商店管理页保留其页面级刷新 | APP_STORE-APPSTORE_LISTS_REFRESH-01 | 第九批补齐 |
 | CR-01 | 自定义资源列表 + 某个 CRD 的实例列表刷新 | 两层各自 `useListRefresh`，实例页只刷新当前 CRD | CLUSTER_MANAGEMENT-CUSTOM_RESOURCES_REFRESH-01 | 第十批补齐 |
-| AGG-01 | 聚合型列表：集群资源监控（指标+归属两个来源）、企业空间成员详情（四个查询一起失效） | 聚合刷新源；成员详情的表用 `invalidateQueries()` 并放弃忙碌态（schema memo 不随 loading 重建） | PROJECT_SETTINGS-AGGREGATE_LISTS_REFRESH-01 | 第十二批补齐 |
+| AGG-01 | 聚合型列表：集群资源监控（指标+归属两个来源）、企业空间用户组（树+成员）、企业空间成员详情（四个查询一起失效） | 聚合刷新源；成员详情的表用 `invalidateQueries()` 并放弃忙碌态（schema memo 不随 loading 重建） | PROJECT_SETTINGS-AGGREGATE_LISTS_REFRESH-01 | 第十二批补齐 |
 | RST-01 | 其余六页：DevOps 工程 / JuiceFS 卷 / 集群自定义监控 / 灰度发布 / 镜像构建器 / 项目服务账号 | 各自 `useListRefresh`；JuiceFS 的按钮随「卷」页签 | CLUSTER_MANAGEMENT-REMAINING_LISTS_REFRESH-01 | 第十一批补齐 |
 
 ## 3. 实现
@@ -57,6 +57,6 @@
 
 **又一个真 bug**：`useListRefresh` 的 `busy` 进入 schema，若页面的 useMemo 依赖不包含 `isFetching`，「刷新」按钮会永久禁用——企业空间控制台与监控告警两批都踩到，已在两个页族把「按钮必须可用」写成断言。
 
-剩余 1 个：企业空间用户组的成员表（无用户组时页面只显示「先创建一个用户组」指引，表格不渲染），随该表的下一次单元交付。
+刷新能力已覆盖全部带列表的页面（12 个页族 / 约 56 个列表）。
 
 审计显示其余约 21 个列表仍未接入刷新，按页族分批推进（每族一个单元、一次闭环）：工作负载、集群资源（节点/组件/网关/IP 池）、监控与告警、访问控制、应用商店与 DevOps。存储页族的项目级两页（存储卷、存储卷快照）已在第二批完成。面板型列表（行数据由父级传入）没有自己的查询，刷新应在其父页面上接入，单独归类。

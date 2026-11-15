@@ -35,14 +35,14 @@
 
 ## 仓库落点
 
-- 页面：`cluster/ResourceMonitorPage.tsx`、`workspace/WorkspaceMemberDetailPage.tsx`
+- 页面：`cluster/ResourceMonitorPage.tsx`、`workspace/{WorkspaceUserGroupsPage,WorkspaceMemberDetailPage}.tsx`
 - 共享能力：`components/resource/useListRefresh.ts`
 
 ## 对外契约
 
 | 用途 | 句柄 |
 | --- | --- |
-| 刷新 | `cluster-resource-monitor:refresh`、`workspace-member-<tab>:refresh` |
+| 刷新 | `cluster-resource-monitor:refresh`、`workspace-user-groups:refresh`、`workspace-member-<tab>:refresh` |
 
 ## 不变量
 

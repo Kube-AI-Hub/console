@@ -16,7 +16,7 @@
 
 ## 验收场景
 
-- **AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-AGGREGATE_LISTS_REFRESH-01** — 已知集群资源监控页与企业空间成员详情页均已加载，则两处都有「刷新」入口且空闲时可用；当点击刷新，则对应的**全部**来源查询重新发起（资源监控：指标与归属两个查询；成员详情：页面上的四个查询一起失效并重取）；句柄分别为 `cluster-resource-monitor:refresh` 与 `workspace-member-<tab>:refresh`。企业空间用户组的成员表在没有任何用户组时不会渲染表格（空态给出的是「先创建一个用户组」的指引），其刷新随该表一起在下次单元交付。
+- **AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-AGGREGATE_LISTS_REFRESH-01** — 已知集群资源监控页、企业空间用户组页、企业空间成员详情页均已加载，则三处都有「刷新」入口且空闲时可用；当点击刷新，则对应的**全部**来源查询重新发起（资源监控：指标与归属两个查询；用户组：用户组树与成员两个查询；成员详情：页面上的四个查询一起失效并重取）；句柄分别为 `cluster-resource-monitor:refresh`、`workspace-user-groups:refresh`、`workspace-member-<tab>:refresh`。即使还没有任何用户组，用户组页的刷新也保持可用（读者可能在别处刚创建了组）。
 
 ## 设计目标
 
