@@ -447,6 +447,11 @@ MODULES = [
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_STORE-BROWSE-01"]},
                     },
                     {
+                        "id": "appstore-lists-refresh",
+                        "title": "应用商店列表刷新",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_STORE-APPSTORE_LISTS_REFRESH-01"]},
+                    },
+                    {
                         "id": "workspace-repos",
                         "title": "企业空间应用仓库",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-01", "TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-02"]},

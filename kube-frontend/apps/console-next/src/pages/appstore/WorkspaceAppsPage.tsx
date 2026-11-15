@@ -5,6 +5,7 @@ import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * 仓库应用.
@@ -62,10 +63,12 @@ export function WorkspaceAppsPage({ workspace }: WorkspaceAppsPageProps): React.
 
   const rows = query.data ?? [];
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
+  const listRefresh = useListRefresh('workspace-apps', query);
 
   const schema = React.useMemo<ListSchema<AppRow>>(
     () => ({
       title: t('appRepos.apps.title'),
+      refresh: listRefresh.refresh,
       description: t('appRepos.apps.description'),
       rowKey: 'id',
       rowAttributes: (row) => ({ 'data-ai-row': row.id }),
@@ -106,6 +109,7 @@ export function WorkspaceAppsPage({ workspace }: WorkspaceAppsPageProps): React.
       ],
       empty: { title: t('appRepos.apps.emptyTitle'), description: t('appRepos.apps.emptyDescription') },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -114,7 +118,7 @@ export function WorkspaceAppsPage({ workspace }: WorkspaceAppsPageProps): React.
         selected: (count) => t('table.selectedCount', { count }),
       },
     }),
-    [t],
+    [query.isFetching, t],
   );
 
   if (state === 'error') {
@@ -130,7 +134,7 @@ export function WorkspaceAppsPage({ workspace }: WorkspaceAppsPageProps): React.
       {/* Literal data-ai-id on the table wrapper: the action contract scans page source, and
           AiSurface's aiId prop is not a literal attribute in this file. */}
       <div data-ai-id="workspace-apps:table">
-        <ResourceList schema={schema} rows={rows} loading={state === 'loading'} />
+        <ResourceList schema={schema} onRefresh={listRefresh.onRefresh} rows={rows} loading={state === 'loading'} />
       </div>
     </AiSurface>
   );

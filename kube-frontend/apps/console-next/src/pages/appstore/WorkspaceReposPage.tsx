@@ -7,6 +7,7 @@ import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * 企业空间应用仓库.
@@ -89,10 +90,12 @@ export function WorkspaceReposPage({ workspace }: WorkspaceReposPageProps): Reac
 
   const rows = query.data ?? [];
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
+  const listRefresh = useListRefresh('workspace-repos', query);
 
   const schema = React.useMemo<ListSchema<RepoRow>>(
     () => ({
       title: t('appRepos.repos.title'),
+      refresh: listRefresh.refresh,
       description: t('appRepos.repos.description'),
       rowKey: 'id',
       rowAttributes: (row) => ({ 'data-ai-row': row.id }),
@@ -139,6 +142,7 @@ export function WorkspaceReposPage({ workspace }: WorkspaceReposPageProps): Reac
       ],
       empty: { title: t('appRepos.repos.emptyTitle'), description: t('appRepos.repos.emptyDescription') },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -147,7 +151,7 @@ export function WorkspaceReposPage({ workspace }: WorkspaceReposPageProps): Reac
         selected: (count) => t('table.selectedCount', { count }),
       },
     }),
-    [t],
+    [query.isFetching, t],
   );
 
   const submitCreate = async () => {
@@ -179,7 +183,7 @@ export function WorkspaceReposPage({ workspace }: WorkspaceReposPageProps): Reac
           schema={schema}
           rows={rows}
           loading={query.isPending}
-          onRefresh={() => void query.refetch()}
+          onRefresh={listRefresh.onRefresh}
           onAction={(action, row) => {
             if (action === 'create') setCreating(true);
             if (action === 'remove' && row) setRemoving(row as RepoRow);

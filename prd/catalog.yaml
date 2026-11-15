@@ -446,6 +446,13 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-APP_STORE-BROWSE-01
+    - id: appstore-lists-refresh
+      title: 应用商店列表刷新
+      prd: prd/kube-frontend/app-store/appstore-lists-refresh.md
+      design: design/kube-frontend/app-store/appstore-lists-refresh.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-APP_STORE-APPSTORE_LISTS_REFRESH-01
     - id: workspace-repos
       title: 企业空间应用仓库
       prd: prd/kube-frontend/app-store/workspace-repos.md
