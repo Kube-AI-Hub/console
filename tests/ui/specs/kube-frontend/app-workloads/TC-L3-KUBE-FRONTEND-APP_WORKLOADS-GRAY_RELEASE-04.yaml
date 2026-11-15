@@ -1,0 +1,39 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-04
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: gray-release
+title: 灰度发布详情 · 匹配规则表与状态条件（Complete/Failed 与空条件）
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/grayrelease"
+prd: prd/kube-frontend/app-workloads/gray-release.md
+design: design/kube-frontend/app-workloads/gray-release.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-04
+
+story:
+- US3
+
+product: 按请求内容分流的策略在匹配规则表里逐条显示 cookie/URL/请求头/客户端操作系统匹配与目标版本，未建模的匹配类型也要出现；条件表显示控制器写入的 type/status/reason/message/最近变更，状态徽标由 Complete/Failed 派生；没有条件时明确说明控制器未上报且状态为未知。
+preconditions:
+- 已登录，host 集群 default 项目，servicemesh 可读写
+- 用例创建按内容分流的 Canary（cookie 正则 + URL 前缀 + 自定义请求头 + method 未建模匹配）与两条普通 Canary
+- 条件通过整对象 PUT 写入 status.conditions（CRD 无 status 子资源；无控制器，见 design DEC-11）
+- 用例对象使用 tc-e2e-gray- 前缀，finally 删除
+steps:
+- 打开内容分流策略详情，读取匹配规则表
+- 用 PUT 写入 Complete=True 条件后重新打开详情，读取条件表与状态徽标
+- 改为 Failed=True 条件后重新打开，读取条件表与状态徽标
+- 打开一条没有 status 的策略详情，读取条件区块与状态徽标
+expected:
+- 匹配规则表出现 cookie 正则、URL 前缀、自定义请求头精确匹配与「其他」行的 method 匹配，每行带目标版本
+- Complete=True 时条件表显示类型 Complete、结果 True、原因、消息与最近变更，状态徽标为「已完成」
+- Failed=True 时条件表显示 Failed，状态徽标为「失败」
+- 没有条件时条件区块显示「控制器尚未写入条件」与原因说明，状态徽标为「未知」，不显示失败色
+troubleshoot:
+- 条件表为空：PUT 是否带上了 resourceVersion 与完整对象
+- 页面仍显示缓存：详情查询键为 ['strategies', cluster, namespace, name]，重新打开或刷新
+- 徽标语言随 locale 变化：断言用中文 locale
+update_automation:
+- 条件映射见 strategyStatusOf；匹配规则展开见 toStrategyDetail

@@ -145,9 +145,17 @@ export function InstalledAppDetailPage({ workspace, releaseId }: InstalledAppDet
     </Link>
   );
 
+  // One surface state for the whole page: the contract asks a page to announce loading /
+  // ready / error through state={...} (data-ai-state), and four literal props drift apart.
+  const surfaceState: 'loading' | 'error' | 'ready' = detail.isPending
+    ? 'loading'
+    : detail.isError
+      ? 'error'
+      : 'ready';
+
   if (detail.isPending) {
     return (
-      <AiSurface as="section" aiId="installed-app:surface" state="loading" className="flex min-w-0 flex-col gap-4">
+      <AiSurface as="section" aiId="installed-app:surface" state={surfaceState} className="flex min-w-0 flex-col gap-4">
         {back}
         <Skeleton className="h-32 w-full" />
       </AiSurface>
@@ -156,7 +164,7 @@ export function InstalledAppDetailPage({ workspace, releaseId }: InstalledAppDet
 
   if (detail.isError) {
     return (
-      <AiSurface as="section" aiId="installed-app:surface" state="error" className="flex min-w-0 flex-col gap-4">
+      <AiSurface as="section" aiId="installed-app:surface" state={surfaceState} className="flex min-w-0 flex-col gap-4">
         {back}
         <ResourceErrorPanel error={detail.error} onRetry={() => void detail.refetch()} retryAiId="installed-app:retry" />
       </AiSurface>
@@ -165,7 +173,7 @@ export function InstalledAppDetailPage({ workspace, releaseId }: InstalledAppDet
 
   if (!release) {
     return (
-      <AiSurface as="section" aiId="installed-app:surface" state="error" className="flex min-w-0 flex-col gap-4">
+      <AiSurface as="section" aiId="installed-app:surface" state={surfaceState} className="flex min-w-0 flex-col gap-4">
         {back}
         <div className="rounded-ai-md border border-ai-line p-8 text-center" data-ai-id="installed-app:not-found">
           <p className="text-sm font-medium text-ai-fg">{t('installedApps.notFoundTitle')}</p>
@@ -176,7 +184,7 @@ export function InstalledAppDetailPage({ workspace, releaseId }: InstalledAppDet
   }
 
   return (
-    <AiSurface as="section" aiId="installed-app:surface" state="ready" className="flex min-w-0 flex-col gap-4">
+    <AiSurface as="section" aiId="installed-app:surface" state={surfaceState} className="flex min-w-0 flex-col gap-4">
       {back}
       <header className="flex flex-wrap items-center gap-3">
         <h1 className="text-lg font-semibold text-ai-fg" data-ai-id="installed-app:name">

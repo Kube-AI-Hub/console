@@ -1,0 +1,42 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: gray-release
+title: 灰度发布详情 · 四区块顺序、版本权重与副本数、未找到工作负载的分支
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/grayrelease"
+prd: prd/kube-frontend/app-workloads/gray-release.md
+design: design/kube-frontend/app-workloads/gray-release.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-03
+
+story:
+- US3
+
+product: 详情页按固定顺序显示基本信息、版本与流量、匹配规则、状态条件。版本卡片显示角色、权重（未设置时明确说明而不显示 0%）、接管徽章，并在按注解或 <host>-<version> 找到 Deployment 时显示副本 ready/total 与工作负载链接；找不到时显示「未找到对应工作负载」。三档宽度下不横向溢出。
+preconditions:
+- 已登录，host 集群 default 项目
+- 用例创建一条 Canary（v1/v2 权重 80/20）与一个名为 <host>-v2 的 Deployment（1 副本、镜像拉不下来故 ready=0），不创建 <host>-v1
+- 用例对象使用 tc-e2e-gray- 前缀，finally 删除 Strategy 与 Deployment
+steps:
+- 打开该策略的详情 URL
+- 读取基本信息区块的标签与值
+- 读取版本卡片的角色、权重、副本数与工作负载链接
+- 读取匹配规则区块与状态条件区块
+- 比较四个区块的纵向位置
+- 在 1024 / 1280 / 1600 三档宽度下断言页面无横向溢出并截图
+expected:
+- 基本信息包含 集群 / 项目 / 分流方式 / 目标服务 / 参考版本 / 接管版本 / 策略 / 创建时间，分流方式为「按流量比例」，接管版本为「未接管（按规则分配）」
+- v2 卡片角色为新版本、权重 20%，找到 Deployment 时显示「副本 0/1」与工作负载链接；v1 卡片角色为参考版本、权重 80%，显示「未找到对应工作负载」
+- 匹配规则区块说明该策略没有请求内容匹配规则、按权重分流
+- 状态条件区块显示「控制器尚未写入条件」及原因说明
+- 区块纵向顺序为 基本信息 < 版本与流量 < 匹配规则 < 状态条件
+- 三档宽度下 document.scrollWidth 不超过窗口宽度
+troubleshoot:
+- 副本数显示 0/0：检查 Deployment 是否创建成功、命名是否与约定一致
+- 找不到 v2 工作负载链接：检查 Deployment 名称是否等于 <目标服务>-v2
+- 权重显示「未设置」：对象的路由没有 weight 字段
+update_automation:
+- 详情区块与句柄见 pages/app-workloads/canary/CanaryDetailPage.tsx

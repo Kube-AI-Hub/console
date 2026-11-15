@@ -310,7 +310,7 @@
 - **GOT-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_RUNS-03** — 环境阻塞：`devops-controller` CrashLoopBackOff（日志逐字 `Error: the token of the Jenkins needs to update`，restartCount 27），`kubesphere-config` 中 `devops.host=http://devops-jenkins.kubesphere-devops-system.svc/`、`devops.username=admin`。表现为 PipelineRun 创建 201 后无状态注解、日志 404、health/validate 缺值。复查条件：controller 就绪且不再重启、Jenkins whoami/crumb 200、新运行 60 秒内出现状态注解、日志 200 且非空；四项满足后才把运行成功/日志内容标为通过。
 - **GOT-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_CREDENTIALS-01** — kapis 的 credentials 列表恒为空（连自己创建的都不返回），必须读 Secret 集合再按 `type` 过滤；但写仍走 kapis，因为只有它会写 `credential.devops.kubesphere.io/syncstatus` 注解。
 - **GOT-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_CREDENTIALS-02** — 未知凭证类型不能在列表里静默消失：`toCredentialRow` 保留 `secretType` 原文，页面在 `kind` 为空时显示它；类型创建后不可改，编辑对话框的 name/type 必须 disabled。
-- **GOT-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_MEMBERS-01** — 新实现没有迁移老 console 的 `showAction: username !== 当前用户` 保护：成员行对任何用户都显示改角色/移除。测试只能用专用测试账号（`ui-test`）做写入并在 finally 移除，严禁对 admin 或当前登录账号执行移除。
+- **GOT-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_MEMBERS-01** — 老 console 用 `showAction: username !== 当前用户` 保护「不能操作自己」；新实现第一版漏了这一条（任何行都显示改角色/移除），现已补齐：当前账号那一行渲染 `devops-detail:member-self` 说明、不渲染两个按钮。服务端同样拒绝改自己的角色或移除自己，所以漏掉时用户点下去只会拿到一个失败弹窗。写入用例仍只用专用测试账号（`ui-test`）并在 finally 移除，避免误操作 admin。
 - **GOT-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_CD-01** — `status.argoApp` 是 string（控制器写 JSON），`spec.argoApp.spec.destination` 可能只有 name 没有 namespace；同步/健康分别取 `sync.status`/`health.status`，缺失显示 `-`，整行不消失。
 
 ## 测试与可观测

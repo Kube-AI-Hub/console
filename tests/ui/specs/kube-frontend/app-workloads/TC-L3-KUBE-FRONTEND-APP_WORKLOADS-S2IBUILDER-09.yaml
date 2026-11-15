@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-S2IBUILDER-09
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: s2ibuilder
+title: 镜像构建器 · 镜像制品页签（仅成功运行、复制拉取命令）
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/s2ibuilder'
+prd: prd/kube-frontend/app-workloads/s2ibuilder.md
+design: design/kube-frontend/app-workloads/s2ibuilder.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-S2IBUILDER-09
+
+story:
+- US4
+
+product: 镜像制品页签只列 status.runState=Successful 的运行：镜像名称/大小/拉取命令（可复制）/发布时间；没有成功构建时显示空态。
+preconditions:
+- 已登录，且在 host 集群的 default 项目
+- 存在一个测试构建器与一条运行
+steps:
+- 创建构建器与运行，用 /status 子资源写入成功状态与 s2iBuildResult（模拟控制器）
+- 打开详情，点击镜像制品页签
+- 核对镜像名称/大小/拉取命令/发布时间与写入值一致
+- 点击复制按钮并断言出现「已复制」通知
+expected:
+- 仅成功状态进入制品表；失败/构建中/未知不进入
+- 镜像名称、大小（formatSize）、拉取命令、发布时间与 status.s2iBuildResult 一致
+- 复制按钮可复制拉取命令并给出反馈
+- 无成功运行时显示「还没有构建成功的镜像制品」
+troubleshoot:
+- 表为空：status.runState 是否成功、s2iBuildResult 是否写入
+- 大小单位错误：imageSize 字节是否按 1024 换算
+update_automation:
+- 页面句柄或字段映射变化时同步本用例

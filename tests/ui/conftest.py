@@ -26,6 +26,7 @@ from pages.platform_settings import PlatformSettingsPage
 from pages.project_settings import ProjectSettingsPage
 from pages.storage import StoragePage
 from pages.app_workloads import AppWorkloadsPage
+from pages.imagebuilder_page import ImageBuilderPageObject
 
 ARTIFACTS = Path(__file__).resolve().parent / "artifacts"
 
@@ -577,6 +578,17 @@ def app_workloads_page(page, ui_config, session_token):
     同一个会话令牌，避免在用例里重新登录或复制 URL 拼装逻辑。
     """
     return AppWorkloadsPage(page, app_base(ui_config), api=ApiClient(app_base(ui_config), session_token))
+
+
+@pytest.fixture
+def image_builder_page(page, ui_config, session_token):
+    """镜像构建器列表/详情/创建，带一个同会话的 ApiClient 用于造数、回读和清理。"""
+    return ImageBuilderPageObject(
+        page,
+        app_base(ui_config),
+        cluster=ui_config.cluster,
+        api=ApiClient(app_base(ui_config), session_token),
+    )
 
 
 @pytest.fixture

@@ -318,8 +318,33 @@ export type {
   SessionUser,
 } from './session';
 export { isLoginErrorCode, sessionApi } from './session';
-export { strategiesApi, strategyStatusOf, targetServiceOf, toStrategySummary } from './servicemesh';
-export type { KubeStrategy, StrategyStatus, StrategySummary, StrategyType } from './servicemesh';
+export {
+  pausedStrategy,
+  resumedStrategy,
+  strategiesApi,
+  strategyStatusOf,
+  targetServiceOf,
+  toStrategyDetail,
+  toStrategySummary,
+  withBluegreenVersion,
+  withGovernor,
+  withTrafficWeight,
+} from './servicemesh';
+export type {
+  KubeStrategy,
+  MatchKind,
+  MatchType,
+  StrategyCondition,
+  StrategyDetail,
+  StrategyMatchRule,
+  StrategyMode,
+  StrategyProtocol,
+  StrategyRoute,
+  StrategyStatus,
+  StrategySummary,
+  StrategyType,
+  StrategyVersion,
+} from './servicemesh';
 export {
   credentialCreateBody,
   devopsApi,
@@ -518,7 +543,41 @@ export { nodeInsightsApi, NODE_INSIGHT_METRICS } from './node-insights';
 export type { NodeInsightValues, RdmaPort } from './node-insights';
 export { nodeRankingApi, NODE_RANK_METRICS } from './node-ranking';
 export type { NodeRankMetric, NodeRankRow } from './node-ranking';
-export { imageBuildersApi, toImageBuilderSummary } from './s2ibuilder';
-export type { ImageBuilderKind, ImageBuilderSummary, ImageBuildersApi } from './s2ibuilder';
+export {
+  decodeEnvValue,
+  downloadS2iBinary,
+  imageBuilderTriggerLink,
+  imageBuildersApi,
+  labelSelector,
+  normalizeBuilderStatus,
+  normalizeRunStatus,
+  runImageSize,
+  s2iAnnotationKeys,
+  toImageBuilderDetail,
+  toImageBuilderSummary,
+  toS2iBuilderTemplate,
+  toS2iRunSummary,
+  uploadS2iBinary,
+} from './s2ibuilder';
+export type {
+  EnvSourceValues,
+  ImageBuilderDetail,
+  ImageBuilderKind,
+  ImageBuilderListParams,
+  ImageBuilderSummary,
+  ImageBuildersApi,
+  RawS2iBinary,
+  RawS2iBuilder,
+  RawS2iBuilderTemplate,
+  RawS2iRun,
+  S2iBuildConfig,
+  S2iBuilderTemplate,
+  S2iEnvVar,
+  S2iEvent,
+  S2iJobDetail,
+  S2iJobPod,
+  S2iRunSummary,
+  S2iSecretOption,
+} from './s2ibuilder';
 export { watchCollection } from './watch';
 export type { WatchEvent, WatchOptions } from './watch';

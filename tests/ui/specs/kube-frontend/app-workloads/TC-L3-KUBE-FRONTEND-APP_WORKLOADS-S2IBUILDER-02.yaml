@@ -1,0 +1,37 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-S2IBUILDER-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: s2ibuilder
+title: 镜像构建器 · 行操作（编辑信息/删除，回读与清理）
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/s2ibuilder'
+prd: prd/kube-frontend/app-workloads/s2ibuilder.md
+design: design/kube-frontend/app-workloads/s2ibuilder.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-S2IBUILDER-02
+
+story:
+- US1
+
+product: 列表行操作有「编辑信息」与「删除」；编辑信息只改别名/描述注解，其余注解保留；删除需输入对象名确认，成功后行消失且 API 回读 404。
+preconditions:
+- 已登录，且在 host 集群的 default 项目
+- 存在一个唯一前缀的测试构建器
+steps:
+- API 创建带自定义注解的构建器，打开列表并定位该行
+- 打开行操作菜单，核对菜单项为 编辑信息/删除
+- 点击编辑信息，填写别名与描述，提交；API 回读 annotations
+- 再次打开行操作，点击删除，输入对象名确认；等待行消失
+- API 回读该构建器为 404
+expected:
+- 行操作顺序为 编辑信息、删除
+- 编辑信息后 kubesphere.io/alias-name 与 kubesphere.io/description 更新，其它注解（languageType 等）保留
+- 删除必须输入完整对象名才能确认；删除成功后列表刷新，API 404
+troubleshoot:
+- 编辑未生效：PATCH 是否 merge-patch
+- 其它注解丢失：是否整体替换 annotations
+- 删除按钮不可点：输入值是否等于对象名
+update_automation:
+- 页面句柄或字段映射变化时同步本用例

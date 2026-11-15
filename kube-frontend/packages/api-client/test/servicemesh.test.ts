@@ -1,6 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import { createClient } from '../src/client';
-import { strategiesApi, strategyStatusOf, targetServiceOf, toStrategySummary } from '../src/servicemesh';
+import type { KubeStrategy } from '../src/servicemesh';
+import {
+  pausedStrategy,
+  resumedStrategy,
+  strategiesApi,
+  strategyStatusOf,
+  targetServiceOf,
+  toStrategyDetail,
+  toStrategySummary,
+  withBluegreenVersion,
+  withTrafficWeight,
+} from '../src/servicemesh';
 
 /**
  * Strategy → row mapping.
@@ -98,5 +109,220 @@ describe('strategiesApi', () => {
     const summary = toStrategySummary(strategy() as never);
     expect(summary.status).toBe('unknown');
     expect(summary.targetService).toBe('reviews-v2');
+    // A strategy without routes has no versions and no weights — not zeros.
+    expect(summary.versionOrder).toEqual([]);
+    expect(summary.weights).toEqual({});
+  });
+
+  it('lists versions new-first with the weights the object sets', () => {
+    const summary = toStrategySummary(weighted(80, 20) as never);
+    expect(summary.versionOrder).toEqual(['v2', 'v1']);
+    expect(summary.weights).toEqual({ v2: 20, v1: 80 });
+  });
+});
+
+/**
+ * Detail model: versions/weights, match rules, conditions, and the writes that keep
+ * governor consistent with the route weights.
+ */
+
+const HOST = 'reviews';
+
+function routeObject(spec: Record<string, unknown>): KubeStrategy {
+  return {
+    apiVersion: 'servicemesh.kubesphere.io/v1alpha2',
+    kind: 'Strategy',
+    metadata: { name: 'release', namespace: 'default', resourceVersion: '42', labels: { app: HOST } },
+    spec: { type: 'Canary', strategyPolicy: 'WaitForWorkloadReady', principal: 'v1', ...spec },
+  };
+}
+
+function weighted(principalWeight: number, canaryWeight: number): KubeStrategy {
+  return routeObject({
+    governor: '',
+    selector: { matchLabels: { app: HOST } },
+    template: {
+      spec: {
+        hosts: [HOST],
+        http: [
+          {
+            route: [
+              { destination: { host: HOST, subset: 'v1' }, weight: principalWeight },
+              { destination: { host: HOST, subset: 'v2' }, weight: canaryWeight },
+            ],
+          },
+        ],
+      },
+    },
+  });
+}
+
+describe('toStrategyDetail', () => {
+  it('derives a traffic split with both versions and their weights', () => {
+    const detail = toStrategyDetail({
+      ...weighted(80, 20),
+      status: { conditions: [{ type: 'Complete', status: 'True', reason: 'Done', message: 'shifted', lastTransitionTime: '2026-11-15T00:00:00Z' }] },
+    } as never);
+    expect(detail.mode).toBe('traffic');
+    expect(detail.protocol).toBe('http');
+    expect(detail.principal).toBe('v1');
+    expect(detail.governor).toBe('');
+    expect(detail.strategyPolicy).toBe('WaitForWorkloadReady');
+    // New version first, principal last: the order the detail cards are read in.
+    expect(detail.versions.map((version) => [version.version, version.role, version.weight])).toEqual([
+      ['v2', 'canary', 20],
+      ['v1', 'principal', 80],
+    ]);
+    expect(detail.conditions).toEqual([
+      { type: 'Complete', status: 'True', reason: 'Done', message: 'shifted', lastTransitionTime: '2026-11-15T00:00:00Z' },
+    ]);
+  });
+
+  it('turns each request-content match into a row with its target version', () => {
+    const detail = toStrategyDetail({
+      ...routeObject({
+        template: {
+          spec: {
+            hosts: [HOST],
+            http: [
+              {
+                match: [
+                  { headers: { cookie: { regex: 'user=canary' }, 'User-Agent': { regex: '.*(Chrome).*' } }, uri: { prefix: '/v2' } },
+                ],
+                route: [{ destination: { host: HOST, subset: 'v2' } }],
+              },
+              { match: [{ headers: { 'x-tenant': { exact: 'acme' } } }], route: [{ destination: { host: HOST, subset: 'v2' } }] },
+              { route: [{ destination: { host: HOST, subset: 'v1' }, weight: 100 }] },
+            ],
+          },
+        },
+      }),
+    } as never);
+    expect(detail.mode).toBe('content');
+    expect(detail.matchRules.map((rule) => [rule.index, rule.kind, rule.key, rule.matchType, rule.value, rule.targets])).toEqual([
+      [1, 'uri', '', 'prefix', '/v2', ['v2']],
+      [1, 'cookie', '', 'regex', 'user=canary', ['v2']],
+      [1, 'userAgent', '', 'regex', '.*(Chrome).*', ['v2']],
+      [2, 'header', 'x-tenant', 'exact', 'acme', ['v2']],
+    ]);
+  });
+
+  it('keeps an unmodelled match kind visible instead of claiming there is none', () => {
+    const detail = toStrategyDetail({
+      ...routeObject({
+        template: { spec: { hosts: [HOST], http: [{ match: [{ method: { exact: 'GET' } }], route: [{ destination: { host: HOST, subset: 'v2' } }] }] } },
+      }),
+    } as never);
+    expect(detail.mode).toBe('content');
+    expect(detail.matchRules).toEqual([
+      { index: 1, kind: 'other', key: 'method', matchType: 'unknown', value: JSON.stringify({ exact: 'GET' }), targets: ['v2'] },
+    ]);
+  });
+
+  it('reads blue-green and mirror releases apart', () => {
+    const bluegreen = toStrategyDetail({
+      ...weighted(100, 0),
+      spec: { ...weighted(100, 0).spec, type: 'Bluegreen', governor: 'v1' },
+    } as never);
+    expect(bluegreen.mode).toBe('bluegreen');
+    expect(bluegreen.versions.find((version) => version.version === 'v1')?.governing).toBe(true);
+
+    const mirror = toStrategyDetail({
+      ...routeObject({
+        type: 'Mirror',
+        template: {
+          spec: {
+            hosts: [HOST],
+            http: [{ route: [{ destination: { host: HOST, subset: 'v1' }, weight: 100 }], mirror: { host: HOST, subset: 'v2' } }],
+          },
+        },
+      }),
+    } as never);
+    expect(mirror.mode).toBe('mirror');
+    expect(mirror.mirror).toEqual({ host: HOST, subset: 'v2' });
+    expect(mirror.versions.map((version) => [version.version, version.role])).toEqual([
+      ['v2', 'mirror'],
+      ['v1', 'principal'],
+    ]);
+  });
+
+  it('reports no condition instead of inventing one', () => {
+    const detail = toStrategyDetail(weighted(100, 0) as never);
+    expect(detail.conditions).toEqual([]);
+    expect(detail.status).toBe('unknown');
+  });
+});
+
+describe('traffic writes', () => {
+  it('writes both weights and keeps governor consistent with the extremes', () => {
+    const source = weighted(80, 20);
+    const middle = withTrafficWeight(source as never, 35);
+    const routes = middle.spec?.template as never as { spec: { http: Array<{ route: Array<{ weight: number; destination: { subset: string } }> }> } };
+    const pairs = routes.spec.http[0]!.route.map((route) => [route.destination.subset, route.weight]);
+    expect(pairs).toEqual([
+      ['v1', 65],
+      ['v2', 35],
+    ]);
+    expect(middle.spec?.governor).toBe('');
+
+    expect(withTrafficWeight(source as never, 100).spec?.governor).toBe('v2');
+    expect(withTrafficWeight(source as never, 0).spec?.governor).toBe('v1');
+    // The source object is not mutated: the page keeps rendering what the server sent
+    // until the PUT answers.
+    const sourceRoutes = (source.spec as never as { template: { spec: { http: Array<{ route: Array<{ weight: number }> }> } } }).template.spec.http[0]!.route;
+    expect(sourceRoutes.map((route) => route.weight)).toEqual([80, 20]);
+    expect(source.spec?.governor).toBe('');
+  });
+
+  it('clamps out-of-range input and keeps the match rule of the content rule', () => {
+    const source = routeObject({
+      template: {
+        spec: {
+          hosts: [HOST],
+          http: [
+            { route: [{ destination: { host: HOST, subset: 'v1' }, weight: 50 }, { destination: { host: HOST, subset: 'v2' }, weight: 50 }] },
+            { match: [{ uri: { prefix: '/x' } }], route: [{ destination: { host: HOST, subset: 'v2' } }] },
+          ],
+        },
+      },
+    });
+    const next = withTrafficWeight(source as never, 250);
+    expect(next.spec?.governor).toBe('v2');
+    const http = (next.spec as never as { template: { spec: { http: Array<Record<string, unknown>> } } }).template.spec.http;
+    expect(http[0]!.route).toEqual([
+      { destination: { host: HOST, subset: 'v1' }, weight: 0 },
+      { destination: { host: HOST, subset: 'v2' }, weight: 100 },
+    ]);
+    // The second rule (the content match) is not dropped by a traffic edit.
+    expect(http[1]!.match).toEqual([{ uri: { prefix: '/x' } }]);
+  });
+
+  it('refuses to guess a split when the strategy has no two-version route', () => {
+    const single = routeObject({ template: { spec: { hosts: [HOST], http: [{ route: [{ destination: { host: HOST, subset: 'v2' } }] }] } } });
+    expect(() => withTrafficWeight(single as never, 30)).toThrow('two versions');
+  });
+
+  it('pauses by handing traffic to the principal and resumes by clearing governor', () => {
+    const source = weighted(65, 35);
+    const paused = pausedStrategy(source as never);
+    expect(paused.spec?.governor).toBe('v1');
+    // Resume restores the configured split because the weights were never touched.
+    const routes = (paused.spec as never as { template: { spec: { http: Array<{ route: Array<{ weight: number }> }> } } }).template.spec.http[0]!.route;
+    expect(routes.map((route) => route.weight)).toEqual([65, 35]);
+    expect(resumedStrategy(paused as never).spec?.governor).toBe('');
+  });
+
+  it('switches a blue-green release to the chosen version', () => {
+    const source = routeObject({
+      type: 'Bluegreen',
+      principal: 'v1',
+      governor: 'v1',
+      template: { spec: { hosts: [HOST], http: [{ route: [{ destination: { host: HOST, subset: 'v1' }, weight: 100 }, { destination: { host: HOST, subset: 'v2' }, weight: 0 }] }] } },
+    });
+    const switched = withBluegreenVersion(source as never, 'v2');
+    expect(switched.spec?.governor).toBe('v2');
+    const routes = (switched.spec as never as { template: { spec: { http: Array<{ route: Array<{ weight: number }> }> } } }).template.spec.http[0]!.route;
+    expect(routes.map((route) => route.weight)).toEqual([0, 100]);
+    expect(withBluegreenVersion(source as never, 'v1').spec?.governor).toBe('v1');
   });
 });

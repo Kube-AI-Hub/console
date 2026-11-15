@@ -221,6 +221,33 @@ class DevopsPage:
         except Exception:  # noqa: BLE001 - 清理尽力而为
             pass
 
+    def namespace_exists(self, name: str) -> bool:
+        status, _ = self._call("GET", f"/api/v1/namespaces/{name}")
+        return status == 200
+
+    def project_exists(self, name: str) -> bool:
+        status, _ = self._call("GET", f"{PROJECTS}/{name}")
+        return status == 200
+
+    def force_remove_project(self, name: str) -> None:
+        """Remove the project even when the controller cannot run its finalizer.
+
+        The delete finalizer is the controller's job; on an install whose devops
+        controller crash-loops (BLOCK-1: Jenkins token), a deleted project would stay
+        in Terminating forever and pollute every later list. Clearing it here keeps the
+        test suite self-cleaning instead of leaving objects behind.
+        """
+        self.delete_project_quiet(name)
+        assert self.api is not None
+        # merge-patch needs its own media type: a PATCH sent as application/json leaves the
+        # finalizer in place, and the project then stays Terminating forever.
+        self.api.request(
+            "PATCH",
+            f"{PROJECTS}/{name}",
+            {"metadata": {"finalizers": []}},
+            content_type="application/merge-patch+json",
+        )
+
     def pipelines(self, project: str, **query: Any) -> tuple[list[dict[str, Any]], int]:
         params = "&".join(f"{key}={value}" for key, value in query.items())
         path = f"{DEVOPS_KAPIS}/devops/{project}/pipelines"

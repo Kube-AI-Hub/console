@@ -15,16 +15,13 @@ def _is_disabled(locator) -> bool:
 
 
 @pytest.mark.point
-def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_DEVOPS_PIPELINES_02(cluster_management_page, screenshot):
+def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_DEVOPS_PIPELINES_02(cluster_management_page, devops_project, screenshot):
     """TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PIPELINES-02 流水线创建、编辑、复制、删除。"""
 
     ui = cluster_management_page
     assert ui.api is not None
     devops = DevopsPage(ui.page, ui.base_url, ui.cluster, ui.api)
-    container = devops.pick_container()
-    if container is None:
-        pytest.skip("集群没有命名空间可用的 DevOps 工程：流水线写用例需要真实工程命名空间")
-    project, _namespace = container
+    project, _namespace = devops_project
 
     suffix = devops.unique("pwspec-crud")[-8:]
     single = f"pwspec-pipe-{suffix}"

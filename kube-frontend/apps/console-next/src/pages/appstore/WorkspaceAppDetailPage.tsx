@@ -249,9 +249,17 @@ export function WorkspaceAppDetailPage({ workspace, appId }: WorkspaceAppDetailP
     </Link>
   );
 
+  // One surface state for the whole page: the contract asks a page to announce loading /
+  // ready / error through state={...} (data-ai-state), and four literal props drift apart.
+  const surfaceState: 'loading' | 'error' | 'ready' = app.isPending
+    ? 'loading'
+    : app.isError
+      ? 'error'
+      : 'ready';
+
   if (app.isPending) {
     return (
-      <AiSurface as="section" aiId="workspace-app:surface" state="loading" className="flex min-w-0 flex-col gap-4">
+      <AiSurface as="section" aiId="workspace-app:surface" state={surfaceState} className="flex min-w-0 flex-col gap-4">
         {back}
         <Skeleton className="h-32 w-full" />
       </AiSurface>
@@ -260,7 +268,7 @@ export function WorkspaceAppDetailPage({ workspace, appId }: WorkspaceAppDetailP
 
   if (app.isError) {
     return (
-      <AiSurface as="section" aiId="workspace-app:surface" state="error" className="flex min-w-0 flex-col gap-4">
+      <AiSurface as="section" aiId="workspace-app:surface" state={surfaceState} className="flex min-w-0 flex-col gap-4">
         {back}
         <ResourceErrorPanel error={app.error} onRetry={() => void app.refetch()} retryAiId="workspace-app:retry" />
       </AiSurface>
@@ -272,7 +280,7 @@ export function WorkspaceAppDetailPage({ workspace, appId }: WorkspaceAppDetailP
   const storeVersions = versionRows.map(toStoreVersion);
 
   return (
-    <AiSurface as="section" aiId="workspace-app:surface" state="ready" className="flex min-w-0 flex-col gap-4">
+    <AiSurface as="section" aiId="workspace-app:surface" state={surfaceState} className="flex min-w-0 flex-col gap-4">
       {back}
       <header className="flex flex-wrap items-center gap-3">
         <h1 className="text-lg font-semibold text-ai-fg" data-ai-id="workspace-app:name">

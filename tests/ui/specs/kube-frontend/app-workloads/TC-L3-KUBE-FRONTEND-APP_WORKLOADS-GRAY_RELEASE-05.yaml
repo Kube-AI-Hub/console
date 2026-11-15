@@ -1,0 +1,42 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-05
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: gray-release
+title: 灰度发布 · 调整流量（权重/接管/蓝绿切换）写回与回读一致
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/grayrelease"
+prd: prd/kube-frontend/app-workloads/gray-release.md
+design: design/kube-frontend/app-workloads/gray-release.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-05
+
+story:
+- US4
+
+product: 调整流量弹窗按发布模式提供不同控件：按权重分流可改 0-100（100 时 governor=新版本、0 时=参考版本、其余为空）；按内容分流提供保持规则/新版本接管/参考版本接管；蓝绿提供两版本单选并写 100/0；镜像不提供入口。非法输入不产生写请求，保存失败保留输入。
+preconditions:
+- 已登录，host 集群 default 项目，servicemesh 可读写
+- 用例创建：按权重 Canary（80/20）、按内容 Canary、Bluegreen、Mirror 各一条
+- 用例对象使用 tc-e2e-gray- 前缀，finally 删除
+steps:
+- 打开按权重 Canary 详情，点「调整流量」，把新版本比例改为 35 并确认，轮询回读权重与 governor
+- 把比例改为 100 后回读 governor；改为 0 后回读 governor
+- 输入 150，断言提交被拒且对象未被修改
+- 打开按内容 Canary 详情，选「新版本接管全部流量」并确认，回读 governor
+- 打开 Bluegreen 详情，选择新版本并确认，回读权重 0/100 与 governor
+- 打开 Mirror 详情，断言没有「调整流量」入口
+expected:
+- 35 保存后回读两条路由权重为 65/35、spec.governor 为空，页面版本卡片显示 35% 并有已更新提示
+- 100 保存后 spec.governor 等于新版本；0 保存后等于参考版本
+- 150 时页面就地提示范围错误且对象权重与 governor 不变
+- 内容模式选择新版本接管后 spec.governor 等于新版本，匹配规则保持不变
+- Bluegreen 选择新版本后权重为 0/100 且 spec.governor 为新版本
+- Mirror 详情没有 grayrelease-detail:edit-traffic 入口
+troubleshoot:
+- 回读权重不变：PUT 是否带 resourceVersion；对象是否已被控制器改写
+- governor 与权重不一致：检查 withTrafficWeight 的 0/100/中间值分支
+- 弹窗确认按钮不可点：输入是否被解析为整数、是否越界
+update_automation:
+- 写入函数见 packages/api-client/src/servicemesh.ts 的 withTrafficWeight/withGovernor/withBluegreenVersion

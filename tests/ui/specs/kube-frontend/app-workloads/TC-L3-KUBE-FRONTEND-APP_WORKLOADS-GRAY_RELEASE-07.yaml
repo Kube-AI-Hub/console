@@ -1,0 +1,38 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-07
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: gray-release
+title: 灰度发布 · 删除（名称确认、回读 404、列表刷新、失败不关闭）
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/grayrelease"
+prd: prd/kube-frontend/app-workloads/gray-release.md
+design: design/kube-frontend/app-workloads/gray-release.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-07
+
+story:
+- US5
+
+product: 详情页删除需要输入策略名确认（不匹配时确认按钮不可用），取消不写；确认后 Strategy 被删除、API 回读 404、页面回到列表且该行消失；删除请求失败时确认框不关闭并显示原因。
+preconditions:
+- 已登录，host 集群 default 项目，servicemesh 可读写
+- 用例创建两条 Canary 策略：一条用于取消分支与失败分支，一条用于成功删除
+- 用例对象使用 tc-e2e-gray- 前缀，finally 兜底删除
+steps:
+- 打开第一条策略详情，点「删除」，输入错误名称，断言确认按钮不可用
+- 取消，回读对象仍存在
+- 用页面拦截让 DELETE 返回 500，点「删除」并输入正确名称确认，断言确认框仍显示且给出服务端原因
+- 放开拦截，打开第二条策略详情，输入名称确认删除，轮询回读 404 并等待页面回到列表
+expected:
+- 输入不匹配时 grayrelease:delete-confirm 不可用
+- 取消后对象仍存在
+- 请求失败时确认框不关闭且显示错误文本
+- 成功后回读 404、页面 URL 回到 …/grayrelease、列表不再包含该行
+troubleshoot:
+- 确认按钮一直不可用：输入是否与策略名完全一致
+- 删除成功但列表仍有行：是否 invalidate 了 ['strategies', cluster, namespace]
+- 拦截未生效：page.route 的 URL 匹配需覆盖对象端点
+update_automation:
+- 删除对话框复用 components/resource/DeleteDialog.tsx（句柄 grayrelease:delete-input/confirm）

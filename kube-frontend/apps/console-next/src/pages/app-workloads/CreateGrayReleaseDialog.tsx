@@ -8,18 +8,17 @@ import { api as apiClient } from '@/api';
 import { errorMessage } from '@/components/resource/ResourceErrorPanel';
 
 /**
- * 创建灰度发布（最小向导）.
+ * 创建灰度发布.
  *
- * Three inputs are enough for a runnable Strategy: a name, the deployment being released,
- * and the strategy type. The shape below is the one the servicemesh controller accepted
- * when probed: type + selector matching the workload + a VirtualService template whose
- * host is the workload's app label, with v1/v2 destinations. Traffic weights and match
- * rules are intentionally left at controller defaults — editing those belongs to the
- * follow-up release-detail work.
+ * Four inputs are enough for a runnable Strategy: a name, the deployment being released,
+ * the strategy type and the initial traffic share. The manifest below is the shape the
+ * servicemesh API accepted when probed (201 for all three types): type + selector
+ * matching the workload + a VirtualService template whose host is the workload's app
+ * label, with v1/v2 destinations.
  *
  * Submission is two-step: the form is validated locally, then a confirmation panel names
  * what will be created. The API is called only from the confirm button, so a half-typed
- * release never reaches the controller.
+ * release never reaches the cluster.
  */
 export interface CreateGrayReleaseDialogProps {
   open: boolean;
@@ -41,7 +40,57 @@ function targetOf(workload: { name: string; app: string }): string {
   return workload.app || workload.name;
 }
 
-function strategyManifest(name: string, workload: { name: string; app: string }, type: StrategyType, namespace: string) {
+/**
+ * The initial split per type.
+ *
+ * A canary starts at the operator's chosen share. Blue-green has exactly one receiving
+ * version, so the new one starts at 0 percent; traffic mirroring copies requests to the
+ * new version without giving it any of them, so its route weight is 100 for the
+ * principal and the new subset appears under `mirror` instead.
+ */
+function initialRoutes(type: StrategyType, target: string, weight: number) {
+  if (type === 'Mirror') {
+    return [
+      {
+        route: [{ destination: { host: target, subset: 'v1' }, weight: 100 }],
+        mirror: { host: target, subset: 'v2' },
+      },
+    ];
+  }
+  if (type === 'Bluegreen') {
+    return [
+      {
+        route: [
+          { destination: { host: target, subset: 'v1' }, weight: 100 },
+          { destination: { host: target, subset: 'v2' }, weight: 0 },
+        ],
+      },
+    ];
+  }
+  return [
+    {
+      route: [
+        { destination: { host: target, subset: 'v1' }, weight: 100 - weight },
+        { destination: { host: target, subset: 'v2' }, weight },
+      ],
+    },
+  ];
+}
+
+function initialGovernor(type: StrategyType, weight: number): string {
+  if (type === 'Bluegreen' || type === 'Mirror') return 'v1';
+  if (weight === 100) return 'v2';
+  if (weight === 0) return 'v1';
+  return '';
+}
+
+function strategyManifest(
+  name: string,
+  workload: { name: string; app: string },
+  type: StrategyType,
+  namespace: string,
+  weight: number,
+) {
   const target = targetOf(workload);
   return {
     apiVersion: 'servicemesh.kubesphere.io/v1alpha2',
@@ -54,21 +103,14 @@ function strategyManifest(name: string, workload: { name: string; app: string },
     spec: {
       type,
       principal: 'v1',
-      governor: 'v2',
+      governor: initialGovernor(type, weight),
       strategyPolicy: 'WaitForWorkloadReady',
       selector: { matchLabels: { app: target } },
       template: {
         metadata: { labels: { app: target } },
         spec: {
           hosts: [target],
-          http: [
-            {
-              route: [
-                { destination: { host: target, subset: 'v1' } },
-                { destination: { host: target, subset: 'v2' } },
-              ],
-            },
-          ],
+          http: initialRoutes(type, target, weight),
         },
       },
     },
@@ -88,6 +130,7 @@ export function CreateGrayReleaseDialog({
   const [name, setName] = React.useState('');
   const [workloadName, setWorkloadName] = React.useState('');
   const [type, setType] = React.useState<StrategyType>('Canary');
+  const [traffic, setTraffic] = React.useState('50');
   const [error, setError] = React.useState('');
 
   const workloads = useQuery({
@@ -106,6 +149,7 @@ export function CreateGrayReleaseDialog({
     setStep('form');
     setName('');
     setType('Canary');
+    setTraffic('50');
     setError('');
   }, [open]);
 
@@ -120,7 +164,7 @@ export function CreateGrayReleaseDialog({
       return strategiesApi(apiClient).create({
         cluster,
         namespace,
-        body: strategyManifest(name.trim(), selected, type, namespace),
+        body: strategyManifest(name.trim(), selected, type, namespace, weightOf(type, traffic)),
       });
     },
     onSuccess: () => {
@@ -134,6 +178,7 @@ export function CreateGrayReleaseDialog({
   function validate(): string {
     if (!NAME_PATTERN.test(name.trim())) return t('grayRelease.create.error.name');
     if (!selected) return t('grayRelease.create.error.workload');
+    if (type === 'Canary' && !trafficIsValid(traffic)) return t('grayRelease.traffic.error.range');
     return '';
   }
 
@@ -206,6 +251,20 @@ export function CreateGrayReleaseDialog({
                 ))}
               </select>
             </label>
+            {type === 'Canary' ? (
+              <label className="flex flex-col gap-1 text-xs">
+                <span className="text-ai-fg-muted">{t('grayRelease.create.traffic')}</span>
+                <Input
+                  value={traffic}
+                  inputMode="numeric"
+                  maxLength={3}
+                  aria-label={t('grayRelease.create.traffic')}
+                  {...actionProps('grayrelease:create-traffic')}
+                  onChange={(event) => setTraffic(event.target.value)}
+                />
+                <span className="text-[11px] text-ai-fg-muted">{t('grayRelease.create.trafficHint')}</span>
+              </label>
+            ) : null}
             {error ? (
               <p role="alert" className="text-xs text-ai-danger" data-ai-id="grayrelease:create-error">
                 {error}
@@ -227,6 +286,7 @@ export function CreateGrayReleaseDialog({
                 name: name.trim(),
                 workload: selected?.name ?? '-',
                 type: typeLabel(type),
+                weight: String(weightOf(type, traffic)),
               })}
             </p>
             {error ? (
@@ -253,4 +313,16 @@ export function CreateGrayReleaseDialog({
       </div>
     </Modal>
   );
+}
+
+/** The share the new version receives; non-canary types start at zero. */
+function weightOf(type: StrategyType, traffic: string): number {
+  if (type !== 'Canary') return 0;
+  const parsed = Number(traffic);
+  return Number.isInteger(parsed) ? Math.max(0, Math.min(100, parsed)) : 0;
+}
+
+function trafficIsValid(traffic: string): boolean {
+  const parsed = Number(traffic);
+  return Number.isInteger(parsed) && parsed >= 0 && parsed <= 100;
 }

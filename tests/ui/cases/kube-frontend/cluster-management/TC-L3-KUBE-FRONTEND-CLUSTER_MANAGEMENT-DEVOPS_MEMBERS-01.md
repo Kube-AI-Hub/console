@@ -19,7 +19,7 @@
 文案来自需求 [`prd/kube-frontend/cluster-management/devops-projects.md`](../../../../prd/kube-frontend/cluster-management/devops-projects.md)，与用例的 `covers` 对应；改需求即改这里。
 
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_MEMBERS-01** — Given 打开成员页签，Then 表格列为 用户名 / 角色 / 状态 / 最近登录 / 操作，无成员显示「该工程还没有成员。」，最近登录为空显示「尚未登录」；点邀请打开对话框，用户名为空提交被校验拦下并提示，角色下拉只列预置角色 viewer / operator / admin；成员读取失败显示失败原因与重试。
-- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_MEMBERS-02** — Given 邀请对话框，When 填平台已有用户名并选 viewer 提交，Then 发出 POST `/kapis/iam.kubesphere.io/v1alpha2/devops/<name>/members`（数组 body），成功后行出现且角色为 viewer；点修改角色选 operator 保存，发出 PUT `…/members/<username>` 且行角色更新；点移除并在确认框确认，发出 DELETE `…/members/<username>` 且行消失；失败显示服务端消息。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_MEMBERS-02** — Given 邀请对话框，When 填平台已有用户名并选 viewer 提交，Then 发出 POST `/kapis/iam.kubesphere.io/v1alpha2/devops/<name>/members`（数组 body），成功后行出现且角色为 viewer；点修改角色选 operator 保存，发出 PUT `…/members/<username>` 且行角色更新；点移除并在确认框确认，发出 DELETE `…/members/<username>` 且行消失；失败显示服务端消息。 成员列表对**当前登录账号自己**这一行不渲染「修改角色 / 移除」，改显示「不能修改自己的角色或移除自己」（旧 console 的 showAction 保护；服务端也会拒绝对自己改角色或移除）。
 
 ### 关联设计
 

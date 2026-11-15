@@ -5,96 +5,69 @@ from uuid import uuid4
 import pytest
 from playwright.sync_api import expect
 
+from pages.canary_page import CanaryPage, strategy_manifest
+
 pytestmark = pytest.mark.ui
-
-#: The native CRD endpoint the page reads (verified 200 on this cluster; the kapis
-#: proxy answers as well but returns the resource-proxy envelope).
-STRATEGIES = "/apis/servicemesh.kubesphere.io/v1alpha2/namespaces/default/strategies"
-
-
-def _strategy(name: str, target: str) -> dict:
-    """A Canary strategy that routes a host to two versions, as the controller expects."""
-    return {
-        "apiVersion": "servicemesh.kubesphere.io/v1alpha2",
-        "kind": "Strategy",
-        "metadata": {"name": name, "namespace": "default", "labels": {"app": target}},
-        "spec": {
-            "type": "Canary",
-            "principal": "v1",
-            "governor": "v2",
-            "strategyPolicy": "WaitForWorkloadReady",
-            "selector": {"matchLabels": {"app": target}},
-            "template": {
-                "metadata": {"labels": {"app": target}},
-                "spec": {
-                    "hosts": [target],
-                    "http": [
-                        {
-                            "route": [
-                                {"destination": {"host": target, "subset": "v1"}},
-                                {"destination": {"host": target, "subset": "v2"}},
-                            ]
-                        }
-                    ],
-                },
-            },
-        },
-    }
 
 
 @pytest.mark.point
 def test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_GRAY_RELEASE_01(app_workloads_page, screenshot):
-    """TC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-01 灰度发布列表：空态可达，有策略时列头与行内容正确。"""
+    """TC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-01 灰度发布列表：空态、六列与版本权重、名称下钻详情。"""
 
     ui = app_workloads_page
     assert ui.api is not None
+    canary = CanaryPage(ui.page, ui.base, namespace=ui.namespace, api=ui.api)
     suffix = uuid4().hex[:8]
     name = f"tc-e2e-gray-{suffix}"
     target = f"tc-e2e-gray-svc-{suffix}"
-    created = False
 
     try:
-        # ---- empty state (when the project has no strategies yet) ----
-        status, body = ui._request("GET", STRATEGIES)
-        existing = (body.get("items") or []) if status == 200 else []
-        ui.open("grayrelease")
-        surface = ui.surface("grayrelease")
-        expect(surface).to_be_visible()
-        ui.wait_ready(surface)
+        existing = canary.list_strategies()
+
+        # ---- empty state when the project has nothing yet ----
+        canary.open_list()
         if not existing:
-            assert ui.state("grayrelease") == "empty"
-            expect(surface).to_contain_text("暂无灰度发布任务")
+            assert canary.state == "empty", canary.state
+            expect(canary.surface).to_contain_text("暂无灰度发布任务")
 
-        # ---- one strategy: headers, row and derived fields ----
-        status, payload = ui._request("POST", STRATEGIES, _strategy(name, target))
-        assert status in (200, 201), (status, payload)
-        created = True
+        # ---- one weighted canary, with a controller condition injected ----
+        canary.create_strategy(strategy_manifest(name, target, canary.namespace, weights=(80, 20)))
+        canary.set_conditions(
+            name,
+            [
+                {
+                    "type": "Complete",
+                    "status": "True",
+                    "reason": "Done",
+                    "message": "all traffic shifted",
+                    "lastTransitionTime": "2026-11-15T00:00:00Z",
+                }
+            ],
+            completion_time="2026-11-15T00:00:00Z",
+        )
 
-        ui.open("grayrelease")
-        surface = ui.surface("grayrelease")
-        expect(surface).to_be_visible()
-        ui.wait_ready(surface)
-        expect(surface).to_have_attribute("data-ai-state", "ready")
+        canary.open_list()
+        expect(canary.surface).to_have_attribute("data-ai-state", "ready")
 
-        headers = [title.strip() for title in surface.locator("thead th:visible").all_inner_texts() if title.strip()]
-        for column in ("名称", "类型", "目标服务", "状态"):
+        headers = canary.headers()
+        for column in ("名称", "类型", "目标服务", "版本", "状态", "创建时间"):
             assert column in headers, headers
 
-        row = ui.row("grayrelease", name)
+        row = canary.row(name)
         expect(row).to_be_visible()
         text = row.inner_text()
-        # spec.type drives the badge; a Chinese badge is what proves the mapping ran.
+        # spec.type drives the badge; the Chinese word proves the mapping ran.
         assert "金丝雀发布" in text, text
-        # The target service comes from spec.template.spec.hosts[0], not the strategy name.
+        # The target service is hosts[0], not the strategy name.
         assert target in text, text
-        # Complete/Failed/absent conditions map to one of four labels; a fresh object may
-        # still be 未知 until the controller writes its condition.
-        assert any(label in text for label in ("已完成", "进行中", "失败", "未知")), text
-        assert "spec.type" not in text
+        # Both versions and both weights come from the weighted routes.
+        assert "v2" in text and "v1" in text, text
+        assert "20%" in text and "80%" in text, text
+        # Complete=True is derived to 已完成.
+        assert "已完成" in text, text
 
-        # Creation now has its own case; the list only has to expose the entry.
-        expect(ui.page.locator('[data-ai-id="grayrelease:create"]')).to_be_visible(timeout=20_000)
-        screenshot(ui.page, "gray-release")
+        canary.open_detail(name)
+        expect(canary.detail_surface).to_be_visible()
+        screenshot(ui.page, "gray-release-list")
     finally:
-        if created:
-            ui._request("DELETE", f"{STRATEGIES}/{name}")
+        canary.cleanup(name)

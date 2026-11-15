@@ -98,9 +98,17 @@ export function WorkspaceRepoDetailPage({ workspace, repoId }: WorkspaceRepoDeta
     </Link>
   );
 
+  // One surface state for the whole page: the contract asks a page to announce loading /
+  // ready / error through state={...} (data-ai-state), and four literal props drift apart.
+  const surfaceState: 'loading' | 'error' | 'ready' = repo.isPending
+    ? 'loading'
+    : repo.isError
+      ? 'error'
+      : 'ready';
+
   if (repo.isPending) {
     return (
-      <AiSurface as="section" aiId="workspace-repo-detail:surface" state="loading" className="flex min-w-0 flex-col gap-4">
+      <AiSurface as="section" aiId="workspace-repo-detail:surface" state={surfaceState} className="flex min-w-0 flex-col gap-4">
         {back}
         <Skeleton className="h-32 w-full" />
       </AiSurface>
@@ -109,7 +117,7 @@ export function WorkspaceRepoDetailPage({ workspace, repoId }: WorkspaceRepoDeta
 
   if (repo.isError) {
     return (
-      <AiSurface as="section" aiId="workspace-repo-detail:surface" state="error" className="flex min-w-0 flex-col gap-4">
+      <AiSurface as="section" aiId="workspace-repo-detail:surface" state={surfaceState} className="flex min-w-0 flex-col gap-4">
         {back}
         <ResourceErrorPanel error={repo.error} onRetry={() => void repo.refetch()} retryAiId="workspace-repo-detail:retry" />
       </AiSurface>
@@ -120,7 +128,7 @@ export function WorkspaceRepoDetailPage({ workspace, repoId }: WorkspaceRepoDeta
   const eventRows = events.data?.items ?? [];
 
   return (
-    <AiSurface as="section" aiId="workspace-repo-detail:surface" state="ready" className="flex min-w-0 flex-col gap-4">
+    <AiSurface as="section" aiId="workspace-repo-detail:surface" state={surfaceState} className="flex min-w-0 flex-col gap-4">
       {back}
       <header className="flex flex-wrap items-center gap-3">
         <h1 className="text-lg font-semibold text-ai-fg" data-ai-id="workspace-repo-detail:name">

@@ -11,16 +11,13 @@ TEST_USER = "ui-test"
 
 
 @pytest.mark.point
-def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_DEVOPS_MEMBERS_01(cluster_management_page, screenshot):
+def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_DEVOPS_MEMBERS_01(cluster_management_page, devops_project, ui_config, screenshot):
     """TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_MEMBERS-01 成员列表、邀请、改角色与移除。"""
 
     ui = cluster_management_page
     assert ui.api is not None
     devops = DevopsPage(ui.page, ui.base_url, ui.cluster, ui.api)
-    container = devops.pick_container()
-    if container is None:
-        pytest.skip("集群没有命名空间可用的 DevOps 工程：成员页签需要真实工程")
-    project, _namespace = container
+    project, _namespace = devops_project
 
     def row():
         return ui.page.locator(f'[data-ai-id="devops-detail:members-table"] tbody tr[data-ai-row="{TEST_USER}"]')
@@ -33,6 +30,13 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_DEVOPS_MEMBERS_01(cluster_manage
         devops.open_project(project)
         devops.open_tab("members")
         devops.expect_exactly_one_state("members")
+        # Self-protection (old console: showAction hidden for username === own): the signed-in
+        # account must never be offered "change role" / "remove" on its own row.
+        self_name = ui_config.username
+        if devops.member_role(project, self_name) is not None:
+            expect(devops.surface("devops-detail:member-self")).to_be_visible(timeout=30_000)
+            assert devops.locator(f"devops-detail:member-remove:{self_name}").count() == 0
+            assert devops.locator(f"devops-detail:member-role:{self_name}").count() == 0
         table = devops.surface("devops-detail:members-table")
         if table.count() > 0:
             headers = [title.strip() for title in table.locator("thead th").all_inner_texts()]

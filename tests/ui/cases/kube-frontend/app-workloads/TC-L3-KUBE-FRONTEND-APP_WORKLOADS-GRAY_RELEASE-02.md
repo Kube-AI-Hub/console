@@ -1,4 +1,4 @@
-# TC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-02 灰度发布 · 最小创建向导（确认后写入、列表可见、finally 清理）
+# TC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-02 灰度发布 · 创建向导（初始流量与三种类型的 manifest、确认后写入、finally 清理）
 
 - **用例 ID**: `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-02`
 - **级别**: L3  **套件**: `point`
@@ -8,7 +8,7 @@
 
 ## 产品功能
 
-灰度发布列表提供「创建灰度发布」主操作；向导采集名称、目标 Deployment 与类型，下一步只做本地校验并展示确认摘要，点确认后才 POST Strategy；成功后关闭弹窗、列表出现该行；失败在确认弹窗内显示原因；用例 finally 删除并核对计数回创建前。
+创建向导采集名称、目标 Deployment、类型与初始流量；点下一步只做本地校验并展示确认摘要（含初始流量），点确认后才 POST Strategy。Canary 按 100-w/w 写两条权重与 governor；Bluegreen 写 100/0 且 governor 为参考版本；Mirror 写参考版本 100% 加 mirror 到新版本。成功后关闭弹窗、列表出现该行；finally 删除并核对计数回创建前。
 
 ### 关联需求
 
@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/app-workloads/gray-release.md`](../../../../prd/kube-frontend/app-workloads/gray-release.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-02** — 已知项目内有至少一个 Deployment，当在灰度发布页点「创建灰度发布」，填写合法名称、选择该 Deployment 与 Canary（或 Bluegreen/Mirror）并点「下一步」，则在点「确认创建」之前不产生任何写请求；确认后项目命名空间下出现对应 `Strategy` 对象，其 `spec.type` 等于所选类型、`spec.selector.matchLabels.app` 与 `spec.template.spec.hosts[0]` 来自所选 Deployment 的 app 标签，列表刷新后出现该行（状态为进行中/未知之一）；创建失败（名称冲突/权限/非法字段）时确认弹窗内显示服务端原因且不关闭；用例 finally 删除该对象，结束后 strategies 计数回到创建前。
+- **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-02** — 已知项目内有至少一个 Deployment，当在灰度发布页点「创建灰度发布」，填写合法名称、选择该 Deployment、类型 Canary 与初始流量 25 并点「下一步」，则在点「确认创建」之前不产生任何写请求；确认后项目命名空间下出现对应 `Strategy`，其 `spec.type`、`spec.selector.matchLabels.app`、`spec.template.spec.hosts[0]` 与所选 Deployment 一致，两条路由权重为 75/25 且 `spec.governor` 为空；类型 Bluegreen 创建出 100/0 权重且 governor 为参考版本，Mirror 创建出参考版本 100% 加 `mirror` 到新版本；列表刷新后出现该行（状态为进行中/未知之一）；创建失败（名称冲突/权限/非法字段）时确认弹窗内显示服务端原因且不关闭；用例 finally 删除该对象。
 
 ### 关联设计
 
@@ -28,11 +28,11 @@
 
 文案来自需求 [`prd/kube-frontend/app-workloads/gray-release.md`](../../../../prd/kube-frontend/app-workloads/gray-release.md)，与用例的 `story` 对应；改需求即改这里。
 
-### US2 - 不用写 YAML 就能起一个最小灰度发布 (Priority: P1)
+### US2 - 不用写 YAML 就能起一个灰度发布并指定初始流量 (Priority: P1)
 
-作为 **项目运维**，我希望 **在列表上填写名称、选一个 Deployment 与发布类型，确认后创建 Strategy**，以便 **先让控制器接管这次发布，再在后续能力里补流量比例与匹配规则，而不是从零写 manifest**。
+作为 **项目运维**，我希望 **在列表上填写名称、选一个 Deployment、选择发布类型并给出初始流量比例，确认后创建 Strategy**，以便 **创建出的策略一开始就按我指定的比例分流，而不是先创建再改一次**。
 
-**Independent Test**：点「创建灰度发布」，填名称、选项目内 Deployment 与类型，下一步确认后创建；API 回读到 Strategy（spec.type/selector/template 符合选择），列表刷新出现该行，状态为进行中/未知之一。
+**Independent Test**：点「创建灰度发布」，填名称、选项目内 Deployment、类型 Canary、初始流量 25，下一步确认后创建；API 回读到两版本权重 75/25、`spec.governor` 为空，列表刷新出现该行。
 
 ## 前置与配置
 
@@ -44,27 +44,27 @@
 
 1. 用 API 读取 default 项目的 Deployment 列表与 strategies 当前条数
 2. 打开灰度发布页，点「创建灰度发布」
-3. 填写唯一名称，选择第一个 Deployment 与类型 Canary，点「下一步」
+3. 填唯一名称、选择第一个 Deployment、类型 Canary、初始流量 25，点「下一步」
 4. 此时用 API 回读该名称应为 404，且页面尚未发出 POST
-5. 在确认面板点「确认创建」，轮询 API 直到对象出现
-6. 核对 spec.type/selector.matchLabels.app/template.spec.hosts 与所选 Deployment 一致
-7. 核对页面成功提示与列表行（类型显示金丝雀发布）
-8. finally 删除对象，轮询到 404，并核对 strategies 计数回到创建前、无本前缀残留
+5. 点「确认创建」，轮询 API 直到对象出现，核对类型/选择器/host/权重 75/25/governor 为空
+6. 再次创建 Bluegreen 与 Mirror，核对权重 100/0 与 mirror 字段、governor 为参考版本
+7. 核对页面成功提示与列表行；finally 删除三个对象并核对计数回创建前
 
 ## 期望结果
 
 - 点「下一步」不产生写请求；对象在确认前不存在
-- 确认后对象存在且字段与选择一致，列表行可见
-- 删除后回读 404，计数回创建前；无残留
+- Canary 对象两条路由权重为 75/25 且 spec.governor 为空
+- Bluegreen 对象权重为 100/0 且 spec.governor 等于参考版本
+- Mirror 对象第一条路由为参考版本 100% 且存在 mirror 目标
+- 列表出现对应的行；删除后回读 404、计数回创建前、无本前缀残留
 
 ## 失败排查
 
-- 创建按钮不可见：列表是否处于 error/loading，或 registry 未 ready
+- 创建按钮不可见：列表是否处于 error/loading，或权限检查明确拒绝
 - 确认后 409：名称已被占用（换唯一后缀）
-- 回读 selector/hosts 为空：检查 Deployment 是否有 app 标签及向导 manifest
-- 列表不出现新行：确认成功后是否 invalidate ['strategies',cluster,namespace]
+- 权重不是 75/25：检查向导是否把初始流量写进 manifest
 - 计数未回零：finally 的 DELETE 是否执行/对象名是否一致
 
 ## 产品改版后如何更新自动化
 
-- 向导句柄与字段变化时同步本用例
+- 向导句柄与初始流量字段变化时同步本用例

@@ -57,7 +57,7 @@
 | LEG-devops-032 | `member.edit` modal | edit | 修改角色 | 保留 | AC-…-MEMBERS-02；TC-…-MEMBERS-01 断言 operator 回读 | 通过 |
 | LEG-devops-033 | `member.remove` | delete | 移除成员（单条） | 保留（输入用户名确认） | AC-…-MEMBERS-02；TC-…-MEMBERS-01 断言行消失 | 通过 |
 | LEG-devops-034 | `member.remove.batch` | delete | 批量移除 | 不迁移（明确不做） | PRD「明确不做」 | 不做 |
-| LEG-devops-035 | Members.showAction（username !== 当前用户） | 当前用户行 | 自己不可改/移除 | 未迁移：新实现对任何行都显示操作（GOT-…-DEVOPS_MEMBERS-01） | 待补 | 待补 |
+| LEG-devops-035 | Members.showAction（username !== 当前用户） | 当前用户行 | 自己不可改/移除 | 补齐：当前用户行渲染 `devops-detail:member-self` 说明，不渲染改角色/移除按钮 | AC-…-DEVOPS_MEMBERS-02（自我保护条款）；TC-…-DEVOPS_MEMBERS-01 断言（该账号有成员行时） | 通过（本集群无可用工程时该用例 skip，见 §6 环境依赖） |
 | LEG-devops-036 | `containers/Roles/index.jsx` getColumns | roles view | 列：名称/描述/创建时间 | 改进：名称/别名/权限模块/角色类型/创建时间 + 数量徽标 | AC-…-DEVOPS_ROLES-01；TC-…-DEVOPS_PROJECTS-05 断言表头/分类/数量 | 通过 |
 | LEG-devops-037 | Roles itemActions（新建/编辑信息/编辑权限/删除） | edit/delete | 角色 CRUD | 不迁移（明确不做：本轮只读） | PRD「明确不做」 | 不做 |
 | LEG-devops-038 | `containers/Credential/index.jsx` getColumns | credentials view | 列：名称/类型/描述/创建时间 | 改进：名称/类型/用户名/同步状态/描述/操作 | AC-…-DEVOPS_CREDENTIALS-01；TC-…-DEVOPS_CREDENTIALS-01 | 通过 |
@@ -137,11 +137,11 @@
 
 | 维度 | 状态 | 日期/构建/证据 | 未通过或未验收项 |
 | --- | --- | --- | --- |
-| 旧能力覆盖 | 部分完成 | 61 行原子能力：通过 33、等价承接 4（运行任务状态/提交、凭证详情编辑、工程列表作用域）、不做 22、阻塞 1、待补 1；未映射 0、未经证明承接 0 | 待补：成员「不能操作自己」保护；阻塞：运行日志正文；不做项见 §2 理由 |
+| 旧能力覆盖 | 部分完成 | 61 行原子能力：通过 34、等价承接 4（运行任务状态/提交、凭证详情编辑、工程列表作用域）、不做 22、阻塞 1、待补 0；未映射 0、未经证明承接 0 | 阻塞：运行日志正文；不做项见 §2 理由 |
 | 数据语义 | 通过（阻塞项除外） | 请求→mapper→展示逐项对账（§3）；运行状态正分支、health 正分支、日志正文未验 | 运行成功/失败状态、耗时正分支、日志正文（BLOCK-1） |
 | 交互与权限 | 部分完成 | 12 条用例覆盖列表/七页签/流水线 CRUD/运行链路/凭证/成员/角色/代码仓库/CD 白名单的读写回读；写后回读与自清理通过 | member 角色（非 admin）与 403 分支、视觉三档未验 |
 | 视觉与主题 | 未验收 | 用例生成截图 `artifacts/<test>/`；未做 1024/1280/1600 三档与深浅主题计算色复核 | 全部视觉判定 |
-| 静态/类型/构建/测试 | 部分通过 | 本批：check_docs --strict 0/0；12/12 E2E 通过（本地全栈→B200）；未跑 tsc/build/单元测试 | tsc/build/单元测试与全站回归由 Lead 执行 |
+| 静态/类型/构建/测试 | 通过（本轮复核） | check_docs --strict 0/0；console-next 与 api-client `tsc --noEmit` 0 error；`vite build` 通过；21:50 在存在可用工程的集群上 12/12 E2E 通过（本地全栈→B200）。补充（22:24）：工程被清理后，`devops-controller` 无法为新工程准备 adminNamespace，5 条写入用例改为以 BLOCK-1 原因 skip（新增 `devops_project` fixture） | 全站串行回归未跑 |
 | 本地全栈/B200 读取 | 通过 | B200 host、admin；读：devopsprojects/kapis pipelines/iam members+roles/gitops applications/gitrepositories/pipelineruns；写：工程、流水线、凭证、成员、代码仓库、运行请求均实测回读 | 无 |
 | 新版部署/member/全站 | 未验收 | 未在部署环境与本页族之外执行 | 全站串行、新版生产、member 角色 |
 
@@ -149,7 +149,8 @@
 
 - **BLOCK-1（运行成功 / 日志正文）**：`devops-controller` CrashLoopBackOff（pod `devops-controller-85bf6b9c66-bjkwc`，restartCount 27，exitCode 1），日志逐字 `Error: the token of the Jenkins needs to update`；`kubesphere-config` 的 `devops.host=http://devops-jenkins.kubesphere-devops-system.svc/`、`devops.username=admin`。`POST /apis/…/pipelineruns` 返回 201 且对象可读，但无 `jenkins-pipelinerun-status` 注解；日志 kapis 路由 404。复查条件：controller 就绪不再重启、Jenkins whoami/crumb 200、新运行 60 秒内出现状态注解、日志 200 非空；四条满足后重跑 TC-…-DEVOPS_RUNS-01 并追加证据。
 - **BLOCK-2（新工程集合回退）**：新建工程在控制器恢复前无 `status.adminNamespace`，其 kapis 集合回退到平台级数据（members 返回平台用户、roles 返回 533 条模板、pipelines 返回其他工程）。工程创建用例只验收创建/编辑/删除与命名空间回退；复查条件：新建工程 30 秒内出现 adminNamespace 后补该场景。
-- **待补（LEG-devops-035）**：成员行对当前登录用户仍显示改角色/移除（旧 console 有 showAction 保护）；已在 design GOT-…-DEVOPS_MEMBERS-01 记录，本批不实现（产品代码归 devops-pipelines），用例只用 `ui-test` 账号避免误操作。
+- **已关闭（LEG-devops-035）**：成员行对当前登录用户不再显示改角色/移除，改为渲染「不能修改自己的角色或移除自己」；TC-…-DEVOPS_MEMBERS-01 在账号存在成员行时断言按钮不存在。
+- **环境依赖（写入用例）**：`devops-controller` 崩溃循环期间新建工程拿不到 `status.adminNamespace`（实测 90 秒无回填，创建流水线报 `an empty namespace may not be set during creation`）。因此 `tests/ui/tests/kube-frontend/cluster-management/conftest.py` 的 `devops_project` fixture 在「集群已有可用工程」时复用、否则新建并等待命名空间，等待超时则按 BLOCK-1 原因 skip 并清理自建工程——不再依赖残留对象，也不会把 skip 当通过。
 - **已知实现差异（不是阻塞）**：无注解运行的耗时显示 `0s`（mapper 把缺失 durationInMillis 归 0，与「未运行」并存）；代码仓库提供方显示 `spec.provider` 原值（如 `github`，旧 console 标题化）。两条都写入 AC/设计并由用例按实际行为断言。
 
 ### 证据文件

@@ -11,16 +11,13 @@ RUNS_GLOB = "**/pipelineruns*"
 
 
 @pytest.mark.point
-def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_DEVOPS_RUNS_01(cluster_management_page, screenshot):
+def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_DEVOPS_RUNS_01(cluster_management_page, devops_project, screenshot):
     """TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_RUNS-01 运行请求链路、运行记录、运行详情与日志错误。"""
 
     ui = cluster_management_page
     assert ui.api is not None
     devops = DevopsPage(ui.page, ui.base_url, ui.cluster, ui.api)
-    container = devops.pick_container()
-    if container is None:
-        pytest.skip("集群没有命名空间可用的 DevOps 工程：运行链路需要真实工程命名空间")
-    project, namespace = container
+    project, namespace = devops_project
 
     suffix = devops.unique("pwspec-run")[-8:]
     pipeline = f"pwspec-run-{suffix}"

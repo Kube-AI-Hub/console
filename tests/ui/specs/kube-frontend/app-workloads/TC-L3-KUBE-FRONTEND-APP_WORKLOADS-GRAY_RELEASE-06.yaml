@@ -1,0 +1,38 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-06
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: gray-release
+title: 灰度发布 · 暂停/恢复（governor 接管与还原权重）
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/grayrelease"
+prd: prd/kube-frontend/app-workloads/gray-release.md
+design: design/kube-frontend/app-workloads/gray-release.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-06
+
+story:
+- US4
+
+product: 暂停发布把流量全部交给参考版本（spec.governor 等于参考版本）并保留权重；恢复发布清空 governor，恢复暂停前的权重比例。按钮文案随 governor 切换，页面给出已暂停/已恢复提示。按内容分流的 Canary 同样支持暂停/恢复且匹配规则不变。
+preconditions:
+- 已登录，host 集群 default 项目，servicemesh 可读写
+- 用例创建按权重 Canary（65/35、governor 空）与按内容 Canary 各一条
+- 用例对象使用 tc-e2e-gray- 前缀，finally 删除
+steps:
+- 打开按权重 Canary 详情，点「暂停发布」，轮询回读 governor 与权重
+- 断言按钮变为「恢复发布」并显示已暂停提示
+- 点「恢复发布」，轮询回读 governor 与权重
+- 打开按内容 Canary 详情，依次暂停与恢复，回读 governor 与匹配规则
+expected:
+- 暂停后 spec.governor 等于参考版本且两条权重仍为 65/35
+- 恢复后 spec.governor 为空且权重仍为 65/35
+- 按钮文案在暂停后变为「恢复发布」、恢复后变回「暂停发布」
+- 内容分流策略暂停后 governor 等于参考版本、恢复后为空，匹配规则不变
+troubleshoot:
+- 暂停后权重被改成 0/100：暂停写的是权重，不是 governor
+- 恢复后权重不是 65/35：暂停时是否覆盖了权重
+- 按钮不切换：页面是否在写成功后重新读取对象
+update_automation:
+- 暂停/恢复见 pausedStrategy/resumedStrategy；按钮句柄见 CanaryDetailPage

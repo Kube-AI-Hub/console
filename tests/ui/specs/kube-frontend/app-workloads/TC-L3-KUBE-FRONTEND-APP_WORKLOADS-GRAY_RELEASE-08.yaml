@@ -1,0 +1,40 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-08
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: gray-release
+title: 灰度发布 · 权限门控（SSAR 允许/拒绝与 fail-open）
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/grayrelease"
+prd: prd/kube-frontend/app-workloads/gray-release.md
+design: design/kube-frontend/app-workloads/gray-release.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-08
+
+story:
+- US6
+
+product: 创建与删除入口由 SelfSubjectAccessReview 决定：页面为 servicemesh.kubesphere.io 组 strategies 资源发出 create/delete 检查；当前 admin 身份下创建按钮可用、详情删除入口可见；拦截检查返回 allowed=false 时创建按钮禁用并显示原因、删除入口不渲染；解除拦截后恢复可用（fail-open）。
+preconditions:
+- 已登录且当前身份对 default 项目的 strategies 有 create/delete 权限（B200 admin）
+- 项目内存在一条 tc-e2e-gray- 前缀的 Canary 策略
+- 用例对象 finally 删除
+steps:
+- 监听页面请求，打开灰度发布页，断言发生 selfsubjectaccessreviews 调用
+- 断言创建按钮可用
+- 进入策略详情，断言删除入口可见
+- 用 page.route 拦截 selfsubjectaccessreviews 返回 status.allowed=false，重新打开列表
+- 断言创建按钮禁用并显示权限原因；进入详情断言删除入口不出现
+- 解除拦截，重新打开列表与详情，断言入口恢复
+expected:
+- 页面发出 POST /apis/authorization.k8s.io/v1/selfsubjectaccessreviews（verb create 与 delete）
+- 允许时 grayrelease:create 可用、grayrelease-detail:delete 可见
+- 拒绝时创建按钮 disabled 且页面出现「没有创建灰度发布的权限」，详情没有 grayrelease-detail:delete
+- 解除拦截后两个入口恢复可用
+troubleshoot:
+- 没有 SSAR 请求：页面是否在加载后立即渲染权限查询（enabled 依赖 cluster/namespace）
+- 拦截不生效：请求会经 BFF 转发，page.route 需匹配 **/selfsubjectaccessreviews
+- 按钮仍可见：确认返回体是 {status:{allowed:false}} 形状
+update_automation:
+- 权限 hook 见 pages/app-workloads/canary/useStrategyPermission.ts

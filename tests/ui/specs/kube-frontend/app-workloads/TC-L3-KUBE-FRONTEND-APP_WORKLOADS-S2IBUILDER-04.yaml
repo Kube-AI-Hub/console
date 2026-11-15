@@ -1,0 +1,37 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-S2IBUILDER-04
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: s2ibuilder
+title: 镜像构建器 · 创建制品构建（B2I 上传链路，上游不可用时如实报错）
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/s2ibuilder'
+prd: prd/kube-frontend/app-workloads/s2ibuilder.md
+design: design/kube-frontend/app-workloads/s2ibuilder.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-S2IBUILDER-04
+
+story:
+- US2
+
+product: B2I 模式先上传制品：创建 S2iBinary 并 PUT /file，成功后写 downloadURL 到 sourceUrl 且 isBinaryURL=true；上传失败时对话框显示服务端原因、不创建构建器，且失败对象被清理。
+preconditions:
+- 已登录，且在 host 集群的 default 项目
+- 存在构建模板
+steps:
+- 打开创建构建器，选择「通过制品构建镜像 / JAR」，进入下一步
+- 生成一个唯一前缀的 .jar 临时文件并通过制品上传控件选择
+- 观察请求：S2iBinary 创建与 /file 上传；记录响应与页面提示
+- 若上传失败：断言对话框中制品字段显示错误文本，构建器未被创建，s2ibinaries 无前缀残留
+- 若上传成功：继续创建并回读 builder 的 isBinaryURL 与 sourceUrl，再清理
+expected:
+- 上传链路真实发起 POST s2ibinaries 与 PUT /kapis/devops.kubesphere.io/v1alpha2/namespaces/default/s2ibinaries/<name>/file
+- 上传失败时页面如实显示服务端错误（当前上游 minio 不可用 → 500），不伪装成功
+- 上传失败不创建 S2iBuilder，且半成品 S2iBinary 被删除
+- 上传成功时 builder 的 spec.config.isBinaryURL=true、sourceUrl 指向 downloadURL
+troubleshoot:
+- 上传 500：devops-apiserver 到 minio 的 DNS/服务是否可用
+- 出现残留 S2iBinary：失败路径是否清理
+update_automation:
+- 页面句柄或字段映射变化时同步本用例

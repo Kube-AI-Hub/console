@@ -1,0 +1,38 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-S2IBUILDER-06
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: s2ibuilder
+title: 镜像构建器 · 运行/重新构建（预填、PATCH、更新工作负载注解、触发 run）
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/s2ibuilder'
+prd: prd/kube-frontend/app-workloads/s2ibuilder.md
+design: design/kube-frontend/app-workloads/s2ibuilder.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-S2IBUILDER-06
+
+story:
+- US4
+
+product: 详情页「运行」打开预填当前配置的表单；保存会 PATCH 构建器配置并创建新的 S2iRun；有 serviceName 注解时显示「构建成功后更新工作负载」开关，默认开（移除 donotautoscale 注解），关闭则写入该注解。
+preconditions:
+- 已登录，且在 host 集群的 default 项目
+- 存在带 serviceName 注解的测试构建器
+steps:
+- 打开详情，点击运行；核对仓库 URL/镜像名称/标签已预填
+- 修改镜像标签，确认「更新工作负载」开关默认为开，提交
+- 轮询 API：构建器 tag 已更新、donotautoscale 注解不存在、新增一条 S2iRun
+- 再次打开运行，关闭「更新工作负载」开关并提交
+- 轮询 API：donotautoscale 注解为 true，且再新增一条运行
+expected:
+- 运行表单预填既有 config；提交按钮在提交中禁用并显示进行中
+- PATCH 后配置更新（未修改字段保留），并创建 spec.builderName 等于该构建器的新 S2iRun
+- 更新工作负载开：不写 devops.kubesphere.io/donotautoscale；关：写入 true
+- 没有 serviceName 注解时不显示该校验框，并说明原因
+troubleshoot:
+- PATCH 后字段丢失：是否 merge-patch 而非整对象
+- 没有新 run：是否只 PATCH 未 createRun
+- 注解未更新：merge patch 删除键用 null
+update_automation:
+- 页面句柄或字段映射变化时同步本用例
