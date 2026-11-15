@@ -18,6 +18,7 @@ import { useAuth } from '@/shell/AuthProvider';
 import { MutationAlert } from '@/components/resource/ResourceErrorPanel';
 import { UserCreateDialog } from './UserCreateDialog';
 import { UserRoleDialog } from './UserRoleDialog';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * Platform-level lists: 用户, 平台角色 and 企业空间.
@@ -70,10 +71,12 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
 
   const rows = (query.data?.items ?? []) as Row[];
   const total = query.data?.total ?? 0;
+  const listRefresh = useListRefresh(`${kind}`, query);
 
   const schema = React.useMemo<ListSchema<Row>>(
     () => ({
       title: t(PLATFORM_DESCRIPTORS[kind].titleKey),
+      refresh: listRefresh.refresh,
       description: t(PLATFORM_DESCRIPTORS[kind].descriptionKey),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
@@ -307,6 +310,7 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
         description: t(PLATFORM_DESCRIPTORS[kind].emptyDescriptionKey),
       },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -316,7 +320,7 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
       },
       pagination: { page: list.page, pageSize: PAGE_SIZE, total },
     }),
-    [kind, list, t, total, currentUsername],
+    [kind, list, query.isFetching, t, total, currentUsername],
   );
 
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
@@ -332,6 +336,7 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
   return (
     <AiSurface as="section" aiId={`${kind}:surface`} state={state} className="min-w-0">
       <ResourceList
+        onRefresh={listRefresh.onRefresh}
         schema={schema}
         rows={rows}
         loading={state === 'loading'}

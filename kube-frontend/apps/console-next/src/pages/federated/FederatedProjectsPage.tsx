@@ -5,6 +5,7 @@ import { useT } from '@/i18n';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
 import { useFederatedProjects, type FederatedProject } from './queries';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * 联邦项目列表.
@@ -26,10 +27,12 @@ export function FederatedProjectsPage({ workspace }: FederatedProjectsPageProps)
   const query = useFederatedProjects(workspace);
   const rows = query.data ?? [];
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
+  const listRefresh = useListRefresh('federated-projects', query);
 
   const schema = React.useMemo<ListSchema<FederatedProject>>(
     () => ({
       title: t('fedprojects.list.title'),
+      refresh: listRefresh.refresh,
       description: t('fedprojects.list.description'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
@@ -81,6 +84,7 @@ export function FederatedProjectsPage({ workspace }: FederatedProjectsPageProps)
       ],
       empty: { title: t('fedprojects.list.emptyTitle'), description: t('fedprojects.list.emptyDescription') },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -89,7 +93,7 @@ export function FederatedProjectsPage({ workspace }: FederatedProjectsPageProps)
         selected: (count) => t('table.selectedCount', { count }),
       },
     }),
-    [t, workspace],
+    [query.isFetching, t, workspace],
   );
 
   if (state === 'error') {
@@ -106,7 +110,7 @@ export function FederatedProjectsPage({ workspace }: FederatedProjectsPageProps)
 
   return (
     <AiSurface as="section" aiId="federated-projects:surface" state={state} className="min-w-0">
-      <ResourceList schema={schema} rows={rows} loading={state === 'loading'} />
+      <ResourceList schema={schema} onRefresh={listRefresh.onRefresh} rows={rows} loading={state === 'loading'} />
     </AiSurface>
   );
 }

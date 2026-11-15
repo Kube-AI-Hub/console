@@ -6,6 +6,7 @@ import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 
 /**
  * 集群成员.
@@ -30,10 +31,12 @@ export function ClusterMembersPage({ cluster }: ClusterMembersPageProps): React.
 
   const rows = query.data?.items ?? [];
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
+  const listRefresh = useListRefresh('cluster-members', query);
 
   const schema = React.useMemo<ListSchema<ClusterMemberSummary>>(
     () => ({
       title: t('cluster.members.title'),
+      refresh: listRefresh.refresh,
       description: t('cluster.members.description'),
       rowKey: 'username',
       rowAttributes: (row) => ({ 'data-ai-row': row.username }),
@@ -73,6 +76,7 @@ export function ClusterMembersPage({ cluster }: ClusterMembersPageProps): React.
       ],
       empty: { title: t('cluster.members.emptyTitle'), description: t('cluster.members.emptyDescription') },
       labels: {
+        ...listRefresh.emptyLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -82,7 +86,7 @@ export function ClusterMembersPage({ cluster }: ClusterMembersPageProps): React.
       },
       pagination: { page: 1, pageSize: Math.max(rows.length, 10), total: rows.length },
     }),
-    [rows.length, t],
+    [query.isFetching, rows.length, t],
   );
 
   if (state === 'error') {
@@ -95,7 +99,7 @@ export function ClusterMembersPage({ cluster }: ClusterMembersPageProps): React.
 
   return (
     <AiSurface as="section" aiId="cluster-members:surface" state={state} className="min-w-0">
-      <ResourceList schema={schema} rows={rows} loading={state === 'loading'} />
+      <ResourceList schema={schema} onRefresh={listRefresh.onRefresh} rows={rows} loading={state === 'loading'} />
     </AiSurface>
   );
 }

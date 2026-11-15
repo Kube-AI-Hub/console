@@ -503,6 +503,13 @@ modules:
       - TC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-01
       - TC-FULL-KUBE-FRONTEND-ACCESS_CONTROL-02
     features:
+    - id: access-lists-refresh
+      title: 访问控制列表刷新
+      prd: prd/kube-frontend/access-control/access-lists-refresh.md
+      design: design/kube-frontend/access-control/access-lists-refresh.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-ACCESS_LISTS_REFRESH-01
     - id: workspace-members
       title: 租户(企业空间)成员授权
       prd: prd/kube-frontend/access-control/workspace-members.md

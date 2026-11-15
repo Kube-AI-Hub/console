@@ -498,6 +498,11 @@ MODULES = [
                 ]},
                 "features": [
                     {
+                        "id": "access-lists-refresh",
+                        "title": "访问控制列表刷新",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-ACCESS_LISTS_REFRESH-01"]},
+                    },
+                    {
                         "id": "workspace-members",
                         "title": "租户(企业空间)成员授权",
                         "tests": {"L3": [
