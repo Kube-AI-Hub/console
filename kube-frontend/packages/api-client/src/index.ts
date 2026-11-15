@@ -219,6 +219,7 @@ export type {
   IamKind,
   MemberDetail,
   ClusterMemberSummary,
+  ClusterRoleOption,
   MemberSummary,
   MembersApi,
   NetworkPolicyDetail,
@@ -542,8 +543,8 @@ export type {
 
 export { clusterDashboardsApi, projectDashboardsApi } from './dashboards';
 export type { DashboardDetail, DashboardSummary } from './dashboards';
-export { clusterGatewaysApi, toClusterGateway } from './gateways';
-export type { ClusterGateway } from './gateways';
+export { clusterGatewaysApi, projectGatewaysApi, isClusterGatewayNamespace, toClusterGateway, toGatewayDetail } from './gateways';
+export type { ClusterGateway, GatewayChanges, GatewayDetail, GatewayServicePort, GatewaySpec } from './gateways';
 export { kubectlApi } from './kubectl';
 export type { KubectlTarget } from './kubectl';
 export { nodeTerminalPath, openNodeTerminalSession } from './node-terminal';
