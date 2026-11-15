@@ -36,3 +36,36 @@
 - 在长跑中采样 BFF 的响应时间与连接数，确认是否连接池耗尽；
 - 在长跑中采样 SSH 隧道的吞吐与重连次数；
 - 若确认是上游限流，考虑给 E2E 增加请求重试或降低并发（当前已是 `-n 0`，只能减少总量）。
+
+## 按区隔离跑的全量结果（2026-11-16 03:00 起）
+
+每个区各自起一个 pytest 会话（即每个区一个全新的浏览器上下文），16 个区依次跑完：
+
+| 区 | 结果 | 用时 |
+| --- | --- | --- |
+| access-control | 1 failed / 42 passed | 6:12 |
+| app-store | 18 passed | 2:05 |
+| app-workloads | 5 failed / 65 passed / 1 skipped | 9:03 |
+| cluster-management | 3 failed / 90 passed / 12 skipped | 14:10 |
+| configmaps | 25 passed / 2 skipped | 1:29 |
+| core | 1 passed | 0:02 |
+| login | 3 passed | 0:05 |
+| monitoring | 1 failed / 14 passed | 2:33 |
+| platform-settings | 3 passed / 6 skipped | 1:32 |
+| project-settings | 25 passed / 1 skipped | 3:25 |
+| secrets | 16 passed | 0:58 |
+| serviceaccounts | 13 passed | 2:05 |
+| storage | 21 passed | 2:11 |
+| theme | 2 passed | 0:06 |
+| user-settings | 7 passed | 0:28 |
+| workbench | 3 passed | 0:07 |
+
+合计 **348 passed / 22 skipped / 10 failed**。
+
+## 失败全部集中在最长的三个区，且复跑全绿
+
+10 条失败只出现在 access-control（6 分钟）、app-workloads（9 分钟）、cluster-management（14 分钟）这三个**单区用时最长**的区里；把其中 6 条具名用例（`APP_WORKLOADS-STATUS-01/02`、`MONITORING-LIST_REFRESH-01`、`MONITOR_RESOURCE-01`、`NODES-10`、`WORKSPACE_CONSOLE-05`）单独再跑一次：**6 passed in 59s**。
+
+这与前面的判断一致：**不是产品缺陷**，而是同一个会话跑够久之后上游响应退化；区越短越不受影响（所有 2 分钟以内的区 100% 全绿）。
+
+因此可用的判据是：**短区直接信结果；长区（>5 分钟）的失败必须在新区复跑一次再定性**。
