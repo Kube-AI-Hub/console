@@ -1,0 +1,39 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DASHBOARD_PANELS-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: dashboard-panels
+title: 仪表板面板渲染
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/custom-monitoring'
+prd: prd/kube-frontend/cluster-management/dashboard-panels.md
+design: design/kube-frontend/cluster-management/dashboard-panels.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DASHBOARD_PANELS-01
+
+story:
+- US1
+
+product: 打开自定义监控仪表板即可看到 row 标题、singlestat 数值与 graph 曲线；坏表达式只影响该面板。
+preconditions:
+- 已登录且有集群监控读权限
+- host 集群 Prometheus 可经 apiserver service proxy 查询
+steps:
+- 自建一个含 row / singlestat(sum(up)) / graph(sum(up)) / 坏表达式面板的仪表板
+- 从列表点进该仪表板
+- 读取 row 标题、singlestat 数值、graph 曲线与坏面板的提示
+- 切换时间窗到 24 小时
+- 清理仪表板
+steps_expected:
+- row 渲染为标题且不查询
+- singlestat 显示数值，graph 画出曲线
+- 坏表达式面板显示错误/空态，其它面板仍正常
+- 切换时间窗后重新取数
+expected:
+- 面板只读，页面注明编辑不在迁移范围
+troubleshoot:
+- 全部面板都空：求值走了 metrics_filter 而不是 Prometheus proxy
+- 一个坏面板导致整页空白：没有按面板隔离错误
+update_automation:
+- 选择器：dashboard-panels:surface / :title / :readonly-note / :panel:<i> / :panel:<i>:value / :chart / :empty / :error / :range:24h

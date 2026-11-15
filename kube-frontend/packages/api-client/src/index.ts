@@ -620,3 +620,6 @@ export type {
   FederatedResourceType,
   KubeFederatedObject,
 } from './federated';
+
+export { promqlApi } from './promql';
+export type { PromqlSeries } from './promql';

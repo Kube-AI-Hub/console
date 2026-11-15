@@ -920,6 +920,11 @@ MODULES = [
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_MONITORING-01", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CUSTOM_MONITORING-05"]},
                     },
                     {
+                        "id": "dashboard-panels",
+                        "title": "仪表板面板渲染",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DASHBOARD_PANELS-01"]},
+                    },
+                    {
                         "id": "cluster-config-lists-refresh",
                         "title": "集群配置与资源列表刷新",
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG_LISTS_REFRESH-01"]},
