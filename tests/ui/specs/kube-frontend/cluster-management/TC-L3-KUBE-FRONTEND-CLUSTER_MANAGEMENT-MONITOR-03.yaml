@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: monitor
+title: 集群监控：物理资源指标
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/monitor'
+prd: prd/kube-frontend/cluster-management/monitor.md
+design: design/kube-frontend/cluster-management/monitor.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-03
+
+story:
+- US1
+
+product: 集群监控页显示 13 张物理资源卡片：CPU/内存/容器组（运行、异常、完成）/节点/负载 1-5-15/磁盘/inode/网络收发。
+preconditions:
+- 已登录且监控后端可用
+steps:
+- 打开集群监控页
+- 逐个核对待办卡片是否存在
+- 读取 CPU、内存、磁盘、inode、网络速率、平均负载的当前值
+steps_expected:
+- 13 张卡片都渲染（有数据或空态）
+- 百分比为 0–100、平均负载两位小数、网络速率为 B/KiB/MiB/GiB 每秒
+- 无数据的卡片显示空态说明而不是 0
+expected:
+- 磁盘使用率由已用/总量算出；inode 由 0–1 比值乘 100
+troubleshoot:
+- inode 显示 0%：未乘 100
+- 网络速率显示为纯数字：未按字节单位格式化
+- 平均负载为整数：用了 Math.round
+update_automation:
+- 选择器：cluster-monitor:cpu / :memory / :pods / :pods-abnormal / :pods-succeeded / :nodes / :load1 / :load5 / :load15 / :disk / :inode / :net-tx / :net-rx（每张卡片带 :latest 值）

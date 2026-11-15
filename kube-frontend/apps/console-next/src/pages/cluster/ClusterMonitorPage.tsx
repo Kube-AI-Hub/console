@@ -43,6 +43,13 @@ type WindowKey = (typeof WINDOWS)[number]['key'];
  * hundreds of percent (memory read as a percentage printed 937053405184%). The
  * total has to be read in the same request and the pair divided sample by sample.
  */
+/**
+ * The physical-resource charts, matching the old console's cluster monitor.
+ *
+ * `kind` decides only how a number is printed; `scale` converts a ratio the API
+ * reports as 0..1 into a percentage. Disk and inode usage are ratios of two series,
+ * so they carry a `total` like CPU and memory do.
+ */
 const CHARTS = [
   { key: 'cpu', metric: 'cluster_cpu_usage', total: 'cluster_cpu_total', kind: 'percent', aiId: 'cluster-monitor:cpu' },
   {
@@ -53,7 +60,22 @@ const CHARTS = [
     aiId: 'cluster-monitor:memory',
   },
   { key: 'pods', metric: 'cluster_pod_running_count', kind: 'count', aiId: 'cluster-monitor:pods' },
+  { key: 'podsAbnormal', metric: 'cluster_pod_abnormal_count', kind: 'count', aiId: 'cluster-monitor:pods-abnormal' },
+  { key: 'podsSucceeded', metric: 'cluster_pod_succeeded_count', kind: 'count', aiId: 'cluster-monitor:pods-succeeded' },
   { key: 'nodes', metric: 'cluster_node_online', kind: 'count', aiId: 'cluster-monitor:nodes' },
+  { key: 'load1', metric: 'cluster_load1', kind: 'decimal', aiId: 'cluster-monitor:load1' },
+  { key: 'load5', metric: 'cluster_load5', kind: 'decimal', aiId: 'cluster-monitor:load5' },
+  { key: 'load15', metric: 'cluster_load15', kind: 'decimal', aiId: 'cluster-monitor:load15' },
+  {
+    key: 'disk',
+    metric: 'cluster_disk_size_usage',
+    total: 'cluster_disk_size_capacity',
+    kind: 'percent',
+    aiId: 'cluster-monitor:disk',
+  },
+  { key: 'inode', metric: 'cluster_disk_inode_utilisation', kind: 'percent', scale: 100, aiId: 'cluster-monitor:inode' },
+  { key: 'netTx', metric: 'cluster_net_bytes_transmitted', kind: 'rate', aiId: 'cluster-monitor:net-tx' },
+  { key: 'netRx', metric: 'cluster_net_bytes_received', kind: 'rate', aiId: 'cluster-monitor:net-rx' },
 ] as const;
 
 /** Every metric a chart needs, including the totals the ratios divide by. */
@@ -122,8 +144,14 @@ export function ClusterMonitorPage({ cluster, node }: ClusterMonitorPageProps): 
     for (const chart of charts) {
       const used = seriesByName.get(chart.metric);
       if (!used) continue;
+      // A ratio the API already reports as 0..1 (inode usage) is scaled, not divided:
+      // dividing it by another series would be a different quantity.
+      const scale = 'scale' in chart && chart.scale ? chart.scale : 1;
       if (!('total' in chart) || !chart.total) {
-        out.set(chart.key, used);
+        out.set(
+          chart.key,
+          scale === 1 ? used : { name: used.name, points: used.points.map((point) => ({ at: point.at, value: point.value * scale })) },
+        );
         continue;
       }
       const total = seriesByName.get(chart.total);
@@ -195,6 +223,22 @@ export function ClusterMonitorPage({ cluster, node }: ClusterMonitorPageProps): 
   );
 }
 
+/** How a chart prints its numbers. */
+type ChartKind = 'percent' | 'count' | 'decimal' | 'rate';
+
+/** Bytes per second in the units a reader recognises (KiB/s, MiB/s, ...). */
+function formatBytesPerSecond(value: number): string {
+  const units = ['B', 'KiB', 'MiB', 'GiB', 'TiB'];
+  let scaled = Math.abs(value);
+  let unit = 0;
+  while (scaled >= 1024 && unit < units.length - 1) {
+    scaled /= 1024;
+    unit += 1;
+  }
+  const text = scaled >= 100 || unit === 0 ? scaled.toFixed(0) : scaled.toFixed(1);
+  return `${value < 0 ? '-' : ''}${text} ${units[unit]}`;
+}
+
 /**
  * One trend.
  *
@@ -213,7 +257,7 @@ function TrendCard({
   title: string;
   aiId: string;
   series: MetricSeries | undefined;
-  kind: 'percent' | 'count';
+  kind: ChartKind;
   start: number;
   end: number;
 }): React.ReactElement {
@@ -282,7 +326,7 @@ function Sparkline({
   points: MetricSeries['points'];
   start: number;
   end: number;
-  kind: 'percent' | 'count';
+  kind: ChartKind;
 }): React.ReactElement {
   return <TrendChart points={points} start={start} end={end}
     label={`${t_count(points.length)} ${kind}`} emptyText="-" data-ai-id="cluster-monitor:chart" />;
@@ -293,7 +337,9 @@ function t_count(count: number): string {
   return `${count} samples`;
 }
 
-function formatValue(value: number, kind: 'percent' | 'count'): string {
+function formatValue(value: number, kind: ChartKind): string {
   if (kind === 'percent') return `${Math.round(value)}%`;
+  if (kind === 'decimal') return value.toFixed(2);
+  if (kind === 'rate') return `${formatBytesPerSecond(value)}/s`;
   return String(Math.round(value));
 }

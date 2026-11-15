@@ -570,7 +570,7 @@
 | kube-frontend/cluster-management/log-collections | `US2` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-LOG_COLLECTIONS-02` |
 | kube-frontend/cluster-management/log-search | `US1` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-LOG_SEARCH-01` |
 | kube-frontend/cluster-management/monitor-resource | `US1` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR_RESOURCE-01` |
-| kube-frontend/cluster-management/monitor | `US1` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01` |
+| kube-frontend/cluster-management/monitor | `US1` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01`, `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-03` |
 | kube-frontend/cluster-management/monitor | `US2` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01` |
 | kube-frontend/cluster-management/monitor | `US3` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01` |
 | kube-frontend/cluster-management/namespace-detail | `US1` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NAMESPACE_DETAIL-01` |
