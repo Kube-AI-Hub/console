@@ -321,24 +321,45 @@ export { isLoginErrorCode, sessionApi } from './session';
 export { strategiesApi, strategyStatusOf, targetServiceOf, toStrategySummary } from './servicemesh';
 export type { KubeStrategy, StrategyStatus, StrategySummary, StrategyType } from './servicemesh';
 export {
+  credentialCreateBody,
+  devopsApi,
   devopsCollectionsApi,
+  devopsProjectCreateBody,
   devopsProjectNamespace,
+  isDevopsCredential,
   isRunOfPipeline,
+  pipelineCreateBody,
+  pipelineRunCreateBody,
   pipelineRunStatusOf,
   toCdApplicationSummary,
   toCodeRepositorySummary,
+  toCredentialRow,
+  toDevopsProjectSummary,
   toPipelineDetail,
+  toPipelineRow,
   toPipelineRunSummary,
   toPipelineSummary,
 } from './devops';
 export type {
   CdApplicationSummary,
   CodeRepositorySummary,
+  CredentialDraft,
+  CredentialKind,
+  CredentialRow,
   DevopsProjectDetail,
+  DevopsProjectDraft,
+  DevopsProjectSummary,
+  MemberRow,
   PipelineDetail,
+  PipelineDraft,
+  PipelineParameter,
+  PipelineParameterDraft,
+  PipelineRow,
   PipelineRunStatus,
   PipelineRunSummary,
   PipelineSummary,
+  RoleRow,
+  RunPipelineRequest,
 } from './devops';
 export { isTokenExpired, userFromToken } from './token';
 
@@ -445,6 +466,7 @@ export type { IpPoolDetail, IpPoolSummary } from './network';
 
 export {
   decodeStoreFile,
+  decodeHelmValues,
   storeAppsApi,
   workspaceReposApi,
   storeCategoriesApi,
@@ -452,6 +474,16 @@ export {
   workspaceApplicationsApi,
   storeWorkspacesApi,
   storeWorkspaceProjectsApi,
+  installedReleasesApi,
+  appTemplatesApi,
+  appTemplateInstancesApi,
+  VERSION_STATUS_ACTION,
+  VERSION_DELETABLE,
+  toWorkspaceRepo,
+  toInstalledRelease,
+  toHelmRelease,
+  toAppTemplate,
+  toAppTemplateVersion,
 } from './appstore';
 export type {
   StoreApp,
@@ -461,6 +493,13 @@ export type {
   StoreAppVersion,
   StoreCategory,
   StoreReview,
+  WorkspaceRepo,
+  RepoEvent,
+  InstalledRelease,
+  HelmRelease,
+  ReleaseResource,
+  AppTemplate,
+  AppTemplateVersion,
 } from './appstore';
 
 export { clusterDashboardsApi, projectDashboardsApi } from './dashboards';
