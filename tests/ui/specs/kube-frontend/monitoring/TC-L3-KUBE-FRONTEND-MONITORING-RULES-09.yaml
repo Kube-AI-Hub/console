@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-MONITORING-RULES-09
+level: 3
+suite: point
+module: kube-frontend
+submodule: monitoring
+feature: rules
+title: 告警策略详情 · 规则搜索与分页
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/alertingrules/thanos-rule?scope=global'
+prd: prd/kube-frontend/monitoring/rules.md
+design: design/kube-frontend/monitoring/rules.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-MONITORING-RULES-09
+
+story:
+- US6
+
+product: 策略详情的规则表每页 10 条并可翻页；搜索框按名称/表达式/摘要/说明/级别过滤，无匹配时给出说明；规则数不超过 10 时不渲染分页器。
+preconditions:
+- 集群存在 globalrulegroups 且其中一组规则数 > 10
+steps:
+- 通过 API 找一组规则数 > 10 的策略，打开其详情（带 scope 参数）
+- 核对规则表行数为 10 且分页器显示「第 1-10 条，共 N 条规则」
+- 点下一页，核对范围变成第 11 条起
+- 在搜索框输入该组某条规则名的前缀，核对只剩匹配行；再输入不存在的字符串，核对出现无匹配说明
+expected:
+- 首页 10 行，范围文案与实际一致
+- 翻页后范围文案更新且行数 ≤ 10
+- 搜索后行数减少且每行都含关键字；分页器在结果 ≤ 10 时消失
+- 无匹配时显示 alertingrules:detail:no-rule-match，而不是空表
+troubleshoot:
+- 搜索永远无匹配：取值用了 CRD 字段名（alert/expr）而不是 mapper 的 name/expression
+- 分页器不出现：规则数 ≤ 10，属正常
+update_automation:
+- 句柄：alertingrules:detail:rule-table / :rule-search / :rule-pager / :rule-range / :rule-prev / :rule-next / :no-rule-match

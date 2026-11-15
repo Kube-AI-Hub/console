@@ -1082,6 +1082,7 @@ MODULES = [
                             "TC-L3-KUBE-FRONTEND-MONITORING-RULES-05",
                             "TC-L3-KUBE-FRONTEND-MONITORING-RULES-06",
                             "TC-L3-KUBE-FRONTEND-MONITORING-RULES-07",
+                            "TC-L3-KUBE-FRONTEND-MONITORING-RULES-09",
                         ]},
                     },
                 ],

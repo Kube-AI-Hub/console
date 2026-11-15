@@ -8,6 +8,8 @@
 
 ## 关联需求
 
+- AC-L3-KUBE-FRONTEND-MONITORING-RULES-09
+- AC-L3-KUBE-FRONTEND-MONITORING-RULES-09
 - AC-L3-KUBE-FRONTEND-MONITORING-RULES-07
 - AC-L3-KUBE-FRONTEND-MONITORING-RULES-01
 - AC-L3-KUBE-FRONTEND-MONITORING-RULES-02
@@ -134,6 +136,16 @@
 
 **何时重新考虑**：平台支持结构化阈值（模板规则）并在本页展示时。
 
+### DEC-L3-KUBE-FRONTEND-MONITORING-RULES-09 — 规则搜索与分页都在客户端
+
+规则随规则组对象一起返回（`spec.rules`），所以搜索与分页不需要第二次请求：客户端过滤 + 切片即可，
+响应即时且不增加 API server 负担。被否方案：给 rulegroup 加服务端 keyword 参数——该集合没有搜索参数，
+而「先取全量再过滤」在这里本来就是零成本。
+
+### GOT-L3-KUBE-FRONTEND-MONITORING-RULES-09 — 搜索字段名以 mapper 为准
+
+`RuleGroupRule` 的字段是 `name`/`expression`/`summary`/`message`/`description`/`severity`，不是原始 CRD 的
+`alert`/`expr`——写搜索时按 CRD 字段名取值会得到 `undefined`，表现为「搜索永远无匹配」。
 ## 系统现状
 
 老 console 的告警策略页面向 3.3 的 `AlertingRule`，字段为名称、状态、规则数、最近检测时间。本次迁移保留这些字段语义，并把「最近检测时间」换成「创建时间」——规则组对象没有 `status.lastEvaluation`（那是 alertingrules 的字段），编造一个时间比不显示更糟。

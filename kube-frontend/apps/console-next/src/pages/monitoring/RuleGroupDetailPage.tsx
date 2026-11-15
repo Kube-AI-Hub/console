@@ -10,7 +10,7 @@ import {
   type RuleGroupSummary,
 } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { AiButton, AiSurface, Badge, Icon, Skeleton } from '@kube-ai-hub/ui';
+import { AiButton, AiSurface, Badge, Button, Icon, InputSearch, Skeleton } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { DefinitionRow } from '@/components/resource/DefinitionRow';
@@ -268,22 +268,65 @@ function RuleSection({
   activeFetched: number;
 }): React.ReactElement {
   const t = useT();
+  /*
+   * Rule search and paging.
+   *
+   * A policy can carry dozens of rules (the builtin Kubernetes policies carry 10–20 each), and the
+   * old console let the reader filter them. The filter is client-side on purpose: the rules arrive
+   * inside the group object, so asking the server to search them would be a second, slower request
+   * for data this page already holds.
+   */
+  const [keyword, setKeyword] = React.useState('');
+  const [page, setPage] = React.useState(1);
+  const PAGE_SIZE = 10;
+  const needle = keyword.trim().toLowerCase();
+  const filtered = React.useMemo(
+    () =>
+      needle
+        ? detail.rules.filter((rule) =>
+            [rule.name, rule.expression, rule.summary, rule.message, rule.severity, rule.description]
+              .filter(Boolean)
+              .some((value) => String(value).toLowerCase().includes(needle)),
+          )
+        : detail.rules,
+    [detail.rules, needle],
+  );
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const current = Math.min(page, pageCount);
+  const pageRows = filtered.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE);
+  React.useEffect(() => setPage(1), [needle]);
   return (
     <section className="rounded-ai-md border border-ai-line p-4" data-ai-id="alertingrules:detail:rules">
       <header className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="text-sm font-medium text-ai-fg">
           {t('monitoring.ruleGroups.rules')} ({detail.rules.length})
         </h2>
-        {activeTotal > activeFetched ? (
-          <span className="text-[11px] text-ai-fg-muted">
-            {t('monitoring.ruleGroups.detail.ruleStatePartial', { fetched: activeFetched, total: activeTotal })}
-          </span>
-        ) : null}
+        <div className="flex flex-wrap items-center gap-2">
+          {detail.rules.length > 0 ? (
+            <InputSearch
+              value={keyword}
+              placeholder={t('monitoring.ruleGroups.detail.searchRules')}
+              data-ai-id="alertingrules:detail:rule-search"
+              onSearch={setKeyword}
+              onChange={setKeyword}
+            />
+          ) : null}
+          {activeTotal > activeFetched ? (
+            <span className="text-[11px] text-ai-fg-muted">
+              {t('monitoring.ruleGroups.detail.ruleStatePartial', { fetched: activeFetched, total: activeTotal })}
+            </span>
+          ) : null}
+        </div>
       </header>
 
       {detail.rules.length === 0 ? (
         <p className="text-xs text-ai-fg-muted" {...actionProps('alertingrules:detail:no-rules')}>
           {t('monitoring.ruleGroups.rule.noRules')}
+        </p>
+      ) : filtered.length === 0 ? (
+        /* A search that matches nothing is not an empty policy: say which it is. */
+        <p className="text-xs text-ai-fg-muted" data-ai-id="alertingrules:detail:no-rule-match">
+          {t('monitoring.ruleGroups.detail.noRuleMatch', { keyword: keyword.trim() })}
         </p>
       ) : (
         <div className="overflow-x-auto">
@@ -313,7 +356,7 @@ function RuleSection({
               </tr>
             </thead>
             <tbody>
-              {detail.rules.map((rule) => {
+              {pageRows.map((rule) => {
                 const active = activeByRule.get(rule.name);
                 return (
                   <tr key={rule.name} className="border-b border-ai-line align-top" data-ai-row={rule.name}>
@@ -341,6 +384,38 @@ function RuleSection({
           </table>
         </div>
       )}
+
+      {filtered.length > PAGE_SIZE ? (
+        <nav className="mt-3 flex items-center justify-between gap-2 text-[11px] text-ai-fg-muted" data-ai-id="alertingrules:detail:rule-pager">
+          <span data-ai-id="alertingrules:detail:rule-range">
+            {t('monitoring.ruleGroups.detail.ruleRange', {
+              from: (current - 1) * PAGE_SIZE + 1,
+              to: Math.min(current * PAGE_SIZE, filtered.length),
+              total: filtered.length,
+            })}
+          </span>
+          <span className="flex items-center gap-1">
+            <Button
+              size="sm"
+              variant="secondary"
+              disabled={current <= 1}
+              {...actionProps('alertingrules:detail:rule-prev')}
+              onClick={() => setPage(current - 1)}
+            >
+              {t('table.previous')}
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              disabled={current >= pageCount}
+              {...actionProps('alertingrules:detail:rule-next')}
+              onClick={() => setPage(current + 1)}
+            >
+              {t('table.next')}
+            </Button>
+          </span>
+        </nav>
+      ) : null}
     </section>
   );
 }
