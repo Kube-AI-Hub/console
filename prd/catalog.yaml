@@ -619,6 +619,7 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-01
+        - TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-07
     - id: users
       title: 用户列表
       prd: prd/kube-frontend/access-control/users.md

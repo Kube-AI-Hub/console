@@ -601,7 +601,8 @@ MODULES = [
                     {
                         "id": "workspace-console",
                         "title": "企业空间控制台",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-01"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-01",
+                            "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-07"]},
                     },
                     {
                         "id": "users",

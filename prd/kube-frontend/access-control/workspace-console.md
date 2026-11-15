@@ -18,6 +18,7 @@
 
 ## 验收场景
 
+- **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-07** — 已知企业空间 `<ws>` 的监控上报了空间级指标，当打开空间控制台概览页，则「资源用量」区块显示 CPU、内存、容器组数量与网络收发（收/发分别以字节单位呈现），缺失的指标显示 `-` 而不是 0；监控不可用时显示说明而不是数字；「项目用量排行（Top 5）」区块按 CPU 与内存两个页签列出该空间内用量最高的 5 个项目（序号、名称、数值），名称链接到该项目的控制台概览页，排行只包含 `workspace` 标签等于本空间的样本；排行无数据时显示空态说明。
 - **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-01** — 已知企业空间有 N 个项目与 M 个成员，当打开该空间控制台概览页，则显示基本信息（名称/别名/管理员/创建者/创建时间/部署集群）与项目数 N、成员数 M；侧栏有「概览 / 项目 / 企业空间成员」；项目页列出 N 行且名称链到该项目控制台（URL 含 workspace、cluster、project 段）；成员页列出 M 行，含成员名与角色。
 
 ## 设计目标
@@ -68,4 +69,5 @@
 
 ## 验收用例
 
+- `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-07`
 - `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-01`

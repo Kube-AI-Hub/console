@@ -8,6 +8,7 @@
 
 ## 关联需求
 
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-07
 - AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-01
 
 ## 设计目标与非目标
@@ -34,6 +35,20 @@
 **被否方案**：用「最后访问的集群」。跨空间跳转会把人带到没放这个空间的集群。
 **何时重新考虑**：企业空间支持多集群项目视图时。
 
+### DEC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-14 — 空间用量是向量，项目排行靠标签过滤
+
+两个聚合的形态不同，实现必须分别处理：
+
+- `GET /kapis/monitoring.kubesphere.io/v1alpha3/workspaces/<ws>` 返回 **vector**（每个指标一条样本），
+  直接取 `value[1]`；
+- 项目排行用的 `/kapis/monitoring.kubesphere.io/v1alpha3/namespaces` 是**集群级**排行，服务端不接受
+  workspace 过滤参数（实测带 `workspace=` 仍返回全集群样本），因此按每条样本自带的 `workspace` 标签
+  在客户端过滤——没有该标签的样本无法归属，直接跳过而不是猜。
+
+### DEC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-15 — 存储用量不显示
+
+本部署没有空间级存储指标（探测不到该序列）。旧页面有存储一列，这里选择整行不出现，而不是显示 `-`：
+「未测量」与「测到 0」是两件事，而一个永远为 `-` 的行只会让人以为坏了。
 ## 系统现状
 
 老 console：`/workspaces/:ws/*` 18 条路由（概览、项目、成员、角色、部门、配额、DevOps、应用仓库等）。本页迁前三页；其余属「需额外接口/模块」或「未部署模块」。

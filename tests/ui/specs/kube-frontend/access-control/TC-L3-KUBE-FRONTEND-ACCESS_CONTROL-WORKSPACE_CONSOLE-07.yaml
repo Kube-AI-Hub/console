@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-07
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: workspace-console
+title: 企业空间概览 · 资源用量与项目用量排行
+entry_url: '{BASE_URL}/kube-frontend/workspaces/system-workspace/overview'
+prd: prd/kube-frontend/access-control/workspace-console.md
+design: design/kube-frontend/access-control/workspace-console.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-07
+
+story:
+- US1
+
+product: 企业空间概览显示空间级资源用量（CPU/内存/容器组/网络收发）与项目用量排行 Top 5（CPU/内存页签），缺失指标显示 - 而不是 0。
+preconditions:
+- 已登录；system-workspace 的监控有空间级采样
+steps:
+- 通过 API 读 `/kapis/monitoring.kubesphere.io/v1alpha3/workspaces/<ws>` 取期望用量
+- 打开企业空间概览，核对「资源用量」四项数值与 API 一致
+- 核对「项目用量排行」默认 CPU 页签 ≤5 行且每行名称属于该空间
+- 切到内存页签，核对数值带字节单位
+expected:
+- 资源用量区块 workspace-overview:usage 存在，四项分别有句柄 :usage:cpu/:memory/:pods/:network
+- CPU 数值等于 API 的 workspace_cpu_usage（保留一位小数以内），容器组为整数
+- 排行行数 ≤5，名称链接形如 /kube-frontend/<ws>/projects/<ns>/overview
+- 排行只含 workspace 标签等于本空间的样本（用例用 API 交叉核对）
+troubleshoot:
+- 排行里出现别的空间的命名空间：没按 workspace 标签过滤
+- 用量显示 0：把缺失指标当成了 0
+update_automation:
+- 句柄：workspace-overview:usage / :usage:cpu / :usage:memory / :usage:pods / :usage:network / :ranking / :ranking:tab:{cpu,memory} / :ranking:list / :ranking:empty
