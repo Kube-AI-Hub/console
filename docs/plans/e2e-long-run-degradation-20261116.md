@@ -107,3 +107,20 @@
 **只解决了一部分**：重试救回的是夹具与断言里的 API 调用；页面加载（Playwright `goto` / 等待选择器）遇到同一次卡死仍然会超时。失败的用例集合也随每次卡死发生在哪一条而变（这次是 `SERVICE_PODS-01` 而非上次的 `GRAY_RELEASE-08`），进一步说明与具体用例无关。
 
 要让长区也稳定，需要给页面导航加重试（改 harness 的 `page` 夹具），风险高于收益：它会把真正的页面错误也重试掉。因此维持现有判据——**长区失败在新区复跑再定性**。
+
+## 加重试后重跑各区（2026-11-16 05:00）
+
+| 区 | 加重试前 | 加重试后 |
+| --- | --- | --- |
+| monitoring | 1 failed / 14 passed | **16 passed** |
+| access-control | 1 failed / 42 passed | **43 passed** |
+| cluster-management | 3 failed / 90 passed | **94 passed / 12 skipped** |
+| app-workloads | 9 failed / 61 passed | 3 failed / 66 passed（再跑一次 1~3 条） |
+
+三个长区在加重试后**完全转绿**，只有用例最多的 `app-workloads`（71 条、单区 7~11 分钟）仍会掉 1~3 条。
+
+把这些掉队的用例单独跑：`SERVICES-01`、`STATUS-01`、`STATUS-02` 三条 **3 passed in 9.54s**（各自 2~4 秒）。它们本身不慢、也没有依赖，只是恰好落在卡死窗口里。
+
+把 `app-workloads` 拆成两半再跑（各 35/36 个文件）仍各有 1 条与 3 条失败，且**失败的用例会换**（这次多了 `COLUMN_VISIBILITY-01`）——进一步印证与用例无关，与「哪条正好撞上卡死」有关。
+
+结论：**加重试是有效且应当保留的**（三个长区从红转绿）；`app-workloads` 的残余失败属于同一条链路的偶发卡死，用「新区复跑」判定即可。
