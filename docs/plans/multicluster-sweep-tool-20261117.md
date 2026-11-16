@@ -285,3 +285,35 @@ OK   xc     pods          sort=True search=True size=False next=True  requests=3
 
 第一次用 `select_option()` 直接报 `Element is not a <select> element`——每页条数是一个 `role=combobox` 的按钮，
 要先点开再从 `role=option` 里选。**控件类型不能凭名字猜**，报错信息已经说得很清楚。
+## 15. 交互维度最终形态（六项）
+
+```
+OK   host   deployments   sort=True search=True size=True  next=True  cols=False filter=False requests=6 errors=0
+OK   host   configmaps    sort=True search=True size=True  next=True  cols=False filter=True  requests=7 errors=0
+OK   host   pods          sort=True search=True size=False next=True  cols=False filter=False requests=6 errors=0
+OK   xc     deployments   sort=True search=True size=True  next=False cols=False filter=False requests=6 errors=0
+OK   xc     configmaps    sort=True search=True size=True  next=False cols=False filter=True  requests=7 errors=0
+OK   xc     pods          sort=True search=True size=False next=True  cols=False filter=False requests=6 errors=0
+```
+
+六张列表、两集群，**0 条失败请求**；排序、搜索、每页条数、翻页、筛选都在成员集群上真实触发并通过。
+
+**列显隐（`cols=False`）仍未覆盖**：页面上有 `configmaps:columns` 按钮，但打开后找不到
+`role=menuitemcheckbox` / `role=checkbox` 的开关。如实记为 False，不写成通过。
+
+## 16. 两个把「全绿」变成「全 SKIP」的坑
+
+### 坑一：上一张列表的菜单没关，后面全部点不动
+
+重构后第一次跑，只有第一张列表有交互，其余 5 张全 SKIP。原因是上一轮打开的下拉/弹窗没关，
+遮住了后面每一次点击——**表现为「没有句柄」，实际是「点不进去」**。
+
+修法：**每张列表用一个全新的 page**（重新登录态注入）。代价是几秒，换来的是互不污染。
+
+### 坑二：成员集群的容器组列表偶发 503
+
+`/kapis/clusters/xc/.../pods?page=1&limit=20&sortBy=name` 偶发 503（响应约 470 KB，负载下超时）；
+手工复测同一 URL 连续 3 次都是 200。所以交互巡检也加了「整页失败且全是 5xx 就重跑一次」的规则。
+
+**注意路径本身是对的**（`clusters/xc` 在 group 之前），503 是上游超时，不是路径缺陷——
+区分这两者正是巡检要打印 URL 的原因。

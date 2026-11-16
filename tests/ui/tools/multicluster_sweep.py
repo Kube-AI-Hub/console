@@ -136,9 +136,7 @@ def sweep(
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch()
         context = browser.new_context(viewport={'width': 1500, 'height': 1000})
-        page = context.new_page()
-        page.goto(f'{app}/kube-frontend/login', wait_until='domcontentloaded')
-        page.evaluate("token => localStorage.setItem('kubesphere-token', token)", token)
+        page = None
 
         for cluster in clusters:
             for segment in pages:
@@ -364,7 +362,16 @@ INTERACTION_PAGES = (
 def sweep_interactions(
     app: str, token: str, clusters: list[str], workspace: str, project: str,
 ) -> list[dict]:
-    """Sort, search and resize the list on a member cluster, watching for failed requests."""
+    """Sort, search, resize, page, hide a column and filter the list, watching for failures.
+
+    Each interaction is a different request shape (`sortBy`, `keyword`, `limit`, `page`, a filter
+    value), and any of them can drop the cluster segment. A page that renders correctly can still
+    be broken the moment someone sorts it.
+
+    Every interaction records whether it actually happened: a missing handle must not look like a
+    pass. A 5xx that goes away on a retry is this installation hiccuping, not a defect -- the same
+    rule the page sweep uses.
+    """
     from playwright.sync_api import sync_playwright
 
     results: list[dict] = []
@@ -377,78 +384,114 @@ def sweep_interactions(
 
         for cluster in clusters:
             for segment, scope, prefix in INTERACTION_PAGES:
-                failures: list[tuple[int, str]] = []
-
-                def record(response, sink=failures):
-                    if response.status < 400 or response.url.endswith('/api/session/me'):
-                        return
-                    sink.append((response.status, response.url))
-
-                page.on('response', record)
                 url = (f'{app}/kube-frontend/{workspace}/clusters/{cluster}/projects/{project}/{segment}'
                        if scope == 'project' else f'{app}/kube-frontend/clusters/{cluster}/{segment}')
-                page.goto(url, wait_until='domcontentloaded')
-                page.wait_for_timeout(7000)
-                before = len(failures)
-                # Count what actually happened: an interaction that never fired a request proves
-                # nothing, and a missing handle would otherwise look like a pass.
-                acted = {'sort': False, 'search': False, 'page_size': False, 'next_page': False, 'requests': 0}
+                # A fresh page per list: a menu or modal left open by the previous list swallowed
+                # every later click, which showed up as a run of silent SKIPs.
+                if page is not None:
+                    page.close()
+                page = context.new_page()
+                page.goto(f'{app}/kube-frontend/login', wait_until='domcontentloaded')
+                page.evaluate("token => localStorage.setItem('kubesphere-token', token)", token)
 
-                def count_request(request, sink=acted):
-                    if '/kapis/' in request.url or '/apis/' in request.url:
-                        sink['requests'] += 1
+                def run_once():
+                    failures: list[tuple[int, str]] = []
+                    acted = {'sort': False, 'search': False, 'page_size': False, 'next_page': False,
+                             'columns': False, 'filter': False, 'requests': 0}
 
-                page.on('request', count_request)
+                    def record(response, sink=failures):
+                        if response.status < 400 or response.url.endswith('/api/session/me'):
+                            return
+                        sink.append((response.status, response.url))
 
-                # Sort by the first sortable column.
-                sort = page.locator(f'[data-ai-id^="{prefix}:sort:"]').first
-                if sort.count():
-                    requests_before_sort = acted['requests']
-                    sort.click()
-                    page.wait_for_timeout(3000)
-                    acted['sort'] = acted['requests'] > requests_before_sort
+                    def count_request(request, sink=acted):
+                        if '/kapis/' in request.url or '/apis/' in request.url:
+                            sink['requests'] += 1
 
-                # Search for a substring that certainly matches nothing: the request still fires.
-                search = page.locator(f'[data-ai-id="{prefix}:search"]').first
-                if search.count():
-                    requests_before_search = acted['requests']
-                    search.fill('zzz-no-such-object')
-                    page.wait_for_timeout(3000)
-                    acted['search'] = acted['requests'] > requests_before_search
-                    search.fill('')
-                    page.wait_for_timeout(1500)
+                    page.on('response', record)
+                    page.on('request', count_request)
+                    page.goto(url, wait_until='domcontentloaded')
+                    page.wait_for_timeout(7000)
 
-                # Page size and paging are two more query shapes (`limit=`, `page=`).
-                page_size = page.locator(f'[data-ai-id="{prefix}:page-size"]').first
-                if page_size.count():
-                    # A Radix combobox, not a native <select>: open it and pick an option.
-                    requests_before_size = acted['requests']
-                    page_size.click()
-                    page.wait_for_timeout(800)
-                    options = page.locator('[role="option"]')
-                    if options.count() > 1:
-                        options.nth(1).click()
+                    sort = page.locator(f'[data-ai-id^="{prefix}:sort:"]').first
+                    if sort.count():
+                        before = acted['requests']
+                        sort.click()
                         page.wait_for_timeout(3000)
-                    else:
+                        acted['sort'] = acted['requests'] > before
+
+                    search = page.locator(f'[data-ai-id="{prefix}:search"]').first
+                    if search.count():
+                        before = acted['requests']
+                        search.fill('zzz-no-such-object')
+                        page.wait_for_timeout(3000)
+                        acted['search'] = acted['requests'] > before
+                        search.fill('')
+                        page.wait_for_timeout(1500)
+
+                    page_size = page.locator(f'[data-ai-id="{prefix}:page-size"]').first
+                    if page_size.count():
+                        before = acted['requests']
+                        page_size.click()
+                        page.wait_for_timeout(800)
+                        options = page.locator('[role="option"]')
+                        if options.count() > 1:
+                            options.nth(1).click()
+                            page.wait_for_timeout(3000)
+                        else:
+                            page.keyboard.press('Escape')
+                        acted['page_size'] = acted['requests'] > before
+
+                    next_page = page.locator(f'[data-ai-id="{prefix}:page:next"]').first
+                    if next_page.count() and not next_page.is_disabled():
+                        before = acted['requests']
+                        next_page.click()
+                        page.wait_for_timeout(3000)
+                        acted['next_page'] = acted['requests'] > before
+
+                    # Column visibility is client-side: no request is expected, so the evidence is
+                    # that a checkbox really toggled and that nothing errored.
+                    columns = page.locator(f'[data-ai-id="{prefix}:columns"]').first
+                    if columns.count():
+                        columns.click()
+                        page.wait_for_timeout(1000)
+                        toggles = page.locator('[role="menuitemcheckbox"], [role="checkbox"]')
+                        if toggles.count():
+                            toggles.first.click()
+                            page.wait_for_timeout(1200)
+                            acted['columns'] = True
                         page.keyboard.press('Escape')
-                    acted['page_size'] = acted['requests'] > requests_before_size
+                        page.wait_for_timeout(600)
 
-                next_page = page.locator(f'[data-ai-id="{prefix}:page:next"]').first
-                if next_page.count() and not next_page.is_disabled():
-                    requests_before_next = acted['requests']
-                    next_page.click()
-                    page.wait_for_timeout(3000)
-                    acted['next_page'] = acted['requests'] > requests_before_next
+                    filter_control = page.locator(f'[data-ai-id^="{prefix}:filter:"]').first
+                    if filter_control.count():
+                        before = acted['requests']
+                        filter_control.click()
+                        page.wait_for_timeout(800)
+                        options = page.locator('[role="option"]')
+                        if options.count() > 1:
+                            options.nth(1).click()
+                            page.wait_for_timeout(3000)
+                            acted['filter'] = acted['requests'] > before
+                        else:
+                            page.keyboard.press('Escape')
 
-                after = failures[before:]
-                page.remove_listener('request', count_request)
+                    page.remove_listener('response', record)
+                    page.remove_listener('request', count_request)
+                    return acted, failures
+
+                acted, failures = run_once()
+                # A 5xx that disappears on a second attempt is the installation hiccuping (the pods
+                # list of a member cluster is a ~470 KB response and times out under load).
+                if failures and all(status >= 500 for status, _ in failures):
+                    acted, failures = run_once()
+
                 results.append({
                     'cluster': cluster,
                     'page': segment,
                     'acted': acted,
-                    'errors': [{'status': status, 'url': url.replace(app, '')} for status, url in after],
+                    'errors': [{'status': status, 'url': url_.replace(app, '')} for status, url_ in failures],
                 })
-                page.remove_listener('response', record)
 
         browser.close()
     return results
@@ -544,12 +587,12 @@ def main() -> int:
             bad += 1 if noisy else 0
             # An interaction that never fired a request is not evidence; say so instead of passing.
             acted = row['acted']
-            performed = any(acted[key] for key in ('sort', 'search', 'page_size', 'next_page'))
+            performed = any(acted[key] for key in ('sort', 'search', 'page_size', 'next_page', 'columns', 'filter'))
             flag = 'FAIL' if noisy else ('OK  ' if performed else 'SKIP')
             # SKIP is not a failure: a list with no rows renders no toolbar, so there is nothing to
             # interact with. It is printed rather than hidden, so nobody mistakes it for coverage.
             bad += 1 if noisy else 0
-            print(f"{flag} {row['cluster']:6s} {row['page']:20s} sort={acted['sort']} search={acted['search']} size={acted['page_size']} next={acted['next_page']} requests={acted['requests']} errors={len(noisy)}")
+            print(f"{flag} {row['cluster']:6s} {row['page']:20s} sort={acted['sort']} search={acted['search']} size={acted['page_size']} next={acted['next_page']} cols={acted['columns']} filter={acted['filter']} requests={acted['requests']} errors={len(noisy)}")
             for entry in noisy[:3]:
                 print(f"       {entry['status']} {entry['url'][:120]}")
         return 1 if bad else 0
