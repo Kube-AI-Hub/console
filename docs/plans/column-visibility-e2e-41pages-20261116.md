@@ -46,3 +46,14 @@
 | 项 | 结果 |
 | --- | --- |
 | 列显隐 E2E | **41 passed / 135.58s** |
+## 5. 一次提交越界（如实记录）
+
+本轮提交 `52589ab22` 里混进了**并行线生成的两个文件**：`tests/ui/cases/_traceability.md` 与
+`tests/ui/cases/kube-frontend/access-control/…USER_DETAIL-04.md`（另一条线跑 `generate_case_docs.py` 产生的用例文档，
+恰好被 `git add -A` 收进我的提交）。
+
+违反了「不要把并行工作混进提交」的约定。没有改写历史（并行线可能已在别处引用这些对象），
+但在此记录，便于后续核对提交归属时不被误导。
+
+**流程改进**：提交前用 `git status --porcelain` 逐条过一遍，而不是直接 `git add -A`；
+本会话后面几轮已经这样做（先列文件、再 `git commit` 已暂存内容）。
