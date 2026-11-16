@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_GATEWAYS-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: cluster-gateways
+title: 集群网关 · 双页签各自的显示列
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/gateways'
+prd: prd/kube-frontend/cluster-management/cluster-gateways.md
+design: design/kube-frontend/cluster-management/cluster-gateways.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_GATEWAYS-02
+
+story:
+- US1
+
+product: 集群网关页的两个页签（集群网关 / 项目网关）各自提供「显示列」，选择按页签分别持久化，互不影响。
+preconditions:
+- 已登录；集群 host 有网关数据
+steps:
+- 打开集群网关页，核对默认页签的显示列菜单
+- 在「集群网关」页签取消勾选一列，核对表头减一并持久化
+- 切到「项目网关」页签，核对它的选择未受影响（表头数不变）
+- 在项目网关页签取消一列，核对两个页签的存储键不同
+expected:
+- 两个页签分别有 cluster-gateways:{cluster,project}:columns 触发器
+- 各页签的菜单只列该 schema 的可隐藏列（名称不可隐藏）
+- 取消勾选只影响当前页签；存储键分别为 kube-frontend.columns.cluster-gateways:{cluster,project}
+troubleshoot:
+- 两个页签互相影响：存储键没有带页签名
+- 菜单只有「重置」：该 schema 的列没有标 hideable
+update_automation:
+- 句柄：cluster-gateways:tab:{cluster,project} / cluster-gateways:{cluster,project}:columns / :columns:<key> / :columns:reset

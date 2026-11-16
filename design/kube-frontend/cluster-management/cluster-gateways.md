@@ -4,6 +4,7 @@
 
 ## 关联需求
 
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_GATEWAYS-02
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_GATEWAYS-01
 
 ## 概述
@@ -11,6 +12,20 @@
 ClusterGatewaysPage 共用两视图表格，clusterGatewaysApi 读取原生集合，
 toClusterGateway 复用已有 toProjectGateway 的控制器就绪映射。
 
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_GATEWAYS-02 — 一个组件、两份 schema、两个存储键
+
+集群网关页用同一个 `ResourceList` 渲染两个页签，schema 按 `component` 切换。列显隐因此必须：
+
+- 两份 schema 各声明一份 `columnVisibility`（aiId 分别为 `cluster-gateways:cluster|project:columns`）；
+- 活动 schema 由 `component` 派生，`useColumnVisibility` 的键带页签名（`cluster-gateways:<tab>`），
+  否则在「集群网关」隐藏「命名空间」会连带隐藏「项目网关」的同名列。
+
+### GOT-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_GATEWAYS-02 — 单行列定义与 rowActions 的坑
+
+该文件里既有**多行**列定义、也有**单行**列定义（`{ key: 'ready', title: …, render: … }`），逐行补 `hideable`
+的脚本只处理多行会漏掉一半（本批第一次只剩「重置」可见）。另外 `rowActions` 里的对象也有 `key:`，
+批量加 `hideable` 会误加到 action 上并触发类型错误（`hideable` 不存在于 `ListAction`）——必须限定在
+`columns: [` 块内。
 ## 系统现状
 
 老版 gateways/cluster 与 gateways/project 是两个视图；新 UI 原来只有项目网关页。

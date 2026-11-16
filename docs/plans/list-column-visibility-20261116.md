@@ -119,3 +119,22 @@
 用例的偏好列表 `('public','spaces')` / `('public','csghub')` 都落空，于是退到系统命名空间；安装弹窗对这些
 项目的可选状态与用例预期不一致。**这是共享环境的项目数据被清理导致的**，不是本轮改动引入；需要在环境侧
 恢复一个可安装的项目，或让该用例自己创建项目（已登记为待办）。
+
+## 13. 第五批（同日）：集群网关（双 schema + 双页签）
+
+集群网关页用同一个 `ResourceList` 渲染两个页签，schema 按 `component` 切换。接入方式与前几批不同：
+
+- 两份 schema（`clusterSchema` / `projectSchema`）各声明一份 columnVisibility，aiId 分别为
+  `cluster-gateways:cluster:columns` 与 `:project:columns`；
+- 活动 schema 由 `component` 派生，存储键带页签名（`cluster-gateways:<tab>`），两个页签互不影响；
+- 用例 `CLUSTER_GATEWAYS-02` 验证两页签各自的菜单、取消勾选后表头减一、存储键不同、重置恢复。
+
+本批的两个坑：
+
+1. **单行列定义**：该文件里既有**多行**列定义、也有**单行**（`{ key: 'ready', title: …, render: … }`）。
+   只按行匹配 `key: 'x',` 的脚本会漏掉单行写法，第一次探测「集群网关」页签只剩「重置」一项。
+2. **rowActions 里也有 `key:`**：批量加 `hideable` 会误加到 action 上，`tsc` 报「`hideable` 不存在于
+   `ListAction`」。必须把插入范围限制在 `columns: [` 块内。
+
+第三个坑属于用例：**项目网关页签在本集群没有对象**，`thead` 数量为 0，断言「表头减一」必然失败；
+用例改为「有表头时断言减一，无表头时断言仍为 0 并依赖持久化值」。

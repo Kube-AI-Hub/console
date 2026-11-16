@@ -4,6 +4,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { accessReviewApi, projectGatewaysApi, type ClusterGateway, type GatewayServicePort } from '@kube-ai-hub/api-client';
 import { AiSurface, Badge, ResourceList, Tabs, type ListSchema } from '@kube-ai-hub/ui';
 import { api } from '@/api';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { DeleteDialog } from '@/components/resource/DeleteDialog';
 import { MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -98,6 +99,7 @@ export function ClusterGatewaysPage({ cluster, component = 'cluster' }: {
     await queryClient.invalidateQueries({ queryKey: ['cluster-gateways'] });
   });
 
+
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length ? 'ready' : 'empty';
 
   const projectNameCell = (row: ClusterGateway) => (
@@ -123,6 +125,8 @@ export function ClusterGatewaysPage({ cluster, component = 'cluster' }: {
     rowAttributes: (row) => ({ 'data-ai-row': row.namespace + '/' + row.name }),
     search: { placeholder: t('cluster.searchPlaceholder'), aiId: 'cluster-gateways:search' },
     refresh: { label: t('cluster.list.refresh'), aiId: 'cluster-gateways:refresh', busy: query.isFetching },
+    // Each tab keeps its own column choice: the two tables show different columns.
+    columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'cluster-gateways:cluster:columns' },
     columns: [
       {
         key: 'name',
@@ -137,14 +141,14 @@ export function ClusterGatewaysPage({ cluster, component = 'cluster' }: {
           </a>
         ),
       },
-      { key: 'namespace', title: t('cluster.workloads.column.project'), render: (row) => row.namespace || '-' },
-      { key: 'ready', title: t('cluster.column.status'), render: (row) => (
+      { key: 'namespace', hideable: true, title: t('cluster.workloads.column.project'), render: (row) => row.namespace || '-' },
+      { key: 'ready', hideable: true, title: t('cluster.column.status'), render: (row) => (
         <Badge tone={row.ready ? 'success' : 'warning'}>{t(row.ready ? 'settings.gateway.ready' : 'settings.gateway.pending')}</Badge>
       ) },
-      { key: 'type', title: t('settings.gateway.type'), render: (row) => row.type || row.serviceType || '-' },
-      { key: 'address', title: t('settings.gateway.address'), render: (row) => row.address || '-', hideBelow: 'lg' },
-      { key: 'message', title: t('settings.gateway.message'), render: (row) => row.message || '-', wrap: true },
-      { key: 'createdAt', title: t('cluster.column.createdAt'), render: (row) => formatTimestamp(row.createdAt), hideBelow: 'xl' },
+      { key: 'type', hideable: true, title: t('settings.gateway.type'), render: (row) => row.type || row.serviceType || '-' },
+      { key: 'address', hideable: true, title: t('settings.gateway.address'), render: (row) => row.address || '-', hideBelow: 'lg' },
+      { key: 'message', hideable: true, title: t('settings.gateway.message'), render: (row) => row.message || '-', wrap: true },
+      { key: 'createdAt', hideable: true, title: t('cluster.column.createdAt'), render: (row) => formatTimestamp(row.createdAt), hideBelow: 'xl' },
     ],
     empty: { title: t('cluster.clusterGateways.empty'), description: t('cluster.clusterGateways.emptyHint') },
   };
@@ -154,10 +158,12 @@ export function ClusterGatewaysPage({ cluster, component = 'cluster' }: {
     rowAttributes: (row) => ({ 'data-ai-row': row.namespace + '/' + row.name }),
     search: { placeholder: t('cluster.searchPlaceholder'), aiId: 'cluster-gateways:search' },
     refresh: { label: t('cluster.list.refresh'), aiId: 'cluster-gateways:refresh', busy: query.isFetching },
+    columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'cluster-gateways:project:columns' },
     columns: [
       { key: 'name', title: t('settings.gateway.name'), render: projectNameCell },
       {
         key: 'namespace',
+        hideable: true,
         title: t('cluster.workloads.column.project'),
         render: (row) => (
           <a
@@ -178,6 +184,7 @@ export function ClusterGatewaysPage({ cluster, component = 'cluster' }: {
       },
       {
         key: 'type',
+        hideable: true,
         title: t('settings.gateway.type'),
         render: (row) => (
           <span data-ai-id={'cluster-gateways:cell:type:' + row.namespace + '/' + row.name}>{row.type || row.serviceType || '-'}</span>
@@ -185,6 +192,7 @@ export function ClusterGatewaysPage({ cluster, component = 'cluster' }: {
       },
       {
         key: 'address',
+        hideable: true,
         title: t('cluster.clusterGateways.ip'),
         render: (row) => (
           <span data-ai-id={'cluster-gateways:cell:ip:' + row.namespace + '/' + row.name}>{row.address || '-'}</span>
@@ -193,6 +201,7 @@ export function ClusterGatewaysPage({ cluster, component = 'cluster' }: {
       },
       {
         key: 'nodePorts',
+        hideable: true,
         title: t('settings.gateway.nodePorts'),
         render: (row) => (
           <span data-ai-id={'cluster-gateways:cell:node-ports:' + row.namespace + '/' + row.name}>{formatNodePorts(row.ports)}</span>
@@ -201,6 +210,7 @@ export function ClusterGatewaysPage({ cluster, component = 'cluster' }: {
       },
       {
         key: 'replicas',
+        hideable: true,
         title: t('settings.gateway.replicas'),
         render: (row) => (
           <span data-ai-id={'cluster-gateways:cell:replicas:' + row.namespace + '/' + row.name}>
@@ -210,6 +220,7 @@ export function ClusterGatewaysPage({ cluster, component = 'cluster' }: {
       },
       {
         key: 'tracing',
+        hideable: true,
         title: t('settings.gateway.tracing'),
         render: (row) => (
           <span data-ai-id={'cluster-gateways:cell:tracing:' + row.namespace + '/' + row.name}>
@@ -217,7 +228,7 @@ export function ClusterGatewaysPage({ cluster, component = 'cluster' }: {
           </span>
         ),
       },
-      { key: 'ready', title: t('cluster.column.status'), render: (row) => (
+      { key: 'ready', hideable: true, title: t('cluster.column.status'), render: (row) => (
         <Badge tone={row.ready ? 'success' : 'warning'}>{t(row.ready ? 'settings.gateway.ready' : 'settings.gateway.pending')}</Badge>
       ) },
     ],
@@ -239,6 +250,14 @@ export function ClusterGatewaysPage({ cluster, component = 'cluster' }: {
     empty: { title: t('cluster.clusterGateways.projectEmpty'), description: t('cluster.clusterGateways.projectEmptyHint') },
   };
 
+  /*
+   * One stored choice per tab. The gateway list has two schemas (cluster-wide and per-project)
+   * sharing one component, so the storage key carries the tab: hiding "project" on the
+   * per-project table must not hide the cluster-wide one.
+   */
+  const activeSchema = component === 'project' ? projectSchema : clusterSchema;
+  const columnKeys = React.useMemo(() => activeSchema.columns.map((column) => column.key), [activeSchema]);
+  const columnVisibility = useColumnVisibility('cluster-gateways:' + component, columnKeys);
   return (
     <AiSurface as="section" aiId="cluster-gateways:surface" state={state} aria-busy={query.isFetching} className="flex min-w-0 flex-col gap-4" data-ai-id="cluster-gateways:body">
       <header>
@@ -262,7 +281,9 @@ export function ClusterGatewaysPage({ cluster, component = 'cluster' }: {
         <ResourceErrorPanel error={query.error} onRetry={() => void query.refetch()} retryAiId="cluster-gateways:retry" />
       ) : (
         <ResourceList
-          schema={component === 'project' ? projectSchema : clusterSchema}
+          schema={activeSchema}
+          {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+          onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
           rows={rows}
           loading={query.isPending}
           searchValue={search}

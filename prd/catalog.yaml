@@ -1097,6 +1097,7 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_GATEWAYS-01
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_GATEWAYS-02
   - id: project-settings
     title: 项目设置
     prd: prd/kube-frontend/project-settings/_index.md

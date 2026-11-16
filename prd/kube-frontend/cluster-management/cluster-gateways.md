@@ -17,6 +17,7 @@
 
 ## 验收场景
 
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_GATEWAYS-02** — 已知集群网关页的「集群网关」与「项目网关」两个页签各自是多列表格，当点某个页签的「显示列」，则只列出该页签 schema 的可隐藏列（名称不可隐藏）；取消勾选后该页签表头立即消失，选择按页签分别持久化（`kube-frontend.columns.cluster-gateways:{cluster,project}`）、两个页签互不影响，「重置」恢复该页签全部列。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_GATEWAYS-01** — 网关设置从集群侧栏可达；默认显示集群网关，切换项目网关更新 URL。列表显示名称、项目、状态、访问方式、地址、控制器消息和创建时间；状态以 Deployed 条件为准，空值为 -，无对象为空态，接口失败不伪装为无数据。两视图可刷新，项目链接到已有网关设置页。
 
 ## 设计目标
@@ -55,6 +56,7 @@
 
 ## 验收用例
 
+- `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_GATEWAYS-02`
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_GATEWAYS-01`
 
 ## 功能需求
