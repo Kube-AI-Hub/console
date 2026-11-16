@@ -37,3 +37,4 @@ prd/tools/__pycache__/
 tests/ui/__pycache__/
 tests/ui/**/__pycache__/
 tests/ui/.venv/
+tests/ui/.artifacts/
