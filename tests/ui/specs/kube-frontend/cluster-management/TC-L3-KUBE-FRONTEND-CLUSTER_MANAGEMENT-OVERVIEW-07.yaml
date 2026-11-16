@@ -1,0 +1,29 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-07
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: overview
+title: 集群概览 · 资源选择与真实历史读数
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/overview'
+prd: prd/kube-frontend/cluster-management/overview.md
+design: design/kube-frontend/cluster-management/overview.md
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-08
+story:
+- US5
+product: 按资源与时间窗读取集群历史，指针和键盘检查真实采样。
+preconditions:
+- 已登录B200，当前资源和历史指标可读
+steps:
+- 捕获默认显存历史并核对matrix采样与时间戳比例
+- 点击CPU，仅查询CPU使用与总量，保持排行维度不变
+- 悬停资源卡核对抬升和聚光，点击非标题留白区域也能选择
+- 核对整卡焦点和键盘选择，减弱动画不抬升
+- 切换6h和24h，核对步长和窗口长度
+- 悬停和键盘移动，核对读数与采样
+- 切换深浅主题和现有色调，核对中英文与三档截图
+expected:
+- 使用与总量按时间戳匹配，不用分配量或compute利用率替代
+- 趋势有真实采样、单位和读数，切换不影响其他面板
+- 缺值和失败独立降级，原字段及主题交互保留

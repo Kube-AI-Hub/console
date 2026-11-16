@@ -4,7 +4,7 @@ suite: point
 module: kube-frontend
 submodule: cluster-management
 feature: overview
-title: 集群概览 · 字段对齐、左列状态与主题边框
+title: 集群概览 · 资源排行优先、字段对齐与主题边框
 entry_url: '{BASE_URL}/kube-frontend/clusters/host/overview'
 prd: prd/kube-frontend/cluster-management/overview.md
 design: design/kube-frontend/cluster-management/overview.md
@@ -18,7 +18,11 @@ product: 区块层次和固定字段栅格提高扫读效率，不改变数据�
 preconditions:
 - 已登录 B200 host，概览和 gpu02 节点详情可读
 steps:
-- 核对 Kubernetes 状态紧随左列基本信息
+- 核对资源和排行位于辅助信息之前，Kubernetes状态紧随辅助列基本信息
+- 核对资源区没有节点卡，节点数与排行同一行且宽度约1:2
+- 核对节点总量、就绪数量和就绪率保留，没有节点趋势或时间窗
+- 核对基本信息/Kubernetes状态与节点数左边界及宽度一致
+- 核对四个常用运维入口同宽同高、图标和文字起始位置及基线一致
 - 在 1024/1280/1600 核对资源字段相对位置并截图
 - 确认没有分配字段的卡片留空，GPU 没有额外利用率行
 - 比较概览各区块与节点属性区计算出的主题边框颜色

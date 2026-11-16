@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
 import { TrendChart, TREND_SERIES_COLORS } from '../src/primitives/TrendChart';
 
 describe('TrendChart', () => {
@@ -63,5 +63,32 @@ describe('TrendChart', () => {
     render(<TrendChart label="Palette" emptyText="Empty" start={0} end={100}
       series={[{ key: 'A', label: 'A', points: [{ at: 0, value: 1 }] }]} />);
     expect(document.querySelector('path')).toHaveAttribute('stroke', TREND_SERIES_COLORS[0]);
+  });
+  it('supports pointer and keyboard sample inspection with formatted values', () => {
+    const view = render(<TrendChart label="CPU history" emptyText="Empty" start={0} end={100} interactive showAxes showGrid
+      yDomain={[0, 100]} formatTime={(at) => `${at}s`} formatValue={(value) => `${value}%`}
+      points={[{ at: 0, value: 0 }, { at: 50, value: 20 }, { at: 100, value: 125 }]} />);
+    const chart = screen.getByRole('group', { name: 'CPU history' });
+    fireEvent.focus(chart);
+    expect(chart).toHaveAttribute('data-ai-cursor-at', '100');
+    fireEvent.keyDown(chart, { key: 'ArrowLeft' });
+    expect(view.container.querySelector('[data-ai-trend-readout]')).toHaveTextContent('50s20%');
+    fireEvent.keyDown(chart, { key: 'Home' });
+    expect(chart).toHaveAttribute('data-ai-cursor-at', '0');
+    const svg = screen.getByRole('img');
+    vi.spyOn(svg, 'getBoundingClientRect').mockReturnValue({ left: 0, width: 100 } as DOMRect);
+    fireEvent.mouseMove(chart, { clientX: 51 });
+    expect(chart).toHaveAttribute('data-ai-cursor-at', '50');
+    fireEvent.mouseLeave(chart);
+    expect(chart).not.toHaveAttribute('data-ai-cursor-at');
+  });
+  it('does not fill areas across missing scrapes and keeps new features opt-in', () => {
+    const view = render(<TrendChart label="Gaps" emptyText="Empty" start={0} end={100} area maxGap={20}
+      points={[{ at: 0, value: 2 }, { at: 10, value: 3 }, { at: 90, value: 4 }, { at: 100, value: 5 }]} />);
+    expect(view.container.querySelectorAll('[data-ai-trend-area]')).toHaveLength(2);
+    expect(screen.queryByRole('group')).toBeNull();
+    view.rerender(<TrendChart label="Legacy" emptyText="Empty" start={0} end={100} points={[{ at: 0, value: 0 }]} />);
+    expect(view.container.querySelector('[data-ai-trend-area]')).toBeNull();
+    expect(view.container.querySelector('[data-ai-trend-readout]')).toBeNull();
   });
 });

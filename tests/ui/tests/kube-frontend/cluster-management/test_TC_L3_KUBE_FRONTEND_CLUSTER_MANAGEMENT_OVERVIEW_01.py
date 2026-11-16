@@ -72,8 +72,11 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_OVERVIEW_01(cluster_overview_pag
     else:
         for row in ui.USAGE_ROWS:
             text = ui.usage_text(row)
-            # used / total, and a percentage that comes from the same two numbers.
-            assert "已使用" in text and "总量" in text, f"{row} 用量必须明确已用和总量: {text}"
+            # Node readiness is health, not resource consumption.
+            used_label = "就绪节点" if row == "nodes" else "已使用"
+            assert used_label in text and "总量" in text, f"{row} 必须明确当前数量和总量: {text}"
+            if row == "nodes":
+                assert "就绪率" in text, text
             assert ui.usage_field(row, "used").inner_text().strip()
             assert ui.usage_field(row, "total").inner_text().strip()
             assert "%" in text, f"{row} 用量必须给出百分比: {text}"

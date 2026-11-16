@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/cluster-management/overview.md`](../../../../prd/kube-frontend/cluster-management/overview.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-05** — 基本信息显示集群可见性；六类系统组件入口按当前集群和分类进入列表，可清除分类，详情保持同集群。kubectl 不自动连接；主动打开 kubeconfig 时只读当前用户/集群配置，显示安全提示并可下载 kubeconfig.yaml。关闭取消读取并清除敏感缓存，身份或集群变化不显示旧内容，403 不提供重试；不记录或截图凭据正文。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-05** — 基本信息显示集群可见性；六类系统组件入口按当前集群和分类进入列表，可清除分类，详情保持同集群。kubectl只在主动点击后准备并连接；主动打开kubeconfig时只读当前用户/集群配置，提示并可下载kubeconfig.yaml。关闭取消读取并清除敏感缓存，身份或集群变化不显示旧内容，403不提供重试，不记录或截图凭据正文。
 
 ### 关联设计
 

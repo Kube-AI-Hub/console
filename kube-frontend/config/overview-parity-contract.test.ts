@@ -13,7 +13,12 @@ describe('legacy overview capability inventory', () => {
     expect(client).toContain("gpuUsed: values.get('cluster_gpu_usage')");
     expect(client).toContain("error: attempt('error')");
     const page = read('apps/console-next/src/pages/cluster/ClusterOverviewPage.tsx');
-    for (const id of ['usage-gpu-memory', 'usage-gpu', 'usage-disk', 'schedule-error', 'visibility', 'kubeconfig-open']) {
+    const resources = read('apps/console-next/src/pages/cluster/overviewResourceMetrics.ts');
+    const panel = read('apps/console-next/src/pages/cluster/OverviewResourcePanel.tsx');
+    expect(page).toContain('OverviewResourcePanel');
+    expect(panel).toContain('`overview:usage-${entry.key}`');
+    for (const key of ['gpu-memory', 'gpu', 'disk']) expect(resources).toContain(`key: '${key}'`);
+    for (const id of ['schedule-error', 'visibility', 'kubeconfig-open']) {
       expect(page).toContain(`overview:${id}`);
     }
   });

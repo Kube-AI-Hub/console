@@ -19,15 +19,15 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_OVERVIEW_02(cluster_overview_pag
         ui.page.set_viewport_size({"width": width, "height": 1000})
         assert ui.page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
         screenshot(ui.page, f"overview-layout-{width}")
-    for page in ("nodes", "gpus", "monitor", "kubectl"):
+    for page in ("nodes", "gpus", "monitor"):
         expect(ui.page.locator(f'[data-ai-id="overview:shortcut:{page}"]')).to_have_attribute(
             "href", f"/kube-frontend/clusters/{ui.cluster}/{page}")
     sockets = []
     ui.page.on("websocket", lambda socket: sockets.append(socket.url))
-    ui.page.locator('[data-ai-id="overview:shortcut:kubectl"]').click()
-    expect(ui.page.locator('[data-ai-id="kubectl:prepare"]')).to_be_visible()
+    expect(ui.control("shortcut:kubectl")).to_be_visible()
     expect(ui.page.get_by_role("dialog")).to_have_count(0)
-    assert sockets == [], "快捷跳转不得自动连接终端"
+    assert sockets == [], "页面挂载不得自动连接终端"
+    assert not any("/users/" in request.url and "/kubectl" in request.url for request in requests)
     ui.open()
     ui.wait_ready()
     requests.clear()

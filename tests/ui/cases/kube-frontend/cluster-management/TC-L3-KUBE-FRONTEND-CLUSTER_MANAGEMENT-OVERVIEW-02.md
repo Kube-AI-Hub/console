@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/cluster-management/overview.md`](../../../../prd/kube-frontend/cluster-management/overview.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-03** — 概览在 1024/1280/1600 视口采用身份与模块侧栏、资源和控制面主栏，不撑宽页面；提供节点、显卡、监控与 kubectl 的当前集群快捷入口和协调刷新，进入 kubectl 不自动连接。代理未就绪集群保留 agent 接入说明。部分指标缺失或分母为零显示 `-` 且不绘制 0% 进度条，真实零采样显示 0%；集群用量不引用单节点数据。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-03** — 概览在1024/1280/1600视口优先显示资源总量/用量与排行，其后为基本信息、控制面、组件、模块和其他工具，不撑宽页面。节点/显卡/监控保持同集群快捷链接；kubectl点击一次原地打开终端，页面挂载不自动连接。代理未就绪集群保留接入说明。缺值/零分母显示 `-` 不画0%环，真实零显示0%，不以单节点代替集群用量。
 
 ### 关联设计
 

@@ -123,6 +123,14 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .ai-lift,
+  .ai-spotlight::before {
+    transition: none !important;
+  }
+  .ai-lift:hover,
+  .ai-lift:active {
+    transform: none !important;
+  }
   /* Nothing here animates, but a static wash still costs a repaint on scroll
      in some engines; dropping it is the safer choice. */
   .ai-ambient::before {

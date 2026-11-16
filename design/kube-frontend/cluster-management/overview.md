@@ -15,12 +15,15 @@
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-05
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-06
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-07
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-08
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-09
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-10
 
 ## 设计目标与非目标
 
-目标：一屏读完集群的身份、容量与模块状态，且任一路数据缺失都不拖垮整页。
+目标：首屏优先资源容量/用量与节点排行，身份与控制面随后；任一路数据缺失不拖垮整页。
 
-非目标：趋势图与历史、集群设置的写入、节点明细。
+非目标：无数据来源的大屏指标、集群设置写入和节点属性列表；本批增加选中资源历史和一键终端。
 
 ## 关键约束
 
@@ -81,6 +84,9 @@
 ## 仓库落点
 
 - 页面：apps/console-next/src/pages/cluster/ClusterOverviewPage.tsx
+- 资源：同目录OverviewResourcePanel.tsx、overviewResourceMetrics.ts、useOverviewRefresh.ts
+- 图表：console/packages/ai-kit/src/primitives/{MetricRing,TrendChart}.tsx；UI barrel导出
+- 终端：apps/console-next/src/components/resource/KubectlConsoleDialog.tsx，共享ExecConsoleDialog
 - 路由：apps/console-next/src/routes/kube-frontend.clusters.$cluster/overview/{route.tsx,index.tsx}
 - 区域注册：apps/console-next/src/areas/registry.ts（cluster-management 的 defaultPage 改为 overview）
 - 接口：packages/api-client/src/cluster.ts（clusterApi / clusterMetricsApi / componentMetricsApi / toClusterDetail / toMetricValues）
@@ -126,7 +132,7 @@ ClusterUsage 的数值字段由必有 number 调整为 number | undefined。未�
 
 ## 后续改进
 
-- 用量趋势曲线（需要指标历史接口）。
+- 高级图表缩放及面板定制，本批提供资源选择、时间窗与采样读数。
 - 集群设置写入（描述、可见性、可插拔组件）。
 - 多集群列表页（B200 已启用多集群，但只有 host 一个集群对象）。
 
@@ -146,6 +152,9 @@ ClusterUsage 的数值字段由必有 number 调整为 number | undefined。未�
 - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-04
 - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-05
 - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-06
+- TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-07
+- TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-08
+- TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-09
 
 ### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-07 — 恢复原子能力，不以新概念替换旧事实
 
@@ -223,3 +232,65 @@ OVERVIEW-06 核对左列相邻区块、三档相对字段坐标、空分配区�
 **被否方案**：把 CRD / 接口字段改名为 `kubeAiHubVersion`。已装集群和 ks-apiserver 仍写 `kubeSphereVersion`，改字段名会让概览读不到版本。
 
 **何时重新考虑**：平台 CRD 把该字段正式改名，且已装集群完成迁移之后。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-11 — 资源和排行优先于辅助信息
+
+**为什么**：用户新的运维顺序是先定位容量和压力，再定位异常节点。资源、选中趋势、Top5位于上部，
+身份/Kubernetes状态仍相邻并默认显示在辅助区。全部字段及原句柄保留，不靠隐藏面板换空间。
+
+**被否方案**：沿用身份左栏占据首屏，或复制示例大屏的Token/功率等无接口指标；前者弱化主任务，后者虚构数据。
+本决策覆盖原身份优先布局，不撤销旧字段与未知值改进。
+
+**何时重新考虑**：用户需要可配置仪表盘或展示目标改为集群身份管理。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-12 — 环图与历史复用纯展示原语
+
+**为什么**：现有rangeMetricsApi已提供集群matrix采样，无需新后端或重型图库。
+overviewResourceMetrics列明七资源的usage/total，按时间戳匹配分母。窗口1h/6h/24h对应60s/5m/15m。
+MetricRing继承Progress语义色，TrendChart的新axes/grid/area/interactive/yDomain/formatter均可选默认关闭，
+保留旧消费者外观，缺口面积分别闭合。悬停和键盘只展示真实采样，动画遵循reduced-motion。
+
+**被否方案**：每张卡下载全部历史，按数组索引拼比例，或用compute utilization替换GPU使用卡数；
+它们分别增加请求、错配时间和改变事实。装饰性随机波动不是实时监控。
+
+**何时重新考虑**：需要缩放、多轴、大量序列或独立时间刷选时再评估图表引擎。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-13 — 一个30秒协调器与可见性暂停
+
+**为什么**：默认自动更新回答实时运维需求，useOverviewRefresh统一刷新资源/历史/排行/Kubernetes状态，
+不让每个卡片创建计时器。窗口时间只在刷新/切窗改变，隐藏时停止，可见恢复读一次，有请求未完成不重叠。
+按用户最新要求不显示最近刷新时间；查询失败保留旧值时仍明确标识。
+刷新控件复用ghost小按钮，暂停/start图标随自动刷新状态切换，短文字为暂停/继续，title和aria-label保留30秒周期。
+手动刷新使用refresh图标及loading等待反馈，kubectl使用primary主按钮，避免刷新控件抢占终端入口的视觉重点。
+
+**被否方案**：每次render把Date.now放queryKey会循环请求；固定旧历史范围不停refetch不会向前滚动。
+为制造动态效果无条件5秒拉取所有数据会增加负载。
+
+**何时重新考虑**：后端提供推送式聚合快照，或实测30秒请求影响集群负载。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-14 — 点击即准备并连接，直接工具路由仍主动开启
+
+**为什么**：概览按钮是用户明确的启动行为，不需要跳转后重复点击。
+KubectlConsoleDialog挂载即读当前身份工具目标，准备态到ExecConsoleDialog沿用原生协议。
+key含cluster/username/实例，关闭取消并清理；晚到响应和旧身份不能重新开会话。403不给重试。
+
+**被否方案**：给工具路由一律自动连接会改变直接访问行为；新建高权限工具Pod会越过授权。
+原“概览不自动连接”仅保留为页面挂载不连接，用户点击则一次启动。
+
+**何时重新考虑**：工具目标服务契约变化或需要多终端管理。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-15 — 节点统计与排行1:2，资源整卡交互
+
+**为什么**：最新布局要求将节点计数移出六资源网格，放在排行左侧，基本信息/Kubernetes状态对齐左列。
+两行共用`minmax(0,1fr)/minmax(0,2fr)`及相同间距，节点统计保留总量、就绪数量及就绪率。
+用户明确要求移除节点就绪率趋势，nodeOnly组合复用同一用量query且禁用历史query，不渲染时间窗或图表；六资源历史仍保留。
+常用运维入口四项复用secondary Button，导航项使用asChild Link保留路由语义，统一h-12/w-full/justify-start/px-4。
+图标与文字采用相同gap，链接和kubeconfig按钮的尺寸、起始位置及文字基线一致。
+
+资源使用ai-kit Card interactive及useSpotlight，整卡承担一个动作；标题/数值/留白点击都可选中，
+Enter/Space和aria-pressed/描述提供键盘读数，不嵌套第二个按钮。减弱动画关闭抬升与非必要过渡。
+
+**被否方案**：复制私有hover卡片、只让标题可点，或保留七卡形成不齐的网格；都会造成视觉/点击区域分叉。
+仅移动标题而丢弃节点总量或就绪率，不符合保留已有能力的要求；节点历史的移除以用户明确批准为边界。
+
+**何时重新考虑**：新增资源类别或用户需要可配置面板列宽时。

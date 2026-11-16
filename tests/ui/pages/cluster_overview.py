@@ -130,6 +130,32 @@ class ClusterOverviewPage:
     def control(self, suffix: str) -> Locator:
         return self.page.locator(f'[data-ai-id="overview:{suffix}"]').last
 
+    def select_resource(self, name: str) -> None:
+        card = self.usage_row(name)
+        box = card.bounding_box()
+        assert box
+        card.click(position={"x": 8, "y": box["height"] - 8})
+
+    def hover_resource(self, name: str) -> None:
+        card = self.usage_row(name)
+        card.hover(position={"x": 8, "y": 8})
+        self.page.wait_for_function("""el => {
+            const transform = getComputedStyle(el).transform;
+            return transform !== 'none' && new DOMMatrix(transform).m42 < 0;
+        }""", arg=card.element_handle(), timeout=5000)
+
+    def select_trend_range(self, name: str) -> None:
+        self.control(f"trend-range:{name}").click()
+
+    def kubectl(self, suffix: str) -> Locator:
+        return self.page.locator(f'[data-ai-id="kubectl:{suffix}"]').last
+
+    def terminal_input(self) -> Locator:
+        return self.kubectl("terminal-output").locator(".xterm-helper-textarea")
+
+    def trend_readout(self) -> Locator:
+        return self.control("trend-chart").locator("[data-ai-trend-readout]")
+
     def ranking_rows(self) -> Locator:
         return self.control("ranking").locator("[data-ai-row]")
 

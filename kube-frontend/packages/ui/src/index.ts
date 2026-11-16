@@ -24,6 +24,7 @@ export type { AiButtonProps, AiSurfaceProps } from './ai-controls';
 export {
   Badge,
   Button,
+  Card,
   DescriptionItem,
   DescriptionList,
   ResourceForm,
@@ -48,6 +49,7 @@ export {
   MultiSelect,
   StatisticsGroup,
   MetricCell,
+  MetricRing,
   TrendChart,
   TREND_SERIES_COLORS,
   Progress,
@@ -75,11 +77,13 @@ export {
   registerFieldType,
   useIsMobile,
   useMediaQuery,
+  useSpotlight,
 } from '@kube-ai-hub/ai-kit';
 
 export type {
   AccentPalette,
   ButtonProps,
+  CardProps,
   DescriptionItemProps,
   DescriptionListProps,
   DropdownItem,
@@ -102,6 +106,7 @@ export type {
   StatisticItem,
   StatisticsGroupProps,
   MetricCellProps,
+  MetricRingProps,
   TrendChartProps,
   TrendPoint,
   TrendSeries,

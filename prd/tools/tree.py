@@ -719,7 +719,17 @@ MODULES = [
                     {
                         "id": "overview",
                         "title": "集群概览",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-01"]},
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-01",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-02",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-03",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-04",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-05",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-06",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-07",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-08",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-09",
+                        ]},
                     },
                     {
                         "id": "nodes",

@@ -28,6 +28,13 @@ export interface TrendChartProps extends React.HTMLAttributes<HTMLDivElement> {
   emptyText: string;
   /** A missing scrape beyond this interval starts a separate line, never a fake zero. */
   maxGap?: number;
+  interactive?: boolean;
+  showAxes?: boolean;
+  showGrid?: boolean;
+  area?: boolean;
+  yDomain?: [number, number] | undefined;
+  formatValue?: (value: number) => string;
+  formatTime?: (at: number) => string;
 }
 
 /**
@@ -94,11 +101,21 @@ export function TrendChart({
   label,
   emptyText,
   maxGap,
+  interactive = false,
+  showAxes = false,
+  showGrid = false,
+  area = false,
+  yDomain,
+  formatValue = String,
+  formatTime = (at) => new Date(at).toLocaleTimeString(),
   className,
   ...attributes
 }: TrendChartProps): React.ReactElement {
   const lines = toLines(points, series, start, end);
   const total = lines.reduce((sum, line) => sum + line.points.length, 0);
+  const [activeAt, setActiveAt] = React.useState<number | null>(null);
+  const times = [...new Set(lines.flatMap((line) => line.points.map((point) => point.at)))].sort((a, b) => a - b);
+  React.useEffect(() => setActiveAt(null), [start, end]);
   if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start || total === 0) {
     return (
       <div className={cn('py-6 text-sm text-ai-fg-muted', className)} {...attributes} data-ai-state="empty">
@@ -107,20 +124,67 @@ export function TrendChart({
     );
   }
   const all = lines.flatMap((line) => line.points.map((point) => point.value));
-  const low = Math.min(0, ...all);
-  const high = Math.max(1, ...all);
-  const span = (high - low) * 1.1;
+  const domain = yDomain && Number.isFinite(yDomain[0]) && Number.isFinite(yDomain[1]) && yDomain[1] > yDomain[0] ? yDomain : undefined;
+  const low = domain?.[0] ?? Math.min(0, ...all);
+  const high = domain?.[1] ?? Math.max(1, ...all);
+  const span = (high - low) * (domain ? 1 : 1.1);
   const y = (value: number) => 30 - ((value - low) / span) * 30;
+  const selectedAt = activeAt !== null && times.includes(activeAt) ? activeAt : null;
 
   return (
     <div
       className={cn('text-ai-accent', className)}
       {...attributes}
+      {...(interactive ? {
+        tabIndex: attributes.tabIndex ?? 0,
+        role: 'group',
+        'aria-label': label,
+        onFocus: (event: React.FocusEvent<HTMLDivElement>) => {
+          attributes.onFocus?.(event);
+          setActiveAt(times[times.length - 1] ?? null);
+        },
+        onKeyDown: (event: React.KeyboardEvent<HTMLDivElement>) => {
+          attributes.onKeyDown?.(event);
+          if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+          event.preventDefault();
+          const index = selectedAt === null ? times.length - 1 : times.indexOf(selectedAt);
+          const next = event.key === 'Home' ? 0 : event.key === 'End' ? times.length - 1 :
+            Math.max(0, Math.min(times.length - 1, index + (event.key === 'ArrowLeft' ? -1 : 1)));
+          setActiveAt(times[next] ?? null);
+        },
+        onMouseMove: (event: React.MouseEvent<HTMLDivElement>) => {
+          attributes.onMouseMove?.(event);
+          const box = event.currentTarget.querySelector('svg')?.getBoundingClientRect();
+          if (!box || box.width <= 0) return;
+          const at = start + Math.max(0, Math.min(1, (event.clientX - box.left) / box.width)) * (end - start);
+          setActiveAt(times.reduce((nearest, time) => Math.abs(time - at) < Math.abs(nearest - at) ? time : nearest, times[0]!));
+        },
+        onMouseLeave: (event: React.MouseEvent<HTMLDivElement>) => { attributes.onMouseLeave?.(event); setActiveAt(null); },
+      } : {})}
       data-ai-state="ready"
       data-ai-points={total}
       data-ai-series-count={lines.length}
+      data-ai-cursor-at={selectedAt ?? undefined}
     >
-      <svg viewBox="0 0 100 30" preserveAspectRatio="none" role="img" aria-label={label} className="h-24 w-full">
+      <div className={showAxes ? 'relative pl-9' : undefined}>
+      {showAxes ? <div className="absolute inset-y-0 left-0 flex h-24 flex-col justify-between text-[10px] tabular-nums text-ai-fg-muted">
+        <span>{formatValue(high)}</span><span>{formatValue((low + high) / 2)}</span><span>{formatValue(low)}</span>
+      </div> : null}
+      <svg viewBox="0 0 100 30" preserveAspectRatio="none" role="img" aria-label={label} className={cn('h-24 w-full', interactive && 'cursor-crosshair')}>
+        {showGrid ? [0, 10, 20, 30].map((at) => <line key={at} x1="0" y1={at} x2="100" y2={at}
+          stroke="currentColor" opacity=".12" strokeDasharray="2 2" vectorEffect="non-scaling-stroke" />) : null}
+        {area ? lines.flatMap((line) => {
+          const segments: TrendPoint[][] = [];
+          for (const point of line.points) {
+            const previous = segments[segments.length - 1]?.at(-1);
+            if (!previous || (maxGap !== undefined && point.at - previous.at > maxGap)) segments.push([point]);
+            else segments[segments.length - 1]!.push(point);
+          }
+          return segments.filter((segment) => segment.length > 1).map((segment, index) => <path
+            key={`${line.key}:area:${index}`} data-ai-trend-area
+            d={`M${endOfLine(segment[0]!.at, start, end)},30 ${segment.map((point) => `L${endOfLine(point.at, start, end)},${y(point.value)}`).join(' ')} L${endOfLine(segment.at(-1)!.at, start, end)},30 Z`}
+            fill={line.color ?? 'currentColor'} opacity=".12" />);
+        }) : null}
         {lines.map((line) => {
           if (line.points.length === 0) return null;
           const path = line.points.map((point, index) => {
@@ -153,7 +217,22 @@ export function TrendChart({
           />
         ) : null)}
         <line x1="0" y1="30" x2="100" y2="30" stroke="currentColor" opacity=".25" vectorEffect="non-scaling-stroke" />
+        {selectedAt !== null ? <line x1={endOfLine(selectedAt, start, end)} x2={endOfLine(selectedAt, start, end)}
+          y1="0" y2="30" stroke="currentColor" opacity=".6" vectorEffect="non-scaling-stroke" /> : null}
       </svg>
+      </div>
+      {showAxes ? <div className="mt-1 ml-9 flex justify-between text-[10px] tabular-nums text-ai-fg-muted">
+        <span>{formatTime(start)}</span><span>{formatTime(end)}</span>
+      </div> : null}
+      {interactive ? <div className="mt-2 min-h-4 flex flex-wrap gap-x-4 text-xs tabular-nums text-ai-fg-secondary" aria-live="polite" data-ai-trend-readout>
+        {selectedAt === null ? <span>{label}</span> : <>
+          <time dateTime={new Date(selectedAt).toISOString()}>{formatTime(selectedAt)}</time>
+          {lines.map((line) => {
+            const point = line.points.find((entry) => entry.at === selectedAt);
+            return <span key={line.key || 'single'}>{line.label ? `${line.label}: ` : ''}{point ? formatValue(point.value) : '-'}</span>;
+          })}
+        </>}
+      </div> : null}
     </div>
   );
 }

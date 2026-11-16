@@ -86,3 +86,22 @@ export const Sizes: Story = {
     </div>
   ),
 };
+
+export const NavigationButtons: Story = {
+  render: () => (
+    <nav className="grid grid-cols-2 gap-2" aria-label="Operations">
+      <Button asChild variant="secondary" className="h-12 w-full justify-start px-4">
+        <a href="#nodes"><Icon name="nodes" /><span>Nodes</span></a>
+      </Button>
+      <Button asChild variant="secondary" className="h-12 w-full justify-start px-4">
+        <a href="#gpus"><Icon name="gpu" /><span>GPUs</span></a>
+      </Button>
+      <Button asChild variant="secondary" className="h-12 w-full justify-start px-4">
+        <a href="#monitor"><Icon name="monitor" /><span>Monitoring</span></a>
+      </Button>
+      <Button variant="secondary" className="h-12 w-full justify-start px-4">
+        <Icon name="file" /><span>kubeconfig</span>
+      </Button>
+    </nav>
+  ),
+};

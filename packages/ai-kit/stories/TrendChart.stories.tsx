@@ -13,6 +13,14 @@ export const Idle: Story = { args: { points: [{ at: 0, value: 0 }, { at: 100, va
 export const MissingSamples: Story = { args: { maxGap: 30, points: [{ at: 0, value: 10 }, { at: 20, value: 20 }, { at: 90, value: 15 }, { at: 100, value: 30 }] } };
 export const Empty: Story = { args: { points: [] } };
 export const OneSample: Story = { args: { points: [{ at: 50, value: 0 }] } };
+export const Interactive: Story = {
+  args: {
+    ...Samples.args, interactive: true, showAxes: true, showGrid: true, area: true,
+    yDomain: [0, 100], formatValue: (value) => `${Math.round(value)}%`,
+    formatTime: (at) => `${at}s`,
+  },
+};
+export const InteractiveGaps: Story = { args: { ...Interactive.args, ...MissingSamples.args } };
 
 /**
  * Several identities on one scale — the component panels' case (one line per verb /

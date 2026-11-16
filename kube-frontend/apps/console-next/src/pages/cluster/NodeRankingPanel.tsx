@@ -37,6 +37,8 @@ export function NodeRankingPanel({ cluster, preview = false, initialMetric = 'no
       cluster, metric, order: preview ? 'desc' : list.order, page: preview ? 1 : list.page,
       pageSize: preview ? 5 : list.pageSize, keyword: preview ? '' : list.search, signal,
     }), retry: false, staleTime: 15_000,
+    refetchOnWindowFocus: !preview,
+    refetchOnReconnect: !preview,
   });
   const metadata = useQuery({ queryKey: ['node-ranking-info', cluster], retry: false, staleTime: 30_000,
     queryFn: ({ signal }) => nodesApi(api).list({ cluster, namespace: '', page: 1, pageSize: -1, sortBy: 'name', order: 'asc', signal }) });
@@ -92,11 +94,12 @@ export function NodeRankingPanel({ cluster, preview = false, initialMetric = 'no
       {query.isError ? <ResourceErrorPanel error={query.error} onRetry={() => void query.refetch()} retryAiId="overview:rank-retry" /> :
         <Table rows={rows} rowKey={(row) => row.name} loading={query.isPending} empty={t('cluster.nodeUsage.emptyTitle')}
           rowAttributes={(row) => ({ 'data-ai-row': row.name })} columns={[
-            { key: 'name', title: t('cluster.column.name'), render: nodeCell },
+            { key: 'rank', title: '#', width: 48, render: (row) => <span className="text-xs font-medium tabular-nums text-ai-fg-muted">{rows.indexOf(row) + 1}</span> },
+            { key: 'name', title: t('cluster.column.name'), width: 280, render: nodeCell },
             { key: 'metric', title: t(`cluster.rank.${metric}`), render: (row) => {
               const value = rankValue(row, metric);
-              return <span className="flex items-center gap-3" data-ai-id={`overview:rank-value:${row.name}`}>
-                {value.endsWith('%') ? <Progress value={Number.parseFloat(value)} className="w-20" aria-label={t(`cluster.rank.${metric}`)} /> : null}
+              return <span className="flex w-full items-center gap-3" data-ai-id={`overview:rank-value:${row.name}`}>
+                {value.endsWith('%') ? <Progress value={Number.parseFloat(value)} tone="auto" className="min-w-20 flex-1" aria-label={t(`cluster.rank.${metric}`)} /> : null}
                 <span className="whitespace-nowrap tabular-nums">{value}</span>
               </span>;
             } },

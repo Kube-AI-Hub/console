@@ -1,0 +1,27 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-08
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: overview
+title: 集群概览 · 自动刷新与可见性暂停
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/overview'
+prd: prd/kube-frontend/cluster-management/overview.md
+design: design/kube-frontend/cluster-management/overview.md
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-09
+story:
+- US5
+product: 一个30秒协调器，可暂停并在隐藏时停止，不伪造实时数据。
+preconditions:
+- 已登录；使用浏览器受控时钟和明确模拟的指标响应
+steps:
+- 核对暂停/继续与刷新使用图标及短文字次要按钮，kubectl主按钮更突出，没有最近刷新时间
+- 首次读取完成后推进30秒，核对新请求
+- 暂停后核对图标切换为继续并推进时间，核对没有额外请求
+- 恢复，隐藏页面后推进时间，核对停止轮询
+- 恢复可见，核对刷新一次及手动刷新
+- 返回失败并核对旧值标识，保留原值不当成最新状态
+expected:
+- 轮询可控且隐藏暂停，数据请求不因装饰动画增加
+- 刷新控件层次清晰、状态可读，失败不填0，不把旧值误报为实时

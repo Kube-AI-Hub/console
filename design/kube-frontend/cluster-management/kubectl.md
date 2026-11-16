@@ -4,7 +4,7 @@
 
 ## 概述
 
-KubectlPage 从 AuthProvider 获取身份，经 kubectlApi 解析用户工具 Pod，再挂载 ExecConsoleDialog。
+KubectlPage与概览共用KubectlConsoleDialog，从AuthProvider获取身份，经kubectlApi解析工具Pod后挂载ExecConsoleDialog。
 容器终端共用该近全屏弹窗，ai-kit 的 TerminalView 负责 ANSI、光标、键盘及备用屏幕。
 
 ## 关联需求
@@ -22,6 +22,7 @@ BFF 已代理原生 exec，容器终端已实现 v5.channel.k8s.io，不必扩�
 
 - `apps/console-next/src/pages/cluster/KubectlPage.tsx` 与集群路由
 - `apps/console-next/src/components/resource/ExecConsoleDialog.tsx` 和 ai-kit `terminal/TerminalView.tsx`
+- `apps/console-next/src/components/resource/KubectlConsoleDialog.tsx`：目标解析、准备态、取消与缓存清理
 - `packages/api-client/src/kubectl.ts` 与 barrel
 - `areas/registry.ts`、locales 及对应单测
 
@@ -74,6 +75,16 @@ B200 E2E 只执行 printf 与 kubectl 只读版本查询，不创建工作负载
 ## 后续改进
 
 节点 shell 需独立权限与特殊协议，不因复用终端而视为已迁移。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-KUBECTL-02 — 概览一次启动与工具页共用控制器
+
+**为什么**：概览按钮已是主动启动，不能跳转后要求重复点击；直接访问原工具页则继续保留prepare。
+控制器挂载即读工具目标，成功进入原生终端。key含用户/集群/挂载实例，重开重新读取，取消/身份变化清理旧请求，
+不自动重取、不用缓存旧目标绕过准备，403无重试。
+
+**被否方案**：全工具路由自动连接改变书签访问语义；为概览复制目标解析和终端状态会让两处生命周期分叉。
+
+**何时重新考虑**：产品需要多会话或后端不再提供当前用户工具目标。
 
 ## 验收用例
 

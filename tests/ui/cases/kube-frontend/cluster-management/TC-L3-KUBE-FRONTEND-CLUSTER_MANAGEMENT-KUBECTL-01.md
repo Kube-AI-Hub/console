@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/cluster-management/kubectl.md`](../../../../prd/kube-frontend/cluster-management/kubectl.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-KUBECTL-01** — 集群侧栏可进入 kubectl；点击连接后在近全屏独立弹窗查询当前账号工具 Pod，再连接 PTY。关闭及离开页面释放连接，返回页面不自动连接；未部署或未就绪不创建替代 Pod，错误明确可见。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-KUBECTL-01** — 集群侧栏可进入kubectl，直接访问工具页需主动连接；概览kubectl按钮一次点击原地打开近全屏弹窗，查询当前账号/集群工具目标后直接连接PTY，不需二次点击。关闭/离开/切身份释放连接并取消准备，晚到响应不重开，返回工具页不自动连接；未就绪不创建替代Pod，403无重试，错误明确可见。
 
 ### 关联设计
 

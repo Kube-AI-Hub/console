@@ -1,15 +1,14 @@
 import * as React from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import {
   clusterAgentApi,
   clusterApi,
-  clusterMetricsApi,
   componentMetricsApi,
   type ClusterDetail,
 } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { AiSurface, Badge, Button, Icon, Progress, Skeleton, type IconName } from '@kube-ai-hub/ui';
+import { AiSurface, Badge, Button, Icon, Skeleton, type IconName } from '@kube-ai-hub/ui';
 import type { LocaleKey } from '@kube-ai-hub/locales';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
@@ -19,6 +18,9 @@ import { useAuth } from '@/shell/AuthProvider';
 import { OverviewComponents } from './OverviewComponents';
 import { NodeRankingPanel } from './NodeRankingPanel';
 import { UserKubeconfigDialog } from './UserKubeconfigDialog';
+import { OverviewResourcePanel } from './OverviewResourcePanel';
+import { useOverviewRefresh } from './useOverviewRefresh';
+import { KubectlConsoleDialog } from '@/components/resource/KubectlConsoleDialog';
 
 /**
  * 集群概览.
@@ -44,13 +46,14 @@ export function ClusterOverviewPage({ cluster }: ClusterOverviewPageProps): Reac
   const t = useT();
   const { user } = useAuth();
   const [configOwner, setConfigOwner] = React.useState<string | null>(null);
+  const [terminalOwner, setTerminalOwner] = React.useState<string | null>(null);
   const owner = `${cluster}/${user?.name ?? ''}`;
-  React.useEffect(() => setConfigOwner(null), [owner]);
-  const client = useQueryClient();
+  React.useEffect(() => { setConfigOwner(null); setTerminalOwner(null); }, [owner]);
   const detail = useQuery({
     queryKey: ['cluster-detail', cluster],
     queryFn: ({ signal }) => clusterApi(apiClient).get({ cluster, signal }),
   });
+  const refresh = useOverviewRefresh(cluster);
 
   if (detail.isError) {
     return <ResourceErrorPanel error={detail.error} onRetry={() => void detail.refetch()} retryAiId="overview:retry" />;
@@ -69,44 +72,68 @@ export function ClusterOverviewPage({ cluster }: ClusterOverviewPageProps): Reac
         <div><h1 className="text-2xl font-semibold text-ai-fg">{cluster} · {t('cluster.overview.title')}</h1>
         <p className="text-sm text-ai-fg-muted">{t('cluster.overview.description')}</p>
         </div>
-        <Button variant="secondary" disabled={detail.isFetching} data-ai-id="overview:refresh" onClick={() => {
-          for (const key of ['cluster-detail', 'cluster-usage', 'kubernetes-status', 'cluster-agent', 'components', 'node-ranking', 'node-ranking-info']) {
-            void client.invalidateQueries({ queryKey: [key, cluster] });
-          }
-        }}>{t('common.refresh')}</Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button size="sm" variant="ghost" aria-pressed={refresh.auto}
+            aria-label={t(refresh.auto ? 'cluster.overview.autoPauseLabel' : 'cluster.overview.autoResumeLabel')}
+            title={t(refresh.auto ? 'cluster.overview.autoPauseLabel' : 'cluster.overview.autoResumeLabel')}
+            data-ai-id="overview:auto-refresh" onClick={() => refresh.setAuto(!refresh.auto)}>
+            <Icon name={refresh.auto ? 'pause' : 'start'} />
+            {t(refresh.auto ? 'cluster.overview.autoOn' : 'cluster.overview.autoOff')}
+          </Button>
+          <Button size="sm" variant="ghost" loading={refresh.busy} data-ai-id="overview:refresh"
+            onClick={() => void refresh.refresh()}>
+            {!refresh.busy ? <Icon name="refresh" /> : null}{t('common.refresh')}
+          </Button>
+          <Button variant="primary" disabled={!user} data-ai-id="overview:shortcut:kubectl" onClick={() => setTerminalOwner(owner)}>
+            <Icon name="terminal" />{t('cluster.overview.shortcut.kubectl')}
+          </Button>
+        </div>
       </header>
+      {refresh.failed ? <p role="alert" className="text-xs text-ai-warning" data-ai-id="overview:refresh-failed">
+        {t('cluster.overview.refreshFailed')}
+      </p> : null}
       {!detail.data ? <Skeleton className="h-64" /> : null}
       {detail.data ? (
-        <div className="grid min-w-0 gap-5 lg:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)]">
-          <aside className="min-w-0 space-y-4" data-ai-id="overview:identity-column">
-          <BasicInfoPanel detail={detail.data} />
-          <KubernetesStatusPanel cluster={cluster} />
-          <ModulesPanel detail={detail.data} />
-          </aside>
-          <div className="min-w-0 space-y-4">
+        <div className="min-w-0 space-y-4">
           {/* A proxy cluster stays not-ready until its agent is installed, so the
               instructions are part of the page, not a separate document. */}
           <ProxyAgentPanel cluster={cluster} detail={detail.data} />
-          <UsagePanel cluster={cluster} />
-          <NodeRankingPanel cluster={cluster} preview />
+          <OverviewResourcePanel key={cluster} cluster={cluster} refreshAt={refresh.refreshAt} />
+          <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]" data-ai-id="overview:node-row">
+            <OverviewResourcePanel key={`${cluster}:nodes`} cluster={cluster} refreshAt={refresh.refreshAt} nodeOnly />
+            <NodeRankingPanel cluster={cluster} preview />
+          </div>
+          <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]" data-ai-id="overview:secondary">
+          <aside className="min-w-0 space-y-4" data-ai-id="overview:identity-column">
+            <BasicInfoPanel detail={detail.data} />
+            <KubernetesStatusPanel cluster={cluster} />
+          </aside>
+          <div className="min-w-0 space-y-4">
           <OverviewComponents cluster={cluster} />
-          <Panel title={t('cluster.overview.shortcuts')} icon="wrench">
-            <nav className="grid grid-cols-2 gap-2" aria-label={t('cluster.overview.shortcuts')}>
-              {(['nodes', 'gpus', 'monitor', 'kubectl'] as const).map((page) => <Link key={page}
-                to={`/kube-frontend/clusters/$cluster/${page}`} params={{ cluster }}
-                data-ai-id={`overview:shortcut:${page}`} className="rounded-ai-md border border-ai-line bg-ai-surface-2 px-4 py-3 text-sm text-ai-fg hover:bg-ai-surface-3">
-                <Icon name={page === 'gpus' ? 'gpu' : page === 'kubectl' ? 'terminal' : page === 'monitor' ? 'monitor' : 'nodes'} className="mr-2" />
-                {t(`cluster.overview.shortcut.${page}`)}
-              </Link>)}
+          <ModulesPanel detail={detail.data} />
+          <Panel title={t('cluster.overview.shortcuts')} icon="wrench" aiId="overview:shortcuts">
+            <nav className="grid grid-cols-2 items-stretch gap-2" aria-label={t('cluster.overview.shortcuts')}>
+              {(['nodes', 'gpus', 'monitor'] as const).map((page) => <Button key={page} asChild
+                variant="secondary" className="h-12 w-full justify-start px-4 text-left">
+                <Link to={`/kube-frontend/clusters/$cluster/${page}`} params={{ cluster }}
+                  data-ai-id={`overview:shortcut:${page}`}>
+                  <Icon name={page === 'gpus' ? 'gpu' : page === 'monitor' ? 'monitor' : 'nodes'} />
+                  <span>{t(`cluster.overview.shortcut.${page}`)}</span>
+                </Link>
+              </Button>)}
               <Button variant="secondary" disabled={!user} data-ai-id="overview:kubeconfig-open"
-                onClick={() => setConfigOwner(owner)}><Icon name="file" />kubeconfig</Button>
+                className="h-12 w-full justify-start px-4 text-left"
+                onClick={() => setConfigOwner(owner)}><Icon name="file" /><span>kubeconfig</span></Button>
             </nav>
           </Panel>
+          </div>
           </div>
         </div>
       ) : null}
       {configOwner === owner && user ? <UserKubeconfigDialog key={owner} cluster={cluster} username={user.name}
         onClose={() => setConfigOwner(null)} /> : null}
+      {terminalOwner === owner && user ? <KubectlConsoleDialog key={owner} cluster={cluster}
+        onClose={() => setTerminalOwner(null)} /> : null}
     </AiSurface>
   );
 }
@@ -252,146 +279,6 @@ function BasicInfoPanel({ detail }: { detail: ClusterDetail }): React.ReactEleme
 }
 
 /**
- * Resource usage.
- *
- * The three numbers are shown as used/total, not as a bare percentage: 20 cores out of
- * 512 and 20 out of 24 are the same percentage and completely different situations.
- * "Allocated" is shown next to "used" because they answer different questions — a
- * cluster can be 40% used and 100% allocated, which means new pods will not schedule.
- */
-function UsagePanel({ cluster }: { cluster: string }): React.ReactElement {
-  const t = useT();
-  const usage = useQuery({
-    queryKey: ['cluster-usage', cluster],
-    queryFn: ({ signal }) => clusterMetricsApi(apiClient).usage({ cluster, signal }),
-    // Metrics move; a stale figure with no visible timestamp is a lie by omission.
-    staleTime: 30_000,
-    retry: false,
-  });
-
-  return (
-    <Panel title={t('cluster.overview.usage')} icon="computing" aiId="overview:usage">
-      {usage.isError ? (
-        /*
-         * Not an error page: the rest of the overview is still valid. Saying so
-         * explicitly stops the empty panel from reading as "this cluster uses nothing".
-         */
-        <div className="flex flex-col gap-1 text-sm" {...actionProps('overview:no-metrics')}>
-          <span className="text-ai-fg">{t('cluster.overview.noMetrics')}</span>
-          <span className="text-xs text-ai-fg-muted">{t('cluster.overview.noMetricsHint')}</span>
-        </div>
-      ) : usage.isLoading || !usage.data ? (
-        <Skeleton className="h-40" />
-      ) : (
-        <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2 xl:grid-cols-3">
-          {usage.data.gpuTotal !== 0 ? <UsageRow label={t('node.list.gpuMemory')}
-            used={formatBytes(usage.data.gpuMemoryUsedBytes)} total={formatBytes(usage.data.gpuMemoryTotalBytes)}
-            ratioValue={ratio(usage.data.gpuMemoryUsedBytes, usage.data.gpuMemoryTotalBytes)} aiId="overview:usage-gpu-memory" /> : null}
-          {usage.data.gpuTotal !== 0 ? <UsageRow
-            label={t('cluster.overview.gpuCards')}
-            used={usage.data.gpuUsed === undefined ? '-' : `${round(usage.data.gpuUsed)} ${t('node.list.cards')}`}
-            total={usage.data.gpuTotal === undefined ? '-' : `${usage.data.gpuTotal} ${t('node.list.cards')}`}
-            allocated={usage.data.gpuAllocated === undefined ? '-' : `${round(usage.data.gpuAllocated)} ${t('node.list.cards')}`}
-            ratioValue={ratio(usage.data.gpuUsed, usage.data.gpuTotal)}
-            aiId="overview:usage-gpu"
-          /> : null}
-          <UsageRow
-            label={t('cluster.overview.cpu')}
-            used={formatCores(usage.data.cpuUsedCores)}
-            total={formatCores(usage.data.cpuTotalCores)}
-            allocated={formatCores(usage.data.cpuAllocatedCores)}
-            ratioValue={ratio(usage.data.cpuUsedCores, usage.data.cpuTotalCores)}
-            aiId="overview:usage-cpu"
-          />
-          <UsageRow
-            label={t('cluster.overview.memory')}
-            used={formatBytes(usage.data.memoryUsedBytes)}
-            total={formatBytes(usage.data.memoryTotalBytes)}
-            allocated={formatBytes(usage.data.memoryAllocatedBytes)}
-            ratioValue={ratio(usage.data.memoryUsedBytes, usage.data.memoryTotalBytes)}
-            aiId="overview:usage-memory"
-          />
-          <UsageRow
-            label={t('cluster.overview.pods')}
-            used={usage.data.podRunning === undefined ? '-' : String(usage.data.podRunning)}
-            total={usage.data.podCapacity === undefined ? '-' : String(usage.data.podCapacity)}
-            ratioValue={ratio(usage.data.podRunning, usage.data.podCapacity)}
-            aiId="overview:usage-pods"
-          />
-          <UsageRow
-            label={t('cluster.overview.disk')}
-            used={formatBytes(usage.data.diskUsedBytes)} total={formatBytes(usage.data.diskTotalBytes)}
-            ratioValue={ratio(usage.data.diskUsedBytes, usage.data.diskTotalBytes)}
-            aiId="overview:usage-disk"
-          />
-          <UsageRow
-            label={t('cluster.overview.nodes')}
-            used={usage.data.nodeReady === undefined ? '-' : String(usage.data.nodeReady)}
-            total={usage.data.nodeTotal === undefined ? '-' : String(usage.data.nodeTotal)}
-            ratioValue={ratio(usage.data.nodeReady, usage.data.nodeTotal)}
-            health
-            aiId="overview:usage-nodes"
-          />
-        </dl>
-      )}
-    </Panel>
-  );
-}
-
-function UsageRow({
-  label,
-  used,
-  total,
-  allocated,
-  ratioValue,
-  health = false,
-  aiId,
-}: {
-  label: string;
-  used: string;
-  total: string;
-  allocated?: string | undefined;
-  ratioValue: number | undefined;
-  health?: boolean;
-  aiId: string;
-}): React.ReactElement {
-  const t = useT();
-  const clamped = ratioValue === undefined ? undefined : Math.max(0, Math.min(1, ratioValue));
-  const icons: Record<string, IconName> = {
-    'overview:usage-gpu-memory': 'memory', 'overview:usage-gpu': 'gpu', 'overview:usage-cpu': 'cpu',
-    'overview:usage-memory': 'memory', 'overview:usage-pods': 'pod', 'overview:usage-disk': 'storage', 'overview:usage-nodes': 'nodes',
-  };
-  return (
-    <div className="grid min-w-0 grid-rows-[2rem_auto_auto_1.25rem] gap-3 rounded-ai-md border border-ai-line bg-ai-surface-2 p-4" {...actionProps(aiId)}>
-      <dt className="flex items-center gap-2 font-medium text-ai-fg" data-ai-field="name">
-        <span className="grid size-8 shrink-0 place-items-center rounded-ai-md bg-ai-accent/10"><Icon name={icons[aiId] ?? 'resource'} size={20} /></span>
-        {label}
-      </dt>
-      <dd className="contents">
-        <dl className="grid grid-cols-2 gap-3">
-          <div className="min-w-0"><dt className="mb-1 text-xs text-ai-fg-secondary">{t('cluster.overview.used')}</dt>
-            <dd className="break-words text-base font-semibold tabular-nums text-ai-fg" data-ai-field="used">{used}</dd></div>
-          <div className="min-w-0"><dt className="mb-1 text-xs text-ai-fg-secondary">{t('cluster.overview.total')}</dt>
-            <dd className="break-words text-base font-semibold tabular-nums text-ai-fg" data-ai-field="total">{total}</dd></div>
-        </dl>
-        <div className="min-w-0">
-          <div className="mb-2 flex items-center justify-between text-xs text-ai-fg-secondary">
-            <span>{t('cluster.overview.usageRate')}</span><span className="font-medium tabular-nums text-ai-fg" data-ai-field="ratio">
-              {ratioValue === undefined ? '-' : `${Math.round(ratioValue * 100)}%`}
-            </span>
-          </div>
-          <div className="h-1.5">{clamped === undefined ? null : <Progress value={clamped * 100}
-            tone={health ? clamped === 1 ? 'success' : 'warning' : 'auto'} aria-label={label} />}</div>
-        </div>
-        <div className="h-5 text-xs text-ai-fg-secondary" data-ai-field="allocated">
-          {allocated !== undefined ? <><span>{t('cluster.overview.allocated')}</span>{' '}<span className="font-medium tabular-nums text-ai-fg">{allocated}</span></> : null}
-        </div>
-      </dd>
-    </div>
-  );
-}
-
-/**
  * Kubernetes 状态.
  *
  * Three control-plane numbers the old console's dashboard also shows, and the reason
@@ -406,6 +293,8 @@ function KubernetesStatusPanel({ cluster }: { cluster: string }): React.ReactEle
     queryFn: ({ signal }) => componentMetricsApi(apiClient).kubernetesStatus({ cluster, signal }),
     staleTime: 30_000,
     retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 
   return (
@@ -566,28 +455,4 @@ const KNOWN_MODULES: Record<string, LocaleKey> = {
 function moduleLabel(t: ReturnType<typeof useT>, key: string): string {
   const localeKey = KNOWN_MODULES[key];
   return localeKey ? t(localeKey) : key;
-}
-
-function ratio(used: number | undefined, total: number | undefined): number | undefined {
-  if (used === undefined || total === undefined || !Number.isFinite(used) || !Number.isFinite(total) || total <= 0) return undefined;
-  return used / total;
-}
-
-function formatCores(cores: number | undefined): string {
-  if (cores === undefined) return '-';
-  if (cores <= 0) return '0';
-  return round(cores);
-}
-
-function formatBytes(bytes: number | undefined): string {
-  if (bytes === undefined) return '-';
-  if (bytes <= 0) return '0';
-  const units = ['B', 'KiB', 'MiB', 'GiB', 'TiB'];
-  let value = bytes;
-  let index = 0;
-  while (value >= 1024 && index < units.length - 1) {
-    value /= 1024;
-    index += 1;
-  }
-  return value.toFixed(index >= 2 ? 1 : 0) + units[index];
 }

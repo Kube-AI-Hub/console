@@ -444,6 +444,9 @@
 /* Motion is a preference, not a decoration: honour it globally so every
    component inherits the reduced behaviour without repeating the query. */
 @media (prefers-reduced-motion: reduce) {
+  .ai-metric-ring [data-ai-ring-value] {
+    transition-duration: 0.01ms !important;
+  }
   .ai-root *,
   .ai-root *::before,
   .ai-root *::after {
