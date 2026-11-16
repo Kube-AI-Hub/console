@@ -1,5 +1,5 @@
 import { ApiError } from './errors';
-import { clusterScoped } from './paths';
+import { clusterScoped, coreWritePath } from './paths';
 import type { Client } from './client';
 
 /**
@@ -141,7 +141,8 @@ function clusterCollectionPath(cluster: string): string {
  * `POST /api/v1/.../configmaps` → 201.
  */
 function writePath(cluster: string, namespace: string): string {
-  return resourcePath('kube', cluster, namespace);
+  // Same rule as `resources.ts`: core-group writes have no member-cluster form.
+  return coreWritePath(cluster, `namespaces/${encodeURIComponent(namespace)}/configmaps`);
 }
 
 /** Shared shape of the two collections above. */

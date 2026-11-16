@@ -1,5 +1,5 @@
 import { ApiError } from './errors';
-import { clusterScoped } from './paths';
+import { clusterScoped, coreWritePath } from './paths';
 import type { Client } from './client';
 
 /**
@@ -119,7 +119,13 @@ export function kubePrefix(resource: string): string {
 }
 
 function writePath(cluster: string, namespace: string, resource: string): string {
-  return resourcePath('kube', cluster, namespace, resource, KAPIS_RESOURCES);
+  const namespaceSegment = namespace ? `namespaces/${encodeURIComponent(namespace)}/` : '';
+  const prefix = kubePrefix(resource);
+  // A grouped resource (`/apis/<group>/...`) takes the member segment like a read does; a core
+  // resource (`/api/v1`) has no member form, so `coreWritePath` refuses instead of writing to the
+  // host cluster behind the reader's back.
+  if (prefix === '/api/v1') return coreWritePath(cluster, `${namespaceSegment}${resource}`);
+  return clusterScoped(prefix, cluster, `${namespaceSegment}${resource}`);
 }
 
 /** Default kapis group: the generic resource proxy. */

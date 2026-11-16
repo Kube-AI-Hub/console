@@ -45,3 +45,21 @@ export function corePath(cluster: string | undefined, rest: string): string {
   if (!cluster || cluster === 'host') return `/api/v1/${rest}`;
   return clusterScoped('/kapis/resources.kubesphere.io/v1alpha3', cluster, rest);
 }
+
+/**
+ * A core-group (`/api/v1/...`) **write**, which only the host cluster supports.
+ *
+ * Measured on A100: `POST /kapis/.../configmaps` → 405, `POST /api/v1/.../configmaps` → 201. So writes
+ * have to use the core group, and the core group has no member-cluster form. Before this guard the
+ * console silently wrote to the **host** cluster while the reader was looking at a member: two
+ * ConfigMaps created from `xc`'s page appeared on `host`.
+ *
+ * Refusing is the only honest option: writing to a cluster the reader did not choose is worse than
+ * saying the operation is unavailable here.
+ */
+export function coreWritePath(cluster: string | undefined, rest: string): string {
+  if (cluster && cluster !== 'host') {
+    throw new Error('该资源暂不支持在成员集群上从控制台写入：ks-apiserver 的 core 组没有成员集群形态，写入会落到主集群。');
+  }
+  return `/api/v1/${rest}`;
+}
