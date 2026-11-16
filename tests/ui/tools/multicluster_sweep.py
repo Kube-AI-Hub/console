@@ -121,6 +121,25 @@ def page_url(app: str, cluster: str, segment: str, scope: str, workspace: str, p
     return f'{app}/kube-frontend/clusters/{cluster}/{segment}'
 
 
+def _open_app(page, app: str, token: str) -> None:
+    """Land in the app with a session, deterministically.
+
+    Writing the token and navigating in one breath races the app's own boot: the app reads storage
+    while the token is still absent, renders the login screen, and every later measurement is taken
+    on a page that never became the app. That showed up as `ready` with zero rows -- a blank page
+    recorded as a healthy one. Reloading *after* the token is stored makes the boot see it.
+    """
+    page.goto(f'{app}/kube-frontend/login', wait_until='domcontentloaded')
+    page.evaluate("token => localStorage.setItem('kubesphere-token', token)", token)
+    # Boot again with the token in place, then wait for the shell rather than for a fixed delay.
+    page.reload(wait_until='domcontentloaded')
+    try:
+        page.wait_for_selector('[data-ai-id^="shell:"]', timeout=30_000)
+    except Exception:
+        # The shell handle is a convenience; a page that renders later still gets measured, but a
+        # page that never renders is reported as blank rather than as ready.
+        pass
+
 def sweep(
     app: str,
     token: str,
@@ -137,8 +156,7 @@ def sweep(
         browser = playwright.chromium.launch()
         context = browser.new_context(viewport={'width': 1500, 'height': 1000})
         page = context.new_page()
-        page.goto(f'{app}/kube-frontend/login', wait_until='domcontentloaded')
-        page.evaluate("token => localStorage.setItem('kah_token', token)", token)
+        _open_app(page, app, token)
 
         for cluster in clusters:
             for segment in pages:
@@ -185,6 +203,11 @@ def sweep(
                         state = surface.get_attribute('data-ai-state') or 'none'
                         if state != 'loading':
                             break
+                # A redirect to /login is not a page: the login screen has its own `:surface`,
+                # which used to be scored as `ready` with zero rows -- a signed-out session
+                # reported as a healthy page. Report it for what it is.
+                if '/login' in page.url:
+                    state = 'signed-out'
                 rows.append({
                     'cluster': cluster,
                     'page': segment,
@@ -305,8 +328,7 @@ def sweep_details(
         browser = playwright.chromium.launch()
         context = browser.new_context(viewport={'width': 1500, 'height': 1000})
         page = context.new_page()
-        page.goto(f'{app}/kube-frontend/login', wait_until='domcontentloaded')
-        page.evaluate("token => localStorage.setItem('kah_token', token)", token)
+        _open_app(page, app, token)
 
         for cluster in clusters:
             for segment, resource, namespaced in DETAIL_PAGES:
@@ -381,8 +403,7 @@ def sweep_interactions(
         browser = playwright.chromium.launch()
         context = browser.new_context(viewport={'width': 1500, 'height': 1000})
         page = context.new_page()
-        page.goto(f'{app}/kube-frontend/login', wait_until='domcontentloaded')
-        page.evaluate("token => localStorage.setItem('kah_token', token)", token)
+        _open_app(page, app, token)
 
         for cluster in clusters:
             for segment, scope, prefix in INTERACTION_PAGES:
@@ -393,8 +414,7 @@ def sweep_interactions(
                 if page is not None:
                     page.close()
                 page = context.new_page()
-                page.goto(f'{app}/kube-frontend/login', wait_until='domcontentloaded')
-                page.evaluate("token => localStorage.setItem('kah_token', token)", token)
+                _open_app(page, app, token)
 
                 def run_once():
                     failures: list[tuple[int, str]] = []
