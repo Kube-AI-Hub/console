@@ -1,4 +1,5 @@
 import type { Client } from './client';
+import { clusterScoped } from './paths';
 import { ApiError } from './errors';
 import { KAPIS_ALERTING, baseOf, resourceApi, type KubeObject, type ResourceBase } from './resources';
 
@@ -728,11 +729,11 @@ interface AggregatedAlertItem {
  * **aggregated kapis** prefix — `/apis/alerting.kubesphere.io/v2beta1` serves rule
  * groups only, and `/apis/.../alerts` answers 404 (probed 2026-11-15).
  */
-function alertCollectionPath(scope: AlertMessageScope, namespace: string): string {
+function alertCollectionPath(scope: AlertMessageScope, namespace: string, cluster?: string): string {
   if (scope === 'project') {
-    return `${CLUSTER_ALERT_KAPIS}/namespaces/${encodeURIComponent(namespace)}/alerts`;
+    return clusterScoped(CLUSTER_ALERT_KAPIS, cluster, `namespaces/${encodeURIComponent(namespace)}/alerts`);
   }
-  return `${CLUSTER_ALERT_KAPIS}/${CLUSTER_ALERT_PATHS[scope === 'global' ? 'builtin' : 'custom']}`;
+  return clusterScoped(CLUSTER_ALERT_KAPIS, cluster, CLUSTER_ALERT_PATHS[scope === 'global' ? 'builtin' : 'custom']);
 }
 
 /**
@@ -796,6 +797,8 @@ export function toClusterAlertSummary(
 export function alertMessagesApi(client: Client) {
   return {
     async list(params: {
+      /** Which cluster the alerts belong to; a member cluster answers for itself (or errors). */
+      cluster?: string;
       scope: AlertMessageScope;
       /** Required for project scope: the collection is namespaced. */
       namespace?: string;
@@ -828,7 +831,7 @@ export function alertMessagesApi(client: Client) {
         ...(labelFilters.length > 0 ? { label_filters: labelFilters.join(',') } : {}),
       };
       const body = await client.request<{ items?: AggregatedAlertItem[]; totalItems?: number }>(
-        alertCollectionPath(params.scope, params.namespace ?? ''),
+        alertCollectionPath(params.scope, params.namespace ?? '', params.cluster),
         { query, ...(params.signal ? { signal: params.signal } : {}) },
       );
       return {
@@ -874,6 +877,7 @@ export function clusterAlertMessagesApi(client: Client) {
     source: ClusterAlertSource,
     limit: number,
     filters: { state?: string | undefined; severity?: string | undefined; ruleGroup?: string | undefined },
+    cluster: string | undefined,
     signal?: AbortSignal,
   ): Promise<{ source: ClusterAlertSource; items: AggregatedAlertItem[]; total: number }> {
     /*
@@ -886,7 +890,7 @@ export function clusterAlertMessagesApi(client: Client) {
     if (filters.severity) labelFilters.push(`severity=${filters.severity}`);
     if (filters.ruleGroup) labelFilters.push(`rule_group=${filters.ruleGroup}`);
     const body = await client.request<{ items?: AggregatedAlertItem[]; totalItems?: number }>(
-      `${CLUSTER_ALERT_KAPIS}/${CLUSTER_ALERT_PATHS[source]}`,
+      clusterScoped(CLUSTER_ALERT_KAPIS, cluster, CLUSTER_ALERT_PATHS[source]),
       {
         query: {
           limit,
@@ -907,6 +911,8 @@ export function clusterAlertMessagesApi(client: Client) {
 
   return {
     async list(params: {
+      /** Which cluster the alerts belong to; a member cluster answers for itself (or errors). */
+      cluster?: string;
       page: number;
       pageSize: number;
       /** `firing` / `pending`; server-side. */
@@ -920,8 +926,8 @@ export function clusterAlertMessagesApi(client: Client) {
       const limit = Math.min(params.page * params.pageSize, MAX_WINDOW);
       const filters = { state: params.state, severity: params.severity, ruleGroup: params.ruleGroup };
       const [custom, builtin] = await Promise.all([
-        fetchSource('custom', limit, filters, params.signal),
-        fetchSource('builtin', limit, filters, params.signal),
+        fetchSource('custom', limit, filters, params.cluster, params.signal),
+        fetchSource('builtin', limit, filters, params.cluster, params.signal),
       ]);
       const items = [
         ...custom.items.map((item, index) => toClusterAlertSummary(item, 'custom', index)),

@@ -66,6 +66,7 @@ export function useMonitoringList(kind: MonitoringKind, params: MonitoringListPa
     queryFn: async ({ signal }) => {
       if (kind === 'alerts') {
         return alertMessagesApi(api).list({
+          cluster: params.cluster,
           scope: 'project',
           namespace: params.namespace,
           page: params.page,
@@ -123,6 +124,7 @@ export function useToggleRule(params: { cluster: string; namespace: string }) {
  * on a later page.
  */
 export function useAlertMessages(params: {
+  cluster?: string;
   scope: AlertMessageScope;
   /** Required for project scope. */
   namespace?: string;
@@ -131,9 +133,10 @@ export function useAlertMessages(params: {
   pageSize: number;
 }) {
   return useQuery({
-    queryKey: ['alert-messages', params.scope, params.namespace, params.ruleGroup, params.page, params.pageSize],
+    queryKey: ['alert-messages', params.cluster, params.scope, params.namespace, params.ruleGroup, params.page, params.pageSize],
     queryFn: ({ signal }) =>
       alertMessagesApi(api).list({
+        ...(params.cluster ? { cluster: params.cluster } : {}),
         scope: params.scope,
         ...(params.namespace ? { namespace: params.namespace } : {}),
         ruleGroup: params.ruleGroup,

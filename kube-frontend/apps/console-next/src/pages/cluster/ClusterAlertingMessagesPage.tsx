@@ -48,6 +48,7 @@ export function ClusterAlertingMessagesPage({ cluster }: ClusterAlertingMessages
     queryKey: ['cluster-alert-messages', cluster, page, pageSize, state, severity, ruleGroup],
     queryFn: ({ signal }) =>
       clusterAlertMessagesApi(apiClient).list({
+        cluster,
         page,
         pageSize,
         ...(state ? { state } : {}),
