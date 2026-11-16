@@ -40,6 +40,8 @@
 | C11 | **测试也会固化缺陷**：断言写错位置时，测试在 host 上永远绿 | `devops.test.ts`、`configmaps.test.ts`、`kubectl.test.ts`、`overview-completion.test.ts` 都断言过旧的（错误的）集群段位置 |
 | C12 | **扫尾按症状找，不按文件找**：从错误 URL 反查调用者 | 上一轮按文件列了一遍，漏掉 `projects.ts` 里另一份 `namespacesPath`；本轮从 `limit=50` 反查到 `projectsApi` 一次命中 |
 | C13 | **同一个 helper 会在多个模块被复制**，收敛到一处才算完 | `namespacesPath` / `clusterSegment` 各有 5+ 份副本 |
+| C14 | **固定 sleep 的巡检会给出「看起来正常」的假结果**，必须等状态机离开 loading | 多集群巡检第一版固定等 6s，每页都报「ready / 0 行」 |
+| C15 | **把人工检查变成一条可重跑的命令**，才有资格说「已验证」 | 23 页 × 2 集群靠手点是无法复现的；写成 `multicluster_sweep.py` 后一条命令覆盖 |
 
 ## D. 提交
 
