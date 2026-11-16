@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { formatTimestamp } from '@/lib/time';
 import { statusLabel } from '@/lib/status';
@@ -100,6 +101,7 @@ export function ClusterVolumeSnapshotsPage({ cluster }: ClusterVolumeSnapshotsPa
       sortableKeys: ['name', 'createTime'],
       sortAiPrefix: AI_ID,
       sort: { key: list.sortBy, order: list.order },
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'cluster-volume-snapshots:columns' },
       columns: [
         {
           key: 'name',
@@ -121,6 +123,7 @@ export function ClusterVolumeSnapshotsPage({ cluster }: ClusterVolumeSnapshotsPa
         },
         {
           key: 'namespace',
+          hideable: true,
           title: t('cluster.workloads.column.project'),
           width: 180,
           hideBelow: 'md',
@@ -138,12 +141,14 @@ export function ClusterVolumeSnapshotsPage({ cluster }: ClusterVolumeSnapshotsPa
         },
         {
           key: 'status',
+          hideable: true,
           title: t('storage.column.status'),
           width: 130,
           render: (row) => <Badge tone={snapshotTone(row.status)}>{statusLabel(t, row.status)}</Badge>,
         },
         {
           key: 'capacity',
+          hideable: true,
           title: t('storage.column.capacity'),
           width: 110,
           hideBelow: 'md',
@@ -151,6 +156,7 @@ export function ClusterVolumeSnapshotsPage({ cluster }: ClusterVolumeSnapshotsPa
         },
         {
           key: 'snapshotClass',
+          hideable: true,
           title: t('storage.field.snapshotClass'),
           width: 190,
           hideBelow: 'xl',
@@ -158,6 +164,7 @@ export function ClusterVolumeSnapshotsPage({ cluster }: ClusterVolumeSnapshotsPa
         },
         {
           key: 'createTime',
+          hideable: true,
           title: t('cluster.column.createdAt'),
           width: 170,
           hideBelow: 'xl',
@@ -178,6 +185,9 @@ export function ClusterVolumeSnapshotsPage({ cluster }: ClusterVolumeSnapshotsPa
     }),
     [cluster, list, query.isFetching, t, total, workspaceOf],
   );
+
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('cluster-volume-snapshots', columnKeys);
 
   if (state === 'error') {
     return (
@@ -208,6 +218,8 @@ export function ClusterVolumeSnapshotsPage({ cluster }: ClusterVolumeSnapshotsPa
   return (
     <AiSurface as="section" aiId="cluster-volume-snapshots:surface" state={state} className="min-w-0">
       <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
         schema={schema}
         onRefresh={listRefresh.onRefresh}
         rows={rows}

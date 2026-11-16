@@ -4,6 +4,7 @@ import { Link } from '@tanstack/react-router';
 import { storageClassesApi, type StorageClassSummary } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { useResourceListState, toListParams } from '@/components/resource/useResourceListState';
@@ -77,6 +78,7 @@ export function StorageClassesPage({ cluster }: StorageClassesPageProps): React.
       sortableKeys: ['name', 'createTime'],
       sortAiPrefix: 'storageclasses',
       sort: { key: list.sortBy, order: list.order },
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'storageclasses:columns' },
       columns: [
         {
           key: 'name',
@@ -96,6 +98,7 @@ export function StorageClassesPage({ cluster }: StorageClassesPageProps): React.
         },
         {
           key: 'provisioner',
+          hideable: true,
           title: t('cluster.storageClasses.provisioner'),
           width: 200,
           hideBelow: 'md',
@@ -103,6 +106,7 @@ export function StorageClassesPage({ cluster }: StorageClassesPageProps): React.
         },
         {
           key: 'pvcCount',
+          hideable: true,
           title: t('cluster.storageClasses.pvcCount'),
           width: 110,
           hideBelow: 'lg',
@@ -114,6 +118,7 @@ export function StorageClassesPage({ cluster }: StorageClassesPageProps): React.
         },
         {
           key: 'capabilities',
+          hideable: true,
           title: t('cluster.storageClasses.capabilities'),
           width: 220,
           hideBelow: 'lg',
@@ -140,6 +145,7 @@ export function StorageClassesPage({ cluster }: StorageClassesPageProps): React.
         },
         {
           key: 'reclaimPolicy',
+          hideable: true,
           title: t('cluster.storageClasses.reclaim'),
           width: 130,
           hideBelow: 'xl',
@@ -147,6 +153,7 @@ export function StorageClassesPage({ cluster }: StorageClassesPageProps): React.
         },
         {
           key: 'createTime',
+          hideable: true,
           title: t('cluster.column.createdAt'),
           width: 170,
           hideBelow: 'xl',
@@ -169,6 +176,9 @@ export function StorageClassesPage({ cluster }: StorageClassesPageProps): React.
     [list, query.isFetching, t, total],
   );
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('storageclasses', columnKeys);
+
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
 
   if (state === 'error') {
@@ -182,6 +192,8 @@ export function StorageClassesPage({ cluster }: StorageClassesPageProps): React.
   return (
     <AiSurface as="section" aiId="storageclasses:surface" state={state} className="min-w-0">
       <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
         schema={schema}
         onRefresh={listRefresh.onRefresh}
         rows={rows}

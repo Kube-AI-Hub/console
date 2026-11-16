@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { storageApi, type StorageSummary } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { useResourceListState } from '@/components/resource/useResourceListState';
@@ -73,6 +74,7 @@ export function ClusterPersistentVolumeClaimsPage({ cluster }: ClusterPersistent
       sortableKeys: ['name', 'createTime'],
       sortAiPrefix: AI_ID,
       sort: { key: list.sortBy, order: list.order },
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'cluster-pvc:columns' },
       columns: [
         {
           key: 'name',
@@ -95,6 +97,7 @@ export function ClusterPersistentVolumeClaimsPage({ cluster }: ClusterPersistent
         },
         {
           key: 'namespace',
+          hideable: true,
           title: t('cluster.workloads.column.project'),
           width: 180,
           hideBelow: 'md',
@@ -102,12 +105,14 @@ export function ClusterPersistentVolumeClaimsPage({ cluster }: ClusterPersistent
         },
         {
           key: 'status',
+          hideable: true,
           title: t('storage.column.status'),
           width: 130,
           render: (row) => <Badge tone={pvcStatusTone(row.status)}>{statusLabel(t, row.status)}</Badge>,
         },
         {
           key: 'capacity',
+          hideable: true,
           title: t('storage.column.capacity'),
           width: 110,
           hideBelow: 'md',
@@ -115,6 +120,7 @@ export function ClusterPersistentVolumeClaimsPage({ cluster }: ClusterPersistent
         },
         {
           key: 'accessModes',
+          hideable: true,
           title: t('storage.column.accessModes'),
           width: 130,
           hideBelow: 'lg',
@@ -122,6 +128,7 @@ export function ClusterPersistentVolumeClaimsPage({ cluster }: ClusterPersistent
         },
         {
           key: 'storageClass',
+          hideable: true,
           title: t('storage.field.storageClass'),
           width: 180,
           hideBelow: 'xl',
@@ -129,6 +136,7 @@ export function ClusterPersistentVolumeClaimsPage({ cluster }: ClusterPersistent
         },
         {
           key: 'createTime',
+          hideable: true,
           title: t('cluster.column.createdAt'),
           width: 170,
           hideBelow: 'xl',
@@ -150,6 +158,9 @@ export function ClusterPersistentVolumeClaimsPage({ cluster }: ClusterPersistent
     [cluster, list, query.isFetching, t, total, workspaceOf],
   );
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('cluster-pvc', columnKeys);
+
   if (state === 'error') {
     return (
       <AiSurface as="section" aiId={AI_ID + ':surface'} state="error" className="min-w-0">
@@ -161,6 +172,8 @@ export function ClusterPersistentVolumeClaimsPage({ cluster }: ClusterPersistent
   return (
     <AiSurface as="section" aiId={AI_ID + ':surface'} state={state} className="min-w-0">
       <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
         schema={schema}
         onRefresh={listRefresh.onRefresh}
         rows={rows}

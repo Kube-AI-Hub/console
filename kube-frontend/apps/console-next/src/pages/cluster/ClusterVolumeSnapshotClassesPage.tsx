@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { AiSurface, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { formatTimestamp } from '@/lib/time';
 import { useResourceListState } from '@/components/resource/useResourceListState';
@@ -79,6 +80,7 @@ export function ClusterVolumeSnapshotClassesPage({
       sortableKeys: ['name', 'createTime'],
       sortAiPrefix: AI_ID,
       sort: { key: list.sortBy, order: list.order },
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'cluster-snapshot-classes:columns' },
       columns: [
         {
           key: 'name',
@@ -87,11 +89,13 @@ export function ClusterVolumeSnapshotClassesPage({
         },
         {
           key: 'driver',
+          hideable: true,
           title: t('storage.snapshotClasses.column.driver'),
           render: (row) => <span className="truncate font-mono text-[11px] text-ai-fg-secondary">{row.driver || '-'}</span>,
         },
         {
           key: 'deletionPolicy',
+          hideable: true,
           title: t('storage.snapshotClasses.column.deletionPolicy'),
           width: 130,
           hideBelow: 'md',
@@ -99,6 +103,7 @@ export function ClusterVolumeSnapshotClassesPage({
         },
         {
           key: 'parameterCount',
+          hideable: true,
           title: t('storage.snapshotClasses.column.parameterCount'),
           width: 110,
           hideBelow: 'md',
@@ -106,6 +111,7 @@ export function ClusterVolumeSnapshotClassesPage({
         },
         {
           key: 'createTime',
+          hideable: true,
           title: t('cluster.column.createdAt'),
           width: 170,
           hideBelow: 'xl',
@@ -130,6 +136,9 @@ export function ClusterVolumeSnapshotClassesPage({
     [list, query.isFetching, t, total],
   );
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('cluster-snapshot-classes', columnKeys);
+
   if (state === 'error') {
     return (
       <AiSurface as="section" aiId="cluster-snapshot-classes:surface" state="error" className="min-w-0">
@@ -153,6 +162,8 @@ export function ClusterVolumeSnapshotClassesPage({
   return (
     <AiSurface as="section" aiId="cluster-snapshot-classes:surface" state={state} className="min-w-0">
       <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
         schema={schema}
         onRefresh={listRefresh.onRefresh}
         rows={rows}

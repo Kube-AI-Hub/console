@@ -13,6 +13,7 @@ import {
   type ListSchema,
 } from '@kube-ai-hub/ui';
 import { actionProps } from '@kube-ai-hub/ai-surface';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { MutationAlert, ResourceErrorPanel, errorMessage } from '@/components/resource/ResourceErrorPanel';
@@ -125,6 +126,7 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
       rowKey: 'name',
       refresh: listRefresh.refresh,
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'cluster-alerting-policies:columns' },
       columns: [
         {
           key: 'name',
@@ -138,6 +140,7 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
         },
         {
           key: 'enabled',
+          hideable: true,
           title: t('monitoring.column.ruleStatus'),
           width: 130,
           hideBelow: 'md',
@@ -149,6 +152,7 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
         },
         {
           key: 'ruleCount',
+          hideable: true,
           title: t('monitoring.column.ruleCount'),
           width: 110,
           hideBelow: 'lg',
@@ -156,6 +160,7 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
         },
         {
           key: 'scope',
+          hideable: true,
           title: t('monitoring.ruleGroups.type'),
           width: 110,
           hideBelow: 'lg',
@@ -167,6 +172,7 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
         },
         {
           key: 'createdAt',
+          hideable: true,
           title: t('cluster.column.createdAt'),
           width: 170,
           hideBelow: 'xl',
@@ -212,6 +218,9 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
     }),
     [page, pageSize, refreshing, t, total],
   );
+
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('cluster-alerting-policies', columnKeys);
 
   const state = active.isPending ? 'loading' : active.isError ? 'error' : pageRows.length === 0 ? 'empty' : 'ready';
 
@@ -269,6 +278,8 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
             <Skeleton className="h-40 w-full" />
           ) : (
             <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
               schema={schema}
               onRefresh={listRefresh.onRefresh}
               rows={pageRows}

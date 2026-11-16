@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { customResourcesApi, type CustomResourceSummary } from '@kube-ai-hub/api-client';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { useResourceListState } from '@/components/resource/useResourceListState';
@@ -71,9 +72,11 @@ export function CustomResourcesPage({ cluster }: CustomResourcesPageProps): Reac
       sortableKeys: ['kind', 'name', 'scope', 'createTime'],
       sortAiPrefix: 'custom-resources',
       sort: { key: list.sortBy, order: list.order },
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'custom-resources:columns' },
       columns: [
         {
           key: 'kind',
+          hideable: true,
           title: t('cluster.customResources.kind'),
           render: (row: CustomResourceSummary) => (
             <span className="flex min-w-0 flex-col" data-ai-id={`custom-resources:kind:${row.name}`}>
@@ -108,6 +111,7 @@ export function CustomResourcesPage({ cluster }: CustomResourcesPageProps): Reac
         },
         {
           key: 'scope',
+          hideable: true,
           title: t('cluster.customResources.scope'),
           width: 120,
           hideBelow: 'lg',
@@ -119,6 +123,7 @@ export function CustomResourcesPage({ cluster }: CustomResourcesPageProps): Reac
         },
         {
           key: 'served',
+          hideable: true,
           title: t('cluster.customResources.served'),
           width: 110,
           hideBelow: 'lg',
@@ -130,6 +135,7 @@ export function CustomResourcesPage({ cluster }: CustomResourcesPageProps): Reac
         },
         {
           key: 'createTime',
+          hideable: true,
           title: t('cluster.column.createdAt'),
           width: 170,
           hideBelow: 'xl',
@@ -156,6 +162,9 @@ export function CustomResourcesPage({ cluster }: CustomResourcesPageProps): Reac
     [list.sortBy, list.order, query.isFetching, rows.length, t],
   );
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('custom-resources', columnKeys);
+
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
 
   if (state === 'error') {
@@ -169,6 +178,8 @@ export function CustomResourcesPage({ cluster }: CustomResourcesPageProps): Reac
   return (
     <AiSurface as="section" aiId="custom-resources:surface" state={state} className="min-w-0">
       <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
         schema={schema}
         onRefresh={listRefresh.onRefresh}
         rows={rows}
