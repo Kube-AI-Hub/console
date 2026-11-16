@@ -57,8 +57,25 @@ host tc-mc present: ['tc-mc-fba5a823', 'tc-mc-53f40ceb']
 | api-client 测试 | 36 文件 / 379 passed |
 | console-next tsc | 0 |
 
-**未完成**：脚本走到「创建」按钮时没找到 `configmaps:create-submit`（该步骤的按钮句柄与预期不同），
-因此**没有截到错误提示的画面**；「不落 host」这一条是实测的，但「提示文案显示在表单上」只做了代码路径确认。
+**UI 侧的取证到此为止**：配置字典与保密字典的创建都是两步表单，脚本走到第二步时找不到提交句柄
+（`configmaps:create-submit` / `secrets:create-submit` 在未填数据时并不渲染），所以没有截到错误提示的画面。
+
+## 5b. 改用单测固化这条规则（本轮补上）
+
+与其继续和对话框的步骤较劲，把规则写成测试更可靠——而且它能防止回归：
+
+`packages/api-client/test/member-cluster-paths.test.ts`（5 条）：
+
+| 断言 | 内容 |
+| --- | --- |
+| 段位置 | `clusterScoped` 把 `clusters/<id>` 放在 group 之前；`host`/空值保持原路径 |
+| core 读 | 成员集群的 core 读改走 kapis 代理 |
+| **core 写** | `host` 返回 `/api/v1/...`；成员集群**抛错** |
+| 分组写 | `/apis/<group>` 的写在成员集群上仍走 `clusterScoped`（受支持） |
+| **不发请求** | `configMapsApi.create(..., 'xc')` 直接拒绝，且**一条请求都没发出** |
+
+**负向验证**：把守卫的 `if` 改成 `if (false)` 后，5 条里**恰好 2 条失败**（core 写 + 不发请求），
+恢复后全绿。这证明测试真的在盯着这条规则，而不是碰巧通过。
 
 ## 6. 反思
 
