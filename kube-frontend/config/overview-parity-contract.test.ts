@@ -43,4 +43,31 @@ describe('legacy overview capability inventory', () => {
     expect(dialog).not.toMatch(/localStorage|console\.log/);
     expect(read('packages/api-client/src/kubectl.ts')).toContain("responseType: 'text'");
   });
+  /*
+   * The overview used to carry its own `function Panel`, which is how two panel headers on
+   * one page ended up at different heights and why the node block could not stretch its
+   * body. Both the shared panel and the dense description list exist now; this check keeps
+   * the next edit from copying either one back into the page.
+   */
+  it('builds the overview panels from shared components instead of page-local copies', () => {
+    const page = read('apps/console-next/src/pages/cluster/ClusterOverviewPage.tsx');
+    const resources = read('apps/console-next/src/pages/cluster/OverviewResourcePanel.tsx');
+    const ranking = read('apps/console-next/src/pages/cluster/NodeRankingPanel.tsx');
+    const components = read('apps/console-next/src/pages/cluster/OverviewComponents.tsx');
+    for (const file of [page, resources, ranking, components]) {
+      expect(file).toContain('Panel');
+      // A second `function Panel(` in the app is the copy this check exists to prevent.
+      expect(file).not.toMatch(/^function Panel\(/m);
+    }
+    // The identity panels use the dense variant: 14px medium labels over 12px values.
+    expect(page).toContain('variant="dense"');
+    expect(page).toContain('divided');
+    // Both blocks in the 1:2 row give their header the same floor and let the body stretch.
+    for (const file of [resources, ranking]) {
+      expect(file).toContain('headerClassName="min-h-[3.75rem] items-center"');
+      expect(file).toContain('bodyClassName="flex min-h-0 flex-1 flex-col"');
+    }
+    // The node block's only action is a link; selecting a resource is the grid's job.
+    expect(resources).toContain('overview:node-summary-more');
+  });
 });

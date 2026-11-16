@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { NODE_RANK_METRICS, nodeRankingApi, nodesApi, type NodeRankMetric, type NodeRankRow } from '@kube-ai-hub/api-client';
-import { Badge, Button, Icon, Progress, ResourceList, Select, Table, type ListSchema } from '@kube-ai-hub/ui';
+import { Badge, Button, Panel, Progress, ResourceList, Select, Table, type ListSchema } from '@kube-ai-hub/ui';
 import { api } from '@/api';
 import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
@@ -86,11 +86,19 @@ export function NodeRankingPanel({ cluster, preview = false, initialMetric = 'no
 
   const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
   const columnVisibility = useColumnVisibility('node-usage', columnKeys);
-  return <section data-ai-id={preview ? 'overview:ranking' : 'node-usage:surface'}
-    data-ai-state={state}
-    aria-busy={query.isFetching} className={preview ? 'min-w-0 rounded-ai-lg border border-ai-line bg-ai-surface-1 p-4' : 'min-w-0'}>
-    {preview ? <>
-      <header className="mb-3 flex flex-wrap items-center justify-between gap-2"><h2 className="flex items-center gap-2 text-sm font-medium"><Icon name="barchart" size={18} />{t('cluster.overview.top5')}</h2>{controls}</header>
+  if (preview) {
+    return <Panel title={t('cluster.overview.top5')} icon="barchart" titleLevel={2}
+      data-ai-id="overview:ranking" data-ai-state={state} aria-busy={query.isFetching}
+      className="flex h-full min-w-0 flex-col"
+      /*
+       * The header height matches the node block beside it. Both carry a control (this one
+       * a metric select, that one a link), and without a shared floor the shorter header
+       * starts its body on a different baseline — the row then reads as two panels that
+       * happen to be adjacent rather than one row of a dashboard.
+       */
+      headerClassName="min-h-[3.75rem] items-center"
+      bodyClassName="flex min-h-0 flex-1 flex-col"
+      actions={controls}>
       {query.isError ? <ResourceErrorPanel error={query.error} onRetry={() => void query.refetch()} retryAiId="overview:rank-retry" /> :
         <Table rows={rows} rowKey={(row) => row.name} loading={query.isPending} empty={t('cluster.nodeUsage.emptyTitle')}
           rowAttributes={(row) => ({ 'data-ai-row': row.name })} columns={[
@@ -105,15 +113,20 @@ export function NodeRankingPanel({ cluster, preview = false, initialMetric = 'no
             } },
           ]} />}
       <Link to="/kube-frontend/clusters/$cluster/node-usage" params={{ cluster }} search={{ metric }}
-        className="mt-3 inline-block text-sm text-ai-fg underline underline-offset-2" data-ai-id="overview:rank-more">{t('cluster.overview.viewMore')}</Link>
-    </> : <><div className="mb-3">{controls}</div><ResourceList
-        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
-        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
-        schema={schema} rows={rows} loading={query.isPending}
+        className="mt-auto inline-block pt-3 text-xs text-ai-link underline-offset-4 hover:underline" data-ai-id="overview:rank-more">{t('cluster.overview.viewMore')}</Link>
+    </Panel>;
+  }
+  return <section data-ai-id="node-usage:surface"
+    data-ai-state={state}
+    aria-busy={query.isFetching} className="min-w-0">
+    <div className="mb-3">{controls}</div><ResourceList
+      {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+      onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
+      schema={schema} rows={rows} loading={query.isPending}
       errorContent={query.isError ? renderError ? renderError(query.error, () => void query.refetch()) :
         <ResourceErrorPanel error={query.error} onRetry={() => void query.refetch()} retryAiId="node-usage:retry" /> : undefined}
       searchValue={list.keyword} onSearchChange={list.setKeyword}
       onSortChange={(sort) => { if (sort) { setMetric(sort.key as NodeRankMetric); list.setSort(sort); } }}
-      onPageChange={list.setPage} onPageSizeChange={list.setPageSize} /></>}
+      onPageChange={list.setPage} onPageSizeChange={list.setPageSize} />
   </section>;
 }

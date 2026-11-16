@@ -50,12 +50,35 @@ describe('overview completion', () => {
     const platformVersion = view.container.querySelector('[data-ai-id="overview:product-version"]');
     expect(platformVersion?.closest('dd')?.previousElementSibling).toHaveTextContent('Kube AI Hub 版本');
     expect(view.container.querySelector('[data-ai-id="overview:basic"]')).not.toHaveTextContent('KubeSphere 版本');
+    // The identity panels are row-style property tables: label and value are separate cells
+    // of a two-column grid, and the label is the larger, stronger of the two.
+    const basicGrid = view.container.querySelector('[data-ai-id="overview:basic"] dl')!;
+    expect(basicGrid.className).toContain('sm:grid-cols-[minmax(5.5rem,7.5rem)_1fr]');
+    expect(basicGrid.className).toContain('[&>dt]:text-sm');
+    expect(basicGrid.className).toContain('text-xs');
+    // Eight identity fields always; `description` is the optional ninth.
+    expect(basicGrid.querySelectorAll('dt').length).toBeGreaterThanOrEqual(8);
+    expect(basicGrid.querySelectorAll('dt').length).toBe(basicGrid.querySelectorAll('dd').length);
+    expect(view.container.querySelector('[data-ai-id="overview:kubernetes-status"] dl')!.className)
+      .toContain('sm:grid-cols-[minmax(5.5rem,7.5rem)_1fr]');
+    // The status message stays inside the value node: automation reads that node's text to
+    // decide whether the controller's own explanation is on screen.
+    expect(view.container.querySelector('[data-ai-id="overview:status"]')).toBeTruthy();
+    // A ready cluster must not repeat the Ready condition's message next to the badge —
+    // "Cluster is available now" restates the green badge. The fixture reports no
+    // conditions, so the cluster is not ready and the message slot stays empty anyway.
+    expect(view.container.querySelector('[data-ai-id="overview:status"]')!.textContent).not.toContain('available');
     const sidebar = view.container.querySelector('[data-ai-id="overview:identity-column"]')!;
     expect(sidebar.querySelector('[data-ai-id="overview:basic"]')?.nextElementSibling).toHaveAttribute('data-ai-id', 'overview:kubernetes-status');
     expect(view.container.querySelector('[data-ai-id="overview:usage-gpu"]')).not.toHaveTextContent('GPU 利用率');
     expect(view.container.querySelector('[data-ai-id="overview:usage-disk"] [data-ai-field="allocated"]')).toBeEmptyDOMElement();
-    for (const row of view.container.querySelectorAll('[data-ai-id^="overview:usage-"]')) {
+    // The six resource cards keep the five-field grid; the node block is a separate block
+    // beside the ranking and publishes its own four facts.
+    for (const row of view.container.querySelectorAll('[data-ai-id="overview:usage"] [data-ai-id^="overview:usage-"]')) {
       expect(row.querySelectorAll('[data-ai-field]')).toHaveLength(5);
+    }
+    for (const field of ['used', 'total', 'ratio', 'allocated']) {
+      expect(view.container.querySelector(`[data-ai-id="overview:usage-nodes"] [data-ai-field="${field}"]`)).not.toBeNull();
     }
   });
   it('requests Top5 globally and keeps the selected ranking when opening the full page', async () => {
@@ -105,6 +128,34 @@ describe('overview completion', () => {
     expect(screen.queryByRole('button', { name: '下载 kubeconfig' })).toBeNull();
     expect(denied.container.querySelector('[data-ai-id="overview:kubeconfig-retry"]')).toBeNull();
     expect(within(screen.getByRole('dialog')).queryByDisplayValue('apiVersion: v1\nclusters: []')).toBeNull();
+  });
+  it('shows the Ready condition message only when the cluster is not ready', async () => {
+    const mountWith = async (status: Record<string, unknown>) => {
+      vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
+        const url = new URL(String(input));
+        if (url.pathname.includes('/monitoring.')) return Response.json({ total_item: 0, results: [] });
+        if (url.pathname.endsWith('/components')) return Response.json([]);
+        if (url.pathname.endsWith('/nodes')) return Response.json({ items: [], totalItems: 0 });
+        return Response.json({ metadata: { name: 'host' }, status });
+      }));
+      const view = mount(<ClusterOverviewPage cluster="host" />);
+      const cell = () => view.container.querySelector('[data-ai-id="overview:status"]')!;
+      await waitFor(() => expect(cell().textContent).not.toBe(''));
+      return { cell, view };
+    };
+    // Ready: "Cluster is available now" restates the green badge, so it is dropped.
+    const ready = await mountWith({ conditions: [
+      { type: 'Ready', status: 'True', message: 'Cluster is available now' },
+    ] });
+    expect(ready.cell()).toHaveTextContent('运行正常');
+    expect(ready.cell()).not.toHaveTextContent('Cluster is available now');
+    ready.view.unmount();
+    // Not ready: the controller's sentence is the only hint about what to do, so it stays.
+    const broken = await mountWith({ conditions: [
+      { type: 'Ready', status: 'False', message: 'Cluster agent is not connected' },
+    ] });
+    expect(broken.cell()).toHaveTextContent('未就绪');
+    expect(broken.cell()).toHaveTextContent('Cluster agent is not connected');
   });
   it('keeps real zero, load units and allocation ratios distinct', () => {
     expect(rankValue({ name: 'n', values: { node_load1: 2 } }, 'node_load1')).toBe('2');

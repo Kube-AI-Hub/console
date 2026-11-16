@@ -1,0 +1,40 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-10
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: overview
+title: 集群概览 · 密集属性表与节点块铺满
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/overview'
+prd: prd/kube-frontend/cluster-management/overview.md
+design: design/kube-frontend/cluster-management/overview.md
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-11
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-07
+story:
+- US1
+- US5
+product: 概览的信息块用行式属性表提高密度，节点块铺满槽位，两者都不改变字段含义。
+preconditions:
+- 已登录 B200 host，概览可读且监控可用
+steps:
+- 打开集群概览并等待就绪，记录基本信息与 Kubernetes 状态两块高度之和
+- 逐行读取基本信息：标签列宽、标签字号、值字号与两侧计算色
+- 核对每行之间有 1px 主题分隔线，且首行不出现重复边框
+- 逐行读取 Kubernetes 状态五个字段，核对标签列与值列起点和基本信息一致
+- 在 1024/1280/1600 核对标签不换行、值可换行、无横向溢出并截图
+- 核对节点块头部高度与排行头部一致，块内没有按钮，只有「查看全部节点」链接
+- 核对环图与就绪/总量数字在块内垂直居中，环心显示就绪率且不另起一行重复
+- 切换深浅主题与中英文，核对标签与值仍可分辨
+expected:
+- 两块合计高度不超过改动前单列堆叠的 60%，字段一个不少
+- 标签是行里更大的那一半（14px 中等字重、主色），值次之（12px、次色），两者计算色在深浅主题下对比度均不低于 4.5:1
+- 标签列与值列起点在两块之间及相邻行之间偏差小于 2px
+- 节点块头部与排行头部高度差小于 2px，块内按钮数为 0，链接指向当前集群节点列表
+- 环图与数字组的垂直中心与块内容区中心偏差小于 4px，就绪率只出现一次
+- 三档与深浅主题下均无裁剪、无横向滚动
+troubleshoot:
+- 标签换行：先看身份列实际宽度，再看 DescriptionList 的 dense 标签列上限
+- 头部不等高：核对两块是否都走共享 Panel 的 headerClassName，而不是各自写 min-h
+update_automation:
+- 列宽或字号变化时改 packages/ai-kit/src/primitives/DescriptionList.tsx 与 pages/cluster_overview.py

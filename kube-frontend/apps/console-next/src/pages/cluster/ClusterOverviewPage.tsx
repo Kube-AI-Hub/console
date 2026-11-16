@@ -8,17 +8,16 @@ import {
   type ClusterDetail,
 } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { AiSurface, Badge, Button, Icon, Skeleton, type IconName } from '@kube-ai-hub/ui';
+import { AiSurface, Badge, Button, DescriptionList, Icon, Panel, Skeleton, type DescriptionItem, type IconName } from '@kube-ai-hub/ui';
 import type { LocaleKey } from '@kube-ai-hub/locales';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel, errorMessage } from '@/components/resource/ResourceErrorPanel';
-import { DefinitionRow } from '@/components/resource/DefinitionRow';
 import { useAuth } from '@/shell/AuthProvider';
 import { OverviewComponents } from './OverviewComponents';
 import { NodeRankingPanel } from './NodeRankingPanel';
 import { UserKubeconfigDialog } from './UserKubeconfigDialog';
-import { OverviewResourcePanel } from './OverviewResourcePanel';
+import { OverviewResourcePanel, NodeSummaryPanel } from './OverviewResourcePanel';
 import { useOverviewRefresh } from './useOverviewRefresh';
 import { KubectlConsoleDialog } from '@/components/resource/KubectlConsoleDialog';
 
@@ -100,7 +99,7 @@ export function ClusterOverviewPage({ cluster }: ClusterOverviewPageProps): Reac
           <ProxyAgentPanel cluster={cluster} detail={detail.data} />
           <OverviewResourcePanel key={cluster} cluster={cluster} refreshAt={refresh.refreshAt} />
           <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]" data-ai-id="overview:node-row">
-            <OverviewResourcePanel key={`${cluster}:nodes`} cluster={cluster} refreshAt={refresh.refreshAt} nodeOnly />
+            <NodeSummaryPanel key={`${cluster}:nodes`} cluster={cluster} />
             <NodeRankingPanel cluster={cluster} preview />
           </div>
           <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]" data-ai-id="overview:secondary">
@@ -111,7 +110,7 @@ export function ClusterOverviewPage({ cluster }: ClusterOverviewPageProps): Reac
           <div className="min-w-0 space-y-4">
           <OverviewComponents cluster={cluster} />
           <ModulesPanel detail={detail.data} />
-          <Panel title={t('cluster.overview.shortcuts')} icon="wrench" aiId="overview:shortcuts">
+          <OverviewPanel title={t('cluster.overview.shortcuts')} icon="wrench" aiId="overview:shortcuts">
             <nav className="grid grid-cols-2 items-stretch gap-2" aria-label={t('cluster.overview.shortcuts')}>
               {(['nodes', 'gpus', 'monitor'] as const).map((page) => <Button key={page} asChild
                 variant="secondary" className="h-12 w-full justify-start px-4 text-left">
@@ -125,7 +124,7 @@ export function ClusterOverviewPage({ cluster }: ClusterOverviewPageProps): Reac
                 className="h-12 w-full justify-start px-4 text-left"
                 onClick={() => setConfigOwner(owner)}><Icon name="file" /><span>kubeconfig</span></Button>
             </nav>
-          </Panel>
+          </OverviewPanel>
           </div>
           </div>
         </div>
@@ -139,14 +138,15 @@ export function ClusterOverviewPage({ cluster }: ClusterOverviewPageProps): Reac
 }
 
 /** A titled block; every panel on this page has the same shape. */
-function Panel({ title, children, icon = 'resource', aiId }: {
-  title: string; children: React.ReactNode; icon?: IconName; aiId?: string;
+function OverviewPanel({ title, children, icon = 'resource', aiId, actions, className }: {
+  title: string; children: React.ComponentProps<typeof Panel>['children'];
+  icon?: IconName; aiId?: string; actions?: React.ComponentProps<typeof Panel>['actions']; className?: string;
 }): React.ReactElement {
   return (
-    <section className="rounded-ai-lg border border-ai-line bg-ai-surface-1 p-4" data-ai-id={aiId}>
-      <h2 className="mb-3 flex items-center gap-2 text-sm font-medium text-ai-fg"><Icon name={icon} size={18} />{title}</h2>
+    <Panel title={title} icon={icon} titleLevel={2} className={className}
+      {...(aiId ? { 'data-ai-id': aiId } : {})} {...(actions ? { actions } : {})}>
       {children}
-    </section>
+    </Panel>
   );
 }
 
@@ -186,7 +186,7 @@ function ProxyAgentPanel({ cluster, detail }: { cluster: string; detail: Cluster
   };
 
   return (
-    <Panel title={t('cluster.add.agentTitle')}>
+    <OverviewPanel title={t('cluster.add.agentTitle')} icon="cluster">
       <div className="flex flex-col gap-2" data-ai-id="overview:agent-panel">
         <p className="text-sm text-ai-fg-secondary">{t('cluster.add.agentDesc')}</p>
         {query.isError ? (
@@ -217,7 +217,7 @@ function ProxyAgentPanel({ cluster, detail }: { cluster: string; detail: Cluster
           <p className="text-xs text-ai-fg-muted">{t('common.loading')}</p>
         ) : null}
       </div>
-    </Panel>
+    </OverviewPanel>
   );
 }
 
@@ -228,53 +228,59 @@ function BasicInfoPanel({ detail }: { detail: ClusterDetail }): React.ReactEleme
     : detail.ready
       ? t('cluster.overview.ready')
       : t('cluster.overview.notReady');
+  const visibility = detail.visibility === 'public'
+    ? { short: t('cluster.visibility.public'), hint: t('cluster.visibility.publicHint') }
+    : { short: t('cluster.visibility.private'), hint: t('cluster.visibility.privateHint') };
+  /*
+   * Readiness first: it is the one line that decides whether anything else on this page
+   * is actionable.
+   *
+   * The condition message is shown only when the cluster is **not** ready. On a ready
+   * cluster the controller reports something like "Cluster is available now", which says
+   * nothing the green badge has not already said — the same rule the cluster list uses.
+   * When it is not ready, that sentence is the only thing that tells an administrator what
+   * to do, so it stays and sits beside the badge.
+   *
+   * The message is part of the value, not a `hint`: automation reads this field's text to
+   * decide whether the controller's own explanation is on screen, and a hint outside the
+   * value node would be invisible to it.
+   */
+  const healthy = detail.ready && detail.enabled;
+  const items: DescriptionItem[] = [
+    {
+      label: t('cluster.column.status'),
+      value: (
+        <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <Badge tone={healthy ? 'success' : 'warning'}>{status}</Badge>
+          {!healthy && detail.readyMessage ? <span className="text-[11px] text-ai-fg-muted">{detail.readyMessage}</span> : null}
+        </span>
+      ),
+      aiId: 'overview:status',
+    },
+    { label: t('cluster.overview.provider'), value: detail.provider || '-', aiId: 'overview:provider' },
+    { label: t('cluster.overview.kubernetesVersion'), value: detail.kubernetesVersion || '-', aiId: 'overview:kubernetes-version' },
+    { label: t('cluster.overview.productVersion'), value: detail.kubeSphereVersion || '-', aiId: 'overview:product-version' },
+    { label: t('cluster.overview.nodeCount'), value: String(detail.nodeCount), aiId: 'overview:node-count' },
+    {
+      label: t('cluster.visibility.title'),
+      value: (
+        <span className="flex flex-col gap-0.5">
+          <span>{visibility.short}</span>
+          <span className="text-[11px] text-ai-fg-muted">{visibility.hint}</span>
+        </span>
+      ),
+      aiId: 'overview:visibility',
+    },
+    { label: t('cluster.overview.connectionType'), value: detail.connectionType || '-', aiId: 'overview:connection' },
+    { label: t('cluster.overview.apiEndpoint'), value: detail.kubernetesAPIEndpoint || '-', aiId: 'overview:api-endpoint' },
+    ...(detail.description
+      ? [{ label: t('cluster.overview.description_'), value: detail.description, aiId: 'overview:description' }]
+      : []),
+  ];
   return (
-    <Panel title={t('cluster.overview.basicInfo')} icon="cluster" aiId="overview:basic">
-      <dl className="grid grid-cols-1 gap-y-3 text-sm">
-        {/*
-          * Readiness first: it is the one line that decides whether anything else on
-          * this page is actionable. Its message sits beside it because "not ready" alone
-          * does not tell an administrator what to do.
-          */}
-        <div className="flex flex-col gap-1">
-          <dt className="text-ai-fg-muted">{t('cluster.column.status')}</dt>
-          <dd className="flex flex-wrap items-center gap-2" {...actionProps('overview:status')}>
-            <Badge tone={detail.ready && detail.enabled ? 'success' : 'warning'}>{status}</Badge>
-            {detail.readyMessage ? <span className="text-xs text-ai-fg-muted">{detail.readyMessage}</span> : null}
-          </dd>
-        </div>
-        <DefinitionRow label={t('cluster.overview.provider')} value={detail.provider || '-'} aiId="overview:provider" />
-        <DefinitionRow
-          label={t('cluster.overview.kubernetesVersion')}
-          value={detail.kubernetesVersion || '-'}
-          aiId="overview:kubernetes-version"
-        />
-        <DefinitionRow
-          label={t('cluster.overview.productVersion')}
-          value={detail.kubeSphereVersion || '-'}
-          aiId="overview:product-version"
-        />
-        <DefinitionRow label={t('cluster.overview.nodeCount')} value={String(detail.nodeCount)} aiId="overview:node-count" />
-        <DefinitionRow label={t('cluster.visibility.title')} aiId="overview:visibility"
-          value={t(detail.visibility === 'public' ? 'cluster.visibility.publicHint' : 'cluster.visibility.privateHint')} />
-        <DefinitionRow
-          label={t('cluster.overview.connectionType')}
-          value={detail.connectionType || '-'}
-          aiId="overview:connection"
-        />
-        <DefinitionRow
-          label={t('cluster.overview.apiEndpoint')}
-          value={detail.kubernetesAPIEndpoint || '-'}
-          aiId="overview:api-endpoint"
-        />
-        {detail.description ? (
-          <div className="flex flex-col gap-1">
-            <dt className="text-ai-fg-muted">{t('cluster.overview.description_')}</dt>
-            <dd className="min-w-0 break-words text-ai-fg-secondary">{detail.description}</dd>
-          </div>
-        ) : null}
-      </dl>
-    </Panel>
+    <OverviewPanel title={t('cluster.overview.basicInfo')} icon="cluster" aiId="overview:basic">
+      <DescriptionList items={items} variant="dense" divided />
+    </OverviewPanel>
   );
 }
 
@@ -297,8 +303,45 @@ function KubernetesStatusPanel({ cluster }: { cluster: string }): React.ReactEle
     refetchOnReconnect: false,
   });
 
+  const items: DescriptionItem[] = status.isLoading || !status.data ? [] : [
+    {
+      label: t('cluster.overview.requestRate'),
+      value: status.data.requestRate === undefined
+        ? '-'
+        : `${round(status.data.requestRate)} ${t('cluster.overview.requestRateUnit')}`,
+      aiId: 'overview:request-rate',
+    },
+    {
+      label: t('cluster.overview.requestLatency'),
+      value: status.data.requestLatencySeconds === undefined ? '-' : formatLatency(status.data.requestLatencySeconds),
+      aiId: 'overview:request-latency',
+    },
+    {
+      label: t('cluster.overview.scheduled'),
+      value: status.data.scheduled === undefined ? '-' : String(status.data.scheduled),
+      aiId: 'overview:scheduled',
+    },
+    /*
+     * Emphasised only when non-zero: a scheduler refusing pods is the one number here
+     * that means "something needs attention right now".
+     */
+    {
+      label: t('cluster.overview.scheduleError'),
+      value: status.data.error === undefined
+        ? '-'
+        : <StatusValue value={status.data.error} tone={status.data.error ? 'warning' : undefined} />,
+      aiId: 'overview:schedule-error',
+    },
+    {
+      label: t('cluster.overview.unschedulable'),
+      value: status.data.unschedulable === undefined
+        ? '-'
+        : <StatusValue value={status.data.unschedulable} tone={status.data.unschedulable ? 'warning' : undefined} />,
+      aiId: 'overview:unschedulable',
+    },
+  ];
   return (
-    <Panel title={t('cluster.overview.kubernetesStatus')} icon="kubernetes" aiId="overview:kubernetes-status">
+    <OverviewPanel title={t('cluster.overview.kubernetesStatus')} icon="kubernetes" aiId="overview:kubernetes-status">
       {status.isError ? (
         <div className="flex flex-col gap-1 text-sm" {...actionProps('overview:no-kubernetes-status')}>
           <span className="text-ai-fg">{t('cluster.overview.noMetrics')}</span>
@@ -306,67 +349,27 @@ function KubernetesStatusPanel({ cluster }: { cluster: string }): React.ReactEle
       ) : status.isLoading || !status.data ? (
         <Skeleton className="h-28" />
       ) : (
-        <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-          <StatusNumber
-            label={t('cluster.overview.requestRate')}
-            value={
-              status.data.requestRate === undefined
-                ? '-'
-                : `${round(status.data.requestRate)} ${t('cluster.overview.requestRateUnit')}`
-            }
-            aiId="overview:request-rate"
-          />
-          <StatusNumber
-            label={t('cluster.overview.requestLatency')}
-            value={
-              status.data.requestLatencySeconds === undefined
-                ? '-'
-                : formatLatency(status.data.requestLatencySeconds)
-            }
-            aiId="overview:request-latency"
-          />
-          <StatusNumber
-            label={t('cluster.overview.scheduled')}
-            value={status.data.scheduled === undefined ? '-' : String(status.data.scheduled)}
-            aiId="overview:scheduled"
-          />
-          {/*
-            * Emphasised only when non-zero: a scheduler refusing pods is the one number
-            * here that means "something needs attention right now".
-            */}
-          <StatusNumber
-            label={t('cluster.overview.scheduleError')}
-            value={status.data.error === undefined ? '-' : String(status.data.error)}
-            tone={status.data.error ? 'warning' : undefined} aiId="overview:schedule-error"
-          />
-          <StatusNumber
-            label={t('cluster.overview.unschedulable')}
-            value={status.data.unschedulable === undefined ? '-' : String(status.data.unschedulable)}
-            tone={status.data.unschedulable ? 'warning' : undefined}
-            aiId="overview:unschedulable"
-          />
-        </dl>
+        <DescriptionList items={items} variant="dense" divided />
       )}
-    </Panel>
+    </OverviewPanel>
   );
 }
 
-function StatusNumber({
-  label,
-  value,
-  tone,
-  aiId,
-}: {
-  label: string;
-  value: string;
-  tone?: 'warning' | undefined;
-  aiId: string;
-}): React.ReactElement {
+/**
+ * A scheduler count.
+ *
+ * The number itself is what a reader compares, so it is set in tabular figures and, when
+ * non-zero, carries the warning colour plus a short bar on the left: colour alone would
+ * be invisible to a reader who cannot distinguish it, and the bar survives a greyscale
+ * screenshot.
+ */
+function StatusValue({ value, tone }: { value: number; tone?: 'warning' | undefined }): React.ReactElement {
+  if (tone !== 'warning') return <span className="tabular-nums">{value}</span>;
   return (
-    <div className="flex flex-col gap-1" {...actionProps(aiId)}>
-      <dt className="text-ai-fg-muted">{label}</dt>
-      <dd className={`font-medium tabular-nums ${tone === 'warning' ? 'text-ai-warning' : 'text-ai-fg'}`}>{value}</dd>
-    </div>
+    <span className="flex items-center gap-2 font-medium tabular-nums text-ai-warning">
+      <span aria-hidden className="h-3 w-0.5 rounded-ai-pill bg-ai-warning" />
+      {value}
+    </span>
   );
 }
 
@@ -395,8 +398,11 @@ function ModulesPanel({ detail }: { detail: ClusterDetail }): React.ReactElement
   const enabled = detail.modules.filter((m) => m.enabled);
   const disabled = detail.modules.filter((m) => !m.enabled);
   return (
-    <Panel title={t('cluster.overview.modules')} icon="components">
-      <ul className="flex flex-wrap gap-2" {...actionProps('overview:modules')}>
+    <OverviewPanel title={t('cluster.overview.modules')} icon="components"
+      actions={<span className="text-xs tabular-nums text-ai-fg-muted" data-ai-id="overview:module-count">
+        {enabled.length}/{detail.modules.length}
+      </span>}>
+      <ul className="flex flex-wrap gap-1.5" {...actionProps('overview:modules')}>
         {enabled.map((module) => (
           <li key={module.key} title={module.key}>
             <Badge tone="success">{moduleLabel(t, module.key)}</Badge>
@@ -404,20 +410,20 @@ function ModulesPanel({ detail }: { detail: ClusterDetail }): React.ReactElement
         ))}
       </ul>
       {disabled.length > 0 ? (
-        <div className="mt-3 flex flex-col gap-1">
-          <span className="text-xs text-ai-fg-muted">
+        <div className="mt-3 flex flex-col gap-1.5 border-t border-ai-line pt-3">
+          <span className="text-[11px] text-ai-fg-muted">
             {t('cluster.overview.notInstalled')} ({disabled.length})
           </span>
-          <ul className="flex flex-wrap gap-2">
+          <ul className="flex flex-wrap gap-x-3 gap-y-1">
             {disabled.map((module) => (
-              <li key={module.key} className="text-xs text-ai-fg-muted" title={module.key}>
+              <li key={module.key} className="text-[11px] text-ai-fg-muted" title={module.key}>
                 {moduleLabel(t, module.key)}
               </li>
             ))}
           </ul>
         </div>
       ) : null}
-    </Panel>
+    </OverviewPanel>
   );
 }
 

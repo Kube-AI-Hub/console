@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import * as React from 'react';
-import { Badge, Tag, Progress, resolveProgressTone } from '../src/primitives/Display';
+import { Badge, Tag, Panel, Progress, resolveProgressTone } from '../src/primitives/Display';
 import { RadioGroup, Slider, Switch } from '../src/primitives/Toggles';
 import { Table, type TableColumn, type TableSortState } from '../src/primitives/Table';
 import { Dropdown } from '../src/primitives/Navigation';
@@ -344,5 +344,43 @@ describe('Table sort state type', () => {
   it('accepts a widened sort state', () => {
     const state: TableSortState = { key: 'cpu', order: 'asc' };
     expect(state.order).toBe('asc');
+  });
+});
+
+describe('Panel', () => {
+  /*
+   * The overview page needed three things the panel did not offer, and had copied the
+   * component into the page to get them. Each assertion here pins one of those needs so
+   * the next page uses the shared panel instead of copying it again.
+   */
+  it('renders the title as h3 by default and h2 when asked', () => {
+    const { rerender } = render(<Panel title="基本信息">内容</Panel>);
+    expect(screen.getByRole('heading', { name: '基本信息', level: 3 })).toBeInTheDocument();
+    rerender(<Panel title="基本信息" titleLevel={2}>内容</Panel>);
+    expect(screen.getByRole('heading', { name: '基本信息', level: 2 })).toBeInTheDocument();
+  });
+
+  it('puts the icon next to the title text, never instead of it', () => {
+    const { container } = render(<Panel title="节点数" icon="nodes">内容</Panel>);
+    const heading = container.querySelector('header h3')!;
+    expect(heading).toHaveTextContent('节点数');
+    expect(heading.querySelector('svg use')).not.toBeNull();
+  });
+
+  it('lets a caller set a header floor so neighbouring panels share a baseline', () => {
+    const { container } = render(
+      <Panel title="节点数" headerClassName="min-h-[3.75rem]" bodyClassName="flex-1">内容</Panel>,
+    );
+    expect(container.querySelector('header')!.className).toContain('min-h-[3.75rem]');
+    expect(container.querySelector('header')!.className).toContain('border-b');
+    // The body keeps its padding and gains the caller's class.
+    const body = container.querySelector('header')!.nextElementSibling!;
+    expect(body.className).toContain('p-4');
+    expect(body.className).toContain('flex-1');
+  });
+
+  it('keeps the body padded when no body class is given', () => {
+    const { container } = render(<Panel title="a">内容</Panel>);
+    expect(container.querySelector('header')!.nextElementSibling!.className).toBe('p-4');
   });
 });

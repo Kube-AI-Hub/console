@@ -41,16 +41,23 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_OVERVIEW_01(cluster_overview_pag
     assert ui.field_text("provider") == (spec.get("provider") or "-")
 
     status_text = ui.status_row
-    if ready_condition is not None and ready_condition.get("status") == "True" and spec.get("enable") is not False:
+    healthy = ready_condition is not None and ready_condition.get("status") == "True" and spec.get("enable") is not False
+    if healthy:
         assert "运行正常" in status_text, status_text
+        # On a ready cluster the condition message only restates the badge ("Cluster is
+        # available now"), so it must not be rendered twice over the same fact.
+        if ready_condition.get("message"):
+            assert str(ready_condition["message"])[:40] not in status_text, (
+                f"就绪集群不应重复显示条件说明: {status_text}"
+            )
     else:
         # A cluster that is not ready must not claim to be. This is the one assertion
         # that would catch "missing condition read as healthy".
         assert "运行正常" not in status_text, status_text
-    if ready_condition and ready_condition.get("message"):
-        # The controller's own sentence is what tells an operator what to do about a
-        # cluster that is not ready; dropping it leaves "未就绪" with no next step.
-        assert str(ready_condition["message"])[:40] in status_text, status_text
+        if ready_condition and ready_condition.get("message"):
+            # The controller's own sentence is what tells an operator what to do about a
+            # cluster that is not ready; dropping it leaves "未就绪" with no next step.
+            assert str(ready_condition["message"])[:40] in status_text, status_text
 
     assert ui.workspace_bar_count == 0, "集群作用域页面不应出现项目工作区栏"
 

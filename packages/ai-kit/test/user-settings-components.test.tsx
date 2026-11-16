@@ -179,6 +179,60 @@ describe('DescriptionList', () => {
     // The caller's column count must replace the default, not duplicate it.
     expect(dl.className).not.toContain('grid-cols-1');
   });
+
+  /*
+   * The dense variant exists because an overview panel is read like a specification
+   * table: the reader finds the field in the left column, then reads its value on the
+   * right. The label is therefore the larger half (14px medium, primary colour) and the
+   * value the smaller one (12px, secondary colour). The failure it prevents is the
+   * reverse — a 14px value against a 12px muted label, where the answer outshouted the
+   * question and a row could not be scanned by field name.
+   */
+  it('makes the label the larger half in the dense variant', () => {
+    const { container } = render(
+      <DescriptionList variant="dense" items={[{ label: '供应者', value: 'E2E Provider' }]} />,
+    );
+    const dl = container.querySelector('dl')!;
+    expect(dl.className).toContain('[&>dt]:text-sm');
+    expect(dl.className).toContain('[&>dt]:font-medium');
+    expect(dl.className).toContain('[&>dt]:text-ai-fg');
+    expect(dl.className).toContain('[&>dd]:text-ai-fg-secondary');
+    // The value must be visibly the smaller of the two, not merely a different colour:
+    // 14px label against 12px value.
+    expect(dl.className).toContain('text-xs');
+    // Wide tracking belongs to the demoted-label version; with the label now the louder
+    // half it would only make the left column look like small caps.
+    expect(dl.className).not.toContain('[&>dt]:tracking-wide');
+    // Two columns from `sm`; a phone stacks them because a 40% label column leaves the
+    // value too narrow to read.
+    expect(dl.className).toContain('sm:grid-cols-[minmax(5.5rem,7.5rem)_1fr]');
+    // Start-aligned cells, not baseline: the rule is drawn on both halves of a row and
+    // baseline alignment offsets them (measured 2.5px), splitting one line into two.
+    expect(dl.className).toContain('sm:items-start');
+    expect(dl.className).not.toContain('sm:items-baseline');
+  });
+
+  it('draws one rule per field, skipping the first row', () => {
+    const { container } = render(
+      <DescriptionList variant="dense" divided items={[{ label: 'a', value: '1' }, { label: 'b', value: '2' }]} />,
+    );
+    const dl = container.querySelector('dl')!;
+    // `nth-child(n+3)` is the third cell — the label of the second pair. The first pair
+    // must stay borderless or it doubles the panel header's own border.
+    expect(dl.className).toContain('[&>dt:nth-child(n+3)]:border-t');
+    expect(dl.className).toContain('sm:[&>dd:nth-child(n+4)]:border-t');
+    expect(dl.className).toContain('border-ai-line');
+    expect(dl.className).not.toContain('[&>dt:nth-child(n+1)]:border-t');
+  });
+
+  it('leaves the default variant untouched', () => {
+    const { container } = render(<DescriptionList items={[{ label: '节点名称', value: 'gpu01' }]} />);
+    const dl = container.querySelector('dl')!;
+    expect(dl.className).toContain('gap-3');
+    expect(dl.className).toContain('sm:grid-cols-[minmax(6rem,auto)_1fr]');
+    expect(dl.className).not.toContain('text-xs [&>dt]');
+    expect(dl.className).not.toContain('border-t');
+  });
 });
 
 const CHECKS: PasswordStrengthCheck[] = [

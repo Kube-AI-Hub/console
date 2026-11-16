@@ -91,3 +91,34 @@ export const EmptyValue: Story = {
     </div>
   ),
 };
+
+/**
+ * 概览面板的形态：标签为主、值为次，字段之间一条细线。
+ *
+ * 与默认形态的区别不只是密度。详情页里每个字段单独阅读，标签和值同字号可以接受；
+ * 概览面板像一张规格表：先按字段名找到行，再往右读值。所以标签是行里更大的一半
+ * （14px 中等字重、主色），值退为 12px 次色。反过来做——弱化的小标签配大号主色值——
+ * 读者会先看到一串供应者名和版本号，却不知道它们各是什么字段。
+ */
+export const DenseDivided: Story = {
+  name: 'dense, divided',
+  render: () => (
+    <div className="mx-auto max-w-md">
+      <Panel title="基本信息" icon="cluster" titleLevel={2}>
+        <DescriptionList
+          variant="dense"
+          divided
+          items={[
+            { label: '状态', value: '运行正常', aiId: 'story:status' },
+            { label: '供应者', value: 'E2E Provider' },
+            { label: 'Kubernetes 版本', value: 'v1.37.0' },
+            { label: 'Kube AI Hub 版本', value: 'v3.4.1' },
+            { label: '节点数', value: '3' },
+            { label: '连接方式', value: 'direct' },
+            { label: 'API 端点', value: 'https://10.233.0.1:443' },
+          ]}
+        />
+      </Panel>
+    </div>
+  ),
+};

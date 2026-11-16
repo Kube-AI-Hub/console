@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../utils/cn';
+import { Icon } from './Icon/Icon';
+import type { IconName } from './Icon/names';
 
 /* ---------------- Badge / Tag ---------------- */
 
@@ -224,21 +226,66 @@ export interface PanelProps extends Omit<React.HTMLAttributes<HTMLElement>, 'tit
   description?: React.ReactNode;
   /** Rendered at the right edge of the header. */
   actions?: React.ReactNode;
+  /**
+   * Leading glyph for the title.
+   *
+   * Passed as a name rather than a node so every panel header on a page gets the
+   * same size and spacing without each caller repeating `size={18}`; the icon is
+   * decorative and sits next to the title text, never instead of it.
+   */
+  icon?: IconName;
+  /**
+   * Heading level for the title.
+   *
+   * A panel is a `<section>` with a heading, and the level has to match where the
+   * panel sits: a page-level block is an `h2` under the page `h1`, while a panel
+   * nested inside another section is an `h3`. The default stays `3` so existing
+   * consumers keep their current outline.
+   */
+  titleLevel?: 2 | 3;
+  /**
+   * Classes for the body wrapper.
+   *
+   * The body is padded by default, which is what a panel of text wants. A panel that
+   * has to share a row with a taller neighbour instead needs to stretch its body to
+   * fill the remaining height (`flex-1`); without this hook that caller has to stop
+   * using `Panel` and rebuild the header, which is how two headers on one page end up
+   * at different heights.
+   */
+  bodyClassName?: string;
+  /**
+   * Classes for the header row.
+   *
+   * A page that shows several panels side by side wants one header height across all of
+   * them; without this hook each header is as tall as its own tallest child (a 20px
+   * title next to a 36px select control), and neighbouring panels start their content on
+   * different baselines. Scoped per page rather than baked into the default so other
+   * consumers keep their current density.
+   */
+  headerClassName?: string;
 }
 
-export function Panel({ title, description, actions, className, children, ...props }: PanelProps): React.ReactElement {
+export function Panel({
+  title, description, actions, icon, titleLevel = 3, className, bodyClassName, headerClassName, children, ...props
+}: PanelProps): React.ReactElement {
+  const Heading = titleLevel === 2 ? 'h2' : 'h3';
   return (
     <section className={cn('rounded-ai-lg border border-ai-line bg-ai-surface-1', className)} {...props}>
       {title || actions ? (
-        <header className="flex items-start gap-3 border-b border-ai-line px-4 py-3">
+        <header className={cn('flex items-start gap-3 border-b border-ai-line px-4 py-3', headerClassName)}>
           <div className="min-w-0 flex-1">
-            {title ? <h3 className="truncate text-sm font-semibold text-ai-fg">{title}</h3> : null}
+            {title ? (
+              <Heading className="flex min-w-0 items-center gap-2 truncate text-sm font-semibold text-ai-fg">
+                {icon ? <Icon name={icon} size={18} className="text-ai-fg-secondary" /> : null}
+                <span className="truncate">{title}</span>
+              </Heading>
+            ) : null}
             {description ? <p className="mt-0.5 text-xs text-ai-fg-muted">{description}</p> : null}
           </div>
           {actions ? <div className="flex shrink-0 items-center gap-2">{actions}</div> : null}
         </header>
       ) : null}
-      <div className="p-4">{children}</div>
+      <div className={cn('p-4', bodyClassName)}>{children}</div>
     </section>
   );
 }

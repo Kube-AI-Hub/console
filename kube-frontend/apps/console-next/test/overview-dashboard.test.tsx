@@ -4,13 +4,18 @@ import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider } from '@/i18n';
-import { OverviewResourcePanel } from '@/pages/cluster/OverviewResourcePanel';
+import { OverviewResourcePanel, NodeSummaryPanel } from '@/pages/cluster/OverviewResourcePanel';
 import { useOverviewRefresh } from '@/pages/cluster/useOverviewRefresh';
 import { formatOverviewValue, overviewRatioPoints, OVERVIEW_RESOURCES } from '@/pages/cluster/overviewResourceMetrics';
 import { KubectlConsoleDialog } from '@/components/resource/KubectlConsoleDialog';
 
 const identity = vi.hoisted(() => ({ name: 'admin' }));
 vi.mock('@/shell/AuthProvider', () => ({ useAuth: () => ({ user: { name: identity.name } }) }));
+// The node block links to the full node list; a real router is not mounted here.
+vi.mock('@tanstack/react-router', () => ({
+  Link: ({ children, to, params, ...props }: { children: React.ReactNode; to: string; params?: Record<string, string> }) =>
+    <a href={Object.entries(params ?? {}).reduce((url, [key, value]) => url.replace(`$${key}`, value), to)} {...props}>{children}</a>,
+}));
 vi.mock('@/components/resource/ExecConsoleDialog', () => ({
   ExecConsoleDialog: ({ onClose }: { onClose: () => void }) => <div data-ai-id="fake-exec"><button onClick={onClose}>Close session</button></div>,
 }));
@@ -69,7 +74,7 @@ describe('overview dashboard', () => {
       ] } })) });
     }));
     const view = mount(<><OverviewResourcePanel cluster="host" refreshAt={1_700_000_000_000} />
-      <OverviewResourcePanel cluster="host" refreshAt={1_700_000_000_000} nodeOnly /></>);
+      <NodeSummaryPanel cluster="host" /></>);
     await waitFor(() => expect(view.container.querySelector('[data-ai-id="overview:node-summary"] [data-ai-field="total"]')).toHaveTextContent('3'));
     expect(view.container.querySelector('[data-ai-id="overview:usage"] [data-ai-id="overview:usage-nodes"]')).toBeNull();
     expect(view.container.querySelector('[data-ai-id="overview:node-summary"] [data-ai-field="used"]')).toHaveTextContent('2');
@@ -77,6 +82,9 @@ describe('overview dashboard', () => {
     expect(view.container.querySelector('[data-ai-id="overview:node-summary"] [data-ai-field="ratio"]')).toHaveTextContent('67%');
     expect(view.container.querySelector('[data-ai-id="overview:node-summary"] [data-ai-id="overview:trend-panel"]')).toBeNull();
     expect(view.container.querySelector('[data-ai-id="overview:node-trend-panel"]')).toBeNull();
+    // The block links to the full node list; it must not carry a resource selector.
+    expect(screen.getByRole('link', { name: '查看全部节点' })).toHaveAttribute('href', '/kube-frontend/clusters/host/nodes');
+    expect(view.container.querySelector('[data-ai-id="overview:node-summary"]')!.querySelectorAll('button')).toHaveLength(0);
     expect(calls.filter((url) => url.searchParams.has('start') && url.searchParams.get('metrics_filter')?.includes('cluster_node_'))).toHaveLength(0);
     expect(calls.filter((url) => !url.searchParams.has('start'))).toHaveLength(1);
     expect(screen.queryByRole('button', { name: '节点' })).toBeNull();

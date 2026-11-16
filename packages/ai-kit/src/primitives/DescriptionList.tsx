@@ -55,6 +55,26 @@ export function DescriptionItem({ label, value, hint, aiId }: DescriptionItemPro
 export interface DescriptionListProps {
   items: DescriptionItem[];
   className?: string;
+  /**
+   * Density and emphasis.
+   *
+   * `default` keeps the label above its value at the same size, which suits a
+   * detail page where each fact is read on its own. `dense` turns the list into a
+   * specification table: the label is the row's anchor at 14px medium, and the
+   * value is the detail at 12px. The reader scans the left column to find the
+   * field, then reads right for its value.
+   */
+  variant?: 'default' | 'dense';
+  /**
+   * Draw a hairline between rows.
+   *
+   * Only meaningful with `dense`: it turns the list into a specification table
+   * (label left, value right) whose rows stay aligned across a whole panel
+   * without adding vertical gaps. The rule is drawn on the row's own top edge
+   * from the second pair onwards, so the first row does not double the panel
+   * header's border.
+   */
+  divided?: boolean;
 }
 
 /**
@@ -63,11 +83,61 @@ export interface DescriptionListProps {
  * The default layout is a label column sized to its content and a value column
  * that takes the rest of the width, stacking to one column on phones.
  */
-export function DescriptionList({ items, className }: DescriptionListProps): React.ReactElement {
+export function DescriptionList({ items, className, variant = 'default', divided = false }: DescriptionListProps): React.ReactElement {
+  const dense = variant === 'dense';
   return (
     <dl
       className={cn(
-        'grid grid-cols-1 gap-3 text-xs sm:grid-cols-[minmax(6rem,auto)_1fr]',
+        'grid grid-cols-1 text-xs',
+        /*
+         * `dense` restyles the bare `dt`/`dd` fragments through the parent, which is
+         * why `DescriptionItem` needs no variant prop of its own: the pair carries no
+         * wrapper, so one class on the `<dl>` reaches every row and the 24 existing
+         * call sites keep their current appearance.
+         *
+         * The label is the larger half: 14px medium in the primary colour, with the
+         * value at 12px in the secondary one. A specification table is read by finding
+         * the field first — "供应者" is what the reader is scanning for, and the provider
+         * name is the answer they then glance at. Making the value the bigger of the two
+         * reversed that: it drew the eye to a fact the reader had not asked about yet.
+         * Tracking is normal, not wide: the label is already the louder half and wide
+         * tracking would turn a two-column table into letterspaced small caps.
+         */
+        dense
+          ? 'text-xs [&>dd]:text-ai-fg-secondary [&>dt]:text-sm [&>dt]:font-medium [&>dt]:text-ai-fg'
+          : 'gap-3 sm:grid-cols-[minmax(6rem,auto)_1fr]',
+        dense && (divided
+          ? [
+              'gap-y-0',
+              // One rule per field. Below `sm` the pair stacks, so the rule sits on the
+              // label of every field after the first; from `sm` the value cell carries it
+              // too, which joins the two columns into one continuous line.
+              '[&>dt:nth-child(n+3)]:border-t [&>dt:nth-child(n+3)]:border-ai-line',
+              'sm:[&>dd:nth-child(n+4)]:border-t sm:[&>dd:nth-child(n+4)]:border-ai-line',
+            ].join(' ')
+          : 'gap-y-2'),
+        /*
+         * Two columns from `sm`, stacked only on a phone.
+         *
+         * The label column is capped rather than proportional: at 1024 the identity column
+         * of the cluster overview is ~256px wide, and a 120px label still leaves ~104px for
+         * the value. The longest label here ("Kube AI Hub 版本") needs ~108px at 14px
+         * medium, so the cap keeps it on one line while a long value wraps instead —
+         * wrapping a value is readable, wrapping a label beside a one-line value is not.
+         *
+         * `items-start`, not `items-baseline`. The rule between fields is drawn on both
+         * cells, and baseline alignment starts them at different heights (measured: the
+         * label's border sat 2.5px below the value's), which breaks one rule into two
+         * offset segments. Grid rows start both cells at the same y, so the two halves meet.
+         * It also matches a specification table: the label stays at the top when the value
+         * wraps onto a second line.
+         */
+        dense && 'sm:grid-cols-[minmax(5.5rem,7.5rem)_1fr] sm:items-start sm:gap-x-4',
+        // Row padding: one line of value plus breathing room. Below `sm` the pair is stacked,
+        // so the label takes the top padding and the value the bottom one; doubling both
+        // would turn each field into two full rows.
+        dense && divided && 'sm:[&>dd]:py-2.5 sm:[&>dt]:py-2.5',
+        dense && divided && 'max-sm:[&>dd]:pb-2.5 max-sm:[&>dd]:pt-0.5 max-sm:[&>dt]:pb-0 max-sm:[&>dt]:pt-2.5',
         className,
       )}
     >

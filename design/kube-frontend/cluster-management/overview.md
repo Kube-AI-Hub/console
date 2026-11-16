@@ -18,6 +18,7 @@
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-08
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-09
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-10
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-11
 
 ## 设计目标与非目标
 
@@ -109,10 +110,11 @@ ClusterUsage 的数值字段由必有 number 调整为 number | undefined。未�
 ## 不变量
 
 1. 就绪只认 Ready 条件为 True；条件缺失 = 未就绪。
-2. 监控缺失时不得渲染 0：要么显示实际值，要么显示「不可用」。
-3. 任何百分比都必须与同行的分子分母一致。
-4. 无 GPU 的集群不渲染 GPU 行。
-5. 本页不产生任何写请求。
+2. Ready 条件的 message 只在未就绪时显示：就绪集群上它只是一句重复徽标的话（"Cluster is available now"），未就绪时它才是唯一的下一步线索。
+3. 监控缺失时不得渲染 0：要么显示实际值，要么显示「不可用」。
+4. 任何百分比都必须与同行的分子分母一致。
+5. 无 GPU 的集群不渲染 GPU 行。
+6. 本页不产生任何写请求。
 
 ## 已知坑
 
@@ -155,6 +157,7 @@ ClusterUsage 的数值字段由必有 number 调整为 number | undefined。未�
 - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-07
 - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-08
 - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-09
+- TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-10
 
 ### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-07 — 恢复原子能力，不以新概念替换旧事实
 
@@ -294,3 +297,51 @@ Enter/Space和aria-pressed/描述提供键盘读数，不嵌套第二个按钮�
 仅移动标题而丢弃节点总量或就绪率，不符合保留已有能力的要求；节点历史的移除以用户明确批准为边界。
 
 **何时重新考虑**：新增资源类别或用户需要可配置面板列宽时。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-16 — 密集属性表复用 DescriptionList，不新建私有行组件
+
+**为什么**：改动前基本信息是单列 `grid-cols-1 gap-y-3` 的八行堆叠（1600 下 614px 高），且标签用 `text-ai-fg-muted`（`#c9e1f3`）比值的 `text-ai-fg-secondary`（`#a9d1de`）更亮——在 14px 同字号下标签比值更抢眼，主次颠倒。整块既高又分不清主次。
+
+改为 `DescriptionList` 的 `variant="dense"` + `divided`：`dense` 在父级 `<dl>` 上用 `[&>dt]:text-sm [&>dt]:font-medium [&>dt]:text-ai-fg` 与 `[&>dd]:text-xs [&>dd]:text-ai-fg-secondary` 同时区分字号和亮度（14px 中等标签 vs 12px 值），`divided` 用 nth-child 边界在每行之间画 1px `border-ai-line`。两块合计高度从 703px 降到约 470px（1600 档），信息密度明显提高而没有任何字段被删。
+
+字号方向是「标签大于值」：属性表按字段名找行、再看右侧取值，标签是行的入口。最初做成 12px 弱标签 + 14px 主色值，视觉上答案压过了问题——读者先看到一串供应者名、版本号，却不知道它们各是什么字段。反过来之后标签是 14px 中等字重的主色、值是 12px 次色，与 `ResourceDetail` 的字段区块同一读法（标签在上、值在下、标签更重）。不再加 `tracking-wide`：标签已经是更响的一半，再加字距只会让左列像小型大写字母。
+
+分隔线横跨两列依赖单元格起点对齐：线分别画在标签与值两个单元格的顶边，若用 `items-baseline`，两个单元格会因字号不同而错开（实测标签的边框比值的低 2.5px），一行就断成两段错位的短线。因此用 `items-start`：网格行让两半从同一 y 开始，首尾相接成一条通栏线；值换行时标签仍停在首行，也符合属性表的读法。
+
+样式挂在 `<dl>` 而不是新增 `variant` prop 到 `DescriptionItem`：`DescriptionItem` 只渲染裸 `dt`/`dd` 片段、没有包裹元素（既有测试 `renders DescriptionItem as a bare dt/dd fragment` 锁定这一点），因此父级选择器能覆盖全部行，24 处既有详情页调用点零改动、外观不变。
+
+两列从 `sm` 起生效，标签列 `minmax(5.5rem, 7.5rem)`：1024 下概览身份列只有 ~256px，120px 标签列仍留 ~104px 给值；「Kube AI Hub 版本」在 14px 中等字重下约 108px，上限刚好让它保持单行。值换行可读，标签换行会与相邻单行值错位，所以上限给标签、余量给值。仅在手机宽度（`<sm`）堆叠。
+
+**被否方案**：在页面里自写一个 `Row` 组件。`config/consistency-contracts.test.ts` 的「defines the detail label/value row once」正是为了防止这种复制——八处详情页曾经各写一份并已经漂移（有的值用主色、有的用次色）。另一种是给 `DescriptionItem` 加 `dense` prop，但那要每个调用点都传，且无法改变列布局。
+
+**何时重新考虑**：需要每行可展开、可编辑，或属性表要支持多列分组时；那时是新的表结构，不是密度变体。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-17 — 节点块铺满 1:2 槽位，头部与排行等高
+
+**为什么**：节点块与排行同处 `minmax(0,1fr)/minmax(0,2fr)` 一行，行高由排行决定。改动前节点块内只有一张 134px 小卡，324px 的面板里约 170px 是空白，读起来像渲染故障；两块头部也不等高（20px 标题 vs 36px 下拉控件），正文基线错位。
+
+保留列宽比例（AC-07 与 TC-06 锁定 1:2，且左列宽度须与基本信息一致），改块内结构：面板 `flex h-full flex-col`，`headerClassName="min-h-[3.75rem] items-center"` 给头部一个下限，`bodyClassName="flex min-h-0 flex-1 flex-col"` 让正文吃掉剩余高度。
+
+正文不再「上排数字 + 下排进度条、中间留空」：环图在左、就绪/总量数字在右，两者作为一组用 `items-center` 在块内垂直居中，环心显示就绪率。这样面板被邻居撑高时，多出来的高度均匀落在内容上下，而不是在中间形成一条空白带；就绪率只出现一次（环心），不再另起一行重复同一个数字。
+
+排行头部同样走共享 `Panel`（`icon` + `titleLevel={2}` + `headerClassName`），两块头部因此在结构上完全一致——不是靠两处各写 `min-h` 对齐，而是同一个组件同一个下限。
+
+节点块的动作只有一个「查看全部节点」文字链接：TC-06 断言该块内按钮数为 0，因为选择资源是资源网格的职责；就绪率随时间变化是节点页的职责，所以块内不出现趋势、时间窗或第二个入口。
+
+`Panel` 新增 `icon` / `titleLevel` / `headerClassName` / `bodyClassName` 四个可选属性，默认值保持既有行为（`h3`、`p-4`、无图标），15+ 既有消费者零改动。概览此前在页面内复制了一份 `function Panel`，本次删除并改从 `@kube-ai-hub/ui` 导入——barrel 之前没有导出 `Panel`，这正是复制的原因。
+
+**被否方案**：改列宽比例（如 1:3 或固定 320px）能腾出更多高度，但要同时改 AC-07 与 TC-06 的 1:2 断言，且破坏「节点块与基本信息左边界/宽度一致」的既有约束；把节点就绪并进排行头部能省一个面板，但节点健康与节点负载是两个事实，合并后既无法独立降级，也要重写 `overview:node-summary` 的 `data-ai-id` 契约。
+
+**何时重新考虑**：需要可配置仪表盘、或节点块要承载就绪趋势时；后者要新增历史查询，属于能力变更而非布局调整。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-18 — 就绪集群不重复显示 Ready 条件说明
+
+**为什么**：`toClusterDetail` 把 Ready 条件的 `message`（缺省回落到 `reason`）映射成 `readyMessage`。B200 host 上该条件是 `True`，message 为 "Cluster is available now"——与绿色「运行正常」徽标表达同一件事，并排显示等于把同一个事实写两遍，还占掉状态行一半宽度。
+
+规则改成「只在未就绪时显示」：`healthy = ready && enabled`，徽标右侧的说明仅在 `!healthy` 时渲染。未就绪时那句话是管理员唯一的下一步线索（例如代理集群提示要装 agent），不能删；就绪时删掉不损失信息。
+
+集群列表 `MultiClusterListPage` 已经是这个规则（`!row.ready && row.readyMessage`），概览此前与它不一致；本次统一，两处对同一个字段给出同一种解释。
+
+**被否方案**：继续无条件显示，靠 `title` 或截断减少视觉噪声——那句话本身没有新信息，缩小或悬停都不能让它变得有用。另一种是把 message 从接口层丢掉，但未就绪场景需要它，且它是 kapis 契约的一部分（CON-01），页面决定展示与否才是正确层次。
+
+**何时重新考虑**：Ready 条件在就绪时开始携带新事实（例如最近一次健康检查时间）时，那句话不再重复徽标，届时再判断是否显示。
