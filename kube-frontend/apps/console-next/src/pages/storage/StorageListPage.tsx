@@ -2,6 +2,7 @@ import * as React from 'react';
 import { type StorageDetail, type StorageKind, type StorageSummary } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 
 import { useProjectFilter } from '@/components/projects/useProjects';
@@ -127,6 +128,7 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
       selection: 'multiple',
       sortableKeys: ['name', 'createTime'],
       sortAiPrefix: kind,
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: `${kind}:columns` },
       selectAiId: `${kind}:select`,
       sort: { key: list.sortBy, order: list.order },
       actions: [
@@ -161,6 +163,7 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
         },
         {
           key: 'status',
+          hideable: true,
           title: t('storage.column.status'),
           width: 150,
           hideBelow: 'md',
@@ -168,6 +171,7 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
         },
         {
           key: 'capacity',
+          hideable: true,
           title: t('storage.column.capacity'),
           width: 110,
           hideBelow: 'lg',
@@ -178,6 +182,7 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
           ? [
               {
                 key: 'accessModes',
+                hideable: true,
                 title: t('storage.column.accessModes'),
                 width: 130,
                 hideBelow: 'xl' as const,
@@ -196,6 +201,7 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
                  * fields (reclaim policy, node affinity) live.
                  */
                 key: 'volume',
+                hideable: true,
                 title: t('storage.column.volume'),
                 hideBelow: 'lg' as const,
                 render: (row: StorageSummary) =>
@@ -216,6 +222,7 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
           : []),
         {
           key: 'createTime',
+          hideable: true,
           title: t('storage.column.createdAt'),
           width: 170,
           hideBelow: 'xl',
@@ -223,6 +230,7 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
         },
         {
           key: 'mountStatus',
+          hideable: true,
           title: t('storage.column.mountStatus'),
           width: 110,
           hideBelow: 'lg',
@@ -287,6 +295,8 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
     [cluster, descriptor, kind, list, projectFilter, projectFilterControl, t, total, workspace],
   );
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility(kind, columnKeys);
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
 
   if (state === 'error') {
@@ -300,6 +310,8 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
   return (
     <AiSurface as="section" aiId={`${kind}:surface`} state={state} className="min-w-0">
       <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
         schema={schema}
         onRefresh={listRefresh.onRefresh}
         rows={rows}

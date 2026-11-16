@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router';
 import { ApiError, type ConfigMapDetail, type ConfigMapInput } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, ResourceList, type ListSchema} from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient, configMapsApi } from '@/api';
 import { ensureConfigMapsRegistered, type ConfigMapSummary } from './queries';
@@ -124,6 +125,7 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
       sortableKeys: ['name', 'createTime'],
       // Matches the `configmaps:sort:*` handles the page objects already target.
       sortAiPrefix: 'configmaps',
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'configmaps:columns' },
       // And `configmaps:select:<name>` for the row checkboxes.
       selectAiId: 'configmaps:select',
       sort: { key: sortBy, order },
@@ -172,6 +174,7 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
         },
         {
           key: 'project',
+          hideable: true,
           title: t('configmaps.column.project'),
           hideBelow: 'xl',
           width: 150,
@@ -187,6 +190,7 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
         },
         {
           key: 'keys',
+          hideable: true,
           title: t('configmaps.column.keys'),
           // Hidden on phones; the detail page still shows them.
           hideBelow: 'md',
@@ -225,6 +229,7 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
            * the default order still sorted by it — the header looked inert.
            */
           key: 'createTime',
+          hideable: true,
           title: t('configmaps.column.createdAt'),
           width: 170,
           hideBelow: 'lg',
@@ -264,7 +269,11 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
     [t, sortBy, order, page, total, cluster, namespace, workspace, projectFilterControl],
   );
 
-  const state = query.isPending ? 'loading' : query.isError ? 'error' : items.length === 0 ? 'empty' : 'ready';
+    // One stored choice per list: hidden columns survive a refresh, and a column this page does
+  // not have (because the list changed) is simply not in the stored set.
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('configmaps', columnKeys);
+const state = query.isPending ? 'loading' : query.isError ? 'error' : items.length === 0 ? 'empty' : 'ready';
 
   /*
    * The error state is rendered by the page rather than the schema: `ResourceList`
@@ -286,6 +295,8 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
       </PageTip>
       <ResourceList
         schema={schema}
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
         onRefresh={listRefresh.onRefresh}
         rows={items}
         loading={state === 'loading'}

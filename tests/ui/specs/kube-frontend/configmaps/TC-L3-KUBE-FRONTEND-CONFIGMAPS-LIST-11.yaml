@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-11
+level: 3
+suite: point
+module: kube-frontend
+submodule: configmaps
+feature: list
+title: 列表显示列（列显隐）覆盖配置/保密/服务账号/存储列表
+entry_url: '{BASE_URL}/kube-frontend/{WORKSPACE}/clusters/{CLUSTER}/projects/default/configmaps'
+prd: prd/kube-frontend/configmaps/list.md
+design: design/kube-frontend/configmaps/list.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-11
+
+story:
+- US1
+
+product: 四个多列列表都提供「显示列」：只列可隐藏列（名称不可隐藏），取消勾选后表头立即消失、选择被记住、重置恢复。
+preconditions:
+- 已登录；项目 default 有配置字典/保密字典/服务账号/PVC
+steps:
+- 打开配置字典列表，点「显示列」，核对菜单项只包含可隐藏列且有重置项
+- 取消勾选「项目」列，核对表头减少一列；刷新后该列仍隐藏
+- 点「重置」，核对表头恢复
+- 对保密字典、服务账号、存储列表重复确认「显示列」句柄存在
+expected:
+- 每页都有 <前缀>:columns 触发器；菜单项为 <前缀>:columns:<列键> 与 :columns:reset
+- 取消勾选后 th 数量减少 1，行数不变；localStorage 的 kube-frontend.columns.<页面键> 记录新集合
+- 刷新后仍隐藏；重置后恢复全部列
+- 名称列不出现在可隐藏菜单里
+troubleshoot:
+- 菜单只有「重置」：列没有标 hideable: true
+- 隐藏后刷新又出现：没有接 useColumnVisibility（选择未持久化）
+update_automation:
+- 句柄：configmaps:columns / secrets:columns / serviceaccounts:columns / persistentvolumeclaims:columns；项 :columns:<key> 与 :columns:reset

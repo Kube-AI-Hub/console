@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router';
 import type { ServiceAccountDetail, ServiceAccountInput } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient, serviceAccountsApi } from '@/api';
 import {
@@ -138,6 +139,7 @@ export function ServiceAccountsPage({ workspace, cluster, namespace }: ServiceAc
       selection: 'multiple',
       sortableKeys: ['name', 'createTime'],
       sortAiPrefix: 'serviceaccounts',
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'serviceaccounts:columns' },
       selectAiId: 'serviceaccounts:select',
       sort: { key: list.sortBy, order: list.order },
       primaryAction: { key: 'create', label: t('serviceaccounts.action.create'), aiId: 'serviceaccounts:create' },
@@ -174,6 +176,7 @@ export function ServiceAccountsPage({ workspace, cluster, namespace }: ServiceAc
         },
         {
           key: 'project',
+          hideable: true,
           title: t('serviceaccounts.column.project'),
           hideBelow: 'xl',
           width: 150,
@@ -189,6 +192,7 @@ export function ServiceAccountsPage({ workspace, cluster, namespace }: ServiceAc
         },
         {
           key: 'role',
+          hideable: true,
           title: t('serviceaccounts.column.role'),
           width: 180,
           hideBelow: 'lg',
@@ -198,6 +202,7 @@ export function ServiceAccountsPage({ workspace, cluster, namespace }: ServiceAc
         },
         {
           key: 'secrets',
+          hideable: true,
           title: t('serviceaccounts.column.secrets'),
           hideBelow: 'lg',
           // One link per token Secret, stacked, as the old list renders them.
@@ -222,6 +227,7 @@ export function ServiceAccountsPage({ workspace, cluster, namespace }: ServiceAc
         },
         {
           key: 'createTime',
+          hideable: true,
           title: t('serviceaccounts.column.createdAt'),
           width: 170,
           hideBelow: 'md',
@@ -249,6 +255,8 @@ export function ServiceAccountsPage({ workspace, cluster, namespace }: ServiceAc
     [cluster, list, projectFilter, projectFilterControl, query.isFetching, t, total, workspace],
   );
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('serviceaccounts', columnKeys);
   const state = query.isPending ? 'loading' : query.isError ? 'error' : items.length === 0 ? 'empty' : 'ready';
 
   if (state === 'error') {
@@ -265,6 +273,8 @@ export function ServiceAccountsPage({ workspace, cluster, namespace }: ServiceAc
         {t('pageTip.serviceaccounts')}
       </PageTip>
       <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
         schema={schema}
         onRefresh={listRefresh.onRefresh}
         rows={items}

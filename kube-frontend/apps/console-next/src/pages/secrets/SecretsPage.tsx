@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router';
 import { type SecretDetail, type SecretInput } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient, secretsApi } from '@/api';
 import {
@@ -148,6 +149,7 @@ export function SecretsPage({ workspace, cluster, namespace }: SecretsPageProps)
       selection: 'multiple',
       sortableKeys: ['name', 'createTime'],
       sortAiPrefix: 'secrets',
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'secrets:columns' },
       selectAiId: 'secrets:select',
       sort: { key: list.sortBy, order: list.order },
       primaryAction: { key: 'create', label: t('secrets.action.create'), aiId: 'secrets:create' },
@@ -188,6 +190,7 @@ export function SecretsPage({ workspace, cluster, namespace }: SecretsPageProps)
         },
         {
           key: 'project',
+          hideable: true,
           title: t('secrets.column.project'),
           hideBelow: 'xl',
           width: 150,
@@ -203,6 +206,7 @@ export function SecretsPage({ workspace, cluster, namespace }: SecretsPageProps)
         },
         {
           key: 'type',
+          hideable: true,
           title: t('secrets.column.type'),
           hideBelow: 'lg',
           width: 180,
@@ -210,6 +214,7 @@ export function SecretsPage({ workspace, cluster, namespace }: SecretsPageProps)
         },
         {
           key: 'data',
+          hideable: true,
           title: t('secrets.column.fieldCount'),
           width: 100,
           hideBelow: 'md',
@@ -217,6 +222,7 @@ export function SecretsPage({ workspace, cluster, namespace }: SecretsPageProps)
         },
         {
           key: 'createTime',
+          hideable: true,
           title: t('secrets.column.createdAt'),
           width: 170,
           hideBelow: 'lg',
@@ -244,6 +250,8 @@ export function SecretsPage({ workspace, cluster, namespace }: SecretsPageProps)
     [t, list, total, cluster, projectFilter, workspace, projectFilterControl],
   );
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('secrets', columnKeys);
   const state = query.isPending ? 'loading' : query.isError ? 'error' : items.length === 0 ? 'empty' : 'ready';
 
   if (state === 'error') {
@@ -260,6 +268,8 @@ export function SecretsPage({ workspace, cluster, namespace }: SecretsPageProps)
         {t('pageTip.secrets')}
       </PageTip>
       <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
         schema={schema}
         onRefresh={listRefresh.onRefresh}
         rows={items}

@@ -9,6 +9,7 @@
 ## 关联需求
 
 - `AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-01`
+- AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-11
 - AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-10
 - AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-09
 - AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-08
@@ -90,6 +91,18 @@
 
 分页器（含档位选择器）的 `data-ai-id` 由 `schema.sortAiPrefix` 派生。给列表接档位时如果没设这个前缀，
 选择器在页面上是有的，但自动化找不到它（`<前缀>:page-size` 不存在）。本批的集群告警消息页就是这样漏掉的。
+### DEC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-11 — 列显隐只列可隐藏列，标识列不可隐藏
+
+`ResourceList` 的列选择器只渲染 `column.hideable` 的列，因此接入新页面时必须两步：schema 上声明
+`columnVisibility`，且给需要可隐藏的列标 `hideable: true`。只做第一步时菜单里只有「重置」一项——
+看起来像坏了，其实是所有列都被视为不可隐藏（本批第一轮就是这样）。标识列（名称）保持不可隐藏：
+隐藏它之后行就认不出来了。
+
+### GOT-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-11 — 选择要按页面键持久化
+
+`useColumnVisibility(pageKey, columnKeys)` 把选择写进 `kube-frontend.columns.<pageKey>`。页面键必须区分
+「同一个组件的多个 kind」（如存储列表用 `kind` 作键），否则在 PVC 上隐藏「命名空间」会连带把快照列表的那一列
+也隐藏掉。
 ## 系统现状
 
 首个资源模块，无可继承的历史实现；行为以需求为准。
