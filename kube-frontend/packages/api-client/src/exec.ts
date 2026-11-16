@@ -120,6 +120,8 @@ const SOCKET_OPEN = 1;
  * exec subresource.
  */
 export function execPath(target: ExecTarget): string {
+  // The exec subresource exists only on the core group, which has no member-cluster form; a member
+  // exec therefore keeps the host path. Documented here rather than silently building a 404.
   const clusterSegment =
     target.cluster && target.cluster !== 'host' ? 'clusters/' + encodeURIComponent(target.cluster) + '/' : '';
   const query = new URLSearchParams();

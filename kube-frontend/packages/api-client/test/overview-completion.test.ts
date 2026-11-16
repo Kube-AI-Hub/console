@@ -63,7 +63,8 @@ describe('overview full parity contracts', () => {
       return new Response('apiVersion: v1\nclusters: []', { headers: { 'Content-Type': 'text/plain' } });
     }) as typeof fetch });
     expect(await kubectlApi(client).kubeconfig({ cluster: 'member', username: 'u/a' })).toContain('apiVersion: v1');
-    expect(calls[0]?.url.pathname).toBe('/kapis/resources.kubesphere.io/v1alpha2/clusters/member/users/u%2Fa/kubeconfig');
+    // `clusters/<id>` goes before the group (see `clusterScoped`); the other placement 404s on a member.
+    expect(calls[0]?.url.pathname).toBe('/kapis/clusters/member/resources.kubesphere.io/v1alpha2/users/u%2Fa/kubeconfig');
     expect(calls[0]?.init?.headers).toMatchObject({ Authorization: 'Bearer test-token' });
     const denied = createClient({ fetchImpl: (async () => new Response('denied', { status: 403 })) as typeof fetch });
     await expect(kubectlApi(denied).kubeconfig({ cluster: 'host', username: 'admin' })).rejects.toMatchObject({ status: 403 });

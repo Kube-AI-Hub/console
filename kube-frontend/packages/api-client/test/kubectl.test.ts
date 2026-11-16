@@ -13,7 +13,8 @@ describe('kubectl target discovery', () => {
     expect(await kubectlApi(client).target({ cluster: 'member/a', username: 'user/b' })).toEqual({
       namespace: 'kubesphere-system', pod: 'kubectl-user-1', container: 'kubectl',
     });
-    expect(url).toContain('/kapis/resources.kubesphere.io/v1alpha2/clusters/member%2Fa/users/user%2Fb/kubectl');
+    // `clusters/<id>` goes before the group (see `clusterScoped`).
+    expect(url).toContain('/kapis/clusters/member%2Fa/resources.kubesphere.io/v1alpha2/users/user%2Fb/kubectl');
   });
   it('rejects incomplete discovery data instead of opening a default Pod', async () => {
     const client = createClient({ fetchImpl: (async () => new Response('{}',

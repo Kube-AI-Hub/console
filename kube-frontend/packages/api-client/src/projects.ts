@@ -40,10 +40,9 @@ const WORKSPACE_LABEL = 'kubesphere.io/workspace';
  */
 const MAX_PAGES = 40;
 
-/** Cluster segment: the host cluster has none, members are `clusters/<id>`. */
+/** The namespace collection, with `clusters/<id>` before the group: see `clusterScoped`. */
 function namespacesPath(cluster: string): string {
-  const prefix = cluster && cluster !== 'host' ? `clusters/${encodeURIComponent(cluster)}/` : '';
-  return `/kapis/resources.kubesphere.io/v1alpha3/${prefix}namespaces`;
+  return clusterScoped('/kapis/resources.kubesphere.io/v1alpha3', cluster, 'namespaces');
 }
 
 interface NamespacePage {
@@ -137,3 +136,4 @@ export function selectableProjects(projects: Project[] | undefined): Project[] {
 export function projectLabel(project: Project): string {
   return project.alias ? `${project.name} (${project.alias})` : project.name;
 }
+import { clusterScoped } from './paths';
