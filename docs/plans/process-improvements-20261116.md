@@ -37,7 +37,9 @@
 | C8 | **有意偏离旧实现要写明「偏离了什么、为什么」** | 显示层与旧 console 不同，不记录就会被后来者当成回退 |
 | C9 | **改路径拼接先验证「函数输出 == 期望字符串」** | 修成员集群路径段时，helper 写错但看起来对，页面照旧 404；绕两轮才打印返回值 |
 | C10 | **单集群验证不出多集群缺陷**：只在 `host` 上跑过的路径拼接，成员集群上可能全错 | 两个环境都是单集群（或只用 host），直到切到 A100 的 `xc` 才暴露 |
-| C11 | **测试也会固化缺陷**：断言写错位置时，测试在 host 上永远绿 | `devops.test.ts`、`configmaps.test.ts` 断言的是旧的（错误的）集群段位置 |
+| C11 | **测试也会固化缺陷**：断言写错位置时，测试在 host 上永远绿 | `devops.test.ts`、`configmaps.test.ts`、`kubectl.test.ts`、`overview-completion.test.ts` 都断言过旧的（错误的）集群段位置 |
+| C12 | **扫尾按症状找，不按文件找**：从错误 URL 反查调用者 | 上一轮按文件列了一遍，漏掉 `projects.ts` 里另一份 `namespacesPath`；本轮从 `limit=50` 反查到 `projectsApi` 一次命中 |
+| C13 | **同一个 helper 会在多个模块被复制**，收敛到一处才算完 | `namespacesPath` / `clusterSegment` 各有 5+ 份副本 |
 
 ## D. 提交
 
