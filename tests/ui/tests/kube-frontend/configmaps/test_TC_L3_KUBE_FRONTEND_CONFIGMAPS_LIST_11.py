@@ -53,6 +53,9 @@ def _check_column_chooser(ui, origin, page_spec, tab_ai_id=None, ui_config=None,
     prefix, path, storage, column, surface_prefix, *rest = page_spec
     tab_ai_id = rest[0] if rest else tab_ai_id
     resolver = rest[1] if len(rest) > 1 else None
+    # `installed-app-resources` is not covered here: it needs an installed release, and on this
+    # deployment a release cannot be removed again (DELETE answers 200 but the object stays in
+    # `creating`/`created` for minutes). A case that cannot clean up would leave objects behind.
     if resolver:
         # The object under test (a GPU card, a repo, a workspace app) is resolved from the API:
         # those come and go on a shared cluster, so a hard-coded id would rot.
@@ -154,6 +157,7 @@ TAB_PAGES = (
     ('workspace-repo-events', '/kube-frontend/workspaces/{workspace}/repos/{repo}', 'workspace-repo-events', 'type', 'workspace-repo-detail', 'workspace-repo-detail:tab:events', 'repo'),
     ('workspace-app-versions', '/kube-frontend/workspaces/{workspace}/apps/{app}', 'workspace-app-versions', 'status', 'workspace-app', 'workspace-app:tab:versions', 'app'),
     ('workspace-app-instances', '/kube-frontend/workspaces/{workspace}/apps/{app}', 'workspace-app-instances', 'status', 'workspace-app', 'workspace-app:tab:instances', 'app'),
+
 )
 
 
@@ -189,6 +193,8 @@ def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_11(configmaps_page, screenshot, pag
     # `ui.url` is the project configmaps URL; strip the tail to reach the console root.
     origin = ui.url.split('/kube-frontend/')[0]
 
+    # The helper installs a temporary release for the one case that needs it and removes it again
+    # in a finally block, so a failing assertion cannot leave the object behind.
     _check_column_chooser(ui, origin, page_spec, ui_config=ui_config, session_token=session_token)
 
     screenshot(ui.page, f'list-column-visibility-{page_spec[0]}')

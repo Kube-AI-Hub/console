@@ -696,6 +696,8 @@ export function toInstalledRelease(item: RawApplication, workspace: string): Ins
     versionId: cluster.version_id ?? version.version_id ?? '',
     versionName: version.name ?? '',
     project: cluster.zone ?? '',
+    // OpenPitrix's runtime id (`default` on this deployment). It is **not** a KubeSphere cluster
+    // name -- see `resources()`, which must be given the console cluster instead.
     cluster: cluster.runtime_id ?? '',
     owner: cluster.owner ?? '',
     createdAt: cluster.create_time ?? '',

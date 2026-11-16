@@ -31,11 +31,13 @@ import { statusTone } from './InstalledAppsPage';
 export interface InstalledAppDetailPageProps {
   workspace: string;
   releaseId: string;
+  /** The KubeSphere cluster from the route; resource reads are scoped to it. */
+  cluster?: string;
 }
 
 type Tab = 'info' | 'resources' | 'events' | 'config' | 'yaml';
 
-export function InstalledAppDetailPage({ workspace, releaseId }: InstalledAppDetailPageProps): React.ReactElement {
+export function InstalledAppDetailPage({ workspace, releaseId, cluster: routeCluster }: InstalledAppDetailPageProps): React.ReactElement {
   const t = useT();
   const queryClient = useQueryClient();
   const [tab, setTab] = React.useState<Tab>('info');
@@ -55,7 +57,10 @@ export function InstalledAppDetailPage({ workspace, releaseId }: InstalledAppDet
     queryKey: ['installed-app-resources', workspace, releaseId, release?.project, release?.name],
     queryFn: ({ signal }) =>
       installedReleasesApi(apiClient).resources({
-        cluster: release?.cluster || 'host',
+        // The console cluster from the route -- **not** `release.cluster`, which is OpenPitrix's
+        // runtime id (`default`). Using it sent the reads to `/clusters/default/...`, which 404s,
+        // and the 资源 tab said 「资源不存在」 for a release that had resources.
+        cluster: routeCluster || 'host',
         namespace: release?.project ?? '',
         releaseName: release?.name ?? '',
         signal,
