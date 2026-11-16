@@ -453,13 +453,20 @@ def sweep_interactions(
                     # that a checkbox really toggled and that nothing errored.
                     columns = page.locator(f'[data-ai-id="{prefix}:columns"]').first
                     if columns.count():
+                        headers_before = page.locator('thead th').count()
                         columns.click()
                         page.wait_for_timeout(1000)
-                        toggles = page.locator('[role="menuitemcheckbox"], [role="checkbox"]')
+                        # Each toggle carries `columns:<key>`; `:reset` is the last item and is not
+                        # a toggle, so it is excluded rather than clicked by accident.
+                        toggles = page.locator(f'[data-ai-id^="{prefix}:columns:"]:not([data-ai-id$=":reset"])')
                         if toggles.count():
                             toggles.first.click()
                             page.wait_for_timeout(1200)
-                            acted['columns'] = True
+                            headers_after = page.locator('thead th').count()
+                            # Evidence: a column really disappeared, not merely a click that landed.
+                            acted['columns'] = headers_after != headers_before
+                            toggles.first.click()
+                            page.wait_for_timeout(800)
                         page.keyboard.press('Escape')
                         page.wait_for_timeout(600)
 

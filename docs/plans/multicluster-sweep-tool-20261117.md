@@ -298,8 +298,23 @@ OK   xc     pods          sort=True search=True size=False next=True  cols=False
 
 六张列表、两集群，**0 条失败请求**；排序、搜索、每页条数、翻页、筛选都在成员集群上真实触发并通过。
 
-**列显隐（`cols=False`）仍未覆盖**：页面上有 `configmaps:columns` 按钮，但打开后找不到
-`role=menuitemcheckbox` / `role=checkbox` 的开关。如实记为 False，不写成通过。
+### 列显隐补上了（`cols=True`）
+
+上一版找 `role=menuitemcheckbox`，全 False。实际每个开关带的是 `columns:<columnKey>` 的 `data-ai-id`
+（`ResourceList` → `Dropdown` 的 `item.aiId`），`:reset` 是最后一项、不是开关。
+
+现在的证据更强：**点一下开关，然后比对表头单元格数量是否真的变了**——变了才算交互发生，再点回去复原。
+
+```
+OK   host   deployments   ... cols=True filter=False requests=6 errors=0
+OK   host   configmaps    ... cols=True filter=True  requests=7 errors=0
+OK   host   pods          ... cols=True filter=False requests=6 errors=0
+OK   xc     deployments   ... cols=True filter=False requests=6 errors=0
+OK   xc     configmaps    ... cols=True filter=True  requests=7 errors=0
+OK   xc     pods          ... cols=True filter=False requests=6 errors=0
+```
+
+六项交互在六张列表上全部为真，两集群 **0 条失败请求**。
 
 ## 16. 两个把「全绿」变成「全 SKIP」的坑
 
