@@ -136,7 +136,9 @@ def sweep(
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch()
         context = browser.new_context(viewport={'width': 1500, 'height': 1000})
-        page = None
+        page = context.new_page()
+        page.goto(f'{app}/kube-frontend/login', wait_until='domcontentloaded')
+        page.evaluate("token => localStorage.setItem('kah_token', token)", token)
 
         for cluster in clusters:
             for segment in pages:
@@ -304,7 +306,7 @@ def sweep_details(
         context = browser.new_context(viewport={'width': 1500, 'height': 1000})
         page = context.new_page()
         page.goto(f'{app}/kube-frontend/login', wait_until='domcontentloaded')
-        page.evaluate("token => localStorage.setItem('kubesphere-token', token)", token)
+        page.evaluate("token => localStorage.setItem('kah_token', token)", token)
 
         for cluster in clusters:
             for segment, resource, namespaced in DETAIL_PAGES:
@@ -380,7 +382,7 @@ def sweep_interactions(
         context = browser.new_context(viewport={'width': 1500, 'height': 1000})
         page = context.new_page()
         page.goto(f'{app}/kube-frontend/login', wait_until='domcontentloaded')
-        page.evaluate("token => localStorage.setItem('kubesphere-token', token)", token)
+        page.evaluate("token => localStorage.setItem('kah_token', token)", token)
 
         for cluster in clusters:
             for segment, scope, prefix in INTERACTION_PAGES:
@@ -392,7 +394,7 @@ def sweep_interactions(
                     page.close()
                 page = context.new_page()
                 page.goto(f'{app}/kube-frontend/login', wait_until='domcontentloaded')
-                page.evaluate("token => localStorage.setItem('kubesphere-token', token)", token)
+                page.evaluate("token => localStorage.setItem('kah_token', token)", token)
 
                 def run_once():
                     failures: list[tuple[int, str]] = []
@@ -489,9 +491,14 @@ def sweep_interactions(
 
                 acted, failures = run_once()
                 # A 5xx that disappears on a second attempt is the installation hiccuping (the pods
-                # list of a member cluster is a ~470 KB response and times out under load).
+                # list of a member cluster is a ~470 KB response and times out under load). The
+                # evidence from the first attempt is kept: a retry that lands on a slow page must
+                # not erase the interactions the first attempt did perform.
                 if failures and all(status >= 500 for status, _ in failures):
-                    acted, failures = run_once()
+                    retry_acted, failures = run_once()
+                    acted = {key: (acted[key] or retry_acted[key]) if isinstance(acted[key], bool) else acted[key]
+                             for key in acted}
+                    acted['requests'] = max(acted['requests'], retry_acted['requests'])
 
                 results.append({
                     'cluster': cluster,

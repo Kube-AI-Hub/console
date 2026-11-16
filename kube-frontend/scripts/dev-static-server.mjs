@@ -8,7 +8,13 @@
  * JSON. That failure looks like "the list is empty" rather than a routing mistake,
  * which is why the prefixes are handled explicitly here.
  *
- * Usage: dev-static-server.mjs <distDir> <port> <bffUrl>
+ * Usage: dev-static-server.mjs <distDir> <port> <bffUrl> [basePrefix]
+ *
+ * `basePrefix` is the path the build was made with (vite `base`). Without it the server
+ * assumes the build is rooted at `/`; a build made with `base: '/kube-frontend/'` asks for
+ * `/kube-frontend/assets/…`, which would otherwise miss the file and fall back to
+ * `index.html` -- the browser then refuses the module ("Expected a JavaScript module script")
+ * and the page renders blank.
  */
 import { createServer, request as httpRequest } from 'node:http';
 import { request as httpsRequest } from 'node:https';
@@ -22,7 +28,7 @@ const UPSTREAM_TIMEOUT_MS = 60_000;
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
 
-const [distDir, portArg, bffUrl] = process.argv.slice(2);
+const [distDir, portArg, bffUrl, prefixArg] = process.argv.slice(2);
 if (!distDir || !portArg || !bffUrl) {
   console.error('usage: dev-static-server.mjs <distDir> <port> <bffUrl>');
   process.exit(1);
@@ -118,7 +124,12 @@ const server = createServer(async (request, response) => {
     return;
   }
 
-  const filePath = normalize(join(distDir, url.pathname === '/' ? 'index.html' : url.pathname));
+  // Strip the build's base prefix, if one was given, before resolving on disk.
+  const basePrefix = prefixArg ? `/${prefixArg.replace(/^\/+|\/+$/g, '')}` : '';
+  const pathname = basePrefix && (url.pathname === basePrefix || url.pathname.startsWith(`${basePrefix}/`))
+    ? url.pathname.slice(basePrefix.length) || '/'
+    : url.pathname;
+  const filePath = normalize(join(distDir, pathname === '/' ? 'index.html' : pathname));
   try {
     const file = await readFile(filePath);
     response.writeHead(200, { 'content-type': contentTypes[extname(filePath)] ?? 'application/octet-stream' }).end(file);

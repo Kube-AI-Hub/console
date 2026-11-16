@@ -332,3 +332,32 @@ OK   xc     pods          ... cols=True filter=False requests=6 errors=0
 
 **注意路径本身是对的**（`clusters/xc` 在 group 之前），503 是上游超时，不是路径缺陷——
 区分这两者正是巡检要打印 URL 的原因。
+## 17. 一个把整套巡检打成「全 SKIP」的环境变化
+
+本轮中途所有页面突然 **body 长度 0**：浏览器控制台报
+`Failed to load module script: … responded with a MIME type of "text/html"`。
+
+原因不在应用，而在**构建的 `base` 变成了 `/kube-frontend/`**：`index.html` 里写的是
+`/kube-frontend/assets/index-*.js`，而本地静态服务器把 `dist` 挂在根路径，
+于是 `/kube-frontend/assets/…` 找不到文件 → 回落到 `index.html` → 浏览器拒绝执行 HTML 当模块。
+
+**修法**：`scripts/dev-static-server.mjs` 增加可选的第 4 个参数 `basePrefix`，按构建的 base 剥掉前缀再落盘：
+
+```bash
+node scripts/dev-static-server.mjs apps/console-next/dist 5179 http://127.0.0.1:8093 kube-frontend
+```
+
+不带第 4 个参数时行为不变（默认构建根路径为 `/`），B200 那套 5178 不受影响。
+
+**教训**：页面全白时先看**控制台第一条报错**，不要先怀疑数据或权限——
+这次的报错直接点名了 MIME 类型，指向资源路径而不是接口。
+
+### 顺带修掉的自身缺陷
+
+1. 页面隔离的改动误伤了 `sweep()`（把它的 page 也置空），基线直接 `AttributeError`；已修复并冒烟（nodes 7 行、configmaps 20 行）。
+2. 5xx 重试会把第一次的交互证据覆盖掉，导致「重试后反而全 SKIP」；现在**合并两次证据**（布尔取或、请求数取大）。
+
+### 未完成
+
+并行线改动后，列表工具栏的 ai-id 句柄在本轮末尾不再命中（请求有发出、`acted` 全 False）。
+六项交互的全绿结果来自**并行线改动之前**（见上节）。下一轮要在当前构建上重新对齐句柄并复跑。
