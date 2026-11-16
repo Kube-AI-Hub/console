@@ -23,6 +23,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import urllib.error
 import urllib.request
 
 #: Project-scoped pages, by route segment, used with `--scope project`.
@@ -161,6 +162,73 @@ def sweep(
     return rows
 
 
+def _call(bff: str, token: str, method: str, path: str, body: dict | None = None) -> tuple[int, str]:
+    """One request through the BFF, returning (status, text)."""
+    data = json.dumps(body).encode() if body is not None else None
+    request = urllib.request.Request(
+        f'{bff}{path}', data=data, method=method,
+        headers={'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'},
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=90) as response:
+            return response.status, response.read().decode()
+    except urllib.error.HTTPError as error:
+        return error.code, error.read().decode()
+
+
+def _collection(prefix: str, cluster: str, namespace: str, resource: str) -> str:
+    """A grouped-resource collection on a specific cluster (the member form puts the segment first)."""
+    segment = '' if cluster == 'host' else f'clusters/{cluster}/'
+    return f'/{prefix}/{segment}namespaces/{namespace}/{resource}'
+
+
+def _names(bff: str, token: str, path: str) -> set[str] | None:
+    status, text = _call(bff, token, 'GET', f'{path}?limit=-1')
+    if status != 200:
+        return None
+    return {(item.get('metadata') or {}).get('name') for item in (json.loads(text).get('items') or [])}
+
+
+def write_check(bff: str, token: str, cluster: str, host: str, namespace: str) -> dict:
+    """Prove a grouped write lands on the cluster it was sent to -- and only there.
+
+    The failure this exists for: a ConfigMap created from a member-cluster page used to land on the
+    host cluster, because the write path dropped the cluster segment. A page-level check cannot see
+    that; listing *both* clusters can.
+
+    A uniquely named Ingress is created, looked for on both clusters, then deleted. The name is
+    unique per run so a parallel run cannot collide, and the delete happens in a `finally`.
+    """
+    import uuid
+
+    name = f'tc-sweep-{uuid.uuid4().hex[:8]}'
+    member_path = _collection('apis/clusters/' + cluster + '/networking.k8s.io/v1', cluster, namespace, 'ingresses')
+    member_path = f'/apis/clusters/{cluster}/networking.k8s.io/v1/namespaces/{namespace}/ingresses'
+    host_path = f'/apis/networking.k8s.io/v1/namespaces/{namespace}/ingresses'
+    body = {
+        'apiVersion': 'networking.k8s.io/v1',
+        'kind': 'Ingress',
+        'metadata': {'name': name},
+        'spec': {'rules': [{'host': f'{name}.example.test', 'http': {'paths': [
+            {'path': '/', 'pathType': 'Prefix', 'backend': {'service': {'name': 'nginx', 'port': {'number': 80}}}},
+        ]}}]},
+    }
+    result = {'cluster': cluster, 'name': name, 'created': None, 'on_target': None, 'on_host': None, 'deleted': None, 'gone': None}
+    try:
+        status, _ = _call(bff, token, 'POST', member_path, body)
+        result['created'] = status
+        target_names = _names(bff, token, member_path) or set()
+        host_names = _names(bff, token, host_path) or set()
+        result['on_target'] = name in target_names
+        result['on_host'] = name in host_names
+    finally:
+        status, _ = _call(bff, token, 'DELETE', f'{member_path}/{name}')
+        result['deleted'] = status
+        import time
+        time.sleep(2)
+        result['gone'] = name not in (_names(bff, token, member_path) or set())
+    return result
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--app', default='http://localhost:5179')
@@ -172,13 +240,34 @@ def main() -> int:
     parser.add_argument('--project', default='spaces')
     parser.add_argument('--env-file', default='.env')
     parser.add_argument('--out', default='')
+    parser.add_argument('--write-check', action='store_true', help='prove a grouped write lands on the right cluster')
+    parser.add_argument('--namespace', default='spaces')
     args = parser.parse_args()
 
     env = _env(args.env_file)
     token = login(args.bff, env.get('KA_USERNAME', 'admin'), env.get('KA_PASSWORD', ''))
     default_pages = PROJECT_PAGES if args.scope == 'project' else PAGES
     pages = tuple(p.strip() for p in args.pages.split(',') if p.strip()) or default_pages
-    rows = sweep(args.app, token, [c.strip() for c in args.clusters.split(',') if c.strip()], pages, args.scope, args.workspace, args.project)
+    clusters = [c.strip() for c in args.clusters.split(',') if c.strip()]
+
+    if args.write_check:
+        bad = 0
+        for cluster in clusters:
+            outcome = write_check(args.bff, token, cluster, 'host', args.namespace)
+            # For the host cluster the "target" and "host" collections are the same one, so the
+            # cross-cluster assertion only means something for a member.
+            ok = (
+                outcome['created'] in (200, 201)
+                and outcome['on_target'] is True
+                and (cluster == 'host' or outcome['on_host'] is False)
+                and outcome['deleted'] in (200, 202)
+                and outcome['gone'] is True
+            )
+            bad += 0 if ok else 1
+            print(f"{'OK  ' if ok else 'FAIL'} write-check {cluster}: {outcome}")
+        return 1 if bad else 0
+
+    rows = sweep(args.app, token, clusters, pages, args.scope, args.workspace, args.project)
 
     for row in rows:
         bad = [e for e in row['errors'] if e['status'] in (401, 403, 404, 500, 502, 503)]

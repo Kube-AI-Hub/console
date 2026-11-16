@@ -79,3 +79,28 @@ A100 实测（17 页 × 2 集群 = 34 次访问）：
 在 `xc` 的集群概览点开切换器：出现 `clusters:switch-to:xc` 与 `clusters:switch-to:host` 两个句柄；
 点 `host` 后 URL 变为 `/kube-frontend/clusters/host/overview`，切换器文字变为「host 当前集群」，概览渲染 3 行。
 **切换是全站生效的（路由 + 侧栏上下文 + 数据）。**
+## 8. 写入落点检查（`--write-check`）
+
+页面巡检只能证明「读」没问题。写入是否落在正确的集群，需要**同时列举两个集群**才看得出来：
+
+```bash
+python3 tools/multicluster_sweep.py --env-file /tmp/a100.env --write-check --clusters host,xc --namespace spaces
+```
+
+它做的事：
+
+1. 用唯一名字（`tc-sweep-<随机>`）在目标集群创建一个最小 Ingress（`/apis/clusters/<c>/networking.k8s.io/v1/...`）；
+2. 在**目标集群与 host 两边**分别列举，确认「目标有、host 没有」；
+3. `finally` 里删除，并复核确实消失。
+
+A100 实测：
+
+```
+OK   write-check host: created=201 on_target=True  deleted=200 gone=True
+OK   write-check xc  : created=201 on_target=True on_host=False deleted=200 gone=True
+```
+
+复核两个集群的 `tc-*` Ingress 均为空——**没有留下任何对象**。
+
+第一版把 host 也当成「不应出现在 host」来断言，于是 host 必然 FAIL；对 host 而言目标集合与 host 集合是同一个，
+这条跨集群断言只对成员集群有意义，已改为条件断言。
