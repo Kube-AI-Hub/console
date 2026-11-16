@@ -265,6 +265,88 @@ def write_check(bff: str, token: str, cluster: str, host: str, namespace: str) -
         result['gone'] = name not in (_names(bff, token, member_path) or set())
     return result
 
+#: Detail pages: (route segment, kapis resource, whether it is namespaced). The object name is
+#: resolved from the API per cluster, because hard-coding one would rot on a shared installation.
+DETAIL_PAGES = (
+    ('nodes', 'nodes', False),
+    ('deployments', 'deployments', True),
+    ('pods', 'pods', True),
+    ('configmaps', 'configmaps', True),
+    ('persistentvolumeclaims', 'persistentvolumeclaims', True),
+    ('services', 'services', True),
+)
+
+
+def _first_name(bff: str, token: str, cluster: str, resource: str, namespaced: bool, namespace: str) -> str | None:
+    """The first object name of a collection on a specific cluster, or None."""
+    segment = '' if cluster == 'host' else f'clusters/{cluster}/'
+    ns = f'namespaces/{namespace}/' if namespaced else ''
+    path = f'/kapis/{segment}resources.kubesphere.io/v1alpha3/{ns}{resource}?limit=1'
+    status, text = _call(bff, token, 'GET', path)
+    if status != 200:
+        return None
+    items = json.loads(text).get('items') or []
+    return (items[0].get('metadata') or {}).get('name') if items else None
+
+
+def sweep_details(
+    app: str,
+    bff: str,
+    token: str,
+    clusters: list[str],
+    workspace: str,
+    project: str,
+) -> list[dict]:
+    """Visit one detail page per kind per cluster, resolving the object name from the API."""
+    from playwright.sync_api import sync_playwright
+
+    rows: list[dict] = []
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        context = browser.new_context(viewport={'width': 1500, 'height': 1000})
+        page = context.new_page()
+        page.goto(f'{app}/kube-frontend/login', wait_until='domcontentloaded')
+        page.evaluate("token => localStorage.setItem('kubesphere-token', token)", token)
+
+        for cluster in clusters:
+            for segment, resource, namespaced in DETAIL_PAGES:
+                name = _first_name(bff, token, cluster, resource, namespaced, project)
+                if not name:
+                    rows.append({'cluster': cluster, 'page': f'{segment}/<none>', 'state': 'empty', 'rows': 0, 'errors': []})
+                    continue
+                failures: list[tuple[int, str]] = []
+
+                def record(response, sink=failures):
+                    if response.status < 400 or response.url.endswith('/api/session/me'):
+                        return
+                    sink.append((response.status, response.url))
+
+                page.on('response', record)
+                url = f'{app}/kube-frontend/{workspace}/clusters/{cluster}/projects/{project}/{segment}/{name}'
+                if not namespaced:
+                    url = f'{app}/kube-frontend/clusters/{cluster}/{segment}/{name}'
+                page.goto(url, wait_until='domcontentloaded')
+                surface = page.locator('[data-ai-id$=":surface"]').last
+                state = 'none'
+                for _ in range(30):
+                    page.wait_for_timeout(2000)
+                    if surface.count() == 0:
+                        continue
+                    state = surface.get_attribute('data-ai-state') or 'none'
+                    if state != 'loading':
+                        break
+                rows.append({
+                    'cluster': cluster,
+                    'page': f'{segment}/{name}',
+                    'state': state,
+                    'rows': page.locator('[data-ai-row]').count(),
+                    'errors': [{'status': status, 'url': url.replace(app, '')} for status, url in failures],
+                })
+                page.remove_listener('response', record)
+
+        browser.close()
+    return rows
+
 def baseline(args, token: str, clusters: list[str]) -> int:
     """Everything that has to hold on a multi-cluster install, in one command.
 
@@ -288,6 +370,14 @@ def baseline(args, token: str, clusters: list[str]) -> int:
         print(f'{flag} {scope:8s} read: {len(rows)} visits, {ready} ready, {empty} empty, {len(broken)} error, {failed_requests} failed requests')
         for row in (broken + noisy)[:5]:
             print(f"       {row['cluster']} {row['page']}: {row['state']} {row['errors'][:1]}")
+
+    detail_rows = sweep_details(args.app, args.bff, token, clusters, args.workspace, args.project)
+    detail_broken = [row for row in detail_rows if row['state'] == 'error' or row['errors']]
+    failures += len(detail_broken)
+    detail_flag = 'OK  ' if not detail_broken else 'FAIL'
+    print(f'{detail_flag} detail   read: {len(detail_rows)} visits, {sum(1 for row in detail_rows if row["state"] in ("ready", "empty"))} ok, {len(detail_broken)} broken')
+    for row in detail_broken[:5]:
+        print(f"       {row['cluster']} {row['page']}: {row['state']} {row['errors'][:1]}")
 
     for cluster in clusters:
         outcome = write_check(args.bff, token, cluster, 'host', args.namespace)
@@ -321,6 +411,7 @@ def main() -> int:
     parser.add_argument('--write-check', action='store_true', help='prove a grouped write lands on the right cluster')
     parser.add_argument('--namespace', default='spaces')
     parser.add_argument('--baseline', action='store_true', help='run read sweeps (both scopes) and the write check')
+    parser.add_argument('--details', action='store_true', help='also visit one detail page per kind per cluster')
     args = parser.parse_args()
 
     env = _env(args.env_file)
@@ -328,6 +419,17 @@ def main() -> int:
     default_pages = PROJECT_PAGES if args.scope == 'project' else PAGES
     pages = tuple(p.strip() for p in args.pages.split(',') if p.strip()) or default_pages
     clusters = [c.strip() for c in args.clusters.split(',') if c.strip()]
+
+    if args.details and not args.baseline:
+        rows = sweep_details(args.app, args.bff, token, clusters, args.workspace, args.project)
+        bad = 0
+        for row in rows:
+            broken = row['state'] == 'error'
+            noisy = [e for e in row['errors'] if e['status'] in (401, 403, 404, 500, 502, 503)]
+            bad += 1 if broken or noisy else 0
+            flag = 'FAIL' if broken or noisy else 'OK  '
+            print(f"{flag} {row['cluster']:6s} {row['page'][:44]:44s} state={row['state']:8s} errors={len(noisy)}")
+        return 1 if bad else 0
 
     if args.baseline:
         return baseline(args, token, clusters)

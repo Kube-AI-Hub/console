@@ -137,3 +137,49 @@ baseline PASS in 283s
 
 退出码非 0 即失败，可直接作为「多集群改动」的提交/发布闸门。**225 秒覆盖 80 次页面访问 + 2 次写入**，
 相当于把过去几轮手工验证压成一条命令。
+## 10. 详情页巡检（`--details`）
+
+列表页与深度页都通过后，最后补上**详情页**：每个集群、每种对象各打开一个详情页，对象名由 API 现查。
+
+```bash
+python3 tools/multicluster_sweep.py --env-file /tmp/a100.env --details --clusters host,xc --project spaces
+```
+
+覆盖 6 种：节点、部署、容器组、配置字典、存储卷声明、服务。
+
+### 首跑就抓到一个真缺陷
+
+`xc` 的部署详情页报了 2 条 404：
+
+```
+404 /apis/apps/v1/clusters/xc/namespaces/spaces/deployments/<name>
+404 /apis/apps/v1/clusters/xc/namespaces/spaces/replicasets?labelSelector=…
+```
+
+`packages/api-client/src/workloads.ts` 的 `workloadPath` 是**又一个**自带 cluster 段的路径构造器，
+把 `clusters/<id>` 拼在 group 之后——与前面几轮修的是同一个根因，只是这份副本漏了。
+
+改成 `clusterScoped(kubePrefix(resource), cluster, …)` 后，同一页 404 归零：
+
+```
+OK   xc     deployments/csghub-argo-workflow-controller  state=ready  errors=0
+```
+
+### 复跑结果
+
+```
+OK   host   nodes/a100-04                                state=ready errors=0
+OK   host   deployments/u-admin-mineru141-easydataset-20 state=ready errors=0
+OK   host   pods/g4hvt7hknqww                            state=ready errors=0
+OK   host   configmaps/istio-ca-root-cert                state=ready errors=0
+OK   host   persistentvolumeclaims/admin                 state=ready errors=0
+OK   host   services/u-admin-mineru141-easydataset-20261 state=ready errors=0
+OK   xc     nodes/hw-4090d-50                            state=ready errors=0
+OK   xc     deployments/csghub-argo-workflow-controller  state=ready errors=0
+OK   xc     pods/csghub-argo-workflow-controller-5bb84dc state=ready errors=0
+OK   xc     configmaps/nginx-docker-configmap            state=ready errors=0
+OK   xc     persistentvolumeclaims/<none>                state=empty errors=0
+OK   xc     services/<none>                              state=empty errors=0
+```
+
+**12 次详情页访问，0 条失败请求。**

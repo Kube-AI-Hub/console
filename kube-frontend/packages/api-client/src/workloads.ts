@@ -1,4 +1,5 @@
 import type { Client } from './client';
+import { clusterScoped } from './paths';
 import { annotationKeys, baseOf, kubePrefix, resourceApi, type KubeObject, type ResourceBase } from './resources';
 
 /**
@@ -809,12 +810,12 @@ export function revisionTemplate(item: KubeReplicaSet): Record<string, unknown> 
   return template;
 }
 
-/** Cluster/namespace-aware path for a core-group resource (deployments, replicasets). */
+/** Cluster/namespace-aware path for a grouped workload resource (deployments, replicasets). */
 function workloadPath(cluster: string, resource: string, namespace: string, name?: string): string {
-  const clusterSegment = cluster && cluster !== 'host' ? `clusters/${encodeURIComponent(cluster)}/` : '';
   const namespaceSegment = namespace ? `namespaces/${encodeURIComponent(namespace)}/` : '';
   const suffix = name ? `/${encodeURIComponent(name)}` : '';
-  return `${kubePrefix(resource)}/${clusterSegment}${namespaceSegment}${resource}${suffix}`;
+  // `clusters/<id>` goes before the group, not after the version: see `clusterScoped`.
+  return clusterScoped(kubePrefix(resource), cluster, `${namespaceSegment}${resource}${suffix}`);
 }
 
 /** A pod owned by the workload being viewed. */
