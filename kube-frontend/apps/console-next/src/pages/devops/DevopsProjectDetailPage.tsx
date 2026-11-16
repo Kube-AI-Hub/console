@@ -379,7 +379,7 @@ export function DevopsProjectDetailPage({ cluster, name }: DevopsProjectDetailPa
           <Link
             to="/kube-frontend/clusters/$cluster/devops"
             params={{ cluster }}
-            className="text-sm text-ai-accent hover:underline"
+            className="text-sm text-ai-link hover:underline"
             data-ai-id="devops-detail:back"
           >
             {'← ' + t('devops.list.title')}
@@ -501,7 +501,7 @@ export function DevopsProjectDetailPage({ cluster, name }: DevopsProjectDetailPa
                               <Link
                                 to="/kube-frontend/clusters/$cluster/devops/$name/pipelines/$pipeline"
                                 params={{ cluster, name, pipeline: row.name }}
-                                className="font-medium text-ai-accent hover:underline"
+                                className="font-medium text-ai-link hover:underline"
                                 data-ai-id={'devops-detail:pipeline:' + row.name}
                               >
                                 {row.alias || row.name}

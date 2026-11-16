@@ -89,7 +89,7 @@ export function ContainerDetailPage({ workspace, cluster, namespace, pod, contai
         <Link
           to="/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/pods/$name"
           params={{ ...podLinks, name: pod }}
-          className="text-sm text-ai-accent hover:underline"
+          className="text-sm text-ai-link hover:underline"
           {...actionProps('container-detail:back')}
         >
           ← {pod}

@@ -54,7 +54,7 @@ export function GpuDetailPage({ cluster }: GpuDetailPageProps): React.ReactEleme
         <Link
           to="/kube-frontend/clusters/$cluster/gpus"
           params={{ cluster }}
-          className="text-sm text-ai-accent hover:underline"
+          className="text-sm text-ai-link hover:underline"
           {...actionProps('gpu-detail:back')}
         >
           ← {t('cluster.gpu.title')}
@@ -114,7 +114,7 @@ export function GpuDetailPage({ cluster }: GpuDetailPageProps): React.ReactEleme
                   <Link
                     to="/kube-frontend/clusters/$cluster/nodes/$name"
                     params={{ cluster, name: gpu.node }}
-                    className="text-ai-accent hover:underline"
+                    className="text-ai-link hover:underline"
                     {...actionProps(`gpu-detail:node-link:${gpu.node}`)}
                   >
                     {gpu.node || '-'}

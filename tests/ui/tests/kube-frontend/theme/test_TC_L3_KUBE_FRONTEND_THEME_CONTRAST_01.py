@@ -23,14 +23,17 @@ THEMES = ('dark', 'light')
 #: They are listed rather than ignored so the suite stays honest: a *new* violation still fails, and
 #: an entry that stops reproducing also fails (the fix landed -- delete the entry). Both directions
 #: are asserted below.
-KNOWN_CONTRAST_DEFECTS = {
-    # violet-300 (--ai-accent) used as link text on --ai-surface-2 (navy-500): 2.84:1.
-    # ai-kit's link-styled button paints `text-ai-accent`; the accent is a fill colour, not a text
-    # colour, so it needs a text-specific token (a lighter violet) before this can pass.
-    '查看文档': {'ratio': 2.84, 'defect': 'link-accent-on-surface-2' },
-    # status badge: --ai-success (0 138 92) on the light page background is 4.07:1, just under AA.
-    'Active': {'ratio': 4.07, 'defect': 'success-text-on-light-bg'},
-}
+#:
+#: Empty today, and that is the point: both entries that lived here were fixed.
+#:
+#:  - the link was painted with `--ai-accent` (a fill colour) at 2.84:1; ai-kit now has a dedicated
+#:    `--ai-link` text token, chosen per theme to clear AA on every surface;
+#:  - the status badge used the light theme's `--ai-success` at 4.07:1; the light block now uses a
+#:    darker mint (5.01:1).
+#:
+#: The two-way guard below still fails if either comes back, and the token contract
+#: (`config/theme-contrast-contract.test.ts`) keeps the new token honest per surface.
+KNOWN_CONTRAST_DEFECTS = {}
 
 
 def _apply_theme(page, theme: str) -> None:

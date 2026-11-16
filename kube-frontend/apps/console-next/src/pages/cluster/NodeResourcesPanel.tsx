@@ -32,7 +32,7 @@ export function NodeResourcesPanel({ cluster, node, kind }: { cluster: string; n
       { key: 'name', title: t('cluster.column.name'), render: (row) => {
         const pod = row as WorkloadSummary;
         const workspace = workspaceOf.get(pod.namespace) ?? 'public';
-        return <a className="text-ai-accent hover:underline"
+        return <a className="text-ai-link hover:underline"
           href={`/kube-frontend/${encodeURIComponent(workspace)}/clusters/${encodeURIComponent(cluster)}/projects/${encodeURIComponent(pod.namespace)}/pods/${encodeURIComponent(pod.name)}`}>{pod.name}</a>;
       } },
       { key: 'namespace', title: t('cluster.workloads.column.project') },

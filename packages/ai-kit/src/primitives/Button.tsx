@@ -52,7 +52,9 @@ const buttonVariants = cva(
           'hover:shadow-[0_8px_20px_-8px_rgb(var(--ai-danger)/0.7)]',
           'active:translate-y-0 active:shadow-none',
         ].join(' '),
-        link: 'bg-transparent text-ai-accent underline-offset-4 hover:underline',
+        // `text-ai-link`, not `text-ai-accent`: the accent is a fill colour and only reached 2.84:1
+        // as text on an elevated surface (measured by the rendered contrast audit).
+        link: 'bg-transparent text-ai-link underline-offset-4 hover:underline',
       },
       size: {
         sm: 'h-8 px-3 text-xs',

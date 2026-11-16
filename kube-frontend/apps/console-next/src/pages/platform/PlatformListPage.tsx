@@ -109,7 +109,7 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
                       <Link
                         to="/kube-frontend/access/users/$name"
                         params={{ name: user.username }}
-                        className="truncate font-medium text-ai-accent hover:underline"
+                        className="truncate font-medium text-ai-link hover:underline"
                       >
                         {user.username}
                       </Link>
@@ -164,7 +164,7 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
                           <Link
                           to="/kube-frontend/access/clusterroles/$name"
                           params={{ name: role.name }}
-                          className="truncate font-medium text-ai-accent hover:underline"
+                          className="truncate font-medium text-ai-link hover:underline"
                         >
                           {role.alias || role.name}
                         </Link>
@@ -201,7 +201,7 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
                         <Link
                           to="/kube-frontend/access/workspaces/$name"
                           params={{ name: ws.name }}
-                          className="truncate font-medium text-ai-accent hover:underline"
+                          className="truncate font-medium text-ai-link hover:underline"
                         >
                           {ws.alias || ws.name}
                         </Link>

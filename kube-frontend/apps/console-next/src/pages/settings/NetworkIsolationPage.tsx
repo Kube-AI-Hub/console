@@ -106,7 +106,7 @@ export function NetworkIsolationPage({ workspace, cluster, namespace }: NetworkI
                   from here, not by hunting for the object's YAML in kubectl. */}
               <a
                 href={`/kube-frontend/${encodeURIComponent(workspace)}/clusters/${encodeURIComponent(cluster)}/projects/${encodeURIComponent(namespace)}/networkpolicies/${encodeURIComponent(row.name)}`}
-                className="truncate font-medium text-ai-accent hover:underline"
+                className="truncate font-medium text-ai-link hover:underline"
                 {...actionProps(`networkpolicies:open:${row.name}`)}
               >
                 {row.alias || row.name}

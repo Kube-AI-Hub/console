@@ -39,6 +39,7 @@ const aiKitPreset: Partial<Config> = {
           'accent-fg': withAlpha('--ai-accent-fg'),
           'accent-soft': withAlpha('--ai-accent-soft'),
           'accent-strong': withAlpha('--ai-accent-strong'),
+          link: withAlpha('--ai-link'),
 
           info: withAlpha('--ai-info'),
           success: withAlpha('--ai-success'),

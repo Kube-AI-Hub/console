@@ -73,7 +73,7 @@ export function StorageClassDetailPage(_props: StorageClassDetailPageProps): Rea
   return (
     <AiSurface as="section" aiId="sc-detail:surface" state={state} className="flex min-w-0 flex-col gap-4">
       <header className="flex flex-col gap-1">
-        <Link to="/kube-frontend/clusters/$cluster/storageclasses" params={{ cluster }} className="text-sm text-ai-accent hover:underline">
+        <Link to="/kube-frontend/clusters/$cluster/storageclasses" params={{ cluster }} className="text-sm text-ai-link hover:underline">
           ← {t('cluster.storageClasses.title')}
         </Link>
         <div className="flex flex-wrap items-center gap-2">
@@ -187,7 +187,7 @@ export function StorageClassDetailPage(_props: StorageClassDetailPageProps): Rea
                                 page: 'persistentvolumeclaims',
                                 name: claim.name,
                               })}
-                              className="font-medium text-ai-accent hover:underline"
+                              className="font-medium text-ai-link hover:underline"
                               data-ai-id={'sc-detail:pvc:' + handle + ':open'}
                             >
                               {claim.name}

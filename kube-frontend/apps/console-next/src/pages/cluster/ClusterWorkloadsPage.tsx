@@ -89,7 +89,7 @@ export function ClusterWorkloadsPage({ cluster, kind }: ClusterWorkloadsPageProp
             return (
               <a
                 href={`/kube-frontend/${workspace}/clusters/${encodeURIComponent(cluster)}/projects/${encodeURIComponent(row.namespace)}/${kind}/${encodeURIComponent(row.name)}`}
-                className="truncate font-medium text-ai-accent hover:underline"
+                className="truncate font-medium text-ai-link hover:underline"
                 {...actionProps(`${aiId}:name:${row.name}`)}
               >
                 {row.name}

@@ -168,7 +168,7 @@ export function FederatedProjectsPage({ workspace }: FederatedProjectsPageProps)
           render: (row) => (
             <a
               href={'/kube-frontend/workspaces/' + encodeURIComponent(workspace) + '/federatedprojects/' + encodeURIComponent(row.name)}
-              className="inline-flex min-h-6 min-w-0 flex-col justify-center text-ai-accent hover:underline"
+              className="inline-flex min-h-6 min-w-0 flex-col justify-center text-ai-link hover:underline"
               {...actionProps('federated-projects:open:' + row.name)}
             >
               <span className="truncate font-medium">{row.name}</span>

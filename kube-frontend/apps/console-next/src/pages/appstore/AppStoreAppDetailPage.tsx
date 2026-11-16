@@ -75,7 +75,7 @@ export function AppStoreAppDetailPage({ appId }: AppStoreAppDetailPageProps): Re
   const state = query.isPending ? 'loading' : query.isError ? 'error' : 'ready';
 
   const back = (
-    <Link to="/kube-frontend/apps" className="text-sm text-ai-accent hover:underline" {...actionProps('app-detail:back')}>
+    <Link to="/kube-frontend/apps" className="text-sm text-ai-link hover:underline" {...actionProps('app-detail:back')}>
       ← {t('store.detail.back')}
     </Link>
   );

@@ -57,7 +57,7 @@ function ServiceAccountDetailRoute() {
         <Link
           to={listRoute}
           params={listParams}
-          className="inline-flex items-center gap-1 text-xs text-ai-accent hover:underline"
+          className="inline-flex items-center gap-1 text-xs text-ai-link hover:underline"
           {...actionProps('serviceaccount-detail:back')}
         >
           <Icon name="chevron-left" size={12} />

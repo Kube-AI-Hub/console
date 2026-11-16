@@ -101,7 +101,7 @@ export function WorkspaceOverviewPage({ workspace }: WorkspaceOverviewPageProps)
             <p className="text-2xl font-semibold tabular-nums text-ai-fg" data-ai-id="workspace-overview:project-count">
               {projects.data?.length ?? 0}
             </p>
-            <a className="text-xs text-ai-accent hover:underline" href={`/kube-frontend/workspaces/${encodeURIComponent(workspace)}/projects`}>
+            <a className="text-xs text-ai-link hover:underline" href={`/kube-frontend/workspaces/${encodeURIComponent(workspace)}/projects`}>
               {t('workspace.overview.viewProjects')}
             </a>
           </section>
@@ -110,7 +110,7 @@ export function WorkspaceOverviewPage({ workspace }: WorkspaceOverviewPageProps)
             <p className="text-2xl font-semibold tabular-nums text-ai-fg" data-ai-id="workspace-overview:member-count">
               {members.data?.length ?? 0}
             </p>
-            <a className="text-xs text-ai-accent hover:underline" href={`/kube-frontend/workspaces/${encodeURIComponent(workspace)}/members`}>
+            <a className="text-xs text-ai-link hover:underline" href={`/kube-frontend/workspaces/${encodeURIComponent(workspace)}/members`}>
               {t('workspace.overview.viewMembers')}
             </a>
           </section>

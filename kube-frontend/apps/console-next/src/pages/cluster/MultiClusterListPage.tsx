@@ -132,7 +132,7 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
               <Link
                 to="/kube-frontend/clusters/$cluster/overview"
                 params={{ cluster: row.name }}
-                className="truncate font-medium text-ai-accent hover:underline"
+                className="truncate font-medium text-ai-link hover:underline"
                 title={row.name}
               >
                 {row.alias || row.name}

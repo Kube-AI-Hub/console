@@ -114,7 +114,7 @@ export function GpusPage({ cluster }: GpusPageProps): React.ReactElement {
               <Link
                 to="/kube-frontend/clusters/$cluster/nodes/$name"
                 params={{ cluster, name: row.node }}
-                className="truncate font-medium text-ai-accent hover:underline"
+                className="truncate font-medium text-ai-link hover:underline"
                 {...actionProps(`cluster-gpus:node:${row.node}`)}
               >
                 {row.node || '-'}
@@ -137,7 +137,7 @@ export function GpusPage({ cluster }: GpusPageProps): React.ReactElement {
             <Link
               to="/kube-frontend/clusters/$cluster/gpus/$name"
               params={{ cluster, name: row.uuid }}
-              className="block max-w-64 truncate font-mono text-[11px] text-ai-accent hover:underline"
+              className="block max-w-64 truncate font-mono text-[11px] text-ai-link hover:underline"
               title={row.uuid}
               {...actionProps(`cluster-gpus:uuid:${row.uuid}`)}
             >

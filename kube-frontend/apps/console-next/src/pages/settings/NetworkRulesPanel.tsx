@@ -221,7 +221,7 @@ export function NetworkRulesPanel({ workspace, cluster, namespace }: NetworkRule
                         '/networkpolicies/' +
                         encodeURIComponent(row.policy)
                       }
-                      className="inline-flex min-h-6 items-center font-mono text-[11px] text-ai-accent hover:underline"
+                      className="inline-flex min-h-6 items-center font-mono text-[11px] text-ai-link hover:underline"
                     >
                       {row.policy}
                     </a>

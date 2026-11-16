@@ -126,7 +126,7 @@ export function ImageBuilderDetailPage({ workspace, cluster, namespace, name }: 
           <div className="flex flex-col items-start gap-2 rounded-ai-md border border-ai-line p-8" data-ai-id="image-builder-detail:not-found">
             <p className="text-sm font-medium text-ai-fg">{t('error.notFound')}</p>
             <p className="text-xs text-ai-fg-muted">{errorMessage(t, query.error)}</p>
-            <Link to={listHref} className="text-xs text-ai-accent hover:underline" data-ai-id="image-builder-detail:back-to-list">
+            <Link to={listHref} className="text-xs text-ai-link hover:underline" data-ai-id="image-builder-detail:back-to-list">
               {'← ' + t('devopsProject.s2ibuilder.title')}
             </Link>
           </div>
@@ -140,7 +140,7 @@ export function ImageBuilderDetailPage({ workspace, cluster, namespace, name }: 
   return (
     <AiSurface as="section" aiId="image-builder-detail:surface" state={state} className="flex min-w-0 flex-col gap-4">
       <div>
-        <Link to={listHref} className="inline-flex items-center gap-1 text-xs text-ai-accent hover:underline" data-ai-id="image-builder-detail:back">
+        <Link to={listHref} className="inline-flex items-center gap-1 text-xs text-ai-link hover:underline" data-ai-id="image-builder-detail:back">
           <Icon name="chevron-left" size={12} />
           {t('devopsProject.s2ibuilder.title')}
         </Link>

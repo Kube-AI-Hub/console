@@ -114,7 +114,7 @@ export function ClusterVolumeSnapshotsPage({ cluster }: ClusterVolumeSnapshotsPa
                 namespace: row.namespace,
                 name: row.name,
               })}
-              className="truncate font-medium text-ai-accent hover:underline"
+              className="truncate font-medium text-ai-link hover:underline"
               {...actionProps(AI_ID + ':name:' + row.namespace + '/' + row.name)}
             >
               {row.name}
@@ -133,7 +133,7 @@ export function ClusterVolumeSnapshotsPage({ cluster }: ClusterVolumeSnapshotsPa
           render: (row) => (
             <a
               href={projectSnapshotUrl({ workspace: workspaceOf.get(row.namespace) ?? 'public', cluster, namespace: row.namespace })}
-              className="text-ai-fg-secondary hover:text-ai-accent hover:underline"
+              className="text-ai-fg-secondary hover:text-ai-link hover:underline"
             >
               {row.namespace || '-'}
             </a>

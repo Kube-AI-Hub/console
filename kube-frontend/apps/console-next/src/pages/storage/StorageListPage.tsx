@@ -209,7 +209,7 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
                     <Link
                       to="/kube-frontend/clusters/$cluster/persistentvolumes/$name"
                       params={{ cluster, name: row.volumeName }}
-                      className="inline-flex min-h-6 items-center text-ai-accent hover:underline"
+                      className="inline-flex min-h-6 items-center text-ai-link hover:underline"
                       data-ai-id={`persistentvolumeclaims:volume:${row.volumeName}`}
                     >
                       {row.volumeName}

@@ -24,7 +24,7 @@ export function NodeHardwarePanel({ cluster, node }: { cluster: string; node: No
         <Table rows={cards.data ?? []} loading={cards.isPending} rowKey={(row) => row.uuid} empty={t('common.empty')} columns={[
           { key: 'index', title: t('cluster.gpu.column.index'), render: (row) => row.index },
           { key: 'uuid', title: t('cluster.gpu.column.uuid'), render: (row) => <Link to="/kube-frontend/clusters/$cluster/gpus/$name"
-            params={{ cluster, name: row.uuid }} className="block max-w-64 truncate text-ai-accent" title={row.uuid}>{row.uuid}</Link> },
+            params={{ cluster, name: row.uuid }} className="block max-w-64 truncate text-ai-link" title={row.uuid}>{row.uuid}</Link> },
           { key: 'health', title: t('cluster.column.status'), className: 'whitespace-nowrap', render: (row) => <Badge tone={row.health ? 'success' : 'warning'}>{t(row.health ? 'cluster.gpu.healthy' : 'cluster.gpu.unhealthy')}</Badge> },
           { key: 'model', title: t('cluster.gpu.column.model'), render: (row) => row.model || '-' },
           { key: 'memory', title: t('cluster.gpu.column.memory'), className: 'whitespace-nowrap', render: (row) => row.memoryTotalMiB > 0 ? `${formatGpuMemory(row.memoryUsedMiB)} / ${formatGpuMemory(row.memoryTotalMiB)}` : '-' },

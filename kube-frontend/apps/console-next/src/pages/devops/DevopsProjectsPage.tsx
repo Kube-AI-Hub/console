@@ -128,7 +128,7 @@ export function DevopsProjectsPage({ cluster }: DevopsProjectsPageProps): React.
             <Link
               to="/kube-frontend/clusters/$cluster/devops/$name"
               params={{ cluster, name: row.name }}
-              className="truncate font-medium text-ai-accent hover:underline"
+              className="truncate font-medium text-ai-link hover:underline"
               data-ai-id={`devops:link:${row.name}`}
             >
               {row.name}

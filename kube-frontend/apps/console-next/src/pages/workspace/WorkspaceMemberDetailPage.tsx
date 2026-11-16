@@ -77,7 +77,7 @@ function MemberResourceTable({
             kind === 'projects' && cluster ? (
               <a
                 href={`/kube-frontend/${encodeURIComponent(workspace)}/clusters/${encodeURIComponent(cluster)}/projects/${encodeURIComponent(row.name)}/overview`}
-                className="truncate font-medium text-ai-accent hover:underline"
+                className="truncate font-medium text-ai-link hover:underline"
                 {...actionProps(`workspace-member-${kind}:name:${row.name}`)}
               >
                 {row.alias || row.name}
@@ -173,7 +173,7 @@ export function WorkspaceMemberDetailPage({ workspace, name }: WorkspaceMemberDe
           <Link
             to="/kube-frontend/workspaces/$workspace/members"
             params={{ workspace }}
-            className="text-sm text-ai-accent hover:underline"
+            className="text-sm text-ai-link hover:underline"
             {...actionProps('workspace-member-detail:back')}
           >
             ← {t('workspace.members.back')}

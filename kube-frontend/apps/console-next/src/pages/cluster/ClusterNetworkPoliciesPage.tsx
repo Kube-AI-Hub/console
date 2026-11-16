@@ -92,7 +92,7 @@ export function ClusterNetworkPoliciesPage({ cluster }: ClusterNetworkPoliciesPa
             return (
               <a
                 href={`/kube-frontend/${encodeURIComponent(workspace)}/clusters/${encodeURIComponent(cluster)}/projects/${encodeURIComponent(row.namespace)}/settings/network`}
-                className="truncate font-medium text-ai-accent hover:underline"
+                className="truncate font-medium text-ai-link hover:underline"
                 {...actionProps(`cluster-networkpolicies:name:${row.namespace}/${row.name}`)}
               >
                 {row.name}

@@ -61,7 +61,7 @@ export function NetworkPolicyDetailPage({ workspace, cluster, namespace }: Netwo
           <Link
             to="/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/networkpolicies"
             params={{ workspace, cluster, namespace }}
-            className="text-sm text-ai-accent hover:underline"
+            className="text-sm text-ai-link hover:underline"
             {...actionProps('networkpolicy-detail:back')}
           >
             ← {t('settings.network.title')}

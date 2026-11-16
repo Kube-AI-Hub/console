@@ -115,7 +115,7 @@ export function WorkspaceMembersPage({ workspace }: WorkspaceMembersPageProps): 
               <Link
                 to="/kube-frontend/workspaces/$workspace/members/$name"
                 params={{ workspace, name: row.username }}
-                className="truncate font-medium text-ai-accent hover:underline"
+                className="truncate font-medium text-ai-link hover:underline"
                 {...actionProps(`workspace-members:name:${row.username}`)}
               >
                 {row.username}

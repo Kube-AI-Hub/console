@@ -88,7 +88,7 @@ export function NodeDetailPage({ cluster, name: nameProp, backTo = '/kube-fronte
     <AiSurface as="section" aiId="node-detail:surface" state={state} className="flex min-w-0 flex-col gap-4">
       <header className="flex flex-col gap-1">
         <div className="flex items-center gap-2">
-          <Link to={backTo} params={{ cluster }} className="text-sm text-ai-accent hover:underline">
+          <Link to={backTo} params={{ cluster }} className="text-sm text-ai-link hover:underline">
             ← {t('cluster.nodes.title')}
           </Link>
         </div>

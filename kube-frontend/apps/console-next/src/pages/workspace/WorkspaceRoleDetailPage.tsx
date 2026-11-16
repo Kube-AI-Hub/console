@@ -126,7 +126,7 @@ export function WorkspaceRoleDetailPage({ workspace, name }: WorkspaceRoleDetail
         <Link
           to="/kube-frontend/workspaces/$workspace/roles"
           params={{ workspace }}
-          className="text-sm text-ai-accent hover:underline"
+          className="text-sm text-ai-link hover:underline"
           data-ai-id="workspace-role-detail:back"
         >
           ← {t('workspace.roles.title')}

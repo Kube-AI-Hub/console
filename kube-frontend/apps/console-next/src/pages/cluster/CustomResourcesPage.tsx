@@ -87,7 +87,7 @@ export function CustomResourcesPage({ cluster }: CustomResourcesPageProps): Reac
               <Link
                 to="/kube-frontend/clusters/$cluster/custom-resources/$name"
                 params={{ cluster, name: row.name }}
-                className="truncate font-medium text-ai-accent hover:underline"
+                className="truncate font-medium text-ai-link hover:underline"
               >
                 {row.kind || '-'}
               </Link>

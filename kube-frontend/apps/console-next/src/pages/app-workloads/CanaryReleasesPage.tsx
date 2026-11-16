@@ -90,7 +90,7 @@ export function CanaryReleasesPage({ workspace, cluster, namespace }: CanaryRele
                 to="/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/grayrelease/$name"
                 params={{ workspace, cluster, namespace, name: row.name }}
                 data-ai-id={'grayrelease:open:' + row.name}
-                className="truncate font-medium text-ai-accent hover:underline"
+                className="truncate font-medium text-ai-link hover:underline"
               >
                 {row.alias || row.name}
               </Link>

@@ -50,7 +50,7 @@ export function WorkspaceDetailPage(_props: WorkspaceDetailPageProps): React.Rea
   return (
     <AiSurface as="section" aiId="workspace-detail:surface" state={state} className="flex min-w-0 flex-col gap-4">
       <header className="flex flex-col gap-1">
-        <Link to="/kube-frontend/access/workspaces" className="text-sm text-ai-accent hover:underline">
+        <Link to="/kube-frontend/access/workspaces" className="text-sm text-ai-link hover:underline">
           ← {t('platform.workspaces.title')}
         </Link>
         <h1 className="text-lg font-semibold text-ai-fg">{workspace?.alias || name}</h1>
@@ -122,7 +122,7 @@ export function WorkspaceDetailPage(_props: WorkspaceDetailPageProps): React.Rea
                     <Link
                       to="/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/configmaps"
                       params={{ workspace: name, cluster, namespace: project.name }}
-                      className="truncate font-medium text-ai-accent hover:underline"
+                      className="truncate font-medium text-ai-link hover:underline"
                     >
                       {project.alias || project.name}
                     </Link>

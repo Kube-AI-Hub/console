@@ -213,7 +213,7 @@ export function ServiceAccountsPage({ workspace, cluster, namespace }: ServiceAc
                   <Link
                     key={secret}
                     to={secretsLink(row, secret)}
-                    className="truncate text-ai-accent hover:underline"
+                    className="truncate text-ai-link hover:underline"
                     title={secret}
                     {...actionProps(`serviceaccounts:open-secret:${secret}`)}
                   >

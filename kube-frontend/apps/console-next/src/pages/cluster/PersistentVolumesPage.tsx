@@ -73,7 +73,7 @@ export function PersistentVolumesPage({ cluster }: PersistentVolumesPageProps): 
               <Link
                 to="/kube-frontend/clusters/$cluster/persistentvolumes/$name"
                 params={{ cluster, name: row.name }}
-                className="truncate font-medium text-ai-accent hover:underline"
+                className="truncate font-medium text-ai-link hover:underline"
               >
                 {row.name}
               </Link>

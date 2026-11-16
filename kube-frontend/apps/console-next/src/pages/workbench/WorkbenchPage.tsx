@@ -112,7 +112,7 @@ function WorkspaceSections({
       <div className="rounded-ai-md border border-ai-line p-6 text-center" data-ai-id="workbench:empty">
         <p className="text-sm text-ai-fg">{t('workbench.emptyTitle')}</p>
         <p className="mt-1 text-xs text-ai-fg-muted">{t('workbench.emptyHint')}</p>
-        <Link to="/kube-frontend/clusters" className="mt-3 inline-block text-sm text-ai-accent hover:underline">
+        <Link to="/kube-frontend/clusters" className="mt-3 inline-block text-sm text-ai-link hover:underline">
           {t('workbench.gotoPlatform')}
         </Link>
       </div>

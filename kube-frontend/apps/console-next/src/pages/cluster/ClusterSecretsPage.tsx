@@ -85,7 +85,7 @@ export function ClusterSecretsPage({ cluster }: ClusterSecretsPageProps): React.
                 page: 'secrets',
                 name: row.name,
               })}
-              className="truncate font-medium text-ai-accent hover:underline"
+              className="truncate font-medium text-ai-link hover:underline"
               {...actionProps(AI_ID + ':name:' + row.namespace + '/' + row.name)}
             >
               {row.name}

@@ -134,7 +134,7 @@ export function StorageDetailPage({ kind, cluster, namespace, name }: StorageDet
       <div>
         <a
           href={back}
-          className="inline-flex items-center gap-1 text-xs text-ai-accent hover:underline"
+          className="inline-flex items-center gap-1 text-xs text-ai-link hover:underline"
           {...actionProps(`${kind}-detail:back`)}
           onClick={(event) => {
             if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
@@ -474,7 +474,7 @@ function SnapshotsPanel({
                   className="border-b border-ai-line last:border-b-0"
                 >
                   <td className="py-2 pr-3">
-                    <a href={snapshotHref(snapshot.name)} className="font-medium text-ai-accent hover:underline">
+                    <a href={snapshotHref(snapshot.name)} className="font-medium text-ai-link hover:underline">
                       {snapshot.name}
                     </a>
                   </td>

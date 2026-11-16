@@ -125,7 +125,7 @@ function NamespaceListPage({ kind, cluster }: ClusterListPageProps): React.React
                       <Link
                         to="/kube-frontend/clusters/$cluster/nodes/$name"
                         params={{ cluster, name: node.name }}
-                        className="truncate font-medium text-ai-accent hover:underline"
+                        className="truncate font-medium text-ai-link hover:underline"
                       >
                         {node.name}
                       </Link>
@@ -220,7 +220,7 @@ function NamespaceListPage({ kind, cluster }: ClusterListPageProps): React.React
                       <Link
                         to="/kube-frontend/clusters/$cluster/namespaces/$name"
                         params={{ cluster, name: project.name }}
-                        className="truncate font-medium text-ai-accent hover:underline"
+                        className="truncate font-medium text-ai-link hover:underline"
                         data-ai-id={`projects:link:${project.name}`}
                       >
                         {project.name}

@@ -104,7 +104,7 @@ export function ClusterGatewaysPage({ cluster, component = 'cluster' }: {
 
   const projectNameCell = (row: ClusterGateway) => (
     <a
-      className="font-medium text-ai-accent hover:underline"
+      className="font-medium text-ai-link hover:underline"
       href={
         '/kube-frontend/' +
         encodeURIComponent(workspaceOf.get(row.namespace) ?? 'public') +
@@ -133,7 +133,7 @@ export function ClusterGatewaysPage({ cluster, component = 'cluster' }: {
         title: t('settings.gateway.name'),
         render: (row) => (
           <a
-            className="font-medium text-ai-accent hover:underline"
+            className="font-medium text-ai-link hover:underline"
             href={'/kube-frontend/clusters/' + encodeURIComponent(cluster) + '/gateways/' + encodeURIComponent(row.name)}
             data-ai-id={'cluster-gateways:name:' + row.name}
           >
@@ -167,7 +167,7 @@ export function ClusterGatewaysPage({ cluster, component = 'cluster' }: {
         title: t('cluster.workloads.column.project'),
         render: (row) => (
           <a
-            className="text-ai-accent hover:underline"
+            className="text-ai-link hover:underline"
             href={
               '/kube-frontend/' +
               encodeURIComponent(workspaceOf.get(row.namespace) ?? 'public') +

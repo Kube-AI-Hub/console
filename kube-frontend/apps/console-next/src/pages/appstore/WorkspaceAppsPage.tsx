@@ -120,7 +120,7 @@ export function WorkspaceAppsPage({ workspace }: WorkspaceAppsPageProps): React.
               <Link
                 to="/kube-frontend/workspaces/$workspace/apps/$appId"
                 params={{ workspace, appId: row.id }}
-                className="truncate font-medium text-ai-accent hover:underline"
+                className="truncate font-medium text-ai-link hover:underline"
                 data-ai-id={`workspace-apps:name:${row.id}`}
               >
                 {row.name || row.id}

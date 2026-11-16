@@ -148,7 +148,7 @@ export function FederatedProjectDetailPage({ workspace, name }: FederatedProject
       <div>
         <a
           href={back}
-          className="inline-flex items-center gap-1 text-xs text-ai-accent hover:underline"
+          className="inline-flex items-center gap-1 text-xs text-ai-link hover:underline"
           {...actionProps('federated-project:back')}
         >
           <Icon name="chevron-left" size={12} />

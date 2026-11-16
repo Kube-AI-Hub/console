@@ -280,7 +280,7 @@ export function WorkspaceReposPage({ workspace }: WorkspaceReposPageProps): Reac
               <Link
                 to="/kube-frontend/workspaces/$workspace/repos/$repoId"
                 params={{ workspace, repoId: row.id }}
-                className="truncate font-medium text-ai-accent hover:underline"
+                className="truncate font-medium text-ai-link hover:underline"
                 data-ai-id={`workspace-repos:name:${row.id}`}
               >
                 {row.name || '-'}

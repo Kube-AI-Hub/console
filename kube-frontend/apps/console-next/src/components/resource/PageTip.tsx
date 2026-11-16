@@ -61,7 +61,7 @@ export function PageTip({ pageKey, children, docHref }: PageTipProps): React.Rea
             href={docHref}
             target="_blank"
             rel="noreferrer"
-            className="ml-1 inline-flex min-h-6 items-center gap-0.5 py-0.5 text-ai-accent hover:underline"
+            className="ml-1 inline-flex min-h-6 items-center gap-0.5 py-0.5 text-ai-link hover:underline"
             data-ai-id="page-tip:link"
           >
             {t('pageTip.docs')}

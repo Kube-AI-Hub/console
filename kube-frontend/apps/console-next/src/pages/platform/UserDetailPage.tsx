@@ -48,7 +48,7 @@ export function UserDetailPage(_props: UserDetailPageProps): React.ReactElement 
     <AiSurface as="section" aiId="user-detail:surface" state={state} className="flex min-w-0 flex-col gap-4">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-1">
-          <Link to="/kube-frontend/access/users" className="text-sm text-ai-accent hover:underline">
+          <Link to="/kube-frontend/access/users" className="text-sm text-ai-link hover:underline">
             ← {t('platform.users.title')}
           </Link>
           <div className="flex flex-wrap items-center gap-2">

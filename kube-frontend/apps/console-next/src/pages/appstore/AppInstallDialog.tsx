@@ -269,7 +269,7 @@ export function AppInstallDialog({
             <Link
               to="/kube-frontend/workspaces/$workspace/apps/instances"
               params={{ workspace: installed.workspace }}
-              className="text-sm text-ai-accent hover:underline"
+              className="text-sm text-ai-link hover:underline"
               data-ai-id="app-detail:install-success-link"
               onClick={() => onOpenChange(false)}
             >

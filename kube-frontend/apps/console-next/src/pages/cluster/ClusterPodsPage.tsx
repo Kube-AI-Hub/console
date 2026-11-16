@@ -97,7 +97,7 @@ export function ClusterPodsPage({ cluster }: ClusterPodsPageProps): React.ReactE
             return (
               <a
                 href={`/kube-frontend/${workspace}/clusters/${encodeURIComponent(cluster)}/projects/${encodeURIComponent(row.namespace)}/pods/${encodeURIComponent(row.name)}`}
-                className="truncate font-medium text-ai-accent hover:underline"
+                className="truncate font-medium text-ai-link hover:underline"
                 {...actionProps(`cluster-pods:name:${row.name}`)}
               >
                 {row.name}

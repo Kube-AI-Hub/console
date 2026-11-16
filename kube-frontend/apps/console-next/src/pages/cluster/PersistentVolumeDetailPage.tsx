@@ -60,7 +60,7 @@ export function PersistentVolumeDetailPage({ cluster }: PersistentVolumeDetailPa
   return (
     <AiSurface as="section" aiId="pv-detail:surface" state={state} className="flex min-w-0 flex-col gap-4">
       <header className="flex flex-col gap-1">
-        <Link to="/kube-frontend/clusters/$cluster/persistentvolumes" params={{ cluster }} className="text-sm text-ai-accent hover:underline">
+        <Link to="/kube-frontend/clusters/$cluster/persistentvolumes" params={{ cluster }} className="text-sm text-ai-link hover:underline">
           ← {t('cluster.persistentVolumes.title')}
         </Link>
         <div className="flex flex-wrap items-center gap-2">

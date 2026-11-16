@@ -216,7 +216,7 @@ export function PipelineDetailPage({ cluster, devops, pipeline }: PipelineDetail
           <Link
             to="/kube-frontend/clusters/$cluster/devops/$name"
             params={{ cluster, name: devops }}
-            className="text-sm text-ai-accent hover:underline"
+            className="text-sm text-ai-link hover:underline"
             data-ai-id="pipeline-detail:back"
           >
             {'← ' + devops}
@@ -349,7 +349,7 @@ export function PipelineDetailPage({ cluster, devops, pipeline }: PipelineDetail
                             to="/kube-frontend/clusters/$cluster/devops/$name/pipelines/$pipeline"
                             params={{ cluster, name: devops, pipeline }}
                             search={{ run: entry.name }}
-                            className="font-mono text-[11px] text-ai-accent hover:underline"
+                            className="font-mono text-[11px] text-ai-link hover:underline"
                             data-ai-id={'pipeline-detail:run-link:' + entry.name}
                           >
                             {entry.runId || '-'}
@@ -391,7 +391,7 @@ export function PipelineDetailPage({ cluster, devops, pipeline }: PipelineDetail
                     to="/kube-frontend/clusters/$cluster/devops/$name/pipelines/$pipeline"
                     params={{ cluster, name: devops, pipeline }}
                     search={{}}
-                    className="text-xs text-ai-accent hover:underline"
+                    className="text-xs text-ai-link hover:underline"
                     data-ai-id="pipeline-detail:run-close"
                   >
                     {t('common.close')}

@@ -426,7 +426,7 @@ function BackLink({ workspace, cluster, namespace }: { workspace: string; cluste
     <Link
       to={LIST_ROUTE}
       params={{ workspace, cluster, namespace }}
-      className="inline-flex w-fit items-center gap-1 text-xs text-ai-accent hover:underline"
+      className="inline-flex w-fit items-center gap-1 text-xs text-ai-link hover:underline"
       {...actionProps('alertingrules:detail:back')}
     >
       <Icon name="chevron-left" size={12} />

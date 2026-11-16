@@ -21,7 +21,7 @@ export function NotFoundPage(): React.ReactElement {
       <p className="max-w-md text-center text-xs text-ai-fg-muted">{t('notFound.description')}</p>
       <Link
         to="/kube-frontend"
-        className="rounded-ai-md border border-ai-line px-3 py-1.5 text-xs text-ai-accent hover:underline"
+        className="rounded-ai-md border border-ai-line px-3 py-1.5 text-xs text-ai-link hover:underline"
       >
         {t('notFound.backHome')}
       </Link>

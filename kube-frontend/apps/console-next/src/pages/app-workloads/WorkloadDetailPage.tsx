@@ -213,7 +213,7 @@ export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, 
       <div>
         <a
           href={back}
-          className="inline-flex items-center gap-1 text-xs text-ai-accent hover:underline"
+          className="inline-flex items-center gap-1 text-xs text-ai-link hover:underline"
           {...actionProps(`${kind}-detail:back`)}
           onClick={(event) => {
             if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
@@ -458,7 +458,7 @@ export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, 
                             <td className="py-1.5 pr-4">
                               <a
                                 href={`/kube-frontend/${workspace}/clusters/${cluster}/projects/${namespace}/pods/${run.pod}`}
-                                className="inline-flex min-h-6 items-center font-mono text-[11px] text-ai-accent hover:underline"
+                                className="inline-flex min-h-6 items-center font-mono text-[11px] text-ai-link hover:underline"
                                 {...actionProps(`jobs-detail:run-pod:${run.index}`)}
                                 data-ai-id={`jobs-detail:run-pod:${run.index}`}
                               >
@@ -579,7 +579,7 @@ export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, 
                                */}
                               <a
                                 href={`/kube-frontend/${workspace}/clusters/${cluster}/projects/${namespace}/pods/${pod.name}`}
-                                className="inline-flex min-h-6 items-center font-mono text-[11px] text-ai-accent hover:underline"
+                                className="inline-flex min-h-6 items-center font-mono text-[11px] text-ai-link hover:underline"
                                 {...actionProps(`deployments-detail:pod:${pod.name}`)}
                                 data-ai-id={`${kind}-detail:pod:${pod.name}`}
                               >
@@ -681,7 +681,7 @@ export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, 
                     <li key={containerName} data-ai-row={containerName}>
                       <a
                         href={`/kube-frontend/${workspace}/clusters/${cluster}/projects/${namespace}/pods/${name}/containers/${containerName}`}
-                        className="inline-flex min-h-6 items-center font-mono text-[11px] text-ai-accent hover:underline"
+                        className="inline-flex min-h-6 items-center font-mono text-[11px] text-ai-link hover:underline"
                         data-ai-id={`${kind}-detail:container:${containerName}`}
                       >
                         {containerName}

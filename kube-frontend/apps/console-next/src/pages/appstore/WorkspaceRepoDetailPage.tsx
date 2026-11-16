@@ -99,7 +99,7 @@ export function WorkspaceRepoDetailPage({ workspace, repoId }: WorkspaceRepoDeta
     <Link
       to="/kube-frontend/workspaces/$workspace/repos"
       params={{ workspace }}
-      className="text-sm text-ai-accent hover:underline"
+      className="text-sm text-ai-link hover:underline"
       {...actionProps('workspace-repo-detail:back')}
     >
       ← {t('appRepos.repos.detailBack')}

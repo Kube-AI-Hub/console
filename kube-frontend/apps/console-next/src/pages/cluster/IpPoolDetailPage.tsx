@@ -60,7 +60,7 @@ export function IpPoolDetailPage({ cluster }: IpPoolDetailPageProps): React.Reac
   return (
     <AiSurface as="section" aiId="ip-pool-detail:surface" state={state} className="flex min-w-0 flex-col gap-4">
       <header className="flex flex-col gap-1">
-        <Link to="/kube-frontend/clusters/$cluster/ippools" params={{ cluster }} className="text-sm text-ai-accent hover:underline">
+        <Link to="/kube-frontend/clusters/$cluster/ippools" params={{ cluster }} className="text-sm text-ai-link hover:underline">
           ← {t('cluster.network.ipPools.title')}
         </Link>
         <div className="flex flex-wrap items-center gap-2">

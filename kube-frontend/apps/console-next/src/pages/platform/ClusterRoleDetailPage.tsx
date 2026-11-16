@@ -42,7 +42,7 @@ export function ClusterRoleDetailPage(_props: ClusterRoleDetailPageProps): React
   return (
     <AiSurface as="section" aiId="clusterrole-detail:surface" state={state} className="flex min-w-0 flex-col gap-4">
       <header className="flex flex-col gap-1">
-        <Link to="/kube-frontend/access/clusterroles" className="text-sm text-ai-accent hover:underline">
+        <Link to="/kube-frontend/access/clusterroles" className="text-sm text-ai-link hover:underline">
           ← {t('platform.roles.title')}
         </Link>
         <div className="flex flex-wrap items-center gap-2">

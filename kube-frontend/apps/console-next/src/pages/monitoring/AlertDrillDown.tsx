@@ -69,7 +69,7 @@ function TargetLink({
   params: { workspace: string; cluster: string; namespace: string; name: string };
   label: string;
 }): React.ReactElement | null {
-  const common = { params, className: 'text-ai-accent hover:underline', 'data-ai-id': 'alerts:detail:target-link' } as const;
+  const common = { params, className: 'text-ai-link hover:underline', 'data-ai-id': 'alerts:detail:target-link' } as const;
   switch (kind) {
     case 'pods':
       return <Link to="/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/pods/$name" {...common}>{label}</Link>;
@@ -133,7 +133,7 @@ export function AlertDrillDown({ message, cluster, workspace, fallbackNamespace 
             to="/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/alertingrules/$name"
             params={{ workspace: effectiveWorkspace, cluster, namespace: targets.objectNamespace, name: targets.ruleName }}
             search={{ scope: targets.scope }}
-            className="text-ai-accent hover:underline"
+            className="text-ai-link hover:underline"
             data-ai-id="alerts:detail:rule-link"
           >
             {t('monitoring.detail.openRule', { name: targets.ruleName })}

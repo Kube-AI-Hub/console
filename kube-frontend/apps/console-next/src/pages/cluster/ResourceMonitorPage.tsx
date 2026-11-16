@@ -165,7 +165,7 @@ export function ResourceMonitorPage({ cluster }: ResourceMonitorPageProps): Reac
     return (
       <span className="flex min-w-0 flex-col">
         {detail ? (
-          <a href={detail} className="truncate font-medium text-ai-accent hover:underline">
+          <a href={detail} className="truncate font-medium text-ai-link hover:underline">
             {row.name}
           </a>
         ) : (

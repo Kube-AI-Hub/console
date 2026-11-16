@@ -108,7 +108,7 @@ export function DashboardPanelsPage({ cluster, name }: DashboardPanelsPageProps)
           <Link
             to="/kube-frontend/clusters/$cluster/custom-monitoring"
             params={{ cluster }}
-            className="inline-flex items-center text-xs text-ai-accent hover:underline"
+            className="inline-flex items-center text-xs text-ai-link hover:underline"
             {...actionProps('dashboard-panels:back')}
           >
             ← {t('customMonitoring.title')}

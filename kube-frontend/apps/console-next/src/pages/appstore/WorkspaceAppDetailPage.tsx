@@ -220,7 +220,7 @@ export function WorkspaceAppDetailPage({ workspace, appId }: WorkspaceAppDetailP
             <Link
               to="/kube-frontend/workspaces/$workspace/apps/instances/$releaseId"
               params={{ workspace, releaseId: row.id }}
-              className="truncate font-medium text-ai-accent hover:underline"
+              className="truncate font-medium text-ai-link hover:underline"
             >
               {row.name || row.id}
             </Link>
@@ -251,7 +251,7 @@ export function WorkspaceAppDetailPage({ workspace, appId }: WorkspaceAppDetailP
     <Link
       to="/kube-frontend/workspaces/$workspace/apps"
       params={{ workspace }}
-      className="text-sm text-ai-accent hover:underline"
+      className="text-sm text-ai-link hover:underline"
       {...actionProps('workspace-app:back')}
     >
       ← {t('appRepos.apps.detailBack')}

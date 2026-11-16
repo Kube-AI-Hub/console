@@ -37,7 +37,7 @@ export function GatewayDetailPage({ cluster, name }: GatewayDetailPageProps): Re
       <div>
         <a
           href={backHref}
-          className="inline-flex items-center gap-1 text-xs text-ai-accent hover:underline"
+          className="inline-flex items-center gap-1 text-xs text-ai-link hover:underline"
           {...actionProps('gateway-detail:back')}
         >
           <Icon name="chevron-left" size={12} />
@@ -155,7 +155,7 @@ export function GatewayDetailPage({ cluster, name }: GatewayDetailPageProps): Re
                                 page: 'ingresses',
                                 name: ingress.name,
                               })}
-                              className="font-medium text-ai-accent hover:underline"
+                              className="font-medium text-ai-link hover:underline"
                               data-ai-id={'gateway-detail:ingress:' + handle + ':open'}
                             >
                               {ingress.name}

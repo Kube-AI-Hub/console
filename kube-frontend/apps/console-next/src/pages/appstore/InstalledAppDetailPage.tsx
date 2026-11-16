@@ -143,7 +143,7 @@ export function InstalledAppDetailPage({ workspace, releaseId }: InstalledAppDet
     <Link
       to="/kube-frontend/workspaces/$workspace/apps/instances"
       params={{ workspace }}
-      className="text-sm text-ai-accent hover:underline"
+      className="text-sm text-ai-link hover:underline"
       {...actionProps('installed-app:back')}
     >
       ← {t('installedApps.detailBack')}

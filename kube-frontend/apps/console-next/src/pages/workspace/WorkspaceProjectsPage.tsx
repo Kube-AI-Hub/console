@@ -52,7 +52,7 @@ export function WorkspaceProjectsPage({ workspace }: WorkspaceProjectsPageProps)
           render: (row) => (
             <a
               href={`/kube-frontend/${encodeURIComponent(workspace)}/clusters/${encodeURIComponent(cluster)}/projects/${encodeURIComponent(row.name)}/overview`}
-              className="truncate font-medium text-ai-accent hover:underline"
+              className="truncate font-medium text-ai-link hover:underline"
               {...actionProps(`workspace-projects:name:${row.name}`)}
             >
               {row.alias || row.name}

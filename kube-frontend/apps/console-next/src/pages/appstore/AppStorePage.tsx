@@ -61,7 +61,7 @@ export function AppStorePage(): React.ReactElement {
         <a
           {...actionProps('app-store:manage')}
           href="/kube-frontend/apps-manage"
-          className="text-sm text-ai-accent hover:underline"
+          className="text-sm text-ai-link hover:underline"
         >
           {t('store.manage')}
         </a>

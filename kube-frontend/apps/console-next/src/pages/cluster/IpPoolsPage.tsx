@@ -75,7 +75,7 @@ export function IpPoolsPage({ cluster }: IpPoolsPageProps): React.ReactElement {
             <span className="flex min-w-0 items-center gap-2">
               <a
                 href={`/kube-frontend/clusters/${encodeURIComponent(cluster)}/ippools/${encodeURIComponent(row.name)}`}
-                className="truncate font-medium text-ai-accent hover:underline"
+                className="truncate font-medium text-ai-link hover:underline"
                 {...actionProps(`ip-pools:name:${row.name}`)}
               >
                 {row.alias || row.name}

@@ -155,7 +155,7 @@ export function InstalledAppsPage({ workspace, project, cluster = 'host' }: Inst
                 <Link
                   to="/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/applications/$releaseId"
                   params={{ workspace, cluster, namespace: project, releaseId: row.id }}
-                  className="truncate font-medium text-ai-accent hover:underline"
+                  className="truncate font-medium text-ai-link hover:underline"
                   data-ai-id={`installed-apps:name:${row.id}`}
                 >
                   {row.name || row.id}
@@ -164,7 +164,7 @@ export function InstalledAppsPage({ workspace, project, cluster = 'host' }: Inst
                 <Link
                   to="/kube-frontend/workspaces/$workspace/apps/instances/$releaseId"
                   params={{ workspace, releaseId: row.id }}
-                  className="truncate font-medium text-ai-accent hover:underline"
+                  className="truncate font-medium text-ai-link hover:underline"
                   data-ai-id={`installed-apps:name:${row.id}`}
                 >
                   {row.name || row.id}

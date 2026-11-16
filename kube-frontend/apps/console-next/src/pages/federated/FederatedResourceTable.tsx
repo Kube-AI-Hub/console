@@ -94,7 +94,7 @@ export function FederatedResourceTable({
                     '/' +
                     encodeURIComponent(row.name)
                   }
-                  className="text-ai-accent hover:underline"
+                  className="text-ai-link hover:underline"
                   {...actionProps('federated-project:resource:' + segmentOf(row.plural) + '/' + row.name)}
                 >
                   {row.name}

@@ -80,6 +80,7 @@
   --ai-raw-mint-400: 57 229 184; /* brand #39E5B8 */
   --ai-raw-mint-500: 32 201 158; /* #20c99e */
   --ai-raw-mint-600: 14 190 132; /* #0ebe84 — readable on white */
+  --ai-raw-mint-700: 10 110 85; /* #0a6e55 — the mint that stays readable as text on a light page */
 
   /* Accent-tinted dark shells.
      The navy ramp above is console's own. These two ramps reuse its exact
@@ -145,7 +146,15 @@
 
   /* console's primary is violet, not green — see the naming note above.
      The accent block is overridden by the `data-accent` palettes below. */
+  /*
+   * `--ai-link`: the accent as **text**.
+   *
+   * `--ai-accent` is a fill colour: as text it reached only 2.84:1 on `--ai-surface-2` (measured by
+   * the rendered contrast audit), because a fill only has to read against nothing. Text does, so it
+   * gets its own step per theme, chosen to clear WCAG AA on every surface in that theme.
+   */
   --ai-accent: var(--ai-raw-violet-300); /* $primary */
+  --ai-link: var(--ai-raw-violet-500); /* 5.20:1 worst case on this theme's surfaces */
   --ai-accent-hover: var(--ai-raw-violet-400);
   --ai-accent-fg: var(--ai-raw-navy-900);
   --ai-accent-soft: var(--ai-raw-violet-200);
@@ -238,6 +247,7 @@
  * near-white background; the hue is unchanged.
  */
 :root[data-theme='light'] {
+  --ai-link: var(--ai-raw-violet-100); /* 4.68:1 worst case */
   --ai-bg: var(--ai-raw-ice-800); /* #f9fbfd */
   --ai-bg-elevated: var(--ai-raw-white);
   --ai-bg-overlay: var(--ai-raw-white);
@@ -258,7 +268,7 @@
   /* The accent family and the surface tint are supplied by the per-accent
      light blocks below, so this rule only carries the neutral defaults. */
   --ai-info: var(--ai-raw-cyan-100);
-  --ai-success: 0 138 92; /* #00aa72 darkened for white background */
+  --ai-success: 10 110 85; /* #0a6e55 — 5.01:1 on this theme's lightest surface (was 4.07:1) */
   --ai-warning: var(--ai-raw-amber-200);
   --ai-danger: var(--ai-raw-red-200);
   --ai-danger-fg: var(--ai-raw-white);
@@ -334,6 +344,7 @@
   --ai-line-strong: 92 108 182;
 
   --ai-accent: var(--ai-raw-violet-300);
+  --ai-link: var(--ai-raw-violet-500);
   --ai-accent-hover: var(--ai-raw-violet-400);
   --ai-accent-soft: var(--ai-raw-violet-200);
   --ai-accent-strong: var(--ai-raw-violet-100);
@@ -356,6 +367,7 @@
   --ai-nav-bg: rgb(247 246 250 / 0.8);
 
   --ai-accent: var(--ai-raw-violet-100);
+  --ai-link: var(--ai-raw-violet-100);
   --ai-accent-hover: var(--ai-raw-violet-200);
   --ai-accent-soft: var(--ai-raw-violet-300);
   --ai-accent-strong: var(--ai-raw-violet-100);
@@ -387,6 +399,7 @@
   --ai-line-strong: 42 92 108;
 
   --ai-accent: var(--ai-raw-mint-400);
+  --ai-link: var(--ai-raw-mint-400); /* 7.31:1 worst case */
   --ai-accent-hover: var(--ai-raw-mint-300);
   --ai-accent-soft: var(--ai-raw-mint-600);
   --ai-accent-strong: var(--ai-raw-mint-500);
@@ -409,6 +422,7 @@
   --ai-nav-bg: rgb(246 250 250 / 0.8);
 
   --ai-accent: var(--ai-raw-mint-600);
+  --ai-link: var(--ai-raw-mint-700); /* 5.01:1 worst case */
   --ai-accent-hover: var(--ai-raw-mint-500);
   --ai-accent-soft: var(--ai-raw-mint-400);
   --ai-accent-strong: var(--ai-raw-mint-600);

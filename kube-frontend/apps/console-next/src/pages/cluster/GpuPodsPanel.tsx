@@ -28,7 +28,7 @@ export function GpuPodsPanel({ cluster, node, uuid }: { cluster: string; node: s
     refresh: { label: t('common.refresh'), aiId: 'gpu-detail:pods-refresh', busy: query.isFetching },
     columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'gpu-pods:columns' },
     columns: [
-      { key: 'name', title: t('cluster.column.name'), render: (row) => <a className="text-ai-accent hover:underline"
+      { key: 'name', title: t('cluster.column.name'), render: (row) => <a className="text-ai-link hover:underline"
         href={`/kube-frontend/${encodeURIComponent(workspaceOf.get(row.namespace) ?? 'public')}/clusters/${encodeURIComponent(cluster)}/projects/${encodeURIComponent(row.namespace)}/pods/${encodeURIComponent(row.name)}`}>{row.name}</a> },
       { key: 'namespace', hideable: true, title: t('cluster.workloads.column.project') },
       { key: 'status', hideable: true, title: t('cluster.column.status'), render: (row) => statusLabel(t, row.status) },

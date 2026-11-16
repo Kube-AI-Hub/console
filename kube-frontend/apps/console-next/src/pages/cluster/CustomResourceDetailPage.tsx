@@ -157,7 +157,7 @@ export function CustomResourceDetailPage({ cluster, name }: CustomResourceDetail
         <Link
           to="/kube-frontend/clusters/$cluster/custom-resources"
           params={{ cluster }}
-          className="text-xs text-ai-accent hover:underline"
+          className="text-xs text-ai-link hover:underline"
           {...actionProps('custom-resource:back')}
         >
           {t('cluster.customResources.backToList')}

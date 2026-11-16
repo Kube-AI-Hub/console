@@ -149,7 +149,7 @@ export function ImageBuilderPage({ workspace, cluster, namespace }: ImageBuilder
               <Link
                 to="/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/services/$name"
                 params={{ workspace, cluster, namespace, name: row.serviceName }}
-                className="truncate text-ai-accent hover:underline"
+                className="truncate text-ai-link hover:underline"
                 data-ai-id={'image-builder:service:' + row.name}
               >
                 {row.serviceName}

@@ -85,7 +85,7 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
   };
   const columns: ListColumn<NodeSummary>[] = [
     { key: 'name', title: t('cluster.column.name'), width: 170, render: (row) => <span className="flex flex-col">
-      <Link to="/kube-frontend/clusters/$cluster/nodes/$name" params={{ cluster, name: row.name }} className="text-ai-accent hover:underline">{row.name}</Link>
+      <Link to="/kube-frontend/clusters/$cluster/nodes/$name" params={{ cluster, name: row.name }} className="text-ai-link hover:underline">{row.name}</Link>
       <span className="text-[11px] text-ai-fg-muted">{row.internalIP || '-'}</span></span> },
     { key: 'status', title: t('cluster.column.status'), hideable: true, render: (row) => <span className="flex flex-col gap-1">
       <Badge tone={row.status === 'Ready' ? 'success' : 'danger'}>{row.status}</Badge>

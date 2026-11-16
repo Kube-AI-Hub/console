@@ -109,7 +109,7 @@ export function RoleDetailPage({ workspace, cluster, namespace, name }: RoleDeta
         <Link
           to="/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/roles"
           params={{ workspace, cluster, namespace }}
-          className="text-sm text-ai-accent hover:underline"
+          className="text-sm text-ai-link hover:underline"
           data-ai-id="project-role-detail:back"
         >
           ← {t('settings.roles.title')}
@@ -274,7 +274,7 @@ function UsersTable({
                     <Link
                       to="/kube-frontend/access/users/$name"
                       params={{ name: subject.name }}
-                      className="text-ai-accent hover:underline"
+                      className="text-ai-link hover:underline"
                       data-ai-id={`project-role-detail:user:${subject.name}`}
                     >
                       {subject.name}

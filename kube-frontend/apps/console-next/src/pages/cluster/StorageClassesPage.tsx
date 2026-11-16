@@ -88,7 +88,7 @@ export function StorageClassesPage({ cluster }: StorageClassesPageProps): React.
               <Link
                 to="/kube-frontend/clusters/$cluster/storageclasses/$name"
                 params={{ cluster, name: row.name }}
-                className="truncate font-medium text-ai-accent hover:underline"
+                className="truncate font-medium text-ai-link hover:underline"
               >
                 {row.name}
               </Link>

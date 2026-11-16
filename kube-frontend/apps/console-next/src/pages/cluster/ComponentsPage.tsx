@@ -92,7 +92,7 @@ export function ComponentsPage({ cluster: _cluster, initialType = '' }: Componen
               <Link
                 to="/kube-frontend/clusters/$cluster/components/$name"
                 params={{ cluster: _cluster, name: row.name }}
-                className="inline-flex min-h-6 items-center truncate font-medium text-ai-accent hover:underline"
+                className="inline-flex min-h-6 items-center truncate font-medium text-ai-link hover:underline"
                 data-ai-id={`components:link:${row.name}`}
               >
                 {row.name}

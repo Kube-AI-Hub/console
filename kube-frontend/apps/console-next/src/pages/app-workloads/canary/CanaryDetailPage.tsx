@@ -165,7 +165,7 @@ export function CanaryDetailPage({ workspace, cluster, namespace, name }: Canary
       <div>
         <a
           href={listHref}
-          className="inline-flex items-center gap-1 text-xs text-ai-accent hover:underline"
+          className="inline-flex items-center gap-1 text-xs text-ai-link hover:underline"
           {...actionProps('grayrelease-detail:back')}
           onClick={(event) => {
             if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
@@ -267,7 +267,7 @@ export function CanaryDetailPage({ workspace, cluster, namespace, name }: Canary
                         <Link
                           to="/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/deployments/$name"
                           params={{ workspace, cluster, namespace, name: workload.name }}
-                          className="inline-flex min-h-6 items-center text-ai-accent hover:underline"
+                          className="inline-flex min-h-6 items-center text-ai-link hover:underline"
                           data-ai-id={'grayrelease-detail:workload:' + workload.name}
                         >
                           {workload.name}

@@ -61,7 +61,7 @@ export function NamespaceDetailPage({ cluster, name }: NamespaceDetailPageProps)
         <Link
           to="/kube-frontend/clusters/$cluster/namespaces"
           params={{ cluster }}
-          className="text-sm text-ai-accent hover:underline"
+          className="text-sm text-ai-link hover:underline"
           data-ai-id="namespace-detail:back"
         >
           ← {t('cluster.projects.title')}
