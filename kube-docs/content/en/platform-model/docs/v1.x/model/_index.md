@@ -43,4 +43,5 @@ Switch the source filter in the model library to **Public models** to see only t
 - [Update Models](./update_model)
 - [Download Models](./download_models)
 - [Admin console in detail](../admin/admin_intro)
+- [Model storage and space reclamation](../admin/lfs_storage_gc)
 - [Tenants and Compute Placement](../tenancy/)

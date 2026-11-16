@@ -47,4 +47,5 @@ icon: "/images/docs/platform-model/model.svg"
 - [更新模型](./update_model)
 - [下载模型](./download_models)
 - [管理后台说明](../admin/admin_intro)
+- [模型存储与空间回收](../admin/lfs_storage_gc)
 - [租户与算力归属](../tenancy/)

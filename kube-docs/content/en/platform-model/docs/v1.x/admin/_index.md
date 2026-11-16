@@ -18,4 +18,5 @@ The dashboard, the asset management lists, and instances and tasks all show **th
 ## Related documentation
 
 - [Admin console in detail](./admin_intro)
+- [Model storage and space reclamation](./lfs_storage_gc)
 - [Tenant and compute ownership](../tenancy/)
