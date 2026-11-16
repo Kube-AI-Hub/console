@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-APP_STORE-INSTALL-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-store
+feature: install
+title: 安装弹窗 · 企业空间与项目的有效组合
+entry_url: '{BASE_URL}/kube-frontend/apps/{appId}'
+prd: prd/kube-frontend/app-store/detail.md
+design: design/kube-frontend/app-store/detail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_STORE-INSTALL-03
+
+story:
+- US3
+
+product: 切换企业空间会立即清空项目并按新空间的项目列表回填首项；没有项目的企业空间保持为空并在提交时本地拦截、提示「请选择项目。」且不发创建请求。
+preconditions:
+- 已登录；商店里有带版本的应用；存在一个没有项目的企业空间（本部署为 public）和一个有项目的企业空间
+steps:
+- 打开某应用详情，点安装
+- 若有空间没有项目，选它，核对项目选择为空；填名称后提交
+- 切到有项目的空间，核对项目自动回落到该空间的首个项目
+- 再次切回没有项目的空间，核对项目被清空（不是保留上一个空间的项目）
+expected:
+- 空间切换后项目立即清空，并在新区间列表就绪后回填首项
+- 项目为空时提交被本地拦截，提示「请选择项目。」，且没有任何创建请求
+- 项目列表为空的企业空间不会凭空出现项目选项
+troubleshoot:
+- 提交后装进了错误的空间：项目没有随空间重置（保留了上一个空间的项目）
+- 提示「请选择项目」但界面上显示有项目：项目不在当前列表里却没有回落
+update_automation:
+- 句柄：app-detail:install / :install-dialog / :install-workspace / :install-project / :install-name / :install-submit / :install-error

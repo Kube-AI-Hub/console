@@ -74,8 +74,11 @@ def _pick_target(api) -> tuple[str, str]:
             if project_name:
                 pairs.append((name, project_name))
     assert pairs, "没有可安装的项目"
-    # Prefer the pair the probe verified; any pair works, but stability matters for a write case.
-    for preferred in (("public", "spaces"), ("public", "csghub")):
+    # Prefer a stable target; any pair works, but stability matters for a write case.
+    # `public` currently has no projects on this deployment (its former `spaces`/`csghub`
+    # projects were removed), and installing into a system namespace is not representative,
+    # so fall back to system-workspace's `default` before taking whatever comes first.
+    for preferred in (("public", "spaces"), ("public", "csghub"), ("system-workspace", "default")):
         if preferred in pairs:
             return preferred
     return pairs[0]
@@ -164,9 +167,14 @@ def test_TC_L3_KUBE_FRONTEND_APP_STORE_INSTALL_01(page, ui_config, session_token
         created = True
 
         # Same name in the same project must be rejected before the write, not by a server 500.
+        # The dialog resets on every open, so the target pair is chosen again here: its default is
+        # the first workspace, which on this deployment can be one without any project.
         page.locator('[data-ai-id="app-detail:install-close"]').click()
         page.locator('[data-ai-id="app-detail:install"]').click()
         expect(page.locator('[data-ai-id="app-detail:install-dialog"]')).to_be_visible(timeout=20_000)
+        _select(page, "app-detail:install-workspace", workspace)
+        expect(page.locator('[data-ai-id="app-detail:install-project"]')).to_be_visible(timeout=30_000)
+        _select(page, "app-detail:install-project", project)
         page.locator('[data-ai-id="app-detail:install-name"]').fill(release)
         page.locator('[data-ai-id="app-detail:install-submit"]').click()
         expect(page.locator('[data-ai-id="app-detail:install-error"]')).to_contain_text("同名", timeout=30_000)

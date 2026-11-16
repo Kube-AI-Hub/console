@@ -147,13 +147,34 @@ export function AppInstallDialog({
     }
   }, [workspaces.data, workspace, lockedWorkspace]);
 
+  /*
+   * Keep the project valid for the selected workspace.
+   *
+   * Changing the workspace must not keep the previous workspace's project: the pair is what
+   * gets submitted, and a project from another workspace is not installable (the API rejects
+   * it, or worse, installs into a namespace the reader did not mean). The project list is also
+   * the source of truth — a value that is not in it is replaced by its first entry rather than
+   * left to fail at submit time with "选择一个项目".
+   */
   React.useEffect(() => {
     if (lockedProject) return;
-    if (!project) {
-      const first = projects.data?.[0]?.name;
-      if (first) setProject(first);
+    const names = (projects.data ?? []).map((entry) => entry.name);
+    if (names.length === 0) {
+      if (project) setProject('');
+      return;
+    }
+    if (!project || !names.includes(project)) {
+      setProject(names[0] ?? '');
     }
   }, [projects.data, project, lockedProject]);
+
+  /* A workspace change invalidates the project immediately, before the list refetches. */
+  const previousWorkspace = React.useRef(workspace);
+  React.useEffect(() => {
+    if (previousWorkspace.current === workspace) return;
+    previousWorkspace.current = workspace;
+    if (!lockedProject) setProject('');
+  }, [workspace, lockedProject]);
 
   const create = useMutation({
     mutationFn: () =>

@@ -11,6 +11,7 @@
 - AC-L3-KUBE-FRONTEND-APP_STORE-DETAIL-01
 - AC-L3-KUBE-FRONTEND-APP_STORE-DETAIL-02
 - AC-L3-KUBE-FRONTEND-APP_STORE-INSTALL-01
+- AC-L3-KUBE-FRONTEND-APP_STORE-INSTALL-03
 - AC-L3-KUBE-FRONTEND-APP_STORE-INSTALL-02
 
 ## 设计目标与非目标
@@ -34,6 +35,25 @@
 - 404 是终态：不自动重试；其他错误才显示重试。
 
 ## 方案决策
+
+### DEC-L3-KUBE-FRONTEND-APP_STORE-INSTALL-03 — 企业空间与项目必须始终是一对有效组合
+
+安装提交的是 `(namespace, workspace, appId, versionId, name)`，其中「项目」就是命名空间。旧实现只在
+「项目为空」时自动填入列表首项，于是切换企业空间后会**保留上一个空间的项目**：两者组合无效，
+提交要么被服务端拒绝，要么装进读者没想装的空间。
+
+现在两条规则固定住这个不变量：
+
+1. 企业空间一变，项目立刻清空（不等列表刷新）；
+2. 项目列表是权威：选中的项目不在当前列表里（例如切换空间、或列表刷新后消失）就回落到首项，
+   列表为空时保持空，由提交前的本地校验拦下并提示「请选择项目。」。
+
+### GOT-L3-KUBE-FRONTEND-APP_STORE-INSTALL-03 — 「没有项目的企业空间」是正常状态
+
+本部署的 `public` 企业空间没有项目，而它是企业空间列表的第一项——弹窗打开时默认选中它，于是项目为空。
+这不是缺陷，是数据；页面必须如实表现为「请选择项目。」而不是自己编一个项目。用例因此显式选择目标对，
+并在每次重新打开弹窗时重新选择（弹窗每次打开都会重置）。
+
 
 ### DEC-L3-KUBE-FRONTEND-APP_STORE-DETAIL-01 — 详情是独立路由，卡片整卡是链接
 
