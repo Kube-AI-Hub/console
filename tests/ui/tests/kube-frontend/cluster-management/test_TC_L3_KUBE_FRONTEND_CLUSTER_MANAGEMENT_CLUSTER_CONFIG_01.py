@@ -26,7 +26,10 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_CONFIG_01(cluster_manage
     assert ui.api is not None, "api client required"
 
     for segment, ai_id, expected_headers in PAGES:
-        status, body = ui.api.request("GET", f"{KAPIS}/{segment}?limit=20&page=1")
+        # One item is enough to learn the total: `totalItems` is what the assertion below needs,
+        # and asking for 20 of these objects pulls over a megabyte through the kapis proxy
+        # (measured: 1.34MB and 120s for secrets), which turns a slow server into a test failure.
+        status, body = ui.api.request("GET", f"{KAPIS}/{segment}?limit=1&page=1", timeout=120)
         if status in (401, 403):
             # A permission answer is a real "cannot verify here"; anything else is a broken read
             # and must fail rather than skip, or an outage reads as "this cluster has nothing".
