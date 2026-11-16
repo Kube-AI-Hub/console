@@ -30,6 +30,9 @@ yarn-error.log*
 .work
 outputs/
 
+# Local build output of the console image build (hack/docker_build.sh writes it)
+out/
+
 # SDD UI tests: credentials and artifacts never leave the machine
 tests/ui/.env
 tests/ui/artifacts/
