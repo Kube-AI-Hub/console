@@ -236,7 +236,10 @@ export function InstalledAppDetailPage({ workspace, releaseId, cluster: routeClu
               <DefinitionRow label={t('installedApps.column.app')} value={release.appName || '-'} />
               <DefinitionRow label={t('installedApps.column.version')} value={release.versionName || '-'} />
               <DefinitionRow label={t('installedApps.column.project')} value={release.project || '-'} />
-              <DefinitionRow label={t('installedApps.column.cluster')} value={release.cluster || '-'} />
+              {/* The row says 集群, so it shows the console cluster. `release.cluster` is
+                  OpenPitrix's runtime id (`default`), which is a different thing and read as a
+                  cluster name is simply wrong. */}
+              <DefinitionRow label={t('installedApps.column.cluster')} value={routeCluster || 'host'} />
               <DefinitionRow label={t('appRepos.repos.column.creator')} value={release.owner || '-'} />
               <DefinitionRow label={t('installedApps.revision')} value={helmRelease ? String(helmRelease.revision || '-') : '-'} />
               <DefinitionRow label={t('cluster.column.createdAt')} value={release.createdAt ? formatTimestamp(release.createdAt) : '-'} />
