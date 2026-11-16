@@ -212,6 +212,8 @@ export function WorkspaceUserGroupsPage({ workspace }: WorkspaceUserGroupsPagePr
       rowKey: 'username',
       rowAttributes: (row) => ({ 'data-ai-row': row.username }),
       columns: [
+        // Single-column table: a column chooser here would have nothing to hide, so none is
+        // wired. The group tree above is not a ListSchema table at all.
         {
           key: 'username',
           title: t('workspace.field.member'),

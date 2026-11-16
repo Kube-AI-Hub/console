@@ -324,3 +324,26 @@ useMemo 的参数列表（`tsc` 立刻报 `Argument expression expected`）。�
 与「长跑退化」记录中的上游假设一致。
 
 另：本轮后期沙箱收紧，`ps` 被拒绝（`/bin/ps: Operation not permitted`），后续排查改用 `lsof`/`curl`/`git`。
+
+## 29. 收口：所有多列 ListSchema 列表都已接入
+
+对全部页面做了最终清点（`columns: [` 且没有 `columnVisibility` 的文件）：
+
+```
+0  workspace/WorkspaceUserGroupsPage.tsx
+```
+
+**这不是遗漏，而是不适用**：该页上半部是企业空间用户组**树**（自定义渲染，不是 `ListSchema` 表格），
+下半部是把某个组的成员列出来的表——**只有一列「成员名称」**。单列表格放一个「显示列」只会有「重置」一项，
+没有任何东西可隐藏。已在代码里就地写明原因，避免后来者以为是漏接。
+
+**结论：列显隐这条能力线收口——42 个多列列表全部接入，1 个单列/树页面按设计不接入。**
+
+| 统计 | 值 |
+| --- | --- |
+| 接入页面键 | 42 |
+| 机械契约 | 4 条（`config/column-visibility-contract.test.ts`） |
+| 契约套件总数 | 1456 passed |
+| E2E 用例覆盖 | `CONFIGMAPS-LIST-11` 覆盖 36 个页面；余 6 个（面板/详情内表/双表页）待补用例 |
+
+**仍未完成**：那 6 个新键的 E2E、以及两条被链路阻塞的集群复核——都依赖 B200 链路恢复。
