@@ -263,3 +263,25 @@ OK   xc     pods  sort=True search=True requests=2 errors=0
 ```
 
 **SKIP 的价值在这里兑现**：它把「没覆盖」摆到台面上，才会有人去查为什么没覆盖。
+## 14. 交互维度扩展：分页与每页条数
+
+排序、搜索之外，`limit=`（每页条数）与 `page=`（翻页）是另外两种查询形状，同样可能丢掉集群段。
+
+```
+OK   host   deployments   sort=True search=True size=True  next=True  requests=4 errors=0
+OK   host   configmaps    sort=True search=True size=True  next=True  requests=4 errors=0
+OK   host   pods          sort=True search=True size=False next=True  requests=3 errors=0
+OK   xc     deployments   sort=True search=True size=True  next=False requests=3 errors=0
+OK   xc     configmaps    sort=True search=True size=True  next=False requests=3 errors=0
+OK   xc     pods          sort=True search=True size=False next=True  requests=3 errors=0
+```
+
+六张列表**全部 0 条失败请求**，且每张都至少有 3 项交互真的发出了请求。
+
+`next=False` 不是缺陷：`xc` 的 `spaces` 只有 1 个部署，没有第二页可翻；`size=False` 表示该页没有每页条数控件。
+**能翻却没翻**和**根本没得翻**必须区分——所以证据列如实记录每一项是否为真，而不是笼统一个「通过」。
+
+### 踩坑：Radix 组合框不是 `<select>`
+
+第一次用 `select_option()` 直接报 `Element is not a <select> element`——每页条数是一个 `role=combobox` 的按钮，
+要先点开再从 `role=option` 里选。**控件类型不能凭名字猜**，报错信息已经说得很清楚。

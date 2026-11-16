@@ -392,7 +392,7 @@ def sweep_interactions(
                 before = len(failures)
                 # Count what actually happened: an interaction that never fired a request proves
                 # nothing, and a missing handle would otherwise look like a pass.
-                acted = {'sort': False, 'search': False, 'requests': 0}
+                acted = {'sort': False, 'search': False, 'page_size': False, 'next_page': False, 'requests': 0}
 
                 def count_request(request, sink=acted):
                     if '/kapis/' in request.url or '/apis/' in request.url:
@@ -417,6 +417,28 @@ def sweep_interactions(
                     acted['search'] = acted['requests'] > requests_before_search
                     search.fill('')
                     page.wait_for_timeout(1500)
+
+                # Page size and paging are two more query shapes (`limit=`, `page=`).
+                page_size = page.locator(f'[data-ai-id="{prefix}:page-size"]').first
+                if page_size.count():
+                    # A Radix combobox, not a native <select>: open it and pick an option.
+                    requests_before_size = acted['requests']
+                    page_size.click()
+                    page.wait_for_timeout(800)
+                    options = page.locator('[role="option"]')
+                    if options.count() > 1:
+                        options.nth(1).click()
+                        page.wait_for_timeout(3000)
+                    else:
+                        page.keyboard.press('Escape')
+                    acted['page_size'] = acted['requests'] > requests_before_size
+
+                next_page = page.locator(f'[data-ai-id="{prefix}:page:next"]').first
+                if next_page.count() and not next_page.is_disabled():
+                    requests_before_next = acted['requests']
+                    next_page.click()
+                    page.wait_for_timeout(3000)
+                    acted['next_page'] = acted['requests'] > requests_before_next
 
                 after = failures[before:]
                 page.remove_listener('request', count_request)
@@ -522,12 +544,12 @@ def main() -> int:
             bad += 1 if noisy else 0
             # An interaction that never fired a request is not evidence; say so instead of passing.
             acted = row['acted']
-            performed = acted['sort'] or acted['search']
+            performed = any(acted[key] for key in ('sort', 'search', 'page_size', 'next_page'))
             flag = 'FAIL' if noisy else ('OK  ' if performed else 'SKIP')
             # SKIP is not a failure: a list with no rows renders no toolbar, so there is nothing to
             # interact with. It is printed rather than hidden, so nobody mistakes it for coverage.
             bad += 1 if noisy else 0
-            print(f"{flag} {row['cluster']:6s} {row['page']:20s} sort={acted['sort']} search={acted['search']} requests={acted['requests']} errors={len(noisy)}")
+            print(f"{flag} {row['cluster']:6s} {row['page']:20s} sort={acted['sort']} search={acted['search']} size={acted['page_size']} next={acted['next_page']} requests={acted['requests']} errors={len(noisy)}")
             for entry in noisy[:3]:
                 print(f"       {entry['status']} {entry['url'][:120]}")
         return 1 if bad else 0
