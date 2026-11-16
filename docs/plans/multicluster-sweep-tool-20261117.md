@@ -112,15 +112,26 @@ OK   write-check xc  : created=201 on_target=True on_host=False deleted=200 gone
 python3 tools/multicluster_sweep.py --env-file /tmp/a100.env --baseline --clusters host,xc
 ```
 
-A100 实测输出（**225 秒**跑完全部）：
+页面集扩充到 **36 个集群级页面**（新增监控、GPU、JuiceFS、事件、日志、审计、自定义资源/监控、DevOps、边缘节点等深度页）后，
+A100 实测输出（**283 秒**跑完全部）：
 
 ```
-OK   cluster  read: 46 visits, 41 ready, 5 empty, 0 error, 0 failed requests
+OK   cluster  read: 72 visits, 65 ready, 7 empty, 0 error, 0 failed requests
 OK   project  read: 34 visits, 20 ready, 14 empty, 0 error, 0 failed requests
 OK   write    host    : created=201 on_target=True  deleted=200 gone=True
 OK   write    xc      : created=201 on_target=True on_host=False deleted=200 gone=True
-baseline PASS in 225s
+baseline PASS in 283s
 ```
+
+## 9b. 两个让基线「不误报」的修正
+
+| 现象 | 处理 |
+| --- | --- |
+| `/api/session/me` 的 401 被记成页面失败 | 认证握手不算页面缺陷，已在采集时过滤 |
+| `juicefs-storage` 报 `503 configz`，几分钟后同一接口 200 | **5xx 只在整页失败且错误全是 5xx 时重载一次**；持续 5xx 仍失败 |
+
+第二条的依据：A100 的 console 会偶发 5xx（本轮还遇到一次登录 503，重试即恢复）。**重试一次**既能滤掉抖动，
+又不会放过真故障——第二次仍失败就是失败。
 
 跑完复核两个集群的 `tc-*` Ingress 均为空——**没有残留**。
 

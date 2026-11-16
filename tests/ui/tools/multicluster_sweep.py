@@ -73,6 +73,21 @@ PAGES = (
     'alerting-messages',
     'monitor-resource',
     'node-usage',
+    # Deep pages: charts, logs and provider-specific views. They read different endpoints than the
+    # plain lists, so a member-cluster path bug can hide in any of them.
+    'monitor',
+    'gpus',
+    'gpu-resource',
+    'juicefs-storage',
+    'events',
+    'logs',
+    'audit-logs',
+    'log-collections',
+    'members',
+    'custom-resources',
+    'custom-monitoring',
+    'devops',
+    'edgenodes',
 )
 
 
@@ -132,8 +147,14 @@ def sweep(
                 def record(response, sink=failures):
                     # Kept as a named function with a default arg: Playwright wraps handlers, so a
                     # lambda cannot be passed to `remove_listener` afterwards.
-                    if response.status >= 400:
-                        sink.append((response.status, response.url))
+                    if response.status < 400:
+                        return
+                    # `/api/session/me` answering 401 is the auth handshake, not a page defect: the
+                    # app asks before the token is applied. Counting it would put a red mark on
+                    # whichever page happened to be open at that moment.
+                    if response.url.endswith('/api/session/me'):
+                        return
+                    sink.append((response.status, response.url))
 
                 page.on('response', record)
                 page.goto(page_url(app, cluster, segment, scope, workspace, project), wait_until='domcontentloaded')
@@ -149,6 +170,21 @@ def sweep(
                     state = surface.get_attribute('data-ai-state') or 'none'
                     if state != 'loading':
                         break
+
+                # A 5xx here is usually the console's upstream hiccuping (observed: configz answering
+                # 503 once, then 200). Reload once before calling it a failure -- a persistent 5xx
+                # still fails, because the second attempt sees it too.
+                transient = [entry for entry in failures if entry[0] >= 500]
+                if state == 'error' and transient and len(failures) == len(transient):
+                    failures.clear()
+                    page.goto(page_url(app, cluster, segment, scope, workspace, project), wait_until='domcontentloaded')
+                    for _ in range(30):
+                        page.wait_for_timeout(2000)
+                        if surface.count() == 0:
+                            continue
+                        state = surface.get_attribute('data-ai-state') or 'none'
+                        if state != 'loading':
+                            break
                 rows.append({
                     'cluster': cluster,
                     'page': segment,
