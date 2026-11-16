@@ -289,3 +289,21 @@ useMemo 的参数列表（`tsc` 立刻报 `Argument expression expected`）。�
 ## 26. 剩余
 
 **仅剩 1 页**：企业空间用户组（树 + 对话框内表，需要逐表接线）。
+
+## 27. 第十一批的验证边界（环境阻塞，如实记录）
+
+| 已完成（不需集群） | 结果 |
+| --- | --- |
+| console-next 显式类型 | **0 error** |
+| `vite build` | **✓** |
+| 契约套件（含列显隐四条守卫） | **1456 passed** |
+
+| 未能完成（需 B200 链路） | 现象 |
+| --- | --- |
+| 上轮挂起的 `CUSTOM_RESOURCES_01` / `CUSTOM_MONITORING_01` 复核 | 本轮连续尝试 3 次：隧道建立后 1–3 分钟内挂起（端口在听、请求 10s 超时；`ssh sgb000` 频现 banner 超时），pytest 因登录超时中断 |
+| 本批 5 个表格/面板的 E2E | 同上，无法在浏览器里打开这些页面 |
+
+**因此本批只宣称「接线完成 + 类型/构建/契约通过」，不宣称 E2E 通过。** 待链路恢复后需补：
+① 上轮两条复核；② 在 `CONFIGMAPS-LIST-11` 用例中为 `gpu-pods`、`node-usage`、`installed-app-resources`、
+`workspace-repo-events`、`workspace-app-versions`、`workspace-app-instances` 六个键补页面（这些页面多数在
+详情/面板内，需要先准备数据）。
