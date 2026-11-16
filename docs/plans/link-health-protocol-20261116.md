@@ -61,3 +61,12 @@ python3 tools/link_health.py --duration 3600 --interval 15 --out .artifacts/link
 ```
 
 即：页面能打开、会话层活着、**kube 上游死了**——与上面四条失败现象完全吻合，把「产品坏了」的怀疑排除掉。
+
+## 6. 第一次真正用它判定一次失败（2026-11-16 16:29）
+
+16:29:48 探测得出 `ok`（四跳全绿）→ 立即启动 `CUSTOM_RESOURCES_01` 单跑，同时后台每 15s 采样；
+16:30:25 起采样转为 `degraded`（`tunnel` 连续 8s 超时），16:33 仍 `degraded`；pytest 一直卡在登录阶段、日志为空。
+
+时间线原始记录已入库：`docs/evidence/link-timeline-20261116-1629.jsonl`（8 个样本，1 个 `ok` + 7 个 `degraded`）。
+
+**结论**：这次失败与产品/用例无关，是链路在启动后一分钟内断开。协议按设计工作——它把「猜」变成了「有证据的判定」。
