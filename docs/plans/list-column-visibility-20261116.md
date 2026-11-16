@@ -347,3 +347,13 @@ useMemo 的参数列表（`tsc` 立刻报 `Argument expression expected`）。�
 | E2E 用例覆盖 | `CONFIGMAPS-LIST-11` 覆盖 36 个页面；余 6 个（面板/详情内表/双表页）待补用例 |
 
 **仍未完成**：那 6 个新键的 E2E、以及两条被链路阻塞的集群复核——都依赖 B200 链路恢复。
+
+## 30. 两条挂起复核的结果（部分settled）
+
+| 用例 | 结果 | 证据 |
+| --- | --- | --- |
+| `CUSTOM_MONITORING_01` | **passed** | 2026-11-16 15:50 那一轮（555.49s）：`1 failed, 1 passed`，通过的是它 |
+| `CUSTOM_RESOURCES_01` | **未settled** | 同一轮失败于 `http.client.IncompleteRead: IncompleteRead(8416130 bytes read)`——响应在 8.4MB 处被截断，是链路中途断开，不是页面或断言问题；后续单跑因隧道再次挂起而中断 |
+
+`IncompleteRead` 是这次链路故障最直接的证据：请求本身有效、服务器开始返回大响应、连接中途死掉。
+因此该用例**不宣称通过**，也不宣称失败——判据写在上面，等链路稳定后单跑一次即可。
