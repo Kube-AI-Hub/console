@@ -13,6 +13,7 @@ import {
   TabsContent,
   type ListSchema,
 } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { formatTimestamp } from '@/lib/time';
 import { statusLabel } from '@/lib/status';
@@ -133,6 +134,7 @@ export function JuiceFSStoragePage({ cluster }: JuiceFSStoragePageProps): React.
       rowKey: 'name',
       refresh: listRefresh.refresh,
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'juicefs:columns' },
       columns: [
         {
           key: 'name',
@@ -146,6 +148,7 @@ export function JuiceFSStoragePage({ cluster }: JuiceFSStoragePageProps): React.
         },
         {
           key: 'status',
+          hideable: true,
           title: t('storage.column.status'),
           width: 130,
           render: (row) =>
@@ -157,6 +160,7 @@ export function JuiceFSStoragePage({ cluster }: JuiceFSStoragePageProps): React.
         },
         {
           key: 'capacity',
+          hideable: true,
           title: t('storage.column.capacity'),
           width: 150,
           render: (row) => (
@@ -170,6 +174,7 @@ export function JuiceFSStoragePage({ cluster }: JuiceFSStoragePageProps): React.
         },
         {
           key: 'used',
+          hideable: true,
           title: t('cluster.juicefs.column.used'),
           width: 150,
           render: (row) => {
@@ -184,6 +189,7 @@ export function JuiceFSStoragePage({ cluster }: JuiceFSStoragePageProps): React.
         },
         {
           key: 'nodes',
+          hideable: true,
           title: t('cluster.juicefs.column.mountedNodes'),
           width: 120,
           hideBelow: 'md',
@@ -198,6 +204,7 @@ export function JuiceFSStoragePage({ cluster }: JuiceFSStoragePageProps): React.
         },
         {
           key: 'createTime',
+          hideable: true,
           title: t('cluster.column.createdAt'),
           width: 170,
           hideBelow: 'xl',
@@ -217,6 +224,9 @@ export function JuiceFSStoragePage({ cluster }: JuiceFSStoragePageProps): React.
     }),
     [t, volumes.isFetching],
   );
+
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('juicefs', columnKeys);
 
   if (state === 'error') {
     return (
@@ -245,7 +255,9 @@ export function JuiceFSStoragePage({ cluster }: JuiceFSStoragePageProps): React.
             {state === 'loading' ? (
               <Skeleton className="h-40 w-full" />
             ) : (
-              <ResourceList schema={schema} onRefresh={listRefresh.onRefresh} rows={rows} loading={false} />
+              <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys} schema={schema} onRefresh={listRefresh.onRefresh} rows={rows} loading={false} />
             )}
           </div>
         </TabsContent>

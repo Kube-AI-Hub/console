@@ -4,6 +4,7 @@ import { Link } from '@tanstack/react-router';
 import { workspaceMembersApi, type WorkspaceMemberSummary } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, ResourceList, type ListSchema } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { errorMessage, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -103,9 +104,11 @@ export function WorkspaceMembersPage({ workspace }: WorkspaceMembersPageProps): 
       ],
       rowKey: 'username',
       rowAttributes: (row) => ({ 'data-ai-row': row.username }),
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'workspace-members:columns' },
       columns: [
         {
           key: 'username',
+          hideable: true,
           title: t('workspace.field.member'),
           render: (row) => (
             <span className="flex min-w-0 flex-col">
@@ -123,6 +126,7 @@ export function WorkspaceMembersPage({ workspace }: WorkspaceMembersPageProps): 
         },
         {
           key: 'role',
+          hideable: true,
           title: t('workspace.field.role'),
           width: 200,
           hideBelow: 'md',
@@ -130,6 +134,7 @@ export function WorkspaceMembersPage({ workspace }: WorkspaceMembersPageProps): 
         },
         {
           key: 'status',
+          hideable: true,
           title: t('cluster.column.status'),
           width: 120,
           hideBelow: 'lg',
@@ -141,6 +146,7 @@ export function WorkspaceMembersPage({ workspace }: WorkspaceMembersPageProps): 
         },
         {
           key: 'lastLogin',
+          hideable: true,
           title: t('workspace.field.lastLogin'),
           width: 170,
           hideBelow: 'xl',
@@ -164,6 +170,9 @@ export function WorkspaceMembersPage({ workspace }: WorkspaceMembersPageProps): 
     [t, query.isFetching, isSelf, workspace],
   );
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('workspace-members', columnKeys);
+
   if (state === 'error') {
     return (
       <AiSurface as="section" aiId="workspace-members:surface" state="error" className="min-w-0">
@@ -178,6 +187,8 @@ export function WorkspaceMembersPage({ workspace }: WorkspaceMembersPageProps): 
           AiSurface alone would leave this page without a targetable surface element. */}
       <div data-ai-id="workspace-members:table">
         <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
           schema={schema}
           rows={rows}
           loading={state === 'loading'}

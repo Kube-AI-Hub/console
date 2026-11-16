@@ -72,3 +72,23 @@
 三模块串行回归出现 2 条失败：`ACCESS_CONTROL_USERS_05`、`ACCESS_CONTROL_WORKSPACE_CONSOLE_05`（用户组名称生成的
 等待超时）。单独串行重跑这两条 **2 passed（26.15s）**，且本批没有改动访问控制相关页面——属于长跑/并发下的
 等待敏感用例，与列显隐改动无关。这与「长跑退化」的记录一致：判定按「失败单条复跑」。
+
+## 9. 第三批（同日）：集群列表 / 企业空间成员 / 集群成员 / JuiceFS 存储
+
+| 页面 | 可隐藏列 | 页面键 | surface aiId |
+| --- | --- | --- | --- |
+| 集群列表 | 5（就绪/角色/K8s 版本/节点数/创建时间） | `clusters` | 同名 |
+| 企业空间成员 | 4（用户名/角色/状态/最近登录） | `workspace-members` | 同名 |
+| 集群成员 | 4（用户名/状态/角色/最近登录） | `cluster-members` | 同名 |
+| JuiceFS 存储 | 5（状态/容量/已用/节点/创建时间） | `juicefs` | **`cluster-juicefs`** |
+
+用例 `CONFIGMAPS-LIST-11` 已扩到 **11 个页面**（41.91s 通过）。
+
+第三批的处理方式：`columnVisibility` 直接插在 `columns: [` 之前（不依赖 `sortAiPrefix`，这四个页面都没有），
+`hideable` 只加在多行写法的列上。踩到的坑：**JuiceFS 页的 surface aiId 是 `cluster-juicefs:surface`**，
+而列菜单前缀是 `juicefs`——用例必须分开给出。
+
+## 10. 仍未接入（约 36 个）
+
+集群网关（双 schema、双页签，需按页签分键）、商店管理（一页三表）、工作负载以外的多数详情内表格、
+集群自定义监控、访问控制的若干列表等。商店管理与集群网关都属于「一页多表/多 schema」，需要逐表接线。

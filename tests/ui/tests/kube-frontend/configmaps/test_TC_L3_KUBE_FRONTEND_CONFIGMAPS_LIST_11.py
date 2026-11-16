@@ -14,6 +14,10 @@ PAGES = (
     ('rule-groups', '/kube-frontend/system-workspace/clusters/host/projects/default/alertingrules', 'rule-groups', 'enabled', 'alertingrules'),
     ('federated-projects', '/kube-frontend/workspaces/system-workspace/federatedprojects', 'federated-projects', 'clusters', 'federated-projects'),
     ('cluster-alerting-messages', '/kube-frontend/clusters/host/alerting-messages', 'cluster-alerting-messages', 'severity', 'cluster-alerting-messages'),
+    ('clusters', '/kube-frontend/clusters', 'clusters', 'nodeCount', 'clusters'),
+    ('workspace-members', '/kube-frontend/workspaces/system-workspace/members', 'workspace-members', 'role', 'workspace-members'),
+    ('cluster-members', '/kube-frontend/clusters/host/members', 'cluster-members', 'lastLogin', 'cluster-members'),
+    ('juicefs', '/kube-frontend/clusters/host/juicefs-storage', 'juicefs', 'nodes', 'cluster-juicefs'),
 )
 
 @pytest.mark.point

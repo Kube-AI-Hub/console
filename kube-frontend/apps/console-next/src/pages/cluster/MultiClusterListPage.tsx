@@ -4,6 +4,7 @@ import { useMulticluster } from '@/shell/useMulticluster';
 import { Link } from '@tanstack/react-router';
 import { clustersApi, type ClusterSummary } from '@kube-ai-hub/api-client';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { useResourceListState } from '@/components/resource/useResourceListState';
@@ -115,6 +116,7 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
       sortableKeys: ['name', 'createTime', 'nodeCount'],
       sortAiPrefix: 'clusters',
       sort: { key: list.sortBy, order: list.order },
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'clusters:columns' },
       columns: [
         {
           key: 'name',
@@ -148,6 +150,7 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
         },
         {
           key: 'ready',
+          hideable: true,
           title: t('cluster.column.status'),
           width: 150,
           render: (row: ClusterSummary) => (
@@ -171,6 +174,7 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
         },
         {
           key: 'role',
+          hideable: true,
           title: t('cluster.list.role'),
           width: 110,
           // Rendered from the label the federation writes, so a member cluster called
@@ -183,6 +187,7 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
         },
         {
           key: 'kubernetesVersion',
+          hideable: true,
           title: t('cluster.list.kubernetesVersion'),
           width: 150,
           hideBelow: 'md',
@@ -190,6 +195,7 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
         },
         {
           key: 'nodeCount',
+          hideable: true,
           title: t('cluster.list.nodeCount'),
           width: 110,
           hideBelow: 'lg',
@@ -197,6 +203,7 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
         },
         {
           key: 'createTime',
+          hideable: true,
           title: t('cluster.column.createdAt'),
           width: 170,
           hideBelow: 'xl',
@@ -243,6 +250,9 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
     [list.sortBy, list.order, rows.length, t],
   );
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('clusters', columnKeys);
+
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
 
   if (state === 'error') {
@@ -256,6 +266,8 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
   return (
     <AiSurface as="section" aiId="clusters:surface" state={state} className="min-w-0">
       <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
         schema={schema}
         rows={rows}
         loading={state === 'loading'}

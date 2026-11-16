@@ -8,6 +8,7 @@ import {
 } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, Button, Input, Modal, ResourceList, Select, type ListSchema } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { useAuth } from '@/shell/AuthProvider';
@@ -152,9 +153,11 @@ export function ClusterMembersPage({ cluster }: ClusterMembersPageProps): React.
             },
           ]
         : [],
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'cluster-members:columns' },
       columns: [
         {
           key: 'username',
+          hideable: true,
           title: t('platform.column.username'),
           render: (row: ClusterMemberSummary) => (
             <span className="flex min-w-0 items-center gap-2">
@@ -171,6 +174,7 @@ export function ClusterMembersPage({ cluster }: ClusterMembersPageProps): React.
         },
         {
           key: 'status',
+          hideable: true,
           title: t('platform.column.status'),
           width: 120,
           render: (row: ClusterMemberSummary) => (
@@ -179,12 +183,14 @@ export function ClusterMembersPage({ cluster }: ClusterMembersPageProps): React.
         },
         {
           key: 'role',
+          hideable: true,
           title: t('cluster.members.role'),
           width: 180,
           render: (row: ClusterMemberSummary) => <span className="truncate text-ai-fg-secondary">{row.role || '-'}</span>,
         },
         {
           key: 'lastLogin',
+          hideable: true,
           title: t('platform.user.lastLogin'),
           width: 170,
           hideBelow: 'lg',
@@ -208,6 +214,9 @@ export function ClusterMembersPage({ cluster }: ClusterMembersPageProps): React.
     [listRefresh, rows.length, self, t, writable],
   );
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('cluster-members', columnKeys);
+
   if (state === 'error') {
     return (
       <AiSurface as="section" aiId="cluster-members:surface" state="error" className="min-w-0">
@@ -229,6 +238,8 @@ export function ClusterMembersPage({ cluster }: ClusterMembersPageProps): React.
         </p>
       ) : null}
       <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
         schema={schema}
         onRefresh={listRefresh.onRefresh}
         rows={rows}
