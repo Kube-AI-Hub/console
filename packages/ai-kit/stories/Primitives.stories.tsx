@@ -163,6 +163,17 @@ export const AllPrimitives: StoryObj = {
             <div><dt className="text-[11px] text-ai-fg-muted">创建时间</dt><dd className="text-xs text-ai-fg-secondary">2026-11-09</dd></div>
           </dl>
         </Panel>
+        {/*
+         * 概览用到的形态：标题带图标且为页面级 h2，头部给一个下限以便和同排面板对齐，
+         * 正文可拉伸。三者都是可选属性，不传时与上面的默认形态完全一致。
+         */}
+        <div className="mt-4">
+          <Panel title="节点数" icon="nodes" titleLevel={2} headerClassName="min-h-[3.75rem] items-center"
+            bodyClassName="flex min-h-0 flex-1 flex-col"
+            actions={<a href="#nodes" className="text-xs text-ai-link underline-offset-4 hover:underline">查看全部节点</a>}>
+            <p className="text-xs text-ai-fg-muted">带图标的 h2 标题、60px 头部下限、可拉伸正文。</p>
+          </Panel>
+        </div>
       </CardSection>
 
       <CardSection title="Tabs / Accordion / Breadcrumb / Pagination">
