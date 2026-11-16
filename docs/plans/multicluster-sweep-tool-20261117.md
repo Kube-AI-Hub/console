@@ -204,3 +204,35 @@ baseline PASS in 252s
 `pages/cluster/juicefsQueries.ts` 里还留着一份手拼的旧位置。改用 `clusterScoped` 后该页 `state=empty, errors=0`。
 
 这是「同一根因的第 N 份副本」：api-client 里清完后，**页面目录里还有一份**。以后清理这类问题要同时扫 `apps/` 与 `packages/`。
+## 12. 交互维度（`--interactions`）
+
+首屏渲染通过，不代表**排序、搜索**这些交互也对：排序会加 `sortBy`、搜索会加 `keyword`，是**另一次请求**，
+每一次都可能丢掉集群段。
+
+```bash
+python3 tools/multicluster_sweep.py --env-file /tmp/a100.env --interactions --clusters host,xc --project spaces
+```
+
+### 关键设计：交互必须**证明自己发生过**
+
+第一版只看「有没有 4xx」，结果 6 个页面全绿——但其中 4 个页面的句柄根本没找到，**等于什么都没做**。
+改成统计交互前后的 kapis/apis 请求数，并要求至少一次交互真的发出了请求：
+
+```
+OK   host   deployments          sort=True search=True requests=2 errors=0
+OK   host   configmaps           sort=True search=True requests=2 errors=0
+SKIP host   pods                 sort=False search=False requests=0 errors=0
+OK   xc     deployments          sort=True search=True requests=2 errors=0
+OK   xc     configmaps           sort=True search=True requests=2 errors=0
+SKIP xc     pods                 sort=False search=False requests=0 errors=0
+```
+
+- `deployments`、`configmaps` 在两个集群上都真的发出了 2 次请求，**0 条失败**；
+- `pods` 标 **SKIP**：`spaces` 项目在该集群没有容器组，列表没有行也就没有工具栏，无可交互。
+  SKIP 不计为失败，但**打印出来**，避免被误当成覆盖。
+
+### 踩到的坑：句柄前缀猜错
+
+第一次用 `cluster-workloads` 当部署页的前缀，全 SKIP。实际该页 `search`/`sortAiPrefix` 都由 `kind` 派生
+（`deployments:search`、`deployments:sort:<key>`）。**SKIP 的可见性正是这样救回来的**——如果 SKIP 被算作通过，
+这一轮会得到一个「6 页全绿」的假结论。

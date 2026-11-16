@@ -347,6 +347,89 @@ def sweep_details(
         browser.close()
     return rows
 
+#: Pages whose list interactions (sort, search, page size) are exercised, with the ai-id prefix the
+#: page uses for its list. Interaction is a different request than the first paint: sorting adds
+#: `sortBy`, searching adds `keyword`, a size change adds `limit` -- each is a chance to drop the
+#: cluster segment.
+INTERACTION_PAGES = (
+    # The workload list derives both handles from the kind (`deployments:search`, `deployments:sort:…`).
+    ('deployments', 'deployments', True, 'deployments'),
+    ('configmaps', 'configmaps', True, 'configmaps'),
+    ('pods', 'pods', True, 'cluster-pods'),
+)
+
+
+def sweep_interactions(
+    app: str, token: str, clusters: list[str], workspace: str, project: str,
+) -> list[dict]:
+    """Sort, search and resize the list on a member cluster, watching for failed requests."""
+    from playwright.sync_api import sync_playwright
+
+    results: list[dict] = []
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        context = browser.new_context(viewport={'width': 1500, 'height': 1000})
+        page = context.new_page()
+        page.goto(f'{app}/kube-frontend/login', wait_until='domcontentloaded')
+        page.evaluate("token => localStorage.setItem('kubesphere-token', token)", token)
+
+        for cluster in clusters:
+            for segment, _resource, namespaced, prefix in INTERACTION_PAGES:
+                if not namespaced:
+                    continue
+                failures: list[tuple[int, str]] = []
+
+                def record(response, sink=failures):
+                    if response.status < 400 or response.url.endswith('/api/session/me'):
+                        return
+                    sink.append((response.status, response.url))
+
+                page.on('response', record)
+                url = f'{app}/kube-frontend/{workspace}/clusters/{cluster}/projects/{project}/{segment}'
+                page.goto(url, wait_until='domcontentloaded')
+                page.wait_for_timeout(7000)
+                before = len(failures)
+                # Count what actually happened: an interaction that never fired a request proves
+                # nothing, and a missing handle would otherwise look like a pass.
+                acted = {'sort': False, 'search': False, 'requests': 0}
+
+                def count_request(request, sink=acted):
+                    if '/kapis/' in request.url or '/apis/' in request.url:
+                        sink['requests'] += 1
+
+                page.on('request', count_request)
+
+                # Sort by the first sortable column.
+                sort = page.locator(f'[data-ai-id^="{prefix}:sort:"]').first
+                if sort.count():
+                    requests_before_sort = acted['requests']
+                    sort.click()
+                    page.wait_for_timeout(3000)
+                    acted['sort'] = acted['requests'] > requests_before_sort
+
+                # Search for a substring that certainly matches nothing: the request still fires.
+                search = page.locator(f'[data-ai-id="{prefix}:search"]').first
+                if search.count():
+                    requests_before_search = acted['requests']
+                    search.fill('zzz-no-such-object')
+                    page.wait_for_timeout(3000)
+                    acted['search'] = acted['requests'] > requests_before_search
+                    search.fill('')
+                    page.wait_for_timeout(1500)
+
+                after = failures[before:]
+                page.remove_listener('request', count_request)
+                results.append({
+                    'cluster': cluster,
+                    'page': segment,
+                    'acted': acted,
+                    'errors': [{'status': status, 'url': url.replace(app, '')} for status, url in after],
+                })
+                page.remove_listener('response', record)
+
+        browser.close()
+    return results
+
 def baseline(args, token: str, clusters: list[str]) -> int:
     """Everything that has to hold on a multi-cluster install, in one command.
 
@@ -412,6 +495,7 @@ def main() -> int:
     parser.add_argument('--namespace', default='spaces')
     parser.add_argument('--baseline', action='store_true', help='run read sweeps (both scopes) and the write check')
     parser.add_argument('--details', action='store_true', help='also visit one detail page per kind per cluster')
+    parser.add_argument('--interactions', action='store_true', help='sort and search the list on each cluster')
     args = parser.parse_args()
 
     env = _env(args.env_file)
@@ -419,6 +503,24 @@ def main() -> int:
     default_pages = PROJECT_PAGES if args.scope == 'project' else PAGES
     pages = tuple(p.strip() for p in args.pages.split(',') if p.strip()) or default_pages
     clusters = [c.strip() for c in args.clusters.split(',') if c.strip()]
+
+    if args.interactions and not args.baseline:
+        rows = sweep_interactions(args.app, token, clusters, args.workspace, args.project)
+        bad = 0
+        for row in rows:
+            noisy = [e for e in row['errors'] if e['status'] in (401, 403, 404, 500, 502, 503)]
+            bad += 1 if noisy else 0
+            # An interaction that never fired a request is not evidence; say so instead of passing.
+            acted = row['acted']
+            performed = acted['sort'] or acted['search']
+            flag = 'FAIL' if noisy else ('OK  ' if performed else 'SKIP')
+            # SKIP is not a failure: a list with no rows renders no toolbar, so there is nothing to
+            # interact with. It is printed rather than hidden, so nobody mistakes it for coverage.
+            bad += 1 if noisy else 0
+            print(f"{flag} {row['cluster']:6s} {row['page']:20s} sort={acted['sort']} search={acted['search']} requests={acted['requests']} errors={len(noisy)}")
+            for entry in noisy[:3]:
+                print(f"       {entry['status']} {entry['url'][:120]}")
+        return 1 if bad else 0
 
     if args.details and not args.baseline:
         rows = sweep_details(args.app, args.bff, token, clusters, args.workspace, args.project)
