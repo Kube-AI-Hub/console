@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import {
+import { clusterScoped,
   nodesApi,
   quantityToNumber,
   resourceApi,
@@ -41,7 +41,7 @@ export function useNodeUsage(cluster = 'host', enabled = true) {
     retry: false,
     queryFn: async ({ signal }) => {
       const body = await api.request<{ items?: Array<{ metadata?: { name?: string }; usage?: Record<string, string> }> }>(
-        `/apis/metrics.k8s.io/v1beta1/${cluster && cluster !== 'host' ? `clusters/${encodeURIComponent(cluster)}/` : ''}nodes`,
+        clusterScoped('/apis/metrics.k8s.io/v1beta1', cluster, 'nodes'),
         { signal },
       );
       const out: Record<string, { cpu?: string; memory?: string }> = {};
@@ -94,7 +94,7 @@ export function useProjectPods(cluster = 'host', enabled = true) {
        */
       const body = await api.request<{
         items?: Array<{ metadata?: { namespace?: string }; containers?: Array<{ usage?: Record<string, string> }> }>;
-      }>(`/apis/metrics.k8s.io/v1beta1/${cluster && cluster !== 'host' ? `clusters/${encodeURIComponent(cluster)}/` : ''}pods`, { signal });
+      }>(clusterScoped('/apis/metrics.k8s.io/v1beta1', cluster, 'pods'), { signal });
       const out: Record<string, { cpuCores: number; memoryBytes: number; podCount: number }> = {};
       for (const item of body?.items ?? []) {
         const namespace = item.metadata?.namespace;

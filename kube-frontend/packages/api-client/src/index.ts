@@ -630,3 +630,6 @@ export type {
 
 export { promqlApi } from './promql';
 export type { PromqlSeries } from './promql';
+
+// Path helpers: the member-cluster segment placement lives in one place (see `paths.ts`).
+export { clusterScoped, corePath } from './paths';
