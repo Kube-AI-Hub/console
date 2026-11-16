@@ -1,59 +1,46 @@
-# 列显隐 E2E：41 个页面，含 4 个页签内表格（2026-11-16 第 56 轮）
+# 列显隐 E2E：41 个页面（2026-11-16 第 56–62 轮）
 
 ```
-41 passed in 135.58s (0:02:15)
+41 passed in 132.39s (0:02:12)
 ```
 
-37 个平铺页面 + 4 个**页签内表格**：`gpu-pods`、`workspace-repo-events`、`workspace-app-versions`、
-`workspace-app-instances`。只剩 `installed-app-resources` 因**企业空间级已安装应用为 0** 无法验证。
+37 个平铺页面 + **4 个页签内表格**（`gpu-pods`、`workspace-repo-events`、`workspace-app-versions`、
+`workspace-app-instances`）。仅剩 `installed-app-resources` 因**企业空间级已安装应用为 0** 无法验证。
 
 ## 1. 页签内表格要补的三件事
 
 | 事 | 为什么 |
 | --- | --- |
 | **先点页签** | `TabsContent` 懒挂载，页签未激活时列表根本没渲染 |
-| **点之前等页面稳定** | 页面还在加载时点页签，标签栏随后重渲染会把选择退回默认——看起来像「这个表没有列选择器」 |
-| **surface 前缀取页面级** | `GpuPodsPanel` 自己**没有** AiSurface，用的是 `gpu-detail:surface`；仓库/应用详情同理 |
+| **点之前等页面稳定** | 页面还在加载时点页签，标签栏随后重渲染会把选择退回默认 |
+| **surface 前缀取页面级** | `GpuPodsPanel` 自己没有 AiSurface，用的是 `gpu-detail:surface` |
 
 被测对象（GPU 卡、仓库、应用）的 id 由 API 现查，不写死——共享集群上这些对象会变。
 
 ## 2. 空表格是另一种形状
 
-`gpu-pods` 与 `workspace-app-instances` 在本集群**没有行**。空表的行为与有行时不同：
+`gpu-pods` 与 `workspace-app-instances` 在本集群没有行。空表行为与有行时不同：
 
-- 隐藏最后一列后，表格可能连工具栏一起消失 → 后续「刷新/重置」步骤无处可点；
+- 隐藏最后一列后表格可能连工具栏一起消失 → 后续「刷新/重置」无处可点；
 - 行数在两次读取之间会变（数据正在到达），此时比较表头数没有意义。
 
-处理（两条都是有据可依的，不是放宽）：
+处理：表头比较只在「前后行数相同且 > 0」时进行；空表在断言完「菜单提供了该列 + 选择已持久化」后提前返回。
 
-1. **表头比较只在「前后行数相同且 > 0」时进行**；
-2. **空表在断言完「菜单提供了该列 + 选择已持久化」后提前返回**——这两条才是空表上可观察的事实。
-
-## 3. 本轮踩的四个坑（按发现顺序）
+## 3. 本轮踩的六个坑（按发现顺序）
 
 | 坑 | 症状 | 根因 |
 | --- | --- | --- |
-| 重构时把断言体搬进 helper，缩进丢了 | `SyntaxError: 'return' outside function` | 用字符串切割搬代码，没保持缩进 |
-| helper 里留了测试才有的 `screenshot` | `NameError: screenshot is not defined` | 同一原因：搬多了 |
-| `tab_ai_id` 参数加了却**没用上** | 4 条页签用例全失败 | 插入点选错，点击逻辑根本没进 helper |
-| `ui.cluster` 不存在 | `AttributeError` | 页面对象只暴露 `url`，cluster/workspace 是构造参数 |
+| 重构搬代码丢缩进 | `SyntaxError: 'return' outside function` | 字符串切割搬代码没保持缩进 |
+| helper 里留了测试才有的 `screenshot` | `NameError` | 同一原因：搬多了 |
+| `tab_ai_id` 参数加了却没用上 | 4 条页签用例全失败 | 插入点选错，点击逻辑没进 helper |
+| `ui.cluster` 不存在 | `AttributeError` | 页面对象只暴露 `url` |
+| 两个测试函数在同一文件 | 门禁 `应恰好有 1 个测试函数` | 一 spec 一文件是硬规矩 |
+| `TAB_PAGES` 定义在装饰器之后 | 只收集到 37 条而不是 41 | 模块级常量必须先定义 |
 
-**共同教训**：批量改测试代码时，改完**立刻跑一次 collect + 单条**，不要攒到最后一起跑——
-前三个坑任意一个都能被「跑一条」立刻发现。
+## 4. 流程反思（已落成规则）
 
-## 4. 验证
-
-| 项 | 结果 |
-| --- | --- |
-| 列显隐 E2E | **41 passed / 135.58s** |
-## 5. 一次提交越界（如实记录）
-
-本轮提交 `52589ab22` 里混进了**并行线生成的两个文件**：`tests/ui/cases/_traceability.md` 与
-`tests/ui/cases/kube-frontend/access-control/…USER_DETAIL-04.md`（另一条线跑 `generate_case_docs.py` 产生的用例文档，
-恰好被 `git add -A` 收进我的提交）。
-
-违反了「不要把并行工作混进提交」的约定。没有改写历史（并行线可能已在别处引用这些对象），
-但在此记录，便于后续核对提交归属时不被误导。
-
-**流程改进**：提交前用 `git status --porcelain` 逐条过一遍，而不是直接 `git add -A`；
-本会话后面几轮已经这样做（先列文件、再 `git commit` 已暂存内容）。
+1. **改完立刻 `--collect-only` + 跑单条**，不要攒到最后一起跑——前四个坑任意一个都能被「跑一条」立刻发现；
+2. **一 spec 一文件是硬约束**：新增分组要用 `parametrize` 扩展同一个函数，不能加第二个 `def test_`；
+3. **模块级常量放在被测函数之前**：装饰器在导入时求值，常量在后定义只会静默少收集；
+4. **失败先看是不是链路**：本轮 41 条全 ERROR 的真因是 BFF 502（隧道/BFF/静态站全挂了），
+   重建四件套后同样的用例 41 passed——**先跑 `tools/link_health.py` 再判读失败**。

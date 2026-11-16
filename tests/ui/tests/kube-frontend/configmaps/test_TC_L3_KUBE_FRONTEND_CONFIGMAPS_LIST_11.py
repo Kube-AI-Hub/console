@@ -47,11 +47,29 @@ PAGES = (
     ('cluster-custom-monitoring', '/kube-frontend/clusters/host/custom-monitoring', 'cluster-custom-monitoring', 'panels', 'custom-monitoring'),
 )
 
-def _check_column_chooser(ui, origin, page_spec, tab_ai_id=None):
+def _check_column_chooser(ui, origin, page_spec, tab_ai_id=None, ui_config=None, session_token=None):
     """Assert the column chooser on one page (optionally inside a tab)."""
 
     prefix, path, storage, column, surface_prefix, *rest = page_spec
     tab_ai_id = rest[0] if rest else tab_ai_id
+    resolver = rest[1] if len(rest) > 1 else None
+    if resolver:
+        # The object under test (a GPU card, a repo, a workspace app) is resolved from the API:
+        # those come and go on a shared cluster, so a hard-coded id would rot.
+        from helpers.api import ApiClient
+
+        api = ApiClient(ui_config.app, session_token)
+        workspace = 'system-workspace'
+        cluster = 'host'
+        if resolver == 'gpu':
+            value = _first_id(api, '/kapis/gpu.kubesphere.io/v1alpha1/gpus?limit=1', 'uuid')
+        elif resolver == 'repo':
+            value = _first_id(api, f'/kapis/openapalis?limit=1', 'repo_id') if False else _first_id(api, f'/kapis/openpitrix.io/v1/workspaces/{workspace}/repos?limit=1', 'repo_id')
+        else:
+            value = _first_id(api, f'/kapis/openpitrix.io/v1/workspaces/{workspace}/apps?limit=1', 'app_id')
+        if not value:
+            pytest.skip(f'集群上没有可用于 {prefix} 的对象')
+        path = path.format(cluster=cluster, workspace=workspace, **{resolver: value})
     ui.page.goto(origin + path, wait_until='domcontentloaded')
     surface = ui.page.locator(f'[data-ai-id="{surface_prefix}:surface"]').last
     # 90s, not 30s: this cluster's first paint of a list page has been measured at 9s with the
@@ -131,32 +149,6 @@ def _check_column_chooser(ui, origin, page_spec, tab_ai_id=None):
     
 
 
-@pytest.mark.point
-@pytest.mark.parametrize(
-    'page_spec',
-    PAGES,
-    ids=[spec[0] for spec in PAGES],
-    )
-def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_11(configmaps_page, screenshot, page_spec):
-    """TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-11 列表显示列。
-
-    One case per page, not one loop over all of them: a single page that is slow or erroring in
-    this environment used to abort the whole run, so 35 passing pages produced no evidence. Split,
-    each page reports on its own and a failure names the page in the test id.
-    """
-
-    ui = configmaps_page
-    # `ui.url` is the project configmaps URL; strip the tail to reach the console root.
-    origin = ui.url.split('/kube-frontend/')[0]
-
-    _check_column_chooser(ui, origin, page_spec)
-
-    screenshot(ui.page, f'list-column-visibility-{page_spec[0]}')
-
-
-#: Tables that live inside a tab: the list is not rendered until the tab is activated, so each
-#: entry carries the tab's handle and a resolver for the id in its path.
-#: (prefix, path template, storage, column, surface prefix, tab handle, resolver)
 TAB_PAGES = (
     ('gpu-pods', '/kube-frontend/clusters/{cluster}/gpus/{gpu}', 'gpu-pods', 'namespace', 'gpu-detail', 'gpu-detail:tab:pods', 'gpu'),
     ('workspace-repo-events', '/kube-frontend/workspaces/{workspace}/repos/{repo}', 'workspace-repo-events', 'type', 'workspace-repo-detail', 'workspace-repo-detail:tab:events', 'repo'),
@@ -177,41 +169,31 @@ def _first_id(api, path: str, key: str) -> str | None:
     return str(first.get(key) or (first.get('metadata') or {}).get('name') or '') or None
 
 
-@pytest.mark.point
-@pytest.mark.parametrize('page_spec', TAB_PAGES, ids=[spec[0] for spec in TAB_PAGES])
-def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_11_TABS(configmaps_page, screenshot, page_spec, ui_config, session_token):
-    """TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-11 列表显示列（页签内的表格）。
 
-    Same assertions as the flat pages; the difference is that these lists are mounted only once
-    their tab is active, so the case clicks the tab first. The id in the path (a GPU card, a repo,
-    a workspace app) is resolved from the API rather than hard-coded, because those objects come
-    and go on a shared cluster.
+
+@pytest.mark.point
+@pytest.mark.parametrize(
+    'page_spec',
+    PAGES + TAB_PAGES,
+    ids=[spec[0] for spec in PAGES + TAB_PAGES],
+)
+def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_11(configmaps_page, screenshot, page_spec, ui_config, session_token):
+    """TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-11 列表显示列。
+
+    One case per page, not one loop over all of them: a single page that is slow or erroring in
+    this environment used to abort the whole run, so 35 passing pages produced no evidence. Split,
+    each page reports on its own and a failure names the page in the test id.
     """
 
     ui = configmaps_page
-    prefix, template, storage, column, surface_prefix, tab_handle, resolver = page_spec
+    # `ui.url` is the project configmaps URL; strip the tail to reach the console root.
     origin = ui.url.split('/kube-frontend/')[0]
 
-    from helpers.api import ApiClient
+    _check_column_chooser(ui, origin, page_spec, ui_config=ui_config, session_token=session_token)
 
-    api = ApiClient(ui_config.app, session_token)
+    screenshot(ui.page, f'list-column-visibility-{page_spec[0]}')
 
-    # The page object only exposes its URL; the cluster and workspace are the ones the URL was
-    # built with, so read them back from there instead of assuming attributes that do not exist.
-    workspace = 'system-workspace'
-    cluster = 'host'
-    ids: dict[str, str] = {'cluster': cluster, 'workspace': workspace}
-    if resolver == 'gpu':
-        value = _first_id(api, '/kapis/gpu.kubesphere.io/v1alpha1/gpus?limit=1', 'uuid')
-    elif resolver == 'repo':
-        value = _first_id(api, f'/kapis/openpitrix.io/v1/workspaces/{workspace}/repos?limit=1', 'repo_id')
-    else:
-        value = _first_id(api, f'/kapis/openpitrix.io/v1/workspaces/{workspace}/apps?limit=1', 'app_id')
-    if not value:
-        pytest.skip(f'集群上没有可用于 {prefix} 的对象')
-    ids[resolver] = value
 
-    path = template.format(**ids)
-    _check_column_chooser(ui, origin, (prefix, path, storage, column, surface_prefix), tab_ai_id=tab_handle)
-
-    screenshot(ui.page, f'list-column-visibility-{prefix}')
+#: Tables that live inside a tab: the list is not rendered until the tab is activated, so each
+#: entry carries the tab's handle and a resolver for the id in its path.
+#: (prefix, path template, storage, column, surface prefix, tab handle, resolver)
