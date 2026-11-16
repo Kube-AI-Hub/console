@@ -660,7 +660,7 @@ def baseline(args, token: str, clusters: list[str], allowed: set[str] | None = N
     for scope, pages in (('cluster', PAGES), ('project', PROJECT_PAGES)):
         rows = sweep(args.app, token, clusters, pages, scope, args.workspace, args.project)
         broken = [row for row in rows if row['state'] == 'error' and f"{row['cluster']}:{row['page']}" not in allowed]
-        noisy = [row for row in rows if row['errors']]
+        noisy = [row for row in rows if row['errors'] and f"{row['cluster']}:{row['page']}" not in allowed]
         failures += len(broken)
         ready = sum(1 for row in rows if row['state'] == 'ready')
         empty = sum(1 for row in rows if row['state'] == 'empty')

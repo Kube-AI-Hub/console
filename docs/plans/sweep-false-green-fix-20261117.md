@@ -82,3 +82,33 @@ baseline FAIL in 495s | repo 1ccb36cea (dirty files: 124)
 
 **待查**：cluster 72 次里 49 ready + 8 empty + 1 error = 58，还有 14 次落在别的状态（`none`：surface 始终没出现）。
 下一轮加 `--out` 导出 JSON 逐条核对，确认这 14 个页面是「确实没有该资源」还是「页面没渲染出来」。
+## 8. 会话中途掉线，以及「已知不可用」白名单
+
+修好登录态后仍有 20 个页面报 `signed-out`：一次 401 就让应用登出，之后每次导航都落在登录页。
+修法：**每 15 个页面重新注入一次会话**，并在发现 `/login` 时就地重试一次。修后 72 次访问只剩 1 次掉线。
+
+另外引入 `--allow cluster:page`：某些页面在某个集群上**本来就不该能用**（如 `xc` 没有告警组件，
+`alerting-messages` 必然 503）。这类页面的 `error` 与身份检查的 `SUSPECT` 是**同一事实的两面**，
+不应各记一次失败。白名单让它只报一次、且不计失败。
+
+## 9. 第一条可信的基线（`dirty files: 0`）
+
+```bash
+python3 tools/multicluster_sweep.py --env-file /tmp/a100.env \
+  --app http://localhost:5180 --bff http://127.0.0.1:8093 \
+  --baseline --clusters host,xc --namespace spaces --project spaces \
+  --allow xc:alerting-messages
+```
+
+```
+OK   cluster  read: 72 visits, 59 ready, 12 empty, 1 error(allowlisted), 0 failed requests
+OK   project  read: 34 visits, 20 ready, 13 empty, 0 error, 0 failed requests
+OK   identity read: 9 collections, 8 distinct, 1 identical, 0 suspect
+OK   detail   read: 12 visits, 12 ok, 0 broken
+OK   interact read: 6 lists, 6 interacted, 0 skipped, 0 broken
+OK   write    host / xc: 均 OK（xc 上 on_host=False）
+baseline PASS in 580s | repo 86ccd280d (dirty files: 0)
+```
+
+**这是第一条可以当证据的多集群基线**：代码状态干净、页面真的渲染（55+ 页有数据）、交互真的触发、
+写入落点正确、且唯一的失败是已知的环境缺失。
