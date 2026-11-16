@@ -34,7 +34,7 @@
 
 ## 仓库落点
 
-- `pages/platform/PlatformSettingsPage.tsx`（info 视图）
+- `pages/platform/PlatformInfoPage.tsx`（`/kube-frontend/settings/info`）
 - `packages/api-client/src/access.ts` 的 `configScalar`
 
 ## 对外契约

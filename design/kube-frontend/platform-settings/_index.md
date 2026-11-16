@@ -42,7 +42,7 @@
 
 ## 仓库落点
 
-- `apps/console-next/src/pages/platform/PlatformSettingsPage.tsx`
+- `apps/console-next/src/pages/platform/PlatformInfoPage.tsx`（平台信息）与 `ChannelConfigPage.tsx`（五种通知渠道）
 - `packages/api-client/src/access.ts` 的 `configScalar` / `toPlatformInfo` / `toNotificationChannels`
 - `src/routes/kube-frontend.settings/`
 
@@ -75,7 +75,7 @@ E2E：`tests/kube-frontend/platform-settings/`。
 ## 页面与技术结构
 
 - 区域 `platform-settings`（两页），布局 `kube-frontend.settings/route.tsx`。
-- 组件 `PlatformSettingsPage`（按 `view` 渲染两个卡片之一）。
+- 组件 `PlatformInfoPage`（平台信息）与 `ChannelConfigPage`（按 `channel` 渲染一个通知渠道）；两者共用 `DefinitionRow` 的只读呈现。
 
 ## 状态与数据归属
 
