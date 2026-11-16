@@ -13,6 +13,8 @@ import type { Client } from './client';
  * the same request the write will use.
  */
 export interface AccessQuery {
+  /** Which cluster the question is about; a member cluster is answered by that cluster, not the host. */
+  cluster?: string;
   verb: 'create' | 'update' | 'delete' | 'get' | 'list';
   /** Plural resource name, e.g. `services`. */
   resource: string;
@@ -36,7 +38,7 @@ export function accessReviewApi(client: Client) {
      */
     async allowed(params: AccessQuery & { signal?: AbortSignal }): Promise<boolean> {
       const review = await client.request<{ status?: { allowed?: boolean; reason?: string } }>(
-        '/apis/authorization.k8s.io/v1/selfsubjectaccessreviews',
+        clusterScoped('/apis/authorization.k8s.io/v1', params.cluster, 'selfsubjectaccessreviews'),
         {
           method: 'POST',
           body: {
@@ -59,3 +61,4 @@ export function accessReviewApi(client: Client) {
     },
   };
 }
+import { clusterScoped } from './paths';

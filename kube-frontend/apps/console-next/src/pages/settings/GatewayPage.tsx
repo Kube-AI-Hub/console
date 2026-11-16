@@ -58,6 +58,7 @@ export function GatewayPage({ cluster, namespace }: GatewayPageProps): React.Rea
     queryKey: ['gateway-can-update', cluster, namespace],
     queryFn: ({ signal }) =>
       accessReviewApi(apiClient).allowed({
+        cluster,
         verb: 'update',
         resource: 'gateways',
         group: 'gateway.kubesphere.io',
@@ -71,6 +72,7 @@ export function GatewayPage({ cluster, namespace }: GatewayPageProps): React.Rea
     queryKey: ['gateway-can-delete', cluster, namespace],
     queryFn: ({ signal }) =>
       accessReviewApi(apiClient).allowed({
+        cluster,
         verb: 'delete',
         resource: 'gateways',
         group: 'gateway.kubesphere.io',

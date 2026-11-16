@@ -61,6 +61,7 @@ export function ClusterGatewaysPage({ cluster, component = 'cluster' }: {
       queryKey: ['gateway-row-update', cluster, row.namespace],
       queryFn: ({ signal }: { signal: AbortSignal }) =>
         accessReviewApi(api).allowed({
+          cluster,
           verb: 'update' as const,
           resource: 'gateways',
           group: 'gateway.kubesphere.io',
@@ -76,6 +77,7 @@ export function ClusterGatewaysPage({ cluster, component = 'cluster' }: {
       queryKey: ['gateway-row-delete', cluster, row.namespace],
       queryFn: ({ signal }: { signal: AbortSignal }) =>
         accessReviewApi(api).allowed({
+          cluster,
           verb: 'delete' as const,
           resource: 'gateways',
           group: 'gateway.kubesphere.io',
