@@ -16,6 +16,7 @@
 
 ## 验收场景
 
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-VISIBILITY-03** — 已知集群为「私有」，当打开集群可见性页，则「可使用该集群的企业空间」列出所有企业空间并显示授权状态：`spec.placement.clusters` 含本集群的显示「已授权」且勾选，未含的显示「未授权」且未勾选；勾选/取消勾选对该空间的 Workspace 发 `application/json-patch+json` PATCH（`add /spec/placement/clusters/-` 或 `remove /spec/placement/clusters/<index>`），成功后回读新状态；`spec.placement.clusterSelector` 存在的空间显示「按标签选择集群 / 已按标签覆盖」且不提供开关；集群为「公开」时该区块整体只读并说明原因。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-VISIBILITY-01** — 已知打开集群可见性页，当选择「公开」，则集群对象的 `cluster.kubesphere.io/visibility` 标签变为 `public`，徽标同步显示「公开」；再选择「私有」，标签变回 `private`；页面其余标签（如 `kubesphere.io/workspace`）不被改动。
 
 ## 设计目标
@@ -56,6 +57,7 @@
 
 ## 验收用例
 
+- `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-VISIBILITY-03`
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-VISIBILITY-01`
 
 ## 功能需求

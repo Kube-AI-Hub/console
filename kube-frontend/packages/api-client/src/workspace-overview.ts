@@ -104,3 +104,74 @@ export function workspaceUsageApi(client: Client) {
     },
   };
 }
+
+/**
+ * Workspace ↔ cluster placement.
+ *
+ * A private cluster is usable only by the workspaces whose `spec.placement` includes it. The old
+ * console edits that placement directly with a JSON patch per workspace, and this API does the
+ * same rather than inventing a KubeSphere-specific endpoint (there is none for this direction).
+ *
+ * `spec.placement.clusterSelector` (an empty selector means "every cluster") takes precedence over
+ * `clusters`: a workspace that selects by label is already entitled, and adding an explicit entry
+ * to it would be noise.
+ */
+export interface WorkspacePlacement {
+  name: string;
+  alias: string;
+  /** Explicitly listed clusters. */
+  clusters: string[];
+  /** True when the workspace selects clusters by label instead of listing them. */
+  selectorAll: boolean;
+}
+
+export function workspacePlacementApi(client: Client) {
+  return {
+    async list(params: { signal?: AbortSignal } = {}): Promise<WorkspacePlacement[]> {
+      const body = await client.request<{
+        items?: Array<{
+          metadata?: { name?: string; annotations?: Record<string, string> };
+          spec?: { placement?: { clusters?: Array<{ name?: string }>; clusterSelector?: Record<string, unknown> | null } };
+        }>;
+      }>('/kapis/tenant.kubesphere.io/v1alpha2/workspaces', {
+        query: { limit: -1 },
+        ...(params.signal ? { signal: params.signal } : {}),
+      });
+      return (body?.items ?? [])
+        .map((item) => {
+          const placement = item.spec?.placement ?? {};
+          const selector = placement.clusterSelector;
+          return {
+            name: item.metadata?.name ?? '',
+            alias: item.metadata?.annotations?.['kubesphere.io/alias-name'] ?? item.metadata?.name ?? '',
+            clusters: (placement.clusters ?? []).map((entry) => entry?.name ?? '').filter(Boolean),
+            selectorAll: selector !== null && selector !== undefined,
+          };
+        })
+        .filter((item) => item.name);
+    },
+
+    /** Entitle a workspace to this cluster. */
+    async addCluster(params: { workspace: WorkspacePlacement; cluster: string }): Promise<void> {
+      const path = `/kapis/tenant.kubesphere.io/v1alpha2/workspaces/${encodeURIComponent(params.workspace.name)}`;
+      const operations = params.workspace.clusters.length
+        ? [{ op: 'add', path: '/spec/placement/clusters/-', value: { name: params.cluster } }]
+        : [{ op: 'add', path: '/spec/placement', value: { clusters: [{ name: params.cluster }] } }];
+      await client.request(path, { method: 'PATCH', body: operations, contentType: 'application/json-patch+json' });
+    },
+
+    /** Remove this cluster from a workspace's placement. */
+    async removeCluster(params: { workspace: WorkspacePlacement; cluster: string }): Promise<void> {
+      const index = params.workspace.clusters.indexOf(params.cluster);
+      if (index < 0) return;
+      const path = `/kapis/tenant.kubesphere.io/v1alpha2/workspaces/${encodeURIComponent(params.workspace.name)}`;
+      await client.request(path, {
+        method: 'PATCH',
+        // This aggregated API validates that every op carries `value`, even `remove` (probed: 500
+        // "operation, missing value field"). The value is ignored, the field must be present.
+        body: [{ op: 'remove', path: `/spec/placement/clusters/${index}`, value: { name: params.cluster } }],
+        contentType: 'application/json-patch+json',
+      });
+    },
+  };
+}

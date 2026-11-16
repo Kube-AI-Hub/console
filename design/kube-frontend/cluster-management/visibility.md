@@ -8,6 +8,7 @@
 
 ## 关联需求
 
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-VISIBILITY-03
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-VISIBILITY-01
 
 ## 设计目标与非目标
@@ -37,6 +38,21 @@
 
 **何时重新考虑**：需要批量切换多个集群时（那时要有明确的批量状态）。
 
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-VISIBILITY-03 — 授权写的是企业空间的 placement，不是集群
+
+「哪些企业空间能用这个集群」记录在**企业空间**一侧：`spec.placement.clusters`。因此授权/取消授权是对
+`workspaces/<name>` 发 JSON Patch（`add /spec/placement/clusters/-`，`clusters` 不存在时先 `add /spec/placement`），
+与旧 console 的 `pages/clusters/actions/cluster.js` 完全一致。集群对象上只有可见性标签，没有空间清单。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-VISIBILITY-04 — 按标签选择的空间不给开关
+
+`spec.placement.clusterSelector` 存在时，该空间本来就覆盖所有集群（或按标签覆盖）。给它一个勾选框，
+要么点了没反应（选择器仍然生效），要么把选择器改写成显式清单——两种都不是读者想要的。这一行只读并说明原因。
+
+### GOT-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-VISIBILITY-03 — 公开集群下整块只读
+
+公开意味着「所有空间都能用」，此时逐条授权没有意义。区块仍显示清单（读者需要看到谁在用），但开关禁用
+并说明要先切到私有。
 ## 系统现状
 
 老 console `pages/clusters/containers/Visibility`：面板显示当前可见性，表格列出企业空间并可从弹窗调整。本页迁移「公开/私有」部分；企业空间授权列表未迁移（需要联邦工作空间资源），页面上据实说明。

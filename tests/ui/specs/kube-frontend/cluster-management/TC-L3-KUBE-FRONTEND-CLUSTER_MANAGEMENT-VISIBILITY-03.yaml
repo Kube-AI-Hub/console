@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-VISIBILITY-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: visibility
+title: 集群可见性 · 企业空间授权开关
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/visibility'
+prd: prd/kube-frontend/cluster-management/visibility.md
+design: design/kube-frontend/cluster-management/visibility.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-VISIBILITY-03
+
+story:
+- US1
+
+product: 私有集群的可见性页列出所有企业空间并显示是否已授权；勾选/取消勾选通过 Workspace 的 JSON Patch 生效；按标签选择集群的空间只读；公开集群下整块只读。
+preconditions:
+- 已登录为平台管理员；集群 host 为私有；存在显式列出集群的企业空间
+steps:
+- 通过 API 读 workspaces 的 spec.placement 记录初始授权状态
+- 打开集群可见性页，核对每个企业空间行的授权状态与 API 一致
+- 取消一个已授权空间的勾选，等列表回读后核对 API 里该空间的 placement 不再含 host
+- 重新勾选，核对 API 恢复原状（测试自清理）
+- 核对按标签选择集群的空间没有开关，只有说明
+expected:
+- 区块 cluster-visibility:workspaces 存在，行数等于企业空间数
+- 复选框状态与 spec.placement.clusters 一致；切换后 API 状态随之变化
+- selectorAll 的空间渲染「已按标签覆盖」且无 checkbox
+- 公开集群时出现只读说明 :workspaces:public
+troubleshoot:
+- 勾选后 API 没变：PATCH 用了 merge patch 或写到了集群对象上（应写 workspaces/<name> 的 json-patch）
+- 取消授权无效：remove 的 index 计算错（应按当前 clusters 数组下标）
+update_automation:
+- 句柄：cluster-visibility:workspaces / :workspaces:list / :workspaces:toggle:<name> / :workspaces:name:<name> / :workspaces:public / :workspaces:unavailable / :workspaces:error

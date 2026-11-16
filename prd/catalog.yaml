@@ -879,6 +879,7 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-VISIBILITY-01
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-VISIBILITY-03
     - id: cluster-members
       title: 集群成员
       prd: prd/kube-frontend/cluster-management/cluster-members.md

@@ -557,6 +557,8 @@ export type { NodeInsightValues, RdmaPort } from './node-insights';
 export { nodeRankingApi, NODE_RANK_METRICS } from './node-ranking';
 export { workloadRankingApi, WORKLOAD_RANK_METRICS } from './workload-ranking';
 export { workspaceUsageApi, WORKSPACE_USAGE_METRICS, WORKSPACE_PROJECT_RANK_METRICS } from './workspace-overview';
+export { workspacePlacementApi } from './workspace-overview';
+export type { WorkspacePlacement } from './workspace-overview';
 export type { WorkspaceUsageMetric, WorkspaceProjectRankMetric, WorkspaceProjectRankRow } from './workspace-overview';
 export type { WorkloadRankMetric, WorkloadRankRow } from './workload-ranking';
 export type { NodeRankMetric, NodeRankRow } from './node-ranking';

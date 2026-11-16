@@ -818,7 +818,7 @@ MODULES = [
                     {
                         "id": "visibility",
                         "title": "集群可见性",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-VISIBILITY-01"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-VISIBILITY-01", "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-VISIBILITY-03"]},
                     },
                     {
                         "id": "cluster-members",
