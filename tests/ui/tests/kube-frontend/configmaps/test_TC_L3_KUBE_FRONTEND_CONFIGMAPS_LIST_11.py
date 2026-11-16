@@ -30,6 +30,8 @@ PAGES = (
     ('storageclasses', '/kube-frontend/clusters/host/storageclasses', 'storageclasses', 'provisioner', 'storageclasses'),
     ('cluster-alerting-policies', '/kube-frontend/clusters/host/alerting-policies', 'cluster-alerting-policies', 'type', 'cluster-alerting-policies'),
     ('custom-resources', '/kube-frontend/clusters/host/custom-resources', 'custom-resources', 'scope', 'custom-resources'),
+    # Panel and tab-hosted tables: each needs a click before its list exists.
+    ('node-usage', '/kube-frontend/clusters/host/node-usage', 'node-usage', 'pods', 'node-usage'),
     ('workspace-projects', '/kube-frontend/workspaces/system-workspace/projects', 'workspace-projects', 'clusters', 'workspace-projects'),
     ('workspace-roles', '/kube-frontend/workspaces/system-workspace/roles', 'workspace-roles', 'description', 'workspace-roles'),
     ('workspace-quota', '/kube-frontend/workspaces/system-workspace/quota', 'workspace-quota', 'used', 'workspace-quota'),
