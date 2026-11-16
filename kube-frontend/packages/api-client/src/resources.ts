@@ -1,4 +1,5 @@
 import { ApiError } from './errors';
+import { clusterScoped } from './paths';
 import type { Client } from './client';
 
 /**
@@ -141,10 +142,10 @@ function resourcePath(
   resource: string,
   kapisPrefix: string,
 ): string {
-  const clusterSegment = cluster && cluster !== 'host' ? `clusters/${encodeURIComponent(cluster)}/` : '';
   const namespaceSegment = namespace ? `namespaces/${encodeURIComponent(namespace)}/` : '';
   const prefix = kind === 'kapis' ? kapisPrefix : kubePrefix(resource);
-  return `${prefix}/${clusterSegment}${namespaceSegment}${resource}`;
+  // The member-cluster segment goes before the group, not after the version: see `clusterScoped`.
+  return clusterScoped(prefix, cluster, `${namespaceSegment}${resource}`);
 }
 
 export interface ResourceApiOptions<TItem, TSummary, TDetail> {

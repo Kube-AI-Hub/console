@@ -1,9 +1,11 @@
 import type { Client } from './client';
+import { clusterScoped } from './paths';
 import { toNodeSummary } from './storage';
 import type { KubeObject } from './resources';
 
 const NODE_SELECTOR = '!node-role.kubernetes.io/edge';
-const base = (cluster: string) => `/kapis/resources.kubesphere.io/v1alpha3/${cluster && cluster !== 'host' ? `clusters/${encodeURIComponent(cluster)}/` : ''}nodes`;
+// The member-cluster segment goes before the group: see `clusterScoped` in ./paths.
+const base = (cluster: string) => clusterScoped('/kapis/resources.kubesphere.io/v1alpha3', cluster, 'nodes');
 
 export interface NodeListParams {
   cluster: string;
