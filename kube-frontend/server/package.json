@@ -8,12 +8,15 @@
   "scripts": {
     "dev": "tsx watch src/dev.ts",
     "start": "tsx src/dev.ts",
+    "build": "node scripts/build.mjs",
+    "serve": "node dist/server.js",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
     "lint": "tsc --noEmit -p tsconfig.json"
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "esbuild": "catalog:",
     "tsx": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

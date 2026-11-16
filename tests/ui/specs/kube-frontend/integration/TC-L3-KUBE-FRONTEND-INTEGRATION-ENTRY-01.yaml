@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-INTEGRATION-ENTRY-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: integration
+feature: entry
+title: "同源集成 · 老控制台顶部入口"
+entry_url: "{BASE_URL}/dashboard"
+prd: prd/kube-frontend/integration/entry.md
+design: design/kube-frontend/integration/entry.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-INTEGRATION-ENTRY-01
+
+story:
+- US1
+
+product: 老控制台顶部导航有「新版控制台」入口，点击整页跳到新前端工作台。
+preconditions:
+- 已登录老控制台
+- 新前端已挂载
+steps:
+- 登录后停在控制台首页，读取顶部导航所有产品入口的文案、x、width、height、y
+- 点击「新版控制台」
+- 观察地址与页面
+expected:
+- 「新版控制台」出现在「工作台」之后、「智能体工坊」之前
+- 该按钮的 height 与 y 与相邻按钮完全一致，相邻水平间距与其他按钮一致
+- 点击后地址变为 /kube-frontend/，页面为新前端工作台且工作台区域进入 ready
+- 不出现新前端的登录表单
+troubleshoot:
+- 入口不出现：检查 client.portal.newConsole 是否为 true（取决于 ks-console 的 local_config.yaml）
+- 点击后落到老控制台的 404：检查是否误用了 routing.push 而不是 location.assign
+- 文案显示成 NEW_CONSOLE：检查 locales/*/l10n-appStore-list.js 是否有该键
+update_automation:
+- 入口文案或位置变化时同步本用例与 design 的对齐表

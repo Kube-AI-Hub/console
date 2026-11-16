@@ -28,7 +28,7 @@ def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_09(access_control_page, screenshot)
 
     for prefix, path, server_paged in PAGES:
         requests: list[str] = []
-        ui.page.on('request', lambda r: requests.append(r.url) if 'limit=' in r.url and 'kube-frontend' not in r.url and '/api/' not in r.url else None)
+        ui.page.on('request', lambda r: requests.append(r.url) if 'limit=' in r.url and '/kapis/' in r.url and '/api/' not in r.url else None)
         ui.page.goto(origin + path, wait_until='domcontentloaded')
         ui.page.wait_for_timeout(3500)
 

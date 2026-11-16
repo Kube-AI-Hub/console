@@ -2,6 +2,7 @@ import { request as httpRequest } from 'node:http';
 import { request as httpsRequest } from 'node:https';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { UpstreamConfig } from './config';
+import { stripAppPrefix } from './static';
 
 /**
  * Paths that are forwarded verbatim to ks-apiserver.
@@ -54,6 +55,9 @@ export async function proxyRequest(
   response: ServerResponse,
 ): Promise<void> {
   const url = new URL(request.url ?? '/', `http://${request.headers.host ?? 'localhost'}`);
+  // Requests may arrive with the mount prefix still on them (a direct call, or a
+  // proxy that forwards the path verbatim); ks-apiserver has no such prefix.
+  url.pathname = stripAppPrefix(url.pathname);
   const target = resolveTarget(url.pathname);
   const upstreamPath = target === 'kapis' ? rewriteForMode(config, url) : url.pathname;
   const upstream = new URL(config.baseUrl);

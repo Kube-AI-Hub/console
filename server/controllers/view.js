@@ -41,6 +41,7 @@ const clientConfig = {
   portal: {
     studio: portalEntryEnabled(serverConfigFull.server.studio),
     operations: portalEntryEnabled(serverConfigFull.server.operations),
+    newConsole: portalEntryEnabled(serverConfigFull.server.newConsole),
   },
 }
 

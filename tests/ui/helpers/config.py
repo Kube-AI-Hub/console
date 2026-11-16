@@ -52,6 +52,16 @@ class UiConfig:
         """Origin the kube-frontend pages live on."""
         return self.app_url or self.base_url
 
+    @property
+    def app_api(self) -> str:
+        """Origin plus the app's path prefix — where its BFF endpoints live.
+
+        The new console is served under `/kube-frontend` on a host it shares with
+        the old console, so `/api/session/login` at the origin root is answered by
+        the old console (which has no such route) instead of the BFF.
+        """
+        return f"{self.app.rstrip('/')}/kube-frontend"
+
     def url(self, path: str) -> str:
         return f"{self.base_url.rstrip('/')}/{path.lstrip('/')}"
 

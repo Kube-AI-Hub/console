@@ -6,17 +6,59 @@ import { api, TOKEN_STORAGE_KEY } from '@/api';
  * Who is signed in, for the whole app.
  *
  * The token lives in `localStorage` under the key the platform already used
- * (`kubesphere-token`) so a session started in the old console carries over and
- * the API client's lazy `getToken` keeps working unchanged. The user is derived
- * from the token rather than cached separately: two sources for "who am I" is how
- * a page ends up greeting one account while acting as another.
+ * (`kah_token`) so a session started in the old console carries over and the API
+ * client's lazy `getToken` keeps working unchanged. The user is derived from the
+ * token rather than cached separately: two sources for "who am I" is how a page
+ * ends up greeting one account while acting as another.
+ *
+ * The same value is also mirrored into a `kah_token` cookie. The old console
+ * does that because the model portal's same-origin proxy reads the JWT from the
+ * cookie (`server/proxy.js` → `injectConsoleJwt`); a reader who signs in here and
+ * then opens `/platform-model` would otherwise reach it unauthenticated.
  */
 
+/** The cookie the old console writes and the portal proxy reads. */
+const TOKEN_COOKIE = 'kah_token';
+
+/**
+ * The key earlier builds of this app used.
+ *
+ * Both apps are now served from one origin and one login, so there is exactly one
+ * key. A session stored under the old name is migrated once, on read, instead of
+ * being silently dropped — that would sign out every reader who was already using
+ * this console.
+ */
+const LEGACY_TOKEN_KEY = 'kubesphere-token';
+
+function migrateLegacyToken(): void {
+  try {
+    const legacy = window.localStorage.getItem(LEGACY_TOKEN_KEY);
+    if (!legacy) return;
+    if (!window.localStorage.getItem(TOKEN_STORAGE_KEY)) window.localStorage.setItem(TOKEN_STORAGE_KEY, legacy);
+    window.localStorage.removeItem(LEGACY_TOKEN_KEY);
+  } catch {
+    // Private browsing: nothing to migrate.
+  }
+}
+
 export function readToken(): string | null {
+  migrateLegacyToken();
   try {
     return window.localStorage.getItem(TOKEN_STORAGE_KEY);
   } catch {
     return null;
+  }
+}
+
+/** Mirror the token into the cookie the portal proxy reads. */
+function writeTokenCookie(token: string | null): void {
+  try {
+    document.cookie = token
+      ? `${TOKEN_COOKIE}=${encodeURIComponent(token)};path=/;SameSite=Lax`
+      : `${TOKEN_COOKIE}=;path=/;max-age=0`;
+  } catch {
+    // `document` is absent in a non-browser environment (tests mount pages in jsdom,
+    // where it exists but may throw on assignment in strict privacy modes).
   }
 }
 
@@ -27,6 +69,7 @@ function writeToken(token: string | null): void {
   } catch {
     // Private browsing or a full quota: the session then lasts one page load.
   }
+  writeTokenCookie(token);
 }
 
 /** The stored token's user, or `null` when missing, unreadable or expired. */

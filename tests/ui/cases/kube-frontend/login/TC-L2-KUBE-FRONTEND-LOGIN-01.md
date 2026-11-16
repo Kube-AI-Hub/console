@@ -18,8 +18,8 @@
 
 文案来自需求 [`prd/kube-frontend/login.md`](../../../../prd/kube-frontend/login.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L2-KUBE-FRONTEND-LOGIN-01** — Given 未登录，When 访问任意受保护路由，Then 跳转到 `/login` 且 `redirect` 携带原路径与查询串；登录成功后跳回该路径。
-- **AC-L2-KUBE-FRONTEND-LOGIN-06** — Given 已登录，When 访问 `/login?redirect=//evil.com`，Then 不跳往站外，落在站内入口。
+- **AC-L2-KUBE-FRONTEND-LOGIN-01** — Given 未登录，When 访问任意受保护路由，Then 跳转到 `/kube-frontend/login` 且 `redirect` 携带原路径与查询串；登录成功后跳回该路径。
+- **AC-L2-KUBE-FRONTEND-LOGIN-06** — Given 已登录，When 访问 `/kube-frontend/login?redirect=//evil.com`，Then 不跳往站外，落在站内入口。
 
 ### 关联设计
 
@@ -32,11 +32,11 @@
 ### US1 - 作为平台用户，用自己的账号登录后回到原来要去的页面
 
 
-**Independent Test**：未登录状态下打开配置字典深链接，被带到 `/login?redirect=...`；输入正确账号密码后，落在原来的配置字典页而不是首页。
+**Independent Test**：未登录状态下打开配置字典深链接，被带到 `/kube-frontend/login?redirect=...`；输入正确账号密码后，落在原来的配置字典页而不是首页。
 
 ## 前置与配置
 
-- 浏览器 localStorage 中没有 kubesphere-token
+- 浏览器 localStorage 中没有 kah_token
 - 有一个可用的账号
 
 ## 测试步骤
@@ -48,13 +48,13 @@
 
 ## 期望结果
 
-- 第二步被重定向到 /login，且 redirect 参数等于第一步的路径与查询串
+- 第二步被重定向到 /kube-frontend/login，且 redirect 参数等于第一步的路径与查询串
 - 提交后落在第一步的配置字典页，而不是首页
 - 列表面板进入 ready 或 empty 状态
 
 ## 失败排查
 
-- 停在 /login 时看表单内的错误提示，区分密码错误与连不上集群
+- 停在 /kube-frontend/login 时看表单内的错误提示，区分密码错误与连不上集群
 - redirect 丢失时检查 __root 的 beforeLoad 是否仍在传 search
 
 ## 产品改版后如何更新自动化

@@ -19,6 +19,15 @@ import { TanStackRouterVite } from '@tanstack/router-plugin/vite';
 
 
 export default defineConfig({
+  /*
+   * Served under a prefix, not at the origin root.
+   *
+   * The app shares its origin with the old console (`/` and `/login` belong to
+   * that one), so every asset URL has to carry the prefix too. Without this the
+   * build emits `/assets/index-*.js`, which on the shared origin resolves to the
+   * old console's static tree and 404s.
+   */
+  base: '/kube-frontend/',
   plugins: [TanStackRouterVite({ target: 'react', autoCodeSplitting: true }), react(), tailwindcss()],
   resolve: {
     /*

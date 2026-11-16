@@ -5,7 +5,7 @@ module: kube-frontend
 submodule: login
 feature: session
 title: 新前端 · 登录失败提示可区分
-entry_url: "{BASE_URL}/login"
+entry_url: "{BASE_URL}/kube-frontend/login"
 prd: prd/kube-frontend/login.md
 design: design/kube-frontend/login.md
 
@@ -18,9 +18,9 @@ story:
 
 product: 登录失败时用户能看出是哪一类问题，而不是笼统的「登录失败」。
 preconditions:
-- 浏览器 localStorage 中没有 kubesphere-token
+- 浏览器 localStorage 中没有 kah_token
 steps:
-- 打开 /login，不填任何内容直接提交
+- 打开 /kube-frontend/login，不填任何内容直接提交
 - 只填用户名，提交
 - 填入存在的用户名与错误密码，提交
 - 观察提示与输入框

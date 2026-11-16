@@ -35,7 +35,7 @@ def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_CREATE_02(configmaps_page, ui_config, sc
     configmaps_page.wait_ready()
     # Read the token only after the page has an origin: `evaluate` throws on
     # about:blank, and the header is needed just for the cleanup below.
-    token = configmaps_page.page.evaluate("() => localStorage.getItem('kubesphere-token')")
+    token = configmaps_page.page.evaluate("() => localStorage.getItem('kah_token')")
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
     url = f"{ui_config.app}/api/v1/namespaces/default/configmaps/{unique}"
     try:

@@ -5,6 +5,7 @@ import { isProxiedPath, proxyRequest } from './proxy';
 import { createUpgradeHandler } from './upgrade';
 import { bearerToken, login, logout, resolveCurrentUser, type OAuthClientConfig } from './auth/session';
 import { badRequest } from './errors';
+import { serveStatic, stripAppPrefix } from './static';
 
 export interface HandlerDeps {
   config: UpstreamConfig;
@@ -13,6 +14,15 @@ export interface HandlerDeps {
   manifest?: () => Promise<unknown>;
   /** OAuth client used for the password grant; defaults to the old console's. */
   oauthClient?: OAuthClientConfig;
+  /**
+   * Built SPA directory (`STATIC_DIR`).
+   *
+   * When set, this process is the app's web server as well as its API: the
+   * container ships the build, and the reverse proxy in front forwards the whole
+   * prefix here. Unset in development, where `dev-static-server.mjs` plays that
+   * role.
+   */
+  staticDir?: string;
 }
 
 /** Largest login body accepted, in bytes. A password grant is a few hundred. */
@@ -34,32 +44,43 @@ async function readBody(request: IncomingMessage): Promise<string> {
 /**
  * Request handler.
  *
- * Two jobs only: serve the AI manifest, and forward everything addressed to the
- * cluster. There is deliberately no per-resource route table. The old console
- * forwards `/{k}api{s}/{*path}` in one rule (`console/server/routes.js:153`) and
- * the same choice applies here — the API surface is defined by ks-apiserver, and
- * mirroring it would create a second definition that drifts.
+ * Three jobs: serve the AI manifest, answer the session endpoints, and forward
+ * everything addressed to the cluster. There is deliberately no per-resource route
+ * table. The old console forwards `/{k}api{s}/{*path}` in one rule
+ * (`console/server/routes.js:153`) and the same choice applies here — the API
+ * surface is defined by ks-apiserver, and mirroring it would create a second
+ * definition that drifts.
+ *
+ * Every path is normalised through `stripAppPrefix` first, so the same build works
+ * both behind the old console (which strips `/kube-frontend` before forwarding) and
+ * when addressed directly with the prefix still on it.
  */
 export function createHandler(deps: HandlerDeps) {
   const oauthClient = deps.oauthClient ?? { clientId: 'kubesphere', clientSecret: 'kubesphere', encryptKey: 'kubesphere' };
 
   return async function handle(request: IncomingMessage, response: ServerResponse): Promise<void> {
     const url = new URL(request.url ?? '/', `http://${request.headers.host ?? 'localhost'}`);
+    const pathname = stripAppPrefix(url.pathname);
 
     try {
-      if (url.pathname === '/api/ai/manifest') {
+      if (pathname === '/api/ai/manifest') {
         // A failure here must not take the page down: an agent that sees "no
         // declared pages" can still browse, whereas a 500 gives it nothing.
         const manifest = await deps.manifest?.().catch(() => []);
         return send(response, 200, manifest ?? []);
       }
 
-      if (url.pathname.startsWith('/api/session')) {
-        return await handleSession(deps, oauthClient, request, response, url.pathname);
+      if (pathname.startsWith('/api/session')) {
+        return await handleSession(deps, oauthClient, request, response, pathname);
       }
 
-      if (isProxiedPath(url.pathname)) {
+      if (isProxiedPath(pathname)) {
         return await proxyRequest(deps.config, request, response);
+      }
+
+      if (deps.staticDir !== undefined) {
+        const served = await serveStatic(deps.staticDir, pathname, request.method, request.headers.accept, response);
+        if (served.handled) return;
       }
 
       return send(response, 404, { code: 'not_found', message: 'no such endpoint', status: 404 });
@@ -197,6 +218,7 @@ export async function startServer(port: number, deps: HandlerDeps): Promise<Retu
 
 export { loadConfig, createUpgradeHandler };
 export { isExecUpgradePath, upgradeBearerToken, upstreamProtocols } from './upgrade';
+export { APP_PREFIX, looksLikeAsset, resolveStaticPath, stripAppPrefix } from './static';
 
 /**
  * The AI surface manifest.

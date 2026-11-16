@@ -118,10 +118,10 @@ start() {
   mode    $CLUSTER_MODE
 $([[ "$CLUSTER_MODE" == "kapis" ]] && echo "  upstream $upstream" || echo "  upstream $upstream (kubectl proxy)")
 
-  In kapis mode the page needs a JWT in localStorage under \`kubesphere-token\`:
-  copy it from the logged-in console (localStorage[\"kah_token\"]), for example
+  In kapis mode the page needs a JWT in localStorage under \`kah_token\`
+  (the same key the old console uses, so one login serves both), for example
 
-    localStorage.setItem('kubesphere-token', localStorage.getItem('kah_token'))
+    localStorage.setItem('kah_token', '<paste the JWT>')
 
   logs    .dev-stack-{proxy,bff,web}.log
 

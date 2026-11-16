@@ -18,6 +18,7 @@
 module.exports = {
   // Head
   APP_STORE: '앱 스토어',
+  NEW_CONSOLE: 'New Console',
   HOME_APP_STORE_DESC: 'Kube AI Hub 공식 앱스토어는 배포 및 관리 기능을 제공하며 사용자는 앱 템플릿을 기반으로 앱을 원클릭으로 신속하게 배포할 수 있습니다.',
   // Discover
   DISCOVER: '살펴보기',

@@ -129,9 +129,11 @@ const PLATFORMS: readonly Platform[] = [
     href: '/kube-frontend/',
     /*
      * This app is the compute console, so it owns its own route prefix. The bare
-     * `/` also belongs here: the landing route redirects into it.
+     * `/` does **not** belong here: it is the old console's root, served from the
+     * same origin. Claiming it would highlight this platform on a page this app
+     * does not own.
      */
-    matches: (path) => path.startsWith('/kube-frontend') || path === '/',
+    matches: (path) => path.startsWith('/kube-frontend'),
   },
   { key: 'model', labelKey: 'platform.model', icon: 'ai', href: '/platform-model/', matches: (path) => path.startsWith('/platform-model') },
   {
@@ -922,7 +924,7 @@ function UserMenu(): React.ReactElement | null {
 
   if (!user) return null;
   const label = user.displayName ?? user.name;
-  const leave = (): void => void signOut().then(() => window.location.assign('/login'));
+  const leave = (): void => void signOut().then(() => window.location.assign('/kube-frontend/login'));
 
   return (
     <React.Fragment>

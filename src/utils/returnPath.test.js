@@ -22,4 +22,20 @@ describe('visibleProductEntries', () => {
       'operations',
     ])
   })
+
+  it('shows the new console entry only when it is mounted', () => {
+    // A link to a deployment that is not mounted is a 404, so the entry rides on
+    // the same flag the proxy uses.
+    expect(visibleProductEntries({ newConsole: true })).toEqual([
+      'workbench',
+      'newConsole',
+      'models',
+      'plaza',
+    ])
+    expect(visibleProductEntries({ newConsole: false })).toEqual([
+      'workbench',
+      'models',
+      'plaza',
+    ])
+  })
 })

@@ -7,7 +7,7 @@ export interface NodeTerminalTarget {
 }
 
 export type NodeTerminalOptions = NodeTerminalTarget & Pick<ExecOptions,
-  'getToken' | 'origin' | 'webSocketImpl' | 'connectTimeoutMs' | 'onOpen' | 'onData' | 'onError' | 'onClose'>;
+  'getToken' | 'origin' | 'basePath' | 'webSocketImpl' | 'connectTimeoutMs' | 'onOpen' | 'onData' | 'onError' | 'onClose'>;
 
 /** Node access is authorized as nodes/exec, not as an ordinary container exec. */
 export function nodeTerminalPath(target: NodeTerminalTarget): string {
@@ -57,7 +57,7 @@ export function openNodeTerminalSession(options: NodeTerminalOptions): ExecSessi
     return session;
   }
   try {
-    const url = new URL(nodeTerminalPath(options), options.origin ?? globalThis.location?.origin ?? 'http://localhost');
+    const url = new URL(`${options.basePath ?? ''}${nodeTerminalPath(options)}`, options.origin ?? globalThis.location?.origin ?? 'http://localhost');
     url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
     const Impl = options.webSocketImpl ?? (globalThis.WebSocket as unknown as ExecSocketFactory);
     socket = new Impl(url.toString(), ['binary.k8s.io', TOKEN_PROTOCOL_PREFIX + token]);

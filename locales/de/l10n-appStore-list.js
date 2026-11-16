@@ -18,6 +18,7 @@
 module.exports = {
   // Head
   APP_STORE: 'App Store',
+  NEW_CONSOLE: 'New Console',
   HOME_APP_STORE_DESC: 'Der offizielle App-Store von Kube AI Hub bietet Funktionen zur Bereitstellung und Verwaltung von Anwendungen, die es Benutzern ermöglichen, Apps mit einem Klick auf App-Vorlagen schnell zu verteilen.',
   // Discover
   DISCOVER: 'Entdecken',

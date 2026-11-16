@@ -90,7 +90,11 @@ function pathRequiresDocumentNavigation(target) {
     pathname.startsWith('/dongba/') ||
     pathname.startsWith('/studio') ||
     pathname === '/operations' ||
-    pathname.startsWith('/operations/')
+    pathname.startsWith('/operations/') ||
+    // The new console is a separate application on this host's prefix; pushing it
+    // into this SPA's router would land on its own 404 route.
+    pathname === '/kube-frontend' ||
+    pathname.startsWith('/kube-frontend/')
   )
 }
 

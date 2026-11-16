@@ -39,6 +39,7 @@ const {
   labelStudioProxy,
   studioProxy,
   operationsProxy,
+  kubeFrontendProxy,
 } = require('./proxy')
 
 const { handleDockerhubProxy, handleHarborProxy } = require('./controllers/api')
@@ -136,6 +137,10 @@ function studioGateway(ctx, next) {
 
 router.use(studioGateway)
 mountPortal('/operations', operationsProxy)
+// The new console (kube-frontend) on the same host. Mounted before the catch-all
+// page renderer below, which would otherwise answer `/kube-frontend/*` with the
+// old console's own shell.
+mountPortal('/kube-frontend', kubeFrontendProxy)
 
 router
   .use(proxy('/endpoint{/*path}', endpointProxy))

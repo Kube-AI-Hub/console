@@ -19,6 +19,7 @@ module.exports = {
   // Head
   APP_STORE: '应用商店',
   LARGE_MODEL: '模型与数据',
+  NEW_CONSOLE: '新版控制台',
   AGENT_WORKSHOP: '智能体工坊',
   GOVERNANCE: '治理与运营',
   DONGBA: '生态广场',

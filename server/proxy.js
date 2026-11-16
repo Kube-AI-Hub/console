@@ -19,7 +19,12 @@
 const http = require('http')
 
 const { getServerConfig } = require('./libs/utils')
-const { resolvePortalTarget } = require('./libs/portalMounts')
+const {
+  NEW_CONSOLE_PREFIX,
+  isNewConsolePath,
+  resolvePortalTarget,
+  stripNewConsolePrefix,
+} = require('./libs/portalMounts')
 
 const { server: serverConfig } = getServerConfig()
 
@@ -365,7 +370,7 @@ const labelStudioProxy = {
   },
 }
 
-function createPortalProxy(target) {
+function createPortalProxy(target, { stripPrefix = '' } = {}) {
   const base = normalizeBaseUrl(target)
   return {
     target: base,
@@ -377,7 +382,14 @@ function createPortalProxy(target) {
     ws: true,
     optionsHandle(options, req) {
       const parsedUrl = new URL(req.url, 'http://localhost')
-      options.target = `${base}${parsedUrl.pathname}${parsedUrl.search}`
+      // The new console is mounted on a prefix of this host; its own process knows
+      // nothing about that prefix, so it is removed here rather than taught to the
+      // upstream. Everything after it — including the app's `/api/session/*` —
+      // passes through untouched.
+      const pathname = stripPrefix
+        ? stripNewConsolePrefix(parsedUrl.pathname)
+        : parsedUrl.pathname
+      options.target = `${base}${pathname}${parsedUrl.search}`
     },
     events: {
       proxyReq(proxyReq, req) {
@@ -389,8 +401,12 @@ function createPortalProxy(target) {
 
 const studioTarget = resolvePortalTarget(serverConfig.studio)
 const operationsTarget = resolvePortalTarget(serverConfig.operations)
+const newConsoleTarget = resolvePortalTarget(serverConfig.newConsole)
 const studioProxy = studioTarget ? createPortalProxy(studioTarget) : null
 const operationsProxy = operationsTarget ? createPortalProxy(operationsTarget) : null
+const kubeFrontendProxy = newConsoleTarget
+  ? createPortalProxy(newConsoleTarget, { stripPrefix: NEW_CONSOLE_PREFIX })
+  : null
 
 module.exports = {
   STREAM_PROXY_TIMEOUT_MS,
@@ -411,4 +427,5 @@ module.exports = {
   labelStudioProxy,
   studioProxy,
   operationsProxy,
+  kubeFrontendProxy,
 }

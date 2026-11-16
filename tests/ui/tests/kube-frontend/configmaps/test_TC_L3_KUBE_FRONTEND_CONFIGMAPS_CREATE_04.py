@@ -66,7 +66,7 @@ def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_CREATE_04(configmaps_page, ui_config, se
     # The object must exist in the project chosen in the dialog, not the page's.
     # `page.request` fires outside the app, so the bearer header has to be passed
     # explicitly: the BFF reads the token from the request, not from the browser.
-    token = page.evaluate("() => localStorage.getItem('kubesphere-token')")
+    token = page.evaluate("() => localStorage.getItem('kah_token')")
     headers = api_headers(token)
     url = f"{ui_config.app}/api/v1/namespaces/{other_project}/configmaps/{name}"
     try:

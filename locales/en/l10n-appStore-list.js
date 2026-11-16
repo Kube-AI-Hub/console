@@ -20,6 +20,7 @@ module.exports = {
   // Head
   APP_STORE: 'App Store',
   LARGE_MODEL: 'Models and Data',
+  NEW_CONSOLE: 'New Console',
   AGENT_WORKSHOP: 'Agent Workshop',
   GOVERNANCE: 'Governance',
   DONGBA: 'Ecosystem Plaza',

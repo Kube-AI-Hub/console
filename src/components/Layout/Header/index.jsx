@@ -68,6 +68,14 @@ class Header extends React.Component {
         onClick: this.handleLinkClick('/'),
         active: location.pathname === '/',
       },
+      newConsole: {
+        title: 'NEW_CONSOLE',
+        icon: 'computing',
+        // A full document navigation: the new console is a separate application on
+        // this host's `/kube-frontend` prefix, not a route of this SPA.
+        onClick: this.handleDocumentNav('/kube-frontend/'),
+        active: location.pathname.startsWith('/kube-frontend'),
+      },
       studio: {
         title: 'AGENT_WORKSHOP',
         icon: 'strategy-group',

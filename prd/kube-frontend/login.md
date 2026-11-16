@@ -8,7 +8,7 @@
 
 ### US1 - 作为平台用户，用自己的账号登录后回到原来要去的页面
 
-**Independent Test**：未登录状态下打开配置字典深链接，被带到 `/login?redirect=...`；输入正确账号密码后，落在原来的配置字典页而不是首页。
+**Independent Test**：未登录状态下打开配置字典深链接，被带到 `/kube-frontend/login?redirect=...`；输入正确账号密码后，落在原来的配置字典页而不是首页。
 
 ### US2 - 作为输错密码的用户，知道错在哪里而不是「登录失败」
 
@@ -20,12 +20,12 @@
 
 ## 验收场景
 
-- **AC-L2-KUBE-FRONTEND-LOGIN-01** — Given 未登录，When 访问任意受保护路由，Then 跳转到 `/login` 且 `redirect` 携带原路径与查询串；登录成功后跳回该路径。
+- **AC-L2-KUBE-FRONTEND-LOGIN-01** — Given 未登录，When 访问任意受保护路由，Then 跳转到 `/kube-frontend/login` 且 `redirect` 携带原路径与查询串；登录成功后跳回该路径。
 - **AC-L2-KUBE-FRONTEND-LOGIN-02** — Given 登录页，When 用户名或密码为空提交，Then 对应输入框下方给出提示，且不发起请求。
 - **AC-L2-KUBE-FRONTEND-LOGIN-03** — Given 密码错误，When 提交，Then 表单内显示「用户名或密码不正确」，密码被清空，未写入 token。
 - **AC-L2-KUBE-FRONTEND-LOGIN-04** — Given 已登录，When 点击账号菜单的「退出登录」，Then 回到登录页，token 从 `localStorage` 移除，且 upstream 收到 token 注销。
 - **AC-L2-KUBE-FRONTEND-LOGIN-05** — Given `localStorage` 里有一个已被集群注销的 token，When 打开任意页面，Then 不渲染控制台外壳，直接回到登录页。
-- **AC-L2-KUBE-FRONTEND-LOGIN-06** — Given 已登录，When 访问 `/login?redirect=//evil.com`，Then 不跳往站外，落在站内入口。
+- **AC-L2-KUBE-FRONTEND-LOGIN-06** — Given 已登录，When 访问 `/kube-frontend/login?redirect=//evil.com`，Then 不跳往站外，落在站内入口。
 - **AC-L2-KUBE-FRONTEND-LOGIN-07** — Given 账号是预注册状态（`initialized=false`），When 登录成功，Then 停留在登录页并说明「该账号尚未设置密码」，不进入控制台。
 
 ## 设计目标

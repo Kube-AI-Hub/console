@@ -94,7 +94,7 @@ def test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_MAIL_01(platform_settings_page, u
 
         # Read all three objects back: "the button stopped spinning" is not evidence.
         assert page.evaluate(
-            """async () => (await fetch('/kapis/notification.kubesphere.io/v2beta2/configs/default-email-config', {headers: {Authorization: 'Bearer ' + localStorage.getItem('kubesphere-token')}})).status"""
+            """async () => (await fetch('/kapis/notification.kubesphere.io/v2beta2/configs/default-email-config', {headers: {Authorization: 'Bearer ' + localStorage.getItem('kah_token')}})).status"""
         ) == 200
 
         # Reload: the page must render what was saved, not an empty form.

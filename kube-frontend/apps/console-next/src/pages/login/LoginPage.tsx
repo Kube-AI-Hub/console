@@ -5,7 +5,7 @@ import type { AiSurfaceState } from '@kube-ai-hub/ai-surface';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { useT } from '@/i18n';
 import { useAuth } from '@/shell/AuthProvider';
-import { safeReturnPath } from '@/routes/login';
+import { safeReturnPath } from '@/routes/kube-frontend.login';
 
 /**
  * Sign-in screen, ported from the old console (`core/containers/Login`).
@@ -195,7 +195,9 @@ function Field({
  */
 export function navigateAfterLogin(location: Location = window.location): void {
   const params = new URLSearchParams(location.search);
-  const target = safeReturnPath(params.get('redirect')) ?? safeReturnPath(params.get('referer')) ?? '/';
+  // The default is this app's own entry point, not `/`: the bare root is the old
+  // console's landing page on the shared origin.
+  const target = safeReturnPath(params.get('redirect')) ?? safeReturnPath(params.get('referer')) ?? '/kube-frontend/';
   window.location.assign(target);
 }
 

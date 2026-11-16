@@ -104,33 +104,26 @@ describe('POST /api/session/login', () => {
     expect(form.get('grant_type')).toBe('password');
     expect(form.get('username')).toBe('admin');
     /*
-     * The password is encoded before it leaves this process. Pinned to the exact
-     * ciphertext the legacy console sends, captured from the live cluster: a
-     * plaintext password is rejected there with `invalid_grant`, so this string is
-     * the working contract, not an implementation detail.
+     * The password goes over as typed. Measured on mlu370 (2026-11-17): plaintext
+     * answers 200 with a token, while the legacy console's `mix()` ciphertext is
+     * rejected with `invalid_grant`. The old console only sends that ciphertext
+     * because its own server decrypts it before the grant; there is no such hop
+     * here, so reproducing it would break login rather than match it.
      */
-    expect(form.get('password')).toBe('MDAxMTAwMTAxMDAw@`]QLa\\enjiSA');
+    expect(form.get('password')).toBe('P@88w0rd');
     expect(form.get('client_id')).toBe('kube-ai-hub');
     expect(form.get('client_secret')).toBe('kube-ai-hub');
   });
 
-  it('encodes a password containing `@` to the same string regardless of length', async () => {
+  it('passes a password containing `@` through unchanged', async () => {
     /*
-     * `@` is the separator in the encoded form, and the payload is base64 of the
-     * password after a salt is mixed in. A short password is padded with the
-     * sentinel `64`, a long one extends the salt — both branches must produce a
-     * stable, server-accepted string. The expected values are the ones the live
-     * cluster accepts; `encodePassword` is pure, so asserting here is the cheapest
-     * way to pin the wire format.
+     * The legacy transform used `@` as its separator, which is why it mangled
+     * passwords containing one. Sending the value as typed is what removes that
+     * whole class of failure — pinned here because it is the user-visible reason
+     * the transform is not sent.
      */
-    expect(encodePassword('kubesphere', 'P@88w0rd')).toBe('MDAxMTAwMTAxMDAw@`]QLa\\enjiSA');
-
-    // A long password takes the other branch: the salt is extended with the
-    // payload, so the encoded body is longer than the salt.
-    const long = 'a'.repeat(40);
-    const encoded = encodePassword('kubesphere', long);
-    expect(encoded).toContain('@');
-    expect(encoded.split('@')[1]!.length).toBe(Buffer.from(long).toString('base64').length);
+    expect(encodePassword('kubesphere', 'P@88w0rd')).toBe('P@88w0rd');
+    expect(encodePassword('kubesphere', 'a'.repeat(40))).toBe('a'.repeat(40));
   });
 
   it('keeps bad credentials distinguishable from a bad client', async () => {

@@ -5,6 +5,7 @@ import type { Socket } from 'node:net';
 import type { Duplex } from 'node:stream';
 import type { UpstreamConfig } from './config';
 import { isProxiedPath } from './proxy';
+import { stripAppPrefix } from './static';
 
 /**
  * WebSocket upgrade forwarding for container exec and the versioned node shell.
@@ -187,6 +188,9 @@ export function createUpgradeHandler(config: UpstreamConfig): UpgradeHandler {
     client.on('error', () => client.destroy());
 
     const url = new URL(request.url ?? '/', 'http://' + (request.headers.host ?? 'localhost'));
+    // Same normalisation as the HTTP path: the mount prefix may still be on the
+    // request when this process is addressed directly.
+    url.pathname = stripAppPrefix(url.pathname);
     if (!isExecUpgradePath(url.pathname)) {
       reject(client, 404, 'not_found', 'no such upgrade endpoint');
       return;

@@ -1,0 +1,39 @@
+id: TC-L3-KUBE-FRONTEND-INTEGRATION-SESSION-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: integration
+feature: session
+title: "同源集成 · 登录态互通"
+entry_url: "{BASE_URL}/kube-frontend/"
+prd: prd/kube-frontend/integration/session.md
+design: design/kube-frontend/integration/session.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-INTEGRATION-SESSION-01
+
+story:
+- US1
+
+product: 两个 UI 共用一个 kah_token：老控制台登录后进入新前端不再登录，退出两边都失效。
+preconditions:
+- 已登录老控制台
+- 新前端已挂载
+steps:
+- 在老控制台登录后，读取 localStorage 的全部键名与 document.cookie
+- 打开 /kube-frontend/
+- 核对是否出现登录表单
+- 在新前端右上角账号菜单退出登录
+- 回到老控制台页面刷新
+expected:
+- localStorage 中 token 键只有 kah_token，没有 kubesphere-token
+- document.cookie 含 kah_token
+- 第二步不出现登录表单，工作台直接进入 ready
+- 退出后地址为 /kube-frontend/login，localStorage 中没有 kah_token
+- 第五步老控制台也回到登录页
+troubleshoot:
+- 进入新前端被要求登录：检查 api.ts 的 TOKEN_KEY 是否与老控制台一致
+- 老控制台仍登录：检查退出是否清了 kah_token 与 cookie
+- cookie 缺失：检查 AuthProvider 是否在写 token 时同步写 cookie
+update_automation:
+- token 键名变化时同步 tests/ui/pages/*.py 与 conftest 的 storage_state

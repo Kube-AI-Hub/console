@@ -17,7 +17,7 @@ PASSWORD = "TcE2e@2026C"
 
 def _login(origin: str, username: str, password: str) -> int:
     request = urllib.request.Request(
-        f"{origin.rstrip('/')}/api/session/login",
+        f"{origin.rstrip('/')}/kube-frontend/api/session/login",
         data=json.dumps({"username": username, "password": password}).encode("utf-8"),
         headers={"Content-Type": "application/json"},
         method="POST",

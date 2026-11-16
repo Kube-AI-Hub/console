@@ -12,7 +12,21 @@ Console 的新前端。React 19 + Vite + TanStack Router/Query + Tailwind 4，UI
 
 - 本目录以 [Apache License 2.0](./LICENSE) 授权，**不包含任何 `console/src` 的代码**。
 - 不复用 `console` 的 `withList` HOC、`ListPage`、`Table` 等组件，也不复制其源码后改写；业务逻辑以需求文档为规格重新实现。
-- 与老 console 的通信只发生在 HTTP 层：新前端 → BFF → `ks-apiserver`。老 console 继续独立提供服务，本项目不改它一行。
+- 与老 console 的通信只发生在 HTTP 层：新前端 → BFF → `ks-apiserver`。老 console 继续独立提供服务，本项目不复制它的源码。
+
+## 与老 console 并存
+
+两个 UI 部署在**同一个地址**上，新前端只占 `/kube-frontend` 前缀（裸 `/` 与 `/login` 属于老 console）：
+
+| 路径 | 归属 |
+| --- | --- |
+| `/`、`/login` | 老 console |
+| `/kube-frontend/`、`/kube-frontend/login` | 本应用 |
+| `/kube-frontend/api/*`、`/kube-frontend/{kapis,apis,api/v1}/*` | 本应用的 BFF |
+
+老 console 按配置（`server.newConsole`）把 `/kube-frontend/*` 反代到本应用的 Deployment 并剥掉前缀，同时在顶部导航显示「新版控制台」入口。两边的登录态共用 `localStorage.kah_token` 与同名 cookie。
+
+前缀的连带要求：`vite.config.ts` 的 `base`、`src/api.ts` 的 `APP_BASE`、终端 WebSocket 的 `basePath`，以及所有路由（含登录页）。老 console 侧的反代、入口与登录回跳见 `console/docs/plans/kube-frontend-integration-20261117.md`。
 
 ## 结构
 
@@ -86,11 +100,17 @@ KS_API_URL=http://ks-apiserver KS_API_MODE=kapis ./scripts/dev-stack.sh start
 
 `KS_API_MODE=kapis` 直连 `ks-apiserver`；`kube` 模式改用本机 `kubectl proxy`（无鉴权，
 分页排序由 BFF 模拟），适合没有 token 时快速看页面。kapis 模式在浏览器
-`localStorage` 里放一个 JWT 到 `kubesphere-token`。
+`localStorage` 里放一个 JWT 到 `kah_token`（与老 console 同一个键，两边登录状态互通）。
 
-登录本身由前端自己完成，不再需要手工塞 JWT：打开 `/login` 输入账号密码即可。凭据由 BFF
+登录本身由前端自己完成，不再需要手工塞 JWT：打开 `/kube-frontend/login` 输入账号密码即可。凭据由 BFF
 代为提交给 `/oauth/token`（`client_secret` 不下发到浏览器），默认用 `kubesphere` 客户端，
 可用 `KS_OAUTH_CLIENT_ID` / `KS_OAUTH_CLIENT_SECRET` 覆盖（本集群是 `kube-ai-hub`）。
+
+### 挂载路径
+
+这个应用与老 console 共用同一个源，所有路由、资源与接口都在 `/kube-frontend` 前缀下（`vite.config.ts`
+的 `base`、`src/api.ts` 的 `baseUrl`），裸 `/` 与 `/login` 属于老 console。上线时由 ks-console
+把 `/kube-frontend/*` 反代到本服务并剥掉前缀；本地 `dev-static-server.mjs` 做同样的事。
 
 注意读和写走的是不同的门：读走 `/kapis/resources.kubesphere.io/v1alpha3/...`，
 写（POST/PUT/PATCH/DELETE）走 `/api/v1/...`。kapis 的 resources 端点只注册了 GET，

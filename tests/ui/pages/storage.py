@@ -86,7 +86,7 @@ class StoragePage:
             # A bounce to /login is a session problem, not a page problem; say so
             # with the evidence a report needs instead of a bare "not found".
             state = self.page.evaluate(
-                "() => ({ token: Boolean(localStorage.getItem('kubesphere-token')), keys: Object.keys(localStorage) })"
+                "() => ({ token: Boolean(localStorage.getItem('kah_token')), keys: Object.keys(localStorage) })"
             )
             raise AssertionError(f"{kind} surface missing at {self.page.url}; storage={state}") from None
         self.wait_ready(self.surface(kind))

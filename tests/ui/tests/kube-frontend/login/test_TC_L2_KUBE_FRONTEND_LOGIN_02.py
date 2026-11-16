@@ -32,5 +32,5 @@ def test_TC_L2_KUBE_FRONTEND_LOGIN_02(anonymous_page, ui_config, login_page, scr
     assert "用户名或密码不正确" in login_page.error_panel.inner_text()
     assert login_page.password.input_value() == ""
     assert login_page.username.input_value() == ui_config.login_user
-    assert page.evaluate("() => localStorage.getItem('kubesphere-token')") is None
+    assert page.evaluate("() => localStorage.getItem('kah_token')") is None
     screenshot(page, "login-failure")

@@ -49,10 +49,28 @@ const contentTypes = {
 /** Every prefix the BFF owns; anything else is an asset or an SPA route. */
 const API_PREFIXES = ['/api', '/kapis', '/apis'];
 
+/** The prefix the app is mounted on; the build's asset URLs carry it. */
+const APP_PREFIX = '/kube-frontend';
+
+/**
+ * Drop the mount prefix, keeping the two shapes the app can be addressed with.
+ *
+ * The dev stack serves the build at the root (so `http://127.0.0.1:5178/` works for
+ * a quick look) while every asset URL in the build says `/kube-frontend/assets/...`
+ * — matching production, where the app sits under the prefix. Both have to resolve
+ * to the same file, or the dev page renders unstyled with 404s.
+ */
+function stripAppPrefix(pathname) {
+  if (pathname === APP_PREFIX) return '/';
+  if (pathname.startsWith(`${APP_PREFIX}/`)) return pathname.slice(APP_PREFIX.length);
+  return pathname;
+}
+
 const server = createServer(async (request, response) => {
   const url = new URL(request.url ?? '/', 'http://localhost');
+  const pathname = stripAppPrefix(url.pathname);
 
-  if (API_PREFIXES.some((prefix) => url.pathname === prefix || url.pathname.startsWith(`${prefix}/`))) {
+  if (API_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) {
     try {
       /*
        * Proxy with node:http, not fetch.
@@ -62,7 +80,7 @@ const server = createServer(async (request, response) => {
        * occupying the shared 32-connection pool and every later call queued behind them. Using
        * http.request gives us the socket, the back-pressure and the cancellation directly.
        */
-      const upstreamUrl = new URL(`${bffUrl}${request.url}`);
+      const upstreamUrl = new URL(`${bffUrl}${pathname}${url.search}`);
       const isHttps = upstreamUrl.protocol === 'https:';
       const headers = { accept: request.headers['accept'] ?? 'application/json' };
       for (const key of ['content-type', 'authorization']) {
@@ -124,12 +142,13 @@ const server = createServer(async (request, response) => {
     return;
   }
 
-  // Strip the build's base prefix, if one was given, before resolving on disk.
+  // `pathname` already had the app's mount prefix removed above; `prefixArg` (if
+  // given) is a second, caller-supplied prefix some dev setups use.
   const basePrefix = prefixArg ? `/${prefixArg.replace(/^\/+|\/+$/g, '')}` : '';
-  const pathname = basePrefix && (url.pathname === basePrefix || url.pathname.startsWith(`${basePrefix}/`))
-    ? url.pathname.slice(basePrefix.length) || '/'
-    : url.pathname;
-  const filePath = normalize(join(distDir, pathname === '/' ? 'index.html' : pathname));
+  const filePathname = basePrefix && (pathname === basePrefix || pathname.startsWith(`${basePrefix}/`))
+    ? pathname.slice(basePrefix.length) || '/'
+    : pathname;
+  const filePath = normalize(join(distDir, filePathname === '/' ? 'index.html' : filePathname));
   try {
     const file = await readFile(filePath);
     response.writeHead(200, { 'content-type': contentTypes[extname(filePath)] ?? 'application/octet-stream' }).end(file);
@@ -167,7 +186,8 @@ const server = createServer(async (request, response) => {
  */
 server.on('upgrade', (request, clientSocket, head) => {
   const url = new URL(request.url ?? '/', 'http://localhost');
-  if (!API_PREFIXES.some((prefix) => url.pathname === prefix || url.pathname.startsWith(`${prefix}/`))) {
+  const upgradePath = stripAppPrefix(url.pathname);
+  if (!API_PREFIXES.some((prefix) => upgradePath === prefix || upgradePath.startsWith(`${prefix}/`))) {
     clientSocket.destroy();
     return;
   }
@@ -183,7 +203,9 @@ server.on('upgrade', (request, clientSocket, head) => {
     // Rebuild the request line and headers; only `host` changes (the BFF is this
     // hop's origin). Key, version and subprotocols stay exactly as the browser
     // sent them, because the handshake has to be accepted end to end.
-    const lines = [`${request.method} ${request.url} HTTP/1.1`];
+    // The request line carries the prefix-stripped path, so the BFF sees the same
+    // shape it would behind the production reverse proxy.
+    const lines = [`${request.method} ${upgradePath}${url.search} HTTP/1.1`];
     for (let index = 0; index < request.rawHeaders.length; index += 2) {
       const name = request.rawHeaders[index];
       if (name.toLowerCase() === 'host') continue;

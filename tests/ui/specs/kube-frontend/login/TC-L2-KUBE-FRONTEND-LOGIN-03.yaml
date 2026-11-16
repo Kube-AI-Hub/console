@@ -5,7 +5,7 @@ module: kube-frontend
 submodule: login
 feature: session
 title: 新前端 · 退出登录后 token 失效
-entry_url: "{BASE_URL}/"
+entry_url: "{BASE_URL}/kube-frontend/"
 prd: prd/kube-frontend/login.md
 design: design/kube-frontend/login.md
 
@@ -25,9 +25,9 @@ steps:
 - 用记录的 token 直接请求 kapis 的 configmaps 资源
 - 把记录的 token 写回 localStorage 后刷新页面
 expected:
-- 退出后地址为 /login，localStorage 中没有 kubesphere-token
+- 退出后地址为 /kube-frontend/login，localStorage 中没有 kah_token
 - 第三步返回 401
-- 第四步不渲染控制台外壳，回到 /login
+- 第四步不渲染控制台外壳，回到 /kube-frontend/login
 troubleshoot:
 - 第三步仍为 200 时检查登出是否真的调用了 GET /oauth/logout
 - 第四步闪出控制台再跳走，说明闸门放在了 effect 里而不是渲染前

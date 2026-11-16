@@ -207,7 +207,20 @@ def sweep(
                 # which used to be scored as `ready` with zero rows -- a signed-out session
                 # reported as a healthy page. Report it for what it is.
                 if '/login' in page.url:
-                    state = 'signed-out'
+                    # The session can drop mid-run (one 401 makes the app sign out, and every later
+                    # navigation then lands on the login screen). Re-seed the token and try the page
+                    # once more, instead of recording the rest of the run as signed out.
+                    _open_app(page, app, token)
+                    page.goto(page_url(app, cluster, segment, scope, workspace, project), wait_until='domcontentloaded')
+                    for _ in range(20):
+                        page.wait_for_timeout(2000)
+                        if surface.count() == 0:
+                            continue
+                        state = surface.get_attribute('data-ai-state') or 'none'
+                        if state != 'loading':
+                            break
+                    if '/login' in page.url:
+                        state = 'signed-out'
                 rows.append({
                     'cluster': cluster,
                     'page': segment,

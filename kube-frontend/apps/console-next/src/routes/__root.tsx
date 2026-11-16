@@ -11,9 +11,9 @@ import { AuthProvider, readToken, useAuth } from '@/shell/AuthProvider';
  *
  * The shell lives here rather than in each route so the sidebar, the mobile
  * drawer and the skip link exist exactly once, and a new route cannot forget
- * them — with one exception: `/login` renders without the shell, because a reader
- * who is not signed in has no navigation to use and every link behind it would
- * fail.
+ * them — with one exception: `/kube-frontend/login` renders without the shell,
+ * because a reader who is not signed in has no navigation to use and every link
+ * behind it would fail.
  *
  * The gate is `beforeLoad`, not an effect, so the login form paints first and the
  * console behind it never flashes. It checks only that a token *exists* and has
@@ -26,7 +26,7 @@ export const Route = createRootRoute({
     const token = readToken();
     if (token && !isTokenExpired(token)) return;
     throw redirect({
-      to: '/login',
+      to: '/kube-frontend/login',
       // The return path rides in the query string, as in the old console, so a
       // deep link lands where it pointed after signing in.
       search: { redirect: `${location.pathname}${location.searchStr}` },
@@ -35,9 +35,15 @@ export const Route = createRootRoute({
   component: RootComponent,
 });
 
-/** Routes reachable without a session. */
+/**
+ * Routes reachable without a session.
+ *
+ * Prefixed, like the login route itself: the bare `/login` belongs to the old
+ * console on the shared origin, and treating it as public here would only ever
+ * match a path this app does not serve.
+ */
 function isPublicRoute(pathname: string): boolean {
-  return pathname === '/login' || pathname.startsWith('/login/');
+  return pathname === '/kube-frontend/login' || pathname.startsWith('/kube-frontend/login/');
 }
 
 function RootComponent(): React.ReactElement {
@@ -67,7 +73,7 @@ function AuthenticatedShell({ children }: { children: React.ReactNode }): React.
 
   React.useEffect(() => {
     if (ready && !user) {
-      window.location.assign(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+      window.location.assign(`/kube-frontend/login?redirect=${encodeURIComponent(window.location.pathname)}`);
     }
   }, [ready, user]);
 

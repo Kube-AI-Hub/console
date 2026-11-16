@@ -50,40 +50,27 @@ export function oauthClientFromEnv(env: NodeJS.ProcessEnv = process.env): OAuthC
 }
 
 /**
- * The password encoding ks-apiserver requires on `/oauth/token`.
+ * The password as ks-apiserver expects it on `/oauth/token`.
  *
- * This install's server expects the old console's `mix(salt, base64(pw))` form,
- * not the plaintext: posting `P@88w0rd` answers `invalid_grant: incorrect
- * password`, while the mixed form is accepted. Verified against the live
- * cluster by reproducing the ciphertext the legacy console sends
- * (`MDAxMTAwMTAxMDAw@`]QLa\enjiSA` for that password with salt `kubesphere`).
+ * **Plaintext.** The old console sends `mix(salt, base64(pw))` and its server
+ * decrypts it back before the grant, so the wire format the console *client* uses
+ * is not what ks-apiserver accepts. Measured on mlu370 (2026-11-17):
  *
- * It provides no secrecy — the salt is public and the transform is reversible —
- * so it is not a security measure and must not be described as one. It is a wire
- * format, which is why it lives here in the BFF rather than in the browser: the
- * reader types and sees the password, and only this process encodes it.
+ * | body sent                              | answer                          |
+ * | -------------------------------------- | ------------------------------- |
+ * | plaintext                              | 200 + token                     |
+ * | the legacy `mix()` ciphertext          | 400 `invalid_grant`             |
  *
- * A server that accepts plaintext ignores the difference, so encoding
- * unconditionally is safe for both.
+ * An earlier comment here claimed the opposite, from a single observation that
+ * could not be reproduced. This is what the live cluster does, and it also
+ * matches `DEC-L2-KUBE-FRONTEND-LOGIN-02`: the transform hid nothing (public
+ * salt, reversible) and rejected passwords containing `@`, so it is not sent.
+ *
+ * The salt argument is kept so a server that does require the transform can be
+ * supported by changing this one function.
  */
-export function encodePassword(salt: string, password: string): string {
-  return mix(salt, Buffer.from(password, 'utf8').toString('base64'));
-}
-
-/** The old console's `mix` (`console/src/utils/index.js:889`), ported verbatim. */
-function mix(salt: string, encoded: string): string {
-  let key = salt;
-  if (encoded.length > key.length) key += encoded.slice(0, encoded.length - key.length);
-
-  const prefix: string[] = [];
-  const out: string[] = [];
-  for (let index = 0; index < key.length; index += 1) {
-    const tomix = encoded.length > index ? encoded.charCodeAt(index) : 64;
-    const sum = key.charCodeAt(index) + tomix;
-    prefix.push(sum % 2 === 0 ? '0' : '1');
-    out.push(String.fromCharCode(Math.floor(sum / 2)));
-  }
-  return `${Buffer.from(prefix.join(''), 'utf8').toString('base64')}@${out.join('')}`;
+export function encodePassword(_salt: string, password: string): string {
+  return password;
 }
 
 /** The upstream base URL with `path` appended; `baseUrl` may carry no trailing slash. */

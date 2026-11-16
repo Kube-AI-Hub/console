@@ -192,6 +192,29 @@ MODULES = [
         "tests": {"L1": ["TC-CORE-KUBE-FRONTEND-01"]},
         "submodules": [
             {
+                "id": "integration",
+                "title": "与老控制台同源集成",
+                "goal": "新前端挂在老控制台同一地址的 /kube-frontend 前缀下，老控制台顶部导航有入口，两边的登录态互通；裸 / 与 /login 仍属于老控制台。",
+                "tests": {"L2": ["TC-FULL-KUBE-FRONTEND-INTEGRATION-01"]},
+                "features": [
+                    {
+                        "id": "mount",
+                        "title": "前缀挂载与反代",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-INTEGRATION-MOUNT-01"]},
+                    },
+                    {
+                        "id": "entry",
+                        "title": "老控制台顶部入口",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-INTEGRATION-ENTRY-01"]},
+                    },
+                    {
+                        "id": "session",
+                        "title": "登录态互通",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-INTEGRATION-SESSION-01"]},
+                    },
+                ],
+            },
+            {
                 "id": "configmaps",
                 "title": "配置字典",
                 "goal": "项目内的 ConfigMap 列表能列出真实数据、按名称搜索、按名称与创建时间排序、分页，并能删除单条或所选多条。",
@@ -729,6 +752,7 @@ MODULES = [
                             "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-07",
                             "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-08",
                             "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-09",
+                            "TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-10",
                         ]},
                     },
                     {

@@ -177,6 +177,35 @@ modules:
     L1:
     - TC-CORE-KUBE-FRONTEND-01
   submodules:
+  - id: integration
+    title: 与老控制台同源集成
+    prd: prd/kube-frontend/integration/_index.md
+    design: design/kube-frontend/integration/_index.md
+    tests:
+      L2:
+      - TC-FULL-KUBE-FRONTEND-INTEGRATION-01
+    features:
+    - id: mount
+      title: 前缀挂载与反代
+      prd: prd/kube-frontend/integration/mount.md
+      design: design/kube-frontend/integration/mount.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-INTEGRATION-MOUNT-01
+    - id: entry
+      title: 老控制台顶部入口
+      prd: prd/kube-frontend/integration/entry.md
+      design: design/kube-frontend/integration/entry.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-INTEGRATION-ENTRY-01
+    - id: session
+      title: 登录态互通
+      prd: prd/kube-frontend/integration/session.md
+      design: design/kube-frontend/integration/session.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-INTEGRATION-SESSION-01
   - id: configmaps
     title: 配置字典
     prd: prd/kube-frontend/configmaps/_index.md
@@ -766,6 +795,7 @@ modules:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-07
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-08
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-09
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-10
     - id: nodes
       title: 节点列表
       prd: prd/kube-frontend/cluster-management/nodes.md

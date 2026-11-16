@@ -105,8 +105,8 @@ describe('project routes', () => {
 
   it('renders the current page through exactly one Outlet per scope', () => {
     // Two Outlets in one layout double-render the child (and the queries with it).
-    // The root route is the exception: it renders either the bare `/login` outlet or
-    // the one inside the shell, never both at once.
+    // The root route is the exception: it renders either the bare `/kube-frontend/login`
+    // outlet or the one inside the shell, never both at once.
     for (const [file, text] of routeFiles()) {
       if (file === '__root.tsx') continue;
       // Strip comments first: a doc block that *mentions* `<Outlet/>` is not a

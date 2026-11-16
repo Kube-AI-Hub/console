@@ -52,12 +52,14 @@ def app_base(ui_config) -> str:
 def _storage_state(origin: str, token: str) -> dict:
     """LocalStorage for one origin, as Playwright's `storage_state` expects.
 
-    All three keys the two consoles use are written, so a page never has to care
-    which one its own build reads.
+    Both consoles now read `kah_token` (one origin, one login). The other keys are
+    written too so a page never has to care which build it is talking to: the old
+    console's login page and a kube-frontend build from before the key was unified
+    each look for a different one.
     """
     value = [
-        {"name": "kubesphere-token", "value": token},
         {"name": "kah_token", "value": token},
+        {"name": "kubesphere-token", "value": token},
         {"name": "token", "value": token},
     ]
     return {"cookies": [], "origins": [{"origin": origin.rstrip("/"), "localStorage": value}]}
@@ -76,7 +78,7 @@ def _app_token(ui_config) -> str:
     import time
     import urllib.request
 
-    url = f"{app_base(ui_config)}/api/session/login"
+    url = f"{ui_config.app_api}/api/session/login"
     body = json.dumps({"username": ui_config.username, "password": ui_config.password}).encode("utf-8")
     last_error: Exception | None = None
     # The dev static server proxies to the BFF, and under parallel load that proxy has been
@@ -102,7 +104,7 @@ def _app_token(ui_config) -> str:
         raise RuntimeError(f"could not sign in through {url}: {last_error}") from last_error
     token = str(session.get("token") or "")
     if not token:
-        raise RuntimeError(f"login through {app_base(ui_config)} returned no token")
+        raise RuntimeError(f"login through {ui_config.app_api} returned no token")
     return token
 
 

@@ -32,7 +32,9 @@ def _wait_until_signin(api: Any, name: str, password: str, timeout_s: float = 30
     deadline = time.time() + timeout_s
     last = ""
     while time.time() < deadline:
-        status, body = api.request("POST", "/api/session/login", {"username": name, "password": password})
+        # Prefixed: the app shares its origin with the old console, so a bare
+        # `/api/session/login` would be answered by the wrong process.
+        status, body = api.request("POST", "/kube-frontend/api/session/login", {"username": name, "password": password})
         if status == 200 and (body or {}).get("token"):
             return
         last = f"{status} {body}"
@@ -96,7 +98,7 @@ def settings_page_for(browser, ui_config, e2e_objects) -> Callable[[str, str], U
 
     为什么必须真登录：改密会签出，改邮箱改的是当前登录账号。共享登录态既改不了别人，
     也会被改密带走。用 `context.add_init_script` 注 token 更不行——它在每次文档加载时重跑，
-    跳到 /login 后会把 token 写回去，测出来的「已退出」是假的。
+    跳到 /kube-frontend/login 后会把 token 写回去，测出来的「已退出」是假的。
     """
     base = ui_config.app.rstrip("/")
     api = e2e_objects["api"]

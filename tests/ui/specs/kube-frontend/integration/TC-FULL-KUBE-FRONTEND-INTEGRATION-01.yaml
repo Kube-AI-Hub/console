@@ -1,0 +1,36 @@
+id: TC-FULL-KUBE-FRONTEND-INTEGRATION-01
+level: 2
+suite: full
+module: kube-frontend
+submodule: integration
+feature: page
+title: 新前端与老控制台同源并存
+entry_url: '{BASE_URL}/kube-frontend/'
+prd: prd/kube-frontend/integration/_index.md
+design: design/kube-frontend/integration/_index.md
+covers:
+- AC-FULL-KUBE-FRONTEND-INTEGRATION-01
+story:
+- US1
+- US2
+- US3
+product: 两个 UI 共用一个地址：老控制台占裸 / 与 /login，新前端占 /kube-frontend；登录态互通，入口可关。
+preconditions:
+- 已登录老控制台
+- 新前端已挂载（ks-console 的 newConsole.enabled 为 true）
+steps:
+- 依次请求 /、/login、/kube-frontend/、/kube-frontend/login，记录状态码与 Content-Type
+- 在老控制台顶部导航找到「新版控制台」并点击
+- 核对新前端工作台是否直接渲染（不出现登录表单）
+- 读 localStorage 的键集合与 document.cookie
+expected:
+- 第一步四个路径都是 200 且 Content-Type 为 text/html
+- 第三步落在 /kube-frontend/ 且工作台进入 ready，不出现登录页
+- 第四步 localStorage 只有 kah_token 一个 token 键，cookie 含 kah_token
+- 关掉 newConsole 后入口消失、/kube-frontend/* 返回 404，老控制台其余页面照常
+troubleshoot:
+- /kube-frontend/* 返回老控制台的壳：检查 routes.js 的 mountPortal 是否在 catch-all 之前
+- 进入新前端被要求登录：检查 localStorage 键名是否已统一为 kah_token
+- 静态资源 404：检查 vite.config.ts 的 base 与反代是否剥了前缀
+update_automation:
+- 前缀或入口文案变化时同步 tests/ui/pages/login.py 与 pages 下的导航断言

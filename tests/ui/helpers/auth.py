@@ -14,7 +14,7 @@ from typing import Any
 
 from helpers.config import UiConfig
 
-LOGIN_PATH = "/login"
+LOGIN_PATH = "/kube-frontend/login"
 
 
 def _b64(text: str) -> str:
@@ -42,15 +42,14 @@ def login(page: Any, config: UiConfig) -> str:
     if not config.password:
         raise RuntimeError("KA_PASSWORD is not set (copy tests/ui/env.example to .env)")
 
-    page.goto(config.url(LOGIN_PATH), wait_until="domcontentloaded")
+    page.goto(config.app_url_for(LOGIN_PATH), wait_until="domcontentloaded")
     page.fill("input[name=username]", config.username)
     page.fill("input[name=password]", config.password)
     page.click("button:has-text('登录'), button:has-text('Log in'), button[type=submit]")
     page.wait_for_url(lambda url: LOGIN_PATH not in url, timeout=30_000)
 
     token = page.evaluate(
-        """() => localStorage.getItem('kah_token') || localStorage.getItem('token')
-            || localStorage.getItem('kubesphere-token') || ''"""
+        """() => localStorage.getItem('kah_token') || localStorage.getItem('token') || ''"""
     )
     if not token:
         raise RuntimeError("logged in but no token in localStorage")

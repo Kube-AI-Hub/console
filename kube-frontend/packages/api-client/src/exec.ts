@@ -103,6 +103,14 @@ export interface ExecOptions extends ExecTarget {
   getToken?: () => string | null | undefined;
   /** WebSocket origin; defaults to the page's origin (same-origin with the BFF). */
   origin?: string;
+  /**
+   * Prefix the app is served under, e.g. `/kube-frontend`.
+   *
+   * The console shares its origin with the old console, which proxies `/kapis`
+   * itself, so a bare `/api/v1/.../exec` socket would be answered by the wrong
+   * process. Empty in a standalone deployment.
+   */
+  basePath?: string;
   /** Test seam: defaults to the browser's 'WebSocket'. */
   webSocketImpl?: ExecSocketFactory;
   /** Bound a stalled handshake so the page never remains connecting indefinitely. */
@@ -145,9 +153,9 @@ export function execPath(target: ExecTarget): string {
 }
 
 /** Absolute ws(s) URL for a session, derived from the page origin by default. */
-export function execWebSocketUrl(options: ExecTarget & { origin?: string }): string {
+export function execWebSocketUrl(options: ExecTarget & { origin?: string; basePath?: string }): string {
   const origin = options.origin ?? globalThis.location?.origin ?? 'http://localhost';
-  const url = new URL(execPath(options), origin);
+  const url = new URL(`${options.basePath ?? ''}${execPath(options)}`, origin);
   url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
   return url.toString();
 }

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { openExecSession, openNodeTerminalSession, type ExecTarget, type ExecSession, type NodeTerminalTarget } from '@kube-ai-hub/api-client';
 import { Button, Modal } from '@kube-ai-hub/ui';
 import type { TerminalHandle } from '@kube-ai-hub/ui/terminal';
-import { currentToken } from '@/api';
+import { currentToken, APP_BASE } from '@/api';
 import { useT } from '@/i18n';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 
@@ -29,6 +29,7 @@ export function ExecConsoleDialog({ target, title, aiPrefix, onClose }: {
     renderer.clear();
     const callbacks = {
       getToken: currentToken,
+      basePath: APP_BASE,
       onData: (data: string) => { if (!disposed) renderer.write(data); },
       onOpen: () => {
         if (disposed) return;

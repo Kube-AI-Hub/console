@@ -45,7 +45,7 @@ if [[ -z "${DRY_RUN:-}" ]]; then
 fi
 
 # supported platforms
-PLATFORMS=linux/amd64,linux/arm64
+PLATFORMS=${PLATFORMS:-linux/amd64,linux/arm64}
 
 "$(dirname "$0")/build_csghub_frontend.sh"
 

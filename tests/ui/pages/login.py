@@ -11,11 +11,14 @@ from playwright.sync_api import Locator, Page, expect
 
 
 class LoginPage:
-    """`/login` 表单。"""
+    """`/kube-frontend/login` 表单。
+
+    路径带前缀：新前端与老 console 同源，裸 `/login` 是老 console 的登录页。
+    """
 
     def __init__(self, page: Page, base_url: str) -> None:
         self.page = page
-        self.url = f"{base_url}/login"
+        self.url = f"{base_url}/kube-frontend/login"
 
     @property
     def surface(self) -> Locator:
@@ -51,6 +54,12 @@ class LoginPage:
         expect(self.surface).to_be_visible()
 
     def sign_in(self, username: str, password: str) -> None:
+        # The inputs exist in the server-rendered markup but only become controlled
+        # once React has hydrated. Filling a pre-hydration field is silently
+        # discarded by the first render, and the form then submits empty — which
+        # looks like "the login page ignores the password". Waiting on the submit
+        # button's handler-owning surface state is what makes this deterministic.
+        expect(self.surface).to_have_attribute("data-ai-state", "ready")
         self.username.fill(username)
         self.password.fill(password)
         self.submit.click()

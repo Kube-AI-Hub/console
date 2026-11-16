@@ -1,0 +1,38 @@
+id: TC-L3-KUBE-FRONTEND-INTEGRATION-MOUNT-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: integration
+feature: mount
+title: "同源集成 · 前缀挂载与静态分流"
+entry_url: "{BASE_URL}/kube-frontend/"
+prd: prd/kube-frontend/integration/mount.md
+design: design/kube-frontend/integration/mount.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-INTEGRATION-MOUNT-01
+
+story:
+- US1
+
+product: 新前端挂在 /kube-frontend 前缀下，静态资源与客户端路由分别得到正确的响应。
+preconditions:
+- 新前端已挂载（ks-console 的 newConsole.enabled 为 true）
+steps:
+- 请求 /kube-frontend/ 并从 HTML 里取出一个 /kube-frontend/assets/*.js 的地址
+- 请求该静态资源
+- 请求 /kube-frontend/system-workspace/clusters/host/projects/default/configmaps
+- 请求一个不存在的 /kube-frontend/assets/<missing>.js
+- 请求 /kube-frontend/foo 且 Accept 为 application/json
+expected:
+- 静态资源返回 200，Content-Type 为 javascript，Cache-Control 含 immutable
+- 客户端路由返回 200 且 Content-Type 为 text/html（SPA 外壳）
+- 缺失的静态资源返回 404，不是 HTML
+- Accept 为 application/json 的未知路径返回 404
+- 裸 / 与 /login 仍返回老控制台的 HTML
+troubleshoot:
+- 静态资源 404 但 Pod 里有文件：检查 STATIC_DIR 是否为绝对路径，相对路径会让容器检查失败
+- 客户端路由返回老控制台的壳：检查 mountPortal 是否在 .all('{/*path}') 之前注册
+- 缺失资源返回 HTML：检查 static.ts 是否按扩展名分流
+update_automation:
+- 前缀常量变更时同步 server/libs/portalMounts.js 与 static.ts 的 APP_PREFIX

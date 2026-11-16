@@ -3,7 +3,7 @@
 - **用例 ID**: `TC-L2-KUBE-FRONTEND-LOGIN-03`
 - **级别**: L2  **套件**: `login`
 - **模块**: `kube-frontend` / `login` `session`
-- **入口**: `{BASE_URL}/`
+- **入口**: `{BASE_URL}/kube-frontend/`
 - **需求**: `prd/kube-frontend/login.md`
 
 ## 产品功能
@@ -47,9 +47,9 @@
 
 ## 期望结果
 
-- 退出后地址为 /login，localStorage 中没有 kubesphere-token
+- 退出后地址为 /kube-frontend/login，localStorage 中没有 kah_token
 - 第三步返回 401
-- 第四步不渲染控制台外壳，回到 /login
+- 第四步不渲染控制台外壳，回到 /kube-frontend/login
 
 ## 失败排查
 

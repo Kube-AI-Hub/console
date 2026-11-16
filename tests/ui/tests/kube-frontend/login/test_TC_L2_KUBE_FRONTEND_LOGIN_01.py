@@ -15,9 +15,9 @@ def test_TC_L2_KUBE_FRONTEND_LOGIN_01(anonymous_page, ui_config, login_page, scr
     page = anonymous_page
     destination = "/kube-frontend/system-workspace/clusters/host/projects/default/configmaps"
 
-    # 1. A protected deep link goes to /login and keeps the destination.
+    # 1. A protected deep link goes to /kube-frontend/login and keeps the destination.
     page.goto(f"{ui_config.app}{destination}")
-    page.wait_for_url("**/login**")
+    page.wait_for_url("**/kube-frontend/login**")
     expect(login_page.surface).to_be_visible()
 
     query = parse_qs(urlparse(page.url).query)
@@ -32,5 +32,5 @@ def test_TC_L2_KUBE_FRONTEND_LOGIN_01(anonymous_page, ui_config, login_page, scr
     # and asserting `ready` here would fail for a reader who merely cannot see
     # the project, which is not a login defect.
     expect(page.locator('[data-ai-id="configmaps:surface"]')).to_be_visible()
-    assert page.evaluate("() => !!localStorage.getItem('kubesphere-token')")
+    assert page.evaluate("() => !!localStorage.getItem('kah_token')")
     screenshot(page, "login-return-path")

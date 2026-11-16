@@ -3,7 +3,7 @@
 - **用例 ID**: `TC-L2-KUBE-FRONTEND-LOGIN-02`
 - **级别**: L2  **套件**: `login`
 - **模块**: `kube-frontend` / `login` `session`
-- **入口**: `{BASE_URL}/login`
+- **入口**: `{BASE_URL}/kube-frontend/login`
 - **需求**: `prd/kube-frontend/login.md`
 
 ## 产品功能
@@ -36,11 +36,11 @@
 
 ## 前置与配置
 
-- 浏览器 localStorage 中没有 kubesphere-token
+- 浏览器 localStorage 中没有 kah_token
 
 ## 测试步骤
 
-1. 打开 /login，不填任何内容直接提交
+1. 打开 /kube-frontend/login，不填任何内容直接提交
 2. 只填用户名，提交
 3. 填入存在的用户名与错误密码，提交
 4. 观察提示与输入框

@@ -18,7 +18,7 @@ story:
 
 product: 未登录的用户访问受保护页面时被带到登录页，登录后回到原来要去的页面。
 preconditions:
-- 浏览器 localStorage 中没有 kubesphere-token
+- 浏览器 localStorage 中没有 kah_token
 - 有一个可用的账号
 steps:
 - 清空 localStorage 后打开配置字典深链接
@@ -26,11 +26,11 @@ steps:
 - 输入账号与密码并提交
 - 观察地址栏与页面内容
 expected:
-- 第二步被重定向到 /login，且 redirect 参数等于第一步的路径与查询串
+- 第二步被重定向到 /kube-frontend/login，且 redirect 参数等于第一步的路径与查询串
 - 提交后落在第一步的配置字典页，而不是首页
 - 列表面板进入 ready 或 empty 状态
 troubleshoot:
-- 停在 /login 时看表单内的错误提示，区分密码错误与连不上集群
+- 停在 /kube-frontend/login 时看表单内的错误提示，区分密码错误与连不上集群
 - redirect 丢失时检查 __root 的 beforeLoad 是否仍在传 search
 update_automation:
 - 登录页字段 id 变更时同步 pages 下的登录页对象

@@ -40,7 +40,7 @@ def test_TC_L3_KUBE_FRONTEND_USER_SETTINGS_PASSWORD_02(temp_user, settings_page_
     login = LoginPage(ui.page, ui.base_url)
     # 不用 wait_for_url：签出会触发两次导航（路由守卫 + location.assign），那个 API 会抛
     # net::ERR_ABORTED。轮询地址则是安全的。
-    expect(ui.page).to_have_url(re.compile(r"/login"), timeout=30_000)
+    expect(ui.page).to_have_url(re.compile(r"/kube-frontend/login"), timeout=30_000)
     expect(login.surface).to_be_visible()
 
     # 3) 旧密码登不进去。

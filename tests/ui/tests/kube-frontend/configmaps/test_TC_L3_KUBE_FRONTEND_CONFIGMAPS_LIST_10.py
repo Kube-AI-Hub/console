@@ -16,7 +16,7 @@ def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_10(cluster_management_page, screens
 
     # Server-paged: cluster alert messages page through the aggregate collection.
     requests: list[str] = []
-    ui.page.on('request', lambda r: requests.append(r.url) if 'limit=' in r.url and 'kube-frontend' not in r.url and '/api/' not in r.url else None)
+    ui.page.on('request', lambda r: requests.append(r.url) if 'limit=' in r.url and '/kapis/' in r.url and '/api/' not in r.url else None)
     ui.page.goto(f'{origin}/kube-frontend/clusters/{ui.cluster}/alerting-messages', wait_until='domcontentloaded')
     surface = ui.page.locator('[data-ai-id="cluster-alerting-messages:surface"]').last
     expect(surface).to_be_visible(timeout=30_000)
