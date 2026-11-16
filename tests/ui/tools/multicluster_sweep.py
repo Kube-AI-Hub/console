@@ -229,6 +229,48 @@ def write_check(bff: str, token: str, cluster: str, host: str, namespace: str) -
         result['gone'] = name not in (_names(bff, token, member_path) or set())
     return result
 
+def baseline(args, token: str, clusters: list[str]) -> int:
+    """Everything that has to hold on a multi-cluster install, in one command.
+
+    Two read sweeps (cluster-scoped and project-scoped) plus the write-landing check. Prints one
+    line per phase and returns non-zero if any phase fails, so it can gate a release or a commit.
+    """
+    import time
+
+    started = time.monotonic()
+    failures = 0
+
+    for scope, pages in (('cluster', PAGES), ('project', PROJECT_PAGES)):
+        rows = sweep(args.app, token, clusters, pages, scope, args.workspace, args.project)
+        broken = [row for row in rows if row['state'] == 'error']
+        noisy = [row for row in rows if row['errors']]
+        failures += len(broken)
+        ready = sum(1 for row in rows if row['state'] == 'ready')
+        empty = sum(1 for row in rows if row['state'] == 'empty')
+        failed_requests = sum(len(row['errors']) for row in noisy)
+        flag = 'OK  ' if not broken and not noisy else 'FAIL'
+        print(f'{flag} {scope:8s} read: {len(rows)} visits, {ready} ready, {empty} empty, {len(broken)} error, {failed_requests} failed requests')
+        for row in (broken + noisy)[:5]:
+            print(f"       {row['cluster']} {row['page']}: {row['state']} {row['errors'][:1]}")
+
+    for cluster in clusters:
+        outcome = write_check(args.bff, token, cluster, 'host', args.namespace)
+        ok = (
+            outcome['created'] in (200, 201)
+            and outcome['on_target'] is True
+            and (cluster == 'host' or outcome['on_host'] is False)
+            and outcome['deleted'] in (200, 202)
+            and outcome['gone'] is True
+        )
+        failures += 0 if ok else 1
+        flag = 'OK  ' if ok else 'FAIL'
+        print(f'{flag} write    {cluster:8s}: {outcome}')
+
+    elapsed = time.monotonic() - started
+    verdict = 'PASS' if failures == 0 else 'FAIL'
+    print(f'baseline {verdict} in {elapsed:.0f}s')
+    return 0 if failures == 0 else 1
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--app', default='http://localhost:5179')
@@ -242,6 +284,7 @@ def main() -> int:
     parser.add_argument('--out', default='')
     parser.add_argument('--write-check', action='store_true', help='prove a grouped write lands on the right cluster')
     parser.add_argument('--namespace', default='spaces')
+    parser.add_argument('--baseline', action='store_true', help='run read sweeps (both scopes) and the write check')
     args = parser.parse_args()
 
     env = _env(args.env_file)
@@ -249,6 +292,9 @@ def main() -> int:
     default_pages = PROJECT_PAGES if args.scope == 'project' else PAGES
     pages = tuple(p.strip() for p in args.pages.split(',') if p.strip()) or default_pages
     clusters = [c.strip() for c in args.clusters.split(',') if c.strip()]
+
+    if args.baseline:
+        return baseline(args, token, clusters)
 
     if args.write_check:
         bad = 0

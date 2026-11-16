@@ -104,3 +104,25 @@ OK   write-check xc  : created=201 on_target=True on_host=False deleted=200 gone
 
 第一版把 host 也当成「不应出现在 host」来断言，于是 host 必然 FAIL；对 host 而言目标集合与 host 集合是同一个，
 这条跨集群断言只对成员集群有意义，已改为条件断言。
+## 9. 一条命令的多集群基线（`--baseline`）
+
+把两轮读巡检与写入落点检查合成一条命令：
+
+```bash
+python3 tools/multicluster_sweep.py --env-file /tmp/a100.env --baseline --clusters host,xc
+```
+
+A100 实测输出（**225 秒**跑完全部）：
+
+```
+OK   cluster  read: 46 visits, 41 ready, 5 empty, 0 error, 0 failed requests
+OK   project  read: 34 visits, 20 ready, 14 empty, 0 error, 0 failed requests
+OK   write    host    : created=201 on_target=True  deleted=200 gone=True
+OK   write    xc      : created=201 on_target=True on_host=False deleted=200 gone=True
+baseline PASS in 225s
+```
+
+跑完复核两个集群的 `tc-*` Ingress 均为空——**没有残留**。
+
+退出码非 0 即失败，可直接作为「多集群改动」的提交/发布闸门。**225 秒覆盖 80 次页面访问 + 2 次写入**，
+相当于把过去几轮手工验证压成一条命令。
