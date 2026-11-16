@@ -25,6 +25,27 @@ import json
 import os
 import urllib.request
 
+#: Project-scoped pages, by route segment, used with `--scope project`.
+PROJECT_PAGES = (
+    'overview',
+    'deployments',
+    'statefulsets',
+    'daemonsets',
+    'jobs',
+    'cronjobs',
+    'pods',
+    'services',
+    'ingresses',
+    'configmaps',
+    'secrets',
+    'serviceaccounts',
+    'persistentvolumeclaims',
+    'applications',
+    'alertingrules',
+    'custom-monitoring',
+    'baseinfo',
+)
+
 #: Cluster-scoped pages, by route segment. Keep this list to pages that exist on every cluster;
 #: the sweep is about the cluster dimension, not about feature availability.
 PAGES = (
@@ -77,7 +98,22 @@ def login(bff: str, username: str, password: str) -> str:
         return json.load(response)['token']
 
 
-def sweep(app: str, token: str, clusters: list[str], pages: tuple[str, ...]) -> list[dict]:
+def page_url(app: str, cluster: str, segment: str, scope: str, workspace: str, project: str) -> str:
+    """The console URL of one page, in either scope."""
+    if scope == 'project':
+        return f'{app}/kube-frontend/{workspace}/clusters/{cluster}/projects/{project}/{segment}'
+    return f'{app}/kube-frontend/clusters/{cluster}/{segment}'
+
+
+def sweep(
+    app: str,
+    token: str,
+    clusters: list[str],
+    pages: tuple[str, ...],
+    scope: str = 'cluster',
+    workspace: str = 'public',
+    project: str = 'spaces',
+) -> list[dict]:
     from playwright.sync_api import sync_playwright
 
     rows: list[dict] = []
@@ -99,7 +135,7 @@ def sweep(app: str, token: str, clusters: list[str], pages: tuple[str, ...]) -> 
                         sink.append((response.status, response.url))
 
                 page.on('response', record)
-                page.goto(f'{app}/kube-frontend/clusters/{cluster}/{segment}', wait_until='domcontentloaded')
+                page.goto(page_url(app, cluster, segment, scope, workspace, project), wait_until='domcontentloaded')
                 # Wait for the page to settle instead of a fixed sleep: this cluster answers a
                 # list in 1s when healthy and in tens of seconds when it is not, and a fixed wait
                 # reports "ready with 0 rows" for a page that simply had not loaded yet.
@@ -131,14 +167,18 @@ def main() -> int:
     parser.add_argument('--bff', default='http://127.0.0.1:8093')
     parser.add_argument('--clusters', default='host')
     parser.add_argument('--pages', default='')
+    parser.add_argument('--scope', default='cluster', choices=('cluster', 'project'))
+    parser.add_argument('--workspace', default='public')
+    parser.add_argument('--project', default='spaces')
     parser.add_argument('--env-file', default='.env')
     parser.add_argument('--out', default='')
     args = parser.parse_args()
 
     env = _env(args.env_file)
     token = login(args.bff, env.get('KA_USERNAME', 'admin'), env.get('KA_PASSWORD', ''))
-    pages = tuple(p.strip() for p in args.pages.split(',') if p.strip()) or PAGES
-    rows = sweep(args.app, token, [c.strip() for c in args.clusters.split(',') if c.strip()], pages)
+    default_pages = PROJECT_PAGES if args.scope == 'project' else PAGES
+    pages = tuple(p.strip() for p in args.pages.split(',') if p.strip()) or default_pages
+    rows = sweep(args.app, token, [c.strip() for c in args.clusters.split(',') if c.strip()], pages, args.scope, args.workspace, args.project)
 
     for row in rows:
         bad = [e for e in row['errors'] if e['status'] in (401, 403, 404, 500, 502, 503)]
