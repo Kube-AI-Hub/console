@@ -655,6 +655,7 @@ MODULES = [
                             "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USER_DETAIL-01",
                             "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USER_DETAIL-02",
                             "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USER_DETAIL-03",
+                            "TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-USER_DETAIL-04",
                         ]},
                     },
                 ],
