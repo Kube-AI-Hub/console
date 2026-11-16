@@ -7,6 +7,8 @@ from urllib.parse import quote
 import pytest
 from playwright.sync_api import expect
 
+from helpers.reads import ReadError
+
 pytestmark = pytest.mark.ui
 
 MONITORING = "/kapis/monitoring.kubesphere.io/v1alpha3"
@@ -27,7 +29,10 @@ def _sample_count(api, path: str) -> int | None:
         'GET',
         f'{path}{separator}start={start}&end={end}&step=60s&cluster=host',
     )
-    if status != 200 or not isinstance(body, dict):
+    if status != 200:
+        # A failed read is not an absence: fail loudly instead of letting the caller skip.
+        raise ReadError(f"APP_WORKLOADS_DETAIL_MONITOR_01 读取失败：HTTP {status} — {repr(body)[:300]}")
+    if not isinstance(body, dict):
         return None
     total = 0
     for result in body.get('results') or []:

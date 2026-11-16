@@ -7,6 +7,8 @@ import re
 import pytest
 from playwright.sync_api import expect
 
+from helpers.reads import ReadError
+
 pytestmark = pytest.mark.ui
 
 SYSTEM_NAMESPACE = "kubesphere-system"
@@ -56,7 +58,10 @@ def _follow_starts(api, pod: str, container: str) -> bool:
 def _followable_container(api):
     """A (pod, container) the live tail can actually start on, or None."""
     status, body = api.request("GET", f"/api/v1/namespaces/{SYSTEM_NAMESPACE}/pods?limit=100")
-    if status != 200 or not isinstance(body, dict):
+    if status != 200:
+        # A failed read is not an absence: fail loudly instead of letting the caller skip.
+        raise ReadError(f"APP_WORKLOADS_CONTAINER_DETAIL_03 读取失败：HTTP {status} — {repr(body)[:300]}")
+    if not isinstance(body, dict):
         return None
 
     candidates: list[tuple[str, str]] = []

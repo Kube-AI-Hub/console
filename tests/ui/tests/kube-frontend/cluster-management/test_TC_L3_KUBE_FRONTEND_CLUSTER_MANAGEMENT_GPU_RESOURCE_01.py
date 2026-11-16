@@ -5,6 +5,8 @@ import time
 import pytest
 from playwright.sync_api import expect
 
+from helpers.reads import ReadError
+
 pytestmark = pytest.mark.ui
 
 MONITORING = "/kapis/monitoring.kubesphere.io/v1alpha3/cluster"
@@ -32,7 +34,10 @@ def _point_count(api, cluster: str, duration: int, step: str) -> int | None:
         f"&start={start}&end={end}&step={step}&cluster={cluster}"
     )
     status, body = api.request("GET", path)
-    if status != 200 or not isinstance(body, dict):
+    if status != 200:
+        # A failed read is not an absence: fail loudly instead of letting the caller skip.
+        raise ReadError(f"CLUSTER_MANAGEMENT_GPU_RESOURCE_01 读取失败：HTTP {status} — {repr(body)[:300]}")
+    if not isinstance(body, dict):
         return None
     total = 0
     for result in body.get("results") or []:

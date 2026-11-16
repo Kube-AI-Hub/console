@@ -3,16 +3,16 @@ from __future__ import annotations
 import pytest
 from playwright.sync_api import expect
 
+from helpers.reads import read_list
+
 pytestmark = pytest.mark.ui
 
 CRDS = "/apis/apiextensions.k8s.io/v1/customresourcedefinitions"
 
 
-def _crds(api) -> list[dict] | None:
-    status, body = api.request("GET", f"{CRDS}?limit=-1")
-    if status != 200 or not isinstance(body, dict):
-        return None
-    return body.get("items") or []
+def _crds(api) -> list[dict]:
+    """Read every item, failing the case if the read itself fails."""
+    return read_list(api, f"{CRDS}?limit=-1", "CRD 列表")
 
 
 @pytest.mark.point

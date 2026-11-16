@@ -6,6 +6,8 @@ import re
 import pytest
 from playwright.sync_api import expect
 
+from helpers.reads import ReadError
+
 pytestmark = pytest.mark.ui
 
 NODE_METRICS = "/kapis/monitoring.kubesphere.io/v1alpha3/nodes"
@@ -40,7 +42,10 @@ def _node_usage(api) -> dict[str, float] | None:
         for name in ("node_cpu_utilisation", "node_memory_utilisation", "node_disk_size_utilisation", "node_pod_running_count")
     )
     status, body = api.request("GET", f"{NODE_METRICS}?cluster=host&limit=-1&metrics_filter={metrics}")
-    if status != 200 or not isinstance(body, dict):
+    if status != 200:
+        # A failed read is not an absence: fail loudly instead of letting the caller skip.
+        raise ReadError(f"CLUSTER_MANAGEMENT_NODE_USAGE_01 读取失败：HTTP {status} — {repr(body)[:300]}")
+    if not isinstance(body, dict):
         return None
     cpu: dict[str, float] = {}
     for result in body.get("results") or []:

@@ -7,6 +7,8 @@ from uuid import uuid4
 import pytest
 from playwright.sync_api import expect
 
+from helpers.reads import ReadError
+
 pytestmark = pytest.mark.ui
 
 LOGS = "/kapis/tenant.kubesphere.io/v1alpha2/logs"
@@ -21,7 +23,10 @@ def _stable_pod(api, start: int, end: int):
     the feature under test.
     """
     status, body = api.request("GET", f"/api/v1/namespaces/{SYSTEM_NAMESPACE}/pods?limit=100")
-    if status != 200 or not isinstance(body, dict):
+    if status != 200:
+        # A failed read is not an absence: fail loudly instead of letting the caller skip.
+        raise ReadError(f"APP_WORKLOADS_CONTAINER_DETAIL_02 读取失败：HTTP {status} — {repr(body)[:300]}")
+    if not isinstance(body, dict):
         return None
     candidates = []
     for item in body.get("items") or []:

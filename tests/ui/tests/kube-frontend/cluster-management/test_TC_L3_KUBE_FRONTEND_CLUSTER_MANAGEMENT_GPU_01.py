@@ -6,6 +6,8 @@ from urllib.parse import quote
 import pytest
 from playwright.sync_api import Locator, expect
 
+from helpers.reads import ReadError
+
 pytestmark = pytest.mark.ui
 
 GPU_API = "/kapis/gpu.kubesphere.io/v1alpha1/gpus"
@@ -19,7 +21,10 @@ UNHEALTHY_LABELS = {"亚健康", "Degraded"}
 def _devices(api) -> list[dict] | None:
     """Every physical card, the way the page reads them (limit=-1 is the whole set)."""
     status, body = api.request("GET", f"{GPU_API}?limit=-1")
-    if status != 200 or not isinstance(body, dict):
+    if status != 200:
+        # A failed read is not an absence: fail loudly instead of letting the caller skip.
+        raise ReadError(f"CLUSTER_MANAGEMENT_GPU_01 读取失败：HTTP {status} — {repr(body)[:300]}")
+    if not isinstance(body, dict):
         return None
     items = body.get("items")
     return items if isinstance(items, list) else None

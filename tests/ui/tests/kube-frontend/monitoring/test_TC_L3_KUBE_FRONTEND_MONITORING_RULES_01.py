@@ -3,6 +3,8 @@ from __future__ import annotations
 import pytest
 from playwright.sync_api import expect
 
+from helpers.reads import ReadError
+
 pytestmark = pytest.mark.ui
 
 API = "/apis/alerting.kubesphere.io/v2beta1"
@@ -11,7 +13,10 @@ API = "/apis/alerting.kubesphere.io/v2beta1"
 def _rule_groups(api) -> list[dict] | None:
     """Rule groups from both cluster-wide sources, or None when this cluster has none."""
     status, group = api.request("GET", API)
-    if status != 200 or not isinstance(group, dict):
+    if status != 200:
+        # A failed read is not an absence: fail loudly instead of letting the caller skip.
+        raise ReadError(f"规则组接口读取失败：HTTP {status} — {repr(group)[:300]}")
+    if not isinstance(group, dict):
         return None
     names = {resource.get("name") for resource in group.get("resources") or []}
     if "globalrulegroups" not in names and "clusterrulegroups" not in names:
