@@ -46,17 +46,31 @@ PAGES = (
 )
 
 @pytest.mark.point
-def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_11(configmaps_page, screenshot):
-    """TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-11 列表显示列。"""
+@pytest.mark.parametrize(
+    'page_spec',
+    PAGES,
+    ids=[spec[0] for spec in PAGES],
+)
+def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_11(configmaps_page, screenshot, page_spec):
+    """TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-11 列表显示列。
+
+    One case per page, not one loop over all of them: a single page that is slow or erroring in
+    this environment used to abort the whole run, so 35 passing pages produced no evidence. Split,
+    each page reports on its own and a failure names the page in the test id.
+    """
 
     ui = configmaps_page
     # `ui.url` is the project configmaps URL; strip the tail to reach the console root.
     origin = ui.url.split('/kube-frontend/')[0]
 
-    for prefix, path, storage, column, surface_prefix in PAGES:
+    prefix, path, storage, column, surface_prefix = page_spec
+    if True:
         ui.page.goto(origin + path, wait_until='domcontentloaded')
         surface = ui.page.locator(f'[data-ai-id="{surface_prefix}:surface"]').last
-        expect(surface).to_be_visible(timeout=30_000)
+        # 90s, not 30s: this cluster's first paint of a list page has been measured at 9s with the
+        # API healthy and much worse while it degrades. A broken page still fails -- just later --
+        # whereas a 30s budget reports "the feature is missing" for what is only slowness.
+        expect(surface).to_be_visible(timeout=90_000)
         expect(surface).not_to_have_attribute('data-ai-state', 'loading', timeout=120_000)
 
         trigger = ui.page.locator(f'[data-ai-id="{prefix}:columns"]')
@@ -72,9 +86,10 @@ def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_11(configmaps_page, screenshot):
 
         item = ui.page.locator(f'[data-ai-id="{prefix}:columns:{column}"]')
         if item.count() == 0:
-            # A list without that column (e.g. cluster-scoped kinds) still proves the menu opened.
+            # A list without that column (e.g. cluster-scoped kinds) still proves the menu opened;
+            # with one case per page this is a return, not a skip to the next page.
             ui.page.keyboard.press('Escape')
-            continue
+            return
 
         item.first.click()
         ui.page.wait_for_timeout(700)
@@ -91,9 +106,15 @@ def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_11(configmaps_page, screenshot):
 
         # The choice survives a reload.
         ui.page.reload(wait_until='domcontentloaded')
+        # A reload throws the page away, so the surface has to appear again before anything can be
+        # asserted about it -- and on this cluster a heavy list can take tens of seconds to paint.
+        expect(surface).to_be_visible(timeout=90_000)
         expect(surface).not_to_have_attribute('data-ai-state', 'loading', timeout=120_000)
         if before > 0:
-            assert ui.page.locator('thead th').count() == before - 1, f'{prefix} 刷新后列没有保持隐藏'
+            # Polled, not counted once: right after a reload the table can render its default
+            # header set before the stored choice is applied, so a single count races the
+            # hydration and reports "the choice was lost" for what is a one-frame lag.
+            expect(ui.page.locator('thead th')).to_have_count(before - 1, timeout=30_000)
 
         # Reset restores every column and clears the stored choice.
         ui.page.locator(f'[data-ai-id="{prefix}:columns"]').first.click()
@@ -101,5 +122,5 @@ def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_11(configmaps_page, screenshot):
         ui.page.wait_for_timeout(700)
         assert ui.page.locator('thead th').count() == before, f'{prefix} 重置后未恢复全部列'
 
-    screenshot(ui.page, 'list-column-visibility')
+    screenshot(ui.page, f'list-column-visibility-{prefix}')
 
