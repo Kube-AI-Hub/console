@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { serviceAccountsApi, type ServiceAccountSummary } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { useResourceListState } from '@/components/resource/useResourceListState';
@@ -68,6 +69,7 @@ export function ClusterServiceAccountsPage({ cluster }: ClusterServiceAccountsPa
       sortableKeys: ['name', 'createTime'],
       sortAiPrefix: AI_ID,
       sort: { key: list.sortBy, order: list.order },
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'cluster-serviceaccounts:columns' },
       columns: [
         {
           key: 'name',
@@ -90,6 +92,7 @@ export function ClusterServiceAccountsPage({ cluster }: ClusterServiceAccountsPa
         },
         {
           key: 'namespace',
+          hideable: true,
           title: t('cluster.workloads.column.project'),
           width: 180,
           hideBelow: 'md',
@@ -97,6 +100,7 @@ export function ClusterServiceAccountsPage({ cluster }: ClusterServiceAccountsPa
         },
         {
           key: 'secrets',
+          hideable: true,
           title: t('serviceaccounts.column.secrets'),
           width: 100,
           align: 'right',
@@ -104,6 +108,7 @@ export function ClusterServiceAccountsPage({ cluster }: ClusterServiceAccountsPa
         },
         {
           key: 'createTime',
+          hideable: true,
           title: t('cluster.column.createdAt'),
           width: 170,
           hideBelow: 'xl',
@@ -125,6 +130,9 @@ export function ClusterServiceAccountsPage({ cluster }: ClusterServiceAccountsPa
     [cluster, list, query.isFetching, t, total, workspaceOf],
   );
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('cluster-serviceaccounts', columnKeys);
+
   if (state === 'error') {
     return (
       <AiSurface as="section" aiId={AI_ID + ':surface'} state="error" className="min-w-0">
@@ -136,6 +144,8 @@ export function ClusterServiceAccountsPage({ cluster }: ClusterServiceAccountsPa
   return (
     <AiSurface as="section" aiId={AI_ID + ':surface'} state={state} className="min-w-0">
       <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
         schema={schema}
         onRefresh={listRefresh.onRefresh}
         rows={rows}

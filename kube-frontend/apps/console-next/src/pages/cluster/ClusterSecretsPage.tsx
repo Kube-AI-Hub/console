@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { secretsApi, type SecretSummary } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { useListRefresh } from '@/components/resource/useListRefresh';
 import { api as apiClient } from '@/api';
@@ -70,6 +71,7 @@ export function ClusterSecretsPage({ cluster }: ClusterSecretsPageProps): React.
       sortableKeys: ['name', 'createTime'],
       sortAiPrefix: AI_ID,
       sort: { key: list.sortBy, order: list.order },
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'cluster-secrets:columns' },
       columns: [
         {
           key: 'name',
@@ -92,6 +94,7 @@ export function ClusterSecretsPage({ cluster }: ClusterSecretsPageProps): React.
         },
         {
           key: 'namespace',
+          hideable: true,
           title: t('cluster.workloads.column.project'),
           width: 180,
           hideBelow: 'md',
@@ -99,12 +102,14 @@ export function ClusterSecretsPage({ cluster }: ClusterSecretsPageProps): React.
         },
         {
           key: 'type',
+          hideable: true,
           title: t('secrets.column.type'),
           width: 180,
           render: (row) => <span className="truncate text-ai-fg-secondary">{secretTypeLabel(t, row.type)}</span>,
         },
         {
           key: 'fieldCount',
+          hideable: true,
           title: t('secrets.column.fieldCount'),
           width: 90,
           align: 'right',
@@ -112,6 +117,7 @@ export function ClusterSecretsPage({ cluster }: ClusterSecretsPageProps): React.
         },
         {
           key: 'createTime',
+          hideable: true,
           title: t('cluster.column.createdAt'),
           width: 170,
           hideBelow: 'xl',
@@ -133,6 +139,9 @@ export function ClusterSecretsPage({ cluster }: ClusterSecretsPageProps): React.
     [cluster, list, t, total, workspaceOf],
   );
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('cluster-secrets', columnKeys);
+
   if (state === 'error') {
     return (
       <AiSurface as="section" aiId={AI_ID + ':surface'} state="error" className="min-w-0">
@@ -144,6 +153,8 @@ export function ClusterSecretsPage({ cluster }: ClusterSecretsPageProps): React.
   return (
     <AiSurface as="section" aiId={AI_ID + ':surface'} state={state} className="min-w-0">
       <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
         schema={schema}
         onRefresh={listRefresh.onRefresh}
         rows={rows}

@@ -18,6 +18,12 @@ PAGES = (
     ('workspace-members', '/kube-frontend/workspaces/system-workspace/members', 'workspace-members', 'role', 'workspace-members'),
     ('cluster-members', '/kube-frontend/clusters/host/members', 'cluster-members', 'lastLogin', 'cluster-members'),
     ('juicefs', '/kube-frontend/clusters/host/juicefs-storage', 'juicefs', 'nodes', 'cluster-juicefs'),
+    ('cluster-configmaps', '/kube-frontend/clusters/host/configmaps', 'cluster-configmaps', 'keys', 'cluster-configmaps'),
+    ('cluster-secrets', '/kube-frontend/clusters/host/secrets', 'cluster-secrets', 'type', 'cluster-secrets'),
+    ('cluster-serviceaccounts', '/kube-frontend/clusters/host/serviceaccounts', 'cluster-serviceaccounts', 'secrets', 'cluster-serviceaccounts'),
+    ('cluster-networkpolicies', '/kube-frontend/clusters/host/networkpolicies', 'cluster-networkpolicies', 'policyTypes', 'cluster-networkpolicies'),
+    ('persistent-volumes', '/kube-frontend/clusters/host/persistentvolumes', 'persistent-volumes', 'capacity', 'persistentvolumes'),
+    ('ip-pools', '/kube-frontend/clusters/host/ippools', 'ip-pools', 'cidr', 'ip-pools'),
 )
 
 @pytest.mark.point

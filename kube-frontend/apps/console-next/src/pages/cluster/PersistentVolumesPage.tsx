@@ -4,6 +4,7 @@ import { Link } from '@tanstack/react-router';
 import { persistentVolumesApi, type PersistentVolumeSummary } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { useResourceListState } from '@/components/resource/useResourceListState';
@@ -62,6 +63,7 @@ export function PersistentVolumesPage({ cluster }: PersistentVolumesPageProps): 
       sortableKeys: ['name', 'createTime'],
       sortAiPrefix: 'persistentvolumes',
       sort: { key: list.sortBy, order: list.order },
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'persistent-volumes:columns' },
       columns: [
         {
           key: 'name',
@@ -81,6 +83,7 @@ export function PersistentVolumesPage({ cluster }: PersistentVolumesPageProps): 
         },
         {
           key: 'status',
+          hideable: true,
           title: t('storage.column.status'),
           width: 120,
           render: (row) => (
@@ -91,12 +94,14 @@ export function PersistentVolumesPage({ cluster }: PersistentVolumesPageProps): 
         },
         {
           key: 'capacity',
+          hideable: true,
           title: t('storage.column.capacity'),
           width: 100,
           render: (row) => <span className="tabular-nums text-ai-fg-secondary">{row.capacity || '-'}</span>,
         },
         {
           key: 'accessModes',
+          hideable: true,
           title: t('storage.column.accessModes'),
           width: 110,
           hideBelow: 'lg',
@@ -104,6 +109,7 @@ export function PersistentVolumesPage({ cluster }: PersistentVolumesPageProps): 
         },
         {
           key: 'claim',
+          hideable: true,
           title: t('cluster.persistentVolumes.claim'),
           width: 200,
           hideBelow: 'md',
@@ -111,6 +117,7 @@ export function PersistentVolumesPage({ cluster }: PersistentVolumesPageProps): 
         },
         {
           key: 'reclaimPolicy',
+          hideable: true,
           title: t('cluster.storageClasses.reclaim'),
           width: 110,
           hideBelow: 'xl',
@@ -118,6 +125,7 @@ export function PersistentVolumesPage({ cluster }: PersistentVolumesPageProps): 
         },
         {
           key: 'createTime',
+          hideable: true,
           title: t('cluster.column.createdAt'),
           width: 160,
           hideBelow: 'xl',
@@ -140,6 +148,9 @@ export function PersistentVolumesPage({ cluster }: PersistentVolumesPageProps): 
     [list.sortBy, list.order, query.isFetching, rows.length, t],
   );
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('persistent-volumes', columnKeys);
+
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
 
   if (state === 'error') {
@@ -153,6 +164,8 @@ export function PersistentVolumesPage({ cluster }: PersistentVolumesPageProps): 
   return (
     <AiSurface as="section" aiId="persistentvolumes:surface" state={state} className="min-w-0">
       <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
         schema={schema}
         onRefresh={listRefresh.onRefresh}
         rows={rows}

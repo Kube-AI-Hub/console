@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ipPoolsApi, type IpPoolSummary } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { useResourceListState } from '@/components/resource/useResourceListState';
@@ -65,6 +66,7 @@ export function IpPoolsPage({ cluster }: IpPoolsPageProps): React.ReactElement {
       sortableKeys: ['name', 'createTime'],
       sortAiPrefix: 'ip-pools',
       sort: { key: list.sortBy, order: list.order },
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'ip-pools:columns' },
       columns: [
         {
           key: 'name',
@@ -85,12 +87,14 @@ export function IpPoolsPage({ cluster }: IpPoolsPageProps): React.ReactElement {
         },
         {
           key: 'cidr',
+          hideable: true,
           title: t('cluster.network.ipPools.cidr'),
           width: 180,
           render: (row) => <span className="truncate font-mono text-[11px] text-ai-fg-secondary">{row.cidr || '-'}</span>,
         },
         {
           key: 'used',
+          hideable: true,
           title: t('cluster.network.ipPools.usage'),
           width: 150,
           render: (row) => (
@@ -103,6 +107,7 @@ export function IpPoolsPage({ cluster }: IpPoolsPageProps): React.ReactElement {
         },
         {
           key: 'workspace',
+          hideable: true,
           title: t('cluster.column.workspace'),
           width: 160,
           hideBelow: 'md',
@@ -110,6 +115,7 @@ export function IpPoolsPage({ cluster }: IpPoolsPageProps): React.ReactElement {
         },
         {
           key: 'createTime',
+          hideable: true,
           title: t('cluster.column.createdAt'),
           width: 170,
           hideBelow: 'lg',
@@ -131,6 +137,9 @@ export function IpPoolsPage({ cluster }: IpPoolsPageProps): React.ReactElement {
     [cluster, list, query.isFetching, t, total],
   );
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('ip-pools', columnKeys);
+
   if (state === 'error') {
     return (
       <AiSurface as="section" aiId="ip-pools:surface" state="error" className="min-w-0">
@@ -142,6 +151,8 @@ export function IpPoolsPage({ cluster }: IpPoolsPageProps): React.ReactElement {
   return (
     <AiSurface as="section" aiId="ip-pools:surface" state={state} className="min-w-0">
       <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
         onRefresh={listRefresh.onRefresh}
         schema={schema}
         rows={rows}
