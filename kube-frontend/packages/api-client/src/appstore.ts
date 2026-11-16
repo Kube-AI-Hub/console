@@ -1,4 +1,5 @@
 import type { Client } from './client';
+import { clusterScoped } from './paths';
 
 /**
  * 应用商店（openpitrix）.
@@ -998,9 +999,8 @@ export function installedReleasesApi(client: Client) {
       const selector = `app.kubesphere.io/instance=${params.releaseName}`;
       const collections = await Promise.all(
         RELEASE_RESOURCE_KINDS.map(async (kind) => {
-          const clusterSegment = params.cluster && params.cluster !== 'host' ? `clusters/${encodeURIComponent(params.cluster)}/` : '';
           const body = await client.request<{ items?: KubeItem[] }>(
-            `${KAPIS_RESOURCES}/${clusterSegment}namespaces/${encodeURIComponent(params.namespace)}/${kind}`,
+            clusterScoped(KAPIS_RESOURCES, params.cluster, `namespaces/${encodeURIComponent(params.namespace)}/${kind}`),
             {
               query: { labelSelector: selector, limit: -1 },
               ...(params.signal ? { signal: params.signal } : {}),

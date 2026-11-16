@@ -417,6 +417,17 @@ export function toProjectInfo(item: KubeIam, quotas: KubeIam[] = []): ProjectInf
  * ones a project administrator reasons about, and they map to ResourceQuota keys the
  * apiserver accepts. `count/pods` etc. are separate keys, not an alias for `pods`.
  */
+/**
+ * The project resource-quota keys the form offers.
+ *
+ * This list is the old console's `QUOTAS_MAP` (`src/utils/constants.js`), not a subset of it: the
+ * migration originally carried only ten of its fifteen entries, so an administrator could not set
+ * limits on statefulsets, daemonsets, jobs, cronjobs, ingresses, secrets or configmaps at all --
+ * a silent capability loss, because a missing field just does not appear in the form.
+ *
+ * `pods` and `persistentvolumeclaims` are the canonical Kubernetes names; the old console spelled
+ * the first `count/pods` (an accepted alias) and used `persistentvolumeclaims` for volumes.
+ */
 export const QUOTA_RESOURCES = [
   'requests.cpu',
   'requests.memory',
@@ -424,7 +435,14 @@ export const QUOTA_RESOURCES = [
   'limits.memory',
   'pods',
   'count/deployments.apps',
+  'count/statefulsets.apps',
+  'count/daemonsets.apps',
+  'count/jobs.batch',
+  'count/cronjobs.batch',
   'count/services',
+  'count/ingresses.extensions',
+  'count/secrets',
+  'count/configmaps',
   'count/persistentvolumeclaims',
   'persistentvolumeclaims',
   'requests.storage',

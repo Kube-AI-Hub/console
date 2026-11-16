@@ -20,7 +20,14 @@ const FORM_KEY: Record<string, string> = {
   'limits.memory': 'limits_memory',
   pods: 'pods',
   'count/deployments.apps': 'count_deployments',
+  'count/statefulsets.apps': 'count_statefulsets',
+  'count/daemonsets.apps': 'count_daemonsets',
+  'count/jobs.batch': 'count_jobs',
+  'count/cronjobs.batch': 'count_cronjobs',
   'count/services': 'count_services',
+  'count/ingresses.extensions': 'count_ingresses',
+  'count/secrets': 'count_secrets',
+  'count/configmaps': 'count_configmaps',
   'count/persistentvolumeclaims': 'count_pvcs',
   persistentvolumeclaims: 'pvc_requests',
   'requests.storage': 'requests_storage',
@@ -34,9 +41,12 @@ const RESOURCE_OF: Record<string, string> = Object.fromEntries(
  * 编辑项目配额.
  *
  * The old console edits quotas through a resource picker (choose a key, add a row).
- * A fixed list of the ten resources administrators actually set is calmer: the picker
- * invites choosing a key with an unusual unit and then discovering the apiserver
- * rejects it, while these ten all accept plain quantities.
+ * A fixed list is calmer: the picker invites choosing a key with an unusual unit and then
+ * discovering the apiserver rejects it, while these all accept plain quantities.
+ *
+ * The list is the old console's `QUOTAS_MAP` (see `QUOTA_RESOURCES`). It started as ten of the
+ * fifteen, which silently removed the ability to cap statefulsets, daemonsets, jobs, cronjobs,
+ * ingresses, secrets and configmaps -- a field that is simply absent reads as "not supported".
  *
  * Leaving a field empty **removes** the limit rather than setting zero — zero would
  * forbid the resource entirely, which is the opposite of what an empty box means.
