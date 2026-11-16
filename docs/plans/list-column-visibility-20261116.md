@@ -230,3 +230,28 @@ Canary 发布）、集群组件页/自定义监控/资源监控/节点排行/GPU
 | 企业空间仓库用例弹窗未关闭 | 单跑通过（等待敏感） |
 
 三条复跑合计 **4 passed（41.34s）**，确认与本批改动无关。
+
+## 22. 第十批（同日）：Canary 发布、资源监控、自定义监控、CRD 实例表
+
+| 页面 | 页面键 | 菜单项数 | 备注 |
+| --- | --- | --- | --- |
+| Canary 发布 | `canary-releases` | 6 | surface 是 `grayrelease:surface` |
+| 集群资源监控 | `cluster-resource-monitor` | 4 | 该页结构复杂（多段 return），hook 必须放在主 return 之前 |
+| 集群自定义监控 | `cluster-custom-monitoring` | 5 | surface 是 `custom-monitoring:surface` |
+| CRD 实例表（详情页内） | `custom-resource-instances` | 3 | 直接探测确认（未进 36 页用例） |
+
+用例 `CONFIGMAPS-LIST-11` 扩到 **36 个页面**（145.55s 通过）。
+
+**项目自定义监控页未纳入用例**：该页只在 `state==='ready'` 时渲染列表，本集群的项目没有自定义监控面板，
+页面落在 empty 分支（自带空态块），没有表头可数。已接线（`project-custom-monitoring:columns`），
+等有数据后再补验证。
+
+本批又踩到两次「surface 前缀 ≠ 列表前缀」（`grayrelease`、`custom-monitoring`），以及一次**脚本插错位置**：
+集群资源监控页有多段 `return (`，脚本把 hook 插到了 schema 闭合括号之前，`tsc` 报「used before declaration」；
+手工把 hook 移到主 `return` 之前才通过。复杂页面不适合纯脚本插入。
+
+## 23. 本次未完成的验证（环境不稳定）
+
+复核 `CUSTOM_RESOURCES_01`、`CUSTOM_MONITORING_01` 时，B200 的 SSH 隧道反复中断（`curl 18088` 多次返回 000，
+BFF 登录超时），两次跑到一半失败，失败信息是页面进入 **error 状态**（API 全失败），与列显隐无关。
+隧道恢复后单跑仍受间歇断连影响，故本轮**不宣称**这两条已复核；判据仍是「隧道稳定后单条复跑」。
