@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { workspaceDetailApi } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, ResourceList, type ListSchema } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -43,6 +44,7 @@ export function WorkspaceProjectsPage({ workspace }: WorkspaceProjectsPageProps)
       description: t('workspace.projects.description'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'workspace-projects:columns' },
       columns: [
         {
           key: 'name',
@@ -59,6 +61,7 @@ export function WorkspaceProjectsPage({ workspace }: WorkspaceProjectsPageProps)
         },
         {
           key: 'alias',
+          hideable: true,
           title: t('workspace.field.name'),
           width: 180,
           hideBelow: 'md',
@@ -66,6 +69,7 @@ export function WorkspaceProjectsPage({ workspace }: WorkspaceProjectsPageProps)
         },
         {
           key: 'status',
+          hideable: true,
           title: t('cluster.column.status'),
           width: 120,
           render: (row) => (
@@ -74,6 +78,7 @@ export function WorkspaceProjectsPage({ workspace }: WorkspaceProjectsPageProps)
         },
         {
           key: 'creator',
+          hideable: true,
           title: t('workspace.field.creator'),
           width: 150,
           hideBelow: 'lg',
@@ -81,6 +86,7 @@ export function WorkspaceProjectsPage({ workspace }: WorkspaceProjectsPageProps)
         },
         {
           key: 'createdAt',
+          hideable: true,
           title: t('workspace.field.createdAt'),
           width: 170,
           hideBelow: 'xl',
@@ -102,6 +108,9 @@ export function WorkspaceProjectsPage({ workspace }: WorkspaceProjectsPageProps)
     [cluster, query.isFetching, t, workspace],
   );
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('workspace-projects', columnKeys);
+
   if (state === 'error') {
     return (
       <AiSurface as="section" aiId="workspace-projects:surface" state="error" className="min-w-0">
@@ -112,7 +121,9 @@ export function WorkspaceProjectsPage({ workspace }: WorkspaceProjectsPageProps)
 
   return (
     <AiSurface as="section" aiId="workspace-projects:surface" state={state} className="min-w-0">
-      <ResourceList schema={schema} onRefresh={listRefresh.onRefresh} rows={rows} loading={state === 'loading'} />
+      <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys} schema={schema} onRefresh={listRefresh.onRefresh} rows={rows} loading={state === 'loading'} />
     </AiSurface>
   );
 }

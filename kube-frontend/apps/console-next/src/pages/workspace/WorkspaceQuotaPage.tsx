@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { workspaceDetailApi } from '@kube-ai-hub/api-client';
 import { AiSurface, ResourceList, type ListSchema } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -106,19 +107,23 @@ export function WorkspaceQuotaPage({ workspace }: WorkspaceQuotaPageProps): Reac
       // so the object name belongs in the key even though the row reads the same resource twice.
       rowKey: (row) => `${row.project}/${row.quotaName}/${row.resource}`,
       rowAttributes: (row) => ({ 'data-ai-row': `${row.project}/${row.quotaName}/${row.resource}` }),
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'workspace-quota:columns' },
       columns: [
         {
           key: 'project',
+          hideable: true,
           title: t('workspace.field.project'),
           render: (row) => <span className="truncate font-medium text-ai-fg">{row.project}</span>,
         },
         {
           key: 'resource',
+          hideable: true,
           title: t('projectInfo.quota.resource'),
           render: (row) => <span className="truncate font-mono text-[11px] text-ai-fg-secondary">{row.resource}</span>,
         },
         {
           key: 'hard',
+          hideable: true,
           title: t('projectInfo.quota.hard'),
           width: 160,
           align: 'right',
@@ -126,6 +131,7 @@ export function WorkspaceQuotaPage({ workspace }: WorkspaceQuotaPageProps): Reac
         },
         {
           key: 'used',
+          hideable: true,
           title: t('projectInfo.quota.used'),
           width: 160,
           align: 'right',
@@ -152,6 +158,9 @@ export function WorkspaceQuotaPage({ workspace }: WorkspaceQuotaPageProps): Reac
     [page, pageSize, paged, projectCount, query.isFetching, rows.length, t],
   );
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('workspace-quota', columnKeys);
+
   if (state === 'error') {
     return (
       <AiSurface as="section" aiId="workspace-quota:surface" state="error" className="min-w-0">
@@ -166,6 +175,8 @@ export function WorkspaceQuotaPage({ workspace }: WorkspaceQuotaPageProps): Reac
           and `AiSurface`'s `aiId` prop alone is not a literal attribute in this file. */}
       <div data-ai-id="workspace-quota:table" className="min-w-0">
         <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
           schema={schema}
           onRefresh={listRefresh.onRefresh}
           rows={visibleRows}

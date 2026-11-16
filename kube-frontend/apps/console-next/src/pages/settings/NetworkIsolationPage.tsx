@@ -10,6 +10,7 @@ import {
 } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, ResourceList, Switch, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { useResourceListState, toListParams } from '@/components/resource/useResourceListState';
@@ -94,6 +95,7 @@ export function NetworkIsolationPage({ workspace, cluster, namespace }: NetworkI
       sortableKeys: ['name', 'createTime'],
       sortAiPrefix: 'networkpolicies',
       sort: { key: list.sortBy, order: list.order },
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'network-isolation:columns' },
       columns: [
         {
           key: 'name',
@@ -115,6 +117,7 @@ export function NetworkIsolationPage({ workspace, cluster, namespace }: NetworkI
         },
         {
           key: 'policyTypes',
+          hideable: true,
           title: t('settings.network.types'),
           width: 140,
           hideBelow: 'md',
@@ -126,6 +129,7 @@ export function NetworkIsolationPage({ workspace, cluster, namespace }: NetworkI
         },
         {
           key: 'rules',
+          hideable: true,
           title: t('settings.network.rules'),
           width: 130,
           hideBelow: 'lg',
@@ -135,6 +139,7 @@ export function NetworkIsolationPage({ workspace, cluster, namespace }: NetworkI
         },
         {
           key: 'createTime',
+          hideable: true,
           title: t('settings.column.createdAt'),
           width: 170,
           hideBelow: 'xl',
@@ -159,6 +164,9 @@ export function NetworkIsolationPage({ workspace, cluster, namespace }: NetworkI
     }),
     [list, policies.isFetching, t, total],
   );
+
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('network-isolation', columnKeys);
 
   const state = policies.isPending ? 'loading' : policies.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
 
@@ -194,6 +202,8 @@ export function NetworkIsolationPage({ workspace, cluster, namespace }: NetworkI
       <MutationAlert error={toggle.error} />
 
       <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
         onRefresh={listRefresh.onRefresh}
         schema={schema}
         rows={rows}

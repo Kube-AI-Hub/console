@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { workspaceRolesApi, type WorkspaceRoleSummary } from '@kube-ai-hub/api-client';
 import { AiSurface, ResourceList, type ListSchema } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -64,6 +65,7 @@ export function WorkspaceRolesPage({ workspace }: WorkspaceRolesPageProps): Reac
       description: t('workspace.roles.description'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'workspace-roles:columns' },
       columns: [
         {
           key: 'name',
@@ -85,6 +87,7 @@ export function WorkspaceRolesPage({ workspace }: WorkspaceRolesPageProps): Reac
         },
         {
           key: 'ruleCount',
+          hideable: true,
           title: t('platform.column.ruleCount'),
           width: 120,
           align: 'right',
@@ -92,6 +95,7 @@ export function WorkspaceRolesPage({ workspace }: WorkspaceRolesPageProps): Reac
         },
         {
           key: 'createdAt',
+          hideable: true,
           title: t('workspace.field.createdAt'),
           width: 180,
           hideBelow: 'lg',
@@ -116,6 +120,9 @@ export function WorkspaceRolesPage({ workspace }: WorkspaceRolesPageProps): Reac
     [page, pageSize, paged, query.isFetching, rows.length, t, workspace],
   );
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('workspace-roles', columnKeys);
+
   if (state === 'error') {
     return (
       <AiSurface as="section" aiId="workspace-roles:surface" state="error" className="min-w-0">
@@ -130,6 +137,8 @@ export function WorkspaceRolesPage({ workspace }: WorkspaceRolesPageProps): Reac
           and `AiSurface`'s `aiId` prop alone is not a literal attribute in this file. */}
       <div data-ai-id="workspace-roles:table" className="min-w-0">
         <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
           schema={schema}
           onRefresh={listRefresh.onRefresh}
           rows={visibleRows}

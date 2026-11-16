@@ -4,6 +4,7 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import { workspaceDetailApi, workspaceMembersApi, type WorkspaceMemberResource } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiButton, AiSurface, Badge, ResourceList, Skeleton, Tabs, TabsContent, type ListSchema } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { errorMessage, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -67,6 +68,7 @@ function MemberResourceTable({
       refresh: listRefresh.refresh,
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'workspace-member-detail:columns' },
       columns: [
         {
           key: 'name',
@@ -86,6 +88,7 @@ function MemberResourceTable({
         },
         {
           key: 'createdAt',
+          hideable: true,
           title: t('workspace.field.createdAt'),
           width: 180,
           hideBelow: 'md',
@@ -106,9 +109,14 @@ function MemberResourceTable({
     }),
     [t, description, emptyTitle, kind, workspace, cluster],
   );
+
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('workspace-member-detail', columnKeys);
   return (
     <div data-ai-id={`workspace-member-detail:${kind}`}>
-      <ResourceList schema={schema} rows={rows} loading={loading} onRefresh={listRefresh.onRefresh} />
+      <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys} schema={schema} rows={rows} loading={loading} onRefresh={listRefresh.onRefresh} />
     </div>
   );
 }
