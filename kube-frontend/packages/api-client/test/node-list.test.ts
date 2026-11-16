@@ -17,7 +17,7 @@ describe('node list API contracts', () => {
     const { api, calls } = harness({ items: [], totalItems: 31 });
     expect(await api.list({ cluster: 'member/a', page: 3, pageSize: 20, sortBy: 'name', order: 'asc',
       keyword: '172.16', status: 'running', role: 'master', deviceVendors: ['nvidia', 'CPU'], xpuModel: 'B200' })).toEqual({ items: [], total: 31 });
-    expect(calls[0]?.url.pathname).toBe('/kapis/resources.kubesphere.io/v1alpha3/clusters/member%2Fa/nodes');
+    expect(calls[0]?.url.pathname).toBe('/kapis/clusters/member%2Fa/resources.kubesphere.io/v1alpha3/nodes');
     expect(Object.fromEntries(calls[0]!.url.searchParams)).toMatchObject({
       page: '3', limit: '20', name: '172.16', role: 'master', status: 'running', deviceVendor: 'nvidia,CPU', xpuModel: 'B200', ascending: 'true',
     });

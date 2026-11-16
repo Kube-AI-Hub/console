@@ -1,4 +1,5 @@
 import type { Client } from './client';
+import { clusterScoped } from './paths';
 import { baseOf, resourceApi, type KubeObject, type ResourceBase } from './resources';
 import { collectionPath } from './resources';
 
@@ -187,9 +188,9 @@ export function rolesApi(client: Client) {
 
 /** IAM collection URL for one resource. */
 export function iamPath(cluster: string, namespace: string, resource: string): string {
-  const clusterSegment = cluster && cluster !== 'host' ? `clusters/${encodeURIComponent(cluster)}/` : '';
   const namespaceSegment = namespace ? `namespaces/${encodeURIComponent(namespace)}/` : '';
-  return `${KAPIS_IAM}/${clusterSegment}${namespaceSegment}${resource}`;
+  // `clusters/<id>` goes before the group: see `clusterScoped`.
+  return clusterScoped(KAPIS_IAM, cluster, `${namespaceSegment}${resource}`);
 }
 
 /**

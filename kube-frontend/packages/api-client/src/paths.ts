@@ -29,3 +29,19 @@ export function clusterScoped(prefix: string, cluster: string | undefined, rest:
   if (!match) return `${prefix}/${rest}`;
   return `${match[1]}/clusters/${encodeURIComponent(cluster)}/${match[2]}/${rest}`;
 }
+
+/**
+ * A core-group (`/api/v1/...`) read, routed to the right cluster.
+ *
+ * The core group has no member-cluster form: `/api/v1/clusters/xc/nodes` answers 404. The generic
+ * kapis resources proxy does accept the same shape with a cluster segment, and answers 200 for
+ * core resources of a member cluster (measured:
+ * `/kapis/clusters/xc/resources.kubesphere.io/v1alpha3/namespaces/default/secrets`). So a member
+ * read is rewritten onto that proxy rather than left to fail.
+ *
+ * `rest` is the part after `/api/v1/`, e.g. `namespaces/default/secrets` or `nodes`.
+ */
+export function corePath(cluster: string | undefined, rest: string): string {
+  if (!cluster || cluster === 'host') return `/api/v1/${rest}`;
+  return clusterScoped('/kapis/resources.kubesphere.io/v1alpha3', cluster, rest);
+}

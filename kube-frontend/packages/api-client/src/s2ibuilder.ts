@@ -1,4 +1,5 @@
 import type { Client } from './client';
+import { clusterScoped, corePath } from './paths';
 import { ApiError } from './errors';
 import { annotationKeys, baseOf, type KubeObject, type ResourceBase, type ResourceListResult } from './resources';
 
@@ -320,13 +321,9 @@ export function normalizeRunStatus(raw: string | undefined): string {
   return normalizeBuilderStatus(raw);
 }
 
-/** The `clusters/<id>` segment other native kube paths in this app use. Only host is verified. */
-function clusterSegment(cluster: string | undefined): string {
-  return cluster && cluster !== 'host' ? 'clusters/' + encodeURIComponent(cluster) + '/' : '';
-}
-
+// `clusters/<id>` goes before the group, not after the version: see `clusterScoped`.
 function namespacePath(cluster: string | undefined, namespace: string): string {
-  return S2I_APIS + '/' + clusterSegment(cluster) + 'namespaces/' + encodeURIComponent(namespace);
+  return clusterScoped(S2I_APIS, cluster, `namespaces/${encodeURIComponent(namespace)}`);
 }
 
 function buildersPath(cluster: string | undefined, namespace: string, name?: string): string {
@@ -345,19 +342,11 @@ function binariesPath(cluster: string | undefined, namespace: string, name?: str
 }
 
 function binaryFileKapisPath(cluster: string | undefined, namespace: string, name: string): string {
-  return (
-    '/kapis/devops.kubesphere.io/v1alpha2/' +
-    clusterSegment(cluster) +
-    'namespaces/' +
-    encodeURIComponent(namespace) +
-    '/s2ibinaries/' +
-    encodeURIComponent(name) +
-    '/file'
+  return clusterScoped(
+    '/kapis/devops.kubesphere.io/v1alpha2',
+    cluster,
+    `namespaces/${encodeURIComponent(namespace)}/s2ibinaries/${encodeURIComponent(name)}/file`,
   );
-}
-
-function kapisClusterSegment(cluster: string | undefined): string {
-  return cluster && cluster !== 'host' ? 'clusters/' + encodeURIComponent(cluster) + '/' : '';
 }
 
 /**
@@ -565,7 +554,7 @@ export function imageBuildersApi(client: Client) {
       if (params.order) query.ascending = params.order === 'asc';
       if (params.keyword?.trim()) query.name = params.keyword.trim();
       const body = await client.request<{ items?: RawS2iBuilder[]; totalItems?: number; total_count?: number }>(
-        S2I_BUILDERS_KAPIS + '/' + kapisClusterSegment(params.cluster) + 'namespaces/' + encodeURIComponent(params.namespace) + '/s2ibuilders',
+        clusterScoped(S2I_BUILDERS_KAPIS, params.cluster, `namespaces/${encodeURIComponent(params.namespace)}/s2ibuilders`),
         {
           query,
           ...(params.signal ? { signal: params.signal } : {}),
@@ -620,7 +609,7 @@ export function imageBuildersApi(client: Client) {
 
     /** Every builder template (cluster-scoped), for the create dialog's language/template picker. */
     async templates(params: { cluster: string; signal?: AbortSignal }): Promise<S2iBuilderTemplate[]> {
-      const body = await client.request<{ items?: RawS2iBuilderTemplate[] }>(S2I_APIS + '/' + clusterSegment(params.cluster) + 's2ibuildertemplates', {
+      const body = await client.request<{ items?: RawS2iBuilderTemplate[] }>(clusterScoped(S2I_APIS, params.cluster, 's2ibuildertemplates'), {
         ...(params.signal ? { signal: params.signal } : {}),
       });
       return (body?.items ?? []).map(toS2iBuilderTemplate);
@@ -634,7 +623,7 @@ export function imageBuildersApi(client: Client) {
      */
     async secrets(params: { cluster: string; namespace: string; type: string; signal?: AbortSignal }): Promise<S2iSecretOption[]> {
       const body = await client.request<{ items?: RawSecret[] }>(
-        '/api/v1/' + clusterSegment(params.cluster) + 'namespaces/' + encodeURIComponent(params.namespace) + '/secrets',
+        corePath(params.cluster, 'namespaces/' + encodeURIComponent(params.namespace) + '/secrets'),
         {
           query: { fieldSelector: 'type=' + params.type },
           ...(params.signal ? { signal: params.signal } : {}),
@@ -708,7 +697,7 @@ export function imageBuildersApi(client: Client) {
     async job(params: { cluster: string; namespace: string; name: string; signal?: AbortSignal }): Promise<S2iJobDetail | null> {
       try {
         const raw = await client.request<KubeObject>(
-          '/apis/batch/v1/' + clusterSegment(params.cluster) + 'namespaces/' + encodeURIComponent(params.namespace) + '/jobs/' + encodeURIComponent(params.name),
+          clusterScoped('/apis/batch/v1', params.cluster, 'namespaces/' + encodeURIComponent(params.namespace) + '/jobs/' + encodeURIComponent(params.name)),
           { ...(params.signal ? { signal: params.signal } : {}) },
         );
         return toJob(raw);
@@ -723,7 +712,7 @@ export function imageBuildersApi(client: Client) {
       const selector = labelSelector(params.selector);
       if (!selector) return [];
       const body = await client.request<{ items?: RawPod[] }>(
-        '/api/v1/' + clusterSegment(params.cluster) + 'namespaces/' + encodeURIComponent(params.namespace) + '/pods',
+        corePath(params.cluster, 'namespaces/' + encodeURIComponent(params.namespace) + '/pods'),
         {
           query: { labelSelector: selector },
           ...(params.signal ? { signal: params.signal } : {}),
@@ -759,7 +748,7 @@ export function imageBuildersApi(client: Client) {
       };
       if (params.uid) fields['involvedObject.uid'] = params.uid;
       const body = await client.request<{ items?: RawEvent[] }>(
-        '/api/v1/' + clusterSegment(params.cluster) + 'namespaces/' + encodeURIComponent(params.namespace) + '/events',
+        corePath(params.cluster, 'namespaces/' + encodeURIComponent(params.namespace) + '/events'),
         {
           query: { fieldSelector: encodeFieldSelector(fields) },
           ...(params.signal ? { signal: params.signal } : {}),
@@ -786,7 +775,7 @@ export function imageBuildersApi(client: Client) {
      */
     async secretValues(params: { cluster: string; namespace: string; name: string; signal?: AbortSignal }): Promise<EnvSourceValues> {
       const raw = await client.request<RawSecret>(
-        '/api/v1/' + clusterSegment(params.cluster) + 'namespaces/' + encodeURIComponent(params.namespace) + '/secrets/' + encodeURIComponent(params.name),
+        corePath(params.cluster, 'namespaces/' + encodeURIComponent(params.namespace) + '/secrets/' + encodeURIComponent(params.name)),
         { ...(params.signal ? { signal: params.signal } : {}) },
       );
       const values: Record<string, string> = {};
@@ -803,7 +792,7 @@ export function imageBuildersApi(client: Client) {
     /** Read the ConfigMap a container environment variable references. */
     async configMapValues(params: { cluster: string; namespace: string; name: string; signal?: AbortSignal }): Promise<EnvSourceValues> {
       const raw = await client.request<KubeObject & { data?: Record<string, string> }>(
-        '/api/v1/' + clusterSegment(params.cluster) + 'namespaces/' + encodeURIComponent(params.namespace) + '/configmaps/' + encodeURIComponent(params.name),
+        corePath(params.cluster, 'namespaces/' + encodeURIComponent(params.namespace) + '/configmaps/' + encodeURIComponent(params.name)),
         { ...(params.signal ? { signal: params.signal } : {}) },
       );
       return { values: raw.data ?? {}, kind: 'ConfigMap' };

@@ -1,4 +1,5 @@
 import type { Client } from './client';
+import { clusterScoped } from './paths';
 import { baseOf, type KubeObject, type ResourceBase } from './resources';
 
 /**
@@ -386,8 +387,8 @@ export function isRunOfPipeline(item: KubePipelineRun, pipeline: string): boolea
  * the host cluster is verified on this installation.
  */
 function collectionPath(groupVersion: string, cluster: string, namespace: string, resource: string, name?: string): string {
-  const clusterSegment = cluster && cluster !== 'host' ? `clusters/${encodeURIComponent(cluster)}/` : '';
-  const base = `/apis/${groupVersion}/${clusterSegment}namespaces/${encodeURIComponent(namespace)}/${resource}`;
+  // `clusters/<id>` goes before the group, not after the version: see `clusterScoped`.
+  const base = clusterScoped(`/apis/${groupVersion}`, cluster, `namespaces/${encodeURIComponent(namespace)}/${resource}`);
   return name ? `${base}/${encodeURIComponent(name)}` : base;
 }
 

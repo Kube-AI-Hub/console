@@ -1,4 +1,5 @@
 import type { Client } from './client';
+import { clusterScoped, corePath } from './paths';
 import { ApiError } from './errors';
 import { baseOf, type KubeObject, type ResourceBase } from './resources';
 
@@ -128,16 +129,13 @@ function numberOrUndefined(value: unknown): number | undefined {
   return Number.isFinite(parsed) ? parsed : undefined;
 }
 
-function clusterSegment(cluster: string): string {
-  return cluster && cluster !== 'host' ? 'clusters/' + encodeURIComponent(cluster) + '/' : '';
-}
-
+// `clusters/<id>` goes before the group, not after the version: see `clusterScoped`.
 function gatewayGroupPath(cluster: string, suffix: string): string {
-  return '/apis/gateway.kubesphere.io/v1alpha1/' + clusterSegment(cluster) + suffix;
+  return clusterScoped('/apis/gateway.kubesphere.io/v1alpha1', cluster, suffix);
 }
 
 function resourcesPath(cluster: string, suffix: string): string {
-  return '/kapis/resources.kubesphere.io/v1alpha3/' + clusterSegment(cluster) + suffix;
+  return clusterScoped('/kapis/resources.kubesphere.io/v1alpha3', cluster, suffix);
 }
 
 function servicePath(cluster: string, namespace: string, name: string): string {
@@ -152,7 +150,7 @@ function servicePath(cluster: string, namespace: string, name: string): string {
  * `clusters/<id>/` segment convention.
  */
 function nativeServicePath(cluster: string, namespace: string, name: string): string {
-  return '/api/v1/' + clusterSegment(cluster) + 'namespaces/' + encodeURIComponent(namespace) + '/services/' + encodeURIComponent(name);
+  return corePath(cluster, 'namespaces/' + encodeURIComponent(namespace) + '/services/' + encodeURIComponent(name));
 }
 
 function toPorts(service: KubeObject | undefined): GatewayServicePort[] {

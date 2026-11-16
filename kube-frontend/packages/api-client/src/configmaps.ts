@@ -1,4 +1,5 @@
 import { ApiError } from './errors';
+import { clusterScoped } from './paths';
 import type { Client } from './client';
 
 /**
@@ -150,15 +151,12 @@ function resourcePath(kind: 'kapis' | 'kube', cluster: string, namespace: string
    * ks-apiserver does not serve. The bare collection is what walks every project;
    * the reader filters afterwards.
    */
-  const clusterSegment =
-    scope === 'cluster'
-      ? ''
-      : cluster && cluster !== 'host'
-        ? `clusters/${encodeURIComponent(cluster)}/`
-        : '';
   const namespaceSegment = namespace ? `namespaces/${encodeURIComponent(namespace)}/` : '';
   const prefix = kind === 'kapis' ? '/kapis/resources.kubesphere.io/v1alpha3' : '/api/v1';
-  return `${prefix}/${clusterSegment}${namespaceSegment}configmaps`;
+  // A cluster-scoped read has no member segment at all; a namespaced one goes through the helper,
+  // which puts `clusters/<id>` before the group. See `clusterScoped`.
+  if (scope === 'cluster') return `${prefix}/${namespaceSegment}configmaps`;
+  return clusterScoped(prefix, cluster, `${namespaceSegment}configmaps`);
 }
 
 /* ---------------- Mapping (pure, so it can be tested without a network) ---------------- */

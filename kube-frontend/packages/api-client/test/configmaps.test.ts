@@ -54,7 +54,8 @@ describe('ConfigMaps transport', () => {
     const { api, calls } = recordingClient();
     await api.list({ cluster: 'default', namespace: 'ns', page: 1, pageSize: 10 });
 
-    expect(calls[0]?.url).toContain('/kapis/resources.kubesphere.io/v1alpha3/clusters/default/namespaces/ns/configmaps');
+    // Same convention: the member segment sits before the group (see `clusterScoped`).
+    expect(calls[0]?.url).toContain('/kapis/clusters/default/resources.kubesphere.io/v1alpha3/namespaces/ns/configmaps');
     expect(calls[0]?.url).not.toContain('/klusters/');
   });
 

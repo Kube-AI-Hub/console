@@ -75,7 +75,9 @@ describe('resourceApi', () => {
   it('addresses a member cluster with the clusters segment', async () => {
     const { client, calls } = recordingClient();
     await api(client).list({ cluster: 'member-1', namespace: 'ns', page: 1, pageSize: 10 });
-    expect(calls[0]?.url).toContain('/clusters/member-1/namespaces/ns/secrets');
+    // The segment goes right after the API root, before the group: the other order
+    // (/kapis/<group>/<version>/clusters/...) answers 404 on a member cluster.
+    expect(calls[0]?.url).toContain('/kapis/clusters/member-1/resources.kubesphere.io/v1alpha3/namespaces/ns/secrets');
   });
 
   it('lists across projects when the namespace is empty', async () => {

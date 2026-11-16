@@ -106,8 +106,10 @@ describe('devopsCollectionsApi', () => {
   it('addresses a member cluster through the clusters segment', async () => {
     const { client, calls } = recordingClient([]);
     await devopsCollectionsApi(client).pipelines({ cluster: 'member', namespace: 'devops-beta' });
+    // `clusters/<id>` goes before the group, not after the version: the other placement 404s on a
+    // real member cluster (measured on A100's `xc`). See `clusterScoped`.
     expect(new URL(calls[0] ?? '').pathname).toBe(
-      '/apis/devops.kubesphere.io/v1alpha3/clusters/member/namespaces/devops-beta/pipelines',
+      '/apis/clusters/member/devops.kubesphere.io/v1alpha3/namespaces/devops-beta/pipelines',
     );
   });
 });
