@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { gpusApi, type WorkloadSummary } from '@kube-ai-hub/api-client';
 import { ResourceList, type ListSchema } from '@kube-ai-hub/ui';
 import { api } from '@/api';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { statusLabel } from '@/lib/status';
 import { useResourceListState } from '@/components/resource/useResourceListState';
@@ -25,22 +26,29 @@ export function GpuPodsPanel({ cluster, node, uuid }: { cluster: string; node: s
     rowKey: (row) => `${row.namespace}/${row.name}`, rowAttributes: (row) => ({ 'data-ai-row': `${row.namespace}/${row.name}` }),
     search: { placeholder: t('cluster.searchPlaceholder'), aiId: 'gpu-detail:pods-search' },
     refresh: { label: t('common.refresh'), aiId: 'gpu-detail:pods-refresh', busy: query.isFetching },
+    columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'gpu-pods:columns' },
     columns: [
       { key: 'name', title: t('cluster.column.name'), render: (row) => <a className="text-ai-accent hover:underline"
         href={`/kube-frontend/${encodeURIComponent(workspaceOf.get(row.namespace) ?? 'public')}/clusters/${encodeURIComponent(cluster)}/projects/${encodeURIComponent(row.namespace)}/pods/${encodeURIComponent(row.name)}`}>{row.name}</a> },
-      { key: 'namespace', title: t('cluster.workloads.column.project') },
-      { key: 'status', title: t('cluster.column.status'), render: (row) => statusLabel(t, row.status) },
-      { key: 'node', title: t('workloads.field.node') },
+      { key: 'namespace', hideable: true, title: t('cluster.workloads.column.project') },
+      { key: 'status', hideable: true, title: t('cluster.column.status'), render: (row) => statusLabel(t, row.status) },
+      { key: 'node', hideable: true, title: t('workloads.field.node') },
     ],
     empty: { title: t('common.empty'), description: t('gpu.detail.podsHint') },
     labels: { previous: t('table.previous'), next: t('table.next'), pageSize: t('table.pageSize'),
       pageSizeSuffix: t('table.pageSizeSuffix'), clearSearch: t('gpu.list.clearSearch') },
     pagination: { page: list.page, pageSize: list.pageSize, total: query.data?.total ?? 0, pageSizeOptions: [10, 20, 50, 100] },
   };
+
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('gpu-pods', columnKeys);
   return <div data-ai-id="gpu-detail:pods" aria-busy={query.isFetching} className="flex flex-col gap-3">
     <p className="text-xs text-ai-fg-muted">{t('gpu.detail.podsHint')}</p>
     {query.isError ? <ResourceErrorPanel error={query.error} onRetry={() => void query.refetch()} retryAiId="gpu-detail:pods-retry" /> :
-      <ResourceList schema={schema} rows={query.data?.items ?? []} loading={query.isPending}
+      <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
+        schema={schema} rows={query.data?.items ?? []} loading={query.isPending}
         searchValue={list.keyword} onSearchChange={list.setKeyword} onPageChange={list.setPage}
         onPageSizeChange={list.setPageSize} onRefresh={() => void query.refetch()} />}
   </div>;

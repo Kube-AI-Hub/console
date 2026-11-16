@@ -4,6 +4,7 @@ import { Link } from '@tanstack/react-router';
 import { installedReleasesApi, objectEventsApi } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, Button, Modal, ResourceList, Skeleton, Tabs, TabsContent, type ListSchema } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -86,14 +87,15 @@ export function InstalledAppDetailPage({ workspace, releaseId }: InstalledAppDet
 
   const resourceSchema = React.useMemo<ListSchema<{ kind: string; name: string; detail: string }>>(
     () => ({
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'installed-app-resources:columns' },
       title: t('installedApps.tabResources'),
       refresh: resourcesRefresh.refresh,
       rowKey: (row) => `${row.kind}/${row.name}`,
       rowAttributes: (row) => ({ 'data-ai-row': `${row.kind}/${row.name}` }),
       columns: [
-        { key: 'kind', title: t('installedApps.column.app'), width: 160, render: (row) => <span className="text-ai-fg-secondary">{row.kind}</span> },
+        { key: 'kind', hideable: true, title: t('installedApps.column.app'), width: 160, render: (row) => <span className="text-ai-fg-secondary">{row.kind}</span> },
         { key: 'name', title: t('installedApps.column.name'), render: (row) => <span className="truncate font-medium text-ai-fg">{row.name}</span> },
-        { key: 'detail', title: t('installedApps.column.status'), width: 160, render: (row) => <span className="tabular-nums text-ai-fg-secondary">{row.detail}</span> },
+        { key: 'detail', hideable: true, title: t('installedApps.column.status'), width: 160, render: (row) => <span className="tabular-nums text-ai-fg-secondary">{row.detail}</span> },
       ],
       empty: { title: t('installedApps.resourcesEmptyTitle'), description: t('installedApps.resourcesEmptyDescription') },
       labels: {
@@ -108,6 +110,9 @@ export function InstalledAppDetailPage({ workspace, releaseId }: InstalledAppDet
     }),
     [resources.isFetching, t, resourcesRefresh],
   );
+
+  const resourceSchemaKeyMap = React.useMemo(() => resourceSchema.columns.map((column) => column.key), [resourceSchema]);
+  const columnVisibility = useColumnVisibility('installed-app-resources', resourceSchemaKeyMap);
 
   const eventSchema = React.useMemo<ListSchema<{ reason: string; message: string; type: string; lastSeen: string }>>(
     () => ({
@@ -248,7 +253,9 @@ export function InstalledAppDetailPage({ workspace, releaseId }: InstalledAppDet
             <ResourceErrorPanel error={resources.error} onRetry={() => void resources.refetch()} retryAiId="installed-app:resources-retry" />
           ) : (
             <div data-ai-id="installed-app:resources">
-              <ResourceList schema={resourceSchema} rows={resources.data ?? []} loading={resources.isPending} onRefresh={resourcesRefresh.onRefresh} />
+              <ResourceList schema={resourceSchema}
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys} rows={resources.data ?? []} loading={resources.isPending} onRefresh={resourcesRefresh.onRefresh} />
             </div>
           )}
         </TabsContent>

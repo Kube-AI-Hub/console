@@ -269,3 +269,23 @@ BFF 登录超时），两次跑到一半失败，失败信息是页面进入 **e
 
 **验证守卫有效**：把 `IpPoolsPage` 里的 `hideable: true` 全部删掉后契约立即失败（`1 failed | 3 passed`），
 恢复后全绿。契约套件总数从 1452 增至 **1456**。
+
+## 25. 第十一批（同日）：面板子表与详情内表
+
+| 页面 | 页面键 | 说明 |
+| --- | --- | --- |
+| GPU 容器组面板（节点详情内） | `gpu-pods` | 宿主页内的子表，独立键 |
+| 节点用量排行面板 | `node-usage` | 动态生成的指标列无法逐个标 hideable，只把「容器组」列设为可隐藏 |
+| 应用实例详情 · 资源表 | `installed-app-resources` | 详情内表 |
+| 企业空间仓库详情 · 事件表 | `workspace-repo-events` | 详情内表 |
+| 企业空间应用详情 · 版本/实例两张表 | `workspace-app-versions` / `workspace-app-instances` | 同一页两个表，两个独立键 |
+
+四条机械契约在每次改动后都跑：**1456 passed**，未出现「声明了选择器但没有 hideable」「忘记传 handler」「键重复」。
+
+本轮脚本又两次插错位置：`useMemo(() => ({...}), [deps])` 的闭合是 `  );`，而脚本按 `    }),` 插入，把 hook 塞进了
+useMemo 的参数列表（`tsc` 立刻报 `Argument expression expected`）。两次都用 `git checkout --` 回滚后按正确
+闭合位置重做。**结论：只有结构简单的单表页适合脚本，`useMemo` 包装的 schema 一律手工插。**
+
+## 26. 剩余
+
+**仅剩 1 页**：企业空间用户组（树 + 对话框内表，需要逐表接线）。

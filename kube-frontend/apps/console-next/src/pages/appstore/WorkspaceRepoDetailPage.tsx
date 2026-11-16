@@ -4,6 +4,7 @@ import { Link } from '@tanstack/react-router';
 import { workspaceReposApi } from '@kube-ai-hub/api-client';
 import { AiSurface, Badge, ResourceList, Skeleton, Tabs, TabsContent, type ListSchema } from '@kube-ai-hub/ui';
 import { actionProps } from '@kube-ai-hub/ai-surface';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -48,6 +49,7 @@ export function WorkspaceRepoDetailPage({ workspace, repoId }: WorkspaceRepoDeta
 
   const eventSchema = React.useMemo<ListSchema<{ id: string; createdAt: string; status: string; message: string }>>(
     () => ({
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'workspace-repo-events:columns' },
       title: t('appRepos.repos.eventsTitle'),
       refresh: listRefresh.refresh,
       rowKey: 'id',
@@ -55,12 +57,14 @@ export function WorkspaceRepoDetailPage({ workspace, repoId }: WorkspaceRepoDeta
       columns: [
         {
           key: 'createdAt',
+          hideable: true,
           title: t('cluster.column.createdAt'),
           width: 190,
           render: (row) => <span className="tabular-nums text-ai-fg-secondary">{row.createdAt ? formatTimestamp(row.createdAt) : '-'}</span>,
         },
         {
           key: 'status',
+          hideable: true,
           title: t('cluster.column.status'),
           width: 140,
           render: (row) => (
@@ -69,6 +73,7 @@ export function WorkspaceRepoDetailPage({ workspace, repoId }: WorkspaceRepoDeta
         },
         {
           key: 'message',
+          hideable: true,
           title: t('appRepos.repos.column.message'),
           render: (row) => <span className="truncate text-ai-fg-secondary">{row.message || '-'}</span>,
         },
@@ -86,6 +91,9 @@ export function WorkspaceRepoDetailPage({ workspace, repoId }: WorkspaceRepoDeta
     }),
     [events.isFetching, t, listRefresh],
   );
+
+  const eventSchemaKeyMap = React.useMemo(() => eventSchema.columns.map((column) => column.key), [eventSchema]);
+  const columnVisibility = useColumnVisibility('workspace-repo-events', eventSchemaKeyMap);
 
   const back = (
     <Link
@@ -174,7 +182,9 @@ export function WorkspaceRepoDetailPage({ workspace, repoId }: WorkspaceRepoDeta
             <ResourceErrorPanel error={events.error} onRetry={() => void events.refetch()} retryAiId="workspace-repo-detail:events-retry" />
           ) : (
             <div data-ai-id="workspace-repo-detail:events">
-              <ResourceList schema={eventSchema} rows={eventRows} loading={events.isPending} onRefresh={listRefresh.onRefresh} />
+              <ResourceList schema={eventSchema}
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys} rows={eventRows} loading={events.isPending} onRefresh={listRefresh.onRefresh} />
             </div>
           )}
         </TabsContent>

@@ -11,6 +11,7 @@ import {
 } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, Button, Modal, ResourceList, Skeleton, Tabs, TabsContent, type ListSchema } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -126,6 +127,7 @@ export function WorkspaceAppDetailPage({ workspace, appId }: WorkspaceAppDetailP
 
   const versionSchema = React.useMemo<ListSchema<AppTemplateVersion>>(
     () => ({
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'workspace-app-versions:columns' },
       title: t('appRepos.apps.tabVersions'),
       refresh: versionsRefresh.refresh,
       rowKey: 'id',
@@ -135,12 +137,13 @@ export function WorkspaceAppDetailPage({ workspace, appId }: WorkspaceAppDetailP
         { key: 'name', title: t('store.detail.versionNumber'), render: (row) => <span className="truncate font-medium text-ai-fg">{row.name || row.id}</span> },
         {
           key: 'status',
+          hideable: true,
           title: t('cluster.column.status'),
           width: 130,
           render: (row) => <Badge tone={row.status === 'active' ? 'success' : row.status === 'rejected' ? 'danger' : 'warning'}>{row.status || '-'}</Badge>,
         },
-        { key: 'owner', title: t('appRepos.repos.column.creator'), width: 140, hideBelow: 'md', render: (row) => <span className="truncate text-ai-fg-secondary">{row.owner || '-'}</span> },
-        { key: 'updatedAt', title: t('appRepos.apps.column.updateTime'), width: 170, hideBelow: 'lg', render: (row) => <span className="tabular-nums text-ai-fg-muted">{row.updatedAt ? formatTimestamp(row.updatedAt) : '-'}</span> },
+        { key: 'owner', hideable: true, title: t('appRepos.repos.column.creator'), width: 140, hideBelow: 'md', render: (row) => <span className="truncate text-ai-fg-secondary">{row.owner || '-'}</span> },
+        { key: 'updatedAt', hideable: true, title: t('appRepos.apps.column.updateTime'), width: 170, hideBelow: 'lg', render: (row) => <span className="tabular-nums text-ai-fg-muted">{row.updatedAt ? formatTimestamp(row.updatedAt) : '-'}</span> },
         {
           /*
            * The review transition is a named button, not a generic menu entry: the old console
@@ -148,6 +151,7 @@ export function WorkspaceAppDetailPage({ workspace, appId }: WorkspaceAppDetailP
            * says "操作已提交" tells the reader nothing about what it will do.
            */
           key: 'actions',
+          hideable: true,
           title: t('appRepos.apps.tabVersions'),
           width: 200,
           render: (row) => {
@@ -199,8 +203,11 @@ export function WorkspaceAppDetailPage({ workspace, appId }: WorkspaceAppDetailP
     [versions.isFetching, t, versionsRefresh, versionAction.isPending],
   );
 
+  const versionSchemaVisibility = useColumnVisibility('workspace-app-versions', versionSchema.columns.map((column) => column.key));
+
   const instanceSchema = React.useMemo<ListSchema<{ id: string; name: string; status: string; project: string; versionName: string; createdAt: string }>>(
     () => ({
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'workspace-app-instances:columns' },
       title: t('appRepos.apps.tabInstances'),
       refresh: instancesRefresh.refresh,
       rowKey: 'id',
@@ -219,10 +226,10 @@ export function WorkspaceAppDetailPage({ workspace, appId }: WorkspaceAppDetailP
             </Link>
           ),
         },
-        { key: 'status', title: t('installedApps.column.status'), width: 130, render: (row) => <Badge tone={statusTone(row.status)}>{row.status || '-'}</Badge> },
-        { key: 'versionName', title: t('installedApps.column.version'), width: 150, hideBelow: 'md', render: (row) => <span className="truncate text-ai-fg-secondary">{row.versionName || '-'}</span> },
-        { key: 'project', title: t('installedApps.column.project'), width: 140, hideBelow: 'lg', render: (row) => <span className="truncate text-ai-fg-secondary">{row.project || '-'}</span> },
-        { key: 'createdAt', title: t('cluster.column.createdAt'), width: 170, hideBelow: 'xl', render: (row) => <span className="tabular-nums text-ai-fg-muted">{row.createdAt ? formatTimestamp(row.createdAt) : '-'}</span> },
+        { key: 'status', hideable: true, title: t('installedApps.column.status'), width: 130, render: (row) => <Badge tone={statusTone(row.status)}>{row.status || '-'}</Badge> },
+        { key: 'versionName', hideable: true, title: t('installedApps.column.version'), width: 150, hideBelow: 'md', render: (row) => <span className="truncate text-ai-fg-secondary">{row.versionName || '-'}</span> },
+        { key: 'project', hideable: true, title: t('installedApps.column.project'), width: 140, hideBelow: 'lg', render: (row) => <span className="truncate text-ai-fg-secondary">{row.project || '-'}</span> },
+        { key: 'createdAt', hideable: true, title: t('cluster.column.createdAt'), width: 170, hideBelow: 'xl', render: (row) => <span className="tabular-nums text-ai-fg-muted">{row.createdAt ? formatTimestamp(row.createdAt) : '-'}</span> },
       ],
       empty: { title: t('appRepos.apps.instancesEmptyTitle'), description: t('appRepos.apps.instancesEmptyDescription') },
       labels: {
@@ -237,6 +244,8 @@ export function WorkspaceAppDetailPage({ workspace, appId }: WorkspaceAppDetailP
     }),
     [instances.isFetching, t, instancesRefresh, workspace],
   );
+
+  const instanceSchemaVisibility = useColumnVisibility('workspace-app-instances', instanceSchema.columns.map((column) => column.key));
 
   const back = (
     <Link
@@ -333,6 +342,8 @@ export function WorkspaceAppDetailPage({ workspace, appId }: WorkspaceAppDetailP
           ) : (
             <div data-ai-id="workspace-app:versions">
               <ResourceList
+                {...(versionSchemaVisibility.visibleColumnKeys ? { visibleColumnKeys: versionSchemaVisibility.visibleColumnKeys } : {})}
+                onVisibleColumnsChange={versionSchemaVisibility.setVisibleColumnKeys}
                 schema={versionSchema}
                 rows={versionRows}
                 loading={versions.isPending}
@@ -348,7 +359,10 @@ export function WorkspaceAppDetailPage({ workspace, appId }: WorkspaceAppDetailP
             <ResourceErrorPanel error={instances.error} onRetry={() => void instances.refetch()} retryAiId="workspace-app:instances-retry" />
           ) : (
             <div data-ai-id="workspace-app:instances">
-              <ResourceList schema={instanceSchema} rows={instances.data ?? []} loading={instances.isPending} onRefresh={instancesRefresh.onRefresh} />
+              <ResourceList
+                {...(instanceSchemaVisibility.visibleColumnKeys ? { visibleColumnKeys: instanceSchemaVisibility.visibleColumnKeys } : {})}
+                onVisibleColumnsChange={instanceSchemaVisibility.setVisibleColumnKeys}
+                schema={instanceSchema} rows={instances.data ?? []} loading={instances.isPending} onRefresh={instancesRefresh.onRefresh} />
               <p className="mt-2 text-[11px] text-ai-fg-muted">{t('appRepos.apps.instancesHint', { workspace })}</p>
             </div>
           )}

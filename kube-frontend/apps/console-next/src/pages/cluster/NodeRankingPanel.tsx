@@ -4,6 +4,7 @@ import { Link } from '@tanstack/react-router';
 import { NODE_RANK_METRICS, nodeRankingApi, nodesApi, type NodeRankMetric, type NodeRankRow } from '@kube-ai-hub/api-client';
 import { Badge, Button, Icon, Progress, ResourceList, Select, Table, type ListSchema } from '@kube-ai-hub/ui';
 import { api } from '@/api';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { useResourceListState } from '@/components/resource/useResourceListState';
@@ -71,14 +72,18 @@ export function NodeRankingPanel({ cluster, preview = false, initialMetric = 'no
     title: t('cluster.nodeUsage.title'), rowKey: 'name', rowAttributes: (row) => ({ 'data-ai-row': row.name }),
     search: { placeholder: t('cluster.searchPlaceholder'), aiId: 'node-usage:search' },
     sort: { key: metric, order: list.order }, sortableKeys: [...NODE_RANK_METRICS], sortAiPrefix: 'node-usage',
+    columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'node-usage:columns' },
     columns: [{ key: 'name', title: t('cluster.column.name'), render: nodeCell }, ...values,
-      { key: 'pods', title: t('cluster.nodeUsage.pods'), render: (row) => <span data-ai-id={`node-usage:pods:${row.name}`}>{row.values.node_pod_running_count ?? '-'}</span> }],
+      { key: 'pods', hideable: true, title: t('cluster.nodeUsage.pods'), render: (row) => <span data-ai-id={`node-usage:pods:${row.name}`}>{row.values.node_pod_running_count ?? '-'}</span> }],
     pagination: { page: list.page, pageSize: list.pageSize, total: query.data?.total ?? 0,
       pageSizeOptions: [10, 20, 50, 100] },
     empty: { title: t('cluster.nodeUsage.emptyTitle') },
     labels: { selectAll: t('table.selectAll'), selectRow: (index) => t('table.selectRow', { index }),
       moreActions: t('table.moreActions'), previous: t('table.previous'), next: t('table.next'), selected: (count) => t('table.selectedCount', { count }) },
   };
+
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('node-usage', columnKeys);
   return <section data-ai-id={preview ? 'overview:ranking' : 'node-usage:surface'}
     data-ai-state={state}
     aria-busy={query.isFetching} className={preview ? 'min-w-0 rounded-ai-lg border border-ai-line bg-ai-surface-1 p-4' : 'min-w-0'}>
@@ -98,7 +103,10 @@ export function NodeRankingPanel({ cluster, preview = false, initialMetric = 'no
           ]} />}
       <Link to="/kube-frontend/clusters/$cluster/node-usage" params={{ cluster }} search={{ metric }}
         className="mt-3 inline-block text-sm text-ai-fg underline underline-offset-2" data-ai-id="overview:rank-more">{t('cluster.overview.viewMore')}</Link>
-    </> : <><div className="mb-3">{controls}</div><ResourceList schema={schema} rows={rows} loading={query.isPending}
+    </> : <><div className="mb-3">{controls}</div><ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
+        schema={schema} rows={rows} loading={query.isPending}
       errorContent={query.isError ? renderError ? renderError(query.error, () => void query.refetch()) :
         <ResourceErrorPanel error={query.error} onRetry={() => void query.refetch()} retryAiId="node-usage:retry" /> : undefined}
       searchValue={list.keyword} onSearchChange={list.setKeyword}
