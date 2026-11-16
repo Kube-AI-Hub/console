@@ -436,7 +436,7 @@ MODULES = [
                     {
                         "id": "appearance",
                         "title": "外观（深浅色与色调）",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-APPEARANCE-01"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-APPEARANCE-01", "TC-L3-KUBE-FRONTEND-THEME-CONTRAST-01"]},
                     },
                     {
                         "id": "mail",

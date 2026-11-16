@@ -4,12 +4,27 @@
 
 ## 关联需求
 
+- AC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-APPEARANCE-03
 - AC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-APPEARANCE-01
 
 ## 概述
 
 平台信息页的「外观」分区：主题模式与色调，复用 ai-kit 的主题系统。
 
+### DEC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-APPEARANCE-03 — 对比度要在渲染层验，不只是算令牌
+
+令牌层契约（`config/theme-contrast-contract.test.ts`）只能证明**语义文本令牌**在**语义背景**上的比值，
+它明确把「强调色作为文字」列为覆盖外。而真实缺陷恰好落在那里：`--ai-accent` 是填充色，
+被链接按钮当成文字色用在不那么深的 `--ai-surface-2` 上只有 2.84:1。
+
+所以渲染层另有一条审计：写 `localStorage['ai-kit-theme']` → 导航 → 断言 `<html data-theme>` 确实切换
+（否则测的是另一个主题）→ 用 `helpers/contrast.py` 走 `main` 里的真实文本节点。
+
+### GOT-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-APPEARANCE-03 — 已知缺陷用清单登记，不放宽断言
+
+两条已知不达标（链接 2.84、成功徽标 4.07）按**文本**登记在 `KNOWN_CONTRAST_DEFECTS`，双向守卫：
+出现新违规失败；登记项不再复现或比值变化超过 0.05 也失败（说明已修复，应删除条目）。
+这样套件保持绿色、缺陷仍被追踪，清单也不会腐烂成「什么都允许」。
 ## 系统现状
 
 - `ThemeProvider` 已支持 `data-theme`（dark/light）与 `data-accent`（violet/green），并把选择写入 `localStorage`，还会在首帧前用内联脚本恢复（避免闪烁）。
@@ -67,3 +82,4 @@
 ## 验收用例
 
 - `TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-APPEARANCE-01`
+- `TC-L3-KUBE-FRONTEND-THEME-CONTRAST-01`

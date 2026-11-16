@@ -383,6 +383,7 @@
 | kube-frontend/monitoring/rules | `AC-L3-KUBE-FRONTEND-MONITORING-RULES-09` | `TC-L3-KUBE-FRONTEND-MONITORING-RULES-09` | [`design/kube-frontend/monitoring/rules.md`](../../../design/kube-frontend/monitoring/rules.md) | [`tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_RULES_09.py`](../../../tests/ui/tests/kube-frontend/monitoring/test_TC_L3_KUBE_FRONTEND_MONITORING_RULES_09.py) |
 | kube-frontend/platform-settings/_index | `AC-FULL-KUBE-FRONTEND-PLATFORM_SETTINGS-01` | `TC-FULL-KUBE-FRONTEND-PLATFORM_SETTINGS-01` | [`design/kube-frontend/platform-settings/_index.md`](../../../design/kube-frontend/platform-settings/_index.md) | [`tests/ui/tests/kube-frontend/platform-settings/test_TC_FULL_KUBE_FRONTEND_PLATFORM_SETTINGS_01.py`](../../../tests/ui/tests/kube-frontend/platform-settings/test_TC_FULL_KUBE_FRONTEND_PLATFORM_SETTINGS_01.py) |
 | kube-frontend/platform-settings/appearance | `AC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-APPEARANCE-01` | `TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-APPEARANCE-01` | [`design/kube-frontend/platform-settings/appearance.md`](../../../design/kube-frontend/platform-settings/appearance.md) | [`tests/ui/tests/kube-frontend/platform-settings/test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_APPEARANCE_01.py`](../../../tests/ui/tests/kube-frontend/platform-settings/test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_APPEARANCE_01.py) |
+| kube-frontend/platform-settings/appearance | `AC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-APPEARANCE-03` | `TC-L3-KUBE-FRONTEND-THEME-CONTRAST-01` | **（无）** | [`tests/ui/tests/kube-frontend/theme/test_TC_L3_KUBE_FRONTEND_THEME_CONTRAST_01.py`](../../../tests/ui/tests/kube-frontend/theme/test_TC_L3_KUBE_FRONTEND_THEME_CONTRAST_01.py) |
 | kube-frontend/platform-settings/channels | `AC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-CHANNELS-01` | `TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-CHANNELS-01` | [`design/kube-frontend/platform-settings/channels.md`](../../../design/kube-frontend/platform-settings/channels.md) | [`tests/ui/tests/kube-frontend/platform-settings/test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_CHANNELS_01.py`](../../../tests/ui/tests/kube-frontend/platform-settings/test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_CHANNELS_01.py) |
 | kube-frontend/platform-settings/channels | `AC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-CHANNELS-02` | `TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-CHANNELS-01` | [`design/kube-frontend/platform-settings/channels.md`](../../../design/kube-frontend/platform-settings/channels.md) | [`tests/ui/tests/kube-frontend/platform-settings/test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_CHANNELS_01.py`](../../../tests/ui/tests/kube-frontend/platform-settings/test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_CHANNELS_01.py) |
 | kube-frontend/platform-settings/channels | `AC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-CHANNELS-03` | `TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-CHANNELS-01` | [`design/kube-frontend/platform-settings/channels.md`](../../../design/kube-frontend/platform-settings/channels.md) | [`tests/ui/tests/kube-frontend/platform-settings/test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_CHANNELS_01.py`](../../../tests/ui/tests/kube-frontend/platform-settings/test_TC_L3_KUBE_FRONTEND_PLATFORM_SETTINGS_CHANNELS_01.py) |
@@ -493,9 +494,9 @@
 
 ## 小结
 
-- 需求里的 AC：486 条，其中未覆盖 1 条、无技术方案承接 18 条、无用例规格实现 1 条。
+- 需求里的 AC：487 条，其中未覆盖 1 条、无技术方案承接 19 条、无用例规格实现 1 条。
 - 未覆盖：`AC-L2-KUBE-FRONTEND-LOGIN-07`
-- 无技术方案承接：`AC-L2-KUBE-FRONTEND-LOGIN-01`, `AC-L2-KUBE-FRONTEND-LOGIN-02`, `AC-L2-KUBE-FRONTEND-LOGIN-03`, `AC-L2-KUBE-FRONTEND-LOGIN-04`, `AC-L2-KUBE-FRONTEND-LOGIN-05`, `AC-L2-KUBE-FRONTEND-LOGIN-06`, `AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L2-KUBE-FRONTEND-THEME-01`, `AC-L2-KUBE-FRONTEND-THEME-02`, `AC-L2-KUBE-FRONTEND-THEME-03`, `AC-L2-KUBE-FRONTEND-THEME-04`, `AC-L2-KUBE-FRONTEND-THEME-05`, `AC-L2-KUBE-FRONTEND-THEME-06`, `AC-L3-KUBE-FRONTEND-MONITORING-PROJECT_CUSTOM_MONITORING-01`, `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-02`, `AC-L3-KUBE-FRONTEND-STORAGE-DETAIL_TABS-01`
+- 无技术方案承接：`AC-L2-KUBE-FRONTEND-LOGIN-01`, `AC-L2-KUBE-FRONTEND-LOGIN-02`, `AC-L2-KUBE-FRONTEND-LOGIN-03`, `AC-L2-KUBE-FRONTEND-LOGIN-04`, `AC-L2-KUBE-FRONTEND-LOGIN-05`, `AC-L2-KUBE-FRONTEND-LOGIN-06`, `AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L2-KUBE-FRONTEND-THEME-01`, `AC-L2-KUBE-FRONTEND-THEME-02`, `AC-L2-KUBE-FRONTEND-THEME-03`, `AC-L2-KUBE-FRONTEND-THEME-04`, `AC-L2-KUBE-FRONTEND-THEME-05`, `AC-L2-KUBE-FRONTEND-THEME-06`, `AC-L3-KUBE-FRONTEND-MONITORING-PROJECT_CUSTOM_MONITORING-01`, `AC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-APPEARANCE-03`, `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-02`, `AC-L3-KUBE-FRONTEND-STORAGE-DETAIL_TABS-01`
 - 无用例规格实现：`AC-L2-KUBE-FRONTEND-LOGIN-07`
 
 ## 用户故事覆盖
@@ -778,7 +779,7 @@
 | kube-frontend/monitoring/rules | `US7` | `TC-L3-KUBE-FRONTEND-MONITORING-RULES-06` |
 | kube-frontend/monitoring/rules | `US8` | `TC-L3-KUBE-FRONTEND-MONITORING-RULES-07` |
 | kube-frontend/platform-settings/_index | `US1` | `TC-FULL-KUBE-FRONTEND-PLATFORM_SETTINGS-01` |
-| kube-frontend/platform-settings/appearance | `US1` | `TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-APPEARANCE-01` |
+| kube-frontend/platform-settings/appearance | `US1` | `TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-APPEARANCE-01`, `TC-L3-KUBE-FRONTEND-THEME-CONTRAST-01` |
 | kube-frontend/platform-settings/channels | `US1` | `TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-CHANNELS-01` |
 | kube-frontend/platform-settings/feishu | `US1` | `TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-FEISHU-01` |
 | kube-frontend/platform-settings/info | `US1` | `TC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-INFO-01` |

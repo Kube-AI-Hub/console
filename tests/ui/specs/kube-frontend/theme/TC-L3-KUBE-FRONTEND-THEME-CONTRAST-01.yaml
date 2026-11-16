@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-THEME-CONTRAST-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: theme
+feature: contrast
+title: 外观 · 渲染后文本对比度达到 WCAG AA
+entry_url: '{BASE_URL}/kube-frontend/workspaces/{workspace}/overview'
+prd: prd/kube-frontend/platform-settings/appearance.md
+design: design/kube-frontend/platform-settings/appearance.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-APPEARANCE-03
+
+story:
+- US1
+
+product: 在深色与浅色两种外观下打开代表性页面，main 内所有可见文本与其实际背景的对比度达到 WCAG 2.1 AA（4.5:1）；已知未达标的两处登记在用例的已知缺陷清单里，出现新的不达标即失败。
+preconditions:
+- 已登录；外观可切换（ai-kit-theme 写入 localStorage 后由 ThemeProvider 应用）
+steps:
+- 写入 localStorage 的 ai-kit-theme 为目标主题后打开页面
+- 断言 html 的 data-theme 已变为目标主题
+- 用 helpers/contrast.audit 遍历 main 的可见文本节点
+- 对每页每主题重复
+expected:
+- html[data-theme] 等于目标主题（否则测的是另一个主题）
+- 除已登记的两处外，没有对比度低于 4.5:1 的文本
+- 已登记项的比值与登记值相差不超过 0.05；若不再复现应删除登记
+troubleshoot:
+- 报告某页对比度不足：先确认 data-theme 真的切了，再看该文本用的是不是填充色令牌当文字色
+- 已知缺陷清单报「比值变了」：说明修复已生效，删除对应条目
+update_automation:
+- 句柄：html[data-theme] / main；辅助函数 helpers/contrast.py 的 audit

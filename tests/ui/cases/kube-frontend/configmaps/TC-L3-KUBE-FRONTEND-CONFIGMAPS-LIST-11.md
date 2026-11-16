@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/configmaps/list.md`](../../../../prd/kube-frontend/configmaps/list.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-11** — 已知配置字典、保密字典、服务账号、项目存储、告警策略、联邦项目、集群告警消息、集群列表、企业空间成员、集群成员与 JuiceFS 存储列表均为多列列表，当点工具栏的「显示列」，则只列出**可隐藏列**（标识列「名称」不可隐藏）；取消勾选某列后该列表头立即消失、结果行不变，选择被记住（刷新后仍隐藏），「重置」恢复全部列；同一套行为由 `useColumnVisibility` + `ResourceList.columnVisibility` 提供，每个页面的选择独立保存（`kube-frontend.columns.<页面键>`）。
+- **AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-11** — 已知配置字典、保密字典、服务账号、项目存储、告警策略、联邦项目、集群告警消息、集群列表、企业空间成员、集群成员、JuiceFS 存储、集群配置字典/保密字典/服务账号/网络策略、持久卷与 IP 池列表均为多列列表，当点工具栏的「显示列」，则只列出**可隐藏列**（标识列「名称」不可隐藏）；取消勾选某列后该列表头立即消失、结果行不变，选择被记住（刷新后仍隐藏），「重置」恢复全部列；同一套行为由 `useColumnVisibility` + `ResourceList.columnVisibility` 提供，每个页面的选择独立保存（`kube-frontend.columns.<页面键>`）。
 
 ### 关联设计
 

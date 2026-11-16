@@ -55,6 +55,8 @@
 
 ## 功能需求
 
+- **AC-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-APPEARANCE-03** — 已知任意外观组合（深/浅 × 紫/绿），当页面渲染完成，则 `main` 内所有可见文本与其实际背景的对比度达到 WCAG 2.1 AA（正文 4.5:1）；已知未达标的两处（链接强调色在 `--ai-surface-2` 上 2.84:1、成功色徽标在浅色背景 4.07:1）登记在用例的已知缺陷清单中，出现**新的**不达标文本即判失败。
+
 - **FR-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-APPEARANCE-01** — 平台信息页提供模式与色调切换，立即生效并持久化。
 - **FR-L3-KUBE-FRONTEND-PLATFORM_SETTINGS-APPEARANCE-02** — 当前选项有可见的选中态。
 
