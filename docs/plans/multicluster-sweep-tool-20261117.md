@@ -392,3 +392,40 @@ WARN alert rule groups  xc  host=200/0  member=200/0
 而 host 正常——这就是「页面显示 host 数据」的充分条件。
 
 该检查已并入 `--baseline`（第五段），`SUSPECT` 计为失败，`IDENTICAL` 只告警。
+## 19. 基线要记录「跑在哪个代码状态上」
+
+共享检出里，**别人未提交的改动可以让整站不可用**。本轮就遇到了：从 04:00 到 04:20，
+两套本地栈的所有列表页都在渲染阶段抛错（`state=error`、零 4xx/5xx、零 pageerror），
+而 `git status` 显示 100+ 个未提交文件（含 `src/api.ts`、`AppShell.tsx`、`LoginPage.tsx`）。
+
+没有这一行信息，一条失败的基线看起来就像「刚提交的代码有缺陷」。所以基线结尾现在固定打印：
+
+```
+baseline PASS in 431s | repo 86ac322d7 (dirty files: 102)
+```
+
+**判读规则**：
+
+| 输出 | 含义 |
+| --- | --- |
+| `dirty files: 0` | 结果只反映该提交，可作为证据 |
+| `dirty files: N` | 结果混合了工作区改动；失败**先怀疑工作区**，通过也只能证明「当前工作区」 |
+
+## 20. 数据归属检查扩容
+
+集合从 5 个扩到 9 个（加了 `persistentvolumes` 与三个项目级集合）。A100 实测：
+
+```
+OK   nodes               xc  host=200/3   member=200/7
+OK   storageclasses      xc  host=200/3   member=200/5
+OK   namespaces          xc  host=200/34  member=200/53
+OK   persistentvolumes   xc  host=200/195 member=200/182
+FAIL cluster alerts      xc  host=200/1   member=503/None
+WARN alert rule groups   xc  host=200/0   member=200/0
+OK   secrets (project)   xc  host=200/23  member=200/1
+OK   configmaps (project) xc host=200/41  member=200/7
+OK   deployments (project) xc host=200/36 member=200/1
+```
+
+项目级三个集合**同名项目在两个集群上内容不同**，且成员页显示的是成员自己的数量——
+这从数据侧证明项目级读取确实按集群隔离。

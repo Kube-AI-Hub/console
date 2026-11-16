@@ -516,8 +516,14 @@ IDENTITY_RESOURCES = (
     ('nodes', 'resources.kubesphere.io/v1alpha3', 'nodes', False),
     ('storageclasses', 'resources.kubesphere.io/v1alpha3', 'storageclasses', False),
     ('namespaces', 'resources.kubesphere.io/v1alpha3', 'namespaces', False),
+    ('persistentvolumes', 'resources.kubesphere.io/v1alpha3', 'persistentvolumes', False),
     ('cluster alerts', 'alerting.kubesphere.io/v2beta1', 'globalalerts', False),
     ('alert rule groups', 'alerting.kubesphere.io/v2beta1', 'rulegroups', False),
+    # Project-scoped: the same namespace exists on both clusters, so an identical set is normal --
+    # the useful signal here is a member that cannot answer at all.
+    ('secrets (project)', 'resources.kubesphere.io/v1alpha3', 'secrets', True),
+    ('configmaps (project)', 'resources.kubesphere.io/v1alpha3', 'configmaps', True),
+    ('deployments (project)', 'resources.kubesphere.io/v1alpha3', 'deployments', True),
 )
 
 
@@ -566,6 +572,25 @@ def _name_set(status: int, body: str) -> set[str] | None:
     except json.JSONDecodeError:
         return None
     return {str((item.get('metadata') or {}).get('name')) for item in items}
+
+def _repo_state() -> str:
+    """HEAD and the number of modified files, so a baseline record can be attributed.
+
+    In a shared checkout a teammate's uncommitted work can break every page; without this line a
+    failing baseline looks like a defect in whatever was last committed.
+    """
+    import subprocess
+
+    def run(*args: str) -> str:
+        try:
+            return subprocess.run(args, capture_output=True, text=True, timeout=20).stdout.strip()
+        except (OSError, subprocess.SubprocessError):
+            return ''
+
+    head = run('git', 'rev-parse', '--short', 'HEAD') or 'unknown'
+    dirty = run('git', 'status', '--porcelain')
+    changed = len([line for line in dirty.splitlines() if line.strip()])
+    return f'{head} (dirty files: {changed})'
 
 def baseline(args, token: str, clusters: list[str]) -> int:
     """Everything that has to hold on a multi-cluster install, in one command.
@@ -632,7 +657,7 @@ def baseline(args, token: str, clusters: list[str]) -> int:
 
     elapsed = time.monotonic() - started
     verdict = 'PASS' if failures == 0 else 'FAIL'
-    print(f'baseline {verdict} in {elapsed:.0f}s')
+    print(f'baseline {verdict} in {elapsed:.0f}s | repo {_repo_state()}')
     return 0 if failures == 0 else 1
 
 def main() -> int:
