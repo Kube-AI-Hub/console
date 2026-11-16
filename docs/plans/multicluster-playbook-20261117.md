@@ -86,3 +86,33 @@ baseline PASS in 431s
 
 任何写检查都必须：**唯一名字 → 在目标集群与 host 两边列举 → `finally` 删除 → 复核消失**。
 只在一个集群上看列表会被乐观刷新骗过（历史事故：从 `xc` 创建的配置字典落到了 `host`）。
+## 8. 同一套基线跑单集群（B200 回归）
+
+路径改动（`clusterScoped` / `coreWritePath`）动的是**共享代码**，所以单集群环境也必须回归。同一份工具换参数即可：
+
+```bash
+cd console/tests/ui
+python3 tools/multicluster_sweep.py --env-file .env \
+  --app http://localhost:5178 --bff http://127.0.0.1:8092 \
+  --baseline --clusters host --namespace default --project default
+```
+
+B200 实测（172 秒）：
+
+```
+OK   cluster  read: 36 visits, 33 ready, 3 empty, 0 error, 0 failed requests
+OK   project  read: 17 visits, 12 ready, 5 empty, 0 error, 0 failed requests
+OK   detail   read: 6 visits, 6 ok, 0 broken
+OK   interact read: 3 lists, 3 interacted, 0 skipped, 0 broken
+OK   write    host    : created=201 on_target=True  deleted=200 gone=True
+baseline PASS in 172s
+```
+
+**单集群上 host 路径未被改动破坏**——这是所有成员集群修复的回归证据。
+
+### 一个参数坑（不是回归）
+
+第一次在 B200 上跑用了 A100 的 `--namespace public --project spaces`，写检查 `created=404`。
+B200 没有 `spaces` 这个项目，**是参数不匹配，不是代码回归**。换成 `--namespace default` 后 201。
+
+**结论**：基线参数是**环境相关**的，跑之前先确认目标环境里真实存在的命名空间。
