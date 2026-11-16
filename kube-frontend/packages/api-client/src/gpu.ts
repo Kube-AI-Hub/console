@@ -1,4 +1,5 @@
 import type { Client } from './client';
+import { clusterScoped } from './paths';
 import type { KubeObject } from './resources';
 import { toWorkloadSummary } from './workloads';
 
@@ -236,10 +237,8 @@ export function gpusApi(client: Client) {
       return toGpuStats(body);
     },
     async pods(params: { cluster: string; node: string; uuid: string; page: number; pageSize: number; keyword?: string; signal?: AbortSignal }) {
-      const podsPath =
-        params.cluster && params.cluster !== 'host' && params.cluster !== 'default'
-          ? `/kapis/resources.kubesphere.io/v1alpha3/clusters/${encodeURIComponent(params.cluster)}/pods`
-          : '/kapis/resources.kubesphere.io/v1alpha3/pods';
+      // `clusters/<id>` goes before the group: see `clusterScoped`.
+      const podsPath = clusterScoped('/kapis/resources.kubesphere.io/v1alpha3', params.cluster, 'pods');
       const body = await client.request<{ items?: KubeObject[]; totalItems?: number }>(
         podsPath, {
           query: { nodeName: params.node, gpuUuid: params.uuid, page: params.page, limit: params.pageSize,
