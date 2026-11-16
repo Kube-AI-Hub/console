@@ -9,6 +9,7 @@ import {
   type ListSchema,
   type SortOrder,
 } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api } from '@/api';
 import { formatTimestamp } from '@/lib/time';
@@ -158,6 +159,7 @@ export function FederatedProjectsPage({ workspace }: FederatedProjectsPageProps)
       search: { placeholder: t('fedprojects.list.searchPlaceholder'), aiId: 'federated-projects:search' },
       sortableKeys: ['name', 'createdAt'],
       sortAiPrefix: 'federated-projects',
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'federated-projects:columns' },
       sort: { key: list.sortBy, order: list.order },
       columns: [
         {
@@ -178,6 +180,7 @@ export function FederatedProjectsPage({ workspace }: FederatedProjectsPageProps)
         },
         {
           key: 'namespace',
+          hideable: true,
           title: t('fedprojects.field.namespace'),
           width: 200,
           hideBelow: 'md',
@@ -185,6 +188,7 @@ export function FederatedProjectsPage({ workspace }: FederatedProjectsPageProps)
         },
         {
           key: 'clusters',
+          hideable: true,
           title: t('workspace.field.clusters'),
           width: 170,
           render: (row) =>
@@ -202,6 +206,7 @@ export function FederatedProjectsPage({ workspace }: FederatedProjectsPageProps)
         },
         {
           key: 'propagated',
+          hideable: true,
           title: t('fedprojects.field.propagation'),
           width: 120,
           hideBelow: 'lg',
@@ -216,6 +221,7 @@ export function FederatedProjectsPage({ workspace }: FederatedProjectsPageProps)
         },
         {
           key: 'createdAt',
+          hideable: true,
           title: t('workspace.field.createdAt'),
           width: 170,
           hideBelow: 'xl',
@@ -294,6 +300,9 @@ export function FederatedProjectsPage({ workspace }: FederatedProjectsPageProps)
     ],
   );
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('federated-projects', columnKeys);
+
   if (state === 'error') {
     return (
       <AiSurface as="section" aiId="federated-projects:surface" state="error" className="min-w-0">
@@ -305,6 +314,8 @@ export function FederatedProjectsPage({ workspace }: FederatedProjectsPageProps)
   return (
     <AiSurface as="section" aiId="federated-projects:surface" state={state} className="min-w-0">
       <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
         schema={schema}
         rows={pageRows}
         loading={state === 'loading'}

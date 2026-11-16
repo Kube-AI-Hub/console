@@ -43,3 +43,32 @@
 
 还有 43 个多列列表没有「显示列」（集群网关、告警策略、商店管理、联邦、工作负载等）。接入方式已经固定为两步，
 每页改动约 3 处（import、schema、ResourceList props）+ 列上的 `hideable`。
+
+## 6. 第二批（同日）：告警策略 / 联邦项目 / 集群告警消息
+
+| 页面 | 可隐藏列 | 页面键 | 表格 aiId |
+| --- | --- | --- | --- |
+| 告警策略 | 4（启用/规则数/类型/创建时间） | `rule-groups` | `alertingrules:surface` |
+| 联邦项目 | 4（命名空间/集群/传播状态/创建时间） | `federated-projects` | `federated-projects:surface` |
+| 集群告警消息 | 6（摘要/状态/级别/规则组/来源/触发时间） | `cluster-alerting-messages` | 同名 |
+
+用例 `CONFIGMAPS-LIST-11` 已扩到 **7 个页面**（前四个 + 这三个），逐页验证菜单项、取消勾选后表头减一、
+持久化、刷新后保持、重置恢复，并断言名称列不在可隐藏菜单里（25.73s）。
+
+第二批踩到的两个坑：
+
+1. **hook 必须放在 schema 之后**：`columnKeys` 依赖 `schema.columns`，放在 `const state =` 之前（schema 之前）会报
+   「used before its declaration」。
+2. **surface 的 aiId 未必等于前缀**：告警策略页的 surface 是 `alertingrules:surface`，而列菜单前缀是
+   `rule-groups`；用例需要为每页单独给出 surface 前缀。
+
+## 7. 仍待接入
+
+约 40 个多列列表（集群网关 17 列、商店管理 3 张表、多集群列表、工作空间成员、JuiceFS、集群自定义监控等）。
+商店管理这类**一页多表**的页面需要为每张表分别接线，不能套用单表脚本。
+
+## 8. 回归中两条 access-control 失败（已确认非本批引入）
+
+三模块串行回归出现 2 条失败：`ACCESS_CONTROL_USERS_05`、`ACCESS_CONTROL_WORKSPACE_CONSOLE_05`（用户组名称生成的
+等待超时）。单独串行重跑这两条 **2 passed（26.15s）**，且本批没有改动访问控制相关页面——属于长跑/并发下的
+等待敏感用例，与列显隐改动无关。这与「长跑退化」的记录一致：判定按「失败单条复跑」。

@@ -5,27 +5,28 @@ from playwright.sync_api import expect
 
 pytestmark = pytest.mark.ui
 
-#: (ai prefix, route segment, storage key)
+#: (ai prefix, absolute path, storage key, hideable column to toggle)
 PAGES = (
-    ('configmaps', 'configmaps', 'configmaps'),
-    ('secrets', 'secrets', 'secrets'),
-    ('serviceaccounts', 'serviceaccounts', 'serviceaccounts'),
-    ('persistentvolumeclaims', 'persistentvolumeclaims', 'persistentvolumeclaims'),
+    ('configmaps', '/kube-frontend/system-workspace/clusters/host/projects/default/configmaps', 'configmaps', 'project', 'configmaps'),
+    ('secrets', '/kube-frontend/system-workspace/clusters/host/projects/default/secrets', 'secrets', 'project', 'secrets'),
+    ('serviceaccounts', '/kube-frontend/system-workspace/clusters/host/projects/default/serviceaccounts', 'serviceaccounts', 'project', 'serviceaccounts'),
+    ('persistentvolumeclaims', '/kube-frontend/system-workspace/clusters/host/projects/default/persistentvolumeclaims', 'persistentvolumeclaims', 'project', 'persistentvolumeclaims'),
+    ('rule-groups', '/kube-frontend/system-workspace/clusters/host/projects/default/alertingrules', 'rule-groups', 'enabled', 'alertingrules'),
+    ('federated-projects', '/kube-frontend/workspaces/system-workspace/federatedprojects', 'federated-projects', 'clusters', 'federated-projects'),
+    ('cluster-alerting-messages', '/kube-frontend/clusters/host/alerting-messages', 'cluster-alerting-messages', 'severity', 'cluster-alerting-messages'),
 )
-
-COLUMN = 'project'
-
 
 @pytest.mark.point
 def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_11(configmaps_page, screenshot):
     """TC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-11 列表显示列。"""
 
     ui = configmaps_page
-    base = ui.url.split('/configmaps')[0]
+    # `ui.url` is the project configmaps URL; strip the tail to reach the console root.
+    origin = ui.url.split('/kube-frontend/')[0]
 
-    for prefix, segment, storage in PAGES:
-        ui.page.goto(f'{base}/{segment}', wait_until='domcontentloaded')
-        surface = ui.page.locator(f'[data-ai-id="{prefix}:surface"]').last
+    for prefix, path, storage, column, surface_prefix in PAGES:
+        ui.page.goto(origin + path, wait_until='domcontentloaded')
+        surface = ui.page.locator(f'[data-ai-id="{surface_prefix}:surface"]').last
         expect(surface).to_be_visible(timeout=30_000)
         expect(surface).not_to_have_attribute('data-ai-state', 'loading', timeout=120_000)
 
@@ -40,7 +41,7 @@ def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_11(configmaps_page, screenshot):
         expect(ui.page.locator(f'[data-ai-id="{prefix}:columns:reset"]')).to_have_count(1, timeout=20_000)
         assert ui.page.locator(f'[data-ai-id="{prefix}:columns:name"]').count() == 0, '名称列不应可隐藏'
 
-        item = ui.page.locator(f'[data-ai-id="{prefix}:columns:{COLUMN}"]')
+        item = ui.page.locator(f'[data-ai-id="{prefix}:columns:{column}"]')
         if item.count() == 0:
             # A list without that column (e.g. cluster-scoped kinds) still proves the menu opened.
             ui.page.keyboard.press('Escape')
@@ -52,7 +53,7 @@ def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_11(configmaps_page, screenshot):
         assert after == before - 1, f'{prefix} 取消勾选后表头数未减少：{before} -> {after}'
 
         stored = ui.page.evaluate(f"() => localStorage.getItem('kube-frontend.columns.{storage}')")
-        assert stored is not None and COLUMN not in stored, f'{prefix} 选择未持久化：{stored}'
+        assert stored is not None and column not in stored, f'{prefix} 选择未持久化：{stored}'
 
         # The choice survives a reload.
         ui.page.reload(wait_until='domcontentloaded')

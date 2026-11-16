@@ -9,6 +9,7 @@ import {
 } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { useProjectFilter } from '@/components/projects/useProjects';
@@ -206,6 +207,7 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
       filters: [projectFilterControl, enableFilter],
       sortableKeys: ['name', 'ruleCount', 'createTime'],
       sortAiPrefix: 'alertingrules',
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'rule-groups:columns' },
       sort: { key: list.sortBy, order: list.order },
       columns: [
         {
@@ -224,6 +226,7 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
         },
         {
           key: 'enabled',
+          hideable: true,
           title: t('monitoring.column.ruleStatus'),
           width: 130,
           hideBelow: 'md',
@@ -235,6 +238,7 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
         },
         {
           key: 'ruleCount',
+          hideable: true,
           title: t('monitoring.ruleGroups.ruleCount'),
           width: 110,
           hideBelow: 'lg',
@@ -242,6 +246,7 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
         },
         {
           key: 'type',
+          hideable: true,
           title: t('monitoring.ruleGroups.type'),
           width: 110,
           hideBelow: 'lg',
@@ -253,6 +258,7 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
         },
         {
           key: 'createdAt',
+          hideable: true,
           title: t('cluster.column.createdAt'),
           width: 170,
           hideBelow: 'xl',
@@ -337,6 +343,9 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
     [canEdit, enableFilter, enabledFilter, groups.isFetching, list, permissions, projectFilter, projectFilterControl, t, total],
   );
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('rule-groups', columnKeys);
+
   const state = groups.isPending ? 'loading' : groups.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
 
   if (state === 'error') {
@@ -365,6 +374,8 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
         </p>
       ) : null}
       <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
         schema={schema}
         onRefresh={listRefresh.onRefresh}
         selectedKeys={selectedKeys}

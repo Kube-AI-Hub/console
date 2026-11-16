@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { clusterAlertMessagesApi, type ClusterAlertSummary } from '@kube-ai-hub/api-client';
 import { AiSurface, Badge, Button, Modal, ResourceList, type ListSchema } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { AlertDrillDown } from '@/pages/monitoring/AlertDrillDown';
 import { api as apiClient } from '@/api';
@@ -64,6 +65,7 @@ export function ClusterAlertingMessagesPage({ cluster }: ClusterAlertingMessages
     () => ({
       title: t('cluster.alerting.messages.title'),
       sortAiPrefix: 'cluster-alerting-messages',
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'cluster-alerting-messages:columns' },
       refresh: listRefresh.refresh,
       description: t('cluster.alerting.messages.description'),
       filters: [
@@ -94,6 +96,7 @@ export function ClusterAlertingMessagesPage({ cluster }: ClusterAlertingMessages
       columns: [
         {
           key: 'summary',
+          hideable: true,
           title: t('monitoring.column.message'),
           render: (row) => (
             /*
@@ -118,6 +121,7 @@ export function ClusterAlertingMessagesPage({ cluster }: ClusterAlertingMessages
         },
         {
           key: 'state',
+          hideable: true,
           title: t('monitoring.column.state'),
           width: 110,
           hideBelow: 'md',
@@ -129,6 +133,7 @@ export function ClusterAlertingMessagesPage({ cluster }: ClusterAlertingMessages
         },
         {
           key: 'severity',
+          hideable: true,
           title: t('monitoring.column.severity'),
           width: 100,
           hideBelow: 'lg',
@@ -136,6 +141,7 @@ export function ClusterAlertingMessagesPage({ cluster }: ClusterAlertingMessages
         },
         {
           key: 'ruleGroup',
+          hideable: true,
           title: t('monitoring.field.rule'),
           width: 160,
           hideBelow: 'lg',
@@ -143,6 +149,7 @@ export function ClusterAlertingMessagesPage({ cluster }: ClusterAlertingMessages
         },
         {
           key: 'source',
+          hideable: true,
           title: t('cluster.alerting.column.source'),
           width: 140,
           hideBelow: 'md',
@@ -150,6 +157,7 @@ export function ClusterAlertingMessagesPage({ cluster }: ClusterAlertingMessages
         },
         {
           key: 'triggeredAt',
+          hideable: true,
           title: t('monitoring.column.triggeredAt'),
           width: 200,
           hideBelow: 'xl',
@@ -175,6 +183,9 @@ export function ClusterAlertingMessagesPage({ cluster }: ClusterAlertingMessages
     [page, pageSize, query.isFetching, ruleGroup, severity, state, t, total],
   );
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('cluster-alerting-messages', columnKeys);
+
   const [detail, setDetail] = React.useState<ClusterAlertSummary | null>(null);
   const pageState = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
 
@@ -193,6 +204,8 @@ export function ClusterAlertingMessagesPage({ cluster }: ClusterAlertingMessages
   return (
     <AiSurface as="section" aiId="cluster-alerting-messages:surface" state={pageState} className="min-w-0">
       <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
         /*
          * The filter values are passed back in as controlled state. Without this the list keeps
          * its own copy and every change reports only the key that was just touched, so setting
