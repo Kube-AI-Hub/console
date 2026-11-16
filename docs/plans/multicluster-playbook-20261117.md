@@ -116,3 +116,51 @@ baseline PASS in 172s
 B200 没有 `spaces` 这个项目，**是参数不匹配，不是代码回归**。换成 `--namespace default` 后 201。
 
 **结论**：基线参数是**环境相关**的，跑之前先确认目标环境里真实存在的命名空间。
+## 9. 两条已验证的基线（2026-11-17，修复工具后）
+
+### A100（多集群：`host` + `xc`）
+
+```bash
+python3 tools/multicluster_sweep.py --env-file /tmp/a100.env \
+  --app http://localhost:5180 --bff http://127.0.0.1:8093 \
+  --baseline --clusters host,xc --namespace spaces --project spaces \
+  --allow xc:alerting-messages
+```
+
+```
+OK   cluster  read: 72 visits, 59 ready, 12 empty, 1 error(allowlisted), 0 failed requests
+OK   project  read: 34 visits, 20 ready, 13 empty, 0 error, 0 failed requests
+OK   identity read: 9 collections, 8 distinct, 1 identical, 0 suspect
+OK   detail   read: 12 visits, 12 ok, 0 broken
+OK   interact read: 6 lists, 6 interacted, 0 skipped, 0 broken
+OK   write    host / xc: 均 OK（xc 上 on_host=False）
+baseline PASS in 580s | repo 86ccd280d (dirty files: 0)
+```
+
+### B200（单集群回归）
+
+```bash
+python3 tools/multicluster_sweep.py --env-file .env \
+  --app http://localhost:5181 --bff http://127.0.0.1:8092 \
+  --baseline --clusters host --namespace default --project default
+```
+
+```
+OK   cluster  read: 36 visits, 33 ready, 3 empty, 0 error, 0 failed requests
+OK   project  read: 17 visits, 11 ready, 6 empty, 0 error, 0 failed requests
+OK   identity read: 0 collections（单集群没有可比对象，符合预期）
+OK   detail   read: 6 visits, 6 ok, 0 broken
+OK   interact read: 3 lists, 3 interacted, 0 skipped, 0 broken
+OK   write    host: created=201 on_target=True deleted=200 gone=True
+baseline PASS in 213s
+```
+
+**单集群没有回归**——所有成员集群的路径修复都没有破坏 host 行为。
+
+## 10. 已知不可用清单（`--allow`）
+
+| 集群:页面 | 原因 |
+| --- | --- |
+| `xc:alerting-messages` | 成员集群没有告警组件，聚合接口稳定 503；页面应显示「加载失败」 |
+
+清单要跟着环境更新：**新出现的 error 先查是不是环境缺失，确认后再进白名单**，不要为了绿灯而加。
