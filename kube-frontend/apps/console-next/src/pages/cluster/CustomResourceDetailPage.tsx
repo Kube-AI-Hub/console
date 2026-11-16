@@ -4,6 +4,7 @@ import { Link } from '@tanstack/react-router';
 import { customResourcesApi, type CustomResourceDetail, type CustomResourceInstance } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, ResourceList, Skeleton, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { useResourceListState } from '@/components/resource/useResourceListState';
@@ -77,6 +78,7 @@ export function CustomResourceDetailPage({ cluster, name }: CustomResourceDetail
       sortableKeys: ['name', 'createTime'],
       sortAiPrefix: 'custom-resource',
       sort: { key: list.sortBy, order: list.order },
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'custom-resource-instances:columns' },
       columns: [
         {
           key: 'name',
@@ -91,6 +93,7 @@ export function CustomResourceDetailPage({ cluster, name }: CustomResourceDetail
           ? [
               {
                 key: 'namespace',
+                hideable: true,
                 title: t('cluster.customResources.namespace'),
                 width: 180,
                 hideBelow: 'md' as const,
@@ -102,6 +105,7 @@ export function CustomResourceDetailPage({ cluster, name }: CustomResourceDetail
           : []),
         {
           key: 'createTime',
+          hideable: true,
           title: t('cluster.column.createdAt'),
           width: 170,
           hideBelow: 'lg',
@@ -127,6 +131,9 @@ export function CustomResourceDetailPage({ cluster, name }: CustomResourceDetail
     }),
     [apiPath, instances.isFetching, list.sortBy, list.order, namespaced, rows.length, t],
   );
+
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('custom-resource-instances', columnKeys);
 
   /*
    * The surface stays `loading` until the instance list settles too.
@@ -185,6 +192,8 @@ export function CustomResourceDetailPage({ cluster, name }: CustomResourceDetail
           />
         ) : (
           <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
             schema={schema}
             onRefresh={listRefresh.onRefresh}
             rows={rows}

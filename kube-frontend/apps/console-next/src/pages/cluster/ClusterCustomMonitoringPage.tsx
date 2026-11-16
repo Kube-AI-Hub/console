@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { clusterDashboardsApi, type DashboardSummary } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, ResourceList, Skeleton, type ListSchema } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -117,9 +118,11 @@ export function ClusterCustomMonitoringPage({ cluster }: ClusterCustomMonitoring
       description: t('customMonitoring.description'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'cluster-custom-monitoring:columns' },
       columns: [
         {
           key: 'title',
+          hideable: true,
           title: t('cluster.column.name'),
           render: (row) => (
             <span className="flex min-w-0 flex-col">
@@ -130,12 +133,14 @@ export function ClusterCustomMonitoringPage({ cluster }: ClusterCustomMonitoring
         },
         {
           key: 'panels',
+          hideable: true,
           title: t('customMonitoring.panels'),
           width: 120,
           render: (row) => <span className="tabular-nums text-ai-fg-secondary">{row.panels}</span>,
         },
         {
           key: 'editable',
+          hideable: true,
           title: t('customMonitoring.editable'),
           width: 120,
           hideBelow: 'md',
@@ -147,6 +152,7 @@ export function ClusterCustomMonitoringPage({ cluster }: ClusterCustomMonitoring
         },
         {
           key: 'createTime',
+          hideable: true,
           title: t('cluster.column.createdAt'),
           width: 170,
           hideBelow: 'lg',
@@ -173,6 +179,9 @@ export function ClusterCustomMonitoringPage({ cluster }: ClusterCustomMonitoring
     [openYaml, query.isFetching, t],
   );
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('cluster-custom-monitoring', columnKeys);
+
   return (
     <AiSurface as="section" aiId="custom-monitoring:surface" state={state} className="flex min-w-0 flex-col gap-4">
       <p className="text-xs text-ai-fg-muted" {...actionProps('custom-monitoring:panel-note')}>
@@ -186,6 +195,8 @@ export function ClusterCustomMonitoringPage({ cluster }: ClusterCustomMonitoring
 
       {state !== 'loading' && state !== 'error' ? (
         <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
           schema={schema}
           onRefresh={listRefresh.onRefresh}
           rows={rows}

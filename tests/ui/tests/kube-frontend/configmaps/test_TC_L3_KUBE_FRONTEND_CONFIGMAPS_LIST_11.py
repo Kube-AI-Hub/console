@@ -40,6 +40,9 @@ PAGES = (
     ('devops-projects', '/kube-frontend/clusters/host/devops', 'devops-projects', 'workspace', 'devops'),
     ('components', '/kube-frontend/clusters/host/components', 'components', 'health', 'components'),
     ('edge-nodes', '/kube-frontend/clusters/host/edgenodes', 'edge-nodes', 'status', 'edgenodes'),
+    ('canary-releases', '/kube-frontend/system-workspace/clusters/host/projects/default/grayrelease', 'canary-releases', 'type', 'grayrelease'),
+    ('cluster-resource-monitor', '/kube-frontend/clusters/host/monitor-resource', 'cluster-resource-monitor', 'cpu', 'cluster-resource-monitor'),
+    ('cluster-custom-monitoring', '/kube-frontend/clusters/host/custom-monitoring', 'cluster-custom-monitoring', 'panels', 'custom-monitoring'),
 )
 
 @pytest.mark.point

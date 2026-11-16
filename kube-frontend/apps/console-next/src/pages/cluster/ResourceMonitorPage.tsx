@@ -9,6 +9,7 @@ import {
   type ListSchema,
   type SortOrder,
 } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { useResourceListState } from '@/components/resource/useResourceListState';
 import { useClusterProjectIndex } from './useClusterProjectIndex';
@@ -185,6 +186,7 @@ export function ResourceMonitorPage({ cluster }: ResourceMonitorPageProps): Reac
     sortableKeys: ['name', 'cpu', 'memory'],
     sortAiPrefix: AI_ID,
     sort: { key: list.sortBy, order: list.order },
+    columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'cluster-resource-monitor:columns' },
     columns: [
       {
         key: 'name',
@@ -193,6 +195,7 @@ export function ResourceMonitorPage({ cluster }: ResourceMonitorPageProps): Reac
       },
       {
         key: 'namespace',
+        hideable: true,
         title: t('cluster.workloads.column.project'),
         width: 180,
         hideBelow: 'md',
@@ -200,6 +203,7 @@ export function ResourceMonitorPage({ cluster }: ResourceMonitorPageProps): Reac
       },
       {
         key: 'cpu',
+        hideable: true,
         title: t('cluster.resourceMonitor.cpu'),
         width: 140,
         render: (row) => (
@@ -210,6 +214,7 @@ export function ResourceMonitorPage({ cluster }: ResourceMonitorPageProps): Reac
       },
       {
         key: 'memory',
+        hideable: true,
         title: t('cluster.resourceMonitor.memory'),
         width: 140,
         render: (row) => (
@@ -230,7 +235,11 @@ export function ResourceMonitorPage({ cluster }: ResourceMonitorPageProps): Reac
       selected: (count) => t('table.selectedCount', { count }),
     },
     pagination: { page: list.page, pageSize: list.pageSize, pageSizeOptions: [...PAGE_SIZES], total: sorted.length },
+
   };
+
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('cluster-resource-monitor', columnKeys);
 
   if (usage.isError) {
     return (
@@ -310,6 +319,8 @@ export function ResourceMonitorPage({ cluster }: ResourceMonitorPageProps): Reac
         <TabsContent value="workloads">
           <div data-ai-id="cluster-resource-monitor:tab:workloads" className="pt-2">
             <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
               schema={schema}
               onRefresh={listRefresh.onRefresh}
               rows={pageRows}

@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { projectDashboardsApi, type DashboardSummary } from '@kube-ai-hub/api-client';
 import { AiSurface, Badge, Button, ResourceList, Skeleton, type ListSchema } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -79,9 +80,11 @@ export function ProjectCustomMonitoringPage({ namespace }: ProjectCustomMonitori
       description: t('customMonitoring.projectDescription'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'project-custom-monitoring:columns' },
       columns: [
         {
           key: 'title',
+          hideable: true,
           title: t('cluster.column.name'),
           render: (row) => (
             <span className="flex min-w-0 flex-col">
@@ -92,12 +95,14 @@ export function ProjectCustomMonitoringPage({ namespace }: ProjectCustomMonitori
         },
         {
           key: 'panels',
+          hideable: true,
           title: t('customMonitoring.panels'),
           width: 120,
           render: (row) => <span className="tabular-nums text-ai-fg-secondary">{row.panels}</span>,
         },
         {
           key: 'editable',
+          hideable: true,
           title: t('customMonitoring.editable'),
           width: 120,
           hideBelow: 'md',
@@ -109,6 +114,7 @@ export function ProjectCustomMonitoringPage({ namespace }: ProjectCustomMonitori
         },
         {
           key: 'createTime',
+          hideable: true,
           title: t('cluster.column.createdAt'),
           width: 170,
           hideBelow: 'lg',
@@ -132,6 +138,9 @@ export function ProjectCustomMonitoringPage({ namespace }: ProjectCustomMonitori
     [openYaml, query.isFetching, t],
   );
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('project-custom-monitoring', columnKeys);
+
   return (
     <AiSurface as="section" aiId="project-custom-monitoring:surface" state={state} className="flex min-w-0 flex-col gap-4">
       {state === 'loading' ? <Skeleton className="h-40 w-full" /> : null}
@@ -142,6 +151,8 @@ export function ProjectCustomMonitoringPage({ namespace }: ProjectCustomMonitori
       {state === 'ready' ? (
         <div data-ai-id="project-custom-monitoring:table" className="min-w-0">
           <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
             schema={schema}
             onRefresh={listRefresh.onRefresh}
             rows={rows}

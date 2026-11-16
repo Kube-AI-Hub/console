@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { strategiesApi, type StrategySummary } from '@kube-ai-hub/api-client';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { useResourceListState } from '@/components/resource/useResourceListState';
@@ -78,6 +79,7 @@ export function CanaryReleasesPage({ workspace, cluster, namespace }: CanaryRele
       sortableKeys: ['name', 'createTime'],
       sortAiPrefix: 'grayrelease',
       sort: { key: list.sortBy, order: list.order },
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'canary-releases:columns' },
       columns: [
         {
           key: 'name',
@@ -98,18 +100,21 @@ export function CanaryReleasesPage({ workspace, cluster, namespace }: CanaryRele
         },
         {
           key: 'type',
+          hideable: true,
           title: t('grayRelease.column.type'),
           width: 150,
           render: (row) => <Badge tone={row.type === 'Canary' ? 'info' : 'neutral'}>{typeText(t, row.type)}</Badge>,
         },
         {
           key: 'targetService',
+          hideable: true,
           title: t('grayRelease.column.targetService'),
           width: 180,
           render: (row) => <span className="truncate font-mono text-[11px] text-ai-fg-secondary">{row.targetService || '-'}</span>,
         },
         {
           key: 'versions',
+          hideable: true,
           title: t('grayRelease.column.versions'),
           width: 150,
           hideBelow: 'lg',
@@ -129,6 +134,7 @@ export function CanaryReleasesPage({ workspace, cluster, namespace }: CanaryRele
         },
         {
           key: 'status',
+          hideable: true,
           title: t('grayRelease.column.status'),
           width: 120,
           render: (row) => (
@@ -140,6 +146,7 @@ export function CanaryReleasesPage({ workspace, cluster, namespace }: CanaryRele
         },
         {
           key: 'createdAt',
+          hideable: true,
           title: t('grayRelease.column.createdAt'),
           width: 170,
           hideBelow: 'xl',
@@ -173,6 +180,9 @@ export function CanaryReleasesPage({ workspace, cluster, namespace }: CanaryRele
     [cluster, createPermission.denied, list.sortBy, list.order, namespace, query.isFetching, rows.length, t, workspace],
   );
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('canary-releases', columnKeys);
+
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
 
   if (state === 'error') {
@@ -190,6 +200,8 @@ export function CanaryReleasesPage({ workspace, cluster, namespace }: CanaryRele
           the surface it sits in. */}
       <div data-ai-id="grayrelease:list" className="min-w-0">
         <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
           schema={schema}
           onRefresh={listRefresh.onRefresh}
           rows={rows}
