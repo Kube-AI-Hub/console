@@ -8,6 +8,7 @@ export const Route = createFileRoute('/kube-frontend/$workspace/clusters/$cluste
 });
 
 function projectApplicationDetailRoute(): React.ReactElement {
-  const { workspace, releaseId } = Route.useParams();
-  return <InstalledAppDetailPage workspace={workspace} releaseId={releaseId} />;
+  const { workspace, cluster, releaseId } = Route.useParams();
+  // The cluster is needed by the 资源 tab: resource reads are scoped to it.
+  return <InstalledAppDetailPage workspace={workspace} releaseId={releaseId} cluster={cluster} />;
 }
