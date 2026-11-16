@@ -3,6 +3,8 @@ from __future__ import annotations
 import pytest
 from playwright.sync_api import expect
 
+from helpers.reads import ReadError
+
 pytestmark = pytest.mark.ui
 
 PVS = "/api/v1/persistentvolumes"
@@ -17,8 +19,10 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_PERSISTENT_VOLUMES_01(cluster_ma
 
     # PERFORMANCE: ~24s here (the kapis proxy needs 63s for the same list).
     status, body = ui.api.request("GET", PVS, timeout=180)
+    if status in (401, 403):
+        pytest.skip(f"当前账号无权读取持久卷（HTTP {status}）")
     if status != 200:
-        pytest.skip(f"无法读取持久卷（{status}）")
+        raise ReadError(f"持久卷读取失败：HTTP {status} — {repr(body)[:300]}")
     volumes = body.get("items") or []
     if not volumes:
         pytest.skip("集群没有持久卷，无法核对列表")

@@ -18,10 +18,15 @@ class ReadError(AssertionError):
     """The API did not answer with a usable list. Fails the case instead of skipping it."""
 
 
-def read_list(api: Any, path: str, what: str) -> list[Any]:
-    """`GET path` and return `items`, or raise `ReadError` if the API did not answer."""
+def read_list(api: Any, path: str, what: str, timeout: float = 30, attempts: int = 2) -> list[Any]:
+    """`GET path` and return `items`, or raise `ReadError` if the API did not answer.
 
-    status, body = api.request("GET", path)
+    `timeout` is explicit because this cluster's list endpoints scale with object count rather
+    than payload size: the cluster-wide CRD list takes over a minute through the kapis proxy,
+    which the default 30s would turn into a timeout that looks like a broken endpoint.
+    """
+
+    status, body = api.request("GET", path, timeout=timeout, attempts=attempts)
     if status != 200:
         excerpt = repr(body)[:300]
         raise ReadError(f"{what} 读取失败：HTTP {status} — {excerpt}")

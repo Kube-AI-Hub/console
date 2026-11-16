@@ -3,6 +3,8 @@ from __future__ import annotations
 import pytest
 from playwright.sync_api import expect
 
+from helpers.reads import ReadError
+
 pytestmark = pytest.mark.ui
 
 KAPIS = "/kapis/resources.kubesphere.io/v1alpha3"
@@ -25,8 +27,14 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_CONFIG_01(cluster_manage
 
     for segment, ai_id, expected_headers in PAGES:
         status, body = ui.api.request("GET", f"{KAPIS}/{segment}?limit=20&page=1")
-        if status != 200 or not isinstance(body, dict):
-            pytest.skip(f"无法读取跨项目 {segment}")
+        if status in (401, 403):
+            # A permission answer is a real "cannot verify here"; anything else is a broken read
+            # and must fail rather than skip, or an outage reads as "this cluster has nothing".
+            pytest.skip(f"当前账号无权读取跨项目 {segment}（HTTP {status}）")
+        if status != 200:
+            raise ReadError(f"跨项目 {segment} 读取失败：HTTP {status} — {repr(body)[:300]}")
+        if not isinstance(body, dict):
+            raise ReadError(f"跨项目 {segment} 读取失败：响应不是对象 — {type(body).__name__}")
         items = body.get("items") or []
         total = int(body.get("totalItems") or len(items))
         if not items:

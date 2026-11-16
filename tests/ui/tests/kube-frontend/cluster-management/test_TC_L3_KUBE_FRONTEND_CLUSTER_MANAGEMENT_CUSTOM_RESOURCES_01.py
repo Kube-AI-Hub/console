@@ -12,7 +12,9 @@ CRDS = "/apis/apiextensions.k8s.io/v1/customresourcedefinitions"
 
 def _crds(api) -> list[dict]:
     """Read every item, failing the case if the read itself fails."""
-    return read_list(api, f"{CRDS}?limit=-1", "CRD 列表")
+    # The cluster-wide CRD list is the slowest read here: over a minute through the kapis proxy,
+    # and several megabytes of JSON, so give it room instead of reporting a timeout as breakage.
+    return read_list(api, f"{CRDS}?limit=-1", "CRD 列表", timeout=240)
 
 
 @pytest.mark.point

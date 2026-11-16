@@ -13,15 +13,17 @@ class FakeApi:
         self.body = body
         self.calls: list[str] = []
 
-    def request(self, method: str, path: str):
-        self.calls.append(f'{method} {path}')
+    def request(self, method: str, path: str, **kwargs):
+        # The real client takes timeout/attempts; record them so the calls stay inspectable.
+        self.calls.append(f'{method} {path} {sorted(kwargs)}' if kwargs else f'{method} {path}')
+        self.kwargs = kwargs
         return self.status, self.body
 
 
 def test_returns_the_items_when_the_api_answers():
     api = FakeApi(200, {'items': [{'metadata': {'name': 'a'}}]})
     assert read_list(api, '/x', '对象') == [{'metadata': {'name': 'a'}}]
-    assert api.calls == ['GET /x']
+    assert api.calls and api.calls[0].startswith('GET /x')
 
 
 def test_returns_an_empty_list_when_there_really_is_nothing():

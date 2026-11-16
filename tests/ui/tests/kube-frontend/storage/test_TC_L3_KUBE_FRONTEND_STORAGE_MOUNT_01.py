@@ -3,6 +3,8 @@ from __future__ import annotations
 import pytest
 from playwright.sync_api import expect
 
+from helpers.reads import ReadError
+
 pytestmark = pytest.mark.ui
 
 PODS = "/api/v1/namespaces/csghub/pods"
@@ -28,8 +30,10 @@ def test_TC_L3_KUBE_FRONTEND_STORAGE_MOUNT_01(kube_storage_page, screenshot):
             continue
         if status == 200:
             break
+    if status in (401, 403):
+        pytest.skip(f"当前账号无权读取项目内的容器组（HTTP {status}），挂载状态无法核对")
     if status != 200:
-        pytest.skip(f"无法读取项目内的容器组（{status}），挂载状态无法核对")
+        raise ReadError(f"项目内容器组读取失败：HTTP {status} — {repr(body)[:300]}")
     mounted: set[str] = set()
     for pod in body.get("items") or []:
         for volume in ((pod.get("spec") or {}).get("volumes") or []):
