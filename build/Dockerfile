@@ -16,6 +16,14 @@ WORKDIR /kubesphere
 # npm registry mirror for fast install in China
 RUN yarn config set registry https://registry.npmmirror.com
 
+# Cypress is a devDependency used only by `yarn test:e2e`; its postinstall
+# downloads a browser from download.cypress.io, which is unreachable from
+# several build networks (and hangs the install instead of failing). Nothing in
+# the console image needs it, so skip the binary download by default. Override
+# with --build-arg CYPRESS_INSTALL_BINARY= when an image must ship Cypress.
+ARG CYPRESS_INSTALL_BINARY=0
+ENV CYPRESS_INSTALL_BINARY=${CYPRESS_INSTALL_BINARY}
+
 # Install dependencies to reduce build time
 ADD package.json /kubesphere/package.json
 ADD yarn.lock /kubesphere/yarn.lock
