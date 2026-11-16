@@ -183,3 +183,24 @@ OK   xc     services/<none>                              state=empty errors=0
 ```
 
 **12 次详情页访问，0 条失败请求。**
+## 11. 完整基线（读 + 详情 + 写）最终结果
+
+把详情页并入基线后，A100 实测：
+
+```
+OK   cluster  read: 72 visits, 72 ready, 0 empty, 0 error, 0 failed requests
+OK   project  read: 34 visits, 31 ready, 3 empty, 0 error, 0 failed requests
+OK   detail   read: 12 visits, 12 ok, 0 broken
+OK   write    host    : created=201 on_target=True  deleted=200 gone=True
+OK   write    xc      : created=201 on_target=True on_host=False deleted=200 gone=True
+baseline PASS in 252s
+```
+
+**118 次页面访问 + 2 次写入，252 秒，0 失败请求**；跑完两集群 `tc-*` Ingress 均为空。
+
+### 并入详情页时又抓到一处
+
+`xc` 的 JuiceFS 页报 404：`/kapis/resources.kubesphere.io/v1alpha3/clusters/xc/persistentvolumes` ——
+`pages/cluster/juicefsQueries.ts` 里还留着一份手拼的旧位置。改用 `clusterScoped` 后该页 `state=empty, errors=0`。
+
+这是「同一根因的第 N 份副本」：api-client 里清完后，**页面目录里还有一份**。以后清理这类问题要同时扫 `apps/` 与 `packages/`。

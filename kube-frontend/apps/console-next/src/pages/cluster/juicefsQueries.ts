@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { rangeMetricsApi, type MetricSeries } from '@kube-ai-hub/api-client';
+import { clusterScoped, rangeMetricsApi, type MetricSeries } from '@kube-ai-hub/api-client';
 import type { Translate } from '@kube-ai-hub/locales';
 import { api as apiClient } from '@/api';
 
@@ -155,7 +155,7 @@ export function useJuiceFSPersistentVolumes(cluster: string) {
     queryFn: async ({ signal }) => {
       const path =
         cluster && cluster !== 'host'
-          ? '/kapis/resources.kubesphere.io/v1alpha3/clusters/' + encodeURIComponent(cluster) + '/persistentvolumes'
+          ? clusterScoped('/kapis/resources.kubesphere.io/v1alpha3', cluster, 'persistentvolumes')
           : '/kapis/resources.kubesphere.io/v1alpha3/persistentvolumes';
       const body = await apiClient.request<{
         items?: Array<{ metadata?: { name?: string; creationTimestamp?: string }; status?: { phase?: string } }>;
