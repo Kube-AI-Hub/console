@@ -73,6 +73,39 @@ OK   write    host / xc: 均 OK
 也就是说 `alerting-messages` 页走的项目级集合在成员集群上同样不可用；而页面仍显示 `ready`，
 说明它拿到的数据来自 host。
 
-**结论（本轮未完成）**：告警路径的集群化还没做到位——`alertMessagesApi` 虽然加了 `cluster` 参数，
-但页面调用链上还有一处没把集群传下去（或传了 `host`）。下一轮从页面 → hook → api 逐层核对参数，
-并用「成员集合 503 时页面必须是 error」作为验收条件。
+### 更正：修复其实生效了，是巡检工具读错了页面
+
+下一轮用**定点探针**（不复用巡检工具）复测同一页面，结论相反：
+
+```
+REQ /kapis/clusters/xc/alerting.kubesphere.io/v2beta1/clusteralerts?limit=20&page=1&sortBy=activeAt…
+REQ /kapis/clusters/xc/alerting.kubesphere.io/v2beta1/globalalerts?limit=20&page=1&sortBy=activeAt…
+state: error   rows= 0
+```
+
+页面**确实**请求成员集群的路径，并且因为成员返回 503 而进入 `error` —— **修复是生效的**。
+
+同一页面在同一构建上的三种测法给出三种结果：
+
+| 测法 | 结果 |
+| --- | --- |
+| 定点探针（直接 `goto` 后等 8–12 秒） | **error**，body 1263 字符 |
+| 巡检工具 `--pages alerting-messages` | `ready`，rows 0 |
+| 巡检工具同一 URL 打 `nodes` | `ready`，rows 0（而定点探针是 7 行） |
+
+即：**巡检工具在该环境下读到的是一张空白页**，把「空白」当成了 `ready`。这是工具缺陷，不是产品缺陷。
+上一轮据此写下的「修复没做到位」结论**已作废**。
+
+### 工具缺陷（未修，已记录）
+
+同一 URL、同一浏览器参数，`sweep()` 拿到的 `document.body.innerText` 只有 19 字符，而定点探针是 1263。
+推测与「写入 token 与 SPA 启动的竞态」有关：输了竞态就停在登录页/空白页，而巡检仍按 `ready` 记账。
+
+尝试过的修法（均未验证成功，已回滚，避免把未验证的改动留在仓库里）：
+
+1. 状态稳定 6 秒再取值；
+2. 要求「`ready` 且行数 > 0」或 `empty`/`error` 才算终态；
+3. body 少于 100 字符时 reload 一次，仍空则记 `blank`。
+
+**当前处置**：工具回滚到 HEAD 版本；多集群结论**以定点探针为准**，`--baseline` 的 `rows` 列暂不可信，
+`state/errors` 列在空白页场景下也不可信。下一轮先修这个竞态（例如登录后等 `/api/session/me` 返回 200 再导航）。
