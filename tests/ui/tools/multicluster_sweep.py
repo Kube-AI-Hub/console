@@ -158,8 +158,14 @@ def sweep(
         page = context.new_page()
         _open_app(page, app, token)
 
+        visited = 0
         for cluster in clusters:
             for segment in pages:
+                visited += 1
+                if visited > 1 and visited % 15 == 0:
+                    # Re-seed periodically: one 401 anywhere signs the app out, and every page after
+                    # that measures the login screen instead of the page.
+                    _open_app(page, app, token)
                 failures: list[tuple[int, str]] = []
 
                 def record(response, sink=failures):
@@ -545,6 +551,20 @@ def sweep_interactions(
 
 #: Collections compared across clusters to catch "the page rendered, but with another cluster's data".
 #: (label, kapis group/version, resource, namespaced)
+#: Which page shows each identity collection; used to tell "the page errors *because* the member
+#: cannot answer" (consistent) from "the page renders data it should not have" (a defect).
+IDENTITY_PAGE = {
+    'nodes': 'nodes',
+    'storageclasses': 'storageclasses',
+    'namespaces': 'namespaces',
+    'persistentvolumes': 'persistentvolumes',
+    'cluster alerts': 'alerting-messages',
+    'alert rule groups': 'alerting-policies',
+    'secrets (project)': 'secrets',
+    'configmaps (project)': 'configmaps',
+    'deployments (project)': 'deployments',
+}
+
 IDENTITY_RESOURCES = (
     ('nodes', 'resources.kubesphere.io/v1alpha3', 'nodes', False),
     ('storageclasses', 'resources.kubesphere.io/v1alpha3', 'storageclasses', False),
@@ -625,7 +645,7 @@ def _repo_state() -> str:
     changed = len([line for line in dirty.splitlines() if line.strip()])
     return f'{head} (dirty files: {changed})'
 
-def baseline(args, token: str, clusters: list[str]) -> int:
+def baseline(args, token: str, clusters: list[str], allowed: set[str] | None = None) -> int:
     """Everything that has to hold on a multi-cluster install, in one command.
 
     Two read sweeps (cluster-scoped and project-scoped) plus the write-landing check. Prints one
@@ -633,12 +653,13 @@ def baseline(args, token: str, clusters: list[str]) -> int:
     """
     import time
 
+    allowed = allowed or set()
     started = time.monotonic()
     failures = 0
 
     for scope, pages in (('cluster', PAGES), ('project', PROJECT_PAGES)):
         rows = sweep(args.app, token, clusters, pages, scope, args.workspace, args.project)
-        broken = [row for row in rows if row['state'] == 'error']
+        broken = [row for row in rows if row['state'] == 'error' and f"{row['cluster']}:{row['page']}" not in allowed]
         noisy = [row for row in rows if row['errors']]
         failures += len(broken)
         ready = sum(1 for row in rows if row['state'] == 'ready')
@@ -650,7 +671,11 @@ def baseline(args, token: str, clusters: list[str]) -> int:
             print(f"       {row['cluster']} {row['page']}: {row['state']} {row['errors'][:1]}")
 
     identity = data_identity(args.bff, token, clusters, args.project)
-    suspects = [f for f in identity if f['verdict'] == 'SUSPECT']
+    suspects = [
+        f for f in identity
+        if f['verdict'] == 'SUSPECT'
+        and f"{f['cluster']}:{IDENTITY_PAGE.get(f['label'], '')}" not in allowed
+    ]
     identical = [f for f in identity if f['verdict'] == 'IDENTICAL']
     failures += len(suspects)
     identity_flag = 'OK  ' if not suspects else 'FAIL'
@@ -706,6 +731,7 @@ def main() -> int:
     parser.add_argument('--out', default='')
     parser.add_argument('--write-check', action='store_true', help='prove a grouped write lands on the right cluster')
     parser.add_argument('--namespace', default='spaces')
+    parser.add_argument('--allow', default='', help='cluster:page pairs that are known to be unavailable on that cluster')
     parser.add_argument('--baseline', action='store_true', help='run read sweeps (both scopes) and the write check')
     parser.add_argument('--details', action='store_true', help='also visit one detail page per kind per cluster')
     parser.add_argument('--interactions', action='store_true', help='sort and search the list on each cluster')
@@ -756,8 +782,10 @@ def main() -> int:
             print(f"{flag} {row['cluster']:6s} {row['page'][:44]:44s} state={row['state']:8s} errors={len(noisy)}")
         return 1 if bad else 0
 
+    allowed = {entry.strip() for entry in args.allow.split(',') if entry.strip()}
+
     if args.baseline:
-        return baseline(args, token, clusters)
+        return baseline(args, token, clusters, allowed)
 
     if args.write_check:
         bad = 0
