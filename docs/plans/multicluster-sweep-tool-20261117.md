@@ -429,3 +429,34 @@ OK   deployments (project) xc host=200/36 member=200/1
 
 项目级三个集合**同名项目在两个集群上内容不同**，且成员页显示的是成员自己的数量——
 这从数据侧证明项目级读取确实按集群隔离。
+## 21. 在「已知良好提交」上验证：独立 worktree
+
+共享检出里别人未提交的改动可以让整站不可用（见上一节）。这时**不要**去改他们的文件，也不要回滚——
+从 HEAD 建一个独立 worktree，用它的构建继续验证：
+
+```bash
+cd console
+git worktree add --detach /tmp/kfh HEAD
+
+# 三处软链，让 worktree 复用已安装的依赖与已构建的 ai-kit 产物
+ln -s $PWD/node_modules /tmp/kfh/node_modules
+ln -s $PWD/kube-frontend/node_modules /tmp/kfh/kube-frontend/node_modules
+ln -s $PWD/packages/ai-kit/dist /tmp/kfh/packages/ai-kit/dist
+
+cd /tmp/kfh/kube-frontend/apps/console-next && npx vite build
+cd $PWD/console/kube-frontend && node scripts/dev-static-server.mjs \
+  /tmp/kfh/kube-frontend/apps/console-next/dist 5180 http://127.0.0.1:8093
+```
+
+要点：
+
+| 坑 | 说明 |
+| --- | --- |
+| `tailwind.config.cjs` 里 `require('../../../packages/ai-kit/dist/tailwind.preset.js')` | 指向的是**仓库根**的 `console/packages/ai-kit/dist`，不是 `kube-frontend/packages`；worktree 里没有构建产物，必须软链 |
+| `class-variance-authority` 解析失败 | 软链仓库根 `node_modules` 后才通 |
+| 端口 | 用 5180，与工作区的 5178/5179 分开，互不干扰 |
+
+验证结果：`/clusters/xc/nodes` → `ready`/7 行，`/clusters/host/nodes` → `ready`/3 行。
+**同一时刻工作区那份构建是所有列表页 error**——这就把「缺陷来自未提交改动」从推测变成了证据。
+
+**代价**：一次 worktree 检出 + 一次构建（约 5 秒），远小于等待或猜测的时间。
