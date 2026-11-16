@@ -49,6 +49,8 @@
 | C20 | **断言要区分「对谁有意义」**：跨集群断言在 host 上恒真/恒假 | write-check 第一版对 host 也断言 on_host=False，必然 FAIL |
 | C21 | **把多条检查合成一条带退出码的基线**，才可能被反复执行 | 读巡检 + 写检查分散时，每轮都要手工拼命令；合成 `--baseline` 后一条命令覆盖 106 次访问 |
 | C22 | **基线要滤掉已知噪声，但只滤「握手」与「一次性抖动」**：认证 401 过滤，5xx 重试一次 | `session/me` 的 401 与 `configz` 的一次 503 都曾把整条基线判成 FAIL |
+| C23 | **清理一类缺陷要同时扫 `apps/` 与 `packages/`** | api-client 清完后，`pages/cluster/juicefsQueries.ts` 里还留着一份手拼的旧位置 |
+| C24 | **每扩一档覆盖面就会暴露新缺陷**：列表 → 深度页 → 详情页，每一档都抓到至少一处 | 深度页抓到 metrics 路径、详情页抓到 workloadPath、JuiceFS 页抓到 persistentvolumes |
 
 ## D. 提交
 
