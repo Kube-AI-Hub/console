@@ -307,3 +307,20 @@ useMemo 的参数列表（`tsc` 立刻报 `Argument expression expected`）。�
 ① 上轮两条复核；② 在 `CONFIGMAPS-LIST-11` 用例中为 `gpu-pods`、`node-usage`、`installed-app-resources`、
 `workspace-repo-events`、`workspace-app-versions`、`workspace-app-instances` 六个键补页面（这些页面多数在
 详情/面板内，需要先准备数据）。
+
+## 28. 链路故障的定位记录（2026-11-16 15:20–15:50）
+
+为了把「环境坏」与「用例坏」分开，做了逐层探测：
+
+| 探测 | 结果 | 结论 |
+| --- | --- | --- |
+| `ssh sgb000 'echo ok'` | 有时 ok、有时 `Connection timed out during banner exchange` | 跳板机偶发不可达 |
+| 跳板机内 `curl https://172.16.10.20:30880` | 000（0.003s，立即失败） | 远端 API 侧也不稳 |
+| 本地隧道端口 `curl http://127.0.0.1:18088/` | 间歇 200 / 000（8s 超时） | 隧道时好时坏 |
+| BFF 直连 `/api/session/login` | 健康时 400（错误凭据，符合预期）；故障时 25s 超时 | BFF 本身无问题 |
+| 经静态站 `/api/session/login` | 与 BFF 同结果 | 静态站代理无问题 |
+
+**结论：故障点在 B200 侧的 SSH 跳板机与远端 K8s API，不在本地栈。** 重建本地栈（隧道/BFF/静态站）后仍然间歇失败，
+与「长跑退化」记录中的上游假设一致。
+
+另：本轮后期沙箱收紧，`ps` 被拒绝（`/bin/ps: Operation not permitted`），后续排查改用 `lsof`/`curl`/`git`。
