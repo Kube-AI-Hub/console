@@ -361,3 +361,34 @@ node scripts/dev-static-server.mjs apps/console-next/dist 5179 http://127.0.0.1:
 
 并行线改动后，列表工具栏的 ai-id 句柄在本轮末尾不再命中（请求有发出、`acted` 全 False）。
 六项交互的全绿结果来自**并行线改动之前**（见上节）。下一轮要在当前构建上重新对齐句柄并复跑。
+## 18. 数据归属检查（`--data-identity`）
+
+前面所有检查都有一个共同盲点：**页面渲染成功、有数据，但数据不是这个集群的**。
+告警列表就踩过这个坑——`xc` 的页面上显示的是 host 的 71 条，而 `state/rows/errors` 三项全绿。
+
+```bash
+python3 tools/multicluster_sweep.py --env-file /tmp/a100.env --data-identity --clusters host,xc
+```
+
+对每个集合分别在 host 与成员上取一次，判定：
+
+| 判定 | 含义 |
+| --- | --- |
+| `OK` | 两边都 200，且名称集合不同 |
+| `WARN IDENTICAL` | 两边都 200，名称集合相同——可能合理（如都只有 `default`），需人工判断 |
+| **`SUSPECT`** | **host 200 而成员非 200**：成员页面上任何数据都只能来自 host |
+
+A100 实测：
+
+```
+OK   nodes              xc  host=200/3  member=200/7
+OK   storageclasses     xc  host=200/3  member=200/5
+OK   namespaces         xc  host=200/34 member=200/53
+FAIL cluster alerts     xc  host=200/1  member=503/None
+WARN alert rule groups  xc  host=200/0  member=200/0
+```
+
+`cluster alerts` 的 SUSPECT **独立复现了上一轮修掉的告警缺陷**：成员集群的聚合接口 503，
+而 host 正常——这就是「页面显示 host 数据」的充分条件。
+
+该检查已并入 `--baseline`（第五段），`SUSPECT` 计为失败，`IDENTICAL` 只告警。

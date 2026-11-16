@@ -510,6 +510,63 @@ def sweep_interactions(
         browser.close()
     return results
 
+#: Collections compared across clusters to catch "the page rendered, but with another cluster's data".
+#: (label, kapis group/version, resource, namespaced)
+IDENTITY_RESOURCES = (
+    ('nodes', 'resources.kubesphere.io/v1alpha3', 'nodes', False),
+    ('storageclasses', 'resources.kubesphere.io/v1alpha3', 'storageclasses', False),
+    ('namespaces', 'resources.kubesphere.io/v1alpha3', 'namespaces', False),
+    ('cluster alerts', 'alerting.kubesphere.io/v2beta1', 'globalalerts', False),
+    ('alert rule groups', 'alerting.kubesphere.io/v2beta1', 'rulegroups', False),
+)
+
+
+def data_identity(bff: str, token: str, clusters: list[str], namespace: str) -> list[dict]:
+    """Compare each collection between the host and every member.
+
+    A page that renders rows is not proof the data belongs to the cluster being viewed: a hardcoded
+    host path renders happily on a member. The signature is *the member's collection is unavailable
+    while the host's is not* -- then any data on that member page came from the host.
+    """
+    findings: list[dict] = []
+    for label, group, resource, namespaced in IDENTITY_RESOURCES:
+        ns = f'namespaces/{namespace}/' if namespaced else ''
+        host_path = f'/kapis/{group}/{ns}{resource}?limit=-1'
+        host_status, host_body = _call(bff, token, 'GET', host_path)
+        host_names = _name_set(host_status, host_body)
+        for cluster in clusters:
+            if cluster == 'host':
+                continue
+            member_path = f'/kapis/clusters/{cluster}/{group}/{ns}{resource}?limit=-1'
+            status, body = _call(bff, token, 'GET', member_path)
+            member_names = _name_set(status, body)
+            if status != 200 and host_status == 200:
+                verdict = 'SUSPECT'
+            elif member_names is not None and member_names == host_names:
+                verdict = 'IDENTICAL'
+            else:
+                verdict = 'OK'
+            findings.append({
+                'label': label,
+                'cluster': cluster,
+                'host_status': host_status,
+                'member_status': status,
+                'host_count': None if host_names is None else len(host_names),
+                'member_count': None if member_names is None else len(member_names),
+                'verdict': verdict,
+            })
+    return findings
+
+
+def _name_set(status: int, body: str) -> set[str] | None:
+    if status != 200:
+        return None
+    try:
+        items = json.loads(body).get('items') or []
+    except json.JSONDecodeError:
+        return None
+    return {str((item.get('metadata') or {}).get('name')) for item in items}
+
 def baseline(args, token: str, clusters: list[str]) -> int:
     """Everything that has to hold on a multi-cluster install, in one command.
 
@@ -533,6 +590,15 @@ def baseline(args, token: str, clusters: list[str]) -> int:
         print(f'{flag} {scope:8s} read: {len(rows)} visits, {ready} ready, {empty} empty, {len(broken)} error, {failed_requests} failed requests')
         for row in (broken + noisy)[:5]:
             print(f"       {row['cluster']} {row['page']}: {row['state']} {row['errors'][:1]}")
+
+    identity = data_identity(args.bff, token, clusters, args.project)
+    suspects = [f for f in identity if f['verdict'] == 'SUSPECT']
+    identical = [f for f in identity if f['verdict'] == 'IDENTICAL']
+    failures += len(suspects)
+    identity_flag = 'OK  ' if not suspects else 'FAIL'
+    print(f'{identity_flag} identity read: {len(identity)} collections, {len(identity) - len(suspects) - len(identical)} distinct, {len(identical)} identical, {len(suspects)} suspect')
+    for finding in suspects[:5]:
+        print(f"       {finding['label']} @ {finding['cluster']}: host={finding['host_status']} member={finding['member_status']}")
 
     detail_rows = sweep_details(args.app, args.bff, token, clusters, args.workspace, args.project)
     detail_broken = [row for row in detail_rows if row['state'] == 'error' or row['errors']]
@@ -585,6 +651,7 @@ def main() -> int:
     parser.add_argument('--baseline', action='store_true', help='run read sweeps (both scopes) and the write check')
     parser.add_argument('--details', action='store_true', help='also visit one detail page per kind per cluster')
     parser.add_argument('--interactions', action='store_true', help='sort and search the list on each cluster')
+    parser.add_argument('--data-identity', action='store_true', help="compare each collection between host and members")
     args = parser.parse_args()
 
     env = _env(args.env_file)
@@ -592,6 +659,15 @@ def main() -> int:
     default_pages = PROJECT_PAGES if args.scope == 'project' else PAGES
     pages = tuple(p.strip() for p in args.pages.split(',') if p.strip()) or default_pages
     clusters = [c.strip() for c in args.clusters.split(',') if c.strip()]
+
+    if args.data_identity and not args.baseline:
+        findings = data_identity(args.bff, token, clusters, args.project)
+        bad = 0
+        for f in findings:
+            flag = {'SUSPECT': 'FAIL', 'IDENTICAL': 'WARN', 'OK': 'OK  '}[f['verdict']]
+            bad += 1 if f['verdict'] == 'SUSPECT' else 0
+            print(f"{flag} {f['label']:18s} {f['cluster']:6s} host={f['host_status']}/{f['host_count']} member={f['member_status']}/{f['member_count']}")
+        return 1 if bad else 0
 
     if args.interactions and not args.baseline:
         rows = sweep_interactions(args.app, token, clusters, args.workspace, args.project)
