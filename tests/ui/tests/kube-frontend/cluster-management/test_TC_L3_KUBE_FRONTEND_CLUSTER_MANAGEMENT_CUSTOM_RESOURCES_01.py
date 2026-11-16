@@ -3,18 +3,33 @@ from __future__ import annotations
 import pytest
 from playwright.sync_api import expect
 
-from helpers.reads import read_list
+from helpers.reads import ReadError, read_list
 
 pytestmark = pytest.mark.ui
 
 CRDS = "/apis/apiextensions.k8s.io/v1/customresourcedefinitions"
 
 
-def _crds(api) -> list[dict]:
-    """Read every item, failing the case if the read itself fails."""
-    # The cluster-wide CRD list is the slowest read here: over a minute through the kapis proxy,
-    # and several megabytes of JSON, so give it room instead of reporting a timeout as breakage.
-    return read_list(api, f"{CRDS}?limit=-1", "CRD 列表", timeout=240)
+def _crd_sample(api, count: int = 20) -> list[dict]:
+    """A cheap sample of CRDs, used to pick a target kind and scope."""
+    return read_list(api, f"{CRDS}?limit={count}", "CRD 列表", timeout=120, attempts=1)
+
+
+def _crd_total(api) -> int:
+    """How many CRDs exist, read from one small request.
+
+    The page under test asks for `limit=-1`, so its row count must equal this total -- that is the
+    assertion's whole point. Fetching the full set here to compare against would cost several
+    megabytes and minutes (measured: over 240s through the kapis proxy), which is why the total
+    is read from `limit=1` + `metadata.remainingItemCount` instead: same number, ~1.2s.
+    """
+    status, body = api.request("GET", f"{CRDS}?limit=1", timeout=120, attempts=1)
+    if status != 200:
+        raise ReadError(f"CRD 列表读取失败：HTTP {status} — {repr(body)[:300]}")
+    items = (body or {}).get("items") or []
+    remaining = ((body or {}).get("metadata") or {}).get("remainingItemCount")
+    # A cluster small enough to answer in one page has no `remainingItemCount`.
+    return len(items) if remaining is None else len(items) + int(remaining)
 
 
 @pytest.mark.point
@@ -24,9 +39,10 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CUSTOM_RESOURCES_01(cluster_mana
     ui = cluster_management_page
     assert ui.api is not None
 
-    crds = _crds(ui.api)
+    crds = _crd_sample(ui.api)
     if not crds:
         pytest.skip("集群没有 CRD，无法核对列表")
+    total_crds = _crd_total(ui.api)
 
     # Pick a target with a kind and a scope, so the assertions below have something
     # concrete to compare against rather than a shape.
@@ -54,7 +70,7 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CUSTOM_RESOURCES_01(cluster_mana
 
     # Row count against the API: a request without limit=-1 silently returns one page.
     rows = surface.locator("[data-ai-row]")
-    assert rows.count() == len(crds), f"行数 {rows.count()} 与接口的 {len(crds)} 不一致（是否漏了 limit=-1）"
+    assert rows.count() == total_crds, f"行数 {rows.count()} 与接口的 {total_crds} 不一致（是否漏了 limit=-1）"
 
     # Search by kind — the word someone writes in a manifest — must find it.
     ui.page.locator('[data-ai-id="custom-resources:search"]').last.fill(kind)
