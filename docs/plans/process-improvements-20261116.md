@@ -51,6 +51,8 @@
 | C22 | **基线要滤掉已知噪声，但只滤「握手」与「一次性抖动」**：认证 401 过滤，5xx 重试一次 | `session/me` 的 401 与 `configz` 的一次 503 都曾把整条基线判成 FAIL |
 | C23 | **清理一类缺陷要同时扫 `apps/` 与 `packages/`** | api-client 清完后，`pages/cluster/juicefsQueries.ts` 里还留着一份手拼的旧位置 |
 | C24 | **每扩一档覆盖面就会暴露新缺陷**：列表 → 深度页 → 详情页，每一档都抓到至少一处 | 深度页抓到 metrics 路径、详情页抓到 workloadPath、JuiceFS 页抓到 persistentvolumes |
+| C25 | **交互类检查必须证明「交互真的发生过」**，否则全绿是假象 | 交互巡检第一版 6 页全绿，实际 4 页句柄没找到、什么都没做 |
+| C26 | **SKIP 要打印出来但不计失败**：隐藏 SKIP 会把未覆盖当成已覆盖 | pods 页在 spaces 下无数据，无工具栏可交互 |
 
 ## D. 提交
 
