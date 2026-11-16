@@ -84,3 +84,25 @@ host tc-mc present: ['tc-mc-fba5a823', 'tc-mc-53f40ceb']
 | 1 | **写操作必须先确认它落在哪个集群**：读对了不代表写对了 |
 | 2 | **不能实现的操作用「拒绝 + 说明」，绝不用「打到默认集群」** |
 | 3 | 写验证要同时列举**两个集群**，只看当前页面的列表会被自己的乐观刷新骗过 |
+## 7. 分组资源在成员集群上的真实写入（本轮补齐）
+
+上一条只证明了「core 写会被拒绝」。分组资源（`/apis/<group>`）应当**可以**在成员集群写，本轮实测确认：
+
+```
+POST /apis/clusters/xc/networking.k8s.io/v1/namespaces/spaces/ingresses → 201
+xc   has it: True
+host has it: False      ← 落点正确，没有跑到主集群
+DELETE …/ingresses/<name> → 200
+after delete, xc has: False
+```
+
+用的是唯一命名的临时 Ingress（`tc-mc-ing-<随机>`，一条最小规则），**创建 → 双集群核对 → 删除 → 复核**，
+不留对象。
+
+同时确认：`DELETE /apis/clusters/xc/...` 受支持（对不存在的对象返回 404 而不是 405），
+所以成员集群的分组资源是可写可删的——与 core 资源（只能读）形成对照。
+
+## 8. 环境观察
+
+本轮有一次 `/api/session/login` 返回 **503**，同一时刻隧道根路径 200、`ssh a100` 正常；
+重试三次全部 200。说明 A100 的 ks-console 会偶发 503，与链路无关——遇到时先重试再判断。
