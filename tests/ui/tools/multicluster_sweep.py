@@ -351,11 +351,13 @@ def sweep_details(
 #: page uses for its list. Interaction is a different request than the first paint: sorting adds
 #: `sortBy`, searching adds `keyword`, a size change adds `limit` -- each is a chance to drop the
 #: cluster segment.
+#: (route segment, scope, ai-id prefix). The workload list derives both handles from the kind
+#: (`deployments:search`, `deployments:sort:…`); the cluster pod list uses `cluster-pods` and only
+#: exists at cluster scope, which is why the scope is part of the tuple.
 INTERACTION_PAGES = (
-    # The workload list derives both handles from the kind (`deployments:search`, `deployments:sort:…`).
-    ('deployments', 'deployments', True, 'deployments'),
-    ('configmaps', 'configmaps', True, 'configmaps'),
-    ('pods', 'pods', True, 'cluster-pods'),
+    ('deployments', 'project', 'deployments'),
+    ('configmaps', 'project', 'configmaps'),
+    ('pods', 'cluster', 'cluster-pods'),
 )
 
 
@@ -374,9 +376,7 @@ def sweep_interactions(
         page.evaluate("token => localStorage.setItem('kubesphere-token', token)", token)
 
         for cluster in clusters:
-            for segment, _resource, namespaced, prefix in INTERACTION_PAGES:
-                if not namespaced:
-                    continue
+            for segment, scope, prefix in INTERACTION_PAGES:
                 failures: list[tuple[int, str]] = []
 
                 def record(response, sink=failures):
@@ -385,7 +385,8 @@ def sweep_interactions(
                     sink.append((response.status, response.url))
 
                 page.on('response', record)
-                url = f'{app}/kube-frontend/{workspace}/clusters/{cluster}/projects/{project}/{segment}'
+                url = (f'{app}/kube-frontend/{workspace}/clusters/{cluster}/projects/{project}/{segment}'
+                       if scope == 'project' else f'{app}/kube-frontend/clusters/{cluster}/{segment}')
                 page.goto(url, wait_until='domcontentloaded')
                 page.wait_for_timeout(7000)
                 before = len(failures)
@@ -461,6 +462,15 @@ def baseline(args, token: str, clusters: list[str]) -> int:
     print(f'{detail_flag} detail   read: {len(detail_rows)} visits, {sum(1 for row in detail_rows if row["state"] in ("ready", "empty"))} ok, {len(detail_broken)} broken')
     for row in detail_broken[:5]:
         print(f"       {row['cluster']} {row['page']}: {row['state']} {row['errors'][:1]}")
+
+    interaction_rows = sweep_interactions(args.app, token, clusters, args.workspace, args.project)
+    acted = [row for row in interaction_rows if row['acted']['sort'] or row['acted']['search']]
+    interaction_broken = [row for row in interaction_rows if row['errors']]
+    failures += len(interaction_broken)
+    interaction_flag = 'OK  ' if not interaction_broken else 'FAIL'
+    print(f'{interaction_flag} interact read: {len(interaction_rows)} lists, {len(acted)} interacted, {len(interaction_rows) - len(acted)} skipped, {len(interaction_broken)} broken')
+    for row in interaction_broken[:5]:
+        print(f"       {row['cluster']} {row['page']}: {row['errors'][:1]}")
 
     for cluster in clusters:
         outcome = write_check(args.bff, token, cluster, 'host', args.namespace)

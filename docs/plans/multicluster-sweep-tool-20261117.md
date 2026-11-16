@@ -236,3 +236,30 @@ SKIP xc     pods                 sort=False search=False requests=0 errors=0
 第一次用 `cluster-workloads` 当部署页的前缀，全 SKIP。实际该页 `search`/`sortAiPrefix` 都由 `kind` 派生
 （`deployments:search`、`deployments:sort:<key>`）。**SKIP 的可见性正是这样救回来的**——如果 SKIP 被算作通过，
 这一轮会得到一个「6 页全绿」的假结论。
+## 13. 四段式基线最终形态
+
+`--baseline` 现在跑四段：**集群级读 → 项目级读 → 详情页 → 交互 → 写入落点**。A100 实测：
+
+```
+OK   cluster  read: 72 visits, 60 ready, 12 empty, 0 error, 0 failed requests
+OK   project  read: 34 visits, 20 ready, 14 empty, 0 error, 0 failed requests
+OK   detail   read: 12 visits, 12 ok, 0 broken
+OK   interact read: 6 lists, 6 interacted, 0 skipped, 0 broken
+OK   write    host    : created=201 on_target=True  deleted=200 gone=True
+OK   write    xc      : created=201 on_target=True on_host=False deleted=200 gone=True
+baseline PASS in 431s
+```
+
+**124 次页面访问 + 12 次交互 + 2 次写入，431 秒，0 失败请求**；两集群 `tc-*` Ingress 均为空。
+
+### 补上 `pods` 的交互：是作用域搞错了
+
+上一轮 `pods` 是 SKIP，原因不是「没数据」而是**作用域搞错**——容器组列表只在集群作用域存在
+（`/clusters/<c>/pods`），而交互巡检按项目作用域拼 URL。把作用域写进 `INTERACTION_PAGES` 后：
+
+```
+OK   host   pods  sort=True search=True requests=2 errors=0
+OK   xc     pods  sort=True search=True requests=2 errors=0
+```
+
+**SKIP 的价值在这里兑现**：它把「没覆盖」摆到台面上，才会有人去查为什么没覆盖。
