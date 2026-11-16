@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { storeAppsApi, storeCategoriesApi, storeReviewsApi } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, Button, ResourceList, Skeleton, type ListSchema } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { useResourceListState } from '@/components/resource/useResourceListState';
@@ -60,11 +61,12 @@ function CategoriesTable(): React.ReactElement {
     description: t('store.manage.categoriesDescription'),
     rowKey: 'id',
     rowAttributes: (row) => ({ 'data-ai-row': row.id }),
+    columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'store-manage:categories:columns' },
     columns: [
       { key: 'name', title: t('cluster.column.name'), render: (row) => <span className="truncate font-medium text-ai-fg">{row.name}</span> },
-      { key: 'description', title: t('store.manage.description'), width: 260, hideBelow: 'md', render: (row) => <span className="truncate text-ai-fg-secondary">{row.description || '-'}</span> },
-      { key: 'appTotal', title: t('store.manage.appCount'), width: 120, render: (row) => <span className="tabular-nums text-ai-fg-secondary">{row.appTotal}</span> },
-      { key: 'createdAt', title: t('cluster.column.createdAt'), width: 170, hideBelow: 'lg', render: (row) => <span className="tabular-nums text-ai-fg-muted">{formatTimestamp(row.createdAt)}</span> },
+      { key: 'description', hideable: true, title: t('store.manage.description'), width: 260, hideBelow: 'md', render: (row) => <span className="truncate text-ai-fg-secondary">{row.description || '-'}</span> },
+      { key: 'appTotal', hideable: true, title: t('store.manage.appCount'), width: 120, render: (row) => <span className="tabular-nums text-ai-fg-secondary">{row.appTotal}</span> },
+      { key: 'createdAt', hideable: true, title: t('cluster.column.createdAt'), width: 170, hideBelow: 'lg', render: (row) => <span className="tabular-nums text-ai-fg-muted">{formatTimestamp(row.createdAt)}</span> },
     ],
     empty: { title: t('store.manage.categoriesEmpty'), description: t('store.manage.emptyDescription') },
     labels: {
@@ -77,11 +79,14 @@ function CategoriesTable(): React.ReactElement {
     },
   };
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('store-manage:categories', columnKeys);
+
   if (state === 'error') {
     return <ResourceErrorPanel error={categories.error} onRetry={() => void categories.refetch()} retryAiId="store-manage:categories:retry" />;
   }
   if (state === 'loading') return <Skeleton className="h-40 w-full" />;
-  return <ResourceList schema={schema} rows={rows} loading={false} />;
+  return <ResourceList {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})} onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys} schema={schema} rows={rows} loading={false} />;
 }
 
 /**
@@ -109,10 +114,12 @@ function StoreAppsTable(): React.ReactElement {
     description: t('store.manage.appsDescription'),
     rowKey: 'id',
     rowAttributes: (row) => ({ 'data-ai-row': row.name }),
+    columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'store-manage:apps:columns' },
     columns: [
       { key: 'name', title: t('cluster.column.name'), render: (row) => <span className="truncate font-medium text-ai-fg">{row.name}</span> },
       {
         key: 'description',
+        hideable: true,
         title: t('store.manage.description'),
         width: 280,
         hideBelow: 'md',
@@ -120,6 +127,7 @@ function StoreAppsTable(): React.ReactElement {
       },
       {
         key: 'workspace',
+        hideable: true,
         title: t('cluster.column.workspace'),
         width: 150,
         hideBelow: 'lg',
@@ -127,12 +135,14 @@ function StoreAppsTable(): React.ReactElement {
       },
       {
         key: 'status',
+        hideable: true,
         title: t('cluster.column.status'),
         width: 120,
         render: (row) => <Badge tone={row.status === 'active' ? 'success' : 'warning'}>{row.status || '-'}</Badge>,
       },
       {
         key: 'createdAt',
+        hideable: true,
         title: t('cluster.column.createdAt'),
         width: 170,
         hideBelow: 'xl',
@@ -151,11 +161,14 @@ function StoreAppsTable(): React.ReactElement {
     pagination: { page: list.page, pageSize: list.pageSize, pageSizeOptions: [...PAGE_SIZES], total },
   };
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('store-manage:apps', columnKeys);
+
   if (state === 'error') {
     return <ResourceErrorPanel error={apps.error} onRetry={() => void apps.refetch()} retryAiId="store-manage:apps:retry" />;
   }
   if (state === 'loading') return <Skeleton className="h-40 w-full" />;
-  return <ResourceList schema={schema} rows={rows} loading={false} onPageChange={list.setPage} onPageSizeChange={list.setPageSize} />;
+  return <ResourceList {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})} onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys} schema={schema} rows={rows} loading={false} onPageChange={list.setPage} onPageSizeChange={list.setPageSize} />;
 }
 
 function ReviewsTable(): React.ReactElement {
@@ -175,11 +188,12 @@ function ReviewsTable(): React.ReactElement {
     description: t('store.manage.reviewsDescription'),
     rowKey: 'id',
     rowAttributes: (row) => ({ 'data-ai-row': row.appName || row.id }),
+    columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'store-manage:reviews:columns' },
     columns: [
-      { key: 'appName', title: t('store.manage.app'), render: (row) => <span className="truncate font-medium text-ai-fg">{row.appName || row.appId}</span> },
-      { key: 'status', title: t('cluster.column.status'), width: 130, render: (row) => <Badge tone={row.status === 'passed' ? 'success' : row.status === 'rejected' ? 'danger' : 'warning'}>{row.status || '-'}</Badge> },
-      { key: 'reviewer', title: t('store.manage.reviewer'), width: 160, hideBelow: 'md', render: (row) => <span className="truncate text-ai-fg-secondary">{row.reviewer || '-'}</span> },
-      { key: 'createdAt', title: t('cluster.column.createdAt'), width: 170, hideBelow: 'lg', render: (row) => <span className="tabular-nums text-ai-fg-muted">{formatTimestamp(row.createdAt)}</span> },
+      { key: 'appName', hideable: true, title: t('store.manage.app'), render: (row) => <span className="truncate font-medium text-ai-fg">{row.appName || row.appId}</span> },
+      { key: 'status', hideable: true, title: t('cluster.column.status'), width: 130, render: (row) => <Badge tone={row.status === 'passed' ? 'success' : row.status === 'rejected' ? 'danger' : 'warning'}>{row.status || '-'}</Badge> },
+      { key: 'reviewer', hideable: true, title: t('store.manage.reviewer'), width: 160, hideBelow: 'md', render: (row) => <span className="truncate text-ai-fg-secondary">{row.reviewer || '-'}</span> },
+      { key: 'createdAt', hideable: true, title: t('cluster.column.createdAt'), width: 170, hideBelow: 'lg', render: (row) => <span className="tabular-nums text-ai-fg-muted">{formatTimestamp(row.createdAt)}</span> },
     ],
     empty: { title: t('store.manage.reviewsEmpty'), description: t('store.manage.emptyDescription') },
     labels: {
@@ -193,9 +207,12 @@ function ReviewsTable(): React.ReactElement {
     pagination: { page: list.page, pageSize: list.pageSize, pageSizeOptions: [...PAGE_SIZES], total },
   };
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('store-manage:reviews', columnKeys);
+
   if (state === 'error') {
     return <ResourceErrorPanel error={reviews.error} onRetry={() => void reviews.refetch()} retryAiId="store-manage:reviews:retry" />;
   }
   if (state === 'loading') return <Skeleton className="h-40 w-full" />;
-  return <ResourceList schema={schema} rows={rows} loading={false} onPageChange={list.setPage} onPageSizeChange={list.setPageSize} />;
+  return <ResourceList {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})} onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys} schema={schema} rows={rows} loading={false} onPageChange={list.setPage} onPageSizeChange={list.setPageSize} />;
 }

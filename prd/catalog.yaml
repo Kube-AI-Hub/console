@@ -510,6 +510,7 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-01
+        - TC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-02
     - id: detail
       title: 应用详情
       prd: prd/kube-frontend/app-store/detail.md

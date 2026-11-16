@@ -106,6 +106,7 @@
 | kube-frontend/app-store/manage | `AC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-01` | `TC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-01` | [`design/kube-frontend/app-store/manage.md`](../../../design/kube-frontend/app-store/manage.md) | [`tests/ui/tests/kube-frontend/app-store/test_TC_L3_KUBE_FRONTEND_APP_STORE_MANAGE_01.py`](../../../tests/ui/tests/kube-frontend/app-store/test_TC_L3_KUBE_FRONTEND_APP_STORE_MANAGE_01.py) |
 | kube-frontend/app-store/manage | `AC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-02` | `TC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-01` | [`design/kube-frontend/app-store/manage.md`](../../../design/kube-frontend/app-store/manage.md) | [`tests/ui/tests/kube-frontend/app-store/test_TC_L3_KUBE_FRONTEND_APP_STORE_MANAGE_01.py`](../../../tests/ui/tests/kube-frontend/app-store/test_TC_L3_KUBE_FRONTEND_APP_STORE_MANAGE_01.py) |
 | kube-frontend/app-store/manage | `AC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-03` | `TC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-01` | [`design/kube-frontend/app-store/manage.md`](../../../design/kube-frontend/app-store/manage.md) | [`tests/ui/tests/kube-frontend/app-store/test_TC_L3_KUBE_FRONTEND_APP_STORE_MANAGE_01.py`](../../../tests/ui/tests/kube-frontend/app-store/test_TC_L3_KUBE_FRONTEND_APP_STORE_MANAGE_01.py) |
+| kube-frontend/app-store/manage | `AC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-04` | `TC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-02` | [`design/kube-frontend/app-store/manage.md`](../../../design/kube-frontend/app-store/manage.md) | **（无）** |
 | kube-frontend/app-store/project-apps | `AC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-01` | `TC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-01` | [`design/kube-frontend/app-store/project-apps.md`](../../../design/kube-frontend/app-store/project-apps.md) | [`tests/ui/tests/kube-frontend/app-store/test_TC_L3_KUBE_FRONTEND_APP_STORE_PROJECT_APPS_01.py`](../../../tests/ui/tests/kube-frontend/app-store/test_TC_L3_KUBE_FRONTEND_APP_STORE_PROJECT_APPS_01.py) |
 | kube-frontend/app-store/project-apps | `AC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-02` | `TC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-02` | [`design/kube-frontend/app-store/project-apps.md`](../../../design/kube-frontend/app-store/project-apps.md) | [`tests/ui/tests/kube-frontend/app-store/test_TC_L3_KUBE_FRONTEND_APP_STORE_PROJECT_APPS_02.py`](../../../tests/ui/tests/kube-frontend/app-store/test_TC_L3_KUBE_FRONTEND_APP_STORE_PROJECT_APPS_02.py) |
 | kube-frontend/app-store/project-apps | `AC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-03` | `TC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-03` | [`design/kube-frontend/app-store/project-apps.md`](../../../design/kube-frontend/app-store/project-apps.md) | [`tests/ui/tests/kube-frontend/app-store/test_TC_L3_KUBE_FRONTEND_APP_STORE_PROJECT_APPS_03.py`](../../../tests/ui/tests/kube-frontend/app-store/test_TC_L3_KUBE_FRONTEND_APP_STORE_PROJECT_APPS_03.py) |
@@ -490,10 +491,10 @@
 
 ## 小结
 
-- 需求里的 AC：483 条，其中未覆盖 1 条、无技术方案承接 18 条、无用例规格实现 1 条。
+- 需求里的 AC：484 条，其中未覆盖 1 条、无技术方案承接 18 条、无用例规格实现 2 条。
 - 未覆盖：`AC-L2-KUBE-FRONTEND-LOGIN-07`
 - 无技术方案承接：`AC-L2-KUBE-FRONTEND-LOGIN-01`, `AC-L2-KUBE-FRONTEND-LOGIN-02`, `AC-L2-KUBE-FRONTEND-LOGIN-03`, `AC-L2-KUBE-FRONTEND-LOGIN-04`, `AC-L2-KUBE-FRONTEND-LOGIN-05`, `AC-L2-KUBE-FRONTEND-LOGIN-06`, `AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L2-KUBE-FRONTEND-THEME-01`, `AC-L2-KUBE-FRONTEND-THEME-02`, `AC-L2-KUBE-FRONTEND-THEME-03`, `AC-L2-KUBE-FRONTEND-THEME-04`, `AC-L2-KUBE-FRONTEND-THEME-05`, `AC-L2-KUBE-FRONTEND-THEME-06`, `AC-L3-KUBE-FRONTEND-MONITORING-PROJECT_CUSTOM_MONITORING-01`, `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-02`, `AC-L3-KUBE-FRONTEND-STORAGE-DETAIL_TABS-01`
-- 无用例规格实现：`AC-L2-KUBE-FRONTEND-LOGIN-07`
+- 无用例规格实现：`AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-04`
 
 ## 用户故事覆盖
 
@@ -594,7 +595,7 @@
 | kube-frontend/app-store/detail | `US3` | `TC-L3-KUBE-FRONTEND-APP_STORE-DETAIL-02` |
 | kube-frontend/app-store/installed-apps | `US1` | `TC-L3-KUBE-FRONTEND-APP_STORE-INSTALLED_APPS-01` |
 | kube-frontend/app-store/installed-apps | `US2` | `TC-L3-KUBE-FRONTEND-APP_STORE-INSTALLED_APPS-02` |
-| kube-frontend/app-store/manage | `US1` | `TC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-01` |
+| kube-frontend/app-store/manage | `US1` | `TC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-01`, `TC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-02` |
 | kube-frontend/app-store/project-apps | `US1` | `TC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-01` |
 | kube-frontend/app-store/project-apps | `US2` | `TC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-02` |
 | kube-frontend/app-store/project-apps | `US3` | `TC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-03` |

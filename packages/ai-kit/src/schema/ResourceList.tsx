@@ -478,7 +478,13 @@ export function ResourceList<TRow>({
     return mapped;
   }, [schema.columns, schema.sortableKeys, schema.rowActions, schema.labels, onAction, askConfirm, visibleColumnKeys]);
 
-  const hasToolbar = Boolean(schema.search || schema.filters?.length || (schema.refresh && onRefresh));
+  //
+  // A column chooser is a toolbar control, so a list with no search, filters or refresh still
+  // needs the toolbar row to hold it — otherwise wiring `columnVisibility` on such a page does
+  // nothing at all (the chooser never renders). Found on the store-management tables.
+  const hasToolbar = Boolean(
+    schema.search || schema.filters?.length || (schema.refresh && onRefresh) || schema.columnVisibility,
+  );
 
   /**
    * The one action the page is for.

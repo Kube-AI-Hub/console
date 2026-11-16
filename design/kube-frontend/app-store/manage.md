@@ -6,12 +6,25 @@
 
 - AC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-01
 - AC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-02
+- AC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-04
 - AC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-03
 
 ## 概述
 
 `/kube-frontend/apps-manage` 区域：应用 / 分类 / 审核 三个页签。
 
+### DEC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-04 — 一页三表：三份 schema、三个存储键、三个刷新入口
+
+商店管理是唯一一个「一页三张表」的页面，每张表是独立的组件（`CategoriesTable` / `StoreAppsTable` /
+`ReviewsTable`），各自的 schema、查询与列表状态。列显隐因此也必须三份：`store-manage:{apps,categories,reviews}`，
+否则在应用表隐藏「工作空间」会连带把分类表的同名状态读走。
+
+### GOT-L3-KUBE-FRONTEND-APP_STORE-MANAGE-04 — 没有工具栏就没有列选择器
+
+`ResourceList` 的列选择器渲染在工具栏里，而工具栏只在 `search`/`filters`/`refresh` 至少有一项时出现。
+三张表原本都没有工具栏，接上 `columnVisibility` 后选择器依然不显示。给三张表各加刷新按钮可以解决，但会让管理页
+出现四个刷新入口、并打断既有用例 `APPSTORE_LISTS_REFRESH_01`（断言管理页只有一个 `:refresh`）。
+最终把 `columnVisibility` 纳入 `hasToolbar` 的判断（共享组件一行改动），既不重复刷新入口，也让选择器出现。
 ## 系统现状
 
 老 console 的 `/apps-manage` 默认跳 `/store`，另有 `/categories` 与 `/reviews/:type`。

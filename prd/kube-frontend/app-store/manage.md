@@ -18,6 +18,7 @@
 
 - **AC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-01** — 当打开 `/kube-frontend/apps-manage`，则重定向到 `/store` 并显示「应用/分类/审核」三个页签。
 - **AC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-02** — 当切到「分类」，则列出商店分类及其应用数。
+- **AC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-04** — 已知三个视图（应用/分类/审核）都是多列表格，当点工具栏的「显示列」，则只列出可隐藏列（名称不可隐藏）；取消勾选后该表头立即消失、选择按视图分别保存（`kube-frontend.columns.store-manage:{apps,categories,reviews}`）、刷新页面仍保持，「重置」恢复全部列；三个视图各自独立，隐藏「应用」的一列不影响「分类」。
 - **AC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-03** — 当切到「审核」，则列出审核记录；没有记录时说明需要先发布应用。
 
 ## 设计目标
@@ -53,6 +54,7 @@
 
 ## 验收用例
 
+- `TC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-02`
 - `TC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-01`
 
 ## 功能需求

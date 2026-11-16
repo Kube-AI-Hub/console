@@ -504,7 +504,7 @@ MODULES = [
                                                             {
                         "id": "manage",
                         "title": "商店管理（应用/分类/审核）",
-                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-01"]},
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-01", "TC-L3-KUBE-FRONTEND-APP_STORE-MANAGE-02"]},
                     },
                     {
                         "id": "detail",
