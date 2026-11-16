@@ -53,8 +53,9 @@ const THEMES: { name: string; chain: string[] }[] = [
  * bottom fails if a listed pair starts passing, so the entry cannot outlive the defect.
  */
 const KNOWN_TOKEN_GAPS: Record<string, number> = {
-  '--ai-fg-secondary on --ai-surface-3': 3.97,
-  '--ai-link on --ai-surface-3': 4.01,
+  // Empty: both entries that lived here (fg-secondary 3.97 and link 4.01 on the hover surface) were
+  // fixed by moving `--ai-surface-3` one step darker (navy-450). The two-way guard below stays so a
+  // future palette change cannot quietly reintroduce them.
 };
 
 const TEXT_TOKENS = ['--ai-fg', '--ai-fg-secondary', '--ai-fg-muted', '--ai-link'];
@@ -128,9 +129,13 @@ describe('theme contrast', () => {
       }
     }
     expect(failures, `${failures.join('\n')}\n最差对比度：${worst.ratio.toFixed(2)}:1 @ ${worst.where}`).toEqual([]);
-    // Record where the floor is. It may sit inside a registered gap (hover surfaces), so the floor
-    // is asserted to be the lowest *registered* value rather than an arbitrary pass mark.
-    const floor = Math.min(...Object.values(KNOWN_TOKEN_GAPS));
-    expect(worst.ratio).toBeGreaterThanOrEqual(floor - 0.2);
+    // Record where the floor is. While a gap is registered the floor may sit inside it; with no
+    // gaps the whole matrix has to clear AA outright -- which is the state this palette is in now.
+    const registered = Object.values(KNOWN_TOKEN_GAPS);
+    if (registered.length > 0) {
+      expect(worst.ratio).toBeGreaterThanOrEqual(Math.min(...registered) - 0.2);
+    } else {
+      expect(worst.ratio, `最差对比度 ${worst.ratio.toFixed(2)}:1 @ ${worst.where}`).toBeGreaterThan(4.5);
+    }
   });
 });

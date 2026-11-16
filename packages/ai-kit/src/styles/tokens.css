@@ -26,6 +26,7 @@
   --ai-raw-navy-600: 44 58 124; /* $light-color04 #2c3a7c */
   --ai-raw-navy-500: 58 73 143; /* $light-color05 #3a498f */
   --ai-raw-navy-400: 74 90 162; /* $light-color06 #4a5aa2 */
+  --ai-raw-navy-450: 62 77 148; /* #3e4d94 — the hover surface: lighter than navy-500 so a hovered row still reads as raised, dark enough that secondary and link text clear AA (4.82:1) */
   --ai-raw-navy-300: 92 108 182; /* $light-color07 #5c6cb6 */
   --ai-raw-navy-200: 112 127 201; /* $light-color08 #707fc9 */
 
@@ -132,7 +133,7 @@
 
   --ai-surface-1: var(--ai-raw-navy-600); /* $card-bg-color */
   --ai-surface-2: var(--ai-raw-navy-500); /* $btn-default-hover-bg */
-  --ai-surface-3: var(--ai-raw-navy-400);
+  --ai-surface-3: var(--ai-raw-navy-450); /* hover rows: text on this surface clears AA */
 
   --ai-fg: var(--ai-raw-ice-700); /* $text-color */
   --ai-fg-secondary: var(--ai-raw-ice-100); /* $second-text-color */
@@ -334,7 +335,7 @@
   --ai-bg-deep: var(--ai-raw-navy-900);
   --ai-surface-1: var(--ai-raw-navy-600);
   --ai-surface-2: var(--ai-raw-navy-500);
-  --ai-surface-3: var(--ai-raw-navy-400);
+  --ai-surface-3: var(--ai-raw-navy-450); /* hover rows: text on this surface clears AA */
   --ai-th-bg: var(--ai-raw-navy-900);
   --ai-row-hover-bg: rgb(var(--ai-raw-navy-500) / 0.55);
   --ai-nav-bg: rgb(11 24 77 / 0.62);
