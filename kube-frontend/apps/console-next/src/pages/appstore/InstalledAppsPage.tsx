@@ -10,6 +10,7 @@ import {
 } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, Button, InputSearch, Modal, ResourceList, Skeleton, type ListSchema } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -143,6 +144,7 @@ export function InstalledAppsPage({ workspace, project, cluster = 'host' }: Inst
       rowActions: [
         { key: 'remove', label: t('installedApps.uninstall'), aiId: 'installed-apps:uninstall', tone: 'danger' as const },
       ],
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'installed-apps:columns' },
       columns: [
         {
           key: 'name',
@@ -174,12 +176,14 @@ export function InstalledAppsPage({ workspace, project, cluster = 'host' }: Inst
         },
         {
           key: 'status',
+          hideable: true,
           title: t('installedApps.column.status'),
           width: 130,
           render: (row) => <Badge tone={statusTone(row.status)}>{row.status || '-'}</Badge>,
         },
         {
           key: 'appName',
+          hideable: true,
           title: t('installedApps.column.app'),
           width: 180,
           hideBelow: 'md',
@@ -187,6 +191,7 @@ export function InstalledAppsPage({ workspace, project, cluster = 'host' }: Inst
         },
         {
           key: 'versionName',
+          hideable: true,
           title: t('installedApps.column.version'),
           width: 150,
           hideBelow: 'lg',
@@ -198,6 +203,7 @@ export function InstalledAppsPage({ workspace, project, cluster = 'host' }: Inst
           : [
               {
                 key: 'project',
+                hideable: true,
                 title: t('installedApps.column.project'),
                 width: 140,
                 hideBelow: 'lg' as const,
@@ -208,6 +214,7 @@ export function InstalledAppsPage({ workspace, project, cluster = 'host' }: Inst
             ]),
         {
           key: 'createdAt',
+          hideable: true,
           title: t('installedApps.column.createdAt'),
           width: 170,
           hideBelow: 'xl',
@@ -228,6 +235,9 @@ export function InstalledAppsPage({ workspace, project, cluster = 'host' }: Inst
     [query.isFetching, t, listRefresh, workspace, project, cluster],
   );
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('installed-apps', columnKeys);
+
   if (state === 'error') {
     return (
       <AiSurface as="section" aiId="installed-apps:surface" state="error" className="min-w-0">
@@ -240,6 +250,8 @@ export function InstalledAppsPage({ workspace, project, cluster = 'host' }: Inst
     <AiSurface as="section" aiId="installed-apps:surface" state={state} className="min-w-0">
       <div data-ai-id="installed-apps:table">
         <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
           schema={schema}
           rows={visibleRows}
           loading={query.isPending}

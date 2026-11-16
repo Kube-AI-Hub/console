@@ -14,7 +14,7 @@ STORE_APPS = "/kapis/openpitrix.io/v1/apps"
 def test_TC_L3_KUBE_FRONTEND_APP_STORE_DETAIL_02(ui_config, page, session_token, screenshot):
     """TC-L3-KUBE-FRONTEND-APP_STORE-DETAIL-02 应用详情 · 安装弹窗的 values 配置。"""
 
-    from conftest import ApiClient
+    from helpers.api import ApiClient
 
     origin = ui_config.app
     api = ApiClient(origin, session_token)

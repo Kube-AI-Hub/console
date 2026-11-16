@@ -4,6 +4,7 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import { AiSurface, Button, ResourceList, type ListSchema } from '@kube-ai-hub/ui';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { devopsApi } from '@kube-ai-hub/api-client';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -118,6 +119,7 @@ export function DevopsProjectsPage({ cluster }: DevopsProjectsPageProps): React.
       description: t('devops.list.description'),
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'devops-projects:columns' },
       columns: [
         {
           key: 'name',
@@ -135,12 +137,14 @@ export function DevopsProjectsPage({ cluster }: DevopsProjectsPageProps): React.
         },
         {
           key: 'description',
+          hideable: true,
           title: t('projectInfo.field.description'),
           hideBelow: 'md',
           render: (row) => <span className="truncate text-ai-fg-secondary">{row.description || '-'}</span>,
         },
         {
           key: 'workspace',
+          hideable: true,
           title: t('projectInfo.field.workspace'),
           width: 160,
           hideBelow: 'lg',
@@ -148,6 +152,7 @@ export function DevopsProjectsPage({ cluster }: DevopsProjectsPageProps): React.
         },
         {
           key: 'createdAt',
+          hideable: true,
           title: t('cluster.column.createdAt'),
           width: 170,
           hideBelow: 'xl',
@@ -168,6 +173,9 @@ export function DevopsProjectsPage({ cluster }: DevopsProjectsPageProps): React.
     [cluster, query.isFetching, t],
   );
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('devops-projects', columnKeys);
+
   if (state === 'error') {
     return (
       <AiSurface as="section" aiId="devops:surface" state="error" className="min-w-0">
@@ -183,7 +191,9 @@ export function DevopsProjectsPage({ cluster }: DevopsProjectsPageProps): React.
           {t('devops.create.title')}
         </Button>
       </div>
-      <ResourceList schema={schema} onRefresh={listRefresh.onRefresh} rows={rows} loading={state === 'loading'} />
+      <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys} schema={schema} onRefresh={listRefresh.onRefresh} rows={rows} loading={state === 'loading'} />
       <DevopsProjectCreateDialog
         open={creating}
         onOpenChange={(open) => {

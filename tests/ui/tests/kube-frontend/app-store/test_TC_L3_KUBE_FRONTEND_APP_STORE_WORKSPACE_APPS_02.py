@@ -18,7 +18,7 @@ STORE_APPS = "/kapis/openpitrix.io/v1/apps"
 def test_TC_L3_KUBE_FRONTEND_APP_STORE_WORKSPACE_APPS_02(ui_config, page, session_token, screenshot):
     """TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_APPS-02 企业空间应用模板：上传、版本状态机与删除。"""
 
-    from conftest import ApiClient
+    from helpers.api import ApiClient
 
     origin = ui_config.app
     api = ApiClient(origin, session_token)

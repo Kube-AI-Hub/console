@@ -203,3 +203,30 @@ Canary 发布）、集群组件页/自定义监控/资源监控/节点排行/GPU
 还有 **18 个**带表格的页面：应用商店家族（已安装应用、企业空间应用/仓库、详情内表、Canary）、
 集群组件页 / 自定义监控 / 资源监控 / 节点排行 / GPU 容器组面板、DevOps 工程、监控自定义监控、
 企业空间成员详情/用户组。其中**面板类**（GPU 容器组、节点排行）是嵌在宿主页里的子表，需要独立页面键。
+
+## 20. 第九批（同日）：应用商店、DevOps、组件与边缘节点六页
+
+| 页面 | 页面键 | 菜单项数 | 备注 |
+| --- | --- | --- | --- |
+| 已安装应用 | `installed-apps` | 6 | 两个真实路由（企业空间 `/apps/instances` 与项目 `/applications`） |
+| 企业空间应用 | `workspace-apps` | 6 | |
+| 企业空间仓库 | `workspace-repos` | 6 | |
+| DevOps 工程 | `devops-projects` | 4 | 本集群无工程时列表为空 |
+| 系统组件 | `components` | 3 | |
+| 边缘节点 | `edge-nodes` | 4 | |
+
+用例 `CONFIGMAPS-LIST-11` 扩到 **33 个页面**（159.08s 通过）。
+
+**又一个 surface 前缀不同的页面**：边缘节点的 surface 是 `edgenodes:surface`（无连字符），列菜单前缀是
+`edge-nodes`；DevOps 页的 surface 是 `devops:surface`、前缀是 `devops-projects`。至此「surface 前缀 ≠ 列表前缀」
+已在 5 个页面上出现，用例里每一页都显式给出 surface 前缀。
+
+## 21. 回归中发现的三个与列显隐无关的问题（均已处理）
+
+| 问题 | 处理 |
+| --- | --- |
+| 两个 app-store 用例 `from conftest import ApiClient` 报 ImportError | pytest 把 `conftest` 解析到了别的模块（多 conftest 同名）；改成文档规定的 `from helpers.api import ApiClient`，两条恢复通过 |
+| 边缘节点用例 502 `ECONNREFUSED 127.0.0.1:18088` | SSH 隧道中断；重启后单跑通过 |
+| 企业空间仓库用例弹窗未关闭 | 单跑通过（等待敏感） |
+
+三条复跑合计 **4 passed（41.34s）**，确认与本批改动无关。

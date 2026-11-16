@@ -1,0 +1,114 @@
+....F..........F..F.Fs                                                   [100%]
+=================================== FAILURES ===================================
+____________ test_TC_L3_KUBE_FRONTEND_APP_STORE_DETAIL_02[chromium] ____________
+
+ui_config = UiConfig(base_url='https://console-dev.brightaitoken.ai', cluster='host', username='admin', password='Bat@2026', headl..._text=4.5, contrast_muted=3.0, app_url='http://localhost:5178', login_username='ui-test', login_password='UiTest@2026')
+page = <Page url='about:blank'>
+session_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlLWFpLWh1YiIsInN1YiI6ImFkbWluIiwiZXhwIjoxNzk1MDYyMjAzLCJpYXQiOjE3OTQ4MDMwMDMsInRva2VuX3R5cGUiOiJhY2Nlc3NfdG9rZW4iLCJ1c2VybmFtZSI6ImFkbWluIn0.mocWbFf8VkyUCnkC6wkP6r4uURLGAP-PIiZ2mF-IiiM'
+screenshot = <function screenshot.<locals>._shot at 0x104077600>
+
+    @pytest.mark.point
+    def test_TC_L3_KUBE_FRONTEND_APP_STORE_DETAIL_02(ui_config, page, session_token, screenshot):
+        """TC-L3-KUBE-FRONTEND-APP_STORE-DETAIL-02 应用详情 · 安装弹窗的 values 配置。"""
+    
+>       from conftest import ApiClient
+E       ImportError: cannot import name 'ApiClient' from 'conftest' (/Users/yuan/code/kube-ai-hub/console/tests/ui/tests/kube-frontend/cluster-management/conftest.py)
+
+tests/kube-frontend/app-store/test_TC_L3_KUBE_FRONTEND_APP_STORE_DETAIL_02.py:17: ImportError
+________ test_TC_L3_KUBE_FRONTEND_APP_STORE_WORKSPACE_APPS_02[chromium] ________
+
+ui_config = UiConfig(base_url='https://console-dev.brightaitoken.ai', cluster='host', username='admin', password='Bat@2026', headl..._text=4.5, contrast_muted=3.0, app_url='http://localhost:5178', login_username='ui-test', login_password='UiTest@2026')
+page = <Page url='about:blank'>
+session_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlLWFpLWh1YiIsInN1YiI6ImFkbWluIiwiZXhwIjoxNzk1MDYyMjAzLCJpYXQiOjE3OTQ4MDMwMDMsInRva2VuX3R5cGUiOiJhY2Nlc3NfdG9rZW4iLCJ1c2VybmFtZSI6ImFkbWluIn0.mocWbFf8VkyUCnkC6wkP6r4uURLGAP-PIiZ2mF-IiiM'
+screenshot = <function screenshot.<locals>._shot at 0x10466dee0>
+
+    @pytest.mark.point
+    def test_TC_L3_KUBE_FRONTEND_APP_STORE_WORKSPACE_APPS_02(ui_config, page, session_token, screenshot):
+        """TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_APPS-02 企业空间应用模板：上传、版本状态机与删除。"""
+    
+>       from conftest import ApiClient
+E       ImportError: cannot import name 'ApiClient' from 'conftest' (/Users/yuan/code/kube-ai-hub/console/tests/ui/tests/kube-frontend/cluster-management/conftest.py)
+
+tests/kube-frontend/app-store/test_TC_L3_KUBE_FRONTEND_APP_STORE_WORKSPACE_APPS_02.py:21: ImportError
+_______ test_TC_L3_KUBE_FRONTEND_APP_STORE_WORKSPACE_REPOS_03[chromium] ________
+
+app_workloads_page = <pages.app_workloads.AppWorkloadsPage object at 0x1040e0380>
+screenshot = <function screenshot.<locals>._shot at 0x10466c900>
+
+    @pytest.mark.point
+    def test_TC_L3_KUBE_FRONTEND_APP_STORE_WORKSPACE_REPOS_03(app_workloads_page, screenshot):
+        """TC-L3-KUBE-FRONTEND-APP_STORE-WORKSPACE_REPOS-03 企业空间应用仓库：编辑、同步索引与事件详情。"""
+    
+        ui = app_workloads_page
+        assert ui.api is not None
+        name = f"tc-e2e-repo-{uuid.uuid4().hex[:8]}"
+        origin = ui.base.split("/kube-frontend/")[0]
+    
+        def find() -> dict:
+            status, body = ui.api.request("GET", f"{REPOS}?limit=-1")
+            if status != 200 or not isinstance(body, dict):
+                return {}
+            for item in body.get("items") or []:
+                if item.get("name") == name:
+                    return item
+            return {}
+    
+        try:
+            status, created = ui.api.request(
+                "POST", REPOS, {"name": name, "url": CHART_REPO, "description": "e2e before edit"}
+            )
+            assert status == 200, f"create -> {status}: {created}"
+            repo_id = (created or {}).get("repo_id") or ""
+            assert repo_id, created
+    
+            ui.page.goto(f"{origin}/kube-frontend/workspaces/{WS}/repos")
+            surface = ui.page.locator('[data-ai-id="workspace-repos:surface"]').last
+            expect(surface).to_be_visible(timeout=30_000)
+            expect(surface).not_to_have_attribute("data-ai-state", "loading", timeout=60_000)
+            expect(ui.page.locator(f'[data-ai-row="{repo_id}"]')).to_be_visible(timeout=30_000)
+    
+            # --- 编辑：描述与同步周期（PATCH 子集） ---
+            row = ui.page.locator(f'[data-ai-row="{repo_id}"]')
+            row.get_by_role("button", name="更多操作").click()
+            ui.page.get_by_role("menuitem", name="编辑", exact=True).click()
+            dialog = ui.page.get_by_role("dialog")
+            expect(dialog).to_be_visible(timeout=20_000)
+            description = ui.page.locator('[data-ai-id="workspace-repos:create:description"]')
+            description.fill("e2e after edit")
+            ui.page.locator('[data-ai-id="workspace-repos:create:sync-period"]').fill("600s")
+            ui.page.locator('[data-ai-id="workspace-repos:create:submit"]').click()
+>           expect(dialog).to_have_count(0, timeout=60_000)
+E           AssertionError: Locator expected to have count '0'
+E           Actual value: 1 
+E           Call log:
+E             - Expect "to_have_count" get_by_role("dialog") with timeout 60000ms
+E             - waiting for get_by_role("dialog")
+E               97 × locator resolved to 1 element
+E                  - unexpected value "1"
+
+tests/kube-frontend/app-store/test_TC_L3_KUBE_FRONTEND_APP_STORE_WORKSPACE_REPOS_03.py:57: AssertionError
+___ test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_EDGE_NODE_PAGES_01[chromium] ___
+
+cluster_management_page = <pages.cluster_management.ClusterManagementPage object at 0x1046b8c50>
+screenshot = <function screenshot.<locals>._shot at 0x1040ffba0>
+
+    @pytest.mark.point
+    def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_EDGE_NODE_PAGES_01(cluster_management_page, screenshot):
+        """TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-EDGE_NODE_PAGES-01 边缘节点列表与详情。"""
+    
+        ui = cluster_management_page
+        assert ui.api is not None
+        status, body = ui.api.request("GET", NODES)
+>       assert status == 200, (status, body)
+E       AssertionError: (502, {'code': 'upstream_unreachable', 'message': 'connect ECONNREFUSED 127.0.0.1:18088', 'status': 502})
+E       assert 502 == 200
+
+tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_EDGE_NODE_PAGES_01.py:18: AssertionError
+=========================== short test summary info ============================
+SKIPPED [1] tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_COMPONENTS_01.py:20: 无法读取系统组件
+FAILED tests/kube-frontend/app-store/test_TC_L3_KUBE_FRONTEND_APP_STORE_DETAIL_02.py::test_TC_L3_KUBE_FRONTEND_APP_STORE_DETAIL_02[chromium]
+FAILED tests/kube-frontend/app-store/test_TC_L3_KUBE_FRONTEND_APP_STORE_WORKSPACE_APPS_02.py::test_TC_L3_KUBE_FRONTEND_APP_STORE_WORKSPACE_APPS_02[chromium]
+FAILED tests/kube-frontend/app-store/test_TC_L3_KUBE_FRONTEND_APP_STORE_WORKSPACE_REPOS_03.py::test_TC_L3_KUBE_FRONTEND_APP_STORE_WORKSPACE_REPOS_03[chromium]
+FAILED tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_EDGE_NODE_PAGES_01.py::test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_EDGE_NODE_PAGES_01[chromium]
+4 failed, 17 passed, 1 skipped in 170.91s (0:02:50)
+EXIT=1

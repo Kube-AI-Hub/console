@@ -4,6 +4,7 @@ import { Link } from '@tanstack/react-router';
 import { componentsApi, type ComponentSummary } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { useResourceListState } from '@/components/resource/useResourceListState';
@@ -81,6 +82,7 @@ export function ComponentsPage({ cluster: _cluster, initialType = '' }: Componen
       sortableKeys: ['name', 'health'],
       sortAiPrefix: 'components',
       sort: { key: list.sortBy, order: list.order },
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'components:columns' },
       columns: [
         {
           key: 'name',
@@ -101,6 +103,7 @@ export function ComponentsPage({ cluster: _cluster, initialType = '' }: Componen
         },
         {
           key: 'health',
+          hideable: true,
           title: t('cluster.components.health'),
           width: 140,
           render: (row) => (
@@ -111,6 +114,7 @@ export function ComponentsPage({ cluster: _cluster, initialType = '' }: Componen
         },
         {
           key: 'startedAt',
+          hideable: true,
           title: t('cluster.components.startedAt'),
           width: 170,
           hideBelow: 'md',
@@ -133,6 +137,9 @@ export function ComponentsPage({ cluster: _cluster, initialType = '' }: Componen
     [list.sortBy, list.order, query.isFetching, t, total],
   );
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('components', columnKeys);
+
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
 
   if (state === 'error') {
@@ -146,6 +153,8 @@ export function ComponentsPage({ cluster: _cluster, initialType = '' }: Componen
   return (
     <AiSurface as="section" aiId="components:surface" state={state} className="min-w-0">
       <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
         onRefresh={listRefresh.onRefresh}
         filters={{ type: group?.key ?? '' }} onFiltersChange={(next) => setType(next.type ?? '')}
         schema={schema}

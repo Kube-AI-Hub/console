@@ -4,6 +4,7 @@ import { Link } from '@tanstack/react-router';
 import { accessReviewApi, appTemplatesApi, type AppTemplate } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, Button, Input, Modal, ResourceList, type ListSchema } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -109,6 +110,7 @@ export function WorkspaceAppsPage({ workspace }: WorkspaceAppsPageProps): React.
         disabled: writeBlocked,
         ...(writeBlocked ? { disabledHint: t('appRepos.repos.noPermission') } : {}),
       },
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'workspace-apps:columns' },
       columns: [
         {
           key: 'name',
@@ -129,6 +131,7 @@ export function WorkspaceAppsPage({ workspace }: WorkspaceAppsPageProps): React.
         },
         {
           key: 'status',
+          hideable: true,
           title: t('cluster.column.status'),
           width: 120,
           render: (row) => (
@@ -137,6 +140,7 @@ export function WorkspaceAppsPage({ workspace }: WorkspaceAppsPageProps): React.
         },
         {
           key: 'latestVersionName',
+          hideable: true,
           title: t('appRepos.apps.column.latestVersion'),
           width: 170,
           hideBelow: 'md',
@@ -144,6 +148,7 @@ export function WorkspaceAppsPage({ workspace }: WorkspaceAppsPageProps): React.
         },
         {
           key: 'versionTypes',
+          hideable: true,
           title: t('appRepos.apps.column.versionType'),
           width: 130,
           hideBelow: 'lg',
@@ -151,6 +156,7 @@ export function WorkspaceAppsPage({ workspace }: WorkspaceAppsPageProps): React.
         },
         {
           key: 'updatedAt',
+          hideable: true,
           title: t('appRepos.apps.column.updateTime'),
           width: 170,
           hideBelow: 'xl',
@@ -158,6 +164,7 @@ export function WorkspaceAppsPage({ workspace }: WorkspaceAppsPageProps): React.
         },
         {
           key: 'createdAt',
+          hideable: true,
           title: t('cluster.column.createdAt'),
           width: 170,
           hideBelow: 'xl',
@@ -177,6 +184,9 @@ export function WorkspaceAppsPage({ workspace }: WorkspaceAppsPageProps): React.
     }),
     [query.isFetching, t, listRefresh, workspace, writeBlocked],
   );
+
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('workspace-apps', columnKeys);
 
   const submitUpload = async () => {
     setFormError('');
@@ -209,6 +219,8 @@ export function WorkspaceAppsPage({ workspace }: WorkspaceAppsPageProps): React.
           AiSurface's aiId prop is not a literal attribute in this file. */}
       <div data-ai-id="workspace-apps:table">
         <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
           schema={schema}
           rows={rows}
           loading={query.isPending}

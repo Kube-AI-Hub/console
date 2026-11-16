@@ -34,6 +34,12 @@ PAGES = (
     ('workspace-roles', '/kube-frontend/workspaces/system-workspace/roles', 'workspace-roles', 'description', 'workspace-roles'),
     ('workspace-quota', '/kube-frontend/workspaces/system-workspace/quota', 'workspace-quota', 'used', 'workspace-quota'),
     ('network-isolation', '/kube-frontend/system-workspace/clusters/host/projects/default/networkpolicies', 'network-isolation', 'policyTypes', 'networkpolicies'),
+    ('installed-apps', '/kube-frontend/workspaces/system-workspace/apps/instances', 'installed-apps', 'status', 'installed-apps'),
+    ('workspace-apps', '/kube-frontend/workspaces/system-workspace/apps', 'workspace-apps', 'status', 'workspace-apps'),
+    ('workspace-repos', '/kube-frontend/workspaces/system-workspace/repos', 'workspace-repos', 'type', 'workspace-repos'),
+    ('devops-projects', '/kube-frontend/clusters/host/devops', 'devops-projects', 'workspace', 'devops'),
+    ('components', '/kube-frontend/clusters/host/components', 'components', 'health', 'components'),
+    ('edge-nodes', '/kube-frontend/clusters/host/edgenodes', 'edge-nodes', 'status', 'edgenodes'),
 )
 
 @pytest.mark.point

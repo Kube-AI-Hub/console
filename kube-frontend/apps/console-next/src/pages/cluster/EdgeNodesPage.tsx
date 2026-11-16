@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { toNodeSummary, type KubeObject, type NodeSummary } from '@kube-ai-hub/api-client';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { useResourceListState } from '@/components/resource/useResourceListState';
@@ -57,6 +58,7 @@ export function EdgeNodesPage({ cluster }: EdgeNodesPageProps): React.ReactEleme
     sortableKeys: ['name', 'createTime'],
     sortAiPrefix: 'edgenodes',
     sort: { key: list.sortBy, order: list.order },
+    columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'edge-nodes:columns' },
     columns: [
       {
         key: 'name',
@@ -72,9 +74,9 @@ export function EdgeNodesPage({ cluster }: EdgeNodesPageProps): React.ReactEleme
           </Link>
         ),
       },
-      { key: 'status', title: t('cluster.column.status'), render: (row) => <Badge tone={row.status === 'Ready' ? 'success' : 'danger'}>{row.status}</Badge> },
-      { key: 'internalIP', title: t('node.detail.internalIP'), hideBelow: 'md', render: (row) => <span className="tabular-nums">{row.internalIP || '-'}</span> },
-      { key: 'createdAt', title: t('cluster.column.createdAt'), hideBelow: 'md', render: (row) => <span className="tabular-nums text-ai-fg-muted">{row.createdAt || '-'}</span> },
+      { key: 'status', hideable: true, title: t('cluster.column.status'), render: (row) => <Badge tone={row.status === 'Ready' ? 'success' : 'danger'}>{row.status}</Badge> },
+      { key: 'internalIP', hideable: true, title: t('node.detail.internalIP'), hideBelow: 'md', render: (row) => <span className="tabular-nums">{row.internalIP || '-'}</span> },
+      { key: 'createdAt', hideable: true, title: t('cluster.column.createdAt'), hideBelow: 'md', render: (row) => <span className="tabular-nums text-ai-fg-muted">{row.createdAt || '-'}</span> },
     ],
     empty: {
       title: t('cluster.edgeNodes.emptyTitle'),
@@ -82,12 +84,17 @@ export function EdgeNodesPage({ cluster }: EdgeNodesPageProps): React.ReactEleme
     },
   };
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('edge-nodes', columnKeys);
+
   return (
     <AiSurface as="section" aiId="edgenodes:surface" data-ai-id="edgenodes:surface" state={query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready'}>
       {query.isError ? (
         <ResourceErrorPanel error={query.error} onRetry={() => void query.refetch()} retryAiId="edgenodes:retry" />
       ) : (
         <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
           schema={schema}
           rows={rows}
           loading={query.isPending}
@@ -99,4 +106,5 @@ export function EdgeNodesPage({ cluster }: EdgeNodesPageProps): React.ReactEleme
       )}
     </AiSurface>
   );
+
 }

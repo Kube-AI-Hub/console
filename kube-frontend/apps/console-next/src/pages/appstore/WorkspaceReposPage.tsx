@@ -4,6 +4,7 @@ import { Link } from '@tanstack/react-router';
 import { accessReviewApi, workspaceReposApi, type WorkspaceRepo } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, Button, Input, Modal, ResourceList, Select, Textarea, type ListSchema } from '@kube-ai-hub/ui';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -269,6 +270,7 @@ export function WorkspaceReposPage({ workspace }: WorkspaceReposPageProps): Reac
         },
         { key: 'remove', label: t('common.delete'), aiId: 'workspace-repos:delete', tone: 'danger' as const, visible: () => !writeBlocked },
       ],
+      columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'workspace-repos:columns' },
       columns: [
         {
           key: 'name',
@@ -289,12 +291,14 @@ export function WorkspaceReposPage({ workspace }: WorkspaceReposPageProps): Reac
         },
         {
           key: 'url',
+          hideable: true,
           title: t('appRepos.repos.column.url'),
           hideBelow: 'md',
           render: (row) => <span className="truncate font-mono text-[11px] text-ai-fg-secondary">{row.url || '-'}</span>,
         },
         {
           key: 'type',
+          hideable: true,
           title: t('appRepos.repos.column.type'),
           width: 100,
           hideBelow: 'lg',
@@ -302,6 +306,7 @@ export function WorkspaceReposPage({ workspace }: WorkspaceReposPageProps): Reac
         },
         {
           key: 'status',
+          hideable: true,
           title: t('cluster.column.status'),
           width: 130,
           render: (row) => (
@@ -312,6 +317,7 @@ export function WorkspaceReposPage({ workspace }: WorkspaceReposPageProps): Reac
         },
         {
           key: 'creator',
+          hideable: true,
           title: t('appRepos.repos.column.creator'),
           width: 140,
           hideBelow: 'xl',
@@ -319,6 +325,7 @@ export function WorkspaceReposPage({ workspace }: WorkspaceReposPageProps): Reac
         },
         {
           key: 'createdAt',
+          hideable: true,
           title: t('cluster.column.createdAt'),
           width: 170,
           hideBelow: 'xl',
@@ -339,6 +346,9 @@ export function WorkspaceReposPage({ workspace }: WorkspaceReposPageProps): Reac
     [query.isFetching, t, writeBlocked, listRefresh, workspace],
   );
 
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('workspace-repos', columnKeys);
+
   if (state === 'error') {
     return (
       <AiSurface as="section" aiId="workspace-repos:surface" state="error" className="min-w-0">
@@ -354,6 +364,8 @@ export function WorkspaceReposPage({ workspace }: WorkspaceReposPageProps): Reac
       {/* Literal data-ai-id on the table wrapper: the action contract scans page source. */}
       <div data-ai-id="workspace-repos:table">
         <ResourceList
+        {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
           schema={schema}
           rows={visibleRows}
           loading={query.isPending}
