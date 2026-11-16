@@ -148,6 +148,8 @@ def sweep(
     scope: str = 'cluster',
     workspace: str = 'public',
     project: str = 'spaces',
+    bff: str = '',
+    creds: tuple[str, str] | None = None,
 ) -> list[dict]:
     from playwright.sync_api import sync_playwright
 
@@ -216,7 +218,16 @@ def sweep(
                     # The session can drop mid-run (one 401 makes the app sign out, and every later
                     # navigation then lands on the login screen). Re-seed the token and try the page
                     # once more, instead of recording the rest of the run as signed out.
-                    _open_app(page, app, token)
+                    # Minting a token can itself fail (the console answers 503 now and then); fall
+                    # back to the current one instead of crashing the whole run.
+                    fresh = token
+                    if creds:
+                        try:
+                            fresh = login(bff, creds[0], creds[1])
+                            token = fresh
+                        except Exception:
+                            fresh = token
+                    _open_app(page, app, fresh)
                     page.goto(page_url(app, cluster, segment, scope, workspace, project), wait_until='domcontentloaded')
                     for _ in range(20):
                         page.wait_for_timeout(2000)
@@ -645,7 +656,7 @@ def _repo_state() -> str:
     changed = len([line for line in dirty.splitlines() if line.strip()])
     return f'{head} (dirty files: {changed})'
 
-def baseline(args, token: str, clusters: list[str], allowed: set[str] | None = None) -> int:
+def baseline(args, token: str, clusters: list[str], allowed: set[str] | None = None, creds: tuple[str, str] | None = None) -> int:
     """Everything that has to hold on a multi-cluster install, in one command.
 
     Two read sweeps (cluster-scoped and project-scoped) plus the write-landing check. Prints one
@@ -658,7 +669,7 @@ def baseline(args, token: str, clusters: list[str], allowed: set[str] | None = N
     failures = 0
 
     for scope, pages in (('cluster', PAGES), ('project', PROJECT_PAGES)):
-        rows = sweep(args.app, token, clusters, pages, scope, args.workspace, args.project)
+        rows = sweep(args.app, token, clusters, pages, scope, args.workspace, args.project, args.bff, creds)
         broken = [row for row in rows if row['state'] == 'error' and f"{row['cluster']}:{row['page']}" not in allowed]
         noisy = [row for row in rows if row['errors'] and f"{row['cluster']}:{row['page']}" not in allowed]
         failures += len(broken)
@@ -785,7 +796,7 @@ def main() -> int:
     allowed = {entry.strip() for entry in args.allow.split(',') if entry.strip()}
 
     if args.baseline:
-        return baseline(args, token, clusters, allowed)
+        return baseline(args, token, clusters, allowed, (env.get('KA_USERNAME', 'admin'), env.get('KA_PASSWORD', '')))
 
     if args.write_check:
         bad = 0
@@ -804,7 +815,7 @@ def main() -> int:
             print(f"{'OK  ' if ok else 'FAIL'} write-check {cluster}: {outcome}")
         return 1 if bad else 0
 
-    rows = sweep(args.app, token, clusters, pages, args.scope, args.workspace, args.project)
+    rows = sweep(args.app, token, clusters, pages, args.scope, args.workspace, args.project, args.bff, (env.get('KA_USERNAME', 'admin'), env.get('KA_PASSWORD', '')))
 
     for row in rows:
         bad = [e for e in row['errors'] if e['status'] in (401, 403, 404, 500, 502, 503)]
