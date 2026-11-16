@@ -146,6 +146,7 @@ class ApiClient:
         every case in the session fail, which reads as a regression. Idempotent methods are
         therefore retried once; POST is not, because a retried create can leave two objects.
         """
+        import http.client
         import json
         import urllib.error
         import urllib.request
@@ -157,8 +158,12 @@ class ApiClient:
         for attempt in range(1, tries + 1):
             try:
                 return self._once(method, path, data, content_type, timeout, json)
-            except (TimeoutError, OSError) as stall:
-                # A stall, not an answer: retry the idempotent call, then let it surface.
+            except (TimeoutError, OSError, http.client.HTTPException) as stall:
+                # A stall or a truncated body, not an answer: retry the idempotent call, then
+                # let it surface. `IncompleteRead` is an `HTTPException`, not an `OSError`, and
+                # it is what this link produces on multi-megabyte list payloads (a chunked
+                # response cut mid-body); retrying turns an infrastructure hiccup into a pass
+                # instead of a red test that reads as a product regression.
                 if attempt >= tries:
                     raise
                 time.sleep(1.0 * attempt)
