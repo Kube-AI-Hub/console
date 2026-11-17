@@ -3,6 +3,8 @@ import { Button, Icon, Input, Modal, Select } from '@kube-ai-hub/ui';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { quantityToNumber, ApiError, type KubeObject, type WorkloadDetail, type WorkloadKind } from '@kube-ai-hub/api-client';
 import { useT } from '@/i18n';
+import { toYaml } from '@/components/resource/yaml';
+import { parse as parseYaml } from 'yaml';
 import { useIPPools } from './queries';
 
 /**
@@ -400,6 +402,19 @@ function securityContextOf(podSpec: JsonObject | undefined): SecurityContextDraf
   };
 }
 
+/** Parse the affinity YAML; `undefined` means "remove the block", a string means "invalid". */
+function affinityManifest(text: string): JsonObject | undefined | string {
+  const trimmed = text.trim();
+  if (!trimmed) return undefined;
+  try {
+    const parsed = parseYaml(trimmed);
+    if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) return 'not an object';
+    return parsed as JsonObject;
+  } catch {
+    return 'invalid yaml';
+  }
+}
+
 /** Build the pod securityContext; undefined when the reader did not enable it. */
 function securityContextManifest(draft: SecurityContextDraft, stored: JsonObject | undefined): JsonObject | undefined {
   if (!draft.enabled) return undefined;
@@ -593,6 +608,12 @@ export function EditWorkloadDialog({
   const [replicas, setReplicas] = React.useState<number | ''>('');
   const [strategy, setStrategy] = React.useState<StrategyDraft>({ type: 'RollingUpdate', maxUnavailable: '', maxSurge: '', partition: '' });
   const [nodeSelector, setNodeSelector] = React.useState<PairDraft[]>([]);
+  // Affinity as YAML: the old console's dialog has a whole tab for it, and a form over node/pod
+  // affinity (required + preferred, each with weight and topology) would be larger than every other
+  // field in this dialog combined. Editing the block as YAML keeps the capability without rebuilding
+  // the create wizard here.
+  const [affinityText, setAffinityText] = React.useState('');
+  const [affinityError, setAffinityError] = React.useState<string | null>(null);
   const [podLabels, setPodLabels] = React.useState<PairDraft[]>([]);
   const [podAnnotations, setPodAnnotations] = React.useState<PairDraft[]>([]);
   const [gracePeriod, setGracePeriod] = React.useState('');
@@ -618,6 +639,8 @@ export function EditWorkloadDialog({
     setNodeSelector(pairsOf(seedPodSpec?.['nodeSelector']));
     setVolumes(volumesOf(seedPodSpec));
     setSecurityContext(securityContextOf(seedPodSpec));
+    setAffinityText(seedPodSpec?.['affinity'] ? toYaml(seedPodSpec['affinity'] as JsonObject).trimEnd() : '');
+    setAffinityError(null);
     setGracePeriod(
       seedPodSpec?.['terminationGracePeriodSeconds'] === undefined ? '' : String(seedPodSpec['terminationGracePeriodSeconds']),
     );
@@ -893,6 +916,15 @@ export function EditWorkloadDialog({
         after: nextSecurityContext ? JSON.stringify(nextSecurityContext) : t('workloads.editSettings.removed'),
       });
     }
+    const storedAffinity = storedPodSpec ? asObject(storedPodSpec['affinity']) : undefined;
+    const nextAffinity = affinityManifest(affinityText);
+    if (typeof nextAffinity !== 'string' && JSON.stringify(storedAffinity ?? null) !== JSON.stringify(nextAffinity ?? null)) {
+      rows.push({
+        path: 'spec.template.spec.affinity',
+        before: storedAffinity ? toYaml(storedAffinity).trimEnd() : '-',
+        after: nextAffinity ? toYaml(nextAffinity).trimEnd() : t('workloads.editSettings.removed'),
+      });
+    }
     const storedGrace = storedPodSpec?.['terminationGracePeriodSeconds'];
     const nextGrace = gracePeriod.trim();
     if ((storedGrace === undefined ? '' : String(storedGrace)) !== nextGrace) {
@@ -983,6 +1015,9 @@ export function EditWorkloadDialog({
       const selector = mapOf(nodeSelector);
       if (Object.keys(selector).length > 0) nextPodSpec['nodeSelector'] = selector;
       else delete nextPodSpec['nodeSelector'];
+      const affinity = affinityManifest(affinityText);
+      if (affinity && typeof affinity !== 'string') nextPodSpec['affinity'] = affinity;
+      else delete nextPodSpec['affinity'];
     }
     if (nextTemplate) {
       const metadata = asObject(nextTemplate['metadata']) ?? {};
@@ -1209,6 +1244,7 @@ export function EditWorkloadDialog({
     selectorBroken ||
     probeIssues.size > 0 ||
     gracePeriodInvalid ||
+    affinityError !== null ||
     volumeIssues.size > 0 ||
     securityContextInvalid ||
     changes.length === 0;
@@ -1332,6 +1368,28 @@ export function EditWorkloadDialog({
             {gracePeriodInvalid ? (
               <span role="alert" className="text-[11px] text-ai-danger" data-ai-id={`${kind}-edit:grace-error`}>
                 {t('workloads.editSettings.graceInvalid')}
+              </span>
+            ) : null}
+          </label>
+          <label className="flex flex-col gap-1" data-ai-id={`${kind}-edit:affinity`}>
+            <span className="text-xs text-ai-fg-secondary">{t('workloads.editSettings.affinity')}</span>
+            <textarea
+              value={affinityText}
+              rows={6}
+              spellCheck={false}
+              placeholder={t('workloads.editSettings.affinityHint')}
+              className="w-full rounded-ai-sm border border-ai-line bg-ai-bg px-2 py-1 font-mono text-xs text-ai-fg"
+              {...actionProps(`${kind}-edit:affinity-input`)}
+              onChange={(event) => {
+                setAffinityText(event.target.value);
+                const parsed = affinityManifest(event.target.value);
+                setAffinityError(typeof parsed === 'string' ? t('workloads.editSettings.affinityInvalid') : null);
+              }}
+            />
+            <span className="text-[11px] text-ai-fg-muted">{t('workloads.editSettings.affinityNote')}</span>
+            {affinityError ? (
+              <span role="alert" className="text-[11px] text-ai-danger" data-ai-id={`${kind}-edit:affinity-error`}>
+                {affinityError}
               </span>
             ) : null}
           </label>
