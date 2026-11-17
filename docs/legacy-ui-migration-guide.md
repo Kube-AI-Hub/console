@@ -203,6 +203,15 @@ python3 prd/tools/parity_check.py     # 已登记页面 ↔ 规格 ↔ 测试
 调整尺寸时不用改测试，改错方向时会失败。同理，对齐用 `getBoundingClientRect()` 的差值（分隔线两半
 `y` 差 < 1px、环心与内容区中心差 < 4px），不要用“看起来对齐”或“类名正确”。
 
+**几何断言要给相对容差。** 固定 2px 的容差在非整数 `devicePixelRatio`（实测 0.8）下会失败：
+CSS 里完全对齐的两条边，取整到设备像素后相差 3.9px。用 `max(2, width * 0.01)` 这类随元素尺寸缩放的阈值，
+并在失败信息里同时打印两个 box，否则下一次只能靠猜。
+
+**基线断言不能依赖「源环境恰好有数据」。** 写「切走前先记下原集群的数字，切走后断言它不在页面上」时，
+如果原集群当时没有监控（返回空），`inner_text()` 会直接超时，测试失败的原因与要验证的行为无关。
+先 `expect(该区块).to_be_visible()` 明确要求前置数据存在，或改成断言结构性事实（该区块显示失败态、
+行数为 0），不要把「有数据」当默认前提。
+
 **改 AC 文案后必须重跑 `generate_case_docs.py`。** `cases/**` 是从 `specs/`/`prd/` 生成的，
 门禁只校验引用是否成立，不校验正文是否过期——AC 改了措辞而用例正文仍写旧文案时，门禁照样绿。
 反向也成立：改完视觉决策要 grep 旧的数字与措辞，`design/`、story 注释、契约测试的说明行都可能
@@ -350,7 +359,7 @@ pytest tests/kube-frontend/<模块> -q -n 0   # 本批相关及共享影响用�
 | 21 | **聚合读与原资源读字段不同** | 换读路径后状态/评估时间整列为空或被填 0 | 同一对象的聚合 kapis 读常带 `status`/派生字段，`/apis` 原对象没有；列表与详情用**聚合路径**并同次响应对账，缺失字段显示 `-`，不用 0 补 |
 | 22 | **共享列表默认值也是已交付契约** | 只改默认页大小/排序，本页旧用例整页失败 | 改前检索对应 AC 与既有用例；默认页大小、排序、列顺序变更要跟页面一起验收，不能只改代码 |
 | 23 | **表格内联动作用了裸 `<button>`** | `ai-surface-contract` 失败 | 用共享 `Button` + `actionProps()`，同时拿到稳定句柄与键盘/焦点行为 |
-| 24 | **监控接口的 `cluster=` 查询参数对成员集群无效** | 成员集群显示主集群的 CPU/内存/磁盘数字（有数但不属于它） | 集群段放**路径**：`/kapis/clusters/<id>/monitoring.kubesphere.io/v1alpha3/cluster`；实测 `?cluster=<member>` 返回 host 数值 |
+| 24 | **监控接口的 `cluster=` 查询参数对成员集群无效** | 成员集群显示主集群的 CPU/内存/磁盘数字（有数但不属于它） | 集群段放**路径**：`/kapis/clusters/<id>/monitoring.kubesphere.io/v1alpha3/cluster`；实测 `?cluster=<member>` 返回 host 数值。判定：同一指标分别请求两种形态，数值不同即查询形态无效 |
 | 25 | **把「模块未启用」当接口失败** | 未装 DevOps 的集群对 kapis 聚合返回 404，整页报错或空表 | 查询前按 `status.configz.<module>` 过滤；模块未启用是正常状态，用单独说明，不是错误 |
 | 26 | **空间作用域列表先读集群级 raw 集合、再按标签过滤** | 读到别的空间的工程，或与服务端口径不一致 | 优先 kapis workspace 聚合 `/kapis/.../workspaces/<ws>/...`（服务端过滤）；成员集群把 `clusters/<c>` 段放在 `/kapis/` 之后 |
 | 27 | **别名含空格** | 编辑信息保存没反应，对话框停在原地；其实是被别名校验（老 console 的正则）拦下 | 别名只允许中英文/数字/内部连字符；E2E 与截图造数用连字符别名，别把校验失败误判成接口失败 |
@@ -365,6 +374,8 @@ pytest tests/kube-frontend/<模块> -q -n 0   # 本批相关及共享影响用�
 | 36 | **按 UI 表象设计写接口** | 老页面有「配置」按钮，但弹窗 onOk 只关闭、不发请求；照搬会做出「填完保存没反应」的假表单 | 迁移前查 action 链/网络请求；按钮不等于能力，没有写路径就只迁状态并说明 |
 | 38 | **权限检查走 kube SSAR 代理** | 以只读用户打开项目页，创建入口仍可见；`/apis/authorization.k8s.io` 经 ks-apiserver 代理时以 service account（cluster-admin）求值，所有 SSAR 都 allowed | 权限判断改用 ks-apiserver 的 IAM 检查（以请求用户求值）；旧后端 404 再回退；见[权限检查后端记录](plans/permission-review-backend-20261117.md) |
 | 37 | **聚合页的健康口径含糊** | 只按「有工作负载」判健康会把 0 副本/空 selector 误报为正常；空 selector 在语义上匹配全部组件 | 健康用 ready/desired 明确三态；写清空 selector 与 desired=0 的语义，并用单测固定 |
+| 39 | **界面标签依赖按需加载的列表** | 刷新后同一对象换了个称呼：别名退回对象名（列表只在弹窗打开时才请求） | 展示名要么随外壳一起取，要么本地记住「用户+对象」的展示名；列表到达后**以列表为准**，否则清空别名后仍显示旧值 |
+| 40 | **把 5xx 一律说成「网络异常」** | 未就绪成员集群显示「网络异常，请稍后重试」，实际原因 `cluster <name> is not ready` 被丢弃，重试永远不会成功 | 5xx 携带具体原因时优先显示原因，只对 `Internal Server Error` 这类无信息量短语回退本地化文案；客户端先剥掉 `Internal Server Error: "<path>":` 包装再截断，否则路径与查询串会把消息额度用完 |
 
 多集群部署另有一条命令：`cd tests/ui && python3 tools/multicluster_sweep.py --env-file <env> --baseline --clusters host,<member>`，
 覆盖集群级/项目级列表、数据归属、详情页、Tab 与写入落点；判读方式见[多集群验证手册](plans/multicluster-playbook-20261117.md)。

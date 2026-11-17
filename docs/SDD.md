@@ -193,6 +193,19 @@ python3 prd/tools/cleanup_test_objects.py --apply  # 真的删
 | 本批提交判定 | 本批相关 + 共享组件影响用例，显式 `-n 0` | 以本次记录为准 |
 | 全站发布判定 | `pytest tests/kube-frontend -n 0` | 以本次记录为准 |
 
+**门禁的耗时取决于带不带 scope，而不是「跑哪几类」。** 2026-11-18 实测：
+
+| 命令 | 耗时 |
+| --- | --- |
+| `check_docs.py --what prd prd/kube-frontend` | **1.1 秒** |
+| `check_docs.py prd/kube-frontend design/kube-frontend` | 4 分 10 秒 |
+| `check_docs.py --what tests`（忽略 scope） | **4 分 42 秒** |
+| `check_docs.py --strict`（全量） | 15 分钟以上 |
+
+`--what tests` 和 `--what structure` 是全局检查，**给不给 scope 都一样慢**；只有带 scope 的
+`prd`/`design` 才是秒级。所以一轮改动的顺序应是：先跑秒级的 prd/design 看编号与追溯，
+把全局的 tests 留到本批最后一次；不要每改一条 AC 就跑一次 4 分钟的门禁。
+
 **改多处同类问题时，先全部改完再统一验证。** 一个共享层改动（`Modal`/`Select`/`FormField`）通常一次
 影响几十个页面；每改一处就跑一次浏览器，时间几乎全花在重复启动上。做法是：单元测试跟着改动走（毫秒级），
 浏览器验证攒到最后，用同一批构建跑一次脚本覆盖多个对话框并打印每处的判定值。
@@ -210,8 +223,13 @@ python3 prd/tools/cleanup_test_objects.py --apply  # 真的删
 通过、失败、重跑通过、skip 与未执行分别统计；模拟、B200 读取、本地全栈及新版生产部署分别结论。
 
 **先确认失败是不是自己引入的。** 全仓基线本来就有失败（缺样式文件、双 React 的 `Invalid hook call`、
-上游返回 400 而非 404）。判定方法是 `git stash` 掉本批改动后重跑同一条命令：仍失败即为基线，
+上游返回 400 而非 404）。判定方法是回到本批**之前**的代码重跑同一条命令：仍失败即为基线，
 把它连命令与错误一起写进记录，不豁免、不修改并行范围掩盖。
+
+`git stash` 只覆盖未提交的改动。本批已被提交（或一部分已提交）时，stash 后的树仍含本批代码，
+量出来的不是基线——2026-11-18 就这样把「带着自己改动的失败列表」当成了基线。基线要用
+`git worktree add /tmp/base <本批第一个提交>^` 检出，构建后在同一端口跑同一命令；跑完删掉 worktree。
+记录里写清基线的提交号，否则无法判断它是否真的在本批之前。
 
 ### 用户故事怎么钉到用例
 
