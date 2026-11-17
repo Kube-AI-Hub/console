@@ -55,7 +55,8 @@ python3 -u tools/multicluster_sweep.py --env-file /tmp/a100.env \
 | `--locale-scan --locale en` | 英文界面的裸标识符（未翻译文案） | ~2 分钟 |
 | `--probes` | 7 个只读接口探针的状态码（能力指纹，两个部署可直接对比） | ~10 秒 |
 
-**四种模式一条命令跑完**（按「最快失败」排序）：
+**四种模式一条命令跑完**（按「最快失败」排序）。第三个参数是 BFF；**传 `-` 表示应用与接口同一个 origin**
+（BFF 退役后的形态）：
 
 ```bash
 tools/verify-all.sh /tmp/a100.env http://localhost:5182 http://127.0.0.1:8093 host,xc system-workspace spaces

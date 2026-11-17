@@ -16,7 +16,9 @@ case "$ENV_FILE" in
 esac
 [ -f "$ENV_FILE" ] || { echo "env file not found: $ENV_FILE" >&2; exit 2; }
 APP=${2:-http://localhost:5182}
+# The BFF is retired (2026-11-18): pass `-` (or omit) to use the app origin for both.
 BFF=${3:-http://127.0.0.1:8093}
+if [ "$BFF" = "-" ] || [ -z "$BFF" ]; then BFF=$APP; fi
 CLUSTERS=${4:-host,xc}
 WORKSPACE=${5:-system-workspace}
 PROJECT=${6:-spaces}
