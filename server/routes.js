@@ -217,6 +217,18 @@ router
   // The new console's client routes. Registered before the old console's page
   // renderer so a deep link reaches the router rather than the old shell.
   .get('/kube-frontend{/*path}', newConsoleShell)
+  /*
+   * A file-shaped request under the new console's prefix that nothing served.
+   *
+   * It must 404, not fall through to the old console's page renderer: the browser
+   * would receive HTML where it asked for a module and fail with a syntax error
+   * that names neither the missing file nor the real cause.
+   */
+  .all('/kube-frontend{/*path}', ctx => {
+    if (ctx.status === 404) return
+    ctx.status = 404
+    ctx.body = { status: 404, reason: 'NotFound' }
+  })
   .all('{/*path}', renderView)
 
 module.exports = router
