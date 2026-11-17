@@ -1,3 +1,4 @@
+import { safeReturnPath } from './return-path';
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import { isTokenExpired } from '@kube-ai-hub/api-client';
 import { LoginPage } from '@/pages/login/LoginPage';
@@ -31,15 +32,4 @@ export const Route = createFileRoute('/kube-frontend/login')({
   component: LoginPage,
 });
 
-/**
- * A same-origin absolute path, or `null` for anything that could leave it.
- *
- * `//host` and `/\host` are both read as protocol-relative by browsers, and the
- * value comes from the query string, so it is attacker-controlled.
- */
-export function safeReturnPath(value: string | null | undefined): string | null {
-  if (!value) return null;
-  const trimmed = value.trim();
-  if (!trimmed.startsWith('/') || trimmed.startsWith('//') || trimmed.startsWith('/\\')) return null;
-  return trimmed;
-}
+export { safeReturnPath };
