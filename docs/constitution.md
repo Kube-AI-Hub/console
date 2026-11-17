@@ -71,7 +71,6 @@
 因此：**能读的按集群读；读不到或写不了的，明确拒绝并说明原因**。把操作打到主集群会得到「有数据、但是别人的」——比报错危险得多。
 统一实现见 `packages/api-client/src/paths.ts` 的 `clusterScoped` / `corePath` / `coreWritePath`，不要自己拼路径。
 
-
 ---
 
 ## UI 与交互设计原则
