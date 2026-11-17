@@ -246,3 +246,15 @@ baseline PASS in 548s
 | 写入落点 | 两集群各一次真实写入 + 清理 |
 
 这是多集群这条线**第一个可以放心引用的结果**。
+## 17. 2026-11-17 10:00 起：两个环境同时不可达
+
+| 环境 | 现象 |
+| --- | --- |
+| A100 | `ssh a100` 报 `kex_exchange_identification: Connection reset by peer`；隧道 18091 连不上；登录 502 |
+| B200 | `link_health.py` verdict **degraded**：隧道 18088 超时、`bff-kube` 8 秒超时；登录 502 |
+
+**两套都不可用时不要反复重试**：先确认是环境（ssh / 隧道）而不是代码，然后改做环境无关的工作
+（契约套件、tsc、文档），下一轮再验。
+
+`--baseline` 的内置探针在这种情况下会直接打印 `baseline NOT RUN: the environment is not usable` 并退出码 2——
+这正是它存在的理由。
