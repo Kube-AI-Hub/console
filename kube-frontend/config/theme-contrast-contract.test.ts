@@ -57,11 +57,9 @@ const KNOWN_TOKEN_GAPS: Record<string, number> = {
   // moving `--ai-surface-3` one step darker (navy-450). The two-way guard below stays so a future
   // palette change cannot quietly reintroduce them.
   //
-  // The two below were hidden until the cascade lookup was fixed (it used to read `:root` for every
-  // theme, so all six combinations were really the dark palette). They are just under AA in the
-  // violet/light hover surface and need a dedicated hover-text step, not a token nudge.
-  'violet/light: --ai-fg-muted on --ai-surface-3': 4.47,
-  'violet/light: --ai-link on --ai-surface-3': 4.41,
+  // The two gaps the fixed cascade first surfaced (violet/light muted text 4.47 and link 4.41 on the
+  // hover surface) were fixed by darkening that surface one step; they are cleared, and the two-way
+  // guard below keeps them from coming back.
 };
 
 const TEXT_TOKENS = ['--ai-fg', '--ai-fg-secondary', '--ai-fg-muted', '--ai-link'];
@@ -156,10 +154,10 @@ describe('theme contrast', () => {
    * background.
    */
   it('keeps the focus ring visible on every theme (SC 1.4.11, 3:1)', () => {
-    // Measured today: the dark ring is violet-100 on a dark page (2.38:1) and the green/light ring is
+    // The dark ring was violet-100 on a dark page (2.38:1) and is fixed by taking the lighter step;
     // mint-300 on a light page (2.29:1). Both need a brighter/darker step; registered so the gap is
     // tracked, and the guard below fails if one starts passing (then delete its entry).
-    const KNOWN_RING_GAPS: Record<string, number> = { 'default (dark)': 2.38, 'green/light': 2.29 };
+    const KNOWN_RING_GAPS: Record<string, number> = {};
     const failures: string[] = [];
     for (const theme of THEMES) {
       const ring = resolve('--ai-ring', theme.chain);

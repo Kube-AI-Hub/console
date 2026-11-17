@@ -198,7 +198,9 @@
   --ai-code-comment: var(--ai-raw-ice-100);
   --ai-code-punctuation: var(--ai-raw-ice-300);
 
-  --ai-ring: var(--ai-accent-strong);
+  /* The ring must stay visible on the dark page: the darkest violet reads at 2.38:1 there, so it
+     takes the same lighter step the accent blocks use (SC 1.4.11 wants 3:1 for non-text). */
+  --ai-ring: var(--ai-raw-violet-400);
 
   /* Navigation and table surfaces console styles separately */
   --ai-nav-bg: rgb(20 33 90 / 0.58);
@@ -249,6 +251,9 @@
  */
 :root[data-theme='light'] {
   --ai-link: var(--ai-raw-violet-100); /* 4.68:1 worst case */
+  /* Mirrors the dark-page rule: on white the ring needs the *darker* violet, otherwise it
+     inherits the dark-page step and disappears (measured 1.89:1). */
+  --ai-ring: var(--ai-raw-violet-100);
   --ai-bg: var(--ai-raw-ice-800); /* #f9fbfd */
   --ai-bg-elevated: var(--ai-raw-white);
   --ai-bg-overlay: var(--ai-raw-white);
@@ -360,7 +365,9 @@
   --ai-bg-deep: var(--ai-raw-violet-lite-600);
   --ai-surface-1: var(--ai-raw-violet-lite-elevated);
   --ai-surface-2: var(--ai-raw-violet-lite-600);
-  --ai-surface-3: var(--ai-raw-violet-lite-400);
+  /* hover rows: violet-lite-400 left muted text and links at 4.47 / 4.41 on this surface, just under
+     AA. One step darker fixes both without moving any text token. */
+  --ai-surface-3: var(--ai-raw-violet-lite-500);
   --ai-line: var(--ai-raw-violet-lite-300);
   --ai-line-strong: var(--ai-raw-violet-lite-200);
   --ai-th-bg: var(--ai-raw-violet-lite-600);
@@ -405,6 +412,7 @@
   --ai-accent-soft: var(--ai-raw-mint-600);
   --ai-accent-strong: var(--ai-raw-mint-500);
   --ai-accent-fg: var(--ai-raw-abyss-950);
+  /* mint-300 reads at 2.29:1 on the light page; mint-600 is the ramp's "readable on white" step. */
   --ai-ring: var(--ai-raw-mint-300);
 }
 
@@ -428,7 +436,7 @@
   --ai-accent-soft: var(--ai-raw-mint-400);
   --ai-accent-strong: var(--ai-raw-mint-600);
   --ai-accent-fg: var(--ai-raw-white);
-  --ai-ring: var(--ai-raw-mint-600);
+  --ai-ring: var(--ai-raw-mint-700); /* mint-600 reads at 2.29:1 on the light page; 700 is the text step */
 }
 
 /* The base element styles are opt-in via `.ai-root` so the library never

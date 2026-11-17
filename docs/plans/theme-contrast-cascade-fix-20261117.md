@@ -26,11 +26,19 @@ const layer = [...chain].reverse().find((selector) => propsOf(selector).has(name
 | `default (dark)` | `--ai-ring` on `--ai-bg` | **2.38:1** | 3（1.4.11 非文本） |
 | `green/light` | `--ai-ring` on `--ai-bg` | **2.29:1** | 3 |
 
-## 3. 处理
+## 3. 处理：四处差距**全部修掉**（不是登记了事）
 
-- 新增**焦点环**契约（SC 1.4.11，3:1）：`Button` 画的是 `ring-ai-ring` + `ring-offset-ai-bg`，所以查 `--ai-ring` 对 `--ai-bg`；
-- 差距按**主题**登记（`KNOWN_TOKEN_GAPS` / `KNOWN_RING_GAPS`），并保留双向守卫：登记项一旦开始通过，测试就会失败并要求删除登记；
-- 没有为了让测试变绿去调色板——这几个值需要专门的一档 hover 文字色与更亮的环，属于设计决策，登记后单独处理。
+新增**焦点环**契约（SC 1.4.11，3:1）：`Button` 画的是 `ring-ai-ring` + `ring-offset-ai-bg`，所以查 `--ai-ring` 对 `--ai-bg`。
+
+| 差距 | 修法 | 结果 |
+| --- | --- | --- |
+| 深色主题环 2.38:1 | `--ai-ring` 从最深的一档 violet-100 换成 violet-400（与 accent 块一致） | 通过 |
+| 浅色主题环 1.89:1（改深色后暴露） | 纯浅色块补上自己的 `--ai-ring`（violet-100），不再继承深色页那一档 | 通过 |
+| `green/light` 环 2.29:1 | 换成 mint-700（调色板里「在浅底上仍可读」的那一档） | 通过 |
+| `violet/light` hover 面文字 4.47 / 4.41 | 把 hover 面 `--ai-surface-3` 调深一档（violet-lite-400 → 500） | 4.76 起，通过 |
+
+`KNOWN_TOKEN_GAPS` 与 `KNOWN_RING_GAPS` **现在都是空的**——契约从「登记差距」回到「零容忍」。
+双向守卫保留：以后若有人把某一档改回去，测试会立刻失败。
 
 ## 4. 验证
 
