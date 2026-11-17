@@ -262,3 +262,6 @@ baseline PASS in 548s
 
 `--baseline` 的内置探针在这种情况下会直接打印 `baseline NOT RUN: the environment is not usable` 并退出码 2——
 这正是它存在的理由。
+
+**同日 12:50 再次中断**（`ssh a100` 依旧 `Connection reset by peer`，隧道进程被回收）。结论不变：先修隧道再谈验证；
+修不动就改做环境无关的工作（契约套件、tsc、文档），不要反复重试。

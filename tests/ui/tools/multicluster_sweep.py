@@ -725,7 +725,7 @@ def preflight(app: str, bff: str, creds: tuple[str, str], attempts: int = 3) -> 
             time.sleep(3)
     return None
 
-def sweep_tabs(app: str, token: str, clusters: list[str], workspace: str, project: str) -> list[dict]:
+def sweep_tabs(app: str, bff: str, token: str, clusters: list[str], workspace: str, project: str) -> list[dict]:
     """Open every tab of a few detail pages and record what each one renders.
 
     A detail page loads different endpoints per tab, so a page that opens fine can still have a tab
@@ -744,9 +744,9 @@ def sweep_tabs(app: str, token: str, clusters: list[str], workspace: str, projec
         context = browser.new_context(viewport={'width': 1500, 'height': 1000})
         for cluster in clusters:
             for resource, namespaced in targets:
-                name = _first_name('http://127.0.0.1:8093', token, cluster, resource, namespaced, project)
+                name = _first_name(bff, token, cluster, resource, namespaced, project)
                 if not name:
-                    results.append({'cluster': cluster, 'page': resource, 'tab': '<none>', 'body': 0, 'errors': []})
+                    results.append({'cluster': cluster, 'page': resource, 'tab': '<none>', 'body': 0, 'errors': [], 'skipped': True})
                     continue
                 page = context.new_page()
                 _open_app(page, app, token)
@@ -849,7 +849,12 @@ def baseline(args, token: str, clusters: list[str], allowed: set[str] | None = N
     for row in detail_broken[:5]:
         print(f"       {row['cluster']} {row['page']}: {row['state']} {row['errors'][:1]}")
 
-    tab_rows = sweep_tabs(args.app, token, clusters, args.workspace, args.project)
+    if creds:
+        try:
+            token = login(args.bff, creds[0], creds[1])
+        except Exception:
+            pass
+    tab_rows = sweep_tabs(args.app, args.bff, token, clusters, args.workspace, args.project)
     tab_broken = [row for row in tab_rows if (not row.get('skipped')) and (row['body'] < 300 or row['errors'])]
     failures += len(tab_broken)
     tab_flag = 'OK  ' if not tab_broken else 'FAIL'
@@ -913,7 +918,7 @@ def main() -> int:
     clusters = [c.strip() for c in args.clusters.split(',') if c.strip()]
 
     if args.tabs and not args.baseline:
-        rows = sweep_tabs(args.app, token, clusters, args.workspace, args.project)
+        rows = sweep_tabs(args.app, args.bff, token, clusters, args.workspace, args.project)
         bad = 0
         for row in rows:
             broken = (not row.get('skipped')) and (row['body'] < 300 or bool(row['errors']))
