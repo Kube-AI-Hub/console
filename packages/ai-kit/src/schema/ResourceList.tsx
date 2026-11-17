@@ -777,8 +777,20 @@ export function ResourceList<TRow>({
             title={narrowed ? schema.empty?.noMatchTitle ?? '没有匹配的结果' : schema.empty?.title ?? '暂无数据'}
             description={narrowed ? schema.empty?.noMatchDescription : schema.empty?.description}
             action={
-              onSearchChange || onFiltersChange || onRefresh ? (
+              onSearchChange || onFiltersChange || onRefresh || (primaryAction && !primaryAction.disabled) ? (
                 <div className="flex flex-wrap items-center justify-center gap-2">
+                  {/* An empty list is exactly where a create button earns its place: the header one is
+                      easy to miss when the table body is what drew the eye. */}
+                  {primaryAction && !primaryAction.disabled ? (
+                    <Button
+                      size="sm"
+                      variant="primary"
+                      data-ai-id="empty-state:primary"
+                      onClick={() => onAction?.(primaryAction.key, undefined as unknown as TRow)}
+                    >
+                      {primaryAction.label}
+                    </Button>
+                  ) : null}
                   {onSearchChange || onFiltersChange ? (
                     <Button
                       size="sm"
