@@ -316,6 +316,11 @@ python3 tools/multicluster_sweep.py … --budget 600
 
 超时后打印 `ABORTED: budget of N s exceeded` 并**退出码 3**——与「跑完但有缺陷」(1)、「环境不可用」(2) 区分。
 
+**2026-11-17 19:00 实测：预算没能兜住。** 上游在数据归属段后变 502，进程停住；设了 `--budget 1700`（28 分钟）
+但 55 分钟后日志仍停在最后一行、既没有 `ABORTED` 也没有 `EXIT=`，`ps` 里进程已不在。原因待查
+（`signal.alarm` 只在 Python 字节码边界投递，若阻塞在 Playwright 的同步调用里可能不触发）。
+**结论：目前仍需人工 kill，预算不能当作唯一保险。**
+
 ## 19. 企业空间作用域：整个区域此前没有被巡检过
 
 巡检只覆盖了集群级与项目级，**企业空间（workspace）的八个页面从来没被走过**。本轮补上 `--scope workspace`：
