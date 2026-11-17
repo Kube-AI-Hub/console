@@ -265,3 +265,23 @@ baseline PASS in 845s
 
 这是多集群这条线第一个把 **Tab** 也纳入的全绿结果。
 
+### 单集群（B200）同一套命令
+
+```bash
+python3 tools/multicluster_sweep.py --env-file .env --app http://localhost:5178 \
+  --bff http://127.0.0.1:8092 --baseline --clusters host --namespace default --project default
+```
+
+```
+OK   cluster  read: 36 visits, 33 ready, 3 empty, 0 error, 0 failed requests
+OK   project  read: 17 visits, 11 ready, 6 empty, 0 error, 0 failed requests
+     identity: skipped -- a single cluster has nothing to compare against
+OK   detail   read: 6 visits, 6 ok, 0 broken
+OK   tabs     read: 12 tabs, 12 ok, 0 skipped, 0 broken
+OK   interact read: 3 lists, 3 interacted, 0 skipped, 0 broken
+OK   write    host: created=201 on_target=True deleted=200 gone=True
+baseline PASS in 274s
+```
+
+**两个环境各一条命令、都全绿**：A100 845 秒（多集群）、B200 274 秒（单集群）。
+
