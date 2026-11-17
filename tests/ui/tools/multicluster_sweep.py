@@ -724,6 +724,11 @@ EXPECTED_404_RESOURCES = ('resourcequotas', 'limitranges')
 
 def _is_expected_failure(status: int, url: str) -> bool:
     """True when a failed request is one the console handles on purpose."""
+    # The permission review probes the IAM aggregated route first and falls back to the native
+    # authorization API when the route is missing (go-restful answers 500 "no matches for ...").
+    # Both deployments answer 500 there, so every page shows one -- it is the probe, not a defect.
+    if status == 500 and 'iam.kubesphere.io/v1alpha2/selfsubjectaccessreviews' in url:
+        return True
     if status != 404:
         return False
     return any(resource in url for resource in EXPECTED_404_RESOURCES)

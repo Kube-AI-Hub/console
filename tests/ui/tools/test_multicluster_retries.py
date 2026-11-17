@@ -93,3 +93,23 @@ def test_write_verdict_accepts_a_clean_host_write():
 )
 def test_write_verdict_rejects(change):
     assert sweep.write_verdict(outcome(**change)) is False
+
+
+@pytest.mark.parametrize(
+    'status,url,expected',
+    [
+        # The permission review probes the IAM aggregated route and falls back when it is missing.
+        # Both deployments answer 500 there, so every page carries this one request.
+        (500, '/kapis/iam.kubesphere.io/v1alpha2/selfsubjectaccessreviews', True),
+        # A 500 on any other route is a real failure.
+        (500, '/kapis/tenant.kubesphere.io/v1alpha2/workspaces', False),
+        # Member clusters cannot serve quotas or limit ranges (constitution C6).
+        (404, '/kapis/resources.kubesphere.io/v1alpha3/namespaces/x/resourcequotas', True),
+        (404, '/kapis/resources.kubesphere.io/v1alpha3/namespaces/x/limitranges', True),
+        # A 404 anywhere else stays a failure.
+        (404, '/kapis/resources.kubesphere.io/v1alpha3/namespaces/x/configmaps', False),
+        (403, '/kapis/iam.kubesphere.io/v1alpha2/selfsubjectaccessreviews', False),
+    ],
+)
+def test_expected_failures(status, url, expected):
+    assert sweep._is_expected_failure(status, url) is expected
