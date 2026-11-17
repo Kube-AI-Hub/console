@@ -244,43 +244,21 @@ Tab 段实测 **24 个 Tab（两集群各 12）、0 失败**。
 | Tab | 该 Tab 全是 5xx → 再点一次 |
 | 写入 | 5xx → 重试一次 |
 
-## 17. 全绿基线（2026-11-17，工具全部修复后）
+## 17. 全绿基线（六段式，2026-11-17）
 
 ```
-OK   cluster  read: 72 visits, 59 ready, 12 empty, 0 error, 0 failed requests
+OK   cluster  read: 72 visits, 57 ready, 11 empty, 0 error, 0 failed requests
 OK   project  read: 34 visits, 20 ready, 14 empty, 0 error, 0 failed requests
 OK   identity read: 9 collections, 8 distinct, 1 identical, 0 suspect
 OK   detail   read: 12 visits, 12 ok, 0 broken
+OK   tabs     read: 24 tabs, 24 ok, 0 skipped, 0 broken
 OK   interact read: 6 lists, 6 interacted, 0 skipped, 0 broken
-OK   write    host    : created=201 on_target=True  deleted=200 gone=True
-OK   write    xc      : created=201 on_target=True on_host=False deleted=200 gone=True
-baseline PASS in 548s
+OK   write    host / xc: created=201 on_target=True deleted=200 gone=True（xc 上 on_host=False）
+baseline PASS in 845s
 ```
 
-**五段全绿、零失败请求、零掉线、零残留**：
+**六段全绿、零失败请求、零掉线、零残留**：36 页 × 2 集群、17 页 × 2 集群、9 个集合归属比对、
+6 种对象详情、**24 个 Tab**、6 张列表 × 6 项交互、两集群各一次真实写入。
 
-| 段 | 覆盖 |
-| --- | --- |
-| 集群级读 | 36 页 × 2 集群 |
-| 项目级读 | 17 页 × 2 集群 |
-| 数据归属 | 9 个集合（host vs 成员） |
-| 详情页 | 6 种对象 × 2 集群 |
-| 交互 | 6 张列表 × 6 项操作 |
-| 写入落点 | 两集群各一次真实写入 + 清理 |
+这是多集群这条线第一个把 **Tab** 也纳入的全绿结果。
 
-这是多集群这条线**第一个可以放心引用的结果**。
-## 17. 2026-11-17 10:00 起：两个环境同时不可达
-
-| 环境 | 现象 |
-| --- | --- |
-| A100 | `ssh a100` 报 `kex_exchange_identification: Connection reset by peer`；隧道 18091 连不上；登录 502 |
-| B200 | `link_health.py` verdict **degraded**：隧道 18088 超时、`bff-kube` 8 秒超时；登录 502 |
-
-**两套都不可用时不要反复重试**：先确认是环境（ssh / 隧道）而不是代码，然后改做环境无关的工作
-（契约套件、tsc、文档），下一轮再验。
-
-`--baseline` 的内置探针在这种情况下会直接打印 `baseline NOT RUN: the environment is not usable` 并退出码 2——
-这正是它存在的理由。
-
-**同日 12:50 再次中断**（`ssh a100` 依旧 `Connection reset by peer`，隧道进程被回收）。结论不变：先修隧道再谈验证；
-修不动就改做环境无关的工作（契约套件、tsc、文档），不要反复重试。
