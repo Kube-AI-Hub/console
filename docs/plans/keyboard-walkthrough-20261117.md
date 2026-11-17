@@ -101,6 +101,16 @@ OK xc   configmaps / deployments / nodes   stops=10 no_ring=0 first=跳到主要
 python3 tools/multicluster_sweep.py --env-file <env> --app http://localhost:5182 --keyboard-local
 ```
 
+同一条命令还会做**结构性检查**（登录页是每个读者见到的第一屏）：
+
+```
+OK html[lang]              zh-CN
+OK one main landmark       1
+OK one h1                  1
+OK every field has a label -
+OK every button has a name -
+```
+
 **四种主题 × 色调组合**各走一遍（换色调会同时移动焦点环与强调色文字）：
 
 ```

@@ -818,6 +818,38 @@ KEYBOARD_PAGES = (
 KEYBOARD_LOCAL_PAGES = ('login',)
 
 
+def sweep_a11y_local(app: str) -> list[dict]:
+    """Structural accessibility of the one page reachable without a session.
+
+    The login page is the only screen that renders with no cluster, and it is also the screen every
+    reader meets first: a missing landmark, an unlabelled input or a nameless button there is worse
+    than anywhere else. Assertions are the cheap, unambiguous ones -- no heuristics about wording.
+    """
+    from playwright.sync_api import sync_playwright
+
+    checks: list[dict] = []
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        page = browser.new_context(viewport={'width': 1200, 'height': 800}).new_page()
+        page.goto(f'{app}/kube-frontend/login', wait_until='domcontentloaded')
+        page.wait_for_timeout(4000)
+        lang = page.evaluate('() => document.documentElement.lang')
+        checks.append({'check': 'html[lang]', 'ok': bool(lang), 'detail': lang or '(empty)'})
+        mains = page.evaluate("() => document.querySelectorAll('main,[role=main]').length")
+        checks.append({'check': 'one main landmark', 'ok': mains == 1, 'detail': str(mains)})
+        h1s = page.evaluate("() => document.querySelectorAll('h1').length")
+        checks.append({'check': 'one h1', 'ok': h1s == 1, 'detail': str(h1s)})
+        unlabelled = page.evaluate("() => Array.from(document.querySelectorAll('input,select,textarea'))"
+                                   ".filter(el => !(el.labels && el.labels.length) && !el.getAttribute('aria-label') && !el.getAttribute('aria-labelledby'))"
+                                   ".map(el => el.type || el.tagName)")
+        checks.append({'check': 'every field has a label', 'ok': not unlabelled, 'detail': ','.join(unlabelled) or '-'})
+        nameless = page.evaluate("() => Array.from(document.querySelectorAll('button'))"
+                                 ".filter(el => !(el.textContent || '').trim() && !el.getAttribute('aria-label'))"
+                                 ".map(el => el.className.slice(0, 24))")
+        checks.append({'check': 'every button has a name', 'ok': not nameless, 'detail': ','.join(nameless) or '-'})
+        browser.close()
+    return checks
+
 def sweep_keyboard(app: str, token: str | None, clusters: list[str], workspace: str, project: str, stops: int = 10, local_only: bool = False) -> list[dict]:
     """Walk the tab order of a few pages and report where focus goes.
 
@@ -1035,8 +1067,14 @@ def main() -> int:
     clusters = [c.strip() for c in args.clusters.split(',') if c.strip()]
 
     if args.keyboard_local:
+        checks = sweep_a11y_local(args.app)
+        structural = 0
+        for check in checks:
+            flag = 'OK  ' if check['ok'] else 'FAIL'
+            structural += 0 if check['ok'] else 1
+            print(f"{flag} {check['check']:26s} {check['detail']}")
         rows = sweep_keyboard(args.app, None, [], args.workspace, args.project, local_only=True)
-        bad = 0
+        bad = structural
         for row in rows:
             ok = row['stops'] >= 3 and not row['no_ring'] and not row['weak']
             bad += 0 if ok else 1
