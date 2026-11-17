@@ -3,6 +3,9 @@ import { ApiError } from './errors';
 import { baseOf, resourceApi, type KubeObject, type ResourceBase } from './resources';
 import { KAPIS_IAM } from './iam';
 
+/** Read-only aggregate over every resource kind (the console's own gateway). */
+const KAPIS_RESOURCES = '/kapis/resources.kubesphere.io/v1alpha3';
+
 /**
  * Platform-level access control: users, platform roles and workspaces.
  *
@@ -587,6 +590,37 @@ export function workspaceMembersApi(client: Client) {
     }): Promise<WorkspaceMemberResource[]> {
       return readCollection({ ...params, kind: 'namespaces' });
     },
+    /**
+     * Roles this member holds in each project they can reach.
+     *
+     * One role-binding request per project: the binding is namespaced and there is no aggregated
+     * "roles of this user in this workspace" route on the deployments we run. Capped so a workspace
+     * with hundreds of projects cannot turn the detail page into a stampede.
+     */
+    async memberProjectRoles(params: {
+      workspace: string;
+      username: string;
+      cluster?: string;
+      signal?: AbortSignal;
+    }): Promise<Record<string, string[]>> {
+      const projects = await readCollection({ ...params, kind: 'namespaces' });
+      const names = projects.map((project) => project.name).filter(Boolean).slice(0, 60);
+      const entries = await Promise.all(
+        names.map(async (namespace) => {
+          try {
+            const body = await client.request<{ items?: KubeRoleBinding[] }>(
+              `${KAPIS_RESOURCES}/namespaces/${encodeURIComponent(namespace)}/rolebindings`,
+              { query: { limit: -1 }, ...(params.signal ? { signal: params.signal } : {}) },
+            );
+            return [namespace, rolesForUser(body?.items ?? [], params.username)] as const;
+          } catch {
+            // A project the member cannot read is not an error on this page: it simply has no role.
+            return [namespace, []] as const;
+          }
+        }),
+      );
+      return Object.fromEntries(entries);
+    },
     async memberDevops(params: {
       workspace: string;
       username: string;
@@ -797,6 +831,7 @@ interface KubeGroupBinding {
 interface KubeRoleBinding {
   metadata?: { name?: string; labels?: Record<string, string> };
   subjects?: Array<{ kind?: string; name?: string }>;
+  roleRef?: { name?: string; kind?: string };
 }
 
 function generateNameOf(item: KubeAccess): string {
@@ -879,6 +914,23 @@ function workspaceRoleBindingBody(groupName: string, role: string): Record<strin
     subjects: [{ kind: 'Group', apiGroup: 'rbac.authorization.k8s.io', name: groupName }],
     roleRef: { apiGroup: 'iam.kubesphere.io/v1alpha2', kind: 'WorkspaceRole', name: role },
   };
+}
+
+/**
+ * The roles a user holds in one namespace, read from its role bindings.
+ *
+ * KubeSphere binds project roles as ordinary namespaced `RoleBinding`s whose subjects carry the
+ * user name, so "which role does this member have in this project" is a filter, not a new endpoint.
+ */
+export function rolesForUser(bindings: KubeRoleBinding[], username: string): string[] {
+  const roles = new Set<string>();
+  for (const binding of bindings) {
+    const subjects = binding.subjects ?? [];
+    if (!subjects.some((subject) => subject?.name === username)) continue;
+    const role = binding.roleRef?.name;
+    if (role) roles.add(role);
+  }
+  return [...roles].sort();
 }
 
 export function workspaceGroupsApi(client: Client) {

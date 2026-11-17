@@ -42,6 +42,7 @@ function MemberResourceTable({
   loading,
   description,
   emptyTitle,
+  roles,
 }: {
   workspace: string;
   cluster: string;
@@ -50,6 +51,8 @@ function MemberResourceTable({
   loading: boolean;
   description: string;
   emptyTitle: string;
+  /** Project roles by project name; empty for the DevOps tab. */
+  roles: Record<string, string[]>;
 }): React.ReactElement {
   const t = useT();
   // The rows come from four queries that live in the page, so the table cannot refetch them
@@ -87,6 +90,18 @@ function MemberResourceTable({
             ),
         },
         {
+          key: 'roles',
+          hideable: true,
+          title: t('workspace.field.projectRole'),
+          width: 200,
+          hideBelow: 'md',
+          render: (row) => {
+            const held = roles[row.name] ?? [];
+            if (!held.length) return <span className="text-ai-fg-muted">-</span>;
+            return <span className="truncate text-ai-fg">{held.join(', ')}</span>;
+          },
+        },
+        {
           key: 'createdAt',
           hideable: true,
           title: t('workspace.field.createdAt'),
@@ -107,7 +122,7 @@ function MemberResourceTable({
         selected: (count) => t('table.selectedCount', { count }),
       },
     }),
-    [t, description, emptyTitle, kind, workspace, cluster],
+    [t, description, emptyTitle, kind, workspace, cluster, roles],
   );
 
   const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
@@ -146,6 +161,13 @@ export function WorkspaceMemberDetailPage({ workspace, name }: WorkspaceMemberDe
       cluster
         ? members.memberProjects({ workspace, username: name, cluster, signal })
         : members.memberProjects({ workspace, username: name, signal }),
+  });
+  const projectRoles = useQuery({
+    queryKey: ['workspace-member-project-roles', workspace, name, cluster],
+    queryFn: ({ signal }) =>
+      cluster
+        ? members.memberProjectRoles({ workspace, username: name, cluster, signal })
+        : members.memberProjectRoles({ workspace, username: name, signal }),
   });
   const devops = useQuery({
     queryKey: ['workspace-member-devops', workspace, name, cluster],
@@ -240,6 +262,7 @@ export function WorkspaceMemberDetailPage({ workspace, name }: WorkspaceMemberDe
                   workspace={workspace}
                   cluster={cluster || 'host'}
                   kind="projects"
+                  roles={projectRoles.data ?? {}}
                   rows={projects.data ?? []}
                   loading={projects.isPending}
                   description={t('workspace.members.projectsDescription')}
@@ -255,6 +278,7 @@ export function WorkspaceMemberDetailPage({ workspace, name }: WorkspaceMemberDe
                   workspace={workspace}
                   cluster={cluster || 'host'}
                   kind="devops"
+                  roles={{}}
                   rows={devops.data ?? []}
                   loading={devops.isPending}
                   description={t('workspace.members.devopsDescription')}

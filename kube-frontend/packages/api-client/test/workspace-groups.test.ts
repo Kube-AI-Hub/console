@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createClient } from '../src/client';
-import { toWorkspaceGroupSummary, workspaceGroupForest, workspaceGroupsApi } from '../src/access';
+import { rolesForUser, toWorkspaceGroupSummary, workspaceGroupForest, workspaceGroupsApi } from '../src/access';
 
 function json(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json' } });
@@ -140,5 +140,28 @@ describe('workspace group contracts', () => {
     expect(urls[0]).toContain('iam.kubesphere.io%2Fuser-ref%3Dalice');
     expect(methods[1]).toBe('DELETE');
     expect(urls[1]).toContain('/groupbindings/bind-1');
+  });
+});
+
+describe('project roles of a member', () => {
+  /*
+   * KubeSphere binds project roles as ordinary namespaced RoleBindings whose subjects carry the user
+   * name, so this is the only thing standing between a role binding and the column the detail page
+   * shows. Two things must hold: only bindings that actually name this user count, and a user bound
+   * to two roles in one project sees both.
+   */
+  it('collects the roles a user holds and ignores everyone else', () => {
+    const bindings = [
+      { roleRef: { name: 'viewer' }, subjects: [{ kind: 'User', name: 'alice' }] },
+      { roleRef: { name: 'editor' }, subjects: [{ kind: 'User', name: 'alice' }, { kind: 'User', name: 'bob' }] },
+      { roleRef: { name: 'admin' }, subjects: [{ kind: 'User', name: 'bob' }] },
+      { roleRef: { name: 'viewer' }, subjects: [] },
+    ];
+    expect(rolesForUser(bindings, 'alice')).toEqual(['editor', 'viewer']);
+  });
+
+  it('returns nothing for a user with no binding', () => {
+    const bindings = [{ roleRef: { name: 'admin' }, subjects: [{ kind: 'User', name: 'bob' }] }];
+    expect(rolesForUser(bindings, 'carol')).toEqual([]);
   });
 });
