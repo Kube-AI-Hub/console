@@ -240,7 +240,7 @@ SKIP xc     pods                 sort=False search=False requests=0 errors=0
 第一次用 `cluster-workloads` 当部署页的前缀，全 SKIP。实际该页 `search`/`sortAiPrefix` 都由 `kind` 派生
 （`deployments:search`、`deployments:sort:<key>`）。**SKIP 的可见性正是这样救回来的**——如果 SKIP 被算作通过，
 这一轮会得到一个「6 页全绿」的假结论。
-## 13. 四段式基线最终形态
+## 13. 四段式基线（历史，现已扩为七段）
 
 `--baseline` 现在跑四段：**集群级读 → 项目级读 → 详情页 → 交互 → 写入落点**。A100 实测：
 
