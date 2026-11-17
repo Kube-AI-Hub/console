@@ -6,16 +6,34 @@
 #   * `server/` — the routing, static mount, API proxy and the two config endpoints
 #   * `dist/kube-frontend/` — the new console's build
 #
-# The old console's own client (`src/`) is untouched, so its webpack output is
-# reused from the base image instead of rebuilt. That also keeps the build inside
-# this host's disk budget.
+# **`server/` ships as a webpack bundle, not as sources.** The image has no
+# `node_modules`: `scripts/webpack.server.js` inlines every dependency into
+# `dist/server.js`, and the entrypoint runs that file. Copying the raw
+# `server/` directory instead makes the container die at startup with
+# `Cannot find module 'koa'` — the bundle was replaced by files that `require`
+# packages the image does not contain.
 #
-# Build from `console/`:
+# The old console's client (`src/`) is untouched, so its webpack output is reused
+# from the base image instead of rebuilt. That also keeps the build inside this
+# host's disk budget.
+#
+# Build from `console/`, after `yarn build:server` and `hack/build_kube_frontend.sh`:
 #   docker buildx build --platform linux/amd64 --push \
 #     -f build/Dockerfile.kube-frontend-overlay \
 #     -t <registry>/ks-console:<tag> .
 ARG BASE=watering-ai-registry.cn-shanghai.cr.aliyuncs.com/kube-ai-hub/ks-console:develop-20261117-nosupport3@sha256:c85731123e10d45edc2c6b72c7a7ea07496fddc3242d08c30073fdcbe7b020d6
 FROM ${BASE}
 
-COPY server/ /opt/kubesphere/console/server/
+# The bundled server: `dist/server.js` becomes the file the entrypoint runs.
+COPY dist/server.js /opt/kubesphere/console/server/server.js
+
+# Static assets the server reads from disk: locales, views, the sample app and the
+# config it merges `local_config.yaml` over.
+COPY server/config.yaml /opt/kubesphere/console/server/config.yaml
+COPY server/locales/ /opt/kubesphere/console/server/locales/
+COPY server/views/ /opt/kubesphere/console/server/views/
+COPY server/sample/ /opt/kubesphere/console/server/sample/
+COPY server/public/ /opt/kubesphere/console/server/public/
+
+# The new console's build, served by this process on /kube-frontend.
 COPY .build/kube-frontend/dist /opt/kubesphere/console/dist/kube-frontend
