@@ -113,3 +113,33 @@ def test_write_verdict_rejects(change):
 )
 def test_expected_failures(status, url, expected):
     assert sweep._is_expected_failure(status, url) is expected
+
+def test_login_urls_try_the_new_transport_first():
+    """The console moved sign-in from the BFF to ks-apiserver on 2026-11-18; the sweep follows."""
+    urls = sweep.login_urls('http://localhost:5182', 'http://127.0.0.1:8093')
+    assert urls[0] == 'http://localhost:5182/kapis/oauth.kubesphere.io/v1alpha1/login'
+    # The retired BFF route is still tried, on both origins, so an un-upgraded deployment works.
+    assert 'http://localhost:5182/api/session/login' in urls
+    assert 'http://127.0.0.1:8093/api/session/login' in urls
+
+
+def test_login_urls_do_not_repeat_one_origin():
+    urls = sweep.login_urls('http://localhost:5182/', 'http://localhost:5182')
+    assert urls == [
+        'http://localhost:5182/kapis/oauth.kubesphere.io/v1alpha1/login',
+        'http://localhost:5182/api/session/login',
+    ]
+
+
+@pytest.mark.parametrize(
+    'url,expected',
+    [
+        ('/api/session/me', True),
+        ('/oauth/userinfo', True),
+        ('/oauth/userinfo?x=1', True),
+        ('/kapis/resources.kubesphere.io/v1alpha3/pods', False),
+        ('/kapis/oauth.kubesphere.io/v1alpha1/login', False),
+    ],
+)
+def test_session_probes(url, expected):
+    assert sweep._is_session_probe(url) is expected

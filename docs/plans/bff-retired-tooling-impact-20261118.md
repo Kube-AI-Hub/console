@@ -24,6 +24,20 @@ BFF 退役后这三条都要重新确认：
   `login.oauth.kubesphere.io is forbidden: User "system:anonymous"`）；
 - 会话是 bearer token 还是 cookie。
 
+## 已完成的适配（2026-11-18）
+
+| 改动 | 内容 |
+| --- | --- |
+| 登录 | `login()` 按 `LOGIN_PATHS` 依次尝试：先 `POST {app}/kapis/oauth.kubesphere.io/v1alpha1/login`，再退回 `POST {bff}/api/session/login`；两个 origin 都试 |
+| 会话探针 | 认证握手从 `/api/session/me` 扩展到 `/oauth/userinfo`（`SESSION_PROBES`），401 仍不计为页面缺陷 |
+| 单元测试 | 新增 3 条：新传输优先且不重复同一 origin；探针路径判定 5 例。共 **33 条** |
+
+这样在**后端升级前后都能跑**：升级前走 BFF 老路，升级后走新路，工具自己不需要人工切换。
+
+## 仍待验证
+
+新路要等部署升级后才能在真实环境验证（当前 `/kapis/oauth.kubesphere.io/v1alpha1/login` 仍 403）。
+
 ## 下一步（按顺序）
 
 1. 读 ks-console 侧的转发/登录实现，确认浏览器实际发的登录请求与响应形态；

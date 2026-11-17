@@ -117,15 +117,54 @@ def _env(path: str) -> dict[str, str]:
     return values
 
 
-def login(bff: str, username: str, password: str) -> str:
-    """Token from the BFF, so the sweep uses the same session the pages do."""
-    request = urllib.request.Request(
-        f'{bff}/api/session/login',
-        data=json.dumps({'username': username, 'password': password}).encode(),
-        headers={'content-type': 'application/json'},
-    )
-    with urllib.request.urlopen(request, timeout=30) as response:
-        return json.load(response)['token']
+#: Where a sign-in happens, in the order the console itself changed on 2026-11-18.
+#:
+#: The new console asks ks-apiserver directly (`/kapis/oauth.kubesphere.io/v1alpha1/login`), and the
+#: BFF that used to do the password grant is retired. The old route stays second so a deployment that
+#: has not been upgraded yet can still be swept -- the sweep then says which one answered.
+LOGIN_PATHS = (
+    '/kapis/oauth.kubesphere.io/v1alpha1/login',
+    '/api/session/login',
+)
+
+
+#: Paths the console polls to learn whether the session is still good. The 401 they answer during a
+#: sign-in is the handshake, not a page defect; the new transport moved this from the BFF route to the
+#: OIDC one.
+SESSION_PROBES = ('/api/session/me', '/oauth/userinfo')
+
+
+def _is_session_probe(url: str) -> bool:
+    """True when the URL is a session handshake rather than a page's data."""
+    return any(url.split('?')[0].endswith(path) for path in SESSION_PROBES)
+
+def login_urls(app: str, bff: str) -> list[str]:
+    """Candidate sign-in URLs, new transport first. The app origin serves both when they match."""
+    origins = [app.rstrip('/')]
+    if bff and bff.rstrip('/') != origins[0]:
+        origins.append(bff.rstrip('/'))
+    return [origin + path for origin in origins for path in LOGIN_PATHS]
+
+
+def login(bff: str, username: str, password: str, app: str = '') -> str:
+    """Token from whichever sign-in route this deployment offers.
+
+    Tries the new ks-apiserver route on the app origin first, then the retired BFF route. Raises the
+    last error so a caller's message names the last thing it tried.
+    """
+    last: Exception | None = None
+    for url in login_urls(app or bff, bff):
+        request = urllib.request.Request(
+            url,
+            data=json.dumps({'username': username, 'password': password}).encode(),
+            headers={'content-type': 'application/json'},
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=30) as response:
+                return json.load(response)['token']
+        except Exception as cause:  # noqa: BLE001 - try the next transport, then re-raise
+            last = cause
+    raise last if last is not None else RuntimeError('no login route configured')
 
 
 def page_url(app: str, cluster: str, segment: str, scope: str, workspace: str, project: str) -> str:
@@ -203,7 +242,7 @@ def sweep(
                     # `/api/session/me` answering 401 is the auth handshake, not a page defect: the
                     # app asks before the token is applied. Counting it would put a red mark on
                     # whichever page happened to be open at that moment.
-                    if response.url.endswith('/api/session/me'):
+                    if _is_session_probe(response.url):
                         return
                     if _is_expected_failure(response.status, response.url):
                         return
@@ -250,7 +289,7 @@ def sweep(
                     fresh = token
                     if creds:
                         try:
-                            fresh = login(bff, creds[0], creds[1])
+                            fresh = login(bff, creds[0], creds[1], app)
                             token = fresh
                         except Exception:
                             fresh = token
@@ -429,7 +468,7 @@ def sweep_details(
                 failures: list[tuple[int, str]] = []
 
                 def record(response, sink=failures):
-                    if response.status < 400 or response.url.endswith('/api/session/me'):
+                    if response.status < 400 or _is_session_probe(response.url):
                         return
                     if _is_expected_failure(response.status, response.url):
                         return
@@ -523,7 +562,7 @@ def sweep_interactions(
                              'columns': False, 'filter': False, 'requests': 0}
 
                     def record(response, sink=failures):
-                        if response.status < 400 or response.url.endswith('/api/session/me'):
+                        if response.status < 400 or _is_session_probe(response.url):
                             return
                         if _is_expected_failure(response.status, response.url):
                             return
@@ -815,7 +854,7 @@ def preflight(app: str, bff: str, creds: tuple[str, str], attempts: int = 3) -> 
     """
     import time
 
-    status, _ = _call(bff, '', 'GET', '/api/session/me')
+    status, _ = _call(bff, '', 'GET', '/api/session/me' if '/oauth/userinfo' not in bff else '/oauth/userinfo')
     if status not in (200, 401):
         print(f'preflight: BFF {bff} answered {status} on /api/session/me')
         return None
@@ -833,7 +872,7 @@ def preflight(app: str, bff: str, creds: tuple[str, str], attempts: int = 3) -> 
 
     for attempt in range(attempts):
         try:
-            token = login(bff, creds[0], creds[1])
+            token = login(bff, creds[0], creds[1], app)
         except Exception as cause:
             print(f'preflight: login attempt {attempt + 1}/{attempts} failed ({type(cause).__name__})')
             time.sleep(3)
@@ -1244,7 +1283,7 @@ def baseline(args, token: str, clusters: list[str], allowed: set[str] | None = N
 
     if creds:
         try:
-            token = login(args.bff, creds[0], creds[1])
+            token = login(args.bff, creds[0], creds[1], args.app)
         except Exception:
             pass
     tab_rows = sweep_tabs(args.app, args.bff, token, clusters, args.workspace, args.project)
