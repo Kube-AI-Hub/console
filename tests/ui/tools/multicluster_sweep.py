@@ -823,8 +823,28 @@ def sweep_keyboard(app: str, token: str, clusters: list[str], workspace: str, pr
     from playwright.sync_api import sync_playwright
 
     js = ("() => { const el = document.activeElement; if (!el) return null; const cs = getComputedStyle(el);"
+          " const parse = (value) => { const m = /rgba?\\(([\\d.]+)[,\\s]+([\\d.]+)[,\\s]+([\\d.]+)(?:[,\\/\\s]+([\\d.]+))?\\)/.exec(value || '');"
+          "   if (!m) return null; return [Number(m[1]), Number(m[2]), Number(m[3]), m[4] === undefined ? 1 : Number(m[4])]; };"
+          " const lum = (c) => { const f = (v) => { const s = v / 255; return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4); };"
+          "   return 0.2126 * f(c[0]) + 0.7152 * f(c[1]) + 0.0722 * f(c[2]); };"
+          " const ratio = (a, b) => { const la = lum(a), lb = lum(b); return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05); };"
+          " let bg = null, node = el;"
+          " while (node && !bg) { const c = parse(getComputedStyle(node).backgroundColor); if (c && c[3] > 0.9) bg = c; node = node.parentElement; }"
+          " if (!bg) bg = [255, 255, 255, 1];"
+          " const ringColours = [];"
+          " let probe = el;"
+          " for (let level = 0; level < 3 && probe; level += 1) {"
+          "   const pcs = getComputedStyle(probe);"
+          "   if (pcs.outlineStyle !== 'none' && parseFloat(pcs.outlineWidth) > 0) { const c = parse(pcs.outlineColor); if (c) ringColours.push(c); }"
+          "   if (parseFloat(pcs.borderTopWidth) > 0) { const c = parse(pcs.borderTopColor); if (c) ringColours.push(c); }"
+          "   if (pcs.boxShadow && pcs.boxShadow !== 'none') {"
+          "     for (const shadow of pcs.boxShadow.split(/,(?![^(]*\\))/)) { const c = parse(shadow); if (c) ringColours.push(c); }"
+          "   }"
+          "   probe = probe.parentElement;"
+          " }"
+          " const ratios = ringColours.map((c) => Number(ratio(c, bg).toFixed(2)));"
           " return { id: (el.getAttribute('data-ai-id') || el.getAttribute('aria-label') || (el.textContent||'').trim().slice(0,24) || el.tagName),"
-          " tag: el.tagName, ring: (cs.outlineStyle !== 'none' && cs.outlineWidth !== '0px') || cs.boxShadow !== 'none' }; }")
+          "   tag: el.tagName, ring: ringColours.length > 0, best: ratios.length ? Math.max(...ratios) : null }; }")
     results: list[dict] = []
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch()
@@ -858,6 +878,8 @@ def sweep_keyboard(app: str, token: str, clusters: list[str], workspace: str, pr
                         'page': segment,
                         'stops': len(walk),
                         'no_ring': [entry['id'] for entry in walk if not entry['ring']],
+                        'weak': [entry['id'] for entry in walk if entry['ring'] and (entry['best'] or 0) < 3],
+                        'worst': min([entry['best'] for entry in walk if entry['ring']] or [None], default=None),
                         'first': walk[0]['id'] if walk else '',
                         'order': [entry['id'][:24] for entry in walk[:6]],
                     })
@@ -997,12 +1019,14 @@ def main() -> int:
         rows = sweep_keyboard(args.app, token, clusters, args.workspace, args.project)
         bad = 0
         for row in rows:
-            ok = row['stops'] >= 5 and not row['no_ring']
+            ok = row['stops'] >= 5 and not row['no_ring'] and not row['weak']
             bad += 0 if ok else 1
             flag = 'OK  ' if ok else 'FAIL'
-            print(f"{flag} {row.get('theme','dark'):5s} {row['cluster']:6s} {row['page']:14s} stops={row['stops']:<3d} no_ring={len(row['no_ring'])} first={row['first'][:24]}")
+            print(f"{flag} {row.get('theme','dark'):5s} {row['cluster']:6s} {row['page']:14s} stops={row['stops']:<3d} no_ring={len(row['no_ring'])} weak={len(row['weak'])} worst={row['worst']} first={row['first'][:24]}")
             if row['no_ring']:
                 print(f"       no ring: {row['no_ring'][:3]}")
+            if row['weak']:
+                print(f"       焦点环对比度不足 3:1: {row['weak'][:3]}")
         return 1 if bad else 0
 
     if args.tabs and not args.baseline:

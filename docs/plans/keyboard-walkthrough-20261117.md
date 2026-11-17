@@ -74,7 +74,26 @@ OK host configmaps / deployments / nodes   stops=10 no_ring=0 first=跳到主要
 OK xc   configmaps / deployments / nodes   stops=10 no_ring=0 first=跳到主要内容
 ```
 
-## 6. 未覆盖
+## 6. 焦点环的**渲染层**对比度（本轮补上）
+
+之前只断言「有可见的 outline/box-shadow」。现在每个停靠点还会：
+
+1. 取元素**及其上两级祖先**的 `outline`、`box-shadow`、`border` 颜色（组件常把环画在外层包装上，内层 `<input>` 主动 `outline-none`）；
+2. 向上找第一个不透明的背景色；
+3. 用 WCAG 公式算最高一档指示色对该背景的对比度，**低于 3:1 判为不达标**（SC 1.4.11）。
+
+在**登录页**（不需要集群）冒烟验证过：
+
+| 停靠点 | 指示色来源 | 对比度 |
+| --- | --- | --- |
+| 用户名输入框 | 聚焦态边框 `border-ai-accent`（环是 25% 透明，只有 2.0:1，但边框够） | **3.59** |
+| 显示密码按钮 | 环 | **5.36** |
+| 登录按钮 | 环 | **4.24** |
+
+**发现**：输入框的环是 `ring-ai-accent/25`，单独看只有 2.0:1；靠 `focus-visible:border-ai-accent` 这个第二指示才达标。
+只测环会误判为缺陷，只测边框会漏掉按钮类控件——**两者都要测，取最高的一档**。
+
+## 7. 未覆盖
 
 - **焦点环的对比度数值**没有测量（只断言「有可见的 outline/box-shadow」）；
 - `host` 的双主题遍待 A100 恢复后补跑。
