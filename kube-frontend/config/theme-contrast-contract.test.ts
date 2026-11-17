@@ -109,6 +109,25 @@ describe('theme contrast', () => {
     expect(darkFg?.every((channel) => Number.isInteger(channel) && channel >= 0 && channel <= 255)).toBe(true);
   });
 
+  /*
+   * The cascade guard.
+   *
+   * The first version of this file searched the chain forwards, so `:root` answered for every
+   * token and all six combinations resolved to the dark palette -- six checks that were really one.
+   * Nothing failed, because the dark palette passes. This asserts the themes are actually distinct,
+   * which is what makes the matrix below meaningful.
+   */
+  it('resolves a different palette for each theme', () => {
+    const seen = new Map<string, string>();
+    for (const theme of THEMES) {
+      const bg = resolve('--ai-bg', theme.chain);
+      expect(bg, `${theme.name}: --ai-bg 解析不出来`).not.toBeNull();
+      seen.set(theme.name, (bg as Triple).join(','));
+    }
+    const distinct = new Set(seen.values());
+    expect(distinct.size, `六个主题只解析出 ${distinct.size} 种背景色：${[...seen.entries()].map(([k, v]) => `${k}=${v}`).join(' | ')}`).toBeGreaterThanOrEqual(5);
+  });
+
   it('keeps every text token at WCAG AA on every background in every theme', () => {
     const failures: string[] = [];
     let worst = { ratio: Number.POSITIVE_INFINITY, where: '' };

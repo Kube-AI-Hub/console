@@ -47,7 +47,21 @@ Test Files  18 passed (18)
 Tests       1500 passed (1500)
 ```
 
-## 5. 反思
+## 5. 加一条守卫：主题必须真的不同
+
+```ts
+it('resolves a different palette for each theme', () => { … expect(distinct.size).toBeGreaterThanOrEqual(5); });
+```
+
+**负向验证**：把 `[...chain].reverse().find` 改回 `chain.find`，这条立刻失败并打印：
+
+```
+六个主题只解析出 1 种背景色：default (dark)=20,33,90 | light=20,33,90 | … 全部相同
+```
+
+恢复后 4 条全过。以后谁把级联方向改回去，第一条守卫就会喊。
+
+## 6. 反思
 
 | # | 规则 |
 | --- | --- |
