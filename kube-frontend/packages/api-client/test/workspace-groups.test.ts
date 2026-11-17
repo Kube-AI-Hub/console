@@ -71,7 +71,7 @@ describe('workspace group contracts', () => {
   });
 
   it('creates a group with generateName then posts a workspace role binding array', async () => {
-    const calls: { url: string; method?: string; body?: string }[] = [];
+    const calls: { url: string; method?: string | undefined; body?: string | undefined }[] = [];
     const client = createClient({
       fetchImpl: (async (input, init) => {
         const url = String(input);
@@ -100,7 +100,7 @@ describe('workspace group contracts', () => {
   });
 
   it('adds members as a userName/groupName array after the account exists', async () => {
-    const calls: { url: string; method?: string; body?: string }[] = [];
+    const calls: { url: string; method?: string | undefined; body?: string | undefined }[] = [];
     const client = createClient({
       fetchImpl: (async (input, init) => {
         calls.push({ url: String(input), method: init?.method, body: init?.body ? String(init.body) : undefined });

@@ -248,6 +248,18 @@ export function InstalledAppsPage({ workspace, project, cluster = 'host' }: Inst
 
   return (
     <AiSurface as="section" aiId="installed-apps:surface" state={state} className="min-w-0">
+      {project ? (
+        <div className="mb-3 flex justify-end">
+          <Link
+            to="/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/applications/composing"
+            params={{ workspace, cluster, namespace: project }}
+            className="text-xs text-ai-link hover:underline"
+            data-ai-id="installed-apps:composed-link"
+          >
+            {t('composedApps.title')}
+          </Link>
+        </div>
+      ) : null}
       <div data-ai-id="installed-apps:table">
         <ResourceList
         {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}

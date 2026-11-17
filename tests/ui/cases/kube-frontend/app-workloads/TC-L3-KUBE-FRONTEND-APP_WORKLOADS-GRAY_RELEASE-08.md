@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/app-workloads/gray-release.md`](../../../../prd/kube-frontend/app-workloads/gray-release.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-08** — 已知当前身份对 strategies 有 create/delete 权限，则列表创建入口与详情删除入口可见可用，且页面发出对 `servicemesh.kubesphere.io` 组 `strategies` 资源的 `SelfSubjectAccessReview`（create/delete）；当权限检查明确返回 `allowed=false` 时，创建按钮禁用并显示「没有创建灰度发布的权限」、删除入口不渲染；当权限检查失败或未返回时保持可用（fail-open），不因检查失败禁用写入口。
+- **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-08** — 已知当前身份对 strategies 有 create/delete 权限，则列表创建入口与详情删除入口可见可用，且页面发出对 `servicemesh.kubesphere.io` 组 `strategies` 资源的权限检查（ks-apiserver IAM，以请求用户求值；旧后端回退 `SelfSubjectAccessReview`；create/delete）；当权限检查明确返回 `allowed=false` 时，创建按钮禁用并显示「没有创建灰度发布的权限」、删除入口不渲染；当权限检查失败或未返回时保持可用（fail-open），不因检查失败禁用写入口。
 
 ### 关联设计
 

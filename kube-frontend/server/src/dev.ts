@@ -1,4 +1,5 @@
 import { loadConfig } from './config';
+import { loadDocs } from './docs';
 import { loadManifest, startServer } from './index';
 
 /**
@@ -20,6 +21,7 @@ async function main(): Promise<void> {
   const server = await startServer(port, {
     config,
     manifest: loadManifest,
+    docs: loadDocs(process.env),
     ...(staticDir === undefined || staticDir === '' ? {} : { staticDir }),
   });
   console.log(`[bff] listening on http://127.0.0.1:${port}`);

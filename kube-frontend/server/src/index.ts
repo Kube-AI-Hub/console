@@ -6,6 +6,7 @@ import { createUpgradeHandler } from './upgrade';
 import { bearerToken, login, logout, resolveCurrentUser, type OAuthClientConfig } from './auth/session';
 import { badRequest } from './errors';
 import { serveStatic, stripAppPrefix } from './static';
+import { DEFAULT_DOCS, type DocsUrls } from './docs';
 
 export interface HandlerDeps {
   config: UpstreamConfig;
@@ -14,6 +15,13 @@ export interface HandlerDeps {
   manifest?: () => Promise<unknown>;
   /** OAuth client used for the password grant; defaults to the old console's. */
   oauthClient?: OAuthClientConfig;
+  /**
+   * Documentation links exposed to the SPA at `GET /api/config`.
+   *
+   * Deployment-specific, so it comes from the environment (see `docs.ts`); the
+   * defaults match the old console's relative doc paths.
+   */
+  docs?: DocsUrls;
   /**
    * Built SPA directory (`STATIC_DIR`).
    *
@@ -72,6 +80,16 @@ export function createHandler(deps: HandlerDeps) {
 
       if (pathname.startsWith('/api/session')) {
         return await handleSession(deps, oauthClient, request, response, pathname);
+      }
+
+      /*
+       * Public, deployment-specific configuration the SPA cannot know at build time.
+       * Unauthenticated on purpose: it contains no credentials, and the login page
+       * itself may need to read it later (branding/docs).
+       */
+      if (pathname === '/api/config') {
+        if (request.method !== 'GET') return send(response, 405, { code: 'method_not_allowed', status: 405 });
+        return send(response, 200, { documents: deps.docs ?? DEFAULT_DOCS });
       }
 
       if (isProxiedPath(pathname)) {

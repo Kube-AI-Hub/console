@@ -1,12 +1,19 @@
 import * as React from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link, useParams } from '@tanstack/react-router';
-import { persistentVolumesApi, type KubeObject, type PersistentVolumeDetail } from '@kube-ai-hub/api-client';
+import { Link, useNavigate, useParams } from '@tanstack/react-router';
+import {
+  annotationKeys,
+  persistentVolumesApi,
+  type KubeObject,
+  type PersistentVolumeDetail,
+} from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, Button, Skeleton } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
-import { MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
+import { errorMessage, MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
+import { DeleteDialog } from '@/components/resource/DeleteDialog';
+import { EditInfoDialog } from '@/components/resource/EditInfoDialog';
 import { YamlDialog } from '@/components/resource/YamlDialog';
 import { toYaml } from '@/components/resource/yaml';
 import { DefinitionRow } from '@/components/resource/DefinitionRow';
@@ -20,18 +27,21 @@ import { formatTimestamp } from '@/lib/time';
  * what happens to its data when the claim goes away. Those three questions decide whether
  * deleting a claim is safe, and none of them fit the list row.
  *
- * 编辑 YAML mirrors the old console, but delete stays out on purpose: a volume is
- * usually the only copy of its data, and `reclaimPolicy: Delete` means deleting the
- * object also destroys the backing storage. That operation deserves its own design
- * rather than a button added in passing.
+ * Writes (edit info / edit YAML / delete) were re-included on 2026-11-17 (N-11). Delete is
+ * constrained, not hidden: `Bound` / `Released` volumes cannot be removed here, and the
+ * reason is visible beside the disabled button. Removing the console button never removed
+ * the capability — it moved the操作 to kubectl, which has no status guard at all.
  */
 export interface PersistentVolumeDetailPageProps {
   cluster: string;
 }
 
+const UNDELETABLE = new Set(['Bound', 'Released']);
+
 export function PersistentVolumeDetailPage({ cluster }: PersistentVolumeDetailPageProps): React.ReactElement {
   const t = useT();
   const { name } = useParams({ from: '/kube-frontend/clusters/$cluster/persistentvolumes/$name' });
+  const navigate = useNavigate();
 
   const query = useQuery({
     queryKey: ['persistent-volume-detail', name],
@@ -40,42 +50,62 @@ export function PersistentVolumeDetailPage({ cluster }: PersistentVolumeDetailPa
 
   const queryClient = useQueryClient();
   const [editingYaml, setEditingYaml] = React.useState(false);
-  /**
-   * 编辑 YAML, added to close the parity gap with the old console.
-   *
-   * The write is a read-then-PUT with the current `resourceVersion`; the dialog keeps
-   * its text on failure. Delete stays out of the page: a volume is usually the only
-   * copy of its data, and `reclaimPolicy: Delete` means removing the object also
-   * removes the backing storage.
-   */
+  const [editingInfo, setEditingInfo] = React.useState(false);
+  const [deleting, setDeleting] = React.useState(false);
+
   const update = useMutation({
     mutationFn: (body: KubeObject) => persistentVolumesApi(apiClient).update({ name, body }),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['persistent-volume-detail', name] }),
+  });
+  const updateInfo = useMutation({
+    mutationFn: (annotations: Record<string, string>) => persistentVolumesApi(apiClient).updateInfo({ name, annotations }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['persistent-volume-detail', name] }),
+  });
+  const remove = useMutation({
+    mutationFn: () => persistentVolumesApi(apiClient).remove({ names: [name] }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['persistentvolumes'] });
+      void navigate({ to: '/kube-frontend/clusters/$cluster/persistentvolumes', params: { cluster } });
+    },
   });
 
   const state = query.isPending ? 'loading' : query.isError ? 'error' : 'ready';
   const volume = query.data as PersistentVolumeDetail | undefined;
   const [, claimName] = (volume?.claim ?? '').split('/');
+  const protectedVolume = volume ? UNDELETABLE.has(volume.status) : false;
 
   return (
     <AiSurface as="section" aiId="pv-detail:surface" state={state} className="flex min-w-0 flex-col gap-4">
-      <header className="flex flex-col gap-1">
+      <header className="flex flex-col gap-2">
         <Link to="/kube-frontend/clusters/$cluster/persistentvolumes" params={{ cluster }} className="text-sm text-ai-link hover:underline">
           ← {t('cluster.persistentVolumes.title')}
         </Link>
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="text-lg font-semibold text-ai-fg">{name}</h1>
           {volume ? <Badge tone={volume.status === 'Bound' ? 'success' : 'neutral'}>{volume.status}</Badge> : null}
-          <Button
-            variant="secondary"
-            size="sm"
-            className="ml-auto"
-            {...actionProps('pv-detail:edit-yaml')}
-            onClick={() => setEditingYaml(true)}
-          >
-            {t('resource.action.editYaml')}
-          </Button>
+          <div className="ml-auto flex items-center gap-2">
+            <Button variant="secondary" size="sm" {...actionProps('pv-detail:edit-info')} onClick={() => setEditingInfo(true)}>
+              {t('resource.action.editInfo')}
+            </Button>
+            <Button variant="secondary" size="sm" {...actionProps('pv-detail:edit-yaml')} onClick={() => setEditingYaml(true)}>
+              {t('resource.action.editYaml')}
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              disabled={protectedVolume}
+              {...actionProps('pv-detail:delete')}
+              onClick={() => setDeleting(true)}
+            >
+              {t('common.delete')}
+            </Button>
+          </div>
         </div>
+        {protectedVolume ? (
+          <p className="text-[11px] text-ai-fg-muted" data-ai-id="pv-detail:delete-protected">
+            {t('cluster.persistentVolumes.deleteProtected')}
+          </p>
+        ) : null}
       </header>
 
       {state === 'loading' ? <Skeleton className="h-40 w-full" /> : null}
@@ -131,7 +161,7 @@ export function PersistentVolumeDetailPage({ cluster }: PersistentVolumeDetailPa
         </React.Fragment>
       ) : null}
 
-      <MutationAlert error={update.error} />
+      <MutationAlert error={update.error ?? updateInfo.error ?? remove.error} />
 
       {volume ? (
         <YamlDialog
@@ -145,6 +175,39 @@ export function PersistentVolumeDetailPage({ cluster }: PersistentVolumeDetailPa
           onSubmit={async (object) => {
             await update.mutateAsync(object);
             setEditingYaml(false);
+          }}
+        />
+      ) : null}
+
+      {volume ? (
+        <EditInfoDialog
+          open={editingInfo}
+          onOpenChange={setEditingInfo}
+          resource="pv-detail"
+          name={volume.name}
+          alias={volume.annotations[annotationKeys.alias] ?? ''}
+          description={volume.annotations[annotationKeys.description] ?? ''}
+          annotations={volume.annotations}
+          pending={updateInfo.isPending}
+          onSubmit={async (annotations) => {
+            await updateInfo.mutateAsync(annotations);
+            setEditingInfo(false);
+          }}
+        />
+      ) : null}
+
+      {volume ? (
+        <DeleteDialog
+          open={deleting}
+          onOpenChange={setDeleting}
+          names={[name]}
+          resource="pv-detail"
+          noun={t('cluster.persistentVolumes.noun')}
+          pending={remove.isPending}
+          {...(remove.error ? { error: errorMessage(t, remove.error) } : {})}
+          onConfirm={async () => {
+            await remove.mutateAsync();
+            setDeleting(false);
           }}
         />
       ) : null}

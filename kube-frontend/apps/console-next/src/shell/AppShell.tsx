@@ -10,6 +10,8 @@ import { projectPageSegment } from '@/areas/scope';
 import { ClusterSwitcher } from '@/shell/ClusterSwitcher';
 import { UserSettingsDialog } from '@/shell/UserSettingsDialog';
 import { AboutDialog } from '@/shell/AboutDialog';
+import { HelpMenu } from '@/shell/HelpMenu';
+import { Toolbox } from '@/shell/Toolbox';
 import { readLastCluster } from '@/lib/lastCluster';
 
 /**
@@ -791,6 +793,7 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
               return rows;
             })}
           />
+          <HelpMenu />
           <Dropdown
             align="end"
             trigger={localeButton}
@@ -901,6 +904,8 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
           <div className="w-full max-w-[1800px]">{children}</div>
         </main>
       </div>
+      {/* Fixed to the viewport, so it must sit outside the scrolling columns. */}
+      <Toolbox />
     </div>
   );
 }

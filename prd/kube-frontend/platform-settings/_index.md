@@ -2,11 +2,11 @@
 
 [上级模块](../_index.md)
 
-平台自身的配置：平台信息与通知渠道。地址形如 `/kube-frontend/settings/<page>`，不属于任何项目或集群。
+平台自身的配置：平台信息、通知渠道与第三方登录。地址形如 `/kube-frontend/settings/<page>`，不属于任何项目或集群。
 
 ## 概述
 
-- **路由**：`/kube-frontend/settings/{info,notifications}`
+- **路由**：`/kube-frontend/settings/{info,mail,feishu,dingtalk,wecom,slack,webhook,third-login}`；其中 `third-login` 为 2026-11-17 重纳项，尚未实现。
 - **谁用**：平台管理员，确认「平台叫什么、控制台在哪个地址、通知发得出去吗」。
 - **做哪几步**：打开平台信息 → 看名称与地址；切到通知渠道 → 看五种渠道哪些已配置。
 - **看到什么**：三行属性；五个渠道各带「已配置 / 未配置」。
@@ -25,7 +25,7 @@
 
 ## 设计目标
 
-1. 只读呈现，不做可能破坏平台配置的写操作。
+1. 平台信息与渠道凭据保持只读，不做可能破坏平台配置的写操作；第三方登录配置是这条之外的**唯一**写入点（重纳项，见下文「重纳登记」与设计方案的 `DEC-L2-KUBE-FRONTEND-PLATFORM_SETTINGS-03`）。
 2. 未配置是正常状态，显式说明而非留空。
 
 ## 约束与边界
@@ -44,6 +44,7 @@
 |---|---|
 | 平台信息 | `/kube-frontend/settings/info` |
 | 通知渠道 | `/kube-frontend/settings/notifications` |
+| 第三方登录（重纳 N-02，待补） | `/kube-frontend/settings/third-login` |
 
 ## 文案与校验
 
@@ -62,11 +63,22 @@
 |---|---|
 | 平台信息 | [info.md](./info.md) |
 | 通知渠道 | [notifications.md](./notifications.md) |
+| 第三方登录（重纳 N-02，待补） | 待建 `third-login.md`；决定与依赖见 [重纳决策](../../../docs/plans/reinclusion-decisions-20261117.md) 的 N-02 |
+
+## 重纳登记（2026-11-17 产品复核）
+
+产品复核把两条原先登记为「明确不做」的能力重新纳入本模块范围。二者**尚未实现**，本节的用途是让「已决定要做但还没做」和「决定不做」在文档上可区分。
+
+| 重纳项 | 原登记 | 现状 | 待补 |
+|---|---|---|---|
+| N-02 第三方登录（OAuth / GitHub OAuth / LDAP） | 本文件「明确不做」第 2 条、`login.md` 的「约束与边界」 | 无页面、无路由 | `US`/`AC`/`TC` 与本目录 `third-login.md`；接口探测见设计方案 `DEC-L2-KUBE-FRONTEND-PLATFORM_SETTINGS-03` |
+| N-03 资源消费统计（账单） | `capability-matrix.md` §3.1 的「明确不做」 | 无页面；浮动工具箱亦未实现 | 独立功能点；无计量数据源时的文案见设计方案 `DEC-CORE-KUBE-FRONTEND-10` |
+
+**依赖未核实**：第三方登录接口与计量接口的历史结论都是「404 / 无数据源」，且**未记录探测版本与角色**。按[迁移指南](../../legacy-ui-migration-guide.md) §2.3，判定顺序是「①老源码里它调哪个 API →②该组该版本是否被服务 →③实际读一次」；只有试一个版本得到的 404，证明的是那个版本没有，不是没有。
 
 ## 明确不做
 
 - 编辑平台信息与通知渠道（渠道凭据是可读性受限的 Secret）。
-- 第三方登录配置（依赖外部身份提供方）。
 - 读取或显示任何渠道凭据。
 
 ## 假设

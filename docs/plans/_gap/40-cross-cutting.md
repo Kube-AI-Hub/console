@@ -1,5 +1,295 @@
 # 跨页面功能层缺口分析（40-cross-cutting）
 
+> 当前状态：**2026-11-17 复验**（下面 §0）。旧正文（2026-11-14）保留为附录 A，仅作源码线索，**不得据其「无/真缺失」判定当前状态**。
+> 方法见[迁移指南](../../legacy-ui-migration-guide.md) §3.3/§5/§6；当前待复核台账见[能力矩阵](../capability-matrix.md) §0。
+
+## 2026-11-17 复验
+
+### 0.1 复验口径
+
+- **页面级 ✅ ≠ 能力完整**：逐项按原子能力核对（迁移指南 §3.3）。
+- **判定能不能做要探测接口，不读模块开关**（指南 §2.3）。本轮为纯静态源码分析：接口存在性以 `api-client` 端点为证，**未**对部署发请求，凡需真实响应才能定论的标「未核实」。
+- 状态取值：`已交付`（有源码证据）/ `部分` / `待补` / `批准不做`（须有理由）/ `环境阻塞`（须有证据）/ `未核实`。
+- 计数自数，不复制旧数字；每条结论给 `路径:行号`。
+- 唯一写入文件：本文件。
+
+### 0.2 一句话结论
+
+2026-11-14 判定的**四个“架构级缺失”已全部推翻**：BFF 已有 `upgrade`，容器 exec / kubectl / 节点 shell / 容器日志 tail 四条通道都已建立并接入页面。本轮真正剩下的是**能力细节的缺口**（日志检索的筛选维度与导出、少数资源的 YAML/写、企业空间角色的写、实时 watch 只接了 1 页），而不是通道缺失。
+
+### 0.3 八个前置事实（本轮新证据）
+
+| # | 事实 | 证据 |
+| --- | --- | --- |
+| 1 | BFF 已有 WebSocket upgrade 转发，且只放行 exec 路径 | `server/src/upgrade.ts:51-57`（`isExecUpgradePath`）、`server/src/index.ts:214`（`server.on('upgrade', createUpgradeHandler(deps.config))`） |
+| 2 | 鉴权走 `bearer.<token>` 子协议，不用 query（避免 token 进访问日志） | `server/src/upgrade.ts:25-35,77-86` |
+| 3 | 容器 exec 用 kube `v5.channel.k8s.io` 帧协议，`/api/v1/.../exec` | `packages/api-client/src/exec.ts:26-42,130-161` |
+| 4 | 节点 shell 用 kapis `terminal.kubesphere.io/v1alpha2/.../nodes/<name>/exec`，JSON 信封 | `packages/api-client/src/node-terminal.ts:13-16,19-96` |
+| 5 | 前端终端是**真 xterm**（不是 `<pre>`） | `packages/ai-kit/src/terminal/TerminalView.tsx:2-4,51-56`；经 `packages/ui/src/terminal.ts:1` 再导出 |
+| 6 | 容器日志走 HTTP 分块流（`follow=true`），**不是** WebSocket；且实测 `follow` 不能带 `tailLines` | `packages/api-client/src/logs.ts:3-13,71-102` |
+| 7 | 列表实时用 `?watch=true` 的 HTTP watch 流，非 WebSocket | `packages/api-client/src/watch.ts:22-35`、`apps/console-next/src/components/resource/useCollectionWatch.ts:41-73` |
+| 8 | 老 console 的 DEC 已把“不做 WebSocket”写成**被否方案** | `design/kube-frontend/_index.md:91-102`（DEC-CORE-KUBE-FRONTEND-08，含“2026-11-14 推翻”记录） |
+
+### 1. 终端与运维
+
+| 子能力 | 老 console | 新 UI 现状 | 状态 | 证据（新） |
+| --- | --- | --- | --- | --- |
+| 容器 exec | `components/Modals/ContianerTerminal/index.jsx:100-151`（含容器切换 + 状态/镜像/命令/资源面板） | 有：全屏 `size="console"` 弹窗，xterm 渲染，resize 上报，失败可见可重试 | **已交付** | `components/resource/ExecConsoleDialog.tsx:53-78`；入口 `pages/app-workloads/ContainerTerminal.tsx:19` ← `ContainerDetailPage.tsx:212` |
+| kubectl | `components/Modals/KubeCtl/index.jsx:103-118` + 独立窗口 `pages/terminal/index.jsx:70-78` | 有：独立页面 `/clusters/<c>/kubectl`，先取 kubectl Pod 再连 exec | **已交付（形态改进）** | `pages/cluster/KubectlPage.tsx:21-23`；`components/resource/KubectlConsoleDialog.tsx:24-41`；`packages/api-client/src/kubectl.ts:23-31` |
+| 节点 shell | `stores/terminal.js:61-65` | 有：节点列表/节点详情/集群列表三处入口，带危险操作提示 | **已交付（环境受限）** | `NodesPage.tsx:163`、`NodeDetailPage.tsx:183`、`ClusterListPage.tsx:350`、`ExecConsoleDialog.tsx:61` |
+| 独立新窗口承载 | `core/terminal.js:71` 单独 webpack entry | 无独立窗口，改为页内近全屏弹窗 | **有替代（批准）** | 迁移指南 §5 第 151 行要求“独立近全屏弹窗”；`ExecConsoleDialog.tsx:53` `dismissOnEscape={false}` |
+| 容器文件上传/下载 | **老 console 也没有** | 无 | 不构成缺口 | 旧正文已反向核实 |
+| 会话就绪判定 | 老无（连上即用） | 以首次输出为就绪；握手 101 不算成功 | **改进** | `node-terminal.ts:64-82`（注释“Upgrade is not readiness”） |
+
+> **本轮推翻**：旧 §1 的 6 条“真缺失”（含“架构级缺失”定性）全部不成立。
+
+### 2. 日志
+
+#### 2.1 交付面（先确认“在不在”）
+
+| 能力 | 新 UI | 证据 |
+| --- | --- | --- |
+| 容器日志 tail（实时） | 有：`follow=true` 分块流，xterm 渲染，开关式实时 | `pages/app-workloads/ContainerLogsDialog.tsx:46-68` |
+| 容器日志（非实时检索） | 有：走日志检索 API，最近 1h / 200 条 | `ContainerLogsDialog.tsx:22-35` |
+| 日志查询页 | 有：`/clusters/<c>/logs` | `routes/kube-frontend.clusters.$cluster/logs`；`pages/cluster/ClusterLogsPage.tsx:30` |
+| 审计日志页 | 有：`/clusters/<c>/audit-logs` | `pages/cluster/ClusterAuditLogsPage.tsx:29` |
+| 事件检索页 | 有：`/clusters/<c>/events` | `pages/cluster/ClusterEventsPage.tsx:44` |
+| 侧栏入口 | 三页都在「监控告警」组 | `areas/registry.ts:269-271` |
+| 日志收集配置 | 有（只读，批准不做编辑） | `areas/registry.ts:201`；旧正文 parity:37 |
+
+#### 2.2 与老 console 的逐项差异
+
+| # | 老能力 | 老证据 | 新现状 | 状态 |
+| --- | --- | --- | --- | --- |
+| L1 | 集群筛选（多集群时选集群） | `Modals/LogSearch/Logging/Search/index.jsx:446-454` | 无：`ClusterLogsPage` 的 `cluster` 参数**未被使用**（`cluster: _cluster`，`ClusterLogsPage.tsx:30`）；`logSearchApi` 也无 cluster 入参（`search.ts:61-68`） | **待补** |
+| L2 | 工作负载（workload）维度筛选 | 同上 `:468-471`（`workload_query`） | 无：只有 namespace/pod/container/keyword（`ClusterLogsPage.tsx:96-112`） | **待补** |
+| L3 | 精确/模糊查询模式 | `Search/index.jsx:140-143,482-487` | 无 | **待补** |
+| L4 | 自定义时间区间（起止 + step） | `SearchInput/index.jsx:26-28`（DefaultRange/CustomRange） | 只有 4 档预设（`ClusterLogsPage.tsx:23-28`） | **部分** |
+| L5 | 直方图点击下钻到该时间桶 | `Search/index.jsx:226-234,550-556`（`onBarClick`） | 日志/审计页直方图是**不可点的 div**（`ClusterLogsPage.tsx:128-138`）；事件页可点（`ClusterEventsPage.tsx:178-196`） | **部分** |
+| L6 | 导出/下载 `logs.log` | `Search/index.jsx:391-415` | 无（两页均无下载入口） | **待补** |
+| L7 | 关键字高亮 + ANSI 着色 | `Search/index.jsx:284-332`（esMark / ansi_up） | 纯文本渲染（`ClusterLogsPage.tsx:161`） | **待补** |
+| L8 | 实时轮询 + 刷新频率 5/10/15s | `Search/index.jsx:135-138,275-282,334-348` | 日志/审计页无；事件页有 5s 实时开关（`ClusterEventsPage.tsx:80-89,233-241`） | **部分** |
+| L9 | 无限滚动「加载更多」 | `Search/index.jsx:236-254` | 改为上一页/下一页（`ClusterLogsPage.tsx:167-190`） | **有替代（更优）** |
+| L10 | 列显隐（时间/项目/容器可隐藏） | `Search/index.jsx:76-121`（`hidden`） | 日志页是自绘行、无列概念；审计页是固定 6 列表格 | **部分** |
+| L11 | 点击行进入日志详情 | `Search/index.jsx:422-425` | 无 | **待补** |
+| L12 | 审计按 namespace / 响应码筛选 | 老 AuditingSearch 有对应输入 | API 支持（`search.ts:174,178`）但页面只暴露 verb/resource/user/workspace（`ClusterAuditLogsPage.tsx:31-34`） | **部分** |
+| L13 | 容器日志「查看更多」（每次 +1000 行） | `Cards/ContainerLog/index.jsx:130-135` | 无：非实时路径固定 1h/200 条 | **待补** |
+| L14 | 容器日志下载 `.log` | `Cards/ContainerLog/index.jsx:144-167` | 无下载按钮（`ContainerLogsDialog.tsx:76-88` 只有实时/搜索/刷新） | **待补** |
+| L15 | 事件按 message/namespace/kind/name/reason/type 筛选 + 直方图下钻 + 实时 | 老 EventSearch | **全部有**，且直方图与列表共用同一组过滤条件 | **已交付（优于旧）**（`ClusterEventsPage.tsx:36-42,137-141,158-199`） |
+
+> 结论：**三页都在，但日志/审计两页只覆盖了老能力的约六成**；差距集中在筛选维度、导出、高亮、实时与下钻交互。
+
+### 3. 监控图表
+
+| 子能力 | 老 console | 新 UI | 状态 | 证据 |
+| --- | --- | --- | --- | --- |
+| 图表组件 | 自建 `components/Charts`（Area×5、Bar×3、Pie、Custom Tooltip） | `TrendChart`：多序列、可选坐标轴/网格/面积、键盘可导航、NaN 断点不填 0 | **已交付（类型减少）** | `packages/ai-kit/src/primitives/TrendChart.tsx:4-55,96-165`；经 `packages/ui/src/index.ts:56` 导出 |
+| 集群物理资源指标 | 14 类（`Monitor/PhysicalResource/index.jsx:32-302`） | **26 张卡**，按 GPU/主机/磁盘 I/O/网络/RDMA 五组 | **已交付** | `ClusterMonitorPage.tsx:64-120`（`CHARTS` 定义）、分组注释 `:55-60` |
+| 系统组件监控 | etcd/apiserver/scheduler 三页 | 页内三子组（APIServer 速率/延迟按 verb 多序列、Scheduler 按 result、etcd 6 图） | **已交付** | `ClusterMonitorPage.tsx:10`；`componentMonitorQueries.ts` |
+| 时间区间 | `MonitoringController`（step/times 参数化，含自定义） | 4 档预设（1h/6h/24h/7d），各页一致 | **部分** | `ClusterMonitorPage.tsx:31-36`、`GpuResourcePage.tsx:32-38`、`DashboardPanelsPage.tsx:44-51`、`OverviewResourcePanel.tsx:164` |
+| 节点用量排行 | `Monitor/Cluster/Ranking` | 有独立页 `node-usage` + `NodeRankingPanel` | **已交付** | `areas/registry.ts:207`；`NodeRankingPanel.tsx` |
+| 项目/空间用量排行与趋势 | `Overview/{ResourceUsage,UsageRanking}` | 项目概览 CPU/内存 Top5 + 1h/6h/24h 趋势；空间概览用量 + 项目排行 | **已交付** | `ProjectOverviewPage.tsx`；`WorkspaceOverviewPage.tsx`；能力矩阵 §0 两行记录 |
+| GPU 资源页 | `Monitor/Cluster/GPUResource/**` | `gpu-resource` 页 + `GpuMonitorPanel`（单卡五指标） | **已交付** | `areas/registry.ts:260`；`GpuResourcePage.tsx:32-38`；`GpuMonitorPanel.tsx:9-29` |
+| 饼图（节点厂商分布） | `Monitor/Cluster/Overview/index.jsx:201-274`（recharts Pie） | 无饼图；厂商/型号以**节点列表筛选统计**呈现 | **有替代（非等价）** | `NodesPage.tsx:64`（`stats.data.vendors` 作为筛选项）；全仓无 Pie/Donut 组件 |
+| 堆叠柱 / 时间柱（TimeBar） | `Charts/Bar/{SimpleBar,StackedBar,TimeBar}` | 无；日志/审计直方图是自绘 div 条 | **待补** | `ClusterLogsPage.tsx:128-138` |
+| 服务拓扑图 | `components/Graph/**` | 无 | **未核实**（是否随 servicemesh 一并批准不做，旧正文未给依据） | — |
+
+### 4. 编辑能力矩阵（重做）
+
+> 列定义：**YAML**=编辑 YAML；**信息**=编辑别名/描述；**表单**=资源定制编辑表单；**删除**=单条删除。
+> 只填本轮直接读到的证据；未读到的写「未核实」。
+
+| 资源 | YAML | 信息 | 表单 | 删除 | 证据（新 UI） |
+| --- | --- | --- | --- | --- | --- |
+| Deployment | 有 | 有 | 有 | 有 | `WorkloadListPage.tsx:247,263`；`WorkloadDetailPage.tsx:787-788` |
+| StatefulSet | 有 | 有 | 有 | 有 | 同上（同一通用页/弹窗） |
+| DaemonSet | 有 | 有 | 有 | 有 | 同上 |
+| CronJob | 有 | 有 | 有 | 有 | 同上；`EditWorkloadDialog.tsx:21` |
+| Job | 有 | 有 | **无（Pod 模板不可变，设计决定）** | 有 | `EditWorkloadDialog.tsx:22-23` |
+| Pod | 有 | 有 | 无 | 有 | 同一通用页 |
+| Service | 有 | 有 | 有（端口） | 有 | `WorkloadListPage.tsx:254-262`；`ServicePortsDialog.tsx` |
+| Ingress | 有 | 有 | 有（规则） | 有 | `WorkloadListPage.tsx:249-251`；`IngressRulesDialog.tsx` |
+| ConfigMap | 有 | 有 | 有（键值） | 有 | `ConfigMapsPage.tsx:251`；`ConfigMapEditDialogs.tsx` |
+| Secret | 有 | 有 | 有（数据） | 有 | `SecretsPage.tsx:235`；`SecretEditDialogs.tsx` |
+| ServiceAccount | 有 | 有 | 有（角色） | 有 | `ServiceAccountsPage.tsx`；`ServiceAccountRoleDialog.tsx` |
+| PVC | 有 | 有 | 有（扩容/克隆/快照） | 有 | `StorageListPage.tsx:354`；`StorageDetailPage.tsx:259,273` |
+| VolumeSnapshot | 有 | 有 | 无 | 有 | `StorageListPage.tsx`（kind 参数化） |
+| PV | 有 | 无 | 无 | 有 | `PersistentVolumeDetailPage.tsx`（含 YamlDialog/删除） |
+| StorageClass | 有（详情页） | 无 | 无 | **无** | `StorageClassDetailPage.tsx`；`StorageClassesPage.tsx` 无 rowActions 写 |
+| NetworkPolicy | 有 | 未核实 | 有 | 有 | `NetworkPolicyDetailPage.tsx`；`NetworkIsolationPage.tsx:152` |
+| IPPool | **无** | 无 | 无 | **无** | `IpPoolsPage.tsx` 无 actions；`IpPoolDetailPage.tsx` 无 edit/yaml |
+| Node | 有 | 有（标签/污点） | 有（标签/污点） | — | `NodeDetailPage.tsx:113,145,146` |
+| CRD 实例 | **无（只读）** | 无 | 无 | 无 | `CustomResourceDetailPage.tsx` 无 yaml/edit 匹配 |
+| 告警策略（rule group） | 有 | 有 | 有 | 有 | `RuleGroupDetailPage.tsx`；`RuleGroupsPage.tsx`；`RuleGroupDialog.tsx` |
+| 告警消息 | 无 | 无 | 无 | **无（仅详情）** | `ClusterAlertingMessagesPage.tsx:168` |
+| 自定义监控 | 有 | 有 | 有 | 有 | `ClusterCustomMonitoringPage.tsx`；`ProjectCustomMonitoringPage.tsx` |
+| 日志收集 | 无 | 无 | 无 | 无 | 批准不做（parity:37） |
+| 集群级配置字典/保密字典/服务账户 | 无 | 无 | 无 | 无 | 设计上只读、跳转项目页（`ClusterSecretsPage.tsx:21`） |
+| 命名空间 | 无 | 无 | 无 | 无 | 设计只读（`NamespaceDetailPage.tsx:23`） |
+| 集群网关 | 无 | 无 | 无 | 无 | 设计只读（`GatewayDetailPage.tsx:17`） |
+| VolumeSnapshotContent | **无** | **无** | 无 | 无 | `VolumeSnapshotContentPage.tsx:12` 声明只读 |
+| 镜像构建器 | 有 | 有 | 有 | 有 | `ImageBuilderPage.tsx`；`ImageBuilderDetailPage.tsx` |
+| DevOps 工程 | 未核实 | 有 | 有 | 有 | `DevopsProjectDetailPage.tsx`（EditInfoDialog） |
+| 联邦项目 | 有（资源详情） | 有 | 有 | 有 | `FederatedResourceDetailPage.tsx`；`FederatedProjectDetailPage.tsx` |
+| 边节点 | 未核实 | 未核实 | 未核实 | 未核实 | `EdgeNodesPage.tsx` 无 edit/yaml 匹配 |
+
+**矩阵结论**（逐行数）：31 行里 YAML 可编辑 **21 行**（2026-11-14 基线是 13 行，新增 PV、StorageClass、NetworkPolicy、Node、告警策略、自定义监控、镜像构建器、联邦资源共 8 行）；仍缺 3 行：**CRD 实例、IPPool、VolumeSnapshotContent**；1 行未核实（DevOps 工程）。
+
+### 5. 成员 / 角色 / 授权矩阵（重做）
+
+| 作用域 | 邀请 | 改角色 | 移除 | 批量移除 | 建角色 | 改规则 | 已授权用户 | 用户组 | 状态 | 证据 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 平台用户 | 有（创建账号） | 有 | 有 | 有（批量启停） | — | — | — | — | **已交付** | `PlatformListPage.tsx:93,243-249,355-358`；`UserCreateDialog.tsx`；`UserRoleDialog.tsx`；`UserResetPasswordDialog.tsx` |
+| 平台角色 | — | — | 有 | — | 有 | **有（规则可增删、动词勾选）** | 有 | — | **已交付** | `PlatformListPage.tsx:95`；`RoleEditorDialog.tsx:13-41`；`ClusterRoleDetailPage.tsx:34-87` |
+| 企业空间 · 成员 | 有 | 有 | 有 | 有 | — | — | — | — | **已交付** | `WorkspaceMembersPage.tsx:94,100-102`；`WorkspaceMemberDialog.tsx` |
+| 企业空间 · 角色 | — | — | — | — | **无** | **无** | 未核实 | — | **待补**（页面明写只读理由） | `WorkspaceRolesPage.tsx:24-25`；`WorkspaceRoleDetailPage.tsx` |
+| 企业空间 · 用户组 | — | — | — | — | 有 | 有（空间角色） | — | 有 | **已交付** | `WorkspaceUserGroupsPage.tsx:46-50,150-164`；`WorkspaceUserGroupDialog.tsx` |
+| 集群 · 成员 | 有 | 有 | 有 | 有 | — | — | — | — | **已交付** | `ClusterMembersPage.tsx:26-41,133` |
+| 集群 · 角色 | — | — | — | — | — | — | 有（走平台角色详情） | — | **有替代** | 能力矩阵 §0 R-12（登记 ELSEWHERE） |
+| 项目 · 成员 | 有 | 有 | 有 | 有 | — | — | — | — | **已交付** | `SettingsListPage.tsx:213,217`；`MemberDialog.tsx` |
+| 项目 · 角色 | — | — | 有 | — | 有 | 有 | 有（规则页签 + 授权对象页签） | — | **已交付** | `SettingsListPage.tsx:209`；`RoleCreateDialog.tsx`；`RolePermissionsDialog.tsx`；`RoleDetailPage.tsx:17-55` |
+| DevOps · 成员 | 有 | 未核实 | 有 | 无 | — | — | — | — | **部分** | `DevopsProjectDetailPage.tsx:312-331,661-705` |
+| DevOps · 角色 | — | — | — | — | — | 未核实 | 未核实 | — | **未核实** | `DevopsProjectDetailPage.tsx:81-93`（页签存在） |
+
+**矩阵结论**：11 个作用域行里 **8 行已交付**、1 行有替代、1 行部分（DevOps 成员无改角色）、1 行待补（企业空间角色写）。
+
+### 6. 创建能力矩阵（重做）
+
+| 资源 | 老 console | 新 UI | 状态 | 证据 |
+| --- | --- | --- | --- | --- |
+| 工作负载（Deploy/STS/DS） | 有 | 有 | 已交付 | `WorkloadListPage.tsx:150`；`WorkloadCreateDialog.tsx` |
+| Job / CronJob | 有 | 有（manifest 表单） | 已交付 | `WorkloadListPage.tsx:492`；`JobCreateDialog.tsx:51` |
+| Service | 有 | 有 | 已交付 | `WorkloadListPage.tsx:484`；`CreateServiceDialog.tsx` |
+| Ingress | 有 | 有 | 已交付 | `WorkloadListPage.tsx:488`；`CreateIngressDialog.tsx` |
+| ConfigMap / Secret / ServiceAccount | 有 | 有（含 YAML 模式） | 已交付 | `ConfigMapsPage.tsx:132`；`SecretsPage.tsx:155`；`ServiceAccountsPage.tsx:145` |
+| PVC | 有 | 有 | 已交付 | `StorageListPage.tsx:126,354`；`CreateVolumeDialog.tsx` |
+| VolumeSnapshot | 有 | 有（+ 克隆） | 已交付 | `StorageDetailPage.tsx:259,273`；`CreateSnapshotDialog.tsx` |
+| NetworkPolicy | 有 | 有 | 已交付 | `NetworkIsolationPage.tsx:152`；`NetworkPolicyDialog.tsx` |
+| 用户 / 平台角色 / 企业空间 | 有 | 有 | 已交付 | `PlatformListPage.tsx:93-97` |
+| 项目角色 / 成员 | 有 | 有 | 已交付 | `SettingsListPage.tsx:209-213` |
+| 企业空间成员 / 用户组 | 有 | 有 | 已交付 | `WorkspaceMembersPage.tsx:94`；`WorkspaceUserGroupsPage.tsx:150` |
+| 集群成员 / 集群 | 有 | 有 | 已交付 | `ClusterMembersPage.tsx:133`；`AddClusterDialog.tsx`；能力矩阵 §0 |
+| 告警策略 / 自定义监控 | 有 | 有 | 已交付 | `RuleGroupsPage.tsx:275`；`ClusterCustomMonitoringPage.tsx:117` |
+| 镜像构建器 / 灰度 / 联邦项目 / 应用仓库 | 有 | 有 | 已交付 | `ImageBuilderPage.tsx:97`；`CanaryReleasesPage.tsx:156`；`FederatedProjectsPage.tsx:231`；`WorkspaceReposPage.tsx:250` |
+| **StorageClass** | 有 | **无** | **待补** | `StorageClassesPage.tsx` 无 primaryAction/创建弹窗 |
+| **IPPool** | 有 | **无** | **待补** | `IpPoolsPage.tsx` 无创建入口 |
+| **VolumeSnapshotContent** | 有 | **无** | **待补** | `VolumeSnapshotContentPage.tsx` 只读 |
+| 命名空间（项目） | 有 | 无 | 批准不做 | 能力矩阵 §0 R-09 / 项目创建登记不做 |
+| 节点添加 | 有 | 未核实 | 未核实 | `AddClusterDialog` 是集群导入，不是加节点 |
+
+**矩阵结论**（逐行数）：19 行里 **14 行已交付**（覆盖 17 类以上资源，含分组行）、**3 行待补**（StorageClass / IPPool / VolumeSnapshotContent）、**1 行批准不做**（命名空间）、**1 行未核实**（节点添加）。
+
+### 7. 壳层
+
+| 子能力 | 老 console | 新 UI | 状态 | 证据 |
+| --- | --- | --- | --- | --- |
+| 404 兜底 | `/404` 路由 + NotFound | 有 catch-all `$.tsx` | **已交付** | `routes/$.tsx:4-7`；`components/NotFoundPage.tsx` |
+| 关于（版本） | `Layout/LoginInfo/index.jsx:87-89` | 有：产品名 + 两个版本串，读失败不阻塞 | **已交付** | `shell/AboutDialog.tsx:9-40`；`AppShell.tsx:956-958` |
+| 帮助/文档入口 | `Layout/Header/index.jsx:110-122` | 无 | **批准不做**（部署无文档站点，链接会落到 SPA 兜底页） | 能力矩阵 §0 CHECK-09 |
+| 语言切换 | 用户设置里 `spec.lang` | 顶栏独立按钮（zh/en） | **已交付（改进）** | `AppShell.tsx:640-650,796-800` |
+| 主题切换 | 无 | 有 | **新增** | `AppShell.tsx:813`；终端主题跟随 `TerminalView.tsx:44-50,77-78` |
+| 用户菜单 | 设置/退出/关于 | 邮箱/用户设置/关于/退出 | **已交付** | `AppShell.tsx:923-973` |
+| 浮动工具箱（6 工具） | `components/KubeTools/index.jsx:74-135` | 无浮动件；6 个工具拆成页面/弹窗 | **有替代（逐项等价，见下）** | — |
+| ├ 容器日志查询 | `/logquery` | `/clusters/<c>/logs` | 等价（细节见 §2.2） | `ClusterLogsPage.tsx` |
+| ├ 事件检索 | `/eventsearch` | `/clusters/<c>/events` | 等价（优于旧） | `ClusterEventsPage.tsx` |
+| ├ 审计检索 | `/auditingsearch` | `/clusters/<c>/audit-logs` | 等价（细节见 §2.2） | `ClusterAuditLogsPage.tsx` |
+| ├ kubectl | `/terminal/kubectl` | `/clusters/<c>/kubectl` | 等价 | `KubectlPage.tsx` |
+| ├ kubeconfig | `Modals/KubeConfig` | 集群概览的 `UserKubeconfigDialog` + 服务账号 kubeconfig 下载 | 等价 | `ClusterOverviewPage.tsx:19`；`ServiceAccountSecretsSection.tsx:118,188` |
+| └ 计量账单 | `/bill`（metering） | 无 | **批准不做**（metering 未开启） | 能力矩阵 §3.1 建议表 |
+| 顶栏死链接（应用商店 / 应用商店管理） | 老受 `enableAppStore` 开关控制 | 路由已存在 | **已修复** | `routes/kube-frontend.apps`、`routes/kube-frontend.apps-manage` |
+| 移动端抽屉侧栏 | 无 | 有 | **新增** | `AppShell.tsx:820-829` |
+| 跳到主内容 | 无 | 有 | **新增** | `AppShell.tsx` 的 skip-link |
+
+### 8. 列表通用能力
+
+| 能力 | 老 console | 新 UI | 状态 | 计数与证据 |
+| --- | --- | --- | --- | --- |
+| 每页档位 | `PAGESIZE_OPTION=[10,20,50,100]` | `pageSizeOptions` 已接入 | **已交付（多数）** | **35 个** `pages/**` 文件（`pageSizeOptions` 36 处）；`useResourceListState.ts:17-18,34,77-82` |
+| 列显隐 | `Tables/Base/CustomColumns` | `hideable: true` + 持久化 | **已交付** | **53 个** 页面文件、**243** 处 `hideable:` |
+| 刷新按钮 | `Tables/Base/index.jsx:335-340` | `useListRefresh` | **已交付（多数）** | **44 个** 页面文件（`useListRefresh` 90 处） |
+| 空态出口 | `Tables/Base/index.jsx:365-399` | `schema.empty` 必填 + 契约测试 | **已交付** | **65 个** 页面文件含 `empty:`；`config/empty-state-contract.test.ts`（能力矩阵 §0） |
+| 排序 | 列头 sorter，服务端 | `sortableKeys` 白名单 + 服务端 | **已交付** | `useResourceListState.ts:71-75` |
+| 批量操作 | 选中后切标题栏 | `selection:'multiple'` + `actions` | **部分** | 有批量删除/批量移除/批量启停；其余资源仍无批量动作 |
+| 实时刷新（watch） | 组列表 WebSocket watch | `watchCollection` 已有，**仅 1 页接入** | **部分** | `ClusterPodsPage.tsx:63-67,194` 是唯一消费者（`useCollectionWatch` 全仓仅此一处） |
+| 卡片视图 | `ToggleView`（实为“高级设置”折叠，非卡片切换） | 无 | 不构成缺口 | 旧正文已纠正该误读 |
+
+**计数口径**：以上数字是 `apps/console-next/src/pages/**` 下命中该标记的**文件数**（含页面内弹窗/子组件），不是“页面数”；`areas/registry.ts` 现有 **93** 个 `status: 'ready'` 页面，故档位/刷新尚未覆盖全部页面。
+
+### 9. 仍然缺失（本轮复验后仍成立）
+
+| ID | 缺口 | 类型 | 影响 | 证据 |
+| --- | --- | --- | --- | --- |
+| C-01 | 日志/审计检索无集群维度 | 待补 | 多集群部署下无法限定集群 | `ClusterLogsPage.tsx:30`；`search.ts:61-68` |
+| C-02 | 日志检索缺 workload 维度、精确/模糊、自定义区间 | 待补 | 定位「某工作负载某时间段」要多跳一次 | `ClusterLogsPage.tsx:96-125` |
+| C-03 | 日志/审计无导出下载 | 待补 | 无法带走证据 | 两页均无下载入口 |
+| C-04 | 日志/审计无关键字高亮与 ANSI 着色 | 待补 | 长日志里找关键字靠肉眼 | `ClusterLogsPage.tsx:161` |
+| C-05 | 日志/审计无实时开关；直方图不可点下钻 | 部分 | 与事件页体验不一致 | `ClusterLogsPage.tsx:128-138` vs `ClusterEventsPage.tsx:178-196` |
+| C-06 | 容器日志无下载、无「查看更多」 | 待补 | 非实时路径固定 1h/200 条 | `ContainerLogsDialog.tsx:22-35,76-88` |
+| C-07 | 审计缺 namespace / 响应码筛选 | 部分 | API 支持但未暴露 | `search.ts:174,178` vs `ClusterAuditLogsPage.tsx:31-34` |
+| C-08 | 无饼图/堆叠柱/时间柱 | 待补 | 分布类与堆叠类图表无法表达 | 全仓仅 `TrendChart` |
+| C-09 | 图表无自定义时间区间 | 部分 | 只能 4 档预设 | 各监控页 `WINDOWS` |
+| C-10 | CRD 实例无 YAML 编辑 | 待补 | 只能看不能改 | `CustomResourceDetailPage.tsx` |
+| C-11 | IPPool 无任何写（无 YAML/无创建/无删除） | 待补 | IP 池只能由 YAML/kubectl 维护 | `IpPoolsPage.tsx`、`IpPoolDetailPage.tsx` |
+| C-12 | VolumeSnapshotContent 无 YAML/编辑信息（老有） | 待补 | 快照内容不可改注解 | `VolumeSnapshotContentPage.tsx:12`；老 `SnapshotContent/Detail/index.jsx:75,87` |
+| C-13 | StorageClass 无创建、无编辑信息、无删除（老有 set-default/卷功能/自动扩容/授权） | 待补 | 存储类只能安装期定 | `StorageClassesPage.tsx`、`StorageClassDetailPage.tsx` |
+| C-14 | 企业空间角色只读（老可创建/编辑/删除） | 待补 | 空间内无法新建角色 | `WorkspaceRolesPage.tsx:24-25` |
+| C-15 | DevOps 成员无「改角色」 | 部分 | 只能移除后重邀 | `DevopsProjectDetailPage.tsx:312-331,661-705` |
+| C-16 | 告警消息只读（老有静默/通知/删除） | 批准不做 | 已登记 | 旧正文 parity:114 |
+| C-17 | 列表实时 watch 仅 1 页接入 | 部分 | 「改完看到的是不是真的」仍靠手刷 | `useCollectionWatch` 唯一消费者 `ClusterPodsPage.tsx:67` |
+| C-18 | 每页档位/刷新未覆盖全部 93 个 ready 页面 | 部分 | 剩余页面仍固定档位 | §8 计数 |
+| C-19 | 帮助/文档入口 | 批准不做 | 部署无文档站点 | 能力矩阵 CHECK-09 |
+| C-20 | 计量账单 | 批准不做 | metering 未开启 | 能力矩阵 §3.1 |
+| C-21 | 节点 shell 在 B200 无数据帧（后端不起 node access pod） | 环境阻塞 | 用例按环境跳过 | 能力矩阵 §1 R-13 |
+| C-22 | 服务拓扑图 | 未核实 | 是否随 servicemesh 批准不做缺依据 | 旧正文未给理由 |
+
+**计数**：待补 **11**（C-01/02/03/04/06/08/10/11/12/13/14）、部分 **6**（C-05/07/09/15/17/18）、批准不做 **3**（C-16/19/20）、环境阻塞 **1**（C-21）、未核实 **1**（C-22），合计 **22**。
+
+### 10. 本轮推翻的旧结论
+
+| # | 2026-11-14 旧结论 | 复验事实 | 证据 |
+| --- | --- | --- | --- |
+| X-01 | “新 UI 的 BFF 与 api-client 都没有流式通道，终端/日志 tail 属架构级缺失” | **推翻**：BFF 有 `upgrade`，api-client 有 exec/logs/watch/node-terminal/kubectl 五个模块 | `server/src/upgrade.ts`；`packages/api-client/src/{exec,logs,watch,node-terminal,kubectl}.ts` |
+| X-02 | “容器 exec 真缺失（架构级）” | **推翻**：已交付，含全屏 xterm 与容器详情入口 | `ExecConsoleDialog.tsx`；`ContainerDetailPage.tsx:212` |
+| X-03 | “kubectl 真缺失（架构级）” | **推翻**：独立页面 + 共享控制台 | `KubectlPage.tsx`；`KubectlConsoleDialog.tsx` |
+| X-04 | “节点 shell 真缺失（架构级）” | **推翻**：三处入口可用（B200 环境受限） | `NodesPage.tsx:163` 等 |
+| X-05 | “容器日志查看（tail/实时/下载）真缺失” | **部分推翻**：tail 与实时已交付；**下载仍缺** | `ContainerLogsDialog.tsx:46-68` |
+| X-06 | “`/logquery`、`/eventsearch`、`/auditingsearch` 真缺失” | **推翻**：三页都已交付 | `areas/registry.ts:269-271` |
+| X-07 | “图表能力整体退化（只有 4 张手写 SVG 折线）” | **推翻**：`TrendChart` 多序列可交互；集群监控 26 卡 + 组件面板 | `TrendChart.tsx`；`ClusterMonitorPage.tsx:64-120` |
+| X-08 | “集群物理资源 14 类指标 / GPU 资源监控真缺失” | **推翻**：26 张卡覆盖 GPU/磁盘/网络/RDMA + 独立 GPU 页 | 同上；`GpuResourcePage.tsx` |
+| X-09 | “工作负载无编辑设置（容器模板）” | **推翻**：`EditWorkloadDialog` 覆盖镜像/副本/环境变量/拉取策略/更新策略/节点选择/优雅终止/安全上下文/IP 池/标签注解/存储/探针 | `EditWorkloadDialog.tsx:9-29` 与全文 |
+| X-10 | “Node 污点/标签编辑真缺失” | **推翻**：节点详情有编辑标签/污点 + 6 页签 + YAML | `NodeDetailPage.tsx:113,132-137,145-146` |
+| X-11 | “PV / StorageClass / NetworkPolicy 编辑 YAML 退化” | **推翻**：三者详情页都有 YamlDialog | `PersistentVolumeDetailPage.tsx`、`StorageClassDetailPage.tsx`、`NetworkPolicyDetailPage.tsx` |
+| X-12 | “平台角色无规则编辑器” | **推翻**：规则可增删、动词逐项勾选，且编辑前先读回 | `RoleEditorDialog.tsx:13-41` |
+| X-13 | “集群成员只读” | **推翻**：邀请/改角色/单条与批量移除齐备，含自我保护 | `ClusterMembersPage.tsx:26-41` |
+| X-14 | “企业空间整层不存在” | **推翻**：`/kube-frontend/workspaces/<ws>/…` 已有 members/roles/user-groups/quota/projects/overview 等 | `routes/kube-frontend.workspaces.$workspace/`；`pages/workspace/` |
+| X-15 | “用户组真缺失” | **推翻**：企业空间用户组树 + 创建/编辑/删除 + 成员增删 | `WorkspaceUserGroupsPage.tsx:150-164` |
+| X-16 | “Service / Ingress 无法创建” | **推翻**：两个专用创建弹窗 | `CreateServiceDialog.tsx`；`CreateIngressDialog.tsx` |
+| X-17 | “PVC / 快照 / StorageClass 创建真缺失” | **部分推翻**：PVC、快照、克隆已交付；**StorageClass 仍缺** | `CreateVolumeDialog.tsx`、`CreateSnapshotDialog.tsx`、`CloneVolumeDialog.tsx` |
+| X-18 | “无 404 兜底页” | **推翻**：catch-all 路由 | `routes/$.tsx` |
+| X-19 | “无关于（版本）” | **推翻** | `shell/AboutDialog.tsx` |
+| X-20 | “顶栏应用商店/应用商店管理是死链接” | **推翻**：两个路由组都已存在 | `routes/kube-frontend.apps/`、`routes/kube-frontend.apps-manage/` |
+| X-21 | “列表固定 10 条、无列显隐、无刷新、空态无出口” | **推翻**：四项都已交付并有契约测试 | §8 |
+| X-22 | “无实时刷新” | **部分推翻**：通道与 hook 已有，仅 1 页接入 | `useCollectionWatch.ts`；`ClusterPodsPage.tsx:67` |
+| X-23 | “`/bill`、帮助入口、日志收集编辑为有意不迁移” | **维持**（本轮无变化，理由已在能力矩阵登记） | 能力矩阵 CHECK-07/09 |
+
+### 11. 规模
+
+| 维度 | 数量 |
+| --- | --- |
+| 复验能力类 | 8 |
+| 旧结论被推翻/修正 | **22**（X-01…X-22；X-23 维持） |
+| 仍成立缺口 | **22 项**（待补 11 / 部分 6 / 批准不做 3 / 环境阻塞 1 / 未核实 1） |
+| 重做矩阵 | 3 张（编辑 31 行 × 4 能力、授权 11 行 × 8 能力、创建 19 行） |
+
+**一句话**：本轮复验把 2026-11-14 的“通道级缺失”全部推翻——终端、kubectl、节点 shell、日志 tail 都已建成；剩下的是**日志检索的深度（集群/工作负载维度、导出、高亮、实时、下钻）、3 类资源的写（CRD 实例 / IPPool / StorageClass）、企业空间角色写、以及实时 watch 与列表能力的覆盖广度**。
+
+---
+
+## 附录 A：2026-11-14 历史基线（原文保留）
+
+> 以下为 2026-11-14 原文，**章节编号（§0–§10）保持原样**，与上文 §0.1–§11 不是同一套编号。
+> 原文中的「无 / 真缺失 / 架构级缺失 / 疑似回归」均已被上文 §10 逐条推翻或修正，只作源码线索使用。
+
 > **历史证据，2026-11-14 基线。** 本文的接口/通道/表单数量和“不做”理由不作实时状态；不重复迁移已交付能力。
 > 现行方法见[迁移指南](../../legacy-ui-migration-guide.md)，待复核项见[能力矩阵](../capability-matrix.md)。
 

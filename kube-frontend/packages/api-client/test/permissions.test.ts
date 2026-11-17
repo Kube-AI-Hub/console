@@ -3,14 +3,14 @@ import { accessReviewApi } from '../src/permissions';
 import { createClient } from '../src/client';
 
 /**
- * `SelfSubjectAccessReview` transport contract.
+ * Access-review transport contract.
  *
- * The answer decides whether a create button is enabled, so both the request shape
- * and the reading of a missing `status` are pinned here: a wrong method (GET against
- * a create-only resource) or treating "no status" as allowed would silently change who
- * can attempt a write.
+ * ks-apiserver's IAM route answers with the request user's identity; the kube API
+ * SelfSubjectAccessReview is only a fallback for older backends (where /apis is
+ * evaluated as the proxy service account). Pinning both shapes keeps a backend
+ * upgrade from silently changing who can attempt a write.
  */
-function recordingClient(body: unknown, status = 201) {
+function recordingClient(body: unknown, status = 200) {
   const calls: Array<{ url: string; method: string; body: string | undefined }> = [];
   const client = createClient({
     fetchImpl: (async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -26,19 +26,17 @@ function recordingClient(body: unknown, status = 201) {
 }
 
 describe('accessReviewApi', () => {
-  it('asks for a namespaced core-group create with the review POST endpoint', async () => {
-    const { client, calls } = recordingClient({ status: { allowed: true } });
+  it('asks ks-apiserver with the user identity, not the kube proxy', async () => {
+    const { client, calls } = recordingClient({ allowed: true });
     const allowed = await accessReviewApi(client).allowed({ verb: 'create', resource: 'services', namespace: 'default' });
     expect(allowed).toBe(true);
     expect(calls[0]?.method).toBe('POST');
-    expect(calls[0]?.url.endsWith('/apis/authorization.k8s.io/v1/selfsubjectaccessreviews')).toBe(true);
-    const body = JSON.parse(calls[0]?.body ?? '{}');
-    expect(body.kind).toBe('SelfSubjectAccessReview');
-    expect(body.spec.resourceAttributes).toEqual({ verb: 'create', resource: 'services', namespace: 'default' });
+    expect(calls[0]?.url.endsWith('/kapis/iam.kubesphere.io/v1alpha2/selfsubjectaccessreviews')).toBe(true);
+    expect(JSON.parse(calls[0]?.body ?? '{}')).toEqual({ verb: 'create', resource: 'services', namespace: 'default' });
   });
 
   it('sends the API group for a grouped resource such as Ingress', async () => {
-    const { client, calls } = recordingClient({ status: { allowed: false } });
+    const { client, calls } = recordingClient({ allowed: false });
     const allowed = await accessReviewApi(client).allowed({
       verb: 'create',
       resource: 'ingresses',
@@ -46,12 +44,46 @@ describe('accessReviewApi', () => {
       namespace: 'demo',
     });
     expect(allowed).toBe(false);
-    const body = JSON.parse(calls[0]?.body ?? '{}');
-    expect(body.spec.resourceAttributes.group).toBe('networking.k8s.io');
+    expect(JSON.parse(calls[0]?.body ?? '{}').group).toBe('networking.k8s.io');
   });
 
-  it('treats a review without a status as not allowed', async () => {
+  it('treats a missing answer as not allowed', async () => {
     const { client } = recordingClient({});
     expect(await accessReviewApi(client).allowed({ verb: 'create', resource: 'services', namespace: 'default' })).toBe(false);
+  });
+
+  it('falls back to the kube review on an older backend (404)', async () => {
+    const calls: string[] = [];
+    let first = true;
+    const client = createClient({
+      fetchImpl: (async (input: RequestInfo | URL) => {
+        calls.push(String(input));
+        if (first) {
+          first = false;
+          return new Response(JSON.stringify({ message: 'not found' }), { status: 404, headers: { 'content-type': 'application/json' } });
+        }
+        return new Response(JSON.stringify({ status: { allowed: true } }), { status: 201, headers: { 'content-type': 'application/json' } });
+      }) as typeof fetch,
+    });
+    expect(await accessReviewApi(client).allowed({ verb: 'create', resource: 'services', namespace: 'default' })).toBe(true);
+    expect(calls).toHaveLength(2);
+    expect(calls[1]?.endsWith('/apis/authorization.k8s.io/v1/selfsubjectaccessreviews')).toBe(true);
+  });
+
+  it('falls back when go-restful reports the unregistered route as 500 "no matches"', async () => {
+    let first = true;
+    const client = createClient({
+      fetchImpl: (async () => {
+        if (first) {
+          first = false;
+          return new Response('no matches for iam.kubesphere.io/v1alpha2, Resource=selfsubjectaccessreviews', {
+            status: 500,
+            headers: { 'content-type': 'text/plain' },
+          });
+        }
+        return new Response(JSON.stringify({ status: { allowed: false } }), { status: 201, headers: { 'content-type': 'application/json' } });
+      }) as typeof fetch,
+    });
+    expect(await accessReviewApi(client).allowed({ verb: 'create', resource: 'services' })).toBe(false);
   });
 });

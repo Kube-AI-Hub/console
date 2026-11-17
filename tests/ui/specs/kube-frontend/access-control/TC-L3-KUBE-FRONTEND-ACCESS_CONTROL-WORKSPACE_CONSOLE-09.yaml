@@ -1,0 +1,40 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-09
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: workspace-console
+title: 企业空间 DevOps 工程入口与列表
+entry_url: '{BASE_URL}/kube-frontend/workspaces/{KA_WORKSPACE}/devops'
+prd: prd/kube-frontend/access-control/workspace-console.md
+design: design/kube-frontend/access-control/workspace-console.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-09
+
+story:
+- US3
+
+product: 企业空间侧栏有「DevOps 工程」入口；列表按 workspace 聚合各已启用 DevOps 的集群，显示工程名称/别名/描述、集群、同步状态与创建时间；行链接到该工程在集群作用域的详情；集为空、未启用 DevOps、部分集群读取失败分别给出说明。
+preconditions:
+- 已登录，且在 host 集群；企业空间 system-workspace 存在且至少一个集群启用了 DevOps
+- 测试自建一个唯一 DevOps 工程（POST /kapis/devops.kubesphere.io/v1alpha3/workspaces/system-workspace/devops），结束后删除（含 finalizer 清理），不依赖环境里已有工程
+steps:
+- 从企业空间概览点击侧栏「DevOps 工程」，进入 /kube-frontend/workspaces/system-workspace/devops
+- 等待列表离开 loading，核对行集合与各集群 kapis workspace aggregate（/kapis/devops.../workspaces/<ws>/devops，成员集群走 /kapis/clusters/<c>/...）的并集一致
+- 定位刚创建的工程行：显示别名（无别名显示名称）、集群、同步状态与创建时间
+- 核对行链接 href 指向 /kube-frontend/clusters/<cluster>/devops/<name>
+- 在搜索框输入别名，行集合缩小到该行；清空搜索恢复
+- 清理测试工程，确认列表中不再出现
+expected:
+- 侧栏入口可达，URL 为 workspace 作用域的 /workspaces/<ws>/devops（不带集群段）
+- 行数 = 各 DevOps 已启用集群 aggregate 并集；每行集群列正确，名称/别名不混用
+- 行链接到集群作用域工程详情；搜索按名称/别名过滤
+- 无任何工程时显示「还没有 DevOps 工程」空态；空间所在集群都未启用 DevOps 时显示未启用说明，而不是空表或整页错误
+- 某集群读取失败时保留其他集群的行并显示部分失败提示；全部失败显示错误+重试
+troubleshoot:
+- 入口不存在：确认 registry workspace 区域有 devops 页，且 route 文件在 workspaces/$workspace/devops/
+- 有工程但列表为空：确认按 status.configz.devops 过滤了集群，且用 kapis workspace aggregate（不是 raw /apis/devopsprojects）
+- 成员集群行缺失：确认成员集群请求走 /kapis/clusters/<c>/devops...；成员未就绪时不查询
+update_automation:
+- 行的 data-ai-id 为 workspace-devops:link:<cluster>:<name>；surface 为 workspace-devops:surface

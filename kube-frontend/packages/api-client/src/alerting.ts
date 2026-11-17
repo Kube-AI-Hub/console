@@ -244,6 +244,10 @@ export interface RuleGroupSummary extends ResourceBase {
   resettable: boolean;
   /** Free-form description, from the `kubesphere.io/description` annotation. */
   description: string;
+  /** Display name, from the `kubesphere.io/alias-name` annotation; empty when unset. */
+  alias: string;
+  /** Runtime status; absent when the group was read through a path that does not enrich it. */
+  status?: RuleGroupRuntimeStatus;
 }
 
 /** One Prometheus rule inside a group. */
@@ -262,6 +266,8 @@ export interface RuleGroupRule {
   description: string;
   /** Longer message shown with the alert, from `annotations.message`. */
   message: string;
+  /** This rule's evaluation state, when the API enriched the response with status. */
+  status?: RuleGroupRuleStatus;
 }
 
 export interface RuleGroupDetail extends RuleGroupSummary {
@@ -269,6 +275,50 @@ export interface RuleGroupDetail extends RuleGroupSummary {
   labels: Record<string, string>;
   annotations: Record<string, string>;
   raw: KubeObject;
+}
+
+/**
+ * One rule's evaluation state, as the aggregated kapis API enriches it.
+ *
+ * The raw CRD has no status at all: ks-apiserver joins each group with Prometheus's
+ * rule API before answering, and only on the **kapis** path. Reading `/apis` therefore
+ * returns the same rules with every state silently missing — which is how a policy
+ * list ends up claiming "nothing is firing" about a cluster that has alerts.
+ */
+export interface RuleGroupRuleStatus {
+  /** `inactive` / `pending` / `firing` / `disabled`, as Prometheus reports it. */
+  state: string;
+  /** Prometheus's own health for the rule: `ok` / `err` / `unknown`. */
+  health: string;
+  /** Seconds the rule took to evaluate, when the API reports it. */
+  evaluationTime?: number;
+  /** When the rule was last evaluated, when the API reports it. */
+  lastEvaluation?: string;
+}
+
+/** Counts per state, exactly as the aggregated API reports them (absent keys stay absent). */
+export interface RuleGroupStateCounts {
+  inactive?: number;
+  pending?: number;
+  firing?: number;
+  disabled?: number;
+}
+
+/**
+ * A group's runtime status.
+ *
+ * Absent means "the API did not report it" (an installation without the rule API, a
+ * read through `/apis`): the page must render `-`, never zero. A zero is a real
+ * observation — "evaluated 0 rules firing" — and the two are different facts.
+ */
+export interface RuleGroupRuntimeStatus {
+  /** Seconds the whole group took to evaluate. */
+  evaluationTime?: number;
+  /** When the group was last evaluated. */
+  lastEvaluation?: string;
+  stats: RuleGroupStateCounts;
+  /** Per-rule states, aligned by index with `spec.rules`. */
+  rules: RuleGroupRuleStatus[];
 }
 
 const BUILTIN_LABEL = 'alerting.kubesphere.io/builtin';
@@ -292,6 +342,16 @@ const INITIAL_CONFIGURATION_ANNOTATION = 'alerting.kubesphere.io/initial-configu
  */
 const DESCRIPTION_ANNOTATION = 'kubesphere.io/description';
 
+/**
+ * Annotation holding a policy's display name.
+ *
+ * The old console's create/edit form writes `kubesphere.io/alias-name`, and its list,
+ * detail and YAML all render it as the title. Writing `metadata.name` there instead
+ * would rename the object; writing a different annotation would save and then show
+ * nothing on re-read.
+ */
+const ALIAS_ANNOTATION = 'kubesphere.io/alias-name';
+
 /** Severity as the rule declares it; Whizard writes it as `severity` or a label. */
 function ruleSeverity(rule: Record<string, unknown>): string {
   const direct = rule['severity'];
@@ -314,10 +374,46 @@ function toRule(raw: unknown): RuleGroupRule {
   };
 }
 
+/**
+ * The aggregated status, when the response carries one.
+ *
+ * Missing status is kept as `undefined` rather than defaulted: "the API did not
+ * report" and "reported zero" are different. Every field is parsed defensively —
+ * the status is written by ks-apiserver from Prometheus, so its shape can differ
+ * between installations.
+ */
+export function toRuleGroupStatus(raw: KubeObject): RuleGroupRuntimeStatus | undefined {
+  const status = (raw.status ?? undefined) as Record<string, unknown> | undefined;
+  if (!status || typeof status !== 'object') return undefined;
+  const counts = (status['rulesStats'] ?? {}) as Record<string, unknown>;
+  const stats: RuleGroupStateCounts = {};
+  for (const state of ['inactive', 'pending', 'firing', 'disabled'] as const) {
+    const value = counts[state];
+    // Only a real number is a count; a missing key is unknown, not zero.
+    if (typeof value === 'number' && Number.isFinite(value)) stats[state] = value;
+  }
+  const rawRules = (status['rulesStatus'] ?? []) as Array<Record<string, unknown>>;
+  const rules: RuleGroupRuleStatus[] = rawRules.map((entry) => ({
+    state: String(entry['state'] ?? ''),
+    health: String(entry['health'] ?? ''),
+    ...(typeof entry['evaluationTime'] === 'number' ? { evaluationTime: entry['evaluationTime'] } : {}),
+    ...(typeof entry['lastEvaluation'] === 'string' ? { lastEvaluation: entry['lastEvaluation'] } : {}),
+  }));
+  const evaluationTime = typeof status['evaluationTime'] === 'number' ? status['evaluationTime'] : undefined;
+  const lastEvaluation = typeof status['lastEvaluation'] === 'string' ? status['lastEvaluation'] : undefined;
+  return {
+    ...(evaluationTime === undefined ? {} : { evaluationTime }),
+    ...(lastEvaluation === undefined ? {} : { lastEvaluation }),
+    stats,
+    rules,
+  };
+}
+
 export function toRuleGroupSummary(raw: KubeObject, scope: RuleGroupScope): RuleGroupSummary {
   const spec = (raw.spec ?? {}) as Record<string, unknown>;
   const labels = (raw.metadata?.labels ?? {}) as Record<string, string>;
   const rules = (spec['rules'] ?? []) as unknown[];
+  const status = toRuleGroupStatus(raw);
   return {
     ...baseOf(raw),
     kind: 'rulegroups',
@@ -329,14 +425,22 @@ export function toRuleGroupSummary(raw: KubeObject, scope: RuleGroupScope): Rule
     builtin: String(labels[BUILTIN_LABEL] ?? 'false') === 'true',
     resettable: String((raw.metadata?.annotations ?? {})[INITIAL_CONFIGURATION_ANNOTATION] ?? '') !== '',
     description: String((raw.metadata?.annotations ?? {})[DESCRIPTION_ANNOTATION] ?? ''),
+    alias: String((raw.metadata?.annotations ?? {})[ALIAS_ANNOTATION] ?? ''),
+    ...(status ? { status } : {}),
   };
 }
 
 export function toRuleGroupDetail(raw: KubeObject, scope: RuleGroupScope): RuleGroupDetail {
   const spec = (raw.spec ?? {}) as Record<string, unknown>;
+  const summary = toRuleGroupSummary(raw, scope);
+  const statusRules = summary.status?.rules ?? [];
   return {
-    ...toRuleGroupSummary(raw, scope),
-    rules: ((spec['rules'] ?? []) as unknown[]).map(toRule),
+    ...summary,
+    rules: ((spec['rules'] ?? []) as unknown[]).map((entry, index) => {
+      const rule = toRule(entry);
+      const state = statusRules[index];
+      return state ? { ...rule, status: state } : rule;
+    }),
     labels: raw.metadata?.labels ?? {},
     annotations: raw.metadata?.annotations ?? {},
     raw,
@@ -350,7 +454,51 @@ const RULE_GROUP_PATHS: Record<RuleGroupScope, string> = {
   project: 'rulegroups',
 };
 
+/** Raw CRD path: rules only, no runtime status. */
 const API = '/apis/alerting.kubesphere.io/v2beta1';
+/**
+ * Aggregated kapis path: the same objects enriched with Prometheus's rule status.
+ *
+ * Measured on the mlu370 host cluster (2026-11-17): `GET /kapis/.../clusterrulegroups`
+ * returns `status.{evaluationTime,lastEvaluation,rulesStatus,rulesStats}`, while
+ * `GET /apis/.../clusterrulegroups` returns the identical objects with **no status
+ * key at all**. The old console read the kapis path for this reason.
+ */
+const KAPIS = '/kapis/alerting.kubesphere.io/v2beta1';
+
+function rawCollectionPath(scope: RuleGroupScope, namespace: string): string {
+  return scope === 'project'
+    ? `${API}/namespaces/${encodeURIComponent(namespace)}/${RULE_GROUP_PATHS.project}`
+    : `${API}/${RULE_GROUP_PATHS[scope]}`;
+}
+
+function rawItemPath(params: { name: string; scope: RuleGroupScope; namespace?: string }): string {
+  return `${rawCollectionPath(params.scope, params.namespace ?? '')}/${encodeURIComponent(params.name)}`;
+}
+
+/**
+ * The same collection through kapis, which is where the runtime status lives.
+ *
+ * `cluster` is optional so the existing project page's calls stay host-only; a
+ * cluster-scope page passes it and a member cluster gets its segment right after
+ * `/kapis`, exactly as the aggregated API expects (see `clusterScoped`).
+ */
+function kapisCollectionPath(scope: RuleGroupScope, namespace: string, cluster?: string): string {
+  const rest =
+    scope === 'project'
+      ? `namespaces/${encodeURIComponent(namespace)}/${RULE_GROUP_PATHS.project}`
+      : RULE_GROUP_PATHS[scope];
+  return clusterScoped(KAPIS, cluster, rest);
+}
+
+function kapisItemPath(params: {
+  name: string;
+  scope: RuleGroupScope;
+  namespace?: string;
+  cluster?: string;
+}): string {
+  return `${kapisCollectionPath(params.scope, params.namespace ?? '', params.cluster)}/${encodeURIComponent(params.name)}`;
+}
 
 /**
  * Which alerting model this cluster serves.
@@ -374,13 +522,8 @@ export async function alertingModel(
 }
 
 export function ruleGroupsApi(client: Client) {
-  const collectionPath = (scope: RuleGroupScope, namespace: string): string =>
-    scope === 'project'
-      ? `${API}/namespaces/${encodeURIComponent(namespace)}/${RULE_GROUP_PATHS.project}`
-      : `${API}/${RULE_GROUP_PATHS[scope]}`;
-
-  const itemPath = (params: { name: string; scope: RuleGroupScope; namespace?: string }): string =>
-    `${collectionPath(params.scope, params.namespace ?? '')}/${encodeURIComponent(params.name)}`;
+  const collectionPath = rawCollectionPath;
+  const itemPath = rawItemPath;
 
   return {
     /**
@@ -423,9 +566,14 @@ export function ruleGroupsApi(client: Client) {
       name: string;
       scope: RuleGroupScope;
       namespace?: string;
+      /** Read the aggregated path so the returned detail carries `status` (rule states). */
+      withStatus?: boolean;
+      /** Member cluster the page is looking at; host omits the segment. */
+      cluster?: string;
       signal?: AbortSignal;
     }): Promise<RuleGroupDetail> {
-      const body = await client.request<KubeObject>(itemPath(params), params.signal ? { signal: params.signal } : {});
+      const path = params.withStatus ? kapisItemPath(params) : itemPath(params);
+      const body = await client.request<KubeObject>(path, params.signal ? { signal: params.signal } : {});
       return toRuleGroupDetail(body ?? {}, params.scope);
     },
 
@@ -434,20 +582,38 @@ export function ruleGroupsApi(client: Client) {
      *
      * `list` intentionally merges scopes because the project page is one list. The
      * cluster pages are separate by ownership — custom cluster groups vs the
-     * installer's global ones — so they read a single collection and count its
-     * items. The API list has no `totalItems`; the array length is the count.
+     * installer's global ones — so they read a single collection.
+     *
+     * `withStatus` switches the read to the aggregated kapis path, which is the only
+     * one that carries each group's rule states, evaluation time and last evaluation.
+     * It fetches the collection whole (`limit=-1`) because the rule-state filter is not
+     * a server parameter (probed: `state=inactive` is ignored by kapis); the caller
+     * filters and pages locally, which is what the project page already does. Without
+     * `withStatus` the raw CRD path is used and the status columns must show `-`.
      */
     async listScope(params: {
       scope: 'cluster' | 'global';
+      /** Read the aggregated kapis path so status is present. */
+      withStatus?: boolean;
+      /** Member cluster the page is looking at; host omits the segment. */
+      cluster?: string;
       signal?: AbortSignal;
     }): Promise<{ items: RuleGroupSummary[]; total: number }> {
-      const body = await client.request<{ items?: KubeObject[] }>(`${API}/${RULE_GROUP_PATHS[params.scope]}`, {
-        ...(params.signal ? { signal: params.signal } : {}),
-      });
+      const body = params.withStatus
+        ? await client.request<{ items?: KubeObject[]; totalItems?: number }>(
+            kapisCollectionPath(params.scope, '', params.cluster),
+            { query: { limit: -1 }, ...(params.signal ? { signal: params.signal } : {}) },
+          )
+        : await client.request<{ items?: KubeObject[]; totalItems?: number }>(
+            `${API}/${RULE_GROUP_PATHS[params.scope]}`,
+            { ...(params.signal ? { signal: params.signal } : {}) },
+          );
       const items = (body?.items ?? [])
         .map((item) => toRuleGroupSummary(item, params.scope))
         .sort((a, b) => a.name.localeCompare(b.name));
-      return { items, total: items.length };
+      // kapis reports totalItems; the raw CRD list does not, so the array length is the count.
+      const total = typeof body?.totalItems === 'number' ? body.totalItems : items.length;
+      return { items, total };
     },
 
     /**
@@ -545,62 +711,113 @@ export interface RuleGroupRuleInput {
   message: string;
 }
 
+/** One group's editable fields, from the create/edit form. */
+export interface RuleGroupWriteInput {
+  name: string;
+  rules: RuleGroupRuleInput[];
+  /** Free-form description (`kubesphere.io/description`). */
+  description?: string;
+  /** Display name (`kubesphere.io/alias-name`). */
+  alias?: string;
+  /** Check interval, e.g. `2m`; empty clears it. */
+  interval?: string;
+}
+
+/** Where a write lands. Project groups are namespaced; cluster groups are not. */
+export type RuleGroupWriteScope = 'project' | 'cluster';
+
+const RULE_GROUP_KIND: Record<RuleGroupWriteScope, string> = {
+  project: 'RuleGroup',
+  cluster: 'ClusterRuleGroup',
+};
+
 /**
- * Create, edit and delete a **project-scoped** rule group.
+ * Create, edit and delete a rule group, at project or cluster scope.
  *
- * Only the namespaced `rulegroups` resource is writable here. The global and
- * cluster-scoped groups are installer-owned (`builtin: true`) — the API accepts a
- * write, but the next reconciliation puts them back, which is a worse outcome than
- * refusing the edit.
+ * Global groups are **not** writable here: they are installer-owned (`builtin:
+ * true`) and the next reconciliation puts them back, which is worse than refusing the
+ * edit. The cluster-scoped `clusterrulegroups` are the operator's own policies, and the
+ * old console created/edited/deleted them from the same page that shows the global ones
+ * — the page is one page; ownership decides which rows are writable.
  *
  * Rule bodies are sent whole: they are the object, and a merge patch on an array
  * replaces it anyway.
  */
 export function ruleGroupsWriteApi(client: Client) {
-  const collection = (namespace: string) =>
-    `/apis/alerting.kubesphere.io/v2beta1/namespaces/${encodeURIComponent(namespace)}/rulegroups`;
-  const item = (namespace: string, name: string) => `${collection(namespace)}/${encodeURIComponent(name)}`;
+  const kindOf = (scope: RuleGroupWriteScope): string => RULE_GROUP_KIND[scope];
+  const collection = (scope: RuleGroupWriteScope, namespace: string) => rawCollectionPath(scope, namespace);
+  const item = (scope: RuleGroupWriteScope, namespace: string, name: string) =>
+    `${collection(scope, namespace)}/${encodeURIComponent(name)}`;
 
-  const toSpec = (rules: RuleGroupRuleInput[]) => ({
-    rules: rules.map((rule) => {
-      const annotations: Record<string, string> = {};
-      if (rule.summary) annotations.summary = rule.summary;
-      if (rule.message) annotations.message = rule.message;
-      return {
-        alert: rule.alert,
-        expr: rule.expression,
-        for: rule.duration,
-        severity: rule.severity,
-        ...(Object.keys(annotations).length > 0 ? { annotations } : {}),
-      };
-    }),
-  });
+  const toSpec = (rules: RuleGroupRuleInput[], interval?: string) => {
+    const spec: Record<string, unknown> = {
+      rules: rules.map((rule) => {
+        const annotations: Record<string, string> = {};
+        if (rule.summary) annotations.summary = rule.summary;
+        if (rule.message) annotations.message = rule.message;
+        return {
+          alert: rule.alert,
+          expr: rule.expression,
+          for: rule.duration,
+          severity: rule.severity,
+          ...(Object.keys(annotations).length > 0 ? { annotations } : {}),
+        };
+      }),
+    };
+    if (interval !== undefined) spec['interval'] = interval;
+    return spec;
+  };
+
+  /** Merge the two console-owned annotations, leaving strangers' keys alone. */
+  const mergeAnnotations = (
+    current: Record<string, string>,
+    fields: { description?: string; alias?: string },
+  ): Record<string, string> => {
+    const annotations = { ...current };
+    if (fields.description !== undefined) {
+      const description = fields.description.trim();
+      if (description) annotations[DESCRIPTION_ANNOTATION] = description;
+      else delete annotations[DESCRIPTION_ANNOTATION];
+    }
+    if (fields.alias !== undefined) {
+      const alias = fields.alias.trim();
+      if (alias) annotations[ALIAS_ANNOTATION] = alias;
+      else delete annotations[ALIAS_ANNOTATION];
+    }
+    return annotations;
+  };
 
   return {
-    async create(params: {
-      namespace: string;
-      name: string;
-      rules: RuleGroupRuleInput[];
-      description?: string;
+    async create(params: RuleGroupWriteInput & {
+      scope: RuleGroupWriteScope;
+      /** Required for project scope. */
+      namespace?: string;
     }): Promise<void> {
-      const description = (params.description ?? '').trim();
-      await client.request(collection(params.namespace), {
+      const namespace = params.namespace ?? '';
+      if (params.scope === 'project' && !namespace) {
+        throw new ApiError({ code: 'invalid', message: 'a project rule group needs a namespace' }, 422);
+      }
+      const annotations = mergeAnnotations({}, params);
+      await client.request(collection(params.scope, namespace), {
         method: 'POST',
         body: {
           apiVersion: 'alerting.kubesphere.io/v2beta1',
-          kind: 'RuleGroup',
+          kind: kindOf(params.scope),
           metadata: {
             name: params.name,
-            namespace: params.namespace,
-            ...(description ? { annotations: { [DESCRIPTION_ANNOTATION]: description } } : {}),
+            ...(params.scope === 'project' ? { namespace } : {}),
+            ...(Object.keys(annotations).length > 0 ? { annotations } : {}),
+            // The platform evaluates an absent label as enabled; write it explicitly so
+            // the enable/disable switch starts from an observable value.
+            labels: { [ALERTING_ENABLE_LABEL]: 'true' },
           },
-          spec: toSpec(params.rules),
+          spec: toSpec(params.rules, params.interval ?? ''),
         },
       });
     },
 
     /**
-     * Replace a group's rules and its description.
+     * Replace a group's rules and its editable metadata.
      *
      * PUT with the full object: `spec.rules` is an array, and a merge patch would
      * replace it wholesale while leaving `metadata` untouched — which is what we want,
@@ -608,38 +825,57 @@ export function ruleGroupsWriteApi(client: Client) {
      * annotations this editor does not own. Sending a bare body lets two editors
      * overwrite each other silently.
      *
-     * The description is merged into the existing annotations rather than replacing
-     * them: the alerting controller and the installer write their own annotations on
-     * the group, and a save that dropped them would break the object for a field the
-     * form did not even show.
+     * The description/alias are merged into the existing annotations rather than
+     * replacing them: the alerting controller and the installer write their own
+     * annotations on the group, and a save that dropped them would break the object for
+     * a field the form did not even show.
      */
-    async update(params: {
-      namespace: string;
-      name: string;
-      rules: RuleGroupRuleInput[];
-      description?: string;
+    async update(params: RuleGroupWriteInput & {
+      scope: RuleGroupWriteScope;
+      /** Required for project scope. */
+      namespace?: string;
     }): Promise<void> {
-      const current = await client.request<KubeObject>(item(params.namespace, params.name));
+      const namespace = params.namespace ?? '';
+      const itemPath = item(params.scope, namespace, params.name);
+      const current = await client.request<KubeObject>(itemPath);
       const metadata = { ...(current.metadata ?? {}) };
-      if (params.description !== undefined) {
-        const annotations = { ...(metadata.annotations ?? {}) };
-        const description = params.description.trim();
-        if (description) annotations[DESCRIPTION_ANNOTATION] = description;
-        else delete annotations[DESCRIPTION_ANNOTATION];
-        metadata.annotations = annotations;
-      }
-      await client.request(item(params.namespace, params.name), {
+      metadata.annotations = mergeAnnotations(metadata.annotations ?? {}, params);
+      await client.request(itemPath, {
         method: 'PUT',
         body: {
           ...current,
           metadata,
-          spec: { ...(current?.spec as object), ...toSpec(params.rules) },
+          spec: { ...(current?.spec as object), ...toSpec(params.rules, params.interval) },
         },
       });
     },
 
-    async remove(params: { namespace: string; name: string }): Promise<void> {
-      await client.request(item(params.namespace, params.name), { method: 'DELETE' });
+    async remove(params: {
+      scope: RuleGroupWriteScope;
+      namespace?: string;
+      name: string;
+    }): Promise<void> {
+      await client.request(item(params.scope, params.namespace ?? '', params.name), { method: 'DELETE' });
+    },
+
+    /**
+     * Write a whole object from the YAML editor.
+     *
+     * The editor edits the object the API returned, so the caller owns what changes —
+     * this method only decides the path. It is deliberately separate from `update`:
+     * that one merges the form's fields and keeps annotations the form does not show,
+     * while YAML mode is the reader's explicit whole-object write.
+     */
+    async replace(params: {
+      scope: RuleGroupWriteScope;
+      namespace?: string;
+      name: string;
+      object: KubeObject;
+    }): Promise<void> {
+      await client.request(item(params.scope, params.namespace ?? '', params.name), {
+        method: 'PUT',
+        body: params.object,
+      });
     },
   };
 }

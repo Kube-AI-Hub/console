@@ -4,14 +4,16 @@ import { api } from '@/api';
 import { useT } from '@/i18n';
 
 /**
- * Whether the reader may create the network resources of this page.
+ * Whether the reader may create the resources of this page.
  *
  * The check is a `SelfSubjectAccessReview` for the same verb/resource/namespace the
  * create POST will use, so the button's state and the write agree. It fails **open**:
  * a permission check that errors (an older BFF, a network blip) must not disable a
  * control the reader is allowed to use, so only an explicit `allowed: false` disables
- * the button. The check only runs for Service and Ingress lists; other kinds keep
- * their single create entry untouched.
+ * the button.
+ *
+ * Every writable workload kind is checked: a project viewer sees the create entry
+ * disabled with the reason instead of clicking into a form that 403s.
  */
 export interface CreatePermission {
   disabled: boolean;
@@ -19,9 +21,29 @@ export interface CreatePermission {
   hint?: string;
 }
 
+const KIND_GROUP: Partial<Record<string, string>> = {
+  deployments: 'apps',
+  statefulsets: 'apps',
+  daemonsets: 'apps',
+  jobs: 'batch',
+  cronjobs: 'batch',
+  ingresses: 'networking.k8s.io',
+};
+
+const KIND_TITLE: Partial<Record<string, string>> = {
+  deployments: 'workloads.deployments.title',
+  statefulsets: 'workloads.statefulsets.title',
+  daemonsets: 'workloads.daemonsets.title',
+  jobs: 'workloads.jobs.title',
+  cronjobs: 'workloads.cronjobs.title',
+  services: 'workloads.services.title',
+  ingresses: 'workloads.ingresses.title',
+};
+
 export function useCreatePermission(kind: WorkloadKind, cluster: string, namespace: string): CreatePermission {
   const t = useT();
-  const checkable = kind === 'services' || kind === 'ingresses';
+  const checkable = Boolean(KIND_TITLE[kind]);
+  const group = KIND_GROUP[kind];
   const query = useQuery({
     queryKey: ['can-create', kind, cluster, namespace],
     enabled: checkable && Boolean(cluster) && Boolean(namespace),
@@ -33,13 +55,13 @@ export function useCreatePermission(kind: WorkloadKind, cluster: string, namespa
       accessReviewApi(api).allowed({
         verb: 'create',
         resource: kind,
-        ...(kind === 'ingresses' ? { group: 'networking.k8s.io' } : {}),
+        ...(group ? { group } : {}),
         namespace,
         signal,
       }),
   });
 
   if (query.data !== false) return { disabled: false };
-  const resource = kind === 'services' ? t('workloads.services.title') : t('workloads.ingresses.title');
+  const resource = t(KIND_TITLE[kind] as 'workloads.services.title');
   return { disabled: true, hint: t('networkCreate.noPermission', { resource }) };
 }

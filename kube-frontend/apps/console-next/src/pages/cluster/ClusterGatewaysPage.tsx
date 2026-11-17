@@ -152,6 +152,18 @@ export function ClusterGatewaysPage({ cluster, component = 'cluster' }: {
       { key: 'message', hideable: true, title: t('settings.gateway.message'), render: (row) => row.message || '-', wrap: true },
       { key: 'createdAt', hideable: true, title: t('cluster.column.createdAt'), render: (row) => formatTimestamp(row.createdAt), hideBelow: 'xl' },
     ],
+    rowActions: [
+      {
+        // The cluster gateway is installer-owned. Editing its replica/type/tracing is
+        // supported (same dialog as project gateways); creating a second one and deleting
+        // it are not offered here — creation is the installer's Helm release and delete
+        // would remove the cluster ingress controller.
+        key: 'edit',
+        label: t('settings.gateway.edit'),
+        aiId: 'cluster-gateways:edit',
+        visible: (row) => canUpdate(row),
+      },
+    ],
     empty: { title: t('cluster.clusterGateways.empty'), description: t('cluster.clusterGateways.emptyHint') },
   };
 

@@ -880,10 +880,17 @@ export function devopsApi(client: Client) {
   const projectKapis = (name: string) => DEVOPS_KAPIS + '/devops/' + q(name);
 
   return {
-    /** Every DevOps project of one workspace, through the kapis workspace aggregate. */
-    async projects(params: { workspace: string; signal?: AbortSignal }): Promise<DevopsProjectSummary[]> {
+    /**
+     * Every DevOps project of one workspace, through the kapis workspace aggregate.
+     *
+     * `cluster` selects a member cluster (segment right after `/kapis`); omitted means
+     * the host cluster, which is what the old console's workspace DevOps page used when
+     * it had only one cluster. The workspace aggregate filters server-side, which is why
+     * this is the read for a workspace-scoped page instead of filtering the raw CRD list.
+     */
+    async projects(params: { workspace: string; cluster?: string; signal?: AbortSignal }): Promise<DevopsProjectSummary[]> {
       const body = await client.request<{ items?: KubeObject[] }>(
-        DEVOPS_KAPIS + '/workspaces/' + q(params.workspace) + '/devops',
+        clusterScoped(DEVOPS_KAPIS, params.cluster, 'workspaces/' + q(params.workspace) + '/devops'),
         { query: { limit: -1 }, ...(params.signal ? { signal: params.signal } : {}) },
       );
       return (body?.items ?? []).map(toDevopsProjectSummary);

@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GATEWAY_DETAIL-04
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: gateway-detail
+title: 网关详情控制器日志
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/gateways/{name}'
+prd: prd/kube-frontend/cluster-management/gateway-detail.md
+design: design/kube-frontend/cluster-management/gateway-detail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GATEWAY_DETAIL-04
+
+story:
+- US1
+
+product: 网关详情新增「日志」区块：读取首个控制器 Pod 的 controller 容器最近 200 行日志（多容器必须显式指定 container）；读取失败显示明确说明；区块只读。
+preconditions:
+- 已登录 admin；host 集群存在集群网关且控制器 Pod 运行中
+- 只读用例，不触发日志下载/写入
+steps:
+- 打开集群网关详情，滚动到「日志」区块
+- 断言区块可见；有日志时显示 Pod/容器/最近 200 行与 pre 文本；读取失败显示不可用说明
+- 断言文本非空（运行中的 controller 至少输出启动行）
+expected:
+- 多容器 Pod 必须带 container=controller（否则 API 返回 400）
+- 日志只读、截断到 200 行，不排队/不轮询
+- 日志为空与不可用是不同状态
+troubleshoot:
+- 400 a container name must be specified：检查 container 参数
+- 一直不可用：确认 /api/v1/namespaces/<ns>/pods/<pod>/log 经 BFF 可达
+update_automation:
+- 句柄：gateway-detail:logs-section/logs-meta/logs/logs-unavailable

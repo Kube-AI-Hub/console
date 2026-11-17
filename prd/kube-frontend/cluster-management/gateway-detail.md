@@ -19,6 +19,10 @@
 ## 验收场景
 
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GATEWAY_DETAIL-01** — 已知集群安装了集群网关（Nginx CR 存在），当从集群网关列表点击名称进入详情，则显示名称、状态、访问方式、IngressClass、访问地址、端口、集群 IP、TLS、副本数、镜像、创建时间、创建者、链路追踪开关与控制器条件；创建者取 metadata.annotations 里的 kubesphere.io/creator，链路追踪取 spec.deployment.annotations 里的 servicemesh.kubesphere.io/enabled（只认字符串 true），两者都是老 console 网关卡片上的字段；并列出 `ingressClassName` 等于该网关 IngressClass 的应用路由（名称/命名空间/主机/TLS/创建时间），没有时显示「该网关还没有关联的应用路由」空态；详情只读，不提供安装、编辑或删除网关的入口。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GATEWAY_DETAIL-05** — 已知打开集群网关详情，当滚动到「监控」区块，则通过 Prometheus instant 查询控制器 controller 容器的 CPU/内存并显示；若 Prometheus 有 nginx_ingress_controller_requests 则追加请求速率与 5xx 速率，否则明确显示「未上报 ingress 指标」而不是空图；Prometheus 不可达显示不可用 + 原因；区块只读。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GATEWAY_DETAIL-04** — 已知打开集群网关详情，当滚动到「日志」区块，则读取首个控制器 Pod 的 controller 容器最近 200 行日志并显示 Pod/容器/文本；多容器必须显式指定 container（否则 API 400）；读取失败显示「暂时无法读取」+ 原因；日志为空与不可用分开；区块只读、不轮询。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GATEWAY_DETAIL-03** — 已知打开集群网关详情，当滚动到「资源状态」区块，则显示控制器 Deployment 的 ready/desired 副本与 Pods 列表（名称、阶段、就绪、重启次数、创建时间）；Pod 按 label app.kubernetes.io/instance=<name>-ingress 读取，就绪以全部 containerStatuses.ready 为准，重启次数求和；无 Pod 显示明确空态；区块只读。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GATEWAY_DETAIL-02** — 已知打开集群网关详情，当滚动到「元数据」区块，则显示 Gateway 对象的 labels、annotations 与 resourceVersion；空 labels/annotations 显示「暂无元数据」；两列取值直接来自 metadata，不经过 Service/Nginx 派生；区块只读。
 
 ## 设计目标
 
@@ -68,9 +72,29 @@
 
 ## 明确不做
 
-- 安装/升级/删除集群网关与 ingress-nginx release（属安装流程，写操作）。
-- 网关监控曲线与日志（另有监控/日志查询页面）。
+- 安装/升级 ingress-nginx release（属安装流程，写操作）。
 - 编辑 Ingress（回项目页）。
+
+## 重纳能力（2026-11-17 产品复核）
+
+原登记「安装/升级/删除集群网关与 ingress-nginx release」「网关监控曲线与日志」。**2026-11-17 产品复核决定重纳**（N-29，见[重纳决策记录](../../../docs/plans/reinclusion-decisions-20261117.md)）：详情补 4 个页签，删除入口随之打开（安装/升级 release 仍不做，那是安装器职责）。
+
+**这是「重纳 + 环境阻塞」，不是「已可验收」**——控制器未就绪时页签可以有代码，但验收等控制器。
+
+待交付：
+
+1. **监控**：网关的请求量 / 延迟 / 错误率曲线，复用既有监控区间查询。
+2. **日志**：网关访问日志与错误日志，复用既有日志查询能力（老 console `Gateway/Detail/GatewayLog`）。
+3. **资源状态**：该网关 release 的容器组与其状态。
+4. **元数据**：网关对象的 labels / annotations 列表。
+
+约束：
+
+- 四个页签按需加载（打开才请求），单个页签失败只降级该页签，不让整页失败。
+- 数据源缺失时（控制器未就绪、监控未上报、日志后端未启用）显示「本集群未上报」并说明原因，**不显示空表**——空表会被读成「没有流量」。
+- 删除网关需输入名称确认；控制器未就绪时删除仍应可用（对象存在即可删）。
+
+**待补登记**：对应 `US` / `AC` 未编号，与实现同批补齐（新增无覆盖 AC 会让 `check_docs.py --strict` 失败）。
 
 ## 假设
 

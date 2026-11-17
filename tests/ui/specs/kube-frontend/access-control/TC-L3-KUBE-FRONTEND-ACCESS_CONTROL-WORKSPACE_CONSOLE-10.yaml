@@ -1,0 +1,38 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-10
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: workspace-console
+title: 企业空间用户组 · 实时刷新（watch）
+entry_url: '{BASE_URL}/kube-frontend/workspaces/{KA_WORKSPACE}/user-groups'
+prd: prd/kube-frontend/access-control/workspace-user-groups.md
+design: design/kube-frontend/access-control/workspace-user-groups.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-10
+
+story:
+- US4
+
+product: 用户组页同时 watch groups 与 groupbindings；另一处创建/删除部门或改成员绑定后，树与成员数自动更新，无需点刷新；页面显示实时刷新状态，断开时显示「已断开，可手动刷新」，手动刷新保留。
+preconditions:
+- 已登录，且在 host 集群；企业空间 system-workspace 可写用户组
+- 用例自建唯一用户组（generateName）并在结束后删除（含 groupbinding）
+steps:
+- 打开用户组页，等待 surface 就绪；读取 live-state，等待其离开 connecting
+- 用 API 在另一处创建唯一用户组（不点页面刷新），观察树节点是否出现
+- 用 API 为该组创建 groupbinding（admin）；本部署 groupbindings 无 watch，点页面「刷新」后节点成员数变为 1（登记部署限制，不用轮询掩盖）
+- 用 API 删除该组，观察节点是否自动消失（组变更全程不点刷新）
+- 最后确认手动刷新按钮仍在
+expected:
+- live-state 为 live（若通道不可用则为 error 且显示「实时刷新已断开」；本用例要求 live 时自动更新，error 时按环境阻塞记录而不是静默）
+- 外部创建后数秒内树出现节点；外部删除后数秒内节点消失（组变更未点刷新）
+- 仅成员绑定变化：手动刷新后成员数更新；页面不冒充实时（live-state 只由 groups watch 驱动）
+- 页面未发生整页错误，手动刷新可用
+troubleshoot:
+- 节点不出现：确认 watch 同时订阅 groups（只订阅 groupbindings 收不到创建事件）
+- live-state 长期 connecting：确认 BFF 流式代理支持 /kapis/... watch；回退为手动刷新并登记环境阻塞
+- 节点出现但成员数不变：确认 groupbindings watch 也建立，且 invalidate 的是 ['workspace-user-groups', ws] 前缀
+update_automation:
+- 句柄：workspace-user-groups:live-state（data-ai-state）、tree-node、data-ai-generate-name、refresh

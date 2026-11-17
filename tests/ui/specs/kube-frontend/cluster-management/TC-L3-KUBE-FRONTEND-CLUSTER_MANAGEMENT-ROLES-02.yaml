@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ROLES-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: roles
+title: 平台角色页多集群切换（成员集群只读）
+entry_url: '{BASE_URL}/kube-frontend/access/clusterroles'
+prd: prd/kube-frontend/cluster-management/roles.md
+design: design/kube-frontend/cluster-management/roles.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ROLES-02
+
+story:
+- US2
+
+product: 平台「集群角色」页增加集群选择器：host 保持可写平台列表；切到成员集群时显示该集群的角色只读列表（复用集群作用域角色页），隐藏创建/编辑/删除，并说明写操作在集群控制台。
+preconditions:
+- 多集群安装（host + 至少一个成员集群），admin 登录；成员集群 IAM 可读
+- 用例不改动任何角色
+steps:
+- 打开 /kube-frontend/access/clusterroles，确认集群选择器可见且含 host 与成员集群
+- 选择成员集群，断言只读提示出现、集群作用域角色列表加载、行集合与成员集群 clusterroles API 一致、没有创建角色按钮
+- 切回 host，断言平台角色列表与创建按钮恢复
+expected:
+- 选择器仅在集群数 >1 时显示
+- 成员视图使用 /kapis/clusters/<c>/iam… 读取；写入口隐藏
+- host 视图行为与原平台角色页一致（可写）
+troubleshoot:
+- 选择器不出现：确认 clusters 接口返回 >1 个集群
+- 成员列表串成 host 数据：确认路径含 /clusters/<c>/iam…
+update_automation:
+- 句柄：clusterroles:cluster（选择器）、clusterroles:create、clusterroles:member-readonly、cluster-roles:surface/table

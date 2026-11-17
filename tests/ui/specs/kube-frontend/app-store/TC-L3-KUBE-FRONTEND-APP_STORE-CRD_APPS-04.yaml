@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-APP_STORE-CRD_APPS-04
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-store
+feature: crd-apps
+title: 编辑自制 CRD 应用信息
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/applications/composing'
+prd: prd/kube-frontend/app-store/crd-apps.md
+design: design/kube-frontend/app-store/crd-apps.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_STORE-CRD_APPS-05
+
+story:
+- US4
+
+product: 自制应用详情提供「编辑信息」：修改别名/描述，保存为 Application metadata.annotations（merge-patch，清空键 null）；保存后详情别名与接口回读一致。
+preconditions:
+- 已登录 admin；项目 default 可用；用例自建唯一 Application，finally 删除
+steps:
+- API 创建临时 Application，打开详情
+- 点「编辑信息」，填别名与描述，提交
+- 断言弹窗关闭、详情显示别名、API annotations 中 alias/description 与输入一致
+- 清空描述再保存，断言 description 注解被移除
+expected:
+- 编辑信息只发 annotations merge-patch，不触碰 spec/selector/组件
+- 清空字段删除注解而非写空串
+- 失败保留弹窗与原因
+troubleshoot:
+- 保存后别名不显示：确认详情 invalidate 了 composed-app 查询
+- 注解未删除：确认清空键发 null
+update_automation:
+- 句柄：composed-app-detail:edit/edit-alias/edit-description/edit-info-submit/alias

@@ -1290,12 +1290,13 @@ def main() -> int:
     clusters = [c.strip() for c in args.clusters.split(',') if c.strip()]
 
     if args.probes:
-        bad = 0
+        # A fingerprint, not a gate: a path the console does not call today may be broken without
+        # anything being wrong with the pages. The wrapper prints it so two deployments can be
+        # compared; failures are read, not counted.
         for row in sweep_probes(args.bff, token):
-            ok = 200 <= row['status'] < 300
-            bad += 0 if ok else 1
-            print(f"{'OK  ' if ok else 'FAIL'} {row['probe']:18s} {row['status']:3d}  {row['method']} {row['path'][:70]}")
-        return 1 if bad else 0
+            mark = 'OK  ' if 200 <= row['status'] < 300 else 'WARN'
+            print(f"{mark} {row['probe']:18s} {row['status']:3d}  {row['method']} {row['path'][:70]}")
+        return 0
 
     if args.locale_scan:
         rows = sweep_locale(args.app, token, clusters[0], args.workspace, args.project, args.locale)

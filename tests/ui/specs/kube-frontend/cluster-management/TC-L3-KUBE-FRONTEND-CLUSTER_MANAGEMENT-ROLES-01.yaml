@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ROLES-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: roles
+title: 集群作用域角色列表与详情（规则 / 已授权用户）
+entry_url: '{BASE_URL}/kube-frontend/clusters/{KA_CLUSTER}/roles'
+prd: prd/kube-frontend/cluster-management/roles.md
+design: design/kube-frontend/cluster-management/roles.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ROLES-01
+
+story:
+- US1
+
+product: 集群作用域角色页：列表（名称/系统徽标/规则数/创建时间），详情两页签（权限规则、已授权用户）；角色读当前集群的 IAM 集合；只读。
+preconditions:
+- 已登录 admin；host 集群有 218 个 clusterrole，且至少一个 ClusterRoleBinding 绑定到 User
+- 用例不改动集群数据
+steps:
+- 打开 /clusters/host/roles，核对行数 >0、规则数列与接口一致
+- 通过 API 选一个有 User 主体的 ClusterRoleBinding 的角色，进入其详情
+- 默认权限规则页签：行数等于该角色 rules 数组长度，列头为 API 组/资源/动作
+- 切到已授权用户：包含绑定中的用户名；空绑定角色显示空态
+- 返回列表，核对系统角色有「系统」徽标
+expected:
+- 列表来自 /kapis/iam…/clusterroles?limit=-1；行数与 totalItems 一致
+- 详情规则行数 = rules.length；用户行来自 /kapis/iam…/users?clusterrole=<name>
+- 系统角色（role-template-*）带徽标；页面只读（无创建/删除入口）
+troubleshoot:
+- 规则数不一致：确认详情读的是同一对象，规则按 rule 条目计
+- 用户页签为空：确认查询参数是 clusterrole=<对象名>，且绑定主体为 User
+update_automation:
+- 句柄：cluster-roles:surface/table/name:<name>；cluster-role-detail:surface/rules/rule:<i>/tab:rules/tab:users/users/user:<name>/rules-empty/users-empty/retry

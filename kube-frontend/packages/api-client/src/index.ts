@@ -9,6 +9,7 @@ export {
   type StreamOptions,
 } from './client';
 export { ApiError, type ApiErrorBody } from './errors';
+export { DEFAULT_DOCUMENTS, publicConfigApi, type DocsLinks, type PublicConfig } from './config';
 export {
   projectLabel,
   projectsApi,
@@ -124,6 +125,7 @@ export {
 export {
   ASSIGNABLE_PLATFORM_ROLES,
   clusterRolesApi,
+  clusterRolesForClusterApi,
   clusterRolesWriteApi,
   ROLE_VERBS,
   configScalar,
@@ -148,9 +150,11 @@ export {
   workspaceDetailApi,
   workspaceGroupsApi,
   workspaceGroupForest,
+  toWorkspaceClusterSummary,
   toWorkspaceGroupSummary,
   workspaceMembersApi,
   workspaceRolesApi,
+  workspaceRolesWriteApi,
   workspacesApi,
   workspacesWriteApi,
 } from './access';
@@ -159,6 +163,8 @@ export type {
   AssignablePlatformRole,
   PasswordChecks,
   ClusterRoleDetail,
+  ClusterRoleScopedDetail,
+  ClusterRoleScopedUser,
   ClusterRoleSummary,
   EditableRule,
   RoleVerb,
@@ -170,13 +176,16 @@ export type {
   RoleSubject,
   UserDetail,
   UserSummary,
+  WorkspaceClusterSummary,
   WorkspaceDetail,
   WorkspaceGroupMember,
   WorkspaceGroupNode,
   WorkspaceGroupSummary,
   WorkspaceMemberResource,
   WorkspaceMemberSummary,
+  WorkspaceRoleDetail,
   WorkspaceRoleSummary,
+  WorkspaceRoleTemplate,
   WorkspaceProject,
   WorkspaceSummary,
 } from './access';
@@ -252,6 +261,7 @@ export {
   toAlertSummary,
   toClusterAlertSummary,
   toRuleGroupDetail,
+  toRuleGroupStatus,
   toRuleGroupSummary,
 } from './alerting';
 export type {
@@ -270,9 +280,14 @@ export type {
   ClusterAlertSummary,
   RuleGroupDetail,
   RuleGroupRule,
+  RuleGroupRuleStatus,
+  RuleGroupRuntimeStatus,
   RuleGroupScope,
   RuleGroupRuleInput,
+  RuleGroupStateCounts,
   RuleGroupSummary,
+  RuleGroupWriteInput,
+  RuleGroupWriteScope,
   RuleGroupsApi,
   RuleGroupsWriteApi,
 } from './alerting';
@@ -286,6 +301,7 @@ export {
   nodeStatus,
   nodesApi,
   nodesWriteApi,
+  type NodeJoinCommand,
   toComponentSummary,
   toNamespaceSummary,
   toNodeDetail,
@@ -314,7 +330,31 @@ export {
   toStorageDetail,
   toStorageSummary,
 } from './storage';
-export type { ClaimCreateInput, StorageApi, StorageClassDetail, StorageClassSizeConfig, StorageClassSummary, StorageDetail, StorageKind, StorageSummary } from './storage';
+export type { ClaimCreateInput, StorageApi, StorageClassDetail, StorageClassDraft, StorageClassSizeConfig, StorageClassSummary, StorageDetail, StorageKind, StorageSummary } from './storage';
+export { meteringBase, namespaceUsageApi, type NamespaceUsageResult, type ProjectUsage, type UsageRange } from './metering';
+export { identityProvidersApi, type IdentityProvider, type IdentityProvidersResult } from './identity';
+export {
+  composedAppBodies,
+  composedAppsApi,
+  composedAppsWriteApi,
+  validateComposedAppInput,
+  type ComposedAppComponentCounts,
+  type ComposedAppCreateInput,
+  type ComposedAppDetail,
+  type ComposedAppHealth,
+  type ComposedAppIngress,
+  type ComposedAppService,
+  type ComposedAppGray,
+  type ComposedAppGrayStrategy,
+  type ComposedAppGrayType,
+  type ComposedAppSummary,
+  type ComposedAppTrace,
+  type ComposedAppTraceSpan,
+  type ComposedAppTracing,
+  type ComposedAppTraffic,
+  type ComposedAppTrafficNode,
+  type ComposedAppWorkload,
+} from './apps';
 export type {
   LOGIN_ERROR_CODES,
   LoginErrorCode,

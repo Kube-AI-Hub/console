@@ -39,6 +39,7 @@
 - 项目集合返回的行结构与工作空间汇总一致（`cluster.cluster_id`、`app`、`version`、`status`）；分页与搜索由页面承担，因为该集合忽略 `keyword`。
 - 卸载按对象 id 删除：按名称删除会返回 200 但不生效（实测）。删除是异步的，回读可能在数秒内仍返回该 release。
 - 安装目标必须是项目：openpitrix 没有工作空间级创建路由。
+- **与「自制 CRD 应用」是两页，不是同一功能**：本页只读 openpitrix release（`applications` 路由）。旧 console 的 `applications/composing`（CRD 组装应用）已按 **2026-11-17 产品复核决定重纳**，作为**独立页面**交付，不并入本页、不复用本页路由；两者对象不同（release 实例 vs 按 app 标签聚合的 Deployment/StatefulSet/Service/Ingress）。原「→扩展资源 别处承接」的理由已作废：扩展资源是通用 CRD 浏览器，没有聚合健康、组件下钻、流量治理与链路追踪。
 
 ## UI 交互设计
 
@@ -78,7 +79,6 @@
 
 ## 明确不做
 
-- **CRD 组装应用（`applications/composing`）**：旧 console 的另一类应用（由 CRD 组装，带 Tracing/灰度发布页签）。它依赖 CRD 应用的 composition 模型，与商店 release 不是同一对象，本单元只交付 `applications/template` 这一支；CRD 应用页另立单元。
 - **应用「编辑信息」**：旧 console 的 `openpitrix.app.edit` 在升级/改名上有独立的接口语义，本部署的 release 升级无接口（已登记在 `installed-apps.md` 的明确不做）；改名未验证，不交付控件。
 
 ## 假设

@@ -10,18 +10,30 @@ import {
   type RuleGroupSummary,
 } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { AiButton, AiSurface, Badge, Button, Icon, InputSearch, Skeleton } from '@kube-ai-hub/ui';
+import { AiButton, AiSurface, Badge, Button, Icon, InputSearch, Modal, Skeleton } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { DefinitionRow } from '@/components/resource/DefinitionRow';
 import { DeleteDialog } from '@/components/resource/DeleteDialog';
+import { DialogSuspense } from '@/components/resource/DialogSuspense';
 import { MutationAlert, ResourceErrorPanel, errorMessage } from '@/components/resource/ResourceErrorPanel';
+import { toYaml } from '@/components/resource/yaml';
 import { formatTimestamp } from '@/lib/time';
 import { AlertMessagesTimeline } from './AlertMessagesTimeline';
-import { alertSeverityLabel, alertStateLabel, scopeLabel } from './alertLabels';
+import { alertSeverityLabel, alertStateLabel, ruleStateLabel, ruleStateTone, scopeLabel } from './alertLabels';
+import { RuleMetricDialog } from './RuleMetricDialog';
 import { useRuleGroupPermissions } from './permissions';
 import { useAlertMessages } from './queries';
 import { RuleGroupDialog } from './RuleGroupDialog';
+
+/*
+ * The YAML editor is 188 KB gzip of CodeMirror; a detail page must not pay for it until
+ * the reader asks for it (DEC-CORE-KUBE_FRONTEND-04).
+ */
+const LazyYamlDialog = React.lazy(async () => {
+  const module = await import('@/components/resource/YamlDialog');
+  return { default: module.YamlDialog };
+});
 
 /**
  * 告警策略详情.
@@ -44,32 +56,62 @@ import { RuleGroupDialog } from './RuleGroupDialog';
  */
 export interface RuleGroupDetailPageProps {
   cluster: string;
-  namespace: string;
+  /** Required for project scope; omitted when `from` is `cluster`. */
+  namespace?: string;
   name: string;
   scope: RuleGroupScope;
+  /**
+   * Which list opened this detail, because it decides the back link.
+   *
+   * The same page serves two lists: the project list (which merges global, cluster and
+   * project groups) and the cluster page (two tabs, custom cluster groups and the
+   * installer's global ones). Returning to the wrong list loses the reader's tab and
+   * filter, so the context is explicit rather than inferred from the scope.
+   */
+  from?: 'project' | 'cluster';
 }
 
 /** The project's policy list; the back link and delete both return here. */
-const LIST_ROUTE = '/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/alertingrules';
+const PROJECT_LIST_ROUTE = '/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/alertingrules';
+/** The cluster page's two tabs live on one route. */
+const CLUSTER_LIST_ROUTE = '/kube-frontend/clusters/$cluster/alerting-policies';
 
-export function RuleGroupDetailPage({ cluster, namespace, name, scope }: RuleGroupDetailPageProps): React.ReactElement {
+export function RuleGroupDetailPage({
+  cluster,
+  namespace = '',
+  name,
+  scope,
+  from = 'project',
+}: RuleGroupDetailPageProps): React.ReactElement {
   const t = useT();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const routeParams = useParams({ strict: false }) as { workspace?: string };
   const workspace = routeParams.workspace ?? 'system-workspace';
   const permissions = useRuleGroupPermissions({ cluster, namespace });
+  /*
+   * The cluster page reads the aggregated path: its attributes include the group's
+   * evaluation time and last evaluation, and each rule's state. The project page keeps
+   * deriving rule state from the alert list, because a project group's alerts are the
+   * page's own second list; switching its read path is not part of this change.
+   */
+  const withStatus = from === 'cluster';
 
   const [editing, setEditing] = React.useState(false);
   const [deleting, setDeleting] = React.useState(false);
+  const [editingYaml, setEditingYaml] = React.useState(false);
+  const [yamlError, setYamlError] = React.useState('');
+  /** Disabling stops evaluation, so it asks once — as the old console's detail did. */
+  const [confirmDisable, setConfirmDisable] = React.useState(false);
 
   const detailQuery = useQuery({
-    queryKey: ['rule-group-detail', cluster, namespace, scope, name],
+    queryKey: ['rule-group-detail', cluster, namespace, scope, name, withStatus],
     queryFn: ({ signal }) =>
       ruleGroupsApi(apiClient).get({
         name,
         scope,
         ...(scope === 'project' ? { namespace } : {}),
+        ...(withStatus ? { withStatus: true, cluster } : {}),
         signal,
       }),
   });
@@ -110,21 +152,64 @@ export function RuleGroupDetailPage({ cluster, namespace, name, scope }: RuleGro
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['rule-group-detail', cluster, namespace, scope, name] });
       void queryClient.invalidateQueries({ queryKey: ['rule-groups', cluster] });
+      void queryClient.invalidateQueries({ queryKey: ['cluster-rule-groups', cluster] });
     },
   });
 
+  /**
+   * Whole-object write from the YAML editor.
+   *
+   * The aggregated read injects `status`; the CRD has no status subresource, so a
+   * write that carries it is rejected. The editor is seeded without it, and the object
+   * is stripped here too (a reader can paste status back in).
+   */
+  const replaceYaml = useMutation({
+    mutationFn: async (object: Record<string, unknown>) => {
+      const body = { ...object } as Record<string, unknown>;
+      delete body['status'];
+      await ruleGroupsWriteApi(apiClient).replace({
+        scope: scope === 'project' ? 'project' : 'cluster',
+        ...(scope === 'project' ? { namespace } : {}),
+        name,
+        object: body,
+      });
+    },
+    onSuccess: () => {
+      setEditingYaml(false);
+      setYamlError('');
+      void queryClient.invalidateQueries({ queryKey: ['rule-group-detail', cluster, namespace, scope, name] });
+      void queryClient.invalidateQueries({ queryKey: ['cluster-rule-groups', cluster] });
+    },
+    onError: (error) => setYamlError(errorMessage(t, error)),
+  });
+
   const remove = useMutation({
-    mutationFn: () => ruleGroupsWriteApi(apiClient).remove({ namespace, name }),
+    mutationFn: () =>
+      ruleGroupsWriteApi(apiClient).remove({
+        scope: scope === 'project' ? 'project' : 'cluster',
+        ...(scope === 'project' ? { namespace } : {}),
+        name,
+      }),
     onSuccess: async () => {
       setDeleting(false);
       void queryClient.invalidateQueries({ queryKey: ['rule-groups', cluster] });
-      await navigate({ to: LIST_ROUTE, params: { workspace, cluster, namespace } });
+      void queryClient.invalidateQueries({ queryKey: ['cluster-rule-groups', cluster] });
+      if (from === 'cluster' || scope !== 'project') {
+        await navigate({ to: CLUSTER_LIST_ROUTE, params: { cluster } });
+        return;
+      }
+      await navigate({ to: PROJECT_LIST_ROUTE, params: { workspace, cluster, namespace } });
     },
   });
 
   const detail = detailQuery.data;
-  const canEdit = detail !== undefined && detail.scope === 'project' && !detail.builtin && permissions.update.project;
-  const canDelete = detail !== undefined && detail.scope === 'project' && !detail.builtin && permissions.deleteProject;
+  const writable = detail !== undefined && !detail.builtin;
+  const canEdit =
+    writable &&
+    (detail.scope === 'project' ? permissions.update.project : detail.scope === 'cluster' ? permissions.update.cluster : false);
+  const canDelete =
+    writable &&
+    (detail.scope === 'project' ? permissions.deleteProject : detail.scope === 'cluster' ? permissions.deleteCluster : false);
   const canToggle = permissions.update[scope];
   const state = detailQuery.isPending ? 'loading' : detailQuery.isError ? 'error' : 'ready';
 
@@ -133,7 +218,7 @@ export function RuleGroupDetailPage({ cluster, namespace, name, scope }: RuleGro
       <AiSurface as="section" aiId="alertingrules:detail-surface" state="error" className="min-w-0">
         <ResourceErrorPanel error={detailQuery.error} onRetry={() => void detailQuery.refetch()} retryAiId="alertingrules:detail-retry" />
         <div className="mt-3">
-          <BackLink workspace={workspace} cluster={cluster} namespace={namespace} />
+          <BackLink from={from} workspace={workspace} cluster={cluster} namespace={namespace} />
         </div>
       </AiSurface>
     );
@@ -149,7 +234,7 @@ export function RuleGroupDetailPage({ cluster, namespace, name, scope }: RuleGro
 
   return (
     <AiSurface as="section" aiId="alertingrules:detail" state={state} className="flex min-w-0 flex-col gap-4">
-      <BackLink workspace={workspace} cluster={cluster} namespace={namespace} />
+      <BackLink from={from} workspace={workspace} cluster={cluster} namespace={namespace} />
 
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-1">
@@ -171,13 +256,29 @@ export function RuleGroupDetailPage({ cluster, namespace, name, scope }: RuleGro
               {t('common.edit')}
             </AiButton>
           ) : null}
+          {canEdit && from === 'cluster' ? (
+            <AiButton
+              aiId="alertingrules:detail:edit-yaml"
+              size="sm"
+              variant="secondary"
+              onClick={() => {
+                setYamlError('');
+                setEditingYaml(true);
+              }}
+            >
+              {t('resource.action.editYaml')}
+            </AiButton>
+          ) : null}
           {canToggle ? (
             <AiButton
               aiId="alertingrules:detail:toggle"
               size="sm"
               variant="secondary"
               disabled={toggle.isPending}
-              onClick={() => toggle.mutate(!detail.enabled)}
+              onClick={() => {
+                if (detail.enabled) setConfirmDisable(true);
+                else toggle.mutate(true);
+              }}
             >
               {detail.enabled ? t('monitoring.action.disable') : t('monitoring.action.enable')}
             </AiButton>
@@ -196,12 +297,25 @@ export function RuleGroupDetailPage({ cluster, namespace, name, scope }: RuleGro
         <h2 className="mb-3 text-sm font-medium text-ai-fg">{t('monitoring.ruleGroups.detail.attributes')}</h2>
         <dl className="grid grid-cols-1 gap-3 text-xs sm:grid-cols-[minmax(6rem,auto)_1fr]">
           <DefinitionRow label={t('monitoring.field.name')} value={detail.name} />
+          <DefinitionRow label={t('monitoring.ruleGroups.field.alias')} value={detail.alias || '-'} />
           <DefinitionRow label={t('monitoring.ruleGroups.field.description')} value={detail.description || t('monitoring.ruleGroups.noDescription')} />
           <DefinitionRow label={t('monitoring.ruleGroups.scope')} value={scopeLabel(t, detail.scope)} />
           <DefinitionRow label={t('monitoring.column.ruleStatus')} value={detail.enabled ? t('monitoring.status.enabled') : t('monitoring.status.disabled')} />
           <DefinitionRow label={t('monitoring.ruleGroups.type')} value={detail.builtin ? t('monitoring.ruleGroups.builtin') : t('monitoring.ruleGroups.custom')} />
           <DefinitionRow label={t('monitoring.ruleGroups.ruleCount')} value={String(detail.ruleCount)} />
           <DefinitionRow label={t('monitoring.ruleGroups.checkInterval')} value={detail.interval || '-'} />
+          {withStatus ? (
+            <DefinitionRow
+              label={t('monitoring.ruleGroups.evaluationTime')}
+              value={detail.status?.evaluationTime === undefined ? '-' : `${detail.status.evaluationTime.toFixed(3)} ${t('monitoring.ruleGroups.seconds')}`}
+            />
+          ) : null}
+          {withStatus ? (
+            <DefinitionRow
+              label={t('monitoring.ruleGroups.lastEvaluation')}
+              value={detail.status?.lastEvaluation ? formatTimestamp(detail.status.lastEvaluation) : '-'}
+            />
+          ) : null}
           <DefinitionRow label={t('monitoring.field.createdAt')} value={formatTimestamp(detail.createdAt)} />
           <DefinitionRow label={t('monitoring.ruleGroups.creator')} value={detail.creator || '-'} />
         </dl>
@@ -212,6 +326,7 @@ export function RuleGroupDetailPage({ cluster, namespace, name, scope }: RuleGro
         activeByRule={activeByRule}
         activeTotal={activeQuery.data?.total ?? 0}
         activeFetched={activeQuery.data?.items.length ?? 0}
+        useStatus={withStatus && detail.status !== undefined}
       />
       <AlertMessagesTimeline scope={scope} {...(scope === 'project' ? { namespace } : {})} ruleGroup={detail.name} />
 
@@ -222,9 +337,69 @@ export function RuleGroupDetailPage({ cluster, namespace, name, scope }: RuleGro
           if (!open) void queryClient.invalidateQueries({ queryKey: ['rule-group-detail', cluster, namespace, scope, name] });
         }}
         cluster={cluster}
-        namespace={namespace}
+        scope={detail.scope}
+        {...(detail.scope === 'project' ? { namespace } : {})}
         group={detail as RuleGroupSummary}
       />
+
+      <Modal
+        open={confirmDisable}
+        onOpenChange={(open) => !open && !toggle.isPending && setConfirmDisable(false)}
+        title={t('cluster.alerting.policies.disableTitle')}
+        size="md"
+      >
+        {detail ? (
+          <div className="flex flex-col gap-4 text-xs" data-ai-id="alertingrules:detail:disable-dialog">
+            <p className="text-ai-fg-secondary">{t('cluster.alerting.policies.disableDesc', { name: detail.name })}</p>
+            <div className="flex justify-end gap-2">
+              <Button
+                size="sm"
+                variant="secondary"
+                disabled={toggle.isPending}
+                {...actionProps('alertingrules:detail:disable-cancel')}
+                onClick={() => setConfirmDisable(false)}
+              >
+                {t('common.cancel')}
+              </Button>
+              <Button
+                size="sm"
+                variant="danger"
+                disabled={toggle.isPending}
+                {...actionProps('alertingrules:detail:disable-confirm')}
+                onClick={() => {
+                  toggle.mutate(false);
+                  setConfirmDisable(false);
+                }}
+              >
+                {t('monitoring.action.disable')}
+              </Button>
+            </div>
+          </div>
+        ) : null}
+      </Modal>
+
+      {editingYaml && detail ? (
+        <DialogSuspense>
+          <LazyYamlDialog
+            open
+            onOpenChange={(open) => !open && setEditingYaml(false)}
+            initialYaml={toYaml(withoutStatus(detail.raw))}
+            lockName={detail.name}
+            title={t('resource.action.editYaml')}
+            submitLabel={t('common.confirm')}
+            pending={replaceYaml.isPending}
+            onSubmit={async (object) => {
+              await replaceYaml.mutateAsync(object);
+            }}
+          />
+        </DialogSuspense>
+      ) : null}
+
+      {yamlError ? (
+        <p role="alert" className="text-xs text-ai-danger" data-ai-id="alertingrules:detail:yaml-error">
+          {yamlError}
+        </p>
+      ) : null}
 
       {deleting ? (
         <DeleteDialog
@@ -251,23 +426,32 @@ export function RuleGroupDetailPage({ cluster, namespace, name, scope }: RuleGro
  * rule (the comparison lives inside the expression), and truncating it hides the
  * exact condition the reader opened the page to check.
  *
- * The state column is derived from the active alerts of this group, not fabricated:
- * the rule-group API has no per-rule evaluation status. A rule with no active alert
- * reads **正常**, not `-` — "evaluated and not firing" is a fact, while `-` would
- * claim the state is unknown.
+ * The state column has two sources, and which one is authoritative depends on the
+ * read path:
+ *
+ * - Through the aggregated kapis path (cluster pages) the group carries
+ *   `status.rulesStatus` — Prometheus's own per-rule state, including `disabled`.
+ *   That is used when present; it is the same field the old console rendered.
+ * - Through the raw CRD path (project page today) there is no status, so the state is
+ *   derived from the group's active alerts. A rule with no active alert reads **正常**,
+ *   not `-` — "evaluated and not firing" is a fact, while `-` would claim it is unknown.
  */
 function RuleSection({
   detail,
   activeByRule,
   activeTotal,
   activeFetched,
+  useStatus,
 }: {
   detail: RuleGroupDetail;
   activeByRule: Map<string, AlertMessage>;
   activeTotal: number;
   activeFetched: number;
+  /** Render `status.rulesStatus` (kapis) instead of deriving state from alerts. */
+  useStatus: boolean;
 }): React.ReactElement {
   const t = useT();
+  const [metricRule, setMetricRule] = React.useState<{ name: string; expression: string; summary?: string } | null>(null);
   /*
    * Rule search and paging.
    *
@@ -311,7 +495,7 @@ function RuleSection({
               onChange={setKeyword}
             />
           ) : null}
-          {activeTotal > activeFetched ? (
+          {!useStatus && activeTotal > activeFetched ? (
             <span className="text-[11px] text-ai-fg-muted">
               {t('monitoring.ruleGroups.detail.ruleStatePartial', { fetched: activeFetched, total: activeTotal })}
             </span>
@@ -338,12 +522,13 @@ function RuleSection({
            */}
           <table className="w-full table-fixed border-collapse text-xs" data-ai-id="alertingrules:detail:rule-table">
             <colgroup>
-              <col className="w-[10%]" />
+              <col className="w-[9%]" />
+              <col className="w-[17%]" />
+              <col className="w-[8%]" />
+              <col className="w-[7%]" />
               <col className="w-[20%]" />
-              <col className="w-[9%]" />
-              <col className="w-[9%]" />
-              <col className="w-[24%]" />
-              <col className="w-[28%]" />
+              <col className="w-[25%]" />
+              {useStatus ? <col className="w-[14%]" /> : null}
             </colgroup>
             <thead>
               <tr className="border-b border-ai-line text-ai-fg-muted">
@@ -353,21 +538,41 @@ function RuleSection({
                 <th scope="col" className="px-2 py-2 text-left font-medium">{t('monitoring.ruleGroups.rule.duration')}</th>
                 <th scope="col" className="px-2 py-2 text-left font-medium">{t('monitoring.ruleGroups.rule.summary')}</th>
                 <th scope="col" className="px-2 py-2 text-left font-medium">{t('monitoring.ruleGroups.rule.expressionThreshold')}</th>
+                {useStatus ? <th scope="col" className="px-2 py-2 text-left font-medium">{t('monitoring.ruleGroups.lastEvaluation')}</th> : null}
               </tr>
             </thead>
             <tbody>
-              {pageRows.map((rule) => {
+              {pageRows.map((rule, indexInPage) => {
+                const absoluteIndex = (current - 1) * PAGE_SIZE + indexInPage;
+                const statusRule = useStatus ? detail.status?.rules[absoluteIndex] : undefined;
                 const active = activeByRule.get(rule.name);
                 return (
                   <tr key={rule.name} className="border-b border-ai-line align-top" data-ai-row={rule.name}>
                     <td className="whitespace-nowrap px-2 py-2">
-                      {active ? (
+                      {statusRule ? (
+                        <Badge tone={ruleStateTone(statusRule.state)}>{ruleStateLabel(t, statusRule.state)}</Badge>
+                      ) : active ? (
                         <Badge tone={active.state === 'firing' ? 'danger' : 'warning'}>{alertStateLabel(t, active.state)}</Badge>
                       ) : (
                         <span className="text-ai-fg-secondary">{t('monitoring.ruleGroups.rule.stateNormal')}</span>
                       )}
                     </td>
-                    <td className="break-all px-2 py-2 font-medium text-ai-fg">{rule.name}</td>
+                    <td className="break-all px-2 py-2 font-medium text-ai-fg">
+                      {rule.name}
+                      {rule.expression ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="mt-1 flex w-full justify-start px-0 py-0 text-left text-[11px] font-normal text-ai-link hover:underline"
+                          {...actionProps(`alertingrules:detail:rule-metric:${rule.name}`)}
+                          onClick={() =>
+                            setMetricRule({ name: rule.name, expression: rule.expression, ...(rule.summary ? { summary: rule.summary } : {}) })
+                          }
+                        >
+                          {t('monitoring.ruleGroups.metric.open')}
+                        </Button>
+                      ) : null}
+                    </td>
                     <td className="px-2 py-2 text-ai-fg-secondary">{rule.severity ? alertSeverityLabel(t, rule.severity) : '-'}</td>
                     <td className="px-2 py-2 tabular-nums text-ai-fg-secondary">{rule.duration || '-'}</td>
                     <td className="min-w-0 px-2 py-2 text-ai-fg-secondary">
@@ -377,6 +582,11 @@ function RuleSection({
                     <td className="min-w-0 px-2 py-2">
                       <code className="block whitespace-pre-wrap break-all font-mono text-[11px] text-ai-fg-muted">{rule.expression || '-'}</code>
                     </td>
+                    {useStatus ? (
+                      <td className="whitespace-nowrap px-2 py-2 tabular-nums text-ai-fg-muted" data-ai-id={`alertingrules:detail:rule-last:${rule.name}`}>
+                        {statusRule?.lastEvaluation ? formatTimestamp(statusRule.lastEvaluation) : '-'}
+                      </td>
+                    ) : null}
                   </tr>
                 );
               })}
@@ -416,15 +626,47 @@ function RuleSection({
           </span>
         </nav>
       ) : null}
+
+      <RuleMetricDialog open={metricRule !== null} onOpenChange={(open) => !open && setMetricRule(null)} rule={metricRule} />
     </section>
   );
 }
 
-function BackLink({ workspace, cluster, namespace }: { workspace: string; cluster: string; namespace: string }): React.ReactElement {
+/** The aggregated read injects `status`; the CRD has no status subresource. */
+function withoutStatus(object: Record<string, unknown>): Record<string, unknown> {
+  const copy = { ...object };
+  delete copy['status'];
+  return copy;
+}
+
+function BackLink({
+  from,
+  workspace,
+  cluster,
+  namespace,
+}: {
+  from: 'project' | 'cluster';
+  workspace: string;
+  cluster: string;
+  namespace: string;
+}): React.ReactElement {
   const t = useT();
+  if (from === 'cluster') {
+    return (
+      <Link
+        to={CLUSTER_LIST_ROUTE}
+        params={{ cluster }}
+        className="inline-flex w-fit items-center gap-1 text-xs text-ai-link hover:underline"
+        {...actionProps('alertingrules:detail:back')}
+      >
+        <Icon name="chevron-left" size={12} />
+        {t('monitoring.ruleGroups.detail.back')}
+      </Link>
+    );
+  }
   return (
     <Link
-      to={LIST_ROUTE}
+      to={PROJECT_LIST_ROUTE}
       params={{ workspace, cluster, namespace }}
       className="inline-flex w-fit items-center gap-1 text-xs text-ai-link hover:underline"
       {...actionProps('alertingrules:detail:back')}

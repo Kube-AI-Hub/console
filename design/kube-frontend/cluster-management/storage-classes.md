@@ -7,6 +7,9 @@
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-01
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-02
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-03
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-04
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-05
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-06
 
 ## 概述
 
@@ -14,7 +17,7 @@
 
 ## 设计目标与非目标
 
-目标：能力一眼可读；详情能把「哪些存储卷在用这个类」列出来。非目标：任何写操作（创建、编辑、设为默认、删除关联的 PVC）。
+目标：能力一眼可读；详情能把「哪些存储卷在用这个类」列出来；写能力（创建 / 编辑 / 删除 / 设为默认 / 卷功能 / 自动扩容）已由 2026-11-17 重纳，见 DEC-…-STORAGE_CLASSES-04。非目标：在关联存储卷列表里编辑或删除存储卷（回项目存储页）。
 
 ## 关键约束
 
@@ -55,6 +58,24 @@
 
 **何时重新考虑**：平台为参数提供统一 schema 时。
 
+### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-STORAGE_CLASSES-04 — 写能力重纳，删除以 PVC 依赖为前置（2026-11-17）
+
+**新决定**：提供创建、编辑信息、编辑 YAML、删除、批量删除、设为默认、卷功能（克隆/快照/扩容）与自动扩容。**2026-11-17 产品复核决定重纳**（N-12，见[重纳决策记录](../../../docs/plans/reinclusion-decisions-20261117.md)）。
+
+**原判断（保留，不删除）**：PRD 曾登记「创建与编辑存储类型（属基础设施操作）不做」「设为默认类型的操作不做」；本文件非目标曾写「任何写操作」。
+
+**为什么当时判断错了**：把「改存储类型会影响未来所有声明」当成拒绝入口的理由，但这条风险恰恰应该由**删除拦截**来兜，而不是靠没有按钮。老 console 的实现里就有这层保护（`StorageClasses/index.jsx:42-57` 在选中项关联 PVC 非零时直接 `Notify.error` 并中止），新实现删掉入口等于连这层保护一起删掉——管理员转去 kubectl 反而没有任何拦截。
+
+**落地约定**：
+1. **删除前置校验**：删除前统计 `storageClassName` 等于该类的 PVC 数（复用详情页那次集群级 PVC 读的同一份数据与同一口径），非零时不发请求，提示「有 N 个 PVC 在使用该存储类型」；批量删除逐项校验并汇总。
+2. **设为默认**：写 `storageclass.kubernetes.io/is-default-class` 注解（同时认 beta 拼写）；已有默认类时提示将替换谁，不静默切换。
+3. **能力开关与自动扩容**：卷功能写 `storageclass.kubesphere.io/allow-{clone,snapshot}` 注解，自动扩容写 `allowVolumeExpansion`；三者与列表「能力」列读同一组字段，避免开关与徽标不一致。
+4. 写路径走 `storage.k8s.io/v1`（对象的真实组），不走 kapis 代理——kapis 的 resources 端点只注册 GET。
+
+**何时重新考虑**：若平台提供「存储类型变更影响预览」接口，可把删除拦截从「拒绝」改为「列出受影响的 PVC 并二次确认」。
+
+**交付（2026-11-17）**：`storageClassesApi` 增加 `create` / `updateInfo`（merge-patch，清空键 null）/ `setDefault`（先清旧默认三种拼写再写正式键）/ `setFeatures`（关闭时移除字段而非写 false）/ `remove`（逐条）；写路径全走 `/apis/storage.k8s.io/v1`（成员集群加 `/apis/clusters/<c>` 段）。列表提供创建对话框、多选批量删除与行操作；详情提供编辑信息/编辑 YAML/设为默认/卷功能/删除。删除拦截用**实时 PVC 集合**（同一 query key 与详情共享），PVC 读取失败时单条入口停用、批量操作不渲染（不把失败当 0）。设为默认前有「替换现有默认」提示。E2E 见 `TC-…-04`；单测见 `storage-class-writes.test.ts` / `app .../storage-class-writes.test.tsx`。
+
 ## 系统现状
 
 老 console `clusters/containers/Storage/StorageClasses`：名称、存储卷数、是否默认、克隆/快照/扩容能力、供应者。本模块把三项能力合成一列徽标集合。老 console 的存储类型详情还有「关联存储卷」列表页签（`StorageClasses/Detail/routes.js:24-31`），新 UI 第一版只有属性与参数，R-16 补上该列表（只读，链接回项目存储页）。
@@ -73,8 +94,13 @@
 | --- | --- |
 | 存储类型 | /apis/storage.k8s.io/v1/storageclasses（集群级） |
 | 关联存储卷 | /kapis/resources.kubesphere.io/v1alpha3/persistentvolumeclaims（集群级，`limit=500`） |
+| 创建 | POST /apis/storage.k8s.io/v1/storageclasses |
+| 编辑信息 | PATCH /apis/storage.k8s.io/v1/storageclasses/&lt;name&gt;（merge-patch，metadata.annotations） |
+| 编辑 YAML / 能力 | GET 后 PUT（整对象，带 resourceVersion）；能力开关用 PATCH（annotations + spec.allowVolumeExpansion） |
+| 设为默认 | GET 列表后 PATCH 旧默认（清三种拼写）+ PATCH 新默认（写 storageclass.kubernetes.io/is-default-class=true） |
+| 删除 | DELETE /apis/storage.k8s.io/v1/storageclasses/&lt;name&gt;（逐条） |
 
-只读；`persistentvolumeclaims` 的每项用 `metadata.namespace`、`metadata.name`、`spec.storageClassName`、`status.phase`、`spec.resources.requests.storage`。
+写路径用对象真实组；成员集群按 paths.ts 的约定把 `clusters/&lt;c&gt;` 放在 `/apis` 之后。
 
 ## 不变量
 
@@ -82,6 +108,9 @@
 2. 平台未上报存储卷数时显示 `-`。
 3. 关联存储卷行数 = 返回的 PVC 中 `spec.storageClassName` 等于该类型的条数。
 4. 每行名称链接到 `/kube-frontend/<workspace>/clusters/<cluster>/projects/<namespace>/persistentvolumeclaims/<name>`。
+5. 删除 = 实时 PVC 计数为 0 且 PVC 读取成功；任一不满足都不发 DELETE（单条 disabled、批量跳过/隐藏）。
+6. 一次默认切换结束后只有一个默认类（旧三种拼写注解全部清空）。
+7. 能力关闭时字段/注解被移除，而不是保留 false。
 
 ## 已知坑
 
@@ -93,8 +122,8 @@
 
 ## 测试与可观测
 
-E2E 见 `tests/kube-frontend/cluster-management/`；单测覆盖 `toStorageClassSummary` 的默认值与能力判定。
-可观测点：`sc-detail:surface`、`sc-detail:pvcs`、`sc-detail:pvcs-empty`、`sc-detail:pvc:<namespace>/<name>`（行）、`:pvcs-retry`。
+E2E 见 `tests/ui/tests/kube-frontend/cluster-management/`：TC-01/02/03 读取与关联卷，TC-04 覆盖创建、编辑信息/YAML、设为默认、能力开关、单删/批删与 PVC 守卫。单测：`packages/api-client/test/storage-class-writes.test.ts`（创建 body/成员路径、merge-patch null、默认切换、能力移除、逐条删除）、`apps/console-next/test/storage-class-writes.test.tsx`（删除守卫两因、创建表单校验/提交）。
+可观测点：`storageclasses:surface/create/create-dialog/create-name/create-provisioner/create-reclaim/create-binding/create-expand|clone|snapshot/create-submit/create-error`、`:select:<name>`、`:bulk-delete`、`:batch-result`（deleted/skipped/failed 属性）、`:delete-policy`、`:claims-unavailable`、`sc-detail:edit-info|edit-yaml|set-default|features|delete|delete-protected|features-dialog|feature:<expansion|cloning|snapshot>`。
 
 ## 后续改进
 
@@ -105,3 +134,4 @@ E2E 见 `tests/kube-frontend/cluster-management/`；单测覆盖 `toStorageClass
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-01`
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-02`
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-03`
+- `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-04`

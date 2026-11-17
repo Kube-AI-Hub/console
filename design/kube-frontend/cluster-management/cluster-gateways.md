@@ -6,6 +6,7 @@
 
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_GATEWAYS-02
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_GATEWAYS-01
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_GATEWAYS-03
 
 ## 概述
 
@@ -45,7 +46,7 @@ GET `/apis/gateway.kubesphere.io/v1alpha1/gateways`，成员集群沿用 cluster
 
 ## 设计目标与非目标
 
-目标：集群入口、作用域区分与真实状态。非目标：安装控制器、集群写操作与网关监控。
+目标：集群入口、作用域区分与真实状态；写能力（创建/编辑/删除）已由 2026-11-17 重纳，见 DEC-…-CLUSTER_GATEWAYS-03，验收等控制器就绪。非目标：安装控制器与 ingress-nginx release。
 
 ## 关键约束
 
@@ -53,6 +54,16 @@ GET `/apis/gateway.kubesphere.io/v1alpha1/gateways`，成员集群沿用 cluster
 - Gateway 读取错误必须抛出，不能吞掉异常返回空列表。
 
 ## 方案决策
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_GATEWAYS-04 — 集群网关只开放编辑，创建/删除留给安装器
+
+**为什么**：集群网关是安装器 Helm release 的产物（命名空间 kubesphere-controls-system，名字沿用旧约定），删除它会直接移除集群入口控制器；新建第二个集群网关没有产品语义。编辑（类型/副本/追踪/NodePort）是管理员真实需要的操作，对话框与项目网关完全一致，直接复用避免两套表单。
+
+**被否方案**：照搬老 console 的集群卡片创建/删除按钮。老页面删除按钮同样只在受控运维场景使用；新 UI 没有安装器上下文，误删代价是整个集群入口不可用。
+
+**何时重新考虑**：平台提供集群网关安全删除（先迁移/确认入口）的明确流程时。
+
+
 
 ### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_GATEWAYS-01 — 原生 List 只读盘点，不模拟分页或就绪
 
@@ -62,6 +73,8 @@ GET `/apis/gateway.kubesphere.io/v1alpha1/gateways`，成员集群沿用 cluster
 **被否方案**：因控制器不完整而隐藏整个入口；这会丢失状态排障能力。吞掉接口错误显示暂无网关会误导管理员。
 
 **何时重新考虑**：控制器安装完整并能验证部署、禁用、日志和监控后，迁移剩余写能力及下钻页。
+
+> 2026-11-17 更正：这条「何时重新考虑」被产品复核提前触发——写能力与下钻页从「不做」改为**重纳 + 环境阻塞**（见下条 DEC）。原判断里「不模拟就绪」的部分仍然有效：未就绪就是未就绪，不因为有了写入口就显示可用。
 
 ## 不变量
 
@@ -81,8 +94,25 @@ E2E 见 `tests/kube-frontend/cluster-management/`：读取真实集合，核对�
 
 ## 后续改进
 
-集群写操作、网关详情监控和日志；环境就绪前不能把这些能力登记为已迁移。
+集群写操作与详情 4 页签已重纳（DEC-…-CLUSTER_GATEWAYS-03）；**环境就绪前不能把这些能力登记为已迁移**。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_GATEWAYS-03 — 写能力重纳，验收等控制器（2026-11-17）
+
+**新决定**：提供创建、编辑、删除集群网关。**2026-11-17 产品复核决定重纳**（N-29，见[重纳决策记录](../../../docs/plans/reinclusion-decisions-20261117.md)），登记口径为**重纳 + 环境阻塞**。
+
+**原判断（保留，不删除）**：PRD 曾登记「本轮不安装集群网关控制器，不创建、编辑或删除集群网关：部署环境缺控制器 chart，无法验证真实就绪」；本文件「后续改进」曾写「集群写操作…环境就绪前不能把这些能力登记为已迁移」。
+
+**为什么当时判断错了**：把一条**环境限制**登记成了**产品决定不做**。这两件事的处置不同——环境限制是「等条件具备再验收」，产品不做是「永远不做」。按后者登记，会让控制器就绪之后也没有任何待办指向它。
+
+**落地约定**：
+1. 代码与规格可以推进；验收条件写明「控制器就绪后网关能创建到 Ready」，未就绪前不登记已迁移。
+2. 创建/编辑的失败必须在弹窗内映射控制器返回的原因（纯文本正文也要保留），不能退化成「保存失败」。
+3. 删除需输入名称确认；对象存在即可删，不等就绪。
+4. 未就绪时列表与详情都必须显示「部署中」而不是「已就绪」——写入口的存在不改变就绪判据。
+
+**何时重新考虑**：控制器 chart 就绪并跑通一次完整创建→就绪→删除后，把本条从「环境阻塞」改为「已交付」，并补验收证据链接。
 
 ## 验收用例
 
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_GATEWAYS-01`
+- `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_GATEWAYS-03`

@@ -79,6 +79,9 @@ export interface GatewayDetail {
   address: string;
   ports: GatewayServicePort[];
   resourceVersion: string;
+  /** Raw metadata labels/annotations, for the detail metadata tab. */
+  labels: Record<string, string>;
+  annotations: Record<string, string>;
 }
 
 export interface ClusterGateway extends ResourceBase, GatewayDetail {
@@ -192,6 +195,8 @@ function emptyDetail(namespace: string): GatewayDetail {
     address: '',
     ports: [],
     resourceVersion: '',
+    labels: {},
+    annotations: {},
   };
 }
 
@@ -231,6 +236,8 @@ export function toGatewayDetail(item: KubeObject, service?: KubeObject): Gateway
     address: loadBalancerAddress(service),
     ports: toPorts(service),
     resourceVersion: item.metadata?.resourceVersion ?? '',
+    labels: stringMap(item.metadata?.labels),
+    annotations: stringMap(item.metadata?.annotations),
   };
 }
 

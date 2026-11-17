@@ -1,0 +1,42 @@
+id: TC-L2-KUBE-FRONTEND-HELP-01
+level: 2
+suite: point
+module: kube-frontend
+submodule: help
+feature: help-entry
+title: 顶栏帮助菜单：两种语言、新窗口、配置兜底
+entry_url: '{BASE_URL}/kube-frontend/'
+prd: prd/kube-frontend/help.md
+design: design/kube-frontend/help.md
+
+covers:
+- AC-L2-KUBE-FRONTEND-HELP-01
+- AC-L2-KUBE-FRONTEND-HELP-02
+- AC-L2-KUBE-FRONTEND-HELP-03
+
+story:
+- US1
+- US2
+
+product: 登录后顶栏右侧有「帮助与文档」图标；菜单两项（用户指南 / API 文档）使用 GET /api/config 下发的当前语言地址（未配置时用旧 console 的相对路径），点击在新窗口打开且 noopener；部署显式置空时不渲染该项/整个入口。
+preconditions:
+- 已登录；BFF 提供 GET /api/config（默认文档地址可用）
+- 远程测试环境当前不可达时本用例记录为环境阻塞，不伪造通过
+steps:
+- 登录后打开任意控制台页面，等待顶栏渲染
+- 确认帮助按钮存在且可访问名称为「帮助与文档」
+- 点开菜单，确认「用户指南」「API 文档」两项可见
+- 用 Playwright 捕获新窗口点击「用户指南」，核对新窗口 URL 与当前语言配置的 url 一致
+- 尝试读取新窗口 window.opener，确认被切断（noopener）
+- 通过语言切换改为英文，再打开菜单，核对菜单项仍为两项（URL 变为 en 配置）
+expected:
+- 帮助图标可见且不造成顶栏换行/溢出
+- 两项菜单使用当前语言 URL；点击新窗口打开；window.opener 为 null
+- 配置接口失败时菜单仍显示（内置 /kube-docs/... 兜底）；显式空 URL 不产生死链（本用例默认部署走默认值，空值分支由单测覆盖）
+troubleshoot:
+- 菜单不出现：确认 AppShell 顶栏挂载了 HelpMenu，且 /api/config 返回 documents 非空
+- 点击无反应/被拦截：window.open 必须在 onSelect 同步栈内；确认菜单项未被 Radix 延迟
+- URL 语言不对：确认 helpLinksFor 用当前 locale 选择 zh/en，而不是浏览器语言
+- 新窗口 opener 非空：window.open 第三参必须含 noopener
+update_automation:
+- 句柄：shell:help-menu、shell:docs-guide、shell:docs-api

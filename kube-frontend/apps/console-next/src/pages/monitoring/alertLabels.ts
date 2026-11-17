@@ -29,6 +29,34 @@ export function alertStateLabel(t: Translate, state: string): string {
   return key ? t(key) : state || '-';
 }
 
+/**
+ * Per-rule evaluation state → the four words the old policy page used.
+ *
+ * They are **not** the alert-message states: an inactive rule was evaluated and found
+ * nothing wrong ("未触发"), while a resolved alert is a message that stopped firing
+ * ("已恢复"). Reusing the message words here would claim a rule never ran.
+ */
+const RULE_STATE_KEYS: Record<string, LocaleKey> = {
+  inactive: 'monitoring.ruleGroupState.inactive',
+  pending: 'monitoring.ruleGroupState.pending',
+  firing: 'monitoring.ruleGroupState.firing',
+  disabled: 'monitoring.ruleGroupState.disabled',
+};
+
+export function ruleStateLabel(t: Translate, state: string): string {
+  const key = RULE_STATE_KEYS[state.toLowerCase()];
+  return key ? t(key) : state || '-';
+}
+
+/** One rule state's badge tone: firing is the alarm, pending is building, the rest calm. */
+export function ruleStateTone(state: string): 'danger' | 'warning' | 'success' | 'neutral' {
+  const normalized = state.toLowerCase();
+  if (normalized === 'firing') return 'danger';
+  if (normalized === 'pending') return 'warning';
+  if (normalized === 'inactive') return 'success';
+  return 'neutral';
+}
+
 export function alertSeverityLabel(t: Translate, severity: string): string {
   const key = SEVERITY_KEYS[severity.toLowerCase()];
   return key ? t(key) : severity || '-';

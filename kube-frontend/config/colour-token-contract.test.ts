@@ -74,7 +74,7 @@ describe('colour tokens', () => {
     const offenders: string[] = [];
     for (const { relative, source } of files) {
       for (const match of source.matchAll(/rgba?\(([^)]*)\)/g)) {
-        if (!match[1].includes('var(--ai-')) offenders.push(`${relative}: rgba?(${match[1]})`);
+        if (!match[1]?.includes('var(--ai-')) offenders.push(`${relative}: rgba?(${match[1]})`);
       }
     }
     expect(offenders, offenders.join('\n')).toEqual([]);

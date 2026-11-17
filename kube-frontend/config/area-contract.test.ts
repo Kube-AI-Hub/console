@@ -53,11 +53,6 @@ function pageFolder(scopeDir: string, page: string): Array<[string, string]> {
   return routeFiles().filter(([file]) => file.startsWith(`${scopeDir}/${page}/`));
 }
 
-/** Page directories that exist on disk. */
-function pageDirs(): string[] {
-  return readdirSync(join(APP_SRC, 'pages')).filter((entry) => statSync(join(APP_SRC, 'pages', entry)).isDirectory());
-}
-
 describe('area registry', () => {
   it('derives routes from the registry and not from a second list', () => {
     const shell = read('shell/AppShell.tsx');

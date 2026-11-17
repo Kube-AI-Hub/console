@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { promqlApi } from '@kube-ai-hub/api-client';
 import { api as apiClient } from '@/api';
 
 /**
@@ -59,6 +60,43 @@ export interface GatewayDetail {
   creator: string;
   /** `spec.deployment.annotations['servicemesh.kubesphere.io/enabled']` — 链路追踪 in the old card. */
   tracing: boolean;
+  labels: Record<string, string>;
+  annotations: Record<string, string>;
+  resourceVersion: string;
+}
+
+export interface GatewayPod {
+  name: string;
+  phase: string;
+  ready: boolean;
+  restarts: number;
+  createdAt: string;
+}
+
+export interface GatewayResourceStatus {
+  deploymentName: string;
+  readyReplicas: number;
+  desiredReplicas: number;
+  pods: GatewayPod[];
+}
+
+export interface GatewayMonitoring {
+  available: boolean;
+  cpuCores: number;
+  memoryBytes: number;
+  /** Ingress metrics (request rate / 5xx) are optional: the controller may not scrape them. */
+  ingressAvailable: boolean;
+  requestRate: number;
+  errorRate: number;
+  reason?: string;
+}
+
+export interface GatewayLogs {
+  pod: string;
+  container: string;
+  text: string;
+  available: boolean;
+  reason?: string;
 }
 
 export interface GatewayIngress {
@@ -71,6 +109,11 @@ export interface GatewayIngress {
 
 function asRecord(value: unknown): Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
+}
+
+function stringRecord(value: unknown): Record<string, string> {
+  const record = asRecord(value);
+  return Object.fromEntries(Object.entries(record).map(([key, item]) => [key, text(item)]));
 }
 
 function text(value: unknown): string {
@@ -211,6 +254,35 @@ export function useGatewayDetail(cluster: string, name: string) {
 
       const config = Object.entries(asRecord(gatewayController['config'])).map(([key, value]) => ({ key, value: text(value) }));
 
+      const podsBody = await apiClient
+        .request<{ items?: Array<Record<string, unknown>> }>(resourcesPath(cluster, 'namespaces/' + namespace + '/pods'), {
+          query: { labelSelector: 'app.kubernetes.io/instance=' + name + '-ingress', limit: 50 },
+          ...options,
+        })
+        .catch(() => undefined);
+      const deploymentBody = await apiClient
+        .request<Record<string, unknown>>(resourcesPath(cluster, 'namespaces/' + namespace + '/deployments/' + encodeURIComponent(serviceName)), options)
+        .catch(() => undefined);
+      const deploymentStatus = asRecord(deploymentBody?.['status']);
+      const deploymentSpec = asRecord(deploymentBody?.['spec']);
+      const resourceStatus: GatewayResourceStatus = {
+        deploymentName: serviceName,
+        readyReplicas: Number(deploymentStatus['readyReplicas'] ?? 0),
+        desiredReplicas: Number(deploymentSpec['replicas'] ?? 0),
+        pods: (podsBody?.items ?? []).map((pod): GatewayPod => {
+          const metadata = asRecord(pod['metadata']);
+          const status = asRecord(pod['status']);
+          const statuses = (status['containerStatuses'] ?? []) as Array<Record<string, unknown>>;
+          return {
+            name: text(metadata['name']),
+            phase: text(status['phase']),
+            ready: statuses.length > 0 && statuses.every((entry) => entry['ready'] === true),
+            restarts: statuses.reduce((sum, entry) => sum + Number(entry['restartCount'] ?? 0), 0),
+            createdAt: text(metadata['creationTimestamp']),
+          };
+        }),
+      };
+
       const detail: GatewayDetail = {
         name: text(asRecord(gateway['metadata'])['name']) || name,
         namespace: text(asRecord(gateway['metadata'])['namespace']) || namespace,
@@ -232,8 +304,68 @@ export function useGatewayDetail(cluster: string, name: string) {
         tracing:
           text(asRecord(asRecord(gatewaySpec['deployment'])['annotations'])['servicemesh.kubesphere.io/enabled']) ===
           'true',
+        labels: stringRecord(asRecord(gateway['metadata'])['labels']),
+        annotations: stringRecord(asRecord(gateway['metadata'])['annotations']),
+        resourceVersion: text(asRecord(gateway['metadata'])['resourceVersion']),
       };
-      return { detail, ingresses };
+      let logs: GatewayLogs = { pod: '', container: '', text: '', available: false };
+      const firstPod = resourceStatus.pods[0];
+      if (firstPod) {
+        // The controller pod has two containers (istio-proxy + controller); the API needs
+        // an explicit container name when more than one exists.
+        const podBody = await apiClient
+          .request<Record<string, unknown>>(resourcesPath(cluster, 'namespaces/' + namespace + '/pods/' + encodeURIComponent(firstPod.name)), options)
+          .catch(() => undefined);
+        const containers = (((asRecord(podBody?.['spec'])['containers'] ?? []) as Array<Record<string, unknown>>) ?? []).map((item) =>
+          text(item['name']),
+        );
+        const container = containers.includes('controller') ? 'controller' : containers[0] ?? '';
+        try {
+          const text = await apiClient.request<string>(
+            '/api/v1/namespaces/' + encodeURIComponent(namespace) + '/pods/' + encodeURIComponent(firstPod.name) + '/log',
+            { query: { container, tailLines: 200 }, ...options },
+          );
+          logs = { pod: firstPod.name, container, text: typeof text === 'string' ? text : '', available: true };
+        } catch (error) {
+          logs = {
+            pod: firstPod.name,
+            container,
+            text: '',
+            available: false,
+            reason: error instanceof Error ? error.message : String(error),
+          };
+        }
+      }
+
+      const monitoring: GatewayMonitoring = {
+        available: true,
+        cpuCores: 0,
+        memoryBytes: 0,
+        ingressAvailable: false,
+        requestRate: 0,
+        errorRate: 0,
+      };
+      try {
+        const selector = 'namespace="' + namespace + '",pod=~"' + serviceName + '.*",container="controller"';
+        const prom = promqlApi(apiClient);
+        const [cpu, memory, requests, errors] = await Promise.all([
+          prom.instant({ query: 'sum(rate(container_cpu_usage_seconds_total{' + selector + '}[5m]))' }),
+          prom.instant({ query: 'sum(container_memory_working_set_bytes{' + selector + '})' }),
+          prom.instant({ query: 'sum(rate(nginx_ingress_controller_requests{namespace="' + namespace + '"}[5m]))' }),
+          prom.instant({ query: 'sum(rate(nginx_ingress_controller_requests{namespace="' + namespace + '",status=~"5.."}[5m]))' }),
+        ]);
+        const value = (series: Array<{ points: Array<{ value: number }> }>): number => series[0]?.points.at(-1)?.value ?? 0;
+        monitoring.cpuCores = value(cpu);
+        monitoring.memoryBytes = value(memory);
+        monitoring.ingressAvailable = requests.length > 0;
+        monitoring.requestRate = value(requests);
+        monitoring.errorRate = value(errors);
+      } catch (error) {
+        monitoring.available = false;
+        monitoring.reason = error instanceof Error ? error.message : String(error);
+      }
+
+      return { detail, ingresses, resourceStatus, logs, monitoring };
     },
   });
 }

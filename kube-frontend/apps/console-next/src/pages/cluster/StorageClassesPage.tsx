@@ -1,71 +1,181 @@
 import * as React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { storageClassesApi, type StorageClassSummary } from '@kube-ai-hub/api-client';
+import {
+  annotationKeys,
+  storageApi,
+  storageClassesApi,
+  type StorageClassDetail,
+  type StorageClassDraft,
+  type StorageClassSummary,
+  type StorageSummary,
+} from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
 import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { useResourceListState, toListParams } from '@/components/resource/useResourceListState';
-import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
+import { errorMessage, MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
+import { DeleteDialog } from '@/components/resource/DeleteDialog';
+import { EditInfoDialog } from '@/components/resource/EditInfoDialog';
+import { LoadingDialog } from '@/components/resource/LoadingDialog';
+import { DialogSuspense } from '@/components/resource/DialogSuspense';
+import { toYaml } from '@/components/resource/yaml';
 import { formatTimestamp } from '@/lib/time';
 import { useListRefresh } from '@/components/resource/useListRefresh';
+import { StorageClassCreateDialog } from './StorageClassCreateDialog';
+
+const YamlDialog = React.lazy(() => import('@/components/resource/YamlDialog'));
 
 /**
  * 存储类型 (StorageClass).
  *
- * Cluster-scoped and read-only: a StorageClass is infrastructure, and editing one
- * changes where every future claim lands. The columns are the questions an
- * administrator asks of it — who provisions it, what happens on delete, does it
- * default, and what may be done to the volumes it makes.
+ * Writes were re-included by the 2026-11-17 review (N-12). A class that claims still
+ * reference cannot be deleted; the guard reads the live PVC collection, not the
+ * kubesphere.io/pvc-count annotation (which can be stale). Writes go to storage.k8s.io/v1
+ * because the kapis resources proxy registers GET only.
  */
 export interface StorageClassesPageProps {
   cluster: string;
 }
 
-/** Page sizes the old console offered (`PAGESIZE_OPTION`): 10/20/50/100. */
+/** Page sizes the old console offered: 10/20/50/100. */
 const PAGE_SIZES = [10, 20, 50, 100] as const;
 const PAGE_SIZE = 10;
 
+type Dialog =
+  | { kind: 'none' }
+  | { kind: 'create' }
+  | { kind: 'loading'; target: 'editInfo' | 'editYaml'; subject: string }
+  | { kind: 'delete'; names: string[] }
+  | { kind: 'editInfo'; detail: StorageClassDetail }
+  | { kind: 'editYaml'; detail: StorageClassDetail };
+
+interface ResultSummary {
+  deleted: number;
+  skipped: number;
+  failed: number;
+}
+
+/**
+ * Whether a delete must be refused.
+ *
+ * Two independent reasons, both safety-critical: the class is used by a claim, or the claim
+ * read failed so "not used" cannot be proven. The second is the one a page forgets, and a
+ * failed read then silently authorises deleting an in-use class.
+ */
+export function isDeleteBlocked(claimCount: number | undefined, claimsUnavailable: boolean): boolean {
+  return claimsUnavailable || (claimCount ?? 0) > 0;
+}
+
 export function StorageClassesPage({ cluster }: StorageClassesPageProps): React.ReactElement {
   const t = useT();
-  // Cluster-scoped: `namespace` empty means the cluster-wide collection.
   const list = useResourceListState<'name' | 'createTime'>({ defaultSortBy: 'name', defaultPageSize: PAGE_SIZE, resetOn: [cluster] });
   const query = useQuery({
     queryKey: ['storageclasses', cluster],
     queryFn: ({ signal }) => storageClassesApi(apiClient).list({ ...toListParams(list, { cluster, namespace: '' }, 200), signal }),
   });
 
-  /*
-   * Sorted here, not by the server.
-   *
-   * `storageclasses` is a cluster-scoped core resource read from `storage.k8s.io`; the
-   * `sortBy`/`ascending` query parameters are a KubeSphere convention that the core API
-   * ignores, so the sort control used to do nothing at all. The whole collection is
-   * fetched anyway (a cluster has a handful), so ordering it locally is both correct
-   * and cheap.
-   */
-  /*
-   * Sorted **and sliced** here.
-   *
-   * The whole collection is fetched (a cluster has a handful of classes) and the pager is
-   * client-side, so the table must show only the current page: rendering every row while the
-   * pager claims several pages makes the page buttons do nothing, which reads as a broken list
-   * rather than as a wrong page size.
-   */
-  const rows = React.useMemo(() => {
+  const sorted = React.useMemo(() => {
     const items = [...((query.data?.items ?? []) as StorageClassSummary[])];
-    const sorted = items.sort((a, b) => {
+    return items.sort((a, b) => {
       const direction = list.order === 'asc' ? 1 : -1;
       if (list.sortBy === 'createTime') return a.createdAt.localeCompare(b.createdAt) * direction;
       return a.name.localeCompare(b.name) * direction;
     });
-    const start = (list.page - 1) * list.pageSize;
-    return sorted.slice(start, start + list.pageSize);
-  }, [query.data, list.page, list.pageSize, list.sortBy, list.order]);
+  }, [query.data, list.sortBy, list.order]);
+  const rows = sorted.slice((list.page - 1) * list.pageSize, list.page * list.pageSize);
   const total = query.data?.total ?? 0;
   const listRefresh = useListRefresh('storageclasses', query);
+
+  const queryClient = useQueryClient();
+  const [dialog, setDialog] = React.useState<Dialog>({ kind: 'none' });
+  const [result, setResult] = React.useState<ResultSummary | null>(null);
+  const [pendingSkipped, setPendingSkipped] = React.useState(0);
+
+  const claims = useQuery({
+    queryKey: ['storageclass-claims', cluster],
+    queryFn: ({ signal }) => storageApi(apiClient, 'persistentvolumeclaims').list({ cluster, namespace: '', page: 1, pageSize: 500, signal }),
+  });
+  const claimCounts = React.useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const claim of (claims.data?.items ?? []) as StorageSummary[]) {
+      if (!claim.storageClass) continue;
+      counts.set(claim.storageClass, (counts.get(claim.storageClass) ?? 0) + 1);
+    }
+    return counts;
+  }, [claims.data]);
+  const inUse = React.useCallback(
+    (row: StorageClassSummary) => isDeleteBlocked(claimCounts.get(row.name), false),
+    [claimCounts],
+  );
+
+  const invalidate = React.useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: ['storageclasses', cluster] });
+    void queryClient.invalidateQueries({ queryKey: ['storageclass-claims', cluster] });
+  }, [cluster, queryClient]);
+
+  const create = useMutation({
+    mutationFn: (draft: StorageClassDraft) => storageClassesApi(apiClient).create(draft),
+    onSuccess: () => {
+      invalidate();
+      setDialog({ kind: 'none' });
+    },
+  });
+  const updateInfo = useMutation({
+    mutationFn: (params: { name: string; annotations: Record<string, string> }) =>
+      storageClassesApi(apiClient).updateInfo({ cluster, ...params }),
+    onSuccess: () => {
+      invalidate();
+      void queryClient.invalidateQueries({ queryKey: ['storageclass-detail'] });
+    },
+  });
+  const updateYaml = useMutation({
+    mutationFn: (params: { name: string; body: Record<string, unknown> }) =>
+      storageClassesApi(apiClient).update({ cluster, namespace: '', body: params.body }),
+    onSuccess: () => invalidate(),
+  });
+  const setDefault = useMutation({
+    mutationFn: (name: string) => storageClassesApi(apiClient).setDefault({ cluster, name }),
+    onSuccess: () => {
+      invalidate();
+      setResult(null);
+    },
+  });
+  const remove = useMutation({
+    mutationFn: async (names: string[]): Promise<{ deleted: string[]; failed: string[] }> => {
+      const deleted: string[] = [];
+      const failed: string[] = [];
+      for (const name of names) {
+        try {
+          await storageClassesApi(apiClient).remove({ cluster, names: [name] });
+          deleted.push(name);
+        } catch {
+          failed.push(name);
+        }
+      }
+      return { deleted, failed };
+    },
+    onSuccess: () => invalidate(),
+  });
+
+  const openWithDetail = React.useCallback(
+    async (target: 'editInfo' | 'editYaml', name: string) => {
+      setDialog({ kind: 'loading', target, subject: name });
+      try {
+        const detail = await storageClassesApi(apiClient).get({ cluster, name, namespace: '' });
+        setDialog({ kind: target, detail });
+      } catch {
+        setDialog({ kind: 'none' });
+      }
+    },
+    [cluster],
+  );
+
+  const inUseCount = sorted.filter(inUse).length;
+  /** While loading or after a failure we cannot prove a class is unused, so deletion is unsafe. */
+  const claimsUnavailable = claims.isPending || claims.isError;
 
   const schema = React.useMemo<ListSchema<StorageClassSummary>>(
     () => ({
@@ -75,16 +185,32 @@ export function StorageClassesPage({ cluster }: StorageClassesPageProps): React.
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
       search: { placeholder: t('cluster.searchPlaceholder'), aiId: 'storageclasses:search' },
+      selection: 'multiple',
+      selectAiId: 'storageclasses:select',
       sortableKeys: ['name', 'createTime'],
       sortAiPrefix: 'storageclasses',
       sort: { key: list.sortBy, order: list.order },
       columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'storageclasses:columns' },
+      primaryAction: { key: 'create', label: t('cluster.storageClasses.create'), aiId: 'storageclasses:create' },
+      // With the claim read failed there is no safe subset to delete; hide the bulk action
+      // instead of offering an operation the page cannot guard.
+      actions: claimsUnavailable
+        ? []
+        : [
+            {
+              key: 'bulk-delete',
+              label: t('cluster.storageClasses.bulkDelete'),
+              tone: 'danger',
+              aiId: 'storageclasses:bulk-delete',
+              aiNeeds: ['storageclasses:row-select'],
+            },
+          ],
       columns: [
         {
           key: 'name',
           title: t('cluster.column.name'),
           render: (row) => (
-            <span className="flex min-w-0 items-center gap-1.5" {...actionProps(`storageclasses:name:${row.name}`)}>
+            <span className="flex min-w-0 items-center gap-1.5" {...actionProps('storageclasses:name:' + row.name)}>
               <Link
                 to="/kube-frontend/clusters/$cluster/storageclasses/$name"
                 params={{ cluster, name: row.name }}
@@ -110,11 +236,11 @@ export function StorageClassesPage({ cluster }: StorageClassesPageProps): React.
           title: t('cluster.storageClasses.pvcCount'),
           width: 110,
           hideBelow: 'lg',
-          // The platform only reports this for some clusters; saying so is better than
-          // a zero that reads as "none in use".
-          render: (row) => (
-            <span className="tabular-nums text-ai-fg-secondary">{row.pvcCount === undefined ? '-' : row.pvcCount}</span>
-          ),
+          render: (row) => {
+            const live = claimCounts.get(row.name);
+            const value = live ?? row.pvcCount;
+            return <span className="tabular-nums text-ai-fg-secondary">{value === undefined ? '-' : value}</span>;
+          },
         },
         {
           key: 'capabilities',
@@ -123,11 +249,6 @@ export function StorageClassesPage({ cluster }: StorageClassesPageProps): React.
           width: 220,
           hideBelow: 'lg',
           render: (row) => {
-            /*
-             * Only the capabilities the class actually has are rendered. Rendering all
-             * three with a muted tone made every class look fully featured — the reader
-             * had to compare colours to learn that `openebs-hostpath` cannot expand.
-             */
             const supported = [
               row.allowExpansion ? t('cluster.storageClasses.expand') : null,
               row.allowCloning ? t('cluster.storageClasses.clone') : null,
@@ -160,7 +281,18 @@ export function StorageClassesPage({ cluster }: StorageClassesPageProps): React.
           render: (row) => <span className="tabular-nums text-ai-fg-muted">{formatTimestamp(row.createdAt)}</span>,
         },
       ],
-      rowActions: [],
+      rowActions: [
+        { key: 'editInfo', label: t('resource.action.editInfo') },
+        { key: 'editYaml', label: t('resource.action.editYaml') },
+        {
+          key: 'setDefault',
+          label: t('cluster.storageClasses.setDefault'),
+          visible: (row) => !row.isDefault,
+          // Explicit: replacing the current default changes where new claims land.
+          confirm: t('cluster.storageClasses.setDefaultConfirm'),
+        },
+        { key: 'delete', label: t('common.delete'), tone: 'danger', disabled: (row) => isDeleteBlocked(claimCounts.get(row.name), claimsUnavailable) },
+      ],
       empty: { title: t('cluster.storageClasses.emptyTitle'), description: t('cluster.storageClasses.emptyDescription') },
       labels: {
         ...listRefresh.emptyLabels,
@@ -173,7 +305,7 @@ export function StorageClassesPage({ cluster }: StorageClassesPageProps): React.
       },
       pagination: { page: list.page, pageSize: list.pageSize, pageSizeOptions: [...PAGE_SIZES], total },
     }),
-    [list, query.isFetching, t, total],
+    [claimCounts, claimsUnavailable, inUse, list, query.isFetching, t, total],
   );
 
   const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
@@ -190,7 +322,16 @@ export function StorageClassesPage({ cluster }: StorageClassesPageProps): React.
   }
 
   return (
-    <AiSurface as="section" aiId="storageclasses:surface" state={state} className="min-w-0">
+    <AiSurface as="section" aiId="storageclasses:surface" state={state} className="flex min-w-0 flex-col gap-2">
+      {claimsUnavailable ? (
+        <p className="text-[11px] text-ai-warning" role="status" data-ai-id="storageclasses:claims-unavailable">
+          {t('cluster.storageClasses.claimsUnavailable')}
+        </p>
+      ) : inUseCount > 0 ? (
+        <p className="text-[11px] text-ai-fg-muted" data-ai-id="storageclasses:delete-policy">
+          {t('cluster.storageClasses.deletePolicy')}
+        </p>
+      ) : null}
       <ResourceList
         {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
         onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
@@ -200,12 +341,147 @@ export function StorageClassesPage({ cluster }: StorageClassesPageProps): React.
         loading={state === 'loading'}
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}
+        selectedKeys={list.selected}
+        onSelectionChange={list.setSelected}
         onPageChange={list.setPage}
         onPageSizeChange={list.setPageSize}
         onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
           if (next) list.setSort(next);
         }}
+        onAction={(action, row) => {
+          if (action === 'create') {
+            setDialog({ kind: 'create' });
+            return;
+          }
+          if (!row) return;
+          if (action === 'delete') {
+            if (isDeleteBlocked(claimCounts.get(row.name), claimsUnavailable)) return;
+            setPendingSkipped(0);
+            setResult(null);
+            setDialog({ kind: 'delete', names: [row.name] });
+            return;
+          }
+          if (action === 'setDefault') {
+            setResult(null);
+            setDefault.mutate(row.name);
+            return;
+          }
+          if (action === 'editInfo' || action === 'editYaml') void openWithDetail(action, row.name);
+        }}
+        onBulkAction={(action, keys) => {
+          if (action !== 'bulk-delete' || !keys.length) return;
+          // Compute from the selected keys, not from a memo of the current page: the
+          // selection is authoritative and the page slice may lag a render behind.
+          const deletable = keys.filter((name) => !isDeleteBlocked(claimCounts.get(name), claimsUnavailable));
+          const skipped = keys.length - deletable.length;
+          setPendingSkipped(skipped);
+          if (!deletable.length) {
+            setResult({ deleted: 0, skipped, failed: 0 });
+            return;
+          }
+          setResult(null);
+          setDialog({ kind: 'delete', names: deletable });
+        }}
       />
+
+      {result ? (
+        <p
+          className="text-xs text-ai-fg-secondary"
+          role="status"
+          data-ai-id="storageclasses:batch-result"
+          data-ai-deleted={result.deleted}
+          data-ai-skipped={result.skipped}
+          data-ai-failed={result.failed}
+        >
+          {result.deleted + result.failed === 0
+            ? t('cluster.storageClasses.batchNothing', { skipped: result.skipped })
+            : t('cluster.storageClasses.batchResult', {
+                deleted: result.deleted,
+                skipped: result.skipped,
+                failed: result.failed,
+              })}
+        </p>
+      ) : null}
+
+      <MutationAlert error={create.error ?? updateInfo.error ?? updateYaml.error ?? setDefault.error} />
+
+      <StorageClassCreateDialog
+        open={dialog.kind === 'create'}
+        onOpenChange={(open) => !open && setDialog({ kind: 'none' })}
+        cluster={cluster}
+        pending={create.isPending}
+        isNameTaken={(name) => sorted.some((row) => row.name === name)}
+        onSubmit={async (draft) => {
+          await create.mutateAsync(draft);
+        }}
+      />
+
+      {dialog.kind === 'loading' ? (
+        <LoadingDialog
+          open
+          title={dialog.target === 'editInfo' ? t('resource.action.editInfo') : t('resource.action.editYaml')}
+          subject={dialog.subject}
+          size="xl"
+        />
+      ) : null}
+
+      {dialog.kind === 'delete' ? (
+        <DeleteDialog
+          open
+          onOpenChange={(open) => {
+            if (!open) {
+              setDialog({ kind: 'none' });
+              setResult(null);
+            }
+          }}
+          names={dialog.names}
+          resource="storageclasses"
+          noun={t('cluster.storageClasses.noun')}
+          pending={remove.isPending}
+          {...(remove.error ? { error: errorMessage(t, remove.error) } : {})}
+          onConfirm={async () => {
+            const outcome = await remove.mutateAsync(dialog.names);
+            setResult({ deleted: outcome.deleted.length, skipped: pendingSkipped, failed: outcome.failed.length });
+            list.setSelected([]);
+            setDialog({ kind: 'none' });
+          }}
+        />
+      ) : null}
+
+      {dialog.kind === 'editInfo' ? (
+        <EditInfoDialog
+          open
+          onOpenChange={(open) => !open && setDialog({ kind: 'none' })}
+          resource="storageclasses"
+          name={dialog.detail.name}
+          alias={dialog.detail.annotations[annotationKeys.alias] ?? ''}
+          description={dialog.detail.annotations[annotationKeys.description] ?? ''}
+          annotations={dialog.detail.annotations}
+          pending={updateInfo.isPending}
+          onSubmit={async (annotations) => {
+            await updateInfo.mutateAsync({ name: dialog.detail.name, annotations });
+            setDialog({ kind: 'none' });
+          }}
+        />
+      ) : null}
+
+      {dialog.kind === 'editYaml' ? (
+        <DialogSuspense>
+          <YamlDialog
+            open
+            onOpenChange={(open) => !open && setDialog({ kind: 'none' })}
+            initialYaml={toYaml(dialog.detail.raw)}
+            lockName={dialog.detail.name}
+            title={t('resource.action.editYaml')}
+            submitLabel={t('common.confirm')}
+            pending={updateYaml.isPending}
+            onSubmit={async (object) => {
+              await updateYaml.mutateAsync({ name: dialog.detail.name, body: object });
+              setDialog({ kind: 'none' });
+            }}
+          />
+        </DialogSuspense>
+      ) : null}
     </AiSurface>
   );
 }

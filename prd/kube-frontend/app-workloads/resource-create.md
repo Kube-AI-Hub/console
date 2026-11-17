@@ -39,7 +39,7 @@
 - 节点端口可留空由集群分配；填写时按默认范围 30000–32767 校验，集群配置了其他范围时以服务端拒绝为准。
 - 选择器来自项目内 Deployment/StatefulSet/DaemonSet 的 app 标签，可手动填写；留空表示不设置选择器（Endpoints 手动维护）。
 - 应用路由规则：host 可空（通配规则）；path 必须以 / 开头；pathType 为 Prefix/Exact；后端端口支持数字或命名端口；IngressClass 与 TLS 保密字典名为可选。
-- 权限判断为一次 `SelfSubjectAccessReview`（verb=create、resource、namespace）；检查本身失败时放行（fail-open），不因权限检查故障阻止写入。
+- 权限判断为一次 ks-apiserver IAM 权限检查（verb=create、resource、namespace，以请求用户求值；旧后端回退 `SelfSubjectAccessReview`）；检查本身失败时放行（fail-open），不因权限检查故障阻止写入。
 - 写路径：Service 走 `/api/v1/namespaces/<ns>/services`，Ingress 走 `/apis/networking.k8s.io/v1/namespaces/<ns>/ingresses`。
 
 ## UI 交互设计

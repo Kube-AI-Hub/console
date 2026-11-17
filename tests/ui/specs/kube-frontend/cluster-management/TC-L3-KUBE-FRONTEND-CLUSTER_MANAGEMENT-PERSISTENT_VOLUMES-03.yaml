@@ -1,0 +1,45 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-PERSISTENT_VOLUMES-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: persistent-volumes
+title: 持久卷写能力：编辑信息、编辑 YAML、单条与批量删除（Bound 保护）
+entry_url: '{BASE_URL}/kube-frontend/clusters/{KA_CLUSTER}/persistentvolumes'
+prd: prd/kube-frontend/cluster-management/persistent-volumes.md
+design: design/kube-frontend/cluster-management/persistent-volumes.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-PERSISTENT_VOLUMES-03
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-PERSISTENT_VOLUMES-04
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-PERSISTENT_VOLUMES-05
+
+story:
+- US3
+
+product: 持久卷详情可编辑别名/描述（merge-patch）与 YAML（整对象 PUT）；可删卷可单条删除（输入卷名确认）；Bound/Released 的卷删除入口置灰并说明原因；批量删除跳过不可删卷并汇总成功/跳过/失败。
+preconditions:
+- 已登录，且在 host 集群；集群内至少有一个 Bound 持久卷（mlu370 有 22 个）
+- 用例自建唯一的 Available 持久卷（hostPath，1Gi）；结束后删除，不依赖环境已有工程
+steps:
+- 用 API 创建临时卷 A、B、C（Available）并读取一个 Bound 卷名
+- 打开 A 详情，确认删除按钮可用
+- 点「编辑信息」，改别名与描述后保存；轮询接口确认两个注解更新
+- 点「编辑 YAML」，在别名注解行末追加 "-yaml" 并提交；轮询接口确认别名以 -yaml 结尾
+- 打开 Bound 卷详情，确认删除按钮置灰且出现「先释放声明并确认后端数据处置」说明
+- 回到列表，选中 A、B 与 Bound 卷，点「批量删除」，输入数量确认；核对结果汇总成功 2 / 跳过 1，A、B 从接口消失，Bound 仍在
+- 打开 C 详情，点删除并输入 C 的名称确认；回到列表后 C 从接口消失
+expected:
+- 编辑信息只发 metadata.annotations 的 merge-patch，未改注解保留、清空键以 null 移除；保存后详情/接口同步
+- 编辑 YAML 走整对象 PUT 并刷新详情；提交后对话框关闭
+- Bound/Released 的删除入口 disabled，并显示可见原因；不出现「点了再报错」
+- 单条删除需输入名称，确认后回到列表且卷从接口/列表消失
+- 批量只删除可删卷，结果区汇总成功/跳过/失败计数；Bound 卷保持 Bound
+- 全部被选卷都不可删时不发 DELETE，并显示「均不可删除」
+troubleshoot:
+- 编辑信息后注解未更新：确认 updateInfo 发送的 patch 对清空键是 null（不是省略）
+- YAML 保存 409：页面应保留输入并显示错误；重试前刷新对象
+- 批量后 Bound 卷消失：说明前端未过滤 UNDELETABLE，先查 bulk 提交前的 deletable 过滤
+- 列表 checkbox 不存在：确认页面 schema.selection/multiple 与 selectAiId 已设置
+update_automation:
+- 句柄：persistentvolumes:select:<name>、:bulk-delete、:batch-result（data-ai-deleted/skipped/failed）、pv-detail:edit-info|edit-yaml|delete|delete-protected、pv-detail:delete-input|delete-confirm、yaml:submit

@@ -27,18 +27,24 @@ const RESOURCES = {
 export type AlertingPolicyScope = keyof typeof RESOURCES;
 
 export interface RuleGroupPermissions {
-  /** Create is only ever offered inside one project. */
+  /** Create in the project the page is filtered to. */
   create: boolean;
+  /** Create a cluster-scoped (custom cluster) policy. */
+  createCluster: boolean;
   update: Record<AlertingPolicyScope, boolean>;
   deleteProject: boolean;
+  /** Delete a cluster-scoped (custom cluster) policy. */
+  deleteCluster: boolean;
   /** True while the reviews are in flight; callers keep entries enabled meanwhile. */
   loading: boolean;
 }
 
 const ALLOW_ALL: RuleGroupPermissions = {
   create: true,
+  createCluster: true,
   update: { project: true, cluster: true, global: true },
   deleteProject: true,
+  deleteCluster: true,
   loading: false,
 };
 
@@ -51,17 +57,22 @@ export function useRuleGroupPermissions(params: { cluster: string; namespace: st
     retry: false,
     queryFn: async () => {
       const review = accessReviewApi(api);
-      const [create, updateProject, deleteProject, updateCluster, updateGlobal] = await Promise.all([
-        review.allowed({ verb: 'create', resource: RESOURCES.project, group: GROUP, namespace: params.namespace }),
-        review.allowed({ verb: 'update', resource: RESOURCES.project, group: GROUP, namespace: params.namespace }),
-        review.allowed({ verb: 'delete', resource: RESOURCES.project, group: GROUP, namespace: params.namespace }),
-        review.allowed({ verb: 'update', resource: RESOURCES.cluster, group: GROUP }),
-        review.allowed({ verb: 'update', resource: RESOURCES.global, group: GROUP }),
-      ]);
+      const [create, updateProject, deleteProject, updateCluster, updateGlobal, createCluster, deleteCluster] =
+        await Promise.all([
+          review.allowed({ verb: 'create', resource: RESOURCES.project, group: GROUP, namespace: params.namespace }),
+          review.allowed({ verb: 'update', resource: RESOURCES.project, group: GROUP, namespace: params.namespace }),
+          review.allowed({ verb: 'delete', resource: RESOURCES.project, group: GROUP, namespace: params.namespace }),
+          review.allowed({ verb: 'update', resource: RESOURCES.cluster, group: GROUP }),
+          review.allowed({ verb: 'update', resource: RESOURCES.global, group: GROUP }),
+          review.allowed({ verb: 'create', resource: RESOURCES.cluster, group: GROUP }),
+          review.allowed({ verb: 'delete', resource: RESOURCES.cluster, group: GROUP }),
+        ]);
       return {
         create,
+        createCluster,
         update: { project: updateProject, cluster: updateCluster, global: updateGlobal },
         deleteProject,
+        deleteCluster,
       };
     },
   });
@@ -69,8 +80,10 @@ export function useRuleGroupPermissions(params: { cluster: string; namespace: st
   if (!query.data) return ALLOW_ALL;
   return {
     create: query.data.create,
+    createCluster: query.data.createCluster,
     update: query.data.update,
     deleteProject: query.data.deleteProject,
+    deleteCluster: query.data.deleteCluster,
     loading: query.isPending,
   };
 }

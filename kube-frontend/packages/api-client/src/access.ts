@@ -137,6 +137,68 @@ export function clusterRolesApi(client: Client) {
   };
 }
 
+/** One cluster role with its raw rules, for the cluster-scoped detail page. */
+export interface ClusterRoleScopedDetail extends ClusterRoleSummary {
+  rules: Array<Record<string, unknown>>;
+  annotations: Record<string, string>;
+}
+
+/** A user bound to a cluster role (through a ClusterRoleBinding). */
+export interface ClusterRoleScopedUser {
+  username: string;
+  status: string;
+  lastLogin: string;
+}
+
+/**
+ * Cluster roles **in a cluster scope**.
+ *
+ * The platform page always reads the host cluster. A cluster console can address a member
+ * cluster too; IAM is reached through the kapis cluster prefix there
+ * (`/kapis/clusters/<c>/iam…`), the same pattern as the other member-cluster reads.
+ */
+export function clusterRolesForClusterApi(client: Client) {
+  const base = (cluster: string): string =>
+    cluster === 'host' ? KAPIS_IAM : '/kapis/clusters/' + encodeURIComponent(cluster) + '/iam.kubesphere.io/v1alpha2';
+  return {
+    async list(params: { cluster: string; signal?: AbortSignal }): Promise<ClusterRoleSummary[]> {
+      const body = await client.request<{ items?: KubeAccess[] }>(base(params.cluster) + '/clusterroles', {
+        query: { limit: -1 },
+        ...(params.signal ? { signal: params.signal } : {}),
+      });
+      return (body?.items ?? []).map(toClusterRoleSummary);
+    },
+    async get(params: { cluster: string; name: string; signal?: AbortSignal }): Promise<ClusterRoleScopedDetail> {
+      const item = await client.request<KubeAccess>(base(params.cluster) + '/clusterroles/' + encodeURIComponent(params.name), {
+        ...(params.signal ? { signal: params.signal } : {}),
+      });
+      return {
+        ...toClusterRoleSummary(item),
+        rules: (item.rules ?? []) as Array<Record<string, unknown>>,
+        annotations: (item.metadata?.annotations ?? {}) as Record<string, string>,
+      };
+    },
+    /**
+     * Users bound to this role.
+     *
+     * The IAM aggregate filters users by `?clusterrole=<name>`; it walks the role bindings
+     * server-side. An empty list means the role is granted to no user (or only to groups /
+     * service accounts, which this tab does not list).
+     */
+    async users(params: { cluster: string; name: string; signal?: AbortSignal }): Promise<ClusterRoleScopedUser[]> {
+      const body = await client.request<{ items?: KubeAccess[] }>(base(params.cluster) + '/users', {
+        query: { clusterrole: params.name, limit: -1 },
+        ...(params.signal ? { signal: params.signal } : {}),
+      });
+      return (body?.items ?? []).map((item) => ({
+        username: item.metadata?.name ?? '',
+        status: String((item.status as Record<string, unknown> | undefined)?.['state'] ?? ''),
+        lastLogin: String((item.status as Record<string, unknown> | undefined)?.['lastLoginTime'] ?? ''),
+      }));
+    },
+  };
+}
+
 /**
  * Workspaces are **read** from the resources proxy but **written** to the tenant
  * kapis group.
@@ -340,6 +402,56 @@ export interface WorkspaceDetail {
   clusters: string[];
 }
 
+/**
+ * One cluster visible to a workspace, from the tenant aggregate.
+ *
+ * The endpoint returns the cluster **objects** (not names): provider, Kubernetes version,
+ * node count and the Ready condition are what a workspace manager needs to tell apart the
+ * clusters their projects can land on. The workspace object's own `spec.placement.clusters`
+ * is only a name list, so it cannot answer "is it ready".
+ */
+export interface WorkspaceClusterSummary {
+  name: string;
+  /** `kubesphere.io/alias-name`; empty falls back to the name in the UI. */
+  alias: string;
+  description: string;
+  /** `spec.provider`, e.g. `kube-ai-hub`. */
+  provider: string;
+  /** `status.kubernetesVersion`, e.g. `v1.28.15`. */
+  kubernetesVersion: string;
+  /** `status.nodeCount`; absent when the cluster never reported it. */
+  nodeCount?: number;
+  /** True only when the Ready condition's status is `True`; a missing condition is not ready. */
+  ready: boolean;
+  /** `cluster.kubesphere.io/visibility` label: `public` / `private`. */
+  visibility: string;
+  /** `status.configz.devops`; false when the cluster does not report the module. */
+  devopsEnabled: boolean;
+}
+
+/** Map one raw cluster object to the view model, keeping "missing" distinct from 0/false. */
+export function toWorkspaceClusterSummary(item: KubeAccess): WorkspaceClusterSummary {
+  const annotations = (item.metadata?.annotations ?? {}) as Record<string, string>;
+  const labels = (item.metadata?.labels ?? {}) as Record<string, string>;
+  const spec = (item.spec ?? {}) as Record<string, unknown>;
+  const status = (item.status ?? {}) as Record<string, unknown>;
+  const conditions = Array.isArray(status['conditions']) ? (status['conditions'] as Array<Record<string, unknown>>) : [];
+  const readyCondition = conditions.find((condition) => String(condition['type'] ?? '') === 'Ready');
+  const nodeCount = typeof status['nodeCount'] === 'number' && Number.isFinite(status['nodeCount']) ? status['nodeCount'] : undefined;
+  const configz = (status['configz'] ?? {}) as Record<string, unknown>;
+  return {
+    name: item.metadata?.name ?? '',
+    alias: annotations['kubesphere.io/alias-name'] ?? '',
+    description: annotations['kubesphere.io/description'] ?? '',
+    provider: String(spec['provider'] ?? ''),
+    kubernetesVersion: String(status['kubernetesVersion'] ?? ''),
+    ...(nodeCount === undefined ? {} : { nodeCount }),
+    ready: String(readyCondition?.['status'] ?? '') === 'True',
+    visibility: labels['cluster.kubesphere.io/visibility'] ?? '',
+    devopsEnabled: configz['devops'] === true,
+  };
+}
+
 export interface WorkspaceProject {
   name: string;
   alias: string;
@@ -491,21 +603,154 @@ export interface WorkspaceRoleSummary {
   alias: string;
   ruleCount: number;
   createdAt: string;
+  /** `kubesphere.io/creator`; platform-maintained roles are `system` and read-only. */
+  creator: string;
+}
+
+/** One workspace role, including the templates it aggregates. */
+export interface WorkspaceRoleDetail extends WorkspaceRoleSummary {
+  description: string;
+  /** `iam.kubesphere.io/aggregation-roles` parsed; the server turns these into rules. */
+  aggregationRoles: string[];
+  /** All annotations, for the shared edit-info dialog (merge preserves untouched keys). */
+  annotations: Record<string, string>;
+}
+
+export interface WorkspaceRoleTemplate {
+  name: string;
+  alias: string;
+  description: string;
+  ruleCount: number;
+}
+
+const WORKSPACE_ROLE_AGGREGATION = 'iam.kubesphere.io/aggregation-roles';
+
+function workspaceRolePath(workspace: string, name?: string): string {
+  return `${KAPIS_IAM}/workspaces/${encodeURIComponent(workspace)}/workspaceroles${name ? `/${encodeURIComponent(name)}` : ''}`;
+}
+
+function workspaceRoleFrom(item: KubeAccess): WorkspaceRoleDetail {
+  const annotations = (item.metadata?.annotations ?? {}) as Record<string, string>;
+  let aggregationRoles: string[] = [];
+  try {
+    const parsed: unknown = JSON.parse(annotations[WORKSPACE_ROLE_AGGREGATION] ?? '[]');
+    if (Array.isArray(parsed)) aggregationRoles = parsed.map(String);
+  } catch {
+    // A malformed annotation is an object condition; the role still exists.
+    aggregationRoles = [];
+  }
+  return {
+    name: item.metadata?.name ?? '',
+    alias: annotations['kubesphere.io/alias-name'] ?? '',
+    description: annotations['kubesphere.io/description'] ?? '',
+    ruleCount: (item.rules ?? []).length,
+    aggregationRoles,
+    createdAt: item.metadata?.creationTimestamp ?? '',
+    creator: annotations['kubesphere.io/creator'] ?? '',
+    annotations,
+  };
 }
 
 export function workspaceRolesApi(client: Client) {
   return {
     async list(params: { workspace: string; signal?: AbortSignal }): Promise<WorkspaceRoleSummary[]> {
-      const body = await client.request<{ items?: KubeAccess[] }>(
-        `${KAPIS_IAM}/workspaces/${encodeURIComponent(params.workspace)}/workspaceroles`,
-        { query: { limit: -1 }, ...(params.signal ? { signal: params.signal } : {}) },
-      );
-      return (body?.items ?? []).map((item) => ({
-        name: item.metadata?.name ?? '',
-        alias: item.metadata?.annotations?.['kubesphere.io/alias-name'] ?? '',
-        ruleCount: (item.rules ?? []).length,
-        createdAt: item.metadata?.creationTimestamp ?? '',
-      }));
+      const body = await client.request<{ items?: KubeAccess[] }>(workspaceRolePath(params.workspace), {
+        query: { limit: -1 },
+        ...(params.signal ? { signal: params.signal } : {}),
+      });
+      return (body?.items ?? []).map(workspaceRoleFrom);
+    },
+
+    /** One role with its aggregation templates. */
+    async get(params: { workspace: string; name: string; signal?: AbortSignal }): Promise<WorkspaceRoleDetail> {
+      const item = await client.request<KubeAccess>(workspaceRolePath(params.workspace, params.name), {
+        ...(params.signal ? { signal: params.signal } : {}),
+      });
+      return workspaceRoleFrom(item);
+    },
+
+    /**
+     * The platform's workspace-role templates.
+     *
+     * They live in the same collection, marked by `iam.kubesphere.io/role-template`; the
+     * 19 templates this list holds are what a custom workspace role may aggregate.
+     */
+    async templates(params: { workspace: string; signal?: AbortSignal }): Promise<WorkspaceRoleTemplate[]> {
+      const body = await client.request<{ items?: KubeAccess[] }>(workspaceRolePath(params.workspace), {
+        query: { limit: -1, labelSelector: 'iam.kubesphere.io/role-template' },
+        ...(params.signal ? { signal: params.signal } : {}),
+      });
+      return (body?.items ?? []).map((item) => {
+        const summary = workspaceRoleFrom(item);
+        return { name: summary.name, alias: summary.alias, description: summary.description, ruleCount: summary.ruleCount };
+      });
+    },
+  };
+}
+
+export function workspaceRolesWriteApi(client: Client) {
+  return {
+    /**
+     * Create a workspace role from template names.
+     *
+     * The object carries **rules: []** and an aggregation-roles annotation: ks-apiserver
+     * aggregates the templates' rules into `rules`. Writing rules directly would diverge
+     * from what the built-in roles do and would stop tracking template updates.
+     */
+    async create(params: {
+      workspace: string;
+      name: string;
+      alias: string;
+      description: string;
+      templates: string[];
+    }): Promise<WorkspaceRoleDetail> {
+      const annotations: Record<string, string> = {
+        [WORKSPACE_ROLE_AGGREGATION]: JSON.stringify(params.templates),
+      };
+      if (params.alias.trim()) annotations['kubesphere.io/alias-name'] = params.alias.trim();
+      if (params.description.trim()) annotations['kubesphere.io/description'] = params.description.trim();
+      const item = await client.request<KubeAccess>(workspaceRolePath(params.workspace), {
+        method: 'POST',
+        body: {
+          apiVersion: 'iam.kubesphere.io/v1alpha2',
+          kind: 'WorkspaceRole',
+          metadata: { name: params.name, annotations },
+          rules: [],
+        },
+      });
+      return workspaceRoleFrom(item);
+    },
+
+    /** Replace alias/description only; removed annotations are sent as null. */
+    async updateInfo(params: { workspace: string; name: string; annotations: Record<string, string> }): Promise<void> {
+      const current = await client.request<KubeAccess>(workspaceRolePath(params.workspace, params.name));
+      const existing = (current.metadata?.annotations ?? {}) as Record<string, string>;
+      const patch: Record<string, string | null> = {};
+      for (const key of Object.keys(existing)) {
+        if (!(key in params.annotations)) patch[key] = null;
+      }
+      for (const [key, value] of Object.entries(params.annotations)) {
+        if (existing[key] !== value) patch[key] = value;
+      }
+      if (Object.keys(patch).length === 0) return;
+      await client.request(workspaceRolePath(params.workspace, params.name), {
+        method: 'PATCH',
+        contentType: 'application/merge-patch+json',
+        body: { metadata: { annotations: patch } },
+      });
+    },
+
+    /** Replace the aggregated templates (the old "编辑权限"). */
+    async setTemplates(params: { workspace: string; name: string; templates: string[] }): Promise<void> {
+      await client.request(workspaceRolePath(params.workspace, params.name), {
+        method: 'PATCH',
+        contentType: 'application/merge-patch+json',
+        body: { metadata: { annotations: { [WORKSPACE_ROLE_AGGREGATION]: JSON.stringify(params.templates) } } },
+      });
+    },
+
+    async remove(params: { workspace: string; name: string }): Promise<void> {
+      await client.request<void>(workspaceRolePath(params.workspace, params.name), { method: 'DELETE' });
     },
   };
 }
@@ -848,6 +1093,22 @@ export function workspaceDetailApi(client: Client) {
         manager: String(templateSpec['manager'] ?? ''),
         clusters,
       };
+    },
+
+    /**
+     * The clusters this workspace can use.
+     *
+     * Read from the tenant aggregate, not from `spec.placement.clusters`: the aggregate
+     * is what the platform uses for visibility, and it carries the cluster objects
+     * (provider/version/node count/Ready) the overview's cluster cards show. A workspace
+     * with no authorized cluster answers an empty list, which is a fact, not an error.
+     */
+    async clusters(params: { name: string; signal?: AbortSignal }): Promise<WorkspaceClusterSummary[]> {
+      const body = await client.request<{ items?: KubeAccess[] }>(`${path(params.name)}/clusters`, {
+        query: { limit: -1 },
+        ...(params.signal ? { signal: params.signal } : {}),
+      });
+      return (body?.items ?? []).map(toWorkspaceClusterSummary);
     },
 
     /** The workspace's projects (namespaces carrying its label). */

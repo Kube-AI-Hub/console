@@ -62,6 +62,7 @@ flowchart LR
 | 层级 | 目录 | 职责 |
 |---|---|---|
 | 应用 | `apps/console-next` | 路由、页面装配、业务状态 |
+| 壳层 | `apps/console-next/src/shell` | 顶栏、侧栏、浮动工具箱、帮助入口等跨页共用部件（重纳项见 `DEC-CORE-KUBE-FRONTEND-09` / `-11`） |
 | 共享 | `packages/ui` | 纯展示层，不引状态 / 请求 / i18n / 路由 |
 | 共享 | `packages/api-client` | 唯一知道 HTTP 的地方 |
 | 共享 | `packages/ai-surface` | 智能体契约：属性、状态、manifest |
@@ -80,7 +81,12 @@ flowchart LR
 | 创建 / 编辑（表单） | 未覆盖，见「明确不做」 |
 | 登录 / 登出 | 已实现，见 [`login.md`](login.md) |
 | 深浅色主题切换 | 已实现，见 [`theme.md`](theme.md) |
-| 第三方登录 / 注册 / 找回密码 | 未覆盖 |
+| 注册 / 找回密码 | 未覆盖 |
+| 第三方登录（OAuth / GitHub OAuth / LDAP） | 重纳待补（2026-11-17），入口在平台设置，见 [`platform-settings/_index.md`](platform-settings/_index.md) |
+| 资源消费统计（账单） | 重纳待补（2026-11-17），见 `DEC-CORE-KUBE-FRONTEND-10` |
+| 浮动工具箱（壳层悬浮球，6 个工具入口） | 重纳待补（2026-11-17），见 `DEC-CORE-KUBE-FRONTEND-09` |
+| 帮助 / 文档入口 | 重纳待补（2026-11-17），见 `DEC-CORE-KUBE-FRONTEND-11` |
+| 集群 kubeconfig 查看 / 下载 | 已实现（集群概览「常用运维入口」弹窗承接，见 [`cluster-management/overview.md`](cluster-management/overview.md) 的 `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-05`） |
 | 其他资源模块 | 未覆盖 |
 
 ## 功能需求
@@ -90,6 +96,18 @@ flowchart LR
 ## 成功标准
 
 - **SC-CORE-KUBE-FRONTEND-01** — 架构约束测试覆盖包边界、依赖归属、AI 句柄，全部通过；新增违规会使测试失败。
+
+## 重纳登记（2026-11-17 产品复核）
+
+产品复核把三条原先登记为「明确不做」的壳层 / 全局能力重新纳入迁移范围。三条**均未实现**，登记在此以区分「已决定要做但没做」与「决定不做」；逐条现状、依赖与验收见 [重纳决策](../../docs/plans/reinclusion-decisions-20261117.md)。
+
+| 重纳项 | 原登记 | 现状 | 依赖 / 待补 |
+|---|---|---|---|
+| N-03 浮动工具箱（右下角悬浮球，6 个工具入口：日志查询 / 事件检索 / 审计检索 / 资源消费统计 / kubeconfig / kubectl） | 从未登记为页面，散落在各批次「另立单元」 | 无 | 它是 N-02/N-03 的共同壳，建议先单独落地；见 `DEC-CORE-KUBE-FRONTEND-09` |
+| N-03 资源消费统计（账单） | `capability-matrix.md` §3.1「明确不做」 | 无页面 | 计量接口历史结论为「无数据源」，**未记录探测版本与角色**；见 `DEC-CORE-KUBE-FRONTEND-10` |
+| N-28 帮助 / 文档入口 | `capability-matrix.md` CHECK-09「帮助外链明确不做」 | 顶栏无入口 | 文档地址可配置，未配置时不显示；见 `DEC-CORE-KUBE-FRONTEND-11` |
+
+**口径**：这三条都不是「页面级已迁移」，`gap_check.py` 的页面段检查看不到它们（浮动工具箱与帮助入口是壳层部件，账单是全局页）。引用「未归类 0」不能推出它们已闭环。
 
 ## 明确不做
 

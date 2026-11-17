@@ -38,14 +38,14 @@
 - 告警策略读 `/apis/alerting.kubesphere.io/v2beta1/clusterrulegroups` 与 `.../globalrulegroups`（K8s list，没有 `totalItems`，条数即数组长度）。
 - `/apis/alerting.kubesphere.io/v2beta1/alerts` 不存在（实测 404）；v1alpha2 的 `/kapis/.../alerts` 在本集群返回 200 空体 `{}`——空体不是「没有告警」，是读错了 API 组。
 - 消息页两个来源各自分页，页面先把两边的首页取回、按 `activeAt` 倒序合并再切页；单来源最多取 500 条，超过该窗口的分页不再可达（当前合计约 98 条）。
-- 集群级自定义策略本期只读展示 + 启用/停用；创建与编辑未迁移（项目级已具备）。
+- 集群级自定义策略的写入（创建/编辑/YAML/删除/批量启停）与详情页、列表状态列/筛选见 [cluster-alerting-write.md](./cluster-alerting-write.md)；本文件只描述读列表与消息筛选的读模型。
 - 内置策略启停写 `alerting.kubesphere.io/enable` 标签；消息详情的 labels/annotations 只渲染白名单键。两条约束的探测证据、请求体与键清单见 [cluster-alerting-write.md](./cluster-alerting-write.md)。
 
 ## UI 交互设计
 
 - 告警消息：表格列「消息（标题 + 正文）」「状态」「级别」「所属策略」「来源」「触发时间」；点击消息标题（或行操作「详情」）打开下钻弹窗；无删除。
 - 下钻弹窗：先属性（名称、摘要、消息、状态、级别、所属策略、规则类型、来源、监控目标、触发时间、当前值），再「标签摘要」「注解摘要」两段白名单键值；不展示原始对象。
-- 告警策略：页签「自定义策略 / 内置策略」，页签上带计数；列「名称（副行描述）」「策略状态」「规则数」「类型」「创建时间」；两页签行操作「详情」+「启用 / 停用」（互斥显示），内置页签顶部显示「内置策略由平台安装；启用/停用写入规则组的 enable 标签」提示；两页签都没有编辑/删除。
+- 告警策略：页签「自定义策略 / 内置策略」，页签上带计数；列「名称（别名/对象名/副行描述）」「策略状态」「规则状态」「耗时」「最近检查」「规则数」「创建时间」；工具条有搜索、策略状态与规则状态筛选、显示列与刷新，分页档位 10/20/50/100。行操作「详情」（进入独立详情页）+「启用 / 停用」（互斥显示）；自定义行还有「编辑」「编辑 YAML」「删除」，内置可恢复行有「恢复初始配置」。内置页签顶部显示「内置策略由平台安装；启用/停用写入规则组的 enable 标签」提示。
 - 页面句柄：`cluster-alerting-messages:surface`、`cluster-alerting-messages:open`、`cluster-alerting-messages:detail`、`cluster-alerting-messages:detail:labels`、`cluster-alerting-messages:detail:annotations`、`cluster-alerting-policies:surface`、`cluster-alerting-policies:tab:custom`、`cluster-alerting-policies:tab:builtin`、`cluster-alerting-policies:enable`、`cluster-alerting-policies:disable`。
 
 ## 文案与校验
@@ -70,7 +70,7 @@
 
 ## 明确不做
 
-- **集群级自定义策略的创建、编辑、删除**：写通道在项目级已实现；集群级策略没有命名空间归属，且当前集群尚无自定义集群组，本期只做列表与启停。
+- **模板规则构建器**：见 [cluster-alerting-write.md](./cluster-alerting-write.md) 的明确不做；列表只展示名称、状态、规则数与时间。
 - **内置策略的编辑 / 删除**：编辑/删除仍属安装器。启用/停用与 reset 的契约见 write 文档（reset 基于 `alerting.kubesphere.io/initial-configuration` 注解）。
 - **详情展示原始对象 / 审计字段**：详情只渲染白名单 labels 与 annotations；不提供 YAML、事件或审计日志视图。
 - **告警消息删除 / 静默 / 通知配置**：消息生命周期归告警控制器，控制台删掉也会被重新评估出来。

@@ -1,0 +1,39 @@
+id: TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-11
+level: 3
+suite: point
+module: kube-frontend
+submodule: access-control
+feature: workspace-console
+title: 企业空间角色写能力：创建、编辑信息/权限、模板只读、删除
+entry_url: '{BASE_URL}/kube-frontend/workspaces/{KA_WORKSPACE}/roles'
+prd: prd/kube-frontend/access-control/workspace-roles.md
+design: design/kube-frontend/access-control/workspace-roles.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-11
+
+story:
+- US2
+
+product: 企业空间角色页支持创建自定义角色（聚合平台权限模板）、编辑别名/描述、编辑权限（替换模板集合）、删除；平台维护（creator=system）与 role-template-* 角色只读；写成功后回读集合，失败保留弹窗与原因。
+preconditions:
+- 已登录，admin；企业空间 system-workspace 存在且可写工作空间角色
+- 用例自建唯一角色并在 finally 删除；不修改平台模板与预置角色
+steps:
+- 打开角色页，点「创建角色」，填名称、别名，勾选两个权限模板后提交
+- 轮询 API 核对角色存在、aggregationRoles 注解含所选模板、rules 已由服务端聚合非空
+- 行操作「编辑信息」改别名/描述并提交；回读注解
+- 行操作「编辑权限」替换模板集合（取消一个、勾选另一个）并提交；回读 aggregationRoles 与 rules 变化
+- 打开平台维护角色（system-workspace-admin）行菜单，确认没有「编辑信息 / 编辑权限 / 删除」（模板角色在本部署不显示于普通列表，按 creator=system 同一规则隐藏）
+- 行操作「删除」，输入角色名确认；API 404，列表移除
+expected:
+- "create 请求 POST /kapis/iam…/workspaces/<ws>/workspaceroles，body 含 rules: [] 与 aggregation-roles JSON"
+- 编辑信息为只含 annotations 的 merge-patch（清空键 null）；编辑权限只替换 aggregation-roles
+- 平台角色/模板角色无写操作入口
+- 删除需输入名称确认；成功后回读集合
+troubleshoot:
+- 创建后 rules 为空：确认服务端聚合需要 aggregation-roles 注解，不要手写 rules
+- 模板角色出现写入口：确认按 creator=system 或 role-template-* 前缀隐藏
+- 编辑权限后规则数不变：确认 PATCH 的注解值为 JSON 字符串数组
+update_automation:
+- 句柄：workspace-roles:create/name/alias/description/submit/dialog/templates/template:<name>/error

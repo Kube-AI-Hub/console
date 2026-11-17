@@ -13,11 +13,13 @@
 - `AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-04`
 - `AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-05`
 - `AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-06`
+- `AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-10`
 
 ## 设计目标与非目标
 
 - **目标**：把旧部门页的树、组 CRUD、组成员增删和空间角色绑定收进同一 API 与同一页，页面不再直接拼 IAM URL。
-- **非目标**：项目/DevOps 角色数组、未分配用户双栏、watch。
+- **非目标**：项目/DevOps 角色数组、未分配用户双栏。
+- **已移出非目标**：部门树实时刷新（watch）——2026-11-17 产品复核决定重纳，见 DEC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-19。
 
 ## 关键约束
 
@@ -99,16 +101,37 @@
 - 两个读请求必须都成功才算 ready；只成功一个会显示假空树。
 - 有下级时 DeleteDialog 仍可输入确认词，`onConfirm` 必须再次拦住。
 
+### DEC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-19 — 部门树接入实时刷新（watch），原「不做 watch」作废
+
+**新决定（2026-11-17 产品复核）**：用户组的部门树接入 `useCollectionWatch`，另一处改动部门/成员后本页无需手动刷新即更新。
+
+**为什么推翻原判断**：原登记把 watch 列为非目标，理由是「会改变请求量与页面状态机」。产品复核后认为该理由不足以长期挡住能力：实时通道已经建好（`components/resource/useCollectionWatch.ts`，目前只有 `ClusterPodsPage` 接入），接入成本是「极小」，而部门树是多人协作编辑的对象——没有实时刷新时，两个管理员同时维护会互相覆盖且看不出来。
+
+**被否方案（保留原记录）**：
+1. 原方案 A「不做 watch，靠刷新按钮」。被否原因：部门树编辑是并发写场景，靠人工刷新无法避免「基于过期树改」。
+2. 原方案 B「用定时轮询代替 watch」。被否原因：轮询请求量固定且空转；已有 watch 通道时不另造一套。
+
+**何时重新考虑**：若 watch 通道在某部署不可用（分块 HTTP 被代理截断），回退为「手动刷新 + 明确的最后更新时间」，并登记为环境阻塞而不是不做。
+
+**落地约定**：
+1. **通道复用（实现补正，两次）**：只 watch `groups`（真实 CRD）。两次实测修正了原设想：①只 watch `groupbindings` 收不到创建的部门（树节点来自 groups）；②本部署的 `groupbindings` 原生 watch 不投递事件（20s 探测无响应头/事件，虚拟集合），接口层也不支持 `/kapis/.../groups?watch=true`（返回普通 JSON 列表）。因此成员绑定变化不冒充实时：保留手动刷新并在页面显示状态；不以轮询替代。
+2. **失效即重取**：收到变更只做 `invalidateQueries`，不在客户端合并事件流——树是按 `parent` 标签在客户端拼的，局部合并会拼出与集合不一致的树。
+3. **状态可见**：两路任一断开即显示「实时刷新已断开，可手动刷新」；连接中显示连接中；都 live 才显示已开启。手动刷新仍可用（宪法「等待必须可见」「状态可分且可恢复」）。
+
+**交付（2026-11-17）**：`US4` + `AC-…-10` + `TC-…-10`；页面头 `workspace-user-groups:live-state`（connecting/live/error），groups watch 只 invalidate `['workspace-user-groups', ws]`（成员查询前缀一并失效）。E2E 用 API 在另一处创建/删除部门，页面不点刷新即更新；成员绑定变化后点刷新，成员数更新（登记部署限制）。
+
+
 ## 测试与可观测
 
-用例：`WORKSPACE_CONSOLE-04/05/06`。API 单测覆盖 join、forest、POST 数组、账号校验、binding DELETE。句柄：`workspace-user-groups:surface/tree/tree-node/create/edit/delete/add-member/search/dialog/delete-input/delete-confirm`。树节点另有 `data-ai-generate-name`、`data-ai-depth`。
+用例：`WORKSPACE_CONSOLE-04/05/06/10`。API 单测覆盖 join、forest、POST 数组、账号校验、binding DELETE。句柄：`workspace-user-groups:surface/tree/tree-node/create/edit/delete/add-member/search/dialog/delete-input/delete-confirm/live-state`（`data-ai-state=connecting|live|error`）。树节点另有 `data-ai-generate-name`、`data-ai-depth`。
 
 ## 后续改进
 
-跨作用域的项目/DevOps 角色数组；未分配用户勾选；websocket watch。
+跨作用域的项目/DevOps 角色数组；未分配用户勾选。实时刷新（watch）已重纳，见 DEC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-19。
 
 ## 验收用例
 
 - `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-04`
 - `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-05`
 - `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-06`
+- `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-10`

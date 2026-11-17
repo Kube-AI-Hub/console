@@ -22,13 +22,13 @@ type Triple = [number, number, number];
 const css = readFileSync(tokensCss, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
 
 const blocks = [...css.matchAll(/(:root(?:\[[^\]]+\])*)\s*\{([\s\S]*?)\n\}/g)].map((match) => ({
-  selector: match[1],
-  props: new Map([...match[2].matchAll(/--ai-([\w-]+):\s*([^;]+);/g)].map((entry) => ['--ai-' + entry[1], entry[2].trim()])),
+  selector: match[1]!,
+  props: new Map([...match[2]!.matchAll(/--ai-([\w-]+):\s*([^;]+);/g)].map((entry) => ['--ai-' + entry[1]!, entry[2]!.trim()])),
 }));
 
 const rawColours = new Map<string, Triple>();
 for (const match of css.matchAll(/--ai-raw-([\w-]+):\s*(\d{1,3})\s+(\d{1,3})\s+(\d{1,3})/g)) {
-  rawColours.set(match[1], [Number(match[2]), Number(match[3]), Number(match[4])]);
+  rawColours.set(match[1]!, [Number(match[2]), Number(match[3]), Number(match[4])]);
 }
 
 /** Theme combinations the appearance settings can produce, as cascade chains. */
@@ -78,9 +78,9 @@ function resolve(name: string, chain: string[], depth = 0): Triple | null {
   if (layer === undefined) return null;
   const value = propsOf(layer).get(name) as string;
   const rawMatch = /var\(--ai-raw-([\w-]+)\)/.exec(value);
-  if (rawMatch) return rawColours.get(rawMatch[1]) ?? null;
+  if (rawMatch) return rawColours.get(rawMatch[1]!) ?? null;
   const semantic = /var\((--ai-[\w-]+)\)/.exec(value);
-  if (semantic) return resolve(semantic[1], chain, depth + 1);
+  if (semantic) return resolve(semantic[1]!, chain, depth + 1);
   return null;
 }
 
@@ -90,12 +90,12 @@ function luminance([red, green, blue]: Triple): number {
     const value = channel / 255;
     return value <= 0.03928 ? value / 12.92 : Math.pow((value + 0.055) / 1.055, 2.4);
   });
-  return linear.reduce((sum, value, index) => sum + value * weights[index], 0);
+  return linear.reduce((sum, value, index) => sum + value * weights[index]!, 0);
 }
 
 function contrast(foreground: Triple, background: Triple): number {
   const [light, dark] = [luminance(foreground), luminance(background)].sort((a, b) => b - a);
-  return (light + 0.05) / (dark + 0.05);
+  return (light! + 0.05) / (dark! + 0.05);
 }
 
 describe('theme contrast', () => {

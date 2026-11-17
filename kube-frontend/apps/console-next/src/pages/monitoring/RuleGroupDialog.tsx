@@ -3,8 +3,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ruleGroupsApi,
   ruleGroupsWriteApi,
-  type RuleGroupSummary,
   type RuleGroupRuleInput,
+  type RuleGroupScope,
+  type RuleGroupSummary,
 } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiButton, Button, Input, Modal, Select, Skeleton, Textarea } from '@kube-ai-hub/ui';
@@ -34,7 +35,17 @@ export interface RuleGroupDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   cluster: string;
-  namespace: string;
+  /**
+   * Which collection the dialog writes to.
+   *
+   * The project page and the cluster page share this editor, and the only difference is
+   * the resource: a project group is namespaced, a cluster group is not. Ownership
+   * (built-in vs operator-created) is the caller's gate — the dialog never offers a
+   * built-in group for editing.
+   */
+  scope: RuleGroupScope;
+  /** Required when `scope` is `project`; ignored for cluster/global. */
+  namespace?: string;
   /** Present when editing; absent when creating. */
   group?: RuleGroupSummary | undefined;
 }
@@ -58,7 +69,20 @@ function newDraft(): DraftRule {
   };
 }
 
-export function RuleGroupDialog({ open, onOpenChange, cluster, namespace, group }: RuleGroupDialogProps): React.ReactElement {
+/** Split `2m` / `30s` / `1h` into the number and unit the form edits separately. */
+function splitInterval(interval: string | undefined): { value: string; unit: 's' | 'm' | 'h' } {
+  const match = /^(\d+)\s*([smh])$/.exec((interval ?? '').trim());
+  if (!match) {
+    // A value the platform wrote in another form (or nothing) is left for the reader to
+    // replace; defaulting the numeric part would silently change the configured interval.
+    return { value: '', unit: 'm' };
+  }
+  return { value: match[1] ?? '', unit: (match[2] as 's' | 'm' | 'h') ?? 'm' };
+}
+
+const INTERVAL_UNITS = ['s', 'm', 'h'] as const;
+
+export function RuleGroupDialog({ open, onOpenChange, cluster, scope, namespace = '', group }: RuleGroupDialogProps): React.ReactElement {
   const t = useT();
   const queryClient = useQueryClient();
   const editing = group !== undefined;
@@ -66,12 +90,24 @@ export function RuleGroupDialog({ open, onOpenChange, cluster, namespace, group 
   const detail = useQuery({
     // Only when editing: the list row does not carry the rule bodies.
     enabled: open && editing,
-    queryKey: ['rule-group-detail', cluster, namespace, group?.name],
-    queryFn: ({ signal }) => ruleGroupsApi(apiClient).get({ name: group?.name ?? '', scope: 'project', namespace, signal }),
+    queryKey: ['rule-group-detail', cluster, scope, namespace, group?.name],
+    queryFn: ({
+      signal,
+    }) =>
+      ruleGroupsApi(apiClient).get({
+        name: group?.name ?? '',
+        scope,
+        ...(scope === 'project' ? { namespace } : {}),
+        cluster,
+        signal,
+      }),
   });
 
   const [name, setName] = React.useState('');
+  const [alias, setAlias] = React.useState('');
   const [description, setDescription] = React.useState('');
+  const [intervalValue, setIntervalValue] = React.useState('');
+  const [intervalUnit, setIntervalUnit] = React.useState<'s' | 'm' | 'h'>('m');
   const [draft, setDraft] = React.useState<DraftRule[]>([]);
   const [error, setError] = React.useState('');
 
@@ -83,7 +119,11 @@ export function RuleGroupDialog({ open, onOpenChange, cluster, namespace, group 
   React.useEffect(() => {
     if (!open) return;
     setName(group?.name ?? '');
+    setAlias(detail.data?.alias ?? group?.alias ?? '');
     setDescription(detail.data?.description ?? group?.description ?? '');
+    const interval = splitInterval(detail.data?.interval ?? group?.interval);
+    setIntervalValue(interval.value);
+    setIntervalUnit(interval.unit);
     setError('');
     if (!editing) {
       setDraft([newDraft()]);
@@ -103,7 +143,7 @@ export function RuleGroupDialog({ open, onOpenChange, cluster, namespace, group 
             message: rule.message,
           })),
     );
-  }, [open, editing, group?.name, group?.description, detail.data]);
+  }, [open, editing, scope, group?.name, group?.alias, group?.description, group?.interval, detail.data]);
 
   const save = useMutation({
     mutationFn: async () => {
@@ -115,15 +155,30 @@ export function RuleGroupDialog({ open, onOpenChange, cluster, namespace, group 
         summary: rule.summary.trim(),
         message: rule.message.trim(),
       }));
+      // The unit is part of the value: the API stores `spec.interval` as a duration string.
+      const interval = intervalValue.trim() ? `${intervalValue.trim()}${intervalUnit}` : '';
+      const fields = { rules, description, alias, interval };
       if (editing) {
-        await ruleGroupsWriteApi(apiClient).update({ namespace, name: group?.name ?? '', rules, description });
+        await ruleGroupsWriteApi(apiClient).update({
+          scope: scope === 'global' ? 'cluster' : scope,
+          ...(scope === 'project' ? { namespace } : {}),
+          name: group?.name ?? '',
+          ...fields,
+        });
       } else {
-        await ruleGroupsWriteApi(apiClient).create({ namespace, name: name.trim(), rules, description });
+        await ruleGroupsWriteApi(apiClient).create({
+          scope: scope === 'global' ? 'cluster' : scope,
+          ...(scope === 'project' ? { namespace } : {}),
+          name: name.trim(),
+          ...fields,
+        });
       }
     },
     onSuccess: () => {
       onOpenChange(false);
       void queryClient.invalidateQueries({ queryKey: ['rule-groups', cluster] });
+      void queryClient.invalidateQueries({ queryKey: ['cluster-rule-groups', cluster] });
+      void queryClient.invalidateQueries({ queryKey: ['rule-group-detail', cluster] });
     },
   });
 
@@ -167,6 +222,41 @@ export function RuleGroupDialog({ open, onOpenChange, cluster, namespace, group 
             />
             <span className="text-ai-fg-muted">{t('monitoring.ruleGroups.field.nameHint')}</span>
           </label>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <label className="flex flex-col gap-1 text-xs">
+              <span className="text-ai-fg-muted">{t('monitoring.ruleGroups.field.alias')}</span>
+              <Input
+                value={alias}
+                maxLength={63}
+                aria-label={t('monitoring.ruleGroups.field.alias')}
+                {...actionProps('monitoring-alerts:alias')}
+                onChange={(event) => setAlias(event.target.value)}
+              />
+              <span className="text-ai-fg-muted">{t('monitoring.ruleGroups.field.aliasHint')}</span>
+            </label>
+            <label className="flex flex-col gap-1 text-xs">
+              <span className="text-ai-fg-muted">{t('monitoring.ruleGroups.field.interval')}</span>
+              <span className="flex items-center gap-2">
+                <Input
+                  value={intervalValue}
+                  inputMode="numeric"
+                  maxLength={6}
+                  aria-label={t('monitoring.ruleGroups.field.interval')}
+                  {...actionProps('monitoring-alerts:interval')}
+                  onChange={(event) => setIntervalValue(event.target.value.replace(/[^0-9]/g, ''))}
+                />
+                <Select
+                  value={intervalUnit}
+                  aria-label={t('monitoring.ruleGroups.field.intervalUnit')}
+                  {...actionProps('monitoring-alerts:interval-unit')}
+                  onValueChange={(value) => setIntervalUnit(value as 's' | 'm' | 'h')}
+                  options={INTERVAL_UNITS.map((unit) => ({ value: unit, label: t(`monitoring.ruleGroups.intervalUnit.${unit}`) }))}
+                />
+              </span>
+              <span className="text-ai-fg-muted">{t('monitoring.ruleGroups.field.intervalHint')}</span>
+            </label>
+          </div>
 
           <label className="flex flex-col gap-1 text-xs">
             <span className="text-ai-fg-muted">{t('monitoring.ruleGroups.field.description')}</span>

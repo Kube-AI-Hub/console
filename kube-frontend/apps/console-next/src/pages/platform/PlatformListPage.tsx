@@ -1,9 +1,12 @@
 import * as React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { isProtectedPlatformUser, type ClusterRoleSummary, type UserSummary, type WorkspaceSummary } from '@kube-ai-hub/api-client';
+import { clustersApi, isProtectedPlatformUser, type ClusterRoleSummary, type UserSummary, type WorkspaceSummary } from '@kube-ai-hub/api-client';
+import { ClusterRolesPage } from '@/pages/cluster/ClusterRolesPage';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
+import { api as apiClient } from '@/api';
 import { useResourceListState, toListParams } from '@/components/resource/useResourceListState';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
@@ -40,6 +43,44 @@ type SortKey = 'name' | 'createTime';
 
 type Row = UserSummary | ClusterRoleSummary | WorkspaceSummary;
 
+/**
+ * Cluster picker above the platform role list (N-06).
+ *
+ * Only rendered when the installation actually has more than one cluster: a select with one
+ * option is noise, and a single-cluster deployment has no member roles to show.
+ */
+function RoleClusterBar({
+  cluster,
+  clusterNames,
+  onChange,
+}: {
+  cluster: string;
+  clusterNames: string[];
+  onChange: (next: string) => void;
+}): React.ReactElement {
+  const t = useT();
+  return (
+    <div className="mb-3 flex flex-wrap items-center gap-2 text-xs text-ai-fg-secondary">
+      <label htmlFor="platform-roles-cluster" className="font-medium">
+        {t('platform.roles.cluster')}
+      </label>
+      <select
+        id="platform-roles-cluster"
+        className="min-h-9 rounded-ai-md border border-ai-line bg-ai-bg px-2 text-xs text-ai-fg"
+        value={cluster}
+        data-ai-id="clusterroles:cluster"
+        onChange={(event) => onChange(event.target.value)}
+      >
+        {['host', ...clusterNames.filter((name) => name !== 'host')].map((name) => (
+          <option key={name} value={name}>
+            {name}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactElement {
   const t = useT();
   const { user } = useAuth();
@@ -66,6 +107,18 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
   const [roleEditor, setRoleEditor] = React.useState<{ name: string; alias: string; description: string } | null | 'new'>(null);
   const [deleteRole, setDeleteRole] = React.useState<ClusterRoleSummary | null>(null);
   const removeRole = useDeleteClusterRole();
+  // N-06: the platform role page used to always read the host cluster. The selector
+  // switches reads to a member cluster; those rows are read-only here because the
+  // write APIs below are host-scoped (the cluster console owns member-cluster writes).
+  const [roleCluster, setRoleCluster] = React.useState('host');
+  const clusters = useQuery({
+    queryKey: ['clusters'],
+    queryFn: ({ signal }) => clustersApi(apiClient).list({ signal }),
+    enabled: kind === 'clusterroles',
+    staleTime: 60_000,
+  });
+  const clusterNames = (clusters.data?.items ?? []).map((item) => item.name);
+  const memberRoleView = kind === 'clusterroles' && roleCluster !== 'host';
   const [workspaceEditor, setWorkspaceEditor] = React.useState<{ name: string; alias: string; description: string } | null | 'new'>(null);
   const [deleteWorkspace, setDeleteWorkspace] = React.useState<WorkspaceSummary | null>(null);
   const createWorkspace = useCreateWorkspace();
@@ -328,6 +381,18 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
 
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
 
+  if (memberRoleView) {
+    return (
+      <div className="min-w-0">
+        <RoleClusterBar cluster={roleCluster} clusterNames={clusterNames} onChange={setRoleCluster} />
+        <p className="mb-3 text-xs text-ai-fg-muted" data-ai-id="clusterroles:member-readonly">
+          {t('platform.roles.memberReadOnly')}
+        </p>
+        <ClusterRolesPage cluster={roleCluster} />
+      </div>
+    );
+  }
+
   if (state === 'error') {
     return (
       <AiSurface as="section" aiId={`${kind}:surface`} state="error" className="min-w-0">
@@ -338,6 +403,9 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
 
   return (
     <AiSurface as="section" aiId={`${kind}:surface`} state={state} className="min-w-0">
+      {kind === 'clusterroles' && clusterNames.length > 1 ? (
+        <RoleClusterBar cluster={roleCluster} clusterNames={clusterNames} onChange={setRoleCluster} />
+      ) : null}
       <ResourceList
         onRefresh={listRefresh.onRefresh}
         schema={schema}

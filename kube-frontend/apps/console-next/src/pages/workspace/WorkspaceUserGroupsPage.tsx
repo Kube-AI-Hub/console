@@ -25,6 +25,7 @@ import { errorMessage, ResourceErrorPanel } from '@/components/resource/Resource
 import { DeleteDialog } from '@/components/resource/DeleteDialog';
 import { GROUP_PARENT_ROOT, WorkspaceUserGroupDialog } from './WorkspaceUserGroupDialog';
 import { useListRefresh } from '@/components/resource/useListRefresh';
+import { useCollectionWatch } from '@/components/resource/useCollectionWatch';
 
 /**
  * 租户(企业空间)用户组.
@@ -128,6 +129,41 @@ export function WorkspaceUserGroupsPage({ workspace }: WorkspaceUserGroupsPagePr
     if (selected && groups.some((group) => group.name === selected)) return;
     setSelected(groups[0]?.name ?? '');
   }, [groups, selected]);
+
+  /*
+   * Live refresh (re-inclusion N-27 / DEC-19).
+   *
+   * Two watches, not one: the tree's nodes come from the `groups` collection while its
+   * member counts come from `groupbindings`. Watching only bindings (the decision's first
+   * wording) would miss a group created/renamed/deleted from another console — the tree
+   * would stay stale while claiming to be live. Both only invalidate the queries; the tree
+   * is assembled client-side from the collections, so merging events would produce a tree
+   * the next read disagrees with.
+   *
+   * The **native** cluster-scoped collection is watched, not the kapis workspace aggregate
+   * the page reads. Probed 2026-11-17: `/kapis/.../workspaces/<ws>/groups?watch=true`
+   * answers `content-type: application/json` with a plain list and closes — the page would
+   * say "live" and never update. `/apis/iam.kubesphere.io/v1alpha2/groups?watch=true`
+   * streams `ADDED` events. The watch is cluster-wide and only invalidates this workspace's
+   * queries, so a change in another workspace costs one refetch, not a wrong row.
+   *
+   * `groupbindings` is deliberately **not** watched: on this deployment its native watch
+   * does not deliver events (20s probe: no response head, no event; the collection is a
+   * virtual one served by ks-apiserver). Member-count changes made elsewhere therefore need
+   * the manual refresh; the page keeps it visible. Watching a collection that never speaks
+   * would be worse than not watching it — the page would claim to be live.
+   */
+  const groupsWatch = useCollectionWatch({
+    enabled: true,
+    path: '/apis/iam.kubesphere.io/v1alpha2/groups',
+    queryKey: ['workspace-user-groups', workspace],
+    client: apiClient,
+  });
+  /*
+   * A watch reports "live" only once its first event arrives (the HTTP response headers
+   * are not flushed before that); before that it is "connecting".
+   */
+  const liveState = groupsWatch;
 
   const membersQuery = useQuery({
     queryKey: ['workspace-user-groups', workspace, 'members', selected],
@@ -260,7 +296,19 @@ export function WorkspaceUserGroupsPage({ workspace }: WorkspaceUserGroupsPagePr
             <h2 className="text-base font-semibold text-ai-fg">{t('workspace.userGroups.title')}</h2>
             <p className="text-xs text-ai-fg-muted">{t('workspace.userGroups.description')}</p>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              data-ai-id="workspace-user-groups:live-state"
+              data-ai-state={liveState}
+              title={t('workspace.userGroups.liveHint')}
+              className={`self-center text-[11px] ${liveState === 'error' ? 'text-ai-warning' : 'text-ai-fg-muted'}`}
+            >
+              {liveState === 'live'
+                ? t('workspace.userGroups.liveOn')
+                : liveState === 'error'
+                  ? t('workspace.userGroups.liveOff')
+                  : t('workspace.userGroups.liveConnecting')}
+            </span>
             <AiButton aiId="workspace-user-groups:refresh" size="sm" variant="secondary" onClick={() => void groupsQuery.refetch()}>
               {t('common.refresh')}
             </AiButton>

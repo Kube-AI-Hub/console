@@ -1,4 +1,5 @@
 import type { Client } from './client';
+import { clusterScoped } from './paths';
 import { baseOf, resourceApi, type KubeObject, type ResourceBase } from './resources';
 
 /**
@@ -599,6 +600,14 @@ export function nodesApi(client: Client) {
  * patch, because the node object is owned by kubelet and the cloud controller, and a PUT
  * would race them for every other field.
  */
+export interface NodeJoinCommand {
+  command: string;
+  token: string;
+  server: string;
+  caCertHash: string;
+  expiresAt: string;
+}
+
 export function nodesWriteApi(client: Client) {
   const path = (cluster: string | undefined, name: string) =>
     `/api/v1/${cluster && cluster !== 'host' ? `clusters/${encodeURIComponent(cluster)}/` : ''}nodes/${encodeURIComponent(name)}`;
@@ -608,6 +617,24 @@ export function nodesWriteApi(client: Client) {
         method: 'PATCH',
         contentType: 'application/merge-patch+json',
         body: { spec: { unschedulable: params.unschedulable } },
+      });
+    },
+    /**
+     * Ask ks-apiserver for a short-lived kubeadm join command.
+     *
+     * The server issues the bootstrap token (kube-system) and returns a command with the
+     * CA discovery hash. This is the replacement for the old KubeKey Cluster-CR edit:
+     * kube-server has no KubeKey integration. A 404 means the running ks-apiserver is
+     * older than the endpoint; the dialog turns that into an actionable upgrade note.
+     */
+    async joinCommand(params: { cluster?: string; ttlHours?: number }): Promise<NodeJoinCommand> {
+      const prefix =
+        params.cluster && params.cluster !== 'host'
+          ? '/kapis/clusters/' + encodeURIComponent(params.cluster) + '/resources.kubesphere.io/v1alpha3'
+          : '/kapis/resources.kubesphere.io/v1alpha3';
+      return client.request<NodeJoinCommand>(prefix + '/nodes/join-command', {
+        method: 'POST',
+        ...(params.ttlHours ? { query: { ttlHours: params.ttlHours } } : {}),
       });
     },
     async updateMetadata(params: { cluster: string; name: string; labels?: Record<string, string | null>; taints?: NodeTaint[]; resourceVersion: string }): Promise<void> {
@@ -788,7 +815,30 @@ export function toStorageClassDetail(item: KubeStorageClass): StorageClassDetail
   };
 }
 
+export interface StorageClassDraft {
+  cluster: string;
+  name: string;
+  provisioner: string;
+  reclaimPolicy: 'Delete' | 'Retain';
+  volumeBindingMode: 'Immediate' | 'WaitForFirstConsumer';
+  allowVolumeExpansion: boolean;
+  allowCloning: boolean;
+  allowSnapshot: boolean;
+}
+
+const STORAGE_CLASS_API = '/apis/storage.k8s.io/v1';
+const DEFAULT_CLASS_KEYS = [
+  'storageclass.kubernetes.io/is-default-class',
+  'storageclass.beta.kubernetes.io/is-default-class',
+  'storageclass.kubesphere.io/is-default-class',
+];
+
 export function storageClassesApi(client: Client) {
+  const path = (cluster: string | undefined, name?: string) =>
+    clusterScoped(STORAGE_CLASS_API, cluster, name ? `storageclasses/${encodeURIComponent(name)}` : 'storageclasses');
+  const read = (cluster: string | undefined, name: string) =>
+    client.request<KubeStorageClass>(path(cluster, name));
+
   return {
     ...resourceApi<KubeStorageClass, StorageClassSummary, StorageClassDetail>(client, {
       resource: 'storageclasses',
@@ -796,6 +846,122 @@ export function storageClassesApi(client: Client) {
       toDetail: toStorageClassDetail,
     }),
     kind: 'storageclasses' as const,
+
+    /**
+     * Create a storage class.
+     *
+     * The object lives in `storage.k8s.io/v1`, not the kapis proxy: that proxy registers
+     * GET only and answers 405 to writes (same reason the YAML editor's PUT goes native).
+     * Capabilities are annotations/spec fields rather than first-class CRD fields, so they
+     * are written exactly as the reader displays them.
+     */
+    async create(draft: StorageClassDraft): Promise<StorageClassDetail> {
+      const annotations: Record<string, string> = {};
+      if (draft.allowCloning) annotations['storageclass.kubesphere.io/allow-clone'] = 'true';
+      if (draft.allowSnapshot) annotations['storageclass.kubesphere.io/allow-snapshot'] = 'true';
+      const item = await client.request<KubeStorageClass>(path(draft.cluster), {
+        method: 'POST',
+        body: {
+          apiVersion: 'storage.k8s.io/v1',
+          kind: 'StorageClass',
+          metadata: { name: draft.name, ...(Object.keys(annotations).length ? { annotations } : {}) },
+          provisioner: draft.provisioner,
+          reclaimPolicy: draft.reclaimPolicy,
+          volumeBindingMode: draft.volumeBindingMode,
+          ...(draft.allowVolumeExpansion ? { allowVolumeExpansion: true } : {}),
+        },
+      });
+      return toStorageClassDetail(item ?? {});
+    },
+
+    /**
+     * Replace alias/description annotations only.
+     *
+     * Merge patch: the parameters are driver-specific and the class may be referenced by
+     * existing claims; a whole-object PUT from the info dialog would race them. Removed
+     * keys are sent as `null` (omitting them leaves the old value).
+     */
+    async updateInfo(params: { cluster: string; name: string; annotations: Record<string, string> }): Promise<void> {
+      const current = await read(params.cluster, params.name);
+      const existing = (current.metadata?.annotations ?? {}) as Record<string, string>;
+      const patch: Record<string, string | null> = {};
+      for (const key of Object.keys(existing)) {
+        if (!(key in params.annotations)) patch[key] = null;
+      }
+      for (const [key, value] of Object.entries(params.annotations)) {
+        if (existing[key] !== value) patch[key] = value;
+      }
+      if (Object.keys(patch).length === 0) return;
+      await client.request(path(params.cluster, params.name), {
+        method: 'PATCH',
+        contentType: 'application/merge-patch+json',
+        body: { metadata: { annotations: patch } },
+      });
+    },
+
+    /**
+     * Make one class the cluster's default.
+     *
+     * A cluster can have several default annotations at once, so the previous defaults are
+     * cleared first (all three spellings the reader recognises). Doing only the "set" half
+     * leaves two defaults, and the list would then show two badges.
+     */
+    async setDefault(params: { cluster: string; name: string }): Promise<void> {
+      const body = await client.request<{ items?: KubeStorageClass[] }>(path(params.cluster, undefined), {
+        query: { limit: 500 },
+      });
+      for (const item of body?.items ?? []) {
+        const name = item.metadata?.name ?? '';
+        if (!name || name === params.name) continue;
+        const annotations = (item.metadata?.annotations ?? {}) as Record<string, string>;
+        const wasDefault = DEFAULT_CLASS_KEYS.some((key) => annotations[key] === 'true');
+        if (!wasDefault) continue;
+        const patch: Record<string, string | null> = {};
+        for (const key of DEFAULT_CLASS_KEYS) patch[key] = null;
+        await client.request(path(params.cluster, name), {
+          method: 'PATCH',
+          contentType: 'application/merge-patch+json',
+          body: { metadata: { annotations: patch } },
+        });
+      }
+      await client.request(path(params.cluster, params.name), {
+        method: 'PATCH',
+        contentType: 'application/merge-patch+json',
+        body: { metadata: { annotations: { 'storageclass.kubernetes.io/is-default-class': 'true' } } },
+      });
+    },
+
+    /** Toggle the three volume capabilities; false removes the annotation/spec field. */
+    async setFeatures(params: {
+      cluster: string;
+      name: string;
+      allowExpansion: boolean;
+      allowCloning: boolean;
+      allowSnapshot: boolean;
+    }): Promise<void> {
+      const body: Record<string, unknown> = {
+        metadata: {
+          annotations: {
+            'storageclass.kubesphere.io/allow-clone': params.allowCloning ? 'true' : null,
+            'storageclass.kubesphere.io/allow-snapshot': params.allowSnapshot ? 'true' : null,
+          },
+        },
+      };
+      if (!params.allowExpansion) body['allowVolumeExpansion'] = null;
+      else body['allowVolumeExpansion'] = true;
+      await client.request(path(params.cluster, params.name), {
+        method: 'PATCH',
+        contentType: 'application/merge-patch+json',
+        body,
+      });
+    },
+
+    /** Delete sequentially; the page enforces the "in use" guard before calling. */
+    async remove(params: { cluster: string; names: string[] }): Promise<void> {
+      for (const name of params.names) {
+        await client.request<void>(path(params.cluster, name), { method: 'DELETE' });
+      }
+    },
   };
 }
 
@@ -1104,6 +1270,47 @@ export function persistentVolumesApi(client: Client) {
       };
       const item = await client.request<KubePersistentVolume>(path, { method: 'PUT', body });
       return toPersistentVolumeDetail(item);
+    },
+
+    /**
+     * Replace the metadata annotations (alias / description) only.
+     *
+     * A merge patch, not the whole-object PUT used by the YAML editor: the volume spec is
+     * owned by the provisioner and a PUT from the info dialog would race it for every
+     * field the dialog does not show. The method reads first and emits `null` for the
+     * annotations the caller removed — omitting a key from a merge patch leaves it in
+     * place, which is the classic "cleared the alias and nothing happened" bug.
+     */
+    async updateInfo(params: { name: string; annotations: Record<string, string> }): Promise<void> {
+      const path = `/api/v1/persistentvolumes/${encodeURIComponent(params.name)}`;
+      const current = await client.request<KubePersistentVolume>(path);
+      const existing = (current.metadata?.annotations ?? {}) as Record<string, string>;
+      const patch: Record<string, string | null> = {};
+      for (const key of Object.keys(existing)) {
+        if (!(key in params.annotations)) patch[key] = null;
+      }
+      for (const [key, value] of Object.entries(params.annotations)) {
+        if (existing[key] !== value) patch[key] = value;
+      }
+      if (Object.keys(patch).length === 0) return;
+      await client.request(path, {
+        method: 'PATCH',
+        contentType: 'application/merge-patch+json',
+        body: { metadata: { annotations: patch } },
+      });
+    },
+
+    /**
+     * Delete volumes sequentially.
+     *
+     * Batch delete has no transaction upstream: a failure halfway must not silently hide
+     * the rows already deleted. The page reports the per-name outcome; this method throws
+     * only for a single-name call so the single delete can show the server error.
+     */
+    async remove(params: { names: string[] }): Promise<void> {
+      for (const name of params.names) {
+        await client.request<void>(`/api/v1/persistentvolumes/${encodeURIComponent(name)}`, { method: 'DELETE' });
+      }
     },
   };
 }

@@ -1,0 +1,33 @@
+id: TC-L3-KUBE-FRONTEND-APP_STORE-CRD_APPS-05
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-store
+feature: crd-apps
+title: 创建多组件自制 CRD 应用
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/applications/composing'
+prd: prd/kube-frontend/app-store/crd-apps.md
+design: design/kube-frontend/app-store/crd-apps.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_STORE-CRD_APPS-06
+
+story:
+- US2
+
+product: 创建自制应用支持多个组件：每个组件生成一个 Deployment 与一个 Service，全部挂在同一 Application selector 下；dry-run 全量校验后写入，失败回滚。
+preconditions:
+- 已登录 admin；项目 default 可用；用例自建唯一名称，finally 删除两个 Deployment/Service 与 Application
+steps:
+- 打开创建对话框，填应用名，默认组件 web，点「添加组件」填第二个组件（名称 api、镜像/端口）
+- 提交，断言弹窗关闭、列表行组件数=工作负载 2、服务 2
+- API 断言 Application 存在、两个 Deployment 与两个 Service 均存在且 selector={app:<name>}
+expected:
+- components 数组每个生成 Deployment/Service；Application selector 覆盖全部
+- 组件名重复/非法、镜像空、副本<1、端口越界时本地拒绝
+- 真实写入失败回滚所有已建对象（单测覆盖）
+troubleshoot:
+- 只创建一个组件：检查 addComponent 状态与表单索引
+- 组件标签不一致：所有组件必须同 app=<name> 标签
+update_automation:
+- 句柄：composed-apps:create-add-component、create-component-<i>、create-image-<i>、create-replicas-<i>、create-port-<i>

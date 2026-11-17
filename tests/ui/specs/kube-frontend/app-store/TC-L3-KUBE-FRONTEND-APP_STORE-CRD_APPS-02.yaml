@@ -1,0 +1,33 @@
+id: TC-L3-KUBE-FRONTEND-APP_STORE-CRD_APPS-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-store
+feature: crd-apps
+title: 创建自制 CRD 应用（Application + Deployment + Service）
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/applications/composing'
+prd: prd/kube-frontend/app-store/crd-apps.md
+design: design/kube-frontend/app-store/crd-apps.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_STORE-CRD_APPS-03
+
+story:
+- US2
+
+product: 项目「自制应用」页提供创建：填名称/描述/版本/组件名/镜像/副本/端口，提交后创建 Application + Deployment + Service（先 dry-run 校验再真实写入，失败回滚）。
+preconditions:
+- 已登录 admin；项目 default 可用；用例自建唯一名称并在 finally 删除 Application/Deployment/Service
+steps:
+- 打开 composing 页，点「创建自制应用」，空名称提交：断言本地错误、无请求
+- 填名称/镜像/副本/端口提交；断言弹窗关闭、列表出现该应用、健康/组件显示工作负载 1 与服务 1
+- 用 API 断言 Application 存在、Deployment shop-web 存在且 selector 匹配、Service shop-web 存在；打开详情断言工作负载行
+expected:
+- 三个对象都创建；Application selector.matchLabels 与工作负载/Service 标签一致
+- 失败时删除已创建对象并保留错误（单测覆盖回滚）
+- 创建入口只在 host 集群渲染（成员集群无写路径）
+troubleshoot:
+- 弹窗关闭但列表无行：确认 invalidate 的 queryKey 与页面一致
+- 创建 422：先 dry-run 定位哪个对象被拒；检查镜像/端口/selector 标签
+update_automation:
+- 句柄：composed-apps:create/create-dialog/create-name/create-image/create-replicas/create-port/create-submit/create-error

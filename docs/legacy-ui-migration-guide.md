@@ -279,6 +279,8 @@ pytest tests/kube-frontend/<模块> -q -n 4   # 隔离数据前提下快速反�
 pytest tests/kube-frontend/<模块> -q -n 0   # 本批相关及共享影响用例的串行判定
 ```
 
+同一环境的多条用例**合并成一次 pytest 调用**，共享 session 登录与浏览器启动；2026-11-17 把 13 条新交付用例一次跑完 109.73s（逐条起跑约 4–5 分钟），回归结果与逐条一致；同日晚把「集群网关/详情四视图 + 节点添加 + 自制应用 9 条」共 15 条合成一次跑完 **64.38s**，用于新改动后的快速回归；全站 `TC-FULL-…` 18 条同进程 **64.08s** 通过。
+
 `specs/` 是事实源，`cases/` 是生成物，`tests/` 按 spec 一比一镜像，选择器只写在 `pages/`。
 
 既有夹具不要重写：`logged_in_context`（session 级真登录）、`anonymous_page`（无 token，登录用例专用）、
@@ -358,6 +360,7 @@ pytest tests/kube-frontend/<模块> -q -n 0   # 本批相关及共享影响用�
 | 34 | **时间窗参数照搬旧 util** | 计量 step 传数值秒得到 `400 time: missing unit`；当前版本要 Go duration（5m） | 新接口的时间单位先探测再写；窗口 API 的 step/start/end 单位写进契约 |
 | 35 | **把 IAM 用户列表当成全部授权主体** | users?clusterrole= 只返回 IAM 管理的绑定；原生 k8s 绑定（system:*、ServiceAccount、安装时 admin）不在其中，0 个用户是真实结果 | 已授权用户为空显示明确空态；不要让空集合退化成空白表或隐藏页签 |
 | 36 | **按 UI 表象设计写接口** | 老页面有「配置」按钮，但弹窗 onOk 只关闭、不发请求；照搬会做出「填完保存没反应」的假表单 | 迁移前查 action 链/网络请求；按钮不等于能力，没有写路径就只迁状态并说明 |
+| 38 | **权限检查走 kube SSAR 代理** | 以只读用户打开项目页，创建入口仍可见；`/apis/authorization.k8s.io` 经 ks-apiserver 代理时以 service account（cluster-admin）求值，所有 SSAR 都 allowed | 权限判断改用 ks-apiserver 的 IAM 检查（以请求用户求值）；旧后端 404 再回退；见[权限检查后端记录](plans/permission-review-backend-20261117.md) |
 | 37 | **聚合页的健康口径含糊** | 只按「有工作负载」判健康会把 0 副本/空 selector 误报为正常；空 selector 在语义上匹配全部组件 | 健康用 ready/desired 明确三态；写清空 selector 与 desired=0 的语义，并用单测固定 |
 
 多集群部署另有一条命令：`cd tests/ui && python3 tools/multicluster_sweep.py --env-file <env> --baseline --clusters host,<member>`，

@@ -524,6 +524,14 @@ MODULES = [
                             "TC-L3-KUBE-FRONTEND-APP_STORE-PROJECT_APPS-03",
                         ]},
                     },
+                    {
+                        # 旧 console 的「自制应用」：Application（app.k8s.io）按 selector
+                        # 聚合 Deployment/StatefulSet/Service/Ingress；与 openpitrix release
+                        # 不是同一对象，故独立页面（N-01）。
+                        "id": "crd-apps",
+                        "title": "自制 CRD 应用",
+                        "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_STORE-CRD_APPS-01"]},
+                    },
                                                             {
                         "id": "manage",
                         "title": "商店管理（应用/分类/审核）",

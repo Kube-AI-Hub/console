@@ -16,6 +16,7 @@
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-09
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-10
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-11
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-12
 
 ## 概述
 
@@ -23,7 +24,7 @@
 
 ## 设计目标与非目标
 
-Ready、调度与负载独立展示，提供节点终端、局部元数据写入、已上报硬件拓扑和 vGPU 模式配置。非目标：排空、导入、设备发现及生产模式切换验证。
+Ready、调度与负载独立展示，提供节点终端、局部元数据写入、已上报硬件拓扑和 vGPU 模式配置。非目标：排空、设备发现及生产模式切换验证。节点添加已由 2026-11-17 产品复核重纳，并在后端探测后改为签发 kubeadm join 命令，见本文末「DEC-…-NODES-12」。
 
 ## 关键约束
 
@@ -130,11 +131,11 @@ E2E 见 `tests/kube-frontend/cluster-management/`；单测覆盖 `nodeStatus` / 
 2026-11-14 在 localhost:5178 构建产物验证 NODES-07 至 10：真实读取统计和监控，模拟分页与模式写入，三档截图。
 前端全量 160 条单测、节点 API 8 条、config 契约 12 条以及 ai-kit/Storybook 构建通过。
 既有 NODES-01/02/03/06 通过；NODES-05 因上游节点终端没有输出帧而跳过，不计作通过。
-API 包全量类型检查仍报 test/network-create.test.ts 与 test/workspace-members.test.ts 的 exactOptionalPropertyTypes 错误，未降低检查规则。
+API 包与 config 契约测试的严格空值类型错误已在 2026-11-17 修复（仅测试夹具，未放宽规则）；当前 `pnpm typecheck` 全量 0 error。
 
 ## 后续改进
 
-节点导入仍未交付；member 硬件读取及模式写入需后端提供明确集群路由后开放。
+节点添加已改为后端签发 kubeadm join（DEC-…-NODES-12，TC-…-NODES-12）；member 硬件读取及模式写入需后端提供明确集群路由后开放。
 
 ## 验收用例
 
@@ -219,3 +220,22 @@ GET gpu v1alpha1 `/gpus?nodeName=<node>&limit=-1` 与 rdma v1alpha1 `/ports?node
 gpu02 的测量和分配不能用于 host 集群汇总。Ready True 正常；MemoryPressure/DiskPressure/PIDPressure/NetworkUnavailable False 正常，未知条件为 neutral。NTP 继续使用全部基础范围节点的时间中位数。
 
 新增自动化：TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-11；既有 03/06 随表格和元数据页签调整选择器，保留容量、标签回读、清理与趋势采样断言。单测覆盖反向压力条件、超配、缺值、未知拓扑连接和 RDMA 精确身份。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-12 — 节点添加改为后端签发 kubeadm join（2026-11-17 修正）
+
+**新决定**：节点列表提供「添加节点」弹窗，调用 ks-apiserver 新增的 `POST /kapis/resources.kubesphere.io/v1alpha3/nodes/join-command`，展示一条带到期时间的 `kubeadm join` 命令（含 CA hash），由管理员在目标主机执行。不依赖 KubeKey。
+
+**原判断（保留，不删除）**：节点添加曾是「不做」——依据是「节点纳管属于安装器职责」；2026-11-17 产品复核重纳为 KubeKey 向导，入口按集群 `kkName` 显示。
+
+**为什么再次修正**：实际探测发现当前 ks-apiserver（kube-server）没有 KubeKey 集成：`kubekey.kubesphere.io` 组与 CRD 在 B200、mlu370 均 404，按原方案交付会得到一个永远不显示的入口。Kubernetes 原生 kubeadm 加入只需要 bootstrap token 与 CA hash，ks-apiserver 可以安全签发短时 token；这既保留「不离开控制台」的肌肉记忆，也不要求控制台持有主机清单。
+
+**落地约定**：
+1. 后端接口：POST，权限按 `create nodes`（resources.kubesphere.io）授权；ttlHours 1-168，默认 24；返回 command/token/server/caCertHash/expiresAt；token 存 kube-system 的 bootstrap token Secret。
+2. 页面：入口先按 create nodes 权限检查（IAM，用户身份；明确 false 隐藏、失败 fail-open）；调用失败按 404/405（后端版本不支持；405 是旧后端的 generic GET /nodes/{name} 对 POST 的响应）/403（无权限）/其他分类显示，不统一显示成"加载失败"；命令仅内存展示，不写 URL/日志，关闭即丢弃。
+3. 后端未升级的集群仍显示入口但明确说明需要升级后端——这是可行动的依赖说明，不伪装成"不可用功能"。
+
+**被否方案**：控制台 BFF 自己签发 token。会把集群写权限与 CA 处理放进静态前端服务，职责错位，且无法被其他客户端复用。
+
+**何时重新考虑**：ks-apiserver 提供安装器/节点池的声明式接口时，接该接口并保留本命令作为 fallback。
+
+**证据**：后端实现与单测见 [节点加入后端记录](../../../docs/plans/node-add-backend-20261117.md)。

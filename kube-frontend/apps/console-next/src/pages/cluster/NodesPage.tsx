@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { Link } from '@tanstack/react-router';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { nodesWriteApi, type NodeSummary, type NodeMetricValues } from '@kube-ai-hub/api-client';
+import { actionProps } from '@kube-ai-hub/ai-surface';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { accessReviewApi, nodesWriteApi, type NodeSummary, type NodeMetricValues } from '@kube-ai-hub/api-client';
 import { AiSurface, Badge, Button, MetricCell, ResourceList, StatisticsGroup, type ListColumn, type ListSchema, type StatisticItem } from '@kube-ai-hub/ui';
 import { api } from '@/api';
 import { useT } from '@/i18n';
@@ -13,6 +14,7 @@ import { GPU_MODES } from './gpuModeConfig';
 import { GPU_VENDOR_LABEL_KEYS, vendorKey } from './gpuVendors';
 import { formatGpuMemory } from './gpuFormat';
 import { GpuModeDialog } from './GpuModeDialog';
+import { NodeJoinDialog } from './NodeJoinDialog';
 import { hasPendingMode, timeOffsets, useNodesList, useNodesMetrics, useNodesStats, useNodesTime } from './nodeListQueries';
 
 export function NodesPage({ cluster }: { cluster: string }): React.ReactElement {
@@ -23,6 +25,15 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
   const [model, setModel] = React.useState('');
   const [terminal, setTerminal] = React.useState<string | null>(null);
   const [modeNode, setModeNode] = React.useState<string | null>(null);
+  const [joinOpen, setJoinOpen] = React.useState(false);
+  // The node-add dialog only makes sense for readers allowed to create nodes. Hide the
+  // entry only on an explicit "false"; a failed check must not remove a permitted action.
+  const canAddNode = useQuery({
+    queryKey: ['can-create-nodes', cluster],
+    queryFn: ({ signal }) => accessReviewApi(api).allowed({ cluster, verb: 'create', resource: 'nodes', group: 'resources.kubesphere.io', signal }),
+    staleTime: 60_000,
+    retry: false,
+  });
   const [visibleColumns, setVisibleColumns] = React.useState<string[] | undefined>();
   React.useEffect(() => { const timer = setTimeout(() => setModel(filters.model?.trim() ?? ''), 250); return () => clearTimeout(timer); }, [filters.model]);
   React.useEffect(() => { setTerminal(null); setModeNode(null); setFilters({}); list.setPage(1); list.setKeyword(''); }, [cluster]);
@@ -147,7 +158,10 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
   };
   const state = nodes.isPending ? 'loading' : nodes.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
   return <AiSurface as="section" aiId="nodes:surface" state={state} className="flex min-w-0 flex-col gap-4">
-    <header><h1 className="text-lg font-semibold text-ai-fg">{t('node.list.title')}</h1><p className="mt-1 text-xs text-ai-fg-muted">{t('node.list.description')}</p></header>
+    <header className="flex flex-wrap items-start justify-between gap-3"><div><h1 className="text-lg font-semibold text-ai-fg">{t('node.list.title')}</h1><p className="mt-1 text-xs text-ai-fg-muted">{t('node.list.description')}</p></div>
+      {canAddNode.data !== false ? (
+        <Button size="sm" variant="secondary" {...actionProps('nodes:add')} onClick={() => setJoinOpen(true)}>{t('node.add.button')}</Button>
+      ) : null}</header>
     <StatisticsGroup items={summary} unknownLabel={t('node.list.unknown')} data-ai-id="nodes:stats" />
     {stats.isError || controlPlane.isError ? <div className="text-xs"><ResourceErrorPanel error={stats.error || controlPlane.error}
       onRetry={() => { void stats.refetch(); void controlPlane.refetch(); }} retryAiId="nodes:stats-retry" /></div> : null}
@@ -162,5 +176,6 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
     <MutationAlert error={cordon.error} />
     {terminal ? <ExecConsoleDialog target={{ cluster, node: terminal }} title={`${t('container.terminal.title')} · ${terminal}`} aiPrefix="node" onClose={() => setTerminal(null)} /> : null}
     {modeNode ? <GpuModeDialog cluster={cluster} name={modeNode} onClose={() => setModeNode(null)} onUpdated={invalidate} /> : null}
+    <NodeJoinDialog cluster={cluster} open={joinOpen} onOpenChange={setJoinOpen} />
   </AiSurface>;
 }

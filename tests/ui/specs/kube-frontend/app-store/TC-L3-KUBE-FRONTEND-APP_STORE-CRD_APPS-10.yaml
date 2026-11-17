@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-APP_STORE-CRD_APPS-10
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-store
+feature: crd-apps
+title: 自制应用详情灰度发布
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/applications/composing'
+prd: prd/kube-frontend/app-store/crd-apps.md
+design: design/kube-frontend/app-store/crd-apps.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_STORE-CRD_APPS-11
+
+story:
+- US3
+
+product: 自制应用详情展示命中该应用/服务的 servicemesh Strategy（名称/类型/命中服务/选择器）；无策略显示空态；策略接口不可用显示未上报而不是空表。
+preconditions:
+- 已登录 admin；项目 default 可用；用例自建 Application+Deployment+Service 与一个 Strategy，finally 清理
+steps:
+- 创建临时应用、工作负载、服务与服务网格 Strategy（selector app=<name>，host=workload）
+- 打开详情，滚动到「灰度发布」区块
+- 若策略创建成功：断言表格出现且含策略名；否则断言空态/未上报说明
+- finally 删除 Strategy、Service、Deployment、Application
+expected:
+- 表格列：名称/类型（按流量比例、按内容、流量镜像）/命中服务/选择器
+- 「管理灰度发布」链接到项目灰度发布页（写操作在项目级向导承接）
+- 无策略与模块不可用分开；区块只读
+troubleshoot:
+- 表格为空但策略存在：检查 selector.app 或 hosts 是否命中应用
+- 类型误判：检查 http 首条规则是 mirror/match/route
+update_automation:
+- 句柄：composed-app-detail:gray/gray-empty/gray-unavailable/gray-table/gray:<name>/gray-retry

@@ -44,7 +44,7 @@ function dictionaryBlocks(): { zh: Set<string>; en: Set<string> } {
   const zhStart = text.indexOf('export const zh');
   const enStart = text.indexOf('export const en');
   const entries = (block: string): Set<string> =>
-    new Set([...block.matchAll(/^ {2}'([a-zA-Z0-9_.]+)':/gm)].map((match) => match[1]));
+    new Set([...block.matchAll(/^ {2}'([a-zA-Z0-9_.]+)':/gm)].map((match) => match[1]!));
   return { zh: entries(text.slice(zhStart, enStart)), en: entries(text.slice(enStart)) };
 }
 
@@ -65,7 +65,7 @@ describe('locale keys', () => {
     const missing: string[] = [];
     for (const file of appFiles) {
       for (const match of read(file).matchAll(/\bt\(\s*'([a-zA-Z0-9_.]+)'/g)) {
-        if (!keys.has(match[1])) missing.push(`${relative(root, file)} -> ${match[1]}`);
+        if (!keys.has(match[1]!)) missing.push(`${relative(root, file)} -> ${match[1]}`);
       }
     }
     expect(missing).toEqual([]);
@@ -153,7 +153,7 @@ describe('declared list capabilities are wired', () => {
       const text = read(file);
       const pagination = text.match(/pagination:\s*\{([^}]*)\}/);
       if (!pagination) continue;
-      if (pagination[1].includes('Math.max(')) continue;
+      if (pagination[1]!.includes('Math.max(')) continue;
       if (!text.includes('onPageChange')) offenders.push(relative(root, file));
     }
     expect(offenders).toEqual([]);

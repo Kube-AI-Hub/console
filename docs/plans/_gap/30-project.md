@@ -2,6 +2,222 @@
 
 > **历史证据，2026-11-14 基线。** 下文“无页签/无终端/固定分页/模块关闭”等并非当前状态。
 > 现行方法见[迁移指南](../../legacy-ui-migration-guide.md)，待复核项见[能力矩阵](../capability-matrix.md)。
+> **2026-11-17 复验结论见 §A；下方 §0–§4 保留为历史证据，不再作为当前状态。**
+
+## A. 2026-11-17 复验
+
+> 复验基线：2026-11-17。只读静态源码 + 既有批次证据文档（不跑 dev server、不开浏览器）。
+> 方法依据：[迁移指南](../../legacy-ui-migration-guide.md) §2.3（探测接口不读模块开关）、§3.3（页面在 ≠ 功能在）、§6（新 PRD 自洽 ≠ 与旧版一致）。
+
+### A.1 规模（本节自行从源码重数，未沿用旧数字）
+
+| 项 | 老 console | 新 UI（2026-11-17） |
+| --- | --- | --- |
+| 项目作用域路由 | **50** 条 = 列表/入口 29（`projects/routes/index.js:57-165`，含 `grayrelease` 的 `cates`/`jobs` 两条子页）+ 详情 **21**（`routes/detail.js:40-121`，其中 `alert-rules/builtin/:name` 与 `alert-rules/:name` 同组件两条路径） | **46** 条叶子路由 = 26 个页面目录的列表页 + 20 条详情（17 个 `$name.tsx` + `applications/$releaseId.tsx` + `pods/$name/containers/$container.tsx` + `pods/$name/index.tsx`） |
+| 页面目录 | — | **26**（`routes/kube-frontend.$workspace.clusters.$cluster.projects.$namespace/`；`find -name index.tsx` 得 27，其中 `pods/$name/index.tsx` 是详情） |
+| 详情页形态 | 左栏信息 + 顶部页签（`core/containers/Base/Detail/index.jsx:143-189`） | 页签已恢复：`WorkloadDetailPage.tsx:302-321` 自绘 `role=tablist`；`StorageDetailPage.tsx:190-216`、`RoleDetailPage.tsx:153-183`、`ImageBuilderDetailPage.tsx:61-63` 用 ai-kit `Tabs` |
+| 列表通用能力 | 档位 10/20/50/100（`utils/constants.js:1226`）、列显隐（`components/Tables/Base/index.jsx:85-94`） | 已接入：`WorkloadListPage.tsx:58`（`PAGE_SIZES`）、`:370`（`useColumnVisibility`）、`:142`（refresh） |
+
+### A.2 逐能力对照表
+
+归宿取值：**已交付** / **部分交付** / **待补** / **批准不做** / **环境阻塞** / **未核实**。
+
+#### A.2.1 应用负载：列表（8 类共用）
+
+| 老能力 | 老证据 | 新实现现状 | 归宿 | 说明 |
+| --- | --- | --- | --- | --- |
+| 每页档位 10/20/50/100 | `utils/constants.js:1226` | `WorkloadListPage.tsx:58,351,418` | 已交付 | 服务端 `page/limit` |
+| 列显隐 | `components/Tables/Base/index.jsx:85-94` | `WorkloadListPage.tsx:214-292`（`hideable`）、`:370` | 已交付 | 持久化键 `workloads:<kind>` |
+| 刷新出口 / 空态出口 | `components/Tables/List` 的 onFetch | `WorkloadListPage.tsx:142`、`:348-349` | 已交付 | |
+| 排序（名称/时间） | `Pods/index.jsx:112,150` | `WorkloadListPage.tsx` 的 `sortableKeys` | 已交付 | |
+| 批量选择 + 批量停止/删除 | `HOCs/withList` 的 `selectActions` | `WorkloadListPage.tsx` 的 `actions`/`onBulkAction` | 已交付 | |
+| 容器组列：节点 | `Pods/index.jsx:127-133` | `WorkloadListPage.tsx:262-284` | 部分交付 | 列在，但**不再链到节点详情**（旧 `:186-195` 是 `Link`） |
+| 容器组列：Pod IP | `Pods/index.jsx:134-139` | `WorkloadListPage.tsx:274-283` | 已交付 | |
+| 容器组按状态筛选（`PODS_STATUS`） | `Pods/index.jsx:120` | `WorkloadListPage.tsx:134` 只有项目筛选 | **待补** | 状态筛选未迁 |
+| 页头 Banner 的 tips（问号说明） | `Pods/index.jsx:205` | 只有 descriptor 的 title/description | 部分交付 | 说明性 tips 未迁 |
+
+#### A.2.2 应用负载：详情页签体系
+
+| 老能力 | 老证据 | 新实现现状 | 归宿 | 说明 |
+| --- | --- | --- | --- | --- |
+| Deployment 6 页签（资源状态/版本记录/元数据/监控/环境变量/事件） | `Deployments/Detail/routes.js:30-59` | `WorkloadDetailPage.tsx:101-109`：overview/monitor/pods/revisions/events/metadata | **部分交付** | 新增 `pods` 页签；**环境变量页签仍缺**；版本记录有回滚无 diff（已登记） |
+| StatefulSet / DaemonSet 6 页签 | `StatefulSets/Detail/routes.js:30-59`、`DaemonSets/Detail/routes.js:30-59` | 同上（无 revisions） | **部分交付** | 缺环境变量页签 |
+| Job 5 页签（执行记录/资源状态/元数据/环境变量/事件） | `Jobs/Detail/routes.js:29-52` | overview（内含 `jobs-detail:runs`，`WorkloadDetailPage.tsx:439-455`）+ events + metadata | **部分交付** | 执行记录并入 overview；**缺环境变量页签** |
+| CronJob 运行记录页签 | `CronJobs/Detail/routes.js:27-38`、`CronJobs/Detail/JobRecords/index.jsx` 168 行 | `useJobRuns` 仅 `kind === 'jobs'` 启用（`queries.ts:127-133`） | **待补** | 定时任务运行记录整块未迁 |
+| Service 3 页签 + 拓扑图 | `Services/Detail/routes.js:27-38`、`Services/index.jsx:51,64,298-299` | overview+events+metadata；拓扑见 A.2.6 | 部分交付 | 页签等价，拓扑缺 |
+| Ingress 3 页签 | `Routes/Detail/routes.js:27-38` | overview+events+metadata | 已交付 | |
+| 元数据页签 | `core/containers/Base/Detail/Metadata/index.jsx` | `WorkloadDetailPage.tsx:739-750` `MetadataBlock` | 已交付 | |
+| 事件页签 | `core/containers/Base/Detail/Events/index.jsx` | `WorkloadDetailPage.tsx:697-736` | 已交付 | 三态齐全 |
+| 监控页签（工作负载级） | `Deployments/Detail/Monitoring/index.jsx` 258 行 | `WorkloadDetailPage.tsx:71-79` + `WorkloadMonitorPanel.tsx` 336 行 | 已交付 | 仅 deployment/statefulset/daemonset，原因写在源码注释 |
+| 版本记录 + 回滚 | `Deployments/Detail/RevisionControl/index.jsx` 173 行 | `WorkloadDetailPage.tsx` revisions 页签 + rollback | 已交付 | diff 与「再次部署」按登记不做 |
+| 编辑设置（资源限额/更新策略/选择节点/健康检查/存储/安全上下文） | 老容器模板页签 | `EditWorkloadDialog.tsx` 1941 行 | 已交付 | 见 `capability-matrix.md:32` |
+| 详情页 websocket 实时刷新 | `projects/containers/Base/Detail/index.jsx:62-92` | 静态源码未见 detail 级 watch | 未核实 | 列表侧实时见 `capability-matrix.md:121` |
+
+#### A.2.3 容器组详情
+
+| 老能力 | 老证据 | 新实现现状 | 归宿 | 说明 |
+| --- | --- | --- | --- | --- |
+| 资源状态 / 监控 / 事件 / 元数据 | `Pods/Detail/routes.js:28-59` | `WorkloadDetailPage.tsx:102`：overview/monitor/containers/events/metadata | 已交付 | |
+| 容器卡片可点入容器详情 | `Pods/Detail/ResourceStatus.jsx:45-59` | `WorkloadDetailPage.tsx:669-694` 容器名链到 `.../containers/$container` | 已交付 | |
+| **调度信息页签**（亲和/污点/容忍/资源请求） | `Pods/Detail/routes.js:35-39`、`ScheduleInfo/index.jsx` 362 行 | 无（`app-workloads/` 下无 schedule 实现） | **待补** | 整块未迁 |
+| **环境变量页签** | `Pods/Detail/routes.js:52-57` | 无（`tabsFor` 无 env；env 只在 `EditWorkloadDialog.tsx:455,931`） | **待补** | 只读 env 视图缺 |
+| 属性含 requests / limits 聚合 | `Pods/Detail/index.jsx:161-168` | `api-client/src/workloads.ts:262-276` 只产 podStatus/node/podIP/hostIP/qosClass/restarts | **待补** | 详情页无 requests/limits 行 |
+
+#### A.2.4 容器详情页（`pods/:podName/containers/:containerName`）
+
+| 老能力 | 老证据 | 新实现现状 | 归宿 | 说明 |
+| --- | --- | --- | --- | --- |
+| 页面本身 + 路由 | `routes/detail.js:62-64`、`Pods/Containers/Detail.jsx:35-231` | `pods/$name/containers/$container.tsx` + `ContainerDetailPage.tsx` 294 行 | **已交付** | 旧「整页缺失」不成立 |
+| 属性 12 项（含镜像 ID/端口/命令/拉取策略/重启） | `Pods/Containers/Detail.jsx:108-179` | `ContainerDetailPage.tsx:112-123`（名称/镜像/拉取策略/状态/重启/启动时间/命令）+ 端口区块 `:174-188` | 部分交付 | **缺镜像 ID（imageID）** |
+| 资源 requests/limits | `Detail.jsx:163-169` | `ContainerDetailPage.tsx:125-137` | 已交付 | |
+| 探针（liveness/readiness） | `Containers/ResourceStatus.jsx:49-57` | `ContainerDetailPage.tsx:190-204` | 已交付 | 新增 startupProbe |
+| 卷挂载 | `Containers/ResourceStatus.jsx:34-47` | `ContainerDetailPage.tsx:155-172` | 已交付 | |
+| **生命周期（postStart/preStop）** | `Containers/ResourceStatus.jsx:59-67` | 无（`containerView` 未解析 `lifecycle`） | **待补** | |
+| 环境变量 | `Containers/routes.js:39-44` | `ContainerDetailPage.tsx:139-153` | 已交付 | |
+| **单容器监控曲线**（GPU/GPU 内存/CPU/内存） | `Containers/Monitoring.jsx:26-85` | 无，源码自述（`ContainerDetailPage.tsx:27-28`） | **待补** | 需监控区间查询 |
+| 容器日志（历史 + 实时 tail） | `Containers/routes.js:45-50`、`Logs.jsx:33-43` | `ContainerLogsDialog.tsx` 98 行：日志检索（1h 窗）+ `openPodLogStream(follow)`（`:46-68`） | 已交付 | 旧「架构级缺失」不成立 |
+| 容器终端 | `Pods/Containers/Detail.jsx:61-69,181-200` | `ContainerTerminal.tsx` + `ExecConsoleDialog`（BFF WebSocket） | 已交付 | `capability-matrix.md:107`（`432fc81d6`） |
+
+#### A.2.5 存储
+
+| 老能力 | 老证据 | 新实现现状 | 归宿 | 说明 |
+| --- | --- | --- | --- | --- |
+| PVC 详情 4 页签（资源状态/元数据/事件/快照） | `Volumes/Detail/routes.js:28-51` | `StorageDetailPage.tsx:50`、`:190-216` | 已交付 | 快照页签按 `source.persistentVolumeClaimName` 过滤（`:63`） |
+| 快照详情 2 页签（数据来源/事件） | `VolumeSnapshots/Detail/routes.js:26-37` | `StorageDetailPage.tsx:112-117` 单页属性 | 部分交付 | 快照分支无事件页签（`:190-198`） |
+| 操作：编辑信息/编辑 YAML/克隆/创建快照/扩容/删除 | `Volumes/Detail/index.jsx:131-202` | `StorageDetailPage.tsx:167-183`（editInfo/clone/snapshot/editYaml/delete）+ 扩容在列表 `StorageListPage.tsx:218-220` | 已交付 | **扩容入口从详情移到列表**（位置差异） |
+| 资源状态用量卡片 | `Volumes/Detail/ResourceStatus/UsageCard/index.jsx` 176 行 | attributes 有 capacity，未见用量/水位 | 未核实 | 需读 `detailSnapshots.ts` 与 attributes 区块确认 |
+
+#### A.2.6 网络 / 网关 / 服务拓扑
+
+| 老能力 | 老证据 | 新实现现状 | 归宿 | 说明 |
+| --- | --- | --- | --- | --- |
+| 隔离开关（annotation 写入） | `Network/Policies/index.jsx:70-92` | `NetworkIsolationPage.tsx:184-200` | 已交付 | |
+| 规则聚合视图（内部/外部白名单，ingress/egress） | `Network/Policies/RuleInfo/index.jsx:145-365` | `NetworkRulesPanel.tsx` 243 行（matchLabels/matchExpressions/ipBlock+except/endPort，`:52-120`），挂 `NetworkIsolationPage.tsx:230` | 已交付 | 旧「不等价」不成立 |
+| 白名单新建向导（多规则/三类对端/端口） | `RuleInfo/index.jsx:108-131,297-328` | `NetworkPolicyDialog.tsx:39` `PEER_KINDS` + 端口行 | 已交付 | |
+| 策略详情（出站/入站规则查看器） | `Network/Policies/Detail/routes.js:19-36`、`Viewer/index.jsx` 286 行 | `NetworkPolicyDetailPage.tsx:100-114`：属性 + labels/annotations + 编辑 YAML，**无按策略展开的规则内容** | 部分交付 | 规则内容只能在列表页聚合面板看到 |
+| 项目网关信息 + 修改类型/端口/副本数 | `Gateway/index.jsx:90-136` | `GatewayPage.tsx:118-164` + `GatewayEditDialog.tsx:73-94` | 已交付 | 旧「批准不做」不成立 |
+| **集群网关卡片** | `Gateway/index.jsx:80-87,106-129` | 无（只渲染项目网关） | **待补** | |
+| **网关详情页 `/gateways/:gatewayName`** | `routes/detail.js:113-116`、`Gateway/index.jsx:93-104` | `gateways/` 只有 `index.tsx`+`route.tsx`，**无 `$name.tsx`** | **待补** | 入口与页面都缺 |
+| **服务拓扑图**（条件入口 `network.topology`） | `Services/index.jsx:32,51,64,298-299`、`Services/Topology/**` 12 文件 | 无（全仓 `topology` 仅命中 `cluster/NodeHardwarePanel.tsx`） | **待补** | 条件入口须单列（指南 §3.3） |
+
+#### A.2.7 监控告警
+
+| 老能力 | 老证据 | 新实现现状 | 归宿 | 说明 |
+| --- | --- | --- | --- | --- |
+| 告警策略列表 | `Alerting/Policies/index.jsx:316-370` | `RuleGroupsPage.tsx` 549 行；`MonitoringListPage.tsx:130-166` 兼容旧模型 | 已交付 | 3.4 集群走 RuleGroup |
+| 创建策略 | `Alerting/Policies/index.jsx:389-409` | `RuleGroupsPage.tsx:270` | 已交付 | namespaced 写 + 双门控 |
+| 批量启用/停用 | `Alerting/Policies/index.jsx:228-267` | `RuleGroupsPage.tsx:93-121,282-287,361-368` | 已交付 | 逐条 PATCH + 结果汇总 |
+| 策略详情 2 页签（规则/消息） | `Alerting/Policies/Detail/routes.js:26-36` | `RuleGroupDetailPage.tsx` 677 行 + `AlertMessagesTimeline.tsx` 156 行 | 已交付 | 规则搜索/分页见 `rule-search-paging-20261116.md` |
+| 告警消息列表 + 下钻 | `Alerting/Messages/index.jsx` 320 行 | `MonitoringListPage.tsx:237-238,317-330` + `AlertDrillDown.tsx` 152 行 | 已交付 | |
+| 静默 / 通知 / 批量删除 | `Alerting/Messages/index.jsx` | 无 | **批准不做** | `prd/kube-frontend/monitoring/alerts.md:61`、`monitoring/_index.md:76` |
+| 自定义监控（列表 + YAML） | `CustomMonitoring/index.jsx:19-137` | `ProjectCustomMonitoringPage.tsx` 211 行 | 已交付 | 旧「真缺失」不成立 |
+| 自定义监控面板编辑器 | `CustomMonitoring/CreateDashborad/index.jsx` 107 行、`EditDashborad` 77 行 | 无，源码自述（`ProjectCustomMonitoringPage.tsx:26-27`） | **批准不做** | `capability-matrix.md:77`（CHECK-07） |
+
+#### A.2.8 项目设置
+
+| 老能力 | 老证据 | 新实现现状 | 归宿 | 说明 |
+| --- | --- | --- | --- | --- |
+| 基本信息：角色/成员/服务统计 | `BaseInfo/index.jsx:196-215` | `ProjectInfoPage.tsx:118-143`（三卡取 `totalItems`，失败显 `-`） | 已交付 | 旧「真缺失」不成立 |
+| 基本信息：配额 + 编辑 | `BaseInfo/index.jsx` + `ResourceQuota` | `ProjectInfoPage.tsx:148+` + `QuotaEditDialog.tsx` 134 行 | 已交付 | |
+| 基本信息：LimitRange 区块 | `BaseInfo/index.jsx:230` | 概览页有只读区块（`ProjectOverviewPage.tsx:212-238`）；基本信息页无 | 部分交付 | 内容在概览，归属与旧版不同 |
+| 项目角色列表 + 创建/编辑/删除 | `Roles/index.jsx` 169 行 | `SettingsListPage.tsx` + `RoleCreateDialog.tsx` | 已交付 | |
+| **角色详情「已授权用户」页签** | `Roles/Detail/routes.js:32-36` | `RoleDetailPage.tsx:51,153-183` | 已交付 | 旧「真缺失」不成立；按 RoleBinding subjects 展开，比旧 `users?role=` 更全 |
+| 成员：邀请/改角色/移除 | `Members/index.jsx` 212 行 | `SettingsListPage.tsx:213,232-233,322-328` + `MemberDialog.tsx` | 已交付 | |
+| 成员：批量移除 | 老 console 无 | `SettingsListPage.tsx:214-217,350` | 已交付 | 新增能力 |
+| 日志收集（卷上采集开关 + 关闭确认） | `LogCollection/index.jsx:41-89`、`LogCollection/LogCollection/index.jsx:37-135` | `LogCollectionPage.tsx` 134 行 | 已交付 | |
+
+#### A.2.9 项目概览
+
+| 老能力 | 老证据 | 新实现现状 | 归宿 | 说明 |
+| --- | --- | --- | --- | --- |
+| 基本信息（名称/别名/描述/创建者） | `Overview/BaseInfo/index.jsx:44-58` | `ProjectOverviewPage.tsx:127-141` | 部分交付 | **企业空间链接仍缺**（旧 `:44-58` 有 `Link` 到 `/workspaces/:ws/overview`） |
+| 配额 | `Overview/Quota/index.jsx` 80 行 | `ProjectOverviewPage.tsx:181-211` | 已交付 | |
+| LimitRange | `Overview/LimitRange/index.jsx` 82 行 | `ProjectOverviewPage.tsx:212-238` | 已交付 | |
+| 资源用量（应用 11 项 + 物理 4 项） | `Overview/ResourceUsage/index.jsx:19-80` | `ProjectOverviewPage.tsx:140-179`（4 项 used/hard）+ `:335-420` 趋势（CPU/内存，1h/6h/24h） | 已交付 | 旧「真缺失」不成立；「物理/应用」分组按无数据源不迁（`capability-matrix.md:58`） |
+| 用量排行（Top 5） | `Overview/UsageRanking/index.jsx` 182 行 | `ProjectOverviewPage.tsx:448-530`（CPU/内存两页签，可下钻） | 已交付 | 网络收发排行不做（`capability-matrix.md:57`） |
+| 提示卡片（Help） | `Overview/Help/index.jsx:19-53` | 无 | **批准不做** | `design/kube-frontend/project-settings/overview.md:36-38`、`prd/kube-frontend/project-settings/overview.md:51-56` |
+| 应用列表（openpitrix） | `Overview/Applications/index.jsx` 126 行 | 无 | **批准不做** | 同上 DEC |
+
+#### A.2.10 应用 / 构建器 / 灰度 / 兜底
+
+| 老能力 | 老证据 | 新实现现状 | 归宿 | 说明 |
+| --- | --- | --- | --- | --- |
+| 应用（模板）/ 详情 | `Applications/OPApps.jsx` 269 行、`OPAppDetail/index.jsx` 206 行 | `applications/index.tsx`→`InstalledAppsPage`、`$releaseId.tsx`→`InstalledAppDetailPage` | 已交付 | 旧「依赖模块关闭」不成立（openpitrix 已开启，`capability-matrix.md:203`） |
+| **应用（自制 / CRD composing）+ 详情** | `Applications/CRDApps.jsx:29-33`、`CRDAppDetail/routes.js`（4 页签）、`stores/application/crd.js:50`、`utils/constants.js:990`（`apis/app.k8s.io/v1beta1`） | `applications` 路由指向 appstore 组件；全仓无 composing 实现 | **待补（承接理由不成立）** | `capability-matrix.md:79` 登记「自制CRD应用→扩展资源 别处承接」，但通用 CRD 浏览器无聚合健康/组件下钻/流量治理/链路追踪，未满足指南 §4「别处承接须证明任务等价」 |
+| 镜像构建器列表 + 详情 5 页签 | `ImageBuilder/index.jsx` 184 行、`Detail/routes.js:29-52` | `s2ibuilder/index.tsx`+`$name.tsx`+`ImageBuilderDetailPage.tsx:61-63` | 已交付 | 旧「依赖 devops 关闭」不成立；RBAC/minio 阻塞见 `capability-matrix.md:35` |
+| 灰度发布列表 + 详情 + 流量 | `GrayRelease/index.jsx` 109 行、`Categories`/`Jobs` | `grayrelease/index.tsx`+`$name.tsx`+`CanaryDetailPage.tsx` 410 行+`TrafficDialog.tsx` | 已交付 | 旧「依赖 servicemesh 关闭」不成立；正分支受控制器限制（`capability-matrix.md:36`） |
+| 404 兜底 | `projects/routes/index.js:162` | `routes/$.tsx` → `NotFoundPage` | 已交付 | 旧「真缺失」不成立 |
+
+### A.3 仍然缺失的能力（按严重度排序）
+
+| # | 能力 | 严重度 | 老证据 | 新侧 | 归宿 |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 应用（自制 / CRD composing）列表 + 详情 4 页签 | 高 | `Applications/CRDApps.jsx:29-33`、`CRDAppDetail/routes.js` | 无（`applications` 是 appstore） | 待补（承接理由不成立） |
+| 2 | 定时任务（CronJob）运行记录 | 高 | `CronJobs/Detail/routes.js:27-38` | `queries.ts:127-133` 只对 jobs 启用 | 待补 |
+| 3 | 容器组「调度信息」页签 | 高 | `Pods/Detail/routes.js:35-39`、`ScheduleInfo/index.jsx` 362 行 | 无 | 待补 |
+| 4 | 容器详情「单容器监控曲线」 | 中 | `Containers/Monitoring.jsx:26-85` | 无，源码自述（`ContainerDetailPage.tsx:27-28`） | 待补 |
+| 5 | 工作负载/容器组「环境变量」只读页签 | 中 | `Pods/Detail/routes.js:52-57`、`Deployments/Detail/routes.js:54-56` | `WorkloadDetailPage.tsx:101-109` 无 env | 待补 |
+| 6 | 服务拓扑图（条件入口 `network.topology`） | 中 | `Services/index.jsx:51,64,298-299`、`Services/Topology/**` | 无 | 待补 |
+| 7 | 网关：集群网关卡片 + `/gateways/:gatewayName` 详情页 | 中 | `Gateway/index.jsx:80-129`、`routes/detail.js:113-116` | `gateways/` 只有 index | 待补 |
+| 8 | 容器详情：生命周期（postStart/preStop）+ 镜像 ID | 中 | `Containers/ResourceStatus.jsx:59-67`、`Detail.jsx:150-153` | `containerView` 未解析 | 待补 |
+| 9 | 容器组详情属性缺 requests/limits | 中 | `Pods/Detail/index.jsx:161-168` | `api-client/src/workloads.ts:262-276` | 待补 |
+| 10 | 网络策略详情缺按策略展开的规则内容 | 中 | `Network/Policies/Detail/routes.js:19-36` | `NetworkPolicyDetailPage.tsx:100-114` 只有属性 | 部分交付 |
+| 11 | 容器组列表按状态筛选 | 低 | `Pods/index.jsx:120` | `WorkloadListPage.tsx:134` | 待补 |
+| 12 | 概览基本信息的「企业空间」链接 | 低 | `Overview/BaseInfo/index.jsx:44-58` | `ProjectOverviewPage.tsx:127-141` | 待补 |
+| 13 | 容器组节点列不再链到节点详情 | 低 | `Pods/index.jsx:186-195` | `WorkloadListPage.tsx:262-284` | 部分交付 |
+| 14 | 快照详情缺事件页签 | 低 | `VolumeSnapshots/Detail/routes.js:26-37` | `StorageDetailPage.tsx:190-198` | 部分交付 |
+| 15 | 列表页头 tips（Banner 说明） | 低 | `Pods/index.jsx:205` | 只有 title/description | 部分交付 |
+
+**已批准不做（不计缺口，理由仍成立）**：告警静默/通知/批量删除（`prd/kube-frontend/monitoring/alerts.md:61`）、自定义监控面板编辑器（`capability-matrix.md:77`）、概览提示卡片与应用列表（`design/kube-frontend/project-settings/overview.md:36-38`）、版本 diff 与「再次部署」（`page-parity-report.md:98`）。
+
+### A.4 本轮推翻的旧结论
+
+旧文档（2026-11-14 基线）判为「缺失 / 不做」但**当前已交付**的，逐条列出：
+
+| # | 旧结论 | 现状证据 | 是否完全推翻 |
+| --- | --- | --- | --- |
+| 1 | 容器详情页「整页缺失」 | `pods/$name/containers/$container.tsx` + `ContainerDetailPage.tsx` | 是 |
+| 2 | 容器终端与容器日志「架构级缺失」 | `ContainerTerminal.tsx` + `ContainerLogsDialog.tsx:46-68` | 是 |
+| 3 | 工作负载详情「无页签，单页分区」 | `WorkloadDetailPage.tsx:101-109,302-321` | 是 |
+| 4 | 容器组详情缺监控/事件/元数据页签 | `WorkloadDetailPage.tsx:102` | 是 |
+| 5 | 容器卡片不可点入容器详情 | `WorkloadDetailPage.tsx:669-694` | 是 |
+| 6 | 项目概览缺资源用量图表 | `ProjectOverviewPage.tsx:140-179,335-420` | 部分（无「物理/应用」分组） |
+| 7 | 项目概览缺用量排行 | `ProjectOverviewPage.tsx:448-530` | 部分（无网络收发指标） |
+| 8 | 角色详情缺「已授权用户」页签 | `RoleDetailPage.tsx:51,153-183` | 是 |
+| 9 | 网络隔离规则聚合视图「不等价」 | `NetworkRulesPanel.tsx`（`NetworkIsolationPage.tsx:230`） | 是 |
+| 10 | 白名单新建向导缺失 | `NetworkPolicyDialog.tsx:39` | 是 |
+| 11 | 存储卷详情缺快照页签 | `StorageDetailPage.tsx:50,207-215` | 是 |
+| 12 | 存储缺克隆 / 创建快照 | `StorageDetailPage.tsx:171-179` + 两个 Dialog | 是（扩容移到列表） |
+| 13 | 项目基本信息缺角色/成员/服务统计 | `ProjectInfoPage.tsx:118-143` | 是 |
+| 14 | 网关类型/端口/副本数「批准不做」 | `GatewayEditDialog.tsx:73-94` | 是 |
+| 15 | 容器组列表缺节点/Pod IP 列 | `WorkloadListPage.tsx:262-284` | 部分（节点列无链接） |
+| 16 | 告警策略缺创建/编辑/批量 | `RuleGroupsPage.tsx:93-121,270` | 是 |
+| 17 | 告警策略详情「弹窗替代，不等价」 | `RuleGroupDetailPage.tsx` + `AlertMessagesTimeline.tsx` | 是 |
+| 18 | 自定义监控「真缺失」 | `ProjectCustomMonitoringPage.tsx` 211 行 | 部分（面板编辑器批准不做） |
+| 19 | 应用（模板）/ 详情「依赖 openpitrix，不做」 | `applications/index.tsx` + `$releaseId.tsx` | 是 |
+| 20 | 镜像构建器「依赖 devops 关闭」 | `s2ibuilder/*` + `ImageBuilderDetailPage.tsx` | 是 |
+| 21 | 灰度发布「依赖 servicemesh 关闭」 | `grayrelease/*` + `CanaryDetailPage.tsx` | 是 |
+| 22 | 404 兜底「真缺失」 | `routes/$.tsx` | 是 |
+| 23 | 列表档位固定 10 | `WorkloadListPage.tsx:58` | 是 |
+| 24 | 列显隐「不做」 | `WorkloadListPage.tsx:214-292,370` | 是 |
+| 25 | 成员批量移除缺失 | `SettingsListPage.tsx:214-217,350` | 是 |
+| 26 | 网络策略详情页「真缺失」 | `networkpolicies/$name.tsx` + `NetworkPolicyDetailPage.tsx` | 部分（规则内容仍缺，见 A.3-10） |
+
+**统计：推翻 26 条**，其中 20 条完全推翻、6 条部分推翻（#6 #7 #12 #15 #18 #26）。
+
+### A.5 结论
+
+计数口径：A.2 共 **76** 行原子能力对照 —— **已交付 48 / 部分交付 11 / 待补 11（含 1 项承接理由不成立）/ 批准不做 4 / 未核实 2**；A.3 列出仍缺 **15** 项；A.4 推翻旧结论 **26** 条（20 完全 + 6 部分）。
+
+- **页面级已基本收敛**：老 50 条路由中 46 条在新 UI 有对应叶子路由；页面级缺项只剩 3 个——自制 CRD 应用（含详情）、网关详情页、服务拓扑图。
+- **剩余缺口集中在原子能力层**：A.3 共 15 项，其中 4 项属整块功能未迁（CronJob 运行记录、调度信息、单容器监控、服务拓扑），其余为字段/页签/入口级。
+- 旧文档 12 条「疑似回归」中：9 条被交付推翻，2 条转为「批准不做」（概览提示卡、网络收发排行），1 条仍成立（自制 CRD 应用，且其「扩展资源承接」理由不成立）。
+- **未核实项**：PVC 详情用量卡片、详情页 websocket 实时刷新、`app.k8s.io/v1beta1` 在本集群是否被服务（须按指南 §2.3 探测接口，不能凭模块开关判断）。
+
+---
+
+## 旧正文（历史证据，2026-11-14 基线），不再作为当前状态
+
 
 > 作用域：老 console 项目作用域下全部页面与功能。
 > 老源码：`console/src/pages/projects/routes/{index,detail,grayrelease}.js`、`console/src/pages/projects/containers/**`、`console/src/core/containers/Base/Detail/**`。

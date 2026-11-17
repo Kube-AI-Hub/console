@@ -1,0 +1,38 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-BILL-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: bill
+title: 浮动工具箱与资源消费页（B200 计量已启用）
+entry_url: '{BASE_URL}/kube-frontend/'
+prd: prd/kube-frontend/cluster-management/bill.md
+design: design/kube-frontend/cluster-management/bill.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-BILL-01
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-BILL-02
+
+story:
+- US1
+- US2
+
+product: 任意页面右下角有可拖拽工具箱，位置持久；展开后 6 个入口可达（日志/事件/审计/资源消费/kubeconfig/kubectl）。资源消费页按项目展示时间窗内 CPU/内存/存储/GPU；计量未启用时明确说明而不是空表。
+preconditions:
+- 已登录 admin；集群 host 已启用 metering（实测 200）
+- 用例不改动集群数据；拖拽位置在测试后复位/由浏览器上下文隔离
+steps:
+- 打开工作台，确认工具箱悬浮球可见；点击展开，核对 6 个入口的 href 都带当前集群段
+- 点击「资源消费统计」进入账单页，核对表头 5 列且有项目行（命名空间来自计量返回）
+- 切换「近 6 小时」，表格仍就绪且请求带 start/end/step
+- 返回工作台，拖动悬浮球到新位置，核对 localStorage 记录；刷新后位置保持
+expected:
+- 工具箱在所有页面可见；拖拽与点击互斥（拖动不展开）
+- 6 个入口分别到 /clusters/<c>/{logs,events,audit-logs,bill,overview,kubectl}
+- 账单页每个项目一行，CPU 降序；空窗口显示空态；计量 404/5xx 显示未启用说明 + 重试
+troubleshoot:
+- 账单空表但接口 404：应显示「本集群未启用计量组件」而不是空态
+- 拖拽后点击无效：pointerup 判断 moved，移动超过阈值不触发 toggle
+- 项目行与 API 不一致：先核对 metric_name 映射与 namespace label
+update_automation:
+- 句柄：toolbox:ball/panel/item:<key>；cluster-bill:surface/table/range:<1h|6h|24h>/empty/unavailable/retry/row:<ns>

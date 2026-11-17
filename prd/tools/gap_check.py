@@ -95,15 +95,15 @@ RENAME: dict[str, dict[str, str]] = {
 }
 
 #: 明确不迁移的段 → 原因。原因必须能追到接口探测结果（见计划 §6.1）或已登记的技术约束。
-UNMIGRATED: dict[str, str] = {
-    "clusters/kubeconfig": "kubeconfig 读取 405（计划 §7.3）；导入更新已迁移",
-    "settings/third-login": "第三方登录：登录方式由服务端注入，控制台无写入路径（计划 §7.3）",
-}
+UNMIGRATED: dict[str, str] = {}
+
+#: 2026-11-17 产品决定重纳的段：原登记「批准不做」，现进入迁移范围。
+#: 依据 docs/plans/reinclusion-decisions-20261117.md。
 
 #: 在别处承接的段 → 说明。
 ELSEWHERE: dict[str, str] = {
-    "workspaces/devops": "DevOps 工程在集群作用域 /kube-frontend/clusters/<cluster>/devops（新 UI 集群侧栏），不在企业空间作用域",
-    "clusters/roles": "集群角色统一在「访问控制 › 平台角色」维护（同一批 clusterrole 对象）",
+    "clusters/kubeconfig": "集群概览「常用运维入口」的 kubeconfig 弹窗承接（N-05，2026-11-17 复核确认已交付）",
+    "clusters/roles": "集群角色统一在「访问控制 › 平台角色」维护（同一批 clusterrole 对象）；集群作用域独立页已重纳（N-06）",
     "settings/notification-configuration": "重定向到 settings/mail（通知渠道是每渠道一页）",
 }
 
@@ -112,6 +112,8 @@ ELSEWHERE: dict[str, str] = {
 PLANNED: dict[str, str] = {
     # 2026-11-15：用户确认所有组件已开启（应用商店/DevOps/集群网关/联邦/服务网格）。
     # 这些段原登记为「模块未开启」，现改为待迁移，按区域分批交付。
+    # 2026-11-17：产品复核后重纳的段（见 docs/plans/reinclusion-decisions-20261117.md）。
+    # 现均已交付：workspaces/devops（N-07）、settings/third-login（N-02 只读状态页）。
 }
 
 #: 整个作用域级别的归宿。老 console 有 9 个作用域，其中四个整块不在迁移范围内——
@@ -129,6 +131,8 @@ MAPPED: dict[str, str] = {
     "apps/apps-manage": "kube-frontend/apps-manage（商店管理）",
     "apps/store": "kube-frontend/apps-manage/store（商店里的应用）",
     "apps/categories": "kube-frontend/apps-manage/categories",
+    "workspaces/devops": "kube-frontend/workspaces/<ws>/devops（N-07 已交付）",
+    "settings/third-login": "kube-frontend/settings/third-login（N-02 只读状态页）",
     "apps/reviews": "kube-frontend/apps-manage/reviews",
 }
 

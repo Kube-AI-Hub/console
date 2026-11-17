@@ -18,6 +18,14 @@ import { TanStackRouterVite } from '@tanstack/router-plugin/vite';
  */
 
 
+/** The BFF this dev server proxies API calls to. */
+const BFF_TARGET = process.env['BFF_URL'] ?? 'http://127.0.0.1:8091';
+
+/** Drop the app's mount prefix: the BFF serves the same routes at the root. */
+function stripAppBase(path: string): string {
+  return path.replace(/^\/kube-frontend/, '');
+}
+
 export default defineConfig({
   /*
    * Served under a prefix, not at the origin root.
@@ -140,9 +148,23 @@ export default defineConfig({
        * forwards `/api/`, `/kapis/` and `/apis/`, and `scripts/dev-static-server.mjs`
        * proxies the same three.
        */
-      '/api': { target: process.env['BFF_URL'] ?? 'http://127.0.0.1:8091', changeOrigin: true, ws: true },
-      '/kapis': { target: process.env['BFF_URL'] ?? 'http://127.0.0.1:8091', changeOrigin: true, ws: true },
-      '/apis': { target: process.env['BFF_URL'] ?? 'http://127.0.0.1:8091', changeOrigin: true, ws: true },
+      '/api': { target: BFF_TARGET, changeOrigin: true, ws: true },
+      '/kapis': { target: BFF_TARGET, changeOrigin: true, ws: true },
+      '/apis': { target: BFF_TARGET, changeOrigin: true, ws: true },
+      /*
+       * The same three prefixes **as the app addresses them**.
+       *
+       * The app keeps every request inside its mount prefix (`/kube-frontend/api/...`,
+       * `APP_BASE` in src/api.ts): on the shared origin the bare `/api` belongs to the
+       * old console. In production a reverse proxy strips the prefix; Vite does not, so
+       * without these three entries every API call in `vite dev` falls through to the
+       * SPA fallback and answers HTML — the login page reports "Not Found" and every
+       * list stays empty. `dev-static-server.mjs` strips the prefix itself; this is the
+       * hot-reload equivalent.
+       */
+      '/kube-frontend/api': { target: BFF_TARGET, changeOrigin: true, ws: true, rewrite: stripAppBase },
+      '/kube-frontend/kapis': { target: BFF_TARGET, changeOrigin: true, ws: true, rewrite: stripAppBase },
+      '/kube-frontend/apis': { target: BFF_TARGET, changeOrigin: true, ws: true, rewrite: stripAppBase },
     },
   },
   build: {

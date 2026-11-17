@@ -35,7 +35,7 @@ function hasRouteDirectory(prefix: string, pagePath: string): boolean {
 }
 
 const readyPages = AREAS.flatMap((area) =>
-  area.pages.filter((page) => page.status === 'ready').map((page) => ({ area: area.key, scope: area.scope, page })),
+  (area.pages ?? []).filter((page) => page.status === 'ready').map((page) => ({ area: area.key, scope: area.scope, page })),
 );
 
 describe('navigation and routes', () => {
@@ -71,7 +71,7 @@ describe('navigation and routes', () => {
   });
 
   it('does not advertise a planned page as ready', () => {
-    const planned = AREAS.flatMap((area) => area.pages.filter((page) => page.status === 'planned'));
+    const planned = AREAS.flatMap((area) => (area.pages ?? []).filter((page) => page.status === 'planned'));
     // Planned pages are allowed to exist in the registry (that is the point: the sidebar can say
     // "not yet"), but they must stay out of the ready set counted above.
     expect(planned.length).toBeLessThanOrEqual(readyPages.length);

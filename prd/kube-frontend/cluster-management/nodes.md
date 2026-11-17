@@ -50,6 +50,12 @@
 
 **Independent Test**：真实环境打开并取消；拦截写入验证参数、成功、失败、竞争请求、旧结果和超时，不切换生产节点模式。
 
+### US8 - 不离开控制台获取新节点的加入方式 (Priority: P2)
+
+作为 **集群管理员**，我希望 **在节点列表直接生成一条带有效期的加入命令**，以便 **新主机能加入集群，而不用自己拼 token 和 CA hash**。
+
+**Independent Test**：有后端接口时打开弹窗看到 `kubeadm join` 命令与到期时间；后端 404 时看到明确的版本不支持说明；无权限时看到 403 原因。
+
 ## 验收场景
 
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-02** — 已知集群可访问节点监控接口，当打开节点列表，则显示「CPU 使用率」与「内存使用率」，取监控比率乘 100 并四舍五入；指标不可用时显示 `-`，真实零值显示 0%。
@@ -62,6 +68,7 @@
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-07** — 顶部显示非 edge 节点总数、控制面数量、健康率及厂商数量，统计始终为整个集群，不随列表条件变化；健康口径取 stats.healthy，不冒充 Ready 数量。失败有重试，未知不显示零。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-08** — 名称/IP 搜索、状态、角色、厂商多选 OR、型号包含筛选由服务端执行。条件变化回第一页，可单独清除和清除全部；工作节点包括无 worker 标签节点。复用 ai-kit ResourceList 与 Pagination，每页 10/20/50/100、翻页和跳页对齐其他列表。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-09** — 列表批量读取 GPU/显存、CPU/内存和容器组的比率及绝对量，GPU/CPU/内存分配量独立显示；显存 bytes 换算 GiB。显示厂商、型号、当前模式及相对整个基础范围时间中位数的 NTP 偏移；30 秒警告、120 秒危险。缺失或零分母显示 `-`，指标失败不阻断操作。名称和行操作不可隐藏，其余列可隐藏并恢复；1024/1280/1600 下横向滚动限于表格。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-12** — 已知节点列表，当点击「添加节点」，则调用 `POST /kapis/resources.kubesphere.io/v1alpha3/nodes/join-command`（默认 24h，可选 ttlHours）并在弹窗展示 `kubeadm join <server> --token <token> --discovery-token-ca-cert-hash sha256:<hash>`、到期时间与复制按钮；后端 404/405 显示「当前 ks-apiserver 版本不支持节点加入，需升级后端」，403 显示无权限，其他错误保留可重试；权限检查明确拒绝 create nodes 时隐藏「添加节点」入口（检查失败 fail-open）；命令不在 URL/日志中出现，弹窗关闭即丢弃。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-10** — host GPU 节点提供设置 vGPU 模式及参数，NVIDIA 支持独占/MIG/HAMi-core、寒武纪支持独占/dynamic-smlu/env-share。数量为正整数，比例为有限正数，仅提交当前模式参数；未变化不重复提交。风险确认后提交，提交时禁用关闭；success=true 仅表示信号提交。三秒轮询最多五分钟，以新 desired/status 时间戳和参数判断结果，区分等待、处理中、完成、失败、外部请求和超时。403 或业务失败保留输入；member 禁用并由 API 拒绝写入。B200 仅只读与取消，所有模式写测试拦截模拟。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-11** — 节点详情为紧凑身份侧栏与资源主栏；首屏展示节点 GPU/显存、CPU、内存、容器组与磁盘当前负载及可切换趋势，监控页展示全部趋势。Ready True 和压力类 False 为正常，Unknown 不误判健康；NTP 使用全局时间中位数。容量表展示全部资源的 Capacity、Allocatable、Requests、Limits，优先 status.allocated/allocatedLimits，仅 CPU/内存缺失时回退对应注解，分配率以 Allocatable 为分母并保留超过 100% 的事实。硬件页精确过滤当前节点的显卡与 RDMA 端口，展示传输类型、链路速率、后端健康和资源可用性；速率 bytes/s 转 Gb/s。拓扑分离 GPU/NIC 连接与 CPU/NUMA 亲和信息，用唯一 X 对角项识别设备，保留未知连接代码，点击高亮行列，无拓扑明确空态。详情复用已有 vGPU 配置弹窗，取消不写入；终端、调度、YAML、元数据及关联资源保留。1024/1280/1600 视口表格内部滚动，不撑宽页面。
 
@@ -100,7 +107,21 @@ flowchart LR
 
 ## 明确不做
 
-- 节点排空、导入/删除、批量污点；不在生产环境验证 GPU 模式切换。RDMA 端口和已上报拓扑此前缺少确认契约，本批确认 B200 只读接口后迁移；不探测未上报设备或推断连接。
+- 节点排空、删除、批量污点；不在生产环境验证 GPU 模式切换。RDMA 端口和已上报拓扑此前缺少确认契约，本批确认 B200 只读接口后迁移；不探测未上报设备或推断连接。
+
+## 重纳能力（2026-11-17 产品复核）
+
+原登记「节点导入不做」（见上条与[节点技术方案](../../../design/kube-frontend/cluster-management/nodes.md)的非目标）。**2026-11-17 产品复核决定重纳**（N-10，见[重纳决策记录](../../../docs/plans/reinclusion-decisions-20261117.md)）。
+
+**路径修正（2026-11-17 后端探测）**：老 console 的入口编辑 KubeKey Cluster CR（`apis/kubekey.kubesphere.io/v1alpha1`），但当前 ks-apiserver（kube-server）没有 KubeKey 集成，B200 与 mlu370 上该 CRD/组均 404。因此改为**原生 kubeadm join 路径**：ks-apiserver 新增 `POST /kapis/resources.kubesphere.io/v1alpha3/nodes/join-command`，签发 24h（可配 ttlHours 1-168）bootstrap token 并返回带 CA hash 的 `kubeadm join` 命令；控制台展示命令与说明，管理员在目标主机执行后节点自动加入。该路径不依赖 KubeKey，适用于所有 kubeadm 集群，也不需要控制台持有主机清单。
+
+约束：
+
+1. 节点列表顶部提供「添加节点」；后端未提供该接口（404）时，弹窗明确说明「当前 ks-apiserver 版本不支持节点加入，需升级后端」，不显示成权限错误。
+2. 命令只读展示 + 复制；token 到期/权限失败/后端错误分别映射原因，保留可重试。
+3. 不把 token 写入日志或页面 URL；成功后提示节点会在 kubelet 启动后出现，列表刷新由用户触发或返回列表时加载。
+
+**交付登记**：`US8` / `AC-…-NODES-12` 随本节补齐；后端实现与测试见 [节点加入后端记录](../../../docs/plans/node-add-backend-20261117.md)。
 
 ## 假设
 
@@ -118,6 +139,7 @@ flowchart LR
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-09`
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-10`
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-11`
+- `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-12`
 
 ## 功能需求
 

@@ -1,0 +1,46 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-04
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: storage-classes
+title: 存储类型写能力：创建、编辑、默认、卷功能、删除与 PVC 守卫
+entry_url: '{BASE_URL}/kube-frontend/clusters/{KA_CLUSTER}/storageclasses'
+prd: prd/kube-frontend/cluster-management/storage-classes.md
+design: design/kube-frontend/cluster-management/storage-classes.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-04
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-05
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-STORAGE_CLASSES-06
+
+story:
+- US3
+
+product: 存储类型列表可创建（名称/供应者/回收策略/绑定模式/能力）；详情与行操作可编辑信息/YAML、设为默认、切换卷功能；删除以实时 PVC 统计为前置（有 PVC 使用的类不可删，批量跳过并汇总；PVC 读取失败时删除停用）。
+preconditions:
+- 已登录，且在 host 集群；集群有 3 个以上存储类型、至少一个 PVC
+- 用例自建唯一临时存储类型（无效供应者可接受，Kubernetes 不校验）与一个引用它的 Pending PVC；结束后删除 PVC、临时类，恢复原默认类
+steps:
+- 打开存储类型列表，点「创建存储类型」，填唯一名称与供应者、勾选扩容/克隆/快照，提交
+- 轮询 API 确认对象存在、spec.allowVolumeExpansion=true、两个能力注解；列表出现该行且徽标与设置一致
+- 行操作编辑信息，改别名与描述；回读注解
+- 编辑 YAML，在别名注解行末追加 -yaml；回读
+- 详情切换卷功能（关闭克隆、开启扩容），回读注解与 spec
+- 设为默认：记录当前默认类；对本类执行并确认；断言本类带默认徽标、旧默认注解被清空；恢复旧默认
+- 在某命名空间创建引用本类的 Pending PVC；返回列表，断言本类行删除入口不可用；打开详情，删除按钮禁用并显示「有 1 个 PVC 在使用」
+- 再创建一个无 PVC 的临时类，两个一起选中批量删除：结果汇总成功 1 / 跳过 1，被使用类仍在
+- 删除 PVC 后再删除被使用的临时类，确认从 API 与列表消失
+expected:
+- 创建请求为 POST /apis/storage.k8s.io/v1/storageclasses，仅写被勾选能力
+- 编辑信息为只含 annotations 的 merge-patch（清空键 null）；YAML 为整对象 PUT
+- 设为默认后旧默认（三种拼写）被清空、只有一个默认徽标；跨行无两个默认
+- 有 PVC 使用的类单条与批量都不会被 DELETE；汇总计数正确
+- PVC 读取失败时删除入口停用（单测覆盖，E2E 通过代理模拟不做）
+troubleshoot:
+- 创建 405：确认写路径是 /apis/storage.k8s.io/v1，不是 kapis resources 代理
+- 设为默认后两个徽标：确认 setDefault 先清旧默认的三种注解拼写
+- 关闭能力后徽标仍在：确认 setFeatures 对 false 发 null 移除（不是写 'false' 字符串）
+- 有 PVC 仍可删：确认守卫用实时 PVC 列表而不是 pvc-count 注解
+update_automation:
+- 句柄：storageclasses:create/create-name/create-provisioner/create-expand|clone|snapshot/create-submit、:select:<name>、:bulk-delete、:batch-result、sc-detail:edit-info|edit-yaml|set-default|features|delete|delete-protected、:features-dialog、:feature:<key>

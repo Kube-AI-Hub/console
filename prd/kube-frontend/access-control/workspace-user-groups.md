@@ -28,11 +28,18 @@
 
 **Independent Test**：选定测试组，添加一次性账号 → 成员表与 `groupbindings` 含该用户；输入用户名确认移除 → 绑定消失，平台账号仍在。
 
+### US4 - 与他人同时维护部门树时看到别人的改动 (Priority: P2)
+
+作为 **租户(企业空间)管理员**，我希望 **在页面打开期间，其他管理员创建/改名/删除用户组或调整成员后，本页自动更新**，以便 **不会基于过期树继续编辑而互相覆盖**。
+
+**Independent Test**：保持用户组页打开，用 API 在另一处创建一个唯一用户组 → 树在数秒内出现该节点（未点刷新）；再删除该组 → 节点自动消失；页面显示实时刷新状态，断开时显示「实时刷新已断开」且手动刷新仍可用。
+
 ## 验收场景
 
 - **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-04** — 已知租户(企业空间)内有 G 个用户组（G 可能为 0），当打开该空间用户组页，则 G 为 0 时显示空态「还没有用户组」且「创建用户组」可见；G > 0 时左侧树有 G 个节点，节点主文案为别名（否则 `generateName`），节点上的成员数等于绑定中该组的用户数之和；接口失败时显示错误面板与重试。
 - **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-05** — 已知该空间可写用户组，当点「创建用户组」并提交合法名称、上级与租户(企业空间)角色，则树出现该组；再创建下级组时节点缩进一级；编辑别名后树显示新别名；有下级时删除提示先删下级且对象仍在；删除无下级组需输入显示名确认，确认后组与绑定从接口消失。
 - **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-06** — 已知已选中一个用户组，当点「添加成员」并提交存在的平台用户名，则成员表出现该用户，且 `groupbindings` 含该组与该用户；对该成员执行「移除成员」并输入用户名确认后，成员表与绑定中不再含该用户，平台账号仍在。
+- **AC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-10** — 已知用户组页保持打开，当另一处创建/重命名/删除该空间的用户组后，本页无需手动刷新即在数秒内更新树；页面显示实时刷新状态（连接中/已开启/已断开），已断开时显示「实时刷新已断开，可手动刷新」，手动刷新按钮仍可用。仅成员绑定变化时，若该部署的 groupbindings 集合不提供 watch（mlu370 实测不投递事件），则成员数在手动刷新后更新，页面不得静默假装实时或改用轮询。
 
 ## 设计目标
 
@@ -55,7 +62,8 @@
 - 有数据：左树右成员。树节点显示显示名与成员数；右侧是选定组的成员表，主操作「添加成员」，行操作「移除成员」，以及「编辑用户组 / 删除用户组」。
 - 创建/编辑弹窗：名称（创建必填、编辑锁定）、别名、上级用户组、租户(企业空间)角色（必填）。
 - 删除组、移除成员均走 DeleteDialog：确认词是显示名或用户名。
-- `data-ai-id`：`workspace-user-groups:surface` / `:table` / `:tree` / `:tree-node:<name>` / `:create` / `:edit` / `:delete` / `:add-member` / `:search` / `:retry`。
+- 页面头右侧显示实时刷新状态：`workspace-user-groups:live-state`（`data-ai-state=connecting|live|error`），文案「实时刷新连接中… / 实时刷新已开启 / 实时刷新已断开，可手动刷新」；手动刷新始终保留。
+- `data-ai-id`：`workspace-user-groups:surface` / `:table` / `:tree` / `:tree-node:<name>` / `:live-state` / `:create` / `:edit` / `:delete` / `:add-member` / `:search` / `:retry`。
 
 ## 文案与校验
 
@@ -78,24 +86,28 @@
 - 父组标签指向不存在的组：该组按根节点显示。
 - 名称与对象名不同：树主文案用显示名，对象名在右侧副行。
 - 写失败：弹窗保留输入与错误；成功后刷新树与成员。
+- 实时通道断开：显示「实时刷新已断开」并保留手动刷新；重连成功后状态回到「已开启」，不要求用户刷新页面。
+- 仅成员绑定变化：本部署 groupbindings 无 watch 事件（原生 watch 探测 20s 无响应头/事件），成员数需手动刷新；这是登记的部署限制，不用轮询掩盖。
+- 另一处改动只触发重新读取，不在客户端合并事件（树按 parent 标签拼装，局部合并会与集合不一致）。
 
 ## 功能需求
 
 - **FR-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-04** — 系统必须按工作空间作用域展示用户组树与成员数，空态与错误态可区分。
 - **FR-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-05** — 系统必须支持用户组的创建、编辑（别名/上级/空间角色）与删除，删除有下级的组必须被拒绝。
 - **FR-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-06** — 系统必须能把已有平台用户加入选定组，或从该组移除，且不删除平台账号。
+- **FR-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-07** — 用户组页必须接入 groups 的实时刷新，状态可见，断开时可手动刷新；groupbindings 不提供 watch 的部署上成员数走手动刷新并登记限制。
 
 ## 成功标准
 
 - **SC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-04** — 树节点数与组接口一致；节点成员数与绑定合并结果一致。
 - **SC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-05** — 创建后接口可回读；下级缩进一级；删除无下级组后对象消失。
 - **SC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-06** — 添加后绑定含该用户；移除后绑定不含该用户，账号 GET 仍 200。
+- **SC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-10** — 外部创建/删除用户组后，页面在数秒内自动出现/移除节点；live-state 从 connecting 进入 live（或 error 并显示断开文案）；组变更全过程未点击刷新；成员绑定变化后手动刷新，成员数更新。
 
 ## 明确不做
 
 - 项目角色 / DevOps 角色的 ArrayInput：旧 SET_DEPARTMENTS 弹窗里的跨项目授权，归 CHECK-05 的跨作用域授权，本页不写 `rolebindings`。
 - 未分配用户双栏点选：新页按空间成员邀请的方式输入用户名，不拉全量平台用户。
-- 部门树的 websocket watch。
 - 多集群下为每个集群挑选项目角色。
 
 ## 假设
@@ -109,3 +121,4 @@
 - `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-04`
 - `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-05`
 - `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-06`
+- `TC-L3-KUBE-FRONTEND-ACCESS_CONTROL-WORKSPACE_CONSOLE-10`

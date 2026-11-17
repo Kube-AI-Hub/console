@@ -24,7 +24,7 @@
 - PUT 必须带 `metadata.resourceVersion`；否则两个编辑者会静默覆盖对方。
 - 描述写 `metadata.annotations['kubesphere.io/description']`；规则说明/消息写 `spec.rules[].annotations.summary` / `annotations.message`。
 - 启用 / 停用只 patch `alerting.kubesphere.io/enable` 标签，不动 `spec`（与 `rules.md` 的 DEC-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-03 一致）。
-- 写入口先问 `SelfSubjectAccessReview`：资源 `rulegroups`（项目级，带 namespace）/ `clusterrulegroups` / `globalrulegroups`（集群级，不带 namespace），动词 create/update/delete。只有明确的 `allowed: false` 才隐藏入口。
+- 写入口先问 IAM 权限检查（ks-apiserver，用户身份；旧后端回退 `SelfSubjectAccessReview`）：资源 `rulegroups`（项目级，带 namespace）/ `clusterrulegroups` / `globalrulegroups`（集群级，不带 namespace），动词 create/update/delete。只有明确的 `allowed: false` 才隐藏入口。
 
 ## 方案决策
 
@@ -78,7 +78,7 @@
 
 ### DEC-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-07 — 写入口先过 SSAR，再决定渲染
 
-**为什么**：角色绑定是权限的唯一事实，前端没有第二套权限模型。`SelfSubjectAccessReview` 用与真实写入相同的 verb/resource/namespace 提问，结论与 403 一致；这样只读成员看不到「创建策略」，不会填完表单才被拒绝。创建是项目级写（必须选定项目），编辑/删除只在项目级非内置策略上出现，启停按行所属 scope 分别检查。
+**为什么**：角色绑定是权限的唯一事实，前端没有第二套权限模型。IAM 权限检查以请求用户求值，用与真实写入相同的 verb/resource/namespace 提问，结论与 403 一致；这样只读成员看不到「创建策略」，不会填完表单才被拒绝。创建是项目级写（必须选定项目），编辑/删除只在项目级非内置策略上出现，启停按行所属 scope 分别检查。
 
 **被否方案**：先渲染入口，403 时再提示。把一次确定的拒绝变成一次填表实验；旧 console 的 `authKey` 只控制菜单可见性，不判断具体资源动词，不能直接照搬。
 
@@ -151,7 +151,7 @@
 
 ### CON-L3-KUBE-FRONTEND-MONITORING-ALERTS_WRITE-03 — 写权限检查契约
 
-`POST /apis/authorization.k8s.io/v1/selfsubjectaccessreviews`，body 的 `spec.resourceAttributes` 为 `{group: alerting.kubesphere.io, resource, verb, namespace?}`：项目级 `resource=rulegroups` 且带 namespace；`clusterrulegroups`/`globalrulegroups` 不带 namespace。响应 `status.allowed` 为 `true`/`false`；缺失或请求失败按允许处理（DEC-08）。
+`POST /kapis/iam.kubesphere.io/v1alpha2/selfsubjectaccessreviews`，body 为 `{group: alerting.kubesphere.io, resource, verb, namespace?}`：项目级 `resource=rulegroups` 且带 namespace；`clusterrulegroups`/`globalrulegroups` 不带 namespace。响应 `allowed` 为 `true`/`false`；旧后端 404 回退 `POST /apis/authorization.k8s.io/v1/selfsubjectaccessreviews`（`spec.resourceAttributes`）；缺失或请求失败按允许处理（DEC-08）。
 
 ## 已知坑
 

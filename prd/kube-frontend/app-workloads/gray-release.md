@@ -57,7 +57,7 @@
 - **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-05** — 已知一个按权重分流的 Canary 详情（新版本 20%），当点「调整流量」把新版本比例改为 35 并确认，则 API 回读两条路由权重为 65/35 且 `spec.governor` 为空、页面提示已更新且版本卡片权重变为 35%；改为 100 时回读 `spec.governor` 等于新版本、改为 0 时等于参考版本；按内容分流的 Canary 打开同一入口时提供「保持按匹配规则分流 / 新版本接管 / 参考版本接管」三个选项并写回 `spec.governor`；Bluegreen 打开时提供两版本单选，选新版本后回读权重 0/100 且 governor 为新版本；Mirror 不提供调整流量入口；非 0–100 整数被就地拒绝且不产生写请求；保存失败时弹窗保留输入并显示服务端原因。
 - **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-06** — 已知一个按权重分流的 Canary 详情（权重 65/35、`spec.governor` 为空），当点「暂停发布」，则回读 `spec.governor` 等于参考版本且两条权重仍为 65/35、按钮变为「恢复发布」并显示已暂停说明；当再点「恢复发布」，则回读 `spec.governor` 为空、权重仍为 65/35 且按钮变回「暂停发布」；按内容分流的 Canary 同样支持暂停/恢复，恢复后匹配规则不变。
 - **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-07** — 已知一个灰度发布详情，当点「删除」，则出现要求输入策略名的确认框，输入不匹配时确认按钮不可用；输入策略名确认后 API 回读 404、列表不再包含该行、页面回到灰度发布列表；取消后对象仍存在；删除失败（权限/服务端错误）时确认框不关闭并显示服务端原因。
-- **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-08** — 已知当前身份对 strategies 有 create/delete 权限，则列表创建入口与详情删除入口可见可用，且页面发出对 `servicemesh.kubesphere.io` 组 `strategies` 资源的 `SelfSubjectAccessReview`（create/delete）；当权限检查明确返回 `allowed=false` 时，创建按钮禁用并显示「没有创建灰度发布的权限」、删除入口不渲染；当权限检查失败或未返回时保持可用（fail-open），不因检查失败禁用写入口。
+- **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-08** — 已知当前身份对 strategies 有 create/delete 权限，则列表创建入口与详情删除入口可见可用，且页面发出对 `servicemesh.kubesphere.io` 组 `strategies` 资源的权限检查（ks-apiserver IAM，以请求用户求值；旧后端回退 `SelfSubjectAccessReview`；create/delete）；当权限检查明确返回 `allowed=false` 时，创建按钮禁用并显示「没有创建灰度发布的权限」、删除入口不渲染；当权限检查失败或未返回时保持可用（fail-open），不因检查失败禁用写入口。
 
 ## 设计目标
 
@@ -75,7 +75,7 @@
 - 版本副本数与工作负载链接来自同命名空间的 Deployment 列表（`/apis/apps/v1/namespaces/<ns>/deployments`）；名称优先取 `servicemesh.kubesphere.io/oldWorkloadName` / `newWorkloadName` 注解，否则按 `<host>-<version>` 约定匹配。
 - 列：名称（别名优先）、类型、目标服务、版本（新版本在前 + 权重）、状态、创建时间；支持按名称/创建时间排序，按名称/目标服务/版本搜索（客户端过滤，策略数量少）。
 - 状态映射：`Failed=True` → 失败；`Complete=True` → 已完成；有其它 condition → 进行中；有 `completionTime` 无 condition → 已完成；无 condition → 未知。
-- 权限：create/delete 用 `SelfSubjectAccessReview`（group `servicemesh.kubesphere.io`，resource `strategies`）；只有明确 `allowed=false` 才禁用/隐藏，检查失败按可用处理。
+- 权限：create/delete 用 ks-apiserver IAM 权限检查（group `servicemesh.kubesphere.io`，resource `strategies`；旧后端回退 `SelfSubjectAccessReview`）；只有明确 `allowed=false` 才禁用/隐藏，检查失败按可用处理。
 - 未验收边界：成员集群路径未验证；受限账号的真实 403 未验收（本环境只有 admin）；servicemesh 控制器未部署。
 
 ## UI 交互设计
@@ -147,7 +147,7 @@
 - **FR-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-03**：详情页必须依次展示基本信息、版本与流量（角色/权重/接管/副本数或未找到）、匹配规则、状态条件，并提供调整流量、暂停/恢复与删除入口。
 - **FR-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-04**：流量编辑必须按发布模式提供对应控件，写入整对象并保持 `spec.governor` 与权重一致；暂停/恢复只改 `governor` 且保留权重；保存失败保留输入并显示原因。
 - **FR-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-05**：删除必须经输入名称确认，成功后重新拉取列表并回到列表；失败保留确认框并显示原因。
-- **FR-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-06**：创建与删除入口由 `SelfSubjectAccessReview` 决定，明确拒绝时禁用/隐藏并说明原因，检查失败时 fail-open。
+- **FR-L3-KUBE-FRONTEND-APP_WORKLOADS-GRAY_RELEASE-06**：创建与删除入口由 IAM 权限检查（用户身份；旧后端回退 `SelfSubjectAccessReview`）决定，明确拒绝时禁用/隐藏并说明原因，检查失败时 fail-open。
 
 ## 成功标准
 

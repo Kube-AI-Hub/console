@@ -1,0 +1,33 @@
+id: TC-L3-KUBE-FRONTEND-APP_STORE-CRD_APPS-08
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-store
+feature: crd-apps
+title: 自制应用详情流量治理
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/applications/composing'
+prd: prd/kube-frontend/app-store/crd-apps.md
+design: design/kube-frontend/app-store/crd-apps.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_STORE-CRD_APPS-09
+
+story:
+- US3
+
+product: 自制应用详情展示服务网格流量子图：可用时有节点/边摘要与节点表（类型/应用/工作负载/服务/命名空间，外部节点标注）；应用无流量节点时明确空态；服务网格不可用时显示未上报而不是空表。
+preconditions:
+- 已登录 admin；项目 default 可用；用例自建唯一 Application，finally 删除
+steps:
+- API 创建临时 Application（无工作负载，确保无网格节点）
+- 打开详情，滚动到「流量治理」区块
+- 断言区块可见，且显示「暂无该应用的流量节点」或「未上报服务网格流量」之一
+expected:
+- 有节点时显示摘要（节点/边）与节点表
+- 无节点与模块不可用是两种不同说明
+- 流量区块只读
+troubleshoot:
+- 区块一直 loading：确认 graph 请求返回 200 或 4xx/5xx 被归类为 unavailable
+- 出现无关节点：过滤条件只保留 app/workload/service 命中项
+update_automation:
+- 句柄：composed-app-detail:traffic/traffic-empty/traffic-unavailable/traffic-table/traffic-node:<id>/traffic-retry

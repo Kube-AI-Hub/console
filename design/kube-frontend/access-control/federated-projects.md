@@ -28,7 +28,7 @@
 - 作用域：workspace（`/kube-frontend/workspaces/<ws>/federatedprojects`），由 registry 的 federated-projects 区域提供侧栏入口。
 - 读取：`GET /apis/types.kubefed.io/v1beta1/federatednamespaces`（cluster-wide 集合）、`GET .../v1beta1`（discovery）、`GET .../namespaces/<ns>/<plural>[/<name>]`、`GET /api/v1/namespaces/<ns>/events`（fieldSelector involvedObject）。
 - 写入：`POST /kapis/tenant.kubesphere.io/v1alpha2/workspaces/<ws>/namespaces`（宿主命名空间）、`POST|PUT /apis/types.kubefed.io/v1beta1/namespaces/<ns>/federatednamespaces[/<name>]`、`DELETE /api/v1/namespaces/<name>`。
-- 权限：`POST /apis/authorization.k8s.io/v1/selfsubjectaccessreviews`，verb/resource/namespace 与实际请求一致。
+- 权限：ks-apiserver IAM `POST /selfsubjectaccessreviews`（以请求用户求值；旧后端 404 回退 `/apis/authorization.k8s.io/v1/selfsubjectaccessreviews`），verb/resource/namespace 与实际请求一致。
 - 只读的部分：联邦资源详情不提供编辑/删除；资源页签不做搜索/分页。
 - 页面必须有字面量 data-ai-id；用共享 Modal/表格/空态/错误面板/确认框，不新建同类控件。
 

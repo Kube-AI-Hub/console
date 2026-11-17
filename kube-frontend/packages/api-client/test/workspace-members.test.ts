@@ -31,7 +31,16 @@ describe('workspace membership contracts', () => {
       items: [{ metadata: { name: 'team-viewer', annotations: { 'kubesphere.io/alias-name': 'viewer' } }, rules: [{}] }],
     }), { headers: { 'content-type': 'application/json' } })) as typeof fetch });
     expect(await workspaceRolesApi(client).list({ workspace: 'team' })).toEqual([
-      { name: 'team-viewer', alias: 'viewer', ruleCount: 1, createdAt: '' },
+      {
+        name: 'team-viewer',
+        alias: 'viewer',
+        ruleCount: 1,
+        createdAt: '',
+        creator: '',
+        description: '',
+        aggregationRoles: [],
+        annotations: { 'kubesphere.io/alias-name': 'viewer' },
+      },
     ]);
     const denied = createClient({ fetchImpl: (async () => new Response('{"message":"forbidden"}', { status: 403 })) as typeof fetch });
     await expect(workspaceRolesApi(denied).list({ workspace: 'team' })).rejects.toThrow();

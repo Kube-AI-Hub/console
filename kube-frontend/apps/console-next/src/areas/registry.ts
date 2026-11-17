@@ -99,6 +99,7 @@ export const AREAS: readonly Area[] = [
     pages: [
       { key: 'overview', path: 'overview', titleKey: 'workspace.overview.title', status: 'ready' },
       { key: 'projects', path: 'projects', titleKey: 'workspace.projects.title', status: 'ready' },
+      { key: 'devops', path: 'devops', titleKey: 'devops.title', status: 'ready' },
       { key: 'members', path: 'members', titleKey: 'workspace.members.title', status: 'ready' },
       { key: 'quota', path: 'quota', titleKey: 'workspace.quota.title', status: 'ready' },
       { key: 'roles', path: 'roles', titleKey: 'workspace.roles.title', status: 'ready' },
@@ -253,6 +254,7 @@ export const AREAS: readonly Area[] = [
       { key: 'settings', path: 'settings', titleKey: 'cluster.settings.title', status: 'ready', groupKey: 'cluster.nav.groupSettings' },
       { key: 'visibility', path: 'visibility', titleKey: 'cluster.visibility.title', status: 'ready', groupKey: 'cluster.nav.groupSettings' },
       { key: 'members', path: 'members', titleKey: 'cluster.members.title', status: 'ready', groupKey: 'cluster.nav.groupSettings' },
+      { key: 'roles', path: 'roles', titleKey: 'cluster.roles.title', status: 'ready', groupKey: 'cluster.nav.groupSettings' },
       { key: 'log-collections', path: 'log-collections', titleKey: 'cluster.logCollections.title', status: 'ready', groupKey: 'cluster.nav.groupSettings' },
       // Trends over time. The old console puts these under 集群监控; the numbers come
       // from the monitoring API's range query, which is a different read from the
@@ -268,6 +270,7 @@ export const AREAS: readonly Area[] = [
       { key: 'alerting-policies', path: 'alerting-policies', titleKey: 'cluster.alerting.policies.title', status: 'ready', groupKey: 'nav.groupMonitoring' },
       { key: 'events', path: 'events', titleKey: 'cluster.events.title', status: 'ready', groupKey: 'nav.groupMonitoring' },
       { key: 'logs', path: 'logs', titleKey: 'search.logs.title', status: 'ready', groupKey: 'nav.groupMonitoring' },
+      { key: 'bill', path: 'bill', titleKey: 'bill.title', status: 'ready', groupKey: 'nav.groupMonitoring' },
       { key: 'audit-logs', path: 'audit-logs', titleKey: 'search.audit.title', status: 'ready', groupKey: 'nav.groupMonitoring' },
       { key: 'custom-resources', path: 'custom-resources', titleKey: 'cluster.customResources.title', status: 'ready', groupKey: 'cluster.nav.groupExtensions' },
       { key: 'volume-snapshot-content', path: 'volume-snapshot-content', titleKey: 'storage.snapshotContent.title', status: 'ready', groupKey: 'nav.groupStorage' },
@@ -358,6 +361,7 @@ export const AREAS: readonly Area[] = [
     defaultPage: 'info',
     pages: [
       { key: 'info', path: 'info', titleKey: 'platform.settings.info', status: 'ready' },
+      { key: 'third-login', path: 'third-login', titleKey: 'thirdLogin.title', status: 'ready' },
       // 通知渠道是一个页面一个渠道，与老 console 一致（notification-configuration 的五个页签）。
       { key: 'mail', path: 'mail', titleKey: 'mail.title', status: 'ready' },
       { key: 'dingtalk', path: 'dingtalk', titleKey: 'channel.dingtalk.title', status: 'ready' },

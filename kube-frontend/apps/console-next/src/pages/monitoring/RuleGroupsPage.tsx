@@ -130,7 +130,7 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
 
   const remove = useMutation({
     mutationFn: (group: RuleGroupSummary) =>
-      ruleGroupsWriteApi(apiClient).remove({ namespace: projectFilter, name: group.name }),
+      ruleGroupsWriteApi(apiClient).remove({ scope: 'project', namespace: projectFilter, name: group.name }),
     onSuccess: () => {
       setDeleting(null);
       void queryClient.invalidateQueries({ queryKey: ['rule-groups', cluster] });
@@ -441,6 +441,7 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
           }
         }}
         cluster={cluster}
+        scope="project"
         namespace={projectFilter}
         {...(editing ? { group: editing } : {})}
       />

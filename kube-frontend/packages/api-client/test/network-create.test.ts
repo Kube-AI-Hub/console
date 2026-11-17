@@ -4,7 +4,7 @@ import { workloadsApi } from '../src/workloads';
 
 describe('network resource creation', () => {
   it.each(['services', 'ingresses'] as const)('POSTs %s to its native collection and preserves extra fields', async (kind) => {
-    const calls: { url: string; init?: RequestInit }[] = [];
+    const calls: { url: string; init: RequestInit | undefined }[] = [];
     const client = createClient({ fetchImpl: (async (input, init) => {
       calls.push({ url: String(input), init });
       return new Response(String(init?.body), { headers: { 'content-type': 'application/json' } });

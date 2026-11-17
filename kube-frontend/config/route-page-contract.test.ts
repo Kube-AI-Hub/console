@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 /**
@@ -64,7 +64,7 @@ describe('routes and pages', () => {
     for (const file of routeFiles) {
       const source = sources.get(file) ?? '';
       for (const match of source.matchAll(/from '(@\/pages\/[^']+)'/g)) {
-        if (!resolvesPageImport(match[1])) unresolved.push(`${file} -> ${match[1]}`);
+        if (!resolvesPageImport(match[1]!)) unresolved.push(`${file} -> ${match[1]}`);
       }
     }
     expect(unresolved, unresolved.join('\n')).toEqual([]);

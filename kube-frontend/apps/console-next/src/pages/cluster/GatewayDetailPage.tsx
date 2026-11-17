@@ -29,6 +29,21 @@ export function GatewayDetailPage({ cluster, name }: GatewayDetailPageProps): Re
   const state = query.isPending ? 'loading' : query.isError ? 'error' : 'ready';
   const detail = query.data?.detail;
   const ingresses = query.data?.ingresses ?? [];
+  const resourceStatus = query.data?.resourceStatus;
+  const logs = query.data?.logs;
+  const monitoring = query.data?.monitoring;
+
+  const formatBytes = (bytes: number): string => {
+    if (!Number.isFinite(bytes) || bytes <= 0) return '0';
+    const units = ['B', 'KiB', 'MiB', 'GiB', 'TiB'];
+    let scaled = bytes;
+    let unit = 0;
+    while (scaled >= 1024 && unit < units.length - 1) {
+      scaled /= 1024;
+      unit += 1;
+    }
+    return (scaled < 10 ? scaled.toFixed(1) : Math.round(scaled).toString()) + ' ' + units[unit];
+  };
 
   const backHref = '/kube-frontend/clusters/' + encodeURIComponent(cluster) + '/gateways/cluster';
 
@@ -176,6 +191,144 @@ export function GatewayDetailPage({ cluster, name }: GatewayDetailPageProps): Re
                 </table>
               </div>
             )}
+          </section>
+
+          <section className="rounded-ai-md border border-ai-line p-4" data-ai-id="gateway-detail:monitoring">
+            <h2 className="mb-3 text-sm font-medium text-ai-fg">{t('cluster.clusterGateways.detail.monitoring')}</h2>
+            {monitoring ? (
+              monitoring.available ? (
+                <div className="flex flex-wrap gap-6">
+                  <div data-ai-id="gateway-detail:monitor-cpu">
+                    <p className="text-[11px] text-ai-fg-muted">{t('cluster.clusterGateways.detail.cpu')}</p>
+                    <p className="mt-1 text-lg font-medium tabular-nums text-ai-fg">{monitoring.cpuCores.toFixed(3)}</p>
+                  </div>
+                  <div data-ai-id="gateway-detail:monitor-memory">
+                    <p className="text-[11px] text-ai-fg-muted">{t('cluster.clusterGateways.detail.memory')}</p>
+                    <p className="mt-1 text-lg font-medium tabular-nums text-ai-fg">{formatBytes(monitoring.memoryBytes)}</p>
+                  </div>
+                  {monitoring.ingressAvailable ? (
+                    <>
+                      <div data-ai-id="gateway-detail:monitor-requests">
+                        <p className="text-[11px] text-ai-fg-muted">{t('cluster.clusterGateways.detail.requestRate')}</p>
+                        <p className="mt-1 text-lg font-medium tabular-nums text-ai-fg">{monitoring.requestRate.toFixed(2)}/s</p>
+                      </div>
+                      <div data-ai-id="gateway-detail:monitor-errors">
+                        <p className="text-[11px] text-ai-fg-muted">{t('cluster.clusterGateways.detail.errorRate')}</p>
+                        <p className="mt-1 text-lg font-medium tabular-nums text-ai-fg">{monitoring.errorRate.toFixed(2)}/s</p>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="self-center text-xs text-ai-fg-muted" data-ai-id="gateway-detail:monitor-ingress-unavailable">
+                      {t('cluster.clusterGateways.detail.ingressMetricsUnavailable')}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-xs text-ai-fg-muted" data-ai-id="gateway-detail:monitor-unavailable">
+                  {t('cluster.clusterGateways.detail.monitorUnavailable')}
+                  {monitoring.reason ? <span className="ml-1 font-mono text-[11px]">({monitoring.reason})</span> : null}
+                </p>
+              )
+            ) : null}
+          </section>
+
+          <section className="rounded-ai-md border border-ai-line p-4" data-ai-id="gateway-detail:resource-status">
+            <h2 className="mb-3 text-sm font-medium text-ai-fg">{t('cluster.clusterGateways.detail.resourceStatus')}</h2>
+            {resourceStatus ? (
+              <>
+                <p className="text-xs text-ai-fg-secondary" data-ai-id="gateway-detail:resource-deployment">
+                  {resourceStatus.deploymentName}: {resourceStatus.readyReplicas}/{resourceStatus.desiredReplicas} {t('cluster.clusterGateways.detail.readyReplicas')}
+                </p>
+                {resourceStatus.pods.length === 0 ? (
+                  <p className="mt-2 text-xs text-ai-fg-muted" data-ai-id="gateway-detail:pods-empty">
+                    {t('cluster.clusterGateways.detail.podsEmpty')}
+                  </p>
+                ) : (
+                  <div className="mt-2 overflow-x-auto">
+                    <table className="w-full text-xs" data-ai-id="gateway-detail:pods">
+                      <thead>
+                        <tr className="border-b border-ai-line text-left text-ai-fg-muted">
+                          <th className="py-2 pr-3 font-medium">{t('storage.column.name')}</th>
+                          <th className="py-2 pr-3 font-medium">{t('storage.column.status')}</th>
+                          <th className="py-2 pr-3 font-medium">{t('cluster.clusterGateways.detail.ready')}</th>
+                          <th className="py-2 pr-3 text-right font-medium">{t('cluster.clusterGateways.detail.restarts')}</th>
+                          <th className="py-2 font-medium">{t('cluster.column.createdAt')}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {resourceStatus.pods.map((pod) => (
+                          <tr key={pod.name} data-ai-row={pod.name} data-ai-id={'gateway-detail:pod:' + pod.name} className="border-b border-ai-line last:border-b-0">
+                            <td className="py-2 pr-3 font-mono text-ai-fg-secondary">{pod.name}</td>
+                            <td className="py-2 pr-3 text-ai-fg-secondary">{pod.phase}</td>
+                            <td className="py-2 pr-3 text-ai-fg-secondary">{pod.ready ? 'Ready' : 'NotReady'}</td>
+                            <td className="py-2 pr-3 text-right tabular-nums text-ai-fg-secondary">{pod.restarts}</td>
+                            <td className="py-2 tabular-nums text-ai-fg-muted">{formatTimestamp(pod.createdAt)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </>
+            ) : null}
+          </section>
+
+          <section className="rounded-ai-md border border-ai-line p-4" data-ai-id="gateway-detail:logs-section">
+            <h2 className="mb-3 text-sm font-medium text-ai-fg">{t('cluster.clusterGateways.detail.logs')}</h2>
+            {logs ? (
+              logs.available ? (
+                <>
+                  <p className="text-[11px] text-ai-fg-muted" data-ai-id="gateway-detail:logs-meta">
+                    {logs.pod} · {logs.container} · {t('cluster.clusterGateways.detail.tailLines')}
+                  </p>
+                  <pre className="mt-2 max-h-72 overflow-auto rounded-ai-sm bg-ai-surface-2 p-3 font-mono text-[11px] leading-5 text-ai-fg-secondary" data-ai-id="gateway-detail:logs">
+                    {logs.text || t('cluster.clusterGateways.detail.logsEmpty')}
+                  </pre>
+                </>
+              ) : (
+                <p className="text-xs text-ai-fg-muted" data-ai-id="gateway-detail:logs-unavailable">
+                  {t('cluster.clusterGateways.detail.logsUnavailable')}
+                  {logs.reason ? <span className="ml-1 font-mono text-[11px]">({logs.reason})</span> : null}
+                </p>
+              )
+            ) : null}
+          </section>
+
+          <section className="rounded-ai-md border border-ai-line p-4" data-ai-id="gateway-detail:metadata">
+            <h2 className="mb-3 text-sm font-medium text-ai-fg">{t('cluster.clusterGateways.detail.metadata')}</h2>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div data-ai-id="gateway-detail:labels">
+                <h3 className="mb-1 text-xs font-medium text-ai-fg-secondary">{t('cluster.clusterGateways.detail.labels')}</h3>
+                {Object.keys(detail.labels).length === 0 ? (
+                  <p className="text-xs text-ai-fg-muted">{t('cluster.clusterGateways.detail.emptyMetadata')}</p>
+                ) : (
+                  <dl className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-x-3 gap-y-1 text-xs">
+                    {Object.entries(detail.labels).map(([key, value]) => (
+                      <React.Fragment key={key}>
+                        <dt className="break-all text-ai-fg-muted">{key}</dt>
+                        <dd className="break-all text-ai-fg-secondary">{value || '-'}</dd>
+                      </React.Fragment>
+                    ))}
+                  </dl>
+                )}
+              </div>
+              <div data-ai-id="gateway-detail:annotations">
+                <h3 className="mb-1 text-xs font-medium text-ai-fg-secondary">{t('cluster.clusterGateways.detail.annotations')}</h3>
+                {Object.keys(detail.annotations).length === 0 ? (
+                  <p className="text-xs text-ai-fg-muted">{t('cluster.clusterGateways.detail.emptyMetadata')}</p>
+                ) : (
+                  <dl className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-x-3 gap-y-1 text-xs">
+                    {Object.entries(detail.annotations).map(([key, value]) => (
+                      <React.Fragment key={key}>
+                        <dt className="break-all text-ai-fg-muted">{key}</dt>
+                        <dd className="break-all text-ai-fg-secondary">{value || '-'}</dd>
+                      </React.Fragment>
+                    ))}
+                  </dl>
+                )}
+              </div>
+            </div>
+            <p className="mt-3 text-[11px] text-ai-fg-muted">{t('cluster.clusterGateways.detail.resourceVersion')}: {detail.resourceVersion || '-'}</p>
           </section>
         </React.Fragment>
       ) : null}

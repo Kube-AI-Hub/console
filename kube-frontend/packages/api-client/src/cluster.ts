@@ -1,4 +1,5 @@
 import type { Client } from './client';
+import { clusterScoped } from './paths';
 import type { KubeObject } from './resources';
 
 /**
@@ -218,11 +219,18 @@ export function clusterMetricsApi(client: Client) {
        * One request for every metric: the comma-separated filter is part of the
        * monitoring API, and a request per metric would be a dozen round trips for one
        * panel.
+       *
+       * The cluster goes in the **path**, not a `cluster=` query parameter. Measured on
+       * mlu370 (2026-11-17): `/kapis/monitoring.../cluster?cluster=4paradigm` answered 200
+       * with the **host** cluster's numbers (128 cores), while
+       * `/kapis/clusters/4paradigm/monitoring.../cluster` answered the member's own
+       * (384 cores). The query parameter silently reads another cluster — the worst kind
+       * of wrong, because the card looks populated.
        */
       const body = await client.request<MonitoringResponse>(
-        '/kapis/monitoring.kubesphere.io/v1alpha3/cluster',
+        clusterScoped('/kapis/monitoring.kubesphere.io/v1alpha3', params.cluster, 'cluster'),
         {
-          query: { metrics_filter: METRICS.map((m) => `${m}$`).join('|'), cluster: params.cluster },
+          query: { metrics_filter: METRICS.map((m) => `${m}$`).join('|') },
           ...(params.signal ? { signal: params.signal } : {}),
         },
       );

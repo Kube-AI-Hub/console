@@ -34,6 +34,10 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_PERSISTENT_VOLUMES_01(cluster_ma
 
     headers = [text.strip() for text in surface.locator("thead th:visible").all_inner_texts() if text.strip()]
     assert headers == ["名称", "状态", "容量", "访问模式", "绑定声明", "回收策略", "创建时间"], headers
+    # The full header row also carries the selection and row-action columns (empty labels).
+    # Locate the claim cell by its header position instead of a magic index.
+    all_headers = [text.strip() for text in surface.locator("thead th").all_inner_texts()]
+    claim_index = all_headers.index("绑定声明")
 
     rows = surface.locator("[data-ai-row]")
     expect(rows).to_have_count(len(volumes), timeout=30_000)
@@ -47,7 +51,7 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_PERSISTENT_VOLUMES_01(cluster_ma
         if row.count() == 0:
             continue
         cells = [cell.strip() for cell in row.locator("td").all_inner_texts()]
-        claim_cell = cells[4]
+        claim_cell = cells[claim_index]
         if claim_ref:
             assert "/" in claim_cell, (name, claim_cell)
             assert claim_cell == f"{claim_ref.get('namespace')}/{claim_ref.get('name')}", (name, claim_cell)

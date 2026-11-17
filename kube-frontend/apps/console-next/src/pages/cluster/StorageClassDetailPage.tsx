@@ -1,12 +1,21 @@
 import * as React from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link, useParams } from '@tanstack/react-router';
-import { storageApi, storageClassesApi, type KubeObject, type StorageClassDetail, type StorageSummary } from '@kube-ai-hub/api-client';
+import { Link, useNavigate, useParams } from '@tanstack/react-router';
+import {
+  annotationKeys,
+  storageApi,
+  storageClassesApi,
+  type KubeObject,
+  type StorageClassDetail,
+  type StorageSummary,
+} from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { AiSurface, Badge, Button, Skeleton } from '@kube-ai-hub/ui';
+import { AiSurface, Badge, Button, Modal, Skeleton } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
-import { MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
+import { errorMessage, MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
+import { DeleteDialog } from '@/components/resource/DeleteDialog';
+import { EditInfoDialog } from '@/components/resource/EditInfoDialog';
 import { YamlDialog } from '@/components/resource/YamlDialog';
 import { toYaml } from '@/components/resource/yaml';
 import { DefinitionRow } from '@/components/resource/DefinitionRow';
@@ -36,7 +45,17 @@ export function StorageClassDetailPage(_props: StorageClassDetailPageProps): Rea
   });
 
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [editingYaml, setEditingYaml] = React.useState(false);
+  const [editingInfo, setEditingInfo] = React.useState(false);
+  const [editingFeatures, setEditingFeatures] = React.useState(false);
+  const [deleting, setDeleting] = React.useState(false);
+  /*
+   * Feature checkboxes live in local state while the dialog is open; the saved values are
+   * the class itself. A failed save keeps the dialog and the chosen values, so the reader
+   * does not have to re-tick the boxes.
+   */
+  const [features, setFeatures] = React.useState({ expansion: false, cloning: false, snapshot: false });
   /**
    * 编辑 YAML. The old console edits a StorageClass through this dialog; the write is
    * a read-then-PUT to `storage.k8s.io/v1`, the group the object actually lives in.
@@ -46,6 +65,38 @@ export function StorageClassDetailPage(_props: StorageClassDetailPageProps): Rea
   const update = useMutation({
     mutationFn: (body: KubeObject) => storageClassesApi(apiClient).update({ cluster, namespace: '', body }),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['storageclass-detail', name] }),
+  });
+  const updateInfo = useMutation({
+    mutationFn: (annotations: Record<string, string>) => storageClassesApi(apiClient).updateInfo({ cluster, name, annotations }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['storageclass-detail', name] }),
+  });
+  const setDefault = useMutation({
+    mutationFn: () => storageClassesApi(apiClient).setDefault({ cluster, name }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['storageclass-detail', name] });
+      void queryClient.invalidateQueries({ queryKey: ['storageclasses', cluster] });
+    },
+  });
+  const saveFeatures = useMutation({
+    mutationFn: () =>
+      storageClassesApi(apiClient).setFeatures({
+        cluster,
+        name,
+        allowExpansion: features.expansion,
+        allowCloning: features.cloning,
+        allowSnapshot: features.snapshot,
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['storageclass-detail', name] });
+      setEditingFeatures(false);
+    },
+  });
+  const remove = useMutation({
+    mutationFn: () => storageClassesApi(apiClient).remove({ cluster, names: [name] }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['storageclasses', cluster] });
+      void navigate({ to: '/kube-frontend/clusters/$cluster/storageclasses', params: { cluster } });
+    },
   });
 
   const state = query.isPending ? 'loading' : query.isError ? 'error' : 'ready';
@@ -79,16 +130,55 @@ export function StorageClassDetailPage(_props: StorageClassDetailPageProps): Rea
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="text-lg font-semibold text-ai-fg">{name}</h1>
           {sc?.isDefault ? <Badge tone="info">{t('cluster.storageClasses.default')}</Badge> : null}
-          <Button
-            variant="secondary"
-            size="sm"
-            className="ml-auto"
-            {...actionProps('sc-detail:edit-yaml')}
-            onClick={() => setEditingYaml(true)}
-          >
-            {t('resource.action.editYaml')}
-          </Button>
+          <div className="ml-auto flex flex-wrap items-center gap-2">
+            <Button variant="secondary" size="sm" {...actionProps('sc-detail:edit-info')} onClick={() => setEditingInfo(true)}>
+              {t('resource.action.editInfo')}
+            </Button>
+            <Button variant="secondary" size="sm" {...actionProps('sc-detail:edit-yaml')} onClick={() => setEditingYaml(true)}>
+              {t('resource.action.editYaml')}
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled={!sc || sc.isDefault}
+              {...actionProps('sc-detail:set-default')}
+              onClick={() => setDefault.mutate()}
+            >
+              {t('cluster.storageClasses.setDefault')}
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              {...actionProps('sc-detail:features')}
+              onClick={() => {
+                if (!sc) return;
+                setFeatures({ expansion: sc.allowExpansion, cloning: sc.allowCloning, snapshot: sc.allowSnapshot });
+                setEditingFeatures(true);
+              }}
+            >
+              {t('sc.detail.volumeFeatures')}
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              disabled={claims.isPending || relatedClaims.length > 0}
+              {...actionProps('sc-detail:delete')}
+              onClick={() => setDeleting(true)}
+            >
+              {t('common.delete')}
+            </Button>
+          </div>
         </div>
+        {sc && !sc.isDefault ? (
+          <p className="text-[11px] text-ai-fg-muted" data-ai-id="sc-detail:set-default-hint">
+            {t('cluster.storageClasses.setDefaultConfirm')}
+          </p>
+        ) : null}
+        {!claims.isPending && (relatedClaims.length > 0 || claims.isError) ? (
+          <p className="text-[11px] text-ai-fg-muted" data-ai-id="sc-detail:delete-protected">
+            {claims.isError ? t('sc.detail.claimsUnavailableForDelete') : t('sc.detail.deleteInUse', { count: relatedClaims.length })}
+          </p>
+        ) : null}
       </header>
 
       {state === 'loading' ? <Skeleton className="h-40 w-full" /> : null}
@@ -211,7 +301,7 @@ export function StorageClassDetailPage(_props: StorageClassDetailPageProps): Rea
         </React.Fragment>
       ) : null}
 
-      <MutationAlert error={update.error} />
+      <MutationAlert error={update.error ?? updateInfo.error ?? setDefault.error ?? saveFeatures.error ?? remove.error} />
 
       {sc ? (
         <YamlDialog
@@ -225,6 +315,77 @@ export function StorageClassDetailPage(_props: StorageClassDetailPageProps): Rea
           onSubmit={async (object) => {
             await update.mutateAsync(object);
             setEditingYaml(false);
+          }}
+        />
+      ) : null}
+
+      {sc ? (
+        <EditInfoDialog
+          open={editingInfo}
+          onOpenChange={setEditingInfo}
+          resource="sc-detail"
+          name={sc.name}
+          alias={sc.annotations[annotationKeys.alias] ?? ''}
+          description={sc.annotations[annotationKeys.description] ?? ''}
+          annotations={sc.annotations}
+          pending={updateInfo.isPending}
+          onSubmit={async (annotations) => {
+            await updateInfo.mutateAsync(annotations);
+            setEditingInfo(false);
+          }}
+        />
+      ) : null}
+
+      {sc ? (
+        <Modal
+          open={editingFeatures}
+          onOpenChange={setEditingFeatures}
+          size="sm"
+          title={t('sc.detail.volumeFeatures')}
+          description={t('sc.detail.volumeFeaturesDescription')}
+          footer={
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" size="sm" onClick={() => setEditingFeatures(false)}>
+                {t('common.cancel')}
+              </Button>
+              <Button size="sm" loading={saveFeatures.isPending} {...actionProps('sc-detail:features-submit')} onClick={() => saveFeatures.mutate()}>
+                {t('common.confirm')}
+              </Button>
+            </div>
+          }
+        >
+          <div className="flex flex-col gap-2" data-ai-id="sc-detail:features-dialog">
+            {[
+              { key: 'expansion', label: t('cluster.storageClasses.expand'), value: features.expansion, set: (next: boolean) => setFeatures((current) => ({ ...current, expansion: next })) },
+              { key: 'cloning', label: t('cluster.storageClasses.clone'), value: features.cloning, set: (next: boolean) => setFeatures((current) => ({ ...current, cloning: next })) },
+              { key: 'snapshot', label: t('cluster.storageClasses.snapshot'), value: features.snapshot, set: (next: boolean) => setFeatures((current) => ({ ...current, snapshot: next })) },
+            ].map((option) => (
+              <label key={option.key} className="flex items-center gap-2 text-xs text-ai-fg-secondary">
+                <input
+                  type="checkbox"
+                  checked={option.value}
+                  data-ai-id={'sc-detail:feature:' + option.key}
+                  onChange={(event) => option.set(event.target.checked)}
+                />
+                {option.label}
+              </label>
+            ))}
+          </div>
+        </Modal>
+      ) : null}
+
+      {sc ? (
+        <DeleteDialog
+          open={deleting}
+          onOpenChange={setDeleting}
+          names={[name]}
+          resource="sc-detail"
+          noun={t('cluster.storageClasses.noun')}
+          pending={remove.isPending}
+          {...(remove.error ? { error: errorMessage(t, remove.error) } : {})}
+          onConfirm={async () => {
+            await remove.mutateAsync();
+            setDeleting(false);
           }}
         />
       ) : null}

@@ -113,7 +113,7 @@ describe('keyboard and focus', () => {
       const parts = source.split(/<(?=Button\b|AiButton\b|IconButton\b)/g).slice(1);
       for (const part of parts) {
         const body = part.slice(0, 400);
-        if (!hasAccessibleName(body)) offenders.push(`${relative}: ${body.split('\n')[0].slice(0, 60)}`);
+        if (!hasAccessibleName(body)) offenders.push(`${relative}: ${body.split('\n')[0]!.slice(0, 60)}`);
       }
     }
     expect(offenders, `以下按钮没有可访问名称（图标按钮必须加 aria-label）：\n${offenders.join('\n')}`).toEqual([]);

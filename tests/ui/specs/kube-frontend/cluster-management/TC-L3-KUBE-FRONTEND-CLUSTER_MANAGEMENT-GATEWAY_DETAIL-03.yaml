@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GATEWAY_DETAIL-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: gateway-detail
+title: 网关详情资源状态（控制器 Deployment + Pods）
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/gateways/{name}'
+prd: prd/kube-frontend/cluster-management/gateway-detail.md
+design: design/kube-frontend/cluster-management/gateway-detail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GATEWAY_DETAIL-03
+
+story:
+- US1
+
+product: 网关详情新增「资源状态」区块：展示控制器 Deployment 的 ready/desired 副本与 Pod 列表（名称/阶段/就绪/重启次数/创建时间）；无 Pod 或读取失败有明确说明。
+preconditions:
+- 已登录 admin；host 集群存在集群网关且控制器 Pod 运行中
+- 只读用例
+steps:
+- 打开集群网关详情
+- 断言「资源状态」区块、Deployment 副本行与 Pods 表出现
+- 断言至少一行 Pod（运行中的控制器 Pod）
+expected:
+- Pod 按 label app.kubernetes.io/instance=<name>-ingress 过滤
+- 就绪以所有 containerStatuses.ready 为准；重启次数求和
+- 区块只读
+troubleshoot:
+- Pods 表为空：确认 labelSelector 与控制器实例名一致
+- 副本数 0：检查 Deployment 名（Nginx fullnameOverride/网关名）
+update_automation:
+- 句柄：gateway-detail:resource-status/resource-deployment/pods/pod:<name>/pods-empty

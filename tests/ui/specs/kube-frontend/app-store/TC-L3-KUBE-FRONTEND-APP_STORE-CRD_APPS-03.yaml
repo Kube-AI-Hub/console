@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-APP_STORE-CRD_APPS-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-store
+feature: crd-apps
+title: 删除自制 CRD 应用
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/applications/composing'
+prd: prd/kube-frontend/app-store/crd-apps.md
+design: design/kube-frontend/app-store/crd-apps.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_STORE-CRD_APPS-04
+
+story:
+- US3
+
+product: 自制应用详情提供删除：输入应用名确认后删除 Application；成功后回到列表且行消失。组件是否级联取决于 ownerReference/控制器，页面不假装自己级联删除。
+preconditions:
+- 已登录 admin；项目 default 可用；用例自建 Application+Deployment+Service，finally 清理
+steps:
+- 用 API 创建临时 Application（selector app=<name>）、Deployment、Service
+- 打开详情，点删除，输入应用名确认
+- 断言 Application 404、页面回到 composing 列表、行消失
+- finally 删除 Deployment/Service（应用对象已删）
+expected:
+- 删除确认必须输入完整对象名；取消不发请求
+- 删除成功回列表；失败保留弹窗并显示原因
+- 组件不保证级联；页面说明由 ownerReference/控制器负责
+troubleshoot:
+- 行仍存在：确认删除的是 Application 且列表 invalidate
+- 组件残留：检查 ownerReferences 是否有 app.k8s.io 控制器添加的 owner
+update_automation:
+- 句柄：composed-app-detail:delete/delete-input/delete-confirm

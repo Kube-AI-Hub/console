@@ -58,6 +58,8 @@
 **被否方案**：把 URL 改成 `/:workspace/clusters/:cluster/devops`。集群菜单的链接由 registry scope 生成（`/kube-frontend/clusters/<id>/devops`），workspace-prefixed 路由在集群菜单里不可达。
 **何时重新考虑**：产品决定 DevOps 必须按企业空间过滤/授权时，把区域改成 workspace scope 并改 URL（需同步 registry 与 shell）。
 
+**后续（2026-11-17）**：产品复核决定重纳空间作用域入口，但没有改本区域的 scope——入口以 workspace scope 的独立列表页承接（[workspace-console DEC-16](../access-control/workspace-console.md)），本区域 URL 与写入能力不变；空间列表行链接回本区域的工程详情。
+
 ### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-DEVOPS_PROJECTS-02 — 详情页签以工程名为键，分别读取 IAM/devops 的工程级集合
 
 **为什么**：成员/角色在 IAM 聚合下 `/devops/<name>/...`，凭证在 devops 组 `/devops/<name>/credentials`；三者都以工程名解析，不需要 workspace 段，和 cluster-scope 详情 URL 自洽。每个查询独立，失败只影响本页签。

@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-12
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: nodes
+title: 节点添加（kubeadm join 命令）
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/nodes'
+prd: prd/kube-frontend/cluster-management/nodes.md
+design: design/kube-frontend/cluster-management/nodes.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-12
+
+story:
+- US8
+
+product: 节点列表「添加节点」弹窗调用 ks-apiserver join-command，展示带到期时间的 kubeadm join 命令与复制按钮；后端未升级（404）时明确说明需要升级后端，403 显示无权限，其他错误可重试；命令只存在内存，不写 URL/日志。
+preconditions:
+- 已登录 admin；host 集群；ks-apiserver 支持 nodes/join-command（或按 404 分支验证）
+- 只读用例：不执行 join，不创建节点
+steps:
+- 打开节点列表，点击「添加节点」
+- 若接口 200：断言弹窗显示 kubeadm join、--token、sha256 CA hash、到期时间，复制按钮可用
+- 若接口 404：断言显示「当前 ks-apiserver 版本不支持节点加入，需升级后端」
+- 若 403：断言显示无权限；关闭弹窗命令不再可见
+expected:
+- 命令格式：kubeadm join <server> --token <id>.<secret> --discovery-token-ca-cert-hash sha256:<hash>
+- 404/403/其他错误分类显示，不统一成"加载失败"
+- token 不进入 URL、不写控制台日志
+troubleshoot:
+- 404：后端未部署本接口，需升级 ks-apiserver（见 docs/plans/node-add-backend-20261117.md）
+- 401/403：确认用户有 create nodes 权限
+update_automation:
+- 句柄：nodes:add、node-add:surface/command/copy/error/retry

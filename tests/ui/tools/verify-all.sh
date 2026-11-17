@@ -49,6 +49,9 @@ run() {
 
 cd "$here"
 
+run 'capability probes (fingerprint)' python3 -u multicluster_sweep.py \
+  --env-file "$ENV_FILE" --app "$APP" --bff "$BFF" --probes --clusters "$FIRST_CLUSTER"
+
 run 'login page a11y + keyboard (no cluster)' python3 -u multicluster_sweep.py \
   --env-file "$ENV_FILE" --app "$APP" --bff "$BFF" --keyboard-local
 

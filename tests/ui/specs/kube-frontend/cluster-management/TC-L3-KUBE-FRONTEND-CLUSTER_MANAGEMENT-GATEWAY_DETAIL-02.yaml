@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GATEWAY_DETAIL-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: gateway-detail
+title: 网关详情元数据（标签/注解/ResourceVersion）
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/gateways/{name}'
+prd: prd/kube-frontend/cluster-management/gateway-detail.md
+design: design/kube-frontend/cluster-management/gateway-detail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-GATEWAY_DETAIL-02
+
+story:
+- US1
+
+product: 网关详情新增「元数据」区块：展示 Gateway 的 labels、annotations 与 resourceVersion；空值显示明确说明；只读。
+preconditions:
+- 已登录 admin；host 集群存在集群网关（安装器创建）
+- 只读用例，不修改对象
+steps:
+- 打开集群网关详情，等待 surface 就绪
+- 滚动到「元数据」区块
+- 断言标签/注解两列存在；注解包含 kubesphere.io/creator（或显示空态说明）
+- 断言 resourceVersion 显示非空
+expected:
+- 元数据取自 Gateway.metadata，不经过 Service/Nginx 派生
+- 空 labels/annotations 显示「暂无元数据」
+- 区块只读
+troubleshoot:
+- 元数据空：确认 gateway 对象 metadata.labels/annotations 真实为空
+- 与列表不一致：列表与详情读同一 Gateway 对象
+update_automation:
+- 句柄：gateway-detail:metadata/labels/annotations

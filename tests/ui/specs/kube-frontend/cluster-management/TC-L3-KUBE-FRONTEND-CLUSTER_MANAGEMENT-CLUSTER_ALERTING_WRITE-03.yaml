@@ -1,0 +1,47 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING_WRITE-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: cluster-alerting-write
+title: 集群告警策略 · 状态列表、详情与自定义策略完整生命周期
+entry_url: '{BASE_URL}/kube-frontend/clusters/{KA_CLUSTER}/alerting-policies'
+prd: prd/kube-frontend/cluster-management/cluster-alerting-write.md
+design: design/kube-frontend/cluster-management/cluster-alerting-write.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING_WRITE-03
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING_WRITE-04
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING_WRITE-05
+
+story:
+- US3
+
+product: 集群告警策略页的自定义策略可创建/编辑/编辑 YAML/停用（确认）/启用/删除；两个页签显示规则状态计数、耗时、最近检查，并支持搜索、筛选、排序与分页；行详情进入独立详情页（属性/规则/告警消息/查看指标数据）。
+preconditions:
+- 已登录，且在 host 集群，账号对 clusterrulegroups 有创建/更新/删除权限
+- 集群已安装告警模块（globalrulegroups 至少 1 条）
+- 探测结论（2026-11-17，mlu370）：聚合 kapis 返回 status.{evaluationTime,lastEvaluation,rulesStatus,rulesStats}，raw /apis 不返回 status；集群策略写路径为 /apis/.../clusterrulegroups
+steps:
+- 打开集群告警策略页，核对两个页签计数与 kapis 返回的 totalItems 一致，表头含「规则状态/耗时/最近检查」
+- 任取一行有 status 的策略，核对规则状态计数、耗时（三位小数 + 秒）与最近检查与 kapis status 一致
+- 在自定义页签用唯一名称创建两条临时策略（别名/检查间隔/描述/一条规则），核对列表出现别名行、API 回读别名/间隔/规则一致
+- 打开第一条的详情页，核对属性含别名/检查间隔/耗时/最近检查、规则表含告警名称与「查看指标数据」；点击「查看指标数据」打开弹窗，图表区离开 loading 并呈现空态/曲线/可重试错误
+- 编辑第一条的别名与描述并保存，核对详情与 API 回读更新
+- 编辑 YAML 把别名追加后缀并保存，核对 API 回读注解已更新
+- 搜索唯一前缀，勾选两条临时策略，批量停用（确认弹窗）后 API 回读 enable=false；批量启用后回读 true
+- 依次删除两条临时策略并在列表中确认消失；finally 通过 API 删除残余对象
+expected:
+- 表头包含规则状态、耗时、最近检查；规则状态计数与 kapis status.rulesStats 一致；状态缺失显示「-」；耗时三位小数、最近检查为本地时间
+- 规则状态筛选（客户端）只保留计数大于 0 的行；切换筛选后回到第 1 页
+- 详情页返回链接回列表，属性/规则/消息三段齐全；指标弹窗按表达式求值，空态不是 0 曲线
+- 创建后列表出现该行且 API 回读一致；编辑/YAML/启停/删除每次回读一致；删除后行消失且 API 404
+- 批量停用/启用按对象逐条写入并汇总结果，未勾选或不可写行不参与
+troubleshoot:
+- 规则状态全显示「-」：确认 listScope 使用 withStatus，且读的是聚合 kapis 而不是 /apis
+- 创建按钮不出现：确认 custom 页签且 SSAR create clusterrulegroups 未被拒绝
+- 停用没有确认弹窗：确认走的是列表/详情的 disable 分支，而不是 detail toggle 的启用分支
+- 指标弹窗空白：确认 Prometheus 代理路径与表达式；带比较的表达式只返回超过阈值的样本，空图不一定代表查询失败
+- 删除残留：finally 用 API DELETE 清理本次唯一名称对象，不要清其他对象
+update_automation:
+- 页面 data-ai-id 或规则组 status 字段形状变化时同步本用例

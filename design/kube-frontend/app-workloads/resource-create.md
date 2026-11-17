@@ -20,7 +20,7 @@
 
 - 核心组与分组写路径不同：Service 是 `/api/v1`，Ingress 是 `/apis/networking.k8s.io/v1`；写成 `/apis/v1` 会 404。
 - 选项来自数据：项目列表来自 `useProjectOptions`，选择器候选来自项目内控制器的 `app` 标签（三个列表请求）。
-- 权限检查是 `SelfSubjectAccessReview`（create-only 资源，POST 提问）。
+- 权限检查是 ks-apiserver IAM `POST /kapis/iam.kubesphere.io/v1alpha2/selfsubjectaccessreviews`（以请求用户求值；旧后端 404 回退 create-only 的 `SelfSubjectAccessReview`）。
 - 页面契约：不允许裸 `<button>`，每个动作有字面量 `data-ai-id`；英文文案中的撇号用双引号包裹。
 
 ## 方案决策
@@ -33,7 +33,7 @@
 
 **何时重新考虑**：当第三种清单（例如 Gateway）也要创建且字段形状与这两个相似时，抽共享的表单分节组件，而不是再写第三个弹窗。
 
-### DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-CREATE_SERVICE_INGRESS-02 — 权限用 SelfSubjectAccessReview，且失败放行
+### DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-CREATE_SERVICE_INGRESS-02 — 权限用 IAM 检查（用户身份），且失败放行
 
 **为什么**：平台没有客户端权限模型，角色绑定是唯一事实源；SSAR 用与服务端相同的 verb/resource/namespace 评估，按钮状态与实际写入一致。权限检查本身失败（旧 BFF、网络抖动）时放行：把「检查不了」当成「不允许」会让有权限的人无法创建，而这正是检查想避免的失败。
 
@@ -86,7 +86,7 @@
 | --- | --- | --- | --- |
 | `POST /api/v1/namespaces/<ns>/services` | Kubernetes 对象 | `spec.type`、`spec.selector`、`spec.ports[0]` | apiserver |
 | `POST /apis/networking.k8s.io/v1/namespaces/<ns>/ingresses` | Kubernetes 对象 | `spec.rules[]`（按 host 分组）、可选 `ingressClassName` / `tls` | apiserver |
-| `POST /apis/authorization.k8s.io/v1/selfsubjectaccessreviews` | `SelfSubjectAccessReview` | `status.allowed` 决定创建按钮是否禁用 | 列表页 |
+| `POST /kapis/iam.kubesphere.io/v1alpha2/selfsubjectaccessreviews`（旧后端回退 `/apis/authorization.k8s.io/v1/selfsubjectaccessreviews`） | `{verb, resource, namespace, group}` | `allowed` 决定创建按钮是否禁用 | 列表页 |
 | `services-create:dialog` / `:submit` / `:name` / `:type` / `:port` / `:target-port` / `:node-port` / `:selector` / `:selector-manual` / `:error` | `data-ai-id` | 服务表单句柄 | 自动化与智能体 |
 | `ingresses-create:dialog` / `:submit` / `:rule-add` / `:rule-remove:<id>` / `:host:<id>` / `:path:<id>` / `:backend:<id>` / `:backend-port:<id>` / `:error` | `data-ai-id` | 路由表单句柄；规则行 id 稳定 | 自动化与智能体 |
 | `services:create` / `ingresses:create`（+ `:disabled-hint`） | `data-ai-id` | 列表页入口与禁用说明 | 自动化与智能体 |

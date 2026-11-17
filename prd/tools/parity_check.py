@@ -116,8 +116,13 @@ PLATFORM_PAGES = {
 }
 
 #: 平台作用域明确不迁移的页面。
-PLATFORM_UNMIGRATED = {
-    'settings/ThirdPartyLogin': '第三方登录：本 fork 的登录方式由服务端配置与中间件注入，控制台没有写入路径',
+PLATFORM_UNMIGRATED: dict[str, str] = {}
+
+#: 平台作用域已重纳、尚未实现的页面（2026-11-17 产品复核）。
+#: 依据 docs/plans/reinclusion-decisions-20261117.md。与 UNMIGRATED 的区别是：
+#: 这些不是「不做」，而是「要做、还没做」，所以不计入未登记，也不当作已迁移。
+PLATFORM_PLANNED: dict[str, str] = {
+    'settings/ThirdPartyLogin': '第三方登录：已重纳（N-02），入口落在平台设置，待实现',
 }
 
 #: 结构性目录（不是页面，只是布局或包装）。
@@ -214,9 +219,11 @@ def untracked_legacy_pages() -> list[str]:
 
     for group in ('access', 'settings'):
         dirs = _dirs(OLD / group / 'containers')
-        known = {key.split('/')[1].lower() for key in PLATFORM_PAGES if key.startswith(group + '/')} | {
-            key.split('/')[1].lower() for key in PLATFORM_UNMIGRATED if key.startswith(group + '/')
-        }
+        known = (
+            {key.split('/')[1].lower() for key in PLATFORM_PAGES if key.startswith(group + '/')}
+            | {key.split('/')[1].lower() for key in PLATFORM_UNMIGRATED if key.startswith(group + '/')}
+            | {key.split('/')[1].lower() for key in PLATFORM_PLANNED if key.startswith(group + '/')}
+        )
         for name in sorted({entry.lower() for entry in dirs} - known - structural):
             out.append(f'platform:{group}/{name}')
 
@@ -312,6 +319,9 @@ def main() -> int:
         print(f"  - {name}：{why}")
     print("\n显式决定不迁移的页面（平台作用域）：")
     for name, why in PLATFORM_UNMIGRATED.items():
+        print(f"  - {name}：{why}")
+    print("\n已重纳、待实现（平台作用域）：")
+    for name, why in PLATFORM_PLANNED.items():
         print(f"  - {name}：{why}")
 
     print("\n每页的文件：")

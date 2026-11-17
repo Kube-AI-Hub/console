@@ -38,7 +38,7 @@
 
 - 密码**按原样**提交。老 console 的 `mix(salt, base64(pw))` 混淆不迁移：salt 是公开的、变换可逆，不增加任何保密性，反而让含 `@` 的密码无法登录。
 - 预注册账号没有密码确认页（新前端尚未迁移 `/password/confirm`），因此只能停在登录页提示，不能放行。
-- 不迁移第三方登录（LDAP / OIDC / GitHub）：它们依赖 `oauthServers` 配置与跳转回调，属于独立的一块。
+- 第三方登录（LDAP / OIDC / GitHub）**不在本文件范围**。2026-11-17 产品复核决定把它重新纳入迁移范围，作为平台设置里的配置项落地，见 [`platform-settings/_index.md`](platform-settings/_index.md)；本文件只负责账号密码登录与登出。
 - token 的 `iss` 为 `kube-ai-hub` 时载荷不含 `extra`，解出的用户只有 `name` 与 `expiresAt`，没有邮箱。
 
 ## 明确不做

@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_GATEWAYS-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: cluster-gateways
+title: 集群网关编辑（复用项目网关对话框）
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/gateways/cluster'
+prd: prd/kube-frontend/cluster-management/cluster-gateways.md
+design: design/kube-frontend/cluster-management/cluster-gateways.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_GATEWAYS-03
+
+story:
+- US2
+
+product: 集群网关页「集群网关」页签提供编辑：打开复用项目网关的编辑对话框（类型/副本/追踪/NodePort），保存走 gateway PATCH；集群网关由安装器创建，本页不提供创建/删除。
+preconditions:
+- 已登录 admin；host 集群存在集群网关（安装器创建，kubesphere-controls-system）
+- 用例保存**未修改**的表单（不改变真实配置）
+steps:
+- 打开 /clusters/host/gateways/cluster，等待列表就绪
+- 对集群网关行打开操作菜单「编辑」，确认对话框带网关名
+- 不修改任何字段直接保存；断言对话框关闭、无错误
+- 回读 Gateway 对象确认仍存在
+expected:
+- 集群网关行显示编辑入口（权限允许时）；项目网关页签仍保留其编辑/删除
+- 集群网关页签不显示创建/删除（安装器所有）
+- 保存失败保留对话框与原因
+troubleshoot:
+- 无编辑入口：检查行权限 SSAR 是否返回 allowed=false
+- 保存报错：确认 patch 的 spec.type/replicas 与服务一致
+update_automation:
+- 句柄：cluster-gateways:edit（行操作）、gateway:edit:save/error、cluster-gateways:surface

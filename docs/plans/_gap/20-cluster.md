@@ -4,6 +4,271 @@
 > 现行方法见[迁移指南](../../legacy-ui-migration-guide.md)，待复核项见[能力矩阵](../capability-matrix.md)；
 > 概览后续功能与视觉证据见[补齐](../cluster-overview-completion-20261115.md)、[布局复盘](../cluster-overview-layout-review-20261115.md)。
 
+---
+
+## 2026-11-17 复验
+
+> 复验方式：读 6 份方法文档 → 读本文件旧正文 → **重新枚举两侧路由** → 逐能力读当前新 UI 源码。
+> 未跑 dev server / 浏览器 / 用例；以下状态均为**静态源码判定**，「已交付」= 有实现代码，不代表 E2E/部署已验收。
+> 旧正文保留在下方并已标注历史边界；其中的 35 / 74 / 17 等计数是 2026-11-14 基线，不得再作当前进度。
+
+### 1. 路由规模（本次自己数）
+
+| 侧 | 数法 | 结果 |
+| --- | --- | --- |
+| 老 console | `console/src/pages/clusters/routes/{index,detail}.js` 的 `path:` 字面量去重 | **72 条** `/clusters/:cluster/*` 条目 |
+| 其中 | 项目作用域详情复用（`projects/:namespace/{deployments,statefulsets,...}/:name`） | 15 条（属项目作用域，不计入集群自身） |
+| 其中 | 纯重定向（`/workloads`、`/log-collections`、`/gateways`） | 3 条 |
+| **老集群作用域自身** | 72 − 15 − 3 | **54 条**（含 17 条详情、1 条别名 `/snapshots/:namespace?`） |
+| 新 UI | `routes/kube-frontend.clusters.$cluster/` 页面目录 | **45 个** |
+| 新 UI | `createFileRoute(...)` 去重注册数 | **107 条**（含 44 条只渲染 `<Outlet/>` 的布局路由） |
+| 新 UI | 叶子路由 | **63 条** = 46 主页/列表 + 17 详情 |
+
+**54 → 50 条已交付、2 条登记不迁移、1 条环境阻塞、1 条真缺口。**
+页面级覆盖率已从 2026-11-14 的 13/54 升到 50/54；**当前缺口几乎全部在能力级，不在页面级**（与迁移指南 §3.3 的警告一致）。
+
+### 2. 逐能力对照
+
+归宿取值：**已交付** / **部分交付** / **待补** / **批准不做** / **环境阻塞** / **未核实**。
+
+#### 2.1 集群级应用负载（8 页）
+
+| 老能力 | 老证据 | 新实现现状 | 归宿 | 说明 |
+| --- | --- | --- | --- | --- |
+| 8 个跨项目列表页 | `clusters/routes/index.js:131-169` | `routes/.../{deployments,statefulsets,daemonsets,jobs,cronjobs,services,ingresses}/index.tsx`；`pages/cluster/ClusterWorkloadsPage.tsx:23` | 已交付 | 7 类共用一页 + 容器组单独一页 |
+| PROJECT 列 + 跳所属项目 | `Workload/Deployments/index.jsx:197-207` | `ClusterWorkloadsPage.tsx:100-107`、`:91`（按命名空间标签解析 workspace 再拼链接） | 已交付 | 新实现多解析一层 workspace |
+| 全命名空间筛选（「全部项目」下拉，可搜索/翻页/清空） | `clusters/components/ResourceTable/index.jsx:67-79`、`ResourceTable/ProjectSelect/index.jsx:56-71` | 无：`ClusterWorkloadsPage.tsx:76` 只有 keyword 搜索 | **待补** | 旧页可按项目收窄；新页只能靠关键字 |
+| 创建（向导先选项目） | `Workload/Deployments/index.jsx:220-228` | 无（`ClusterWorkloadsPage.tsx` 无 `primaryAction`/`rowActions`） | **待补** | 整页只读 |
+| 编辑信息 / 编辑 YAML / 重新部署 / 停止启动 / 删除 / 批量停止删除 | `Workload/Deployments/index.jsx:71-138` | 无 | **待补** | 项目作用域已具备这些能力，集群作用域未接 |
+| 联邦托管对象不可改（`isFedManaged` 收敛行操作与勾选） | `Workload/Deployments/index.jsx:69,158-161` | 无 | **待补** | 随写能力一并缺失 |
+| 容器组：NODE 列可跳节点、Pod IP、资源 limits/requests | `Workload/Pods/index.jsx:123-149` | `ClusterPodsPage.tsx`（`:84-99` 搜索/刷新/列显隐/项目链接） | 部分交付 | 列集需逐列对账，节点列与 limits/requests 未见 |
+
+#### 2.2 集群级配置（3 页）
+
+| 老能力 | 老证据 | 新实现现状 | 归宿 | 说明 |
+| --- | --- | --- | --- | --- |
+| 3 个跨项目列表页 | `routes/index.js:171-184` | `ClusterConfigMapsPage.tsx`、`ClusterSecretsPage.tsx`、`ClusterServiceAccountsPage.tsx` | 已交付 | 行键用 `项目/名称`（`useClusterProjectIndex.ts:…`） |
+| PROJECT 列 + 键数量 / 类型 / 角色 / 令牌列 | `ConfigMaps/index.jsx:118-144`、`Secrets/index.jsx:152-184`、`ServiceAccounts/index.jsx:114-152` | `ClusterConfigMapsPage.tsx:99-121`（项目+键数）；其余两页同构 | 部分交付 | 保密字典「类型」、服务账户「角色/令牌」列需逐列对账 |
+| 编辑信息 / 编辑 YAML / 编辑设置 / 删除 | `ConfigMaps/index.jsx:45-80` | 无（三页均无 `rowActions`） | **待补** | `ClusterConfigMapsPage.tsx:21` 明写 "Read-only" |
+| 保密字典「设为默认镜像仓库」 | `Secrets/index.jsx:85-95` | 无 | **待补** | — |
+| 全命名空间筛选 | `ResourceTable/index.jsx:67-79` | 无 | **待补** | 同 2.1 |
+
+#### 2.3 集群级网络（2 页 + 1 详情）
+
+| 老能力 | 老证据 | 新实现现状 | 归宿 | 说明 |
+| --- | --- | --- | --- | --- |
+| 网络策略列表（项目列 + 类型 + 规则） | `Network/Policies/index.jsx:121-161` | `ClusterNetworkPoliciesPage.tsx:76-153` | 已交付 | 新实现多「类型」「规则」列 |
+| 网络策略创建（按 YAML）/ 编辑信息 / 编辑 YAML / 删除 | `Network/Policies/index.jsx:62-119` | 无 `rowActions`/`primaryAction` | **待补** | 只读 |
+| Pod IP 池列表（网段 + 已用/总量 + 企业空间） | `Network/IPPools/index.jsx:95-142` | `IpPoolsPage.tsx:60-125` | 已交付 | — |
+| IP 池创建 / 编辑信息 / 查看 YAML / 分配企业空间 / 删除 | `Network/IPPools/index.jsx:46-93,144-150` | 无 | **待补** | 只读 |
+| IP 池详情 + Workspaces 页签 | `Network/IPPools/Detail/Workspaces/index.jsx:97` | `IpPoolDetailPage.tsx:102-125`（workspaces 区块）+ `:127-156`（pods 区块） | 已交付 | 页签改为区块，**等价且多一个 Pod 下钻** |
+
+#### 2.4 节点
+
+| 老能力 | 老证据 | 新实现现状 | 归宿 | 说明 |
+| --- | --- | --- | --- | --- |
+| 节点总览面板（总数 / master 数 / 健康率 / 各 XPU 厂商计数） | `Nodes/index.jsx:892-973` | `NodesPage.tsx:57-65`（`StatisticsGroup`：total / controlPlane / health% / 每厂商计数）+ `:151` | 已交付 | — |
+| 列：GPU 使用率（含已分配） | `Nodes/index.jsx:514-557` | `NodesPage.tsx:95-97,66-85`（`node_gpu_utilisation` + allocated） | 已交付 | — |
+| 列：GPU 显存 | `Nodes/index.jsx:558-597` | `NodesPage.tsx:71`（`node_gpu_memory_*`） | 已交付 | — |
+| 列：CPU / 内存（含 requests 已分配） | `Nodes/index.jsx:598-684` | `NodesPage.tsx:80-82`（`cpuRequested`/`memoryRequested`） | 已交付 | — |
+| 列：Pod 用量 | `Nodes/index.jsx:685-709` | `NodesPage.tsx:74` | 已交付 | — |
+| 列：XPU 类型（厂商+型号） | `Nodes/index.jsx:710-738` | `NodesPage.tsx:98-99` | 已交付 | — |
+| 列：GPU 虚拟化模式（切换中/失败态） | `Nodes/index.jsx:739-769` | `NodesPage.tsx:100-107`（`hasPendingMode` 三态） | 已交付 | — |
+| 列：时间同步（偏移秒 + NTP 状态 + 30/120s 分级着色） | `Nodes/index.jsx:332-373` | `NodesPage.tsx:108-114`（同两级阈值） | 已交付 | — |
+| 时间同步 critical 横幅 | `Nodes/index.jsx:990-1005` | `NodesPage.tsx:155` | 已交付 | — |
+| 列筛选：状态 / 角色 / 设备厂商 / XPU 型号 | `Nodes/index.jsx:426-457` | `NodesPage.tsx:120-129`（status/role/vendor 多选/model 文本） | 已交付 | — |
+| 行操作：停止/启动调度 | `Nodes/index.jsx:99-119` | `NodesPage.tsx:133-134` | 已交付 | — |
+| 行操作：节点终端 | `Nodes/index.jsx:120-127` | `NodesPage.tsx:135,163`（`ExecConsoleDialog`） | 已交付 | 环境侧 B200 节点 shell 缺 node access pod（已登记） |
+| 行操作：设置 vGPU 模式 | `Nodes/index.jsx:137-153` | `NodesPage.tsx:136-137,164`（`GpuModeDialog`，非 host 集群禁用） | 已交付 | — |
+| 状态列污点数 + tooltip | `Nodes/index.jsx:485-503` | 无 | **待补** | 只剩「已停止调度」文字 |
+| 批量「编辑污点」 | `Nodes/index.jsx:198-209` | 无（`NodesPage.tsx` 无 `selection`/`actions`） | **待补** | 单节点版在详情页有 |
+| 顶部「添加节点」（KubeKey） | `Nodes/index.jsx:179-193` | 无 | **待补** | — |
+| 行操作：查看导入日志 / 删除导入失败节点 | `Nodes/index.jsx:128-136,154-166` | 无 | **待补** | 新实现无 `importStatus` 概念 |
+| Banner 说明（节点类型 / 污点含义） | `Nodes/index.jsx:86-97` | 无 | **待补** | 非阻塞 |
+| 详情 5 页签（运行状态/容器组/元数据/监控/事件） | `Nodes/Detail/routes.js:26-45` | `NodeDetailPage.tsx:131-138`（status/hardware/pods/monitor/events/metadata **6 页签**） | 已交付 | 多一个 hardware 页签 |
+| 详情操作：终端 / 停止启动 / 编辑标签 / 编辑污点 / vGPU | `Nodes/Detail/index.jsx:122-175` | `NodeDetailPage.tsx:101-119`（终端/调度/YAML/刷新）、`:145-146`（标签/污点）、`:130`（`NodeInfoSidebar` 的 vGPU 入口） | 已交付 | — |
+| 详情属性：XPU/OS 类型/架构/kube-proxy/GPU 驱动/引擎/切分数 | `Nodes/Detail/index.jsx:237-366` | `NodeInfoSidebar.tsx:32-42`（GPU 模式 + 切分数已见）、`NodeHardwarePanel.tsx`（66 行） | 部分交付 | GPU 模式与 `deviceSplitCount` 已有；OS 类型/架构/kube-proxy/驱动/引擎版本**未逐项核对**（未核实，不判缺） |
+
+#### 2.5 存储
+
+| 老能力 | 老证据 | 新实现现状 | 归宿 | 说明 |
+| --- | --- | --- | --- | --- |
+| 存储类型列表（PVC 数/默认/克隆/快照/扩容/供应者） | `Storage/StorageClasses/index.jsx:59-124` | `StorageClassesPage.tsx` | 已交付 | — |
+| 存储类型**详情：关联 PVC 列表** | `StorageClasses/Detail/routes.js:24-31` | `StorageClassDetailPage.tsx:136-210`（一次集群级 PVC 读 + 页面侧过滤，名称链回项目） | 已交付 | 注释写明 kapis 忽略 fieldSelector |
+| 存储类型 创建 / 编辑信息 / 删除 / 批量删除（含 PVC 依赖拦截）/ 设为默认 | `StorageClasses/index.jsx:42-57,126-191` | 只有「编辑 YAML」（`StorageClassDetailPage.tsx:82-90`） | 部分交付 | 其余登记在 `page-parity-report.md` 的历史不做项 |
+| 持久卷列表 + 详情 | `Storage/PV/index.jsx:138-217`、`detail.js:101-103` | `PersistentVolumesPage.tsx`、`PersistentVolumeDetailPage.tsx` | 已交付 | 只读（已登记） |
+| 持久卷 编辑信息/编辑 YAML/删除/批量删除 | `Storage/PV/index.jsx:47-111` | 无 | 批准不做 | 历史登记：编辑/删除持久卷 |
+| **集群级全命名空间 PVC 列表** | `Storage/Volumes/Volume/index.jsx:152-249` | `ClusterPersistentVolumeClaimsPage.tsx:68-146` | 已交付 | 含项目列、状态、容量、访问模式、存储类型 |
+| 卷快照列表 | `Storage/VolumeSnapshots/Snapshots/index.jsx` | `ClusterVolumeSnapshotsPage.tsx:95-174` | 已交付 | 只读 |
+| 快照创建（apply）/ 删除 | `VolumeSnapshots/Snapshots/index.jsx:81,139` | 无 `rowActions` | **待补** | — |
+| 快照类型列表 | `VolumeSnapshotClasses/index.jsx:72-116` | `ClusterVolumeSnapshotClassesPage.tsx:74-122` | 已交付 | 只读 |
+| **快照类型详情页** | `detail.js:109-111`、`VolumeSnapshotClasses/Detail/routes.js` | **无**（`routes/.../volume-snapshot-classes/` 下无 `$name.tsx`） | **待补** | 唯一仍缺的页面级条目 |
+| 快照类型 创建/编辑/编辑 YAML/删除 | `VolumeSnapshotClasses/index.jsx:19-70,118-125` | 无 | **待补** | — |
+| 快照内容详情 | `detail.js:105-107` | `VolumeSnapshotContentPage.tsx` + 列表路径重定向（`volume-snapshot-content/index.tsx`） | 已交付 | — |
+| `/snapshots/:namespace?` 别名 | `routes/index.js:251-254` | `snapshots/index.tsx` 重定向到 `volume-snapshots` | 已交付 | 书签兼容 |
+| JuiceFS 共享存储三页签（总览/卷/性能） | `Storage/JuiceFS/index.jsx:56-82` | `JuiceFSStoragePage.tsx:126-128`（volumes/usage/performance） | 已交付 | — |
+| JuiceFS 卷配额编辑（该页唯一写操作） | `JuiceFS/Volumes/index.jsx:32,39-66` | 无（只有 `quotaDrift` 只读提示，`JuiceFSStoragePage.tsx:171,332,351`） | **待补** | — |
+
+#### 2.6 GPU
+
+| 老能力 | 老证据 | 新实现现状 | 归宿 | 说明 |
+| --- | --- | --- | --- | --- |
+| GPU 卡列表（12 列 + 健康率/厂商型号总览） | `Nodes/Gpus/index.jsx:109-300,302-…` | `GpusPage.tsx:94-103`（5 个筛选 + 列显隐 + 刷新）、`:207-208`（统计）、`:110-183`（12 列） | 已交付 | — |
+| GPU 卡详情（RunningStatus / Monitoring 页签） | `detail.js:58-59`、`Nodes/Detail/GpuDetail/index.jsx:190` | `GpuDetailPage.tsx:90-93`（overview/pods/monitor/events **4 页签**） | 已交付 | 路由从 `nodes/:node/gpus/:uuid` 改为 `gpus/$name` |
+| GPU 资源监控三页签（总览/物理监控/排行） | `Monitor/Cluster/GpuResourcePage.jsx:31-57` | `GpuResourcePage.tsx`（summary + chart，无页签） | 部分交付 | 排行由 `GpusPage` 统计承接；旧「模型使用排行表」未核实 |
+| 边缘节点列表 / 详情 | `routes/index.js:106-109`、`detail.js:65-67` | `EdgeNodesPage.tsx`、`edgenodes/$name`（复用 `NodeDetailPage`） | 已交付 | 旧依赖 `edgeruntime`；新页面存在，能力未逐项核对 |
+
+#### 2.7 监控告警
+
+| 老能力 | 老证据 | 新实现现状 | 归宿 | 说明 |
+| --- | --- | --- | --- | --- |
+| 集群监控 6 页签 | `Monitor/Cluster/routes.js:29-67` | `ClusterMonitorPage.tsx:124` 五组（gpu/host/disk/network/rdma）+ `:436-476` 系统组件三组 | 已交付 | 页签改为分组，内容覆盖 物理资源 + etcd/apiserver/scheduler |
+| 物理资源（GPU/显存/CPU/内存/磁盘/IOPS/网络/RDMA） | `Monitor/Cluster/Monitor/PhysicalResource/index.jsx:336` | `ClusterMonitorPage.tsx:66-120`（29 张卡，含 RDMA 8 项） | 已交付 | — |
+| etcd / APIServer / Scheduler 监控 | `Monitor/Etcd:225`、`APIServer:159`、`Scheduler:165` | `ClusterMonitorPage.tsx:462-476` + `componentMonitorQueries.ts` | 已交付 | etcd 正分支环境受限（已登记：本部署 13 指标全 0 序列） |
+| 节点用量排行 | `Monitor/Cluster/Ranking/index.jsx:157` | `NodeUsagePage.tsx` + `NodeRankingPanel.tsx` | 已交付 | 概览也复用同一面板（Top5） |
+| 「总览」页签：节点状态 + 厂商饼图 + 组件健康徽标 | `Monitor/Cluster/Overview/index.jsx:443-521` | 节点统计在 `NodesPage.tsx:57-65`；组件入口在 `OverviewComponents.tsx:25-38` | 部分交付 | **旧「etcd / controller-manager / scheduler 健康徽标」无等价物**（新侧只有指标曲线，没有健康判定） |
+| 应用资源监控：物理资源 / 虚拟资源（9 类对象计数）/ 项目用量趋势 / 项目用量排行 | `Monitor/Resource/routes.js:25-38`、`Usage/{Physical,Virtual,Trend}` | `ResourceMonitorPage.tsx:52`（workloads / pods 两个排行页签） | 部分交付 | 物理资源在集群监控页；**9 类对象计数、项目维度排行/趋势无等价物** |
+| 集群级告警消息（自定义/内置两页签） | `projects/containers/Alerting/Messages/index.jsx:70-92` | `ClusterAlertingMessagesPage.tsx:17-19,152-157`（来源改为**列**） | 已交付 | 交互升级，理由写在源码注释 |
+| 集群级告警策略（两页签 + 启停/reset/编辑/删除/批量） | `Alerting/Policies/index.jsx:53-72,106-260` | `ClusterAlertingPoliciesPage.tsx:458-500,587-595` | 已交付 | 能力比旧版多（批量启停、reset） |
+| 告警策略详情（规则 + 消息两页签） | `Policies/Detail/routes.js:24-38` | `alerting-policies/$name` → `pages/monitoring/RuleGroupDetailPage.tsx` | 已交付 | — |
+| 自定义监控（列表 + 创建/编辑/YAML/删除 + 面板） | `CustomMonitoring/index.jsx:39-117` | `ClusterCustomMonitoringPage.tsx:117-176` + `custom-monitoring/$name` → `DashboardPanelsPage.tsx` | 已交付 | 面板编辑器批准不做（CHECK-07） |
+
+#### 2.8 集群设置与系统组件
+
+| 老能力 | 老证据 | 新实现现状 | 归宿 | 说明 |
+| --- | --- | --- | --- | --- |
+| 基本信息 + 编辑信息 | `BaseInfo/index.jsx:266-305` | `ClusterSettingsPage.tsx:56-107` | 已交付 | 与集群列表共用同一弹窗 |
+| 基本信息顶部 6 项资源总量（节点/CPU/内存/磁盘/GPU/vGPU） | `BaseInfo/index.jsx:112-154` | `ClusterOverviewPage.tsx` + `overviewResourceMetrics.ts:11-18`（7 项：gpu-memory/gpu/cpu/memory/pods/disk/nodes） | 已交付（别处承接） | 概览资源面板覆盖并超出旧范围 |
+| 更新 kubeconfig / 移除集群 | `BaseInfo/index.jsx:183-223` | `UpdateKubeconfigDialog.tsx`、`RemoveClusterDialog.tsx`（集群列表侧） | 已交付（别处承接） | 在集群列表而非设置页 |
+| 可见性：公开/私有 + **企业空间授权列表** | `Visibility/index.jsx:103-131,197-202` | `ClusterVisibilityPage.tsx:42-59`（`workspacePlacementApi` 增删 `spec.placement.clusters`） | 已交付 | 比旧版多「按标签选择的空间只读」说明 |
+| 成员：列表四列 | `Members/index.jsx:143-185` | `ClusterMembersPage.tsx` | 已交付 | — |
+| 成员：邀请 / 改角色 / 移除 / 批量移除 / 自我保护 | `Members/index.jsx:67-141` | `ClusterMembersPage.tsx:39-41,74-94`（invite/role/remove/bulk） | 已交付 | 有独立批次记录 |
+| 集群角色（列表 + 权限/授权用户两页签） | `routes/index.js:241-245`、`detail.js:73-75` | 无集群作用域路由 | 批准不做 | `capability-matrix.md` R-12：与平台角色同一批对象，统一在「访问控制 › 平台角色」维护 |
+| 日志收集 3 类页签（容器日志/资源事件/审计日志） | `LogCollections/index.jsx:96-118` | `ClusterLogCollectionsPage.tsx:50-60,145` | 已交付 | — |
+| 日志收集器详情（资源状态） | `LogCollections/Detail/routes.js:25-32` | `ClusterLogCollectionsPage.tsx:166,280`（`DetailDialog`） | 已交付 | 页面改对话框 |
+| 添加日志接收器（创建） | `LogCollections/index.jsx:120-172` | 无 | 批准不做 | 历史登记：修改收集器/输入/输出 |
+| 网关设置（集群 / 项目两页签） | `Gateway/index.jsx:53-68` | `ClusterGatewaysPage.tsx:270-271` | 已交付 | 每页签独立列显隐 |
+| 网关编辑 / 删除 | `Gateway/Components/GatewayCard/index.jsx:453` | `ClusterGatewaysPage.tsx:240-248` | 已交付 | — |
+| 网关创建 | `Gateway/Components/GatewayCard/index.jsx` | 无 `primaryAction` | **待补** | — |
+| 网关详情 5 页签（监控/配置/日志/资源状态/元数据） | `Gateway/Detail/routes.js:27-58` | `GatewayDetailPage.tsx:62,113,124`（属性 / 配置 / 关联应用路由） | 部分交付 | **监控图表、网关日志、资源状态(Pod)、元数据页签无等价物** |
+| 系统组件列表（按模块分组 + 异常计数徽标） | `ServiceComponents/index.jsx:69-144` | `ComponentsPage.tsx`（按健康排序，不分组）+ `OverviewComponents.tsx:25-38`（6 组入口带计数） | 部分交付 | 分组与计数在概览面板承接；列表页本身仍平铺 |
+| 系统组件详情（副本数 + Pod 列表） | `ServiceComponents/Detail/routes.js:25-33` | `ComponentDetailPage.tsx:76-124`（namespace/健康副本/启动时间 + 后端 Pod 表） | 已交付 | Pod 按名称前缀推导（注释说明标签不统一） |
+| kubeConfig 独立窗口页 | `routes/index.js:88-91` | 无 | 环境阻塞 | 读接口 405（`area-migration-plan.md` §5.5）；已由 `UserKubeconfigDialog.tsx` / `kubectl` 页部分承接 |
+
+#### 2.9 项目详情与终端
+
+| 老能力 | 老证据 | 新实现现状 | 归宿 | 说明 |
+| --- | --- | --- | --- | --- |
+| 集群下的项目详情（概览/容器组/网关/配额 4 页签） | `Projects/Detail/routes.js:28-49` | `NamespaceDetailPage.tsx:92-151`（基本信息 / ResourceQuota used-hard / LimitRange） | 已交付（只读） | 页签改为区块；编辑仍不做 |
+| 项目配额 / LimitRange **编辑** | `Projects/Detail/index.jsx:100-124` | 无（`NamespaceDetailPage.tsx:23` 明写 read-only，指向项目设置页） | 批准不做 | — |
+| kubectl 工具 | `Overview/Dashboard/Tools/index.jsx:44-73`（`/terminal/kubectl/:cluster`） | `KubectlPage.tsx`（`/clusters/$cluster/kubectl`）+ 概览 `KubectlConsoleDialog` | 已交付 | 从独立窗口改为集群内页面 |
+| 容器/节点终端 | `components/Terminal/index.jsx:36`（`ws(s)://`） | `ExecConsoleDialog`（`NodesPage.tsx:163`、`NodeDetailPage.tsx:183`） | 已交付 | BFF WebSocket upgrade 已补（R-13）；节点 shell 环境受限 |
+| 兜底 404 | `console/routes/index.js:28,41` | `routes/$.tsx` → `NotFoundPage` | 已交付 | 旧底稿 R16 已关闭 |
+
+### 3. 仍然缺失的能力（按严重度排序）
+
+| # | 能力 | 老证据 | 影响 | 归宿 |
+| --- | --- | --- | --- | --- |
+| 1 | **集群级 8 类负载的写能力全缺**：创建（先选项目）、编辑信息、编辑 YAML、重新部署、停止/启动、删除、批量停止/删除、联邦托管对象收敛 | `Workload/Deployments/index.jsx:71-138,220-228` | 集群页只能「看」，任何变更都要先跳进项目；8 页 × 5~7 个动作 | 待补 |
+| 2 | **集群级配置 3 页写能力全缺**（编辑信息/YAML/设置/删除 + 保密字典设默认仓库） | `ConfigMaps/index.jsx:45-80` 等 | 同上 | 待补 |
+| 3 | **全命名空间「按项目筛选」缺失**（负载 8 页 + 配置 3 页 + 网络 2 页） | `ResourceTable/ProjectSelect/index.jsx:56-71` | 旧页可按项目收窄，新页只能靠关键字；大集群下不可用 | 待补 |
+| 4 | **网关详情缺 4 个页签**（监控图表 / 网关日志 / 资源状态 Pod / 元数据） | `Gateway/Detail/routes.js:27-58` | 网关排障链路断开 | 部分交付 |
+| 5 | **应用资源监控缺「9 类对象计数 + 项目维度排行/趋势」** | `Monitor/Resource/Usage/Virtual/index.jsx:116-176`、`Ranking/Project` | 只有 workloads/pods 排行，项目维度与对象盘点无替代 | 部分交付 |
+| 6 | **快照类型详情页 + 快照类型写能力**（唯一仍缺的页面级条目） | `detail.js:109-111`、`VolumeSnapshotClasses/index.jsx:19-125` | 快照类型无法查详情/改删除 | 待补 |
+| 7 | **集群级网络 2 页写能力**（策略创建/编辑/删除；IP 池创建/编辑/分配企业空间/删除） | `Network/Policies/index.jsx:62-119`、`IPPools/index.jsx:46-150` | 只读 | 待补 |
+| 8 | **快照创建/删除、JuiceFS 配额编辑** | `VolumeSnapshots/Snapshots/index.jsx:81,139`、`JuiceFS/Volumes/index.jsx:32` | 存储运维写能力缺失 | 待补 |
+| 9 | **节点列表：批量编辑污点、污点数 tooltip、添加节点、导入失败节点处理** | `Nodes/index.jsx:128-166,198-209,485-503` | 批量运维退化为逐个操作 | 待补 |
+| 10 | **集群监控「总览」的组件健康徽标**（etcd/controller-manager/scheduler 健康态） | `Monitor/Cluster/Overview/index.jsx:443-484` | 新侧只有指标曲线，无「健康/不健康」判定 | 部分交付 |
+| 11 | **系统组件列表按模块分组 + 异常计数**（列表页本身） | `ServiceComponents/index.jsx:121-144` | 概览面板有分组入口，列表页仍平铺 | 部分交付 |
+| 12 | 网关创建 | `Gateway/Components/GatewayCard` | 只读 | 待补 |
+| 13 | 集群角色入口 / kubeConfig 读取 / 自定义监控面板编辑器 / 持久卷与存储类型写能力 | 见 §2 各行 | — | 批准不做或环境阻塞（**不计入分母外的“缺口”**） |
+
+### 4. 本轮推翻的旧结论（旧底稿说缺、实际已交付）
+
+> 这是复验价值最大的一节。旧底稿 2026-11-14 判「真缺失 35 / 功能 74 / 疑似回归 17」，本节逐条核对。
+> **共推翻 50 条**：页面级 34、疑似回归 15、有意不迁移 1。
+
+| # | 旧底稿结论 | 旧判 | 复验结论 | 证据 |
+| --- | --- | --- | --- | --- |
+| O-1 | GPU 卡详情（`nodes/:node/gpus/:gpuUuid`） | 真缺失 | 已交付，改路由 `gpus/$name` | `GpuDetailPage.tsx:90-93` |
+| O-2 | 边缘节点列表 | 真缺失 | 已交付 | `EdgeNodesPage.tsx`、`routes/.../edgenodes/index.tsx` |
+| O-3 | 边缘节点详情 | 真缺失 | 已交付（复用节点详情） | `routes/.../edgenodes/$name.tsx` |
+| O-4 | GPU 卡列表 | 真缺失 | 已交付（12 列 + 统计 + 5 筛选） | `GpusPage.tsx:94-208` |
+| O-5 | 系统组件详情 | 真缺失 | 已交付（含后端 Pod 表） | `ComponentDetailPage.tsx:76-124` |
+| O-6 | 集群下项目详情（4 页签） | 真缺失 | 已交付（只读，含配额/LimitRange） | `NamespaceDetailPage.tsx:92-151` |
+| O-7~14 | 集群级 8 类负载页 | 真缺失 | **页面已交付**（能力仍缺，见 §3-1） | `ClusterWorkloadsPage.tsx:23`、`ClusterPodsPage.tsx` |
+| O-15~17 | 集群级配置 3 页 | 真缺失 | **页面已交付**（只读） | `ClusterConfigMapsPage.tsx`、`ClusterSecretsPage.tsx`、`ClusterServiceAccountsPage.tsx` |
+| O-18 | 卷快照列表 | 真缺失 | 已交付 | `ClusterVolumeSnapshotsPage.tsx` |
+| O-19 | 快照类型列表 | 真缺失 | 已交付 | `ClusterVolumeSnapshotClassesPage.tsx` |
+| O-20 | 快照类型详情 | 真缺失 | **仍缺**（唯一未推翻） | 无 `volume-snapshot-classes/$name.tsx` |
+| O-21 | 快照内容详情 | 真缺失 | 已交付 + 列表路径重定向 | `VolumeSnapshotContentPage.tsx`、`volume-snapshot-content/index.tsx` |
+| O-22 | `/snapshots/:namespace?` 别名 | 真缺失 | 已交付（重定向） | `snapshots/index.tsx` |
+| O-23 | JuiceFS 共享存储三页签 | 真缺失 | 已交付 | `JuiceFSStoragePage.tsx:126-128` |
+| O-24 | GPU 资源监控 | 真缺失 | 已交付（页面在，排行由 GPU 列表承接） | `GpuResourcePage.tsx` |
+| O-25 | 应用资源监控 | 真缺失 | 已交付（2 页签，范围收窄见 §3-5） | `ResourceMonitorPage.tsx:52` |
+| O-26~28 | 集群级告警消息 / 策略 / 策略详情 | 真缺失 | 已交付 | `ClusterAlertingMessagesPage.tsx`、`ClusterAlertingPoliciesPage.tsx:458-500`、`RuleGroupDetailPage.tsx` |
+| O-29 | 集群级网络策略 | 真缺失 | 已交付（只读） | `ClusterNetworkPoliciesPage.tsx` |
+| O-30 | Pod IP 池列表 | 真缺失 | 已交付（只读） | `IpPoolsPage.tsx` |
+| O-31 | Pod IP 池详情（Workspaces 页签） | 真缺失 | 已交付 + 多一个 Pod 下钻 | `IpPoolDetailPage.tsx:102-156` |
+| O-32 | 日志收集器详情 | 真缺失 | 已交付（对话框） | `ClusterLogCollectionsPage.tsx:166,280` |
+| O-33 | 网关设置（两页签） | 真缺失 | 已交付 | `ClusterGatewaysPage.tsx:270-271` |
+| O-34 | 网关详情 | 真缺失 | 页面已交付（页签收窄见 §3-4） | `GatewayDetailPage.tsx:62-124` |
+| O-35 | 集群级全命名空间 PVC 列表 | 真缺失 | 已交付 | `ClusterPersistentVolumeClaimsPage.tsx` |
+| R-1 | 集群级负载 8 页（疑似回归） | 疑似回归 | 页面已交付 | 同 O-7~14 |
+| R-2 | 集群级配置 3 页 | 疑似回归 | 页面已交付 | 同 O-15~17 |
+| R-3 | 集群级网络 2 页 + 详情 | 疑似回归 | 已交付 | 同 O-29~31 |
+| R-4 | 集群级告警消息/策略/详情 | 疑似回归 | 已交付 | 同 O-26~28 |
+| R-5 | 节点列表 6 列 + 总览面板 + 列筛选 | 疑似回归 | 已交付（逐列核对，见 §2.4） | `NodesPage.tsx:57-129` |
+| R-6 | 节点详情 5 页签 + 4 操作 | 疑似回归 | 已交付（6 页签 + 5 操作） | `NodeDetailPage.tsx:101-146` |
+| R-7 | 系统组件详情页 | 疑似回归 | 已交付 | `ComponentDetailPage.tsx` |
+| R-8 | 项目详情 4 页签 + 配额/LimitRange | 疑似回归 | 已交付（只读） | `NamespaceDetailPage.tsx` |
+| R-9 | 存储类型详情关联 PVC 列表 | 疑似回归 | 已交付 | `StorageClassDetailPage.tsx:136-210` |
+| R-10 | 集群级全命名空间 PVC 列表 | 疑似回归 | 已交付 | 同 O-35 |
+| R-11 | 快照三件套 + JuiceFS 三页签 | 疑似回归 | 已交付 | 同 O-18/O-19/O-23 |
+| R-12 | 日志收集 3 页签 + 收集器详情 | 疑似回归 | 已交付 | `ClusterLogCollectionsPage.tsx:50-60,280` |
+| R-13 | 网关设置 + 详情 5 页签 | 疑似回归 | **部分推翻**：设置已交付，详情 5 页签 → 3 区块 | `GatewayDetailPage.tsx` |
+| R-14 | GPU 三页（列表/详情/资源监控） | 疑似回归 | 已交付 | `GpusPage.tsx`、`GpuDetailPage.tsx`、`GpuResourcePage.tsx` |
+| R-15 | 集群角色入口 | 疑似回归 | **未推翻**，但已登记批准不做 | `capability-matrix.md` R-12 |
+| R-16 | 兜底 404 路由 | 疑似回归 | 已交付 | `routes/$.tsx` |
+| R-17 | 节点详情「容器组」文档与实现不一致 | 疑似回归 | 已交付（pods 页签存在） | `NodeDetailPage.tsx:134,171` |
+| N-1 | 自定义监控 | 有意不迁移 | **已推翻**：已交付（列表 + 面板只读） | `ClusterCustomMonitoringPage.tsx`、`DashboardPanelsPage.tsx` |
+
+**未推翻的旧结论**（3 条）：快照类型详情（真缺口）、集群角色入口（登记不迁移）、kubeConfig 读取（环境阻塞）。
+**部分推翻**（1 条）：网关详情页签（R-13）。
+
+### 5. 与能力矩阵的冲突（需 Lead 裁决）
+
+| 位置 | 旧登记 | 复验事实 | 建议 |
+| --- | --- | --- | --- |
+| `capability-matrix.md:108`（R-14） | 「部分已补：GPU 使用率、GPU 显存、Pod 用量、时间同步仍缺」 | 四列**全部已实现**（`NodesPage.tsx:95-114`） | 更新为「已补」；R-14 剩余项只剩污点数 tooltip 与批量污点 |
+| `capability-matrix.md:109`（R-15） | 「部分已补：事件页签与 vGPU 模式仍缺」 | events 页签与 vGPU 入口**均已实现**（`NodeDetailPage.tsx:136,173`、`:130`） | 更新为「已补」 |
+| `capability-matrix.md:141`（四列矩阵·系统组件） | 「**无详情页**（R-08）」 | 已有 `ComponentDetailPage` | 该段已是历史快照，但 §0 未覆盖，建议在 CHECK 台账注明 |
+| `capability-matrix.md:142`（四列矩阵·项目） | 「**无详情页**（R-09）」 | 已有 `NamespaceDetailPage` | 同上 |
+| `capability-matrix.md:147`（四列矩阵·存储类型） | 「**缺关联 PVC 列表**（R-16）」 | 已实现 | 同上 |
+| `capability-matrix.md:149`（四列矩阵·集群日志收集） | 「**无分类页签、无收集器详情**（R-11）」 | 均已实现 | 同上 |
+
+> 上述 4 条四列矩阵条目位于 `<details>` 历史快照内，本身已声明「不作当前状态」；列出是为了避免读者把它当现状。
+
+### 6. 复验规模小结
+
+| 维度 | 2026-11-14 基线 | 2026-11-17 复验 |
+| --- | --- | --- |
+| 老集群作用域路由 | 54（当时计 54） | **54**（重数：72 − 15 项目详情 − 3 重定向） |
+| 新 UI 对应 | 13 页 | **45 个页面目录 / 63 条叶子路由** |
+| 页面级已交付 | 10 | **50**（+ 2 批准不做 + 1 环境阻塞 + 1 待补） |
+| 能力级待补 | 74 项 | **13 组**（§3 表，按能力族计；不再按 2026-11-14 的行数口径） |
+| 疑似回归 | 17 | **0 条未登记**（R-15 已登记为不迁移） |
+| 推翻的旧结论 | — | **50 条** |
+
+**结论**：集群作用域的**页面级缺口已基本关闭**，剩余缺口集中在**写能力**（负载 8 页、配置 3 页、网络 2 页、存储写操作、网关创建）与**跨项目筛选**；页面级仅剩「快照类型详情」1 条。旧底稿的「数量差本身就是最大缺口」这一判断已不再成立。
+
+---
+
+## 历史证据（2026-11-14 基线），不再作为当前状态
+
+> 以下正文是 2026-11-14 的缺口判定，**逐条已由上方「2026-11-17 复验」取代**。
+> 其中「真缺失 35 / 功能 74 项 / 疑似回归 17」等计数是当时基线，**不得作为当前进度、待办或批准不做的依据**。
+
 > 事实源：**老 console 源码**（`console/src/pages/clusters/**`、`console/src/pages/projects/containers/Alerting/**`、`console/server/config.yaml`）。
 > 新 UI：`console/kube-frontend/apps/console-next/src/routes/kube-frontend.clusters.$cluster/**`、`src/pages/cluster/**`、`src/areas/registry.ts`。
 > 已登记的有意不迁移：`console/docs/plans/page-parity-report.md`（cluster-management 一节，L26–L46）、`console/docs/plans/area-migration-plan.md` §5（L164–L189）。
