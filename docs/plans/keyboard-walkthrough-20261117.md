@@ -101,10 +101,16 @@ OK xc   configmaps / deployments / nodes   stops=10 no_ring=0 first=跳到主要
 python3 tools/multicluster_sweep.py --env-file <env> --app http://localhost:5182 --keyboard-local
 ```
 
+**四种主题 × 色调组合**各走一遍（换色调会同时移动焦点环与强调色文字）：
+
 ```
-OK dark  login  stops=8 no_ring=0 weak=0 worst=3.52
-OK light login  stops=8 no_ring=0 weak=0 worst=17.12
+OK violet/dark  login stops=8 no_ring=0 weak=0 worst=3.52
+OK violet/light login stops=8 no_ring=0 weak=0 worst=17.12
+OK green/dark   login stops=8 no_ring=0 weak=0 worst=9.9
+OK green/light  login stops=8 no_ring=0 weak=0 worst=18.49
 ```
+
+`violet/dark` 的 3.52 最贴近阈值（来自输入框聚焦态边框），其余组合余量充足。
 
 两个环境同时不可达时，这条命令仍能给出可访问性结论。
 

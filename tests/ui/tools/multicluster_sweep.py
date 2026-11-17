@@ -858,7 +858,7 @@ def sweep_keyboard(app: str, token: str | None, clusters: list[str], workspace: 
             _open_app(page, app, token)
         # Both themes: the focus ring must stay visible on the light theme too, and that is exactly
         # the kind of thing a screenshot review misses.
-        for theme in ('dark', 'light'):
+        for theme, accent in (('dark', 'violet'), ('light', 'violet'), ('dark', 'green'), ('light', 'green')):
             # Re-seed the session before each pass: one 401 signs the app out and the rest of the
             # walk then measures the login screen (which has inputs but no skip link).
             if not local_only:
@@ -869,6 +869,7 @@ def sweep_keyboard(app: str, token: str | None, clusters: list[str], workspace: 
                 page.goto(f'{app}/kube-frontend/{KEYBOARD_LOCAL_PAGES[0]}', wait_until='domcontentloaded')
                 page.wait_for_timeout(1500)
             page.evaluate("t => localStorage.setItem('ai-kit-theme', t)", theme)
+            page.evaluate("a => localStorage.setItem('ai-kit-accent', a)", accent)
             targets = ([(c, s, sc) for c in clusters for s, sc in KEYBOARD_PAGES] if not local_only
                        else [('local', segment, 'local') for segment in KEYBOARD_LOCAL_PAGES])
             for cluster, segment, scope in targets:
@@ -889,7 +890,7 @@ def sweep_keyboard(app: str, token: str | None, clusters: list[str], workspace: 
                         if seen and seen['tag'] not in ('BODY', 'HTML'):
                             walk.append(seen)
                     results.append({
-                        'theme': theme,
+                        'theme': f'{accent}/{theme}',
                         'cluster': cluster,
                         'page': segment,
                         'stops': len(walk),
