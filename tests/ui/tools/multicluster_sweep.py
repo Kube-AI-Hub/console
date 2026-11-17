@@ -1040,6 +1040,16 @@ LOCALE_PAGES = (
 )
 
 
+def _looks_like_host(text: str, match: str) -> bool:
+    """True when a dotted token is part of an address rather than a locale key."""
+    start = text.find(match)
+    while start >= 0:
+        before = text[start - 1] if start > 0 else ''
+        if before in ('@', '-', '/', '.'):
+            return True
+        start = text.find(match, start + 1)
+    return False
+
 def sweep_locale(app: str, token: str, cluster: str, workspace: str, project: str, locale: str) -> list[dict]:
     """Look for untranslated identifiers rendered as text.
 
@@ -1079,8 +1089,14 @@ def sweep_locale(app: str, token: str, cluster: str, workspace: str, project: st
             page.goto(url, wait_until='domcontentloaded')
             page.wait_for_timeout(9000)
             text = page.evaluate('() => document.body.innerText')
-            # Drop the sentences that merely contain a period: only standalone identifiers matter.
-            found = sorted({match for match in pattern.findall(text) if not match.endswith('.')})
+            # Only standalone identifiers matter: an email (`admin@kube-ai-hub.local`) and a hostname
+            # are not missing translations, and both match the shape `a.b`.
+            found = sorted({
+                match
+                for match in pattern.findall(text)
+                if not match.endswith('.')
+                and not _looks_like_host(text, match)
+            })
             label = segment.format(workspace=workspace) if '{workspace}' in segment else segment
             results.append({'page': label, 'locale': locale, 'raw': found[:6]})
         browser.close()

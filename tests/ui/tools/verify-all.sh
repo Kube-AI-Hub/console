@@ -9,6 +9,12 @@
 set -u
 
 ENV_FILE=${1:?usage: verify-all.sh <env-file> [app] [bff] [clusters] [workspace] [project]}
+# Absolute before the cd below: a relative path would resolve against tools/ and quietly vanish.
+case "$ENV_FILE" in
+  /*) ;;
+  *) ENV_FILE=$(cd "$(dirname "$ENV_FILE")" 2>/dev/null && pwd)/$(basename "$ENV_FILE") ;;
+esac
+[ -f "$ENV_FILE" ] || { echo "env file not found: $ENV_FILE" >&2; exit 2; }
 APP=${2:-http://localhost:5182}
 BFF=${3:-http://127.0.0.1:8093}
 CLUSTERS=${4:-host,xc}
@@ -61,9 +67,18 @@ run 'eight-phase baseline' python3 -u multicluster_sweep.py \
 echo
 echo '=== summary ==='
 printf '%s\n' "${summary[@]}"
-if [ "$failures" -eq 0 ]; then
-  echo 'VERDICT: PASS'
-  exit 0
+skipped=0
+for line in "${summary[@]}"; do
+  case "$line" in SKIP*) skipped=$((skipped + 1)) ;; esac
+done
+if [ "$failures" -gt 0 ]; then
+  echo "VERDICT: FAIL ($failures mode(s))"
+  exit 1
 fi
-echo "VERDICT: FAIL ($failures mode(s))"
-exit 1
+if [ "$skipped" -gt 0 ]; then
+  # Not PASS: part of the verification never ran, and calling that PASS would overstate the evidence.
+  echo "VERDICT: INCOMPLETE ($skipped mode(s) skipped)"
+  exit 4
+fi
+echo 'VERDICT: PASS'
+exit 0

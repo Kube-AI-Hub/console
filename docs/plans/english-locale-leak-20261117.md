@@ -57,6 +57,9 @@ OK en projects/spaces/members        raw=[]
 **正则要排除句子边界**：第一版用 `\.[a-zA-Z]` 把「use a Secret instead.」+「Read the docs」误判成 `instead.Read`；
 改为要求点号后**小写开头**（locale key 的段是小写，句首不是），噪声消失。
 
+**还要排除地址**：B200 上成员页的 `admin@kube-ai-hub.local` 被匹配成 `hub.local`。现在会跳过前面紧邻
+`@`、`-`、`/`、`.` 的命中——地址和主机名不是缺失的翻译。
+
 ## 6. 反思
 
 | # | 规则 |
