@@ -39,12 +39,55 @@ Error: Uncaught [Error: Invalid hook call. …]
 也就是说某个组件在渲染/副作用阶段抛了，而 vitest 把它记成用例失败。**`Dropdown`、`Modal`、`Pagination`、`ResourceList` 都受影响**，
 共同点是它们都经由 Radix 的 popper/portal 组件。
 
-## 下一步（按顺序）
+## 根因（已定位并验证）
 
-1. 用 `--reporter=verbose` + 单文件跑 `Dropdown` 那条，拿到**组件内部的完整调用栈**（现在的栈只到 jsdom 的 reportException）；
-2. 检查 `@radix-ui/*` 的版本是否与 `react-dom@18.3.1` 匹配（Radix 的某些版本对 React 18/19 行为不同）；
-3. 若确认是 Radix 版本问题，考虑升级 Radix 或把 ai-kit 的测试环境对齐 app（react 19 + 对应 Radix）；
-4. 修好后跑 `verify.py --no-e2e` 应能越过第一关。
+完整栈给出了答案：
+
+```
+at resolveDispatcher (.../node_modules/use-callback-ref/node_modules/react/cjs/react.development.js:1465:13)
+```
+
+`use-callback-ref`（Radix 的依赖）下面被装了一份**自己的 React**：
+
+| 位置 | 版本 |
+| --- | --- |
+| `ai-kit/node_modules/react` | **18.3.1** |
+| `ai-kit/node_modules/use-callback-ref/node_modules/react` | **16.14.0** |
+
+它的 peer 范围是 `^16.8 || ^17 || ^18 || ^19`，pnpm 给这个 peer 解析到了 **16.14.0**，于是 Radix 内部的 hook
+调用落到 React 16 的 dispatcher 上，与 18 的 renderer 不匹配 → `Invalid hook call`。
+
+## 验证
+
+把那份嵌套的 React 移开后再跑：
+
+```
+Test Files  21 passed (21)
+Tests       226 passed (226)
+```
+
+**9 条全绿**。移开的目录已还原，工作区未留改动。
+
+## 正确的修法（需安装步骤，未在本轮执行）
+
+在 `packages/ai-kit/package.json` 里钉住这个 peer：
+
+```json
+"pnpm": { "overrides": { "react": "18.3.1", "react-dom": "18.3.1" } }
+```
+
+然后 `pnpm install`。本轮试到安装阶段时，pnpm 提示要**删掉并重装整个 node_modules**——那会打断并行线正在用的环境，
+所以没有执行；override 也已回退，避免留下与 lockfile 不一致的声明。
+
+## 未尝试/已排除的其他修法
+
+| 尝试 | 结果 |
+| --- | --- |
+| `resolve.dedupe: ['react','react-dom']` | 无效（已回退） |
+| `resolve.alias` 指向 ai-kit 的 react | 无效（已回退） |
+| `test.server.deps.inline` 内联 use-callback-ref / @radix-ui | 无效（已回退） |
+
+三者都改不动**已装好的嵌套副本**——它由 node 直接解析，Vite 的配置管不到。
 
 ## 为什么现在不改
 
