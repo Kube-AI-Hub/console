@@ -345,6 +345,13 @@ def _first_name(bff: str, token: str, cluster: str, resource: str, namespaced: b
     ns = f'namespaces/{namespace}/' if namespaced else ''
     path = f'/kapis/{segment}resources.kubesphere.io/v1alpha3/{ns}{resource}?limit=1'
     status, text = _call(bff, token, 'GET', path)
+    # One 5xx here turns a page into "skipped", which reads like "no such object". Retry once: the
+    # A100 baseline showed two such skips that a clean run does not reproduce.
+    if status >= 500:
+        import time
+
+        time.sleep(2)
+        status, text = _call(bff, token, 'GET', path)
     if status != 200:
         return None
     items = json.loads(text).get('items') or []
