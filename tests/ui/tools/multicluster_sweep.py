@@ -746,6 +746,11 @@ def should_retry_tab(failures: list[tuple[int, str]]) -> bool:
     """One more click for a tab whose only failures are 5xx."""
     return transient_only(failures)
 
+#: Handle of the watchdog timer, so the `finally` in `__main__` can cancel it. A local of `main()`
+#: cannot be seen there -- that mistake turned a passing run into exit 1 with a NameError.
+BUDGET_TIMER = None
+
+
 class BudgetExceeded(RuntimeError):
     """Raised when a run outlives its budget."""
 
@@ -1217,7 +1222,8 @@ def main() -> int:
     parser.add_argument('--locale', default='en', help='locale used by --locale-scan (default en)')
     args = parser.parse_args()
 
-    budget_timer = with_budget(args.budget)
+    global BUDGET_TIMER
+    BUDGET_TIMER = with_budget(args.budget)
 
     env = _env(args.env_file)
     # Every mode gets the same three-try login the baseline has: a transient 503 at startup used to
@@ -1366,4 +1372,4 @@ if __name__ == '__main__':
         print(f'ABORTED: {cause} (the upstream is probably gone; see docs/plans/multicluster-playbook-20261117.md)')
         raise SystemExit(3)
     finally:
-        clear_budget(budget_timer)
+        clear_budget(BUDGET_TIMER)
