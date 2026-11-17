@@ -49,6 +49,7 @@ const {
   handlePublicConfig,
   handleAiManifest,
 } = require('./controllers/newConsole')
+const { newConsoleShell } = require('./components/newConsoleStatic')
 
 const {
   handleThirdLogin,
@@ -213,6 +214,9 @@ router
   // terminal
   .get('/terminal{/*path}', renderTerminal)
   // page entry
+  // The new console's client routes. Registered before the old console's page
+  // renderer so a deep link reaches the router rather than the old shell.
+  .get('/kube-frontend{/*path}', newConsoleShell)
   .all('{/*path}', renderView)
 
 module.exports = router

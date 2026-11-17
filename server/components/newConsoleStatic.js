@@ -28,17 +28,14 @@ const { NEW_CONSOLE_PREFIX, isNewConsolePath } = require('../libs/portalMounts')
  * That process is gone: the build is copied into this image and served here, so a
  * deployment has one web server instead of two.
  *
- * Two rules, because the app is a client-side router:
+ * **Two separate mounts, deliberately.**
  *
- * 1. Anything that names a real file under the build root is served as a file.
- *    Fingerprinted assets get a long cache; everything else revalidates.
- * 2. Anything else under the prefix that looks like a navigation is answered with
- *    `index.html`, so a deep link such as `/kube-frontend/clusters/host/overview`
- *    reaches the router instead of 404ing.
- *
- * A request for a missing `.js` chunk must **not** get `index.html`: the browser
- * would try to parse HTML as a module and fail with a syntax error that says
- * nothing about the real problem.
+ * `mountNewConsoleAssets` serves real files and runs with the other static mounts,
+ * early. `newConsoleShell` answers client routes with `index.html` and must run
+ * **last** — after the API routes — or it swallows `/kube-frontend/api/config` and
+ * `/kube-frontend/kapis/...` and the whole API answers with the SPA shell. That is
+ * exactly the bug this split fixes: mounting both early made every API path return
+ * `index.html` with a 200.
  */
 
 /** Where the build is copied in the image. */
@@ -65,13 +62,12 @@ function wantsShell(pathname, accept) {
 }
 
 /**
- * Mount the new console's static build.
+ * Mount the build's files.
  *
- * Returns the middleware, or `null` when no build is present — an installation
- * that does not ship the new console must behave exactly as before, including
- * answering 404 for its paths.
+ * Returns `false` when no build is present, so an installation that does not ship
+ * the new console behaves exactly as before, including answering 404 for its paths.
  */
-function mountNewConsole(app) {
+function mountNewConsoleAssets(app) {
   const distRoot = resolveDistRoot()
   if (!distRoot) {
     return false
@@ -106,18 +102,33 @@ function mountNewConsole(app) {
     )
   )
 
-  // The router's entry point for every client-side route.
-  app.use(async (ctx, next) => {
-    if (ctx.method !== 'GET' && ctx.method !== 'HEAD') return next()
-    if (!isNewConsolePath(ctx.path)) return next()
-    if (!wantsShell(ctx.path, ctx.headers.accept)) return next()
-
-    ctx.set('Cache-Control', 'no-cache')
-    ctx.type = 'html'
-    ctx.body = fs.createReadStream(path.join(distRoot, 'index.html'))
-  })
-
   return true
 }
 
-module.exports = { mountNewConsole, resolveDistRoot, wantsShell, DEFAULT_DIST }
+/**
+ * The router's entry point for client-side routes.
+ *
+ * Register this **after** every API route. A request for a missing `.js` chunk must
+ * not get `index.html`: the browser would try to parse HTML as a module and fail
+ * with a syntax error that says nothing about the real problem.
+ */
+async function newConsoleShell(ctx, next) {
+  if (ctx.method !== 'GET' && ctx.method !== 'HEAD') return next()
+  if (!isNewConsolePath(ctx.path)) return next()
+  if (!wantsShell(ctx.path, ctx.headers.accept)) return next()
+
+  const distRoot = resolveDistRoot()
+  if (!distRoot) return next()
+
+  ctx.set('Cache-Control', 'no-cache')
+  ctx.type = 'html'
+  ctx.body = fs.createReadStream(path.join(distRoot, 'index.html'))
+}
+
+module.exports = {
+  mountNewConsoleAssets,
+  newConsoleShell,
+  resolveDistRoot,
+  wantsShell,
+  DEFAULT_DIST,
+}

@@ -25,7 +25,7 @@ const fs = require('fs')
 const path = require('path')
 
 const { getServerConfig, root } = require('../libs/utils')
-const { mountNewConsole } = require('./newConsoleStatic')
+const { mountNewConsoleAssets } = require('./newConsoleStatic')
 
 const serverConfig = getServerConfig().server
 
@@ -129,7 +129,7 @@ module.exports = function(app) {
    * Placed after the other static mounts and before the dev-only proxy below, so
    * the shell fallback only answers paths nothing else claimed.
    */
-  mountNewConsole(app)
+  mountNewConsoleAssets(app)
 
   if (global.MODE_DEV) {
     // Proxy /kube-docs requests to Hugo dev server
