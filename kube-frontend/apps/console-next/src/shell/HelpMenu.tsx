@@ -71,7 +71,7 @@ export function HelpMenu({ documents }: HelpMenuProps = {}): React.ReactElement 
       trigger={
         <button
           type="button"
-          className="inline-flex h-11 items-center rounded-ai-md px-2 text-ai-fg-secondary hover:bg-ai-surface-2 hover:text-ai-fg sm:h-9"
+          className="hidden h-11 items-center rounded-ai-md px-2 text-ai-fg-secondary hover:bg-ai-surface-2 hover:text-ai-fg sm:inline-flex sm:h-9"
           title={t('shell.help')}
           aria-label={t('shell.help')}
           {...actionProps('shell:help-menu')}

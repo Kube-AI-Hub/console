@@ -27,6 +27,26 @@ overflowing: ['ml-auto flex items-center gap-1 right=400',
 - 出现在页头，属于 shell 的改动范围（本轮之前页头没有这两个控件时该用例是通过的）；
 - 本轮只记录证据，未改 shell——那是并行线正在改的文件，避免冲突。
 
-## 建议
+## 修法
 
-页头在窄屏下让右侧控件组换行或收起次要控件（语言/主题/用户菜单），保证 `scrollWidth <= innerWidth`。
+右侧控件组在 390px 下占 216→400（5 个控件 168px + 4 个 4px 间距 = 184px）。
+其中**帮助菜单**最不主要（文档入口在用户菜单里也有），所以在 `sm` 以下收起——与模块导航在 `md` 以下收起的同一个思路：
+
+```diff
+- className="inline-flex h-11 items-center rounded-ai-md px-2 … sm:h-9"
++ className="hidden h-11 items-center rounded-ai-md px-2 … sm:inline-flex sm:h-9"
+```
+
+## 修复后
+
+```
+scrollWidth: 390   innerWidth: 390      ← 页面级溢出消失
+```
+
+剩下被列出的 `right=467` 是表格本体，位于横向滚动容器内（预期行为）。
+
+## E2E 复跑的阻塞
+
+`THEME_02` 的复跑被另一处改动挡住：E2E helper 的登录端点已换成
+`/kapis/oauth.kubesphere.io/v1alpha1/login`，在当前部署上返回 **403**（并行线正在改这个 helper）。
+所以本轮的验证依据是上面的直接测量，不是 E2E 通过。
