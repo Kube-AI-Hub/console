@@ -10,6 +10,8 @@ from pages.canary_page import CanaryPage, strategy_manifest
 
 pytestmark = pytest.mark.ui
 
+from helpers.access_review import install_access_review_mock
+
 SSAR_GLOB = "**/selfsubjectaccessreviews"
 
 
@@ -24,19 +26,6 @@ def test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_GRAY_RELEASE_08(app_workloads_page, s
     name = f"tc-e2e-gray-perm-{suffix}"
     target = f"tc-e2e-gray-perm-svc-{suffix}"
     checks: list[str] = []
-
-    def deny(route, request):
-        route.fulfill(
-            status=200,
-            content_type="application/json",
-            body=json.dumps(
-                {
-                    "apiVersion": "authorization.k8s.io/v1",
-                    "kind": "SelfSubjectAccessReview",
-                    "status": {"allowed": False, "reason": "denied by test"},
-                }
-            ),
-        )
 
     ui.page.on(
         "request",
@@ -58,7 +47,7 @@ def test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_GRAY_RELEASE_08(app_workloads_page, s
         assert any('"delete"' in body for body in checks), checks
 
         # ---- denied: create disabled with a reason, delete not rendered ----
-        ui.page.route(SSAR_GLOB, deny)
+        install_access_review_mock(ui.page, lambda attributes: False)
         canary.open_list()
         canary.wait_ready()
         expect(canary.create_button).to_be_disabled(timeout=20_000)

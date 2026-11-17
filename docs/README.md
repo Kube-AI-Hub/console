@@ -48,6 +48,7 @@
 | [第三方登录状态页记录](plans/third-login-20261117.md) | 本批交付证据 | 平台设置 › 第三方登录（只读）：identityproviders 可用时按身份源显示卡片/空态；404/5xx 显示「本部署未提供身份源读取接口」；403 仍错误；老页面 Configure 弹窗只关闭不提交，故无写能力可迁 |
 | [集群作用域角色记录](plans/cluster-roles-20261117.md) | 本批交付证据 | 集群控制台的角色列表 + 详情两页签（规则 / IAM 已授权用户）；按集群前缀读取；平台角色页多集群选择器（host 可写、成员只读，mlu370 多集群 E2E 8.08s）；系统角色徽标；B200/mlu370 E2E 通过 |
 | [浮动工具箱与资源消费记录](plans/bill-toolbox-20261117.md) | 本批交付证据 | 全站可拖拽工具箱（6 入口、位置持久）+ 按项目/时间窗资源消费页；B200 计量已启用，项目行与聚合正确；未启用/403 分支单测；1600 截图 |
+| [ks-apiserver 部署记录](plans/kube-server-deploy-20261118.md) | 部署证据 | B200 部署 `node-join-20261118c`（85db2a5 + 两提交）；首次从 develop 构建导致登录故障、已回滚重发；admin/viewer 权限、节点 join、节点弹窗与权限 E2E 均通过 |
 | [权限检查后端记录](plans/permission-review-backend-20261117.md) | 非 admin 验收发现 + 后端前置 | 发现 `/apis` SSAR 以 ks service account 求值（所有检查 allowed）；ks-apiserver 新增 IAM `selfsubjectaccessreviews`，控制台改为请求用户求值并保留旧后端回退；Go 单测 2 + api-client 5 通过；旧后端返回 500 "no matches" 时回退原 SSAR（权限 E2E 5 条回归 60.01s 通过）；写身份审计 viewer 直写 kube/kapis generic 均 403，写身份正确；部署新后端后复测只读用户创建入口 |
 | [节点加入后端与弹窗记录](plans/node-add-backend-20261117.md) | 后端前置 + 控制台接入 | N-10：ks-apiserver 新增 `POST /kapis/resources.kubesphere.io/v1alpha3/nodes/join-command`，签发 24h bootstrap token 并返回 kubeadm join 命令；Go 单测 3 条通过；控制台「添加节点」弹窗（复制/到期/404/405 升级提示）已接；后端对 B200 真实 cluster-info 集成签发 token 通过（并修了无 current-context 的 500），B200 E2E 覆盖升级提示 + 契约 mock 正向；真实后端部署后再跑一次正向 |
 | [集群网关编辑与详情四视图记录](plans/cluster-gateway-edit-20261117.md) | 本批交付证据 | 集群网关编辑；详情元数据/资源状态/日志/监控（CPU/内存 + ingress 指标可用时追加，缺失明确说明）；创建/删除按职责边界不提供；B200 五条 E2E 通过 |

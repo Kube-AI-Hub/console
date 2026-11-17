@@ -5,6 +5,8 @@ import json
 import pytest
 from playwright.sync_api import expect
 
+from helpers.access_review import install_access_review_mock
+
 pytestmark = pytest.mark.ui
 
 WS = "system-workspace"
@@ -38,14 +40,7 @@ def test_TC_L3_KUBE_FRONTEND_APP_STORE_WORKSPACE_REPOS_04(ui_config, page, scree
 
     # --- 权限明确拒绝：写入入口不可用并说明（fail-open 的反面） ---
     page.evaluate("window.localStorage.setItem('kube-frontend-locale', 'zh')")
-    page.route(
-        "**/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
-        lambda route: route.fulfill(
-            status=201,
-            content_type="application/json",
-            body=json.dumps({"status": {"allowed": False}}),
-        ),
-    )
+    install_access_review_mock(page, lambda attributes: False)
     page.goto(origin + path)
     create_button = page.locator('[data-ai-id="workspace-repos:create"]')
     expect(create_button).to_be_visible(timeout=60_000)
@@ -62,9 +57,9 @@ def test_TC_L3_KUBE_FRONTEND_APP_STORE_WORKSPACE_REPOS_04(ui_config, page, scree
         page.keyboard.press("Escape")
 
     # --- 探测失败：保持可用（fail-open） ---
-    page.unroute("**/apis/authorization.k8s.io/v1/selfsubjectaccessreviews")
+    page.unroute("**/selfsubjectaccessreviews")
     page.route(
-        "**/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+        "**/kapis/iam.kubesphere.io/v1alpha2/selfsubjectaccessreviews",
         lambda route: route.fulfill(status=500, content_type="application/json", body="{}"),
     )
     page.goto(origin + path)

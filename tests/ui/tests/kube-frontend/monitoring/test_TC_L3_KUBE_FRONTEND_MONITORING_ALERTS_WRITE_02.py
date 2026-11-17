@@ -67,8 +67,12 @@ def test_TC_L3_KUBE_FRONTEND_MONITORING_ALERTS_WRITE_02(monitoring_page, screens
         assert _wait_for(ui.api, name, lambda group: group is not None), "创建后回读不到测试策略"
 
         def handle(route):
+            on_iam = "/kapis/iam.kubesphere.io/" in route.request.url
             if mode["value"] == "deny":
-                route.fulfill(status=201, content_type="application/json", body=json.dumps(_denied()))
+                if on_iam:
+                    route.fulfill(status=200, content_type="application/json", body=json.dumps({"allowed": False}))
+                else:
+                    route.fulfill(status=201, content_type="application/json", body=json.dumps(_denied()))
             elif mode["value"] == "error":
                 route.fulfill(status=500, content_type="application/json", body='{"message":"injected failure"}')
             else:

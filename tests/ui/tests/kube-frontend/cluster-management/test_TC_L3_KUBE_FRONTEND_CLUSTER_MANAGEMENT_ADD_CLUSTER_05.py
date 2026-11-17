@@ -3,9 +3,10 @@ from __future__ import annotations
 import pytest
 from playwright.sync_api import expect
 
+from helpers.access_review import install_access_review_mock
+
 pytestmark = pytest.mark.ui
 
-SSAR = "**/apis/authorization.k8s.io/v1/selfsubjectaccessreviews"
 CLUSTERS_WRITE = "/apis/cluster.kubesphere.io/v1alpha1/clusters"
 
 
@@ -17,19 +18,10 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_ADD_CLUSTER_05(cluster_managemen
     assert ui.api is not None
 
     # Refuse only the cluster-create review; other reviews (if any) keep the real answer.
-    def deny_create(route) -> None:
-        body = route.request.post_data or ""
-        allowed = not ("clusters" in body and "cluster.kubesphere.io" in body)
-        route.fulfill(
-            status=200,
-            content_type="application/json",
-            body=(
-                '{"apiVersion":"authorization.k8s.io/v1","kind":"SelfSubjectAccessReview",'
-                '"status":{"allowed":' + ("true" if allowed else "false") + "}}"
-            ),
-        )
-
-    ui.page.route(SSAR, deny_create)
+    install_access_review_mock(
+        ui.page,
+        lambda attributes: not (attributes.get("resource") == "clusters" and attributes.get("group") == "cluster.kubesphere.io"),
+    )
     created: list[str] = []
     ui.page.on(
         "request",

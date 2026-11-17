@@ -6,11 +6,10 @@ from uuid import uuid4
 import pytest
 from playwright.sync_api import expect
 
+from helpers.access_review import install_access_review_mock
 from pages.project_settings import ProjectSettingsPage
 
 pytestmark = pytest.mark.ui
-
-SSAR = "**/apis/authorization.k8s.io/v1/selfsubjectaccessreviews"
 
 
 def _wait_until(predicate, timeout_seconds: float = 90, interval: float = 2) -> bool:
@@ -22,23 +21,13 @@ def _wait_until(predicate, timeout_seconds: float = 90, interval: float = 2) -> 
     return False
 
 
-def _deny_update(route) -> None:
-    """SSAR that forbids `update` but allows `delete`.
+def _deny_update(page) -> None:
+    """Forbid `update` but allow `delete`.
 
     The page asks one question per verb, so denying only update must hide the edit
     action while leaving delete (and the row action menu itself) present.
     """
-    import json as _json
-
-    body = _json.loads(route.request.post_data or "{}")
-    verb = (((body.get("spec") or {}).get("resourceAttributes") or {}).get("verb"))
-    route.fulfill(
-        json={
-            "apiVersion": "authorization.k8s.io/v1",
-            "kind": "SelfSubjectAccessReview",
-            "status": {"allowed": verb != "update"},
-        }
-    )
+    install_access_review_mock(page, lambda attributes: attributes.get("verb") != "update")
 
 
 @pytest.mark.point
@@ -95,7 +84,7 @@ def test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_GATEWAY_03(project_settings_page, 
         )
 
         # ---- SSAR 明确拒绝：行编辑入口隐藏 + 页面说明；列表仍显示对象 ----
-        ui.page.route(SSAR, _deny_update)
+        _deny_update(ui.page)
         ui.open_cluster_gateways("project")
         ui.wait_cluster_gateways_ready()
         expect(ui.page.locator('[data-ai-id="cluster-gateways:project-edit-denied"]')).to_be_visible(timeout=60_000)
@@ -113,7 +102,7 @@ def test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_GATEWAY_03(project_settings_page, 
         assert "权限" in ui.gateway_edit_denied_text()
 
         # ---- 移除拦截后行删除 ----
-        ui.page.unroute(SSAR)
+        ui.page.unroute("**/selfsubjectaccessreviews")
         ui.open_cluster_gateways("project")
         ui.wait_cluster_gateways_ready()
         ui.open_cluster_gateway_actions(namespace, gateway_name)
@@ -141,7 +130,7 @@ def test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_GATEWAY_03(project_settings_page, 
         screenshot(ui.page, "cluster-gateways-project")
     finally:
         try:
-            ui.page.unroute(SSAR)
+            ui.page.unroute("**/selfsubjectaccessreviews")
         except Exception:  # noqa: BLE001 - cleanup must not mask the assertion
             pass
         ui.delete_project_gateway(namespace)
