@@ -85,6 +85,8 @@
 | C56 | **Tab 是独立的读取**：列表/详情页全绿不代表 Tab 全绿 | `--tabs` 一上线就在 xc 上抓到容器组与事件两个 Tab 失败 |
 | C57 | **换 API 组必须换选择器名字**：`involvedObject.*` → `regarding.*` | 发旧名字不报错、只静默返回空，比 404 更难发现 |
 | C58 | **巡检运行期间不要重建 `dist`** | 我在基线跑到一半时重建，导致一次 503 落在 JS 资源上、`xc serviceaccounts` 被记成 none |
+| C59 | **「未定性」要写清下一步怎么定性**，并在下一轮就做 | 关联容器组 Tab 上轮只记「body 292，未定性」，本轮查出是读了 host 的 pods |
+| C60 | **core 组资源在 `workloadPath` 里也要走 `corePath`**：否则成员集群静默读 host | pods/services 的读取路径都属于这一类 |
 
 ## D. 提交
 
