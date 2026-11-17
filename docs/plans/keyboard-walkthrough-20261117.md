@@ -93,7 +93,29 @@ OK xc   configmaps / deployments / nodes   stops=10 no_ring=0 first=跳到主要
 **发现**：输入框的环是 `ring-ai-accent/25`，单独看只有 2.0:1；靠 `focus-visible:border-ai-accent` 这个第二指示才达标。
 只测环会误判为缺陷，只测边框会漏掉按钮类控件——**两者都要测，取最高的一档**。
 
-## 7. 未覆盖
+## 7. 集群不可用时也能跑：`--keyboard-local`
+
+登录页不需要会话，却覆盖了输入框、按钮两类控件与全部焦点样式。所以另有一条只走登录页的模式：
+
+```bash
+python3 tools/multicluster_sweep.py --env-file <env> --app http://localhost:5182 --keyboard-local
+```
+
+```
+OK dark  login  stops=8 no_ring=0 weak=0 worst=3.52
+OK light login  stops=8 no_ring=0 weak=0 worst=17.12
+```
+
+两个环境同时不可达时，这条命令仍能给出可访问性结论。
+
+### 两个必须过滤的噪声
+
+| 现象 | 原因 | 处置 |
+| --- | --- | --- |
+| `SecurityError: localStorage denied` | 未先打开应用页就去写主题，页面还是 `about:blank` | 先落到目标页再写存储 |
+| 两个停靠点「没有焦点指示」 | Tab 越过最后一个控件后焦点停在 `<body>` | 过滤 `BODY`/`HTML`（那是循环结束，不是控件缺指示） |
+
+## 8. 未覆盖
 
 - **焦点环的对比度数值**没有测量（只断言「有可见的 outline/box-shadow」）；
 - `host` 的双主题遍待 A100 恢复后补跑。

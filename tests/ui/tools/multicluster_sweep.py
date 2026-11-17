@@ -813,8 +813,12 @@ KEYBOARD_PAGES = (
     ('nodes', 'cluster'),
 )
 
+#: Pages reachable without a session. They still cover inputs, buttons and the focus styles, so the
+#: keyboard check can run when no cluster is reachable.
+KEYBOARD_LOCAL_PAGES = ('login',)
 
-def sweep_keyboard(app: str, token: str, clusters: list[str], workspace: str, project: str, stops: int = 10) -> list[dict]:
+
+def sweep_keyboard(app: str, token: str | None, clusters: list[str], workspace: str, project: str, stops: int = 10, local_only: bool = False) -> list[dict]:
     """Walk the tab order of a few pages and report where focus goes.
 
     A page can look complete and still be unusable without a mouse: focus that never becomes visible,
@@ -850,18 +854,30 @@ def sweep_keyboard(app: str, token: str, clusters: list[str], workspace: str, pr
         browser = playwright.chromium.launch()
         context = browser.new_context(viewport={'width': 1400, 'height': 900})
         page = context.new_page()
-        _open_app(page, app, token)
+        if not local_only:
+            _open_app(page, app, token)
         # Both themes: the focus ring must stay visible on the light theme too, and that is exactly
         # the kind of thing a screenshot review misses.
         for theme in ('dark', 'light'):
             # Re-seed the session before each pass: one 401 signs the app out and the rest of the
             # walk then measures the login screen (which has inputs but no skip link).
-            _open_app(page, app, token)
+            if not local_only:
+                _open_app(page, app, token)
+            else:
+                # localStorage is origin-scoped: without a page on the app's origin the write throws
+                # SecurityError. Land on the first local page before touching storage.
+                page.goto(f'{app}/kube-frontend/{KEYBOARD_LOCAL_PAGES[0]}', wait_until='domcontentloaded')
+                page.wait_for_timeout(1500)
             page.evaluate("t => localStorage.setItem('ai-kit-theme', t)", theme)
-            for cluster in clusters:
-                for segment, scope in KEYBOARD_PAGES:
-                    url = (f'{app}/kube-frontend/{workspace}/clusters/{cluster}/projects/{project}/{segment}'
-                           if scope == 'project' else f'{app}/kube-frontend/clusters/{cluster}/{segment}')
+            targets = ([(c, s, sc) for c in clusters for s, sc in KEYBOARD_PAGES] if not local_only
+                       else [('local', segment, 'local') for segment in KEYBOARD_LOCAL_PAGES])
+            for cluster, segment, scope in targets:
+                    if scope == 'local':
+                        url = f'{app}/kube-frontend/{segment}'
+                    elif scope == 'project':
+                        url = f'{app}/kube-frontend/{workspace}/clusters/{cluster}/projects/{project}/{segment}'
+                    else:
+                        url = f'{app}/kube-frontend/clusters/{cluster}/{segment}'
                     page.goto(url, wait_until='domcontentloaded')
                     page.wait_for_timeout(9000)
                     page.evaluate('() => document.body.focus()')
@@ -870,7 +886,7 @@ def sweep_keyboard(app: str, token: str, clusters: list[str], workspace: str, pr
                         page.keyboard.press('Tab')
                         page.wait_for_timeout(120)
                         seen = page.evaluate(js)
-                        if seen:
+                        if seen and seen['tag'] not in ('BODY', 'HTML'):
                             walk.append(seen)
                     results.append({
                         'theme': theme,
@@ -1002,18 +1018,34 @@ def main() -> int:
     parser.add_argument('--data-identity', action='store_true', help="compare each collection between host and members")
     parser.add_argument('--tabs', action='store_true', help='click every tab of a few detail pages')
     parser.add_argument('--keyboard', action='store_true', help='walk the tab order of a few pages')
+    parser.add_argument('--keyboard-local', action='store_true', help='walk only the login page (no cluster needed)')
     args = parser.parse_args()
 
     env = _env(args.env_file)
     # Every mode gets the same three-try login the baseline has: a transient 503 at startup used to
     # kill a standalone run before it printed anything.
-    token = preflight(args.app, args.bff, (env.get('KA_USERNAME', 'admin'), env.get('KA_PASSWORD', '')))
-    if token is None:
+    # The login page needs no session, so the local walk must not be gated on the cluster being up.
+    token = None if args.keyboard_local else preflight(args.app, args.bff, (env.get('KA_USERNAME', 'admin'), env.get('KA_PASSWORD', '')))
+    if token is None and not args.keyboard_local:
         print('NOT RUN: the environment is not usable (see the preflight lines above)')
         return 2
     default_pages = PROJECT_PAGES if args.scope == 'project' else PAGES
     pages = tuple(p.strip() for p in args.pages.split(',') if p.strip()) or default_pages
     clusters = [c.strip() for c in args.clusters.split(',') if c.strip()]
+
+    if args.keyboard_local:
+        rows = sweep_keyboard(args.app, None, [], args.workspace, args.project, local_only=True)
+        bad = 0
+        for row in rows:
+            ok = row['stops'] >= 3 and not row['no_ring'] and not row['weak']
+            bad += 0 if ok else 1
+            flag = 'OK  ' if ok else 'FAIL'
+            print(f"{flag} {row.get('theme','dark'):5s} {row['page']:14s} stops={row['stops']:<3d} no_ring={len(row['no_ring'])} weak={len(row['weak'])} worst={row['worst']}")
+            if row['weak']:
+                print(f"       焦点环对比度不足 3:1: {row['weak'][:3]}")
+            if row['no_ring']:
+                print(f"       没有焦点指示: {row['no_ring'][:4]}")
+        return 1 if bad else 0
 
     if args.keyboard and not args.baseline:
         rows = sweep_keyboard(args.app, token, clusters, args.workspace, args.project)
