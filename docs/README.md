@@ -39,7 +39,7 @@
 | [概览补齐记录](plans/cluster-overview-completion-20261115.md) | 后续实现证据 | 已被布局批次推进；历史故障/节点数/测试数量均有时间边界 |
 | [概览视觉复盘](plans/cluster-overview-layout-review-20261115.md) | 后续视觉验收证据 | 四项展示要求及三档截图；仍不能代表全部主题、生产/member 或全站回归 |
 | [概览密度记录](plans/cluster-overview-density-20261117.md) | 后续视觉交付证据 | 节点块铺满与行式属性表；三档+深浅截图，生产/member/全站未验收 |
-| [添加集群对话框记录](plans/cluster-add-dialog-20261117.md) | 本批交付证据 | 两段式表单、标签/供应商、懒加载编辑器、名称预检、SSAR 门控；三档+深浅+中英文截图，部署/member/全站未验收 |
+| [添加集群对话框记录](plans/cluster-add-dialog-20261117.md) | 本批交付证据 | 两段式表单、标签/供应商、懒加载编辑器、名称预检、SSAR 门控、弹窗错误自动滚入视野；三档+深浅+中英文截图，部署/member/全站未验收 |
 | [集群告警策略记录](plans/cluster-alerting-policies-write-20261117.md) | 本批交付证据 | 两个页签状态列（规则状态/耗时/最近检查）、搜索/筛选/分页、自定义策略创建/编辑/编辑 YAML/启停（确认）/批量/删除、独立详情页（规则状态+告警消息+查看指标数据）；三档+深浅+绿色+英文截图，member/生产/全站未验收 |
 
 原地整合保留旧 URL、相对链接和 git 历史。历史文档的状态提示优先于其旧正文中的“当前/待补/已完成”。
@@ -68,6 +68,26 @@
 另补[指南 §7.5](legacy-ui-migration-guide.md#75-页面正常但写入失败先证明是谁的问题)：
 写入 5xx 先分清前端 / apiserver / 被调组件，再决定改代码还是记环境问题。
 `constitution.md` 与执行路线未改——铁律和执行顺序都没变，变的是判断依据。
+
+### 2026-11-17 增补（集群列表 / 添加集群批次）
+
+本轮的错误都不是某一页的问题，而是**共享层**的问题；教训并入既有条目，不新增流程：
+
+| 错误 | 已并入 |
+| --- | --- |
+| 弹窗里的下拉有 `overflow:auto` 却滚不动（Radix Dialog 的滚动锁在 document 捕获阶段拦截 portal） | 指南 §8 坑 17、constitution「复用既有组件」 |
+| 一个下拉打开时点另一个，第一个不收起（Radix 触发器在 `pointerdown` 上 `preventDefault`，抑制了 `mousedown`） | 指南 §8 坑 16 |
+| 校验错误渲染在可视区之外，按钮看起来没反应 | constitution「校验错误必须可见」、指南 §5、模板 §4 |
+| `DialogPrimitive.Portal` 晚一个 commit 挂载，`useEffect` 里的 ref 还是 `null` | 指南 §8 坑 18 |
+| 测试桩打在 `Element.prototype` 上被 `HTMLElement.prototype` 覆盖，看起来像产品没生效 | 指南 §8 坑 19 |
+| 在 ai-kit 单测里渲染 `Modal` 报 `Invalid hook call`（ai-kit 有独立 React） | 指南 §8 坑 20 |
+| 逐个页面补同一个行为，改漏一处就留一个 bug | constitution「复用既有组件」、SDD §2、路线「一页的执行顺序」 |
+| 每改一处就跑浏览器，时间全花在重复启动上 | SDD §2「改多处同类问题时先全部改完再统一验证」 |
+| 把并行批次的基线失败当成自己的 | SDD §2「先确认失败是不是自己引入的」、模板 §5、路线「暂停与恢复」 |
+
+另补[指南 §7.2](legacy-ui-migration-guide.md#72-起本地全栈)：一套本地栈可指向任何集群
+（`KS_API_URL` 决定后端），多环境并行各占一组端口；并记录 mlu370 与 B200 的两处真实差异
+（`x-check-exist` 与 `/oauth/token` 的密码格式）。
 
 ## 维护规则
 

@@ -155,6 +155,8 @@ python3 prd/tools/parity_check.py     # 已登记页面 ↔ 规格 ↔ 测试
   不用 `data-testid`——它同时服务自动化与智能体。
 - **`actionProps` 展开必须在 handler 之前**（写在 `onClick` 之后会覆盖业务 handler）。
 - **错误页给可恢复的重试**；403 显示权限原因，不在同一身份和权限条件下自动重试。
+- **表单错误要滚入视野**：提交失败时滚到第一个出错字段并聚焦（`focusFirstInvalidField`）；不知道谁失败时由 `Modal` 观察 `[role="alert"]` / `[data-invalid]` 自动揭示。只滚容器而不是错误段落，用 `block:'center'`，聚焦真正的控件（CodeMirror 是 `.cm-content`）。
+- **同类行为修在共享层**：`Modal`/`Select`/`FormField` 的改动一次覆盖全部页面；逐个页面补一遍必然改漏。
 - **移动端是断点决策**：`100dvh` 而非 `100vh`；横滑容器 `overscroll-x-contain`（否则触发浏览器返回手势）。
 - **原生终端交互保留**：kubectl、节点/容器终端及日志用独立近全屏弹窗，主动打开才建立会话；
   终端保留 Tab、历史、ANSI、光标、PTY 尺寸和目标已有的 vi/vim，Esc 留给程序。
@@ -222,6 +224,18 @@ KS_API_MODE=kapis KS_API_URL=http://127.0.0.1:18088 \
 ./scripts/dev-stack.sh status   # 三个端口各自在不在
 ```
 
+**一套环境可以指任何集群**：`KS_API_URL` 决定后端，BFF 与静态站可以多开几套并行（各自一组端口），
+不必为一个环境停掉另一个。切环境只换隧道与 `KS_API_URL`，前端产物不变：
+
+| 目标 | 隧道 | BFF |
+| --- | --- | --- |
+| B200 | `ssh -N -L 18088:<apiserver>:<port> sgb000` | `KS_API_URL=http://127.0.0.1:18088` |
+| mlu370 | `ssh -N -L 18093:10.233.60.28:80 cam` | `KS_API_URL=http://127.0.0.1:18093` |
+
+两个环境有真实差异，选哪个要先想清楚在验证什么（差异清单见 `环境/` 下各环境文档）：
+**mlu370 的 `ks-apiserver` 不实现 `x-check-exist`**（那是 console 服务端中间件），名称预检会静默跳过；
+它的 `/oauth/token` 在 ks-console 路径上要 `mix()` 密码，所以隧道指向 apiserver 而不是 30880。
+
 - 端口可用 `BFF_PORT` / `WEB_PORT` 覆盖；Vite 把 `/api` 代理到 `BFF_URL`，**两者对不上时所有请求 504**，
   表现为"页面加载不出来"。
 - `KS_API_MODE=kube` 是无鉴权临时 harness（用本机 kubectl 凭据、BFF 模拟分页），**任何"接口对不对"的结论都不能从这里得出**。
@@ -232,10 +246,10 @@ KS_API_MODE=kapis KS_API_URL=http://127.0.0.1:18088 \
 
 ```text
 浏览器 /login ──POST /api/session/login──▶ BFF（注入 client_id/secret）──POST /oauth/token──▶ ks-apiserver
-                                      ◀── {token,user}；浏览器写 localStorage['kubesphere-token']
+                                      ◀── {token,user}；浏览器写 localStorage['kah_token']
 ```
 
-密码**按原样发送**（旧加密变换已废弃）。新 console 只认 `kubesphere-token`，别的键名不生效——
+密码**按原样发送**（旧加密变换已废弃）。新 console 认 `kah_token`（与老 console 同一个键），别的键名不生效——
 这是"登录了但刷新又回登录页"的头号原因。
 
 登录失败按 BFF 错误码定位：
@@ -262,8 +276,12 @@ pytest tests/kube-frontend/<模块> -q -n 0   # 本批相关及共享影响用�
 既有夹具不要重写：`logged_in_context`（session 级真登录）、`anonymous_page`（无 token，登录用例专用）、
 `login_page`（页面对象）、`seeded_*`（造数据且失败也清理）。
 
-**断言登录成功**：等 URL 落到目标页 → 等 `data-ai-state` 离开 `loading` → 再断言 localStorage 有 token。
+**断言登录成功**：等 URL 落到目标页 → 等 `data-ai-state` 离开 `loading` → 再断言 localStorage 有 `kah_token`。
 只等其中一个都会拿到中间态。
+
+**填表前等页面水合。** 输入框在服务端渲染的 HTML 里就存在，但受控组件要等 React 挂载后才接受输入：
+水合前 `fill()` 的值会被首次渲染丢掉，表单提交的是空值，看起来像"登录页忽略密码"。等一个由 React
+拥有的信号（`data-ai-state="ready"`、某个交互按钮可用）再填。
 
 失败先看三样：`artifacts/<test>/` 的截图、Playwright trace、BFF 日志。用例失败不一定是页面问题——
 残留对象、token 过期、上游 5xx 都表现成同一个"断言没过"。
@@ -311,6 +329,11 @@ pytest tests/kube-frontend/<模块> -q -n 0   # 本批相关及共享影响用�
 | 13 | **成员集群的 `clusters/<id>` 段位置** | 成员集群上整页 404 | 段紧跟 `/kapis`、`/apis`，在 group/version **之前**；统一用 `clusterScoped` |
 | 14 | **core 组资源在成员集群上读写** | 写落到了主集群、读到了主集群的数据 | 读走 `corePath`（kapis 代理）；写走 `coreWritePath`，成员集群**明确拒绝** |
 | 15 | **读不到被渲染成「没有」** | 成员集群显示「该项目没有设置配额」，实际是读不到 | 缺失 / 不可用 / 空是三件事，各给一句不同的文案 |
+| 16 | **Radix 触发器在 `pointerdown` 上 `preventDefault`** | 一个下拉打开时点另一个，第一个不收起 | 外部关闭监听挂 `pointerdown`（捕获），不要用 `mousedown`——它会被前一个事件抑制掉 |
+| 17 | **弹窗内 portal 的滚动被 Dialog 锁拦截** | 下拉列表有 `overflow:auto` 却滚不动，`scrollTop` 恒为 0 | `react-remove-scroll` 在 document 捕获阶段 `preventDefault`；在弹层自身加捕获监听 `stopPropagation`，并让高度取自 `--radix-*-content-available-height` |
+| 18 | **`DialogPrimitive.Portal` 的内容晚一个 commit 挂载** | `useEffect` 里 `ref.current` 是 `null`，observer/测量静默不生效 | 用 callback ref（或 state）拿节点，不要在挂载时的 effect 里读 ref |
+| 19 | **测试桩打在 `Element.prototype` 上被子类覆盖** | 打了桩但断言说没调用，看起来像产品没生效 | 应用测试的 `setup.ts` 已定义 `HTMLElement.prototype.scrollIntoView`；桩要打在 `HTMLElement` 上 |
+| 20 | **ai-kit 测试里渲染 `Modal` 报 `Invalid hook call`** | 组件在 Storybook 正常，单测必失败 | ai-kit 有独立 React 18 安装；需要渲染组件的测试放 app 套件，ai-kit 只测无框架依赖的纯逻辑 |
 
 多集群部署另有一条命令：`cd tests/ui && python3 tools/multicluster_sweep.py --env-file <env> --baseline --clusters host,<member>`，
 覆盖集群级/项目级列表、数据归属、详情页、Tab 与写入落点；判读方式见[多集群验证手册](plans/multicluster-playbook-20261117.md)。
