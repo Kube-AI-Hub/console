@@ -7,6 +7,7 @@ import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from 
 import { api as apiClient } from '@/api';
 import { useT } from '@/i18n';
 import { useResourceListState, toListParams } from '@/components/resource/useResourceListState';
+import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { MutationAlert, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { ExecConsoleDialog } from '@/components/resource/ExecConsoleDialog';
 import { formatTimestamp } from '@/lib/time';
@@ -138,6 +139,7 @@ function NamespaceListPage({ kind, cluster }: ClusterListPageProps): React.React
                 key: 'status',
                 title: t('cluster.column.status'),
                 width: 120,
+                hideable: true,
                 hideBelow: 'md',
                 render: (row: Row) => {
                   const node = row as NodeSummary;
@@ -176,6 +178,7 @@ function NamespaceListPage({ kind, cluster }: ClusterListPageProps): React.React
                 key: 'cpu',
                 title: t('cluster.column.cpuUsage'),
                 width: 110,
+                hideable: true,
                 hideBelow: 'lg',
                 // The percentage is what an operator watches; the capacity sits in the
                 // title so the absolute number is one hover away.
@@ -194,6 +197,7 @@ function NamespaceListPage({ kind, cluster }: ClusterListPageProps): React.React
                 key: 'memory',
                 title: t('cluster.column.memoryUsage'),
                 width: 110,
+                hideable: true,
                 hideBelow: 'lg',
                 render: (row: Row) => {
                   const node = row as NodeSummary;
@@ -260,6 +264,7 @@ function NamespaceListPage({ kind, cluster }: ClusterListPageProps): React.React
                 key: 'pods',
                 title: t('cluster.column.pods'),
                 width: 90,
+                hideable: true,
                 hideBelow: 'xl',
                 render: (row: Row) => <span className="tabular-nums text-ai-fg-secondary">{(row as unknown as { podCount?: number }).podCount ?? '-'}</span>,
               },
@@ -267,6 +272,7 @@ function NamespaceListPage({ kind, cluster }: ClusterListPageProps): React.React
                 key: 'workspace',
                 title: t('cluster.column.workspace'),
                 width: 160,
+                hideable: true,
                 hideBelow: 'lg',
                 render: (row: Row) => <span className="truncate text-ai-fg-secondary">{(row as NamespaceSummary).workspace || '-'}</span>,
               },
@@ -274,10 +280,14 @@ function NamespaceListPage({ kind, cluster }: ClusterListPageProps): React.React
                 key: 'createTime',
                 title: t('cluster.column.createdAt'),
                 width: 170,
+                hideable: true,
                 hideBelow: 'xl',
                 render: (row) => <span className="tabular-nums text-ai-fg-muted">{formatTimestamp(row.createdAt)}</span>,
               },
             ],
+      ...(kind === 'namespaces'
+        ? { columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'namespaces:columns' } }
+        : {}),
       empty: {
         title: t(CLUSTER_DESCRIPTORS[kind].emptyTitleKey),
         description: t(CLUSTER_DESCRIPTORS[kind].emptyDescriptionKey),
@@ -297,6 +307,9 @@ function NamespaceListPage({ kind, cluster }: ClusterListPageProps): React.React
     }),
     [kind, list, t, total, cluster, query.isFetching, cordon.isPending],
   );
+
+  const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);
+  const columnVisibility = useColumnVisibility('namespaces', columnKeys);
 
   const state = query.isPending ? 'loading' : query.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
 
@@ -318,6 +331,10 @@ function NamespaceListPage({ kind, cluster }: ClusterListPageProps): React.React
         onSearchChange={list.setKeyword}
         onPageChange={list.setPage}
         onPageSizeChange={list.setPageSize}
+        {...(kind === 'namespaces' && columnVisibility.visibleColumnKeys
+          ? { visibleColumnKeys: columnVisibility.visibleColumnKeys }
+          : {})}
+        {...(kind === 'namespaces' ? { onVisibleColumnsChange: columnVisibility.setVisibleColumnKeys } : {})}
         onRefresh={() => { void query.refetch(); if (kind === 'nodes') void nodeUsage.refetch(); else void projectPods.refetch(); }}
         onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
           if (next) list.setSort(next);
