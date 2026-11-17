@@ -187,6 +187,22 @@ export function createClient(options: ClientOptions = {}): ApiClient {
   return { request, stream };
 }
 
+/**
+ * The readable half of a plain-text error body.
+ *
+ * ks-apiserver's proxy wraps its own sentence as
+ * `Internal Server Error: "/kapis/...": cluster 4paradigm is not ready`, and the whole
+ * string used to be cut at 300 characters — which on a monitoring request is spent
+ * entirely on the status line and the query string, so the reason never reached the
+ * reader. The path is noise either way (it is the request the page just made), so it is
+ * dropped and the reason kept, which is the only part that says what to do.
+ */
+function plainErrorText(raw: string): string {
+  const wrapped = /^[A-Za-z ]+:\s*"[^"]*":\s*([\s\S]+)$/.exec(raw);
+  const message = (wrapped?.[1] ?? raw).trim();
+  return message.length > 300 ? `${message.slice(0, 299)}…` : message;
+}
+
 async function toApiError(response: Response): Promise<ApiError> {
   const fallback: ApiErrorBody = {
     code: codeForStatus(response.status),
@@ -206,7 +222,7 @@ async function toApiError(response: Response): Promise<ApiError> {
   if (!trimmed || !(trimmed.startsWith('{') || trimmed.startsWith('['))) {
     const isHtml = trimmed.startsWith('<');
     return new ApiError(
-      { ...fallback, message: trimmed && !isHtml ? trimmed.slice(0, 300) : fallback.message },
+      { ...fallback, message: trimmed && !isHtml ? plainErrorText(trimmed) : fallback.message },
       response.status,
     );
   }

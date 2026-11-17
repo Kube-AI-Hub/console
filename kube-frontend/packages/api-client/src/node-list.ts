@@ -60,14 +60,18 @@ export function nodeListApi(client: Client) {
   async function metrics(cluster: string, names: string[], time: boolean, signal?: AbortSignal) {
     if (names.length === 0) return {};
     const escaped = names.map((name) => name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-    const body = await client.request<Parameters<typeof toNodeMetrics>[0]>('/kapis/monitoring.kubesphere.io/v1alpha3/nodes', {
-      query: {
-        cluster, limit: -1, last: true,
-        metrics_filter: (time ? ['node_time_seconds', 'node_timex_sync_status'] : NODE_LIST_METRICS).map((metric) => `${metric}$`).join('|'),
-        resources_filter: `^(?:${escaped.join('|')})$`,
-      },
-      ...(signal ? { signal } : {}),
-    });
+    const body = await client.request<Parameters<typeof toNodeMetrics>[0]>(
+      // Cluster in the path: a query parameter is ignored by the monitoring handler, which
+      // would return the host cluster's nodes for a member cluster's page.
+      clusterScoped('/kapis/monitoring.kubesphere.io/v1alpha3', cluster, 'nodes'),
+      {
+        query: {
+          limit: -1, last: true,
+          metrics_filter: (time ? ['node_time_seconds', 'node_timex_sync_status'] : NODE_LIST_METRICS).map((metric) => `${metric}$`).join('|'),
+          resources_filter: `^(?:${escaped.join('|')})$`,
+        },
+        ...(signal ? { signal } : {}),
+      });
     return toNodeMetrics(body ?? {});
   }
   return {

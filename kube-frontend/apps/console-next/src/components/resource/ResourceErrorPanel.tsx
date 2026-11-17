@@ -19,11 +19,33 @@ export interface ResourceErrorPanelProps {
   retryable?: boolean;
 }
 
+/**
+ * The generic phrases a transport failure is reported with.
+ *
+ * They say nothing a reader can act on, so the localized "network error" is better.
+ * Anything else a 5xx carries is the apiserver's own sentence — see `upstreamReason`.
+ */
+const GENERIC_FAILURE = /^(internal server error|bad gateway|service unavailable|gateway timeout|network request failed|request failed|error)$/i;
+
+/**
+ * The reason inside a 5xx message, when it has one.
+ *
+ * The client already strips the `Internal Server Error: "/kapis/...":` wrapper, but a body
+ * that never had one still arrives whole. What matters is that a permanent, specific
+ * sentence ("cluster 4paradigm is not ready") is not replaced by "network error, please
+ * retry" — the retry cannot succeed, and the sentence is the only next step the reader has.
+ */
+function upstreamReason(error: ApiError): string | undefined {
+  const message = error.message.trim();
+  const tail = message.replace(/^[A-Za-z ]+:\s*"[^"]*":\s*/, '').trim() || message;
+  return GENERIC_FAILURE.test(tail) ? undefined : tail;
+}
+
 export function errorMessage(t: ReturnType<typeof useT>, error: unknown): string {
   if (!(error instanceof ApiError)) return t('error.unknown');
   if (error.isPermission) return t('error.unauthorized');
   if (error.isNotFound) return t('error.notFound');
-  if (error.retryable) return t('error.network');
+  if (error.retryable) return upstreamReason(error) ?? t('error.network');
   return error.message;
 }
 

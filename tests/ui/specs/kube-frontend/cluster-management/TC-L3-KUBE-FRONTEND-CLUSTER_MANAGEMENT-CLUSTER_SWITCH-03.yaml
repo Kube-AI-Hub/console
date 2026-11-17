@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_SWITCH-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: cluster-switch
+title: 切换集群弹窗 · 搜索与刷新同一行
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/overview'
+prd: prd/kube-frontend/cluster-management/cluster-switch.md
+design: design/kube-frontend/cluster-management/cluster-switch.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_SWITCH-03
+
+story:
+- US1
+
+product: 弹窗里刷新按钮紧贴搜索框右侧，与列表右缘对齐，不再单独占一行。
+preconditions:
+- 已登录，且有平台管理权限
+- 平台为多集群模式
+steps:
+- 在集群概览打开切换器
+- 读取搜索框与刷新按钮的包围盒
+- 点击刷新并观察按钮状态
+expected:
+- 搜索框与刷新按钮顶边相同、同一行内，二者间距为一行内的常规间距
+- 刷新按钮右缘与下方集群列表右缘对齐
+- 刷新按钮可访问名称为「刷新」，请求进行中禁用
+troubleshoot:
+- 行高不一致：搜索框需 min-w-0 flex-1，刷新按钮固定 36px 方形，二者才在同一基线
+- 右缘不齐：列表与搜索行须共用同一容器内边距
+update_automation:
+- 选择器变化时改 pages/cluster_fleet.py 的 open_switcher 与新增的 switcher_search/switcher_refresh

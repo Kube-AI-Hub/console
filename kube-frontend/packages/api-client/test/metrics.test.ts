@@ -54,8 +54,9 @@ describe('rangeMetricsApi.workload', () => {
       start: 1700000000,
       end: 1700000060,
       step: '60s',
-      cluster: 'host',
     });
+    // The cluster travels in the path only: a query parameter is ignored upstream.
+    expect(calls[0]!.query).not.toHaveProperty('cluster');
     expect(series).toEqual([
       { name: 'workload_cpu_usage', points: [{ at: 1_700_000_000_000, value: 0.5 }] },
     ]);

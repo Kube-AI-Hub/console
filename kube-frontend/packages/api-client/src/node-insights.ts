@@ -1,4 +1,5 @@
 import type { Client } from './client';
+import { clusterScoped } from './paths';
 import { gpusApi } from './gpu';
 import { NODE_LIST_METRICS, toNodeMetrics } from './node-list';
 
@@ -17,8 +18,9 @@ export function nodeInsightsApi(client: Client) {
   return {
     async instant(params: { cluster: string; node: string; signal?: AbortSignal }): Promise<NodeInsightValues> {
       const body = await client.request<Parameters<typeof toNodeMetrics>[0]>(
-        `/kapis/monitoring.kubesphere.io/v1alpha3/nodes/${encodeURIComponent(params.node)}`, {
-          query: { cluster: params.cluster, last: true, metrics_filter: NODE_INSIGHT_METRICS.map((key) => `${key}$`).join('|') },
+        // Cluster in the path: `?cluster=` is ignored upstream and would read the host's node.
+        clusterScoped('/kapis/monitoring.kubesphere.io/v1alpha3', params.cluster, `nodes/${encodeURIComponent(params.node)}`), {
+          query: { last: true, metrics_filter: NODE_INSIGHT_METRICS.map((key) => `${key}$`).join('|') },
           ...(params.signal ? { signal: params.signal } : {}),
         });
       return (toNodeMetrics(body ?? {})[params.node] ?? {}) as NodeInsightValues;

@@ -1,4 +1,5 @@
 import type { Client } from './client';
+import { clusterScoped } from './paths';
 
 /**
  * Workload usage ranking for one project.
@@ -43,9 +44,8 @@ export function workloadRankingApi(client: Client) {
           metric_name?: string;
           data?: { result?: Array<{ metric?: { workload?: string; owner_kind?: string }; value?: [number, string] }> };
         }>;
-      }>(`/kapis/monitoring.kubesphere.io/v1alpha3/namespaces/${encodeURIComponent(params.namespace)}/workloads`, {
+      }>(clusterScoped('/kapis/monitoring.kubesphere.io/v1alpha3', params.cluster, `namespaces/${encodeURIComponent(params.namespace)}/workloads`), {
         query: {
-          ...(params.cluster ? { cluster: params.cluster } : {}),
           sort_metric: params.metric,
           sort_type: 'desc',
           page: 1,

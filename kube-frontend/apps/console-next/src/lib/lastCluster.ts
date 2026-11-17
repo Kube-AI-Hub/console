@@ -10,9 +10,15 @@
  * the caller falls back to whatever the route says.
  */
 const PREFIX = 'kube-frontend:last-cluster';
+/** Alias the switcher showed for that cluster, so a reload keeps the same label. */
+const ALIAS_PREFIX = 'kube-frontend:cluster-alias';
 
 export function lastClusterKey(username: string): string {
   return `${PREFIX}:${username || 'anonymous'}`;
+}
+
+function aliasKey(username: string, cluster: string): string {
+  return `${ALIAS_PREFIX}:${username || 'anonymous'}:${cluster}`;
 }
 
 export function readLastCluster(username: string): string {
@@ -27,6 +33,31 @@ export function readLastCluster(username: string): string {
 export function rememberLastCluster(username: string, cluster: string): void {
   try {
     window.localStorage.setItem(lastClusterKey(username), cluster);
+  } catch {
+    // Ignored for the same reason.
+  }
+}
+
+/**
+ * The alias the switcher last showed for a cluster.
+ *
+ * The switcher's own label is the alias when the cluster has one, and the cluster list is
+ * fetched when the dialog opens — a page reload would otherwise show the raw object name
+ * until the reader opened the switcher. The alias is a display fact about a cluster, so it
+ * is remembered next to the cluster it belongs to rather than re-read on every page load.
+ */
+export function readClusterAlias(username: string, cluster: string): string {
+  try {
+    return window.localStorage.getItem(aliasKey(username, cluster)) ?? '';
+  } catch {
+    return '';
+  }
+}
+
+export function rememberClusterAlias(username: string, cluster: string, alias: string): void {
+  try {
+    if (alias) window.localStorage.setItem(aliasKey(username, cluster), alias);
+    else window.localStorage.removeItem(aliasKey(username, cluster));
   } catch {
     // Ignored for the same reason.
   }

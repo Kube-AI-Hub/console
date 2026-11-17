@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_SWITCH-05
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: cluster-switch
+title: 切到未就绪集群 · 概览不留上一集群数据
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/overview'
+prd: prd/kube-frontend/cluster-management/cluster-switch.md
+design: design/kube-frontend/cluster-management/cluster-switch.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_SWITCH-05
+
+story:
+- US1
+
+product: 切换到未就绪集群后，各区块按目标集群重读；失败显示原因，不显示上一集群的数值。
+preconditions:
+- 已登录，且有平台管理权限
+- 存在一个未就绪的代理集群（用例自行创建，结束删除）
+steps:
+- 在已就绪集群概览记录资源用量、节点数、排行行、Kubernetes 状态与系统组件
+- 用切换器切到未就绪集群
+- 逐块读取资源用量、节点数、排行、Kubernetes 状态、系统组件与基本信息
+- 对同一集群地址整页刷新后再读一次
+expected:
+- 资源用量、节点数、Kubernetes 状态显示「监控数据不可用」，不出现上一集群的数字
+- 排行与系统组件显示失败与上游原因（cluster <name> is not ready），行数为 0
+- 基本信息状态为「未就绪」，节点数为目标集群的值而非上一集群的值
+- 整页刷新后结论相同，说明不是仅靠客户端状态复位
+troubleshoot:
+- 出现上一集群节点名：检查排行与节点读取是否把集群放进路径（DEC-06）
+- 显示「网络异常」而非原因：5xx 原因被丢弃（DEC-07）
+update_automation:
+- 页面对象选择器变化时改 pages/cluster_overview.py

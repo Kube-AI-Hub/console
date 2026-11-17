@@ -1,4 +1,5 @@
 import type { Client } from './client';
+import { clusterScoped } from './paths';
 
 export const NODE_RANK_METRICS = [
   'node_gpu_memory_utilisation', 'node_gpu_utilisation', 'node_gpu_allocated',
@@ -24,13 +25,17 @@ export function nodeRankingApi(client: Client) {
         results?: Array<{ metric_name?: string; data?: { result?: Array<{
           metric?: { node?: string }; value?: [number, string];
         }> } }>;
-      }>('/kapis/monitoring.kubesphere.io/v1alpha3/nodes', {
-        query: { cluster: params.cluster, type: 'rank', sort_metric: params.metric,
-          sort_type: params.order, page: params.page, limit: params.pageSize,
-          metrics_filter: METRICS.map((metric) => `${metric}$`).join('|'),
-          ...(params.keyword ? { resources_filter: params.keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') } : {}),
-        }, ...(params.signal ? { signal: params.signal } : {}),
-      });
+      }>(
+        // Cluster in the path: the monitoring handler ignores `?cluster=` and would rank the
+        // host cluster's nodes under the member cluster's title (see `clusterScoped`).
+        clusterScoped('/kapis/monitoring.kubesphere.io/v1alpha3', params.cluster, 'nodes'),
+        {
+          query: { type: 'rank', sort_metric: params.metric,
+            sort_type: params.order, page: params.page, limit: params.pageSize,
+            metrics_filter: METRICS.map((metric) => `${metric}$`).join('|'),
+            ...(params.keyword ? { resources_filter: params.keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') } : {}),
+          }, ...(params.signal ? { signal: params.signal } : {}),
+        });
       const rows = new Map<string, NodeRankRow>();
       for (const result of body.results ?? []) {
         if (!METRICS.includes(result.metric_name as NodeRankMetric)) continue;

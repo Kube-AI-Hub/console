@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_SWITCH-04
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: cluster-switch
+title: 切换集群 · 别名在整页刷新后保持
+entry_url: '{BASE_URL}/kube-frontend/clusters/host/overview'
+prd: prd/kube-frontend/cluster-management/cluster-switch.md
+design: design/kube-frontend/cluster-management/cluster-switch.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_SWITCH-04
+
+story:
+- US1
+
+product: 侧栏切换器在整页刷新前后显示同一个标签，不因刷新从别名退回集群名。
+preconditions:
+- 已登录，且有平台管理权限
+- 当前集群带 kubesphere.io/alias-name 注解
+steps:
+- 打开该集群概览，读取切换器文字（别名与集群名两行）
+- 整页重新加载同一地址
+- 再次读取切换器文字
+- 清空该集群别名后重新加载
+expected:
+- 刷新前与刷新后切换器文字一致：第一行别名，第二行「集群名 · 当前集群」
+- 别名被清空后下一次加载显示集群名，不残留旧别名
+troubleshoot:
+- 刷新后变回集群名：确认集群列表已随外壳加载，且别名记忆键含用户名
+- 残留旧别名：别名清空时要删除记忆键，而不是写入空串
+update_automation:
+- 选择器变化时改 pages/cluster_fleet.py 的 switcher_current

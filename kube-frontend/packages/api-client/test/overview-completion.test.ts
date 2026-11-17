@@ -47,8 +47,12 @@ describe('overview full parity contracts', () => {
     expect(data.items.map((row) => row.name)).toEqual(['a', 'b']);
     expect(data.items[0]?.values).toMatchObject({ node_gpu_total: 7, node_gpu_allocated: 6, node_load1: 1.2 });
     expect(data.items[1]?.values.node_load1).toBeUndefined();
+    // The cluster is a path segment: the handler reads it from the path, so a query parameter
+    // would rank the host cluster's nodes under a member cluster's title.
+    expect(urls[0]?.pathname).toBe('/kapis/clusters/member/monitoring.kubesphere.io/v1alpha3/nodes');
+    expect(urls[0]?.searchParams.has('cluster')).toBe(false);
     expect(Object.fromEntries(urls[0]!.searchParams)).toMatchObject({
-      cluster: 'member', type: 'rank', page: '2', limit: '5', resources_filter: 'gpu\\.1', sort_metric: 'node_gpu_allocated',
+      type: 'rank', page: '2', limit: '5', resources_filter: 'gpu\\.1', sort_metric: 'node_gpu_allocated',
     });
   });
   it('scopes component reads and does not silently read host for a member', async () => {

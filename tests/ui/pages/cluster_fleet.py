@@ -67,6 +67,15 @@ class ClusterFleetPage:
         expect(dialog).to_be_visible(timeout=20_000)
         return dialog
 
+    def switcher_search(self, dialog: Locator) -> Locator:
+        return dialog.locator('[data-ai-id="clusters:switch-search"]')
+
+    def switcher_refresh(self, dialog: Locator) -> Locator:
+        return dialog.locator('[data-ai-id="clusters:switch-refresh"]')
+
+    def switcher_rows(self, dialog: Locator) -> Locator:
+        return dialog.locator("ul > li")
+
     def switcher_current(self) -> str:
         return self.page.locator('[data-ai-id="shell:cluster-switcher"]').first.inner_text()
 

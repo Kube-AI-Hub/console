@@ -333,9 +333,18 @@ export function componentMetricsApi(client: Client) {
     signal?: AbortSignal;
   }): Promise<Map<string, Array<{ labels: Record<string, string>; value: number }>>> {
     const body = await client.request<MonitoringResponse>(
-      `/kapis/monitoring.kubesphere.io/v1alpha3/components/${encodeURIComponent(params.component)}`,
+      /*
+       * The cluster belongs in the **path**, not a query parameter.
+       *
+       * The monitoring handler reads `cluster` from `req.PathParameter` only
+       * (`pkg/kapis/monitoring/v1alpha3/helper.go`), so `?cluster=<member>` is ignored and the
+       * host cluster answers: measured on mlu370 (2026-11-17) the query form returned 128 cores
+       * for `4paradigm` while the path form returned the member's own 384. A silently wrong
+       * answer is worse than a failure — the panel looks populated and belongs to another cluster.
+       */
+      clusterScoped('/kapis/monitoring.kubesphere.io/v1alpha3', params.cluster, `components/${encodeURIComponent(params.component)}`),
       {
-        query: { metrics_filter: params.metrics.map((m) => `${m}$`).join('|'), cluster: params.cluster },
+        query: { metrics_filter: params.metrics.map((m) => `${m}$`).join('|') },
         ...(params.signal ? { signal: params.signal } : {}),
       },
     );
@@ -580,7 +589,7 @@ function escapeResourceFilter(value: string): string {
  */
 export function rangeMetricsApi(client: Client) {
   async function query(
-    pathname: string,
+    rest: string,
     params: RangeQuery,
     extra: Record<string, string | number | undefined> = {},
     expectedLabels: Record<string, string> = {},
@@ -593,17 +602,24 @@ export function rangeMetricsApi(client: Client) {
           result?: Array<{ metric?: Record<string, string>; values?: Array<[number, string]> }>;
         };
       }>;
-    }>(pathname, {
-      query: {
-        metrics_filter: params.metrics.map((metric) => `${metric}$`).join('|'),
-        start: Math.round(params.start / 1000),
-        end: Math.round(params.end / 1000),
-        step: params.step,
-        cluster: params.cluster,
-        ...extra,
+    }>(
+      /*
+       * Cluster in the path, as `clusterMetricsApi.usage` does: the monitoring handler reads
+       * `cluster` from `req.PathParameter` only, so `?cluster=<member>` is ignored and the host
+       * cluster answers — the same series drawn under another cluster's title.
+       */
+      clusterScoped('/kapis/monitoring.kubesphere.io/v1alpha3', params.cluster, rest),
+      {
+        query: {
+          metrics_filter: params.metrics.map((metric) => `${metric}$`).join('|'),
+          start: Math.round(params.start / 1000),
+          end: Math.round(params.end / 1000),
+          step: params.step,
+          ...extra,
+        },
+        ...(params.signal ? { signal: params.signal } : {}),
       },
-      ...(params.signal ? { signal: params.signal } : {}),
-    });
+    );
 
     const out: MetricSeries[] = [];
     for (const result of body?.results ?? []) {
@@ -630,8 +646,8 @@ export function rangeMetricsApi(client: Client) {
 
   return {
     async gpuCard(params: RangeQuery & { node: string; uuid: string }): Promise<MetricSeries[]> {
-      const pathname = `/kapis/monitoring.kubesphere.io/v1alpha3/nodes/${encodeURIComponent(params.node)}`;
-      return query(pathname, params, { gpu_uuid: params.uuid }, { node: params.node, uuid: params.uuid });
+      const rest = `nodes/${encodeURIComponent(params.node)}`;
+      return query(rest, params, { gpu_uuid: params.uuid }, { node: params.node, uuid: params.uuid });
     },
     async cluster(
       params: RangeQuery & {
@@ -641,7 +657,7 @@ export function rangeMetricsApi(client: Client) {
       },
     ): Promise<MetricSeries[]> {
       const scope = params.scope === 'node' && params.node ? `nodes/${encodeURIComponent(params.node)}` : (params.scope ?? 'cluster');
-      return query(`/kapis/monitoring.kubesphere.io/v1alpha3/${scope}`, params, {
+      return query(scope, params, {
         ...(params.node ? { node: params.node } : {}),
         ...(params.namespace ? { namespace: params.namespace } : {}),
       });
@@ -658,18 +674,18 @@ export function rangeMetricsApi(client: Client) {
     async workload(
       params: RangeQuery & { namespace: string; kind: MetricWorkloadKind; workload: string },
     ): Promise<MetricSeries[]> {
-      const pathname = `/kapis/monitoring.kubesphere.io/v1alpha3/namespaces/${encodeURIComponent(
+      const rest = `namespaces/${encodeURIComponent(
         params.namespace,
       )}/workloads/${WORKLOAD_KIND_SEGMENT[params.kind]}`;
-      return query(pathname, params, { resources_filter: escapeResourceFilter(params.workload) });
+      return query(rest, params, { resources_filter: escapeResourceFilter(params.workload) });
     },
 
     /** One pod's CPU/memory series. */
     async pod(params: RangeQuery & { namespace: string; pod: string }): Promise<MetricSeries[]> {
-      const pathname = `/kapis/monitoring.kubesphere.io/v1alpha3/namespaces/${encodeURIComponent(
+      const rest = `namespaces/${encodeURIComponent(
         params.namespace,
       )}/pods/${encodeURIComponent(params.pod)}`;
-      return query(pathname, params);
+      return query(rest, params);
     },
 
     /**
@@ -688,7 +704,7 @@ export function rangeMetricsApi(client: Client) {
      * path is an empty `d` (the line vanishes) or a fake zero if coerced.
      */
     async component(params: RangeQuery & { component: ComponentMetricName }): Promise<ComponentMetricSeries[]> {
-      const pathname = `/kapis/monitoring.kubesphere.io/v1alpha3/components/${encodeURIComponent(params.component)}`;
+      const rest = `components/${encodeURIComponent(params.component)}`;
       const body = await client.request<{
         results?: Array<{
           metric_name?: string;
@@ -697,13 +713,12 @@ export function rangeMetricsApi(client: Client) {
             result?: Array<{ metric?: Record<string, string>; values?: Array<[number, string]> }>;
           };
         }>;
-      }>(pathname, {
+      }>(clusterScoped('/kapis/monitoring.kubesphere.io/v1alpha3', params.cluster, rest), {
         query: {
           metrics_filter: params.metrics.map((metric) => `${metric}$`).join('|'),
           start: Math.round(params.start / 1000),
           end: Math.round(params.end / 1000),
           step: params.step,
-          cluster: params.cluster,
         },
         ...(params.signal ? { signal: params.signal } : {}),
       });
@@ -787,14 +802,16 @@ export function nodeUsageApi(client: Client) {
           metric_name?: string;
           data?: { result?: Array<{ metric?: Record<string, string>; value?: [number, string] }> };
         }>;
-      }>('/kapis/monitoring.kubesphere.io/v1alpha3/nodes', {
-        query: {
-          metrics_filter: METRICS.map((metric) => `${metric}$`).join('|'),
-          cluster: params.cluster,
-          limit: -1,
+      }>(
+        clusterScoped('/kapis/monitoring.kubesphere.io/v1alpha3', params.cluster, 'nodes'),
+        {
+          query: {
+            metrics_filter: METRICS.map((metric) => `${metric}$`).join('|'),
+            limit: -1,
+          },
+          ...(params.signal ? { signal: params.signal } : {}),
         },
-        ...(params.signal ? { signal: params.signal } : {}),
-      });
+      );
 
       const byNode = new Map<string, NodeUsage>();
       const entry = (node: string): NodeUsage => {

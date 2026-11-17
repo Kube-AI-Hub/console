@@ -7,7 +7,7 @@ import { Badge, Button, Icon, Modal } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { useAuth } from '@/shell/AuthProvider';
-import { rememberLastCluster } from '@/lib/lastCluster';
+import { readClusterAlias, rememberClusterAlias, rememberLastCluster } from '@/lib/lastCluster';
 import { useMulticluster } from '@/shell/useMulticluster';
 
 /**
@@ -39,7 +39,14 @@ export function ClusterSwitcher({ current, collapsed = false }: ClusterSwitcherP
     queryKey: ['clusters'],
     // Membership changes at installation time, not between page views.
     staleTime: 60_000,
-    enabled: open,
+    /*
+     * Loaded with the shell, not only when the dialog opens.
+     *
+     * The switcher's label is the cluster's alias, which only the list carries. Fetching on
+     * open meant a reload showed the raw object name until the reader opened the switcher —
+     * the label silently changed identity across a refresh. One small request per cluster
+     * page, shared through the query cache with the cluster list and the workspace bar.
+     */
     queryFn: ({ signal }) => clustersApi(apiClient).list({ signal }),
   });
 
@@ -55,6 +62,8 @@ export function ClusterSwitcher({ current, collapsed = false }: ClusterSwitcherP
   const enter = React.useCallback(
     (target: string) => {
       rememberLastCluster(user?.name ?? '', target);
+      const targetAlias = clusters.find((cluster) => cluster.name === target)?.alias ?? '';
+      rememberClusterAlias(user?.name ?? '', target, targetAlias);
       setOpen(false);
       // Overview, like the old console's `enterCluster`: not every cluster runs every
       // module, and the overview is the page that explains why one is missing.
@@ -64,10 +73,22 @@ export function ClusterSwitcher({ current, collapsed = false }: ClusterSwitcherP
       // re-fetch ~1.5 MB to reach a page this app can render immediately.
       void navigate({ href: `/kube-frontend/clusters/${encodeURIComponent(target)}/overview` });
     },
-    [navigate, user?.name],
+    [clusters, navigate, user?.name],
   );
 
-  const currentCluster = clusters.find((cluster) => cluster.name === current);
+  /*
+   * Keep the remembered alias in step with the cluster list whenever it is loaded.
+   *
+   * The switcher's label is the alias; the list is the only source of it. Caching it here
+   * means the next page load — where the list has not been fetched yet — still shows the
+   * same label, and an alias edited elsewhere replaces the stale one on the next visit.
+   */
+  const knownAlias = clusters.find((cluster) => cluster.name === current)?.alias;
+  React.useEffect(() => {
+    if (knownAlias !== undefined) rememberClusterAlias(user?.name ?? '', current, knownAlias);
+  }, [current, knownAlias, user?.name]);
+
+  const currentAlias = knownAlias || readClusterAlias(user?.name ?? '', current);
 
   return (
     <>
@@ -84,14 +105,14 @@ export function ClusterSwitcher({ current, collapsed = false }: ClusterSwitcherP
         {collapsed ? null : (
           <span className="flex min-w-0 flex-1 flex-col">
             <span className="truncate text-sm font-medium text-ai-fg">
-              {currentCluster?.alias || current}
+              {currentAlias || current}
             </span>
             {/* The object name sits under the alias, as in the cluster list: the alias is
                 what the reader recognises, the name is what every URL and every other page
                 calls the cluster. Showing only the alias made the console address the same
                 cluster by two different names. */}
             <span className="truncate text-[11px] text-ai-fg-muted">
-              {currentCluster?.alias ? `${current} · ${t('cluster.switch.trigger')}` : t('cluster.switch.trigger')}
+              {currentAlias ? `${current} · ${t('cluster.switch.trigger')}` : t('cluster.switch.trigger')}
             </span>
           </span>
         )}
@@ -123,26 +144,31 @@ export function ClusterSwitcher({ current, collapsed = false }: ClusterSwitcherP
         }
       >
         <div className="flex flex-col gap-3">
-          <input
-            value={keyword}
-            onChange={(event) => setKeyword(event.target.value)}
-            placeholder={t('cluster.switch.search')}
-            aria-label={t('cluster.switch.search')}
-            className="h-9 rounded-ai-md border border-ai-line bg-ai-surface px-2 text-sm text-ai-fg"
-            {...actionProps('clusters:switch-search')}
-          />
-
+          {/*
+           * Search and refresh share one row: they shape the same list, and the refresh
+           * used to sit on its own line under the field, which read as a stray control
+           * between the search box and the clusters it refreshes.
+           */}
           <div className="flex items-center gap-2">
+            <input
+              value={keyword}
+              onChange={(event) => setKeyword(event.target.value)}
+              placeholder={t('cluster.switch.search')}
+              aria-label={t('cluster.switch.search')}
+              className="h-9 min-w-0 flex-1 rounded-ai-md border border-ai-line bg-ai-surface px-2 text-sm text-ai-fg"
+              {...actionProps('clusters:switch-search')}
+            />
             <button
               type="button"
               onClick={() => void query.refetch()}
               disabled={query.isFetching}
-              className="inline-flex size-8 shrink-0 items-center justify-center rounded-ai-md border border-ai-line text-ai-fg-secondary hover:bg-ai-surface-2 disabled:opacity-50"
+              className="inline-flex size-9 shrink-0 items-center justify-center rounded-ai-md border border-ai-line text-ai-fg-secondary hover:bg-ai-surface-2 disabled:opacity-50"
               aria-label={t('cluster.list.refresh')}
+              aria-busy={query.isFetching}
               title={t('cluster.list.refresh')}
               {...actionProps('clusters:switch-refresh')}
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true" className="size-4">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true" className={`size-4${query.isFetching ? ' animate-spin motion-reduce:animate-none' : ''}`}>
                 <path d="M20 11a8 8 0 1 0-2.3 5.7" />
                 <path d="M20 4v7h-7" />
               </svg>
