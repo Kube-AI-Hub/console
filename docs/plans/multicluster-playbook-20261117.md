@@ -91,6 +91,7 @@ tools/verify-all.sh /tmp/a100.env http://localhost:5182 http://127.0.0.1:8093 ho
 | --- | --- | --- |
 | `/api/session/login` 502/503，隧道根路径仍 200 | 控制台抖动 | 重试 2–3 次；仍失败先修隧道 |
 | `/api/session/login` **429** | 登录被限流（同一账号短时间内登录太多次） | **等几分钟**再跑；这不是缺陷，重试也没用 |
+| 登录 **400 `invalid_credentials`**，而手工用已知密码能登进去 | `tests/ui/.env` 里的密码**过期**了 | 更新那个文件（它被 gitignore）；先确认手工登录能过 |
 | 隧道根路径 `000` | 隧道进程已断 | 重启隧道再谈巡检 |
 | 某页 `503 configz`，几分钟后同一接口 200 | 控制台抖动 | 巡检对「整页失败且全是 5xx」自动重载一次 |
 | `session/me` 401 | 认证握手 | 已在采集时过滤 |
@@ -141,8 +142,8 @@ tools/verify-all.sh /tmp/a100.env http://localhost:5182 http://127.0.0.1:8093 ho
 | 环境 | 命令参数 | 结果 |
 | --- | --- | --- |
 | A100（多集群，**已不可复现**） | `--clusters host,xc --namespace spaces --project spaces` | **PASS 789s**：72 次集群级访问（59 ready/11 empty/0 error）、34 次项目级（20/14）、16 次企业空间访问（10/6）、9 个集合归属、12 个详情、24 个 Tab、6 张列表交互、两集群各一次写入。**2026-11-18 01:40 起 `xc` 已从 A100 移除，见[记录](a100-member-cluster-removed-20261118.md)** |
-| A100（单集群） | `--clusters host --workspace system-workspace --project spaces` | **PASS 459s**（`verify-all.sh` 四模式整体 PASS）：36+17+8 次访问、6 个详情、12 个 Tab、3 张列表交互、1 次写入，**0 失败请求** |
-| B200（单集群） | `--clusters host --workspace system-workspace --project default` | **PASS 281s**（`verify-all.sh` 四模式整体 PASS）：36+17+8 次访问、6 个详情、12 个 Tab、3 张列表交互、1 次写入，**0 失败请求** |
+| A100（单集群） | `--clusters host --workspace system-workspace --project spaces` | **PASS 391s**（`verify-all.sh` 四模式整体 PASS，2026-11-18）：36+17+8 次访问、6 个详情、12 个 Tab、3 张列表交互、1 次写入，**0 失败请求** |
+| B200（单集群） | `--clusters host --workspace system-workspace --project default` | **PASS 323s**（`verify-all.sh` 四模式整体 PASS，2026-11-18）：36+17+8 次访问、6 个详情、12 个 Tab、3 张列表交互、1 次写入，**0 失败请求** |
 | B200（单集群） | `--clusters host --namespace default --project default` | **PASS 284s**（静态站 5183 → BFF 8092 配对正确后）：36+17+8 次访问、6 个详情、12 个 Tab、3 张列表交互、1 次写入 |
 
 B200 那条是**共享代码的回归证据**：路径改动动的是 `clusterScoped`/`coreWritePath`，单集群也必须照常。
