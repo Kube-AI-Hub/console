@@ -23,7 +23,7 @@
 | 节点列表/详情 | 统计/筛选/GPU/Pod/NTP/模式入口；详情负载/趋势/健康/Requests/Limits、硬件与拓扑；真实节点终端 | `67be3c456`、`38d5eb47d`；[节点记录](node-detail-overview-execution-20261115.md) | 生产GPU模式切换未执行；member硬件路由/拓扑契约边界保留 |
 | GPU列表/单卡详情 | 全局统计、筛选/分页、NUMA/模式、五指标监控、关联Pods及节点事件 | `c37467da7`；[GPU记录](gpu-parity-execution-20261114.md) | 单卡拓扑/高级图表及member支持须独立核实 |
 | 用户列表 + 用户详情 | 四列与 `status.lastLoginTime`、默认 createTime 降序、创建 uninitialized/描述、行与批量启停、预置/自己保护（省略 checkbox）、登录历史服务端分页四列、管理员重置 `{ password }` | 未提交；[用户记录](users-user-detail-execution-20261115.md) | 企业空间/项目成员、配额、部门/用户组、跨作用域授权；生产前端与 member；英文分页句柄残留 |
-| 访问控制根路径 | `/kube-frontend/access` 与侧栏「访问控制」落到用户表，三页签可见 | `aafd0484f`；[入口记录](access-landing-20261115.md) | `/settings` 根路径仍可能空白；生产前端未部署 |
+| 访问控制根路径 | `/kube-frontend/access` 与侧栏「访问控制」落到用户表，三页签可见 | `aafd0484f`；[入口记录](access-landing-20261115.md) | `/settings` 根路径仍可能空白；生产前端未部署 | 生产前端未部署 |
 | 租户(企业空间)成员 列表+详情 | 搜索/邮箱/活跃态/尚未登录/自我保护/批量移除；详情属性与项目/DevOps 页签（404 空态）；中文产品名「租户(企业空间)」 | `23e566649`；[成员记录](workspace-members-20261115.md) | 跨作用域授权；生产前端与 member；英文页未作为本页主验 |
 | 项目成员 列表+写入 | 搜索/邮箱/活跃态/尚未登录/自我保护/批量移除；邀请/改角色/单人与批量解绑；无详情页（旧 `noLink`） | 未提交；[项目成员记录](project-members-20261115.md) | 跨作用域授权；生产前端与 member；英文页未作为本页主验 |
 | 租户(企业空间)配额 | 项目 × 资源只读表；空态「这些项目还没有设置资源配额」；空间级 CR 编辑批准不做 | 未提交；[配额记录](workspace-quota-20261115.md) | 跨作用域授权；本部署无 hard 条目故未截到四列表 |

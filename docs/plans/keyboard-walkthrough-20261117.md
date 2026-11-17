@@ -1,0 +1,53 @@
+# 键盘走查：Tab 顺序、焦点环、弹层焦点归属（2026-11-17）
+
+能力矩阵里「键盘可达与弹层归属」一行原先写着「静态检查，tab 顺序/焦点环/朗读顺序仍需浏览器走查」。本轮补了这项走查。
+
+## 1. Tab 顺序（项目配置字典页，12 次 Tab）
+
+```
+1  A       跳到主要内容          ring=True
+2  BUTTON  shell:platform-switch  ring=True
+3  BUTTON  global-nav:platform    ring=True
+4  A       global-nav:appStore    ring=True
+5  A       global-nav:workbench   ring=True
+6  BUTTON  shell:locale-switch    ring=True
+7  BUTTON  切换深浅色主题          ring=True
+8  BUTTON  shell:user-menu        ring=True
+9  A       项目概览                ring=True
+10 A       配置                    ring=True
+11 A       工作负载                ring=True
+12 A       DevOps 工具             ring=True
+```
+
+顺序合理：**跳过导航链接在最前**，然后顶部平台/全局导航/语言/主题/用户菜单，再到侧栏。**12 个元素全部有可见焦点环**。
+
+## 2. 弹层焦点归属（创建配置字典）
+
+| 检查 | 结果 |
+| --- | --- |
+| 打开后焦点落点 | `configmaps:field-name`（第一个输入框，在弹层内） |
+| Tab 是否逃出弹层 | 连续 10 次 Tab 全在弹层内（焦点陷阱生效） |
+| Esc 是否关闭 | 关闭 |
+| **关闭后焦点归属** | **修复前 `<body>`；修复后回到 `configmaps:create`（触发按钮）** |
+
+## 3. 修复：关闭弹层把焦点还给触发按钮
+
+`packages/ai-kit/src/primitives/Feedback.tsx` 的 `Modal` 用 Radix，但弹层由页面用 `open` 控制、没有 Radix `Trigger`，
+所以 Radix 找不到可归还的元素，焦点落回 `<body>`——读者在列表里的位置丢了。
+
+改法：打开时记住 `document.activeElement`，在 `onCloseAutoFocus` 里 `preventDefault()` 并把它 `focus()` 回来
+（元素已卸载则跳过）。**一处改动，所有弹层受益。**
+
+## 4. 验证
+
+| 项 | 结果 |
+| --- | --- |
+| 关闭后焦点 | `configmaps:create`（修复前 `<body>`） |
+| 契约套件 | **18 文件 / 1499 passed** |
+| api-client | **419 passed** |
+| `tsc` | 0 错误 |
+| `vite build` | ✓ |
+
+## 5. 未覆盖
+
+朗读顺序（屏幕阅读器）与焦点环在**浅色主题**下的对比度未走查；跨页面的 Tab 顺序只抽查了配置字典页。

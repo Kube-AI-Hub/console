@@ -95,6 +95,20 @@ export function Modal({ open, onOpenChange, title, description, children, footer
    * would silently never exist. A callback ref runs when the node actually appears.
    */
   const [body, setBody] = React.useState<HTMLDivElement | null>(null);
+  /*
+   * Where focus goes when the dialog closes.
+   *
+   * Radix restores focus to its own `Trigger`; these dialogs are opened from plain buttons with
+   * `open` controlled by the page, so there is no trigger to restore to and focus fell back to
+   * `<body>` -- the reader lost their place in the list. Remember the element that had focus when
+   * the dialog opened and put it back.
+   */
+  const returnFocusTo = React.useRef<HTMLElement | null>(null);
+  React.useEffect(() => {
+    if (open) {
+      returnFocusTo.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    }
+  }, [open]);
   React.useEffect(() => {
     if (!open) return;
     return observeHiddenErrors(body);
@@ -105,6 +119,12 @@ export function Modal({ open, onOpenChange, title, description, children, footer
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-[2px] animate-ai-fade-in" />
         <DialogPrimitive.Content
+          onCloseAutoFocus={(event) => {
+            const target = returnFocusTo.current;
+            if (!target || !target.isConnected) return;
+            event.preventDefault();
+            target.focus();
+          }}
           onEscapeKeyDown={(event) => { if (!dismissOnEscape || closeDisabled) event.preventDefault(); }}
           onPointerDownOutside={(event) => { if (!dismissOnOutside || closeDisabled) event.preventDefault(); }}
           // Confirm dialogs have a title and no extra copy; without this Radix
