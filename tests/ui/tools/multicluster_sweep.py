@@ -770,6 +770,10 @@ def sweep_tabs(app: str, bff: str, token: str, clusters: list[str], workspace: s
                     if current == previous and current > 300:
                         break
                     previous = current
+                # The tab strip alone is already a few hundred characters, so a fixed body-length
+                # threshold cannot tell "rendered an empty state" from "rendered nothing". Compare
+                # each tab against the page as it was before any tab was clicked.
+                baseline_body = len(page.evaluate('() => document.body.innerText').strip())
                 tabs = page.locator('[role="tab"]')
                 count = tabs.count()
                 if count == 0:
@@ -862,7 +866,7 @@ def baseline(args, token: str, clusters: list[str], allowed: set[str] | None = N
         except Exception:
             pass
     tab_rows = sweep_tabs(args.app, args.bff, token, clusters, args.workspace, args.project)
-    tab_broken = [row for row in tab_rows if (not row.get('skipped')) and (row['body'] < 300 or row['errors'])]
+    tab_broken = [row for row in tab_rows if (not row.get('skipped')) and (bool(row['errors']) or row['body'] <= row.get('baseline_body', 0) + 20)]
     failures += len(tab_broken)
     tab_flag = 'OK  ' if not tab_broken else 'FAIL'
     tab_skipped = sum(1 for row in tab_rows if row.get('skipped'))
@@ -933,7 +937,7 @@ def main() -> int:
         rows = sweep_tabs(args.app, args.bff, token, clusters, args.workspace, args.project)
         bad = 0
         for row in rows:
-            broken = (not row.get('skipped')) and (row['body'] < 300 or bool(row['errors']))
+            broken = (not row.get('skipped')) and (bool(row['errors']) or row['body'] <= row.get('baseline_body', 0) + 20)
             bad += 1 if broken else 0
             flag = 'FAIL' if broken else ('SKIP' if row.get('skipped') else 'OK  ')
             print(f"{flag} {row['cluster']:6s} {row['page'][:34]:34s} {row['tab']:16s} body={row['body']:<5d} errors={len(row['errors'])}")
