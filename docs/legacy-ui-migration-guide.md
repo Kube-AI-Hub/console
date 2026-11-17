@@ -379,8 +379,8 @@ pytest tests/kube-frontend/<模块> -q -n 0   # 本批相关及共享影响用�
 | 39 | **界面标签依赖按需加载的列表** | 刷新后同一对象换了个称呼：别名退回对象名（列表只在弹窗打开时才请求） | 展示名要么随外壳一起取，要么本地记住「用户+对象」的展示名；列表到达后**以列表为准**，否则清空别名后仍显示旧值 |
 | 40 | **把 5xx 一律说成「网络异常」** | 未就绪成员集群显示「网络异常，请稍后重试」，实际原因 `cluster <name> is not ready` 被丢弃，重试永远不会成功 | 5xx 携带具体原因时优先显示原因，只对 `Internal Server Error` 这类无信息量短语回退本地化文案；客户端先剥掉 `Internal Server Error: "<path>":` 包装再截断，否则路径与查询串会把消息额度用完 |
 
-多集群部署另有一条命令：`cd tests/ui && python3 tools/multicluster_sweep.py --env-file <env> --baseline --clusters host,<member>`，
-覆盖集群级/项目级列表、数据归属、详情页、Tab 与写入落点；判读方式见[多集群验证手册](plans/multicluster-playbook-20261117.md)。
+浏览器侧的收尾方式与判读**只有一处正文**：见[执行路线](plans/migration-execution-roadmap.md)的「一页的执行顺序」与
+[多集群验证手册](plans/multicluster-playbook-20261117.md)。本节不再重复命令与段数——它们会随工具演进变化。
 
 ## 9. 文档与门禁
 
