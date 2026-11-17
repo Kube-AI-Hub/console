@@ -1035,7 +1035,7 @@ LOCALE_PAGES = (
     ('configmaps', 'project'),
     ('info', 'settings'),
     # The two member pages the capability matrix still lists as "not verified in English".
-    ('workspaces/workspace/members', 'raw'),
+    ('workspaces/{workspace}/members', 'workspace-raw'),
     ('projects/spaces/members', 'project-raw'),
 )
 
@@ -1066,6 +1066,8 @@ def sweep_locale(app: str, token: str, cluster: str, workspace: str, project: st
         for segment, scope in LOCALE_PAGES:
             if scope == 'raw':
                 url = f'{app}/kube-frontend/{segment}'
+            elif scope == 'workspace-raw':
+                url = f'{app}/kube-frontend/{segment.format(workspace=workspace)}'
             elif scope == 'project-raw':
                 url = f'{app}/kube-frontend/{workspace}/clusters/{cluster}/{segment}'
             elif scope == 'project':
@@ -1079,7 +1081,8 @@ def sweep_locale(app: str, token: str, cluster: str, workspace: str, project: st
             text = page.evaluate('() => document.body.innerText')
             # Drop the sentences that merely contain a period: only standalone identifiers matter.
             found = sorted({match for match in pattern.findall(text) if not match.endswith('.')})
-            results.append({'page': segment, 'locale': locale, 'raw': found[:6]})
+            label = segment.format(workspace=workspace) if '{workspace}' in segment else segment
+            results.append({'page': label, 'locale': locale, 'raw': found[:6]})
         browser.close()
     return results
 

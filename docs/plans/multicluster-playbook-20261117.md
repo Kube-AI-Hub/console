@@ -45,6 +45,14 @@ python3 -u tools/multicluster_sweep.py --env-file /tmp/a100.env \
 | `--keyboard-local` | 登录页（**不需要集群**）：结构 a11y + 4 组合 | ~1 分钟 |
 | `--locale-scan --locale en` | 英文界面的裸标识符（未翻译文案） | ~2 分钟 |
 
+**四种模式一条命令跑完**（按「最快失败」排序）：
+
+```bash
+tools/verify-all.sh /tmp/a100.env http://localhost:5182 http://127.0.0.1:8093 host,xc system-workspace spaces
+```
+
+最后打印 `=== summary ===` 与 `VERDICT: PASS|FAIL`；某模式因环境不可用退出 2 时记 `SKIP` 而不是 `FAIL`。
+
 **退出码**：`0` 全绿 / `1` 跑完但有缺陷 / `2` 环境不可用（preflight 拦下）/ `3` 超预算中止。
 
 ## 3. 每一段在证明什么
