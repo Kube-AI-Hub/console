@@ -133,7 +133,8 @@ tools/verify-all.sh /tmp/a100.env http://localhost:5182 http://127.0.0.1:8093 ho
 
 | 环境 | 命令参数 | 结果 |
 | --- | --- | --- |
-| A100（多集群） | `--clusters host,xc --namespace spaces --project spaces` | **PASS 789s**：72 次集群级访问（59 ready/11 empty/0 error）、34 次项目级（20/14）、**16 次企业空间访问（10/6）**、9 个集合归属、12 个详情、24 个 Tab、6 张列表交互、两集群各一次写入 |
+| A100（多集群，**已不可复现**） | `--clusters host,xc --namespace spaces --project spaces` | **PASS 789s**：72 次集群级访问（59 ready/11 empty/0 error）、34 次项目级（20/14）、16 次企业空间访问（10/6）、9 个集合归属、12 个详情、24 个 Tab、6 张列表交互、两集群各一次写入。**2026-11-18 01:40 起 `xc` 已从 A100 移除，见[记录](a100-member-cluster-removed-20261118.md)** |
+| A100（单集群） | `--clusters host --workspace system-workspace --project spaces` | **PASS 393s**：36+17+8 次访问、6 个详情、12 个 Tab、3 张列表交互、1 次写入，**0 失败请求** |
 | B200（单集群） | `--clusters host --namespace default --project default` | **PASS 284s**（静态站 5183 → BFF 8092 配对正确后）：36+17+8 次访问、6 个详情、12 个 Tab、3 张列表交互、1 次写入 |
 
 B200 那条是**共享代码的回归证据**：路径改动动的是 `clusterScoped`/`coreWritePath`，单集群也必须照常。
