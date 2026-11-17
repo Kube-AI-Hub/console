@@ -73,6 +73,42 @@ export function encodePassword(_salt: string, password: string): string {
   return password;
 }
 
+/**
+ * The legacy console's `mix(salt, base64(password))`.
+ *
+ * Needed when the upstream is **ks-console**, which decrypts any password containing `@` before
+ * forwarding the grant: sending the typed value there answers `invalid_grant`, and a password like
+ * `P@88w0rd` never reaches ks-apiserver intact. Measured on A100 and B200 (2026-11-17): plaintext
+ * → 400 `invalid_credentials`, encoded → 200.
+ *
+ * The default stays plaintext because that is what a BFF talking straight to ks-apiserver needs
+ * (measured on mlu370); a deployment behind ks-console sets `KS_OAUTH_ENCODING=mix`.
+ */
+export function mixPassword(salt: string, password: string): string {
+  return mix(salt, Buffer.from(password, 'utf8').toString('base64'));
+}
+
+/** The old console's `mix` (`console/src/utils/index.js:889`), ported verbatim. */
+function mix(salt: string, encoded: string): string {
+  let key = salt;
+  if (encoded.length > key.length) key += encoded.slice(0, encoded.length - key.length);
+
+  const prefix: string[] = [];
+  const out: string[] = [];
+  for (let index = 0; index < key.length; index += 1) {
+    const tomix = encoded.length > index ? encoded.charCodeAt(index) : 64;
+    const sum = key.charCodeAt(index) + tomix;
+    prefix.push(sum % 2 === 0 ? '0' : '1');
+    out.push(String.fromCharCode(Math.floor(sum / 2)));
+  }
+  return `${Buffer.from(prefix.join(''), 'utf8').toString('base64')}@${out.join('')}`;
+}
+
+/** Which form this deployment's upstream expects; see `mixPassword`. */
+export function passwordForUpstream(encryptKey: string, password: string): string {
+  return process.env['KS_OAUTH_ENCODING'] === 'mix' ? mixPassword(encryptKey, password) : password;
+}
+
 /** The upstream base URL with `path` appended; `baseUrl` may carry no trailing slash. */
 function upstreamUrl(config: UpstreamConfig, path: string): string {
   return `${config.baseUrl}${path.startsWith('/') ? path : `/${path}`}`;
@@ -148,7 +184,7 @@ export async function login(
 ): Promise<{ ok: true; session: SessionResponse } | { ok: false; error: LoginErrorBody }> {
   const form = new URLSearchParams({
     username: input.username,
-    password: encodePassword(client.encryptKey, input.password),
+    password: passwordForUpstream(client.encryptKey, input.password),
     grant_type: 'password',
     client_id: client.clientId,
     client_secret: client.clientSecret,

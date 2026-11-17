@@ -2,7 +2,7 @@ import { createServer, type Server } from 'node:http';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createHandler } from '../src/index';
 import type { UpstreamConfig } from '../src/config';
-import { encodePassword, loginErrorFor } from '../src/auth/session';
+import { encodePassword, loginErrorFor, mixPassword, passwordForUpstream } from '../src/auth/session';
 import { userFromToken } from '../src/auth/token';
 
 /**
@@ -113,6 +113,28 @@ describe('POST /api/session/login', () => {
     expect(form.get('password')).toBe('P@88w0rd');
     expect(form.get('client_id')).toBe('kube-ai-hub');
     expect(form.get('client_secret')).toBe('kube-ai-hub');
+  });
+
+  /*
+   * The other half of the same story: when the upstream is **ks-console**, it decrypts any password
+   * containing `@`, so the typed value must be encoded first. Both forms are correct for their own
+   * deployment, which is why this is an env switch rather than a single answer.
+   */
+  it('encodes the legacy way when the deployment asks for it', () => {
+    const encoded = mixPassword('kubesphere', 'P@88w0rd');
+    expect(encoded).toContain('@');
+    expect(encoded).not.toBe('P@88w0rd');
+
+    const previous = process.env['KS_OAUTH_ENCODING'];
+    try {
+      process.env['KS_OAUTH_ENCODING'] = 'mix';
+      expect(passwordForUpstream('kubesphere', 'P@88w0rd')).toBe(encoded);
+      delete process.env['KS_OAUTH_ENCODING'];
+      expect(passwordForUpstream('kubesphere', 'P@88w0rd')).toBe('P@88w0rd');
+    } finally {
+      if (previous === undefined) delete process.env['KS_OAUTH_ENCODING'];
+      else process.env['KS_OAUTH_ENCODING'] = previous;
+    }
   });
 
   it('passes a password containing `@` through unchanged', async () => {
