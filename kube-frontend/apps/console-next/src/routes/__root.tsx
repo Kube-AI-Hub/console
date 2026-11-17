@@ -18,7 +18,7 @@ import { AuthProvider, readToken, useAuth } from '@/shell/AuthProvider';
  * The gate is `beforeLoad`, not an effect, so the login form paints first and the
  * console behind it never flashes. It checks only that a token *exists* and has
  * not expired; whether the cluster still honours it is decided by the first
- * `/api/session/me`, which clears the token and sends the reader here.
+ * `/oauth/userinfo`, which clears the token and sends the reader here.
  */
 export const Route = createRootRoute({
   beforeLoad: ({ location }) => {

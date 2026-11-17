@@ -129,7 +129,7 @@ export function UserSettingsDialog({ open, onOpenChange, onSignedOut }: UserSett
       setPasswordDone(true);
       /*
        * The session survives a password change — verified against the cluster: the same token
-       * still answers `/api/session/me` with 200 afterwards. So leaving the console is this
+       * still answers `/oauth/userinfo` with 200 afterwards. So leaving the console is this
        * dialog's job, not the server's. Without the sign-out, "I changed my password" would
        * leave the old session usable, which is the opposite of what the reader asked for.
        */

@@ -1586,7 +1586,7 @@ export function userSettingsApi(client: Client) {
      * show a reader, so the caller phrases both.
      *
      * The session survives this call: verified that the same token still answers
-     * `/api/session/me` with 200 afterwards. Whoever calls this must sign out explicitly,
+     * `/oauth/userinfo` with 200 afterwards. Whoever calls this must sign out explicitly,
      * or "changed my password" leaves the old session usable.
      */
     async changePassword(params: { name: string; currentPassword: string; password: string }): Promise<void> {
