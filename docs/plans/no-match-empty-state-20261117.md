@@ -40,7 +40,20 @@ title={narrowed ? schema.empty?.noMatchTitle ?? '没有匹配的结果' : schema
 | 契约套件 | 18 文件 / 1544 passed |
 | `tsc` / `vite build` | 0 / ✓ |
 
-## 5. 反思
+## 5. 守卫：契约不让它被简化回去
+
+`config/empty-state-contract.test.ts` 新增一条：
+
+```ts
+expect(shared).toMatch(/const narrowed\s*=/);
+expect(shared).toMatch(/narrowed\s*\?[^\n]*noMatchTitle/);
+expect(shared).toContain('没有匹配的结果');
+expect(shared).toContain('暂无数据');
+```
+
+**负向验证**：把 `const narrowed =` 改名后这条立刻失败并给出理由「ResourceList 不再判断是否被搜索/筛选收窄」；恢复后全绿。
+
+## 6. 反思
 
 | # | 规则 |
 | --- | --- |

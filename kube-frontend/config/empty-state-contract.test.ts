@@ -56,6 +56,20 @@ describe('empty states', () => {
     ).toEqual([]);
   });
 
+  /*
+   * "Nothing here yet" and "nothing matches what I typed" are different answers, and a list with a
+   * search box will produce both. The distinction lives in the shared component so all 44 searchable
+   * lists get it at once; this guards against it being quietly simplified back to one message.
+   */
+  it('keeps the shared list telling "no match" apart from "empty"', () => {
+    const shared = readFileSync(join(root, '..', 'packages/ai-kit/src/schema/ResourceList.tsx'), 'utf8');
+    expect(shared, 'ResourceList 不再判断「是否被搜索/筛选收窄」').toMatch(/const narrowed\s*=/);
+    expect(shared, '空态标题不再区分 noMatchTitle 与 title').toMatch(/narrowed\s*\?[^\n]*noMatchTitle/);
+    // Both fallbacks must survive: a page that supplies neither still gets a meaningful sentence.
+    expect(shared).toContain('没有匹配的结果');
+    expect(shared).toContain('暂无数据');
+  });
+
   it('keeps the own-empty-block list honest', () => {
     for (const relative of OWN_EMPTY_BLOCK) {
       const entry = listFiles.find((candidate) => candidate.relative === relative);
