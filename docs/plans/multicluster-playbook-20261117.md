@@ -200,3 +200,24 @@ baseline NOT RUN: the environment is not usable
 
 B200 上实测到一次 `created: 502`——控制台抖动，不是写被拒绝。写入检查现在遇到 5xx 重试一次，
 复跑即 `created: 201 / deleted: 200`。
+## 14. 详情页也重试一次 5xx
+
+A100 本轮出现一次 `host pods/<name>` 详情页报 `error`，失败请求是 `503 /kapis/…/namespaces?page=1&limit=50`
+——又是控制台抖动。详情页巡检现在与页面巡检同规则：**整页失败且全是 5xx 就重载一次**。
+
+复跑：
+
+```
+OK   host   nodes/a100-04                       state=ready errors=0
+OK   host   pods/u-admin-…                       state=ready errors=0   ← 之前是 error
+… 12 visits, 12 ok, 0 broken
+```
+
+## 15. 单集群时身份检查显式跳过
+
+```
+     identity: skipped -- a single cluster has nothing to compare against
+```
+
+以前它打印 `0 collections, 0 distinct, 0 identical, 0 suspect`，看起来像「检查通过」，
+实际是「没有可比对象」。**未执行与通过必须能区分**。

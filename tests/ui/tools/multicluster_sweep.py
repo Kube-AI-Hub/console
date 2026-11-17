@@ -384,16 +384,25 @@ def sweep_details(
                 url = f'{app}/kube-frontend/{workspace}/clusters/{cluster}/projects/{project}/{segment}/{name}'
                 if not namespaced:
                     url = f'{app}/kube-frontend/clusters/{cluster}/{segment}/{name}'
-                page.goto(url, wait_until='domcontentloaded')
+                def visit():
+                    page.goto(url, wait_until='domcontentloaded')
+                    settled = 'none'
+                    for _ in range(30):
+                        page.wait_for_timeout(2000)
+                        if surface.count() == 0:
+                            continue
+                        settled = surface.get_attribute('data-ai-state') or 'none'
+                        if settled != 'loading':
+                            break
+                    return settled
+
                 surface = page.locator('[data-ai-id$=":surface"]').last
-                state = 'none'
-                for _ in range(30):
-                    page.wait_for_timeout(2000)
-                    if surface.count() == 0:
-                        continue
-                    state = surface.get_attribute('data-ai-state') or 'none'
-                    if state != 'loading':
-                        break
+                state = visit()
+                # Same rule as the page sweep: a 5xx that goes away on a retry is the console
+                # hiccuping, not the detail page being broken.
+                if state == 'error' and failures and all(status >= 500 for status, _ in failures):
+                    failures.clear()
+                    state = visit()
                 rows.append({
                     'cluster': cluster,
                     'page': f'{segment}/{name}',
@@ -739,6 +748,8 @@ def baseline(args, token: str, clusters: list[str], allowed: set[str] | None = N
     identical = [f for f in identity if f['verdict'] == 'IDENTICAL']
     failures += len(suspects)
     identity_flag = 'OK  ' if not suspects else 'FAIL'
+    if not identity:
+        print('     identity: skipped -- a single cluster has nothing to compare against')
     print(f'{identity_flag} identity read: {len(identity)} collections, {len(identity) - len(suspects) - len(identical)} distinct, {len(identical)} identical, {len(suspects)} suspect')
     for finding in suspects[:5]:
         print(f"       {finding['label']} @ {finding['cluster']}: host={finding['host_status']} member={finding['member_status']}")
