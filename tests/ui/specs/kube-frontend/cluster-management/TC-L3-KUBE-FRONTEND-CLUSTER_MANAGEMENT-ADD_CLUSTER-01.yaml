@@ -17,25 +17,30 @@ story:
 - US1
 - US2
 
-product: 集群列表的主操作「添加集群」用 kubeconfig 导入集群；提交后创建 Cluster 对象并刷新列表。
+product: 集群列表的主操作「添加集群」用 kubeconfig 导入集群；对话框分「基本信息」与「连接设置」两段，提交后创建 Cluster 对象并刷新列表。
 preconditions:
 - 已登录，且有平台管理权限
 - 平台启用多集群联邦
 steps:
 - 打开集群列表，点「添加集群」
+- 核对对话框的两段标题与基本信息字段（名称/别名/标签/供应商/描述）
 - 分别提交非法名称与非 kubeconfig 内容，确认被拦下且未发请求
-- 填入合法名称与 kubeconfig 并确认
-- 读回 Cluster 对象核对 connection 与 joinFederation
+- 选择标签「演示」与供应商「Kube AI Hub」，填入合法名称与 kubeconfig 并确认
+- 读回 Cluster 对象核对 connection、joinFederation、labels 与 provider
 - 清理：删除该集群对象
 expected:
+- 对话框出现「基本信息」与「连接设置」两段
+- 标签下拉含生产/开发/测试/演示四项；供应商可从预设中选择
 - 名称非法时提示「名称只能包含小写字母、数字与连字符…」
 - 内容非 kubeconfig 时提示「这段内容不像 kubeconfig…」
-- 合法提交后对话框关闭，列表出现该集群
+- 合法提交后对话框关闭，列表出现该集群，并弹出「集群 {name} 已接入」通知
 - 对象的 spec.connection.type 为 direct，kubeconfig 为 base64，joinFederation 为 true
+- metadata.labels['cluster.kubesphere.io/group'] 为 demo，spec.provider 为 Kube AI Hub
 performance:
 - 无特殊要求；创建为单次 POST
 troubleshoot:
 - 对话框不打开：主操作要用 onAction 承接，primaryAction 上的 onClick 无效
 - 对象创建了但列表没变：检查列表查询是否失效
+- 编辑器无法填值：kubeconfig 是 CodeMirror，需定位 .cm-content 后用键盘输入
 update_automation:
 - 字段变化时改 pages/cluster_management.py 的 add 相关选择器

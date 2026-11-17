@@ -30,6 +30,8 @@ export {
   Panel,
   ResourceForm,
   Switch,
+  Radio,
+  RadioGroup,
   type FormSchema,
   Drawer,
   Dropdown,
@@ -76,6 +78,14 @@ export {
   cn,
   /** Lets a console page teach the schema layer a field type it does not ship. */
   registerFieldType,
+  /**
+   * Scroll and focus the first field that failed validation.
+   *
+   * `ResourceForm` uses it internally; exporting it lets a hand-written dialog get the
+   * same behaviour instead of a second copy (which is what 添加集群 had before).
+   */
+  focusFirstInvalidField,
+  hasFocusWithin,
   useIsMobile,
   useMediaQuery,
   useSpotlight,

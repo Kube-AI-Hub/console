@@ -70,17 +70,25 @@ const GROUP_LABEL = 'cluster.kubesphere.io/group';
 /** Public clusters are visible to every enterprise space; private ones only to those granted. */
 const VISIBILITY_LABEL = 'cluster.kubesphere.io/visibility';
 /** Preset tags the old console offers in 编辑信息. */
-export const CLUSTER_GROUPS = ['production', 'development', 'testing'] as const;
+export const CLUSTER_GROUPS = ['production', 'development', 'testing', 'demo'] as const;
 export type ClusterGroup = (typeof CLUSTER_GROUPS)[number];
-/** Providers the old console offers; the field also accepts anything typed. */
+/**
+ * Providers the old console offers; the field also accepts anything typed.
+ *
+ * The seven entries mirror the old console's list. Its Azure value was stored as
+ * `Aure Kubernetes Service` (a typo in the source constant); the corrected spelling
+ * is used here, so newly created clusters do not reproduce it. Existing objects that
+ * carry the old string keep it — the field is free text, and rewriting other people's
+ * data is not this dialog's job.
+ */
 export const CLUSTER_PROVIDERS = [
   'Kube AI Hub',
   'Aliyun ACK',
   'Azure Kubernetes Service',
+  'Huawei Cloud CCE',
   'Amazon EKS',
-  'Google GKE',
-  'Tencent TKE',
-  'Huawei CCE',
+  'Google Kubernetes Engine',
+  'Tencent Kubernetes Engine',
   'Bare Metal',
 ] as const;
 
@@ -1045,6 +1053,14 @@ export function clusterImportBody(params: {
   /** Friendly name; the old console's basic-information step collects it up front. */
   alias?: string;
   description?: string;
+  /**
+   * Environment tag (`production` / `development` / `testing` / `demo`).
+   *
+   * The same label 编辑信息 writes, so a cluster created with a tag does not need a
+   * second visit to get one. Empty means "no tag": the key is omitted rather than set
+   * to an empty string, which the platform would read as a tag named "".
+   */
+  group?: string;
 }): Record<string, unknown> {
   const connection: Record<string, unknown> = { type: params.mode };
   if (params.mode === 'direct') {
@@ -1066,12 +1082,16 @@ export function clusterImportBody(params: {
   if (params.alias?.trim()) annotations[ALIAS_ANNOTATION] = params.alias.trim();
   if (params.description?.trim()) annotations[DESCRIPTION_ANNOTATION] = params.description.trim();
 
+  const labels: Record<string, string> = {};
+  if (params.group?.trim()) labels[GROUP_LABEL] = params.group.trim();
+
   return {
     apiVersion: 'cluster.kubesphere.io/v1alpha1',
     kind: 'Cluster',
     metadata: {
       name: params.name.trim(),
       ...(Object.keys(annotations).length ? { annotations } : {}),
+      ...(Object.keys(labels).length ? { labels } : {}),
     },
     spec: {
       provider: params.provider?.trim() ?? '',
@@ -1101,6 +1121,7 @@ export function clusterImportApi(client: Client) {
       provider?: string;
       alias?: string;
       description?: string;
+      group?: string;
     }): Promise<void> {
       await client.request('/apis/cluster.kubesphere.io/v1alpha1/clusters', {
         method: 'POST',
@@ -1122,11 +1143,36 @@ export function clusterImportApi(client: Client) {
       provider?: string;
       alias?: string;
       description?: string;
+      group?: string;
     }): Promise<void> {
       await client.request('/kapis/cluster.kubesphere.io/v1alpha1/clusters/validation', {
         method: 'POST',
         body: clusterImportBody(params),
       });
+    },
+
+    /**
+     * Whether a cluster with this name already exists.
+     *
+     * The console's own server answers `x-check-exist` with `{ exist }` instead of the
+     * object, which is what the old console's basic-information step used to reject a
+     * taken name before the reader finished the rest of the form. The read goes through
+     * kapis because that is the endpoint whose `x-check-exist` branch is wired.
+     *
+     * A name that does not exist answers 200 `{ exist: false }`, not 404 — the header
+     * changes the handler's job, so callers must read `exist` rather than the status.
+     */
+    async exists(params: { name: string; signal?: AbortSignal }): Promise<boolean> {
+      const name = params.name.trim();
+      if (!name) return false;
+      const body = await client.request<{ exist?: boolean }>(
+        `/kapis/cluster.kubesphere.io/v1alpha1/clusters/${encodeURIComponent(name)}`,
+        {
+          headers: { 'x-check-exist': 'true' },
+          ...(params.signal ? { signal: params.signal } : {}),
+        },
+      );
+      return body?.exist === true;
     },
   };
 }

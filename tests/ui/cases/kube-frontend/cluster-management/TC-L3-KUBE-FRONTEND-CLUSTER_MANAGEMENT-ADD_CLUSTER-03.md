@@ -8,7 +8,7 @@
 
 ## 产品功能
 
-添加集群的校验或创建失败时，对话框留下可操作原因并弹出通知，不创建 Cluster 对象。
+添加集群的校验或创建失败时，对话框留下可操作原因并弹出通知，不创建 Cluster 对象；服务端用 kube Status JSON 或纯文本回答都能映射。
 
 ### 关联需求
 
@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/cluster-management/add-cluster.md`](../../../../prd/kube-frontend/cluster-management/add-cluster.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-03** — 已知对话框已填写合法名称与结构完整的 kubeconfig，当校验或创建接口返回失败（400/409/5xx 或超时），则对话框保持打开、输入保留，`role="alert"` 的 `clusters:add-error` 展示可操作原因（jwtSecret 不一致、clusterRole 非法、API 不可达、名称冲突或内部错误），页面同时弹出失败通知，且未创建 Cluster 对象。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-03** — 已知对话框已填写合法名称与结构完整的 kubeconfig，当校验或创建接口返回失败（400/409/5xx 或超时），则对话框保持打开、输入保留，`role="alert"` 的 `clusters:add-error` 展示可操作原因（jwtSecret 不一致、clusterRole 非法、API 不可达、名称冲突或内部错误），页面同时弹出失败通知，且未创建 Cluster 对象；服务端以 kube Status JSON（`{"kind":"Status","message":…}`）或纯文本回答时都能映射到同一套说明。
 
 ### 关联设计
 
@@ -41,13 +41,15 @@
 ## 测试步骤
 
 1. 打开集群列表，点「添加集群」
-2. 拦截 POST /kapis/cluster.kubesphere.io/v1alpha1/clusters/validation 为 400，正文含 Jwt is not equal
+2. 拦截 POST /kapis/cluster.kubesphere.io/v1alpha1/clusters/validation 为 400，正文为 kube Status JSON（message 含 clusterRole of the member cluster must be）
 3. 填入合法名称与结构完整的 kubeconfig 并确认
+4. 重复一次，把正文换成纯文本（含 Jwt is not equal）
 
 ## 期望结果
 
 - 对话框保持打开
-- clusters:add-error 出现含 jwtSecret 的说明
+- clusters:add-error 出现含 clusterRole 的说明（JSON 形态）
+- 第二次出现含 jwtSecret 的说明（纯文本形态），并保留原文作为次要细节
 - 列表与 API 中都不存在该名称的 Cluster 对象
 
 ## 失败排查

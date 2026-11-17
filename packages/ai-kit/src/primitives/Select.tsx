@@ -7,6 +7,62 @@ import { Input } from './Input';
 import { Button } from './Button';
 import { Checkbox } from './Toggles';
 
+/**
+ * Keep wheel and touch scrolling working inside a portalled popup that lives in a
+ * Radix Dialog.
+ *
+ * Why this exists: Radix Dialog locks page scrolling with `react-remove-scroll`,
+ * which listens for `wheel`/`touchmove` on `document` in the **capture** phase and
+ * calls `preventDefault` for anything it decides is "outside" the dialog. A Select
+ * or Popover portal renders into `document.body`, which *is* outside — so the list
+ * rendered, had `overflow: auto`, had a real `scrollHeight > clientHeight`, and
+ * still could not be scrolled by the wheel: the event never reached it. Measured on
+ * the add-cluster dialog (2026-11-17): `scrollTop` stayed 0 while `max` was 24, and
+ * `defaultPrevented` was `true` on every wheel event.
+ *
+ * The fix is a capture-phase listener on the popup itself that stops the event from
+ * reaching the document listener. It runs before the document's capture handler
+ * (capture goes outermost-in, but the popup is inside the document's subtree, so its
+ * capture handler runs first), and it only fires when the lock is actually engaged —
+ * outside a modal the popup keeps normal bubbling behaviour, so a page's own wheel
+ * handling is unaffected.
+ *
+ * Keyboard scrolling is untouched: Radix's own typeahead/arrow handling runs on the
+ * content element and does not depend on this.
+ */
+function useScrollLockShield<T extends HTMLElement>(): (element: T | null) => void {
+  /*
+   * A callback ref rather than a ref object: Radix's `Content` types its `ref` as
+   * `Ref<HTMLDivElement>` (non-nullable), which a `RefObject<T | null>` does not
+   * satisfy. The callback also gives the effect a definite element to attach to.
+   */
+  const cleanup = React.useRef<(() => void) | null>(null);
+
+  return React.useCallback((element: T | null) => {
+    cleanup.current?.();
+    cleanup.current = null;
+    if (!element) return;
+
+    /*
+     * `data-scroll-locked` is what `react-remove-scroll` sets on `<body>` while a
+     * modal is open. Checking it per event (not once on mount) keeps the shield
+     * inert in a popup opened outside any dialog, and correct if the dialog closes
+     * while the list is still open.
+     */
+    const stop = (event: Event): void => {
+      if (document.body.hasAttribute('data-scroll-locked')) event.stopPropagation();
+    };
+    // `passive: true` is deliberate: this listener never calls preventDefault, it
+    // only stops propagation, so there is nothing to wait for.
+    element.addEventListener('wheel', stop, { capture: true, passive: true });
+    element.addEventListener('touchmove', stop, { capture: true, passive: true });
+    cleanup.current = () => {
+      element.removeEventListener('wheel', stop, { capture: true });
+      element.removeEventListener('touchmove', stop, { capture: true });
+    };
+  }, []);
+}
+
 export interface SelectOption {
   value: string;
   label: string;
@@ -136,6 +192,10 @@ export function Select({
   const listId = React.useId();
   const inputRef = React.useRef<HTMLInputElement>(null);
   const anchorRef = React.useRef<HTMLButtonElement>(null);
+  /** Scroll shield for the searchable popup; see `useScrollLockShield`. */
+  const popupRef = useScrollLockShield<HTMLDivElement>();
+  /** Scroll shield for the Radix-Select popup. */
+  const nativePopupRef = useScrollLockShield<HTMLDivElement>();
 
   const commit = (next: string) => {
     if (controlledValue === undefined) setInternalValue(next);
@@ -161,7 +221,17 @@ export function Select({
   }, [open]);
   React.useEffect(() => {
     if (!open) return;
-    const onPointerDown = (event: MouseEvent) => {
+    /*
+     * `pointerdown`, not `mousedown`.
+     *
+     * A Radix `Select` trigger calls `preventDefault()` on its own `pointerdown`
+     * (to keep focus where Radix wants it), and that suppresses the compatibility
+     * `mousedown` a browser would otherwise synthesise afterwards. Listening for
+     * `mousedown` therefore never fired when the reader moved from this popup to a
+     * Select — measured on the add-cluster dialog (2026-11-17): clicking 标签 while
+     * 供应商 was open left both lists on screen.
+     */
+    const onPointerDown = (event: PointerEvent) => {
       const target = event.target as Node | null;
       if (!target) return;
       if (rootRef.current?.contains(target)) return;
@@ -169,8 +239,8 @@ export function Select({
       setQuery('');
       setOpen(false);
     };
-    document.addEventListener('mousedown', onPointerDown, true);
-    return () => document.removeEventListener('mousedown', onPointerDown, true);
+    document.addEventListener('pointerdown', onPointerDown, true);
+    return () => document.removeEventListener('pointerdown', onPointerDown, true);
   }, [open]);
 
   // The search mode owns its own popup: Radix Select's trigger is a button, and
@@ -271,7 +341,23 @@ export function Select({
               )}
               // The full name is in the title so a hover reveals what the ellipsis hides.
               title={selectedLabel || placeholder}
-              onClick={() => setOpen(true)}
+              /*
+               * Open on `pointerdown`, not `click`.
+               *
+               * When another popup (a Radix Select, a Dropdown) is open, it installs a
+               * dismissable layer that calls `preventDefault()` on pointerdown; the
+               * browser then never synthesises the `click` this button listened for, so
+               * moving straight from that popup to this field did nothing. Radix's own
+               * Select trigger opens on pointerdown for the same reason. Measured on the
+               * add-cluster dialog (2026-11-17): with 标签 open, clicking 供应商 left the
+               * label list open and the provider list closed.
+               */
+              onPointerDown={(event) => {
+                // Left button only: a right-click opens the context menu, not this list.
+                if (event.button !== 0) return;
+                event.preventDefault();
+                setOpen(true);
+              }}
             >
               <span className="min-w-0 flex-1 truncate">{selectedLabel || placeholder}</span>
               <ChevronDown className="size-4 shrink-0 text-ai-fg-muted" />
@@ -280,12 +366,25 @@ export function Select({
         </Popover.Anchor>
         <Popover.Portal>
           <Popover.Content
+            ref={popupRef}
             align="start"
             sideOffset={4}
             onOpenAutoFocus={(event) => event.preventDefault()}
             onCloseAutoFocus={(event) => event.preventDefault()}
             className={cn(
-              'z-50 max-h-64 w-[var(--radix-popper-anchor-width)] overflow-y-auto rounded-ai-md border border-ai-line bg-ai-bg-overlay p-1 shadow-ai-pop animate-ai-scale-in',
+              /*
+               * `overscroll-contain` keeps a wheel that reaches the end of the list
+               * from chaining to the page behind the modal; the scroll itself is
+               * enabled here (not on the `<ul>`) because this is the element with
+               * the max height, and the shield above is attached to it.
+               *
+               * The height is `min(16rem, available)` rather than a flat `max-h-64`:
+               * on a short viewport (a laptop with a small window, or a phone in
+               * landscape) 256px ran past the bottom edge and the last option could
+               * not be reached at all. Radix publishes the space it actually has as
+               * `--radix-popover-content-available-height`.
+               */
+              'z-50 max-h-[min(16rem,var(--radix-popover-content-available-height))] w-[var(--radix-popper-anchor-width)] overflow-y-auto overscroll-contain rounded-ai-md border border-ai-line bg-ai-bg-overlay p-1 shadow-ai-pop animate-ai-scale-in',
               contentClassName,
             )}
           >
@@ -354,16 +453,26 @@ export function Select({
       </SelectPrimitive.Trigger>
       <SelectPrimitive.Portal>
         <SelectPrimitive.Content
+          ref={nativePopupRef}
           position="popper"
           sideOffset={6}
           className={cn(
-            'z-50 max-h-64 min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded-ai-md',
+            /*
+             * `overflow-hidden` on the content and `overflow-y-auto` on the viewport is
+             * Radix's own shape (the viewport is what scrolls), so the shield goes on
+             * this wrapper — the element whose subtree the wheel has to be kept inside.
+             *
+             * Height is capped by the space Radix measured, not a flat 256px: on a short
+             * viewport the popup otherwise ran past the bottom edge and the last option
+             * could not be reached.
+             */
+            'z-50 max-h-[min(16rem,var(--radix-select-content-available-height))] min-w-[var(--radix-select-trigger-width)] overflow-hidden overscroll-contain rounded-ai-md',
             'border border-ai-line bg-ai-bg-overlay shadow-ai-pop',
             'animate-ai-scale-in',
             contentClassName,
           )}
         >
-          <SelectPrimitive.Viewport className="p-1">
+          <SelectPrimitive.Viewport className="max-h-[min(16rem,var(--radix-select-content-available-height))] overflow-y-auto p-1">
             {options.map((option) => (
               <SelectPrimitive.Item
                 key={option.value}

@@ -61,7 +61,14 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_ADD_CLUSTER_03(cluster_managemen
         dialog = ui.page.get_by_role("dialog")
         expect(dialog).to_be_visible(timeout=20_000)
         dialog.locator("#ai-field-cluster-name").fill(name)
-        dialog.locator("#ai-field-cluster-kubeconfig").fill(KUBECONFIG)
+        # The field is the shared CodeMirror editor: `fill()` is ignored and a bulk
+        # insert reads as a paste the validator never sees.
+        editor = dialog.locator(".cm-content").first
+        expect(editor).to_be_visible(timeout=30_000)
+        editor.click()
+        ui.page.keyboard.press("ControlOrMeta+a")
+        ui.page.keyboard.press("Delete")
+        ui.page.keyboard.type(KUBECONFIG, delay=1)
         ui.page.locator('[data-ai-id="clusters:add-submit"]').click()
 
         banner = dialog.locator('[data-ai-id="clusters:add-error"]')

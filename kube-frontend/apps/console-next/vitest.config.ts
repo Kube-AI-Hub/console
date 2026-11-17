@@ -30,6 +30,13 @@ export default defineConfig({
         replacement: fileURLToPath(new URL('../../packages/ui/src/index.ts', import.meta.url)),
       },
       {
+        // The editor subpath, same reason the app has it: `YamlEditor` lives outside
+        // the barrel so CodeMirror is not in every first load. A dialog that imports
+        // it needs this alias here too, or the test cannot resolve the module.
+        find: /^@kube-ai-hub\/ui\/editor$/,
+        replacement: fileURLToPath(new URL('../../packages/ui/src/editor.ts', import.meta.url)),
+      },
+      {
         find: /^@kube-ai-hub\/ui\/styles\.css$/,
         replacement: fileURLToPath(new URL('../../packages/ui/src/styles.css', import.meta.url)),
       },

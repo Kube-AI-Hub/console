@@ -1,0 +1,39 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-04
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: add-cluster
+title: 添加集群 · 名称已存在时提前提示且不阻止提交
+entry_url: '{BASE_URL}/kube-frontend/clusters'
+prd: prd/kube-frontend/cluster-management/add-cluster.md
+design: design/kube-frontend/cluster-management/add-cluster.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-04
+
+story:
+- US1
+
+product: 名称字段失焦时向平台确认是否已被占用，命中则提示；该提示只是提前告知，提交仍由服务端裁决。
+preconditions:
+- 已登录，且有平台管理权限
+- 平台里已存在名为 host 的集群
+steps:
+- 打开集群列表，点「添加集群」
+- 在「集群名称」输入 host，然后让该字段失焦
+- 观察字段下方的提示
+- 把名称改成另一个合法且未被占用的名字，再次失焦
+- 观察提示是否消失
+expected:
+- 第二步后出现「已经有同名集群了，请换一个名称。」，元素句柄 clusters:add-name-error
+- 该提示出现时提交按钮仍可用（不因预检结果禁用）
+- 第四步后提示消失
+- 预检只发一次 GET（带 x-check-exist 头），不随输入逐字请求
+performance:
+- 预检为单次 GET；失焦触发，不阻塞输入
+troubleshoot:
+- 提示不出现：确认请求带 x-check-exist: true，且返回 200 {"exist":true}
+- 提示把可用名字也判为占用：该端点对不存在的名字返回 200 {"exist":false}，不是 404
+update_automation:
+- 句柄变化时改 pages/cluster_fleet.py 与用例断言

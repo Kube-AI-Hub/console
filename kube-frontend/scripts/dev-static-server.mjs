@@ -82,11 +82,22 @@ const server = createServer(async (request, response) => {
        */
       const upstreamUrl = new URL(`${bffUrl}${pathname}${url.search}`);
       const isHttps = upstreamUrl.protocol === 'https:';
-      const headers = { accept: request.headers['accept'] ?? 'application/json' };
-      for (const key of ['content-type', 'authorization']) {
-        const value = request.headers[key];
-        if (value) headers[key] = value;
+      /*
+       * Forward the caller's own headers, minus the hop-by-hop ones.
+       *
+       * The BFF passes almost everything through, and features depend on it: the
+       * add-cluster dialog asks `x-check-exist`, which only the console server
+       * understands. An allow-list of two headers (content-type, authorization)
+       * silently dropped it, so the endpoint answered with the full object instead
+       * of `{ exist }` — the page then read "taken" as "free".
+       */
+      const headers = {};
+      const DROP = new Set(['host', 'connection', 'content-length', 'accept-encoding', 'transfer-encoding', 'upgrade', 'keep-alive']);
+      for (const [key, value] of Object.entries(request.headers)) {
+        if (value === undefined || DROP.has(key.toLowerCase())) continue;
+        headers[key] = Array.isArray(value) ? value.join(', ') : value;
       }
+      headers.accept ??= 'application/json';
       const upstreamRequest = (isHttps ? httpsRequest : httpRequest)({
         protocol: upstreamUrl.protocol,
         hostname: upstreamUrl.hostname,

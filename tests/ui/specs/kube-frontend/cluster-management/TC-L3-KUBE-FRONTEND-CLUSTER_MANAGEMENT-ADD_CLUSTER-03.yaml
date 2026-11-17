@@ -15,16 +15,18 @@ covers:
 story:
 - US3
 
-product: 添加集群的校验或创建失败时，对话框留下可操作原因并弹出通知，不创建 Cluster 对象。
+product: 添加集群的校验或创建失败时，对话框留下可操作原因并弹出通知，不创建 Cluster 对象；服务端用 kube Status JSON 或纯文本回答都能映射。
 preconditions:
 - 已登录，且有平台管理权限
 steps:
 - 打开集群列表，点「添加集群」
-- 拦截 POST /kapis/cluster.kubesphere.io/v1alpha1/clusters/validation 为 400，正文含 Jwt is not equal
+- 拦截 POST /kapis/cluster.kubesphere.io/v1alpha1/clusters/validation 为 400，正文为 kube Status JSON（message 含 clusterRole of the member cluster must be）
 - 填入合法名称与结构完整的 kubeconfig 并确认
+- 重复一次，把正文换成纯文本（含 Jwt is not equal）
 expected:
 - 对话框保持打开
-- clusters:add-error 出现含 jwtSecret 的说明
+- clusters:add-error 出现含 clusterRole 的说明（JSON 形态）
+- 第二次出现含 jwtSecret 的说明（纯文本形态），并保留原文作为次要细节
 - 列表与 API 中都不存在该名称的 Cluster 对象
 performance:
 - 无特殊要求；失败为单次 POST

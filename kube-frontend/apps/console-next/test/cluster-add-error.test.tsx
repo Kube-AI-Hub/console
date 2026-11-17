@@ -105,7 +105,16 @@ describe('AddClusterDialog', () => {
     mount();
     const user = userEvent.setup();
     await user.type(document.querySelector('#ai-field-cluster-name') as HTMLInputElement, 'modehub-xc');
-    await user.type(document.querySelector('#ai-field-cluster-kubeconfig') as HTMLTextAreaElement, KUBECONFIG);
+    // The kubeconfig is a CodeMirror surface now, not a textarea: drive its content
+    // element. Typing the whole document at once would be treated as a paste.
+    const editor = await waitFor(() => {
+      const content = document.querySelector('[role="dialog"] .cm-content');
+      if (!content) throw new Error('editor not ready');
+      return content as HTMLElement;
+    });
+    await user.click(editor);
+    await user.keyboard('{Control>}a{/Control}');
+    await user.keyboard(KUBECONFIG.replace(/\n/g, ' '));
     await user.click(screen.getByRole('button', { name: '确认' }));
 
     await waitFor(() => {

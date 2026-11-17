@@ -9,6 +9,7 @@ import { DatePicker } from '../primitives/DatePicker';
 import { FormField } from '../primitives/FormField';
 import { Tag } from '../primitives/Display';
 import { getByPath, getFieldRenderer, setByPath } from './registry';
+import { focusFirstInvalidField } from '../utils/focusFirstInvalid';
 
 /* ---------------- Types ---------------- */
 
@@ -341,18 +342,15 @@ export function ResourceForm<TValues extends Record<string, unknown>>({
        * offending field is below the fold — the message is rendered but out of view.
        * The fields are rendered in schema order, so the first key in that order (not in
        * the object's key order) is the one nearest the top.
+       *
+       * The scroll/focus itself lives in `focusFirstInvalidField` so that hand-written
+       * dialogs (which do not use this form) get the same behaviour from one
+       * implementation instead of a second, drifting copy.
        */
       const firstInvalid = schema.fields.find((field) => nextErrors[field.key]);
       if (firstInvalid) {
         const id = `ai-field-${firstInvalid.key.replace(/\./g, '-')}`;
-        const target = formRef.current?.querySelector<HTMLElement>(`#${CSS.escape(id)}`);
-        target?.focus();
-        // Guarded because not every DOM implementation has it: jsdom does not, and an
-        // unguarded call throws inside an event handler, which surfaces as an unhandled
-        // rejection that masks the next real failure in the suite.
-        if (typeof target?.scrollIntoView === 'function') {
-          target.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-        }
+        focusFirstInvalidField(formRef.current, id);
       }
       return;
     }
@@ -384,6 +382,7 @@ export function ResourceForm<TValues extends Record<string, unknown>>({
             <FormField
               key={field.key}
               htmlFor={id}
+              fieldKey={field.key}
               label={field.label}
               required={field.required}
               hint={field.hint}

@@ -135,3 +135,45 @@ export const JobPolicies: StoryObj = {
     onSubmit={async () => { throw new Error('演示提交失败：表单保留输入并显示错误'); }}
   />,
 };
+
+/**
+ * A rejected submit must not look like a no-op.
+ *
+ * The form is deliberately taller than its scroll box. Pressing 创建 without filling
+ * anything scrolls to the first invalid field (名称) and focuses it; fill that in and
+ * press again to see the scroll move to 容器镜像. The behaviour comes from
+ * `focusFirstInvalidField`, which `ResourceForm` and hand-written dialogs share — see
+ * `packages/ai-kit/src/utils/focusFirstInvalid.ts`.
+ */
+export const ValidationScrollsToTheFailedField: StoryObj = {
+  render: () => (
+    <div className="mx-auto max-w-2xl">
+      <div className="mb-3">
+        <h1 className="text-base font-semibold text-ai-fg">校验失败滚到出错字段</h1>
+        <p className="mt-1 text-xs text-ai-fg-muted">
+          表单比可视区高。直接点「创建任务」：页面滚到第一个出错字段（名称）并聚焦；填好后再点，滚到下一个（容器镜像）。
+        </p>
+      </div>
+      {/* A fixed-height scroll box is what makes the failure visible: without it the
+          whole form fits and there is nothing to scroll. */}
+      <div className="max-h-64 overflow-y-auto rounded-ai-md border border-ai-line p-4">
+        <ResourceForm
+          schema={{
+            fields: [
+              { key: 'name', label: '任务名称', type: 'text', required: true },
+              { key: 'image', label: '容器镜像', type: 'text', required: true },
+              { key: 'command', label: '启动命令', type: 'text', hint: '留空则使用镜像默认入口' },
+              { key: 'parallelism', label: '并行数', type: 'number', min: 0 },
+              { key: 'schedule', label: '执行计划', type: 'text', hint: '例如 0 * * * *' },
+              { key: 'retries', label: '重试次数', type: 'number', min: 0 },
+              { key: 'note', label: '备注', type: 'textarea', hint: '最多 256 个字符' },
+            ],
+            submit: { label: '创建任务' },
+          }}
+          defaultValues={{ name: '', image: '', command: '', parallelism: 1, schedule: '', retries: 0, note: '' }}
+          onSubmit={() => undefined}
+        />
+      </div>
+    </div>
+  ),
+};

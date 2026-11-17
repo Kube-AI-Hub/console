@@ -205,6 +205,8 @@
 | kube-frontend/cluster-management/add-cluster | `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-01` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-01` | [`design/kube-frontend/cluster-management/add-cluster.md`](../../../design/kube-frontend/cluster-management/add-cluster.md) | [`tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_ADD_CLUSTER_01.py`](../../../tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_ADD_CLUSTER_01.py) |
 | kube-frontend/cluster-management/add-cluster | `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-02` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-01` | [`design/kube-frontend/cluster-management/add-cluster.md`](../../../design/kube-frontend/cluster-management/add-cluster.md) | [`tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_ADD_CLUSTER_01.py`](../../../tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_ADD_CLUSTER_01.py) |
 | kube-frontend/cluster-management/add-cluster | `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-03` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-03` | [`design/kube-frontend/cluster-management/add-cluster.md`](../../../design/kube-frontend/cluster-management/add-cluster.md) | [`tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_ADD_CLUSTER_03.py`](../../../tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_ADD_CLUSTER_03.py) |
+| kube-frontend/cluster-management/add-cluster | `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-04` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-04` | [`design/kube-frontend/cluster-management/add-cluster.md`](../../../design/kube-frontend/cluster-management/add-cluster.md) | **（无）** |
+| kube-frontend/cluster-management/add-cluster | `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-05` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-05` | [`design/kube-frontend/cluster-management/add-cluster.md`](../../../design/kube-frontend/cluster-management/add-cluster.md) | **（无）** |
 | kube-frontend/cluster-management/audit-search | `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-AUDIT_SEARCH-01` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-AUDIT_SEARCH-01` | [`design/kube-frontend/cluster-management/audit-search.md`](../../../design/kube-frontend/cluster-management/audit-search.md) | [`tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_AUDIT_SEARCH_01.py`](../../../tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_AUDIT_SEARCH_01.py) |
 | kube-frontend/cluster-management/cluster-alerting-write | `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING_WRITE-01` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING_WRITE-01` | [`design/kube-frontend/cluster-management/cluster-alerting-write.md`](../../../design/kube-frontend/cluster-management/cluster-alerting-write.md) | [`tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_ALERTING_WRITE_01.py`](../../../tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_ALERTING_WRITE_01.py) |
 | kube-frontend/cluster-management/cluster-alerting-write | `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING_WRITE-02` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_ALERTING_WRITE-02` | [`design/kube-frontend/cluster-management/cluster-alerting-write.md`](../../../design/kube-frontend/cluster-management/cluster-alerting-write.md) | [`tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_ALERTING_WRITE_02.py`](../../../tests/ui/tests/kube-frontend/cluster-management/test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_ALERTING_WRITE_02.py) |
@@ -505,10 +507,10 @@
 
 ## 小结
 
-- 需求里的 AC：498 条，其中未覆盖 1 条、无技术方案承接 18 条、无用例规格实现 1 条。
+- 需求里的 AC：500 条，其中未覆盖 1 条、无技术方案承接 18 条、无用例规格实现 3 条。
 - 未覆盖：`AC-L2-KUBE-FRONTEND-LOGIN-07`
 - 无技术方案承接：`AC-L2-KUBE-FRONTEND-LOGIN-01`, `AC-L2-KUBE-FRONTEND-LOGIN-02`, `AC-L2-KUBE-FRONTEND-LOGIN-03`, `AC-L2-KUBE-FRONTEND-LOGIN-04`, `AC-L2-KUBE-FRONTEND-LOGIN-05`, `AC-L2-KUBE-FRONTEND-LOGIN-06`, `AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L2-KUBE-FRONTEND-THEME-01`, `AC-L2-KUBE-FRONTEND-THEME-02`, `AC-L2-KUBE-FRONTEND-THEME-03`, `AC-L2-KUBE-FRONTEND-THEME-04`, `AC-L2-KUBE-FRONTEND-THEME-05`, `AC-L2-KUBE-FRONTEND-THEME-06`, `AC-L3-KUBE-FRONTEND-MONITORING-PROJECT_CUSTOM_MONITORING-01`, `AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-OVERVIEW-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-01`, `AC-L3-KUBE-FRONTEND-STORAGE-CREATE-02`, `AC-L3-KUBE-FRONTEND-STORAGE-DETAIL_TABS-01`
-- 无用例规格实现：`AC-L2-KUBE-FRONTEND-LOGIN-07`
+- 无用例规格实现：`AC-L2-KUBE-FRONTEND-LOGIN-07`, `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-04`, `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-05`
 
 ## 用户故事覆盖
 
@@ -658,7 +660,7 @@
 | kube-frontend/app-workloads/status | `US1` | `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-STATUS-01`, `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-STATUS-02` |
 | kube-frontend/cluster-management/_index | `US1` | `TC-FULL-KUBE-FRONTEND-CLUSTER_MANAGEMENT-01`, `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-SORT-01` |
 | kube-frontend/cluster-management/_index | `US2` | `TC-FULL-KUBE-FRONTEND-CLUSTER_MANAGEMENT-01` |
-| kube-frontend/cluster-management/add-cluster | `US1` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-01` |
+| kube-frontend/cluster-management/add-cluster | `US1` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-01`, `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-04`, `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-05` |
 | kube-frontend/cluster-management/add-cluster | `US2` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-01` |
 | kube-frontend/cluster-management/add-cluster | `US3` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-03` |
 | kube-frontend/cluster-management/audit-search | `US1` | `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-AUDIT_SEARCH-01` |

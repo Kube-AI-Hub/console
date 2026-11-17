@@ -32,6 +32,21 @@ users:
 """
 
 
+def _fill_kubeconfig(dialog, page, text: str) -> None:
+    """Type a kubeconfig into the CodeMirror editor.
+
+    The field is the shared YAML editor, not a textarea: `fill()` on a `.cm-content`
+    is ignored, and a bulk insert is treated as a paste that the validator does not
+    see. Click, select-all, delete, then type incrementally.
+    """
+    editor = dialog.locator(".cm-content").first
+    expect(editor).to_be_visible(timeout=30_000)
+    editor.click()
+    page.keyboard.press("ControlOrMeta+a")
+    page.keyboard.press("Delete")
+    page.keyboard.type(text, delay=1)
+
+
 @pytest.mark.point
 def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_ADD_CLUSTER_01(cluster_management_page, screenshot):
     """TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-01 添加集群：导入 kubeconfig 并出现在列表。"""
@@ -54,13 +69,13 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_ADD_CLUSTER_01(cluster_managemen
         # Invalid input is refused before any request is made — the empty selectors are
         # deliberate: a request that never happens cannot be observed afterwards.
         dialog.locator("#ai-field-cluster-name").fill("Bad_Name")
-        dialog.locator("#ai-field-cluster-kubeconfig").fill(KUBECONFIG)
+        _fill_kubeconfig(dialog, ui.page, KUBECONFIG)
         ui.page.locator('[data-ai-id="clusters:add-submit"]').click()
         expect(dialog).to_contain_text("名称只能包含", timeout=15_000)
         assert ui.api.request("GET", f"{CLUSTERS_WRITE}/{name}")[0] != 200, "非法名称竟创建了集群"
 
         dialog.locator("#ai-field-cluster-name").fill(name)
-        dialog.locator("#ai-field-cluster-kubeconfig").fill("not a kubeconfig")
+        _fill_kubeconfig(dialog, ui.page, "not a kubeconfig")
         ui.page.locator('[data-ai-id="clusters:add-submit"]').click()
         expect(dialog).to_contain_text("不像 kubeconfig", timeout=15_000)
         assert ui.api.request("GET", f"{CLUSTERS_WRITE}/{name}")[0] != 200, "非法内容竟创建了集群"
@@ -68,7 +83,7 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_ADD_CLUSTER_01(cluster_managemen
         # A well-formed kubeconfig that cannot be reached is refused **before** the object
         # is created: the platform validates the connection first. Creating it anyway would
         # leave a cluster in the list that can never become ready.
-        dialog.locator("#ai-field-cluster-kubeconfig").fill(KUBECONFIG)
+        _fill_kubeconfig(dialog, ui.page, KUBECONFIG)
         ui.page.locator('[data-ai-id="clusters:add-submit"]').click()
         expect(dialog).to_be_visible()
         expect(dialog.locator('[data-ai-id="clusters:add-error"]')).to_be_visible(timeout=60_000)
@@ -93,11 +108,18 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_ADD_CLUSTER_01(cluster_managemen
         # does: they land as annotations, which is where every later page reads them from.
         proxy_dialog.locator("#ai-field-cluster-alias").fill(alias)
         proxy_dialog.locator("#ai-field-cluster-description").fill(description)
-        proxy_dialog.locator('[data-ai-id="clusters:add-mode:proxy"]').check()
+        # The environment tag is the same label 编辑信息 writes, and it is collected up
+        # front so a newly imported cluster is already grouped.
+        proxy_dialog.locator('[data-ai-id="clusters:add-group"]').click()
+        ui.page.get_by_role("option", name="演示", exact=True).click()
+        proxy_dialog.locator('[data-ai-id="clusters:add-mode:proxy"]').click()
         # The kubeconfig field is gone in this mode; a leftover textarea would be a form
         # that collects something it will not send.
         expect(proxy_dialog.locator("#ai-field-cluster-kubeconfig")).to_have_count(0)
         expect(proxy_dialog.locator('[data-ai-id="clusters:add-proxy-tip"]')).to_be_visible()
+        # The dialog is two titled sections, not a wizard: both are on screen at once.
+        expect(proxy_dialog.get_by_role("heading", name="基本信息")).to_be_visible()
+        expect(proxy_dialog.get_by_role("heading", name="连接设置")).to_be_visible()
         ui.page.locator('[data-ai-id="clusters:add-submit"]').click()
         expect(ui.page.get_by_role("dialog")).to_have_count(0, timeout=30_000)
 
@@ -109,11 +131,15 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_ADD_CLUSTER_01(cluster_managemen
         annotations = (proxy_body.get("metadata") or {}).get("annotations") or {}
         assert annotations.get("kubesphere.io/alias-name") == alias, annotations
         assert annotations.get("kubesphere.io/description") == description, annotations
+        labels = (proxy_body.get("metadata") or {}).get("labels") or {}
+        assert labels.get("cluster.kubesphere.io/group") == "demo", labels
         # The list shows the alias with the object name underneath, so both are visible.
         surface_after = ui.page.locator('[data-ai-id="clusters:surface"]').last
         row = surface_after.locator(f'[data-ai-row="{proxy_name}"]')
         expect(row).to_be_visible(timeout=30_000)
         assert alias in row.inner_text() and proxy_name in row.inner_text(), row.inner_text()[:160]
+        # The tag shows as a badge next to the object name.
+        assert "演示" in row.inner_text(), row.inner_text()[:160]
         screenshot(ui.page, "cluster-add")
     finally:
         # Unconditional: a half-finished import would sit in the fleet list as a cluster

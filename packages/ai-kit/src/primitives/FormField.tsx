@@ -21,6 +21,14 @@ export interface FormFieldProps {
    */
   errorAiId?: string;
   required?: boolean;
+  /**
+   * Field key, rendered as `data-field-key` on the wrapper.
+   *
+   * Exists so "scroll the failed field into view" can find the wrapper from either the
+   * control's id or the key, and so a field whose control has no id (a custom renderer,
+   * a group of inputs) is still addressable. See `focusFirstInvalidField`.
+   */
+  fieldKey?: string;
   className?: string;
   children: React.ReactNode;
 }
@@ -39,11 +47,16 @@ export function FormField({
   error,
   errorAiId,
   required = false,
+  fieldKey,
   className,
   children,
 }: FormFieldProps): React.ReactElement {
   return (
-    <div className={cn('flex flex-col gap-1.5', className)} data-invalid={error ? 'true' : undefined}>
+    <div
+      className={cn('flex flex-col gap-1.5', className)}
+      data-invalid={error ? 'true' : undefined}
+      {...(fieldKey ? { 'data-field-key': fieldKey } : {})}
+    >
       {label ? (
         <LabelPrimitive.Root
           htmlFor={htmlFor}

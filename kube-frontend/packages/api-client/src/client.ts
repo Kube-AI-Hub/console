@@ -25,6 +25,16 @@ export interface RequestOptions {
    * Every other verb is fine with the default.
    */
   contentType?: string;
+  /**
+   * Extra request headers, merged after the defaults.
+   *
+   * ks-apiserver's `x-check-exist` is the reason this exists: the console's own
+   * server reads it to answer `{ exist }` instead of the object, and there is no
+   * other way to ask "does this name exist" without downloading the object.
+   * `Authorization` and `Accept` are set by the client and are not overridable
+   * here — a caller must not be able to redirect the session.
+   */
+  headers?: Record<string, string>;
 }
 
 /**
@@ -98,6 +108,18 @@ export function createClient(options: ClientOptions = {}): ApiClient {
 
     const headers: Record<string, string> = { Accept: init.responseType === 'text' ? '*/*' : 'application/json', ...authHeaders() };
     if (init.body !== undefined) headers['Content-Type'] = init.contentType ?? 'application/json';
+    /*
+     * Caller headers come last, except the two the client owns.
+     *
+     * `x-check-exist` is the case this exists for. Letting a caller replace
+     * `Authorization` or `Accept` would let a page act as a different session or
+     * parse a body as the wrong type, so those two stay the client's.
+     */
+    for (const [name, value] of Object.entries(init.headers ?? {})) {
+      const lower = name.toLowerCase();
+      if (lower === 'authorization' || lower === 'accept') continue;
+      headers[name] = value;
+    }
 
     let response: Response;
     try {

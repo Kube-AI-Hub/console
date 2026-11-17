@@ -94,7 +94,12 @@ export function AutoComplete({
    */
   React.useEffect(() => {
     if (!open) return;
-    const onPointerDown = (event: MouseEvent) => {
+    /*
+     * `pointerdown`, not `mousedown`: a Radix Select trigger prevents the default of
+     * its own pointerdown, which suppresses the compatibility mousedown — so moving
+     * from this list straight to a Select would leave both open.
+     */
+    const onPointerDown = (event: PointerEvent) => {
       const target = event.target as Node | null;
       if (target && inputRef.current?.contains(target)) return;
       // The list itself lives in a portal, so a click on an option must not be
@@ -102,8 +107,8 @@ export function AutoComplete({
       if (target instanceof Element && target.closest('[data-ai-autocomplete-list]')) return;
       setOpen(false);
     };
-    document.addEventListener('mousedown', onPointerDown, true);
-    return () => document.removeEventListener('mousedown', onPointerDown, true);
+    document.addEventListener('pointerdown', onPointerDown, true);
+    return () => document.removeEventListener('pointerdown', onPointerDown, true);
   }, [open]);
 
   const setValue = (next: string) => {

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMulticluster } from '@/shell/useMulticluster';
 import { Link } from '@tanstack/react-router';
-import { clustersApi, type ClusterSummary } from '@kube-ai-hub/api-client';
+import { accessReviewApi, clustersApi, type ClusterSummary } from '@kube-ai-hub/api-client';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
 import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
@@ -46,6 +46,22 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
     staleTime: 60_000,
     queryFn: ({ signal }) => clustersApi(apiClient).list({ signal }),
   });
+
+  /*
+   * Whether this account may import a cluster.
+   *
+   * The old console hides 添加集群 unless the account's rules include `clusters:create`.
+   * The button is not merely decorative: pressing it opens a form whose submit is refused
+   * with a 403, which reads as a broken dialog. `fail-open` (undefined → allowed) matches
+   * the rest of the app: a broken permission check must not take a permitted action away.
+   */
+  const canWrite = useQuery({
+    queryKey: ['clusters-can-create'],
+    staleTime: 60_000,
+    retry: false,
+    queryFn: ({ signal }) => accessReviewApi(apiClient).allowed({ verb: 'create', resource: 'clusters', group: 'cluster.kubesphere.io', signal }),
+  });
+  const writeBlocked = canWrite.data === false;
 
   const all = query.data?.items ?? [];
 
@@ -212,7 +228,13 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
           ),
         },
       ],
-      primaryAction: { key: 'add', label: t('cluster.add.title'), aiId: 'clusters:add' },
+      primaryAction: {
+        key: 'add',
+        label: t('cluster.add.title'),
+        aiId: 'clusters:add',
+        disabled: writeBlocked,
+        ...(writeBlocked ? { disabledHint: t('cluster.add.noPermission') } : {}),
+      },
       rowActions: [
         { key: 'edit', label: t('resource.action.editInfo'), aiId: 'clusters:edit' },
         /*
@@ -247,7 +269,7 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
       },
       pagination: { page: 1, pageSize: Math.max(rows.length, 10), total: rows.length },
     }),
-    [list.sortBy, list.order, rows.length, t],
+    [list.sortBy, list.order, rows.length, t, writeBlocked],
   );
 
   const columnKeys = React.useMemo(() => schema.columns.map((column) => column.key), [schema]);

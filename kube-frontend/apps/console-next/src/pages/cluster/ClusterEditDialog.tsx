@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ApiError, CLUSTER_GROUPS, CLUSTER_PROVIDERS, clusterWriteApi } from '@kube-ai-hub/api-client';
+import { ApiError, clusterWriteApi } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { Button, Modal } from '@kube-ai-hub/ui';
+import { Alert, Button, FormField, Input, Modal, Notify } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { errorMessage } from '@/components/resource/ResourceErrorPanel';
+import { ALIAS_MAX, ClusterIdentityFields } from './ClusterIdentityFields';
 
 /**
  * 编辑信息 for a cluster — the old console's `EditBasicInfoModal`.
@@ -18,6 +19,12 @@ import { errorMessage } from '@/components/resource/ResourceErrorPanel';
  * Everything else about a cluster object belongs to the installer (its connection, its
  * modules, its addresses). Offering those would let a click silently disagree with the
  * thing that actually configured the cluster, so they are not here.
+ *
+ * The four fields come from `ClusterIdentityFields`, the same component 添加集群 uses.
+ * They were duplicated before, and the copies had already drifted: this dialog's tag
+ * list was missing `demo`, and its provider was a plain text input with a `<datalist>`
+ * while 添加集群 had the shared searchable `Select`. One component is the only way the
+ * two dialogs cannot disagree about what a cluster's alias or tag is.
  */
 /**
  * The four writable attributes.
@@ -41,9 +48,6 @@ export interface ClusterEditDialogProps {
   cluster: ClusterEditable | null;
   onSaved?: () => void;
 }
-
-const ALIAS_MAX = 63;
-const DESCRIPTION_MAX = 256;
 
 export function ClusterEditDialog({ open, onOpenChange, cluster, onSaved }: ClusterEditDialogProps): React.ReactElement {
   const t = useT();
@@ -70,6 +74,9 @@ export function ClusterEditDialog({ open, onOpenChange, cluster, onSaved }: Clus
       void queryClient.invalidateQueries({ queryKey: ['clusters'] });
       onSaved?.();
       onOpenChange(false);
+      // Same confirmation the add dialog gives: a dialog that vanishes silently leaves
+      // the reader unsure whether the write happened.
+      Notify.success({ content: t('common.saved') });
     },
   });
 
@@ -105,88 +112,38 @@ export function ClusterEditDialog({ open, onOpenChange, cluster, onSaved }: Clus
         </div>
       }
     >
-      <div className="flex flex-col gap-3">
-        <label className="flex flex-col gap-1 text-xs text-ai-fg-secondary" htmlFor="ai-field-cluster-edit-name">
-          {t('cluster.edit.name')}
-          <input
+      <div className="flex flex-col gap-4">
+        {/* Same placement as 添加集群: the failure is at the top, where a long form
+            cannot scroll it under the confirm button. */}
+        {requestError ? (
+          <Alert tone="danger" title={t('cluster.edit.failedTitle')} data-ai-id="clusters:edit-error">
+            <p>{requestError}</p>
+          </Alert>
+        ) : null}
+
+        <FormField htmlFor="ai-field-cluster-edit-name" label={t('cluster.edit.name')} hint={t('cluster.edit.nameHint')}>
+          <Input
             id="ai-field-cluster-edit-name"
             value={cluster?.name ?? ''}
             readOnly
             disabled
-            className="h-9 rounded-ai-md border border-ai-line bg-ai-surface-2 px-2 text-sm text-ai-fg-muted"
+            className="bg-ai-surface-2 text-ai-fg-muted"
           />
-        </label>
+        </FormField>
 
-        <label className="flex flex-col gap-1 text-xs text-ai-fg-secondary" htmlFor="ai-field-cluster-edit-alias">
-          {t('cluster.edit.alias')}
-          <input
-            id="ai-field-cluster-edit-alias"
-            value={alias}
-            onChange={(event) => setAlias(event.target.value)}
-            maxLength={ALIAS_MAX}
-            className="h-9 rounded-ai-md border border-ai-line bg-ai-surface px-2 text-sm text-ai-fg"
-            {...actionProps('clusters:edit-alias')}
-          />
-          <span className="text-[11px] text-ai-fg-muted">{t('cluster.edit.aliasHint')}</span>
-          {aliasError ? <span className="text-[11px] text-ai-danger" role="alert">{aliasError}</span> : null}
-        </label>
-
-        <label className="flex flex-col gap-1 text-xs text-ai-fg-secondary" htmlFor="ai-field-cluster-edit-group">
-          {t('cluster.edit.group')}
-          <select
-            id="ai-field-cluster-edit-group"
-            value={group}
-            onChange={(event) => setGroup(event.target.value)}
-            className="h-9 rounded-ai-md border border-ai-line bg-ai-surface px-2 text-sm text-ai-fg"
-            {...actionProps('clusters:edit-group')}
-          >
-            <option value="">{t('cluster.group.none')}</option>
-            {CLUSTER_GROUPS.map((value) => (
-              <option key={value} value={value}>
-                {t(`cluster.group.${value}` as never)}
-              </option>
-            ))}
-          </select>
-          <span className="text-[11px] text-ai-fg-muted">{t('cluster.edit.groupHint')}</span>
-        </label>
-
-        <label className="flex flex-col gap-1 text-xs text-ai-fg-secondary" htmlFor="ai-field-cluster-edit-provider">
-          {t('cluster.edit.provider')}
-          <input
-            id="ai-field-cluster-edit-provider"
-            value={provider}
-            onChange={(event) => setProvider(event.target.value)}
-            list="cluster-provider-options"
-            className="h-9 rounded-ai-md border border-ai-line bg-ai-surface px-2 text-sm text-ai-fg"
-            {...actionProps('clusters:edit-provider')}
-          />
-          <datalist id="cluster-provider-options">
-            {CLUSTER_PROVIDERS.map((value) => (
-              <option key={value} value={value} />
-            ))}
-          </datalist>
-          <span className="text-[11px] text-ai-fg-muted">{t('cluster.edit.providerHint')}</span>
-        </label>
-
-        <label className="flex flex-col gap-1 text-xs text-ai-fg-secondary" htmlFor="ai-field-cluster-edit-description">
-          {t('cluster.edit.descriptionLabel')}
-          <textarea
-            id="ai-field-cluster-edit-description"
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            maxLength={DESCRIPTION_MAX}
-            rows={3}
-            className="rounded-ai-md border border-ai-line bg-ai-surface p-2 text-sm text-ai-fg"
-            {...actionProps('clusters:edit-description')}
-          />
-          <span className="text-[11px] text-ai-fg-muted">{t('cluster.edit.descriptionHint')}</span>
-        </label>
-
-        {requestError ? (
-          <p className="text-xs text-ai-danger" role="alert" data-ai-id="clusters:edit-error">
-            {requestError}
-          </p>
-        ) : null}
+        <ClusterIdentityFields
+          idPrefix="ai-field-cluster-edit"
+          aiPrefix="clusters:edit"
+          alias={alias}
+          onAliasChange={setAlias}
+          group={group}
+          onGroupChange={setGroup}
+          provider={provider}
+          onProviderChange={setProvider}
+          description={description}
+          onDescriptionChange={setDescription}
+          aliasError={aliasError}
+        />
       </div>
     </Modal>
   );

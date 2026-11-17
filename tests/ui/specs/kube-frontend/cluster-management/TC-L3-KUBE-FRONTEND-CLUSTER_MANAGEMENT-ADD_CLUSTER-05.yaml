@@ -1,0 +1,37 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-05
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: add-cluster
+title: 添加集群 · 无写权限时主操作禁用
+entry_url: '{BASE_URL}/kube-frontend/clusters'
+prd: prd/kube-frontend/cluster-management/add-cluster.md
+design: design/kube-frontend/cluster-management/add-cluster.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-05
+
+story:
+- US1
+
+product: 没有 clusters:create 权限的账号看到禁用的「添加集群」，旁边说明原因，点击不打开对话框。
+preconditions:
+- 已登录，且当前账号对 clusters@cluster.kubesphere.io 没有 create 权限
+steps:
+- 拦截 POST /apis/authorization.k8s.io/v1/selfsubjectaccessreviews，返回 status.allowed=false
+- 打开集群列表
+- 观察主操作的状态与旁边的说明
+- 尝试点击主操作
+expected:
+- 「添加集群」按钮带 disabled 属性
+- 按钮旁出现「当前账号没有接入集群的权限，请联系平台管理员。」，句柄 clusters:add:disabled-hint
+- 点击后不出现对话框（role=dialog 数量为 0）
+- 不发出任何 POST /apis/cluster.kubesphere.io/v1alpha1/clusters
+performance:
+- 无特殊要求；权限查询为单次 SSAR
+troubleshoot:
+- 按钮仍可点：确认 SSAR 响应被拦截且 status.allowed 明确为 false
+- 有权限时也被禁用：门控是 fail-open，只有明确的 false 才禁用
+update_automation:
+- 门控条件变化时同步用例与 design 的 DEC-10

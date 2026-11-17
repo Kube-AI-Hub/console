@@ -8,6 +8,18 @@ pytestmark = pytest.mark.ui
 CLUSTERS = "/apis/cluster.kubesphere.io/v1alpha1/clusters"
 
 
+def _choose_tag(dialog, page, label: str) -> None:
+    """Pick a tag from the shared Select.
+
+    The field is a Radix Select now (the same component 添加集群 uses), not a native
+    `<select>`: `select_option` does not apply, and the option list lives in a portal
+    outside the dialog.
+    """
+    dialog.locator("#ai-field-cluster-edit-group").click()
+    page.get_by_role("option", name=label, exact=True).click()
+    page.wait_for_timeout(300)
+
+
 @pytest.mark.point
 def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_EDIT_INFO_01(cluster_fleet_page, ui_config, screenshot):
     """TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_EDIT_INFO-01 集群列表：编辑信息写回别名/标签/供应商/描述。"""
@@ -40,8 +52,9 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_EDIT_INFO_01(cluster_fle
         expect(dialog.locator("#ai-field-cluster-edit-name")).to_be_disabled()
 
         dialog.locator("#ai-field-cluster-edit-alias").fill("E2E 别名")
-        dialog.locator("#ai-field-cluster-edit-group").select_option("testing")
-        dialog.locator("#ai-field-cluster-edit-provider").fill("E2E Provider")
+        _choose_tag(dialog, ui.page, "测试")
+        dialog.locator('[data-ai-id="clusters:edit-provider"]').click()
+        ui.page.get_by_role("option", name="Kube AI Hub", exact=True).first.click()
         dialog.locator("#ai-field-cluster-edit-description").fill("由 E2E 写入")
         ui.page.locator('[data-ai-id="clusters:edit-submit"]').click()
         expect(ui.page.get_by_role("dialog")).to_have_count(0, timeout=30_000)
@@ -56,7 +69,7 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_EDIT_INFO_01(cluster_fle
         assert annotations.get("kubesphere.io/alias-name") == "E2E 别名", annotations
         assert annotations.get("kubesphere.io/description") == "由 E2E 写入", annotations
         assert labels.get("cluster.kubesphere.io/group") == "testing", labels
-        assert (after.get("spec") or {}).get("provider") == "E2E Provider", after.get("spec")
+        assert (after.get("spec") or {}).get("provider") == "Kube AI Hub", after.get("spec")
 
         # The list shows the alias, and the object name stays readable underneath so the
         # two are never confused.
@@ -72,7 +85,7 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_EDIT_INFO_01(cluster_fle
         dialog = ui.open_edit(cluster)
         dialog.locator("#ai-field-cluster-edit-alias").fill("")
         dialog.locator("#ai-field-cluster-edit-description").fill("")
-        dialog.locator("#ai-field-cluster-edit-group").select_option("")
+        _choose_tag(dialog, ui.page, "无")
         ui.page.locator('[data-ai-id="clusters:edit-submit"]').click()
         expect(ui.page.get_by_role("dialog")).to_have_count(0, timeout=30_000)
 

@@ -69,4 +69,28 @@ describe('createClient', () => {
     const error = (await client.request('/thing').catch((cause: unknown) => cause)) as ApiError;
     expect(error.isNotFound).toBe(true);
   });
+
+  it('sends caller headers alongside the session, not instead of it', async () => {
+    // `x-check-exist` is the reason this exists; it has to reach the server while the
+    // Authorization header the client owns stays intact.
+    const fetchImpl = vi.fn(async () => jsonResponse({ exist: true }));
+    const client = createClient({ baseUrl: '/api', getToken: () => 'tok', fetchImpl });
+    await client.request('/thing', { headers: { 'x-check-exist': 'true' } });
+    const init = (fetchImpl.mock.calls[0] as unknown as [string, RequestInit])[1];
+    const headers = init.headers as Record<string, string>;
+    expect(headers['x-check-exist']).toBe('true');
+    expect(headers.Authorization).toBe('Bearer tok');
+  });
+
+  it('refuses to let a caller replace Authorization or Accept', async () => {
+    // A page that could swap either one would be acting as another session, or reading
+    // a body as the wrong type.
+    const fetchImpl = vi.fn(async () => jsonResponse({}));
+    const client = createClient({ baseUrl: '/api', getToken: () => 'tok', fetchImpl });
+    await client.request('/thing', { headers: { Authorization: 'Bearer other', accept: 'text/html' } });
+    const init = (fetchImpl.mock.calls[0] as unknown as [string, RequestInit])[1];
+    const headers = init.headers as Record<string, string>;
+    expect(headers.Authorization).toBe('Bearer tok');
+    expect(headers.Accept).toBe('application/json');
+  });
 });
