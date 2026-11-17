@@ -100,6 +100,9 @@ tools/verify-all.sh /tmp/a100.env http://localhost:5182 http://127.0.0.1:8093 ho
 
 开跑前三条探针（已内置在 `--baseline`，任一失败即退出码 2）：BFF `/api/session/me`、静态站首页、登录。
 
+**探测用的字段名要从客户端代码里取**：2026-11-18 手工探 `cluster_gpu_used` 得到「缺失」，差点判成
+「缺失被显示成 0」；客户端实际用的是 `cluster_gpu_usage`，值为真实 0。字段名凭直觉拼会造出假缺陷。
+
 ## 6. 单独跑某一段
 
 ```bash
