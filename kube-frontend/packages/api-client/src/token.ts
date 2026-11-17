@@ -1,29 +1,17 @@
 /**
  * Reading a session token.
  *
- * The BFF and the browser both need this — the BFF to answer `/api/session/me`,
- * the browser to show the signed-in account before any request finishes — and a
- * second copy is how the two start disagreeing about which accounts are
- * uninitialised. It runs in either environment: no `Buffer`, no `process`.
+ * The browser still decodes a stored token to show the signed-in account before
+ * any request finishes. `SessionUser` lives in `./session` — the module that owns
+ * the shape — so the two cannot drift.
  *
  * The token is never verified here. ks-apiserver signed it and will reject it on
  * the next call if it is forged; decoding only decides what to display.
  */
 
-export interface SessionUser {
-  /** The account name (`sub`), which is what ks-apiserver authorises against. */
-  name: string;
-  displayName?: string;
-  email?: string;
-  /**
-   * `false` for a pre-registration account that has not set a password. Such a
-   * token authenticates but every request is refused, so the login page routes
-   * it to password confirmation instead of the console.
-   */
-  initialized: boolean;
-  /** Seconds since the epoch, when the issuer included it. */
-  expiresAt?: number;
-}
+import type { SessionUser } from './session';
+
+export type { SessionUser };
 
 interface TokenClaims {
   sub?: unknown;

@@ -25,6 +25,7 @@ const fs = require('fs')
 const path = require('path')
 
 const { getServerConfig, root } = require('../libs/utils')
+const { mountNewConsole } = require('./newConsoleStatic')
 
 const serverConfig = getServerConfig().server
 
@@ -122,6 +123,14 @@ module.exports = function(app) {
     )
   }
 
+  /*
+   * The new console's build, served from this process.
+   *
+   * Placed after the other static mounts and before the dev-only proxy below, so
+   * the shell fallback only answers paths nothing else claimed.
+   */
+  mountNewConsole(app)
+
   if (global.MODE_DEV) {
     // Proxy /kube-docs requests to Hugo dev server
     const hugoProxy = HttpProxy.createProxyServer({
@@ -133,7 +142,9 @@ module.exports = function(app) {
       console.error('Hugo proxy error:', err.message)
       if (res.writeHead) {
         res.writeHead(502, { 'Content-Type': 'text/plain' })
-        res.end('Hugo dev server not available. Please run: cd kube-docs && yarn dev')
+        res.end(
+          'Hugo dev server not available. Please run: cd kube-docs && yarn dev'
+        )
       }
     })
 
@@ -146,7 +157,8 @@ module.exports = function(app) {
             if (e) {
               console.error('Hugo proxy error:', e.message)
               ctx.status = 502
-              ctx.body = 'Hugo dev server not available. Please run: cd kube-docs && yarn dev'
+              ctx.body =
+                'Hugo dev server not available. Please run: cd kube-docs && yarn dev'
             }
             resolve()
           })

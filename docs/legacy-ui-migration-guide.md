@@ -224,62 +224,64 @@ CSS 里完全对齐的两条边，取整到设备像素后相差 3.9px。用 `ma
 | 环境 | 能证明 | **不能**证明 |
 |---|---|---|
 | Storybook（`cd console/packages/ai-kit && pnpm storybook`，6106） | 组件在深浅色/两套色调下、键盘与焦点态 | 真实数据、路由、权限 |
-| 本地全栈（BFF + 静态站） | 登录 → 列表 → 子页面，请求真的到 apiserver | 部署环境的 ingress/TLS 行为 |
+| 本地静态站 + 部署后端 | 登录 → 列表 → 子页面，请求真的到 apiserver | 部署环境的 ingress/TLS 行为 |
 | 部署环境（B200） | 用户真正看到的东西 | — |
 
-规则：组件问题在 Storybook 定位，交互问题在本地全栈定位，**最终结论必须在部署环境复核**。
+规则：组件问题在 Storybook 定位，交互问题在本地静态站定位，**最终结论必须在部署环境复核**。
 现有组件仅组合时无需新增 Storybook API 示例；新增/扩展公共组件时补故事和组件测试，
 覆盖声明支持的主题、键盘、加载/空/错误态及既有消费者回归。
 
-### 7.2 起本地全栈
+### 7.2 起本地静态站
+
+新前端**没有自己的服务端**：构建产物由 ks-console 托管，接口由 ks-console 直连 ks-apiserver。
+所以本地只需要一个静态站，其余请求原样打到已部署的控制台：
 
 ```bash
 cd console/kube-frontend
-# kapis 模式必须给 KS_API_URL；端口可用 BFF_PORT / WEB_PORT 覆盖（默认 8091 / 5174）
-KS_API_MODE=kapis KS_API_URL=http://127.0.0.1:18088 \
-  BFF_PORT=8092 WEB_PORT=5178 ./scripts/dev-stack.sh start
-./scripts/dev-stack.sh status   # 三个端口各自在不在
+./scripts/dev-mlu370.sh start   # 静态站 + 后端探测
+./scripts/dev-mlu370.sh status
 ```
 
-**一套环境可以指任何集群**：`KS_API_URL` 决定后端，BFF 与静态站可以多开几套并行（各自一组端口），
-不必为一个环境停掉另一个。切环境只换隧道与 `KS_API_URL`，前端产物不变：
+**一套脚本可以指任何环境**：`KA_BACKEND` 决定后端（默认 `https://ka.watering.ai`），
+不必为一个环境停掉另一个：
 
-| 目标 | 隧道 | BFF |
-| --- | --- | --- |
-| B200 | `ssh -N -L 18088:<apiserver>:<port> sgb000` | `KS_API_URL=http://127.0.0.1:18088` |
-| mlu370 | `ssh -N -L 18093:10.233.60.28:80 cam` | `KS_API_URL=http://127.0.0.1:18093` |
+| 目标 | KA_BACKEND |
+| --- | --- |
+| mlu370 | `https://ka.watering.ai`（默认，实测 0.24s 可达） |
+| B200 | `https://console-dev.brightaitoken.ai` |
 
-两个环境有真实差异，选哪个要先想清楚在验证什么（差异清单见 `环境/` 下各环境文档）：
-**mlu370 的 `ks-apiserver` 不实现 `x-check-exist`**（那是 console 服务端中间件），名称预检会静默跳过；
-它的 `/oauth/token` 在 ks-console 路径上要 `mix()` 密码，所以隧道指向 apiserver 而不是 30880。
+选哪个要先想清楚在验证什么（差异清单见 `环境/` 下各环境文档）。两个环境都有
+`x-check-exist`（ks-console 的中间件）与 `/oauth/token` 的密码解密分支，差异比之前小。
 
-- 端口可用 `BFF_PORT` / `WEB_PORT` 覆盖。应用请求都在 `/kube-frontend` 前缀下（与老 console 同源），
-  `vite dev` 不剥前缀：`vite.config.ts` 要同时代理 `/kube-frontend/{api,kapis,apis}` 并在 rewrite 里剥掉前缀；
-  只配 `/api` 时登录 POST 落到 SPA 兜底，页面报 `Not Found`。`BFF_URL` 与代理目标对不上时表现为 504/页面加载不出来。
-- 热更新用于开发；固定产物用 `node scripts/dev-static-server.mjs apps/console-next/dist <端口> <BFF地址> /kube-frontend`
-  起静态站（它自己剥前缀），把 `KA_APP_URL` 指向它即可跑截图与 E2E，不必先部署。
-- `KS_API_MODE=kube` 是无鉴权临时 harness（用本机 kubectl 凭据、BFF 模拟分页），**任何"接口对不对"的结论都不能从这里得出**。
-- 改 BFF/代理后重启对应进程；共享包先重新构建，静态站先重建 dist。验收时记录实际构建与
-  BFF 版本，不能在并行工作替换产物时复用旧结果。开发调试可用热更新，最终截图与回归使用同一批固定产物。
+- 路径**原样转发**（含 `/kube-frontend` 前缀）：前缀分流正是部署端在做的判断，本地重写会把那里的错误藏起来。
+  `vite.config.ts` 与 `dev-static-server.mjs` 都对 `/kube-frontend/{api,kapis,apis}` 转发到 `KA_BACKEND`；
+  只配 `/api` 时 kapis 读落到 SPA 兜底、页面报「资源不存在」。
+- 热更新用于开发；固定产物用 `node scripts/dev-static-server.mjs <dist> <端口> <KA_BACKEND>`
+  起静态站，把 `KA_APP_URL` 指向它即可跑截图与 E2E，不必先部署。
+- 改代理后重启静态站；共享包先重新构建，静态站先重建 dist。验收时记录实际构建与
+  后端版本，不能在并行工作替换产物时复用旧结果。开发调试可用热更新，最终截图与回归使用同一批固定产物。
 
 ### 7.3 登录
 
 ```text
-浏览器 /login ──POST /api/session/login──▶ BFF（注入 client_id/secret）──POST /oauth/token──▶ ks-apiserver
+浏览器 ──POST /kube-frontend/kapis/oauth.kubesphere.io/v1alpha1/login──▶ ks-apiserver
+                                                        进程内 password grant
+                                       ◀── {token, user}；浏览器写 localStorage['kah_token']
+```
                                       ◀── {token,user}；浏览器写 localStorage['kah_token']
 ```
 
 密码**按原样发送**（旧加密变换已废弃）。新 console 认 `kah_token`（与老 console 同一个键），别的键名不生效——
 这是"登录了但刷新又回登录页"的头号原因。
 
-登录失败按 BFF 错误码定位：
+登录失败按服务端错误码定位：
 
-| 文案 | BFF 返回 | 原因 |
+| 文案 | 返回 | 原因 |
 |---|---|---|
-| 用户名或密码不正确 | `400 invalid_credentials` | 账号密码错/账号未初始化 |
-| 登录凭据未配置正确 | `400 invalid_client` | `KS_OAUTH_CLIENT_*` 与集群注册的客户端不一致 |
-| 无法连接集群 | `502 upstream_unreachable` | `KS_API_URL` 不通或 TLS 校验失败（`KS_API_INSECURE=1`） |
-| 失败次数过多 | `400 too_many_attempts` | 上游限流，**等窗口过去**（重试会延长锁定） |
+| 用户名或密码不正确 | `400 invalid_credentials` | 账号密码错 |
+| 该账号未激活 | `400 account_not_active` | 账号被停用/待审批/已锁定 |
+| 失败次数过多 | `429 too_many_attempts` | `AuthenticateRateLimiter` 生效，**等窗口过去**（重试会延长锁定） |
+| 登录失败 | `500 upstream_unreachable` | 签发 token 失败或集群不可达 |
 
 ### 7.4 端到端
 

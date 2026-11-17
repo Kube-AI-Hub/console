@@ -204,7 +204,7 @@ export function navigateAfterLogin(location: Location = window.location): void {
 /**
  * Turn a login failure into a sentence.
  *
- * The BFF sends a stable `code` and ks-apiserver's English text. The code is
+ * The server sends a stable `code` and its own English text. The code is
  * preferred because it is translated; the raw text is shown only for failures
  * this app has no phrase for, where hiding it would leave the reader with
  * "login failed" and no clue.
@@ -215,7 +215,7 @@ function phraseLoginError(cause: unknown, t: ReturnType<typeof useT>): string {
     if (code === 'invalid_credentials') return t('login.invalidCredentials');
     if (code === 'too_many_attempts') return t('login.tooManyAttempts');
     if (code === 'upstream_unreachable') return t('login.upstreamUnreachable');
-    if (code === 'invalid_client') return t('login.invalidClient');
+    if (code === 'account_not_active') return t('login.accountNotActive');
     return cause.message || t('login.failed');
   }
   return t('login.failed');

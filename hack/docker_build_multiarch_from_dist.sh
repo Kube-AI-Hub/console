@@ -48,6 +48,9 @@ fi
 PLATFORMS=${PLATFORMS:-linux/amd64,linux/arm64}
 
 "$(dirname "$0")/build_csghub_frontend.sh"
+# The new console's SPA. Staged into `.build/kube-frontend/dist` and copied into
+# the image below; `SKIP_KUBE_FRONTEND_BUILD=1` reuses an existing build.
+"$(dirname "$0")/build_kube_frontend.sh"
 
 # Local-directory buildx cache. Override BUILD_CACHE_DIR to relocate or
 # set BUILD_CACHE='' to disable.
@@ -63,6 +66,14 @@ cp package.json out/
 if [[ -d .build/csghub/frontend/dist ]]; then
   mkdir -p out/csghub/frontend
   cp -r .build/csghub/frontend/dist out/csghub/frontend/dist
+fi
+# The new console's build. Served by this image's own koa-static mount
+# (`server/components/newConsoleStatic.js`), so the separate frontend deployment
+# is no longer needed. Absent when the build has not been produced — an
+# installation that does not ship the new console then behaves exactly as before.
+if [[ -d .build/kube-frontend/dist ]]; then
+  mkdir -p out/dist/kube-frontend
+  cp -r .build/kube-frontend/dist/. out/dist/kube-frontend/
 fi
 
 IMAGE="${REPO}"/ks-console:"${TAG}"

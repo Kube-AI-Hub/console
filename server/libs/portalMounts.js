@@ -1,4 +1,7 @@
-const normalizeBaseUrl = url => String(url || '').trim().replace(/\/+$/, '')
+const normalizeBaseUrl = url =>
+  String(url || '')
+    .trim()
+    .replace(/\/+$/, '')
 
 function resolvePortalTarget(section) {
   if (!section || section.enabled !== true) {
@@ -11,8 +14,18 @@ function resolvePortalTarget(section) {
   return target
 }
 
+/**
+ * Whether a section is mounted at all.
+ *
+ * `selfHosted` means this process serves the section itself (the new console's
+ * build is copied into this image and served here), so no upstream target exists
+ * and none is required. Without it, a section needs a resolvable `target`.
+ */
 function portalEntryEnabled(section) {
-  return Boolean(resolvePortalTarget(section))
+  if (!section || section.enabled !== true) {
+    return false
+  }
+  return section.selfHosted === true || Boolean(resolvePortalTarget(section))
 }
 
 function isStudioGatewayPath(pathname) {
@@ -53,8 +66,33 @@ function stripNewConsolePrefix(pathname) {
   return pathname.slice(NEW_CONSOLE_PREFIX.length) || '/'
 }
 
+/**
+ * Paths under the new console's prefix that belong to ks-apiserver, not to its build.
+ *
+ * The console's API requests are proxied straight to the API server (both HTTP and
+ * WebSocket). Everything else under the prefix is its own static build. Keeping the
+ * list here — rather than inline in `routes.js` and again in `wsProxy.js` — is what
+ * stops the HTTP and WebSocket sides from disagreeing about where exec goes.
+ */
+const NEW_CONSOLE_API_PREFIXES = [
+  `${NEW_CONSOLE_PREFIX}/kapis`,
+  `${NEW_CONSOLE_PREFIX}/apis`,
+  `${NEW_CONSOLE_PREFIX}/api/v1`,
+]
+
+function isNewConsoleApiPath(pathname) {
+  if (typeof pathname !== 'string') {
+    return false
+  }
+  return NEW_CONSOLE_API_PREFIXES.some(
+    prefix => pathname === prefix || pathname.startsWith(`${prefix}/`)
+  )
+}
+
 module.exports = {
   NEW_CONSOLE_PREFIX,
+  NEW_CONSOLE_API_PREFIXES,
+  isNewConsoleApiPath,
   resolvePortalTarget,
   portalEntryEnabled,
   isStudioGatewayPath,

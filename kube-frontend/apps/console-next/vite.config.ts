@@ -18,13 +18,14 @@ import { TanStackRouterVite } from '@tanstack/router-plugin/vite';
  */
 
 
-/** The BFF this dev server proxies API calls to. */
-const BFF_TARGET = process.env['BFF_URL'] ?? 'http://127.0.0.1:8091';
-
-/** Drop the app's mount prefix: the BFF serves the same routes at the root. */
-function stripAppBase(path: string): string {
-  return path.replace(/^\/kube-frontend/, '');
-}
+/**
+ * The deployed console this dev server proxies to.
+ *
+ * `ka.watering.ai` is the mlu370 console; it is reachable directly, so a local
+ * checkout needs no tunnel and no local API process. Point `KA_BACKEND` at another
+ * environment to work against it.
+ */
+const BACKEND = process.env['KA_BACKEND'] ?? 'https://ka.watering.ai';
 
 export default defineConfig({
   /*
@@ -137,34 +138,23 @@ export default defineConfig({
     },
     proxy: {
       /*
-       * The BFF is a separate process; proxying keeps the app same-origin in
-       * development so cookies and relative `/api` paths behave as in production.
+       * A deployed console is the backend; proxying keeps the app same-origin in
+       * development so relative `/kube-frontend/...` paths behave as in production.
        *
-       * Every prefix the BFF forwards needs an entry of its own — Vite matches
-       * proxy keys by URL prefix and has no `changeOrigin`-style wildcard. With
-       * only `/api` listed, `/kapis/...` fell through to the SPA fallback and every
-       * resource page rendered "资源不存在" from an HTML body (observed; it looks
-       * like a product bug rather than a missing proxy rule). `server/src/index.ts`
-       * forwards `/api/`, `/kapis/` and `/apis/`, and `scripts/dev-static-server.mjs`
-       * proxies the same three.
-       */
-      '/api': { target: BFF_TARGET, changeOrigin: true, ws: true },
-      '/kapis': { target: BFF_TARGET, changeOrigin: true, ws: true },
-      '/apis': { target: BFF_TARGET, changeOrigin: true, ws: true },
-      /*
-       * The same three prefixes **as the app addresses them**.
+       * The path is forwarded **unchanged**, including the mount prefix: the
+       * deployed ks-console is what routes `/kube-frontend/{kapis,apis,api/v1}` to
+       * ks-apiserver, and rewriting it here would hide a mistake in that routing —
+       * the very thing a local check is supposed to exercise.
        *
-       * The app keeps every request inside its mount prefix (`/kube-frontend/api/...`,
-       * `APP_BASE` in src/api.ts): on the shared origin the bare `/api` belongs to the
-       * old console. In production a reverse proxy strips the prefix; Vite does not, so
-       * without these three entries every API call in `vite dev` falls through to the
-       * SPA fallback and answers HTML — the login page reports "Not Found" and every
-       * list stays empty. `dev-static-server.mjs` strips the prefix itself; this is the
-       * hot-reload equivalent.
+       * Every prefix needs an entry of its own — Vite matches proxy keys by URL
+       * prefix and has no wildcard. With only `/api` listed, `/kapis/...` fell
+       * through to the SPA fallback and every resource page rendered "资源不存在"
+       * from an HTML body, which looks like a product bug rather than a missing
+       * proxy rule.
        */
-      '/kube-frontend/api': { target: BFF_TARGET, changeOrigin: true, ws: true, rewrite: stripAppBase },
-      '/kube-frontend/kapis': { target: BFF_TARGET, changeOrigin: true, ws: true, rewrite: stripAppBase },
-      '/kube-frontend/apis': { target: BFF_TARGET, changeOrigin: true, ws: true, rewrite: stripAppBase },
+      '/kube-frontend/api': { target: BACKEND, changeOrigin: true, ws: true },
+      '/kube-frontend/kapis': { target: BACKEND, changeOrigin: true, ws: true },
+      '/kube-frontend/apis': { target: BACKEND, changeOrigin: true, ws: true },
     },
   },
   build: {

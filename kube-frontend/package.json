@@ -12,7 +12,6 @@
     "dev": "pnpm --filter @kube-ai-hub/console-next dev",
     "build": "pnpm --filter @kube-ai-hub/console-next build",
     "preview": "pnpm --filter @kube-ai-hub/console-next preview",
-    "bff": "pnpm --filter @kube-ai-hub/bff dev",
     "typecheck": "pnpm -r typecheck && pnpm typecheck:config",
     "typecheck:config": "tsc --noEmit -p config/tsconfig.json",
     "test": "pnpm test:config && pnpm -r test",

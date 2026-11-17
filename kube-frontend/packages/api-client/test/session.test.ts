@@ -4,7 +4,7 @@ import { sessionApi } from '../src/session';
 import { userFromToken, isTokenExpired } from '../src/token';
 
 /**
- * Session calls against a stubbed BFF.
+ * Session calls against a stubbed API server.
  *
  * Two things matter here and neither is the happy path: a login failure has to
  * keep its specific code (the form phrases it), and the token decoder has to
@@ -32,7 +32,10 @@ describe('sessionApi.login', () => {
     const token = jwt({ sub: 'admin' });
     const api = sessionApi(
       client((url) => {
-        expect(url).toContain('/api/session/login');
+        // A kapis path, not `/oauth/token`: that endpoint authenticates a *client*,
+        // and a browser page must not hold a client secret.
+        expect(url).toContain('/kapis/oauth.kubesphere.io/v1alpha1/login');
+        expect(url).not.toContain('/oauth/token');
         return json(200, { token, user: { name: 'admin', initialized: true } });
       }),
     );
@@ -42,25 +45,51 @@ describe('sessionApi.login', () => {
     expect(session.user.name).toBe('admin');
   });
 
-  it('keeps the specific code from the BFF instead of collapsing to "unauthorized"', async () => {
+  it('keeps the specific code instead of collapsing to "unauthorized"', async () => {
     const api = sessionApi(client(() => json(400, { code: 'invalid_credentials', message: 'incorrect password', status: 400 })));
     // A generic 401 from a resource call is the coarse class; the login form needs
-    // the narrow one, which travels in `details.serverCode`.
+    // the narrow one, which the endpoint sends as `code`.
     await expect(api.login({ username: 'admin', password: 'x' })).rejects.toMatchObject({
       code: 'invalid_credentials',
     });
   });
 
-  it('keeps invalid_client, which is an operator problem rather than a wrong password', async () => {
-    const api = sessionApi(client(() => json(400, { code: 'invalid_client', message: 'bad client', status: 400 })));
-    await expect(api.login({ username: 'admin', password: 'x' })).rejects.toMatchObject({ code: 'invalid_client' });
+  it('keeps account_not_active, which is not a wrong password', async () => {
+    const api = sessionApi(client(() => json(400, { code: 'account_not_active', message: 'this account is not active', status: 400 })));
+    await expect(api.login({ username: 'admin', password: 'x' })).rejects.toMatchObject({ code: 'account_not_active' });
+  });
+
+  it('keeps too_many_attempts, which needs waiting rather than retrying', async () => {
+    const api = sessionApi(client(() => json(429, { code: 'too_many_attempts', message: 'too many login attempts', status: 429 })));
+    await expect(api.login({ username: 'admin', password: 'x' })).rejects.toMatchObject({ code: 'too_many_attempts' });
   });
 });
 
 describe('sessionApi.me', () => {
-  it('returns the user from the body', async () => {
-    const api = sessionApi(client(() => json(200, { user: { name: 'admin', initialized: true } })));
-    expect(await api.me()).toMatchObject({ name: 'admin' });
+  it('reads the OIDC userinfo document', async () => {
+    const api = sessionApi(
+      client((url) => {
+        expect(url).toContain('/oauth/userinfo');
+        return json(200, { sub: 'admin', email: 'a@b.io', exp: 4102444800, extra: { username: ['Admin'] } });
+      }),
+    );
+    expect(await api.me()).toEqual({
+      name: 'admin',
+      initialized: true,
+      email: 'a@b.io',
+      displayName: 'Admin',
+      expiresAt: 4102444800,
+    });
+  });
+
+  it('treats the uninitialized extra as a pre-registered account', async () => {
+    const api = sessionApi(client(() => json(200, { sub: 'new', extra: { uninitialized: ['true'] } })));
+    expect((await api.me()).initialized).toBe(false);
+  });
+
+  it('omits expiry when the cluster issues non-expiring tokens', async () => {
+    const api = sessionApi(client(() => json(200, { sub: 'admin' })));
+    expect(await api.me()).toEqual({ name: 'admin', initialized: true });
   });
 
   it('rejects with unauthorized when the session is gone', async () => {
@@ -113,7 +142,7 @@ describe('login copy helpers', () => {
     const fetchImpl = vi.fn();
     const api = sessionApi(createClient({ fetchImpl: fetchImpl as unknown as typeof fetch }));
     // The page checks first; this pins that the API layer is not the guard, so a
-    // blank password must still reach the BFF and be refused there.
+    // blank password must still reach the server and be refused there.
     await api.login({ username: 'admin', password: '' }).catch(() => undefined);
     expect(fetchImpl).toHaveBeenCalled();
   });

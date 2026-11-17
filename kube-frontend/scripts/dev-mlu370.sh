@@ -1,42 +1,38 @@
 #!/usr/bin/env bash
 #
-# Local full stack against the mlu370 lab cluster.
+# Local development against a deployed console.
 #
-# mlu370 (`ssh cam`) is a single-node control plane whose `ks-apiserver` is a
-# ClusterIP only, so a local checkout cannot reach it without a tunnel. This
-# wraps the four hops the manual setup needed:
+# The new console is now served by ks-console, so a local checkout does not need a
+# BFF, an SSH tunnel, or a retrying proxy: it needs a static server for the build
+# and a backend to talk to. Every request goes straight to that backend.
 #
-#   1. ssh -L        cam's cluster IP:80 -> 127.0.0.1:$TUNNEL_PORT
-#   2. tunnel-proxy  keeps a listening socket alive across ssh reconnects, so a
-#                    dropped tunnel becomes a slow request instead of a 502
-#   3. BFF           kapis mode; injects the oauth client the apiserver expects
-#   4. static server the built SPA, forwarding /kapis and /api to (3)
+#   1. static server   serves the build and forwards `/kube-frontend/*` to (2)
+#   2. backend         the deployed console (ks-console), which forwards the API
+#                      prefixes to ks-apiserver and answers the build itself
 #
-# The stack answers on the same URL as the B200 setup it replaces, so existing
-# bookmarks and the notes in 环境/mlu370环境.md keep working.
+# Two processes instead of four, and the backend is the same binary and config as
+# production — so a local check exercises the real routing rather than a copy of it.
 #
 # Usage:
-#   scripts/dev-mlu370.sh start     # build the SPA if needed, then start all four
+#   scripts/dev-mlu370.sh start     # build the SPA if needed, then start
 #   scripts/dev-mlu370.sh stop
 #   scripts/dev-mlu370.sh status
 #   scripts/dev-mlu370.sh restart
 #
-# Override with TUNNEL_PORT / PROXY_PORT / BFF_PORT / WEB_PORT / MLU_HOST.
+# Override with KA_BACKEND / WEB_PORT.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-REPO_ROOT="$(cd "$ROOT/.." && pwd)"
 STATE="$ROOT/.dev-mlu370"
 
-MLU_HOST="${MLU_HOST:-cam}"
+# The deployed console. `ka.watering.ai` is reachable directly (measured 2026-11-18:
+# `/kapis/version` answers 200 in ~0.24s), so no tunnel is involved.
+KA_BACKEND="${KA_BACKEND:-https://ka.watering.ai}"
 WEB_PORT="${WEB_PORT:-5178}"
-BFF_PORT="${BFF_PORT:-8098}"
-PROXY_PORT="${PROXY_PORT:-18098}"
-TUNNEL_PORT="${TUNNEL_PORT:-18099}"
 DIST="$ROOT/apps/console-next/dist"
 
-log() { printf '\033[36m[mlu370]\033[0m %s\n' "$*"; }
-fail() { printf '\033[31m[mlu370]\033[0m %s\n' "$*" >&2; exit 1; }
+log() { printf '\033[36m[dev]\033[0m %s\n' "$*"; }
+fail() { printf '\033[31m[dev]\033[0m %s\n' "$*" >&2; exit 1; }
 
 port_pid() { lsof -ti:"$1" 2>/dev/null | head -1 || true; }
 
@@ -49,98 +45,61 @@ wait_for() {
   fail "$label did not answer at $url"
 }
 
-# The apiserver is a ClusterIP. Ask the node for its address rather than
-# hardcoding it: the service was recreated once already and the IP moved.
-resolve_upstream() {
-  ssh -o ConnectTimeout=10 -o BatchMode=yes "$MLU_HOST" \
-    "kubectl -n kubesphere-system get svc ks-apiserver -o jsonpath='{.spec.clusterIP}'" 2>/dev/null
-}
-
-stop_one() {
-  local name="$1" file="$STATE/$1.pid"
-  [ -f "$file" ] || return 0
-  local pid; pid="$(cat "$file")"
-  if kill -0 "$pid" 2>/dev/null; then
-    # `pnpm dev` spawns tsx which spawns node; killing the parent leaves the
-    # child holding the port. Take the whole tree down.
-    pkill -P "$pid" 2>/dev/null || true
-    kill "$pid" 2>/dev/null || true
+# Fail with the address named: "the list is empty" is the symptom of an
+# unreachable backend, and that reads as a product bug rather than a network one.
+probe_backend() {
+  local url="$KA_BACKEND/kube-frontend/kapis/version"
+  local code
+  code="$(curl -s -o /dev/null -m 10 -w '%{http_code}' "$url" 2>/dev/null || echo 000)"
+  if [[ "$code" == "000" ]]; then
+    fail "backend unreachable: $url (check KA_BACKEND=$KA_BACKEND)"
   fi
-  rm -f "$file"
-  log "stopped $name"
+  log "backend $KA_BACKEND (kapis/version -> HTTP $code)"
 }
 
 cmd_stop() {
-  for name in web bff proxy tunnel; do stop_one "$name"; done
-  sleep 1
-  # Anything still holding one of our ports is a straggler from an earlier run
-  # (a pnpm grandchild, or a stack started before the pid files existed).
-  for port in "$WEB_PORT" "$BFF_PORT" "$PROXY_PORT" "$TUNNEL_PORT"; do
-    local pid; pid="$(port_pid "$port")"
-    if [ -n "$pid" ]; then
+  local file="$STATE/web.pid"
+  if [ -f "$file" ]; then
+    local pid
+    pid="$(cat "$file")"
+    if kill -0 "$pid" 2>/dev/null; then
       pkill -P "$pid" 2>/dev/null || true
-      kill "$pid" 2>/dev/null && log "released port $port"
+      kill "$pid" 2>/dev/null || true
     fi
-  done
-  return 0
+    rm -f "$file"
+    log "stopped static server"
+  fi
+  local stray
+  stray="$(port_pid "$WEB_PORT")"
+  if [ -n "$stray" ]; then
+    kill "$stray" 2>/dev/null && log "released port $WEB_PORT"
+  fi
 }
 
 cmd_start() {
   mkdir -p "$STATE"
 
-  local upstream
-  upstream="$(resolve_upstream)"
-  [ -n "$upstream" ] || fail "cannot read ks-apiserver ClusterIP over ssh $MLU_HOST"
-  log "upstream ks-apiserver $upstream"
+  probe_backend
 
-  # 1. ssh tunnel. ExitOnForwardFailure makes a port clash fail loudly instead
-  #    of silently leaving a dead forward behind.
-  ssh -o ExitOnForwardFailure=yes -o ConnectTimeout=10 \
-      -o ServerAliveInterval=5 -o ServerAliveCountMax=2 \
-      -N -L "$TUNNEL_PORT:$upstream:80" "$MLU_HOST" </dev/null >"$STATE/tunnel.log" 2>&1 &
-  echo $! >"$STATE/tunnel.pid"
-  wait_for "http://127.0.0.1:$TUNNEL_PORT/version" "tunnel"
-  log "tunnel 127.0.0.1:$TUNNEL_PORT -> $MLU_HOST:$upstream:80"
-
-  # 2. retrying proxy: the lab link drops, and without this every drop surfaces
-  #    as a 502 that looks like a product bug.
-  node "$REPO_ROOT/tests/ui/tools/tunnel-proxy.mjs" \
-    --listen "$PROXY_PORT" --upstream "$TUNNEL_PORT" </dev/null >"$STATE/proxy.log" 2>&1 &
-  echo $! >"$STATE/proxy.pid"
-  wait_for "http://127.0.0.1:$PROXY_PORT/version" "tunnel proxy"
-  log "proxy 127.0.0.1:$PROXY_PORT"
-
-  # 3. BFF in kapis mode. It needs a real KS_API_URL: the kube mode uses local
-  #    kubectl credentials and cannot answer "is this request correct".
-  ( cd "$ROOT/server" && \
-    KS_API_MODE=kapis KS_API_URL="http://127.0.0.1:$PROXY_PORT" BFF_PORT="$BFF_PORT" \
-    nohup pnpm dev </dev/null >"$STATE/bff.log" 2>&1 & echo $! >"$STATE/bff.pid" )
-  wait_for "http://127.0.0.1:$BFF_PORT/api/ai/manifest" "BFF"
-  log "bff 127.0.0.1:$BFF_PORT"
-
-  # 4. static server. A stale dist silently serves the previous build, so the
-  #    caller decides whether to rebuild; we only warn.
   if [ ! -f "$DIST/index.html" ]; then
     fail "no build at $DIST; run: pnpm --filter @kube-ai-hub/console-next build"
   fi
-  node "$ROOT/scripts/dev-static-server.mjs" "$DIST" "$WEB_PORT" "http://127.0.0.1:$BFF_PORT" \
+
+  node "$ROOT/scripts/dev-static-server.mjs" "$DIST" "$WEB_PORT" "$KA_BACKEND" \
     </dev/null >"$STATE/web.log" 2>&1 &
   echo $! >"$STATE/web.pid"
   wait_for "http://127.0.0.1:$WEB_PORT/" "static server"
-  log "web http://localhost:$WEB_PORT/kube-frontend/clusters"
 
+  log "web http://localhost:$WEB_PORT/kube-frontend/clusters"
   log "login: admin / Kah@2025 (see 环境/mlu370环境.md)"
 }
 
 cmd_status() {
-  printf '%-10s %-6s %s\n' component port state
-  for pair in "web:$WEB_PORT" "bff:$BFF_PORT" "proxy:$PROXY_PORT" "tunnel:$TUNNEL_PORT"; do
-    local name="${pair%%:*}" port="${pair##*:}" pid
-    pid="$(port_pid "$port")"
-    printf '%-10s %-6s %s\n' "$name" "$port" "${pid:-DOWN}"
-  done
-  local upstream; upstream="$(resolve_upstream)"
-  printf '%-10s %-6s %s\n' upstream "$TUNNEL_PORT" "${upstream:-UNREACHABLE}"
+  printf '%-8s %-6s %s\n' component port state
+  local pid
+  pid="$(port_pid "$WEB_PORT")"
+  printf '%-8s %-6s %s\n' web "$WEB_PORT" "${pid:-DOWN}"
+  printf '%-8s %-6s %s\n' backend - "$KA_BACKEND"
 }
 
 case "${1:-start}" in

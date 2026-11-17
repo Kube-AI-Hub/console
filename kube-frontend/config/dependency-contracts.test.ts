@@ -30,7 +30,6 @@ const WORKSPACE_PACKAGES = [
   'packages/ai-surface',
   'packages/api-client',
   'packages/locales',
-  'server',
 ] as const;
 
 /** Packages the catalog owns; a literal version here means drift. */

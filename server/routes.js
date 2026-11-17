@@ -40,9 +40,15 @@ const {
   studioProxy,
   operationsProxy,
   kubeFrontendProxy,
+  newConsoleApiProxy,
+  newConsoleSelfHosted,
 } = require('./proxy')
 
 const { handleDockerhubProxy, handleHarborProxy } = require('./controllers/api')
+const {
+  handlePublicConfig,
+  handleAiManifest,
+} = require('./controllers/newConsole')
 
 const {
   handleThirdLogin,
@@ -121,7 +127,6 @@ function mountPortal(prefix, portalProxy) {
   }
   router.all(`${prefix}{/*path}`, refuseUnmountedPortal)
 }
-
 const studioProxyAll = studioProxy ? proxy('/{*path}', studioProxy) : null
 
 function studioGateway(ctx, next) {
@@ -137,10 +142,43 @@ function studioGateway(ctx, next) {
 
 router.use(studioGateway)
 mountPortal('/operations', operationsProxy)
-// The new console (kube-frontend) on the same host. Mounted before the catch-all
-// page renderer below, which would otherwise answer `/kube-frontend/*` with the
-// old console's own shell.
-mountPortal('/kube-frontend', kubeFrontendProxy)
+/*
+ * Deployment configuration for the new console.
+ *
+ * These were endpoints of the new console's own Node process, which no longer
+ * exists. They describe the *deployment* — which docs this install hosts, which
+ * pages its build declares — so they are answered here rather than by the cluster
+ * API. Both are unauthenticated: neither holds a credential, and the login page
+ * needs the docs links.
+ */
+router
+  .get('/kube-frontend/api/config', handlePublicConfig)
+  .get('/kube-frontend/api/ai/manifest', handleAiManifest)
+/*
+ * The new console on this host's `/kube-frontend` prefix.
+ *
+ * Its API requests go straight to ks-apiserver; everything else is its own build,
+ * served by this process (see `components/newConsoleStatic.js`) or, when a
+ * deployment still runs the separate frontend process, proxied to it. The API
+ * rules come first: they must win over the general mount, which would otherwise
+ * send `/kube-frontend/kapis/...` to the frontend process — where nothing answers
+ * it any more.
+ */
+router.use(proxy('/kube-frontend/kapis{/*path}', newConsoleApiProxy))
+router.use(proxy('/kube-frontend/apis{/*path}', newConsoleApiProxy))
+router.use(proxy('/kube-frontend/api/v1{/*path}', newConsoleApiProxy))
+/*
+ * The new console's build and client routes.
+ *
+ * The static mount in `components/boot.js` answers these, so no proxy is needed
+ * when this process serves the build (`selfHosted`). A deployment that still runs
+ * the separate frontend process keeps working through `kubeFrontendProxy`.
+ */
+if (kubeFrontendProxy) {
+  mountPortal('/kube-frontend', kubeFrontendProxy)
+} else if (!newConsoleSelfHosted) {
+  router.all('/kube-frontend{/*path}', refuseUnmountedPortal)
+}
 
 router
   .use(proxy('/endpoint{/*path}', endpointProxy))

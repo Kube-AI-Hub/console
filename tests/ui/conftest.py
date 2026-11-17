@@ -68,23 +68,24 @@ def _storage_state(origin: str, token: str) -> dict:
 def _app_token(ui_config) -> str:
     """A bearer token minted by the console serving `UiConfig.app`.
 
-    Minted through the BFF's own login endpoint rather than by driving the legacy
-    login form: that form encrypts the password with the console's
+    Minted through the API server's first-party login endpoint rather than by driving
+    the legacy login form: that form encrypts the password with the console's
     `mix(salt, base64(pw))` before posting, and the dev deployment rejects the
-    plaintext the helper sends. The BFF takes the password as typed and returns
+    plaintext the helper sends. The endpoint takes the password as typed and returns
     the same token type the UI stores.
     """
     import json
     import time
     import urllib.request
 
-    url = f"{ui_config.app_api}/api/session/login"
+    url = f"{ui_config.app_api}/kapis/oauth.kubesphere.io/v1alpha1/login"
     body = json.dumps({"username": ui_config.username, "password": ui_config.password}).encode("utf-8")
     last_error: Exception | None = None
-    # The dev static server proxies to the BFF, and under parallel load that proxy has been
-    # measured answering 502 or stalling for 20s+ while the same request straight to the BFF
-    # returns in a second. Retrying here keeps a slow proxy from failing every case in the run
-    # with a login error that says nothing about the page under test.
+    # The dev static server proxies to the deployed console, and under parallel load that
+    # proxy has been measured answering 502 or stalling for 20s+ while the same request
+    # straight to the backend returns in a second. Retrying here keeps a slow proxy from
+    # failing every case in the run with a login error that says nothing about the page
+    # under test.
     for attempt in range(3):
         request = urllib.request.Request(
             url,

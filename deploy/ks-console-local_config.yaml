@@ -13,12 +13,13 @@ server:
   redisTimeout: 5000
   sessionTimeout: 7200000
   # The new console on this host's /kube-frontend prefix. Mounting it here is what
-  # makes the header entry appear and what routes the prefix to its deployment;
-  # setting `enabled: false` (or emptying `target`) removes both, which is the
-  # rollback path.
+  # makes the header entry appear. This process serves its build itself (the SPA is
+  # copied into this image), so there is no upstream target; setting
+  # `enabled: false` removes both the entry and the prefix, which is the rollback
+  # path.
   newConsole:
     enabled: true
-    target: http://kube-frontend.kubesphere-system.svc:8080
+    selfHosted: true
 client:
   version:
     kubesphere: v3.3.2

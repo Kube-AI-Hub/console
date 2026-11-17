@@ -75,12 +75,13 @@ server:
   operations:
     enabled: false
     target: ""
-  # The new console (kube-frontend): a separate deployment that owns the
-  # `/kube-frontend` prefix on this same host. Mounted by proxy so both consoles
-  # share one address; the entry in the header is shown only when it is mounted.
+  # The new console (kube-frontend): its build is copied into this image and served
+  # by this process on the `/kube-frontend` prefix, so both consoles share one
+  # address and one web server. `selfHosted` says there is no upstream to proxy to;
+  # `enabled: false` removes the prefix and the header entry together.
   newConsole:
     enabled: false
-    target: ""
+    selfHosted: false
 
   # docker image search default url
   dockerHubUrl: https://hub.docker.com

@@ -8,7 +8,6 @@
 packages:
   - apps/*
   - packages/*
-  - server
 
 catalog:
   # Framework. React 19 and Vite are the same generation dongba runs on; a
@@ -51,13 +50,6 @@ catalog:
   '@testing-library/react': 16.3.0
   '@testing-library/user-event': 14.6.1
   '@testing-library/jest-dom': 6.9.1
-
-  # BFF. A small Node server, no framework: the job is to forward with auth and
-  # normalise errors, which `node:http` and `fetch` already cover.
-  tsx: 4.20.6
-  # Bundles the BFF into one file for the image, so the runtime container needs no
-  # `node_modules` (tsx/esbuild/TypeScript would otherwise ship with it).
-  esbuild: 0.25.12
 
   # Radix primitives live here so the app and ai-kit resolve one copy; two copies
   # of a Radix package each pull their own React and break hooks at runtime.

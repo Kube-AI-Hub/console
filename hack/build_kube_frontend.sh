@@ -1,58 +1,35 @@
 #!/usr/bin/env bash
 #
-# Build and push the new console image (kube-frontend).
+# Build the new console's SPA into the staging directory the console image picks up.
 #
-# Run from `console/`:
-#   TAG=develop-20261117 PLATFORMS=linux/amd64 hack/build_kube_frontend.sh
+#   hack/build_kube_frontend.sh            # build into .build/kube-frontend/dist
+#   SKIP_KUBE_FRONTEND_BUILD=1 hack/...    # reuse an existing build
 #
-# Serial by design: this host's disk has little headroom, and two concurrent
-# buildx exports is how a build fails with an unrelated-looking error.
+# There is no image of its own any more. The build is copied into `ks-console`
+# (`hack/docker_build_multiarch_from_dist.sh`) and served by that process, so the
+# frontend and the console ship together — one web server, one deployment.
+#
+# Run from `console/`.
 set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 CONSOLE_DIR=$(cd "${SCRIPT_DIR}/.." && pwd)
 FRONTEND_DIR="${CONSOLE_DIR}/kube-frontend"
+STAGED_DIR="${CONSOLE_DIR}/.build/kube-frontend"
 
-REGISTRY=${REGISTRY:-watering-ai-registry.cn-shanghai.cr.aliyuncs.com/kube-ai-hub}
-TAG=${TAG:-develop}
-IMAGE="${REGISTRY}/kube-frontend:${TAG}"
-PLATFORMS=${PLATFORMS:-linux/amd64}
-
-if pgrep -f "buildx build" | grep -v "$$" >/dev/null 2>&1; then
-  echo "ERROR: another buildx build is already running; builds are serial here." >&2
-  pgrep -fl "buildx build" | grep -v "zsh -c" >&2 || true
-  exit 1
+if [[ -z "${SKIP_KUBE_FRONTEND_BUILD:-}" ]]; then
+  echo "==> building the SPA"
+  pnpm --dir "${FRONTEND_DIR}" --filter @kube-ai-hub/console-next build
 fi
-
-echo "==> building the SPA"
-pnpm --dir "${FRONTEND_DIR}" --filter @kube-ai-hub/console-next build
-
-echo "==> bundling the BFF"
-pnpm --dir "${FRONTEND_DIR}" --filter @kube-ai-hub/bff build
 
 if [[ ! -f "${FRONTEND_DIR}/apps/console-next/dist/index.html" ]]; then
   echo "ERROR: the SPA build produced no index.html" >&2
   exit 1
 fi
-if [[ ! -f "${FRONTEND_DIR}/server/dist/server.js" ]]; then
-  echo "ERROR: the BFF bundle is missing" >&2
-  exit 1
-fi
 
-echo "==> building ${IMAGE} for ${PLATFORMS}"
-PUSH_FLAG=()
-if [[ -z "${DRY_RUN:-}" ]]; then
-  PUSH_FLAG=(--push)
-fi
+echo "==> staging into ${STAGED_DIR}/dist"
+rm -rf "${STAGED_DIR}"
+mkdir -p "${STAGED_DIR}"
+cp -r "${FRONTEND_DIR}/apps/console-next/dist" "${STAGED_DIR}/dist"
 
-docker buildx build \
-  --platform "${PLATFORMS}" \
-  "${PUSH_FLAG[@]}" \
-  -f "${FRONTEND_DIR}/Dockerfile" \
-  -t "${IMAGE}" \
-  "${FRONTEND_DIR}"
-
-if [[ -z "${DRY_RUN:-}" ]]; then
-  echo "==> pushed ${IMAGE}"
-  docker buildx imagetools inspect "${IMAGE}" | sed -n '1,8p'
-fi
+echo "==> done: ${STAGED_DIR}/dist"

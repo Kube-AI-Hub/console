@@ -20,7 +20,7 @@ const httpProxy = require('http-proxy')
 
 const { getServerConfig } = require('../libs/utils')
 const {
-  NEW_CONSOLE_PREFIX,
+  isNewConsoleApiPath,
   isNewConsolePath,
   resolvePortalTarget,
   stripNewConsolePrefix,
@@ -40,11 +40,24 @@ const studioTarget = resolvePortalTarget(serverConfig.studio)
 // exec protocol and holds the token-subprotocol translation.
 const newConsoleTarget = resolvePortalTarget(serverConfig.newConsole)
 
+/**
+ * Whether this upgrade belongs to the new console's API rather than to its build.
+ *
+ * `/kube-frontend/{kapis,apis,api/v1}` is proxied to ks-apiserver on the HTTP side
+ * (see `routes.js`), so its exec sockets have to go to the same place. Only the
+ * remaining paths under the prefix belong to the frontend process. The prefix list
+ * lives in `libs/portalMounts` so the two sides cannot disagree.
+ */
+const isNewConsoleApiUpgrade = url =>
+  isNewConsoleApiPath(String(url || '').split('?')[0])
+
 const isStudioUpgrade = url =>
   typeof url === 'string' && url.startsWith('/studio') && Boolean(studioTarget)
 
 const isNewConsoleUpgrade = url =>
-  typeof url === 'string' && Boolean(newConsoleTarget) && isNewConsolePath(url.split('?')[0])
+  typeof url === 'string' &&
+  Boolean(newConsoleTarget) &&
+  isNewConsolePath(url.split('?')[0])
 
 const getWebSocketTarget = url => {
   if (url.startsWith('/endpoint/')) {
@@ -52,6 +65,11 @@ const getWebSocketTarget = url => {
   }
   if (isStudioUpgrade(url)) {
     return studioTarget
+  }
+  // API sockets (container exec, node shell) belong to ks-apiserver, which speaks
+  // the kube channel protocol and accepts the token subprotocol the page sends.
+  if (isNewConsoleApiUpgrade(url)) {
+    return serverConfig.apiServer.wsUrl
   }
   if (isNewConsoleUpgrade(url)) {
     return newConsoleTarget
@@ -63,11 +81,12 @@ const getWebSocketTarget = url => {
  * The path to forward for an upgrade.
  *
  * The new console's process does not know it is mounted on a prefix of this host,
- * so `/kube-frontend/api/v1/.../exec` has to arrive as `/api/v1/.../exec`. Every
- * other target keeps the path as the browser sent it.
+ * so `/kube-frontend/api/v1/.../exec` has to arrive as `/api/v1/.../exec`. The same
+ * applies to its API paths, which go to ks-apiserver. Every other target keeps the
+ * path as the browser sent it.
  */
 const getWebSocketPath = url => {
-  if (!isNewConsoleUpgrade(url)) return url
+  if (!isNewConsoleApiUpgrade(url) && !isNewConsoleUpgrade(url)) return url
   const [pathname, search] = splitQuery(url)
   return `${stripNewConsolePrefix(pathname)}${search}`
 }
@@ -87,7 +106,7 @@ module.exports = function(app) {
     const isEndpointRequest = req.url.startsWith('/endpoint/')
     const target = getWebSocketTarget(req.url)
     const originalUrl = req.url
-    if (isNewConsoleUpgrade(req.url)) {
+    if (isNewConsoleApiUpgrade(req.url) || isNewConsoleUpgrade(req.url)) {
       // `http-proxy` forwards `req.url` verbatim, so the prefix is removed here
       // rather than configured — the same request object is ours for the life of
       // this upgrade.

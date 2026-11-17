@@ -21,7 +21,6 @@ const http = require('http')
 const { getServerConfig } = require('./libs/utils')
 const {
   NEW_CONSOLE_PREFIX,
-  isNewConsolePath,
   resolvePortalTarget,
   stripNewConsolePrefix,
 } = require('./libs/portalMounts')
@@ -310,8 +309,7 @@ const aigatewayProxy = {
   optionsHandle(options, req) {
     const parsedUrl = new URL(req.url, 'http://localhost')
     const suffix = rewriteAigatewayPath(parsedUrl.pathname)
-    const base =
-      normalizeBaseUrl(options.target) || CSGHUB_AIGATEWAY_TARGET
+    const base = normalizeBaseUrl(options.target) || CSGHUB_AIGATEWAY_TARGET
     options.target = `${base}${suffix}${parsedUrl.search}`
   },
 }
@@ -327,7 +325,9 @@ const rewriteLabelStudioLocation = location => {
       const url = new URL(location)
       const idx = url.pathname.indexOf(LABEL_STUDIO_PATH)
       if (idx < 0) return location
-      return `${LABEL_STUDIO_PREFIX}${url.pathname.slice(idx + LABEL_STUDIO_PATH.length)}${url.search}${url.hash}`
+      return `${LABEL_STUDIO_PREFIX}${url.pathname.slice(
+        idx + LABEL_STUDIO_PATH.length
+      )}${url.search}${url.hash}`
     }
     if (location.startsWith(LABEL_STUDIO_PATH)) {
       return `${LABEL_STUDIO_PREFIX}${location.slice(LABEL_STUDIO_PATH.length)}`
@@ -335,7 +335,10 @@ const rewriteLabelStudioLocation = location => {
     if (location.startsWith('/user/login')) {
       const url = new URL(location, 'http://localhost')
       const next = url.searchParams.get('next') || ''
-      if (next.includes(LABEL_STUDIO_PATH) || next.includes(LABEL_STUDIO_PREFIX)) {
+      if (
+        next.includes(LABEL_STUDIO_PATH) ||
+        next.includes(LABEL_STUDIO_PREFIX)
+      ) {
         return `${LABEL_STUDIO_PREFIX}${url.pathname}${url.search}${url.hash}`
       }
     }
@@ -403,10 +406,56 @@ const studioTarget = resolvePortalTarget(serverConfig.studio)
 const operationsTarget = resolvePortalTarget(serverConfig.operations)
 const newConsoleTarget = resolvePortalTarget(serverConfig.newConsole)
 const studioProxy = studioTarget ? createPortalProxy(studioTarget) : null
-const operationsProxy = operationsTarget ? createPortalProxy(operationsTarget) : null
+const operationsProxy = operationsTarget
+  ? createPortalProxy(operationsTarget)
+  : null
 const kubeFrontendProxy = newConsoleTarget
   ? createPortalProxy(newConsoleTarget, { stripPrefix: NEW_CONSOLE_PREFIX })
   : null
+/**
+ * Whether this process serves the new console's build itself.
+ *
+ * The build is copied into this image and mounted by `components/boot.js`, so no
+ * upstream exists and none is required. A deployment that still runs the separate
+ * frontend process sets `target` instead, and `kubeFrontendProxy` handles it.
+ */
+const newConsoleSelfHosted =
+  serverConfig.newConsole?.enabled === true &&
+  serverConfig.newConsole?.selfHosted === true
+
+/**
+ * API requests from the new console go straight to ks-apiserver.
+ *
+ * The new console used to run its own Node process ("BFF") that forwarded these
+ * three prefixes; that process is gone, so the console's own server does it. The
+ * mount prefix is stripped on the way out — ks-apiserver has no such prefix.
+ *
+ * `cache-control: no-store` because every response here is user-scoped: a shared
+ * cache would serve one reader's list to another.
+ */
+const newConsoleApiProxy = {
+  target: serverConfig.apiServer.url,
+  changeOrigin: true,
+  ignorePath: true,
+  secure: false,
+  timeout: STREAM_PROXY_TIMEOUT_MS,
+  proxyTimeout: STREAM_PROXY_TIMEOUT_MS,
+  ws: true,
+  optionsHandle(options, req) {
+    const parsedUrl = new URL(req.url, 'http://localhost')
+    options.target = `${normalizeBaseUrl(
+      serverConfig.apiServer.url
+    )}${stripNewConsolePrefix(parsedUrl.pathname)}${parsedUrl.search}`
+  },
+  events: {
+    proxyReq(proxyReq) {
+      NEED_OMIT_HEADERS.forEach(key => proxyReq.removeHeader(key))
+    },
+    proxyRes(proxyRes) {
+      proxyRes.headers['cache-control'] = 'no-store'
+    },
+  },
+}
 
 module.exports = {
   STREAM_PROXY_TIMEOUT_MS,
@@ -428,4 +477,6 @@ module.exports = {
   studioProxy,
   operationsProxy,
   kubeFrontendProxy,
+  newConsoleApiProxy,
+  newConsoleSelfHosted,
 }

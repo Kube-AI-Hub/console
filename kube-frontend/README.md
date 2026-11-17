@@ -4,7 +4,7 @@ Console 的新前端。React 19 + Vite + TanStack Router/Query + Tailwind 4，UI
 
 ## 为什么另起一套
 
-`console` 的上游是 **AGPL-3.0**。AGPL 的触发条件是"通过网络提供服务"，控制台是 SaaS，意味着每改一行都在扩大传染面。唯一干净的做法是重写，并通过进程边界（BFF）与原后端通信。
+`console` 的上游是 **AGPL-3.0**。AGPL 的触发条件是"通过网络提供服务"，控制台是 SaaS，意味着每改一行都在扩大传染面。唯一干净的做法是重写，并通过 HTTP 边界与原后端通信。
 
 方案正文：[`doc/12_frontend_stack_unification.md`](../../doc/12_frontend_stack_unification.md)。
 
@@ -12,7 +12,7 @@ Console 的新前端。React 19 + Vite + TanStack Router/Query + Tailwind 4，UI
 
 - 本目录以 [Apache License 2.0](./LICENSE) 授权，**不包含任何 `console/src` 的代码**。
 - 不复用 `console` 的 `withList` HOC、`ListPage`、`Table` 等组件，也不复制其源码后改写；业务逻辑以需求文档为规格重新实现。
-- 与老 console 的通信只发生在 HTTP 层：新前端 → BFF → `ks-apiserver`。老 console 继续独立提供服务，本项目不复制它的源码。
+- 与老 console 的通信只发生在 HTTP 层：新前端 → ks-console → `ks-apiserver`。老 console 继续独立提供服务，本项目不复制它的源码。
 
 ## 与老 console 并存
 
@@ -22,7 +22,8 @@ Console 的新前端。React 19 + Vite + TanStack Router/Query + Tailwind 4，UI
 | --- | --- |
 | `/`、`/login` | 老 console |
 | `/kube-frontend/`、`/kube-frontend/login` | 本应用 |
-| `/kube-frontend/api/*`、`/kube-frontend/{kapis,apis,api/v1}/*` | 本应用的 BFF |
+| `/kube-frontend/{kapis,apis,api/v1}/*` | ks-apiserver（由 ks-console 转发） |
+| `/kube-frontend/api/*` | 本应用的部署配置（ks-console 提供） |
 
 老 console 按配置（`server.newConsole`）把 `/kube-frontend/*` 反代到本应用的 Deployment 并剥掉前缀，同时在顶部导航显示「新版控制台」入口。两边的登录态共用 `localStorage.kah_token` 与同名 cookie。
 
@@ -36,7 +37,7 @@ kube-frontend/
 ├── tsconfig.base.json    strict 全量开启，不做按文件豁免
 ├── apps/console-next/    应用壳（文件路由、Query、Tailwind）
 ├── packages/             共享包，职责边界由 config/ 的测试锁住
-├── server/               BFF：鉴权、聚合、错误归一
+├── scripts/              本地静态站与部署脚本
 └── config/               架构约束测试
 ```
 
@@ -47,7 +48,7 @@ kube-frontend/
 | 包 | 职责 |
 |---|---|
 | `@kube-ai-hub/ui` | ai-kit 之上的薄封装。**纯展示层**：不引状态库、不发请求、不调 i18n、不引路由 |
-| `@kube-ai-hub/api-client` | 类型化 API 客户端，只调 BFF |
+| `@kube-ai-hub/api-client` | 类型化 API 客户端，只调 ks-apiserver |
 | `@kube-ai-hub/locales` | 文案的唯一来源 |
 | `@kube-ai-hub/ai-surface` | 让界面可被智能体操作：稳定选择器、状态机、机读清单 |
 
@@ -82,35 +83,32 @@ kube-frontend/
 ```bash
 pnpm install
 pnpm dev        # 应用，默认 5174
-pnpm bff        # BFF，默认 8080
 pnpm typecheck
 pnpm test
 ```
 
 ### 对着真实接口跑
 
-`scripts/dev-stack.sh` 把 BFF 和静态站点一起拉起来，BFF 按 `/kapis/*`、`/api/v1/*`、`/apis/*`
-前缀透传给 `ks-apiserver`，不做字段映射：
+本应用没有自己的服务端：构建产物由 ks-console 托管，接口由 ks-console 直连 ks-apiserver。
+本地只需要一个静态站，所有请求直接打到已部署的控制台：
 
 ```bash
-KS_API_URL=http://ks-apiserver KS_API_MODE=kapis ./scripts/dev-stack.sh start
-./scripts/dev-stack.sh smoke     # list/create/read/patch/put/delete 全链路
-./scripts/dev-stack.sh stop
+./scripts/dev-mlu370.sh start     # 静态站 + 探测后端
+./scripts/dev-mlu370.sh status
+./scripts/dev-mlu370.sh stop
 ```
 
-`KS_API_MODE=kapis` 直连 `ks-apiserver`；`kube` 模式改用本机 `kubectl proxy`（无鉴权，
-分页排序由 BFF 模拟），适合没有 token 时快速看页面。kapis 模式在浏览器
-`localStorage` 里放一个 JWT 到 `kah_token`（与老 console 同一个键，两边登录状态互通）。
+`KA_BACKEND` 决定后端（默认 `https://ka.watering.ai`）。打开 `http://localhost:5178/kube-frontend/login`
+用账号密码登录即可——凭据由 ks-apiserver 自己校验，`client_secret` 不出现在浏览器可触达的链路上。
 
-登录本身由前端自己完成，不再需要手工塞 JWT：打开 `/kube-frontend/login` 输入账号密码即可。凭据由 BFF
-代为提交给 `/oauth/token`（`client_secret` 不下发到浏览器），默认用 `kubesphere` 客户端，
-可用 `KS_OAUTH_CLIENT_ID` / `KS_OAUTH_CLIENT_SECRET` 覆盖（本集群是 `kube-ai-hub`）。
+热更新用 `pnpm dev`：`vite.config.ts` 的 proxy 同样指向 `KA_BACKEND`，路径**原样转发**（含
+`/kube-frontend` 前缀），因为前缀分流正是部署端在做的判断。
 
 ### 挂载路径
 
 这个应用与老 console 共用同一个源，所有路由、资源与接口都在 `/kube-frontend` 前缀下（`vite.config.ts`
-的 `base`、`src/api.ts` 的 `baseUrl`），裸 `/` 与 `/login` 属于老 console。上线时由 ks-console
-把 `/kube-frontend/*` 反代到本服务并剥掉前缀；本地 `dev-static-server.mjs` 做同样的事。
+的 `base`、`src/api.ts` 的 `baseUrl`），裸 `/` 与 `/login` 属于老 console。ks-console 就是这个前缀的
+主人：它把 `/kube-frontend/{kapis,apis,api/v1}` 转给 ks-apiserver，其余路径交给本应用的构建产物。
 
 注意读和写走的是不同的门：读走 `/kapis/resources.kubesphere.io/v1alpha3/...`，
 写（POST/PUT/PATCH/DELETE）走 `/api/v1/...`。kapis 的 resources 端点只注册了 GET，

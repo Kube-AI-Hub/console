@@ -5,10 +5,12 @@ import { createClient, configMapsApi, secretsApi, serviceAccountsApi, storageApi
  *
  * It shares an origin with the old console, so both the assets and every request
  * this app makes have to stay inside `/kube-frontend`: the old console owns `/`,
- * `/login` and its own `/kapis` proxy, and a bare `/api/session/login` would be
- * answered by it instead. The reverse proxy in front of this app strips the
- * prefix before the BFF sees the request, so the paths below are unchanged from
- * the BFF's point of view.
+ * `/login` and its own `/kapis` proxy, and a bare `/kapis/...` would be answered
+ * by it instead.
+ *
+ * The old console serves this app's build and forwards everything under the prefix
+ * to the right place — `/kube-frontend/{kapis,apis,api/v1}` to ks-apiserver, the
+ * rest to this app's own build. There is no separate frontend process any more.
  */
 export const APP_BASE = '/kube-frontend';
 
@@ -38,7 +40,7 @@ export function currentToken(): string | null {
     return window.localStorage.getItem(TOKEN_KEY);
   } catch {
     // Private browsing can throw on access; treat it as "no token" and let the
-    // BFF answer 401, which the page renders as a permission notice.
+    // server answer 401, which the page renders as a permission notice.
     return null;
   }
 }

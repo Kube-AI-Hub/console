@@ -1,22 +1,40 @@
 /**
  * Login, logout and the current user.
  *
- * These three calls go to the BFF rather than straight to ks-apiserver, because
- * `/oauth/token` needs an OAuth client secret. A failed login answers 400/401
- * with a `code` that says *why* — the page turns it into a sentence — so unlike
- * resource calls this module keeps the server's code instead of the status class.
+ * These go to ks-apiserver directly. The console used to run its own Node process
+ * ("BFF") that performed the password grant on the browser's behalf, because
+ * `/oauth/token` requires an OAuth client secret. That secret never has to leave
+ * the cluster: the API server performs the grant itself at a first-party endpoint,
+ * so a browser page can sign in without ever holding a client credential.
+ *
+ * The three calls and why each is where it is:
+ *
+ * - `login` → `POST /kapis/oauth.kubesphere.io/v1alpha1/login`. A kapis path, not
+ *   `/oauth/token`: the latter must keep authenticating its *client* per RFC 6749,
+ *   and a route that skips that would make the `/oauth` namespace ambiguous.
+ * - `me` → `GET /oauth/userinfo`. The standard OIDC endpoint, which now also
+ *   reports the two fields this app needs (see `sessionUserFromClaims`).
+ * - `logout` → `GET /oauth/logout`. Revokes only the token the request carries, so
+ *   signing out of one browser does not end every session of the account.
+ *
+ * A failed login answers with a `code` that says *why* — the page turns it into a
+ * sentence — so unlike resource calls this module keeps the server's code instead
+ * of the status class.
  */
 
 import type { Client } from './client';
 import { ApiError } from './errors';
 
-/**
- * `SessionUser` is declared in `./token`, not here: the type is only useful
- * together with the decoder that produces it, and the BFF imports both.
- */
-import type { SessionUser } from './token';
-
-export type { SessionUser };
+/** The signed-in user, as this app renders it. */
+export interface SessionUser {
+  name: string;
+  /** False for a pre-registered account that has not chosen a password yet. */
+  initialized: boolean;
+  displayName?: string;
+  email?: string;
+  /** Token expiry, epoch seconds. Absent when the cluster issues non-expiring tokens. */
+  expiresAt?: number;
+}
 
 export interface Session {
   token: string;
@@ -33,7 +51,7 @@ export interface SessionApi {
 export const LOGIN_ERROR_CODES = [
   'invalid_credentials',
   'too_many_attempts',
-  'invalid_client',
+  'account_not_active',
   'upstream_unreachable',
 ] as const;
 
@@ -43,23 +61,63 @@ export function isLoginErrorCode(code: string): code is LoginErrorCode {
   return (LOGIN_ERROR_CODES as readonly string[]).includes(code);
 }
 
+/** Path of the first-party sign-in endpoint. */
+export const LOGIN_PATH = '/kapis/oauth.kubesphere.io/v1alpha1/login';
+
+/**
+ * The OIDC userinfo document, as far as this app reads it.
+ *
+ * `extra` is where the server puts non-standard claims; `uninitialized` is the one
+ * this app cares about. `exp` is the registered expiry claim.
+ */
+interface UserinfoDocument {
+  sub?: string;
+  name?: string;
+  email?: string;
+  exp?: number;
+  extra?: Record<string, string[]>;
+}
+
+/**
+ * Project a userinfo document onto the app's user shape.
+ *
+ * Exported for the tests: the mapping is where the "pre-registered account" rule
+ * lives, and it is the one thing that would silently send a reader to the wrong
+ * screen if it were wrong.
+ */
+export function sessionUserFromClaims(document: UserinfoDocument): SessionUser {
+  const extras = document.extra ?? {};
+  const uninitialized = extras['uninitialized'] ?? [];
+  const displayName = extras['username'] ?? [];
+  const name = document.sub ?? document.name ?? '';
+  return {
+    name,
+    // The annotation's presence marks a pre-registered account; its value is not
+    // meaningful, so any entry at all means "not initialized".
+    initialized: uninitialized.length === 0,
+    ...(displayName[0] ? { displayName: displayName[0] } : {}),
+    ...(document.email ? { email: document.email } : {}),
+    ...(typeof document.exp === 'number' ? { expiresAt: document.exp } : {}),
+  };
+}
+
 export function sessionApi(client: Client): SessionApi {
   return {
     async login(input) {
       try {
-        return await client.request<Session>('/api/session/login', { method: 'POST', body: input });
+        return await client.request<Session>(LOGIN_PATH, { method: 'POST', body: input });
       } catch (cause) {
         throw asLoginError(cause);
       }
     },
 
     async me() {
-      const body = await client.request<{ user: SessionUser }>('/api/session/me');
-      return body.user;
+      const document = await client.request<UserinfoDocument>('/oauth/userinfo');
+      return sessionUserFromClaims(document ?? {});
     },
 
     async logout() {
-      await client.request<void>('/api/session/logout', { method: 'POST' });
+      await client.request<void>('/oauth/logout');
     },
   };
 }
@@ -71,12 +129,14 @@ export function sessionApi(client: Client): SessionApi {
  * "unauthorized", because the page only has to stop and ask for a token. The
  * login form is the one place that must distinguish "wrong password" from "the
  * cluster is down", and those arrive at the same status class, so the narrower
- * code the BFF sent is restored here.
+ * code the server sent is restored here.
  */
 function asLoginError(cause: unknown): ApiError {
   if (!(cause instanceof ApiError)) {
     return new ApiError({ code: 'upstream_unreachable', message: 'login failed' }, 0);
   }
+  // The API server's login endpoint answers `{ code, message, status }` as the body,
+  // which the client already surfaces as `code`; older shapes nested it in details.
   const details = cause.details as { serverCode?: unknown } | undefined;
   const serverCode = typeof details?.serverCode === 'string' ? details.serverCode : undefined;
   if (!serverCode || serverCode === cause.code) return cause;

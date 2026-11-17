@@ -23,6 +23,21 @@
 
 页面需要的新数据，要么来自已有的 kapis（k8s 资源、monitoring），要么新增一个 group；不要在页面里拼 kube-apiserver 的原始路径。
 
+### 新前端没有独立服务端
+
+新前端（`kube-frontend`）的构建产物由 **ks-console 托管**，接口由 ks-console 直连 ks-apiserver：
+
+| 路径 | 归属 |
+| --- | --- |
+| `/kube-frontend/{kapis,apis,api/v1}/*` | ks-apiserver（ks-console 转发，HTTP + WebSocket） |
+| `/kube-frontend/api/config`、`/kube-frontend/api/ai/manifest` | ks-console（部署期配置） |
+| `/kube-frontend/*` 其余 | 构建产物 + SPA 回落 |
+
+原先的 Node "BFF" 进程已删除。它存在的唯一硬理由是把 OAuth client secret 挡在浏览器之外，
+而这件事现在由 ks-apiserver 的 first-party 登录端点完成（`POST /kapis/oauth.kubesphere.io/v1alpha1/login`，
+进程内执行 password grant）。**不要重新引入一个只为转发而存在的进程**：转发是 ks-console 的职责，
+重复一份就会出现两套路由规则，而错的那一套总是被部署的那一套。
+
 ## C2. 生成物
 
 下列文件由工具生成，**不手改**：
@@ -75,6 +90,11 @@
 `?cluster=<member>` 被静默忽略后由主集群作答：2026-11-17 实测 `?cluster=4paradigm` 返回 200 且是 host 的 128 核，
 路径形态才返回成员自己的 384 核。响应正常、面板有值、数字属于另一个集群——比 404 难发现得多。
 判断某组是否认查询参数只能实测：拿同一指标分别请求查询形态与路径形态，数值不同就说明查询形态无效。
+
+**WebSocket 的 token 有两种载体，两种都要认。** 浏览器不能给 `WebSocket` 设 header，所以 token 走
+`Sec-WebSocket-Protocol`：本产品前端发 `bearer.<token>`（明文），kube-apiserver 的约定是
+`base64url.bearer.authorization.k8s.io.<base64url(token)>`。`requestinfo.go` 两者都接受，
+否则 exec 会 401 而列表页一切正常——最难定位的那种半坏状态。
 
 ---
 

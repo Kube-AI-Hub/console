@@ -3,9 +3,10 @@ import type { Client } from './client';
 /**
  * Deployment configuration the SPA cannot know at build time.
  *
- * The old console received it as `globals.config` from its Node server; the new BFF is
- * that server, so it answers `GET /api/config`. Currently only the documentation links
- * live here.
+ * The old console received it as `globals.config` from its Node server. That server
+ * is now the only one, so it answers `GET /kube-frontend/api/config` (see
+ * `server/controllers/newConsole.js`). Currently only the documentation links live
+ * here.
  */
 export interface DocsLinks {
   /** User guide root. */
