@@ -295,6 +295,22 @@ def _names(bff: str, token: str, path: str) -> set[str] | None:
     return {(item.get('metadata') or {}).get('name') for item in (json.loads(text).get('items') or [])}
 
 
+def write_verdict(outcome: dict) -> bool:
+    """Did the write land on the target cluster, stay off the host, and get cleaned up?
+
+    Every clause exists because of a real failure: a member-cluster write that landed on the host
+    (the bug this check was written for), a delete that returned 200 but left the object behind, and
+    a create the console answered with a 5xx.
+    """
+    cluster = outcome.get('cluster')
+    return (
+        outcome.get('created') in (200, 201)
+        and outcome.get('on_target') is True
+        and (cluster == 'host' or outcome.get('on_host') is False)
+        and outcome.get('deleted') in (200, 202)
+        and outcome.get('gone') is True
+    )
+
 def write_check(bff: str, token: str, cluster: str, host: str, namespace: str) -> dict:
     """Prove a grouped write lands on the cluster it was sent to -- and only there.
 
@@ -1165,13 +1181,7 @@ def baseline(args, token: str, clusters: list[str], allowed: set[str] | None = N
 
     for cluster in clusters:
         outcome = write_check(args.bff, token, cluster, 'host', args.namespace)
-        ok = (
-            outcome['created'] in (200, 201)
-            and outcome['on_target'] is True
-            and (cluster == 'host' or outcome['on_host'] is False)
-            and outcome['deleted'] in (200, 202)
-            and outcome['gone'] is True
-        )
+        ok = write_verdict(outcome)
         failures += 0 if ok else 1
         flag = 'OK  ' if ok else 'FAIL'
         print(f'{flag} write    {cluster:8s}: {outcome}')
@@ -1327,13 +1337,7 @@ def main() -> int:
             outcome = write_check(args.bff, token, cluster, 'host', args.namespace)
             # For the host cluster the "target" and "host" collections are the same one, so the
             # cross-cluster assertion only means something for a member.
-            ok = (
-                outcome['created'] in (200, 201)
-                and outcome['on_target'] is True
-                and (cluster == 'host' or outcome['on_host'] is False)
-                and outcome['deleted'] in (200, 202)
-                and outcome['gone'] is True
-            )
+            ok = write_verdict(outcome)
             bad += 0 if ok else 1
             print(f"{'OK  ' if ok else 'FAIL'} write-check {cluster}: {outcome}")
         return 1 if bad else 0

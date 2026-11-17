@@ -50,3 +50,46 @@ def test_should_retry_page(state, failures, expected):
 )
 def test_should_retry_tab(failures, expected):
     assert sweep.should_retry_tab(failures) is expected
+
+
+def outcome(**overrides):
+    """A successful member-cluster write, with fields replaced per case."""
+    base = {
+        'cluster': 'xc',
+        'name': 'tc-sweep-x',
+        'created': 201,
+        'on_target': True,
+        'on_host': False,
+        'deleted': 200,
+        'gone': True,
+    }
+    base.update(overrides)
+    return base
+
+
+def test_write_verdict_accepts_a_clean_member_write():
+    assert sweep.write_verdict(outcome()) is True
+
+
+def test_write_verdict_accepts_a_clean_host_write():
+    # On the host the object is *expected* to be on the host.
+    assert sweep.write_verdict(outcome(cluster='host', on_host=True)) is True
+
+
+@pytest.mark.parametrize(
+    'change',
+    [
+        # The original bug: a member write that landed on the host.
+        {'on_host': True},
+        # Never appeared where it was sent.
+        {'on_target': False},
+        # A 5xx from the console is not a create.
+        {'created': 503},
+        # Delete said 200 but the object is still there.
+        {'gone': False},
+        # Delete was refused.
+        {'deleted': 403},
+    ],
+)
+def test_write_verdict_rejects(change):
+    assert sweep.write_verdict(outcome(**change)) is False
