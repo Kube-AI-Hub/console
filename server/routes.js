@@ -168,6 +168,7 @@ router
 router.use(proxy('/kube-frontend/kapis{/*path}', newConsoleApiProxy))
 router.use(proxy('/kube-frontend/apis{/*path}', newConsoleApiProxy))
 router.use(proxy('/kube-frontend/api/v1{/*path}', newConsoleApiProxy))
+router.use(proxy('/kube-frontend/oauth{/*path}', newConsoleApiProxy))
 /*
  * The new console's build and client routes.
  *

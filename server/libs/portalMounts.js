@@ -78,6 +78,14 @@ const NEW_CONSOLE_API_PREFIXES = [
   `${NEW_CONSOLE_PREFIX}/kapis`,
   `${NEW_CONSOLE_PREFIX}/apis`,
   `${NEW_CONSOLE_PREFIX}/api/v1`,
+  /*
+   * The OIDC endpoints the console calls directly: `userinfo` (who am I) and
+   * `logout` (revoke this token). Both are `/oauth/*` on the API server, so they
+   * need the same forwarding as the resource prefixes — without this the console
+   * receives the SPA shell instead of a session, and the page shows a signed-in
+   * user it cannot identify.
+   */
+  `${NEW_CONSOLE_PREFIX}/oauth`,
 ]
 
 function isNewConsoleApiPath(pathname) {
