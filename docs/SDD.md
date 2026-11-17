@@ -292,6 +292,9 @@ def test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_02(storage_page, screenshot)
 | 同上 `--budget <秒>` | 整轮预算（默认 1800），上游掉线时中止而不是无限等待 |
 | `cd tests/ui && tools/verify-all.sh <env-file> <app> <bff> <clusters> <workspace> <project>` | 一次跑完四种模式并按「最快失败」排序；末行给 `VERDICT: PASS\|FAIL\|INCOMPLETE` |
 
+**静态站与 BFF 必须配对**：每个环境一个端口对（A100 `5182`→`8093`，B200 `5183`→`8092`）。
+配错时页面全部落到登录页、巡检却报「0 error」——preflight 会用同一个 token 经应用请求 `/api/session/me` 拦住这种情形。
+
 并行开发时全量 `check_docs --strict` 可能超过 15 分钟（2026-11-17 实测 1003.6s）；
 批次判定用本批范围 + 受影响包检查，全量门禁留到合入/发布前，不每批重复。
 
