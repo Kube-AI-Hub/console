@@ -1,12 +1,8 @@
 # 多集群验证手册（A100：`host` + `xc`）
 
-> 这份文档回答一个问题：**拿到一台多集群环境，怎样在半小时内确认新 UI 在成员集群上真的能用。**
-> 所有命令都实测过，结论与耗时都来自真实运行。
+> 回答一个问题：**拿到一台多集群环境，怎样在半小时内确认新 UI 在成员集群上真的能用。**
+> 命令与数字都来自真实运行；作废的历史数字在文末指路。
 
-> ⚠️ **数字有效性**：本文第 11–20 节里出现的 `state`/`rows` 汇总（含「72 visits / 72 ready」、
-> 「431 秒 PASS」、交互全绿等）来自**会话键写错的那段时期**，页面实际停在登录页，
-> 数字**已作废**。逐条判定见 [多集群结论有效性清单](multicluster-conclusions-validity-20261117.md)。
-> 修复后的可信基线见本文第 21 节与[手册](multicluster-playbook-20261117.md)。
 ## 1. 起栈（4 步）
 
 ```bash
@@ -15,47 +11,41 @@ ssh -N -L 18091:172.26.1.44:30880 a100
 
 # 2) BFF 指向隧道（与 B200 的 8092 分开，避免互相干扰）
 cd console/kube-frontend/server
-BFF_PORT=8093 KS_API_URL=http://127.0.0.1:18091 ./node_modules/.bin/tsx src/dev.ts
+BFF_PORT=8093 KS_API_URL=http://127.0.0.1:18091 KS_OAUTH_ENCODING=mix ./node_modules/.bin/tsx src/dev.ts
 
 # 3) 静态站
 cd console/kube-frontend
-node scripts/dev-static-server.mjs apps/console-next/dist 5179 http://127.0.0.1:8093
+node scripts/dev-static-server.mjs apps/console-next/dist 5179 http://127.0.0.1:8093 kube-frontend
 
 # 4) 冒烟：登录必须 200
 curl -s -o /dev/null -w '%{http_code}\n' -X POST http://127.0.0.1:8093/api/session/login \
   -H 'content-type: application/json' -d '{"username":"admin","password":"P@88w0rd"}'
 ```
 
-**坑**：`admin` 的密码含 `@`。走 ks-console 时必须用前端那套加密；直连 ks-apiserver 才是明文。
-BFF 用 **`KS_OAUTH_ENCODING=mix`** 表示「上游是 ks-console」（默认明文，给直连 ks-apiserver 的部署）：
+**`KS_OAUTH_ENCODING=mix` 不能省**：A100/B200 的上游是 ks-console，它会把含 `@` 的密码当密文解密。
+不设这个变量时登录返回 **400 `invalid_credentials`**——不是密码错了。直连 ks-apiserver 的部署才用默认明文。
 
-```bash
-BFF_PORT=8093 KS_API_URL=http://127.0.0.1:18091 KS_OAUTH_ENCODING=mix ./node_modules/.bin/tsx src/dev.ts
-```
+B200 需要两段：ssh 隧道（18089）+ `tools/tunnel-proxy.mjs`（18088 → 18089）。
 
-不设这个变量时，A100/B200 的登录会返回 **400 `invalid_credentials`**——不是密码错了。
-
-## 2. 一条命令跑完基线
+## 2. 一条命令跑完
 
 ```bash
 cd console/tests/ui
-python3 tools/multicluster_sweep.py --env-file /tmp/a100.env \
-  --baseline --clusters host,xc --namespace spaces --project spaces
+python3 -u tools/multicluster_sweep.py --env-file /tmp/a100.env \
+  --baseline --clusters host,xc --namespace spaces --project spaces \
+  --allow xc:alerting-messages,xc:alerting-policies --budget 1700
 ```
 
-`/tmp/a100.env` 只需两行：`KA_USERNAME=admin`、`KA_PASSWORD=…`。
+`/tmp/a100.env` 只需两行：`KA_USERNAME=admin`、`KA_PASSWORD=…`。`-u` 必须加，否则输出会被缓冲成「卡住」。
 
-实测输出（431 秒）：
+| 模式 | 覆盖 | 耗时（A100） |
+| --- | --- | --- |
+| `--baseline` | 八段：集群读 / 项目读 / 企业空间读 / 数据归属 / 详情 / Tab / 交互 / 写入 | ~15 分钟 |
+| `--keyboard` | 两集群 × 4 主题色调组合 × 3 页 的 Tab 顺序与焦点指示对比度 | ~9 分钟 |
+| `--keyboard-local` | 登录页（**不需要集群**）：结构 a11y + 4 组合 | ~1 分钟 |
+| `--locale-scan --locale en` | 英文界面的裸标识符（未翻译文案） | ~2 分钟 |
 
-```
-OK   cluster  read: 72 visits, 60 ready, 12 empty, 0 error, 0 failed requests
-OK   project  read: 34 visits, 20 ready, 14 empty, 0 error, 0 failed requests
-OK   detail   read: 12 visits, 12 ok, 0 broken
-OK   interact read: 6 lists, 6 interacted, 0 skipped, 0 broken
-OK   write    host    : created=201 on_target=True  deleted=200 gone=True
-OK   write    xc      : created=201 on_target=True on_host=False deleted=200 gone=True
-baseline PASS in 431s
-```
+**退出码**：`0` 全绿 / `1` 跑完但有缺陷 / `2` 环境不可用（preflight 拦下）/ `3` 超预算中止。
 
 ## 3. 每一段在证明什么
 
@@ -63,7 +53,10 @@ baseline PASS in 431s
 | --- | --- | --- |
 | `cluster read` | 36 个集群级页面 × 2 集群能渲染、无 4xx/5xx | 成员集群路径段位置错 |
 | `project read` | 17 个项目级页面 × 2 集群 | 同上，或项目上下文丢失 |
-| `detail read` | 每种对象各开一个详情页 | 详情/子资源路径错（如 `workloadPath`） |
+| `workspace read` | 8 个企业空间页面（与集群无关，跑一遍即可） | 企业空间 API 或路由错 |
+| `identity` | 9 个集合在两个集群上的数据归属 | 成员集群读到了主集群的数据 |
+| `detail` | 每种对象各开一个详情页 | 详情/子资源路径错（如 `workloadPath`） |
+| `tabs` | 每个详情页的每个 Tab 都点开 | 某个 Tab 走了主集群的接口 |
 | `interact` | 排序、搜索各触发一次真实请求 | 查询参数丢掉集群段 |
 | `write` | 分组资源写**落在目标集群**、能删干净 | 写到了主集群（最严重） |
 
@@ -73,21 +66,33 @@ baseline PASS in 431s
 | --- | --- | --- |
 | core（configmaps、secrets、pods…） | ✅ 走 kapis 代理 | ❌ 控制台**明确拒绝**（core 组无成员形态） |
 | 分组（ingresses、jobs、cronjobs…） | ✅ | ✅ 实测 201 / 200 |
+| `resourcequotas` / `limitranges` | ❌ 读不到 | ❌ |
+| `events` | ✅ 但只走 `events.k8s.io/v1` + `regarding.*` | — |
 
-## 5. 环境怪癖（遇到先重试，别改代码）
+## 5. 环境不稳定：症状与处置
 
-| 现象 | 处理 |
-| --- | --- |
-| `/api/session/login` 偶发 503，隧道根路径仍 200 | 重试 1–3 次；A100 的 ks-console 会抖动 |
-| 某页 `503 configz`，几分钟后同一接口 200 | 基线对「整页失败且全是 5xx」会自动重载一次 |
-| `session/me` 401 | 认证握手，已在采集时过滤 |
+| 现象 | 含义 | 处置 |
+| --- | --- | --- |
+| `/api/session/login` 502/503，隧道根路径仍 200 | 控制台抖动 | 重试 2–3 次；仍失败先修隧道 |
+| 隧道根路径 `000` | 隧道进程已断 | 重启隧道再谈巡检 |
+| 某页 `503 configz`，几分钟后同一接口 200 | 控制台抖动 | 巡检对「整页失败且全是 5xx」自动重载一次 |
+| `session/me` 401 | 认证握手 | 已在采集时过滤 |
+| **长时间无新行 + 登录 502** | 上游掉了，某请求在等超时 | **kill 巡检**，修隧道后重跑 |
+| 长时间无新行 + 登录 200 | 某页在等很慢的响应 | 看该段等待上限（页面 40s / Tab 30s / 详情 60s） |
+| 巡检「卡住」 | Python 输出缓冲 | 用 `python3 -u` |
+
+**不要把「卡住」当成「通过」**。整轮有 `--budget`（默认 1800 秒）兜底：超时打印 `ABORTED` 并退出码 3。
+它用看门狗线程实现（`signal.alarm` 在主线程阻塞于 Playwright 调用时不投递，实测 55 分钟没触发）。
+
+开跑前三条探针（已内置在 `--baseline`，任一失败即退出码 2）：BFF `/api/session/me`、静态站首页、登录。
 
 ## 6. 单独跑某一段
 
 ```bash
 --pages nodes,configmaps    # 只跑指定页面
---scope project             # 项目级页面
+--scope project             # 项目级页面（另有 workspace）
 --details                   # 只跑详情页
+--tabs                      # 只跑 Tab 段
 --interactions              # 只跑排序/搜索
 --write-check               # 只跑写入落点
 --out /tmp/sweep.json       # 存 JSON 便于比对
@@ -97,78 +102,8 @@ baseline PASS in 431s
 
 任何写检查都必须：**唯一名字 → 在目标集群与 host 两边列举 → `finally` 删除 → 复核消失**。
 只在一个集群上看列表会被乐观刷新骗过（历史事故：从 `xc` 创建的配置字典落到了 `host`）。
-## 8. 同一套基线跑单集群（B200 回归）
 
-路径改动（`clusterScoped` / `coreWritePath`）动的是**共享代码**，所以单集群环境也必须回归。同一份工具换参数即可：
-
-```bash
-cd console/tests/ui
-python3 tools/multicluster_sweep.py --env-file .env \
-  --app http://localhost:5178 --bff http://127.0.0.1:8092 \
-  --baseline --clusters host --namespace default --project default
-```
-
-B200 实测（172 秒）：
-
-```
-OK   cluster  read: 36 visits, 33 ready, 3 empty, 0 error, 0 failed requests
-OK   project  read: 17 visits, 12 ready, 5 empty, 0 error, 0 failed requests
-OK   detail   read: 6 visits, 6 ok, 0 broken
-OK   interact read: 3 lists, 3 interacted, 0 skipped, 0 broken
-OK   write    host    : created=201 on_target=True  deleted=200 gone=True
-baseline PASS in 172s
-```
-
-**单集群上 host 路径未被改动破坏**——这是所有成员集群修复的回归证据。
-
-### 一个参数坑（不是回归）
-
-第一次在 B200 上跑用了 A100 的 `--namespace public --project spaces`，写检查 `created=404`。
-B200 没有 `spaces` 这个项目，**是参数不匹配，不是代码回归**。换成 `--namespace default` 后 201。
-
-**结论**：基线参数是**环境相关**的，跑之前先确认目标环境里真实存在的命名空间。
-## 9. 两条已验证的基线（2026-11-17，修复工具后）
-
-### A100（多集群：`host` + `xc`）
-
-```bash
-python3 tools/multicluster_sweep.py --env-file /tmp/a100.env \
-  --app http://localhost:5180 --bff http://127.0.0.1:8093 \
-  --baseline --clusters host,xc --namespace spaces --project spaces \
-  --allow xc:alerting-messages
-```
-
-```
-OK   cluster  read: 72 visits, 59 ready, 12 empty, 1 error(allowlisted), 0 failed requests
-OK   project  read: 34 visits, 20 ready, 13 empty, 0 error, 0 failed requests
-OK   identity read: 9 collections, 8 distinct, 1 identical, 0 suspect
-OK   detail   read: 12 visits, 12 ok, 0 broken
-OK   interact read: 6 lists, 6 interacted, 0 skipped, 0 broken
-OK   write    host / xc: 均 OK（xc 上 on_host=False）
-baseline PASS in 580s | repo 86ccd280d (dirty files: 0)
-```
-
-### B200（单集群回归）
-
-```bash
-python3 tools/multicluster_sweep.py --env-file .env \
-  --app http://localhost:5181 --bff http://127.0.0.1:8092 \
-  --baseline --clusters host --namespace default --project default
-```
-
-```
-OK   cluster  read: 36 visits, 33 ready, 3 empty, 0 error, 0 failed requests
-OK   project  read: 17 visits, 11 ready, 6 empty, 0 error, 0 failed requests
-OK   identity read: 0 collections（单集群没有可比对象，符合预期）
-OK   detail   read: 6 visits, 6 ok, 0 broken
-OK   interact read: 3 lists, 3 interacted, 0 skipped, 0 broken
-OK   write    host: created=201 on_target=True deleted=200 gone=True
-baseline PASS in 213s
-```
-
-**单集群没有回归**——所有成员集群的路径修复都没有破坏 host 行为。
-
-## 10. 已知不可用清单（`--allow`）
+## 8. 已知不可用清单（`--allow`）
 
 | 集群:页面 | 原因 |
 | --- | --- |
@@ -179,178 +114,49 @@ baseline PASS in 213s
 页面主动请求并渲染「不可用」。这类 404 由工具内置过滤，不计入 `failed requests`。
 
 清单要跟着环境更新：**新出现的 error 先查是不是环境缺失，确认后再进白名单**，不要为了绿灯而加。
-## 11. A100 的可用性并不稳定（本轮实测）
 
-本轮想再跑一次干净基线时，A100 的登录接口连续返回 **502**，隧道根路径一度 `000`（连接失败），
-而同一时刻 `ssh a100` 正常。重试两次后恢复 200。
+## 9. 已验证的基线（2026-11-17）
 
-**这不是本仓库的问题**，但会直接毁掉一次 10 分钟的巡检：
-
-| 现象 | 处置 |
-| --- | --- |
-| `/api/session/login` 502/503 | 先重试 2–3 次；仍失败就先修隧道（`ssh -N -L 18091:…` 重连） |
-| 隧道根路径 `000` | 隧道进程已断，重启它再谈巡检 |
-| 巡检卡住无输出 | Python 重定向会缓冲；用 `python3 -u` 或先看 `login` 是否 200 |
-
-**建议**：跑基线前固定做一次「三条健康探针」（隧道根、`/api/session/login`、静态站首页），
-任一失败就不开跑——比跑到一半再失败省时间。
-## 12. 开跑前的三条探针（已内置）
-
-`--baseline` 现在**先做三条探针**，任一失败就直接退出并说明「环境不可用」，而不是跑十分钟再报失败：
-
-```
-preflight: BFF <bff> answered <status> on /api/session/me   → BFF 不在
-preflight: app <app> is not serving (<异常类型>)            → 静态站不在
-preflight: login attempt 1/3 failed (<异常类型>)            → 控制台登录不可用
-baseline NOT RUN: the environment is not usable
-```
-
-退出码 **2** 与「跑完但有缺陷」（1）区分开：前者是环境问题，后者是代码问题。
-
-## 13. 写入检查也重试一次 5xx
-
-B200 上实测到一次 `created: 502`——控制台抖动，不是写被拒绝。写入检查现在遇到 5xx 重试一次，
-复跑即 `created: 201 / deleted: 200`。
-## 14. 详情页也重试一次 5xx
-
-A100 本轮出现一次 `host pods/<name>` 详情页报 `error`，失败请求是 `503 /kapis/…/namespaces?page=1&limit=50`
-——又是控制台抖动。详情页巡检现在与页面巡检同规则：**整页失败且全是 5xx 就重载一次**。
-
-复跑：
-
-```
-OK   host   nodes/a100-04                       state=ready errors=0
-OK   host   pods/u-admin-…                       state=ready errors=0   ← 之前是 error
-… 12 visits, 12 ok, 0 broken
-```
-
-## 15. 单集群时身份检查显式跳过
-
-```
-     identity: skipped -- a single cluster has nothing to compare against
-```
-
-以前它打印 `0 collections, 0 distinct, 0 identical, 0 suspect`，看起来像「检查通过」，
-实际是「没有可比对象」。**未执行与通过必须能区分**。
-## 16. 七段式基线（Tab 段已并入）
-
-`--baseline` 现在覆盖：集群级读 / 项目级读 / 数据归属 / 详情页 / **Tab** / 交互 / 写入落点。
-Tab 段实测 **24 个 Tab（两集群各 12）、0 失败**。
-
-### 所有模式共用同一套登录重试
-
-单页巡检、`--details`、`--tabs` 与 `--baseline` 现在都先跑同一段 preflight（3 次登录重试），
-环境不可用一律打印 `NOT RUN` 并退出码 2——**没有哪个模式会因为一次瞬时 503 而崩掉**。
-
-### 5xx 重试的覆盖范围
-
-| 位置 | 规则 |
-| --- | --- |
-| 页面读 | 整页失败且全是 5xx → 重载一次（`state=none`，即导航本身 503、页面没渲染，也算） |
-| 详情页 | 同上；`state=none`（页面没渲染出来）也算 |
-| Tab | 该 Tab 全是 5xx → 再点一次 |
-
-Tab 段里出现的 `skipped` 表示**找不到可打开的对象**（对象查询失败或该集群确实没有）。查询遇到 5xx 会重试一次——
-A100 基线曾出现 2 个 skipped，干净复跑是 **24/24 全 OK**，说明那是瞬时失败而不是缺对象。
-
-**Tab 是否「渲染了东西」按差值判断**，不用固定阈值：Tab 条本身就有几百字符，`body < 300` 会把
-「渲染了空态」误判成「什么都没渲染」。现在记下点击前的页面长度，只有**没比点击前长 20 字符以上**才算异常。
-| 写入 | 5xx → 重试一次 |
-
-**判定规则有单元测试**（`tools/test_multicluster_retries.py`，13 条，不需要集群）：
-5xx 重试一次、404/403 不重试、渲染正常的页面不重载、混合失败不重试。
-这些分支此前只在「上游抖动」时才走到，等于从未被检查过。
-写入落点的判定（`write_verdict`）也一并抽出并测试：落在目标集群、没落到主集群、删得掉、真删干净——
-五条拒绝用例各自对应一次真实故障（含最初那个「成员集群写入落到主集群」）。共 **20 条**。
-
-## 17. 全绿基线（七段式，2026-11-17）
-
-```
-OK   cluster  read: 72 visits, 58 ready, 11 empty, 0 error, 0 failed requests
-OK   project  read: 34 visits, 20 ready, 14 empty, 0 error, 0 failed requests
-OK   identity read: 9 collections, 8 distinct, 1 identical, 0 suspect
-OK   detail   read: 12 visits, 12 ok, 0 broken
-OK   tabs     read: 24 tabs, 24 ok, 0 skipped, 0 broken
-OK   interact read: 6 lists, 6 interacted, 0 skipped, 0 broken
-OK   write    host / xc: created=201 on_target=True deleted=200 gone=True（xc 上 on_host=False）
-baseline PASS in 792s
-```
-
-**七段全绿、零失败请求、零掉线、零残留**：36 页 × 2 集群、17 页 × 2 集群、9 个集合归属比对、
-6 种对象详情、24 个 Tab、6 张列表 × 6 项交互、两集群各一次真实写入。
-### 单集群（B200）同一套命令
-
-```bash
-python3 tools/multicluster_sweep.py --env-file .env --app http://localhost:5178 \
-  --bff http://127.0.0.1:8092 --baseline --clusters host --namespace default --project default
-```
-
-```
-OK   cluster  read: 36 visits, 33 ready, 3 empty, 0 error, 0 failed requests
-OK   project  read: 17 visits, 11 ready, 6 empty, 0 error, 0 failed requests
-     identity: skipped -- a single cluster has nothing to compare against
-OK   detail   read: 6 visits, 6 ok, 0 broken
-OK   tabs     read: 12 tabs, 12 ok, 0 skipped, 0 broken
-OK   interact read: 3 lists, 3 interacted, 0 skipped, 0 broken
-OK   write    host: created=201 on_target=True deleted=200 gone=True
-baseline PASS in 274s
-```
-
-**两个环境各一条命令、都全绿**：A100 845 秒（多集群）、B200 274 秒（单集群）。
-
-## 18. 上游中途掉线时，巡检会「卡住」而不是「失败」
-
-2026-11-17 17:20–18:00 第三次中断：A100 的 ssh 反复 `Connection closed by UNKNOWN`，隧道重建后登录从 200 变 502。
-一条七段式基线跑到详情段后**停在原地**——前三段（集群读/项目读/数据归属）已完成且全绿，之后没有新行输出。
-
-**判读**：
-
-| 现象 | 含义 | 处置 |
+| 环境 | 命令参数 | 结果 |
 | --- | --- | --- |
-| 长时间没有新行 + 登录 502 | 上游掉了，某个请求在等超时 | **kill 掉巡检**，先修隧道，再重跑 |
-| 长时间没有新行 + 登录 200 | 某个页面在等一个很慢的响应 | 看该段的等待上限（页面 40s、Tab 30s、详情 60s） |
+| A100（多集群） | `--clusters host,xc --namespace spaces --project spaces` | **PASS 792s**：72 次集群级访问（58 ready/11 empty/0 error）、34 次项目级（20/14）、9 个集合归属、12 个详情、24 个 Tab、6 张列表交互、两集群各一次写入 |
+| B200（单集群） | `--clusters host --namespace default --project default` | **PASS 369s**：36+17 次访问、6 个详情、12 个 Tab、3 张列表交互、1 次写入 |
 
-**不要**把「卡住」当成「通过」——本次前三段的绿灯是真的，但整轮没有结论。
+B200 那条是**共享代码的回归证据**：路径改动动的是 `clusterScoped`/`coreWritePath`，单集群也必须照常。
 
-### 整轮预算（`--budget`，默认 1800 秒）
+**参数是环境相关的**：在 B200 上用 A100 的 `--namespace spaces` 会让写入检查 `created=404`——那是参数不匹配，不是回归。
 
-每条请求都有超时，但上游掉线时七段会**一个接一个地等**，整轮没有上限。现在有：
-
-```bash
-python3 tools/multicluster_sweep.py … --budget 600
-```
-
-超时后打印 `ABORTED: budget of N s exceeded` 并**退出码 3**——与「跑完但有缺陷」(1)、「环境不可用」(2) 区分。
-
-**2026-11-17 19:00 实测：`signal.alarm` 版本没能兜住。** 上游在数据归属段后变 502，进程停住；设了
-`--budget 1700`（28 分钟），55 分钟后日志仍停在最后一行、既没有 `ABORTED` 也没有 `EXIT=`。
-原因：信号只在 Python 字节码边界投递，主线程卡在 Playwright 的同步调用里就一直不投递。
-
-**已改为看门狗线程 + `os._exit(3)`**：不依赖主线程配合。验证方式不是只跑一次快速路径，
-而是让主线程 `sleep(60)` 模拟「阻塞不返回」——2 秒后仍打印 `ABORTED` 并以 3 退出。
-
-## 19. 企业空间作用域：整个区域此前没有被巡检过
-
-巡检只覆盖了集群级与项目级，**企业空间（workspace）的八个页面从来没被走过**。本轮补上 `--scope workspace`：
+## 10. 企业空间作用域（`--scope workspace`）
 
 ```bash
-python3 tools/multicluster_sweep.py --env-file <env> --app http://localhost:5182 \
+python3 -u tools/multicluster_sweep.py --env-file <env> --app http://localhost:5182 \
   --bff http://127.0.0.1:8093 --scope workspace --clusters host
 ```
 
-```
-OK host overview    ready rows=8   OK base-info ready rows=7   OK members   ready rows=3
-OK host user-groups ready rows=12  OK projects  ready rows=16  OK devops    empty rows=0
-OK host quota       empty rows=0   OK roles     ready rows=4
-```
+八个页面：overview / base-info / members / user-groups / projects / devops / quota / roles。
 
-### 踩坑：`--workspace` 写错，项目级照样全绿
+**坑**：项目页 URL 里的 workspace 段是**装饰性的**（页面靠 cluster+namespace 取数），所以 `--workspace` 写错时
+项目级照样全绿，而企业空间页八页全 404。工具现在会先解析：名字取不到就退到 `system-workspace`（或第一个可用）并打印。
 
-项目页的 URL 里那段 workspace 是**装饰性的**（页面靠 cluster+namespace 取数），所以 `--workspace workspace`
-这种不存在的名字**不会**让项目级变红；但企业空间页真的用它，于是八页全 404。
+## 11. 重试规则（有单元测试）
 
-现在工具会先解析：给定的名字取不到就退到 `system-workspace`（或第一个可用），并打印：
+| 位置 | 规则 |
+| --- | --- |
+| 页面读 | 整页失败且全是 5xx → 重载一次（`state=none`，导航本身 503 也算） |
+| 详情页 | 同上 |
+| Tab | 该 Tab 全是 5xx → 再点一次 |
+| 写入 | 5xx → 重试一次 |
+| 对象查询 | 5xx → 重试一次（否则页面被误标 `skipped`） |
 
-```
-workspace: 'workspace' 不存在，改用 'system-workspace'（可用：telco, fsi, public, system-workspace）
-```
+**判定规则有 20 条单元测试**（`tools/test_multicluster_retries.py`，0.03 秒，不需要集群）：
+5xx 重试、404/403 不重试、渲染正常的页面不重载、混合失败不重试；写入判定覆盖「落到主集群」「没出现在目标集群」
+「创建 5xx」「删了还在」「删除被拒」五类真实故障。
+
+**Tab 是否「渲染了东西」按差值判断**：Tab 条本身就有几百字符，`body < 300` 会把「渲染了空态」误判成「什么都没渲染」。
+现在记下点击前的长度，只有**没比点击前长 20 字符以上**才算异常。
+
+## 12. 历史与作废数字
+
+2026-11-17 早些时候的一批基线数字（「431 秒 PASS」「72 ready」等）来自**会话键写错**的时期——
+页面实际停在登录页，那些数字**已作废**。逐条判定见[结论有效性清单](multicluster-conclusions-validity-20261117.md)；
+本文第 9 节只保留修复后的记录，不再并存多套数字。
