@@ -268,6 +268,12 @@ pytest tests/kube-frontend/<模块> -q -n 0   # 本批相关及共享影响用�
 | 10 | 详情与列表各写一份格式化 | 同一字段两处显示不同 | 抽共享模块 |
 | 11 | 服务端 import 浏览器包 | BFF 起不来 | 共用逻辑选无 DOM 依赖的落点 |
 | 12 | 裸 List 当分页列表处理 | 分页器错乱 | 无 `totalItems` 的接口不分页 |
+| 13 | **成员集群的 `clusters/<id>` 段位置** | 成员集群上整页 404 | 段紧跟 `/kapis`、`/apis`，在 group/version **之前**；统一用 `clusterScoped` |
+| 14 | **core 组资源在成员集群上读写** | 写落到了主集群、读到了主集群的数据 | 读走 `corePath`（kapis 代理）；写走 `coreWritePath`，成员集群**明确拒绝** |
+| 15 | **读不到被渲染成「没有」** | 成员集群显示「该项目没有设置配额」，实际是读不到 | 缺失 / 不可用 / 空是三件事，各给一句不同的文案 |
+
+多集群部署另有一条命令：`cd tests/ui && python3 tools/multicluster_sweep.py --env-file <env> --baseline --clusters host,<member>`，
+覆盖集群级/项目级列表、数据归属、详情页、Tab 与写入落点；判读方式见[多集群验证手册](plans/multicluster-playbook-20261117.md)。
 
 ## 9. 文档与门禁
 

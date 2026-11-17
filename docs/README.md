@@ -14,6 +14,7 @@
 | [执行路线](plans/migration-execution-roadmap.md) | 选批次、顺序、各阶段准入与退出条件 | 安排下一批工作 |
 | [区域方案](plans/area-migration-plan.md) | 路由结构、作用域约定与跨页实现注意项 | 接入页面或公共能力 |
 | [能力矩阵](plans/capability-matrix.md) | 当前复核任务与能力级状态索引 | 判断还缺什么 |
+| [多集群验证手册](plans/multicluster-playbook-20261117.md) | 成员集群的起栈、一条命令基线、能力边界与已知怪癖 | 部署含 member 集群时 |
 | [架构宪法](constitution.md) | 架构约束与 UI 原则 | 做实现与设计决策 |
 | [续迁移 Prompt](plans/continue-migration-prompt.md) | 引用现行规则的任务输入，不是另一套状态正文 | 交接给其他 AI agent |
 

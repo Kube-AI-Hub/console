@@ -260,6 +260,7 @@ def test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_02(storage_page, screenshot)
 | `cd kube-frontend && pnpm --filter @kube-ai-hub/console-next typecheck` | 新 UI 显式类型检查 |
 | `cd kube-frontend && pnpm --filter @kube-ai-hub/console-next build` | 新 UI 构建；API/ai-kit 等受影响包另按各包 scripts 检查 |
 | `cd ../kube-server && go test ./pkg/kapis/... ./pkg/models/monitoring/...` | 后端单测 |
+| `cd tests/ui && python3 tools/multicluster_sweep.py --env-file <env> --baseline --clusters host,<member>` | 多集群基线：列表/数据归属/详情/Tab/写入落点，退出码 2 表示环境不可用 |
 
 ---
 
@@ -283,3 +284,5 @@ def test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_02(storage_page, screenshot)
    修改视觉时同步三档、主题计算色和人工复核，不以截图存在代替可读性。
 7. **验证逐项报告**：显式类型检查、构建、Storybook、相关/全站 E2E、部署不包含在
    `verify.py --no-e2e` 的通过结论里。基线错误和并行范围如实记录，不能豁免规则或冒称全仓通过。
+8. **区分「未执行」与「通过」，并绑定代码状态**：skip 要打印出来；结论要带 HEAD 与未提交文件数；
+   多集群另按 [`constitution.md`](constitution.md) C6 判定成员集群的读写归属。
