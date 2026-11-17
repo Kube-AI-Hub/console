@@ -152,7 +152,11 @@ export function ProjectInfoPage({ cluster, namespace }: ProjectInfoPageProps): R
                 {t('projectInfo.quota.edit')}
               </AiButton>
             </div>
-            {info.quota.length === 0 ? (
+            {info.quotaUnavailable ? (
+              <p className="text-xs text-ai-fg-muted" data-ai-id="project-info:quota-unavailable">
+                {t('projectInfo.quota.unavailable')}
+              </p>
+            ) : info.quota.length === 0 ? (
               <p className="text-xs text-ai-fg-muted" data-ai-id="project-info:quota-empty">
                 {t('projectInfo.quota.empty')}
               </p>

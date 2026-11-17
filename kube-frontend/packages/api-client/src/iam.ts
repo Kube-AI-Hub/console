@@ -378,6 +378,14 @@ export interface ProjectInfo extends ResourceBase {
   quotaName: string;
   /** `spec.hard` as stored, keyed by resource. */
   quotaHard: Record<string, string>;
+  /**
+   * True when the quota could not be read at all, as opposed to "there is none".
+   *
+   * A member cluster has no readable quota path (the core group has no member form and the kapis
+   * proxy does not serve `resourcequotas`), so the read fails there. Rendering that failure as
+   * "this project has no quota" would state something the console cannot know.
+   */
+  quotaUnavailable: boolean;
   /** Namespace labels as Kubernetes stores them (the project's metadata). */
   labels: Record<string, string>;
 }
@@ -386,7 +394,7 @@ export interface ProjectInfo extends ResourceBase {
  * `kubesphere.io/workspace` also carries the project name on some objects
  * (`kubesphere.io/namespace`), so do not mistake the annotation for the workspace.
  */
-export function toProjectInfo(item: KubeIam, quotas: KubeIam[] = []): ProjectInfo {
+export function toProjectInfo(item: KubeIam, quotas: KubeIam[] = [], quotaUnavailable = false): ProjectInfo {
   const labels = (item.metadata?.labels ?? {}) as Record<string, string>;
   const base = baseOf(item);
   const quota = quotas.flatMap((quotaItem) => {
@@ -403,6 +411,7 @@ export function toProjectInfo(item: KubeIam, quotas: KubeIam[] = []): ProjectInf
     workspace: labels['kubesphere.io/workspace'] ?? '',
     status: String((item.status as Record<string, unknown> | undefined)?.['phase'] ?? ''),
     quota,
+    quotaUnavailable,
     quotaName: quotas[0]?.metadata?.name ?? '',
     quotaHard: ((quotas[0] as unknown as { spec?: { hard?: Record<string, string> } })?.spec?.hard) ?? {},
     // Labels are needed by the cluster-scope detail (the project console reads the same
@@ -823,10 +832,10 @@ export function projectInfoApi(client: Client) {
          */
         client
           .request<{ items?: KubeIam[] }>(corePath(params.cluster, `namespaces/${encodeURIComponent(params.namespace)}/resourcequotas`), signal)
-          .then((body) => body?.items ?? [])
-          .catch(() => [] as KubeIam[]),
+          .then((body) => ({ items: body?.items ?? [], failed: false }))
+          .catch(() => ({ items: [] as KubeIam[], failed: true })),
       ]);
-      return toProjectInfo(item ?? {}, quotaBody);
+      return toProjectInfo(item ?? {}, quotaBody.items, quotaBody.failed);
     },
   };
 }
