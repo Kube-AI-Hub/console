@@ -48,7 +48,7 @@ export function ProjectOverviewPage({ workspace, cluster, namespace }: ProjectOv
   });
   const limits = useQuery({
     queryKey: ['limitranges', namespace],
-    queryFn: ({ signal }) => limitRangesApi(apiClient).list({ namespace, signal }),
+    queryFn: ({ signal }) => limitRangesApi(apiClient).list({ cluster, namespace, signal }),
   });
 
   /*

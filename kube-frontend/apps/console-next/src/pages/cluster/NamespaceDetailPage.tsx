@@ -41,7 +41,7 @@ export function NamespaceDetailPage({ cluster, name }: NamespaceDetailPageProps)
   });
   const limits = useQuery({
     queryKey: ['namespace-detail-limitranges', name],
-    queryFn: ({ signal }) => limitRangesApi(apiClient).list({ namespace: name, signal }),
+    queryFn: ({ signal }) => limitRangesApi(apiClient).list({ cluster, namespace: name, signal }),
   });
 
   const project: ProjectInfo | undefined = info.data;

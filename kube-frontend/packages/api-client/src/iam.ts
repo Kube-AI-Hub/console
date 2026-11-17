@@ -1,5 +1,5 @@
 import type { Client } from './client';
-import { clusterScoped } from './paths';
+import { clusterScoped, corePath } from './paths';
 import { baseOf, resourceApi, type KubeObject, type ResourceBase } from './resources';
 import { collectionPath } from './resources';
 
@@ -517,10 +517,16 @@ export function projectQuotaApi(client: Client) {
       return { name: params.name, hard: clean };
     },
 
-    /** The project's quota objects; the page edits the first one. */
-    async list(params: { namespace: string }): Promise<ProjectQuota[]> {
+    /**
+     * The project's quota objects; the page edits the first one.
+     *
+     * A member cluster has no readable quota path (core group has no member form, and the kapis
+     * proxy does not serve `resourcequotas` -- both measured on A100), so the read fails there and
+     * the page shows an empty quota section instead of the host's numbers.
+     */
+    async list(params: { cluster?: string; namespace: string }): Promise<ProjectQuota[]> {
       const body = await client
-        .request<{ items?: KubeQuota[] }>(`/api/v1/namespaces/${encodeURIComponent(params.namespace)}/resourcequotas`)
+        .request<{ items?: KubeQuota[] }>(corePath(params.cluster, `namespaces/${encodeURIComponent(params.namespace)}/resourcequotas`))
         .catch(() => undefined);
       return (body?.items ?? []).map((item) => ({
         name: item.metadata?.name ?? '',
@@ -800,7 +806,7 @@ export function projectInfoApi(client: Client) {
        */
       const [item, quotaBody] = await Promise.all([
         client.request<KubeIam>(
-          `/kapis/resources.kubesphere.io/v1alpha3/namespaces/${encodeURIComponent(params.namespace)}`,
+          clusterScoped('/kapis/resources.kubesphere.io/v1alpha3', params.cluster, `namespaces/${encodeURIComponent(params.namespace)}`),
           signal,
         ),
         /*
@@ -808,8 +814,15 @@ export function projectInfoApi(client: Client) {
          * ResourceQuota is the normal case on this cluster, and the page renders an
          * explicit "no quota" section rather than failing the whole view.
          */
+        /*
+         * A member cluster has no readable quota path: the core group has no member form and the
+         * kapis resources proxy does not serve `resourcequotas` (both measured on A100). Asking the
+         * member therefore fails, and the page falls back to its "no quota" section -- which is
+         * weaker than we want (unavailable reads as empty) but never shows another cluster's numbers.
+         * Distinguishing the two is a follow-up: the page needs a third state.
+         */
         client
-          .request<{ items?: KubeIam[] }>(`/api/v1/namespaces/${encodeURIComponent(params.namespace)}/resourcequotas`, signal)
+          .request<{ items?: KubeIam[] }>(corePath(params.cluster, `namespaces/${encodeURIComponent(params.namespace)}/resourcequotas`), signal)
           .then((body) => body?.items ?? [])
           .catch(() => [] as KubeIam[]),
       ]);
@@ -952,9 +965,9 @@ export function clusterLoggingApi(client: Client) {
 
 export function limitRangesApi(client: Client) {
   return {
-    async list(params: { namespace: string; signal?: AbortSignal }): Promise<LimitRangeSummary[]> {
+    async list(params: { cluster?: string; namespace: string; signal?: AbortSignal }): Promise<LimitRangeSummary[]> {
       const body = await client.request<{ items?: Array<Record<string, unknown>> }>(
-        `/api/v1/namespaces/${encodeURIComponent(params.namespace)}/limitranges`,
+        corePath(params.cluster, `namespaces/${encodeURIComponent(params.namespace)}/limitranges`),
         { ...(params.signal ? { signal: params.signal } : {}) },
       );
       return (body?.items ?? []).map((item) => {
