@@ -25,7 +25,11 @@ curl -s -o /dev/null -w '%{http_code}\n' -X POST http://127.0.0.1:8093/api/sessi
 **`KS_OAUTH_ENCODING=mix` 不能省**：A100/B200 的上游是 ks-console，它会把含 `@` 的密码当密文解密。
 不设这个变量时登录返回 **400 `invalid_credentials`**——不是密码错了。直连 ks-apiserver 的部署才用默认明文。
 
-B200 需要两段：ssh 隧道（18089）+ `tools/tunnel-proxy.mjs`（18088 → 18089）。
+B200 需要两段：ssh 隧道（18089）+ `tools/tunnel-proxy.mjs`（18088 → 18089）；BFF 用 **8092**。
+
+**静态站必须与 BFF 配对**：`node scripts/dev-static-server.mjs apps/console-next/dist 5183 http://127.0.0.1:8092 kube-frontend`。
+2026-11-18 实测过 `5178` 被接到 8093（A100 的 BFF），于是「B200 巡检」量的是登录页、整段却报 0 error——
+preflight 现在会用同一个 token 经应用请求 `/api/session/me`，不是 200 就拒绝开跑。
 
 ## 2. 一条命令跑完
 
@@ -130,7 +134,7 @@ tools/verify-all.sh /tmp/a100.env http://localhost:5182 http://127.0.0.1:8093 ho
 | 环境 | 命令参数 | 结果 |
 | --- | --- | --- |
 | A100（多集群） | `--clusters host,xc --namespace spaces --project spaces` | **PASS 789s**：72 次集群级访问（59 ready/11 empty/0 error）、34 次项目级（20/14）、**16 次企业空间访问（10/6）**、9 个集合归属、12 个详情、24 个 Tab、6 张列表交互、两集群各一次写入 |
-| B200（单集群） | `--clusters host --namespace default --project default` | **PASS 384s**：36+17+8 次访问、6 个详情、12 个 Tab、3 张列表交互、1 次写入 |
+| B200（单集群） | `--clusters host --namespace default --project default` | **PASS 284s**（静态站 5183 → BFF 8092 配对正确后）：36+17+8 次访问、6 个详情、12 个 Tab、3 张列表交互、1 次写入 |
 
 B200 那条是**共享代码的回归证据**：路径改动动的是 `clusterScoped`/`coreWritePath`，单集群也必须照常。
 
