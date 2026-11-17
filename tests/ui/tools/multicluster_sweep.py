@@ -697,6 +697,33 @@ def _is_expected_failure(status: int, url: str) -> bool:
         return False
     return any(resource in url for resource in EXPECTED_404_RESOURCES)
 
+class BudgetExceeded(RuntimeError):
+    """Raised when a run outlives its budget."""
+
+
+def with_budget(seconds: int):
+    """Abort the run after `seconds`, whatever it is waiting on.
+
+    Per-request timeouts exist, but a dead upstream makes a seven-phase baseline wait them out one
+    after another -- observed 2026-11-17: the run stopped printing for 16 minutes after the third
+    phase. A whole-run budget makes that a reported outcome (exit 3) rather than a hang.
+    """
+    import signal
+
+    def handler(_signum, _frame):
+        raise BudgetExceeded(f'budget of {seconds}s exceeded')
+
+    if hasattr(signal, 'SIGALRM'):
+        signal.signal(signal.SIGALRM, handler)
+        signal.alarm(seconds)
+
+
+def clear_budget() -> None:
+    import signal
+
+    if hasattr(signal, 'SIGALRM'):
+        signal.alarm(0)
+
 def preflight(app: str, bff: str, creds: tuple[str, str], attempts: int = 3) -> str | None:
     """Three probes before a ten-minute run: static site, BFF, login.
 
@@ -1059,7 +1086,10 @@ def main() -> int:
     parser.add_argument('--tabs', action='store_true', help='click every tab of a few detail pages')
     parser.add_argument('--keyboard', action='store_true', help='walk the tab order of a few pages')
     parser.add_argument('--keyboard-local', action='store_true', help='walk only the login page (no cluster needed)')
+    parser.add_argument('--budget', type=int, default=1800, help='abort the whole run after this many seconds (default 1800)')
     args = parser.parse_args()
+
+    with_budget(args.budget)
 
     env = _env(args.env_file)
     # Every mode gets the same three-try login the baseline has: a transient 503 at startup used to
@@ -1195,4 +1225,10 @@ def main() -> int:
 
 
 if __name__ == '__main__':
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except BudgetExceeded as cause:
+        print(f'ABORTED: {cause} (the upstream is probably gone; see docs/plans/multicluster-playbook-20261117.md)')
+        raise SystemExit(3)
+    finally:
+        clear_budget()
