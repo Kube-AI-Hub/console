@@ -831,28 +831,36 @@ def sweep_keyboard(app: str, token: str, clusters: list[str], workspace: str, pr
         context = browser.new_context(viewport={'width': 1400, 'height': 900})
         page = context.new_page()
         _open_app(page, app, token)
-        for cluster in clusters:
-            for segment, scope in KEYBOARD_PAGES:
-                url = (f'{app}/kube-frontend/{workspace}/clusters/{cluster}/projects/{project}/{segment}'
-                       if scope == 'project' else f'{app}/kube-frontend/clusters/{cluster}/{segment}')
-                page.goto(url, wait_until='domcontentloaded')
-                page.wait_for_timeout(9000)
-                page.evaluate('() => document.body.focus()')
-                walk = []
-                for _ in range(stops):
-                    page.keyboard.press('Tab')
-                    page.wait_for_timeout(120)
-                    seen = page.evaluate(js)
-                    if seen:
-                        walk.append(seen)
-                results.append({
-                    'cluster': cluster,
-                    'page': segment,
-                    'stops': len(walk),
-                    'no_ring': [entry['id'] for entry in walk if not entry['ring']],
-                    'first': walk[0]['id'] if walk else '',
-                    'order': [entry['id'][:24] for entry in walk[:6]],
-                })
+        # Both themes: the focus ring must stay visible on the light theme too, and that is exactly
+        # the kind of thing a screenshot review misses.
+        for theme in ('dark', 'light'):
+            # Re-seed the session before each pass: one 401 signs the app out and the rest of the
+            # walk then measures the login screen (which has inputs but no skip link).
+            _open_app(page, app, token)
+            page.evaluate("t => localStorage.setItem('ai-kit-theme', t)", theme)
+            for cluster in clusters:
+                for segment, scope in KEYBOARD_PAGES:
+                    url = (f'{app}/kube-frontend/{workspace}/clusters/{cluster}/projects/{project}/{segment}'
+                           if scope == 'project' else f'{app}/kube-frontend/clusters/{cluster}/{segment}')
+                    page.goto(url, wait_until='domcontentloaded')
+                    page.wait_for_timeout(9000)
+                    page.evaluate('() => document.body.focus()')
+                    walk = []
+                    for _ in range(stops):
+                        page.keyboard.press('Tab')
+                        page.wait_for_timeout(120)
+                        seen = page.evaluate(js)
+                        if seen:
+                            walk.append(seen)
+                    results.append({
+                        'theme': theme,
+                        'cluster': cluster,
+                        'page': segment,
+                        'stops': len(walk),
+                        'no_ring': [entry['id'] for entry in walk if not entry['ring']],
+                        'first': walk[0]['id'] if walk else '',
+                        'order': [entry['id'][:24] for entry in walk[:6]],
+                    })
         browser.close()
     return results
 
@@ -992,7 +1000,7 @@ def main() -> int:
             ok = row['stops'] >= 5 and not row['no_ring']
             bad += 0 if ok else 1
             flag = 'OK  ' if ok else 'FAIL'
-            print(f"{flag} {row['cluster']:6s} {row['page']:14s} stops={row['stops']:<3d} no_ring={len(row['no_ring'])} first={row['first'][:24]}")
+            print(f"{flag} {row.get('theme','dark'):5s} {row['cluster']:6s} {row['page']:14s} stops={row['stops']:<3d} no_ring={len(row['no_ring'])} first={row['first'][:24]}")
             if row['no_ring']:
                 print(f"       no ring: {row['no_ring'][:3]}")
         return 1 if bad else 0

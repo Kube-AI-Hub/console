@@ -56,7 +56,18 @@ python3 tools/multicluster_sweep.py --env-file /tmp/a100.env --app http://localh
 ```
 
 对配置字典、部署、节点三个页面各走 10 个 Tab，检查「第一个停靠点是跳过导航」与「每个停靠点都有可见焦点环」。
-两集群实测：
+**深色与浅色主题各走一遍**（浅色下的焦点环可见性正是截图走查容易漏掉的）。`xc` 实测：
+
+```
+OK dark  xc configmaps / deployments / nodes   stops=10 no_ring=0 first=跳到主要内容
+OK light xc configmaps / deployments / nodes   stops=10 no_ring=0 first=跳到主要内容
+```
+
+每一遍之前都会重新注入会话：一次 401 会让应用登出，之后走的其实是登录页（登录页也有输入框，但没有跳过导航）。
+
+`host` 这一遍本轮没跑完——A100 登录连续 503，preflight 打印 `NOT RUN` 并以退出码 2 结束（这正是它该做的）。
+
+旧记录（单主题、两集群）：
 
 ```
 OK host configmaps / deployments / nodes   stops=10 no_ring=0 first=跳到主要内容
@@ -64,5 +75,8 @@ OK xc   configmaps / deployments / nodes   stops=10 no_ring=0 first=跳到主要
 ```
 
 ## 6. 未覆盖
+
+- **焦点环的对比度数值**没有测量（只断言「有可见的 outline/box-shadow」）；
+- `host` 的双主题遍待 A100 恢复后补跑。
 
 朗读顺序（屏幕阅读器）与焦点环在**浅色主题**下的对比度未走查；弹层的焦点归属只在配置字典的创建弹层验过。
