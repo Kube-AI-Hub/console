@@ -44,11 +44,15 @@ python3 tools/multicluster_sweep.py --env-file /tmp/a100.env --app http://localh
 走概览/节点/配置字典/平台信息四页，扫「形如 `a.b.c` 的裸标识符」。实测：
 
 ```
-OK en overview     raw=[]
-OK en nodes        raw=[]
-OK en configmaps   raw=[]
-OK en info         raw=[]
+OK en overview                       raw=[]
+OK en nodes                          raw=[]
+OK en configmaps                     raw=[]
+OK en info                           raw=[]
+OK en workspaces/workspace/members   raw=[]   ← 能力矩阵里「英文页未作为本页主验」的两页
+OK en projects/spaces/members        raw=[]
 ```
+
+两个成员页确认真的渲染了内容（body 430 / 562 字符、英文导航），不是空白页蒙混过关。
 
 **正则要排除句子边界**：第一版用 `\.[a-zA-Z]` 把「use a Secret instead.」+「Read the docs」误判成 `instead.Read`；
 改为要求点号后**小写开头**（locale key 的段是小写，句首不是），噪声消失。

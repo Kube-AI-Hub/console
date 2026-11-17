@@ -976,6 +976,9 @@ LOCALE_PAGES = (
     ('nodes', 'cluster'),
     ('configmaps', 'project'),
     ('info', 'settings'),
+    # The two member pages the capability matrix still lists as "not verified in English".
+    ('workspaces/workspace/members', 'raw'),
+    ('projects/spaces/members', 'project-raw'),
 )
 
 
@@ -1003,7 +1006,11 @@ def sweep_locale(app: str, token: str, cluster: str, workspace: str, project: st
         page.reload(wait_until='domcontentloaded')
         page.wait_for_timeout(4000)
         for segment, scope in LOCALE_PAGES:
-            if scope == 'project':
+            if scope == 'raw':
+                url = f'{app}/kube-frontend/{segment}'
+            elif scope == 'project-raw':
+                url = f'{app}/kube-frontend/{workspace}/clusters/{cluster}/{segment}'
+            elif scope == 'project':
                 url = f'{app}/kube-frontend/{workspace}/clusters/{cluster}/projects/{project}/{segment}'
             elif scope == 'settings':
                 url = f'{app}/kube-frontend/settings/{segment}'
