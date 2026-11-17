@@ -3,12 +3,32 @@
 > 回答一个问题：**拿到一台多集群环境，怎样在半小时内确认新 UI 在成员集群上真的能用。**
 > 命令与数字都来自真实运行；作废的历史数字在文末指路。
 
-> ⚠️ **2026-11-18 05:23 起本文的起栈步骤已过时**：`4ff017afa` 退役了 BFF，新 console 改由 ks-console 直接提供，
-> 登录走 `POST /kapis/oauth.kubesphere.io/v1alpha1/login`。本文第 1–2 节描述的「隧道 + BFF + 静态站」三段式属于**重构前**的形态；
-> 在工具适配并重新验收之前，本文的命令只能作为历史记录阅读，见[影响记录](bff-retired-tooling-impact-20261118.md)与
-> [登录受阻记录](new-console-login-blocked-20261118.md)。
+> ⚠️ **2026-11-18 05:23 起本文的起栈步骤已过时**：`4ff017afa` 退役了 BFF，新 console 改由 ks-console 直接提供。
+> 第 1–2 节描述的三段式属于**重构前**形态；新形态见下方「0. 起栈（新形态，未验证）」。
 
-## 1. 起栈（4 步）
+## 0. 起栈（新形态，未验证）
+
+```bash
+# 只剩一步：隧道。ks-console 自己提供新 console、自己转发 API、自己完成登录。
+ssh -N -L 18091:172.26.1.44:30880 a100
+```
+
+验收目标就是 `http://127.0.0.1:18091/kube-frontend/`，不需要 BFF，也不需要单独的静态站。
+
+**就绪检查（十秒）**：
+
+```bash
+python3 tools/multicluster_sweep.py --env-file /tmp/a100.env \
+  --app http://127.0.0.1:18091 --bff - --probes --clusters host
+```
+
+`oauth-userinfo` 与 `oauth-login-route` 两条不再是 WARN，才值得往下跑。
+
+**本节未验证**：2026-11-18 06:05 实测该部署的 `POST /kapis/oauth.kubesphere.io/v1alpha1/login` 仍返回 **403**
+（`login.oauth.kubesphere.io` 未注册），所以上面的命令是**按新架构推导**的，不是跑通过的结果。
+跑通后请把这一行删掉并附上实际输出。
+
+## 1. 起栈（4 步，重构前形态）
 
 ```bash
 # 1) 隧道：本机 18091 → A100 的 ks-console NodePort（30880）
