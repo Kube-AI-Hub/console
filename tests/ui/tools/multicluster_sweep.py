@@ -180,6 +180,8 @@ def sweep(
                     # whichever page happened to be open at that moment.
                     if response.url.endswith('/api/session/me'):
                         return
+                    if _is_expected_failure(response.status, response.url):
+                        return
                     sink.append((response.status, response.url))
 
                 page.on('response', record)
@@ -672,6 +674,22 @@ def _repo_state() -> str:
     changed = len([line for line in dirty.splitlines() if line.strip()])
     return f'{head} (dirty files: {changed})'
 
+#: Requests the console makes on purpose and handles itself. A member cluster has no readable quota
+#: path (see docs/constitution.md C6), so the page asks, gets 404, and renders "unavailable". Counting
+#: that as a failed request would report the designed behaviour as a defect.
+EXPECTED_FAILURES = (
+    '/namespaces/',  # paired with the resource below
+)
+
+EXPECTED_404_RESOURCES = ('resourcequotas', 'limitranges')
+
+
+def _is_expected_failure(status: int, url: str) -> bool:
+    """True when a failed request is one the console handles on purpose."""
+    if status != 404:
+        return False
+    return any(resource in url for resource in EXPECTED_404_RESOURCES)
+
 def preflight(app: str, bff: str, creds: tuple[str, str], attempts: int = 3) -> str | None:
     """Three probes before a ten-minute run: static site, BFF, login.
 
@@ -831,6 +849,15 @@ def baseline(args, token: str, clusters: list[str], allowed: set[str] | None = N
     for row in detail_broken[:5]:
         print(f"       {row['cluster']} {row['page']}: {row['state']} {row['errors'][:1]}")
 
+    tab_rows = sweep_tabs(args.app, token, clusters, args.workspace, args.project)
+    tab_broken = [row for row in tab_rows if (not row.get('skipped')) and (row['body'] < 300 or row['errors'])]
+    failures += len(tab_broken)
+    tab_flag = 'OK  ' if not tab_broken else 'FAIL'
+    tab_skipped = sum(1 for row in tab_rows if row.get('skipped'))
+    print(f'{tab_flag} tabs     read: {len(tab_rows)} tabs, {len(tab_rows) - len(tab_broken) - tab_skipped} ok, {tab_skipped} skipped, {len(tab_broken)} broken')
+    for row in tab_broken[:5]:
+        print(f"       {row['cluster']} {row['page']} {row['tab']}: body={row['body']} {row['errors'][:1]}")
+
     interaction_rows = sweep_interactions(args.app, token, clusters, args.workspace, args.project)
     acted = [row for row in interaction_rows if row['acted']['sort'] or row['acted']['search']]
     interaction_broken = [row for row in interaction_rows if row['errors']]
@@ -933,7 +960,7 @@ def main() -> int:
             print(f"{flag} {row['cluster']:6s} {row['page'][:44]:44s} state={row['state']:8s} errors={len(noisy)}")
         return 1 if bad else 0
 
-    allowed = {entry.strip() for entry in args.allow.split(',') if entry.strip()}
+    allowed = {entry.strip() for entry in args.allow.split(',') if entry.strip()}  # used by both paths
 
     if args.baseline:
         return baseline(args, token, clusters, allowed, (env.get('KA_USERNAME', 'admin'), env.get('KA_PASSWORD', '')))
@@ -958,8 +985,9 @@ def main() -> int:
     rows = sweep(args.app, token, clusters, pages, args.scope, args.workspace, args.project, args.bff, (env.get('KA_USERNAME', 'admin'), env.get('KA_PASSWORD', '')))
 
     for row in rows:
+        allowed_page = f"{row['cluster']}:{row['page']}" in allowed
         bad = [e for e in row['errors'] if e['status'] in (401, 403, 404, 500, 502, 503)]
-        flag = 'FAIL' if row['state'] == 'error' else '    '
+        flag = 'FAIL' if row['state'] == 'error' and not allowed_page else ('OK  ' if allowed_page else '    ')
         print(f"{flag} {row['cluster']:6s} {row['page']:24s} state={row['state']:8s} rows={row['rows']:<3d} errors={len(bad)}")
         for entry in bad[:3]:
             print(f"       {entry['status']} {entry['url'][:130]}")
@@ -967,7 +995,7 @@ def main() -> int:
     if args.out:
         with open(args.out, 'w', encoding='utf-8') as sink:
             json.dump(rows, sink, ensure_ascii=False, indent=1)
-    broken = [row for row in rows if row['state'] == 'error']
+    broken = [row for row in rows if row['state'] == 'error' and f"{row['cluster']}:{row['page']}" not in allowed]
     return 1 if broken else 0
 
 

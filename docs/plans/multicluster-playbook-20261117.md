@@ -165,7 +165,11 @@ baseline PASS in 213s
 
 | 集群:页面 | 原因 |
 | --- | --- |
-| `xc:alerting-messages` | 成员集群没有告警组件，聚合接口稳定 503；页面应显示「加载失败」 |
+| `xc:alerting-messages` | 成员集群没有告警组件，`globalalerts`/`clusteralerts` 稳定 503；页面应显示「加载失败」 |
+| `xc:alerting-policies` | 同上，`clusterrulegroups`/`globalrulegroups` 503 |
+
+**预期内的 404 不算失败**：`resourcequotas` / `limitranges` 在成员集群上读不到（宪法 C6），
+页面主动请求并渲染「不可用」。这类 404 由工具内置过滤，不计入 `failed requests`。
 
 清单要跟着环境更新：**新出现的 error 先查是不是环境缺失，确认后再进白名单**，不要为了绿灯而加。
 ## 11. A100 的可用性并不稳定（本轮实测）
