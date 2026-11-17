@@ -70,6 +70,32 @@ describe('empty states', () => {
     expect(shared).toContain('暂无数据');
   });
 
+  /*
+   * An empty state that only says "nothing here" leaves the reader stuck: no explanation of what
+   * would appear here, no way to start. The shared component now renders the page's primary action
+   * on its own, so the part a page must supply is the explanation (`description`).
+   *
+   * Ratchet, not a wall: 43 of 61 lists have one today. The number may only go up -- a new list has
+   * to bring its description, and paying down the rest is welcome but not forced.
+   */
+  it('offers the page primary action from the empty state', () => {
+    const shared = readFileSync(join(root, '..', 'packages/ai-kit/src/schema/ResourceList.tsx'), 'utf8');
+    expect(shared, '空态不再渲染 schema.primaryAction').toMatch(/data-ai-id="empty-state:primary"/);
+    // A disabled action must stay out: an empty list plus a dead button reads as a broken page.
+    expect(shared).toMatch(/primaryAction && !primaryAction\.disabled/);
+  });
+
+  it('keeps empty-state descriptions from regressing', () => {
+    const withDescription = listFiles.filter(({ source }) => {
+      const start = source.indexOf('empty: {');
+      return start >= 0 && source.slice(start, start + 400).includes('description');
+    });
+    expect(
+      withDescription.length,
+      `只有 ${withDescription.length} 个列表的空态带说明文字（下限 43）：新增列表请补 empty.description，说明这里会出现什么`,
+    ).toBeGreaterThanOrEqual(43);
+  });
+
   it('keeps the own-empty-block list honest', () => {
     for (const relative of OWN_EMPTY_BLOCK) {
       const entry = listFiles.find((candidate) => candidate.relative === relative);

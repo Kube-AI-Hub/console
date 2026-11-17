@@ -33,7 +33,22 @@
 | `tsc` | 0 |
 | 契约套件 | 18 文件 / 1566 passed |
 
-## 4. 反思
+## 4. 契约：空态要有「下一步」，且说明不能退化
+
+`config/empty-state-contract.test.ts` 加两条：
+
+```ts
+// 空态必须渲染主操作，且禁用的主操作不渲染
+expect(shared).toMatch(/data-ai-id="empty-state:primary"/);
+expect(shared).toMatch(/primaryAction && !primaryAction\.disabled/);
+
+// 带说明文字的空态数量只能涨（今天 43/61）
+expect(withDescription.length).toBeGreaterThanOrEqual(43);
+```
+
+**棘轮而不是墙**：现有的 18 个只有标题的空态不强制补，但新增列表必须带说明，补掉旧的随时欢迎。
+
+## 5. 反思
 
 | # | 规则 |
 | --- | --- |
