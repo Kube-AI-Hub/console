@@ -49,23 +49,35 @@ run() {
 
 cd "$here"
 
+# One login for the whole run. Each mode used to log in on its own, and five logins in a row trip
+# the console's rate limit (429) -- the run then reported "environment unusable" while the
+# environment was fine.
+TOKEN=$(curl -s --max-time 20 -X POST "$BFF/api/session/login" -H 'content-type: application/json' \
+  -d "{\"username\":\"$(grep '^KA_USERNAME=' "$ENV_FILE" | cut -d= -f2-)\",\"password\":\"$(grep '^KA_PASSWORD=' "$ENV_FILE" | cut -d= -f2-)\"}" \
+  | sed -n 's/.*"token":"\([^"]*\)".*/\1/p')
+if [ -z "$TOKEN" ]; then
+  echo 'login failed: the console did not return a token (rate limit? credentials?)' >&2
+  exit 2
+fi
+TOKEN_ARGS=(--token "$TOKEN")
+
 run 'capability probes (fingerprint)' python3 -u multicluster_sweep.py \
-  --env-file "$ENV_FILE" --app "$APP" --bff "$BFF" --probes --clusters "$FIRST_CLUSTER"
+  --env-file "$ENV_FILE" --app "$APP" --bff "$BFF" --probes --clusters "$FIRST_CLUSTER" "${TOKEN_ARGS[@]}"
 
 run 'login page a11y + keyboard (no cluster)' python3 -u multicluster_sweep.py \
   --env-file "$ENV_FILE" --app "$APP" --bff "$BFF" --keyboard-local
 
 run 'untranslated identifiers (en)' python3 -u multicluster_sweep.py \
   --env-file "$ENV_FILE" --app "$APP" --bff "$BFF" --locale-scan --locale en \
-  --clusters "$FIRST_CLUSTER" --workspace "$WORKSPACE" --project "$PROJECT"
+  --clusters "$FIRST_CLUSTER" --workspace "$WORKSPACE" --project "$PROJECT" "${TOKEN_ARGS[@]}"
 
 run 'keyboard walk (both themes x accents)' python3 -u multicluster_sweep.py \
   --env-file "$ENV_FILE" --app "$APP" --bff "$BFF" --keyboard \
-  --clusters "$CLUSTERS" --workspace "$WORKSPACE" --project "$PROJECT"
+  --clusters "$CLUSTERS" --workspace "$WORKSPACE" --project "$PROJECT" "${TOKEN_ARGS[@]}"
 
 run 'eight-phase baseline' python3 -u multicluster_sweep.py \
   --env-file "$ENV_FILE" --app "$APP" --bff "$BFF" --baseline \
-  --clusters "$CLUSTERS" --workspace "$WORKSPACE" --project "$PROJECT" --budget 1800 --allow "$ALLOW"
+  --clusters "$CLUSTERS" --workspace "$WORKSPACE" --project "$PROJECT" --budget 1800 --allow "$ALLOW" "${TOKEN_ARGS[@]}"
 
 echo
 echo '=== summary ==='

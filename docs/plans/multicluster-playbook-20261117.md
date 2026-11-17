@@ -56,7 +56,10 @@ python3 -u tools/multicluster_sweep.py --env-file /tmp/a100.env \
 tools/verify-all.sh /tmp/a100.env http://localhost:5182 http://127.0.0.1:8093 host,xc system-workspace spaces
 ```
 
-最后打印 `=== summary ===` 与 `VERDICT: PASS|FAIL`；某模式因环境不可用退出 2 时记 `SKIP` 而不是 `FAIL`。
+最后打印 `=== summary ===` 与 `VERDICT: PASS|FAIL|INCOMPLETE`；某模式因环境不可用退出 2 时记 `SKIP` 而不是 `FAIL`。
+
+**整轮只登录一次**：脚本先取一个 token，再用 `--token` 传给各模式。此前每个模式各自登录，
+五次连续登录会触发控制台的限流（**429**），整轮被误报成「环境不可用」。
 
 **退出码**：`0` 全绿 / `1` 跑完但有缺陷 / `2` 环境不可用（preflight 拦下）/ `3` 超预算中止。
 

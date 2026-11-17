@@ -1298,6 +1298,7 @@ def main() -> int:
     parser.add_argument('--tabs', action='store_true', help='click every tab of a few detail pages')
     parser.add_argument('--keyboard', action='store_true', help='walk the tab order of a few pages')
     parser.add_argument('--keyboard-local', action='store_true', help='walk only the login page (no cluster needed)')
+    parser.add_argument('--token', default='', help='reuse this session token instead of logging in')
     parser.add_argument('--budget', type=int, default=1800, help='abort the whole run after this many seconds (default 1800)')
     parser.add_argument('--locale-scan', action='store_true', help='look for untranslated identifiers on a few pages')
     parser.add_argument('--probes', action='store_true', help='print the status of each capability probe')
@@ -1312,7 +1313,11 @@ def main() -> int:
     # Every mode gets the same three-try login the baseline has: a transient 503 at startup used to
     # kill a standalone run before it printed anything.
     # The login page needs no session, so the local walk must not be gated on the cluster being up.
-    token = None if args.keyboard_local else preflight(args.app, args.bff, (env.get('KA_USERNAME', 'admin'), env.get('KA_PASSWORD', '')))
+    if args.token and not args.keyboard_local:
+        token = args.token
+        print('preflight: using the token passed on the command line')
+    else:
+        token = None if args.keyboard_local else preflight(args.app, args.bff, (env.get('KA_USERNAME', 'admin'), env.get('KA_PASSWORD', '')))
     if token:
         args.workspace = resolve_workspace(args.bff, token, args.workspace)
     if token is None and not args.keyboard_local:
