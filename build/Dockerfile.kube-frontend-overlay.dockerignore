@@ -1,0 +1,14 @@
+# Context for `build/Dockerfile.kube-frontend-overlay`.
+#
+# The overlay copies four things and nothing else, so the context is deliberately
+# tiny: everything below is excluded, and the Dockerfile's COPY lines are the
+# allow-list. Without this file the repo's own `.dockerignore` applies — and it
+# excludes `dist`, which is exactly where the server bundle lives.
+*
+!dist/server.js
+!server/config.yaml
+!server/locales/
+!server/views/
+!server/sample/
+!server/public/
+!.build/kube-frontend/dist/
