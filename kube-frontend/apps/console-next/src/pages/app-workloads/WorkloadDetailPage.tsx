@@ -190,7 +190,7 @@ export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, 
   const events = useQuery({
     queryKey: ['object-events', kind, namespace, name],
     queryFn: ({ signal }) =>
-      objectEventsApi(apiClient).list({ namespace, name, kind: EVENT_OBJECT_KINDS[kind], signal }),
+      objectEventsApi(apiClient).list({ cluster, namespace, name, kind: EVENT_OBJECT_KINDS[kind], signal }),
   });
 
   const state = query.isPending ? 'loading' : query.isError ? 'error' : 'ready';

@@ -707,6 +707,75 @@ def preflight(app: str, bff: str, creds: tuple[str, str], attempts: int = 3) -> 
             time.sleep(3)
     return None
 
+def sweep_tabs(app: str, token: str, clusters: list[str], workspace: str, project: str) -> list[dict]:
+    """Open every tab of a few detail pages and record what each one renders.
+
+    A detail page loads different endpoints per tab, so a page that opens fine can still have a tab
+    that renders nothing. The list/detail sweeps never click, so this is the only check that would
+    notice. A tab counts as broken when its body stays tiny or its requests fail.
+    """
+    from playwright.sync_api import sync_playwright
+
+    targets = (
+        ('deployments', True),
+        ('nodes', False),
+    )
+    results: list[dict] = []
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        context = browser.new_context(viewport={'width': 1500, 'height': 1000})
+        for cluster in clusters:
+            for resource, namespaced in targets:
+                name = _first_name('http://127.0.0.1:8093', token, cluster, resource, namespaced, project)
+                if not name:
+                    results.append({'cluster': cluster, 'page': resource, 'tab': '<none>', 'body': 0, 'errors': []})
+                    continue
+                page = context.new_page()
+                _open_app(page, app, token)
+                failures: list[tuple[int, str]] = []
+
+                def record(response, sink=failures):
+                    if response.status < 400 or response.url.endswith('/api/session/me'):
+                        return
+                    sink.append((response.status, response.url))
+
+                page.on('response', record)
+                url = (f'{app}/kube-frontend/{workspace}/clusters/{cluster}/projects/{project}/{resource}/{name}'
+                       if namespaced else f'{app}/kube-frontend/clusters/{cluster}/{resource}/{name}')
+                page.goto(url, wait_until='domcontentloaded')
+                # Wait for the page to stop growing instead of a fixed delay: a member cluster answers
+                # slower, and a fixed 9s read the page mid-load and recorded it as "no tabs".
+                previous = -1
+                for _ in range(15):
+                    page.wait_for_timeout(2000)
+                    current = len(page.evaluate('() => document.body.innerText').strip())
+                    if current == previous and current > 300:
+                        break
+                    previous = current
+                tabs = page.locator('[role="tab"]')
+                count = tabs.count()
+                if count == 0:
+                    # Not a failure: some detail pages have no tab strip at all. Reported so it is
+                    # visible that the page was visited but had nothing to click.
+                    results.append({'cluster': cluster, 'page': f'{resource}/{name}', 'tab': '<no tabs>',
+                                    'body': len(page.evaluate('() => document.body.innerText').strip()),
+                                    'errors': [], 'skipped': True})
+                for index in range(count):
+                    tabs.nth(index).click()
+                    page.wait_for_timeout(3500)
+                    results.append({
+                        'cluster': cluster,
+                        'page': f'{resource}/{name}',
+                        'tab': (tabs.nth(index).inner_text().strip() or f'#{index}')[:16],
+                        'body': len(page.evaluate('() => document.body.innerText').strip()),
+                        'errors': [{'status': status, 'url': target.replace(app, '')} for status, target in failures],
+                    })
+                    failures.clear()
+                page.remove_listener('response', record)
+                page.close()
+        browser.close()
+    return results
+
 def baseline(args, token: str, clusters: list[str], allowed: set[str] | None = None, creds: tuple[str, str] | None = None) -> int:
     """Everything that has to hold on a multi-cluster install, in one command.
 
@@ -807,6 +876,7 @@ def main() -> int:
     parser.add_argument('--details', action='store_true', help='also visit one detail page per kind per cluster')
     parser.add_argument('--interactions', action='store_true', help='sort and search the list on each cluster')
     parser.add_argument('--data-identity', action='store_true', help="compare each collection between host and members")
+    parser.add_argument('--tabs', action='store_true', help='click every tab of a few detail pages')
     args = parser.parse_args()
 
     env = _env(args.env_file)
@@ -814,6 +884,16 @@ def main() -> int:
     default_pages = PROJECT_PAGES if args.scope == 'project' else PAGES
     pages = tuple(p.strip() for p in args.pages.split(',') if p.strip()) or default_pages
     clusters = [c.strip() for c in args.clusters.split(',') if c.strip()]
+
+    if args.tabs and not args.baseline:
+        rows = sweep_tabs(args.app, token, clusters, args.workspace, args.project)
+        bad = 0
+        for row in rows:
+            broken = (not row.get('skipped')) and (row['body'] < 300 or bool(row['errors']))
+            bad += 1 if broken else 0
+            flag = 'FAIL' if broken else ('SKIP' if row.get('skipped') else 'OK  ')
+            print(f"{flag} {row['cluster']:6s} {row['page'][:34]:34s} {row['tab']:16s} body={row['body']:<5d} errors={len(row['errors'])}")
+        return 1 if bad else 0
 
     if args.data_identity and not args.baseline:
         findings = data_identity(args.bff, token, clusters, args.project)

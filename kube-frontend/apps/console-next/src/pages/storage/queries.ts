@@ -221,12 +221,15 @@ export function useCreateClaimSnapshot(params: { cluster: string; namespace: str
 }
 
 /** Events about one object, for the detail page's 事件 tab. */
-export function useObjectEvents(params: { namespace: string; name: string; kind: string }) {
+export function useObjectEvents(params: { cluster?: string; namespace: string; name: string; kind: string }) {
   return useQuery({
-    queryKey: ['object-events', params.namespace, params.kind, params.name],
+    queryKey: ['object-events', params.cluster, params.namespace, params.kind, params.name],
     enabled: Boolean(params.namespace && params.name),
     queryFn: ({ signal }) =>
-      objectEventsApi(api).list({ namespace: params.namespace, name: params.name, kind: params.kind, signal }),
+      objectEventsApi(api).list({
+        ...(params.cluster ? { cluster: params.cluster } : {}),
+        namespace: params.namespace, name: params.name, kind: params.kind, signal,
+      }),
   });
 }
 

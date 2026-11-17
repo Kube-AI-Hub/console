@@ -72,6 +72,7 @@ export function InstalledAppDetailPage({ workspace, releaseId, cluster: routeClu
     queryKey: ['installed-app-events', releaseId, release?.project],
     queryFn: ({ signal }) =>
       objectEventsApi(apiClient).list({
+        cluster: routeCluster || 'host',
         namespace: release?.project ?? '',
         name: release?.name ?? '',
         kind: 'HelmRelease',

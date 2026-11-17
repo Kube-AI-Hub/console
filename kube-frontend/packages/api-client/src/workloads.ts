@@ -974,12 +974,17 @@ function toPodEvent(item: Record<string, unknown>): PodEvent {
  */
 export function objectEventsApi(client: Client) {
   return {
-    async list(params: { namespace: string; name: string; kind: string; signal?: AbortSignal }): Promise<PodEvent[]> {
+    async list(params: { cluster?: string; namespace: string; name: string; kind: string; signal?: AbortSignal }): Promise<PodEvent[]> {
+      /*
+       * `events.k8s.io/v1`, for the same reason as the node tab: the core group has no member-cluster
+       * form (`/api/v1/clusters/xc/...` is 404) and the kapis resources proxy does not serve events.
+       * Its selectors are `regarding.*`, not `involvedObject.*`.
+       */
       const body = await client.request<{ items?: Array<Record<string, unknown>> }>(
-        `/api/v1/namespaces/${encodeURIComponent(params.namespace)}/events`,
+        clusterScoped('/apis/events.k8s.io/v1', params.cluster, `namespaces/${encodeURIComponent(params.namespace)}/events`),
         {
           query: {
-            fieldSelector: `involvedObject.name=${params.name},involvedObject.kind=${params.kind}`,
+            fieldSelector: `regarding.name=${params.name},regarding.kind=${params.kind}`,
           },
           ...(params.signal ? { signal: params.signal } : {}),
         },

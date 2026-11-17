@@ -15,7 +15,9 @@ describe('node scoped resources and writes', () => {
     }) as typeof fetch });
     const pods = await nodeResourcesApi(client).pods({ cluster: 'member', node: 'gpu01' });
     expect(pods).toHaveLength(2);
-    expect(calls[0]?.pathname).toBe('/api/v1/clusters/member/pods');
+    // Measured on A100: `/api/v1/clusters/xc/pods` answers 404 (the core group has no member
+    // form), while the kapis proxy accepts the same shape and field selector.
+    expect(calls[0]?.pathname).toBe('/kapis/clusters/member/resources.kubesphere.io/v1alpha3/pods');
     expect(calls[0]?.searchParams.get('fieldSelector')).toBe('spec.nodeName=gpu01');
     expect(calls[1]?.searchParams.get('continue')).toBe('next');
   });
@@ -28,7 +30,10 @@ describe('node scoped resources and writes', () => {
     expect(await nodeResourcesApi(client).events({ cluster: 'host', node: 'gpu01' })).toEqual([
       expect.objectContaining({ name: 'e1', reason: 'Ready', count: 2 }),
     ]);
-    expect(url?.searchParams.get('fieldSelector')).toBe('involvedObject.kind=Node,involvedObject.name=gpu01');
+    // `events.k8s.io/v1` names its selectors `regarding.*`; the core group's `involvedObject.*`
+    // would be accepted but match nothing, which is worse than an error.
+    expect(url?.pathname).toBe('/apis/events.k8s.io/v1/events');
+    expect(url?.searchParams.get('fieldSelector')).toBe('regarding.kind=Node,regarding.name=gpu01');
   });
   it('patches only requested metadata and carries cluster and resourceVersion', async () => {
     const calls: Array<{ url: string; body: unknown }> = [];

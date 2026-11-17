@@ -65,7 +65,7 @@ export function StorageDetailPage({ kind, cluster, namespace, name }: StorageDet
   const snapshotClasses = useSnapshotClasses();
   const clone = useCloneStorage({ cluster, namespace });
   const createSnapshot = useCreateClaimSnapshot({ cluster, namespace, claim: isClaim ? name : '' });
-  const events = useObjectEvents({ namespace, name, kind: isClaim ? 'PersistentVolumeClaim' : 'VolumeSnapshot' });
+  const events = useObjectEvents({ cluster, namespace, name, kind: isClaim ? 'PersistentVolumeClaim' : 'VolumeSnapshot' });
 
   const detail = query.data;
   /*
