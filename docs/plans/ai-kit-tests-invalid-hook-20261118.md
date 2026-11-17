@@ -68,6 +68,24 @@ Tests       226 passed (226)
 
 **9 条全绿**。移开的目录已还原，工作区未留改动。
 
+## 连带发现：`verify.py` 后面几关也有红灯
+
+`verify.py` 在 ai-kit 停下，后面的关看不到。手工跑：
+
+| 关 | 结果 |
+| --- | --- |
+| 架构契约（config/*.test.ts） | 20 文件 / 1579 passed ✓ |
+| api-client 单测 | 50 文件 / 477 passed ✓ |
+| **ai-kit 单测** | **9 失败**（本节根因） |
+| **console-next 单测** | **3 失败**，2 文件：`GPU pages`、`ConfigMaps list`（两条），错误是 jsdom 的
+  `textRange(...).getClientRects is not a function`（130 处），且失败用例里 **body 是空的**——页面根本没渲染 |
+
+console-next 那三条与 ai-kit 的根因不同：`Range.getClientRects` 是 jsdom 的缺口，Radix 的 popper 在定位时调用它。
+我按 ai-kit 的 `test/setup.ts` 风格补了 `Range.prototype.getClientRects/getBoundingClientRect` 两个桩，**没有解决**（失败数没变，已回退）。
+
+> 注意：console-next 的 `vitest.config.ts` 里已经写着「ai-kit 自带的 pnpm 装了一份 React 18，消费 `dist` 会触发 Invalid hook call，
+> 所以这里 alias 到源码」——说明团队知道这个重复，只是 ai-kit **自己的**测试没有同样的保护。
+
 ## 正确的修法（需安装步骤，未在本轮执行）
 
 在 `packages/ai-kit/package.json` 里钉住这个 peer：
