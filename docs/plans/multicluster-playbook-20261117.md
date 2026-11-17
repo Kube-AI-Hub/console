@@ -44,6 +44,7 @@ python3 -u tools/multicluster_sweep.py --env-file /tmp/a100.env \
 | `--keyboard` | 两集群 × 4 主题色调组合 × 3 页 的 Tab 顺序与焦点指示对比度 | ~9 分钟 |
 | `--keyboard-local` | 登录页（**不需要集群**）：结构 a11y + 4 组合 | ~1 分钟 |
 | `--locale-scan --locale en` | 英文界面的裸标识符（未翻译文案） | ~2 分钟 |
+| `--probes` | 7 个只读接口探针的状态码（能力指纹，两个部署可直接对比） | ~10 秒 |
 
 **四种模式一条命令跑完**（按「最快失败」排序）：
 
@@ -133,6 +134,34 @@ tools/verify-all.sh /tmp/a100.env http://localhost:5182 http://127.0.0.1:8093 ho
 B200 那条是**共享代码的回归证据**：路径改动动的是 `clusterScoped`/`coreWritePath`，单集群也必须照常。
 
 **参数是环境相关的**：在 B200 上用 A100 的 `--namespace spaces` 会让写入检查 `created=404`——那是参数不匹配，不是回归。
+
+### 定向用例（2026-11-17 晚，mlu370 成员集群只读）
+
+环境：`ssh -N -L 18093:10.233.60.28:80 cam`；BFF `8096 → http://127.0.0.1:18093`；静态 5177；`KA_CLUSTER=4paradigm`、admin。
+
+| 用例 | 结果 |
+| --- | --- |
+| 节点列表 `NODES-01` | **1 passed（13.49s）** |
+| 节点详情 `NODES-03` + `NODES-06` | **2 passed（32.29s）** |
+
+只读、无写入。说明：成员集群路径 `/kapis/clusters/4paradigm/...` 与节点读链路在真实成员集群可用；写入仍需按各能力单独验证。
+
+### 读扫描回归（2026-11-17 晚，B200 单集群，只读）
+
+命令（同一次会话复用登录与浏览器）：
+
+```
+python3 tools/multicluster_sweep.py --app http://localhost:5176 --bff http://127.0.0.1:8092 \
+  --env-file /tmp/kah/sweep.env --clusters host --namespace default --project default \
+  --scope cluster --pages deployments,statefulsets,pods,nodes,services,ingresses,configmaps,secrets,persistentvolumeclaims,storageclasses
+```
+
+| 范围 | 页面数 | 结果 |
+| --- | --- | --- |
+| 集群作用域 | 10 | 全部 ready/empty，**0 请求错误** |
+| 项目作用域（default） | 10 | 全部 ready/empty，**0 请求错误** |
+
+只读扫描，不含写入；用于页面/路由/查询改动后的快速回归，不替代逐功能 AC 验收。
 
 ## 10. 企业空间作用域（`--scope workspace`）
 
