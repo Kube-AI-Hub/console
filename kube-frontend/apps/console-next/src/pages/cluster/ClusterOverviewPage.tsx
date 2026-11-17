@@ -459,6 +459,9 @@ const KNOWN_MODULES: Record<string, LocaleKey> = {
 };
 
 function moduleLabel(t: ReturnType<typeof useT>, key: string): string {
-  const localeKey = KNOWN_MODULES[key];
+  // `configz` reports sub-modules too (`network.ippool`, `openpitrix.appstore`), so an exact match
+  // is not enough: fall back to the module's first segment, and only then to the raw key. Showing
+  // `network.ippool` to a reader is a missing label, not a feature.
+  const localeKey = KNOWN_MODULES[key] ?? KNOWN_MODULES[key.split('.')[0] ?? ''];
   return localeKey ? t(localeKey) : key;
 }
