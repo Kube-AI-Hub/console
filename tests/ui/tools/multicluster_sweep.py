@@ -203,7 +203,7 @@ def sweep(
                 # 503 once, then 200). Reload once before calling it a failure -- a persistent 5xx
                 # still fails, because the second attempt sees it too.
                 transient = [entry for entry in failures if entry[0] >= 500]
-                if state == 'error' and transient and len(failures) == len(transient):
+                if state in ('error', 'none') and transient and len(failures) == len(transient):
                     failures.clear()
                     page.goto(page_url(app, cluster, segment, scope, workspace, project), wait_until='domcontentloaded')
                     for _ in range(30):
