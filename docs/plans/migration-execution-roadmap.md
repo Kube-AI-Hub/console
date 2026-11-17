@@ -78,6 +78,11 @@
 另有一项**排在恢复之后**的测试质量工作：E2E 里 55 处「固定 sleep 后紧接断言」（见
 [记录](e2e-fixed-sleeps-20261118.md)）。现在不能改——跑不起来就无法验证；恢复后先取通过率与耗时基线，再分批替换。
 
+**收尾脚本本身有两关红灯**（2026-11-18 实测）：`verify.py --no-e2e` 在 ai-kit 停下，手工跑后面发现
+ai-kit 9 条（嵌套 React 16.14.0）与 console-next 3 条（jsdom 的 `Range.getClientRects` 缺口）都失败。
+修 ai-kit 需要 `pnpm.overrides` + 重装 `packages/ai-kit/node_modules`，会短暂影响并行环境，**需要协调窗口**。
+详见[记录](ai-kit-tests-invalid-hook-20261118.md)。
+
 并行方在改同一批文件时，提交前按文件逐个 `git diff` 确认归属；无法确认的**不要提交**，
 在回复里列出文件名与它属于哪个批次，由对方决定。混入并行改动会让一次提交同时包含两个方向
 未完成的改动，回滚时无法只回一个。
