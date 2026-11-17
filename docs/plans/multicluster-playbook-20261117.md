@@ -260,21 +260,18 @@ A100 基线曾出现 2 个 skipped，干净复跑是 **24/24 全 OK**，说明�
 ## 17. 全绿基线（七段式，2026-11-17）
 
 ```
-OK   cluster  read: 72 visits, 57 ready, 11 empty, 0 error, 0 failed requests
+OK   cluster  read: 72 visits, 58 ready, 11 empty, 0 error, 0 failed requests
 OK   project  read: 34 visits, 20 ready, 14 empty, 0 error, 0 failed requests
 OK   identity read: 9 collections, 8 distinct, 1 identical, 0 suspect
 OK   detail   read: 12 visits, 12 ok, 0 broken
 OK   tabs     read: 24 tabs, 24 ok, 0 skipped, 0 broken
 OK   interact read: 6 lists, 6 interacted, 0 skipped, 0 broken
 OK   write    host / xc: created=201 on_target=True deleted=200 gone=True（xc 上 on_host=False）
-baseline PASS in 845s
+baseline PASS in 792s
 ```
 
-**六段全绿、零失败请求、零掉线、零残留**：36 页 × 2 集群、17 页 × 2 集群、9 个集合归属比对、
-6 种对象详情、**24 个 Tab**、6 张列表 × 6 项交互、两集群各一次真实写入。
-
-这是多集群这条线第一个把 **Tab** 也纳入的全绿结果。
-
+**七段全绿、零失败请求、零掉线、零残留**：36 页 × 2 集群、17 页 × 2 集群、9 个集合归属比对、
+6 种对象详情、24 个 Tab、6 张列表 × 6 项交互、两集群各一次真实写入。
 ### 单集群（B200）同一套命令
 
 ```bash
