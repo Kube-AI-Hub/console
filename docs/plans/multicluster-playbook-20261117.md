@@ -183,3 +183,20 @@ baseline PASS in 213s
 
 **建议**：跑基线前固定做一次「三条健康探针」（隧道根、`/api/session/login`、静态站首页），
 任一失败就不开跑——比跑到一半再失败省时间。
+## 12. 开跑前的三条探针（已内置）
+
+`--baseline` 现在**先做三条探针**，任一失败就直接退出并说明「环境不可用」，而不是跑十分钟再报失败：
+
+```
+preflight: BFF <bff> answered <status> on /api/session/me   → BFF 不在
+preflight: app <app> is not serving (<异常类型>)            → 静态站不在
+preflight: login attempt 1/3 failed (<异常类型>)            → 控制台登录不可用
+baseline NOT RUN: the environment is not usable
+```
+
+退出码 **2** 与「跑完但有缺陷」（1）区分开：前者是环境问题，后者是代码问题。
+
+## 13. 写入检查也重试一次 5xx
+
+B200 上实测到一次 `created: 502`——控制台抖动，不是写被拒绝。写入检查现在遇到 5xx 重试一次，
+复跑即 `created: 201 / deleted: 200`。

@@ -305,6 +305,13 @@ def write_check(bff: str, token: str, cluster: str, host: str, namespace: str) -
     result = {'cluster': cluster, 'name': name, 'created': None, 'on_target': None, 'on_host': None, 'deleted': None, 'gone': None}
     try:
         status, _ = _call(bff, token, 'POST', member_path, body)
+        # A 5xx here is the console hiccuping, not the write being refused: retry once before
+        # calling it a failure, the same rule the page sweep uses.
+        if status >= 500:
+            import time
+
+            time.sleep(3)
+            status, _ = _call(bff, token, 'POST', member_path, body)
         result['created'] = status
         target_names = _names(bff, token, member_path) or set()
         host_names = _names(bff, token, host_path) or set()
@@ -656,6 +663,41 @@ def _repo_state() -> str:
     changed = len([line for line in dirty.splitlines() if line.strip()])
     return f'{head} (dirty files: {changed})'
 
+def preflight(app: str, bff: str, creds: tuple[str, str], attempts: int = 3) -> str | None:
+    """Three probes before a ten-minute run: static site, BFF, login.
+
+    A baseline that starts while the console is answering 502 spends ten minutes failing and then
+    reports the failure as if it were a defect. Checking first costs two seconds and turns the
+    outcome into "the environment is not up" instead of "the console is broken".
+
+    Returns the token, or None when the environment is not usable.
+    """
+    import time
+
+    status, _ = _call(bff, '', 'GET', '/api/session/me')
+    if status not in (200, 401):
+        print(f'preflight: BFF {bff} answered {status} on /api/session/me')
+        return None
+
+    try:
+        import urllib.request
+
+        with urllib.request.urlopen(f'{app}/kube-frontend/', timeout=20) as response:
+            if response.status != 200:
+                print(f'preflight: app {app} answered {response.status}')
+                return None
+    except Exception as cause:
+        print(f'preflight: app {app} is not serving ({type(cause).__name__})')
+        return None
+
+    for attempt in range(attempts):
+        try:
+            return login(bff, creds[0], creds[1])
+        except Exception as cause:
+            print(f'preflight: login attempt {attempt + 1}/{attempts} failed ({type(cause).__name__})')
+            time.sleep(3)
+    return None
+
 def baseline(args, token: str, clusters: list[str], allowed: set[str] | None = None, creds: tuple[str, str] | None = None) -> int:
     """Everything that has to hold on a multi-cluster install, in one command.
 
@@ -666,6 +708,13 @@ def baseline(args, token: str, clusters: list[str], allowed: set[str] | None = N
 
     allowed = allowed or set()
     started = time.monotonic()
+
+    if creds:
+        fresh = preflight(args.app, args.bff, creds)
+        if fresh is None:
+            print('baseline NOT RUN: the environment is not usable (see the preflight lines above)')
+            return 2
+        token = fresh
     failures = 0
 
     for scope, pages in (('cluster', PAGES), ('project', PROJECT_PAGES)):
