@@ -221,3 +221,28 @@ OK   host   pods/u-admin-…                       state=ready errors=0   ← �
 
 以前它打印 `0 collections, 0 distinct, 0 identical, 0 suspect`，看起来像「检查通过」，
 实际是「没有可比对象」。**未执行与通过必须能区分**。
+## 16. 全绿基线（2026-11-17，工具全部修复后）
+
+```
+OK   cluster  read: 72 visits, 59 ready, 12 empty, 0 error, 0 failed requests
+OK   project  read: 34 visits, 20 ready, 14 empty, 0 error, 0 failed requests
+OK   identity read: 9 collections, 8 distinct, 1 identical, 0 suspect
+OK   detail   read: 12 visits, 12 ok, 0 broken
+OK   interact read: 6 lists, 6 interacted, 0 skipped, 0 broken
+OK   write    host    : created=201 on_target=True  deleted=200 gone=True
+OK   write    xc      : created=201 on_target=True on_host=False deleted=200 gone=True
+baseline PASS in 548s
+```
+
+**五段全绿、零失败请求、零掉线、零残留**：
+
+| 段 | 覆盖 |
+| --- | --- |
+| 集群级读 | 36 页 × 2 集群 |
+| 项目级读 | 17 页 × 2 集群 |
+| 数据归属 | 9 个集合（host vs 成员） |
+| 详情页 | 6 种对象 × 2 集群 |
+| 交互 | 6 张列表 × 6 项操作 |
+| 写入落点 | 两集群各一次真实写入 + 清理 |
+
+这是多集群这条线**第一个可以放心引用的结果**。
