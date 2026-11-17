@@ -179,6 +179,9 @@ def sweep(
         for cluster in clusters:
             for segment in pages:
                 visited += 1
+                if os.environ.get('SWEEP_PROGRESS') == '1':
+                    # A phase prints only when it finishes, so a hang reads as "nothing happened".
+                    print(f'  · {cluster} {scope} {segment}', flush=True)
                 if visited > 1 and visited % 15 == 0:
                     # Re-seed periodically: one 401 anywhere signs the app out, and every page after
                     # that measures the login screen instead of the page.
@@ -255,6 +258,7 @@ def sweep(
                             break
                     if '/login' in page.url:
                         state = 'signed-out'
+
                 rows.append({
                     'cluster': cluster,
                     'page': segment,
@@ -1272,6 +1276,7 @@ def main() -> int:
     parser.add_argument('--budget', type=int, default=1800, help='abort the whole run after this many seconds (default 1800)')
     parser.add_argument('--locale-scan', action='store_true', help='look for untranslated identifiers on a few pages')
     parser.add_argument('--probes', action='store_true', help='print the status of each capability probe')
+    parser.add_argument('--progress', action='store_true', help='print one line per page while sweeping')
     parser.add_argument('--locale', default='en', help='locale used by --locale-scan (default en)')
     args = parser.parse_args()
 
