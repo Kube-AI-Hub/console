@@ -805,6 +805,57 @@ def sweep_tabs(app: str, bff: str, token: str, clusters: list[str], workspace: s
         browser.close()
     return results
 
+#: Pages walked with the keyboard: (route segment, scope). The walk records the first tab stops and
+#: whether each one draws a focus ring, and checks that the skip link comes first.
+KEYBOARD_PAGES = (
+    ('configmaps', 'project'),
+    ('deployments', 'project'),
+    ('nodes', 'cluster'),
+)
+
+
+def sweep_keyboard(app: str, token: str, clusters: list[str], workspace: str, project: str, stops: int = 10) -> list[dict]:
+    """Walk the tab order of a few pages and report where focus goes.
+
+    A page can look complete and still be unusable without a mouse: focus that never becomes visible,
+    or a first stop that skips the navigation. Neither shows up in a screenshot.
+    """
+    from playwright.sync_api import sync_playwright
+
+    js = ("() => { const el = document.activeElement; if (!el) return null; const cs = getComputedStyle(el);"
+          " return { id: (el.getAttribute('data-ai-id') || el.getAttribute('aria-label') || (el.textContent||'').trim().slice(0,24) || el.tagName),"
+          " tag: el.tagName, ring: (cs.outlineStyle !== 'none' && cs.outlineWidth !== '0px') || cs.boxShadow !== 'none' }; }")
+    results: list[dict] = []
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        context = browser.new_context(viewport={'width': 1400, 'height': 900})
+        page = context.new_page()
+        _open_app(page, app, token)
+        for cluster in clusters:
+            for segment, scope in KEYBOARD_PAGES:
+                url = (f'{app}/kube-frontend/{workspace}/clusters/{cluster}/projects/{project}/{segment}'
+                       if scope == 'project' else f'{app}/kube-frontend/clusters/{cluster}/{segment}')
+                page.goto(url, wait_until='domcontentloaded')
+                page.wait_for_timeout(9000)
+                page.evaluate('() => document.body.focus()')
+                walk = []
+                for _ in range(stops):
+                    page.keyboard.press('Tab')
+                    page.wait_for_timeout(120)
+                    seen = page.evaluate(js)
+                    if seen:
+                        walk.append(seen)
+                results.append({
+                    'cluster': cluster,
+                    'page': segment,
+                    'stops': len(walk),
+                    'no_ring': [entry['id'] for entry in walk if not entry['ring']],
+                    'first': walk[0]['id'] if walk else '',
+                    'order': [entry['id'][:24] for entry in walk[:6]],
+                })
+        browser.close()
+    return results
+
 def baseline(args, token: str, clusters: list[str], allowed: set[str] | None = None, creds: tuple[str, str] | None = None) -> int:
     """Everything that has to hold on a multi-cluster install, in one command.
 
@@ -920,6 +971,7 @@ def main() -> int:
     parser.add_argument('--interactions', action='store_true', help='sort and search the list on each cluster')
     parser.add_argument('--data-identity', action='store_true', help="compare each collection between host and members")
     parser.add_argument('--tabs', action='store_true', help='click every tab of a few detail pages')
+    parser.add_argument('--keyboard', action='store_true', help='walk the tab order of a few pages')
     args = parser.parse_args()
 
     env = _env(args.env_file)
@@ -932,6 +984,18 @@ def main() -> int:
     default_pages = PROJECT_PAGES if args.scope == 'project' else PAGES
     pages = tuple(p.strip() for p in args.pages.split(',') if p.strip()) or default_pages
     clusters = [c.strip() for c in args.clusters.split(',') if c.strip()]
+
+    if args.keyboard and not args.baseline:
+        rows = sweep_keyboard(args.app, token, clusters, args.workspace, args.project)
+        bad = 0
+        for row in rows:
+            ok = row['stops'] >= 5 and not row['no_ring']
+            bad += 0 if ok else 1
+            flag = 'OK  ' if ok else 'FAIL'
+            print(f"{flag} {row['cluster']:6s} {row['page']:14s} stops={row['stops']:<3d} no_ring={len(row['no_ring'])} first={row['first'][:24]}")
+            if row['no_ring']:
+                print(f"       no ring: {row['no_ring'][:3]}")
+        return 1 if bad else 0
 
     if args.tabs and not args.baseline:
         rows = sweep_tabs(args.app, args.bff, token, clusters, args.workspace, args.project)

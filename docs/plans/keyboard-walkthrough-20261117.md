@@ -48,6 +48,21 @@
 | `tsc` | 0 错误 |
 | `vite build` | ✓ |
 
-## 5. 未覆盖
+## 5. 可重跑：`--keyboard`
 
-朗读顺序（屏幕阅读器）与焦点环在**浅色主题**下的对比度未走查；跨页面的 Tab 顺序只抽查了配置字典页。
+```bash
+python3 tools/multicluster_sweep.py --env-file /tmp/a100.env --app http://localhost:5182 \
+  --bff http://127.0.0.1:8093 --keyboard --clusters host,xc --project spaces
+```
+
+对配置字典、部署、节点三个页面各走 10 个 Tab，检查「第一个停靠点是跳过导航」与「每个停靠点都有可见焦点环」。
+两集群实测：
+
+```
+OK host configmaps / deployments / nodes   stops=10 no_ring=0 first=跳到主要内容
+OK xc   configmaps / deployments / nodes   stops=10 no_ring=0 first=跳到主要内容
+```
+
+## 6. 未覆盖
+
+朗读顺序（屏幕阅读器）与焦点环在**浅色主题**下的对比度未走查；弹层的焦点归属只在配置字典的创建弹层验过。
