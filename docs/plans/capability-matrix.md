@@ -23,7 +23,7 @@
 
 | 页面/能力 | 已验收范围 | 提交/证据 | 未覆盖的范围 |
 | --- | --- | --- | --- |
-| 集群概览 | OVR-01至08、九维排行/组件/工具、左列状态、五字段对齐、图标和主题边框；节点块环图左置并铺满1:2槽、头部与排行等高；基本信息/Kubernetes状态改行式密集属性表（14px中等标签+12px次色值+行分隔线）；10概览+6关联回归 | `597e4e437`、`b93ec2f80`；[补齐](cluster-overview-completion-20261115.md)、[布局](cluster-overview-layout-review-20261115.md)、[密度](cluster-overview-density-20261117.md) | 新版生产、真实member、所有主题/语言、全站回归未在该批验收 |
+| 集群概览 | OVR-01至08、九维排行/组件/工具、左列状态、五字段对齐、图标和主题边框；节点块环图左置并铺满1:2槽、头部与排行等高；基本信息/Kubernetes状态改行式密集属性表（14px中等标签+12px次色值+行分隔线）；10概览+6关联回归 | `597e4e437`、`b93ec2f80`；[补齐](cluster-overview-completion-20261115.md)、[布局](cluster-overview-layout-review-20261115.md)、[密度](cluster-overview-density-20261117.md) | **主题 × 语言已走查**（2026-11-18：zh/en × 4 主题色调组合，6 组全 ready、0 溢出、0 裸标识符，[记录](cluster-overview-theme-language-20261118.md)）；新版生产、真实 member、全站回归未验收 |
 | 节点列表/详情 | 统计/筛选/GPU/Pod/NTP/模式入口；详情负载/趋势/健康/Requests/Limits、硬件与拓扑；真实节点终端 | `67be3c456`、`38d5eb47d`；[节点记录](node-detail-overview-execution-20261115.md) | 生产GPU模式切换未执行；member硬件路由/拓扑契约边界保留 |
 | GPU列表/单卡详情 | 全局统计、筛选/分页、NUMA/模式、五指标监控、关联Pods及节点事件 | `c37467da7`；[GPU记录](gpu-parity-execution-20261114.md) | 单卡拓扑/高级图表及member支持须独立核实 |
 | 用户列表 + 用户详情 | 四列与 `status.lastLoginTime`、默认 createTime 降序、创建 uninitialized/描述、行与批量启停、预置/自己保护（省略 checkbox）、登录历史服务端分页四列、管理员重置 `{ password }` | 未提交；[用户记录](users-user-detail-execution-20261115.md) | 企业空间/项目成员、配额、部门/用户组、跨作用域授权；生产前端与 member；英文分页句柄残留 |
