@@ -45,8 +45,24 @@ scrollWidth: 390   innerWidth: 390      ← 页面级溢出消失
 
 剩下被列出的 `right=467` 是表格本体，位于横向滚动容器内（预期行为）。
 
-## E2E 复跑的阻塞
+### 三档宽度实测
 
-`THEME_02` 的复跑被另一处改动挡住：E2E helper 的登录端点已换成
-`/kapis/oauth.kubesphere.io/v1alpha1/login`，在当前部署上返回 **403**（并行线正在改这个 helper）。
-所以本轮的验证依据是上面的直接测量，不是 E2E 通过。
+| 视口 | 帮助菜单 | 页面级溢出 |
+| --- | --- | --- |
+| 390px | **hidden** | 0px |
+| 700px | visible | 0px |
+| 1440px | visible | 0px |
+
+收起只发生在 `sm` 以下，桌面端行为不变。
+
+## E2E 复跑的阻塞（并行线的改动）
+
+`THEME_02` 的复跑被另一处改动挡住：E2E helper 的登录端点换成了
+`/kapis/oauth.kubesphere.io/v1alpha1/login`，而该路由在匿名身份下返回：
+
+```
+403  login.oauth.kubesphere.io is forbidden: User "system:anonymous" cannot create resource "login"
+```
+
+BFF 自己的 `/api/session/login` 仍然 200。所以本轮的验证依据是三档直接测量，**不是 E2E 通过**；
+等 helper 的登录方式定下来再复跑。
