@@ -56,7 +56,8 @@ project-settings 27 passed）。详见 [e2e-long-run-degradation-20261116.md](e2
 
 ## 7. 若要继续推进，可做且不依赖环境的项
 
-1. 剩余约 27 个列表的每页档位（同一套状态已就绪，按页族推进）；
-2. 列显隐逐页铺开（目前清单页族已接入）；
+1. ~~每页档位~~ **已完成**：32 个服务端分页列表**全部**声明 `pageSizeOptions`（2026-11-17 复查）；
+2. ~~列显隐铺开~~ **基本完成**：54 个文件接入；剩余 4 处是通用容器（`SettingsListPage`/`PlatformListPage`/`MonitoringListPage`/`NodeResourcesPanel`），schema 由调用方传入，不是漏改；
 3. 长跑退化的环境侧采样（BFF 响应时间/连接数、SSH 隧道吞吐），把「长跑」变成可用判据；
-4. 环境侧修复上述 6 项阻塞后，补验对应正分支。
+4. 环境侧修复上述 6 项阻塞后，补验对应正分支；
+5. 多集群（member）验证已独立成线：`tests/ui/tools/multicluster_sweep.py --baseline` 六段式 + `--keyboard`/`--keyboard-local` 可访问性检查，见[多集群验证手册](multicluster-playbook-20261117.md)与[键盘走查](keyboard-walkthrough-20261117.md)。
