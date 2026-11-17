@@ -14,7 +14,7 @@
 | [执行路线](plans/migration-execution-roadmap.md) | 选批次、顺序、各阶段准入与退出条件 | 安排下一批工作 |
 | [区域方案](plans/area-migration-plan.md) | 路由结构、作用域约定与跨页实现注意项 | 接入页面或公共能力 |
 | [能力矩阵](plans/capability-matrix.md) | 当前复核任务与能力级状态索引 | 判断还缺什么 |
-| [多集群验证手册](plans/multicluster-playbook-20261117.md) | 成员集群的起栈、一条命令基线、能力边界与已知怪癖 | 部署含 member 集群时 |
+| [多集群验证手册](plans/multicluster-playbook-20261117.md) | 成员集群的起栈、七段式基线（另含键盘/文案走查与整轮预算）、能力边界与已知怪癖 | 部署含 member 集群时 |
 | [架构宪法](constitution.md) | 架构约束与 UI 原则 | 做实现与设计决策 |
 | [续迁移 Prompt](plans/continue-migration-prompt.md) | 引用现行规则的任务输入，不是另一套状态正文 | 交接给其他 AI agent |
 
@@ -41,6 +41,17 @@
 | [概览密度记录](plans/cluster-overview-density-20261117.md) | 后续视觉交付证据 | 节点块铺满与行式属性表；三档+深浅截图，生产/member/全站未验收 |
 | [添加集群对话框记录](plans/cluster-add-dialog-20261117.md) | 本批交付证据 | 两段式表单、标签/供应商、懒加载编辑器、名称预检、SSAR 门控、弹窗错误自动滚入视野；三档+深浅+中英文截图，部署/member/全站未验收 |
 | [集群告警策略记录](plans/cluster-alerting-policies-write-20261117.md) | 本批交付证据 | 两个页签状态列（规则状态/耗时/最近检查）、搜索/筛选/分页、自定义策略创建/编辑/编辑 YAML/启停（确认）/批量/删除、独立详情页（规则状态+告警消息+查看指标数据）；三档+深浅+绿色+英文截图，member/生产/全站未验收 |
+| [企业空间概览集群信息记录](plans/workspace-overview-clusters-20261117.md) | 本批交付证据 | 概览两页签、可见集群卡片（别名/就绪/供应商/K8s 版本/节点数/可见性）、四项使用率（含成员集群指标路径修复）、就绪链接/未就绪说明、空态/错误；三档+深浅+绿色+英文截图，单集群/非 admin/生产/全站未验收 |
+| [企业空间 DevOps 工程入口记录](plans/workspace-devops-entry-20261117.md) | 本批交付证据 | 空间侧栏入口、按集群聚合的工程列表（名称/别名/描述、集群、同步状态、创建者、创建时间）、行链接到集群作用域详情、搜索/排序/列显示/分页/刷新、无工程/未启用/部分失败状态；三档+深浅+绿色+英文截图，member 合并/未启用/部分失败/非 admin/生产未验收 |
+| [持久卷写能力记录](plans/persistent-volumes-write-20261117.md) | 本批交付证据 | 详情/列表编辑信息（merge-patch，清空注解发 null）、编辑 YAML（整对象 PUT）、单条删除（输入名称确认）、批量删除（Bound/Released 跳过并汇总成功/跳过/失败）；三档+深浅+旧站对照截图；member/非 admin/生产/全站未验收 |
+| [自制 CRD 应用记录](plans/crd-apps-20261117.md) | 本批交付证据 | 新树节点 crd-apps；/applications/composing 只读列表 + 基础详情：Application selector 聚合 Deployment/StatefulSet/Service/Ingress，健康（ready/desired 三态）、组件数、版本、创建时间；详情含 selector/工作负载就绪/服务/路由；应用页入口；多组件创建（dry-run+回滚）+ 删除 + 编辑信息 + 详情事件/流量（服务网格子图）+ 添加 Ingress 路由；API 单测 16 条 + B200 八条 E2E（7.21/7.62/6.86/6.83/12.07/5.65/7.34/6.64s，清理复核）；链路/灰度登记后续 |
+| [第三方登录状态页记录](plans/third-login-20261117.md) | 本批交付证据 | 平台设置 › 第三方登录（只读）：identityproviders 可用时按身份源显示卡片/空态；404/5xx 显示「本部署未提供身份源读取接口」；403 仍错误；老页面 Configure 弹窗只关闭不提交，故无写能力可迁 |
+| [集群作用域角色记录](plans/cluster-roles-20261117.md) | 本批交付证据 | 集群控制台的角色列表 + 详情两页签（规则 / IAM 已授权用户）；按集群前缀读取；平台角色页多集群选择器（host 可写、成员只读，mlu370 多集群 E2E 8.08s）；系统角色徽标；B200/mlu370 E2E 通过 |
+| [浮动工具箱与资源消费记录](plans/bill-toolbox-20261117.md) | 本批交付证据 | 全站可拖拽工具箱（6 入口、位置持久）+ 按项目/时间窗资源消费页；B200 计量已启用，项目行与聚合正确；未启用/403 分支单测；1600 截图 |
+| [企业空间角色写能力记录](plans/workspace-roles-write-20261117.md) | 本批交付证据 | 创建（19 个权限模板复选框，服务端聚合规则）、编辑信息（merge-patch）、编辑权限（替换模板集合）、删除（输入角色名）；平台预置角色只读（无操作菜单）；API 5 + 组件 4 单测 + B200 E2E 通过，1600 深浅列表/创建对话框截图 |
+| [存储类型写能力记录](plans/storage-class-writes-20261117.md) | 本批交付证据 | 创建、编辑信息/YAML、设为默认（清旧默认+替换提示）、卷功能开关、单条/批量删除（实时 PVC 守卫，失败停用）；API/组件单测 + B200 E2E 通过（三档深浅/创建/保护态截图）；B200 读回丢弃 clone/snapshot 注解（环境差异，单测覆盖请求体） |
+| [帮助/文档入口记录](plans/help-entry-20261117.md) | 本批交付证据 | 顶栏帮助菜单（用户指南/API 文档，按语言选择）、BFF `GET /api/config` 运行时配置 + 旧 console 相对路径兜底、显式空隐藏；BFF/api-client/组件单测 + B200 E2E（新窗口 noopener）通过，菜单深浅截图；旧站对照未生成 |
+| [企业空间用户组实时刷新记录](plans/workspace-user-groups-watch-20261117.md) | 本批交付证据 | 用户组页 watch 真实 groups 集合；live-state 三态可见；groupbindings 无 watch 的部署成员数走手动刷新（不轮询）；B200 上验证「WATCH 不投递→刷新回退」后 skip，自动路径待 mlu370 恢复复跑，深浅截图已生成 |
 
 原地整合保留旧 URL、相对链接和 git 历史。历史文档的状态提示优先于其旧正文中的“当前/待补/已完成”。
 新决策替代旧决策时补明范围、依据和批准记录，不擦除导致返工的历史证据。
