@@ -171,8 +171,13 @@ python3 prd/tools/parity_check.py     # 已登记页面 ↔ 规格 ↔ 测试
 | **契约测试** | 架构约束，防"改回去也没人发现" | `kube-frontend/config/*.test.ts` |
 | 端到端 | 按标注环境验证链路；真实与拦截模拟分开 | `tests/ui/` |
 
-契约测试价值最高：它读源码断言约定（不允许裸 `<button>`、`actionProps` 顺序、包边界、AI 句柄）。
+契约测试价值最高：它读源码断言约定（不允许裸 `<button>`、`actionProps` 顺序、包边界、AI 句柄、
+**主题令牌对比度**——含焦点环的 3:1）。**契约自己也会假绿**：2026-11-17 发现对比度契约的级联查找方向反了，
+六个主题组合其实都在测深色调色板；修好后立刻暴露四处真实差距。改契约先确认它真的在测不同的东西。
 端到端用例**必须能在失败时自清理**，否则残留对象会让下一次跑挂掉。
+
+浏览器侧的**键盘走查**（`tests/ui/tools/multicluster_sweep.py --keyboard`）是截图替代不了的：
+它逐个 Tab 记录焦点落点与焦点环，深色/浅色各走一遍；弹层要验焦点陷阱、Esc 与**关闭后焦点归还**。
 
 **三层测试还需要一份独立的旧能力覆盖清单**。`gap_check.py` 检查 URL 段，
 `check_docs.py` 检查已写 AC 的追溯，`parity_report.py` 从现有 PRD 生成报告；
@@ -236,8 +241,11 @@ KS_API_MODE=kapis KS_API_URL=http://127.0.0.1:18088 \
 **mlu370 的 `ks-apiserver` 不实现 `x-check-exist`**（那是 console 服务端中间件），名称预检会静默跳过；
 它的 `/oauth/token` 在 ks-console 路径上要 `mix()` 密码，所以隧道指向 apiserver 而不是 30880。
 
-- 端口可用 `BFF_PORT` / `WEB_PORT` 覆盖；Vite 把 `/api` 代理到 `BFF_URL`，**两者对不上时所有请求 504**，
-  表现为"页面加载不出来"。
+- 端口可用 `BFF_PORT` / `WEB_PORT` 覆盖。应用请求都在 `/kube-frontend` 前缀下（与老 console 同源），
+  `vite dev` 不剥前缀：`vite.config.ts` 要同时代理 `/kube-frontend/{api,kapis,apis}` 并在 rewrite 里剥掉前缀；
+  只配 `/api` 时登录 POST 落到 SPA 兜底，页面报 `Not Found`。`BFF_URL` 与代理目标对不上时表现为 504/页面加载不出来。
+- 热更新用于开发；固定产物用 `node scripts/dev-static-server.mjs apps/console-next/dist <端口> <BFF地址> /kube-frontend`
+  起静态站（它自己剥前缀），把 `KA_APP_URL` 指向它即可跑截图与 E2E，不必先部署。
 - `KS_API_MODE=kube` 是无鉴权临时 harness（用本机 kubectl 凭据、BFF 模拟分页），**任何"接口对不对"的结论都不能从这里得出**。
 - 改 BFF/代理后重启对应进程；共享包先重新构建，静态站先重建 dist。验收时记录实际构建与
   BFF 版本，不能在并行工作替换产物时复用旧结果。开发调试可用热更新，最终截图与回归使用同一批固定产物。
@@ -334,6 +342,15 @@ pytest tests/kube-frontend/<模块> -q -n 0   # 本批相关及共享影响用�
 | 18 | **`DialogPrimitive.Portal` 的内容晚一个 commit 挂载** | `useEffect` 里 `ref.current` 是 `null`，observer/测量静默不生效 | 用 callback ref（或 state）拿节点，不要在挂载时的 effect 里读 ref |
 | 19 | **测试桩打在 `Element.prototype` 上被子类覆盖** | 打了桩但断言说没调用，看起来像产品没生效 | 应用测试的 `setup.ts` 已定义 `HTMLElement.prototype.scrollIntoView`；桩要打在 `HTMLElement` 上 |
 | 20 | **ai-kit 测试里渲染 `Modal` 报 `Invalid hook call`** | 组件在 Storybook 正常，单测必失败 | ai-kit 有独立 React 18 安装；需要渲染组件的测试放 app 套件，ai-kit 只测无框架依赖的纯逻辑 |
+| 21 | **聚合读与原资源读字段不同** | 换读路径后状态/评估时间整列为空或被填 0 | 同一对象的聚合 kapis 读常带 `status`/派生字段，`/apis` 原对象没有；列表与详情用**聚合路径**并同次响应对账，缺失字段显示 `-`，不用 0 补 |
+| 22 | **共享列表默认值也是已交付契约** | 只改默认页大小/排序，本页旧用例整页失败 | 改前检索对应 AC 与既有用例；默认页大小、排序、列顺序变更要跟页面一起验收，不能只改代码 |
+| 23 | **表格内联动作用了裸 `<button>`** | `ai-surface-contract` 失败 | 用共享 `Button` + `actionProps()`，同时拿到稳定句柄与键盘/焦点行为 |
+| 24 | **监控接口的 `cluster=` 查询参数对成员集群无效** | 成员集群显示主集群的 CPU/内存/磁盘数字（有数但不属于它） | 集群段放**路径**：`/kapis/clusters/<id>/monitoring.kubesphere.io/v1alpha3/cluster`；实测 `?cluster=<member>` 返回 host 数值 |
+| 25 | **把「模块未启用」当接口失败** | 未装 DevOps 的集群对 kapis 聚合返回 404，整页报错或空表 | 查询前按 `status.configz.<module>` 过滤；模块未启用是正常状态，用单独说明，不是错误 |
+| 26 | **空间作用域列表先读集群级 raw 集合、再按标签过滤** | 读到别的空间的工程，或与服务端口径不一致 | 优先 kapis workspace 聚合 `/kapis/.../workspaces/<ws>/...`（服务端过滤）；成员集群把 `clusters/<c>` 段放在 `/kapis/` 之后 |
+| 27 | **别名含空格** | 编辑信息保存没反应，对话框停在原地；其实是被别名校验（老 console 的正则）拦下 | 别名只允许中英文/数字/内部连字符；E2E 与截图造数用连字符别名，别把校验失败误判成接口失败 |
+| 28 | **批量删除的确认文本按可删数量决定** | 选了 2 行（1 行不可删）后输入「2」提交按钮一直置灰 | 确认文本规则是「可删项 >1 → 数量；=1 → 该名字」；自动化从可删集合推导，不要按选中数硬编码 |
+| 29 | **把「请求已发出/连接中」当成实时** | 页面显示实时刷新却从不更新：kapis 聚合把 `?watch=true` 当普通 list 返回 JSON；虚拟集合（groupbindings）的原生 watch 也不投递事件 | 接入前用真实事件验证（创建对象→收到 ADDED，而不只是连接成功）；watch 真实 CRD 集合，绑定类保留手动刷新并显示状态，不用轮询掩盖 |
 
 多集群部署另有一条命令：`cd tests/ui && python3 tools/multicluster_sweep.py --env-file <env> --baseline --clusters host,<member>`，
 覆盖集群级/项目级列表、数据归属、详情页、Tab 与写入落点；判读方式见[多集群验证手册](plans/multicluster-playbook-20261117.md)。
@@ -360,6 +377,8 @@ python3 prd/tools/parity_report.py    # 更新 page-parity-audit.md，不改历�
   弱断言检查只是提示。必须补跑受影响包的 `typecheck`/构建、共享组件故事及相关串行 E2E。
   示例：在 `kube-frontend` 执行 `pnpm --filter @kube-ai-hub/console-next typecheck` 与
   `pnpm --filter @kube-ai-hub/api-client typecheck`，构建与 ai-kit 检查按各包 scripts。
+- 并行开发时全量门禁可能超过 15 分钟（2026-11-17 实测 1003.6s）；批次判定用**本批路径**的严格门禁
+  + 受影响包检查，全量 `check_docs --strict` 只在合入/发布前跑一次，不每批重复。
 - 基线失败记录文件、错误、命令与影响范围；可以交付已通过的局部范围，但不能声称全仓门禁通过，
   也不豁免检查或改动并行方代码来隐藏失败。
 - 本批相关回归与共享影响回归是单页判定；全站串行 E2E 是全站发布判定，未运行就写未验收。
