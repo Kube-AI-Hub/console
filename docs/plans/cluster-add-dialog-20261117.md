@@ -104,15 +104,17 @@
 | `pnpm --filter @kube-ai-hub/api-client test` | 392 passed |
 | `pnpm --filter @kube-ai-hub/api-client typecheck` | 仅两条既有失败（见上） |
 | `pnpm --filter @kube-ai-hub/console-next typecheck` | 通过 |
-| `pnpm --filter @kube-ai-hub/console-next test` | 199 passed，2 failed（既有） |
+| `pnpm --filter @kube-ai-hub/console-next test` | 195 passed，2 failed（`configmaps-page`、`gpu-parity`，既有）；另有 2 个既有 `.test.ts` 因 `src/styles.css` 路径缺失加载失败 |
 | `pnpm --filter @kube-ai-hub/console-next build` | 通过 |
 | `pytest tests/kube-frontend/cluster-management -k ADD_CLUSTER -n 0` | **4 passed / 15.1s** |
 | `pytest tests/kube-frontend/cluster-management -k "ADD_CLUSTER or CLUSTER_EDIT_INFO" -n 0` | **5 passed / 23.05s**（含编辑信息） |
+| `pytest tests/kube-frontend/cluster-management -k "ADD_CLUSTER or CLUSTER_EDIT_INFO or CLUSTER_MEMBERS" -n 0` | **7 passed / 41.82s** |
 | `pytest tests/kube-frontend/cluster-management -n 0`（全模块） | 108 passed / 4 failed / 2 skipped；失败项为 `CLUSTER_EVENTS_02`、`CLUSTER_LIST_01`、`DEVOPS_CREDENTIALS_01`、`MONITOR_06`，均为既有（`CLUSTER_LIST_01` 已 stash 复现） |
 | `python3 prd/tools/check_docs.py` | `errors=0 warnings=0` |
 | ai-kit `tsc --noEmit` / `vite build` / `storybook build` | 通过 |
 | ai-kit `test/form-focus-invalid.test.tsx` | 5 passed |
 | ai-kit `test/select-scroll-shield.test.ts` | 3 passed |
+| ai-kit `test/modal-error-reveal.test.tsx` | 6 passed |
 | ai-kit 全量 vitest | 9 failed（`Invalid hook call`，双 React 的既有基线；stash 后同样失败） |
 
 真实接入回读（`admin`，临时集群，已删除）：
@@ -154,16 +156,18 @@ Radix `Select` 的触发器在自己的 `pointerdown` 上调用 `preventDefault(
 
 只填集群名称就点确认时，kubeconfig 的错误渲染在可视区之下（实测 443px），按钮看起来没反应。
 
-修复：抽成 ai-kit 通用能力 `packages/ai-kit/src/utils/focusFirstInvalid.ts` 的 `focusFirstInvalidField(container, fieldKeyOrId)`：
+修复分两层：
 
-1. 滚**字段容器**（`data-field-key`）而不是错误段落——段落是后渲染的；
-2. `block: 'center'` 而不是 `'nearest'`——贴边时错误行仍会被裁；
-3. 聚焦真正的控件，CodeMirror 聚焦 `.cm-content`；
-4. `requestAnimationFrame` 等一帧，否则量到错误插入前的高度。
+1. **提交路径**（知道哪个字段失败）：ai-kit 的 `focusFirstInvalidField(container, fieldKeyOrId)` —— 滚字段容器（`data-field-key`）而非错误段落、`block: 'center'`、聚焦真正的控件（CodeMirror 聚焦 `.cm-content`）、`requestAnimationFrame` 等一帧。`ResourceForm` 与手写对话框共用。
+2. **渲染路径**（不知道谁失败）：`Modal` 的滚动体上挂 `observeHiddenErrors`（`packages/ai-kit/src/utils/observeHiddenErrors.ts`），用 `MutationObserver` 观察 `[role="alert"]` 与 `[data-invalid="true"]`，把第一个**不在可视区**的错误滚入视野。这条覆盖全部 73 个对话框，包括手写校验的（成员邀请、YAML 编辑器、网策略等），无需逐个改。
 
-`ResourceForm` 与手写对话框共用这一份实现；`FormField` 新增 `fieldKey` → `data-field-key`。`@kube-ai-hub/ui` 导出该函数供页面使用。
+两条规则避免打扰：错误已经在屏上时不滚动；一次提交里多个错误只滚第一个（否则会停在最后一个）。空 `role="alert"` 占位不滚。
+
+`FormField` 新增 `fieldKey` → `data-field-key`，让没有 id 的控件（CodeMirror）也能被定位。
 
 验证（1600×760）：空 kubeconfig → `scrollTop` 0→443、错误可见、焦点在 `.cm-content`；非法名称 → 滚回 0、错误可见、焦点在输入框。
+
+验证（mlu370，1400×620）：添加集群 → `scrollTop` 485、错误可见；项目成员邀请（手写校验）→ 错误「请输入用户名。」可见。
 
 ### 编辑信息复用添加集群的字段组件
 
@@ -177,3 +181,21 @@ Radix `Select` 的触发器在自己的 `pointerdown` 上调用 `preventDefault(
 - 接入进度提示（等待 Ready 的轮询）——当前只有列表状态列的控制器原因。
 - 上传/下载 kubeconfig 文件（LEG-add-020）如确有必要再评估。
 - 全站串行 E2E 与部署环境验收。
+
+## 9. 测试环境（2026-11-17 起改用 mlu370）
+
+本批的浏览器验证从 B200 切到 **mlu370**，本地起一套独立的前端栈（不占用已有的 5174/5178/5179）：
+
+| 组件 | 地址 | 上游 |
+| --- | --- | --- |
+| 静态站 | `http://localhost:5180/kube-frontend/` | BFF `8094` |
+| BFF | `http://127.0.0.1:8094` | 隧道 `18093` → `ks-apiserver`（mlu370） |
+| 隧道 | `127.0.0.1:18093` | `ssh -L 18093:10.233.60.28:80 cam` |
+
+登录用 mlu370 的 `admin` / `Kah@2025`（见 [`环境/mlu370环境.md`](../../../环境/mlu370环境.md)）。
+
+两点与 B200 不同，记录以免误判：
+
+- **mlu370 的 `ks-apiserver` 不实现 `x-check-exist`**：那是 console 服务端（`server/middlewares/checkIfExist.js`）的中间件。走 apiserver 时该端点返回完整对象而非 `{exist}`，名称预检因此静默跳过（设计内的 fail-open），不会误报「已占用」。
+- **mlu370 的 `/oauth/token` 在 ks-console 路径上要求 `mix()` 密码**：BFF 发明文，只有直连 apiserver 才通过。所以隧道指向 apiserver，不指向 `30880`。
+

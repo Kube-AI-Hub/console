@@ -4,6 +4,7 @@ import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { cn } from '../utils/cn';
 import { Button } from './Button';
+import { observeHiddenErrors } from '../utils/observeHiddenErrors';
 
 /* ---------------- Alert ---------------- */
 
@@ -78,6 +79,27 @@ export interface ModalProps {
 const modalSizes = { sm: 'max-w-sm', md: 'max-w-lg', lg: 'max-w-2xl', xl: 'max-w-4xl', console: 'max-w-none h-[calc(100dvh-1rem)]' } as const;
 
 export function Modal({ open, onOpenChange, title, description, children, footer, size = 'md', dismissOnEscape = true, dismissOnOutside = true, closeAiId, closeLabel = '关闭', closeDisabled = false }: ModalProps): React.ReactElement {
+  /*
+   * Reveal an error that would otherwise be rendered below the fold.
+   *
+   * Done here rather than in each dialog: the body scrolls (`max-h-[70vh]`), a form can
+   * be taller than that, and a message rendered outside the visible area reads as "the
+   * button did nothing". Every dialog gets it, including the ones that validate by hand
+   * and never call `focusFirstInvalidField`.
+   *
+   * The observer is attached to the scrolling body (not the whole dialog) so it only
+   * sees content that can actually be scrolled.
+   *
+   * State, not a ref: `DialogPrimitive.Portal` mounts its subtree in a later commit, so
+   * on the first effect `bodyRef.current` is still null and an observer attached there
+   * would silently never exist. A callback ref runs when the node actually appears.
+   */
+  const [body, setBody] = React.useState<HTMLDivElement | null>(null);
+  React.useEffect(() => {
+    if (!open) return;
+    return observeHiddenErrors(body);
+  }, [open, body]);
+
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
@@ -129,7 +151,7 @@ export function Modal({ open, onOpenChange, title, description, children, footer
               </Button>
             </DialogPrimitive.Close>
           </header>
-          {children ? <div className={size === 'console' ? 'flex min-h-0 flex-1 flex-col overflow-hidden p-2' : 'max-h-[70vh] overflow-y-auto px-5 py-4'}>{children}</div> : null}
+          {children ? <div ref={setBody} className={size === 'console' ? 'flex min-h-0 flex-1 flex-col overflow-hidden p-2' : 'max-h-[70vh] overflow-y-auto px-5 py-4'}>{children}</div> : null}
           {footer ? <footer className="flex justify-end gap-2 border-t border-ai-line px-5 py-3">{footer}</footer> : null}
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>

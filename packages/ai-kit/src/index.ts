@@ -231,3 +231,4 @@ export { fieldsFor, detectKind, lastSegment, depthOf, type FieldSpec } from './e
 export { cn } from './utils/cn';
 export { useMediaQuery, useIsMobile, useIsCompact } from './utils/useMediaQuery';
 export { focusFirstInvalidField, hasFocusWithin } from './utils/focusFirstInvalid';
+export { observeHiddenErrors } from './utils/observeHiddenErrors';

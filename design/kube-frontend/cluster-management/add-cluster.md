@@ -122,11 +122,16 @@ spec:
 
 ### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-11 — 校验失败滚到第一个出错字段（用 ai-kit 的通用实现）
 
-**为什么**：对话框正文在 `max-h-[70vh] overflow-y-auto` 里滚动，连接设置位于基本信息下方。只填了名称就点确认时，kubeconfig 的错误渲染在可视区之下（实测 443px），读者看到的是「按钮没反应」。这不是本页独有的问题：任何比容器高的表单都有同一种失败，所以实现放在 ai-kit 的 `focusFirstInvalidField`（`packages/ai-kit/src/utils/focusFirstInvalid.ts`），`ResourceForm` 与手写对话框共用一份。
+**为什么**：对话框正文在 `max-h-[70vh] overflow-y-auto` 里滚动，连接设置位于基本信息下方。只填了名称就点确认时，kubeconfig 的错误渲染在可视区之下（实测 443px），读者看到的是「按钮没反应」。这不是本页独有的问题：任何比容器高的表单都有同一种失败，所以实现放在 ai-kit。
 
-三点缺一不可：滚**字段容器**而不是错误段落（段落是后渲染的）、`block: 'center'` 而不是 `'nearest'`（贴边时错误行仍会被裁掉）、聚焦真正的控件（CodeMirror 要聚焦 `.cm-content` 而非容器）。`requestAnimationFrame` 等一帧，否则量到的是错误插入前的高度。
+**两层**，因为有的对话框知道哪个字段失败、有的不知道：
 
-**被否方案**：每个对话框各写一份滚动逻辑。已经发生过：本页第一版把逻辑写在自己文件里，`ResourceForm` 里另有一份，两处的滚动位置与焦点目标不同。
+1. `focusFirstInvalidField`（`packages/ai-kit/src/utils/focusFirstInvalid.ts`）——提交路径。`ResourceForm` 与手写对话框共用。
+2. `observeHiddenErrors`（`packages/ai-kit/src/utils/observeHiddenErrors.ts`）——渲染路径。挂在 `Modal` 的滚动体上，`MutationObserver` 观察 `[role="alert"]` 与 `[data-invalid="true"]`，把第一个不在可视区的错误滚入视野。覆盖全部 73 个对话框，包括手写校验的，不需要逐个改。
+
+两条规则避免打扰：错误已在屏上不滚动；一次提交多个错误只滚第一个。空 `role="alert"` 占位不滚。
+
+**被否方案**：每个对话框各写一份滚动逻辑。已经发生过：本页第一版把逻辑写在自己文件里，`ResourceForm` 里另有一份，两处的滚动位置与焦点目标不同。**逐个改 73 个对话框**也被否：改漏一个就少一处，而 Modal 层一次覆盖。
 
 **何时重新考虑**：表单改为独立路由页（滚动容器变成页面本身）时，`block: 'center'` 仍适用，但 `focus()` 的 `preventScroll` 需要重新评估。
 
@@ -172,6 +177,8 @@ spec:
 - **GOT-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-08**：老 console 的供应商常量里 Azure 存的是 `Aure Kubernetes Service`（源码拼写错误）。新数据用修正后的 `Azure Kubernetes Service`，但既有对象保持原值——不要做数据迁移。
 - **GOT-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-09**：kubeconfig 控件是 CodeMirror，**没有 id**。按 `#ai-field-cluster-kubeconfig` 查找会落空，只有 `FormField` 的 `data-field-key` 能定位它；`focusFirstInvalidField` 因此先按 key 找、再按 id 找。
 - **GOT-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-10**：`scrollIntoView({ block: 'nearest' })` 会把贴着底边的字段滚到边上，它下方的错误行仍被裁掉。用 `'center'`。
+- **GOT-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-11**：`DialogPrimitive.Portal` 的内容在**后续 commit** 才挂载，`useEffect` 里 `bodyRef.current` 仍是 `null`。给 Modal 的滚动体挂 observer 必须用 callback ref（或 state），否则 observer 静默不存在。
+- **GOT-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-12**：测试里打桩 `scrollIntoView` 要打在 `HTMLElement.prototype` 上；应用测试的 `setup.ts` 已在该原型上定义空实现，打在 `Element.prototype` 上会被子类覆盖，看起来像产品没生效。
 
 ## 测试与可观测
 
