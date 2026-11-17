@@ -1128,6 +1128,10 @@ def _looks_like_host(text: str, match: str) -> bool:
 #: is what makes a page pass in one environment and fail in the other.
 CAPABILITY_PROBES = (
     ('workspaces', 'GET', '/kapis/tenant.kubesphere.io/v1alpha2/workspaces?limit=-1'),
+    # The two routes the console signs in through after 2026-11-18. `userinfo` answering 401 means
+    # the route exists and wants a token; a 403 `no matches` means the deployment is not upgraded.
+    ('oauth-userinfo', 'GET', '/oauth/userinfo'),
+    ('oauth-login-route', 'GET', '/kapis/oauth.kubesphere.io/v1alpha1/login'),
     ('ssar-native', 'POST', '/apis/authorization.k8s.io/v1/selfsubjectaccessreviews'),
     ('ssar-iam', 'POST', '/kapis/iam.kubesphere.io/v1alpha2/selfsubjectaccessreviews'),
     ('configz', 'GET', '/kapis/config.kubesphere.io/v1alpha2/configs/configz'),
