@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import time
 import os
 import urllib.error
 import urllib.request
@@ -136,6 +137,10 @@ def page_url(app: str, cluster: str, segment: str, scope: str, workspace: str, p
     return f'{app}/kube-frontend/clusters/{cluster}/{segment}'
 
 
+class SessionNotEstablished(RuntimeError):
+    """The app did not reach its shell, so no page measurement is meaningful."""
+
+
 def _open_app(page, app: str, token: str) -> None:
     """Land in the app with a session, deterministically.
 
@@ -150,10 +155,11 @@ def _open_app(page, app: str, token: str) -> None:
     page.reload(wait_until='domcontentloaded')
     try:
         page.wait_for_selector('[data-ai-id^="shell:"]', timeout=30_000)
-    except Exception:
-        # The shell handle is a convenience; a page that renders later still gets measured, but a
-        # page that never renders is reported as blank rather than as ready.
-        pass
+    except Exception as cause:
+        # Measured 2026-11-18: without this the sweep went on to measure the login screen for 36
+        # pages (34.6s each, `state=signed-out`) and reported the phase as clean. A session that
+        # never came up is an environment problem and has to stop the run, not be averaged in.
+        raise SessionNotEstablished('the app never showed its shell after seeding the token') from cause
 
 def sweep(
     app: str,
@@ -179,6 +185,7 @@ def sweep(
         for cluster in clusters:
             for segment in pages:
                 visited += 1
+                page_started = time.monotonic()
                 if os.environ.get('SWEEP_PROGRESS') == '1':
                     # A phase prints only when it finishes, so a hang reads as "nothing happened".
                     print(f'  · {cluster} {scope} {segment}', flush=True)
@@ -259,6 +266,8 @@ def sweep(
                     if '/login' in page.url:
                         state = 'signed-out'
 
+                if os.environ.get('SWEEP_PROGRESS') == '1':
+                    print(f'      done in {time.monotonic() - page_started:4.1f}s', flush=True)
                 rows.append({
                     'cluster': cluster,
                     'page': segment,
@@ -1435,6 +1444,9 @@ def main() -> int:
 if __name__ == '__main__':
     try:
         raise SystemExit(main())
+    except SessionNotEstablished as cause:
+        print(f'NOT RUN: {cause} (check the token, the BFF and the app build)')
+        raise SystemExit(2)
     except BudgetExceeded as cause:
         print(f'ABORTED: {cause} (the upstream is probably gone; see docs/plans/multicluster-playbook-20261117.md)')
         raise SystemExit(3)
