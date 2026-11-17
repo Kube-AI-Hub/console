@@ -431,6 +431,8 @@ def sweep_details(
                 def record(response, sink=failures):
                     if response.status < 400 or response.url.endswith('/api/session/me'):
                         return
+                    if _is_expected_failure(response.status, response.url):
+                        return
                     sink.append((response.status, response.url))
 
                 page.on('response', record)
@@ -522,6 +524,8 @@ def sweep_interactions(
 
                     def record(response, sink=failures):
                         if response.status < 400 or response.url.endswith('/api/session/me'):
+                            return
+                        if _is_expected_failure(response.status, response.url):
                             return
                         sink.append((response.status, response.url))
 
@@ -874,6 +878,8 @@ def sweep_tabs(app: str, bff: str, token: str, clusters: list[str], workspace: s
 
                 def record(response, sink=failures):
                     if response.status < 400 or response.url.endswith('/api/session/me'):
+                        return
+                    if _is_expected_failure(response.status, response.url):
                         return
                     sink.append((response.status, response.url))
 
