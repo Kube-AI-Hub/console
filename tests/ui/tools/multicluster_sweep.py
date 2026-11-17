@@ -829,10 +829,20 @@ def preflight(app: str, bff: str, creds: tuple[str, str], attempts: int = 3) -> 
 
     for attempt in range(attempts):
         try:
-            return login(bff, creds[0], creds[1])
+            token = login(bff, creds[0], creds[1])
         except Exception as cause:
             print(f'preflight: login attempt {attempt + 1}/{attempts} failed ({type(cause).__name__})')
             time.sleep(3)
+            continue
+        # The token must be accepted *through the app*: a static site wired to another BFF answers
+        # 401 here while every page then measures the login screen (measured 2026-11-18: 5178 served
+        # A100's BFF, so a "B200" sweep was signed out the whole time).
+        status, _ = _call(app + '/kube-frontend', token, 'GET', '/api/session/me')
+        if status != 200:
+            print(f'preflight: the app at {app} does not accept the token from {bff} (status {status})')
+            print('preflight: the static site is wired to a different BFF; fix that before sweeping')
+            return None
+        return token
     return None
 
 def sweep_tabs(app: str, bff: str, token: str, clusters: list[str], workspace: str, project: str) -> list[dict]:
