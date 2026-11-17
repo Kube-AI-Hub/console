@@ -1,0 +1,21 @@
+# Layer the new console onto the deployed ks-console image.
+#
+# The BFF is gone and this process now serves the new console's build and forwards
+# its API prefixes, so the image needs two things on top of the previous one:
+#
+#   * `server/` — the routing, static mount, API proxy and the two config endpoints
+#   * `dist/kube-frontend/` — the new console's build
+#
+# The old console's own client (`src/`) is untouched, so its webpack output is
+# reused from the base image instead of rebuilt. That also keeps the build inside
+# this host's disk budget.
+#
+# Build from `console/`:
+#   docker buildx build --platform linux/amd64 --push \
+#     -f build/Dockerfile.kube-frontend-overlay \
+#     -t <registry>/ks-console:<tag> .
+ARG BASE=watering-ai-registry.cn-shanghai.cr.aliyuncs.com/kube-ai-hub/ks-console:develop-20261117-nosupport3@sha256:c85731123e10d45edc2c6b72c7a7ea07496fddc3242d08c30073fdcbe7b020d6
+FROM ${BASE}
+
+COPY server/ /opt/kubesphere/console/server/
+COPY .build/kube-frontend/dist /opt/kubesphere/console/dist/kube-frontend
