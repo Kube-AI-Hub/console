@@ -26,7 +26,14 @@ curl -s -o /dev/null -w '%{http_code}\n' -X POST http://127.0.0.1:8093/api/sessi
   -H 'content-type: application/json' -d '{"username":"admin","password":"P@88w0rd"}'
 ```
 
-**坑**：`admin` 的密码含 `@`。走 ks-console 时必须用前端那套加密（BFF 已实现）；直连 ks-apiserver 才是明文。
+**坑**：`admin` 的密码含 `@`。走 ks-console 时必须用前端那套加密；直连 ks-apiserver 才是明文。
+BFF 用 **`KS_OAUTH_ENCODING=mix`** 表示「上游是 ks-console」（默认明文，给直连 ks-apiserver 的部署）：
+
+```bash
+BFF_PORT=8093 KS_API_URL=http://127.0.0.1:18091 KS_OAUTH_ENCODING=mix ./node_modules/.bin/tsx src/dev.ts
+```
+
+不设这个变量时，A100/B200 的登录会返回 **400 `invalid_credentials`**——不是密码错了。
 
 ## 2. 一条命令跑完基线
 
