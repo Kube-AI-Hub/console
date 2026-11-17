@@ -86,6 +86,11 @@ floating-ui 在定位时通过它测量文本范围。
 **已补桩并验证有效**：在 `apps/console-next/test/setup.ts` 加 `Range.prototype.getClientRects/getBoundingClientRect` 之后，
 `getClientRects is not a function` 从 **130 处降到 0**。三条用例仍然失败，但**原因已经换了一个**——不再是 jsdom 缺口。
 
+再查那三条：失败形态是 **`Test timed out in 5000ms`**，且失败时 `document.body.textContent` **只有换行**——
+页面组件根本没渲染出来（不是空态文案不对）。三个用例都来自 `configmaps-page.test.tsx` 与 `gpu-pages.test.tsx`，
+属并行线的批次（`5ba075d9c`、`698fb0bc6`），**需要测试作者看**：`renderPage()` 之后没有任何 DOM，
+说明某个 await 一直没有 resolve（`stubFetch` 的返回形状或 provider 缺失）。
+
 > 注意：console-next 的 `vitest.config.ts` 里已经写着「ai-kit 自带的 pnpm 装了一份 React 18，消费 `dist` 会触发 Invalid hook call，
 > 所以这里 alias 到源码」——说明团队知道这个重复，只是 ai-kit **自己的**测试没有同样的保护。
 
