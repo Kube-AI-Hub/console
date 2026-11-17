@@ -32,7 +32,26 @@ GET /kapis/resources.kubesphere.io/v1alpha3/namespaces/default/rolebindings
 | 单元测试 | `rolesForUser` 两条：只算命名该用户的绑定、同一项目多个角色都返回；api-client 50 文件 / **471 passed** |
 | `tsc` / `vite build` | 0 / ✓ |
 
+## 正例（已补验）
+
+本部署原本没有任何项目级绑定，列上全是 `-`。为验证正例，临时建了一条唯一命名的绑定：
+
+```
+POST /apis/rbac.authorization.k8s.io/v1/namespaces/default/rolebindings
+  name=tc-rolecheck-fbc37921  roleRef=viewer  subjects=[User:test]   -> 201
+```
+
+成员详情里 `default` 行立刻显示：
+
+```
+default    viewer    2026-03-31 10:58:07
+```
+
+随后删除并复核：`DELETE -> 200`、`GET -> 404`（**已清理，无残留**）。
+
+**顺带发现**：聚合网关 `/kapis/resources.kubesphere.io/v1alpha3/...` 对 RoleBinding 是**只读**的
+（POST 返回 405），写要走原生 `/apis/rbac.authorization.k8s.io/v1/...`。
+
 ## 未覆盖
 
-**正例未观察到**：本部署里 `test` 账号在 40 个命名空间中都没有项目级 RoleBinding（逐个数过），
-所以列上全是 `-`。要看到真实角色需要一条项目角色绑定——那是往共享环境写数据，本轮没做。
+多角色并存（同一项目两个 RoleBinding）未在真实环境验证；单元测试覆盖了合并逻辑。
