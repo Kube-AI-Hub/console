@@ -18,18 +18,15 @@
 
 1. 解析 `console/packages/ai-kit/src/styles/tokens.css`：65 个原始色阶 + 6 个 `:root` 块；
 2. 按**级联链**解析语义令牌：`var(--ai-raw-*)` 直接取值，`var(--ai-*)` 逐层回溯；
-3. 对 6 种主题组合 × 3 个背景（`--ai-bg`/`--ai-surface-1`/`--ai-surface-2`）× 3 个文本令牌（`--ai-fg`/`-secondary`/`-muted`）逐一计算 WCAG 2.1 对比度；
-4. 全部必须 ≥ **4.5:1**（AA 正文阈值），失败时列出每一对与最差值。
+3. 对 6 种主题组合 × 4 个背景（`--ai-bg`/`--ai-surface-1`/`-2`/`-3`）× 4 个文本令牌（`--ai-fg`/`-secondary`/`-muted`/`--ai-link`）逐一计算 WCAG 2.1 对比度；
+4. 全部必须 ≥ **4.5:1**（AA 正文阈值），失败时列出每一对与最差值；另有**焦点环契约**查 `--ai-ring` 对 `--ai-bg` ≥ 3:1（SC 1.4.11 非文本）。
 
 ## 3. 实测结果
 
-**54 组组合全部 ≥ 4.5:1**，最差为 **5.14:1**（default dark：`--ai-fg-secondary` on `--ai-surface-2`）。
-
-| 主题 | 最差 |
-| --- | --- |
-| default (dark) | 5.14:1 |
-| light | `--ai-fg` 14.51、`-secondary` 12.45、`-muted` 6.18 |
-| violet/dark、violet/light、green/dark、green/light | 均通过 |
+> ⚠️ **本节数字已作废**（2026-11-17）：`resolve()` 的级联查找方向反了，六个主题组合其实都在解析 `:root`，
+> 也就是**同一套深色调色板**。修正后矩阵扩为 6 × 4 × 4 = **96 组**，并暴露四处真实差距（已全部修掉）。
+> 当前状态与判定方式见[级联修复记录](theme-contrast-cascade-fix-20261117.md)；`KNOWN_TOKEN_GAPS` 与
+> `KNOWN_RING_GAPS` 现在都为空。
 
 ## 4. 解析器自身的守卫
 
