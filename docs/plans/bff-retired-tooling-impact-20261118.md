@@ -30,7 +30,7 @@ BFF 退役后这三条都要重新确认：
 | --- | --- |
 | 登录 | `login()` 按 `LOGIN_PATHS` 依次尝试：先 `POST {app}/kapis/oauth.kubesphere.io/v1alpha1/login`，再退回 `POST {bff}/api/session/login`；两个 origin 都试 |
 | 会话探针 | 认证握手从 `/api/session/me` 扩展到 `/oauth/userinfo`（`SESSION_PROBES`），401 仍不计为页面缺陷 |
-| 单元测试 | 新增 3 条：新传输优先且不重复同一 origin；探针路径判定 5 例。共 **33 条** |
+| 单元测试 | 新增 6 条：URL 构造（新传输优先、同一 origin 不重复）、探针路径判定 5 例，以及**对本地假服务器的三条行为测试**——新路 200 用新路、新路 403 退回旧路、两条都不通时抛错。共 **36 条** |
 
 这样在**后端升级前后都能跑**：升级前走 BFF 老路，升级后走新路，工具自己不需要人工切换。
 

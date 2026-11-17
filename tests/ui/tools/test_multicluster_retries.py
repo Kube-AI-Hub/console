@@ -143,3 +143,58 @@ def test_login_urls_do_not_repeat_one_origin():
 )
 def test_session_probes(url, expected):
     assert sweep._is_session_probe(url) is expected
+
+# --- login transport behaviour, against a local server -------------------------------------
+
+import http.server
+import threading
+
+
+def _serve(routes):
+    """Run a one-off HTTP server whose answers come from `routes` (path -> status, body)."""
+
+    class Handler(http.server.BaseHTTPRequestHandler):
+        def do_POST(self):  # noqa: N802 - stdlib naming
+            status, body = routes.get(self.path, (404, '{}'))
+            payload = body.encode()
+            self.send_response(status)
+            self.send_header('content-type', 'application/json')
+            self.send_header('content-length', str(len(payload)))
+            self.end_headers()
+            self.wfile.write(payload)
+
+        def log_message(self, *_args):  # silence the request log
+            return
+
+    server = http.server.HTTPServer(('127.0.0.1', 0), Handler)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    return server, f'http://127.0.0.1:{server.server_port}'
+
+
+def test_login_uses_the_new_route_when_it_answers():
+    server, origin = _serve({'/kapis/oauth.kubesphere.io/v1alpha1/login': (200, '{"token":"new"}')})
+    try:
+        assert sweep.login(origin, 'admin', 'pw', origin) == 'new'
+    finally:
+        server.shutdown()
+
+
+def test_login_falls_back_to_the_retired_route():
+    # An un-upgraded deployment answers 403 on the new route; the sweep must still sign in.
+    server, origin = _serve({
+        '/kapis/oauth.kubesphere.io/v1alpha1/login': (403, '{}'),
+        '/api/session/login': (200, '{"token":"old"}'),
+    })
+    try:
+        assert sweep.login(origin, 'admin', 'pw', origin) == 'old'
+    finally:
+        server.shutdown()
+
+
+def test_login_raises_when_no_route_answers():
+    server, origin = _serve({})
+    try:
+        with pytest.raises(Exception):
+            sweep.login(origin, 'admin', 'pw', origin)
+    finally:
+        server.shutdown()
