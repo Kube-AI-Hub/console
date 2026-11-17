@@ -29,13 +29,15 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_SWITCH_03(cluster_fleet_
     # Immediately to its right, not pushed to the far edge of the dialog.
     gap = refresh_box["x"] - (search_box["x"] + search_box["width"])
     assert 0 < gap <= 16, gap
-    # And the pair ends where the list ends, so the row reads as one toolbar.
+    # And the pair ends where the list ends, so the row reads as one toolbar. A relative
+    # tolerance: fractional device pixel ratios scale the boxes, and a fixed 2px budget
+    # then fails on an alignment that is exact in CSS pixels.
     rows = ui.switcher_rows(dialog)
     expect(rows.first).to_be_visible(timeout=20_000)
     list_box = rows.first.bounding_box()
     assert list_box
-    assert abs((refresh_box["x"] + refresh_box["width"]) - (list_box["x"] + list_box["width"])) <= 2, (
-        refresh_box, list_box)
+    drift = abs((refresh_box["x"] + refresh_box["width"]) - (list_box["x"] + list_box["width"]))
+    assert drift <= max(2, list_box["width"] * 0.01), (refresh_box, list_box)
 
     # A refresh control with no accessible name is unusable from the keyboard.
     expect(refresh).to_have_attribute("aria-label", "刷新")

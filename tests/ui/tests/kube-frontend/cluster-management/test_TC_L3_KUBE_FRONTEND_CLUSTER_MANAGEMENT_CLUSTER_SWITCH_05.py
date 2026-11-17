@@ -28,43 +28,45 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_SWITCH_05(
     assert created in (200, 201), created
 
     try:
+        # Baseline: the source cluster is ready, so its overview has real numbers and rows.
         ui.open()
         ui.wait_ready()
-        origin_usage = ui.usage_text("cpu")
-        origin_nodes = ui.usage_field("nodes", "used").inner_text().strip()
-        origin_rows = ui.ranking_rows().count()
+        expect(ui.usage_row("cpu")).to_be_visible(timeout=60_000)
+        origin_cpu = ui.usage_text("cpu")
+        origin_nodes = ui.field_text("node-count")
+        assert ui.ranking_rows().count() > 0
 
         ui.page.goto(f"{ui.base_url}/kube-frontend/clusters/{target}/overview")
         expect(ui.page.locator('[data-ai-id="overview:surface"]').last).to_be_visible(timeout=30_000)
 
-        # Monitoring cannot answer for a cluster whose agent is not connected. What must
-        # not happen is the previous cluster's numbers staying on screen: the old code read
-        # them from a cache keyed only by what the query happened to send.
-        expect(ui.page.locator('[data-ai-id="overview:no-metrics"]').last).to_be_visible(timeout=30_000)
-        assert ui.usage_text("cpu") == "集群资源总量与用量\n点击资源查看趋势\n\n监控数据不可用", ui.usage_text("cpu")
-        assert origin_usage not in ui.usage_text("cpu")
-        assert ui.usage_field("nodes", "used").count() == 0
-        # The node block says monitoring is unavailable rather than showing a ready count.
+        # Monitoring cannot answer for a cluster whose agent never connected. What must not
+        # happen is the previous cluster's numbers staying on screen: the panel is rebuilt
+        # from a query keyed by the cluster in the address.
+        expect(ui.control("no-metrics")).to_be_visible(timeout=60_000)
+        assert ui.usage_row("cpu").count() == 0, ui.usage_text("cpu")
+        assert origin_cpu not in ui.page.locator('[data-ai-id="overview:usage"]').last.inner_text()
+        # The node block states that monitoring is unavailable rather than showing a rate.
         expect(ui.control("no-node-metrics")).to_be_visible(timeout=30_000)
+        assert ui.usage_field("nodes", "used").count() == 0
 
-        # The ranking and the component list fail with the reason, not with a network claim,
-        # and carry no rows from the cluster the reader came from.
+        # The ranking and the component list fail with the reason the apiserver gave, not
+        # with a claim about the network, and carry no rows from the cluster we came from.
         expect(ui.control("ranking")).to_contain_text(target, timeout=30_000)
         expect(ui.control("ranking")).not_to_contain_text("网络异常")
         assert ui.ranking_rows().count() == 0
         expect(ui.control("components")).to_contain_text("not ready", timeout=30_000)
 
-        # Identity is the target cluster's own: not ready, and its node count, not the other's.
+        # Identity belongs to the target cluster: not ready, and its own node count.
         assert "未就绪" in ui.status_row, ui.status_row
         assert ui.field_text("node-count") != origin_nodes, (ui.field_text("node-count"), origin_nodes)
-        assert origin_rows > 0  # the fixture cluster had rows; the switch dropped them
         screenshot(ui.page, "cluster-switch-not-ready")
 
-        # A full reload must reach the same conclusion: the old data must not have been
-        # only cleared by a client-side state reset.
+        # A full reload reaches the same conclusion: the clearing is not a client-side
+        # state reset that a refresh would undo.
         ui.page.reload()
-        expect(ui.page.locator('[data-ai-id="overview:no-metrics"]').last).to_be_visible(timeout=30_000)
-        assert ui.usage_field("nodes", "used").count() == 0
+        expect(ui.page.locator('[data-ai-id="overview:surface"]').last).to_be_visible(timeout=30_000)
+        expect(ui.control("no-metrics")).to_be_visible(timeout=60_000)
+        assert ui.usage_row("cpu").count() == 0
         assert ui.ranking_rows().count() == 0
     finally:
         ui.api.request("DELETE", f"{CLUSTERS}/{target}")

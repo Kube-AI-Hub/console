@@ -80,15 +80,26 @@ export function ClusterSwitcher({ current, collapsed = false }: ClusterSwitcherP
    * Keep the remembered alias in step with the cluster list whenever it is loaded.
    *
    * The switcher's label is the alias; the list is the only source of it. Caching it here
-   * means the next page load — where the list has not been fetched yet — still shows the
-   * same label, and an alias edited elsewhere replaces the stale one on the next visit.
+   * means the next page load — where the list has not arrived yet — still shows the same
+   * label. An alias that was edited or cleared elsewhere replaces the remembered one on the
+   * next load, so the label cannot drift away from the object.
    */
   const knownAlias = clusters.find((cluster) => cluster.name === current)?.alias;
+  const [rememberedAlias, setRememberedAlias] = React.useState(() => readClusterAlias(user?.name ?? '', current));
   React.useEffect(() => {
-    if (knownAlias !== undefined) rememberClusterAlias(user?.name ?? '', current, knownAlias);
+    setRememberedAlias(readClusterAlias(user?.name ?? '', current));
+  }, [current, user?.name]);
+  React.useEffect(() => {
+    if (knownAlias === undefined) return;
+    rememberClusterAlias(user?.name ?? '', current, knownAlias);
+    setRememberedAlias(knownAlias);
   }, [current, knownAlias, user?.name]);
-
-  const currentAlias = knownAlias || readClusterAlias(user?.name ?? '', current);
+  /*
+   * Once the list has answered it is the truth, including "this cluster has no alias":
+   * falling back to the remembered value there would keep a cleared alias on screen until
+   * the next reload.
+   */
+  const currentAlias = query.data ? (knownAlias ?? '') : rememberedAlias;
 
   return (
     <>

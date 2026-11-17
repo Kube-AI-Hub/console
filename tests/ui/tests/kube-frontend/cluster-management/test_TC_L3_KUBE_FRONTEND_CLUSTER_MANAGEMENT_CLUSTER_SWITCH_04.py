@@ -20,17 +20,18 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_SWITCH_04(cluster_fleet_
     assert status == 200 and isinstance(body, dict), status
     existing = (body.get("metadata") or {}).get("annotations") or {}
     original = existing.get("kubesphere.io/alias-name")
+    # A merge patch needs its own media type: the apiserver answers 415 to `application/json`.
     patched, _ = ui.api.request(
-        "PATCH", f"{CLUSTERS}/{cluster}", {"metadata": {"annotations": {"kubesphere.io/alias-name": alias}}})
+        "PATCH", f"{CLUSTERS}/{cluster}",
+        {"metadata": {"annotations": {"kubesphere.io/alias-name": alias}}},
+        content_type="application/merge-patch+json")
     assert patched in (200, 201), patched
 
     def restore() -> None:
-        if original is None:
-            ui.api.request("PATCH", f"{CLUSTERS}/{cluster}",
-                           {"metadata": {"annotations": {"kubesphere.io/alias-name": None}}})
-        else:
-            ui.api.request("PATCH", f"{CLUSTERS}/{cluster}",
-                           {"metadata": {"annotations": {"kubesphere.io/alias-name": original}}})
+        value = None if original is None else original
+        ui.api.request("PATCH", f"{CLUSTERS}/{cluster}",
+                       {"metadata": {"annotations": {"kubesphere.io/alias-name": value}}},
+                       content_type="application/merge-patch+json")
 
     try:
         url = f"{ui.base_url}/kube-frontend/clusters/{cluster}/overview"
@@ -51,7 +52,8 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CLUSTER_SWITCH_04(cluster_fleet_
 
         # An alias that is removed must not survive as a stale label.
         ui.api.request("PATCH", f"{CLUSTERS}/{cluster}",
-                       {"metadata": {"annotations": {"kubesphere.io/alias-name": None}}})
+                       {"metadata": {"annotations": {"kubesphere.io/alias-name": None}}},
+                       content_type="application/merge-patch+json")
         ui.page.reload()
         expect(switcher).to_contain_text(cluster, timeout=30_000)
         expect(switcher).not_to_contain_text(alias, timeout=10_000)
