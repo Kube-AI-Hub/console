@@ -53,9 +53,15 @@ const THEMES: { name: string; chain: string[] }[] = [
  * bottom fails if a listed pair starts passing, so the entry cannot outlive the defect.
  */
 const KNOWN_TOKEN_GAPS: Record<string, number> = {
-  // Empty: both entries that lived here (fg-secondary 3.97 and link 4.01 on the hover surface) were
-  // fixed by moving `--ai-surface-3` one step darker (navy-450). The two-way guard below stays so a
-  // future palette change cannot quietly reintroduce them.
+  // Both entries that lived here (fg-secondary 3.97 and link 4.01 on the hover surface) were fixed by
+  // moving `--ai-surface-3` one step darker (navy-450). The two-way guard below stays so a future
+  // palette change cannot quietly reintroduce them.
+  //
+  // The two below were hidden until the cascade lookup was fixed (it used to read `:root` for every
+  // theme, so all six combinations were really the dark palette). They are just under AA in the
+  // violet/light hover surface and need a dedicated hover-text step, not a token nudge.
+  'violet/light: --ai-fg-muted on --ai-surface-3': 4.47,
+  'violet/light: --ai-link on --ai-surface-3': 4.41,
 };
 
 const TEXT_TOKENS = ['--ai-fg', '--ai-fg-secondary', '--ai-fg-muted', '--ai-link'];
@@ -67,7 +73,10 @@ function propsOf(selector: string): Map<string, string> {
 
 function resolve(name: string, chain: string[], depth = 0): Triple | null {
   if (depth > 8) return null;
-  const layer = chain.find((selector) => propsOf(selector).has(name));
+  // Later blocks override earlier ones in the cascade, so the last layer that defines the token
+  // wins. Searching forwards returns `:root` for almost every token, which silently made every
+  // theme check the dark palette.
+  const layer = [...chain].reverse().find((selector) => propsOf(selector).has(name));
   if (layer === undefined) return null;
   const value = propsOf(layer).get(name) as string;
   const rawMatch = /var\(--ai-raw-([\w-]+)\)/.exec(value);
@@ -115,14 +124,14 @@ describe('theme contrast', () => {
           const ratio = contrast(textColour as Triple, backgroundColour as Triple);
           if (ratio < worst.ratio) worst = { ratio, where: `${theme.name}: ${text} on ${background}` };
           if (ratio < 4.5) {
-            const gap = KNOWN_TOKEN_GAPS[`${text} on ${background}`];
+            const gap = KNOWN_TOKEN_GAPS[`${theme.name}: ${text} on ${background}`];
             if (gap === undefined) {
               failures.push(`${theme.name}: ${text} on ${background} = ${ratio.toFixed(2)}:1（AA 要求 4.5）`);
             } else {
               expect(Math.abs(ratio - gap), `${text} on ${background} 的比值变了（登记 ${gap}，实测 ${ratio.toFixed(2)}）：若已修复请从 KNOWN_TOKEN_GAPS 删除`).toBeLessThan(0.2);
             }
           } else {
-            const key = `${text} on ${background}`;
+            const key = `${theme.name}: ${text} on ${background}`;
             expect(KNOWN_TOKEN_GAPS[key], `${key} 现在通过了（${ratio.toFixed(2)}:1），请从 KNOWN_TOKEN_GAPS 删除`).toBeUndefined();
           }
         }
@@ -137,5 +146,34 @@ describe('theme contrast', () => {
     } else {
       expect(worst.ratio, `最差对比度 ${worst.ratio.toFixed(2)}:1 @ ${worst.where}`).toBeGreaterThan(4.5);
     }
+  });
+  /*
+   * The focus ring is a non-text indicator: WCAG 2.1 SC 1.4.11 asks for 3:1 against what it sits
+   * on, not 4.5:1. It is checked here because the ring is the one thing a keyboard user relies on,
+   * and because a light-theme ring that fades into the surface is invisible in a screenshot review.
+   *
+   * `Button` draws it as `ring-ai-ring` with `ring-offset-ai-bg`, so the pair is ring vs page
+   * background.
+   */
+  it('keeps the focus ring visible on every theme (SC 1.4.11, 3:1)', () => {
+    // Measured today: the dark ring is violet-100 on a dark page (2.38:1) and the green/light ring is
+    // mint-300 on a light page (2.29:1). Both need a brighter/darker step; registered so the gap is
+    // tracked, and the guard below fails if one starts passing (then delete its entry).
+    const KNOWN_RING_GAPS: Record<string, number> = { 'default (dark)': 2.38, 'green/light': 2.29 };
+    const failures: string[] = [];
+    for (const theme of THEMES) {
+      const ring = resolve('--ai-ring', theme.chain);
+      const background = resolve('--ai-bg', theme.chain);
+      expect(ring, `${theme.name} 没有可解析的 --ai-ring`).not.toBeNull();
+      expect(background, `${theme.name} 没有可解析的 --ai-bg`).not.toBeNull();
+      const ratio = contrast(ring as Triple, background as Triple);
+      const gap = KNOWN_RING_GAPS[theme.name];
+      if (gap === undefined && ratio < 3) {
+        failures.push(`${theme.name}: --ai-ring on --ai-bg = ${ratio.toFixed(2)}:1（1.4.11 要求 3）`);
+      } else if (gap !== undefined) {
+        expect(Math.abs(ratio - gap), `${theme.name} 的焦点环比值变了（登记 ${gap}，实测 ${ratio.toFixed(2)}）：若已修复请从 KNOWN_RING_GAPS 删除`).toBeLessThan(0.2);
+      }
+    }
+    expect(failures, failures.join('\n')).toEqual([]);
   });
 });
