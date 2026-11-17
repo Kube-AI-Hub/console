@@ -56,10 +56,11 @@
 | 主题（浅色 / 第二色调）与禁用态可读性 | 浅色 + violet 与浅色 + green 两种组合在集群概览/节点/监控/成员/项目配置字典四页三档走查，无横向溢出，`data-accent` 生效；修复禁用态实心按钮「白字 + 半透明实心色」对比度约 2:1 的缺陷（改中性表面 + 弱化文字 + opacity 1），并加架构契约测试禁止回归；theme 用例 3 passed | 未提交；[主题记录](theme-light-20261116.md) | 深色 + green 已补走查（项目概览页 1280 无溢出）；部署环境、member 集群与全站串行 E2E 未验收 |
 | 项目概览 · 资源使用排行（Top 5） | 新增排行区块：CPU / 内存两页签，各列 5 个工作负载（序号/名称/类型/数值），数据取自监控 `namespaces/<ns>/workloads` 排序聚合，`metric.workload` 解析 Kind 与名称；Deployment/StatefulSet/DaemonSet 可下钻；空态/失败可重试、不显示假 0；修掉 `TabsContent` 写成兄弟节点导致整页进错误边界的缺陷 | 未提交；[排行记录](project-overview-ranking-20261116.md) | 网络收发排行与旧「应用模板」区块不做（后者属别处承接）；部署环境、member 与全站串行 E2E 未验收 |
 | 项目概览 · 资源用量趋势（1h/6h/24h） | 新增趋势区块：CPU 与内存两条独立曲线（核与字节不共用纵轴），时间窗 1h（60s 步长）/6h、24h（300s 步长）切换后重新取数；无采样显示空态、失败可重试，NaN 采样表现为断点而非 0 | 未提交；[趋势记录](project-overview-trend-20261116.md) | 旧「物理资源/应用资源」分组不迁移（本部署无该粒度数据源）；部署环境、member 与全站串行 E2E 未验收 |
-| 企业空间概览 · 资源用量与项目排行 | 新增「资源用量」（CPU/内存/容器组/网络收发，缺失指标显示 `-`）与「项目用量排行（Top 5）」（CPU/内存页签，名称链到项目概览）；空间用量读 vector 端点，项目排行读集群级 namespaces 排行并按样本 `workspace` 标签过滤（该端点不接受 workspace 参数，实测） | 未提交；[空间概览记录](workspace-overview-usage-20261116.md) | 旧「集群信息」页签不做（空间详情无可用集群选择器）；存储用量列不做（无空间级指标）；部署环境、member 与全站串行 E2E 未验收 |
+| 企业空间概览 · 资源用量与项目排行 | 新增「资源用量」（CPU/内存/容器组/网络收发，缺失指标显示 `-`）与「项目用量排行（Top 5）」（CPU/内存页签，名称链到项目概览）；空间用量读 vector 端点，项目排行读集群级 namespaces 排行并按样本 `workspace` 标签过滤（该端点不接受 workspace 参数，实测） | 未提交；[空间概览记录](workspace-overview-usage-20261116.md) | ~~旧「集群信息」页签不做（空间详情无可用集群选择器）~~ → **2026-11-17 重纳（N-09）**：该理由把「接口形态」误判成「数据源不可得」，页签按待补推进；存储用量列仍不做（无空间级指标）；部署环境、member 与全站串行 E2E 未验收 |
 | 集群可见性 · 企业空间授权 | 私有集群下列出所有企业空间与授权状态，勾选即对该空间 Workspace 发 json-patch（add/remove `spec/placement/clusters`）并回读；按标签选择集群的空间只读并说明；公开时整块只读。实测该聚合 API 要求每个 op 都带 `value`（`remove` 亦然），`replace`/merge patch 均被拒绝 | 未提交；[可见性授权记录](cluster-visibility-workspaces-20261116.md) | 部署环境、member 集群、全站串行 E2E 未验收 |
 | 项目级告警策略页族（列表/详情/告警消息/批量/下钻） | 新增策略详情页（基本信息/规则逐条含完整 PromQL/告警消息时间线分页）；告警消息列表改读聚合 v2beta1（六列 + 服务端筛选 + 抽屉）；SSAR 写门控；集群两页签复用同一 body；**批量启用/停用**（多选 + 逐条 PATCH + 结果汇总，不可写行不可选）；**告警消息下钻**（策略链接按 rule_level 推断 scope，对象链接按 namespace+对象键，工作空间由命名空间标签解析）；15 条用例串行通过 | 未提交；[告警策略记录](alerting-policies-20261115.md) | 详情规则搜索/分页已补（客户端过滤 + 每页 10 条，见[规则搜索记录](rule-search-paging-20261116.md)）；未验收：浅色/第二色调、受限账号 403、member、生产前端、全站串行 E2E |
 | 集群监控 · 物理资源面板（R-29 剩余） | GPU 显存/使用率/已分配卡数、磁盘读/写吞吐与 IOPS、RDMA 健康度/端口可用率/收发与链路速率/错误·重传·丢弃·链路中断；按 GPU→主机→磁盘 I/O→网络→RDMA 五组显示；比值×100、吞吐 B/s、链路速率 bit/s→Gb/s、无数据显示空态；29 张卡片，监控 E2E 5 passed | 未提交；[监控面板记录](cluster-monitor-panels-20261115.md) | etcd/apiserver/scheduler 组件面板未做（`/kapis/.../cluster` 对组件指标返回 0 序列，需另一路径）；浅色/第二色调、新版部署与全站串行 E2E 未验收 |
+| 集群告警策略页族（列表状态 + 自定义策略写 + 详情） | 两个页签列表（名称/别名/描述、策略状态、规则状态四态计数、耗时、最近检查、规则数、创建时间）；搜索、策略状态/规则状态筛选、名称/创建时间排序、10/20/50/100 档位、列显隐、刷新；自定义策略创建/编辑（描述/别名/间隔/规则）/编辑 YAML/停用（确认）/启用/删除；批量启用/停用；独立详情页（属性、规则表含每条状态与最近检查、查看指标数据弹窗、告警消息时间线、返回链接）；SSAR 门控；13 条相关串行 E2E（含新增 1 条）通过，其中 5 条在固定构建上复跑 | 未提交；[记录](cluster-alerting-policies-write-20261117.md) | 真实非 admin 403、member 集群读写、浅+绿/浅+英截图、>50 策略规模、部署环境与全站串行 E2E 未验收；内置策略编辑/删除与模板规则构建器为 PRD 明确不做 |
 | 集群监控 · 系统组件面板（apiserver/scheduler/etcd） | 页内「系统组件」三子组：APIServer 请求速率（总量 + 按 verb 多序列）、请求延迟（按 verb，秒→ms）；Scheduler 调度尝试按 result（scheduled/error/unschedulable）多序列 + 尝试速率 + 调度延迟；etcd 6 图（DB 大小/客户端流量/gRPC 速率/WAL fsync/backend commit）由 requireETCD 隐藏改为「本集群未上报该组件指标」说明；复用页面时间窗与自动刷新；TrendChart 支持多序列（向后兼容单序列）并补 Storybook 与单测 | 未提交；[组件监控记录](cluster-monitor-components-20261115.md) | etcd 6 图正分支未验收（本部署 components/etcd 200 但 13 指标全 0 序列）；旧 ETCDNodes 每节点服务状态待补（无序列可读）；浅色/第二色调、真实受限账号 403（用 mock 验）、新版部署与全站串行 E2E 未验收 |
 ### 待核对与发布收口
 
@@ -74,9 +75,10 @@
 | CHECK-04 | 日常资源完整表单、详情、创建与写闭环 | 存储卷页面族、工作负载编辑设置的资源限额与更新策略已闭环（见各自记录）；其余资源仍待复核 | R-01/02/03/06/07/09/16/22/30；工作负载资源限额/存储/更新策略、快照与别名、项目写入、网关等逐项核实 |
 | CHECK-05 | 成员/角色/用户全任务 | 平台用户列表+详情、访问控制根路径、租户(企业空间)成员列表+详情、项目成员列表+写入、租户(企业空间)配额只读表、租户(企业空间)用户组树+写入、集群成员列表+写入本地已验收。其余待复核并协调并行修改 | R-12/17/18/20/24；用户页退出条件已关闭。根路径见[入口记录](access-landing-20261115.md)。租户成员见[成员记录](workspace-members-20261115.md)。项目成员见[项目成员记录](project-members-20261115.md)。配额见[配额记录](workspace-quota-20261115.md)。用户组见[用户组记录](workspace-user-groups-20261115.md)。仍缺跨作用域授权及专用角色能力 |
 | CHECK-06 | 新开启区域的深度能力 | 应用商店页族（含项目内应用）、DevOps 工程页族、镜像构建器页族、灰度发布页族、联邦项目页族已按页面族闭环，见各自记录与上表 | 镜像构建器依赖 s2ioperator RBAC 与 minio、灰度依赖 servicemesh 控制器、联邦受单集群限制（均已登记阻塞与复查条件） |
-| CHECK-07 | 监控/图表/组件/日志与通知 | **复核完毕**：项目级告警策略页族已闭环（[记录](alerting-policies-20261115.md)）；集群监控物理资源面板（GPU/磁盘 I/O/RDMA，[记录](cluster-monitor-panels-20261115.md)）与系统组件面板（apiserver/scheduler/etcd，[记录](cluster-monitor-components-20261115.md)）已补齐；资源事件查询补齐时间段选择与实时刷新（`CLUSTER_EVENTS-03`）；仪表板面板只读渲染（`DASHBOARD_PANELS-01`，[PRD](../../prd/kube-frontend/cluster-management/dashboard-panels.md)）；告警消息按状态/级别服务端筛选（`CLUSTER_ALERTING-02`）；集群监控自动刷新（`MONITOR-04`） | R-04/08/10/11/19/21/23/29；**明确不做**：仪表板面板编辑器（完整 Grafana 编辑器，另立单元）；**环境受限**：通知渠道写入（集群缺 notification webhook server，见[环境受限记录](environment-blocked-verifications-20261115.md)）；不以配置替代事实 |
+| CHECK-07 | 监控/图表/组件/日志与通知 | **复核完毕**：项目级告警策略页族已闭环（[记录](alerting-policies-20261115.md)）；集群告警策略页族的自定义策略写、列表状态列与独立详情页已闭环（[记录](cluster-alerting-policies-write-20261117.md)）；集群监控物理资源面板（GPU/磁盘 I/O/RDMA，[记录](cluster-monitor-panels-20261115.md)）与系统组件面板（apiserver/scheduler/etcd，[记录](cluster-monitor-components-20261115.md)）已补齐；资源事件查询补齐时间段选择与实时刷新（`CLUSTER_EVENTS-03`）；仪表板面板只读渲染（`DASHBOARD_PANELS-01`，[PRD](../../prd/kube-frontend/cluster-management/dashboard-panels.md)）；告警消息按状态/级别服务端筛选（`CLUSTER_ALERTING-02`）；集群监控自动刷新（`MONITOR-04`） | R-04/08/10/11/19/21/23/29；**明确不做**：仪表板面板编辑器（完整 Grafana 编辑器，另立单元）；**环境受限**：通知渠道写入（集群缺 notification webhook server，见[环境受限记录](environment-blocked-verifications-20261115.md)）；不以配置替代事实 |
 | CHECK-08 | 通用列表、详情结构及公共组件接入 | 复核完毕：刷新与空态出口覆盖全部带列表页面（十二个页族，见[列表刷新记录](list-refresh-config-secrets-20261115.md)）；每页条数档位已接入 26 个列表并加三条机械契约（见[档位记录](list-page-size-tail-20261116.md)、[契约记录](page-size-contract-20261116.md)）；排序/列显隐/分页在清单页族已接入；共享 API 存在不等于所有页已接入这一点已按页核对 | [列表刷新记录](list-refresh-config-secrets-20261115.md)、[档位记录](list-page-size-tail-20261116.md)、[契约记录](page-size-contract-20261116.md) | 剩余列表（约 27 个）仍固定档位（同一套状态已就绪，按页族推进）；列显隐仍未逐页铺开；面板型列表不适用刷新 |
 | CHECK-09 | 壳、帮助/关于、独立登录与应用任务 | **复核完毕**：关于与版本已交付（`USER_SETTINGS-ABOUT-01`）；配置入口已交付（平台设置页族）；帮助外链与第三方登录/账单**明确不做**（部署无文档站点、无身份源，链接会落到 SPA 兜底页）；自制CRD应用→扩展资源、商城模板→应用商店**别处承接** | [壳层范围复核](check09-shell-scope-20261115.md) | 若部署将来提供文档站点或身份源，另立单元接入 |
+| CHECK-11 | **2026-11-17 重纳批次（14 项）** | **登记完成，实现待排期**：PRD「明确不做」已删对应条目、design 已改写 DEC（原被否方案逐字保留并注明重纳）、`gap_check.py` 与 `parity_check.py` 已同步。**AC/TC 全部待补** | [重纳决策与执行计划](reinclusion-decisions-20261117.md)：页面级 8（N-01/02/03/05/06/07/09/10）+ 能力级 5（N-11/12/21/27/28）+ 集群网关 N-29。N-05 已实现（集群概览常用运维入口弹窗），只改登记 |
 | CHECK-10 | 全部旧页面与条件入口完整清点 | 持续维护，各页选定前完成 | 路由脚本范围有限；动态子页、独立终端及非导航入口人工补充，原子清单不从新AC反推 |
 
 不再汇总“已补26/总31”之类覆盖率：R编号是历史疑似回归集合，不是旧能力全集，
@@ -170,9 +172,9 @@
 
 `gap_check.py` 按 `src/pages/*/routes/*.js` 枚举段。**有两类老页面不在这条路径上**，因此至今没有归宿——和 115 个缺口当初隐身是同一个原因。
 
-### 3.1 `src/pages/console` 整个作用域（7 页）
+### 3.1 `src/pages/console` 整个作用域（6 页）
 
-`SCOPE_DIRS` 里没有 `console`，所以 `/dashboard`、`/logquery`、`/eventsearch`、`/auditingsearch`、`/bill`、`/support`、`/404` 一条都没被枚举过。
+`SCOPE_DIRS` 里没有 `console`，所以 `/dashboard`、`/logquery`、`/eventsearch`、`/auditingsearch`、`/bill`、`/404` 一条都没被枚举过（`/support` 已于 2026-11-17 从源码删除，不再有归宿问题）。
 
 **建议归宿**（可直接落到 `gap_check.py` 的四类表）：
 
@@ -183,7 +185,6 @@
 | `console/eventsearch` | ⇄ 别处承接 | 由集群「资源事件」承接（`ef0725ddb`） |
 | `console/auditingsearch` | ⇄ 别处承接 | 由集群「审计日志」承接（`82e76d57f`） |
 | `console/bill` | ⊘ 明确不做 | `metering` 模块未开启 |
-| `console/support` | ⊘ 明确不做 | 支持页是外链集合（文档/论坛/Issue/Slack），产品内不做聚合页 |
 | `console/404` | … 已登记缺口 | 新 UI 无兜底路由，任何写错的 URL 没有落点（缺口分析 §4.7 F-37） |
 
 ### 3.2 `src/pages/terminal`（独立新窗口，3 种模式）

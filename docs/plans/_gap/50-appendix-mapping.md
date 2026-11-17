@@ -1,209 +1,269 @@
-# 附录：老 console 页面 → 新 UI 路由 全量映射
+# 附录：老 console 页面 → 新 UI 路由全量映射（2026-11-17 复验）
 
-> **历史映射，2026-11-14 基线。** 192条路由和表中符号不是当前迁移进度，旧模块结论不能继承为不做。
-> 当前段级输出用 `gap_check.py`，完整能力仍需[单页清单](../page-migration-template.md)；
-> 当前复核任务见[能力矩阵](../capability-matrix.md)，不继续维护第二份手写全站映射。
+> **复验基线**：2026-11-17，HEAD `3ee0da93d` 工作树。
+> 旧实现取自 `console/src/pages/*/routes/*.js`（脚本枚举，非导航）；新实现取自 `console/kube-frontend/apps/console-next/src/routes/` 的目录与 `$*.tsx` 文件。
+> 上一版（2026-11-14）的映射表保留在文末，标注为历史基线。
 
-判定图例：✓ 已迁移 ／ ⇄ 有替代（改名、合并或拆分，需核对等价性）／ ✗ 真缺失 ／ ⊘ 有意不迁移（依赖模块或已登记理由）
+## 0. 计数
 
-> 统计口径：老 console 的路由取自 `console/src/pages/*/routes/*.js`，已剔除重定向与 `*` 兜底路由，合计 192 条（含详情页）。新 UI 路由取自 `apps/console-next/src/routes/` 的目录结构。
+| 作用域 | 老路由 | 路径级已交付 | 结构性对应 | 真缺口 | 未核实 | 批准不做 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 全局 | 7 | 1 | 4 | 0 | 2 |
+| 平台访问控制 | 5 | 5 | 0 | 0 | 0 |
+| 平台设置 | 9 | 7 | 1 | 0 | 1 |
+| 应用商店 | 7 | 4 | 3 | 0 | 0 |
+| 企业空间 | 14 | 13 | 1 | 0 | 0 |
+| DevOps 工程 | 11 | 11 | 0 | 0 | 0 |
+| 联邦项目 | 23 | 0 | 19 | 0 | 4 |
+| 集群 | 74 | 67 | 6 | 0 | 1 |
+| 项目 | 50 | 48 | 2 | 0 | 0 |
+| **合计** | **200** | **156** | **32** | **2** | **2** | **8** |
 
-## A. 全局与平台入口（老 `src/pages/console/routes`、`src/core/routes.js`）
+> 路径级直配 = 新旧 URL 段能一对一映射（含改名）。结构性对应 = 详情页页签、弹窗、重定向或另一作用域承接。
+> **真缺口 2 条**：快照类型详情页、项目网关详情页——这是 200 条老路由里唯一没有新落点的两页。其余 198 条有落点（含 36 条由页签/弹窗/重定向/另一作用域承接），另有 4 条未核实。
+> **但这只证明「页面有落点」，不证明「能力完整」**——能力级对照见 `10-platform.md` / `20-cluster.md` / `30-project.md` / `40-cross-cutting.md` 的 2026-11-17 复验节。
 
-| 老路由 | 新 UI 路由 | 判定 | 说明 |
+## 全局
+
+| 老路由 | 新 UI | 判定 | 备注 |
 | --- | --- | --- | --- |
-| `/login` | `/login` | ✓ |  |
-| `/login/confirm` | — | ✗ | 首次登录二次确认（如强制改密）；新 UI 无此环节 |
-| `/password/confirm` | — | ✗ | 密码过期强制改密；新 UI 无 |
-| `/dashboard` | `/kube-frontend` | ⇄ | 新工作台（WorkbenchPage）只有入口卡片；老仪表盘的资源统计与快捷入口未迁 |
-| `/logquery` | — | ✗ | 日志检索页 |
-| `/eventsearch` | — | ✗ | 事件检索页 |
-| `/auditingsearch` | — | ✗ | 审计检索页 |
-| `/bill` | — | ✗ | 账单页 |
-| `/support` | — | ✗ | 支持页 |
-| `/404` | — | ✗ | 新 UI 无兜底路由，未匹配路径没有 404 页 |
-| `/clusters` | `/kube-frontend/clusters` | ✓ | 集群列表 |
-| `/terminal/*` | — | ✗ | 容器终端 / kubectl / 节点终端（独立新窗口）整条链路缺失 |
+| `/404` | `routes/$.tsx` 兜底路由 | 已交付 | — |
+| `/auditingsearch` | `clusters/:c/audit-logs`（审计日志） | 别处承接 | — |
+| `/bill` | — | 批准不做（部署无计量数据源） | — |
+| `/dashboard` | `/kube-frontend`（WorkbenchPage） | 有替代 | — |
+| `/eventsearch` | `clusters/:c/events`（资源事件） | 别处承接 | — |
+| `/logquery` | `clusters/:c/logs`（集群作用域日志查询） | 别处承接 | — |
+| `/support` | — | 已从源码删除（2026-11-17，含路由/页面/文案/资源） | — |
 
-## B. 平台访问控制（老 `/access`）
+## 平台访问控制
 
-| 老路由 | 新 UI 路由 | 判定 | 说明 |
+| 老路由 | 新 UI | 判定 | 备注 |
 | --- | --- | --- | --- |
-| `/access/accounts` | `/kube-frontend/access/users` | ⇄ | 改名 accounts → users |
-| `/access/accounts/:name` | `/kube-frontend/access/users/$name` | ✓ |  |
-| `/access/roles` | `/kube-frontend/access/clusterroles` | ⇄ | 改名 roles → clusterroles |
-| `/access/roles/:name` | `/kube-frontend/access/clusterroles/$name` | ✓ |  |
-| `/access/workspaces` | `/kube-frontend/access/workspaces` | ✓ | 新 UI 另有 workspaces/$name 详情（老 console 无） |
+| `/access/accounts` | `kube-frontend.access/users` | 已交付 | — |
+| `/access/accounts/:name` | `kube-frontend.access/users` | 已交付 | — |
+| `/access/roles` | `kube-frontend.access/clusterroles` | 已交付 | — |
+| `/access/roles/:name` | `kube-frontend.access/clusterroles` | 已交付 | — |
+| `/access/workspaces` | `kube-frontend.access/workspaces` | 已交付 | — |
 
-## C. 平台设置（老 `/settings`）
+## 平台设置
 
-| 老路由 | 新 UI 路由 | 判定 | 说明 |
+| 老路由 | 新 UI | 判定 | 备注 |
 | --- | --- | --- | --- |
-| `/settings/base-info` | `/kube-frontend/settings/info` | ⇄ | 工作树中正在迁移 |
-| `/settings/third-login` | — | ✗ | 第三方登录（OAuth / LDAP / AD）配置 |
-| `/settings/mail` | `/kube-frontend/settings/mail` | ⇄ | 工作树中正在迁移 |
-| `/settings/feishu` | — | ✗ | 通知渠道 |
-| `/settings/dingtalk` | — | ✗ | 通知渠道 |
-| `/settings/wecom` | — | ✗ | 通知渠道 |
-| `/settings/slack` | — | ✗ | 通知渠道 |
-| `/settings/webhook` | — | ✗ | 通知渠道 |
+| `/settings/base-info` | `kube-frontend.settings/info` | 已交付 | — |
+| `/settings/dingtalk` | `kube-frontend.settings/dingtalk` | 已交付 | — |
+| `/settings/feishu` | `kube-frontend.settings/feishu` | 已交付 | — |
+| `/settings/mail` | `kube-frontend.settings/mail` | 已交付 | — |
+| `/settings/notification-configuration` | 重定向到 `settings/mail` | 重定向 | — |
+| `/settings/slack` | `kube-frontend.settings/slack` | 已交付 | — |
+| `/settings/third-login` | — | 批准不做（服务端注入，控制台无写入路径） | — |
+| `/settings/webhook` | `kube-frontend.settings/webhook` | 已交付 | — |
+| `/settings/wecom` | `kube-frontend.settings/wecom` | 已交付 | — |
 
-## D. 应用商店（老 `/apps`、`/apps-manage`，依赖 openpitrix）
+## 应用商店
 
-| 老路由 | 新 UI 路由 | 判定 | 说明 |
+| 老路由 | 新 UI | 判定 | 备注 |
 | --- | --- | --- | --- |
-| `/apps` | — | ⊘ | 依赖 openpitrix.appstore |
-| `/apps/:appId` | — | ⊘ | 依赖 openpitrix.appstore |
-| `/apps/:appId/deploy` | — | ⊘ | 依赖 openpitrix.appstore |
-| `/apps-manage/store` | — | ⊘ | 依赖 openpitrix.appstore |
-| `/apps-manage/store/:appId` | — | ⊘ | 依赖 openpitrix.appstore |
-| `/apps-manage/categories` | — | ⊘ | 依赖 openpitrix.appstore |
-| `/apps-manage/reviews/:type` | — | ⊘ | 依赖 openpitrix.appstore |
+| `/apps` | `kube-frontend.apps` | 已交付 | — |
+| `/apps-manage/categories` | `kube-frontend.apps-manage/categories` | 已交付 | — |
+| `/apps-manage/reviews/:type` | `apps-manage/reviews` 页签 | 有替代 | — |
+| `/apps-manage/store` | `kube-frontend.apps-manage/store` | 已交付 | — |
+| `/apps-manage/store/:appId` | `apps-manage/store` 内详情 | 未核实 | 10-platform 复验列为未核实 |
+| `/apps/:appId` | `kube-frontend.apps.$appId.tsx` | 已交付 | — |
+| `/apps/:appId/deploy` | 安装弹窗（非独立路由） | 未核实 | 30-project/10-platform 未逐项核对安装向导字段 |
 
-## E. 企业空间（老 `/workspaces/:workspace`）
+## 企业空间
 
-| 老路由 | 新 UI 路由 | 判定 | 说明 |
+| 老路由 | 新 UI | 判定 | 备注 |
 | --- | --- | --- | --- |
-| `overview（页签 usage / ranking / clusters）` | — | ✗ | 整个企业空间作用域在新 UI 不存在 |
-| `projects` | — | ✗ |  |
-| `federatedprojects` | — | ✗ | 依赖多集群联邦 |
-| `devops` | — | ⊘ | 依赖 devops 模块 |
-| `apps / apps/:appId` | — | ⊘ | 依赖 openpitrix |
-| `repos / repos/:repo_id` | — | ⊘ | 依赖 openpitrix |
-| `base-info` | — | ✗ |  |
-| `quota` | — | ✗ | 企业空间配额 |
-| `roles / roles/:name` | — | ✗ |  |
-| `members / members/:name` | — | ✗ | 新 UI 的 `access/workspaces/$name` 只做详情 + 成员列表，不是企业空间控制台 |
-| `groups` | — | ✗ | 部门 / 用户组 |
+| `/workspaces/:workspace/apps` | `kube-frontend.workspaces.$workspace/apps` | 已交付 | — |
+| `/workspaces/:workspace/apps/:appId` | `kube-frontend.workspaces.$workspace/apps` | 已交付 | — |
+| `/workspaces/:workspace/base-info` | `base-info/index.tsx` | 已交付 | — |
+| `/workspaces/:workspace/devops` | `clusters/:c/devops`（集群作用域） | 别处承接 | — |
+| `/workspaces/:workspace/federatedprojects` | `kube-frontend.workspaces.$workspace/federatedprojects` | 已交付 | — |
+| `/workspaces/:workspace/groups` | `user-groups`（改名） | 已交付 | — |
+| `/workspaces/:workspace/members` | `kube-frontend.workspaces.$workspace/members` | 已交付 | — |
+| `/workspaces/:workspace/members/:name` | `kube-frontend.workspaces.$workspace/members` | 已交付 | — |
+| `/workspaces/:workspace/projects` | `projects/index.tsx` | 已交付 | — |
+| `/workspaces/:workspace/quota` | `kube-frontend.workspaces.$workspace/quota` | 已交付 | — |
+| `/workspaces/:workspace/repos` | `kube-frontend.workspaces.$workspace/repos` | 已交付 | — |
+| `/workspaces/:workspace/repos/:repo_id` | `kube-frontend.workspaces.$workspace/repos` | 已交付 | — |
+| `/workspaces/:workspace/roles` | `kube-frontend.workspaces.$workspace/roles` | 已交付 | — |
+| `/workspaces/:workspace/roles/:name` | `kube-frontend.workspaces.$workspace/roles` | 已交付 | — |
 
-## F. DevOps 工程（老 `/:ws/clusters/:cluster/devops/:devops`）
+## DevOps 工程
 
-| 老路由 | 新 UI 路由 | 判定 | 说明 |
+| 老路由 | 新 UI | 判定 | 备注 |
 | --- | --- | --- | --- |
-| `pipelines / pipelines/:name` | — | ⊘ | 依赖 devops 模块 |
-| `cd / cd/:cd` | — | ⊘ | 依赖 devops 模块 |
-| `code-repo` | — | ⊘ | 依赖 devops 模块 |
-| `base-info` | — | ⊘ | 依赖 devops 模块 |
-| `roles / roles/:name` | — | ⊘ | 依赖 devops 模块 |
-| `members` | — | ⊘ | 依赖 devops 模块 |
-| `credentials / credentials/:credential_id` | — | ⊘ | 依赖 devops 模块 |
+| `/:workspace/clusters/:cluster/devops/:devops/base-info` | `devops/$name` 详情页签 | 已交付 | — |
+| `/:workspace/clusters/:cluster/devops/:devops/cd` | `devops/$name` 详情页签 | 已交付 | — |
+| `/:workspace/clusters/:cluster/devops/:devops/cd/:cd` | `devops/$name` 详情页签 | 已交付 | — |
+| `/:workspace/clusters/:cluster/devops/:devops/code-repo` | `devops/$name` 详情页签 | 已交付 | — |
+| `/:workspace/clusters/:cluster/devops/:devops/credentials` | `devops/$name` 详情页签 | 已交付 | — |
+| `/:workspace/clusters/:cluster/devops/:devops/credentials/:credential_id` | `devops/$name` 详情页签 | 已交付 | — |
+| `/:workspace/clusters/:cluster/devops/:devops/members` | `devops/$name` 详情页签 | 已交付 | — |
+| `/:workspace/clusters/:cluster/devops/:devops/pipelines` | `devops/$name/pipelines` | 已交付 | — |
+| `/:workspace/clusters/:cluster/devops/:devops/pipelines/:name` | `devops/$name/pipelines/$pipeline.tsx` | 已交付 | — |
+| `/:workspace/clusters/:cluster/devops/:devops/roles` | `devops/$name` 详情页签 | 已交付 | — |
+| `/:workspace/clusters/:cluster/devops/:namespace/roles/:name` | `devops/$name` 详情页签 | 已交付 | — |
 
-## G. 联邦项目（老 `/:ws/federatedprojects/:ns`）
+## 联邦项目
 
-| 老路由 | 新 UI 路由 | 判定 | 说明 |
+| 老路由 | 新 UI | 判定 | 备注 |
 | --- | --- | --- | --- |
-| `overview` | — | ✗ | 联邦项目作用域整体缺失 |
-| `applications(+:name)` | — | ✗ |  |
-| `deployments(+:name)` | — | ✗ |  |
-| `statefulsets(+:name)` | — | ✗ |  |
-| `services(+:name)` | — | ✗ |  |
-| `ingresses(+:name)` | — | ✗ |  |
-| `volumes(+:name)` | — | ✗ |  |
-| `configmaps(+:name)` | — | ✗ |  |
-| `secrets(+:name)` | — | ✗ |  |
-| `base-info` | — | ✗ |  |
-| `quota` | — | ✗ | 联邦项目配额 |
-| `gateways(+:gatewayName)` | — | ✗ |  |
-| `log-collections` | — | ✗ |  |
+| `/:workspace/federatedprojects/:namespace/applications` | `$name` 页签「工作负载」 | 有替代 | — |
+| `/:workspace/federatedprojects/:namespace/applications/:name` | `$name/$resource/$object` | 有替代 | — |
+| `/:workspace/federatedprojects/:namespace/base-info` | `$name` 详情页签「概览」的基本信息 | 有替代 | — |
+| `/:workspace/federatedprojects/:namespace/configmaps` | `$name` 页签「配置」 | 有替代 | — |
+| `/:workspace/federatedprojects/:namespace/configmaps/:name` | `$name/$resource/$object` | 有替代 | — |
+| `/:workspace/federatedprojects/:namespace/deployments` | `$name` 页签「工作负载」+ `$resource/$object` | 有替代 | — |
+| `/:workspace/federatedprojects/:namespace/deployments/:name` | `$name/$resource/$object` | 有替代 | — |
+| `/:workspace/federatedprojects/:namespace/gateways` | — | 批准不做（见 capability-matrix CHECK-06） | — |
+| `/:workspace/federatedprojects/:namespace/gateways/:gatewayName` | — | 批准不做（见 capability-matrix CHECK-06） | — |
+| `/:workspace/federatedprojects/:namespace/ingresses` | `$name` 页签「工作负载」 | 有替代 | — |
+| `/:workspace/federatedprojects/:namespace/ingresses/:name` | `$name/$resource/$object` | 有替代 | — |
+| `/:workspace/federatedprojects/:namespace/log-collections` | — | 批准不做（见 capability-matrix CHECK-06） | — |
+| `/:workspace/federatedprojects/:namespace/overview` | `$name` 详情页签「概览」 | 有替代 | — |
+| `/:workspace/federatedprojects/:namespace/quota` | — | 批准不做（见 capability-matrix CHECK-06） | — |
+| `/:workspace/federatedprojects/:namespace/secrets` | `$name` 页签「配置」 | 有替代 | — |
+| `/:workspace/federatedprojects/:namespace/secrets/:name` | `$name/$resource/$object` | 有替代 | — |
+| `/:workspace/federatedprojects/:namespace/services` | `$name` 页签「工作负载」 | 有替代 | — |
+| `/:workspace/federatedprojects/:namespace/services/:name` | `$name/$resource/$object` | 有替代 | — |
+| `/:workspace/federatedprojects/:namespace/statefulsets` | `$name` 页签「工作负载」 | 有替代 | — |
+| `/:workspace/federatedprojects/:namespace/statefulsets/:name` | `$name/$resource/$object` | 有替代 | — |
+| `/:workspace/federatedprojects/:namespace/volumes` | `$name` 页签「存储」 | 有替代 | — |
+| `/:workspace/federatedprojects/:namespace/volumes/:name` | `$name/$resource/$object` | 有替代 | — |
+| `/:workspace/federatedprojects/:namespace/workloads` | 重定向到 `deployments` | 重定向 | — |
 
-## H. 集群作用域（老 `/clusters/:cluster`）
+## 集群
 
-| 老路由 | 新 UI 路由 | 判定 | 说明 |
+| 老路由 | 新 UI | 判定 | 备注 |
 | --- | --- | --- | --- |
-| `/overview` | `overview` | ✓ |  |
-| `/nodes` | `nodes` | ✓ |  |
-| `/nodes/:node` | `nodes/$name` | ✓ |  |
-| `/nodes/:node/gpus/:gpuUuid` | — | ✗ | 单卡详情页 |
-| `/edgenodes、/edgenodes/:node` | — | ⊘ | 依赖 edgeruntime 模块 |
-| `/gpus` | — | ✗ | GPU 卡列表页（集群级） |
-| `/components` | `components` | ✓ |  |
-| `/components/:namespace/:name` | — | ✗ | 系统组件详情页 |
-| `/projects` | `namespaces` | ⇄ | 改名 projects → namespaces |
-| `/projects/:namespace（集群下的项目详情布局）` | — | ✗ | 老 console 可从集群入口直接进项目详情；新 UI 只能先切 workspace 再进项目 |
-| `/customresources、/customresources/:name` | `custom-resources、custom-resources/$name` | ✓ |  |
-| `/deployments` | — | ✗ | **集群级全命名空间**应用负载页 |
-| `/statefulsets` | — | ✗ | 同上 |
-| `/daemonsets` | — | ✗ | 同上 |
-| `/jobs` | — | ✗ | 同上 |
-| `/cronjobs` | — | ✗ | 同上 |
-| `/pods` | — | ✗ | 同上 |
-| `/services` | — | ✗ | 同上 |
-| `/ingresses` | — | ✗ | 同上 |
-| `/secrets` | — | ✗ | **集群级**配置 |
-| `/configmaps` | — | ✗ | 同上 |
-| `/serviceaccounts` | — | ✗ | 同上 |
-| `/storageclasses、/storageclasses/:name` | `storageclasses、storageclasses/$name` | ✓ |  |
-| `/volumes（PVC，集群级）` | — | ✗ | 集群级持久卷声明列表 |
-| `/volume-snapshots` | — | ✗ | 集群级卷快照 |
-| `/volume-snapshot-classes、/:name` | — | ✗ | 卷快照类 |
-| `/volume-snapshot-content/:name` | — | ✗ | 快照内容详情 |
-| `/snapshots/:namespace?` | — | ✗ | 快照页签入口 |
-| `/pv/:name` | `persistentvolumes、persistentvolumes/$name` | ⇄ | 老 console 的 PV 详情挂在 `volumes` 页签里；新 UI 拆成独立页（老无 PV 列表路由） |
-| `/juicefs-storage` | — | ✗ | 共享存储（JuiceFS 配额/性能/卷） |
-| `/monitor-cluster` | `monitor` | ⇄ | 改名；需逐项核对图表与下钻 |
-| `/gpu-resource` | — | ✗ | GPU 资源监控页 |
-| `/monitor-resource` | — | ✗ | 应用资源监控页 |
-| `/alerts` | — | ✗ | **集群级**告警消息 |
-| `/alert-rules、/alert-rules/:name（含 builtin）` | — | ✗ | **集群级**告警策略与详情 |
-| `/custom-monitoring` | — | ✗ | 自定义监控（需图表引擎） |
-| `/base-info` | `settings` | ⇄ | 改名 base-info → settings；可写字段范围不同 |
-| `/visibility` | `visibility` | ✓ |  |
-| `/members` | `members` | ✓ |  |
-| `/roles、/roles/:name` | — | ✗ | **集群级**角色（区别于平台角色 `access/clusterroles`） |
-| `/networkpolicies` | — | ✗ | **集群级**网络策略 |
-| `/ippools、/ippools/:name` | — | ✗ | 容器组 IP 池 |
-| `/log-collections/:component、/:name` | `log-collections` | ⇄ | 老 console 按 logging / events / auditing 三类分页签并各有详情页；新 UI 单页只读展示四类对象 |
-| `/gateways/:component、/:gatewayName` | — | ✗ | 集群网关 |
-| `/kubeConfig` | — | ✗ | 集群 kubeconfig 管理 |
+| `/clusters` | `kube-frontend.clusters.index.tsx` | 已交付 | — |
+| `/clusters/:cluster/alert-rules` | `kube-frontend.clusters.$cluster/alerting-policies` | 已交付 | — |
+| `/clusters/:cluster/alert-rules/:name` | `kube-frontend.clusters.$cluster/alerting-policies` | 已交付 | — |
+| `/clusters/:cluster/alert-rules/builtin/:name` | `kube-frontend.clusters.$cluster/alerting-policies` | 已交付 | — |
+| `/clusters/:cluster/alerts` | `kube-frontend.clusters.$cluster/alerting-messages` | 已交付 | — |
+| `/clusters/:cluster/base-info` | `kube-frontend.clusters.$cluster/settings` | 已交付 | — |
+| `/clusters/:cluster/components` | `kube-frontend.clusters.$cluster/components` | 已交付 | — |
+| `/clusters/:cluster/components/:namespace/:name` | `kube-frontend.clusters.$cluster/components` | 已交付 | — |
+| `/clusters/:cluster/configmaps` | `kube-frontend.clusters.$cluster/configmaps` | 已交付 | — |
+| `/clusters/:cluster/cronjobs` | `kube-frontend.clusters.$cluster/cronjobs` | 已交付 | — |
+| `/clusters/:cluster/custom-monitoring` | `kube-frontend.clusters.$cluster/custom-monitoring` | 已交付 | — |
+| `/clusters/:cluster/customresources` | `kube-frontend.clusters.$cluster/custom-resources` | 已交付 | — |
+| `/clusters/:cluster/customresources/:name` | `kube-frontend.clusters.$cluster/custom-resources` | 已交付 | — |
+| `/clusters/:cluster/daemonsets` | `kube-frontend.clusters.$cluster/daemonsets` | 已交付 | — |
+| `/clusters/:cluster/deployments` | `kube-frontend.clusters.$cluster/deployments` | 已交付 | — |
+| `/clusters/:cluster/edgenodes` | `kube-frontend.clusters.$cluster/edgenodes` | 已交付 | — |
+| `/clusters/:cluster/edgenodes/:node` | `kube-frontend.clusters.$cluster/edgenodes` | 已交付 | — |
+| `/clusters/:cluster/gateways` | `kube-frontend.clusters.$cluster/gateways` | 已交付 | — |
+| `/clusters/:cluster/gateways/:component` | `kube-frontend.clusters.$cluster/gateways` | 已交付 | — |
+| `/clusters/:cluster/gateways/:component/:gatewayName` | `kube-frontend.clusters.$cluster/gateways` | 已交付 | — |
+| `/clusters/:cluster/gpu-resource` | `kube-frontend.clusters.$cluster/gpu-resource` | 已交付 | — |
+| `/clusters/:cluster/gpus` | `kube-frontend.clusters.$cluster/gpus` | 已交付 | — |
+| `/clusters/:cluster/ingresses` | `kube-frontend.clusters.$cluster/ingresses` | 已交付 | — |
+| `/clusters/:cluster/ippools` | `kube-frontend.clusters.$cluster/ippools` | 已交付 | — |
+| `/clusters/:cluster/ippools/:name` | `kube-frontend.clusters.$cluster/ippools` | 已交付 | — |
+| `/clusters/:cluster/jobs` | `kube-frontend.clusters.$cluster/jobs` | 已交付 | — |
+| `/clusters/:cluster/juicefs-storage` | `kube-frontend.clusters.$cluster/juicefs-storage` | 已交付 | — |
+| `/clusters/:cluster/kubeConfig` | — | 批准不做（读接口 405） | — |
+| `/clusters/:cluster/log-collections` | `kube-frontend.clusters.$cluster/log-collections` | 已交付 | — |
+| `/clusters/:cluster/log-collections/:component` | `log-collections` 页签 | 有替代 | — |
+| `/clusters/:cluster/log-collections/:component/:name` | `log-collections` 页签 | 有替代 | — |
+| `/clusters/:cluster/members` | `kube-frontend.clusters.$cluster/members` | 已交付 | — |
+| `/clusters/:cluster/monitor-cluster` | `kube-frontend.clusters.$cluster/monitor` | 已交付 | — |
+| `/clusters/:cluster/monitor-resource` | `kube-frontend.clusters.$cluster/monitor-resource` | 已交付 | — |
+| `/clusters/:cluster/networkpolicies` | `kube-frontend.clusters.$cluster/networkpolicies` | 已交付 | — |
+| `/clusters/:cluster/nodes` | `kube-frontend.clusters.$cluster/nodes` | 已交付 | — |
+| `/clusters/:cluster/nodes/:node` | `kube-frontend.clusters.$cluster/nodes` | 已交付 | — |
+| `/clusters/:cluster/nodes/:node/gpus/:gpuUuid` | `kube-frontend.clusters.$cluster/nodes` | 已交付 | — |
+| `/clusters/:cluster/overview` | `kube-frontend.clusters.$cluster/overview` | 已交付 | — |
+| `/clusters/:cluster/pods` | `kube-frontend.clusters.$cluster/pods` | 已交付 | — |
+| `/clusters/:cluster/projects` | `kube-frontend.clusters.$cluster/namespaces` | 已交付 | — |
+| `/clusters/:cluster/projects/:namespace` | `kube-frontend.clusters.$cluster/namespaces` | 已交付 | — |
+| `/clusters/:cluster/projects/:namespace/configmaps/:name` | `kube-frontend.clusters.$cluster/namespaces` | 已交付 | — |
+| `/clusters/:cluster/projects/:namespace/cronjobs/:name` | `kube-frontend.clusters.$cluster/namespaces` | 已交付 | — |
+| `/clusters/:cluster/projects/:namespace/daemonsets/:name` | `kube-frontend.clusters.$cluster/namespaces` | 已交付 | — |
+| `/clusters/:cluster/projects/:namespace/deployments/:name` | `kube-frontend.clusters.$cluster/namespaces` | 已交付 | — |
+| `/clusters/:cluster/projects/:namespace/ingresses/:name` | `kube-frontend.clusters.$cluster/namespaces` | 已交付 | — |
+| `/clusters/:cluster/projects/:namespace/jobs/:name` | `kube-frontend.clusters.$cluster/namespaces` | 已交付 | — |
+| `/clusters/:cluster/projects/:namespace/networkpolicies/:name` | `kube-frontend.clusters.$cluster/namespaces` | 已交付 | — |
+| `/clusters/:cluster/projects/:namespace/pods/:podName` | `kube-frontend.clusters.$cluster/namespaces` | 已交付 | — |
+| `/clusters/:cluster/projects/:namespace/pods/:podName/containers/:containerName` | `kube-frontend.clusters.$cluster/namespaces` | 已交付 | — |
+| `/clusters/:cluster/projects/:namespace/secrets/:name` | `kube-frontend.clusters.$cluster/namespaces` | 已交付 | — |
+| `/clusters/:cluster/projects/:namespace/serviceaccounts/:name` | `kube-frontend.clusters.$cluster/namespaces` | 已交付 | — |
+| `/clusters/:cluster/projects/:namespace/services/:name` | `kube-frontend.clusters.$cluster/namespaces` | 已交付 | — |
+| `/clusters/:cluster/projects/:namespace/statefulsets/:name` | `kube-frontend.clusters.$cluster/namespaces` | 已交付 | — |
+| `/clusters/:cluster/projects/:namespace/volume-snapshots/:name` | `kube-frontend.clusters.$cluster/namespaces` | 已交付 | — |
+| `/clusters/:cluster/projects/:namespace/volumes/:name` | `kube-frontend.clusters.$cluster/namespaces` | 已交付 | — |
+| `/clusters/:cluster/pv/:name` | `kube-frontend.clusters.$cluster/persistentvolumes` | 已交付 | — |
+| `/clusters/:cluster/roles` | 平台 `access/clusterroles` | 别处承接 | — |
+| `/clusters/:cluster/roles/:name` | 平台 `access/clusterroles/$name` | 别处承接 | — |
+| `/clusters/:cluster/secrets` | `kube-frontend.clusters.$cluster/secrets` | 已交付 | — |
+| `/clusters/:cluster/serviceaccounts` | `kube-frontend.clusters.$cluster/serviceaccounts` | 已交付 | — |
+| `/clusters/:cluster/services` | `kube-frontend.clusters.$cluster/services` | 已交付 | — |
+| `/clusters/:cluster/snapshots/:namespace?` | `kube-frontend.clusters.$cluster/snapshots` | 已交付 | — |
+| `/clusters/:cluster/statefulsets` | `kube-frontend.clusters.$cluster/statefulsets` | 已交付 | — |
+| `/clusters/:cluster/storageclasses` | `kube-frontend.clusters.$cluster/storageclasses` | 已交付 | — |
+| `/clusters/:cluster/storageclasses/:name` | `kube-frontend.clusters.$cluster/storageclasses` | 已交付 | — |
+| `/clusters/:cluster/visibility` | `kube-frontend.clusters.$cluster/visibility` | 已交付 | — |
+| `/clusters/:cluster/volume-snapshot-classes` | `kube-frontend.clusters.$cluster/volume-snapshot-classes` | 已交付 | — |
+| `/clusters/:cluster/volume-snapshot-classes/:name` | — | **真缺口** | 无 `$name.tsx`（20-cluster 复验 O-20） |
+| `/clusters/:cluster/volume-snapshot-content/:name` | `kube-frontend.clusters.$cluster/volume-snapshot-content` | 已交付 | — |
+| `/clusters/:cluster/volume-snapshots` | `kube-frontend.clusters.$cluster/volume-snapshots` | 已交付 | — |
+| `/clusters/:cluster/volumes` | `kube-frontend.clusters.$cluster/persistentvolumeclaims` | 已交付 | — |
+| `/clusters/:cluster/workloads` | 重定向到 `deployments` | 重定向 | — |
 
-## I. 集群下的项目详情入口（老 `/clusters/:cluster/projects/:namespace/...`，16 条）
+## 项目
 
-| 老路由 | 新 UI 路由 | 判定 | 说明 |
+| 老路由 | 新 UI | 判定 | 备注 |
 | --- | --- | --- | --- |
-| `/projects/:namespace 及其下 deployments/statefulsets/daemonsets/jobs/cronjobs/pods(+containers)/services/ingresses/secrets/configmaps/serviceaccounts/volumes/volume-snapshots/networkpolicies 详情` | — | ✗ | 老 console 允许「从集群管理直接进入某个项目的资源详情」；新 UI 的项目页只挂在 `/:workspace/clusters/:cluster/projects/:namespace` 下，必须经过 workspace 上下文。**这是入口能力缺口，不是页面缺失** |
-
-## J. 项目作用域（老 `/:ws/clusters/:cluster/projects/:ns`）
-
-| 老路由 | 新 UI 路由 | 判定 | 说明 |
-| --- | --- | --- | --- |
-| `/overview` | `overview` | ✓ |  |
-| `/applications、/applications/composing(+:name)、/applications/template(+:id)` | — | ✗ | composing 部分不依赖 openpitrix（CRD 应用），template 依赖 openpitrix |
-| `/deployments(+:name)` | `deployments(+$name)` | ✓ |  |
-| `/statefulsets(+:name)` | `statefulsets(+$name)` | ✓ |  |
-| `/daemonsets(+:name)` | `daemonsets(+$name)` | ✓ |  |
-| `/jobs(+:name)` | `jobs(+$name)` | ✓ |  |
-| `/cronjobs(+:name)` | `cronjobs(+$name)` | ✓ |  |
-| `/pods` | `pods` | ✓ |  |
-| `/pods/:podName` | `pods/$name` | ✓ |  |
-| `/pods/:podName/containers/:containerName` | — | ✗ | **独立容器详情页**（监控/环境变量/日志/终端/文件等页签） |
-| `/services(+:name)` | `services(+$name)` | ✓ |  |
-| `/ingresses(+:name)` | `ingresses(+$name)` | ✓ |  |
-| `/s2ibuilders(+:name)` | — | ⊘ | 依赖 devops 模块 |
-| `/grayrelease（cates / jobs）` | — | ⊘ | 依赖 servicemesh 模块 |
-| `/volumes(+:name)` | `persistentvolumeclaims(+$name)` | ⇄ | 改名 volumes → persistentvolumeclaims |
-| `/volume-snapshots(+:name)` | `volumesnapshots(+$name)` | ✓ |  |
-| `/base-info` | `baseinfo` | ✓ |  |
-| `/networkpolicies` | `networkpolicies` | ⇄ | 列表已迁，详情未迁 |
-| `/networkpolicies/:name` | — | ✗ |  |
-| `/configmaps(+:name)` | `configmaps(+$name)` | ✓ |  |
-| `/secrets(+:name)` | `secrets(+$name)` | ✓ |  |
-| `/serviceaccounts、/serviceAccounts/:name` | `serviceaccounts(+$name)` | ✓ | 老 console 详情路径拼作 `serviceAccounts`（大小写不一致） |
-| `/roles` | `roles` | ⇄ | 列表已迁，详情未迁 |
-| `/roles/:name` | — | ✗ |  |
-| `/members` | `members` | ✓ |  |
-| `/log-collections` | `log-collections` | ✓ |  |
-| `/gateways` | `gateways` | ⇄ | 列表已迁，详情未迁 |
-| `/gateways/:gatewayName` | — | ✗ |  |
-| `/alert-rules、/alert-rules/:name（含 builtin）` | `alertingrules` | ⇄ | 改名 alert-rules → alertingrules；详情未迁 |
-| `/alerts` | `alerts` | ✓ |  |
-| `/custom-monitoring` | — | ✗ | 自定义监控（需图表引擎） |
-
-## 计数
-
-| 判定 | 条数 |
-| --- | --- |
-| ✓ 已迁移 | 31 |
-| ⇄ 有替代 | 15 |
-| ✗ 真缺失 | 74 |
-| ⊘ 有意不迁移 | 20 |
-| **合计（映射条目）** | **140** |
+| `/:workspace/clusters/:cluster/projects/:namespace/alert-rules` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/alertingrules` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/alert-rules/:name` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/alertingrules` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/alert-rules/builtin/:name` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/alertingrules` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/alerts` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/alerts` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/applications` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/applications` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/applications/composing` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/applications` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/applications/composing/:name` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/applications` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/applications/template` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/applications` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/applications/template/:id` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/applications` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/base-info` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/baseinfo` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/configmaps` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/configmaps` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/configmaps/:name` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/configmaps` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/cronjobs` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/cronjobs` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/cronjobs/:name` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/cronjobs` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/custom-monitoring` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/custom-monitoring` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/daemonsets` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/daemonsets` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/daemonsets/:name` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/daemonsets` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/deployments` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/deployments` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/deployments/:name` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/deployments` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/gateways` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/gateways` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/gateways/:gatewayName` | — | **真缺口** | `gateways/` 只有 `index`（30-project 复验 A.3-7） |
+| `/:workspace/clusters/:cluster/projects/:namespace/grayrelease` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/grayrelease` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/ingresses` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/ingresses` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/ingresses/:name` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/ingresses` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/jobs` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/jobs` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/jobs/:name` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/jobs` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/log-collections` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/log-collections` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/members` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/members` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/networkpolicies` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/networkpolicies` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/overview` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/overview` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/pods` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/pods` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/pods/:podName` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/pods` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/pods/:podName/containers/:containerName` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/pods` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/roles` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/roles` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/roles/:name` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/roles` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/s2ibuilders` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/s2ibuilder` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/s2ibuilders/:name` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/s2ibuilder` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/secrets` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/secrets` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/secrets/:name` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/secrets` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/serviceAccounts/:name` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/serviceaccounts` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/serviceaccounts` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/serviceaccounts` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/services` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/services` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/services/:name` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/services` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/statefulsets` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/statefulsets` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/statefulsets/:name` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/statefulsets` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/volume-snapshots` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/volumesnapshots` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/volume-snapshots/:name` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/volumesnapshots` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/volumes` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/persistentvolumeclaims` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/volumes/:name` | `kube-frontend.$workspace.clusters.$cluster.projects.$namespace/persistentvolumeclaims` | 已交付 | — |
+| `/:workspace/clusters/:cluster/projects/:namespace/workloads` | 重定向到 `deployments` | 重定向 | — |

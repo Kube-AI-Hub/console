@@ -1,14 +1,198 @@
 # 10 · 平台与全局作用域缺口分析
 
-> **历史证据，2026-11-14 基线。** 下文“当前工作树/未迁移/模块关闭”均只代表分析当时，不能用于当前排期。
-> 现行方法见[迁移指南](../../legacy-ui-migration-guide.md)，待复核项见[能力矩阵](../capability-matrix.md)。
+> **当前状态 = §「2026-11-17 复验」；下方「历史正文（2026-11-14 基线）」只作历史证据，不得引用为当前事实。**
+> 现行方法见[迁移指南](../../legacy-ui-migration-guide.md)，待复核项见[能力矩阵](../capability-matrix.md)，
+> 页面段级归宿看 `prd/tools/gap_check.py`。旧对照报告 `page-parity-report.md` 已降级为历史快照（`docs/README.md:30`）。
 
 > 作用域：老 console 里**不隶属于某个集群/项目**的全部页面 + 老顶栏的全局能力。
-> 事实源：`console/src`（KubeSphere 3.1 fork）。新 UI：`console/kube-frontend/apps/console-next/src`。
-> 本文所有结论都带 `路径:行号`。没读到的写「未核实」，不猜。
-> **以当前工作树为准**：`console/` 是 git 仓库。分析期间工作树发生了两次变化，本文已对齐：`settings/notifications` 的 `route.tsx` 被删、新增 `settings/mail` 与 `src/shell/UserSettingsDialog.tsx`、`src/pages/platform/{MailChannelPage,PlatformInfoPage}.tsx`（**现已提交**）；`docs/plans/page-parity-report.md` 同期新增「修改他人密码」与 `user-settings` 两处登记（`page-parity-report.md:136`、`:147-151`）。涉及这些的条目都注明「本轮新增」或「有意不迁移」。
+> 事实源：老 `console/src`（KubeSphere 3.1 fork）；新 `console/kube-frontend/apps/console-next/src`。
+> 每条结论都带 `路径:行号`；没读到的写「未核实」，不猜。
 
 ---
+
+## 2026-11-17 复验
+
+> 复验基线：2026-11-17 工作树。方法按[迁移指南](../../legacy-ui-migration-guide.md) §3.3（页面级 ✅ 只说明路由存在，须做原子能力级核对）与 §2.3（判定能不能做要探测接口，不读模块开关）。
+> 本文所有计数由本次从源码重新数出，**未沿用旧文档的 82/73/19/10**。
+
+### 0. 复验结论速览
+
+路由级归宿（合计 = 老路由 82 条，逐项见 §2）：
+
+| 归宿 | 条数 | 说明 |
+| --- | --- | --- |
+| 已交付（其中等价承接 4 条） | **67** | 有路由且有对应实现 |
+| 部分交付 | **2** | 工作台仪表盘、流水线详情页签 |
+| 批准不做 | **7** | 均有登记，见 §2 各表的「登记出处 / 说明」列 |
+| 环境阻塞 | **1** | 节点 shell（代码已交付，B200 无 node access pod） |
+| 未核实 | **5** | 商店 2（部署向导、商店应用详情）+ DevOps 3（cd/:cd、roles/:name、credentials/:credential_id） |
+| **小计** | **82** | 与 §1 的老路由计数一致 |
+
+另有**能力级**结论（不计入上面的 82 条路由，**不从分母删除**）：**待补 6 项**（见 §3）+ **环境阻塞 1 项**（通知渠道真实投递，集群无 webhook 接收方，`migration-status-20261116.md:22`）。
+
+**最重要的一句**：旧底稿「73 个页面真缺失、容器终端是架构级缺失、企业空间/DevOps/联邦/应用商店整块空白」**已被当前代码全面推翻**；本轮真正还缺的是 **6 项能力级缺口**（通知筛选条件、全局工具箱、工作台仪表盘卡片、流水线图形化编辑器、`/operations` 入口、DevOps 三个详情路由），不是页面。
+
+### 1. 路由计数（自己数，不复制旧数字）
+
+| 项 | 数 | 数法 |
+| --- | --- | --- |
+| 本作用域老路由 | **82** | 读 `console/src/pages/{console,access,settings,workspaces,apps,devops,fedprojects,clusters}/routes/*.js` 的 `path:` 字面量：console 7 + terminal 3（按 `pages/terminal/index.jsx:58-88` 的三种模式计）+ clusters 1 + access 5 + settings 8 + apps 7 + workspaces 18 + devops 11 + fedprojects 22 |
+| 新 UI 对应路由 | **49** | 数 `console/kube-frontend/apps/console-next/src/routes/` 的页面文件（`route.tsx` 是布局不计）：`$` 1 + clusters.index 1 + access 7 + settings 9（8 页 + 1 重定向）+ apps 2 + apps-manage 4 + workspaces 18 + devops 3 + kubectl/logs/events/audit-logs 4 |
+| 其中重定向 / 兜底 | 2 | `settings/notifications` 重定向、`routes/$.tsx` 兜底 |
+
+> **口径警告**：`prd/tools/gap_check.py:57-65` 的 `SCOPE_DIRS` 只含 clusters/projects/access/settings/apps/workspaces，**没有 console 与 terminal**。因此 `migration-status-20261116.md:9` 的「已迁移 91 / 未归类 0」**不覆盖本作用域这 10 条全局路由**。看到「0 缺口」不能推出本作用域已闭环。
+
+### 2. 逐能力对照表
+
+状态取：已交付 / 部分交付 / 待补 / 批准不做 / 环境阻塞 / 别处承接 / 未核实。
+
+#### 2.1 全局（老 10 条）
+
+| 老能力 | 老证据 | 新实现现状 | 归宿 | 登记出处 / 说明 |
+| --- | --- | --- | --- | --- |
+| 404 兜底 | `console/src/pages/console/routes/index.js:28`、`containers/NotFound/index.jsx:28-44` | `routes/$.tsx:5-6` → `components/NotFoundPage` | **已交付** | 旧「真缺失」被推翻 |
+| 工作台仪表盘（用户卡片/平台版本与集群数/资源统计/东巴入口/最近访问） | `containers/Dashboard/index.jsx:73-101`、`Dashboard/Admin/index.jsx:61-103`、`Admin/PlatformStatus/index.jsx:33-84`、`Admin/History/index.jsx:31-58` | `pages/workbench/WorkbenchPage.tsx:66-83` 只有标题 + 「集群→企业空间→项目」树 | **部分交付** | 仪表盘六类卡片全无；该页语义是「项目入口」不是「平台仪表盘」 |
+| 容器日志查询（独立窗口） | `containers/LogQuery/index.jsx:34` → `components/Modals/LogSearch` | `pages/cluster/ClusterLogsPage.tsx:32-66`（namespace/pod/container/keyword + 时间窗 + 直方图 + 分页） | **别处承接** | 功能等价，入口从「全局弹窗」改为「集群作用域页」；集群侧栏 `logs` 路由 |
+| 资源事件检索 | `containers/EventSearch/index.jsx:17` | `pages/cluster/ClusterEventsPage.tsx`（339 行）、路由 `clusters.$cluster/events` | **别处承接** | 同上 |
+| 审计日志检索 | `containers/AuditingSearch/index.jsx:17` | `pages/cluster/ClusterAuditLogsPage.tsx:35-66`（verb/resource/user/workspace + 时间窗 + 直方图） | **别处承接** | 同上 |
+| 账单/资源消费统计 | `containers/Bill/index.jsx:30-36` | 无 | **批准不做** | `migration-status-20261116.md:13-16`：「部署未启用计量组件，页面没有数据源」 |
+| 支持页 | `containers/Support/index.jsx:110-295` | 无 | **已删除** | 2026-11-17 从源码移除：路由、页面、`l10n-technicalSupport` 文案、11 个 `support-*.svg` 资源与 `supportLinks` 配置 |
+| 容器终端 | `components/Modals/ContianerTerminal/index.jsx:153-163`、`components/Terminal/index.jsx:35-39` | `pages/app-workloads/ContainerTerminal.tsx:19-20` → `components/resource/ExecConsoleDialog.tsx:44-51`；协议 `packages/api-client/src/exec.ts:27`（`v5.channel.k8s.io`）、`exec.ts:186`；BFF `server/src/upgrade.ts:11` | **已交付** | 旧「架构级缺失」被推翻。bash→sh 回退在 `ExecConsoleDialog.tsx:47-48` |
+| kubectl 控制台 | `containers/KubeCtl/index.jsx:140-152` | `pages/cluster/KubectlPage.tsx:23` → `KubectlConsoleDialog`；路由 `clusters.$cluster/kubectl` | **已交付** | 旧「真缺失」被推翻 |
+| 节点 shell | `pages/terminal/index.jsx:80-88` | `pages/cluster/NodeDetailPage.tsx:183-184`（`target={{ cluster, node }}`）→ `openNodeTerminalSession`（`packages/api-client/src/node-terminal.ts:19`） | **环境阻塞** | 代码已交付；`capability-matrix.md:107` 记「B200 上后端不起 node access pod，握手 101 但无数据帧」 |
+
+#### 2.2 访问控制与集群列表（老 6 条）
+
+| 老能力 | 老证据 | 新实现现状 | 归宿 | 说明 |
+| --- | --- | --- | --- | --- |
+| 集群列表 | `clusters/containers/Clusters/index.jsx:158-262` | `pages/cluster/MultiClusterListPage.tsx:86-127`（host/member 筛选 + host 置顶） | **已交付** | 分组改为「集群类型」筛选（`capability-matrix.md:119`）；卡片视图批准不做（同处 DEC-06） |
+| 用户列表：批量启停 | `access/containers/Accounts/index.jsx:118-152` | `pages/platform/PlatformListPage.tsx:359-365`（`onBulkAction` enable-users/disable-users） | **已交付** | 旧 R-01 被推翻 |
+| 用户列表：预置账号与自我保护 | `Accounts/index.jsx:36-41,147-151` | `PlatformListPage.tsx:246,267,274,279-295,356`（`isProtectedPlatformUser`） | **已交付** | 旧 R-02 被推翻 |
+| 用户详情：登录历史分页 | `Accounts/Detail/routes.js:26-32` | `pages/platform/LoginHistoryPanel.tsx:35,42,107-110`（`page`/`limit` 服务端分页） | **已交付** | 旧「无分页」被推翻 |
+| 用户详情：管理员重置密码 | `Accounts/Detail/index.jsx:92-102` | `pages/platform/UserResetPasswordDialog.tsx`（列表行操作 `resetPassword`，`PlatformListPage.tsx` 内） | **已交付** | 旧登记「另立功能点」已被实现推翻 |
+| 平台角色：规则编辑器（多规则 + 逐项动词） | `access/containers/Roles/index.jsx:60-73` | `pages/platform/RoleEditorDialog.tsx:13-14`（「rules are a list, not one line」）、`:152` 加规则、`:156` 逐条渲染、`:40-42` 编辑前读回现有规则 | **已交付** | 旧「只有一行」被推翻 |
+| 平台角色详情：已授权用户 | `Roles/Detail/routes.js:33-38`、`AuthorizedUsers/index.jsx:54-109` | `pages/platform/ClusterRoleDetailPage.tsx:29-33`（`roleBindingsApi.subjectsOf`） | **已交付** | 旧 R-03 被推翻。注意该文件 `:15-18` 的注释仍写着「not migrated here」，是**过期注释**，与 `:29-33` 的代码矛盾 |
+
+#### 2.3 平台设置（老 8 条）
+
+| 老能力 | 老证据 | 新实现现状 | 归宿 | 说明 |
+| --- | --- | --- | --- | --- |
+| 平台信息 | `settings/containers/BaseInfo/index.jsx:40-74` | `pages/platform/PlatformInfoPage.tsx`（路由 `settings/info`） | **已交付** | 另多「外观」分区 |
+| 第三方登录 | `settings/routes/index.js:46-49` | 无 | **批准不做** | `migration-status-20261116.md:15`：「登录方式由服务端注入，控制台没有写入路径」 |
+| 邮件/飞书/钉钉/企微/Slack/Webhook 六渠道 | `settings/routes/index.js:50-73` | `pages/platform/ChannelConfigPage.tsx:26-37`（一页渲染全部渠道）+ `channelDescriptors.ts:105-370`（CHANNELS 六个 key）；路由 `settings/{mail,feishu,dingtalk,wecom,slack,webhook}`；注册表 `areas/registry.ts:359-368` | **已交付** | 旧「5 个真缺失」被推翻 |
+| 渠道**筛选条件**（`alertSelector.matchExpressions`） | `components/Forms/Notification/BaseForm/index.jsx:157-181,224-228` | **无**：`channelDescriptors.ts:116-122` 的 mail 字段只有 host/port/requireTLS/username/password/from/recipients，无任何 alertSelector | **待补** | 见 §3-1 |
+| 渠道真实投递 | — | 代码已交付 | **环境阻塞** | `migration-status-20261116.md:22`：集群无 webhook 接收方 |
+
+#### 2.4 应用商店（老 7 条）
+
+| 老能力 | 老证据 | 新实现现状 | 归宿 | 说明 |
+| --- | --- | --- | --- | --- |
+| 商店浏览 | `apps/routes/index.js:64` | `routes/kube-frontend.apps/index.tsx` → `pages/appstore/AppStorePage.tsx` | **已交付** | 旧「真缺失 + 顶栏死链」被推翻 |
+| 应用详情 | `apps/routes/index.js:65` | `routes/kube-frontend.apps.$appId.tsx` → `AppStoreAppDetailPage` | **已交付** | 同上 |
+| 部署向导 | `apps/routes/index.js:66` | `pages/appstore/AppInstallDialog.tsx` | **未核实** | 有安装弹窗，是否等价于老的独立 `/apps/:appId/deploy` 多步页未逐一核对 |
+| 商店管理 | `apps/routes/index.js:40-44` | `routes/kube-frontend.apps-manage/store/index.tsx` → `StoreManagePage view="store"` | **已交付** | 死链已消除 |
+| 商店应用详情（4 页签） | `apps/routes/detail.js:22-25` | 无独立路由；`StoreManagePage` 内呈现 | **未核实** | 四页签是否齐全未核对 |
+| 分类管理 | `apps/routes/index.js:45-49` | `apps-manage/categories` | **已交付** | — |
+| 审核 | `apps/routes/index.js:50-54` | `apps-manage/reviews` | **已交付** | 老的 `reviews/:type` 子类型是否保留未核实 |
+
+#### 2.5 企业空间控制台（老 18 条）
+
+| 老能力 | 老证据 | 新实现现状 | 归宿 | 说明 |
+| --- | --- | --- | --- | --- |
+| 概览 + 资源用量 + 项目排行 | `workspaces/containers/Overview/index.jsx:30-67`、`Overview/ResourceUsage/index.jsx:94-116`、`Overview/UsageRanking/index.jsx:111-207` | `pages/workspace/WorkspaceOverviewPage.tsx:93-95,133-156`（用量：CPU/内存/Pod/网络收发；排行：Top5） | **已交付** | `capability-matrix.md:59` 有批次记录 |
+| 概览「集群信息」页签 | `workspaces/routes/overview.js:30-35` | 无 | **批准不做** | `capability-matrix.md:59`：「旧「集群信息」页签不做（空间详情无可用集群选择器）」 |
+| 项目列表 | `containers/Projects/index.jsx:316-350` | `pages/workspace/WorkspaceProjectsPage.tsx` | **已交付** | — |
+| 联邦项目列表 | `containers/FedProjects/index.jsx:203-227` | `pages/federated/FederatedProjectsPage.tsx` | **已交付** | — |
+| DevOps 工程列表（企业空间作用域） | `workspaces/containers/DevOps/index.jsx:226-257` | 企业空间作用域无 `devops` 路由；在 `clusters.$cluster/devops` | **别处承接** | `gap_check.py:105`、`migration-status-20261116.md:29` |
+| 应用 / 应用详情 / 仓库 / 仓库详情 | `routes/index.js:59-63`、`detail.js:35-42` | `workspaces.$workspace/{apps,apps/$appId,repos,repos/$repoId}` + `apps/instances` | **已交付** | `areas/registry.ts:324-340` 登记为 app-repos 区域 |
+| 基本信息 | `containers/BaseInfo/index.jsx:392-406` | `workspaces.$workspace/base-info` | **已交付** | 网络隔离开关是否随迁未核实 |
+| 配额 | `containers/QuotaManage/index.jsx:62-82` | `workspaces.$workspace/quota` + `pages/workspace/WorkspaceQuotaPage.tsx` | **已交付** | `capability-matrix.md:29`：只读表；空间级 CR 编辑批准不做 |
+| 角色 / 角色详情 | `routes/index.js:79-83`、`detail.js:31-34` | `workspaces.$workspace/roles(/$name)` + `WorkspaceRolesPage/WorkspaceRoleDetailPage` | **已交付** | — |
+| 成员 / 成员详情 | `routes/index.js:84-88`、`detail.js:27-30` | `workspaces.$workspace/members(/$name)` + `WorkspaceMembersPage/WorkspaceMemberDetailPage` | **已交付** | `capability-matrix.md:27` |
+| 用户组（部门树） | `containers/Groups/index.jsx:236-281` | `workspaces.$workspace/user-groups` + `WorkspaceUserGroupsPage` | **已交付** | `capability-matrix.md:30`；watch 实时刷新批准不做 |
+
+#### 2.6 DevOps 工程（老 11 条）
+
+| 老能力 | 老证据 | 新实现现状 | 归宿 | 说明 |
+| --- | --- | --- | --- | --- |
+| 工程详情 7 页签（基本信息/流水线/CD/代码仓库/成员/角色/凭证） | `devops/routes/index.js:42-53` | `pages/devops/DevopsProjectDetailPage.tsx:73-83`（TAB_ORDER 七项，顺序照 `devopsNavs`） | **已交付** | 旧「11 页全缺」被推翻 |
+| 流水线列表 + 创建/编辑/复制/删除 | `containers/Pipelines/PipelinesList/index.jsx` | `DevopsProjectDetailPage.tsx` pipelines 页签 + `DevopsDialogs` | **已交付** | `capability-matrix.md:34` |
+| 流水线详情（老 9 个页签 + 图形化编辑器 + 运行日志） | `containers/Pipelines/Detail/{Activity,Artifacts,Branch,CodeQuality,Commit,Events,Parameters,PullRequest,TaskStatus}`、`components/Pipeline/StepsEditor`、`PipelineLogDialog` | `pages/devops/PipelineDetailPage.tsx:65`（`TABS = ['runs','config']`）：运行列表/重放/运行日志 `:431-450`、Jenkinsfile 编辑 `:453-490` | **部分交付** | 运行日志与 Jenkinsfile 已交付；**图形化 StepsEditor 与老 7 个页签（Artifacts/Branch/Commit/CodeQuality/PullRequest/TaskStatus/Events）无对应**，见 §3-4 |
+| CD 列表 + 白名单 | `containers/CD/CDList/index.jsx` | `DevopsProjectDetailPage.tsx` cd 页签（`devops-cd` 查询 `:170-173`） | **已交付** | — |
+| CD 详情（FluxApp/SyncStatus） | `devops/routes/detail.js:35-38` | 无独立路由 | **未核实** | 页签内是否呈现同步状态未核对 |
+| 代码仓库导入 | `containers/CodeRepo/CRList/index.jsx` | code-repo 页签 | **已交付** | — |
+| 角色查看 / 角色详情 | `routes/index.js:50`、`detail.js:39-42` | roles 页签 | **未核实** | 老有独立 `roles/:name` 详情，新为页签内查看 |
+| 凭证列表 + 详情 | `routes/index.js:52`、`detail.js:31-34` | credentials 页签 + `CredentialFormDialog`（四类型 CRUD） | **已交付** | 老 `credentials/:credential_id` 的 detail/activity 两页签是否等价未核实 |
+| 成员 | `routes/index.js:51` | members 页签（邀请/改角色/移除） | **已交付** | `capability-matrix.md:34` |
+
+#### 2.7 联邦项目（老 22 条）
+
+| 老能力 | 老证据 | 新实现现状 | 归宿 | 说明 |
+| --- | --- | --- | --- | --- |
+| 13 类联邦资源列表（applications/deployments/statefulsets/services/ingresses/volumes/configmaps/secrets/base-info + 其他） | `fedprojects/routes/index.js:47-79` | `pages/federated/FederatedProjectDetailPage.tsx:41`（6 页签 overview/workloads/config/storage/metadata/events）+ `:49-65`（12 个 Federated 类型，含 `federatedapplications`） | **已交付**（等价承接） | 13 个列表页折叠为 4 个分组页签 |
+| 9 个详情路由 | `fedprojects/routes/detail.js:29-66` | `federatedprojects/$name/$resource/$object` → `FederatedResourceDetailPage.tsx:32`（definition/events 两页签） | **已交付**（等价承接） | 一个通用资源详情替代 9 个专用详情 |
+| 网关 / 日志收集 / 配额 三页 | `fedprojects/routes/index.js:73-79` | 无 | **批准不做** | `capability-matrix.md:37`：「22 条老详情中的网关/日志/配额/成员页签与逐集群 overrides 编辑器批准不做」 |
+| 写能力（创建/编辑/调整集群/删除） | `containers/FedProjects/index.jsx:73-133` | `pages/federated/FederatedProjectDialogs.tsx` + `FederatedProjectsPage` | **已交付** | `capability-matrix.md:37`（两步写入 + 失败回滚 + SSAR 门控） |
+
+#### 2.8 壳层与顶栏
+
+| 老能力 | 老证据 | 新实现现状 | 归宿 | 说明 |
+| --- | --- | --- | --- | --- |
+| 平台下拉（按权限裁剪） | `components/Layout/Header/index.jsx:124-135`、`core/global.js:141-199` | `shell/AppShell.tsx` MODULES → 平台管理子菜单 | **部分交付** | 入口在；老 `checkNavItem` 的 `ksModule`/`admin`/`authKey` 逐项裁剪**未核实**是否等价 |
+| 平台切换 | `Header/index.jsx:62-108` | `AppShell.tsx:124-149`（compute/model/agent/ecosystem 四个） | **已交付** | 老第 5 个入口 `/operations`（治理）无对应，见 §3-5 |
+| 语言切换 | `Modals/UserSetting/BaseInfo/index.jsx:89-97` | `AppShell.tsx:640-644,796` | **已交付**（改进：localStorage 不刷新） | `design/kube-frontend/user-settings/_index.md:106`（GOT-03） |
+| 主题 | 老无 | `AppShell.tsx:813` ThemeToggle | **已交付**（新增） | 超出旧版 |
+| 用户菜单「关于」 | `Layout/LoginInfo/index.jsx:87-89,101-104` | `shell/AboutDialog.tsx:25`、`AppShell.tsx:956-958,973` | **已交付** | 旧 R-06 被推翻；`capability-matrix.md:79` 登记 `USER_SETTINGS-ABOUT-01` |
+| 帮助/文档外链 | `Header/index.jsx:110-122,192-196` | 无（`AppShell.tsx` 内 `help|docs|documentation` 零命中） | **批准不做** | `capability-matrix.md:79`：「帮助外链…明确不做（部署无文档站点，链接会落到 SPA 兜底页）」 |
+| 密码强度指示器 | `Modals/UserSetting/PasswordSetting/index.jsx:124-131` | `components/password/PasswordStrength.tsx:37,52` + `shell/UserSettingsDialog.tsx:357` | **已交付** | 旧 R-08 被推翻（`capability-matrix.md:126` R-31） |
+| 全局工具箱 KubeTools（6 工具悬浮球） | `core/layouts/Base/index.jsx:144`、`components/KubeTools/index.jsx:74-151` | **无**（`grep -rn "Draggable|toolbox|float"` 在 `console-next/src` 零命中） | **待补** | 见 §3-2 |
+
+### 3. 仍然缺失的能力（按严重度排序）
+
+| # | 能力 | 老证据 | 新 UI 现状 | 影响 | 严重度 |
+| --- | --- | --- | --- | --- | --- |
+| 1 | **通知渠道筛选条件** `alertSelector.matchExpressions` | `components/Forms/Notification/BaseForm/index.jsx:157-181,224-228` + `BaseForm/ConditionSelect/index.jsx` | 无。`ChannelConfigPage.tsx:202-222` 只渲染 descriptor 里的传输/收件人字段；`channelDescriptors.ts:116-122` 无 alertSelector | 渠道无法按告警级别/规则过滤，**所有渠道对全部告警发送**。这是通知路由的核心字段 | 高 |
+| 2 | **全局工具箱 KubeTools** | `core/layouts/Base/index.jsx:144`（每页挂载）、`components/KubeTools/index.jsx:74-151`（6 项 + 第三方工具 + Shift 新窗口 + 位置记忆） | 无对应物 | 6 个工具入口消失；其中 logquery/eventsearch/auditingsearch 已改为集群作用域页（可绕行），`/kubeConfig` 由 `UserKubeconfigDialog` 承接，kubectl 由 `clusters/$cluster/kubectl` 承接。**没有任何一处能一屏触达全部工具** | 中高 |
+| 3 | **工作台仪表盘卡片** | `Dashboard/Admin/index.jsx:61-103`（版本/集群数/东巴双入口）、`PlatformStatus/index.jsx:33-84`（企业空间/用户/应用模板计数）、`Admin/History/index.jsx:31-58`（最近访问 8 条） | `WorkbenchPage.tsx:66-83` 只有标题与项目树 | 平台管理员失去「平台整体状况」与「最近访问」的落地页；工作台语义从「仪表盘」变成「项目入口」 | 中高 |
+| 4 | **流水线图形化编辑器 + 老 7 个详情页签** | `devops/components/Pipeline/StepsEditor/*`、`StepsSelector`、`StepModals/*`（十余种步骤）、`Pipelines/Detail/{Artifacts,Branch,Commit,CodeQuality,PullRequest,TaskStatus,Events}` | `PipelineDetailPage.tsx:65` 仅 `['runs','config']`；配置是 Jenkinsfile 文本框 `:453-490` | 不写 Jenkinsfile 就无法编辑流水线；制品/提交记录/代码质量/PR/任务状态六类信息无入口 | 中高 |
+| 5 | **顶栏 `/operations`（治理）入口** | `components/Layout/Header/index.jsx:87-92` | `AppShell.tsx:124-149` 只有 4 个平台 | 若部署的 `config.portal` 配了 operations，用户失去该入口。**是否启用未核实** | 低 |
+| 6 | **DevOps 三个详情路由** `cd/:cd`、`roles/:name`、`credentials/:credential_id` | `devops/routes/detail.js:31-42` | 无独立路由，折叠进页签/弹窗 | 深链接不可用；凭证的 activity（使用记录）页签、CD 的 FluxApp/SyncStatus 明细未核实是否呈现 | 低 |
+
+补充说明：第 1、2 项是**旧底稿报过、复验后确认仍然缺**的；第 3 项旧底稿报「6 项差距」，复验确认 6 项全缺（页面未变）；第 4 项旧底稿报「11 页全缺」，复验后降级为「页签与编辑器缺」。
+
+### 4. 本轮推翻的旧结论
+
+> 这是复验价值最大的部分：旧底稿说缺、当前代码已交付。共 **17 条**。
+
+| # | 旧结论（2026-11-14） | 当前事实 | 证据 |
+| --- | --- | --- | --- |
+| 1 | `/404` 真缺失，无兜底路由 | 已交付兜底路由 | `routes/$.tsx:5-6` |
+| 2 | 容器终端/kubectl/节点 shell 是**架构级缺失**（api-client 无 exec 端点、BFF 无 WebSocket upgrade） | 三者全部交付；api-client 有 `exec.ts`/`node-terminal.ts`，BFF 有 `upgrade.ts` | `packages/api-client/src/exec.ts:27,186`、`node-terminal.ts:19`、`server/src/upgrade.ts:11` |
+| 3 | 应用商店 7 页全缺，且顶栏 2 个入口是死链 | 5 条路由已交付（浏览/详情/商店管理/分类/审核），死链消除 | `routes/kube-frontend.apps/{index.tsx,$appId.tsx}`、`apps-manage/{store,categories,reviews}` |
+| 4 | 通知渠道 5 个（飞书/钉钉/企微/Slack/Webhook）真缺失 | 六渠道全部交付，且用一张 descriptor 表驱动 | `pages/platform/ChannelConfigPage.tsx:26-37`、`channelDescriptors.ts:105-370`、`areas/registry.ts:359-368` |
+| 5 | 企业空间 18 路由「全部真缺失」，`WorkspaceDetailPage` 不是替代 | 17 条已交付（devops 别处承接），形成完整企业空间控制台 | `routes/kube-frontend.workspaces.$workspace/**`（27 个文件）、`pages/workspace/*`（10 个页面） |
+| 6 | DevOps 工程 11 页全缺 | 7 页签 + 流水线详情已交付 | `pages/devops/DevopsProjectDetailPage.tsx:73-83`、`PipelineDetailPage.tsx` |
+| 7 | 联邦项目 22 页全缺 | 列表 + 6 页签详情 + 通用资源详情已交付 | `pages/federated/FederatedProjectDetailPage.tsx:41`、`FederatedResourceDetailPage.tsx:32` |
+| 8 | 用户列表缺批量启用/停用 | 已交付，且过滤受保护账号 | `PlatformListPage.tsx:359-365` |
+| 9 | 用户列表保护面缩到只剩 `admin` | 已改为 `isProtectedPlatformUser`（预置账号 + 自己） | `PlatformListPage.tsx:246,356` |
+| 10 | 平台角色详情缺「已授权用户」页签 | 已交付（读 RoleBinding subjects） | `ClusterRoleDetailPage.tsx:29-33` |
+| 11 | 平台角色规则只能编辑一行 | 已交付多规则编辑器，编辑前读回现有规则 | `RoleEditorDialog.tsx:13-14,40-42,152-156` |
+| 12 | 用户登录历史无分页 | 已交付服务端分页 | `LoginHistoryPanel.tsx:35,42,107-110` |
+| 13 | 「管理员重置他人密码」登记为**有意不迁移** | 已交付 | `pages/platform/UserResetPasswordDialog.tsx` |
+| 14 | 用户菜单缺「关于」 | 已交付 | `shell/AboutDialog.tsx:25`、`AppShell.tsx:956-958` |
+| 15 | 缺密码强度指示器 | 已交付 | `components/password/PasswordStrength.tsx:37,52` |
+| 16 | 集群列表缺 host/成员分组 | 已交付「集群类型」筛选 + host 置顶（卡片视图批准不做） | `MultiClusterListPage.tsx:86-127` |
+| 17 | `/logquery`、`/eventsearch`、`/auditingsearch` 真缺失 | 三条均以集群作用域页承接 | `pages/cluster/{ClusterLogsPage,ClusterEventsPage,ClusterAuditLogsPage}.tsx` |
+
+**一处需要一并纠正的文档漂移**：`pages/platform/ClusterRoleDetailPage.tsx:15-18` 的注释仍写「the users it was granted to … is not migrated here」，而同一文件 `:29-33` 已经在读 `roleBindingsApi.subjectsOf`。**代码已交付、注释过期**，读注释会得出错误结论。
+
+### 5. 旧正文
+
+以下正文是 **2026-11-14 基线**，保留作为历史证据与源码线索（老侧 `路径:行号` 仍然有效，新侧结论多数已被 §2/§4 推翻）。**不得再作为当前状态引用。**
+
+---
+
+# 历史正文（2026-11-14 基线，不再作为当前状态）
 
 ## 0. 结论摘要
 
@@ -65,7 +249,7 @@
 | EventSearch 资源事件检索 | `/eventsearch` | 无 | **真缺失** | `console/routes/index.js:31` → `containers/EventSearch/index.jsx:17` → `components/Modals/EventSearch`。新 UI 无 |
 | AuditingSearch 审计日志检索 | `/auditingsearch` | 无 | **真缺失** | `console/routes/index.js:32` → `containers/AuditingSearch/index.jsx:17` → `components/Modals/AuditingSearch`。新 UI 无 |
 | Bill 资源消费统计 | `/bill` | 无 | **真缺失** | `console/routes/index.js:33` → `containers/Bill/index.jsx:30-36` → `components/Modals/Bill`。新 UI 无 |
-| Support 支持 | `/support` | 无 | **真缺失** | `console/routes/index.js:34` → `containers/Support/index.jsx:110-295`：社区支持 4 个入口（文档/论坛/Issue/Slack）、仓库/贡献/Star、工单支持、KSE/KSC 两个产品卡片。新 UI 无 |
+| Support 支持 | `/support` | 已删除 | — | 2026-11-17 从源码移除（路由 + 页面 + 文案 + 资源 + `supportLinks` 配置），不再是缺口 |
 | 容器终端（独立窗口） | `/terminal/...` | 无 | **真缺失** | `pages/terminal/index.jsx:57-91` 按路径分流三种模式。容器终端：`components/Modals/ContianerTerminal/index.jsx:153-163`（左终端 + 右容器信息：状态/镜像/命令/requests/limits/重启次数，容器可切换 `TypeSelect`） |
 | kubectl 终端（独立窗口） | `/terminal/kubectl/:cluster` | 无 | **真缺失** | `pages/terminal/index.jsx:70-78` → `components/Modals/KubeCtl/index.jsx:140-152`（多集群下拉切换 `renderTips` 121-138 + kubectl 用法文档 + 全屏终端） |
 | 节点终端（独立窗口） | `/terminal/nodename/:node` | 无 | **真缺失** | `pages/terminal/index.jsx:80-88` → 同一 `KubeCtl` 组件带 `nodename` |
