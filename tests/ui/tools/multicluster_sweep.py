@@ -969,6 +969,55 @@ def sweep_keyboard(app: str, token: str | None, clusters: list[str], workspace: 
         browser.close()
     return results
 
+#: Pages walked by `--locale-scan`: a spread of the shapes that carry copy (overview panels, a wide
+#: table, a project page, a settings form).
+LOCALE_PAGES = (
+    ('overview', 'cluster'),
+    ('nodes', 'cluster'),
+    ('configmaps', 'project'),
+    ('info', 'settings'),
+)
+
+
+def sweep_locale(app: str, token: str, cluster: str, workspace: str, project: str, locale: str) -> list[dict]:
+    """Look for untranslated identifiers rendered as text.
+
+    A missing translation shows up as `network.ippool` or `appRepos.title` in the middle of a sentence.
+    Matching the shape `a.b.c` is crude but it found two real leaks on the cluster overview that no
+    Chinese-language walkthrough made obvious.
+    """
+    import re
+
+    from playwright.sync_api import sync_playwright
+
+    # A locale key's segment after the dot is lowercase (`network.ippool`); a sentence boundary is not
+    # (`…instead. Read the docs` reads as `instead.Read` once newlines are flattened).
+    pattern = re.compile(r'\b[a-z][a-zA-Z0-9]*\.[a-z][a-zA-Z0-9.]{3,}\b')
+    results: list[dict] = []
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        context = browser.new_context(viewport={'width': 1500, 'height': 1000})
+        page = context.new_page()
+        _open_app(page, app, token)
+        page.evaluate("value => localStorage.setItem('kube-frontend-locale', value)", locale)
+        page.reload(wait_until='domcontentloaded')
+        page.wait_for_timeout(4000)
+        for segment, scope in LOCALE_PAGES:
+            if scope == 'project':
+                url = f'{app}/kube-frontend/{workspace}/clusters/{cluster}/projects/{project}/{segment}'
+            elif scope == 'settings':
+                url = f'{app}/kube-frontend/settings/{segment}'
+            else:
+                url = f'{app}/kube-frontend/clusters/{cluster}/{segment}'
+            page.goto(url, wait_until='domcontentloaded')
+            page.wait_for_timeout(9000)
+            text = page.evaluate('() => document.body.innerText')
+            # Drop the sentences that merely contain a period: only standalone identifiers matter.
+            found = sorted({match for match in pattern.findall(text) if not match.endswith('.')})
+            results.append({'page': segment, 'locale': locale, 'raw': found[:6]})
+        browser.close()
+    return results
+
 def baseline(args, token: str, clusters: list[str], allowed: set[str] | None = None, creds: tuple[str, str] | None = None) -> int:
     """Everything that has to hold on a multi-cluster install, in one command.
 
@@ -1087,6 +1136,8 @@ def main() -> int:
     parser.add_argument('--keyboard', action='store_true', help='walk the tab order of a few pages')
     parser.add_argument('--keyboard-local', action='store_true', help='walk only the login page (no cluster needed)')
     parser.add_argument('--budget', type=int, default=1800, help='abort the whole run after this many seconds (default 1800)')
+    parser.add_argument('--locale-scan', action='store_true', help='look for untranslated identifiers on a few pages')
+    parser.add_argument('--locale', default='en', help='locale used by --locale-scan (default en)')
     args = parser.parse_args()
 
     with_budget(args.budget)
@@ -1102,6 +1153,15 @@ def main() -> int:
     default_pages = PROJECT_PAGES if args.scope == 'project' else PAGES
     pages = tuple(p.strip() for p in args.pages.split(',') if p.strip()) or default_pages
     clusters = [c.strip() for c in args.clusters.split(',') if c.strip()]
+
+    if args.locale_scan:
+        rows = sweep_locale(args.app, token, clusters[0], args.workspace, args.project, args.locale)
+        bad = 0
+        for row in rows:
+            bad += 0 if not row['raw'] else 1
+            flag = 'OK  ' if not row['raw'] else 'FAIL'
+            print(f"{flag} {row['locale']} {row['page']:12s} raw={row['raw']}")
+        return 1 if bad else 0
 
     if args.keyboard_local:
         checks = sweep_a11y_local(args.app)
