@@ -142,3 +142,39 @@ function asLoginError(cause: unknown): ApiError {
   if (!serverCode || serverCode === cause.code) return cause;
   return new ApiError({ code: serverCode, message: cause.message, status: cause.status }, cause.status);
 }
+
+/**
+ * Turn a login failure into a phrase key, or `undefined` when the message should be shown as-is.
+ *
+ * Lives here rather than in the page so the branches can be tested without a browser: the mapping
+ * is the whole behaviour, and every branch is a different sentence the operator reads.
+ *
+ * The 403/404/405 branch exists because a backend without `login.oauth.kubesphere.io` answers with a
+ * k8s Status body (measured 2026-11-18). That is not a wrong password, and showing the Status text
+ * verbatim leaves the reader with `system:anonymous cannot create resource "login"`.
+ */
+export type LoginPhraseKey =
+  | 'login.invalidCredentials'
+  | 'login.tooManyAttempts'
+  | 'login.upstreamUnreachable'
+  | 'login.accountNotActive'
+  | 'login.backendUnsupported';
+
+export function loginPhraseKey(failure: { code?: string; status?: number }): LoginPhraseKey | undefined {
+  // A specific code wins over the status: a disabled account answers 403 too, and telling that
+  // operator "your backend cannot sign in" would send them to the wrong person.
+  switch (failure.code) {
+    case 'invalid_credentials':
+      return 'login.invalidCredentials';
+    case 'too_many_attempts':
+      return 'login.tooManyAttempts';
+    case 'upstream_unreachable':
+      return 'login.upstreamUnreachable';
+    case 'account_not_active':
+      return 'login.accountNotActive';
+    default:
+      break;
+  }
+  if (failure.status === 403 || failure.status === 404 || failure.status === 405) return 'login.backendUnsupported';
+  return undefined;
+}

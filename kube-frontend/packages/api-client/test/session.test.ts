@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createClient } from '../src/client';
-import { sessionApi } from '../src/session';
+import { loginPhraseKey, sessionApi } from '../src/session';
 import { userFromToken, isTokenExpired } from '../src/token';
 
 /**
@@ -145,5 +145,31 @@ describe('login copy helpers', () => {
     // blank password must still reach the server and be refused there.
     await api.login({ username: 'admin', password: '' }).catch(() => undefined);
     expect(fetchImpl).toHaveBeenCalled();
+  });
+});
+
+describe('login failure phrasing', () => {
+  /*
+   * Every branch is a different sentence the operator reads, so each one is pinned. The 403 case is
+   * the one that motivated the table: a backend without `login.oauth.kubesphere.io` answers with a
+   * k8s Status body, and pasting it verbatim left the reader with
+   * `system:anonymous cannot create resource "login"`.
+   */
+  it('maps the codes the server sends', () => {
+    expect(loginPhraseKey({ code: 'invalid_credentials', status: 401 })).toBe('login.invalidCredentials');
+    expect(loginPhraseKey({ code: 'too_many_attempts', status: 429 })).toBe('login.tooManyAttempts');
+    expect(loginPhraseKey({ code: 'upstream_unreachable', status: 502 })).toBe('login.upstreamUnreachable');
+    expect(loginPhraseKey({ code: 'account_not_active', status: 403 })).toBe('login.accountNotActive');
+  });
+
+  it('treats a missing sign-in route as an unsupported backend', () => {
+    expect(loginPhraseKey({ status: 403 })).toBe('login.backendUnsupported');
+    expect(loginPhraseKey({ status: 404 })).toBe('login.backendUnsupported');
+    expect(loginPhraseKey({ status: 405 })).toBe('login.backendUnsupported');
+  });
+
+  it('leaves an unknown failure to the caller', () => {
+    expect(loginPhraseKey({ code: 'something_else', status: 400 })).toBeUndefined();
+    expect(loginPhraseKey({ status: 500 })).toBeUndefined();
   });
 });

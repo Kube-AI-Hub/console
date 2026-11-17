@@ -28,10 +28,22 @@ if (cause.status === 403 || cause.status === 404 || cause.status === 405) {
 
 文案：中文「当前后端不支持这种登录方式（需要更新的 ks-apiserver）」/ 英文对应句。
 
+## 落点调整：分支表移进 api-client
+
+页面里的 `phraseLoginError` 无法在不启浏览器的情况下测试，所以把**分支表**抽成
+`api-client` 的纯函数 `loginPhraseKey({ code, status })`，页面只负责把 key 交给 `t()`。
+
+## 一处优先级修正
+
+第一版先判状态码再判错误码，结果 `code=account_not_active` + `status=403` 被判成「后端不支持登录」——
+会把被停用的账号送去查后端。改为**具体错误码优先**，状态码只作兜底。
+
 ## 验证
 
 | 检查 | 结果 |
 | --- | --- |
+| 单元测试 | `loginPhraseKey` 三条（四种码、三种状态码、未知情况留给调用方） |
+| api-client | 50 文件 / **477 passed** |
 | `tsc` | 0 |
 | 契约套件 | 18 文件 / 1569 passed |
 

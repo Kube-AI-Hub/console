@@ -362,7 +362,8 @@ export type {
   SessionApi,
   SessionUser,
 } from './session';
-export { isLoginErrorCode, sessionApi } from './session';
+export { isLoginErrorCode, loginPhraseKey, sessionApi } from './session';
+export type { LoginPhraseKey } from './session';
 export {
   pausedStrategy,
   resumedStrategy,

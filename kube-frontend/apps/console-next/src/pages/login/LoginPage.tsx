@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ApiError, isLoginErrorCode } from '@kube-ai-hub/api-client';
+import { ApiError, loginPhraseKey } from '@kube-ai-hub/api-client';
 import { AiButton, AiSurface, Alert, Button, Input, InputPassword, Label, cn } from '@kube-ai-hub/ui';
 import type { AiSurfaceState } from '@kube-ai-hub/ai-surface';
 import { actionProps } from '@kube-ai-hub/ai-surface';
@@ -211,18 +211,9 @@ export function navigateAfterLogin(location: Location = window.location): void {
  */
 function phraseLoginError(cause: unknown, t: ReturnType<typeof useT>): string {
   if (cause instanceof ApiError) {
-    const code = isLoginErrorCode(cause.code) ? cause.code : undefined;
-    if (code === 'invalid_credentials') return t('login.invalidCredentials');
-    if (code === 'too_many_attempts') return t('login.tooManyAttempts');
-    if (code === 'upstream_unreachable') return t('login.upstreamUnreachable');
-    if (code === 'account_not_active') return t('login.accountNotActive');
-    // A 403/404/405 on the login route is not a wrong password: the backend does not offer this
-    // sign-in at all (measured 2026-11-18: a ks-apiserver without `login.oauth.kubesphere.io`
-    // answers 403 with a k8s Status body). Showing that Status verbatim leaves the operator reading
-    // `system:anonymous cannot create resource "login"`, which says nothing they can act on.
-    if (cause.status === 403 || cause.status === 404 || cause.status === 405) {
-      return t('login.backendUnsupported');
-    }
+    // The branch table lives in the api-client so it can be tested without a browser.
+    const key = loginPhraseKey(cause);
+    if (key) return t(key);
     return cause.message || t('login.failed');
   }
   return t('login.failed');
