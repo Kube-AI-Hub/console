@@ -52,6 +52,16 @@ default    viewer    2026-03-31 10:58:07
 **顺带发现**：聚合网关 `/kapis/resources.kubesphere.io/v1alpha3/...` 对 RoleBinding 是**只读**的
 （POST 返回 405），写要走原生 `/apis/rbac.authorization.k8s.io/v1/...`。
 
+## 多角色并存（已补验）
+
+同一项目建两条绑定（viewer + editor，都指向 `test`）后，列显示：
+
+```
+default    editor, viewer    2026-03-31 10:58:07
+```
+
+**按名称排序、去重后拼接**，与单元测试的期望一致。两条绑定随后删除并复核 `404`，无残留。
+
 ## 未覆盖
 
-多角色并存（同一项目两个 RoleBinding）未在真实环境验证；单元测试覆盖了合并逻辑。
+项目角色**编辑**（在 UI 里增删绑定）未做——当前只读展示。
