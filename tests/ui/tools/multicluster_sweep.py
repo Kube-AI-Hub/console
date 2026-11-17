@@ -26,6 +26,19 @@ import os
 import urllib.error
 import urllib.request
 
+#: Workspace-scoped pages. They do not belong to a cluster at all, so they were the one whole area
+#: the sweep never visited.
+WORKSPACE_PAGES = (
+    'overview',
+    'base-info',
+    'members',
+    'user-groups',
+    'projects',
+    'devops',
+    'quota',
+    'roles',
+)
+
 #: Project-scoped pages, by route segment, used with `--scope project`.
 PROJECT_PAGES = (
     'overview',
@@ -118,6 +131,8 @@ def page_url(app: str, cluster: str, segment: str, scope: str, workspace: str, p
     """The console URL of one page, in either scope."""
     if scope == 'project':
         return f'{app}/kube-frontend/{workspace}/clusters/{cluster}/projects/{project}/{segment}'
+    if scope == 'workspace':
+        return f'{app}/kube-frontend/workspaces/{workspace}/{segment}'
     return f'{app}/kube-frontend/clusters/{cluster}/{segment}'
 
 
@@ -1025,6 +1040,29 @@ def sweep_locale(app: str, token: str, cluster: str, workspace: str, project: st
         browser.close()
     return results
 
+def resolve_workspace(bff: str, token: str, wanted: str) -> str:
+    """Return a workspace name that actually exists.
+
+    The URL segment of a project page is decorative (project pages key off cluster+namespace), so a
+    wrong `--workspace` still produced green project reads while every workspace-scope page 404'd.
+    Workspace pages do use the name, so resolve it once instead of trusting the flag.
+    """
+    status, text = _call(bff, token, 'GET', f'/kapis/tenant.kubesphere.io/v1alpha2/workspaces/{wanted}')
+    if status == 200:
+        return wanted
+    status, text = _call(bff, token, 'GET', '/kapis/tenant.kubesphere.io/v1alpha2/workspaces?limit=-1')
+    if status != 200:
+        return wanted
+    try:
+        names = [item['metadata']['name'] for item in json.loads(text).get('items', [])]
+    except (ValueError, KeyError, TypeError):
+        return wanted
+    if not names:
+        return wanted
+    chosen = 'system-workspace' if 'system-workspace' in names else names[0]
+    print(f"workspace: '{wanted}' 不存在，改用 '{chosen}'（可用：{', '.join(names[:4])}）")
+    return chosen
+
 def baseline(args, token: str, clusters: list[str], allowed: set[str] | None = None, creds: tuple[str, str] | None = None) -> int:
     """Everything that has to hold on a multi-cluster install, in one command.
 
@@ -1044,7 +1082,7 @@ def baseline(args, token: str, clusters: list[str], allowed: set[str] | None = N
         token = fresh
     failures = 0
 
-    for scope, pages in (('cluster', PAGES), ('project', PROJECT_PAGES)):
+    for scope, pages in (('cluster', PAGES), ('project', PROJECT_PAGES), ('workspace', WORKSPACE_PAGES)):
         rows = sweep(args.app, token, clusters, pages, scope, args.workspace, args.project, args.bff, creds)
         broken = [row for row in rows if row['state'] == 'error' and f"{row['cluster']}:{row['page']}" not in allowed]
         noisy = [row for row in rows if row['errors'] and f"{row['cluster']}:{row['page']}" not in allowed]
@@ -1127,7 +1165,7 @@ def main() -> int:
     parser.add_argument('--bff', default='http://127.0.0.1:8093')
     parser.add_argument('--clusters', default='host')
     parser.add_argument('--pages', default='')
-    parser.add_argument('--scope', default='cluster', choices=('cluster', 'project'))
+    parser.add_argument('--scope', default='cluster', choices=('cluster', 'project', 'workspace'))
     parser.add_argument('--workspace', default='public')
     parser.add_argument('--project', default='spaces')
     parser.add_argument('--env-file', default='.env')
@@ -1154,10 +1192,14 @@ def main() -> int:
     # kill a standalone run before it printed anything.
     # The login page needs no session, so the local walk must not be gated on the cluster being up.
     token = None if args.keyboard_local else preflight(args.app, args.bff, (env.get('KA_USERNAME', 'admin'), env.get('KA_PASSWORD', '')))
+    if token:
+        args.workspace = resolve_workspace(args.bff, token, args.workspace)
     if token is None and not args.keyboard_local:
         print('NOT RUN: the environment is not usable (see the preflight lines above)')
         return 2
-    default_pages = PROJECT_PAGES if args.scope == 'project' else PAGES
+    default_pages = (
+        PROJECT_PAGES if args.scope == 'project' else WORKSPACE_PAGES if args.scope == 'workspace' else PAGES
+    )
     pages = tuple(p.strip() for p in args.pages.split(',') if p.strip()) or default_pages
     clusters = [c.strip() for c in args.clusters.split(',') if c.strip()]
 

@@ -316,3 +316,28 @@ python3 tools/multicluster_sweep.py … --budget 600
 
 超时后打印 `ABORTED: budget of N s exceeded` 并**退出码 3**——与「跑完但有缺陷」(1)、「环境不可用」(2) 区分。
 
+## 19. 企业空间作用域：整个区域此前没有被巡检过
+
+巡检只覆盖了集群级与项目级，**企业空间（workspace）的八个页面从来没被走过**。本轮补上 `--scope workspace`：
+
+```bash
+python3 tools/multicluster_sweep.py --env-file <env> --app http://localhost:5182 \
+  --bff http://127.0.0.1:8093 --scope workspace --clusters host
+```
+
+```
+OK host overview    ready rows=8   OK base-info ready rows=7   OK members   ready rows=3
+OK host user-groups ready rows=12  OK projects  ready rows=16  OK devops    empty rows=0
+OK host quota       empty rows=0   OK roles     ready rows=4
+```
+
+### 踩坑：`--workspace` 写错，项目级照样全绿
+
+项目页的 URL 里那段 workspace 是**装饰性的**（页面靠 cluster+namespace 取数），所以 `--workspace workspace`
+这种不存在的名字**不会**让项目级变红；但企业空间页真的用它，于是八页全 404。
+
+现在工具会先解析：给定的名字取不到就退到 `system-workspace`（或第一个可用），并打印：
+
+```
+workspace: 'workspace' 不存在，改用 'system-workspace'（可用：telco, fsi, public, system-workspace）
+```
