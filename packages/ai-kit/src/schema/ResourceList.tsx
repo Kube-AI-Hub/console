@@ -169,7 +169,20 @@ export interface ListSchema<TRow> {
    * the checkbox and keeps the row out of select-all.
    */
   isRowSelectable?: (row: TRow) => boolean;
-  empty?: { title?: React.ReactNode; description?: React.ReactNode };
+  empty?: {
+    /** Shown when the collection itself is empty. */
+    title?: React.ReactNode;
+    description?: React.ReactNode;
+    /**
+     * Shown when the collection has rows but the current search/filters exclude them all.
+     *
+     * "Nothing here yet" and "nothing matches what you typed" are different answers, and a reader
+     * who typed a query needs the second one. Pages may override it; the component supplies a
+     * neutral default so every list distinguishes the two states.
+     */
+    noMatchTitle?: React.ReactNode;
+    noMatchDescription?: React.ReactNode;
+  };
   pagination?: {
     pageSize: number;
     total: number;
@@ -363,6 +376,13 @@ export function ResourceList<TRow>({
   onVisibleColumnsChange,
   className,
 }: ResourceListProps<TRow>): React.ReactElement {
+  /*
+   * Is a search or filter narrowing the list right now? An empty result then means "nothing
+   * matches", not "nothing exists" -- two different answers for the reader.
+   */
+  const narrowed =
+    Boolean(searchValue) || Object.values(filters ?? {}).some((value) => value !== '' && value !== undefined);
+
   const keyOf = React.useCallback(
     (row: TRow, index: number): string =>
       typeof schema.rowKey === 'function'
@@ -754,8 +774,8 @@ export function ResourceList<TRow>({
         }
         empty={
           <Empty
-            title={schema.empty?.title ?? '暂无数据'}
-            description={schema.empty?.description}
+            title={narrowed ? schema.empty?.noMatchTitle ?? '没有匹配的结果' : schema.empty?.title ?? '暂无数据'}
+            description={narrowed ? schema.empty?.noMatchDescription : schema.empty?.description}
             action={
               onSearchChange || onFiltersChange || onRefresh ? (
                 <div className="flex flex-wrap items-center justify-center gap-2">
