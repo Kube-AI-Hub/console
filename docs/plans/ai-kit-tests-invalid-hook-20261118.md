@@ -80,8 +80,11 @@ Tests       226 passed (226)
 | **console-next 单测** | **3 失败**，2 文件：`GPU pages`、`ConfigMaps list`（两条），错误是 jsdom 的
   `textRange(...).getClientRects is not a function`（130 处），且失败用例里 **body 是空的**——页面根本没渲染 |
 
-console-next 那三条与 ai-kit 的根因不同：`Range.getClientRects` 是 jsdom 的缺口，Radix 的 popper 在定位时调用它。
-我按 ai-kit 的 `test/setup.ts` 风格补了 `Range.prototype.getClientRects/getBoundingClientRect` 两个桩，**没有解决**（失败数没变，已回退）。
+console-next 那三条与 ai-kit 的根因不同：`Range.getClientRects` 是 jsdom 的缺口（实测 `Range.prototype.getClientRects` 为 `undefined`），
+floating-ui 在定位时通过它测量文本范围。
+
+**已补桩并验证有效**：在 `apps/console-next/test/setup.ts` 加 `Range.prototype.getClientRects/getBoundingClientRect` 之后，
+`getClientRects is not a function` 从 **130 处降到 0**。三条用例仍然失败，但**原因已经换了一个**——不再是 jsdom 缺口。
 
 > 注意：console-next 的 `vitest.config.ts` 里已经写着「ai-kit 自带的 pnpm 装了一份 React 18，消费 `dist` 会触发 Invalid hook call，
 > 所以这里 alias 到源码」——说明团队知道这个重复，只是 ai-kit **自己的**测试没有同样的保护。

@@ -6,6 +6,9 @@ HTMLElement.prototype.hasPointerCapture ??= () => false;
 HTMLElement.prototype.setPointerCapture ??= () => undefined;
 HTMLElement.prototype.releasePointerCapture ??= () => undefined;
 HTMLElement.prototype.scrollIntoView ??= () => undefined;
+// jsdom has no Range layout queries; floating-ui measures text ranges through them.
+Range.prototype.getClientRects ??= () => ({ length: 0, item: () => null }) as unknown as DOMRectList;
+Range.prototype.getBoundingClientRect ??= () => new DOMRect();
 
 /** jsdom has no `matchMedia`; the default is the desktop branch. */
 if (!window.matchMedia) {
