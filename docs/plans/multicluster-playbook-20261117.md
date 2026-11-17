@@ -120,7 +120,7 @@ python3 -u tools/multicluster_sweep.py --env-file /tmp/a100.env \
 | 环境 | 命令参数 | 结果 |
 | --- | --- | --- |
 | A100（多集群） | `--clusters host,xc --namespace spaces --project spaces` | **PASS 789s**：72 次集群级访问（59 ready/11 empty/0 error）、34 次项目级（20/14）、**16 次企业空间访问（10/6）**、9 个集合归属、12 个详情、24 个 Tab、6 张列表交互、两集群各一次写入 |
-| B200（单集群） | `--clusters host --namespace default --project default` | **PASS 369s**：36+17 次访问、6 个详情、12 个 Tab、3 张列表交互、1 次写入 |
+| B200（单集群） | `--clusters host --namespace default --project default` | **PASS 384s**：36+17+8 次访问、6 个详情、12 个 Tab、3 张列表交互、1 次写入 |
 
 B200 那条是**共享代码的回归证据**：路径改动动的是 `clusterScoped`/`coreWritePath`，单集群也必须照常。
 
