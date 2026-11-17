@@ -61,10 +61,26 @@ OK   xc nodes/… 容器组        body=470 errors=0   ← 修复前 errors=1
 api-client 37 文件 / 392 passed；tsc 相关文件 0 错误；vite build ✓
 ```
 
-## 6. 未解决
+## 6. 补完：`关联容器组` 也是同一类缺陷
 
-`xc deployments/… 关联容器组` 的 body 只有 292（阈值 300），且没有表格行、也没有空态文案。
-该请求没有失败，可能是「该部署在 xc 上确实没有匹配的容器组」+「空态没渲染」。**本轮未定性**，下一轮补。
+上一轮把它记成「未定性」。查下去发现是**第三个**同类问题：该 Tab 请求的是
+
+```
+/api/v1/namespaces/spaces/pods?labelSelector=…      ← 没有集群段，读的是 host
+```
+
+而 `xc` 上这个部署**确实有 1 个匹配的容器组**（直接查 API 确认：selector 匹配 `…-5bb84dcd6f-hkzds`）。
+所以是「在成员集群上读了主集群的 pods」，不是数据为空。
+
+根因：`workloads.ts` 的 `workloadPath` 对 core 组资源（`pods`、`services`）仍拼 `/api/v1/…`——
+而 core 组没有成员形态。改成：分组资源走 `clusterScoped`，core 资源走 `corePath`（成员集群→kapis 代理）。
+
+修后 `xc` 的 `关联容器组` 从 0 行变为 **1 行**，Tab 巡检 12 项全部 OK：
+
+```
+OK   xc deployments/… 关联容器组  body=409 errors=0
+…  12 tabs, 0 errors
+```
 
 ## 7. 反思
 

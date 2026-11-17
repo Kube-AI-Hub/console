@@ -1,5 +1,5 @@
 import type { Client } from './client';
-import { clusterScoped } from './paths';
+import { clusterScoped, corePath } from './paths';
 import { annotationKeys, baseOf, kubePrefix, resourceApi, type KubeObject, type ResourceBase } from './resources';
 
 /**
@@ -810,12 +810,20 @@ export function revisionTemplate(item: KubeReplicaSet): Record<string, unknown> 
   return template;
 }
 
-/** Cluster/namespace-aware path for a grouped workload resource (deployments, replicasets). */
+/**
+ * Cluster/namespace-aware path for a workload resource.
+ *
+ * A grouped resource (`/apis/<group>`) takes the member segment like any other read. A core-group
+ * one (`pods`, `services`) does not have a member form at all, so it goes through `corePath`: on a
+ * member cluster that is the kapis proxy, on the host it stays `/api/v1`. Leaving `/api/v1` alone
+ * here made the 关联容器组 tab of a member-cluster workload list the **host's** pods.
+ */
 function workloadPath(cluster: string, resource: string, namespace: string, name?: string): string {
   const namespaceSegment = namespace ? `namespaces/${encodeURIComponent(namespace)}/` : '';
   const suffix = name ? `/${encodeURIComponent(name)}` : '';
-  // `clusters/<id>` goes before the group, not after the version: see `clusterScoped`.
-  return clusterScoped(kubePrefix(resource), cluster, `${namespaceSegment}${resource}${suffix}`);
+  const rest = `${namespaceSegment}${resource}${suffix}`;
+  const prefix = kubePrefix(resource);
+  return prefix === '/api/v1' ? corePath(cluster, rest) : clusterScoped(prefix, cluster, rest);
 }
 
 /** A pod owned by the workload being viewed. */
