@@ -7,7 +7,7 @@
 
 | 检查 | 命令 | 当前结果 |
 | --- | --- | --- |
-| 老新页面映射 | `python3 prd/tools/gap_check.py` | **2026-11-18 复跑**：已迁移 **93** / 明确不做 **0** / 别处承接 **3** / 已登记缺口 **0** / 未归类 **0**（旧记录为 91/2/3） |
+| 老新页面映射 | `python3 prd/tools/gap_check.py` | **2026-11-18 复跑**：已迁移 **93** / 明确不做 **0** / 别处承接 **3** / 已登记缺口 **0** / 未归类 **0**（旧记录为 91/2/3）；`parity_check.py` 同日复跑：**合计待处理 0** |
 | 路由与页面配对 | `python3 prd/tools/parity_check.py` | 合计待处理 **0** |
 | 文档门禁 | `python3 prd/tools/check_docs.py --strict` | errors **0** / warnings **0** |
 | 架构契约 | `npx vitest run --config config/vitest.config.ts` | **1452 passed** |
