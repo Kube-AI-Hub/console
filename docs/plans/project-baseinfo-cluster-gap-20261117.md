@@ -24,23 +24,27 @@
 
 `api-client` 37 文件 / 392 passed，`tsc` 0 错误，`vite build` ✓。
 
-## 3. 为什么没生效
+## 3. 更正：改动其实生效了，是我探到了旧构建
 
-`baseinfo` 路由渲染的是 `settings/ProjectInfoPage`，但它发出的两条请求**并不来自** `projectInfoApi.get`
-（否则 namespace 会带 `clusters/xc`）。也就是说该页另有读取路径，**本轮没有定位到**。
+上一版这里写着「页面另有读取路径，本轮没有定位到」——**这是错的**。重新探一次（等构建完成后再探）：
 
-`projectQuotaApi.list` 我也改了签名，但 grep 没找到调用它的地方——说明这两条请求来自别处
-（可能是页面内联的 `api.request` 或另一个未导出的小函数）。
-
-## 4. 下一步（明确的定位方法）
-
-在 `apps/console-next/src` 里搜 `/api/v1/namespaces/` 与 `resourcequotas` 的**页面级**用法：
-
-```bash
-grep -rn "api/v1/namespaces" apps/console-next/src --include=*.ts --include=*.tsx
+```
+REQ /kapis/clusters/xc/resources.kubesphere.io/v1alpha3/namespaces/spaces
+REQ /kapis/clusters/xc/resources.kubesphere.io/v1alpha3/namespaces/spaces/resourcequotas
+REQ /kapis/clusters/xc/iam.kubesphere.io/v1alpha2/namespaces/spaces/members
+REQ /kapis/clusters/xc/iam.kubesphere.io/v1alpha2/namespaces/spaces/roles
 ```
 
-本轮只查了 `pages/project` 与 `pages/settings` 的配额相关文件，漏掉了可能的内联请求。
+四条请求**全部带 `clusters/xc`**。上一次看到 host 路径，是因为探针跑在构建完成之前——
+浏览器拿到的还是旧 chunk。
+
+页面渲染也印证了：名称空间是 `xc` 的（创建时间 2026-11-12 12:34:36），成员 0 / 角色 6 / 服务账号 3 也都是
+`xc` 的数字，不是 host 的。
+
+### 仍然存在的限制
+
+配额一段显示「该项目没有设置资源配额」——因为成员集群的 `resourcequotas` 读不到（见第 5 节），
+而页面把「读不到」和「没有」渲染成了同一句话。**这是已知的弱化**，需要页面区分第三种状态。
 
 ## 5. 已知的能力边界（实测）
 
