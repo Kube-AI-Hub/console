@@ -216,6 +216,13 @@ function phraseLoginError(cause: unknown, t: ReturnType<typeof useT>): string {
     if (code === 'too_many_attempts') return t('login.tooManyAttempts');
     if (code === 'upstream_unreachable') return t('login.upstreamUnreachable');
     if (code === 'account_not_active') return t('login.accountNotActive');
+    // A 403/404/405 on the login route is not a wrong password: the backend does not offer this
+    // sign-in at all (measured 2026-11-18: a ks-apiserver without `login.oauth.kubesphere.io`
+    // answers 403 with a k8s Status body). Showing that Status verbatim leaves the operator reading
+    // `system:anonymous cannot create resource "login"`, which says nothing they can act on.
+    if (cause.status === 403 || cause.status === 404 || cause.status === 405) {
+      return t('login.backendUnsupported');
+    }
     return cause.message || t('login.failed');
   }
   return t('login.failed');
