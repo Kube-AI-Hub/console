@@ -87,7 +87,8 @@
 | C58 | **巡检运行期间不要重建 `dist`** | 我在基线跑到一半时重建，导致一次 503 落在 JS 资源上、`xc serviceaccounts` 被记成 none |
 | C59 | **「未定性」要写清下一步怎么定性**，并在下一轮就做 | 关联容器组 Tab 上轮只记「body 292，未定性」，本轮查出是读了 host 的 pods |
 | C60 | **core 组资源在 `workloadPath` 里也要走 `corePath`**：否则成员集群静默读 host | pods/services 的读取路径都属于这一类 |
-| C61 | **改 API 层不等于改了页面**：必须抓请求确认页面真的走了新路径 | 改了 `projectInfoApi`，baseinfo 页仍发 host 请求——它另有读取路径 |
+| C61 | **改 API 层不等于改了页面**：必须抓请求确认页面真的走了新路径 | 改了 `projectInfoApi` 后先看到 host 请求，实际是**探到了旧构建** |
+| C62 | **探针要在构建完成之后跑**：`vite build` 与探针连着跑，浏览器可能拿到旧 chunk | baseinfo 因此被误判成「另有读取路径」，多花一轮 |
 
 ## D. 提交
 
