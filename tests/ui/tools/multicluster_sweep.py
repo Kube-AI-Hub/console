@@ -218,7 +218,7 @@ def sweep(
                 # 503 once, then 200). Reload once before calling it a failure -- a persistent 5xx
                 # still fails, because the second attempt sees it too.
                 transient = [entry for entry in failures if entry[0] >= 500]
-                if state in ('error', 'none') and transient and len(failures) == len(transient):
+                if should_retry_page(state, failures):
                     failures.clear()
                     page.goto(page_url(app, cluster, segment, scope, workspace, project), wait_until='domcontentloaded')
                     for _ in range(30):
@@ -424,7 +424,7 @@ def sweep_details(
                 state = visit()
                 # Same rule as the page sweep: a 5xx that goes away on a retry is the console
                 # hiccuping, not the detail page being broken.
-                if state in ('error', 'none') and failures and all(status >= 500 for status, _ in failures):
+                if should_retry_page(state, failures):
                     failures.clear()
                     state = visit()
                 rows.append({
@@ -712,6 +712,24 @@ def _is_expected_failure(status: int, url: str) -> bool:
         return False
     return any(resource in url for resource in EXPECTED_404_RESOURCES)
 
+def transient_only(failures: list[tuple[int, str]]) -> bool:
+    """True when every failure is a 5xx (or the link dropped).
+
+    A page that failed because the console or the cluster hiccuped is worth one retry; a page that
+    failed because of a 404 or a 403 is not -- retrying hides the defect behind a slower failure.
+    """
+    return bool(failures) and all(status >= 500 for status, _ in failures)
+
+
+def should_retry_page(state: str, failures: list[tuple[int, str]]) -> bool:
+    """One reload for a page that never rendered or rendered an error, when every failure is 5xx."""
+    return state in ('error', 'none') and transient_only(failures)
+
+
+def should_retry_tab(failures: list[tuple[int, str]]) -> bool:
+    """One more click for a tab whose only failures are 5xx."""
+    return transient_only(failures)
+
 class BudgetExceeded(RuntimeError):
     """Raised when a run outlives its budget."""
 
@@ -841,7 +859,7 @@ def sweep_tabs(app: str, bff: str, token: str, clusters: list[str], workspace: s
                     page.wait_for_timeout(3500)
                     # A 5xx behind a tab is the console or the member cluster hiccuping; click it
                     # once more before recording it as broken.
-                    if failures and all(status >= 500 for status, _ in failures):
+                    if should_retry_tab(failures):
                         failures.clear()
                         tabs.nth(index).click()
                         page.wait_for_timeout(3500)
