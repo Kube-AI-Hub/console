@@ -225,7 +225,26 @@ OK   host   pods/u-admin-…                       state=ready errors=0   ← �
 
 以前它打印 `0 collections, 0 distinct, 0 identical, 0 suspect`，看起来像「检查通过」，
 实际是「没有可比对象」。**未执行与通过必须能区分**。
-## 16. 全绿基线（2026-11-17，工具全部修复后）
+## 16. 六段式基线（Tab 段已并入）
+
+`--baseline` 现在覆盖：集群级读 / 项目级读 / 数据归属 / 详情页 / **Tab** / 交互 / 写入落点。
+Tab 段实测 **24 个 Tab（两集群各 12）、0 失败**。
+
+### 所有模式共用同一套登录重试
+
+单页巡检、`--details`、`--tabs` 与 `--baseline` 现在都先跑同一段 preflight（3 次登录重试），
+环境不可用一律打印 `NOT RUN` 并退出码 2——**没有哪个模式会因为一次瞬时 503 而崩掉**。
+
+### 5xx 重试的覆盖范围
+
+| 位置 | 规则 |
+| --- | --- |
+| 页面读 | 整页失败且全是 5xx → 重载一次 |
+| 详情页 | 同上；`state=none`（页面没渲染出来）也算 |
+| Tab | 该 Tab 全是 5xx → 再点一次 |
+| 写入 | 5xx → 重试一次 |
+
+## 17. 全绿基线（2026-11-17，工具全部修复后）
 
 ```
 OK   cluster  read: 72 visits, 59 ready, 12 empty, 0 error, 0 failed requests

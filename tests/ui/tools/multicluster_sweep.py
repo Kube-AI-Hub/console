@@ -402,7 +402,7 @@ def sweep_details(
                 state = visit()
                 # Same rule as the page sweep: a 5xx that goes away on a retry is the console
                 # hiccuping, not the detail page being broken.
-                if state == 'error' and failures and all(status >= 500 for status, _ in failures):
+                if state in ('error', 'none') and failures and all(status >= 500 for status, _ in failures):
                     failures.clear()
                     state = visit()
                 rows.append({
@@ -778,9 +778,16 @@ def sweep_tabs(app: str, bff: str, token: str, clusters: list[str], workspace: s
                     results.append({'cluster': cluster, 'page': f'{resource}/{name}', 'tab': '<no tabs>',
                                     'body': len(page.evaluate('() => document.body.innerText').strip()),
                                     'errors': [], 'skipped': True})
+
                 for index in range(count):
                     tabs.nth(index).click()
                     page.wait_for_timeout(3500)
+                    # A 5xx behind a tab is the console or the member cluster hiccuping; click it
+                    # once more before recording it as broken.
+                    if failures and all(status >= 500 for status, _ in failures):
+                        failures.clear()
+                        tabs.nth(index).click()
+                        page.wait_for_timeout(3500)
                     results.append({
                         'cluster': cluster,
                         'page': f'{resource}/{name}',
@@ -912,7 +919,12 @@ def main() -> int:
     args = parser.parse_args()
 
     env = _env(args.env_file)
-    token = login(args.bff, env.get('KA_USERNAME', 'admin'), env.get('KA_PASSWORD', ''))
+    # Every mode gets the same three-try login the baseline has: a transient 503 at startup used to
+    # kill a standalone run before it printed anything.
+    token = preflight(args.app, args.bff, (env.get('KA_USERNAME', 'admin'), env.get('KA_PASSWORD', '')))
+    if token is None:
+        print('NOT RUN: the environment is not usable (see the preflight lines above)')
+        return 2
     default_pages = PROJECT_PAGES if args.scope == 'project' else PAGES
     pages = tuple(p.strip() for p in args.pages.split(',') if p.strip()) or default_pages
     clusters = [c.strip() for c in args.clusters.split(',') if c.strip()]
