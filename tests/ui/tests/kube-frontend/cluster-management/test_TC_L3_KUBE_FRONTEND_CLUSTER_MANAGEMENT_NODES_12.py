@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import time
 
 import pytest
@@ -57,6 +58,11 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_NODES_12(cluster_management_page
         assert "token=" not in ui.page.url.lower()
         expect(ui.page.locator('[data-ai-id="node-add:copy"]')).to_be_visible()
         expect(ui.page.locator('[data-ai-id="node-add:expires"]')).to_contain_text("有效期至")
+        # The live backend created a real bootstrap token; remove it so a read-only
+        # verification does not leave cluster credentials behind.
+        token = re.search(r"--token ([a-z0-9]+)\.", text)
+        if token:
+            ui.api.request("DELETE", f"/api/v1/namespaces/kube-system/secrets/bootstrap-token-{token.group(1)}")
     else:
         # B200 runs an older ks-apiserver: the endpoint is absent and the dialog must say so.
         assert error.is_visible()
@@ -79,5 +85,8 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_NODES_12(cluster_management_page
         expect(ui.page.locator('[data-ai-id="node-add:expires"]')).to_contain_text("有效期至")
         expect(ui.page.locator('[data-ai-id="node-add:copy"]')).to_be_visible()
         assert "token=" not in ui.page.url.lower()
+        token = re.search(r"--token ([a-z0-9]+)\.", text)
+        if token:
+            api.request("DELETE", f"/api/v1/namespaces/kube-system/secrets/bootstrap-token-{token.group(1)}")
         screenshot(ui.page, "node-add-command")
         ui.page.unroute("**/kapis/resources.kubesphere.io/v1alpha3/nodes/join-command**")

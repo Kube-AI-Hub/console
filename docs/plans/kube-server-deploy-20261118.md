@@ -40,7 +40,7 @@
 ## 4. 变更与清理
 
 - 测试更新：`tests/ui/helpers/access_review.py` 统一权限 mock；5 条权限用例改为按新 IAM 契约 mock。
-- 临时 viewer 用户与 RoleBinding 已删除；bootstrap token 无残留。
+- 临时 viewer 用户与 RoleBinding 已删除；bootstrap token 无残留（节点 E2E 现在会在真实分支删除自己签发的 token）。
 - 回滚镜像 `full-20261113` 保留在 Deployment 历史（revision 51 之前），如需回滚可 set image 回去。
 
 ## 5. 后续
