@@ -1050,6 +1050,34 @@ def _looks_like_host(text: str, match: str) -> bool:
         start = text.find(match, start + 1)
     return False
 
+#: Read-only probes that describe what a deployment can answer. Two clusters running the same console
+#: can still differ here (an aggregated API registered on one and not the other), and that difference
+#: is what makes a page pass in one environment and fail in the other.
+CAPABILITY_PROBES = (
+    ('workspaces', 'GET', '/kapis/tenant.kubesphere.io/v1alpha2/workspaces?limit=-1'),
+    ('ssar-native', 'POST', '/apis/authorization.k8s.io/v1/selfsubjectaccessreviews'),
+    ('ssar-iam', 'POST', '/kapis/iam.kubesphere.io/v1alpha2/selfsubjectaccessreviews'),
+    ('configz', 'GET', '/kapis/config.kubesphere.io/v1alpha2/configs/configz'),
+    ('monitoring-nodes', 'GET', '/kapis/monitoring.kubesphere.io/v1alpha3/nodes?limit=1'),
+    ('alerting', 'GET', '/kapis/alerting.kubesphere.io/v2beta1/clusteralerts?limit=1'),
+    ('events-v1', 'GET', '/apis/events.k8s.io/v1/events?limit=1'),
+)
+
+SSAR_BODY = {
+    'apiVersion': 'authorization.k8s.io/v1',
+    'kind': 'SelfSubjectAccessReview',
+    'spec': {'resourceAttributes': {'verb': 'list', 'resource': 'deployments', 'group': 'apps'}},
+}
+
+
+def sweep_probes(bff: str, token: str) -> list[dict]:
+    """Report the status of each capability probe, so two deployments can be diffed."""
+    out: list[dict] = []
+    for name, method, path in CAPABILITY_PROBES:
+        status, _ = _call(bff, token, method, path, SSAR_BODY if method == 'POST' else None)
+        out.append({'probe': name, 'method': method, 'path': path, 'status': status})
+    return out
+
 def sweep_locale(app: str, token: str, cluster: str, workspace: str, project: str, locale: str) -> list[dict]:
     """Look for untranslated identifiers rendered as text.
 
@@ -1238,6 +1266,7 @@ def main() -> int:
     parser.add_argument('--keyboard-local', action='store_true', help='walk only the login page (no cluster needed)')
     parser.add_argument('--budget', type=int, default=1800, help='abort the whole run after this many seconds (default 1800)')
     parser.add_argument('--locale-scan', action='store_true', help='look for untranslated identifiers on a few pages')
+    parser.add_argument('--probes', action='store_true', help='print the status of each capability probe')
     parser.add_argument('--locale', default='en', help='locale used by --locale-scan (default en)')
     args = parser.parse_args()
 
@@ -1259,6 +1288,14 @@ def main() -> int:
     )
     pages = tuple(p.strip() for p in args.pages.split(',') if p.strip()) or default_pages
     clusters = [c.strip() for c in args.clusters.split(',') if c.strip()]
+
+    if args.probes:
+        bad = 0
+        for row in sweep_probes(args.bff, token):
+            ok = 200 <= row['status'] < 300
+            bad += 0 if ok else 1
+            print(f"{'OK  ' if ok else 'FAIL'} {row['probe']:18s} {row['status']:3d}  {row['method']} {row['path'][:70]}")
+        return 1 if bad else 0
 
     if args.locale_scan:
         rows = sweep_locale(args.app, token, clusters[0], args.workspace, args.project, args.locale)
