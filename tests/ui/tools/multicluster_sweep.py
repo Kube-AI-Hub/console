@@ -719,25 +719,29 @@ class BudgetExceeded(RuntimeError):
 def with_budget(seconds: int):
     """Abort the run after `seconds`, whatever it is waiting on.
 
-    Per-request timeouts exist, but a dead upstream makes a seven-phase baseline wait them out one
-    after another -- observed 2026-11-17: the run stopped printing for 16 minutes after the third
-    phase. A whole-run budget makes that a reported outcome (exit 3) rather than a hang.
+    A signal handler only runs at Python bytecode boundaries; measured 2026-11-17: with the upstream
+    gone the process sat inside a Playwright call for 55 minutes and the alarm never fired. A watchdog
+    thread plus `os._exit` does not need the main thread's cooperation, so it works there too.
     """
-    import signal
+    import threading
 
-    def handler(_signum, _frame):
-        raise BudgetExceeded(f'budget of {seconds}s exceeded')
+    def killer():
+        print(
+            f'ABORTED: budget of {seconds}s exceeded (the upstream is probably gone;'
+            ' see docs/plans/multicluster-playbook-20261117.md)',
+            flush=True,
+        )
+        os._exit(3)
 
-    if hasattr(signal, 'SIGALRM'):
-        signal.signal(signal.SIGALRM, handler)
-        signal.alarm(seconds)
+    timer = threading.Timer(seconds, killer)
+    timer.daemon = True
+    timer.start()
+    return timer
 
 
-def clear_budget() -> None:
-    import signal
-
-    if hasattr(signal, 'SIGALRM'):
-        signal.alarm(0)
+def clear_budget(timer=None) -> None:
+    if timer is not None:
+        timer.cancel()
 
 def preflight(app: str, bff: str, creds: tuple[str, str], attempts: int = 3) -> str | None:
     """Three probes before a ten-minute run: static site, BFF, login.
@@ -1185,7 +1189,7 @@ def main() -> int:
     parser.add_argument('--locale', default='en', help='locale used by --locale-scan (default en)')
     args = parser.parse_args()
 
-    with_budget(args.budget)
+    budget_timer = with_budget(args.budget)
 
     env = _env(args.env_file)
     # Every mode gets the same three-try login the baseline has: a transient 503 at startup used to
@@ -1340,4 +1344,4 @@ if __name__ == '__main__':
         print(f'ABORTED: {cause} (the upstream is probably gone; see docs/plans/multicluster-playbook-20261117.md)')
         raise SystemExit(3)
     finally:
-        clear_budget()
+        clear_budget(budget_timer)
