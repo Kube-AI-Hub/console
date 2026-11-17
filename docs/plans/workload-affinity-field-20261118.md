@@ -28,7 +28,22 @@ node/pod 亲和性（required + preferred，每项还带权重与拓扑键）的
 | `vite build` | ✓ |
 | 契约套件 | 18 文件 / 1570 passed |
 
+## 保存回读往返（已补验）
+
+临时 Deployment `tc-affinity-112dfe`（`spaces` 命名空间，无亲和性）上走完整链路：
+
+1. 详情页 → 编辑设置 → 在亲和性文本域填 `nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution`；
+2. 合法 YAML → 行内错误计数 **0**，点确认；
+3. 对话框关闭；**API 回读**得到：
+
+```json
+{"nodeAffinity": {"requiredDuringSchedulingIgnoredDuringExecution":
+  {"nodeSelectorTerms": [{"matchExpressions":
+    [{"key": "kubernetes.io/os", "operator": "In", "values": ["linux"]}]}]}}}
+```
+
+4. 删除并复核：`DELETE 200` / `GET 404`（无残留）。
+
 ## 未覆盖
 
-**保存回读未做**：本轮只验证到「字段渲染 + 非法输入被拦」，没有真的把一条亲和性写进工作负载再读回来。
-下一步应在一个临时 Deployment 上做完整往返（写入 → 回读 → 清理）。
+「清空后删除该字段」这条路径未在真实对象上验（表单里留空 → 保存会 delete 该 key，逻辑与上面同一条链路）。
