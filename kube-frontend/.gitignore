@@ -20,3 +20,6 @@ apps/console-next/src/routeTree.gen.ts
 
 # dev-stack runtime pids
 .dev-stack-*.pid
+
+# dev-mlu370.sh runtime state (pids and per-process logs)
+.dev-mlu370/
