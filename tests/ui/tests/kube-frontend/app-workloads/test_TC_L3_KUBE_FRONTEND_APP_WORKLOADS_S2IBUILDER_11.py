@@ -11,6 +11,8 @@ def test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_S2IBUILDER_11(image_builder_page, scr
     """TC-L3-KUBE-FRONTEND-APP_WORKLOADS-S2IBUILDER-11 事件：无 Job 时如实提示，不渲染事件表。"""
 
     ui = image_builder_page
+    if not ui.available():
+        pytest.skip("本集群未安装 S2I 构建器 CRD（devops/s2ioperator），构建记录用例无法造数")
     name = ui.unique("events")
     try:
         assert ui.create_builder(name) == 201

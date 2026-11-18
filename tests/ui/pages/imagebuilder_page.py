@@ -256,6 +256,17 @@ class ImageBuilderPageObject:
     ) -> tuple[int, dict[str, Any]]:
         return self._api().request(method, path, body, content_type)
 
+    def available(self) -> bool:
+        """Whether this cluster serves the S2I builder CRDs.
+
+        A deployment without the devops/S2I controllers answers 404 (or 403 when the CRD exists
+        but the API group is not installed). The builder cases create objects through this API, so
+        they can only run where it answers 200 — skipping with this reason is honest, while a
+        failed POST assertion reads like a console defect.
+        """
+        status, _ = self.request("GET", self._builder_path())
+        return status == 200
+
     def _builder_path(self, name: str | None = None) -> str:
         base = f"{S2I}/namespaces/{self.namespace}/s2ibuilders"
         return f"{base}/{name}" if name else base

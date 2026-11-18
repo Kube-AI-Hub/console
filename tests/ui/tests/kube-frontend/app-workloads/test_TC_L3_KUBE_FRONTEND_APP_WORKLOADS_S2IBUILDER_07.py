@@ -17,18 +17,36 @@ def test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_S2IBUILDER_07(image_builder_page, scr
     """
 
     ui = image_builder_page
+    if not ui.available():
+        pytest.skip("本集群未安装 S2I 构建器 CRD（devops/s2ioperator），构建记录用例无法造数")
     name = ui.unique("records")
     run_name = f"{name}-run-1"
     try:
         assert ui.create_builder(name, image_name="tc-e2e/records") == 201
         assert ui.create_run(name, run_name) == 201
 
-        # Before the controller reports, the run state is empty and must not look finished.
+        # The row must agree with what the API reports: an unreported run reads 「未知」 and must
+        # not look finished, while a controller that already reported `running` legitimately reads
+        # 「构建中」. Asserting 「未知」 unconditionally failed as soon as this deployment's operator
+        # started writing `runState` (2026-11-19).
         ui.open_detail(name)
         expect(ui.panel("records")).to_be_visible()
         expect(ui.page.locator(f'[data-ai-row="{run_name}"]')).to_be_visible()
         row = ui.page.locator(f'[data-ai-row="{run_name}"]').inner_text()
-        assert "未知" in row, row
+        # Read the run state *after* the row rendered: this deployment's operator writes
+        # `runState` a moment after the run is created, so a status read taken before the render
+        # says "unknown" while the row (correctly) says 构建中. The row must match whatever the
+        # API reports at that moment.
+        status, run_body = ui.request("GET", f"{ui._run_path(run_name)}")
+        assert status == 200, (status, run_body)
+        reported = str(((run_body.get("status") or {}).get("runState")) or "").lower()
+        expected = (
+            "状态未知" if not reported
+            else "构建中" if reported in ("running", "building")
+            else "构建成功" if reported in ("successful", "succeeded", "success")
+            else "构建失败"
+        )
+        assert expected in row, (reported, row)
         assert "#1" in row, row
 
         # No logURL: the panel explains it instead of requesting a log that does not exist.
