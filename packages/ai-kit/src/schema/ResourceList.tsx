@@ -359,6 +359,14 @@ export interface ResourceListProps<TRow> {
   schema: ListSchema<TRow>;
   rows: TRow[];
   loading?: boolean;
+  /**
+   * A refetch is in flight while rows are still on screen.
+   *
+   * Set this instead of `loading` for a refresh: the rows stay (dimmed, with a
+   * spinner) rather than being replaced by skeletons, so the reader keeps their place
+   * and can see the values that are about to change.
+   */
+  refreshing?: boolean;
   /** Replace data/pager on failure while retaining the editable search and filters. */
   errorContent?: React.ReactNode;
   /** Controlled filter values keyed by `ListFilter.key`. */
@@ -600,6 +608,7 @@ export function ResourceList<TRow>({
   schema,
   rows,
   loading = false,
+  refreshing = false,
   errorContent,
   filters,
   onFiltersChange,
@@ -881,10 +890,6 @@ export function ResourceList<TRow>({
             </Button> : null}
             </div>
           ))}
-          {schema.labels?.clearFilters && (searchValue || Object.values(filters ?? {}).some(Boolean)) ?
-            <Button size="sm" variant="ghost" data-ai-id={schema.sortAiPrefix ? `${schema.sortAiPrefix}:filters-clear` : undefined}
-              onClick={() => { onSearchChange?.(''); onFiltersChange?.({}); }}>{schema.labels.clearFilters}</Button> : null}
-
           {schema.search ? (
             <InputSearch hideButton
               // Full width on a phone so the search field is reachable; a fixed
@@ -953,6 +958,20 @@ export function ResourceList<TRow>({
               </svg>
             </button>
           ) : null}
+
+          {/*
+           * "Clear all" sits after the refresh button, at the end of the view-shaping
+           * cluster.
+           *
+           * It used to sit before the search box, which made every filter appear to
+           * shift the search field and everything after it: the control only exists
+           * while something is filtered, so its appearance moved the box the reader
+           * was about to type into. At the end it grows into the gap before the bulk
+           * actions, and nothing that is always present moves.
+           */}
+          {schema.labels?.clearFilters && (searchValue || Object.values(filters ?? {}).some(Boolean)) ?
+            <Button size="sm" variant="ghost" data-ai-id={schema.sortAiPrefix ? `${schema.sortAiPrefix}:filters-clear` : undefined}
+              onClick={() => { onSearchChange?.(''); onFiltersChange?.({}); }}>{schema.labels.clearFilters}</Button> : null}
 
           {/*
            * Bulk actions appear only once something is selected. Rendering them
@@ -1064,6 +1083,7 @@ export function ResourceList<TRow>({
         rows={rows}
         rowKey={keyOf}
         loading={loading}
+        refreshing={refreshing}
         {...(schema.rowAttributes ? { rowAttributes: schema.rowAttributes } : {})}
         {...(schema.sort ? { sorter: { key: schema.sort.key, order: schema.sort.order } satisfies TableSortState } : {})}
         {...(schema.sortFallback ? { sortFallback: schema.sortFallback } : {})}

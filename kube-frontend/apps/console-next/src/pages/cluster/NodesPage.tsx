@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { Link } from '@tanstack/react-router';
-import { actionProps } from '@kube-ai-hub/ai-surface';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { accessReviewApi, nodesWriteApi, type NodeSummary, type NodeMetricValues } from '@kube-ai-hub/api-client';
 import { AiSurface, Badge, Button, Icon, MetricCell, MetricRing, ResourceList, StatisticsGroup, Tooltip, cn, type ListColumn, type ListSchema, type StatisticItem } from '@kube-ai-hub/ui';
@@ -16,7 +15,7 @@ import { formatGpuMemory } from './gpuFormat';
 import { GpuModeDialog } from './GpuModeDialog';
 import { NodeJoinDialog } from './NodeJoinDialog';
 import { hasPendingMode, timeOffsets, useNodesList, useNodesMetrics, useNodesStats, useNodesTime } from './nodeListQueries';
-import { VendorIcon, VendorMix } from './VendorIcon';
+import { VendorIcon } from './VendorIcon';
 
 /**
  * Text size for the ring's centre label.
@@ -330,6 +329,14 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
     ],
     columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'nodes:columns' },
     refresh: { label: t('common.refresh'), aiId: 'nodes:refresh', busy: nodes.isFetching },
+    /*
+     * Adding a node is an action on this list, so it belongs in the list's action
+     * cluster rather than in the page header: the header carries identity, and a
+     * button there sat in a second row of its own for the whole page.
+     */
+    ...(canAddNode.data !== false
+      ? { primaryAction: { key: 'add', label: t('node.add.button'), aiId: 'nodes:add' } }
+      : {}),
     rowActions: [
       { key: 'cordon', label: t('node.action.cordon'), aiId: 'nodes:cordon', visible: (row) => !row.unschedulable, disabled: () => cordon.isPending },
       { key: 'uncordon', label: t('node.action.uncordon'), aiId: 'nodes:uncordon', visible: (row) => row.unschedulable, disabled: () => cordon.isPending },
@@ -359,30 +366,38 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
   };
   const state = nodes.isPending ? 'loading' : nodes.isError ? 'error' : rows.length === 0 ? 'empty' : 'ready';
   return <AiSurface as="section" aiId="nodes:surface" state={state} className="flex min-w-0 flex-col gap-4">
-    <header className="flex flex-wrap items-start justify-between gap-3"><div><h1 className="text-lg font-semibold text-ai-fg">{t('node.list.title')}</h1><p className="mt-1 text-xs text-ai-fg-muted">{t('node.list.description')}</p></div>
-      {canAddNode.data !== false ? (
-        <Button size="sm" variant="secondary" {...actionProps('nodes:add')} onClick={() => setJoinOpen(true)}>{t('node.add.button')}</Button>
-      ) : null}</header>
+    <header className="flex flex-wrap items-start justify-between gap-3"><div><h1 className="text-lg font-semibold text-ai-fg">{t('node.list.title')}</h1><p className="mt-1 text-xs text-ai-fg-muted">{t('node.list.description')}</p></div></header>
     <StatisticsGroup items={summary} unknownLabel={t('node.list.unknown')} data-ai-id="nodes:stats" />
     {/*
-      * The vendor mix, stated once in words and marks under the counts.
+      * No separate vendor strip.
       *
-      * The tiles above already carry one mark per vendor, but a reader scanning four
-      * numbers has to compare glyphs to notice the cluster is heterogeneous. This strip
-      * says it directly — "NVIDIA 2, Cambricon 1, CPU 1" — and is the line that answers
-      * "does this platform actually manage mixed accelerators?".
+      * The statistics tiles already carry one tile per vendor with its mark and its
+      * count; a strip repeating "NVIDIA 2, Cambricon 1, CPU 1" below them stated the
+      * same three facts a second time, and on a cluster with three vendors the two
+      * rows were visually indistinguishable. The tiles answer "is this platform
+      * managing mixed accelerators" on their own.
       */}
-    {(stats.data?.vendors?.length ?? 0) > 1 ? <VendorMix vendors={stats.data?.vendors ?? []} className="rounded-ai-lg border border-ai-line bg-ai-surface-1 px-4 py-2.5" /> : null}
     {stats.isError || controlPlane.isError ? <div className="text-xs"><ResourceErrorPanel error={stats.error || controlPlane.error}
       onRetry={() => { void stats.refetch(); void controlPlane.refetch(); }} retryAiId="nodes:stats-retry" /></div> : null}
     {metrics.isError || time.isError ? <p className="text-xs text-ai-warning">{t('node.list.metricsUnavailable')} <Button size="sm" variant="ghost" onClick={() => { void metrics.refetch(); void time.refetch(); }}>{t('common.retry')}</Button></p> : null}
     {Object.values(offsets).some((entry) => entry.offset !== undefined && Math.abs(entry.offset) >= 120) ? <p role="alert" className="text-xs text-ai-danger">{t('node.list.timeWarning')}</p> : null}
     {nodes.isError ? <ResourceErrorPanel error={nodes.error} onRetry={() => void nodes.refetch()} retryAiId="nodes:retry" /> :
-      <ResourceList schema={schema} rows={rows} loading={nodes.isPending} filters={filters} onFiltersChange={changeFilters}
+      <ResourceList schema={schema} rows={rows} loading={nodes.isPending}
+        // A refetch keeps the rows on screen: replacing them with skeletons made the
+        // table blink on every filter change, and the reader lost the row they were
+        // reading while the request was in flight.
+        refreshing={nodes.isFetching && !nodes.isPending}
+        filters={filters} onFiltersChange={changeFilters}
         searchValue={list.keyword} onSearchChange={list.setKeyword} onPageChange={list.setPage} onPageSizeChange={list.setPageSize}
-        onRefresh={refresh} onSortChange={(next) => { if (next) list.setSort(next); }}
+        onRefresh={refresh} onSortChange={list.setSort}
         {...(visibleColumns ? { visibleColumnKeys: visibleColumns } : {})} onVisibleColumnsChange={setVisibleColumns}
-        onAction={(action, row) => { if (action === 'terminal') setTerminal(row.name); else if (action === 'gpu-mode') setModeNode(row.name); else cordon.mutate(row); }} />}
+        onAction={(action, row) => {
+          // The primary action arrives without a row; the row actions always have one.
+          if (action === 'add') { setJoinOpen(true); return; }
+          if (action === 'terminal') setTerminal(row.name);
+          else if (action === 'gpu-mode') setModeNode(row.name);
+          else cordon.mutate(row);
+        }} />}
     <MutationAlert error={cordon.error} />
     {terminal ? <ExecConsoleDialog target={{ cluster, node: terminal }} title={`${t('container.terminal.title')} · ${terminal}`} aiPrefix="node" onClose={() => setTerminal(null)} /> : null}
     {modeNode ? <GpuModeDialog cluster={cluster} name={modeNode} onClose={() => setModeNode(null)} onUpdated={invalidate} /> : null}

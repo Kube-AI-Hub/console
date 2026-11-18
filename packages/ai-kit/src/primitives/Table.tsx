@@ -99,6 +99,14 @@ const PIN_LEFT: Record<number, string> = {
  * `border-collapse`, where a cell's border scrolls away with the cell instead of
  * staying at the edge, so the shadow is what draws the seam.
  *
+ * The two sides are deliberately not equal in weight. The start column carries the
+ * row's identity — the name a reader scans and the link they click — so it keeps the
+ * raised surface (`bg-ai-surface-1`). The end column is a row of actions, and giving
+ * it the same surface made the eye land on the ellipsis at the right edge as often as
+ * on the name at the left, leaving the table with two competing anchors. It sits on
+ * the page background instead: still opaque, still separated by the shadow, but not
+ * competing.
+ *
  * The shadow colour is a token rather than black, so it is visible on the light
  * theme instead of only on the dark one.
  */
@@ -106,7 +114,8 @@ function pinClasses(pin: TableColumn<unknown>['pin'], background: string, left =
   if (!pin) return '';
   return cn(
     'sticky z-20',
-    background,
+    // The action column reads as part of the page, not as another panel.
+    pin === 'start' ? background : 'bg-ai-bg',
     pin === 'start'
       ? PIN_LEFT[left] ?? 'left-0'
       : 'right-0 shadow-[inset_-8px_0_8px_-8px_rgb(var(--ai-line))]',
@@ -151,6 +160,15 @@ export interface TableProps<T> {
     aiId?: string;
   };
   loading?: boolean;
+  /**
+   * A refetch is in flight while rows are still on screen.
+   *
+   * Different from `loading`: that one replaces the rows with skeletons because
+   * there is nothing to show yet. A refresh already has rows, and swapping them for
+   * skeletons makes the table blink — the reader loses their place and cannot tell
+   * whether the data changed. The rows stay, dimmed, with a spinner in the corner.
+   */
+  refreshing?: boolean;
   /** Shown when `rows` is empty and not loading. */
   empty?: React.ReactNode;
   onRowClick?: (row: T) => void;
@@ -198,6 +216,7 @@ export function Table<T>({
   rowKey,
   selection,
   loading = false,
+  refreshing = false,
   empty,
   onRowClick,
   rowAttributes,
@@ -291,8 +310,11 @@ export function Table<T>({
         // `overscroll-x-contain` stops a horizontal swipe at the table edge from
         // triggering the browser's back gesture on mobile.
         'overflow-x-auto overscroll-x-contain rounded-ai-md border border-ai-line',
+        // Positioning context for the refresh veil below.
+        refreshing && 'relative',
         className,
       )}
+      {...(refreshing ? { 'aria-busy': true, 'data-refreshing': 'true' } : {})}
     >
       {/*
         * `w-max` + `min-w-full` rather than `w-full`.
@@ -533,6 +555,33 @@ export function Table<T>({
           )}
         </tbody>
       </table>
+      {/*
+        * Refresh veil: the rows stay readable and in place, dimmed just enough to
+        * show they are being replaced, with a spinner that says the wait is active.
+        * A skeleton screen here would blink the table and lose the reader's place.
+        *
+        * `absolute inset-0` covers the rows rather than sitting under them: a bar at
+        * the bottom of a tall table is easy to miss, and the reader's eye is on the
+        * values that are about to change. `pointer-events-none` keeps the dimmed rows
+        * inert without trapping focus or blocking the scrollbar, and `aria-busy` on
+        * the container is what tells a screen reader the content is being replaced.
+        */}
+      {refreshing ? (
+        <div
+          aria-hidden="true"
+          data-ai-id="table:refreshing"
+          className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center gap-2 bg-ai-bg/40 backdrop-blur-[1px]"
+        >
+          <span className="flex items-center gap-2 rounded-ai-pill border border-ai-line bg-ai-bg-overlay px-3 py-1.5 text-[11px] text-ai-fg-secondary shadow-ai-pop">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+              className="size-3.5 animate-spin motion-reduce:animate-none">
+              <path d="M20 11a8 8 0 1 0-2.3 5.7" />
+              <path d="M20 4v7h-7" />
+            </svg>
+            更新中…
+          </span>
+        </div>
+      ) : null}
     </div>
   );
 }
