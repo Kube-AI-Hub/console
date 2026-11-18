@@ -171,6 +171,12 @@ const narrowed = Boolean(searchValue) || Object.values(filters ?? {}).some(v => 
 | `resolve.dedupe: ['react','react-dom']` | 无效（已回退） |
 | `resolve.alias` 指向 ai-kit 的 react | 无效（已回退） |
 | `test.server.deps.inline` 内联 use-callback-ref / @radix-ui | 无效（已回退） |
+| `test.alias`（vitest 测试期别名） | 无效（已回退） |
+| `resolve.alias` + `test.deps.inline`（vitest 2 的写法） | 无效（已回退） |
+
+**五次配置层尝试全部无效**。结论：那份嵌套 React 是 **node 自己解析的**，Vite/vitest 的解析配置改不到它。
+要修只能动依赖树——`pnpm.overrides` + 重装，或删掉 `use-callback-ref/node_modules/react`。
+**别再试第六种配置写法。**
 
 三者都改不动**已装好的嵌套副本**——它由 node 直接解析，Vite 的配置管不到。
 
