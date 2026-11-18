@@ -1,0 +1,47 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-11
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: monitor
+title: 集群监控 · 页签 IA 与深链（默认概览、?tab=、单一页头控件）
+entry_url: '{{BASE_URL}}/kube-frontend/clusters/host/monitor'
+prd: prd/kube-frontend/cluster-management/monitor.md
+design: design/kube-frontend/cluster-management/monitor.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-11
+
+story:
+- US8
+
+product: 集群监控是「一个导航入口 + 五个页内页签」：概览 / 物理资源监控 / API Server 监控 / 调度器监控 / 资源用量排行；默认落在概览，地址栏 `?tab=` 可深链、刷新保持、非法值忽略（页签切换用 replace，不新增浏览器历史）；页头只有一套时间窗与自动刷新（页签内不再重复），切换页签不请求未挂载页签的数据；页面 surface 的状态跟随当前页签的主查询。
+preconditions:
+- 已登录 admin，集群 host 已就绪，监控后端可用
+- 当前 build 已包含页签 IA（cluster-monitor:tab:*）
+steps:
+- 打开 /kube-frontend/clusters/host/monitor，等待 cluster-monitor:surface 就绪
+- 核对五个基础页签按 overview → resource → apiserver → scheduler → ranking 顺序排列；默认 overview 被选中（data-state=active），overview 面板可见，其余面板隐藏
+- 核对条件 etcd 页签：本部署 etcd ServiceMonitor 探测为 404，页签条不渲染 cluster-monitor:tab:etcd；打开 ?tab=etcd 时回退 overview；探测为 200 时才在末尾追加 etcd 页签（正分支用 page.route mock 200 由 pytest 覆盖）
+- 依次点击 resource / apiserver / scheduler / ranking：每次核对地址栏出现 `?tab=<key>`、该页签被选中、对应 cluster-monitor:tabpanel:<key> 可见、上一个面板不再挂载
+- 直接打开 ?tab=scheduler：核对 scheduler 被选中并可见；再打开 ?tab=bogus：核对回退 overview 且不因非法值报错
+- 切到 resource 后刷新页面，核对仍落在 resource（URL 即状态）；复制该 URL 到新标签打开也落在 resource
+- 统计页头控件：cluster-monitor:range:* 按钮组与 cluster-monitor:auto-refresh 各恰好出现一次；在任一页签面板内部再统计一遍，确认没有第二套时间窗/刷新
+- 用 page.route 记录各页签的数据源请求：打开页面后（只挂载 overview）核对没有物理资源 range 指标、组件指标与 nodes?type=rank 请求；点开 resource 后核对物理资源指标开始请求；点开 ranking 后核对 nodes?type=rank 开始请求
+- 核对 cluster-monitor:surface 的 data-ai-state 在就绪后不是 loading，取值属于 ready / empty / error
+expected:
+- 五个页签齐全有序，默认地落在 overview；点选与深链都改变选中页签与可见面板，切页签后 URL 同步为 ?tab=<key>
+- ?tab=resource（及 apiserver/scheduler/ranking）可直接进入对应页签；刷新/复制 URL 保持当前页签；?tab=bogus 被忽略并回退 overview
+- 页签切换用 replace，不新增浏览器历史（后退/前进不承诺在页签间切换）
+- 页头只有一套时间窗与自动刷新，页签面板内部没有重复控件
+- 基础 5 页签 + 条件 etcd 页签（200 才有，404 隐藏且 ?tab=etcd 回退 overview）
+- 未挂载的页签不发起自己的数据请求；挂载后才请求，且各页签请求互不替代
+- 页面 surface 的 state 与当前页签主查询一致，就绪后不为 loading
+- 节点详情等 node 变体（若当前 build 有入口）没有页签；本 build 无节点监控入口时在报告中登记未覆盖
+troubleshoot:
+- 点页签地址栏不出现 ?tab=：route 的 useNavigate 没有把 search 写回（替换历史但必须同步 URL）
+- 深链后仍落在 overview：validateSearch 未接受 tab，或组件没有用搜索参数初始化受控 value
+- 未挂载页签就发请求：五个页签内容被同时渲染（只应渲染当前页签），或查询提升到了页面级
+- 页签内又出现时间窗：页签组件自己渲染了控件，而不是复用页头
+update_automation:
+- 句柄：cluster-monitor:tab:<overview|resource|apiserver|scheduler|ranking> / cluster-monitor:tabpanel:<key> / cluster-monitor:range:* / cluster-monitor:auto-refresh / cluster-monitor:surface[data-ai-state]

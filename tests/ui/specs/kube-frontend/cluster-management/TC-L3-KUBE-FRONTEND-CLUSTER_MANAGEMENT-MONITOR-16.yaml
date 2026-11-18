@@ -1,0 +1,43 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-16
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: monitor
+title: 集群监控 · 资源用量排行页签与 JSON 导出
+entry_url: '{{BASE_URL}}/kube-frontend/clusters/host/monitor'
+prd: prd/kube-frontend/cluster-management/monitor.md
+design: design/kube-frontend/cluster-management/monitor.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-16
+
+story:
+- US8
+
+product: 资源用量排行页签复用 NodeRankingPanel（aiIdPrefix=cluster-monitor:ranking:），显示节点数排行并可导出当前 metric/order 的全量行为 JSON 文件 node.usage.rank.json（{cluster, metric, order, generatedAt, items:[{name, values}]}）；无数据时导出按钮禁用并提示「没有可导出的数据」；node-usage 页同时获得同款导出。
+preconditions:
+- 已登录 admin，集群 host 已就绪，节点排名接口可读
+- 集群至少有一个节点（无节点时导出禁用分支另做，见步骤）
+steps:
+- 用 API 读 nodes?type=rank 当前 metric/order 的全量行
+- 打开 /kube-frontend/clusters/host/monitor?tab=ranking，等待 ranking surface 就绪
+- 核对表格行与 API 行数/顺序一致（默认 metric 与 order），每行 node 名可见
+- 点导出按钮 cluster-monitor:ranking:export：核对下载文件名为 node.usage.rank.json，读取 JSON 并核对 {cluster, metric, order, generatedAt, items} 字段齐全
+- 核对导出 items 覆盖 API 全量行（不是当前页），每项有 name 与 values；对同一节点的同一指标值与 API 数值一致
+- 切换 metric（如 node_memory_utilisation）与排序：核对表格按新指标刷新，导出 JSON 的 metric/order/items 随之变化
+- 用 page.route 让 nodes?type=rank 返回 200 空结果（total_item=0, results=[]）：核对表格空态、导出按钮 disabled 且 title 为「没有可导出的数据」
+- 打开 /kube-frontend/clusters/host/node-usage，核对默认前缀 node-usage:export 存在且可点击（同一能力在独立页可用）
+expected:
+- ranking 页签表格行数与顺序与 API 一致，页面无重复分页导致的行缺失
+- 导出文件名 node.usage.rank.json，JSON 结构 {cluster, metric, order, generatedAt, items:[{name, values}]} 完整
+- 导出为全量行而非当前页；数值与 API 一致；切换 metric/order 后导出内容跟随
+- 空数据时按钮禁用并显示 exportEmpty 提示
+- node-usage 页也有导出按钮（node-usage:export）
+troubleshoot:
+- 导出只有一页：实现取了当前 pageSize 而不是全量（pageSize=-1 或逐页拉取）
+- 下载文件名不对：a.download 写死或未设置
+- 空数据仍可点导出：disabled 条件只看 loading 没看 rows.length
+- ranking 页签行数与 node-usage 页不同：aiIdPrefix 改造时误改了查询参数
+update_automation:
+- 句柄：cluster-monitor:ranking:surface / :ranking:export / :ranking:metric / :ranking:<metric>:<node> / node-usage:export

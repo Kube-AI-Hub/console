@@ -74,6 +74,12 @@ export default defineConfig({
         replacement: fileURLToPath(new URL('../../packages/ui/src/terminal.ts', import.meta.url)),
       },
       {
+        // Charts pull recharts; an explicit subpath keeps them off the barrel,
+        // so pages that only need a button never load a chart library.
+        find: /^@kube-ai-hub\/ui\/charts$/,
+        replacement: fileURLToPath(new URL('../../packages/ui/src/charts.ts', import.meta.url)),
+      },
+      {
         find: /^@kube-ai-hub\/ai-kit\/terminal$/,
         replacement: fileURLToPath(new URL('../../../packages/ai-kit/src/terminal.ts', import.meta.url)),
       },
@@ -98,6 +104,12 @@ export default defineConfig({
         replacement: fileURLToPath(new URL('../../packages/locales/src/index.ts', import.meta.url)),
       },
       {
+        // Charts are a subpath on both layers so the drawing library stays out
+        // of the barrel and off every page's first load.
+        find: /^@kube-ai-hub\/ai-kit\/charts$/,
+        replacement: fileURLToPath(new URL('../../../packages/ai-kit/src/charts.ts', import.meta.url)),
+      },
+      {
         find: /^@kube-ai-hub\/ai-kit\/styles\.css$/,
         replacement: fileURLToPath(new URL('../../../packages/ai-kit/src/styles/tokens.css', import.meta.url)),
       },
@@ -110,6 +122,15 @@ export default defineConfig({
         replacement: fileURLToPath(new URL('../../../packages/ai-kit/src/index.ts', import.meta.url)),
       },
     ],
+    /*
+     * ai-kit keeps its own pnpm install for Storybook, and that install resolves
+     * `react` to ai-kit's React 18. Its source can reach two dependencies that are
+     * only there — Radix (aliased above) and now recharts. Without a dedupe the
+     * chart pulls a second React into the app graph: the build still succeeds and
+     * every hook throws "Invalid hook call" at runtime. Pin both runtimes to this
+     * app's copy, in dev and in build.
+     */
+    dedupe: ['react', 'react-dom'],
   },
   server: {
     port: 5174,
@@ -201,6 +222,18 @@ export default defineConfig({
               'vendor-yaml-editor',
             ],
             /*
+             * Charting. recharts is only reached from the cluster monitor's
+             * DonutChart; left in the generic vendor bucket it would be
+             * downloaded (and re-downloaded on every dependency bump) by pages
+             * that never draw a chart. Isolate the library and its runtime
+             * dependencies so the entry only preloads this chunk when the chart
+             * route is entered.
+             */
+            [
+              /node_modules[\\/](recharts|react-redux|redux|@reduxjs|reselect|immer|victory-vendor|d3-[^\\/]+|internmap|es-toolkit|eventemitter3|decimal\.js-light|react-is)[\\/]/,
+              'vendor-charts',
+            ],
+            /*
              * React and its renderer: effectively frozen, shared by every area.
              * Kept apart so an ai-kit change never invalidates it.
              */
@@ -215,6 +248,14 @@ export default defineConfig({
             [/node_modules[\\/]@radix-ui[\\/]/, 'vendor-radix'],
             /* Other third-party code (clsx, tailwind-merge, lucide, …). */
             [/node_modules[\\/]/, 'vendor-misc'],
+            /*
+             * Charts, at both layers: the ui subpath and the ai-kit subpath that
+             * carries recharts. They are reached only from the monitor page; the
+             * generic package rules below would otherwise fold them into
+             * app-shared / ai-kit and put the chart library on every first load.
+             */
+            [/packages[\\/]ui[\\/]src[\\/]charts\.ts$/, 'ui-charts'],
+            [/packages[\\/]ai-kit[\\/]src[\\/](charts\.ts|primitives[\\/]DonutChart)/, 'ai-kit-charts'],
             /*
              * The YAML editor pulls CodeMirror. A list page must not download it,
              * so it stays in its own chunk even though every area's dialogs

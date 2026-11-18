@@ -1,0 +1,47 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-12
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: monitor
+title: 集群监控 · 概览页签：节点环图 / 厂商构成图 / 组件磁贴 / 7 指标主图与明细 / RDMA 摘要
+entry_url: '{{BASE_URL}}/kube-frontend/clusters/host/monitor'
+prd: prd/kube-frontend/cluster-management/monitor.md
+design: design/kube-frontend/cluster-management/monitor.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-12
+
+story:
+- US9
+
+product: 概览页签先给「集群整体是否正常」的图形答案：节点在线环图（healthy/total 与百分比文本）、XPU 厂商构成环图（图例行含厂商名/数量/百分比）、组件状态 3×2 磁贴与核心组件一行；再给集群资源用量：左侧 7 行指标的当前值 used/total，右侧一张带坐标轴/网格/读数的大图；下方 RDMA 摘要与「查看 RDMA 趋势」按钮切到物理资源页签。任一指标缺失显示 «-» 与空态说明，不填 0，也不画零线。
+preconditions:
+- 已登录 admin，集群 host 已就绪
+- componenthealth、nodes/stats 可读；监控 range query 可用
+steps:
+- 用 API 读取 componenthealth 的 nodeStatus、nodes/stats 的各厂商计数，以及一次 range 查询取契约 §4 的 7 组成对指标与 RDMA 摘要指标
+- 打开 /kube-frontend/clusters/host/monitor（overview 页签），等待 surface 就绪
+- 核对概览页签内节点环图存在：文本为 healthy/total，cluster-monitor:overview:node-ring:value 为百分比且与 healthy÷total 一致
+- 核对厂商构成环图存在，图例行集合等于 nodes/stats 除 healthy/total 外的厂商键；逐行核对名称、数量与百分比（数量÷各厂商计数之和），合计约 100%
+- 核对组件状态磁贴 cluster-monitor:status:components 内的 6 个服务磁贴与 3 个核心组件行可见，data-ai-status 语义与同页 ClusterStatusSection 一致（本用例只断言存在与语义属性，不重复 MONITOR-08 的逐行数据核对）
+- 核对用量列表恰好 7 行且 key 顺序为 gpuMemory / gpu / gpuAllocated / cpu / memory / disk / pods；逐行读取 cluster-monitor:overview:usage:<key>:value，与 API 的 used/total 交叉核对（字节类按 B/KiB/MiB/GiB/TiB 换算后比较，比率类为百分比，计数类为整数）
+- 核对右侧主图 cluster-monitor:overview:usage-chart 画出了曲线、有坐标轴刻度与图例 :usage-chart:legend；切换左侧指标后主图对应指标变化（或按实现的选中态断言）
+- 核对 RDMA 摘要区 cluster-monitor:overview:rdma 有端口/吞吐/错误等数值；点「查看 RDMA 趋势」后核对切到 resource 页签（?tab=resource、resource 面板可见），地址仍在本页、不新增路由
+- 用 page.route 让 range query 返回 200 且 results 为空，重新打开页签：核对 7 行当前值显示 «-»、主图显示 cluster-monitor:overview:usage-chart:empty 说明、没有零线；移除拦截后恢复
+- 测量状态行三块（节点环图 / 厂商构成图 / 组件磁贴）的 getBoundingClientRect：宽屏 top 对齐、同高；主图区宽度明显大于左侧指标列表
+expected:
+- 节点环图显示 healthy/total 与百分比，数字与 componenthealth 一致；厂商构成图行数与占比与 nodes/stats 一致
+- 组件状态磁贴 6+3 齐全，保留 data-ai-status 语义
+- 用量 7 行 key 与顺序固定；当前值与 API used/total 一致；比率类按百分比显示、缺失显示 «-»
+- 主图有曲线、坐标轴与图例，且随选中指标变化；RDMA 摘要与按钮存在，按钮切到物理资源页签
+- 无数据时行显示 «-»、主图给出 :empty 说明，不出现零线
+- 宽屏三块同排同高，主图区显著大于左侧列表；窄屏无横向溢出
+troubleshoot:
+- 环图不出现：DonutChart/MetricRing 未渲染或数据为 0 时直接消失（应为空态说明）
+- 百分比是 1.00% 量级：把 0–1 比值当百分比直接打印，缺 ×100
+- 用量行出现 0：缺值被默认成 0，应从接口缺失走到 «-» 与空态
+- 主图无坐标轴：TrendChart 没有传 showAxes/showGrid/interactive
+- 点「查看 RDMA 趋势」整页刷新：按钮用了 <a href> 而不是 onTabChange
+update_automation:
+- 句柄：cluster-monitor:overview:node-ring[:value] / :overview:vendor-donut / :overview:vendor:<vendor> / :overview:usage / :overview:usage:<key>[:value] / :overview:usage-chart[:legend|:empty] / :overview:rdma / :overview:view-rdma / :status:components[:service:<ns>|:core:<key>]

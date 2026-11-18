@@ -10,18 +10,22 @@
       "types": "./src/index.ts",
       "import": "./src/index.ts"
     },
+    "./charts": {
+      "types": "./src/charts.ts",
+      "import": "./src/charts.ts"
+    },
     "./editor": {
       "types": "./src/editor.ts",
       "import": "./src/editor.ts"
     },
     "./styles.css": "./src/styles.css",
-    "./terminal": {
-      "types": "./src/terminal.ts",
-      "import": "./src/terminal.ts"
-    },
     "./tailwind.preset": {
       "types": "./src/preset.ts",
       "import": "./src/preset.ts"
+    },
+    "./terminal": {
+      "types": "./src/terminal.ts",
+      "import": "./src/terminal.ts"
     }
   },
   "scripts": {

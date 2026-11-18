@@ -25,14 +25,18 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./styles.css": "./dist/styles.css",
-    "./terminal": {
-      "types": "./dist/terminal.d.ts",
-      "import": "./dist/terminal.js"
+    "./charts": {
+      "types": "./dist/charts.d.ts",
+      "import": "./dist/charts.js"
     },
+    "./styles.css": "./dist/styles.css",
     "./tailwind.preset": {
       "types": "./dist/tailwind.preset.d.ts",
       "import": "./dist/tailwind.preset.js"
+    },
+    "./terminal": {
+      "types": "./dist/terminal.d.ts",
+      "import": "./dist/terminal.js"
     }
   },
   "scripts": {
@@ -79,6 +83,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "codemirror": "^6.0.2",
+    "recharts": "^3.11.0",
     "tailwind-merge": "^2.5.4",
     "yaml": "^1.10.3"
   },

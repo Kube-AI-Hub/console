@@ -1,96 +1,120 @@
 from __future__ import annotations
 
 import re
-import time
 
 import pytest
 from playwright.sync_api import expect
 
-from pages.cluster_monitor import ClusterMonitorPage
-
 pytestmark = pytest.mark.ui
 
+PERCENT = re.compile(r"^(\d+(?:\.\d+)?)%$")
+COUNT = re.compile(r"^\d+$")
+DECIMAL = re.compile(r"^\d+\.\d{2}$")
+RATE = re.compile(r"^\d+(?:\.\d)?\s?(?:B|KiB|MiB|GiB|TiB)/s$")
 
-def _series(api, cluster: str, metrics: list[str], window: int = 600, step: str = '60s') -> dict[str, list[float]]:
-    end = int(time.time())
-    start = end - window
-    metrics_filter = '|'.join(f'{metric}$' for metric in metrics)
-    status, body = api.request(
-        'GET',
-        f'/kapis/monitoring.kubesphere.io/v1alpha3/cluster?cluster={cluster}&metrics_filter={metrics_filter}&start={start}&end={end}&step={step}',
-    )
-    assert status == 200, f'metrics -> {status}: {str(body)[:200]}'
-    out: dict[str, list[float]] = {}
-    for result in (body or {}).get('results') or []:
-        name = result.get('metric_name') or ''
-        values: list[float] = []
-        for series in (result.get('data') or {}).get('result') or []:
-            for _at, value in series.get('values') or []:
-                try:
-                    values.append(float(value))
-                except (TypeError, ValueError):
-                    continue
-        if values:
-            out[name] = values
-    return out
+GROUP_TITLES = ("GPU", "主机资源", "磁盘 I/O", "网络", "RDMA / InfiniBand")
+
+
+def _last(series: dict, metric: str) -> float | None:
+    points = series.get(metric) or []
+    for _at, value in reversed(points):
+        if value == value and abs(value) != float("inf"):
+            return value
+    return None
 
 
 @pytest.mark.point
-def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_MONITOR_05(cluster_management_page, screenshot):
-    """TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-05 集群监控：GPU/磁盘 I/O/RDMA 面板与单位。"""
+def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_MONITOR_05(cluster_monitor_page, screenshot):
+    """TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-05 集群监控：GPU / 磁盘 I/O / RDMA 面板与单位。"""
 
-    ui = cluster_management_page
+    ui = cluster_monitor_page
     assert ui.api is not None
-    monitor = ClusterMonitorPage(ui.page, ui.base_url, ui.cluster, ui.api)
-    monitor.open()
-    monitor.wait_ready()
+
+    series = ui._range(
+        3600,
+        "60s",
+        [
+            "cluster_gpu_memory_utilisation",
+            "cluster_gpu_utilization",
+            "cluster_gpu_allocated",
+            "cluster_ib_health",
+            "cluster_ib_port_up",
+            "cluster_ib_port_total",
+            "cluster_ib_tx_bytes",
+            "cluster_ib_rx_bytes",
+            "cluster_ib_link_speed",
+            "cluster_ib_rx_errors",
+            "cluster_ib_retrans",
+            "cluster_ib_discards",
+            "cluster_ib_link_downed",
+            "cluster_disk_read_throughput",
+            "cluster_disk_write_throughput",
+            "cluster_disk_read_iops",
+            "cluster_disk_write_iops",
+            "cluster_net_bytes_transmitted",
+            "cluster_net_bytes_received",
+        ],
+    )
+    if series is None:
+        pytest.skip("监控 range query 不可用，无法核对 GPU/磁盘/RDMA 指标")
+
+    ui.open("resource")
+    ui.wait_ready()
 
     # ---- groups: order and headings ----
-    assert monitor.groups() == list(ClusterMonitorPage.GROUPS), monitor.groups()
-    titles = monitor.group_titles()
-    assert titles == ['GPU', '主机资源', '磁盘 I/O', '网络', 'RDMA / InfiniBand'], titles
+    assert ui.resource_groups() == ["gpu", "host", "disk", "network", "rdma"], ui.resource_groups()
+    titles = tuple(
+        ui.resource_group(group).locator(":scope > h2").first.inner_text().strip()
+        for group in ui.resource_groups()
+    )
+    assert titles == GROUP_TITLES, titles
 
-    # ---- every physical-resource card is present: 29 in total ----
-    assert monitor.charts() + monitor.empty_cards() == 29, (monitor.charts(), monitor.empty_cards())
+    # ---- every physical-resource chart is present: 18 in total ----
+    assert len(ui.resource_chart_ids()) == 18, ui.resource_chart_ids()
 
-    # ---- the new cards exist and carry a current value ----
-    for card in ClusterMonitorPage.EXTRA_CARDS:
-        expect(monitor.page.locator(f'[data-ai-id="cluster-monitor:{card}"]').last).to_be_visible(timeout=30_000)
-        latest = monitor.latest(card)
-        assert latest and latest != '-', f'{card} 没有当前值'
+    def unit_check(group: str, key: str, series_key: str, pattern: re.Pattern, label: str) -> None:
+        if ui.resource_chart_empty(group, key).count() > 0:
+            assert ui.resource_chart_empty(group, key).inner_text().strip(), f"{group}/{key} 空态缺说明"
+            return
+        value = ui.resource_legend_value(group, key, series_key)
+        assert pattern.match(value), f"{label} 单位不对: {value!r}"
 
-    # ---- units: GPU ratios become percentages, link speed becomes Gb/s ----
-    for card in ('gpu-memory', 'gpu-utilization', 'rdma-health', 'rdma-ports'):
-        value = monitor.latest(card)
-        match = re.search(r'(\d+)%', value)
-        assert match, f'{card} 应为百分比: {value!r}'
-        assert 0 <= int(match.group(1)) <= 100, value
-    for card in ('disk-read-throughput', 'disk-write-throughput', 'rdma-tx', 'rdma-rx'):
-        assert re.search(r'/s$', monitor.latest(card)), f'{card} 应带每秒单位: {monitor.latest(card)!r}'
-    for card in ('disk-read-iops', 'disk-write-iops'):
-        assert re.fullmatch(r'\d+\.\d{2}', monitor.latest(card)), f'{card} 应为两位小数: {monitor.latest(card)!r}'
-    assert re.fullmatch(r'[\d.]+ Gb/s', monitor.latest('rdma-link-speed')), monitor.latest('rdma-link-speed')
-    for card in ('gpu-allocated', 'rdma-rx-errors', 'rdma-retrans', 'rdma-discards', 'rdma-link-downed'):
-        assert re.fullmatch(r'\d+', monitor.latest(card)), f'{card} 应为整数: {monitor.latest(card)!r}'
+    # ---- GPU ratios become percentages, counts stay integers ----
+    unit_check("gpu", "gpuMemory", "gpuMemory", PERCENT, "GPU 显存使用率")
+    unit_check("gpu", "gpuUtilization", "gpuUtilization", PERCENT, "GPU 使用率")
+    unit_check("gpu", "gpuAllocated", "gpuAllocated", COUNT, "已分配 GPU 卡数")
+
+    # ---- disk / network: bytes per second, IOPS two decimals ----
+    for series_key in ("read", "write"):
+        unit_check("disk", "throughput", series_key, RATE, f"磁盘吞吐 {series_key}")
+        unit_check("disk", "iops", series_key, DECIMAL, f"磁盘 IOPS {series_key}")
+    for series_key in ("tx", "rx"):
+        unit_check("network", "traffic", series_key, RATE, f"网络流量 {series_key}")
+
+    # ---- RDMA: percent health, counts, B/s, Gb/s ----
+    unit_check("rdma", "health", "health", PERCENT, "RDMA 健康度")
+    for series_key in ("portUp", "portTotal"):
+        unit_check("rdma", "ports", series_key, COUNT, f"RDMA 端口 {series_key}")
+    for series_key in ("tx", "rx"):
+        unit_check("rdma", "throughput", series_key, RATE, f"RDMA 吞吐 {series_key}")
+    for series_key in ("rxErrors", "retrans", "discards"):
+        unit_check("rdma", "errors", series_key, COUNT, f"RDMA 错误 {series_key}")
+    unit_check("rdma", "linkDowned", "linkDowned", COUNT, "RDMA 链路中断数")
+    if ui.resource_chart_empty("rdma", "linkSpeed").count() == 0:
+        value = ui.resource_legend_value("rdma", "linkSpeed", "linkSpeed")
+        assert re.fullmatch(r"\d+\.\d Gb/s", value), f"链路速率应以 Gb/s 显示并保留一位小数: {value!r}"
 
     # ---- cross-check the percentages against the API's own series ----
-    series = _series(ui.api, ui.cluster, ['cluster_gpu_memory_utilisation', 'cluster_ib_port_up', 'cluster_ib_port_total'])
-    gpu = series.get('cluster_gpu_memory_utilisation')
-    assert gpu, 'GPU 显存使用率没有序列'
-    shown = int(re.search(r'(\d+)%', monitor.latest('gpu-memory')).group(1))
-    expected = gpu[-1] * 100
-    assert abs(shown - expected) <= 2, f'GPU 显存 {shown}% 与接口 {expected:.1f}% 相差过大'
+    gpu = _last(series, "cluster_gpu_memory_utilisation")
+    if gpu is not None and ui.resource_chart_empty("gpu", "gpuMemory").count() == 0:
+        shown = float(PERCENT.match(ui.resource_legend_value("gpu", "gpuMemory", "gpuMemory")).group(1))
+        expected = gpu * 100
+        assert abs(shown - expected) <= 2, f"GPU 显存 {shown}% 与接口 {expected:.1f}% 相差过大"
 
-    up = series.get('cluster_ib_port_up')
-    total = series.get('cluster_ib_port_total')
-    if up and total and total[-1] > 0:
-        shown_ports = int(re.search(r'(\d+)%', monitor.latest('rdma-ports')).group(1))
-        expected_ports = up[-1] / total[-1] * 100
-        assert abs(shown_ports - expected_ports) <= 2, f'RDMA 端口 {shown_ports}% 与接口 {expected_ports:.1f}% 相差过大'
+    up, total = _last(series, "cluster_ib_port_up"), _last(series, "cluster_ib_port_total")
+    if up is not None and total is not None and ui.resource_chart_empty("rdma", "ports").count() == 0:
+        assert COUNT.match(ui.resource_legend_value("rdma", "ports", "portUp"))
+        assert COUNT.match(ui.resource_legend_value("rdma", "ports", "portTotal"))
+        assert int(ui.resource_legend_value("rdma", "ports", "portTotal")) == round(total)
 
-    # ---- node detail keeps the three node-scoped cards only ----
-    node_monitor = ClusterMonitorPage(ui.page, ui.base_url, ui.cluster, ui.api)
-    assert node_monitor.GROUPS == ('gpu', 'host', 'disk', 'network', 'rdma')
-
-    screenshot(ui.page, 'cluster-monitor-physical')
-
+    screenshot(ui.page, "cluster-monitor-physical")

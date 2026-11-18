@@ -1,13 +1,27 @@
 from __future__ import annotations
 
 import re
+import time
+from urllib.parse import parse_qs, urlparse
 
 import pytest
+from playwright.sync_api import expect
 
 pytestmark = pytest.mark.ui
 
-PERCENT = re.compile(r"^(\d+)%$")
+PERCENT = re.compile(r"^(\d+(?:\.\d+)?)%$")
 COUNT = re.compile(r"^(\d+)$")
+CLUSTER_RANGE = "**/monitoring.kubesphere.io/v1alpha3/cluster**"
+
+
+def _ratio(series: dict, used_metric: str, total_metric: str) -> float | None:
+    used = series.get(used_metric) or []
+    total = dict(series.get(total_metric) or [])
+    for at, value in reversed(used):
+        capacity = total.get(at)
+        if capacity and capacity > 0:
+            return value / capacity * 100
+    return None
 
 
 @pytest.mark.point
@@ -20,80 +34,94 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_MONITOR_01(cluster_monitor_page,
     series = ui._range(
         3600,
         "60s",
-        ["cluster_cpu_usage", "cluster_cpu_total", "cluster_memory_usage_wo_cache", "cluster_memory_total"],
+        [
+            "cluster_cpu_usage",
+            "cluster_cpu_total",
+            "cluster_memory_usage_wo_cache",
+            "cluster_memory_total",
+            "cluster_pod_running_count",
+        ],
     )
     if series is None:
         pytest.skip("监控 range query 不可用，无法核对趋势")
 
-    ui.open()
+    status, health = ui.component_health()
+    assert status == 200, f"componenthealth -> {status}: {str(health)[:200]}"
+    node_status = health.get("nodeStatus") or {}
+    healthy = int(node_status.get("healthyNodes") or 0)
+    total = int(node_status.get("totalNodes") or 0)
+
+    ui.open("overview")
     ui.wait_ready()
 
-    assert ui.state() == "ready", ui.state()
+    # ---- AC-01's four trends after the tab rework: nodes is the overview ring ----
+    expect(ui.status_node_ratio_locator()).to_be_visible(timeout=30_000)
+    assert ui.status_node_ratio() == f"{healthy}/{total}", (ui.status_node_ratio(), healthy, total)
+    nodes_percent = PERCENT.match(ui.status_node_percent())
+    assert nodes_percent, f"节点在线比例应为百分比: {ui.status_node_percent()!r}"
 
-    # ---- AC-01 + AC-03: the four core cards exist, and the physical-resource set fills the page ----
-    # AC-01 named the original four; AC-03 added the rest of the old console's physical metrics, so
-    # the page now draws thirteen cards. Asserting the core four are among them keeps this case about
-    # AC-01 without freezing the total at a number AC-03 owns.
-    assert ui.charts() >= 4, f"expected at least the four core charts, found {ui.charts()}"
-    # The page now also carries the GPU / disk-IO / RDMA cards (AC-05): count every card,
-    # whether it drew a sparkline or the explicit no-data state.
-    total_cards = ui.charts() + ui.empty_cards()
-    assert total_cards == 29, f"expected the twenty-nine physical-resource charts, found {total_cards}"
-    assert ui.empty_cards() == 0, "监控有数据时不应出现无数据卡片"
+    ui.select_tab("resource")
+    expect(ui.resource_chart("host", "cpu")).to_be_visible(timeout=30_000)
+    expect(ui.resource_chart("host", "memory")).to_be_visible(timeout=30_000)
+    expect(ui.resource_chart("host", "pods")).to_be_visible(timeout=30_000)
 
-    for card in ui.CARDS:
-        text = ui.card_text(card)
-        for label in ("最小", "最大", "当前"):
-            assert label in text, f"{card} 卡片缺少 {label}: {text[:120]}"
-
-    # ---- AC-01: percentages are ratios, counts are counts ----
-    for card in ("cpu", "memory"):
-        value = ui.latest(card)
+    # ---- CPU / memory are ratios of two series, not the raw metric drawn as a percent ----
+    for group, key, series_key, used_metric, total_metric in (
+        ("host", "cpu", "cpu", "cluster_cpu_usage", "cluster_cpu_total"),
+        ("host", "memory", "memory", "cluster_memory_usage_wo_cache", "cluster_memory_total"),
+    ):
+        value = ui.resource_legend_value(group, key, series_key)
         match = PERCENT.match(value)
-        assert match, f"{card} 当前值应为百分比: {value!r}"
-        percent = int(match.group(1))
-        assert 0 <= percent <= 100, f"{card} 当前值超出 0-100: {percent}"
+        assert match, f"{key} 当前值应为百分比: {value!r}"
+        percent = float(match.group(1))
+        assert 0 <= percent <= 100, f"{key} 当前值超出 0-100: {percent}"
+        expected = _ratio(series, used_metric, total_metric)
+        if expected is not None:
+            assert abs(expected - percent) <= 5, (
+                f"{key} 当前值 {percent}% 与接口算出的 {expected:.1f}% 相差过大——可能没有除以总量"
+            )
 
-        # Cross-check against the API: a card that prints bytes as a percentage
-        # also prints a number, so only the division proves the unit is right.
-        usage_name, total_name = (
-            ("cluster_cpu_usage", "cluster_cpu_total") if card == "cpu" else
-            ("cluster_memory_usage_wo_cache", "cluster_memory_total")
-        )
-        usage = series.get(usage_name) or []
-        total = series.get(total_name) or []
-        if usage and total:
-            totals = dict(total)
-            ratios = [
-                used / totals[at] * 100 for at, used in usage if at in totals and totals[at] > 0
-            ]
-            if ratios:
-                expected_last = ratios[-1]
-                # One percentage point of slack: the page samples a few seconds later
-                # than the API call this test made.
-                assert abs(expected_last - percent) <= 5, (
-                    f"{card} 当前值 {percent}% 与接口算出的 {expected_last:.1f}% 相差过大——"
-                    "可能没有除以总量"
-                )
-
-    for card in ("pods", "nodes"):
-        value = ui.latest(card)
-        assert COUNT.match(value), f"{card} 当前值应为整数计数: {value!r}"
+    pods_value = ui.resource_legend_value("host", "pods", "running")
+    assert COUNT.match(pods_value), f" pods 当前值应为整数计数: {pods_value!r}"
 
     screenshot(ui.page, "cluster-monitor")
 
     # ---- AC-02: switching the window re-reads a different interval ----
-    before = ui.latest("cpu")
-    ui.select_range("24h")
-    ui.page.wait_for_timeout(4000)
+    requests: list[str] = []
+
+    def record(route):
+        requests.append(route.request.url)
+        route.continue_()
+
+    ui.page.route(CLUSTER_RANGE, record)
+    try:
+        date_before = list(requests)
+
+        def window_starts() -> list[int]:
+            starts: list[int] = []
+            for url in requests[len(date_before):]:
+                start = int((parse_qs(urlparse(url).query).get("start") or ["0"])[0])
+                if start:
+                    starts.append(start)
+            return starts
+
+        ui.select_range("24h")
+        deadline = time.time() + 30
+        starts: list[int] = []
+        while time.time() < deadline:
+            starts = window_starts()
+            if any(abs(time.time() - value - 24 * 3600) < 600 for value in starts):
+                break
+            ui.page.wait_for_timeout(250)
+        assert any(abs(time.time() - value - 24 * 3600) < 600 for value in starts), (
+            f"切换时间窗后没有按 24 小时窗口重新取数: {starts}"
+        )
+    finally:
+        ui.page.unroute(CLUSTER_RANGE)
+
     ui.wait_ready()
-    assert ui.charts() + ui.empty_cards() == 29
-    after = ui.latest("cpu")
-    # The value may legitimately match (an idle cluster is idle at both scales), so
-    # the assertion is that the page still renders a valid percentage for the new
-    # window, plus the request itself changed — checked through the card's "until"
-    # timestamp, which is now part of the new interval.
-    assert PERCENT.match(after), f"切换时间窗后当前值不是百分比: {after!r} (before {before!r})"
-    assert COUNT.match(ui.latest("pods")), ui.latest("pods")
+    expect(ui.resource_chart("host", "cpu")).to_be_visible(timeout=30_000)
+    assert PERCENT.match(ui.resource_legend_value("host", "cpu", "cpu")), "24h 窗口的 CPU 当前值不是百分比"
+    assert COUNT.match(ui.resource_legend_value("host", "pods", "running")), "24h 窗口的 pods 当前值不是整数"
 
     screenshot(ui.page, "cluster-monitor-24h")

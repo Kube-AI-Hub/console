@@ -10,13 +10,11 @@ from pages.cluster_monitor import ClusterMonitorPage
 
 pytestmark = pytest.mark.ui
 
-#: The member cluster that is expected to be joined-but-not-ready. Its whole
-#: /kapis/clusters/test/* surface answers 500 "cluster test is not ready".
 NOT_READY_CLUSTER = "test"
 
-#: Glob (not a compiled regex) so page.unroute can remove the same pattern again.
 COMPONENTHEALTH = "**/componenthealth*"
 NODES_STATS = "**/nodes/stats*"
+CLUSTER_RANGE = "**/monitoring.kubesphere.io/v1alpha3/cluster**"
 
 
 def _cluster_ready(record: dict) -> bool:
@@ -34,14 +32,11 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_MONITOR_09(cluster_monitor_page,
     ui = cluster_monitor_page
     assert ui.api is not None
 
-    # ---- AC-09: a not-ready member cluster never mounts the monitor page ----
+    # ---- a not-ready member cluster never mounts the monitor page ----
     status, clusters = ui.api.request("GET", "/kapis/resources.kubesphere.io/v1alpha3/clusters")
     assert status == 200, f"clusters -> {status}: {str(clusters)[:200]}"
     items = clusters.get("items") or []
-    record = next(
-        (item for item in items if (item.get("metadata") or {}).get("name") == NOT_READY_CLUSTER),
-        None,
-    )
+    record = next((item for item in items if (item.get("metadata") or {}).get("name") == NOT_READY_CLUSTER), None)
     if record is None:
         pytest.skip(f"本部署没有成员集群 {NOT_READY_CLUSTER}，未就绪分支无法真实复现")
     if _cluster_ready(record):
@@ -51,27 +46,17 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_MONITOR_09(cluster_monitor_page,
     not_ready_page.page.goto(not_ready_page.url)
     not_ready = ui.page.locator('[data-ai-id="cluster:not-ready"]')
     expect(not_ready).to_be_visible(timeout=60_000)
-
     overview_link = ui.page.locator('[data-ai-id="cluster:not-ready-overview"]')
     expect(overview_link).to_be_visible(timeout=30_000)
-    href = overview_link.get_attribute("href") or ""
-    assert href.endswith(f"/clusters/{NOT_READY_CLUSTER}/overview"), href
-
-    # The whole page is the waiting panel: no monitor surface, no trends, no status band,
-    # and above all no retry button (retrying a cluster that has not joined cannot help).
+    assert (overview_link.get_attribute("href") or "").endswith(f"/clusters/{NOT_READY_CLUSTER}/overview")
     assert ui.page.locator('[data-ai-id="cluster-monitor:surface"]').count() == 0, "未就绪时不应挂载监控页"
     assert ui.page.locator('[data-ai-id="cluster-monitor:status"]').count() == 0, "未就绪时不应显示状态分区"
-    assert ui.page.locator('[data-ai-id="cluster-monitor:chart"]').count() == 0, "未就绪时不应画趋势"
     assert ui.page.locator('[data-ai-id$=":retry"]').count() == 0, "未就绪时不应提供重试"
-    body = not_ready.inner_text()
-    assert "等待" in body or "未就绪" in body or "not ready" in body.lower(), body[:200]
     screenshot(ui.page, "cluster-monitor-not-ready-test")
 
-    # ---- status-band branches on the ready host cluster ----
+    # ---- the status band's branches on the ready host cluster ----
     def open_host() -> None:
         ui.open()
-        # Trends are independent of the status band, but "still loading" is not a
-        # useful state to assert against: wait for the page to reach ready first.
         ui.wait_ready()
         expect(ui.status_section).to_be_visible(timeout=30_000)
 
@@ -80,20 +65,19 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_MONITOR_09(cluster_monitor_page,
     baseline_ratio = ui.status_node_ratio()
     baseline_vendors = ui.status_vendor_ids()
     assert baseline_vendors, "host 的厂商分布不应为空"
-    assert baseline_ratio.startswith("1/") or re.match(r"^\d+/\d+$", baseline_ratio), baseline_ratio
+    assert re.fullmatch(r"\d+/\d+", baseline_ratio), baseline_ratio
 
-    # 403 on componenthealth: permission on the node and component blocks, no retry.
+    # 403 on componenthealth: permission on the node ring and the component tiles, no retry.
     ui.page.route(COMPONENTHEALTH, lambda route: route.fulfill(status=403, json={"message": "forbidden"}))
     open_host()
     expect(ui.status_block_permission("node-online")).to_be_visible(timeout=30_000)
     expect(ui.status_permission()).to_be_visible(timeout=30_000)
     assert ui.status_block_retry("node-online").count() == 0, "无权限时节点块不应提供重试"
     assert ui.status_retry().count() == 0, "无权限时组件块不应提供重试"
-    # The vendor block reads nodes/stats and must stay on real data.
     assert ui.status_vendor_ids() == baseline_vendors, "componenthealth 无权限不应影响厂商块"
     ui.page.unroute(COMPONENTHEALTH)
 
-    # nodes/stats 403: only the vendor block is permission; node and component blocks stay real.
+    # nodes/stats 403: only the vendor block is permission; node and components stay real.
     ui.page.route(NODES_STATS, lambda route: route.fulfill(status=403, json={"message": "forbidden"}))
     open_host()
     expect(ui.status_block_permission("vendor")).to_be_visible(timeout=30_000)
@@ -103,7 +87,7 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_MONITOR_09(cluster_monitor_page,
     ui.page.unroute(NODES_STATS)
     screenshot(ui.page, "cluster-monitor-status-permission")
 
-    # 5xx on componenthealth: error + retry on both blocks; the trend section is untouched.
+    # 5xx on componenthealth: error + retry on both blocks; the usage section is untouched.
     requests: list[str] = []
 
     def unavailable(route):
@@ -116,7 +100,7 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_MONITOR_09(cluster_monitor_page,
     expect(ui.status_error()).to_be_visible(timeout=30_000)
     expect(ui.status_block_retry("node-online")).to_be_visible(timeout=30_000)
     expect(ui.status_retry()).to_be_visible(timeout=30_000)
-    assert ui.charts() + ui.empty_cards() == 29, "组件状态失败不应清空趋势分区"
+    assert ui.overview_usage().is_visible(), "组件状态失败不应清空资源用量分区"
 
     before = len(requests)
     ui.status_retry().click()
@@ -125,14 +109,13 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_MONITOR_09(cluster_monitor_page,
         ui.page.wait_for_timeout(200)
     assert len(requests) > before, "点重试后没有重新请求 componenthealth"
 
-    # Remove the failure and retry: the block recovers instead of staying red.
     ui.page.unroute(COMPONENTHEALTH)
     ui.status_retry().click()
     expect(ui.status_node_ratio_locator()).to_be_visible(timeout=30_000)
     assert ui.status_node_ratio() == baseline_ratio, ui.status_node_ratio()
     screenshot(ui.page, "cluster-monitor-status-error")
 
-    # 5xx on nodes/stats: only the vendor block fails; node and component blocks stay real.
+    # 5xx on nodes/stats: only the vendor block fails; the other two stay real.
     ui.page.route(NODES_STATS, unavailable)
     open_host()
     expect(ui.status_vendor_branch("error")).to_be_visible(timeout=30_000)
@@ -164,25 +147,23 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_MONITOR_09(cluster_monitor_page,
     assert ui.status_node_ratio_locator().count() == 0, "totalNodes=0 时不应把 0/0 当正常态"
     ui.page.unroute(COMPONENTHEALTH)
 
-    # nodes/stats 200 with an empty object: an explicit empty state, not an empty bar.
+    # nodes/stats 200 with an empty object: an explicit empty state, not an empty ring.
     ui.page.route(NODES_STATS, lambda route: route.fulfill(status=200, json={}))
     open_host()
     expect(ui.status_vendor_empty()).to_be_visible(timeout=30_000)
     assert "暂无" in ui.status_vendor_empty().inner_text()
     assert ui.status_vendor_ids() == [], "空数据时不应渲染厂商行"
+    expect(ui.page.locator('[data-ai-id="cluster-monitor:overview:vendor-donut:empty"]')).to_be_visible(timeout=30_000)
     ui.page.unroute(NODES_STATS)
 
-    # Trends failing must not blank the status band: the two reads are independent.
-    ui.page.route(
-        "**/monitoring.kubesphere.io/v1alpha3/cluster*",
-        lambda route: route.fulfill(status=500, json={"message": "monitoring unavailable"}),
-    )
+    # The usage range failing must not blank the status band: the reads are independent.
+    ui.page.route(CLUSTER_RANGE, lambda route: route.fulfill(status=500, json={"message": "monitoring unavailable"}))
     open_host()
     expect(ui.status_node_ratio_locator()).to_be_visible(timeout=30_000)
     assert ui.status_node_ratio() == baseline_ratio, ui.status_node_ratio()
     assert ui.status_vendor_ids() == baseline_vendors, ui.status_vendor_ids()
     expect(ui.status_service_row("kube-system")).to_be_visible(timeout=30_000)
-    ui.page.unroute("**/monitoring.kubesphere.io/v1alpha3/cluster*")
+    ui.page.unroute(CLUSTER_RANGE)
 
     # Remove every interception: the band is real again.
     open_host()

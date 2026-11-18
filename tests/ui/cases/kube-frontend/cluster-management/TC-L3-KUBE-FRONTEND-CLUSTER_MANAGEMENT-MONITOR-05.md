@@ -8,7 +8,7 @@
 
 ## 产品功能
 
-物理资源面板按 GPU / 主机资源 / 磁盘 I/O / 网络 / RDMA 五组显示，补齐旧 console 的 GPU、磁盘吞吐/IOPS 与 RDMA 卡片，单位正确。
+物理资源监控页签按 GPU / 主机资源 / 磁盘 I/O / 网络 / RDMA 五组渲染，共 18 张多序列大图；旧页按卡拆分的读写吞吐、读写 IOPS、网络收发、Pod 三态、负载 1/5/15、RDMA 端口/吞吐/错误合并为同一张图的不同身份序列。GPU 与健康度为 0–1 比值×100，链路速率 bit/s→Gb/s，IOPS 两位小数，无数据给空态说明。
 
 ### 关联需求
 
@@ -37,26 +37,32 @@
 ## 前置与配置
 
 - 监控后端可用（/kapis/monitoring.kubesphere.io/v1alpha3/cluster 返回指标）
+- 页面默认时间窗为最近 1 小时
 
 ## 测试步骤
 
-1. 打开集群监控，等 cluster-monitor:surface 进入 ready
-2. 核对五个分组标题存在且顺序为 GPU → 主机资源 → 磁盘 I/O → 网络 → RDMA
-3. 核对 GPU/磁盘/RDMA 卡片存在且每个有当前值
-4. 用接口同一窗口的序列核对：GPU 显存使用率的当前值 = 比值×100；RDMA 端口可用率 = 端口up/端口total×100；链路速率显示为 Gb/s
+1. 打开集群监控，点「物理资源监控」页签（cluster-monitor:tab:resource），等 cluster-monitor:resource 就绪
+2. 核对五个分组标题与顺序为 GPU → 主机资源 → 磁盘 I/O → 网络 → RDMA
+3. 核对图表总数为 18（gpu 3 + host 6 + disk 2 + network 1 + rdma 6）
+4. 逐图核对 GPU、磁盘吞吐/IOPS、网络流量与 RDMA 图的图例或空态说明
+5. 用接口同一窗口序列核对 GPU 显存=比值×100、RDMA 端口 up/total、链路速率显示为 Gb/s；吞吐为 B/s、IOPS 两位小数、错误类为整数
 
 ## 期望结果
 
-- 五个分组标题与顺序正确；卡片总数 = 29（GPU 3 + 主机资源 11 + 磁盘 I/O 4 + 网络 2 + RDMA 9）
-- GPU 使用率/显存为 0–100 百分比；已分配卡数为整数；磁盘吞吐带 /s 单位；IOPS 两位小数
-- 链路速率形如 '907.5 Gb/s'（不是原始大整数）
-- 任一卡片无数据时显示空态说明而不是 0
+- 五个分组齐全且顺序正确；共 18 张图，多序列图按身份一条线（负载 3、Pod 三态 3、磁盘读写 2、网络收发 2、RDMA 端口/吞吐/错误）
+- GPU 显存/使用率与 RDMA 健康度为 0–100 百分比；已分配卡数、端口、错误/重传/丢弃/链路中断为整数
+- 链路速率形如 '907.5 Gb/s'（一位小数），不是原始 bit/s 大整数
+- 磁盘/网络/RDMA 吞吐为 B/KiB/MiB/GiB 每秒；IOPS 两位小数
+- 任一图无数据时显示空态说明（<chart>:empty）而不是 0 或零线
 
 ## 失败排查
 
-- 数值显示成 0–1：忘了 scale=100（GPU/健康度是比值）
+- 数值显示成 0–1：忘了 ×100（GPU/健康度是比值）
 - 链路速率显示 907500000000.00：把 bit/s 当成普通小数，未用 Gb/s 格式
+- 图数量或分组不对：多序列被按卡拆分、或组顺序错了；检查 monitorResourceCharts.ts 与 cluster-monitor:resource:chart:<group>:<key>
 
 ## 产品改版后如何更新自动化
 
-- 句柄：cluster-monitor:surface / :group:<gpu|host|disk|network|rdma> / :<card> / :<card>:latest
+- 页签/分组：cluster-monitor:tab:resource、cluster-monitor:resource:group:<gpu|host|disk|network|rdma>
+- 图表：cluster-monitor:resource:chart:<group>:<key>，图例值位于 <chart>:legend:<series>:value，空态位于 <chart>:empty
+- 分组与单位配置：monitorResourceCharts.ts

@@ -33,3 +33,4 @@ if (!window.matchMedia) {
  * stops the clock from being the thing under test.
  */
 configure({ asyncUtilTimeout: 5_000 });
+

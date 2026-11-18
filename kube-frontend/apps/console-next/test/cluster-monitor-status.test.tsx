@@ -5,10 +5,29 @@ import { I18nProvider } from '@/i18n';
 import { ClusterStatusSection } from '@/pages/cluster/ClusterStatusSection';
 
 /*
- * 'Link' is the only router entry the section uses: the node card opens the node
+ * 'Link' is the only router entry the section uses: the node ring opens the node
  * list. Rendering it as an anchor keeps this test about the section rather than
  * about the router.
  */
+/*
+ * DonutChart carries recharts (a second React root in ai-kit's own install, React
+ * 18). jsdom does not need the drawing: the app only owns the segment inputs and
+ * the surrounding handles, and ai-kit's own suite covers the ring, legend and empty
+ * state. Mocking the subpath keeps this test about the status band.
+ */
+vi.mock('@kube-ai-hub/ui/charts', () => ({
+  DonutChart: ({ segments, label, emptyText, centerLabel }: {
+    segments: { key: string; label: string; value: number }[];
+    label: string;
+    emptyText: string;
+    centerLabel?: React.ReactNode;
+  }) => (
+    <div role="img" aria-label={label} data-ai-segments={segments.length}>
+      {segments.length > 0 ? centerLabel ?? null : emptyText}
+    </div>
+  ),
+}));
+
 vi.mock('@tanstack/react-router', () => ({
   Link: ({ children, to, params, ...rest }: {
     children: React.ReactNode;
@@ -116,32 +135,38 @@ function stubApi(overrides: {
   }));
 }
 
-const NODE_ONLINE = 'cluster-monitor:status:node-online';
-const VENDOR = 'cluster-monitor:status:vendor';
+const NODE_RING = 'cluster-monitor:overview:node-ring';
+const VENDOR = 'cluster-monitor:overview:vendor-donut';
 const COMPONENTS = 'cluster-monitor:status:components';
 
+/** Every per-vendor handle of the overview's vendor block. */
+const vendorId = (vendor: string) => 'cluster-monitor:overview:vendor:' + vendor;
+
 describe('cluster monitor status section', () => {
-  it('renders node ratio, vendor share, service aggregates and core components', async () => {
+  it('renders the node ring, vendor composition and component tiles', async () => {
     stubApi();
     const view = mount(<ClusterStatusSection cluster="host" live={false} />);
 
-    await waitFor(() => expect(view.container.querySelector('[data-ai-id="' + NODE_ONLINE + '"]')).not.toBeNull());
-    const nodeRatio = view.container.querySelector('[data-ai-id="' + NODE_ONLINE + '"]')!;
-    expect(nodeRatio).toHaveTextContent('3/3');
-    expect(view.container.querySelector('[data-ai-id="' + NODE_ONLINE + ':ratio"]')).toHaveTextContent('100%');
-    expect(view.container.querySelector('[data-ai-id="' + NODE_ONLINE + ':link"]'))
+    // Node ring: the percentage lives in the ring, the raw pair next to it.
+    await waitFor(() => expect(view.container.querySelector('[data-ai-id="' + NODE_RING + ':value"]')).not.toBeNull());
+    expect(view.container.querySelector('[data-ai-id="' + NODE_RING + ':value"]')).toHaveTextContent('100%');
+    expect(view.container.querySelector('[data-ai-id="' + NODE_RING + ':count"]')).toHaveTextContent('3/3');
+    expect(view.container.querySelector('[data-ai-id="' + NODE_RING + ':link"]'))
       .toHaveAttribute('href', '/kube-frontend/clusters/host/nodes');
 
-    const vendorRow = view.container.querySelector('[data-ai-id="' + VENDOR + ':row:nvidia"]')!;
+    // Vendor composition: the ring plus one row per vendor with count and share.
+    expect(view.container.querySelector('[data-ai-id="' + VENDOR + '"]')).not.toBeNull();
+    const vendorRow = view.container.querySelector('[data-ai-id="' + vendorId('nvidia') + '"]')!;
     expect(vendorRow).toHaveTextContent('英伟达');
-    expect(vendorRow.querySelector('[data-ai-id="' + VENDOR + ':row:nvidia:count"]')).toHaveTextContent('3');
-    expect(vendorRow.querySelector('[data-ai-id="' + VENDOR + ':row:nvidia:percent"]')).toHaveTextContent('100%');
+    expect(vendorRow.querySelector('[data-ai-id="' + vendorId('nvidia') + ':count"]')).toHaveTextContent('3');
+    expect(vendorRow.querySelector('[data-ai-id="' + vendorId('nvidia') + ':percent"]')).toHaveTextContent('100%');
 
+    // Component tiles: same semantics as the previous rows, new 3×2 layout.
     const platform = view.container.querySelector('[data-ai-id="' + COMPONENTS + ':service:kubesphere-system"]')!;
     expect(platform).toHaveTextContent('2/2');
     expect(platform).toHaveAttribute('data-ai-status', 'healthy');
-    // A healthy service row prints the ratio, not a redundant 正常 badge; the badge
-    // stays on the unhealthy/absent rows where the verdict is the only signal.
+    // A healthy tile prints the ratio, not a redundant 正常 badge; the badge
+    // stays on the unhealthy/absent tiles where the verdict is the only signal.
     expect(platform).not.toHaveTextContent('正常');
     expect(view.container.querySelector('[data-ai-id="' + COMPONENTS + ':service:kubesphere-monitoring-system"]'))
       .toHaveTextContent('2/3');
@@ -177,18 +202,18 @@ describe('cluster monitor status section', () => {
     });
     const view = mount(<ClusterStatusSection cluster="host" live={false} />);
 
-    await waitFor(() => expect(view.container.querySelector('[data-ai-id="' + NODE_ONLINE + ':empty"]')).not.toBeNull());
-    expect(view.container.querySelector('[data-ai-id="' + VENDOR + ':empty"]')).not.toBeNull();
-    // 0/0 is not an online ratio: nothing on the card may claim the cluster is healthy.
-    expect(view.container.querySelector('[data-ai-id="' + NODE_ONLINE + '"]')).toBeNull();
+    await waitFor(() => expect(view.container.querySelector('[data-ai-id="cluster-monitor:status:node-online:empty"]')).not.toBeNull());
+    expect(view.container.querySelector('[data-ai-id="cluster-monitor:status:vendor:empty"]')).not.toBeNull();
+    // 0/0 is not an online ratio: nothing in the ring may claim the cluster is healthy.
+    expect(view.container.querySelector('[data-ai-id="' + NODE_RING + ':value"]')).toBeNull();
   });
 
   it('marks an unreported node count as unreported, not as zero', async () => {
     stubApi({ componentHealth: () => Response.json({ kubesphereStatus: [] }) });
     const view = mount(<ClusterStatusSection cluster="host" live={false} />);
 
-    await waitFor(() => expect(view.container.querySelector('[data-ai-id="' + NODE_ONLINE + ':unreported"]')).not.toBeNull());
-    expect(view.container.querySelector('[data-ai-id="' + NODE_ONLINE + '"]')).toBeNull();
+    await waitFor(() => expect(view.container.querySelector('[data-ai-id="cluster-monitor:status:node-online:unreported"]')).not.toBeNull());
+    expect(view.container.querySelector('[data-ai-id="' + NODE_RING + ':value"]')).toBeNull();
   });
 
   it('explains a forbidden read without offering a retry', async () => {
@@ -196,12 +221,12 @@ describe('cluster monitor status section', () => {
     const view = mount(<ClusterStatusSection cluster="host" live={false} />);
 
     await waitFor(() => expect(view.container.querySelector('[data-ai-id="cluster-monitor:status:permission"]')).not.toBeNull());
-    expect(view.container.querySelector('[data-ai-id="' + NODE_ONLINE + ':permission"]')).not.toBeNull();
+    expect(view.container.querySelector('[data-ai-id="cluster-monitor:status:node-online:permission"]')).not.toBeNull();
     expect(view.container.querySelector('[data-ai-id="cluster-monitor:status:retry"]')).toBeNull();
     expect(view.container.querySelector('[data-ai-id="cluster-monitor:status:error"]')).toBeNull();
     // The vendor block reads a different endpoint and still renders: one failed block
     // must not take its neighbours down.
-    expect(view.container.querySelector('[data-ai-id="' + VENDOR + ':row:nvidia"]')).not.toBeNull();
+    expect(view.container.querySelector('[data-ai-id="' + vendorId('nvidia') + '"]')).not.toBeNull();
   });
 
   it('offers a retry when the component health read fails with a server error', async () => {
@@ -216,29 +241,29 @@ describe('cluster monitor status section', () => {
     await waitFor(() => expect(view.container.querySelector('[data-ai-id="cluster-monitor:status:error"]')).not.toBeNull());
     expect(view.container.querySelector('[data-ai-id="cluster-monitor:status:retry"]')).not.toBeNull();
     // The upstream sentence is the only actionable part, so it stays on screen. It is
-    // shown once per affected block (node card and components card).
+    // shown once per affected block (node ring and components card).
     expect(screen.getAllByText('cluster agent is not ready').length).toBeGreaterThan(0);
-    expect(view.container.querySelector('[data-ai-id="' + NODE_ONLINE + ':error"]')).not.toBeNull();
+    expect(view.container.querySelector('[data-ai-id="cluster-monitor:status:node-online:error"]')).not.toBeNull();
   });
 
   it('renders a CPU vendor row with no accelerator mark', async () => {
     stubApi({ nodeVendorStats: () => Response.json({ CPU: 2, cambricon: 1, healthy: 3, total: 3 }) });
     const view = mount(<ClusterStatusSection cluster="host" live={false} />);
 
-    await waitFor(() => expect(view.container.querySelector('[data-ai-id="' + VENDOR + ':row:CPU"]')).not.toBeNull());
-    const row = view.container.querySelector('[data-ai-id="' + VENDOR + ':row:CPU"]')!;
+    await waitFor(() => expect(view.container.querySelector('[data-ai-id="' + vendorId('CPU') + '"]')).not.toBeNull());
+    const row = view.container.querySelector('[data-ai-id="' + vendorId('CPU') + '"]')!;
     // 'CPU' is normalised by vendorKey but is not an accelerator vendor; the mark
     // falls back to the CPU glyph instead of an empty slot.
     expect(row).toHaveTextContent('CPU 节点');
-    expect(row.querySelector('[data-ai-id="' + VENDOR + ':row:CPU:count"]')).toHaveTextContent('2');
-    expect(row.querySelector('[data-ai-id="' + VENDOR + ':row:CPU:percent"]')).toHaveTextContent('66.7%');
+    expect(row.querySelector('[data-ai-id="' + vendorId('CPU') + ':count"]')).toHaveTextContent('2');
+    expect(row.querySelector('[data-ai-id="' + vendorId('CPU') + ':percent"]')).toHaveTextContent('66.7%');
     expect(row.querySelector('svg')).not.toBeNull();
   });
 
   it('polls the three status reads only while the page auto refresh is on', async () => {
     stubApi();
     const { client, rerender, view } = mountWithClient(<ClusterStatusSection cluster="host" live={false} />);
-    await waitFor(() => expect(view.container.querySelector('[data-ai-id="' + NODE_ONLINE + '"]')).not.toBeNull());
+    await waitFor(() => expect(view.container.querySelector('[data-ai-id="' + NODE_RING + '"]')).not.toBeNull());
 
     // Switched off: no query schedules a repeat, so a reader who paused auto refresh
     // stops all of the page's polling, not just the trends.
@@ -249,7 +274,7 @@ describe('cluster monitor status section', () => {
     expect(refetchInterval(client, ['cluster-detail', 'host'])).not.toBe(5000);
 
     rerender(<ClusterStatusSection cluster="host" live />);
-    // The switch drives the same five-second cadence the trends use: one refresh
+    // The switch drives the same five-second cadence the tabs use: one refresh
     // semantic for the whole page.
     await waitFor(() => {
       expect(refetchInterval(client, ['cluster-status', 'host', 'component-health'])).toBe(5000);

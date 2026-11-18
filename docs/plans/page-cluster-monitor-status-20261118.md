@@ -4,6 +4,7 @@
 > 方法：[旧前端迁移指南](../legacy-ui-migration-guide.md)；模板：[单页迁移交付模板](./page-migration-template.md)。
 > 规格：`prd|design/kube-frontend/cluster-management/monitor.md`（AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-08/09/10、DEC-11…16、CON-03、GOT-07…11）。
 > 旧页截图（2026-11-18 实拍 https://ka.watering.ai，已归档到本目录）：`assets/cluster-monitor-status-20261118/old-host.png`、`old-agent.png`、`old-test.png`。
+> 2026-11-18 后续批次（页签 IA 与图表化）：本记录补 §2.1 页签级归宿、§4.1 图表形态基线、§6 该批验收状态；交付记录见 [cluster-monitor-tabs-20261118.md](./cluster-monitor-tabs-20261118.md)。状态分区三块的数据语义不变，概览形态由该批 AC-12 调整（环图/构成图/3×2 磁贴）。
 
 ## 1. 范围与基线
 
@@ -25,7 +26,7 @@
 
 | 旧能力 ID | 源码/部署证据 | 显示条件/角色 | 字段、动作、默认项与完整选项 | 归宿/新位置 | 新 AC/用例/具体断言 | 实现与验收状态 |
 | --- | --- | --- | --- | --- | --- | --- |
-| LEG-CLUSTER-STATUS-001 | `Cluster/index.jsx`（Banner `CLUSTER_STATUS` + `routes`），`routes.js` 六页签 overview/resource/etcd/api-server/scheduler/ranking；etcd 页签 `requireETCD` | 登录且集群可见 | 六个页签互斥切换；默认 overview；banner 标题「集群状态」 | 改进：收敛为两个入口——`/monitor`（状态分区 + 趋势五组 + 系统组件）与既有独立页 `/node-usage`（节点用量排行）；不新增页签/路由 | AC-...-08 / AC-...-09；TC-...-08 断言监控页无页签条、状态分区在趋势前 | 既有入口已交付；状态分区待验证 |
+| LEG-CLUSTER-STATUS-001 | `Cluster/index.jsx`（Banner `CLUSTER_STATUS` + `routes`），`routes.js` 六页签 overview/resource/etcd/api-server/scheduler/ranking；etcd 页签 `requireETCD` | 登录且集群可见 | 六个页签互斥切换；默认 overview；banner 标题「集群状态」 | 改进（2026-11-18 页签 IA 批次）：恢复页内 5 页签（概览/物理资源监控/API Server 监控/调度器监控/资源用量排行），一个导航入口 + `?tab=` 深链，不新增独立路由；排行在页签内复用并支持导出，独立页 `/node-usage` 保留并同步获得导出；etcd 恢复为条件页签（ServiceMonitor 200 显示、404/探测失败隐藏，本部署 404 隐藏） | AC-...-11…16；TC-...-11 断言页签条/默认概览/深链/非法值忽略/切页签不请求未挂载页签 | 页签 IA 由本批交付，TC-11…16 待验证 |
 | LEG-CLUSTER-STATUS-002 | `Overview/index.jsx` `renderNodeStatus`：`StatusCircle used=counts.node.health total=counts.node.total`，图例 `ONLINE_NODES`/`ALL_NODES` | 始终 | 节点健康编号环：健康数/总数 + 图例 | 改进：节点在线状态块（`healthy/total` 数字 + 在线比例条），不再用编号环保留「当前值」 | AC-...-08；TC-...-08 断言 host 显示 1/1、agent 显示 3/3 且比例 100%；数字与同次 componenthealth 一致 | 待验证 |
 | LEG-CLUSTER-STATUS-003 | 同文件 `handleNodeClick`：`hasPermission({module:'nodes',action:'view'})` → `routing.push('/clusters/:cluster/nodes')` | 有节点查看权限 | 点击节点卡进入该集群节点页；无权限不跳转 | 保留：节点块整块可点，直接链接到本集群节点页；**权限口径：不预检，由目标页在无权限时呈现无权限画面**（与全站一致，页面不预检路由；DEC-17） | AC-...-08；TC-...-08 断言点击后到达 `/nodes` | 待验证 |
 | LEG-CLUSTER-STATUS-004 | `Overview/index.jsx` `fetchNodeStats` → `/kapis[/clusters/{c}]/resources.kubesphere.io/v1alpha3/nodes/stats`；多集群前缀 `globals.app.isMultiCluster` | 始终 | GET；返回对象键为厂商/汇总；加载中 `Loading` | 保留并拆分数据源：节点在线读 componenthealth.`nodeStatus`；厂商读 nodes/stats | AC-...-08；TC-...-08 用互不相同的数字（healthy/total 与厂商计数）对账 | 待验证 |
@@ -49,6 +50,20 @@
 | LEG-CLUSTER-STATUS-022 | 同文件 `handleComponentsClick`：monitoring view 权限且未 disabled → `/clusters/:cluster/components?type=...` | 有权限且模块已启用 | 点击服务组件图标进入集群组件页 | **本轮不做（待补，批准依据）**：状态行回答「是否健康」不是导航入口；组件页已有入口（概览组件面板/侧栏），摘要行再加 6 个深链会把「状态」与「去哪看」混在一行；旧页 `?type=` 过滤在新组件页是客户端分组，复刻可行但本轮 AC 未承诺（见 PRD 明确不做） | 未映射→登记待补（批准不做，不计入通过）；不写成「已迁移」 | 待补（批准不做） |
 
 统计：22 条原子能力。既有承接 3（019–021，历史批次已验收，本轮不重验）+ 001 的入口部分；本次实现范围 15（002–014、015–018 中的页面级分支；AC-10 的自动刷新行为并入 LEG-013）；批准不做/待补 2（006 批准不做；022 本轮不做·待补）。**实现与验收状态在 TC-…-08/09 与 task-1 落地后回填，本节不提前声称通过。**
+
+### 2.1 页签级归宿（2026-11-18 页签 IA 与图表化批次补）
+
+> 旧页 5 个页签各占一行，写明用户场景与归宿；本轮把页签恢复为**页内页签**（一个导航入口、`?tab=` 深链），不新增独立子路由。验收由 TC-…-11…16 承担，状态列不提前声称通过。
+
+| 旧页签 | 旧 URL | 用户场景 | 新归宿（页内页签） | 新 AC / 断言 | 状态 |
+| --- | --- | --- | --- | --- | --- |
+| 概览 | `/clusters/:cluster/monitor-cluster/overview` | 先判断集群是否健康，再看资源用量与 RDMA | 页签 `overview`（默认）：状态行（节点环图/厂商构成图/组件 3×2 磁贴）+ 7 指标主图+明细 + RDMA 摘要/跳转 | AC-…-12；TC-…-12 | 待验证 |
+| 物理资源监控 | `.../resource` | 看 GPU/主机/磁盘/网络/RDMA 的多序列趋势 | 页签 `resource`：5 组 18 张多序列大图（27 项指标合并） | AC-…-13；TC-…-13 | 待验证 |
+| API Server 监控 | `.../api-server` | 看控制面请求速率与按 verb 延迟 | 页签 `apiserver`：latency（总均+按 verb，秒→ms）与 rate 两张大图 | AC-…-14；TC-…-14 | 待验证 |
+| 调度器监控 | `.../scheduler` | 看调度尝试/速率/延迟 | 页签 `scheduler`：attempts/rate/latency 三张大图 | AC-…-15；TC-…-15 | 待验证 |
+| 资源用量排行 | `.../ranking` | 找用量最高的节点并导出 | 页签 `ranking`：复用 NodeRankingPanel + 导出 JSON（独立页 node-usage 同步获得） | AC-…-16；TC-…-16 | 待验证 |
+| etcd（条件页签） | `.../etcd`（`requireETCD`） | 看 etcd 组件指标 | 条件页签：ServiceMonitor 200 时在页签条末尾显示（内容=现有 etcd 组件图 + 无序列说明），404/探测失败隐藏；`?tab=etcd` 隐藏时回退概览；本部署 404 → 隐藏 | AC-…-07（正分支本地 skip，环境限制）；TC-…-07 随页签化更新 | 待验证（正分支 skip） |
+| 页签级全局行为 | — | 切页签/深链/时间窗 | 页头一套时间窗 + 自动刷新；`?tab=` 深链、非法值忽略、默认 overview；切页签 replace 语义（不进历史）；切页签不请求未挂载页签 | AC-…-11；TC-…-11 | 待验证 |
 
 ## 3. 数据契约与全链路
 
@@ -85,6 +100,20 @@
 | 控制台 | 不适用（本页无终端） | — |
 
 复用决定：全部为组合既有能力——厂商标识（`gpuVendors.ts` / `VendorIcon.tsx` / `vendorMarks.tsx`，已用于节点与 GPU 页）、错误面板（`ResourceErrorPanel`）、块容器与骨架（`Panel` / `Skeleton`）、趋势（ai-kit `TrendChart`，既有）。**无需新增 Storybook 故事**，不新建业务专用公共组件；比例条用页面内布局（`div` + 宽度百分比），不新增 ai-kit 原语。
+
+### 4.1 图表形态基线（2026-11-18 页签 IA 与图表化批次补）
+
+> 旧页对照截图仍用 `assets/cluster-monitor-status-20261118/` 与验证方新拍的 5 页签基线；复制旧页的**信息分组与密度**，但图表形态按本批 AC-12/13 执行。
+
+| 项 | 编码前约定 | 验证断言/截图 |
+| --- | --- | --- |
+| 页签 IA | 页头下方 5 个基础页签（概览/物理资源监控/API Server 监控/调度器监控/资源用量排行）+ etcd 接入监控时的条件 etcd 页签，默认概览；`?tab=` 深链；页签内不再有时间窗/刷新 | 五页签逐个可进、URL 同步、刷新保持；页头只有一套时间窗/刷新；切页签只为新页签取数 |
+| 状态行 | 三块同高：节点环图（内文 healthy/total+百分比）、厂商构成环图（图例名称/数量/百分比）、组件 3×2 磁贴 + 核心组件一行 | 环图/构成图有 SVG 或等价环图句柄；三块 top 差 <2px、宽屏同排、窄屏堆叠；数字与同次接口一致 |
+| 资源用量 | 左列 7 行当前值（used/total）+ 右侧一张大图（轴/网格/读数/图例）；主图面积明显大于明细行 | 点行切换大图；单位按行变化；缺值显示「-」且大图空态；比率 >100% 不截断 |
+| 物理资源 | 5 组 18 张多序列大图（负载 3 线、磁盘读写、Pod 三态、RDMA 端口/吞吐/错误），轴/图例/空态齐全 | 每图有图例与空态句柄；同一身份一条线；组顺序 GPU→主机→磁盘→网络→RDMA；本页签只有一次 range 请求 |
+| 组件页签 | APIServer 2 张、Scheduler 3 张大图，秒→ms、按 verb/result/quantile 合并；状态分支独立 | 图例身份正确；无序列空态不画 0；一个页签失败不影响另一个 |
+| 排行与导出 | 复用 NodeRankingPanel（前缀 `cluster-monitor:ranking:`）+ 导出 JSON | 导出文件形状与行范围；无数据按钮禁用；独立页 `node-usage:export` 同款 |
+| 主题与图表 | 只用 ai-kit token；recharts 颜色 token 解析失败回退内置调色板；隐藏页签不挂载 | 深浅主题取样；DonutChart 空态不渲染 SVG；无硬编码色值 |
 
 ## 5. 编码与回归
 
@@ -124,5 +153,6 @@
 | 静态/类型/构建/测试 | 待填 | 见 §5 验收记录 | 全仓串行 E2E 未跑 |
 | 本地全栈 | 待填 | 127.0.0.1:5178 → KA_BACKEND=https://ka.watering.ai，admin | 成员集群真实就绪后的正向数据（状态分区）未验收 |
 | 新版部署/全站 | 未验收 | — | 部署环境；且部署构建可能尚未包含路由层 `cluster:not-ready`（本地/新构建才有） |
+| 页签 IA 与图表形态（2026-11-18 增量） | 待验证 | [交付记录](cluster-monitor-tabs-20261118.md)；AC-…-11…16、TC-…-11…16 | 每页签独立时间窗（本轮共用页头，登记后续）、旧概览 RDMA 四子图（本轮摘要+跳转）、etcd 条件页签正分支（本部署 404 → 隐藏，AC-…-07 正分支 skip）、浅色/英文/三档视口截图、部署环境与全站串行 E2E |
 
 结论口径：按声明范围分别写「本地该页交付完成」「部分完成/阻塞」「新版部署已验收」，不使用没有范围的「全部完成」。本批工作树按用户要求**未提交**。

@@ -16,36 +16,37 @@ covers:
 story:
 - US6
 
-product: 就绪集群打开集群监控时，趋势分组之前先显示「集群状态」分区：节点在线健康数/总数与比例、按 XPU 厂商的节点数与占比、6 个服务组件的健康/总后端数与 3 个核心组件状态；宽屏三块同排、窄屏堆叠，分区标题与趋势分组标题同级。
+product: 概览页签最上方是「集群状态」状态行（位于资源用量之前）：节点在线环图（healthy/total + 百分比）、XPU 厂商构成环图（图例含名称/数量/百分比）、组件状态 3×2 磁贴（6 个服务组件 + etcd/controller-manager/scheduler 核心组件）；宽屏三块同排、窄屏堆叠。自动刷新开关同时驱动状态行的 componenthealth / nodes/stats / etcd ServiceMonitor 三查询。
 preconditions:
 - 已登录，且集群 host 已就绪
 - componenthealth（/kapis/resources.kubesphere.io/v1alpha2/componenthealth）与 nodes/stats（/kapis/resources.kubesphere.io/v1alpha3/nodes/stats）返回 200
 - KubeSphere 监控的 range query 与组件指标可用
 steps:
-- 用 API 读取 componenthealth 的 nodeStatus、kubesphereStatus，nodes/stats 的厂商计数，configz 的模块开关与 etcd ServiceMonitor 的状态
-- 打开集群监控页，等待 cluster-monitor:surface 就绪
-- 核对「集群状态」分区存在，且位于第一个趋势分组（cluster-monitor:group:gpu）之前，三块卡片齐全
-- 核对节点在线文本为 healthy/total（1/1）、比例文本为 healthy÷total 的百分比，点击入口指向该集群节点页
-- 逐行核对厂商分布：行集合等于 nodes/stats 中除 healthy/total 外的厂商键；每行的数量与占比（数量÷厂商节点数之和）与接口一致；host 为 cambricon 1 与 100%
-- 逐行核对 6 个服务组件：kubesphere-system / kube-system / istio-system / kubesphere-monitoring-system / kubesphere-logging-system / kubesphere-devops-system；启用模块的文本为命名空间内 healthyBackends 之和 ÷ totalBackends 之和，未启用模块显示未安装
-- 核对 3 个核心组件：etcd 按 ServiceMonitor 是否存在显示已接入/未接入监控；controller-manager 与 scheduler 按 label.component 匹配的 healthyBackends>0 显示正常、否则异常/未上报
-- 测量三块卡片的 getBoundingClientRect：宽屏 top 对齐差值、列间距，分区标题与趋势分组标题的 font-size 一致
-- 用 page.route 计数 componenthealth / nodes/stats / etcd ServiceMonitor 三类请求：点「自动刷新：开」后轮询等待 15s 内三类各至少重取一次，期间状态分区内容不被骨架遮挡；再关闭并等 8s 确认三类都不再新增
+- 用 API 读取 componenthealth 的 nodeStatus、kubesphereStatus，nodes/stats 的厂商计数，configz 的模块开关与 etcd ServiceMonitor 状态
+- 打开集群监控（默认 overview），等待 cluster-monitor:surface 就绪
+- 核对状态行三块齐全，且位于资源用量（cluster-monitor:overview:usage）之前
+- 核对节点环图 healthy/total（1/1）与百分比（健康÷总数，最多一位小数，±1 个百分点内一致），节点入口指向该集群节点页
+- 逐行核对厂商构成图图例：行集合等于 nodes/stats 除 healthy/total 外的厂商键；数量与占比（数量÷各厂商计数之和×100）与接口一致；host 为 cambricon 1、100%
+- 逐行核对 6 个服务组件磁贴与 3 个核心组件；未启用模块显示未安装、无记录显示未上报；etcd 按 ServiceMonitor 显示已接入/未接入
+- 测量三块 getBoundingClientRect：宽屏 top/高度对齐、间距一致；分区标题与资源用量标题 font-size 一致
+- 用 page.route 计数 componenthealth / nodes/stats / etcd ServiceMonitor：点「自动刷新：开」后 15s 内三类各至少重取一次且已有内容不被骨架遮挡；关闭后 8s 内不再新增
 - 把 viewport 收窄到 900，核对三块纵向堆叠且页面无横向溢出
-- 核对趋势分组（5 组 29 张卡）与「系统组件」分区仍在
 expected:
-- 分区在趋势之前，三块齐全；宽屏同排（top 差值≤2px，两列间距相等），窄屏堆叠
-- 节点在线 1/1，比例与接口一致，入口指向 /kube-frontend/clusters/host/nodes
-- 厂商行 cambricon：数量 1、占比 100%（100% 而非旧页的 1.00%）
-- 服务组件 6 行齐全，health/total 与接口聚合一致；未启用的服务网格显示未安装而不是 0/0
-- 核心组件 3 行齐全，etcd 未接入监控时显示未接入；controller-manager 与 scheduler 正常
-- 自动刷新开启时状态分区的 three 类查询（componenthealth / nodes/stats / etcd ServiceMonitor）各按 5s 节拍重取，已有内容不被加载骨架整体遮挡；关闭后不再发起这三类定时请求
-- 趋势仍是 5 个分组、29 张卡，系统组件分区仍在
+- 状态行在概览页签内、资源用量之前；宽屏三块同排（top 差≤2px、高度差≤2px），窄屏堆叠
+- 节点在线 1/1，百分比=健康÷总数（最多一位小数，±1 内一致），入口指向 /kube-frontend/clusters/host/nodes
+- 厂商构成图图例按数量降序，行数与 nodes/stats 厂商键一致；cambricon 数量 1、占比 100%（不是旧页的 1.00%）
+- 6 个服务组件磁贴与 3 个核心组件齐全，状态与接口聚合一致；未启用=未安装、无记录=未上报，不显示 0/0
+- 自动刷新开启时三查询各按 5s 节拍重取且已有内容不被骨架整体遮挡；关闭后不再发起这三类定时请求
+- 900 宽下三块纵向堆叠、无横向溢出；概览的资源用量区（7 行当前值 + 主图）仍在
 troubleshoot:
 - 厂商占比显示 1.00%：把 0..1 的比例当成了百分数，应 ×100 后加 %
 - 服务组件显示 0/0：把「没有记录」当成了健康 0 后端，应显示未上报/未安装
-- 分区不出现：确认 ClusterStatusSection 渲染在 node 版以外，且组件查询独立于趋势查询
-- 三块没有同排：检查网格断点（xl:grid-cols-3）与卡片根元素是否在同一 grid 容器
-- 自动刷新只刷趋势：ClusterStatusSection 没有拿到 live/autoRefresh，三查询的 refetchInterval 仍为 false
+- 状态行不在概览或跑到资源用量之后：检查 ClusterOverviewTab 的渲染顺序
+- 三块没有同排/等高：检查网格断点与卡片根元素是否在同一 grid 容器
+- 自动刷新只刷趋势：状态行三查询没有拿到 live/autoRefresh，refetchInterval 仍为 false
 update_automation:
-- 句柄：cluster-monitor:status / :status:node-online<:ratio|:link|:unreported|:empty> / :status:vendor:row:<vendor><:count|:percent> / :status:components:service:<namespace>[data-ai-status] / :status:components:core:<etcd|controller-manager|scheduler>
+- 状态行：cluster-monitor:status、cluster-monitor:overview:node-ring / :node-ring:count / :node-ring:value / :node-ring:link
+- 厂商：cluster-monitor:overview:vendor-donut / :overview:vendor:<vendor>[:count|:percent]
+- 组件：cluster-monitor:status:components:service:<namespace>[data-ai-status] / :components:core:<etcd|controller-manager|scheduler>[data-ai-status]
+- 资源用量：cluster-monitor:overview:usage / :overview:usage:<key>
+- 自动刷新：cluster-monitor:auto-refresh

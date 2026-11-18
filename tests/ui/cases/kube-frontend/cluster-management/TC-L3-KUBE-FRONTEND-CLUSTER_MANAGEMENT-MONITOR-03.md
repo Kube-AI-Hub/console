@@ -8,7 +8,7 @@
 
 ## 产品功能
 
-集群监控页显示 13 张物理资源卡片：CPU/内存/容器组（运行、异常、完成）/节点/负载 1-5-15/磁盘/inode/网络收发。
+物理资源监控页签把旧页 13 张主机相关卡片合并为多序列大图（host 组 6 张 + network 组 1 张）：CPU/内存/inode 使用率（API 0–1 比值×100）、容器组三态（运行/已完成/异常）、1/5/15 分钟负载、磁盘用量（字节）、网络收发（B/s）；缺失数据显示空态说明而不是 0。节点数是概览页签的节点在线环图。
 
 ### 关联需求
 
@@ -37,23 +37,34 @@
 ## 前置与配置
 
 - 已登录且监控后端可用
+- 页面默认时间窗为最近 1 小时
 
 ## 测试步骤
 
-1. 打开集群监控页
-2. 逐个核对待办卡片是否存在
-3. 读取 CPU、内存、磁盘、inode、网络速率、平均负载的当前值
+1. 用同一窗口读取 cluster_cpu_utilisation / cluster_memory_utilisation / cluster_disk_inode_utilisation、cluster_pod_running_count / cluster_pod_succeeded_count / cluster_pod_abnormal_count、cluster_load1/5/15、cluster_disk_size_usage、cluster_net_bytes_transmitted / cluster_net_bytes_received
+2. 打开集群监控，点「物理资源监控」页签（cluster-monitor:tab:resource），等 surface 就绪
+3. 逐张核对 host:cpu / host:memory / host:pods / host:load / host:diskUsage / host:inode 与 network:traffic 存在，且有数据或空态说明
+4. 读取图例当前值：cpu/memory/inode 为百分比、load1/5/15 两位小数、pods 三态整数、diskUsage 字节单位、network tx/rx 为 B/s
+5. 用接口序列核对 cpu/memory/inode 当前值等于比值×100（±3 个百分点）
+6. 切回概览页签，核对节点在线环图 healthy/total 与百分比
 
 ## 期望结果
 
-- 磁盘使用率由已用/总量算出；inode 由 0–1 比值乘 100
+- 7 张图齐全（6 张 host + 1 张 network），每张有图例与当前值；无数据时显示空态说明而不是 0
+- CPU/内存/inode 为 0–100 百分比，等于 API 0–1 比值×100
+- 容器组三态为整数、负载两位小数、磁盘用量带 B/KiB/MiB/GiB、网络速率为带 /s 的字节单位
+- 节点数是概览页签的节点在线环图（healthy/total），不再是一张独立趋势卡
 
 ## 失败排查
 
-- inode 显示 0%：未乘 100
+- inode 显示 0% 或 1%：未乘 100
 - 网络速率显示为纯数字：未按字节单位格式化
 - 平均负载为整数：用了 Math.round
+- 找不到 CPU 图：旧卡片句柄已改为页签图表 cluster-monitor:resource:chart:host:cpu
 
 ## 产品改版后如何更新自动化
 
-- 选择器：cluster-monitor:cpu / :memory / :pods / :pods-abnormal / :pods-succeeded / :nodes / :load1 / :load5 / :load15 / :disk / :inode / :net-tx / :net-rx（每张卡片带 :latest 值）
+- 图表句柄：cluster-monitor:resource:chart:<group>:<key>（host:cpu|memory|pods|load|diskUsage|inode、network:traffic），图例值位于 <chart>:legend:<series>:value
+- 分组：cluster-monitor:resource:group:<gpu|host|disk|network|rdma>
+- 节点环图：cluster-monitor:overview:node-ring
+- 改 pages/cluster_monitor.py 与 ClusterResourceTab.tsx / monitorResourceCharts.ts

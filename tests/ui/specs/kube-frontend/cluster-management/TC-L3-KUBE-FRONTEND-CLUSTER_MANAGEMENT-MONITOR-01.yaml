@@ -18,26 +18,32 @@ story:
 - US2
 - US3
 
-product: 集群监控显示 CPU/内存/容器组/节点四条趋势，每张卡片有曲线与最小/最大/当前值；切换时间窗会按新区间重新取数。
+product: 集群监控页签化后，原「四条趋势」分到两个页签：概览页签的节点在线环图负责节点健康数/总数与比例，物理资源监控页签用多序列大图承载 CPU、内存、容器组（运行/完成/异常）等主机指标；当前值在图例中给出，百分比由用量÷总量按时间戳配对算出；页头切换时间窗会按新区间重新取数。
 preconditions:
 - 已登录，且对集群 host 有读取权限
-- KubeSphere 监控的 range query 可用
+- KubeSphere 监控的 range query 可用，页面默认停在概览页签（最近 1 小时）
 steps:
-- 用 API 取最近 1 小时的 cluster_cpu_usage 与 cluster_cpu_total，按时间戳相除得到百分比区间
-- 打开集群监控页，等待 surface 就绪
-- 核对四张卡片都存在且都画出了曲线
-- 核对 CPU 与内存的当前值为 0-100 的百分比，容器组与节点为整数
-- 点「最近 24 小时」，核对重新取数且当前值更新
-- 核对单条曲线点数不超过 200
+- 用 API 取最近 1 小时的 cluster_cpu_usage / cluster_cpu_total、cluster_memory_usage_wo_cache / cluster_memory_total、cluster_pod_running_count，以及 componenthealth 的 nodeStatus
+- 打开集群监控页（默认 overview），等待 cluster-monitor:surface 就绪
+- 核对概览状态行的节点在线环图显示 healthy/total 且比例文本为百分比（cluster-monitor:overview:node-ring / :node-ring:count / :node-ring:value）
+- 点「物理资源监控」页签（cluster-monitor:tab:resource），等 cluster-monitor:resource:chart:host:cpu 可见
+- 核对 host:cpu / host:memory / host:pods 三张图都在，并读取图例当前值
+- 用接口同一时间戳的用量与总量核对 CPU、内存当前值等于用量÷总量×100
+- 读取 host:pods 的 running 图例值，应为整数计数
+- 记录切换前的监控请求，点「最近 24 小时」，核对新请求的 start 落在 24 小时窗口内、曲线与当前值更新
+- 核对切换后单条曲线点数与窗口步长匹配（24h 步长 15m，不随窗口线性膨胀）
 expected:
-- 四张卡片齐全，各有最小/最大/当前三个数值
-- 百分比由用量与总量相除得到（不得出现大于 100 的值）
-- 切换时间窗后请求区间变化、数值更新
-- 曲线点数与步长匹配，不随窗口线性膨胀
+- 节点在线环图存在，healthy/total 与 componenthealth 一致，比例是百分比而不是 0/0
+- CPU 与内存图例当前值为 0–100 的百分比，且等于同时间戳的用量÷总量（不是原始字节/核数）
+- 容器组当前值为整数计数
+- 切到 24 小时窗口后监控请求的 start/end 按新窗口变化，曲线与当前值更新，不继续用旧区间
+- 曲线点数与所选窗口的步长匹配，不随窗口线性膨胀
 troubleshoot:
-- 百分比大于 100：说明直接把字节/核当成了百分比，需除以总量
-- 曲线贴底一条直线：说明用了固定 0-100 刻度而不是按峰值缩放
-- 切换窗口后数值不变：检查 query key 是否包含区间，或 end 是否每次渲染都重算
-- 卡片显示无数据：确认 range query 返回 matrix 且 step 在保留期内
+- 百分比大于 100 或出现 9e11 量级：直接画了字节/核，没有除以总量
+- 切换窗口后数值不变：query key 未包含区间，或 end 每次渲染都重算
+- 页签缺失或图表找不到：确认页签 IA 的 cluster-monitor:tab:* 与 cluster-monitor:resource:chart:<group>:<key> 句柄；旧的四张卡片句柄已被页签化替换
 update_automation:
-- 卡片或标识变化时改 pages/cluster_monitor.py 与 ClusterMonitorPage.tsx
+- 页签：cluster-monitor:tab:<overview|resource|...>、cluster-monitor:tabpanel:<key>
+- 图表：cluster-monitor:resource:chart:<group>:<key>（本用例 host:cpu / host:memory / host:pods），图例值位于 <chart>:legend:<series>:value
+- 节点环图：cluster-monitor:overview:node-ring / :node-ring:count / :node-ring:value
+- 改 pages/cluster_monitor.py 与 ClusterMonitorPage.tsx

@@ -18,6 +18,18 @@ export default defineConfig({
      */
     alias: [
       { find: /^@\//, replacement: fileURLToPath(new URL('./src/', import.meta.url)) },
+      /*
+       * react/react-dom must resolve to **this app's** copy: recharts lives in
+       * ai-kit's own pnpm install, whose `react` is React 18. A test rendering
+       * DonutChart otherwise mixes React 18 and 19 and fails with
+       * "A React Element from an older version of React was rendered".
+       */
+      /* Drawing library stand-in; see test/stubs/recharts.tsx for why. */
+      { find: /^recharts$/, replacement: fileURLToPath(new URL('./test/stubs/recharts.tsx', import.meta.url)) },
+      { find: /^react$/, replacement: fileURLToPath(new URL('./node_modules/react/index.js', import.meta.url)) },
+      { find: /^react\/jsx-runtime$/, replacement: fileURLToPath(new URL('./node_modules/react/jsx-runtime.js', import.meta.url)) },
+      { find: /^react-dom$/, replacement: fileURLToPath(new URL('./node_modules/react-dom/index.js', import.meta.url)) },
+      { find: /^react-dom\/client$/, replacement: fileURLToPath(new URL('./node_modules/react-dom/client.js', import.meta.url)) },
       // Every Radix primitive resolves from this workspace's root copy. The linked
       // ai-kit keeps its own `node_modules/@radix-ui` bound to React 18; letting
       // its source reach that copy is what produced two React instances.
@@ -37,6 +49,10 @@ export default defineConfig({
         replacement: fileURLToPath(new URL('../../packages/ui/src/editor.ts', import.meta.url)),
       },
       {
+        find: /^@kube-ai-hub\/ui\/charts$/,
+        replacement: fileURLToPath(new URL('../../packages/ui/src/charts.ts', import.meta.url)),
+      },
+      {
         find: /^@kube-ai-hub\/ui\/styles\.css$/,
         replacement: fileURLToPath(new URL('../../packages/ui/src/styles.css', import.meta.url)),
       },
@@ -53,6 +69,10 @@ export default defineConfig({
         replacement: fileURLToPath(new URL('../../packages/locales/src/index.ts', import.meta.url)),
       },
       {
+        find: /^@kube-ai-hub\/ai-kit\/charts$/,
+        replacement: fileURLToPath(new URL('../../../packages/ai-kit/src/charts.ts', import.meta.url)),
+      },
+      {
         find: /^@kube-ai-hub\/ai-kit\/styles\.css$/,
         replacement: fileURLToPath(new URL('../../../packages/ai-kit/src/styles/tokens.css', import.meta.url)),
       },
@@ -65,6 +85,12 @@ export default defineConfig({
         replacement: fileURLToPath(new URL('../../../packages/ai-kit/src/index.ts', import.meta.url)),
       },
     ],
+    /*
+     * Belt and braces for the same duplicate-React problem the aliases fix:
+     * ai-kit's install is a second React 18 root, so every `react` import in the
+     * graph (including recharts') must resolve to this app's copy.
+     */
+    dedupe: ['react', 'react-dom'],
   },
   test: {
     environment: 'jsdom',

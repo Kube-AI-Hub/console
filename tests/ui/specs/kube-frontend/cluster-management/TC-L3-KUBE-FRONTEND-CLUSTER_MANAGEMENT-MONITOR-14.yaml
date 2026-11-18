@@ -1,0 +1,43 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-14
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: monitor
+title: 集群监控 · API Server 页签：延迟（总均 + 按 verb）与请求速率大图
+entry_url: '{{BASE_URL}}/kube-frontend/clusters/host/monitor'
+prd: prd/kube-frontend/cluster-management/monitor.md
+design: design/kube-frontend/cluster-management/monitor.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-14
+
+story:
+- US8
+
+- US4
+product: API Server 监控是独立页签：请求延迟（总平均 + 按 verb 多条线，API 秒值 ×1000 显示 ms）与请求速率（总请求，次/秒）两张大图，带坐标轴、网格、图例与读数；组件查询与其它页签独立，加载/空/无权限/失败四种画面互不顶替，403 不提供重试。
+preconditions:
+- 已登录 admin，集群 host 已就绪
+- /kapis/monitoring.kubesphere.io/v1alpha3/components/apiserver 可读
+steps:
+- 用 API 读 components/apiserver 的 window range query（与页面同窗口同 step），取延迟与请求速率指标及 verb 身份
+- 打开 /kube-frontend/clusters/host/monitor?tab=apiserver，等待面板就绪
+- 核对两张图 cluster-monitor:apiserver:chart:latency 与 :chart:rate 都可见、都画出曲线、都有图例与坐标轴
+- 核对延迟图按 verb 的多条线与图例身份一致：一个 verb 一条线，不同 verb 不混成一条；整条 NaN 的身份不画零线
+- 核对延迟显示单位为 ms（API 秒 ×1000），速率显示为次/秒；至少抽查一组图例读数与 API 同一时间窗末值数量级一致
+- 用 page.route 让 components/apiserver 返回 403：重新打开页签，核对无权限说明可见且没有重试按钮
+- 让 components/apiserver 返回 500：核对错误说明与重试按钮可见；点重试核对再次发起请求；移除拦截后重试恢复
+- 在 apiserver 处于 500 时切到 scheduler 页签，核对 scheduler 图仍正常（两个页签独立）
+expected:
+- apiserver 页签两张图（latency/rate）齐全，有曲线、坐标轴、图例；延迟多条线按 verb 身份分开
+- 延迟单位 ms（秒 ×1000），速率单位次/秒；数值与同窗口 API 响应一致
+- 403：仅该页签显示无权限且无重试；500：错误说明 + 重试，且不影响 scheduler 页签
+- 空数据（200 无序列）时对应图显示 :empty 说明而不是零线
+troubleshoot:
+- 延迟数值小 1000 倍：秒没有 ×1000 就显示成 ms
+- verb 多条线被合并：身份只用了 metric_name，没有按 verb 标签分组
+- 403 出现重试：错误面板没有区分无权限分支
+- 切到 scheduler 也失败：组件查询被提升到页面级共用 query key
+update_automation:
+- 句柄：cluster-monitor:apiserver:chart:<latency|rate>[:legend|:empty]

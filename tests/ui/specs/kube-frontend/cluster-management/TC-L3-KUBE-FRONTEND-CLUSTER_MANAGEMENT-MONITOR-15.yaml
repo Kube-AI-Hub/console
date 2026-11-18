@@ -1,0 +1,41 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-15
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: monitor
+title: 集群监控 · 调度器页签：调度尝试/速率（按 result）与延迟图
+entry_url: '{{BASE_URL}}/kube-frontend/clusters/host/monitor'
+prd: prd/kube-frontend/cluster-management/monitor.md
+design: design/kube-frontend/cluster-management/monitor.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-15
+
+story:
+- US8
+
+- US4
+product: 调度器监控是独立页签：调度尝试次数（按 result scheduled/error/unschedulable，累积整数）、调度尝试速率（同 result，次/秒）、调度延迟（平均 + 分位，秒 ×1000 显示 ms；无序列时给空态说明）三张大图，带坐标轴、网格、图例与读数；查询独立于 API Server 页签。
+preconditions:
+- 已登录 admin，集群 host 已就绪
+- /kapis/monitoring.kubesphere.io/v1alpha3/components/scheduler 可读
+steps:
+- 用 API 读 components/scheduler 的 window range query，取 attempts/rate/latency 指标与 result/quantile 身份
+- 打开 /kube-frontend/clusters/host/monitor?tab=scheduler，等待面板就绪
+- 核对三张图 cluster-monitor:scheduler:chart:attempts / :chart:rate / :chart:latency 都可见
+- 核对 attempts 与 rate 图按 result 三条身份（scheduled/error/unschedulable）画线且图例与线一一对应；attempts 为整数累积值，rate 为次/秒
+- 核对 latency 图：有序列时按平均与分位（p50/p90/p99）多条线，单位 ms；无序列时显示 :chart:latency:empty 说明而不是零线
+- 用 page.route 让 components/scheduler 返回 500：核对错误说明 + 重试；移除拦截后恢复
+- 核对 scheduler 页签的查询独立：在 apiserver 页签数据正常时让 scheduler 失败，只影响 scheduler 页签
+expected:
+- 三张图齐全；attempts/rate 按 result 分三条身份，图例与线一致
+- attempts 整数累积、rate 次/秒、latency 秒 ×1000 显示 ms（平均 + 分位）
+- latency 无序列时 :empty 说明，不画零线
+- 失败只影响本页签，错误说明 + 重试；403 时不提供重试
+troubleshoot:
+- attempts 与 rate 画成同一张/同一单位：两图共用了格式化函数
+- latency 一条直线 0：无序列时用了 0 补线，应走空态
+- 三条 result 线颜色相同或身份混淆：身份键没有包含 result 标签
+update_automation:
+- 句柄：cluster-monitor:scheduler:chart:<attempts|rate|latency>[:legend|:empty]

@@ -15,25 +15,28 @@ covers:
 story:
 - US4
 
-product: 集群监控页在物理资源分组之后显示「系统组件」分区；APIServer 请求速率/延迟与 Scheduler 调度尝试/速率按 verb、result 身份分成多条线，延迟以 ms、速率为次/秒，全 NaN 的序列不画成 0 线。
+product: 页签化后 API Server 监控与调度器监控各占一个页签：APIServer 页签用两张带轴大图承载请求延迟（总平均 + 按 verb 多序列，API 秒→ms）与请求速率（次/秒）；调度器页签用三张图承载调度尝试（按 result，累积整数）、尝试速率（次/秒）与调度延迟（平均+分位，秒→ms，本部署无序列时给空态）。多序列按 verb/result/quantile 身份合并，全 NaN 的序列不画 0 线。etcd 接入监控时另有条件 etcd 页签，本部署不可见（其分支见 MONITOR-07）。
 preconditions:
 - 监控后端可用，且 /kapis/monitoring.kubesphere.io/v1alpha3/components/apiserver 与 .../scheduler 返回 200
 - 页面默认时间窗为最近 1 小时
 steps:
-- 打开集群监控，等 cluster-monitor:surface 离开 loading，再等 cluster-monitor:group:apiserver / scheduler 进入 ready
-- 核对系统组件分区存在，三个子组顺序为 API Server → Scheduler → etcd
-- 读取 APIServer 请求延迟卡片的图例身份，与同一窗口接口返回的 apiserver_request_by_verb_latencies 的 verb 集合比对
-- 读取 Scheduler 调度尝试与尝试速率卡片的图例身份，与 scheduler_schedule_attempts 的 result 集合比对
-- 读取调度延迟卡片的空态，并确认接口的 scheduler_e2e_scheduling_latency_quantile 没有序列
+- 用同一窗口读取 components/apiserver 与 components/scheduler 的序列（保留身份标签）
+- 打开集群监控，点「API Server 监控」页签（cluster-monitor:tab:apiserver），等 cluster-monitor:tabpanel:apiserver 就绪
+- 核对 cluster-monitor:apiserver:chart:latency 与 :chart:rate 存在；读取延迟图图例身份与接口 verb 集合对比，读取请求速率当前值
+- 点「调度器监控」页签（cluster-monitor:tab:scheduler），核对 :chart:attempts / :chart:rate / :chart:latency 三张图
+- 读取 attempts 的 result 身份与接口对比，核对尝试值为整数、速率为次/秒两位小数；读取延迟图空态并确认接口无序列
+- 用 page.route 让 apiserver 返回一条 APPLY 全 NaN 与 GET 有限值，切换时间窗触发重取，核对只画 GET 与总平均两条线
 expected:
-- 分区在物理资源五组之后；三个子组顺序固定，etcd 子组显示未上报（其断言在 TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-07）
-- APIServer 请求延迟图例按 verb 一条线，整条为 NaN 的 APPLY 不出现、不画 0 线；总平均单独一条
-- 延迟显示为 ms（接口秒值 ×1000），请求速率与按 verb 速率为次/秒；按 verb 速率之和与总速率相近
-- Scheduler 调度尝试为 scheduled/error/unschedulable 三条整数线，尝试速率为三条次/秒线；有序列且值为 0 时显示 0
-- 调度延迟（平均与分位）在本部署无序列时卡片显示空态说明，不显示 0
+- APIServer 页签两张图齐全；延迟图按 verb 一条线、总平均单独一条；整条 NaN 的 APPLY 不出现、不画 0 线；延迟为 ms（接口秒值×1000），速率为次/秒两位小数
+- Scheduler 页签三张图齐全；attempts 按 result 一条线且为累积整数，rate 按 result 为次/秒，缺失身份不补 0 线
+- 本部署调度延迟无序列时 :chart:latency 显示空态说明且没有曲线，不显示 0
+- 多序列身份不混淆：同一身份一条线，返回顺序不影响图例
 troubleshoot:
-- 只看到一条延迟线：多序列被按位置合并或按指标名合并，检查 componentMonitorQueries.ts 的身份标签
-- 延迟显示成 0.00x：秒没有 ×1000，检查 formatComponentValue 的 milliseconds 分支
-- APPLY 出现一条贴底直线：NaN 没有过滤，检查 api-client component 方法的 Number.isFinite
+- 只看到一条延迟线：多序列被按位置合并，检查 componentMonitorQueries.ts 的身份标签
+- 延迟显示成 0.00x：秒没有 ×1000
+- APPLY 出现贴底直线：NaN 没有过滤
+- 找不到图：旧「系统组件分区」句柄已被页签图句柄替换（cluster-monitor:apiserver:chart:* 与 cluster-monitor:scheduler:chart:*）
 update_automation:
-- 句柄：cluster-monitor:components / cluster-monitor:group:<apiserver|scheduler|etcd> / cluster-monitor:<component>:<card> / :latest / :series:<identity> / :series:<identity>:value / :chart path[data-ai-series]
+- 页签：cluster-monitor:tab:<apiserver|scheduler>、cluster-monitor:tabpanel:<key>
+- 图表：cluster-monitor:<apiserver|scheduler>:chart:<key>，图例值位于 <chart>:legend:<identity>:value，空态位于 <chart>:empty，曲线为 path[data-ai-trend-line][data-ai-series]
+- 改 pages/cluster_monitor.py 与 ClusterApiServerTab.tsx / ClusterSchedulerTab.tsx

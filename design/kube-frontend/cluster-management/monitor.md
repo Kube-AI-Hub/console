@@ -4,7 +4,7 @@
 
 ## 概述
 
-四个趋势卡片，数据来自 KubeSphere 监控的 range query；百分比由两条序列相除得到。另有「系统组件」分区：APIServer / Scheduler / etcd 的组件级 range 指标，多序列按 `verb` / `result` / `quantile` 身份分开画。趋势之前是「集群状态」分区：节点在线状态、XPU 厂商分布、组件状态（6 个服务组件 + etcd/controller-manager/scheduler）。集群未就绪时页面不挂载，由集群作用域路由层整页接管为「等待集群加入」，页面内不重复实现等待视图。
+一个导航入口、页内五个基础页签：概览 / 物理资源监控 / API Server 监控 / 调度器监控 / 资源用量排行（etcd 接入监控时另有条件 etcd 页签），`?tab=` 可深链，默认概览。页头只有一套时间窗与自动刷新，五个页签共用。概览先给节点在线环图、XPU 厂商构成环图与组件状态 3×2 磁贴，再给「7 行当前用量 + 一张可选指标大图」，最后是 RDMA 摘要与跳转按钮；物理资源页签把旧 console 的多序列指标合并成 18 张带坐标轴的大图；APIServer / Scheduler 页签承载组件级 range 指标，多序列按 `verb` / `result` / `quantile` 身份分开画；排行页签复用节点用量排行并支持导出 JSON。折线继续用 ai-kit `TrendChart`，构成图用本批新增的 `DonutChart`（recharts）。数据来自 KubeSphere 监控的 range query，概览的用量行由 used/total 两条序列按时间戳相除。集群未就绪时页面不挂载，由集群作用域路由层整页接管为「等待集群加入」，页面内不重复实现等待视图。
 
 ## 关联需求
 
@@ -18,12 +18,18 @@
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-08
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-09
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-10
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-11
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-12
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-13
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-14
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-15
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-16
 
 ## 设计目标与非目标
 
-目标：先回答「集群整体是否正常」（节点在线、厂商构成、控制面组件），再回答「趋势如何」；形状与数值同时可读；步长随窗口放大；缺数据、未上报、无权限与失败各自说清。
+目标：一个导航入口、五个基础页签 + 条件 etcd 页签，按使用场景拆分并可深链；先回答「集群整体是否正常」（节点在线、厂商构成、控制面组件），再回答「趋势如何」；构成用环图、趋势用带轴多序列大图，形状与数值同时可读；同一指标的多条身份序列同图比较；步长随窗口放大；缺数据、未上报、无权限与失败各自说清；页签各自降级。
 
-非目标：下钻、排行、阈值线、组件指标的独立路由页与交互式缩放；不做厂商分布饼图，也不承诺 etcd 的真实健康（只表达是否接入监控）。
+仍然非目标：节点/容器组级下钻、告警阈值线、组件指标的独立路由页、折线缩放与框选、环图的 hover 下钻与扇区筛选、每页签独立时间窗（本批共用页头，登记后续）。etcd 的真实健康仍不承诺（只表达是否接入监控）。
 
 ## 关键约束
 
@@ -31,6 +37,15 @@
 - range 返回 `matrix`：`results[].data.result[].values = [[ts, "value"], …]`
 - 百分比需要成对的用量/总量序列：`cluster_cpu_usage`/`cluster_cpu_total`、`cluster_memory_usage_wo_cache`/`cluster_memory_total`
 - 组件级指标走 `GET /kapis/monitoring.kubesphere.io/v1alpha3/components/{apiserver|scheduler|etcd}?metrics_filter=…&start=…&end=…&step=…&cluster=…`，返回每个 `metric_name` 下的多条 `matrix`，身份在 `data.result[].metric` 的 `verb` / `result` / `quantile` 标签上
+
+- 路由：`/kube-frontend/clusters/$cluster/monitor` 是唯一入口；`validateSearch` 接受 `tab` ∈ `overview|resource|apiserver|scheduler|ranking|etcd`；未知值忽略、默认 `overview`；etcd 页签仅在 `kubesphere-monitoring-system/etcd` ServiceMonitor 探测为 200 时可见，隐藏时 `?tab=etcd` 按 `overview` 渲染；`Route.useSearch()` 读、`Route.useNavigate()` 写，切页签 `navigate({ search: { tab }, replace: true })`（不进浏览器历史）。节点详情复用同页（传入 `node`）时没有页签。
+- 图表组件：折线/面积用 ai-kit `TrendChart`（多序列 `series`、`showAxes`/`showGrid`/`interactive`）；构成用新增的 ai-kit `DonutChart`。不在页面内自绘 SVG 环图/饼图/折线。
+- recharts 依赖装在独立 pnpm 项目 `console/packages/ai-kit`（`^3.11.0`），**不要加到 kube-frontend workspace**；ai-kit 需先构建（`vite build` + `tsc -p tsconfig.build.json`），再由 `kube-frontend/packages/ui/src/index.ts` 命名导出 `DonutChart` 与类型。
+- 每个页签一个主查询：物理资源页签一次 range 查询取 18 张图的指标；APIServer / Scheduler 各自一次 `components/<apiserver|scheduler>` 查询，etcd 页签（可见时）一次 `components/etcd` 查询；排行页签走既有 node 用量排行接口；页头持有时间窗，页签不持有第二套时间窗。
+- 只读页面；不改 api-client 既有方法签名。排行导出如需新增参数只加不改，并同步 barrel 导出与契约测试。
+- 交互元素用共享 `Button`/`Tabs` + `actionProps`（ai-surface 契约）；图表容器加 `aria-label`（图名）；DonutChart 根 `role="img"`。
+- 状态：loading 用 Skeleton（保留已有内容不被整块骨架遮挡的场景按既有约定）；empty 用说明文本；error 用 ResourceErrorPanel（403 无重试）；不得用 0 顶替无数据。
+- 排行导出用 Blob + `a.download`，文件名固定 `node.usage.rank.json`，并 `revokeObjectURL`。
 
 ## 方案决策
 
@@ -41,6 +56,8 @@
 **被否方案**：引 ECharts/Recharts。它们解决的是坐标轴、缩放、堆叠、tooltip——当前四个指标都不需要。
 
 **何时重新考虑**：需要交互式缩放、多序列叠加或 tooltip 时。
+
+> **2026-11-18 已触发**：页签化与图表形态需要环图/构成图与多序列大图；按 `DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-20` 只在 ai-kit 引入 recharts 与 DonutChart，折线继续用 TrendChart。
 
 ### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-02 — 窗口决定步长
 
@@ -71,6 +88,8 @@
 一列三十张无标题卡片读不出「哪些数字属于同一件事」。页面按 GPU / 主机资源 / 磁盘 I/O / 网络 / RDMA 五组渲染，
 组标题只做分区不折叠；组内仍是两列网格。被否方案：做页签——切换页签会把「同时看 GPU 与主机」的对比场景拆散，
 而监控页的首要任务正是横向比较。
+
+> 2026-11-18：物理资源整体成为页面级页签（`DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-22`），但组内仍不拆二级页签；本决策的分组结论继续有效。
 
 ### CON-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-01 — 指标名与单位
 
@@ -111,6 +130,8 @@
 
 老页在集群未就绪时的行为与本次决定不同：旧实现把读失败吞掉，显示 0/0 与「暂无数据」、模块显示「已禁用」（2026-11-18 在无 Ready 条件的成员集群 `test` 上实测，截图 [assets/cluster-monitor-status-20261118/old-test.png](../../../docs/plans/assets/cluster-monitor-status-20261118/old-test.png)）。新页由集群作用域路由层整页接管为「等待集群加入」面板并给出集群概览入口，这是对旧页的**改进**，不是 parity；理由见 `DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-12`。注意：页面内的旧/新等待视图都不在本页实现，路由层接管是既有能力，部署构建可能尚未包含该路由层（本地/新构建才有）。
 
+2026-11-18 用户对比旧页 5 个页签后指出两处未承接：旧页的 5 个页签（概览 / 物理资源监控 / API Server 监控 / 调度器监控 / 资源用量排行）应按场景逐一迁移而不是平铺成一屏；概览的节点健康/厂商分布应以图表呈现，资源用量应是「主图 + 明细」。本批（增量 1）恢复**页内页签 IA**（一个导航入口、五个页签、`?tab=` 深链），在 ai-kit 引入 recharts 并新增 `DonutChart`，概览恢复环图/构成图/3×2 磁贴与主图+明细，物理资源页签把 29 张卡合并为 18 张多序列大图，APIServer / Scheduler / 排行各自成为页签。旧页 etcd 页签是按 `requireETCD` 条件显示的；本部署 etcd ServiceMonitor 探测为 404，因此条件 etcd 页签隐藏；AC-07 的「有序列 / 无序列说明」正分支待接入 etcd 监控的集群复验（见「后续改进」与交付记录）。
+
 ## 仓库落点
 
 - 页面：`apps/console-next/src/pages/cluster/ClusterMonitorPage.tsx`
@@ -125,11 +146,45 @@
 - 共享图表：`console/packages/ai-kit/src/primitives/TrendChart.tsx`（新增多序列能力，单序列 `points` 兼容）+ `src/styles/tokens.css` 的 `--ai-chart-*` 语义色
 - 文案：`packages/locales/src/index.ts`（`cluster.monitor.*`）
 
+本批（页签 IA 与图表化）新增/改动的落点：
+
+- 页面与页签框架：`apps/console-next/src/pages/cluster/ClusterMonitorPage.tsx`（页头 + `Tabs` + node 变体）、`monitorTabs.ts`（`MonitorTabKey` / `MONITOR_TABS` / `parseMonitorTab` / `WindowContext`）、`monitorWindow.ts`（`WINDOWS` / `rangeForWindow` / `AUTO_REFRESH_INTERVAL_MS`）
+- 概览：`apps/console-next/src/pages/cluster/ClusterOverviewTab.tsx`、`ClusterStatusSection.tsx`（3×2 磁贴与核心组件行；节点环图用既有 `MetricRing`，厂商构成用 `DonutChart`）
+- 物理资源：`apps/console-next/src/pages/cluster/ClusterResourceTab.tsx`、`monitorResourceCharts.ts`（18 图与多序列配置）
+- 组件页签：`ClusterApiServerTab.tsx`、`ClusterSchedulerTab.tsx`、`componentMonitorQueries.ts`（既有查询与身份合并）
+- 排行：`ClusterRankingTab.tsx`、`NodeRankingPanel.tsx`（新增 `aiIdPrefix` 与导出）
+- 路由：`apps/console-next/src/routes/kube-frontend.clusters.$cluster/monitor/index.tsx`（`validateSearch` / `useSearch` / `useNavigate`）
+- ai-kit：`console/packages/ai-kit/src/primitives/DonutChart.tsx`、`src/index.ts`、`kube-frontend/packages/ui/src/index.ts`（再导出）、Storybook story 与单测
+- 文案：`packages/locales/src/index.ts`（本批 key 由 Lead 统一写入，`cluster.monitor.tab.*` / `overview.*` / `resource.*` / `series.*` / `cluster.nodeUsage.export*`）
+
 ## 对外契约
 
 `GET /kapis/monitoring.kubesphere.io/v1alpha3/cluster`，参数 `metrics_filter`（`|` 分隔，每个名字以 `$` 结尾）、`start`、`end`（epoch 秒）、`step`（`60s`/`5m`/`15m`/`2h`）、`cluster`。
 
 `GET /kapis/monitoring.kubesphere.io/v1alpha3/components/{component}`（`component` ∈ `apiserver` / `scheduler` / `etcd`），参数同上。返回 `results[].metric_name` 与 `data.result[]`，每条 `data.result[]` 是一个独立序列，身份在 `metric.verb` / `metric.result` / `metric.quantile`；某条指标在本集群没有采集时仍返回该 `metric_name`，但 `data.result` 为空数组（不是 404，也不是 0）。
+
+页签路由与深链（本批新增）：
+
+- `/kube-frontend/clusters/$cluster/monitor?tab=<overview|resource|apiserver|scheduler|ranking>`；无参数或非法值按 `overview` 渲染，URL 不被改写；切页签 `navigate({ search: { tab }, replace: true })`，不进入浏览器历史（`DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-19`）。
+- 页签标签来自 `cluster.monitor.tab.*`；页签句柄 `cluster-monitor:tab:<key>`，面板 `cluster-monitor:tabpanel:<key>`；node 变体不产生这些句柄。
+
+DonutChart（ai-kit 共享原语，本批新增）：
+
+```ts
+export interface DonutSegment { key: string; label: string; value: number; color?: string }
+export interface DonutChartProps extends React.HTMLAttributes<HTMLDivElement> {
+  segments: DonutSegment[]; label: string; emptyText: string;
+  formatValue?: (value: number) => string; showLegend?: boolean; size?: number; centerLabel?: React.ReactNode;
+}
+```
+
+契约：recharts `PieChart/Pie/Cell`（内半径约 62%、外半径约 88%）；颜色默认取 `TREND_SERIES_COLORS` 并解析成 recharts 可用的颜色（`GOT-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-12`）；HTML 图例每行 `data-ai-segment={key}`；合计 ≤0 或全部非有限时只渲染 `emptyText`、不渲染 SVG；根 `role="img" aria-label={label}`；只使用 ai-kit token，不新增硬编码色值。
+
+排行导出（本批新增）：
+
+- 触发：`cluster-monitor:ranking:export`（页签）与 `node-usage:export`（独立页），文案 `cluster.nodeUsage.export` / `exportHint` / `exportEmpty`。
+- 产物：`node.usage.rank.json`，形状 `{cluster, metric, order, generatedAt, items:[{name, values}]}`；items 为当前 metric/order 的全部行（后端支持全量时），否则已加载页并如实标注范围（`CON-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-07`）。
+- 端点：不新增后端导出接口，仍只读 node 用量排行数据。
 
 ## 不变量
 
@@ -144,6 +199,16 @@
 9. 状态分区的零值、缺失、未上报、未安装、无权限与失败是六种不同的事实，不互相顶替；`0/0` 不是「正常」。
 10. 厂商占比的分母等于参与展示的厂商行计数之和；`healthy` / `total` 不进入厂商列表与分母。`CPU` 键表示「无 XPU 节点」，作为 CPU 行显示并计入分母；空态只用于各厂商计数合计为 0（无节点/未上报），CPU 行不是空态。
 11. 就绪判断只认集群列表的 `ready === false`：命中时页面不挂载、由路由层整页接管；`ready` 缺失（列表读取中或读取失败）时不接管，页面照常挂载。
+
+12. 页签：URL 的 `tab` 与选中页签一致；未知值忽略并按概览渲染；默认 `overview`；切页签用 replace 语义，不新增浏览器历史；node 变体没有页签；etcd 页签只在 ServiceMonitor 200 时存在，隐藏时 `?tab=etcd` 按 `overview` 渲染。
+13. 一个时间窗、一个自动刷新开关，只出现在页头；任何页签内不得再出现第二套时间窗/刷新控件。
+14. 切页签只为新进入的页签发起主查询；未挂载过的页签零请求；同一时间窗内回到已加载页签复用缓存。
+15. 图表空态不画零线；DonutChart 合计 ≤0 或全非有限时只显示说明、不渲染 SVG；环图百分比由同次响应计算。
+16. 多序列图按身份标签合并：同一身份一条线、不同身份不混线，线数等于有数据的身份数；某身份缺序列时图例不补 0 线。
+17. 页签主查询彼此独立：一个页签失败不影响其他页签；403 只说明无权限且不给重试。
+18. 导出 JSON 形状固定；items 来自当前 metric/order；无数据不生成文件；导出范围与文件内容一致。
+19. ai-kit 主题：DonutChart 只使用 `--ai-*` token；recharts 颜色 token 解析失败时回退内置调色板，不写死十六进制。
+20. 既有 `data-ai-id` 不串：`NodeRankingPanel` 默认前缀 `node-usage:`，排行页签传 `cluster-monitor:ranking:`；同一句柄不得在页面里出现两次。
 
 ## 已知坑
 
@@ -162,12 +227,21 @@
 - **旧页 Kube AI Hub 恒为 0/0**：旧 store 的 `data` 键是 `kubesphere` 而模板取 `counts.kubeaihub`，两个名字对不上，所以无论真实后端数是多少都显示 0/0。这是旧实现缺陷，不是集群事实；新页按命名空间聚合 healthyBackends/totalBackends。
 - **状态分区的刷新随页面开关**：三块查询与趋势共用「自动刷新」开关（开启每 5 秒重取，关闭/卸载停止），不是各自独立的 interval；实现时定时器必须与趋势的 tick 同一生命周期，否则关闭开关后状态分区仍会继续请求。
 
+- **recharts 颜色 token**：`TREND_SERIES_COLORS` 是 `rgb(var(--ai-chart-N))` 字符串；DonutChart 需从 computed style 解析出可解析颜色，失败回退内置调色板（`GOT-...-12`）。
+- **隐藏页签里的图表尺寸为 0**：recharts `ResponsiveContainer` 在 `display:none` 容器里测量为 0；页签必须懒挂载（离开即卸载），不能全部挂载后隐藏（`GOT-...-14`）。
+- **深链与 replace**：`?tab=` 非法值不要改写 URL；切页签用 `replace: true`，后退/前进不切换页签是**本批的明确行为**（`DEC-...-19`、`GOT-...-15`）。
+- **导出全量不能想当然**：`pageSize=-1` 是否生效需实测，返回行数要核对 total；否则会把「一页」当「全量」导出（`GOT-...-16`）。
+- **比率超配**：`cluster_*_utilisation` 超配时 >1，×100 后允许 >100%，不要截断或固定轴上限（`GOT-...-13`）。
+- **etcd 页签可见性**：只有 ServiceMonitor 探测 200 才显示；404 与探测失败（403/5xx）都隐藏，页签条不区分「未接入」与「探测失败」（旧 `requireETCD` parity，`GOT-...-17`）。
+
 ## 测试与可观测
 
 用例：`tests/ui/specs/kube-frontend/cluster-management/TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01.yaml`、`TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-06.yaml`（组件多序列/单位）、`TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-07.yaml`（无数据/错误/无权限分支）。
 可观测点：`cluster-monitor:surface`、`cluster-monitor:{cpu,memory,pods,nodes}`、`:latest`、`:empty`、`:chart`、`cluster-monitor:range:<key>`；系统组件：`cluster-monitor:components`、`cluster-monitor:group:{apiserver|scheduler|etcd}`（带 `data-ai-state`）、`cluster-monitor:{apiserver|scheduler|etcd}:<card>`、`:<card>:series:<identity>`、`:<card>:series:<identity>:value`。
 
 集群状态分区（`data-ai-id` 清单，以 `ClusterStatusSection.tsx` 为准）：`cluster-monitor:status`（分区根，`data-ai-state` = loading/ready/empty/error）、`cluster-monitor:status:node-online:card`（节点在线卡，`data-ai-state`；含 `cluster-monitor:status:node-online` 数字、`:node-online:ratio` 比例、`:node-online:link` 节点页入口，以及 `:node-online:loading|unreported|empty|permission|error|retry`）、`cluster-monitor:status:vendor:card`（厂商卡；含 `cluster-monitor:status:vendor` 列表、`:vendor:row:<vendor>`（`data-ai-count`）与 `:vendor:row:<vendor>:count|:percent`、`:vendor:loading|empty|permission|error|retry`）、`cluster-monitor:status:components:card`（组件卡；含 `:components:service:<namespace>`（`data-ai-status` = healthy/unhealthy/not-installed/not-reported）、`:components:core:<etcd|controller-manager|scheduler>`（`data-ai-status`）、`:components:core:etcd:retry`，以及组件查询失败时复用分区前缀的 `cluster-monitor:status:permission|:error|:retry`）。未就绪由路由层接管，用既有句柄 `cluster:not-ready`、`cluster:not-ready-overview` 断言（本页不新增等待视图句柄）。用例按这些句柄断言，不按标题文字猜。
+
+页签 IA 与图表化（本批）的观测点：`cluster-monitor:tab:<key>`、`cluster-monitor:tabpanel:<key>`（含条件 `cluster-monitor:tab:etcd` / `cluster-monitor:tabpanel:etcd`，仅在 etcd 接入监控时存在）、`cluster-monitor:range:<key>`、`cluster-monitor:auto-refresh`、`cluster-monitor:retry`、`cluster-monitor:surface`；概览 `cluster-monitor:overview`、`:overview:node-ring`/`:node-ring:value`、`:overview:vendor-donut`/`:overview:vendor:<vendor>`、`cluster-monitor:status:components`（`:components:service:<ns>`、`:components:core:<key>`）、`:overview:usage`/`:usage:<key>`/`:usage:<key>:value`、`:overview:usage-chart`/`:usage-chart:legend`、`:overview:rdma`、`:overview:view-rdma`；物理资源 `cluster-monitor:resource`、`:resource:group:<gpu|host|disk|network|rdma>`、`:resource:chart:<key>`、`:chart:<key>:legend`、`:chart:<key>:empty`；APIServer `cluster-monitor:apiserver:chart:latency|rate`；Scheduler `cluster-monitor:scheduler:chart:attempts|rate|latency`；排行 `cluster-monitor:ranking`、`cluster-monitor:ranking:export`（独立页 `node-usage:export`）；DonutChart 图例行 `data-ai-segment`。
 
 ## 后续改进
 
@@ -176,12 +250,24 @@
 - 交互式缩放与 tooltip。
 - 成员集群就绪后的状态分区正向数据（本轮只能验收 host/agent 就绪集群的正常态与未就绪集群 `test` 的路由层接管）。
 - 真实受限账号下 componenthealth / nodes/stats 的 403 分支（本轮用 route mock）。
+- **每页签独立时间窗/播放控制**：本批五个页签共用页头一套时间窗与自动刷新（`DEC-...-23`）；旧 console 的组件面板各自 50×2m 并有播放控制。若产品确认需要按页签独立窗口，另立批次实现，不把「共用」当成永久形态。
+- **旧概览 RDMA 四子图**：本批概览只做 RDMA 摘要 + 「查看 RDMA 趋势」跳转（`AC-...-12`）；旧页健康/端口/吞吐/错误四张子图只在物理资源页签的 RDMA 组承接，若需在概览内直接展示，可复用 RDMA 组图表。
+- **etcd 条件页签正分支复验**：条件 etcd 页签已按 `requireETCD` 承接（ServiceMonitor 200 显示、404/失败隐藏，`DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-27`）；本部署探测为 404，页签隐藏，`AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-07` 的「有序列 / 无序列说明」正分支只能在接入 etcd 监控的集群上复验（环境限制，已记入交付记录）。
+- **排行导出扩展**：全量分页拉取的后端核对、CSV/Excel、服务端异步导出（本批只做 JSON）。
+- **环图/构成图交互**：hover 读数、扇区点击筛选、跨集群构成对比；折线缩放/框选。
+- **旧页逐页签对照验收**：五个基础页签（+条件 etcd 页签）× 旧页截图 × 三档视口 × 浅色/英文，待验证方补齐。
 
 ## 验收用例
 
 - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01
 - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-06
 - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-07
+- TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-11（页签 IA 与深链，覆盖 AC-11）
+- TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-12（概览环图/构成图/主图+明细，覆盖 AC-12）
+- TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-13（物理资源多序列分组，覆盖 AC-13）
+- TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-14（API Server 页签，覆盖 AC-14）
+- TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-15（调度器页签，覆盖 AC-15）
+- TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-16（排行页签与导出，覆盖 AC-16）
 
 
 ## 自动刷新（R-27 的对应实现）
@@ -321,7 +407,7 @@
 
 **何时重新考虑**：需要跨集群构成对比或交互式下钻时，按 `DEC-...-01` 的条件评估图表库。
 
-> 2026-11-18 用户反馈：节点健康与厂商分布应以图表（环图/饼图）呈现；数值 + 比例条被判定为观感与信息密度退化。后续批次优先扩展 ai-kit 共享图表（环/饼）后重做，不再以「不引入图表库」作为长期结论。
+> 2026-11-18 用户反馈：节点健康与厂商分布应以图表（环图/饼图）呈现；数值 + 比例条被判定为观感与信息密度退化。**本批已重做**：ai-kit 引入 recharts 并新增 DonutChart（`DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-20`），状态行恢复环图/构成图/3×2 磁贴（`DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-26`）；本决策保留为历史与「列表可读性」论据，不再是现状。
 
 ### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-14 — 服务组件按命名空间聚合 healthyBackends / totalBackends
 
@@ -387,4 +473,193 @@
 ### GOT-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-11 — 「未就绪」判断在路由层/概览页，监控页此前没有该分支
 
 旧 console 的监控页（`clusters/containers/Monitor/Cluster/index.jsx`）只做 Banner + 页签路由，没有 Ready 判断；整页等待只存在于集群概览的 `Initializing` 视图。新 console 的集群作用域路由层已经有统一接管（`cluster:not-ready`），因此本页的未就绪契约是「页面不挂载」，不是「页面内渲染等待视图」——不能从旧监控页「已支持未就绪」反推，也不要再在页面里加第二套。路由层接管依赖集群列表的 `ready === false`；`ready` 缺失（列表读取中或读取失败）时不接管。部署构建可能尚未包含该路由层（本地/新构建才有），验收时先确认构建版本。
+
+## 页签 IA 与图表化（2026-11-18）
+
+> 背景：2026-11-18 用户对比旧 console 的 5 个页签后指出两处未承接——（a）旧页「概览 / 物理资源监控 / API Server 监控 / 调度器监控 / 资源用量排行」应按场景逐一迁移，不得平铺成一屏；（b）概览的节点健康/厂商分布图表缺失，资源用量应是「主图 + 明细」。本批（增量 1）恢复页内页签 IA（一个导航入口、五个页签、`?tab=` 深链），在 ai-kit 引入 recharts 并新增 `DonutChart`，概览恢复环图/构成图/3×2 磁贴与主图+明细，物理资源页签把 29 张卡合并为 18 张多序列大图，APIServer / Scheduler / 排行各自成为页签。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-18 — 页签 IA 用页内 Tabs + 路由 search 参数，而非独立子路由或本地状态
+
+**为什么**：旧 console 的监控每个页签是一个子路由（`/clusters/:cluster/monitor-cluster/<tab>`），侧栏里「集群状态」是一个入口、进去后有 5 个基础页签（etcd 接入监控时另有条件 etcd 页签）。新 console 的集群监控入口已经是 `/monitor`，产品要求「一个导航入口、基础 5 页签 + 条件 etcd 页签」。页内 Tabs + `?tab=<key>` 同时满足四件事：侧栏只有一个入口；URL 可保存/分享/直接粘贴；刷新后停在原页签；不新增路由目录，权限与集群就绪判断仍在同一路由上，面包屑与侧栏高亮不用分叉。数据归属上，页签各自挂载自己的主查询，页头持有时间窗，切页签不会把未挂载页签的数据也拉一遍。
+
+**被否方案**：
+- 旧形态的每个页签独立子路由：导航多出 5 个与「监控」语义重叠的入口，需要重复权限/就绪判断，且与「一个动作一个入口」的导航决定冲突。
+- 页签状态放本地 `useState`（不写 URL）：刷新、分享、书签都会回到概览，页签 IA 等于没有深链。
+- 维持平铺单页：2026-11-18 被用户判定为「只迁移了概览、丢失其他页签内容」。
+
+**何时重新考虑**：某个页签需要独立的权限、就绪判断或独立时间窗时，再拆成子路由；或页面需要同时并排看两个页签时，改为分区布局。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-19 — 切页签用 `replace: true`，不把返回键变成页签步行器
+
+**为什么**：页签切换在语义上是「在同一页里换内容」，不是「进入新页面」。若每次切页签都 push 一条历史，读一遍五个页签就要按五次返回才能离开监控页，浏览器的返回键会被页签占用；而深链（直接打开 `?tab=...`）与刷新定位仍由 search 参数保证。因此切换路径统一 `navigate({ search: { tab }, replace: true })`，只有从其它页面进入监控页时才产生一条历史。
+
+**被否方案**：push 每次切换（返回键变成页签步行器，与「页签是页内状态」的语义冲突）；不写 URL（失去深链，AC-11 的 URL 同步与非法值忽略都无从验证）。
+
+**何时重新考虑**：用户明确要求「返回键回到上一个页签」时；届时用 push 并在文档里把该行为列为验收项。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-20 — ai-kit 引入 recharts 并新增 DonutChart；折线继续用 TrendChart
+
+**为什么**：本批需要环图/构成图，旧页是 recharts 饼图。自绘 SVG 环图要自己处理扇区路径、比例、图例、无障碍与主题，而 ai-kit 的 `TrendChart` 已经承担折线（多序列/坐标轴/读数）。只在 ai-kit 引入一次 recharts（独立 pnpm 项目，`^3.11.0`，不进入 kube-frontend workspace），新增 `DonutChart` 供概览与后续构成场景复用；折线保持 `TrendChart` 不动，避免二次实现与既有 3 处消费者回归。
+
+**被否方案**：
+- 继续不引入图表库，用数字 + 比例条（2026-11-18 被用户判为观感与信息密度退化；`DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-13` 因此被 `DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-26` 取代）。
+- 页面内自绘 SVG 环图/饼图（与「一套共享组件」冲突，主题 token、空态与可访问性会分叉）。
+- 把 TrendChart 也迁到 recharts（改动面大、既有消费者与单测要一起改，收益低）。
+
+**何时重新考虑**：图表类型继续增长（柱状/堆叠/热力）或需要统一交互（缩放/刷选）时，可把折线也迁到 recharts 并评估 bundle 体积。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-21 — 概览「主图 + 明细」，而不是 7 个页签或 7 张同权卡片
+
+**为什么**：旧概览的「集群资源用量」是 7 个 StatusTabs，每次只看一张图；7 张等宽卡片平铺则趋势图太小、首屏被图表占满。「左侧 7 行当前值（used/total）+ 右侧一张可选指标大图」同时回答「多少」与「形状」：左列是精确当前值与指标选择器，右列是当前选中指标的趋势，且主图面积明显大于明细行。
+
+**被否方案**：保留 7 个页签（与页面级页签叠加成两级页签，读者要在两级之间切换）；7 张同权卡片平铺（趋势图小、没有主次）；只保留一张固定总图（看不出 CPU/内存/磁盘分别在哪）。
+
+**何时重新考虑**：需要同时对比多条用量曲线时，改为多序列（同单位）或增加「对比」模式。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-22 — 物理资源页签按场景分组、多序列合并为 18 张大图
+
+**为什么**：旧「物理资源监控」一列约三十张图，其中读/写吞吐、读/写 IOPS、网络收发、Pod 三态、负载 1/5/15、RDMA 端口/吞吐/错误本来就是「同一指标的不同身份」。拆成 29 张同权卡会丢失同图比较，还要求读者自己对齐时间轴。本批把身份合并成一张多序列图（TrendChart 的 `series`），保持 18 张，按 GPU/主机/磁盘/网络/RDMA 分组；组标题只做分区不折叠（延续 `DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-06` 的结论，但物理资源整体成为页面级页签）。
+
+**被否方案**：29 张卡片平铺（现状，页面长且横向比较丢失）；每指标一张二级页签（又一层页签）；保留旧 Overview 的 7 个 StatusTabs。
+
+**何时重新考虑**：某组指标继续增长（>30 张图）时，可把组做成页内折叠或二级导航。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-23 — 基础五个页签与条件 etcd 页签共用页头一套时间窗与自动刷新；页签懒挂载、各自查询
+
+**为什么**：一个动作一个入口：时间窗与刷新是页面级动作，页签是内容（基础五个页签与条件 etcd 页签共用这一套）。若每个页签各有一套时间窗，同一页会出现两套时间语义，切页签还会重置读者刚设的窗口。页签各自持有主查询（而非页面一次拉全部）才能在切换时不请求未挂载页签的数据，并让每个页签的主查询独立降级（一页签失败不拖垮另一页签）。
+
+**被否方案**：
+- 每页签独立时间窗/播放控制（旧 console 组件面板各自 50×2m；本轮不做，登记后续，不是永久结论）。
+- 页面一次性拉全部页签指标（切页签快，但首屏慢、未看页签也请求、单块失败影响整页）。
+- 所有页签保持挂载只隐藏（recharts 在 `display:none` 容器里宽度为 0；未挂载页签仍会取数，与 AC-11 冲突）。
+
+**何时重新考虑**：监控 API 支持服务端聚合，或页面需要「同屏对比两个页签」时。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-24 — 排行页签复用 NodeRankingPanel + `aiIdPrefix`，导出 JSON
+
+**为什么**：节点用量排行的表格逻辑（服务端分页/排序/搜索/指标切换）已经在独立页 `node-usage` 使用。页签内复制一份会分叉空态/错误/分页行为。给 `NodeRankingPanel` 加 `aiIdPrefix`，同一组件在两个入口产出不同 `data-ai-id`，不重复写表格。导出由页面从「当前 metric/order 的行」生成 JSON，不引入后端导出接口。
+
+**被否方案**：页签内复制排行实现（两份状态机）；新增后端导出接口（本批只读、契约不改后端）；导出 CSV/Excel（本批只要 JSON，格式扩展另立）。
+
+**何时重新考虑**：后端提供导出接口，或排行数据量超过浏览器可承载时。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-25 — 排行导出范围：优先全量，退化为已加载页并如实标注
+
+**为什么**：导出是「把当前看到的排行带走」，因此应包含当前 metric/order 的全部行，而不只是当前页。`nodeRankingApi` 支持 `pageSize=-1` 或可逐页拉取时导全量；不支持时导出已加载页，并在文件中记录范围与原因，避免读者以为拿到了全量。无数据时禁用按钮而不是生成空文件。
+
+**被否方案**：只导出当前页（用户常以为拿到全部）；导出空文件或无提示；把导出做成服务端任务（超出本批）。
+
+**何时重新考虑**：后端支持全量/异步导出时。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-26 — 状态行恢复环图 + 构成图 + 3×2 磁贴，取代 DEC-13 的列表+比例条
+
+**为什么**：2026-11-18 用户对比旧页指出：节点健康与厂商分布必须是图表（编号环/饼图），数值 + 比例条被判定为观感与信息密度退化；组件状态在旧页是 3×2 磁贴。本批用 ai-kit 的 `MetricRing`（单值占比）与新增 `DonutChart`（构成）恢复图形形态，组件状态改为 3×2 磁贴 + 核心组件一行。数据语义不变（`AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-08` 的 healthy/total、厂商占比口径、CPU 行、未安装/未上报等）。
+
+**被否方案**：继续列表 + 比例条（`DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-13` 原方案，被用户反馈否决）；页面内自绘环图；直接移植旧 recharts 饼图组件（旧组件带旧主题与自定义 `activeShape`，无法复用）。
+
+**何时重新考虑**：环图/构成图需要做交互（hover 读数、点击筛选、跨集群对比）时，扩展 DonutChart 能力。
+
+> `DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-13` 的「不引入图表库」前提已被 `DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-20` 取代；`DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-13` 保留为历史与「列表可读性」论据，但不再是现状。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-27 — etcd 恢复为条件页签，与旧 `requireETCD` 一致
+
+**为什么**：旧 console 的 etcd 页签只在 `kubesphere-monitoring-system/etcd` ServiceMonitor 存在（探测 200）时出现，否则隐藏；AC-07 需要 etcd 组件图与「未上报」说明的落点。本批保留页内页签形态，但把 etcd 作为第 6 个**条件页签**（不是页面级独立路由）：可见性由同一探测决定，隐藏时 `?tab=etcd` 回退概览。这样既保持旧页「没接入就不显示」的语义，又不把 etcd 说明塞进 APIServer / 调度器页签。
+
+**被否方案**：
+- 塞进 API Server 页签当子组：页签语义变成「控制面 + etcd」，与页签名不符。
+- 始终显示 etcd 页签、无数据时给说明：会改变页签数量与旧页 requireETCD 的可感知行为（产品要求恢复旧行为）。
+- 不做 etcd：AC-07 没有落点，追溯断裂。
+
+**何时重新考虑**：平台改为按安装状态决定监控入口，或 etcd 有真实健康数据源（leader/延迟/成员级）时，另立真实健康项。
+
+> 探测失败（403/5xx）与 404 一样按隐藏处理，不把未知当已接入；页签条不提供「探测失败」单独画面（旧页 parity），限制见交付记录未验收项。
+
+### CON-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-04 — 概览 7 行用量与主图指标
+
+| 行 key | 当前值 used / total | 大图指标（单位） |
+| --- | --- | --- |
+| gpuMemory | `cluster_gpu_memory_usage` / `cluster_gpu_memory_total`（bytes） | `cluster_gpu_memory_utilisation`（0–1 ×100，%） |
+| gpu | `cluster_gpu_usage` / `cluster_gpu_total`（卡） | `cluster_gpu_utilization`（0–1 ×100，%） |
+| gpuAllocated | `cluster_gpu_allocated` / `cluster_gpu_total`（卡） | `cluster_gpu_allocated`（整数，卡） |
+| cpu | `cluster_cpu_usage` / `cluster_cpu_total`（核） | `cluster_cpu_utilisation`（0–1 ×100，%） |
+| memory | `cluster_memory_usage_wo_cache` / `cluster_memory_total`（bytes） | `cluster_memory_utilisation`（0–1 ×100，%） |
+| disk | `cluster_disk_size_usage` / `cluster_disk_size_capacity`（bytes） | `cluster_disk_size_utilisation`（0–1 ×100，%） |
+| pods | `cluster_pod_running_count` / `cluster_pod_quota`（个） | `cluster_pod_running_count`（整数，个） |
+
+RDMA 摘要指标：`cluster_ib_port_up`、`cluster_ib_port_total`、`cluster_ib_tx_bytes`、`cluster_ib_rx_bytes`、`cluster_ib_rx_errors`。缺任何一条：该行显示「-」、大图按无数据说明，不填 0；比率 >1 时可显示 >100%（超配）不做截断，轴上限取数据峰值；一次 range 查询取回上述全部指标（含 used/total），比率按时间戳配对相除，不按下标 zip。
+
+### CON-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-05 — 物理资源页签 18 张图与序列
+
+| 组 | 图 key | 序列（身份） | 指标 | 呈现 |
+| --- | --- | --- | --- | --- |
+| gpu | gpuMemory | 单序列 | `cluster_gpu_memory_utilisation` | 0–1 ×100，% |
+| gpu | gpuUtilization | 单序列 | `cluster_gpu_utilization` | 0–1 ×100，% |
+| gpu | gpuAllocated | 单序列 | `cluster_gpu_allocated` | 卡，整数 |
+| host | cpu | 单序列 | `cluster_cpu_utilisation` | 0–1 ×100，% |
+| host | memory | 单序列 | `cluster_memory_utilisation` | 0–1 ×100，% |
+| host | load | load1/load5/load15 | `cluster_load1` / `cluster_load5` / `cluster_load15` | 两位小数 |
+| host | diskUsage | 单序列 | `cluster_disk_size_usage` | B/KiB/MiB/GiB |
+| host | inode | 单序列 | `cluster_disk_inode_utilisation` | 0–1 ×100，% |
+| host | pods | running/completed/abnormal | `cluster_pod_running_count` / `cluster_pod_succeeded_count` / `cluster_pod_abnormal_count` | 个，整数 |
+| disk | throughput | read/write | `cluster_disk_read_throughput` / `cluster_disk_write_throughput` | B/s |
+| disk | iops | read/write | `cluster_disk_read_iops` / `cluster_disk_write_iops` | 两位小数 |
+| network | traffic | tx/rx | `cluster_net_bytes_transmitted` / `cluster_net_bytes_received` | B/s |
+| rdma | health | 单序列 | `cluster_ib_health` | 0–1 ×100，% |
+| rdma | ports | portUp/portTotal | `cluster_ib_port_up` / `cluster_ib_port_total` | 个，整数 |
+| rdma | throughput | tx/rx | `cluster_ib_tx_bytes` / `cluster_ib_rx_bytes` | B/s |
+| rdma | linkSpeed | 单序列 | `cluster_ib_link_speed` | bit/s → Gb/s，一位小数 |
+| rdma | errors | rxErrors/retrans/discards | `cluster_ib_rx_errors` / `cluster_ib_retrans` / `cluster_ib_discards` | 个，整数 |
+| rdma | linkDowned | 单序列 | `cluster_ib_link_downed` | 个，整数 |
+
+查询：本页签一次 range 查询取上述全部指标；某条在本部署不存在（返回 0 序列）时该图显示空态说明，并在交付记录里列出缺失指标，不改契约（`AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-13`）。
+
+### CON-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-06 — 页签 IA、深链与观测点
+
+- 路由：`/kube-frontend/clusters/$cluster/monitor`；search `tab` ∈ overview|resource|apiserver|scheduler|ranking|etcd；未知值忽略；无参数 = overview；etcd 仅在 ServiceMonitor 200 时可见，隐藏时 `?tab=etcd` 按 overview 渲染；切页签 `navigate({ search: { tab }, replace: true })`。
+- 页签标签：`cluster.monitor.tab.*`；页签 `data-ai-id="cluster-monitor:tab:<key>"`；内容容器 `cluster-monitor:tabpanel:<key>`。
+- 条件 etcd 页签：`cluster-monitor:tab:etcd` / `cluster-monitor:tabpanel:etcd`；仅在 `kubesphere-monitoring-system/etcd` ServiceMonitor 探测为 200 时存在，404/探测失败时页签与面板都不渲染。
+- 页头：`cluster-monitor:surface`（`data-ai-state` = 当前页签主查询）、`cluster-monitor:range:<key>`、`cluster-monitor:auto-refresh`、`cluster-monitor:retry`。
+- 概览：`cluster-monitor:overview`、`:overview:node-ring` + `:node-ring:value`、`:overview:vendor-donut` + `:overview:vendor:<vendor>`、`cluster-monitor:status:components` + `:components:service:<ns>` / `:components:core:<key>`、`:overview:usage` + `:usage:<key>` + `:usage:<key>:value`、`:overview:usage-chart` + `:usage-chart:legend`、`:overview:rdma`、`:overview:view-rdma`。
+- 物理资源：`cluster-monitor:resource`、`:resource:group:<gpu|host|disk|network|rdma>`、`:resource:chart:<key>`、`:chart:<key>:legend`、`:chart:<key>:empty`。
+- API Server：`cluster-monitor:apiserver:chart:latency`、`:chart:rate`；调度器：`cluster-monitor:scheduler:chart:attempts`、`:chart:rate`、`:chart:latency`。
+- 排行：`cluster-monitor:ranking`；导出 `cluster-monitor:ranking:export`（独立页为 `node-usage:export`）。
+- DonutChart：根 `role="img" aria-label`，图例行 `data-ai-segment="<key>"`；无数据只渲染 `emptyText`，不渲染 SVG。
+- 节点详情变体无页签，不产生上述页签句柄。
+
+### CON-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-07 — 排行导出 JSON
+
+导出文件名 `node.usage.rank.json`，内容 `{cluster, metric, order, generatedAt, items:[{name, values}]}`；items 来自当前 metric/order 的全部行（后端支持全量时；否则已加载页并在文件与交付记录中标注范围）；无数据时按钮禁用（`cluster.nodeUsage.exportEmpty`），不生成文件；下载用 Blob + `a.download` 并 revoke object URL；两处入口（排行页签 / node-usage 页）形状一致，句柄前缀分别为 `cluster-monitor:ranking:` 与 `node-usage:`。
+
+### GOT-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-12 — recharts 颜色：`rgb(var(--ai-chart-N))` 需要解析
+
+`TREND_SERIES_COLORS` 是 `rgb(var(--ai-chart-N))` 字符串（CSS 变量语义色）。TrendChart 直接在 SVG 属性里使用没问题，但 recharts 的 `fill`/`stroke` 与图例色块、颜色计算路径不一定能解析 `var()`。`DonutChart` 必须从 `getComputedStyle(document.documentElement)` 读 `--ai-chart-N` 再拼成 `rgb(...)`（失败时回退内置调色板），且不得在 ai-kit 新增硬编码十六进制；主题切换后需重新解析（订阅主题或按主题 key 重算）。
+
+### GOT-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-13 — 比率指标 ×100，且超配可 >100%
+
+`cluster_*_utilisation`、`cluster_gpu_*_utilisation`、`cluster_ib_health` 是 0–1 比值，必须 ×100 显示百分比；但这些比率在超配/错误聚合时可能 >1，页面不能把值截到 100%，轴上限也不能固定 100（取数据峰值）。用量行 used/total 同理；「显示 100%」与「显示 -」是两件事，缺序列不能填 0 或 100。
+
+### GOT-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-14 — 隐藏容器里的图表宽度为 0：页签必须懒挂载
+
+recharts 的 `ResponsiveContainer` 在 `display:none` 容器里测量到宽度 0；若所有页签都挂载只隐藏，切到某个页签时图表可能保持 0 高/0 宽。页签内容必须**只在选中时挂载**（离开即卸载），这同时也是 AC-11「切页签不请求未挂载页签」的实现基础。不要用 CSS 隐藏来省掉挂载成本。
+
+### GOT-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-15 — 深链与 replace：URL 是页签的唯一真相
+
+`Route.useSearch()` 的 `tab` 是任意字符串，必须经 `parseMonitorTab` 收窄；无参数/非法值不写回 `?tab=overview`，保持 `/monitor` 的规范 URL，避免每次进入都污染历史与分享链接；切页签用 `navigate({ search: { tab }, replace: true })`，不要手工拼 `location.search` 或 `window.history`（会绕过路由与严格模式）。测试可用 `page.goto(?tab=...)` 验证深链，再用一次点击验证 URL 同步。
+
+### GOT-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-16 — 排行导出：全量、文件名与 Blob 生命周期
+
+`nodeRankingApi` 是否接受 `pageSize=-1` 必须实测；若后端忽略该参数仍只返回一页，页面会误以为拿到全量——实现要核对返回行数与 total（或逐页拉取到 total 满），并把实际范围写进交付记录。下载用 `Blob` + `a.download`，文件名固定 `node.usage.rank.json`；`URL.revokeObjectURL` 必须在 click 后调用，避免长会话泄漏；无数据时不要生成空文件（按钮禁用 + `exportEmpty` 提示）。
+
+### GOT-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-17 — etcd 页签可见性：探测失败一律隐藏，不能把未知当已接入
+
+条件 etcd 页签的可见性由 `GET /apis[/clusters/{c}]/monitoring.coreos.com/v1/namespaces/kubesphere-monitoring-system/servicemonitors/etcd` 决定：200 显示、404（未接入）隐藏；探测失败（403/5xx/网络）也隐藏——旧 `requireETCD` 的行为是「拿不到就当没有」，不能把失败当已接入。代价是页签条无法区分「没接入」与「探测失败」，这是本批接受的 parity 限制；接入 etcd 监控的集群上再复验正分支。探测查询的缓存键必须含 cluster，且只影响页签可见性，不阻塞其它页签。
+
+### GOT-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-18 — 库装在 ai-kit 自己的 pnpm 项目里，会带第二份 React
+
+recharts 属于 `console/packages/ai-kit`（独立 pnpm install，React 18），app 的 React 是 19。直接 import 会在构建/测试里混入 React 18：构建仍成功，运行/单测报「A React Element from an older version of React was rendered」。三件事缺一不可：
+1) `apps/console-next/vite.config.ts` 与 `vitest.config.ts` 都加 `resolve.dedupe: ['react','react-dom']` **并显式 alias** react/react-dom 到 app 的 node_modules（vitest 对 linked 包的依赖解析不会只靠 dedupe）；
+2) 图表能力放**子路径**（`@kube-ai-hub/ai-kit/charts`、`@kube-ai-hub/ui/charts`），不进主 barrel，否则每个 import ui barrel 的页面/测试都会被动加载 recharts；
+3) app 单测用 `test/stubs/recharts.tsx` 替身（jsdom 不验绘图，真实 DonutChart 由 ai-kit 自己的 React 18 测试覆盖），并给 charts 子路径配 alias。
+同时把 recharts 及其运行依赖拆到独立 `vendor-charts` chunk（`manualChunks` 规则要匹配到 `ai-kit/src/charts.ts` **和** `primitives/DonutChart`，否则 DonutChart 仍被吞进 ai-kit chunk 并随首屏 preload）。实测拆分后 index.html 不再 preload charts chunk，monitor 路由才加载（97.5 KB gzip）。
+
 
