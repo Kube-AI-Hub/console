@@ -178,3 +178,85 @@ const narrowed = Boolean(searchValue) || Object.values(filters ?? {}).some(v => 
 
 这是**依赖结构问题**，不是一行代码能修的；而且 ai-kit 的 React 版本选择涉及是否与 app 对齐（app 已用 19），
 属于架构决策。先记录现象、已排除项与下一步。
+
+---
+
+## 附一：`verify.py --continue`（2026-11-18）
+
+## 问题
+
+`verify.py` 的设计是**遇到第一个失败就停**（fail-fast，理由是「后续检查建立在前一项通过之上」）。
+但排查时这条规则让我多跑了一轮：
+
+```
+第一次跑：失败 ai-kit，停
+手工跑后面几关：发现 console-next 也失败
+```
+
+**两个失败项，花了两轮才知道。**
+
+## 改法
+
+加 `--continue`：跑完所有环节，末尾汇总失败项。默认行为不变。
+
+```bash
+python3 prd/tools/verify.py --no-e2e --continue
+```
+
+```
+通过：文档门禁（260.5s）
+通过：一致性核对（0.0s）
+通过：缺口清单单测（0.0s）
+通过：缺口清单（0.0s）
+通过：架构契约（6.9s）
+通过：api-client 单测（2.0s）
+失败：ai-kit 单测（3.2s）
+失败：console-next 单测（12.1s）
+失败的环节（2）：ai-kit 单测、console-next 单测
+EXIT=1
+```
+
+## 实现要点
+
+`CONTINUE_ON_FAILURE` 必须在**解析参数之后、第一次 `run()` 之前**赋值——
+我第一版写在了末尾（`if args.no_e2e` 之前），结果只跑完 ai-kit 就退了，看起来像没生效。
+**改开关要先确认它被读到的时机。**
+
+## 反思
+
+| # | 规则 |
+| --- | --- |
+| 1 | **fail-fast 适合「修」，不适合「查」**：两种场景要两种模式 |
+| 2 | 默认行为不变，新能力用参数开——不会打断别人已有的习惯 |
+| 3 | 开关没生效时，先看它的作用域与赋值时机，而不是怀疑判断逻辑 |
+
+---
+
+## 附二：console-next 从 3 红到全绿（2026-11-18）
+
+`verify.py --continue` 一次列出两项红灯后，逐个查清 console-next 的三条失败，**现在 38 文件 / 222 条全过**。
+
+## 三条失败，三种原因
+
+| 用例 | 真因 | 修法 |
+| --- | --- | --- |
+| `requests the kapis collection with paging and sort` | `KAPIS` 常量少了 `/kube-frontend` 前缀 | 补前缀 |
+| `shows the empty state when nothing matches` | **我的 bug**：`ResourceList` 把作用域筛选当成读者收窄 | 改为只按搜索框判断 + `schema.narrowed` |
+| `keeps global statistics while filtering` | 断言 `url.search === ''` 过严：`/stats` 带 `?cluster=host` 是作用域不是筛选 | 改为断言没有 `type`/`uuid`/`page`/`limit` |
+
+第四条 `cluster list controls > pods` 单独跑 12/12 通过、全量跑超时——**并行负载下的 5 秒上限**，
+已在 `vitest.config.ts` 把 `testTimeout` 提到 15 秒（与 setup 里 5 秒 `asyncUtilTimeout` 同一理由）。
+
+## 两个我自己犯的错（都写进了记录）
+
+1. 用 `.slice(0, 120)` 打印请求，把 `&sortBy=createTime&ascending=false` 切掉了，据此断言「页面没发排序」——错；
+2. 把「作用域筛选」当「读者收窄」，项目内空列表因此显示「没有匹配的结果」——错，被测试抓到。
+
+## 结果
+
+```
+Test Files  38 passed (38)
+Tests       222 passed (222)
+```
+
+`verify.py` 现在只剩 ai-kit 一关红灯（嵌套 React 16，需重装依赖）。
