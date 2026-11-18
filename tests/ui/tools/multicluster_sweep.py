@@ -138,6 +138,13 @@ def _is_session_probe(url: str) -> bool:
     """True when the URL is a session handshake rather than a page's data."""
     return any(url.split('?')[0].endswith(path) for path in SESSION_PROBES)
 
+def normalise_bff(app: str, bff: str | None) -> str:
+    """`-` or empty means "no separate BFF": the app origin serves the API too."""
+    if not bff or bff == '-':
+        return app
+    return bff
+
+
 def login_urls(app: str, bff: str) -> list[str]:
     """Candidate sign-in URLs, new transport first. The app origin serves both when they match."""
     origins = [app.rstrip('/')]
@@ -1352,9 +1359,7 @@ def main() -> int:
     parser.add_argument('--progress', action='store_true', help='print one line per page while sweeping')
     parser.add_argument('--locale', default='en', help='locale used by --locale-scan (default en)')
     args = parser.parse_args()
-    # `-` (or empty) means "no separate BFF": the app origin serves the API too.
-    if args.bff in ('', '-', None):
-        args.bff = args.app
+    args.bff = normalise_bff(args.app, args.bff)
 
     global BUDGET_TIMER
     BUDGET_TIMER = with_budget(args.budget)

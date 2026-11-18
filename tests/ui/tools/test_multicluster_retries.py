@@ -198,3 +198,12 @@ def test_login_raises_when_no_route_answers():
             sweep.login(origin, 'admin', 'pw', origin)
     finally:
         server.shutdown()
+
+@pytest.mark.parametrize('bff', ['-', '', None])
+def test_dash_bff_means_same_origin(bff):
+    """A `-` BFF must become the app origin, or every later request builds a `-` URL."""
+    assert sweep.normalise_bff('https://console.example', bff) == 'https://console.example'
+
+
+def test_a_real_bff_is_left_alone():
+    assert sweep.normalise_bff('http://localhost:5182', 'http://127.0.0.1:8093') == 'http://127.0.0.1:8093'
