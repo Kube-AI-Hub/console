@@ -89,10 +89,12 @@
 **排查时用 `verify.py --no-e2e --continue`**：它会跑完所有环节并汇总失败项，
 一次看到全貌（默认仍是遇错即停）。见[记录](verify-continue-20261118.md)。
 
-**收尾脚本本身有两关红灯**（2026-11-18 实测）：`verify.py --no-e2e` 在 ai-kit 停下，手工跑后面发现
-ai-kit 9 条（嵌套 React 16.14.0）与 console-next 3 条（jsdom 的 `Range.getClientRects` 缺口）都失败。
-修 ai-kit 需要 `pnpm.overrides` + 重装 `packages/ai-kit/node_modules`，会短暂影响并行环境，**需要协调窗口**。
-详见[记录](ai-kit-tests-invalid-hook-20261118.md)。
+**收尾脚本还剩一关红灯**（2026-11-18 12:10 实测）：`verify.py --no-e2e --continue` 六项通过、
+**只有 ai-kit 9 条失败**（`use-callback-ref` 下嵌套 React 16.14.0）。console-next 已从 3 红追到
+**38 文件 / 222 条全绿**（连跑两次稳定），见[记录](console-next-suite-green-20261118.md)。
+
+修 ai-kit 需要 `pnpm.overrides` + 重装 `packages/ai-kit/node_modules`（会短暂影响并行环境，
+Storybook 6106 正在用它），**需要协调窗口**。根因与修法见[记录](ai-kit-tests-invalid-hook-20261118.md)。
 
 并行方在改同一批文件时，提交前按文件逐个 `git diff` 确认归属；无法确认的**不要提交**，
 在回复里列出文件名与它属于哪个批次，由对方决定。混入并行改动会让一次提交同时包含两个方向
