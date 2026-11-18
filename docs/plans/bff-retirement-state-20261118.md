@@ -78,6 +78,10 @@ exit=2
 
 工具单测 36 条仍全过。
 
+**八个模式都试过 `--bff -`**（`--probes`、`--baseline`、`--keyboard`、`--locale-scan`、`--tabs`、`--details`、
+`--interactions`、`--write-check`）：全部走到 preflight 并给出「环境不可用」，**没有一个因为 `-` 而崩**。
+这条覆盖的正是之前那个 `-` 拼进 URL 的缺陷——单测只验了 URL 构造，模式级冒烟才验到参数一路传下去。
+
 ## 仍待验证
 
 新路要等部署升级后才能在真实环境验证。
