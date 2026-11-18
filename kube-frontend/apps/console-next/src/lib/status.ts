@@ -26,10 +26,22 @@ const STATUS_LOCALE_KEYS: Record<string, string> = {
   Succeeded: 'phase.succeeded',
   Failed: 'phase.failed',
   Unknown: 'phase.unknown',
+  /*
+   * The pod list's four states arrive lowercased from the client (`running`, `waiting`,
+   * `completed`, `error`) while the API spells phases capitalized. Both spellings map to the
+   * same labels, so the cluster pods list cannot read "running" while the project page reads
+   * 「运行中」 (guide pitfall 52).
+   */
+  running: 'workloads.filter.status.running',
+  waiting: 'workloads.filter.status.waiting',
+  completed: 'workloads.filter.status.completed',
+  error: 'workloads.filter.status.error',
 };
 
 /** The translated label for an API status value, or the value itself. */
 export function statusLabel(t: (key: never) => string, status: string): string {
-  const key = STATUS_LOCALE_KEYS[status];
+  const key = STATUS_LOCALE_KEYS[status]
+    ?? STATUS_LOCALE_KEYS[status.charAt(0).toUpperCase() + status.slice(1)]
+    ?? STATUS_LOCALE_KEYS[status.toLowerCase()];
   return key ? t(key as never) : status;
 }

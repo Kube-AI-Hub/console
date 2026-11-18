@@ -26,6 +26,9 @@ import { useStrategyPermission } from './canary/useStrategyPermission';
  * `Failed`), so the status column is derived — see `strategyStatusOf` in the api-client
  * module, which is unit-tested rather than re-derived here.
  */
+/** Page sizes the old console offered (`PAGESIZE_OPTION`): 10/20/50/100. */
+const PAGE_SIZES = [10, 20, 50, 100] as const;
+
 export interface CanaryReleasesPageProps {
   workspace: string;
   cluster: string;
@@ -35,6 +38,9 @@ export interface CanaryReleasesPageProps {
 export function CanaryReleasesPage({ workspace, cluster, namespace }: CanaryReleasesPageProps): React.ReactElement {
   const t = useT();
   const list = useResourceListState<'name' | 'createTime'>({ defaultSortBy: 'name', defaultOrder: 'asc', resetOn: [cluster, namespace] });
+  /* 每页档位 (old console's PAGESIZE_OPTION): the list is client-side, so the slice is here. */
+  const [page, setPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState(20);
   const [creating, setCreating] = React.useState(false);
   const [created, setCreated] = React.useState('');
   const createPermission = useStrategyPermission('create', cluster, namespace);
@@ -68,6 +74,10 @@ export function CanaryReleasesPage({ workspace, cluster, namespace }: CanaryRele
   }, [filtered, list.sortBy, list.order]);
   const listRefresh = useListRefresh('grayrelease', query);
 
+  const total = rows.length;
+  const pageCount = Math.max(1, Math.ceil(rows.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const pageRows = rows.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   const schema = React.useMemo<ListSchema<StrategySummary>>(
     () => ({
       title: t('grayRelease.title'),
@@ -175,7 +185,7 @@ export function CanaryReleasesPage({ workspace, cluster, namespace }: CanaryRele
         next: t('table.next'),
         selected: (count) => t('table.selectedCount', { count }),
       },
-      pagination: { page: 1, pageSize: Math.max(rows.length, 1), total: rows.length },
+      pagination: { page: currentPage, pageSize, pageSizeOptions: [...PAGE_SIZES], total },
     }),
     // `listRefresh.refresh.busy` reads `query.isFetching`; without it in the deps the schema keeps
     // the busy value from the first render, when the query was still fetching, and the refresh
@@ -207,10 +217,15 @@ export function CanaryReleasesPage({ workspace, cluster, namespace }: CanaryRele
         onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
           schema={schema}
           onRefresh={listRefresh.onRefresh}
-          rows={rows}
+          rows={pageRows}
           loading={query.isFetching}
           searchValue={list.keyword}
           onSearchChange={list.setKeyword}
+          onPageChange={setPage}
+          onPageSizeChange={(size: number) => {
+            setPageSize(size);
+            setPage(1);
+          }}
           onSortChange={(next: { key: string; order: SortOrder }) => {
             if (next) list.setSort(next);
           }}

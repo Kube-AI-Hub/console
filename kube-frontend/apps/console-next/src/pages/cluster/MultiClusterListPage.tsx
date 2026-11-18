@@ -26,6 +26,9 @@ import { UpdateKubeconfigDialog } from './UpdateKubeconfigDialog';
  * link target is the cluster's overview, which is where a reader goes next: "this
  * cluster is not ready" is answered by its version, modules and node count.
  */
+/** Page sizes the old console offered (`PAGESIZE_OPTION`): 10/20/50/100. */
+const PAGE_SIZES = [10, 20, 50, 100] as const;
+
 export interface MultiClusterListPageProps {}
 
 type SortKey = 'name' | 'createTime' | 'nodeCount';
@@ -35,6 +38,9 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
   const { multicluster, loading: configLoading } = useMulticluster();
   const queryClient = useQueryClient();
   const list = useResourceListState<SortKey>({ defaultSortBy: 'name' });
+  /* 每页档位 (old console's PAGESIZE_OPTION): the list is client-side, so the slice is here. */
+  const [page, setPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState(20);
   const [adding, setAdding] = React.useState(false);
   const [editing, setEditing] = React.useState<ClusterSummary | null>(null);
   const [removing, setRemoving] = React.useState<ClusterSummary | null>(null);
@@ -111,6 +117,10 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
     return [...hosts, ...members];
   }, [filtered, list.sortBy, list.order]);
 
+  const total = rows.length;
+  const pageCount = Math.max(1, Math.ceil(rows.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const pageRows = rows.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   const schema = React.useMemo<ListSchema<ClusterSummary>>(
     () => ({
       title: t('cluster.list.title'),
@@ -324,7 +334,7 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
         next: t('table.next'),
         selected: (count) => t('table.selectedCount', { count }),
       },
-      pagination: { page: 1, pageSize: Math.max(rows.length, 10), total: rows.length },
+      pagination: { page: currentPage, pageSize, pageSizeOptions: [...PAGE_SIZES], total },
     }),
     [list.sortBy, list.order, rows.length, t, writeBlocked],
   );
@@ -348,13 +358,18 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
         {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
         onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
         schema={schema}
-        rows={rows}
+        rows={pageRows}
         loading={state === 'loading'}
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}
         filters={{ type: typeFilter }}
         onFiltersChange={(next) => setTypeFilter(next.type ?? '')}
         onRefresh={() => void query.refetch()}
+        onPageChange={setPage}
+        onPageSizeChange={(size: number) => {
+          setPageSize(size);
+          setPage(1);
+        }}
         onSortChange={(next: { key: string; order: SortOrder }) => {
           if (next) list.setSort(next);
         }}

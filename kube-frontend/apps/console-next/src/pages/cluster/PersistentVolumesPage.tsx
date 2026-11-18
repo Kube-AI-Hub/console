@@ -38,6 +38,9 @@ const YamlDialog = React.lazy(() => import('@/components/resource/YamlDialog'));
  * Read from the core API rather than the kapis proxy: measured 24s against 63s for the
  * same list, and the page only needs the standard fields.
  */
+/** Page sizes the old console offered (`PAGESIZE_OPTION`): 10/20/50/100. */
+const PAGE_SIZES = [10, 20, 50, 100] as const;
+
 export interface PersistentVolumesPageProps {
   cluster: string;
 }
@@ -61,6 +64,9 @@ interface BatchResult {
 export function PersistentVolumesPage({ cluster }: PersistentVolumesPageProps): React.ReactElement {
   const t = useT();
   const list = useResourceListState<'name' | 'createTime'>({ defaultSortBy: 'name', defaultOrder: 'asc' });
+  /* 每页档位 (old console's PAGESIZE_OPTION): the list is client-side, so the slice is here. */
+  const [page, setPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState(20);
 
   const query = useQuery({
     queryKey: ['persistentvolumes'],
@@ -148,6 +154,10 @@ export function PersistentVolumesPage({ cluster }: PersistentVolumesPageProps): 
   const selectedRows = React.useMemo(() => rows.filter((row) => list.selected.includes(row.name)), [rows, list.selected]);
   const protectedCount = rows.filter((row) => UNDELETABLE.has(row.status)).length;
 
+  const total = rows.length;
+  const pageCount = Math.max(1, Math.ceil(rows.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const pageRows = rows.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   const schema = React.useMemo<ListSchema<PersistentVolumeSummary>>(
     () => ({
       title: t('cluster.persistentVolumes.title'),
@@ -264,7 +274,7 @@ export function PersistentVolumesPage({ cluster }: PersistentVolumesPageProps): 
         next: t('table.next'),
         selected: (count) => t('table.selectedCount', { count }),
       },
-      pagination: { page: 1, pageSize: Math.max(rows.length, 1), total: rows.length },
+      pagination: { page: currentPage, pageSize, pageSizeOptions: [...PAGE_SIZES], total },
     }),
     [cluster, list.selected, list.order, list.sortBy, query.isFetching, rows.length, t],
   );
@@ -294,7 +304,7 @@ export function PersistentVolumesPage({ cluster }: PersistentVolumesPageProps): 
         onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
         schema={schema}
         onRefresh={listRefresh.onRefresh}
-        rows={rows}
+        rows={pageRows}
         // The list takes ~24s on this cluster; showing the skeleton while a refetch is
         // in flight is what tells the reader the page is working.
         loading={query.isFetching}
@@ -302,6 +312,11 @@ export function PersistentVolumesPage({ cluster }: PersistentVolumesPageProps): 
         onSearchChange={list.setKeyword}
         selectedKeys={list.selected}
         onSelectionChange={list.setSelected}
+        onPageChange={setPage}
+        onPageSizeChange={(size: number) => {
+          setPageSize(size);
+          setPage(1);
+        }}
         onSortChange={(next: { key: string; order: SortOrder }) => {
           if (next) list.setSort(next);
         }}

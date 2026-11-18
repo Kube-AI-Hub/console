@@ -25,6 +25,9 @@ import { useListRefresh } from '@/components/resource/useListRefresh';
  * URL — so the page shows the exact path it read, which is also what a reader needs to
  * reproduce the query with kubectl.
  */
+/** Page sizes the old console offered (`PAGESIZE_OPTION`): 10/20/50/100. */
+const PAGE_SIZES = [10, 20, 50, 100] as const;
+
 export interface CustomResourceDetailPageProps {
   cluster: string;
   name: string;
@@ -33,6 +36,9 @@ export interface CustomResourceDetailPageProps {
 export function CustomResourceDetailPage({ cluster, name }: CustomResourceDetailPageProps): React.ReactElement {
   const t = useT();
   const list = useResourceListState<'name' | 'createTime'>({ defaultSortBy: 'name', resetOn: [cluster, name] });
+  /* 每页档位 (old console's PAGESIZE_OPTION): the list is client-side, so the slice is here. */
+  const [page, setPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState(20);
 
   const crd = useQuery({
     queryKey: ['custom-resource', cluster, name],
@@ -67,6 +73,10 @@ export function CustomResourceDetailPage({ cluster, name }: CustomResourceDetail
   const apiPath = crd.data ? `/apis/${crd.data.group}/${crd.data.readVersion}/${crd.data.plural}` : '';
   const listRefresh = useListRefresh('custom-resource', instances);
 
+  const total = rows.length;
+  const pageCount = Math.max(1, Math.ceil(rows.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const pageRows = rows.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   const schema = React.useMemo<ListSchema<CustomResourceInstance>>(
     () => ({
       title: t('cluster.customResources.instances'),
@@ -130,7 +140,7 @@ export function CustomResourceDetailPage({ cluster, name }: CustomResourceDetail
         next: t('table.next'),
         selected: (count) => t('table.selectedCount', { count }),
       },
-      pagination: { page: 1, pageSize: Math.max(rows.length, 10), total: rows.length },
+      pagination: { page: currentPage, pageSize, pageSizeOptions: [...PAGE_SIZES], total },
     }),
     [apiPath, instances.isFetching, list.sortBy, list.order, namespaced, rows.length, t],
   );
@@ -199,10 +209,15 @@ export function CustomResourceDetailPage({ cluster, name }: CustomResourceDetail
         onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
             schema={schema}
             onRefresh={listRefresh.onRefresh}
-            rows={rows}
+            rows={pageRows}
             loading={false}
             searchValue={list.keyword}
             onSearchChange={list.setKeyword}
+            onPageChange={setPage}
+            onPageSizeChange={(size: number) => {
+              setPageSize(size);
+              setPage(1);
+            }}
             onSortChange={(next: { key: string; order: SortOrder }) => {
               if (next) list.setSort(next);
             }}

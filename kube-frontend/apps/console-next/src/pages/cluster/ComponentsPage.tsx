@@ -24,6 +24,9 @@ import { useListRefresh } from '@/components/resource/useListRefresh';
  * The endpoint returns a bare array rather than the usual `{ items }` envelope — see
  * `componentsApi` — which is why this page does not use `resourceApi`.
  */
+/** Page sizes the old console offered (`PAGESIZE_OPTION`): 10/20/50/100. */
+const PAGE_SIZES = [10, 20, 50, 100] as const;
+
 export interface ComponentsPageProps {
   cluster: string;
   initialType?: string;
@@ -36,6 +39,9 @@ export function ComponentsPage({ cluster: _cluster, initialType = '' }: Componen
   // Default to health so a broken component is not buried among 49 rows; the sort
   // control then works like everywhere else.
   const list = useResourceListState<'name' | 'createTime' | 'health'>({ defaultSortBy: 'health', defaultOrder: 'asc' });
+  /* 每页档位 (old console's PAGESIZE_OPTION): the list is client-side, so the slice is here. */
+  const [page, setPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState(20);
 
   const query = useQuery({
     queryKey: ['components', _cluster],
@@ -67,6 +73,9 @@ export function ComponentsPage({ cluster: _cluster, initialType = '' }: Componen
   const total = rows.length;
   const listRefresh = useListRefresh('components', query);
 
+  const pageCount = Math.max(1, Math.ceil(rows.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const pageRows = rows.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   const schema = React.useMemo<ListSchema<ComponentSummary>>(
     () => ({
       title: t('cluster.components.title'),
@@ -135,7 +144,7 @@ export function ComponentsPage({ cluster: _cluster, initialType = '' }: Componen
         next: t('table.next'),
         selected: (count) => t('table.selectedCount', { count }),
       },
-      pagination: { page: 1, pageSize: Math.max(total, 1), total },
+      pagination: { page: currentPage, pageSize, pageSizeOptions: [...PAGE_SIZES], total },
     }),
     [list.sortBy, list.order, query.isFetching, t, total],
   );
@@ -161,10 +170,15 @@ export function ComponentsPage({ cluster: _cluster, initialType = '' }: Componen
         onRefresh={listRefresh.onRefresh}
         filters={{ type: group?.key ?? '' }} onFiltersChange={(next) => setType(next.type ?? '')}
         schema={schema}
-        rows={rows}
+        rows={pageRows}
         loading={state === 'loading'}
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}
+        onPageChange={setPage}
+        onPageSizeChange={(size: number) => {
+          setPageSize(size);
+          setPage(1);
+        }}
         onSortChange={(next: { key: string; order: SortOrder }) => {
           if (next) list.setSort(next);
         }}

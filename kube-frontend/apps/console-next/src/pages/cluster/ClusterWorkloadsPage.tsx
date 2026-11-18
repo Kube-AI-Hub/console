@@ -9,6 +9,7 @@ import { useResourceListState } from '@/components/resource/useResourceListState
 import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
+import { statusLabel } from '@/lib/status';
 
 /**
  * 集群级工作负载（跨项目）.
@@ -115,7 +116,9 @@ export function ClusterWorkloadsPage({ cluster, kind }: ClusterWorkloadsPageProp
           width: 130,
           render: (row) => (
             <Badge tone={row.status === 'running' ? 'success' : row.status === 'failed' ? 'danger' : 'warning'}>
-              {row.status || '-'}
+              {/* Shared label table: the same state must not read "running" here and 「运行中」
+                  on the project page (guide pitfall 52). */}
+              {row.status ? statusLabel(t as never, row.status) : '-'}
             </Badge>
           ),
         },

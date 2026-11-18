@@ -22,6 +22,9 @@ import { useListRefresh } from '@/components/resource/useListRefresh';
  * proxy has been observed to lag on newly-created objects elsewhere, and "what does
  * this cluster serve" is exactly the question a stale answer makes useless.
  */
+/** Page sizes the old console offered (`PAGESIZE_OPTION`): 10/20/50/100. */
+const PAGE_SIZES = [10, 20, 50, 100] as const;
+
 export interface CustomResourcesPageProps {
   cluster: string;
 }
@@ -31,6 +34,9 @@ type SortKey = 'kind' | 'name' | 'scope' | 'createTime';
 export function CustomResourcesPage({ cluster }: CustomResourcesPageProps): React.ReactElement {
   const t = useT();
   const list = useResourceListState<SortKey>({ defaultSortBy: 'kind', resetOn: [cluster] });
+  /* 每页档位 (old console's PAGESIZE_OPTION): the list is client-side, so the slice is here. */
+  const [page, setPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState(20);
 
   const query = useQuery({
     queryKey: ['custom-resources', cluster],
@@ -61,6 +67,10 @@ export function CustomResourcesPage({ cluster }: CustomResourcesPageProps): Reac
   }, [filtered, list.sortBy, list.order]);
   const listRefresh = useListRefresh('custom-resources', query);
 
+  const total = rows.length;
+  const pageCount = Math.max(1, Math.ceil(rows.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const pageRows = rows.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   const schema = React.useMemo<ListSchema<CustomResourceSummary>>(
     () => ({
       title: t('cluster.customResources.title'),
@@ -160,7 +170,7 @@ export function CustomResourcesPage({ cluster }: CustomResourcesPageProps): Reac
         next: t('table.next'),
         selected: (count) => t('table.selectedCount', { count }),
       },
-      pagination: { page: 1, pageSize: Math.max(rows.length, 10), total: rows.length },
+      pagination: { page: currentPage, pageSize, pageSizeOptions: [...PAGE_SIZES], total },
     }),
     [list.sortBy, list.order, query.isFetching, rows.length, t],
   );
@@ -185,10 +195,15 @@ export function CustomResourcesPage({ cluster }: CustomResourcesPageProps): Reac
         onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
         schema={schema}
         onRefresh={listRefresh.onRefresh}
-        rows={rows}
+        rows={pageRows}
         loading={state === 'loading'}
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}
+        onPageChange={setPage}
+        onPageSizeChange={(size: number) => {
+          setPageSize(size);
+          setPage(1);
+        }}
         onSortChange={(next: { key: string; order: SortOrder }) => {
           if (next) list.setSort(next);
         }}

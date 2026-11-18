@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { configMapsApi, type ConfigMapSummary } from '@kube-ai-hub/api-client';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { configMapsApi, type ConfigMapDetail, type ConfigMapSummary } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
 import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
@@ -11,6 +11,12 @@ import { useResourceListState } from '@/components/resource/useResourceListState
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
 import { clusterProjectRowId, projectObjectUrl, useClusterProjectIndex } from './useClusterProjectIndex';
+import { toYaml } from '@/components/resource/yaml';
+import { ConfigMapDeleteDialog } from '@/pages/configmaps/ConfigMapDeleteDialog';
+import { ConfigMapEditInfoDialog, ConfigMapEditSettingsDialog } from '@/pages/configmaps/ConfigMapEditDialogs';
+import { DialogSuspense } from '@/components/resource/DialogSuspense';
+import { LoadingDialog } from '@/components/resource/LoadingDialog';
+import { MutationAlert } from '@/components/resource/ResourceErrorPanel';
 
 /**
  * 集群级配置字典（跨项目）.
@@ -33,8 +39,50 @@ const PAGE_SIZES = [10, 20, 50, 100] as const;
 const PAGE_SIZE = 20;
 const AI_ID = 'cluster-configmaps';
 
+const ConfigMapYamlDialog = React.lazy(() => import('@/pages/configmaps/ConfigMapYamlDialog'));
+
+type Dialog =
+  | { kind: 'none' }
+  | { kind: 'loading'; target: 'editInfo' | 'editSettings' | 'editYaml'; subject: string }
+  | { kind: 'editInfo'; detail: ConfigMapDetail }
+  | { kind: 'editSettings'; detail: ConfigMapDetail }
+  | { kind: 'editYaml'; detail: ConfigMapDetail }
+  | { kind: 'delete'; row: ConfigMapSummary };
+
 export function ClusterConfigMapsPage({ cluster }: ClusterConfigMapsPageProps): React.ReactElement {
   const t = useT();
+  const queryClient = useQueryClient();
+  const [dialog, setDialog] = React.useState<Dialog>({ kind: 'none' });
+  const invalidate = React.useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: [AI_ID] });
+  }, [queryClient]);
+  const patch = useMutation({
+    mutationFn: (input: { namespace: string; name: string; body: unknown }) =>
+      configMapsApi(apiClient).patch({ cluster, namespace: input.namespace, name: input.name, body: input.body }),
+    onSuccess: invalidate,
+  });
+  const update = useMutation({
+    mutationFn: (input: { namespace: string; body: Record<string, unknown> }) =>
+      configMapsApi(apiClient).update({ cluster, namespace: input.namespace, body: input.body as never }),
+    onSuccess: invalidate,
+  });
+  const remove = useMutation({
+    mutationFn: (input: { namespace: string; names: string[] }) =>
+      configMapsApi(apiClient).remove({ cluster, namespace: input.namespace, names: input.names }),
+    onSuccess: invalidate,
+  });
+  const openWithDetail = React.useCallback(
+    async (target: 'editInfo' | 'editSettings' | 'editYaml', row: ConfigMapSummary) => {
+      setDialog({ kind: 'loading', target, subject: row.name });
+      try {
+        const detail = await configMapsApi(apiClient).get({ cluster, namespace: row.namespace, name: row.name });
+        setDialog({ kind: target, detail });
+      } catch {
+        setDialog({ kind: 'none' });
+      }
+    },
+    [cluster],
+  );
   const list = useResourceListState<'name' | 'createTime'>({ defaultSortBy: 'createTime', defaultOrder: 'desc', defaultPageSize: PAGE_SIZE, resetOn: [cluster] });
   const workspaceOf = useClusterProjectIndex(cluster);
 
@@ -124,6 +172,12 @@ export function ClusterConfigMapsPage({ cluster }: ClusterConfigMapsPageProps): 
           render: (row) => <span className="tabular-nums text-ai-fg-muted">{formatTimestamp(row.createdAt)}</span>,
         },
       ],
+      rowActions: [
+        { key: 'editInfo', label: t('configmaps.action.editInfo'), visible: (row) => !row.federated },
+        { key: 'editYaml', label: t('configmaps.action.editYaml'), visible: (row) => !row.federated },
+        { key: 'editSettings', label: t('configmaps.action.editSettings'), visible: (row) => !row.federated },
+        { key: 'delete', label: t('common.delete'), tone: 'danger' as const, visible: (row) => !row.federated },
+      ],
       empty: { title: t('cluster.workloads.emptyTitle'), description: t('cluster.workloads.emptyDescription') },
       labels: {
         ...listRefresh.emptyLabels,
@@ -166,7 +220,59 @@ export function ClusterConfigMapsPage({ cluster }: ClusterConfigMapsPageProps): 
         onSortChange={(next: { key: string; order: SortOrder }) => {
           if (next) list.setSort(next);
         }}
+        onAction={(action, row) => {
+          if (!row) return;
+          if (action === 'delete') return setDialog({ kind: 'delete', row });
+          if (action === 'editInfo' || action === 'editSettings' || action === 'editYaml') void openWithDetail(action, row);
+        }}
       />
+
+      {dialog.kind === 'loading' ? (
+        <LoadingDialog open subject={dialog.subject} size="xl"
+          title={dialog.target === 'editInfo' ? t('configmaps.action.editInfo')
+            : dialog.target === 'editYaml' ? t('configmaps.action.editYaml') : t('configmaps.action.editSettings')} />
+      ) : null}
+
+      {dialog.kind === 'delete' ? (
+        <ConfigMapDeleteDialog open names={[dialog.row.name]} pending={remove.isPending}
+          onOpenChange={(open) => !open && setDialog({ kind: 'none' })}
+          onConfirm={async () => {
+            await remove.mutateAsync({ namespace: dialog.row.namespace, names: [dialog.row.name] });
+            setDialog({ kind: 'none' });
+          }} />
+      ) : null}
+
+      {dialog.kind === 'editInfo' ? (
+        <ConfigMapEditInfoDialog open detail={dialog.detail} pending={patch.isPending}
+          onOpenChange={(open) => !open && setDialog({ kind: 'none' })}
+          onSubmit={async (annotations) => {
+            await patch.mutateAsync({ namespace: dialog.detail.namespace, name: dialog.detail.name, body: { metadata: { annotations } } });
+            setDialog({ kind: 'none' });
+          }} />
+      ) : null}
+
+      {dialog.kind === 'editSettings' ? (
+        <ConfigMapEditSettingsDialog open detail={dialog.detail} pending={update.isPending}
+          onOpenChange={(open) => !open && setDialog({ kind: 'none' })}
+          onSubmit={async (data) => {
+            await update.mutateAsync({ namespace: dialog.detail.namespace, body: { ...dialog.detail.raw, data } });
+            setDialog({ kind: 'none' });
+          }} />
+      ) : null}
+
+      {dialog.kind === 'editYaml' ? (
+        <DialogSuspense>
+          <ConfigMapYamlDialog open initialYaml={toYaml(dialog.detail.raw)} lockName={dialog.detail.name}
+            title={t('configmaps.action.editYaml')} submitLabel={t('common.confirm')} pending={update.isPending}
+            onOpenChange={(open) => !open && setDialog({ kind: 'none' })}
+            onSubmit={async (object) => {
+              await update.mutateAsync({ namespace: dialog.detail.namespace, body: object });
+              setDialog({ kind: 'none' });
+            }} />
+        </DialogSuspense>
+      ) : null}
+
+      <MutationAlert error={patch.error ?? update.error ?? remove.error} />
     </AiSurface>
   );
 }

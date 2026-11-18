@@ -10,6 +10,7 @@ import { useResourceListState } from '@/components/resource/useResourceListState
 import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
+import { statusLabel } from '@/lib/status';
 
 /**
  * 集群级容器组.
@@ -150,7 +151,7 @@ export function ClusterPodsPage({ cluster }: ClusterPodsPageProps): React.ReactE
           render: (row) => (
             <span className="flex min-w-0 flex-col gap-0.5">
               <Badge tone={row.status === 'running' ? 'success' : row.status === 'failed' ? 'danger' : 'warning'}>
-                {row.status || '-'}
+                {row.status ? statusLabel(t as never, row.status) : '-'}
               </Badge>
               {row.statusReason ? (
                 <span className="truncate text-[11px] text-ai-fg-muted" data-ai-id={`cluster-pods:reason:${row.name}`} title={row.statusReason}>
