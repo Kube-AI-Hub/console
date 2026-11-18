@@ -287,16 +287,37 @@ pytest 两条判定约 40 秒；不用等实现就绪才动笔。
 现有组件仅组合时无需新增 Storybook API 示例；新增/扩展公共组件时补故事和组件测试，
 覆盖声明支持的主题、键盘、加载/空/错误态及既有消费者回归。
 
-### 7.2 起本地静态站
+### 7.2 起本地开发环境
 
 新前端**没有自己的服务端**：构建产物由 ks-console 托管，接口由 ks-console 直连 ks-apiserver。
-所以本地只需要一个静态站，其余请求原样打到已部署的控制台：
+所以本地只需要一个静态站，其余请求原样打到已部署的控制台。两种模式，按要不要改代码选：
+
+| 模式 | 命令 | 端口 | 热更新 | 用途 |
+| --- | --- | --- | --- | --- |
+| **Vite dev** | `pnpm dev` | 5174 | 有 | 写代码：改一行刷新即可，`routeTree.gen.ts` 自动重建 |
+| **静态站** | `./scripts/dev-mlu370.sh start` | 5178 | 无 | 验收：跑的是真实构建产物，与部署同一条路径 |
+
+两者都走 `KA_BACKEND`，都**原样转发** `/kube-frontend/{api,kapis,apis}`（含前缀）。
 
 ```bash
 cd console/kube-frontend
+
+# 写代码
+pnpm dev                        # → http://localhost:5174/kube-frontend/clusters
+
+# 验收（先构建，再起静态站）
+pnpm --filter @kube-ai-hub/console-next build
 ./scripts/dev-mlu370.sh start   # 静态站 + 后端探测
 ./scripts/dev-mlu370.sh status
+./scripts/dev-mlu370.sh stop
 ```
+
+**Vite dev 用 `localhost`，不要用 `127.0.0.1`。** 它默认只监听回环的 IPv6（`[::1]:5174`），
+`http://127.0.0.1:5174` 会直接连不上（`curl` 报 000、浏览器「无法访问」），而服务其实是好的。
+要两者都能访问就加 `--host 127.0.0.1` 或 `--host 0.0.0.0`。静态站没这个问题——它显式绑 `127.0.0.1`。
+
+**静态站必须先有 `dist`**：`dev-mlu370.sh start` 在缺 `apps/console-next/dist/index.html` 时直接报错退出，
+不会替你构建。改了共享包（`packages/ai-kit`、`packages/api-client`）要重新 `build`，否则跑的是旧产物。
 
 **一套脚本可以指任何环境**：`KA_BACKEND` 决定后端（默认 `https://ka.watering.ai`），
 不必为一个环境停掉另一个：
@@ -306,16 +327,27 @@ cd console/kube-frontend
 | mlu370 | `https://ka.watering.ai`（默认，实测 0.24s 可达） |
 | B200 | `https://console-dev.brightaitoken.ai` |
 
+```bash
+KA_BACKEND=https://console-dev.brightaitoken.ai WEB_PORT=5179 ./scripts/dev-mlu370.sh start
+KA_BACKEND=https://console-dev.brightaitoken.ai pnpm dev
+```
+
 选哪个要先想清楚在验证什么（差异清单见 `环境/` 下各环境文档）。两个环境都有
 `x-check-exist`（ks-console 的中间件）与 `/oauth/token` 的密码解密分支，差异比之前小。
 
 - 路径**原样转发**（含 `/kube-frontend` 前缀）：前缀分流正是部署端在做的判断，本地重写会把那里的错误藏起来。
   `vite.config.ts` 与 `dev-static-server.mjs` 都对 `/kube-frontend/{api,kapis,apis}` 转发到 `KA_BACKEND`；
   只配 `/api` 时 kapis 读落到 SPA 兜底、页面报「资源不存在」。
-- 热更新用于开发；固定产物用 `node scripts/dev-static-server.mjs <dist> <端口> <KA_BACKEND>`
-  起静态站，把 `KA_APP_URL` 指向它即可跑截图与 E2E，不必先部署。
 - 改代理后重启静态站；共享包先重新构建，静态站先重建 dist。验收时记录实际构建与
   后端版本，不能在并行工作替换产物时复用旧结果。开发调试可用热更新，最终截图与回归使用同一批固定产物。
+- 静态站的 WebSocket 升级单独走 `server.on('upgrade')`（容器终端）：`/kapis` 下的 exec 握手
+  需要字节级透传，HTTP 代理带不动。终端连不上时先确认后端可达，而不是先怀疑浏览器。
+- **端口冲突会直接失败**：`vite.config.ts` 设了 `strictPort`，5174 被占就报错退出，不会静默换到 5175。
+  这是故意的——两个实例同时写 `routeTree.gen.ts` 会互相触发重建，页面每秒刷新好几次。
+
+**登录**：浏览器打开后走正常登录页。mlu370 的账号见 `环境/mlu370环境.md`；
+自动化里用 `POST /kube-frontend/kapis/oauth.kubesphere.io/v1alpha1/login` 换 token 写入
+`localStorage['kah_token']` 更快。
 
 ### 7.3 登录
 
