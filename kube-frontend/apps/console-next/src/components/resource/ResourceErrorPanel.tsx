@@ -42,7 +42,17 @@ function upstreamReason(error: ApiError): string | undefined {
 }
 
 export function errorMessage(t: ReturnType<typeof useT>, error: unknown): string {
-  if (!(error instanceof ApiError)) return t('error.unknown');
+  /*
+   * A non-ApiError still usually says something: `JSON.parse` throws a SyntaxError whose
+   * message names the position, and a thrown string carries the server's sentence. Only
+   * a value with nothing readable falls back to the localized "unknown error" — replacing
+   * every one of them with it is how a 200-with-a-parsing-bug looked like "unknown error"
+   * with no way to tell what happened.
+   */
+  if (!(error instanceof ApiError)) {
+    const message = error instanceof Error ? error.message : typeof error === 'string' ? error : '';
+    return message.trim() || t('error.unknown');
+  }
   if (error.isPermission) return t('error.unauthorized');
   if (error.isNotFound) return t('error.notFound');
   if (error.retryable) return upstreamReason(error) ?? t('error.network');

@@ -57,6 +57,26 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_OVERVIEW_11(cluster_overview_pag
 
         # 序号来自列表样式，不写进文案：文案里不应出现「1.」这类前缀
         assert not texts[0].lstrip().startswith("1."), texts[0]
+
+        # The manifest itself, not just the step text. The endpoint answers YAML, and
+        # the client used to parse it as JSON: the request returned 200 while the page
+        # showed "unknown error" and no document at all. Asserting only the sentence
+        # left that failure invisible.
+        manifest = ui.page.locator('[data-ai-id="overview:agent-manifest"]')
+        expect(manifest).to_be_visible()
+        body = manifest.inner_text()
+        assert body.lstrip().startswith("---") or "apiVersion:" in body, body[:80]
+        assert "kind: Deployment" in body, body[:200]
+        expect(ui.page.locator('[data-ai-id="overview:agent-unavailable"]')).to_have_count(0)
+        expect(ui.page.locator('[data-ai-id="overview:agent-copy"]')).to_be_visible()
+
+        # 三步的文字起点一致：块级子元素会把序号挤开，差 13px 就看得出来
+        starts = [steps.nth(i).evaluate("""element => {
+            const box = element.getBoundingClientRect();
+            const first = element.firstElementChild.getBoundingClientRect();
+            return Math.round(first.x - box.x);
+        }""") for i in range(3)]
+        assert max(starts) - min(starts) < 2, f"步骤文字起点不一致: {starts}"
     else:
         expect(steps).to_have_count(0)
 

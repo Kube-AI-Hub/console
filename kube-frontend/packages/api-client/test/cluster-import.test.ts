@@ -25,6 +25,7 @@ interface Call {
   method?: string;
   body?: unknown;
   contentType?: string;
+  responseType?: string;
 }
 
 function recordingClient(response: unknown = {}): {
@@ -41,6 +42,7 @@ function recordingClient(response: unknown = {}): {
           ...(init?.method ? { method: init.method } : {}),
           ...(init?.body ? { body: init.body } : {}),
           ...(init?.contentType ? { contentType: init.contentType } : {}),
+          ...(init?.responseType ? { responseType: init.responseType } : {}),
         });
         return response as T;
       },
@@ -231,6 +233,18 @@ describe('clusterAgentApi', () => {
   it('returns the YAML document as text', async () => {
     const { client } = recordingClient('apiVersion: apps/v1\nkind: Deployment\n');
     await expect(clusterAgentApi(client).deployment({ cluster: 'member' })).resolves.toContain('kind: Deployment');
+  });
+
+  /*
+   * The endpoint answers with YAML, and the client parses anything that is not marked
+   * `responseType: 'text'` as JSON. That made `JSON.parse` throw a SyntaxError on the
+   * leading `---`, so the request returned 200 while the page showed "unknown error"
+   * and no manifest at all.
+   */
+  it('asks for the manifest as text so the client does not JSON.parse it', async () => {
+    const { client, calls } = recordingClient('---\nkind: Deployment\n');
+    await clusterAgentApi(client).deployment({ cluster: 'member' });
+    expect(calls[0].responseType).toBe('text');
   });
 
   it('stringifies an object response instead of rendering [object Object]', async () => {

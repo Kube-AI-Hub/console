@@ -251,12 +251,12 @@ function WaitingForCluster({ cluster, detail, refresh }: {
            */
           <ol className="flex list-decimal flex-col gap-2 pl-6 marker:font-medium marker:text-ai-fg-muted" data-ai-id="overview:agent-steps">
             <li className="rounded-ai-md border border-ai-line bg-ai-surface-1 p-3 text-sm text-ai-fg-secondary">
-              {step('cluster.overview.agentStep1', 'cmd', 'vi agent.yaml')}
+              <span className="block">{step('cluster.overview.agentStep1', 'cmd', 'vi agent.yaml')}</span>
             </li>
             <li className="rounded-ai-md border border-ai-line bg-ai-surface-1 p-3" data-ai-id="overview:agent-manifest-step">
-              <p className="text-sm text-ai-fg-secondary">
+              <span className="block text-sm text-ai-fg-secondary">
                 {step('cluster.overview.agentStep2', 'file', 'agent.yaml')}
-              </p>
+              </span>
               {query.isError ? (
                 <div className="mt-2 flex flex-col gap-1" role="alert" data-ai-id="overview:agent-unavailable">
                   <p className="text-xs text-ai-danger">{t('cluster.add.agentUnavailable')}</p>
@@ -265,27 +265,34 @@ function WaitingForCluster({ cluster, detail, refresh }: {
               ) : null}
               {query.data ? (
                 <div className="mt-2 flex flex-col gap-2">
+                  {/*
+                   * The manifest is YAML, so it is shown in the shared editor rather than a
+                   * `<pre>`: syntax highlighting and line numbers make a 30-line document
+                   * readable, and the same component is what the add-cluster dialog and the
+                   * YAML edit dialogs use, so it looks like the rest of the product.
+                   *
+                   * Lazy, like those dialogs: CodeMirror is ~188 KB gzip and a reader who
+                   * never sees a waiting cluster should not download it.
+                   */}
+                  <React.Suspense fallback={<div className="h-[28rem] animate-pulse rounded-ai-md bg-ai-surface-2" />}>
+                    <ManifestEditor value={query.data} ariaLabel={t('cluster.add.agentTitle')} />
+                  </React.Suspense>
+                  {/* Copy sits under the document: the reader looks first, then copies. */}
                   <div className="flex justify-end">
                     <Button variant="secondary" size="sm" onClick={() => void copy()} {...actionProps('overview:agent-copy')}>
                       {copied ? t('cluster.add.agentCopied') : t('cluster.add.agentCopy')}
                     </Button>
                   </div>
-                  <pre
-                    className="max-h-80 overflow-auto rounded-ai-md border border-ai-line bg-ai-surface p-3 font-mono text-[11px] text-ai-fg-secondary"
-                    data-ai-id="overview:agent-manifest"
-                  >
-                    {query.data}
-                  </pre>
                 </div>
               ) : query.isPending ? (
                 <p className="mt-2 text-xs text-ai-fg-muted">{t('common.loading')}</p>
               ) : null}
             </li>
             <li className="rounded-ai-md border border-ai-line bg-ai-surface-1 p-3" data-ai-id="overview:agent-apply-step">
-              <p className="text-sm text-ai-fg-secondary">
+              <span className="block text-sm text-ai-fg-secondary">
                 {step('cluster.overview.agentStep3', 'cmd', 'kubectl create -f agent.yaml')}
-              </p>
-              <p className="mt-1 text-xs text-ai-fg-muted">{t('cluster.overview.agentStep3Hint')}</p>
+              </span>
+              <span className="mt-1 block text-xs text-ai-fg-muted">{t('cluster.overview.agentStep3Hint')}</span>
             </li>
           </ol>
         ) : null}
@@ -306,6 +313,28 @@ function WaitingForCluster({ cluster, detail, refresh }: {
     </Panel>
   );
 }
+
+/**
+ * The read-only YAML view for the join manifest.
+ *
+ * Kept as its own lazy component for the same reason `AddClusterDialog` does it: the
+ * editor pulls CodeMirror in, and the overview is a page people open constantly while
+ * only a not-ready proxy cluster needs this. Importing it at module scope would put
+ * ~188 KB gzip into the overview chunk for everyone.
+ *
+ * `height` is generous rather than tight: the manifest is ~30 lines, and a box that shows
+ * a third of it forces scrolling to check a single field. A fixed height still keeps the
+ * three-step list from jumping as the document loads.
+ */
+const ManifestEditor = React.lazy(() =>
+  import('@kube-ai-hub/ui/editor').then((module) => ({
+    default: ({ value, ariaLabel }: { value: string; ariaLabel: string }) => (
+      <div data-ai-id="overview:agent-manifest">
+        <module.YamlEditor value={value} readOnly height="28rem" ariaLabel={ariaLabel} />
+      </div>
+    ),
+  })),
+);
 
 function BasicInfoPanel({ detail }: { detail: ClusterDetail }): React.ReactElement {
   const t = useT();

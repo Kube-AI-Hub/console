@@ -60,6 +60,7 @@
 - 等待面板可见，页头控件仍可用；`overview:usage-*`、`overview:node-row`、`overview:ranking`、`overview:basic`、`overview:kubernetes-status`、`overview:components`、`overview:shortcuts` 全部不存在
 - 代理集群渲染 `overview:agent-steps` 且恰好三项，序号由列表样式生成而非写在文案里
 - 三步文案分别包含 `vi agent.yaml`、`agent.yaml`、`kubectl create -f agent.yaml`，各出现一次
+- 清单用共享 `YamlEditor`（CodeMirror）只读展示：有行号与语法高亮，可滚动查看完整文档，复制按钮在文档下方
 - `connectionType=direct` 的未就绪集群不渲染 `overview:agent-steps`
 - 控制器有 readyMessage 时显示原文，无则不显示；「本页会自动刷新」只出现一次
 - 集群就绪后完整概览出现，等待面板消失

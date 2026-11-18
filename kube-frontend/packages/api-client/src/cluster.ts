@@ -1232,9 +1232,15 @@ export function platformConfigApi(client: Client) {
 export function clusterAgentApi(client: Client) {
   return {
     async deployment(params: { cluster: string; signal?: AbortSignal }): Promise<string> {
+      /*
+       * `responseType: 'text'`: the endpoint answers with a YAML manifest, not JSON.
+       * Without it the client falls through to `JSON.parse`, which throws a
+       * SyntaxError on the first `---`; React Query then reports a query error and
+       * the page shows "unknown error" while the request itself returned 200.
+       */
       const body = await client.request<string | Record<string, unknown>>(
         `/kapis/cluster.kubesphere.io/v1alpha1/clusters/${encodeURIComponent(params.cluster)}/agent/deployment`,
-        params.signal ? { signal: params.signal } : {},
+        { responseType: 'text', ...(params.signal ? { signal: params.signal } : {}) },
       );
       return typeof body === 'string' ? body : JSON.stringify(body, null, 2);
     },
