@@ -107,7 +107,31 @@ http://localhost:3000/kube-frontend/kapis/resources.kubesphere.io/v1alpha3/names
 
 所以它不是「挂起」，是**重构后没跟上的断言**。属并行线批次（`5ba075d9c`、`698fb0bc6`）。
 
-## 第 2 条可能不是测试的问题
+## 第 2 条：我上一轮的结论是错的（输出被截断）
+
+上一轮说「页面没发排序参数」——**错**。当时打印用了 `.slice(0, 120)`，而完整 URL 是 121 字符，
+`&sortBy=createTime&ascending=false` 正好被切掉。补打完整 URL：
+
+```
+…/configmaps?page=1&limit=10&sortBy=createTime&ascending=false
+```
+
+排序参数**一直都有**。真正的失败原因只有一个：用例里的 `KAPIS` 常量少了 `/kube-frontend` 前缀，
+`pathname` 永远对不上，`find` 返回 undefined。修掉常量后该用例通过。
+
+## 第 3 条：它抓到的是我的 bug
+
+`shows the empty state when nothing matches` 期望「暂无配置字典」，实际显示「没有匹配的结果」。
+查下来是**我给 `ResourceList` 加的判断有误**：
+
+```ts
+const narrowed = Boolean(searchValue) || Object.values(filters ?? {}).some(v => v !== '' && v !== undefined);
+```
+
+很多页面的 `filters` 放的是**作用域**（路由里的项目），不是读者收窄。项目 default 下一个 ConfigMap 都没有时，
+它被误判成「收窄了」。已改为只按搜索框判断，并加 `schema.narrowed` 供按筛选收窄的页面声明。
+
+## 附录：当时的代码链
 
 顺着代码看：`controller.ts` 里 `sortBy` 的初始值是 **`'createTime'`**（`useState<ConfigMapSortKey>('createTime')`），
 `useConfigMaps` 原样透传，`configmaps.ts` 的 `list` 也确实会写 `sortBy`/`ascending`：
