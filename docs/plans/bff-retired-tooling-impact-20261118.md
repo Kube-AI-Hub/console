@@ -44,6 +44,30 @@ BFF 退役后这三条都要重新确认：
 2026-11-18 实测（未升级的部署）：两条都是 **404**（经 5182 代理）/ **403**（直连隧道）。
 所以部署升级后第一件事就是跑 `--probes`：这两条变绿，才值得花十五分钟跑整轮基线。
 
+## 2026-11-18 12:25：`--bff -` 与 preflight 在真实新架构上验过
+
+在 mlu370（已是新架构）上跑：
+
+```bash
+python3 tools/multicluster_sweep.py --env-file … --app https://ka.watering.ai --bff - --probes --clusters host
+```
+
+```
+preflight: login attempt 1/3 failed (HTTPError)
+preflight: login attempt 2/3 failed (HTTPError)
+preflight: login attempt 3/3 failed (HTTPError)
+NOT RUN: the environment is not usable (see the preflight lines above)
+exit=2
+```
+
+三件事因此得到验证：
+
+1. `--bff -` 现在在 **Python 侧**也归一化成 app origin（之前只有 shell wrapper 处理，直接调工具会拼出 `-` 开头的非法 URL）；
+2. preflight 的会话探针按「是否同源」选 `/oauth/userinfo` 还是 `/api/session/me`；
+3. 凭据不对时**退出码 2、结论是环境不可用**，不会被记成页面缺陷。
+
+工具单测 36 条仍全过。
+
 ## 仍待验证
 
 新路要等部署升级后才能在真实环境验证。

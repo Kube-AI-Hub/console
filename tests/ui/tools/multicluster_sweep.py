@@ -854,9 +854,13 @@ def preflight(app: str, bff: str, creds: tuple[str, str], attempts: int = 3) -> 
     """
     import time
 
-    status, _ = _call(bff, '', 'GET', '/api/session/me' if '/oauth/userinfo' not in bff else '/oauth/userinfo')
+    # Same origin means the app and the API are one process (post-refactor); its session endpoint
+    # is the OIDC one. A separate BFF still answers the old route.
+    same_origin = bff.rstrip('/') == app.rstrip('/')
+    probe = '/oauth/userinfo' if same_origin else '/api/session/me'
+    status, _ = _call(bff, '', 'GET', probe)
     if status not in (200, 401):
-        print(f'preflight: BFF {bff} answered {status} on /api/session/me')
+        print(f'preflight: {bff} answered {status} on {probe}')
         return None
 
     try:
@@ -1348,6 +1352,9 @@ def main() -> int:
     parser.add_argument('--progress', action='store_true', help='print one line per page while sweeping')
     parser.add_argument('--locale', default='en', help='locale used by --locale-scan (default en)')
     args = parser.parse_args()
+    # `-` (or empty) means "no separate BFF": the app origin serves the API too.
+    if args.bff in ('', '-', None):
+        args.bff = args.app
 
     global BUDGET_TIMER
     BUDGET_TIMER = with_budget(args.budget)
