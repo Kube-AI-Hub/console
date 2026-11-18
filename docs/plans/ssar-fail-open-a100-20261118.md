@@ -14,6 +14,18 @@ POST /apis/authorization.k8s.io/v1/selfsubjectaccessreviews
 
 **同一个账号读不了 clusterrolebindings，却被告知可以删除节点、创建集群角色。**
 
+## 关键区分：**拦截是对的，只有预检在说谎**
+
+同一个非管理员账号，真正去读：
+
+```
+GET …/namespaces/default/configmaps?limit=1     -> 403  Status: configmaps.resources.kubesphere.io is forbidden…
+GET …/namespaces/kube-system/configmaps?limit=1 -> 403  同上
+```
+
+**RBAC 在读写路径上是生效的**——不会真的让人删节点。出问题的只有「事前询问能不能做」这一步。
+所以它不是越权漏洞，而是**界面门控失效**：按钮显示出来，点下去才被拒绝。
+
 ## 这正是已登记的那个后端问题
 
 [权限检查后端记录](permission-review-backend-20261117.md) 写过：`/apis` 的 SSAR **以 ks 的 service account 求值**，
