@@ -1,5 +1,7 @@
 import * as React from 'react';
 import { cn } from '../utils/cn';
+import { Tooltip } from './Feedback';
+import { Icon } from './Icon/Icon';
 
 /**
  * One label/value pair in a read-only definition list.
@@ -14,6 +16,16 @@ export interface DescriptionItem {
   value: React.ReactNode;
   /** Small muted line under the value. */
   hint?: React.ReactNode;
+  /**
+   * Explanation of what the field means, shown from an info control beside the label.
+   *
+   * Different from `hint`, which annotates the value ("2 of 3 ready"). This one
+   * explains the field itself — where the value comes from, what format it follows —
+   * and belongs on the label because that is what a reader questions.
+   */
+  labelHint?: React.ReactNode;
+  /** Accessible name for the label's info control when `labelHint` is not a string. */
+  labelHintLabel?: string;
   /** data-ai-id placed on the value (matches the old DefinitionRow's aiId). */
   aiId?: string;
 }
@@ -27,13 +39,39 @@ export interface DescriptionItemProps extends DescriptionItem {}
  * printed it in the primary colour, others in the secondary one); one
  * implementation keeps the same kind of fact looking the same everywhere.
  */
-export function DescriptionItem({ label, value, hint, aiId }: DescriptionItemProps): React.ReactElement {
+export function DescriptionItem({ label, value, hint, labelHint, labelHintLabel, aiId }: DescriptionItemProps): React.ReactElement {
   // Empty means "there is no value for this field", not "the value is falsy":
   // 0 and false are real values and must stay visible.
   const empty = value === null || value === undefined || value === '';
   return (
     <>
-      <dt className="text-ai-fg-muted">{label}</dt>
+      <dt className="text-ai-fg-muted">
+        {labelHint ? (
+          <span className="inline-flex items-center gap-1">
+            {label}
+            <Tooltip content={labelHint}>
+              {/*
+               * A real control, not a `title` attribute: the explanation has to be
+               * reachable by keyboard and by touch, and a header that only reveals
+               * itself on hover is not an explanation for anyone using either.
+               */}
+              <button
+                type="button"
+                aria-label={labelHintLabel ?? (typeof labelHint === 'string' ? labelHint : undefined)}
+                /*
+                 * `cursor-pointer` is not inherited from the `<button>`: the browser's
+                 * default is `default`, so the hint looked like part of the label until
+                 * the pointer was already on it. Same size as the table header's hint so
+                 * the two surfaces agree.
+                 */
+                className="grid size-4 shrink-0 cursor-pointer place-items-center rounded-full text-ai-fg-muted transition-colors duration-ai-fast hover:text-ai-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ai-ring"
+              >
+                <Icon name="information" size={12} />
+              </button>
+            </Tooltip>
+          </span>
+        ) : label}
+      </dt>
       <dd className="min-w-0 break-words text-ai-fg-secondary">
         {
           /*

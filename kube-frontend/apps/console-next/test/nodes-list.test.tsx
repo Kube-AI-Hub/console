@@ -35,18 +35,16 @@ describe('node list and mode behavior', () => {
     await waitFor(() => expect(calls.some((url) => url.searchParams.get('page') === '2')).toBe(true));
     await user.type(screen.getByRole('searchbox', { name: '按名称或 IP 搜索' }), '172.16');
     /*
-     * The model filter lives in the model column's header, not the toolbar: a field's
-     * own filter belongs where the field is, and the toolbar keeps the row search.
+     * The model filter stays in the toolbar: its column is now the vendor cell's
+     * detail line, so there is no header to hang it from. The other field filters
+     * (status, role, vendor) are still on their headers.
      */
-    await user.click(screen.getByRole('button', { name: '型号' }));
-    await user.type(await screen.findByRole('textbox', { name: '型号' }), 'B200');
+    await user.type(screen.getByRole('textbox', { name: '型号' }), 'B200');
     await waitFor(() => expect(calls.some((url) => url.searchParams.get('name') === '172.16' && url.searchParams.get('xpuModel') === 'B200' && url.searchParams.get('page') === '1')).toBe(true));
     expect(document.querySelector('[data-stat-key="total"]')).toHaveTextContent('120');
     expect(calls.filter((url) => url.pathname.endsWith('/stats')).every((url) => !url.searchParams.has('name'))).toBe(true);
     await user.click(screen.getByRole('button', { name: '清除全部条件' }));
-    // The popover is closed by then, so reopen it to read the cleared value.
-    await user.click(screen.getByRole('button', { name: '型号' }));
-    expect(await screen.findByRole('textbox', { name: '型号' })).toHaveValue('');
+    expect(screen.getByRole('textbox', { name: '型号' })).toHaveValue('');
   });
   it('isolates full-cluster NTP offsets and marks unknown synchronization', () => {
     expect(timeOffsets({

@@ -15,15 +15,25 @@ import { vendorMark } from './vendorMarks';
  * `currentColor` throughout, so the glyph takes the tile's tone and needs no
  * per-vendor theming.
  */
-export function VendorIcon({ vendor, size = 40, className }: {
+export function VendorIcon({ vendor, size = 40, className, decorative = false }: {
   vendor: string | undefined; size?: number; className?: string;
+  /**
+   * Hide the mark from assistive tech and from the cell's text.
+   *
+   * The statistics tiles show a mark with no adjacent label, so the icon has to name
+   * itself. A table cell is the opposite: the vendor name is already in the value
+   * beside it, and a second copy of the label makes the cell read
+   * "英伟达英伟达A100_40G" — once for the icon's `<title>`, once for the text.
+   */
+  decorative?: boolean;
 }): React.ReactElement {
   const t = useT();
   const mark = vendorMark(vendor);
   const label = t(mark.labelKey as Parameters<typeof t>[0]);
-  return <svg viewBox={mark.viewBox} width={size} height={size} role="img" aria-label={label}
+  return <svg viewBox={mark.viewBox} width={size} height={size}
+    {...(decorative ? { 'aria-hidden': true } : { role: 'img', 'aria-label': label })}
     className={cn('shrink-0 fill-current', className)} data-vendor={vendor || 'unknown'}>
-    <title>{label}</title>
+    {decorative ? null : <title>{label}</title>}
     {mark.parts.map((part, index) => renderPart(part, index))}
   </svg>;
 }

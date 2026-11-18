@@ -26,7 +26,14 @@ export function NodeInfoSidebar({ node, onMode }: { node: NodeDetail; onMode: ()
       <DefinitionRow label={t('node.detail.runtime')} value={node.nodeInfo.containerRuntimeVersion} />
       <DefinitionRow label={t('node.detail.kubeletVersion')} value={node.nodeInfo.kubeletVersion} />
       <DefinitionRow label={t('node.detail.kubeProxyVersion')} value={node.nodeInfo.kubeProxyVersion} />
-      <DefinitionRow label={t('node.detail.xpu')} value={gpu ? `${vendor ? t(GPU_VENDOR_LABEL_KEYS[vendor]) : node.gpuVendor} ${node.gpuModel ?? ''}` : 'CPU'} />
+      <DefinitionRow label={t('node.detail.xpu')} value={gpu ? `${vendor ? t(GPU_VENDOR_LABEL_KEYS[vendor]) : node.gpuVendor} ${node.gpuModel ?? ''}` : 'CPU'}
+        labelHintLabel={t('node.detail.xpu')}
+        labelHint={<span className="flex flex-col gap-0.5">
+          <span>{t('node.list.hint.vendor')}</span>
+          <span>{t('node.list.hint.vendorFormat')}</span>
+          <span>{t('node.list.hint.vendorExamples')}</span>
+          <span>{t('node.list.hint.vendorDefault')}</span>
+        </span>} />
       {gpu ? <>
         <DefinitionRow label={t('node.detail.gpuMode')} value={<div className="flex items-center justify-between gap-2">
           <span>{hasPendingMode(node) ? t(node.gpuModeStatus?.status === 'in_progress' ? 'node.mode.in_progress' : 'node.mode.waiting') : mode ? t(mode.labelKey) : node.gpuMode || '-'}</span>

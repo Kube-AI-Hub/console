@@ -23,6 +23,13 @@ export interface TableColumn<T> {
    */
   hint?: React.ReactNode;
   /**
+   * Accessible name for the hint control, when `hint` is not a plain string.
+   *
+   * A multi-line hint cannot be its own name — the button would be announced as
+   * "information" with no indication of what it explains.
+   */
+  hintLabel?: string;
+  /**
    * Keep this column visible while the table scrolls horizontally.
    *
    * `start` pins to the left edge, `end` to the right. The pinned column is the
@@ -433,8 +440,13 @@ export function Table<T>({
                            * sort control under the 44px touch minimum. Filling the cell's
                            * height on a touch viewport (`pointer-coarse`) gives a thumb a
                            * target without changing the row height on desktop.
+                           *
+                           * `cursor-pointer` is not inherited from the `<button>`: the
+                           * browser's default for a button is `default`, so a sortable
+                           * header looked like plain text until the pointer was already on
+                           * it.
                            */
-                          'inline-flex min-h-11 items-center gap-1 transition-colors duration-ai-fast hover:text-ai-fg sm:min-h-0',
+                          'inline-flex min-h-11 cursor-pointer items-center gap-1 transition-colors duration-ai-fast hover:text-ai-fg sm:min-h-0',
                           active && 'text-ai-accent',
                         )}
                       >
@@ -453,8 +465,10 @@ export function Table<T>({
                          */}
                         <button
                           type="button"
-                          aria-label={typeof column.hint === 'string' ? column.hint : undefined}
-                          className="grid size-4 place-items-center rounded-full text-ai-fg-faint transition-colors duration-ai-fast hover:text-ai-fg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ai-ring"
+                          aria-label={column.hintLabel ?? (typeof column.hint === 'string' ? column.hint : undefined)}
+                          /* 24px box (WCAG 2.5.8 floor): at size-4 (16px) the header hint was the
+                             smallest pointer target on every list and failed the mobile sweep. */
+                          className="grid size-6 cursor-pointer place-items-center rounded-full text-ai-fg-muted transition-colors duration-ai-fast hover:text-ai-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ai-ring"
                           // Without this the click also lands on the header's sort
                           // button in browsers that route the event up the tree.
                           onClick={(event) => event.stopPropagation()}
@@ -520,7 +534,7 @@ export function Table<T>({
                           aria-label={isExpanded ? '收起' : '展开'}
                           aria-expanded={isExpanded}
                           onClick={() => toggleExpanded(key)}
-                          className="grid size-5 place-items-center rounded-ai-sm text-ai-fg-muted transition-colors duration-ai-fast hover:bg-ai-surface-3 hover:text-ai-fg"
+                          className="grid size-5 cursor-pointer place-items-center rounded-ai-sm text-ai-fg-muted transition-colors duration-ai-fast hover:bg-ai-surface-3 hover:text-ai-fg"
                         >
                           <svg
                             viewBox="0 0 24 24"

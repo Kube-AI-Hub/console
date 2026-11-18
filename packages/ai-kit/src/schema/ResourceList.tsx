@@ -43,6 +43,14 @@ export interface ListColumnBase<TRow> {
    * that makes a number misread.
    */
   hint?: React.ReactNode;
+  /**
+   * Accessible name for the hint control, when `hint` is not a plain string.
+   *
+   * A multi-line hint (a list of label rules, say) cannot be its own name — the button
+   * would be announced as "information" with no indication of what it explains. Pass
+   * the column title here.
+   */
+  hintLabel?: string;
 }
 
 /**
@@ -471,12 +479,14 @@ function ColumnFilter({ filter, value, onChange, labels }: {
           data-active={active ? 'true' : undefined}
           onClick={(event) => event.stopPropagation()}
           className={cn(
-            'grid size-5 place-items-center rounded-ai-sm transition-colors duration-ai-fast',
+            // size-6 is the 24px minimum touch target: at size-5 (20px) the column-filter chip
+            // failed the mobile sweep on every list that has filters (2026-11-19).
+            'grid size-6 cursor-pointer place-items-center rounded-ai-sm transition-colors duration-ai-fast',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ai-ring',
             active ? 'text-ai-accent' : 'text-ai-fg-faint hover:text-ai-fg-muted',
           )}
         >
-          <Icon name="filter" size={12} />
+          <Icon name="filter" size={14} />
         </button>
       }
     >
@@ -716,6 +726,7 @@ export function ResourceList<TRow>({
       align: column.align,
       sortable: sortableKeys.has(column.key),
       ...(column.hint === undefined ? {} : { hint: column.hint }),
+      ...(column.hintLabel === undefined ? {} : { hintLabel: column.hintLabel }),
       ...(resolvedPin(column) ? { pin: resolvedPin(column) } : {}),
       // `<column key>:sort` matches the convention the page objects and the agent
       // manifest already use (`configmaps:sort:name`).

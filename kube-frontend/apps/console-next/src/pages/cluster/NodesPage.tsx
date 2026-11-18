@@ -280,16 +280,40 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
         key === 'cpu' ? { hint: t('node.list.hint.cpu') } :
         key === 'memory' ? { hint: t('node.list.hint.memory') } : {}),
       render: (row: NodeSummary) => metric(row, key) })),
-    { key: 'vendor', title: t('node.detail.xpu'), hideable: true, width: 130, render: (row) => <span className="flex min-w-0 items-center gap-2">
-      <VendorIcon vendor={row.gpuVendor || 'CPU'} size={18} className="text-ai-fg-secondary" />
-      <span className="truncate">{vendorName(row.gpuVendor || 'CPU')}</span></span> },
+    /* Each readable cell carries its own handle, like the mode column: without one the vendor
+       and model values are the only fields a reader (or an agent) cannot address per row. */
     /*
-     * The model gets its own column rather than riding along as the vendor cell's
-     * detail line: it is a field readers filter and sort by ("show me the B200s"),
-     * and a value you can narrow has to be addressable as a column.
+     * The compute-card column carries the old console's explanation of where the value
+     * comes from. Four lines is more than a hint usually holds, but this is the column
+     * readers most often ask about ("why does it say CPU?"), and the answer is the
+     * label format rather than anything about the node.
      */
-    { key: 'model', title: t('node.filter.model'), hideable: true, width: 130,
-      render: (row) => <span className="truncate">{row.gpuModel || '-'}</span> },
+    { key: 'vendor', title: t('node.detail.xpu'), hideable: true, width: 150,
+      hintLabel: t('node.detail.xpu'),
+      hint: <span className="flex flex-col gap-0.5">
+        <span>{t('node.list.hint.vendor')}</span>
+        <span>{t('node.list.hint.vendorFormat')}</span>
+        <span>{t('node.list.hint.vendorExamples')}</span>
+        <span>{t('node.list.hint.vendorDefault')}</span>
+      </span>,
+      /*
+       * Vendor and model share one column.
+       *
+       * They are two halves of the same fact — the model is only meaningful next to
+       * its vendor, and a reader asking "what card is in here" wants both — so the
+       * model rides as the cell's detail line instead of taking a column of its own.
+       * The list was fourteen columns wide and most of the extra width came from
+       * fields like this that read as one answer.
+       */
+      render: (row) => <span
+      className="flex min-w-0 items-center gap-2" data-ai-id={`nodes:vendor:${row.name}`}>
+      {/*
+        * The mark is decorative here: the value beside it already spells the vendor
+        * out, and `VendorIcon` would otherwise put the name in the cell's text twice
+        * ("英伟达英伟达A100_40G") — once from its `<title>`, once from the text.
+        */}
+      <VendorIcon vendor={row.gpuVendor || 'CPU'} size={18} decorative className="text-ai-fg-secondary" />
+      <MetricCell value={vendorName(row.gpuVendor || 'CPU')} detail={row.gpuModel || '-'} /></span> },
     { key: 'mode', title: t('node.detail.gpuMode'), hideable: true, width: 130, render: (row) => {
       const definition = GPU_MODES[row.gpuVendor?.toLowerCase() ?? '']?.find((entry) => entry.value === row.gpuMode);
       const current = definition ? t(definition.labelKey) : row.gpuMode || '-';
@@ -305,7 +329,6 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
         tone={entry?.offset !== undefined && Math.abs(entry.offset) >= 120 ? 'danger' : entry?.offset !== undefined && Math.abs(entry.offset) >= 30 ? 'warning' : 'neutral'}
         data-ai-id={`nodes:ntp:${row.name}`} />;
     } },
-    { key: 'version', title: t('node.detail.kubeletVersion'), hideable: true, render: (row) => row.version || '-' },
   ];
   const schema: ListSchema<NodeSummary> = {
     rowKey: 'name', rowAttributes: (row) => ({ 'data-ai-row': row.name }), columns,
@@ -315,8 +338,9 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
        * Field filters live on their columns, not in the toolbar.
        *
        * A reader narrows "status" by clicking the status header — the control sits
-       * where the value is, and the toolbar keeps the row search, which is the only
-       * control here that is not a field.
+       * where the value is. The model filter stays in the toolbar: it is free text,
+       * and its column is now the vendor cell's detail line rather than a column of
+       * its own, so there is no header to hang it from.
        */
       { key: 'status', column: 'status', title: t('node.filter.status'), allLabel: t('node.filter.all'), aiId: 'nodes:filter:status', options: [
         { value: 'running', label: t('node.list.running') }, { value: 'warning', label: t('node.list.warning') }, { value: 'unschedulable', label: t('node.status.unschedulable') }] },
@@ -325,7 +349,7 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
       { key: 'vendor', column: 'vendor', title: t('node.filter.vendor'), multiple: true, searchable: true, aiId: 'nodes:filter:vendor', emptyText: t('common.empty'),
         options: Array.from(new Set([...Object.keys(GPU_VENDOR_LABEL_KEYS), ...(stats.data?.vendors ?? []).map((entry) => entry.vendor)]))
           .map((vendor) => ({ value: vendor, label: vendorName(vendor) })) },
-      { key: 'model', column: 'model', title: t('node.filter.model'), type: 'text', aiId: 'nodes:filter:model' },
+      { key: 'model', title: t('node.filter.model'), type: 'text', aiId: 'nodes:filter:model' },
     ],
     columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'nodes:columns' },
     refresh: { label: t('common.refresh'), aiId: 'nodes:refresh', busy: nodes.isFetching },

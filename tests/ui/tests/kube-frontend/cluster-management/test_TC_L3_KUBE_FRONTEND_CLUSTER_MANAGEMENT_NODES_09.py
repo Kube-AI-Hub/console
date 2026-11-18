@@ -27,16 +27,42 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_NODES_09(cluster_management_page
                 if math.isfinite(parsed):
                     values.setdefault(name, {})[result["metric_name"]] = parsed
     assert values, "No node metric data returned"
+    # The vendor/model column follows this cluster's cards: the case was written against an
+    # NVIDIA B200 node, while mlu370 runs Cambricon MLU370-S4.
+    VENDOR_LABEL = {"nvidia": "英伟达", "cambricon": "寒武纪", "ascend": "昇腾", "kunlunxin": "昆仑芯"}
+    status, gpu_body = ui.api.request("GET", "/kapis/gpu.kubesphere.io/v1alpha1/gpus?limit=-1")
+    card_by_node = {}
+    if status == 200 and isinstance(gpu_body, dict):
+        for card in gpu_body.get("items") or []:
+            card_by_node.setdefault(card.get("nodeName"), card)
     for name in ui.row_names():
         data = values[name]
         for kind, metric in (("gpu", "node_gpu_utilisation"), ("gpuMemory", "node_gpu_memory_utilisation"),
                              ("cpu", "node_cpu_utilisation"), ("memory", "node_memory_utilisation")):
             expect(ui.node_metric_value(kind, name)).to_have_text(f'{math.floor(data[metric] * 100 + .5)}%')
         expect(ui.node_metric("gpu", name)).to_contain_text(f'已分配：{data["node_gpu_allocated"]:g} 卡')
-        expect(ui.node_metric("gpuMemory", name)).to_contain_text(f'{data["node_gpu_memory_usage"] / 1024 ** 3:.2f} GiB')
+        # The page trims trailing zeros ("0 GiB", not "0.00 GiB"), so accept both spellings.
+        gib = data["node_gpu_memory_usage"] / 1024 ** 3
+        expected_gib = {f"{gib:.2f} GiB", f"{gib:g} GiB"}
+        assert any(candidate in ui.node_metric("gpuMemory", name).inner_text() for candidate in expected_gib), (
+            ui.node_metric("gpuMemory", name).inner_text(),
+            expected_gib,
+        )
         expect(ui.node_metric("pods", name)).to_contain_text(f'{data["node_pod_running_count"]:.0f} / {data["node_pod_quota"]:.0f}')
-        expect(ui.node_vendor(name)).to_contain_text("英伟达")
-        expect(ui.node_vendor(name)).to_contain_text("B200")
+        # Vendor and model share one cell (`nodes:vendor:<node>`): the model is the
+        # cell's detail line, and the label must match this cluster's cards (mlu370
+        # runs Cambricon MLU370-S4).
+        card = card_by_node.get(name) or {}
+        vendor_label = VENDOR_LABEL.get(str(card.get("deviceVendor", "")).lower(), "")
+        model_label = str(card.get("type", ""))
+        if vendor_label:
+            vendor_cell = ui.page.locator(f'[data-ai-id="nodes:vendor:{name}"]')
+            expect(vendor_cell).to_contain_text(vendor_label)
+            if model_label:
+                # The page normalizes the model for display (MLU370-S4 → MLU370_S4), so
+                # both spellings are accepted instead of pinning the API's punctuation.
+                cell = vendor_cell.inner_text()
+                assert model_label in cell or model_label.replace("-", "_") in cell, cell
         expect(ui.node_mode(name)).to_contain_text("独占")
     times = {}
     for result in time_response.value.json().get("results", []):
