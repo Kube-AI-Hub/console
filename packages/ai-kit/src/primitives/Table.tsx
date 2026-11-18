@@ -134,7 +134,7 @@ function pinClasses(pin: TableColumn<unknown>['pin'], background: string, left =
    */
   return cn(
     'sticky z-20',
-    isHeader ? background : pin === 'start' ? 'bg-[rgb(var(--ai-pin-start-bg))]' : 'bg-[rgb(var(--ai-pin-end-bg))]',
+    isHeader ? background : pin === 'start' ? 'bg-ai-pin-start' : 'bg-ai-pin-end',
     pin === 'start'
       ? PIN_LEFT[left] ?? 'left-0'
       : 'right-0 shadow-[inset_-8px_0_8px_-8px_rgb(var(--ai-line))]',

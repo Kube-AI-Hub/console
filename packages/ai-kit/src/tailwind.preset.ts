@@ -26,6 +26,16 @@ const aiKitPreset: Partial<Config> = {
           'surface-2': withAlpha('--ai-surface-2'),
           'surface-3': withAlpha('--ai-surface-3'),
 
+          /*
+           * Pinned table columns. Registered here rather than written as an arbitrary
+           * value (`bg-[rgb(var(--ai-pin-end-bg))]`): Tailwind does not reliably emit
+           * utilities whose arbitrary value nests parentheses, and the class was
+           * silently dropped — the pinned cell rendered transparent and the columns
+           * scrolling underneath showed through it.
+           */
+          'pin-start': withAlpha('--ai-pin-start-bg'),
+          'pin-end': withAlpha('--ai-pin-end-bg'),
+
           fg: withAlpha('--ai-fg'),
           'fg-secondary': withAlpha('--ai-fg-secondary'),
           'fg-muted': withAlpha('--ai-fg-muted'),

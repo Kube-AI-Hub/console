@@ -31,6 +31,21 @@
   overflow: visible !important;
 }
 
+/*
+ * Storybook paints every docs-table cell transparent (`.ai-root .sbdocs tbody td`).
+ * A pinned cell must be opaque — that is the whole point, so the columns scrolling
+ * underneath do not show through it — and the addon's selector is more specific than
+ * the `bg-ai-pin-*` utility, so the pinned cells rendered as glass. Only the pinned
+ * cells are re-enabled; the rest of the table stays transparent as the addon intends.
+ */
+.ai-root .sbdocs tbody td.sticky {
+  background-color: rgb(var(--ai-pin-start-bg)) !important;
+}
+
+.ai-root .sbdocs tbody td.sticky.right-0 {
+  background-color: rgb(var(--ai-pin-end-bg)) !important;
+}
+
 .sbdocs-wrapper,
 .sbdocs-content {
   background-color: rgb(var(--ai-bg)) !important;

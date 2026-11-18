@@ -49,7 +49,7 @@ describe('pinned columns', () => {
     expect(cell.className).toContain('left-0');
     // The body cell paints the start-pin surface, not a generic one: the three-step
     // weight scale is what makes the identity column read as the anchor.
-    expect(cell.className).toContain('--ai-pin-start-bg');
+    expect(cell.className).toContain('bg-ai-pin-start');
   });
 
   it('pins row actions to the right edge automatically', () => {
