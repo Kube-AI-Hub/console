@@ -317,7 +317,7 @@ def test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_02(storage_page, screenshot)
 巡检工具已适配：第三个参数传 `-` 表示「应用与接口同源」（shell wrapper 与 Python 两侧都会归一化），
 登录按 `LOGIN_PATHS` 先试新路由再退回旧路由，preflight 的会话探针按是否同源选 `/oauth/userinfo` 或 `/api/session/me`。
 在 mlu370 实测：凭据不对时退出码 **2**、结论是「环境不可用」，不会被记成页面缺陷。
-见[影响记录](plans/bff-retired-tooling-impact-20261118.md)。
+见[影响记录](plans/bff-retirement-state-20261118.md)。
 
 并行开发时全量 `check_docs --strict` 可能超过 15 分钟（2026-11-17 实测 1003.6s）；
 批次判定用本批范围 + 受影响包检查，全量门禁留到合入/发布前，不每批重复。

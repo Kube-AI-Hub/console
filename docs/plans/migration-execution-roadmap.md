@@ -67,7 +67,7 @@
 **部分恢复（2026-11-18 08:00）**：mlu370（`https://ka.watering.ai`）**已经是新架构**——`/kube-frontend/` 200、
 登录路由存在（错误密码返回 400 而不是 403）。**不需要凭据也能验的部分已经验了**：
 登录页结构可访问性 5 条 + 四组主题色调键盘走查全部通过，登录失败文案是本地化句子。
-见[记录](mlu370-ready-for-new-arch-20261118.md)。**登录后的页面仍需 mlu370 凭据。**
+见[记录](bff-retirement-state-20261118.md)。**登录后的页面仍需 mlu370 凭据。**
 
 **共享组件的行为已经在 Storybook 上验完六项**（空态文案、列显隐、分页与每页档位、多选筛选、弹层焦点、
 下拉键盘），见[记录](storybook-verifications-20261118.md)。这一层不需要集群，是本轮验证成本最低的部分。
@@ -78,7 +78,7 @@
 
 恢复条件与顺序：
 
-1. `--probes` 的 `oauth-userinfo` 与 `oauth-login-route` 两条不再 WARN（见[影响记录](bff-retired-tooling-impact-20261118.md)）；
+1. `--probes` 的 `oauth-userinfo` 与 `oauth-login-route` 两条不再 WARN（见[影响记录](bff-retirement-state-20261118.md)）；
 2. 浏览器能登录（登录页不再显示「后端不支持这种登录方式」）；
 3. 依次跑 `--keyboard-local` → `--locale-scan` → 整轮基线，作为**新架构的第一次验收**；
 4. 验收通过后，才把能力矩阵各行的「历史」标注撤掉。
