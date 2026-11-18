@@ -85,3 +85,30 @@ export const RecoverableFilterError: StoryObj = {
       errorContent={<p role="alert">The request failed. Search stays editable so the condition can be corrected.</p>} />;
   },
 };
+
+/**
+ * 搜不到时的空态。
+ *
+ * 「列表本来就是空的」与「搜了但没匹配到」是两个答案，读者问的是后者。
+ * 这个 story 固定展示「被搜索收窄」的那一支：标题换成「没有匹配的结果」，
+ * 并且仍然给出页面的主操作（这里用刷新代替创建，保持 story 无副作用）。
+ */
+export const NoMatch: StoryObj = {
+  render: () => (
+    <ResourceList
+      schema={{
+        title: '工作负载',
+        description: '输入一个不存在的名字，看空态说的是什么。',
+        rowKey: 'name',
+        search: { placeholder: '按名称搜索' },
+        columns: [{ key: 'name', title: '名称' }],
+        empty: { title: '还没有工作负载', description: '创建后会出现在这里。' },
+        primaryAction: { key: 'create', label: '创建', aiId: 'list-nomatch:create' },
+      }}
+      rows={[]}
+      searchValue="no-such-workload"
+      onSearchChange={() => undefined}
+      onAction={() => undefined}
+    />
+  ),
+};
