@@ -14,24 +14,49 @@ set -euo pipefail
 
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 PKG="$HERE/packages/ai-kit"
-TARGET="$PKG/node_modules/use-callback-ref/node_modules/react"
 BACKUP="/tmp/ai-kit-nested-react-backup-$(date +%s)"
 
-if [ ! -d "$TARGET" ]; then
-  echo "nothing to do: $TARGET is already gone"
+# Sweep *every* nested React, not one hardcoded path: the copy appears under whichever
+# Radix dependency pnpm happened to auto-install peers for, and that set changes with the
+# lockfile. 2026-11-18: use-callback-ref *and* use-sidecar both carried 16.14.0, so moving
+# only the first one left the suite red.
+mapfile -t TARGETS < <(find "$PKG/node_modules" -mindepth 3 -maxdepth 4 -type d -name react \
+  -path "*/node_modules/*/node_modules/react" 2>/dev/null)
+
+if [ "${#TARGETS[@]}" -eq 0 ]; then
+  echo "nothing to do: no nested React copies under $PKG/node_modules"
   exit 0
 fi
 
-echo "moving $TARGET aside to $BACKUP"
-mv "$TARGET" "$BACKUP"
+mkdir -p "$BACKUP"
+moved=()
+for target in "${TARGETS[@]}"; do
+  label=$(printf '%s' "${target#"$PKG/node_modules/"}" | tr '/' '_')
+  echo "moving $target aside"
+  mv "$target" "$BACKUP/$label"
+  moved+=("$target")
+done
 
 echo "running ai-kit tests"
-if (cd "$PKG" && npx vitest run >/tmp/ai-kit-after-fix.log 2>&1); then
-  echo "OK: ai-kit tests pass; the stray copy stays at $BACKUP (delete it when convenient)"
+(cd "$PKG" && npx vitest run >/tmp/ai-kit-after-fix.log 2>&1) || true
+
+# Judge on the test counts, not the exit code. Vitest also exits non-zero for *unhandled*
+# errors: 2026-11-18 CodeMirror's measure pass called getClientRects from a jsdom animation
+# frame after the test finished, so all 243 tests passed and the run still exited 1.
+# Restoring the React copies over that would re-break the 9 real failures.
+if grep -qE "^ +Tests +[0-9]+ passed" /tmp/ai-kit-after-fix.log && ! grep -qE "^ +Tests .*failed" /tmp/ai-kit-after-fix.log; then
+  echo "OK: ai-kit tests pass; the stray copies stay at $BACKUP (delete them when convenient)"
+  if grep -qE "^ +Errors +[0-9]+ error" /tmp/ai-kit-after-fix.log; then
+    echo "note: vitest reported unhandled errors (jsdom/CodeMirror); see /tmp/ai-kit-after-fix.log"
+  fi
   exit 0
 fi
 
-echo "tests still fail; restoring the copy" >&2
-mv "$BACKUP" "$TARGET"
+echo "tests still fail; restoring the copies" >&2
+for target in "${moved[@]}"; do
+  label=$(printf '%s' "${target#"$PKG/node_modules/"}" | tr '/' '_')
+  mkdir -p "$(dirname "$target")"
+  mv "$BACKUP/$label" "$target"
+done
 echo "see /tmp/ai-kit-after-fix.log" >&2
 exit 1

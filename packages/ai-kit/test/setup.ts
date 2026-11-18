@@ -44,6 +44,19 @@ if (typeof HTMLElement !== 'undefined') {
 }
 
 /**
+ * jsdom has no `Range.getClientRects`, and CodeMirror measures text with it.
+ *
+ * The call happens from a `requestAnimationFrame` callback (CodeMirror's measure
+ * pass), i.e. *after* the test that opened the editor has finished. The tests still
+ * pass, but vitest counts the throw as an unhandled error and exits non-zero, which
+ * makes the whole suite look red. The app's own suite already stubs this
+ * (`kube-frontend/apps/console-next/test/setup.ts`); ai-kit needs the same stub.
+ */
+if (typeof Range !== 'undefined' && !Range.prototype.getClientRects) {
+  Range.prototype.getClientRects = () => ({ length: 0, item: () => null }) as unknown as DOMRectList;
+}
+
+/**
  * jsdom has no layout engine, so every `getBoundingClientRect` returns zeros.
  * Radix's popper uses that to decide visibility and skips rendering content it
  * believes has no size. Reporting a plausible box keeps the components
