@@ -1,0 +1,40 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-11
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: overview
+title: 集群概览 · 未就绪集群显示等待加入引导
+entry_url: '{BASE_URL}/kube-frontend/clusters/{notReadyCluster}/overview'
+prd: prd/kube-frontend/cluster-management/overview.md
+design: design/kube-frontend/cluster-management/overview.md
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-12
+story:
+- US1
+- US5
+product: 未就绪集群的概览整页让给「等待集群加入」，代理集群给出三步接入引导，就绪后自动切换回完整概览。
+preconditions:
+- 已登录，存在一个 Ready 条件非 True 的集群；代理集群的接入清单接口可用
+steps:
+- 打开未就绪集群的概览，等待集群对象返回
+- 核对页头保留集群名、暂停/刷新与 kubectl，其下只有等待面板
+- 核对资源用量、节点块、排行、基本信息、Kubernetes 状态、组件、模块与快捷入口均未渲染
+- 核对等待面板含加载指示、说明文案与手动刷新
+- 代理集群：核对三步引导的顺序与命令，命令以行内 code 呈现且不重复
+- 核对文案中不残留 `{cmd}`、`{file}` 等占位符
+- 清单接口不可用时核对显示 tower 说明与原始原因，而非仅「未找到」
+- 让集群变为就绪，核对页面无需刷新即切回完整概览
+expected:
+- 等待面板可见，页头控件仍可用；`overview:usage-*`、`overview:node-row`、`overview:ranking`、`overview:basic`、`overview:kubernetes-status`、`overview:components`、`overview:shortcuts` 全部不存在
+- 代理集群渲染 `overview:agent-steps` 且恰好三项，序号由列表样式生成而非写在文案里
+- 三步文案分别包含 `vi agent.yaml`、`agent.yaml`、`kubectl create -f agent.yaml`，各出现一次
+- "`connectionType=direct` 的未就绪集群不渲染 `overview:agent-steps`"
+- 控制器有 readyMessage 时显示原文，无则不显示；「本页会自动刷新」只出现一次
+- 集群就绪后完整概览出现，等待面板消失
+troubleshoot:
+- 等待面板不出现：先看集群对象的 Ready 条件，`toClusterDetail` 只认 `status=True`
+- 步骤命令重复：检查是否把命令同时作为 `t()` 参数和 `step()` 的分隔 token
+- 序号不显示：`<ol>` 需 `list-decimal`，不要用 `content-[counter(...)]`
+update_automation:
+- 等待面板结构变化时改 pages/cluster_overview.py 与 test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_OVERVIEW_11.py

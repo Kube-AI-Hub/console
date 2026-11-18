@@ -92,11 +92,21 @@ export function ClusterOverviewPage({ cluster }: ClusterOverviewPageProps): Reac
         {t('cluster.overview.refreshFailed')}
       </p> : null}
       {!detail.data ? <Skeleton className="h-64" /> : null}
-      {detail.data ? (
+      {/*
+       * A cluster that is not ready has nothing to report: no metrics, no nodes, no
+       * module status. Rendering the normal page anyway would fill it with panels that
+       * say "unavailable" and leave the reader hunting for the one block that matters.
+       * The old console swaps the whole overview for its Initializing view; this does
+       * the same, so the next step is the only thing on screen.
+       *
+       * The header above stays: it carries the cluster name and the refresh controls,
+       * which are still meaningful while waiting.
+       */}
+      {detail.data && !detail.data.ready ? (
+        <WaitingForCluster cluster={cluster} detail={detail.data} refresh={refresh} />
+      ) : null}
+      {detail.data && detail.data.ready ? (
         <div className="min-w-0 space-y-4">
-          {/* A proxy cluster stays not-ready until its agent is installed, so the
-              instructions are part of the page, not a separate document. */}
-          <ProxyAgentPanel cluster={cluster} detail={detail.data} />
           <OverviewResourcePanel key={cluster} cluster={cluster} refreshAt={refresh.refreshAt} />
           <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]" data-ai-id="overview:node-row">
             <NodeSummaryPanel key={`${cluster}:nodes`} cluster={cluster} />
@@ -151,29 +161,39 @@ function OverviewPanel({ title, children, icon = 'resource', aiId, actions, clas
 }
 
 /**
- * 代理接入：the manifest a proxy-mode member cluster has to apply.
+ * 等待集群加入：what the overview shows instead of itself while a cluster is not ready.
  *
- * A proxy cluster carries no kubeconfig, so nothing can be verified up front: the agent
- * dials out and the cluster becomes ready afterwards. Without this panel the reader has
- * created a cluster and has no next step — the old console shows the same document on the
- * cluster overview while it is initialising.
+ * A cluster that has not joined yet has nothing to report — no metrics, no nodes, no
+ * module status — so the normal page would be a wall of "unavailable" panels with the
+ * one block that matters buried among them. The old console replaces the whole overview
+ * with its Initializing view (`Overview/index.jsx` renders `<Initializing>` when
+ * `!isReady`); this keeps that decision and ports its three-step agent guide.
  *
- * Rendered only for proxy clusters that are not ready yet; a ready cluster's agent is
- * already running, and a direct cluster never had one.
+ * Two shapes, because two things can be wrong:
+ *
+ * - **proxy** without an agent: the reader still has to apply a manifest, so the steps
+ *   are the page. The manifest comes from the platform's agent service; when that is not
+ *   installed the endpoint answers 404 mentioning `tower`, and saying so explains why the
+ *   cluster will never become ready — better than "not found".
+ * - **anything else**: the cluster is expected to join on its own (a direct cluster still
+ *   initialising, or a proxy cluster whose agent was just applied). There is no action to
+ *   take, so the page says it is waiting and refreshes itself.
  */
-function ProxyAgentPanel({ cluster, detail }: { cluster: string; detail: ClusterDetail }): React.ReactElement | null {
+function WaitingForCluster({ cluster, detail, refresh }: {
+  cluster: string;
+  detail: ClusterDetail;
+  refresh: ReturnType<typeof useOverviewRefresh>;
+}): React.ReactElement {
   const t = useT();
   const [copied, setCopied] = React.useState(false);
   const isProxy = detail.connectionType === 'proxy';
   const query = useQuery({
     queryKey: ['cluster-agent', cluster],
-    enabled: isProxy && !detail.ready,
+    enabled: isProxy,
     staleTime: 60_000,
     retry: false,
     queryFn: ({ signal }) => clusterAgentApi(apiClient).deployment({ cluster, signal }),
   });
-
-  if (!isProxy || detail.ready) return null;
 
   const copy = async (): Promise<void> => {
     try {
@@ -185,39 +205,105 @@ function ProxyAgentPanel({ cluster, detail }: { cluster: string; detail: Cluster
     }
   };
 
+  /*
+   * The old copy wraps a command in `<span class="code">` inline. `t()` returns a plain
+   * string, so the sentence is split on the placeholder and the command re-inserted as a
+   * real element — the translation stays a sentence, not markup.
+   *
+   * The placeholder name and the command are separate arguments: passing the command to
+   * `t()` as a param would substitute it as plain text, and splitting on the command
+   * itself would find nothing.
+   */
+  const step = (key: LocaleKey, placeholder: string, command: string): React.ReactNode => {
+    const [before, after = ''] = t(key).split(`{${placeholder}}`);
+    return <>{before}<code className="rounded-ai-sm bg-ai-surface-2 px-1.5 py-0.5 font-ai-mono text-[11px] text-ai-fg">{command}</code>{after}</>;
+  };
+
   return (
-    <OverviewPanel title={t('cluster.add.agentTitle')} icon="cluster">
-      <div className="flex flex-col gap-2" data-ai-id="overview:agent-panel">
-        <p className="text-sm text-ai-fg-secondary">{t('cluster.add.agentDesc')}</p>
-        {query.isError ? (
-          /*
-           * The manifest comes from the platform's agent service. When that service is
-           * not installed the endpoint answers 404 with a message about `tower`; saying
-           * so is more useful than "not found", because it explains why the cluster will
-           * never become ready.
-           */
-          <div className="flex flex-col gap-1" role="alert" data-ai-id="overview:agent-unavailable">
-            <p className="text-xs text-ai-danger">{t('cluster.add.agentUnavailable')}</p>
-            <p className="text-[11px] text-ai-fg-muted">{errorMessage(t, query.error)}</p>
+    <Panel title={t('cluster.overview.waitTitle')} icon="cluster" titleLevel={2} data-ai-id="overview:waiting">
+      <div className="flex flex-col gap-4">
+        <div className="flex items-start gap-3">
+          <svg viewBox="0 0 16 16" className="mt-0.5 size-4 shrink-0 animate-spin text-ai-link motion-reduce:animate-none" aria-hidden="true">
+            <circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" strokeWidth="2" strokeOpacity="0.25" />
+            <path d="M14 8a6 6 0 0 0-6-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+          <div className="min-w-0">
+            <p className="text-sm text-ai-fg">{t('cluster.overview.waitDesc')}</p>
+            {/*
+             * The controller's own sentence when it has one ("Agent has connected…").
+             * Otherwise stay silent: the refresh control below already says the page
+             * keeps itself current, and repeating that here reads as two separate facts.
+             */}
+            {detail.readyMessage ? (
+              <p className="mt-1 text-xs text-ai-fg-muted" data-ai-id="overview:waiting-hint">
+                {detail.readyMessage}
+              </p>
+            ) : null}
           </div>
+        </div>
+
+        {isProxy ? (
+          /*
+           * Numbered by the list itself, not by the copy: the old console put "1." inside
+           * the translation string, which forces every locale to keep the same
+           * punctuation and makes the number impossible to restyle. `list-decimal` plus a
+           * marker style does the same job and leaves the sentence a sentence.
+           */
+          <ol className="flex list-decimal flex-col gap-2 pl-6 marker:font-medium marker:text-ai-fg-muted" data-ai-id="overview:agent-steps">
+            <li className="rounded-ai-md border border-ai-line bg-ai-surface-1 p-3 text-sm text-ai-fg-secondary">
+              {step('cluster.overview.agentStep1', 'cmd', 'vi agent.yaml')}
+            </li>
+            <li className="rounded-ai-md border border-ai-line bg-ai-surface-1 p-3" data-ai-id="overview:agent-manifest-step">
+              <p className="text-sm text-ai-fg-secondary">
+                {step('cluster.overview.agentStep2', 'file', 'agent.yaml')}
+              </p>
+              {query.isError ? (
+                <div className="mt-2 flex flex-col gap-1" role="alert" data-ai-id="overview:agent-unavailable">
+                  <p className="text-xs text-ai-danger">{t('cluster.add.agentUnavailable')}</p>
+                  <p className="text-[11px] text-ai-fg-muted">{errorMessage(t, query.error)}</p>
+                </div>
+              ) : null}
+              {query.data ? (
+                <div className="mt-2 flex flex-col gap-2">
+                  <div className="flex justify-end">
+                    <Button variant="secondary" size="sm" onClick={() => void copy()} {...actionProps('overview:agent-copy')}>
+                      {copied ? t('cluster.add.agentCopied') : t('cluster.add.agentCopy')}
+                    </Button>
+                  </div>
+                  <pre
+                    className="max-h-80 overflow-auto rounded-ai-md border border-ai-line bg-ai-surface p-3 font-mono text-[11px] text-ai-fg-secondary"
+                    data-ai-id="overview:agent-manifest"
+                  >
+                    {query.data}
+                  </pre>
+                </div>
+              ) : query.isPending ? (
+                <p className="mt-2 text-xs text-ai-fg-muted">{t('common.loading')}</p>
+              ) : null}
+            </li>
+            <li className="rounded-ai-md border border-ai-line bg-ai-surface-1 p-3" data-ai-id="overview:agent-apply-step">
+              <p className="text-sm text-ai-fg-secondary">
+                {step('cluster.overview.agentStep3', 'cmd', 'kubectl create -f agent.yaml')}
+              </p>
+              <p className="mt-1 text-xs text-ai-fg-muted">{t('cluster.overview.agentStep3Hint')}</p>
+            </li>
+          </ol>
         ) : null}
-        {query.data ? (
-          <React.Fragment>
-            <Button variant="secondary" size="sm" onClick={() => void copy()} {...actionProps('overview:agent-copy')}>
-              {copied ? t('cluster.add.agentCopied') : t('cluster.add.agentCopy')}
-            </Button>
-            <pre
-              className="max-h-80 overflow-auto rounded-ai-md border border-ai-line bg-ai-surface p-3 font-mono text-[11px] text-ai-fg-secondary"
-              data-ai-id="overview:agent-manifest"
-            >
-              {query.data}
-            </pre>
-          </React.Fragment>
-        ) : query.isPending ? (
-          <p className="text-xs text-ai-fg-muted">{t('common.loading')}</p>
-        ) : null}
+
+        {/*
+         * The page watches the cluster object itself, so the agent being applied flips
+         * this view to the real overview without the reader reloading. The hint says that
+         * once, here, next to the control that can also do it by hand.
+         */}
+        <div className="flex flex-wrap items-center gap-2">
+          <Button size="sm" variant="secondary" loading={refresh.busy} data-ai-id="overview:waiting-refresh"
+            onClick={() => void refresh.refresh()}>
+            {!refresh.busy ? <Icon name="refresh" /> : null}{t('common.refresh')}
+          </Button>
+          {refresh.auto ? <span className="text-xs text-ai-fg-muted">{t('cluster.overview.agentWaiting')}</span> : null}
+        </div>
       </div>
-    </OverviewPanel>
+    </Panel>
   );
 }
 
