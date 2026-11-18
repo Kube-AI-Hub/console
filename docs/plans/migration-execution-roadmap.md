@@ -76,6 +76,10 @@
 新 console 在这两个环境上无法登录，**浏览器侧验收全部暂停**（用户指示：等前端重构完毕再测试）。
 期间只做离线可验的工作（契约套件、api-client 单测、类型检查、文档）。
 
+**权限类验收的前提**：先确认该环境的 SSAR 可信。2026-11-18 在 A100 实测到 fail-open——
+非管理员账号读 `clusterrolebindings` 得 403，却被告知可以 `delete nodes`、`create clusterroles`。
+这类部署上「按钮可见性」不能作为权限验收证据，见[记录](ssar-fail-open-a100-20261118.md)。
+
 恢复条件与顺序：
 
 1. `--probes` 的 `oauth-userinfo` 与 `oauth-login-route` 两条不再 WARN（见[影响记录](bff-retirement-state-20261118.md)）；
