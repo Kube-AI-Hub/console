@@ -1,6 +1,6 @@
 # @kube-ai-hub/ai-kit
 
-Console 的新界面库。替代 `@kube-design/components`，并补上「列表 / 详情 / 表单」三类 schema 驱动的公共组件。
+Console 的界面库：基础组件 + 列表 / 详情 / 表单三类 schema。
 
 采用 [Apache License 2.0](./LICENSE) 开源发布。
 
@@ -28,7 +28,7 @@ Console 的新界面库。替代 `@kube-design/components`，并补上「列表 
 #### token 值必须是空格分隔的通道三元组
 
 ```css
---ai-bg: 20 33 90;      /* 正确：249 251 253 */
+--ai-bg: 20 33 90;      /* 正确 */
 --ai-bg: 20, 33, 90;    /* 错误：逗号分隔 */
 --ai-bg: #14215a;       /* 错误：hex */
 ```
@@ -58,15 +58,15 @@ Console 的新界面库。替代 `@kube-design/components`，并补上「列表 
 | violet | light | `#f7f6fa` | `#fefefe` | `#d1c6e9` |
 | green | light | `#f6fafa` | `#fefefe` | `#c6e5e9` |
 
-**violet = console 线上原貌**：背景走 `$light-color01..04`（`#0b184d` → `#2c3a7c`，色相 229° 蓝紫），主色 `$primary #a981f8`。这两个值已对照线上 CSS 核实（`#a981f8` 出现 55 次、`#14215a` 44 次）。
+**violet = console 线上原貌**：背景走 `$light-color01..04`（`#0b184d` → `#2c3a7c`，色相 229° 蓝紫），主色 `$primary #a981f8`。
 
 **green = dataelem 原貌**：背景用其 `--deep-0..2` 与 `--abyss`（`#00151C` / `#001E28` / `#0A3D4D` / `#002E3C`，色相 186° 青绿），主色品牌薄荷 `#39E5B8`。
 
-两套色相的差别是刻意的：紫配色的页面必须落在蓝紫区（210°–250°），绿配色落在青绿区。混用会让主题「变色」—— 例如把 dataelem 的青黑底套到紫色主题上，页面会明显偏绿。
+两套色相的差别是刻意的：紫配色的页面必须落在蓝紫区（210°–250°），绿配色落在青绿区。混用会让主题「变色」。
 
 实测正文对比度：violet-dark 13.8:1、green-dark 15.4:1，均超 WCAG AAA。
 
-**每个配色块必须覆盖完整的 13 个外壳 token**（背景 4 个、表面 3 个、边框 2 个、表头、行悬停、导航、主色）。漏掉任何一个，就会出现「紫底配蓝边」这种割裂感 —— 这正是深色模式最初的缺陷，现在由 `test/tokens.test.ts` 逐块校验，并用色相断言锁住紫配色的色相区间。
+**每个配色块必须覆盖完整的 13 个外壳 token**（背景 4 个、表面 3 个、边框 2 个、表头、行悬停、导航、主色）。漏掉任何一个，就会出现「紫底配蓝边」这种割裂感，由 `test/tokens.test.ts` 逐块校验，并用色相断言锁住紫配色的色相区间。
 
 主题写在 `<html>` 上而不是 Provider 容器上，否则 portal 出去的弹窗、菜单拿不到变量。
 
@@ -96,22 +96,29 @@ src/
 ├── styles/        tokens.css（双层 token）、motion.css（动效类）
 ├── theme/         ThemeProvider（mode + accent）、ThemeToggle / AccentToggle
 ├── motion/        useSpotlight、Reveal、ParticleField、StreamText
-├── primitives/    35 个基础组件
+├── primitives/    基础组件
 ├── schema/        ResourceList / ResourceDetail / ResourceForm + 注册表
-└── utils/         cn()
+├── editor/        YamlEditor（CodeMirror 6，懒加载）+ k8s 字段补全
+├── terminal/      TerminalView（xterm，懒加载）
+├── charts.ts      子路径入口：DonutChart
+├── terminal.ts    子路径入口：TerminalView
+└── utils/         cn()、useMediaQuery
 ```
 
 ### 基础组件清单
 
 | 类别 | 组件 |
 |---|---|
-| 表单 | Button / Input / Textarea / Select / Checkbox / RadioGroup（及别名 Radio）/ Switch / Slider / InputNumber / DatePicker / FormField / Label / AutoComplete / PasswordStrengthMeter（密码强度面板） |
+| 表单 | Button / Input（含 `InputSearch`）/ Textarea / Select（含 `MultiSelect`）/ Checkbox / RadioGroup（及别名 Radio）/ Switch / Slider / InputNumber / DatePicker / FormField / Label / AutoComplete / PasswordStrengthMeter |
 | 表单容器 | Form / Form.Item / Form.Group（声明式，兼容 `async-validator` 规则） |
-| 展示 | Badge / Tag / Avatar / Card（+Header/Title/Description/Content）/ Panel / Text / Divider / Skeleton / Progress / Empty / DescriptionList（+DescriptionItem）/ Icon（366 个） |
+| 展示 | Badge / Tag / Avatar / Card（+Header/Title/Description/Content）/ Panel / Text / Divider / Skeleton / Progress / Empty / DescriptionList（+DescriptionItem）/ MetricCell / StatisticsGroup / MetricRing / Icon（366 个） |
 | 反馈 | Alert / Loading / Modal / Drawer / Tooltip / Popover / Toast（Provider + useToast）/ Notify（命令式） |
 | 导航 | Tabs（`aiId` / 徽标 / 内容面板）/ Menu（支持折叠态）/ Breadcrumb / Dropdown / Pagination / Accordion / Collapse |
 | 布局 | Columns / Column / Level / LevelLeft / LevelRight / LevelItem |
-| 数据 | Table / Tree |
+| 数据 | Table（排序 / 固定首末列 / 列提示）/ Tree |
+| 图表 | TrendChart / DonutChart（`@kube-ai-hub/ai-kit/charts` 子路径，按需引入） |
+| 编辑器 | YamlEditor（`@kube-ai-hub/ai-kit` barrel 导出，CodeMirror 内部懒加载） |
+| 终端 | TerminalView（`@kube-ai-hub/ai-kit/terminal` 子路径） |
 
 ### 与 kube-design 的对照
 
@@ -128,7 +135,7 @@ src/
 | AutoComplete | AutoComplete | 完整重写，含键盘导航与 `aria-activedescendant` |
 | LocaleProvider | — | 刻意不做：库不内置 i18n，文案走 props |
 
-kube-design 里没有、迁移中从应用层上收的两个组件：
+kube-design 里没有、迁移中从应用层上收的组件：
 
 | 组件 | 来源 | 为什么上收 |
 | --- | --- | --- |
@@ -145,16 +152,35 @@ Storybook 侧补齐 kube-design 的 `Foundation`（Colors / Icons）与 `Compone
 const schema: ListSchema<Pod> = {
   rowKey: 'name',
   columns: [
-    { key: 'name', title: '名称', type: 'link' },
+    // 固定在左侧：横向滚动时读者靠它认行。
+    { key: 'name', title: '名称', type: 'link', width: 180, pin: 'start' },
     { key: 'status', title: '状态', type: 'status' },
     { key: 'restarts', title: '重启', type: 'number', align: 'right' },
+    // 表头旁的信息按钮，说明口径；不是 title 属性（键盘可达）。
+    { key: 'cpu', title: 'CPU', hint: '实时利用率；已分配为调度器口径' },
   ],
   search: { placeholder: '按名称搜索' },
+  filters: [
+    { key: 'status', title: '状态', options: [...] },
+    // 多选 + 可搜索：选项长到需要打字时用。
+    { key: 'vendor', title: '厂商', multiple: true, searchable: true, options: [...] },
+    { key: 'model', title: '型号', type: 'text' },
+  ],
+  sortableKeys: ['name', 'status'],
+  columnVisibility: { label: '显示列', resetLabel: '恢复默认列' },
+  refresh: { label: '刷新' },
+  primaryAction: { key: 'create', label: '创建' },
+  selection: 'multiple',
+  actions: [{ key: 'delete', label: '删除', tone: 'danger', confirm: '确认删除？' }],
   rowActions: [{ key: 'delete', label: '删除', tone: 'danger', confirm: '确认删除？' }],
 };
 
 <ResourceList schema={schema} rows={rows} onAction={(key, row) => ...} />
 ```
+
+排序、筛选、列显隐、分页都由宿主持有状态（列表通常服务端分页，客户端排序会得到跨页错误的顺序），`ResourceList` 只报告请求。
+
+**固定列只支持首末各一列**，且不可隐藏 —— 它是定位行的锚点。选择框列与 `rowActions` 列自动固定，页面只需声明左侧那一列。细节见 `design/kube-frontend/cluster-management/nodes.md` 的 `DEC-...-16`。
 
 ### 详情
 
@@ -194,11 +220,11 @@ const schema: FormSchema<WorkloadForm> = {
 ## 开发
 
 ```bash
-npm install --legacy-peer-deps   # 库目录内独立安装
-npm run typecheck
-npm test
-npm run storybook                # 组件与 schema 的可视化验证
-npm run build                    # 输出 dist/（ESM + d.ts + styles.css）
+pnpm install                     # 库目录内独立安装（.npmrc 已设 node-linker=hoisted）
+pnpm typecheck
+pnpm test
+pnpm storybook                   # 组件与 schema 的可视化验证，6106
+pnpm build                       # 输出 dist/（ESM + d.ts + styles.css）
 ```
 
 ### Storybook 侧的约定
@@ -214,72 +240,58 @@ Schema / Primitives，**分类内部按字母排序**。新增组件时：
 末尾（`DescriptionList` 与 `PasswordStrength` 就这样排到过 `Tree` 后面）。只有新增
 **分类**时才更新 `order`，并同步 `test/storybook-order.test.ts` 的 `SECTIONS`。
 
-`npm test` 里的 `storybook-order` 检查守住四件事：排序必须是 `method: 'alphabetical'`
+`pnpm test` 里的 `storybook-order` 检查守住四件事：排序必须是 `method: 'alphabetical'`
 且 `order` 里不能有嵌套名单；每条 story 的标题必须落在已知分类下；标题不能重复；
-story 文件仍由 glob 自动发现。文件内 story 的先后顺序仍是手写顺序（同一组件的示例
-按叙述排列，不参与字母排序）。
+story 文件仍由 glob 自动发现。文件内 story 的先后顺序仍是手写顺序。
 
 ## 消费方接入
+
+Console 不安装本包的发布产物，而是通过 Vite alias **直接引用 `src/` 源码**：
+
+```ts
+// kube-frontend/apps/console-next/vite.config.ts
+{ find: /^@kube-ai-hub\/ai-kit$/,          replacement: '…/packages/ai-kit/src/index.ts' }
+{ find: /^@kube-ai-hub\/ai-kit\/charts$/,  replacement: '…/packages/ai-kit/src/charts.ts' }
+{ find: /^@kube-ai-hub\/ai-kit\/terminal$/, replacement: '…/packages/ai-kit/src/terminal.ts' }
+{ find: /^@kube-ai-hub\/ai-kit\/styles\.css$/, replacement: '…/packages/ai-kit/src/styles/tokens.css' }
+```
+
+**为什么不用 `dist`**：本包有独立的 `node_modules`（Storybook 需要），其中的 `react` 是
+React 18；加载 `dist` 会让组件跑在那份 React 上，hooks 抛 `Invalid hook call`。指向源码
+则由宿主的打包器解析，`vite.config.ts` 的 `resolve.dedupe` 再把 `react` / `react-dom` 钉到
+宿主那一份。
+
+### 页面实际 import 的是 `@kube-ai-hub/ui`
+
+`kube-frontend/packages/ui` 是 console 的展示层入口，它把本包再导出，并补上应用侧约定
+（无状态管理、无请求、无 i18n、无路由）。页面写 `@kube-ai-hub/ui`，不直接写
+`@kube-ai-hub/ai-kit`。
+
+它的子路径决定「哪些模块能离开首屏」：
+
+| 子路径 | 转发到 | 为什么单独开一个入口 |
+| --- | --- | --- |
+| `@kube-ai-hub/ui` | ai-kit barrel | 每个页面都 import，进 `app-shared` chunk |
+| `@kube-ai-hub/ui/editor` | `YamlEditor` | CodeMirror 188 KB gzip，只有弹窗需要 |
+| `@kube-ai-hub/ui/charts` | `DonutChart` | recharts，只有图表页需要 |
+| `@kube-ai-hub/ui/terminal` | 终端组件 | xterm，只有终端弹窗需要 |
+
+**给本包加导出时注意**：新增到 barrel 就等于新增到每个页面的首屏。重依赖（编辑器、
+图表库、终端）必须走子路径。
+
+`tailwind.preset` 由宿主的 Tailwind 配置引入：
 
 ```js
 // tailwind.config.js
 presets: [require('@kube-ai-hub/ai-kit/tailwind.preset')]
 ```
 
-```ts
-// 入口
-import '@kube-ai-hub/ai-kit/styles.css';
-import { ThemeProvider } from '@kube-ai-hub/ai-kit';
-```
-
-库以 ESM 形式发布，React / Radix 作为外部依赖由宿主的打包器解析，避免出现两份 React。
-
-## 验证结果（2026-11-09）
-
-| 项 | 结果 |
-|---|---|
-| `tsc --noEmit`（strict 全开） | 0 错误 |
-| `vitest run` | 63 通过 / 63 |
-| `vite build` | `index.js` 126 KB、`sprite` 独立 chunk 333 KB（按需加载）、`styles.css` 25.5 KB |
-| Storybook | 全部 story 无编译错误 |
-
-组件级核对（DOM 与计算样式实测）：
-
-| 项 | 结果 |
-|---|---|
-| 四种主题组合 | 背景/边框全部跟随配色 |
-| 深色背景对比度 | violet 13.8:1、green 15.4:1（均超 WCAG AAA） |
-| violet 深色色相 | 实测 228°（蓝紫区），与 console 线上一致 |
-| Icon | 366 个图标全部渲染，`<use>` 引用正确 |
-| Icon 几何 | sprite 光栅化后 4154/9216 不透明像素，图形正常 |
-| 表头与边框 | 四种组合下均解析为主题色，无残留灰色 |
-| 列表/详情/表单 schema | 搜索、选择、分页、字段校验、条件字段均可用 |
-
-**截图验收受阻**：本次会话后期浏览器截图工具持续返回空帧（DOM 内容、几何、计算样式、SVG 光栅化像素均正常，仅截图输出为空白）。已改用 DOM 度量与 canvas 像素采样完成验证；截图工具恢复后应补一次视觉回归。
-
-### 验证中发现并修复的缺陷
-
-1. **整个调色板变黑白（最严重）**：token 值写成 `249, 251, 253`（逗号分隔），而 Tailwind 生成的 `rgb(var(--ai-bg) / 1)` 是现代语法，要求空格分隔。声明整条失效 → 浏览器回退黑色。页面布局完全正常，所以从界面看不出是 CSS 坏了。已全部改为 `249 251 253`，并加 `test/tokens.test.ts` 守住。
-2. **Tailwind preset 静默失效**：`tailwind.config.cjs` 用 `require()` 加载 ES module，拿到 `{ default }` 包装，Tailwind 收到空 preset 且不报错。改为取 `.default`。
-3. **violet 暗色漏色**：`[data-accent='violet']` 缺 `[data-theme]` 限定，与浅色规则同优先级，暗色拿到 `#6b29fa`（应为 `#a981f8`）。四色组合现在各带主题限定。
-4. **深色边框未跟随配色**：两套深色块只覆盖了表面色，漏了 `--ai-line` / `--ai-line-strong`，导致紫底配蓝边。已补齐，并加测试逐块校验 13 个外壳 token。
-5. **浅色外壳几乎无差别**：初版浅色 tint 饱和度过低（`#fbfafd` vs `#fafcfd`），两套配色肉眼无法区分。重新按亮度曲线生成，边框色也一并带上主题色。
-6. **紫色主题偏绿**：为增加深色层次时，把 dataelem 的青黑底（`#00151C`，色相 186°）误用到紫色主题，导致紫蓝页面发绿。改回 console 原生 `#0b184d`（色相 228°），并加色相断言：violet 的 `--ai-bg` 必须落在 210°–250° 区间，且不得引用 `abyss` 色阶。
-6. **Story 标题重复渲染**：story 与 preview decorator 各包了一层 `ai-root` 和标题。改为 decorator 独占页面外壳。
-7. **`hideBelow` 声明未使用**：列级响应式隐藏没有传到 `Table`。补了 `TableColumn.className` 并接入。
-
-### 环境说明
-
-- 本机 `~/.npmrc` 指向国内镜像，本次安装显式使用 `--registry=https://registry.npmjs.org`，未修改全局配置。
-- pnpm 在 workspace 子目录解析 Storybook 的 peer 链会失败（`@storybook/addon-docs` 找不到），库内 `.npmrc` 设 `node-linker=hoisted` 解决。
-
 ## 明确不做
 
-- 不修改 console 应用任何现有代码（库独立演进）
 - 不做 SSR（console 是 SPA）
 - 不内置 i18n（文案走 props）
 - 不引入状态管理库（库是纯展示 + schema 渲染）
-- 第一阶段不做 schema 的「远端加载」（JSON 存后端），只做本地 TS 配置对象
+- 不做 schema 的「远端加载」（JSON 存后端），只做本地 TS 配置对象
 
 ## 许可证
 
@@ -288,4 +300,3 @@ Copyright 2026 Kube AI Hub.
 以 [Apache License, Version 2.0](./LICENSE) 授权。你可以自由使用、修改与再分发，包括商业用途，条件是保留版权与许可声明、在修改过的文件中标注变更，并按需附带 NOTICE 文件。
 
 `package.json` 中的 `license` 字段与本文件一致，均为 `Apache-2.0`。
-
