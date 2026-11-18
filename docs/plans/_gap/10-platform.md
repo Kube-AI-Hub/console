@@ -4,6 +4,16 @@
 > 现行方法见[迁移指南](../../legacy-ui-migration-guide.md)，待复核项见[能力矩阵](../capability-matrix.md)，
 > 页面段级归宿看 `prd/tools/gap_check.py`。旧对照报告 `page-parity-report.md` 已降级为历史快照（`docs/README.md:30`）。
 
+---
+
+## ⚠ 2026-11-18 复核：本文的「待补 / 批准不做」已全部处置
+
+> 2026-11-17 产品复核把 14 条「批准不做」重新纳入迁移（[决策记录](../reinclusion-decisions-20261117.md)），**当天全部交付**；本文判为「待补」的条目也已在同一批落地。
+>
+> 因此本文的**能力级清单与旧源码证据仍然有效**，但**「归宿」列与「仍然缺失」节已过期**。当前状态以[缺口评估](../new-ui-gap-analysis.md)与[能力矩阵](../capability-matrix.md) §0 为准。
+>
+> 本作用域 11-17 判定的 6 项能力缺口中，**工具箱与资源消费（N-03）、第三方登录（N-02）、帮助入口（N-28）已交付**；其余（通知筛选条件、工作台卡片、流水线图形化编辑器、`/operations`、DevOps 三个详情路由）仍是真实缺口，登记在能力矩阵 CHECK-09 / CHECK-06。
+
 > 作用域：老 console 里**不隶属于某个集群/项目**的全部页面 + 老顶栏的全局能力。
 > 事实源：老 `console/src`（KubeSphere 3.1 fork）；新 `console/kube-frontend/apps/console-next/src`。
 > 每条结论都带 `路径:行号`；没读到的写「未核实」，不猜。
