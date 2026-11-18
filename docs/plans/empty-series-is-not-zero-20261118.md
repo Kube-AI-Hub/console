@@ -26,6 +26,24 @@ const point = first?.points[first.points.length - 1];
 - 这 3 条 overview 用例的失败**与本次改动无关**：把它们在**改动前**跑一遍同样失败（`overview completion` 2 条、
   `hardware and overview panels` 1 条，都是并行线正在改的页面，测试还没跟上）。用 `git stash` 对照确认过。
 
+## 同批审计的范围与结论
+
+顺着同一类缺陷把 `apps/console-next/src` 与 `packages/api-client/src` 扫了一遍：
+
+| 检查 | 结果 |
+| --- | --- |
+| `?? 0` 出现在展示路径（14 处） | 12 处是 `pagination.total`（分页器需要一个数，缺省 0 是合理的）；1 处 `NodesPage` 的 `healthRatioLabelSize` 只用于选字号，实际文本有 `stats.data ? … : '-'` 守卫；**1 处即本次修的 `DashboardPanelsPage`** |
+| `catch { return [] / {} / null }` | 逐条看过：`annotationObject` 解析失败返回 `{}`、`appstore`/`devops` 的列表降级为空数组，调用方都把「空」当「没有」而不是「零」或「成功」——未发现把错误当成功的路径 |
+
+**这不是穷尽证明**，只是一次定向审计：结论是「这一类里当前只找到一处」，不是「不存在」。
+
+复跑方式：
+
+```bash
+grep -rn "?? 0" --include=*.tsx --include=*.ts apps/console-next/src
+grep -rn -A2 "catch {" --include=*.ts apps/console-next/src packages/api-client/src | grep -E "return \[\]|return \{\}|return null"
+```
+
 ## 反思
 
 | # | 规则 |
