@@ -46,7 +46,12 @@ describe('cluster list controls', () => {
     expect(requests[0]!.searchParams.get('limit')).toBe('20');
     const user = userEvent.setup();
     await user.click(screen.getByRole('button', { name: '下一页' }));
-    await waitFor(() => expect(requests.at(-1)!.searchParams.get('page')).toBe('2'));
+    /*
+     * `some`, not `at(-1)`: a debounced or remounted request can land after the page-2 one and
+     * make the last entry page 1 again. The case is about "paging asks for page 2", not about
+     * which request happens to be last (measured flaky under load, 2026-11-18).
+     */
+    await waitFor(() => expect(requests.some((url) => url.searchParams.get('page') === '2')).toBe(true));
     await user.click(screen.getByRole('combobox', { name: '每页条数' }));
     await user.click(await screen.findByRole('option', { name: /^50$/ }));
     await waitFor(() => {
