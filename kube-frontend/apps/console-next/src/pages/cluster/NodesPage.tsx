@@ -80,12 +80,12 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
   }, [nodes.data, nodes.isPlaceholderData, list.page, list.pageSize]);
   const vendorName = (vendor: string) => { const key = vendorKey(vendor); return key ? t(GPU_VENDOR_LABEL_KEYS[key]) : vendor || t('node.list.unknown'); };
   /*
-   * The API's own strings are English (`Ready` / `NotReady` / `Unknown`) because they
-   * come from the node's `Ready` condition, not from a catalogue. Printing them raw
-   * left an English word in an otherwise Chinese row.
+   * The API's status values are English because `kube-server` derives them; the
+   * catalogue carries the three the list can actually see.
    */
-  const nodeStatusLabel = (status: string) => status === 'Ready' ? t('node.status.ready')
-    : status === 'NotReady' ? t('node.status.notReady') : t('node.status.unknown');
+  const nodeStatusLabel = (status: string) => status === 'Running' ? t('node.status.running')
+    : status === 'Warning' ? t('node.status.warning')
+      : status === 'Unschedulable' ? t('node.status.unschedulable') : status;
   const statState = stats.isPending ? 'loading' : stats.isError ? 'error' : 'ready';
   const healthRatio = stats.data?.total ? stats.data.healthy / stats.data.total : undefined;
   const healthPercent = healthRatio === undefined ? undefined : Math.round(healthRatio * 100);
@@ -242,8 +242,29 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
       <Link to="/kube-frontend/clusters/$cluster/nodes/$name" params={{ cluster, name: row.name }} className="text-ai-link hover:underline">{row.name}</Link>
       <span className="text-[11px] text-ai-fg-muted">{row.internalIP || '-'}</span></span> },
     { key: 'status', title: t('cluster.column.status'), hideable: true, render: (row) => <span className="flex flex-col items-start gap-1">
-      <Badge tone={row.status === 'Ready' ? 'success' : 'danger'}>{nodeStatusLabel(row.status)}</Badge>
-      {row.unschedulable ? <span className="text-[11px] text-ai-fg-muted" data-ai-id={`nodes:cordoned:${row.name}`}>{t('node.status.cordoned')}</span> : null}</span> },
+      {/*
+        * Three states, the way `kube-server` derives them: cordoned, a condition out
+        * of its expected value, or healthy. The old console shows the same three.
+        *
+        * A cordoned node gets a tooltip listing the taints that explain it — there can
+        * be several, and "无法调度" alone leaves the reader guessing which one (or
+        * whether it was a manual cordon at all).
+        */}
+      {row.status === 'Unschedulable' && row.taints.length > 0 ? (
+        <Tooltip content={<span className="flex flex-col gap-0.5">
+          <span className="font-medium">{t('node.status.taints')}</span>
+          {row.taints.map((taint) => <span key={`${taint.key}=${taint.value}:${taint.effect}`} className="font-ai-mono text-[11px]">
+            {`${taint.key}=${taint.value || ''}:${taint.effect}`}
+          </span>)}
+        </span>}>
+          <span data-ai-id={`nodes:taints:${row.name}`}><Badge tone="warning">{nodeStatusLabel(row.status)}</Badge></span>
+        </Tooltip>
+      ) : (
+        <Badge tone={row.status === 'Running' ? 'success' : row.status === 'Warning' ? 'warning' : 'danger'}>
+          {nodeStatusLabel(row.status)}
+        </Badge>
+      )}
+    </span> },
     { key: 'role', title: t('cluster.column.role'), hideable: true, render: (row) => <span className="whitespace-nowrap">
       {row.role.split(', ').some((role) => ['master', 'control-plane'].includes(role)) ? t('node.list.controlPlane') : t('node.list.worker')}</span> },
     ...(['gpu', 'gpuMemory', 'cpu', 'memory', 'pods'] as const).map((key) => ({ key, hideable: true, width: 150,
@@ -274,7 +295,7 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
     search: { placeholder: t('node.filter.name'), aiId: 'nodes:search' },
     filters: [
       { key: 'status', title: t('node.filter.status'), allLabel: t('node.filter.all'), aiId: 'nodes:filter:status', options: [
-        { value: 'running', label: t('node.list.running') }, { value: 'warning', label: t('node.list.warning') }, { value: 'unschedulable', label: t('node.status.cordoned') }] },
+        { value: 'running', label: t('node.list.running') }, { value: 'warning', label: t('node.list.warning') }, { value: 'unschedulable', label: t('node.status.unschedulable') }] },
       { key: 'role', title: t('node.filter.role'), allLabel: t('node.filter.all'), aiId: 'nodes:filter:role', options: [
         { value: 'master', label: t('node.list.controlPlane') }, { value: 'worker', label: t('node.list.worker') }] },
       { key: 'vendor', title: t('node.filter.vendor'), multiple: true, searchable: true, aiId: 'nodes:filter:vendor', emptyText: t('common.empty'),
@@ -287,7 +308,7 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
     rowActions: [
       { key: 'cordon', label: t('node.action.cordon'), aiId: 'nodes:cordon', visible: (row) => !row.unschedulable, disabled: () => cordon.isPending },
       { key: 'uncordon', label: t('node.action.uncordon'), aiId: 'nodes:uncordon', visible: (row) => row.unschedulable, disabled: () => cordon.isPending },
-      { key: 'terminal', label: t('container.terminal.open'), aiId: 'nodes:terminal-open', disabled: (row) => row.status !== 'Ready' },
+      { key: 'terminal', label: t('container.terminal.open'), aiId: 'nodes:terminal-open', disabled: (row) => row.status !== 'Running' },
       { key: 'gpu-mode', label: t('node.mode.title'), aiId: 'nodes:gpu-mode', visible: (row) => Boolean(row.gpuVendor && row.gpuVendor.toLowerCase() !== 'cpu'),
         /*
          * No `cluster === 'host'` guard: the mode endpoint takes the cluster as a

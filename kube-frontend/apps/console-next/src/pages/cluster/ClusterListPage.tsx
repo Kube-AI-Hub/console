@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { nodesWriteApi, type NamespaceSummary, type NodeSummary } from '@kube-ai-hub/api-client';
 import { Link } from '@tanstack/react-router';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
+import { AiSurface, Badge, ResourceList, Tooltip, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
 import { api as apiClient } from '@/api';
 import { useT } from '@/i18n';
 import { useResourceListState, toListParams } from '@/components/resource/useResourceListState';
@@ -45,8 +45,9 @@ function NamespaceListPage({ kind, cluster }: ClusterListPageProps): React.React
    * come from the node's `Ready` condition, not from a catalogue. Printing them raw
    * left an English word in an otherwise Chinese row.
    */
-  const nodeStatusLabel = (status: string) => status === 'Ready' ? t('node.status.ready')
-    : status === 'NotReady' ? t('node.status.notReady') : t('node.status.unknown');
+  const nodeStatusLabel = (status: string) => status === 'Running' ? t('node.status.running')
+    : status === 'Warning' ? t('node.status.warning')
+      : status === 'Unschedulable' ? t('node.status.unschedulable') : status;
   // Cluster-scoped: no project filter, and nothing to reset when the caller changes
   // project — the page has no project context by design.
   const list = useResourceListState<SortKey>({ defaultSortBy: 'name', defaultPageSize: PAGE_SIZE, resetOn: [cluster] });
@@ -111,7 +112,7 @@ function NamespaceListPage({ kind, cluster }: ClusterListPageProps): React.React
                 disabled: () => cordon.isPending,
               },
               { key: 'terminal', label: t('container.terminal.open'), aiId: 'nodes:terminal-open',
-                disabled: (row: Row) => (row as NodeSummary).status !== 'Ready' },
+                disabled: (row: Row) => (row as NodeSummary).status !== 'Running' },
             ],
           }
         : {}),
@@ -150,15 +151,28 @@ function NamespaceListPage({ kind, cluster }: ClusterListPageProps): React.React
                 hideBelow: 'md',
                 render: (row: Row) => {
                   const node = row as NodeSummary;
+                  /*
+                   * Same three states as the node list, from `kube-server`'s rule:
+                   * cordoned, a condition out of range, or healthy. A cordoned node
+                   * carries its taints in a tooltip — there can be several and the
+                   * badge alone does not say which.
+                   */
                   return (
                     <span className="flex flex-col items-start gap-0.5">
-                      <Badge tone={node.status === 'Ready' ? 'success' : 'danger'}>{nodeStatusLabel(node.status)}</Badge>
-                      {/* Cordoned is a second fact: the node is healthy but takes no new pods. */}
-                      {node.unschedulable ? (
-                        <span className="text-[11px] text-ai-fg-muted" data-ai-id={`nodes:cordoned:${node.name}`}>
-                          {t('node.status.cordoned')}
-                        </span>
-                      ) : null}
+                      {node.status === 'Unschedulable' && node.taints.length > 0 ? (
+                        <Tooltip content={<span className="flex flex-col gap-0.5">
+                          <span className="font-medium">{t('node.status.taints')}</span>
+                          {node.taints.map((taint) => <span key={`${taint.key}=${taint.value}:${taint.effect}`} className="font-ai-mono text-[11px]">
+                            {`${taint.key}=${taint.value || ''}:${taint.effect}`}
+                          </span>)}
+                        </span>}>
+                          <span data-ai-id={`nodes:taints:${node.name}`}><Badge tone="warning">{nodeStatusLabel(node.status)}</Badge></span>
+                        </Tooltip>
+                      ) : (
+                        <Badge tone={node.status === 'Running' ? 'success' : node.status === 'Warning' ? 'warning' : 'danger'}>
+                          {nodeStatusLabel(node.status)}
+                        </Badge>
+                      )}
                     </span>
                   );
                 },
@@ -350,7 +364,7 @@ function NamespaceListPage({ kind, cluster }: ClusterListPageProps): React.React
           const node = row as NodeSummary;
           if (action === 'cordon') cordon.mutate({ name: node.name, unschedulable: true });
           if (action === 'uncordon') cordon.mutate({ name: node.name, unschedulable: false });
-          if (action === 'terminal' && node.status === 'Ready') setTerminalNode(node.name);
+          if (action === 'terminal' && node.status === 'Running') setTerminalNode(node.name);
         }}
       />
       <MutationAlert error={cordon.error} />

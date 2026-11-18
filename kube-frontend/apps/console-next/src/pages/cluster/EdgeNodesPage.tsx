@@ -74,7 +74,11 @@ export function EdgeNodesPage({ cluster }: EdgeNodesPageProps): React.ReactEleme
           </Link>
         ),
       },
-      { key: 'status', hideable: true, title: t('cluster.column.status'), render: (row) => <Badge tone={row.status === 'Ready' ? 'success' : 'danger'}>{row.status}</Badge> },
+      { key: 'status', hideable: true, title: t('cluster.column.status'), render: (row) => <Badge
+        tone={row.status === 'Running' ? 'success' : row.status === 'Warning' ? 'warning' : 'danger'}>
+        {row.status === 'Running' ? t('node.status.running') : row.status === 'Warning' ? t('node.status.warning')
+          : row.status === 'Unschedulable' ? t('node.status.unschedulable') : row.status}
+      </Badge> },
       { key: 'internalIP', hideable: true, title: t('node.detail.internalIP'), hideBelow: 'md', render: (row) => <span className="tabular-nums">{row.internalIP || '-'}</span> },
       { key: 'createdAt', hideable: true, title: t('cluster.column.createdAt'), hideBelow: 'md', render: (row) => <span className="tabular-nums text-ai-fg-muted">{row.createdAt || '-'}</span> },
     ],

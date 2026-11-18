@@ -116,7 +116,8 @@ describe('overview completion', () => {
     mount(<ComponentsPage cluster="host" initialType="monitoring" />);
     await screen.findByText('prometheus');
     expect(screen.queryByText('api')).toBeNull();
-    await userEvent.click(screen.getByRole('combobox'));
+    // The page has two comboboxes (group filter and page size); name the one meant.
+    await userEvent.click(screen.getByRole('combobox', { name: '组件分类' }));
     await userEvent.click(screen.getByRole('option', { name: '全部组件' }));
     expect(await screen.findByText('api')).toBeInTheDocument();
   });

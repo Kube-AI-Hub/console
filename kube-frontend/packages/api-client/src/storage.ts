@@ -333,7 +333,15 @@ interface KubeNode extends KubeObject {
 
 /** One row of the cluster's node list. */
 export interface NodeSummary extends ResourceBase {
-  /** `Ready` / `NotReady` / `Unknown`, from the Ready condition. */
+  /**
+   * The node's overall health, derived the way `kube-server` derives it.
+   *
+   * `kube-server`'s `getNodeStatus` (`pkg/models/resources/v1alpha3/node/nodes.go`)
+   * answers `unschedulable` / `warning` / `running`; the API uses it to *filter*, not
+   * to fill a response field, so the list has to reproduce it. `Ready` / `NotReady` /
+   * `Unknown` describe the `Ready` condition alone and cannot express "cordoned but
+   * healthy" or "a pressure condition is set".
+   */
   status: string;
   /** Control-plane / worker, derived from the node's labels as the old console does. */
   role: string;
@@ -353,6 +361,15 @@ export interface NodeSummary extends ResourceBase {
    * fact and not just a flag in a detail page.
    */
   unschedulable: boolean;
+  /**
+   * The node's taints, in full.
+   *
+   * On the row, not just the detail, because the cordoned state is explained by one
+   * of them (`node.kubernetes.io/unschedulable`): the list shows "无法调度" and the
+   * tooltip has to say *which* taints caused it, or the reader has to open the node
+   * to find out.
+   */
+  taints: NodeTaint[];
   /** Current usage from the metrics API, absent when metrics are unavailable. */
   cpuUsage?: string;
   memoryUsage?: string;
@@ -415,13 +432,48 @@ export function nodeRole(item: KubeNode): string {
   return roles.length > 0 ? roles.join(', ') : 'worker';
 }
 
-/** The Ready condition decides health; a node without one is not usable yet. */
+/**
+ * The node's overall health, matching `kube-server`'s `getNodeStatus`.
+ *
+ * `kube-server` (`pkg/models/resources/v1alpha3/node/nodes.go`) answers three values
+ * and uses them to *filter* the list rather than to fill a response field:
+ *
+ * - `unschedulable` — `spec.unschedulable` is set (cordoned);
+ * - `warning` — any condition in `expectedConditions` is not at its expected status;
+ * - `running` — otherwise.
+ *
+ * Reproduced here because the API does not return it, and because `Ready` alone
+ * cannot express either "cordoned but healthy" or "a pressure condition is set".
+ * The old console's JS version of this iterated with `health = …` (assignment, not
+ * conjunction), so only the *last* condition decided — a node with a real pressure
+ * condition could read as healthy. The Go version is the correct one and is what
+ * this follows.
+ */
 export function nodeStatus(item: KubeNode): string {
+  if ((item.spec ?? {})['unschedulable'] === true) return 'Unschedulable';
   const conditions = (item.status?.['conditions'] ?? []) as Array<Record<string, unknown>>;
-  const ready = conditions.find((condition) => condition['type'] === 'Ready');
-  if (!ready) return 'Unknown';
-  return String(ready['status']) === 'True' ? 'Ready' : 'NotReady';
+  const unhealthy = conditions.some((condition) => {
+    const expected = EXPECTED_CONDITIONS[String(condition['type'] ?? '')];
+    return expected !== undefined && String(condition['status']) !== expected;
+  });
+  return unhealthy ? 'Warning' : 'Running';
 }
+
+/**
+ * Conditions that are supposed to hold, and the status that says they do.
+ *
+ * Mirrors `expectedConditions` in `kube-server`'s node model. A condition not listed
+ * here carries no expectation, so it cannot make a node unhealthy.
+ */
+const EXPECTED_CONDITIONS: Record<string, string> = {
+  MemoryPressure: 'False',
+  DiskPressure: 'False',
+  PIDPressure: 'False',
+  NetworkUnavailable: 'False',
+  ConfigOK: 'True',
+  KubeletReady: 'True',
+  Ready: 'True',
+};
 
 function nodeAddress(item: KubeNode, type: string): string {
   const addresses = (item.status?.['addresses'] ?? []) as Array<Record<string, unknown>>;
@@ -458,7 +510,6 @@ export interface NodeDetail extends NodeSummary {
   allocatedLimits: Record<string, string>;
   gpuTopology: Array<Record<string, string>>;
   labels: Record<string, string>;
-  taints: NodeTaint[];
   nodeInfo: {
     osImage: string;
     kernelVersion: string;
@@ -552,6 +603,12 @@ export function toNodeSummary(item: KubeNode): NodeSummary {
     cpu: String(allocatable['cpu'] ?? ''),
     memory: String(allocatable['memory'] ?? ''),
     unschedulable: (item.spec ?? {})['unschedulable'] === true,
+    taints: (((item.spec ?? {})['taints'] ?? []) as Array<Record<string, unknown>>).map((taint) => ({
+      key: String(taint['key'] ?? ''),
+      value: String(taint['value'] ?? ''),
+      effect: String(taint['effect'] ?? ''),
+      ...(taint['timeAdded'] ? { timeAdded: String(taint['timeAdded']) } : {}),
+    })),
     xpu: labels['xpu'] || (labels['xpu-vendor'] ? `${labels['xpu-vendor']}-${labels['xpu-model'] ?? ''}` : 'CPU'),
     gpuMode: String(gpuInfo['virtualCardMode'] ?? ''),
     gpuVendor,

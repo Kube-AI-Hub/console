@@ -95,10 +95,15 @@ export function NodeDetailPage({ cluster, name: nameProp, backTo = '/kube-fronte
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="text-2xl font-semibold text-ai-fg">{name}</h1>
           {node ? (
-            <Badge tone={node.status === 'Ready' ? 'success' : 'danger'}>{node.status}</Badge>
+            <Badge tone={node.status === 'Running' ? 'success' : node.status === 'Warning' ? 'warning' : 'danger'}>
+              {node.status === 'Running' ? t('node.status.running') : node.status === 'Warning' ? t('node.status.warning')
+                : node.status === 'Unschedulable' ? t('node.status.unschedulable') : node.status}
+            </Badge>
           ) : null}
           {node?.unschedulable ? <span className="text-xs text-ai-fg-muted">{t('node.status.cordoned')}</span> : null}
-          <Button variant="primary" size="sm" className="ml-auto" disabled={node?.status !== 'Ready'}
+          {/* The terminal needs a kubelet that is up; `Running` is exactly that (a
+              cordoned node is still `Running`, and can still be exec'd into). */}
+          <Button variant="primary" size="sm" className="ml-auto" disabled={node?.status !== 'Running'}
             {...actionProps('node-detail:terminal-open')} onClick={() => setTerminalOpen(true)}>
             {t('container.terminal.open')}
           </Button>

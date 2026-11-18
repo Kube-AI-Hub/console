@@ -120,20 +120,15 @@ describe('statistics tiles filter the node list', () => {
 });
 
 /**
- * The status column speaks the reader's language.
+ * The status column speaks the reader's language and matches `kube-server`.
  *
- * `NodeSummary.status` is the API's own English (`Ready` / `NotReady` / `Unknown`,
- * straight from the node's `Ready` condition), so printing it raw left one English
- * word in an otherwise Chinese row.
+ * `kube-server`'s `getNodeStatus` answers `unschedulable` / `warning` / `running` —
+ * it is used to *filter* the list, not to fill a response field, so the row has to
+ * reproduce it. `Ready` alone cannot express "cordoned but healthy" or "a pressure
+ * condition is set", which is why the column is not derived from the Ready condition.
  */
-describe('node status is localized', () => {
-  it.each([
-    ['Ready', '就绪', 'True'],
-    ['NotReady', '未就绪', 'False'],
-    // No `Ready` condition at all is `Unknown`, not `NotReady`: the node has not
-    // reported anything, which is a different fact from reporting not-ready.
-    ['Unknown', '未知', null],
-  ])('renders %s as %s', async (apiStatus, label, condition) => {
+describe('node status matches kube-server and is localized', () => {
+  const mountWithNode = async (spec: Record<string, unknown>, conditions: Array<Record<string, string>>) => {
     vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
       const url = new URL(String(input));
       if (url.pathname.endsWith('/stats')) return Response.json({ total: 1, healthy: 1, nvidia: 1 });
@@ -141,20 +136,52 @@ describe('node status is localized', () => {
       if (url.pathname.includes('/selfsubjectaccessreviews')) return Response.json({ status: { allowed: true } });
       if (url.pathname.includes('/monitoring.')) return Response.json({ results: [] });
       return Response.json({
-        items: [{ metadata: { name: 'gpu01', labels: { 'xpu-vendor': 'nvidia' } }, spec: {},
-          status: condition === null ? {} : { conditions: [{ type: 'Ready', status: condition }] } }],
+        items: [{ metadata: { name: 'gpu01', labels: { 'xpu-vendor': 'nvidia' } }, spec, status: { conditions } }],
         totalItems: 1,
       });
     }));
     mount();
     await screen.findByText('gpu01');
-
     const th = screen.getAllByRole('columnheader').find((cell) => (cell.textContent ?? '').trim() === '状态')!;
     const index = [...th.parentElement!.children].indexOf(th);
-    const cell = document.querySelectorAll('tbody tr')[0]!.children[index]!;
-    expect(cell).toHaveTextContent(label);
-    // The API value must not survive anywhere in the cell.
-    if (apiStatus !== label) expect(cell.textContent).not.toContain(apiStatus);
+    return document.querySelectorAll('tbody tr')[0]!.children[index] as HTMLElement;
+  };
+
+  it('reads 运行中 when every expected condition holds', async () => {
+    const cell = await mountWithNode({}, [
+      { type: 'Ready', status: 'True' },
+      { type: 'MemoryPressure', status: 'False' },
+    ]);
+    expect(cell).toHaveTextContent('运行中');
+    expect(cell.textContent).not.toContain('Running');
+  });
+
+  it('reads 告警 when any expected condition is out of range', async () => {
+    // The old console's JS version assigned inside `forEach`, so only the *last*
+    // condition decided; a real pressure condition could read as healthy. This is
+    // the case that separates the two implementations: Ready is True, but the node
+    // is under memory pressure.
+    const cell = await mountWithNode({}, [
+      { type: 'MemoryPressure', status: 'True' },
+      { type: 'Ready', status: 'True' },
+    ]);
+    expect(cell).toHaveTextContent('告警');
+  });
+
+  it('reads 无法调度 when cordoned, and lists the taints in a tooltip', async () => {
+    const cell = await mountWithNode({
+      unschedulable: true,
+      taints: [
+        { key: 'node.kubernetes.io/unschedulable', effect: 'NoSchedule' },
+        { key: 'dedicated', value: 'gpu-a100', effect: 'NoExecute' },
+      ],
+    }, [{ type: 'Ready', status: 'True' }]);
+
+    expect(cell).toHaveTextContent('无法调度');
+    // The badge is the tooltip's anchor; the taints themselves are in the content,
+    // which Radix renders on hover. The anchor carries the node name so the state is
+    // reachable from a test and from the page's own action handles.
+    expect(cell.querySelector('[data-ai-id="nodes:taints:gpu01"]')).not.toBeNull();
   });
 });
 

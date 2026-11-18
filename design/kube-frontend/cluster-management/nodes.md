@@ -307,22 +307,36 @@ gpu02 的测量和分配不能用于 host 集群汇总。Ready True 正常；Mem
 
 **验证**：`nodes-stats-filter.test.tsx` 覆盖双向清除、关闭 tile 不清厂商、以及 tile 的 `aria-pressed` 与 chip 同步。mlu370 `agent` 集群实测（3 节点 / 1 控制面 / 3 英伟达）：先点英伟达出现「清除厂商」，再点控制面后「清除厂商」消失、只剩「清除角色」，英伟达 tile 回落为未选中；反方向同样成立；工具条「角色」下拉选控制平面时也会清掉已选的厂商。
 
-### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-16 — 状态列本地化、vGPU 模式不再限定 host（2026-11-19）
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-16 — 状态列按 kube-server 的三态，污点进 tooltip（2026-11-19）
 
-**为什么**：两个问题都源于「把 API 的偶然形态当成契约」。
+**为什么**：状态列原本只反映 `Ready` condition（`Ready` / `NotReady` / `Unknown`），而老 console 与 `kube-server` 表达的是另一组更有信息量的三态。两个具体缺口：
 
-1. **状态列直接打印 `NodeSummary.status`**。这个值来自节点的 `Ready` condition，取值是 `Ready` / `NotReady` / `Unknown`——英文，且不在文案表里。中文页面上每行状态都是一个英文单词。
-2. **vGPU 模式按钮带 `cluster !== 'host'`**。这个限制让成员集群上的操作项灰掉，但**接口本身支持成员集群**：`setMode` 把集群作为查询参数（`?cluster=agent`），`GET /kapis/gpu.kubesphere.io/v1alpha1/gpus?cluster=agent` 返回 200 与真实卡信息，`PUT …/device-plugins/gpu/mode?cluster=agent` 也被同一后端接受（返回 `success: true`）。限制没有对应的服务端依据。
+1. **「无法调度」没有独立状态**。节点被 cordon（`spec.unschedulable: true`）后仍然健康、仍在运行容器，只是不再接新 Pod。用 `Ready` 表达会把这件事压成「就绪」，读者看不出它不再接活。
+2. **压力类 condition 被忽略**。`MemoryPressure` / `DiskPressure` / `PIDPressure` 为 True 时节点其实不健康，但 `Ready` 可能仍是 True。
 
-**做法**：
-1. 状态经 `nodeStatusLabel()` 映射到 `node.status.{ready,notReady,unknown}`。三个值分别对应「就绪 / 未就绪 / 未知」——注意**没有 `Ready` condition 是「未知」，不是「未就绪」**：节点什么都没报告，和报告了不健康是两件事。
-2. 去掉 `cluster !== 'host'`，保留 `hasPendingMode` 守卫（那才是真正的并发限制：上一次信号未完成时不能再发）。`NodesPage` 的行操作与 `NodeInfoSidebar` 的按钮两处同步改；`NodeInfoSidebar` 因此不再需要 `cluster` prop。
+**做法**：复刻 `kube-server` 的 `getNodeStatus`（`pkg/models/resources/v1alpha3/node/nodes.go`）：
+
+```go
+if node.Spec.Unschedulable { return "unschedulable" }
+for _, c := range node.Status.Conditions { if isUnhealthyStatus(c) { return "warning" } }
+return "running"
+```
+
+- `spec.unschedulable` → `unschedulable`（无法调度）
+- 任一 `expectedConditions` 不在期望值 → `warning`（告警）
+- 否则 → `running`（运行中）
+
+`expectedConditions` 也照搬：`MemoryPressure`/`DiskPressure`/`PIDPressure`/`NetworkUnavailable` 期望 `False`，`ConfigOK`/`KubeletReady`/`Ready` 期望 `True`。不在表里的 condition 没有期望值，不会让节点变告警。
+
+**为什么在 `api-client` 里算而不是取接口字段**：`kube-server` 的 `getNodeStatus` 只用于**服务端筛选**（`query.FieldStatus`），响应里没有这个字段。实测 `GET …/nodes` 的 item 顶层只有 `apiVersion/kind/metadata/spec/status`，`status` 里也没有 `nodeStatus`。所以列表必须自己推导，且必须与筛选口径一致——否则「筛选无法调度」选出来的行和状态列显示会对不上。
+
+**污点 tooltip**：`taints` 从 `NodeDetail` 上移到 `NodeSummary`，因为列表行也需要它。无法调度时徽章外包 `Tooltip`，逐条列出 `key=value:effect`——污点可能不止一条（`node.kubernetes.io/unschedulable` 是 cordon 产生的，用户还可能手动加别的），只说「无法调度」读者仍不知道原因。格式与老 console 的 `renderTaintsTip` 一致。
 
 **被否方案**：
-- 把 `Ready`/`NotReady` 直接当文案键（`t('node.status.Ready')`）。键名会跟着 API 取值走，API 改一个词就多一个键，且大小写敏感的键名容易写错。
-- 保留 host 限制、只在文案上说明「仅主集群支持」。限制本身是错的，解释它只会把错误固化。
-- 只在 `NodesPage` 放开、不动 `NodeInfoSidebar`。同一个能力在两个入口行为不一致，比两处都错更难排查。
+- 继续用 `Ready`/`NotReady` 并另加一个「已停止调度」副标题。两个事实挤在一列里，且压力类 condition 仍然看不见。
+- 照抄老 console 的 JS 版 `getNodeStatus`。它有 bug：`conditions.forEach(item => { health = … })` 是**赋值不是合取**，最终只由最后一个 condition 决定——内存压力为 True 但 Ready 在末尾时会被判成健康。Go 版本才是对的。
+- 只在详情页展示污点。列表是读者发现「这个节点不接活了」的地方，答案要在那一行。
 
-**何时重新考虑**：若后端明确对成员集群关闭该写接口（返回 4xx 而非 `success: true`），恢复限制并在 design 里写明是哪条错误。
+**何时重新考虑**：若 `kube-server` 把 `nodeStatus` 放进响应（而不是只用于筛选），改为直接读该字段，删掉本地推导。
 
-**验证**：`nodes-stats-filter.test.tsx` 覆盖三种状态的本地化（含「无 Ready 条件 → 未知」）与成员集群上 vGPU 菜单项**未禁用**（`aria-disabled` 不为 true、`pointer-events` 不为 none）。mlu370 实测 `agent` 集群：状态列显示「就绪」，行操作里「设置 vGPU 模式」`pointer-events: auto`、`opacity: 1`，点击后弹窗标题为「设置 vGPU 模式 · sagesuite-demo」、副标题 `agent / sagesuite-demo`。
+**验证**：`nodes-stats-filter.test.tsx` 覆盖三态（含「内存压力 True + Ready True → 告警」这个区分新旧实现的用例）与无法调度时的 tooltip 锚点。mlu370 `agent` 实测：三个节点显示「运行中」；注入 cordon + 两条污点后显示「无法调度」，tooltip 内容为「污点 / node.kubernetes.io/unschedulable=:NoSchedule / dedicated=gpu-a100:NoExecute」，徽章为警示色（琥珀 30 像素、绿色 0 像素）；状态筛选下拉为「全部 / 运行中 / 告警 / 无法调度」，与老 console 截图一致。
