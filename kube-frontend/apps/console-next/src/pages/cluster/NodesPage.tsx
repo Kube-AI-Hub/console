@@ -3,7 +3,7 @@ import { Link } from '@tanstack/react-router';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { accessReviewApi, nodesWriteApi, type NodeSummary, type NodeMetricValues } from '@kube-ai-hub/api-client';
-import { AiSurface, Badge, Button, Icon, MetricCell, MetricRing, ResourceList, StatisticsGroup, type ListColumn, type ListSchema, type StatisticItem } from '@kube-ai-hub/ui';
+import { AiSurface, Badge, Button, Icon, MetricCell, MetricRing, ResourceList, StatisticsGroup, Tooltip, cn, type ListColumn, type ListSchema, type StatisticItem } from '@kube-ai-hub/ui';
 import { api } from '@/api';
 import { useT } from '@/i18n';
 import { useResourceListState } from '@/components/resource/useResourceListState';
@@ -17,6 +17,20 @@ import { GpuModeDialog } from './GpuModeDialog';
 import { NodeJoinDialog } from './NodeJoinDialog';
 import { hasPendingMode, timeOffsets, useNodesList, useNodesMetrics, useNodesStats, useNodesTime } from './nodeListQueries';
 import { VendorIcon, VendorMix } from './VendorIcon';
+
+/**
+ * Text size for the ring's centre label.
+ *
+ * `1/1` and `12/16` fit a 40px ring at 11px; `100/128` measures 41px and would
+ * spill outside it. Stepping the size down keeps the counts inside the arc at any
+ * fleet size instead of letting a large cluster look like a broken glyph.
+ */
+function healthRatioLabelSize(healthy: number | undefined, total: number | undefined): string {
+  const label = `${healthy ?? 0}/${total ?? 0}`;
+  if (label.length >= 7) return 'text-[9px]';
+  if (label.length >= 5) return 'text-[10px]';
+  return 'text-[11px]';
+}
 
 export function NodesPage({ cluster }: { cluster: string }): React.ReactElement {
   const t = useT();
@@ -83,17 +97,35 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
      * then label, then value", so the eye compares like with like instead of reading
      * a percentage that happens to sit beside a circle.
      *
-     * `MetricRing` is this design system's equivalent: one arc, tone by ratio, the
-     * ratio in the middle. The detail line ("1 / 1 healthy nodes") moves into the
-     * ring's centre, which is where the old chart put its own counts.
+     * `MetricRing` is this design system's equivalent: one arc, tone by ratio. The
+     * counts go **inside** the ring — `healthy / total`, the pair the old chart
+     * prints in its centre — and the tooltip restates them in words.
+     *
+     * The percentage therefore appears **once**, in the value column, which is what
+     * the old console does: its `SimpleCircle` draws `1/1` in the middle and the
+     * adjacent `Text` carries `100.0%`. Putting the percentage in both places is the
+     * duplication to avoid.
      */
     { key: 'health', label: t('node.stats.health'),
       value: healthPercent === undefined ? '-' : `${healthPercent}%`,
       state: statState, tone: healthRatio === 1 ? 'success' : healthRatio === undefined ? 'neutral' : 'warning',
       icon: healthPercent === undefined ? <Icon name="nodes" size={40} /> :
-        <MetricRing value={healthPercent} tone={healthRatio === 1 ? 'success' : 'warning'} className="size-10">
-          <span className="text-[11px] font-semibold tabular-nums">{healthPercent}%</span>
-        </MetricRing> },
+        <Tooltip content={t('node.stats.healthTooltip', { healthy: stats.data?.healthy ?? 0, total: stats.data?.total ?? 0, percent: healthPercent })}>
+          <MetricRing value={healthPercent} tone={healthRatio === 1 ? 'success' : 'warning'} className="size-10"
+            aria-label={t('node.stats.healthTooltip', { healthy: stats.data?.healthy ?? 0, total: stats.data?.total ?? 0, percent: healthPercent })}>
+            {/*
+              * `healthy/total`, the pair the old chart prints in its centre.
+              *
+              * The size steps down for longer text: `100/128` measures 41px at 11px
+              * and would spill outside a 40px ring, which reads as a rendering fault
+              * rather than as a number.
+              */}
+            <span className={cn('font-semibold tabular-nums', healthRatioLabelSize(stats.data?.healthy, stats.data?.total))}
+              data-ai-id="nodes:health-ratio">
+              {stats.data ? `${stats.data.healthy}/${stats.data.total}` : '-'}
+            </span>
+          </MetricRing>
+        </Tooltip> },
     /*
      * One tile per accelerator vendor, each with its own mark.
      *
