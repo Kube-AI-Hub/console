@@ -25,6 +25,31 @@ python3 tools/multicluster_sweep.py --env-file <mlu370 的 env> \
 
 `--bff -` 表示应用与接口同源（新形态），工具已支持（见[影响记录](bff-retired-tooling-impact-20261118.md)）。
 
+## 已完成的验收：登录页（无需凭据）
+
+登录页是公开的，所以**不拿凭据也能验**：
+
+```bash
+python3 tools/multicluster_sweep.py --env-file <任意> --app https://ka.watering.ai \
+  --bff - --keyboard-local
+```
+
+```
+OK   html[lang]                 zh-CN
+OK   one main landmark          1
+OK   one h1                     1
+OK   every field has a label    -
+OK   every button has a name    -
+OK   violet/dark  login  stops=8  no_ring=0 weak=0 worst=3.52
+OK   violet/light login  stops=8  no_ring=0 weak=0 worst=17.12
+OK   green/dark   login  stops=8  no_ring=0 weak=0 worst=10.4
+OK   green/light  login  stops=8  no_ring=0 weak=0 worst=18.49
+EXIT=0
+```
+
+**这是新架构部署上的第一份验收证据**：结构可访问性 5 条 + 四组主题色调的 Tab 顺序与焦点指示对比度全部通过，
+数值与本地构建完全一致（3.52 / 17.12 / 10.4 / 18.49）。
+
 ## 缺什么
 
 **mlu370 的账号密码不在仓库里**（也不该在）。拿到凭据后即可：
