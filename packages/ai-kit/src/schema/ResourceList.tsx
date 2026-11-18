@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { cn } from '../utils/cn';
 import { Button } from '../primitives/Button';
-import { InputSearch } from '../primitives/Input';
+import { InputSearch, Input } from '../primitives/Input';
 import { Select, MultiSelect } from '../primitives/Select';
+import { Checkbox } from '../primitives/Toggles';
 import { Table, type SortOrder, type TableColumn, type TableSortState } from '../primitives/Table';
 import { Pagination } from '../primitives/Navigation';
 import { Badge, Empty } from '../primitives/Display';
@@ -111,7 +112,7 @@ export interface ListFilter {
   column?: string;
   /** Label for the "no filter" option; defaults to `全部{title}`. */
   allLabel?: string;
-  options?: Array<{ value: string; label: string }>;
+  options?: Array<{ value: string; label: string; disabled?: boolean }>;
   type?: 'select' | 'text';
   multiple?: boolean;
   /**
@@ -409,8 +410,12 @@ function renderStatus(value: unknown): React.ReactNode {
  *
  * The icon is always present so the column does not shift when a filter becomes
  * active; it is tinted when the column is narrowed, which is the only signal that a
- * filter is on once the popover is closed. The popover holds the same control the
- * toolbar used to: a select, a searchable multi-select, or a keyword field.
+ * filter is on once the popover is closed.
+ *
+ * The options are rendered directly in the panel, not behind a nested select. A
+ * select inside a popover makes the reader open the filter and then open the select —
+ * two clicks to reach a list of four vendors. The panel is already the place they
+ * asked for, so the choices belong in it.
  */
 function ColumnFilter({ filter, value, onChange, labels }: {
   filter: ListFilter;
@@ -418,22 +423,22 @@ function ColumnFilter({ filter, value, onChange, labels }: {
   onChange: (next: string) => void;
   labels?: { clearFilter?: (title: string) => string };
 }): React.ReactElement {
+  const [query, setQuery] = React.useState('');
   const active = value !== '';
+  const selected = value.split(',').filter(Boolean);
+  const selectedSet = new Set(selected);
   const clear = (): void => onChange('');
+  const keyword = query.trim().toLowerCase();
+  const matches = (filter.options ?? []).filter((option) => !keyword || option.label.toLowerCase().includes(keyword));
+
   return (
     <Popover
       align="start"
-      /*
-       * `p-0` on the panel: it holds exactly one control, and the control draws its
-       * own frame. Keeping the default padding put a border inside a border, which is
-       * the "field wrapped in a field" look the popover is meant to avoid.
-       */
       className="w-56 p-0"
       trigger={
         <button
           type="button"
           aria-label={filter.title}
-          aria-expanded={undefined}
           data-ai-id={filter.aiId}
           data-active={active ? 'true' : undefined}
           onClick={(event) => event.stopPropagation()}
@@ -460,36 +465,82 @@ function ColumnFilter({ filter, value, onChange, labels }: {
             clearLabel={labels?.clearFilter?.(filter.title)}
             clearAiId={filter.aiId ? `${filter.aiId}:clear` : undefined}
           />
-        ) : filter.multiple ? (
-          <MultiSelect
-            options={filter.options ?? []}
-            value={value.split(',').filter(Boolean)}
-            onValueChange={(values) => onChange(values.join(','))}
-            placeholder={filter.title}
-            clearLabel={labels?.clearFilter?.(filter.title) ?? filter.title}
-            searchLabel={filter.searchable ? filter.title : undefined}
-            emptyText={filter.emptyText}
-            data-ai-id={filter.aiId ? `${filter.aiId}:options` : undefined}
-          />
         ) : (
-          <Select
-            aria-label={filter.title}
-            placeholder={filter.title}
-            value={value || ALL_OPTION}
-            onValueChange={(next) => onChange(next === ALL_OPTION ? '' : next)}
-            {...(filter.aiId ? { 'data-ai-id': `${filter.aiId}:options` } : {})}
-            options={[{ value: ALL_OPTION, label: filter.allLabel ?? `全部${filter.title}` }, ...(filter.options ?? [])]}
-            {...(filter.searchable ? { searchable: true } : {})}
-            {...(filter.emptyText ? { emptyText: filter.emptyText } : {})}
-          />
+          <>
+            {/*
+             * A search field only when the list is long enough to need one: a filter
+             * with three options does not, and the extra row pushes the options down.
+             */}
+            {filter.searchable ? (
+              <div className="border-b border-ai-line p-1.5">
+                <Input value={query} aria-label={filter.title} placeholder={filter.title}
+                  onChange={(event) => setQuery(event.target.value)} />
+              </div>
+            ) : null}
+            <div className="flex max-h-60 flex-col gap-0.5 overflow-y-auto p-1" role="group" aria-label={filter.title}
+              data-ai-id={filter.aiId ? `${filter.aiId}:options` : undefined}
+              onKeyDown={(event) => {
+                if (!['ArrowDown', 'ArrowUp'].includes(event.key)) return;
+                const items = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="option"], [role="checkbox"]'));
+                const index = items.indexOf(document.activeElement as HTMLButtonElement);
+                items[(index + (event.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length]?.focus();
+                event.preventDefault();
+              }}>
+              {filter.multiple ? null : (
+                <FilterOption key={ALL_OPTION} label={filter.allLabel ?? `全部${filter.title}`}
+                  selected={!active} onSelect={() => onChange('')} />
+              )}
+              {matches.map((option) => filter.multiple ? (
+                <label key={option.value} className="flex min-h-8 cursor-pointer items-center gap-2 rounded-ai-sm px-2 text-xs text-ai-fg hover:bg-ai-surface-2">
+                  <Checkbox checked={selectedSet.has(option.value)} disabled={option.disabled} aria-label={option.label}
+                    onCheckedChange={(checked) => onChange(checked
+                      ? [...selected, option.value].join(',')
+                      : selected.filter((entry) => entry !== option.value).join(','))} />
+                  <span className="truncate">{option.label}</span>
+                </label>
+              ) : (
+                <FilterOption key={option.value} label={option.label} selected={selectedSet.has(option.value)}
+                  onSelect={() => onChange(option.value)} />
+              ))}
+              {matches.length === 0 ? (
+                <p className="p-2 text-xs text-ai-fg-muted">{filter.emptyText ?? '无匹配项'}</p>
+              ) : null}
+            </div>
+          </>
         )}
         {active ? (
-          <Button size="sm" variant="ghost" onClick={clear} data-ai-id={filter.aiId ? `${filter.aiId}:reset` : undefined}>
-            {labels?.clearFilter?.(filter.title) ?? '清除'}
-          </Button>
+          <div className="border-t border-ai-line p-1">
+            <Button size="sm" variant="ghost" block onClick={clear} data-ai-id={filter.aiId ? `${filter.aiId}:reset` : undefined}>
+              {labels?.clearFilter?.(filter.title) ?? '清除'}
+            </Button>
+          </div>
         ) : null}
       </div>
     </Popover>
+  );
+}
+
+/**
+ * One row in a single-select filter.
+ *
+ * A button rather than a Radix select item: the list lives in the popover the reader
+ * already opened, so it only has to report the choice.
+ */
+function FilterOption({ label, selected, onSelect }: {
+  label: string; selected: boolean; onSelect: () => void;
+}): React.ReactElement {
+  return (
+    <button type="button" role="option" aria-selected={selected} onClick={onSelect}
+      className={cn(
+        'flex min-h-8 items-center gap-2 rounded-ai-sm px-2 text-left text-xs transition-colors duration-ai-fast',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ai-ring',
+        selected ? 'text-ai-accent' : 'text-ai-fg hover:bg-ai-surface-2',
+      )}>
+      <span className="flex size-3 shrink-0 items-center justify-center">
+        {selected ? <Icon name="check" size={12} /> : null}
+      </span>
+      <span className="truncate">{label}</span>
+    </button>
   );
 }
 
