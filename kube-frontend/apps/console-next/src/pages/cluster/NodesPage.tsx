@@ -3,7 +3,7 @@ import { Link } from '@tanstack/react-router';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { accessReviewApi, nodesWriteApi, type NodeSummary, type NodeMetricValues } from '@kube-ai-hub/api-client';
-import { AiSurface, Badge, Button, MetricCell, ResourceList, StatisticsGroup, type ListColumn, type ListSchema, type StatisticItem } from '@kube-ai-hub/ui';
+import { AiSurface, Badge, Button, Icon, MetricCell, MetricRing, ResourceList, StatisticsGroup, type ListColumn, type ListSchema, type StatisticItem } from '@kube-ai-hub/ui';
 import { api } from '@/api';
 import { useT } from '@/i18n';
 import { useResourceListState } from '@/components/resource/useResourceListState';
@@ -16,6 +16,7 @@ import { formatGpuMemory } from './gpuFormat';
 import { GpuModeDialog } from './GpuModeDialog';
 import { NodeJoinDialog } from './NodeJoinDialog';
 import { hasPendingMode, timeOffsets, useNodesList, useNodesMetrics, useNodesStats, useNodesTime } from './nodeListQueries';
+import { VendorIcon, VendorMix } from './VendorIcon';
 
 export function NodesPage({ cluster }: { cluster: string }): React.ReactElement {
   const t = useT();
@@ -65,14 +66,39 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
   }, [nodes.data, nodes.isPlaceholderData, list.page, list.pageSize]);
   const vendorName = (vendor: string) => { const key = vendorKey(vendor); return key ? t(GPU_VENDOR_LABEL_KEYS[key]) : vendor || t('node.list.unknown'); };
   const statState = stats.isPending ? 'loading' : stats.isError ? 'error' : 'ready';
+  const healthRatio = stats.data?.total ? stats.data.healthy / stats.data.total : undefined;
+  const healthPercent = healthRatio === undefined ? undefined : Math.round(healthRatio * 100);
   const summary: StatisticItem[] = [
-    { key: 'total', label: t('node.stats.total'), value: stats.data?.total, state: statState },
+    { key: 'total', label: t('node.stats.total'), value: stats.data?.total, state: statState, icon: <Icon name="nodes" size={20} /> },
     { key: 'control-plane', label: t('node.stats.controlPlane'), value: controlPlane.data,
-      state: controlPlane.isPending ? 'loading' : controlPlane.isError ? 'error' : 'ready' },
-    { key: 'health', label: t('node.stats.health'), value: stats.data?.total ? `${(stats.data.healthy / stats.data.total * 100).toFixed(1)}%` : '-',
+      state: controlPlane.isPending ? 'loading' : controlPlane.isError ? 'error' : 'ready',
+      icon: <Icon name="kubernetes" size={20} /> },
+    /*
+     * Health as a ring rather than a bare percentage.
+     *
+     * The number alone says "100%" without saying "of how many"; the ring carries the
+     * same ratio as a shape, so a partially-ready fleet is visible before the figure
+     * is read. The ring is the same `MetricRing` the overview uses, which keeps the
+     * two pages telling the same story in the same visual language.
+     */
+    { key: 'health', label: t('node.stats.health'),
+      value: healthPercent === undefined ? '-' : `${healthPercent}%`,
       description: stats.data ? t('node.stats.healthDetail', { healthy: stats.data.healthy, total: stats.data.total }) : '',
-      state: statState, tone: stats.data?.healthy === stats.data?.total ? 'success' : 'warning' },
-    ...(stats.data?.vendors ?? []).map((entry) => ({ key: `vendor:${entry.vendor}`, label: vendorName(entry.vendor), value: entry.count })),
+      state: statState, tone: healthRatio === 1 ? 'success' : healthRatio === undefined ? 'neutral' : 'warning',
+      icon: healthPercent === undefined ? undefined : <MetricRing value={healthPercent} tone={healthRatio === 1 ? 'success' : 'warning'} className="size-11">
+        <Icon name="nodes" size={16} />
+      </MetricRing> },
+    /*
+     * One tile per accelerator vendor, each with its own mark.
+     *
+     * This is the part that makes heterogeneity readable: three accelerators plus a
+     * CPU-only node set is four glyphs of different shapes, not four identical
+     * numbers under four unfamiliar names.
+     */
+    ...(stats.data?.vendors ?? []).map((entry) => ({
+      key: `vendor:${entry.vendor}`, label: vendorName(entry.vendor), value: entry.count,
+      icon: <VendorIcon vendor={entry.vendor} size={20} />,
+    })),
   ];
   const metric = (row: NodeSummary, kind: 'gpu' | 'gpuMemory' | 'cpu' | 'memory' | 'pods') => {
     const data: NodeMetricValues = metrics.data?.[row.name] ?? {};
@@ -106,8 +132,9 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
     ...(['gpu', 'gpuMemory', 'cpu', 'memory', 'pods'] as const).map((key) => ({ key, hideable: true, width: 150,
       title: t(key === 'gpu' ? 'node.list.gpu' : key === 'gpuMemory' ? 'node.list.gpuMemory' : key === 'cpu' ? 'cluster.column.cpuUsage' : key === 'memory' ? 'cluster.column.memoryUsage' : 'cluster.workloads.pods.title'),
       render: (row: NodeSummary) => metric(row, key) })),
-    { key: 'vendor', title: t('node.detail.xpu'), hideable: true, width: 130, render: (row) => <MetricCell
-      value={vendorName(row.gpuVendor || 'CPU')} detail={row.gpuModel || '-'} data-ai-id={`nodes:vendor:${row.name}`} /> },
+    { key: 'vendor', title: t('node.detail.xpu'), hideable: true, width: 150, render: (row) => <span className="flex min-w-0 items-center gap-2">
+      <VendorIcon vendor={row.gpuVendor || 'CPU'} size={18} className="text-ai-fg-secondary" />
+      <MetricCell value={vendorName(row.gpuVendor || 'CPU')} detail={row.gpuModel || '-'} data-ai-id={`nodes:vendor:${row.name}`} /></span> },
     { key: 'mode', title: t('node.detail.gpuMode'), hideable: true, width: 130, render: (row) => {
       const definition = GPU_MODES[row.gpuVendor?.toLowerCase() ?? '']?.find((entry) => entry.value === row.gpuMode);
       const current = definition ? t(definition.labelKey) : row.gpuMode || '-';
@@ -163,6 +190,15 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
         <Button size="sm" variant="secondary" {...actionProps('nodes:add')} onClick={() => setJoinOpen(true)}>{t('node.add.button')}</Button>
       ) : null}</header>
     <StatisticsGroup items={summary} unknownLabel={t('node.list.unknown')} data-ai-id="nodes:stats" />
+    {/*
+      * The vendor mix, stated once in words and marks under the counts.
+      *
+      * The tiles above already carry one mark per vendor, but a reader scanning four
+      * numbers has to compare glyphs to notice the cluster is heterogeneous. This strip
+      * says it directly — "NVIDIA 2, Cambricon 1, CPU 1" — and is the line that answers
+      * "does this platform actually manage mixed accelerators?".
+      */}
+    {(stats.data?.vendors?.length ?? 0) > 1 ? <VendorMix vendors={stats.data?.vendors ?? []} className="rounded-ai-lg border border-ai-line bg-ai-surface-1 px-4 py-2.5" /> : null}
     {stats.isError || controlPlane.isError ? <div className="text-xs"><ResourceErrorPanel error={stats.error || controlPlane.error}
       onRetry={() => { void stats.refetch(); void controlPlane.refetch(); }} retryAiId="nodes:stats-retry" /></div> : null}
     {metrics.isError || time.isError ? <p className="text-xs text-ai-warning">{t('node.list.metricsUnavailable')} <Button size="sm" variant="ghost" onClick={() => { void metrics.refetch(); void time.refetch(); }}>{t('common.retry')}</Button></p> : null}
