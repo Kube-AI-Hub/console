@@ -23,6 +23,7 @@
 | 5 | `Modal` | 焦点移入 / Esc 关闭 / 焦点归还 | ✓ |
 | 6 | `Dropdown` | Enter 打开 / 方向键 / Esc / 焦点归还 | ✓ |
 | 7 | 主题切换 | 组件在深/浅色下重算颜色 | ✓ |
+| 8 | `Table` | 排序的 `aria-sort` 三态循环 | ✓ |
 
 ## 1. 无匹配空态（`Schema/ResourceList › no-match`）
 
@@ -99,6 +100,17 @@ empty text still: True                                  ← 内容不因切主�
 **颜色跟着翻转**说明令牌生效（深色下用深字压亮底，浅色下用白字压暗底），不是写死的一套颜色。
 背景读到 `rgba(0,0,0,0)` 是因为读的是 `body`——令牌背景画在 `.ai-root` 容器上，
 要测对比度得取那个容器（应用里的 `--keyboard` 就是这么做的）。
+
+## 8. 表格排序（`Components/Table › sortable table`）
+
+```
+before:           名称|none
+after 1st click:  名称|ascending
+after 2nd click:  名称|descending
+```
+
+读的是 `th[aria-sort]`——排序**对读屏软件可见**，不是只换一个箭头图标。
+三态循环（无 → 升 → 降）符合 ARIA 的约定；其它列保持 `none`，说明只有被点的列在变。
 
 ## 写选择器前先 dump 结构
 
