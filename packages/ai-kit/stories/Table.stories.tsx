@@ -149,3 +149,41 @@ export const LoadingAndEmpty: Story = {
     </div>
   ),
 };
+
+/**
+ * Pinned columns and header hints.
+ *
+ * A pinned column stays put while the rest scrolls. Give it a `width`: a pinned
+ * column whose width follows its content shifts as rows change, which reads as a
+ * rendering fault rather than as a feature.
+ *
+ * `border-collapse` means a sticky cell's border scrolls away with it, so the seam
+ * is drawn with an inset shadow instead — that is why pinned columns have an opaque
+ * background rather than a border.
+ *
+ * The hint is a real control, not a `title` attribute: a tooltip that only appears on
+ * hover cannot be reached by keyboard or by touch, and it is the only place the
+ * column's unit is written down.
+ */
+export const PinnedAndHinted: Story = {
+  name: 'pinned columns and hints',
+  render: () => {
+    const columns: Array<TableColumn<Pod>> = [
+      { ...COLUMNS[0]!, width: 200, pin: 'start' },
+      { ...COLUMNS[1]!, width: 160 },
+      { ...COLUMNS[2]!, width: 160, hint: 'Pod 的当前相位；CrashLoopBackOff 是容器反复退出后的重启等待。' },
+      { ...COLUMNS[3]!, width: 120 },
+      // A wide filler column makes the horizontal scroll obvious.
+      { key: 'image', title: '镜像', width: 320, render: () => <span className="font-ai-mono text-[11px]">registry.example.com/team/api-server:2026.11.19</span> },
+      { key: 'node', title: '所在节点', width: 200, render: () => 'gpu02' },
+      { key: 'actions', title: '', width: 48, align: 'right', pin: 'end',
+        render: () => <span className="text-ai-fg-muted">···</span> },
+    ];
+    return (
+      <div className="max-w-xl">
+        <Table columns={columns} rows={ROWS} rowKey={(row) => row.name} />
+      </div>
+    );
+  },
+};
+
