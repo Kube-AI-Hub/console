@@ -423,6 +423,12 @@ function ColumnFilter({ filter, value, onChange, labels }: {
   return (
     <Popover
       align="start"
+      /*
+       * `p-0` on the panel: it holds exactly one control, and the control draws its
+       * own frame. Keeping the default padding put a border inside a border, which is
+       * the "field wrapped in a field" look the popover is meant to avoid.
+       */
+      className="w-56 p-0"
       trigger={
         <button
           type="button"
@@ -441,8 +447,7 @@ function ColumnFilter({ filter, value, onChange, labels }: {
         </button>
       }
     >
-      <div className="flex w-56 flex-col gap-2">
-        <span className="text-[11px] font-medium text-ai-fg-secondary">{filter.title}</span>
+      <div className="flex w-full flex-col">
         {filter.type === 'text' ? (
           <InputSearch
             hideButton
