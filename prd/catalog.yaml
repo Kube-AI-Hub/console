@@ -1071,6 +1071,8 @@ modules:
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-05
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-06
         - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-07
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-08
+        - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-09
     - id: node-usage
       title: 节点用量
       prd: prd/kube-frontend/cluster-management/node-usage.md

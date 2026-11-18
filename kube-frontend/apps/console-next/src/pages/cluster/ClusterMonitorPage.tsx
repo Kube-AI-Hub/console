@@ -7,6 +7,7 @@ import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
+import { ClusterStatusSection } from './ClusterStatusSection';
 import { COMPONENT_TITLES, toComponentCharts, useComponentMetrics, type ComponentChart } from './componentMonitorQueries';
 import { formatBytesPerSecond, formatComponentValue, type ComponentUnits } from './monitorFormat';
 
@@ -275,6 +276,16 @@ export function ClusterMonitorPage({ cluster, node }: ClusterMonitorPageProps): 
           </Button>
         </div>
       </header>
+
+      {/*
+        The cluster-status band sits above the trends, where the old 集群状态 page put it:
+        node online status, accelerator-vendor distribution and component status describe
+        what the cluster *is* before the charts describe what it is doing. It is rendered
+        outside the trend state so a failed window does not hide it, and only for the
+        cluster page -- the node monitor reuses this component for three node-scoped
+        trends and must not show a cluster-wide band.
+      */}
+      {node ? null : <ClusterStatusSection cluster={cluster} live={autoRefresh} />}
 
       {state === 'loading' ? <Skeleton className="h-64 w-full" /> : null}
       {state === 'error' ? (

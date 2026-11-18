@@ -1450,3 +1450,101 @@ export function eventSearchApi(client: Client) {
     },
   };
 }
+/* ------------------------------------------------------------------ *
+ * Cluster status: node health, accelerator vendors, control plane.
+ * ------------------------------------------------------------------ */
+
+/**
+ * One row of 'kubesphereStatus'.
+ *
+ * The health endpoint aggregates every KubeSphere component into "how many
+ * backends are healthy out of how many", per namespace. A namespace with no
+ * row is a different answer from a row with zero healthy backends, so callers
+ * must keep the absence (namespace not reported) apart from the number.
+ */
+export interface ComponentHealthBackend {
+  name: string;
+  namespace: string;
+  label?: Record<string, string>;
+  totalBackends: number;
+  healthyBackends: number;
+  startedAt?: string;
+}
+
+/**
+ * 'componenthealth', as far as this app reads it.
+ *
+ * 'kubernetesStatus' is accepted but not interpreted: the old console rendered
+ * it as a list of Kubernetes components, while this page reads the same facts
+ * from 'kubesphereStatus' (kube-system) so one aggregation serves every
+ * namespace. Keeping the field typed documents that the endpoint may carry it.
+ */
+export interface ComponentHealth {
+  kubesphereStatus?: ComponentHealthBackend[];
+  nodeStatus?: { totalNodes?: number; healthyNodes?: number };
+  kubernetesStatus?: unknown[];
+}
+
+/**
+ * The cluster's status band: node health, accelerator vendors and component health.
+ *
+ * Three reads, deliberately separate: an installation without a monitoring
+ * backend still has nodes and component health, and the vendor statistics
+ * endpoint is a different API version from the health one. Folding them into
+ * one call would make one failure blank the whole band.
+ */
+export function clusterStatusApi(client: Client) {
+  return {
+    /** Healthy/total backends per KubeSphere component, plus the node counts. */
+    async componentHealth(params: { cluster: string; signal?: AbortSignal }): Promise<ComponentHealth> {
+      const body = await client.request<ComponentHealth>(
+        clusterScoped('/kapis/resources.kubesphere.io/v1alpha2', params.cluster, 'componenthealth'),
+        params.signal ? { signal: params.signal } : {},
+      );
+      return body ?? {};
+    },
+
+    /**
+     * Node count per accelerator vendor.
+     *
+     * The shape is '{ <vendor>: count, healthy?: number, total?: number }': the
+     * keys are vendor names, and healthy/total are appended summary fields,
+     * not vendors. Values are coerced here because the endpoint is an aggregation
+     * (older servers answered numbers as strings) and a string count would sort
+     * and sum as text.
+     */
+    async nodeVendorStats(params: { cluster: string; signal?: AbortSignal }): Promise<Record<string, number>> {
+      const body = await client.request<Record<string, unknown>>(
+        clusterScoped('/kapis/resources.kubesphere.io/v1alpha3', params.cluster, 'nodes/stats'),
+        params.signal ? { signal: params.signal } : {},
+      );
+      const out: Record<string, number> = {};
+      for (const [key, value] of Object.entries(body ?? {})) {
+        const parsed = typeof value === 'number' ? value : Number(value);
+        if (Number.isFinite(parsed)) out[key] = parsed;
+      }
+      return out;
+    },
+
+    /**
+     * Whether etcd is wired into monitoring.
+     *
+     * The probe is the ServiceMonitor object itself: 200 means the operator would
+     * scrape etcd, 404 means it would not. A 403 is a permission answer, not
+     * "not monitored", so the caller has to branch on it -- the error is
+     * propagated rather than swallowed here.
+     */
+    async etcdServiceMonitor(params: { cluster: string; signal?: AbortSignal }): Promise<unknown> {
+      return client.request<unknown>(
+        clusterScoped(
+          '/apis/monitoring.coreos.com/v1/namespaces/kubesphere-monitoring-system',
+          params.cluster,
+          'servicemonitors/etcd',
+        ),
+        params.signal ? { signal: params.signal } : {},
+      );
+    },
+  };
+}
+
+export type ClusterStatusApi = ReturnType<typeof clusterStatusApi>;

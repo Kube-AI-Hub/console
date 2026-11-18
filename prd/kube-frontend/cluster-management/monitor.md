@@ -6,6 +6,8 @@
 
 集群资源用量随时间的变化：CPU 使用率、内存使用率、运行中的容器组、在线节点四个趋势。时间窗为最近 1 小时 / 6 小时 / 24 小时 / 7 天。
 
+趋势之前另有一个「集群状态」分区：节点在线状态、节点 XPU 厂商分布、组件状态（6 个服务组件与 etcd/controller-manager/scheduler 三个核心组件）。它先回答「这个集群整体是否正常」，再让读者决定看哪条趋势。集群未就绪时该页不挂载，由集群作用域路由层整页显示「等待集群加入」面板与集群概览入口，不渲染趋势与状态分区。
+
 数值来自 KubeSphere 监控的 **range query**（`start`/`end`/`step`，返回 `matrix`），与集群概览读的当前值（`vector`）是两次不同的读取。
 
 页面另有一个「系统组件」分区：APIServer、Scheduler、etcd 三个系统组件的组件级指标（请求速率与延迟按 verb、调度尝试按 result、etcd 提案/DB/WAL 等）。组件端点与集群端点不同，见「约束与边界」。
@@ -42,6 +44,18 @@
 
 **Independent Test**：在该集群 etcd 无序列时打开页面，etcd 子组显示「本集群未上报该组件指标」类说明而不是 0 或空白表格；让组件请求返回 403 时，该子组显示权限说明且没有重试按钮。
 
+### US6 - 先看集群状态再看趋势 (Priority: P1)
+
+作为 **集群管理员**，我希望 **在趋势之前先看到节点在线状态、XPU 厂商分布与组件状态**，以便 **先判断集群整体是否正常，再决定看哪条趋势——一屏曲线回答不了「集群是不是坏了」**。
+
+**Independent Test**：在就绪集群打开监控，核对「集群状态」分区在趋势分组之前、三块都有与接口一致的数字；未启用的模块显示「未安装」，无 XPU 节点时厂商块显示空态说明。
+
+### US7 - 集群未就绪时整页等待而不是一屏「不可用」 (Priority: P1)
+
+作为 **集群管理员**，我希望 **集群未就绪时这个页面由路由层整页拦住并指向集群概览**，以便 **不会对着一屏不可能成功的重试按钮和被「不可用」占满的面板反复操作，也不会看到两个内容不同的等待视图**。
+
+**Independent Test**：打开未就绪集群的监控页，路由层显示「等待集群加入」面板与「前往集群概览」入口，页面本身不挂载（没有趋势卡、没有状态分区、没有重试按钮）；集群就绪后重新进入该页显示完整页面。
+
 ## 验收场景
 
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01** — 已知监控后端可用，当打开集群监控，则四个卡片分别显示 CPU 使用率、内存使用率、运行中的容器组、在线节点，每张卡片有一条曲线与最小/最大/当前三个数值；CPU 与内存的当前值为 0–100 的百分比（由用量除以总量算出），容器组与节点为整数计数。
@@ -52,6 +66,9 @@
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-04** — 已知集群监控页已加载，当点「自动刷新：关」按钮，则按钮变为「自动刷新：开」且每 5 秒以当前时间窗重取一次（窗口向前滚动），期间曲线与当前值持续更新；当再次点击关闭，则不再发起定时请求。离开页面时定时器必须停止。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-06** — 已知监控后端可用且组件指标端点可读，当打开集群监控，则在物理资源分组之后显示「系统组件」分区，按固定顺序含 APIServer、Scheduler、etcd 三个子组；APIServer 子组显示请求速率（总数，次/秒）与请求延迟（总平均 + 按 `verb` 多序列，接口返回的秒值 ×1000 显示为 ms）；按 verb 的延迟按 `verb` 标签身份合并成多条线，同一 verb 一条线、不同 verb 不混成一条，整条为 `NaN` 的序列（本部署的 APPLY）不画成 0 线；Scheduler 子组显示调度尝试次数（按 `result` 分 scheduled/error/unschedulable，累积计数用整数）与调度尝试速率（同 result 三条线，次/秒），两者单位不同；多序列卡片带图例，图例项与线的身份一致；本部署 scheduler 调度延迟（平均值与分位）没有序列时该卡片显示空态说明而不是 0；APIServer 与 Scheduler 的当前值与同一次接口响应、同一时间窗的序列交叉核对一致。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-07** — 已知本集群 `components/etcd` 请求成功但每条指标都返回 0 条序列，当打开集群监控，则 etcd 子组显示「本集群未上报该组件指标」的说明与可能原因，不显示 0 值卡片、不显示空白表格、也不整组消失；当某个组件请求失败（如 5xx）时该子组显示错误说明与重试按钮且可重试；当失败为无权限（403）时该子组显示权限说明且不显示重试按钮；无数据、错误、无权限三种画面互不顶替，某个组件失败时其余有数据的组件子组保持可用。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-08** — 已知集群已就绪且 componenthealth（`/kapis/[clusters/{c}/]resources.kubesphere.io/v1alpha2/componenthealth`）与 nodes/stats（`/kapis/[clusters/{c}/]resources.kubesphere.io/v1alpha3/nodes/stats`）可读，当打开集群监控，则在趋势分组之前显示「集群状态」分区，含节点在线状态、节点 XPU 厂商分布、组件状态三块；节点在线状态显示健康节点数/总节点数（形如 1/1）与在线比例，点击进入该集群节点页，totalNodes 缺失显示「未上报」、为 0 显示空态说明而不是把 0/0 当正常；厂商分布按 nodes/stats 中除 healthy/total 外的全部厂商键列出节点数与占比（占比=该厂商节点数÷各厂商节点数之和，healthy/total 不计入），按数量降序；CPU 键表示集群中没有 XPU 的节点数量，按 CPU 行显示（文案取 node.vendor.*），不是空态；仅当各厂商计数合计为 0（无节点或未上报）时显示空态说明；组件状态含服务组件 6 项（kubesphere-system=Kube AI Hub、kube-system=Kubernetes、istio-system=服务网格、kubesphere-monitoring-system=监控、kubesphere-logging-system=日志、kubesphere-devops-system=DevOps），每项为命名空间内 healthyBackends 之和 ÷ totalBackends 之和，集群 configz 未启用的模块显示「未安装」；核心组件三项 etcd/controller-manager/scheduler 中 controller-manager 与 scheduler 按 label.component 匹配且 healthyBackends>0 判为正常、否则异常/未上报，etcd 按 kubesphere-monitoring-system/etcd ServiceMonitor 是否存在判为「已接入监控/未接入」；三块宽屏同排、窄屏堆叠，分区标题与趋势分组标题同级。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-09** — 已知集群未就绪（如成员集群的 agent 未连上，该集群所有 `/kapis/clusters/{c}/*` 返回 500 且信息为 `cluster {c} is not ready`），当打开集群监控，则集群监控页不挂载，由集群作用域路由层整页显示「等待集群加入」面板（`data-ai-id="cluster:not-ready"`）并提供集群概览入口（`cluster:not-ready-overview`）；页面不显示趋势卡、不显示集群状态分区、不显示重试按钮，也不在页面内重复实现第二套等待视图。就绪判断只认集群列表中的 `ready === false`：`ready` 缺失（列表读取中或读取失败）时不接管，页面照常挂载。状态分区的加载/空/未上报/无权限/失败互不顶替：加载中显示骨架；节点为 0 或厂商计数合计为 0 时显示空态说明，CPU 行不是空态；可读但节点或某模块没有记录时显示「未上报」而不是 0/0；componenthealth 403 时只有状态分区显示无权限说明且无重试，nodes/stats 403 时只有厂商块显示无权限说明；任一 5xx 时对应块显示错误说明与重试按钮且不影响另一块与趋势分区。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-10** — 已知集群监控页已就绪且「集群状态」分区已加载，当打开「自动刷新：开」，则在 5 秒内 componenthealth、nodes/stats、etcd ServiceMonitor 三个查询各再次发起一次并按新响应更新（状态分区数字刷新，已有内容不被加载骨架整体遮挡）；当再次点击关闭，则不再发起这三类定时请求；离开页面时定时器停止。
 
 ## 设计目标
 
@@ -66,12 +83,24 @@
 - 百分比卡片需要两条序列：用量与总量。
 - 系统组件读 `/kapis/monitoring.kubesphere.io/v1alpha3/components/<apiserver|scheduler|etcd>`，带 `metrics_filter`（`|` 分隔、每个名字以 `$` 结尾）、`start`/`end`/`step`、`cluster`。
 - 只保留最近 7 天：监控后端自身的保留期决定，页面不承诺更早的数据。
+- 状态分区读三处集群级接口，均为 JSON：componenthealth `/kapis/[clusters/{c}/]resources.kubesphere.io/v1alpha2/componenthealth`（`nodeStatus`、`kubernetesStatus`、`kubesphereStatus` 数组）；nodes/stats `/kapis/[clusters/{c}/]resources.kubesphere.io/v1alpha3/nodes/stats`（`厂商名 → 节点数`，另带 `healthy` / `total` 汇总字段）；ServiceMonitor `apis[/clusters/{c}]/monitoring.coreos.com/v1/namespaces/kubesphere-monitoring-system/servicemonitors/etcd`（200=已接入，404=未接入）。
+- 成员集群的集群段紧跟 `/kapis` 或 `/apis`：`/kapis/clusters/{c}/...`，不拼在 group 之后，也不用 `?cluster=` 查询参数代替。
+- 成员集群未就绪的语义：所有 `/kapis/clusters/{c}/...` 返回 HTTP 500，信息为 `cluster {c} is not ready`。这不是 403（无权限），也不是空数据（200 空集）；页面按「未就绪」处理并整页让位，不做逐块错误重试。
+- 状态分区三块的数据源互相独立（节点与组件状态来自 componenthealth，厂商分布来自 nodes/stats，etcd 项来自 ServiceMonitor），一块失败不阻塞另一块，也不阻塞趋势分区。
+- 状态分区与集群就绪判断都只读。
 - 组件指标可能整组没有序列（本部署 etcd），页面必须如实说明，不能填 0。
 - 只读。
 
 ## UI 交互设计
 
 - 顶部标题 + 时间窗按钮组（互斥，当前项高亮），窄屏换行。
+- 「集群状态」分区紧随页头、在 GPU 趋势分组之前；分区标题与「GPU / 主机资源 / 磁盘 I/O / 网络 / RDMA」分组标题同级（同一层级的分区标题，都只做分区不折叠）。分区内三块：节点在线状态、节点 XPU 厂商分布、组件状态；宽屏三块同排，窄屏堆叠。
+- 节点在线状态：健康节点数 / 总节点数（形如 1/1）+ 在线比例，整块可点击进入该集群节点页。比例用比例条表达「健康占总量的多少」；它不是一个单独的数字装饰。
+- 厂商分布：按节点数降序的列表，每行为厂商图标 + 厂商名 + 节点数 + 占比比例条与百分比；占比的分母是各厂商节点数之和，`healthy` / `total` 汇总字段不参与。`CPU` 行表示「有节点但没有 XPU」，它带真实节点数，不是空态；只有各厂商计数合计为 0（无节点或未上报）时才显示空态说明、不画空的比例条。
+- 组件状态：上半为 6 个服务组件，每项为图标 + 名称 + 健康后端数 / 总后端数（命名空间内 `healthyBackends` 之和 ÷ `totalBackends` 之和）；configz 未启用的模块显示「未安装」而不是 0/0。下半为三个核心组件：etcd 显示「已接入监控 / 未接入」，controller-manager 与 scheduler 显示「正常 / 异常 / 未上报」。不同语义不共用同一个「健康」徽标。
+- 状态分支：加载中每块给骨架；空数据给空态说明；读不到但接口成功（没有记录）显示「未上报」；无权限只说明「无权限查看」且不给重试；其他失败给错误说明与重试。五种画面互不顶替，失败的重试只重取该块的数据源。
+- 自动刷新开关同时作用于趋势与集群状态分区：开启后每 5 秒重取趋势与状态分区三查询（状态分区已有内容不因瞬时重取被整体清空），关闭后停止；不保留旧页每 2 秒无条件轮询 componenthealth 的行为。
+- 未就绪：页面本身不挂载，由集群作用域路由层整页显示「等待集群加入」面板（`data-ai-id="cluster:not-ready"`），内含「该集群尚未加入，此页面在集群就绪前不可用」与「前往集群概览」入口（`cluster:not-ready-overview`）；页面内不再放第二套等待视图，也不放重试按钮。
 - 四个卡片两列排布；卡片内：标题、当前值、曲线、最小/最大/当前/截至时间。
 - 曲线按卡片自身峰值缩放（含 15% 余量），因为固定 0–100 刻度会让 5% 的曲线贴在底部，看起来和「无数据」一样。
 - 「系统组件」分区在物理资源五组之后，含 APIServer / Scheduler / etcd 三个子组；每个子组一个标题、两列卡片网格；多序列卡片在图下方列图例（色点 + 身份 + 当前值），未返回的身份不以 0 补线。
@@ -93,6 +122,7 @@
 - 组件序列值可能是 `NaN`（本部署 APPLY verb）：丢弃非有限值，整条为 NaN 时按无数据。
 - 组件指标「有序列且值为 0」显示 0；「没有序列」显示说明——两者不得混用。
 - 组件请求 403：显示无权限说明且不提供重试；其他失败提供重试。
+- CPU 行不是空态：`nodes/stats` 的 `CPU` 键表示无 XPU 的节点数，必须作为一行显示（集群有节点、只是没有加速卡）；空态只用于厂商计数合计为 0（无节点/未上报），两者不得混用。
 
 ## 明确不做
 
@@ -100,6 +130,13 @@
 - 独立路由的 etcd / apiserver / scheduler 监控页：旧 console 是三个独立页签；本轮改为在集群监控页内以「系统组件」分区承载（见 `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-06` / `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-07`），独立路由不再需要。
 - etcd 节点级服务状态卡（在线 / 有 leader / leader 变更次数，旧 `ETCDNodes`）：本部署无 etcd 指标序列，无法验收；登记为待补，不以组件页健康数冒充。
 - 告警阈值线叠加：需要知道每条规则的阈值，规则体里没有统一字段。
+- 不新增独立路由或页签：旧 console 的 overview / resource / etcd / api-server / scheduler / ranking 六个页签不逐一搬运；物理资源与系统组件已并入本页分区，节点用量排行已有独立页（`node-usage`）。
+- 服务组件图标点击进入组件页：本轮不做（登记待补）。理由：(a) 状态行回答「是否健康」，不是导航入口；(b) 新 console 的组件页已有入口（集群概览的组件面板/侧栏），在摘要行上再加 6 个深链会把「状态」与「去哪看」混在一行；(c) 旧页的 `?type=` 过滤在新组件页是客户端分组，复刻可行但本轮 AC 未承诺。
+- 厂商分布不做饼图：用列表 + 比例条表达，不引入图表库；精确数字由列表给出。
+- etcd 真实健康不做承诺：etcd 项只表达「是否接入监控」（ServiceMonitor 是否存在），不做 leader、延迟或成员级健康判断。
+- 不单独做「集群状态」页面或页签：状态分区只作为监控页的一个分区存在。
+- 不在监控页内重复实现未就绪等待视图：未就绪由集群作用域路由层统一接管（已有 `cluster:not-ready` 面板），页面内不再加第二个。
+- 不保留旧页每 2 秒无条件轮询 componenthealth 的行为：状态分区改为随页面自动刷新开关每 5 秒重取。
 
 ## 假设
 
@@ -110,6 +147,10 @@
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01`
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-06`
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-07`
+- `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-08`
+- `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-09`
+
+- 上述 `TC-…-MONITOR-08` / `TC-…-MONITOR-09` 同时覆盖 `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-10`（自动刷新同时驱动状态分区三查询）。
 
 ## 功能需求
 
@@ -118,8 +159,12 @@
 - **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-03** — 无数据时说明，不画零线。
 - **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-04** — 组件指标走 `/components/<module>` range 查询，多序列按 verb/result/quantile 标签身份合并与着色。
 - **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-05** — 组件无数据、错误、无权限分别呈现；无数据不填 0。
+- **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-06** — 状态分区读 componenthealth 的节点与组件聚合、nodes/stats 的厂商计数、ServiceMonitor 的 etcd 接入探测与集群 configz 的模块开关；三块各自独立降级。
+- **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-07** — 集群就绪判断来自集群列表的 `ready === false`（路由层接管）；`ready` 缺失不接管。
+- **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-08** — 页面自动刷新开关同时驱动趋势查询与状态分区三查询（componenthealth、nodes/stats、etcd ServiceMonitor），开启时每 5 秒重取，关闭或卸载时停止。
 
 ## 成功标准
 
 - **SC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-01** — 百分比在 0–100 之间；窗口切换后重新取数。
 - **SC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-02** — 组件分区三个子组齐全；多序列身份不混淆；etcd 无数据如实说明；无权限不给重试。
+- **SC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-03** — 就绪集群的状态分区三块齐全，数字与同次接口响应一致，未安装模块如实说明，CPU 行表示无 XPU 节点且不是空态；未就绪成员集群整页为等待视图，无趋势、无状态分区、无重试；加载/空/未上报/无权限/失败五种画面互不顶替。

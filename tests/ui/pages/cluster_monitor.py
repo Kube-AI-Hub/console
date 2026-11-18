@@ -203,6 +203,170 @@ class ClusterMonitorPage:
             if name and points:
                 out[str(name)] = points
         return out or None
+
+    # ---------------- 集群状态分区 ----------------
+
+    #: Service components, keyed by the namespace componenthealth reports.
+    SERVICE_NAMESPACES = (
+        "kubesphere-system",
+        "kube-system",
+        "istio-system",
+        "kubesphere-monitoring-system",
+        "kubesphere-logging-system",
+        "kubesphere-devops-system",
+    )
+
+    #: Core components, in render order.
+    CORE_COMPONENTS = ("etcd", "controller-manager", "scheduler")
+
+    @property
+    def status_section(self) -> Locator:
+        return self.page.locator('[data-ai-id="cluster-monitor:status"]').last
+
+    def status_section_state(self) -> str | None:
+        return self.status_section.get_attribute("data-ai-state")
+
+    def status_card(self, block: str) -> Locator:
+        """One of the three status cards: node-online / vendor / components."""
+        if block == "components":
+            return self.page.locator('[data-ai-id="cluster-monitor:status:components"]').last
+        return self.page.locator(f'[data-ai-id="cluster-monitor:status:{block}:card"]').last
+
+    def status_card_state(self, block: str) -> str | None:
+        return self.status_card(block).get_attribute("data-ai-state")
+
+    # -- node online --
+
+    def status_node_ratio_locator(self) -> Locator:
+        return self.page.locator('[data-ai-id="cluster-monitor:status:node-online"]').last
+
+    def status_node_ratio(self) -> str:
+        return self.status_node_ratio_locator().inner_text().strip()
+
+    def status_node_percent(self) -> str:
+        return self.page.locator('[data-ai-id="cluster-monitor:status:node-online:ratio"]').last.inner_text().strip()
+
+    def status_node_link(self) -> Locator:
+        return self.page.locator('[data-ai-id="cluster-monitor:status:node-online:link"]').last
+
+    def status_node_unreported(self) -> Locator:
+        return self.page.locator('[data-ai-id="cluster-monitor:status:node-online:unreported"]').last
+
+    def status_node_empty(self) -> Locator:
+        return self.page.locator('[data-ai-id="cluster-monitor:status:node-online:empty"]').last
+
+    def status_node_branch(self, key: str) -> Locator:
+        """A node-online branch marker: loading / error / permission."""
+        return self.page.locator(f'[data-ai-id="cluster-monitor:status:node-online:{key}"]').last
+
+    # -- vendor distribution --
+
+    def status_vendor_list(self) -> Locator:
+        return self.page.locator('[data-ai-id="cluster-monitor:status:vendor"]').last
+
+    def status_vendor_empty(self) -> Locator:
+        return self.page.locator('[data-ai-id="cluster-monitor:status:vendor:empty"]').last
+
+    def status_vendor_branch(self, key: str) -> Locator:
+        return self.page.locator(f'[data-ai-id="cluster-monitor:status:vendor:{key}"]').last
+
+    def _row_ids(self, prefix: str) -> list[str]:
+        """Row ids under a prefix that have no further segment (children excluded)."""
+        out: list[str] = []
+        for element in self.page.locator(f'[data-ai-id^="{prefix}"]').all():
+            ai_id = element.get_attribute('data-ai-id') or ''
+            key = ai_id[len(prefix):]
+            if key and ':' not in key:
+                out.append(key)
+        return out
+
+    def status_vendor_ids(self) -> list[str]:
+        return self._row_ids("cluster-monitor:status:vendor:row:")
+
+    def status_vendor_row(self, vendor: str) -> Locator:
+        return self.page.locator(f'[data-ai-id="cluster-monitor:status:vendor:row:{vendor}"]').last
+
+    def status_vendor_count(self, vendor: str) -> str:
+        return self.page.locator(f'[data-ai-id="cluster-monitor:status:vendor:row:{vendor}:count"]').last.inner_text().strip()
+
+    def status_vendor_percent(self, vendor: str) -> str:
+        return self.page.locator(f'[data-ai-id="cluster-monitor:status:vendor:row:{vendor}:percent"]').last.inner_text().strip()
+
+    # -- component status --
+
+    def status_service_ids(self) -> list[str]:
+        return self._row_ids("cluster-monitor:status:components:service:")
+
+    def status_service_row(self, namespace: str) -> Locator:
+        return self.page.locator(f'[data-ai-id="cluster-monitor:status:components:service:{namespace}"]').last
+
+    def status_service_status(self, namespace: str) -> str | None:
+        return self.status_service_row(namespace).get_attribute("data-ai-status")
+
+    def status_core_ids(self) -> list[str]:
+        return self._row_ids("cluster-monitor:status:components:core:")
+
+    def status_core_row(self, component: str) -> Locator:
+        return self.page.locator(f'[data-ai-id="cluster-monitor:status:components:core:{component}"]').last
+
+    def status_core_status(self, component: str) -> str | None:
+        return self.status_core_row(component).get_attribute("data-ai-status")
+
+    # -- block-level branches --
+
+    def status_permission(self) -> Locator:
+        """The components block's canonical 403 panel (cluster-monitor:status:permission)."""
+        return self.page.locator('[data-ai-id="cluster-monitor:status:permission"]').last
+
+    def status_error(self) -> Locator:
+        """The components block's canonical 5xx panel (cluster-monitor:status:error)."""
+        return self.page.locator('[data-ai-id="cluster-monitor:status:error"]').last
+
+    def status_retry(self) -> Locator:
+        return self.page.locator('[data-ai-id="cluster-monitor:status:retry"]').last
+
+    def status_block_error(self, block: str) -> Locator:
+        """A block's own error panel; block is node-online / vendor."""
+        return self.page.locator(f'[data-ai-id="cluster-monitor:status:{block}:error"]').last
+
+    def status_block_retry(self, block: str) -> Locator:
+        return self.page.locator(f'[data-ai-id="cluster-monitor:status:{block}:retry"]').last
+
+    def status_block_permission(self, block: str) -> Locator:
+        return self.page.locator(f'[data-ai-id="cluster-monitor:status:{block}:permission"]').last
+
+    # ---------------- 集群状态数据 ----------------
+
+    def _cluster_path(self, prefix: str, rest: str) -> str:
+        if not self.cluster or self.cluster == "host":
+            return f"{prefix}/{rest}"
+        return f"{prefix}/clusters/{self.cluster}/{rest}"
+
+    def component_health(self) -> tuple[int, dict[str, Any]]:
+        """GET componenthealth for this cluster, the same read the page makes."""
+        assert self.api is not None, "api client required"
+        return self.api.request("GET", self._cluster_path("/kapis/resources.kubesphere.io/v1alpha2", "componenthealth"))
+
+    def node_vendor_stats(self) -> tuple[int, dict[str, Any]]:
+        assert self.api is not None, "api client required"
+        return self.api.request("GET", self._cluster_path("/kapis/resources.kubesphere.io/v1alpha3", "nodes/stats"))
+
+    def etcd_service_monitor(self) -> tuple[int, dict[str, Any]]:
+        """200 = etcd is wired into monitoring, 404 = it is not."""
+        assert self.api is not None, "api client required"
+        return self.api.request(
+            "GET",
+            self._cluster_path(
+                "/apis/monitoring.coreos.com/v1/namespaces/kubesphere-monitoring-system",
+                "servicemonitors/etcd",
+            ),
+        )
+
+    def configz(self) -> tuple[int, dict[str, Any]]:
+        """The cluster's module switches (servicemesh / monitoring / logging / devops)."""
+        assert self.api is not None, "api client required"
+        return self.api.request("GET", "/kapis/config.kubesphere.io/v1alpha2/configs/configz")
+
     def component_series(
         self,
         component: str,
