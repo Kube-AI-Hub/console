@@ -112,7 +112,23 @@ export default function YamlEditorImpl({
           const from = Math.min(line.from + Math.max(problem.column - 1, 0), line.to);
           return [{ from, to: line.to, severity: 'error', message: problem.message }];
         }, { delay: 300 }),
+        /*
+         * Read-only, but still focusable.
+         *
+         * `EditorView.editable.of(false)` is the obvious way to make a viewer, and
+         * on its own it is wrong here: CodeMirror documents it as "the element will
+         * not have its contenteditable attribute set", so the editor also loses
+         * focus. A reader who highlights a few lines and presses Cmd/Ctrl+A then
+         * gets the browser's select-all on the whole page instead of the document
+         * in front of them.
+         *
+         * The fix is not to drop `editable` — that would make the text really
+         * editable — but to give the content DOM a `tabindex` so it can take focus
+         * while staying non-editable. CodeMirror sets `aria-readonly` itself when
+         * the state is read-only, so assistive tech still hears the right thing.
+         */
         EditorView.editable.of(!readOnly),
+        ...(readOnly ? [EditorView.contentAttributes.of({ tabindex: '0' })] : []),
         EditorState.readOnly.of(readOnly),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) onChangeRef.current(update.state.doc.toString());
