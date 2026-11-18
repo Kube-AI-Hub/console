@@ -423,10 +423,12 @@
   --ai-th-bg: var(--ai-raw-abyss-950);
   --ai-row-hover-bg: rgb(var(--ai-raw-abyss-800) / 0.7);
   --ai-nav-bg: rgb(0 21 28 / 0.72);
-  --ai-pin-start-bg: var(--ai-raw-abyss-900);
-  /* Half a step above the page, not a full one: the action column only has to read as
-     a surface, and `abyss-700` made it the brightest block on a dark page. */
-  --ai-pin-end-bg: 0 25 33;
+  /* `abyss-900` (0 30 40) is only 1.7x the page luminance — half of what the violet
+     theme's start pin reads — so the identity column did not separate from the rows on
+     a dark green page. These two sit between `abyss-900` and `abyss-700`, at 2.6x and
+     1.5x: the same two ratios the violet theme uses. */
+  --ai-pin-start-bg: 0 38 50;
+  --ai-pin-end-bg: 0 27 36;
   --ai-line: 28 69 82; /* dataelem's --line */
   --ai-line-strong: 42 92 108;
 
