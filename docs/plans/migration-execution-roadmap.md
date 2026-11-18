@@ -89,12 +89,12 @@
 **排查时用 `verify.py --no-e2e --continue`**：它会跑完所有环节并汇总失败项，
 一次看到全貌（默认仍是遇错即停）。见[记录](ai-kit-tests-invalid-hook-20261118.md)附一。
 
-**收尾脚本还剩一关红灯**（2026-11-18 12:10 实测）：`verify.py --no-e2e --continue` 六项通过、
-**只有 ai-kit 9 条失败**（`use-callback-ref` 下嵌套 React 16.14.0）。console-next 已从 3 红追到
-**38 文件 / 222 条全绿**（连跑两次稳定），见[记录](ai-kit-tests-invalid-hook-20261118.md)附二。
+**收尾脚本只剩一关红灯**（2026-11-18 13:25 实测）：`verify.py --no-e2e --continue` **七项通过**
+（文档门禁、一致性核对、缺口清单×2、架构契约、api-client、**ai-kit 226 条**），
+只剩 **console-next 3 条**——都在 overview 页面，属并行线正在改的部分，与本线改动无关。
 
-修 ai-kit 需要 `pnpm.overrides` + 重装 `packages/ai-kit/node_modules`（会短暂影响并行环境，
-Storybook 6106 正在用它），**需要协调窗口**。根因与修法见[记录](ai-kit-tests-invalid-hook-20261118.md)。
+ai-kit 的 9 条已修：`scripts/fix-nested-react.sh` 把 `use-callback-ref` 自带的 React 16.14.0 移走
+（先备份、失败自动还原）。长期修法仍是 `pnpm.overrides` + 重装，见[记录](ai-kit-tests-invalid-hook-20261118.md)。
 
 并行方在改同一批文件时，提交前按文件逐个 `git diff` 确认归属；无法确认的**不要提交**，
 在回复里列出文件名与它属于哪个批次，由对方决定。混入并行改动会让一次提交同时包含两个方向
