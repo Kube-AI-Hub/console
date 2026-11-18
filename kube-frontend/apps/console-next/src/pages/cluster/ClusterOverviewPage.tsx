@@ -91,6 +91,16 @@ export function ClusterOverviewPage({ cluster }: ClusterOverviewPageProps): Reac
       {refresh.failed ? <p role="alert" className="text-xs text-ai-warning" data-ai-id="overview:refresh-failed">
         {t('cluster.overview.refreshFailed')}
       </p> : null}
+      {/*
+       * A slow read, not a failed one. The distinction matters on a member cluster reached
+       * through the agent: the same endpoint answers in 0.1s or in 30s depending on the
+       * link, and a reader who sees an unchanged skeleton for half a minute has no way to
+       * tell "still working" from "broken". Saying so once, in a muted line, is cheaper
+       * than a spinner that has to animate for 30 seconds to make the same point.
+       */}
+      {refresh.slow && !refresh.failed ? <p role="status" className="text-xs text-ai-fg-muted" data-ai-id="overview:slow-read">
+        {t('cluster.overview.slowRead')}
+      </p> : null}
       {!detail.data ? <Skeleton className="h-64" /> : null}
       {/*
        * A cluster that is not ready has nothing to report: no metrics, no nodes, no
