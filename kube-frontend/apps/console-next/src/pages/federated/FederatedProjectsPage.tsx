@@ -158,6 +158,9 @@ export function FederatedProjectsPage({ workspace }: FederatedProjectsPageProps)
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
       search: { placeholder: t('fedprojects.list.searchPlaceholder'), aiId: 'federated-projects:search' },
       sortableKeys: ['name', 'createdAt'],
+      // Third click of the header cycle returns to the page's default order;
+      // a server list must send a sort key, so "off" cannot be absent.
+      sortFallback: list.sortFallback,
       sortAiPrefix: 'federated-projects',
       columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'federated-projects:columns' },
       sort: { key: list.sortBy, order: list.order },
@@ -326,7 +329,7 @@ export function FederatedProjectsPage({ workspace }: FederatedProjectsPageProps)
         onSelectionChange={list.setSelected}
         onPageChange={list.setPage}
         onPageSizeChange={list.setPageSize}
-        onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
+        onSortChange={(next: { key: string; order: SortOrder }) => {
           if (next) list.setSort(next);
         }}
         onAction={(action, row) => {

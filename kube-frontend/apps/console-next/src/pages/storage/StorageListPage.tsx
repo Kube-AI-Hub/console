@@ -127,6 +127,9 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
         : {}),
       selection: 'multiple',
       sortableKeys: ['name', 'createTime'],
+      // Third click of the header cycle returns to the page's default order;
+      // a server list must send a sort key, so "off" cannot be absent.
+      sortFallback: list.sortFallback,
       sortAiPrefix: kind,
       columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: `${kind}:columns` },
       selectAiId: `${kind}:select`,
@@ -327,7 +330,7 @@ export function StorageListPage({ kind, workspace, cluster, namespace }: Storage
         onSelectionChange={list.setSelected}
         onPageChange={list.setPage}
         onPageSizeChange={list.setPageSize}
-        onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
+        onSortChange={(next: { key: string; order: SortOrder }) => {
           if (next) list.setSort(next);
         }}
         onAction={(action, row) => {

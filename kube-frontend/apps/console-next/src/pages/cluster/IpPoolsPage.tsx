@@ -64,6 +64,9 @@ export function IpPoolsPage({ cluster }: IpPoolsPageProps): React.ReactElement {
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
       search: { placeholder: t('cluster.searchPlaceholder'), aiId: 'ip-pools:search' },
       sortableKeys: ['name', 'createTime'],
+      // Third click of the header cycle returns to the page's default order;
+      // a server list must send a sort key, so "off" cannot be absent.
+      sortFallback: list.sortFallback,
       sortAiPrefix: 'ip-pools',
       sort: { key: list.sortBy, order: list.order },
       columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'ip-pools:columns' },
@@ -161,7 +164,7 @@ export function IpPoolsPage({ cluster }: IpPoolsPageProps): React.ReactElement {
         onSearchChange={list.setKeyword}
         onPageChange={list.setPage}
         onPageSizeChange={list.setPageSize}
-        onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
+        onSortChange={(next: { key: string; order: SortOrder }) => {
           if (next) list.setSort(next);
         }}
       />

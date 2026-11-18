@@ -77,6 +77,9 @@ export function CanaryReleasesPage({ workspace, cluster, namespace }: CanaryRele
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
       search: { placeholder: t('grayRelease.search'), aiId: 'grayrelease:search' },
       sortableKeys: ['name', 'createTime'],
+      // Third click of the header cycle returns to the page's default order;
+      // a server list must send a sort key, so "off" cannot be absent.
+      sortFallback: list.sortFallback,
       sortAiPrefix: 'grayrelease',
       sort: { key: list.sortBy, order: list.order },
       columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'canary-releases:columns' },
@@ -208,7 +211,7 @@ export function CanaryReleasesPage({ workspace, cluster, namespace }: CanaryRele
           loading={query.isFetching}
           searchValue={list.keyword}
           onSearchChange={list.setKeyword}
-          onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
+          onSortChange={(next: { key: string; order: SortOrder }) => {
             if (next) list.setSort(next);
           }}
           onAction={(action) => {

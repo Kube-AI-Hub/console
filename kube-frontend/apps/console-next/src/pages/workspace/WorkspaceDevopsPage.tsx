@@ -140,6 +140,9 @@ export function WorkspaceDevopsPage({ workspace }: WorkspaceDevopsPageProps): Re
       rowAttributes: (row) => ({ 'data-ai-row': `${row.cluster}/${row.name}` }),
       search: { placeholder: t('workspace.devops.searchPlaceholder'), aiId: 'workspace-devops:search' },
       sortableKeys: ['name', 'cluster', 'createTime'],
+      // Third click of the header cycle returns to the page's default order;
+      // a server list must send a sort key, so "off" cannot be absent.
+      sortFallback: list.sortFallback,
       sortAiPrefix: 'workspace-devops',
       sort: { key: list.sortBy, order: list.order },
       columnVisibility: {
@@ -282,7 +285,7 @@ export function WorkspaceDevopsPage({ workspace }: WorkspaceDevopsPageProps): Re
             onSearchChange={list.setKeyword}
             onPageChange={list.setPage}
             onPageSizeChange={list.setPageSize}
-            onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
+            onSortChange={(next: { key: string; order: SortOrder }) => {
               if (next) list.setSort(next);
             }}
           />

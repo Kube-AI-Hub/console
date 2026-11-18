@@ -184,6 +184,9 @@ export function ResourceMonitorPage({ cluster }: ResourceMonitorPageProps): Reac
     rowAttributes: (row) => ({ 'data-ai-row': row.key }),
     search: { placeholder: t('cluster.searchPlaceholder'), aiId: AI_ID + ':search' },
     sortableKeys: ['name', 'cpu', 'memory'],
+    // Third click of the header cycle returns to the page's default order;
+    // a server list must send a sort key, so "off" cannot be absent.
+    sortFallback: list.sortFallback,
     sortAiPrefix: AI_ID,
     sort: { key: list.sortBy, order: list.order },
     columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'cluster-resource-monitor:columns' },
@@ -329,7 +332,7 @@ export function ResourceMonitorPage({ cluster }: ResourceMonitorPageProps): Reac
               onSearchChange={list.setKeyword}
               onPageChange={list.setPage}
               onPageSizeChange={list.setPageSize}
-              onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
+              onSortChange={(next: { key: string; order: SortOrder }) => {
                 if (next) list.setSort(next);
               }}
             />
@@ -346,7 +349,7 @@ export function ResourceMonitorPage({ cluster }: ResourceMonitorPageProps): Reac
               onSearchChange={list.setKeyword}
               onPageChange={list.setPage}
               onPageSizeChange={list.setPageSize}
-              onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
+              onSortChange={(next: { key: string; order: SortOrder }) => {
                 if (next) list.setSort(next);
               }}
             />

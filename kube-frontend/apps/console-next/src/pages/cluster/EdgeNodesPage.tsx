@@ -56,6 +56,9 @@ export function EdgeNodesPage({ cluster }: EdgeNodesPageProps): React.ReactEleme
     search: { placeholder: t('cluster.searchPlaceholder'), aiId: 'edgenodes:search' },
     refresh: { label: t('common.refresh'), aiId: 'edgenodes:refresh', busy: query.isFetching },
     sortableKeys: ['name', 'createTime'],
+    // Third click of the header cycle returns to the page's default order;
+    // a server list must send a sort key, so "off" cannot be absent.
+    sortFallback: list.sortFallback,
     sortAiPrefix: 'edgenodes',
     sort: { key: list.sortBy, order: list.order },
     columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'edge-nodes:columns' },
@@ -105,7 +108,7 @@ export function EdgeNodesPage({ cluster }: EdgeNodesPageProps): React.ReactEleme
           searchValue={list.keyword}
           onSearchChange={list.setKeyword}
           onRefresh={() => void query.refetch()}
-          onSortChange={(next: { key: string; order: SortOrder } | undefined) => { if (next) list.setSort(next); }}
+          onSortChange={(next: { key: string; order: SortOrder }) => { if (next) list.setSort(next); }}
         />
       )}
     </AiSurface>

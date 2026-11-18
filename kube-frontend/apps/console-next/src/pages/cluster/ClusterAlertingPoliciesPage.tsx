@@ -376,6 +376,9 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
         },
       ],
       sortableKeys: ['name', 'createTime'],
+      // Third click of the header cycle returns to the page's default order;
+      // a server list must send a sort key, so "off" cannot be absent.
+      sortFallback: list.sortFallback,
       sortAiPrefix: 'cluster-alerting-policies',
       sort: { key: list.sortBy, order: list.order },
       columnVisibility: {
@@ -688,7 +691,7 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
               onSearchChange={list.setKeyword}
               onPageChange={list.setPage}
               onPageSizeChange={list.setPageSize}
-              onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
+              onSortChange={(next: { key: string; order: SortOrder }) => {
                 if (next) list.setSort(next);
               }}
               onAction={onAction}
@@ -723,7 +726,7 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
               onSearchChange={list.setKeyword}
               onPageChange={list.setPage}
               onPageSizeChange={list.setPageSize}
-              onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
+              onSortChange={(next: { key: string; order: SortOrder }) => {
                 if (next) list.setSort(next);
               }}
               onAction={onAction}

@@ -332,6 +332,9 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
         disabled: (row) => hasPendingMode(row) },
     ],
     sortableKeys: ['name'], sortAiPrefix: 'nodes', sort: { key: list.sortBy, order: list.order },
+    // Third click of the header cycle returns to the page's default order;
+    // a server list must send a sort key, so "off" cannot be absent.
+    sortFallback: list.sortFallback,
     empty: { title: list.search || Object.values(filters).some(Boolean) ? t('node.list.noMatch') : t('cluster.nodes.emptyTitle') },
     pagination: { page: list.page, pageSize: list.pageSize, total: nodes.data?.total ?? 0, pageSizeOptions: [10, 20, 50, 100] },
     labels: { selectAll: t('table.selectAll'), selectRow: (index) => t('table.selectRow', { index }),

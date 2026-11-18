@@ -80,6 +80,9 @@ export function ComponentsPage({ cluster: _cluster, initialType = '' }: Componen
           value: entry.key, label: entry.label.startsWith('cluster.') ? t(entry.label as 'cluster.overview.module.monitoring') : entry.label,
         })) }],
       sortableKeys: ['name', 'health'],
+      // Third click of the header cycle returns to the page's default order;
+      // a server list must send a sort key, so "off" cannot be absent.
+      sortFallback: list.sortFallback,
       sortAiPrefix: 'components',
       sort: { key: list.sortBy, order: list.order },
       columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'components:columns' },
@@ -162,7 +165,7 @@ export function ComponentsPage({ cluster: _cluster, initialType = '' }: Componen
         loading={state === 'loading'}
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}
-        onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
+        onSortChange={(next: { key: string; order: SortOrder }) => {
           if (next) list.setSort(next);
         }}
       />

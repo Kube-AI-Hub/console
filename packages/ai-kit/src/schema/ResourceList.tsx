@@ -6,6 +6,7 @@ import { Select, MultiSelect } from '../primitives/Select';
 import { Table, type SortOrder, type TableColumn, type TableSortState } from '../primitives/Table';
 import { Pagination } from '../primitives/Navigation';
 import { Badge, Empty } from '../primitives/Display';
+import { Icon } from '../primitives/Icon/Icon';
 import { Dropdown } from '../primitives/Navigation';
 import { Modal } from '../primitives/Feedback';
 import { getByPath, getColumnRenderer } from './registry';
@@ -322,6 +323,14 @@ export interface ListSchema<TRow> {
    * is wrong across pages.
    */
   sort?: { key: string; order: SortOrder };
+  /**
+   * What the header cycle returns to when a sorted column is turned off.
+   *
+   * A server-paginated list always sends a sort key, so "off" has to land somewhere.
+   * Set this to the order the page starts with; `useResourceListState` already
+   * exposes it as `list.sortFallback`.
+   */
+  sortFallback?: { key: string; order: SortOrder };
   /** Columns that can be sorted; defaults to none. */
   sortableKeys?: string[];
   /**
@@ -354,7 +363,7 @@ export interface ResourceListProps<TRow> {
   /** Provide together with `pagination.pageSizeOptions` to show a size picker. */
   onPageSizeChange?: (pageSize: number) => void;
   /** Called with the next sort when a sortable header is clicked. */
-  onSortChange?: (sort: { key: string; order: SortOrder } | undefined) => void;
+  onSortChange?: (sort: { key: string; order: SortOrder }) => void;
   onAction?: (action: string, row: TRow) => void;
   /** Called with the primary action key and the current selection. */
   onBulkAction?: (action: string, keys: string[]) => void;
@@ -705,7 +714,22 @@ export function ResourceList<TRow>({
             />
           ) : null}
           {schema.columnVisibility && onVisibleColumnsChange ? <Dropdown closeOnSelect={false}
-            trigger={<Button size="sm" variant="secondary" data-ai-id={schema.columnVisibility.aiId}>{schema.columnVisibility.label}</Button>}
+            tooltip={schema.columnVisibility.label}
+            trigger={
+              /*
+               * An icon, not the label.
+               *
+               * The toolbar carries a search box, a project selector and a refresh
+               * button; a text button here was the widest control on the row for the
+               * least frequent action. The label stays as the accessible name and the
+               * tooltip, so nothing is lost for a screen reader or for a reader who
+               * does not recognise the glyph.
+               */
+              <Button size="icon" variant="secondary" data-ai-id={schema.columnVisibility.aiId}
+                aria-label={schema.columnVisibility.label}>
+                <Icon name="column" size={16} />
+              </Button>
+            }
             items={[
               ...schema.columns.filter((column) => column.hideable).map((column) => ({
                 key: column.key, label: column.title, aiId: `${schema.columnVisibility?.aiId}:${column.key}`,
@@ -856,12 +880,13 @@ export function ResourceList<TRow>({
         loading={loading}
         {...(schema.rowAttributes ? { rowAttributes: schema.rowAttributes } : {})}
         {...(schema.sort ? { sorter: { key: schema.sort.key, order: schema.sort.order } satisfies TableSortState } : {})}
+        {...(schema.sortFallback ? { sortFallback: schema.sortFallback } : {})}
         {...(schema.sortableKeys?.length
           ? {
-              // The cycle lives here so every host behaves the same: a new column
-              // starts ascending, clicking the active one flips it.
-              onSortChange: (next: TableSortState | undefined) =>
-                onSortChange?.(next ? { key: next.key, order: next.order } : undefined),
+              // The cycle lives in `Table` so every host behaves the same: a new
+              // column starts ascending, an active one advances, and turning it off
+              // returns `sortFallback`.
+              onSortChange: (next: TableSortState) => onSortChange?.(next),
             }
           : {})}
         selection={

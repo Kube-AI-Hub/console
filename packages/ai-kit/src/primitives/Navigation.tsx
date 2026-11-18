@@ -191,6 +191,15 @@ export interface DropdownProps {
   onOpenChange?: (open: boolean) => void;
   /** Close after an item is chosen; defaults to true. */
   closeOnSelect?: boolean;
+  /**
+   * Hover text for the trigger.
+   *
+   * For a trigger with no visible label — an icon button — this is the only thing
+   * that says what it does before it is pressed. It is a tooltip rather than a
+   * `title` attribute so it appears on keyboard focus too, and it closes while the
+   * menu is open so the two overlays do not stack.
+   */
+  tooltip?: React.ReactNode;
 }
 
 export function Dropdown({
@@ -200,10 +209,54 @@ export function Dropdown({
   open,
   onOpenChange,
   closeOnSelect = true,
+  tooltip,
 }: DropdownProps): React.ReactElement {
+  /*
+   * A tooltip on a dropdown trigger is a nesting problem.
+   *
+   * Both `Tooltip.Trigger` and `DropdownMenu.Trigger` are `asChild` — each merges its
+   * props (handlers included) into the element it is given. Pointing both at the same
+   * `<button>` makes the second overwrite the first's click handler, and the menu
+   * stops opening. Measured, not theorised: that is exactly what happened.
+   *
+   * A Radix tree can own one element each, so the tooltip is driven here instead of
+   * by a second tree: hover and focus on the wrapper show the hint, and the wrapper
+   * has no click handler of its own, so the menu's button keeps working.
+   *
+   * The hint hides while the menu is open — a tooltip on top of the panel it just
+   * opened reads as a bug.
+   */
+  const [hintOpen, setHintOpen] = React.useState(false);
+  const showHint = tooltip !== undefined && !open && hintOpen;
+
   return (
     <DropdownMenuPrimitive.Root open={open} onOpenChange={onOpenChange}>
-      <DropdownMenuPrimitive.Trigger asChild>{trigger}</DropdownMenuPrimitive.Trigger>
+      <DropdownMenuPrimitive.Trigger asChild>
+        {tooltip === undefined ? trigger : (
+          <span
+            className="relative inline-flex"
+            onMouseEnter={() => setHintOpen(true)}
+            // `mouseenter` fires once, so a pointer that stayed put after the menu
+            // closed would never see the hint again. `mousemove` re-arms it without
+            // re-rendering on every pixel: the setter is idempotent once true.
+            onMouseMove={() => { if (!hintOpen) setHintOpen(true); }}
+            onMouseLeave={() => setHintOpen(false)}
+            onFocus={() => setHintOpen(true)}
+            onBlur={() => setHintOpen(false)}
+            onPointerDown={() => setHintOpen(false)}
+          >
+            {trigger}
+            {showHint ? (
+              <span
+                role="tooltip"
+                className="pointer-events-none absolute top-full left-1/2 z-50 mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-ai-sm bg-ai-fg px-2 py-1 text-[11px] leading-4 text-ai-bg animate-ai-fade-in"
+              >
+                {tooltip}
+              </span>
+            ) : null}
+          </span>
+        )}
+      </DropdownMenuPrimitive.Trigger>
       <DropdownMenuPrimitive.Portal>
         <DropdownMenuPrimitive.Content
           align={align}

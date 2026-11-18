@@ -98,6 +98,9 @@ export function SettingsListPage({ kind, workspace, cluster, namespace }: Settin
       search: { placeholder: t('settings.searchPlaceholder'), aiId: `${kind}:search` },
       filters: [projectFilterControl],
       sortableKeys: ['name', 'createTime'],
+      // Third click of the header cycle returns to the page's default order;
+      // a server list must send a sort key, so "off" cannot be absent.
+      sortFallback: list.sortFallback,
       sortAiPrefix: kind,
       sort: { key: list.sortBy, order: list.order },
       columns:
@@ -310,7 +313,7 @@ export function SettingsListPage({ kind, workspace, cluster, namespace }: Settin
         {...(kind === 'members' ? { selectedKeys: selected, onSelectionChange: setSelected } : {})}
         onPageChange={list.setPage}
         onPageSizeChange={list.setPageSize}
-        onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
+        onSortChange={(next: { key: string; order: SortOrder }) => {
           if (next) list.setSort(next);
         }}
         onAction={(action, row) => {

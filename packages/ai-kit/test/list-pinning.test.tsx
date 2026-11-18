@@ -152,6 +152,39 @@ describe('pinned columns', () => {
     expect(items).toContain('Value');
     expect(items).not.toContain('Name');
   });
+
+  it('opens the chooser from an icon trigger, and hints on hover', async () => {
+    /*
+     * The trigger is an icon button, so its label is only in `aria-label` and the
+     * tooltip. Both have to survive the menu being attached to the same element:
+     * Radix merges a trigger's handlers into its child, so a tooltip built as a
+     * second Radix tree on the same button overwrote the menu's click handler and
+     * the menu stopped opening at all. That is why the hint is driven by local
+     * state rather than a nested `Tooltip.Trigger`.
+     */
+    const user = userEvent.setup();
+    mount({
+      rowKey: 'name',
+      columns: [
+        { key: 'name', title: 'Name', width: 170 },
+        { key: 'value', title: 'Value', width: 100, hideable: true },
+      ],
+      columnVisibility: { label: 'Columns', resetLabel: 'Reset' },
+    }, { visibleColumnKeys: ['name', 'value'], onVisibleColumnsChange: vi.fn() });
+
+    const trigger = screen.getByRole('button', { name: 'Columns' });
+    // No visible label: the accessible name comes from `aria-label`, and the only
+    // child is the icon.
+    expect(trigger.querySelector('svg')).not.toBeNull();
+    expect(trigger.textContent?.trim()).toBe('');
+
+    await user.hover(trigger);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Columns');
+
+    // The menu still opens — the regression this guards against.
+    await user.click(trigger);
+    expect(screen.getAllByRole('menuitem').length).toBeGreaterThan(0);
+  });
 });
 
 describe('column hints', () => {

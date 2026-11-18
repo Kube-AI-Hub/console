@@ -131,6 +131,9 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
       ],
       refresh: { label: t('cluster.list.refresh'), aiId: 'clusters:refresh', busy: query.isFetching },
       sortableKeys: ['name', 'createTime', 'nodeCount'],
+      // Third click of the header cycle returns to the page's default order;
+      // a server list must send a sort key, so "off" cannot be absent.
+      sortFallback: list.sortFallback,
       sortAiPrefix: 'clusters',
       sort: { key: list.sortBy, order: list.order },
       columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'clusters:columns' },
@@ -352,7 +355,7 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
         filters={{ type: typeFilter }}
         onFiltersChange={(next) => setTypeFilter(next.type ?? '')}
         onRefresh={() => void query.refetch()}
-        onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
+        onSortChange={(next: { key: string; order: SortOrder }) => {
           if (next) list.setSort(next);
         }}
         onAction={(action, row) => {

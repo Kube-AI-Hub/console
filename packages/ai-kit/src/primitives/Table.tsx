@@ -155,8 +155,16 @@ export interface TableProps<T> {
   className?: string;
   /** Current sort, when the host owns the order. */
   sorter?: TableSortState;
-  /** Called with the next sort, or `undefined` when the cycle resets. */
-  onSortChange?: (sorter: TableSortState | undefined) => void;
+  /**
+   * What the header cycle returns to when a column is turned off.
+   *
+   * A server-paginated list always sends a sort key, so "off" cannot mean "no
+   * parameter" — it means "back to the order the page starts with". Without this the
+   * cycle has nowhere to land and the third click looks like nothing happened.
+   */
+  sortFallback?: TableSortState;
+  /** Called with the next sort. */
+  onSortChange?: (sorter: TableSortState) => void;
   /**
    * Expanded-row renderer. When present, each row gains a disclosure button and
    * the returned node renders in a full-width row beneath it.
@@ -186,6 +194,7 @@ export function Table<T>({
   rowAttributes,
   className,
   sorter,
+  sortFallback,
   onSortChange,
   expandedRow,
 }: TableProps<T>): React.ReactElement {
@@ -214,19 +223,25 @@ export function Table<T>({
   };
 
   /*
-   * Two states, not three: asc and desc.
+   * Three states: ascending -> descending -> back to the default order.
    *
-   * The cycle used to end with "no sort" and report `undefined`, but every consumer in
-   * this console sorts server-side and always sends a key — all nine of them ignore the
-   * `undefined` step. Worse, the tables default to `desc`, so the *first* click on the
-   * active column asked for "no sort", the page dropped it, and the column looked
-   * permanently unsortable. A state no consumer honours is a dead control.
+   * The middle version stopped at two because a "no sort" step looked like a dead
+   * control: every consumer sorts server-side and always sends a key, so reporting
+   * `undefined` left them with nothing to send and the third click did nothing
+   * visible. The third state exists, it just is not `undefined` — turning the column
+   * off returns `sortFallback`, the order the page starts with.
    */
   const cycleSort = (key: string) => {
     if (!onSortChange) return;
-    if (sorter?.key !== key) onSortChange({ key, order: 'asc' });
-    else if (sorter.order === 'asc') onSortChange({ key, order: 'desc' });
-    else onSortChange({ key, order: 'asc' });
+    if (sorter?.key !== key) {
+      onSortChange({ key, order: 'asc' });
+      return;
+    }
+    if (sorter.order === 'asc') {
+      onSortChange({ key, order: 'desc' });
+      return;
+    }
+    onSortChange(sortFallback ?? { key, order: 'asc' });
   };
 
   const toggleExpanded = (key: string) => {

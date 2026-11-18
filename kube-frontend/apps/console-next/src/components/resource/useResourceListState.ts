@@ -24,6 +24,13 @@ export interface ResourceListState<TSortKey extends string> {
   sortBy: TSortKey;
   order: SortOrder;
   setSort: (next: { key: string; order: SortOrder }) => void;
+  /**
+   * The order the header cycle returns to on its third click.
+   *
+   * Hand this to `schema.sortFallback`. It is the hook's own default, so a page does
+   * not have to restate it — and cannot restate it wrong.
+   */
+  sortFallback: { key: TSortKey; order: SortOrder };
   selected: string[];
   setSelected: (keys: string[]) => void;
 }
@@ -81,7 +88,8 @@ export function useResourceListState<TSortKey extends string>({
     setSelected([]);
   }, []);
 
-  return { page, setPage, pageSize, setPageSize, keyword, setKeyword, search, sortBy, order, setSort, selected, setSelected };
+  return { page, setPage, pageSize, setPageSize, keyword, setKeyword, search, sortBy, order, setSort,
+    sortFallback: { key: defaultSortBy, order: defaultOrder }, selected, setSelected };
 }
 
 /** The query parameters a page's list request needs, derived from the state. */

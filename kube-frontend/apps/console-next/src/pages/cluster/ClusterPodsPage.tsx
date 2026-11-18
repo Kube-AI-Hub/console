@@ -110,6 +110,9 @@ export function ClusterPodsPage({ cluster }: ClusterPodsPageProps): React.ReactE
       filters: [statusFilterControl],
       refresh: { label: t('cluster.list.refresh'), aiId: 'cluster-pods:refresh', busy: query.isFetching },
       sortableKeys: ['name', 'createTime'],
+      // Third click of the header cycle returns to the page's default order;
+      // a server list must send a sort key, so "off" cannot be absent.
+      sortFallback: list.sortFallback,
       sortAiPrefix: 'cluster-pods',
       sort: { key: list.sortBy, order: list.order },
       // Only the identity column is permanent; every other column can be hidden.
@@ -257,7 +260,7 @@ export function ClusterPodsPage({ cluster }: ClusterPodsPageProps): React.ReactE
         }}
         onPageChange={list.setPage}
         onPageSizeChange={list.setPageSize}
-        onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
+        onSortChange={(next: { key: string; order: SortOrder }) => {
           if (next) list.setSort(next);
         }}
       />

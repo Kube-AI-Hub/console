@@ -99,6 +99,9 @@ export function ClusterVolumeSnapshotsPage({ cluster }: ClusterVolumeSnapshotsPa
       rowAttributes: (row) => ({ 'data-ai-row': row.namespace + '/' + row.name }),
       search: { placeholder: t('cluster.searchPlaceholder'), aiId: AI_ID + ':search' },
       sortableKeys: ['name', 'createTime'],
+      // Third click of the header cycle returns to the page's default order;
+      // a server list must send a sort key, so "off" cannot be absent.
+      sortFallback: list.sortFallback,
       sortAiPrefix: AI_ID,
       sort: { key: list.sortBy, order: list.order },
       columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'cluster-volume-snapshots:columns' },
@@ -228,7 +231,7 @@ export function ClusterVolumeSnapshotsPage({ cluster }: ClusterVolumeSnapshotsPa
         onSearchChange={list.setKeyword}
         onPageChange={list.setPage}
         onPageSizeChange={list.setPageSize}
-        onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
+        onSortChange={(next: { key: string; order: SortOrder }) => {
           if (next) list.setSort(next);
         }}
       />

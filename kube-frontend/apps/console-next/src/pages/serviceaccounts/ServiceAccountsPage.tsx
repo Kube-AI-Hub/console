@@ -138,6 +138,9 @@ export function ServiceAccountsPage({ workspace, cluster, namespace }: ServiceAc
       filters: [projectFilterControl],
       selection: 'multiple',
       sortableKeys: ['name', 'createTime'],
+      // Third click of the header cycle returns to the page's default order;
+      // a server list must send a sort key, so "off" cannot be absent.
+      sortFallback: list.sortFallback,
       sortAiPrefix: 'serviceaccounts',
       columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'serviceaccounts:columns' },
       selectAiId: 'serviceaccounts:select',
@@ -290,7 +293,7 @@ export function ServiceAccountsPage({ workspace, cluster, namespace }: ServiceAc
         onSelectionChange={list.setSelected}
         onPageChange={list.setPage}
         onPageSizeChange={list.setPageSize}
-        onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
+        onSortChange={(next: { key: string; order: SortOrder }) => {
           if (!next) return;
           list.setSort(next);
         }}

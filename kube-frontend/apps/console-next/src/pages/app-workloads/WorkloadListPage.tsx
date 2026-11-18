@@ -166,6 +166,9 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
       filters: kind === 'pods' ? [projectFilterControl, statusFilterControl] : [projectFilterControl],
       selection: 'multiple',
       sortableKeys: ['name', 'createTime'],
+      // Third click of the header cycle returns to the page's default order;
+      // a server list must send a sort key, so "off" cannot be absent.
+      sortFallback: list.sortFallback,
       sortAiPrefix: kind,
       selectAiId: `${kind}:select`,
       sort: { key: list.sortBy, order: list.order },
@@ -479,7 +482,7 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
         onSelectionChange={list.setSelected}
         onPageChange={list.setPage}
         onPageSizeChange={list.setPageSize}
-        onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
+        onSortChange={(next: { key: string; order: SortOrder }) => {
           if (next) list.setSort(next);
         }}
         onAction={(action, row) => {

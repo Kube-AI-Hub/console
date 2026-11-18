@@ -206,6 +206,9 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
       search: { placeholder: t('monitoring.searchPlaceholder'), aiId: 'alertingrules:search' },
       filters: [projectFilterControl, enableFilter],
       sortableKeys: ['name', 'ruleCount', 'createTime'],
+      // Third click of the header cycle returns to the page's default order;
+      // a server list must send a sort key, so "off" cannot be absent.
+      sortFallback: list.sortFallback,
       sortAiPrefix: 'alertingrules',
       columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'rule-groups:columns' },
       sort: { key: list.sortBy, order: list.order },
@@ -398,7 +401,7 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
         }}
         onPageChange={list.setPage}
         onPageSizeChange={list.setPageSize}
-        onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
+        onSortChange={(next: { key: string; order: SortOrder }) => {
           if (next) list.setSort(next);
         }}
         onAction={(action, row) => {

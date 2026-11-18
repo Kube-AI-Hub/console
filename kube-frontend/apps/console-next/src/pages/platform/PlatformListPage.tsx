@@ -138,6 +138,9 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
       search: { placeholder: t('platform.searchPlaceholder'), aiId: `${kind}:search` },
       sortableKeys: ['name', 'createTime'],
+      // Third click of the header cycle returns to the page's default order;
+      // a server list must send a sort key, so "off" cannot be absent.
+      sortFallback: list.sortFallback,
       sortAiPrefix: kind,
       sort: { key: list.sortBy, order: list.order },
       // Creating users is the one write this area offers; roles and workspaces are
@@ -415,7 +418,7 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
         onSearchChange={list.setKeyword}
         onPageChange={list.setPage}
         onPageSizeChange={list.setPageSize}
-        onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
+        onSortChange={(next: { key: string; order: SortOrder }) => {
           if (next) list.setSort(next);
         }}
         {...(kind === 'users' ? { selectedKeys: selectedUsernames, onSelectionChange: setSelectedUsernames } : {})}

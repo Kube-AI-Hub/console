@@ -102,6 +102,9 @@ export function GpusPage({ cluster }: GpusPageProps): React.ReactElement {
       columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'cluster-gpus:columns' },
       refresh: { label: t('common.refresh'), aiId: 'cluster-gpus:refresh', busy: devices.isFetching || stats.isFetching },
       sortableKeys: ['nodeName', 'index', 'uuid', 'health', 'type', 'deviceVendor'],
+      // Third click of the header cycle returns to the page's default order;
+      // a server list must send a sort key, so "off" cannot be absent.
+      sortFallback: list.sortFallback,
       sortAiPrefix: 'cluster-gpus', sort: { key: list.sortBy, order: list.order },
       columns: [
         {

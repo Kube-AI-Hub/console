@@ -188,6 +188,9 @@ export function StorageClassesPage({ cluster }: StorageClassesPageProps): React.
       selection: 'multiple',
       selectAiId: 'storageclasses:select',
       sortableKeys: ['name', 'createTime'],
+      // Third click of the header cycle returns to the page's default order;
+      // a server list must send a sort key, so "off" cannot be absent.
+      sortFallback: list.sortFallback,
       sortAiPrefix: 'storageclasses',
       sort: { key: list.sortBy, order: list.order },
       columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'storageclasses:columns' },
@@ -345,7 +348,7 @@ export function StorageClassesPage({ cluster }: StorageClassesPageProps): React.
         onSelectionChange={list.setSelected}
         onPageChange={list.setPage}
         onPageSizeChange={list.setPageSize}
-        onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
+        onSortChange={(next: { key: string; order: SortOrder }) => {
           if (next) list.setSort(next);
         }}
         onAction={(action, row) => {

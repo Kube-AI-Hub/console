@@ -117,6 +117,9 @@ function NamespaceListPage({ kind, cluster }: ClusterListPageProps): React.React
           }
         : {}),
       sortableKeys: ['name', 'createTime'],
+      // Third click of the header cycle returns to the page's default order;
+      // a server list must send a sort key, so "off" cannot be absent.
+      sortFallback: list.sortFallback,
       sortAiPrefix: kind,
       sort: { key: list.sortBy, order: list.order },
       columns:
@@ -357,7 +360,7 @@ function NamespaceListPage({ kind, cluster }: ClusterListPageProps): React.React
           : {})}
         {...(kind === 'namespaces' ? { onVisibleColumnsChange: columnVisibility.setVisibleColumnKeys } : {})}
         onRefresh={() => { void query.refetch(); if (kind === 'nodes') void nodeUsage.refetch(); else void projectPods.refetch(); }}
-        onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
+        onSortChange={(next: { key: string; order: SortOrder }) => {
           if (next) list.setSort(next);
         }}
         onAction={(action, row) => {
