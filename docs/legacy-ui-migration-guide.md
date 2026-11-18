@@ -290,14 +290,12 @@ pytest 两条判定约 40 秒；不用等实现就绪才动笔。
 ### 7.2 起本地开发环境
 
 新前端**没有自己的服务端**：构建产物由 ks-console 托管，接口由 ks-console 直连 ks-apiserver。
-所以本地只需要一个静态站，其余请求原样打到已部署的控制台。两种模式，按要不要改代码选：
+本地只需要一个 Vite 进程，其余请求由它转发到已部署的控制台。两个标准命令，按要不要改代码选：
 
-| 模式 | 命令 | 端口 | 热更新 | 用途 |
+| 模式 | 命令 | 端口 | 服务对象 | 用途 |
 | --- | --- | --- | --- | --- |
-| **Vite dev** | `pnpm dev` | 5174 | 有 | 写代码：改一行刷新即可，`routeTree.gen.ts` 自动重建 |
-| **静态站** | `./scripts/dev-mlu370.sh start` | 5178 | 无 | 验收：跑的是真实构建产物，与部署同一条路径 |
-
-两者都走 `KA_BACKEND`，都**原样转发** `/kube-frontend/{api,kapis,apis}`（含前缀）。
+| **dev** | `pnpm dev` | 5174 | 源码（实时编译，有 HMR） | 写代码 |
+| **preview** | `pnpm preview` | 5178 | `dist/` 构建产物 | 验收：跑的就是要部署的那批文件 |
 
 ```bash
 cd console/kube-frontend
@@ -305,22 +303,23 @@ cd console/kube-frontend
 # 写代码
 pnpm dev                        # → http://localhost:5174/kube-frontend/clusters
 
-# 验收（先构建，再起静态站）
-pnpm --filter @kube-ai-hub/console-next build
-./scripts/dev-mlu370.sh start   # 静态站 + 后端探测
-./scripts/dev-mlu370.sh status
-./scripts/dev-mlu370.sh stop
+# 验收（先构建，再起 preview）
+pnpm build
+pnpm preview                    # → http://localhost:5178/kube-frontend/clusters
 ```
 
-**Vite dev 用 `localhost`，不要用 `127.0.0.1`。** 它默认只监听回环的 IPv6（`[::1]:5174`），
-`http://127.0.0.1:5174` 会直接连不上（`curl` 报 000、浏览器「无法访问」），而服务其实是好的。
-要两者都能访问就加 `--host 127.0.0.1` 或 `--host 0.0.0.0`。静态站没这个问题——它显式绑 `127.0.0.1`。
+两者共用 `vite.config.ts` 里同一份 `PROXY`：`/kube-frontend/{api,kapis,apis}` **原样转发**（含前缀）
+到 `KA_BACKEND`，`ws: true` 让容器终端的 exec 握手也能通过。`preview` 从 Vite 6 起复用
+`server.proxy`（`proxy: preview?.proxy ?? server.proxy`），所以不需要第二个静态站脚本。
 
-**静态站必须先有 `dist`**：`dev-mlu370.sh start` 在缺 `apps/console-next/dist/index.html` 时直接报错退出，
-不会替你构建。改了共享包（`packages/ai-kit`、`packages/api-client`）要重新 `build`，否则跑的是旧产物。
+**用 `localhost`，不要用 `127.0.0.1`。** Vite 默认只监听回环的 IPv6（`[::1]`），
+`http://127.0.0.1:5178` 会连不上（`curl` 报 000、浏览器「无法访问」），而服务其实是好的。
+要两者都能访问就加 `--host 127.0.0.1`。
 
-**一套脚本可以指任何环境**：`KA_BACKEND` 决定后端（默认 `https://ka.watering.ai`），
-不必为一个环境停掉另一个：
+**preview 必须先有 `dist`**：它是静态产物服务器，不会替你构建。改了共享包
+（`packages/ai-kit`、`packages/api-client`）要重新 `pnpm build`，否则跑的是旧产物。
+
+**一套命令可以指任何环境**：`KA_BACKEND` 决定后端（默认 `https://ka.watering.ai`）：
 
 | 目标 | KA_BACKEND |
 | --- | --- |
@@ -328,22 +327,22 @@ pnpm --filter @kube-ai-hub/console-next build
 | B200 | `https://console-dev.brightaitoken.ai` |
 
 ```bash
-KA_BACKEND=https://console-dev.brightaitoken.ai WEB_PORT=5179 ./scripts/dev-mlu370.sh start
 KA_BACKEND=https://console-dev.brightaitoken.ai pnpm dev
+KA_BACKEND=https://console-dev.brightaitoken.ai pnpm preview
 ```
 
 选哪个要先想清楚在验证什么（差异清单见 `环境/` 下各环境文档）。两个环境都有
 `x-check-exist`（ks-console 的中间件）与 `/oauth/token` 的密码解密分支，差异比之前小。
 
 - 路径**原样转发**（含 `/kube-frontend` 前缀）：前缀分流正是部署端在做的判断，本地重写会把那里的错误藏起来。
-  `vite.config.ts` 与 `dev-static-server.mjs` 都对 `/kube-frontend/{api,kapis,apis}` 转发到 `KA_BACKEND`；
   只配 `/api` 时 kapis 读落到 SPA 兜底、页面报「资源不存在」。
-- 改代理后重启静态站；共享包先重新构建，静态站先重建 dist。验收时记录实际构建与
-  后端版本，不能在并行工作替换产物时复用旧结果。开发调试可用热更新，最终截图与回归使用同一批固定产物。
-- 静态站的 WebSocket 升级单独走 `server.on('upgrade')`（容器终端）：`/kapis` 下的 exec 握手
-  需要字节级透传，HTTP 代理带不动。终端连不上时先确认后端可达，而不是先怀疑浏览器。
-- **端口冲突会直接失败**：`vite.config.ts` 设了 `strictPort`，5174 被占就报错退出，不会静默换到 5175。
-  这是故意的——两个实例同时写 `routeTree.gen.ts` 会互相触发重建，页面每秒刷新好几次。
+- 共享包改了先 `pnpm build` 再 `pnpm preview`；验收时记录实际构建与后端版本，
+  不能在并行工作替换产物时复用旧结果。
+- **端口冲突会直接失败**：`server` 与 `preview` 都设了 `strictPort`，端口被占就报错退出，
+  不会静默换一个。这是故意的——两个 dev 实例同时写 `routeTree.gen.ts` 会互相触发重建，页面每秒刷新好几次。
+- **preview 不能替代部署端验收**：它对不存在的 `.js` 会回退到 `index.html`（返回 HTML 而非 404），
+  部署端是明确的 404。分包配置错误在 preview 里会被掩盖成「模块脚本加载失败」。
+  最终结论仍以部署环境为准。
 
 **登录**：浏览器打开后走正常登录页。mlu370 的账号见 `环境/mlu370环境.md`；
 自动化里用 `POST /kube-frontend/kapis/oauth.kubesphere.io/v1alpha1/login` 换 token 写入

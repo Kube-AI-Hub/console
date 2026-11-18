@@ -27,6 +27,31 @@ import { TanStackRouterVite } from '@tanstack/router-plugin/vite';
  */
 const BACKEND = process.env['KA_BACKEND'] ?? 'https://ka.watering.ai';
 
+/**
+ * Proxy rules shared by `dev` and `preview`.
+ *
+ * A deployed console is the backend; proxying keeps the app same-origin so relative
+ * `/kube-frontend/...` paths behave as in production.
+ *
+ * The path is forwarded **unchanged**, including the mount prefix: the deployed
+ * ks-console is what routes `/kube-frontend/{kapis,apis,api/v1}` to ks-apiserver, and
+ * rewriting it here would hide a mistake in that routing — the very thing a local check
+ * is supposed to exercise.
+ *
+ * Every prefix needs an entry of its own — Vite matches proxy keys by URL prefix and has
+ * no wildcard. With only `/api` listed, `/kapis/...` fell through to the SPA fallback and
+ * every resource page rendered "资源不存在" from an HTML body, which looks like a product
+ * bug rather than a missing proxy rule.
+ *
+ * `ws: true` is what carries the container terminal: its exec handshake upgrades the
+ * connection, and an HTTP-only proxy drops it.
+ */
+const PROXY = {
+  '/kube-frontend/api': { target: BACKEND, changeOrigin: true, ws: true },
+  '/kube-frontend/kapis': { target: BACKEND, changeOrigin: true, ws: true },
+  '/kube-frontend/apis': { target: BACKEND, changeOrigin: true, ws: true },
+};
+
 export default defineConfig({
   /*
    * Served under a prefix, not at the origin root.
@@ -157,26 +182,20 @@ export default defineConfig({
        */
       ignored: ['**/.tanstack/tmp/**', '**/src/routeTree.gen.ts'],
     },
-    proxy: {
-      /*
-       * A deployed console is the backend; proxying keeps the app same-origin in
-       * development so relative `/kube-frontend/...` paths behave as in production.
-       *
-       * The path is forwarded **unchanged**, including the mount prefix: the
-       * deployed ks-console is what routes `/kube-frontend/{kapis,apis,api/v1}` to
-       * ks-apiserver, and rewriting it here would hide a mistake in that routing —
-       * the very thing a local check is supposed to exercise.
-       *
-       * Every prefix needs an entry of its own — Vite matches proxy keys by URL
-       * prefix and has no wildcard. With only `/api` listed, `/kapis/...` fell
-       * through to the SPA fallback and every resource page rendered "资源不存在"
-       * from an HTML body, which looks like a product bug rather than a missing
-       * proxy rule.
-       */
-      '/kube-frontend/api': { target: BACKEND, changeOrigin: true, ws: true },
-      '/kube-frontend/kapis': { target: BACKEND, changeOrigin: true, ws: true },
-      '/kube-frontend/apis': { target: BACKEND, changeOrigin: true, ws: true },
-    },
+    proxy: PROXY,
+  },
+  /*
+   * `vite preview` serves `dist/` and — since Vite 6 — reuses `server.proxy` when
+   * `preview.proxy` is absent (`proxy: preview?.proxy ?? server.proxy`). It is the
+   * acceptance server: the same built files that get deployed, an API proxy, and
+   * WebSocket upgrades, with no custom static server to keep in sync.
+   *
+   * A different port from dev so both can run at once: 5174 for the source build,
+   * 5178 for the artifact under test.
+   */
+  preview: {
+    port: 5178,
+    strictPort: true,
   },
   build: {
     outDir: 'dist',

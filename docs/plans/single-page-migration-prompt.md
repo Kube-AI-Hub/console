@@ -87,7 +87,9 @@ pytest tests/kube-frontend/<模块> -k <本页> -q -n 0                # 判定�
 本地起服务：
 
 ```bash
-cd console/kube-frontend && ./scripts/dev-mlu370.sh start   # http://localhost:5178/kube-frontend
+cd console/kube-frontend
+pnpm dev        # 源码 + HMR，5174
+pnpm build && pnpm preview   # 构建产物，5178（验收用这一层）
 ```
 
 ## 四、交付

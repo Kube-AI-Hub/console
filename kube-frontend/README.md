@@ -90,19 +90,18 @@ pnpm test
 ### 对着真实接口跑
 
 本应用没有自己的服务端：构建产物由 ks-console 托管，接口由 ks-console 直连 ks-apiserver。
-本地只需要一个静态站，所有请求直接打到已部署的控制台：
+`vite.config.ts` 的 proxy 指向 `KA_BACKEND`（默认 `https://ka.watering.ai`），路径**原样转发**
+（含 `/kube-frontend` 前缀），因为前缀分流正是部署端在做的判断。
 
 ```bash
-./scripts/dev-mlu370.sh start     # 静态站 + 探测后端
-./scripts/dev-mlu370.sh status
-./scripts/dev-mlu370.sh stop
+pnpm dev          # 源码 + HMR，5174
+pnpm build
+pnpm preview      # dist 构建产物，5178
 ```
 
-`KA_BACKEND` 决定后端（默认 `https://ka.watering.ai`）。打开 `http://localhost:5178/kube-frontend/login`
-用账号密码登录即可——凭据由 ks-apiserver 自己校验，`client_secret` 不出现在浏览器可触达的链路上。
-
-热更新用 `pnpm dev`：`vite.config.ts` 的 proxy 同样指向 `KA_BACKEND`，路径**原样转发**（含
-`/kube-frontend` 前缀），因为前缀分流正是部署端在做的判断。
+打开 `http://localhost:5178/kube-frontend/login` 用账号密码登录即可——凭据由 ks-apiserver
+自己校验，`client_secret` 不出现在浏览器可触达的链路上。`preview` 对不存在的 `.js` 会回退到
+`index.html`，部署端返回 404，所以最终验收仍以部署环境为准。
 
 ### 挂载路径
 
