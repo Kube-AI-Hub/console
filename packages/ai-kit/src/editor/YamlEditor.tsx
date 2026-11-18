@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { cn } from '../utils/cn';
+import { Button } from '../primitives/Button';
 import { depthOf, fieldsFor, lastSegment } from './k8s-fields';
 
 /**
@@ -33,6 +34,19 @@ export interface YamlEditorProps {
   height?: string;
   /** Accessible name; defaults to a generic label. */
   ariaLabel?: string;
+  /**
+   * Copy the document to the clipboard from inside the editor.
+   *
+   * On by default: copying YAML is the one action every host wants (viewing an
+   * object, fixing a manifest, pasting it into `kubectl`), and asking each of the
+   * seven call sites to wire the same button is how they end up inconsistent. A
+   * host that has no clipboard — or wants the corner to itself — turns it off.
+   */
+  copyable?: boolean;
+  /** Label on the copy button, e.g. the host's translated "copy". */
+  copyLabel?: string;
+  /** Label shown briefly after a successful copy. */
+  copiedLabel?: string;
 }
 
 /**
@@ -50,6 +64,9 @@ export function YamlEditor({
   className,
   height = '420px',
   ariaLabel = 'YAML',
+  copyable = true,
+  copyLabel = '复制',
+  copiedLabel = '已复制',
 }: YamlEditorProps): React.ReactElement {
   const [error, setError] = React.useState<string | null>(null);
 
@@ -74,13 +91,85 @@ export function YamlEditor({
           onParseError={setError}
         />
       </React.Suspense>
-      {toolbar ? (
+      {toolbar || copyable ? (
         <div className="pointer-events-none absolute bottom-1 right-1 flex items-center gap-1 rounded-ai-sm bg-ai-bg-overlay/80 px-1 py-0.5">
-          <div className="pointer-events-auto flex items-center gap-1">{toolbar}</div>
+          <div className="pointer-events-auto flex items-center gap-1">
+            {toolbar}
+            {copyable ? <CopyButton value={value} label={copyLabel} copiedLabel={copiedLabel} /> : null}
+          </div>
         </div>
       ) : null}
     </div>
   );
+}
+
+/**
+ * Copies the whole document, and says so.
+ *
+ * `navigator.clipboard` only exists on secure origins, and the lab clusters serve
+ * this console over plain HTTP on an IP — there the promise is `undefined` rather
+ * than rejecting, so calling it blind left the button doing nothing at all. The
+ * `execCommand` path is the fallback those origins do support.
+ */
+function CopyButton({ value, label, copiedLabel }: {
+  value: string; label: string; copiedLabel: string;
+}): React.ReactElement {
+  const [copied, setCopied] = React.useState(false);
+  const timer = React.useRef<number | undefined>(undefined);
+
+  React.useEffect(() => () => window.clearTimeout(timer.current), []);
+
+  const copy = async (): Promise<void> => {
+    if (!(await writeClipboard(value))) return;
+    setCopied(true);
+    window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(() => setCopied(false), 2_000);
+  };
+
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="sm"
+      onClick={() => void copy()}
+      aria-label={copied ? copiedLabel : label}
+      title={copied ? copiedLabel : label}
+      data-ai-id="yaml:copy"
+      data-ai-copied={copied ? 'true' : undefined}
+    >
+      {copied ? copiedLabel : label}
+    </Button>
+  );
+}
+
+/** Writes text to the clipboard; `false` when neither mechanism worked. */
+async function writeClipboard(text: string): Promise<boolean> {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    // Denied or insecure origin; fall through to the legacy path.
+  }
+  try {
+    /*
+     * A hidden textarea rather than the editor's own selection: this button
+     * copies the whole document regardless of what the reader has highlighted.
+     */
+    const area = document.createElement('textarea');
+    area.value = text;
+    area.setAttribute('readonly', '');
+    area.style.position = 'fixed';
+    area.style.opacity = '0';
+    document.body.appendChild(area);
+    area.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(area);
+    return ok;
+  } catch {
+    return false;
+  }
 }
 
 function EditorSkeleton(): React.ReactElement {

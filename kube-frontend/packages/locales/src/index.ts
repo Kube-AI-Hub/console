@@ -3446,6 +3446,8 @@ export const zh = {
   'configmaps.yaml.invalid': 'YAML 格式有误，请修正后再提交。',
   'configmaps.yaml.upload': '上传',
   'configmaps.yaml.download': '下载',
+  'configmaps.yaml.copy': '复制',
+  'configmaps.yaml.copied': '已复制',
   'configmaps.yaml.downloadName': '{name}.yaml',
 
 
@@ -3479,6 +3481,8 @@ export const zh = {
   'yaml.nameLocked': '已有对象不支持改名，名称必须保持为 {name}。',
   'yaml.upload': '上传',
   'yaml.download': '下载',
+  'yaml.copy': '复制',
+  'yaml.copied': '已复制',
 
   /* ---- secrets ---- */
   'secrets.title': '保密字典',
@@ -7042,6 +7046,8 @@ export const en: Record<LocaleKey, string> = {
   'configmaps.yaml.invalid': 'The YAML is not valid. Fix it before submitting.',
   'configmaps.yaml.upload': 'Upload',
   'configmaps.yaml.download': 'Download',
+  'configmaps.yaml.copy': 'Copy',
+  'configmaps.yaml.copied': 'Copied',
   'configmaps.yaml.downloadName': '{name}.yaml',
 
   'detail.back': 'Back to list',
@@ -7078,6 +7084,8 @@ export const en: Record<LocaleKey, string> = {
   'yaml.nameLocked': 'Existing objects cannot be renamed; the name must stay {name}.',
   'yaml.upload': 'Upload',
   'yaml.download': 'Download',
+  'yaml.copy': 'Copy',
+  'yaml.copied': 'Copied',
 
   /* ---- secrets ---- */
   'secrets.title': 'Secrets',

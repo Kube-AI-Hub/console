@@ -36,7 +36,7 @@ export function ManifestCreateDialog({ resource, title, description, schema, ini
       <ResourceForm schema={schema} values={values} onChange={setValues} submitting={pending}
         onCancel={() => onOpenChange(false)} onSubmit={async (next) => { await onSubmit(buildManifest(next)); }} />
     </> : <>
-      <YamlEditor value={yaml} onChange={setYaml} readOnly={pending} />
+      <YamlEditor value={yaml} onChange={setYaml} readOnly={pending} copyLabel={t('yaml.copy')} copiedLabel={t('yaml.copied')} />
       {error ? <p role="alert" className="mt-2 text-sm text-ai-danger">{error}</p> : null}
       <div className="mt-3 flex justify-end gap-2">
         <Button variant="ghost" onClick={() => setYaml(null)} disabled={pending}>{t('networkCreate.back')}</Button>

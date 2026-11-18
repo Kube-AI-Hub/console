@@ -202,7 +202,7 @@ export function CreateServiceDialog({ cluster, namespace, onOpenChange }: Create
     >
       {inYaml ? (
         <div data-ai-id="services-create:yaml">
-          <YamlEditor value={yaml} onChange={setYaml} height="46vh" ariaLabel={t('networkCreate.serviceTitle')} />
+          <YamlEditor value={yaml} onChange={setYaml} height="46vh" ariaLabel={t('networkCreate.serviceTitle')} copyLabel={t('yaml.copy')} copiedLabel={t('yaml.copied')} />
           {yamlError ? (
             <p role="alert" className="mt-2 text-xs text-ai-danger" data-ai-id="services-create:error">
               {yamlError}

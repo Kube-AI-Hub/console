@@ -138,6 +138,8 @@ export function ConfigMapYamlDialog({
           onValidityChange={(problem) => setSyntaxError(problem)}
           height="52vh"
           ariaLabel={title}
+          copyLabel={t('configmaps.yaml.copy')}
+          copiedLabel={t('configmaps.yaml.copied')}
           toolbar={
             <>
               <label

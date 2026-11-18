@@ -201,7 +201,7 @@ export function CreateIngressDialog({ cluster, namespace, onOpenChange }: Create
     >
       {inYaml ? (
         <div data-ai-id="ingresses-create:yaml">
-          <YamlEditor value={yaml} onChange={setYaml} height="46vh" ariaLabel={t('networkCreate.ingressTitle')} />
+          <YamlEditor value={yaml} onChange={setYaml} height="46vh" ariaLabel={t('networkCreate.ingressTitle')} copyLabel={t('yaml.copy')} copiedLabel={t('yaml.copied')} />
           {yamlError ? (
             <p role="alert" className="mt-2 text-xs text-ai-danger" data-ai-id="ingresses-create:error">
               {yamlError}

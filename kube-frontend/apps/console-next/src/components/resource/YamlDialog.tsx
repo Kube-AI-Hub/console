@@ -143,6 +143,8 @@ export function YamlDialog({
           onValidityChange={(problem) => setSyntaxError(problem)}
           height="52vh"
           ariaLabel={title}
+          copyLabel={t('yaml.copy')}
+          copiedLabel={t('yaml.copied')}
           toolbar={
             <>
               <label

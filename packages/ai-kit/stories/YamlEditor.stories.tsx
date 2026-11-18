@@ -121,6 +121,10 @@ export const Invalid: Story = {
  * The toolbar is a slot rather than a set of props: upload, download and format
  * differ per host, and a prop per action would grow the component's API without
  * making any of them more honest.
+ *
+ * Copy is the exception — it is built in, because every host wants it and wiring
+ * the same button seven times is how they drift apart. The host's own actions sit
+ * to its left, so the corner reads "specific → general".
  */
 export const WithToolbar: Story = {
   name: 'with toolbar',
@@ -133,20 +137,9 @@ export const WithToolbar: Story = {
           onChange={setValue}
           height="320px"
           toolbar={
-            <>
-              <Button variant="ghost" size="sm" onClick={() => setValue(CONFIG_MAP)}>
-                重置
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  void navigator.clipboard?.writeText(value);
-                }}
-              >
-                复制
-              </Button>
-            </>
+            <Button variant="ghost" size="sm" onClick={() => setValue(CONFIG_MAP)}>
+              重置
+            </Button>
           }
         />
       </div>

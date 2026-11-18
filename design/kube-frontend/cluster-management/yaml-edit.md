@@ -49,6 +49,20 @@
 
 **何时重新考虑**：接入 CRD 时，组与版本要来自发现接口而不是静态表。
 
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-YAML_EDIT-04 — 复制按钮内置进 `YamlEditor`，不再由各宿主自备
+
+**为什么**：查看或修一份 YAML 的下一步几乎总是「贴到别处」——`kubectl apply`、工单、比对。此前只有 Storybook 的 `with toolbar` 示例演示过这个按钮，真实页面一个都没有；而把同一个按钮在七个调用点各写一遍，是它们最终长得不一样的直接原因。放进编辑器意味着新接入的宿主自动获得，且文案由宿主用 `copyLabel` / `copiedLabel` 传，仍跟随语言。
+
+**位置**：右下角、宿主 `toolbar` 的右侧。角落的读法是「具体 → 通用」：上传/下载/重置属于这个页面，复制属于任何 YAML。
+
+**两条剪贴板路径**：`navigator.clipboard` 只在安全上下文存在，而实验室集群用纯 HTTP + IP 提供控制台——那里 `navigator.clipboard` 是 `undefined` 而不是 reject，所以守卫必须检查方法存在，只包 try/catch 会让按钮静默无反应。退到 `execCommand('copy')` + 隐藏 textarea（复制整份文档，不依赖读者当前选中的内容）。两条都失败时不改文案——失败却显示「已复制」比不反馈更糟。
+
+**为什么不做成 `toolbar` 的一部分**：那样每个宿主仍要自己接剪贴板与两秒回退，等于把这次的重复原样搬到七个地方。`copyable={false}` 留给不需要的宿主。
+
+**被否方案**：用图标按钮而不是文字。上传/下载是图标，复制却需要「已复制」这个状态，纯图标要么加 tooltip 才能表达成功、要么靠颜色暗示；文字按钮在两个状态下都自解释，且与 Storybook 示例一致。
+
+**验证**：`yaml-editor-copy.test.tsx` 覆盖写入成功→显示「已复制」→两秒回落、`navigator.clipboard` 缺失时走 `execCommand`、两条路径都失败时不谎报成功、`copyable={false}` 时不渲染角落。本地实测：`juicefs-driver-config` 的「编辑 YAML」弹窗里工具栏为「上传 → 下载 → 复制」，点击写入的正是该对象 YAML，按钮变为「已复制」并在 2 秒后回落。
+
 ## 系统现状
 
 - 工作负载、配置字典、保密字典、服务账户、存储卷与快照、自定义监控已有 YAML 编辑；节点/持久卷/存储类型/网络策略没有。
