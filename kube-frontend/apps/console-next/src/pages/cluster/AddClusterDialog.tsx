@@ -374,6 +374,8 @@ export function AddClusterDialog({ open, onOpenChange, onCreated }: AddClusterDi
                     onChange={setKubeconfig}
                     height="200px"
                     ariaLabel={t('cluster.add.kubeconfig')}
+                    copyLabel={t('yaml.copy')}
+                    copiedLabel={t('yaml.copied')}
                   />
                 </React.Suspense>
                 <a

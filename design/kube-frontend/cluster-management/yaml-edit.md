@@ -63,6 +63,12 @@
 
 **验证**：`yaml-editor-copy.test.tsx` 覆盖写入成功→显示「已复制」→两秒回落、`navigator.clipboard` 缺失时走 `execCommand`、两条路径都失败时不谎报成功、`copyable={false}` 时不渲染角落。本地实测：`juicefs-driver-config` 的「编辑 YAML」弹窗里工具栏为「上传 → 下载 → 复制」，点击写入的正是该对象 YAML，按钮变为「已复制」并在 2 秒后回落。
 
+**覆盖范围与一处删除**：`copyable` 默认开，所以所有 `YamlEditor` 宿主自动获得——`YamlDialog`（配置字典/保密字典/服务账户/工作负载）、`ConfigMapYamlDialog`、`ManifestCreateDialog`、创建 Service/Ingress、`AddClusterDialog` 的 kubeconfig、以及概览「等待集群加入」里的代理清单。宿主用自己的 `copyLabel` / `copiedLabel` 传文案，语言切换后跟着变。
+
+概览页原来在清单下方另有一个「复制清单」按钮（`overview:agent-copy`），它和编辑器内这个重复，已删除；清单仍可复制，入口只剩编辑器角落一处。`test_TC_..._OVERVIEW_11` 相应改为断言 `yaml:copy` 可见且 `overview:agent-copy` 不存在。
+
+联邦资源详情页的「模板 / 对象」两个区块仍是只读 `<pre>`，不经过 `YamlEditor`，因此没有这个按钮；那里若要复制需要先换成编辑器，属于另一处改动。
+
 ## 系统现状
 
 - 工作负载、配置字典、保密字典、服务账户、存储卷与快照、自定义监控已有 YAML 编辑；节点/持久卷/存储类型/网络策略没有。

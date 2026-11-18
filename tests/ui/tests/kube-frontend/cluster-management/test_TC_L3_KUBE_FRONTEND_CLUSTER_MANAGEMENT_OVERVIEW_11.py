@@ -68,7 +68,9 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_OVERVIEW_11(cluster_overview_pag
         assert body.lstrip().startswith("---") or "apiVersion:" in body, body[:80]
         assert "kind: Deployment" in body, body[:200]
         expect(ui.page.locator('[data-ai-id="overview:agent-unavailable"]')).to_have_count(0)
-        expect(ui.page.locator('[data-ai-id="overview:agent-copy"]')).to_be_visible()
+        # 复制入口在编辑器自己的角落（`yaml:copy`），页面上不再有第二个「复制清单」按钮。
+        expect(ui.page.locator('[data-ai-id="yaml:copy"]')).to_be_visible()
+        expect(ui.page.locator('[data-ai-id="overview:agent-copy"]')).to_have_count(0)
 
         # 三步的文字起点一致：块级子元素会把序号挤开，差 13px 就看得出来
         starts = [steps.nth(i).evaluate("""element => {

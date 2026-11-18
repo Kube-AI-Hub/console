@@ -184,7 +184,6 @@ function WaitingForCluster({ cluster, detail }: {
   detail: ClusterDetail;
 }): React.ReactElement {
   const t = useT();
-  const [copied, setCopied] = React.useState(false);
   const isProxy = detail.connectionType === 'proxy';
   const query = useQuery({
     queryKey: ['cluster-agent', cluster],
@@ -193,16 +192,6 @@ function WaitingForCluster({ cluster, detail }: {
     retry: false,
     queryFn: ({ signal }) => clusterAgentApi(apiClient).deployment({ cluster, signal }),
   });
-
-  const copy = async (): Promise<void> => {
-    try {
-      await navigator.clipboard.writeText(query.data ?? '');
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2_000);
-    } catch {
-      // Clipboard blocked (insecure origin): the text is on screen and selectable.
-    }
-  };
 
   /*
    * The old copy wraps a command in `<span class="code">` inline. `t()` returns a plain
@@ -274,14 +263,9 @@ function WaitingForCluster({ cluster, detail }: {
                    * never sees a waiting cluster should not download it.
                    */}
                   <React.Suspense fallback={<div className="h-[28rem] animate-pulse rounded-ai-md bg-ai-surface-2" />}>
-                    <ManifestEditor value={query.data} ariaLabel={t('cluster.add.agentTitle')} />
+                    <ManifestEditor value={query.data} ariaLabel={t('cluster.add.agentTitle')}
+                      copyLabel={t('yaml.copy')} copiedLabel={t('yaml.copied')} />
                   </React.Suspense>
-                  {/* Copy sits under the document: the reader looks first, then copies. */}
-                  <div className="flex justify-end">
-                    <Button variant="secondary" size="sm" onClick={() => void copy()} {...actionProps('overview:agent-copy')}>
-                      {copied ? t('cluster.add.agentCopied') : t('cluster.add.agentCopy')}
-                    </Button>
-                  </div>
                 </div>
               ) : query.isPending ? (
                 <p className="mt-2 text-xs text-ai-fg-muted">{t('common.loading')}</p>
@@ -321,9 +305,12 @@ function WaitingForCluster({ cluster, detail }: {
  */
 const ManifestEditor = React.lazy(() =>
   import('@kube-ai-hub/ui/editor').then((module) => ({
-    default: ({ value, ariaLabel }: { value: string; ariaLabel: string }) => (
+    default: ({ value, ariaLabel, copyLabel, copiedLabel }: {
+      value: string; ariaLabel: string; copyLabel: string; copiedLabel: string;
+    }) => (
       <div data-ai-id="overview:agent-manifest">
-        <module.YamlEditor value={value} readOnly height="28rem" ariaLabel={ariaLabel} />
+        <module.YamlEditor value={value} readOnly height="28rem" ariaLabel={ariaLabel}
+          copyLabel={copyLabel} copiedLabel={copiedLabel} />
       </div>
     ),
   })),
