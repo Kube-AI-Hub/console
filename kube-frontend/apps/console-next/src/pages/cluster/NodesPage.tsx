@@ -90,23 +90,55 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
    * hunting for the dropdown. The vendors are a multi-select on the wire
    * (`vendor=a,b`), so clicking one adds it and clicking it again removes it rather
    * than replacing the set.
+   *
+   * Role and vendor are not independent here. Control-plane nodes are almost always
+   * CPU machines, so `role=master` together with a vendor asks for a set that
+   * usually does not exist — the reader gets an empty list and no clue that the two
+   * tiles contradict each other. Picking one therefore drops the conflicting half:
+   * control-plane clears the vendor filter, and a vendor clears `role` when it is
+   * `master`. A non-master role (worker, edge) is left alone, because "NVIDIA worker
+   * nodes" is a real question.
    */
   const toggleStat = React.useCallback((patch: { role?: string; vendor?: string }) => {
     setFilters((prev) => {
       const next = { ...prev };
-      if (patch.role !== undefined) next.role = prev.role === patch.role ? '' : patch.role;
+      if (patch.role !== undefined) {
+        const turningOn = prev.role !== patch.role;
+        next.role = turningOn ? patch.role : '';
+        /*
+         * Only when switching *to* the control plane. Clearing the vendor on the
+         * way off would silently undo a choice the reader made in another control
+         * — turning a tile off should remove that tile's filter and nothing else.
+         */
+        if (turningOn) next.vendor = '';
+      }
       if (patch.vendor !== undefined) {
         const current = (prev.vendor ?? '').split(',').filter(Boolean);
         const merged = current.includes(patch.vendor)
           ? current.filter((value) => value !== patch.vendor)
           : [...current, patch.vendor];
         next.vendor = merged.join(',');
+        if (prev.role === 'master') next.role = '';
       }
       return next;
     });
     list.setPage(1);
   }, [list]);
   const selectedVendors = React.useMemo(() => (filters.vendor ?? '').split(',').filter(Boolean), [filters.vendor]);
+  /*
+   * Applied to the toolbar's own controls too, not just the tiles.
+   *
+   * The dropdowns can produce the same contradiction (role=master + a vendor), and
+   * a rule that only holds for one of the two entry points is worse than no rule:
+   * the reader would see the tiles disagree with the chips next to them. One
+   * reconciler keeps both paths honest.
+   */
+  const reconcile = (next: Record<string, string>): Record<string, string> =>
+    next.role === 'master' ? { ...next, vendor: '' } : next;
+  const changeFilters = (next: Record<string, string>): void => {
+    setFilters(reconcile(next));
+    list.setPage(1);
+  };
   const noFilters = !filters.status && !filters.role && !filters.vendor && !filters.model && !list.search;
   const summary: StatisticItem[] = [
     /*
@@ -282,7 +314,7 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
     {metrics.isError || time.isError ? <p className="text-xs text-ai-warning">{t('node.list.metricsUnavailable')} <Button size="sm" variant="ghost" onClick={() => { void metrics.refetch(); void time.refetch(); }}>{t('common.retry')}</Button></p> : null}
     {Object.values(offsets).some((entry) => entry.offset !== undefined && Math.abs(entry.offset) >= 120) ? <p role="alert" className="text-xs text-ai-danger">{t('node.list.timeWarning')}</p> : null}
     {nodes.isError ? <ResourceErrorPanel error={nodes.error} onRetry={() => void nodes.refetch()} retryAiId="nodes:retry" /> :
-      <ResourceList schema={schema} rows={rows} loading={nodes.isPending} filters={filters} onFiltersChange={(next) => { setFilters(next); list.setPage(1); }}
+      <ResourceList schema={schema} rows={rows} loading={nodes.isPending} filters={filters} onFiltersChange={changeFilters}
         searchValue={list.keyword} onSearchChange={list.setKeyword} onPageChange={list.setPage} onPageSizeChange={list.setPageSize}
         onRefresh={refresh} onSortChange={(next) => { if (next) list.setSort(next); }}
         {...(visibleColumns ? { visibleColumnKeys: visibleColumns } : {})} onVisibleColumnsChange={setVisibleColumns}

@@ -118,3 +118,69 @@ describe('statistics tiles filter the node list', () => {
     expect(screen.getAllByRole('progressbar').length).toBeGreaterThan(0);
   });
 });
+
+/**
+ * Control plane and vendor are mutually exclusive.
+ *
+ * Control-plane nodes are nearly always CPU machines, so `role=master` plus a
+ * vendor asks for an empty set — the reader sees no rows and no explanation. These
+ * pin the rule in both directions and from both entry points, because a rule that
+ * only holds on one of them would leave the tiles disagreeing with the chips.
+ */
+describe('control plane and vendor filters exclude each other', () => {
+  it('drops the vendor filter when the control-plane tile is turned on', async () => {
+    const calls = stubServer();
+    mount();
+    await screen.findByText('gpu01');
+
+    await userEvent.click(screen.getByRole('button', { name: /英伟达/ }));
+    await waitFor(() => expect(lastListCall(calls)?.searchParams.get('deviceVendor')).toBe('nvidia'));
+
+    await userEvent.click(screen.getByRole('button', { name: /控制平面节点/ }));
+    await waitFor(() => {
+      const last = lastListCall(calls);
+      expect(last?.searchParams.get('role')).toBe('master');
+      expect(last?.searchParams.has('deviceVendor')).toBe(false);
+    });
+    // The vendor tile drops its pressed state in the same update, otherwise the
+    // band would claim two filters that are not both in effect.
+    expect(screen.getByRole('button', { name: /英伟达/ })).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('button', { name: /控制平面节点/ })).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('drops the control-plane filter when a vendor tile is turned on', async () => {
+    const calls = stubServer();
+    mount();
+    await screen.findByText('gpu01');
+
+    await userEvent.click(screen.getByRole('button', { name: /控制平面节点/ }));
+    await waitFor(() => expect(lastListCall(calls)?.searchParams.get('role')).toBe('master'));
+
+    await userEvent.click(screen.getByRole('button', { name: /英伟达/ }));
+    await waitFor(() => {
+      const last = lastListCall(calls);
+      expect(last?.searchParams.get('deviceVendor')).toBe('nvidia');
+      expect(last?.searchParams.has('role')).toBe(false);
+    });
+    expect(screen.getByRole('button', { name: /控制平面节点/ })).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('leaves the vendor filter alone when the control-plane tile is turned off', async () => {
+    // Turning a tile off must remove that tile's own filter and nothing else; a
+    // reader who picked a vendor in the dropdown keeps it.
+    const calls = stubServer();
+    mount();
+    await screen.findByText('gpu01');
+
+    await userEvent.click(screen.getByRole('button', { name: /控制平面节点/ }));
+    await waitFor(() => expect(lastListCall(calls)?.searchParams.get('role')).toBe('master'));
+
+    await userEvent.click(screen.getByRole('button', { name: /控制平面节点/ }));
+    await waitFor(() => expect(lastListCall(calls)?.searchParams.has('role')).toBe(false));
+
+    // Now pick a vendor and toggle the role back off; the vendor must survive.
+    await userEvent.click(screen.getByRole('button', { name: /英伟达/ }));
+    await waitFor(() => expect(lastListCall(calls)?.searchParams.get('deviceVendor')).toBe('nvidia'));
+    expect(lastListCall(calls)?.searchParams.has('role')).toBe(false);
+  });
+});
