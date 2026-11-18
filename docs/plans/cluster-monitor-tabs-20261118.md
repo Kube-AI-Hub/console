@@ -122,10 +122,26 @@ A100 只有旧 AGPL console（`ssh a100` → 节点 `172.26.1.44:30880`，公网
 - **A100 验证发现并修复**：① 概览用量行标签原用「…使用率」但显示 used/total（已改为资源名，图表标题仍用比率名）；② TiB 级大盘精度改为两位（0.24 TiB / 5.89 TiB）。
 - **边界**：A100 没有部署新前端，也不是本页的部署验收；first-party 登录端点对匿名返回 403，只能 token 注入（KA_TOKEN）。中文深色截图为本轮 A100 证据，浅色/英文未在 A100 复拍。
 
+## mlu370 多集群复验（2026-11-18，切回后）
+
+A100 只有 host 一个集群，多集群分支不在那里验；切回 mlu370 后补验（同一份构建、同一份代码）：
+
+| 集群 | 角色/状态 | 页面结果 |
+| --- | --- | --- |
+| `host` | 主集群，Ready | 节点环 1/1；厂商 寒武纪 1；用量 0 GiB/182.5 GiB、125 pods；RDMA empty（本集群无指标）；组件状态正常展示 |
+| `agent` | 联邦成员，Ready | 节点环 3/3；厂商 **昇腾/昆仑芯/英伟达各 1（33.3%）**；用量 118.1 GiB/276.4 GiB、336 pods、7.9 KiB/s RDMA；组件 Kube AI Hub 17/19 异常；etcd 未接入监控（ServiceMonitor 404，条件页签隐藏） |
+| `test` | 无 Ready 条件 | 不挂载监控页，路由层整页 `cluster:not-ready` + 「前往集群概览」，无趋势/状态分区/重试 |
+
+- **作用域正确**：DOM 与同次 API 逐项对上——`/kapis/clusters/agent/resources…/componenthealth` 给 3/3、`nodes/stats` 给三家厂商，host 给 1/1 与 cambricon；页面数字、厂商行、用量行分别取自各自集群，没有串到主集群。成员集群的 range/rank 路径均为 `/kapis/clusters/agent/…`。
+- **性能观察（非缺陷）**：成员集群经 tower 代理较慢，agent 概览 surface 约 25s 到 ready、物理资源页签约 20s（期间显示骨架）；host 约数秒。若要把长等待变短，可把概览的 20 个指标拆成「状态行/用量主图」两次查询或减少同请求指标数——登记为后续优化，不影响正确性。
+- 截图：`tests/ui/artifacts/cluster-monitor-mlu370/`（host/agent overview、agent/host resource、test 未就绪）。
+- 回归：mlu370 监控页 14 条串行 **14 passed / 128.45s**；A100 的标签/精度修复在本轮多集群上同样生效（同一构建）。
+
 ## 证据链接
 
 - 旧页三集群基线（上一批）：[assets/cluster-monitor-status-20261118/](assets/cluster-monitor-status-20261118/)。
-- A100 复验截图（gitignored）：`console/tests/ui/artifacts/cluster-monitor-a100/`（5 页签 ×1600）。
+- A100 复验截图（gitignored）：`console/tests/ui/artifacts/cluster-monitor-a100/`（5 页签 ×1600；单集群）。
+- mlu370 多集群复验截图（gitignored）：`console/tests/ui/artifacts/cluster-monitor-mlu370/`（host/agent overview、host/agent resource、test 未就绪）。
 - 本批逐页签 after 截图与测量（gitignored）：`console/tests/ui/artifacts/cluster-monitor-tabs/`（`host-*` 15、`agent-*` 6、`host-resource-deeplink-1600.png`、`host-overview-narrow-900.png`、浅色 2 张、英文 2 张、`measurements.json`、复现脚本 `tests/ui/tools/shots_cluster_monitor_tabs.py`）。
 - 本批旧页 5 页签逐页基线、before/after 截图与测量 JSON：待验证方归档到 `console/tests/ui/artifacts/cluster-monitor-tabs/`。
 - 契约：[monitor-tabs-contract.md](/tmp/monitor-tabs-contract.md)。
