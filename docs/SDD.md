@@ -3,7 +3,9 @@
 > **人与 AI coding 工具都从这里开始。** 本文回答「读什么、改哪里、跑什么」。
 > 章节顺序、ID 语法、字段规则**不在本文重复**，都链到各自的正文，避免两处漂移。
 >
-> 平台由两个仓库组成：前端 [`console`](https://codeup.aliyun.com/5ff9e1c4168c689c9272ccdb/kube-ai-hub/console)（KubeSphere Console 3.4.2，React 18），后端 `kube-server`（ks-apiserver，Go）。**本目录的 prd/design/tests 是产品级的**，同时覆盖两边；design 里的「仓库落点」一节说明每个功能点改哪个仓库的哪些文件。
+> 平台由两个仓库组成：前端 [`console`](https://codeup.aliyun.com/5ff9e1c4168c689c9272ccdb/kube-ai-hub/console)（KubeSphere Console 3.4.2，React 18），后端 [`kube-server`](https://codeup.aliyun.com/5ff9e1c4168c689c9272ccdb/kube-ai-hub/kube-server)（ks-apiserver / ks-controller-manager，Go）。**本目录的 prd/design/tests 是产品级的**，同时覆盖两边；design 里的「仓库落点」一节说明每个功能点改哪个仓库的哪些文件。
+>
+> **后端改动同样受本 SDD 约束**，不是「前端文档、后端随意」。凡是要新增或修改 `kube-server` 的 kapis 接口、错误码、指标名、聚合规则、controller 行为，都必须先有对应 AC，并在 design 的 `CON-*` / `INV-*` / `GOT-*` 里写清契约与不变量；只改后端而不留文档等于契约变更没有记录。判断口诀见 §1「选 track」。
 >
 > 旧 UI 迁移还需先读[迁移指南](legacy-ui-migration-guide.md)并填写[单页交付模板](plans/page-migration-template.md)。
 > 本文件的门禁只检查已登记规格，不能发现一开始未写入 AC 的旧字段和交互。
@@ -83,6 +85,23 @@ tests/ui/cases/cluster-storage/shared-storage/TC-L3-CLUSTER-STORAGE-SHARED_STORA
 
 判断口诀：**要改别人依赖的契约、要动 C1–C5、要动页面结构 / 交互 / 主题色或指标口径，就是 Full SDD。**
 
+### 后端改动怎么归 track
+
+`kube-server` 的改动按「是否改变别人依赖的契约」判定，不按代码行数：
+
+| 后端改动 | Track | 必须补什么 |
+|------|-------|-----------|
+| 修 bug、日志、超时、资源 limit、镜像 tag | **Hotfix** | 无文档；回归测试放 `go test`，不新增 AC |
+| 单个 kapis handler 内部修正，请求/响应形状不变 | **Hotfix** | 同上；若行为变化影响页面，在对应 L3 的 `GOT-*` 记一条 |
+| 新增/修改 kapis 接口、字段、错误码 | **Full SDD** | `CON-*` 写清请求/响应/错误码，`INV-*` 写不变量；AC 覆盖新行为 |
+| 新增/修改指标名、单位、recording rule、聚合口径 | **Full SDD** | `CON-*` 或 `INV-*` 记录口径；同步 `named_metrics.go` / `promql.go` 的登记 |
+| 新增/修改 controller 的协调行为（如清理策略、重试） | **Full SDD** | `DES` 写为什么，`INV-*` 写不变量，`GOT-*` 写踩过的坑 |
+| 只改后端、页面完全不受影响 | **Small feature** | 补对应 L3 的 design 章节即可，不必新增 UI 用例 |
+
+**反例**（2026-11 实际发生）：RDMA 链路类型、登录会话吊销、LoginRecord 清理策略都是后端改动，
+一度只在提交信息里描述，没有回写 `design/`。结果是同一个契约（`/ports` 返回 `linkLayerName`、
+logout 吊销范围）在后端、页面、文档三处各说一套。后端改动必须落到 design，不是可选项。
+
 ---
 
 ## 2. 能力级闭环（改一个功能点）
@@ -90,6 +109,18 @@ tests/ui/cases/cluster-storage/shared-storage/TC-L3-CLUSTER-STORAGE-SHARED_STORA
 ```
 tree.py → build_prd.py → prd(AC) → design(承接 AC) → tests(covers) → 测试文件（路径镜像 spec） → check_docs → generate_case_docs
 ```
+
+后端改动的闭环多一步：**design 的「仓库落点」必须写出 `kube-server` 的具体路径**，且 `go test` 覆盖该改动。
+
+```text
+prd/.../feature.md          AC-* 描述用户可见行为
+design/.../feature.md       仓库落点 → kube-server/pkg/kapis/<group>/... + CON-* 契约
+tests/ui/specs/.../TC-*.yaml   covers 指回 AC-*
+kube-server/pkg/kapis/<group>/... 实现 + go test
+```
+
+若某条 AC 只能由后端验证（例如「logout 只吊销当前 token」），UI 用例覆盖不到，就在 design 的
+「验收用例」里注明由 `go test` 承担，并给出测试文件路径；不要因为「页面上看不出来」就跳过。
 
 **迁移准入**：先独立建立旧入口/子组件/字段/动作/条件/选项清单、请求→映射→展示链路及
 视觉/复用基线，再写新 AC。功能、数据、权限、状态与视觉同批实现和验收，不默认另开“美化收尾”批次。
@@ -302,6 +333,8 @@ def test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_02(storage_page, screenshot)
 |------|----------|
 | 架构铁律 C1–C5 与「UI 与交互设计原则」 | [`constitution.md`](constitution.md) |
 | 接口契约与错误码 | `kube-server/pkg/kapis/<group>` 的 `register.go` + design 的 `CON-*` |
+| 后端不变量（并发、幂等、清理策略） | design 的 `INV-*`；实现见 `kube-server/pkg/controller/` 与对应 handler |
+| 后端踩过的坑（时序、缓存、限流） | design 的 `GOT-*`；不要只写在提交信息或代码注释里 |
 | 主题色与间距 | 旧 console：`src/scss/variables.scss`；新 UI：`packages/ai-kit/src/styles/tokens.css` 与 `tailwind.preset.ts`（design 只引用语义 token） |
 | 指标名与单位 | `kube-server/pkg/models/monitoring/named_metrics.go` + `prometheus/promql.go` |
 | **能力级 durable 技术方案** | **[`../design/`](../design/)** |
@@ -326,6 +359,8 @@ def test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_02(storage_page, screenshot)
 | `cd kube-frontend && pnpm --filter @kube-ai-hub/console-next typecheck` | 新 UI 显式类型检查 |
 | `cd kube-frontend && pnpm --filter @kube-ai-hub/console-next build` | 新 UI 构建；API/ai-kit 等受影响包另按各包 scripts 检查 |
 | `cd ../kube-server && go test ./pkg/kapis/... ./pkg/models/monitoring/...` | 后端单测 |
+| `cd ../kube-server && GOOS=linux go build ./...` | 后端全量编译（本机是 darwin 时交叉编译，`netlink` 等包只在 linux 下存在） |
+| `cd ../kube-server && go vet ./...` | 后端静态检查，与 `go test` 一起跑 |
 | `cd tests/ui && python3 tools/multicluster_sweep.py --env-file <env> --baseline --clusters host,<member>` | 多集群基线八段（集群读/项目读/企业空间读/数据归属/详情/Tab/交互/写入落点）；退出码 0 全绿、1 有缺陷、2 环境不可用、3 超预算中止、4 有模式被跳过（INCOMPLETE） |
 | 同上 `--keyboard` / `--keyboard-local` | 键盘走查：Tab 顺序、焦点指示的**渲染层对比度**（3:1）；`--keyboard-local` 只走登录页，**不需要集群** |
 | 同上 `--locale-scan --locale en` | 扫「形如 `a.b.c` 的裸标识符」，查未翻译的文案 |
@@ -361,12 +396,13 @@ def test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_02(storage_page, screenshot)
 2. **改完必须收敛**：`python3 prd/tools/check_docs.py --strict` 必须无 `ERROR`；新增功能点必须同时有需求、技术方案、用例、测试文件（一 spec 一文件）。
 3. **不许绕门禁**：不要为了过门禁去删章节、删 AC，或把 `covers` 指向不存在的 AC。
 4. **UI 改动先过原则再截图**：按 [`constitution.md`](constitution.md) 的「UI 与交互设计原则」核对——一个主任务、一个入口、一套共享组件、点击即反馈、等待可见；再在真实环境截图记录改动前后，对比度、单位、空态逐项核对（见 `.cursor/rules/ui-screenshot-verify.mdc`）。
-5. **改了产品代码要跑测试**：前端 `pytest -m point`（相关用例）；后端 `go test`。
-6. **同批闭环，不削减验收**：对照独立旧能力表检查 AC/实现/断言，保留原数据及安全回归；
+5. **改了产品代码要跑测试**：前端 `pytest -m point`（相关用例）；后端 `go test` + `go vet`，并在 design 的「仓库落点」写明改了哪个 kapis group / controller。
+6. **后端改动也要回写 design**：新增或修改接口、错误码、指标口径、controller 行为，必须在 design 里补 `CON-*` / `INV-*` / `GOT-*`。只提交代码不回写文档，等于契约变更没有记录——这正是 RDMA 链路类型、logout 吊销范围、LoginRecord 清理三处各说一套的原因。
+7. **同批闭环，不削减验收**：对照独立旧能力表检查 AC/实现/断言，保留原数据及安全回归；
    修改视觉时同步三档、主题计算色和人工复核，不以截图存在代替可读性。
-7. **验证逐项报告**：显式类型检查、构建、Storybook、相关/全站 E2E、部署不包含在
+8. **验证逐项报告**：显式类型检查、构建、Storybook、相关/全站 E2E、部署不包含在
    `verify.py --no-e2e` 的通过结论里。基线错误和并行范围如实记录，不能豁免规则或冒称全仓通过。
-8. **区分「未执行」与「通过」，并绑定代码状态**：skip 要打印出来；结论要带 HEAD 与未提交文件数；
+9. **区分「未执行」与「通过」，并绑定代码状态**：skip 要打印出来；结论要带 HEAD 与未提交文件数；
    多集群另按 [`constitution.md`](constitution.md) C6 判定成员集群的读写归属。
-9. **页签/子页逐项交付**：旧页签清单每一行都有归宿并逐页签验收（含默认页签与条件隐藏页签）；
+10. **页签/子页逐项交付**：旧页签清单每一行都有归宿并逐页签验收（含默认页签与条件隐藏页签）；
    合并页签、把内容记作「别处承接」或用数值替代旧页图表，都需要产品批准并写进该页记录。
