@@ -228,6 +228,9 @@ def main() -> int:
     # 缺口清单：老 console 的每个 URL 段都必须有归宿（已迁移/明确不做/别处承接/已登记缺口）。
     # 一致性核对按一级目录名匹配，分组目录下的兄弟页面会整块隐身——见计划 §7.1。
     total += run("缺口清单单测", [sys.executable, "prd/tools/test_gap_check.py"], REPO)
+    # 用例索引：门禁的反向查找曾把「解析全部 spec」重复成 O(spec × test)（483×483 ≈ 23 万次
+    # YAML 解析，5 分钟）。单测钉住两件事：索引答案与线性扫描一致、缓存仍能感知文件变化。
+    total += run("用例索引单测", [sys.executable, "prd/tools/test_test_index.py"], REPO)
     total += run("缺口清单", [sys.executable, "prd/tools/gap_check.py", "--strict"], REPO)
     # Advisory: prints suspicious assertions but does not fail the run. Retry loops are
     # legitimate and would otherwise trip it.

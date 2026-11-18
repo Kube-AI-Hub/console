@@ -13,10 +13,28 @@
 from __future__ import annotations
 
 import ast
+import functools
 import re
 from pathlib import Path
 
 import yaml
+
+#: Parsed specs and parsed test modules, keyed by (path, mtime, size).
+#:
+#: Both were re-parsed from scratch on every call, and one caller asked for the same
+#: spec 483 times per test file (see `reverse_index`). Parsing is pure for a given
+#: file state, so the stamp — not the path alone — is the key: a tool that rewrites a
+#: spec and reads it back in the same process still sees the new content.
+_CACHE: dict[tuple[str, str, int, int], object] = {}
+
+
+def _stamp(path: Path) -> tuple[str, int, int]:
+    """Identity of a file's current content, for the cache key."""
+    try:
+        stat = path.stat()
+    except OSError:
+        return (str(path), 0, 0)
+    return (str(path), stat.st_mtime_ns, stat.st_size)
 
 # 用例 ID 含下划线（SHARED_STORAGE），`\b` 会在下划线处截断，所以用显式边界。
 TC_ID = re.compile(r"(?<![A-Za-z0-9_-])(TC-[A-Z0-9][A-Z0-9_-]*[A-Z0-9])")
@@ -34,29 +52,71 @@ def test_path_for(spec_path: Path, specs_root: Path, tests_root: Path) -> Path:
     return tests_root / rel.parent / f"test_{spec_path.stem.replace('-', '_')}.py"
 
 
-def spec_path_for(test_path: Path, specs_root: Path, tests_root: Path) -> Path:
-    """测试文件路径 → 期望的 spec 路径（反向，用于抓孤儿文件）。
+def reverse_index(specs_root: Path, tests_root: Path) -> dict[Path, Path]:
+    """测试文件路径 → spec 路径，一次遍历建好。
 
     反向不能靠字符串替换：正向把 `-` 换成 `_`，回推时分不清原来的 `_`（用例 ID
     里的 `SHARED_STORAGE`）和原来的 `-`。所以用正向表反查。
+
+    建表要走一遍全部 spec，所以调用方**每个目录只建一次**再查表：逐文件调用
+    `spec_path_for` 会把「解析全部 spec」重复成 O(spec × test)——483 份规格 ×
+    483 个测试文件 ≈ 23 万次 YAML 解析，实测 5 分钟。
     """
-    for tid, path in specs(specs_root).items():
-        if test_path_for(path, specs_root, tests_root) == test_path:
-            return path
+    index: dict[Path, Path] = {}
+    for path in specs(specs_root).values():
+        # setdefault: first match wins, exactly like iterating `specs()` in order.
+        index.setdefault(test_path_for(path, specs_root, tests_root), path)
+    return index
+
+
+def spec_path_for(
+    test_path: Path,
+    specs_root: Path,
+    tests_root: Path,
+    index: dict[Path, Path] | None = None,
+) -> Path:
+    """测试文件路径 → 期望的 spec 路径（反向，用于抓孤儿文件）。
+
+    传入 `index`（`reverse_index` 的结果）时是 O(1) 查表；不传则现建一次表。
+    """
+    if index is None:
+        index = reverse_index(specs_root, tests_root)
+    found = index.get(test_path)
+    if found is not None:
+        return found
     return specs_root / test_path.relative_to(tests_root).with_suffix(".yaml")
 
 
 def load_spec(path: Path) -> dict:
-    return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    """Parse a spec, reusing the result while the file is unchanged.
+
+    The returned mapping is shared: callers read it, they must not mutate it.
+    """
+    key = ("spec", *_stamp(path))
+    cached = _CACHE.get(key)
+    if cached is None:
+        cached = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        _CACHE[key] = cached
+    return cached  # type: ignore[return-value]
 
 
 def spec_id(path: Path) -> str:
     return str(load_spec(path).get("id") or path.stem)
 
 
+def _parse_test(path: Path) -> ast.Module:
+    """Parse a test module once per file state (see `_CACHE`)."""
+    key = ("test", *_stamp(path))
+    cached = _CACHE.get(key)
+    if cached is None:
+        cached = ast.parse(path.read_text(encoding="utf-8"))
+        _CACHE[key] = cached
+    return cached  # type: ignore[return-value]
+
+
 def test_functions(path: Path) -> list[ast.FunctionDef]:
     """模块顶层的 `test_*` 函数。"""
-    tree = ast.parse(path.read_text(encoding="utf-8"))
+    tree = _parse_test(path)
     return [
         node
         for node in tree.body

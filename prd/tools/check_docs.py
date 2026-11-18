@@ -298,6 +298,10 @@ def check_test_binding(report: Report) -> None:
 
     spec_map = test_index.specs(SPECS)
     bound = test_index.bindings(SPECS, UI_TESTS)
+    # One reverse map for the loop below. `spec_path_for` without it rebuilds the whole
+    # spec table per call, i.e. once per test file (483 x 483 YAML parses, measured at
+    # ~5 minutes of the gate's runtime). Building it once is a single pass.
+    reverse = test_index.reverse_index(SPECS, UI_TESTS)
 
     for tid, spec_path in sorted(spec_map.items()):
         expected = test_index.test_path_for(spec_path, SPECS, UI_TESTS)
@@ -342,7 +346,7 @@ def check_test_binding(report: Report) -> None:
     # 反向：每个测试文件都要能对上一条 spec，否则就是孤儿。
     for path in sorted(UI_TESTS.rglob("test_*.py")):
         rel_test = path.relative_to(UI)
-        expected = test_index.spec_path_for(path, SPECS, UI_TESTS)
+        expected = test_index.spec_path_for(path, SPECS, UI_TESTS, index=reverse)
         if not expected.is_file():
             report.error(f"{rel_test}: 找不到对应的用例规格 {expected.relative_to(UI)}")
             continue

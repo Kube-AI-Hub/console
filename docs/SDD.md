@@ -242,22 +242,21 @@ python3 prd/tools/cleanup_test_objects.py --apply  # 真的删
 | 本批提交判定 | 本批相关 + 共享组件影响用例，显式 `-n 0` | 以本次记录为准 |
 | 全站发布判定 | `pytest tests/kube-frontend -n 0` | 以本次记录为准 |
 
-**门禁的耗时取决于带不带 scope，而不是「跑哪几类」。** 2026-11-18 实测：
+**文档门禁是秒级的，随时可以跑。** 2026-11-18 实测（`--what prd/design` 本来就快）：
 
-| 命令 | 耗时 |
-| --- | --- |
-| `check_docs.py --what prd prd/kube-frontend` | **1.1 秒** |
-| `check_docs.py prd/kube-frontend design/kube-frontend` | 4 分 10 秒 |
-| `check_docs.py --what tests`（忽略 scope） | **4 分 42 秒** |
-| `check_docs.py --strict`（全量） | 15 分钟以上 |
+| 命令 | 优化前 | 优化后 |
+| --- | --- | --- |
+| `check_docs.py --what prd prd/kube-frontend` | 1.1 秒 | 1.1 秒 |
+| `check_docs.py --what tests`（全局） | 4 分 42 秒 | **约 1 秒** |
+| `check_docs.py` / `--strict`（全量） | **5 分 6 秒** | **5.8 秒** |
 
-`--what tests` 和 `--what structure` 是全局检查，**给不给 scope 都一样慢**；只有带 scope 的
-`prd`/`design` 才是秒级。所以一轮改动的顺序应是：先跑秒级的 prd/design 看编号与追溯，
-把全局的 tests 留到本批最后一次；不要每改一条 AC 就跑一次 4 分钟的门禁。
+慢的从来不是「检查多少文件」，而是一处 O(spec × test) 的反向查找：`check_test_binding` 对每个
+测试文件调用一次 `spec_path_for`，而它每次都重新解析全部 spec（483 × 483 ≈ 23 万次 YAML 解析）。
+现在 `reverse_index` 一次建表，解析结果按 (路径, mtime, size) 缓存；判定结果不变，用
+`prd/tools/test_test_index.py` 钉住「索引答案 = 线性扫描答案」和「缓存能感知文件变化」。
 
-**重活不要叠跑。** 同一台机器上并发跑全量文档门禁、生产构建与浏览器时，上表 4 分 10 秒的门禁
-实测会拖到 10–20 分钟（2026-11-18 负载 5–15 时复现）。4 分钟级检查与本批 E2E 错开，
-构建/截图集中在同一批产物上做一次。
+因此：**改一条 AC 就可以跑一次全量门禁**，不必攒到最后。真正要错开的是构建与浏览器——
+生产构建、整轮 E2E、三档截图仍属分钟级，按「改多处同类问题时先全部改完再统一验证」批量做。
 
 **改多处同类问题时，先全部改完再统一验证。** 一个共享层改动（`Modal`/`Select`/`FormField`）通常一次
 影响几十个页面；每改一处就跑一次浏览器，时间几乎全花在重复启动上。做法是：单元测试跟着改动走（毫秒级），
