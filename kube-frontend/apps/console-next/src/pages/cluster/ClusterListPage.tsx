@@ -144,7 +144,7 @@ function NamespaceListPage({ kind, cluster }: ClusterListPageProps): React.React
                 render: (row: Row) => {
                   const node = row as NodeSummary;
                   return (
-                    <span className="flex flex-col gap-0.5">
+                    <span className="flex flex-col items-start gap-0.5">
                       <Badge tone={node.status === 'Ready' ? 'success' : 'danger'}>{node.status}</Badge>
                       {/* Cordoned is a second fact: the node is healthy but takes no new pods. */}
                       {node.unschedulable ? (

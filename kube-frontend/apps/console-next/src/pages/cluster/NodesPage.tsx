@@ -234,7 +234,7 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
     { key: 'name', title: t('cluster.column.name'), width: 170, render: (row) => <span className="flex flex-col">
       <Link to="/kube-frontend/clusters/$cluster/nodes/$name" params={{ cluster, name: row.name }} className="text-ai-link hover:underline">{row.name}</Link>
       <span className="text-[11px] text-ai-fg-muted">{row.internalIP || '-'}</span></span> },
-    { key: 'status', title: t('cluster.column.status'), hideable: true, render: (row) => <span className="flex flex-col gap-1">
+    { key: 'status', title: t('cluster.column.status'), hideable: true, render: (row) => <span className="flex flex-col items-start gap-1">
       <Badge tone={row.status === 'Ready' ? 'success' : 'danger'}>{row.status}</Badge>
       {row.unschedulable ? <span className="text-[11px] text-ai-fg-muted" data-ai-id={`nodes:cordoned:${row.name}`}>{t('node.status.cordoned')}</span> : null}</span> },
     { key: 'role', title: t('cluster.column.role'), hideable: true, render: (row) => <span className="whitespace-nowrap">
