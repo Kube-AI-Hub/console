@@ -178,6 +178,25 @@ const narrowed = Boolean(searchValue) || Object.values(filters ?? {}).some(v => 
 要修只能动依赖树——`pnpm.overrides` + 重装，或删掉 `use-callback-ref/node_modules/react`。
 **别再试第六种配置写法。**
 
+## 已修（2026-11-18 13:25）
+
+`scripts/fix-nested-react.sh`：把那份嵌套的 `react` 移到 `/tmp` 备份，跑测试，失败就自动放回去。
+
+```
+moving …/use-callback-ref/node_modules/react aside to /tmp/ai-kit-nested-react-backup-1794979156
+running ai-kit tests
+OK: ai-kit tests pass
+exit=0
+```
+
+```
+Test Files  21 passed (21)
+Tests       226 passed (226)
+```
+
+Storybook 6106 仍返回 200。备份目录保留在 `/tmp`，需要还原时 `mv` 回去即可；
+下次 `pnpm install` 会重新生成那份副本，所以**长期修法仍是 `pnpm.overrides` + 重装**，脚本只是当下的外科手术。
+
 三者都改不动**已装好的嵌套副本**——它由 node 直接解析，Vite 的配置管不到。
 
 ## 为什么现在不改
