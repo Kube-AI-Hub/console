@@ -95,7 +95,7 @@
 
 ## 未验收部分
 
-- 浅色主题已补 overview/resource 两张截图（`host-overview-light-1600.png`、`host-resource-light-1600.png`）；第二色调与英文全页未截图（English 切换脚本选择器失败，未重试）。
+- 深色/浅色中文与英文全页均已截图（`host-*-light-1600.png`、`host-overview-en-1600.png`、`host-resource-en-1600.png`）；英文页无裸 i18n key。**第二色调未截图**（其余主题组合登记未验收）。
 - 部署环境验收（含路由层 `cluster:not-ready` 与本批页签改动是否已部署）。
 - 全站串行 E2E。
 - 真实受限账号 403（组件页签 / 概览状态行）——本轮用 route mock。
@@ -114,6 +114,6 @@
 ## 证据链接
 
 - 旧页三集群基线（上一批）：[assets/cluster-monitor-status-20261118/](assets/cluster-monitor-status-20261118/)。
-- 本批逐页签 after 截图与测量（gitignored）：`console/tests/ui/artifacts/cluster-monitor-tabs/`（`host-*` 15、`agent-*` 6、`host-resource-deeplink-1600.png`、`host-overview-narrow-900.png`、`measurements.json`、复现脚本 `tests/ui/tools/shots_cluster_monitor_tabs.py`）。
+- 本批逐页签 after 截图与测量（gitignored）：`console/tests/ui/artifacts/cluster-monitor-tabs/`（`host-*` 15、`agent-*` 6、`host-resource-deeplink-1600.png`、`host-overview-narrow-900.png`、浅色 2 张、英文 2 张、`measurements.json`、复现脚本 `tests/ui/tools/shots_cluster_monitor_tabs.py`）。
 - 本批旧页 5 页签逐页基线、before/after 截图与测量 JSON：待验证方归档到 `console/tests/ui/artifacts/cluster-monitor-tabs/`。
 - 契约：[monitor-tabs-contract.md](/tmp/monitor-tabs-contract.md)。
