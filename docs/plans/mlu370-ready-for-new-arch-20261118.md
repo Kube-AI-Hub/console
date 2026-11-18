@@ -77,6 +77,20 @@ EXIT=0
 第三条是重构说明里明确的设计点：缺失的 chunk 若返回 HTML，浏览器会报模块语法错误，
 而真正的原因是「这个文件不存在」。**部署上的行为与说明一致。**
 
+### 缓存策略（curl 即可验）
+
+| 响应 | 头 | 判断 |
+| --- | --- | --- |
+| `index.html`（SPA 外壳） | `Cache-Control: no-cache` | ✓ 正确：外壳必须每次校验，否则发版后用户拿旧外壳引旧 chunk |
+| `assets/index-Bl_JTgM_.js`（内容哈希） | `Cache-Control: max-age=31536000, immutable` | ✓ 正确：哈希变了 URL 就变，可以永久缓存 |
+
+**旧 console 的 `/` 两者都没有设置**——所以这一条是迁移带来的改进，不是对等项。
+
+### 安全响应头：新旧都没有（对等，不是回归）
+
+`X-Frame-Options`、`X-Content-Type-Options`、`Content-Security-Policy` 在**旧 console 与新 console 上都不存在**。
+记录在案：这是平台侧的既有缺口，不是本次迁移引入的；要补的话属于网关配置，不是前端改动。
+
 ## 缺什么
 
 **mlu370 的账号密码不在仓库里**（也不该在）。拿到凭据后即可：
