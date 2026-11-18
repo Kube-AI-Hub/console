@@ -358,6 +358,29 @@ curl -s https://ka.watering.ai/kube-frontend/ | grep -oE 'assets/index-[A-Za-z0-
 哈希变了就意味着：结论可能仍成立，但**必须复跑一次**才能这么说。本轮登录页对比度从 3.52 变成 3.41，
 就是同一个地址换了构建的直接结果。
 
+### A100 上的 `/kube-frontend/` 还是旧产物（13:39 实测）
+
+对 A100（隧道 18091）跑同样的登录页走查，**四组主题全部失败**：
+
+```
+FAIL violet/dark login   stops=8  no_ring=0 weak=8 worst=1
+     焦点环对比度不足 3:1: ['INPUT', 'INPUT', 'Log In']
+（四组主题同样）
+```
+
+对比度 **1** 意味着焦点环根本看不见。查它的 HTML：
+
+```html
+<html lang="en">
+  <style>:root { /* Dark colors */ --da…</style>   ← 内联样式块
+```
+
+**没有 Vite 的哈希入口脚本**，`assets/index-*.js` 一条都匹配不到——而 mlu370 上是 `assets/index-BKnDAMkW.js`。
+所以 A100 的 `/kube-frontend/` 仍是**旧产物**（重构前由 BFF 构建的那份），不是当前代码的构建。
+
+**这解释了差异，也说明 A100 的失败不构成回归**：焦点环令牌的修复在当前构建里（mlu370 实测最差 3.41），
+A100 需要重新部署才能验。登录 403 同样是因为该部署的后端没有新路由。
+
 ## 缺什么
 
 **mlu370 的账号密码不在仓库里**（也不该在）。拿到凭据后即可：
