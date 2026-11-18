@@ -232,6 +232,11 @@ EXIT=1
 
 ---
 
+> **2026-11-18 13:20 更新**：console-next 一度回到全绿（222 条），随后并行线新增 overview 用例并把该页改到
+> 「等待集群加入」的整页状态，**现在有 3 条 overview 用例失败**（`node-overview-panels` 1 条、
+> `overview-completion` 2 条）。用 `git stash` 对照过：**与我此前的改动无关**，是他们正在改的页面与测试尚未同步。
+> 当前全量：235 条中 232 通过。
+
 ## 附二：console-next 从 3 红到全绿（2026-11-18）
 
 `verify.py --continue` 一次列出两项红灯后，逐个查清 console-next 的三条失败，**现在 38 文件 / 222 条全过**。
