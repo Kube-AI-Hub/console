@@ -22,6 +22,7 @@
 | 4 | `ResourceList` | 多选筛选（并集） | ✓ |
 | 5 | `Modal` | 焦点移入 / Esc 关闭 / 焦点归还 | ✓ |
 | 6 | `Dropdown` | Enter 打开 / 方向键 / Esc / 焦点归还 | ✓ |
+| 7 | 主题切换 | 组件在深/浅色下重算颜色 | ✓ |
 
 ## 1. 无匹配空态（`Schema/ResourceList › no-match`）
 
@@ -83,6 +84,21 @@ focus back on trigger:    更多操作  ← 焦点回到触发按钮
 ```
 
 第 5、6 两项的最后一条是同一原则：**弹层关闭不能把读者丢回 `<body>`**。
+
+## 7. 主题切换（任何 story 的工具栏）
+
+Storybook 的 preview 里挂了 `ThemeProvider` 与两个切换器（「切换深浅色主题」「切换配色」），
+所以在 story 画布里就能验主题，不用起应用。
+
+```
+dark:          {'fg': 'rgb(11, 24, 77)',  'bg': 'rgba(0, 0, 0, 0)'}
+after toggle:  light  {'fg': 'rgb(255, 255, 255)'}     ← 主按钮前景翻成白色
+empty text still: True                                  ← 内容不因切主题丢失
+```
+
+**颜色跟着翻转**说明令牌生效（深色下用深字压亮底，浅色下用白字压暗底），不是写死的一套颜色。
+背景读到 `rgba(0,0,0,0)` 是因为读的是 `body`——令牌背景画在 `.ai-root` 容器上，
+要测对比度得取那个容器（应用里的 `--keyboard` 就是这么做的）。
 
 ## 写选择器前先 dump 结构
 
