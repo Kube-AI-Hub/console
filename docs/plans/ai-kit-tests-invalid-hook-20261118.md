@@ -105,8 +105,23 @@ http://localhost:3000/kube-frontend/kapis/resources.kubesphere.io/v1alpha3/names
    `pathname` 对不上 → `find` 返回 undefined；
 2. 用例还断言 `sortBy=createTime&ascending=false`，但页面这次**没有发**排序参数（默认排序可能不再上送）。
 
-所以它不是「挂起」，是**重构后没跟上的断言**。属并行线批次（`5ba075d9c`、`698fb0bc6`），
-由测试作者决定是改常量、还是补回排序参数。
+所以它不是「挂起」，是**重构后没跟上的断言**。属并行线批次（`5ba075d9c`、`698fb0bc6`）。
+
+## 第 2 条可能不是测试的问题
+
+顺着代码看：`controller.ts` 里 `sortBy` 的初始值是 **`'createTime'`**（`useState<ConfigMapSortKey>('createTime')`），
+`useConfigMaps` 原样透传，`configmaps.ts` 的 `list` 也确实会写 `sortBy`/`ascending`：
+
+```ts
+...(params.sortBy ? { sortBy: params.sortBy } : {}),
+...(params.order ? { ascending: params.order === 'asc' } : {}),
+```
+
+**但实测请求里这两个参数都没有**。也就是说：要么某处把 `sortBy` 丢了，要么 `order` 为空时排序整体没上送。
+如果属实，这是**产品侧的默认排序没有发给服务端**——测试的期望反而是对的。
+
+**未定性**：本轮只到「代码应该发、实测没发」，没继续追到具体丢失点。下一步在 `useConfigMaps` 的调用处打个断点
+（或给 `list` 加一条断言它收到 sortBy 的单测）即可定位。
 
 > 注意：console-next 的 `vitest.config.ts` 里已经写着「ai-kit 自带的 pnpm 装了一份 React 18，消费 `dist` 会触发 Invalid hook call，
 > 所以这里 alias 到源码」——说明团队知道这个重复，只是 ai-kit **自己的**测试没有同样的保护。
