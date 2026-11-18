@@ -36,6 +36,15 @@ export interface TableColumn<T> {
    */
   pin?: 'start' | 'end';
   /**
+   * Filter control rendered beside the header title.
+   *
+   * A column's own filter belongs at the column: clicking the header is how a reader
+   * says "narrow this field", and it leaves the toolbar for controls that are not a
+   * field — the row search, the project scope, a time range. Supplied by the schema
+   * layer, which owns the filter's value and options.
+   */
+  filter?: React.ReactNode;
+  /**
    * Hide this column below the `sm` breakpoint.
    *
    * A wide table on a phone is better served by dropping the columns that carry
@@ -400,6 +409,7 @@ export function Table<T>({
                         </button>
                       </Tooltip>
                     ) : null}
+                    {column.filter ? <span className="inline-flex">{column.filter}</span> : null}
                   </span>
                 </th>
               );

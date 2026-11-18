@@ -8,7 +8,7 @@ import { Pagination } from '../primitives/Navigation';
 import { Badge, Empty } from '../primitives/Display';
 import { Icon } from '../primitives/Icon/Icon';
 import { Dropdown } from '../primitives/Navigation';
-import { Modal } from '../primitives/Feedback';
+import { Modal, Popover } from '../primitives/Feedback';
 import { getByPath, getColumnRenderer } from './registry';
 
 /* ---------------- Types ---------------- */
@@ -99,6 +99,16 @@ function warnOnce(key: string, message: string): void {
 export interface ListFilter {
   key: string;
   title: string;
+  /**
+   * Put this filter on a column's header instead of in the toolbar.
+   *
+   * The column's key. A field's own filter belongs where the field is — clicking
+   * the header is how a reader says "narrow this column", and it keeps the toolbar
+   * for the things that are not a field: the row search, the project scope, the
+   * time range. Filters without this stay in the toolbar, which is the right place
+   * for a control that narrows several columns at once.
+   */
+  column?: string;
   /** Label for the "no filter" option; defaults to `全部{title}`. */
   allLabel?: string;
   options?: Array<{ value: string; label: string }>;
@@ -394,6 +404,90 @@ function renderStatus(value: unknown): React.ReactNode {
   return <Badge tone={tone} dot>{text || '-'}</Badge>;
 }
 
+/**
+ * A column's own filter, as an icon in its header.
+ *
+ * The icon is always present so the column does not shift when a filter becomes
+ * active; it is tinted when the column is narrowed, which is the only signal that a
+ * filter is on once the popover is closed. The popover holds the same control the
+ * toolbar used to: a select, a searchable multi-select, or a keyword field.
+ */
+function ColumnFilter({ filter, value, onChange, labels }: {
+  filter: ListFilter;
+  value: string;
+  onChange: (next: string) => void;
+  labels?: { clearFilter?: (title: string) => string };
+}): React.ReactElement {
+  const active = value !== '';
+  const clear = (): void => onChange('');
+  return (
+    <Popover
+      align="start"
+      trigger={
+        <button
+          type="button"
+          aria-label={filter.title}
+          aria-expanded={undefined}
+          data-ai-id={filter.aiId}
+          data-active={active ? 'true' : undefined}
+          onClick={(event) => event.stopPropagation()}
+          className={cn(
+            'grid size-5 place-items-center rounded-ai-sm transition-colors duration-ai-fast',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ai-ring',
+            active ? 'text-ai-accent' : 'text-ai-fg-faint hover:text-ai-fg-muted',
+          )}
+        >
+          <Icon name="filter" size={12} />
+        </button>
+      }
+    >
+      <div className="flex w-56 flex-col gap-2">
+        <span className="text-[11px] font-medium text-ai-fg-secondary">{filter.title}</span>
+        {filter.type === 'text' ? (
+          <InputSearch
+            hideButton
+            type="text"
+            role="textbox"
+            aria-label={filter.title}
+            placeholder={filter.title}
+            value={value}
+            onChange={onChange}
+            clearLabel={labels?.clearFilter?.(filter.title)}
+            clearAiId={filter.aiId ? `${filter.aiId}:clear` : undefined}
+          />
+        ) : filter.multiple ? (
+          <MultiSelect
+            options={filter.options ?? []}
+            value={value.split(',').filter(Boolean)}
+            onValueChange={(values) => onChange(values.join(','))}
+            placeholder={filter.title}
+            clearLabel={labels?.clearFilter?.(filter.title) ?? filter.title}
+            searchLabel={filter.searchable ? filter.title : undefined}
+            emptyText={filter.emptyText}
+            data-ai-id={filter.aiId ? `${filter.aiId}:options` : undefined}
+          />
+        ) : (
+          <Select
+            aria-label={filter.title}
+            placeholder={filter.title}
+            value={value || ALL_OPTION}
+            onValueChange={(next) => onChange(next === ALL_OPTION ? '' : next)}
+            {...(filter.aiId ? { 'data-ai-id': `${filter.aiId}:options` } : {})}
+            options={[{ value: ALL_OPTION, label: filter.allLabel ?? `全部${filter.title}` }, ...(filter.options ?? [])]}
+            {...(filter.searchable ? { searchable: true } : {})}
+            {...(filter.emptyText ? { emptyText: filter.emptyText } : {})}
+          />
+        )}
+        {active ? (
+          <Button size="sm" variant="ghost" onClick={clear} data-ai-id={filter.aiId ? `${filter.aiId}:reset` : undefined}>
+            {labels?.clearFilter?.(filter.title) ?? '清除'}
+          </Button>
+        ) : null}
+      </div>
+    </Popover>
+  );
+}
+
 function renderTags(value: unknown): React.ReactNode {
   const items = Array.isArray(value) ? value : typeof value === 'string' ? value.split(',').filter(Boolean) : [];
   if (!items.length) return <span className="text-ai-fg-faint">-</span>;
@@ -516,7 +610,21 @@ export function ResourceList<TRow>({
       // that predates the pin — otherwise an old saved selection silently removes
       // the very column the reader scrolls back to.
       .filter((column) => column.pin || !column.hideable || !visibleColumnKeys || visibleColumnKeys.includes(column.key))
-      .map((column) => ({
+      .map((column) => {
+      /*
+       * The filter declared for this column, if any.
+       *
+       * Rendered inside the header rather than in the toolbar: a field's own filter
+       * belongs where the field is. The toolbar keeps the controls that are not a
+       * field — the row search, the project scope, the time range.
+       */
+      const columnFilterEntry = schema.filters?.find((filter) => filter.column === column.key);
+      const columnFilter = columnFilterEntry
+        ? <ColumnFilter filter={columnFilterEntry} value={filters?.[columnFilterEntry.key] ?? ''}
+            onChange={(next) => onFiltersChange?.({ ...filters, [columnFilterEntry.key]: next })}
+            labels={schema.labels} />
+        : undefined;
+      return {
       key: column.key,
       title: column.title,
       width: column.width,
@@ -529,6 +637,7 @@ export function ResourceList<TRow>({
       ...(sortableKeys.has(column.key) && schema.sortAiPrefix
         ? { sortAiId: `${schema.sortAiPrefix}:sort:${column.key}` }
         : {}),
+      ...(columnFilter ? { filter: columnFilter } : {}),
       className: columnVisibilityClass(column),
       render: (row, index) => {
         if (column.render) return column.render(row, index);
@@ -562,7 +671,8 @@ export function ResourceList<TRow>({
             return <span className="truncate">{value === undefined || value === null || value === '' ? '-' : String(value)}</span>;
         }
       },
-    }));
+      };
+      });
 
     if (schema.rowActions?.length) {
       mapped.push({
@@ -661,7 +771,7 @@ export function ResourceList<TRow>({
            * reach for most — in a fixed position rather than shifting with the
            * number of filters.
            */}
-          {schema.filters?.map((filter) => (
+          {schema.filters?.filter((filter) => filter.column === undefined).map((filter) => (
             <div key={filter.key} className="flex items-center gap-1">
             {filter.type === 'text' ? <InputSearch hideButton type="text" role="textbox" className={filter.widthClass ?? 'w-40'} value={filters?.[filter.key] ?? ''}
               aria-label={filter.title} placeholder={filter.title} data-ai-id={filter.aiId}

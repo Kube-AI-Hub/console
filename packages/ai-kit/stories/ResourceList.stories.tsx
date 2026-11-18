@@ -150,8 +150,74 @@ export const Sorting: StoryObj = {
  * option list is longer than a screen, and a keyword field when the value is free
  * text.
  */
+/**
+ * Filters on the column headers.
+ *
+ * A field's own filter belongs at the field: clicking the header is how a reader
+ * says "narrow this column", and the icon is tinted while the column is narrowed so
+ * the state stays visible after the popover closes. The toolbar is left for controls
+ * that are not a field — the row search here, a project scope or a time range on a
+ * real page.
+ *
+ * `column` is what moves a filter from the toolbar to a header; omit it and the
+ * filter stays in the toolbar, which is where a control that narrows several columns
+ * at once belongs.
+ */
+export const ColumnFilters: StoryObj = {
+  name: 'column filters',
+  render: () => {
+    const [filters, setFilters] = React.useState<Record<string, string>>({});
+    const [search, setSearch] = React.useState('');
+    const rows = NODES.filter((row) => {
+      if (filters.role && row.role !== filters.role) return false;
+      if (filters.vendor && !filters.vendor.split(',').includes(row.vendor)) return false;
+      if (filters.model && !row.model.toLowerCase().includes(filters.model.toLowerCase())) return false;
+      if (search && !row.name.includes(search)) return false;
+      return true;
+    });
+    return (
+      <ResourceList
+        schema={{
+          title: '节点',
+          description: '状态、角色、算力卡类型、型号的筛选在各自的列头；搜索框留在工具栏。',
+          rowKey: 'name',
+          columns: nodeColumns(),
+          search: { placeholder: '按名称搜索' },
+          filters: [
+            { key: 'status', column: 'status', title: '状态', allLabel: '全部状态', aiId: 'demo:filter:status',
+              options: [{ value: 'Ready', label: 'Ready' }, { value: 'Warning', label: 'Warning' }] },
+            { key: 'role', column: 'role', title: '角色', allLabel: '全部角色', aiId: 'demo:filter:role',
+              options: [{ value: 'master', label: '控制平面节点' }, { value: 'worker', label: '工作节点' }] },
+            { key: 'vendor', column: 'vendor', title: '算力卡类型', multiple: true, searchable: true, aiId: 'demo:filter:vendor',
+              emptyText: '没有匹配的厂商',
+              options: (['nvidia', 'cambricon', 'CPU'] as const).map((value) => ({ value, label: VENDOR_LABEL[value] })) },
+            { key: 'model', column: 'model', title: '型号', type: 'text', aiId: 'demo:filter:model' },
+          ],
+          labels: {
+            clearFilters: '清除全部条件',
+            clearFilter: (title) => `清除${title}`,
+            clearSearch: '清除搜索',
+          },
+        }}
+        rows={rows}
+        filters={filters}
+        onFiltersChange={setFilters}
+        searchValue={search}
+        onSearchChange={setSearch}
+      />
+    );
+  },
+};
+
+/**
+ * Filters in the toolbar.
+ *
+ * The shape for a control that is not a field — a project scope, a time range, a
+ * "needs attention" toggle that looks at several columns at once. `column` is
+ * omitted, so these render beside the search box.
+ */
 export const Filters: StoryObj = {
-  name: 'filters',
+  name: 'toolbar filters',
   render: () => {
     const [filters, setFilters] = React.useState<Record<string, string>>({});
     const [search, setSearch] = React.useState('');
