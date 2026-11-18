@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-04
+level: 3
+suite: point
+module: kube-frontend
+submodule: project-settings
+feature: gateway
+title: 项目网关页 · 集群网关卡片（只读 + 链到集群详情）
+entry_url: '{BASE_URL}/kube-frontend/{WORKSPACE}/clusters/{CLUSTER}/projects/default/gateways'
+prd: prd/kube-frontend/project-settings/gateway.md
+design: design/kube-frontend/project-settings/gateway.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-04
+
+story:
+- US1
+
+product: 项目网关页顶部显示集群网关卡片（名称/访问方式/访问地址）与「查看详情」，链接到该集群的网关详情页；集群没有网关时不渲染。
+preconditions:
+- 已登录，host 集群；集群存在网关（旧站对照页可见）
+steps:
+- 用 API 读集群网关列表，记录第一条的名称/访问方式/地址
+- 打开 /kube-frontend/system-workspace/clusters/host/projects/default/gateways
+- 等 gateway:surface 就绪
+- 核对 gateway:cluster-gateway 卡片可见，名称/访问方式/地址与 API 读到的值一致
+- 核对 gateway:cluster-gateway-detail 链接的 href 指向 /kube-frontend/clusters/host/gateways/<名称>
+expected:
+- 卡片在项目网关区块之上；三项字段来自集群网关对象
+- 链接指向集群作用域详情页，且不带项目段
+troubleshoot:
+- 卡片不出现：集群网关列表为空或读取失败（卡片按「有才渲染」处理）
+- 地址为空：网关 Service 还没创建，显示 `-` 而不是编造
+update_automation:
+- 句柄：gateway:cluster-gateway / :cluster-name / :cluster-type / :cluster-address / :cluster-gateway-detail

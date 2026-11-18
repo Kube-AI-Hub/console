@@ -19,7 +19,11 @@ def test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_BASE_INFO_01(project_settings_page
     workspace = ((ns.get("metadata") or {}).get("labels") or {}).get("kubesphere.io/workspace", "")
 
     status, quotas = ui.api.request("GET", "/api/v1/namespaces/spaces/resourcequotas?limit=-1")
-    has_quota = status == 200 and isinstance(quotas, dict) and bool(quotas.get("items"))
+    # The page's quota rows come from the ResourceQuota's `hard` map: an object with an empty
+    # `hard` renders the empty state, so the expectation has to be "any non-empty hard", not
+    # "any ResourceQuota object" (the spaces project has one with no limits on mlu370).
+    items = (quotas.get("items") if isinstance(quotas, dict) else None) or []
+    has_quota = status == 200 and any((item.get("spec") or {}).get("hard") for item in items)
 
     ui.page.goto(f"{ui.base_url}/kube-frontend/system-workspace/clusters/host/projects/spaces/baseinfo")
     surface = ui.page.locator('[data-ai-id="project-info:surface"]')

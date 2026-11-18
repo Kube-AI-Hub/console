@@ -8,6 +8,9 @@
 
 ## 关联需求
 
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-05
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-04
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-03
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-02
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-01
 
@@ -111,3 +114,36 @@
 ## 验收用例
 
 - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-01
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-03 — 集群级配置字典补写入口，按行寻址、联邦对象不渲染操作
+
+**为什么**：集群级配置字典此前是只读的，而它的用途恰恰是「刚在跨项目列表里找到那个键」——找到之后不能改，等于让人再跳一次项目页。旧 console 的集群配置页有编辑信息/编辑 YAML/编辑设置/删除，本次补回同样四项。
+
+**按行寻址**：每一行的写都用**该行自己的 namespace**；用页面的（空）命名空间会拼出 `/api/v1/configmaps/<name>` 这种没有 `namespaces/<ns>` 段的路径，404 而对象还在（项目页的 `useDeleteConfigMaps` 注释记过同一个坑）。
+
+**联邦托管对象不渲染操作**：`kubefed.io/managed=true` 的对象是控制面副本的投影，在这里改会被联邦控制器覆盖；隐藏入口比让写入失败更诚实。
+
+**不逐行做 SSAR**：跨项目列表里每行属于不同命名空间，逐行权限检查是 N 次请求；写入失败时 `MutationAlert` 显示服务端原因（403 会带命名空间与资源）。这是本页与项目页的差异，已在此记录。
+
+**不做批量删除**：跨项目的批量删除无法在一次确认里说明「哪些项目的哪些对象」，旧页也没有；单条删除足够。
+
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-04 — 集群级保密字典沿用配置字典的写入口径
+
+**为什么**：保密字典与配置字典是同一类跨项目对象，写入口的形状必须一致：按行所属项目寻址、联邦托管对象不渲染操作、失败由 `MutationAlert` 显示服务端原因。差异只有一处——镜像仓库类型且非默认的行多一个「设为默认镜像仓库」，它写的是同一命名空间里的默认标记，所以「旧默认」也在该行自己的项目里查（`useDefaultRegistrySecret` 按行命名空间取）。
+
+**被否方案**：把「设为默认」做成批量或做成列表级开关。默认标记是单值语义，一次只能有一个默认；批量设置只会互相覆盖。
+
+**何时重新考虑**：平台支持按命名空间多默认仓库时，与项目页一起改成「默认仓库」管理入口。
+
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-05 — 集群级服务账号沿用同一写入口径，角色修改按行所属项目
+
+**为什么**：三张跨项目配置页（配置字典 / 保密字典 / 服务账号）是同一类对象，写入口的形状必须一致：按行所属项目寻址、联邦托管对象不渲染操作、失败由 `MutationAlert` 显示服务端原因。服务账号的差异是「修改角色」——它写的是该**项目**里的 RoleBinding，而对话框列出的角色也是该项目能提供的，所以角色修改天然属于行而不是页面。
+
+**被否方案**：在集群页只做「删除」，把编辑与角色留给项目页。这正是上一版的做法，结果是「在集群列表里找到账号后还要再跳一次」；旧 console 的集群页本来就有这四项。
+
+**被否方案**：集群页提供跨项目的统一角色列表。角色是项目作用域对象，跨项目列表里根本没有「同一个角色」。
+
+**何时重新考虑**：平台支持集群级角色模板并允许跨项目套用时，「修改角色」要改成选择模板。
+

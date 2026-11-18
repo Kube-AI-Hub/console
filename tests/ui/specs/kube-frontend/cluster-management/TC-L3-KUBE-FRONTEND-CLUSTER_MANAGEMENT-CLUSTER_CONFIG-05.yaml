@@ -1,0 +1,38 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-05
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: cluster-config
+title: 集群级服务账号 · 行操作（编辑 / 修改角色 / 删除）
+entry_url: '{BASE_URL}/kube-frontend/clusters/{CLUSTER}/serviceaccounts'
+prd: prd/kube-frontend/cluster-management/cluster-config.md
+design: design/kube-frontend/cluster-management/cluster-config.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-05
+
+story:
+- US1
+
+product: 集群级服务账号的普通行提供编辑/编辑 YAML/修改角色/删除，写按行所属项目寻址；联邦托管行无操作。
+preconditions:
+- 已登录，host 集群，admin
+- 用例在 default 创建唯一命名的服务账号，结束后删除
+steps:
+- 用 API 创建服务账号 tc-e2e-sa-<stamp>
+- 打开 /kube-frontend/clusters/host/serviceaccounts，搜索到该名称
+- 打开该行更多操作，核对四项（编辑 / 编辑 YAML / 修改角色 / 删除）
+- 点「编辑」，修改描述并确认；用 API 回读 kubesphere.io/description
+- 点「修改角色」，选择一个角色并确认；用 API 读该项目的 RoleBinding 或账号角色字段核对
+- 再打开更多操作点「删除」，输入名称确认；用列表确认对象消失
+expected:
+- 四项操作齐全且顺序为 编辑 → 编辑 YAML → 修改角色 → 删除
+- 编辑按行所属项目更新注解
+- 修改角色写在该行所属项目
+- 删除后对象从列表与 API 集合中消失
+troubleshoot:
+- 修改角色保存失败：角色写入用了页面命名空间（空）而不是行命名空间
+- 删除后还在：DELETE 少了 namespaces 段
+update_automation:
+- 行 data-ai-row=<namespace>/<name>；菜单项见 serviceaccounts.action.* / resource.action.*

@@ -70,7 +70,9 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_CUSTOM_RESOURCES_01(cluster_mana
 
     # Row count against the API: a request without limit=-1 silently returns one page.
     rows = surface.locator("[data-ai-row]")
-    assert rows.count() == total_crds, f"行数 {rows.count()} 与接口的 {total_crds} 不一致（是否漏了 limit=-1）"
+    # Client-side paging at 20 rows per page (2026-11-19): the first page holds 20 unless the
+    # cluster has fewer definitions, and the pager shows the full total.
+    assert rows.count() == min(total_crds, 20), f"行数 {rows.count()} 与接口的 {total_crds} 不一致（是否漏了 limit=-1 或分页档位）"
 
     # Search by kind — the word someone writes in a manifest — must find it.
     ui.page.locator('[data-ai-id="custom-resources:search"]').last.fill(kind)

@@ -26,6 +26,8 @@ import {
   useWorkload,
   useWorkloadAutoscaling,
   useJobRuns,
+  useCronJobRuns,
+  useRunCronJobNow,
   useWorkloadPods,
   useWorkloadService,
   useWorkloadRevisions,
@@ -33,6 +35,7 @@ import {
 } from './queries';
 import { EditInfoDialog } from '@/components/resource/EditInfoDialog';
 import { ReplicasDialog } from './ReplicasDialog';
+import { useCreatePermission } from './useCreatePermission';
 import { WorkloadMonitorPanel } from './WorkloadMonitorPanel';
 import { EditWorkloadDialog } from './EditWorkloadDialog';
 import { DeleteDialog } from '@/components/resource/DeleteDialog';
@@ -70,6 +73,7 @@ function podContainers(detail: WorkloadDetail): string[] {
 /** One tab of the detail page. Not every kind shows every tab. */
 type DetailTab =
   | 'overview'
+  | 'runs'
   | 'schedule'
   | 'monitor'
   | 'pods'
@@ -123,6 +127,12 @@ function tabsFor(kind: WorkloadKind): DetailTab[] {
    * cannot ("why is it not scheduled" and "what is it actually configured with").
    */
   if (kind === 'pods') return ['overview', 'schedule', 'monitor', 'containers', 'env', 'events', 'metadata'];
+  /*
+   * A CronJob's detail opens on 运行记录, like the old console: the question that brings
+   * someone here is "did last night's run succeed", and the overview (schedule string,
+   * suspend flag) does not answer it.
+   */
+  if (kind === 'cronjobs') return ['runs', 'overview', 'events', 'metadata'];
   const tabs: DetailTab[] = ['overview'];
   if (MONITORED_WORKLOAD_KINDS.includes(kind)) tabs.push('monitor');
   if (POD_OWNING_KINDS.includes(kind)) tabs.push('pods');
@@ -134,6 +144,7 @@ function tabsFor(kind: WorkloadKind): DetailTab[] {
 /** The locale key behind each tab's label, so the translation stays in the dictionary. */
 const TAB_LABEL_KEYS: Record<DetailTab, LocaleKey> = {
   overview: 'workloads.detail.tab.overview',
+  runs: 'workloads.detail.tab.runs',
   schedule: 'workloads.detail.tab.schedule',
   env: 'workloads.detail.tab.env',
   monitor: 'workloads.detail.tab.monitor',
@@ -197,6 +208,18 @@ function ResourceLines({ lines }: { lines: Array<{ resource: string; value: stri
   );
 }
 
+/**
+ * A run's duration as people say it.
+ *
+ * Seconds below a minute ("42 秒"), minutes above it ("3.5 分"); a missing duration (the run
+ * is still going) is `-`, never 0 — "0 seconds" would claim a run that finished instantly.
+ */
+function formatRunDuration(t: (key: never, params?: never) => string, seconds: number | undefined): string {
+  if (seconds === undefined || !Number.isFinite(seconds)) return '-';
+  if (seconds < 60) return t('workloads.runs.durationSeconds' as never, { value: seconds } as never);
+  return t('workloads.runs.durationMinutes' as never, { value: Number((seconds / 60).toFixed(1)) } as never);
+}
+
 export interface WorkloadDetailPageProps {
   descriptor: WorkloadDescriptor;
   /** Needed to build links to other pages; the route always carries it. */
@@ -225,9 +248,19 @@ export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, 
   const rollback = useRollbackWorkload(kind, { cluster, namespace });
   const [rollbackTarget, setRollbackTarget] = React.useState<WorkloadRevision | null>(null);
   const [dialog, setDialog] = React.useState<Dialog>('none');
-  const [activeTab, setActiveTab] = React.useState<DetailTab>('overview');
+  // A CronJob opens on its runs; every other kind on the overview (see `tabsFor`).
+  const [activeTab, setActiveTab] = React.useState<DetailTab>(() => (kind === 'cronjobs' ? 'runs' : 'overview'));
 
   const detail = query.data;
+
+  /*
+   * 运行记录 for a CronJob is a different read from a Job's runs (Jobs, not pods), so it has
+   * its own query; `enabled` keeps it off until the tab is opened.
+   */
+  const cronJobRuns = useCronJobRuns(detail, { cluster, namespace }, kind === 'cronjobs' && activeTab === 'runs');
+  const runNow = useRunCronJobNow({ cluster, namespace });
+  // 立即运行一次 creates a Job, so the gate is the jobs-create permission, not the CronJob's.
+  const runNowPermission = useCreatePermission('jobs', cluster, namespace);
 
   // Fetched at the top like every other query: the events tab reads this cache when it
   // is opened, and switching between tabs never starts a request of its own.
@@ -619,6 +652,125 @@ export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, 
                   </ul>
                 </section>
               ) : null}
+            </div>
+          ) : null}
+
+          {/* 运行记录: a CronJob's history is the Jobs it created — the answer to "did it run, and did it work". */}
+          {active === 'runs' ? (
+            <div
+              role="tabpanel"
+              id="workload-detail-panel-runs"
+              aria-labelledby="workload-detail-tab-runs"
+              data-ai-id="workload-detail:tab:runs"
+              className="flex flex-col gap-4"
+            >
+              <section className="rounded-ai-md border border-ai-line p-4" data-ai-id={`${kind}-detail:runs`}>
+                <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <h2 className="text-sm font-medium text-ai-fg">{t('workloads.runs.title')}</h2>
+                    <p className="mt-0.5 text-[11px] text-ai-fg-muted">{t('workloads.runs.description')}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      {...actionProps(`${kind}-detail:runs-refresh`)}
+                      aria-busy={cronJobRuns.isFetching}
+                      onClick={() => void cronJobRuns.refetch()}
+                    >
+                      {t('common.refresh')}
+                    </Button>
+                    {/*
+                      * 立即运行一次 creates a Job, so it is gated by the jobs-create permission and
+                      * shows the reason beside it when withheld — the same rule as the create entry on
+                      * the list pages.
+                      */}
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      {...actionProps(`${kind}-detail:run-now`)}
+                      disabled={runNow.isPending || runNowPermission.disabled}
+                      onClick={() => detail && runNow.mutate(detail)}
+                    >
+                      {runNow.isPending ? t('workloads.runs.runNowPending') : t('workloads.runs.runNow')}
+                    </Button>
+                  </div>
+                </div>
+                {runNowPermission.hint ? (
+                  <p className="mb-2 text-[11px] text-ai-fg-muted" data-ai-id={`${kind}-detail:run-now-hint`}>
+                    {runNowPermission.hint}
+                  </p>
+                ) : null}
+                {cronJobRuns.isPending ? <Skeleton className="h-24 w-full" /> : null}
+                {cronJobRuns.isError ? (
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-ai-fg-muted" data-ai-id={`${kind}-detail:runs-error`}>
+                    <span>
+                      {t('workloads.runs.unavailable')} {t('workloads.runs.unavailableHint')}
+                    </span>
+                    <Button variant="ghost" size="sm" onClick={() => void cronJobRuns.refetch()}>
+                      {t('common.retry')}
+                    </Button>
+                  </div>
+                ) : null}
+                {(cronJobRuns.data?.length ?? 0) === 0 && !cronJobRuns.isPending && !cronJobRuns.isError ? (
+                  <div data-ai-id={`${kind}-detail:runs-empty`}>
+                    <p className="text-xs text-ai-fg">{t('workloads.runs.empty')}</p>
+                    <p className="mt-1 text-[11px] text-ai-fg-muted">{t('workloads.runs.emptyHint')}</p>
+                  </div>
+                ) : null}
+                {(cronJobRuns.data?.length ?? 0) > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs" data-ai-id={`${kind}-detail:runs-table`}>
+                      <thead>
+                        <tr className="text-ai-fg-muted">
+                          <th className="pb-2 pr-4 font-medium">{t('workloads.runs.job')}</th>
+                          <th className="pb-2 pr-4 font-medium">{t('workloads.runs.outcome')}</th>
+                          <th className="pb-2 pr-4 font-medium">{t('workloads.runs.requests')}</th>
+                          <th className="pb-2 pr-4 font-medium">{t('workloads.runs.limits')}</th>
+                          <th className="pb-2 pr-4 font-medium">{t('workloads.runs.startedAt')}</th>
+                          <th className="pb-2 pr-4 font-medium">{t('workloads.runs.finishedAt')}</th>
+                          <th className="pb-2 font-medium">{t('workloads.runs.duration')}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(cronJobRuns.data ?? []).map((run) => (
+                          <tr key={run.name} className="border-t border-ai-line" data-ai-row={run.name}>
+                            <td className="py-1.5 pr-4">
+                              <a
+                                href={`/kube-frontend/${workspace}/clusters/${cluster}/projects/${namespace}/jobs/${run.name}`}
+                                className="inline-flex min-h-6 items-center font-mono text-[11px] text-ai-link hover:underline"
+                                data-ai-id={`${kind}-detail:run:${run.name}`}
+                              >
+                                {run.name}
+                              </a>
+                            </td>
+                            <td className="py-1.5 pr-4">
+                              <span className="flex flex-col gap-0.5">
+                                <Badge tone={run.outcome === 'completed' ? 'success' : run.outcome === 'failed' ? 'danger' : 'warning'}>
+                                  {t(`workloads.runs.outcome.${run.outcome}` as never)}
+                                </Badge>
+                                <span className="text-[11px] text-ai-fg-muted">
+                                  {t('workloads.runs.counts', { succeeded: run.succeeded, failed: run.failed, active: run.active })}
+                                </span>
+                              </span>
+                            </td>
+                            <td className="py-1.5 pr-4 text-ai-fg-secondary"><ResourceLines lines={run.requests} /></td>
+                            <td className="py-1.5 pr-4 text-ai-fg-secondary"><ResourceLines lines={run.limits} /></td>
+                            <td className="py-1.5 pr-4 tabular-nums text-ai-fg-secondary">
+                              {run.startTime ? formatTimestamp(run.startTime) : '-'}
+                            </td>
+                            <td className="py-1.5 pr-4 tabular-nums text-ai-fg-muted">
+                              {run.endTime ? formatTimestamp(run.endTime) : '-'}
+                            </td>
+                            <td className="py-1.5 tabular-nums text-ai-fg-muted">{formatRunDuration(t, run.durationSeconds)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : null}
+                <MutationAlert error={runNow.error} />
+              </section>
             </div>
           ) : null}
 

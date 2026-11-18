@@ -11,6 +11,7 @@ import { DefinitionRow } from '@/components/resource/DefinitionRow';
 import { YamlDialog } from '@/components/resource/YamlDialog';
 import { toYaml } from '@/components/resource/yaml';
 import { formatTimestamp } from '@/lib/time';
+import { policyRuleSections } from './networkPolicyRules';
 
 /**
  * 网络策略详情.
@@ -53,6 +54,12 @@ export function NetworkPolicyDetailPage({ workspace, cluster, namespace }: Netwo
 
   const state = query.isPending ? 'loading' : query.isError ? 'error' : 'ready';
   const policy = query.data as NetworkPolicyDetail | undefined;
+  // The rules come from the object already in hand: no second read, and the table can never
+  // disagree with the counts in the attributes above it.
+  const ruleSections = React.useMemo(
+    () => policyRuleSections(policy?.raw as never),
+    [policy],
+  );
 
   return (
     <AiSurface as="section" aiId="networkpolicy-detail:surface" state={state} className="flex min-w-0 flex-col gap-4">
@@ -111,6 +118,49 @@ export function NetworkPolicyDetailPage({ workspace, cluster, namespace }: Netwo
               />
               <DefinitionRow label={t('settings.column.createdAt')} value={formatTimestamp(policy.createdAt)} />
             </dl>
+          </section>
+
+          {/*
+            * 规则: what this policy actually allows. The attributes above say how many rules
+            * there are; the reason to open a policy is to read them. Same projection as the
+            * project's rule view (one mapper, `networkPolicyRules`), narrowed to this policy.
+            */}
+          <section className="rounded-lg border border-ai-border bg-ai-surface p-4" data-ai-id="networkpolicy-detail:rules">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-sm font-medium text-ai-fg">{t('settings.network.ruleView')}</h2>
+              <span className="text-[11px] text-ai-fg-muted">
+                {t('settings.network.rulesTarget', { value: ruleSections.target })}
+              </span>
+            </div>
+            {(['ingress', 'egress'] as const).map((direction) => (
+              <div key={direction} className="mb-3 last:mb-0" data-ai-id={`networkpolicy-detail:rules:${direction}`}>
+                <p className="mb-1 text-xs text-ai-fg-secondary">
+                  {t(direction === 'ingress' ? 'settings.network.ingressRules' : 'settings.network.egressRules')}
+                </p>
+                {ruleSections[direction].length === 0 ? (
+                  <p className="text-[11px] text-ai-fg-muted" data-ai-id={`networkpolicy-detail:rules:${direction}:empty`}>
+                    {t(direction === 'ingress' ? 'settings.network.noIngressRules' : 'settings.network.noEgressRules')}
+                  </p>
+                ) : (
+                  <table className="w-full text-left text-xs" data-ai-id={`networkpolicy-detail:rules:${direction}:table`}>
+                    <thead>
+                      <tr className="text-ai-fg-muted">
+                        <th className="pb-2 pr-4 font-medium">{t('settings.network.ruleViewPeers')}</th>
+                        <th className="pb-2 font-medium">{t('settings.network.ruleViewPorts')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {ruleSections[direction].map((row) => (
+                        <tr key={row.key} className="border-t border-ai-line" data-ai-row={row.key}>
+                          <td className="py-1.5 pr-4 font-mono text-[11px] text-ai-fg-secondary">{row.peers}</td>
+                          <td className="py-1.5 font-mono text-[11px] text-ai-fg-muted">{row.ports}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            ))}
           </section>
 
           <section className="rounded-lg border border-ai-border bg-ai-surface p-4" data-ai-id="networkpolicy-detail:metadata">

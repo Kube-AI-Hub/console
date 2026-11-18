@@ -48,6 +48,8 @@ export interface StorageDetailPageProps {
 type Dialog = 'none' | 'editYaml' | 'delete' | 'editInfo' | 'clone' | 'snapshot';
 
 type Tab = 'attributes' | 'metadata' | 'events' | 'snapshots';
+/** The snapshot branch has its own two tabs; kept separate so the claim's set cannot drift. */
+type SnapshotTab = 'source' | 'events';
 
 export function StorageDetailPage({ kind, cluster, namespace, name }: StorageDetailPageProps): React.ReactElement {
   const t = useT();
@@ -58,6 +60,7 @@ export function StorageDetailPage({ kind, cluster, namespace, name }: StorageDet
   const remove = useDeleteStorage(kind, { cluster, namespace });
   const [dialog, setDialog] = React.useState<Dialog>('none');
   const [tab, setTab] = React.useState<Tab>('attributes');
+  const [snapshotTab, setSnapshotTab] = React.useState<SnapshotTab>('source');
 
   const isClaim = kind === 'persistentvolumeclaims';
   const snapshots = useClaimSnapshots({ cluster, namespace, claimName: isClaim ? name : '' });
@@ -215,7 +218,26 @@ export function StorageDetailPage({ kind, cluster, namespace, name }: StorageDet
               </TabsContent>
             </Tabs>
           ) : (
-            attributes
+            /*
+             * A snapshot gets the old console's two tabs — 数据来源 / 事件 — instead of the
+             * single column it had. The events were already being fetched for this branch
+             * (the hook takes the kind), they just had nowhere to render; "why is this
+             * snapshot not ready" is an event question, and the object's own conditions
+             * rarely name the driver that failed.
+             */
+            <Tabs
+              value={snapshotTab}
+              onValueChange={(next) => setSnapshotTab(next as SnapshotTab)}
+              items={[
+                { value: 'source', label: t('storage.detail.tab.source'), aiId: `${kind}-detail:tab:source` },
+                { value: 'events', label: t('storage.detail.tab.events'), aiId: `${kind}-detail:tab:events` },
+              ]}
+            >
+              <TabsContent value="source">{attributes}</TabsContent>
+              <TabsContent value="events">
+                <EventsPanel events={events.data ?? []} pending={events.isPending} error={events.error} onRetry={() => void events.refetch()} />
+              </TabsContent>
+            </Tabs>
           )}
         </>
       ) : null}

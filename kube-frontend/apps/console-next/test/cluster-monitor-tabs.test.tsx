@@ -305,19 +305,42 @@ describe('cluster monitor overview tab', () => {
       expect(view.container.querySelector('[data-ai-id="cluster-monitor:overview:usage:' + key + ':value"]'))
         .toHaveTextContent('-');
     }
-    expect(view.container.querySelector('[data-ai-id="cluster-monitor:overview:rdma"]'))
+    // The block is always present; with no RDMA series its chart panel is the empty state.
+    expect(view.container.querySelector('[data-ai-id="cluster-monitor:overview:rdma"]')).not.toBeNull();
+    expect(view.container.querySelector('[data-ai-id="cluster-monitor:overview:rdma:chart"]'))
       .toHaveAttribute('data-ai-state', 'empty');
   });
 
-  it('switches to the physical-resource tab from the RDMA summary', async () => {
+  it('offers the RDMA block four metric tabs, each with a value', async () => {
     stubApi(() => []);
-    const onTabChange = vi.fn();
-    const view = mount(<ClusterOverviewTab {...context({ onTabChange })} />);
+    const view = mount(<ClusterOverviewTab {...context({})} />);
 
     await waitFor(() =>
-      expect(view.container.querySelector('[data-ai-id="cluster-monitor:overview:view-rdma"]')).not.toBeNull(),
+      expect(view.container.querySelector('[data-ai-id="cluster-monitor:overview:rdma:tabs"]')).not.toBeNull(),
     );
-    fireEvent.click(view.container.querySelector('[data-ai-id="cluster-monitor:overview:view-rdma"]')!);
-    expect(onTabChange).toHaveBeenCalledWith('resource');
+    // The old overview had four metrics here (health / ports / throughput / errors); the
+    // first rewrite kept a single summary row, which is what this case guards against.
+    for (const tab of ['health', 'ports', 'throughput', 'errors']) {
+      expect(view.container.querySelector('[data-ai-id="cluster-monitor:overview:rdma:tab:' + tab + '"]')).not.toBeNull();
+      expect(view.container.querySelector('[data-ai-id="cluster-monitor:overview:rdma:tab:' + tab + ':value"]')).not.toBeNull();
+    }
+    fireEvent.click(view.container.querySelector('[data-ai-id="cluster-monitor:overview:rdma:tab:throughput"]')!);
+    expect(
+      view.container.querySelector('[data-ai-id="cluster-monitor:overview:rdma:chart"]')?.getAttribute('aria-label'),
+    ).toContain('RDMA');
+  });
+
+  it('previews the service components with four tabs', async () => {
+    stubApi(() => []);
+    const view = mount(<ClusterOverviewTab {...context({})} />);
+
+    await waitFor(() =>
+      expect(view.container.querySelector('[data-ai-id="cluster-monitor:overview:components:tabs"]')).not.toBeNull(),
+    );
+    for (const tab of ['latency', 'requestRate', 'attempts', 'attemptRate']) {
+      expect(
+        view.container.querySelector('[data-ai-id="cluster-monitor:overview:components:tab:' + tab + '"]'),
+      ).not.toBeNull();
+    }
   });
 });

@@ -4,7 +4,7 @@
 
 ## 概述
 
-一个导航入口、页内五个基础页签：概览 / 物理资源监控 / API Server 监控 / 调度器监控 / 资源用量排行（etcd 接入监控时另有条件 etcd 页签），`?tab=` 可深链，默认概览。页头只有一套时间窗与自动刷新，五个页签共用。概览先给节点在线环图、XPU 厂商构成环图与组件状态 3×2 磁贴，再给「7 行当前用量 + 一张可选指标大图」，最后是 RDMA 摘要与跳转按钮；物理资源页签把旧 console 的多序列指标合并成 18 张带坐标轴的大图；APIServer / Scheduler 页签承载组件级 range 指标，多序列按 `verb` / `result` / `quantile` 身份分开画；排行页签复用节点用量排行并支持导出 JSON。折线继续用 ai-kit `TrendChart`，构成图用本批新增的 `DonutChart`（recharts）。数据来自 KubeSphere 监控的 range query，概览的用量行由 used/total 两条序列按时间戳相除。集群未就绪时页面不挂载，由集群作用域路由层整页接管为「等待集群加入」，页面内不重复实现等待视图。
+一个导航入口、页内五个基础页签：概览 / 物理资源监控 / API Server 监控 / 调度器监控 / 资源用量排行（etcd 接入监控时另有条件 etcd 页签），`?tab=` 可深链，默认概览。页头只有一套时间窗与自动刷新，五个页签共用。概览先给节点在线环图、XPU 厂商构成环图与组件状态 3×2 磁贴，再给「7 行当前用量 + 一张可选指标大图」，最后是两块恢复自旧 console 概览的图表面板：RDMA 状态（health / 端口 / 吞吐 / 错误 4 个指标页签 + 曲线 + 端口异常节点清单）与服务组件监控（APIServer 延迟 / 速率、调度器尝试 / 速率 4 个页签，复用组件查询与身份合并）；物理资源页签把旧 console 的多序列指标合并成 18 张带坐标轴的大图；APIServer / Scheduler 页签承载组件级 range 指标，多序列按 `verb` / `result` / `quantile` 身份分开画；排行页签复用节点用量排行并支持导出 JSON。折线继续用 ai-kit `TrendChart`，构成图用本批新增的 `DonutChart`（recharts）。数据来自 KubeSphere 监控的 range query，概览的用量行由 used/total 两条序列按时间戳相除。集群未就绪时页面不挂载，由集群作用域路由层整页接管为「等待集群加入」，页面内不重复实现等待视图。
 
 ## 关联需求
 
@@ -24,12 +24,14 @@
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-14
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-15
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-16
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-17
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-18
 
 ## 设计目标与非目标
 
-目标：一个导航入口、五个基础页签 + 条件 etcd 页签，按使用场景拆分并可深链；先回答「集群整体是否正常」（节点在线、厂商构成、控制面组件），再回答「趋势如何」；构成用环图、趋势用带轴多序列大图，形状与数值同时可读；同一指标的多条身份序列同图比较；步长随窗口放大；缺数据、未上报、无权限与失败各自说清；页签各自降级。
+目标：一个导航入口、五个基础页签 + 条件 etcd 页签，按使用场景拆分并可深链；概览先回答「集群整体是否正常」（节点在线、厂商构成、控制面组件），再回答「资源用在哪」（7 行当前值 + 主图），最后回答「RDMA 织物是否正常」「控制面是否退化」（两块旧 console 的图表面板，多指标页签 + 曲线 + 异常节点清单）；其它页签回答「趋势如何」；构成用环图、趋势用带轴多序列大图，形状与数值同时可读；同一指标的多条身份序列同图比较；步长随窗口放大；缺数据、未上报、无权限与失败各自说清；页签各自降级。
 
-仍然非目标：节点/容器组级下钻、告警阈值线、组件指标的独立路由页、折线缩放与框选、环图的 hover 下钻与扇区筛选、每页签独立时间窗（本批共用页头，登记后续）。etcd 的真实健康仍不承诺（只表达是否接入监控）。
+仍然非目标：节点/容器组级下钻、告警阈值线、组件指标的独立路由页、折线缩放与框选、环图的 hover 下钻与扇区筛选、每页签独立时间窗（本批共用页头，登记后续）、RDMA 异常节点点击下钻与端口清单搜索/分页/导出、概览内组件下钻。etcd 的真实健康仍不承诺（只表达是否接入监控）。
 
 ## 关键约束
 
@@ -46,6 +48,9 @@
 - 交互元素用共享 `Button`/`Tabs` + `actionProps`（ai-surface 契约）；图表容器加 `aria-label`（图名）；DonutChart 根 `role="img"`。
 - 状态：loading 用 Skeleton（保留已有内容不被整块骨架遮挡的场景按既有约定）；empty 用说明文本；error 用 ResourceErrorPanel（403 无重试）；不得用 0 顶替无数据。
 - 排行导出用 Blob + `a.download`，文件名固定 `node.usage.rank.json`，并 `revokeObjectURL`。
+- 概览的一次 range 查询还携带 RDMA 4 组指标（`cluster_ib_health`、`cluster_ib_port_up`/`cluster_ib_port_total`、`cluster_ib_tx_bytes`/`cluster_ib_rx_bytes`、`cluster_ib_rx_errors`/`cluster_ib_retrans`），让 RDMA 块与用量块共用同一窗口与时间戳；端口清单是独立清单读取，不并入 range 查询（见 `CON-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-08`）。
+- RDMA 端口清单走路径集群段 `GET /kapis[/clusters/<cluster>]/rdma.kubesphere.io/v1alpha1/ports?limit=-1`（api-client `rdmaPortsApi` 用 `clusterScoped`）；不能用 `?cluster=`（成员集群实测返回 0 条，见 `GOT-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-19`）。
+- 概览服务组件监控块复用 `componentMonitorQueries` 的 `useComponentMetrics` / `toComponentCharts`（与 API Server / 调度器页签同一查询与身份合并），概览里不复制第二套请求或按返回顺序配对（见 `CON-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-09`）。
 
 ## 方案决策
 
@@ -132,6 +137,8 @@
 
 2026-11-18 用户对比旧页 5 个页签后指出两处未承接：旧页的 5 个页签（概览 / 物理资源监控 / API Server 监控 / 调度器监控 / 资源用量排行）应按场景逐一迁移而不是平铺成一屏；概览的节点健康/厂商分布应以图表呈现，资源用量应是「主图 + 明细」。本批（增量 1）恢复**页内页签 IA**（一个导航入口、五个页签、`?tab=` 深链），在 ai-kit 引入 recharts 并新增 `DonutChart`，概览恢复环图/构成图/3×2 磁贴与主图+明细，物理资源页签把 29 张卡合并为 18 张多序列大图，APIServer / Scheduler / 排行各自成为页签。旧页 etcd 页签是按 `requireETCD` 条件显示的；本部署 etcd ServiceMonitor 探测为 404，因此条件 etcd 页签隐藏；AC-07 的「有序列 / 无序列说明」正分支待接入 etcd 监控的集群复验（见「后续改进」与交付记录）。
 
+2026-11-18 晚（增量 2）：用户对比旧页指出新概览缺两块——旧 console 的「RDMA 状态」4 指标页签与「服务组件监控」块。增量 1 只把 RDMA 退化成 4 个数字 + 跳转按钮，并且整块漏掉了服务组件监控。本批恢复两块：RDMA 状态 = 4 个指标页签（health / 端口 / 吞吐 / 错误）+ 曲线 + 端口异常节点清单（旧页的 4 个子图与异常节点列表）；服务组件监控 = 4 个页签（APIServer 延迟 / 速率、调度器尝试 / 速率），复用 `componentMonitorQueries` 的查询与身份合并。原「查看 RDMA 趋势」按钮删除，概览四分区顺序固定为：状态行 → 集群资源用量 → RDMA 状态 → 服务组件监控。
+
 ## 仓库落点
 
 - 页面：`apps/console-next/src/pages/cluster/ClusterMonitorPage.tsx`
@@ -156,6 +163,9 @@
 - 路由：`apps/console-next/src/routes/kube-frontend.clusters.$cluster/monitor/index.tsx`（`validateSearch` / `useSearch` / `useNavigate`）
 - ai-kit：`console/packages/ai-kit/src/primitives/DonutChart.tsx`、`src/index.ts`、`kube-frontend/packages/ui/src/index.ts`（再导出）、Storybook story 与单测
 - 文案：`packages/locales/src/index.ts`（本批 key 由 Lead 统一写入，`cluster.monitor.tab.*` / `overview.*` / `resource.*` / `series.*` / `cluster.nodeUsage.export*`）
+- 概览 RDMA 状态块（增量 2）：`apps/console-next/src/pages/cluster/ClusterOverviewRdmaBlock.tsx`（4 指标页签、曲线、端口异常节点清单；`RDMA_BLOCK_METRICS` 供概览 range 查询合并指标，见 `CON-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-08`）
+- 概览服务组件监控块（增量 2）：`apps/console-next/src/pages/cluster/ClusterOverviewComponentsBlock.tsx`（4 页签，复用 `componentMonitorQueries`，见 `CON-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-09`）
+- RDMA 端口清单接口（增量 2）：`packages/api-client/src/node-insights.ts` 的 `rdmaPortsApi`（`clusterScoped` 路径段 + `limit=-1`，返回 `RdmaPortRow[]`）
 
 ## 对外契约
 
@@ -186,6 +196,11 @@ export interface DonutChartProps extends React.HTMLAttributes<HTMLDivElement> {
 - 产物：`node.usage.rank.json`，形状 `{cluster, metric, order, generatedAt, items:[{name, values}]}`；items 为当前 metric/order 的全部行（后端支持全量时），否则已加载页并如实标注范围（`CON-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-07`）。
 - 端点：不新增后端导出接口，仍只读 node 用量排行数据。
 
+RDMA 端口清单（增量 2）：
+
+- `GET /kapis[/clusters/<cluster>]/rdma.kubesphere.io/v1alpha1/ports?limit=-1`，返回 `{items:[{nodeName,device,port,stateName,healthy}],totalItems}`；集群段在路径中（host 为 `/kapis/...`，成员集群为 `/kapis/clusters/<c>/...`），不接受用 `?cluster=` 代替（成员集群实测 0 条，见 `GOT-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-19`）。
+- 该读取与指标查询独立：失败只影响「端口异常节点清单」区域（显示不可用说明），不影响 4 个指标页签的曲线；`staleTime` 30s，不随每次渲染重取。
+
 ## 不变量
 
 1. 百分比 ∈ [0, 100]，且等于用量 ÷ 同一时刻的总量。
@@ -209,6 +224,10 @@ export interface DonutChartProps extends React.HTMLAttributes<HTMLDivElement> {
 18. 导出 JSON 形状固定；items 来自当前 metric/order；无数据不生成文件；导出范围与文件内容一致。
 19. ai-kit 主题：DonutChart 只使用 `--ai-*` token；recharts 颜色 token 解析失败时回退内置调色板，不写死十六进制。
 20. 既有 `data-ai-id` 不串：`NodeRankingPanel` 默认前缀 `node-usage:`，排行页签传 `cluster-monitor:ranking:`；同一句柄不得在页面里出现两次。
+21. 概览四分区顺序固定：状态行 → 集群资源用量 → RDMA 状态 → 服务组件监控；RDMA 块与服务组件块各自 loading/empty/error，一块失败不阻塞其它分区。
+22. RDMA 块：4 页签顺序固定（health → ports → throughput → errors）；值来自概览同一次 range 查询；某页签无序列时当前值显示「-」且图为 `:empty`，不画零线；端口清单 404/403/5xx 一律显示不可用，**不得**显示「所有 RDMA 端口均正常」。
+23. 服务组件块：4 页签顺序固定（latency → requestRate → attempts → attemptRate）；身份按 `verb` / `result` 合并，线数等于有数据的身份数，不按返回顺序配对；单位分别为 ms / 次/秒 / 整数；无序列显示「本集群未上报该组件指标」，失败带重试（403 无重试）。
+24. 概览不存在 `cluster-monitor:overview:view-rdma` 句柄（跳转按钮已删除）；一个动作一个入口：RDMA 明细分组只从物理资源监控页签进入。
 
 ## 已知坑
 
@@ -233,6 +252,10 @@ export interface DonutChartProps extends React.HTMLAttributes<HTMLDivElement> {
 - **导出全量不能想当然**：`pageSize=-1` 是否生效需实测，返回行数要核对 total；否则会把「一页」当「全量」导出（`GOT-...-16`）。
 - **比率超配**：`cluster_*_utilisation` 超配时 >1，×100 后允许 >100%，不要截断或固定轴上限（`GOT-...-13`）。
 - **etcd 页签可见性**：只有 ServiceMonitor 探测 200 才显示；404 与探测失败（403/5xx）都隐藏，页签条不区分「未接入」与「探测失败」（旧 `requireETCD` parity，`GOT-...-17`）。
+- **RDMA 端口清单的集群段**：`?cluster=` 对成员集群无效（实测 agent 返回 0 条，路径形态 16 条）；错用会把成员集群的端口误判成「读不到 = 全正常」（`GOT-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-19`）。
+- **端口清单失败 ≠ 全正常**：404/403/5xx/网络失败都显示「RDMA 端口清单不可用」；只有清单成功且没有 `healthy=false` 的端口才显示「所有 RDMA 端口均正常。」。
+- **RDMA 块的值来自概览查询**：4 个页签不各自再发 range 查询（实现用概览的 `seriesByName`）；端口清单是唯一独立读取。
+- **服务组件块用同一身份合并**：复用 `componentMonitorQueries` 的 `toComponentCharts`，不要按返回顺序取第 i 条；`NaN`-only 身份不画线，无序列显示未上报说明。
 
 ## 测试与可观测
 
@@ -241,7 +264,7 @@ export interface DonutChartProps extends React.HTMLAttributes<HTMLDivElement> {
 
 集群状态分区（`data-ai-id` 清单，以 `ClusterStatusSection.tsx` 为准）：`cluster-monitor:status`（分区根，`data-ai-state` = loading/ready/empty/error）、`cluster-monitor:status:node-online:card`（节点在线卡，`data-ai-state`；含 `cluster-monitor:status:node-online` 数字、`:node-online:ratio` 比例、`:node-online:link` 节点页入口，以及 `:node-online:loading|unreported|empty|permission|error|retry`）、`cluster-monitor:status:vendor:card`（厂商卡；含 `cluster-monitor:status:vendor` 列表、`:vendor:row:<vendor>`（`data-ai-count`）与 `:vendor:row:<vendor>:count|:percent`、`:vendor:loading|empty|permission|error|retry`）、`cluster-monitor:status:components:card`（组件卡；含 `:components:service:<namespace>`（`data-ai-status` = healthy/unhealthy/not-installed/not-reported）、`:components:core:<etcd|controller-manager|scheduler>`（`data-ai-status`）、`:components:core:etcd:retry`，以及组件查询失败时复用分区前缀的 `cluster-monitor:status:permission|:error|:retry`）。未就绪由路由层接管，用既有句柄 `cluster:not-ready`、`cluster:not-ready-overview` 断言（本页不新增等待视图句柄）。用例按这些句柄断言，不按标题文字猜。
 
-页签 IA 与图表化（本批）的观测点：`cluster-monitor:tab:<key>`、`cluster-monitor:tabpanel:<key>`（含条件 `cluster-monitor:tab:etcd` / `cluster-monitor:tabpanel:etcd`，仅在 etcd 接入监控时存在）、`cluster-monitor:range:<key>`、`cluster-monitor:auto-refresh`、`cluster-monitor:retry`、`cluster-monitor:surface`；概览 `cluster-monitor:overview`、`:overview:node-ring`/`:node-ring:value`、`:overview:vendor-donut`/`:overview:vendor:<vendor>`、`cluster-monitor:status:components`（`:components:service:<ns>`、`:components:core:<key>`）、`:overview:usage`/`:usage:<key>`/`:usage:<key>:value`、`:overview:usage-chart`/`:usage-chart:legend`、`:overview:rdma`、`:overview:view-rdma`；物理资源 `cluster-monitor:resource`、`:resource:group:<gpu|host|disk|network|rdma>`、`:resource:chart:<key>`、`:chart:<key>:legend`、`:chart:<key>:empty`；APIServer `cluster-monitor:apiserver:chart:latency|rate`；Scheduler `cluster-monitor:scheduler:chart:attempts|rate|latency`；排行 `cluster-monitor:ranking`、`cluster-monitor:ranking:export`（独立页 `node-usage:export`）；DonutChart 图例行 `data-ai-segment`。
+页签 IA 与图表化（本批）的观测点：`cluster-monitor:tab:<key>`、`cluster-monitor:tabpanel:<key>`（含条件 `cluster-monitor:tab:etcd` / `cluster-monitor:tabpanel:etcd`，仅在 etcd 接入监控时存在）、`cluster-monitor:range:<key>`、`cluster-monitor:auto-refresh`、`cluster-monitor:retry`、`cluster-monitor:surface`；概览 `cluster-monitor:overview`、`:overview:node-ring`/`:node-ring:value`、`:overview:vendor-donut`/`:overview:vendor:<vendor>`、`cluster-monitor:status:components`（`:components:service:<ns>`、`:components:core:<key>`）、`:overview:usage`/`:usage:<key>`/`:usage:<key>:value`、`:overview:usage-chart`/`:usage-chart:legend`；概览 RDMA 块 `:overview:rdma`（`:rdma:tabs`、`:rdma:tab:<health|ports|throughput|errors>`（含 `:value`）、`:rdma:chart`（`data-ai-state` + `:now` / `:empty`）、`:rdma:chart:legend`、`:rdma:legend:<metric>`、`:rdma:no-abnormal`、`:rdma:abnormal`（`+ :rdma:abnormal:<node>`）、`:rdma:inventory-unavailable`）；概览服务组件块 `:overview:components`（`:components:tabs`、`:components:tab:<latency|requestRate|attempts|attemptRate>`（含 `:value`）、`:components:chart`（`data-ai-state` + `:now` / `:empty`）、`:components:chart:legend`、`:components:legend:<line>`、`:components:retry`）；物理资源 `cluster-monitor:resource`、`:resource:group:<gpu|host|disk|network|rdma>`、`:resource:chart:<key>`、`:chart:<key>:legend`、`:chart:<key>:empty`；APIServer `cluster-monitor:apiserver:chart:latency|rate`；Scheduler `cluster-monitor:scheduler:chart:attempts|rate|latency`；排行 `cluster-monitor:ranking`、`cluster-monitor:ranking:export`（独立页 `node-usage:export`）；DonutChart 图例行 `data-ai-segment`。
 
 ## 后续改进
 
@@ -251,7 +274,9 @@ export interface DonutChartProps extends React.HTMLAttributes<HTMLDivElement> {
 - 成员集群就绪后的状态分区正向数据（本轮只能验收 host/agent 就绪集群的正常态与未就绪集群 `test` 的路由层接管）。
 - 真实受限账号下 componenthealth / nodes/stats 的 403 分支（本轮用 route mock）。
 - **每页签独立时间窗/播放控制**：本批五个页签共用页头一套时间窗与自动刷新（`DEC-...-23`）；旧 console 的组件面板各自 50×2m 并有播放控制。若产品确认需要按页签独立窗口，另立批次实现，不把「共用」当成永久形态。
-- **旧概览 RDMA 四子图**：本批概览只做 RDMA 摘要 + 「查看 RDMA 趋势」跳转（`AC-...-12`）；旧页健康/端口/吞吐/错误四张子图只在物理资源页签的 RDMA 组承接，若需在概览内直接展示，可复用 RDMA 组图表。
+- **RDMA 异常节点下钻**：本批端口异常节点只列节点名与 down/total，不提供点击进入节点详情或物理资源页签；端口清单的搜索 / 分页 / 导出也登记后续（不是永久结论）。
+- **概览服务组件块下钻**：本批 4 个页签只给曲线，不做点击进入 API Server / 调度器页签或组件页（登记后续）。
+- **RDMA 端口清单空响应语义**：清单成功但 items 为空时按「无异常端口」显示「所有 RDMA 端口均正常。」；若后端以空清单表示「本集群没有 RDMA 设备」，需与后端确认是否要单独空态（登记待确认）。
 - **etcd 条件页签正分支复验**：条件 etcd 页签已按 `requireETCD` 承接（ServiceMonitor 200 显示、404/失败隐藏，`DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-27`）；本部署探测为 404，页签隐藏，`AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-07` 的「有序列 / 无序列说明」正分支只能在接入 etcd 监控的集群上复验（环境限制，已记入交付记录）。
 - **排行导出扩展**：全量分页拉取的后端核对、CSV/Excel、服务端异步导出（本批只做 JSON）。
 - **环图/构成图交互**：hover 读数、扇区点击筛选、跨集群构成对比；折线缩放/框选。
@@ -263,7 +288,7 @@ export interface DonutChartProps extends React.HTMLAttributes<HTMLDivElement> {
 - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-06
 - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-07
 - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-11（页签 IA 与深链，覆盖 AC-11）
-- TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-12（概览环图/构成图/主图+明细，覆盖 AC-12）
+- TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-12（概览环图/构成图/主图+明细 + RDMA 状态与服务组件监控两块，覆盖 AC-12 / AC-17 / AC-18）
 - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-13（物理资源多序列分组，覆盖 AC-13）
 - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-14（API Server 页签，覆盖 AC-14）
 - TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-15（调度器页签，覆盖 AC-15）
@@ -586,7 +611,7 @@ export interface DonutChartProps extends React.HTMLAttributes<HTMLDivElement> {
 | disk | `cluster_disk_size_usage` / `cluster_disk_size_capacity`（bytes） | `cluster_disk_size_utilisation`（0–1 ×100，%） |
 | pods | `cluster_pod_running_count` / `cluster_pod_quota`（个） | `cluster_pod_running_count`（整数，个） |
 
-RDMA 摘要指标：`cluster_ib_port_up`、`cluster_ib_port_total`、`cluster_ib_tx_bytes`、`cluster_ib_rx_bytes`、`cluster_ib_rx_errors`。缺任何一条：该行显示「-」、大图按无数据说明，不填 0；比率 >1 时可显示 >100%（超配）不做截断，轴上限取数据峰值；一次 range 查询取回上述全部指标（含 used/total），比率按时间戳配对相除，不按下标 zip。
+概览同一次 range 查询还携带 RDMA 状态块的指标：`cluster_ib_health`、`cluster_ib_port_up` / `cluster_ib_port_total`、`cluster_ib_tx_bytes` / `cluster_ib_rx_bytes`、`cluster_ib_rx_errors` / `cluster_ib_retrans`（块内页签与端口清单见 `CON-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-08`）。7 行用量任一行缺 used/total 时显示「-」且主图空态，不填 0；比率 >1 时可显示 >100%（超配）不做截断，轴上限取数据峰值；一次 range 查询取回上述全部指标，比率按时间戳配对相除，不按下标 zip。
 
 **行标签与图表标题是两个事实。** 行标签是资源名（GPU 显存 / GPU 卡 / 已分配 GPU 卡数 / CPU / 内存 / 磁盘 / 容器组），图表标题才是比率名（…使用率）；两者用不同 locale key。把「使用率」贴到 used/total 值上会读成「显存使用率 118 GiB / 276 GiB」——A100 复验时实际发生过。大盘按 total 选单位、两侧同刻度；TiB 级保留两位小数（0.24 TiB / 5.89 TiB），其余一位。
 
@@ -663,5 +688,62 @@ recharts 属于 `console/packages/ai-kit`（独立 pnpm install，React 18），
 2) 图表能力放**子路径**（`@kube-ai-hub/ai-kit/charts`、`@kube-ai-hub/ui/charts`），不进主 barrel，否则每个 import ui barrel 的页面/测试都会被动加载 recharts；
 3) app 单测用 `test/stubs/recharts.tsx` 替身（jsdom 不验绘图，真实 DonutChart 由 ai-kit 自己的 React 18 测试覆盖），并给 charts 子路径配 alias。
 同时把 recharts 及其运行依赖拆到独立 `vendor-charts` chunk（`manualChunks` 规则要匹配到 `ai-kit/src/charts.ts` **和** `primitives/DonutChart`，否则 DonutChart 仍被吞进 ai-kit chunk 并随首屏 preload）。实测拆分后 index.html 不再 preload charts chunk，monitor 路由才加载（97.5 KB gzip）。
+
+## 概览两块恢复：RDMA 状态与服务组件监控（2026-11-18 晚）
+
+> 背景：用户对比旧 console 概览后指出新页缺两块——「RDMA 状态」的 4 指标页签与「服务组件监控」。增量 1 把 RDMA 退化成 4 个数字 + 跳转按钮，服务组件监控整块缺失；本批恢复为旧页的两块图表面板，并把概览分区顺序固定为四段。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-28 — 概览恢复 RDMA 状态为 4 指标页签 + 曲线 + 异常节点清单，删除「查看 RDMA 趋势」按钮
+
+**为什么**：旧 overview 的 RDMA 块是 4 个指标页签（health / ports / throughput / errors），每页签一张曲线，并在图上列出端口异常的节点；增量 1 只剩 4 个数字 + 一个跳转按钮，用户对比旧页判为「缺失」。RDMA 是织物故障在概览里唯一的可视化入口：数字摘要看不出「什么时候开始抖」「哪个节点端口掉了」。恢复为「左列 4 页签（名称 + 当前值）选择指标，右侧大图 + 图例 + 当前值」，端口清单（独立读取）在图上给出异常节点。删除跳转按钮：4 个指标已在概览可见，再放「查看 RDMA 趋势」是重复入口；RDMA 明细分组仍在物理资源监控页签（一个动作一个入口）。
+
+**被否方案**：
+- 保持数字摘要 + 跳转按钮（用户反馈的退化形态，且按钮与块内 4 个指标重复）。
+- 4 张图平铺（旧页是页签式；平铺会让概览过长，与用量主图抢层级）。
+- 把物理资源 RDMA 组的图表整块嵌进概览（与物理资源页签重复，且把「明细」塞进「概览」）。
+
+**何时重新考虑**：产品需要在概览内交互式缩放或并排对比多个 RDMA 指标时（扩展页签为多图同屏）。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-29 — RDMA 端口清单必须用路径集群段，`?cluster=` 不可信
+
+**为什么**：实测 mlu370 2026-11-18：`GET /kapis/rdma.kubesphere.io/v1alpha1/ports?cluster=agent` 返回 **200 但 items 为空（0 条）**（参数被忽略，读的是 host），而 `GET /kapis/clusters/agent/rdma.kubesphere.io/v1alpha1/ports` 返回成员集群的 **16 条**端口。若按 query 形态实现，成员集群的端口清单会退化成 host 的一条，页面可能显示「所有 RDMA 端口均正常。」——把「读错集群/没读到」说成「健康」，比 404 更危险。api-client 用 `clusterScoped` 统一路径（宪法 C6：集群段紧跟 `/kapis` 或 `/apis`），端口清单不例外。
+
+**被否方案**：`?cluster=` 参数（实测对成员集群无效）；前端按 cluster 名手拼 host/成员两套路径（与 `clusterScoped` 重复且易漏）。
+
+**何时重新考虑**：后端把 cluster 作为查询参数正确实现并通过成员集群实测后（届时仍建议保留路径形态作为默认）。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-30 — 概览服务组件监控复用 `componentMonitorQueries`，不复制查询
+
+**为什么**：旧 overview 的第 4 块是控制面预览：APIServer 请求延迟（按 verb）与速率、调度器尝试次数与速率。增量 1 整块缺失。本批在概览恢复该块，并复用 API Server / 调度器页签的同一查询（`useComponentMetrics`）与身份合并（`toComponentCharts`）：同一响应、同一时间窗、同一 verb/result 合并规则，概览与页签不会出现「同一时刻两个数」或「一个页签有 APPLY 线、概览没有」；也不新增两套缓存与重试逻辑。
+
+**被否方案**：概览内另写 4 个查询（两套缓存与身份合并，概览与页签容易对不上）；把整个 API Server / 调度器页签嵌进概览（重复页面，且概览不需要完整明细）。
+
+**何时重新考虑**：概览需要展示与页签不同的时间窗或不同指标集合时。
+
+### CON-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-08 — 概览 RDMA 状态块：页签、指标、单位与句柄
+
+| 项 | 内容 |
+| --- | --- |
+| 根与页签 | `cluster-monitor:overview:rdma`（section）；`:rdma:tabs`；`:rdma:tab:<health|ports|throughput|errors>`（顺序固定 health → ports → throughput → errors），当前值 `:rdma:tab:<key>:value` |
+| 指标与单位 | health = `cluster_ib_health` ×100（%，最多一位小数）；ports = `cluster_ib_port_up` / `cluster_ib_port_total`（整数，以 / 分隔）；throughput = `cluster_ib_tx_bytes` / `cluster_ib_rx_bytes`（B/KiB/MiB/GiB 每秒）；errors = `cluster_ib_rx_errors` / `cluster_ib_retrans`（整数） |
+| 图 | `:rdma:chart`（`data-ai-state` = ready/empty；`:chart:now`、`:chart:empty`）、`:rdma:chart:legend`、`:rdma:legend:<metric>`；TrendChart 带坐标轴/网格/交互读数；health 1 条、ports/throughput/errors 各 2 条；无序列只显示 `:empty`，不画零线 |
+| 端口清单 | `GET /kapis[/clusters/<c>]/rdma.kubesphere.io/v1alpha1/ports?limit=-1`；成功且有 `healthy=false` → `:rdma:abnormal`（节点行 `:rdma:abnormal:<node>`，文案「down/total 个端口不可用」，按异常端口数降序）；全正常 → `:rdma:no-abnormal`「所有 RDMA 端口均正常。」；读取失败（404/403/5xx/网络）→ `:rdma:inventory-unavailable`「RDMA 端口清单不可用」 |
+| 数据来源 | 4 组指标并入概览同一次 range 查询（`RDMA_BLOCK_METRICS`），与用量块共用窗口；端口清单独立读取（staleTime 30s） |
+| 入口 | 概览不再渲染 `cluster-monitor:overview:view-rdma`（按钮删除）；RDMA 明细分组在物理资源监控页签 |
+
+### CON-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-09 — 概览服务组件监控块：页签、指标、身份与单位
+
+| 项 | 内容 |
+| --- | --- |
+| 根与页签 | `cluster-monitor:overview:components`（section）；`:components:tabs`；`:components:tab:<latency|requestRate|attempts|attemptRate>`（顺序固定），当前值 `:components:tab:<key>:value` |
+| 数据与身份 | latency = `apiserver_request_by_verb_latencies`（`verb`）+ `apiserver_request_latencies`（总平均）；requestRate = `apiserver_request_rate`；attempts = `scheduler_schedule_attempts`（`result`，累积整数）；attemptRate = `scheduler_schedule_attempt_rate`（`result`，次/秒） |
+| 单位 | latency：API 秒 ×1000 → ms（两位小数）；requestRate / attemptRate：次/秒（两位小数）；attempts：整数 |
+| 图与状态 | `:components:chart`（`data-ai-state` = loading/ready/empty/error；`:chart:now`、`:chart:empty`）、`:components:chart:legend`、`:components:legend:<line>`；loading 骨架；empty 显示 `cluster.monitor.components.notReported` 说明；error 用 ResourceErrorPanel + `:components:retry`（403 无重试） |
+| 复用 | `componentMonitorQueries` 的 `useComponentMetrics` / `toComponentCharts`，与 API Server / 调度器页签同一查询与身份合并（`DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-30`） |
+
+### GOT-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-19 — `?cluster=` 对 RDMA 端口清单无效：实测 0 条 vs 路径形态 16 条
+
+实测（mlu370，2026-11-18）：`GET /kapis/rdma.kubesphere.io/v1alpha1/ports?cluster=agent` → 200 但 `items=[]`（0 条）；`GET /kapis/clusters/agent/rdma.kubesphere.io/v1alpha1/ports` → 成员集群 16 条端口。前者不会报错，只会让页面「没有异常端口」，即把「读错集群/没读到」显示成「所有 RDMA 端口均正常」——静默错误比 404 更危险。所有集群级读都必须用 `clusterScoped` 路径（`/kapis/clusters/<c>/...` 或 `/apis/clusters/<c>/...`），端口清单不例外；query 形态只在 host 上恰好可用（host 只有 1 条端口），不能据此认为成员集群也可用。验收时可用「成员集群端口数 16 ≠ host 1」区分两种形态。
+
 
 

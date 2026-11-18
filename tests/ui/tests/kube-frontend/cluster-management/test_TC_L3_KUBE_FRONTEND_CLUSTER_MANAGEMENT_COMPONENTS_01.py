@@ -35,7 +35,10 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_COMPONENTS_01(cluster_management
     assert len(positions) == len(required), f"missing columns: {set(required) - set(headers)}"
     assert positions == sorted(positions), f"columns out of order: {headers}"
 
-    assert surface.locator("[data-ai-row]").count() == len(components)
+    # The list pages client-side at 20 rows (2026-11-19); the pager carries the real total.
+    assert surface.locator("[data-ai-row]").count() == min(len(components), 20), (
+        f"行数 {surface.locator('[data-ai-row]').count()} 与首页期望 {min(len(components), 20)} 不一致"
+    )
 
     # When anything is unhealthy it sorts to the top: finding it should not require
     # scanning 49 rows.
@@ -53,10 +56,14 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_COMPONENTS_01(cluster_management
             healthy = c.get("healthyBackends") or 0
             if total > 0 and healthy == total and c["name"] in first:
                 raise AssertionError(f"a healthy component sorted first while {len(unhealthy)} are unhealthy: {first}")
-    surface.get_by_role("combobox").click()
+    # Two comboboxes now (group filter and page size); the group filter is addressed by handle.
+    group_filter = ui.page.locator('[data-ai-id="components:group"]')
+    group_filter.click()
     ui.page.get_by_role("option", name="监控", exact=True).click()
-    expect(surface.locator("[data-ai-row]")).to_have_count(sum(c.get("namespace") == "kubesphere-monitoring-system" for c in components))
-    surface.get_by_role("combobox").click()
+    expect(surface.locator("[data-ai-row]")).to_have_count(
+        min(sum(c.get("namespace") == "kubesphere-monitoring-system" for c in components), 20)
+    )
+    group_filter.click()
     ui.page.get_by_role("option", name="全部组件", exact=True).click()
-    expect(surface.locator("[data-ai-row]")).to_have_count(len(components))
+    expect(surface.locator("[data-ai-row]")).to_have_count(min(len(components), 20))
     screenshot(ui.page, "cluster-components")

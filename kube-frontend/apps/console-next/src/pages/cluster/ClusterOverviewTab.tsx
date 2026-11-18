@@ -8,8 +8,10 @@ import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { ClusterStatusSection } from './ClusterStatusSection';
-import { formatBytes, formatBytesPerSecond } from './monitorFormat';
-import type { MonitorTabKey, MonitorTabState, WindowContext } from './monitorTabs';
+import { ClusterOverviewComponentsBlock } from './ClusterOverviewComponentsBlock';
+import { ClusterOverviewRdmaBlock, RDMA_BLOCK_METRICS } from './ClusterOverviewRdmaBlock';
+import { formatBytes } from './monitorFormat';
+import type { MonitorTabState, WindowContext } from './monitorTabs';
 
 /**
  * 概览: the cluster's status band, its resource usage as a main chart with a detail
@@ -26,10 +28,7 @@ import type { MonitorTabKey, MonitorTabState, WindowContext } from './monitorTab
  * describe the same instants, and one request guarantees that the two cannot
  * disagree because of a stale or partial second read.
  */
-export interface ClusterOverviewTabProps extends WindowContext {
-  /** The page's tab switch, used by 查看 RDMA 趋势. */
-  onTabChange?: (tab: MonitorTabKey) => void;
-}
+export interface ClusterOverviewTabProps extends WindowContext {}
 
 /** How a usage row is printed: a byte size, a core count, or a whole card/pod count. */
 type UsageUnit = 'bytes' | 'cores' | 'count';
@@ -79,31 +78,17 @@ const USAGE: readonly UsageSpec[] = [
 ];
 
 /** The RDMA summary metrics; details live on the physical-resources tab. */
-const RDMA_METRICS = [
-  'cluster_ib_port_up',
-  'cluster_ib_port_total',
-  'cluster_ib_tx_bytes',
-  'cluster_ib_rx_bytes',
-  'cluster_ib_rx_errors',
-] as const;
-
 /** Everything one overview request has to carry. */
 const OVERVIEW_METRICS = Array.from(
   new Set<string>([
     ...USAGE.flatMap((spec) => [spec.used, spec.total, spec.chart]),
-    ...RDMA_METRICS,
+    // The RDMA block plots four metrics (health, ports, throughput, errors) from this
+    // same request: one window, one query, one set of timestamps to pair on.
+    ...RDMA_BLOCK_METRICS,
   ]),
 );
 
 const USAGE_CHART_ID = 'cluster-monitor:overview:usage-chart';
-
-/** The latest point of a series, or undefined when it has none. */
-function latest(series: MetricSeries | undefined): number | undefined {
-  const points = series?.points;
-  if (!points || points.length === 0) return undefined;
-  const point = points[points.length - 1];
-  return point && Number.isFinite(point.value) ? point.value : undefined;
-}
 
 /**
  * The last instant at which both series have a sample.
@@ -187,7 +172,6 @@ export function ClusterOverviewTab({
   step,
   live,
   onStateChange,
-  onTabChange,
 }: ClusterOverviewTabProps): React.ReactElement {
   const t = useT();
   const [selected, setSelected] = React.useState<UsageSpec['key']>('gpuMemory');
@@ -231,17 +215,6 @@ export function ClusterOverviewTab({
   }, [seriesByName, selectedSpec]);
 
   const chartLatest = chartPoints.length > 0 ? chartPoints[chartPoints.length - 1]!.value : undefined;
-
-  const rdma = React.useMemo(() => {
-    const portUp = latest(seriesByName.get('cluster_ib_port_up'));
-    const portTotal = latest(seriesByName.get('cluster_ib_port_total'));
-    return {
-      ports: portUp !== undefined && portTotal !== undefined ? `${Math.round(portUp)}/${Math.round(portTotal)}` : undefined,
-      tx: latest(seriesByName.get('cluster_ib_tx_bytes')),
-      rx: latest(seriesByName.get('cluster_ib_rx_bytes')),
-      rxErrors: latest(seriesByName.get('cluster_ib_rx_errors')),
-    };
-  }, [seriesByName]);
 
   /**
    * The tab's main query state.
@@ -367,66 +340,20 @@ export function ClusterOverviewTab({
         ) : null}
       </section>
 
-      {/* ---- RDMA summary: five numbers and the way to the detail tab. ------ */}
-      <section
-        className="flex flex-col gap-3 rounded-ai-lg border border-ai-line bg-ai-surface-1 p-4"
-        data-ai-id="cluster-monitor:overview:rdma"
-        data-ai-state={
-          rdma.ports === undefined && rdma.tx === undefined && rdma.rx === undefined && rdma.rxErrors === undefined
-            ? 'empty'
-            : 'ready'
-        }
-      >
-        <div className="flex flex-wrap items-start justify-between gap-2">
-          <div className="flex flex-col gap-1">
-            <h2 className="text-sm font-semibold text-ai-fg-secondary">{t('cluster.monitor.overview.rdma')}</h2>
-            <p className="text-xs text-ai-fg-muted">{t('cluster.monitor.overview.rdmaHint')}</p>
-          </div>
-          <Button
-            size="sm"
-            variant="secondary"
-            {...actionProps('cluster-monitor:overview:view-rdma')}
-            onClick={() => onTabChange?.('resource')}
-          >
-            {t('cluster.monitor.overview.viewRdma')}
-          </Button>
-        </div>
-        {rdma.ports === undefined && rdma.tx === undefined && rdma.rx === undefined && rdma.rxErrors === undefined ? (
-          <p className="text-xs text-ai-fg-muted" data-ai-id="cluster-monitor:overview:rdma:empty">
-            {t('cluster.monitor.empty')}
-          </p>
-        ) : null}
-        <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <RdmaStat label={t('cluster.monitor.rdmaPorts')} value={rdma.ports} aiId="cluster-monitor:overview:rdma:ports" />
-          <RdmaStat
-            label={t('cluster.monitor.rdmaTx')}
-            value={rdma.tx === undefined ? undefined : `${formatBytesPerSecond(rdma.tx)}/s`}
-            aiId="cluster-monitor:overview:rdma:tx"
-          />
-          <RdmaStat
-            label={t('cluster.monitor.rdmaRx')}
-            value={rdma.rx === undefined ? undefined : `${formatBytesPerSecond(rdma.rx)}/s`}
-            aiId="cluster-monitor:overview:rdma:rx"
-          />
-          <RdmaStat
-            label={t('cluster.monitor.rdmaRxErrors')}
-            value={rdma.rxErrors === undefined ? undefined : String(Math.round(rdma.rxErrors))}
-            aiId="cluster-monitor:overview:rdma:rx-errors"
-          />
-        </dl>
-      </section>
-    </div>
-  );
-}
+      {/*
+        RDMA 状态: four metrics, each with its own curve and the node list when a port
+        is down — the old overview's block. It reads the series this tab already
+        fetched; only the port inventory is a separate read (it is an inventory).
+      */}
+      <ClusterOverviewRdmaBlock cluster={cluster} seriesByName={seriesByName} start={start} end={end} />
 
-/** One RDMA summary number; a missing metric prints '-' rather than a zero. */
-function RdmaStat({ label, value, aiId }: { label: string; value: string | undefined; aiId: string }): React.ReactElement {
-  return (
-    <div className="flex flex-col gap-0.5">
-      <dt className="text-xs text-ai-fg-muted">{label}</dt>
-      <dd className="text-sm font-medium tabular-nums text-ai-fg" data-ai-id={aiId}>
-        {value ?? '-'}
-      </dd>
+      {/*
+        服务组件监控: the control plane preview the old overview carried (APIServer
+        latency/rate, scheduler attempts/rate). The dedicated tabs remain the place for
+        the full set; this block answers "is the control plane degrading" without a tab
+        switch.
+      */}
+      <ClusterOverviewComponentsBlock cluster={cluster} rangeKey={rangeKey} start={start} end={end} step={step} />
     </div>
   );
 }

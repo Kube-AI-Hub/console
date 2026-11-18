@@ -210,20 +210,23 @@ def test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_LIST_05(app_workloads_page, screensho
                 assert "等待中" in ui.row_text("pods", name), f"{name} 的状态列不是等待中"
 
         # ---- clearing the filter restores the whole set ----
-        with ui.page.expect_response(
-            lambda response: "/namespaces/default/pods?" in response.url and "limit=" in response.url,
-            timeout=60_000,
-        ) as cleared:
-            ui.choose_select("pods:filter:status", "全部状态")
+        # Asserted on the effect, not on a request: clearing returns the query key to the one
+        # the page started with, and React Query may answer that from cache — demanding a
+        # network round trip here would fail a correct page (measured, 2026-11-18).
+        ui.choose_select("pods:filter:status", "全部状态")
         ui.wait_ready(surface)
-        assert "status=" not in cleared.value.url, f"清空筛选后请求仍带 status：{cleared.value.url}"
-        clear_limit = _limit_of(cleared.value.url)
-        total_all, cleared_rows = _oracle(ui, "", clear_limit)
+        deadline = time.time() + 30
         cleared_total = _page_total(surface)
+        while time.time() < deadline and cleared_total != total_all:
+            ui.page.wait_for_timeout(500)
+            cleared_total = _page_total(surface)
+        assert cleared_total == total_all, f"清空后总数应回到全集 {total_all}，实际 {cleared_total}"
+        # The pods list opens at 10 rows per page; the assertion is about the *set*, not the page.
+        clear_limit = 10
+        _, cleared_rows = _oracle(ui, "", clear_limit)
         assert len(cleared_rows) == min(cleared_total, clear_limit), (
             f"清空后行数 {len(cleared_rows)} 与全集 {cleared_total} 不一致"
         )
-        _same_total(ui, "", cleared_total)
 
         screenshot(ui.page, "pods-list-status-filter")
     finally:

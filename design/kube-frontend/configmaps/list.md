@@ -9,6 +9,7 @@
 ## 关联需求
 
 - `AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-01`
+- AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-12
 - AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-11
 - AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-10
 - AC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-09
@@ -50,6 +51,20 @@
 
 **何时重新考虑**：第二个资源模块出现、且列结构重复时
 
+
+### DEC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-12 — 一次读全的列表在客户端切片，页码要收敛
+
+**为什么**：这 7 个列表（灰度发布、集群成员、系统组件、自定义资源及其实例、多集群、持久卷）的接口一次返回全部行，没有服务端分页参数。给它们加每页档位只能是**客户端切片**：`rows.slice((page-1)*size, page*size)`，分页器的 `total` 仍取全部行数——否则「共 47 条」会被写成「共 20 条」，读者会以为数据丢了。
+
+**页码收敛**：数据可能因为刷新、筛选或别的操作变少。用 `currentPage = min(page, ceil(total/size))` 把页码夹住，而不是靠 `useEffect` 回写状态——夹住在渲染期完成，不会先闪一帧空表再跳回。
+
+**为什么集群成员页不用 `useResourceListState`**：该页没有搜索与排序，用整套 hook 会带来三个用不到的字段；它用两个 `useState`（page / pageSize），切换档位时手动回到第 1 页。
+
+**机械守卫**：`config/page-size-contract.test.ts` 新增「有 `pagination` 就必须有 `pageSizeOptions`」，把这 7 个漏项固化成一条会失败的断言——覆盖率不靠人记。
+
+**被否方案**：给这些接口加 `limit`/`page` 参数（服务端分页）。它们多数是聚合端点，加参数要改后端契约；集合本身只有几十到几百行，客户端切片足够，等真的出现上千行再考虑。
+
+**何时重新考虑**：某个列表的数据量稳定超过几百行，或接口开始支持服务端分页时，改为服务端分页并同步本决策。
 
 ### DEC-L3-KUBE-FRONTEND-CONFIGMAPS-LIST-08 — 每页条数是状态，不是常量
 

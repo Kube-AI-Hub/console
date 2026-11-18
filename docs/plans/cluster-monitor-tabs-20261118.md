@@ -137,6 +137,31 @@ A100 只有 host 一个集群，多集群分支不在那里验；切回 mlu370 �
 - 截图：`tests/ui/artifacts/cluster-monitor-mlu370/`（host/agent overview、agent/host resource、test 未就绪）。
 - 回归：mlu370 监控页 14 条串行 **14 passed / 128.45s**；A100 的标签/精度修复在本轮多集群上同样生效（同一构建）。
 
+## 2026-11-19 补：概览恢复 RDMA 多指标块与服务组件监控块（用户反馈）
+
+用户在 mlu370 指出概览少两块旧 console 的内容，已实现：
+
+1. **RDMA 状态** 由「4 个数字 + 查看趋势按钮」恢复为**4 指标页签 + 曲线**：健康度（`cluster_ib_health`×100）、端口可用率（`port_up`/`port_total`）、吞吐（`tx`/`rx` B/s）、错误/重传（`rx_errors`/`retrans`）；四者共用概览那一次 range 查询。跳转按钮删除（页签已含曲线，避免两个入口）。
+   端口清单用 **路径集群段** `/kapis/clusters/<c>/rdma.kubesphere.io/v1alpha1/ports?limit=-1`：实测 `?cluster=agent` 返回 **0 条**（参数被忽略、读到主集群），路径形态返回 **16 条**（宪法 C6）。清单成功→列出异常节点「节点 + down/total」或「所有 RDMA 端口均正常。」；读取失败→「RDMA 端口清单不可用」，不声称正常。
+2. **服务组件监控** 恢复为旧 console 的第 4 块：APIServer 请求延迟（按 verb + 平均，秒→ms）/ 请求速率（次/秒）/ 调度器调度尝试次数（按 result 累积）/ 调度尝试速率（按 result，次/秒），复用 `componentMonitorQueries` 的身份合并；专用页签仍是完整明细的入口。
+
+实测（本地 5178 + mlu370 后端，agent/host 各一）：agent 概览 RDMA 四页签值 87.5% / 14-16 / 6.9 KiB/s / 0-0，异常节点「sagesuite-demo 2/2、a100-04 1/7、a100-64 1/7」；host 为 100% / 1-1 / 0 B/s / 0-0 + 「所有 RDMA 端口均正常。」；服务组件四页签值 1.56 ms / 70.35 次/秒 / 3346 / 0.00 次/秒（agent）、4.03 ms / 17.73 次/秒 / 885 / 0.00 次/秒（host），图例与接口 verb/result 一一对应；900 宽无横向溢出、两块按断点堆叠。截图：`tests/ui/artifacts/cluster-monitor-blocks/`。
+
+**验证**（2026-11-19）：
+
+| 检查 | 结果 |
+| --- | --- |
+| 监控页 pytest 串行（host，01/03/04/05/06/07/08/09/11…16） | **14 passed / 121s** |
+| MONITOR-12 单跑（agent） | **1 passed / 16.4s**（RDMA 异常节点与 ports API 逐节点对账） |
+| console-next vitest | **53 files / 309 tests passed** |
+| typecheck / build | exit 0 |
+| 规格门禁 | `--what prd` / `--what design` / `--what tests --strict` 均 **0 错 0 警** |
+| 用例生成 | `generate_case_docs.py` → 505 条 |
+
+规格：AC-…-MONITOR-17（RDMA 块）/ AC-…-MONITOR-18（服务组件块），由 TC-…-MONITOR-12 覆盖；design 新增 DEC-28/29/30、CON-08/09、GOT-19。
+
+**并行工作说明**：本轮的 `packages/locales/src/index.ts` 与 `packages/api-client/src/index.ts` 同时承载另一个未提交批次（cronjobs/网关/网络策略等）的改动；本记录只声明本页改动的部分。本地联调一律用标准命令（并行批次 `ef71f239d` 删掉了自建静态站）：`pnpm --filter @kube-ai-hub/console-next build` 后 `pnpm --filter @kube-ai-hub/console-next preview`（5178，服务 `dist`，复用 `vite.config.ts` 的 `PROXY` 转发到 `KA_BACKEND`）。注意 Vite 只监听 `[::1]`，要用 `http://localhost:5178` 而不是 `127.0.0.1`；SPA 页面要带 `Accept: text/html`，用 `curl` 探活时带 `Accept: application/json` 会得到 404 而误判服务没起来。本页两块与监控 14 条用例均已在该方式下复跑通过。
+
 ## 证据链接
 
 - 旧页三集群基线（上一批）：[assets/cluster-monitor-status-20261118/](assets/cluster-monitor-status-20261118/)。

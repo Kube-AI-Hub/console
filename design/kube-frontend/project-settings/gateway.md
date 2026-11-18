@@ -4,6 +4,7 @@
 
 ## 关联需求
 
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-04
 - AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-01
 - AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-02
 - AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-03
@@ -193,4 +194,17 @@ Gateway 带 `finalizers: uninstall-helm-release`，Helm release 未清理完时�
 ### GOT-L3-KUBE-FRONTEND-PROJECT-SETTINGS-GATEWAY-06 — 追踪开关是否显示取决于服务网格
 
 旧弹窗只在集群启用 servicemesh 模块时显示追踪开关；新弹窗无条件显示并写字符串注解——在未启用服务网格的集群上，打开追踪不会失败但不能保证生效（CRD 只存注解）。列表的追踪列如实显示注解值，不推断「已生效」。
+
+
+### DEC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-04 — 集群网关卡片留在项目网关页，只读并链到集群详情
+
+**为什么**：旧 console 的项目网关页先渲染「集群网关」卡片再渲染项目网关卡片——项目里的应用路由最终是从集群网关出去的，只显示项目网关的地址，读者不知道它在哪一层被承载。新 UI 第一版只做了项目网关，于是「我的路由从哪出去」在这个页面上没有答案。
+
+**只读 + 跳转**：集群网关由安装器管理（Gateway 在 `kubesphere-controls-system`），项目页不应该出现编辑入口；卡片给「查看详情」链到集群作用域的网关详情页（元数据/资源状态/日志/监控四视图已交付）。跨作用域写会绕过集群管理员的职责边界。
+
+**被否方案**：把集群网关的编辑也放到项目页。同一个对象两个作用域都能改，权限口径和审计都会分裂。
+
+**集群没有网关时**：卡片不渲染（不是空卡）。项目网关的创建/编辑不受影响——两件事，两个区块。
+
+**何时重新考虑**：平台提供「一个集群多个网关」时，卡片要变成列表并支持选择。
 

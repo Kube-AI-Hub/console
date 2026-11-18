@@ -9,6 +9,7 @@
 
 - AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-01
 - AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-02
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_RULES-02
 - AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_RULES-01
 
 ## 概述
@@ -136,3 +137,14 @@ E2E 见 `tests/kube-frontend/project-settings/`；规则视图为 `TC-L3-KUBE-FR
 ### DEC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_ISOLATION-06 — 对端一律包一层
 
 **为什么**：`from: [{ podSelector: … }]` 是对端的形状，`from: [{ matchLabels: … }]` 会被 apiserver 以「must specify a peer」拒绝（已实测）。清单生成器统一包装三种对端，表单因此不需要知道这个细节。
+
+### DEC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_RULES-02 — 详情页复用同一投影，不新增读请求
+
+**为什么**：策略详情已经拿到了对象本身（`spec.ingress` / `spec.egress`），规则表从同一份对象投影出来，因此「属性里的规则数」与下面的规则行永远一致；再发一次规则请求就会出现两处不同步的可能。投影函数抽到 `pages/settings/networkPolicyRules.ts`，项目规则视图与详情页共用——两处各写一份，同一条规则在两个页面会长得不一样（一处写 `namespaceSelector: env=prod`，一处只写 `env=prod`）。
+
+**空与「允许全部」不是一回事**：某方向没有规则时显示「这个策略没有入站规则。」；而一条规则里 `from: []`（或没有 `ports`）表示允许全部，打印成 `*`。把两者都渲染成空表，读者无法区分「没写规则」和「写了规则但允许一切」。
+
+**被否方案**：在详情页内嵌项目级规则视图并高亮本策略那一行。那会拉一份全项目策略的读，还要读者在一堆行里找自己那条；详情页的上下文已经确定了策略。
+
+**何时重新考虑**：策略规则出现「引用其他策略/服务」这类需要额外解析的字段时，投影函数要读更多对象，届时再评估是否加请求。
+

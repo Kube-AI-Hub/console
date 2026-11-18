@@ -16,7 +16,9 @@ def test_TC_L3_KUBE_FRONTEND_SECRETS_LIST_03(secrets_page, session_token, ui_con
 
     from helpers.api import ApiClient
 
-    api = ApiClient(secrets_page.base.split('/kube-frontend/')[0], session_token)
+    # The API lives under the app's /kube-frontend prefix (BFF retirement, 2026-11-18); the
+    # origin alone answers ks-apiserver's "public base URL of /kube-frontend/" 404.
+    api = ApiClient(ui_config.app_api, session_token)
     name = f"tc-e2e-refresh-{uuid.uuid4().hex[:8]}"
 
     try:

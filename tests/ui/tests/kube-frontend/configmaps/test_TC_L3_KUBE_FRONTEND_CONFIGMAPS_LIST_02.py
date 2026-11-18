@@ -14,10 +14,14 @@ def test_TC_L3_KUBE_FRONTEND_CONFIGMAPS_LIST_02(configmaps_page, screenshot):
     configmaps_page.wait_ready()
 
     header = configmaps_page.surface.locator('[data-ai-id="configmaps:sort:name"]')
+    # `aria-sort` lives on the <th>; the handle sits on the control inside it, so walk up to
+    # the column header rather than assuming the immediate parent (markup inside the header is
+    # free to change, the ARIA contract is not).
+    column = header.locator("xpath=ancestor::th[1]")
     header.click()
     configmaps_page.wait_ready()
-    assert header.locator("xpath=..").get_attribute("aria-sort") in {"ascending", "descending"}
+    assert column.get_attribute("aria-sort") in {"ascending", "descending"}
 
     header.click()
     configmaps_page.wait_ready()
-    assert header.locator("xpath=..").get_attribute("aria-sort") in {"ascending", "descending"}
+    assert column.get_attribute("aria-sort") in {"ascending", "descending"}

@@ -48,6 +48,15 @@ export interface ResourceListParams {
    * that is `status` with the kubectl-style values Waiting / Running / Completed / Error.
    */
   filters?: Record<string, string>;
+  /**
+   * Label selector, as the kapis query parameter `labelSelector`.
+   *
+   * Used where the relation between two resources is expressed as a label rather than a
+   * name (a CronJob's runs are the Jobs carrying its jobTemplate labels). kapis reads
+   * `labelSelector` itself and passes it to the cache, so this is a real server-side
+   * filter, not a keyword.
+   */
+  labelSelector?: string;
   signal?: AbortSignal;
 }
 
@@ -202,6 +211,7 @@ export function resourceApi<TItem extends KubeObject, TSummary, TDetail>(client:
           ...(params.keyword?.trim() ? { name: params.keyword.trim() } : {}),
           ...(params.fieldSelector ? { fieldSelector: params.fieldSelector } : {}),
           ...(params.filters ?? {}),
+          ...(params.labelSelector ? { labelSelector: params.labelSelector } : {}),
         },
         ...(params.signal ? { signal: params.signal } : {}),
       });

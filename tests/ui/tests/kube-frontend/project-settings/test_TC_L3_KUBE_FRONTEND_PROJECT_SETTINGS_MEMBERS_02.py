@@ -8,7 +8,30 @@ from playwright.sync_api import expect
 pytestmark = pytest.mark.ui
 
 MEMBERS = "/kapis/iam.kubesphere.io/v1alpha2/namespaces/default/members"
+USERS = "/kapis/iam.kubesphere.io/v1alpha2/users"
 USER = "ui-test"
+
+
+def _ensure_user(api) -> None:
+    """Make the invited account exist.
+
+    The invitation writes a role binding for a subject; on a deployment without that user the
+    binding is created for a phantom and the member list never shows the role. Creating it here
+    keeps the case runnable anywhere, and the case removes it again.
+    """
+    status, body = api.request("GET", f"{USERS}/{USER}")
+    if status == 200:
+        return
+    api.request(
+        "POST",
+        USERS,
+        {
+            "apiVersion": "iam.kubesphere.io/v1alpha2",
+            "kind": "User",
+            "metadata": {"name": USER},
+            "spec": {"email": "ui-test@example.com", "password": "UiTest@2026"},
+        },
+    )
 
 
 def _members(api) -> list[dict]:
@@ -27,6 +50,7 @@ def _role(api) -> str | None:
 
 def _cleanup(api) -> None:
     api.request("DELETE", f"{MEMBERS}/{USER}")
+    api.request("DELETE", f"{USERS}/{USER}")
 
 
 @pytest.mark.point
@@ -36,6 +60,7 @@ def test_TC_L3_KUBE_FRONTEND_PROJECT_SETTINGS_MEMBERS_02(project_settings_page, 
     ui = project_settings_page
     assert ui.api is not None
     _cleanup(ui.api)
+    _ensure_user(ui.api)
 
     try:
         ui.page.goto(

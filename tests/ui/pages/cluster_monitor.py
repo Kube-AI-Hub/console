@@ -185,9 +185,10 @@ class ClusterMonitorPage:
         end = int(time.time())
         start = end - window_seconds
         metrics_filter = "|".join(f"{metric}$" for metric in metrics)
+        path = self._cluster_path("/kapis/monitoring.kubesphere.io/v1alpha3", "cluster")
         status, body = self.api.request(
             "GET",
-            f"{MONITORING_CLUSTER}?cluster={self.cluster}&metrics_filter={metrics_filter}"
+            f"{path}?cluster={self.cluster}&metrics_filter={metrics_filter}"
             f"&start={start}&end={end}&step={step}",
         )
         if status != 200 or not isinstance(body, dict):
@@ -347,8 +348,17 @@ class ClusterMonitorPage:
     # ---------------- 集群状态数据 ----------------
 
     def _cluster_path(self, prefix: str, rest: str) -> str:
+        """Insert the member-cluster segment where the API expects it.
+
+        For a member cluster the segment sits **right after the API root**:
+        `/kapis/clusters/<c>/resources.kubesphere.io/v1alpha2/componenthealth`, not after
+        the group (`/kapis/resources.kubesphere.io/.../clusters/<c>/...`).
+        """
         if not self.cluster or self.cluster == "host":
             return f"{prefix}/{rest}"
+        for root in ("/kapis", "/apis"):
+            if prefix == root or prefix.startswith(root + "/"):
+                return f"{root}/clusters/{self.cluster}{prefix[len(root):]}/{rest}"
         return f"{prefix}/clusters/{self.cluster}/{rest}"
 
     def component_health(self) -> tuple[int, dict[str, Any]]:
@@ -395,8 +405,11 @@ class ClusterMonitorPage:
         metrics_filter = "|".join(f"{metric}$" for metric in metrics)
         status, body = self.api.request(
             "GET",
-            f"/kapis/monitoring.kubesphere.io/v1alpha3/components/{component}"
-            f"?cluster={self.cluster}&metrics_filter={metrics_filter}&start={start}&end={end}&step={step}",
+            self._cluster_path(
+                "/kapis/monitoring.kubesphere.io/v1alpha3",
+                f"components/{component}",
+            )
+            + f"?cluster={self.cluster}&metrics_filter={metrics_filter}&start={start}&end={end}&step={step}",
         )
         assert status == 200, f"components/{component} -> {status}: {str(body)[:200]}"
         out: dict[str, list[tuple[dict[str, str], list[float]]]] = {}
@@ -676,6 +689,185 @@ class ClusterMonitorPage:
 
     def scheduler_legend_value(self, key: str, series_key: str) -> str:
         return self.chart_legend_value(f"cluster-monitor:scheduler:chart:{key}", series_key)
+
+
+    # ---------------- 概览 · RDMA 状态块（4 页签 + 图 + 端口清单） ----------------
+
+    RDMA_TAB_SPECS: tuple[tuple[str, tuple[str, ...]], ...] = (
+        ("health", ("cluster_ib_health",)),
+        ("ports", ("cluster_ib_port_up", "cluster_ib_port_total")),
+        ("throughput", ("cluster_ib_tx_bytes", "cluster_ib_rx_bytes")),
+        ("errors", ("cluster_ib_rx_errors", "cluster_ib_retrans")),
+    )
+
+    def rdma_block(self) -> Locator:
+        return self.page.locator('[data-ai-id="cluster-monitor:overview:rdma"]').last
+
+    def rdma_tab_ids(self) -> list[str]:
+        prefix = "cluster-monitor:overview:rdma:tab:"
+        out: list[str] = []
+        for element in self.page.locator(f'[data-ai-id^="{prefix}"]').all():
+            ai_id = element.get_attribute("data-ai-id") or ""
+            key = ai_id[len(prefix):]
+            if key and ":" not in key:
+                out.append(key)
+        return out
+
+    def rdma_tab(self, key: str) -> Locator:
+        return self.page.locator(f'[data-ai-id="cluster-monitor:overview:rdma:tab:{key}"]').last
+
+    def rdma_tab_state(self, key: str) -> str | None:
+        return self.rdma_tab(key).get_attribute("data-ai-state")
+
+    def rdma_tab_value(self, key: str) -> str:
+        return self.page.locator(f'[data-ai-id="cluster-monitor:overview:rdma:tab:{key}:value"]').last.inner_text().strip()
+
+    def select_rdma_tab(self, key: str) -> None:
+        self.rdma_tab(key).click()
+        expect(self.rdma_tab(key)).to_have_attribute("aria-pressed", "true")
+
+    def rdma_chart(self) -> Locator:
+        return self.page.locator('[data-ai-id="cluster-monitor:overview:rdma:chart"]').last
+
+    def rdma_chart_state(self) -> str | None:
+        return self.rdma_chart().get_attribute("data-ai-state")
+
+    def rdma_chart_now(self) -> str:
+        return self.page.locator('[data-ai-id="cluster-monitor:overview:rdma:chart:now"]').last.inner_text().strip()
+
+    def rdma_chart_empty(self) -> Locator:
+        return self.page.locator('[data-ai-id="cluster-monitor:overview:rdma:chart:empty"]').last
+
+    def rdma_chart_series_ids(self) -> list[str]:
+        return [
+            element.get_attribute("data-ai-series") or ""
+            for element in self.rdma_chart().locator("path[data-ai-trend-line]").all()
+        ]
+
+    def rdma_legend_ids(self) -> list[str]:
+        prefix = "cluster-monitor:overview:rdma:legend:"
+        out: list[str] = []
+        for element in self.page.locator(f'[data-ai-id^="{prefix}"]').all():
+            ai_id = element.get_attribute("data-ai-id") or ""
+            key = ai_id[len(prefix):]
+            if key and ":" not in key:
+                out.append(key)
+        return out
+
+    def rdma_legend_text(self, metric: str) -> str:
+        return self.page.locator(f'[data-ai-id="cluster-monitor:overview:rdma:legend:{metric}"]').last.inner_text().strip()
+
+    def rdma_no_abnormal(self) -> Locator:
+        return self.page.locator('[data-ai-id="cluster-monitor:overview:rdma:no-abnormal"]').last
+
+    def rdma_abnormal(self) -> Locator:
+        return self.page.locator('[data-ai-id="cluster-monitor:overview:rdma:abnormal"]').last
+
+    def rdma_inventory_unavailable(self) -> Locator:
+        return self.page.locator('[data-ai-id="cluster-monitor:overview:rdma:inventory-unavailable"]').last
+
+    def rdma_abnormal_nodes(self) -> dict[str, str]:
+        prefix = "cluster-monitor:overview:rdma:abnormal:"
+        out: dict[str, str] = {}
+        for element in self.page.locator(f'[data-ai-id^="{prefix}"]').all():
+            ai_id = element.get_attribute("data-ai-id") or ""
+            node = ai_id[len(prefix):]
+            if node and ":" not in node:
+                out[node] = element.inner_text().strip()
+        return out
+
+    def rdma_ports(self, api: "ApiLike | None" = None) -> list[dict[str, Any]]:
+        """The RDMA port inventory the block reads, one row per port: node/device/port/state/healthy."""
+        client = api or self.api
+        assert client is not None, "api client required"
+        path = self._cluster_path("/kapis/rdma.kubesphere.io/v1alpha1", "ports") + "?limit=-1"
+        status, body = client.request("GET", path)
+        assert status == 200, f"rdma ports -> {status}: {str(body)[:200]}"
+        rows: list[dict[str, Any]] = []
+        for item in (body or {}).get("items") or []:
+            node = str(item.get("nodeName") or "")
+            if not node:
+                continue
+            rows.append({
+                "node": node,
+                "device": str(item.get("device") or ""),
+                "port": str(item.get("port") or ""),
+                "state": str(item.get("stateName") or "unknown"),
+                "healthy": item.get("healthy") is True,
+            })
+        return rows
+
+    # ---------------- 概览 · 服务组件监控块（4 页签 + 图） ----------------
+
+    COMPONENTS_TAB_SPECS: tuple[tuple[str, str, tuple[str, ...]], ...] = (
+        # (tab key, component, metric names whose series identities the tab draws)
+        ("latency", "apiserver", ("apiserver_request_by_verb_latencies", "apiserver_request_latencies")),
+        ("requestRate", "apiserver", ("apiserver_request_rate", "apiserver_request_by_verb_rate")),
+        ("attempts", "scheduler", ("scheduler_schedule_attempts",)),
+        ("attemptRate", "scheduler", ("scheduler_schedule_attempt_rate",)),
+    )
+
+    def components_block(self) -> Locator:
+        return self.page.locator('[data-ai-id="cluster-monitor:overview:components"]').last
+
+    def components_tab_ids(self) -> list[str]:
+        prefix = "cluster-monitor:overview:components:tab:"
+        out: list[str] = []
+        for element in self.page.locator(f'[data-ai-id^="{prefix}"]').all():
+            ai_id = element.get_attribute("data-ai-id") or ""
+            key = ai_id[len(prefix):]
+            if key and ":" not in key:
+                out.append(key)
+        return out
+
+    def components_tab(self, key: str) -> Locator:
+        return self.page.locator(f'[data-ai-id="cluster-monitor:overview:components:tab:{key}"]').last
+
+    def components_tab_state(self, key: str) -> str | None:
+        return self.components_tab(key).get_attribute("data-ai-state")
+
+    def components_tab_value(self, key: str) -> str:
+        return self.page.locator(f'[data-ai-id="cluster-monitor:overview:components:tab:{key}:value"]').last.inner_text().strip()
+
+    def select_components_tab(self, key: str) -> None:
+        self.components_tab(key).click()
+        expect(self.components_tab(key)).to_have_attribute("aria-pressed", "true")
+
+    def components_chart(self) -> Locator:
+        return self.page.locator('[data-ai-id="cluster-monitor:overview:components:chart"]').last
+
+    def components_chart_state(self) -> str | None:
+        return self.components_chart().get_attribute("data-ai-state")
+
+    def components_chart_now(self) -> str:
+        return self.page.locator('[data-ai-id="cluster-monitor:overview:components:chart:now"]').last.inner_text().strip()
+
+    def components_chart_empty(self) -> Locator:
+        return self.page.locator('[data-ai-id="cluster-monitor:overview:components:chart:empty"]').last
+
+    def components_retry(self) -> Locator:
+        """The chart's retry button (the block renders it under its own handle)."""
+        return self.page.locator('[data-ai-id="cluster-monitor:overview:components:retry"]').last
+
+    def components_chart_series_ids(self) -> list[str]:
+        return [
+            element.get_attribute("data-ai-series") or ""
+            for element in self.components_chart().locator("path[data-ai-trend-line]").all()
+        ]
+
+    def components_legend_ids(self) -> list[str]:
+        """Legend line identities, e.g. `verb:GET`, `result:scheduled`, `apiserver_request_rate`."""
+        prefix = "cluster-monitor:overview:components:legend:"
+        out: list[str] = []
+        for element in self.page.locator(f'[data-ai-id^="{prefix}"]').all():
+            ai_id = element.get_attribute("data-ai-id") or ""
+            key = ai_id[len(prefix):]
+            if key:
+                out.append(key)
+        return out
+
+    def components_legend_text(self, line: str) -> str:
+        return self.page.locator(f'[data-ai-id="cluster-monitor:overview:components:legend:{line}"]').last.inner_text().strip()
 
     # ---------------- 条件 etcd 页签（Lead A-variant，本部署 404 时隐藏） ----------------
 

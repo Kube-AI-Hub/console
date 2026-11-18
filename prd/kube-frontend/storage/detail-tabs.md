@@ -16,6 +16,7 @@
 
 ## 验收场景
 
+- **AC-L3-KUBE-FRONTEND-STORAGE-DETAIL_TABS-02** — 已知存在一个快照对象，当打开其详情，则默认停在「数据来源」页签并显示来源声明、快照类型、容量、状态等属性；切到「事件」则显示该快照的事件（类型/原因/消息/次数/最近发生），没有事件时显示「这个对象还没有事件」；两个页签都存在且可切换。
 - **AC-L3-KUBE-FRONTEND-STORAGE-DETAIL_TABS-01** — 已知存在一个带标签与注解的存储卷，当打开其详情并切到「元数据」，则标签表与注解表的行数分别等于对象 metadata.labels 与 metadata.annotations 的条数，键值原样显示；切到「事件」则显示该 PVC 的事件（类型/原因/消息/次数/最近发生），没有事件时显示「这个对象还没有事件」；四个页签（属性/元数据/事件/快照）都存在且可切换。
 
 ## 设计目标
@@ -26,7 +27,7 @@
 ## 约束与边界
 
 - 事件读 `/api/v1/namespaces/<ns>/events?fieldSelector=involvedObject.name=…,involvedObject.kind=PersistentVolumeClaim`。
-- 快照对象详情不增加这两个页签（其元数据由快照页签与 YAML 覆盖）。
+- 快照对象详情有**自己的两个页签**：数据来源（属性）与事件（旧 console 的 `source` / `event` 两个路由）。快照的「为什么没就绪」几乎只写在事件里（驱动报错、VolumeSnapshotClass 缺失），对象自身的 conditions 往往只有一句 `ReadyToUse=false`。
 
 ## UI 交互设计
 
@@ -62,3 +63,4 @@
 ## 验收用例
 
 - TC-L3-KUBE-FRONTEND-STORAGE-DETAIL_TABS-01
+- TC-L3-KUBE-FRONTEND-STORAGE-DETAIL_TABS-02

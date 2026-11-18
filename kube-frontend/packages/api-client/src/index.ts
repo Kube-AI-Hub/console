@@ -123,6 +123,12 @@ export {
   type WorkloadSummary,
 } from './workloads';
 export {
+  cronJobJobLabels,
+  cronJobRunsApi,
+  toCronJobRun,
+  type CronJobRun,
+} from './cronjobs';
+export {
   containerEnvGroups,
   containerLifecycleHooks,
   decodeBase64,
@@ -625,7 +631,8 @@ export type { NodeTerminalOptions, NodeTerminalTarget } from './node-terminal';
 export { nodeResourcesApi } from './node-resources';
 export { nodeListApi, toNodeMetrics, NODE_LIST_METRICS } from './node-list';
 export type { NodeListParams, NodeListStats, NodeMetricValues } from './node-list';
-export { nodeInsightsApi, NODE_INSIGHT_METRICS } from './node-insights';
+export { nodeInsightsApi, rdmaPortsApi, NODE_INSIGHT_METRICS } from './node-insights';
+export type { RdmaPortRow } from './node-insights';
 export type { NodeInsightValues, RdmaPort } from './node-insights';
 export { nodeRankingApi, NODE_RANK_METRICS } from './node-ranking';
 export { workloadRankingApi, WORKLOAD_RANK_METRICS } from './workload-ranking';

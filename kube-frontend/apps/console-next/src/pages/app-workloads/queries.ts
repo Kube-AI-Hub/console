@@ -1,5 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { hpaFor, ipPoolsApi, toWorkloadAutoscaling, workloadsApi, type KubeObject, type ResourceListParams, type WorkloadKind } from '@kube-ai-hub/api-client';
+import {
+  cronJobJobLabels,
+  cronJobRunsApi,
+  hpaFor,
+  ipPoolsApi,
+  toWorkloadAutoscaling,
+  workloadsApi,
+  type KubeObject,
+  type ResourceListParams,
+  type WorkloadKind,
+} from '@kube-ai-hub/api-client';
 import { registerPage, type AiPage } from '@kube-ai-hub/ai-surface';
 import type { LocaleKey } from '@kube-ai-hub/locales';
 import { api } from '@/api';
@@ -145,6 +155,55 @@ export function useJobRuns(kind: WorkloadKind, params: { cluster: string; namesp
     queryKey: ['job-runs', params.cluster, params.namespace, params.name],
     enabled: kind === 'jobs' && Boolean(params.name),
     queryFn: ({ signal }) => workloadsApi(api, kind).runs({ ...params, signal } as never),
+  });
+}
+
+/**
+ * 定时任务的运行记录: the Jobs this CronJob created.
+ *
+ * Enabled only for cronjobs, and only while the runs tab is open (the caller passes
+ * `enabled`): the list is cheap but it is not what the overview needs. Refetched every 15s
+ * because a schedule keeps firing while the reader watches — the old page required a manual
+ * refresh, which made "did the last run finish" a guess.
+ */
+export function useCronJobRuns(
+  detail: { name: string; raw: unknown } | undefined,
+  params: { cluster: string; namespace: string },
+  enabled: boolean,
+) {
+  const labels = detail ? cronJobJobLabels(detail.raw as never) : {};
+  return useQuery({
+    queryKey: ['cronjob-runs', params.cluster, params.namespace, detail?.name ?? '', JSON.stringify(labels)],
+    enabled: enabled && Boolean(detail?.name),
+    queryFn: ({ signal }) =>
+      cronJobRunsApi(api).list({
+        cluster: params.cluster,
+        namespace: params.namespace,
+        cronJob: detail?.name ?? '',
+        labels,
+        signal,
+      }),
+    refetchInterval: 15_000,
+  });
+}
+
+/** 立即运行一次: one Job copied from the CronJob's jobTemplate. */
+export function useRunCronJobNow(params: { cluster: string; namespace: string }) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (detail: { name: string; raw: unknown }) => {
+      const raw = detail.raw as { spec?: { jobTemplate?: Record<string, unknown> } };
+      return cronJobRunsApi(api).runNow({
+        cluster: params.cluster,
+        namespace: params.namespace,
+        cronJob: detail.name,
+        labels: cronJobJobLabels(detail.raw as never),
+        template: raw.spec?.jobTemplate ?? {},
+      });
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['cronjob-runs', params.cluster, params.namespace] });
+    },
   });
 }
 

@@ -59,6 +59,17 @@ describe('page-size picker', () => {
     expect(offenders, `请求参数仍用常量 PAGE_SIZE：${offenders.join(', ')}`).toEqual([]);
   });
 
+  it('gives every paged list the four sizes the old console offered', () => {
+    // Coverage, not just wiring: the migration delivered the picker page family by page
+    // family, and seven lists were still rendering every row on one "page". A list that
+    // declares `pagination` without the sizes has no picker at all — invisible to tsc.
+    const offenders = files
+      .filter(({ source }) => source.includes('pagination: {'))
+      .filter(({ source }) => !source.includes('pageSizeOptions'))
+      .map(({ file }) => file);
+    expect(offenders, `有分页但没有每页档位：${offenders.join(', ')}`).toEqual([]);
+  });
+
   it('keeps the page size in the query key when the list is server-paged', () => {
     // Server-paged lists derive their key from the list state; if `list.page` is in the key but
     // `list.pageSize` is not, changing the size reuses the cached page.

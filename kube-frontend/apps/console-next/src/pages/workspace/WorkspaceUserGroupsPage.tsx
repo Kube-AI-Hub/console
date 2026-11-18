@@ -309,7 +309,10 @@ export function WorkspaceUserGroupsPage({ workspace }: WorkspaceUserGroupsPagePr
                   ? t('workspace.userGroups.liveOff')
                   : t('workspace.userGroups.liveConnecting')}
             </span>
-            <AiButton aiId="workspace-user-groups:refresh" size="sm" variant="secondary" onClick={() => void groupsQuery.refetch()}>
+            {/* A distinct handle from the member table's `workspace-user-groups:refresh`: two
+                controls with one id make every strict locator (and the AI surface manifest)
+                ambiguous — found by the V-4 serial E2E, 2026-11-19. */}
+            <AiButton aiId="workspace-user-groups:refresh-tree" size="sm" variant="secondary" onClick={() => void groupsQuery.refetch()}>
               {t('common.refresh')}
             </AiButton>
             <AiButton aiId="workspace-user-groups:create" size="sm" variant="primary" onClick={() => setDialog({ kind: 'create' })}>

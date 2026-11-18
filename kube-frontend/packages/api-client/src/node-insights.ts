@@ -13,6 +13,43 @@ export interface RdmaPort {
   resourceReady: boolean; healthy: boolean;
 }
 
+/** One RDMA port row, as the inventory endpoint reports it. */
+export interface RdmaPortRow {
+  node: string;
+  device: string;
+  port: string;
+  /** Driver state name, e.g. `active`; `unknown` when the backend omits it. */
+  state: string;
+  healthy: boolean;
+}
+
+/**
+ * The cluster's RDMA port inventory.
+ *
+ * Cluster-scoped through the **path**, not `?cluster=`: measured on mlu370
+ * 2026-11-18, `/kapis/rdma.kubesphere.io/v1alpha1/ports?cluster=agent` answers 200
+ * with **0 items** (the parameter is ignored and the host is read), while
+ * `/kapis/clusters/agent/rdma.kubesphere.io/v1alpha1/ports` returns the member's 16
+ * ports. A monitor that trusted the query form would call a member cluster's fabric
+ * "all healthy" from the host's single port.
+ */
+export function rdmaPortsApi(client: Client) {
+  return {
+    async list(params: { cluster: string; signal?: AbortSignal }): Promise<RdmaPortRow[]> {
+      const body = await client.request<{ items?: Array<Record<string, unknown>>; totalItems?: number }>(
+        clusterScoped('/kapis/rdma.kubesphere.io/v1alpha1', params.cluster, 'ports'),
+        { query: { limit: -1 }, ...(params.signal ? { signal: params.signal } : {}) });
+      return (body?.items ?? []).map((port) => ({
+        node: String(port.nodeName ?? ''),
+        device: String(port.device ?? ''),
+        port: String(port.port ?? ''),
+        state: String(port.stateName ?? 'unknown'),
+        healthy: port.healthy === true,
+      })).filter((port) => port.node !== '');
+    },
+  };
+}
+
 /** Independent reads: a missing metric or hardware endpoint never hides the node. */
 export function nodeInsightsApi(client: Client) {
   return {

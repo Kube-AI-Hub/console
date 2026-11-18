@@ -122,7 +122,19 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_MONITOR_11(cluster_monitor_page,
         ui.open()
         ui.wait_ready()
         time.sleep(1.0)
-        assert hits["components"] == [], f"overview 不应请求组件指标: {hits['components'][:2]}"
+        # The overview carries a 服务组件监控 preview (APIServer + Scheduler), so those two
+        # reads are expected here; etcd is not — it belongs to the conditional tab, and a
+        # request for it would mean the tab's content mounted while the tab is not shown.
+        overview_components = " ".join(hits["components"])
+        assert "/components/apiserver" in overview_components, (
+            f"overview 应请求 apiserver 组件指标（服务组件监控块）: {hits['components'][:2]}"
+        )
+        assert "/components/scheduler" in overview_components, (
+            f"overview 应请求 scheduler 组件指标（服务组件监控块）: {hits['components'][:2]}"
+        )
+        assert "/components/etcd" not in overview_components, (
+            f"overview 不应请求 etcd 组件指标（属条件页签）: {hits['components'][:2]}"
+        )
         assert hits["rank"] == [], f"overview 不应请求节点排行: {hits['rank'][:2]}"
         assert not any(
             metric in url for url in hits["cluster"] for metric in RESOURCE_ONLY

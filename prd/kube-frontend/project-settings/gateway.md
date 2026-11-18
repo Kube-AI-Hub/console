@@ -28,6 +28,7 @@
 
 ## 验收场景
 
+- **AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-04** — 已知集群存在集群网关，当打开任一项目的网关设置页，则页面顶部显示「集群网关」卡片（名称、访问方式、访问地址）与「查看详情」链接，链接指向该集群的网关详情页；集群没有网关时该卡片不渲染。
 - **AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-01** — 已知项目没有网关，当打开网关设置页则显示空态与创建入口；点创建后页面切换到信息态并显示网关名称与状态；删除后回到空态。
 - **AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-02** — 已知项目已有网关，当在网关设置页点「编辑设置」，则弹窗显示接口当前 spec 的访问方式、副本数、链路追踪、服务注解（仅 LoadBalancer）与配置选项；修改访问方式、副本数、追踪开关与注解并保存后，Gateway 接口回读的 `spec.service.type`、`spec.deployment.replicas`、`spec.deployment.annotations['servicemesh.kubesphere.io/enabled']`、`spec.service.annotations` 与所填值一致，页面信息区显示新值；当访问方式为空、副本数为负数或非整数、NodePort 不是 30000–32767 的整数或两个端口重复时，保存被本地阻止并显示对应错误，且不发起写请求。
 - **AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-03** — 已知集群存在至少一个项目网关，当打开集群网关设置并切到项目页签，则列表显示名称、所属项目、访问方式、IP、NodePort、副本数与追踪，数值来自 Gateway spec 与该项目 Service 的同一次读取；行操作「编辑/删除」打开与项目网关页相同的编辑弹窗与删除确认，保存或删除后列表刷新显示回读结果；集群没有项目网关时显示「该集群还没有项目网关」而不是空白表格；当身份对某项目网关没有 update 权限时，该行编辑入口隐藏且页面说明原因，该画面与空结果、读取失败互不顶替。
@@ -76,6 +77,7 @@
 
 ## 验收用例
 
+- `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-04`
 - `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-01`
 - `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-02`
 - `TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-GATEWAY-03`

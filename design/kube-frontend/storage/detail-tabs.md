@@ -8,6 +8,7 @@
 
 ## 关联需求
 
+- AC-L3-KUBE-FRONTEND-STORAGE-DETAIL_TABS-02
 - AC-L3-KUBE-FRONTEND-STORAGE-DETAIL_TABS-01
 
 ## 设计目标与非目标
@@ -65,3 +66,14 @@
 ## 验收用例
 
 - TC-L3-KUBE-FRONTEND-STORAGE-DETAIL_TABS-01
+
+### DEC-L3-KUBE-FRONTEND-STORAGE-DETAIL_TABS-02 — 快照详情补回「数据来源 / 事件」两个页签
+
+**为什么**：旧 console 的快照详情就是这两个页签（`VolumeSnapshots/Detail/routes.js` 的 `source` 与 `event`，默认 `source`）。新 UI 第一版把快照详情做成单列，理由写的是「其元数据由快照页签与 YAML 覆盖」——但被去掉的是**事件**，不是元数据。快照最常见的状态是「容量有了但 `readyToUse` 一直 false」，原因几乎只出现在事件里（驱动报错、VolumeSnapshotClass 不存在、快照控制器没装），对象自身的 conditions 只有一句 `ReadyToUse=false`。把事件藏起来，等于让人去猜。
+
+**实现**：事件查询本来就是按 kind 取的（`useObjectEvents` 对快照用 `VolumeSnapshot`），数据已经在手，只是没有落点；补页签不增加请求。
+
+**被否方案**：在单列里直接追加一个「事件」区块。页签是使用场景——数据来源是「这个快照是什么」，事件是「它为什么没成」；两者同屏反而让人先读属性再翻事件。旧页的页签顺序也保住了肌肉记忆。
+
+**何时重新考虑**：快照详情增加「恢复/克隆」这类写操作时，页签集合要重新评估（写操作需要独立入口）。
+

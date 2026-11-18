@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-04
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: cluster-config
+title: 集群级保密字典 · 行操作（编辑信息 / 设为默认 / 删除）
+entry_url: '{BASE_URL}/kube-frontend/clusters/{CLUSTER}/secrets'
+prd: prd/kube-frontend/cluster-management/cluster-config.md
+design: design/kube-frontend/cluster-management/cluster-config.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_CONFIG-04
+
+story:
+- US1
+
+product: 集群级保密字典的普通行提供编辑信息/编辑 YAML/删除，镜像仓库类型且非默认的行另提供「设为默认镜像仓库」；写按行所属项目寻址；联邦托管行无操作。
+preconditions:
+- 已登录，host 集群，admin
+- 用例在 default 创建一条唯一命名的 dockerconfigjson Secret，结束后删除
+steps:
+- 用 API 创建 Secret tc-e2e-sec-<stamp>
+- 打开 /kube-frontend/clusters/host/secrets，搜索到该名称
+- 打开该行更多操作，核对四项（设为默认 / 编辑信息 / 编辑 YAML / 删除）
+- 点「编辑信息」，修改描述并确认；用 API 回读 kubesphere.io/description
+- 再打开更多操作点「删除」，在确认弹窗输入名称并确认；用列表确认对象消失
+expected:
+- 四项操作齐全且顺序为 设为默认 → 编辑信息 → 编辑 YAML → 删除
+- 编辑信息按行所属项目更新注解
+- 删除后对象从列表与 API 集合中消失
+troubleshoot:
+- 没有「设为默认」：类型不是 dockerconfigjson，或已经是默认
+- 编辑保存 404：写到了没有 namespaces 段的路径
+update_automation:
+- 行 data-ai-row=<namespace>/<name>；菜单项文案见 secrets.action.setDefault / resource.action.*

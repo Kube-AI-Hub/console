@@ -23,6 +23,10 @@ export interface ConfigMapListScope {
 }
 
 export type ConfigMapSortKey = 'name' | 'createTime';
+
+/** The order the list falls back to when the reader cycles sorting off. */
+const DEFAULT_SORT_BY: ConfigMapSortKey = 'createTime';
+const DEFAULT_ORDER: ConfigMapOrder = 'desc';
 export type ConfigMapOrder = 'asc' | 'desc';
 
 export function useConfigMapListController({ cluster, namespace, pageSize = 10 }: ConfigMapListScope & { pageSize?: number }) {
@@ -33,8 +37,8 @@ export function useConfigMapListController({ cluster, namespace, pageSize = 10 }
   React.useEffect(() => setSize(pageSize), [pageSize]);
   const [keyword, setKeyword] = React.useState('');
   const [debouncedKeyword, setDebouncedKeyword] = React.useState('');
-  const [sortBy, setSortBy] = React.useState<ConfigMapSortKey>('createTime');
-  const [order, setOrder] = React.useState<ConfigMapOrder>('desc');
+  const [sortBy, setSortBy] = React.useState<ConfigMapSortKey>(DEFAULT_SORT_BY);
+  const [order, setOrder] = React.useState<ConfigMapOrder>(DEFAULT_ORDER);
   const [selected, setSelected] = React.useState<string[]>([]);
   /*
    * Project filter: the route's project to begin with, empty meaning every project.
@@ -97,9 +101,14 @@ export function useConfigMapListController({ cluster, namespace, pageSize = 10 }
     setSelected([]);
   }, [cluster, activeNamespace, page, debouncedKeyword, sortBy, order]);
 
-  const sortByKey = React.useCallback((key: string, nextOrder: ConfigMapOrder) => {
-    setSortBy(key as ConfigMapSortKey);
-    setOrder(nextOrder);
+  /*
+   * `undefined` is the header cycle's third state ("off"). The list is read from the
+   * server with a sort key, so "off" falls back to the page's default order rather
+   * than dropping the parameter; see `useResourceListState.setSort`.
+   */
+  const sortByKey = React.useCallback((key: string | undefined, nextOrder: ConfigMapOrder | undefined) => {
+    setSortBy((key as ConfigMapSortKey | undefined) ?? DEFAULT_SORT_BY);
+    setOrder(nextOrder ?? DEFAULT_ORDER);
     setPage(1);
   }, []);
 

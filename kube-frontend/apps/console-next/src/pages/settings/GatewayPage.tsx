@@ -1,6 +1,13 @@
 import * as React from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { accessReviewApi, projectGatewaysApi, type GatewayDetail, type GatewayServicePort } from '@kube-ai-hub/api-client';
+import {
+  accessReviewApi,
+  clusterGatewaysApi,
+  projectGatewaysApi,
+  type ClusterGateway,
+  type GatewayDetail,
+  type GatewayServicePort,
+} from '@kube-ai-hub/api-client';
 import { AiButton, AiSurface, Badge, Skeleton } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
@@ -48,6 +55,31 @@ export function GatewayPage({ cluster, namespace }: GatewayPageProps): React.Rea
     // making the reader reload it themselves.
     refetchInterval: (state) => (state.state.data?.exists && !state.state.data.ready ? 5000 : false),
   });
+
+  /*
+   * The cluster gateway, for the card the old console showed above the project one: a
+   * project's routes leave the cluster through that gateway, so its address is the answer
+   * to "where do my routes actually get served". Read-only here — installing or editing it
+   * belongs to the cluster administrator (the cluster page links to the full detail).
+   */
+  const clusterGateway = useQuery({
+    queryKey: ['cluster-gateways', cluster],
+    queryFn: ({ signal }) => clusterGatewaysApi(apiClient).list({ cluster, signal }),
+    staleTime: 60_000,
+  });
+  /*
+   * Which row is *the* cluster gateway.
+   *
+   * The API client marks every Gateway in `kubesphere-system` / `kubesphere-controls-system`
+   * as cluster scope, but older installs also put project gateways there
+   * (`kubesphere-router-<project>`). The cluster gateway is the one named
+   * `kubesphere-router-kubesphere-system` — the name the installer has always used — so the
+   * card picks that row and nothing else; a project router never shows up as "the cluster
+   * gateway".
+   */
+  const clusterGatewayRow: ClusterGateway | undefined = (clusterGateway.data ?? []).find(
+    (row) => row.name === 'kubesphere-router-kubesphere-system',
+  );
 
   /*
    * Same verb/resource/namespace the write will use. It fails **open**: only an explicit
@@ -112,6 +144,37 @@ export function GatewayPage({ cluster, namespace }: GatewayPageProps): React.Rea
   return (
     <AiSurface as="section" aiId="gateway:surface" state={state} className="flex min-w-0 flex-col gap-4">
       {state === 'loading' ? <Skeleton className="h-32 w-full" /> : null}
+
+      {/*
+        * 集群网关: the gateway a project's routes actually leave through. The old console
+        * showed this card above the project's own gateway; without it a reader on this page
+        * cannot tell where the address they see is hosted. Read-only — installing and editing
+        * it belongs to the cluster administrator, so the card links to the cluster detail.
+        */}
+      {clusterGatewayRow ? (
+        <section className="rounded-ai-md border border-ai-line p-4" data-ai-id="gateway:cluster-gateway">
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <h2 className="text-sm font-medium text-ai-fg">{t('settings.gateway.clusterTitle')}</h2>
+            <a
+              href={`/kube-frontend/clusters/${encodeURIComponent(cluster)}/gateways/${encodeURIComponent(clusterGatewayRow.name)}`}
+              className="text-xs text-ai-link hover:underline"
+              data-ai-id="gateway:cluster-gateway-detail"
+            >
+              {t('settings.gateway.viewDetail')}
+            </a>
+          </div>
+          <dl className="grid grid-cols-1 gap-3 text-xs sm:grid-cols-[minmax(6rem,auto)_1fr]">
+            <Row label={t('settings.gateway.name')} value={clusterGatewayRow.name} aiId="gateway:cluster-name" />
+            <Row
+              label={t('settings.gateway.type')}
+              value={clusterGatewayRow.type || clusterGatewayRow.serviceType || '-'}
+              aiId="gateway:cluster-type"
+            />
+            <Row label={t('settings.gateway.address')} value={clusterGatewayRow.address || '-'} aiId="gateway:cluster-address" />
+          </dl>
+          <p className="mt-3 text-[11px] text-ai-fg-muted">{t('settings.gateway.clusterHint')}</p>
+        </section>
+      ) : null}
 
       {data ? (
         data.exists ? (

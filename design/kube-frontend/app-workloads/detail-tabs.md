@@ -203,3 +203,12 @@
 - `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL_TABS-03`
 - `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL_TABS-04`
 - `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL_TABS-05`
+
+### DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL_TABS-09 — 定时任务的默认页签是「运行记录」
+
+**为什么**：页签的默认项就是「这个页面为什么被打开」。定时任务的概览只有调度表达式、挂起开关和模板镜像——读者到这里来是为了看「昨晚跑成功没有」，所以默认落在运行记录。老 console 同样把 `records` 设为 index 路由。
+
+**被否方案**：所有资源统一默认「概览」。统一不等于一致：一个每次打开都要再点一次的页签，就是默认项选错了。
+
+**何时重新考虑**：定时任务详情增加「下次触发时间 / 最近失败原因」这类概览级结论时，把结论提到概览并把默认改回去。
+

@@ -31,6 +31,8 @@ import { useListRefresh } from '@/components/resource/useListRefresh';
  * its own role or remove itself, and such a row is not even selectable — selection drives the
  * bulk remove, and a row nobody may act on must not be checkable.
  */
+/** Page sizes the old console offered, in the same order. */
+const PAGE_SIZES = [10, 20, 50, 100] as const;
 export interface ClusterMembersPageProps {
   cluster: string;
 }
@@ -49,6 +51,13 @@ export function ClusterMembersPage({ cluster }: ClusterMembersPageProps): React.
   const { user } = useAuth();
   const self = user?.name ?? '';
   const [selected, setSelected] = React.useState<string[]>([]);
+  /*
+   * The list is read in one request and paged here (the cluster-members aggregation has no
+   * server paging). Local state, not `useResourceListState`: this page has no search or sort,
+   * so the hook's other fields would be dead weight.
+   */
+  const [page, setPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState(10);
   const [dialog, setDialog] = React.useState<Dialog>(null);
   const [notice, setNotice] = React.useState<string | null>(null);
 
@@ -121,6 +130,17 @@ export function ClusterMembersPage({ cluster }: ClusterMembersPageProps): React.
     [roles.data],
   );
 
+  /*
+   * This list is read in one request and paged here: the collection is small (a few
+   * hundred at most) and the API offers no server paging for it. The page is clamped so a
+   * refetch that shrinks the set cannot leave the reader on an empty page.
+   */
+  const pageCount = Math.max(1, Math.ceil(rows.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const pageRows = React.useMemo(
+    () => rows.slice((currentPage - 1) * pageSize, currentPage * pageSize),
+    [rows, currentPage, pageSize],
+  );
   const schema = React.useMemo<ListSchema<ClusterMemberSummary>>(
     () => ({
       title: t('cluster.members.title'),
@@ -209,7 +229,7 @@ export function ClusterMembersPage({ cluster }: ClusterMembersPageProps): React.
         next: t('table.next'),
         selected: (count) => t('table.selectedCount', { count }),
       },
-      pagination: { page: 1, pageSize: Math.max(rows.length, 10), total: rows.length },
+      pagination: { page: currentPage, pageSize, pageSizeOptions: [...PAGE_SIZES], total: rows.length },
     }),
     [listRefresh, rows.length, self, t, writable],
   );
@@ -242,7 +262,12 @@ export function ClusterMembersPage({ cluster }: ClusterMembersPageProps): React.
         onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
         schema={schema}
         onRefresh={listRefresh.onRefresh}
-        rows={rows}
+        onPageChange={setPage}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1);
+        }}
+        rows={pageRows}
         loading={state === 'loading'}
         selectedKeys={selected}
         onSelectionChange={setSelected}

@@ -126,6 +126,11 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_PERSISTENT_VOLUMES_03(access_con
         ui.page.goto(f'{ui.base_url}/kube-frontend/clusters/{cluster}/persistentvolumes', wait_until="domcontentloaded")
         surface = ui.page.locator('[data-ai-id="persistentvolumes:surface"]')
         expect(surface).not_to_have_attribute("data-ai-state", "loading", timeout=120_000)
+        # The list pages client-side at 20 rows and these names sort to the end of a 30+ volume
+        # cluster. Switch to 50 per page (the picker added on 2026-11-19) so every row — including
+        # the pre-existing bound volume that must stay protected — is selectable on one page.
+        ui.page.locator('[data-ai-id="persistentvolumes:page-size"]').click()
+        ui.page.get_by_role("option", name="50", exact=True).click()
         for name in (name_a, name_b, bound_name):
             checkbox = ui.page.locator(f'[data-ai-id="persistentvolumes:select:{name}"]')
             expect(checkbox).to_be_visible(timeout=30_000)

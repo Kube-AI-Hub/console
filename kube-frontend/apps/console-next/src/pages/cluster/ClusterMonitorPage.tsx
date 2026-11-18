@@ -279,7 +279,7 @@ export function ClusterMonitorPage({ cluster, node, tab, onTabChange }: ClusterM
               data-ai-id={`cluster-monitor:tabpanel:${key}`}
               className="mt-4 flex flex-col gap-4"
             >
-              {activeTab === key ? renderTab(key, context, reportTabState, handleTabChange) : null}
+              {activeTab === key ? renderTab(key, context, reportTabState) : null}
             </TabsContent>
           ))}
         </Tabs>
@@ -298,11 +298,10 @@ function renderTab(
   key: MonitorTabKey,
   context: WindowContext,
   onStateChange: (state: MonitorTabState) => void,
-  onTabChange: (value: string) => void,
 ): React.ReactElement {
   switch (key) {
     case 'overview':
-      return <ClusterOverviewTab {...context} onTabChange={onTabChange} />;
+      return <ClusterOverviewTab {...context} />;
     case 'resource':
       return <ClusterResourceTab {...context} />;
     case 'apiserver':

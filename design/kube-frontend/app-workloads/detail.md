@@ -8,6 +8,10 @@
 
 ## 关联需求
 
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-08
+
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-09
+
 - AC-L3-KUBE-FRONTEND-APP_WORKLOADS-JOB_RUNS-01
 
 - AC-L3-KUBE-FRONTEND-APP_WORKLOADS-STATEFUL_SERVICE-01
@@ -179,3 +183,30 @@
 **已知限制**：Pod 可能已被清理（`ttlSecondsAfterFinished` 或集群的历史清理）。此时区块不显示——**这是事实，不是缺陷**：历史确实已经不在了，伪造一行比不显示更糟。
 
 **何时重新考虑**：平台开始保留任务历史（例如写入日志系统）时，改为从那里读。
+
+### DEC-L3-KUBE-FRONTEND-APP-WORKLOADS-DETAIL-11 — 定时任务的运行记录读「任务」，按模板标签取、按 ownerReferences 收敛
+
+**为什么**：定时任务不直接拥有容器组，每次触发创建一个**任务**，任务再创建容器组。读者要的是「昨晚那次跑成功了吗」，答案在任务的 `status.conditions`（`Complete` / `Failed`）与起止时间上。老 console 用 `spec.jobTemplate.metadata.labels` 作服务端过滤读任务；新 UI 保留这条路径（kapis 的 `labelSelector` 是真过滤），再在结果里用 `ownerReferences` 收敛到本定时任务——模板标签可能与另一个定时任务相同，只按标签取会把两条历史混成一张表。
+
+**被否方案**：按任务名前缀（`<cronjob>-`）过滤。CronJob 生成的任务名是「名字 + 时间戳」，但手工创建的任务、以及名字前缀相同的另一个定时任务都会混进来。
+
+**被否方案**：读容器组（像任务的执行记录那样按 `job-name`）。一次触发可能有多个 Pod（重试），列表会变成「一次运行的多行」，而读者问的是「这次运行成不成功」。
+
+**另一条**：「立即运行一次」建出来的任务**没有 `ownerReferences`**（它由控制台创建，不是 CronJob 控制器创建），所以列表在「没有 owner 时保留」——只按 owner 过滤会把手动触发的运行从历史里抹掉。
+
+**已知限制**：任务会被历史保留策略清理（`successfulJobsHistoryLimit` / `failedJobsHistoryLimit`，默认 3 + 1）。清理掉的行就是没了——空态与「跑过但被清理」都是真实事实，不伪造行。
+
+**何时重新考虑**：平台提供任务历史归档时，改为从归档读，并在区块里标出「来自归档」。
+
+### DEC-L3-KUBE-FRONTEND-APP-WORKLOADS-DETAIL-12 — 「立即运行一次」复制 jobTemplate 创建任务，权限门控用任务的 create 权限
+
+**为什么**：Kubernetes 没有「立即触发」这个动词；官方做法是把 `spec.jobTemplate` 复制成一个任务。名称带时间戳（`<cronjob>-manual-<base36>`）而不是 `generateName`，因为新 UI 的创建入口要求显式名称、失败时能给出确定的对象名；连点两次也只会得到两个不同名字的任务，不会 409。注解 `cronjob.kubernetes.io/instantiate=manual` 与 kubectl 的手动实例化一致。
+
+**权限**：这个动作创建的是**任务**，所以门控查 `create jobs`（SSAR），而不是定时任务的权限——用错资源会让「能改定时任务、不能建任务」的账号看到一个必然 403 的按钮。
+
+**被否方案**：改 `suspend` 或 `schedule` 去逼一次触发。那会改用户的定时配置，属于另一件事。
+
+**被否方案**：给每个历史行加「重跑」。老 console 是这么做的（一个只有图标、没有文字的按钮），实际点的是「按这个任务的 spec 再建一个任务」；同一能力放在页头一次，比每行一个图标更可发现，也不会让人以为能重跑「那一次」的原始参数之外的东西。
+
+**何时重新考虑**：服务端提供 `POST .../cronjobs/<name>/trigger` 之类的显式端点时。
+

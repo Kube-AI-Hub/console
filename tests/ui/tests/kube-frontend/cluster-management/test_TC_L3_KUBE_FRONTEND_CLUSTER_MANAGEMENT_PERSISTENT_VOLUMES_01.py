@@ -40,7 +40,8 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_PERSISTENT_VOLUMES_01(cluster_ma
     claim_index = all_headers.index("绑定声明")
 
     rows = surface.locator("[data-ai-row]")
-    expect(rows).to_have_count(len(volumes), timeout=30_000)
+    # Client-side paging at 20 rows per page (2026-11-19).
+    expect(rows).to_have_count(min(len(volumes), 20), timeout=30_000)
 
     # A bound volume names its claim as namespace/name; a volume without a claim shows
     # "-". The two are different answers and must not collapse into one.

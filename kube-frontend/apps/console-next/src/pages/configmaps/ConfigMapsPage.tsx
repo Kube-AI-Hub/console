@@ -312,8 +312,7 @@ const state = query.isPending ? 'loading' : query.isError ? 'error' : items.leng
         onPageChange={setPage}
         onPageSizeChange={list.setPageSize}
         onSortChange={(next) => {
-          if (!next) return;
-          sortByKey(next.key, next.order);
+          sortByKey(next?.key, next?.order);
         }}
         onAction={(action, row) => {
           // The primary action arrives without a row; check it before the "is this

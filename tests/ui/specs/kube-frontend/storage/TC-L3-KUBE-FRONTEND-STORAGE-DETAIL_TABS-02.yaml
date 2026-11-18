@@ -1,0 +1,34 @@
+id: TC-L3-KUBE-FRONTEND-STORAGE-DETAIL_TABS-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: storage
+feature: detail-tabs
+title: 快照详情 · 数据来源与事件两个页签
+entry_url: '{BASE_URL}/kube-frontend/{WORKSPACE}/clusters/{CLUSTER}/projects/default/volumesnapshots'
+prd: prd/kube-frontend/storage/detail-tabs.md
+design: design/kube-frontend/storage/detail-tabs.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-STORAGE-DETAIL_TABS-02
+
+story:
+- US1
+
+product: 快照详情默认停在「数据来源」，切到「事件」能看到该快照的事件或空态说明；两个页签都在。
+preconditions:
+- 已登录，host 集群 default 项目；存在至少一个 VolumeSnapshot 对象
+steps:
+- 从快照列表进入任一快照详情（或直接访问 /volumesnapshots/<name>）
+- 等 volumesnapshots-detail:surface 就绪
+- 核对页签为「数据来源 / 事件」，默认选中「数据来源」，属性区可见（来源声明/快照类型/容量/状态）
+- 切到「事件」，核对事件表或「这个对象还没有事件」空态出现
+- 切回「数据来源」，核对属性区仍在（不重新请求）
+expected:
+- 两个页签都存在，默认数据来源
+- 事件页签显示事件表或空态，不是空白
+troubleshoot:
+- 只有属性没有页签：快照分支仍渲染单列
+- 事件页签空白：useObjectEvents 的 kind 传错（应为 VolumeSnapshot）
+update_automation:
+- 句柄：volumesnapshots-detail:tab:source / :tab:events

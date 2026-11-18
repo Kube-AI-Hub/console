@@ -1,0 +1,39 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_WORKLOADS-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: cluster-workloads
+title: 集群级工作负载 · 按项目筛选与行操作（编辑信息 / 删除）
+entry_url: '{BASE_URL}/kube-frontend/clusters/{CLUSTER}/deployments'
+prd: prd/kube-frontend/cluster-management/cluster-workloads.md
+design: design/kube-frontend/cluster-management/cluster-workloads.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-CLUSTER_WORKLOADS-03
+
+story:
+- US1
+
+product: 集群级负载列表可按项目筛选；普通行提供编辑信息/编辑 YAML/删除，写按行所属项目寻址；联邦托管行无操作；批量删除按项目分组。
+preconditions:
+- 已登录，host 集群，admin
+- 用例在 default 创建唯一命名的部署（1 副本、暂停拉取镜像以避免真实调度），结束后删除
+steps:
+- 用 API 在 default 创建 Deployment tc-e2e-deploy-<stamp>
+- 打开 /kube-frontend/clusters/host/deployments
+- 用「项目」筛选选择 default，核对请求带上该命名空间且列表只剩该项目的行
+- 搜索该名称，打开行操作，核对三项（编辑信息 / 编辑 YAML / 删除）
+- 点「编辑信息」，修改描述并确认；用 API 回读 kubesphere.io/description
+- 清空项目筛选，核对回到全部项目
+- 再打开行操作点「删除」，输入名称确认；用列表确认对象消失
+expected:
+- 项目筛选改变请求的 namespace 并回到第 1 页
+- 行操作三项齐全，写按行所属项目寻址
+- 联邦托管行不渲染操作
+- 删除后对象从列表与 API 集合中消失
+troubleshoot:
+- 筛选无效：namespace 没有进入 queryKey（切项目不会重新请求）
+- 编辑 404：写到了没有 namespaces 段的路径
+update_automation:
+- 行 data-ai-row=<name>；项目筛选句柄 cluster-deployments:filter:project

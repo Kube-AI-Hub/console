@@ -1,0 +1,37 @@
+id: TC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_RULES-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: project-settings
+feature: network-rules
+title: 网络策略详情 · 规则视图（入站/出站分块、允许来源与端口）
+entry_url: '{BASE_URL}/kube-frontend/{WORKSPACE}/clusters/{CLUSTER}/projects/default/networkpolicies'
+prd: prd/kube-frontend/project-settings/network-isolation.md
+design: design/kube-frontend/project-settings/network-isolation.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-PROJECT_SETTINGS-NETWORK_RULES-02
+
+story:
+- US1
+
+product: 策略详情页把该策略的入站与出站规则按方向分块列出：允许来源/去向、端口、作用对象；某个方向没有规则时显示明确说明。
+preconditions:
+- 已登录，host 集群 default 项目
+- 用例用 API 创建一条含入站（namespaceSelector + podSelector、ipBlock 含 except、TCP/80 与 UDP/53）与出站（podSelector、TCP/5432-5433）规则的 NetworkPolicy，结束后删除
+steps:
+- 打开 /kube-frontend/system-workspace/clusters/host/projects/default/networkpolicies/<name>
+- 等 networkpolicy-detail:surface 就绪
+- 核对「规则视图」区块可见，作用对象显示 app=web
+- 核对入站块有两行，分别含 namespaceSelector/podSelector 与 ipBlock（含 except），端口列含 TCP/80 与 UDP/53
+- 核对出站块一行，含 podSelector: app=db 与 TCP/5432-5433
+- 另建一条只有入站规则的策略，核对出站块显示「这个策略没有出站规则。」
+expected:
+- 规则按方向分块（networkpolicy-detail:rules:ingress / :egress），每行保留策略规则顺序
+- 允许来源/去向与端口来自对象 spec，与属性区的规则数一致
+- 空方向显示说明文案而不是空表
+troubleshoot:
+- 区块空白：投影函数没读 spec.ingress/egress，或详情对象没带 raw
+- 端口显示成 0：`port` 缺失时应显示协议名（TCP），不是 0
+update_automation:
+- 句柄：networkpolicy-detail:rules / :rules:ingress / :rules:egress；行 data-ai-row=<策略名>/<序号>

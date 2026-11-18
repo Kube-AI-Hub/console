@@ -1,0 +1,38 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-08
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: detail
+title: 定时任务详情 · 运行记录（默认页签、结果与耗时、空态）
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/cronjobs'
+prd: prd/kube-frontend/app-workloads/detail.md
+design: design/kube-frontend/app-workloads/detail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-08
+
+story:
+- US1
+
+product: 定时任务详情默认停在「运行记录」，列出它创建的任务（名称链到任务详情、结果徽标与成功/失败/运行中计数、资源请求/限制、开始/结束时间、耗时）；没有记录显示说明而不是空表。
+preconditions:
+- 已登录，host 集群 default 项目，admin
+- 用例创建一个每分钟触发的定时任务（镜像 nginx:1.27），等它创建出第一个任务；结束后删除定时任务与它创建的任务
+steps:
+- 用 API 创建 CronJob（schedule "* * * * *"、restartPolicy Never、jobTemplate 带唯一标签）
+- 轮询 kapis 的 jobs 集合（labelSelector=模板标签），直到出现该定时任务创建的任务（最长 150s）
+- 打开 /kube-frontend/system-workspace/clusters/host/projects/default/cronjobs/<name>
+- 核对默认选中「运行记录」页签（workload-detail:tab-trigger:runs 的 aria-selected=true，面板 workload-detail:tab:runs 可见）
+- 核对任务表 cronjobs-detail:runs-table 可见，且包含该任务的名称行；结果列出现「已完成 / 失败 / 运行中」之一
+- 点击任务名链接，核对 href 指向该项目的 /jobs/<任务名>
+- 再建一个同模板的定时任务但不触发（schedule 设为很久以后），核对它的运行记录显示空态文案 cronjobs-detail:runs-empty
+expected:
+- 默认页签是「运行记录」，不是「概览」
+- 任务表列出用例创建的任务，结果与计数来自任务的 status.conditions
+- 没有任务时显示「这个定时任务还没有运行记录。」，不显示空表
+troubleshoot:
+- 任务迟迟不出现：CronJob 的 schedule 是否已到分钟边界；镜像是否可拉（用 nginx:1.27）；历史保留策略是否把任务清理掉了
+- 默认页签不是运行记录：tabsFor('cronjobs') 或默认 tab 的初始化被改回 overview
+update_automation:
+- 页签与行的句柄改 WorkloadDetailPage.tsx 的 workload-detail:tab-trigger:runs / cronjobs-detail:run:<任务名>
