@@ -35,6 +35,8 @@ const point = first?.points[first.points.length - 1];
 | `?? 0` 出现在展示路径（14 处） | 12 处是 `pagination.total`（分页器需要一个数，缺省 0 是合理的）；1 处 `NodesPage` 的 `healthRatioLabelSize` 只用于选字号，实际文本有 `stats.data ? … : '-'` 守卫；**1 处即本次修的 `DashboardPanelsPage`** |
 | `catch { return [] / {} / null }` | 逐条看过：`annotationObject` 解析失败返回 `{}`、`appstore`/`devops` 的列表降级为空数组，调用方都把「空」当「没有」而不是「零」或「成功」——未发现把错误当成功的路径 |
 
+| `api-client` 映射层的 `Number(x ?? 0)`（`gpu.ts` 六处显存/核心数、`alerting.ts`/`node-list.ts` 的 `total`） | 看过：类型上这些字段是 number，0 是中性值；**渲染处有守卫**——`GpuDetailPage`/`GpusPage` 都写 `memoryTotalMiB > 0 ? … : …`，缺值不会显示成「0 MiB」；`total` 只喂分页器 |
+
 **这不是穷尽证明**，只是一次定向审计：结论是「这一类里当前只找到一处」，不是「不存在」。
 
 复跑方式：
