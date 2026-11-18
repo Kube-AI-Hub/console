@@ -71,6 +71,13 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./test/setup.ts'],
     include: ['test/**/*.test.{ts,tsx}'],
+    /*
+     * Same reasoning as the 5s `asyncUtilTimeout` in `test/setup.ts`: the suite runs files in
+     * parallel next to builds, and a case that waits for a fetch, a debounce and a re-render can
+     * miss a 5s ceiling while the CPU is busy. Measured 2026-11-18: `cluster list controls > pods`
+     * passes alone (12/12) and timed out in the full run.
+     */
+    testTimeout: 15_000,
     server: {
       deps: {
         // Route the linked packages through Vite instead of Node's resolver, so

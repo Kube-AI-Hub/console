@@ -34,7 +34,16 @@ describe('GPU pages', () => {
     await user.type(screen.getByRole('searchbox', { name: '按完整 GPU UUID 搜索' }), 'GPU-x');
     await waitFor(() => expect(calls.some((url) => url.searchParams.get('uuid') === 'GPU-x' && url.searchParams.get('type') === 'B200' && url.searchParams.get('page') === '1')).toBe(true));
     expect(document.querySelector('[data-ai-id="cluster-gpus:health"]')).toHaveAttribute('data-ai-total', '45');
-    expect(calls.filter((url) => url.pathname.endsWith('/stats')).every((url) => url.search === '')).toBe(true);
+    /*
+     * The statistics are global: narrowing the list must not narrow them. `cluster` is scope, not a
+     * filter, so it is allowed (and required) on this request; `type`/`uuid`/`page` are what would
+     * make the totals lie.
+     */
+    const statsCalls = calls.filter((url) => url.pathname.endsWith('/stats'));
+    expect(statsCalls.length).toBeGreaterThan(0);
+    expect(
+      statsCalls.every((url) => ['type', 'uuid', 'page', 'limit'].every((key) => !url.searchParams.has(key))),
+    ).toBe(true);
     expect(screen.getByText('英伟达')).toBeInTheDocument();
     expect(screen.getByText('独占')).toBeInTheDocument();
   });
