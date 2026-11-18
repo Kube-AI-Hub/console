@@ -311,8 +311,14 @@ export function Table<T>({
          * failed to load its rows rather than as a list that is legitimately empty.
          * Kept while loading: the skeleton rows sit under it, so removing it there
          * would make the table jump when data arrives.
+         *
+         * The exception is a header that carries a filter. Those are controls, and
+         * dropping them when a filter matches nothing leaves the reader able to see
+         * that they narrowed the list but not what they narrowed it by — the only way
+         * back is the page-level "clear all", which is a bigger hammer than changing
+         * one column.
          */}
-        {loading || rows.length > 0 ? (
+        {loading || rows.length > 0 || columns.some((column) => column.filter) ? (
         <thead>
           <tr className="border-b border-ai-line bg-ai-th-bg">
             {expandedRow ? <th scope="col" className={cn('w-8 px-2 py-2', pinClasses('start', 'bg-ai-th-bg', disclosureLeft), 'z-30')} aria-label="展开" /> : null}

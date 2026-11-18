@@ -424,6 +424,7 @@ function ColumnFilter({ filter, value, onChange, labels }: {
   labels?: { clearFilter?: (title: string) => string };
 }): React.ReactElement {
   const [query, setQuery] = React.useState('');
+  const [open, setOpen] = React.useState(false);
   const active = value !== '';
   const selected = value.split(',').filter(Boolean);
   const selectedSet = new Set(selected);
@@ -431,10 +432,29 @@ function ColumnFilter({ filter, value, onChange, labels }: {
   const keyword = query.trim().toLowerCase();
   const matches = (filter.options ?? []).filter((option) => !keyword || option.label.toLowerCase().includes(keyword));
 
+  /*
+   * A single-select filter closes as soon as a choice is made.
+   *
+   * There is nothing left to do in the panel — one value is the whole answer — and
+   * leaving it open makes the reader dismiss it to see the result of their click.
+   * Multi-select stays open: choosing three vendors is one visit, not three.
+   */
+  const chooseOne = (next: string): void => {
+    onChange(next);
+    setOpen(false);
+  };
+
   return (
     <Popover
       align="start"
       className="w-56 p-0"
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        // The search box is a way to find an option, not a saved state: reopening the
+        // panel should show the full list rather than whatever was typed last time.
+        if (!next) setQuery('');
+      }}
       trigger={
         <button
           type="button"
@@ -488,7 +508,7 @@ function ColumnFilter({ filter, value, onChange, labels }: {
               }}>
               {filter.multiple ? null : (
                 <FilterOption key={ALL_OPTION} label={filter.allLabel ?? `全部${filter.title}`}
-                  selected={!active} onSelect={() => onChange('')} />
+                  selected={!active} onSelect={() => chooseOne('')} />
               )}
               {matches.map((option) => filter.multiple ? (
                 <label key={option.value} className="flex min-h-8 cursor-pointer items-center gap-2 rounded-ai-sm px-2 text-xs text-ai-fg hover:bg-ai-surface-2">
@@ -500,7 +520,7 @@ function ColumnFilter({ filter, value, onChange, labels }: {
                 </label>
               ) : (
                 <FilterOption key={option.value} label={option.label} selected={selectedSet.has(option.value)}
-                  onSelect={() => onChange(option.value)} />
+                  onSelect={() => chooseOne(option.value)} />
               ))}
               {matches.length === 0 ? (
                 <p className="p-2 text-xs text-ai-fg-muted">{filter.emptyText ?? '无匹配项'}</p>

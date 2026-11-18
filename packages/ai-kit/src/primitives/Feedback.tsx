@@ -289,11 +289,20 @@ export interface PopoverProps {
   children: React.ReactNode;
   align?: 'start' | 'center' | 'end';
   className?: string;
+  /**
+   * Controlled open state.
+   *
+   * Needed when the panel's own content closes it — a single-select filter that should
+   * dismiss as soon as a choice is made, rather than leaving the reader to click
+   * outside. Leave undefined to let the popover manage itself.
+   */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function Popover({ trigger, children, align = 'start', className }: PopoverProps): React.ReactElement {
+export function Popover({ trigger, children, align = 'start', className, open, onOpenChange }: PopoverProps): React.ReactElement {
   return (
-    <PopoverPrimitive.Root>
+    <PopoverPrimitive.Root {...(open === undefined ? {} : { open })} {...(onOpenChange ? { onOpenChange } : {})}>
       <PopoverPrimitive.Trigger asChild>{trigger}</PopoverPrimitive.Trigger>
       <PopoverPrimitive.Portal>
         <PopoverPrimitive.Content

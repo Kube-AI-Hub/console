@@ -225,3 +225,64 @@ describe('column hints', () => {
     expect(screen.queryByRole('button', { name: /Unit/ })).toBeNull();
   });
 });
+
+/**
+ * Column filters.
+ *
+ * A filter that lives on its column opens the choices directly — the panel is the
+ * place the reader asked for, so a nested select would cost a second click. A
+ * single-select then closes on choice: one value is the whole answer, and leaving the
+ * panel open makes the reader dismiss it to see the result.
+ */
+describe('column filters', () => {
+  const schema = {
+    rowKey: 'name',
+    columns: [
+      { key: 'name', title: 'Name', width: 170 },
+      { key: 'vendor', title: 'Vendor', width: 120 },
+      { key: 'tags', title: 'Tags', width: 120 },
+    ],
+    filters: [
+      { key: 'vendor', column: 'vendor', title: 'Vendor', allLabel: 'All vendors',
+        options: [{ value: 'nvidia', label: 'NVIDIA' }, { value: 'cpu', label: 'CPU' }] },
+      { key: 'tags', column: 'tags', title: 'Tags', multiple: true,
+        options: [{ value: 'a', label: 'Alpha' }, { value: 'b', label: 'Beta' }] },
+    ],
+  } as const;
+
+  it('shows the options on the first click', async () => {
+    const user = userEvent.setup();
+    mount(schema, { filters: {}, onFiltersChange: vi.fn() });
+
+    await user.click(screen.getByRole('button', { name: 'Vendor' }));
+
+    // No second click: the list is in the panel the reader just opened.
+    expect(screen.getByRole('option', { name: 'NVIDIA' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'All vendors' })).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('closes a single-select filter once a value is chosen', async () => {
+    const user = userEvent.setup();
+    const onFiltersChange = vi.fn();
+    mount(schema, { filters: {}, onFiltersChange });
+
+    await user.click(screen.getByRole('button', { name: 'Vendor' }));
+    await user.click(screen.getByRole('option', { name: 'NVIDIA' }));
+
+    expect(onFiltersChange).toHaveBeenCalledWith({ vendor: 'nvidia' });
+    // The panel is gone; the reader can see the result of their click.
+    expect(screen.queryByRole('option', { name: 'NVIDIA' })).toBeNull();
+  });
+
+  it('keeps a multi-select filter open across several choices', async () => {
+    const user = userEvent.setup();
+    const onFiltersChange = vi.fn();
+    mount(schema, { filters: {}, onFiltersChange });
+
+    await user.click(screen.getByRole('button', { name: 'Tags' }));
+    await user.click(screen.getByRole('checkbox', { name: 'Alpha' }));
+
+    // Choosing three vendors is one visit, not three.
+    expect(screen.getByRole('checkbox', { name: 'Beta' })).toBeInTheDocument();
+  });
+});
