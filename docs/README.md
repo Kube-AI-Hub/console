@@ -16,7 +16,8 @@
 | [能力矩阵](plans/capability-matrix.md) | 当前复核任务与能力级状态索引 | 判断还缺什么 |
 | [多集群验证手册](plans/multicluster-playbook-20261117.md) | 成员集群的起栈、七段式基线（另含键盘/文案走查与整轮预算）、能力边界与已知怪癖 | 部署含 member 集群时 |
 | [架构宪法](constitution.md) | 架构约束与 UI 原则 | 做实现与设计决策 |
-| [续迁移 Prompt](plans/continue-migration-prompt.md) | 引用现行规则的任务输入，不是另一套状态正文 | 交接给其他 AI agent |
+| [续迁移 Prompt](plans/continue-migration-prompt.md) | 引用现行规则的任务输入，不是另一套状态正文 | 交接给其他 AI agent 做整批迁移 |
+| [单页迁移 Prompt](plans/single-page-migration-prompt.md) | 针对某一页的定位、阅读顺序与验收要求；不重复全流程规则 | 迁移或优化一个指定页面 |
 
 没有一份文档能够单独证明“全部迁移完成”。方法看指南，需求/决策看 `prd/` 与 `design/`，
 页面级归宿看 `gap_check.py`，原子能力及实测证据看单页记录，当前复核任务只维护在能力矩阵。
