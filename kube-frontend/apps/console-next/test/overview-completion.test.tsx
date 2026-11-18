@@ -35,7 +35,14 @@ describe('overview completion', () => {
       ] });
       if (url.pathname.endsWith('/components')) return Response.json([]);
       if (url.pathname.endsWith('/nodes')) return Response.json({ items: [], totalItems: 0 });
-      return Response.json({ metadata: { name: 'host' }, status: {} });
+      /*
+       * A cluster whose `Ready` condition is missing renders the "waiting for the
+       * cluster to join" panel instead of the overview — the page treats not-ready
+       * as a whole-page state, not a banner. This test is about the resource cards,
+       * so the fixture has to say the cluster is up.
+       */
+      return Response.json({ metadata: { name: 'host' },
+        status: { conditions: [{ type: 'Ready', status: 'True' }] } });
     }));
     const view = mount(<ClusterOverviewPage cluster="host" />);
     await waitFor(() => expect(view.container.querySelector('[data-ai-id="overview:usage-gpu"] [data-ai-field="used"]')).toHaveTextContent('1.91 卡'));
@@ -139,23 +146,36 @@ describe('overview completion', () => {
         return Response.json({ metadata: { name: 'host' }, status });
       }));
       const view = mount(<ClusterOverviewPage cluster="host" />);
-      const cell = () => view.container.querySelector('[data-ai-id="overview:status"]')!;
-      await waitFor(() => expect(cell().textContent).not.toBe(''));
-      return { cell, view };
+      await waitFor(() => expect(
+        view.container.querySelector('[data-ai-id="overview:status"], [data-ai-id="overview:waiting"]'),
+      ).not.toBeNull());
+      return view;
     };
-    // Ready: "Cluster is available now" restates the green badge, so it is dropped.
+    /*
+     * Ready: the status cell restates the badge, and the controller's "Cluster is
+     * available now" adds nothing to a green badge — so it is dropped.
+     */
     const ready = await mountWith({ conditions: [
       { type: 'Ready', status: 'True', message: 'Cluster is available now' },
     ] });
-    expect(ready.cell()).toHaveTextContent('运行正常');
-    expect(ready.cell()).not.toHaveTextContent('Cluster is available now');
-    ready.view.unmount();
-    // Not ready: the controller's sentence is the only hint about what to do, so it stays.
+    const cell = ready.container.querySelector('[data-ai-id="overview:status"]')!;
+    expect(cell).toHaveTextContent('运行正常');
+    expect(cell).not.toHaveTextContent('Cluster is available now');
+    ready.unmount();
+
+    /*
+     * Not ready: the page swaps the whole overview for the waiting panel (the old
+     * console's `Initializing` behaviour), so there is no status cell to read. The
+     * controller's sentence moves to the waiting panel's hint — that is the only
+     * place it can appear now, and it is still what explains the state.
+     */
     const broken = await mountWith({ conditions: [
       { type: 'Ready', status: 'False', message: 'Cluster agent is not connected' },
     ] });
-    expect(broken.cell()).toHaveTextContent('未就绪');
-    expect(broken.cell()).toHaveTextContent('Cluster agent is not connected');
+    expect(broken.container.querySelector('[data-ai-id="overview:status"]')).toBeNull();
+    expect(broken.container.querySelector('[data-ai-id="overview:waiting"]')).not.toBeNull();
+    expect(broken.container.querySelector('[data-ai-id="overview:waiting-hint"]'))
+      .toHaveTextContent('Cluster agent is not connected');
   });
   it('keeps real zero, load units and allocation ratios distinct', () => {
     expect(rankValue({ name: 'n', values: { node_load1: 2 } }, 'node_load1')).toBe('2');

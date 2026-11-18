@@ -30,7 +30,13 @@ describe('hardware and overview panels', () => {
     expect(screen.getByText('400 Gb/s')).toBeInTheDocument();
     expect(screen.getByText('card-0').closest('tr')?.querySelector('td')).toHaveTextContent('0');
   });
-  it('keeps partial cluster measurements unknown and preserves proxy agent instructions', async () => {
+  it('keeps partial cluster measurements unknown', async () => {
+    /*
+     * A ready cluster with a partial metrics response: CPU has a value, memory has
+     * none. This is about the resource cards, so the fixture has to be ready —
+     * a not-ready cluster renders the waiting panel instead of the cards, and the
+     * assertion would be looking for something that is not on screen by design.
+     */
     vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
       const path = String(input);
       if (path.includes('/components/')) return Response.json({ results: [] });
@@ -38,8 +44,8 @@ describe('hardware and overview panels', () => {
         { metric_name: 'cluster_cpu_usage', data: { result: [{ metric: {}, value: [1, '0'] }] } },
         { metric_name: 'cluster_cpu_total', data: { result: [{ metric: {}, value: [1, '8'] }] } },
       ] });
-      if (path.includes('/tower.')) return Response.json({ message: 'tower missing' }, { status: 404 });
-      return Response.json({ metadata: { name: 'member' }, spec: { connection: { type: 'proxy' } }, status: {} });
+      return Response.json({ metadata: { name: 'member' },
+        status: { conditions: [{ type: 'Ready', status: 'True' }] } });
     }));
     const view = mount(<ClusterOverviewPage cluster="member" />);
     await waitFor(() => expect(view.container.querySelector('[data-ai-id="overview:usage-cpu"] [data-ai-field="total"]')).toHaveTextContent('8'));
@@ -49,7 +55,29 @@ describe('hardware and overview panels', () => {
     expect(memory.querySelector('[data-ai-field="used"]')).toHaveTextContent('-');
     expect(memory.querySelector('[data-ai-field="total"]')).toHaveTextContent('-');
     expect(within(memory).queryByRole('progressbar')).toBeNull();
-    expect(view.container.querySelector('[data-ai-id="overview:agent-panel"]')).toBeInTheDocument();
+  });
+
+  it('preserves proxy agent instructions while the cluster is not ready', async () => {
+    /*
+     * The not-ready page is a whole-page takeover now (the old console's
+     * `Initializing`), so the agent guide lives in the waiting panel rather than in a
+     * banner above the cards. `overview:agent-panel` was the banner's id and no
+     * longer exists; `overview:waiting` is what replaced it.
+     */
+    vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
+      const path = String(input);
+      if (path.includes('/components/')) return Response.json({ results: [] });
+      if (path.includes('/monitoring.')) return Response.json({ results: [] });
+      if (path.includes('/tower.')) return Response.json({ message: 'tower missing' }, { status: 404 });
+      return Response.json({ metadata: { name: 'member' },
+        spec: { connection: { type: 'proxy' } },
+        status: { conditions: [{ type: 'Ready', status: 'False' }] } });
+    }));
+    const view = mount(<ClusterOverviewPage cluster="member" />);
+    await waitFor(() => expect(view.container.querySelector('[data-ai-id="overview:waiting"]')).not.toBeNull());
+    // The three-step guide is the page for a proxy cluster with no agent.
+    expect(view.container.querySelector('[data-ai-id="overview:agent-steps"]')).not.toBeNull();
+    // The header keeps its controls: they are still meaningful while waiting.
     expect(view.container.querySelector('[data-ai-id="overview:shortcut:kubectl"]')).toBeInTheDocument();
   });
 });
