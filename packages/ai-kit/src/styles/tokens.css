@@ -207,6 +207,17 @@
   --ai-th-bg: var(--ai-raw-navy-900); /* $th-bg-color */
   --ai-row-hover-bg: rgb(var(--ai-raw-navy-500) / 0.55);
 
+  /*
+   * Pinned columns, as a three-step weight scale: the identity column reads as the
+   * most present, the action column next, and the scrolling columns stay on the page
+   * background. Named tokens rather than `--ai-surface-1` / `-2` because the light
+   * themes invert the scale: on white, "more present" means *darker*, while the
+   * surface ramp gets *lighter* as it rises. Sharing the surface tokens made the
+   * pinned start column the lightest thing on a light page.
+   */
+  --ai-pin-start-bg: var(--ai-raw-navy-600); /* 44 58 124 */
+  --ai-pin-end-bg: 30 43 100;
+
   /* ---- Geometry ---- */
   --ai-radius-sm: 4px; /* $border-radius */
   --ai-radius-md: 6px;
@@ -302,6 +313,11 @@
   --ai-th-bg: var(--ai-raw-ice-600);
   --ai-row-hover-bg: rgb(var(--ai-raw-ice-500) / 0.6);
 
+  /* Pinned columns: darker is more present on a light page, so the start column
+     takes the deeper step and the end column the shallower one. */
+  --ai-pin-start-bg: var(--ai-raw-ice-500); /* 207 228 242 */
+  --ai-pin-end-bg: 241 244 247;
+
   color-scheme: light;
 }
 
@@ -344,6 +360,8 @@
   --ai-th-bg: var(--ai-raw-navy-900);
   --ai-row-hover-bg: rgb(var(--ai-raw-navy-500) / 0.55);
   --ai-nav-bg: rgb(11 24 77 / 0.62);
+  --ai-pin-start-bg: var(--ai-raw-navy-600);
+  --ai-pin-end-bg: 30 43 100;
   /* Borders carry the accent hue too: a neutral border on a tinted page reads
      as a seam between two different designs. */
   --ai-line: 62 76 146;
@@ -373,6 +391,8 @@
   --ai-th-bg: var(--ai-raw-violet-lite-600);
   --ai-row-hover-bg: rgb(var(--ai-raw-violet-lite-500) / 0.6);
   --ai-nav-bg: rgb(247 246 250 / 0.8);
+  --ai-pin-start-bg: var(--ai-raw-violet-lite-500); /* 225 219 240 */
+  --ai-pin-end-bg: 240 237 247;
 
   --ai-accent: var(--ai-raw-violet-100);
   --ai-link: var(--ai-raw-violet-100);
@@ -403,6 +423,10 @@
   --ai-th-bg: var(--ai-raw-abyss-950);
   --ai-row-hover-bg: rgb(var(--ai-raw-abyss-800) / 0.7);
   --ai-nav-bg: rgb(0 21 28 / 0.72);
+  --ai-pin-start-bg: var(--ai-raw-abyss-900);
+  /* Half a step above the page, not a full one: the action column only has to read as
+     a surface, and `abyss-700` made it the brightest block on a dark page. */
+  --ai-pin-end-bg: 0 25 33;
   --ai-line: 28 69 82; /* dataelem's --line */
   --ai-line-strong: 42 92 108;
 
@@ -429,6 +453,8 @@
   --ai-th-bg: var(--ai-raw-green-lite-600);
   --ai-row-hover-bg: rgb(var(--ai-raw-green-lite-500) / 0.6);
   --ai-nav-bg: rgb(246 250 250 / 0.8);
+  --ai-pin-start-bg: var(--ai-raw-green-lite-500); /* 219 238 240 */
+  --ai-pin-end-bg: 237 246 247;
 
   --ai-accent: var(--ai-raw-mint-600);
   --ai-link: var(--ai-raw-mint-700); /* 5.01:1 worst case */

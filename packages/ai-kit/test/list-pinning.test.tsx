@@ -47,7 +47,9 @@ describe('pinned columns', () => {
     const cell = screen.getByText('a').closest('td')!;
     expect(cell.className).toContain('sticky');
     expect(cell.className).toContain('left-0');
-    expect(cell.className).toContain('bg-ai-surface-1');
+    // The body cell paints the start-pin surface, not a generic one: the three-step
+    // weight scale is what makes the identity column read as the anchor.
+    expect(cell.className).toContain('--ai-pin-start-bg');
   });
 
   it('pins row actions to the right edge automatically', () => {

@@ -121,14 +121,20 @@ const PIN_LEFT: Record<number, string> = {
 function pinClasses(pin: TableColumn<unknown>['pin'], background: string, left = 0, isHeader = false): string {
   if (!pin) return '';
   /*
+   * Three-step weight scale, not two: the identity column reads as most present, the
+   * action column next, and the scrolling columns stay on the page background. The
+   * tokens are per-theme because the scale inverts — on a dark page "more present" is
+   * lighter, on a light page it is darker — so `--ai-surface-1/-2` could not serve
+   * both (on white, the surface ramp made the pinned start column the lightest thing
+   * in the table).
+   *
    * The header keeps the surface it was given: a header cell has to match its
-   * neighbours across the row, and painting it with the body's secondary surface
-   * would put a differently-coloured cell in the middle of the header strip. Only the
-   * body cells step down a level.
+   * neighbours across the row, and painting it with the body's weight would put a
+   * differently-coloured cell in the middle of the header strip.
    */
   return cn(
     'sticky z-20',
-    pin === 'start' || isHeader ? background : 'bg-ai-surface-2',
+    isHeader ? background : pin === 'start' ? 'bg-[rgb(var(--ai-pin-start-bg))]' : 'bg-[rgb(var(--ai-pin-end-bg))]',
     pin === 'start'
       ? PIN_LEFT[left] ?? 'left-0'
       : 'right-0 shadow-[inset_-8px_0_8px_-8px_rgb(var(--ai-line))]',
