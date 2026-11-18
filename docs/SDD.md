@@ -216,6 +216,29 @@ python3 prd/tools/add_feature.py --submodule cluster-management --feature node-p
 生成 PRD 树节点、需求、技术方案、用例规格、测试骨架、区域注册表条目，产物直接通过 `--strict` 门禁。
 脚本不写页面代码、不猜字段、不填决策——那些是迁移本身的工作。
 
+### 一批交付跑绿即提交
+
+工作区是共享的：并行会话按批次提交时，会用整文件写入覆盖未提交的改动。这不是偶发——同一批改动被覆盖四次（六个列表的每页档位、集群级配置字典的行操作、状态文案表、一条 E2E 用例），每次都要靠快照重建。
+
+规则：**一批改动跑绿就提交**（门禁 + 本批 E2E + 契约），提交信息写清「改了什么、为什么、哪些是恢复被覆盖的改动」；下一批从干净的工作区开始。判据是契约套件——它先于 E2E 变红，是「未提交改动被覆盖」最快的信号。
+
+### 本地预览必须同时监听 IPv4 与 IPv6
+
+E2E 的浏览器侧（Node）把 `localhost` 解析成 `::1`，Python 侧（`urllib`）解析成 `127.0.0.1`。`vite preview` 默认只监听 `[::1]`，于是**浏览器能开页、脚本直连被拒**，表现为成批 `Connection refused`，看起来像页面坏了。
+
+```bash
+# 判定用：自己起一个只监听 127.0.0.1 的预览，并在跑用例时指过去——不受并行会话重启共享预览的影响
+nohup npx vite preview --host 127.0.0.1 --port 5180 --strictPort > /tmp/preview-5180.log 2>&1 & disown
+curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:5180/kube-frontend/          # 必须 200
+KA_APP_URL=http://127.0.0.1:5180 python3 -m pytest tests/kube-frontend/<module> -q -n 0
+```
+
+### 句柄的两种坏法：没有，或有两个
+
+`data-ai-id` / `data-stat-key` 是页面与测试、智能体之间的唯一契约。一周内连中三次：两个按钮共用一个 id、一个值被两个元素标注、一个可见单元格没有句柄（页面正常，测试与智能体无从寻址，最容易被误判成「功能缺失」）。
+
+守卫是 `config/handle-uniqueness-contract.test.ts`（同一文件重复字面 id 与重复 `data-stat-key` 表达式直接失败，互斥状态分支用 allowlist 逐条说明）。状态文案同理：`config/status-label-contract.test.ts` 要求四个状态页面走共享 `statusLabel`，且表里有小写状态。
+
 ### 测试残留会伪装成产品缺陷
 
 用例在 `finally` 里删自己创建的对象，但进程被中断/超时/fixture 中途失败时删不掉。残留对象让列表
