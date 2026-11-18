@@ -270,7 +270,17 @@ export function Table<T>({
         className,
       )}
     >
-      <table className="w-full border-collapse text-sm text-ai-fg-secondary">
+      {/*
+        * `w-max` + `min-w-full` rather than `w-full`.
+        *
+        * `w-full` caps the table at the container's width, and with `table-layout: auto`
+        * the browser then shrinks every column below its declared `width` — an eight
+        * column node table squeezed 150px columns down to 129px and read as truncated
+        * text rather than as a table that scrolls. `w-max` lets the table take the width
+        * its columns ask for; `min-w-full` keeps a narrow table filling the container
+        * so short lists do not collapse to the left.
+        */}
+      <table className="w-max min-w-full border-collapse text-sm text-ai-fg-secondary">
         {/*
          * No header when there is nothing to head. The old console renders an empty
          * card in that case, and a header row above "no data" reads as a table that
