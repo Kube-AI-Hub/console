@@ -3,7 +3,7 @@
 > **人与 AI coding 工具都从这里开始。** 本文回答「读什么、改哪里、跑什么」。
 > 章节顺序、ID 语法、字段规则**不在本文重复**，都链到各自的正文，避免两处漂移。
 >
-> 平台由两个仓库组成：前端 [`console`](https://codeup.aliyun.com/5ff9e1c4168c689c9272ccdb/kube-ai-hub/console)（KubeSphere Console 3.4.2，React 18），后端 [`kube-server`](https://codeup.aliyun.com/5ff9e1c4168c689c9272ccdb/kube-ai-hub/kube-server)（ks-apiserver / ks-controller-manager，Go）。**本目录的 prd/design/tests 是产品级的**，同时覆盖两边；design 里的「仓库落点」一节说明每个功能点改哪个仓库的哪些文件。
+> 平台由两个仓库组成：前端 [`console`](https://codeup.aliyun.com/5ff9e1c4168c689c9272ccdb/kube-ai-hub/console)（Kube AI Hub 3.4.2，React 18），后端 [`kube-server`](https://codeup.aliyun.com/5ff9e1c4168c689c9272ccdb/kube-ai-hub/kube-server)（ks-apiserver / ks-controller-manager，Go）。**本目录的 prd/design/tests 是产品级的**，同时覆盖两边；design 里的「仓库落点」一节说明每个功能点改哪个仓库的哪些文件。
 >
 > **后端改动同样受本 SDD 约束**，不是「前端文档、后端随意」。凡是要新增或修改 `kube-server` 的 kapis 接口、错误码、指标名、聚合规则、controller 行为，都必须先有对应 AC，并在 design 的 `CON-*` / `INV-*` / `GOT-*` 里写清契约与不变量；只改后端而不留文档等于契约变更没有记录。判断口诀见 §1「选 track」。
 >

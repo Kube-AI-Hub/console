@@ -9,7 +9,7 @@
 | 项 | 本页记录 |
 | --- | --- |
 | 用户任务、作用域 | 项目运维/管理员在项目控制台：看告警消息 → 打开策略详情核对规则与当前告警 → 创建/编辑/删除/启停项目策略；只读成员不显示点不通的写入口。作用域为项目；集群级「告警策略/告警消息」两页签复用同一共享实现（`RuleGroupBody`），本单元不修改集群页文件。 |
-| 旧入口、源码版本、部署 URL | `console/src/pages/projects/containers/Alerting/{Messages,Policies}`：`Policies/index.jsx`（列表 + 创建 + 行操作）、`Policies/Detail/{index.jsx,routes.js,AlertRules/**,AlertMessages/**}`（详情两页签）、`Messages/index.jsx`（消息列表）、`Policies/AlertingStatus`（规则状态计数）；集群级在 `clusters/routes` 复用同一批组件（`/clusters/:c/alert-rules[/builtin/:name]`、`/clusters/:c/alerts`）。源码版本 KubeSphere Console 3.4.2。实际契约以 2026-11-15 对本地全栈（BFF 8092，upstream 隧道 18088）的探测为准。 |
+| 旧入口、源码版本、部署 URL | `console/src/pages/projects/containers/Alerting/{Messages,Policies}`：`Policies/index.jsx`（列表 + 创建 + 行操作）、`Policies/Detail/{index.jsx,routes.js,AlertRules/**,AlertMessages/**}`（详情两页签）、`Messages/index.jsx`（消息列表）、`Policies/AlertingStatus`（规则状态计数）；集群级在 `clusters/routes` 复用同一批组件（`/clusters/:c/alert-rules[/builtin/:name]`、`/clusters/:c/alerts`）。源码版本 Kube AI Hub 3.4.2。实际契约以 2026-11-15 对本地全栈（BFF 8092，upstream 隧道 18088）的探测为准。 |
 | 新入口、提交及工作树、构建 | `/kube-frontend/:ws/clusters/:cluster/projects/:ns/{alerts,alertingrules}`、详情 `/alertingrules/:name?scope=global|cluster|project`；集群级 `/clusters/:cluster/alerting-policies|alerting-messages`（既有）。工作树：`pages/monitoring/**`、`routes/…/alertingrules/$name.tsx`、`packages/api-client/src/{alerting,index}.ts`、`packages/locales/src/index.ts`、PRD/design/specs/tests；构建 `apps/console-next: npx vite build`（23:18 通过）。 |
 | 环境、集群、角色 | 本地全栈（BFF 8092 kapis 模式 → 隧道 18088；静态站 5178），集群 `host`，角色 `admin`；未在 member 集群/生产前端验收。 |
 | 视口、主题、语言 | 1024×900 / 1280×900 / 1600×900，深浅色默认深色主题、默认色调；中文与英文截图均人工核对。浅色主题与第二色调未逐页截图（见 §6）。 |
