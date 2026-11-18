@@ -91,6 +91,22 @@ EXIT=0
 `X-Frame-Options`、`X-Content-Type-Options`、`Content-Security-Policy` 在**旧 console 与新 console 上都不存在**。
 记录在案：这是平台侧的既有缺口，不是本次迁移引入的；要补的话属于网关配置，不是前端改动。
 
+### 英文界面（不需要凭据）
+
+```
+en body:  Welcome | Username or email* | Password* | Log in
+lang attr: en
+raw keys: []
+```
+
+文案是英文、`<html lang>` 跟着切到 `en`、**没有裸标识符**。
+
+### 主题：登录页尊重主题，但没有切换入口
+
+登录页只有「显示密码」与「登录」两个按钮——**没有深浅色开关**（切换器在应用外壳里，登录后才看得到）。
+但它**尊重**主题：`--keyboard-local` 的四组主题色调走查正是靠设置 `ai-kit-theme`/`ai-kit-accent` 后重载完成的，
+焦点环对比度在四组下都达标。
+
 ## 缺什么
 
 **mlu370 的账号密码不在仓库里**（也不该在）。拿到凭据后即可：
