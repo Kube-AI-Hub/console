@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-06
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: detail
+title: 容器组详情 · 资源请求与限制的聚合
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/pods'
+prd: prd/kube-frontend/app-workloads/detail.md
+design: design/kube-frontend/app-workloads/detail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-06
+
+story:
+- US1
+
+product: 容器组概览的「资源请求」「资源限制」两行是全部容器（含 init 容器）的聚合，每个资源一项；完全没有资源声明时两行都是「-」。
+preconditions:
+- 已登录，且在 host 集群（mlu370）的 default 项目空间
+- 由用例创建一个容器组：一个 init 容器 + 两个工作容器，各自声明不同的 requests/limits；再建一个不声明任何资源的容器组；用例结束后无条件删除
+steps:
+- 打开带资源声明的容器组详情，等概览就绪
+- 读 pods-detail:requests 与 pods-detail:limits 的文本
+- 核对 cpu 与 memory 的合计等于三个容器（含 init）之和，每个资源一项
+- 打开没有资源声明的容器组详情，读同样两行
+expected:
+- 资源请求行同时含 cpu 合计与 memory 合计，值等于 init 容器 + 两个工作容器之和（按基准单位相加后格式化）
+- 资源限制行同理，且与请求行是两组不同的数字
+- 没有资源声明时两行都显示「-」，不显示 0
+troubleshoot:
+- 合计偏小：只遍历了 spec.containers，漏了 initContainers
+- 值像 500m1：quantity 字符串直接相加，没有先进基准单位
+- 空声明显示 0：把「没声明」当成了 0
+update_automation:
+- 句柄见 WorkloadDetailPage.tsx 的 pods-detail:requests / pods-detail:limits；聚合见 api-client 的 podResourceLines

@@ -1,0 +1,35 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-05
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: container-detail
+title: 容器详情 · 镜像 ID
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/pods'
+prd: prd/kube-frontend/app-workloads/container-detail.md
+design: design/kube-frontend/app-workloads/container-detail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-05
+
+story:
+- US1
+
+product: 「资源状态」页签的属性含「镜像 ID」，值等于该容器 status.containerStatuses 的 imageID；容器未启动时显示「-」。
+preconditions:
+- 已登录，且在 host 集群（mlu370）的 default 项目空间
+- 用例按 API 挑一个已启动的容器（default 优先、否则 kubesphere-system），并另建一个调度不出去的容器组（容器未启动）；用例结束后删除自建对象
+steps:
+- 打开已启动容器的详情，停在默认「资源状态」页签
+- 读 container-detail:image-id 的文本
+- 与该容器组对象里该容器的 status.containerStatuses[].imageID 逐字核对
+- 打开自建容器组里那个未启动的容器详情，读同一处
+expected:
+- 属性里有「镜像 ID」，值与该容器 status.containerStatuses 的 imageID 完全一致（含 docker-pullable:// 前缀）
+- 容器未启动（没有 containerStatuses 条目）时显示「-」，不是空串
+troubleshoot:
+- 显示 - 但有 containerStatuses：读的是 spec.image 或没按容器名匹配 status
+- 显示空串：空值没有走「缺值显示 -」的规则
+- 值被截断：UI 截断了长 digest，应保留完整值（可悬停看全）
+update_automation:
+- 句柄 container-detail:image-id（值元素）；字段来自 status.containerStatuses[].imageID

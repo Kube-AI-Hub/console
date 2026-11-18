@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-04
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: container-detail
+title: 容器详情 · 四页签与切换不重新取数
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/pods'
+prd: prd/kube-frontend/app-workloads/container-detail.md
+design: design/kube-frontend/app-workloads/container-detail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-04
+
+story:
+- US1
+
+product: 容器详情页签为 资源状态 / 监控 / 环境变量 / 日志，默认停在资源状态；切换页签只换面板，不重新请求容器组对象。
+preconditions:
+- 已登录，且在 host 集群（mlu370）的 default 项目空间
+- 项目里至少有一个带容器的容器组（用例按 API 挑一个容器，优先已调度的）
+steps:
+- 打开该容器详情，等页面 ready
+- 读四个页签触发器的文案与顺序，读默认选中项与可见面板
+- 依次点「监控」「环境变量」「日志」，各读对应面板是否可见
+- 期间统计发往该容器组详情的请求次数
+expected:
+- 页签依次为 资源状态、监控、环境变量、日志；默认「资源状态」为选中态（aria-selected=true）且其面板可见
+- 点「监控」后监控面板出现；点「环境变量」后环境变量区块出现；点「日志」后日志区块出现
+- 整个切换过程中，容器组详情接口只被请求一次（没有因为切页签重新取数）
+troubleshoot:
+- 页签只有一项或没有：CONTAINER_TABS 未启用，页面仍是单列
+- 切页签重新请求：查询被挪进了页签面板而不是页面顶层
+- 默认不在资源状态：activeTab 初值不是 resources
+update_automation:
+- 句柄 container-detail:tab-trigger:<resources|monitor|env|logs> 与 container-detail:tab:<同>；见 ContainerDetailPage.tsx 的 CONTAINER_TABS

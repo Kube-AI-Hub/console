@@ -505,16 +505,29 @@ function round(value: number): string {
  */
 function ModulesPanel({ detail }: { detail: ClusterDetail }): React.ReactElement {
   const t = useT();
-  const enabled = detail.modules.filter((m) => m.enabled);
-  const disabled = detail.modules.filter((m) => !m.enabled);
+  /*
+   * Filter sub-modules before counting, not after rendering: the badge count says
+   * `enabled/total`, and a total that includes rows the list does not show is a number
+   * the reader cannot reconcile with what is on screen.
+   */
+  const modules = detail.modules.filter((m) => !SUB_MODULES.has(m.key));
+  const enabled = modules.filter((m) => m.enabled);
+  const disabled = modules.filter((m) => !m.enabled);
   return (
     <OverviewPanel title={t('cluster.overview.modules')} icon="components"
       actions={<span className="text-xs tabular-nums text-ai-fg-muted" data-ai-id="overview:module-count">
-        {enabled.length}/{detail.modules.length}
+        {enabled.length}/{modules.length}
       </span>}>
       <ul className="flex flex-wrap gap-1.5" {...actionProps('overview:modules')}>
         {enabled.map((module) => (
           <li key={module.key} title={module.key}>
+            {/*
+             * `success` here means "enabled", not "healthy". `configz` records what the
+             * installation turned on and says nothing about whether it is running — the
+             * components API is service-level (`devops-apiserver`), so there is no
+             * reliable mapping from a configz key to a health signal. Labelling it
+             * "running" would claim a check that is not being made.
+             */}
             <Badge tone="success">{moduleLabel(t, module.key)}</Badge>
           </li>
         ))}
@@ -551,6 +564,7 @@ const KNOWN_MODULES: Record<string, LocaleKey> = {
   authorization: 'cluster.overview.module.authorization',
   cache: 'cluster.overview.module.cache',
   devops: 'cluster.overview.module.devops',
+  dongba: 'cluster.overview.module.dongba',
   edgeruntime: 'cluster.overview.module.edgeruntime',
   events: 'cluster.overview.module.events',
   gateway: 'cluster.overview.module.gateway',
@@ -564,9 +578,26 @@ const KNOWN_MODULES: Record<string, LocaleKey> = {
   network: 'cluster.overview.module.network',
   notification: 'cluster.overview.module.notification',
   openpitrix: 'cluster.overview.module.openpitrix',
+  platformModel: 'cluster.overview.module.platformModel',
+  s3: 'cluster.overview.module.s3',
   servicemesh: 'cluster.overview.module.servicemesh',
   terminal: 'cluster.overview.module.terminal',
 };
+
+/**
+ * Sub-modules that must not appear as their own badge.
+ *
+ * `configz` reports a module and its sub-modules separately — `openpitrix` and
+ * `openpitrix.appstore`, `network` and `network.ippool` — but they are one thing to the
+ * reader, and both keys carry the same label ("应用商店" twice, "网络" twice). Rendering
+ * both makes the list look like it has duplicate data.
+ *
+ * The parent already carries the answer: if it is enabled, the sub-module adds nothing
+ * visible. The sub-module is dropped rather than merged into the parent's label because
+ * the parent is the thing the reader can act on, and `network.ippool` being on while
+ * `network` is off is not a state this installation produces.
+ */
+const SUB_MODULES = new Set(['openpitrix.appstore', 'network.ippool']);
 
 function moduleLabel(t: ReturnType<typeof useT>, key: string): string {
   // `configz` reports sub-modules too (`network.ippool`, `openpitrix.appstore`), so an exact match

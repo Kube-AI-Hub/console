@@ -1,0 +1,39 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL_TABS-05
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: detail-tabs
+title: 容器组详情 · 环境变量页签（valueFrom 解析与掩码）
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/pods'
+prd: prd/kube-frontend/app-workloads/detail-tabs.md
+design: design/kube-frontend/app-workloads/detail-tabs.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL_TABS-05
+
+story:
+- US1
+
+product: 环境变量页签按容器分卡片（init 在前、首个展开），列出变量名与值；valueFrom 引用 ConfigMap / Secret 时显示被引用键的实际值（Secret 解码后）；名称含 password/secret 的值显示 ******；没有环境变量时显示「没有环境变量。」。
+preconditions:
+- 已登录，且在 host 集群（mlu370）的 default 项目空间
+- 由用例创建一个 ConfigMap 与一个 Secret（值已知），再创建一个容器组：init 容器带字面量变量、工作容器带字面量 / ConfigMap 引用 / Secret 引用 / 名称含 password 的变量 / 指向不存在 ConfigMap 的引用；另建一个没有任何环境变量的容器组；用例结束后无条件删除
+steps:
+- 打开带变量的容器组详情，点「环境变量」页签
+- 读卡片顺序与首张卡片的展开状态
+- 展开第二张卡片，逐行读变量名与值
+- 与用例写入的 ConfigMap / Secret 值逐项核对（Secret 需 base64 解码后比对）
+- 打开没有环境变量的容器组 → 环境变量页签
+expected:
+- 卡片按容器分组，init 容器在前；首张卡片默认展开，其余收起
+- 字面量变量显示写入的值；ConfigMap 引用显示被引用键的值；Secret 引用显示解码后的明文
+- 名称含 password 的变量值显示 ******（不显示明文）
+- 指向不存在对象的引用显示引用来源（含读取失败），不显示空串
+- 没有环境变量时显示「没有环境变量。」（容器本身没有变量时这句在该容器卡片内，整块没有可显示内容时用空态）
+troubleshoot:
+- 值显示空：valueFrom 只读了 value 字段；引用对象读取失败被当成空值
+- Secret 显示一串 base64：没做 base64 解码
+- 密码明文出现：掩码只按值判断，规则是「变量名含 password/secret」
+update_automation:
+- 句柄 pods-detail:env:<容器名>、卡片内 [data-ai-row=<变量名>]、pods-detail:env-empty；解析见 api-client 的 resolvePodEnv

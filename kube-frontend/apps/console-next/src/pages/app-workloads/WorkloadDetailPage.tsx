@@ -5,7 +5,12 @@ import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiButton, AiSurface, Badge, Button, Icon, Skeleton, cn } from '@kube-ai-hub/ui';
 import {
   objectEventsApi,
+  podResourceLines,
+  resolvePodEnv,
+  toPodScheduling,
+  type ContainerEnvGroup,
   type PodEvent,
+  type PodLike,
   type WorkloadDetail,
   type WorkloadKind,
   type WorkloadRevision,
@@ -63,7 +68,16 @@ function podContainers(detail: WorkloadDetail): string[] {
 }
 
 /** One tab of the detail page. Not every kind shows every tab. */
-type DetailTab = 'overview' | 'monitor' | 'pods' | 'revisions' | 'containers' | 'events' | 'metadata';
+type DetailTab =
+  | 'overview'
+  | 'schedule'
+  | 'monitor'
+  | 'pods'
+  | 'revisions'
+  | 'containers'
+  | 'env'
+  | 'events'
+  | 'metadata';
 
 /** Kinds whose detail lists the pods they run, matching `useWorkloadPods`' enablement. */
 const POD_OWNING_KINDS: WorkloadKind[] = ['deployments', 'statefulsets', 'daemonsets', 'services'];
@@ -77,6 +91,9 @@ const POD_OWNING_KINDS: WorkloadKind[] = ['deployments', 'statefulsets', 'daemon
  * so they get no tab rather than a tab that would only ever say "unavailable".
  */
 const MONITORED_WORKLOAD_KINDS: WorkloadKind[] = ['deployments', 'statefulsets', 'daemonsets'];
+
+/** The four pod conditions the old console showed, in its order. */
+const CONDITION_TYPES = ['PodScheduled', 'Initialized', 'ContainersReady', 'Ready'] as const;
 
 /** The `involvedObject.kind` an event query filters on, per resource. */
 const EVENT_OBJECT_KINDS: Record<WorkloadKind, string> = {
@@ -99,7 +116,13 @@ const EVENT_OBJECT_KINDS: Record<WorkloadKind, string> = {
  * metadata everywhere.
  */
 function tabsFor(kind: WorkloadKind): DetailTab[] {
-  if (kind === 'pods') return ['overview', 'monitor', 'containers', 'events', 'metadata'];
+  /*
+   * A pod's tabs follow the old console's own order and set: 资源状态 / 调度信息 /
+   * 监控 / 容器 / 环境变量 / 事件 / 元数据. 调度信息 and 环境变量 were the two that had
+   * been dropped when this page was built; they answer the two questions the overview
+   * cannot ("why is it not scheduled" and "what is it actually configured with").
+   */
+  if (kind === 'pods') return ['overview', 'schedule', 'monitor', 'containers', 'env', 'events', 'metadata'];
   const tabs: DetailTab[] = ['overview'];
   if (MONITORED_WORKLOAD_KINDS.includes(kind)) tabs.push('monitor');
   if (POD_OWNING_KINDS.includes(kind)) tabs.push('pods');
@@ -111,6 +134,8 @@ function tabsFor(kind: WorkloadKind): DetailTab[] {
 /** The locale key behind each tab's label, so the translation stays in the dictionary. */
 const TAB_LABEL_KEYS: Record<DetailTab, LocaleKey> = {
   overview: 'workloads.detail.tab.overview',
+  schedule: 'workloads.detail.tab.schedule',
+  env: 'workloads.detail.tab.env',
   monitor: 'workloads.detail.tab.monitor',
   pods: 'workloads.detail.tab.pods',
   revisions: 'workloads.detail.tab.revisions',
@@ -150,6 +175,25 @@ function MetadataBlock({
         </dl>
       )}
     </section>
+  );
+}
+
+/**
+ * The resource lines of one requests/limits total.
+ *
+ * Each resource is its own line, so `cpu: 500m` and `memory: 512Mi` stay readable
+ * when a pod declares four of them. Nothing is shown as 0 for a missing block.
+ */
+function ResourceLines({ lines }: { lines: Array<{ resource: string; value: string }> }): React.ReactElement {
+  if (lines.length === 0) return <span>-</span>;
+  return (
+    <span className="flex flex-col">
+      {lines.map((line) => (
+        <span key={line.resource} data-ai-row={line.resource}>
+          {line.resource}: {line.value}
+        </span>
+      ))}
+    </span>
   );
 }
 
@@ -194,6 +238,39 @@ export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, 
   });
 
   const state = query.isPending ? 'loading' : query.isError ? 'error' : 'ready';
+
+  /*
+   * 调度信息、GPU 分配与资源聚合都从容器组对象本身推导，不额外请求：它们与概览
+   * 读的是同一次响应，所以切换页签只换面板，也不会出现「概览说已调度、调度页说
+   * 没有节点」这种自相矛盾。
+   */
+  const podObject = detail?.raw as unknown as PodLike | undefined;
+  const scheduling = React.useMemo(
+    () => (kind === 'pods' && podObject ? toPodScheduling(podObject) : undefined),
+    [kind, podObject],
+  );
+  const requestLines = React.useMemo(
+    () => (kind === 'pods' && podObject ? podResourceLines(podObject, 'requests') : []),
+    [kind, podObject],
+  );
+  const limitLines = React.useMemo(
+    () => (kind === 'pods' && podObject ? podResourceLines(podObject, 'limits') : []),
+    [kind, podObject],
+  );
+
+  /*
+   * 环境变量页签要解析 `valueFrom`，那需要按引用读 ConfigMap / Secret。
+   * 只有打开该页签才发请求（旧 console 同样在页签激活时取），此后切换走缓存；
+   * 对象或作用域变了由 queryKey 自然失效。
+   */
+  const envQuery = useQuery({
+    queryKey: ['pod-env', cluster, namespace, name],
+    queryFn: ({ signal }) => resolvePodEnv(apiClient, { cluster, namespace, item: (podObject ?? {}) as PodLike, signal }),
+    enabled: kind === 'pods' && activeTab === 'env' && Boolean(podObject),
+  });
+
+  /** 每个容器都没有环境变量时，面板显示一句总说明（见下面的空态注释）。 */
+  const envEmpty = (envQuery.data?.length ?? 0) > 0 && (envQuery.data ?? []).every((group) => group.entries.length === 0);
 
   const back = useBackTo(kind);
 
@@ -366,6 +443,19 @@ export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, 
                       }
                     />
                   ))}
+                  {/*
+                    * 资源请求 / 资源限制: the sum over every container, init containers
+                    * included — these are the numbers the scheduler reserves and the
+                    * kubelet enforces. One resource per line, and `-` only when no
+                    * container declares anything of that kind: a pod with no requests is
+                    * a different fact from a pod whose requests could not be read.
+                    */}
+                  {kind === 'pods' ? (
+                    <>
+                      <Row label={t('workloads.field.requests')} aiId="pods-detail:requests" value={<ResourceLines lines={requestLines} />} />
+                      <Row label={t('workloads.field.limits')} aiId="pods-detail:limits" value={<ResourceLines lines={limitLines} />} />
+                    </>
+                  ) : null}
                 </dl>
               </section>
 
@@ -532,6 +622,126 @@ export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, 
             </div>
           ) : null}
 
+          {/* 调度信息: why this pod is (or is not) on a node, and what its conditions say. */}
+          {active === 'schedule' ? (
+            <div
+              role="tabpanel"
+              id="workload-detail-panel-schedule"
+              aria-labelledby="workload-detail-tab-schedule"
+              data-ai-id="workload-detail:tab:schedule"
+              className="flex flex-col gap-4"
+            >
+              <section className="rounded-ai-md border border-ai-line p-4" data-ai-id="pods-detail:schedule-result">
+                <h2 className="mb-3 text-sm font-medium text-ai-fg">{t('workloads.pod.scheduleResult')}</h2>
+                <div className="flex flex-wrap items-center gap-2 text-xs">
+                  <Badge tone={scheduling?.scheduled ? 'success' : 'warning'}>
+                    {scheduling?.scheduled ? t('workloads.pod.scheduled') : t('workloads.pod.notScheduled')}
+                  </Badge>
+                  {/*
+                    * The node name links to that node's page: the next question after
+                    * "which node" is almost always "what else is on it".
+                    */}
+                  {scheduling?.node ? (
+                    <a
+                      href={`/kube-frontend/clusters/${cluster}/nodes/${scheduling.node}`}
+                      className="inline-flex min-h-6 items-center font-mono text-[11px] text-ai-link hover:underline"
+                      data-ai-id="pods-detail:scheduled-node"
+                    >
+                      {t('workloads.pod.scheduledTo', { name: scheduling.node })}
+                    </a>
+                  ) : (
+                    <span className="text-ai-fg-muted" data-ai-id="pods-detail:scheduled-node">
+                      {t('workloads.pod.notScheduled')}
+                    </span>
+                  )}
+                </div>
+                <dl className="mt-3 grid grid-cols-1 gap-3 text-xs sm:grid-cols-[minmax(6rem,auto)_1fr]">
+                  <Row
+                    label={t('workloads.pod.scheduleTime')}
+                    aiId="pods-detail:scheduled-at"
+                    value={scheduling?.scheduledAt ? formatTimestamp(scheduling.scheduledAt) : '-'}
+                  />
+                </dl>
+                <p className="mt-3 text-[11px] text-ai-fg-muted">{t('workloads.pod.scheduleHint')}</p>
+              </section>
+
+              {/*
+                * GPU 分配: only when the pod's annotations declare devices. A pod without
+                * GPUs has nothing to say here, so the block is absent rather than empty.
+                */}
+              {(scheduling?.gpuAllocations.length ?? 0) > 0 ? (
+                <section className="rounded-ai-md border border-ai-line p-4" data-ai-id="pods-detail:schedule-gpu">
+                  <h2 className="mb-3 text-sm font-medium text-ai-fg">{t('workloads.pod.gpuAllocation')}</h2>
+                  <ul className="flex flex-col divide-y divide-ai-line text-xs">
+                    {(scheduling?.gpuAllocations ?? []).map((gpu) => (
+                      <li key={`${gpu.annotationKey}-${gpu.physicalUuid}`} className="flex flex-wrap items-baseline justify-between gap-2 py-1.5" data-ai-row={gpu.physicalUuid}>
+                        <a
+                          href={`/kube-frontend/clusters/${cluster}/gpus/${encodeURIComponent(gpu.physicalUuid)}`}
+                          className="inline-flex min-h-6 items-center font-mono text-[11px] text-ai-link hover:underline"
+                          data-ai-id={`pods-detail:gpu:${gpu.physicalUuid}`}
+                        >
+                          {gpu.uuid}
+                        </a>
+                        <span className="text-ai-fg-muted">
+                          {[
+                            gpu.vendor ? t('workloads.pod.gpuVendor', { value: gpu.vendor }) : '',
+                            gpu.memoryMi > 0 ? t('workloads.pod.gpuMemory', { value: gpu.memoryMi }) : '',
+                            gpu.corePercent > 0 ? t('workloads.pod.gpuCore', { value: gpu.corePercent }) : '',
+                          ]
+                            .filter(Boolean)
+                            .join(' · ') || '-'}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ) : null}
+
+              {/*
+                * 状态信息: the four conditions kubectl shows, each with the reason and
+                * message behind a False — "not ready" without the reason is the answer
+                * that sends people back to the event list.
+                */}
+              <section className="rounded-ai-md border border-ai-line p-4" data-ai-id="pods-detail:schedule-status">
+                <h2 className="mb-3 text-sm font-medium text-ai-fg">{t('workloads.pod.statusInfo')}</h2>
+                <dl className="grid grid-cols-1 gap-3 text-xs sm:grid-cols-[minmax(6rem,auto)_1fr]">
+                  <Row
+                    label={t('workloads.pod.currentStatus')}
+                    aiId="pods-detail:current-status"
+                    value={statusLabel(t, String((detail.attributes.find((attribute) => attribute.key === 'podStatus')?.value ?? '') || '')) || '-'}
+                  />
+                </dl>
+                <ul className="mt-3 grid grid-cols-1 gap-3 text-xs sm:grid-cols-2">
+                  {CONDITION_TYPES.map((type) => {
+                    const condition = scheduling?.conditions.find((entry) => entry.type === type);
+                    if (!condition) return null;
+                    const met = condition.status === 'True';
+                    return (
+                      <li key={type} className="flex flex-col gap-1 rounded-ai-sm border border-ai-line p-2" data-ai-id={`pods-detail:condition:${type}`}>
+                        <span className="flex items-center justify-between gap-2">
+                          <span className="font-medium text-ai-fg">{t(`workloads.pod.condition.${type}` as never)}</span>
+                          <Badge tone={met ? 'success' : 'warning'}>{met ? t('workloads.pod.conditionTrue') : t('workloads.pod.conditionFalse')}</Badge>
+                        </span>
+                        <span className="text-ai-fg-muted">{t(`workloads.pod.condition.${type}.desc` as never)}</span>
+                        {condition.reason ? (
+                          <span className="text-ai-fg-muted">{t('workloads.pod.conditionReason', { value: condition.reason })}</span>
+                        ) : null}
+                        {condition.message ? (
+                          <span className="text-ai-fg-muted">{t('workloads.pod.conditionMessage', { value: condition.message })}</span>
+                        ) : null}
+                        {condition.lastTransitionTime ? (
+                          <span className="text-[11px] text-ai-fg-muted">
+                            {t('workloads.pod.conditionUpdated', { value: formatTimestamp(condition.lastTransitionTime) })}
+                          </span>
+                        ) : null}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            </div>
+          ) : null}
+
           {/* 监控: CPU and memory over time, one panel shared by workloads and pods. */}
           {active === 'monitor' ? (
             <div
@@ -689,6 +899,76 @@ export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, 
                     </li>
                   ))}
                 </ul>
+              </section>
+            </div>
+          ) : null}
+
+          {/* 环境变量: what the containers actually see, valueFrom resolved. */}
+          {active === 'env' ? (
+            <div
+              role="tabpanel"
+              id="workload-detail-panel-env"
+              aria-labelledby="workload-detail-tab-env"
+              data-ai-id="workload-detail:tab:env"
+              className="flex flex-col gap-4"
+            >
+              <section className="rounded-ai-md border border-ai-line p-4">
+                <h2 className="mb-1 text-sm font-medium text-ai-fg">{t('workloads.pod.envTitle')}</h2>
+                <p className="mb-3 text-[11px] text-ai-fg-muted">{t('workloads.pod.envHint')}</p>
+                {envQuery.isPending ? <Skeleton className="h-16 w-full" /> : null}
+                {envQuery.isError ? (
+                  <p className="text-xs text-ai-fg-muted" data-ai-id="pods-detail:env-error">
+                    {t('workloads.pod.envEmpty')}
+                  </p>
+                ) : null}
+                {
+                  /*
+                   * 空态挂在面板上，而不是每张卡片里：容器组至少有一个容器，所以「没有分组」
+                   * 永远不成立；真正的「没有环境变量」是每个分组都没有条目。只有这种情况下
+                   * 才显示一句总说明，混合情况（部分容器有变量）仍按卡片分别说明。
+                   */
+                }
+                {envEmpty ? (
+                  <p className="text-xs text-ai-fg-muted" data-ai-id="pods-detail:env-empty">
+                    {t('workloads.pod.envEmpty')}
+                  </p>
+                ) : null}
+                <div className="flex flex-col gap-2">
+                  {(envQuery.data ?? []).map((group: ContainerEnvGroup, index: number) => (
+                    /*
+                     * One card per container, init containers first, the first card open.
+                     * `details`/summary rather than a click handler: the disclosure is
+                     * keyboard-operable and needs no state, and the page contract keeps
+                     * interactive elements off raw nodes.
+                     */
+                    <details
+                      key={`${group.init ? 'init' : 'work'}-${group.name}`}
+                      open={index === 0}
+                      className="rounded-ai-sm border border-ai-line"
+                      data-ai-id={`pods-detail:env:${group.name}`}
+                    >
+                      <summary className="cursor-pointer px-2 py-1.5 text-xs font-medium text-ai-fg">
+                        {t(group.init ? 'workloads.pod.envInitContainer' : 'workloads.pod.envContainer', { name: group.name })}
+                      </summary>
+                      {group.entries.length === 0 ? (
+                        <p className="px-2 pb-2 text-[11px] text-ai-fg-muted">{t('workloads.pod.envEmpty')}</p>
+                      ) : (
+                        <ul className="flex flex-col divide-y divide-ai-line px-2 pb-1 text-xs">
+                          {group.entries.map((entry) => (
+                            <li key={entry.name} className="flex items-start justify-between gap-3 py-1.5" data-ai-row={entry.name}>
+                              <span className="font-mono text-ai-fg-secondary">{entry.name}</span>
+                              <span className="max-w-[60%] break-all text-right font-mono text-ai-fg-muted">
+                                {entry.masked
+                                  ? t('workloads.pod.envMasked')
+                                  : entry.value || (entry.reference ? t('workloads.pod.envUnresolved', { value: entry.reference }) : '-')}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </details>
+                  ))}
+                </div>
               </section>
             </div>
           ) : null}

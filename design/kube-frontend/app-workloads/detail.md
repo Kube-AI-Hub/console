@@ -24,6 +24,7 @@
 
 - `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-01`
 - `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-02`
+- `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-06`
 - `prd/kube-frontend/app-workloads/detail.md`
 
 ## 设计目标与非目标
@@ -62,18 +63,27 @@
 
 详情读 `GET /kapis/.../namespaces/<ns>/<resource>/<name>`。
 
+容器组概览的两行资源**不来自任何额外请求**：`spec.containers[].resources` 与 `spec.initContainers[].resources` 已在同一次详情响应里，聚合在客户端完成（`podResourceLines(item, 'requests' | 'limits')` → `{resource, value}[]`，空数组表示「一个容器都没声明」）。
+
 ## 不变量
 
 - 详情的状态与列表一致。
 - 面包屑末级是对象名。
+- 资源请求/限制的聚合覆盖**全部容器，含 init 容器**；每个资源名只出现一行。
+- 聚合结果是「未声明」时显示 `-`，不显示 `0`；部分容器未声明时只累加声明了的容器，不把缺失当 0 参与显示。
 
 ## 已知坑
 
 - 详情页的 `useBackTo` 从当前 URL 推导列表地址：对象名可能含 `/` 之外的字符，不能靠字符串替换。
+- **init 容器会被漏掉**：只遍历 `spec.containers` 的聚合看起来对，但带 init 容器的 Pod（几乎都是）合计偏小，而且偏小的量恰好是读者最关心的「启动前预留」。旧 console 的 `formatAggregatedContainersResourceLines` 已经把两类容器合在一起。
+- **quantity 不能直接相加字符串**：`500m` 与 `1` 相加要先进基准单位（cpu 用毫核、内存用字节），否则得到 `500m1`。解析不了的写法保留原文显示，不当成 0——把 `1Gi` 之外的未知单位当 0 会让合计静默变小。
+- **资源名带前缀**：`nvidia.com/gpu`、`amd.com/gpu` 直接显示会把一行撑开；取最后一段（`gpu`）是展示规则，聚合与去重仍按完整资源名做，否则两个厂商的 GPU 会被错误合并。
 
 ## 测试与可观测
 
-- E2E：`TC-…-DETAIL-01/02`。
+- E2E：`TC-…-DETAIL-01/02`；本批新增 `TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL-06`（两个容器 + 一个 init 容器各设不同请求/限制，断言聚合等于三者之和；再用一个没有资源声明的容器组断言两行为 `-`）。
+- 单测：`api-client/test/pods.test.ts` 覆盖 quantity 解析、跨容器相加、init 容器参与、GPU 名简化与「全空返回空数组」。
+- 可观测点：`pods-detail:requests`、`pods-detail:limits`（值里每个资源一项，空时为 `-`）。
 
 ## 后续改进
 
@@ -145,6 +155,20 @@
 **被否方案**：服务不存在时不渲染区块。等于把"配置错了"和"没配置"混为一谈。
 
 **何时重新考虑**：平台开始校验 `serviceName` 时。
+
+### DEC-L3-KUBE-FRONTEND-APP-WORKLOADS-DETAIL-10 — 资源请求/限制在客户端聚合全部容器（含 init），每资源一行
+
+**为什么**：读者打开容器组概览要回答的是「这个容器组总共要了集群多少」，调度器按全部容器（含 init 容器的最大值）预留资源，所以合计必须覆盖两类容器。kapis 返回的容器组对象没有现成合计字段，只能从 `spec.containers[].resources` 与 `spec.initContainers[].resources` 相加。相加前要进基准单位（cpu 毫核、内存字节），因为 quantity 是带单位的字符串。
+
+**被否方案**：只显示第一个容器的资源。单容器 Pod 看着对，多容器 Pod 严重偏小——而多容器正是「为什么调度不上去」的常见现场。
+
+**被否方案**：取各容器的最大值。那是 init 容器语义（init 容器逐个跑），工作容器是并行占用的，取最大值会低估。
+
+**被否方案**：发一次额外的「按 Pod 汇总」请求（节点容量或 metrics 接口）。它们答的是「节点还剩多少」，不是「这个容器组要了多少」，口径不同还多一次往返。
+
+**何时重新考虑**：服务端在容器组对象上提供 `status.requests` 这类合计字段时，改为直接读；届时 `podResourceLines` 只保留展示层格式化。
+
+**另一条**：完全没有资源声明时两行显示 `-` 而不是 `0`。「没声明」意味着调度器按 BestEffort 处理，与「声明为 0」不是同一件事。
 
 ### DEC-L3-KUBE-FRONTEND-APP-WORKLOADS-DETAIL-09 — 执行记录按 `job-name` 标签取 Pod，退出码取最大值
 

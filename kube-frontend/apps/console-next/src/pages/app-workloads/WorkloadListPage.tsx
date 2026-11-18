@@ -85,7 +85,22 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
     defaultPageSize: 10,
     resetOn: [cluster, projectFilter],
   });
-  const query = useWorkloads(kind, toListParams(list, { cluster, namespace: projectFilter }));
+  /*
+   * 状态筛选（仅容器组）。
+   *
+   * The old console offered the four kubectl-style states on the pods list and sent
+   * them to the server; the kapis pods getter filters on exactly those values
+   * (`Waiting / Running / Completed / Error`). It is a real server-side filter, not a
+   * client-side pass over the current page: filtering one page of ten would claim
+   * "no waiting pods" while the rest of the project has plenty.
+   */
+  const [statusFilter, setStatusFilter] = React.useState('');
+  React.useEffect(() => setStatusFilter(''), [cluster, namespace]);
+  const statusFilterValue = kind === 'pods' ? statusFilter : '';
+  const query = useWorkloads(kind, {
+    ...toListParams(list, { cluster, namespace: projectFilter }),
+    ...(statusFilterValue ? { filters: { status: statusFilterValue } } : {}),
+  });
   const remove = useDeleteWorkload(kind, { cluster, namespace: projectFilter });
   const update = useUpdateWorkload(kind, { cluster, namespace: projectFilter });
   const scale = useScaleWorkload(kind, { cluster, namespace: projectFilter });
@@ -101,6 +116,23 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
   const total = query.data?.total ?? 0;
   const api = workloadsApi(apiClient, kind);
   const projectFilterControl = useProjectFilter(cluster, t('workloads.filter.projectLabel'), t('workloads.filter.project'), undefined, 'workloads:filter:project');
+  /** The four states the kapis pods getter filters on, in the old console's order. */
+  const statusFilterControl = React.useMemo(
+    () => ({
+      key: 'status',
+      title: t('workloads.filter.statusLabel'),
+      allLabel: t('workloads.filter.status'),
+      options: [
+        { value: 'Waiting', label: t('workloads.filter.status.waiting') },
+        { value: 'Running', label: t('workloads.filter.status.running') },
+        { value: 'Completed', label: t('workloads.filter.status.completed') },
+        { value: 'Error', label: t('workloads.filter.status.error') },
+      ],
+      aiId: `${kind}:filter:status`,
+      widthClass: 'w-full sm:w-44',
+    }),
+    [kind, t],
+  );
 
   /** Opens the dialog frame first, then fills it: a silent wait reads as a dead click. */
   const openWithDetail = React.useCallback(
@@ -131,7 +163,7 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
       search: { placeholder: t('workloads.searchPlaceholder'), aiId: `${kind}:search` },
-      filters: [projectFilterControl],
+      filters: kind === 'pods' ? [projectFilterControl, statusFilterControl] : [projectFilterControl],
       selection: 'multiple',
       sortableKeys: ['name', 'createTime'],
       sortAiPrefix: kind,
@@ -216,7 +248,20 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
                 width: 140,
                 hideBelow: 'md' as const,
                 render: (row: WorkloadSummary) => (
-                  <Badge tone={statusTone(row.status)}>{statusLabel(row.status)}</Badge>
+                  <span className="flex min-w-0 flex-col gap-0.5">
+                    <Badge tone={statusTone(row.status)}>{statusLabel(row.status)}</Badge>
+                    {/*
+                      * The reason is the part that answers "why": a waiting pod whose
+                      * container is in CrashLoopBackOff is a different problem from one
+                      * that is still pulling its image. The mapper drops it when it only
+                      * repeats the phase.
+                      */}
+                    {row.statusReason ? (
+                      <span className="truncate text-[11px] text-ai-fg-muted" data-ai-id={`${kind}:reason:${row.name}`} title={row.statusReason}>
+                        {row.statusReason}
+                      </span>
+                    ) : null}
+                  </span>
                 ),
               },
             ]
@@ -267,9 +312,26 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
                 title: t('workloads.field.node'),
                 width: 160,
                 hideBelow: 'lg' as const,
-                render: (row: WorkloadSummary) => (
-                  <span className="truncate text-ai-fg-secondary">{row.node || '-'}</span>
-                ),
+                render: (row: WorkloadSummary) =>
+                  row.node ? (
+                    /*
+                     * The node name is the way into that node's page — the same drill-down
+                     * the old list had. The node's IP rides along, because two nodes in a
+                     * cluster often share a name prefix and the IP is what tells them apart
+                     * in a conversation about a specific pod.
+                     */
+                    <a
+                      href={`/kube-frontend/clusters/${cluster}/nodes/${row.node}`}
+                      className="inline-flex min-h-6 min-w-0 items-center gap-1 truncate text-ai-link hover:underline"
+                      data-ai-id={`${kind}:node:${row.name}`}
+                      title={row.nodeIP ? `${row.node} (${row.nodeIP})` : row.node}
+                    >
+                      <span className="truncate">{row.node}</span>
+                      {row.nodeIP ? <span className="shrink-0 font-mono text-[11px] text-ai-fg-muted">{row.nodeIP}</span> : null}
+                    </a>
+                  ) : (
+                    <span className="text-ai-fg-muted">-</span>
+                  ),
               },
               {
                 key: 'podIP',
@@ -407,9 +469,10 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}
         onRefresh={() => void query.refetch()}
-        filters={{ project: projectFilter }}
+        filters={kind === 'pods' ? { project: projectFilter, status: statusFilter } : { project: projectFilter }}
         onFiltersChange={(next) => {
           setProjectFilter(next['project'] ?? '');
+          if (kind === 'pods') setStatusFilter(next['status'] ?? '');
           list.setPage(1);
         }}
         selectedKeys={list.selected}

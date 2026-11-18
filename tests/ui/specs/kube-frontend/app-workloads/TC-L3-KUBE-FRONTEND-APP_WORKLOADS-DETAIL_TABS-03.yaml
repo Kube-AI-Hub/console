@@ -1,0 +1,37 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL_TABS-03
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: detail-tabs
+title: 容器组详情 · 调度信息的 GPU 分配区块
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/pods'
+prd: prd/kube-frontend/app-workloads/detail-tabs.md
+design: design/kube-frontend/app-workloads/detail-tabs.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL_TABS-03
+
+story:
+- US1
+
+product: 注解里含 GPU 分配时「调度信息」显示 GPU 分配区块，每设备一行、uuid 是到该设备状态页的链接，有值时显示厂商/显存/算力；注解里没有 GPU 分配时不显示该区块。
+preconditions:
+- 已登录，且在 host 集群（mlu370）的 default 项目空间
+- 由用例创建一个带 kubesphere.io/gpu-devices-allocated 注解的容器组（值形如 uuid,type,mem,core），再建一个不带该注解的容器组；用例结束后无条件删除
+steps:
+- 打开带注解的容器组详情，点「调度信息」
+- 读 pods-detail:schedule-gpu 区块、每行 uuid 链接的文本与 href
+- 核对厂商、显存 MiB、算力百分比与该注解逐项一致
+- 打开不带注解的容器组详情 → 调度信息，确认没有 pods-detail:schedule-gpu
+expected:
+- 有注解时出现 GPU 分配区块，每个设备一行
+- 每行的 uuid 是链接，href 指向该集群该设备的 GPU 状态页（/clusters/<cluster>/gpus/<uuid>），链接文本是注解里的 uuid
+- 行内显示厂商、显存 MiB、算力百分比（注解里为 0 的那一项不显示）
+- 注解里没有 GPU 分配时不渲染该区块（不是空区块）
+troubleshoot:
+- 区块不出现：解析只认固定键名，没按「键名包含 devices-allocated」识别
+- 链接 404：用了带 MIG 后缀的 uuid，物理设备要剥掉 [1-1]
+- 无注解也有区块：可见性没按注解数量判断
+update_automation:
+- 句柄 pods-detail:schedule-gpu 与 pods-detail:gpu:<uuid>；解析见 api-client 的 parseGpuAllocations

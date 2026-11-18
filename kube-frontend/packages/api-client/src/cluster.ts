@@ -689,6 +689,30 @@ export function rangeMetricsApi(client: Client) {
     },
 
     /**
+     * One container's series — the container detail page's 监控 tab.
+     *
+     * The metric names are the container family: `container_gpu_usage`,
+     * `container_gpu_memory_usage`, `container_cpu_usage`,
+     * `container_memory_usage_wo_cache`. The container is part of the **path**, not a
+     * query parameter, so no extra selector is sent: the handler scopes the query to
+     * the path's container.
+     *
+     * No `expectedLabels` filter is applied here, unlike `gpuCard`. The container
+     * metric templates filter on `container!=""` and `image!=""` server-side; a
+     * cluster whose cAdvisor series omit those labels answers an empty matrix (measured
+     * on mlu370, where every series carries only `cpu`/`id`/`instance`/`job`/`node`).
+     * That is "no data for this deployment", and the page says so instead of guessing.
+     */
+    async container(
+      params: RangeQuery & { namespace: string; pod: string; container: string },
+    ): Promise<MetricSeries[]> {
+      const rest = `namespaces/${encodeURIComponent(
+        params.namespace,
+      )}/pods/${encodeURIComponent(params.pod)}/containers/${encodeURIComponent(params.container)}`;
+      return query(rest, params);
+    },
+
+    /**
      * One system component's series (apiserver / scheduler / etcd).
      *
      * The cluster range query returns one line per metric, but a component metric is a

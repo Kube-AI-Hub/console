@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/app-workloads/detail-tabs.md`](../../../../prd/kube-frontend/app-workloads/detail-tabs.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL_TABS-01** — 已知一个部署详情，当打开它，则页签为「概览 / 关联容器组 / 修订版本 / 事件 / 元数据」，默认选中「概览」；点「事件」显示该对象的事件区块，点「元数据」显示标签与注解；已知一个容器组详情，则页签为「概览 / 容器 / 事件 / 元数据」，点「容器」后容器行可点进容器详情页；切换页签不重新请求数据。
+- **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL_TABS-01** — 已知一个部署详情，当打开它，则页签为「概览 / 关联容器组 / 修订版本 / 事件 / 元数据」，默认选中「概览」；点「事件」显示该对象的事件区块，点「元数据」显示标签与注解；已知一个容器组详情，则页签包含「概览 / 容器 / 事件 / 元数据」（完整集合见 AC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL_TABS-02），点「容器」后容器行可点进容器详情页；切换页签不重新请求数据。
 
 ### 关联设计
 

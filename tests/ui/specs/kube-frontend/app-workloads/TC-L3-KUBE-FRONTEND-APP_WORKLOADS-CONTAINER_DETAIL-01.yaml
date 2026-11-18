@@ -4,7 +4,7 @@ suite: point
 module: kube-frontend
 submodule: app-workloads
 feature: container-detail
-title: 容器详情 · 单个容器的配置与状态
+title: 容器详情 · 单个容器的配置与状态（按页签）
 entry_url: '{BASE_URL}/kube-frontend/public/clusters/host/projects/default/pods'
 prd: prd/kube-frontend/app-workloads/container-detail.md
 design: design/kube-frontend/app-workloads/container-detail.md
@@ -15,22 +15,27 @@ covers:
 story:
 - US1
 
-product: 从容器组详情点容器名进入容器详情：镜像/拉取策略/状态/重启/启动时间/命令，以及资源、环境变量、挂载卷、端口、探针五个区块；无内容显示说明。
+product: 从容器组详情点容器名进入容器详情：镜像/拉取策略/状态/重启/启动时间/命令，以及资源、环境变量、挂载卷、端口、探针五个区块。页面按四个页签组织，资源/挂载卷/端口/探针在默认「资源状态」页签内，环境变量在「环境变量」页签内；无内容显示说明。
 preconditions:
-- 已登录，且对 default 项目有读取权限
+- 已登录，且在 host 集群（mlu370）的 default 项目空间
 - 项目中至少有一个带容器的容器组
 steps:
 - 用 API 读一个容器组对象，取其第一个容器名与镜像
-- 打开容器组详情，点该容器名
+- 打开容器组详情，点该容器名进入容器详情，等页面 ready
 - 核对容器详情的基本信息与容器组对象一致
-- 核对五个区块均存在（有内容或空态说明）
+- 在默认「资源状态」页签内核对资源、挂载卷、端口、探针四个区块（有内容或空态说明）
+- 点「环境变量」页签，核对环境变量区块
+- 用不存在的容器名打开容器详情，核对提示
 expected:
-- 容器详情可达且 ready
+- 容器详情可达且 ready，默认停在「资源状态」页签
 - 镜像与拉取策略等于容器组对象中的字段
+- 资源、挂载卷、端口、探针四个区块在「资源状态」页签内可见；环境变量区块在点开「环境变量」页签后可见
+- 五个区块各自能区分「空」与「有内容」（空态有说明文字，不是空表）
 - 容器不存在时显示明确提示
 troubleshoot:
 - 容器链接点不动：容器组详情的容器区块只在 pods 下提供链接
 - 页面 404：路由没重新生成（改完 $name.tsx 后要 vite build）
+- 区块找不到：页签化后非选中面板不渲染，先点页签再断言
 - 环境变量空白：valueFrom 只读 value，需要显示引用来源
 update_automation:
-- 选择器见 pages/app_workloads.py 与 ContainerDetailPage.tsx
+- 选择器见 pages/app_workloads.py 与 ContainerDetailPage.tsx；页签句柄 container-detail:tab-trigger:<key>

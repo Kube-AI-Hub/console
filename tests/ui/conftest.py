@@ -49,6 +49,21 @@ def app_base(ui_config) -> str:
     return ui_config.app.rstrip("/")
 
 
+def api_base(ui_config) -> str:
+    """Base URL for the API the pages call.
+
+    Since the BFF retired (2026-11-18) the app is served under `/kube-frontend` and the
+    API lives under the same prefix: `/kube-frontend/{kapis,apis,api/v1}`. A bare
+    `/apis/...` on the app origin is forwarded by the dev server **without** the prefix
+    and answered by ks-apiserver with "The server is configured with a public base URL
+    of /kube-frontend/", which reads like a permissions problem and is not one.
+
+    Pages keep using `app_base` (they build `/kube-frontend/<scope>/...` themselves);
+    fixtures that call the API use this.
+    """
+    return ui_config.app_api.rstrip("/")
+
+
 def _storage_state(origin: str, token: str) -> dict:
     """LocalStorage for one origin, as Playwright's `storage_state` expects.
 
@@ -352,7 +367,7 @@ def seeded_configmaps(ui_config, session_token):
     second, and a fixture that hangs fails the test with no product signal.
     """
     namespace = "default"
-    api = ApiClient(app_base(ui_config), session_token)
+    api = ApiClient(api_base(ui_config), session_token)
     created: list[str] = []
     # Unique per fixture instance, i.e. per worker/test.
     #
@@ -414,7 +429,7 @@ def e2e_objects(ui_config, session_token):
     `finally`: a failed assertion must not leave objects that make the next run
     fail differently.
     """
-    api = ApiClient(app_base(ui_config), session_token)
+    api = ApiClient(api_base(ui_config), session_token)
     created: list[tuple[str, str, str]] = []  # (kind, namespace, name)
 
     def _post(kind: str, namespace: str, body: dict[str, object]) -> None:
@@ -553,49 +568,49 @@ def serviceaccounts_page(page, ui_config):
 @pytest.fixture
 def platform_settings_page(page, ui_config, session_token):
     """平台设置（平台信息、通知渠道）。平台作用域，无集群与项目段。"""
-    return PlatformSettingsPage(page, app_base(ui_config), api=ApiClient(app_base(ui_config), session_token))
+    return PlatformSettingsPage(page, app_base(ui_config), api=ApiClient(api_base(ui_config), session_token))
 
 
 @pytest.fixture
 def access_control_page(page, ui_config, session_token):
     """访问控制（用户、平台角色、企业空间）。平台作用域：地址里没有集群与项目段。"""
-    return AccessControlPage(page, app_base(ui_config), api=ApiClient(app_base(ui_config), session_token))
+    return AccessControlPage(page, app_base(ui_config), api=ApiClient(api_base(ui_config), session_token))
 
 
 @pytest.fixture
 def cluster_management_page(page, ui_config, session_token):
     """集群管理（节点、项目）。集群作用域：地址里没有 workspace 与项目段。"""
-    return ClusterManagementPage(page, app_base(ui_config), api=ApiClient(app_base(ui_config), session_token))
+    return ClusterManagementPage(page, app_base(ui_config), api=ApiClient(api_base(ui_config), session_token))
 
 
 @pytest.fixture
 def workbench_page(page, ui_config, session_token):
     """工作台：企业空间与项目的入口页。"""
-    return WorkbenchPage(page, app_base(ui_config), api=ApiClient(app_base(ui_config), session_token))
+    return WorkbenchPage(page, app_base(ui_config), api=ApiClient(api_base(ui_config), session_token))
 
 
 @pytest.fixture
 def cluster_fleet_page(page, ui_config, session_token):
     """集群列表与切换器。平台作用域：地址里没有 workspace 与 cluster 段。"""
-    return ClusterFleetPage(page, app_base(ui_config), api=ApiClient(app_base(ui_config), session_token))
+    return ClusterFleetPage(page, app_base(ui_config), api=ApiClient(api_base(ui_config), session_token))
 
 
 @pytest.fixture
 def cluster_overview_page(page, ui_config, session_token):
     """集群概览。同样是集群作用域，但读两份互不依赖的数据（集群对象 + 监控）。"""
-    return ClusterOverviewPage(page, app_base(ui_config), ui_config.cluster, api=ApiClient(app_base(ui_config), session_token))
+    return ClusterOverviewPage(page, app_base(ui_config), ui_config.cluster, api=ApiClient(api_base(ui_config), session_token))
 
 
 @pytest.fixture
 def cluster_settings_page(page, ui_config, session_token):
     """集群设置。只写描述注解，用例必须在 finally 里还原原值。"""
-    return ClusterSettingsPage(page, app_base(ui_config), ui_config.cluster, api=ApiClient(app_base(ui_config), session_token))
+    return ClusterSettingsPage(page, app_base(ui_config), ui_config.cluster, api=ApiClient(api_base(ui_config), session_token))
 
 
 @pytest.fixture
 def cluster_monitor_page(page, ui_config, session_token):
     """集群监控。只读趋势页，读 range query。"""
-    return ClusterMonitorPage(page, app_base(ui_config), ui_config.cluster, api=ApiClient(app_base(ui_config), session_token))
+    return ClusterMonitorPage(page, app_base(ui_config), ui_config.cluster, api=ApiClient(api_base(ui_config), session_token))
 
 
 @pytest.fixture
@@ -605,7 +620,7 @@ def project_settings_page(page, ui_config, session_token):
     带 `ApiClient`：用例要先用 IAM 接口确认数据存在（角色、规则、成员），否则
     「列与注解一致」这类断言可能在空数据上变成假通过。
     """
-    return ProjectSettingsPage(page, app_base(ui_config), api=ApiClient(app_base(ui_config), session_token))
+    return ProjectSettingsPage(page, app_base(ui_config), api=ApiClient(api_base(ui_config), session_token))
 
 
 @pytest.fixture
@@ -615,7 +630,7 @@ def monitoring_page(page, ui_config, session_token):
     与其它页面对象一样带 `ApiClient`：用例需要先用 API 确认该页确实没有数据，
     否则「空态」断言可能在有数据的集群上悄悄变成假通过。
     """
-    return MonitoringPage(page, app_base(ui_config), api=ApiClient(app_base(ui_config), session_token))
+    return MonitoringPage(page, app_base(ui_config), api=ApiClient(api_base(ui_config), session_token))
 
 
 @pytest.fixture
@@ -626,7 +641,7 @@ def app_workloads_page(page, ui_config, session_token):
     endpoint（kapis 的 resources 端点只注册了 GET），而页面读的是 kapis。两者共用
     同一个会话令牌，避免在用例里重新登录或复制 URL 拼装逻辑。
     """
-    return AppWorkloadsPage(page, app_base(ui_config), api=ApiClient(app_base(ui_config), session_token))
+    return AppWorkloadsPage(page, app_base(ui_config), api=ApiClient(api_base(ui_config), session_token))
 
 
 @pytest.fixture
@@ -636,7 +651,7 @@ def image_builder_page(page, ui_config, session_token):
         page,
         app_base(ui_config),
         cluster=ui_config.cluster,
-        api=ApiClient(app_base(ui_config), session_token),
+        api=ApiClient(api_base(ui_config), session_token),
     )
 
 
@@ -652,7 +667,7 @@ def kube_storage_page(page, ui_config, session_token):
     （kapis 的 resources 端点只注册了 GET），而页面读的是 kapis。两者共用同一个
     会话令牌，避免在用例里重新登录或复制 URL 拼装逻辑。
     """
-    return StoragePage(page, app_base(ui_config), api=ApiClient(app_base(ui_config), session_token))
+    return StoragePage(page, app_base(ui_config), api=ApiClient(api_base(ui_config), session_token))
 
 
 @pytest.fixture

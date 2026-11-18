@@ -1,5 +1,6 @@
 import type { Client } from './client';
 import { clusterScoped, corePath } from './paths';
+import { isInformativeReason, podStatusReason } from './pods';
 import { annotationKeys, baseOf, kubePrefix, resourceApi, type KubeObject, type ResourceBase } from './resources';
 
 /**
@@ -158,6 +159,13 @@ export function workloadProgress(kind: WorkloadKind, item: KubeWorkload): { read
 export interface WorkloadSummary extends ResourceBase {
   kind: WorkloadKind;
   status: string;
+  /**
+   * Pods only: the kubectl-style reason behind the phase (`CrashLoopBackOff`,
+   * `ImagePullBackOff`, `Init:0/1`). The old console printed it under the name,
+   * which is how a reader tells "waiting" from "waiting because the image is wrong".
+   * Empty for every other kind.
+   */
+  statusReason?: string;
   /** The `app` label the old list shows; empty when the workload was not labelled. */
   app: string;
   /** `spec.replicas` for the kinds that have one; 0 when absent. */
@@ -167,6 +175,8 @@ export interface WorkloadSummary extends ResourceBase {
   total?: number;
   /** Pod only: the node it runs on (`spec.nodeName`). */
   node?: string;
+  /** Pod only: the node's own IP (`status.hostIP`), which the old list printed beside the name. */
+  nodeIP?: string;
   /** Pod only: its IP (`status.podIP`). */
   podIP?: string;
   /** Container images, for the pods and workloads that have them. */
@@ -200,13 +210,19 @@ export interface WorkloadSummary extends ResourceBase {
 
 /** The `app` / `app.kubernetes.io/name` label, matching what the old console reads. */
 /** Pod only: the node it runs on and its IP, both absent until it is scheduled. */
-function podPlacement(kind: WorkloadKind, item: KubeWorkload): { node?: string; podIP?: string } {
+function podPlacement(kind: WorkloadKind, item: KubeWorkload): { node?: string; nodeIP?: string; podIP?: string } {
   if (kind !== 'pods') return {};
   const spec = (item.spec ?? {}) as Record<string, unknown>;
   const status = (item.status ?? {}) as Record<string, unknown>;
   const node = String(spec['nodeName'] ?? '');
   const podIP = String(status['podIP'] ?? '');
-  return { ...(node ? { node } : {}), ...(podIP ? { podIP } : {}) };
+  // The node's own IP is what the old list printed beside the node name.
+  const nodeIP = String(status['hostIP'] ?? '');
+  return {
+    ...(node ? { node } : {}),
+    ...(nodeIP ? { nodeIP } : {}),
+    ...(podIP ? { podIP } : {}),
+  };
 }
 
 function appOf(item: KubeWorkload): string {
@@ -322,6 +338,18 @@ export function toWorkloadSummary(kind: WorkloadKind, item: KubeWorkload): Workl
     ...podPlacement(kind, item),
     kind,
     status: workloadStatus(kind, item),
+    /*
+     * Only a pod carries a reason worth showing, and only when it says more than the
+     * phase already does: "Running" under a Running badge is noise, "CrashLoopBackOff"
+     * is the answer to "why is this one not healthy".
+     */
+    ...(kind === 'pods'
+      ? (() => {
+          const reason = podStatusReason(item);
+          const phase = String(((item.status ?? {}) as Record<string, unknown>)['phase'] ?? '');
+          return isInformativeReason(reason, phase) ? { statusReason: reason } : {};
+        })()
+      : {}),
     app: appOf(item),
     replicas: replicasOf(item),
     ...(progress.ready !== undefined ? { ready: progress.ready } : {}),

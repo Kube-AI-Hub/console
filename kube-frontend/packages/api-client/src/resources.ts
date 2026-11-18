@@ -31,10 +31,23 @@ export interface ResourceListParams {
   order?: 'asc' | 'desc';
   keyword?: string;
   /**
-   * Passed through to the API as a `fieldSelector` — the pods list filters by phase this way.
-   * Only lists whose backing collection supports field selection should set it.
+   * Passed through to the API as a `fieldSelector`.
+   *
+   * Only lists whose backing collection really supports field selection should set it.
+   * The kapis **pods** collection does not: `fieldSelector=status.phase=Running` is
+   * parsed as an unknown filter and answers an empty page, so a pod status filter has
+   * to go through `filters.status` instead (see below).
    */
   fieldSelector?: string;
+  /**
+   * Extra kapis filter parameters, one per key (`status=Running`).
+   *
+   * `ParseQueryParameter` turns every query key it does not recognise into a filter, and
+   * a filter the resource getter does not handle matches nothing — so an unknown key
+   * silently empties the list. Only the keys a getter documents belong here; for pods
+   * that is `status` with the kubectl-style values Waiting / Running / Completed / Error.
+   */
+  filters?: Record<string, string>;
   signal?: AbortSignal;
 }
 
@@ -188,6 +201,7 @@ export function resourceApi<TItem extends KubeObject, TSummary, TDetail>(client:
           ...(params.order ? { ascending: params.order === 'asc' } : {}),
           ...(params.keyword?.trim() ? { name: params.keyword.trim() } : {}),
           ...(params.fieldSelector ? { fieldSelector: params.fieldSelector } : {}),
+          ...(params.filters ?? {}),
         },
         ...(params.signal ? { signal: params.signal } : {}),
       });

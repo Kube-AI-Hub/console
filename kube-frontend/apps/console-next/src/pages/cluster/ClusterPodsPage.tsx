@@ -28,9 +28,33 @@ export interface ClusterPodsPageProps {
 export function ClusterPodsPage({ cluster }: ClusterPodsPageProps): React.ReactElement {
   const t = useT();
   const list = useResourceListState<'name' | 'createTime'>({ defaultSortBy: 'createTime', defaultOrder: 'desc', resetOn: [cluster] });
+  /*
+   * 状态筛选: the old cluster pods list had the same four kubectl-style states as the
+   * project one (`PODS_STATUS`), and the kapis pods getter filters on exactly those
+   * values. Without it, 'which pods anywhere are stuck' — the question this page exists
+   * to answer — could only be answered by paging through the whole cluster.
+   */
+  const [statusFilter, setStatusFilter] = React.useState('');
+  React.useEffect(() => setStatusFilter(''), [cluster]);
+  const statusFilterControl = React.useMemo(
+    () => ({
+      key: 'status',
+      title: t('workloads.filter.statusLabel'),
+      allLabel: t('workloads.filter.status'),
+      options: [
+        { value: 'Waiting', label: t('workloads.filter.status.waiting') },
+        { value: 'Running', label: t('workloads.filter.status.running') },
+        { value: 'Completed', label: t('workloads.filter.status.completed') },
+        { value: 'Error', label: t('workloads.filter.status.error') },
+      ],
+      aiId: 'cluster-pods:filter:status',
+      widthClass: 'w-full sm:w-44',
+    }),
+    [t],
+  );
 
   const query = useQuery<ResourceListResult<WorkloadSummary>>({
-    queryKey: ['cluster-pods', cluster, list.page, list.pageSize, list.sortBy, list.order, list.search],
+    queryKey: ['cluster-pods', cluster, list.page, list.pageSize, list.sortBy, list.order, list.search, statusFilter],
     // Retain rows while changing list conditions, never across clusters.
     placeholderData: (previous, previousQuery) => previousQuery?.queryKey[1] === cluster ? previous : undefined,
     queryFn: ({ signal }) =>
@@ -42,6 +66,7 @@ export function ClusterPodsPage({ cluster }: ClusterPodsPageProps): React.ReactE
         sortBy: list.sortBy,
         order: list.order,
         keyword: list.search,
+        ...(statusFilter ? { filters: { status: statusFilter } } : {}),
         signal,
       }),
   });
@@ -82,6 +107,7 @@ export function ClusterPodsPage({ cluster }: ClusterPodsPageProps): React.ReactE
       rowKey: (row) => `${row.namespace}/${row.name}`,
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
       search: { placeholder: t('cluster.searchPlaceholder'), aiId: 'cluster-pods:search' },
+      filters: [statusFilterControl],
       refresh: { label: t('cluster.list.refresh'), aiId: 'cluster-pods:refresh', busy: query.isFetching },
       sortableKeys: ['name', 'createTime'],
       sortAiPrefix: 'cluster-pods',
@@ -119,9 +145,16 @@ export function ClusterPodsPage({ cluster }: ClusterPodsPageProps): React.ReactE
           title: t('cluster.column.status'),
           width: 120,
           render: (row) => (
-            <Badge tone={row.status === 'running' ? 'success' : row.status === 'failed' ? 'danger' : 'warning'}>
-              {row.status || '-'}
-            </Badge>
+            <span className="flex min-w-0 flex-col gap-0.5">
+              <Badge tone={row.status === 'running' ? 'success' : row.status === 'failed' ? 'danger' : 'warning'}>
+                {row.status || '-'}
+              </Badge>
+              {row.statusReason ? (
+                <span className="truncate text-[11px] text-ai-fg-muted" data-ai-id={`cluster-pods:reason:${row.name}`} title={row.statusReason}>
+                  {row.statusReason}
+                </span>
+              ) : null}
+            </span>
           ),
         },
         {
@@ -130,7 +163,20 @@ export function ClusterPodsPage({ cluster }: ClusterPodsPageProps): React.ReactE
           title: t('workloads.field.node'),
           width: 160,
           hideBelow: 'lg',
-          render: (row) => <span className="truncate text-ai-fg-secondary">{row.node || '-'}</span>,
+          render: (row) =>
+            row.node ? (
+              <a
+                href={`/kube-frontend/clusters/${encodeURIComponent(cluster)}/nodes/${encodeURIComponent(row.node)}`}
+                className="inline-flex min-h-6 min-w-0 items-center gap-1 truncate text-ai-link hover:underline"
+                data-ai-id={`cluster-pods:node:${row.name}`}
+                title={row.nodeIP ? `${row.node} (${row.nodeIP})` : row.node}
+              >
+                <span className="truncate">{row.node}</span>
+                {row.nodeIP ? <span className="shrink-0 font-mono text-[11px] text-ai-fg-muted">{row.nodeIP}</span> : null}
+              </a>
+            ) : (
+              <span className="text-ai-fg-muted">-</span>
+            ),
         },
         {
           key: 'podIP',
@@ -204,6 +250,11 @@ export function ClusterPodsPage({ cluster }: ClusterPodsPageProps): React.ReactE
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}
         onRefresh={() => void query.refetch()}
+        filters={{ status: statusFilter }}
+        onFiltersChange={(next) => {
+          setStatusFilter(next['status'] ?? '');
+          list.setPage(1);
+        }}
         onPageChange={list.setPage}
         onPageSizeChange={list.setPageSize}
         onSortChange={(next: { key: string; order: SortOrder } | undefined) => {
@@ -219,7 +270,10 @@ interface WorkloadSummaryLike {
   name: string;
   namespace: string;
   status: string;
+  /** The kubectl-style reason behind the phase, when it says more than the phase. */
+  statusReason?: string;
   node?: string;
+  nodeIP?: string;
   podIP?: string;
   createdAt: string;
 }

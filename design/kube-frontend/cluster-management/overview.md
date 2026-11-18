@@ -381,3 +381,25 @@ Enter/Space和aria-pressed/描述提供键盘读数，不嵌套第二个按钮�
 **被否方案**：把未就绪集群的页面从侧栏隐藏。菜单项消失后读者无法判断「这个功能没有」还是「这个集群还没连上」，而后者是可恢复的。另一种是只在页面里显示错误——那正是改动前的样子，点进去才知道不行。
 
 **何时重新考虑**：未就绪集群开始提供部分可读数据（例如已注册但未就绪的节点清单）时，对应页面可以放行，禁用范围随之缩小。
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-21 — 模块徽标表示「已启用」，不冒充「运行正常」
+
+**为什么不能判断健康**：`status.configz` 只记录安装时启用了什么，不含运行状态。唯一能反映健康的是
+`components` 接口，但它是 **Service 级**的（`devops-apiserver`、`notification-manager-svc`），与 configz 的键
+没有可靠映射。实测 47 个组件里，`devops` 能匹配到 `devops-apiserver`，而 `monitoring`、`logging`、`alerting`、
+`gateway`、`s3`、`platformModel`、`dongba`、`terminal`、`servicemesh` 九个键一个都匹配不到——按名字模糊匹配
+会让「监控已启用」显示成「监控未运行」，比不显示更糟。
+
+所以绿色徽标的语义是**已启用**，面板标题写「已启用模块」，英文 `Enabled modules`（此前是 `Installed modules`，
+与中文不一致）。本环境 `devops` 的 `devops-controller` 已 CrashLoopBackOff 251 次而徽标仍是绿色，这符合
+「已启用」的定义；要回答「运行是否正常」需要按模块维护一份组件名映射表，且要处理「一个模块对应多个服务」
+的情况——那是新能力，不是本页的展示修复。
+
+**子模块不单独成条**：configz 同时报 `openpitrix` 与 `openpitrix.appstore`、`network` 与 `network.ippool`，
+而两组标签完全相同（「应用商店」两次、「网络」两次），读者会以为列表重复渲染。子模块在父模块已代表该能力时
+没有额外信息，因此过滤掉，并在**计数之前**过滤——否则 `enabled/total` 会包含看不到的行，数字与画面无法对上。
+
+**未知键仍原样显示**：configz 是开放集合，插件可以新增键。已登记 24 个键有中文名（`platformModel` → 模型平台），
+未登记的按原样显示（`dongba` 是专有名词，保持 `dongba`），不丢弃也不猜译名。
+
+**何时重新考虑**：需要「模块健康」时，先在 api-client 里维护 `configz key → 组件名列表` 的映射并单测覆盖，
+再决定徽标是加一个健康点还是换成第二组徽标；不要用字符串包含关系推断。

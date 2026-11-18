@@ -48,7 +48,7 @@
 
 ## 验收场景
 
-- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-01** — 已知已登录且对集群有读取权限，当打开集群概览页，则「基本信息」显示状态徽标（就绪时「运行正常」）、供应者、Kubernetes 版本、Kube AI Hub 版本、节点数、连接方式、API 端点与描述；就绪时不重复显示 Ready 条件的说明文字（该说明只在未就绪时出现，且与「未就绪」徽标同行，因为它此时是唯一的下一步线索）；「已启用模块」列出 status.configz 中为真的模块、「未启用」列出为假或缺失的模块，不代表 API 未安装；页面不出现项目工作区栏。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-01** — 已知已登录且对集群有读取权限，当打开集群概览页，则「基本信息」显示状态徽标（就绪时「运行正常」）、供应者、Kubernetes 版本、Kube AI Hub 版本、节点数、连接方式、API 端点与描述；就绪时不重复显示 Ready 条件的说明文字（该说明只在未就绪时出现，且与「未就绪」徽标同行，因为它此时是唯一的下一步线索）；「已启用模块」列出 status.configz 中为真的模块、「未启用」列出为假或缺失的模块，不代表 API 未安装——徽标绿色只表示「已启用」，不表示运行正常，因为 configz 不提供健康状态；子模块（`openpitrix.appstore`、`network.ippool`）不单独成条，其父模块已代表该能力，计数也排除它们；已知模块显示中文名（含 `platformModel` → 模型平台），未登记键原样显示；页面不出现项目工作区栏。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-02** — 已知集群存在且监控后端可用，当查看「资源用量」，则 CPU、内存、容器组、节点各显示已使用、总量与使用率，CPU 与内存额外显示已分配；集群有 GPU 时显示 GPU 实际使用、总数和独立已分配量，不再附加 GPU 利用率文本行；当监控接口不可用时，用量面板显示监控不可用说明而不是 0 或空白，基本信息与模块区不受影响。Kubernetes 状态保留请求速率、延迟、scheduled/error/unschedulable 五字段。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-03** — 概览在1024/1280/1600视口优先显示资源总量/用量与排行，其后为基本信息、控制面、组件、模块和其他工具，不撑宽页面。节点/显卡/监控保持同集群快捷链接；kubectl点击一次原地打开终端，页面挂载不自动连接。代理未就绪集群保留接入说明。缺值/零分母显示 `-` 不画0%环，真实零显示0%，不以单节点代替集群用量。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-04** — 资源用量保留 GPU 显存、GPU 实际使用、CPU、内存、容器组、磁盘六类及新增节点就绪率；每类有使用/总量和比例，GPU/CPU/内存分配量独立显示，GPU 数量允许小数。显存/磁盘为 bytes，按 GiB/TiB 显示；缺失不填零。Kubernetes 状态保留 scheduled 和 error，并额外保留 unschedulable，按 result 标签对账，不能互相替代。

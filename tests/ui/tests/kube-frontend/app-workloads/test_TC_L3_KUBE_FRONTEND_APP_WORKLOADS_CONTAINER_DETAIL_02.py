@@ -74,6 +74,9 @@ def test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_CONTAINER_DETAIL_02(app_workloads_pag
     surface = ui.page.locator('[data-ai-id="container-detail:surface"]').last
     expect(surface).to_be_visible(timeout=30_000)
     expect(surface).not_to_have_attribute("data-ai-state", "loading", timeout=60_000)
+    # The log block lives in the 日志 tab: only the selected panel is mounted.
+    ui.page.locator('[data-ai-id="container-detail:tab-trigger:logs"]').click()
+    expect(ui.page.locator('[data-ai-id="container-detail:tab:logs"]')).to_be_visible(timeout=20_000)
 
     block = ui.page.locator('[data-ai-id="container-detail:logs"]')
     expect(block).to_be_visible(timeout=30_000)

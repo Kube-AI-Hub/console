@@ -1,0 +1,38 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL_TABS-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: detail-tabs
+title: 容器组详情 · 页签集合与调度结果
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/pods'
+prd: prd/kube-frontend/app-workloads/detail-tabs.md
+design: design/kube-frontend/app-workloads/detail-tabs.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL_TABS-02
+
+story:
+- US1
+
+product: 容器组详情的页签为 概览 / 调度信息 / 监控 / 容器 / 环境变量 / 事件 / 元数据；「调度信息」的调度结果区块：已调度显示「已调度到节点 <node>」与 PodScheduled 条件的时间，未调度显示「调度未成功」。
+preconditions:
+- 已登录，且在 host 集群（mlu370）的 default 项目空间
+- 由用例创建一个永远调度不出去的容器组（nodeSelector 指向不存在的节点），用例结束后无条件删除
+- 集群里至少有一个已调度的容器组（用例按 API 挑，default 优先、否则 kubesphere-system）
+steps:
+- 打开已调度容器组详情，读七个页签触发器
+- 点「调度信息」，读 pods-detail:schedule-result 的文本与 pods-detail:scheduled-at
+- 与 API 里的 spec.nodeName、status.conditions[PodScheduled].lastTransitionTime 逐项核对
+- 打开未调度容器组详情 → 调度信息，读同样两块
+expected:
+- 页签为 概览、调度信息、监控、容器、环境变量、事件、元数据，默认选中「概览」
+- 已调度：调度结果区块含「已调度到节点 <node>」（node 与对象一致），调度时间是 PodScheduled 条件的 lastTransitionTime（格式化后非「-」）
+- 未调度：显示「调度未成功」；调度时间取该对象 PodScheduled 条件的时间（未调度的容器组通常带 PodScheduled=False，那个时间就是调度失败的时刻），对象里没有该条件时才显示「-」
+- 切换页签不发新的容器组详情请求
+troubleshoot:
+- 页签少了调度信息：tabsFor 的 pods 分支没含 schedule
+- 时间显示 -：读了 status.startTime 或事件时间，不是 PodScheduled 条件
+- 已调度却显示未成功：只看条件、条件还没写入；判据是 nodeName 与条件两处
+update_automation:
+- 页签句柄 workload-detail:tab-trigger:<key>；调度信息句柄 pods-detail:schedule-result / :scheduled-node / :scheduled-at

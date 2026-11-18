@@ -12,11 +12,15 @@
 - AC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-02
 - AC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-03
 - AC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_TERMINAL-01
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-04
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-05
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-06
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-07
 
 ## 设计目标与非目标
 
-目标：一屏回答「这个容器配置成什么样」，并能直接看它的日志——搜索历史（最近 1 小时）与实时 tail 两种读法；还能直接在容器里执行命令。
-非目标：容器编辑（改模板才是唯一入口）；单容器监控仍登记为待补，见 `DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-02`。日志 tail 不依赖 WebSocket（见 `DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-03`），终端依赖它，见 `DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-04`。
+目标：按旧 console 的四个页签回答四类问题——「这个容器配置成什么样」（资源状态）、「它最近用了多少」（监控）、「它实际拿到哪些变量」（环境变量）、「它输出了什么」（日志 + 实时 tail + 终端）。
+非目标：容器编辑（改模板才是唯一入口）。日志 tail 不依赖 WebSocket（见 `DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-03`），终端依赖它，见 `DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-04`；单容器监控已落地（见 `DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-07`），不再登记为待补。
 
 ## 关键约束
 
@@ -68,9 +72,67 @@
 
 **何时重新考虑**：出现节点 shell、kubectl 会话等第二个 exec 入口时，把 `server/src/upgrade.ts` 的路径规则扩展成一份表，而不是复制一份转发。
 
+### DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-06 — 容器详情由单列改回四页签（资源状态 / 监控 / 环境变量 / 日志）
+
+**为什么**：旧 console 的容器详情就是四个页签（`Pods/Containers/routes.js`：`resource-status` / `monitors` / `env` / `logs`，默认 `resource-status`）。单列把七八个区块纵向堆在一页，读者要滚很久才能到环境变量与日志；而「看配置」「看用量」「看变量」「看日志」是四次不同的任务，页签正是这四次任务的分界。页签化也让监控与日志的取数可以按需发生。
+
+**为什么监控面板首次打开后保持挂载**：`ContainerMonitorPanel` 的时间窗在切换时折算成绝对时间戳并进入 query key；如果每次切走都卸载，切回会算出一个新的区间 → 同一个窗口再请求一次，而且读者选的档位被重置。因此监控面板用「首次访问后常驻 + 非选中时隐藏」的写法；其余三个面板仍按选中项挂载。
+
+**为什么切换页签不重新请求**：容器视图与（解析后的）环境变量都在页面顶层查询，页签只决定渲染哪一块。旧 console 的 EnvStore 是在页签组件里 fetch 的，切一次页签读一次 Secret/ConfigMap——这里刻意不复制那个行为。
+
+**被否方案**：保持单列 + 锚点导航。滚动位置与「当前在看哪一类信息」没有对应关系，日志弹窗与图表混在同一条长页里更容易误触。
+
+**被否方案**：把四个页签做成四个子路由（`/containers/<c>/resources` 等）。可以深链，但会让「同一容器」的四个视图各自成为一次路由跳转，面包屑与返回路径都要重新处理；本批不做深链（与详情页签同一决策）。
+
+**何时重新考虑**：需要「日志」深链分享（贴一个日志 URL 给别人）时，把 logs 页签提成子路由，其余三个保持页内。
+
+### DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-07 — 监控读容器级区间查询，三态分开，空态不降级为「不做」
+
+**为什么**：容器级监控回答「这个容器自己用了多少」，与容器组级（`pod_cpu_usage`，已按容器组聚合）不是同一个口径。旧 console 的 `Containers/Monitoring.jsx` 读的就是容器级四条指标，容器放在**路径**里而不是查询参数里：
+
+```text
+GET /kapis/monitoring.kubesphere.io/v1alpha3/namespaces/<ns>/pods/<pod>/containers/<container>
+    ?metrics_filter=container_gpu_usage$|container_gpu_memory_usage$|container_cpu_usage$|container_memory_usage_wo_cache$
+    &start=<秒>&end=<秒>&step=<60s|5m|15m>
+```
+
+返回是 `results[].data.result[]` 的 **matrix**（`values: [[epoch 秒, "值"], …]`）。集群段在 `/kapis` 之后（`/kapis/clusters/<member>/monitoring…`），host 集群没有这一段。
+
+**三态与工作负载监控页签同一套判断**：请求失败 →「监控不可用。」+ 重试；成功但窗口内 0 个采样点 →「该时间窗没有数据。」；有采样且值为 0 → 照常画零值曲线（空闲不是缺失）。
+
+**本部署的实测事实（2026-11-18，mlu370）**：四条指标全部返回 `200` 且 `resultType: "matrix"`，但 `result` 为空——该集群的 `container_cpu_usage_seconds_total` 等序列**不带 `container` / `image` 标签**，而后端模板带 `container!=""` 与 `image!=""` 过滤，把容器级序列全部滤掉。旧 console 在同一集群同样是空。**这是环境数据限制，不是「这个功能不做」**：页签照常请求、照常显示空态，换一个 cAdvisor 带标签的集群就能出图。因此用例写成「有数据则断言曲线，无数据则断言空态」，而不是 skip。
+
+**被否方案**：用容器组级 `pod_*_usage` 近似。那是整个容器组的用量，单容器页显示它会把别的容器的用量算进来。
+
+**被否方案**：本部署无数据就不做页签。等于把「环境缺标签」当成「能力不需要」，旧页场景就永久丢了（同一类错误在 `DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-02` 的复盘里已经出现过一次）。
+
+**被否方案**：空结果时画一条零线。零线会被读成「用量是 0」，与「没有采集」是两件相反的事。
+
+**何时重新考虑**：集群侧补上 `container` / `image` 标签后，本页无需改动（用例会自动走「有数据」分支）；若监控后端改为 vector 返回，则 `query()` 的解析要按 `resultType` 分支处理。
+
+### DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-08 — 镜像 ID 与生命周期来自容器状态与容器声明
+
+**为什么**：`image` 是「要什么」，`status.containerStatuses[].imageID` 是「实际跑的是什么」（digest）。两个 tag 指向不同构建时，只有 imageID 能区分——这是排查「我改了镜像怎么没生效」的第一手证据。容器没启动时没有 `containerStatuses` 条目，显示 `-` 而不是空串：空串会被读成「字段坏了」。
+
+**为什么生命周期按类型+参数展示**：`lifecycle.postStart` / `preStop` 只有三种处理器（`httpGet` / `tcpSocket` / `exec`）。读者要知道的是「它到底调了什么」——HTTP 的 scheme/路径/端口、TCP 的端口、命令的命令行。未知处理器不渲染（宁可少一行，也不把未知处理器显示成「命令」）。旧 console 的 `Cards/Lifecycle` 就是这个形状。
+
+**被否方案**：把 lifecycle 原样打印成 YAML。可读性差，且与本页其他区块的「类型 + 参数」表达不一致。
+
+**被否方案**：没声明 lifecycle 也渲染区块并显示「没有配置」。每个普通容器都多一块噪音；旧页同样是条件渲染。
+
+**何时重新考虑**：容器探针与 lifecycle 合并成「健康检查」区块时（需要重新设计信息层次）。
+
+### DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-09 — 页签句柄与「默认资源状态」的稳定契约
+
+**为什么**：四个页签的触发器与面板都带字面量 `data-ai-id`（`container-detail:tab-trigger:<key>` / `container-detail:tab:<key>`），key 固定为 `resources|monitor|env|logs`。自动化与 agent 只需要知道 key，不需要读文案；文案在 locale 里改，句柄不动。
+
+**代价（已知坑）**：非选中面板不渲染（监控除外），所以「默认五个区块同屏可见」的旧断言必须改成「默认资源状态页签可见，其余点页签后可见」——`AC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-01` 的措辞与本批用例已同步，别按旧措辞写新断言。
+
+**何时重新考虑**：ui 包导出 `Tabs` 后替换触发器（句柄不变）。
+
 ## 系统现状
 
-老 console：`/pods/:podName/containers/:containerName`，四个页签（资源状态/监控/环境变量/日志）。本页迁出「资源状态 + 环境变量」并补齐挂载、端口、探针；日志已补齐两段（搜索 + 实时 tail）；终端已补齐（exec WebSocket）；监控按 `DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-02` 仍登记为待补。
+老 console：`/pods/:podName/containers/:containerName`，四个页签（资源状态 / 监控 / 环境变量 / 日志；源码 `Pods/Containers/routes.js` 的 `resource-status`、`monitors`、`env`、`logs`）。本页先按单列迁出「资源状态 + 环境变量」并补齐挂载、端口、探针，日志补齐两段（搜索 + 实时 tail），终端补齐（exec WebSocket）；本批把单列改回四页签并补上「监控」，页签化恢复了旧页的使用场景（切页签不滚动、不重新取数）。
 
 ## 流式通道
 
@@ -153,14 +215,18 @@ openExecSession({ cluster, namespace, pod, container, command, getToken, onData,
 | 用途 | 路径 |
 | --- | --- |
 | 容器组 | /kapis/resources.kubesphere.io/v1alpha3/namespaces/&lt;ns&gt;/pods/&lt;name&gt;（含 spec/status） |
+| 容器级监控（range） | /kapis/monitoring.kubesphere.io/v1alpha3/namespaces/&lt;ns&gt;/pods/&lt;pod&gt;/containers/&lt;container&gt;?metrics_filter=container_gpu_usage$\|container_gpu_memory_usage$\|container_cpu_usage$\|container_memory_usage_wo_cache$&amp;start=&lt;秒&gt;&amp;end=&lt;秒&gt;&amp;step=&lt;60s\|5m\|15m&gt;（返回 matrix；成员集群的集群段在 /kapis 之后） |
 | 历史日志（搜索） | /kapis/tenant.kubesphere.io/v1alpha2/logs（最近 1 小时，最多 200 行） |
 | 实时日志 tail | /api/v1/namespaces/&lt;ns&gt;/pods/&lt;pod&gt;/log?container=&lt;c&gt;&amp;follow=true&amp;timestamps=true（HTTP chunked，无 content-length） |
 | 容器终端 | ws(s)://&lt;console&gt;/api/v1/namespaces/&lt;ns&gt;/pods/&lt;pod&gt;/exec?container=&lt;c&gt;&amp;stdin=true&amp;stdout=true&amp;stderr=true&amp;tty=true&amp;command=/bin/sh（子协议 v5.channel.k8s.io；BFF 要求 bearer.&lt;token&gt; 或 Authorization 头，上游只收 Authorization） |
 
 ## 不变量
 
-1. 容器视图全部字段来自容器组对象，不额外请求。
+1. 容器视图全部字段来自容器组对象，不额外请求；监控页签读容器级区间查询，是唯一例外。
 2. 五个区块能把「空」与「有内容」区分开。
+2a. 页签集合恒为 资源状态 / 监控 / 环境变量 / 日志，默认资源状态；切换页签不重新请求容器组对象。
+2b. 镜像 ID 取 `status.containerStatuses[].imageID`，缺失显示 `-`；生命周期区块只在声明了 `lifecycle` 时出现。
+2c. 监控三态互斥：不可用 / 无采样 / 有采样（值为 0 也算有采样，画零值曲线）。
 3. 容器名不在对象里时显示明确提示，而不是空白页。
 4. 实时开关是日志区块唯一的模式入口：同一时刻只显示搜索或流中的一个，关闭开关必须 abort 连接。
 5. 实时列表最多 1000 行，且始终保留最新的行（旧行从头丢弃）。
@@ -172,6 +238,11 @@ openExecSession({ cluster, namespace, pod, container, command, getToken, onData,
 
 ## 已知坑
 
+- **容器级监控在本部署整段为空**（2026-11-18 mlu370 实测）：四条指标都返回 200 + `resultType: matrix`，但 `result` 为空。原因是该集群 cAdvisor 序列缺 `container` / `image` 标签，后端模板的 `container!=""`、`image!=""` 把它们全过滤掉。旧 console 同样为空。**不要把空态当成页签坏了**，也不要为此伪造零线或隐藏页签；用例按「有数据/无数据」两分支判定。
+- **容器级监控的集群段在 `/kapis` 之后**：成员集群是 `/kapis/clusters/<member>/monitoring.kubesphere.io/v1alpha3/...`；host 集群没有这一段。把 `?cluster=` 当参数传会被忽略，页面显示 host 的序列——同一张图挂在别的集群标题下。
+- **指标名不能少 `$`**：`metrics_filter` 的每个指标要带结尾 `$` 且用 `|` 连接，写成 `container_cpu_usage,container_gpu_usage` 会匹配不到。
+- **窗口要在选定瞬间折算成绝对时间戳**：把 `Date.now()` 放进 query key 会让它每帧变化、无限重取（集群监控页踩过同一个坑）。
+- **零高度柱不是缺失**：断言「有没有数据」要数采样点（`data-ai-points`）或 `path[data-ai-trend-line]`，不要看第一根柱子的高度。
 - **`$name.tsx` 与 `$name/` 不能共存**：容器详情要挂在容器组详情之下，必须把 `$name.tsx` 改成 `$name/{route,index}.tsx`，否则路由树冲突；改完要重新 `vite build` 让 `routeTree.gen.ts` 重新生成。
 - **`env[].valueFrom`**：只有引用没有值，直接读 `value` 会显示空白，需要展示引用来源。
 - **上游 flush 阈值（务必先读这条）**：B200 上（ks-apiserver v3.4.1 / k8s v1.37.0，2026-11-14 实测）log 流要等缓冲数据达到约 4 KB 才吐出响应头。`follow=true` + 小 `tailLines` 会在没有后续输出时**永远收不到响应头**：同一个 pod，`tailLines=20`（3771 字节）挂死 20 秒 0 字节，`tailLines=25`（4735 字节）30 ms 就 200 并持续输出。因此 follow 路径**不发 `tailLines`**，只发 `follow=true&timestamps=true`，由 UI 截断到 1000 行。下游接手的第一个人一定会想当然把 `tailLines` 加回去，加了就回到「实时日志一直连接中」。
@@ -193,8 +264,14 @@ openExecSession({ cluster, namespace, pod, container, command, getToken, onData,
 - `tests/ui/specs/kube-frontend/app-workloads/TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-03.yaml`（实时 tail：开 → 有行 → 停）
 
 - `tests/ui/specs/kube-frontend/app-workloads/TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_TERMINAL-01.yaml`（终端：开 → echo → 输出 → 关；无 shell 的错误态）
+- `…-CONTAINER_DETAIL-04.yaml`（四页签、默认资源状态、切换不重新取数）
+- `…-CONTAINER_DETAIL-05.yaml`（镜像 ID 等于 `containerStatuses[].imageID`；未启动为 `-`）
+- `…-CONTAINER_DETAIL-06.yaml`（生命周期：postStart HTTP + preStop 命令；无 lifecycle 不渲染区块）
+- `…-CONTAINER_DETAIL-07.yaml`（监控：四张图/空态两分支、三档窗口重取、错误态与重试、真实 0 画曲线——错误与零值两支用拦截响应模拟）
 
-可观测点：`container-detail:surface`、`:basic`、`:resources`、`:env`、`:mounts`、`:ports`、`:probes`、`:logs`、`:log-list`、`:log-keyword`；
+页签与资源状态页签：`container-detail:tab-trigger:<resources|monitor|env|logs>`、`container-detail:tab:<同>`（`resources` 面板含 `:basic` / `:resources` / `:mounts` / `:ports` / `:probes`）、`:image-id`（镜像 ID 值）、`:lifecycle` 与 `:lifecycle:<postStart|preStop>`（声明了才有）；`env` 面板含 `:env` / `:env-list` / `:env-empty`；`logs` 面板含 `:logs`。
+容器监控：`container-detail:monitor`（`data-ai-state` 为 loading/ready/empty/error）、`:monitor:chart`（`data-ai-window`、`data-ai-points`）、`:monitor:<gpu|gpu-memory|cpu|memory>` 与各自的 `:current`、`:monitor:window:<1h|6h|24h>`（`aria-pressed`）、`:monitor:empty`、`:monitor:error`、`:monitor:retry`。
+其它可观测点：`container-detail:surface`、`:basic`、`:resources`、`:env`、`:mounts`、`:ports`、`:probes`、`:logs`、`:log-list`、`:log-keyword`；
 实时：`:log-follow`（开关，`aria-checked` 表示状态）、`:log-stream`（流容器，`data-ai-state` 为 loading/ready/error）、`:log-stream-list`（行列表，每行一个 `data-ai-row`）、`:log-stream-stop`、`:log-stream-retry`；
 终端：`:terminal-open`、`:terminal`（弹窗内部状态）、`:terminal-output`（xterm 渲染器）、`:terminal-close`、`:terminal-retry`、`:terminal-error`；键盘输入使用 xterm-helper-textarea，不再使用旧命令框与执行按钮。
 
@@ -216,7 +293,7 @@ Tab 保留 `\t` 原样送入 stdin，交互式 shell 优先 bash、缺失回退 
 
 ## 后续改进
 
-- 单容器监控（依赖监控区间查询）。
+- 容器级监控的序列依赖集群 cAdvisor 标签；集群侧修好后本页无需改动。
 - xterm + FitAddon 已落地近全屏弹窗，支持光标、颜色与备用屏幕；远端必须安装 vim/vi 等程序，本功能不在生产容器内安装软件。
 - 节点 shell 与 kubectl 会话：复用 `server/src/upgrade.ts`，把路径规则扩成一份表。
 - 上游修好 flush 后，follow 请求可以加回 `tailLines`，避免回放整个日志文件。
@@ -226,4 +303,8 @@ Tab 保留 `\t` 原样送入 stdin，交互式 shell 优先 bash、缺失回退 
 - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-01
 - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-02
 - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-03
+- TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-04
+- TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-05
+- TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-06
+- TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-07
 - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_TERMINAL-01

@@ -63,9 +63,23 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_OVERVIEW_01(cluster_overview_pag
 
     # ---- AC-01: 模块分组与 configz 一致 ----
     enabled_keys = ui.enabled_module_keys()
-    assert len(ui.enabled_modules()) == len(enabled_keys), (
-        f"已启用模块数与 configz 不一致: rendered={len(ui.enabled_modules())} configz={len(enabled_keys)}"
+    rendered = ui.enabled_modules()
+    assert len(rendered) == len(enabled_keys), (
+        f"已启用模块数与 configz 不一致: rendered={len(rendered)} configz={len(enabled_keys)}"
     )
+    # Sub-modules are folded into their parent: two identical "应用商店" badges read as
+    # duplicated data. The count above already excludes them, so this checks the labels.
+    assert len(rendered) == len(set(rendered)), f"模块标签重复: {rendered}"
+    # A key with no label renders as the raw key, which reads like a bug. Two are
+    # deliberately kept as-is because they are product names, not untranslated words:
+    # `dongba` (the data platform) and `s3` (the protocol). Anything else that is
+    # lowercase-and-dotted is a missing label.
+    KEPT_VERBATIM = {"dongba", "s3"}
+    unlabelled = [
+        name for name in rendered
+        if name not in KEPT_VERBATIM and name.replace(".", "").islower() and " " not in name
+    ]
+    assert not unlabelled, f"模块缺少中文名: {unlabelled}"
     # Unknown keys are rendered verbatim rather than dropped: configz is an open set,
     # so filtering it would under-report what is installed.
     assert ui.missing_section().count("未启用") == 1

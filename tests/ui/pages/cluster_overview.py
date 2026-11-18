@@ -216,13 +216,27 @@ class ClusterOverviewPage:
             out[str(name)] = str(samples[0].get("value", [None, ""])[1])
         return out or None
 
+    #: Sub-modules the overview does not render as their own badge.
+    #:
+    #: `configz` reports a module and its sub-modules separately (`openpitrix` and
+    #: `openpitrix.appstore`), but both carry the same label and the parent already
+    #: represents the capability. The page filters them, so this helper must too —
+    #: otherwise the count comparison fails against a correct page.
+    SUB_MODULES = frozenset({"openpitrix.appstore", "network.ippool"})
+
     def enabled_module_keys(self) -> list[str]:
-        """Module keys the cluster object reports as installed."""
+        """Module keys the cluster object reports as installed, minus sub-modules."""
         cluster = self.cluster_object() or {}
         configz = ((cluster.get("status") or {}).get("configz")) or {}
-        return sorted(key for key, value in configz.items() if value is True)
+        return sorted(
+            key for key, value in configz.items()
+            if value is True and key not in self.SUB_MODULES
+        )
 
     def missing_module_keys(self) -> list[str]:
         cluster = self.cluster_object() or {}
         configz = ((cluster.get("status") or {}).get("configz")) or {}
-        return sorted(key for key, value in configz.items() if value is not True)
+        return sorted(
+            key for key, value in configz.items()
+            if value is not True and key not in self.SUB_MODULES
+        )

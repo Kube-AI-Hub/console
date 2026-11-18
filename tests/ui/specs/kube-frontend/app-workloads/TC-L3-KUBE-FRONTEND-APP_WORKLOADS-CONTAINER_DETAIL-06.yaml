@@ -1,0 +1,37 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-06
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: container-detail
+title: 容器详情 · 生命周期区块
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/pods'
+prd: prd/kube-frontend/app-workloads/container-detail.md
+design: design/kube-frontend/app-workloads/container-detail.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-CONTAINER_DETAIL-06
+
+story:
+- US1
+
+product: 声明了 lifecycle 的容器在「资源状态」页签显示生命周期区块，分别列出 postStart 与 preStop 的类型（HTTP 请求 / TCP 端口 / 命令）与参数；未声明 lifecycle 时不显示该区块。
+preconditions:
+- 已登录，且在 host 集群（mlu370）的 default 项目空间
+- 由用例创建一个容器组：容器 main 声明 lifecycle.postStart=httpGet（路径、端口、scheme）与 preStop=exec（命令），另一个容器 plain 不声明 lifecycle；用例结束后无条件删除
+steps:
+- 打开 main 容器详情，停在默认「资源状态」页签
+- 读 container-detail:lifecycle 区块与两个钩子行
+- 核对类型文案与参数与对象里的 lifecycle 逐项一致
+- 打开 plain 容器详情，确认没有 container-detail:lifecycle
+expected:
+- 生命周期区块出现，含「启动后」（postStart）与「停止前」（preStop）两行
+- postStart 行显示类型「HTTP 请求」与参数（scheme、路径、端口）
+- preStop 行显示类型「命令」与命令行
+- 未声明 lifecycle 的容器没有该区块
+troubleshoot:
+- 区块缺失：lifecycle 读成了探针字段（livenessProbe 等）
+- 类型显示成 httpGet：LIFECYCLE_TYPE_KEYS 没做文案映射
+- 参数为空：只读了处理器名，没取 scheme/path/port 或 command
+update_automation:
+- 句柄 container-detail:lifecycle 与 :lifecycle:<postStart|preStop>；派生见 api-client 的 containerLifecycleHooks

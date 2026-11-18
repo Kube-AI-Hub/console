@@ -14,7 +14,23 @@ import { api } from '@/api';
  */
 
 export function workloadsKey(kind: WorkloadKind, params: Omit<ResourceListParams, 'signal'>) {
-  return [kind, params.cluster, params.namespace, params.page, params.pageSize, params.sortBy, params.order, params.keyword, params.fieldSelector] as const;
+  return [
+    kind,
+    params.cluster,
+    params.namespace,
+    params.page,
+    params.pageSize,
+    params.sortBy,
+    params.order,
+    params.keyword,
+    params.fieldSelector,
+    /*
+     * The status filter is part of the key for the same reason page size is: two
+     * requests that differ only by filter would otherwise share one cache entry, and
+     * clearing the filter would show the filtered page until the next refetch.
+     */
+    params.filters ? JSON.stringify(params.filters) : '',
+  ] as const;
 }
 
 export function useWorkloads(kind: WorkloadKind, params: Omit<ResourceListParams, 'signal'>) {

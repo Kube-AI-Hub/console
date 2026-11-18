@@ -1,0 +1,37 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL_TABS-04
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: detail-tabs
+title: 容器组详情 · 调度信息的状态信息与四项条件
+entry_url: '{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/pods'
+prd: prd/kube-frontend/app-workloads/detail-tabs.md
+design: design/kube-frontend/app-workloads/detail-tabs.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-DETAIL_TABS-04
+
+story:
+- US1
+
+product: 「状态信息」区块显示当前状态，以及 PodScheduled / Initialized / ContainersReady / Ready 四项条件各自的满足与否与明细（状态值、原因、消息、更新时间）；对象里没有的条件不显示。
+preconditions:
+- 已登录，且在 host 集群（mlu370）的 default 项目空间
+- 由用例创建一个未调度的容器组（至少带 PodScheduled=False 与 reason=Unschedulable）与一个已调度的容器组；用例结束后无条件删除
+steps:
+- 打开已调度容器组详情 → 调度信息，读 pods-detail:current-status 与四个 pods-detail:condition:<type>
+- 与 API 的 status.conditions 逐条核对满足与否、原因、消息、更新时间
+- 打开未调度容器组详情 → 调度信息，读同样内容
+- 核对对象里没有的条件类型在页面上没有对应行
+expected:
+- 状态信息区块显示当前状态（与对象派生状态一致）
+- 四项条件各占一行，满足显示「已满足」、不满足显示「未满足」；行内有原因/消息/更新时间时显示对应明细
+- 未调度容器组的 PodScheduled 行显示「未满足」且含 reason（Unschedulable）
+- 对象里没有的条件不产生行（行集合等于对象里的四项交集）
+troubleshoot:
+- 条件行缺失：只渲染了对象里存在的条件，但页面集合写错（例如用了小写 type）
+- 全部显示已满足：没读 condition.status，按「存在即满足」判断
+- 更新时间不显示：条件里 lastTransitionTime 为空时不应显示「更新时间：-」，直接不显示该行
+update_automation:
+- 句柄 pods-detail:schedule-status / :current-status / :condition:<type>；条件集合见 WorkloadDetailPage 的 CONDITION_TYPES

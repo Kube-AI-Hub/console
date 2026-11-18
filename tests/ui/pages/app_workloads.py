@@ -85,8 +85,20 @@ class AppWorkloadsPage:
         return self.page.locator('[data-ai-id^="ingresses-create:rule-remove:"]').nth(index)
 
     def choose_select(self, ai_id: str, option: str) -> None:
-        """Open a Radix select by its handle and pick one option by its visible label."""
-        self.page.locator(f'[data-ai-id="{ai_id}"]').click()
+        """Open a Radix select by its handle and pick one option by its visible label.
+
+        The trigger toggles: clicking it while the list is already open *closes* it, and the
+        following `option` click then times out. Reading the trigger's `aria-expanded` first
+        makes the helper safe to call on a select a previous step left open (measured on the
+        pods status filter, 2026-11-18).
+        """
+        trigger = self.page.locator(f'[data-ai-id="{ai_id}"]')
+        # Whether the popup is open is read from the rendered options, not from
+        # `aria-expanded`: the handle sits on the wrapper, and Radix puts that attribute on
+        # the trigger button, so reading it always said "closed" and the click toggled a
+        # popup that was already open (measured on the pods status filter, 2026-11-18).
+        if self.page.get_by_role("option").count() == 0:
+            trigger.click()
         self.page.get_by_role("option", name=option, exact=True).click()
 
     def network_create_submit(self) -> Locator:
@@ -602,7 +614,14 @@ class AppWorkloadsPage:
         self._wait_pods_gone(name, timeout)
 
     def delete_pod(self, name: str, timeout: float = 60) -> None:
-        self._request("DELETE", self._kube_path("pods", name))
+        """Delete a pod without waiting for a grace period.
+
+        A pod that never scheduled (the Waiting sample these cases create) still gets the
+        default 30s grace period on delete, and the apiserver can keep it in Terminating for
+        much longer; a 120s wait then fails the *cleanup* of a case that already passed its
+        assertions. `gracePeriodSeconds=0` removes it at once.
+        """
+        self._request("DELETE", f"{self._kube_path('pods', name)}?gracePeriodSeconds=0")
         self._wait_gone("pods", name, timeout)
 
     def _wait_gone(self, kind: str, name: str, timeout: float) -> None:
