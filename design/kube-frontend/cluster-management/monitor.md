@@ -588,6 +588,8 @@ export interface DonutChartProps extends React.HTMLAttributes<HTMLDivElement> {
 
 RDMA 摘要指标：`cluster_ib_port_up`、`cluster_ib_port_total`、`cluster_ib_tx_bytes`、`cluster_ib_rx_bytes`、`cluster_ib_rx_errors`。缺任何一条：该行显示「-」、大图按无数据说明，不填 0；比率 >1 时可显示 >100%（超配）不做截断，轴上限取数据峰值；一次 range 查询取回上述全部指标（含 used/total），比率按时间戳配对相除，不按下标 zip。
 
+**行标签与图表标题是两个事实。** 行标签是资源名（GPU 显存 / GPU 卡 / 已分配 GPU 卡数 / CPU / 内存 / 磁盘 / 容器组），图表标题才是比率名（…使用率）；两者用不同 locale key。把「使用率」贴到 used/total 值上会读成「显存使用率 118 GiB / 276 GiB」——A100 复验时实际发生过。大盘按 total 选单位、两侧同刻度；TiB 级保留两位小数（0.24 TiB / 5.89 TiB），其余一位。
+
 ### CON-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-05 — 物理资源页签 18 张图与序列
 
 | 组 | 图 key | 序列（身份） | 指标 | 呈现 |

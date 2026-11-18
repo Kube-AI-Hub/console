@@ -111,9 +111,21 @@
 - **百分比轴精度**：资源/概览图表的百分比原按整数取整，0–1% 的轴出现「1% / 1% / 0%」两条相同刻度；改为最多一位小数（42.4% / 42%），对应单测期望同步。
 - 以上修复后重新 build + restart 5178，overview 截图已由验证方按新构建重拍；app vitest **277 passed**、typecheck exit 0、pytest 监控 14 条 **14 passed / 127.21s**。
 
+## A100 环境复验（2026-11-18）
+
+A100 只有旧 AGPL console（`ssh a100` → 节点 `172.26.1.44:30880`，公网域名本机不可达），没有 `/kube-frontend`，也没有可匿名调用的 first-party 登录端点。用「本地静态站 + 去前缀转发 + 现成 token」验证：
+
+- 临时转发：`/kube-frontend/…` 去前缀到旧 console（再代理 ks-apiserver），`/kube-frontend/api/config`、`/api/ai/manifest` 本地应答；token 由旧 console `/oauth/token`（密码 mix 加密）取得。
+- 测试套件新增 `KA_TOKEN`（`helpers/config.py` + `conftest._app_token`）：有 token 时跳过密码授权，其余断言/截图/API 对账不变。
+- **结果**：监控页 13 条相关用例串行 **12 passed / 1 skipped / 0 failed，73.82s**（skip = 本环境没有未就绪成员集群 `test`，即 AC-09 的环境分支）；截图 `tests/ui/artifacts/cluster-monitor-a100/`（5 页签 1600）。
+- **数据面**：3 节点、厂商 昇腾/昆仑芯/英伟达各 1（构成图 33.3% 三段）、节点环 3/3；Kube AI Hub 17/19 异常；etcd ServiceMonitor 404 → 条件页签隐藏；RDMA 有数据（健康 87.5%、端口 14/16、链路 287.5 Gb/s）；resource 18 图无空态；排行 3 行 + 导出可用。
+- **A100 验证发现并修复**：① 概览用量行标签原用「…使用率」但显示 used/total（已改为资源名，图表标题仍用比率名）；② TiB 级大盘精度改为两位（0.24 TiB / 5.89 TiB）。
+- **边界**：A100 没有部署新前端，也不是本页的部署验收；first-party 登录端点对匿名返回 403，只能 token 注入（KA_TOKEN）。中文深色截图为本轮 A100 证据，浅色/英文未在 A100 复拍。
+
 ## 证据链接
 
 - 旧页三集群基线（上一批）：[assets/cluster-monitor-status-20261118/](assets/cluster-monitor-status-20261118/)。
+- A100 复验截图（gitignored）：`console/tests/ui/artifacts/cluster-monitor-a100/`（5 页签 ×1600）。
 - 本批逐页签 after 截图与测量（gitignored）：`console/tests/ui/artifacts/cluster-monitor-tabs/`（`host-*` 15、`agent-*` 6、`host-resource-deeplink-1600.png`、`host-overview-narrow-900.png`、浅色 2 张、英文 2 张、`measurements.json`、复现脚本 `tests/ui/tools/shots_cluster_monitor_tabs.py`）。
 - 本批旧页 5 页签逐页基线、before/after 截图与测量 JSON：待验证方归档到 `console/tests/ui/artifacts/cluster-monitor-tabs/`。
 - 契约：[monitor-tabs-contract.md](/tmp/monitor-tabs-contract.md)。

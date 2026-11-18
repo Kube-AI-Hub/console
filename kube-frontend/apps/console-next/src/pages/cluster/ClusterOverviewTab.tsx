@@ -39,7 +39,10 @@ type ChartKind = 'percent' | 'count';
 
 interface UsageSpec {
   key: 'gpuMemory' | 'gpu' | 'gpuAllocated' | 'cpu' | 'memory' | 'disk' | 'pods';
+  /** The row's resource name, e.g. "GPU 内存" — a value, not a utilisation rate. */
   labelKey: LocaleKey;
+  /** The chart's title, e.g. "GPU 显存使用率" — the ratio the line shows. */
+  chartLabelKey: LocaleKey;
   /** Series for the current "used" number. */
   used: string;
   /** Series for the current capacity; missing means the row prints '-'. */
@@ -66,13 +69,13 @@ interface UsageSpec {
  * questions on an overcommitted GPU pool, and the old page printed the pair.
  */
 const USAGE: readonly UsageSpec[] = [
-  { key: 'gpuMemory', labelKey: 'cluster.monitor.gpuMemory', used: 'cluster_gpu_memory_usage', total: 'cluster_gpu_memory_total', chart: 'cluster_gpu_memory_utilisation', unit: 'bytes', chartKind: 'percent', scale: 100 },
-  { key: 'gpu', labelKey: 'cluster.monitor.gpuUtilization', used: 'cluster_gpu_usage', total: 'cluster_gpu_total', chart: 'cluster_gpu_utilization', unit: 'count', chartKind: 'percent', scale: 100 },
-  { key: 'gpuAllocated', labelKey: 'cluster.monitor.gpuAllocated', used: 'cluster_gpu_allocated', total: 'cluster_gpu_total', chart: 'cluster_gpu_allocated', unit: 'count', chartKind: 'count' },
-  { key: 'cpu', labelKey: 'cluster.monitor.cpu', used: 'cluster_cpu_usage', total: 'cluster_cpu_total', chart: 'cluster_cpu_utilisation', unit: 'cores', chartKind: 'percent', scale: 100 },
-  { key: 'memory', labelKey: 'cluster.monitor.memory', used: 'cluster_memory_usage_wo_cache', total: 'cluster_memory_total', chart: 'cluster_memory_utilisation', unit: 'bytes', chartKind: 'percent', scale: 100 },
-  { key: 'disk', labelKey: 'cluster.monitor.disk', used: 'cluster_disk_size_usage', total: 'cluster_disk_size_capacity', chart: 'cluster_disk_size_utilisation', unit: 'bytes', chartKind: 'percent', scale: 100 },
-  { key: 'pods', labelKey: 'cluster.monitor.pods', used: 'cluster_pod_running_count', total: 'cluster_pod_quota', chart: 'cluster_pod_running_count', unit: 'count', chartKind: 'count' },
+  { key: 'gpuMemory', labelKey: 'cluster.monitor.overview.usage.gpuMemory', chartLabelKey: 'cluster.monitor.gpuMemory', used: 'cluster_gpu_memory_usage', total: 'cluster_gpu_memory_total', chart: 'cluster_gpu_memory_utilisation', unit: 'bytes', chartKind: 'percent', scale: 100 },
+  { key: 'gpu', labelKey: 'cluster.monitor.overview.usage.gpu', chartLabelKey: 'cluster.monitor.gpuUtilization', used: 'cluster_gpu_usage', total: 'cluster_gpu_total', chart: 'cluster_gpu_utilization', unit: 'count', chartKind: 'percent', scale: 100 },
+  { key: 'gpuAllocated', labelKey: 'cluster.monitor.overview.usage.gpuAllocated', chartLabelKey: 'cluster.monitor.gpuAllocated', used: 'cluster_gpu_allocated', total: 'cluster_gpu_total', chart: 'cluster_gpu_allocated', unit: 'count', chartKind: 'count' },
+  { key: 'cpu', labelKey: 'cluster.monitor.overview.usage.cpu', chartLabelKey: 'cluster.monitor.cpu', used: 'cluster_cpu_usage', total: 'cluster_cpu_total', chart: 'cluster_cpu_utilisation', unit: 'cores', chartKind: 'percent', scale: 100 },
+  { key: 'memory', labelKey: 'cluster.monitor.overview.usage.memory', chartLabelKey: 'cluster.monitor.memory', used: 'cluster_memory_usage_wo_cache', total: 'cluster_memory_total', chart: 'cluster_memory_utilisation', unit: 'bytes', chartKind: 'percent', scale: 100 },
+  { key: 'disk', labelKey: 'cluster.monitor.overview.usage.disk', chartLabelKey: 'cluster.monitor.disk', used: 'cluster_disk_size_usage', total: 'cluster_disk_size_capacity', chart: 'cluster_disk_size_utilisation', unit: 'bytes', chartKind: 'percent', scale: 100 },
+  { key: 'pods', labelKey: 'cluster.monitor.overview.usage.pods', chartLabelKey: 'cluster.monitor.pods', used: 'cluster_pod_running_count', total: 'cluster_pod_quota', chart: 'cluster_pod_running_count', unit: 'count', chartKind: 'count' },
 ];
 
 /** The RDMA summary metrics; details live on the physical-resources tab. */
@@ -147,9 +150,13 @@ function formatUsagePair(pair: { used: number; total: number }, unit: UsageUnit)
     index += 1;
   }
   const scale = 1024 ** index;
+  // TiB-scale totals need two decimals: a 0.2 TiB / 5.9 TiB pair loses the
+  // difference between 180 GiB and 240 GiB at one decimal.
+  const digits = index >= 4 ? 2 : 1;
   const show = (value: number): string => {
-    const scaled = Math.round((value / scale) * 10) / 10;
-    return Number.isInteger(scaled) ? String(scaled) : scaled.toFixed(1);
+    const factor = 10 ** digits;
+    const scaled = Math.round((value / scale) * factor) / factor;
+    return index >= 4 ? scaled.toFixed(digits) : Number.isInteger(scaled) ? String(scaled) : scaled.toFixed(digits);
   };
   return `${show(pair.used)} ${UNITS[index]} / ${show(pair.total)} ${UNITS[index]}`;
 }
@@ -310,10 +317,10 @@ export function ClusterOverviewTab({
               className="flex min-w-0 flex-col gap-2 rounded-ai-lg border border-ai-line bg-ai-surface-1 p-4"
               data-ai-id={USAGE_CHART_ID}
               data-ai-state={chartPoints.length === 0 ? 'empty' : 'ready'}
-              aria-label={t(selectedSpec.labelKey)}
+              aria-label={t(selectedSpec.chartLabelKey)}
             >
               <div className="flex items-baseline justify-between gap-2">
-                <h3 className="text-sm font-medium text-ai-fg">{t(selectedSpec.labelKey)}</h3>
+                <h3 className="text-sm font-medium text-ai-fg">{t(selectedSpec.chartLabelKey)}</h3>
                 <span className="text-xs tabular-nums text-ai-fg-muted" data-ai-id={USAGE_CHART_ID + ':now'}>
                   {chartLatest === undefined ? '-' : formatChartValue(chartLatest, selectedSpec.chartKind)}
                 </span>
@@ -328,14 +335,14 @@ export function ClusterOverviewTab({
                   series={[
                     {
                       key: selectedSpec.key,
-                      label: t(selectedSpec.labelKey),
+                      label: t(selectedSpec.chartLabelKey),
                       points: chartPoints,
                       color: TREND_SERIES_COLORS[0],
                     },
                   ]}
                   start={start}
                   end={end}
-                  label={t(selectedSpec.labelKey)}
+                  label={t(selectedSpec.chartLabelKey)}
                   emptyText={t('cluster.monitor.empty')}
                   showAxes
                   showGrid
@@ -350,7 +357,7 @@ export function ClusterOverviewTab({
                   className="inline-block size-2.5 shrink-0 rounded-full"
                   style={{ backgroundColor: TREND_SERIES_COLORS[0] }}
                 />
-                <span className="text-ai-fg-secondary">{t(selectedSpec.labelKey)}</span>
+                <span className="text-ai-fg-secondary">{t(selectedSpec.chartLabelKey)}</span>
                 <span className="tabular-nums text-ai-fg-muted" data-ai-id={USAGE_CHART_ID + ':legend:value'}>
                   {chartLatest === undefined ? '-' : formatChartValue(chartLatest, selectedSpec.chartKind)}
                 </span>

@@ -78,6 +78,12 @@ def _app_token(ui_config) -> str:
     import time
     import urllib.request
 
+    # An environment that cannot perform the first-party password grant hands in a
+    # minted token instead (A100 serves the old console API; its token comes from
+    # /oauth/token and is injected as KA_TOKEN). Everything downstream is unchanged.
+    if ui_config.token:
+        return ui_config.token
+
     url = f"{ui_config.app_api}/kapis/oauth.kubesphere.io/v1alpha1/login"
     body = json.dumps({"username": ui_config.username, "password": ui_config.password}).encode("utf-8")
     last_error: Exception | None = None

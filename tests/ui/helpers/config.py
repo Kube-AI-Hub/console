@@ -38,6 +38,10 @@ class UiConfig:
     #: of the run down with it.
     login_username: str = ""
     login_password: str = ""
+    #: A ready-made bearer token for deployments whose login endpoint the suite
+    #: cannot call (the old-console API behind A100). Set KA_TOKEN and the run
+    #: skips the password grant entirely; every fixture then uses this token.
+    token: str = ""
 
     @property
     def login_user(self) -> str:
@@ -84,4 +88,5 @@ def load_config() -> UiConfig:
         app_url=_env("KA_APP_URL", ""),
         login_username=_env("KA_LOGIN_USERNAME", ""),
         login_password=_env("KA_LOGIN_PASSWORD", ""),
+        token=_env("KA_TOKEN", ""),
     )

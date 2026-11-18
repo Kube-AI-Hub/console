@@ -18,6 +18,25 @@ cd kube-frontend && node scripts/dev-static-server.mjs apps/console-next/dist 51
 
 `.env` 里的 `KA_APP_URL` 指向 5178、`KA_PASSWORD` 为 B200 的 admin 口令。
 
+### 没有新前端登录端点的环境（如 A100 旧 console）
+
+A100 的控制台仍是旧 AGPL 版本：没有 `/kube-frontend/login`，新 UI 也没有部署。验证方式是本地静态站 + 转发适配 +
+现成 token：
+
+```bash
+# 1) 隧道到旧 console（把 API 前缀透传到 ks-apiserver）
+ssh -N -L 18080:172.26.1.44:30880 a100
+# 2) 本地站：服务 console-next 的 dist，把 /kube-frontend/… 去前缀转发到 18080，
+#    /kube-frontend/api/config 与 /api/ai/manifest 本地应答（旧 console 不提供）
+#    临时脚本见环境文档「A100 环境」的本地测试一节。
+# 3) 用旧 console 的 /oauth/token 取 token（密码要用 mix 加密），用 KA_TOKEN 注入
+KA_TOKEN=<token> KA_BASE_URL=http://127.0.0.1:18080 KA_APP_URL=http://127.0.0.1:5182 \
+KA_CLUSTER=host KA_USERNAME=admin KA_PASSWORD='<password>' \
+pytest tests/kube-frontend/cluster-management -k "MONITOR_01 or MONITOR_11" -q -n 0
+```
+
+`KA_TOKEN` 让套件跳过密码登录；所有断言、截图与 API 对账照常。
+
 ## 跑法
 
 | 场景 | 命令 | 耗时 |
