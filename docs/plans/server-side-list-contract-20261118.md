@@ -30,6 +30,17 @@ limit=100 -> 4 items（不足一页时如实返回全部）
 | `totalItems` 给出总数而非当前页条数 | ✓（4，不是 3） |
 | `name=` 服务端过滤 | ✓ |
 
+### 规模下的分页（427 条的真实集合）
+
+```
+GET /kapis/resources.kubesphere.io/v1alpha3/pods?page=1&limit=5  -> 5 items, totalItems: 427
+GET …/pods?page=2&limit=5                                        -> 5 items
+GET …/nodes?limit=-1                                             -> 3 items（全部）
+```
+
+**`totalItems` 是 427 而不是 5**——分页器显示「第 1-5 条，共 427 条」时读的就是这个数。
+`limit=-1` 在集群级集合上表示「全要」，与旧 console 的用法一致。
+
 ## 这证明了什么、没证明什么
 
 - **证明**：列表页把 `page/limit/sortBy/ascending/name` 交给服务端之后，服务端确实按约定执行；
