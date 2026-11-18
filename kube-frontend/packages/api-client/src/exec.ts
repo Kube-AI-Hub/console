@@ -17,14 +17,28 @@ import { ApiError } from './errors';
  * | 3    | error   | server → client (a kube 'Status' JSON) |
  * | 4    | resize  | client → server (JSON '{Width,Height}') |
  *
+ * **Both channel versions are offered, not just the newest.** `v5` only exists from
+ * kube 1.30; a 1.28 cluster answers a `v5`-only handshake with a bare 403 and no
+ * body, which reads like an authorization failure and sent one investigation down
+ * the wrong path (mlu370, 2026-11-18). Offering `v5, v4` lets the server pick —
+ * it answers `sec-websocket-protocol: v4.channel.k8s.io` on older clusters and
+ * `v5` on newer ones, and the frame layout above is identical in both.
+ *
  * Tokens: the browser 'WebSocket' constructor cannot set headers and this console
  * has no cookie session, so the bearer token travels as a 'bearer.<token>'
- * subprotocol. The BFF strips it and sets the 'Authorization' header on the
- * upstream hop; see 'kube-frontend/server/src/upgrade.ts'.
+ * subprotocol. ks-apiserver strips it and sets the 'Authorization' header on the
+ * upstream hop; see 'kube-server/pkg/apiserver/filters/requestinfo.go'.
  */
 
-/** Channel protocol the upstream expects; kube 1.37 removed the SPDY transports. */
+/** Newest channel protocol; kube 1.30+ answers this one. */
 export const EXEC_PROTOCOL = 'v5.channel.k8s.io';
+
+/**
+ * Older channel protocol, for clusters that predate v5.
+ *
+ * Same frame layout, so nothing else changes: only the negotiated name differs.
+ */
+export const EXEC_PROTOCOL_FALLBACK = 'v4.channel.k8s.io';
 
 /** Subprotocol prefix the BFF uses to receive the bearer token from a browser. */
 export const TOKEN_PROTOCOL_PREFIX = 'bearer.';
@@ -211,7 +225,8 @@ export function openExecSession(options: ExecOptions): ExecSession {
     return { write: () => undefined, resize: () => undefined, close: () => undefined };
   }
 
-  const protocols = [EXEC_PROTOCOL, TOKEN_PROTOCOL_PREFIX + token];
+  // Both channel versions, newest first: the server picks the highest it knows.
+  const protocols = [EXEC_PROTOCOL, EXEC_PROTOCOL_FALLBACK, TOKEN_PROTOCOL_PREFIX + token];
   try {
     socket = new Impl(execWebSocketUrl(options), protocols);
   } catch (cause) {

@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../src/errors';
 import {
   EXEC_PROTOCOL,
+  EXEC_PROTOCOL_FALLBACK,
   execPath,
   execWebSocketUrl,
   openExecSession,
@@ -167,7 +168,7 @@ describe('openExecSession', () => {
     } finally { vi.useRealTimers(); }
   });
 
-  it('sends the channel protocol and the bearer token as subprotocols', () => {
+  it('offers both channel versions and the bearer token as subprotocols', () => {
     openExecSession({
       cluster: 'host',
       namespace: 'demo',
@@ -178,7 +179,9 @@ describe('openExecSession', () => {
       webSocketImpl: FakeSocket,
     });
     expect(lastSocket().url).toContain('/api/v1/namespaces/demo/pods/web-0/exec?');
-    expect(lastSocket().protocols).toEqual([EXEC_PROTOCOL, 'bearer.token-abc']);
+    // v5 first, v4 as the fallback: a 1.28 cluster answers a v5-only handshake
+    // with a bare 403, so the server has to be able to pick an older name.
+    expect(lastSocket().protocols).toEqual([EXEC_PROTOCOL, EXEC_PROTOCOL_FALLBACK, 'bearer.token-abc']);
     expect(lastSocket().binaryType).toBe('arraybuffer');
   });
 
