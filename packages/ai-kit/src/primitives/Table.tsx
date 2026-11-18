@@ -325,8 +325,15 @@ export function Table<T>({
         * text rather than as a table that scrolls. `w-max` lets the table take the width
         * its columns ask for; `min-w-full` keeps a narrow table filling the container
         * so short lists do not collapse to the left.
+        *
+        * `overflow-visible` is load-bearing, not decoration. A `border-collapse` table
+        * establishes a containing block for its sticky cells, so when something
+        * upstream sets `overflow: hidden` on the table — Storybook's docs canvas does —
+        * a pinned column positions against the table's own box and scrolls away with
+        * it. The app never sets it, which is why the same component looked pinned on
+        * the node list and unpinned in the docs.
         */}
-      <table className="w-max min-w-full border-collapse text-sm text-ai-fg-secondary">
+      <table className="w-max min-w-full overflow-visible border-collapse text-sm text-ai-fg-secondary">
         {/*
          * No header when there is nothing to head. The old console renders an empty
          * card in that case, and a header row above "no data" reads as a table that

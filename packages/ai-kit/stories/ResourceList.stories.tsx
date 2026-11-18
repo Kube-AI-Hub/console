@@ -77,7 +77,7 @@ const VENDOR_LABEL: Record<NodeRow['vendor'], string> = {
 const percent = (used: number, total: number) => (total > 0 ? `${Math.round((used / total) * 100)}%` : '-');
 
 /** The columns the capability stories share, so each story only shows its own point. */
-function nodeColumns(options: { hideable?: boolean } = {}): ListSchema<NodeRow>['columns'] {
+function nodeColumns(options: { hideable?: boolean; pinEnd?: boolean } = {}): ListSchema<NodeRow>['columns'] {
   const hideable = options.hideable ? { hideable: true as const } : {};
   return [
     { key: 'name', title: '名称', width: 150, pin: 'start', render: (row) => (
@@ -97,7 +97,12 @@ function nodeColumns(options: { hideable?: boolean } = {}): ListSchema<NodeRow>[
       render: (row) => percent(row.gpuUsed, row.gpu) },
     { key: 'cpu', title: 'CPU 使用率', width: 120, ...hideable, hint: '节点整体实时利用率。',
       render: (row) => `${row.cpu}%` },
-    { key: 'ntp', title: '时间同步', width: 110, ...hideable,
+    /*
+     * A pinned column cannot also be hideable — the type forbids it, because hiding
+     * the anchor while the middle scrolls leaves nothing to orient against. The
+     * pinned variant therefore drops `hideable` rather than carrying both.
+     */
+    { key: 'ntp', title: '时间同步', width: 110, ...(options.pinEnd ? { pin: 'end' as const } : hideable),
       hint: '相对集群时钟源的偏移。超过 30 秒警告，超过 120 秒危险。',
       render: (row) => `${row.ntp > 0 ? '+' : ''}${row.ntp}s` },
   ];
@@ -292,9 +297,13 @@ export const ColumnVisibility: StoryObj = {
 /**
  * Pinned columns.
  *
- * The name column stays at the left edge and the row actions at the right while the
- * middle scrolls. Give a pinned column a `width`: without one it changes width as
- * content changes, which makes the pin more distracting than useful.
+ * `pin: 'start'` on the name and `pin: 'end'` on the last column: both edges stay
+ * while the middle scrolls. A pinned column needs a `width` — without one it changes
+ * width as content changes, which makes the pin more distracting than useful.
+ *
+ * The pinned end column here is a data column, not the row-actions column. A list
+ * that has `rowActions` gets that column pinned automatically, so declaring both
+ * would put two sticky cells on the same edge.
  */
 export const PinnedColumns: StoryObj = {
   name: 'pinned columns',
@@ -308,14 +317,9 @@ export const PinnedColumns: StoryObj = {
       <ResourceList
         schema={{
           title: '节点',
-          description: '把表格横向滚到底：名称停在左侧，行操作停在右侧。',
+          description: '把表格横向滚到底：名称停在左侧，时间同步停在右侧。',
           rowKey: 'name',
-          columns: nodeColumns({ hideable: true }),
-          rowActions: [
-            { key: 'terminal', label: '打开终端', aiId: 'demo:terminal' },
-            { key: 'cordon', label: '禁止调度', aiId: 'demo:cordon' },
-          ],
-          labels: { moreActions: '更多操作' },
+          columns: nodeColumns({ hideable: true, pinEnd: true }),
         }}
         rows={NODES}
         onAction={() => undefined}

@@ -16,6 +16,21 @@
 
 /* --- Surface --- */
 
+/*
+ * A `border-collapse` table establishes a containing block for its sticky cells.
+ * Storybook's docs stylesheet sets `overflow: hidden` on `table`, which turns the
+ * table itself into that containing block — so a pinned column positions against the
+ * table's box and scrolls away with it. The app never sets it, which is why the same
+ * component looked pinned on the node list and unpinned in these docs.
+ *
+ * `!important` because the rule being overridden is the addon's, not ours, and it is
+ * more specific (`.ai-root .sbdocs table`). Scoped to the docs container: a story's
+ * own table keeps whatever its component declares.
+ */
+.ai-root .sbdocs table {
+  overflow: visible !important;
+}
+
 .sbdocs-wrapper,
 .sbdocs-content {
   background-color: rgb(var(--ai-bg)) !important;
