@@ -146,4 +146,29 @@ describe('ConfigMaps transport', () => {
     expect(calls[0]?.url).toContain('/kapis/resources.kubesphere.io/v1alpha3/configmaps');
     expect(calls[0]?.url).not.toContain('/namespaces/');
   });
+
+  /*
+   * Sorting is server-side: the page keeps `sortBy`/`order` in state and this layer has to put them
+   * on the query. Nothing asserted that before, and a console-next case found the request carrying
+   * `page`/`limit` but no sort at all (2026-11-18). This pins the transport half, so the next
+   * investigation starts from "the api is fine, look at the caller" instead of repeating it.
+   */
+  it('sends the sort field and direction on the list query', async () => {
+    const { api, calls } = recordingClient();
+    await api.list({ cluster: 'host', namespace: 'ns', page: 2, pageSize: 20, sortBy: 'createTime', order: 'desc' });
+    const url = new URL(calls[0]!.url, 'http://localhost');
+    expect(url.searchParams.get('page')).toBe('2');
+    expect(url.searchParams.get('limit')).toBe('20');
+    expect(url.searchParams.get('sortBy')).toBe('createTime');
+    // ks-apiserver spells the direction `ascending`, and `desc` is false.
+    expect(url.searchParams.get('ascending')).toBe('false');
+  });
+
+  it('omits the sort query when no sort is asked for', async () => {
+    const { api, calls } = recordingClient();
+    await api.list({ cluster: 'host', namespace: 'ns', page: 1, pageSize: 10 });
+    const url = new URL(calls[0]!.url, 'http://localhost');
+    expect(url.searchParams.get('sortBy')).toBeNull();
+    expect(url.searchParams.get('ascending')).toBeNull();
+  });
 });

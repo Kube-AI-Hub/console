@@ -120,8 +120,11 @@ http://localhost:3000/kube-frontend/kapis/resources.kubesphere.io/v1alpha3/names
 **但实测请求里这两个参数都没有**。也就是说：要么某处把 `sortBy` 丢了，要么 `order` 为空时排序整体没上送。
 如果属实，这是**产品侧的默认排序没有发给服务端**——测试的期望反而是对的。
 
-**未定性**：本轮只到「代码应该发、实测没发」，没继续追到具体丢失点。下一步在 `useConfigMaps` 的调用处打个断点
-（或给 `list` 加一条断言它收到 sortBy 的单测）即可定位。
+**已把传输层排除**：给 api-client 补了两条单测（有排序时写 `sortBy`/`ascending`、无排序时不写），
+`test/configmaps.test.ts` **10 条全过**——说明 `list` 收到 `sortBy` 一定会写进 query。
+
+所以丢失点在**调用方**（页面/控制器把 `sortBy` 传到 `useConfigMaps` 这一段），不在 api 层。
+下一步只需在 `useConfigMaps` 调用处确认参数的实际值。
 
 > 注意：console-next 的 `vitest.config.ts` 里已经写着「ai-kit 自带的 pnpm 装了一份 React 18，消费 `dist` 会触发 Invalid hook call，
 > 所以这里 alias 到源码」——说明团队知道这个重复，只是 ai-kit **自己的**测试没有同样的保护。
