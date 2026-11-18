@@ -563,7 +563,7 @@ export function ResourceList<TRow>({
            */}
           {schema.filters?.map((filter) => (
             <div key={filter.key} className="flex items-center gap-1">
-            {filter.type === 'text' ? <InputSearch hideButton type="text" className={filter.widthClass ?? 'w-40'} value={filters?.[filter.key] ?? ''}
+            {filter.type === 'text' ? <InputSearch hideButton type="text" role="textbox" className={filter.widthClass ?? 'w-40'} value={filters?.[filter.key] ?? ''}
               aria-label={filter.title} placeholder={filter.title} data-ai-id={filter.aiId}
               clearLabel={schema.labels?.clearFilter?.(filter.title)}
               clearAiId={filter.aiId ? `${filter.aiId}:clear` : undefined}

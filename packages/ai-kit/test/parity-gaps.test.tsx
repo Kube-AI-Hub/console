@@ -72,6 +72,36 @@ describe('InputSearch', () => {
     render(<InputSearch hideButton onSearch={() => undefined} aria-label="搜索" />);
     expect(screen.queryByRole('button', { name: '搜索' })).not.toBeInTheDocument();
   });
+
+  /*
+   * `type="search"` makes WebKit paint its own `::-webkit-search-cancel-button`
+   * inside the field. That pseudo-element ignores `display: none`, so it sat
+   * next to the clear button the component renders and the field showed two
+   * x's. The type must stay `text`; the search semantics come from the role.
+   */
+  it('does not use the native search type, which would add a second clear button', () => {
+    render(<InputSearch value="api" clearLabel="清除搜索" onChange={() => undefined} aria-label="搜索" />);
+    const input = screen.getByRole('searchbox', { name: '搜索' });
+    expect(input).toHaveAttribute('type', 'text');
+    // Exactly one clear affordance, and it is the accessible one. (The submit
+    // button sits outside the field, so it is not part of this count.)
+    const clear = screen.getByRole('button', { name: '清除搜索' });
+    expect(clear.closest('[data-ai-field]')).not.toBeNull();
+    expect(clear.closest('[data-ai-field]')!.querySelectorAll('button')).toHaveLength(1);
+  });
+
+  it('clears on Escape', async () => {
+    const onClear = vi.fn();
+    function Harness(): React.ReactElement {
+      const [value, setValue] = React.useState('api');
+      return <InputSearch value={value} clearLabel="清除搜索" onChange={setValue} onClear={onClear} aria-label="搜索" />;
+    }
+    render(<Harness />);
+    const input = screen.getByRole('searchbox', { name: '搜索' });
+    await userEvent.type(input, '{Escape}');
+    expect(input).toHaveValue('');
+    expect(onClear).toHaveBeenCalled();
+  });
 });
 
 describe('CheckboxGroup', () => {

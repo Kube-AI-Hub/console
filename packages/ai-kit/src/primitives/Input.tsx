@@ -152,8 +152,14 @@ export interface InputSearchProps extends Omit<InputProps, 'leading' | 'trailing
  * Search box with an explicit submit.
  *
  * Filtering on every keystroke is fine for local data but wrong for a server
- * query, so the value is only "committed" on Enter or the button. A search field
- * also needs `type="search"` semantics for the native clear affordance.
+ * query, so the value is only "committed" on Enter or the button.
+ *
+ * `role="searchbox"` rather than `type="search"`: WebKit paints its own
+ * `::-webkit-search-cancel-button` inside a `type="search"` field, which sat
+ * next to the clear button this component renders — two x's, the native one
+ * unstyleable (`display: none` on the pseudo-element is ignored) and
+ * unlabelled. The role keeps the field announced as a search box; Escape is
+ * handled below because that came free with the native type.
  */
 export const InputSearch = React.forwardRef<HTMLInputElement, InputSearchProps>(function InputSearch(
   { className, value, onSearch, onChange, hideButton = false, buttonLabel = '搜索', onKeyDown,
@@ -162,6 +168,11 @@ export const InputSearch = React.forwardRef<HTMLInputElement, InputSearchProps>(
 ) {
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const submit = () => onSearch?.(value ?? '');
+  const clear = () => {
+    onChange?.('');
+    onClear?.();
+    inputRef.current?.focus();
+  };
   return (
     <div className={cn('flex w-full items-center gap-2', className)}>
       <Input
@@ -171,7 +182,11 @@ export const InputSearch = React.forwardRef<HTMLInputElement, InputSearchProps>(
           if (typeof ref === 'function') ref(element);
           else if (ref) ref.current = element;
         }}
-        type="search"
+        // `type="text"` on purpose: see the note above. A caller may still pass
+        // its own `type` / `role` (the list's text filters are plain text boxes,
+        // not search boxes), so those are spread last and win.
+        type="text"
+        role="searchbox"
         value={value}
         onChange={(event) => onChange?.(event.target.value)}
         onKeyDown={(event) => {
@@ -179,12 +194,18 @@ export const InputSearch = React.forwardRef<HTMLInputElement, InputSearchProps>(
             event.preventDefault();
             submit();
           }
+          // `type="search"` cleared the field on Escape natively; the role does
+          // not, so it is restored here.
+          if (event.key === 'Escape' && value) {
+            event.preventDefault();
+            clear();
+          }
           onKeyDown?.(event);
         }}
         leading={<SearchIcon className="size-3.5" />}
         trailing={clearLabel && value ? <button type="button" aria-label={clearLabel} data-ai-id={clearAiId}
           disabled={props.disabled} className="grid size-6 place-items-center rounded-ai-sm text-ai-fg-muted hover:text-ai-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ai-ring"
-          onClick={() => { onChange?.(''); onClear?.(); inputRef.current?.focus(); }}>
+          onClick={clear}>
           <svg viewBox="0 0 24 24" className="size-3.5" stroke="currentColor" fill="none" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6" /></svg>
         </button> : null}
         {...props}

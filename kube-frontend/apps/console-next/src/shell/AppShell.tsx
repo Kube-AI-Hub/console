@@ -608,7 +608,10 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
             ...(locked
               ? {
                   disabled: true,
-                  title: lockedReason,
+                  // `lockedReason` is `string | undefined`; `exactOptionalPropertyTypes`
+                  // rejects writing an explicit `undefined` into an optional prop, so
+                  // the value is only spread when there really is a reason to show.
+                  ...(lockedReason ? { title: lockedReason } : {}),
                   // The row dims when disabled; the lock says why at a glance.
                   badge: <Icon name="lock" size={12} />,
                 }
