@@ -64,6 +64,19 @@ EXIT=0
 > `login.backendUnsupported`（403/404/405）那条在 mlu370 上验不了——它的登录路由是通的；
 > 那条只在 A100/B200 那种「后端未升级」的环境才会出现。
 
+### 托管行为（curl 即可验）
+
+| 请求 | 期望 | 实测 |
+| --- | --- | --- |
+| 客户端路由 `/kube-frontend/clusters/host/overview` | SPA 外壳 | **200 text/html** ✓ |
+| 深层客户端路由 `/kube-frontend/workspaces/system-workspace/members` | SPA 外壳 | **200 text/html** ✓ |
+| 不存在的 `.js` | **404 而不是 HTML** | **404 text/plain** ✓ |
+| 不存在的 `.css` | 同上 | **404 text/plain** ✓ |
+| 旧 BFF 路由 `POST /kube-frontend/api/session/login` | 已退役 | **404** ✓ |
+
+第三条是重构说明里明确的设计点：缺失的 chunk 若返回 HTML，浏览器会报模块语法错误，
+而真正的原因是「这个文件不存在」。**部署上的行为与说明一致。**
+
 ## 缺什么
 
 **mlu370 的账号密码不在仓库里**（也不该在）。拿到凭据后即可：
