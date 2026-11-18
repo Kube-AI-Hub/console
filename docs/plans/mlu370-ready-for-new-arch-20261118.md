@@ -107,6 +107,16 @@ raw keys: []
 但它**尊重**主题：`--keyboard-local` 的四组主题色调走查正是靠设置 `ai-kit-theme`/`ai-kit-accent` 后重载完成的，
 焦点环对比度在四组下都达标。
 
+### 三档宽度（不需要凭据）
+
+```
+390px:  overflow=0px  inputs=2
+768px:  overflow=0px  inputs=2
+1440px: overflow=0px  inputs=2
+```
+
+登录页在三档下都没有横向溢出，两个输入框都在。
+
 ## 缺什么
 
 **mlu370 的账号密码不在仓库里**（也不该在）。拿到凭据后即可：
