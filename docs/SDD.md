@@ -308,11 +308,16 @@ def test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_02(storage_page, screenshot)
 | 同上 `--keyboard` / `--keyboard-local` | 键盘走查：Tab 顺序、焦点指示的**渲染层对比度**（3:1）；`--keyboard-local` 只走登录页，**不需要集群** |
 | 同上 `--locale-scan --locale en` | 扫「形如 `a.b.c` 的裸标识符」，查未翻译的文案 |
 | 同上 `--budget <秒>` | 整轮预算（默认 1800），上游掉线时中止而不是无限等待 |
-| `cd tests/ui && tools/verify-all.sh <env-file> <app> <bff> <clusters> <workspace> <project>` | 一次跑完四种模式并按「最快失败」排序；末行给 `VERDICT: PASS\|FAIL\|INCOMPLETE` |
+| `cd tests/ui && tools/verify-all.sh <env-file> <app> <bff> <clusters> <workspace> <project>` | 一次跑完四种模式并按「最快失败」排序；末行给 `VERDICT: PASS\|FAIL\|INCOMPLETE`；`<bff>` 传 `-` 表示与 app 同源（BFF 退役后的形态） |
 
 **部署形态（2026-11-18 变更）**：新 console 由 **ks-console 直接提供**，BFF 已退役——
 转发、OAuth 密码授权、静态文件都回到 ks-console / ks-apiserver。登录走 `POST /kapis/oauth.kubesphere.io/v1alpha1/login`。
-此前「静态站与 BFF 配对」的约束随 BFF 一起作废；巡检工具尚未适配新形态，见[影响记录](plans/bff-retired-tooling-impact-20261118.md)。
+此前「静态站与 BFF 配对」的约束随 BFF 一起作废。
+
+巡检工具已适配：第三个参数传 `-` 表示「应用与接口同源」（shell wrapper 与 Python 两侧都会归一化），
+登录按 `LOGIN_PATHS` 先试新路由再退回旧路由，preflight 的会话探针按是否同源选 `/oauth/userinfo` 或 `/api/session/me`。
+在 mlu370 实测：凭据不对时退出码 **2**、结论是「环境不可用」，不会被记成页面缺陷。
+见[影响记录](plans/bff-retired-tooling-impact-20261118.md)。
 
 并行开发时全量 `check_docs --strict` 可能超过 15 分钟（2026-11-17 实测 1003.6s）；
 批次判定用本批范围 + 受影响包检查，全量门禁留到合入/发布前，不每批重复。
