@@ -1,0 +1,36 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-12
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: overview
+title: 集群概览 · 未就绪集群的导航与页面守卫
+entry_url: '{BASE_URL}/kube-frontend/clusters/{notReadyCluster}/overview'
+prd: prd/kube-frontend/cluster-management/overview.md
+design: design/kube-frontend/cluster-management/overview.md
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-13
+story:
+- US1
+- US5
+product: 未就绪集群的侧栏只放行概览，其余页面禁用并给出原因；直接访问这些页面时给出同语言的说明与回到概览的入口。
+preconditions:
+- 已登录，存在一个 Ready 条件非 True 的集群
+steps:
+- 打开未就绪集群的概览，展开侧栏各分组
+- 核对「集群概览」可点击，其余叶子项被禁用
+- 核对被禁用项没有 href，且 title 说明原因
+- 直接访问该集群的节点页面
+- 核对页面显示等待说明与前往概览的链接，而不是 apiserver 的英文原始错误
+- 让集群变为就绪后核对侧栏恢复可点击
+expected:
+- 概览叶子项 `aria-disabled` 为空且 href 指向 overview
+- 其余叶子项 `aria-disabled="true"`、无 href、`title` 为「未就绪」
+- 直接访问 `/clusters/{id}/nodes` 时出现 `cluster:not-ready`，含中文说明与 `cluster:not-ready-overview` 链接
+- 页面不出现 `cluster <id> is not ready` 这类未翻译的 apiserver 原文
+- 集群就绪后侧栏叶子项恢复 href，且守卫不再出现
+troubleshoot:
+- 侧栏未禁用：确认 `['clusters']` 查询拿到该集群且 `ready` 为 false；加载中不锁定，避免闪烁
+- 守卫未出现：检查路由层拿到的 page 段是否为 overview（overview 放行）
+update_automation:
+- 侧栏或守卫结构变化时改 pages/cluster_fleet.py 与 test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_OVERVIEW_12.py

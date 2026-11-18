@@ -1,8 +1,11 @@
 import * as React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { Drawer, Dropdown, Icon, Menu, ThemeToggle, cn, useIsMobile, type DropdownItem, type IconName, type MenuNode } from '@kube-ai-hub/ui';
 import { actionProps } from '@kube-ai-hub/ai-surface';
+import { clustersApi } from '@kube-ai-hub/api-client';
 import { useLocale, useT } from '@/i18n';
+import { api as apiClient } from '@/api';
 import { useAuth } from '@/shell/AuthProvider';
 import { SharedChunkWarmer } from '@/shell/preload';
 import { areasFor, areaPages, areaOfPage, type Area } from '@/areas/registry';
@@ -491,6 +494,31 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
   }, [location]);
 
   /**
+   * Whether the cluster in the URL has joined yet.
+   *
+   * Every page under a cluster reads through that cluster's agent: nodes, workloads,
+   * configuration, monitoring. A cluster that has not joined answers nothing, so the
+   * pages render as empty lists or errors that look like the resource is gone. The old
+   * console keeps the menu but the pages are unusable; here the rows are disabled with
+   * the reason on them, which says why without pretending the page is broken.
+   *
+   * Shares the `['clusters']` key with `ClusterSwitcher`, so this costs no extra request
+   * and stays correct when the switcher refetches. `undefined` while loading means "do
+   * not disable anything yet": flashing a disabled menu on every load is worse than
+   * letting a not-ready cluster's page load once and fail on its own.
+   */
+  const clustersQuery = useQuery({
+    queryKey: ['clusters'],
+    queryFn: ({ signal }) => clustersApi(apiClient).list({ signal }),
+    enabled: clusterPath !== null,
+    staleTime: 30_000,
+  });
+  const clusterReady: boolean | undefined = clusterPath
+    ? clustersQuery.data?.items.find((item) => item.name === clusterPath.cluster)?.ready
+    : undefined;
+  const clusterNotReady = clusterReady === false;
+
+  /**
    * The workspace console (`/kube-frontend/workspaces/<ws>/<page>`), its own scope.
    *
    * It sits above projects and below the platform: the sidebar there is the workspace's
@@ -561,14 +589,30 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
        */
       const nodes: MenuNode[] = [];
       const groups = new Map<string, MenuNode>();
+      /*
+       * A cluster that has not joined cannot answer any of these pages: they all read
+       * through its agent. 概览 stays enabled because that is the page that explains the
+       * state and carries the join instructions; the rest are disabled with the reason
+       * as their title, so the row says why instead of the page failing after a click.
+       */
+      const lockedReason = clusterNotReady ? t('cluster.overview.notReady') : undefined;
       for (const area of areasFor('cluster')) {
         for (const page of areaPages(area)) {
+          const locked = clusterNotReady && page.key !== 'overview';
           const leaf: MenuNode = {
             key: page.key,
             label: t(page.titleKey),
             icon: <Icon name={area.icon} size={14} />,
             href: `${root}/${page.path}`,
             onClick: () => setDrawerOpen(false),
+            ...(locked
+              ? {
+                  disabled: true,
+                  title: lockedReason,
+                  // The row dims when disabled; the lock says why at a glance.
+                  badge: <Icon name="lock" size={12} />,
+                }
+              : {}),
           };
           if (!page.groupKey) {
             nodes.push(leaf);
@@ -637,7 +681,7 @@ export function AppShell({ children }: { children: React.ReactNode }): React.Rea
         onClick: () => setDrawerOpen(false),
       };
     });
-  }, [clusterPath, location, platformChildren, platformScope, scope, t]);
+  }, [clusterNotReady, clusterPath, location, platformChildren, platformScope, scope, t]);
 
   const localeButton = (
     <button

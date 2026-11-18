@@ -20,6 +20,7 @@
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-10
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-11
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-12
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-13
 
 ## 设计目标与非目标
 
@@ -364,3 +365,19 @@ Enter/Space和aria-pressed/描述提供键盘读数，不嵌套第二个按钮�
 **被否方案**：保留全部面板、只在顶部加提示。这正是改动前的样子：读者要在七八个「不可用」之间找出唯一下一步。另一种是等集群就绪前显示空页或骨架屏——那会掩盖「需要人去执行清单」这个事实。
 
 **何时重新考虑**：未就绪集群开始提供部分可读数据（例如已注册但未就绪的节点清单）时，那部分值得单独成块，而不是继续整页让位。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-20 — 未就绪集群禁用其余页面，直接访问给出说明
+
+**为什么**：集群下的每个页面（节点、工作负载、配置、存储、监控）都经该集群的 agent 读取。集群没加入时它们什么也答不出，页面只能显示空列表或错误。旧 console 保留菜单但页面不可用；读者点进去看到空白，分不清「没有资源」和「集群没连上」。
+
+侧栏把除概览外的项置为禁用（`MenuNode.disabled`）：不保留 `href`、`aria-disabled`、悬停显示原因、带锁标记。分组仍可展开——读者需要知道有哪些页面存在，只是暂时进不去。概览放行，因为那正是解释状态和给出接入步骤的页面。
+
+**加载中不锁定**：`['clusters']` 与 `ClusterSwitcher` 共用 queryKey，没有额外请求；但在它返回之前 `ready` 是 `undefined`，此时不锁定任何项。否则每次进入集群都先闪一下灰菜单，比让页面加载一次失败更糟。
+
+**直接访问仍要拦**：书签、粘贴的 URL、浏览器后退都不经过侧栏。路由层 `kube-frontend.clusters.$cluster/route.tsx` 用同一个 query 判断，非 overview 页面显示本地化说明与回概览的链接。此前这里会显示 apiserver 的 `cluster <id> is not ready`——英文原文、没有下一步，正是侧栏改动想避免的那种失败。
+
+**`MenuNode` 加 `title`**：禁用项的 `title` 原本只在折叠态显示 label，理由无处可放。加一个可选 `title`，禁用时优先用它。
+
+**被否方案**：把未就绪集群的页面从侧栏隐藏。菜单项消失后读者无法判断「这个功能没有」还是「这个集群还没连上」，而后者是可恢复的。另一种是只在页面里显示错误——那正是改动前的样子，点进去才知道不行。
+
+**何时重新考虑**：未就绪集群开始提供部分可读数据（例如已注册但未就绪的节点清单）时，对应页面可以放行，禁用范围随之缩小。

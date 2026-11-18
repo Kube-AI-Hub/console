@@ -21,6 +21,13 @@ export interface MenuNode {
   children?: MenuNode[];
   badge?: React.ReactNode;
   disabled?: boolean;
+  /**
+   * Hover text, when the label alone does not explain the row.
+   *
+   * The case this exists for is a disabled leaf: the reason it is disabled has to be
+   * reachable, and the label ("节点") says what the page is, not why it cannot be opened.
+   */
+  title?: string;
 }
 
 export interface MenuProps {
@@ -192,7 +199,8 @@ export function Menu({
         <a
           href={node.disabled ? undefined : node.href}
           aria-current={active ? 'page' : undefined}
-          title={collapsed ? String(node.label) : undefined}
+          aria-disabled={node.disabled ? true : undefined}
+          title={node.title ?? (collapsed ? String(node.label) : undefined)}
           className={classes}
           style={rowPadding(depth, collapsed, reserveIcon)}
           onClick={(event) => {
