@@ -103,7 +103,7 @@ export function ClusterOverviewPage({ cluster }: ClusterOverviewPageProps): Reac
        * which are still meaningful while waiting.
        */}
       {detail.data && !detail.data.ready ? (
-        <WaitingForCluster cluster={cluster} detail={detail.data} refresh={refresh} />
+        <WaitingForCluster cluster={cluster} detail={detail.data} />
       ) : null}
       {detail.data && detail.data.ready ? (
         <div className="min-w-0 space-y-4">
@@ -179,10 +179,9 @@ function OverviewPanel({ title, children, icon = 'resource', aiId, actions, clas
  *   initialising, or a proxy cluster whose agent was just applied). There is no action to
  *   take, so the page says it is waiting and refreshes itself.
  */
-function WaitingForCluster({ cluster, detail, refresh }: {
+function WaitingForCluster({ cluster, detail }: {
   cluster: string;
   detail: ClusterDetail;
-  refresh: ReturnType<typeof useOverviewRefresh>;
 }): React.ReactElement {
   const t = useT();
   const [copied, setCopied] = React.useState(false);
@@ -298,16 +297,11 @@ function WaitingForCluster({ cluster, detail, refresh }: {
         ) : null}
 
         {/*
-         * No refresh button here: the header above already carries one, and the page
-         * watches the cluster object, so applying the agent flips this view to the real
-         * overview on its own. Two buttons that do the same thing, one at the top and one
-         * at the bottom of a long panel, read as two different actions.
+         * No refresh button and no "this page refreshes itself" line: the header above
+         * already carries the button, and the spinner beside the description is what
+         * says the page is still working. A sentence repeating that is a third way of
+         * stating one fact.
          */}
-        {refresh.auto ? (
-          <p className="text-xs text-ai-fg-muted" data-ai-id="overview:waiting-hint-auto">
-            {t('cluster.overview.agentWaiting')}
-          </p>
-        ) : null}
       </div>
     </Panel>
   );

@@ -18,7 +18,7 @@
 
 文案来自需求 [`prd/kube-frontend/cluster-management/overview.md`](../../../../prd/kube-frontend/cluster-management/overview.md)，与用例的 `covers` 对应；改需求即改这里。
 
-- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-12** — 集群未就绪时（Ready 条件非 True）概览页**整页**替换为「等待集群加入」：保留页头（集群名、暂停/刷新、kubectl），其下只渲染一个等待面板，不渲染资源用量、节点块、排行、基本信息、Kubernetes 状态、组件、模块与快捷入口（这些面板在未就绪集群上没有可读数据，保留只会把唯一下一步淹没）。等待面板含加载指示、`WAIT_FOR_CLUSTER_DESC` 说明、控制器 `readyMessage`（有则显示，无则省略，不与固定文案重复）；`connectionType=proxy` 时额外渲染三步代理接入引导——`vi agent.yaml`、复制清单到 `agent.yaml`、`kubectl create -f agent.yaml`——命令以行内 code 呈现且文案中不留占位符或重复命令，清单取自代理接口并带复制按钮；接口不可用时说明平台可能未部署 tower 并显示原始原因，而不是只报「未找到」。序号由列表样式生成，不写进翻译文案。面板内提供手动刷新，自动刷新开启时说明本页会自行更新。集群变为就绪后无需刷新即切换到完整概览；`connectionType=direct` 的未就绪集群不显示代理步骤。
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-OVERVIEW-12** — 集群未就绪时（Ready 条件非 True）概览页**整页**替换为「等待集群加入」：保留页头（集群名、暂停/刷新、kubectl），其下只渲染一个等待面板，不渲染资源用量、节点块、排行、基本信息、Kubernetes 状态、组件、模块与快捷入口（这些面板在未就绪集群上没有可读数据，保留只会把唯一下一步淹没）。等待面板含加载指示、`WAIT_FOR_CLUSTER_DESC` 说明、控制器 `readyMessage`（有则显示，无则省略，不与固定文案重复）；`connectionType=proxy` 时额外渲染三步代理接入引导——`vi agent.yaml`、复制清单到 `agent.yaml`、`kubectl create -f agent.yaml`——命令以行内 code 呈现且文案中不留占位符或重复命令，清单取自代理接口并带复制按钮；接口不可用时说明平台可能未部署 tower 并显示原始原因，而不是只报「未找到」。序号由列表样式生成，不写进翻译文案。刷新只在页头一处，等待面板内不再放第二个刷新按钮，也不用文案重复「本页会自动刷新」——说明文字前的加载指示已经表达刷新中。集群变为就绪后无需刷新即切换到完整概览；`connectionType=direct` 的未就绪集群不显示代理步骤。
 
 ### 关联设计
 
@@ -62,7 +62,7 @@
 - 三步文案分别包含 `vi agent.yaml`、`agent.yaml`、`kubectl create -f agent.yaml`，各出现一次
 - 清单用共享 `YamlEditor`（CodeMirror）只读展示：有行号与语法高亮，可滚动查看完整文档，复制按钮在文档下方
 - `connectionType=direct` 的未就绪集群不渲染 `overview:agent-steps`
-- 控制器有 readyMessage 时显示原文，无则不显示；「本页会自动刷新」只出现一次
+- 控制器有 readyMessage 时显示原文，无则不显示；不出现「本页会自动刷新」类文案——描述前的加载指示已经表达刷新中
 - 整页只有一个刷新按钮（页头 `overview:refresh`），等待面板内不出现 `overview:waiting-refresh`
 - 集群就绪后完整概览出现，等待面板消失
 

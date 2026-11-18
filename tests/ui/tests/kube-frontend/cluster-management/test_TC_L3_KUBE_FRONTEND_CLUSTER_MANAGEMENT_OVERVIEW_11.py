@@ -85,8 +85,9 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_OVERVIEW_11(cluster_overview_pag
     for placeholder in ("{cmd}", "{file}", "{0}"):
         assert placeholder not in body, f"页面上残留占位符 {placeholder}"
 
-    # ---- 重复提示：本页会自动刷新只说一次 ----
-    assert body.count("本页会自动刷新") <= 1, "自动刷新提示重复"
+    # ---- 加载指示已说明在刷新，不再用文案重复 ----
+    assert "本页会自动刷新" not in body, "加载指示已经表达刷新中，文案不该再说一遍"
+    assert ui.page.locator('[data-ai-id="overview:waiting-hint-auto"]').count() == 0
 
     # ---- 刷新只有一个入口：页头那个，面板里不再重复 ----
     expect(ui.page.locator('[data-ai-id="overview:refresh"]')).to_be_visible()

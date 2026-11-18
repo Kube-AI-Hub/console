@@ -31,7 +31,7 @@ expected:
 - 三步文案分别包含 `vi agent.yaml`、`agent.yaml`、`kubectl create -f agent.yaml`，各出现一次
 - 清单用共享 `YamlEditor`（CodeMirror）只读展示：有行号与语法高亮，可滚动查看完整文档，复制按钮在文档下方
 - "`connectionType=direct` 的未就绪集群不渲染 `overview:agent-steps`"
-- 控制器有 readyMessage 时显示原文，无则不显示；「本页会自动刷新」只出现一次
+- 控制器有 readyMessage 时显示原文，无则不显示；不出现「本页会自动刷新」类文案——描述前的加载指示已经表达刷新中
 - 整页只有一个刷新按钮（页头 `overview:refresh`），等待面板内不出现 `overview:waiting-refresh`
 - 集群就绪后完整概览出现，等待面板消失
 troubleshoot:
