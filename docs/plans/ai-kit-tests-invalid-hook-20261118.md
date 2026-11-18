@@ -299,4 +299,4 @@ Test Files  38 passed (38)
 Tests       222 passed (222)
 ```
 
-`verify.py` 现在只剩 ai-kit 一关红灯（嵌套 React 16，需重装依赖）。
+（写这一句时 ai-kit 是唯一红灯；随后它修好了，**现在唯一的红灯是 console-next 的 overview 用例**，属并行线在改的页面。）
