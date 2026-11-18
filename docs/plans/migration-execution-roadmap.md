@@ -86,6 +86,9 @@
 另有一项**排在恢复之后**的测试质量工作：E2E 里 55 处「固定 sleep 后紧接断言」（见
 [记录](e2e-fixed-sleeps-20261118.md)）。现在不能改——跑不起来就无法验证；恢复后先取通过率与耗时基线，再分批替换。
 
+**排查时用 `verify.py --no-e2e --continue`**：它会跑完所有环节并汇总失败项，
+一次看到全貌（默认仍是遇错即停）。见[记录](verify-continue-20261118.md)。
+
 **收尾脚本本身有两关红灯**（2026-11-18 实测）：`verify.py --no-e2e` 在 ai-kit 停下，手工跑后面发现
 ai-kit 9 条（嵌套 React 16.14.0）与 console-next 3 条（jsdom 的 `Range.getClientRects` 缺口）都失败。
 修 ai-kit 需要 `pnpm.overrides` + 重装 `packages/ai-kit/node_modules`，会短暂影响并行环境，**需要协调窗口**。
