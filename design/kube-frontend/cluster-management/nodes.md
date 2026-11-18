@@ -306,3 +306,23 @@ gpu02 的测量和分配不能用于 host 集群汇总。Ready True 正常；Mem
 **何时重新考虑**：若集群里真的出现带 GPU 的控制面节点、且按厂商筛控制面成为常见需求，改成「允许组合，但空结果时提示是哪个条件导致的」。
 
 **验证**：`nodes-stats-filter.test.tsx` 覆盖双向清除、关闭 tile 不清厂商、以及 tile 的 `aria-pressed` 与 chip 同步。mlu370 `agent` 集群实测（3 节点 / 1 控制面 / 3 英伟达）：先点英伟达出现「清除厂商」，再点控制面后「清除厂商」消失、只剩「清除角色」，英伟达 tile 回落为未选中；反方向同样成立；工具条「角色」下拉选控制平面时也会清掉已选的厂商。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-16 — 状态列本地化、vGPU 模式不再限定 host（2026-11-19）
+
+**为什么**：两个问题都源于「把 API 的偶然形态当成契约」。
+
+1. **状态列直接打印 `NodeSummary.status`**。这个值来自节点的 `Ready` condition，取值是 `Ready` / `NotReady` / `Unknown`——英文，且不在文案表里。中文页面上每行状态都是一个英文单词。
+2. **vGPU 模式按钮带 `cluster !== 'host'`**。这个限制让成员集群上的操作项灰掉，但**接口本身支持成员集群**：`setMode` 把集群作为查询参数（`?cluster=agent`），`GET /kapis/gpu.kubesphere.io/v1alpha1/gpus?cluster=agent` 返回 200 与真实卡信息，`PUT …/device-plugins/gpu/mode?cluster=agent` 也被同一后端接受（返回 `success: true`）。限制没有对应的服务端依据。
+
+**做法**：
+1. 状态经 `nodeStatusLabel()` 映射到 `node.status.{ready,notReady,unknown}`。三个值分别对应「就绪 / 未就绪 / 未知」——注意**没有 `Ready` condition 是「未知」，不是「未就绪」**：节点什么都没报告，和报告了不健康是两件事。
+2. 去掉 `cluster !== 'host'`，保留 `hasPendingMode` 守卫（那才是真正的并发限制：上一次信号未完成时不能再发）。`NodesPage` 的行操作与 `NodeInfoSidebar` 的按钮两处同步改；`NodeInfoSidebar` 因此不再需要 `cluster` prop。
+
+**被否方案**：
+- 把 `Ready`/`NotReady` 直接当文案键（`t('node.status.Ready')`）。键名会跟着 API 取值走，API 改一个词就多一个键，且大小写敏感的键名容易写错。
+- 保留 host 限制、只在文案上说明「仅主集群支持」。限制本身是错的，解释它只会把错误固化。
+- 只在 `NodesPage` 放开、不动 `NodeInfoSidebar`。同一个能力在两个入口行为不一致，比两处都错更难排查。
+
+**何时重新考虑**：若后端明确对成员集群关闭该写接口（返回 4xx 而非 `success: true`），恢复限制并在 design 里写明是哪条错误。
+
+**验证**：`nodes-stats-filter.test.tsx` 覆盖三种状态的本地化（含「无 Ready 条件 → 未知」）与成员集群上 vGPU 菜单项**未禁用**（`aria-disabled` 不为 true、`pointer-events` 不为 none）。mlu370 实测 `agent` 集群：状态列显示「就绪」，行操作里「设置 vGPU 模式」`pointer-events: auto`、`opacity: 1`，点击后弹窗标题为「设置 vGPU 模式 · sagesuite-demo」、副标题 `agent / sagesuite-demo`。

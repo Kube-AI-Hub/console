@@ -9,7 +9,7 @@ import { GPU_VENDOR_LABEL_KEYS, vendorKey } from './gpuVendors';
 import { hasPendingMode } from './nodeListQueries';
 import { formatGpuMemory } from './gpuFormat';
 
-export function NodeInfoSidebar({ node, cluster, onMode }: { node: NodeDetail; cluster: string; onMode: () => void }): React.ReactElement {
+export function NodeInfoSidebar({ node, onMode }: { node: NodeDetail; onMode: () => void }): React.ReactElement {
   const t = useT();
   const vendor = vendorKey(node.gpuVendor ?? '');
   const gpu = Boolean(node.gpuVendor && node.gpuVendor.toLowerCase() !== 'cpu');
@@ -30,7 +30,9 @@ export function NodeInfoSidebar({ node, cluster, onMode }: { node: NodeDetail; c
       {gpu ? <>
         <DefinitionRow label={t('node.detail.gpuMode')} value={<div className="flex items-center justify-between gap-2">
           <span>{hasPendingMode(node) ? t(node.gpuModeStatus?.status === 'in_progress' ? 'node.mode.in_progress' : 'node.mode.waiting') : mode ? t(mode.labelKey) : node.gpuMode || '-'}</span>
-          <Button size="sm" variant="secondary" data-ai-id="node-detail:gpu-mode" disabled={cluster !== 'host' || hasPendingMode(node)}
+          {/* No host-only guard: the mode endpoint accepts `cluster` as a query
+              parameter and works on member clusters (see the note in `NodesPage`). */}
+          <Button size="sm" variant="secondary" data-ai-id="node-detail:gpu-mode" disabled={hasPendingMode(node)}
             onClick={onMode}>{t('node.mode.title')}</Button>
         </div>} />
         {node.gpuModeStatus?.status === 'failed' ? <p role="alert" className="mb-3 text-xs text-ai-danger">

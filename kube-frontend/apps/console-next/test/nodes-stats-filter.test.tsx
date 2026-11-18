@@ -120,6 +120,67 @@ describe('statistics tiles filter the node list', () => {
 });
 
 /**
+ * The status column speaks the reader's language.
+ *
+ * `NodeSummary.status` is the API's own English (`Ready` / `NotReady` / `Unknown`,
+ * straight from the node's `Ready` condition), so printing it raw left one English
+ * word in an otherwise Chinese row.
+ */
+describe('node status is localized', () => {
+  it.each([
+    ['Ready', '就绪', 'True'],
+    ['NotReady', '未就绪', 'False'],
+    // No `Ready` condition at all is `Unknown`, not `NotReady`: the node has not
+    // reported anything, which is a different fact from reporting not-ready.
+    ['Unknown', '未知', null],
+  ])('renders %s as %s', async (apiStatus, label, condition) => {
+    vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
+      const url = new URL(String(input));
+      if (url.pathname.endsWith('/stats')) return Response.json({ total: 1, healthy: 1, nvidia: 1 });
+      if (url.pathname.endsWith('/nodes/join-command')) return Response.json({});
+      if (url.pathname.includes('/selfsubjectaccessreviews')) return Response.json({ status: { allowed: true } });
+      if (url.pathname.includes('/monitoring.')) return Response.json({ results: [] });
+      return Response.json({
+        items: [{ metadata: { name: 'gpu01', labels: { 'xpu-vendor': 'nvidia' } }, spec: {},
+          status: condition === null ? {} : { conditions: [{ type: 'Ready', status: condition }] } }],
+        totalItems: 1,
+      });
+    }));
+    mount();
+    await screen.findByText('gpu01');
+
+    const th = screen.getAllByRole('columnheader').find((cell) => (cell.textContent ?? '').trim() === '状态')!;
+    const index = [...th.parentElement!.children].indexOf(th);
+    const cell = document.querySelectorAll('tbody tr')[0]!.children[index]!;
+    expect(cell).toHaveTextContent(label);
+    // The API value must not survive anywhere in the cell.
+    if (apiStatus !== label) expect(cell.textContent).not.toContain(apiStatus);
+  });
+});
+
+/**
+ * vGPU mode is available on member clusters.
+ *
+ * The action used to carry `cluster !== 'host'`, which greyed it out everywhere but
+ * the host cluster. The endpoint takes the cluster as a query parameter and the GPU
+ * read path already works on members, so that guard removed a working action.
+ */
+describe('vGPU mode on a member cluster', () => {
+  it('offers the action enabled, not greyed out', async () => {
+    stubServer();
+    mount();
+    await screen.findByText('gpu01');
+
+    const buttons = screen.getAllByRole('button', { name: '更多操作' });
+    await userEvent.click(buttons[0]!);
+    const item = await screen.findByRole('menuitem', { name: /设置 vGPU 模式/ });
+
+    expect(item).not.toHaveAttribute('aria-disabled', 'true');
+    expect(getComputedStyle(item).pointerEvents).not.toBe('none');
+  });
+});
+
+/**
  * Control plane and vendor are mutually exclusive.
  *
  * Control-plane nodes are nearly always CPU machines, so `role=master` plus a

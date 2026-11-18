@@ -127,7 +127,7 @@ export function NodeDetailPage({ cluster, name: nameProp, backTo = '/kube-fronte
 
       {node ? (
         <div key={`${cluster}/${name}`} className="grid min-w-0 gap-5 lg:grid-cols-[240px_minmax(0,1fr)] xl:grid-cols-[270px_minmax(0,1fr)]">
-        <NodeInfoSidebar node={node} cluster={cluster} onMode={() => setModeOpen(true)} />
+        <NodeInfoSidebar node={node} onMode={() => setModeOpen(true)} />
         <Tabs className="min-w-0" value={tab} onValueChange={setTab} items={[
           { value: 'status', label: t('node.detail.statusTab'), aiId: 'node-detail:tab:status' },
           { value: 'hardware', label: t('node.hardware.title'), aiId: 'node-detail:tab:hardware' },

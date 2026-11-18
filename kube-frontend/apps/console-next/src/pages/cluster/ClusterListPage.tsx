@@ -40,6 +40,13 @@ export function ClusterListPage(props: ClusterListPageProps): React.ReactElement
 
 function NamespaceListPage({ kind, cluster }: ClusterListPageProps): React.ReactElement {
   const t = useT();
+  /*
+   * The API's own strings are English (`Ready` / `NotReady` / `Unknown`) because they
+   * come from the node's `Ready` condition, not from a catalogue. Printing them raw
+   * left an English word in an otherwise Chinese row.
+   */
+  const nodeStatusLabel = (status: string) => status === 'Ready' ? t('node.status.ready')
+    : status === 'NotReady' ? t('node.status.notReady') : t('node.status.unknown');
   // Cluster-scoped: no project filter, and nothing to reset when the caller changes
   // project — the page has no project context by design.
   const list = useResourceListState<SortKey>({ defaultSortBy: 'name', defaultPageSize: PAGE_SIZE, resetOn: [cluster] });
@@ -145,7 +152,7 @@ function NamespaceListPage({ kind, cluster }: ClusterListPageProps): React.React
                   const node = row as NodeSummary;
                   return (
                     <span className="flex flex-col items-start gap-0.5">
-                      <Badge tone={node.status === 'Ready' ? 'success' : 'danger'}>{node.status}</Badge>
+                      <Badge tone={node.status === 'Ready' ? 'success' : 'danger'}>{nodeStatusLabel(node.status)}</Badge>
                       {/* Cordoned is a second fact: the node is healthy but takes no new pods. */}
                       {node.unschedulable ? (
                         <span className="text-[11px] text-ai-fg-muted" data-ai-id={`nodes:cordoned:${node.name}`}>

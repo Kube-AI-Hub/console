@@ -79,6 +79,13 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
     if (list.page > pages) list.setPage(pages);
   }, [nodes.data, nodes.isPlaceholderData, list.page, list.pageSize]);
   const vendorName = (vendor: string) => { const key = vendorKey(vendor); return key ? t(GPU_VENDOR_LABEL_KEYS[key]) : vendor || t('node.list.unknown'); };
+  /*
+   * The API's own strings are English (`Ready` / `NotReady` / `Unknown`) because they
+   * come from the node's `Ready` condition, not from a catalogue. Printing them raw
+   * left an English word in an otherwise Chinese row.
+   */
+  const nodeStatusLabel = (status: string) => status === 'Ready' ? t('node.status.ready')
+    : status === 'NotReady' ? t('node.status.notReady') : t('node.status.unknown');
   const statState = stats.isPending ? 'loading' : stats.isError ? 'error' : 'ready';
   const healthRatio = stats.data?.total ? stats.data.healthy / stats.data.total : undefined;
   const healthPercent = healthRatio === undefined ? undefined : Math.round(healthRatio * 100);
@@ -235,7 +242,7 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
       <Link to="/kube-frontend/clusters/$cluster/nodes/$name" params={{ cluster, name: row.name }} className="text-ai-link hover:underline">{row.name}</Link>
       <span className="text-[11px] text-ai-fg-muted">{row.internalIP || '-'}</span></span> },
     { key: 'status', title: t('cluster.column.status'), hideable: true, render: (row) => <span className="flex flex-col items-start gap-1">
-      <Badge tone={row.status === 'Ready' ? 'success' : 'danger'}>{row.status}</Badge>
+      <Badge tone={row.status === 'Ready' ? 'success' : 'danger'}>{nodeStatusLabel(row.status)}</Badge>
       {row.unschedulable ? <span className="text-[11px] text-ai-fg-muted" data-ai-id={`nodes:cordoned:${row.name}`}>{t('node.status.cordoned')}</span> : null}</span> },
     { key: 'role', title: t('cluster.column.role'), hideable: true, render: (row) => <span className="whitespace-nowrap">
       {row.role.split(', ').some((role) => ['master', 'control-plane'].includes(role)) ? t('node.list.controlPlane') : t('node.list.worker')}</span> },
@@ -282,7 +289,15 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
       { key: 'uncordon', label: t('node.action.uncordon'), aiId: 'nodes:uncordon', visible: (row) => row.unschedulable, disabled: () => cordon.isPending },
       { key: 'terminal', label: t('container.terminal.open'), aiId: 'nodes:terminal-open', disabled: (row) => row.status !== 'Ready' },
       { key: 'gpu-mode', label: t('node.mode.title'), aiId: 'nodes:gpu-mode', visible: (row) => Boolean(row.gpuVendor && row.gpuVendor.toLowerCase() !== 'cpu'),
-        disabled: (row) => cluster !== 'host' || hasPendingMode(row) },
+        /*
+         * No `cluster === 'host'` guard: the mode endpoint takes the cluster as a
+         * query parameter and the GPU read path already works on member clusters
+         * (verified against `agent`: `GET …/gpus?cluster=agent` answers 200 with real
+         * cards, and `PUT …/device-plugins/gpu/mode?cluster=agent` is accepted by the
+         * same backend). Gating on `host` hid the action on every member cluster for
+         * no reason the API imposes.
+         */
+        disabled: (row) => hasPendingMode(row) },
     ],
     sortableKeys: ['name'], sortAiPrefix: 'nodes', sort: { key: list.sortBy, order: list.order },
     empty: { title: list.search || Object.values(filters).some(Boolean) ? t('node.list.noMatch') : t('cluster.nodes.emptyTitle') },
