@@ -183,6 +183,16 @@ export interface ListSchema<TRow> {
     noMatchTitle?: React.ReactNode;
     noMatchDescription?: React.ReactNode;
   };
+  /**
+   * Whether the list is currently narrowed by the reader, overriding the component's guess.
+   *
+   * The component infers this from the search box alone. It deliberately ignores `filters`:
+   * many pages put their **scope** in `filters` (the project a route points at), and treating
+   * that as narrowing made every empty project-scoped list claim "nothing matches" when the
+   * truth was "nothing here yet" (found by a console-next case, 2026-11-18). A page that
+   * narrows by a real filter can say so here.
+   */
+  narrowed?: boolean;
   pagination?: {
     pageSize: number;
     total: number;
@@ -377,11 +387,13 @@ export function ResourceList<TRow>({
   className,
 }: ResourceListProps<TRow>): React.ReactElement {
   /*
-   * Is a search or filter narrowing the list right now? An empty result then means "nothing
-   * matches", not "nothing exists" -- two different answers for the reader.
+   * Is the reader narrowing the list right now? An empty result then means "nothing matches",
+   * not "nothing exists" -- two different answers.
+   *
+   * Inferred from the search box only: `filters` carries the page's scope on many lists, and a
+   * scope is not a narrowing. Pages that narrow by a filter pass `schema.narrowed`.
    */
-  const narrowed =
-    Boolean(searchValue) || Object.values(filters ?? {}).some((value) => value !== '' && value !== undefined);
+  const narrowed = schema.narrowed ?? Boolean(searchValue?.trim());
 
   const keyOf = React.useCallback(
     (row: TRow, index: number): string =>

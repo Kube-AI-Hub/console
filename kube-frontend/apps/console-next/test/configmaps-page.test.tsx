@@ -26,7 +26,12 @@ import { ConfigMapsPage } from '@/pages/configmaps/ConfigMapsPage';
  * The page opens on the project in the route, so the collection is
  * namespace-scoped. "All projects" is a cluster-wide read the reader must ask for.
  */
-const KAPIS = '/kapis/resources.kubesphere.io/v1alpha3/namespaces/default/configmaps';
+/*
+ * The app is served under `/kube-frontend`, and the page's requests carry that prefix. Without it
+ * the pathname comparison below never matched and the case failed on `undefined` rather than on
+ * the thing it means to assert (2026-11-18).
+ */
+const KAPIS = '/kube-frontend/kapis/resources.kubesphere.io/v1alpha3/namespaces/default/configmaps';
 
 /** A kube `ConfigMapList`, the shape ks-apiserver returns. */
 const listBody = {
@@ -138,6 +143,7 @@ describe('ConfigMaps list', () => {
     renderPage();
     await screen.findByText('app-config');
 
+
     // The projects query runs in parallel, so pick the ConfigMap request by path.
     const call = fetchMock.mock.calls.map((entry) => new URL(String(entry[0]))).find((u) => u.pathname === KAPIS);
     expect(call).toBeTruthy();
@@ -199,6 +205,7 @@ describe('ConfigMaps list', () => {
   it('shows the empty state when nothing matches', async () => {
     stubFetch(() => json({ kind: 'ConfigMapList', items: [], totalItems: 0 }));
     renderPage();
+
 
     expect(await screen.findByText('暂无配置字典')).toBeTruthy();
     expect(surface().getAttribute('data-ai-state')).toBe('empty');
