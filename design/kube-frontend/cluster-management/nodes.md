@@ -264,3 +264,25 @@ gpu02 的测量和分配不能用于 host 集群汇总。Ready True 正常；Mem
 **何时重新考虑**：厂商数量增长到一行放不下、需要折叠成「+N」时；或需要彩色官方 logo 时（当前是单色 `currentColor`，跟随主题）。
 
 **验证**：`vendor-marks.test.ts` 断言每个厂商几何互不相同、`viewBox` 与源文件一致（含 Enflame 27×47、MetaX 107×88 两个非标准坐标系）、`huawei`/大小写等写法被折叠、未知厂商落到中性标记；`vendor-mix.test.tsx` 断言加速卡排在 CPU 前、零计数不渲染、空集合不渲染、每个标记都有可访问名称。mlu370 实测：四项同 `y`、图标 40px、标签 12px、数值 18px；健康环绘出绿色弧（164 个绿色像素）；寒武纪标记绘出六边形轮廓（263 个 ink 像素）；页面无横向溢出。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-14 — 统计块同时是筛选入口（2026-11-18）
+
+**为什么**：统计块回答了「有多少」，但读者看完「控制平面 1」的下一步往往就是「只想看这一个」。此前唯一的路径是去工具条打开「角色」下拉、再选 `master`——统计块和筛选条件明明指的是同一组节点，却要读者自己把两边对应起来。让统计项直接可点，是把「读数」变成「入口」。
+
+**做法**：
+1. **`StatisticItem` 新增可选的 `onSelect` / `selected`**，纯增量：不传 `onSelect` 的项（健康率、以及另外两个调用点 `GpusPage` / `NodeResourceOverview`）输出的仍是原来的 `div` + `dt`/`dd`，无按钮、无动效类。
+2. **点击是切换，不是单向开关**。控制面切 `role=master`，再点取消；厂商在 `deviceVendor` 这个多选参数里**追加/移除**自己，不是替换——一次点第二个厂商应当得到两类节点，而不是把第一个丢掉。集群节点清空全部筛选（它是总数，它的「筛选」就是没有筛选），仍然可点，因为按厂商筛完的人需要一个显眼的回全量入口。
+3. **健康率保持只读**。这个 API 没有「不健康」这个筛选值，点它只能造一个假入口；一个点了没反应的格子比一个只读格子更糟。
+4. **可点的格子必须看起来可点**。复用设计系统已有的三套动作原语，不新造动画：`ai-lift`（抬升 + accent 描边）、`ai-spotlight`（指针跟随高光）、`ai-pressable`（按下 `scale(.98)`），选中态用 `border-ai-accent bg-ai-accent/5`，与资源卡一致。三者都已在 `prefers-reduced-motion` 下各自关闭。
+5. **是真 `<button>`，不是 `div onClick`**：`aria-pressed` 携带选中态，Tab 可达，Enter/Space 触发。`<button>` 只能放 phrasing content，所以按钮内把 `dt`/`dd` 换成 `span`，并在按钮上补 `aria-label="{名称}: {数值}"`——读屏听到的仍是「控制平面节点: 1」，而不是一个无名按钮。
+
+**为什么筛选走服务端**：统计块和工具条驱动**同一个**查询参数（`role=master`、`deviceVendor=nvidia,cambricon`）。只过滤当前页的行会在第一页看起来对、翻页就错。mlu370 实测 `deviceVendor=cambricon` 返回 1 个节点，与统计数字一致。
+
+**被否方案**：
+- 让健康率也可点、点了筛出异常节点。当前 `status` 筛选没有「异常」这个值，要么新造一个后端参数，要么前端拉全量再过滤——两者都超出「统计块是快捷入口」的范围。
+- 点击后不改变工具条。工具条的下拉是筛选状态的唯一真相，统计块只是另一个操作入口；不同步会让两处显示互相矛盾。
+- 用 `div` + `role="button"`。原生 `button` 自带键盘激活与 `:active`，不必手写。
+
+**何时重新考虑**：后端提供「不健康」筛选值时，健康率可以变成第三个可点项；或统计块项数增长到需要分组时。
+
+**验证**：`nodes-stats-filter.test.tsx` 断言点击设值、再点取消、厂商多选叠加、点集群节点清空、健康率不是按钮（`queryByRole('button', {name: /节点健康率/})` 为 null 且存在 `progressbar`）。mlu370 实测：点控制面出现「清除角色」chip、再点消失；点寒武纪出现「清除厂商」chip 且「集群节点」的 `aria-pressed` 回落为 false；选中格子 computed style 为 `border-color: rgb(169,129,248)` + 5% accent 背景；健康率为 `div`、`cursor: auto`、无 `ai-lift`；三个可点格子为 `BUTTON`、`cursor: pointer`、`transition: transform`。
