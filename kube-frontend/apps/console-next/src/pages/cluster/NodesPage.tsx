@@ -238,7 +238,12 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
       data-ai-id={`nodes:metric:${kind}:${row.name}`} tone={ratio !== undefined && ratio >= .9 ? 'warning' : 'neutral'} />;
   };
   const columns: ListColumn<NodeSummary>[] = [
-    { key: 'name', title: t('cluster.column.name'), width: 170, render: (row) => <span className="flex flex-col">
+    /*
+     * The name column is pinned: it is how a reader keeps their place while the
+     * metric columns scroll past. It carries a width because a pinned column
+     * without one shifts as names change length.
+     */
+    { key: 'name', title: t('cluster.column.name'), width: 170, pin: 'start', render: (row) => <span className="flex flex-col">
       <Link to="/kube-frontend/clusters/$cluster/nodes/$name" params={{ cluster, name: row.name }} className="text-ai-link hover:underline">{row.name}</Link>
       <span className="text-[11px] text-ai-fg-muted">{row.internalIP || '-'}</span></span> },
     { key: 'status', title: t('cluster.column.status'), hideable: true, render: (row) => <span className="flex flex-col items-start gap-1">
@@ -267,8 +272,14 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
     </span> },
     { key: 'role', title: t('cluster.column.role'), hideable: true, render: (row) => <span className="whitespace-nowrap">
       {row.role.split(', ').some((role) => ['master', 'control-plane'].includes(role)) ? t('node.list.controlPlane') : t('node.list.worker')}</span> },
-    ...(['gpu', 'gpuMemory', 'cpu', 'memory', 'pods'] as const).map((key) => ({ key, hideable: true, width: 150,
+    ...(['gpu', 'gpuMemory', 'cpu', 'memory', 'pods'] as const).map((key) => ({ key, hideable: true as const, width: 150,
       title: t(key === 'gpu' ? 'node.list.gpu' : key === 'gpuMemory' ? 'node.list.gpuMemory' : key === 'cpu' ? 'cluster.column.cpuUsage' : key === 'memory' ? 'cluster.column.memoryUsage' : 'cluster.workloads.pods.title'),
+      // The metric columns are where a number is most easily misread: "used" and
+      // "allocated" are different measurements and the header cannot say so.
+      ...(key === 'gpu' ? { hint: t('node.list.hint.gpu') } :
+        key === 'gpuMemory' ? { hint: t('node.list.hint.gpuMemory') } :
+        key === 'cpu' ? { hint: t('node.list.hint.cpu') } :
+        key === 'memory' ? { hint: t('node.list.hint.memory') } : {}),
       render: (row: NodeSummary) => metric(row, key) })),
     { key: 'vendor', title: t('node.detail.xpu'), hideable: true, width: 150, render: (row) => <span className="flex min-w-0 items-center gap-2">
       <VendorIcon vendor={row.gpuVendor || 'CPU'} size={18} className="text-ai-fg-secondary" />
@@ -281,7 +292,7 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
         detail={row.gpuModeStatus?.status === 'failed' ? row.gpuModeStatus.message || t('node.mode.failed') : undefined}
         data-ai-id={`nodes:mode:${row.name}`} />;
     } },
-    { key: 'ntp', title: t('node.list.ntp'), hideable: true, width: 110, render: (row) => {
+    { key: 'ntp', title: t('node.list.ntp'), hideable: true, width: 110, hint: t('node.list.hint.ntp'), render: (row) => {
       const entry = offsets[row.name];
       return <MetricCell value={entry?.offset === undefined ? '-' : `${entry.offset > 0 ? '+' : ''}${entry.offset}s`}
         detail={entry?.synced === undefined ? t('node.list.unknown') : t(entry.synced ? 'node.list.synced' : 'node.list.notSynced')}

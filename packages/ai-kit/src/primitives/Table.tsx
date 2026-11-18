@@ -1,5 +1,7 @@
 import * as React from 'react';
 import { cn } from '../utils/cn';
+import { Tooltip } from './Feedback';
+import { Icon } from './Icon/Icon';
 
 export type SortOrder = 'asc' | 'desc';
 
@@ -10,6 +12,29 @@ export interface TableColumn<T> {
   align?: 'left' | 'center' | 'right';
   /** Extra classes for the header and body cells (responsive hiding). */
   className?: string;
+  /**
+   * Explain the column's unit or how the value is derived.
+   *
+   * Rendered as an info affordance beside the title. Column headers are one or two
+   * words by necessity ("GPU usage"), and the difference between "allocated by the
+   * scheduler" and "measured on the card" does not fit in a header — but it is the
+   * difference that makes a number misread. A `title` attribute would only appear on
+   * hover after a delay and is unreachable by keyboard; this is a real control.
+   */
+  hint?: React.ReactNode;
+  /**
+   * Keep this column visible while the table scrolls horizontally.
+   *
+   * `start` pins to the left edge, `end` to the right. The pinned column is the
+   * reader's anchor — the row's identity on the left, its actions on the right — so
+   * it must stay put when the middle columns scroll past.
+   *
+   * Only the first `start` and the last `end` are honoured; offsets are not
+   * accumulated, because a pinned column's rendered width does not reliably match
+   * its declared `width` and a stale offset drifts. Give a pinned column an explicit
+   * `width`, or it jumps as content changes.
+   */
+  pin?: 'start' | 'end';
   /**
    * Hide this column below the `sm` breakpoint.
    *
@@ -35,6 +60,48 @@ export interface TableColumn<T> {
    * inserted. Without it the "sort by X" step is unaddressable.
    */
   sortAiId?: string;
+}
+
+/**
+ * Left offsets for pinned-start columns.
+ *
+ * Tailwind only emits classes it can see as literals, so the four possible leading
+ * widths are spelled out instead of interpolated. They come from the fixed widths of
+ * the two built-in leading columns in this file: the disclosure column is `w-8`
+ * (32px), the selection column `w-10` (40px).
+ *
+ * Offsets are only ever computed from those literals. A business column's rendered
+ * width does not reliably equal its declared `width`, so accumulating offsets from it
+ * would drift — which is why only one business column pins per side.
+ */
+const PIN_LEFT: Record<number, string> = {
+  0: 'left-0',
+  32: 'left-8',
+  40: 'left-10',
+  72: 'left-[72px]',
+};
+
+/**
+ * Sticky classes for a pinned column.
+ *
+ * A pinned cell must paint an opaque background or the columns scrolling underneath
+ * show through it, and it must sit above them (z-index) or the text overlaps. The
+ * `end` column also gets an inset shadow in place of a border: the table uses
+ * `border-collapse`, where a cell's border scrolls away with the cell instead of
+ * staying at the edge, so the shadow is what draws the seam.
+ *
+ * The shadow colour is a token rather than black, so it is visible on the light
+ * theme instead of only on the dark one.
+ */
+function pinClasses(pin: TableColumn<unknown>['pin'], background: string, left = 0): string {
+  if (!pin) return '';
+  return cn(
+    'sticky z-20',
+    background,
+    pin === 'start'
+      ? PIN_LEFT[left] ?? 'left-0'
+      : 'right-0 shadow-[inset_-8px_0_8px_-8px_rgb(var(--ai-line))]',
+  );
 }
 
 export interface TableSortState {
@@ -176,6 +243,19 @@ export function Table<T>({
   const leadingColumns = (selection ? 1 : 0) + (expandedRow ? 1 : 0);
   const columnCount = columns.length + leadingColumns;
 
+  /*
+   * Left offsets for the leading columns, in the order they render.
+   *
+   * Both are pinned: they are the row's identity controls, and a reader who has
+   * scrolled to the far right of a wide table must still be able to select a row.
+   * Their widths are literals in this file, so the offsets are constants rather than
+   * measurements.
+   */
+  const disclosureLeft = 0;
+  const selectionLeft = expandedRow ? 32 : 0;
+  /** Where the first business column starts once the leading columns are pinned. */
+  const firstColumnLeft = (expandedRow ? 32 : 0) + (selection ? 40 : 0);
+
   const sortIcon = (key: string) => {
     if (sorter?.key !== key) return <SortIcon direction="none" />;
     return <SortIcon direction={sorter.order} />;
@@ -201,9 +281,9 @@ export function Table<T>({
         {loading || rows.length > 0 ? (
         <thead>
           <tr className="border-b border-ai-line bg-ai-th-bg">
-            {expandedRow ? <th scope="col" className="w-8 px-2 py-2" aria-label="展开" /> : null}
+            {expandedRow ? <th scope="col" className={cn('w-8 px-2 py-2', pinClasses('start', 'bg-ai-th-bg', disclosureLeft), 'z-30')} aria-label="展开" /> : null}
             {selection ? (
-              <th scope="col" className="w-10 px-3 py-2 text-ai-fg-muted">
+              <th scope="col" className={cn('w-10 px-3 py-2 text-ai-fg-muted', pinClasses('start', 'bg-ai-th-bg', selectionLeft), 'z-30')}>
                 {/*
                  * The label supplies a 44px tap area on phones while the box
                  * itself stays 14px, so density on desktop is unchanged but a
@@ -240,30 +320,62 @@ export function Table<T>({
                     column.align === 'right' ? 'text-right' : column.align === 'center' ? 'text-center' : 'text-left',
                     column.hideOnMobile && 'hidden sm:table-cell',
                     column.className,
+                    // The header is above the pinned body cells so a scrolling column
+                    // never paints over the heading.
+                    column.pin ? cn(pinClasses(column.pin, 'bg-ai-th-bg', firstColumnLeft), 'z-30') : '',
                   )}
                 >
-                  {column.sortable ? (
-                    <button
-                      type="button"
-                      {...(column.sortAiId ? { 'data-ai-id': column.sortAiId } : {})}
-                      onClick={() => cycleSort(column.key)}
-                      className={cn(
-                        /*
-                         * The header cell is only as tall as its text, which leaves the
-                         * sort control under the 44px touch minimum. Filling the cell's
-                         * height on a touch viewport (`pointer-coarse`) gives a thumb a
-                         * target without changing the row height on desktop.
-                         */
-                        'inline-flex min-h-11 items-center gap-1 transition-colors duration-ai-fast hover:text-ai-fg sm:min-h-0',
-                        active && 'text-ai-accent',
-                      )}
-                    >
-                      {column.title}
-                      {sortIcon(column.key)}
-                    </button>
-                  ) : (
-                    column.title
-                  )}
+                  {/*
+                    * The title and the hint are siblings, not nested buttons.
+                    *
+                    * `sortable` puts the title inside a `<button>`; the hint needs its
+                    * own control. Wrapping one in the other is invalid HTML and makes
+                    * the click target ambiguous, so the pair is a flex row: the sort
+                    * button covers the label, the hint button sits beside it.
+                    */}
+                  <span className="inline-flex items-center gap-1">
+                    {column.sortable ? (
+                      <button
+                        type="button"
+                        {...(column.sortAiId ? { 'data-ai-id': column.sortAiId } : {})}
+                        onClick={() => cycleSort(column.key)}
+                        className={cn(
+                          /*
+                           * The header cell is only as tall as its text, which leaves the
+                           * sort control under the 44px touch minimum. Filling the cell's
+                           * height on a touch viewport (`pointer-coarse`) gives a thumb a
+                           * target without changing the row height on desktop.
+                           */
+                          'inline-flex min-h-11 items-center gap-1 transition-colors duration-ai-fast hover:text-ai-fg sm:min-h-0',
+                          active && 'text-ai-accent',
+                        )}
+                      >
+                        {column.title}
+                        {sortIcon(column.key)}
+                      </button>
+                    ) : (
+                      column.title
+                    )}
+                    {column.hint ? (
+                      <Tooltip content={column.hint}>
+                        {/*
+                         * A button rather than a span with `title`: a tooltip that only
+                         * appears on hover is unreachable by keyboard and by touch, and
+                         * the hint is the only place the unit is written down.
+                         */}
+                        <button
+                          type="button"
+                          aria-label={typeof column.hint === 'string' ? column.hint : undefined}
+                          className="grid size-4 place-items-center rounded-full text-ai-fg-faint transition-colors duration-ai-fast hover:text-ai-fg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ai-ring"
+                          // Without this the click also lands on the header's sort
+                          // button in browsers that route the event up the tree.
+                          onClick={(event) => event.stopPropagation()}
+                        >
+                          <Icon name="information" size={12} />
+                        </button>
+                      </Tooltip>
+                    ) : null}
+                  </span>
                 </th>
               );
             })}
@@ -275,10 +387,13 @@ export function Table<T>({
             Array.from({ length: 3 }, (_, index) => (
               <tr key={`skeleton-${index}`} className="border-b border-ai-line last:border-b-0">
                 {leadingColumns > 0
-                  ? Array.from({ length: leadingColumns }, (_, cell) => <td key={cell} className="px-3 py-2.5" />)
+                  ? Array.from({ length: leadingColumns }, (_, cell) => (
+                    <td key={cell} className={cn('px-3 py-2.5', pinClasses('start', 'bg-ai-surface-1', cell === 0 ? disclosureLeft : selectionLeft))} />
+                  ))
                   : null}
                 {columns.map((column) => (
-                  <td key={column.key} className={cn('px-3 py-2.5', column.hideOnMobile && 'hidden sm:table-cell')}>
+                  <td key={column.key} className={cn('px-3 py-2.5', column.hideOnMobile && 'hidden sm:table-cell',
+                    pinClasses(column.pin, 'bg-ai-surface-1', firstColumnLeft))}>
                     <div className="h-3 w-full animate-pulse rounded-ai-sm bg-ai-surface-3" />
                   </td>
                 ))}
@@ -310,7 +425,7 @@ export function Table<T>({
                     )}
                   >
                     {expandedRow ? (
-                      <td className="px-2 py-2.5" onClick={(event) => event.stopPropagation()}>
+                      <td className={cn('px-2 py-2.5', pinClasses('start', 'bg-ai-surface-1', disclosureLeft))} onClick={(event) => event.stopPropagation()}>
                         <button
                           type="button"
                           aria-label={isExpanded ? '收起' : '展开'}
@@ -334,7 +449,7 @@ export function Table<T>({
                       </td>
                     ) : null}
                     {selection ? (
-                      <td className="px-3 py-2.5" onClick={(event) => event.stopPropagation()}>
+                      <td className={cn('px-3 py-2.5', pinClasses('start', 'bg-ai-surface-1', selectionLeft))} onClick={(event) => event.stopPropagation()}>
                         {selection.isRowSelectable?.(row) ?? true ? (
                           <label className="grid size-11 cursor-pointer place-items-center sm:size-auto">
                             <input
@@ -357,6 +472,7 @@ export function Table<T>({
                           column.align === 'right' ? 'text-right' : column.align === 'center' ? 'text-center' : 'text-left',
                           column.hideOnMobile && 'hidden sm:table-cell',
                           column.className,
+                          pinClasses(column.pin, 'bg-ai-surface-1', firstColumnLeft),
                         )}
                       >
                         {column.render ? column.render(row, index) : null}

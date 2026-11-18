@@ -340,3 +340,24 @@ return "running"
 **何时重新考虑**：若 `kube-server` 把 `nodeStatus` 放进响应（而不是只用于筛选），改为直接读该字段，删掉本地推导。
 
 **验证**：`nodes-stats-filter.test.tsx` 覆盖三态（含「内存压力 True + Ready True → 告警」这个区分新旧实现的用例）与无法调度时的 tooltip 锚点。mlu370 `agent` 实测：三个节点显示「运行中」；注入 cordon + 两条污点后显示「无法调度」，tooltip 内容为「污点 / node.kubernetes.io/unschedulable=:NoSchedule / dedicated=gpu-a100:NoExecute」，徽章为警示色（琥珀 30 像素、绿色 0 像素）；状态筛选下拉为「全部 / 运行中 / 告警 / 无法调度」，与老 console 截图一致。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-16 — 列表固定首末列与列口径提示（2026-11-19）
+
+**为什么**：节点列表有十几列，横向滚动时读者失去参照——滚到右边看 GPU 数字，就不知道这一行是哪台机器了；要操作这一行，还得滚回去。同时，「GPU 用量」这类表头只有两三个字，装不下「实时利用率」与「调度器已分配」的区别，而这个区别正是数字被误读的原因。
+
+**做法**：
+1. **`ListColumn` 新增 `pin: 'start' | 'end'`**，只支持首末各一列。`ResourceList` 把选择框列固定到左、`rowActions` 生成的列固定到右——这两个是读者最常回看的锚点，不该要求每页手写。业务列由页面自己声明（节点列表固定 `name`）。
+2. **固定列不可隐藏**。它是定位行的锚点，能隐藏就失去意义。在类型、列选择器、渲染过滤三处强制：`pin` 与 `hideable: true` 同时写在类型上编译失败；选择器只列 `hideable` 列（`ResourceList.tsx:619` 原有逻辑）；`visibleColumnKeys` 过滤显式放行 `pin` 列，挡住列选择器引入前存下的旧 key 列表。
+3. **不做多列累加**。多列需要按可见列顺序累加 `left` 偏移，而列会被隐藏、被过滤，且 `<th>` 实际宽度未必等于声明宽度，累加会漂移。首末各一列不需要偏移计算。唯一的偏移来自两个内置前置列（`w-8` / `w-10`），宽度是文件内的字面量，所以用常量表 `PIN_LEFT` 而不是测量值。
+4. **保持 `border-collapse`**。sticky 单元格在 collapse 模式下边框会随单元格滚走，所以固定列不画分隔线，改用不透明背景（挡住下层内容）+ 右侧固定列的 inset 阴影（`rgb(var(--ai-line))`，不是写死的黑色，浅色主题下也看得见）。改 `border-separate` 要重做全表现有边框，73 个调用点都受影响，收益只有一条线。
+5. **固定列必须有 `width`**，否则内容变化时列宽跳动，固定反而更干扰。缺失时 `ResourceList` 放弃固定并 `console.warn`（按列 key 去重，避免每次渲染刷屏）。
+6. **`hint` 渲染为表头旁的信息按钮**，用 `Tooltip`（键盘可达），不是 `title` 属性（只在悬停时出现、键盘不可达）。排序按钮与提示按钮是**兄弟节点**，不是嵌套——`<button>` 套 `<button>` 是非法 HTML，且点击目标会变歧义。提示按钮 `stopPropagation`，点它不会触发排序。
+
+**被否方案**：
+- 给所有列表一次性开 `pin`。固定列会吃掉窄屏表格的可视宽度，只有列多到需要横向滚动的页面才该开。
+- 用 `title` 属性做提示。移动端没有 hover，键盘用户也拿不到。
+- 多列固定。见第 3 点，偏移无法可靠计算。
+
+**何时重新考虑**：当某页确实需要固定三列以上时，改为测量真实列宽（`ResizeObserver`）并累加偏移，而不是继续用常量。
+
+**验证**：`packages/ai-kit/test/list-pinning.test.tsx` 10 条覆盖：start 列的 th/td 都带 `sticky left-0` 与不透明背景、`rowActions` 末列自动 `sticky right-0`、无 pin 的表格 DOM 不变、第二个同侧 pin 被忽略并告警、无 width 的 pin 被放弃并告警、固定列不被 `visibleColumnKeys` 滤掉、选择器不提供固定列、hint 渲染信息按钮、点 hint 不触发排序、无 hint 不渲染按钮。ai-kit 全量 253 passed。

@@ -12,7 +12,7 @@ import { getByPath, getColumnRenderer } from './registry';
 
 /* ---------------- Types ---------------- */
 
-export interface ListColumn<TRow> {
+export interface ListColumnBase<TRow> {
   /** Dot path into the row, or a stable id when `render` is used. */
   key: string;
   title: React.ReactNode;
@@ -32,9 +32,47 @@ export interface ListColumn<TRow> {
    * trades row height for being able to read the cell.
    */
   wrap?: boolean;
-  /** Opt in to the host-controlled column chooser. Key columns remain visible. */
-  hideable?: boolean;
+  /**
+   * Explain the column's unit or how the value is derived, shown on an info control
+   * beside the header.
+   *
+   * A header is one or two words by necessity; the difference between "allocated by
+   * the scheduler" and "measured on the card" does not fit, and it is the difference
+   * that makes a number misread.
+   */
+  hint?: React.ReactNode;
 }
+
+/**
+ * A pinned column, or a hideable one — never both.
+ *
+ * A pinned column is the reader's anchor for locating a row. Hiding it while the
+ * middle columns scroll leaves nothing to orient against, so the two states are
+ * mutually exclusive. Expressed as a union rather than a doc comment so that writing
+ * both is a compile error instead of a silently-ignored combination.
+ */
+export type ListColumn<TRow> = ListColumnBase<TRow> & (
+  | {
+    /**
+     * Keep this column visible while the table scrolls horizontally.
+     *
+     * `start` pins to the left edge, `end` to the right. Only the first `start` and
+     * the last `end` are honoured — offsets are not accumulated (see
+     * `TableColumn.pin`).
+     *
+     * Give a pinned column an explicit `width`; without one it jumps as its content
+     * changes, which makes the pin more distracting than useful.
+     */
+    pin: 'start' | 'end';
+    /** A pinned column cannot be hidden; see `ListColumn`. */
+    hideable?: false;
+  }
+  | {
+    pin?: undefined;
+    /** Opt in to the host-controlled column chooser. Key columns remain visible. */
+    hideable?: boolean;
+  }
+);
 
 /**
  * Radix `Select` refuses an option whose value is the empty string — it reserves
@@ -42,6 +80,20 @@ export interface ListColumn<TRow> {
  * sentinel; `''` still means "all" to callers, so no page has to know about this.
  */
 const ALL_OPTION = '__all__';
+
+/**
+ * Warn about a misconfiguration once per key.
+ *
+ * A list re-renders on every keystroke, so an unguarded warning would flood the
+ * console and hide the message it is trying to deliver. The key is the column, which
+ * is what the reader would have to change.
+ */
+const warned = new Set<string>();
+function warnOnce(key: string, message: string): void {
+  if (warned.has(key)) return;
+  warned.add(key);
+  console.warn(message);
+}
 
 export interface ListFilter {
   key: string;
@@ -422,14 +474,47 @@ export function ResourceList<TRow>({
 
   const columns: Array<TableColumn<TRow>> = React.useMemo(() => {
     const sortableKeys = new Set(schema.sortableKeys ?? []);
+    /*
+     * Which business columns may actually pin.
+     *
+     * Only the first `start` and the last `end` are honoured: offsets are not
+     * accumulated, so a second pinned column on the same side would sit exactly on
+     * top of the first. A pinned column without a declared width is dropped too — it
+     * would change width as content changes, and the pin then reads as a glitch.
+     * Both cases warn rather than fail silently, because a configuration that looks
+     * applied but does nothing is worse than an obvious error.
+     */
+    const pinStartKey = schema.columns.find((column) => column.pin === 'start')?.key;
+    const pinEndKey = [...schema.columns].reverse().find((column) => column.pin === 'end')?.key;
+    const resolvedPin = (column: ListColumn<TRow>): 'start' | 'end' | undefined => {
+      if (!column.pin) return undefined;
+      const isHonoured = column.pin === 'start' ? column.key === pinStartKey : column.key === pinEndKey;
+      if (!isHonoured) {
+        warnOnce(`pinned-extra:${column.key}`,
+          `[ResourceList] column "${column.key}" is pinned but only the first start and last end are honoured; ignoring.`);
+        return undefined;
+      }
+      if (column.width === undefined) {
+        warnOnce(`pinned-width:${column.key}`,
+          `[ResourceList] column "${column.key}" is pinned without a width; it would shift while scrolling. Ignoring the pin.`);
+        return undefined;
+      }
+      return column.pin;
+    };
+
     const mapped: Array<TableColumn<TRow>> = schema.columns
-      .filter((column) => !column.hideable || !visibleColumnKeys || visibleColumnKeys.includes(column.key))
+      // A pinned column is an anchor, so it survives a stale `visibleColumnKeys`
+      // that predates the pin — otherwise an old saved selection silently removes
+      // the very column the reader scrolls back to.
+      .filter((column) => column.pin || !column.hideable || !visibleColumnKeys || visibleColumnKeys.includes(column.key))
       .map((column) => ({
       key: column.key,
       title: column.title,
       width: column.width,
       align: column.align,
       sortable: sortableKeys.has(column.key),
+      ...(column.hint === undefined ? {} : { hint: column.hint }),
+      ...(resolvedPin(column) ? { pin: resolvedPin(column) } : {}),
       // `<column key>:sort` matches the convention the page objects and the agent
       // manifest already use (`configmaps:sort:name`).
       ...(sortableKeys.has(column.key) && schema.sortAiPrefix
@@ -476,6 +561,12 @@ export function ResourceList<TRow>({
         title: '',
         width: 48,
         align: 'right',
+        /*
+         * Pinned to the right edge: the row's actions are the other half of its
+         * identity. On a wide table a reader who has scrolled past the metrics must
+         * still be able to act on the row without scrolling back.
+         */
+        pin: 'end',
         render: (row) => {
           const visible = schema.rowActions?.filter((action) => action.visible?.(row) ?? true) ?? [];
           if (!visible.length) return null;
