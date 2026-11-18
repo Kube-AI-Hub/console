@@ -24,6 +24,10 @@ REPO = Path(__file__).resolve().parents[2]
 KF = REPO / "kube-frontend"
 
 
+#: Steps that failed, filled in by `run`. Empty means the run is clean so far.
+FAILURES: list[str] = []
+
+
 def run(label: str, cmd: list[str], cwd: Path, env: dict[str, str] | None = None) -> float:
     print(f"\n=== {label} ===", flush=True)
     started = time.time()
@@ -31,8 +35,12 @@ def run(label: str, cmd: list[str], cwd: Path, env: dict[str, str] | None = None
     elapsed = time.time() - started
     if result.returncode != 0:
         print(f"\n失败：{label}（{elapsed:.1f}s）", file=sys.stderr)
-        print("先修这一项再继续——后续检查建立在它通过之上。", file=sys.stderr)
-        raise SystemExit(result.returncode)
+        FAILURES.append(label)
+        if not CONTINUE_ON_FAILURE:
+            print("先修这一项再继续——后续检查建立在它通过之上。"
+                  "（想一次看全貌用 --continue）", file=sys.stderr)
+            raise SystemExit(result.returncode)
+        return elapsed
     print(f"通过：{label}（{elapsed:.1f}s）", flush=True)
     return elapsed
 
@@ -191,7 +199,12 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--no-e2e", action="store_true")
     parser.add_argument("--serial-e2e", action="store_true")
+    parser.add_argument("--continue", dest="keep_going", action="store_true",
+                        help="跑完所有环节并汇总失败项，而不是在第一个失败处停下")
     args = parser.parse_args()
+
+    global CONTINUE_ON_FAILURE
+    CONTINUE_ON_FAILURE = bool(getattr(args, 'keep_going', False))
 
     total = 0.0
     # Leftover test objects are reported before anything else runs, and nothing is
@@ -227,6 +240,10 @@ def main() -> int:
     total += run("console-next 单测", [npx(), "vitest", "run"], KF / "apps/console-next")
 
     if args.no_e2e:
+        if FAILURES:
+            print(f"\n失败的环节（{len(FAILURES)}）：" + "、".join(FAILURES), file=sys.stderr)
+            print(f"合计 {total:.0f}s（未跑 E2E）", file=sys.stderr)
+            return 1
         print(f"\n静态与单测全部通过，合计 {total:.0f}s（未跑 E2E）")
         return 0
 
@@ -235,6 +252,10 @@ def main() -> int:
     total += run_e2e(app_url, parallel=not args.serial_e2e)
     print(f"\n全部通过，合计 {total:.0f}s")
     return 0
+
+
+#: Set by `--continue`: run every step and report the whole set instead of stopping at the first.
+CONTINUE_ON_FAILURE = False
 
 
 def npx() -> str:
