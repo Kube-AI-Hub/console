@@ -168,9 +168,22 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
           key: 'ready',
           hideable: true,
           title: t('cluster.column.status'),
-          width: 150,
+          /*
+           * Sized to the widest status label plus the cell's 24px of padding
+           * (`Not ready`, ~71px), not to the longest `readyMessage` sentence —
+           * that one is truncated anyway, and giving it room cost every row a band
+           * of empty space beside a short badge.
+           */
+          width: 120,
           render: (row: ClusterSummary) => (
-            <span className="flex flex-col gap-0.5">
+            /*
+             * `items-start` is load-bearing: a flex column defaults to
+             * `align-items: stretch`, which made the badge as wide as the cell
+             * (126px for a ~70px label) and left a band of empty colour beside
+             * every status. Letting it size to its text is also what the cluster
+             * switcher does, where the badge is a flex child of the row.
+             */
+            <span className="flex flex-col items-start gap-0.5">
               <Badge tone={row.ready && row.enabled ? 'success' : 'warning'}>
                 {!row.enabled
                   ? t('cluster.list.disabled')
