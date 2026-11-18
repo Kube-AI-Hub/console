@@ -31,7 +31,17 @@ const files = [
  */
 function stretchedColumnsWithBadge(source: string): number[] {
   const offenders: number[] = [];
-  const lines = source.split('\n');
+  /*
+   * Comments are blanked before scanning, keeping line numbers intact.
+   *
+   * A comment that *names* the pattern — "a `flex flex-col` would stretch the badge" —
+   * is documentation of the very rule this test enforces, and matching it reported the
+   * line that explains the fix as a violation. Only real markup should count.
+   */
+  const lines = source
+    .replace(/\/\*[\s\S]*?\*\//g, (block) => block.replace(/[^\n]/g, ' '))
+    .replace(/^\s*\/\/.*$/gm, (line) => ' '.repeat(line.length))
+    .split('\n');
 
   lines.forEach((line, index) => {
     if (!line.includes('flex flex-col')) return;
@@ -82,5 +92,27 @@ describe('status badges in table cells', () => {
 
     const fixed = broken.replace('flex flex-col gap-1', 'flex flex-col items-start gap-1');
     expect(stretchedColumnsWithBadge(fixed)).toEqual([]);
+  });
+
+  it('ignores the pattern when it only appears in a comment', () => {
+    // A comment explaining why the wrapper is wrong must not be read as the wrapper.
+    const documented = [
+      'const col = {',
+      "  key: 'status',",
+      '  /* A `flex flex-col` here would stretch the badge. */',
+      '  render: (row) => <Badge>{row.status}</Badge>,',
+      '};',
+    ].join('\n');
+    expect(stretchedColumnsWithBadge(documented)).toEqual([]);
+
+    // The same words in real markup are still caught, at the same line number.
+    const real = [
+      'const col = {',
+      "  key: 'status',",
+      '  /* A column wrapper would stretch the badge. */',
+      '  render: (row) => <span className="flex flex-col"><Badge>{row.status}</Badge></span>,',
+      '};',
+    ].join('\n');
+    expect(stretchedColumnsWithBadge(real)).toEqual([4]);
   });
 });

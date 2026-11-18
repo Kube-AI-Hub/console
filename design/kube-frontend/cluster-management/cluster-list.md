@@ -127,3 +127,24 @@
 **被否方案**：列表分区。行选中跨区语义不清，且与既有排序参数冲突。
 
 **何时重新考虑**：集群数到几十个、需要按 provider/区域多级分组时。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-CLUSTER_LIST-08 — 列表展示连接方式与 API 端点（2026-11-18）
+
+**为什么**：成员集群连不上时，第一个要确认的事实是**平台怎么连它**——是直连集群自己的 API server，还是经 agent 回连；以及平台实际在往哪个地址发请求。这两项 `ClusterSummary` 里一直都有（`connectionType`、`endpoint`），但只有概览页展示，列表页看不到。排查时逐个点进详情太慢：三个集群就要开三个页面，而这一列本来就能一屏看完。
+
+**做法**：
+1. **新增「连接方式」列**：`direct` → 「直连」`info`，`proxy` → 「代理」`accent`，未知值 → `-`。Badge 是单元格的直接子元素，按文字宽度收缩（列容器会把它拉满整列，见 `DEC-…-NODES-15` 之后那次修复）。
+2. **新增「API 端点」列**：显示 `spec.connection.kubernetesAPIEndpoint`，等宽小字、`truncate` + `title` 带全值。`lg` 以下隐藏——地址很长，窄屏上会把它旁边回答「健不健康」的列挤出屏幕。
+3. **三处共用一个映射**：列表、概览页的身份区块、设置页的只读属性表都显示连接方式。三份各自写 `type === 'direct' ? …` 是它们以后分叉的原因，因此抽到 [`connectionLabel.ts`](../../../kube-frontend/apps/console-next/src/pages/cluster/connectionLabel.ts) 的 `connectionLabelKey()` / `connectionTone()`。
+4. **概览页与设置页只换文案，不加 Badge**：那两处是 `DescriptionList` 的值行，与相邻的「提供商」「Kubernetes 版本」同构，胶囊会破坏这一列的视觉一致性。列表页加 Badge 是因为那一整列都是状态胶囊（角色列也是）。
+
+**为什么 `proxy` 只显示 `kubernetesAPIEndpoint`**：`proxy` 集群的 spec 里还有 `kubesphereAPIServerPort`、`kubernetesAPIServerPort` 与 tower 回连地址。真正决定连通性的是**回连链路**（`tower.watering.ai`），端口是平台内部实现细节；把四个值都塞进列表会让这一列变成噪音，而排查链路的信息已经在概览页与 `环境/mlu370环境.md` 里。
+
+**被否方案**：
+- 只放在概览页。正是当前的问题：逐个点进去才知道怎么连的。
+- 连接方式和 API 端点合并成一列（`代理 · https://…`）。两列的读法不同：一个是分类（可扫视），一个是地址（需要复制/比对），合并后两者都难扫。
+- 未知类型折叠成「代理」。猜一个最接近的值会掩盖事实——读者应当看到「这一项我不知道」，而不是一个可能是错的分类。
+
+**何时重新考虑**：若出现第三种连接类型（如 `tunnel`），在 `connectionLabel.ts` 加一行即可，三处同时生效；若集群数到几十个、列表列过多，把 API 端点改为默认隐藏。
+
+**验证**：`cluster-list-connection.test.tsx` 断言三种状态（direct / proxy / 未知）的文案与 `-` 回退、端点带 `title` 与 `data-ai-id`、Badge 是单元格直接子元素；`node-overview-panels.test.tsx` 断言概览页显示「直连」而非 `direct`。mlu370 实测：`host` 直连、`test`/`agent` 代理，端点列显示 `https://10.233.x.x:6443`。

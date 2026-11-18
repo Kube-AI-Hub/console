@@ -45,6 +45,9 @@ describe('hardware and overview panels', () => {
         { metric_name: 'cluster_cpu_total', data: { result: [{ metric: {}, value: [1, '8'] }] } },
       ] });
       return Response.json({ metadata: { name: 'member' },
+        // `direct` so the identity block has a connection type to render; the point of
+        // this case is the metrics, not the topology.
+        spec: { connection: { type: 'direct', kubernetesAPIEndpoint: 'https://10.233.0.1:443' } },
         status: { conditions: [{ type: 'Ready', status: 'True' }] } });
     }));
     const view = mount(<ClusterOverviewPage cluster="member" />);
@@ -55,6 +58,14 @@ describe('hardware and overview panels', () => {
     expect(memory.querySelector('[data-ai-field="used"]')).toHaveTextContent('-');
     expect(memory.querySelector('[data-ai-field="total"]')).toHaveTextContent('-');
     expect(within(memory).queryByRole('progressbar')).toBeNull();
+    /*
+     * The identity block says how the platform reaches this cluster. It used to print
+     * the raw wire value (`direct` / `proxy`) beside Chinese labels; the list, this
+     * block and the settings page now share one mapping.
+     */
+    const connection = view.container.querySelector('[data-ai-id="overview:connection"]');
+    expect(connection).toHaveTextContent('直连');
+    expect(connection).not.toHaveTextContent('direct');
   });
 
   it('preserves proxy agent instructions while the cluster is not ready', async () => {

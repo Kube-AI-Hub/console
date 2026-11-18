@@ -18,6 +18,7 @@ import { OverviewComponents } from './OverviewComponents';
 import { NodeRankingPanel } from './NodeRankingPanel';
 import { UserKubeconfigDialog } from './UserKubeconfigDialog';
 import { OverviewResourcePanel, NodeSummaryPanel } from './OverviewResourcePanel';
+import { connectionLabelKey } from './connectionLabel';
 import { useOverviewRefresh } from './useOverviewRefresh';
 import { KubectlConsoleDialog } from '@/components/resource/KubectlConsoleDialog';
 
@@ -376,7 +377,11 @@ function BasicInfoPanel({ detail }: { detail: ClusterDetail }): React.ReactEleme
       ),
       aiId: 'overview:visibility',
     },
-    { label: t('cluster.overview.connectionType'), value: detail.connectionType || '-', aiId: 'overview:connection' },
+    { label: t('cluster.overview.connectionType'),
+      // Same wording as the list's badge, without the badge: this row sits beside
+      // "provider" and "Kubernetes version", which are plain values.
+      value: (() => { const label = connectionLabelKey(detail.connectionType); return label ? t(label) : '-'; })(),
+      aiId: 'overview:connection' },
     { label: t('cluster.overview.apiEndpoint'), value: detail.kubernetesAPIEndpoint || '-', aiId: 'overview:api-endpoint' },
     ...(detail.description
       ? [{ label: t('cluster.overview.description_'), value: detail.description, aiId: 'overview:description' }]

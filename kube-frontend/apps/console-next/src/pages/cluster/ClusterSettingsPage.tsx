@@ -7,6 +7,7 @@ import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { DefinitionRow } from '@/components/resource/DefinitionRow';
 import { ClusterEditDialog } from './ClusterEditDialog';
+import { connectionLabelKey } from './connectionLabel';
 
 /**
  * 集群设置.
@@ -93,7 +94,7 @@ export function ClusterSettingsPage({ cluster }: ClusterSettingsPageProps): Reac
             <DefinitionRow label={t('cluster.edit.provider')} value={data.provider || '-'} />
             <DefinitionRow label={t('cluster.settings.kubernetesVersion')} value={data.kubernetesVersion || '-'} />
             <DefinitionRow label={t('cluster.settings.productVersion')} value={data.kubeSphereVersion || '-'} />
-            <DefinitionRow label={t('cluster.settings.connectionType')} value={data.connectionType || '-'} />
+            <DefinitionRow label={t('cluster.settings.connectionType')} value={(() => { const label = connectionLabelKey(data.connectionType); return label ? t(label) : '-'; })()} />
             <DefinitionRow label={t('cluster.settings.apiEndpoint')} value={data.kubernetesAPIEndpoint || '-'} />
             <DefinitionRow label={t('cluster.settings.nodeCount')} value={String(data.nodeCount)} />
           </dl>

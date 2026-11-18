@@ -10,6 +10,7 @@ import { api as apiClient } from '@/api';
 import { useResourceListState } from '@/components/resource/useResourceListState';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
+import { connectionLabelKey, connectionTone } from './connectionLabel';
 import { AddClusterDialog } from './AddClusterDialog';
 import { ClusterEditDialog } from './ClusterEditDialog';
 import { RemoveClusterDialog } from './RemoveClusterDialog';
@@ -212,6 +213,46 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
             <Badge tone={row.isHost ? 'info' : 'neutral'}>
               {row.isHost ? t('cluster.list.host') : t('cluster.list.member')}
             </Badge>
+          ),
+        },
+        {
+          key: 'connectionType',
+          hideable: true,
+          title: t('cluster.list.connection'),
+          width: 100,
+          /*
+           * Rendered as a badge, sized to its text: this column is all pills like
+           * `role` beside it, so a plain word would read as a different kind of fact.
+           * The badge is a direct child of the cell — a column wrapper would stretch
+           * it to the full width of the column.
+           */
+          render: (row: ClusterSummary) => {
+            const label = connectionLabelKey(row.connectionType);
+            return label
+              ? <Badge tone={connectionTone(row.connectionType)}>{t(label)}</Badge>
+              : <span className="text-ai-fg-muted">-</span>;
+          },
+        },
+        {
+          key: 'endpoint',
+          hideable: true,
+          title: t('cluster.column.apiEndpoint'),
+          width: 200,
+          /*
+           * The address the platform calls is the first thing to check when a member
+           * cluster will not answer, but it is long enough to dominate the row, so it
+           * is truncated and carries the full value in `title`. Hidden below `lg`: on a
+           * laptop it would push the columns that answer "is it healthy" off-screen.
+           */
+          hideBelow: 'lg',
+          render: (row: ClusterSummary) => (
+            <span
+              className="block truncate font-ai-mono text-[11px] text-ai-fg-secondary"
+              title={row.endpoint || undefined}
+              data-ai-id={`clusters:endpoint:${row.name}`}
+            >
+              {row.endpoint || '-'}
+            </span>
           ),
         },
         {
