@@ -101,21 +101,34 @@ const PIN_LEFT: Record<number, string> = {
  *
  * The two sides are deliberately not equal in weight. The start column carries the
  * row's identity — the name a reader scans and the link they click — so it keeps the
- * raised surface (`bg-ai-surface-1`). The end column is a row of actions, and giving
- * it the same surface made the eye land on the ellipsis at the right edge as often as
- * on the name at the left, leaving the table with two competing anchors. It sits on
- * the page background instead: still opaque, still separated by the shadow, but not
- * competing.
+ * raised surface (`--ai-surface-1`). The end column is a row of actions, and giving it
+ * the same surface made the eye land on the ellipsis as often as on the name.
  *
- * The shadow colour is a token rather than black, so it is visible on the light
- * theme instead of only on the dark one.
+ * It sits one step *down* the surface scale (`--ai-surface-2`) rather than on the page
+ * background. `--ai-bg` was the first attempt and it read as a gap in the table: on the
+ * light theme it is `#f9fbfd` against a `#ffffff` row, and in the header it is near
+ * white against `--ai-th-bg` `#d9e9f5`, so the pinned column looked like a strip that
+ * had been cut out. `--ai-surface-2` is a real surface in both themes — it is the
+ * token the hover row uses — so the column reads as secondary rather than missing.
+ *
+ * The header keeps whatever the other headers use. It was being painted with the page
+ * background too, which is what produced the pale strip in the light theme; a header
+ * cell only has to match its neighbours, not its own column's body cells.
+ *
+ * The shadow colour is a token rather than black, so it is visible on the light theme
+ * instead of only on the dark one.
  */
-function pinClasses(pin: TableColumn<unknown>['pin'], background: string, left = 0): string {
+function pinClasses(pin: TableColumn<unknown>['pin'], background: string, left = 0, isHeader = false): string {
   if (!pin) return '';
+  /*
+   * The header keeps the surface it was given: a header cell has to match its
+   * neighbours across the row, and painting it with the body's secondary surface
+   * would put a differently-coloured cell in the middle of the header strip. Only the
+   * body cells step down a level.
+   */
   return cn(
     'sticky z-20',
-    // The action column reads as part of the page, not as another panel.
-    pin === 'start' ? background : 'bg-ai-bg',
+    pin === 'start' || isHeader ? background : 'bg-ai-surface-2',
     pin === 'start'
       ? PIN_LEFT[left] ?? 'left-0'
       : 'right-0 shadow-[inset_-8px_0_8px_-8px_rgb(var(--ai-line))]',
@@ -391,7 +404,7 @@ export function Table<T>({
                     column.className,
                     // The header is above the pinned body cells so a scrolling column
                     // never paints over the heading.
-                    column.pin ? cn(pinClasses(column.pin, 'bg-ai-th-bg', firstColumnLeft), 'z-30') : '',
+                    column.pin ? cn(pinClasses(column.pin, 'bg-ai-th-bg', firstColumnLeft, true), 'z-30') : '',
                   )}
                 >
                   {/*
