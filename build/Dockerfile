@@ -5,8 +5,10 @@
 # Prepare the build environment
 FROM watering-ai-registry.cn-shanghai.cr.aliyuncs.com/kube-ai-hub/node:22-alpine AS builder
 
-# APK acceleration for China
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+# APK acceleration for China. Tsinghua rather than aliyun: mirrors.aliyun.com
+# answers 403 for the alpine v3.23 repositories this base image pins, which
+# aborts the build at the first `apk add`.
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
 
 RUN apk add --no-cache --virtual python2
 RUN apk add --no-cache --virtual .build-deps ca-certificates python3 py3-pip make openssl g++ bash hugo asciidoctor
