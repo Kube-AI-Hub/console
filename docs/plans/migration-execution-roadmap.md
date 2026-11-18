@@ -76,6 +76,10 @@
 新 console 在这两个环境上无法登录，**浏览器侧验收全部暂停**（用户指示：等前端重构完毕再测试）。
 期间只做离线可验的工作（契约套件、api-client 单测、类型检查、文档）。
 
+**界面验不了时，服务端契约可以直接对 API 验**（2026-11-18 已完成）：排序（`createTime`/`name`）、
+分页与 `totalItems`（427 条的集合）、`name=` 过滤、`limit=-1` 取全部，全部实测通过；
+顺带发现「缺失对象返回 500 + 纯文本」并已修正客户端分类。见[记录](server-side-list-contract-20261118.md)。
+
 **权限类验收的前提**：先确认该环境的 SSAR 可信。2026-11-18 在 A100 实测到 fail-open——
 非管理员账号读 `clusterrolebindings` 得 403，却被告知可以 `delete nodes`、`create clusterroles`。
 这类部署上「按钮可见性」不能作为权限验收证据，见[记录](ssar-fail-open-a100-20261118.md)。
