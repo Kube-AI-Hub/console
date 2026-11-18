@@ -146,6 +146,7 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
     list.setPage(1);
   };
   const noFilters = !filters.status && !filters.role && !filters.vendor && !filters.model && !list.search;
+  const hasVendors = (stats.data?.vendors?.length ?? 0) > 0;
   const summary: StatisticItem[] = [
     /*
      * "Cluster nodes" clears everything — it is the total, so its own filter is the
@@ -207,6 +208,11 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
      * This is the part that makes heterogeneity readable: three accelerators plus a
      * CPU-only node set is four glyphs of different shapes, not four identical
      * numbers under four unfamiliar names.
+     *
+     * Grouped under a heading, because these count a different thing from the three
+     * tiles before them: those answer "how many nodes, and are they well", these
+     * answer "of which hardware". A flat run of seven made the vendor counts read as
+     * more of the same quantity.
      */
     ...(stats.data?.vendors ?? []).map((entry) => ({
       key: `vendor:${entry.vendor}`, label: vendorName(entry.vendor), value: entry.count,
@@ -214,6 +220,7 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
       onSelect: () => toggleStat({ vendor: entry.vendor }),
       selected: selectedVendors.includes(entry.vendor),
       selectHint: t('node.stats.filterHint'),
+      ...(hasVendors ? { group: 'vendors', groupLabel: t('node.stats.vendors') } : {}),
     })),
   ];
   const metric = (row: NodeSummary, kind: 'gpu' | 'gpuMemory' | 'cpu' | 'memory' | 'pods') => {

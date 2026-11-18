@@ -34,6 +34,21 @@ export interface StatisticItem {
   selected?: boolean;
   /** Accessible name and tooltip for the action, e.g. "filter by this". */
   selectHint?: string;
+  /**
+   * Groups tiles visually.
+   *
+   * Consecutive items sharing a `group` are rendered inside one wrapper, separated
+   * from the rest by a divider. This is how the node page keeps "how many nodes in
+   * total / control plane / healthy" apart from "how many of each accelerator":
+   * they answer different questions, and a flat row of seven tiles made the vendor
+   * counts read as more of the same.
+   *
+   * Items without a group stay in the ungrouped run, so a caller that passes no
+   * groups gets exactly the flat row it always had.
+   */
+  group?: string;
+  /** Heading drawn once, at the start of the group. */
+  groupLabel?: React.ReactNode;
 }
 
 export interface StatisticsGroupProps extends React.HTMLAttributes<HTMLDListElement> {
@@ -49,11 +64,47 @@ export interface StatisticsGroupProps extends React.HTMLAttributes<HTMLDListElem
  * because a `<button>` may only contain phrasing content. The accessible name is
  * built from the label and the value so a screen reader still hears
  * "control-plane nodes: 1" instead of an unlabelled button.
+ *
+ * Items that share a `group` are drawn as a run inside the same `<dl>`, separated
+ * from the previous run by a vertical rule. The grouping is a separator, not a
+ * nested list or a heading: a heading costs horizontal space the tiles need, and on
+ * a seven-tile band it pushed the vendor group onto a second line.
  */
 export function StatisticsGroup({ items, unknownLabel, className, ...attributes }: StatisticsGroupProps): React.ReactElement {
+  const runs = groupRuns(items);
   return <dl className={cn('flex flex-wrap gap-x-8 gap-y-3 rounded-ai-lg border border-ai-line bg-ai-surface-1 px-4 py-3', className)} {...attributes}>
-    {items.map((item) => <StatisticTile key={item.key} item={item} unknownLabel={unknownLabel} />)}
+    {runs.map((run, index) => run.group === undefined
+      ? run.items.map((item) => <StatisticTile key={item.key} item={item} unknownLabel={unknownLabel} />)
+      : <div key={run.group} className={cn('flex flex-wrap items-center gap-x-8 gap-y-3',
+        // A rule between runs, never before the first one.
+        index > 0 && 'border-l border-ai-line pl-8')}
+        data-stat-group={run.group}
+        /*
+         * The label is the group's accessible name, not visible text. Sighted
+         * readers get the separation from the rule and from the glyphs being a
+         * different kind of thing; a heading would spend ~100px of a row that has
+         * none to spare.
+         */
+        {...(run.items[0]?.groupLabel ? { 'aria-label': String(run.items[0].groupLabel) } : {})}>
+        {run.items.map((item) => <StatisticTile key={item.key} item={item} unknownLabel={unknownLabel} />)}
+      </div>)}
   </dl>;
+}
+
+/**
+ * Consecutive items with the same `group`, in order.
+ *
+ * Consecutive rather than "all items with this group": the caller decides the order,
+ * and merging non-adjacent runs would move a tile away from where it was placed.
+ */
+function groupRuns(items: StatisticItem[]): Array<{ group?: string; items: StatisticItem[] }> {
+  const runs: Array<{ group?: string; items: StatisticItem[] }> = [];
+  for (const item of items) {
+    const last = runs[runs.length - 1];
+    if (last && last.group === item.group) last.items.push(item);
+    else runs.push({ group: item.group, items: [item] });
+  }
+  return runs;
 }
 
 function StatisticTile({ item, unknownLabel }: { item: StatisticItem; unknownLabel: string }): React.ReactElement {
