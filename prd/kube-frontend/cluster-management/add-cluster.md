@@ -39,6 +39,8 @@ Kubernetes 集群接入本平台；接入后该集群出现在列表中，可直
 
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-05** — 已知当前账号对 `clusters@cluster.kubesphere.io` 没有 `create` 权限，当打开集群列表，则「添加集群」主操作处于禁用态并在旁边说明缺少权限，点击不打开对话框；有权限时按钮可用。
 
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-06** — 已知用代理连接创建了集群且它尚未就绪，当打开该集群概览页并展开生成的 `agent.yaml`，则清单中 `cluster-agent` Deployment 的容器 `agent` 必须声明 `resources.limits.memory` 为 `2Gi`、`resources.requests.memory` 为 `100Mi`（CPU 为 limit `1` / request `100m`），使用二进制单位（`Gi`/`Mi`）而不是十进制（`G`/`M`）；该清单由 `GET /kapis/cluster.kubesphere.io/v1alpha1/clusters/<name>/agent/deployment` 生成，不经由前端拼装，因此同一平台上的任何成员集群看到的资源规格一致。
+
 ## 设计目标
 
 接入是一个「一次性写对象」的动作：表单不要求用户理解 Cluster 对象结构，只要求两件事——叫什么、怎么连；顺带把别名与描述一次填好，避免接入后再走一次「编辑信息」。
@@ -56,6 +58,7 @@ Kubernetes 集群接入本平台；接入后该集群出现在列表中，可直
   - 基本信息：集群名称（失焦时向平台确认是否已被占用）、别名、标签（无 / 生产 / 开发 / 测试 / 演示）、供应商（七个预设可搜索，也可输入自定义值）、描述。
   - 连接设置：连接方式（直接 / 代理）；直接连接显示 kubeconfig 编辑器与「如何获取 kubeconfig?」文档链接，代理连接改为说明「提交后会立即出现、但在部署代理前不会就绪」。底部「取消 / 确认」。
 - 代理连接不出现 kubeconfig 输入框（多一个输入框就是让读者填它不会发送的内容）。
+- 代理连接未就绪时，概览页展示三步引导与生成的 `agent.yaml`；清单中的资源规格由平台决定，不由读者调整（见 AC-06）。
 - 名称与 kubeconfig 在**发请求前**校验；校验失败时滚动到**第一个**出错的字段并把焦点放到它的控件上（kubeconfig 是编辑器，焦点落到可编辑区），确保错误信息不会被滚动区挡住。
 - 服务端错误显示在对话框**顶部**的危险提示条（不卷到确认按钮下面），并弹出常驻失败通知；保留用户输入，不关闭对话框。
 - 成功后关闭对话框、刷新列表，并弹出「集群 {name} 已接入」的成功通知。
@@ -107,6 +110,7 @@ Kubernetes 集群接入本平台；接入后该集群出现在列表中，可直
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-03`
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-04`
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-05`
+- `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-06`
 
 ## 功能需求
 
@@ -115,6 +119,7 @@ Kubernetes 集群接入本平台；接入后该集群出现在列表中，可直
 - **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-03** — 系统必须把校验或创建失败的原因展示在添加集群对话框内，并弹出通知；失败时不得关闭对话框、不得创建 Cluster 对象。
 - **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-04** — 名称字段失焦时必须向平台确认是否已被占用，命中时给出提示；该提示不得阻止提交。
 - **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-05** — 无 `clusters:create` 权限时主操作必须禁用并说明原因。
+- **FR-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-06** — 代理接入清单中 `cluster-agent` 的资源限制必须由平台生成且足够宽裕（内存 limit `2Gi`、request `100Mi`），避免成员集群在大规模并发代理读时因 OOM 断开隧道而整体不可达。
 
 ## 成功标准
 

@@ -9,6 +9,7 @@
 - `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-03`
 - `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-04`
 - `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-05`
+- `AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-06`
 
 ## 概述
 
@@ -56,10 +57,34 @@ spec:
 | 组件 | `console` | `packages/ai-kit/src/primitives/FormField.tsx` | `fieldKey` → `data-field-key`，供滚动定位 |
 | 文案 | `console` | `kube-frontend/packages/locales/src/index.ts` | `cluster.add.*` 新增键、`cluster.group.demo` |
 | 接口 | `kube-server` | `pkg/kapis/cluster/v1alpha1/handler.go` | 不改；前端消化现有 JSON/纯文本 400 与 5xx |
+| 接口 | `kube-server` | `pkg/kapis/cluster/v1alpha1/handler.go` 的 `generateAgentDeployment` | 代理接入清单的资源规格（`2Gi`/`100Mi`，见 `CON-…-01`）；单元测试 `TestGeranteAgentDeployment` 断言全文 |
 
 ## 对外契约
 
 `POST /apis/cluster.kubesphere.io/v1alpha1/clusters`，body 为完整 Cluster 对象。
+
+### CON-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-01 — 代理接入清单由 apiserver 生成，资源规格固定
+
+`GET /kapis/cluster.kubesphere.io/v1alpha1/clusters/<name>/agent/deployment` 返回 YAML
+（`responseType: 'text'`），内容由 `kube-server/pkg/kapis/cluster/v1alpha1/handler.go` 的
+`generateAgentDeployment` 拼装，前端只展示与复制，不参与生成。清单中
+`Deployment/cluster-agent`（namespace `kubesphere-system`）的容器 `agent` 固定为：
+
+| 资源 | limit | request |
+| --- | --- | --- |
+| `memory` | `2Gi` | `100Mi` |
+| `cpu` | `1` | `100m` |
+
+三个约束：
+
+- **二进制单位**（`Gi`/`Mi`）。`G`/`M` 是十进制，`2G` 比 `2Gi` 少约 147MB，同一份清单里混用会让
+  「源码写 2、Pod 显示 2Gi」在下一次排查时看起来像 bug。
+- **limit 远高于稳态**。agent 稳态约 88Mi；2Gi 是 20 倍余量，不是按观测值调优的结果。
+- **request 保持 100Mi**。request 是调度预留而非上限，调大只会让 agent 在繁忙节点上更难调度。
+
+**为什么这条契约要写在需求里**：它是成员集群唯一会实际落地的资源声明，而它既不由安装清单
+（`ks-installer` 只管 tower）决定，也不由读者在界面上调整——读者能做的只有「复制这段 YAML」。
+把它当作实现细节，就会出现「升级平台后新接入的集群资源规格变了」却没有任何文档记录的情况。
 
 ## 设计目标与非目标
 
@@ -119,6 +144,27 @@ spec:
 **被否方案**：继续用 `<textarea>`。没有语法高亮与括号匹配，几百行 kubeconfig 粘贴后难以核对，而这正是最容易出错的一步。
 
 **何时重新考虑**：编辑器体积降到不影响首屏，或对话框改为独立路由。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-10 — agent 内存上限取 2Gi，不按观测值调优
+
+**为什么**：`cluster-agent` 把所有成员集群请求复用在一到两条 SSH 连接上，链路上每次重传都会让
+对应的 channel 缓冲多留一会儿。mlu370 → A100 实测（2026-11-18）：RTT 60ms、丢包 11–27%，同一
+监控接口在 0.1s 与 31s 之间抖动，代理侧每分钟约 100 次 discovery 请求、峰值 600+。
+
+旧值 `200M` 下容器被 **OOMKilled**（exit 137）。失败模式不是「某个面板慢」，而是整条隧道断开 →
+`Cluster/<name>` 的 `Ready` 翻成 False → 所有集群域接口返回 `500 cluster <name> is not ready`，
+直到 agent 重连。也就是说，用几十 MB 的余量去赌一个集群是否可达。
+
+因此 limit 取稳态（~88Mi）的 20 倍：limit 只在真正使用时才占用节点内存，多留的余量不产生调度成本，
+而一次 OOM 的代价是整个成员集群不可用。大集群（更多并发代理读）正是这条要保护的情况。
+
+**被否方案**：
+- **按观测峰值 × 2（约 512Mi）**。观测窗口只覆盖当时的负载；大集群并发上来后仍会重演，且这类
+  故障只在生产规模下暴露，代价高。
+- **调高 request 到 2Gi**。request 是调度预留，会把 agent 从繁忙节点上挤掉，反而更容易起不来。
+
+**何时重新考虑**：agent 改为每请求一条独立连接（不再复用 SSH），单连接缓冲不再是瓶颈；或代理
+流量被移到 sidecar / 独立组件。
 
 ### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-11 — 校验失败滚到第一个出错字段（用 ai-kit 的通用实现）
 

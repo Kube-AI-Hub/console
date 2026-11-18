@@ -1,0 +1,40 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-06
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: add-cluster
+title: 代理接入清单 · cluster-agent 资源规格
+entry_url: '{BASE_URL}/kube-frontend/clusters'
+prd: prd/kube-frontend/cluster-management/add-cluster.md
+design: design/kube-frontend/cluster-management/add-cluster.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-ADD_CLUSTER-06
+
+story:
+- US1
+
+product: 代理接入时控制台生成的 agent.yaml 里，cluster-agent 的内存上限是 2Gi、请求是 100Mi，用二进制单位；这个值由平台决定，读者不需要也不能在界面上改。
+preconditions:
+- 已登录平台管理，账号有 clusters:create 权限
+- 平台已部署 tower（多集群代理组件）
+steps:
+- 用代理连接创建一个集群，不部署 agent
+- 打开该集群概览页，等待「等待集群加入」面板
+- 读取面板中 agent.yaml 编辑器里的清单内容
+- 直接请求 GET /kapis/cluster.kubesphere.io/v1alpha1/clusters/{name}/agent/deployment，对照两者
+expected:
+- 清单中 Deployment/cluster-agent 位于 namespace kubesphere-system
+- 容器 agent 的 resources.limits.memory 为 2Gi，resources.requests.memory 为 100Mi
+- resources.limits.cpu 为 1，resources.requests.cpu 为 100m
+- 单位是 Gi/Mi；清单中不出现 2G、512M 这类十进制写法
+- 界面展示的清单与接口返回逐字一致（前端不重写资源字段）
+performance:
+- 清单接口为单次读，无特殊要求
+troubleshoot:
+- 仍看到 200M 或 512M：apiserver 镜像未更新，清单由 kube-server 生成而非前端
+- 看到 2G（十进制）：MustParse 的单位写错，2G 比 2Gi 少约 147MB
+- 概览页无清单：平台未部署 tower，接口会返回 404 并提示 tower 无对外地址
+update_automation:
+- 资源规格变更时同步 prd 的 AC-06、design 的 CON-…-01 与 TestGeranteAgentDeployment 的 golden 文本
