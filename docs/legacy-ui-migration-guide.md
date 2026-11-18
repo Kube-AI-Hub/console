@@ -223,7 +223,7 @@ CSS 里完全对齐的两条边，取整到设备像素后相差 3.9px。用 `ma
 
 | 环境 | 能证明 | **不能**证明 |
 |---|---|---|
-| Storybook（`cd console/packages/ai-kit && pnpm storybook`，6106） | 组件在深浅色/两套色调下、键盘与焦点态 | 真实数据、路由、权限 |
+| Storybook（`cd console/packages/ai-kit && pnpm storybook`，6106） | 组件在深浅色/两套色调下、键盘与焦点态；**共享组件的规则（空态文案、列显隐、分页、弹层焦点归还）在这里验最快** | 真实数据、路由、权限 |
 | 本地静态站 + 部署后端 | 登录 → 列表 → 子页面，请求真的到 apiserver | 部署环境的 ingress/TLS 行为 |
 | 部署环境（B200） | 用户真正看到的东西 | — |
 
