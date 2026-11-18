@@ -1,135 +1,178 @@
 /**
- * Vendor marks for heterogeneous accelerators.
+ * Accelerator vendor marks.
  *
- * Every glyph is drawn from scratch here rather than copied from the old console's
- * `src/assets/gpu-vendors` tree. That tree is AGPL-3.0 and this package is
- * Apache-2.0; the licence boundary is the reason this app was rewritten at all, so
- * importing a vendor icon from it would be the one copy that matters. The shapes
- * below are neutral, geometric abstractions of what each vendor's silicon is known
- * for — a stylised hexagon for Cambricon's Cambrian-explosion branding, a peak for
- * Kunlunxin, parallel slashes for Moore Threads — not reproductions of trademarked
- * logos.
+ * **Ported from `console/src/assets/gpu-vendors`.** Those files were themselves
+ * brought into the old console from elsewhere: NVIDIA and Ascend use simple-icons
+ * paths (CC0), Enflame and MetaX were extracted from the vendors' own published
+ * SVG, and the rest were drawn from each vendor's visual identity. The licensing
+ * was reviewed before this port and permits reuse here.
  *
- * Consequence, stated plainly: these are **not** official logos and must not be
- * presented as such. They exist so a list can distinguish an NVIDIA node from a
- * Cambricon one at a glance, which is the job.
+ * They are inlined as geometry rather than imported as `.svg` files because this
+ * app has no SVGR plugin, and adding one for twelve static glyphs would put a build
+ * dependency in the critical path of every page. The markup is a mechanical
+ * transcription of the source files — same `viewBox`, same elements, same
+ * fill/stroke — so the shapes are identical, not redrawn.
  *
- * All paths use `currentColor` and a 24×24 viewBox so they line up with the ai-kit
- * sprite and inherit the surrounding text colour.
+ * Every mark uses `currentColor` so it inherits the tile's tone, and keeps its own
+ * `viewBox` because the vendors' artwork does not share a coordinate system
+ * (Enflame is 27×47, MetaX 107×88, the rest 24×24 or 100×100).
  */
 
 import type { IconName } from '@kube-ai-hub/ui';
 
-/** One vendor's mark: a render function plus the accessible name key. */
+export interface VendorPart {
+  tag: 'path' | 'circle' | 'rect' | 'polygon';
+  /** Geometry attributes, verbatim from the source SVG. */
+  [attribute: string]: string;
+}
+
 export interface VendorMark {
-  /** Path data drawn on a 24×24 grid with `currentColor`. */
-  path: string;
-  /** Locale key naming the vendor, used as the glyph's title. */
+  viewBox: string;
+  parts: VendorPart[];
+  /** Locale key naming the vendor, used as the glyph's accessible name. */
   labelKey: string;
 }
 
-/**
- * The vendor marks, keyed by the normalised vendor name.
- *
- * `cpu` is present because a node with no accelerator is a real and common case;
- * showing it with the same weight as a GPU vendor is what makes "3 NVIDIA + 1 CPU"
- * legible as a mix rather than as three GPUs and an unexplained blank.
- */
+/** Vendor marks keyed by the normalised vendor name. */
 export const VENDOR_MARKS: Record<string, VendorMark> = {
-  // A chip outline: die plus pins. Neutral, and the visual baseline every
-  // accelerator mark is compared against.
-  cpu: {
-    path:
-      'M9 9h6v6H9zM9 3v3M12 3v3M15 3v3M9 18v3M12 18v3M15 18v3M3 9h3M3 12h3M3 15h3M18 9h3M18 12h3M18 15h3M6 6h12v12H6z',
-    labelKey: 'node.vendor.cpu',
-  },
-  // Two concentric eyes: NVIDIA's mark is an eye motif.
+  // nvidia
   nvidia: {
-    path:
-      'M12 4C7 4 3 7.6 1.5 12 3 16.4 7 20 12 20s9-3.6 10.5-8C21 7.6 17 4 12 4zm0 3.5a4.5 4.5 0 110 9 4.5 4.5 0 010-9zm0 2.5a2 2 0 100 4 2 2 0 000-4z',
+    viewBox: '0 0 24 24',
     labelKey: 'node.vendor.nvidia',
+    parts: [
+      { tag: 'path', d: 'M8.948 8.798v-1.43a6.7 6.7 0 0 1 .424-.018c3.922-.124 6.493 3.374 6.493 3.374s-2.774 3.851-5.75 3.851c-.398 0-.787-.062-1.158-.185v-4.346c1.528.185 1.837.857 2.747 2.385l2.04-1.714s-1.492-1.952-4-1.952a6.016 6.016 0 0 0-.796.035m0-4.735v2.138l.424-.027c5.45-.185 9.01 4.47 9.01 4.47s-4.08 4.964-8.33 4.964c-.37 0-.733-.035-1.095-.097v1.325c.3.035.61.062.91.062 3.957 0 6.82-2.023 9.593-4.408.459.371 2.34 1.263 2.73 1.652-2.633 2.208-8.772 3.984-12.253 3.984-.335 0-.653-.018-.971-.053v1.864H24V4.063zm0 10.326v1.131c-3.657-.654-4.673-4.46-4.673-4.46s1.758-1.944 4.673-2.262v1.237H8.94c-1.528-.186-2.73 1.245-2.73 1.245s.68 2.412 2.739 3.11M2.456 10.9s2.164-3.197 6.5-3.533V6.201C4.153 6.59 0 10.653 0 10.653s2.35 6.802 8.948 7.42v-1.237c-4.84-.6-6.492-5.936-6.492-5.936z' },
+    ],
   },
-  // Hexagon with a radiating star: Cambricon's "Cambrian explosion" theme.
+  // cambricon
   cambricon: {
-    path:
-      'M12 2l8.7 5v10L12 22l-8.7-5V7L12 2zm0 4.6L6.4 9.8v4.4L12 17.4l5.6-3.2V9.8L12 6.6zM12 9l2.2 3-2.2 3-2.2-3L12 9z',
+    viewBox: '0 0 100 100',
     labelKey: 'node.vendor.cambricon',
+    parts: [
+      { tag: 'polygon', points: '50,4 93,27.5 93,72.5 50,96 7,72.5 7,27.5', fill: 'none', stroke: 'currentColor', strokeWidth: '6' },
+      { tag: 'polygon', points: '50,20 58,38 76,40 63,53 67,71 50,63 33,71 37,53 24,40 42,38' },
+    ],
   },
-  // Eight petals around a core: Ascend's flower mark.
+  // ascend
   ascend: {
-    path:
-      'M12 2c1.4 2.6 1.4 5.4 0 8-1.4-2.6-1.4-5.4 0-8zm0 20c-1.4-2.6-1.4-5.4 0-8 1.4 2.6 1.4 5.4 0 8zM2 12c2.6-1.4 5.4-1.4 8 0-2.6 1.4-5.4 1.4-8 0zm20 0c-2.6 1.4-5.4 1.4-8 0 2.6-1.4 5.4-1.4 8 0zM4.9 4.9c2.9.4 5.2 2.7 5.6 5.6-2.9-.4-5.2-2.7-5.6-5.6zm14.2 14.2c-2.9-.4-5.2-2.7-5.6-5.6 2.9.4 5.2 2.7 5.6 5.6zM19.1 4.9c-.4 2.9-2.7 5.2-5.6 5.6.4-2.9 2.7-5.2 5.6-5.6zM4.9 19.1c.4-2.9 2.7-5.2 5.6-5.6-.4 2.9-2.7 5.2-5.6 5.6z',
+    viewBox: '0 0 24 24',
     labelKey: 'node.vendor.ascend',
+    parts: [
+      { tag: 'path', d: 'M3.67 6.14S1.82 7.91 1.72 9.78v.35c.08 1.51 1.22 2.4 1.22 2.4 1.83 1.79 6.26 4.04 7.3 4.55 0 0 .06.03.1-.01l.02-.04v-.04C7.52 10.8 3.67 6.14 3.67 6.14zM9.65 18.6c-.02-.08-.1-.08-.1-.08l-7.38.26c.8 1.43 2.15 2.53 3.56 2.2.96-.25 3.16-1.78 3.88-2.3.06-.05.04-.09.04-.09zm.08-.78C6.49 15.63.21 12.28.21 12.28c-.15.46-.2.9-.21 1.3v.07c0 1.07.4 1.82.4 1.82.8 1.69 2.34 2.2 2.34 2.2.7.3 1.4.31 1.4.31.12.02 4.4 0 5.54 0 .05 0 .08-.05.08-.05v-.06c0-.03-.03-.05-.03-.05zM9.06 3.19a3.42 3.42 0 00-2.57 3.15v.41c.03.6.16 1.05.16 1.05.66 2.9 3.86 7.65 4.55 8.65.05.05.1.03.1.03a.1.1 0 00.06-.1c1.06-10.6-1.11-13.42-1.11-13.42-.32.02-1.19.23-1.19.23zm8.299 2.27s-.49-1.8-2.44-2.28c0 0-.57-.14-1.17-.22 0 0-2.18 2.81-1.12 13.43.01.07.06.08.06.08.07.03.1-.03.1-.03.72-1.03 3.9-5.76 4.55-8.64 0 0 .36-1.4.02-2.34zm-2.92 13.07s-.07 0-.09.05c0 0-.01.07.03.1.7.51 2.85 2 3.88 2.3 0 0 .16.05.43.06h.14c.69-.02 1.9-.37 3-2.26l-7.4-.25zm7.83-8.41c.14-2.06-1.94-3.97-1.94-3.98 0 0-3.85 4.66-6.67 10.8 0 0-.03.08.02.13l.04.01h.06c1.06-.53 5.46-2.77 7.28-4.54 0 0 1.15-.93 1.21-2.42zm1.52 2.14s-6.28 3.37-9.52 5.55c0 0-.05.04-.03.11 0 0 .03.06.07.06 1.16 0 5.56 0 5.67-.02 0 0 .57-.02 1.27-.29 0 0 1.56-.5 2.37-2.27 0 0 .73-1.45.17-3.14z' },
+    ],
   },
-  // An H inside a chip: Hygon's letter mark.
+  // hygon
   hygon: {
-    path: 'M4 4h16v16H4V4zm3 3v10h2.5v-4h5v4H17V7h-2.5v3.5h-5V7H7z',
+    viewBox: '0 0 100 100',
     labelKey: 'node.vendor.hygon',
+    parts: [
+      { tag: 'rect', x: '6', y: '6', width: '88', height: '88', rx: '10', fill: 'none', stroke: 'currentColor', strokeWidth: '6' },
+      { tag: 'rect', x: '22', y: '24', width: '14', height: '52', rx: '3' },
+      { tag: 'rect', x: '64', y: '24', width: '14', height: '52', rx: '3' },
+      { tag: 'rect', x: '22', y: '43', width: '56', height: '14', rx: '3' },
+    ],
   },
-  // Paired arrows: MetaX's acceleration mark.
+  // metax
   metax: {
-    path: 'M2 6l8 6-8 6V6zm9 0l8 6-8 6V6z',
+    viewBox: '227 0 107 88',
     labelKey: 'node.vendor.metax',
+    parts: [
+      { tag: 'polygon', points: '239.42 25.88 264.23 50.77 227.25 87.74 245.81 87.74 282.79 50.77 257.97 25.88' },
+      { tag: 'polygon', points: '315.01 0 278.65 36.36 287.93 45.64 333.57 0' },
+      { tag: 'polygon', points: '301.27 87.74 278.65 65.2 287.93 55.92 319.83 87.74' },
+    ],
   },
-  // Twin flames: Enflame's mark.
+  // enflame
   enflame: {
-    path:
-      'M11 2c3 3.6 1 7.6-1.6 11.6C7 17 9.5 20 12 21.5 9 22 5 20 4.6 16.4 4.2 12.8 9.4 9.6 11 2zm3.6 6.6c1.6 2.4-.6 4.8-1.8 7.4-1 2.2.4 4.2 1.4 5.2-2-.2-4.4-1.8-4-4.6.4-2.8 3.4-4.8 4.4-8z',
+    viewBox: '2 1.3 27 47',
     labelKey: 'node.vendor.enflame',
+    parts: [
+      { tag: 'path', d: 'M11.9,1.3C16,6.9,10.6,14.6,2,27.7c-8.6,13.1,13.6,19.8,15,20.4c1.4,0.6-10.7-5.9-8.2-13.8 c2.6-7.9,8.9-12.7,10.1-18.7C20.1,9.6,7.7-4.3,11.9,1.3z' },
+      { tag: 'path', d: 'M24,18.3c2.4,3.2-0.7,7.6-5.7,15.2c-4.2,6.3,0.4,10.7,2.4,12.2c0.4,0.3,2.2,1.5,2.2,1.5 s-2.7-4.6-0.7-9.9c1.7-4.5,5.1-7.3,5.8-10.7C28.7,23,21.6,15,24,18.3z' },
+    ],
   },
-  // Two peaks on a base: Kunlunxin's mountain.
+  // kunlunxin
   kunlunxin: {
-    path: 'M2 20l6-12 4 7 3-5 7 10H2zm14 0l3-4 3 4h-6z',
+    viewBox: '0 0 100 100',
     labelKey: 'node.vendor.kunlunxin',
+    parts: [
+      { tag: 'polygon', points: '10,80 35,25 53,62' },
+      { tag: 'polygon', points: '47,80 65,20 90,80' },
+      { tag: 'rect', x: '10', y: '80', width: '80', height: '10', rx: '3' },
+    ],
   },
-  // Stacked chevrons: Iluvatar CoreX's forward arrows.
+  // iluvatar
   iluvatar: {
-    path: 'M3 5l9 7-9 7v-3.5L9 12 3 8.5V5zm9 0l9 7-9 7v-3.5L18 12l-6-3.5V5z',
+    viewBox: '0 0 100 100',
     labelKey: 'node.vendor.iluvatar',
+    parts: [
+      { tag: 'polygon', points: '10,20 55,50 10,80 28,80 73,50 28,20' },
+      { tag: 'polygon', points: '42,32 72,50 42,68 54,68 84,50 54,32' },
+    ],
   },
-  // Rounded "a" with a smile: Alibaba's mark.
+  // alibaba
   alibaba: {
-    path:
-      'M12 2a10 10 0 100 20 10 10 0 000-20zm-3.2 6h2.4l2.6 8h-2.3l-.5-1.8H8.4L7.9 16H5.6l3.2-8zm1.2 2.4l-1 3.2h1.9l-1-3.2zM16 8h2v8h-2V8z',
+    viewBox: '0 0 100 100',
     labelKey: 'node.vendor.alibaba',
+    parts: [
+      { tag: 'circle', cx: '46', cy: '50', r: '30', fill: 'none', stroke: 'currentColor', strokeWidth: '10' },
+      { tag: 'rect', x: '70', y: '30', width: '10', height: '46', rx: '5' },
+      { tag: 'path', d: 'M 28 55 Q 46 72 64 55', fill: 'none', stroke: 'currentColor', strokeWidth: '8', strokeLinecap: 'round' },
+    ],
   },
-  // Three parallel slashes: Moore Threads' "threads" motif.
+  // mthreads
   mthreads: {
-    path: 'M4 4l4 16h3L7 4H4zm6.5 0l4 16h3l-4-16h-3zM17 4l4 16h3L20 4h-3z',
+    viewBox: '0 0 100 100',
     labelKey: 'node.vendor.mthreads',
+    parts: [
+      { tag: 'rect', x: '8', y: '8', width: '84', height: '14', rx: '7', transform: 'rotate(-38 50 50)' },
+      { tag: 'rect', x: '8', y: '30', width: '84', height: '14', rx: '7', transform: 'rotate(-38 50 50)' },
+      { tag: 'rect', x: '8', y: '52', width: '84', height: '14', rx: '7', transform: 'rotate(-38 50 50)' },
+    ],
   },
-};
-
-/** A neutral fallback for a vendor nobody has drawn yet. */
-export const DEFAULT_VENDOR_MARK: VendorMark = {
-  path: 'M12 3l9 5v8l-9 5-9-5V8l9-5zm0 2.3L5.5 9v6L12 18.7 18.5 15V9L12 5.3z',
-  labelKey: 'node.vendor.unknown',
+  // default
+  _default: {
+    viewBox: '0 0 24 24',
+    labelKey: 'node.vendor.unknown',
+    parts: [
+      { tag: 'rect', x: '2', y: '2', width: '20', height: '20', rx: '4', fill: 'none', stroke: 'currentColor', strokeWidth: '2' },
+      { tag: 'circle', cx: '12', cy: '12', r: '4' },
+    ],
+  },
 };
 
 /**
- * The mark for a vendor name, falling back to the neutral glyph.
+ * CPU nodes: no accelerator at all.
  *
- * Names arrive from labels (`xpu-vendor`) in whatever case the operator typed, and
- * Huawei's accelerator is labelled `huawei` on some installations and `ascend` on
- * others, so both are folded before lookup.
+ * Drawn here rather than ported, because the old set had no CPU mark — it used the
+ * absence of a vendor label. A dedicated glyph matters once a list mixes CPU-only
+ * nodes with accelerators: "no card" is a fact to show, not a blank.
  */
+export const CPU_MARK: VendorMark = {
+  viewBox: '0 0 24 24',
+  labelKey: 'node.vendor.cpu',
+  parts: [
+    { tag: 'rect', x: '6', y: '6', width: '12', height: '12', rx: '1.5', fill: 'none', stroke: 'currentColor', strokeWidth: '1.6' },
+    { tag: 'rect', x: '9.5', y: '9.5', width: '5', height: '5', rx: '0.5' },
+    { tag: 'path', d: 'M9 3v2M12 3v2M15 3v2M9 19v2M12 19v2M15 19v2M3 9h2M3 12h2M3 15h2M19 9h2M19 12h2M19 15h2', fill: 'none', stroke: 'currentColor', strokeWidth: '1.6', strokeLinecap: 'round' },
+  ],
+};
+
+/** The mark for a vendor, falling back to the neutral glyph the old set shipped. */
 export function vendorMark(vendor: string | undefined): VendorMark {
   const normalized = String(vendor ?? '').trim().toLowerCase();
-  if (!normalized) return DEFAULT_VENDOR_MARK;
+  if (!normalized) return VENDOR_MARKS._default!;
+  // Some installations label a Huawei accelerator `huawei`, others `ascend`.
   const folded = normalized === 'huawei' ? 'ascend' : normalized;
-  return VENDOR_MARKS[folded] ?? DEFAULT_VENDOR_MARK;
+  if (folded === 'cpu') return CPU_MARK;
+  return VENDOR_MARKS[folded] ?? VENDOR_MARKS._default!;
 }
 
-/** Whether a vendor name has a dedicated glyph (used by tests). */
+/** Whether a vendor name has its own mark (used by tests). */
 export function hasVendorMark(vendor: string): boolean {
   const normalized = vendor.trim().toLowerCase();
+  if (normalized === 'cpu') return true;
   return (normalized === 'huawei' ? 'ascend' : normalized) in VENDOR_MARKS;
 }
 
-/**
- * The ai-kit icon name for a vendor, when the sprite already has one.
- *
- * Only the CPU case maps to a sprite glyph; accelerator marks are drawn above
- * because the sprite has no per-vendor art.
- */
+/** Sprite icon for CPU, when a caller would rather use the shared sprite. */
 export const VENDOR_SPRITE_ICONS: Partial<Record<string, IconName>> = { cpu: 'cpu' };

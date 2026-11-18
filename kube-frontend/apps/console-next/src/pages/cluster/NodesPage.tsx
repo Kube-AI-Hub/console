@@ -69,25 +69,31 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
   const healthRatio = stats.data?.total ? stats.data.healthy / stats.data.total : undefined;
   const healthPercent = healthRatio === undefined ? undefined : Math.round(healthRatio * 100);
   const summary: StatisticItem[] = [
-    { key: 'total', label: t('node.stats.total'), value: stats.data?.total, state: statState, icon: <Icon name="nodes" size={20} /> },
+    { key: 'total', label: t('node.stats.total'), value: stats.data?.total, state: statState, icon: <Icon name="nodes" size={40} /> },
     { key: 'control-plane', label: t('node.stats.controlPlane'), value: controlPlane.data,
       state: controlPlane.isPending ? 'loading' : controlPlane.isError ? 'error' : 'ready',
-      icon: <Icon name="kubernetes" size={20} /> },
+      icon: <Icon name="kubernetes" size={40} /> },
     /*
-     * Health as a ring rather than a bare percentage.
+     * Health: the chart *is* the leading visual, and the text keeps the name and the
+     * percentage.
      *
-     * The number alone says "100%" without saying "of how many"; the ring carries the
-     * same ratio as a shape, so a partially-ready fleet is visible before the figure
-     * is read. The ring is the same `MetricRing` the overview uses, which keeps the
-     * two pages telling the same story in the same visual language.
+     * The old console put a `SimpleCircle` in this slot — a two-segment ring whose
+     * arc is "healthy / total" — and left the number in the text column. Doing the
+     * same here keeps the band legible in one pass: every tile is "mark or chart,
+     * then label, then value", so the eye compares like with like instead of reading
+     * a percentage that happens to sit beside a circle.
+     *
+     * `MetricRing` is this design system's equivalent: one arc, tone by ratio, the
+     * ratio in the middle. The detail line ("1 / 1 healthy nodes") moves into the
+     * ring's centre, which is where the old chart put its own counts.
      */
     { key: 'health', label: t('node.stats.health'),
       value: healthPercent === undefined ? '-' : `${healthPercent}%`,
-      description: stats.data ? t('node.stats.healthDetail', { healthy: stats.data.healthy, total: stats.data.total }) : '',
       state: statState, tone: healthRatio === 1 ? 'success' : healthRatio === undefined ? 'neutral' : 'warning',
-      icon: healthPercent === undefined ? undefined : <MetricRing value={healthPercent} tone={healthRatio === 1 ? 'success' : 'warning'} className="size-11">
-        <Icon name="nodes" size={16} />
-      </MetricRing> },
+      icon: healthPercent === undefined ? <Icon name="nodes" size={40} /> :
+        <MetricRing value={healthPercent} tone={healthRatio === 1 ? 'success' : 'warning'} className="size-10">
+          <span className="text-[11px] font-semibold tabular-nums">{healthPercent}%</span>
+        </MetricRing> },
     /*
      * One tile per accelerator vendor, each with its own mark.
      *
@@ -97,7 +103,7 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
      */
     ...(stats.data?.vendors ?? []).map((entry) => ({
       key: `vendor:${entry.vendor}`, label: vendorName(entry.vendor), value: entry.count,
-      icon: <VendorIcon vendor={entry.vendor} size={20} />,
+      icon: <VendorIcon vendor={entry.vendor} size={40} />,
     })),
   ];
   const metric = (row: NodeSummary, kind: 'gpu' | 'gpuMemory' | 'cpu' | 'memory' | 'pods') => {

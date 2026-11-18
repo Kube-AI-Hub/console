@@ -1,26 +1,61 @@
 import * as React from 'react';
 import { cn } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
+import type { VendorPart } from './vendorMarks';
 import { vendorMark } from './vendorMarks';
 
 /**
- * One vendor's mark, sized for a statistics tile.
+ * One vendor's mark.
  *
- * `currentColor` throughout, so the glyph takes the tile's tone: a healthy cluster
- * draws every vendor in the foreground colour, and an attention state tints the
- * whole row without a second styling rule.
+ * The default size matches the old console's `Text` component, which draws every
+ * summary icon at 40px. Matching it is not decoration: the statistics band is read
+ * by comparing glyphs, and a 20px mark beside an 18px number reads as a bullet
+ * rather than as the tile's subject.
+ *
+ * `currentColor` throughout, so the glyph takes the tile's tone and needs no
+ * per-vendor theming.
  */
-export function VendorIcon({ vendor, size = 20, className }: {
+export function VendorIcon({ vendor, size = 40, className }: {
   vendor: string | undefined; size?: number; className?: string;
 }): React.ReactElement {
   const t = useT();
   const mark = vendorMark(vendor);
   const label = t(mark.labelKey as Parameters<typeof t>[0]);
-  return <svg viewBox="0 0 24 24" width={size} height={size} role="img" aria-label={label}
+  return <svg viewBox={mark.viewBox} width={size} height={size} role="img" aria-label={label}
     className={cn('shrink-0 fill-current', className)} data-vendor={vendor || 'unknown'}>
     <title>{label}</title>
-    <path d={mark.path} fillRule="evenodd" clipRule="evenodd" />
+    {mark.parts.map((part, index) => renderPart(part, index))}
   </svg>;
+}
+
+/**
+ * Render one source element.
+ *
+ * The geometry is transcribed verbatim from the vendor SVG, so this switch is a
+ * translator, not a designer: an element type it does not know is skipped rather
+ * than approximated.
+ */
+function renderPart(part: VendorPart, key: number): React.ReactElement | null {
+  const { tag, fill, stroke, strokeWidth, strokeLinecap } = part;
+  const style = {
+    ...(fill === 'none' ? { fill: 'none' as const } : {}),
+    ...(stroke ? { stroke } : {}),
+    ...(strokeWidth ? { strokeWidth } : {}),
+    ...(strokeLinecap ? { strokeLinecap: strokeLinecap as 'round' } : {}),
+  };
+  switch (tag) {
+    case 'path':
+      return <path key={key} d={part['d'] ?? ''} {...style} />;
+    case 'circle':
+      return <circle key={key} cx={part['cx']} cy={part['cy']} r={part['r']} {...style} />;
+    case 'rect':
+      return <rect key={key} x={part['x']} y={part['y']} width={part['width']} height={part['height']}
+        {...(part['rx'] ? { rx: part['rx'] } : {})} {...(part['transform'] ? { transform: part['transform'] } : {})} {...style} />;
+    case 'polygon':
+      return <polygon key={key} points={part['points'] ?? ''} {...style} />;
+    default:
+      return null;
+  }
 }
 
 /**
@@ -48,7 +83,7 @@ export function VendorMix({ vendors, className }: {
   return <ul className={cn('flex flex-wrap items-center gap-x-4 gap-y-2', className)} data-ai-id="nodes:vendor-mix">
     {ordered.map((entry) => <li key={entry.vendor} className="flex items-center gap-1.5"
       title={`${t(vendorMark(entry.vendor).labelKey as Parameters<typeof t>[0])}: ${entry.count}`}>
-      <VendorIcon vendor={entry.vendor} size={18} className="text-ai-fg-secondary" />
+      <VendorIcon vendor={entry.vendor} size={20} className="text-ai-fg-secondary" />
       <span className="text-xs font-medium tabular-nums text-ai-fg">{entry.count}</span>
       <span className="text-[11px] text-ai-fg-muted">
         {t(vendorMark(entry.vendor).labelKey as Parameters<typeof t>[0])}

@@ -30,8 +30,15 @@ export interface StatisticsGroupProps extends React.HTMLAttributes<HTMLDListElem
 /** Display-only summary: quantities and aggregation belong to the host. */
 export function StatisticsGroup({ items, unknownLabel, className, ...attributes }: StatisticsGroupProps): React.ReactElement {
   return <dl className={cn('flex flex-wrap gap-x-8 gap-y-3 rounded-ai-lg border border-ai-line bg-ai-surface-1 px-4 py-3', className)} {...attributes}>
-    {items.map((item) => <div key={item.key} className="flex min-w-24 items-center gap-2">
-      {item.icon ? <span className="text-ai-fg-secondary" aria-hidden>{item.icon}</span> : null}
+    {items.map((item) => <div key={item.key} className="flex min-w-24 items-center gap-3">
+      {/*
+        * The leading slot holds either a glyph or a chart.
+        *
+        * Both are drawn at the same height so a row of tiles keeps one baseline:
+        * a 40px vendor mark next to a 40px health ring reads as two facts of equal
+        * weight, which is the point of a summary band.
+        */}
+      {item.icon ? <span className="grid size-10 shrink-0 place-items-center text-ai-fg-secondary">{item.icon}</span> : null}
       <div className="min-w-0">
         <dt className="text-xs text-ai-fg-muted">{item.label}</dt>
         <dd className={cn('mt-1 tabular-nums', item.emphasis ? 'text-2xl font-semibold' : 'text-lg font-semibold',
