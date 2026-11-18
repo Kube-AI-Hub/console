@@ -88,7 +88,10 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_OVERVIEW_11(cluster_overview_pag
     # ---- 重复提示：本页会自动刷新只说一次 ----
     assert body.count("本页会自动刷新") <= 1, "自动刷新提示重复"
 
-    # ---- 手动刷新可用 ----
-    expect(ui.page.locator('[data-ai-id="overview:waiting-refresh"]')).to_be_visible()
+    # ---- 刷新只有一个入口：页头那个，面板里不再重复 ----
+    expect(ui.page.locator('[data-ai-id="overview:refresh"]')).to_be_visible()
+    assert ui.page.locator('[data-ai-id="overview:waiting-refresh"]').count() == 0, "等待面板不应再放一个刷新按钮"
+    refresh_buttons = [b for b in ui.page.get_by_role("button").all() if b.inner_text().strip().startswith("刷新")]
+    assert len(refresh_buttons) == 1, f"页面上应只有一个刷新按钮，实际 {len(refresh_buttons)}"
 
     screenshot(ui.page, f"overview-waiting-{target}")

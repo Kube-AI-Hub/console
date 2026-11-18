@@ -298,17 +298,16 @@ function WaitingForCluster({ cluster, detail, refresh }: {
         ) : null}
 
         {/*
-         * The page watches the cluster object itself, so the agent being applied flips
-         * this view to the real overview without the reader reloading. The hint says that
-         * once, here, next to the control that can also do it by hand.
+         * No refresh button here: the header above already carries one, and the page
+         * watches the cluster object, so applying the agent flips this view to the real
+         * overview on its own. Two buttons that do the same thing, one at the top and one
+         * at the bottom of a long panel, read as two different actions.
          */}
-        <div className="flex flex-wrap items-center gap-2">
-          <Button size="sm" variant="secondary" loading={refresh.busy} data-ai-id="overview:waiting-refresh"
-            onClick={() => void refresh.refresh()}>
-            {!refresh.busy ? <Icon name="refresh" /> : null}{t('common.refresh')}
-          </Button>
-          {refresh.auto ? <span className="text-xs text-ai-fg-muted">{t('cluster.overview.agentWaiting')}</span> : null}
-        </div>
+        {refresh.auto ? (
+          <p className="text-xs text-ai-fg-muted" data-ai-id="overview:waiting-hint-auto">
+            {t('cluster.overview.agentWaiting')}
+          </p>
+        ) : null}
       </div>
     </Panel>
   );

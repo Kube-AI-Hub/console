@@ -20,7 +20,7 @@ steps:
 - 打开未就绪集群的概览，等待集群对象返回
 - 核对页头保留集群名、暂停/刷新与 kubectl，其下只有等待面板
 - 核对资源用量、节点块、排行、基本信息、Kubernetes 状态、组件、模块与快捷入口均未渲染
-- 核对等待面板含加载指示、说明文案与手动刷新
+- 核对等待面板含加载指示与说明文案，且不重复提供刷新按钮（刷新只在页头一处）
 - 代理集群：核对三步引导的顺序与命令，命令以行内 code 呈现且不重复
 - 核对文案中不残留 `{cmd}`、`{file}` 等占位符
 - 清单接口不可用时核对显示 tower 说明与原始原因，而非仅「未找到」
@@ -32,6 +32,7 @@ expected:
 - 清单用共享 `YamlEditor`（CodeMirror）只读展示：有行号与语法高亮，可滚动查看完整文档，复制按钮在文档下方
 - "`connectionType=direct` 的未就绪集群不渲染 `overview:agent-steps`"
 - 控制器有 readyMessage 时显示原文，无则不显示；「本页会自动刷新」只出现一次
+- 整页只有一个刷新按钮（页头 `overview:refresh`），等待面板内不出现 `overview:waiting-refresh`
 - 集群就绪后完整概览出现，等待面板消失
 troubleshoot:
 - 等待面板不出现：先看集群对象的 Ready 条件，`toClusterDetail` 只认 `status=True`
