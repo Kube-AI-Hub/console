@@ -221,8 +221,15 @@ async function toApiError(response: Response): Promise<ApiError> {
   const trimmed = raw.trim();
   if (!trimmed || !(trimmed.startsWith('{') || trimmed.startsWith('['))) {
     const isHtml = trimmed.startsWith('<');
+    /*
+     * A missing object can arrive as `500` with a plain text body --
+     * `configmap "x" not found`, measured against the aggregated kapis endpoint on 2026-11-18.
+     * Trusting the status alone would call a deleted object a server failure, and a deep link to
+     * it would read "服务异常" instead of "不存在". The sentence is the only signal there is.
+     */
+    const code = /\bnot found\b/i.test(trimmed) ? 'not_found' : fallback.code;
     return new ApiError(
-      { ...fallback, message: trimmed && !isHtml ? plainErrorText(trimmed) : fallback.message },
+      { ...fallback, code, message: trimmed && !isHtml ? plainErrorText(trimmed) : fallback.message },
       response.status,
     );
   }

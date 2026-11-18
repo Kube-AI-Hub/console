@@ -171,4 +171,21 @@ describe('ConfigMaps transport', () => {
     expect(url.searchParams.get('sortBy')).toBeNull();
     expect(url.searchParams.get('ascending')).toBeNull();
   });
+
+  /*
+   * A missing object is not a server failure.
+   *
+   * The aggregated kapis endpoint answers a missing ConfigMap with `500` and a **plain text** body
+   * (`configmap "x" not found`, measured against A100 on 2026-11-18), so the status alone would
+   * classify it as `upstream_error` and a deep link to a deleted object would read as an outage.
+   */
+  it('reads a plain-text "not found" body as not_found even on a 500', async () => {
+    const client = createClient({
+      fetchImpl: (async () =>
+        new Response('configmap "gone" not found', { status: 500, headers: { 'content-type': 'text/plain' } })) as typeof fetch,
+    });
+    await expect(configMapsApi(client).get({ cluster: 'host', namespace: 'default', name: 'gone' })).rejects.toMatchObject({
+      code: 'not_found',
+    });
+  });
 });

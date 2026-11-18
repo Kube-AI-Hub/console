@@ -36,3 +36,21 @@ limit=100 -> 4 items（不足一页时如实返回全部）
 - **没证明**：界面是否把这些参数**正确地**传出去（那部分由 api-client 单测与页面用例覆盖）。
 
 两层分开之后，「排序不生效」这类问题可以立刻定位到是「没传」还是「服务端没做」。
+
+---
+
+## 顺带发现：缺失对象返回 **500 纯文本**
+
+```
+GET …/namespaces/default/configmaps/does-not-exist-xyz
+→ 500
+→ configmap "does-not-exist-xyz" not found     ← 纯文本，不是 kube Status JSON
+```
+
+`codeForStatus(500)` 会把它归成 `upstream_error`，于是**指向已删除对象的深链会显示「服务异常」**，
+而真相是「对象不存在」。JSON 解析失败后走的那条分支（`codeForReason`）根本没机会执行。
+
+**已修**：在解析纯文本的入口识别 `not found`，归成 `not_found`（`client.ts`）。
+单测新增一条：500 + `configmap "gone" not found` → `code: 'not_found'`。api-client 50 文件 / **481 条**全过。
+
+> 这条也说明：**服务端契约要实测**。文档里写「404 表示不存在」是对的，但这个聚合端点用的是 500 + 纯文本。
