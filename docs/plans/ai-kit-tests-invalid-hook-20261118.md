@@ -241,6 +241,16 @@ python3 prd/tools/verify.py --no-e2e --continue
 EXIT=1
 ```
 
+**默认路径也复验过**（不带 `--continue`）：仍在第一个失败处停下，并给出提示——
+
+```
+失败：console-next 单测（15.8s）
+先修这一项再继续——后续检查建立在它通过之上。（想一次看全貌用 --continue）
+EXIT=1
+```
+
+所以两种模式各自成立：默认 fail-fast（顺手告诉你有另一条路），`--continue` 给全貌。
+
 ## 实现要点
 
 `CONTINUE_ON_FAILURE` 必须在**解析参数之后、第一次 `run()` 之前**赋值——
