@@ -241,10 +241,16 @@ function SingleStatPanel({ panel, expr, index }: { panel: DashboardPanel; expr: 
     );
   }
   const first = series[0];
-  const value = first?.points[first.points.length - 1]?.value ?? 0;
+  const point = first?.points[first.points.length - 1];
+  /*
+   * A series with no points is "no reading", not a reading of zero: the query can come back with
+   * an empty series for a just-started range, and `0` there would be a measurement the cluster
+   * never reported. The empty state above covers "no series"; this covers "a series with nothing in
+   * it" (2026-11-18).
+   */
   return (
     <p className="text-2xl font-semibold tabular-nums text-ai-fg" data-ai-id={`dashboard-panels:panel:${index}:value`}>
-      {formatSingle(value, panel)}
+      {point ? formatSingle(point.value, panel) : '-'}
     </p>
   );
 }
