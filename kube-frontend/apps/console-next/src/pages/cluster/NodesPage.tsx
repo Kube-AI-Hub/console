@@ -82,11 +82,48 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
   const statState = stats.isPending ? 'loading' : stats.isError ? 'error' : 'ready';
   const healthRatio = stats.data?.total ? stats.data.healthy / stats.data.total : undefined;
   const healthPercent = healthRatio === undefined ? undefined : Math.round(healthRatio * 100);
+  /*
+   * A statistics tile sets the same filters the toolbar's controls set.
+   *
+   * Clicking is a toggle, not a one-way switch: a reader who clicked "control-plane
+   * nodes" to see them and got what they asked for must be able to get back without
+   * hunting for the dropdown. The vendors are a multi-select on the wire
+   * (`vendor=a,b`), so clicking one adds it and clicking it again removes it rather
+   * than replacing the set.
+   */
+  const toggleStat = React.useCallback((patch: { role?: string; vendor?: string }) => {
+    setFilters((prev) => {
+      const next = { ...prev };
+      if (patch.role !== undefined) next.role = prev.role === patch.role ? '' : patch.role;
+      if (patch.vendor !== undefined) {
+        const current = (prev.vendor ?? '').split(',').filter(Boolean);
+        const merged = current.includes(patch.vendor)
+          ? current.filter((value) => value !== patch.vendor)
+          : [...current, patch.vendor];
+        next.vendor = merged.join(',');
+      }
+      return next;
+    });
+    list.setPage(1);
+  }, [list]);
+  const selectedVendors = React.useMemo(() => (filters.vendor ?? '').split(',').filter(Boolean), [filters.vendor]);
+  const noFilters = !filters.status && !filters.role && !filters.vendor && !filters.model && !list.search;
   const summary: StatisticItem[] = [
-    { key: 'total', label: t('node.stats.total'), value: stats.data?.total, state: statState, icon: <Icon name="nodes" size={40} /> },
+    /*
+     * "Cluster nodes" clears everything — it is the total, so its own filter is the
+     * absence of filters. It stays clickable (rather than being a label) because a
+     * reader who has narrowed the list by clicking a vendor needs one obvious way
+     * back to the whole fleet.
+     */
+    { key: 'total', label: t('node.stats.total'), value: stats.data?.total, state: statState,
+      icon: <Icon name="nodes" size={40} />,
+      onSelect: () => { setFilters({}); list.setPage(1); }, selected: noFilters,
+      selectHint: t('node.stats.filterHint') },
     { key: 'control-plane', label: t('node.stats.controlPlane'), value: controlPlane.data,
       state: controlPlane.isPending ? 'loading' : controlPlane.isError ? 'error' : 'ready',
-      icon: <Icon name="kubernetes" size={40} /> },
+      icon: <Icon name="kubernetes" size={40} />,
+      onSelect: () => toggleStat({ role: 'master' }), selected: filters.role === 'master',
+      selectHint: t('node.stats.filterHint') },
     /*
      * Health: the chart *is* the leading visual, and the text keeps the name and the
      * percentage.
@@ -136,6 +173,9 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
     ...(stats.data?.vendors ?? []).map((entry) => ({
       key: `vendor:${entry.vendor}`, label: vendorName(entry.vendor), value: entry.count,
       icon: <VendorIcon vendor={entry.vendor} size={40} />,
+      onSelect: () => toggleStat({ vendor: entry.vendor }),
+      selected: selectedVendors.includes(entry.vendor),
+      selectHint: t('node.stats.filterHint'),
     })),
   ];
   const metric = (row: NodeSummary, kind: 'gpu' | 'gpuMemory' | 'cpu' | 'memory' | 'pods') => {
