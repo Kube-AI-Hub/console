@@ -1,5 +1,4 @@
 import type { LocaleKey } from '@kube-ai-hub/locales';
-import type { WindowKey } from './monitorWindow';
 
 /**
  * The in-page tabs of 集群监控.
@@ -106,8 +105,14 @@ export type MonitorTabState = 'loading' | 'ready' | 'empty' | 'error';
  */
 export interface WindowContext {
   cluster: string;
-  /** The selected header window, e.g. '1h'; also the query-key identity. */
-  rangeKey: WindowKey;
+  /**
+   * Identity of the selected window, e.g. `1h` or `custom`.
+   *
+   * Also the query-key component: the range timestamps already change per window,
+   * so two windows of the same length still cache separately, while a preset key
+   * keeps the entry stable across auto-refresh ticks.
+   */
+  rangeKey: string;
   /** Epoch milliseconds, inclusive lower bound. */
   start: number;
   /** Epoch milliseconds, inclusive upper bound. */

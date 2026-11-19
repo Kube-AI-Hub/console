@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { resolveRange, type TimeRange } from '@kube-ai-hub/ui/charts';
 import { api } from '@/api';
 
 /**
@@ -15,7 +16,13 @@ import { api } from '@/api';
  * row is the mean over it. An instant sample would make the selector meaningless.
  */
 
-/** The selectable windows, with steps that keep a series near 60 points. */
+/**
+ * The presets this page offers.
+ *
+ * The window arithmetic itself lives in ai-kit (`charts/timeRange`), shared with the
+ * other monitoring surfaces: two copies would sample the same hour differently
+ * depending on which page asked.
+ */
 export const RESOURCE_RANGES = [
   { key: '1h', ms: 3_600_000, step: '60s' },
   { key: '6h', ms: 6 * 3_600_000, step: '5m' },
@@ -73,13 +80,14 @@ function mean(values: number[]): number {
  * page of pods would quietly omit the busiest ones. The response is a matrix (one
  * series per pod), which is what makes the range selector honest.
  */
-export function usePodUsage(cluster: string, rangeKey: ResourceRangeKey) {
+export function usePodUsage(cluster: string, range: TimeRange) {
+  const resolved = resolveRange(range);
+  const rangeKey = range.kind === 'relative' ? range.key : 'custom';
   return useQuery({
-    queryKey: ['resource-monitor-pods', cluster, rangeKey],
+    queryKey: ['resource-monitor-pods', cluster, rangeKey, resolved.start, resolved.end],
     queryFn: async ({ signal }): Promise<PodUsage[]> => {
-      const range = RESOURCE_RANGES.find((entry) => entry.key === rangeKey) ?? RESOURCE_RANGES[0];
-      const end = Math.floor(Date.now() / 1000);
-      const start = end - Math.round(range.ms / 1000);
+      const end = Math.floor(resolved.end / 1000);
+      const start = Math.floor(resolved.start / 1000);
       const body = await api.request<MonitoringRangeBody>('/kapis/monitoring.kubesphere.io/v1alpha3/pods', {
         query: {
           cluster,
@@ -87,7 +95,7 @@ export function usePodUsage(cluster: string, rangeKey: ResourceRangeKey) {
           metrics_filter: 'pod_cpu_usage$|pod_memory_usage_wo_cache$',
           start,
           end,
-          step: range.step,
+          step: resolved.step,
         },
         signal,
       });

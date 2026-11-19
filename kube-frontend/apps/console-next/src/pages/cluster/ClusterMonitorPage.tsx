@@ -1,8 +1,9 @@
 import * as React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useIsFetching } from '@tanstack/react-query';
 import { ApiError, clusterStatusApi, rangeMetricsApi, type MetricSeries } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { AiSurface, Button, Skeleton, Tabs, TabsContent, TrendChart } from '@kube-ai-hub/ui';
+import { AiSurface, Button, Icon, Skeleton, Tabs, TabsContent, TrendChart } from '@kube-ai-hub/ui';
+import { TimeRangePicker, rangePresets } from '@kube-ai-hub/ui/charts';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -25,12 +26,13 @@ import {
 } from './monitorTabs';
 import {
   AUTO_REFRESH_INTERVAL_MS,
-  DEFAULT_WINDOW_KEY,
-  WINDOWS,
-  rangeForWindow,
-  windowFor,
-  type WindowKey,
+  defaultMonitorRange,
+  resolveMonitorRange,
 } from './monitorWindow';
+import type { TimeRange } from '@kube-ai-hub/ui/charts';
+
+/** The sampling steps a custom span may choose from. */
+const RANGE_STEP_OPTIONS = ['15s', '30s', '60s', '5m', '15m', '30m', '1h'] as const;
 
 /**
  * 集群监控 — one navigation entry, five tabs.
@@ -76,7 +78,12 @@ const NODE_CHARTS: readonly NodeChart[] = [
 
 export function ClusterMonitorPage({ cluster, node, tab, onTabChange }: ClusterMonitorPageProps): React.ReactElement {
   const t = useT();
-  const [windowKey, setWindowKey] = React.useState<WindowKey>(DEFAULT_WINDOW_KEY);
+  /*
+   * The window is a `TimeRange`, not a fixed key: the reader can pick any preset
+   * from the ladder (10 minutes after an incident) or a fixed span (an incident
+   * comparison whose axis must not move). `rangeKey` stays the query-key identity.
+   */
+  const [range, setRange] = React.useState<TimeRange>(() => defaultMonitorRange());
   const [localTab, setLocalTab] = React.useState<MonitorTabKey>(DEFAULT_MONITOR_TAB);
   /*
    * Guard the prop, not just the route: a search value that slipped through (an old
@@ -85,33 +92,51 @@ export function ClusterMonitorPage({ cluster, node, tab, onTabChange }: ClusterM
    * so no tab reports a state, and the surface stays 'loading' forever.
    */
   const requestedTab: MonitorTabKey = tab !== undefined && isMonitorTabKey(tab) ? tab : localTab;
-  const window = windowFor(windowKey);
 
   /*
-   * The window is resolved to absolute timestamps once per window selection, not on
-   * every render: `end: Date.now()` inside the query key would change on each paint
-   * and refetch forever.
+   * The resolved absolute range.
+   *
+   * Resolved once per selection (or per auto-refresh tick), never per render:
+   * `end: Date.now()` inside a query key would change on every paint and refetch
+   * forever.
    */
-  const [range, setRange] = React.useState(() => rangeForWindow(DEFAULT_WINDOW_KEY));
+  const [resolved, setResolved] = React.useState(() => resolveMonitorRange(defaultMonitorRange()));
   React.useEffect(() => {
-    setRange(rangeForWindow(windowKey));
-  }, [windowKey]);
+    setResolved(resolveMonitorRange(range));
+  }, [range]);
 
   /*
    * Auto refresh, matching the old console's monitoring controller: a play/pause
-   * control that re-reads the last N minutes every five seconds. Each tick moves the
+   * control that re-reads the window every five seconds. Each tick moves a rolling
    * window forward rather than re-querying a frozen range, which is the whole point of
-   * watching a live cluster. The tabs read the same `start`/`end`, so they follow the
-   * switch without a second control -- and a tab that is not mounted issues nothing.
+   * watching a live cluster; a fixed span stays put, because moving it would silently
+   * show different minutes than the ones the reader asked for. The tabs read the same
+   * `start`/`end`, so they follow the switch without a second control -- and a tab
+   * that is not mounted issues nothing.
    */
   const [autoRefresh, setAutoRefresh] = React.useState(false);
   React.useEffect(() => {
     if (!autoRefresh) return;
     const timer = globalThis.setInterval(() => {
-      setRange(rangeForWindow(windowKey));
+      setResolved(resolveMonitorRange(range));
     }, AUTO_REFRESH_INTERVAL_MS);
     return () => globalThis.clearInterval(timer);
-  }, [autoRefresh, windowKey]);
+  }, [autoRefresh, range]);
+
+  /*
+   * Whether any monitoring read is in flight, for the header's refresh button.
+   *
+   * The page cannot see the active tab's queries, so this asks the query cache the
+   * same question the tabs' keys answer: anything under `cluster-monitor` or
+   * `cluster-status` for this cluster. Without it the refresh button never shows
+   * progress on a slow member-cluster read, which is exactly when a reader presses
+   * it a second time.
+   */
+  const queryBusy = useIsFetching({
+    predicate: (query) =>
+      query.queryKey[1] === cluster &&
+      ['cluster-monitor', 'cluster-status', 'node-trend'].includes(String(query.queryKey[0])),
+  }) > 0;
 
   /*
    * The node variant has one query, owned by NodeTrends; it reports through the same
@@ -190,14 +215,14 @@ export function ClusterMonitorPage({ cluster, node, tab, onTabChange }: ClusterM
   const context: WindowContext = React.useMemo(
     () => ({
       cluster,
-      rangeKey: windowKey,
-      start: range.start,
-      end: range.end,
-      step: window.step,
+      rangeKey: resolved.rangeKey,
+      start: resolved.start,
+      end: resolved.end,
+      step: resolved.step,
       live: autoRefresh,
       onStateChange: reportTabState,
     }),
-    [cluster, windowKey, range.start, range.end, window.step, autoRefresh, reportTabState],
+    [cluster, resolved, autoRefresh, reportTabState],
   );
 
   /*
@@ -222,31 +247,56 @@ export function ClusterMonitorPage({ cluster, node, tab, onTabChange }: ClusterM
           </h1>
           {!node ? <p className="text-sm text-ai-fg-muted">{t('cluster.monitor.description')}</p> : null}
         </div>
-        <div className="flex flex-wrap gap-1" {...actionProps('cluster-monitor:range')}>
-          {WINDOWS.map((entry) => (
-            /*
-             * The shared Button, not a bare element: the ai-surface contract requires
-             * every interactive element to carry an agent handle.
-             */
-            <Button
-              key={entry.key}
-              size="sm"
-              variant={entry.key === windowKey ? 'primary' : 'secondary'}
-              aria-pressed={entry.key === windowKey}
-              {...actionProps(`cluster-monitor:range:${entry.key}`)}
-              onClick={() => setWindowKey(entry.key)}
-            >
-              {t(`cluster.monitor.range.${entry.key}`)}
-            </Button>
-          ))}
+        <div className="flex flex-wrap items-center gap-1.5" {...actionProps('cluster-monitor:range')}>
+          <TimeRangePicker
+            value={range}
+            onChange={setRange}
+            presets={rangePresets((key) => t(`cluster.monitor.range.${key}` as 'cluster.monitor.range.1h'))}
+            labels={{
+              placeholder: t('cluster.monitor.range.1h'),
+              presets: t('cluster.monitor.rangeLabel'),
+              custom: t('cluster.monitor.rangeCustom'),
+              rangePlaceholder: t('cluster.monitor.rangePlaceholder'),
+              step: t('cluster.monitor.step'),
+              stepHint: t('cluster.monitor.stepHint'),
+              stepOptions: RANGE_STEP_OPTIONS.map((value) => ({ value, label: value })),
+              cancel: t('common.cancel'),
+              confirm: t('common.confirm'),
+              invalid: t('cluster.monitor.rangeInvalid'),
+            }}
+            aiId="cluster-monitor:range"
+          />
+          {/*
+            Auto-refresh and manual refresh are the same kind of action (re-read the
+            window), so they are the same kind of control and sit together — the shape
+            the cluster overview's header uses. The label is the verb: 暂停 while
+            running, 继续 while paused, so the button always names what a click does.
+          */}
           <Button
             size="sm"
-            variant={autoRefresh ? 'primary' : 'secondary'}
+            variant="ghost"
             aria-pressed={autoRefresh}
+            aria-label={t(autoRefresh ? 'cluster.monitor.autoPauseLabel' : 'cluster.monitor.autoResumeLabel')}
+            title={t(autoRefresh ? 'cluster.monitor.autoPauseLabel' : 'cluster.monitor.autoResumeLabel')}
             {...actionProps('cluster-monitor:auto-refresh')}
             onClick={() => setAutoRefresh((previous) => !previous)}
           >
-            {autoRefresh ? t('cluster.monitor.autoRefreshOn') : t('cluster.monitor.autoRefreshOff')}
+            <Icon name={autoRefresh ? 'pause' : 'start'} />
+            {t(autoRefresh ? 'cluster.monitor.autoPause' : 'cluster.monitor.autoResume')}
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            loading={queryBusy}
+            {...actionProps('cluster-monitor:refresh')}
+            onClick={() => {
+              // A rolling window moves on every tick anyway; this re-reads it now
+              // rather than waiting for the next one.
+              setResolved(resolveMonitorRange(range));
+            }}
+          >
+            {!queryBusy ? <Icon name="refresh" /> : null}
+            {t('common.refresh')}
           </Button>
         </div>
       </header>
@@ -255,10 +305,10 @@ export function ClusterMonitorPage({ cluster, node, tab, onTabChange }: ClusterM
         <NodeTrends
           cluster={cluster}
           node={node}
-          rangeKey={windowKey}
-          start={range.start}
-          end={range.end}
-          step={window.step}
+          rangeKey={resolved.rangeKey}
+          start={resolved.start}
+          end={resolved.end}
+          step={resolved.step}
           onStateChange={setNodeState}
         />
       ) : (
@@ -342,7 +392,7 @@ function NodeTrends({
 }: {
   cluster: string;
   node: string;
-  rangeKey: WindowKey;
+  rangeKey: string;
   start: number;
   end: number;
   step: string;

@@ -27,6 +27,21 @@ vi.mock('@kube-ai-hub/ui/charts', () => ({
       {segments.length > 0 ? centerLabel ?? null : emptyText}
     </div>
   ),
+  /*
+   * The monitor page's header range control. A plain button keeps the test about the
+   * page's tabs: the picker's own calendar is ai-kit's suite's subject, and rendering
+   * it here would pull a portal into a jsdom tree that is asserting on tab panels.
+   */
+  TimeRangePicker: ({ value }: { value: { kind: string; key?: string } }) => (
+    <button type="button" data-ai-range-kind={value.kind}>{value.kind === 'relative' ? value.key : 'custom'}</button>
+  ),
+  rangePresets: (labelOf: (key: string) => string) => [{ key: '1h', ms: 3_600_000, label: labelOf('1h') }],
+  presetRange: (key: string) => ({ kind: 'relative', key, ms: 3_600_000 }),
+  resolveRange: () => ({ start: 0, end: 3_600_000, step: '60s' }),
+  resolveMonitorRange: () => undefined,
+  gapForStep: () => 180_000,
+  stepForSpan: () => '60s',
+  stepToMs: () => 60_000,
 }));
 
 vi.mock('@tanstack/react-router', () => ({

@@ -12,15 +12,14 @@ import {
 import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { useResourceListState } from '@/components/resource/useResourceListState';
+import { TimeRangePicker, presetRange, type TimeRange } from '@kube-ai-hub/ui/charts';
 import { useClusterProjectIndex } from './useClusterProjectIndex';
 import { useListRefresh } from '@/components/resource/useListRefresh';
 import {
-  RESOURCE_RANGES,
   toPodRows,
   toWorkloadRows,
   usePodUsage,
   useReplicaSetOwners,
-  type ResourceRangeKey,
   type ResourceUsageRow,
 } from './resourceMonitorQueries';
 
@@ -109,7 +108,9 @@ function formatBytes(bytes: number): string {
 export function ResourceMonitorPage({ cluster }: ResourceMonitorPageProps): React.ReactElement {
   const t = useT();
   const [tab, setTab] = React.useState<Tab>('workloads');
-  const [rangeKey, setRangeKey] = React.useState<ResourceRangeKey>('1h');
+  /* The window is a `TimeRange`: any preset, or a fixed span for a review. */
+  const [range, setRange] = React.useState<TimeRange>(() => presetRange('1h'));
+  const rangeKey = range.kind === 'relative' ? range.key : 'custom';
   const list = useResourceListState<SortKey>({
     defaultSortBy: 'cpu',
     defaultOrder: 'desc',
@@ -117,7 +118,7 @@ export function ResourceMonitorPage({ cluster }: ResourceMonitorPageProps): Reac
     resetOn: [cluster, tab, rangeKey],
   });
   const workspaceOf = useClusterProjectIndex(cluster);
-  const usage = usePodUsage(cluster, rangeKey);
+  const usage = usePodUsage(cluster, range);
   // The ReplicaSet hop is only needed by the workload tab; the pod tab renders the
   // metrics as they arrive.
   const owners = useReplicaSetOwners(cluster, tab === 'workloads');
@@ -299,19 +300,35 @@ export function ResourceMonitorPage({ cluster }: ResourceMonitorPageProps): Reac
       </header>
 
       {/* The window is the one control that changes both tabs, so it sits above them. */}
-      <div className="flex flex-wrap gap-1" {...actionProps(AI_ID + ':range')}>
-        {RESOURCE_RANGES.map((entry) => (
-          <Button
-            key={entry.key}
-            size="sm"
-            variant={entry.key === rangeKey ? 'primary' : 'secondary'}
-            aria-pressed={entry.key === rangeKey}
-            {...actionProps(AI_ID + ':range:' + entry.key)}
-            onClick={() => setRangeKey(entry.key)}
-          >
-            {t(('cluster.monitor.range.' + entry.key) as never)}
-          </Button>
-        ))}
+      <div className="flex flex-wrap items-center gap-2" {...actionProps(AI_ID + ':range')}>
+        <TimeRangePicker
+          value={range}
+          onChange={(next) => {
+            setRange(next);
+            // The pod list is a current-value read keyed by the window; a new window
+            // is a new question, so it starts at page one.
+            list.setPage(1);
+          }}
+          presets={[
+            { key: '1h', ms: 3_600_000, label: t('cluster.monitor.range.1h') },
+            { key: '6h', ms: 21_600_000, label: t('cluster.monitor.range.6h') },
+            { key: '24h', ms: 86_400_000, label: t('cluster.monitor.range.24h') },
+            { key: '7d', ms: 604_800_000, label: t('cluster.monitor.range.7d') },
+          ]}
+          labels={{
+            placeholder: t('cluster.monitor.range.1h'),
+            presets: t('cluster.monitor.rangeLabel'),
+            custom: t('cluster.monitor.rangeCustom'),
+            rangePlaceholder: t('cluster.monitor.rangePlaceholder'),
+            step: t('cluster.monitor.step'),
+            stepHint: t('cluster.monitor.stepHint'),
+            stepOptions: [],
+            cancel: t('common.cancel'),
+            confirm: t('common.confirm'),
+            invalid: t('cluster.monitor.rangeInvalid'),
+          }}
+          aiId={AI_ID + ':range'}
+        />
       </div>
 
       <Tabs

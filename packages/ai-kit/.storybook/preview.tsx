@@ -157,7 +157,7 @@ const preview: Preview = {
        * known sections.
        */
       storySort: {
-        order: ['Foundation', 'Components', 'Schema', 'Primitives'],
+        order: ['Foundation', 'Components', 'Charts', 'Schema', 'Primitives'],
         method: 'alphabetical',
       },
     },

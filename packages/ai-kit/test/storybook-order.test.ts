@@ -35,7 +35,7 @@ const root = resolve(__dirname, '..');
 const previewSource = readFileSync(resolve(root, '.storybook/preview.tsx'), 'utf8');
 
 /** The sections the sidebar groups stories under; new sections update this list. */
-const SECTIONS = ['Foundation', 'Components', 'Schema', 'Primitives'] as const;
+const SECTIONS = ['Foundation', 'Components', 'Charts', 'Schema', 'Primitives'] as const;
 
 /**
  * Extract the balanced block that starts at the first `{` or `[` after a marker.
