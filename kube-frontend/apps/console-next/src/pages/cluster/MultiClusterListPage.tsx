@@ -38,7 +38,7 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
   const t = useT();
   const { multicluster, loading: configLoading } = useMulticluster();
   const queryClient = useQueryClient();
-  const list = useResourceListState<SortKey>({ defaultSortBy: 'name' });
+  const list = useResourceListState<SortKey>({ defaultSortBy: 'name', defaultOrder: 'asc' });
   /* 每页档位 (old console's PAGESIZE_OPTION): the list is client-side, so the slice is here. */
   const [page, setPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(20);

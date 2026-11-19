@@ -23,7 +23,7 @@ export interface EdgeNodesPageProps {
 
 export function EdgeNodesPage({ cluster }: EdgeNodesPageProps): React.ReactElement {
   const t = useT();
-  const list = useResourceListState<'name' | 'createTime'>({ defaultSortBy: 'name', resetOn: [cluster] });
+  const list = useResourceListState<'name' | 'createTime'>({ defaultSortBy: 'name', defaultOrder: 'asc', resetOn: [cluster] });
 
   const query = useQuery({
     queryKey: ['edge-nodes', cluster],

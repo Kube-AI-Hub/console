@@ -50,7 +50,7 @@ function NamespaceListPage({ kind, cluster }: ClusterListPageProps): React.React
       : status === 'Unschedulable' ? t('node.status.unschedulable') : status;
   // Cluster-scoped: no project filter, and nothing to reset when the caller changes
   // project — the page has no project context by design.
-  const list = useResourceListState<SortKey>({ defaultSortBy: 'name', defaultPageSize: PAGE_SIZE, resetOn: [cluster] });
+  const list = useResourceListState<SortKey>({ defaultSortBy: 'name', defaultOrder: 'asc', defaultPageSize: PAGE_SIZE, resetOn: [cluster] });
   const queryClient = useQueryClient();
   const [terminalNode, setTerminalNode] = React.useState<string | null>(null);
   React.useEffect(() => { setTerminalNode(null); }, [cluster, kind]);

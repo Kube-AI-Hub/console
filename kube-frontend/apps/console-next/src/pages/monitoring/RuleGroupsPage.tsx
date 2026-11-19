@@ -62,7 +62,7 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
   const navigate = useNavigate();
   const routeParams = useParams({ strict: false }) as { workspace?: string };
   const workspace = routeParams.workspace ?? 'system-workspace';
-  const list = useResourceListState<SortKey>({ defaultSortBy: 'name', resetOn: [cluster, namespace], defaultPageSize: PAGE_SIZE });
+  const list = useResourceListState<SortKey>({ defaultSortBy: 'name', defaultOrder: 'asc', resetOn: [cluster, namespace], defaultPageSize: PAGE_SIZE });
   const [projectFilter, setProjectFilter] = React.useState(namespace);
   React.useEffect(() => setProjectFilter(namespace), [cluster, namespace]);
   /*

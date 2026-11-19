@@ -35,7 +35,7 @@ export interface CustomResourceDetailPageProps {
 
 export function CustomResourceDetailPage({ cluster, name }: CustomResourceDetailPageProps): React.ReactElement {
   const t = useT();
-  const list = useResourceListState<'name' | 'createTime'>({ defaultSortBy: 'name', resetOn: [cluster, name] });
+  const list = useResourceListState<'name' | 'createTime'>({ defaultSortBy: 'name', defaultOrder: 'asc', resetOn: [cluster, name] });
   /* 每页档位 (old console's PAGESIZE_OPTION): the list is client-side, so the slice is here. */
   const [page, setPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(20);

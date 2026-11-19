@@ -44,7 +44,7 @@ const PAGE_SIZE = 10;
 export function NetworkIsolationPage({ workspace, cluster, namespace }: NetworkIsolationPageProps): React.ReactElement {
   const t = useT();
   const queryClient = useQueryClient();
-  const list = useResourceListState<'name' | 'createTime'>({ defaultSortBy: 'name', resetOn: [cluster, namespace], defaultPageSize: PAGE_SIZE });
+  const list = useResourceListState<'name' | 'createTime'>({ defaultSortBy: 'name', defaultOrder: 'asc', resetOn: [cluster, namespace], defaultPageSize: PAGE_SIZE });
 
   const isolation = useQuery({
     queryKey: ['network-isolation', namespace],

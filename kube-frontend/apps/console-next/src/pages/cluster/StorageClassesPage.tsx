@@ -71,7 +71,7 @@ export function isDeleteBlocked(claimCount: number | undefined, claimsUnavailabl
 
 export function StorageClassesPage({ cluster }: StorageClassesPageProps): React.ReactElement {
   const t = useT();
-  const list = useResourceListState<'name' | 'createTime'>({ defaultSortBy: 'name', defaultPageSize: PAGE_SIZE, resetOn: [cluster] });
+  const list = useResourceListState<'name' | 'createTime'>({ defaultSortBy: 'name', defaultOrder: 'asc', defaultPageSize: PAGE_SIZE, resetOn: [cluster] });
   const query = useQuery({
     queryKey: ['storageclasses', cluster],
     queryFn: ({ signal }) => storageClassesApi(apiClient).list({ ...toListParams(list, { cluster, namespace: '' }, 200), signal }),

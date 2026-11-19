@@ -437,3 +437,21 @@ return "running"
 **何时重新考虑**：若将来需要「四态」（升 → 降 → 默认 → 无排序），把循环改成显式状态表而不是当前的三分支。
 
 **验证**：`table-sort-cycle.test.tsx` 覆盖升→降→fallback 的正常推进、「fallback 与当前相同则不空转」、以及「fallback 不同时仍返回 fallback」（确保守卫没有吞掉正常路径）。mlu370 `agent` 实测四步：初始 `ascending`（a100-04 / a100-64 / sagesuite-demo）→ 点击 `descending`（sagesuite-demo / a100-64 / a100-04）→ 再点 `ascending` → 再点 `descending`，每次行顺序都真实改变。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-19 — 名称/分类列的默认顺序统一为升序（2026-11-19）
+
+**为什么**：NODES-18 修好 `Table.cycleSort` 的空转后，我按「默认列可排序 + 默认 desc」这个条件把全仓列表扫了一遍，另有 8 个页面落在同一个陷阱里：`ClusterListPage`、`CustomResourceDetailPage`、`EdgeNodesPage`、`MultiClusterListPage`、`StorageClassesPage`、`RuleGroupsPage`、`NetworkIsolationPage`（均为 `name`）、`CustomResourcesPage`（`kind`）。
+
+它们在 NODES-18 之后**不再卡死**（守卫已生效，实测存储类页面升→降正常），但初始仍是「名称降序」：第一次点击只是把列表倒过来，读者得点两次才看到自己期望的 A→Z。名称与分类这类列的自然顺序是升序，降序属于「我明确想看倒序」的动作。
+
+**做法**：这 8 个页面显式 `defaultOrder: 'asc'`。`defaultOrder` 的缺省值 `desc` 保持不动——它服务于 `createTime` / `createdAt` 那批（最新在前），那才是多数列表想要的。
+
+**不改的**：
+- `ResourceMonitorPage`（`cpu` 降序）：这是「最繁忙的排最前」，降序是语义本身，不是习惯问题。
+- `GpuPodsPanel`、`NodeResourcesPanel`（`name` 降序但 `sortableKeys` 为空）：表头不可点，不存在空转，也就没有「点两次才升序」的问题。
+
+**为什么不一刀切改 hook 的默认值**：把 `defaultOrder` 全局改成 `asc` 会把所有按时间排序的列表翻成「最旧在前」，那是更大的错误。默认值该由每个页面的语义决定，而不是由一个全局常量决定。
+
+**何时重新考虑**：若出现按数值降序更自然的新列（用量、副本数），照 `ResourceMonitorPage` 的做法显式写 `desc`，不要依赖缺省值——缺省值只对时间列成立。
+
+**验证**：脚本按「默认列 ∈ sortableKeys 且 order=desc」扫描全部 40 个 `useResourceListState` 调用点，改动后只剩 `ResourceMonitorPage`（有意保留）与两个不可排序列。mlu370 实测：存储类页面初始 `ascending`（juicefs-shared / local-static / openebs-hostpath）点击转 `descending`；集群列表初始 `ascending` 点击转 `descending`，行顺序均真实改变。console-next 320 passed。

@@ -33,7 +33,7 @@ type SortKey = 'kind' | 'name' | 'scope' | 'createTime';
 
 export function CustomResourcesPage({ cluster }: CustomResourcesPageProps): React.ReactElement {
   const t = useT();
-  const list = useResourceListState<SortKey>({ defaultSortBy: 'kind', resetOn: [cluster] });
+  const list = useResourceListState<SortKey>({ defaultSortBy: 'kind', defaultOrder: 'asc', resetOn: [cluster] });
   /* 每页档位 (old console's PAGESIZE_OPTION): the list is client-side, so the slice is here. */
   const [page, setPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(20);
