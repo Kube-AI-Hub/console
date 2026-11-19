@@ -284,6 +284,12 @@ export function Table<T>({
    * `undefined` left them with nothing to send and the third click did nothing
    * visible. The third state exists, it just is not `undefined` — turning the column
    * off returns `sortFallback`, the order the page starts with.
+   *
+   * The fallback is only a distinct step when it differs from where the column
+   * already is. A host whose default is `desc` on this very column would otherwise
+   * have its first click ask for `desc` again: same value, no re-render, no request,
+   * and the header reads as broken. When the fallback *is* the current state, the
+   * cycle is just asc <-> desc.
    */
   const cycleSort = (key: string) => {
     if (!onSortChange) return;
@@ -295,7 +301,10 @@ export function Table<T>({
       onSortChange({ key, order: 'desc' });
       return;
     }
-    onSortChange(sortFallback ?? { key, order: 'asc' });
+    const fallback = sortFallback ?? { key, order: 'asc' as const };
+    // Asking for the state we are already in is a no-op the reader reads as a
+    // dead control; advance to ascending instead.
+    onSortChange(fallback.order === sorter.order && fallback.key === key ? { key, order: 'asc' } : fallback);
   };
 
   const toggleExpanded = (key: string) => {

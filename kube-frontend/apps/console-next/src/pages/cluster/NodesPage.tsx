@@ -35,7 +35,14 @@ function healthRatioLabelSize(healthy: number | undefined, total: number | undef
 export function NodesPage({ cluster }: { cluster: string }): React.ReactElement {
   const t = useT();
   const client = useQueryClient();
-  const list = useResourceListState<'name' | 'createTime'>({ defaultSortBy: 'name', defaultPageSize: 10, resetOn: [cluster] });
+  /*
+   * `defaultOrder: 'asc'` is not cosmetic. `Table`'s header cycle is
+   * ascending → descending → `sortFallback`, and `sortFallback` is this same
+   * default. With the hook's `desc` default, a name column started descending and
+   * the first click asked for `desc` again — the same value, so React saw no state
+   * change, sent no request, and the header looked dead. Names read ascending.
+   */
+  const list = useResourceListState<'name' | 'createTime'>({ defaultSortBy: 'name', defaultOrder: 'asc', defaultPageSize: 10, resetOn: [cluster] });
   const [filters, setFilters] = React.useState<Record<string, string>>({});
   const [model, setModel] = React.useState('');
   const [terminal, setTerminal] = React.useState<string | null>(null);

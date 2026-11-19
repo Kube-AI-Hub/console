@@ -413,3 +413,27 @@ return "running"
 **何时重新考虑**：ks-apiserver 提供成员集群的 core 组写入形态，或提供带事务的批量节点接口。
 
 **验证**：`node-taints.test.ts` 10 条覆盖交集/差集、按 effect 区分、公共块替换且保留独有、按节点删除、无变化判定；`node-taints-bulk.test.tsx` 覆盖勾选两行 → 打开弹窗 → 加公共污点 → 提交，断言两次 PATCH 且 `resourceVersion` 来自详情读取（`rv-a`/`rv-b`）而非列表行。host 集群实测：`njc-0f06-ai02-ds4` 加 `ui-verify=tmp:NoSchedule` 后提示「已更新 1 个节点。」，API 回读一致，清理后 `spec.taints` 为空。`agent` 实测两个节点返回 404 后改为明确的成员集群提示。弹窗实测：标题 14px/600、描述 12px、警告条 40px、公共块 x=180 宽 827、节点块 x=166 宽 853、按钮 36px 高、页面无横向溢出；污点行两个输入框各 296px、效果下拉 176px、删除按钮 36px，同一基线。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-18 — 名称列默认升序，表头循环不得空转（2026-11-19）
+
+**为什么**：节点列表点「名称」表头没有任何反应——`aria-sort` 一直是 `descending`，行顺序不动，也不发请求。后端排序本身是好的（实测 `?sortBy=name&ascending=true/false` 分别返回升序与降序），问题在表头的状态机。
+
+根因是两件事叠加：
+
+1. `NodesPage` 只传了 `defaultSortBy: 'name'`，没传 `defaultOrder`，而 `useResourceListState` 的默认值是 **`desc`**。所以页面初始就是「名称降序」。
+2. `Table.cycleSort` 的第三步返回 `sortFallback`，而 `sortFallback` 就是页面默认值 `{name, desc}`。于是第一次点击要求 `{name, desc}`——**和当前状态一模一样**。React 看到 state 没变就不重渲染，查询不重发，表头读起来就是死的。
+
+**做法**：
+1. `NodesPage` 显式 `defaultOrder: 'asc'`。名称列的默认是升序，这与 `PersistentVolumesPage` 等页面一致，也符合读者对「按名称」的预期。
+2. `Table.cycleSort` 增加守卫：当 `sortFallback` 与当前 `sorter` 相同时，返回 `{key, order: 'asc'}` 而不是原样返回。这样即使某个宿主选了不寻常的默认值，每一次点击都会产生一个**不同的**状态，控件不会静默失效。
+
+**为什么两处都改**：只改 `NodesPage` 能修好这一页，但把「默认值恰好等于循环终点」这个陷阱留给了下一个宿主——它的症状（点击无反应、无报错、无请求）极难从界面推断。循环本身不该产生空操作，这是 `Table` 的职责。
+
+**被否方案**：
+- 把 `useResourceListState` 的 `defaultOrder` 全局改成 `asc`。`createTime` 列的默认必须是 `desc`（最新在前），改全局会把那些列表翻过来。
+- 让 `sortFallback` 永远取「默认值的反向」。`sortFallback` 的语义是「回到页面初始顺序」，改成反向会让第三次点击回到一个读者从没见过的状态。
+- 在 `cycleSort` 里检测「值没变就不调用」。这会让循环在某些默认值下少一个状态，且把判断推给调用方。返回一个不同的值更直接。
+
+**何时重新考虑**：若将来需要「四态」（升 → 降 → 默认 → 无排序），把循环改成显式状态表而不是当前的三分支。
+
+**验证**：`table-sort-cycle.test.tsx` 覆盖升→降→fallback 的正常推进、「fallback 与当前相同则不空转」、以及「fallback 不同时仍返回 fallback」（确保守卫没有吞掉正常路径）。mlu370 `agent` 实测四步：初始 `ascending`（a100-04 / a100-64 / sagesuite-demo）→ 点击 `descending`（sagesuite-demo / a100-64 / a100-04）→ 再点 `ascending` → 再点 `descending`，每次行顺序都真实改变。
