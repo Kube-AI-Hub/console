@@ -71,6 +71,27 @@ describe('locale keys', () => {
     expect(missing).toEqual([]);
   });
 
+  it('never hardcodes an English label that a Chinese page would show', () => {
+    /*
+     * A column header written as `title: 'Requests'` reads as English in the middle of a Chinese
+     * table — the node detail's capacity block shipped exactly that, while the old console said
+     * 「下限(预留)」/「上限」. Literal labels are therefore limited to proper nouns: brand names and
+     * Kubernetes enums that the old console also shows untranslated.
+     */
+    const PROPER_NOUNS = new Set(['Immediate', 'Kubernetes', 'Istio', 'Bitbucket', 'Gitee']);
+    const offenders: string[] = [];
+    for (const file of appFiles) {
+      const lines = read(file).split('\n');
+      lines.forEach((line, index) => {
+        const match = line.match(/\b(?:title|label|placeholder)\s*:\s*'([A-Z][a-z]{2,}(?: [A-Z][a-z]+)*)'/);
+        if (!match) return;
+        if (PROPER_NOUNS.has(match[1]!)) return;
+        offenders.push(`${relative(root, file)}:${index + 1} -> ${match[1]}`);
+      });
+    }
+    expect(offenders, offenders.join('\n')).toEqual([]);
+  });
+
   it('every literal key held in a *Key field exists', () => {
     /*
      * Keys also travel as data: `{ label: 'node.list.gpu' }`, `titleKey: 'cluster.monitor…'`,

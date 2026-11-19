@@ -382,3 +382,20 @@ S2I 整套现状：**5 passed / 5 failed / 2 skipped**（01、03 两条列表用
 **新增守卫**：`config/consistency-contracts.test.ts` 的「every literal key held in a *Key field exists」扩展到 `label` / `title`——键值常以数据形式出现（`{ label: 'node.list.gpu' }`、`titleKey: 'cluster.monitor…'`），渲染处再 `t(...)`；这类拼写错误在原有契约下不可见，正是「属性/列名显示成键」的来源。注入一个 `node.trend.diskTYPO` 验证过该规则会红。
 
 **结论**：当前构建上未复现用户描述的缺失。若仍能看到，请给出具体页面与截图——本扫描的已知盲区是：列表为空的详情页、错误/无权限状态、以及需要特定对象才出现的列。
+
+### AA.1 用户报告的实例：节点详情「容量与资源分配」列名（2026-11-20）
+
+用户给出的具体页面是节点详情的容量区块：新 UI 显示英文 **Requests / Limits**，旧 console 是 **下限(预留) / 上限**。
+
+根因是**硬编码英文列名**，不是字典缺键：`NodeAllocationPanel.tsx` 的列定义写的是 `title: 'Requests'` / `title: 'Limits'`，而同一张表其它列都走 `t('node.allocation.*')`。上一轮的扫描把这两个词当成「专有名词」放过了——**这是上一轮结论的修正**。
+
+处置：
+
+| 项 | 内容 |
+| --- | --- |
+| 文案 | 新增 `node.allocation.requests` = 「下限(预留)」/「Lower limit (Requests)」、`node.allocation.limits` = 「上限」/「Limits」，与旧 console 的 `REQUESTS`/`LIMITS` 完全一致 |
+| 代码 | 两列改用 `t(...)`；`node.allocation.hint` 里的「Limits 可能超配」改为「上限可能超配」 |
+| 验证 | 中文：`资源 / 总量 / 可分配 / 下限(预留) / 上限`；英文：`Resource / Capacity / Allocatable / Lower limit (Requests) / Limits` |
+| 守卫 | 新增契约：`title|label|placeholder: 'Capitalized English'` 一律失败，只放行专有名词白名单（Immediate / Kubernetes / Istio / Bitbucket / Gitee）。把 `Requests` 注入回去验证过会红 |
+
+**方法沉淀（对上一轮的修正）**：扫描把「大写开头的英文单词」当专有名词放过是错的——**专有名词要逐个确认**（品牌、K8s 枚举），普通词（Requests、Limits、Type、Status…）都是漏译。
