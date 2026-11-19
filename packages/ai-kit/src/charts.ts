@@ -20,6 +20,17 @@ export type { ProgressRingProps, ProgressRingLabels } from './charts/ProgressRin
 export { ChartPanel } from './charts/ChartPanel';
 export type { ChartPanelProps, ChartPanelLabels } from './charts/ChartPanel';
 
+/*
+ * The first-load skeleton, on the charts subpath.
+ *
+ * It is not in the main barrel because it is a chart's placeholder: a page that
+ * imports the main barrel draws no plot, so it has no plot box to stand in for.
+ * Surfaces that draw a bare `<TimeSeriesChart>` (a card inside a dashboard, a
+ * dialog) need it here or they end up rendering a solid grey block instead.
+ */
+export { ChartSkeleton } from './primitives/RefreshVeil';
+export type { ChartSkeletonProps } from './primitives/RefreshVeil';
+
 export { TimeRangePicker, rangePresets } from './charts/TimeRangePicker';
 export type { TimeRangePickerProps, TimeRangePickerLabels } from './charts/TimeRangePicker';
 

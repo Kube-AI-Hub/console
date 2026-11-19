@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Skeleton } from '@kube-ai-hub/ui';
+import { ChartSkeleton } from '@kube-ai-hub/ui/charts';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { useT } from '@/i18n';
 import { ClusterChartCard, linesToSeries } from './ClusterChartCard';
@@ -62,10 +62,11 @@ export function ClusterSchedulerTab({
   return (
     <div className="flex flex-col gap-4" data-ai-id="cluster-monitor:scheduler" data-ai-state={state}>
       {state === 'loading' ? (
-        <div className="flex flex-col gap-4">
-          <Skeleton className="h-64 w-full" />
-          <Skeleton className="h-64 w-full" />
-          <Skeleton className="h-64 w-full" />
+        /* The skeleton stands in for the plots, at the plot's own height. */
+        <div className="grid grid-cols-1 gap-4 2xl:grid-cols-2">
+          <ChartSkeleton height={160} aiId="cluster-monitor:scheduler:loading:0" />
+          <ChartSkeleton height={160} aiId="cluster-monitor:scheduler:loading:1" />
+          <ChartSkeleton height={160} aiId="cluster-monitor:scheduler:loading:2" />
         </div>
       ) : null}
 

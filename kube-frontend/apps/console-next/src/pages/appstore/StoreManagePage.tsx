@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { storeAppsApi, storeCategoriesApi, storeReviewsApi } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { AiSurface, Badge, Button, ResourceList, Skeleton, type ListSchema } from '@kube-ai-hub/ui';
+import { AiSurface, Badge, Button, ResourceList, type ListSchema } from '@kube-ai-hub/ui';
 import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
@@ -85,8 +85,13 @@ function CategoriesTable(): React.ReactElement {
   if (state === 'error') {
     return <ResourceErrorPanel error={categories.error} onRetry={() => void categories.refetch()} retryAiId="store-manage:categories:retry" />;
   }
-  if (state === 'loading') return <Skeleton className="h-40 w-full" />;
-  return <ResourceList {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})} onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys} schema={schema} rows={rows} loading={false} />;
+  /*
+   * The list draws its own skeleton rows on a first load. Rendering a single grey
+   * block here first meant the table appeared twice — a placeholder, then the real
+   * one — and a refetch had no visible state at all.
+   */
+  return <ResourceList {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})} onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys} schema={schema} rows={rows}
+    loading={categories.isPending} refreshing={categories.isFetching && !categories.isPending} />;
 }
 
 /**
@@ -167,8 +172,8 @@ function StoreAppsTable(): React.ReactElement {
   if (state === 'error') {
     return <ResourceErrorPanel error={apps.error} onRetry={() => void apps.refetch()} retryAiId="store-manage:apps:retry" />;
   }
-  if (state === 'loading') return <Skeleton className="h-40 w-full" />;
-  return <ResourceList {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})} onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys} schema={schema} rows={rows} loading={false} onPageChange={list.setPage} onPageSizeChange={list.setPageSize} />;
+  return <ResourceList {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})} onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys} schema={schema} rows={rows}
+    loading={apps.isPending} refreshing={apps.isFetching && !apps.isPending} onPageChange={list.setPage} onPageSizeChange={list.setPageSize} />;
 }
 
 function ReviewsTable(): React.ReactElement {
@@ -213,6 +218,6 @@ function ReviewsTable(): React.ReactElement {
   if (state === 'error') {
     return <ResourceErrorPanel error={reviews.error} onRetry={() => void reviews.refetch()} retryAiId="store-manage:reviews:retry" />;
   }
-  if (state === 'loading') return <Skeleton className="h-40 w-full" />;
-  return <ResourceList {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})} onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys} schema={schema} rows={rows} loading={false} onPageChange={list.setPage} onPageSizeChange={list.setPageSize} />;
+  return <ResourceList {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})} onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys} schema={schema} rows={rows}
+    loading={reviews.isPending} refreshing={reviews.isFetching && !reviews.isPending} onPageChange={list.setPage} onPageSizeChange={list.setPageSize} />;
 }

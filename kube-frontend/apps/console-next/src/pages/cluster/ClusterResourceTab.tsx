@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { rangeMetricsApi } from '@kube-ai-hub/api-client';
-import { Skeleton } from '@kube-ai-hub/ui';
+import { ChartSkeleton } from '@kube-ai-hub/ui/charts';
 import { api } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { useT } from '@/i18n';
@@ -123,9 +123,10 @@ export function ClusterResourceTab({
   return (
     <div className="flex flex-col gap-6" data-ai-id="cluster-monitor:resource" data-ai-state={state}>
       {state === 'loading' ? (
-        <div className="flex flex-col gap-4">
-          <Skeleton className="h-64 w-full" />
-          <Skeleton className="h-64 w-full" />
+        /* The skeleton stands in for the plots, at the plot's own height. */
+        <div className="grid grid-cols-1 gap-4 2xl:grid-cols-2">
+          <ChartSkeleton height={160} aiId="cluster-monitor:resource:loading:0" />
+          <ChartSkeleton height={160} aiId="cluster-monitor:resource:loading:1" />
         </div>
       ) : null}
 

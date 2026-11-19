@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {
   FALLBACK_CHART_COLORS,
+  ChartSkeleton,
   TimeSeriesChart,
   seriesColors,
   type TimeSeries,
@@ -41,6 +42,13 @@ export interface ClusterChartCardProps {
   /** Area fill under the lines; off unless a stacked magnitude reads better filled. */
   area?: boolean;
   /**
+   * The first read is still in flight: draw the skeleton instead of the plot.
+   *
+   * Different from `refreshing`. A first load has no curve to keep on screen, and a
+   * solid grey block where a chart will be reads as "broken" rather than "arriving".
+   */
+  loading?: boolean;
+  /**
    * A reader-initiated refresh is in flight.
    *
    * Draws the same translucent veil the resource lists use. The tab sets it from the
@@ -71,6 +79,7 @@ export function ClusterChartCard({
   formatValue,
   group,
   area = false,
+  loading = false,
   refreshing = false,
   refreshingLabel,
   height = 160,
@@ -113,6 +122,14 @@ export function ClusterChartCard({
       <div className="mb-3">
         <h3 className="text-sm font-medium text-ai-fg">{title}</h3>
       </div>
+
+      {/*
+        * A first load has nothing to draw, so the skeleton stands in the plot's box
+        * rather than a solid grey block appearing where the chart will be. `loading`
+        * and `hasData` are separate: a host that has not finished its first read passes
+        * `loading`, and one whose read came back empty passes neither.
+        */}
+      {loading ? <ChartSkeleton height={height} aiId={`${aiId}:loading`} /> : null}
 
       {hasData ? (
         <React.Fragment>

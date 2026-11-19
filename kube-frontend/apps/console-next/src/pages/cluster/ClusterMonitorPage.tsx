@@ -2,8 +2,8 @@ import * as React from 'react';
 import { useQuery, useIsFetching } from '@tanstack/react-query';
 import { ApiError, clusterStatusApi, rangeMetricsApi, type MetricSeries } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { AiSurface, Button, Icon, Skeleton, Tabs, TabsContent } from '@kube-ai-hub/ui';
-import { TimeRangePicker, TimeSeriesChart, rangePresets } from '@kube-ai-hub/ui/charts';
+import { AiSurface, Button, Icon, Tabs, TabsContent } from '@kube-ai-hub/ui';
+import { ChartSkeleton, TimeRangePicker, TimeSeriesChart, rangePresets } from '@kube-ai-hub/ui/charts';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -455,7 +455,14 @@ function NodeTrends({
 
   return (
     <div className="flex flex-col gap-3" data-ai-id="cluster-monitor:node-trends" data-ai-state={state}>
-      {state === 'loading' ? <Skeleton className="h-64 w-full" /> : null}
+      {state === 'loading' ? (
+        /* The skeleton stands in for the plots, at the plot's own height. */
+        <div className="grid grid-cols-1 gap-3 2xl:grid-cols-2">
+          {NODE_CHARTS.map((chart) => (
+            <ChartSkeleton key={chart.key} height={140} aiId={`cluster-monitor:node-trends:loading:${chart.key}`} />
+          ))}
+        </div>
+      ) : null}
       {state === 'error' ? (
         <ResourceErrorPanel error={trends.error} onRetry={() => void trends.refetch()} retryAiId="cluster-monitor:retry" />
       ) : null}

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { Button, Skeleton, TREND_SERIES_COLORS, type TrendSeries } from '@kube-ai-hub/ui';
-import { TimeSeriesChart } from '@kube-ai-hub/ui/charts';
+import { Button, TREND_SERIES_COLORS, type TrendSeries } from '@kube-ai-hub/ui';
+import { ChartSkeleton, TimeSeriesChart } from '@kube-ai-hub/ui/charts';
 import type { LocaleKey } from '@kube-ai-hub/locales';
 import { useT } from '@/i18n';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -130,7 +130,7 @@ export function ClusterOverviewComponentsBlock({
                 : lines.map((line) => formatComponentValue(line.points[line.points.length - 1]!.value, chart?.kind ?? 'perSecond', units)).join(' / ')}
             </span>
           </div>
-          {state === 'loading' ? <Skeleton className="h-40 w-full" /> : null}
+          {state === 'loading' ? <ChartSkeleton height={160} aiId="cluster-monitor:overview:components:loading" /> : null}
           {state === 'error' ? (
             <ResourceErrorPanel error={query.error} onRetry={() => void query.refetch()} retryAiId="cluster-monitor:overview:components:retry" />
           ) : null}

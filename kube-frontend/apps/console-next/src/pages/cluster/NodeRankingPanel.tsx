@@ -241,7 +241,8 @@ export function NodeRankingPanel({ cluster, preview = false, initialMetric = 'no
       bodyClassName="flex min-h-0 flex-1 flex-col"
       actions={controls}>
       {query.isError ? <ResourceErrorPanel error={query.error} onRetry={() => void query.refetch()} retryAiId="overview:rank-retry" /> :
-        <Table rows={rows} rowKey={(row) => row.name} loading={query.isPending} empty={t('cluster.nodeUsage.emptyTitle')}
+        <Table rows={rows} rowKey={(row) => row.name} loading={query.isPending}
+          refreshing={query.isFetching && !query.isPending} empty={t('cluster.nodeUsage.emptyTitle')}
           rowAttributes={(row) => ({ 'data-ai-row': row.name })} columns={[
             { key: 'rank', title: '#', width: 48, render: (row) => <span className="text-xs font-medium tabular-nums text-ai-fg-muted">{rows.indexOf(row) + 1}</span> },
             { key: 'name', title: t('cluster.column.name'), width: 280, render: nodeCell },
@@ -264,6 +265,7 @@ export function NodeRankingPanel({ cluster, preview = false, initialMetric = 'no
       {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
       onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
       schema={schema} rows={rows} loading={query.isPending}
+      refreshing={query.isFetching && !query.isPending}
       errorContent={query.isError ? renderError ? renderError(query.error, () => void query.refetch()) :
         <ResourceErrorPanel error={query.error} onRetry={() => void query.refetch()} retryAiId={aiIdPrefix + 'retry'} /> : undefined}
       searchValue={list.keyword} onSearchChange={list.setKeyword}

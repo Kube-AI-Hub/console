@@ -9,6 +9,7 @@
  */
 export {
   ChartPanel,
+  ChartSkeleton,
   DonutChart,
   PieChart,
   ProgressRing,
@@ -39,6 +40,7 @@ export type {
   AbsoluteRange,
   ChartPanelLabels,
   ChartPanelProps,
+  ChartSkeletonProps,
   DonutChartProps,
   DonutSegment,
   PieChartProps,

@@ -381,7 +381,7 @@ export function ClusterOverviewTab({
         is down — the old overview's block. It reads the series this tab already
         fetched; only the port inventory is a separate read (it is an inventory).
       */}
-      <ClusterOverviewRdmaBlock cluster={cluster} seriesByName={seriesByName} start={start} end={end} />
+      <ClusterOverviewRdmaBlock cluster={cluster} seriesByName={seriesByName} start={start} end={end} refreshing={isManualRefresh} />
 
       {/*
         服务组件监控: the control plane preview the old overview carried (APIServer

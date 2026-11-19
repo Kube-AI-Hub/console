@@ -54,6 +54,7 @@ export function NodeResourcesPanel({ cluster, node, kind }: { cluster: string; n
     {query.isError ? <ResourceErrorPanel error={query.error} onRetry={() => void query.refetch()} retryAiId={`node-${kind}:retry`} /> :
       <ResourceList schema={schema} rows={filtered.slice((list.page - 1) * list.pageSize, list.page * list.pageSize)}
         loading={query.isPending} searchValue={list.keyword} onSearchChange={list.setKeyword}
+        refreshing={query.isFetching && !query.isPending}
         onPageChange={list.setPage} onPageSizeChange={list.setPageSize} onRefresh={() => void query.refetch()} />}
   </div>;
 }

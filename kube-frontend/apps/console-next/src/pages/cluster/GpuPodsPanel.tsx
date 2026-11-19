@@ -49,6 +49,7 @@ export function GpuPodsPanel({ cluster, node, uuid }: { cluster: string; node: s
         {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
         onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
         schema={schema} rows={query.data?.items ?? []} loading={query.isPending}
+        refreshing={query.isFetching && !query.isPending}
         searchValue={list.keyword} onSearchChange={list.setKeyword} onPageChange={list.setPage}
         onPageSizeChange={list.setPageSize} onRefresh={() => void query.refetch()} />}
   </div>;

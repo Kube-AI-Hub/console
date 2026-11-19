@@ -5,12 +5,11 @@ import {
   AiSurface,
   Button,
   Modal,
-  Skeleton,
   TREND_SERIES_COLORS,
   type TrendPoint,
   type TrendSeries,
 } from '@kube-ai-hub/ui';
-import { TimeSeriesChart } from '@kube-ai-hub/ui/charts';
+import { ChartSkeleton, TimeSeriesChart } from '@kube-ai-hub/ui/charts';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
@@ -93,7 +92,7 @@ export function RuleMetricDialog({ open, onOpenChange, rule }: RuleMetricDialogP
         </div>
 
         <AiSurface as="section" aiId="alertingrules:metric:chart" state={state} className="flex min-h-44 flex-col gap-2">
-          {state === 'loading' ? <Skeleton className="h-40 w-full" /> : null}
+          {state === 'loading' ? <ChartSkeleton height={180} aiId="alertingrules:metric:loading" /> : null}
           {state === 'error' ? (
             <div className="flex flex-col gap-2 text-xs" role="alert" data-ai-id="alertingrules:metric:error">
               <p className="text-ai-danger">{errorMessage(t, query.error)}</p>

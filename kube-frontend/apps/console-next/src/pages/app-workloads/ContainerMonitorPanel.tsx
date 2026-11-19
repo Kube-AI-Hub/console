@@ -2,8 +2,8 @@ import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { rangeMetricsApi, type MetricSeries } from '@kube-ai-hub/api-client';
 import { actionProps, surfaceProps, type AiSurfaceState } from '@kube-ai-hub/ai-surface';
-import { Button, Skeleton } from '@kube-ai-hub/ui';
-import { TimeSeriesChart } from '@kube-ai-hub/ui/charts';
+import { Button } from '@kube-ai-hub/ui';
+import { ChartSkeleton, TimeSeriesChart } from '@kube-ai-hub/ui/charts';
 import { useT, type LocaleKey } from '@/i18n';
 import { api as apiClient } from '@/api';
 
@@ -161,7 +161,14 @@ export function ContainerMonitorPanel({ cluster, namespace, pod, container }: Co
         </div>
       </header>
 
-      {loading ? <Skeleton className="h-64 w-full" /> : null}
+      {loading ? (
+        /* The skeleton stands in for the plots, at the plot's own height. */
+        <div className="grid grid-cols-1 gap-3 xl:grid-cols-2" data-ai-id="container-detail:monitor:loading">
+          {CHARTS.map((chart) => (
+            <ChartSkeleton key={chart.metric} height={140} aiId={`container-detail:monitor:loading:${chart.key}`} />
+          ))}
+        </div>
+      ) : null}
 
       {unavailable ? (
         <div

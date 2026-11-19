@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Skeleton } from '@kube-ai-hub/ui';
+import { ChartSkeleton } from '@kube-ai-hub/ui/charts';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { useT } from '@/i18n';
 import { ClusterChartCard, linesToSeries } from './ClusterChartCard';
@@ -65,9 +65,14 @@ export function ClusterApiServerTab({
   return (
     <div className="flex flex-col gap-4" data-ai-id="cluster-monitor:apiserver" data-ai-state={state}>
       {state === 'loading' ? (
-        <div className="flex flex-col gap-4">
-          <Skeleton className="h-64 w-full" />
-          <Skeleton className="h-64 w-full" />
+        /*
+         * The skeleton stands in for the plot, at the plot's own height. Two grey
+         * blocks of a made-up 256px made the page jump when the real cards arrived
+         * and told the reader nothing about what was coming.
+         */
+        <div className="grid grid-cols-1 gap-4 2xl:grid-cols-2">
+          <ChartSkeleton height={160} aiId="cluster-monitor:apiserver:loading:0" />
+          <ChartSkeleton height={160} aiId="cluster-monitor:apiserver:loading:1" />
         </div>
       ) : null}
 

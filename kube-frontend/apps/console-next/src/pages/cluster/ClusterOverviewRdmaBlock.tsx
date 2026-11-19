@@ -117,11 +117,21 @@ export function ClusterOverviewRdmaBlock({
   seriesByName,
   start,
   end,
+  refreshing = false,
 }: {
   cluster: string;
   seriesByName: Map<string, MetricSeries>;
   start: number;
   end: number;
+  /**
+   * A reader-initiated refresh is in flight.
+   *
+   * The block reads the series its tab already fetched, so it has no query of its
+   * own to report one — the tab passes its manual-refresh signal down. Without it the
+   * block's curve changed with no feedback while every neighbouring card veiled,
+   * which read as "this one did not refresh".
+   */
+  refreshing?: boolean;
 }): React.ReactElement {
   const t = useT();
   const [selected, setSelected] = React.useState<RdmaTabSpec['key']>('health');
@@ -218,6 +228,8 @@ export function ClusterOverviewRdmaBlock({
                 emptyText={t('cluster.monitor.empty')}
                 height={160}
                 formatValue={(value) => formatValue(value, tab.kind)}
+                refreshing={refreshing}
+                refreshingLabel={t('cluster.monitor.refreshing')}
                 data-ai-id="cluster-monitor:overview:rdma:chart:plot"
               />
               <div className="flex flex-wrap items-center gap-3 text-xs" data-ai-id="cluster-monitor:overview:rdma:chart:legend">

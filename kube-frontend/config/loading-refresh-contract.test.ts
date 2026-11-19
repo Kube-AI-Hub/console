@@ -97,6 +97,49 @@ describe('a first load and a refresh are not the same state', () => {
     expect(offenders, `这些列表的首次加载用了 isFetching，刷新会闪骨架：\n${offenders.join('\n')}`).toEqual([]);
   });
 
+  it('never renders a chart region as a plain skeleton block', () => {
+    // A chart's first load is a skeleton shaped like a plot, not a grey rectangle of
+    // an arbitrary height: the rectangle told the reader nothing, and its height did
+    // not match the plot, so the page jumped when the real cards arrived.
+    //
+    // Only a file that draws a plot is checked — a detail page's text placeholder is
+    // a different thing.
+    const offenders: string[] = [];
+    for (const { path, text } of PAGES) {
+      if (!/<TimeSeriesChart|<ClusterChartCard/.test(text)) continue;
+      if (/<Skeleton className="h-\d+ w-full" \/>/.test(code(text))) offenders.push(path);
+    }
+    expect(
+      offenders,
+      `这些画图表的区域用整块 Skeleton 占位，改用 ChartSkeleton（与图同高）：\n${offenders.join('\n')}`,
+    ).toEqual([]);
+  });
+
+  it('gives every list that refreshes a visible refreshing state', () => {
+    // `loading` covers the first load only. A list that offers 刷新 but never sets
+    // `refreshing` sits unchanged until the new rows replace the old ones in one
+    // frame, which reads as "the button did nothing" when the response is slow.
+    //
+    // Panels are exempt: they embed a table in a card with no toolbar of their own,
+    // and their own host already reports the read. `loading={false}` is exempt too —
+    // a table rendered from data the page already has has nothing to refresh.
+    const PANEL_EXEMPT = new Set([
+      'apps/console-next/src/pages/cluster/NodeRankingPanel.tsx',
+      'apps/console-next/src/pages/cluster/NodeResourcesPanel.tsx',
+      'apps/console-next/src/pages/cluster/GpuPodsPanel.tsx',
+    ]);
+    const offenders = PAGES
+      .filter(({ path, text }) => {
+        if (PANEL_EXEMPT.has(path)) return false;
+        const body = code(text);
+        if (!/<ResourceList/.test(body)) return false;
+        if (!/refresh:|onRefresh/.test(body)) return false;
+        return !/refreshing=/.test(body);
+      })
+      .map(({ path }) => path);
+    expect(offenders, `这些列表有刷新入口但没有 refreshing 反馈：\n${offenders.join('\n')}`).toEqual([]);
+  });
+
   it('never puts a static state on a region that is still loading', () => {
     // The wrapper said `ready` while `ChartPanel` inside it said `loading`, so a test
     // or an agent could wait for "ready" and read a panel with no data. A region that

@@ -17,6 +17,14 @@ import { MONITOR_TABS, type MonitorTabKey } from '@/pages/cluster/monitorTabs';
  * state. Mocking the subpath keeps this test about the status band.
  */
 vi.mock('@kube-ai-hub/ui/charts', () => ({
+  /*
+   * The plot's first-load placeholder. It renders a box of the given height, which
+   * is what the host asks for — the point of the real component is that the
+   * placeholder occupies the plot's space, so the page does not jump when data lands.
+   */
+  ChartSkeleton: ({ height = 160, aiId }: { height?: number; aiId?: string }) => (
+    <div role="presentation" data-ai-id={aiId} data-ai-skeleton-height={height} />
+  ),
   DonutChart: ({ segments, label, emptyText, centerLabel }: {
     segments: { key: string; label: string; value: number }[];
     label: string;

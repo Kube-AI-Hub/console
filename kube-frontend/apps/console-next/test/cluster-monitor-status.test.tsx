@@ -17,6 +17,14 @@ import { ClusterStatusSection } from '@/pages/cluster/ClusterStatusSection';
  */
 vi.mock('@kube-ai-hub/ui/charts', () => ({
   /*
+   * The plot's first-load placeholder. It renders a box of the given height, which
+   * is what the host asks for — the point of the real component is that the
+   * placeholder occupies the plot's space, so the page does not jump when data lands.
+   */
+  ChartSkeleton: ({ height = 160, aiId }: { height?: number; aiId?: string }) => (
+    <div role="presentation" data-ai-id={aiId} data-ai-skeleton-height={height} />
+  ),
+  /*
    * The drawing library does not paint in jsdom, so the three chart components are
    * replaced with the smallest stand-ins that keep their observable contract: the
    * label, the segment/slice count and the centre content. The tests below assert the
