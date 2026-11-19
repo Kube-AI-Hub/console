@@ -4,7 +4,7 @@ import { Button } from '../primitives/Button';
 import { Icon } from '../primitives/Icon/Icon';
 import { TimeRangePicker, type TimeRangePickerLabels } from './TimeRangePicker';
 import { TimeSeriesChart, type TimeSeries } from './TimeSeriesChart';
-import { gapForStep, resolveRange, type TimeRange } from './timeRange';
+import { gapForStep, resolveRange, stepToMs, type TimeRange } from './timeRange';
 
 export interface ChartPanelLabels extends TimeRangePickerLabels {
   refresh: string;
@@ -38,6 +38,22 @@ export interface ChartPanelProps {
   series: TimeSeries[];
   range: TimeRange;
   onRangeChange: (next: TimeRange) => void;
+  /**
+   * The absolute span the host actually queried.
+   *
+   * A rolling range (`最近 1 小时`) is resolved against `Date.now()` **by whoever
+   * issues the request**. When the panel resolved it a second time, the axis and the
+   * data described two different spans — a few seconds apart, which showed up as the
+   * curve's start sliding right on every auto-refresh: the points were drawn from
+   * their own timestamps while the axis had already moved on.
+   *
+   * Pass the same values the query used and the two cannot disagree. Omit it only
+   * for a static story, where the panel resolves the range once.
+   */
+  start?: number;
+  end?: number;
+  /** Prometheus step, printed under the plot. Defaults to the one the span implies. */
+  step?: string;
   labels: ChartPanelLabels;
   /** `loading` on the first load; `refreshing` keeps the plot and dims it. */
   state: 'loading' | 'refreshing' | 'ready' | 'error' | 'empty';
@@ -104,6 +120,9 @@ export function ChartPanel({
   series,
   range,
   onRangeChange,
+  start,
+  end,
+  step,
   labels,
   state,
   onRetry,
@@ -134,7 +153,23 @@ export function ChartPanel({
   const [hidden, setHidden] = React.useState<ReadonlySet<string>>(() => new Set());
   React.useEffect(() => setHidden(new Set()), [seriesKey]);
 
-  const resolved = React.useMemo(() => resolveRange(range), [range]);
+  /*
+   * The axis must be the span the host queried, not a fresh reading of the clock.
+   *
+   * `start`/`end` are what the request used; `resolveRange` is the fallback for a
+   * host that does not own a query (a story). Resolving here unconditionally is the
+   * bug this guards: a rolling window read twice lands a few seconds apart, so the
+   * points — placed by their own timestamps — slid right against a moving axis on
+   * every auto-refresh.
+   */
+  const resolved = React.useMemo(() => {
+    const auto = resolveRange(range);
+    return {
+      start: start ?? auto.start,
+      end: end ?? auto.end,
+      step: step ?? auto.step,
+    };
+  }, [range, start, end, step]);
   const fill = area ?? series.length === 1;
   const plotted = React.useMemo(
     () => series.map((entry) => ({
@@ -275,6 +310,7 @@ export function ChartPanel({
               emptyText={labels.loading}
               height={height}
               maxGap={gapForStep(resolved.step)}
+              gridSlack={stepToMs(resolved.step) / 2}
               refreshing={manual}
               refreshingLabel={labels.refreshing}
               {...(yDomain ? { yDomain } : {})}

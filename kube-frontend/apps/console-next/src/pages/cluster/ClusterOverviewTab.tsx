@@ -358,6 +358,9 @@ export function ClusterOverviewTab({
               range={range}
               onRangeChange={() => undefined}
               showRangePicker={false}
+              start={start}
+              end={end}
+              step={step}
               labels={chartLabels}
               state={chartState}
               onRetry={() => void query.refetch()}

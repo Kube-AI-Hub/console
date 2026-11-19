@@ -342,6 +342,9 @@ export function OverviewResourcePanel({ cluster, refreshAt, manualRefresh }: {
         series={[{ key: title, label: title, points, area: true, smooth: true }]}
         range={range}
         onRangeChange={setRange}
+        start={resolved.start}
+        end={resolved.end}
+        step={resolved.step}
         labels={chartLabels}
         state={trendState}
         onRetry={() => void trends.refetch()}

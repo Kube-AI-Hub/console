@@ -90,6 +90,15 @@ export interface TimeSeriesChartProps extends Omit<React.HTMLAttributes<HTMLDivE
    * enforces it; this value decides where the holes are.
    */
   maxGap?: number;
+  /**
+   * Half the sampling step, used to keep the sample nearest each window boundary.
+   *
+   * Samples arrive on the step grid, which rarely coincides with a boundary computed
+   * from `Date.now()`. Without this slack the first point can fall outside the
+   * window and be dropped, so the curve appears to start to the right of the axis
+   * origin. The caller knows the step; the chart cannot infer it from the points.
+   */
+  gridSlack?: number;
   /** Print y-axis labels and gridlines. Defaults to true. */
   showYAxis?: boolean;
   /** Print the x-axis time labels. Defaults to true. */
@@ -156,6 +165,14 @@ export function pivotSeries(
   start: number,
   end: number,
   maxGap?: number,
+  /**
+   * Half-width of the grid cell that contains the window boundaries.
+   *
+   * Defaults to 0 so an explicit-range caller keeps exact clipping. The chart passes
+   * half its step, which is what lets the leftmost sample survive a boundary that
+   * falls between two grid points.
+   */
+  gridSlack = 0,
 ): { rows: ChartRow[]; visible: TimeSeries[] } {
   const visible = series.filter((entry) => !entry.hidden);
   const byTime = new Map<number, ChartRow>();
@@ -169,7 +186,18 @@ export function pivotSeries(
   };
   for (const entry of visible) {
     const points = entry.points
-      .filter((point) => Number.isFinite(point.at) && Number.isFinite(point.value) && point.at >= start && point.at <= end)
+      /*
+       * The window is widened by one step on each side.
+       *
+       * Samples arrive on the step grid (a 15s step lands on :00/:15/:30/:45), which
+       * rarely coincides with a window boundary computed from `Date.now()`. A strict
+       * `at >= start` therefore dropped the first sample — often the only point in the
+       * first few seconds — and the curve appeared to begin to the right of the axis
+       * origin, sliding further with every auto-refresh. Clipping to the grid cell
+       * that contains the boundary keeps the leftmost point where the axis starts.
+       */
+      .filter((point) => Number.isFinite(point.at) && Number.isFinite(point.value))
+      .filter((point) => point.at >= start - gridSlack && point.at <= end + gridSlack)
       .sort((a, b) => a.at - b.at);
     let previousAt: number | undefined;
     for (const point of points) {
@@ -242,6 +270,13 @@ export function TimeSeriesChart({
   emptyText,
   height = 200,
   maxGap,
+  /**
+   * Half the sampling step, used to keep the sample nearest each boundary.
+   *
+   * The caller knows the step (it built the request); the chart cannot infer it from
+   * the points without guessing.
+   */
+  gridSlack = 0,
   showYAxis = true,
   showXAxis = true,
   yDomain,
@@ -343,7 +378,10 @@ export function TimeSeriesChart({
       return next;
     });
   };
-  const { rows, visible } = React.useMemo(() => pivotSeries(plotted, start, end, maxGap), [plotted, start, end, maxGap]);
+  const { rows, visible } = React.useMemo(
+    () => pivotSeries(plotted, start, end, maxGap, gridSlack),
+    [plotted, start, end, maxGap, gridSlack],
+  );
   // recharts does not consult `prefers-reduced-motion`; this design system does.
   const moving = animate && !prefersReducedMotion();
 

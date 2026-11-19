@@ -206,6 +206,9 @@ export function GpuResourcePage({ cluster }: GpuResourcePageProps): React.ReactE
                 series={[{ key: chart.key, label: t(chart.titleKey), points, area: true }]}
                 range={range}
                 onRangeChange={setRange}
+                start={resolved.start}
+                end={resolved.end}
+                step={resolved.step}
                 labels={labels}
                 state={state}
                 onRetry={() => void trends.refetch()}

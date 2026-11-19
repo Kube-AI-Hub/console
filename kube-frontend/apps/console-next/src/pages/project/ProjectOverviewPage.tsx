@@ -385,6 +385,9 @@ function UsageTrendSection({ cluster, namespace }: { cluster: string; namespace:
         series={[{ key: 'cpu', label: t('project.overview.trend.cpu'), points: cpu, area: true }]}
         range={range}
         onRangeChange={setRange}
+        start={resolved.start}
+        end={resolved.end}
+        step={resolved.step}
         labels={labels}
         state={state}
         {...(query.isError ? { error: query.error } : {})}
@@ -399,6 +402,9 @@ function UsageTrendSection({ cluster, namespace }: { cluster: string; namespace:
         series={[{ key: 'memory', label: t('project.overview.trend.memory'), points: memory, area: true }]}
         range={range}
         onRangeChange={setRange}
+        start={resolved.start}
+        end={resolved.end}
+        step={resolved.step}
         labels={labels}
         state={state}
         {...(query.isError ? { error: query.error } : {})}

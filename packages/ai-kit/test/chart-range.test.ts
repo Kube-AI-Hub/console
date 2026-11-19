@@ -130,6 +130,23 @@ describe('series pivot', () => {
     expect(rows.map((row) => row['a'])).toEqual([2, 3]);
   });
 
+  it('keeps the sample just before a window boundary when given grid slack', () => {
+    /*
+     * The defect this pins: samples land on the step grid (…:00, …:15), while the
+     * window starts at whatever `Date.now()` said. A strict `at >= start` dropped the
+     * first sample, so the curve began to the right of the axis origin and slid
+     * further on every auto-refresh.
+     */
+    const series = [line('a', [[-8, 1], [7, 2], [22, 3], [37, 4], [52, 5]])];
+    // Without slack the leading sample is clipped — the old behaviour.
+    expect(pivotSeries(series, 0, 50).rows.map((row) => row['a'])).toEqual([2, 3, 4]);
+    // With half a 15s step, the sample inside the first grid cell survives — and so
+    // does the one inside the last cell, because the slack applies to both edges.
+    const withSlack = pivotSeries(series, 0, 50, undefined, 7_500);
+    expect(withSlack.rows[0]!.a).toBe(1);
+    expect(withSlack.rows.map((row) => row['a'])).toEqual([1, 2, 3, 4, 5]);
+  });
+
   it('excludes hidden series from the drawing but keeps them in the input', () => {
     const series = [{ ...line('a', [[0, 1]]), hidden: true }, line('b', [[0, 2]])];
     const { rows, visible } = pivotSeries(series, 0, 100);
