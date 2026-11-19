@@ -14,6 +14,7 @@ import { GPU_VENDOR_LABEL_KEYS, vendorKey } from './gpuVendors';
 import { formatGpuMemory } from './gpuFormat';
 import { GpuModeDialog } from './GpuModeDialog';
 import { NodeJoinDialog } from './NodeJoinDialog';
+import { NodeTaintsBulkDialog } from './NodeTaintsBulkDialog';
 import { hasPendingMode, timeOffsets, useNodesList, useNodesMetrics, useNodesStats, useNodesTime } from './nodeListQueries';
 import { VendorIcon } from './VendorIcon';
 
@@ -40,6 +41,12 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
   const [terminal, setTerminal] = React.useState<string | null>(null);
   const [modeNode, setModeNode] = React.useState<string | null>(null);
   const [joinOpen, setJoinOpen] = React.useState(false);
+  /*
+   * Which taint editor is open: the bulk one takes the current selection, the row
+   * action takes one node. One state rather than two booleans, because the two
+   * dialogs must never be open at once and a single value makes that impossible.
+   */
+  const [taintsTarget, setTaintsTarget] = React.useState<{ names: string[] } | null>(null);
   // The node-add dialog only makes sense for readers allowed to create nodes. Hide the
   // entry only on an explicit "false"; a failed check must not remove a permitted action.
   const canAddNode = useQuery({
@@ -50,7 +57,7 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
   });
   const [visibleColumns, setVisibleColumns] = React.useState<string[] | undefined>();
   React.useEffect(() => { const timer = setTimeout(() => setModel(filters.model?.trim() ?? ''), 250); return () => clearTimeout(timer); }, [filters.model]);
-  React.useEffect(() => { setTerminal(null); setModeNode(null); setFilters({}); list.setPage(1); list.setKeyword(''); }, [cluster]);
+  React.useEffect(() => { setTerminal(null); setModeNode(null); setTaintsTarget(null); setFilters({}); list.setPage(1); list.setKeyword(''); }, [cluster]);
   const nodes = useNodesList({
     cluster, page: list.page, pageSize: list.pageSize, sortBy: list.sortBy, order: list.order,
     keyword: list.search, status: filters.status ?? '', role: filters.role ?? '',
@@ -64,7 +71,7 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
   const { stats, controlPlane } = useNodesStats(cluster);
   const refresh = () => { void nodes.refetch(); void metrics.refetch(); void time.refetch(); void stats.refetch(); void controlPlane.refetch(); };
   const invalidate = () => {
-    for (const key of ['node-list', 'node-list-stats', 'node-list-control-plane', 'node-list-metrics', 'node-list-time', 'node-detail', 'cluster']) {
+    for (const key of ['node-list', 'node-list-stats', 'node-list-control-plane', 'node-list-metrics', 'node-list-time', 'node-detail', 'node-taints-bulk', 'cluster']) {
       void client.invalidateQueries({ queryKey: key === 'cluster' ? [key, 'nodes', cluster] : [key, cluster] });
     }
   };
@@ -361,6 +368,19 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
     columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'nodes:columns' },
     refresh: { label: t('common.refresh'), aiId: 'nodes:refresh', busy: nodes.isFetching },
     /*
+     * Selection exists for one operation: editing taints across several nodes.
+     *
+     * It is not enabled speculatively — a checkbox column with no bulk action is
+     * noise, and every row is 40px narrower for a control that does nothing. The
+     * action below is declared even when nothing is selected because a bulk button
+     * that appears out of nowhere is harder to find than one that starts disabled.
+     */
+    selection: 'multiple',
+    selectAiId: 'nodes:select',
+    actions: [
+      { key: 'taints', label: t('node.action.taints'), aiId: 'nodes:bulk-taints', aiNeeds: ['nodes:select'] },
+    ],
+    /*
      * Adding a node is an action on this list, so it belongs in the list's action
      * cluster rather than in the page header: the header carries identity, and a
      * button there sat in a second row of its own for the whole page.
@@ -371,6 +391,7 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
     rowActions: [
       { key: 'cordon', label: t('node.action.cordon'), aiId: 'nodes:cordon', visible: (row) => !row.unschedulable, disabled: () => cordon.isPending },
       { key: 'uncordon', label: t('node.action.uncordon'), aiId: 'nodes:uncordon', visible: (row) => row.unschedulable, disabled: () => cordon.isPending },
+      { key: 'taints', label: t('node.action.taints'), aiId: 'nodes:taints' },
       { key: 'terminal', label: t('container.terminal.open'), aiId: 'nodes:terminal-open', disabled: (row) => row.status !== 'Running' },
       { key: 'gpu-mode', label: t('node.mode.title'), aiId: 'nodes:gpu-mode', visible: (row) => Boolean(row.gpuVendor && row.gpuVendor.toLowerCase() !== 'cpu'),
         /*
@@ -390,6 +411,7 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
     empty: { title: list.search || Object.values(filters).some(Boolean) ? t('node.list.noMatch') : t('cluster.nodes.emptyTitle') },
     pagination: { page: list.page, pageSize: list.pageSize, total: nodes.data?.total ?? 0, pageSizeOptions: [10, 20, 50, 100] },
     labels: { selectAll: t('table.selectAll'), selectRow: (index) => t('table.selectRow', { index }),
+      selected: (count) => t('table.selectedCount', { count }),
       moreActions: t('table.moreActions'), previous: t('table.previous'), next: t('table.next'),
       range: (from, to, total) => t('table.range', { from, to, total }), goToPage: t('table.goToPage'), jumpTo: t('table.jumpTo'),
       pageSize: t('table.pageSize'), pageSizeSuffix: t('table.pageSizeSuffix'), clearSearch: t('node.filter.clear', { title: t('node.filter.name') }),
@@ -421,17 +443,26 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
         filters={filters} onFiltersChange={changeFilters}
         searchValue={list.keyword} onSearchChange={list.setKeyword} onPageChange={list.setPage} onPageSizeChange={list.setPageSize}
         onRefresh={refresh} onSortChange={list.setSort}
+        selectedKeys={list.selected} onSelectionChange={list.setSelected}
+        onBulkAction={(action, keys) => { if (action === 'taints' && keys.length) setTaintsTarget({ names: keys }); }}
         {...(visibleColumns ? { visibleColumnKeys: visibleColumns } : {})} onVisibleColumnsChange={setVisibleColumns}
         onAction={(action, row) => {
           // The primary action arrives without a row; the row actions always have one.
           if (action === 'add') { setJoinOpen(true); return; }
           if (action === 'terminal') setTerminal(row.name);
+          else if (action === 'taints') setTaintsTarget({ names: [row.name] });
           else if (action === 'gpu-mode') setModeNode(row.name);
           else cordon.mutate(row);
         }} />}
     <MutationAlert error={cordon.error} />
     {terminal ? <ExecConsoleDialog target={{ cluster, node: terminal }} title={`${t('container.terminal.title')} · ${terminal}`} aiPrefix="node" onClose={() => setTerminal(null)} /> : null}
     {modeNode ? <GpuModeDialog cluster={cluster} name={modeNode} onClose={() => setModeNode(null)} onUpdated={invalidate} /> : null}
+    {taintsTarget ? <NodeTaintsBulkDialog cluster={cluster} names={taintsTarget.names}
+      onClose={() => setTaintsTarget(null)}
+      // The selection outlives the dialog on purpose: a partial failure leaves rows
+      // that still need attention, and clearing the checkboxes would make the reader
+      // re-select exactly the ones the error list just named.
+      onSaved={invalidate} /> : null}
     <NodeJoinDialog cluster={cluster} open={joinOpen} onOpenChange={setJoinOpen} />
   </AiSurface>;
 }

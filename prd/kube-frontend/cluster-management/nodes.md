@@ -56,6 +56,12 @@
 
 **Independent Test**：有后端接口时打开弹窗看到 `kubeadm join` 命令与到期时间；后端 404 时看到明确的版本不支持说明；无权限时看到 403 原因。
 
+### US9 - 一次给多个节点加同样的污点 (Priority: P2)
+
+作为 **集群管理员**，我希望 **勾选多个节点后一次编辑它们的污点**，以便 **在维护一批机器时不必逐台打开详情页重复操作**。
+
+**Independent Test**：勾选两个节点打开「编辑污点」，在公共污点里加一条并提交，两个节点的 `spec.taints` 都出现该污点；只改其中一个节点的独有污点，另一个节点不被写入。
+
 ## 验收场景
 
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-02** — 已知集群可访问节点监控接口，当打开节点列表，则显示「CPU 使用率」与「内存使用率」，取监控比率乘 100 并四舍五入；指标不可用时显示 `-`，真实零值显示 0%。
@@ -71,6 +77,8 @@
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-12** — 已知节点列表，当点击「添加节点」，则调用 `POST /kapis/resources.kubesphere.io/v1alpha3/nodes/join-command`（默认 24h，可选 ttlHours）并在弹窗展示 `kubeadm join <server> --token <token> --discovery-token-ca-cert-hash sha256:<hash>`、到期时间与复制按钮；后端 404/405 显示「当前 ks-apiserver 版本不支持节点加入，需升级后端」，403 显示无权限，其他错误保留可重试；权限检查明确拒绝 create nodes 时隐藏「添加节点」入口（检查失败 fail-open）；命令不在 URL/日志中出现，弹窗关闭即丢弃。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-10** — host GPU 节点提供设置 vGPU 模式及参数，NVIDIA 支持独占/MIG/HAMi-core、寒武纪支持独占/dynamic-smlu/env-share。数量为正整数，比例为有限正数，仅提交当前模式参数；未变化不重复提交。风险确认后提交，提交时禁用关闭；success=true 仅表示信号提交。三秒轮询最多五分钟，以新 desired/status 时间戳和参数判断结果，区分等待、处理中、完成、失败、外部请求和超时。403 或业务失败保留输入；member 禁用并由 API 拒绝写入。B200 仅只读与取消，所有模式写测试拦截模拟。
 - **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-11** — 节点详情为紧凑身份侧栏与资源主栏；首屏展示节点 GPU/显存、CPU、内存、容器组与磁盘当前负载及可切换趋势，监控页展示全部趋势。Ready True 和压力类 False 为正常，Unknown 不误判健康；NTP 使用全局时间中位数。容量表展示全部资源的 Capacity、Allocatable、Requests、Limits，优先 status.allocated/allocatedLimits，仅 CPU/内存缺失时回退对应注解，分配率以 Allocatable 为分母并保留超过 100% 的事实。硬件页精确过滤当前节点的显卡与 RDMA 端口，展示传输类型、链路速率、后端健康和资源可用性；速率 bytes/s 转 Gb/s。拓扑分离 GPU/NIC 连接与 CPU/NUMA 亲和信息，用唯一 X 对角项识别设备，保留未知连接代码，点击高亮行列，无拓扑明确空态。详情复用已有 vGPU 配置弹窗，取消不写入；终端、调度、YAML、元数据及关联资源保留。1024/1280/1600 视口表格内部滚动，不撑宽页面。
+
+- **AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-13** — 已知节点列表有可写权限，当勾选一个或多个节点并点击「编辑污点」，或从行操作菜单选择「编辑污点」，则打开批量污点弹窗：多选时上方为「公共污点」（所有选中节点共有的污点，修改写入全部节点）、下方为按节点折叠的「各节点独有污点」；单选时只有一份列表。每行由「键 / 值 / 效果（阻止调度 / 尽可能阻止调度 / 阻止调度并驱逐现有容器组）」组成，可增删行。提交前校验键非空、键与效果不重复；未变化的节点不写入；每个节点带自己的 `resourceVersion` 独立写入，冲突（409）或无权限（403）逐节点报告且不回滚已成功的节点；成功后提示更新数量并刷新列表。成员集群的节点写入被明确拒绝并说明原因（ks-apiserver core 组无成员集群形态），不静默写到主集群。
 
 ## 设计目标
 
@@ -107,7 +115,7 @@ flowchart LR
 
 ## 明确不做
 
-- 节点排空、删除、批量污点；不在生产环境验证 GPU 模式切换。RDMA 端口和已上报拓扑此前缺少确认契约，本批确认 B200 只读接口后迁移；不探测未上报设备或推断连接。
+- 节点排空、删除；不在生产环境验证 GPU 模式切换。RDMA 端口和已上报拓扑此前缺少确认契约，本批确认 B200 只读接口后迁移；不探测未上报设备或推断连接。（批量污点已于 2026-11-19 重纳，见 `AC-…-NODES-13`。）
 
 ## 重纳能力（2026-11-17 产品复核）
 
@@ -140,6 +148,7 @@ flowchart LR
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-10`
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-11`
 - `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-12`
+- `TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-13`
 
 ## 功能需求
 

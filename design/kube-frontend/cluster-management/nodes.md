@@ -17,6 +17,7 @@
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-10
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-11
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-12
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-13
 
 ## 概述
 
@@ -385,3 +386,30 @@ return "running"
 **何时重新考虑**：若统计条宽度稳定大于 1200px、放得下标题而不换行，可以把 `groupLabel` 提升为可见文字，与竖线并用。
 
 **验证**：`statistics-grouping.test.tsx` 覆盖平铺（不传 group 时 DOM 与原先一致、无 wrapper）、相邻合并与顺序、非相邻拆成两段、第一组不画线。mlu370 `agent` 实测（3 节点 / 3 种加速卡）：七项在同一行（`y=165`），竖线位于健康率与第一个厂商格之间（CSS `x=702`，1.25px `rgb(62,76,146)`），组 `aria-label` 为「按算力卡类型」，可见文字中没有该标题。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-18 — 批量污点用「公共 + 各节点独有」两级模型（2026-11-19）
+
+**为什么**：老 console 的批量污点弹窗是这个模型，而它不是随便选的。批量加污点的真实场景是「给这五台机器加同一条 `dedicated=gpu:NoSchedule`」——一次操作。但节点各自的污点必须保住：只提供一个公共块，保存时把公共块写进每个节点，等于**删掉所有不属于公共块的污点**，这是静默的数据丢失。
+
+**做法**：
+1. **两层**：`commonTaints(nodes)` 取交集作为公共块；`distinctTaints(node, common)` 取每个节点剩下的部分。单选时交集就是它自己的全部污点，两层退化成一层，不需要分支。
+2. **合并语义**：`mergeTaints(node, oldCommon, draft)` = `(节点自己的污点 − 旧公共集) + 新公共集`，`perNode` 优先。旧公共集必须在**首次加载时冻结**（`baseline`），不能每次渲染重算——否则读者删掉一条公共污点，重算出的基线又把它算作「本来就有」，删除不生效。
+3. **按行编辑，不按 YAML**：详情页的 `NodeMetadataDialog` 用 YAML 编辑整份数组（它在替换一个对象、读者可能想粘贴）。批量是同一个操作重复 N 次，YAML 会让读者手写 N 遍，且看不出「哪一行属于哪个节点」。`TaintEditor` 是「键 / 值 / 效果」行编辑器，效果是下拉而非自由文本——三个合法值不该靠记忆。
+4. **未变化不写入**：`taintsUnchanged` 先比对，相同就跳过。每次 PATCH 都会 bump `resourceVersion`，为没变的东西写一次会让其他管理员的乐观锁失败。
+5. **逐节点独立写入，带各自 `resourceVersion`**：节点对象归 kubelet 和其他管理员所有。一个 409 不能回滚已经成功的节点——那会把部分成功变成全量失败，而读者无法从错误里知道哪台还需要重试。结果按节点名列出。
+6. **提交前整体校验**：键为空或 `key`+`effect` 重复在本地拦下。API 会逐节点拒绝，一个笔误就变成 N 条部分失败；先校验能让「什么都没写」成为一个可推理的状态。
+7. **行按 index 做 key，不按 `key`+`effect`**：读者正在编辑的那一行，其身份在打字过程中不断变化，按内容 key 会重挂输入框并丢失焦点。
+
+**为什么列表需要复选框列**：`ResourceList` 的 `selection: 'multiple'` 只在真的存在批量操作时才该开。没有批量动作的复选框列是噪音，还让每行窄 40px。节点列表此前没有批量操作，所以没有选择列；这次加了「编辑污点」才开。
+
+**被否方案**：
+- 只做公共块。见上：会删掉节点各自的污点。
+- 每个节点一个独立表单、不做公共块。加同一条污点要重复五次，而这正是批量编辑要消除的事。
+- 用 YAML 文本域批量编辑。见第 3 点。
+- 一条请求写多个节点（服务端批量接口）。ks-apiserver 没有这个接口，且它必须有事务语义才能用；逐节点写入配合逐节点结果已经是可用的部分成功模型。
+
+**成员集群的写入边界**：`nodesWriteApi` 原先手写 `/api/v1/clusters/<cluster>/nodes/<name>`，但 **core 组没有成员集群形态**——实测 `agent` 上该 URL 返回 404，而带集群段的 kapis 代理对 PATCH 返回 405。所以成员集群的节点写入在后端没有可用路径。改为复用 `coreWritePath`，它在请求发出前拒绝成员集群并说明原因，而不是静默写到主集群同名节点上（`paths.ts` 记录的既有事故）。弹窗把这条拒绝翻译成「成员集群的节点无法从控制台写入」，与 409/403 分开显示。
+
+**何时重新考虑**：ks-apiserver 提供成员集群的 core 组写入形态，或提供带事务的批量节点接口。
+
+**验证**：`node-taints.test.ts` 10 条覆盖交集/差集、按 effect 区分、公共块替换且保留独有、按节点删除、无变化判定；`node-taints-bulk.test.tsx` 覆盖勾选两行 → 打开弹窗 → 加公共污点 → 提交，断言两次 PATCH 且 `resourceVersion` 来自详情读取（`rv-a`/`rv-b`）而非列表行。host 集群实测：`njc-0f06-ai02-ds4` 加 `ui-verify=tmp:NoSchedule` 后提示「已更新 1 个节点。」，API 回读一致，清理后 `spec.taints` 为空。`agent` 实测两个节点返回 404 后改为明确的成员集群提示。弹窗实测：标题 14px/600、描述 12px、警告条 40px、公共块 x=180 宽 827、节点块 x=166 宽 853、按钮 36px 高、页面无横向溢出；污点行两个输入框各 296px、效果下拉 176px、删除按钮 36px，同一基线。

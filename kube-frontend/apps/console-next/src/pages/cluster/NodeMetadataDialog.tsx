@@ -1,28 +1,12 @@
 import * as React from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { nodesWriteApi, type NodeDetail, type NodeTaint } from '@kube-ai-hub/api-client';
+import { nodesWriteApi, type NodeDetail } from '@kube-ai-hub/api-client';
 import { Modal, ResourceForm, type FormSchema } from '@kube-ai-hub/ui';
-import { parse } from 'yaml';
 import { api } from '@/api';
 import { useT } from '@/i18n';
-import { toYaml } from '@/components/resource/yaml';
+import { parseNodeTaints, toTaintYaml } from './nodeTaints';
 
-export function parseNodeTaints(text: string): NodeTaint[] {
-  const entries: unknown = parse(text);
-  if (!Array.isArray(entries)) throw new Error('Expected a YAML array of taints');
-  const seen = new Set<string>();
-  return entries.map((entry: unknown) => {
-    const taint = entry as Record<string, unknown> | null;
-    if (!taint || typeof taint.key !== 'string' || !taint.key.trim() ||
-      typeof taint.effect !== 'string' || !['NoSchedule', 'PreferNoSchedule', 'NoExecute'].includes(taint.effect) ||
-      (taint.value !== undefined && typeof taint.value !== 'string')) throw new Error('Invalid taint key, value or effect');
-    const id = `${taint.key}:${taint.effect}`;
-    if (seen.has(id)) throw new Error('Duplicate taint key and effect');
-    seen.add(id);
-    return { key: taint.key, value: String(taint.value ?? ''), effect: taint.effect,
-      ...(taint.timeAdded ? { timeAdded: String(taint.timeAdded) } : {}) };
-  });
-}
+export { parseNodeTaints } from './nodeTaints';
 
 /** A narrow patch with optimistic concurrency leaves kubelet-owned fields untouched. */
 export function NodeMetadataDialog({ cluster, node, kind, onClose, onSaved }: {
@@ -32,7 +16,7 @@ export function NodeMetadataDialog({ cluster, node, kind, onClose, onSaved }: {
   // Keep the version paired with the form's initial values, even if the page refetches.
   const [original] = React.useState(node);
   const [values, setValues] = React.useState<Record<string, unknown>>({
-    labels: original.labels, taints: toYaml(original.taints),
+    labels: original.labels, taints: toTaintYaml(original.taints),
   });
   const save = useMutation({
     mutationFn: (next: Record<string, unknown>) => {

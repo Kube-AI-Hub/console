@@ -1,5 +1,5 @@
 import type { Client } from './client';
-import { clusterScoped } from './paths';
+import { clusterScoped, coreWritePath } from './paths';
 import { baseOf, resourceApi, type KubeObject, type ResourceBase } from './resources';
 
 /**
@@ -666,8 +666,17 @@ export interface NodeJoinCommand {
 }
 
 export function nodesWriteApi(client: Client) {
+  /*
+   * Writes go to the core group, which only the host cluster has.
+   *
+   * The old form `/api/v1/clusters/<cluster>/nodes/<name>` looked cluster-scoped but the
+   * core group has no member-cluster route: measured against `agent`, that URL answers 404
+   * and the kapis proxy that *does* carry a cluster segment answers 405 to PATCH. So a
+   * member-cluster write has nowhere to go, and `coreWritePath` refuses it instead of
+   * silently patching the host cluster's node of the same name.
+   */
   const path = (cluster: string | undefined, name: string) =>
-    `/api/v1/${cluster && cluster !== 'host' ? `clusters/${encodeURIComponent(cluster)}/` : ''}nodes/${encodeURIComponent(name)}`;
+    coreWritePath(cluster, `nodes/${encodeURIComponent(name)}`);
   return {
     async setUnschedulable(params: { cluster?: string; name: string; unschedulable: boolean }): Promise<void> {
       await client.request(path(params.cluster, params.name), {

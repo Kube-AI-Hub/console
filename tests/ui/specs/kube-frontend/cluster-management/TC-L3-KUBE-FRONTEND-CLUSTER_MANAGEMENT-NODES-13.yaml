@@ -1,0 +1,38 @@
+id: TC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-13
+level: 3
+suite: point
+module: kube-frontend
+submodule: cluster-management
+feature: nodes
+title: 节点列表 · 批量编辑污点
+entry_url: "{BASE_URL}/kube-frontend/clusters/{cluster}/nodes"
+prd: prd/kube-frontend/cluster-management/nodes.md
+design: design/kube-frontend/cluster-management/nodes.md
+covers:
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-13
+story:
+- US9
+product: 勾选多个节点后一次编辑污点，公共污点写入全部选中节点，各节点独有污点只改自己；也可从行操作菜单编辑单个节点。
+preconditions:
+- 已登录 admin；host 集群（成员集群的节点写入被明确拒绝，见 troubleshoot）
+- 至少两个节点，且测试前后记录各自的 spec.taints 以便还原
+steps:
+- 打开节点列表，勾选两个节点，断言「编辑污点」按钮由禁用变为可用
+- 点击「编辑污点」，断言弹窗标题为「批量编辑污点」，含「公共污点」与「各节点独有污点」两段
+- 在公共污点里添加一条临时污点（唯一键），提交
+- 以 API 回读两个节点，确认都出现该污点
+- 只修改其中一个节点的独有污点并提交，确认另一个节点的 resourceVersion 未被改动
+- 关闭弹窗，从行操作菜单选择「编辑污点」，确认打开同一弹窗且只含该节点
+- finally 清除本用例添加的污点，核对两个节点的 spec.taints 与初始一致
+expected:
+- 公共污点写入全部选中节点；只改独有污点时其他节点不被写入
+- 未变化的节点不产生 PATCH（不 bump resourceVersion）
+- 键为空或键与效果重复时提交被拦截，不产生任何写入
+- 冲突（409）与无权限（403）按节点名分别报告，已成功的节点不回滚
+- 成员集群点击提交时显示「成员集群的节点无法从控制台写入」，不静默写到 host
+troubleshoot:
+- 提交后全部失败且提示成员集群不支持：后端 core 组没有成员集群形态，改用 host 集群验证或使用 kubectl
+- 提交无反应：确认勾选了节点（按钮未禁用）且至少改动了一条污点，未变化时不会写入
+- 409：节点被其他管理员修改，关闭弹窗重开以取得新的 resourceVersion
+update_automation:
+- 句柄：nodes:select、nodes:select:<name>、nodes:bulk-taints、nodes:taints、node-taints-bulk:surface/submit/cancel/result、node-taints:common:editor/add、node-taints:<name>:editor
