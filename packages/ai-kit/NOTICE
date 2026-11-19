@@ -42,11 +42,13 @@ required by the Apache License 2.0, section 4(b):
   two extra `fill="currentColor"` paths on top of a path that already draws both.
   Those two paths are removed so the glyph is a single shape; the drawn result is
   unchanged.
-- **Brand mark replaced.** The retired `kubesphere` glyph is removed, and
-  `kubeaihub` now draws the Kube AI Hub mark: a solid hexagon with three connected
-  nodes carved out of it. The cut-outs are sub-paths of a single `fill-rule="evenodd"`
-  path rather than a `mask`, so the glyph carries no id reference and survives being
-  inlined more than once on a page.
+- **Brand mark replaced.** The retired `kubesphere` glyph is removed from the
+  sprite and from `ICON_NAMES`, so nothing can resolve it any more. `kubeaihub`
+  now draws the Kube AI Hub mark: a solid hexagon with three connected nodes
+  carved out of it, distinct from KubeSphere's segmented one. The cut-outs are
+  sub-paths of a single `fill-rule="evenodd"` path rather than a `mask`, so the
+  glyph carries no id reference and survives being inlined more than once on a
+  page.
 - **Duplicate paint paths removed.** Where a symbol ends with a path that repaints,
   in the same ink, a shape an earlier `fill-rule="evenodd"` path already carved
   out, the repaint is dropped and the cut-out shows again. Without this the mark
@@ -69,6 +71,55 @@ required by the Apache License 2.0, section 4(b):
   disappeared. They are now `currentColor` with `fill-opacity`, which follows the
   surrounding text colour and stays legible on every theme. The drawn shapes are
   unchanged; only how they take their colour changed.
+- **Sibling paths folded into one compound.** Around two dozen symbols drew their
+  detail as a second path in the same ink as the plate beneath it, so the detail
+  repainted what it was meant to carve and the glyph came out a solid slab —
+  `login-accounts`, `select`, `mail`, `textarea`, `textfield`, `report`, `port`,
+  `minus-square`, `plus-square`, `catalog`, `cpu`, `documentation`, `folder`,
+  `user-profile`, `wallet`, `eip-group`, `project`, `insert-chart`, `terminal`,
+  `bigdata`, `data`, `deal`, `discount` and `file`. Both `d` strings are now one
+  path with `fill-rule="evenodd"`, so the overlap cancels and the detail reads as
+  a cut-out. The drawn silhouettes are unchanged.
+- **Detail folded into the plate on a further nine symbols.** The same slab
+  problem showed up on `eye` (pupil painted over by a same-ink disc), `home`
+  (roof line and door), `lock` (shackle and keyhole), `layer` (arrow inside the
+  stacked plate), `monitor` (waveform on the bezel), `cron-job` (clock hands drawn
+  twice, once filled and once as `fill="none"`) and `job` / `client` (inner badge
+  detail left as `fill="none"`, so it never drew at all). Each is now a single
+  `evenodd` path whose later sub-paths cut out of the earlier ones.
+- **`filter` redrawn.** The upstream funnel and lid were separate filled shapes
+  that cancelled where they met, leaving an open skeleton. It is now one
+  `evenodd` funnel with a cut-out mouth and a solid stem, which stays readable at
+  the 14px size the console shell uses for nav entries.
+- **Content rescaled into the 24 grid.** A number of symbols were authored against
+  a larger artboard (`user-overview` 20, `crane` 40, the `*-duotone` generation 48)
+  or simply occupied a thin band of it (`nodejs`, `sonarqube` were 24-unit wide but
+  only ~5 units tall). `<Icon>` always draws a `0 0 24 24` viewBox, so those glyphs
+  were either clipped at the edge or shrank to an unreadable sliver. Each is now
+  wrapped in a `translate(...) scale(...)` that fits its real ink box inside the
+  grid with a margin. The drawn shapes are unchanged; only their placement and
+  size are. The same pass covered `terminal`, whose path stacked three copies of
+  the window and cancelled against itself; it is redrawn as one `evenodd` window.
+- **`sonarqube` and `nodejs` take their official marks.** The upstream glyphs were
+  wide, flat strips that could not be enlarged without distortion, so both use the
+  vendor mark instead (SonarQube's three rising strokes, Node.js' hexagon), each
+  bespoke single-ink paths rather than the upstream drawings.
+- **`mnic` redrawn.** Its compound path already carved the port bays and the LED
+  row, but seven same-ink paths repainted them on top, so the glyph shipped as a
+  solid slab. The repaints are gone and the card is redrawn as one `evenodd` shape
+  with a bracket rail, four port bays and two LEDs cut out of it.
+- **Low-alpha plates get an outline.** Upstream "duotone" symbols imply their
+  second plane with `fill-opacity=".22"`, which `currentColor` cannot express:
+  on the light theme the plate washes out until it reads as a hole. Every such
+  plate now keeps a faint `.14` wash and gains a `currentColor` outline at
+  `stroke-opacity=".55"`, so the two planes stay distinguishable in both themes
+  without a second colour channel.
+- **`logout` redrawn.** The upstream glyph was a closed-book mark whose two halves
+  could only be told apart by the legacy `color`/`fill` two-channel styling this
+  package does not reproduce, so it rendered as a plain rectangle. A single-ink
+  `logout` cannot express that split, so the glyph is replaced with the
+  conventional meaning — a doorway open to the right with an arrow leaving — drawn
+  as one `evenodd` path. `login-accounts` keeps its box-and-person mark.
 - **Everything else is unmodified.** Apart from the brand mark and the colour
   substitution above, the remaining symbols are byte-identical to upstream, in the
   same order. `timed-task`, `clock`, `calendar` and `history-duotone` are among them.
