@@ -1243,7 +1243,57 @@ export function platformConfigApi(client: Client) {
       );
       return { multicluster: body?.['multicluster'] === true };
     },
+    /**
+     * The accelerator kinds this installation knows about.
+     *
+     * `configs/gpu/kinds` is the same list the old console's server fetched and
+     * injected as `globals.config.supportGpuType` / `supportGpuTypeMetadata`. It is
+     * served from the cluster's `ClusterConfiguration`, so an operator who adds a
+     * vendor there gets it here without a console rebuild — which is the reason to
+     * read it instead of carrying a copy.
+     *
+     * A failed read is not an error worth showing: the caller falls back to the
+     * bundled table, and a node page that renders with slightly stale metadata is
+     * better than one that renders nothing.
+     */
+    async gpuKinds(params: { signal?: AbortSignal } = {}): Promise<GpuKind[]> {
+      const body = await client.request<unknown>(
+        '/kapis/config.kubesphere.io/v1alpha2/configs/gpu/kinds',
+        params.signal ? { signal: params.signal } : {},
+      );
+      if (!Array.isArray(body)) return [];
+      return body.flatMap((entry): GpuKind[] => {
+        if (!entry || typeof entry !== 'object') return [];
+        const item = entry as Record<string, unknown>;
+        const resourceName = typeof item['resourceName'] === 'string' ? item['resourceName'] : '';
+        if (!resourceName) return [];
+        return [{
+          resourceName,
+          displayName: typeof item['displayName'] === 'string' && item['displayName'] ? item['displayName'] : resourceName,
+          resourceType: typeof item['resourceType'] === 'string' ? item['resourceType'] : '',
+          isDefault: item['default'] === true,
+          ...(typeof item['memoryUnit'] === 'string' && item['memoryUnit'] ? { memoryUnit: item['memoryUnit'] } : {}),
+          ...(typeof item['memoryName'] === 'string' && item['memoryName'] ? { memoryName: item['memoryName'] } : {}),
+          ...(typeof item['vcoresName'] === 'string' && item['vcoresName'] ? { vcoresName: item['vcoresName'] } : {}),
+        }];
+      });
+    },
   };
+}
+
+/** One entry of `configs/gpu/kinds`, in this app's field names. */
+export interface GpuKind {
+  resourceName: string;
+  displayName: string;
+  resourceType: string;
+  /** The installation's default accelerator; the others are opt-in. */
+  isDefault: boolean;
+  /** Unit of the `memoryName` value: `Mi`, `Gi`, `%`, or `*256Mi` (a block count). */
+  memoryUnit?: string;
+  /** Resource key carrying this kind's memory. */
+  memoryName?: string;
+  /** Resource key carrying this kind's core/vcore allocation. */
+  vcoresName?: string;
 }
 
 /**

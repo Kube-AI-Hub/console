@@ -489,6 +489,7 @@ export {
   clusterImportApi,
   clusterImportBody,
   platformConfigApi,
+  type GpuKind,
   clustersApi,
   componentMetricsApi,
   customResourcesApi,

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { describe, expect, it, vi } from 'vitest';
 import { I18nProvider } from '@/i18n';
@@ -42,7 +42,16 @@ function mount() {
   );
 }
 
-const stub = () => vi.stubGlobal('fetch', vi.fn(async () => Response.json(raw)));
+const stub = () => vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
+  const url = String(input instanceof Request ? input.url : input);
+  // The accelerator table comes from the platform, not from a bundled copy.
+  if (url.includes('/configs/gpu/kinds')) return Response.json([
+    { resourceName: 'nvidia.com/gpu', displayName: 'GPU - Nvidia/英伟达', resourceType: 'GPU', default: true, memoryUnit: 'Mi' },
+    { resourceName: 'cambricon.com/vmlu', displayName: 'vMLU - Cambricon/寒武纪', resourceType: 'MLU',
+      memoryUnit: '%', memoryName: 'cambricon.com/mlu.smlu.vmemory', vcoresName: 'cambricon.com/mlu.smlu.vcore' },
+  ]);
+  return Response.json(raw);
+}));
 
 describe('node detail resource totals', () => {
   it('renders the totals block above the usage figures', async () => {
@@ -63,11 +72,15 @@ describe('node detail resource totals', () => {
     await screen.findByText('amd64');
 
     const totals = view.container.querySelector('[data-ai-id="node-detail:totals"]')!;
+    // Accelerator rows come from a second request, so the block fills in two steps.
+    await waitFor(() => expect(totals).toHaveTextContent('GPU - Nvidia/英伟达'));
     expect(totals).toHaveTextContent('CPU 总量');
     expect(totals).toHaveTextContent('内存总量');
     expect(totals).toHaveTextContent('容器组总量');
     expect(totals).toHaveTextContent('临时存储');
-    expect(totals).toHaveTextContent('GPU 总量');
+    // Accelerator rows use the platform's own displayName, which is what the old
+    // console prints too — not a generic "GPU 总量".
+    expect(totals).toHaveTextContent('GPU - Nvidia/英伟达');
     // The raw key must not survive as a label.
     expect(totals.textContent).not.toContain('ephemeral-storage');
     expect(totals.textContent).not.toContain('nvidia.com/gpu');
@@ -79,6 +92,7 @@ describe('node detail resource totals', () => {
     await screen.findByText('amd64');
 
     const totals = view.container.querySelector('[data-ai-id="node-detail:totals"]')!;
+    await waitFor(() => expect(totals.querySelector('[data-ai-resource="nvidia.com/gpu"]')).not.toBeNull());
     const keys = [...totals.querySelectorAll('[data-ai-resource]')].map((node) => node.getAttribute('data-ai-resource'));
     expect(keys).toEqual(['cpu', 'memory', 'pods', 'ephemeral-storage', 'nvidia.com/gpu']);
   });
@@ -89,12 +103,13 @@ describe('node detail resource totals', () => {
     await screen.findByText('amd64');
 
     const table = view.container.querySelector('[data-ai-id="node-detail:capacity"]')!;
+    await waitFor(() => expect(table).toHaveTextContent('GPU - Nvidia/英伟达'));
     const keys = [...table.querySelectorAll('[data-ai-resource]')].map((node) => node.getAttribute('data-ai-resource'));
     expect(keys).not.toContain('hugepages-1Gi');
     expect(keys).not.toContain('hugepages-2Mi');
     // Same vocabulary as the totals block, so the two sections read as one story.
     expect(table).toHaveTextContent('临时存储');
-    expect(table).toHaveTextContent('GPU 总量');
+    expect(table).toHaveTextContent('GPU - Nvidia/英伟达');
     expect(table.textContent).not.toContain('ephemeral-storage');
   });
 

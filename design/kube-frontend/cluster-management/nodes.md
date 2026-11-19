@@ -548,3 +548,29 @@ sagesuite-demo -> control-plane, storage, worker
 **何时重新考虑**：若某个页面需要「面板与标签栏无缝」的形态（例如面板自带顶部分隔线），该调用点用 `mt-0` 覆盖即可，`tailwind-merge` 会让它生效。
 
 **验证**：`tabs-panel-spacing.test.tsx` 覆盖默认 `mt-4`（含 Radix 保留的非活动面板）、调用点 `mt-8` 覆盖默认而不叠加、非间距类保留、`role="tabpanel"` 仍可访问。mlu370 `agent` 实测节点详情页：标签栏底部 197、面板顶部 213，间距 **16px**（此前 0），「资源总量」区块与下划线之间留白清晰。ai-kit 322 passed、console-next 330 passed。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-21 — 加速卡名称与单位来自后端配置，不内置副本（2026-11-20）
+
+**为什么**：异构节点上「卡数」不是一个资源键就能表达的。NVIDIA 只发布 `nvidia.com/gpu`（卡数），寒武纪把一张卡拆成多个键——`cambricon.com/mlu.smlu.vmemory` 是显存、`.smlu.vcore` 是核心。原样打印时，一行四个形似的标识符，读者分不出哪个是卡数、哪个是显存。
+
+老 console 靠 `globals.config.supportGpuTypeMetadata` 解决：一张 `resourceName → {displayName, memoryName, memoryUnit, vcoresName}` 的表。那份数据不是前端写死的，来自后端接口 `GET /kapis/config.kubesphere.io/v1alpha2/configs/gpu/kinds`（其内容是 `ClusterConfiguration` 的 `gpu.kinds`）。
+
+**做法**：
+1. 新增 `platformConfigApi.gpuKinds()`，读那个接口；`useAcceleratorKinds()` 用 TanStack Query 缓存 30 分钟——「这个安装有哪些加速卡」是安装决策，不是分钟级事实。
+2. **不内置副本**。先写过一份 28 项的静态表做兜底，随后删除：手工维护的第二份副本一定会和安装器脱节，而脱节的副本比没有更糟——它会用一个集群已经没有的型号去命名资源。读取失败时回退为显示资源键本身，这是诚实的答案。
+3. 名称映射（`capacityLabel`）与单位映射（`formatCapacityValue`）都接受 kinds 列表：
+   - 键本身是某个 kind → 用它的 `displayName`（`GPU - Nvidia/英伟达`），与老 console 一致；
+   - 键是某个 kind 的 `memoryName`/`vcoresName` → kind 名 + 显存/核心总量；
+   - 其余保留原键。
+4. `memoryUnit` 不总是尺寸：`Mi`/`Gi` 是大小（转 GiB 显示）、`%` 是百分比（寒武纪 smlu 显存）、`*256Mi` 是**256Mi 的块数**（天数、摩尔线程）——把 `*256Mi` 解析成字节会是一次静默的单位改变，所以原样显示为 `40 * 256Mi`。
+
+**总量区块补齐**：老 console 的「GPU 总量 8 卡」「显存总量 192 Gi」来自 `nodeInfo.cardCount` / `nodeInfo.gpuMemoryTotal`（设备插件自己的汇总），不是 capacity 里的资源键；「磁盘总量」来自监控指标 `node_disk_size_capacity`（文件系统大小是测量值，不是可调度资源）。三者都补进区块。
+
+**被否方案**：
+- 内置静态表兜底。见上。
+- 只按 `resourceName` 前缀判断是否加速卡。`cambricon.com/mlu` 和 `cambricon.com/real-mlu-counts` 在节点上存在但不在 `gpu.kinds` 里，前缀匹配会把它们当成已知型号并给出错误的单位；老 console 只映射表里有的键，保留其余原样。
+- 把 `memoryUnit` 统一解析成字节。见上。
+
+**何时重新考虑**：若后端把 `nodeInfo.cardCount` 也并入 `gpu.kinds`（当前是两套数据），总量区块可以只读一处。
+
+**验证**：`node-totals-panel.test.tsx` 覆盖加速卡行用 `displayName` 而非通用「GPU 总量」、总量区块含 `cardCount`/`gpuMemoryTotal`、hugepages 不出现在两处、未知扩展资源保留原名。mlu370 `host` 集群 `njc-0f06-ai02-ds4`（寒武纪 MLU370-S4）实测总量区块：`CPU 总量 128 Core / 内存总量 503.8 GiB / 容器组总量 300 / 临时存储 2.6 TiB / GPU 总量 8 卡 / 显存总量 192.0 GiB / 磁盘总量 3.1 TiB / MLU370 - Cambricon/寒武纪 8`，与老 console 同一节点的八项逐一对应。分配表里 `cambricon.com/mlu.smlu.vmemory` 显示为「vMLU - Cambricon/寒武纪 显存总量」，不在配置表里的 `cambricon.com/real-mlu-counts` 保留原键。
