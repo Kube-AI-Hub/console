@@ -30,12 +30,50 @@ import {
  * its own tab, so switching away cancels nothing that is still shown and switching in
  * never pre-fetches.
  */
+/** The chart copy a tab needs for the refresh veil. */
+export interface ManualRefreshState {
+  /** True while a reader-initiated refresh is in flight. */
+  refreshing: boolean;
+  /** Accessible name for the veil. */
+  label: string;
+}
+
+/**
+ * Whether the refresh now in flight was the reader's.
+ *
+ * Every tab has two entry points for the same read: its own controls (none, in most
+ * tabs) and the page header's 刷新, which arrives as `manualTick`. A tab cannot see
+ * the button, so it watches the counter: a bump while the query is fetching means a
+ * person asked, and the plot should veil itself exactly as it would for a local
+ * button.
+ *
+ * The flag clears when the query settles, or after a ceiling so a request that never
+ * settles cannot leave the veil on for ever.
+ */
+export function useManualRefresh(manualTick: number | undefined, isFetching: boolean): ManualRefreshState {
+  const t = useT();
+  const lastTick = React.useRef(manualTick ?? 0);
+  const [bumped, setBumped] = React.useState(false);
+  React.useEffect(() => {
+    if ((manualTick ?? 0) === lastTick.current) return;
+    lastTick.current = manualTick ?? 0;
+    setBumped(true);
+    const timer = globalThis.setTimeout(() => setBumped(false), 8_000);
+    return () => globalThis.clearTimeout(timer);
+  }, [manualTick]);
+  React.useEffect(() => {
+    if (!isFetching) setBumped(false);
+  }, [isFetching]);
+  return { refreshing: bumped, label: t('cluster.monitor.refreshing') };
+}
+
 export function ClusterResourceTab({
   cluster,
   rangeKey,
   start,
   end,
   step,
+  manualTick,
   onStateChange,
 }: WindowContext): React.ReactElement {
   const t = useT();
@@ -54,6 +92,13 @@ export function ClusterResourceTab({
     // A window is historical: refetching it every 30 seconds would re-download the
     // whole range to add one point. The header moves the range when auto refresh is on.
     staleTime: 60_000,
+    /*
+     * Keep the previous window's points while the new one loads: a rolling window
+     * moves on every refresh, so the key changes and the query would otherwise report
+     * `pending` with no data — the plot blinked out and back. Keeping the last answer
+     * is what lets a refresh update the chart instead of replacing it.
+     */
+    placeholderData: (previous) => previous,
     retry: false,
   });
 
@@ -62,6 +107,7 @@ export function ClusterResourceTab({
     [query.data, t],
   );
 
+  const manual = useManualRefresh(manualTick, query.isFetching);
   const state = query.isPending
     ? 'loading'
     : query.isError
@@ -112,6 +158,8 @@ export function ClusterResourceTab({
                       emptyText={t('cluster.monitor.empty')}
                       emptyHint={t('cluster.monitor.emptyHint')}
                       formatValue={(value) => formatResourceValue(value, chart.spec.kind)}
+                      refreshing={manual.refreshing}
+                      refreshingLabel={manual.label}
                     />
                   ))}
                 </div>

@@ -128,6 +128,14 @@ export interface WindowContext {
    */
   live?: boolean;
   /**
+   * Bumped by the page header's 刷新, and only by it.
+   *
+   * A tab cannot see the header's button, and `live` describes the timer. This is
+   * how a chart inside a tab learns that the refresh now in flight was the reader's
+   * — so its veil matches the one its own refresh button draws.
+   */
+  manualTick?: number;
+  /**
    * Report the tab's main query state to the page's {@link AiSurface}.
    *
    * The page cannot see a tab's queries, so the active tab owns the surface state:

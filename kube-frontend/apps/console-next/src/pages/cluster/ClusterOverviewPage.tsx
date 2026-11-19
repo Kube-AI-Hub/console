@@ -118,7 +118,7 @@ export function ClusterOverviewPage({ cluster }: ClusterOverviewPageProps): Reac
       ) : null}
       {detail.data && detail.data.ready ? (
         <div className="min-w-0 space-y-4">
-          <OverviewResourcePanel key={cluster} cluster={cluster} refreshAt={refresh.refreshAt} />
+          <OverviewResourcePanel key={cluster} cluster={cluster} refreshAt={refresh.refreshAt} manualRefresh={refresh.manual} />
           <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]" data-ai-id="overview:node-row">
             <NodeSummaryPanel key={`${cluster}:nodes`} cluster={cluster} />
             <NodeRankingPanel cluster={cluster} preview />

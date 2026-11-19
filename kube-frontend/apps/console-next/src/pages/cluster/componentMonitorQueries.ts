@@ -304,6 +304,12 @@ export function useComponentMetrics(params: ComponentMetricsParams) {
     // A window is historical: refetching it every 30 seconds would re-download the whole
     // window to add one point. The auto-refresh control moves the range, which refetches.
     staleTime: 60_000,
+    /*
+     * Keep the previous window's points while the new one loads: a rolling window
+     * moves on every refresh, so the key changes and the query would otherwise report
+     * `pending` with no data — the plot blinked out and back instead of updating.
+     */
+    placeholderData: (previous) => previous,
     retry: false,
   });
 }

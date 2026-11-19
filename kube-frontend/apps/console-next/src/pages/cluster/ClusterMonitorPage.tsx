@@ -115,6 +115,14 @@ export function ClusterMonitorPage({ cluster, node, tab, onTabChange }: ClusterM
    * that is not mounted issues nothing.
    */
   const [autoRefresh, setAutoRefresh] = React.useState(false);
+  /*
+   * Bumped by the header's 刷新 only.
+   *
+   * A counter rather than a boolean because the signal has to be observable more
+   * than once: two consecutive clicks are two manual refreshes, and a boolean would
+   * stay `true` across them. Charts compare it to the value they last saw.
+   */
+  const [manualTick, setManualTick] = React.useState(0);
   React.useEffect(() => {
     if (!autoRefresh) return;
     const timer = globalThis.setInterval(() => {
@@ -220,9 +228,10 @@ export function ClusterMonitorPage({ cluster, node, tab, onTabChange }: ClusterM
       end: resolved.end,
       step: resolved.step,
       live: autoRefresh,
+      manualTick,
       onStateChange: reportTabState,
     }),
-    [cluster, resolved, autoRefresh, reportTabState],
+    [cluster, resolved, autoRefresh, manualTick, reportTabState],
   );
 
   /*
@@ -289,8 +298,13 @@ export function ClusterMonitorPage({ cluster, node, tab, onTabChange }: ClusterM
             loading={queryBusy}
             {...actionProps('cluster-monitor:refresh')}
             onClick={() => {
-              // A rolling window moves on every tick anyway; this re-reads it now
-              // rather than waiting for the next one.
+              /*
+               * A rolling window moves on every tick anyway; this re-reads it now
+               * rather than waiting for the next one. The manual flag travels with
+               * the new window so a chart can veil itself: the header has no plot of
+               * its own, and without it the two refresh buttons behaved differently.
+               */
+              setManualTick((tick) => tick + 1);
               setResolved(resolveMonitorRange(range));
             }}
           >

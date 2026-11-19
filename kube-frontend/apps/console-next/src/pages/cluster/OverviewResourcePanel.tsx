@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { clusterMetricsApi, rangeMetricsApi, type ClusterUsage } from '@kube-ai-hub/api-client';
+import { clusterMetricsApi, rangeMetricsApi, type ClusterUsage, type MetricSeries } from '@kube-ai-hub/api-client';
 import { Card, Icon, MetricRing, Panel, Progress, Skeleton, cn, useSpotlight } from '@kube-ai-hub/ui';
 import {
   ChartPanel,
@@ -214,10 +214,10 @@ export function NodeSummaryPanel({ cluster }: {
   </Panel>;
 }
 
-export function OverviewResourcePanel({ cluster, refreshAt }: {
+export function OverviewResourcePanel({ cluster, refreshAt, manualRefresh }: {
   cluster: string;
   /**
-   * The page's auto-refresh tick.
+   * The page's refresh tick.
    *
    * Kept in the signature because the page passes it and because a rolling window
    * has to move with the tick: the plot's `range` is a `TimeRange` now, so the
@@ -225,6 +225,14 @@ export function OverviewResourcePanel({ cluster, refreshAt }: {
    * window at mount.
    */
   refreshAt: number;
+  /**
+   * Whether a **reader-initiated** refresh is in flight, from the page's scheduler.
+   *
+   * The page header and this panel both start the same reads. The header's button has
+   * no chart of its own to veil, so it reports the intent here; without it the two
+   * buttons behaved differently — one dimmed the plot, the other changed it silently.
+   */
+  manualRefresh?: boolean;
 }): React.ReactElement {
   const t = useT();
   const [selected, setSelected] = React.useState<OverviewResource>('gpu-memory');
@@ -250,9 +258,18 @@ export function OverviewResourcePanel({ cluster, refreshAt }: {
   const resources = OVERVIEW_RESOURCES.filter((resource) => resource.key !== 'nodes' &&
     (!('gpu' in resource) || usage.data?.gpuTotal !== 0));
   const resource = resources.find((entry) => entry.key === selected) ?? resources[0]!;
-  const trends = useQuery({
+  const trends = useQuery<MetricSeries[]>({
     queryKey: ['overview-trends', cluster, resource.key, resolved.start, resolved.end],
     enabled: Boolean(usage.data), retry: false, staleTime: 30_000, refetchOnWindowFocus: false, refetchOnReconnect: false,
+    /*
+     * Keep the previous window's points while the new one loads.
+     *
+     * A rolling window moves on every refresh, so the query key changes and the query
+     * would otherwise report `pending` with no data — the plot vanished for a frame and
+     * came back. Keeping the last answer means a refresh *updates* the chart, which is
+     * the whole point of veiling it rather than blanking it.
+     */
+    placeholderData: (previous: MetricSeries[] | undefined): MetricSeries[] | undefined => previous,
     queryFn: ({ signal }) => rangeMetricsApi(api).cluster({
       cluster, metrics: [resource.metric, resource.capacity], start: resolved.start, end: resolved.end, step: resolved.step, signal,
     }),
@@ -260,15 +277,22 @@ export function OverviewResourcePanel({ cluster, refreshAt }: {
   /*
    * Whether the current read is the reader's or the page's timer.
    *
-   * The overview refreshes on its own cadence (`refreshAt` moves), which is the
-   * auto path: the line animates to the new shape with no veil. A click on 刷新 is
-   * the manual path and gets the translucent veil the resource lists use.
+   * Two entry points start the same reads: this panel's own 刷新 and the page
+   * header's. The page reports the header click through `manualRefresh`; the panel
+   * reports its own through `ownRefresh`. Either one means "a person asked", and
+   * both must veil the plot — the same action cannot behave two ways depending on
+   * which button was clicked.
+   *
+   * The timer (`refreshAt` moving) sets neither, so the line animates to the new
+   * shape with no veil.
    */
-  const [manualRefresh, setManualRefresh] = React.useState(false);
+  const [ownRefresh, setOwnRefresh] = React.useState(false);
   const refreshNow = React.useCallback(() => {
-    setManualRefresh(true);
-    void trends.refetch().finally(() => setManualRefresh(false));
-  }, [trends]);  const points = React.useMemo(() => overviewRatioPoints(trends.data ?? [], resource.metric, resource.capacity),
+    setOwnRefresh(true);
+    void trends.refetch().finally(() => setOwnRefresh(false));
+  }, [trends]);
+  const isManualRefresh = ownRefresh || manualRefresh === true;
+  const points = React.useMemo(() => overviewRatioPoints(trends.data ?? [], resource.metric, resource.capacity),
     [trends.data, resource.metric, resource.capacity]);
   const title = `${t(resource.label)} · ${t('cluster.overview.trend')}`;
   const prefix = 'overview:trend';
@@ -322,7 +346,7 @@ export function OverviewResourcePanel({ cluster, refreshAt }: {
         state={trendState}
         onRetry={() => void trends.refetch()}
         onRefresh={refreshNow}
-        manualRefresh={manualRefresh}
+        manualRefresh={isManualRefresh}
         height={180}
         yDomain={[0, Math.max(100, ...points.map((point) => point.value))]}
         formatValue={(value) => `${Math.round(value)}%`}

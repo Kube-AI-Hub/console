@@ -39,6 +39,16 @@ export interface ClusterChartCardProps {
   group?: string;
   /** Area fill under the lines; off unless a stacked magnitude reads better filled. */
   area?: boolean;
+  /**
+   * A reader-initiated refresh is in flight.
+   *
+   * Draws the same translucent veil the resource lists use. The tab sets it from the
+   * page's manual-refresh signal, so the header's 刷新 and a chart's own refresh look
+   * identical — the two buttons start the same reads and must not behave two ways.
+   */
+  refreshing?: boolean;
+  /** Accessible name for the veil. */
+  refreshingLabel?: string;
   /** Plot height in CSS pixels. Defaults to 160. */
   height?: number;
 }
@@ -60,6 +70,8 @@ export function ClusterChartCard({
   formatValue,
   group,
   area = false,
+  refreshing = false,
+  refreshingLabel = '更新中…',
   height = 160,
 }: ClusterChartCardProps): React.ReactElement {
   /*
@@ -109,6 +121,8 @@ export function ClusterChartCard({
             emptyText={emptyText}
             height={height}
             formatValue={formatValue}
+            refreshing={refreshing}
+            refreshingLabel={refreshingLabel}
             onToggleSeries={(key) =>
               setHidden((current) => {
                 const next = new Set(current);

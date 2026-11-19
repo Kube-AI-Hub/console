@@ -3,6 +3,7 @@ import { Skeleton } from '@kube-ai-hub/ui';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { useT } from '@/i18n';
 import { ClusterChartCard, linesToSeries } from './ClusterChartCard';
+import { useManualRefresh } from './ClusterResourceTab';
 import { toComponentCharts, useComponentMetrics } from './componentMonitorQueries';
 import { formatComponentValue } from './monitorFormat';
 import type { WindowContext } from './monitorTabs';
@@ -34,6 +35,7 @@ export function ClusterSchedulerTab({
   start,
   end,
   step,
+  manualTick,
   onStateChange,
 }: WindowContext): React.ReactElement {
   const t = useT();
@@ -44,6 +46,7 @@ export function ClusterSchedulerTab({
     [query.data, t],
   );
 
+  const manual = useManualRefresh(manualTick, query.isFetching);
   const state = query.isPending
     ? 'loading'
     : query.isError
@@ -89,6 +92,8 @@ export function ClusterSchedulerTab({
                 emptyText={t('cluster.monitor.empty')}
                 emptyHint={t('cluster.monitor.emptyHint')}
                 formatValue={(value) => formatComponentValue(value, chart.kind, units)}
+                refreshing={manual.refreshing}
+                refreshingLabel={manual.label}
               />
             ))
         : null}

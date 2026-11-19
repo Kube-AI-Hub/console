@@ -13,6 +13,7 @@ import { ClusterOverviewComponentsBlock } from './ClusterOverviewComponentsBlock
 import { ClusterOverviewRdmaBlock, RDMA_BLOCK_METRICS } from './ClusterOverviewRdmaBlock';
 import { formatBytes } from './monitorFormat';
 import { chartPanelLabels } from './OverviewResourcePanel';
+import { useManualRefresh } from './ClusterResourceTab';
 import type { MonitorTabState, WindowContext } from './monitorTabs';
 
 /**
@@ -173,6 +174,7 @@ export function ClusterOverviewTab({
   end,
   step,
   live,
+  manualTick,
   onStateChange,
 }: ClusterOverviewTabProps): React.ReactElement {
   const t = useT();
@@ -192,19 +194,31 @@ export function ClusterOverviewTab({
     // A window is historical: refetching it every 30 seconds would re-download an hour
     // of samples to add one point. Auto refresh moves the window instead.
     staleTime: 60_000,
+    /*
+     * Keep the previous window's points while the new one loads: a rolling window
+     * moves on every refresh, so the key changes and the query would otherwise report
+     * `pending` with no data — the plot blinked out and back. Keeping the last answer
+     * is what lets a refresh update the chart instead of replacing it.
+     */
+    placeholderData: (previous) => previous,
     retry: false,
   });
 
   /*
    * Manual vs auto refresh. The page moves the window every few seconds when
-   * 自动刷新 is on — that path must not dim the plot. A click on 刷新 does, which is
-   * the same gesture the resource lists use.
+   * 自动刷新 is on — that path must not dim the plot. A click on either 刷新 does:
+   * this tab's own button, or the page header's, which arrives as `manualTick`.
+   *
+   * The tab's own click sets `ownRefresh` for the length of its request; the
+   * header's click goes through the shared hook, so both produce the same veil.
    */
-  const [manualRefresh, setManualRefresh] = React.useState(false);
+  const [ownRefresh, setOwnRefresh] = React.useState(false);
   const refreshNow = React.useCallback(() => {
-    setManualRefresh(true);
-    void query.refetch().finally(() => setManualRefresh(false));
+    setOwnRefresh(true);
+    void query.refetch().finally(() => setOwnRefresh(false));
   }, [query]);
+  const headerRefresh = useManualRefresh(manualTick, query.isFetching);
+  const isManualRefresh = ownRefresh || headerRefresh.refreshing;
 
   const seriesByName = React.useMemo(() => {
     const map = new Map<string, MetricSeries>();
@@ -348,7 +362,7 @@ export function ClusterOverviewTab({
               state={chartState}
               onRetry={() => void query.refetch()}
               onRefresh={refreshNow}
-              manualRefresh={manualRefresh}
+              manualRefresh={isManualRefresh}
               height={260}
               formatValue={(value) => formatChartValue(value, selectedSpec.chartKind)}
               className="min-h-[22rem]"

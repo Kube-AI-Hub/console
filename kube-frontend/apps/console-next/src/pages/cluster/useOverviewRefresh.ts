@@ -15,13 +15,34 @@ const ALL = [...LIVE, 'cluster-detail', 'cluster-agent', 'components', 'node-ran
  */
 export const SLOW_READ_MS = 8_000;
 
-/** One scheduler per overview; historical queries move their window through refreshAt. */
+/**
+ * One scheduler per overview; historical queries move their window through refreshAt.
+ *
+ * `manual` is set while a **reader-initiated** refresh is in flight and cleared when
+ * it settles. It exists because two buttons start the same reads — the page header's
+ * 刷新 and each chart panel's own — and a panel cannot tell which one it was from
+ * `isFetching` alone. Without it the header's refresh updated the plot with no
+ * feedback while the panel's own refresh veiled it: the same action, two behaviours.
+ *
+ * Auto refresh (the 30-second timer, or returning to the tab) deliberately leaves it
+ * false: that path moves the window every tick, and a veil on each tick would strobe.
+ */
 export function useOverviewRefresh(cluster: string) {
   const client = useQueryClient();
   const [auto, setAuto] = React.useState(true);
   const [visible, setVisible] = React.useState(() => document.visibilityState !== 'hidden');
   const [refreshAt, setRefreshAt] = React.useState(Date.now);
   const [slow, setSlow] = React.useState(false);
+  /*
+   * The manual-refresh flag every chart panel reads.
+   *
+   * `pending` counts overlapping refreshes rather than holding a boolean: the header
+   * and a panel can both be clicked, and the flag has to stay set until the last one
+   * settles. It is exposed as a boolean so a panel only asks "is this refresh the
+   * reader's".
+   */
+  const [pending, setPending] = React.useState(0);
+  const manual = pending > 0;
   const inFlight = React.useRef<symbol | null>(null);
   const owner = React.useRef(cluster);
   const belongs = React.useCallback((query: Query) => query.queryKey[1] === cluster && ALL.includes(String(query.queryKey[0])), [cluster]);
@@ -41,10 +62,19 @@ export function useOverviewRefresh(cluster: string) {
     const operation = Symbol('overview-refresh');
     inFlight.current = operation;
     setRefreshAt(Date.now());
+    /*
+     * A manual refresh is announced before the reads start, so a chart panel that is
+     * already on screen can show its veil on the first frame instead of one tick
+     * later. The timer path skips it, which is what keeps auto refresh from strobing.
+     */
+    if (manual) setPending((count) => count + 1);
     try {
       await Promise.all((manual ? ALL : LIVE).filter((key) => key !== 'overview-trends').map((key) =>
         client.refetchQueries({ queryKey: [key, cluster], type: 'active' })));
-    } finally { if (inFlight.current === operation) inFlight.current = null; }
+    } finally {
+      if (inFlight.current === operation) inFlight.current = null;
+      if (manual) setPending((count) => Math.max(0, count - 1));
+    }
   }, [client, cluster, belongs]);
   React.useEffect(() => {
     if (owner.current === cluster) return;
@@ -69,7 +99,7 @@ export function useOverviewRefresh(cluster: string) {
   const queries = client.getQueryCache().findAll({ predicate: (query) => belongs(query) && query.isActive() && LIVE.includes(String(query.queryKey[0])) });
   const times = queries.map((query) => query.state.dataUpdatedAt).filter(Boolean);
   return {
-    auto, setAuto, busy, refresh, refreshAt, slow,
+    auto, setAuto, busy, refresh, refreshAt, slow, manual,
     lastRefresh: times.length ? Math.min(...times) : undefined,
     failed: queries.some((query) => query.state.status === 'error'),
   };
