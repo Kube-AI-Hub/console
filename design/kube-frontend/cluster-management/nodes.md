@@ -455,3 +455,31 @@ return "running"
 **何时重新考虑**：若出现按数值降序更自然的新列（用量、副本数），照 `ResourceMonitorPage` 的做法显式写 `desc`，不要依赖缺省值——缺省值只对时间列成立。
 
 **验证**：脚本按「默认列 ∈ sortableKeys 且 order=desc」扫描全部 40 个 `useResourceListState` 调用点，改动后只剩 `ResourceMonitorPage`（有意保留）与两个不可排序列。mlu370 实测：存储类页面初始 `ascending`（juicefs-shared / local-static / openebs-hostpath）点击转 `descending`；集群列表初始 `ascending` 点击转 `descending`，行顺序均真实改变。console-next 320 passed。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-20 — 角色是多值的，按角色标签逐条展示（2026-11-20）
+
+**为什么**：老 console 的「角色」是二选一——`isControlPlaneNode(labels)` 为真显示「控制平面节点」，否则「工作节点」。但一个节点可以同时带多个角色标签，本环境实际就是这样：
+
+```
+a100-04        -> storage, worker
+a100-64        -> storage, worker
+sagesuite-demo -> control-plane, storage, worker
+```
+
+二选一把 `storage` 藏了：`a100-04` 在界面上只是「工作节点」，读者无从知道它还承担存储角色。新 console 原本直接打印 `node.role`（`control-plane, storage`），信息保住了，但**是英文标签原文**，且与列表页的「控制平面节点 / 工作节点」说法不一致——同一个节点在两个页面有两个身份。
+
+**做法**：
+1. 新增 `nodeRoles.ts`，提供 `roleLabel` / `roleLabels` / `isControlPlane`。角色名走文案表：`control-plane` 与 `master` → 控制平面，`storage` → 存储，`edge` → 边缘，`infra` → 基础设施；**表里没有的角色原样显示**，因为集群管理员可以自定义角色，隐藏它比显示原文更糟。
+2. 详情页与列表页都用徽章**逐个**展示，不再拼接成逗号串。列表页的列是 `flex flex-col`，多角色竖排——逗号串在窄列里换行位置不可控，竖排让每个角色都读得清、列宽也稳定（实测 84px）。
+3. 角色筛选增加「存储」。后端本就支持任意角色：`role=<value>` 匹配 `node-role.kubernetes.io/<value>` 标签（`nodes.go` 的 `query.Field("role")` 分支），所以这是把已有能力暴露出来，不是新增服务端功能。实测 `role=storage` 返回 3 个节点，与标签一致。
+
+**为什么列表页不再显示「工作节点」**:`toNodeSummary` 的 `nodeRole` 已经排除了 `worker`——它是缺省角色，和 `control-plane` 并列时说的是「也是工作节点」，没有增量。列表现在展示的就是这个值，所以 `a100-04` 只显示「存储」。筛选器里保留「工作节点」选项，因为它对应服务端的 `role=worker`（排除控制面），语义不同。
+
+**被否方案**：
+- 保持二选一、把 `storage` 放进 tooltip。列表的核心用途就是扫一眼看出谁承担什么，藏进 tooltip 等于没有。
+- 用逗号串 + `whitespace-nowrap`。窄列下要么撑宽表格，要么被截断。
+- 把 `worker` 也显示出来。三个徽章里有一个是「其他所有节点的默认值」，反而稀释了真正的差异。
+
+**何时重新考虑**：若角色种类增长到一行放不下（例如超过 4 个），列表页改为「首个角色 + `+N`」并在 tooltip 里列全。
+
+**验证**：`node-roles.test.ts` 覆盖已知角色翻译、未知角色保留原文、多角色拆分、空条目丢弃、`master`/`control-plane` 都识别为控制面。mlu370 实测：列表页 `a100-04`/`a100-64` 显示「存储」，`sagesuite-demo` 显示「控制平面」+「存储」两行（y 相差 24px，列宽 84px）；详情页显示同样两个徽章；角色筛选为「全部 / 控制平面节点 / 存储 / 工作节点」，选「存储」返回全部 3 个节点。

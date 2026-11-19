@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { NodeDetail } from '@kube-ai-hub/api-client';
-import { Button } from '@kube-ai-hub/ui';
+import { Badge, Button } from '@kube-ai-hub/ui';
 import { DefinitionRow } from '@/components/resource/DefinitionRow';
 import { formatTimestamp } from '@/lib/time';
 import { useT } from '@/i18n';
@@ -8,6 +8,7 @@ import { GPU_MODES } from './gpuModeConfig';
 import { GPU_VENDOR_LABEL_KEYS, vendorKey } from './gpuVendors';
 import { hasPendingMode } from './nodeListQueries';
 import { formatGpuMemory } from './gpuFormat';
+import { roleLabels } from './nodeRoles';
 
 export function NodeInfoSidebar({ node, onMode }: { node: NodeDetail; onMode: () => void }): React.ReactElement {
   const t = useT();
@@ -18,7 +19,11 @@ export function NodeInfoSidebar({ node, onMode }: { node: NodeDetail; onMode: ()
     <h2 className="mb-4 text-sm font-semibold">{t('node.detail.basic')}</h2>
     <dl className="grid grid-cols-1 gap-y-1 text-xs [&>dd]:mb-3">
       <DefinitionRow label={t('node.detail.internalIP')} value={node.internalIP} />
-      <DefinitionRow label={t('cluster.column.role')} value={node.role} />
+      <DefinitionRow label={t('cluster.column.role')} value={
+        <span className="flex flex-wrap gap-1" data-ai-id="node-detail:roles">
+          {roleLabels(node.role, t).map((label) => <Badge key={label} tone="neutral">{label}</Badge>)}
+        </span>
+      } />
       <DefinitionRow label={t('node.detail.osImage')} value={node.nodeInfo.osImage} />
       <DefinitionRow label={t('node.detail.architecture')} value={node.nodeInfo.architecture} />
       <DefinitionRow label={t('node.detail.kernel')} value={node.nodeInfo.kernelVersion} />

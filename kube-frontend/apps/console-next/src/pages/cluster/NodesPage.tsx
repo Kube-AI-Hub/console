@@ -12,6 +12,7 @@ import { formatCpu, formatBytes } from '@/lib/quantity';
 import { GPU_MODES } from './gpuModeConfig';
 import { GPU_VENDOR_LABEL_KEYS, vendorKey } from './gpuVendors';
 import { formatGpuMemory } from './gpuFormat';
+import { roleLabels } from './nodeRoles';
 import { GpuModeDialog } from './GpuModeDialog';
 import { NodeJoinDialog } from './NodeJoinDialog';
 import { NodeTaintsBulkDialog } from './NodeTaintsBulkDialog';
@@ -290,8 +291,16 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
         </Badge>
       )}
     </span> },
-    { key: 'role', title: t('cluster.column.role'), hideable: true, render: (row) => <span className="whitespace-nowrap">
-      {row.role.split(', ').some((role) => ['master', 'control-plane'].includes(role)) ? t('node.list.controlPlane') : t('node.list.worker')}</span> },
+    { key: 'role', title: t('cluster.column.role'), hideable: true, render: (row) => (
+      /*
+       * One line per role, not a comma-joined string: a node can be `storage` and
+       * `worker` and `control-plane` at once, and the joined form wrapped
+       * unpredictably inside the column. A stack keeps every role readable and the
+       * column width stable.
+       */
+      <span className="flex flex-col items-start gap-1" data-ai-id={`nodes:roles:${row.name}`}>
+        {roleLabels(row.role, t).map((label) => <Badge key={label} tone="neutral">{label}</Badge>)}
+      </span>) },
     ...(['gpu', 'gpuMemory', 'cpu', 'memory', 'pods'] as const).map((key) => ({ key, hideable: true as const, width: 150,
       title: t(key === 'gpu' ? 'node.list.gpu' : key === 'gpuMemory' ? 'node.list.gpuMemory' : key === 'cpu' ? 'cluster.column.cpuUsage' : key === 'memory' ? 'cluster.column.memoryUsage' : 'cluster.workloads.pods.title'),
       // The metric columns are where a number is most easily misread: "used" and
@@ -366,7 +375,12 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
       { key: 'status', column: 'status', title: t('node.filter.status'), allLabel: t('node.filter.all'), aiId: 'nodes:filter:status', options: [
         { value: 'running', label: t('node.list.running') }, { value: 'warning', label: t('node.list.warning') }, { value: 'unschedulable', label: t('node.status.unschedulable') }] },
       { key: 'role', column: 'role', title: t('node.filter.role'), allLabel: t('node.filter.all'), aiId: 'nodes:filter:role', options: [
-        { value: 'master', label: t('node.list.controlPlane') }, { value: 'worker', label: t('node.list.worker') }] },
+        { value: 'master', label: t('node.list.controlPlane') },
+        // `storage` is a real role in this platform's clusters (every node here has
+        // it), and the server filters any `node-role.kubernetes.io/<value>` label, so
+        // this is a pass-through rather than a new server capability.
+        { value: 'storage', label: t('node.role.storage') },
+        { value: 'worker', label: t('node.list.worker') }] },
       { key: 'vendor', column: 'vendor', title: t('node.filter.vendor'), multiple: true, searchable: true, aiId: 'nodes:filter:vendor', emptyText: t('common.empty'),
         options: Array.from(new Set([...Object.keys(GPU_VENDOR_LABEL_KEYS), ...(stats.data?.vendors ?? []).map((entry) => entry.vendor)]))
           .map((vendor) => ({ value: vendor, label: vendorName(vendor) })) },
