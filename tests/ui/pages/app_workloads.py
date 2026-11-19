@@ -200,6 +200,39 @@ class AppWorkloadsPage:
         self.page.wait_for_timeout(400)
         self.wait_ready(self.surface(kind))
 
+    def open_row_menu(self, kind: str, name: str, attempts: int = 3) -> None:
+        """Open a row's 更多操作 menu, retrying while the list re-renders.
+
+        `ensure_row` searches by name, and the search's refetch replaces the row element a moment
+        later; a click landing in that window hits a detached node and times out (only in full
+        runs, where the list is longer). Retrying is the fix, not a longer timeout.
+        """
+        for attempt in range(attempts):
+            try:
+                self.row(kind, name).locator('button[aria-label="更多操作"]').click(timeout=10_000)
+                return
+            except Exception:  # noqa: BLE001 - the row was replaced mid-click
+                if attempt == attempts - 1:
+                    raise
+                self.page.wait_for_timeout(800)
+
+    def wait_row_status(self, kind: str, name: str, labels: tuple[str, ...], timeout_ms: int = 20_000) -> str:
+        """Wait until the row's status cell shows one of `labels`, returning the row text.
+
+        A row can be visible before its status cell has text; reading it immediately is what made
+        STATUS_01/02 flaky in full runs.
+        """
+        import time as _time
+
+        deadline = _time.time() + timeout_ms / 1000
+        text = ""
+        while _time.time() < deadline:
+            text = self.row_text(kind, name)
+            if any(label in text for label in labels):
+                return text
+            self.page.wait_for_timeout(400)
+        return text
+
     def ensure_row(self, kind: str, name: str, timeout_ms: int = 4_000) -> None:
         """Make sure `name` is on screen, searching for it if the first page misses it.
 

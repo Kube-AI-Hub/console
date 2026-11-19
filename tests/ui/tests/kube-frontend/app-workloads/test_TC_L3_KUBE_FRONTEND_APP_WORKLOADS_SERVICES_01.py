@@ -37,7 +37,7 @@ def test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_SERVICES_01(app_workloads_page, scree
         # The ports column is the field an operator checks most often on this page.
         assert "80→8080" in ui.row_text("services", name)
 
-        ui.row("services", name).locator('button[aria-label="更多操作"]').click()
+        ui.open_row_menu("services", name)
         actions = [t.strip() for t in ui.page.get_by_role("menuitem").all_inner_texts()]
         assert "编辑服务" in actions, actions
         ui.page.get_by_role("menuitem", name="编辑服务", exact=True).click()

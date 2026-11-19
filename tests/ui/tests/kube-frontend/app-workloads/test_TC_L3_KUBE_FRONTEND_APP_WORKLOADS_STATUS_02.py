@@ -19,6 +19,7 @@ def test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_STATUS_02(app_workloads_page, screens
 
         ui.open("pods")
         ui.ensure_row("pods", name)
+        ui.wait_row_status("pods", name, ("等待中", "运行中", "已完成", "错误"))
 
         row = ui.row_text("pods", name)
         assert "等待中" in row, row

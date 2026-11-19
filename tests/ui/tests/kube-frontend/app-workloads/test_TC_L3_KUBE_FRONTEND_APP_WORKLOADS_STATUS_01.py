@@ -23,6 +23,9 @@ def test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_STATUS_01(app_workloads_page, screens
 
         ui.open("deployments")
         ui.ensure_row("deployments", name)
+        # The row can render before its status cell has text; wait for a label instead of reading
+        # immediately (this is what made the case flaky only in full runs).
+        ui.wait_row_status("deployments", name, ("更新中", "运行中", "已停止", "等待中"))
 
         row = ui.row_text("deployments", name)
         assert "更新中" in row, row
