@@ -17,6 +17,9 @@ def test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_S2IBUILDER_11(image_builder_page, scr
     try:
         assert ui.create_builder(name) == 201
         assert ui.create_run(name, f"{name}-run-1") == 201
+        reported = ui.controller_reports(f"{name}-run-1")
+        if reported:
+            pytest.skip(f"本环境有真实 s2ioperator（runState={reported!r}），无法构造「控制器尚未创建 Job」的状态")
 
         ui.open_detail(name)
         ui.open_tab("events")

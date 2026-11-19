@@ -267,6 +267,27 @@ class ImageBuilderPageObject:
         status, _ = self.request("GET", self._builder_path())
         return status == 200
 
+    def controller_reports(self, run_name: str, timeout: float = 12.0) -> str:
+        """Wait for the s2ioperator to write `runState`, returning it ('' when it never does).
+
+        The "controller has not created a Job yet" cases need a deployment where the operator
+        does nothing. A live operator writes `Running` within a second or two, which makes those
+        fixtures impossible — callers skip with this reason instead of asserting against a state
+        the controller owns.
+        """
+        import time as _time
+
+        deadline = _time.time() + timeout
+        state = ""
+        while _time.time() < deadline:
+            status, body = self.request("GET", self._run_path(run_name))
+            if status == 200 and isinstance(body, dict):
+                state = str(((body.get("status") or {}).get("runState")) or "")
+                if state:
+                    return state
+            self.page.wait_for_timeout(500)
+        return state
+
     def _builder_path(self, name: str | None = None) -> str:
         base = f"{S2I}/namespaces/{self.namespace}/s2ibuilders"
         return f"{base}/{name}" if name else base
