@@ -44,7 +44,6 @@ export function GpuMonitorPanel({ cluster, node, uuid }: { cluster: string; node
           ]}
           labels={{
             placeholder: t('cluster.monitor.range.1h'),
-            presets: t('cluster.monitor.rangeLabel'),
             custom: t('cluster.monitor.rangeCustom'),
             rangePlaceholder: t('cluster.monitor.rangePlaceholder'),
             step: t('cluster.monitor.step'),

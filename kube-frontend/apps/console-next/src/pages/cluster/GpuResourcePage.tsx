@@ -119,7 +119,6 @@ export function GpuResourcePage({ cluster }: GpuResourcePageProps): React.ReactE
   const labels: ChartPanelLabels = React.useMemo(
     () => ({
       placeholder: t('cluster.gpuResource.range.1h'),
-      presets: t('cluster.monitor.rangeLabel'),
       custom: t('cluster.monitor.rangeCustom'),
       rangePlaceholder: t('cluster.monitor.rangePlaceholder'),
       step: t('cluster.monitor.step'),
@@ -132,6 +131,7 @@ export function GpuResourcePage({ cluster }: GpuResourcePageProps): React.ReactE
       error: t('cluster.gpuResource.empty'),
       retry: t('common.retry'),
       loading: t('common.loading'),
+      refreshing: t('cluster.monitor.refreshing'),
       autoPause: t('cluster.monitor.autoPause'),
       autoResume: t('cluster.monitor.autoResume'),
       autoPauseLabel: t('cluster.monitor.autoPauseLabel'),

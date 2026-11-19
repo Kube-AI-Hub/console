@@ -6,7 +6,6 @@ import { presetRange, type TimeRange } from '../src/charts/timeRange';
 
 const LABELS: TimeRangePickerLabels = {
   placeholder: '选择时间范围',
-  presets: '选择时间范围',
   custom: '自定义时间范围',
   rangePlaceholder: '选择起止时间',
   step: '采样间隔',

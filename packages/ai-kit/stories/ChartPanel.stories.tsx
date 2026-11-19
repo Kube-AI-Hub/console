@@ -28,7 +28,6 @@ const SERIES = [
 
 const LABELS: ChartPanelLabels = {
   placeholder: '选择时间范围',
-  presets: '选择时间范围',
   custom: '自定义时间范围',
   rangePlaceholder: '选择起止时间',
   step: '采样间隔',
@@ -47,6 +46,7 @@ const LABELS: ChartPanelLabels = {
   error: '读取监控数据失败。',
   retry: '重试',
   loading: '正在读取监控数据…',
+  refreshing: '更新中…',
   autoPause: '暂停',
   autoResume: '继续',
   autoPauseLabel: '暂停自动刷新（每 5 秒）',

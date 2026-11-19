@@ -340,7 +340,6 @@ function UsageTrendSection({ cluster, namespace }: { cluster: string; namespace:
   const labels: ChartPanelLabels = React.useMemo(
     () => ({
       placeholder: t('project.overview.trend.1h'),
-      presets: t('cluster.monitor.rangeLabel'),
       custom: t('cluster.monitor.rangeCustom'),
       rangePlaceholder: t('cluster.monitor.rangePlaceholder'),
       step: t('cluster.monitor.step'),
@@ -353,6 +352,7 @@ function UsageTrendSection({ cluster, namespace }: { cluster: string; namespace:
       error: t('project.overview.trend.unavailable'),
       retry: t('common.retry'),
       loading: t('common.loading'),
+      refreshing: t('cluster.monitor.refreshing'),
       autoPause: t('cluster.monitor.autoPause'),
       autoResume: t('cluster.monitor.autoResume'),
       autoPauseLabel: t('cluster.monitor.autoPauseLabel'),

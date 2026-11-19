@@ -57,8 +57,28 @@ vi.mock('@kube-ai-hub/ui/charts', () => ({
   TimeSeriesChart: ({ label, emptyText }: { label: string; emptyText: string }) => (
     <div role="img" aria-label={label}>{emptyText}</div>
   ),
-  ChartPanel: ({ aiId, title, state, labels }: { aiId: string; title: string; state: string; labels: { loading: string } }) => (
-    <section data-ai-id={aiId} data-ai-state={state} aria-label={title}>{labels.loading}</section>
+  /*
+   * The panel a page composes around a plot. The stub keeps its handles and its
+   * state, which is what the tests assert: the panel's own plot, legend, step and
+   * empty markers. The window picker is a button so the page's range control is
+   * still reachable in the tree.
+   */
+  ChartPanel: ({ aiId, title, state, labels, showRangePicker, onRefresh }: {
+    aiId: string;
+    title: string;
+    state: string;
+    labels: { loading: string; refresh: string };
+    showRangePicker?: boolean;
+    onRefresh?: () => void;
+  }) => (
+    <section data-ai-id={aiId} data-ai-state={state} aria-label={title}>
+      <div data-ai-id={`${aiId}:chart`} data-ai-state={state} />
+      <span data-ai-id={`${aiId}:legend`} />
+      <span data-ai-id={`${aiId}:step`} />
+      {state === 'empty' ? <div data-ai-id={`${aiId}:empty`} data-ai-state="empty" /> : null}
+      {onRefresh ? <button type="button" data-ai-id={`${aiId}:refresh`}>{labels.refresh}</button> : null}
+      {showRangePicker === false ? null : <span data-ai-id={`${aiId}:range`} />}
+    </section>
   ),
   seriesColors: () => new Map<string, string>(),
   FALLBACK_CHART_COLORS: ['rgb(0 0 0)'],
@@ -147,6 +167,12 @@ function defaultMetrics(): MetricSeriesFixture[] {
   return [
     series('cluster_cpu_usage', [{ at, value: 1 }]),
     series('cluster_cpu_total', [{ at, value: 4 }]),
+    /*
+     * The overview's chart plots the *selected* row, and the default selection is
+     * GPU memory. Without this series the panel would be legitimately empty and the
+     * "ready" assertions would describe a state the fixture never produces.
+     */
+    series('cluster_gpu_memory_utilisation', [{ at, value: 0.42 }]),
   ];
 }
 

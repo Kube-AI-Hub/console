@@ -254,7 +254,6 @@ export function ClusterMonitorPage({ cluster, node, tab, onTabChange }: ClusterM
             presets={rangePresets((key) => t(`cluster.monitor.range.${key}` as 'cluster.monitor.range.1h'))}
             labels={{
               placeholder: t('cluster.monitor.range.1h'),
-              presets: t('cluster.monitor.rangeLabel'),
               custom: t('cluster.monitor.rangeCustom'),
               rangePlaceholder: t('cluster.monitor.rangePlaceholder'),
               step: t('cluster.monitor.step'),

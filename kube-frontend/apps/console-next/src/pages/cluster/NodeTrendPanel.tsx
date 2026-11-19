@@ -54,7 +54,6 @@ export function NodeTrendPanel({ cluster, node, gpu, all = false }: { cluster: s
           ]}
           labels={{
             placeholder: t('cluster.monitor.range.1h'),
-            presets: t('cluster.monitor.rangeLabel'),
             custom: t('cluster.monitor.rangeCustom'),
             rangePlaceholder: t('cluster.monitor.rangePlaceholder'),
             step: t('cluster.monitor.step'),
