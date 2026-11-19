@@ -63,7 +63,7 @@
 | [企业空间用户组实时刷新记录](plans/workspace-user-groups-watch-20261117.md) | 本批交付证据 | 用户组页 watch 真实 groups 集合；live-state 三态可见；groupbindings 无 watch 的部署成员数走手动刷新（不轮询）；B200 上验证「WATCH 不投递→刷新回退」后 skip，自动路径待 mlu370 恢复复跑，深浅截图已生成 |
 | [集群状态页迁移记录](plans/page-cluster-monitor-status-20261118.md) | 本页交付证据（2026-11-18） | 旧「集群状态」22 条能力/状态清单、JSON 契约与逐页签截图基线；§6 记录页签 IA 与图表形态的待补项 |
 | [集群状态页交付记录](plans/cluster-monitor-status-20261118.md) | 本页交付证据（2026-11-18） | 状态分区/自动刷新/未就绪接管；四类验证范围分开结论；页签 IA 与概览图表形态未承接（用户 2026-11-18 反馈） |
-| [验收探测：非 admin 与串行回归](plans/verification-20261119.md) | 本批交付证据（2026-11-19） | V-3 环境阻塞（附 11 步请求证据与解除条件）；V-4 串行回归发现 1 处真实缺陷（重复 aiId，已修）+ 2 处用例过度假设（已修） |
+| [验收探测：非 admin 与串行回归](plans/verification-20261119.md) | 本批交付证据（2026-11-19） | V-3 环境阻塞（附请求证据与解除条件）；V-4 五批串行回归：`app-workloads` **81 passed / 7 skipped / 0 failed**，共修 9 个真实缺陷，并沉淀三条守卫与两条判定法 |
 | [集群级工作负载筛选与写能力](plans/page-cluster-workloads-writes-20261119.md) | 本批交付证据（2026-11-19） | 集群级负载「按项目筛选」+ 编辑信息/编辑 YAML/删除/批量删除（按项目分组）；CLUSTER_WORKLOADS E2E 3 passed |
 | [集群级服务账号写能力](plans/page-cluster-serviceaccounts-writes-20261119.md) | 本批交付证据（2026-11-19） | 集群级服务账号四个行操作（编辑 / 编辑 YAML / 修改角色 / 删除），三张跨项目配置页写入口径统一 |
 | [保密字典写能力](plans/page-secrets-writes-20261119.md) | 本批交付证据（2026-11-19） | 项目列表「设为默认镜像仓库」（先说明取消谁）+ 集群级保密字典四个行操作；保密字典 E2E 17 passed |
