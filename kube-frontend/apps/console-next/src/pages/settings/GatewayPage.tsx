@@ -157,7 +157,9 @@ export function GatewayPage({ cluster, namespace }: GatewayPageProps): React.Rea
             <h2 className="text-sm font-medium text-ai-fg">{t('settings.gateway.clusterTitle')}</h2>
             <a
               href={`/kube-frontend/clusters/${encodeURIComponent(cluster)}/gateways/${encodeURIComponent(clusterGatewayRow.name)}`}
-              className="text-xs text-ai-link hover:underline"
+              /* 24px box (WCAG 2.5.8): a bare text link measures ~16px and fails the mobile sweep.
+                 Re-applied 2026-11-19 after a parallel commit restored the plain link. */
+              className="inline-flex min-h-6 items-center px-1 text-xs text-ai-link hover:underline"
               data-ai-id="gateway:cluster-gateway-detail"
             >
               {t('settings.gateway.viewDetail')}

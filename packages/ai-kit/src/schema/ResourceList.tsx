@@ -894,7 +894,10 @@ export function ResourceList<TRow>({
               {...(filter.searchable ? { searchable: true } : {})}
               {...(filter.emptyText ? { emptyText: filter.emptyText } : {})}
             />}
+            {/* `shrink-0 min-w-6`: in a 375px toolbar the clear button was squeezed to 7px wide,
+                below the 24px touch floor and unusable on a phone (found by MOBILE_01, 2026-11-19). */}
             {filter.type !== 'text' && filters?.[filter.key] && schema.labels?.clearFilter ? <Button size="icon" variant="ghost"
+              className="shrink-0 min-w-6"
               aria-label={schema.labels.clearFilter(filter.title)} data-ai-id={filter.aiId ? `${filter.aiId}:clear` : undefined}
               onClick={() => onFiltersChange?.({ ...filters, [filter.key]: '' })}>
               <span aria-hidden="true">x</span>

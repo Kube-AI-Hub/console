@@ -48,7 +48,12 @@ def test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_MOBILE_01(app_workloads_page, screens
 
     for label, path in PAGES:
         page.goto(f"{base}{path}")
-        expect(page.locator('[data-ai-id$=":surface"]').first).to_be_visible(timeout=30_000)
+        try:
+            expect(page.locator('[data-ai-id$=":surface"]').first).to_be_visible(timeout=30_000)
+        except AssertionError as error:
+            # Name the page: the loop covers 13 routes and "no surface" alone does not say which
+            # one stopped rendering (it cost a round to guess, 2026-11-19).
+            raise AssertionError(f"{label} ({path}): 页面没有渲染出任何 *:surface\n{error}") from error
         page.wait_for_timeout(2500)
 
         scroll_width = page.evaluate("() => document.documentElement.scrollWidth")
