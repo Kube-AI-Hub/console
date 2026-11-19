@@ -12,7 +12,7 @@
 | 旧实现对照 | `console/src/pages/projects/containers/*/index.jsx`、`console/src/components/Tables/List`、`utils/constants.js` 的状态词表 |
 | 新入口、构建 | `kube-frontend/apps/console-next/src/pages/**`、`components/resource/useListRefresh.ts`；构建 `assets/index-Dq2erOh7.js` |
 | 环境、集群、角色 | mlu370 后端（经本地 preview `http://127.0.0.1:5180`），`host` 集群，admin |
-| 视口、主题、语言 | 1280×900 与 700/760/900 窄视口；深色主题；中文 |
+| 视口、主题、语言 | 1280×900 与 700/760/900 窄视口；**深色与浅色**；**中文与英文** |
 | 子页面与状态范围 | 列表的加载/刷新/空/无匹配/错误五态；行操作菜单；列选择器；列头筛选浮层 |
 | 明确排除及批准 | 面板型表格（`NodeRankingPanel` / `NodeResourcesPanel` / `GpuPodsPanel`）不套用工具栏与固定列规则：它们嵌在卡片里，没有独立行身份 |
 | 并行文件与安全边界 | 只改前端页面、共享 hook、locales、契约与文档；E2E 建唯一命名对象并删除 |
@@ -73,7 +73,7 @@
 | 旧能力覆盖 | 通过 | 13 条原子 ID（含 1 条新增能力）；集群级负载 6 条为修复回归 | — |
 | 数据语义 | 通过 | 状态筛选按 getter 词表；写按行命名空间；E2E 回读 | 未知状态值在其它 getter 上的行为只实测了 4 类 |
 | 交互与权限 | 部分通过 | 固定列/刷新遮罩/列头筛选/清除全部条件均实测；联邦行无操作 | 真实非 admin 403 分支未在部署验证 |
-| 视觉与主题 | 部分通过 | 1280 深色 + 700/760/900 窄视口截图（`环境/screenshots/list-standard-*.png`） | 浅色主题、绿色色调、英文、1600 全页未截 |
+| 视觉与主题 | 部分通过 | 深色 + 浅色主题实测：深色固定首列 `rgb(44,58,124)`、浅色 `rgb(225,219,240)`，文字 `rgb(31,44,106)` 均可读；表头与相邻表头同色；中文 + 英文表头/提示标签均正确（`环境/screenshots/list-standard-*.png`） | 绿色色调、1600 全页、其余列表页逐页截图未做 |
 | 静态/类型/构建/测试 | 通过 | 见 §5；api-client 5 条基线失败已用 stash 复现 | — |
 | 本地全栈 | 通过 | mlu370 后端 + preview 5180 | — |
 | 新版部署/member/全站 | 未执行 | — | B200 部署、member 集群、全站串行 E2E |
