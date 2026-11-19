@@ -70,6 +70,36 @@ describe('locale keys', () => {
     }
     expect(missing).toEqual([]);
   });
+
+  it('every literal key held in a *Key field exists', () => {
+    /*
+     * Keys also travel as data: `{ label: 'node.list.gpu' }`, `titleKey: 'cluster.monitor…'`,
+     * `emptyKey`, `hintKey`. The render site then has to call `t(...)` on that field, so a typo
+     * here is invisible to the check above and shows up as a raw key in an attribute label or a
+     * column header — the exact "i18n went missing on this page" report.
+     *
+     * Only values that look like keys are checked (`a.b`), because these fields also hold plain
+     * words ("HTTP", "Immediate", "Kube AI Hub").
+     */
+    const keys = dictionaryBlocks().zh;
+    const namespaces = new Set([...keys].map((key) => key.split('.')[0]!));
+    const missing: string[] = [];
+    for (const file of appFiles) {
+      const text = read(file);
+      /*
+       * `label` and `title` carry keys too (chart series, column descriptors), and they also hold
+       * plain words ("HTTP", "Immediate"), so the check is limited to values whose namespace is
+       * one the dictionary actually uses.
+       */
+      for (const match of text.matchAll(/\b(?:[a-zA-Z]*Key|label|title)\s*:\s*'([a-zA-Z0-9_.]+)'/g)) {
+        const value = match[1]!;
+        if (!value.includes('.')) continue;
+        if (!namespaces.has(value.split('.')[0]!)) continue;
+        if (!keys.has(value)) missing.push(`${relative(root, file)} -> ${value}`);
+      }
+    }
+    expect(missing).toEqual([]);
+  });
 });
 
 describe('api-client barrel', () => {

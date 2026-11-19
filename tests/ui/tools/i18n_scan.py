@@ -112,6 +112,19 @@ def main() -> int:
                   for (const el of document.querySelectorAll('[placeholder]')) push('placeholder', el.getAttribute('placeholder'));
                   for (const el of document.querySelectorAll('[title]')) push('title', el.getAttribute('title'));
                   for (const el of document.querySelectorAll('[aria-label]')) push('aria', el.getAttribute('aria-label'));
+                  // An empty label is the other way i18n "goes missing": a key that resolves to "".
+                  for (const dt of document.querySelectorAll('dt')) {
+                    if (!(dt.textContent || '').trim()) push('EMPTY-dt', 'dt:' + (dt.getAttribute('data-ai-id') || dt.className));
+                  }
+                  for (const th of document.querySelectorAll('th')) {
+                    // The selection and actions columns carry no text on purpose: their controls
+                    // have their own accessible names, so a labelled child means "not missing".
+                    if (th.querySelector('input, button[aria-label], [role="checkbox"]')) continue;
+                    // The pinned actions column has no title by design (its cells hold 更多操作).
+                    if (/right-0|pin-end/.test(th.className) && !(th.textContent || '').trim()) continue;
+                    const label = (th.textContent || '').trim() || (th.getAttribute('aria-label') || '');
+                    if (!label) push('EMPTY-th', 'th:' + (th.getAttribute('data-ai-id') || th.className));
+                  }
                   return out;
                 }""")
             except Exception as error:  # noqa: BLE001 - one page failing must not stop the scan
@@ -188,7 +201,7 @@ def main() -> int:
                 # with a namespace the dictionary actually uses (so object names like
                 # `sh.helm.release.v1.x` and versions like `v1.28.15` do not trip it).
                 looks_key = KEY_RE.match(value) and value.split('.')[0] in key_namespaces
-                if value in keys or looks_key or value.lower() in RAW_ENUMS:
+                if value in keys or looks_key or value.lower() in RAW_ENUMS or where.startswith('EMPTY-'):
                     bad.append({'where': where, 'text': value})
             if bad:
                 problems.append({'page': path, 'scope': scope, 'items': bad})

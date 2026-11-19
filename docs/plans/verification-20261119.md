@@ -365,3 +365,20 @@ S2I 整套现状：**5 passed / 5 failed / 2 skipped**（01、03 两条列表用
 审计中修掉一处**阻塞整个单测运行**的问题：`cluster-monitor-tabs.test.tsx` 的 `vi.mock('@kube-ai-hub/ui/charts')` 缺少新增导出 `RANGE_PRESET_MS`，导致该文件**整份加载失败**（55 个文件里 1 个失败、但 320 条用例全过——这种「文件失败、用例全过」的组合最容易看漏）。
 
 **未验收项（全部为外部条件，附解除条件）**：生产部署（V-1）、非 admin/member（V-2/V-3）、服务拓扑图。节点/概览/GPU 区域的用例由并行会话与页面同批改造，不在本侧范围。
+
+## AA. i18n 全站排查（2026-11-20）
+
+用户报告「页面属性或表格列名丢失 i18n」。按四个层次查完：
+
+| 层次 | 方法 | 结果 |
+| --- | --- | --- |
+| 字典完整性 | 逐 key 比对 zh / en | **3850 / 3850，双向 0 缺失**；无「值等于键」、无空值 |
+| 源码字面量 | `t('…')` 与 `*Key / label / title: '…'` 全部核对字典 | **0 缺失**（新增契约见下） |
+| 运行时 zh | 97 个注册页面 + 每页首个详情页 + 首个弹窗：`dt`/表头/标题/标签/占位符/`title`/`aria-label` | **0 处原始键**、0 处空标签 |
+| 运行时 en | 同样 97 页 | **0 处原始键** |
+
+工具：`tests/ui/tools/i18n_scan.py`（可重跑，`--locale en` 切语言、`--limit N` 抽样），产物 `artifacts/i18n-scan/report-*.json`。
+
+**新增守卫**：`config/consistency-contracts.test.ts` 的「every literal key held in a *Key field exists」扩展到 `label` / `title`——键值常以数据形式出现（`{ label: 'node.list.gpu' }`、`titleKey: 'cluster.monitor…'`），渲染处再 `t(...)`；这类拼写错误在原有契约下不可见，正是「属性/列名显示成键」的来源。注入一个 `node.trend.diskTYPO` 验证过该规则会红。
+
+**结论**：当前构建上未复现用户描述的缺失。若仍能看到，请给出具体页面与截图——本扫描的已知盲区是：列表为空的详情页、错误/无权限状态、以及需要特定对象才出现的列。
