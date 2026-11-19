@@ -108,6 +108,20 @@ required by the Apache License 2.0, section 4(b):
   row, but seven same-ink paths repainted them on top, so the glyph shipped as a
   solid slab. The repaints are gone and the card is redrawn as one `evenodd` shape
   with a bracket rail, four port bays and two LEDs cut out of it.
+- **`allowlist` un-slabbebed, `code` given its frame.** `allowlist` had the same
+  repaint problem as `mnic`: its compound path carved the avatar, both text rows
+  and both checkmarks, then four same-ink paths filled them back in. The repaints
+  are dropped. `code`'s compound drew its frame as a filled rectangle rather than
+  a ring, so it could never read as a border; it is redrawn as a ring with the
+  chevron and the underline cut out of it.
+- **Upstream tag damage repaired.** `springcloud` left two `<g>` open and
+  `springcloudgateway` two, which is why neither parsed; `download-box-2-duotone`
+  and eight following symbols were never closed at all, so the parser swallowed
+  every later icon into them. The dangling `<g>`/`<symbol>` openers are removed,
+  the missing closers added, and `springcloudgateway`'s clip rect takes
+  `currentColor` instead of a hard-coded `white`. All 369 symbols now parse as
+  well-formed XML. `gateway` keeps its four `fill="#fff"` mask fills: white is the
+  "show" value inside an SVG mask, so that is geometry, not styling.
 - **Low-alpha plates get an outline.** Upstream "duotone" symbols imply their
   second plane with `fill-opacity=".22"`, which `currentColor` cannot express:
   on the light theme the plate washes out until it reads as a hole. Every such
