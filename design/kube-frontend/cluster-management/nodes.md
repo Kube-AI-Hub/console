@@ -483,3 +483,26 @@ sagesuite-demo -> control-plane, storage, worker
 **何时重新考虑**：若角色种类增长到一行放不下（例如超过 4 个），列表页改为「首个角色 + `+N`」并在 tooltip 里列全。
 
 **验证**：`node-roles.test.ts` 覆盖已知角色翻译、未知角色保留原文、多角色拆分、空条目丢弃、`master`/`control-plane` 都识别为控制面。mlu370 实测：列表页 `a100-04`/`a100-64` 显示「存储」，`sagesuite-demo` 显示「控制平面」+「存储」两行（y 相差 24px，列宽 84px）；详情页显示同样两个徽章；角色筛选为「全部 / 控制平面节点 / 存储 / 工作节点」，选「存储」返回全部 3 个节点。
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-NODES-20 — 恢复「资源总量」区块，资源名按读者词汇（2026-11-20）
+
+**为什么**：重建的节点详情页从百分比开始——「CPU 6%」——没有先回答「这台机器多大」。老 console 的阅读顺序是「资源总量 → 资源用量 → 已分配资源」：先看规模，再看占用。异构节点上这个顺序尤其重要：128 核 / 2 TiB / 7 张卡比「CPU 6%」更能说明这是台什么机器。
+
+第二处：分配表的资源列直接打印 API 键（`ephemeral-storage`、`nvidia.com/gpu`），还是等宽字体。那是接口的词汇，不是运维的词汇；老 console 同一批行叫「临时存储」「GPU 总量」。
+
+**做法**：
+1. 新增 `NodeTotalsPanel`，放在 `NodeResourceOverview` 的最前面，`data-ai-id="node-detail:totals"`。
+2. 只列 `NODE_TOTAL_RESOURCES = ['cpu','memory','pods','ephemeral-storage']`，再加 `nvidia.com/gpu`（有则显示）。**不用 `Object.keys(capacity)`**——那会把 `hugepages-1Gi`/`hugepages-2Mi` 带进来，它们几乎恒为 0，是调优旋钮而非可规划容量，放在「总量」标题下等于暗示它值得关注。
+3. `resourceLabelKey()` 是唯一的名称映射，两个区块共用：`ephemeral-storage` → 临时存储、`nvidia.com/gpu` → GPU 总量、`nvidia.com/vgpu` → vGPU。**没有目录项的扩展资源保留原名**（`example.com/foo` 原样显示）——猜一个名字比显示接口标识更糟。
+4. 分配表同样过滤 `hugepages-*`，与总量区块口径一致。
+
+**为什么把名称映射放在 `nodeDetailModel` 而不是各自写**：两个区块描述同一批资源，名字不一致会让读者以为是两种东西。一个函数返回 `LocaleKey | undefined`，`undefined` 明确表示「无目录项，用原名」。
+
+**被否方案**：
+- 总量区块用 `capacity` 全量键。见上：hugepages 会污染标题的含义。
+- 资源名直接用 `t('node.resource.' + key)`。键名跟着 API 取值走，`nvidia.com/gpu` 带点和斜杠，做不成合法键名；且未知扩展资源会缺键报错。
+- 把总量做成一行纯文本（老 console 的 `128 Core`）。网格更易扫读，也让五个数字在各断点下保持等宽对齐。
+
+**何时重新考虑**：若出现第二种加速卡资源（如 `amd.com/gpu`），把 GPU 行的筛选从硬编码 `nvidia.com/gpu` 改为「非核心组的计数型资源」。
+
+**验证**：`node-totals-panel.test.tsx` 覆盖总量区块在用量之前、五个名称本地化、hugepages 不出现在两处、未知扩展资源保留原名。mlu370 `agent` 实测：总量区块显示「CPU 总量 128 / 内存总量 2.0 TiB / 容器组总量 300 / 临时存储 1.7 TiB / GPU 总量 7」，五个格在 840px 面板内等宽一行（y 全为 246）；分配表行序为 cpu / memory / pods / ephemeral-storage / nvidia.com/gpu / nvidia.com/vgpu，无 hugepages。console-next 330 passed。

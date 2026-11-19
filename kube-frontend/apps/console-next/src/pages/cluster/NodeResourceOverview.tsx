@@ -7,6 +7,7 @@ import { useT } from '@/i18n';
 import { formatBytes } from '@/lib/quantity';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { NodeTrendPanel } from './NodeTrendPanel';
+import { NodeTotalsPanel } from './NodeTotalsPanel';
 import { NodeAllocationPanel } from './NodeAllocationPanel';
 import { NodeHealthPanel } from './NodeHealthPanel';
 
@@ -46,6 +47,12 @@ export function NodeResourceOverview({ node, cluster }: { node: NodeDetail; clus
     };
   });
   return <div className="flex flex-col gap-4">
+    {/*
+      * Totals before usage, the way the old console reads: how big is this machine,
+      * then how full is it. Reversing them made a heterogeneous node look like a
+      * percentage chart with no context.
+      */}
+    <NodeTotalsPanel node={node} />
     <StatisticsGroup items={summary} unknownLabel={t('node.list.unknown')} className="grid grid-cols-2 gap-x-4 xl:grid-cols-3"
       data-ai-id="node-detail:usage" aria-busy={query.isFetching} />
     {query.isError ? <ResourceErrorPanel error={query.error} onRetry={() => void query.refetch()} retryAiId="node-detail:usage-retry" /> : null}

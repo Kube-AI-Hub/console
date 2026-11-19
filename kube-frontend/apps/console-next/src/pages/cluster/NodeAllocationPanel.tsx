@@ -3,18 +3,32 @@ import type { NodeDetail } from '@kube-ai-hub/api-client';
 import { Table } from '@kube-ai-hub/ui';
 import { useT } from '@/i18n';
 import { formatQuantity } from '@/lib/quantity';
-import { allocationText, allocationValue } from './nodeDetailModel';
+import { allocationText, allocationValue, resourceLabelKey } from './nodeDetailModel';
 
 export function NodeAllocationPanel({ node }: { node: NodeDetail }): React.ReactElement {
   const t = useT();
   const primary = ['cpu', 'memory', 'pods', 'ephemeral-storage'];
   const keys = Array.from(new Set([...primary, ...Object.keys(node.capacity), ...Object.keys(node.allocatable),
-    ...Object.keys(node.allocated), ...Object.keys(node.allocatedLimits)]));
+    ...Object.keys(node.allocated), ...Object.keys(node.allocatedLimits)]))
+    /*
+     * `hugepages-*` are tuning knobs, not capacity to plan against, and they are
+     * zero on every node here. The old console leaves them out of this table too;
+     * keeping them added two permanently-empty rows between the rows a reader
+     * actually compares.
+     */
+    .filter((key) => !key.startsWith('hugepages-'));
   const rows = keys.map((key) => ({ key }));
   return <section className="rounded-ai-lg border border-ai-line bg-ai-surface-1 p-4" data-ai-id="node-detail:capacity">
     <h2 className="mb-3 text-sm font-semibold">{t('node.allocation.title')}</h2>
     <Table rows={rows} rowKey={(row) => row.key} rowAttributes={(row) => ({ 'data-ai-resource': row.key })} columns={[
-      { key: 'key', title: t('node.allocation.resource'), width: 200, render: (row) => <span className="break-all font-mono text-[11px]">{row.key}</span> },
+      { key: 'key', title: t('node.allocation.resource'), width: 200, render: (row) => {
+        const labelKey = resourceLabelKey(row.key);
+        return labelKey
+          ? <span className="text-xs text-ai-fg">{t(labelKey)}</span>
+          // An extended resource with no catalogue entry keeps its own name; the
+          // monospace says "this is the API's identifier", not "this is prose".
+          : <span className="break-all font-mono text-[11px]">{row.key}</span>;
+      } },
       { key: 'capacity', title: t('node.allocation.capacity'), render: (row) => <span className="whitespace-nowrap text-xs">{formatQuantity(row.key, node.capacity[row.key] ?? '')}</span> },
       { key: 'allocatable', title: t('node.allocation.allocatable'), render: (row) => <span className="whitespace-nowrap text-xs">{formatQuantity(row.key, node.allocatable[row.key] ?? '')}</span> },
       { key: 'requests', title: 'Requests', render: (row) => <span className="whitespace-nowrap text-xs"

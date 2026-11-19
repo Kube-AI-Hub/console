@@ -1,5 +1,6 @@
 import { quantityToNumber, type NodeCondition, type NodeDetail } from '@kube-ai-hub/api-client';
 import { formatQuantity } from '@/lib/quantity';
+import type { LocaleKey } from '@/i18n';
 
 export function conditionTone(condition: NodeCondition): 'success' | 'danger' | 'neutral' {
   if (!['True', 'False'].includes(condition.status)) return 'neutral';
@@ -24,6 +25,37 @@ export function allocationText(key: string, value: string | undefined, allocatab
   const total = quantityToNumber(allocatable ?? '');
   return Number.isFinite(used) && Number.isFinite(total) && total > 0 ?
     `${formatted} (${Math.round(used / total * 100)}%)` : formatted;
+}
+
+/**
+ * Resource keys that belong in the "资源总量" block, in reading order.
+ *
+ * Deliberately not `Object.keys(capacity)`: that also carries `hugepages-1Gi` and
+ * `hugepages-2Mi`, which are near-always zero and are tuning knobs rather than
+ * headline capacity. The old console's total block showed exactly these six.
+ */
+export const NODE_TOTAL_RESOURCES = ['cpu', 'memory', 'pods', 'ephemeral-storage'] as const;
+
+/**
+ * A resource key as a reader recognises it.
+ *
+ * The table used to print the raw key (`ephemeral-storage`, `nvidia.com/gpu`) in a
+ * monospace cell, which is the API's vocabulary, not the operator's. The old console
+ * named the same rows 临时存储 / GPU 总量, and the total block uses the same words so
+ * the two sections read as one story: totals first, then the breakdown.
+ *
+ * `undefined` means "no catalogue entry" — the caller falls back to the raw key,
+ * which is what an unknown extended resource (`example.com/foo`) should show.
+ */
+export function resourceLabelKey(key: string): LocaleKey | undefined {
+  if (key === 'cpu') return 'node.resource.cpu';
+  if (key === 'memory') return 'node.resource.memory';
+  if (key === 'pods') return 'node.resource.pods';
+  if (key === 'ephemeral-storage') return 'node.resource.ephemeralStorage';
+  if (key === 'nvidia.com/gpu') return 'node.resource.gpu';
+  if (key === 'nvidia.com/vgpu') return 'node.resource.vgpu';
+  if (key.startsWith('hugepages-')) return 'node.resource.hugepages';
+  return undefined;
 }
 
 export interface TopologyRow {

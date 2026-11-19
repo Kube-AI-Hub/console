@@ -33,7 +33,13 @@ describe('node page controls', () => {
     const view = mount(<NodeDetailPage cluster="host" />);
     await screen.findByText('amd64');
     expect(screen.queryByRole('dialog')).toBeNull();
-    const resource = view.container.querySelector('[data-ai-resource="nvidia.com/gpu"]')!;
+    /*
+     * Scope to the allocation table: `data-ai-resource` now also appears in the
+     * "资源总量" block above it, where the same key is a `<dd>` rather than a table
+     * row. Without the scope this read the totals cell and found no `<td>`.
+     */
+    const table = view.container.querySelector('[data-ai-id="node-detail:capacity"]')!;
+    const resource = table.querySelector('[data-ai-resource="nvidia.com/gpu"]')!;
     expect(resource.querySelectorAll('td')[1]).toHaveTextContent('8');
     expect(resource.querySelectorAll('td')[2]).toHaveTextContent('8');
     await userEvent.click(screen.getByRole('button', { name: '打开终端' }));
