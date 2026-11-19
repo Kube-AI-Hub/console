@@ -1,0 +1,35 @@
+console
+Copyright 2026 Kube AI Hub.
+
+This product includes software developed at KubeSphere.
+
+---
+
+The console frontend is Apache License 2.0. Some files derive from MIT-licensed
+upstream projects; each entry below names the file, the upstream, and every change
+made here. Apache License 2.0 §4(b) requires the modifications to be stated.
+
+## `packages/ai-kit`
+
+The published package carries its own `NOTICE`, which ships with it and is the
+authoritative record for that package. It covers:
+
+- **Icon sprite** (`src/primitives/Icon/sprite.ts`) — derived from
+  `@kube-design/components` 1.32.0 (MIT, Copyright (c) 2020 KubeSphere).
+  359 of 360 symbols are byte-identical; the `information` glyph has two redundant
+  paths removed. Full upstream license text and the change list are in
+  `packages/ai-kit/NOTICE`.
+
+## `packages/kube-design`
+
+A vendored copy of `@kube-design/components` 1.32.0, kept only as the reference the
+migration was checked against. MIT, Copyright (c) 2020 KubeSphere; the license text
+is in `packages/kube-design/LICENSE`. It is not part of the shipped console bundle.
+
+## Not covered here
+
+- `console/src` is the previous console, AGPL-3.0. New code does not copy from it;
+  where behaviour was mirrored the implementation was written independently.
+  Files that still carry an upstream AGPL header keep it.
+- Runtime dependencies are declared in each `package.json`; their licenses are not
+  restated here.

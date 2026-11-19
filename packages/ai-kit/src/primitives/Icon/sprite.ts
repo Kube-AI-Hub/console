@@ -1,3 +1,14 @@
+/**
+ * The icon sprite.
+ *
+ * Derived from `@kube-design/components` 1.32.0 (MIT, Copyright (c) 2020
+ * KubeSphere): 359 of the 360 symbols are byte-identical, and `information` has
+ * two redundant paths removed. See `NOTICE` in this package for the upstream
+ * license text and the full list of modifications, as Apache 2.0 §4 requires.
+ *
+ * Keep that file in sync when the sprite is regenerated: it is the only place the
+ * upstream provenance is recorded, and it ships with the package.
+ */
 export const SVG_SPRITE = `
 <svg
   id="__SVG_SPRITE_NODE__"

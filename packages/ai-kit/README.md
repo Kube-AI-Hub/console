@@ -2,7 +2,8 @@
 
 Console 的界面库：基础组件 + 列表 / 详情 / 表单三类 schema。
 
-采用 [Apache License 2.0](./LICENSE) 开源发布。
+采用 [Apache License 2.0](./LICENSE) 开源发布。第三方来源与修改记录见 [NOTICE](./NOTICE)：
+图标 sprite 派生自 `@kube-design/components`（MIT，Copyright (c) 2020 KubeSphere）。
 
 ## 为什么另起一个库
 
