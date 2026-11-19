@@ -16,6 +16,7 @@
 | [能力矩阵](plans/capability-matrix.md) | 当前复核任务与能力级状态索引 | 判断还缺什么 |
 | [多集群验证手册](plans/multicluster-playbook-20261117.md) | 成员集群的起栈、七段式基线（另含键盘/文案走查与整轮预算）、能力边界与已知怪癖 | 部署含 member 集群时 |
 | [架构宪法](constitution.md) | 架构约束与 UI 原则 | 做实现与设计决策 |
+| [ai-kit 组件手册](../packages/ai-kit/README.md) | 组件契约与「加载态与刷新态」的接线表 | 写/迁移页面，需要加载、刷新、图表、列表组件时 |
 | [续迁移 Prompt](plans/continue-migration-prompt.md) | 引用现行规则的任务输入，不是另一套状态正文 | 交接给其他 AI agent 做整批迁移 |
 | [单页迁移 Prompt](plans/single-page-migration-prompt.md) | 针对某一页的定位、阅读顺序与验收要求；不重复全流程规则 | 迁移或优化一个指定页面 |
 

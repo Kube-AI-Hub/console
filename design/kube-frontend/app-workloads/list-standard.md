@@ -12,6 +12,8 @@
 - `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-02`
 - `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-03`
 - `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-04`
+- `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-05`
+- `AC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-06`
 
 ## 设计目标与非目标
 
@@ -71,6 +73,16 @@
 
 **被否方案**：只靠 code review。这四项在最近一次重构里已经丢过一次（集群级负载页的项目筛选与行操作整块消失，E2E 才抓到）。
 
+### DEC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-06 — 加载与刷新各一份实现，下沉到 ai-kit
+
+**为什么**：此前遮罩有三份拷贝，已经漂移（表格 40% 底色、图表 45% 且带圆角、`z-10` vs `z-30`），同一个刷新动作在不同页看起来像两个功能；图表的首屏是一整块灰底，而列表是骨架行。更隐蔽的一处是 `ChartPanel` 把骨架与图表一起渲染，骨架在文档流里，220px 的面板首屏量出 468px，下面还露着空坐标轴——单测与门禁全绿，只有截图能看出。
+
+因此 `RefreshVeil` 与 `ChartSkeleton` 收进 ai-kit，`Table`、`ChartPanel`、`TimeSeriesChart` 都引用它们。遮罩放在 `ChartPanel` 而不是图表内部：图表没有点时渲染的是空态子树，挂在里面的遮罩会跟着消失，而刷新恰恰是可能出现空点的时刻。
+
+**被否方案**：每个页面各自控制「显示灰块还是骨架」。表达式一多，`loading={isFetching}` 这种把刷新并进首屏的写法就会出现，而它的症状（慢响应像按钮坏了）不会让任何测试失败。
+
+**何时重新考虑**：若某个页面需要「静默刷新」（连遮罩会打扰阅读），加 `manualRefresh={false}` 并说明理由，不要让页面绕过共享层自己拼。
+
 ## 系统现状
 
 `ResourceList` 与 `Table` 已具备 `pin` / `hint` / `refreshing` / `ListFilter.column` 能力；缺的是各页接线一致，以及一条能发现漏接的守卫。
@@ -79,6 +91,8 @@
 
 - 共享 hook：`kube-frontend/apps/console-next/src/components/resource/useListRefresh.ts`
 - 共享列表：`kube-frontend/packages/ai-kit/src/schema/ResourceList.tsx`、`.../primitives/Table.tsx`
+- 加载/刷新画面：`kube-frontend/packages/ai-kit/src/primitives/RefreshVeil.tsx`（`RefreshVeil` / `ChartSkeleton`）、`.../charts/ChartPanel.tsx`、`.../charts/TimeSeriesChart.tsx`
+- 手动刷新信号：`apps/console-next/src/pages/cluster/useOverviewRefresh.ts`（`manual`）、`ClusterMonitorPage.tsx`（`manualTick`）、`ClusterResourceTab.tsx`（`useManualRefresh`）
 - 工作负载族：`kube-frontend/apps/console-next/src/pages/app-workloads/{WorkloadListPage.tsx,queries.ts}`
 - 集群级负载：`kube-frontend/apps/console-next/src/pages/cluster/ClusterWorkloadsPage.tsx`
 - 契约：`kube-frontend/config/list-standard-contract.test.ts`
@@ -92,6 +106,7 @@
 - **INV-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-01** — 固定列必须有显式宽度；无宽度的 pin 被忽略并告警，不会半生效。
 - **INV-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-02** — 固定首列不进入「显示列」菜单；pin 与 hideable 互斥由类型保证。
 - **INV-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-03** — 首次加载用骨架行，重取用遮罩；两者不会同时出现。
+- **INV-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-04** — 加载与刷新的画面在仓内只有一份实现：遮罩是 `RefreshVeil`，图表骨架是 `ChartSkeleton`；页面的 `data-ai-state` 若区分了 `loading`，就必须同时能表达 `refreshing`，不能把它并回 `ready`。
 
 ## 已知坑
 
@@ -99,11 +114,15 @@
 - **GOT-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-02** — `loading={query.isFetching}` 会让每次翻页都闪骨架屏，且遮罩永不出现（`loading` 优先级更高）。必须拆成 `loading={isPending}` 与 `refreshing={isFetching && !isPending}`。
 - **GOT-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-03** — 给同一列同时写 `pin` 与 `hideable` 是类型错误；批量改脚本时容易留下重复 `width`，`tsc` 会以 TS1117 报出。
 - **GOT-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-04** — 集群级负载页的行操作必须用**行自己的命名空间**寻址；用页面的空命名空间会拼出没有 `namespaces/<ns>` 段的路径并 404。
+- **GOT-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-05** — 骨架与内容同时渲染会把面板撑高：`ChartSkeleton` 在文档流里，叠在图表上方时是「高度相加」而不是「代替」。判据是 `getBoundingClientRect().height`——骨架态与就绪态的容器高度必须相等。
+- **GOT-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-06** — 样例数据按 `Date.now()` 生成，而 `ChartPanel` 若自己 `resolveRange` 一次，两者会差几秒，导致首屏「没有数据」。宿主查询用的区间（`start` / `end` / `step`）要原样传给面板。
 
 ## 测试与可观测
 
 - 契约：`kube-frontend/config/list-standard-contract.test.ts`（四项接线 + 面板豁免）
+- 契约：`kube-frontend/config/loading-refresh-contract.test.ts`（遮罩唯一实现、文案不写死、不自拼骨架、`loading` 不取 `isFetching`、状态不吞 `refreshing`、轮询页不遮）
 - 单测：`apps/console-next/test/status-labels.test.tsx`（共享状态文案表）
+- 单测：`packages/ai-kit/test/refresh-veil.test.tsx`、`test/chart-panel-axis.test.tsx`（遮罩外观、骨架占位、首屏不渲染图表、轴取宿主区间）
 - E2E：`TC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-01/02`、`CLUSTER_WORKLOADS-01..03`
 
 ## 后续改进

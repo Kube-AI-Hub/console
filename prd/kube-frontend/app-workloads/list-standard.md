@@ -20,6 +20,8 @@
 - **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-02** — 已知列表已有数据，当点击刷新或改变筛选触发重取，则表格保留现有行并显示居中的「更新中…」遮罩与 `aria-busy="true"`，请求结束后遮罩消失；首次加载仍用骨架行，两者不混用。
 - **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-03** — 已知列表支持字段筛选，当用某一列的筛选器选定值，则列表按该值重新请求并回到第 1 页，列头筛选图标显示为激活态；工具栏出现「清除全部条件」，点击后清空搜索与全部字段筛选并恢复全集，该按钮随之消失；筛选后无结果时显示「没有匹配的结果」而不是「暂无数据」。
 - **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-04** — 已知列表有可选字段（就绪数、镜像、端口、NTP 偏移、GPU/显存用量等），则列头提供可键盘聚焦的说明按钮，悬浮/聚焦显示该字段的单位与口径；点击该按钮不触发排序。
+- **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-05** — 已知数据尚未到达（首次加载、翻页、改排序），则列表显示骨架行而不是空白或遮罩；已知已有行、正在重取（点刷新、改筛选），则行保留不动并显示居中「更新中…」遮罩与 `aria-busy="true"`，请求结束后遮罩消失；两种画面不会同时出现，遮罩外观与图表页同款。
+- **AC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-06** — 已知图表区域尚未有数据，则显示与图表同高的骨架（轴刻度条 + 脉冲带 + 基线），**不**显示空坐标轴、也不把骨架叠在图表上方；已知图表已有曲线、读者点刷新，则曲线保留并加半透明遮罩；页面定时自动刷新时**不出现**遮罩。自动轮询的页面若不遮罩，读者只能看到曲线平滑过渡。
 
 ## 设计目标
 
@@ -34,6 +36,7 @@
 - 固定尾列由 `ResourceList` 在声明 `rowActions` 时自动追加，页面不需要也不应该自己加。
 - 「清除全部条件」只在有筛选条件时出现，位置固定在刷新按钮之后、批量动作之前，避免它出现时推动搜索框。
 - 刷新遮罩只在「有行 + 正在重取」时出现；首次加载用骨架行。
+- 加载/刷新的画面只有共享层一份实现：页面里不出现 `backdrop-blur-[1px]`、`animate-pulse rounded-ai-md bg-ai-surface-2` 或写死的「更新中…」。
 - 列头说明按钮是真实控件（`<button>` + tooltip），不是 `title` 属性。
 
 ## UI 交互设计
@@ -64,11 +67,13 @@
 - **FR-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-03** — 字段筛选使用 `ListFilter.column` 挂在对应列头；工具栏只保留跨字段控件（项目范围、搜索）。
 - **FR-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-04** — 「清除全部条件」文案由 `useListRefresh(...).filterLabels` 注入，所有带筛选的列表都具备该入口。
 - **FR-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-05** — 可排序表头三态循环（升序 → 降序 → 回到页面默认排序），服务端列表必须传排序键。
+- **FR-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-06** — 列表与图表的加载/刷新画面只来自共享层：`ResourceList` 的 `loading` / `refreshing`、`ChartPanel` 的 `state` + `manualRefresh`、`RefreshVeil` 与 `ChartSkeleton`；页面不自行实现遮罩或整块骨架。用法正文见 [`packages/ai-kit/README.md`](../../../packages/ai-kit/README.md#加载态与刷新态)。
 
 ## 成功标准
 
 - **SC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-01** — 契约套件对「缺固定列 / 缺宽度 / 缺刷新反馈 / 缺清除全部条件」四类漏接各有一条失败断言，且当前全站列表均通过。
 - **SC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-02** — 未做任何筛选时，各页表头与列顺序与接线前一致。
+- **SC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-03** — 任取一列表与一图表页，慢网下首屏骨架与图表/表格的容器高度相等（差值 0），且刷新遮罩的外观与句柄一致。
 
 ## 明确不做
 

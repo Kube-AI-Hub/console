@@ -54,9 +54,13 @@ describe('GPU pages', () => {
       { metric_name: 'gpu_card_memory_usage', data: { result: [{ metric: { node: 'gpu02', uuid: 'GPU-x' }, values: [[at, '1073741824']] }] } },
     ] })));
     mount(<GpuMonitorPanel cluster="host" node="gpu02" uuid="GPU-x" />);
-    expect(await screen.findByText('1.00 GiB')).toBeInTheDocument();
-    expect(screen.getByText('0.00 %')).toBeInTheDocument();
-    expect(document.querySelector('[data-ai-id="gpu-detail:metric:power:latest"]')).toHaveTextContent('-');
+    // The panel is the standard chart panel: five titles, one per metric, each with the
+    // unit it is drawn in. The plotting itself is covered by ai-kit's chart tests and the
+    // browser pass — this stub renders no axis, so asserting a tick would assert the stub.
+    expect(await screen.findByText('GPU 显存使用量 (GiB)')).toBeInTheDocument();
+    expect(screen.getByText('GPU 利用率 (%)')).toBeInTheDocument();
+    // A reported zero is a measurement, not a missing value.
+    expect(screen.queryByText('-')).not.toBeInTheDocument();
   });
   it('loads associated resources only after their tab is selected', async () => {
     const calls: URL[] = [];

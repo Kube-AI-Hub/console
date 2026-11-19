@@ -177,6 +177,10 @@ URL 段只到页面；页签写在容器路由（如旧 console 的 `routes.js`�
 - **列表用 schema**：列是数据（`columns: [...]`），不是 JSX。抽象等到第二个使用者出现。
 - **稳定句柄**：`data-ai-id`（动作）、`data-ai-row`（行）、`data-ai-state`（区域四态：`loading/ready/empty/error`）。
   不用 `data-testid`——它同时服务自动化与智能体。
+- **加载态与刷新态只接共享组件**：首次加载用骨架（`ChartPanel` 自动画 `ChartSkeleton`，列表用骨架行），
+  重取用 `RefreshVeil` 遮罩；`loading` 用 `isPending`，`refreshing` 用 `isFetching && !isPending`。
+  自动刷新不遮。接线表见 [ai-kit README](../packages/ai-kit/README.md#加载态与刷新态)，规则见 [SDD §2](SDD.md#加载态与刷新态只有一个实现)。
+  迁移时最容易漏的正是这一条：旧页通常只有一个 `v-loading`，换到新页要么照抄成整块灰底，要么干脆没有。
 - **`actionProps` 展开必须在 handler 之前**（写在 `onClick` 之后会覆盖业务 handler）。
 - **错误页给可恢复的重试**；403 显示权限原因，不在同一身份和权限条件下自动重试。
 - **表单错误要滚入视野**：提交失败时滚到第一个出错字段并聚焦（`focusFirstInvalidField`）；不知道谁失败时由 `Modal` 观察 `[role="alert"]` / `[data-invalid]` 自动揭示。只滚容器而不是错误段落，用 `block:'center'`，聚焦真正的控件（CodeMirror 是 `.cm-content`）。
@@ -482,6 +486,9 @@ pytest tests/kube-frontend/<模块> -q -n 0   # 本批相关及共享影响用�
 | 55 | **预览只监听 IPv6 回环** | 浏览器能开页、脚本直连成批 `Connection refused`，看起来像页面坏了 | `vite preview` 默认只绑 `[::1]`；判定跑用私有端口 `--host 127.0.0.1 --port 5180` + `KA_APP_URL`，跑前 `curl` 确认 200（见 [SDD §2](SDD.md)） |
 | 56 | **图标按钮按视觉尺寸给盒子** | 移动端验收报「触控目标 < 24px」：文本链接、列筛选 chip `size-5`(20px)、表头提示按钮 `size-4`(16px) | 24px 是**盒子**尺寸不是图标尺寸：chip/提示按钮改 `size-6`，文本链接用 `inline-flex min-h-6`；共享组件修一次全站达标 |
 | 57 | **改完不提交，指望工作区留着** | 同一批改动被并行提交覆盖四次，每次都要重建；症状是契约套件突然变红、E2E 断言的东西在页面上不见 | **一批跑绿即提交**（门禁 + 本批 E2E + 契约），提交信息写清「改了什么、为什么、哪些是恢复被覆盖的改动」；判据是契约先红 |
+| 58 | **首屏加载与刷新画成同一个画面** | 首屏是整块灰底、点刷新毫无变化（慢响应像按钮坏了），或反过来每次重取都闪骨架、行被清空又回来 | 首屏 `loading`（`isPending`）出骨架，重取 `refreshing`（`isFetching && !isPending`）出遮罩；两者都只能用共享 `ChartSkeleton` / `RefreshVeil`，见 [ai-kit README](../packages/ai-kit/README.md#加载态与刷新态)；守卫 `config/loading-refresh-contract.test.ts` |
+| 59 | **骨架叠在内容上方，而不是代替它** | 面板首屏被撑高一倍（220px 量出 468px），骨架下面还露着空坐标轴；切换数据到达时页面跳动 | 骨架只在 `state === 'loading'` 时渲染，此时不渲染图表；用 `getBoundingClientRect()` 量骨架与图表容器高度，必须相等 |
+| 60 | **把 `query.isFetching` 接到 `manualRefresh` 上** | 轮询页每 15–30 秒闪一次遮罩，读者以为页面在抽搐 | 手动信号要单独维护（`refresh.manual` / `manualTick` / 局部 `ownRefresh`）；自动刷新只让曲线过渡，不遮 |
 
 浏览器侧的收尾方式与判读**只有一处正文**：见[执行路线](plans/migration-execution-roadmap.md)的「一页的执行顺序」与
 [多集群验证手册](plans/multicluster-playbook-20261117.md)。本节不再重复命令与段数——它们会随工具演进变化。

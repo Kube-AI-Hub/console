@@ -81,7 +81,8 @@ export function GpuModeDialog({ cluster, name, onClose, onUpdated }: {
     closeDisabled={save.isPending}
     closeAiId="node-mode:close" closeLabel={t('common.close')}
     onOpenChange={(open) => { if (!open && !save.isPending) onClose(); }}>
-    <div data-ai-id="node-mode:surface" data-ai-state={loading ? 'loading' : node.isError ? 'error' : 'ready'}>
+    <div data-ai-id="node-mode:surface"
+      data-ai-state={loading ? 'loading' : node.isError ? 'error' : node.isFetching ? 'refreshing' : 'ready'}>
       <p className="mb-3 text-sm text-ai-warning">{t('node.mode.warning')}</p>
       {selected?.descriptionKey ? <p className="mb-3 text-sm">{t(selected.descriptionKey)}</p> : null}
       {loading ? <Skeleton className="h-40" /> : node.isError ?

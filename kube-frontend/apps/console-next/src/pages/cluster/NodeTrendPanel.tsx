@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { rangeMetricsApi } from '@kube-ai-hub/api-client';
-import { Button, Select, Skeleton } from '@kube-ai-hub/ui';
-import { TimeRangePicker, TimeSeriesChart, presetRange, resolveRange, gapForStep, type TimeRange } from '@kube-ai-hub/ui/charts';
+import { Select } from '@kube-ai-hub/ui';
+import { ChartPanel, presetRange, resolveRange, type ChartPanelLabels, type TimeRange } from '@kube-ai-hub/ui/charts';
 import { api } from '@/api';
 import { useT } from '@/i18n';
-import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
+import { chartPanelLabels } from './OverviewResourcePanel';
 
 const CHARTS = [
   { key: 'gpu', metric: 'node_gpu_utilisation', label: 'node.list.gpu', ratio: true },
@@ -17,6 +17,15 @@ const CHARTS = [
   { key: 'disk', metric: 'node_disk_size_utilisation', label: 'node.trend.disk', ratio: true },
 ] as const;
 
+/**
+ * One node's trend, in the shared chart panel.
+ *
+ * The panel — not a hand-built section — is what makes the first load a skeleton
+ * shaped like a plot, a refresh a veil over the previous curve, and the window picker
+ * the same control every other monitoring surface uses. A bare `<TimeSeriesChart>`
+ * here used to show a single grey block while loading and no feedback at all while
+ * refreshing.
+ */
 export function NodeTrendPanel({ cluster, node, gpu, all = false }: { cluster: string; node: string; gpu: boolean; all?: boolean }): React.ReactElement {
   const t = useT();
   const charts = gpu ? CHARTS : CHARTS.slice(3);
@@ -36,59 +45,66 @@ export function NodeTrendPanel({ cluster, node, gpu, all = false }: { cluster: s
       start: resolved.start, end: resolved.end, step: resolved.step, signal,
     }), retry: false, staleTime: 60_000,
   });
-  return <section className="rounded-ai-lg border border-ai-line bg-ai-surface-1 p-4"
-    data-ai-id={all ? 'node-detail:monitor' : 'node-detail:trend'} data-ai-state={query.isPending ? 'loading' : query.isError ? 'error' : 'ready'}>
-    <header className="mb-3 flex flex-wrap items-center justify-between gap-2">
-      <h2 className="text-sm font-semibold">{t('node.trend.title')}</h2>
-      <div className="flex flex-wrap items-center gap-2">
-        {!all ? <Select value={selected} aria-label={t('node.trend.metric')} data-ai-id="node-detail:trend-select"
-          options={charts.map((chart) => ({ value: chart.key, label: t(chart.label) }))} onValueChange={setSelected} className="w-40" /> : null}
-        <TimeRangePicker
-          value={range}
-          onChange={setRange}
-          presets={[
-            { key: '1h', ms: 3_600_000, label: t('cluster.monitor.range.1h') },
-            { key: '6h', ms: 21_600_000, label: t('cluster.monitor.range.6h') },
-            { key: '24h', ms: 86_400_000, label: t('cluster.monitor.range.24h') },
-            { key: '7d', ms: 604_800_000, label: t('cluster.monitor.range.7d') },
-          ]}
-          labels={{
-            placeholder: t('cluster.monitor.range.1h'),
-            custom: t('cluster.monitor.rangeCustom'),
-            rangePlaceholder: t('cluster.monitor.rangePlaceholder'),
-            step: t('cluster.monitor.step'),
-            stepHint: t('cluster.monitor.stepHint'),
-            stepOptions: [],
-            cancel: t('common.cancel'),
-            confirm: t('common.confirm'),
-            invalid: t('cluster.monitor.rangeInvalid'),
-          }}
-          aiId="node-detail:trend-range"
+  /*
+   * The reader's refresh only. This panel has no timer, so every fetch after the first
+   * is a click — but saying it with a flag keeps the rule the same everywhere: a veil
+   * means a person asked, never a clock.
+   */
+  const [ownRefresh, setOwnRefresh] = React.useState(false);
+  const refreshNow = React.useCallback(() => {
+    setOwnRefresh(true);
+    void query.refetch().finally(() => setOwnRefresh(false));
+  }, [query]);
+  const state: 'loading' | 'refreshing' | 'ready' | 'error' =
+    query.isPending ? 'loading' : query.isError ? 'error' : query.isFetching ? 'refreshing' : 'ready';
+  const labels = React.useMemo<ChartPanelLabels>(() => chartPanelLabels(t), [t]);
+  const pointsOf = (chart: (typeof CHARTS)[number]) =>
+    (query.data?.find((series) => series.name === chart.metric)?.points ?? [])
+      .map((point) => ({ at: point.at, value: chart.ratio ? point.value * 100 : point.value }));
+
+  if (all) {
+    return <div className="grid gap-4 xl:grid-cols-2" data-ai-id="node-detail:monitor">
+      {charts.map((chart) => (
+        <ChartPanel
+          key={chart.key}
+          aiId={`node-detail:chart:${chart.key}`}
+          title={t(chart.label)}
+          series={[{ key: chart.key, label: t(chart.label), points: pointsOf(chart), area: true, smooth: true }]}
+          range={range}
+          onRangeChange={setRange}
+          start={resolved.start}
+          end={resolved.end}
+          step={resolved.step}
+          labels={labels}
+          state={state}
+          onRetry={() => void query.refetch()}
+          onRefresh={refreshNow}
+          manualRefresh={ownRefresh}
+          height={140}
+          formatValue={(value) => `${value.toFixed(1)}${chart.ratio ? '%' : ''}`}
         />
-        <Button size="sm" variant="ghost" disabled={query.isFetching} aria-busy={query.isFetching}
-          data-ai-id="node-detail:trend-refresh" onClick={() => void query.refetch()}>{t('common.refresh')}</Button>
-      </div>
-    </header>
-    {query.isPending ? <Skeleton className="h-32" /> : query.isError ?
-      <ResourceErrorPanel error={query.error} onRetry={() => void query.refetch()} retryAiId="node-detail:trend-retry" /> :
-      <div className={all ? 'grid gap-4 xl:grid-cols-2' : ''}>{shown.map((chart) => {
-        const raw = query.data?.find((series) => series.name === chart.metric)?.points ?? [];
-        const points = raw.map((point) => ({ ...point, value: chart.ratio ? point.value * 100 : point.value }));
-        const latest = points.at(-1)?.value;
-        return <div key={chart.key} data-ai-id={`node-detail:chart:${chart.key}`}>
-          <div className="mb-2 flex justify-between text-xs">
-            <span>{t(chart.label)}</span><span className="tabular-nums">{latest === undefined ? '-' : `${latest.toFixed(1)} ${chart.ratio ? '%' : t('node.list.cards')}`}</span>
-          </div>
-          <TimeSeriesChart
-            series={[{ key: chart.key, label: t(chart.label), points, area: true, smooth: true }]}
-            start={resolved.start}
-            end={resolved.end}
-            maxGap={gapForStep(resolved.step)}
-            label={t(chart.label)}
-            emptyText={t('cluster.monitor.empty')}
-            height={140}
-          />
-        </div>;
-      })}</div>}
-  </section>;
+      ))}
+    </div>;
+  }
+
+  const chart = charts.find((entry) => entry.key === selected) ?? charts[0]!;
+  return <ChartPanel
+    aiId="node-detail:trend"
+    title={t('node.trend.title')}
+    series={[{ key: chart.key, label: t(chart.label), points: pointsOf(chart), area: true, smooth: true }]}
+    range={range}
+    onRangeChange={setRange}
+    start={resolved.start}
+    end={resolved.end}
+    step={resolved.step}
+    labels={labels}
+    state={state}
+    onRetry={() => void query.refetch()}
+    onRefresh={refreshNow}
+    manualRefresh={ownRefresh}
+    height={180}
+    formatValue={(value) => `${value.toFixed(1)}${chart.ratio ? '%' : ` ${t('node.list.cards')}`}`}
+    actions={<Select value={selected} aria-label={t('node.trend.metric')} data-ai-id="node-detail:trend-select"
+      options={charts.map((entry) => ({ value: entry.key, label: t(entry.label) }))} onValueChange={setSelected} className="w-40" />}
+  />;
 }

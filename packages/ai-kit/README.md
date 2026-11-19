@@ -113,6 +113,7 @@ src/
 | 表单 | Button / Input（含 `InputSearch`）/ Textarea / Select（含 `MultiSelect`）/ Checkbox / RadioGroup（及别名 Radio）/ Switch / Slider / InputNumber / DatePicker / FormField / Label / AutoComplete / PasswordStrengthMeter |
 | 表单容器 | Form / Form.Item / Form.Group（声明式，兼容 `async-validator` 规则） |
 | 展示 | Badge / Tag / Avatar / Card（+Header/Title/Description/Content）/ Panel / Text / Divider / Skeleton / Progress / Empty / DescriptionList（+DescriptionItem）/ MetricCell / StatisticsGroup / MetricRing / Icon（366 个） |
+| 状态 | RefreshVeil（重取遮罩，全站唯一实现）/ ChartSkeleton（图表首屏骨架）——见「加载态与刷新态」 |
 | 反馈 | Alert / Loading / Modal / Drawer / Tooltip / Popover / Toast（Provider + useToast）/ Notify（命令式） |
 | 导航 | Tabs（`aiId` / 徽标 / 内容面板）/ Menu（支持折叠态）/ Breadcrumb / Dropdown / Pagination / Accordion / Collapse |
 | 布局 | Columns / Column / Level / LevelLeft / LevelRight / LevelItem |
@@ -144,6 +145,80 @@ kube-design 里没有、迁移中从应用层上收的组件：
 | `PasswordStrengthMeter` | 用户设置弹窗与创建用户弹窗共用的密码强度面板 | 面板是纯展示，规则判定与文案在应用层；展示与无障碍语义应只有一份 |
 
 Storybook 侧补齐 kube-design 的 `Foundation`（Colors / Icons）与 `Components` 分类，并额外提供 `Schema` 分类（列表 / 详情 / 表单 / ConfigMaps 移植）。
+
+## 加载态与刷新态
+
+每个「会等待」的区域只有两种画面，且各只有一份实现。写新页面时从这里抄接线，不要自己拼。
+
+| 场景 | 用什么 | 用户看到 |
+| --- | --- | --- |
+| 列表首次加载 / 翻页 / 改排序 | `ResourceList` 的 `loading` | 骨架行 |
+| 列表重取（刷新、改筛选） | `ResourceList` 的 `refreshing`（`useListRefresh(...).refreshing`） | 保留行 + `RefreshVeil` + `aria-busy` |
+| 图表首次加载 | `ChartPanel` 的 `state="loading"` | `ChartSkeleton`：轴刻度条 + 三条脉冲带 + 基线 |
+| 图表手动刷新 | `ChartPanel` 的 `state="refreshing"` + `manualRefresh` | 保留曲线、降到 70% + `RefreshVeil` |
+| 图表自动刷新 | 同上，`manualRefresh={false}` | 无遮罩，曲线平滑过渡 |
+| 只有一块图、不带窗口控件 | `TimeSeriesChart` 的 `refreshing` | 同款 `RefreshVeil`，句柄 `<chartAiId>:refreshing` |
+
+### 为什么必须是同一个组件
+
+两条重复出现过的缺陷：
+
+- **遮罩漂了三份**：表格 40% 底色、图表 45% 且带圆角、`z-10` vs `z-30`。同一个刷新动作在不同页看起来像两个功能。
+- **骨架叠在图表上方**：`ChartPanel` 同时渲染骨架和图表，骨架在文档流里，220px 的面板首屏量出 468px，下面还露着空坐标轴。
+  骨架要**代替**图表占位，不是加在上面。
+
+所以 `RefreshVeil`（遮罩）与 `ChartSkeleton`（骨架）由本库提供，页面与其它共享组件只引用。页面里出现
+`backdrop-blur-[1px]`、`animate-pulse rounded-ai-md bg-ai-surface-2` 或写死的 `'更新中…'`，
+`kube-frontend/config/loading-refresh-contract.test.ts` 会失败。
+
+### 两个 prop 不能混用
+
+`loading` 与 `refreshing` 回答的是两个问题：
+
+- `loading`：**还没有东西可显示**（首屏、翻页）。行列换成骨架。
+- `refreshing`：**已经有内容，正在换**。内容留在屏幕上并压低，遮罩告诉读者数据在更新。
+
+`loading={isFetching}` 是最常见的错：每次重取都闪骨架，而遮罩永远不会出现——慢响应看起来像按钮坏了。
+首屏用 `isPending`，刷新用 `isFetching && !isPending`；`useListRefresh` 已经算好，直接用它的返回值。
+
+### 自动刷新不遮
+
+遮罩只代表「人点了」。轮询页要把手动信号与 `isFetching` 分开：集群概览用 `refresh.manual`，
+集群监控页用 `manualTick`，图表面板自己刷新时用局部的 `ownRefresh`。
+把 `manualRefresh` 接到 `query.isFetching` 上，会让每 15 秒闪一次——比没有反馈更糟。
+
+```tsx
+// 图表：首屏骨架 → 手动刷新遮罩 → 自动刷新安静更新
+<ChartPanel
+  aiId="cluster-monitor:gpu"
+  state={query.isPending ? 'loading' : query.isError ? 'error' : query.isFetching ? 'refreshing' : 'ready'}
+  manualRefresh={isManualRefresh}   // 只来自读者，不来自定时器
+  onRefresh={refreshNow}
+  range={range}
+  onRangeChange={setRange}
+  start={start}          // 宿主查询实际用的区间，见下一节
+  end={end}
+  step={step}
+  labels={labels}
+  series={series}
+/>
+```
+
+```tsx
+// 列表：三件套来自同一个 hook，不能只接一半
+const listRefresh = useListRefresh('pods', query);
+<ResourceList
+  loading={state === 'loading'}
+  refreshing={listRefresh.refreshing}
+  onRefresh={listRefresh.onRefresh}
+  ...
+/>
+```
+
+### 核对的不是「有没有加载组件」
+
+首屏与刷新各截一张，量容器高度：骨架与图表必须同一个高度。再确认遮罩出现时内容还在、图例仍可读。
+`data-ai-id` 的句柄约定：表格是 `table:refreshing`，面板是 `<aiId>:refreshing`，骨架是 `<aiId>:loading`。
 
 ## 三类 schema
 

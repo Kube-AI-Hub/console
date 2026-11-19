@@ -496,7 +496,10 @@ function WorkspaceClusterCard({ cluster }: { cluster: WorkspaceClusterSummary })
       <dl
         className="flex flex-col gap-1 border-t border-ai-line pt-2 text-[11px]"
         data-ai-id={`workspace-overview:clusters:card:${cluster.name}:usage`}
-        data-ai-state={usage.isPending ? 'loading' : usage.isError ? 'error' : 'ready'}
+        data-ai-state={usage.isPending ? 'loading'
+          : usage.isError ? 'error'
+            : usage.isFetching ? 'refreshing'
+              : 'ready'}
       >
         {resourceRows.map((row) => (
           <div key={row.key} className="flex min-w-0 items-baseline justify-between gap-3" data-ai-value={row.key}>

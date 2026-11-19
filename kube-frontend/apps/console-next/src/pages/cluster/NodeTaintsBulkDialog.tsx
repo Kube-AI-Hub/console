@@ -146,7 +146,10 @@ export function NodeTaintsBulkDialog({ cluster, names, onClose, onSaved }: {
         onClick={submit} {...{ 'data-ai-id': 'node-taints-bulk:submit' }}>{t('common.confirm')}</Button>}
     </div>}>
     <div className="flex flex-col gap-3" data-ai-id="node-taints-bulk:surface"
-      data-ai-state={loading ? 'loading' : loadError ? 'error' : 'ready'}>
+      data-ai-state={loading ? 'loading'
+        : loadError ? 'error'
+          : queries.some((query) => query.isFetching) ? 'refreshing'
+            : 'ready'}>
       <Alert tone="warning">{t('node.taints.warning')}</Alert>
       {loadError ? <p role="alert" className="text-sm text-ai-danger">
         {loadError instanceof ApiError ? loadError.message : t('error.unknown')}</p> : null}

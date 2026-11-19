@@ -6,6 +6,7 @@ import {
   type TimeSeries,
 } from '@kube-ai-hub/ui/charts';
 import { cn } from '@kube-ai-hub/ui';
+import { useT } from '@/i18n';
 
 /**
  * One large chart with a legend on a tab of 集群监控.
@@ -71,9 +72,11 @@ export function ClusterChartCard({
   group,
   area = false,
   refreshing = false,
-  refreshingLabel = '更新中…',
+  refreshingLabel,
   height = 160,
 }: ClusterChartCardProps): React.ReactElement {
+  const t = useT();
+  const veilLabel = refreshingLabel ?? t('cluster.monitor.refreshing');
   /*
    * The legend dots use the palette the plot itself resolves, so a dot is never a
    * shade off its line. Reading the tokens through the same helper the chart uses is
@@ -122,7 +125,7 @@ export function ClusterChartCard({
             height={height}
             formatValue={formatValue}
             refreshing={refreshing}
-            refreshingLabel={refreshingLabel}
+            refreshingLabel={veilLabel}
             onToggleSeries={(key) =>
               setHidden((current) => {
                 const next = new Set(current);

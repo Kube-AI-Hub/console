@@ -272,6 +272,37 @@ python3 prd/tools/cleanup_test_objects.py --apply  # 真的删
 **同一环境同一时刻只跑一轮 E2E。** 两个 pytest 进程同时创建对象会让 `totalItems` 这条 oracle 在两次读之间变化，
 失败看起来像产品缺陷（本批 LIST-05 就这样误报过两次）。并发跑必须用不同的命名空间或不同集群。
 
+### 加载态与刷新态只有一个实现
+
+**任何新页面、任何迁移过来的页面都按本节接线。** 正文在 [`packages/ai-kit/README.md`](../packages/ai-kit/README.md)
+的「加载态与刷新态」一节；这里只写「你会因此被门禁拦下」的部分，免得写到一半才发现。
+
+| 场景 | 组件 | 关键 prop | 用户看到 |
+| --- | --- | --- | --- |
+| 列表首次加载 / 翻页 / 改排序 | `ResourceList` → `Table` | `loading` | 骨架行 |
+| 列表重取（点刷新、改筛选） | `ResourceList` | `refreshing` | 保留行 + 「更新中…」遮罩 + `aria-busy` |
+| 图表首次加载 | `ChartPanel` | `state="loading"` | 骨架：轴刻度条 + 脉冲带 + 基线（`ChartSkeleton`） |
+| 图表手动刷新 | `ChartPanel` | `state="refreshing"` + `manualRefresh` | 保留曲线 + 遮罩（`RefreshVeil`） |
+| 图表自动刷新 | `ChartPanel` | `manualRefresh={false}` | 无遮罩，曲线平滑过渡 |
+| 只有一块图、没有窗口控件 | `TimeSeriesChart` | `refreshing` | 同款遮罩，句柄 `<chartAiId>:refreshing` |
+
+三条不可协商的规则：
+
+1. **首次加载与刷新是两个画面，不许合并。** `loading={isFetching}` 会让每次重取都闪骨架，且遮罩永远不出现——
+   慢响应看起来像按钮坏了。首屏用 `isPending`，刷新用 `isFetching && !isPending`（`useListRefresh` 已经算好）。
+2. **不是「用某个加载组件」，而是用同一份实现。** 刷新遮罩只有 `RefreshVeil`（40% 底色 + 1px 模糊 + `z-30` + 居中药丸），
+   首屏骨架只有 `ChartSkeleton`（图表）与 `Table` 的骨架行（列表）。页面里再写一次 `backdrop-blur-[1px]` 或
+   `animate-pulse rounded-ai-md bg-ai-surface-2` 就是第二份实现——它们已经漂移过一次（40% vs 45%、圆角、z-10 vs z-30）。
+3. **自动刷新永远不遮。** 遮罩只在「人点了」时出现。轮询页必须把手动信号与 `isFetching` 分开
+   （集群概览的 `refresh.manual`、监控页的 `manualTick` 是现成写法）；`manualRefresh={query.isFetching}` 会让每 15 秒
+   闪一次。
+
+守卫是 `kube-frontend/config/loading-refresh-contract.test.ts`：自绘遮罩、写死「更新中…」、自拼整块骨架、
+`loading={isFetching}`、以及「区分了 `loading` 却把 `refreshing` 并回 `ready`」的 `data-ai-state` 都会失败。
+没被守卫覆盖的部分靠截图核对：首屏与刷新各截一张，量容器高度（`getBoundingClientRect()`），
+**骨架与图表的容器高度必须相同**——2026-11-19 图表把骨架叠在图表上方，220px 的面板首屏量出 468px，
+下面还露着空坐标轴，门禁全绿。
+
 **改了共享包（`packages/*`）后，测试看不到变化先清缓存。** vitest 的转换缓存会把旧的
 `@kube-ai-hub/locales` 模块继续喂给用例，表现为「新加的文案键渲染成了键名本身」——2026-11-19 的
 定时任务批次为此查了一轮。`rm -rf apps/console-next/node_modules/.vite` 后复跑即好；改公共组件同理。
@@ -373,6 +404,7 @@ def test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_02(storage_page, screenshot)
 | 后端不变量（并发、幂等、清理策略） | design 的 `INV-*`；实现见 `kube-server/pkg/controller/` 与对应 handler |
 | 后端踩过的坑（时序、缓存、限流） | design 的 `GOT-*`；不要只写在提交信息或代码注释里 |
 | 主题色与间距 | 旧 console：`src/scss/variables.scss`；新 UI：`packages/ai-kit/src/styles/tokens.css` 与 `tailwind.preset.ts`（design 只引用语义 token） |
+| 加载态与刷新态的组件用法 | [`packages/ai-kit/README.md`](../packages/ai-kit/README.md) 的「加载态与刷新态」；规则摘要在本文件 §2，守卫是 `kube-frontend/config/loading-refresh-contract.test.ts` |
 | 指标名与单位 | `kube-server/pkg/models/monitoring/named_metrics.go` + `prometheus/promql.go` |
 | **能力级 durable 技术方案** | **[`../design/`](../design/)** |
 
@@ -433,6 +465,7 @@ def test_TC_L3_CLUSTER_STORAGE_SHARED_STORAGE_QUOTA_02(storage_page, screenshot)
 2. **改完必须收敛**：`python3 prd/tools/check_docs.py --strict` 必须无 `ERROR`；新增功能点必须同时有需求、技术方案、用例、测试文件（一 spec 一文件）。
 3. **不许绕门禁**：不要为了过门禁去删章节、删 AC，或把 `covers` 指向不存在的 AC。
 4. **UI 改动先过原则再截图**：按 [`constitution.md`](constitution.md) 的「UI 与交互设计原则」核对——一个主任务、一个入口、一套共享组件、点击即反馈、等待可见；再在真实环境截图记录改动前后，对比度、单位、空态逐项核对（见 `.cursor/rules/ui-screenshot-verify.mdc`）。
+   **加载态与刷新态不许自造**：首屏用骨架（`ChartSkeleton` / 表格骨架行），重取用遮罩（`RefreshVeil`），自动刷新不遮；见 §2「加载态与刷新态只有一个实现」。
 5. **改了产品代码要跑测试**：前端 `pytest -m point`（相关用例）；后端 `go test` + `go vet`，并在 design 的「仓库落点」写明改了哪个 kapis group / controller。
 6. **后端改动也要回写 design**：新增或修改接口、错误码、指标口径、controller 行为，必须在 design 里补 `CON-*` / `INV-*` / `GOT-*`。只提交代码不回写文档，等于契约变更没有记录——这正是 RDMA 链路类型、logout 吊销范围、LoginRecord 清理三处各说一套的原因。
 7. **同批闭环，不削减验收**：对照独立旧能力表检查 AC/实现/断言，保留原数据及安全回归；
