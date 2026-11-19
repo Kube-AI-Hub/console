@@ -301,7 +301,7 @@ export function PipelineDetailPage({ cluster, devops, pipeline }: PipelineDetail
 
       {row ? (
         <Tabs items={tabItems} value={tab} onValueChange={(value) => setTab(value === 'config' ? 'config' : 'runs')}>
-          <TabsContent value="runs" className="pt-4">
+          <TabsContent value="runs">
             <section className="flex flex-col gap-3 rounded-lg border border-ai-border bg-ai-surface p-4" data-ai-id="pipeline-detail:runs">
               <h2 className="text-sm font-medium text-ai-fg">
                 {t('devops.pipeline.runs') + (runs.data ? ' (' + runRows.length + ')' : '')}
@@ -450,7 +450,7 @@ export function PipelineDetailPage({ cluster, devops, pipeline }: PipelineDetail
             ) : null}
           </TabsContent>
 
-          <TabsContent value="config" className="pt-4">
+          <TabsContent value="config">
             <section className="flex flex-col gap-3 rounded-lg border border-ai-border bg-ai-surface p-4" data-ai-id="pipeline-detail:config">
               <div className="flex items-center justify-between gap-2">
                 <h2 className="text-sm font-medium text-ai-fg">{t('devops.pipeline.config')}</h2>

@@ -339,7 +339,7 @@ export function WorkspaceAppDetailPage({ workspace, appId }: WorkspaceAppDetailP
           { value: 'info', label: t('appRepos.apps.tabInfo'), aiId: 'workspace-app:tab:info' },
         ]}
       >
-        <TabsContent value="versions" className="pt-4">
+        <TabsContent value="versions">
           {versions.isError ? (
             <ResourceErrorPanel error={versions.error} onRetry={() => void versions.refetch()} retryAiId="workspace-app:versions-retry" />
           ) : (
@@ -357,7 +357,7 @@ export function WorkspaceAppDetailPage({ workspace, appId }: WorkspaceAppDetailP
           )}
         </TabsContent>
 
-        <TabsContent value="instances" className="pt-4">
+        <TabsContent value="instances">
           {instances.isError ? (
             <ResourceErrorPanel error={instances.error} onRetry={() => void instances.refetch()} retryAiId="workspace-app:instances-retry" />
           ) : (
@@ -371,7 +371,7 @@ export function WorkspaceAppDetailPage({ workspace, appId }: WorkspaceAppDetailP
           )}
         </TabsContent>
 
-        <TabsContent value="info" className="pt-4">
+        <TabsContent value="info">
           <section className="rounded-ai-md border border-ai-line p-4" data-ai-id="workspace-app:basic">
             <dl className="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-[minmax(8rem,12rem)_1fr]">
               <DefinitionRow label={t('cluster.column.name')} value={detail.name || '-'} />

@@ -257,7 +257,7 @@ export function WorkspaceMemberDetailPage({ workspace, name }: WorkspaceMemberDe
               },
             ]}
           >
-            <TabsContent value="projects" className="pt-4">
+            <TabsContent value="projects">
               {projects.isError ? (
                 <ResourceErrorPanel error={projects.error} onRetry={() => void projects.refetch()} retryAiId="workspace-member-detail:projects-retry" />
               ) : (
@@ -273,7 +273,7 @@ export function WorkspaceMemberDetailPage({ workspace, name }: WorkspaceMemberDe
                 />
               )}
             </TabsContent>
-            <TabsContent value="devops" className="pt-4">
+            <TabsContent value="devops">
               {devops.isError ? (
                 <ResourceErrorPanel error={devops.error} onRetry={() => void devops.refetch()} retryAiId="workspace-member-detail:devops-retry" />
               ) : (

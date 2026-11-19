@@ -416,7 +416,7 @@ export function DevopsProjectDetailPage({ cluster, name }: DevopsProjectDetailPa
 
       {project.data ? (
         <Tabs items={tabItems} value={tab} onValueChange={(value) => setTab(value as DevopsTab)}>
-          <TabsContent value="base-info" className="pt-4">
+          <TabsContent value="base-info">
             <BaseInfoPanel
               project={project.data}
               namespace={namespace}
@@ -426,7 +426,7 @@ export function DevopsProjectDetailPage({ cluster, name }: DevopsProjectDetailPa
             />
           </TabsContent>
 
-          <TabsContent value="pipelines" className="pt-4">
+          <TabsContent value="pipelines">
             <section className="flex flex-col gap-3 rounded-lg border border-ai-border bg-ai-surface p-4" data-ai-id="devops-detail:pipelines">
               <div className="flex flex-wrap items-end justify-between gap-2">
                 <div className="flex flex-wrap items-end gap-2">
@@ -593,7 +593,7 @@ export function DevopsProjectDetailPage({ cluster, name }: DevopsProjectDetailPa
             </section>
           </TabsContent>
 
-          <TabsContent value="cd" className="pt-4">
+          <TabsContent value="cd">
             <CollectionPanel
               tab="cd"
               query={cdApplications}
@@ -613,7 +613,7 @@ export function DevopsProjectDetailPage({ cluster, name }: DevopsProjectDetailPa
             />
           </TabsContent>
 
-          <TabsContent value="code-repo" className="pt-4">
+          <TabsContent value="code-repo">
             <section className="flex flex-col gap-3 rounded-lg border border-ai-border bg-ai-surface p-4" data-ai-id="devops-detail:code-repo">
               <div className="flex justify-end">
                 <Button size="sm" {...actionProps('devops-detail:coderepo-create')} onClick={() => setCodeRepoForm(true)}>
@@ -655,7 +655,7 @@ export function DevopsProjectDetailPage({ cluster, name }: DevopsProjectDetailPa
             </section>
           </TabsContent>
 
-          <TabsContent value="members" className="pt-4">
+          <TabsContent value="members">
             <section className="flex flex-col gap-3 rounded-lg border border-ai-border bg-ai-surface p-4" data-ai-id="devops-detail:members">
               <div className="flex justify-end">
                 <Button size="sm" {...actionProps('devops-detail:members-invite')} onClick={() => setInviting(true)}>
@@ -712,7 +712,7 @@ export function DevopsProjectDetailPage({ cluster, name }: DevopsProjectDetailPa
             </section>
           </TabsContent>
 
-          <TabsContent value="roles" className="pt-4">
+          <TabsContent value="roles">
             <CollectionPanel
               tab="roles"
               query={roles}
@@ -739,7 +739,7 @@ export function DevopsProjectDetailPage({ cluster, name }: DevopsProjectDetailPa
             />
           </TabsContent>
 
-          <TabsContent value="credentials" className="pt-4">
+          <TabsContent value="credentials">
             <section className="flex flex-col gap-3 rounded-lg border border-ai-border bg-ai-surface p-4" data-ai-id="devops-detail:credentials">
               <div className="flex justify-end">
                 <Button size="sm" {...actionProps('devops-detail:credentials-create')} onClick={() => setCredentialForm({ editing: null })}>

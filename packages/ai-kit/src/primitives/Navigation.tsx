@@ -97,7 +97,21 @@ export function Tabs({
   );
 }
 
-export const TabsContent = TabsPrimitive.Content;
+/**
+ * A tab panel, spaced away from the tab strip.
+ *
+ * The strip ends with a 1px underline, and a panel that starts flush against it
+ * reads as if the content were part of the tabs — there is no breathing room
+ * between "which tab am I on" and "what is in it". The gap lives here rather than
+ * at each call site so the 60-odd panels cannot drift apart; a caller that needs
+ * more adds its own class and `cn` lets it win.
+ */
+export const TabsContent = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
+>(function TabsContent({ className, ...props }, ref) {
+  return <TabsPrimitive.Content ref={ref} className={cn('mt-4', className)} {...props} />;
+});
 
 /* ---------------- Accordion (also used as Collapse) ---------------- */
 

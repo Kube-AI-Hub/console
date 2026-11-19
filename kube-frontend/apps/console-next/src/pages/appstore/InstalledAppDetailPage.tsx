@@ -229,7 +229,7 @@ export function InstalledAppDetailPage({ workspace, releaseId, cluster: routeClu
           { value: 'yaml', label: t('installedApps.tabYaml'), aiId: 'installed-app:tab:yaml' },
         ]}
       >
-        <TabsContent value="info" className="pt-4">
+        <TabsContent value="info">
           <section className="rounded-ai-md border border-ai-line p-4" data-ai-id="installed-app:basic">
             <dl className="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-[minmax(8rem,12rem)_1fr]">
               <DefinitionRow label={t('installedApps.column.name')} value={release.name || '-'} />
@@ -257,7 +257,7 @@ export function InstalledAppDetailPage({ workspace, releaseId, cluster: routeClu
           </section>
         </TabsContent>
 
-        <TabsContent value="resources" className="pt-4">
+        <TabsContent value="resources">
           {resources.isError ? (
             <ResourceErrorPanel error={resources.error} onRetry={() => void resources.refetch()} retryAiId="installed-app:resources-retry" />
           ) : (
@@ -269,7 +269,7 @@ export function InstalledAppDetailPage({ workspace, releaseId, cluster: routeClu
           )}
         </TabsContent>
 
-        <TabsContent value="events" className="pt-4">
+        <TabsContent value="events">
           {events.isError ? (
             <ResourceErrorPanel error={events.error} onRetry={() => void events.refetch()} retryAiId="installed-app:events-retry" />
           ) : (
@@ -279,7 +279,7 @@ export function InstalledAppDetailPage({ workspace, releaseId, cluster: routeClu
           )}
         </TabsContent>
 
-        <TabsContent value="config" className="pt-4">
+        <TabsContent value="config">
           <section className="flex flex-col gap-2" data-ai-id="installed-app:config">
             <p className="text-[11px] text-ai-fg-muted">{t('installedApps.configHint')}</p>
             {helmRelease?.values ? (
@@ -294,7 +294,7 @@ export function InstalledAppDetailPage({ workspace, releaseId, cluster: routeClu
           </section>
         </TabsContent>
 
-        <TabsContent value="yaml" className="pt-4">
+        <TabsContent value="yaml">
           <section className="flex flex-col gap-2" data-ai-id="installed-app:yaml">
             <p className="text-[11px] text-ai-fg-muted">{t('installedApps.yamlHint')}</p>
             <pre className="max-h-96 overflow-auto rounded-ai-md border border-ai-line bg-ai-bg p-3 text-[11px] leading-relaxed text-ai-fg-secondary">

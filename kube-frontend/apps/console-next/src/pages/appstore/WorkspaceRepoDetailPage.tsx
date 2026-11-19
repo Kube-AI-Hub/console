@@ -161,7 +161,7 @@ export function WorkspaceRepoDetailPage({ workspace, repoId }: WorkspaceRepoDeta
           },
         ]}
       >
-        <TabsContent value="info" className="pt-4">
+        <TabsContent value="info">
           <section className="rounded-ai-md border border-ai-line p-4" data-ai-id="workspace-repo-detail:basic">
             <dl className="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-[minmax(8rem,12rem)_1fr]">
               <DefinitionRow label={t('cluster.column.name')} value={detail.name || '-'} />
@@ -178,7 +178,7 @@ export function WorkspaceRepoDetailPage({ workspace, repoId }: WorkspaceRepoDeta
             </dl>
           </section>
         </TabsContent>
-        <TabsContent value="events" className="pt-4">
+        <TabsContent value="events">
           {events.isError ? (
             <ResourceErrorPanel error={events.error} onRetry={() => void events.refetch()} retryAiId="workspace-repo-detail:events-retry" />
           ) : (

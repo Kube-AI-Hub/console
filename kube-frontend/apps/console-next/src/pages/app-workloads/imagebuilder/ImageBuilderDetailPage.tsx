@@ -262,19 +262,19 @@ export function ImageBuilderDetailPage({ workspace, cluster, namespace, name }: 
           </section>
 
           <Tabs items={tabItems} value={tab} onValueChange={(value) => setTab(value as DetailTab)}>
-            <TabsContent value="records" className="pt-4">
+            <TabsContent value="records">
               <BuildRecordsPanel cluster={cluster} namespace={namespace} builder={builder} latestRun={latestRun} />
             </TabsContent>
-            <TabsContent value="resource-status" className="pt-4">
+            <TabsContent value="resource-status">
               <ResourceStatusPanel {...jobProps} />
             </TabsContent>
-            <TabsContent value="image-artifacts" className="pt-4">
+            <TabsContent value="image-artifacts">
               <ImageArtifactsPanel cluster={cluster} namespace={namespace} builder={builder} />
             </TabsContent>
-            <TabsContent value="environment" className="pt-4">
+            <TabsContent value="environment">
               <EnvironmentPanel {...jobProps} />
             </TabsContent>
-            <TabsContent value="events" className="pt-4">
+            <TabsContent value="events">
               <EventsPanel {...jobProps} />
             </TabsContent>
           </Tabs>
