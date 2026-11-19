@@ -22,7 +22,7 @@ export const ICON_NAMES = [
   'linux', 'macos', 'opensuse', 'oracle-linux', 'redhat', 'ubuntu',
   'windows', 'aliyun', 'aws', 'bitbucket', 'ceph', 'etcd',
   'git', 'github', 'gitlab', 'glusterfs', 'google-plus', 'helm',
-  'istio', 'jenkins', 'kubernetes', 'kubesphere', 'kubeaihub', 'openpitrix',
+  'istio', 'jenkins', 'kubernetes', 'kubeaihub', 'openpitrix',
   'power', 'qingcloud', 'sonarqube', 'svn', 'vmware', 'add',
   'cardview', 'changing-over', 'check', 'close', 'collapse', 'copy',
   'download', 'drag-handle', 'expand', 'export', 'link', 'listview',

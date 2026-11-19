@@ -42,14 +42,49 @@ required by the Apache License 2.0, section 4(b):
   two extra `fill="currentColor"` paths on top of a path that already draws both.
   Those two paths are removed so the glyph is a single shape; the drawn result is
   unchanged.
-- **Everything else is unmodified.** 359 of the 360 symbols are byte-identical to
-  upstream, in the same order. `timed-task`, `clock`, `calendar` and
-  `history-duotone` are among them.
+- **Brand mark replaced.** The retired `kubesphere` glyph is removed, and
+  `kubeaihub` now draws the Kube AI Hub mark: a solid hexagon with three connected
+  nodes carved out of it. The cut-outs are sub-paths of a single `fill-rule="evenodd"`
+  path rather than a `mask`, so the glyph carries no id reference and survives being
+  inlined more than once on a page.
+- **Duplicate paint paths removed.** Where a symbol ends with a path that repaints,
+  in the same ink, a shape an earlier `fill-rule="evenodd"` path already carved
+  out, the repaint is dropped and the cut-out shows again. Without this the mark
+  and its plate merged into one solid mass — `logout-right-duotone`,
+  `login-left-duotone`, `tags-duotone` and `switch-button-duotone` all rendered
+  as blobs. `switch-button-duotone` also gains an explicit `.22` track plate so
+  its knobs still separate from the rails.
+- **White detail fills made transparent.** Twelve symbols painted inner detail in
+  a hard-coded `#FFF`/`white` (`golang`, `client`, `cron-job`, `deamon-set`,
+  `gateway`, `job`, `springcloud`, `ssd`, `vsan`, `edge`, `crane`,
+  `up-circle-duotone`). That detail is invisible on a light surface and wrong on
+  any tinted one. Those fills are now `none`, so the surface behind the glyph
+  shows through, which is what the artwork intended. `mask` and `clipPath`
+  geometry keeps its white: it is not ink.
+- **Fixed-palette fills replaced with `currentColor`.** Upstream hard-codes a
+  light grey (`#CCD3DB`, `#B6C2CD`), a dark navy (`#36435C`, `#242E42`,
+  `#C1C9D1`, `#14215A`) and an off-white (`#F9FBFD`) as secondary or cut-out
+  fills. Those values only read correctly on one surface tone, so on a dark theme
+  the light greys sank into the background and on a light theme the cut-outs
+  disappeared. They are now `currentColor` with `fill-opacity`, which follows the
+  surrounding text colour and stays legible on every theme. The drawn shapes are
+  unchanged; only how they take their colour changed.
+- **Everything else is unmodified.** Apart from the brand mark and the colour
+  substitution above, the remaining symbols are byte-identical to upstream, in the
+  same order. `timed-task`, `clock`, `calendar` and `history-duotone` are among them.
 
 Upstream duplicate ids (`barchart`, `springcloud`, `stretch`, `event` each appear
 twice) are reproduced as-is. They are an upstream quirk rather than a change made
 here: `ICON_NAMES` lists each id once because a browser resolves `<use>` to the
 last definition, so the duplicate is unreachable.
+
+Three symbols are not well-formed in upstream and are left that way rather than
+guessed at, because no rendering of them is known to be correct: `springcloud`
+and `springcloudgateway` contain unbalanced `<g>` elements, and
+`download-box-2-duotone` closes with a bare `<symbol>` instead of `</symbol>`.
+A bare `<symbol>` opener appears ten times upstream and swallows whatever follows
+it, so these glyphs may fail to render; fixing them needs the original artwork,
+not a repair of the markup alone.
 
 The sprite is a *derived work* under the MIT license above, redistributed here
 under the Apache License 2.0 that governs the rest of this package.
