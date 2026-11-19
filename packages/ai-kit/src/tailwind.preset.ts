@@ -25,6 +25,7 @@ const aiKitPreset: Partial<Config> = {
           'surface-1': withAlpha('--ai-surface-1'),
           'surface-2': withAlpha('--ai-surface-2'),
           'surface-3': withAlpha('--ai-surface-3'),
+          'surface-disabled': withAlpha('--ai-surface-disabled'),
 
           /*
            * Pinned table columns. Registered here rather than written as an arbitrary

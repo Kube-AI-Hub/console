@@ -17,15 +17,12 @@ const buttonVariants = cva(
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ai-ring focus-visible:ring-offset-2 focus-visible:ring-offset-ai-bg',
     'disabled:pointer-events-none',
     //
-    // Disabled is a *state*, not a faded copy.
+    // The inert look is applied from the component, not from `disabled:`.
     //
-    // Halving the opacity of a filled button leaves white text on a washed-out red
-    // (`#ab2f29` at 50% over a light page ≈ 2:1 contrast) — unreadable, and it still looks
-    // clickable. A disabled control should read as inert: neutral surface, muted text, no
-    // glow. This applies to every filled variant, so the rule lives on the base class.
-    'disabled:bg-ai-surface-2 disabled:text-ai-fg-muted disabled:shadow-none',
-    // The two outline-ish variants need their border muted too, or the frame stays loud.
-    'disabled:border-ai-line disabled:brightness-100',
+    // `loading` also disables the button, but "busy" and "unavailable" are different
+    // states: a submitting button should still look like the action it is performing.
+    // `:disabled` cannot tell them apart, so the rule below lives in `Button` and is
+    // keyed on `disabled && !loading`.
     '[&_svg]:size-4 [&_svg]:shrink-0',
   ],
   {
@@ -79,6 +76,21 @@ export interface ButtonProps
   loading?: boolean;
 }
 
+/**
+ * The inert look, applied only when the button is genuinely unavailable.
+ *
+ * Separate from the base class because `:disabled` also matches `loading`: a button
+ * that is mid-submit must keep the variant's own fill, or the reader loses the cue
+ * that tells them *which* action is running. Colour alone cannot carry "unavailable"
+ * at the ratios these palettes allow — the best enabled-vs-disabled separation is
+ * about 1.7:1 on the dark themes and 1.2:1 on the light ones — so the state is also
+ * marked structurally, with a broken outline instead of a solid one.
+ */
+const inertClasses = [
+  'bg-ai-surface-disabled text-ai-fg-faint shadow-none',
+  'border border-dashed border-ai-line',
+].join(' ');
+
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   { className, variant, size, block, asChild = false, loading = false, disabled, children, ...props },
   ref,
@@ -89,7 +101,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function 
       ref={ref}
       data-loading={loading ? 'true' : undefined}
       disabled={disabled || loading}
-      className={cn(buttonVariants({ variant, size, block }), className)}
+      className={cn(buttonVariants({ variant, size, block }), disabled && !loading ? inertClasses : undefined, className)}
       {...props}
     >
       {loading ? <Spinner /> : null}

@@ -63,7 +63,14 @@ export const ButtonsWithIcon: Story = {
   ),
 };
 
-/** 加载中会禁用点击并保留原宽度，避免布局跳动。 */
+/**
+ * 加载中会禁用点击并保留原宽度，避免布局跳动。
+ *
+ * 三个状态必须能一眼分开：`loading` 是「正在执行」（保留变体底色 + 转圈），
+ * `disabled` 是「不可用」（凹陷底色 + 虚线边框 + 淡文字）。两者在元素上都是
+ * `disabled`，但视觉上不能相同——提交中的按钮如果和永远点不了的按钮长得一样，
+ * 读者就不知道正在发生什么。
+ */
 export const ButtonLoading: Story = {
   name: 'button loading',
   render: () => (
@@ -71,6 +78,9 @@ export const ButtonLoading: Story = {
       <Button variant="primary" loading>部署中</Button>
       <Button variant="secondary" loading>同步中</Button>
       <Button variant="primary" disabled>已禁用</Button>
+      <Button variant="secondary" disabled>已禁用</Button>
+      <Button variant="primary">可点击</Button>
+      <Button variant="secondary">可点击</Button>
     </div>
   ),
 };

@@ -134,6 +134,16 @@
   --ai-surface-1: var(--ai-raw-navy-600); /* $card-bg-color */
   --ai-surface-2: var(--ai-raw-navy-500); /* $btn-default-hover-bg */
   --ai-surface-3: var(--ai-raw-navy-450); /* hover rows: text on this surface clears AA */
+  /*
+   * Disabled controls sit *below* the page, not on it.
+   *
+   * `surface-2` is the enabled secondary button's own fill, so reusing it for the
+   * disabled state left the two identical: only the label changed, and on a light page
+   * the button's fill is 1.14:1 against the page — the disabled and enabled buttons
+   * were indistinguishable at a glance. This step is darker than the page here and
+   * lighter than it in the light themes, so "recessed" reads the same way in both.
+   */
+  --ai-surface-disabled: 26 39 96;
 
   --ai-fg: var(--ai-raw-ice-700); /* $text-color */
   --ai-fg-secondary: var(--ai-raw-ice-100); /* $second-text-color */
@@ -273,6 +283,9 @@
   --ai-surface-1: var(--ai-raw-white);
   --ai-surface-2: var(--ai-raw-ice-600);
   --ai-surface-3: var(--ai-raw-ice-400);
+  /* Recessed, mirroring the dark theme's direction: on a light page "inert" is a
+     *lighter* slab than the enabled fill, so it reads as sunk rather than raised. */
+  --ai-surface-disabled: 251 253 254;
 
   --ai-fg: var(--ai-raw-navy-800); /* #14215a */
   --ai-fg-secondary: var(--ai-raw-navy-700);
@@ -357,6 +370,7 @@
   --ai-surface-1: var(--ai-raw-navy-600);
   --ai-surface-2: var(--ai-raw-navy-500);
   --ai-surface-3: var(--ai-raw-navy-450); /* hover rows: text on this surface clears AA */
+  --ai-surface-disabled: 26 39 96;
   --ai-th-bg: var(--ai-raw-navy-900);
   --ai-row-hover-bg: rgb(var(--ai-raw-navy-500) / 0.55);
   --ai-nav-bg: rgb(11 24 77 / 0.62);
@@ -386,6 +400,7 @@
   /* hover rows: violet-lite-400 left muted text and links at 4.47 / 4.41 on this surface, just under
      AA. One step darker fixes both without moving any text token. */
   --ai-surface-3: var(--ai-raw-violet-lite-500);
+  --ai-surface-disabled: 251 250 253;
   --ai-line: var(--ai-raw-violet-lite-300);
   --ai-line-strong: var(--ai-raw-violet-lite-200);
   --ai-th-bg: var(--ai-raw-violet-lite-600);
@@ -420,6 +435,7 @@
   --ai-surface-1: var(--ai-raw-abyss-900);
   --ai-surface-2: var(--ai-raw-abyss-700);
   --ai-surface-3: var(--ai-raw-abyss-800);
+  --ai-surface-disabled: 0 30 40;
   --ai-th-bg: var(--ai-raw-abyss-950);
   --ai-row-hover-bg: rgb(var(--ai-raw-abyss-800) / 0.7);
   --ai-nav-bg: rgb(0 21 28 / 0.72);
@@ -450,6 +466,7 @@
   --ai-surface-1: var(--ai-raw-green-lite-elevated);
   --ai-surface-2: var(--ai-raw-green-lite-600);
   --ai-surface-3: var(--ai-raw-green-lite-400);
+  --ai-surface-disabled: 252 254 254;
   --ai-line: var(--ai-raw-green-lite-300);
   --ai-line-strong: var(--ai-raw-green-lite-200);
   --ai-th-bg: var(--ai-raw-green-lite-600);
