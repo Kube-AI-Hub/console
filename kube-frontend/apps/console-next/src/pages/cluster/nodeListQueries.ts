@@ -38,6 +38,18 @@ export function useNodesTime(cluster: string) {
     queryFn: ({ signal }) => nodeListApi(api).timeMetrics({ cluster, signal }) });
 }
 
+/**
+ * The roles the cluster actually uses, for the role filter.
+ *
+ * Shares the `node-list` cache key space so a mutation that invalidates the list also
+ * refreshes the choices — a node that just gained a role should appear in the filter
+ * without a reload.
+ */
+export function useNodeRoles(cluster: string) {
+  return useQuery({ queryKey: ['node-list-roles', cluster], retry: false, staleTime: 60_000,
+    queryFn: ({ signal }) => nodeListApi(api).roles({ cluster, signal }) });
+}
+
 export function timeOffsets(values: Record<string, NodeMetricValues>): Record<string, { offset: number | undefined; synced: boolean | undefined }> {
   const times = Object.values(values).map((entry) => entry.node_time_seconds).filter((value): value is number => value !== undefined && Number.isFinite(value)).sort((a, b) => a - b);
   const middle = Math.floor(times.length / 2);

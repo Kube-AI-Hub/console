@@ -116,6 +116,43 @@ export function nodeListApi(client: Client) {
       return body.totalItems!;
     },
     metrics: (params: { cluster: string; names: string[]; signal?: AbortSignal }) => metrics(params.cluster, params.names, false, params.signal),
+    /**
+     * Every role the cluster actually uses, with how many nodes carry it.
+     *
+     * The filter offers these rather than a hard-coded list: a cluster administrator
+     * can label nodes with any role, and a filter that only knows the four roles this
+     * console ships would leave their nodes unreachable from the dropdown.
+     *
+     * One `limit=-1` read, the same shape `timeMetrics` already makes — the API has
+     * no role aggregate, and the alternative (a request per candidate role) is worse
+     * on every count.
+     */
+    async roles(params: { cluster: string; signal?: AbortSignal }): Promise<Array<{ role: string; count: number }>> {
+      const body = await client.request<{ items?: KubeObject[] }>(base(params.cluster), {
+        query: { limit: -1, labelSelector: NODE_SELECTOR }, ...(params.signal ? { signal: params.signal } : {}),
+      });
+      const counts = new Map<string, number>();
+      for (const item of body.items ?? []) {
+        const labels = (item.metadata?.labels ?? {}) as Record<string, string>;
+        for (const key of Object.keys(labels)) {
+          if (!key.startsWith('node-role.kubernetes.io/')) continue;
+          const role = key.slice('node-role.kubernetes.io/'.length);
+          /*
+           * Two exclusions, both because the filter already covers them:
+           *
+           * - `worker` is the default role and is an explicit filter value meaning
+           *   "not control-plane", so counting the label would offer two ways to ask
+           *   the same question.
+           * - `control-plane` (and its pre-1.20 alias `master`) is what the `master`
+           *   filter matches. Listing it separately put 「控制平面节点」and「控制平面」
+           *   side by side, filtering identically.
+           */
+          if (!role || role === 'worker' || role === 'control-plane' || role === 'master') continue;
+          counts.set(role, (counts.get(role) ?? 0) + 1);
+        }
+      }
+      return [...counts.entries()].map(([role, count]) => ({ role, count })).sort((a, b) => a.role.localeCompare(b.role));
+    },
     async timeMetrics(params: { cluster: string; signal?: AbortSignal }) {
       const body = await client.request<{ items?: KubeObject[] }>(base(params.cluster), {
         query: { limit: -1, labelSelector: NODE_SELECTOR }, ...(params.signal ? { signal: params.signal } : {}),

@@ -41,11 +41,24 @@ describe('node scoped resources and writes', () => {
       calls.push({ url: String(input), body: JSON.parse(String(init?.body)) });
       return Response.json({});
     }) as typeof fetch });
-    await nodesWriteApi(client).setUnschedulable({ cluster: 'member', name: 'gpu01', unschedulable: true });
-    await nodesWriteApi(client).updateMetadata({ cluster: 'member', name: 'gpu01', resourceVersion: '42',
+    /*
+     * `host`, not `member`: core-group writes have no member-cluster form, and
+     * `coreWritePath` refuses one rather than silently writing to the host (see
+     * `paths.ts`). This case is about which fields the patch carries, so it uses the
+     * cluster where the write is supported.
+     */
+    await nodesWriteApi(client).setUnschedulable({ cluster: 'host', name: 'gpu01', unschedulable: true });
+    await nodesWriteApi(client).updateMetadata({ cluster: 'host', name: 'gpu01', resourceVersion: '42',
       labels: { 'test/remove': null, 'test/keep': 'yes' } });
-    expect(calls.every((call) => call.url.endsWith('/api/v1/clusters/member/nodes/gpu01'))).toBe(true);
+    expect(calls.every((call) => call.url.endsWith('/api/v1/nodes/gpu01'))).toBe(true);
     expect(calls[1]?.body).toEqual({ metadata: { resourceVersion: '42', labels: { 'test/remove': null, 'test/keep': 'yes' } } });
+  });
+  it('refuses a member-cluster write instead of writing to the host', async () => {
+    // Silently redirecting a write to another cluster is worse than saying no. The
+    // refusal surfaces as a rejected promise because the method is `async`.
+    await expect(nodesWriteApi(createClient({ fetchImpl: (async () => Response.json({})) as typeof fetch }))
+      .setUnschedulable({ cluster: 'member', name: 'gpu01', unschedulable: true }))
+      .rejects.toThrow(/成员集群/);
   });
   it('preserves extended capacity and accelerator system fields', () => {
     const detail = toNodeDetail({ metadata: { name: 'gpu01', labels: { xpu: 'nvidia-B200' } },

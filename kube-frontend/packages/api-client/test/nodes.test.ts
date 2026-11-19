@@ -21,19 +21,45 @@ const node = (labels: Record<string, string>, conditions: Array<Record<string, u
 });
 
 describe('node status', () => {
-  it('is Ready when the Ready condition is True', () => {
-    expect(nodeStatus(node({}, [{ type: 'Ready', status: 'True' }]))).toBe('Ready');
+  /*
+   * Three states, matching `kube-server`'s `getNodeStatus`: `running` when every
+   * expected condition holds, `warning` when one does not, `unschedulable` when
+   * cordoned. The `Ready` condition alone cannot express the last two — a cordoned
+   * node is healthy but takes no new pods, and a pressure condition can be set while
+   * `Ready` is still True.
+   */
+  it('is Running when every expected condition holds', () => {
+    expect(nodeStatus(node({}, [{ type: 'Ready', status: 'True' }]))).toBe('Running');
+    expect(nodeStatus(node({}, [
+      { type: 'Ready', status: 'True' }, { type: 'MemoryPressure', status: 'False' },
+    ]))).toBe('Running');
   });
 
-  it('is NotReady when the Ready condition is False', () => {
-    expect(nodeStatus(node({}, [{ type: 'Ready', status: 'False' }]))).toBe('NotReady');
+  it('is Warning when any expected condition is out of range', () => {
+    expect(nodeStatus(node({}, [{ type: 'Ready', status: 'False' }]))).toBe('Warning');
+    // `Ready` True does not save it: memory pressure is its own unhealthy fact, and
+    // the old console's JS version decided from the *last* condition only.
+    expect(nodeStatus(node({}, [
+      { type: 'MemoryPressure', status: 'True' }, { type: 'Ready', status: 'True' },
+    ]))).toBe('Warning');
   });
 
-  it('is Unknown when no Ready condition has been reported yet', () => {
-    // A node that has just joined has no condition; calling that "Ready" would hide
-    // exactly the state an operator is looking for.
-    expect(nodeStatus(node({}, []))).toBe('Unknown');
-    expect(nodeStatus({ metadata: { name: 'n' } })).toBe('Unknown');
+  it('is Unschedulable when cordoned, even with every condition healthy', () => {
+    // `spec.unschedulable`, not a condition: cordoning is a spec write, and a
+    // cordoned node is still perfectly healthy — it just takes no new pods.
+    expect(nodeStatus({
+      metadata: { name: 'n1', labels: {} },
+      spec: { unschedulable: true },
+      status: { conditions: [{ type: 'Ready', status: 'True' }] },
+    })).toBe('Unschedulable');
+  });
+
+  it('ignores conditions the server does not expect anything from', () => {
+    // A condition outside `expectedConditions` carries no expectation, so it cannot
+    // make a node unhealthy.
+    expect(nodeStatus(node({}, [
+      { type: 'Ready', status: 'True' }, { type: 'FlannelIsUp', status: 'False' },
+    ]))).toBe('Running');
   });
 });
 
@@ -61,7 +87,9 @@ describe('node role', () => {
 describe('node summary', () => {
   it('carries address, version and allocatable resources', () => {
     const summary = toNodeSummary(node({}, [{ type: 'Ready', status: 'True' }]));
-    expect(summary.status).toBe('Ready');
+    // `Running`, not `Ready`: the summary carries `kube-server`'s three-state status
+    // (see `nodeStatus`), not the raw `Ready` condition.
+    expect(summary.status).toBe('Running');
     expect(summary.internalIP).toBe('10.0.0.5');
     expect(summary.version).toBe('v1.31.0');
     expect(summary.cpu).toBe('16');

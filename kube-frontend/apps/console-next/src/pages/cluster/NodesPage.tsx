@@ -12,11 +12,11 @@ import { formatCpu, formatBytes } from '@/lib/quantity';
 import { GPU_MODES } from './gpuModeConfig';
 import { GPU_VENDOR_LABEL_KEYS, vendorKey } from './gpuVendors';
 import { formatGpuMemory } from './gpuFormat';
-import { roleLabels } from './nodeRoles';
+import { roleLabel, roleLabels } from './nodeRoles';
 import { GpuModeDialog } from './GpuModeDialog';
 import { NodeJoinDialog } from './NodeJoinDialog';
 import { NodeTaintsBulkDialog } from './NodeTaintsBulkDialog';
-import { hasPendingMode, timeOffsets, useNodesList, useNodesMetrics, useNodesStats, useNodesTime } from './nodeListQueries';
+import { hasPendingMode, timeOffsets, useNodeRoles, useNodesList, useNodesMetrics, useNodesStats, useNodesTime } from './nodeListQueries';
 import { VendorIcon } from './VendorIcon';
 
 /**
@@ -77,6 +77,7 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
   const time = useNodesTime(cluster);
   const offsets = React.useMemo(() => timeOffsets(time.data ?? {}), [time.data]);
   const { stats, controlPlane } = useNodesStats(cluster);
+  const roles = useNodeRoles(cluster);
   const refresh = () => { void nodes.refetch(); void metrics.refetch(); void time.refetch(); void stats.refetch(); void controlPlane.refetch(); };
   const invalidate = () => {
     for (const key of ['node-list', 'node-list-stats', 'node-list-control-plane', 'node-list-metrics', 'node-list-time', 'node-detail', 'node-taints-bulk', 'cluster']) {
@@ -374,12 +375,21 @@ export function NodesPage({ cluster }: { cluster: string }): React.ReactElement 
        */
       { key: 'status', column: 'status', title: t('node.filter.status'), allLabel: t('node.filter.all'), aiId: 'nodes:filter:status', options: [
         { value: 'running', label: t('node.list.running') }, { value: 'warning', label: t('node.list.warning') }, { value: 'unschedulable', label: t('node.status.unschedulable') }] },
+      /*
+       * Roles come from the cluster, not from a constant.
+       *
+       * The server matches any `node-role.kubernetes.io/<value>` label, and an
+       * administrator can add one this console has never heard of. A fixed list
+       * would leave those nodes unreachable from the dropdown.
+       *
+       * `master` and `worker` are the two values that are not plain label matches —
+       * `master` spans two label names, `worker` means "not control-plane" — so they
+       * are prepended and appended around the discovered ones. `roles()` already
+       * drops the labels those two cover.
+       */
       { key: 'role', column: 'role', title: t('node.filter.role'), allLabel: t('node.filter.all'), aiId: 'nodes:filter:role', options: [
         { value: 'master', label: t('node.list.controlPlane') },
-        // `storage` is a real role in this platform's clusters (every node here has
-        // it), and the server filters any `node-role.kubernetes.io/<value>` label, so
-        // this is a pass-through rather than a new server capability.
-        { value: 'storage', label: t('node.role.storage') },
+        ...(roles.data ?? []).map((entry) => ({ value: entry.role, label: roleLabel(entry.role, t) })),
         { value: 'worker', label: t('node.list.worker') }] },
       { key: 'vendor', column: 'vendor', title: t('node.filter.vendor'), multiple: true, searchable: true, aiId: 'nodes:filter:vendor', emptyText: t('common.empty'),
         options: Array.from(new Set([...Object.keys(GPU_VENDOR_LABEL_KEYS), ...(stats.data?.vendors ?? []).map((entry) => entry.vendor)]))
