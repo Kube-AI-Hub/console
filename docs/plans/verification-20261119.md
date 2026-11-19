@@ -4,6 +4,22 @@
 > 与已迁移模块的**串行回归**（V-4，发现并修掉 3 处问题）。
 > 方法见[迁移指南](../legacy-ui-migration-guide.md) §7（验收维度）与[执行路线](migration-execution-roadmap.md)。
 
+## 速览（2026-11-19 收尾）
+
+| 范围 | 状态 | 证据 |
+| --- | --- | --- |
+| `app-workloads`（88 例） | **81 passed / 7 skipped / 0 failed** | 本页 §T；7 条 skip 均为环境（旧站不可解析、S2I 活控制器 ×5、数据前提） |
+| `project-settings + secrets` | 全绿（个别 skip 为数据条件） | 本页 §B |
+| `configmaps + storage` | 全绿 | 本页 §B |
+| `monitoring` | **16 passed** | 本页 §E |
+| `cluster-management` 节点/概览/GPU | **由并行会话同批改造页面与用例**，本侧暂停跟进 | 见 §W |
+| 视觉三轴（1024/1600、深浅、英文） | 50 张截图 **0 problems** | 本页 §L，工具 `tools/shots_migrated_pages.py` |
+| 非 admin（V-3）/ member（V-2） | **环境阻塞**，附 11 步请求证据与解除条件 | 本页 §1–§5 |
+| 服务拓扑图 | **环境阻塞**（接口 500） | [网关记录 §8](page-project-gateway-cluster-card-20261119.md) |
+| 生产部署（V-1） | 未验收 | 需要目标环境 |
+
+**本会话共修 10 个真实缺陷**（重复句柄 ×2、排序三态、状态文案 ×2、触控目标 ×3、编辑 409 竞争、缺句柄），沉淀 **3 条守卫**（句柄唯一性、状态文案、每页档位）与 **2 条判定法**（私有预览、单跑判干扰）。
+
 ## 1. 目标
 
 确认写入口在**没有写权限**的账号下是「不出现 / 明确说明」，而不是「点了才 403」。这项验收一直是能力矩阵里 `未验收` 的一栏，此前每批交付都只以 admin 身份验证。
@@ -295,3 +311,13 @@ S2I 整套现状：**5 passed / 5 failed / 2 skipped**（01、03 两条列表用
 复跑 **1 passed（15.30s）**。
 
 **方法沉淀**：同一功能出现两版实现时，**保留语义更简单的那版**并删掉另一版，而不是两版并存；用例的断言则应绑定**契约**（`aria-sort`）而不是点击次数。
+
+## W. 边界：cluster-management 的节点/概览/GPU 区域由并行会话同批改造（2026-11-19 第 39 轮）
+
+复跑该区域（`-k 'NODES or OVERVIEW or GPU'`）：**13 failed / 16 passed / 1 skipped**。查提交记录确认，这一区域的**页面与用例是在同一个提交里一起改的**（例如 `NODES_01` 最后一次改动是并行会话的 `feat(console-next): migrate storage, monitoring, settings, cluster and access areas`）。
+
+我在这个区域反复修过三次（`NODES_01/07/08/09`、`GPU_02`、`GPU_RESOURCE_01`、`OVERVIEW_04/06`、`EDGE_NODES_01`），每次都随下一次改造被覆盖。**结论：这个区域不再由本侧跟进**——同一个人改页面和改断言时，外部同步修改只会制造冲突与返工。
+
+本侧继续负责的范围：`app-workloads`（已全绿）、`project-settings`、`secrets`、`configmaps`、`storage`、`monitoring`、三轴截图巡检、以及文档与守卫。
+
+**方法沉淀**：并行改造同一区域时，**先确认「页面与用例是不是同一个提交在改」**；是的话就把该区域交给那一侧，自己转去没有冲突的范围——两边同时改同一批断言，等于互相覆盖。
