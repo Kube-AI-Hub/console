@@ -113,6 +113,17 @@ export interface TimeSeriesChartProps extends Omit<React.HTMLAttributes<HTMLDivE
    * rather than the chart being replaced.
    */
   animate?: boolean;
+  /**
+   * A refetch is in flight while the plot stays on screen.
+   *
+   * Renders a translucent veil over the drawing, the same gesture the resource
+   * lists use for a manual refresh. Deliberately **not** tied to the data: an
+   * auto-refresh moves the window every few seconds, and a veil on every tick would
+   * be a strobe. The host decides which kind of refresh this is.
+   */
+  refreshing?: boolean;
+  /** Accessible name for the veil, e.g. 更新中… */
+  refreshingLabel?: string;
   /** Legend position. `none` renders no legend (the host may render its own). */
   legend?: 'bottom' | 'none';
   /**
@@ -238,6 +249,8 @@ export function TimeSeriesChart({
   formatValue = String,
   formatTime = (at) => new Date(at).toLocaleTimeString(),
   animate = true,
+  refreshing = false,
+  refreshingLabel = '更新中…',
   legend = 'bottom',
   onToggleSeries,
   className,
@@ -280,18 +293,19 @@ export function TimeSeriesChart({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seriesKey]);
   const isHidden = (key: string): boolean => ownHidden.has(key);
-  const toggleLegend = (key: string): void => {
-    if (onToggleSeries) {
-      onToggleSeries(key);
-      return;
-    }
-    setOwnHidden((current) => {
-      const next = new Set(current);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
-  };
+  /**
+   * How many series carry data — the floor the legend cannot go below.
+   *
+   * A chart whose lines are all switched off has nothing to draw, and it used to
+   * collapse into the empty state: "hide the last line" looked like the data had
+   * disappeared. At least one line with points always stays visible, so the legend
+   * can never blank the plot.
+   *
+   * Counted over the *plotted* series (which already include the `hidden` prop), not
+   * over the raw input: a line the host seeded as hidden is not visible to begin
+   * with, and counting it would refuse a click that is the reader's only line left.
+   */
+  const hasPoints = React.useMemo(() => series.filter((entry) => entry.points.length > 0), [series]);
   const plotted = React.useMemo(
     () => series.map((entry) => ({ ...entry, hidden: isHidden(entry.key) })),
     // `isHidden` closes over both the prop and the local set; the dependencies name
@@ -299,6 +313,36 @@ export function TimeSeriesChart({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [series, ownHidden, onToggleSeries],
   );
+  const toggleLegend = (key: string): void => {
+    if (onToggleSeries) {
+      onToggleSeries(key);
+      return;
+    }
+    setOwnHidden((current) => {
+      /*
+       * `current` is the state *before* this click: if the key is already hidden, the
+       * click shows it again; otherwise the click hides it.
+       */
+      if (current.has(key)) {
+        const next = new Set(current);
+        next.delete(key);
+        return next;
+      }
+      /*
+       * Refuse to hide the last line that is both visible and non-empty.
+       *
+       * A chart whose lines are all switched off has nothing to draw, and it used to
+       * collapse into the empty state: "hide the last line" looked like the data had
+       * vanished. A single-series chart — the overview's usage plot — was one click
+       * away from a blank panel.
+       */
+      const remains = hasPoints.filter((entry) => entry.key !== key && !current.has(entry.key));
+      if (remains.length === 0 && hasPoints.some((entry) => entry.key === key)) return current;
+      const next = new Set(current);
+      next.add(key);
+      return next;
+    });
+  };
   const { rows, visible } = React.useMemo(() => pivotSeries(plotted, start, end, maxGap), [plotted, start, end, maxGap]);
   // recharts does not consult `prefers-reduced-motion`; this design system does.
   const moving = animate && !prefersReducedMotion();
@@ -331,7 +375,14 @@ export function TimeSeriesChart({
 
   return (
     <div {...attributes} ref={hostRef} className={cn('flex min-w-0 flex-col gap-2', className)} data-ai-state="ready">
-      <div style={{ height }} role="img" aria-label={label} data-ai-series-count={visible.length}>
+      {/*
+        * A fixed-height box around the plot.
+        *
+        * The height is declared here rather than by the drawing library: a chart that
+        * grows after its first paint moves everything below it, and on a monitoring
+        * page that is the whole panel jumping as data arrives.
+        */}
+      <div className="relative w-full" style={{ height }} role="img" aria-label={label} data-ai-series-count={visible.length}>
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={rows} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
             <CartesianGrid stroke="rgb(var(--ai-line))" strokeOpacity={0.35} vertical={false} />
@@ -425,6 +476,27 @@ export function TimeSeriesChart({
             {hasBar ? null : null}
           </ComposedChart>
         </ResponsiveContainer>
+        {/*
+          * The manual-refresh veil, inside the fixed box so nothing moves when it
+          * appears. It covers the drawing only — the legend stays readable, which is
+          * what a reader compares against once the new data lands.
+          */}
+        {refreshing ? (
+          <div
+            aria-hidden="true"
+            data-ai-chart-refreshing
+            className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-ai-sm bg-ai-bg/45 backdrop-blur-[1px]"
+          >
+            <span className="flex items-center gap-2 rounded-ai-pill border border-ai-line bg-ai-bg-overlay px-3 py-1.5 text-[11px] text-ai-fg-secondary shadow-ai-pop">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                className="size-3.5 animate-spin motion-reduce:animate-none">
+                <path d="M20 11a8 8 0 1 0-2.3 5.7" />
+                <path d="M20 4v7h-7" />
+              </svg>
+              {refreshingLabel}
+            </span>
+          </div>
+        ) : null}
       </div>
 
       {legend === 'bottom' ? (

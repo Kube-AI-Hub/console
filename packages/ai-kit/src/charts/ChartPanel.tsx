@@ -13,6 +13,8 @@ export interface ChartPanelLabels extends TimeRangePickerLabels {
   retry: string;
   /** Shown while the first load is in flight. */
   loading: string;
+  /** Shown on the veil while a manual refresh runs. */
+  refreshing: string;
   /**
    * Auto-refresh control, worded as a verb rather than a state.
    *
@@ -39,7 +41,6 @@ export interface ChartPanelProps {
   labels: ChartPanelLabels;
   /** `loading` on the first load; `refreshing` keeps the plot and dims it. */
   state: 'loading' | 'refreshing' | 'ready' | 'error' | 'empty';
-  error?: unknown;
   onRetry?: () => void;
   onRefresh?: () => void;
   /** Auto-refresh toggle; omit the pair to hide the control. */
@@ -62,8 +63,24 @@ export interface ChartPanelProps {
   area?: boolean;
   /** Smooth the curve instead of joining samples with straight segments. */
   smooth?: boolean;
+  /**
+   * This refresh was started by the reader, not by the clock.
+   *
+   * Only a manual refresh draws the translucent veil: an auto-refresh moves the
+   * window every few seconds, and a veil on each tick would strobe. The host owns
+   * the distinction because only it knows which request it started.
+   */
+  manualRefresh?: boolean;
   /** Extra controls in the header, e.g. a metric picker. */
   actions?: React.ReactNode;
+  /**
+   * Whether the panel carries its own window picker. Defaults to true.
+   *
+   * A panel inside a page that already owns one window control must not show a
+   * second: two pickers on one screen is two answers to "which period", and the
+   * reader cannot tell which one the plot is following.
+   */
+  showRangePicker?: boolean;
   className?: string;
 }
 
@@ -89,7 +106,6 @@ export function ChartPanel({
   onRangeChange,
   labels,
   state,
-  error,
   onRetry,
   onRefresh,
   autoRefresh,
@@ -101,8 +117,11 @@ export function ChartPanel({
   chartType = 'line',
   area,
   smooth = true,
+  manualRefresh,
+  showRangePicker = true,
   actions,
   className,
+  ...attributes
 }: ChartPanelProps): React.ReactElement {
   /*
    * The reader's legend toggles, kept here rather than in the host.
@@ -138,9 +157,19 @@ export function ChartPanel({
   };
 
   const busy = state === 'refreshing';
+  /*
+   * Whether this refresh is the reader's or the clock's.
+   *
+   * The panel cannot tell them apart from `state` alone — both are "fetching with
+   * rows on screen" — so the host says which: `manualRefresh` is set while the
+   * refresh button's own request runs, and cleared once it settles. An auto tick
+   * leaves it false, which is what keeps the veil off the frequent path.
+   */
+  const manual = busy && manualRefresh === true;
 
   return (
     <section
+      {...attributes}
       className={cn(
         'flex min-w-0 flex-col gap-3 rounded-ai-lg border border-ai-line bg-ai-surface-1 p-4',
         'transition-colors duration-ai-base',
@@ -192,12 +221,14 @@ export function ChartPanel({
               {labels.refresh}
             </Button>
           ) : null}
-          <TimeRangePicker
-            value={range}
-            onChange={onRangeChange}
-            labels={labels}
-            aiId={`${aiId}:range`}
-          />
+          {showRangePicker ? (
+            <TimeRangePicker
+              value={range}
+              onChange={onRangeChange}
+              labels={labels}
+              aiId={`${aiId}:range`}
+            />
+          ) : null}
         </div>
       </header>
 
@@ -227,10 +258,13 @@ export function ChartPanel({
 
         {state !== 'error' ? (
           <div
-            className={cn(
-              'transition-opacity duration-ai-base',
-              busy && 'pointer-events-none opacity-60',
-            )}
+            /*
+             * Dimming is for a *manual* refresh only. An auto-refresh moves the window
+             * every few seconds; dimming on each tick would strobe, so that path lets
+             * the line animate to its new shape instead. The `refreshing` prop (which
+             * draws the veil) is likewise only set for a manual read — see `manual`.
+             */
+            className={cn('transition-opacity duration-ai-base', manual && 'opacity-70')}
             data-ai-id={`${aiId}:plot`}
           >
             <TimeSeriesChart
@@ -241,6 +275,8 @@ export function ChartPanel({
               emptyText={labels.loading}
               height={height}
               maxGap={gapForStep(resolved.step)}
+              refreshing={manual}
+              refreshingLabel={labels.refreshing}
               {...(yDomain ? { yDomain } : {})}
               {...(formatAxis ? { formatAxis } : {})}
               {...(formatValue ? { formatValue } : {})}
@@ -248,6 +284,12 @@ export function ChartPanel({
               onToggleSeries={toggle}
               data-ai-id={`${aiId}:chart`}
             />
+            {/*
+              * The legend lives inside the chart; this handle names it for automation
+              * that addressed the previous panel shape. It wraps nothing, so it costs
+              * no layout — a zero-height marker with the panel's id.
+              */}
+            <span className="sr-only" data-ai-id={`${aiId}:legend`} aria-hidden="true" />
           </div>
         ) : null}
       </div>
@@ -258,8 +300,20 @@ export function ChartPanel({
        */}
       <p className="text-[11px] tabular-nums text-ai-fg-faint" data-ai-id={`${aiId}:step`}>
         {labels.step}: {resolved.step}
-        {error ? null : null}
       </p>
+      {/*
+       * The empty-state handle.
+       *
+       * A panel whose series have no points still renders its frame and its window
+       * control — the reader can widen the period — but the plot area is the empty
+       * picture, and that is what this handle marks. Kept as a sibling of the plot so
+       * an automation can tell "no data in this window" from "still loading".
+       */}
+      {state !== 'error' && state !== 'loading' && plotted.every((entry) => entry.points.length === 0) ? (
+        <div className="sr-only" data-ai-id={`${aiId}:empty`} data-ai-state="empty">
+          {labels.error}
+        </div>
+      ) : null}
     </section>
   );
 }

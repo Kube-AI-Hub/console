@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { rangeMetricsApi, type MetricSeries } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { Button, Skeleton, TREND_SERIES_COLORS, cn } from '@kube-ai-hub/ui';
-import { TimeSeriesChart } from '@kube-ai-hub/ui/charts';
+import { ChartPanel, type TimeRange } from '@kube-ai-hub/ui/charts';
 import type { LocaleKey } from '@kube-ai-hub/locales';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
@@ -12,6 +12,7 @@ import { ClusterStatusSection } from './ClusterStatusSection';
 import { ClusterOverviewComponentsBlock } from './ClusterOverviewComponentsBlock';
 import { ClusterOverviewRdmaBlock, RDMA_BLOCK_METRICS } from './ClusterOverviewRdmaBlock';
 import { formatBytes } from './monitorFormat';
+import { chartPanelLabels } from './OverviewResourcePanel';
 import type { MonitorTabState, WindowContext } from './monitorTabs';
 
 /**
@@ -176,6 +177,13 @@ export function ClusterOverviewTab({
 }: ClusterOverviewTabProps): React.ReactElement {
   const t = useT();
   const [selected, setSelected] = React.useState<UsageSpec['key']>('gpuMemory');
+  /*
+   * The tab reads the page's window (`start`/`end`/`step`) and never owns one: the
+   * header has the only picker, so a second one here would be two answers to "which
+   * period". The panel still needs a `TimeRange` value to label its refresh veil, so
+   * the page's resolved span is passed in as an absolute range.
+   */
+  const range = React.useMemo<TimeRange>(() => ({ kind: 'absolute', start, end }), [start, end]);
 
   const query = useQuery({
     queryKey: ['cluster-monitor', 'overview', cluster, rangeKey, start, end],
@@ -186,6 +194,17 @@ export function ClusterOverviewTab({
     staleTime: 60_000,
     retry: false,
   });
+
+  /*
+   * Manual vs auto refresh. The page moves the window every few seconds when
+   * 自动刷新 is on — that path must not dim the plot. A click on 刷新 does, which is
+   * the same gesture the resource lists use.
+   */
+  const [manualRefresh, setManualRefresh] = React.useState(false);
+  const refreshNow = React.useCallback(() => {
+    setManualRefresh(true);
+    void query.refetch().finally(() => setManualRefresh(false));
+  }, [query]);
 
   const seriesByName = React.useMemo(() => {
     const map = new Map<string, MetricSeries>();
@@ -215,7 +234,22 @@ export function ClusterOverviewTab({
       .map((point) => ({ at: point.at, value: point.value * scale }));
   }, [seriesByName, selectedSpec]);
 
-  const chartLatest = chartPoints.length > 0 ? chartPoints[chartPoints.length - 1]!.value : undefined;
+  const chartLabels = React.useMemo(() => chartPanelLabels(t), [t]);
+  /*
+   * The panel's state, derived from this tab's query.
+   *
+   * `refreshing` is what keeps the plot on screen while new points arrive — the
+   * skeleton is for the first load only, so a refresh never blanks the chart.
+   */
+  const chartState: 'loading' | 'refreshing' | 'ready' | 'error' | 'empty' = query.isPending
+    ? 'loading'
+    : query.isError
+      ? 'error'
+      : chartPoints.length === 0
+        ? 'empty'
+        : query.isFetching
+          ? 'refreshing'
+          : 'ready';
 
   /**
    * The tab's main query state.
@@ -287,56 +321,40 @@ export function ClusterOverviewTab({
             </ul>
 
             {/* ---- The main chart: the selected row's trend. ----------------- */}
-            <section
-              className="flex min-w-0 flex-col gap-2 rounded-ai-lg border border-ai-line bg-ai-surface-1 p-4"
-              data-ai-id={USAGE_CHART_ID}
+            {/*
+              * `ChartPanel` rather than a bare plot: it owns the fixed-height box, the
+              * window picker, the refresh (with its manual-only veil) and the legend.
+              * The title and the current value stay in the page's own header row above
+              * it, because the seven-row list on the left is the page's subject and the
+              * chart is the detail of the row the reader picked.
+              */}
+            <ChartPanel
+              aiId={USAGE_CHART_ID}
+              title={t(selectedSpec.chartLabelKey)}
+              series={[
+                {
+                  key: selectedSpec.key,
+                  label: t(selectedSpec.chartLabelKey),
+                  points: chartPoints,
+                  color: TREND_SERIES_COLORS[0],
+                  area: true,
+                  smooth: true,
+                },
+              ]}
+              range={range}
+              onRangeChange={() => undefined}
+              showRangePicker={false}
+              labels={chartLabels}
+              state={chartState}
+              onRetry={() => void query.refetch()}
+              onRefresh={refreshNow}
+              manualRefresh={manualRefresh}
+              height={260}
+              formatValue={(value) => formatChartValue(value, selectedSpec.chartKind)}
+              className="min-h-[22rem]"
               data-ai-state={chartPoints.length === 0 ? 'empty' : 'ready'}
               aria-label={t(selectedSpec.chartLabelKey)}
-            >
-              <div className="flex items-baseline justify-between gap-2">
-                <h3 className="text-sm font-medium text-ai-fg">{t(selectedSpec.chartLabelKey)}</h3>
-                <span className="text-xs tabular-nums text-ai-fg-muted" data-ai-id={USAGE_CHART_ID + ':now'}>
-                  {chartLatest === undefined ? '-' : formatChartValue(chartLatest, selectedSpec.chartKind)}
-                </span>
-              </div>
-              {chartPoints.length === 0 ? (
-                <div className="flex flex-col gap-1 py-10" data-ai-id={`${USAGE_CHART_ID}:empty`}>
-                  <span className="text-sm text-ai-fg-secondary">{t('cluster.monitor.empty')}</span>
-                  <span className="text-xs text-ai-fg-muted">{t('cluster.monitor.emptyHint')}</span>
-                </div>
-              ) : (
-                <TimeSeriesChart
-                  series={[
-                    {
-                      key: selectedSpec.key,
-                      label: t(selectedSpec.chartLabelKey),
-                      points: chartPoints,
-                      color: TREND_SERIES_COLORS[0],
-                      area: true,
-                      smooth: true,
-                    },
-                  ]}
-                  start={start}
-                  end={end}
-                  label={t(selectedSpec.chartLabelKey)}
-                  emptyText={t('cluster.monitor.empty')}
-                  height={220}
-                  formatValue={(value) => formatChartValue(value, selectedSpec.chartKind)}
-                  data-ai-id={USAGE_CHART_ID + ':trend'}
-                />
-              )}
-              <div className="flex flex-wrap items-center gap-2 text-xs" data-ai-id={USAGE_CHART_ID + ':legend'}>
-                <span
-                  aria-hidden
-                  className="inline-block size-2.5 shrink-0 rounded-full"
-                  style={{ backgroundColor: TREND_SERIES_COLORS[0] }}
-                />
-                <span className="text-ai-fg-secondary">{t(selectedSpec.chartLabelKey)}</span>
-                <span className="tabular-nums text-ai-fg-muted" data-ai-id={USAGE_CHART_ID + ':legend:value'}>
-                  {chartLatest === undefined ? '-' : formatChartValue(chartLatest, selectedSpec.chartKind)}
-                </span>
-              </div>
-            </section>
+            />
           </div>
         ) : null}
       </section>

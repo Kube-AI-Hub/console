@@ -2,16 +2,73 @@ import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { clusterMetricsApi, rangeMetricsApi, type ClusterUsage } from '@kube-ai-hub/api-client';
-import { Button, Card, Icon, MetricRing, Panel, Progress, Skeleton, cn, useSpotlight } from '@kube-ai-hub/ui';
-import { TimeSeriesChart } from '@kube-ai-hub/ui/charts';
+import { Card, Icon, MetricRing, Panel, Progress, Skeleton, cn, useSpotlight } from '@kube-ai-hub/ui';
+import {
+  ChartPanel,
+  presetRange,
+  resolveRange,
+  type ChartPanelLabels,
+  type TimeRange,
+} from '@kube-ai-hub/ui/charts';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { api } from '@/api';
 import { useT } from '@/i18n';
-import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import {
-  OVERVIEW_RESOURCES, OVERVIEW_WINDOWS, formatOverviewValue, overviewRatio, overviewRatioPoints,
-  type OverviewResource, type OverviewWindow,
+  OVERVIEW_RESOURCES, formatOverviewValue, overviewRatio, overviewRatioPoints,
+  type OverviewResource,
 } from './overviewResourceMetrics';
+
+/**
+ * The copy the shared chart panel needs, assembled once.
+ *
+ * Every monitoring surface passes the same sentences; keeping the assembly in one
+ * helper means a wording change lands everywhere instead of on the page that was
+ * edited.
+ */
+export function chartPanelLabels(t: ReturnType<typeof useT>): ChartPanelLabels {
+  return {
+    placeholder: t('cluster.monitor.range.1h'),
+    presets: t('cluster.monitor.rangeLabel'),
+    custom: t('cluster.monitor.rangeCustom'),
+    rangePlaceholder: t('cluster.monitor.rangePlaceholder'),
+    /*
+     * The preset labels are localised here, not left as bare keys.
+     *
+     * `TimeRangePicker` falls back to the preset key when the host passes none, which
+     * is fine for a story but reads as `1h` / `6h` on a Chinese page — the picker's
+     * menu was a column of identifiers.
+     */
+    presetLabels: {
+      '10m': t('cluster.monitor.range.10m'),
+      '20m': t('cluster.monitor.range.20m'),
+      '30m': t('cluster.monitor.range.30m'),
+      '1h': t('cluster.monitor.range.1h'),
+      '2h': t('cluster.monitor.range.2h'),
+      '3h': t('cluster.monitor.range.3h'),
+      '5h': t('cluster.monitor.range.5h'),
+      '12h': t('cluster.monitor.range.12h'),
+      '1d': t('cluster.monitor.range.1d'),
+      '2d': t('cluster.monitor.range.2d'),
+      '3d': t('cluster.monitor.range.3d'),
+      '7d': t('cluster.monitor.range.7d'),
+    },
+    step: t('cluster.monitor.step'),
+    stepHint: t('cluster.monitor.stepHint'),
+    stepOptions: [],
+    cancel: t('common.cancel'),
+    confirm: t('common.confirm'),
+    invalid: t('cluster.monitor.rangeInvalid'),
+    refresh: t('common.refresh'),
+    error: t('cluster.overview.emptyTrend'),
+    retry: t('common.retry'),
+    loading: t('common.loading'),
+    refreshing: t('cluster.monitor.refreshing'),
+    autoPause: t('cluster.monitor.autoPause'),
+    autoResume: t('cluster.monitor.autoResume'),
+    autoPauseLabel: t('cluster.monitor.autoPauseLabel'),
+    autoResumeLabel: t('cluster.monitor.autoResumeLabel'),
+  };
+}
 
 function ResourceMetricCard({ entry, data, active, onSelect }: {
   entry: (typeof OVERVIEW_RESOURCES)[number]; data: ClusterUsage; active: boolean;
@@ -158,11 +215,33 @@ export function NodeSummaryPanel({ cluster }: {
 }
 
 export function OverviewResourcePanel({ cluster, refreshAt }: {
-  cluster: string; refreshAt: number;
+  cluster: string;
+  /**
+   * The page's auto-refresh tick.
+   *
+   * Kept in the signature because the page passes it and because a rolling window
+   * has to move with the tick: the plot's `range` is a `TimeRange` now, so the
+   * component re-resolves it whenever this value changes rather than freezing the
+   * window at mount.
+   */
+  refreshAt: number;
 }): React.ReactElement {
   const t = useT();
   const [selected, setSelected] = React.useState<OverviewResource>('gpu-memory');
-  const [windowKey, setWindowKey] = React.useState<OverviewWindow>('1h');
+  /*
+   * The window is the shared range selection, not a local key: this panel is one of
+   * four monitoring surfaces, and a reader who picked "last 10 minutes" on the
+   * cluster monitor expects the same choice to mean the same thing here.
+   */
+  const [range, setRange] = React.useState<TimeRange>(() => presetRange('1h'));
+  /*
+   * Re-resolve the rolling window on every auto-refresh tick.
+   *
+   * `resolveRange` reads `Date.now()`; without this the window would be pinned to
+   * the instant the panel mounted and the page's timer would re-query the same
+   * frozen minutes. A fixed span is unaffected (its timestamps do not move).
+   */
+  const resolved = React.useMemo(() => resolveRange(range), [range, refreshAt]);
   const usage = useQuery({
     queryKey: ['cluster-usage', cluster], retry: false, staleTime: 30_000,
     refetchOnWindowFocus: false, refetchOnReconnect: false,
@@ -171,19 +250,38 @@ export function OverviewResourcePanel({ cluster, refreshAt }: {
   const resources = OVERVIEW_RESOURCES.filter((resource) => resource.key !== 'nodes' &&
     (!('gpu' in resource) || usage.data?.gpuTotal !== 0));
   const resource = resources.find((entry) => entry.key === selected) ?? resources[0]!;
-  const window = OVERVIEW_WINDOWS.find((entry) => entry.key === windowKey)!;
-  const start = refreshAt - window.ms;
   const trends = useQuery({
-    queryKey: ['overview-trends', cluster, resource.key, windowKey, start, refreshAt],
+    queryKey: ['overview-trends', cluster, resource.key, resolved.start, resolved.end],
     enabled: Boolean(usage.data), retry: false, staleTime: 30_000, refetchOnWindowFocus: false, refetchOnReconnect: false,
     queryFn: ({ signal }) => rangeMetricsApi(api).cluster({
-      cluster, metrics: [resource.metric, resource.capacity], start, end: refreshAt, step: window.step, signal,
+      cluster, metrics: [resource.metric, resource.capacity], start: resolved.start, end: resolved.end, step: resolved.step, signal,
     }),
   });
-  const points = React.useMemo(() => overviewRatioPoints(trends.data ?? [], resource.metric, resource.capacity),
+  /*
+   * Whether the current read is the reader's or the page's timer.
+   *
+   * The overview refreshes on its own cadence (`refreshAt` moves), which is the
+   * auto path: the line animates to the new shape with no veil. A click on 刷新 is
+   * the manual path and gets the translucent veil the resource lists use.
+   */
+  const [manualRefresh, setManualRefresh] = React.useState(false);
+  const refreshNow = React.useCallback(() => {
+    setManualRefresh(true);
+    void trends.refetch().finally(() => setManualRefresh(false));
+  }, [trends]);  const points = React.useMemo(() => overviewRatioPoints(trends.data ?? [], resource.metric, resource.capacity),
     [trends.data, resource.metric, resource.capacity]);
   const title = `${t(resource.label)} · ${t('cluster.overview.trend')}`;
   const prefix = 'overview:trend';
+  const chartLabels = React.useMemo(() => chartPanelLabels(t), [t]);
+  const trendState: 'loading' | 'refreshing' | 'ready' | 'error' | 'empty' = trends.isPending
+    ? 'loading'
+    : trends.isError
+      ? 'error'
+      : points.length === 0
+        ? 'empty'
+        : trends.isFetching
+          ? 'refreshing'
+          : 'ready';
   return <Panel title={t('cluster.overview.resourceOverview')} icon="computing" titleLevel={2}
     data-ai-id="overview:usage" aria-busy={usage.isFetching} className="min-w-0"
     actions={<span className="hidden text-xs text-ai-fg-muted sm:inline">{t('cluster.overview.selectTrend')}</span>}>
@@ -194,31 +292,44 @@ export function OverviewResourcePanel({ cluster, refreshAt }: {
       {resources.map((entry) => <ResourceMetricCard key={entry.key} entry={entry} data={usage.data}
         active={entry.key === resource.key} onSelect={() => setSelected(entry.key)} />)}
     </div> : null}
-    {usage.data ? <div className="mt-4 border-t border-ai-line pt-3" data-ai-id={`${prefix}-panel`}
-      data-ai-state={trends.isPending ? 'loading' : trends.isError ? 'error' : points.length ? 'ready' : 'empty'}>
-      <header className="mb-2 flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-xs font-medium text-ai-fg-secondary">{title}</h3>
-        <div className="flex gap-1">{OVERVIEW_WINDOWS.map((entry) => <Button key={entry.key} size="sm"
-          variant={entry.key === windowKey ? 'primary' : 'ghost'} aria-pressed={entry.key === windowKey}
-          aria-label={t(`cluster.monitor.range.${entry.key}`)}
-          {...actionProps(`${prefix}-range:${entry.key}`)} onClick={() => setWindowKey(entry.key)}>
-          {t(`cluster.monitor.range.${entry.key}`)}
-        </Button>)}</div>
-      </header>
-      {trends.isPending ? <Skeleton className="h-28" /> : trends.isError ?
-        <ResourceErrorPanel error={trends.error} onRetry={() => void trends.refetch()} retryAiId={`${prefix}-retry`} /> :
-        <TimeSeriesChart
-          series={[{ key: title, label: title, points, area: true, smooth: true }]}
-          start={start}
-          end={refreshAt}
-          maxGap={window.gap}
-          label={title}
-          emptyText={t('cluster.overview.emptyTrend')}
-          height={150}
-          yDomain={[0, Math.max(100, ...points.map((point) => point.value))]}
-          formatValue={(value) => `${Math.round(value)}%`}
-          formatTime={(at) => new Date(at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
-          data-ai-id={`${prefix}-chart`} />}
+    {usage.data ? <div
+      className="mt-4 border-t border-ai-line pt-3"
+      data-ai-id={`${prefix}-panel`}
+      /*
+       * The panel's state stays on this wrapper: it is the handle the page's
+       * automation and the older tests address, and it answers "does this section
+       * have data" — which the chart's own state also answers, but from a node that
+       * only exists once the plot has been laid out.
+       */
+      data-ai-state={trendState === 'refreshing' ? 'ready' : trendState}
+    >
+      {/*
+        * `ChartPanel` owns the window picker, the refresh and the fixed-height plot.
+        *
+        * The previous version had three problems the reader could see: the plot grew
+        * after its first paint (a `Skeleton` of a different height was swapped for the
+        * chart), the refresh replaced the whole chart with a skeleton, and the window
+        * was three buttons rather than the shared picker every other monitoring page
+        * uses.
+        */}
+      <ChartPanel
+        aiId={prefix}
+        title={title}
+        series={[{ key: title, label: title, points, area: true, smooth: true }]}
+        range={range}
+        onRangeChange={setRange}
+        labels={chartLabels}
+        state={trendState}
+        onRetry={() => void trends.refetch()}
+        onRefresh={refreshNow}
+        manualRefresh={manualRefresh}
+        height={180}
+        yDomain={[0, Math.max(100, ...points.map((point) => point.value))]}
+        formatValue={(value) => `${Math.round(value)}%`}
+        formatAxis={(value) => `${Math.round(value)}%`}
+        formatTime={(at) => new Date(at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+        className="border-0 bg-transparent p-0"
+      />
     </div> : null}
   </Panel>;
 }

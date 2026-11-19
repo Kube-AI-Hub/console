@@ -57,9 +57,18 @@ describe('overview dashboard', () => {
     expect(screen.getByRole('button', { name: '内存' })).toHaveAttribute('aria-pressed', 'true');
     fireEvent.keyDown(screen.getByRole('button', { name: 'CPU' }), { key: ' ' });
     await waitFor(() => expect(calls.at(-1)?.searchParams.get('metrics_filter')).toBe('cluster_cpu_usage$|cluster_cpu_total$'));
-    await userEvent.click(screen.getByRole('button', { name: '最近 6 小时' }));
-    await waitFor(() => expect(calls.at(-1)?.searchParams.get('step')).toBe('5m'));
-    expect(Number(calls.at(-1)?.searchParams.get('end')) - Number(calls.at(-1)?.searchParams.get('start'))).toBe(21_600);
+    /*
+     * The window control is the shared `TimeRangePicker`: open it and pick the
+     * preset, which is the gesture a reader makes. The three fixed buttons this used
+     * to click are gone, and with them the second way to choose a period.
+     *
+     * Two hours rather than six: the preset ladder is 10m … 7d, and the assertion is
+     * about "the span drives the step", which 2h shows as clearly as 6h did.
+     */
+    await userEvent.click(view.container.querySelector('[data-ai-id="overview:trend:range"]')!);
+    await userEvent.click(screen.getByRole('option', { name: '最近 2 小时' }));
+    await waitFor(() => expect(calls.at(-1)?.searchParams.get('step')).toBe('60s'));
+    expect(Number(calls.at(-1)?.searchParams.get('end')) - Number(calls.at(-1)?.searchParams.get('start'))).toBe(7_200);
   });
   it('moves node statistics out of the resource grid without duplicating the current usage request', async () => {
     const calls: URL[] = [];

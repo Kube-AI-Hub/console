@@ -111,4 +111,84 @@ describe('TimeSeriesChart legend', () => {
     expect(isHidden(view.container, 'a')).toBe(false);
     expect(legendButton(view.container, 'a').textContent).toContain('甲·新');
   });
+
+  it('refuses to hide the last line that has data', () => {
+    /*
+     * The defect this pins: hiding the final visible series left nothing to draw, so
+     * the chart collapsed into its empty state — "hide the last line" looked like the
+     * data had vanished. A single-series chart (the overview's usage plot) was one
+     * click away from a blank panel.
+     */
+    const view = render(
+      <TimeSeriesChart
+        label="单序列"
+        emptyText="无数据"
+        start={0}
+        end={100}
+        animate={false}
+        series={[{ key: 'only', label: '唯一', points: [{ at: 0, value: 1 }, { at: 100, value: 2 }] }]}
+      />,
+    );
+    fireEvent.click(legendButton(view.container, 'only'));
+    // Still drawn, still pressed: the click was refused rather than blanking the plot.
+    expect(isHidden(view.container, 'only')).toBe(false);
+    expect(legendButton(view.container, 'only')).toHaveAttribute('aria-pressed', 'true');
+    expect(view.container.querySelector('[data-ai-state="empty"]')).toBeNull();
+  });
+
+  it('still lets a series with no points be toggled off', () => {
+    // "Hide an empty line" is a legitimate click; it cannot blank the plot because
+    // that line was never drawn.
+    const view = render(
+      <TimeSeriesChart
+        label="空序列"
+        emptyText="无数据"
+        start={0}
+        end={100}
+        animate={false}
+        series={[
+          { key: 'a', label: '甲', points: [{ at: 0, value: 1 }] },
+          { key: 'empty', label: '空', points: [] },
+        ]}
+      />,
+    );
+    fireEvent.click(legendButton(view.container, 'empty'));
+    expect(isHidden(view.container, 'empty')).toBe(true);
+    expect(isHidden(view.container, 'a')).toBe(false);
+  });
+});
+
+describe('TimeSeriesChart refresh', () => {
+  it('keeps the plot mounted while a refresh runs, and veils it only when asked', () => {
+    /*
+     * A refresh must not replace the chart: the reader is watching the line they were
+     * reading. The veil is the manual-refresh affordance (the resource lists' gesture);
+     * an auto tick passes `refreshing={false}` and the line animates instead.
+     */
+    const view = render(
+      <TimeSeriesChart label="趋势" emptyText="无数据" start={0} end={100} series={SERIES} animate={false} />,
+    );
+    expect(view.container.querySelector('[data-ai-chart-refreshing]')).toBeNull();
+
+    view.rerender(
+      <TimeSeriesChart label="趋势" emptyText="无数据" start={0} end={100} series={SERIES} animate={false} refreshing />,
+    );
+    expect(view.container.querySelector('[data-ai-chart-refreshing]')).not.toBeNull();
+    // The drawing is still there behind the veil.
+    expect(view.container.querySelector('[data-ai-state="ready"]')).not.toBeNull();
+
+    view.rerender(
+      <TimeSeriesChart label="趋势" emptyText="无数据" start={0} end={100} series={SERIES} animate={false} />,
+    );
+    expect(view.container.querySelector('[data-ai-chart-refreshing]')).toBeNull();
+  });
+
+  it('holds a fixed plot height so data arriving cannot move the page', () => {
+    const view = render(
+      <TimeSeriesChart label="高度" emptyText="无数据" start={0} end={100} series={SERIES} animate={false} height={260} />,
+    );
+    const box = view.container.querySelector<HTMLElement>('[data-ai-series-count]');
+    expect(box).not.toBeNull();
+    expect(box!.style.height).toBe('260px');
+  });
 });
