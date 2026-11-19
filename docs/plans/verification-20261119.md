@@ -336,3 +336,13 @@ S2I 整套现状：**5 passed / 5 failed / 2 skipped**（01、03 两条列表用
 **顺带发现的产品问题（已登记）**：用户在地址栏输入 `/kube-frontend`（无尾斜杠）会看到 ks-apiserver 的错误页而不是应用。生产由 ks-console 托管，行为可能不同；本地预览下是确定复现的，已记在此处供部署侧确认是否需要在入口做 301 或补一条代理排除规则。
 
 17/18 通过，唯一失败是 `INTEGRATION_01`——它探的是**旧 console 的 `/login`**，本构建不提供，属新旧对照口径。
+
+## Y. 保密字典「设为默认镜像仓库」再次被覆盖并重建（2026-11-19 第 42 轮）
+
+复跑自有三个模块（`configmaps + storage + secrets`）：**102 passed / 1 failed / 7 skipped**，唯一红的是 `SECRETS_LIST_04`。查源码发现**第 8 轮交付的「设为默认镜像仓库」整段被并行提交还原**——行操作、对话框、hooks 与 onAction 分支全部消失（只有 4 个基础操作），但对话框组件、hooks 与文案键仍在库里。
+
+已按原样重建（行操作 + `useSetDefaultSecret`/`useDefaultRegistrySecret` + `SetDefaultSecretDialog` 渲染 + onAction 分支），`typecheck` 0 error，`SECRETS_LIST_04` 复跑 **1 passed（9.29s）**。
+
+这是本会话**第 5 次**覆盖。自第 26 轮起改为「跑绿即提交」，本次重建**立刻提交**，不会再被下一轮的重写带走。
+
+**方法沉淀**：并行覆盖的典型特征是「**功能整体消失但配套件还在**」（对话框/hook/文案仍在，只有页面接线被还原）。发现方式：跑该功能的用例 → 红 → 看页面源码里有没有接线，而不是先怀疑用例。

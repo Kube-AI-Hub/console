@@ -9,7 +9,9 @@ import { api as apiClient, secretsApi } from '@/api';
 import {
   ensureSecretsRegistered,
   useCreateSecret,
+  useDefaultRegistrySecret,
   useDeleteSecrets,
+  useSetDefaultSecret,
   useSecrets,
   useUpdateSecret,
   type SecretSummary,
@@ -31,6 +33,7 @@ const YamlDialog = React.lazy(() => import('@/components/resource/YamlDialog'));
 import { toYaml } from '@/components/resource/yaml';
 import { formatTimestamp } from '@/lib/time';
 import { SecretCreateDialog } from './SecretCreateDialog';
+import { SetDefaultSecretDialog } from './SetDefaultSecretDialog';
 import { SecretEditSettingsDialog } from './SecretEditDialogs';
 import { SECRET_TYPE_LABEL } from './secretTypes';
 import { LoadingDialog } from '@/components/resource/LoadingDialog';
@@ -67,7 +70,9 @@ type Dialog =
   | { kind: 'editInfo'; detail: SecretDetail }
   | { kind: 'editSettings'; detail: SecretDetail }
   | { kind: 'createYaml' }
-  | { kind: 'editYaml'; detail: SecretDetail };
+  | { kind: 'editYaml'; detail: SecretDetail }
+  /* 设为默认镜像仓库: the row's own project, not the page filter. */
+  | { kind: 'setDefault'; row: SecretSummary };
 
 /**
  * Secrets list.
@@ -115,7 +120,19 @@ export function SecretsPage({ workspace, cluster, namespace }: SecretsPageProps)
   const total = query.data?.total ?? 0;
   const api = secretsApi(apiClient);
 
-  const mutationError = [remove.error, create.error, update.error].find((error) => error !== null);
+  /*
+   * The default-mark write addresses the row's own project: the list may be filtered to
+   * "all projects", where the page's namespace is empty and a write would lose its
+   * `namespaces/<ns>` segment.
+   */
+  const setDefaultTarget = dialog.kind === 'setDefault' ? dialog.row : undefined;
+  const setDefault = useSetDefaultSecret({ cluster, namespace: setDefaultTarget?.namespace ?? projectFilter });
+  const previousDefault = useDefaultRegistrySecret({
+    cluster,
+    namespace: setDefaultTarget?.namespace ?? projectFilter,
+    enabled: Boolean(setDefaultTarget),
+  });
+  const mutationError = [remove.error, create.error, update.error, setDefault.error].find((error) => error !== null);
 
   /**
    * Fetch the full object before opening a dialog that edits it: the list carries
@@ -236,6 +253,14 @@ export function SecretsPage({ workspace, cluster, namespace }: SecretsPageProps)
         },
       ],
       rowActions: [
+        // 设为默认镜像仓库: only a registry Secret can be the default, and only when it is not
+        // already marked — the old console hid the entry in the same two cases. Re-applied
+        // 2026-11-19 after a parallel commit restored the four plain actions.
+        {
+          key: 'setDefault',
+          label: t('secrets.action.setDefault'),
+          visible: (row: SecretSummary) => row.type === 'kubernetes.io/dockerconfigjson' && !row.isDefault,
+        },
         { key: 'editInfo', label: t('resource.action.editInfo') },
         { key: 'editYaml', label: t('resource.action.editYaml') },
         { key: 'editSettings', label: t('resource.action.editSettings') },
@@ -305,6 +330,7 @@ export function SecretsPage({ workspace, cluster, namespace }: SecretsPageProps)
           if (action === 'create') return setDialog({ kind: 'create', namespace: projectFilter || namespace });
           if (!row) return;
           if (action === 'delete') return setDialog({ kind: 'delete', names: [row.name] });
+          if (action === 'setDefault') return setDialog({ kind: 'setDefault', row });
           if (action === 'editInfo' || action === 'editSettings' || action === 'editYaml') {
             void openWithDetail(action, row.name);
           }
@@ -313,6 +339,24 @@ export function SecretsPage({ workspace, cluster, namespace }: SecretsPageProps)
           if (action === 'bulk-delete' && keys.length) setDialog({ kind: 'delete', names: keys });
         }}
       />
+
+      {dialog.kind === 'setDefault' ? (
+        <SetDefaultSecretDialog
+          open
+          onOpenChange={(open) => !open && setDialog({ kind: 'none' })}
+          name={dialog.row.name}
+          {...(previousDefault.data ? { previous: previousDefault.data } : {})}
+          loadingPrevious={previousDefault.isPending}
+          pending={setDefault.isPending}
+          onSubmit={async () => {
+            await setDefault.mutateAsync({
+              name: dialog.row.name,
+              ...(previousDefault.data ? { previous: previousDefault.data } : {}),
+            });
+            setDialog({ kind: 'none' });
+          }}
+        />
+      ) : null}
 
       <MutationAlert error={mutationError} />
 
