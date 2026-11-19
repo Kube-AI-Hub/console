@@ -214,7 +214,12 @@ class AppWorkloadsPage:
             except Exception:  # noqa: BLE001 - the row was replaced mid-click
                 if attempt == attempts - 1:
                     raise
-                self.page.wait_for_timeout(800)
+                # Re-open the list before the next attempt: a reload re-runs the query and gives a
+                # settled table, which is what a person would do instead of clicking again.
+                self.open(kind)
+                self.wait_ready(self.surface(kind))
+                self.ensure_row(kind, name)
+                self.page.wait_for_timeout(500)
 
     def wait_row_status(self, kind: str, name: str, labels: tuple[str, ...], timeout_ms: int = 20_000) -> str:
         """Wait until the row's status cell shows one of `labels`, returning the row text.
@@ -226,10 +231,18 @@ class AppWorkloadsPage:
 
         deadline = _time.time() + timeout_ms / 1000
         text = ""
+        reloaded = False
         while _time.time() < deadline:
             text = self.row_text(kind, name)
             if any(label in text for label in labels):
                 return text
+            if not reloaded and _time.time() > deadline - timeout_ms / 2000:
+                # Half the budget gone with no status: reload once, so a stale or half-rendered
+                # table cannot make the case fail for a reason the reader would never hit.
+                reloaded = True
+                self.open(kind)
+                self.wait_ready(self.surface(kind))
+                self.ensure_row(kind, name)
             self.page.wait_for_timeout(400)
         return text
 

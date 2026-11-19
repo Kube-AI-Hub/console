@@ -66,7 +66,11 @@ def test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_S2IBUILDER_12(image_builder_page, scr
     try:
         assert ui.create_builder(name, display_name="English label") == 201
         page.set_viewport_size({"width": 1600, "height": 900})
-        page.add_init_script("try { localStorage.setItem('kube-frontend-locale', 'en') } catch (e) {}")
+        # Set the locale for this page only, and put it back afterwards: an `add_init_script`
+        # writes to the **shared context's** localStorage, so every later test in the same context
+        # rendered in English and its Chinese assertions failed (found 2026-11-19 — SERVICES_01 and
+        # STATUS_01/02 were "empty cells", which were actually `Updating`/`Waiting`).
+        page.evaluate("() => localStorage.setItem('kube-frontend-locale', 'en')")
         ui.open_list()
         expect(ui.surface()).to_be_visible()
         ui.wait_ready()
@@ -77,4 +81,6 @@ def test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_S2IBUILDER_12(image_builder_page, scr
         assert "devopsProject.s2ibuilder" not in ui.surface().inner_text()
         screenshot(page, "image-builder-en")
     finally:
+        # Always restore the shared context's locale, even when an assertion above failed.
+        page.evaluate("() => localStorage.setItem('kube-frontend-locale', 'zh')")
         ui.delete_builder(name)
