@@ -37,17 +37,29 @@ def test_TC_L3_KUBE_FRONTEND_CLUSTER_MANAGEMENT_SORT_01(cluster_management_page,
         sorter = page.locator(f'[data-ai-id="{kind}:sort:name"]')
         sorter.click()
         page.wait_for_timeout(2000)
-        ascending = _names(page, kind)
-        sorter.click()
-        page.wait_for_timeout(2000)
-        descending = _names(page, kind)
-
-        # Both of these pages had a dead sort control: storage classes are read from the
-        # core API, which ignores the sort parameters, and the components page ordered by
-        # health regardless of the control.
-        assert ascending == sorted(ascending), (kind, ascending)
-        assert descending == sorted(descending, reverse=True), (kind, descending)
-        assert ascending != descending, (kind, ascending, descending)
+        # The header cycles three states and a page may already open on one of them, so the
+        # expectation is derived from the column's own `aria-sort` rather than from "the first
+        # click must mean ascending". Both of these pages once had a dead sort control: storage
+        # classes are read from the core API, which ignores the sort parameters, and the
+        # components page ordered by health regardless of the control.
+        column = sorter.locator("xpath=ancestor::th[1]")
+        seen: list[str] = []
+        for _ in range(2):
+            sorter.click()
+            page.wait_for_timeout(2000)
+            order = column.get_attribute("aria-sort")
+            names = _names(page, kind)
+            if order == "ascending":
+                assert names == sorted(names), (kind, order, names)
+            elif order == "descending":
+                assert names == sorted(names, reverse=True), (kind, order, names)
+            else:
+                # Third state = the page's own default order (the components page puts unhealthy
+                # ones first), so it is compared with the order the page opened with rather than
+                # with alphabetical order.
+                assert names == initial, (kind, order, names, initial)
+            seen.append(order or "none")
+        assert seen[0] != seen[1], f"{kind}: 两次点击应切换到不同状态，实际 {seen}"
 
     # The components page still opens with unhealthy components first.
     unhealthy_first = _names(page, "components")
