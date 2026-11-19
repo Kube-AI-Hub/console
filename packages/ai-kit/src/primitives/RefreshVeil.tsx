@@ -60,6 +60,14 @@ export function RefreshVeil({ label = '更新中…', aiId, className, ...attrib
 export interface ChartSkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Plot height in CSS pixels, so the skeleton occupies the plot's own box. */
   height: number;
+  /**
+   * Draw a legend row under the plot area.
+   *
+   * `ChartPanel` always renders a legend under the plot, so its skeleton must too —
+   * otherwise the panel is 28px shorter on the first load and everything below it
+   * jumps when the data lands. A bare chart with no legend leaves this off.
+   */
+  legend?: boolean;
   aiId?: string;
 }
 
@@ -72,32 +80,49 @@ export interface ChartSkeletonProps extends React.HTMLAttributes<HTMLDivElement>
  * `animate-pulse` + `bg-ai-surface-3` as the table's skeleton rows, so the two
  * loading states on one page are visibly the same kind of thing.
  */
-export function ChartSkeleton({ height, aiId, className, ...attributes }: ChartSkeletonProps): React.ReactElement {
+export function ChartSkeleton({ height, legend = false, aiId, className, ...attributes }: ChartSkeletonProps): React.ReactElement {
   return (
     <div
       aria-hidden="true"
       {...attributes}
       {...(aiId ? { 'data-ai-id': aiId } : {})}
-      className={cn('flex w-full gap-3', className)}
-      style={{ height }}
+      className={cn('flex w-full flex-col gap-2', className)}
     >
-      {/* The y-axis gutter: four tick labels' worth of bars. */}
-      <div className="flex w-9 shrink-0 flex-col justify-between py-3">
-        {[0, 1, 2, 3].map((row) => (
-          <div key={row} className="h-2 w-6 animate-pulse rounded-ai-sm bg-ai-surface-3" />
-        ))}
+      <div className="flex w-full gap-3" style={{ height }}>
+        {/* The y-axis gutter: four tick labels' worth of bars. */}
+        <div className="flex w-9 shrink-0 flex-col justify-between py-3">
+          {[0, 1, 2, 3].map((row) => (
+            <div key={row} className="h-2 w-6 animate-pulse rounded-ai-sm bg-ai-surface-3" />
+          ))}
+        </div>
+        {/* The drawing area: three bands where the curve would be, plus the baseline. */}
+        <div className="relative min-w-0 flex-1">
+          {[20, 48, 76].map((top) => (
+            <div
+              key={top}
+              className="absolute inset-x-0 h-2 animate-pulse rounded-ai-sm bg-ai-surface-3"
+              style={{ top: `${top}%` }}
+            />
+          ))}
+          <div className="absolute inset-x-0 bottom-0 h-px bg-ai-line" />
+        </div>
       </div>
-      {/* The drawing area: three bands where the curve would be, plus the baseline. */}
-      <div className="relative min-w-0 flex-1">
-        {[20, 48, 76].map((top) => (
-          <div
-            key={top}
-            className="absolute inset-x-0 h-2 animate-pulse rounded-ai-sm bg-ai-surface-3"
-            style={{ top: `${top}%` }}
-          />
-        ))}
-        <div className="absolute inset-x-0 bottom-0 h-px bg-ai-line" />
-      </div>
+      {/*
+        * The legend's own row, at the legend's own height (20px: a 16px line of
+        * `text-xs` plus its leading). Three swatch-and-label pairs is what a plot of
+        * this width carries; the exact count does not matter, only that the row is the
+        * same height as the real legend so the panel does not grow when data lands.
+        */}
+      {legend ? (
+        <div className="flex h-5 flex-wrap items-center gap-x-4 gap-y-1">
+          {[0, 1, 2].map((index) => (
+            <div key={index} className="flex items-center gap-1.5">
+              <span className="size-2 shrink-0 animate-pulse rounded-full bg-ai-surface-3" />
+              <span className="h-2 w-14 animate-pulse rounded-ai-sm bg-ai-surface-3" />
+            </div>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }

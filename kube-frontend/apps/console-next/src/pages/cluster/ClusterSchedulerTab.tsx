@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { ChartSkeleton } from '@kube-ai-hub/ui/charts';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { useT } from '@/i18n';
 import { ClusterChartCard, linesToSeries } from './ClusterChartCard';
@@ -62,11 +61,27 @@ export function ClusterSchedulerTab({
   return (
     <div className="flex flex-col gap-4" data-ai-id="cluster-monitor:scheduler" data-ai-state={state}>
       {state === 'loading' ? (
-        /* The skeleton stands in for the plots, at the plot's own height. */
-        <div className="grid grid-cols-1 gap-4 2xl:grid-cols-2">
-          <ChartSkeleton height={160} aiId="cluster-monitor:scheduler:loading:0" />
-          <ChartSkeleton height={160} aiId="cluster-monitor:scheduler:loading:1" />
-          <ChartSkeleton height={160} aiId="cluster-monitor:scheduler:loading:2" />
+        /*
+         * The real cards, from the static spec list, with `loading` set — `charts` is
+         * empty on a first load, so driving the skeleton from it rendered nothing.
+         */
+        <div className="flex flex-col gap-4">
+          {toComponentCharts('scheduler', [], t)
+            .filter((chart) => SCHEDULER_CHART_IDS[chart.key] !== undefined)
+            .map((chart) => (
+              <ClusterChartCard
+                key={chart.key}
+                aiId={'cluster-monitor:scheduler:chart:' + SCHEDULER_CHART_IDS[chart.key]}
+                title={t(chart.title)}
+                series={[]}
+                start={start}
+                end={end}
+                hasData={false}
+                loading
+                emptyText={t('cluster.monitor.empty')}
+                formatValue={(value) => formatComponentValue(value, chart.kind, units)}
+              />
+            ))}
         </div>
       ) : null}
 

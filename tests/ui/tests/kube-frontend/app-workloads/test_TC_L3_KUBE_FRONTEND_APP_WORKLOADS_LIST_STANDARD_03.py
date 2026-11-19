@@ -12,12 +12,13 @@ TREND_PLOT = '[data-ai-id="overview:trend:plot"]'
 TREND_VEIL = '[data-ai-id="overview:trend:refreshing"]'
 
 
-def _slow_metrics(page) -> None:
-    """Delay the metric reads so first-load states can be observed.
+def _slow_reads(page) -> None:
+    """Delay the reads this case inspects, so a first-load state can be observed.
 
     The local stack answers in milliseconds and a first load is gone before the
     assertion runs; a delay is what makes "the skeleton was there" observable at all.
-    Only the range reads are slowed — pages, assets and the auth calls stay untouched.
+    Only the list and range reads are slowed — pages, assets and the auth calls stay
+    untouched.
     """
 
     page.add_init_script(
@@ -25,8 +26,9 @@ def _slow_metrics(page) -> None:
         const original = window.fetch;
         window.fetch = async (...args) => {
             const url = String(args[0] && args[0].url ? args[0].url : args[0]);
-            if (url.includes('monitoring.kubesphere.io')) {
-                await new Promise((resolve) => setTimeout(resolve, 1200));
+            const slow = url.includes('monitoring.kubesphere.io') || url.includes('/deployments');
+            if (slow) {
+                await new Promise((resolve) => setTimeout(resolve, 1500));
             }
             return original(...args);
         };
@@ -39,7 +41,7 @@ def test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_LIST_STANDARD_03(app_workloads_page, 
     """TC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-03 首屏骨架与刷新遮罩不混用。"""
 
     ui = app_workloads_page
-    _slow_metrics(ui.page)
+    _slow_reads(ui.page)
     origin = ui.base.split("/kube-frontend/")[0]
 
     # ---- The list: a first load draws skeleton rows, never the veil. -------------
@@ -81,6 +83,8 @@ def test_TC_L3_KUBE_FRONTEND_APP_WORKLOADS_LIST_STANDARD_03(app_workloads_page, 
 
     expect(panel).to_have_attribute("data-ai-state", "ready", timeout=90_000)
     expect(ui.page.locator(TREND_PLOT)).to_be_visible(timeout=30_000)
+    # The skeleton carried the plot *and* its legend row, so the box it filled is the
+    # box the finished plot fills: the panel does not change height when data lands.
     ready_height = ui.page.locator(TREND_PLOT).evaluate("(el) => Math.round(el.getBoundingClientRect().height)")
     assert abs(ready_height - heights["box"]) <= 1, f"首屏与就绪态高度不一致：{heights} vs {ready_height}"
 

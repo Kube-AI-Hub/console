@@ -274,7 +274,7 @@ export function ChartPanel({
        * moves the page under the reader's cursor.
        */}
       <div className="relative" style={{ minHeight: height }}>
-        {state === 'loading' ? <ChartSkeleton height={height} aiId={`${aiId}:loading`} /> : null}
+        {state === 'loading' ? <ChartSkeleton height={height} legend aiId={`${aiId}:loading`} /> : null}
 
         {state === 'error' ? (
           <div className="flex flex-col items-start gap-2 py-6" data-ai-id={`${aiId}:error`}>

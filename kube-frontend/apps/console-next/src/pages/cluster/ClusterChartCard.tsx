@@ -116,11 +116,26 @@ export function ClusterChartCard({
         'transition-colors duration-ai-base hover:border-ai-line',
       )}
       data-ai-id={aiId}
+      /*
+       * The card reports the same four states as the surfaces around it.
+       *
+       * `refreshing` is its own state, not `ready`: a reader's refresh keeps the curve
+       * on screen while the veil covers it, and an automation that waited for "ready"
+       * would otherwise read a card that is being replaced. `loading` and `refreshing`
+       * are mutually exclusive — the first has nothing to show, the second has.
+       */
+      data-ai-state={loading ? 'loading' : hasData ? (refreshing ? 'refreshing' : 'ready') : 'empty'}
+      aria-busy={loading || refreshing || undefined}
       aria-label={title}
       {...(group ? { 'data-ai-group': group } : {})}
     >
       <div className="mb-3">
-        <h3 className="text-sm font-medium text-ai-fg">{title}</h3>
+        {loading ? (
+          /* `text-sm` at `font-medium` is a 20px line; the placeholder matches it. */
+          <span className="block h-5 w-32 animate-pulse rounded-ai-sm bg-ai-surface-3" />
+        ) : (
+          <h3 className="text-sm font-medium text-ai-fg">{title}</h3>
+        )}
       </div>
 
       {/*
@@ -128,9 +143,36 @@ export function ClusterChartCard({
         * rather than a solid grey block appearing where the chart will be. `loading`
         * and `hasData` are separate: a host that has not finished its first read passes
         * `loading`, and one whose read came back empty passes neither.
+        *
+        * `legend` is on: `TimeSeriesChart` draws a legend row under its plot, and the
+        * skeleton stands in for the whole chart, not just the drawing area. The card's
+        * own legend below is then reproduced separately, at its own `mt-3`.
         */}
-      {loading ? <ChartSkeleton height={height} aiId={`${aiId}:loading`} /> : null}
+      {loading ? (
+        <>
+          <ChartSkeleton height={height} legend aiId={`${aiId}:loading`} />
+          {/*
+            * The card's own legend, at its own height. `series` is empty while
+            * loading (nothing has been fetched), so the row is built from a fixed
+            * number of placeholders rather than from the data: what matters is that
+            * the 16px line is there, so the card does not shrink when data lands.
+            */}
+          <div className="mt-3 flex h-4 flex-wrap gap-x-4 gap-y-1" aria-hidden="true">
+            {[0, 1, 2].map((index) => (
+              <span key={index} className="flex items-center gap-1.5">
+                <span className="size-2 shrink-0 animate-pulse rounded-full bg-ai-surface-3" />
+                <span className="h-2 w-16 animate-pulse rounded-ai-sm bg-ai-surface-3" />
+              </span>
+            ))}
+          </div>
+        </>
+      ) : null}
 
+      {/*
+        * The empty explanation only exists once there is an answer. Rendering it while
+        * `loading` put a 68px paragraph under the skeleton, so the card shrank when the
+        * data landed instead of staying the same height.
+        */}
       {hasData ? (
         <React.Fragment>
           <TimeSeriesChart
@@ -177,7 +219,7 @@ export function ClusterChartCard({
             })}
           </dl>
         </React.Fragment>
-      ) : (
+      ) : loading ? null : (
         <div className="flex flex-col gap-1 py-6" data-ai-id={aiId + ':empty'}>
           <span className="text-sm text-ai-fg-secondary">{emptyText}</span>
           {emptyHint ? <span className="text-xs text-ai-fg-muted">{emptyHint}</span> : null}

@@ -26,6 +26,7 @@
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-16
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-17
 - AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-18
+- AC-L3-KUBE-FRONTEND-CLUSTER_MANAGEMENT-MONITOR-19
 
 ## 设计目标与非目标
 
@@ -740,6 +741,24 @@ recharts 属于 `console/packages/ai-kit`（独立 pnpm install，React 18），
 | 单位 | latency：API 秒 ×1000 → ms（两位小数）；requestRate / attemptRate：次/秒（两位小数）；attempts：整数 |
 | 图与状态 | `:components:chart`（`data-ai-state` = loading/ready/empty/error；`:chart:now`、`:chart:empty`）、`:components:chart:legend`、`:components:legend:<line>`；loading 骨架；empty 显示 `cluster.monitor.components.notReported` 说明；error 用 ResourceErrorPanel + `:components:retry`（403 无重试） |
 | 复用 | `componentMonitorQueries` 的 `useComponentMetrics` / `toComponentCharts`，与 API Server / 调度器页签同一查询与身份合并（`DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-30`） |
+
+### DEC-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-31 — 图卡首屏用静态 spec 渲染真实卡片骨架
+
+**为什么**：加载态原先画的是两块固定 256px 的灰底 `Skeleton`，而就绪态是若干张 160px 图表的卡片网格，两者高度不同，数据到达时整页跳动；`ChartPanel` 还曾把骨架叠在图表上方（220px 面板首屏量出 468px，下面露出空坐标轴）。
+
+现在的做法是：加载态渲染**真实的** `ClusterChartCard`，只把 `loading` 置为 true。卡片自己画标题条（20px）、`ChartSkeleton`（轴刻度 + 脉冲带 + 图例占位，与绘图区同高）与图例行（16px），三段与就绪态一一对应，因此卡片高度在数据到达前后不变（实测 282 → 282）。`ChartSkeleton` 的 `legend` 开关就是为这种「骨架要顶替整张图、含图例」的场景加的。
+
+**关键细节**：加载态的卡片清单必须来自**静态 spec**（`RESOURCE_CHARTS` / `toComponentCharts(component, [], t)`），不能来自响应构建的 `charts`——首屏它为空，骨架会一张都画不出来，页面从空白直接跳到满屏，比原来的灰底更差。
+
+**被否方案**：在页面里为加载态手写一组占位卡片。四张卡片的标题、内边距、图例行都得重写一遍，任何一处与真实卡片不一致都会重新引入跳动。
+
+**何时重新考虑**：若某页的图表数量在加载前无法确定（例如由响应决定分组），骨架就退回「与就绪态同高的一整块」，并在 AC 里写明高度关系。
+
+### GOT-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-20 — 骨架里的空态段落会让卡片在数据到达时变矮
+
+`ClusterChartCard` 的 `hasData === false` 分支渲染「无数据」段落（`py-6`，实测 68px）。加载态传 `hasData={false}` 时这段也会渲染，于是骨架卡片比就绪态高 68px，数据到达后卡片变矮、页面往上跳。空态说明属于「已经有答案」的状态，加载态必须显式跳过它（`loading ? null : …`）。
+
+同理，标题占位的高度要按真实标题的行高取（`text-sm` + `font-medium` = 20px），写 `h-3.5`（14px）会差 6px；图例占位要显式给 `h-4`，否则内容为空时行高塌成 0。
 
 ### GOT-L3-KUBE-FRONTEND-CLUSTER-MANAGEMENT-MONITOR-19 — `?cluster=` 对 RDMA 端口清单无效：实测 0 条 vs 路径形态 16 条
 

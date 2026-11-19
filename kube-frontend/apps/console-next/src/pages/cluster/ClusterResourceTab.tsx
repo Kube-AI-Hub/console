@@ -1,19 +1,20 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { rangeMetricsApi } from '@kube-ai-hub/api-client';
-import { ChartSkeleton } from '@kube-ai-hub/ui/charts';
 import { api } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { useT } from '@/i18n';
 import { ClusterChartCard } from './ClusterChartCard';
 import type { WindowContext } from './monitorTabs';
 import {
+  RESOURCE_CHARTS,
   RESOURCE_GROUPS,
   RESOURCE_GROUP_TITLE_KEYS,
   RESOURCE_METRICS,
   chartsInGroup,
   formatResourceValue,
   toResourceCharts,
+  type ResourceChart,
 } from './monitorResourceCharts';
 
 /**
@@ -123,10 +124,34 @@ export function ClusterResourceTab({
   return (
     <div className="flex flex-col gap-6" data-ai-id="cluster-monitor:resource" data-ai-state={state}>
       {state === 'loading' ? (
-        /* The skeleton stands in for the plots, at the plot's own height. */
+        /*
+         * The real cards, from the static spec list, with `loading` set.
+         *
+         * The spec list — not `charts`, which is built from the response — is what
+         * makes this work: on a first load `charts` is empty, so driving the skeleton
+         * from it rendered nothing at all and the page went from blank to full. The
+         * title, the plot box and the legend now take their final places before the
+         * data exists, so nothing moves when it lands.
+         */
         <div className="grid grid-cols-1 gap-4 2xl:grid-cols-2">
-          <ChartSkeleton height={160} aiId="cluster-monitor:resource:loading:0" />
-          <ChartSkeleton height={160} aiId="cluster-monitor:resource:loading:1" />
+          {chartsInGroup(
+            RESOURCE_CHARTS.map((spec): ResourceChart => ({ spec, series: [], hasData: false })),
+            RESOURCE_GROUPS[0],
+          ).map((chart) => (
+            <ClusterChartCard
+              key={chart.spec.group + ':' + chart.spec.key}
+              aiId={'cluster-monitor:resource:chart:' + chart.spec.group + ':' + chart.spec.key}
+              group={chart.spec.group}
+              title={t(chart.spec.titleKey)}
+              series={[]}
+              start={start}
+              end={end}
+              hasData={false}
+              loading
+              emptyText={t('cluster.monitor.empty')}
+              formatValue={(value) => formatResourceValue(value, chart.spec.kind)}
+            />
+          ))}
         </div>
       ) : null}
 

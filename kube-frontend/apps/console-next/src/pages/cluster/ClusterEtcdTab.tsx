@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { ChartSkeleton } from '@kube-ai-hub/ui/charts';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { useT } from '@/i18n';
 import { ClusterChartCard, linesToSeries } from './ClusterChartCard';
@@ -56,10 +55,25 @@ export function ClusterEtcdTab({
   return (
     <div className="flex flex-col gap-4" data-ai-id="cluster-monitor:etcd" data-ai-state={state}>
       {state === 'loading' ? (
-        /* The skeleton stands in for the plots, at the plot's own height. */
-        <div className="grid grid-cols-1 gap-4 2xl:grid-cols-2">
-          <ChartSkeleton height={160} aiId="cluster-monitor:etcd:loading:0" />
-          <ChartSkeleton height={160} aiId="cluster-monitor:etcd:loading:1" />
+        /*
+         * The real cards, from the static spec list, with `loading` set — `charts` is
+         * empty on a first load, so driving the skeleton from it rendered nothing.
+         */
+        <div className="flex flex-col gap-4">
+          {toComponentCharts('etcd', [], t).map((chart) => (
+            <ClusterChartCard
+              key={chart.key}
+              aiId={'cluster-monitor:etcd:chart:' + chart.key}
+              title={t(chart.title)}
+              series={[]}
+              start={start}
+              end={end}
+              hasData={false}
+              loading
+              emptyText={t('cluster.monitor.empty')}
+              formatValue={(value) => formatComponentValue(value, chart.kind, units)}
+            />
+          ))}
         </div>
       ) : null}
 

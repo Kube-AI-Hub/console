@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { ChartSkeleton } from '@kube-ai-hub/ui/charts';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { useT } from '@/i18n';
 import { ClusterChartCard, linesToSeries } from './ClusterChartCard';
@@ -66,13 +65,30 @@ export function ClusterApiServerTab({
     <div className="flex flex-col gap-4" data-ai-id="cluster-monitor:apiserver" data-ai-state={state}>
       {state === 'loading' ? (
         /*
-         * The skeleton stands in for the plot, at the plot's own height. Two grey
-         * blocks of a made-up 256px made the page jump when the real cards arrived
-         * and told the reader nothing about what was coming.
+         * The real cards, from the static spec list, with `loading` set.
+         *
+         * `charts` is built from the response, so on a first load it is empty and
+         * driving the skeleton from it rendered nothing. The spec list is what exists
+         * before the data does; using it puts every title, plot box and legend in its
+         * final place so the answer does not move the page.
          */
-        <div className="grid grid-cols-1 gap-4 2xl:grid-cols-2">
-          <ChartSkeleton height={160} aiId="cluster-monitor:apiserver:loading:0" />
-          <ChartSkeleton height={160} aiId="cluster-monitor:apiserver:loading:1" />
+        <div className="flex flex-col gap-4">
+          {toComponentCharts('apiserver', [], t)
+            .filter((chart) => APISERVER_CHART_IDS[chart.key] !== undefined)
+            .map((chart) => (
+              <ClusterChartCard
+                key={chart.key}
+                aiId={'cluster-monitor:apiserver:chart:' + APISERVER_CHART_IDS[chart.key]}
+                title={t(chart.title)}
+                series={[]}
+                start={start}
+                end={end}
+                hasData={false}
+                loading
+                emptyText={t('cluster.monitor.empty')}
+                formatValue={(value) => formatComponentValue(value, chart.kind, units)}
+              />
+            ))}
         </div>
       ) : null}
 

@@ -110,14 +110,18 @@ describe('monitor tabs render', () => {
     }));
 
     const apiView = mount(<ClusterApiServerTab {...RANGE} />);
-    await waitFor(() => expect(apiView.container.querySelector('[data-ai-id="cluster-monitor:apiserver:chart:latency"]')).not.toBeNull());
+    // Wait for the card to finish its first load, not merely to exist: the card is on
+    // screen from the first frame as a skeleton, and only a `ready` card has a legend.
+    await waitFor(() => expect(apiView.container.querySelector('[data-ai-id="cluster-monitor:apiserver:chart:latency"]'))
+      .toHaveAttribute('data-ai-state', 'ready'));
     expect(apiView.container.querySelector('[data-ai-id="cluster-monitor:apiserver:chart:rate"]')).not.toBeNull();
     const latencyLegend = apiView.container.querySelector('[data-ai-id="cluster-monitor:apiserver:chart:latency:legend"]');
     expect(latencyLegend).toHaveTextContent('60.00 ms');
     expect(latencyLegend).toHaveTextContent('41.00 ms');
 
     const schedView = mount(<ClusterSchedulerTab {...RANGE} />);
-    await waitFor(() => expect(schedView.container.querySelector('[data-ai-id="cluster-monitor:scheduler:chart:attempts"]')).not.toBeNull());
+    await waitFor(() => expect(schedView.container.querySelector('[data-ai-id="cluster-monitor:scheduler:chart:attempts"]'))
+      .toHaveAttribute('data-ai-state', 'ready'));
     expect(schedView.container.querySelector('[data-ai-id="cluster-monitor:scheduler:chart:rate"]')).not.toBeNull();
     expect(schedView.container.querySelector('[data-ai-id="cluster-monitor:scheduler:chart:latency:empty"]')).not.toBeNull();
   });
@@ -138,7 +142,8 @@ describe('monitor tabs render', () => {
     }));
 
     const reported = mount(<ClusterEtcdTab {...RANGE} />);
-    await waitFor(() => expect(reported.container.querySelector('[data-ai-id="cluster-monitor:etcd:chart:dbSize"]')).not.toBeNull());
+    await waitFor(() => expect(reported.container.querySelector('[data-ai-id="cluster-monitor:etcd:chart:dbSize"]'))
+      .toHaveAttribute('data-ai-state', 'ready'));
     expect(reported.container.querySelector('[data-ai-id="cluster-monitor:etcd:chart:dbSize:legend"]')).not.toBeNull();
     expect(reported.container.querySelector('[data-ai-id="cluster-monitor:etcd:chart:clientTraffic"]')).not.toBeNull();
     expect(reported.container.querySelector('[data-ai-id="cluster-monitor:etcd:chart:walFsync:legend"]')).toHaveTextContent('12.00 ms');

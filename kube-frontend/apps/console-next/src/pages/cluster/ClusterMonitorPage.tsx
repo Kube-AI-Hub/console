@@ -340,7 +340,9 @@ export function ClusterMonitorPage({ cluster, node, tab, onTabChange }: ClusterM
               key={key}
               value={key}
               data-ai-id={`cluster-monitor:tabpanel:${key}`}
-              className="mt-4 flex flex-col gap-4"
+              // The `mt-4` comes from the shared `TabsContent`; stating it here too
+              // was only ever noise (tailwind-merge collapsed it).
+              className="flex flex-col gap-4"
             >
               {activeTab === key ? renderTab(key, context, reportTabState) : null}
             </TabsContent>

@@ -36,12 +36,26 @@ describe('ChartSkeleton', () => {
   it('occupies the plot box and pulses like the table skeleton', () => {
     render(<ChartSkeleton height={220} aiId="test:loading" />);
     const skeleton = document.querySelector<HTMLElement>('[data-ai-id="test:loading"]')!;
-    expect(skeleton.style.height).toBe('220px');
+    // The plot area is the inner box: the outer one may add a legend row, so the
+    // declared height belongs to the element that stands in for the drawing.
+    const plot = skeleton.firstElementChild as HTMLElement;
+    expect(plot.style.height).toBe('220px');
     // Same pulse treatment as the table's skeleton rows: `animate-pulse` on
     // `bg-ai-surface-3`, so the two loading states read as one kind of thing.
     const bars = skeleton.querySelectorAll('.animate-pulse');
     expect(bars.length).toBeGreaterThan(3);
     for (const bar of bars) expect(bar).toHaveClass('bg-ai-surface-3');
+  });
+
+  it('draws a legend row only when the plot it stands in for has one', () => {
+    // `ChartPanel` always renders a legend under the plot, so its skeleton must too:
+    // without it the panel is shorter on the first load and the page jumps when the
+    // data lands. A bare chart has no legend, so its skeleton must not invent one.
+    const { unmount } = render(<ChartSkeleton height={180} legend />);
+    expect(document.querySelectorAll('.rounded-full')).toHaveLength(3);
+    unmount();
+    render(<ChartSkeleton height={180} />);
+    expect(document.querySelectorAll('.rounded-full')).toHaveLength(0);
   });
 
   it('draws a y-axis gutter and the baseline, so it looks like a chart', () => {
