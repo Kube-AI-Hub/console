@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { Button, Skeleton, TREND_SERIES_COLORS, TrendChart, type TrendSeries } from '@kube-ai-hub/ui';
+import { Button, Skeleton, TREND_SERIES_COLORS, type TrendSeries } from '@kube-ai-hub/ui';
+import { TimeSeriesChart } from '@kube-ai-hub/ui/charts';
 import type { LocaleKey } from '@kube-ai-hub/locales';
 import { useT } from '@/i18n';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -141,16 +142,15 @@ export function ClusterOverviewComponentsBlock({
           ) : null}
           {state === 'ready' ? (
             <>
-              <TrendChart
-                series={lines}
+              <TimeSeriesChart
+                series={lines.map((line) => ({ ...line, smooth: true }))}
                 start={start}
                 end={end}
                 label={t(tab.labelKey)}
                 emptyText={t('cluster.monitor.empty')}
-                showAxes
-                showGrid
-                interactive
+                height={160}
                 formatValue={(value) => formatComponentValue(value, chart?.kind ?? 'perSecond', units)}
+                data-ai-id="cluster-monitor:overview:components:chart:plot"
               />
               <div className="flex flex-wrap items-center gap-3 text-xs" data-ai-id="cluster-monitor:overview:components:chart:legend">
                 {lines.map((line, index) => (

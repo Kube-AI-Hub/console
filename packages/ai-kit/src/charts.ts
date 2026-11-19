@@ -8,7 +8,7 @@
 export { DonutChart } from './primitives/DonutChart';
 export type { DonutChartProps, DonutSegment } from './primitives/DonutChart';
 
-export { TimeSeriesChart, pivotSeries } from './charts/TimeSeriesChart';
+export { TimeSeriesChart, pivotSeries, seriesColors } from './charts/TimeSeriesChart';
 export type { TimeSeries, TimeSeriesChartProps, SeriesPoint } from './charts/TimeSeriesChart';
 
 export { PieChart, progressSlices } from './charts/PieChart';

@@ -3,13 +3,13 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { ApiError, clusterApi, clusterStatusApi, type ClusterModule } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { AiButton, Badge, MetricRing, Panel, Skeleton, TREND_SERIES_COLORS } from '@kube-ai-hub/ui';
+import { AiButton, Badge, Panel, Skeleton, TREND_SERIES_COLORS } from '@kube-ai-hub/ui';
 /*
  * DonutChart lives on a subpath, not the barrel: it carries recharts, whose React
  * resolves from ai-kit's own install. Re-exporting it from the barrel pulled that
  * second React into every page and test that imports a Button.
  */
-import { DonutChart } from '@kube-ai-hub/ui/charts';
+import { PieChart, ProgressRing } from '@kube-ai-hub/ui/charts';
 import type { LocaleKey } from '@kube-ai-hub/locales';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
@@ -333,19 +333,29 @@ export function ClusterStatusSection({ cluster, live }: ClusterStatusSectionProp
           {vendorState === 'ready' ? (
             <div className="flex flex-1 flex-col justify-center gap-3">
               {/*
-                The ring is drawn by the shared DonutChart; the rows are the host's own
-                because they carry a count and a share as well as a name, and because
-                the agent contract wants one stable handle per vendor. Passing
+                The ring is drawn by the shared PieChart in donut mode; the rows are the
+                host's own because they carry a count and a share as well as a name, and
+                because the agent contract wants one stable handle per vendor. Passing
                 showLegend={false} keeps the chart from printing a second, thinner list.
+                The ring is thin (a band, not a disc) so the total in the hole reads as a
+                caption rather than as a value competing with the ring.
               */}
-              <DonutChart
-                segments={segments}
+              <PieChart
+                slices={segments}
                 label={t('cluster.monitor.status.vendor')}
                 emptyText={t('cluster.monitor.status.vendorEmpty')}
                 formatValue={(value) => String(value)}
                 showLegend={false}
-                size={128}
-                centerLabel={<span className="text-sm font-semibold tabular-nums text-ai-fg">{vendorTotal}</span>}
+                donut
+                thickness={0.22}
+                size={132}
+                centerLabel={
+                  <span className="flex flex-col items-center leading-tight">
+                    <span className="text-base font-semibold tabular-nums text-ai-fg" data-ai-id="cluster-monitor:overview:vendor-donut:total">
+                      {vendorTotal}
+                    </span>
+                  </span>
+                }
               />
               <ul className="flex flex-col gap-2" data-ai-id="cluster-monitor:overview:vendor-donut:legend">
                 {vendors.map((row, index) => (
@@ -436,7 +446,6 @@ function NodeOnlineBody({
   total: number;
 }): React.ReactElement {
   const t = useT();
-  const percent = total > 0 ? (healthy / total) * 100 : 0;
   return (
     <Link
       to="/kube-frontend/clusters/$cluster/nodes"
@@ -444,19 +453,29 @@ function NodeOnlineBody({
       className="flex flex-1 flex-col items-center justify-center gap-3 rounded-ai-md p-2 transition-colors duration-ai-fast hover:bg-ai-surface-2"
       {...actionProps('cluster-monitor:overview:node-ring:link')}
     >
-      <MetricRing
-        value={percent}
+      <ProgressRing
+        used={healthy}
+        total={total}
+        label={t('cluster.monitor.status.nodeOnline')}
+        labels={{ used: t('cluster.monitor.status.healthy'), free: t('cluster.monitor.status.unhealthy') }}
         tone={healthy === total ? 'success' : 'warning'}
-        className="size-28"
-        aria-label={t('cluster.monitor.status.nodeOnline')}
-      >
-        <span
-          className="text-lg font-semibold tabular-nums text-ai-fg"
-          data-ai-id="cluster-monitor:overview:node-ring:value"
-        >
-          {formatPercent(healthy, total)}
-        </span>
-      </MetricRing>
+        size={112}
+        centerLabel={
+          <span className="flex flex-col items-center leading-tight">
+            {/*
+              * The percentage keeps its own handle: it is the number a reader compares
+              * across clusters, and the agent contract already addresses it by this id.
+              */}
+            <span
+              className="text-lg font-semibold tabular-nums text-ai-fg"
+              data-ai-id="cluster-monitor:overview:node-ring:value"
+            >
+              {formatPercent(healthy, total)}
+            </span>
+          </span>
+        }
+        data-ai-id="cluster-monitor:overview:node-ring:gauge"
+      />
       <div className="flex flex-col items-center gap-1">
         {/*
          * The counts are printed beside the ring, not inside it: the ring answers

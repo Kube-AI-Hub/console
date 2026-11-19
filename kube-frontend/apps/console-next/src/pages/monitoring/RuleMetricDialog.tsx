@@ -7,10 +7,10 @@ import {
   Modal,
   Skeleton,
   TREND_SERIES_COLORS,
-  TrendChart,
   type TrendPoint,
   type TrendSeries,
 } from '@kube-ai-hub/ui';
+import { TimeSeriesChart } from '@kube-ai-hub/ui/charts';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
@@ -109,15 +109,13 @@ export function RuleMetricDialog({ open, onOpenChange, rule }: RuleMetricDialogP
           ) : null}
           {state === 'ready' ? (
             <React.Fragment>
-              <TrendChart
-                series={series}
+              <TimeSeriesChart
+                series={series.map((entry) => ({ ...entry, smooth: true }))}
                 start={range.start}
                 end={range.end}
                 label={rule?.name ?? ''}
                 emptyText={t('monitoring.ruleGroups.metric.empty')}
-                showAxes
-                showGrid
-                interactive
+                height={180}
                 data-ai-id="alertingrules:metric:trend"
               />
               <ul className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-ai-fg-muted" data-ai-id="alertingrules:metric:legend">

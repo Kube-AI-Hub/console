@@ -27,6 +27,42 @@ vi.mock('@kube-ai-hub/ui/charts', () => ({
       {segments.length > 0 ? centerLabel ?? null : emptyText}
     </div>
   ),
+  /* The gauge the status band renders; the centre text is what the tests read. */
+  ProgressRing: ({ used, total, label, centerLabel }: {
+    used: number;
+    total?: number;
+    label: string;
+    centerLabel?: React.ReactNode;
+  }) => (
+    <div role="img" aria-label={label} data-ai-progress-used={used} data-ai-progress-total={total}>
+      {centerLabel ?? null}
+    </div>
+  ),
+  /* Composition; the slice count is what the vendor block asserts. */
+  PieChart: ({ slices, label, emptyText, centerLabel }: {
+    slices: { key: string; label: string; value: number }[];
+    label: string;
+    emptyText: string;
+    centerLabel?: React.ReactNode;
+  }) => (
+    <div role="img" aria-label={label} data-ai-slices={slices?.length ?? 0}>
+      {slices && slices.length > 0 ? centerLabel ?? null : emptyText}
+    </div>
+  ),
+  /*
+   * The plots. The drawing library does not paint in jsdom, so this stands in for it;
+   * the tests below assert the surrounding cards, legends and empty states, which are
+   * the host's responsibility.
+   */
+  TimeSeriesChart: ({ label, emptyText }: { label: string; emptyText: string }) => (
+    <div role="img" aria-label={label}>{emptyText}</div>
+  ),
+  ChartPanel: ({ aiId, title, state, labels }: { aiId: string; title: string; state: string; labels: { loading: string } }) => (
+    <section data-ai-id={aiId} data-ai-state={state} aria-label={title}>{labels.loading}</section>
+  ),
+  seriesColors: () => new Map<string, string>(),
+  FALLBACK_CHART_COLORS: ['rgb(0 0 0)'],
+  CHART_TOKENS: [],
   /*
    * The monitor page's header range control. A plain button keeps the test about the
    * page's tabs: the picker's own calendar is ai-kit's suite's subject, and rendering

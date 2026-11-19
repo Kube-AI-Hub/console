@@ -8,7 +8,14 @@ import {
   type ProjectInfo,
   type WorkloadRankMetric,
 } from '@kube-ai-hub/api-client';
-import { AiButton, AiSurface, Skeleton, Tabs, TabsContent, TrendChart, type TrendPoint } from '@kube-ai-hub/ui';
+import { AiButton, AiSurface, Skeleton, Tabs, TabsContent, type TrendPoint } from '@kube-ai-hub/ui';
+import {
+  ChartPanel,
+  presetRange,
+  resolveRange,
+  type ChartPanelLabels,
+  type TimeRange,
+} from '@kube-ai-hub/ui/charts';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -272,30 +279,13 @@ export function ProjectOverviewPage({ workspace, cluster, namespace }: ProjectOv
  * axis would make the smaller series a flat line at the bottom. A gap in the scrape is a break
  * in the line, never a zero.
  */
-const TREND_WINDOWS = [
-  { key: '1h', labelKey: 'project.overview.trend.1h', hours: 1 },
-  { key: '6h', labelKey: 'project.overview.trend.6h', hours: 6 },
-  { key: '24h', labelKey: 'project.overview.trend.24h', hours: 24 },
-] as const;
-
-type TrendWindowKey = (typeof TREND_WINDOWS)[number]['key'];
-
 const TREND_CPU_METRIC = 'namespace_cpu_usage';
 const TREND_MEMORY_METRIC = 'namespace_memory_usage_wo_cache';
 
 /** CPU and memory series for one window, parsed from the range response. */
-function useProjectUsageTrend(cluster: string, namespace: string, windowKey: TrendWindowKey) {
-  const hours = TREND_WINDOWS.find((item) => item.key === windowKey)?.hours ?? 1;
-  /*
-   * The range is resolved when the window changes, not on every render: a range recomputed per
-   * render changes the query key and refetches forever.
-   */
-  const range = React.useMemo(() => {
-    const end = Math.floor(Date.now() / 1000) * 1000;
-    return { start: end - hours * 3600 * 1000, end };
-  }, [hours, windowKey]);
+function useProjectUsageTrend(cluster: string, namespace: string, range: { start: number; end: number; step: string }) {
   const query = useQuery({
-    queryKey: ['project-usage-trend', cluster, namespace, windowKey, range.start],
+    queryKey: ['project-usage-trend', cluster, namespace, range.start, range.end],
     queryFn: async ({ signal }): Promise<{ cpu: TrendPoint[]; memory: TrendPoint[] }> => {
       const body = await apiClient.request<{
         results?: Array<{
@@ -307,7 +297,9 @@ function useProjectUsageTrend(cluster: string, namespace: string, windowKey: Tre
           metrics_filter: [TREND_CPU_METRIC, TREND_MEMORY_METRIC].map((metric) => `${metric}$`).join('|'),
           start: Math.round(range.start / 1000),
           end: Math.round(range.end / 1000),
-          step: hours > 6 ? '300s' : '60s',
+          // The step comes from the shared range arithmetic, not from a local rule:
+          // two pages sampling the same hour differently draw two different shapes.
+          step: range.step,
           cluster,
         },
         ...(signal ? { signal } : {}),
@@ -329,70 +321,93 @@ function useProjectUsageTrend(cluster: string, namespace: string, windowKey: Tre
       return series;
     },
   });
-  return { query, range };
+  return { query };
 }
 
 function UsageTrendSection({ cluster, namespace }: { cluster: string; namespace: string }): React.ReactElement {
   const t = useT();
-  const [windowKey, setWindowKey] = React.useState<TrendWindowKey>('1h');
-  const { query, range } = useProjectUsageTrend(cluster, namespace, windowKey);
+  /*
+   * One window for both panels: cores and bytes do not share a scale, but they must
+   * share a period — comparing CPU over an hour against memory over a day is the
+   * mistake this section exists to prevent.
+   */
+  const [range, setRange] = React.useState<TimeRange>(() => presetRange('1h'));
+  const resolved = React.useMemo(() => resolveRange(range), [range]);
+  const { query } = useProjectUsageTrend(cluster, namespace, resolved);
   const cpu = query.data?.cpu ?? [];
   const memory = query.data?.memory ?? [];
-  const hasData = cpu.length > 0 || memory.length > 0;
+
+  const labels: ChartPanelLabels = React.useMemo(
+    () => ({
+      placeholder: t('project.overview.trend.1h'),
+      presets: t('cluster.monitor.rangeLabel'),
+      custom: t('cluster.monitor.rangeCustom'),
+      rangePlaceholder: t('cluster.monitor.rangePlaceholder'),
+      step: t('cluster.monitor.step'),
+      stepHint: t('cluster.monitor.stepHint'),
+      stepOptions: [],
+      cancel: t('common.cancel'),
+      confirm: t('common.confirm'),
+      invalid: t('cluster.monitor.rangeInvalid'),
+      refresh: t('common.refresh'),
+      error: t('project.overview.trend.unavailable'),
+      retry: t('common.retry'),
+      loading: t('common.loading'),
+      autoPause: t('cluster.monitor.autoPause'),
+      autoResume: t('cluster.monitor.autoResume'),
+      autoPauseLabel: t('cluster.monitor.autoPauseLabel'),
+      autoResumeLabel: t('cluster.monitor.autoResumeLabel'),
+    }),
+    [t],
+  );
+
+  const state: 'loading' | 'refreshing' | 'ready' | 'error' | 'empty' = query.isPending
+    ? 'loading'
+    : query.isError
+      ? 'error'
+      : cpu.length === 0 && memory.length === 0
+        ? 'empty'
+        : query.isFetching
+          ? 'refreshing'
+          : 'ready';
 
   return (
-    <section className="rounded-lg border border-ai-border bg-ai-surface p-4" data-ai-id="project-overview:trend">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-sm font-medium text-ai-fg">{t('project.overview.trend.title')}</h2>
-        <Tabs
-          value={windowKey}
-          onValueChange={(next) => setWindowKey(next as TrendWindowKey)}
-          items={TREND_WINDOWS.map((item) => ({
-            value: item.key,
-            label: t(item.labelKey),
-            aiId: `project-overview:trend:window:${item.key}`,
-          }))}
-        />
-      </div>
-      {query.isPending ? <Skeleton className="h-32 w-full" /> : null}
-      {query.isError ? (
-        <div className="flex flex-col items-start gap-2" data-ai-id="project-overview:trend:error">
-          <p className="text-xs text-ai-fg-muted">{t('project.overview.trend.unavailable')}</p>
-          <AiButton aiId="project-overview:trend:retry" size="sm" variant="secondary" onClick={() => void query.refetch()}>
-            {t('common.retry')}
-          </AiButton>
-        </div>
-      ) : null}
-      {query.isSuccess && !hasData ? (
-        <p className="text-xs text-ai-fg-muted" data-ai-id="project-overview:trend:empty">
-          {t('project.overview.trend.empty')}
-        </p>
-      ) : null}
-      {hasData ? (
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2" data-ai-id="project-overview:trend:charts">
-          <div data-ai-id="project-overview:trend:cpu">
-            <p className="mb-1 text-xs text-ai-fg-muted">{t('project.overview.trend.cpu')}</p>
-            <TrendChart
-              start={range.start}
-              end={range.end}
-              label={t('project.overview.trend.cpu')}
-              emptyText={t('project.overview.trend.empty')}
-              points={cpu}
-            />
-          </div>
-          <div data-ai-id="project-overview:trend:memory">
-            <p className="mb-1 text-xs text-ai-fg-muted">{t('project.overview.trend.memory')}</p>
-            <TrendChart
-              start={range.start}
-              end={range.end}
-              label={t('project.overview.trend.memory')}
-              emptyText={t('project.overview.trend.empty')}
-              points={memory}
-            />
-          </div>
-        </div>
-      ) : null}
-    </section>
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2" data-ai-id="project-overview:trend">
+      {/*
+        Two panels, not two bare plots: each carries its own unit, its own numbers and
+        the shared window control, so "0.54 cores" can be read against the shape that
+        produced it. A single panel with two y axes would make the smaller series a
+        flat line at the bottom.
+      */}
+      <ChartPanel
+        aiId="project-overview:trend:cpu"
+        title={t('project.overview.trend.cpu')}
+        series={[{ key: 'cpu', label: t('project.overview.trend.cpu'), points: cpu, area: true }]}
+        range={range}
+        onRangeChange={setRange}
+        labels={labels}
+        state={state}
+        {...(query.isError ? { error: query.error } : {})}
+        onRetry={() => void query.refetch()}
+        onRefresh={() => void query.refetch()}
+        height={180}
+        formatValue={(value) => formatCpu(String(value))}
+      />
+      <ChartPanel
+        aiId="project-overview:trend:memory"
+        title={t('project.overview.trend.memory')}
+        series={[{ key: 'memory', label: t('project.overview.trend.memory'), points: memory, area: true }]}
+        range={range}
+        onRangeChange={setRange}
+        labels={labels}
+        state={state}
+        {...(query.isError ? { error: query.error } : {})}
+        onRetry={() => void query.refetch()}
+        onRefresh={() => void query.refetch()}
+        height={180}
+        formatValue={(value) => formatBytes(String(value))}
+      />
+    </div>
   );
 }
 

@@ -15,6 +15,9 @@ export {
   TimeRangePicker,
   TimeSeriesChart,
   pivotSeries,
+  seriesColors,
+  CHART_TOKENS,
+  FALLBACK_CHART_COLORS,
   progressSlices,
   rangePresets,
   // Time-range arithmetic: hosts own the window, so they need the same helpers the

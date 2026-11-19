@@ -2,7 +2,8 @@ import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { clusterMetricsApi, rangeMetricsApi, type ClusterUsage } from '@kube-ai-hub/api-client';
-import { Button, Card, Icon, MetricRing, Panel, Progress, Skeleton, TrendChart, cn, useSpotlight } from '@kube-ai-hub/ui';
+import { Button, Card, Icon, MetricRing, Panel, Progress, Skeleton, cn, useSpotlight } from '@kube-ai-hub/ui';
+import { TimeSeriesChart } from '@kube-ai-hub/ui/charts';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { api } from '@/api';
 import { useT } from '@/i18n';
@@ -206,8 +207,14 @@ export function OverviewResourcePanel({ cluster, refreshAt }: {
       </header>
       {trends.isPending ? <Skeleton className="h-28" /> : trends.isError ?
         <ResourceErrorPanel error={trends.error} onRetry={() => void trends.refetch()} retryAiId={`${prefix}-retry`} /> :
-        <TrendChart points={points} start={start} end={refreshAt} maxGap={window.gap} label={title}
-          emptyText={t('cluster.overview.emptyTrend')} interactive showAxes showGrid area
+        <TimeSeriesChart
+          series={[{ key: title, label: title, points, area: true, smooth: true }]}
+          start={start}
+          end={refreshAt}
+          maxGap={window.gap}
+          label={title}
+          emptyText={t('cluster.overview.emptyTrend')}
+          height={150}
           yDomain={[0, Math.max(100, ...points.map((point) => point.value))]}
           formatValue={(value) => `${Math.round(value)}%`}
           formatTime={(at) => new Date(at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}

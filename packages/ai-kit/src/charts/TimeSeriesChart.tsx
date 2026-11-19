@@ -34,8 +34,12 @@ export interface TimeSeries {
   /**
    * Stroke / fill colour. Defaults to the next palette entry, so a host that has
    * nothing to say about colour gets a consistent palette.
+   *
+   * Spelled `string | undefined` rather than `string`: under
+   * `exactOptionalPropertyTypes` the two are different types, and a host that maps
+   * from another shape (`{ color?: string | undefined }`) must be assignable here.
    */
-  color?: string;
+  color?: string | undefined;
   /**
    * Hide this series from the drawing while keeping it in the legend.
    *
@@ -191,6 +195,23 @@ function axisTimeFormatter(formatTime: (at: number) => string): (value: number) 
 }
 
 /**
+ * The colour each series is drawn with.
+ *
+ * Exported so a host that renders its own legend (or a summary row) uses the exact
+ * colours the plot uses. Deriving them a second time from `TREND_SERIES_COLORS` was
+ * how a legend dot ended up one shade off its line: the chart had already assigned a
+ * palette entry per *visible* series, and a hidden series shifts the rest.
+ */
+export function seriesColors(
+  series: readonly TimeSeries[],
+  palette: readonly string[],
+): Map<string, string> {
+  return new Map(
+    series.map((entry, index) => [entry.key, entry.color ?? palette[index % palette.length]!]),
+  );
+}
+
+/**
  * A time-series chart for monitoring surfaces.
  *
  * Why recharts rather than the hand-drawn `TrendChart`: a monitoring chart needs
@@ -298,7 +319,14 @@ export function TimeSeriesChart({
     );
   }
 
-  const colors = new Map(visible.map((entry, index) => [entry.key, entry.color ?? palette[index % palette.length]!]));
+  /*
+   * Colours are assigned over **every** series, not only the visible ones.
+   *
+   * Indexing by `visible` renumbered the palette whenever the reader hid a line: hide
+   * the first of three and the remaining two swapped colours, which reads as "the
+   * data changed". A series keeps its colour for as long as it is on the chart.
+   */
+  const colors = seriesColors(series, palette);
   const hasBar = visible.some((entry) => entry.type === 'bar');
 
   return (
@@ -402,7 +430,7 @@ export function TimeSeriesChart({
       {legend === 'bottom' ? (
         <ul className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs" data-ai-chart-legend>
           {plotted.map((entry, index) => {
-            const color = entry.color ?? palette[index % palette.length]!;
+            const color = colors.get(entry.key) ?? palette[index % palette.length]!;
             const hidden = entry.hidden === true;
             return (
               <li key={entry.key}>

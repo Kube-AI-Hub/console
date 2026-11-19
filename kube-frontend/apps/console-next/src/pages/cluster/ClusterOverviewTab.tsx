@@ -2,7 +2,8 @@ import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { rangeMetricsApi, type MetricSeries } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { Button, Skeleton, TREND_SERIES_COLORS, TrendChart, cn } from '@kube-ai-hub/ui';
+import { Button, Skeleton, TREND_SERIES_COLORS, cn } from '@kube-ai-hub/ui';
+import { TimeSeriesChart } from '@kube-ai-hub/ui/charts';
 import type { LocaleKey } from '@kube-ai-hub/locales';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
@@ -304,22 +305,22 @@ export function ClusterOverviewTab({
                   <span className="text-xs text-ai-fg-muted">{t('cluster.monitor.emptyHint')}</span>
                 </div>
               ) : (
-                <TrendChart
+                <TimeSeriesChart
                   series={[
                     {
                       key: selectedSpec.key,
                       label: t(selectedSpec.chartLabelKey),
                       points: chartPoints,
                       color: TREND_SERIES_COLORS[0],
+                      area: true,
+                      smooth: true,
                     },
                   ]}
                   start={start}
                   end={end}
                   label={t(selectedSpec.chartLabelKey)}
                   emptyText={t('cluster.monitor.empty')}
-                  showAxes
-                  showGrid
-                  interactive
+                  height={220}
                   formatValue={(value) => formatChartValue(value, selectedSpec.chartKind)}
                   data-ai-id={USAGE_CHART_ID + ':trend'}
                 />

@@ -218,9 +218,17 @@ describe('容器详情页签', () => {
     for (const key of ['gpu', 'gpu-memory', 'cpu', 'memory']) {
       const card = view.container.querySelector(`[data-ai-id="container-detail:monitor:${key}"]`);
       expect(card).not.toBeNull();
-      // 有点就是图：TrendChart 在无点时才会打 data-ai-state="empty"。
+      // 有点就是图：共享图表在无点时才会打 data-ai-state="empty"。
       expect(card!.querySelector('[data-ai-state="empty"]')).toBeNull();
-      expect(card!.querySelector('svg')).not.toBeNull();
+      /*
+       * The plot is present and ready. It is asserted through its state rather than
+       * through an `svg`: the drawing library is stubbed in this suite (it lives in
+       * ai-kit's own React), so the element is a div here. The real SVG is covered by
+       * ai-kit's chart tests and the browser pass.
+       */
+      const plot = card!.querySelector('[data-ai-id="container-detail:monitor:' + key + ':chart"]');
+      expect(plot).not.toBeNull();
+      expect(plot!.querySelector('[data-ai-state="empty"]')).toBeNull();
     }
     // GPU 用量是真实的 0，不是「没有数据」。
     expect(view.container.querySelector('[data-ai-id="container-detail:monitor:gpu:current"]')).toHaveTextContent('0');

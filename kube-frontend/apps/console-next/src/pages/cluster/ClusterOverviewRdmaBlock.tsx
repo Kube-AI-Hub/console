@@ -3,7 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import type { MetricSeries } from '@kube-ai-hub/api-client';
 import { rdmaPortsApi } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { Button, TREND_SERIES_COLORS, TrendChart, type TrendSeries } from '@kube-ai-hub/ui';
+import { Button, TREND_SERIES_COLORS, type TrendSeries } from '@kube-ai-hub/ui';
+import { TimeSeriesChart } from '@kube-ai-hub/ui/charts';
 import type { LocaleKey } from '@kube-ai-hub/locales';
 import { api as apiClient } from '@/api';
 import { useT } from '@/i18n';
@@ -209,16 +210,15 @@ export function ClusterOverviewRdmaBlock({
             </div>
           ) : (
             <>
-              <TrendChart
-                series={lines}
+              <TimeSeriesChart
+                series={lines.map((line) => ({ ...line, smooth: true }))}
                 start={start}
                 end={end}
                 label={t(tab.labelKey)}
                 emptyText={t('cluster.monitor.empty')}
-                showAxes
-                showGrid
-                interactive
+                height={160}
                 formatValue={(value) => formatValue(value, tab.kind)}
+                data-ai-id="cluster-monitor:overview:rdma:chart:plot"
               />
               <div className="flex flex-wrap items-center gap-3 text-xs" data-ai-id="cluster-monitor:overview:rdma:chart:legend">
                 {latest.map((line, index) => (

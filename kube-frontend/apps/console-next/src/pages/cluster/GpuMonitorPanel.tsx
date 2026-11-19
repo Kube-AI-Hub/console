@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { rangeMetricsApi } from '@kube-ai-hub/api-client';
-import { Button, Skeleton, TrendChart } from '@kube-ai-hub/ui';
-import { TimeRangePicker, gapForStep, presetRange, resolveRange, type TimeRange } from '@kube-ai-hub/ui/charts';
+import { Button, Skeleton } from '@kube-ai-hub/ui';
+import { TimeRangePicker, TimeSeriesChart, gapForStep, presetRange, resolveRange, type TimeRange } from '@kube-ai-hub/ui/charts';
 import { api } from '@/api';
 import { useT } from '@/i18n';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -75,8 +75,16 @@ export function GpuMonitorPanel({ cluster, node, uuid }: { cluster: string; node
               {latest === undefined ? '-' : format(latest)}
             </span>
           </header>
-          <TrendChart points={points} start={resolved.start} end={resolved.end} maxGap={gapForStep(resolved.step)}
-            label={`${t(`gpu.monitor.${chart.key}`)} (${chart.unit})`} emptyText={t('cluster.monitor.empty')} />
+          <TimeSeriesChart
+            series={[{ key: chart.key, label: t(`gpu.monitor.${chart.key}`), points, area: true, smooth: true }]}
+            start={resolved.start}
+            end={resolved.end}
+            maxGap={gapForStep(resolved.step)}
+            label={`${t(`gpu.monitor.${chart.key}`)} (${chart.unit})`}
+            emptyText={t('cluster.monitor.empty')}
+            height={140}
+            formatValue={format}
+          />
           {points.length > 0 ? <p className="mt-2 text-xs text-ai-fg-muted">
             {t('cluster.monitor.min')}: {format(Math.min(...points.map((point) => point.value)))} · {t('cluster.monitor.max')}: {format(Math.max(...points.map((point) => point.value)))}</p> : null}
         </section>;

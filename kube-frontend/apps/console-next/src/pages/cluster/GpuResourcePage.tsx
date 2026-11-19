@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { rangeMetricsApi, type MetricSeries } from '@kube-ai-hub/api-client';
-import { actionProps } from '@kube-ai-hub/ai-surface';
-import { AiSurface, Button, Skeleton } from '@kube-ai-hub/ui';
+import { AiSurface, Skeleton } from '@kube-ai-hub/ui';
+import { ChartPanel, presetRange, resolveRange, type ChartPanelLabels, type TimeRange } from '@kube-ai-hub/ui/charts';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -16,26 +16,18 @@ import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
  * `cluster_gpu_memory_utilisation`); both are ratios in [0,1], so the page only
  * multiplies by 100 for display and never divides anything itself.
  *
- * Charts are inline SVG bars, not a charting library: the whole cluster monitor page
- * already proves that a 60–100 point series is a few dozen rects, and adding a chart
- * dependency for two of them would cost more than the page. The bars exist to show
- * shape; the current/min/max numbers beside them carry the quantity.
+ * The plots are the shared `ChartPanel`: it brings the window control, the refresh,
+ * the hover readout and the legend, so this page no longer carries its own hand-drawn
+ * bars. That matters beyond tidiness — the previous SVG scaled each card to its own
+ * peak, which made a cluster idling at 3% look as busy as one at 90%. A shared y axis
+ * of 0–100% is the only scale on which two utilisation charts are comparable.
  *
- * The window selects both the range and the step: asking for 24h at 60-second
- * resolution is 1,440 points over the wire and illegible as bars. Every window keeps
- * the series near 60–100 samples.
+ * The window drives the step through the shared range arithmetic: asking for 24h at
+ * 60-second resolution is 1,440 points over the wire and illegible on screen.
  */
 export interface GpuResourcePageProps {
   cluster: string;
 }
-
-const WINDOWS = [
-  { key: '1h', ms: 60 * 60 * 1000, step: '60s' },
-  { key: '6h', ms: 6 * 60 * 60 * 1000, step: '5m' },
-  { key: '24h', ms: 24 * 60 * 60 * 1000, step: '15m' },
-] as const;
-
-type WindowKey = (typeof WINDOWS)[number]['key'];
 
 /** The two trends the page plots. */
 const CHARTS = [
@@ -75,33 +67,24 @@ function formatPercent(ratio: number): string {
 
 export function GpuResourcePage({ cluster }: GpuResourcePageProps): React.ReactElement {
   const t = useT();
-  const [windowKey, setWindowKey] = React.useState<WindowKey>('1h');
-  const window = WINDOWS.find((entry) => entry.key === windowKey) ?? WINDOWS[0];
-
-  /*
-   * Resolve the window to absolute timestamps once per selection.
-   *
-   * `end: Date.now()` inside the query key would change on every render and the query
-   * would refetch forever — the same trap the cluster monitor page documents.
-   */
-  const [range, setRange] = React.useState(() => {
-    const end = Math.floor(Date.now() / 1000) * 1000;
-    return { start: end - WINDOWS[0].ms, end };
-  });
-  React.useEffect(() => {
-    const end = Math.floor(Date.now() / 1000) * 1000;
-    setRange({ start: end - window.ms, end });
-  }, [windowKey, window.ms]);
+  const [range, setRange] = React.useState<TimeRange>(() => presetRange('1h'));
+  const resolved = React.useMemo(() => resolveRange(range), [range]);
 
   const trends = useQuery({
-    queryKey: ['cluster-gpu-resource', cluster, windowKey, range.start, range.end],
+    queryKey: [
+      'cluster-gpu-resource',
+      cluster,
+      range.kind === 'relative' ? range.key : 'custom',
+      resolved.start,
+      resolved.end,
+    ],
     queryFn: ({ signal }) =>
       rangeMetricsApi(apiClient).cluster({
         cluster,
         metrics: [...METRICS],
-        start: range.start,
-        end: range.end,
-        step: window.step,
+        start: resolved.start,
+        end: resolved.end,
+        step: resolved.step,
         signal,
       }),
     // A historical window does not become more true by refetching: re-downloading an
@@ -120,7 +103,11 @@ export function GpuResourcePage({ cluster }: GpuResourcePageProps): React.ReactE
     () =>
       CHARTS.map((chart) => ({
         chart,
-        points: seriesByName.get(chart.metric)?.points ?? [],
+        // Ratios in [0,1] → percent for the axis and the readout.
+        points: (seriesByName.get(chart.metric)?.points ?? []).map((point) => ({
+          at: point.at,
+          value: point.value * 100,
+        })),
       })),
     [seriesByName],
   );
@@ -129,30 +116,45 @@ export function GpuResourcePage({ cluster }: GpuResourcePageProps): React.ReactE
   const allocated = latestPoint(seriesByName.get('cluster_gpu_allocated'));
   const gpuTotal = latestPoint(seriesByName.get('cluster_gpu_total'));
 
-  const state = trends.isPending ? 'loading' : trends.isError ? 'error' : 'ready';
+  const labels: ChartPanelLabels = React.useMemo(
+    () => ({
+      placeholder: t('cluster.gpuResource.range.1h'),
+      presets: t('cluster.monitor.rangeLabel'),
+      custom: t('cluster.monitor.rangeCustom'),
+      rangePlaceholder: t('cluster.monitor.rangePlaceholder'),
+      step: t('cluster.monitor.step'),
+      stepHint: t('cluster.monitor.stepHint'),
+      stepOptions: [],
+      cancel: t('common.cancel'),
+      confirm: t('common.confirm'),
+      invalid: t('cluster.monitor.rangeInvalid'),
+      refresh: t('common.refresh'),
+      error: t('cluster.gpuResource.empty'),
+      retry: t('common.retry'),
+      loading: t('common.loading'),
+      autoPause: t('cluster.monitor.autoPause'),
+      autoResume: t('cluster.monitor.autoResume'),
+      autoPauseLabel: t('cluster.monitor.autoPauseLabel'),
+      autoResumeLabel: t('cluster.monitor.autoResumeLabel'),
+    }),
+    [t],
+  );
+
+  const state: 'loading' | 'refreshing' | 'ready' | 'error' | 'empty' = trends.isPending
+    ? 'loading'
+    : trends.isError
+      ? 'error'
+      : totalPoints === 0
+        ? 'empty'
+        : trends.isFetching
+          ? 'refreshing'
+          : 'ready';
 
   return (
-    <AiSurface as="section" aiId="cluster-gpu-resource:surface" state={state} className="flex min-w-0 flex-col gap-4">
-      <header className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-lg font-semibold text-ai-fg">{t('cluster.gpuResource.title')}</h1>
-          <p className="text-sm text-ai-fg-muted">{t('cluster.gpuResource.description')}</p>
-        </div>
-        {/* The shared Button: a bare element would be an action without an agent handle. */}
-        <div className="flex flex-wrap gap-1" {...actionProps('cluster-gpu-resource:range')}>
-          {WINDOWS.map((entry) => (
-            <Button
-              key={entry.key}
-              size="sm"
-              variant={entry.key === windowKey ? 'primary' : 'secondary'}
-              aria-pressed={entry.key === windowKey}
-              {...actionProps(`cluster-gpu-resource:range:${entry.key}`)}
-              onClick={() => setWindowKey(entry.key)}
-            >
-              {t(`cluster.gpuResource.range.${entry.key}`)}
-            </Button>
-          ))}
-        </div>
+    <AiSurface as="section" aiId="cluster-gpu-resource:surface" state={state === 'refreshing' ? 'ready' : state} className="flex min-w-0 flex-col gap-4">
+      <header className="flex flex-col gap-1">
+        <h1 className="text-lg font-semibold text-ai-fg">{t('cluster.gpuResource.title')}</h1>
+        <p className="text-sm text-ai-fg-muted">{t('cluster.gpuResource.description')}</p>
       </header>
 
       {state === 'loading' ? <Skeleton className="h-64 w-full" /> : null}
@@ -164,7 +166,7 @@ export function GpuResourcePage({ cluster }: GpuResourcePageProps): React.ReactE
         />
       ) : null}
 
-      {state === 'ready' && totalPoints === 0 ? (
+      {state === 'empty' ? (
         /*
          * No metric data at all. This is a real state, not an error: the GPU series are
          * recording rules fed by gpu-agent, and a cluster without them answers an empty
@@ -179,7 +181,7 @@ export function GpuResourcePage({ cluster }: GpuResourcePageProps): React.ReactE
         </div>
       ) : null}
 
-      {state === 'ready' && totalPoints > 0 ? (
+      {state !== 'loading' && state !== 'error' && state !== 'empty' ? (
         <React.Fragment>
           {allocated !== undefined && gpuTotal !== undefined ? (
             <div
@@ -195,152 +197,30 @@ export function GpuResourcePage({ cluster }: GpuResourcePageProps): React.ReactE
             </div>
           ) : null}
 
-          <div
-            className="grid grid-cols-1 gap-3 xl:grid-cols-2"
-            data-ai-id="cluster-gpu-resource:chart"
-            data-ai-window={windowKey}
-            data-ai-points={String(totalPoints)}
-          >
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-2" data-ai-id="cluster-gpu-resource:chart">
             {charted.map(({ chart, points }) => (
-              <TrendCard
+              <ChartPanel
                 key={chart.key}
-                title={t(chart.titleKey)}
                 aiId={chart.aiId}
-                points={points}
-                start={range.start}
-                end={range.end}
+                title={t(chart.titleKey)}
+                series={[{ key: chart.key, label: t(chart.titleKey), points, area: true }]}
+                range={range}
+                onRangeChange={setRange}
+                labels={labels}
+                state={state}
+                onRetry={() => void trends.refetch()}
+                onRefresh={() => void trends.refetch()}
+                height={180}
+                // A fixed 0–100% axis: two utilisation charts are only comparable on a
+                // shared scale, and a peak-scaled axis made an idle cluster look busy.
+                yDomain={[0, 100]}
+                formatAxis={(value) => `${Math.round(value)}%`}
+                formatValue={(value) => formatPercent(value / 100)}
               />
             ))}
           </div>
         </React.Fragment>
       ) : null}
     </AiSurface>
-  );
-}
-
-/**
- * One trend.
- *
- * The bars show shape; the numbers below show quantity, because a spike touching 90%
- * for one sample and a series sitting at 60% draw almost the same picture at this
- * height. Each card scales to its own peak (with headroom) rather than a fixed 0–100:
- * a cluster idling at 3% is exactly the case a trend view must distinguish from "no
- * data", and a fixed scale flattens it onto the baseline.
- */
-function TrendCard({
-  title,
-  aiId,
-  points,
-  start,
-  end,
-}: {
-  title: string;
-  aiId: string;
-  points: MetricSeries['points'];
-  start: number;
-  end: number;
-}): React.ReactElement {
-  const t = useT();
-  const values = points.map((point) => point.value);
-  const current = values.length ? values[values.length - 1] : undefined;
-  const min = values.length ? Math.min(...values) : undefined;
-  const max = values.length ? Math.max(...values) : undefined;
-
-  return (
-    <section className="rounded-lg border border-ai-border bg-ai-surface p-4" data-ai-id={aiId} data-ai-points={String(points.length)}>
-      <div className="mb-2 flex items-baseline justify-between gap-2">
-        <h2 className="text-sm font-medium text-ai-fg">{title}</h2>
-        <span className="text-xs tabular-nums text-ai-fg-muted" data-ai-id={`${aiId}:current`}>
-          {current === undefined ? '-' : formatPercent(current)}
-        </span>
-      </div>
-
-      {points.length === 0 ? (
-        <p className="py-6 text-sm text-ai-fg-secondary" data-ai-id={`${aiId}:empty`}>
-          {t('cluster.gpuResource.empty')}
-        </p>
-      ) : (
-        <React.Fragment>
-          <BarChart points={points} start={start} end={end} />
-          <dl className="mt-2 flex flex-wrap gap-4 text-xs text-ai-fg-muted">
-            <div className="flex gap-1">
-              <dt>{t('cluster.gpuResource.min')}</dt>
-              <dd className="tabular-nums text-ai-fg-secondary">{min === undefined ? '-' : formatPercent(min)}</dd>
-            </div>
-            <div className="flex gap-1">
-              <dt>{t('cluster.gpuResource.max')}</dt>
-              <dd className="tabular-nums text-ai-fg-secondary">{max === undefined ? '-' : formatPercent(max)}</dd>
-            </div>
-            <div className="flex gap-1">
-              <dt>{t('cluster.gpuResource.current')}</dt>
-              <dd className="tabular-nums text-ai-fg-secondary">{current === undefined ? '-' : formatPercent(current)}</dd>
-            </div>
-          </dl>
-        </React.Fragment>
-      )}
-    </section>
-  );
-}
-
-/**
- * The bars.
- *
- * One rect per sample, positioned by its timestamp so a missing scrape leaves a gap
- * instead of silently squeezing the neighbours together. `data-ai-bar` is the handle
- * automation counts; the SVG itself is decorative (the numbers are in text), so it is
- * hidden from assistive technology rather than given a redundant label.
- */
-function BarChart({
-  points,
-  start,
-  end,
-}: {
-  points: MetricSeries['points'];
-  start: number;
-  end: number;
-}): React.ReactElement {
-  const width = 100;
-  const height = 32;
-  const span = Math.max(1, end - start);
-  const peak = Math.max(...points.map((point) => point.value), 0.02);
-  const scaleMax = peak * 1.12;
-  const slot = width / Math.max(points.length, 1);
-  const barWidth = Math.max(slot * 0.72, 0.18);
-
-  return (
-    <svg
-      viewBox={`0 0 ${width} ${height}`}
-      preserveAspectRatio="none"
-      className="h-24 w-full text-ai-accent"
-      aria-hidden="true"
-    >
-      {points.map((point) => {
-        const barHeight = Math.min(height, (point.value / scaleMax) * height);
-        const x = ((point.at - start) / span) * width;
-        return (
-          <rect
-            key={point.at}
-            data-ai-bar
-            x={x.toFixed(2)}
-            y={(height - barHeight).toFixed(2)}
-            width={barWidth.toFixed(2)}
-            height={Math.max(barHeight, 0).toFixed(2)}
-            fill="currentColor"
-            opacity="0.85"
-          />
-        );
-      })}
-      {/* Baseline, so a zero series reads as zero rather than as an empty card. */}
-      <line
-        x1="0"
-        y1={height}
-        x2={width}
-        y2={height}
-        stroke="currentColor"
-        strokeWidth="0.3"
-        opacity="0.25"
-        vectorEffect="non-scaling-stroke"
-      />
-    </svg>
   );
 }

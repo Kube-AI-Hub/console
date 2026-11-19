@@ -2,7 +2,8 @@ import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { rangeMetricsApi, type MetricSeries } from '@kube-ai-hub/api-client';
 import { actionProps, surfaceProps, type AiSurfaceState } from '@kube-ai-hub/ai-surface';
-import { Button, Skeleton, TrendChart } from '@kube-ai-hub/ui';
+import { Button, Skeleton } from '@kube-ai-hub/ui';
+import { TimeSeriesChart } from '@kube-ai-hub/ui/charts';
 import { useT, type LocaleKey } from '@/i18n';
 import { api as apiClient } from '@/api';
 
@@ -218,9 +219,13 @@ export function ContainerMonitorPanel({ cluster, namespace, pod, container }: Co
 /**
  * 一张趋势卡。
  *
- * 一条序列没有采样时由共享的 `TrendChart` 画空态文案，而不是画一条零线：本部署
+ * 一条序列没有采样时由共享图表画空态文案，而不是画一条零线：本部署
  * GPU 两条本来就没有容器级序列，硬画零线会被读成「GPU 用量是 0」。真实的全 0 序列
  * 走另一条路——有点就画线，零值也是点。
+ *
+ * The plot is `TimeSeriesChart`, filled and smoothed: a single container metric is
+ * exactly the case where an area reads better than a bare line, and the hover
+ * readout names the instant the pointer is on.
  */
 function MonitorCard({
   chart,
@@ -238,29 +243,29 @@ function MonitorCard({
   const t = useT();
   const current = points.length > 0 ? points[points.length - 1]?.value : undefined;
   const aiId = `container-detail:monitor:${chart.key}`;
+  const label = t(chart.titleKey);
 
   return (
     <section
       className="flex min-w-0 flex-col rounded-lg border border-ai-border bg-ai-surface p-4"
       data-ai-id={aiId}
-      aria-label={t(chart.titleKey)}
+      aria-label={label}
     >
       <div className="mb-2 flex items-baseline justify-between gap-2">
-        <h3 className="text-sm font-medium text-ai-fg">{t(chart.titleKey)}</h3>
+        <h3 className="text-sm font-medium text-ai-fg">{label}</h3>
         <span className="text-xs tabular-nums text-ai-fg-muted" data-ai-id={`${aiId}:current`}>
           {current === undefined ? '-' : format(chart.key, current)}
         </span>
       </div>
-      <TrendChart
-        points={points}
+      <TimeSeriesChart
+        series={[{ key: chart.key, label, points, area: true, smooth: true }]}
         start={start}
         end={end}
-        label={t(chart.titleKey)}
+        label={label}
         emptyText={t('container.monitor.empty')}
-        showAxes
-        showGrid
-        interactive
+        height={140}
         formatValue={(value) => format(chart.key, value)}
+        data-ai-id={`${aiId}:chart`}
       />
     </section>
   );

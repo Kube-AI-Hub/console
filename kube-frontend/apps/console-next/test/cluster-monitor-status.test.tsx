@@ -16,6 +16,12 @@ import { ClusterStatusSection } from '@/pages/cluster/ClusterStatusSection';
  * state. Mocking the subpath keeps this test about the status band.
  */
 vi.mock('@kube-ai-hub/ui/charts', () => ({
+  /*
+   * The drawing library does not paint in jsdom, so the three chart components are
+   * replaced with the smallest stand-ins that keep their observable contract: the
+   * label, the segment/slice count and the centre content. The tests below assert the
+   * block's states and handles, not the pixels.
+   */
   DonutChart: ({ segments, label, emptyText, centerLabel }: {
     segments: { key: string; label: string; value: number }[];
     label: string;
@@ -26,6 +32,42 @@ vi.mock('@kube-ai-hub/ui/charts', () => ({
       {segments.length > 0 ? centerLabel ?? null : emptyText}
     </div>
   ),
+  PieChart: ({ slices, label, emptyText, centerLabel }: {
+    slices: { key: string; label: string; value: number }[];
+    label: string;
+    emptyText: string;
+    centerLabel?: React.ReactNode;
+  }) => (
+    <div role="img" aria-label={label} data-ai-slices={slices?.length ?? 0}>
+      {slices && slices.length > 0 ? centerLabel ?? null : emptyText}
+    </div>
+  ),
+  ProgressRing: ({ used, total, label, centerLabel }: {
+    used: number;
+    total?: number;
+    label: string;
+    centerLabel?: React.ReactNode;
+  }) => (
+    <div role="img" aria-label={label} data-ai-progress-used={used} data-ai-progress-total={total}>
+      {centerLabel ?? null}
+    </div>
+  ),
+  // The monitor page's header range control; its calendar is ai-kit's own subject.
+  TimeRangePicker: ({ value }: { value: { kind: string; key?: string } }) => (
+    <button type="button" data-ai-range-kind={value.kind}>{value.kind === 'relative' ? value.key : 'custom'}</button>
+  ),
+  TimeSeriesChart: ({ label, emptyText }: { label: string; emptyText: string }) => (
+    <div role="img" aria-label={label} data-ai-state="ready">{emptyText}</div>
+  ),
+  seriesColors: () => new Map<string, string>(),
+  FALLBACK_CHART_COLORS: ['rgb(0 0 0)'],
+  CHART_TOKENS: [],
+  rangePresets: (labelOf: (key: string) => string) => [{ key: '1h', ms: 3_600_000, label: labelOf('1h') }],
+  presetRange: (key: string) => ({ kind: 'relative', key, ms: 3_600_000 }),
+  resolveRange: () => ({ start: 0, end: 3_600_000, step: '60s' }),
+  gapForStep: () => 180_000,
+  stepForSpan: () => '60s',
+  stepToMs: () => 60_000,
 }));
 
 vi.mock('@tanstack/react-router', () => ({

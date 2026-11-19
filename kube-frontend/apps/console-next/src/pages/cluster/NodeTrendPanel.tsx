@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { rangeMetricsApi } from '@kube-ai-hub/api-client';
-import { Button, Select, Skeleton, TrendChart } from '@kube-ai-hub/ui';
-import { TimeRangePicker, presetRange, resolveRange, gapForStep, type TimeRange } from '@kube-ai-hub/ui/charts';
+import { Button, Select, Skeleton } from '@kube-ai-hub/ui';
+import { TimeRangePicker, TimeSeriesChart, presetRange, resolveRange, gapForStep, type TimeRange } from '@kube-ai-hub/ui/charts';
 import { api } from '@/api';
 import { useT } from '@/i18n';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -80,8 +80,15 @@ export function NodeTrendPanel({ cluster, node, gpu, all = false }: { cluster: s
           <div className="mb-2 flex justify-between text-xs">
             <span>{t(chart.label)}</span><span className="tabular-nums">{latest === undefined ? '-' : `${latest.toFixed(1)} ${chart.ratio ? '%' : t('node.list.cards')}`}</span>
           </div>
-          <TrendChart points={points} start={resolved.start} end={resolved.end} maxGap={gapForStep(resolved.step)}
-            label={t(chart.label)} emptyText={t('cluster.monitor.empty')} />
+          <TimeSeriesChart
+            series={[{ key: chart.key, label: t(chart.label), points, area: true, smooth: true }]}
+            start={resolved.start}
+            end={resolved.end}
+            maxGap={gapForStep(resolved.step)}
+            label={t(chart.label)}
+            emptyText={t('cluster.monitor.empty')}
+            height={140}
+          />
         </div>;
       })}</div>}
   </section>;

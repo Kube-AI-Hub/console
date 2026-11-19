@@ -2,8 +2,8 @@ import * as React from 'react';
 import { useQuery, useIsFetching } from '@tanstack/react-query';
 import { ApiError, clusterStatusApi, rangeMetricsApi, type MetricSeries } from '@kube-ai-hub/api-client';
 import { actionProps } from '@kube-ai-hub/ai-surface';
-import { AiSurface, Button, Icon, Skeleton, Tabs, TabsContent, TrendChart } from '@kube-ai-hub/ui';
-import { TimeRangePicker, rangePresets } from '@kube-ai-hub/ui/charts';
+import { AiSurface, Button, Icon, Skeleton, Tabs, TabsContent } from '@kube-ai-hub/ui';
+import { TimeRangePicker, TimeSeriesChart, rangePresets } from '@kube-ai-hub/ui/charts';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -510,12 +510,13 @@ function TrendCard({
         </div>
       ) : (
         <React.Fragment>
-          <TrendChart
-            points={points}
+          <TimeSeriesChart
+            series={[{ key: aiId, label: title, points, area: true, smooth: true }]}
             start={start}
             end={end}
             label={title}
             emptyText={t('cluster.monitor.empty')}
+            height={140}
             formatValue={(value) => formatChartValue(value, kind)}
             data-ai-id={`${aiId}:chart`}
           />
