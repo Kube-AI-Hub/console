@@ -1237,15 +1237,28 @@ export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, 
              * applies the edit the reader asked for; making them reopen the dialog and retype it
              * is the worse answer. One retry only — a second conflict is a real disagreement.
              */
-            try {
-              await update.mutateAsync(body);
-            } catch (error) {
-              if (!(error instanceof ApiError) || !error.isConflict) throw error;
-              const fresh = await workloadsApi(apiClient, kind).get({ cluster, namespace, name });
-              await update.mutateAsync({
-                ...body,
-                metadata: { ...body.metadata, resourceVersion: fresh.raw.metadata?.resourceVersion },
-              } as typeof body);
+            /*
+             * Retry the write on a conflict, up to three times with a short pause. A freshly
+             * created workload's controller writes status (and sometimes generation) several times
+             * in the first seconds, so one retry can lose the race again; three bounded attempts
+             * cover the settling window without hiding a genuine disagreement, which is what a
+             * fourth conflict would mean.
+             */
+            let attempt = 0;
+            for (;;) {
+              try {
+                await update.mutateAsync(body);
+                break;
+              } catch (error) {
+                if (!(error instanceof ApiError) || !error.isConflict || attempt >= 2) throw error;
+                attempt += 1;
+                await new Promise((resolve) => setTimeout(resolve, 300 * attempt));
+                const fresh = await workloadsApi(apiClient, kind).get({ cluster, namespace, name });
+                body = {
+                  ...body,
+                  metadata: { ...body.metadata, resourceVersion: fresh.raw.metadata?.resourceVersion },
+                } as typeof body;
+              }
             }
             setDialog('none');
           }}
