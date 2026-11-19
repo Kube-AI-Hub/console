@@ -4,6 +4,7 @@ import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiButton, AiSurface, Badge, Button, Icon, Skeleton, cn } from '@kube-ai-hub/ui';
 import {
+  ApiError,
   objectEventsApi,
   podResourceLines,
   resolvePodEnv,
@@ -14,6 +15,7 @@ import {
   type WorkloadDetail,
   type WorkloadKind,
   type WorkloadRevision,
+  workloadsApi,
 } from '@kube-ai-hub/api-client';
 import { useLocale, type LocaleKey } from '@/i18n';
 import { api as apiClient } from '@/api';
@@ -1225,9 +1227,26 @@ export function WorkloadDetailPage({ descriptor, workspace, cluster, namespace, 
           detail={detail}
           pending={update.isPending}
           onSubmit={async (body) => {
-            // The dialog keeps itself open on failure, so an error (409 included) is
-            // read where the fields are, not in a banner behind the modal.
-            await update.mutateAsync(body);
+            /*
+             * The dialog keeps itself open on failure, so an error (409 included) is read where the
+             * fields are, not in a banner behind the modal.
+             *
+             * A 409 here is normal rather than exceptional: the controller writes to the same
+             * object (status, generation) while a freshly created workload settles, so a whole
+             * object PUT carries a stale `resourceVersion`. Re-reading the version and retrying
+             * applies the edit the reader asked for; making them reopen the dialog and retype it
+             * is the worse answer. One retry only — a second conflict is a real disagreement.
+             */
+            try {
+              await update.mutateAsync(body);
+            } catch (error) {
+              if (!(error instanceof ApiError) || !error.isConflict) throw error;
+              const fresh = await workloadsApi(apiClient, kind).get({ cluster, namespace, name });
+              await update.mutateAsync({
+                ...body,
+                metadata: { ...body.metadata, resourceVersion: fresh.raw.metadata?.resourceVersion },
+              } as typeof body);
+            }
             setDialog('none');
           }}
         />
