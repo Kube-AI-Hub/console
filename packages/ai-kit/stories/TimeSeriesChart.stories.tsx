@@ -103,5 +103,18 @@ export const LegendToggled: Story = {
   },
 };
 
+/**
+ * The legend is live without a host callback: clicking an entry hides that line and
+ * leaves the entry in place. A story (or a read-only panel) that only supplies
+ * `hidden` must still get a control that responds — a button announcing `aria-pressed`
+ * and doing nothing is worse than no button.
+ */
+export const LegendInteractive: Story = {
+  args: {
+    series: SERIES.map((entry) => ({ ...entry })),
+    onToggleSeries: undefined,
+  },
+};
+
 /** Nothing to draw is an explanation, not a flat line at zero. */
 export const Empty: Story = { args: { series: [{ key: 'gpu0', label: 'GPU-0', points: [] }] } };

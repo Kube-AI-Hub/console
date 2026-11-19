@@ -224,7 +224,61 @@ export function TimeSeriesChart({
 }: TimeSeriesChartProps): React.ReactElement {
   const hostRef = React.useRef<HTMLDivElement>(null);
   const palette = useChartPalette(hostRef);
-  const { rows, visible } = React.useMemo(() => pivotSeries(series, start, end, maxGap), [series, start, end, maxGap]);
+  /*
+   * Legend toggles when the host does not own them.
+   *
+   * The legend renders as a button with `aria-pressed`, so it must respond to a
+   * click in every case. It used to call `onToggleSeries?.(key)` unconditionally:
+   * a host that passed `hidden` but no callback — a story, a read-only panel — got a
+   * control that announced itself as pressable and did nothing. Now the host's
+   * callback wins when present (a page persists the choice), and otherwise the
+   * chart keeps its own set.
+   *
+   * The internal set is keyed by the series identity, so switching metrics does not
+   * carry a hidden key over to an unrelated line that happens to share its name.
+   */
+  const seriesKey = series.map((entry) => entry.key).join('|');
+  const seedHidden = (list: readonly TimeSeries[]): ReadonlySet<string> =>
+    new Set(list.filter((entry) => entry.hidden).map((entry) => entry.key));
+  const [ownHidden, setOwnHidden] = React.useState<ReadonlySet<string>>(() => seedHidden(series));
+  /*
+   * The `hidden` prop seeds the local set, so a chart that starts with a line switched
+   * off can still switch it back on. It re-seeds only when the series identity
+   * changes — re-seeding on every render would undo the reader's clicks whenever the
+   * host re-rendered with the same `hidden` prop.
+   *
+   * The first render is skipped: a mount effect would clear the seed the initializer
+   * just applied, which is exactly the bug this effect is here to avoid.
+   */
+  const lastSeriesKey = React.useRef(seriesKey);
+  React.useEffect(() => {
+    if (lastSeriesKey.current === seriesKey) return;
+    lastSeriesKey.current = seriesKey;
+    setOwnHidden(seedHidden(series));
+    // `series` is covered by `seriesKey`; naming it would re-seed on every new array.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seriesKey]);
+  const isHidden = (key: string): boolean => ownHidden.has(key);
+  const toggleLegend = (key: string): void => {
+    if (onToggleSeries) {
+      onToggleSeries(key);
+      return;
+    }
+    setOwnHidden((current) => {
+      const next = new Set(current);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+  const plotted = React.useMemo(
+    () => series.map((entry) => ({ ...entry, hidden: isHidden(entry.key) })),
+    // `isHidden` closes over both the prop and the local set; the dependencies name
+    // the two inputs rather than the function to avoid re-running on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [series, ownHidden, onToggleSeries],
+  );
+  const { rows, visible } = React.useMemo(() => pivotSeries(plotted, start, end, maxGap), [plotted, start, end, maxGap]);
   // recharts does not consult `prefers-reduced-motion`; this design system does.
   const moving = animate && !prefersReducedMotion();
 
@@ -347,10 +401,8 @@ export function TimeSeriesChart({
 
       {legend === 'bottom' ? (
         <ul className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs" data-ai-chart-legend>
-          {series.map((entry, index) => {
-            const color = entry.color ?? palette[visible.findIndex((item) => item.key === entry.key) >= 0
-              ? visible.findIndex((item) => item.key === entry.key)
-              : index % palette.length]!;
+          {plotted.map((entry, index) => {
+            const color = entry.color ?? palette[index % palette.length]!;
             const hidden = entry.hidden === true;
             return (
               <li key={entry.key}>
@@ -358,7 +410,8 @@ export function TimeSeriesChart({
                   type="button"
                   aria-pressed={!hidden}
                   data-ai-legend={entry.key}
-                  onClick={() => onToggleSeries?.(entry.key)}
+                  data-ai-legend-hidden={hidden ? 'true' : 'false'}
+                  onClick={() => toggleLegend(entry.key)}
                   className={cn(
                     'flex cursor-pointer items-center gap-1.5 rounded-ai-sm px-1 py-0.5 transition-opacity duration-ai-fast',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ai-ring',
