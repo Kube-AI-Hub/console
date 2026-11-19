@@ -45,7 +45,6 @@ export function NodeHealthPanel({ node, cluster }: { node: NodeDetail; cluster: 
           {clock?.offset === undefined ? '-' : `${clock.offset > 0 ? '+' : ''}${clock.offset}s`}
         </p>
         <p className="mt-1 text-[10px] text-ai-fg-secondary">{clockText}</p>
-        <p className="mt-1 text-[10px] text-ai-fg-muted">{t('node.health.timeReference')}</p>
       </div>
     </div>
     {clock?.offset !== undefined && Math.abs(clock.offset) >= 120 ?
