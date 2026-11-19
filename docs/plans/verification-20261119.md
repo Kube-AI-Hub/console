@@ -346,3 +346,22 @@ S2I 整套现状：**5 passed / 5 failed / 2 skipped**（01、03 两条列表用
 这是本会话**第 5 次**覆盖。自第 26 轮起改为「跑绿即提交」，本次重建**立刻提交**，不会再被下一轮的重写带走。
 
 **方法沉淀**：并行覆盖的典型特征是「**功能整体消失但配套件还在**」（对话框/hook/文案仍在，只有页面接线被还原）。发现方式：跑该功能的用例 → 红 → 看页面源码里有没有接线，而不是先怀疑用例。
+
+## Z. 收尾审计（2026-11-19 第 43 轮）
+
+| 维度 | 结果 |
+| --- | --- |
+| 页面覆盖 | `gap_check` 已迁移 **93 / 别处承接 3 / 未归类 0**；`parity_check` 待处理 **0** |
+| 文档门禁 | `--strict` **errors=0 warnings=0** |
+| 类型检查 | `typecheck` **0 error** |
+| 应用单测 | **320 passed / 55 files** |
+| 架构契约 | **1636 passed / 22 files** |
+| `app-workloads` | **81 passed / 7 skipped / 0 failed** |
+| `configmaps + storage + secrets` | **102 passed / 1 failed → 已修 → 0 failed** / 7 skipped |
+| `monitoring` | **16 passed** |
+| 全站串行 smoke | **17 passed / 1 failed**（失败项探旧 console 的 `/login`） |
+| 视觉三轴 | 50 张截图 **0 problems** |
+
+审计中修掉一处**阻塞整个单测运行**的问题：`cluster-monitor-tabs.test.tsx` 的 `vi.mock('@kube-ai-hub/ui/charts')` 缺少新增导出 `RANGE_PRESET_MS`，导致该文件**整份加载失败**（55 个文件里 1 个失败、但 320 条用例全过——这种「文件失败、用例全过」的组合最容易看漏）。
+
+**未验收项（全部为外部条件，附解除条件）**：生产部署（V-1）、非 admin/member（V-2/V-3）、服务拓扑图。节点/概览/GPU 区域的用例由并行会话与页面同批改造，不在本侧范围。

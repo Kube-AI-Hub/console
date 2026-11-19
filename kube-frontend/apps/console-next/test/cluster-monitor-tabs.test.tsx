@@ -42,6 +42,9 @@ vi.mock('@kube-ai-hub/ui/charts', () => ({
   gapForStep: () => 180_000,
   stepForSpan: () => '60s',
   stepToMs: () => 60_000,
+  // The charts entry point grew this export; a mock that omits it makes the whole file fail
+  // to load ("No RANGE_PRESET_MS export is defined on the mock"), which hides every test in it.
+  RANGE_PRESET_MS: { '1h': 3_600_000, '6h': 21_600_000, '24h': 86_400_000 },
 }));
 
 vi.mock('@tanstack/react-router', () => ({
