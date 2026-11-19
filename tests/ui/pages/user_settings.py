@@ -24,7 +24,10 @@ from playwright.sync_api import Locator, Page, Request, expect
 IAM = "/kapis/iam.kubesphere.io/v1alpha2"
 
 #: 打开弹窗的落地页。弹窗挂在 shell 上，任何登录后的页面都能打开它；工作台最省事。
-DEFAULT_PAGE = "/kube-frontend"
+#: The app is served under `/kube-frontend/` (with the trailing slash). Without it the preview
+#: server hands the request to ks-apiserver, which answers with its "public base URL" error page —
+#: no shell, no account menu (found 2026-11-19 by a 60s wait for that menu).
+DEFAULT_PAGE = "/kube-frontend/"
 
 #: 平台角色的注解键，顺序与 `platformRoleOf` 一致（platform-role 优先，其次 globalrole）。
 PLATFORM_ROLE_KEYS = ("iam.kubesphere.io/platform-role", "iam.kubesphere.io/globalrole")
